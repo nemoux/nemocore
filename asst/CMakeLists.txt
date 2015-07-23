@@ -42,13 +42,19 @@ set(NEMOASST_PKGCONFIG_REQUIRES "pixman-1 cairo expat")
 INSTALL(TARGETS nemoasst DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
 
 set(HEADER_FILES
+	nemoxml.h
 	nemopath.h
 	nemotext.h
 	nemomatrix.h
-	nemotoken.h
 	nemohash.h
-	nemoxml.h
+	nemotoken.h
+	nemoitem.h
 	nemolog.h
+	nemomisc.h
+	nemoattr.h
+	nemolist.h
+	nemolistener.h
+	nemoease.h
 	)
 
 configure_file(

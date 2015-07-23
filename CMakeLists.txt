@@ -12,11 +12,13 @@ set(CMAKE_SKIP_BUILD_RPATH FALSE)
 set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 
+set(CMAKE_LIBRARY_SUFFIX "64")
+
 option(WITH_EGL "Build with EGL" ON)
 option(WITH_DRM "Build with DRM" ON)
 option(WITH_LOGIND "Build with LOGIND" OFF)
 option(WITH_UNWIND "Build with UNWIND" OFF)
-option(WITH_XWAYLAND "Build with XWAYLAND" OFF)
+option(WITH_XWAYLAND "Build with XWAYLAND" ON)
 option(WITH_GLIB "Build with GLIB" ON)
 option(WITH_GSTREAMER "Build with GSTREAMER" ON)
 option(WITH_MUPDF "Build with MUPDF" ON)
@@ -192,6 +194,7 @@ endif(WITH_XWAYLAND)
 add_subdirectory(asst)
 
 add_subdirectory(tool)
+add_subdirectory(tale)
 
 add_subdirectory(compz)
 add_subdirectory(shell)
