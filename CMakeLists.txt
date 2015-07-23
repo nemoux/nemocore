@@ -202,4 +202,5 @@ add_subdirectory(shell)
 
 if(WITH_EXAMPLE)
 	add_subdirectory(examples/tale)
+	add_subdirectory(examples/shell)
 endif(WITH_EXAMPLE)
