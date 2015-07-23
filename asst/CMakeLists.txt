@@ -1,0 +1,61 @@
+FIND_PACKAGE(PkgConfig REQUIRED)
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DNEMO_LOG_ON -DNEMO_DEBUG_ON")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
+set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
+
+if(WITH_EGL)
+	set(NEMOASST_EGL_SOURCES
+		${CMAKE_SOURCE_DIR}/misc/glhelper.c
+		${CMAKE_SOURCE_DIR}/misc/eglhelper.c
+		${CMAKE_SOURCE_DIR}/misc/fbohelper.c
+		)
+endif(WITH_EGL)
+
+add_library(nemoasst SHARED
+	nemoxml.c
+	nemopath.c
+	nemotext.c
+	nemomatrix.c
+	nemohash.c
+	nemotoken.c
+	nemoitem.c
+	nemolog.c
+	nemomisc.c
+	${CMAKE_SOURCE_DIR}/misc/xmlparser.c
+	${CMAKE_SOURCE_DIR}/misc/pixmanhelper.c
+	${CMAKE_SOURCE_DIR}/misc/bezierhelper.c
+	${CMAKE_SOURCE_DIR}/misc/codehelper.c
+	${CMAKE_SOURCE_DIR}/misc/cliphelper.c
+	${CMAKE_SOURCE_DIR}/misc/utf8helper.c
+	${CMAKE_SOURCE_DIR}/misc/stringhelper.c
+	${CMAKE_SOURCE_DIR}/misc/oshelper.c
+	${NEMOASST_EGL_SOURCES}
+	)
+
+TARGET_LINK_LIBRARIES(nemoasst
+	${NEMOUX_COMMON_LIBRARIES}
+	)
+
+set(NEMOASST_PKGCONFIG_REQUIRES "pixman-1 cairo expat")
+
+INSTALL(TARGETS nemoasst DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
+
+set(HEADER_FILES
+	nemopath.h
+	nemotext.h
+	nemomatrix.h
+	nemotoken.h
+	nemohash.h
+	nemoxml.h
+	nemolog.h
+	)
+
+configure_file(
+	nemoasst.pc.in
+	nemoasst.pc
+	@ONLY
+	)
+
+INSTALL(FILES ${HEADER_FILES} DESTINATION include/nemoasst)
+INSTALL(FILES ${CMAKE_BINARY_DIR}/asst/nemoasst.pc DESTINATION lib${CMAKE_LIBRARY_SUFFIX}/pkgconfig)

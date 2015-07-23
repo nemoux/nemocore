@@ -1,0 +1,11 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+bindir=${prefix}/bin
+libdir=${prefix}/lib@CMAKE_LIBRARY_SUFFIX@
+incdir=${prefix}/include
+
+Name: Nemoshell
+Description: NEMO-UX shell library
+Version: 0.1.0
+Requires: @NEMOSHELL_PKGCONFIG_REQUIRES@
+Libs: -L${libdir} -lnemoshell
+Cflags: -I${incdir}/nemoshell

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="nemo_tween">
+	<interface name="nemo_tween" version="1">
+		<request name="destroy" type="destructor">
+		</request>
+
+		<event name="configure">
+			<arg name="xdg_runtime_dir" type="string"/>
+			<arg name="wayland_display" type="string"/>
+		</event>
+
+		<event name="execute">
+			<arg name="name" type="string"/>
+			<arg name="args" type="string"/>
+		</event>
+
+		<request name="deliver">
+			<arg name="name" type="string"/>
+			<arg name="fd" type="fd"/>
+		</request>
+	</interface>
+</protocol>

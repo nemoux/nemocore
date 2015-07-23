@@ -1,0 +1,11 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+bindir=${prefix}/bin
+libdir=${prefix}/lib@CMAKE_LIBRARY_SUFFIX@
+incdir=${prefix}/include
+
+Name: Nemoasst
+Description: NEMO-UX asst library
+Version: 0.1.0
+Requires: @NEMOASST_PKGCONFIG_REQUIRES@
+Libs: -L${libdir} -lnemoasst
+Cflags: -I${incdir}/nemoasst

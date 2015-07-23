@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="nemo_shell">
+	<interface name="nemo_shell" version="1">
+		<enum name="version">
+			<entry name="current" value="1"/>
+		</enum>
+
+		<request name="use_unstable_version">
+			<arg name="version" type="int"/>
+		</request>
+
+		<enum name="surface_type">
+			<entry name="normal" value="0"/>
+			<entry name="follow" value="1"/>
+			<entry name="overlay" value="2"/>
+		</enum>
+
+		<request name="get_nemo_surface">
+			<arg name="id" type="new_id" interface="nemo_surface"/>
+			<arg name="surface" type="object" interface="wl_surface"/>
+			<arg name="type" type="uint"/>
+		</request>
+
+		<request name="pong">
+			<arg name="serial" type="uint"/>
+		</request>
+
+		<event name="ping">
+			<arg name="serial" type="uint"/>
+		</event>
+	</interface>
+
+	<interface name="nemo_surface" version="1">
+		<request name="destroy" type="destructor">
+		</request>
+
+		<request name="move">
+			<arg name="seat" type="object" interface="nemo_seat"/>
+			<arg name="serial" type="uint"/>
+		</request>
+
+		<enum name="pick_type">
+			<entry name="scale" value="0"/>
+			<entry name="rotate" value="1"/>
+			<entry name="resize" value="2"/>
+		</enum>
+
+		<request name="pick">
+			<arg name="seat" type="object" interface="nemo_seat"/>
+			<arg name="serial0" type="uint"/>
+			<arg name="serial1" type="uint"/>
+			<arg name="type" type="uint"/>
+		</request>
+
+		<request name="miss">
+		</request>
+
+		<request name="follow">
+			<arg name="x" type="int"/>
+			<arg name="y" type="int"/>
+			<arg name="degree" type="int"/>
+			<arg name="delay" type="uint"/>
+			<arg name="duration" type="uint"/>
+		</request>
+
+		<request name="execute">
+			<arg name="name" type="string"/>
+			<arg name="cmds" type="string"/>
+		</request>
+
+		<request name="set_size">
+			<arg name="width" type="uint"/>
+			<arg name="height" type="uint"/>
+		</request>
+
+		<request name="set_input">
+			<arg name="x" type="uint"/>
+			<arg name="y" type="uint"/>
+			<arg name="width" type="uint"/>
+			<arg name="height" type="uint"/>
+		</request>
+
+		<request name="set_pivot">
+			<arg name="px" type="int"/>
+			<arg name="py" type="int"/>
+		</request>
+
+		<request name="set_anchor">
+			<arg name="ax" type="fixed"/>
+			<arg name="ay" type="fixed"/>
+		</request>
+
+		<enum name="layer_type">
+			<entry name="background" value="0"/>
+			<entry name="service" value="1"/>
+			<entry name="overlay" value="2"/>
+			<entry name="interface" value="3"/>
+		</enum>
+
+		<request name="set_layer">
+			<arg name="type" type="uint"/>
+		</request>
+
+		<request name="set_parent">
+			<arg name="parent" type="object" interface="nemo_surface"/>
+		</request>
+
+		<request name="set_fullscreen">
+			<arg name="output" type="object" interface="wl_output" allow-null="true"/>
+		</request>
+
+		<request name="unset_fullscreen">
+		</request>
+
+		<event name="configure">
+			<arg name="width" type="int"/>
+			<arg name="height" type="int"/>
+		</event>
+	</interface>
+</protocol>

@@ -1,0 +1,11 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+bindir=${prefix}/bin
+libdir=${prefix}/lib@CMAKE_LIBRARY_SUFFIX@
+incdir=${prefix}/include
+
+Name: Nemoxwayland
+Description: NEMO-UX xwayland library
+Version: 0.1.0
+Requires: @NEMOXWAYLAND_PKGCONFIG_REQUIRES@
+Libs: -L${libdir} -lnemoxwayland
+Cflags: -I${incdir}/nemoxwayland

@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="nemo_seat">
+	<interface name="nemo_seat" version="1">
+		<enum name="capability">
+			<entry name="pointer" value="1"/>
+			<entry name="keyboard" value="2"/>
+			<entry name="touch" value="4"/>
+		</enum>
+
+		<event name="capabilities">
+			<arg name="capabilities" type="uint"/>
+		</event>
+
+		<request name="get_pointer">
+			<arg name="id" type="new_id" interface="nemo_pointer"/>
+		</request>
+
+		<request name="get_keyboard">
+			<arg name="id" type="new_id" interface="nemo_keyboard"/>
+		</request>
+
+		<request name="get_touch">
+			<arg name="id" type="new_id" interface="nemo_touch"/>
+		</request>
+
+		<event name="name">
+			<arg name="name" type="string"/>
+		</event>
+	</interface>
+
+	<interface name="nemo_pointer" version="1">
+		<enum name="error">
+			<entry name="role" value="0"/>
+		</enum>
+
+		<request name="set_cursor">
+			<arg name="serial" type="uint"/>
+			<arg name="surface" type="object" interface="wl_surface" allow-null="true"/>
+			<arg name="id" type="int"/>
+			<arg name="hotspot_x" type="int"/>
+			<arg name="hotspot_y" type="int"/>
+		</request>
+
+		<event name="enter">
+			<arg name="serial" type="uint"/>
+			<arg name="surface" type="object" interface="wl_surface"/>
+			<arg name="id" type="int"/>
+			<arg name="surface_x" type="fixed"/>
+			<arg name="surface_y" type="fixed"/>
+		</event>
+
+		<event name="leave">
+			<arg name="serial" type="uint"/>
+			<arg name="surface" type="object" interface="wl_surface"/>
+			<arg name="id" type="int"/>
+		</event>
+
+		<event name="motion">
+			<arg name="time" type="uint"/>
+			<arg name="surface" type="object" interface="wl_surface"/>
+			<arg name="id" type="int"/>
+			<arg name="surface_x" type="fixed"/>
+			<arg name="surface_y" type="fixed"/>
+		</event>
+
+		<enum name="button_state">
+			<entry name="released" value="0"/>
+			<entry name="pressed" value="1"/>
+		</enum>
+
+		<event name="button">
+			<arg name="serial" type="uint"/>
+			<arg name="time" type="uint"/>
+			<arg name="surface" type="object" interface="wl_surface"/>
+			<arg name="id" type="int"/>
+			<arg name="button" type="uint"/>
+			<arg name="state" type="uint"/>
+		</event>
+
+		<enum name="axis">
+			<entry name="vertical_scroll" value="0"/>
+			<entry name="horizontal_scroll" value="1"/>
+		</enum>
+
+		<event name="axis">
+			<arg name="time" type="uint"/>
+			<arg name="surface" type="object" interface="wl_surface"/>
+			<arg name="id" type="int"/>
+			<arg name="axis" type="uint"/>
+			<arg name="value" type="fixed"/>
+		</event>
+
+		<request name="release" type="destructor">
+		</request>
+	</interface>
+
+	<interface name="nemo_keyboard" version="1">
+		<enum name="keymap_format">
+			<entry name="no_keymap" value="0"/>
+			<entry name="xkb_v1" value="1"/>
+		</enum>
+
+		<event name="keymap">
+			<arg name="format" type="uint"/>
+			<arg name="fd" type="fd"/>
+			<arg name="size" type="uint"/>
+		</event>
+
+		<event name="enter">
+			<arg name="serial" type="uint"/>
+			<arg name="surface" type="object" interface="wl_surface"/>
+			<arg name="id" type="int"/>
+			<arg name="keys" type="array"/>
+		</event>
+
+		<event name="leave">
+			<arg name="serial" type="uint"/>
+			<arg name="surface" type="object" interface="wl_surface"/>
+			<arg name="id" type="int"/>
+		</event>
+
+		<enum name="key_state">
+			<entry name="released" value="0"/>
+			<entry name="pressed" value="1"/>
+		</enum>
+
+		<event name="key">
+			<arg name="serial" type="uint"/>
+			<arg name="time" type="uint"/>
+			<arg name="surface" type="object" interface="wl_surface"/>
+			<arg name="id" type="int"/>
+			<arg name="key" type="uint"/>
+			<arg name="state" type="uint"/>
+		</event>
+
+		<event name="modifiers">
+			<arg name="serial" type="uint"/>
+			<arg name="surface" type="object" interface="wl_surface"/>
+			<arg name="id" type="int"/>
+			<arg name="mods_depressed" type="uint"/>
+			<arg name="mods_latched" type="uint"/>
+			<arg name="mods_locked" type="uint"/>
+			<arg name="group" type="uint"/>
+		</event>
+
+		<request name="release" type="destructor">
+		</request>
+
+		<event name="repeat_info">
+			<arg name="rate" type="int"/>
+			<arg name="delay" type="int"/>
+		</event>
+	</interface>
+
+	<interface name="nemo_touch" version="1">
+		<event name="down">
+			<arg name="serial" type="uint"/>
+			<arg name="time" type="uint"/>
+			<arg name="surface" type="object" interface="wl_surface"/>
+			<arg name="id" type="int"/>
+			<arg name="x" type="fixed"/>
+			<arg name="y" type="fixed"/>
+		</event>
+
+		<event name="up">
+			<arg name="serial" type="uint"/>
+			<arg name="time" type="uint"/>
+			<arg name="surface" type="object" interface="wl_surface"/>
+			<arg name="id" type="int"/>
+			<arg name="dx" type="fixed"/>
+			<arg name="dy" type="fixed"/>
+		</event>
+
+		<event name="motion">
+			<arg name="time" type="uint"/>
+			<arg name="surface" type="object" interface="wl_surface"/>
+			<arg name="id" type="int"/>
+			<arg name="x" type="fixed"/>
+			<arg name="y" type="fixed"/>
+		</event>
+
+		<event name="frame">
+		</event>
+
+		<event name="cancel">
+		</event>
+
+		<request name="release" type="destructor">
+		</request>
+	</interface>
+</protocol>

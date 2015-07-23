@@ -1,0 +1,254 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <errno.h>
+
+#include <signal.h>
+#include <sys/socket.h>
+#include <wayland-server.h>
+
+#include <waylandhelper.h>
+#include <oshelper.h>
+#include <nemolog.h>
+
+void wayland_execute_path(int sockfd, const char *path, char *const argv[], char *const envp[])
+{
+	int clientfd;
+	char fdstr[32];
+	char fdenv[32];
+	sigset_t allsigs;
+
+	sigfillset(&allsigs);
+	sigprocmask(SIG_UNBLOCK, &allsigs, NULL);
+
+	if (seteuid(getuid()) == -1) {
+		return;
+	}
+
+	clientfd = dup(sockfd);
+	if (clientfd == -1) {
+		return;
+	}
+
+	if (argv == NULL || argv[0] == NULL) {
+		snprintf(fdstr, sizeof(fdstr), "%d", clientfd);
+		setenv("WAYLAND_SOCKET", fdstr, 1);
+
+		if (execl(path, path, NULL) < 0)
+			nemolog_warning("WAYLAND", "failed to execute '%s' with errno %d\n", path, errno);
+	} else if (envp == NULL || envp[0] == NULL) {
+		snprintf(fdstr, sizeof(fdstr), "%d", clientfd);
+		setenv("WAYLAND_SOCKET", fdstr, 1);
+
+		if (execv(path, argv) < 0)
+			nemolog_warning("WAYLAND", "failed to execute '%s' with errno %d\n", path, errno);
+	} else {
+		char *_envp[16];
+		int i;
+
+		snprintf(fdenv, sizeof(fdenv), "WAYLAND_SOCKET=%d", clientfd);
+
+		for (i = 0; envp[i] != NULL; i++)
+			_envp[i] = envp[i];
+		_envp[i++] = fdenv;
+		_envp[i++] = NULL;
+
+		if (execve(path, argv, _envp) < 0)
+			nemolog_warning("WAYLAND", "failed to execute '%s' with errno %d\n", path, errno);
+	}
+}
+
+struct wl_client *wayland_execute_client(struct wl_display *display, const char *path, char *const argv[], char *const envp[], uint64_t *child)
+{
+	int sv[2];
+	pid_t pid;
+	struct wl_client *client;
+
+	if (os_socketpair_cloexec(AF_UNIX, SOCK_STREAM, 0, sv) < 0) {
+		return NULL;
+	}
+
+	pid = fork();
+	if (pid == -1) {
+		close(sv[0]);
+		close(sv[1]);
+		return NULL;
+	}
+
+	if (pid == 0) {
+		wayland_execute_path(sv[1], path, argv, envp);
+		exit(-1);
+	}
+
+	close(sv[1]);
+
+	client = wl_client_create(display, sv[0]);
+	if (client == NULL) {
+		close(sv[0]);
+		return NULL;
+	}
+
+	if (child != NULL)
+		*child = pid;
+
+	return client;
+}
+
+void wayland_transform_point(int width, int height, enum wl_output_transform transform, int32_t scale, float sx, float sy, float *bx, float *by)
+{
+	switch (transform) {
+		case WL_OUTPUT_TRANSFORM_NORMAL:
+		default:
+			*bx = sx;
+			*by = sy;
+			break;
+		case WL_OUTPUT_TRANSFORM_FLIPPED:
+			*bx = width - sx;
+			*by = sy;
+			break;
+		case WL_OUTPUT_TRANSFORM_90:
+			*bx = height - sy;
+			*by = sx;
+			break;
+		case WL_OUTPUT_TRANSFORM_FLIPPED_90:
+			*bx = height - sy;
+			*by = width - sx;
+			break;
+		case WL_OUTPUT_TRANSFORM_180:
+			*bx = width - sx;
+			*by = height - sy;
+			break;
+		case WL_OUTPUT_TRANSFORM_FLIPPED_180:
+			*bx = sx;
+			*by = height - sy;
+			break;
+		case WL_OUTPUT_TRANSFORM_270:
+			*bx = sy;
+			*by = width - sx;
+			break;
+		case WL_OUTPUT_TRANSFORM_FLIPPED_270:
+			*bx = sy;
+			*by = sx;
+			break;
+	}
+
+	*bx *= scale;
+	*by *= scale;
+}
+
+pixman_box32_t wayland_transform_rect(int width, int height, enum wl_output_transform transform, int32_t scale, pixman_box32_t rect)
+{
+	float x1, x2, y1, y2;
+	pixman_box32_t box;
+
+	wayland_transform_point(width, height, transform, scale, rect.x1, rect.y1, &x1, &y1);
+	wayland_transform_point(width, height, transform, scale, rect.x2, rect.y2, &x2, &y2);
+
+	if (x1 <= x2) {
+		box.x1 = x1;
+		box.x2 = x2;
+	} else {
+		box.x1 = x2;
+		box.x2 = x1;
+	}
+
+	if (y1 <= y2) {
+		box.y1 = y1;
+		box.y2 = y2;
+	} else {
+		box.y1 = y2;
+		box.y2 = y1;
+	}
+
+	return box;
+}
+
+void wayland_transform_region(int width, int height, enum wl_output_transform transform, int32_t scale, pixman_region32_t *src, pixman_region32_t *dest)
+{
+	pixman_box32_t *src_rects, *dest_rects;
+	int nrects, i;
+
+	if (transform == WL_OUTPUT_TRANSFORM_NORMAL && scale == 1) {
+		if (src != dest)
+			pixman_region32_copy(dest, src);
+		return;
+	}
+
+	src_rects = pixman_region32_rectangles(src, &nrects);
+	dest_rects = (pixman_box32_t *)malloc(nrects * sizeof(pixman_box32_t));
+	if (!dest_rects)
+		return;
+
+	if (transform == WL_OUTPUT_TRANSFORM_NORMAL) {
+		memcpy(dest_rects, src_rects, nrects * sizeof(pixman_box32_t));
+	} else {
+		for (i = 0; i < nrects; i++) {
+			switch (transform) {
+				default:
+				case WL_OUTPUT_TRANSFORM_NORMAL:
+					dest_rects[i].x1 = src_rects[i].x1;
+					dest_rects[i].y1 = src_rects[i].y1;
+					dest_rects[i].x2 = src_rects[i].x2;
+					dest_rects[i].y2 = src_rects[i].y2;
+					break;
+				case WL_OUTPUT_TRANSFORM_90:
+					dest_rects[i].x1 = height - src_rects[i].y2;
+					dest_rects[i].y1 = src_rects[i].x1;
+					dest_rects[i].x2 = height - src_rects[i].y1;
+					dest_rects[i].y2 = src_rects[i].x2;
+					break;
+				case WL_OUTPUT_TRANSFORM_180:
+					dest_rects[i].x1 = width - src_rects[i].x2;
+					dest_rects[i].y1 = height - src_rects[i].y2;
+					dest_rects[i].x2 = width - src_rects[i].x1;
+					dest_rects[i].y2 = height - src_rects[i].y1;
+					break;
+				case WL_OUTPUT_TRANSFORM_270:
+					dest_rects[i].x1 = src_rects[i].y1;
+					dest_rects[i].y1 = width - src_rects[i].x2;
+					dest_rects[i].x2 = src_rects[i].y2;
+					dest_rects[i].y2 = width - src_rects[i].x1;
+					break;
+				case WL_OUTPUT_TRANSFORM_FLIPPED:
+					dest_rects[i].x1 = width - src_rects[i].x2;
+					dest_rects[i].y1 = src_rects[i].y1;
+					dest_rects[i].x2 = width - src_rects[i].x1;
+					dest_rects[i].y2 = src_rects[i].y2;
+					break;
+				case WL_OUTPUT_TRANSFORM_FLIPPED_90:
+					dest_rects[i].x1 = height - src_rects[i].y2;
+					dest_rects[i].y1 = width - src_rects[i].x2;
+					dest_rects[i].x2 = height - src_rects[i].y1;
+					dest_rects[i].y2 = width - src_rects[i].x1;
+					break;
+				case WL_OUTPUT_TRANSFORM_FLIPPED_180:
+					dest_rects[i].x1 = src_rects[i].x1;
+					dest_rects[i].y1 = height - src_rects[i].y2;
+					dest_rects[i].x2 = src_rects[i].x2;
+					dest_rects[i].y2 = height - src_rects[i].y1;
+					break;
+				case WL_OUTPUT_TRANSFORM_FLIPPED_270:
+					dest_rects[i].x1 = src_rects[i].y1;
+					dest_rects[i].y1 = src_rects[i].x1;
+					dest_rects[i].x2 = src_rects[i].y2;
+					dest_rects[i].y2 = src_rects[i].x2;
+					break;
+			}
+		}
+	}
+
+	if (scale != 1) {
+		for (i = 0; i < nrects; i++) {
+			dest_rects[i].x1 *= scale;
+			dest_rects[i].x2 *= scale;
+			dest_rects[i].y1 *= scale;
+			dest_rects[i].y2 *= scale;
+		}
+	}
+
+	pixman_region32_clear(dest);
+	pixman_region32_init_rects(dest, dest_rects, nrects);
+	free(dest_rects);
+}

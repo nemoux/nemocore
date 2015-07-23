@@ -1,0 +1,215 @@
+FIND_PACKAGE(PkgConfig REQUIRED)
+
+PKG_CHECK_MODULES(WAYLANDCURSOR REQUIRED wayland-cursor)
+INCLUDE_DIRECTORIES(${WAYLANDCURSOR_INCLUDE_DIRS})
+LINK_DIRECTORIES(${WAYLANDCURSOR_LIBRARY_DIRS})
+
+PKG_CHECK_MODULES(WAYLANDSERVER REQUIRED wayland-server)
+INCLUDE_DIRECTORIES(${WAYLANDSERVER_INCLUDE_DIRS})
+LINK_DIRECTORIES(${WAYLANDSERVER_LIBRARY_DIRS})
+
+PKG_CHECK_MODULES(MTDEV REQUIRED mtdev)
+INCLUDE_DIRECTORIES(${MTDEV_INCLUDE_DIRS})
+LINK_DIRECTORIES(${MTDEV_LIBRARY_DIRS})
+
+PKG_CHECK_MODULES(LIBUDEV REQUIRED libudev)
+INCLUDE_DIRECTORIES(${LIBUDEV_INCLUDE_DIRS})
+LINK_DIRECTORIES(${LIBUDEV_LIBRARY_DIRS})
+
+wayland_add_protocol_server(PROTOCOLS
+	${CMAKE_SOURCE_DIR}/protocol/scaler.xml
+	scaler
+	)
+
+wayland_add_protocol_server(PROTOCOLS
+	${CMAKE_SOURCE_DIR}/protocol/text.xml
+	text
+	)
+
+wayland_add_protocol_server(PROTOCOLS
+	${CMAKE_SOURCE_DIR}/protocol/input-method.xml
+	input-method
+	)
+
+wayland_add_protocol_server(PROTOCOLS
+	${CMAKE_SOURCE_DIR}/protocol/presentation-timing.xml
+	presentation-timing
+	)
+
+wayland_add_protocol_server(PROTOCOLS
+	${CMAKE_SOURCE_DIR}/protocol/nemo-seat.xml
+	nemo-seat
+	)
+
+wayland_add_protocol_server(PROTOCOLS
+	${CMAKE_SOURCE_DIR}/protocol/nemo-sound.xml
+	nemo-sound
+	)
+
+include_directories(
+	${CMAKE_SOURCE_DIR}/asst
+	${CMAKE_SOURCE_DIR}/misc
+	${CMAKE_SOURCE_DIR}/compz
+	${CMAKE_BINARY_DIR}/compz
+	)
+
+if(WITH_EGL)
+	PKG_CHECK_MODULES(GL REQUIRED gl)
+	INCLUDE_DIRECTORIES(${GL_INCLUDE_DIRS})
+	LINK_DIRECTORIES(${GL_LIBRARY_DIRS})
+
+	PKG_CHECK_MODULES(EGL REQUIRED egl)
+	INCLUDE_DIRECTORIES(${EGL_INCLUDE_DIRS})
+	LINK_DIRECTORIES(${EGL_LIBRARY_DIRS})
+
+	PKG_CHECK_MODULES(WAYLANDEGL REQUIRED wayland-egl)
+	INCLUDE_DIRECTORIES(${WAYLANDEGL_INCLUDE_DIRS})
+	LINK_DIRECTORIES(${WAYLANDEGL_LIBRARY_DIRS})
+
+	set(EXTRA ${EXTRA}
+		glrenderer.c
+		glcanvas.c
+		glactor.c
+		)
+endif(WITH_EGL)
+
+if(WITH_DRM)
+	PKG_CHECK_MODULES(LIBDRM REQUIRED libdrm)
+	INCLUDE_DIRECTORIES(${LIBDRM_INCLUDE_DIRS})
+	LINK_DIRECTORIES(${LIBDRM_LIBRARY_DIRS})
+
+	PKG_CHECK_MODULES(GBM REQUIRED gbm)
+	INCLUDE_DIRECTORIES(${GBM_INCLUDE_DIRS})
+	LINK_DIRECTORIES(${GBM_LIBRARY_DIRS})
+
+	set(EXTRA ${EXTRA}
+		drmbackend.c
+		drmnode.c
+		)
+endif(WITH_DRM)
+
+if(WITH_LOGIND)
+	PKG_CHECK_MODULES(DBUS REQUIRED dbus-1)
+	INCLUDE_DIRECTORIES(${DBUS_INCLUDE_DIRS})
+	LINK_DIRECTORIES(${DBUS_LIBRARY_DIRS})
+
+	PKG_CHECK_MODULES(LOGIND REQUIRED libsystemd-login)
+	INCLUDE_DIRECTORIES(${LOGIND_INCLUDE_DIRS})
+	LINK_DIRECTORIES(${LOGIND_LIBRARY_DIRS})
+
+	set(EXTRA ${EXTRA}
+		dbushelper.c
+		logindhelper.c
+		)
+endif(WITH_LOGIND)
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DNEMO_LOG_ON -DNEMO_DEBUG_ON")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
+set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
+
+add_library(nemocompz SHARED
+	compz.c
+	canvas.c
+	scaler.c
+	presentation.c
+	region.c
+	subcompz.c
+	subcanvas.c
+	view.c
+	content.c
+	actor.c
+	layer.c
+	session.c
+	task.c
+	timer.c
+	seat.c
+	input.c
+	keyboard.c
+	pointer.c
+	touch.c
+	keypad.c
+	datadevice.c
+	dataoffer.c
+	datadrag.c
+	dataselection.c
+	clipboard.c
+	textbackend.c
+	textinput.c
+	inputmethod.c
+	screen.c
+	renderer.c
+	fbbackend.c
+	fbnode.c
+	fbhelper.c
+	pixmanrenderer.c
+	pixmancanvas.c
+	pixmanactor.c
+	evdevbackend.c
+	evdevnode.c
+	tuiobackend.c
+	tuionode.c
+	picker.c
+	pitchfilter.c
+	binding.c
+	keymap.c
+	sound.c
+	viewanimation.c
+	vieweffect.c
+	ttyhelper.c
+	waylandhelper.c
+	${EXTRA}
+	${PROTOCOLS}
+	)
+
+TARGET_LINK_LIBRARIES(nemocompz
+	nemoasst
+	${WAYLANDCURSOR_LIBRARIES}
+	${WAYLANDSERVER_LIBRARIES}
+	${NEMOUX_COMMON_LIBRARIES}
+	${MTDEV_LIBRARIES}
+	${LIBUDEV_LIBRARIES}
+	)
+
+set(NEMOCOMPZ_PKGCONFIG_REQUIRES "pixman-1 cairo expat libudev wayland-cursor wayland-server")
+
+if(WITH_EGL)
+	TARGET_LINK_LIBRARIES(nemocompz
+		${GL_LIBRARIES}
+		${EGL_LIBRARIES}
+		${WAYLANDEGL_LIBRARIES}
+		)
+
+	set(NEMOCOMPZ_PKGCONFIG_REQUIRES "${NEMOCOMPZ_PKGCONFIG_REQUIRES} egl wayland-egl")
+endif(WITH_EGL)
+
+if(WITH_DRM)
+	TARGET_LINK_LIBRARIES(nemocompz
+		${LIBDRM_LIBRARIES}
+		${GBM_LIBRARIES}
+		)
+
+	set(NEMOCOMPZ_PKGCONFIG_REQUIRES "${NEMOCOMPZ_PKGCONFIG_REQUIRES} libdrm gbm")
+endif(WITH_DRM)
+
+if(WITH_LOGIND)
+	TARGET_LINK_LIBRARIES(nemocompz
+		${DBUS_LIBRARIES}
+		${LOGIND_LIBRARIES}
+		)
+
+	set(NEMOCOMPZ_PKGCONFIG_REQUIRES "${NEMOCOMPZ_PKGCONFIG_REQUIRES} dbus-1 systemd")
+endif(WITH_LOGIND)
+
+INSTALL(TARGETS nemocompz DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
+
+set(HEADER_FILES
+	)
+
+configure_file(
+	nemocompz.pc.in
+	nemocompz.pc
+	@ONLY
+	)
+
+INSTALL(FILES ${HEADER_FILES} DESTINATION include/nemocompz)
+INSTALL(FILES ${CMAKE_BINARY_DIR}/compz/nemocompz.pc DESTINATION lib${CMAKE_LIBRARY_SUFFIX}/pkgconfig)
