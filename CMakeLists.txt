@@ -32,6 +32,7 @@ option(WITH_MESA_RENDERNODE "Build with MESA's RENDERNODE" OFF)
 
 option(WITH_ALSA_MULTINODE "Build with ALSA's MULTINODE" OFF)
 
+option(WITH_EXAMPLE "Build with EXAMPLE" ON)
 option(WITH_OPTIMIZE "Build with OPTIMIZE" ON)
 option(WITH_DEBUG "Build with DEBUG" OFF)
 option(WITH_PROFILE "Build with PROFILE" OFF)
@@ -198,3 +199,7 @@ add_subdirectory(tale)
 
 add_subdirectory(compz)
 add_subdirectory(shell)
+
+if(WITH_EXAMPLE)
+	add_subdirectory(examples/tale)
+endif(WITH_EXAMPLE)
