@@ -9,6 +9,7 @@
 
 #include <nemoxml.h>
 #include <oshelper.h>
+#include <nemobox.h>
 #include <nemomisc.h>
 
 struct nemoxml *nemoxml_create(void)
@@ -166,7 +167,7 @@ static void nemoxml_handle_sax_characters(void *data, const char *contents, int 
 		context->node->scontents = length + 1;
 	}
 
-	ARRAY_APPEND_STRING(
+	NEMOBOX_APPEND_STRING(
 			context->node->contents,
 			context->node->scontents,
 			context->node->ncontents,

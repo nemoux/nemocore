@@ -7,6 +7,7 @@
 
 #include <nemoshow.h>
 #include <nemoxml.h>
+#include <nemobox.h>
 #include <nemomisc.h>
 
 struct nemoshow *nemoshow_create(void)
@@ -41,7 +42,7 @@ static int nemoshow_compare_qsort(const void *a, const void *b)
 
 void nemoshow_update_one(struct nemoshow *show)
 {
-	ARRAY_QSORT(show->ones, show->nones, nemoshow_compare_qsort);
+	NEMOBOX_QSORT(show->ones, show->nones, nemoshow_compare_qsort);
 }
 
 static int nemoshow_compare_bsearch(const void *a, const void *b)
@@ -55,7 +56,7 @@ struct showone *nemoshow_search_one(struct nemoshow *show, const char *id)
 {
 	struct showone **op;
 
-	op = (struct showone **)ARRAY_BSEARCH(show->ones, show->nones, id, nemoshow_compare_bsearch);
+	op = (struct showone **)NEMOBOX_BSEARCH(show->ones, show->nones, id, nemoshow_compare_bsearch);
 	if (op != NULL)
 		return *op;
 
@@ -87,7 +88,7 @@ static int nemoshow_load_scene(struct nemoshow *show, struct showone *scene, str
 	nemolist_for_each(child, &node->children, link) {
 		one = nemoshow_create_one(child);
 		if (one != NULL) {
-			ARRAY_APPEND(show->ones, show->sones, show->nones, one);
+			NEMOBOX_APPEND(show->ones, show->sones, show->nones, one);
 
 			if (one->type == NEMOSHOW_CANVAS_TYPE) {
 			}
@@ -105,7 +106,7 @@ static int nemoshow_load_show(struct nemoshow *show, struct xmlnode *node)
 	nemolist_for_each(child, &node->children, link) {
 		one = nemoshow_create_one(child);
 		if (one != NULL) {
-			ARRAY_APPEND(show->ones, show->sones, show->nones, one);
+			NEMOBOX_APPEND(show->ones, show->sones, show->nones, one);
 
 			if (one->type == NEMOSHOW_SCENE_TYPE) {
 				nemoshow_load_scene(show, one, child);

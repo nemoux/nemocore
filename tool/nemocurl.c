@@ -10,6 +10,7 @@
 
 #include <nemotool.h>
 #include <nemocurl.h>
+#include <nemobox.h>
 #include <nemomisc.h>
 
 static struct curlreq *nemocurl_create_request(void)
@@ -234,7 +235,7 @@ static size_t nemocurl_dispatch_write_header(char *buffer, size_t size, size_t n
 {
 	struct curlreq *req = (struct curlreq *)data;
 
-	ARRAY_APPEND_BUFFER(req->header, req->sheader, req->nheader, buffer, size * nmemb);
+	NEMOBOX_APPEND_BUFFER(req->header, req->sheader, req->nheader, buffer, size * nmemb);
 
 	return size * nmemb;
 }
@@ -243,7 +244,7 @@ static size_t nemocurl_dispatch_write_body(char *buffer, size_t size, size_t nme
 {
 	struct curlreq *req = (struct curlreq *)data;
 
-	ARRAY_APPEND_BUFFER(req->body, req->sbody, req->nbody, buffer, size * nmemb);
+	NEMOBOX_APPEND_BUFFER(req->body, req->sbody, req->nbody, buffer, size * nmemb);
 
 	return size * nmemb;
 }
