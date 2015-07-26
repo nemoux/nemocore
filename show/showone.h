@@ -8,8 +8,9 @@
 #include <nemolist.h>
 #include <nemolistener.h>
 
-#define	NEMOSHOW_ID_MAX			(32)
-#define	NEMOSHOW_ATTR_MAX		(32)
+#define	NEMOSHOW_ID_MAX					(32)
+#define	NEMOSHOW_ATTR_MAX				(32)
+#define	NEMOSHOW_ATTR_NAME_MAX	(32)
 
 typedef enum {
 	NEMOSHOW_NONE_TYPE = 0,
@@ -46,11 +47,21 @@ struct showone {
 	nemoshow_one_destroy_t destroy;
 };
 
+struct showattr {
+	char name[NEMOSHOW_ATTR_NAME_MAX];
+
+	int type;
+};
+
+extern struct showattr nemoshow_one_attrs[];
+
 extern void nemoshow_one_prepare(struct showone *one);
 extern void nemoshow_one_finish(struct showone *one);
 
 extern void nemoshow_one_destroy(struct showone *one);
 
 extern void nemoshow_one_parse_xml(struct showone *one, struct xmlnode *node);
+
+extern struct showattr *nemoshow_one_get_attr(const char *name);
 
 #endif

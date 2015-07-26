@@ -40,25 +40,58 @@ static int nemoshow_one_compare_attr(const void *a, const void *b)
 	return strcasecmp((const char *)a, (const char *)b);
 }
 
+struct showattr *nemoshow_one_get_attr(const char *name)
+{
+	static struct showattr attrs[] = {
+		{ "alpha",						NEMOSHOW_DOUBLE_ATTR },
+		{ "begin",						NEMOSHOW_INTEGER_ATTR },
+		{ "cx",								NEMOSHOW_DOUBLE_ATTR },
+		{ "cy",								NEMOSHOW_DOUBLE_ATTR },
+		{ "ease",							NEMOSHOW_STRING_ATTR },
+		{ "end",							NEMOSHOW_INTEGER_ATTR },
+		{ "fill",							NEMOSHOW_STRING_ATTR },
+		{ "font",							NEMOSHOW_STRING_ATTR },
+		{ "font-size",				NEMOSHOW_DOUBLE_ATTR },
+		{ "from",							NEMOSHOW_DOUBLE_ATTR },
+		{ "height",						NEMOSHOW_DOUBLE_ATTR },
+		{ "id",								NEMOSHOW_STRING_ATTR },
+		{ "r",								NEMOSHOW_DOUBLE_ATTR },
+		{ "rx",								NEMOSHOW_DOUBLE_ATTR },
+		{ "ry",								NEMOSHOW_DOUBLE_ATTR },
+		{ "src",							NEMOSHOW_STRING_ATTR },
+		{ "stroke",						NEMOSHOW_STRING_ATTR },
+		{ "stroke-width",			NEMOSHOW_DOUBLE_ATTR },
+		{ "t",								NEMOSHOW_DOUBLE_ATTR },
+		{ "timing",						NEMOSHOW_STRING_ATTR },
+		{ "to",								NEMOSHOW_DOUBLE_ATTR },
+		{ "type",							NEMOSHOW_STRING_ATTR },
+		{ "width",						NEMOSHOW_DOUBLE_ATTR },
+		{ "x",								NEMOSHOW_DOUBLE_ATTR },
+		{ "x0",								NEMOSHOW_DOUBLE_ATTR },
+		{ "x1",								NEMOSHOW_DOUBLE_ATTR },
+		{ "y",								NEMOSHOW_DOUBLE_ATTR },
+		{ "y0",								NEMOSHOW_DOUBLE_ATTR },
+		{ "y1",								NEMOSHOW_DOUBLE_ATTR },
+	};
+
+	return (struct showattr *)bsearch(name,
+			attrs,
+			sizeof(attrs) / sizeof(attrs[0]),
+			sizeof(attrs[0]),
+			nemoshow_one_compare_attr);
+}
+
 void nemoshow_one_parse_xml(struct showone *one, struct xmlnode *node)
 {
-	static struct attrparser {
-		char name[32];
-		int type;
-	} parsers[] = {
-		{ "height",		NEMOSHOW_DOUBLE_ATTR },
-		{ "id",				NEMOSHOW_STRING_ATTR },
-		{ "type",			NEMOSHOW_STRING_ATTR },
-		{ "width",		NEMOSHOW_DOUBLE_ATTR },
-	}, *parser;
+	struct showattr *attr;
 	int i;
 
 	for (i = 0; i < node->nattrs; i++) {
-		parser = bsearch(node->attrs[i*2+0], parsers, sizeof(parsers) / sizeof(parsers[0]), sizeof(parsers[0]), nemoshow_one_compare_attr);
-		if (parser != NULL) {
-			if (parser->type == NEMOSHOW_STRING_ATTR) {
+		attr = nemoshow_one_get_attr(node->attrs[i*2+0]);
+		if (attr != NULL) {
+			if (attr->type == NEMOSHOW_STRING_ATTR) {
 				nemoobject_sets(&one->object, node->attrs[i*2+0], node->attrs[i*2+1], strlen(node->attrs[i*2+1]));
-			} else if (parser->type == NEMOSHOW_DOUBLE_ATTR) {
+			} else if (attr->type == NEMOSHOW_DOUBLE_ATTR) {
 				nemoobject_setd(&one->object, node->attrs[i*2+0], strtod(node->attrs[i*2+1], NULL));
 			}
 		}
