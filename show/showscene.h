@@ -4,7 +4,6 @@
 #include <stdint.h>
 
 #include <showone.h>
-#include <nemoxml.h>
 
 struct showscene {
 	struct showone base;

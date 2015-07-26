@@ -44,5 +44,5 @@ void nemoshow_scene_dump(struct showone *one, FILE *out)
 {
 	struct showscene *scene = NEMOSHOW_SCENE(one);
 
-	fprintf(out, "[SCENE] (%s) %f %f\n", one->id, scene->width, scene->height);
+	fprintf(out, "[SCENE] (%s) width=%f, height=%f\n", one->id, scene->width, scene->height);
 }

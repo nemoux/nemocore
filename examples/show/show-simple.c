@@ -11,11 +11,19 @@
 int main(int argc, char *argv[])
 {
 	struct nemoshow *show;
+	struct showone *one;
 
 	show = nemoshow_create();
 
 	nemoshow_load_xml(show, argv[1]);
+	nemoshow_update_one(show);
+
 	nemoshow_dump_all(show, stderr);
+
+	one = nemoshow_search_one(show, "main");
+	if (one != NULL) {
+		nemoshow_scene_dump(one, stderr);
+	}
 
 	nemoshow_destroy(show);
 

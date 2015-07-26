@@ -9,13 +9,18 @@
 
 #include <showone.h>
 #include <showscene.h>
+#include <showcanvas.h>
 
 struct nemoshow {
-	struct nemolist ones;
+	struct showone **ones;
+	int nones, sones;
 };
 
 extern struct nemoshow *nemoshow_create(void);
 extern void nemoshow_destroy(struct nemoshow *show);
+
+extern void nemoshow_update_one(struct nemoshow *show);
+extern struct showone *nemoshow_search_one(struct nemoshow *show, const char *id);
 
 extern int nemoshow_load_xml(struct nemoshow *show, const char *path);
 

@@ -14,6 +14,7 @@ add_library(nemoshow SHARED
 	nemoshow.c
 	showone.c
 	showscene.c
+	showcanvas.c
 	)
 
 TARGET_LINK_LIBRARIES(nemoshow

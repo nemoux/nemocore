@@ -48,6 +48,7 @@ void nemoshow_one_parse_xml(struct showone *one, struct xmlnode *node)
 	} parsers[] = {
 		{ "height",		NEMOSHOW_DOUBLE_ATTR },
 		{ "id",				NEMOSHOW_STRING_ATTR },
+		{ "type",			NEMOSHOW_STRING_ATTR },
 		{ "width",		NEMOSHOW_DOUBLE_ATTR },
 	}, *parser;
 	int i;
