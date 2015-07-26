@@ -49,7 +49,7 @@ struct showattr *nemoshow_one_get_attr(const char *name)
 		{ "cy",								NEMOSHOW_DOUBLE_ATTR },
 		{ "ease",							NEMOSHOW_STRING_ATTR },
 		{ "end",							NEMOSHOW_INTEGER_ATTR },
-		{ "fill",							NEMOSHOW_STRING_ATTR },
+		{ "fill",							NEMOSHOW_COLOR_ATTR },
 		{ "font",							NEMOSHOW_STRING_ATTR },
 		{ "font-size",				NEMOSHOW_DOUBLE_ATTR },
 		{ "from",							NEMOSHOW_DOUBLE_ATTR },
@@ -59,7 +59,7 @@ struct showattr *nemoshow_one_get_attr(const char *name)
 		{ "rx",								NEMOSHOW_DOUBLE_ATTR },
 		{ "ry",								NEMOSHOW_DOUBLE_ATTR },
 		{ "src",							NEMOSHOW_STRING_ATTR },
-		{ "stroke",						NEMOSHOW_STRING_ATTR },
+		{ "stroke",						NEMOSHOW_COLOR_ATTR },
 		{ "stroke-width",			NEMOSHOW_DOUBLE_ATTR },
 		{ "t",								NEMOSHOW_DOUBLE_ATTR },
 		{ "timing",						NEMOSHOW_STRING_ATTR },
@@ -93,6 +93,10 @@ void nemoshow_one_parse_xml(struct showone *one, struct xmlnode *node)
 				nemoobject_sets(&one->object, node->attrs[i*2+0], node->attrs[i*2+1], strlen(node->attrs[i*2+1]));
 			} else if (attr->type == NEMOSHOW_DOUBLE_ATTR) {
 				nemoobject_setd(&one->object, node->attrs[i*2+0], strtod(node->attrs[i*2+1], NULL));
+			} else if (attr->type == NEMOSHOW_INTEGER_ATTR) {
+				nemoobject_seti(&one->object, node->attrs[i*2+0], strtoul(node->attrs[i*2+1], NULL, 10));
+			} else if (attr->type == NEMOSHOW_COLOR_ATTR) {
+				nemoobject_seti(&one->object, node->attrs[i*2+0], nemoshow_color_parse(node->attrs[i*2+1]));
 			}
 		}
 	}
@@ -119,6 +123,8 @@ void nemoshow_one_dump(struct showone *one, FILE *out)
 				fprintf(out, "  %s = %d\n", name, nemoobject_igeti(&one->object, i));
 			else if (attr->type == NEMOSHOW_STRING_ATTR)
 				fprintf(out, "  %s = %s\n", name, nemoobject_igets(&one->object, i));
+			else if (attr->type == NEMOSHOW_COLOR_ATTR)
+				fprintf(out, "  %s = 0x%x\n", name, nemoobject_igeti(&one->object, i));
 		}
 	}
 }

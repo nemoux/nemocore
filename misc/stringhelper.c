@@ -175,6 +175,16 @@ int string_parse_hexadecimal(const char *str, int offset, int length)
 				has_number = 1;
 				break;
 
+			case 'A':
+			case 'B':
+			case 'C':
+			case 'D':
+			case 'E':
+			case 'F':
+				number = (number * 16) + str[i] - 'A' + 10;
+				has_number = 1;
+				break;
+
 			case '-':
 				if (has_number != 0)
 					goto out;
