@@ -196,11 +196,13 @@ add_subdirectory(asst)
 
 add_subdirectory(tool)
 add_subdirectory(tale)
+add_subdirectory(show)
 
 add_subdirectory(compz)
 add_subdirectory(shell)
 
 if(WITH_EXAMPLE)
 	add_subdirectory(examples/tale)
+	add_subdirectory(examples/show)
 	add_subdirectory(examples/shell)
 endif(WITH_EXAMPLE)
