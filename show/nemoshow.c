@@ -71,6 +71,8 @@ static struct showone *nemoshow_create_one(struct xmlnode *node)
 		one = nemoshow_scene_create();
 	} else if (strcmp(node->name, "canvas") == 0) {
 		one = nemoshow_canvas_create();
+	} else if (strcmp(node->name, "rect") == 0) {
+		one = nemoshow_rect_create();
 	}
 
 	if (one != NULL) {
@@ -78,6 +80,21 @@ static struct showone *nemoshow_create_one(struct xmlnode *node)
 	}
 
 	return one;
+}
+
+static int nemoshow_load_canvas(struct nemoshow *show, struct showone *canvas, struct xmlnode *node)
+{
+	struct xmlnode *child;
+	struct showone *one;
+
+	nemolist_for_each(child, &node->children, link) {
+		one = nemoshow_create_one(child);
+		if (one != NULL) {
+			NEMOBOX_APPEND(show->ones, show->sones, show->nones, one);
+		}
+	}
+
+	return 0;
 }
 
 static int nemoshow_load_scene(struct nemoshow *show, struct showone *scene, struct xmlnode *node)
@@ -91,6 +108,7 @@ static int nemoshow_load_scene(struct nemoshow *show, struct showone *scene, str
 			NEMOBOX_APPEND(show->ones, show->sones, show->nones, one);
 
 			if (one->type == NEMOSHOW_CANVAS_TYPE) {
+				nemoshow_load_canvas(show, one, child);
 			}
 		}
 	}
@@ -144,10 +162,6 @@ void nemoshow_dump_all(struct nemoshow *show, FILE *out)
 	for (i = 0; i < show->nones; i++) {
 		one = show->ones[i];
 
-		if (one->type == NEMOSHOW_SCENE_TYPE) {
-			nemoshow_scene_dump(one, out);
-		} else if (one->type == NEMOSHOW_CANVAS_TYPE) {
-			nemoshow_canvas_dump(one, out);
-		}
+		nemoshow_one_dump(one, out);
 	}
 }

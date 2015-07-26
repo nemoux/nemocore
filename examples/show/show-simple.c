@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
 
 	one = nemoshow_search_one(show, "main");
 	if (one != NULL) {
-		nemoshow_scene_dump(one, stderr);
+		nemoshow_one_dump(one, stderr);
 	}
 
 	nemoshow_destroy(show);

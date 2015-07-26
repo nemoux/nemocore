@@ -40,10 +40,3 @@ void nemoshow_canvas_destroy(struct showone *one)
 
 	free(canvas);
 }
-
-void nemoshow_canvas_dump(struct showone *one, FILE *out)
-{
-	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
-
-	fprintf(out, "[CANVAS] (%s) type=%s, width=%f, height=%f\n", one->id, canvas->type, canvas->width, canvas->height);
-}

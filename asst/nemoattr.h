@@ -462,4 +462,16 @@ static inline void nemoobject_destroy(struct nemoobject *object)
 	free(object);
 }
 
+static inline int nemoobject_get_count(struct nemoobject *object)
+{
+	return object->nattrs;
+}
+
+static inline const char *nemoobject_get_name(struct nemoobject *object, int index)
+{
+	struct nemoattr *attr = nemoobject_iget(object, index);
+
+	return attr->name;
+}
+
 #endif

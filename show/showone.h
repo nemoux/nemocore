@@ -64,4 +64,6 @@ extern void nemoshow_one_parse_xml(struct showone *one, struct xmlnode *node);
 
 extern struct showattr *nemoshow_one_get_attr(const char *name);
 
+extern void nemoshow_one_dump(struct showone *one, FILE *out);
+
 #endif

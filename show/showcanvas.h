@@ -20,6 +20,4 @@ struct showcanvas {
 extern struct showone *nemoshow_canvas_create(void);
 extern void nemoshow_canvas_destroy(struct showone *one);
 
-extern void nemoshow_canvas_dump(struct showone *one, FILE *out);
-
 #endif

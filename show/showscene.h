@@ -16,6 +16,4 @@ struct showscene {
 extern struct showone *nemoshow_scene_create(void);
 extern void nemoshow_scene_destroy(struct showone *one);
 
-extern void nemoshow_scene_dump(struct showone *one, FILE *out);
-
 #endif

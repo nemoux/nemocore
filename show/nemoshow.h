@@ -10,6 +10,7 @@
 #include <showone.h>
 #include <showscene.h>
 #include <showcanvas.h>
+#include <showshape.h>
 
 struct nemoshow {
 	struct showone **ones;

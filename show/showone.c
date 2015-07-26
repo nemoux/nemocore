@@ -97,3 +97,28 @@ void nemoshow_one_parse_xml(struct showone *one, struct xmlnode *node)
 		}
 	}
 }
+
+void nemoshow_one_dump(struct showone *one, FILE *out)
+{
+	struct showattr *attr;
+	const char *name;
+	int i, count;
+
+	fprintf(out, "[%s]\n", one->id);
+
+	count = nemoobject_get_count(&one->object);
+
+	for (i = 0; i < count; i++) {
+		name = nemoobject_get_name(&one->object, i);
+
+		attr = nemoshow_one_get_attr(name);
+		if (attr != NULL) {
+			if (attr->type == NEMOSHOW_DOUBLE_ATTR)
+				fprintf(out, "  %s = %f\n", name, nemoobject_igetd(&one->object, i));
+			else if (attr->type == NEMOSHOW_INTEGER_ATTR)
+				fprintf(out, "  %s = %d\n", name, nemoobject_igeti(&one->object, i));
+			else if (attr->type == NEMOSHOW_STRING_ATTR)
+				fprintf(out, "  %s = %s\n", name, nemoobject_igets(&one->object, i));
+		}
+	}
+}

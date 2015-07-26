@@ -15,6 +15,7 @@ add_library(nemoshow SHARED
 	showone.c
 	showscene.c
 	showcanvas.c
+	showshape.c
 	)
 
 TARGET_LINK_LIBRARIES(nemoshow
@@ -29,6 +30,8 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/show/nemoshow.h
 	${CMAKE_SOURCE_DIR}/show/showone.h
 	${CMAKE_SOURCE_DIR}/show/showscene.h
+	${CMAKE_SOURCE_DIR}/show/showcanvas.h
+	${CMAKE_SOURCE_DIR}/show/showshape.h
 	)
 
 set(NEMOSHOW_PKGCONFIG_REQUIRES "nemoasst nemotale")
