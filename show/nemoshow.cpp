@@ -19,11 +19,20 @@ struct nemoshow *nemoshow_create(void)
 		return NULL;
 	memset(show, 0, sizeof(struct nemoshow));
 
+	show->stable = nemoshow_expr_create_symbol();
+	if (show->stable == NULL)
+		goto err1;
+
 	show->ones = (struct showone **)malloc(sizeof(struct showone *) * 8);
 	show->nones = 0;
 	show->sones = 8;
 
 	return show;
+
+err1:
+	free(show);
+
+	return NULL;
 }
 
 void nemoshow_destroy(struct nemoshow *show)

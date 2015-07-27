@@ -17,10 +17,14 @@ NEMO_BEGIN_EXTERN_C
 #include <showscene.h>
 #include <showcanvas.h>
 #include <showshape.h>
+#include <showcolor.h>
+#include <showexpr.h>
 
 struct nemoshow {
 	struct showone **ones;
 	int nones, sones;
+
+	struct showsymbol *stable;
 };
 
 extern struct nemoshow *nemoshow_create(void);

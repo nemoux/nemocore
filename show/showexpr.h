@@ -13,26 +13,31 @@ NEMO_BEGIN_EXTERN_C
 
 #include <showone.h>
 
-#define	NEMOSHOW_ATTR_EXPR_MAX		(128)
+#define NEMOSHOW_EXPR_ATTR_MAX					(128)
+#define NEMOSHOW_EXPR_SYMBOL_MAX				(32)
+#define	NEMOSHOW_EXPR_SYMBOL_NAME_MAX		(32)
 
 struct showexpr {
-	char id[NEMOSHOW_ID_MAX];
-	char name[NEMOSHOW_ATTR_NAME_MAX];
-
-	char text[NEMOSHOW_ATTR_EXPR_MAX];
+	void *cc;
 };
 
 struct showsymbol {
+	char names[NEMOSHOW_EXPR_SYMBOL_MAX][NEMOSHOW_EXPR_SYMBOL_NAME_MAX];
+	double vars[NEMOSHOW_EXPR_SYMBOL_MAX];
+
 	void *cc;
 };
 
 extern struct showexpr *nemoshow_expr_create(void);
 extern void nemoshow_expr_destroy(struct showexpr *expr);
 
-extern struct showsymbol *nemoshow_expr_create_symbol(void);
-extern void nemoshow_expr_destroy_symbol(struct showsymbol *sym);
+extern void nemoshow_expr_add_symbol_table(struct showexpr *expr, struct showsymbol *stable);
+extern double nemoshow_expr_dispatch_expression(struct showexpr *expr, const char *text);
 
-extern double nemoshow_expr_dispatch(struct nemoshow *show, const char *expr);
+extern struct showsymbol *nemoshow_expr_create_symbol(void);
+extern void nemoshow_expr_destroy_symbol(struct showsymbol *stable);
+
+extern int nemoshow_expr_add_symbol(struct showsymbol *stable, const char *name, double value);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

@@ -19,41 +19,76 @@ struct showexpr *nemoshow_expr_create(void)
 		return NULL;
 	memset(expr, 0, sizeof(struct showexpr));
 
+	expr->cc = new showexpr_t;
+
 	return expr;
 }
 
 void nemoshow_expr_destroy(struct showexpr *expr)
 {
+	delete static_cast<showexpr_t *>(expr->cc);
+
 	free(expr);
+}
+
+void nemoshow_expr_add_symbol_table(struct showexpr *expr, struct showsymbol *stable)
+{
+	NEMOSHOW_EXPR_CC(expr, expression).register_symbol_table(NEMOSHOW_SYMBOL_CC(stable, symbol_table));
+}
+
+double nemoshow_expr_dispatch_expression(struct showexpr *expr, const char *text)
+{
+	parser_t parser;
+	parser.compile(text, NEMOSHOW_EXPR_CC(expr, expression));
+
+	return NEMOSHOW_EXPR_CC(expr, expression).value();
 }
 
 struct showsymbol *nemoshow_expr_create_symbol(void)
 {
-	struct showsymbol *sym;
+	struct showsymbol *stable;
 
-	sym = (struct showsymbol *)malloc(sizeof(struct showsymbol));
-	if (sym == NULL)
+	stable = (struct showsymbol *)malloc(sizeof(struct showsymbol));
+	if (stable == NULL)
 		return NULL;
-	memset(sym, 0, sizeof(struct showsymbol));
+	memset(stable, 0, sizeof(struct showsymbol));
 
-	sym->cc = (struct _showsymbol *)malloc(sizeof(struct _showsymbol));
-	if (sym->cc == NULL)
-		goto err1;
+	stable->cc = new showsymbol_t;
 
-	return sym;
+	NEMOSHOW_SYMBOL_CC(stable, symbol_table).add_constants();
 
-err1:
-	free(sym);
-
-	return NULL;
+	return stable;
 }
 
-void nemoshow_expr_destroy_symbol(struct showsymbol *sym)
+void nemoshow_expr_destroy_symbol(struct showsymbol *stable)
 {
-	free(sym->cc);
-	free(sym);
+	delete static_cast<showsymbol_t *>(stable->cc);
+
+	free(stable);
 }
 
-double nemoshow_expr_dispatch(struct nemoshow *show, const char *expr)
+int nemoshow_expr_add_symbol(struct showsymbol *stable, const char *name, double value)
 {
+	int i;
+	int r = 0;
+
+	for (i = 0; i < NEMOSHOW_EXPR_SYMBOL_MAX; i++) {
+		if (strcmp(stable->names[i], name) == 0) {
+			break;
+		} else if (stable->names[i][0] == '\0') {
+			strcpy(stable->names[i], name);
+
+			break;
+		}
+	}
+
+	if (i < NEMOSHOW_EXPR_SYMBOL_MAX) {
+		stable->vars[i] = value;
+
+		NEMOSHOW_SYMBOL_CC(stable, symbol_table).add_variable(name, stable->vars[i]);
+
+		r = 1;
+	}
+
+	return r;
 }
