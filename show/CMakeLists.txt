@@ -19,6 +19,7 @@ add_library(nemoshow SHARED
 	showshape.cpp
 	showcolor.cpp
 	showexpr.cpp
+	showloop.cpp
 	)
 
 TARGET_LINK_LIBRARIES(nemoshow
@@ -37,6 +38,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/show/showshape.h
 	${CMAKE_SOURCE_DIR}/show/showcolor.h
 	${CMAKE_SOURCE_DIR}/show/showexpr.h
+	${CMAKE_SOURCE_DIR}/show/showloop.h
 	)
 
 set(NEMOSHOW_PKGCONFIG_REQUIRES "nemoasst nemotale")

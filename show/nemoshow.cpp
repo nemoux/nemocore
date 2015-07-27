@@ -82,6 +82,8 @@ static struct showone *nemoshow_create_one(struct xmlnode *node)
 		one = nemoshow_canvas_create();
 	} else if (strcmp(node->name, "rect") == 0) {
 		one = nemoshow_rect_create();
+	} else if (strcmp(node->name, "loop") == 0) {
+		one = nemoshow_loop_create();
 	}
 
 	if (one != NULL) {
@@ -89,6 +91,21 @@ static struct showone *nemoshow_create_one(struct xmlnode *node)
 	}
 
 	return one;
+}
+
+static int nemoshow_load_loop(struct nemoshow *show, struct showone *loop, struct xmlnode *node)
+{
+	struct xmlnode *child;
+	struct showone *one;
+
+	nemolist_for_each(child, &node->children, link) {
+		one = nemoshow_create_one(child);
+		if (one != NULL) {
+			NEMOBOX_APPEND(show->ones, show->sones, show->nones, one);
+		}
+	}
+
+	return 0;
 }
 
 static int nemoshow_load_canvas(struct nemoshow *show, struct showone *canvas, struct xmlnode *node)
@@ -100,6 +117,10 @@ static int nemoshow_load_canvas(struct nemoshow *show, struct showone *canvas, s
 		one = nemoshow_create_one(child);
 		if (one != NULL) {
 			NEMOBOX_APPEND(show->ones, show->sones, show->nones, one);
+
+			if (one->type == NEMOSHOW_LOOP_TYPE) {
+				nemoshow_load_loop(show, one, child);
+			}
 		}
 	}
 

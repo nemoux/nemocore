@@ -19,6 +19,7 @@ NEMO_BEGIN_EXTERN_C
 #include <showshape.h>
 #include <showcolor.h>
 #include <showexpr.h>
+#include <showloop.h>
 
 struct nemoshow {
 	struct showone **ones;

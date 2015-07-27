@@ -81,7 +81,13 @@ static inline double nemoattr_getd(struct nemoattr *attr)
 
 static inline void nemoattr_sets(struct nemoattr *attr, const char *s, int size)
 {
-	if (attr->p == NULL) {
+	if (attr->needs_free != 0 && attr->size < size) {
+		free(attr->p);
+
+		attr->p = malloc(size + 1);
+		attr->size = size + 1;
+		attr->needs_free = 1;
+	} else if (attr->p == NULL) {
 		attr->p = malloc(size + 1);
 		attr->size = size + 1;
 		attr->needs_free = 1;
@@ -155,6 +161,19 @@ static inline struct nemoattr *nemoobject_get(struct nemoobject *object, const c
 	}
 
 	return NULL;
+}
+
+static inline int nemoobject_has(struct nemoobject *object, const char *name)
+{
+	int i;
+
+	for (i = 0; i < object->nattrs; i++) {
+		if (strcmp(object->attrs[i].name, name) == 0) {
+			return 1;
+		}
+	}
+
+	return 0;
 }
 
 static inline void nemoobject_seti(struct nemoobject *object, const char *name, uint32_t i)
@@ -279,6 +298,14 @@ static inline void nemoobject_sets(struct nemoobject *object, const char *name, 
 
 	attr = nemoobject_get(object, name);
 	if (attr != NULL) {
+		if (attr->needs_free != 0 && attr->size < size) {
+			free(attr->p);
+
+			attr->p = malloc(size + 1);
+			attr->size = size + 1;
+			attr->needs_free = 1;
+		}
+
 		strncpy((char *)(attr->p), s, attr->size);
 	} else {
 		attr = nemoobject_set(object, name);
