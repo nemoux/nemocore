@@ -1,6 +1,12 @@
 #ifndef	__NEMOSHOW_COLOR_H__
 #define	__NEMOSHOW_COLOR_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <stdint.h>
 
 #define	NEMOSHOW_COLOR_TO_UINT32(b)	\
@@ -16,5 +22,9 @@
 	(uint8_t)((u >> 0) & 0xff)
 
 extern uint32_t nemoshow_color_parse(const char *value);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

@@ -1,4 +1,3 @@
-#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,10 +5,14 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <nemoconfig.h>
+
+NEMO_BEGIN_EXTERN_C
 #include <showcolor.h>
 #include <stringhelper.h>
 #include <nemotoken.h>
 #include <nemomisc.h>
+NEMO_END_EXTERN_C
 
 static int nemoshow_color_compare(const void *a, const void *b)
 {
@@ -172,7 +175,7 @@ static inline const uint8_t *nemoshow_color_get_reserved(const char *name)
 		{ "yellowgreen",          { 154,205, 50 } }
 	}, *map;
 
-	map = bsearch(name, maps, sizeof(maps) / sizeof(maps[0]), sizeof(maps[0]), nemoshow_color_compare);
+	map = static_cast<struct colormap *>(bsearch(name, static_cast<void *>(maps), sizeof(maps) / sizeof(maps[0]), sizeof(maps[0]), nemoshow_color_compare));
 	if (map != NULL)
 		return map->rgb;
 

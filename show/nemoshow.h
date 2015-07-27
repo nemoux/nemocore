@@ -1,6 +1,12 @@
 #ifndef	__NEMOSHOW_H__
 #define	__NEMOSHOW_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <stdint.h>
 
 #include <nemoattr.h>
@@ -26,5 +32,9 @@ extern struct showone *nemoshow_search_one(struct nemoshow *show, const char *id
 extern int nemoshow_load_xml(struct nemoshow *show, const char *path);
 
 extern void nemoshow_dump_all(struct nemoshow *show, FILE *out);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

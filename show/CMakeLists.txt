@@ -4,6 +4,7 @@ include_directories(
 	${CMAKE_SOURCE_DIR}/misc
 	${CMAKE_SOURCE_DIR}/asst
 	${CMAKE_SOURCE_DIR}/tale
+	${CMAKE_SOURCE_DIR}/thirds
 	)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DNEMO_LOG_ON -DNEMO_DEBUG_ON")
@@ -11,12 +12,13 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
 set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 
 add_library(nemoshow SHARED
-	nemoshow.c
-	showone.c
-	showscene.c
-	showcanvas.c
-	showshape.c
-	showcolor.c
+	nemoshow.cpp
+	showone.cpp
+	showscene.cpp
+	showcanvas.cpp
+	showshape.cpp
+	showcolor.cpp
+	showexpr.cpp
 	)
 
 TARGET_LINK_LIBRARIES(nemoshow
@@ -33,6 +35,8 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/show/showscene.h
 	${CMAKE_SOURCE_DIR}/show/showcanvas.h
 	${CMAKE_SOURCE_DIR}/show/showshape.h
+	${CMAKE_SOURCE_DIR}/show/showcolor.h
+	${CMAKE_SOURCE_DIR}/show/showexpr.h
 	)
 
 set(NEMOSHOW_PKGCONFIG_REQUIRES "nemoasst nemotale")

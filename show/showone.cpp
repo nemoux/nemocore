@@ -6,6 +6,7 @@
 #include <errno.h>
 
 #include <showone.h>
+#include <showcolor.h>
 #include <nemomisc.h>
 
 void nemoshow_one_prepare(struct showone *one)

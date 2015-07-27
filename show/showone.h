@@ -1,6 +1,12 @@
 #ifndef	__NEMOSHOW_ONE_H__
 #define	__NEMOSHOW_ONE_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <stdint.h>
 
 #include <nemoattr.h>
@@ -66,5 +72,9 @@ extern void nemoshow_one_parse_xml(struct showone *one, struct xmlnode *node);
 extern struct showattr *nemoshow_one_get_attr(const char *name);
 
 extern void nemoshow_one_dump(struct showone *one, FILE *out);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

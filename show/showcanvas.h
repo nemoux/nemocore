@@ -1,6 +1,12 @@
 #ifndef	__NEMOSHOW_CANVAS_H__
 #define	__NEMOSHOW_CANVAS_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <stdint.h>
 
 #include <showone.h>
@@ -19,5 +25,9 @@ struct showcanvas {
 
 extern struct showone *nemoshow_canvas_create(void);
 extern void nemoshow_canvas_destroy(struct showone *one);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif
