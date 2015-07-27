@@ -30,24 +30,9 @@ typedef enum {
 	NEMOSHOW_LAST_TYPE
 } NemoShowOneType;
 
-typedef enum {
-	NEMOSHOW_NONE_PROP = 0,
-	NEMOSHOW_DOUBLE_PROP = 1,
-	NEMOSHOW_INTEGER_PROP = 2,
-	NEMOSHOW_STRING_PROP = 3,
-	NEMOSHOW_COLOR_PROP = 4,
-	NEMOSHOW_LAST_PROP
-} NemoShowPropType;
-
 struct showone;
 
 typedef void (*nemoshow_one_destroy_t)(struct showone *one);
-
-struct showprop {
-	char name[NEMOSHOW_ATTR_NAME_MAX];
-
-	int type;
-};
 
 struct showattr {
 	char name[NEMOSHOW_ATTR_NAME_MAX];
@@ -78,8 +63,6 @@ extern void nemoshow_one_destroy(struct showone *one);
 
 extern struct showattr *nemoshow_one_create_attr(const char *name, const char *text, struct nemoattr *ref);
 extern void nemoshow_one_destroy_attr(struct showattr *attr);
-
-extern struct showprop *nemoshow_one_get_property(const char *name);
 
 extern void nemoshow_one_dump(struct showone *one, FILE *out);
 

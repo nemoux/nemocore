@@ -9,6 +9,7 @@
 #include <nemoxml.h>
 #include <nemobox.h>
 #include <nemoattr.h>
+#include <showmisc.h>
 #include <nemomisc.h>
 
 struct nemoshow *nemoshow_create(void)
@@ -115,7 +116,7 @@ static struct showone *nemoshow_create_one(struct xmlnode *node)
 			} else {
 				struct showprop *prop;
 
-				prop = nemoshow_one_get_property(node->attrs[i*2+0]);
+				prop = nemoshow_get_property(node->attrs[i*2+0]);
 				if (prop != NULL) {
 					if (prop->type == NEMOSHOW_STRING_PROP) {
 						nemoobject_sets(&one->object, node->attrs[i*2+0], node->attrs[i*2+1], strlen(node->attrs[i*2+1]));

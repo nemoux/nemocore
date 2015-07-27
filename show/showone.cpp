@@ -7,6 +7,7 @@
 
 #include <showone.h>
 #include <showcolor.h>
+#include <showmisc.h>
 #include <nemomisc.h>
 
 void nemoshow_one_prepare(struct showone *one)
@@ -65,52 +66,6 @@ void nemoshow_one_destroy_attr(struct showattr *attr)
 	free(attr);
 }
 
-static int nemoshow_one_compare_property(const void *a, const void *b)
-{
-	return strcasecmp((const char *)a, (const char *)b);
-}
-
-struct showprop *nemoshow_one_get_property(const char *name)
-{
-	static struct showprop props[] = {
-		{ "alpha",						NEMOSHOW_DOUBLE_PROP },
-		{ "begin",						NEMOSHOW_INTEGER_PROP },
-		{ "cx",								NEMOSHOW_DOUBLE_PROP },
-		{ "cy",								NEMOSHOW_DOUBLE_PROP },
-		{ "ease",							NEMOSHOW_STRING_PROP },
-		{ "end",							NEMOSHOW_INTEGER_PROP },
-		{ "fill",							NEMOSHOW_COLOR_PROP },
-		{ "font",							NEMOSHOW_STRING_PROP },
-		{ "font-size",				NEMOSHOW_DOUBLE_PROP },
-		{ "from",							NEMOSHOW_DOUBLE_PROP },
-		{ "height",						NEMOSHOW_DOUBLE_PROP },
-		{ "id",								NEMOSHOW_STRING_PROP },
-		{ "r",								NEMOSHOW_DOUBLE_PROP },
-		{ "rx",								NEMOSHOW_DOUBLE_PROP },
-		{ "ry",								NEMOSHOW_DOUBLE_PROP },
-		{ "src",							NEMOSHOW_STRING_PROP },
-		{ "stroke",						NEMOSHOW_COLOR_PROP },
-		{ "stroke-width",			NEMOSHOW_DOUBLE_PROP },
-		{ "t",								NEMOSHOW_DOUBLE_PROP },
-		{ "timing",						NEMOSHOW_STRING_PROP },
-		{ "to",								NEMOSHOW_DOUBLE_PROP },
-		{ "type",							NEMOSHOW_STRING_PROP },
-		{ "width",						NEMOSHOW_DOUBLE_PROP },
-		{ "x",								NEMOSHOW_DOUBLE_PROP },
-		{ "x0",								NEMOSHOW_DOUBLE_PROP },
-		{ "x1",								NEMOSHOW_DOUBLE_PROP },
-		{ "y",								NEMOSHOW_DOUBLE_PROP },
-		{ "y0",								NEMOSHOW_DOUBLE_PROP },
-		{ "y1",								NEMOSHOW_DOUBLE_PROP },
-	};
-
-	return (struct showprop *)bsearch(name,
-			props,
-			sizeof(props) / sizeof(props[0]),
-			sizeof(props[0]),
-			nemoshow_one_compare_property);
-}
-
 void nemoshow_one_dump(struct showone *one, FILE *out)
 {
 	struct showprop *prop;
@@ -125,7 +80,7 @@ void nemoshow_one_dump(struct showone *one, FILE *out)
 	for (i = 0; i < count; i++) {
 		name = nemoobject_get_name(&one->object, i);
 
-		prop = nemoshow_one_get_property(name);
+		prop = nemoshow_get_property(name);
 		if (prop != NULL) {
 			if (prop->type == NEMOSHOW_DOUBLE_PROP)
 				fprintf(out, "  %s = %f\n", name, nemoobject_igetd(&one->object, i));

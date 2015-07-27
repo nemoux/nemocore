@@ -20,6 +20,7 @@ add_library(nemoshow SHARED
 	showcolor.cpp
 	showexpr.cpp
 	showloop.cpp
+	showmisc.cpp
 	)
 
 TARGET_LINK_LIBRARIES(nemoshow
