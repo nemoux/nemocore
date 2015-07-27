@@ -25,6 +25,7 @@ struct nemoshow {
 	struct showone **ones;
 	int nones, sones;
 
+	struct showexpr *expr;
 	struct showsymbol *stable;
 };
 
@@ -35,6 +36,9 @@ extern void nemoshow_update_one(struct nemoshow *show);
 extern struct showone *nemoshow_search_one(struct nemoshow *show, const char *id);
 
 extern int nemoshow_load_xml(struct nemoshow *show, const char *path);
+
+extern void nemoshow_update_symbol(struct nemoshow *show, const char *name, double value);
+extern int nemoshow_update_expression(struct nemoshow *show, const char *id, const char *name);
 
 extern void nemoshow_dump_all(struct nemoshow *show, FILE *out);
 

@@ -31,17 +31,31 @@ typedef enum {
 } NemoShowOneType;
 
 typedef enum {
-	NEMOSHOW_NONE_ATTR = 0,
-	NEMOSHOW_DOUBLE_ATTR = 1,
-	NEMOSHOW_INTEGER_ATTR = 2,
-	NEMOSHOW_STRING_ATTR = 3,
-	NEMOSHOW_COLOR_ATTR = 4,
-	NEMOSHOW_LAST_ATTR
-} NemoShowAttrType;
+	NEMOSHOW_NONE_PROP = 0,
+	NEMOSHOW_DOUBLE_PROP = 1,
+	NEMOSHOW_INTEGER_PROP = 2,
+	NEMOSHOW_STRING_PROP = 3,
+	NEMOSHOW_COLOR_PROP = 4,
+	NEMOSHOW_LAST_PROP
+} NemoShowPropType;
 
 struct showone;
 
 typedef void (*nemoshow_one_destroy_t)(struct showone *one);
+
+struct showprop {
+	char name[NEMOSHOW_ATTR_NAME_MAX];
+
+	int type;
+};
+
+struct showattr {
+	char name[NEMOSHOW_ATTR_NAME_MAX];
+
+	char *text;
+
+	struct nemoattr *ref;
+};
 
 struct showone {
 	int type;
@@ -52,24 +66,20 @@ struct showone {
 	struct nemolist link;
 
 	nemoshow_one_destroy_t destroy;
+
+	struct showattr **attrs;
+	int nattrs, sattrs;
 };
-
-struct showattr {
-	char name[NEMOSHOW_ATTR_NAME_MAX];
-
-	int type;
-};
-
-extern struct showattr nemoshow_one_attrs[];
 
 extern void nemoshow_one_prepare(struct showone *one);
 extern void nemoshow_one_finish(struct showone *one);
 
 extern void nemoshow_one_destroy(struct showone *one);
 
-extern void nemoshow_one_parse_xml(struct showone *one, struct xmlnode *node);
+extern struct showattr *nemoshow_one_create_attr(const char *name, const char *text, struct nemoattr *ref);
+extern void nemoshow_one_destroy_attr(struct showattr *attr);
 
-extern struct showattr *nemoshow_one_get_attr(const char *name);
+extern struct showprop *nemoshow_one_get_property(const char *name);
 
 extern void nemoshow_one_dump(struct showone *one, FILE *out);
 
