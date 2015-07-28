@@ -42,3 +42,34 @@ void nemoshow_rect_destroy(struct showone *one)
 
 	free(rect);
 }
+
+struct showone *nemoshow_text_create(void)
+{
+	struct showtext *text;
+	struct showone *one;
+
+	text = (struct showtext *)malloc(sizeof(struct showtext));
+	if (text == NULL)
+		return NULL;
+	memset(text, 0, sizeof(struct showtext));
+
+	one = &text->base;
+	one->type = NEMOSHOW_SHAPE_TYPE;
+	one->destroy = nemoshow_text_destroy;
+
+	nemoshow_one_prepare(one);
+
+	nemoobject_set_reserved(&one->object, "x", &text->x, sizeof(double));
+	nemoobject_set_reserved(&one->object, "y", &text->y, sizeof(double));
+
+	return one;
+}
+
+void nemoshow_text_destroy(struct showone *one)
+{
+	struct showtext *text = NEMOSHOW_TEXT(one);
+
+	nemoshow_one_finish(one);
+
+	free(text);
+}

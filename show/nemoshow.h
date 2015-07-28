@@ -20,6 +20,7 @@ NEMO_BEGIN_EXTERN_C
 #include <showcolor.h>
 #include <showexpr.h>
 #include <showloop.h>
+#include <showsequence.h>
 
 struct nemoshow {
 	struct showone **ones;
@@ -32,13 +33,15 @@ struct nemoshow {
 extern struct nemoshow *nemoshow_create(void);
 extern void nemoshow_destroy(struct nemoshow *show);
 
-extern void nemoshow_update_one(struct nemoshow *show);
+extern void nemoshow_sort_one(struct nemoshow *show);
 extern struct showone *nemoshow_search_one(struct nemoshow *show, const char *id);
 
 extern int nemoshow_load_xml(struct nemoshow *show, const char *path);
 
 extern void nemoshow_update_symbol(struct nemoshow *show, const char *name, double value);
 extern int nemoshow_update_expression(struct nemoshow *show, const char *id, const char *name);
+
+extern void nemoshow_arrange_one(struct nemoshow *show);
 
 extern void nemoshow_dump_all(struct nemoshow *show, FILE *out);
 

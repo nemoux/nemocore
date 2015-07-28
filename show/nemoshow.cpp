@@ -63,7 +63,7 @@ static int nemoshow_compare_qsort(const void *a, const void *b)
 	return strcasecmp(oa->id, ob->id);
 }
 
-void nemoshow_update_one(struct nemoshow *show)
+void nemoshow_sort_one(struct nemoshow *show)
 {
 	NEMOBOX_QSORT(show->ones, show->nones, nemoshow_compare_qsort);
 }
@@ -96,8 +96,16 @@ static struct showone *nemoshow_create_one(struct xmlnode *node)
 		one = nemoshow_canvas_create();
 	} else if (strcmp(node->name, "rect") == 0) {
 		one = nemoshow_rect_create();
+	} else if (strcmp(node->name, "text") == 0) {
+		one = nemoshow_text_create();
 	} else if (strcmp(node->name, "loop") == 0) {
 		one = nemoshow_loop_create();
+	} else if (strcmp(node->name, "sequence") == 0) {
+		one = nemoshow_sequence_create();
+	} else if (strcmp(node->name, "frame") == 0) {
+		one = nemoshow_sequence_create_frame();
+	} else if (strcmp(node->name, "set") == 0) {
+		one = nemoshow_sequence_create_set();
 	}
 
 	if (one != NULL) {
@@ -106,6 +114,8 @@ static struct showone *nemoshow_create_one(struct xmlnode *node)
 		for (i = 0; i < node->nattrs; i++) {
 			if (node->attrs[i*2+1][0] == '!') {
 				struct showattr *attr;
+
+				nemoobject_seti(&one->object, node->attrs[i*2+0], 0.0f);
 
 				attr = nemoshow_one_create_attr(
 						node->attrs[i*2+0],
@@ -188,6 +198,48 @@ static int nemoshow_load_scene(struct nemoshow *show, struct showone *scene, str
 	return 0;
 }
 
+static int nemoshow_load_frame(struct nemoshow *show, struct showone *frame, struct xmlnode *node)
+{
+	struct showframe *fone = NEMOSHOW_FRAME(frame);
+	struct xmlnode *child;
+	struct showone *one;
+
+	nemolist_for_each(child, &node->children, link) {
+		one = nemoshow_create_one(child);
+		if (one != NULL) {
+			NEMOBOX_APPEND(show->ones, show->sones, show->nones, one);
+
+			if (one->type == NEMOSHOW_SET_TYPE) {
+				NEMOBOX_APPEND(fone->sets, fone->ssets, fone->nsets, one);
+			}
+		}
+	}
+
+	return 0;
+}
+
+static int nemoshow_load_sequence(struct nemoshow *show, struct showone *sequence, struct xmlnode *node)
+{
+	struct showsequence *sone = NEMOSHOW_SEQUENCE(sequence);
+	struct xmlnode *child;
+	struct showone *one;
+
+	nemolist_for_each(child, &node->children, link) {
+		one = nemoshow_create_one(child);
+		if (one != NULL) {
+			NEMOBOX_APPEND(show->ones, show->sones, show->nones, one);
+
+			if (one->type == NEMOSHOW_FRAME_TYPE) {
+				nemoshow_load_frame(show, one, child);
+
+				NEMOBOX_APPEND(sone->frames, sone->sframes, sone->nframes, one);
+			}
+		}
+	}
+
+	return 0;
+}
+
 static int nemoshow_load_show(struct nemoshow *show, struct xmlnode *node)
 {
 	struct xmlnode *child;
@@ -200,6 +252,8 @@ static int nemoshow_load_show(struct nemoshow *show, struct xmlnode *node)
 
 			if (one->type == NEMOSHOW_SCENE_TYPE) {
 				nemoshow_load_scene(show, one, child);
+			} else if (one->type == NEMOSHOW_SEQUENCE_TYPE) {
+				nemoshow_load_sequence(show, one, child);
 			}
 		}
 	}
@@ -255,6 +309,20 @@ int nemoshow_update_expression(struct nemoshow *show, const char *id, const char
 	}
 
 	return 0;
+}
+
+void nemoshow_arrange_one(struct nemoshow *show)
+{
+	struct showone *one;
+	int i;
+
+	for (i = 0; i < show->nones; i++) {
+		one = show->ones[i];
+
+		if (one->type == NEMOSHOW_SET_TYPE) {
+			nemoshow_sequence_arrange_set(show, one);
+		}
+	}
 }
 
 void nemoshow_dump_all(struct nemoshow *show, FILE *out)

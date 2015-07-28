@@ -96,6 +96,6 @@ void nemoshow_one_dump(struct showone *one, FILE *out)
 	for (i = 0; i < one->nattrs; i++) {
 		attr = one->attrs[i];
 
-		fprintf(out, "  %s = %s\n", attr->name, attr->text);
+		fprintf(out, "  %s = <%s>\n", attr->name, attr->text);
 	}
 }
