@@ -12,8 +12,8 @@ int main(int argc, char *argv[])
 {
 	struct nemoshow *show;
 	struct showone *one;
-	struct showone *text;
-	double t;
+	struct showtransition *trans;
+	int done;
 
 	show = nemoshow_create();
 	nemoshow_load_xml(show, argv[1]);
@@ -27,16 +27,25 @@ int main(int argc, char *argv[])
 
 	nemoshow_dump_all(show, stderr);
 
-	one = nemoshow_search_one(show, "hour-text-sequence");
-	nemoshow_sequence_prepare(one);
+	one = nemoshow_search_one(show, "hour-text");
 
-	text = nemoshow_search_one(show, "hour-text");
+	trans = nemoshow_transition_create(
+			nemoshow_search_one(show, "ease1"),
+			3000,
+			1000);
 
-	for (t = 0.0f; t <= 1.01f; t += 0.1f) {
-		nemoshow_sequence_update(one, t);
+	nemoshow_transition_attach_sequence(trans,
+			nemoshow_search_one(show, "hour-text-sequence"));
 
-		NEMO_DEBUG("=> %f %f\n", NEMOSHOW_TEXT(text)->x, NEMOSHOW_TEXT(text)->y);
-	}
+	do {
+		done = nemoshow_transition_update(trans, time_current_msecs());
+
+		NEMO_DEBUG("=> %f %f\n", NEMOSHOW_TEXT(one)->x, NEMOSHOW_TEXT(one)->y);
+
+		usleep(1000);
+	} while (done == 0);
+
+	nemoshow_transition_destroy(trans);
 
 	nemoshow_destroy(show);
 

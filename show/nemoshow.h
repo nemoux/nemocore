@@ -21,6 +21,8 @@ NEMO_BEGIN_EXTERN_C
 #include <showexpr.h>
 #include <showloop.h>
 #include <showsequence.h>
+#include <showease.h>
+#include <showtransition.h>
 
 struct nemoshow {
 	struct showone **ones;

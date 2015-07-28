@@ -118,7 +118,7 @@ int nemoshow_sequence_arrange_set(struct nemoshow *show, struct showone *one)
 
 	src = nemoshow_search_one(show, set->src);
 	if (src == NULL)
-		return 0;
+		return -1;
 
 	count = nemoobject_get_count(&one->object);
 
@@ -137,7 +137,7 @@ int nemoshow_sequence_arrange_set(struct nemoshow *show, struct showone *one)
 		set->nattrs++;
 	}
 
-	return 1;
+	return 0;
 }
 
 static void nemoshow_sequence_prepare_frame(struct showone *one)
