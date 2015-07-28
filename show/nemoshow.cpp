@@ -285,24 +285,35 @@ void nemoshow_update_symbol(struct nemoshow *show, const char *name, double valu
 	nemoshow_expr_add_symbol(show->stable, name, value);
 }
 
-int nemoshow_update_expression(struct nemoshow *show, const char *id, const char *name)
+void nemoshow_update_expression(struct nemoshow *show)
 {
 	struct showone *one;
 	struct showattr *attr;
-	double value;
-	int i;
+	int i, j;
 
-	one = nemoshow_search_one(show, id);
-	if (one == NULL)
-		return 0;
+	for (i = 0; i < show->nones; i++) {
+		one = show->ones[i];
+
+		for (j = 0; j < one->nattrs; j++) {
+			attr = one->attrs[j];
+
+			nemoattr_setd(attr->ref,
+					nemoshow_expr_dispatch_expression(show->expr, attr->text));
+		}
+	}
+}
+
+int nemoshow_update_one_expression(struct nemoshow *show, struct showone *one, const char *name)
+{
+	struct showattr *attr;
+	int i;
 
 	for (i = 0; i < one->nattrs; i++) {
 		attr = one->attrs[i];
 
 		if (strcmp(attr->name, name) == 0) {
-			value = nemoshow_expr_dispatch_expression(show->expr, attr->text);
-
-			nemoattr_setd(attr->ref, value);
+			nemoattr_setd(attr->ref,
+					nemoshow_expr_dispatch_expression(show->expr, attr->text));
 
 			return 1;
 		}

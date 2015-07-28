@@ -23,11 +23,9 @@ int main(int argc, char *argv[])
 	nemoshow_update_symbol(show, "hour", 5.0f);
 	nemoshow_update_symbol(show, "min", 10.0f);
 	nemoshow_update_symbol(show, "sec", 15.0f);
+	nemoshow_update_expression(show);
 
 	nemoshow_dump_all(show, stderr);
-
-	nemoshow_update_expression(show, "hour-text-sequence:0", "x");
-	nemoshow_update_expression(show, "hour-text-sequence:0", "y");
 
 	one = nemoshow_search_one(show, "hour-text-sequence");
 	nemoshow_sequence_prepare(one);
