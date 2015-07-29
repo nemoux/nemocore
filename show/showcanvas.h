@@ -38,6 +38,7 @@ struct showcanvas {
 
 	char types[NEMOSHOW_CANVAS_TYPE_MAX];
 	char src[NEMOSHOW_CANVAS_SRC_MAX];
+	int32_t event;
 
 	int type;
 	struct talenode *node;

@@ -28,6 +28,7 @@ struct showone *nemoshow_canvas_create(void)
 
 	nemoobject_set_reserved(&one->object, "type", canvas->types, NEMOSHOW_CANVAS_TYPE_MAX);
 	nemoobject_set_reserved(&one->object, "src", canvas->src, NEMOSHOW_CANVAS_SRC_MAX);
+	nemoobject_set_reserved(&one->object, "event", &canvas->event, sizeof(int32_t));
 	nemoobject_set_reserved(&one->object, "width", &canvas->width, sizeof(double));
 	nemoobject_set_reserved(&one->object, "height", &canvas->height, sizeof(double));
 
@@ -73,6 +74,7 @@ int nemoshow_canvas_arrange(struct nemoshow *show, struct showone *one)
 		canvas->type = map->type;
 
 	canvas->node = nemotale_node_create_pixman(canvas->width, canvas->height);
+	nemotale_node_set_id(canvas->node, canvas->event);
 
 	return 0;
 }

@@ -21,6 +21,7 @@ struct showprop *nemoshow_get_property(const char *name)
 		{ "cy",								NEMOSHOW_DOUBLE_PROP },
 		{ "ease",							NEMOSHOW_STRING_PROP },
 		{ "end",							NEMOSHOW_INTEGER_PROP },
+		{ "event",						NEMOSHOW_INTEGER_PROP },
 		{ "fill",							NEMOSHOW_COLOR_PROP },
 		{ "font",							NEMOSHOW_STRING_PROP },
 		{ "font-size",				NEMOSHOW_DOUBLE_PROP },
