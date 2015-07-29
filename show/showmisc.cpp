@@ -32,6 +32,7 @@ struct showprop *nemoshow_get_property(const char *name)
 		{ "src",							NEMOSHOW_STRING_PROP },
 		{ "stroke",						NEMOSHOW_STRING_PROP },
 		{ "stroke-width",			NEMOSHOW_DOUBLE_PROP },
+		{ "style",						NEMOSHOW_STRING_PROP },
 		{ "t",								NEMOSHOW_DOUBLE_PROP },
 		{ "timing",						NEMOSHOW_STRING_PROP },
 		{ "to",								NEMOSHOW_DOUBLE_PROP },

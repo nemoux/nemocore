@@ -187,18 +187,18 @@ uint32_t nemoshow_color_parse(const char *value)
 	uint8_t rgba[4];
 
 	if (value == NULL || value[0] == '\0')
-		return -1;
+		return 0;
 
 	if (value[0] == '#') {
 		if (strlen(value) >= 7) {
-			rgba[0] = (uint8_t)string_parse_hexadecimal(value, 1, 2);
+			rgba[2] = (uint8_t)string_parse_hexadecimal(value, 1, 2);
 			rgba[1] = (uint8_t)string_parse_hexadecimal(value, 3, 2);
-			rgba[2] = (uint8_t)string_parse_hexadecimal(value, 5, 2);
+			rgba[0] = (uint8_t)string_parse_hexadecimal(value, 5, 2);
 			rgba[3] = 255;
 		} else if (strlen(value) >= 4) {
-			rgba[0] = (uint8_t)string_parse_hexadecimal(value, 1, 1);
+			rgba[2] = (uint8_t)string_parse_hexadecimal(value, 1, 1);
 			rgba[1] = (uint8_t)string_parse_hexadecimal(value, 2, 1);
-			rgba[2] = (uint8_t)string_parse_hexadecimal(value, 3, 1);
+			rgba[0] = (uint8_t)string_parse_hexadecimal(value, 3, 1);
 			rgba[3] = 255;
 		}
 	} else if (strcasestr(value, "rgb") != NULL) {
@@ -214,9 +214,9 @@ uint32_t nemoshow_color_parse(const char *value)
 		nemotoken_update(token);
 
 		if (nemotoken_get_token_count(token) >= 4) {
-			rgba[0] = (uint8_t)strtoul(nemotoken_get_token(token, 1), NULL, 10);
+			rgba[2] = (uint8_t)strtoul(nemotoken_get_token(token, 1), NULL, 10);
 			rgba[1] = (uint8_t)strtoul(nemotoken_get_token(token, 2), NULL, 10);
-			rgba[2] = (uint8_t)strtoul(nemotoken_get_token(token, 3), NULL, 10);
+			rgba[0] = (uint8_t)strtoul(nemotoken_get_token(token, 3), NULL, 10);
 			rgba[3] = 255;
 		}
 

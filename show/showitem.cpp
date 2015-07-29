@@ -6,6 +6,9 @@
 #include <errno.h>
 
 #include <showitem.h>
+#include <showitem.hpp>
+#include <showcolor.h>
+#include <nemoshow.h>
 #include <nemoxml.h>
 #include <nemomisc.h>
 
@@ -19,6 +22,8 @@ struct showone *nemoshow_item_create(int type)
 		return NULL;
 	memset(item, 0, sizeof(struct showitem));
 
+	item->cc = new showitem_t;
+
 	one = &item->base;
 	one->type = NEMOSHOW_ITEM_TYPE;
 	one->sub = type;
@@ -30,7 +35,18 @@ struct showone *nemoshow_item_create(int type)
 	nemoobject_set_reserved(&one->object, "y", &item->y, sizeof(double));
 	nemoobject_set_reserved(&one->object, "width", &item->width, sizeof(double));
 	nemoobject_set_reserved(&one->object, "height", &item->height, sizeof(double));
+	nemoobject_set_reserved(&one->object, "r", &item->r, sizeof(double));
+
+	nemoobject_set_reserved(&one->object, "from", &item->from, sizeof(double));
+	nemoobject_set_reserved(&one->object, "to", &item->to, sizeof(double));
+
+	nemoobject_set_reserved(&one->object, "stroke", item->stroke, NEMOSHOW_COLOR_STRING_MAX);
+	nemoobject_set_reserved(&one->object, "stroke-width", &item->stroke_width, sizeof(double));
+	nemoobject_set_reserved(&one->object, "fill", item->fill, NEMOSHOW_COLOR_STRING_MAX);
+
 	nemoobject_set_reserved(&one->object, "alpha", &item->alpha, sizeof(double));
+
+	nemoobject_set_reserved(&one->object, "style", item->style, NEMOSHOW_ID_MAX);
 
 	return one;
 }
@@ -41,5 +57,44 @@ void nemoshow_item_destroy(struct showone *one)
 
 	nemoshow_one_finish(one);
 
+	delete static_cast<showitem_t *>(item->cc);
+
 	free(item);
+}
+
+int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+	struct showone *stone;
+
+	stone = nemoshow_search_one(show, item->style);
+	if (stone != NULL) {
+		item->stone = NEMOSHOW_ITEM(stone);
+	} else {
+		NEMOSHOW_ITEM_CC(item, fill) = new SkPaint;
+		NEMOSHOW_ITEM_CC(item, stroke) = new SkPaint;
+
+		item->stone = item;
+	}
+
+	return 0;
+}
+
+int nemoshow_item_update(struct nemoshow *show, struct showone *one)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	if (item->stone == item) {
+		if (item->fill[0] != '\0') {
+			NEMOSHOW_ITEM_CC(item, fill)->setStyle(SkPaint::kFill_Style);
+			NEMOSHOW_ITEM_CC(item, fill)->setColor(static_cast<SkColor>(nemoshow_color_parse(item->fill)));
+		}
+		if (item->stroke[0] != '\0') {
+			NEMOSHOW_ITEM_CC(item, stroke)->setStyle(SkPaint::kStroke_Style);
+			NEMOSHOW_ITEM_CC(item, stroke)->setStrokeWidth(item->stroke_width);
+			NEMOSHOW_ITEM_CC(item, stroke)->setColor(static_cast<SkColor>(nemoshow_color_parse(item->stroke)));
+		}
+	}
+
+	return 0;
 }

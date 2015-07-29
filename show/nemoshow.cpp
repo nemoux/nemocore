@@ -90,6 +90,9 @@ struct showone *nemoshow_search_one(struct nemoshow *show, const char *id)
 {
 	struct showone **op;
 
+	if (id == NULL || id[0] == '\0')
+		return NULL;
+
 	op = (struct showone **)NEMOBOX_BSEARCH(show->ones, show->nones, id, nemoshow_compare_bsearch);
 	if (op != NULL)
 		return *op;
@@ -109,6 +112,8 @@ static struct showone *nemoshow_create_one(struct xmlnode *node)
 		one = nemoshow_item_create(NEMOSHOW_RECT_ITEM);
 	} else if (strcmp(node->name, "text") == 0) {
 		one = nemoshow_item_create(NEMOSHOW_TEXT_ITEM);
+	} else if (strcmp(node->name, "style") == 0) {
+		one = nemoshow_item_create(NEMOSHOW_STYLE_ITEM);
 	} else if (strcmp(node->name, "loop") == 0) {
 		one = nemoshow_loop_create();
 	} else if (strcmp(node->name, "sequence") == 0) {
@@ -353,6 +358,8 @@ void nemoshow_arrange_one(struct nemoshow *show)
 			nemoshow_ease_arrange(show, one);
 		} else if (one->type == NEMOSHOW_CANVAS_TYPE) {
 			nemoshow_canvas_arrange(show, one);
+		} else if (one->type == NEMOSHOW_ITEM_TYPE) {
+			nemoshow_item_arrange(show, one);
 		}
 	}
 }
@@ -361,6 +368,14 @@ void nemoshow_update_one(struct nemoshow *show)
 {
 	struct showone *one;
 	int i;
+
+	for (i = 0; i < show->nones; i++) {
+		one = show->ones[i];
+
+		if (one->type == NEMOSHOW_ITEM_TYPE) {
+			nemoshow_item_update(show, one);
+		}
+	}
 
 	for (i = 0; i < show->nones; i++) {
 		one = show->ones[i];
