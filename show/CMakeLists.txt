@@ -1,15 +1,33 @@
 FIND_PACKAGE(PkgConfig REQUIRED)
 
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DNEMO_LOG_ON -DNEMO_DEBUG_ON")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -std=c++11")
+set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
+
 include_directories(
 	${CMAKE_SOURCE_DIR}/misc
 	${CMAKE_SOURCE_DIR}/asst
 	${CMAKE_SOURCE_DIR}/tale
 	${CMAKE_SOURCE_DIR}/thirds
+	/usr/include/skia/core
+	/usr/include/skia/config
+	/usr/include/skia/animator
+	/usr/include/skia/codec
+	/usr/include/skia/device
+	/usr/include/skia/effects
+	/usr/include/skia/images
+	/usr/include/skia/pathops
+	/usr/include/skia/pipe
+	/usr/include/skia/ports
+	/usr/include/skia/svg
+	/usr/include/skia/utils
+	/usr/include/skia/views
+	/usr/include/skia/xml
 	)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DNEMO_LOG_ON -DNEMO_DEBUG_ON")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
-set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
+link_directories(
+	/usr/lib64/skia
+	)
 
 add_library(nemoshow SHARED
 	nemoshow.cpp
@@ -29,6 +47,7 @@ add_library(nemoshow SHARED
 TARGET_LINK_LIBRARIES(nemoshow
 	nemoasst
 	nemotale
+	skia
 	${NEMOUX_COMMON_LIBRARIES}
 	)
 

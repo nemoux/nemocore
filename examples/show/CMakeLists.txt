@@ -10,6 +10,12 @@ include_directories(
 	${CMAKE_BINARY_DIR}/tool
 	)
 
+link_directories(
+	/usr/lib64/skia
+	)
+
+set(CMAKE_INSTALL_RPATH "/usr/lib64/skia")
+
 add_executable(show-simple
 	show-simple.c
 	)
