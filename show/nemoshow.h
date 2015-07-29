@@ -45,6 +45,9 @@ struct nemoshow {
 	void *userdata;
 };
 
+extern void nemoshow_initialize(void);
+extern void nemoshow_finalize(void);
+
 extern struct nemoshow *nemoshow_create(void);
 extern void nemoshow_destroy(struct nemoshow *show);
 

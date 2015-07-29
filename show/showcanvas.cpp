@@ -92,7 +92,6 @@ int nemoshow_canvas_arrange(struct nemoshow *show, struct showone *one)
 
 static int nemoshow_canvas_update_vector(struct nemoshow *show, struct showcanvas *canvas)
 {
-	SkAutoGraphics autograph;
 	SkBitmap bitmap;
 	struct showone *one;
 	int i;

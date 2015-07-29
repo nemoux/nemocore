@@ -11,6 +11,17 @@
 #include <nemoattr.h>
 #include <showmisc.h>
 #include <nemomisc.h>
+#include <skiaconfig.hpp>
+
+void nemoshow_initialize(void)
+{
+	SkGraphics::Init();
+}
+
+void nemoshow_finalize(void)
+{
+	SkGraphics::Term();
+}
 
 struct nemoshow *nemoshow_create(void)
 {

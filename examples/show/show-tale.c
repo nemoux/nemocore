@@ -126,6 +126,8 @@ int main(int argc, char *argv[])
 	nemotale_attach_canvas(tale, NTEGL_CANVAS(canvas), nemoshow_dispatch_tale_event);
 	nemotale_set_userdata(tale, context);
 
+	nemoshow_initialize();
+
 	show = nemoshow_create();
 	nemoshow_set_tale(show, tale);
 	nemoshow_set_dispatch_resize(show, nemoshow_dispatch_show_resize);
@@ -145,6 +147,8 @@ int main(int argc, char *argv[])
 	nemotool_run(tool);
 
 	nemoshow_destroy(show);
+
+	nemoshow_finalize();
 
 	nemotale_destroy(tale);
 
