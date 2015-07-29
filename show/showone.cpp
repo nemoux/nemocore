@@ -88,8 +88,6 @@ void nemoshow_one_dump(struct showone *one, FILE *out)
 				fprintf(out, "  %s = %d\n", name, nemoobject_igeti(&one->object, i));
 			else if (prop->type == NEMOSHOW_STRING_PROP)
 				fprintf(out, "  %s = %s\n", name, nemoobject_igets(&one->object, i));
-			else if (prop->type == NEMOSHOW_COLOR_PROP)
-				fprintf(out, "  %s = 0x%x\n", name, nemoobject_igeti(&one->object, i));
 		}
 	}
 

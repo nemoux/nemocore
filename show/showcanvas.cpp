@@ -36,9 +36,9 @@ struct showone *nemoshow_canvas_create(void)
 	nemoobject_set_reserved(&one->object, "width", &canvas->width, sizeof(double));
 	nemoobject_set_reserved(&one->object, "height", &canvas->height, sizeof(double));
 
-	canvas->shapes = (struct showone **)malloc(sizeof(struct showone *) * 8);
-	canvas->nshapes = 0;
-	canvas->sshapes = 8;
+	canvas->items = (struct showone **)malloc(sizeof(struct showone *) * 8);
+	canvas->nitems = 0;
+	canvas->sitems = 8;
 
 	return one;
 }
@@ -51,7 +51,7 @@ void nemoshow_canvas_destroy(struct showone *one)
 
 	delete static_cast<showcanvas_t *>(canvas->cc);
 
-	free(canvas->shapes);
+	free(canvas->items);
 	free(canvas);
 }
 
@@ -109,19 +109,19 @@ static int nemoshow_canvas_update_vector(struct nemoshow *show, struct showcanva
 	struct showone *one;
 	int i;
 
-	SkPaint spaint;
-	spaint.setStyle(SkPaint::kStrokeAndFill_Style);
-	spaint.setStrokeWidth(3.0f);
-	spaint.setColor(SK_ColorYELLOW);
+	SkPaint paint;
+	paint.setStyle(SkPaint::kStrokeAndFill_Style);
+	paint.setStrokeWidth(3.0f);
+	paint.setColor(SK_ColorYELLOW);
 
-	for (i = 0; i < canvas->nshapes; i++) {
-		one = canvas->shapes[i];
+	for (i = 0; i < canvas->nitems; i++) {
+		one = canvas->items[i];
 
-		if (one->sub == NEMOSHOW_SHAPE_RECT_TYPE) {
-			struct showrect *rect = NEMOSHOW_RECT(one);
-			SkRect srect = SkRect::MakeXYWH(rect->x, rect->y, rect->width, rect->height);
+		if (one->sub == NEMOSHOW_RECT_ITEM) {
+			struct showitem *item = NEMOSHOW_ITEM(one);
+			SkRect rect = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
 
-			NEMOSHOW_CANVAS_CC(canvas, canvas)->drawRect(srect, spaint);
+			NEMOSHOW_CANVAS_CC(canvas, canvas)->drawRect(rect, paint);
 		}
 	}
 

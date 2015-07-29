@@ -44,8 +44,8 @@ struct showcanvas {
 
 	double width, height;
 
-	struct showone **shapes;
-	int nshapes, sshapes;
+	struct showone **items;
+	int nitems, sitems;
 
 	void *cc;
 };

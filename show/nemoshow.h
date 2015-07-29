@@ -16,7 +16,7 @@ NEMO_BEGIN_EXTERN_C
 #include <showone.h>
 #include <showscene.h>
 #include <showcanvas.h>
-#include <showshape.h>
+#include <showitem.h>
 #include <showcolor.h>
 #include <showexpr.h>
 #include <showloop.h>

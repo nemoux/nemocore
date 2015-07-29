@@ -106,9 +106,9 @@ static struct showone *nemoshow_create_one(struct xmlnode *node)
 	} else if (strcmp(node->name, "canvas") == 0) {
 		one = nemoshow_canvas_create();
 	} else if (strcmp(node->name, "rect") == 0) {
-		one = nemoshow_rect_create();
+		one = nemoshow_item_create(NEMOSHOW_RECT_ITEM);
 	} else if (strcmp(node->name, "text") == 0) {
-		one = nemoshow_text_create();
+		one = nemoshow_item_create(NEMOSHOW_TEXT_ITEM);
 	} else if (strcmp(node->name, "loop") == 0) {
 		one = nemoshow_loop_create();
 	} else if (strcmp(node->name, "sequence") == 0) {
@@ -147,8 +147,6 @@ static struct showone *nemoshow_create_one(struct xmlnode *node)
 						nemoobject_setd(&one->object, node->attrs[i*2+0], strtod(node->attrs[i*2+1], NULL));
 					} else if (prop->type == NEMOSHOW_INTEGER_PROP) {
 						nemoobject_seti(&one->object, node->attrs[i*2+0], strtoul(node->attrs[i*2+1], NULL, 10));
-					} else if (prop->type == NEMOSHOW_COLOR_PROP) {
-						nemoobject_seti(&one->object, node->attrs[i*2+0], nemoshow_color_parse(node->attrs[i*2+1]));
 					}
 				}
 			}
@@ -186,8 +184,8 @@ static int nemoshow_load_canvas(struct nemoshow *show, struct showone *canvas, s
 
 			if (one->type == NEMOSHOW_LOOP_TYPE) {
 				nemoshow_load_loop(show, one, child);
-			} else if (one->type == NEMOSHOW_SHAPE_TYPE) {
-				NEMOBOX_APPEND(cone->shapes, cone->sshapes, cone->nshapes, one);
+			} else if (one->type == NEMOSHOW_ITEM_TYPE) {
+				NEMOBOX_APPEND(cone->items, cone->sitems, cone->nitems, one);
 			}
 		}
 	}

@@ -34,7 +34,7 @@ add_library(nemoshow SHARED
 	showone.cpp
 	showscene.cpp
 	showcanvas.cpp
-	showshape.cpp
+	showitem.cpp
 	showcolor.cpp
 	showexpr.cpp
 	showloop.cpp
@@ -58,7 +58,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/show/showone.h
 	${CMAKE_SOURCE_DIR}/show/showscene.h
 	${CMAKE_SOURCE_DIR}/show/showcanvas.h
-	${CMAKE_SOURCE_DIR}/show/showshape.h
+	${CMAKE_SOURCE_DIR}/show/showitem.h
 	${CMAKE_SOURCE_DIR}/show/showcolor.h
 	${CMAKE_SOURCE_DIR}/show/showexpr.h
 	${CMAKE_SOURCE_DIR}/show/showloop.h
