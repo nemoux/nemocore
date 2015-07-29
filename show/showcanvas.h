@@ -46,6 +46,8 @@ struct showcanvas {
 
 	struct showone **shapes;
 	int nshapes, sshapes;
+
+	void *cc;
 };
 
 #define	NEMOSHOW_CANVAS(one)		((struct showcanvas *)container_of(one, struct showcanvas, base))

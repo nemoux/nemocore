@@ -6,6 +6,7 @@
 #include <errno.h>
 
 #include <showcanvas.h>
+#include <showcanvas.hpp>
 #include <nemoshow.h>
 #include <nemoxml.h>
 #include <nemomisc.h>
@@ -20,6 +21,8 @@ struct showone *nemoshow_canvas_create(void)
 	if (canvas == NULL)
 		return NULL;
 	memset(canvas, 0, sizeof(struct showcanvas));
+
+	canvas->cc = new showcanvas_t;
 
 	one = &canvas->base;
 	one->type = NEMOSHOW_CANVAS_TYPE;
@@ -45,6 +48,8 @@ void nemoshow_canvas_destroy(struct showone *one)
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
 	nemoshow_one_finish(one);
+
+	delete static_cast<showcanvas_t *>(canvas->cc);
 
 	free(canvas->shapes);
 	free(canvas);
@@ -81,28 +86,28 @@ int nemoshow_canvas_arrange(struct nemoshow *show, struct showone *one)
 
 	canvas->node = nemotale_node_create_pixman(canvas->width, canvas->height);
 
-	if (canvas->event == 0) {
+	NEMOSHOW_CANVAS_CC(canvas, bitmap) = new SkBitmap;
+
+	NEMOSHOW_CANVAS_CC(canvas, bitmap)->setInfo(
+			SkImageInfo::Make(canvas->width, canvas->height, kN32_SkColorType, kPremul_SkAlphaType));
+	NEMOSHOW_CANVAS_CC(canvas, bitmap)->setPixels(
+			nemotale_node_get_buffer(canvas->node));
+
+	NEMOSHOW_CANVAS_CC(canvas, device) = new SkBitmapDevice(*NEMOSHOW_CANVAS_CC(canvas, bitmap));
+	NEMOSHOW_CANVAS_CC(canvas, canvas) = new SkCanvas(NEMOSHOW_CANVAS_CC(canvas, device));
+
+	if (canvas->event == 0)
 		nemotale_node_set_pick_type(canvas->node, NEMOTALE_PICK_NO_TYPE);
-	} else {
+	else
 		nemotale_node_set_id(canvas->node, canvas->event);
-	}
 
 	return 0;
 }
 
 static int nemoshow_canvas_update_vector(struct nemoshow *show, struct showcanvas *canvas)
 {
-	SkBitmap bitmap;
 	struct showone *one;
 	int i;
-
-	bitmap.setInfo(
-			SkImageInfo::Make(canvas->width, canvas->height, kN32_SkColorType, kPremul_SkAlphaType));
-	bitmap.setPixels(
-			nemotale_node_get_buffer(canvas->node));
-
-	SkBitmapDevice sdevice(bitmap);
-	SkCanvas scanvas(&sdevice);
 
 	SkPaint spaint;
 	spaint.setStyle(SkPaint::kStrokeAndFill_Style);
@@ -116,7 +121,7 @@ static int nemoshow_canvas_update_vector(struct nemoshow *show, struct showcanva
 			struct showrect *rect = NEMOSHOW_RECT(one);
 			SkRect srect = SkRect::MakeXYWH(rect->x, rect->y, rect->width, rect->height);
 
-			scanvas.drawRect(srect, spaint);
+			NEMOSHOW_CANVAS_CC(canvas, canvas)->drawRect(srect, spaint);
 		}
 	}
 
