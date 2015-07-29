@@ -12,6 +12,13 @@
 
 #define	NEMOTALE_NODE_ATTR_MAX			(16)
 
+typedef enum {
+	NEMOTALE_PICK_DEFAULT_TYPE = 0,
+	NEMOTALE_PICK_CUSTOM_TYPE = 1,
+	NEMOTALE_PICK_NO_TYPE = 2,
+	NEMOTALE_PICK_LAST_TYPE
+} NemoTalePickType;
+
 typedef int (*nemotale_node_pick_t)(struct talenode *node, double x, double y, void *data);
 
 struct talenode;
@@ -28,6 +35,7 @@ struct talenode {
 	void *userdata;
 	void *pickdata;
 
+	int picktype;
 	nemotale_node_pick_t pick;
 
 	uint32_t id;
@@ -97,6 +105,11 @@ static inline void nemotale_node_set_id(struct talenode *node, uint32_t id)
 static inline uint32_t nemotale_node_get_id(struct talenode *node)
 {
 	return node == NULL ? 0 : node->id;
+}
+
+static inline void nemotale_node_set_pick_type(struct talenode *node, int type)
+{
+	node->picktype = type;
 }
 
 static inline int32_t nemotale_node_get_width(struct talenode *node)

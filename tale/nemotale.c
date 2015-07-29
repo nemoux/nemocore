@@ -109,16 +109,16 @@ struct talenode *nemotale_pick(struct nemotale *tale, float x, float y, float *s
 	struct talenode *node;
 
 	nemolist_for_each(node, &tale->node_list, link) {
-		nemotale_node_transform_from_global(node, x, y, sx, sy);
+		if (node->picktype == NEMOTALE_PICK_DEFAULT_TYPE) {
+			nemotale_node_transform_from_global(node, x, y, sx, sy);
 
-		if (node->pick == NULL) {
-			if (pixman_region32_contains_point(&node->input, *sx, *sy, NULL)) {
+			if (pixman_region32_contains_point(&node->input, *sx, *sy, NULL))
 				return node;
-			}
-		} else {
-			if (node->pick(node, *sx, *sy, node->pickdata) != 0) {
+		} else if (node->picktype == NEMOTALE_PICK_CUSTOM_TYPE) {
+			nemotale_node_transform_from_global(node, x, y, sx, sy);
+
+			if (node->pick(node, *sx, *sy, node->pickdata) != 0)
 				return node;
-			}
 		}
 	}
 

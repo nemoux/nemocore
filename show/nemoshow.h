@@ -63,6 +63,9 @@ extern void nemoshow_update_one(struct nemoshow *show);
 extern int nemoshow_set_scene(struct nemoshow *show, struct showone *one);
 extern void nemoshow_put_scene(struct nemoshow *show);
 
+extern int nemoshow_attach_canvas(struct nemoshow *show, struct showone *one);
+extern void nemoshow_detach_canvas(struct nemoshow *show, struct showone *one);
+
 extern void nemoshow_dump_all(struct nemoshow *show, FILE *out);
 
 static inline void nemoshow_set_tale(struct nemoshow *show, struct nemotale *tale)

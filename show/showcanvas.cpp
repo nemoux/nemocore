@@ -74,7 +74,12 @@ int nemoshow_canvas_arrange(struct nemoshow *show, struct showone *one)
 		canvas->type = map->type;
 
 	canvas->node = nemotale_node_create_pixman(canvas->width, canvas->height);
-	nemotale_node_set_id(canvas->node, canvas->event);
+
+	if (canvas->event == 0) {
+		nemotale_node_set_pick_type(canvas->node, NEMOTALE_PICK_NO_TYPE);
+	} else {
+		nemotale_node_set_id(canvas->node, canvas->event);
+	}
 
 	return 0;
 }

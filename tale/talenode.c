@@ -235,6 +235,8 @@ void nemotale_node_set_picker(struct talenode *node, nemotale_node_pick_t pick, 
 {
 	node->pick = pick;
 	node->pickdata = data;
+
+	node->picktype = NEMOTALE_PICK_CUSTOM_TYPE;
 }
 
 void nemotale_node_translate(struct talenode *node, float x, float y)

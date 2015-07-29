@@ -402,6 +402,20 @@ void nemoshow_put_scene(struct nemoshow *show)
 	}
 }
 
+int nemoshow_attach_canvas(struct nemoshow *show, struct showone *one)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	nemotale_attach_node(show->tale, canvas->node);
+}
+
+void nemoshow_detach_canvas(struct nemoshow *show, struct showone *one)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	nemotale_detach_node(show->tale, canvas->node);
+}
+
 void nemoshow_dump_all(struct nemoshow *show, FILE *out)
 {
 	struct showone *one;
