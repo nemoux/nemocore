@@ -11,6 +11,13 @@ NEMO_BEGIN_EXTERN_C
 
 #include <showone.h>
 
+typedef enum {
+	NEMOSHOW_SHAPE_NONE_TYPE = 0,
+	NEMOSHOW_SHAPE_RECT_TYPE = 1,
+	NEMOSHOW_SHAPE_TEXT_TYPE = 2,
+	NEMOSHOW_SHAPE_LAST_TYPE
+} NemoShowShapeType;
+
 struct showrect {
 	struct showone base;
 

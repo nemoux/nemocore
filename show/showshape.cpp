@@ -21,6 +21,7 @@ struct showone *nemoshow_rect_create(void)
 
 	one = &rect->base;
 	one->type = NEMOSHOW_SHAPE_TYPE;
+	one->sub = NEMOSHOW_SHAPE_RECT_TYPE;
 	one->destroy = nemoshow_rect_destroy;
 
 	nemoshow_one_prepare(one);
@@ -55,6 +56,7 @@ struct showone *nemoshow_text_create(void)
 
 	one = &text->base;
 	one->type = NEMOSHOW_SHAPE_TYPE;
+	one->sub = NEMOSHOW_SHAPE_TEXT_TYPE;
 	one->destroy = nemoshow_text_destroy;
 
 	nemoshow_one_prepare(one);

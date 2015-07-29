@@ -9,6 +9,7 @@
 #include <nemoshow.h>
 #include <nemoxml.h>
 #include <nemomisc.h>
+#include <skiaconfig.hpp>
 
 struct showone *nemoshow_canvas_create(void)
 {
@@ -26,11 +27,15 @@ struct showone *nemoshow_canvas_create(void)
 
 	nemoshow_one_prepare(one);
 
-	nemoobject_set_reserved(&one->object, "type", canvas->types, NEMOSHOW_CANVAS_TYPE_MAX);
+	nemoobject_set_reserved(&one->object, "type", canvas->type, NEMOSHOW_CANVAS_TYPE_MAX);
 	nemoobject_set_reserved(&one->object, "src", canvas->src, NEMOSHOW_CANVAS_SRC_MAX);
 	nemoobject_set_reserved(&one->object, "event", &canvas->event, sizeof(int32_t));
 	nemoobject_set_reserved(&one->object, "width", &canvas->width, sizeof(double));
 	nemoobject_set_reserved(&one->object, "height", &canvas->height, sizeof(double));
+
+	canvas->shapes = (struct showone **)malloc(sizeof(struct showone *) * 8);
+	canvas->nshapes = 0;
+	canvas->sshapes = 8;
 
 	return one;
 }
@@ -41,6 +46,7 @@ void nemoshow_canvas_destroy(struct showone *one)
 
 	nemoshow_one_finish(one);
 
+	free(canvas->shapes);
 	free(canvas);
 }
 
@@ -56,22 +62,22 @@ int nemoshow_canvas_arrange(struct nemoshow *show, struct showone *one)
 
 		int type;
 	} maps[] = {
-		{ "vec",				NEMOSHOW_CANVAS_VECTOR_TYPE },
-		{ "svg",				NEMOSHOW_CANVAS_SVG_TYPE },
 		{ "img",				NEMOSHOW_CANVAS_IMAGE_TYPE },
-		{ "ref",				NEMOSHOW_CANVAS_REF_TYPE },
-		{ "use",				NEMOSHOW_CANVAS_USE_TYPE },
-		{ "scene",			NEMOSHOW_CANVAS_SCENE_TYPE },
 		{ "opengl",			NEMOSHOW_CANVAS_OPENGL_TYPE },
 		{ "pixman",			NEMOSHOW_CANVAS_PIXMAN_TYPE },
+		{ "ref",				NEMOSHOW_CANVAS_REF_TYPE },
+		{ "scene",			NEMOSHOW_CANVAS_SCENE_TYPE },
+		{ "svg",				NEMOSHOW_CANVAS_SVG_TYPE },
+		{ "use",				NEMOSHOW_CANVAS_USE_TYPE },
+		{ "vec",				NEMOSHOW_CANVAS_VECTOR_TYPE },
 	}, *map;
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
-	map = static_cast<struct canvasmap *>(bsearch(canvas->types, static_cast<void *>(maps), sizeof(maps) / sizeof(maps[0]), sizeof(maps[0]), nemoshow_canvas_compare));
+	map = static_cast<struct canvasmap *>(bsearch(canvas->type, static_cast<void *>(maps), sizeof(maps) / sizeof(maps[0]), sizeof(maps[0]), nemoshow_canvas_compare));
 	if (map == NULL)
-		canvas->type = NEMOSHOW_CANVAS_NONE_TYPE;
+		one->sub = NEMOSHOW_CANVAS_NONE_TYPE;
 	else
-		canvas->type = map->type;
+		one->sub = map->type;
 
 	canvas->node = nemotale_node_create_pixman(canvas->width, canvas->height);
 
@@ -84,12 +90,47 @@ int nemoshow_canvas_arrange(struct nemoshow *show, struct showone *one)
 	return 0;
 }
 
+static int nemoshow_canvas_update_vector(struct nemoshow *show, struct showcanvas *canvas)
+{
+	SkAutoGraphics autograph;
+	SkBitmap bitmap;
+	struct showone *one;
+	int i;
+
+	bitmap.setInfo(
+			SkImageInfo::Make(canvas->width, canvas->height, kN32_SkColorType, kPremul_SkAlphaType));
+	bitmap.setPixels(
+			nemotale_node_get_buffer(canvas->node));
+
+	SkBitmapDevice sdevice(bitmap);
+	SkCanvas scanvas(&sdevice);
+
+	SkPaint spaint;
+	spaint.setStyle(SkPaint::kStrokeAndFill_Style);
+	spaint.setStrokeWidth(3.0f);
+	spaint.setColor(SK_ColorYELLOW);
+
+	for (i = 0; i < canvas->nshapes; i++) {
+		one = canvas->shapes[i];
+
+		if (one->sub == NEMOSHOW_SHAPE_RECT_TYPE) {
+			struct showrect *rect = NEMOSHOW_RECT(one);
+			SkRect srect = SkRect::MakeXYWH(rect->x, rect->y, rect->width, rect->height);
+
+			scanvas.drawRect(srect, spaint);
+		}
+	}
+
+	return 0;
+}
+
 int nemoshow_canvas_update(struct nemoshow *show, struct showone *one)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
-	if (canvas->type == NEMOSHOW_CANVAS_VECTOR_TYPE) {
-	} else if (canvas->type == NEMOSHOW_CANVAS_SVG_TYPE) {
+	if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
+		nemoshow_canvas_update_vector(show, canvas);
+	} else if (one->sub == NEMOSHOW_CANVAS_SVG_TYPE) {
 	} else {
 		nemotale_node_fill_pixman(canvas->node, 0.0f, 1.0f, 1.0f, 1.0f);
 	}

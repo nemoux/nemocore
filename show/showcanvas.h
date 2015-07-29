@@ -36,14 +36,16 @@ struct nemoshow;
 struct showcanvas {
 	struct showone base;
 
-	char types[NEMOSHOW_CANVAS_TYPE_MAX];
+	char type[NEMOSHOW_CANVAS_TYPE_MAX];
 	char src[NEMOSHOW_CANVAS_SRC_MAX];
 	int32_t event;
 
-	int type;
 	struct talenode *node;
 
 	double width, height;
+
+	struct showone **shapes;
+	int nshapes, sshapes;
 };
 
 #define	NEMOSHOW_CANVAS(one)		((struct showcanvas *)container_of(one, struct showcanvas, base))

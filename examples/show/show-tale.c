@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
 	struct eglcanvas *canvas;
 	struct nemotale *tale;
 	struct nemoshow *show;
-	int32_t width = 300, height = 300;
+	int32_t width = 1000, height = 1000;
 
 	context = (struct showcontext *)malloc(sizeof(struct showcontext));
 	if (context == NULL)

@@ -48,6 +48,13 @@ static inline cairo_surface_t *nemotale_get_cairo(struct nemotale *tale)
 	return context->surface;
 }
 
+static inline void *nemotale_node_get_buffer(struct talenode *node)
+{
+	struct talepmnode *context = (struct talepmnode *)node->pmcontext;
+
+	return context->data;
+}
+
 static inline pixman_image_t *nemotale_node_get_pixman(struct talenode *node)
 {
 	struct talepmnode *context = (struct talepmnode *)node->pmcontext;

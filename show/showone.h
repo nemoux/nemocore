@@ -45,7 +45,7 @@ struct showattr {
 };
 
 struct showone {
-	int type;
+	int type, sub;
 	char id[NEMOSHOW_ID_MAX];
 
 	struct nemoobject object;

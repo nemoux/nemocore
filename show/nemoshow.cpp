@@ -164,6 +164,7 @@ static int nemoshow_load_loop(struct nemoshow *show, struct showone *loop, struc
 
 static int nemoshow_load_canvas(struct nemoshow *show, struct showone *canvas, struct xmlnode *node)
 {
+	struct showcanvas *cone = NEMOSHOW_CANVAS(canvas);
 	struct xmlnode *child;
 	struct showone *one;
 
@@ -174,6 +175,8 @@ static int nemoshow_load_canvas(struct nemoshow *show, struct showone *canvas, s
 
 			if (one->type == NEMOSHOW_LOOP_TYPE) {
 				nemoshow_load_loop(show, one, child);
+			} else if (one->type == NEMOSHOW_SHAPE_TYPE) {
+				NEMOBOX_APPEND(cone->shapes, cone->sshapes, cone->nshapes, one);
 			}
 		}
 	}
