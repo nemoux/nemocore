@@ -39,10 +39,6 @@ int main(int argc, char *argv[])
 
 	do {
 		done = nemoshow_transition_update(trans, time_current_msecs());
-
-		NEMO_DEBUG("=> %f %f\n", NEMOSHOW_TEXT(one)->x, NEMOSHOW_TEXT(one)->y);
-
-		usleep(1000);
 	} while (done == 0);
 
 	nemoshow_transition_destroy(trans);

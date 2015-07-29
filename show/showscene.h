@@ -15,6 +15,9 @@ struct showscene {
 	struct showone base;
 
 	double width, height;
+
+	struct showone **canvases;
+	int ncanvases, scanvases;
 };
 
 #define	NEMOSHOW_SCENE(one)		((struct showscene *)container_of(one, struct showscene, base))

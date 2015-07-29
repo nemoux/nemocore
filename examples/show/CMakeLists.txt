@@ -5,6 +5,9 @@ set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 include_directories(
 	${CMAKE_CURRENT_BINARY_DIR}
 	${CMAKE_SOURCE_DIR}/show
+	${CMAKE_SOURCE_DIR}/tale
+	${CMAKE_SOURCE_DIR}/tool
+	${CMAKE_BINARY_DIR}/tool
 	)
 
 add_executable(show-simple
@@ -13,5 +16,17 @@ add_executable(show-simple
 
 TARGET_LINK_LIBRARIES(show-simple
 	nemoshow
+	${NEMOUX_COMMON_LIBRARIES}
+	)
+
+add_executable(show-tale
+	show-tale.c
+	talehelper.c
+	)
+
+TARGET_LINK_LIBRARIES(show-tale
+	nemoshow
+	nemotale
+	nemotool
 	${NEMOUX_COMMON_LIBRARIES}
 	)

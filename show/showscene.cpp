@@ -28,6 +28,10 @@ struct showone *nemoshow_scene_create(void)
 	nemoobject_set_reserved(&one->object, "width", &scene->width, sizeof(double));
 	nemoobject_set_reserved(&one->object, "height", &scene->height, sizeof(double));
 
+	scene->canvases = (struct showone **)malloc(sizeof(struct showone *) * 8);
+	scene->ncanvases = 0;
+	scene->scanvases = 8;
+
 	return one;
 }
 
@@ -37,5 +41,6 @@ void nemoshow_scene_destroy(struct showone *one)
 
 	nemoshow_one_finish(one);
 
+	free(scene->canvases);
 	free(scene);
 }
