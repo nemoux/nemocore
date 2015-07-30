@@ -114,6 +114,8 @@ static struct showone *nemoshow_create_one(struct xmlnode *node)
 		one = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
 	} else if (strcmp(node->name, "arc") == 0) {
 		one = nemoshow_item_create(NEMOSHOW_ARC_ITEM);
+	} else if (strcmp(node->name, "pie") == 0) {
+		one = nemoshow_item_create(NEMOSHOW_PIE_ITEM);
 	} else if (strcmp(node->name, "text") == 0) {
 		one = nemoshow_item_create(NEMOSHOW_TEXT_ITEM);
 	} else if (strcmp(node->name, "path") == 0) {
