@@ -193,6 +193,15 @@ static struct showone *nemoshow_create_one(struct xmlnode *node)
 	return one;
 }
 
+static int nemoshow_load_loop(struct nemoshow *show, struct showone *loop, struct xmlnode *node);
+static int nemoshow_load_item(struct nemoshow *show, struct showone *item, struct xmlnode *node);
+static int nemoshow_load_canvas(struct nemoshow *show, struct showone *canvas, struct xmlnode *node);
+static int nemoshow_load_matrix(struct nemoshow *show, struct showone *matrix, struct xmlnode *node);
+static int nemoshow_load_scene(struct nemoshow *show, struct showone *scene, struct xmlnode *node);
+static int nemoshow_load_frame(struct nemoshow *show, struct showone *frame, struct xmlnode *node);
+static int nemoshow_load_sequence(struct nemoshow *show, struct showone *sequence, struct xmlnode *node);
+static int nemoshow_load_show(struct nemoshow *show, struct xmlnode *node);
+
 static int nemoshow_load_loop(struct nemoshow *show, struct showone *loop, struct xmlnode *node)
 {
 	struct xmlnode *child;
@@ -218,6 +227,10 @@ static int nemoshow_load_item(struct nemoshow *show, struct showone *item, struc
 		one = nemoshow_create_one(child);
 		if (one != NULL) {
 			NEMOBOX_APPEND(show->ones, show->sones, show->nones, one);
+
+			if (one->type == NEMOSHOW_MATRIX_TYPE) {
+				nemoshow_load_matrix(show, one, child);
+			}
 
 			NEMOBOX_APPEND(ione->ones, ione->sones, ione->nones, one);
 		}

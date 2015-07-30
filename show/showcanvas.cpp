@@ -145,6 +145,13 @@ static int nemoshow_canvas_update_vector(struct nemoshow *show, struct showcanva
 			nemoshow_canvas_draw_item(canvas, one->sub, item, style);
 
 			NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
+		} else if (NEMOSHOW_ITEM_CC(item, matrix) != NULL) {
+			NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
+			NEMOSHOW_CANVAS_CC(canvas, canvas)->setMatrix(*NEMOSHOW_ITEM_CC(item, matrix));
+
+			nemoshow_canvas_draw_item(canvas, one->sub, item, style);
+
+			NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
 		} else {
 			nemoshow_canvas_draw_item(canvas, one->sub, item, style);
 		}

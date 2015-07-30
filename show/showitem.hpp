@@ -7,6 +7,8 @@ typedef struct _showitem {
 	SkPaint *fill;
 	SkPaint *stroke;
 
+	SkMatrix *matrix;
+
 	SkPath *path;
 } showitem_t;
 

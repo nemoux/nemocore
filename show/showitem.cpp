@@ -9,6 +9,7 @@
 #include <showitem.hpp>
 #include <showcolor.h>
 #include <showmatrix.h>
+#include <showmatrix.hpp>
 #include <showpath.h>
 #include <nemoshow.h>
 #include <nemoxml.h>
@@ -25,6 +26,7 @@ struct showone *nemoshow_item_create(int type)
 	memset(item, 0, sizeof(struct showitem));
 
 	item->cc = new showitem_t;
+	NEMOSHOW_ITEM_CC(item, matrix) = NULL;
 
 	one = &item->base;
 	one->type = NEMOSHOW_ITEM_TYPE;
@@ -84,6 +86,8 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	struct showone *stone;
 	struct showone *mtone;
+	struct showone *child;
+	int i;
 
 	stone = nemoshow_search_one(show, item->style);
 	if (stone != NULL) {
@@ -104,12 +108,21 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 		NEMOSHOW_ITEM_CC(item, path) = new SkPath;
 	}
 
+	for (i = 0; i < item->nones; i++) {
+		if (item->ones[i]->type == NEMOSHOW_MATRIX_TYPE) {
+			NEMOSHOW_ITEM_CC(item, matrix) = new SkMatrix;
+			break;
+		}
+	}
+
 	return 0;
 }
 
 int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
+	struct showone *child;
+	int i;
 
 	if (item->stone == item) {
 		if (item->fill != 0) {
@@ -126,9 +139,7 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 	}
 
 	if (one->sub == NEMOSHOW_PATH_ITEM) {
-		struct showone *child;
 		struct showpath *path;
-		int i;
 
 		NEMOSHOW_ITEM_CC(item, path)->reset();
 
@@ -150,6 +161,23 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 				} else if (child->sub == NEMOSHOW_CLOSE_PATH) {
 					NEMOSHOW_ITEM_CC(item, path)->close();
 				}
+			}
+		}
+	}
+
+	if (NEMOSHOW_ITEM_CC(item, matrix) != NULL) {
+		NEMOSHOW_ITEM_CC(item, matrix)->setIdentity();
+
+		for (i = 0; i < item->nones; i++) {
+			child = item->ones[i];
+
+			if (child->type == NEMOSHOW_MATRIX_TYPE) {
+				nemoshow_matrix_update(show, child);
+
+				NEMOSHOW_ITEM_CC(item, matrix)->postConcat(
+						*NEMOSHOW_MATRIX_CC(
+							NEMOSHOW_MATRIX(child),
+							matrix));
 			}
 		}
 	}
