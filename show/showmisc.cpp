@@ -26,6 +26,7 @@ struct showprop *nemoshow_get_property(const char *name)
 		{ "from",							NEMOSHOW_DOUBLE_PROP },
 		{ "height",						NEMOSHOW_DOUBLE_PROP },
 		{ "id",								NEMOSHOW_STRING_PROP },
+		{ "matrix",						NEMOSHOW_STRING_PROP },
 		{ "r",								NEMOSHOW_DOUBLE_PROP },
 		{ "rx",								NEMOSHOW_DOUBLE_PROP },
 		{ "ry",								NEMOSHOW_DOUBLE_PROP },

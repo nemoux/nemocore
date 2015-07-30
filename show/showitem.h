@@ -19,6 +19,8 @@ typedef enum {
 	NEMOSHOW_LAST_ITEM
 } NemoShowItemType;
 
+struct showmatrix;
+
 struct showitem {
 	struct showone base;
 
@@ -38,6 +40,9 @@ struct showitem {
 
 	char style[NEMOSHOW_ID_MAX];
 	struct showitem *stone;
+
+	char matrix[NEMOSHOW_ID_MAX];
+	struct showmatrix *mtone;
 
 	void *cc;
 };

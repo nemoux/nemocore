@@ -9,6 +9,8 @@
 #include <showcanvas.hpp>
 #include <showitem.h>
 #include <showitem.hpp>
+#include <showmatrix.h>
+#include <showmatrix.hpp>
 #include <nemoshow.h>
 #include <nemoxml.h>
 #include <nemomisc.h>
@@ -106,23 +108,36 @@ int nemoshow_canvas_arrange(struct nemoshow *show, struct showone *one)
 	return 0;
 }
 
+static inline void nemoshow_canvas_draw_item(struct showcanvas *canvas, int type, struct showitem *item, struct showitem *style)
+{
+	if (type == NEMOSHOW_RECT_ITEM) {
+		SkRect rect = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
+
+		if (style->fill != 0)
+			NEMOSHOW_CANVAS_CC(canvas, canvas)->drawRect(rect, *NEMOSHOW_ITEM_CC(style, fill));
+		if (style->stroke != 0)
+			NEMOSHOW_CANVAS_CC(canvas, canvas)->drawRect(rect, *NEMOSHOW_ITEM_CC(style, stroke));
+	}
+}
+
 static int nemoshow_canvas_update_vector(struct nemoshow *show, struct showcanvas *canvas)
 {
-	struct showone *one;
 	int i;
 
 	for (i = 0; i < canvas->nitems; i++) {
-		one = canvas->items[i];
+		struct showone *one = canvas->items[i];
+		struct showitem *item = NEMOSHOW_ITEM(one);
+		struct showitem *style = item->stone;
 
-		if (one->sub == NEMOSHOW_RECT_ITEM) {
-			struct showitem *item = NEMOSHOW_ITEM(one);
-			struct showitem *style = item->stone;
-			SkRect rect = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
+		if (item->mtone != NULL) {
+			NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
+			NEMOSHOW_CANVAS_CC(canvas, canvas)->setMatrix(*NEMOSHOW_MATRIX_CC(item->mtone, matrix));
 
-			if (style->fill != 0)
-				NEMOSHOW_CANVAS_CC(canvas, canvas)->drawRect(rect, *NEMOSHOW_ITEM_CC(style, fill));
-			if (style->stroke != 0)
-				NEMOSHOW_CANVAS_CC(canvas, canvas)->drawRect(rect, *NEMOSHOW_ITEM_CC(style, stroke));
+			nemoshow_canvas_draw_item(canvas, one->sub, item, style);
+
+			NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
+		} else {
+			nemoshow_canvas_draw_item(canvas, one->sub, item, style);
 		}
 	}
 

@@ -8,6 +8,7 @@
 #include <showitem.h>
 #include <showitem.hpp>
 #include <showcolor.h>
+#include <showmatrix.h>
 #include <nemoshow.h>
 #include <nemoxml.h>
 #include <nemomisc.h>
@@ -56,6 +57,8 @@ struct showone *nemoshow_item_create(int type)
 
 	nemoobject_set_reserved(&one->object, "style", item->style, NEMOSHOW_ID_MAX);
 
+	nemoobject_set_reserved(&one->object, "matrix", item->matrix, NEMOSHOW_ID_MAX);
+
 	return one;
 }
 
@@ -74,6 +77,7 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	struct showone *stone;
+	struct showone *mtone;
 
 	stone = nemoshow_search_one(show, item->style);
 	if (stone != NULL) {
@@ -83,6 +87,11 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 		NEMOSHOW_ITEM_CC(item, stroke) = new SkPaint;
 
 		item->stone = item;
+	}
+
+	mtone = nemoshow_search_one(show, item->matrix);
+	if (mtone != NULL) {
+		item->mtone = NEMOSHOW_MATRIX(mtone);
 	}
 
 	return 0;
