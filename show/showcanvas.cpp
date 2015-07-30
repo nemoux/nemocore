@@ -117,6 +117,18 @@ static inline void nemoshow_canvas_draw_item(struct showcanvas *canvas, int type
 			NEMOSHOW_CANVAS_CC(canvas, canvas)->drawRect(rect, *NEMOSHOW_ITEM_CC(style, fill));
 		if (style->stroke != 0)
 			NEMOSHOW_CANVAS_CC(canvas, canvas)->drawRect(rect, *NEMOSHOW_ITEM_CC(style, stroke));
+	} else if (type == NEMOSHOW_CIRCLE_ITEM) {
+		if (style->fill != 0)
+			NEMOSHOW_CANVAS_CC(canvas, canvas)->drawCircle(item->x, item->y, item->r, *NEMOSHOW_ITEM_CC(style, fill));
+		if (style->stroke != 0)
+			NEMOSHOW_CANVAS_CC(canvas, canvas)->drawCircle(item->x, item->y, item->r, *NEMOSHOW_ITEM_CC(style, stroke));
+	} else if (type == NEMOSHOW_ARC_ITEM) {
+		SkRect rect = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
+
+		if (style->fill != 0)
+			NEMOSHOW_CANVAS_CC(canvas, canvas)->drawArc(rect, item->from, item->to, false, *NEMOSHOW_ITEM_CC(style, fill));
+		if (style->stroke != 0)
+			NEMOSHOW_CANVAS_CC(canvas, canvas)->drawArc(rect, item->from, item->to, false, *NEMOSHOW_ITEM_CC(style, stroke));
 	} else if (type == NEMOSHOW_PATH_ITEM) {
 		if (style->fill != 0)
 			NEMOSHOW_CANVAS_CC(canvas, canvas)->drawPath(

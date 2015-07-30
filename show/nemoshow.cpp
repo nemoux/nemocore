@@ -110,6 +110,10 @@ static struct showone *nemoshow_create_one(struct xmlnode *node)
 		one = nemoshow_canvas_create();
 	} else if (strcmp(node->name, "rect") == 0) {
 		one = nemoshow_item_create(NEMOSHOW_RECT_ITEM);
+	} else if (strcmp(node->name, "circle") == 0) {
+		one = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
+	} else if (strcmp(node->name, "arc") == 0) {
+		one = nemoshow_item_create(NEMOSHOW_ARC_ITEM);
 	} else if (strcmp(node->name, "text") == 0) {
 		one = nemoshow_item_create(NEMOSHOW_TEXT_ITEM);
 	} else if (strcmp(node->name, "path") == 0) {
