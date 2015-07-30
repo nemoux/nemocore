@@ -24,6 +24,7 @@ NEMO_BEGIN_EXTERN_C
 #include <showease.h>
 #include <showtransition.h>
 #include <showmatrix.h>
+#include <showpath.h>
 
 #include <nemotale.h>
 

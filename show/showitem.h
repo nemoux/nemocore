@@ -15,7 +15,8 @@ typedef enum {
 	NEMOSHOW_NONE_ITEM = 0,
 	NEMOSHOW_RECT_ITEM = 1,
 	NEMOSHOW_TEXT_ITEM = 2,
-	NEMOSHOW_STYLE_ITEM = 3,
+	NEMOSHOW_PATH_ITEM = 3,
+	NEMOSHOW_STYLE_ITEM = 4,
 	NEMOSHOW_LAST_ITEM
 } NemoShowItemType;
 
@@ -43,6 +44,9 @@ struct showitem {
 
 	char matrix[NEMOSHOW_ID_MAX];
 	struct showmatrix *mtone;
+
+	struct showone **ones;
+	int nones, sones;
 
 	void *cc;
 };

@@ -42,9 +42,11 @@ struct showprop *nemoshow_get_property(const char *name)
 		{ "x",								NEMOSHOW_DOUBLE_PROP },
 		{ "x0",								NEMOSHOW_DOUBLE_PROP },
 		{ "x1",								NEMOSHOW_DOUBLE_PROP },
+		{ "x2",								NEMOSHOW_DOUBLE_PROP },
 		{ "y",								NEMOSHOW_DOUBLE_PROP },
 		{ "y0",								NEMOSHOW_DOUBLE_PROP },
 		{ "y1",								NEMOSHOW_DOUBLE_PROP },
+		{ "y2",								NEMOSHOW_DOUBLE_PROP },
 	};
 
 	return (struct showprop *)bsearch(name,

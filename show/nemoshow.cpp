@@ -112,6 +112,8 @@ static struct showone *nemoshow_create_one(struct xmlnode *node)
 		one = nemoshow_item_create(NEMOSHOW_RECT_ITEM);
 	} else if (strcmp(node->name, "text") == 0) {
 		one = nemoshow_item_create(NEMOSHOW_TEXT_ITEM);
+	} else if (strcmp(node->name, "path") == 0) {
+		one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
 	} else if (strcmp(node->name, "style") == 0) {
 		one = nemoshow_item_create(NEMOSHOW_STYLE_ITEM);
 	} else if (strcmp(node->name, "loop") == 0) {
@@ -132,6 +134,14 @@ static struct showone *nemoshow_create_one(struct xmlnode *node)
 		one = nemoshow_matrix_create(NEMOSHOW_ROTATE_MATRIX);
 	} else if (strcmp(node->name, "translate") == 0) {
 		one = nemoshow_matrix_create(NEMOSHOW_TRANSLATE_MATRIX);
+	} else if (strcmp(node->name, "moveto") == 0) {
+		one = nemoshow_path_create(NEMOSHOW_MOVETO_PATH);
+	} else if (strcmp(node->name, "lineto") == 0) {
+		one = nemoshow_path_create(NEMOSHOW_LINETO_PATH);
+	} else if (strcmp(node->name, "curveto") == 0) {
+		one = nemoshow_path_create(NEMOSHOW_CURVETO_PATH);
+	} else if (strcmp(node->name, "close") == 0) {
+		one = nemoshow_path_create(NEMOSHOW_CLOSE_PATH);
 	}
 
 	if (one != NULL) {
@@ -198,6 +208,24 @@ static int nemoshow_load_loop(struct nemoshow *show, struct showone *loop, struc
 	return 0;
 }
 
+static int nemoshow_load_item(struct nemoshow *show, struct showone *item, struct xmlnode *node)
+{
+	struct showitem *ione = NEMOSHOW_ITEM(item);
+	struct xmlnode *child;
+	struct showone *one;
+
+	nemolist_for_each(child, &node->children, link) {
+		one = nemoshow_create_one(child);
+		if (one != NULL) {
+			NEMOBOX_APPEND(show->ones, show->sones, show->nones, one);
+
+			NEMOBOX_APPEND(ione->ones, ione->sones, ione->nones, one);
+		}
+	}
+
+	return 0;
+}
+
 static int nemoshow_load_canvas(struct nemoshow *show, struct showone *canvas, struct xmlnode *node)
 {
 	struct showcanvas *cone = NEMOSHOW_CANVAS(canvas);
@@ -213,6 +241,8 @@ static int nemoshow_load_canvas(struct nemoshow *show, struct showone *canvas, s
 				nemoshow_load_loop(show, one, child);
 			} else if (one->type == NEMOSHOW_ITEM_TYPE) {
 				NEMOBOX_APPEND(cone->items, cone->sitems, cone->nitems, one);
+
+				nemoshow_load_item(show, one, child);
 			}
 		}
 	}

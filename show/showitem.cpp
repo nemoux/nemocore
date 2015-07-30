@@ -9,6 +9,7 @@
 #include <showitem.hpp>
 #include <showcolor.h>
 #include <showmatrix.h>
+#include <showpath.h>
 #include <nemoshow.h>
 #include <nemoxml.h>
 #include <nemomisc.h>
@@ -59,6 +60,10 @@ struct showone *nemoshow_item_create(int type)
 
 	nemoobject_set_reserved(&one->object, "matrix", item->matrix, NEMOSHOW_ID_MAX);
 
+	item->ones = (struct showone **)malloc(sizeof(struct showone *) * 4);
+	item->nones = 0;
+	item->sones = 4;
+
 	return one;
 }
 
@@ -70,6 +75,7 @@ void nemoshow_item_destroy(struct showone *one)
 
 	delete static_cast<showitem_t *>(item->cc);
 
+	free(item->ones);
 	free(item);
 }
 
@@ -94,6 +100,10 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 		item->mtone = NEMOSHOW_MATRIX(mtone);
 	}
 
+	if (one->sub == NEMOSHOW_PATH_ITEM) {
+		NEMOSHOW_ITEM_CC(item, path) = new SkPath;
+	}
+
 	return 0;
 }
 
@@ -112,6 +122,35 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 			NEMOSHOW_ITEM_CC(item, stroke)->setStrokeWidth(item->stroke_width);
 			NEMOSHOW_ITEM_CC(item, stroke)->setColor(
 					SkColorSetRGB(item->strokes[2], item->strokes[1], item->strokes[0]));
+		}
+	}
+
+	if (one->sub == NEMOSHOW_PATH_ITEM) {
+		struct showone *child;
+		struct showpath *path;
+		int i;
+
+		NEMOSHOW_ITEM_CC(item, path)->reset();
+
+		for (i = 0; i < item->nones; i++) {
+			child = item->ones[i];
+
+			if (child->type == NEMOSHOW_PATH_TYPE) {
+				path = NEMOSHOW_PATH(child);
+
+				if (child->sub == NEMOSHOW_MOVETO_PATH) {
+					NEMOSHOW_ITEM_CC(item, path)->moveTo(path->x0, path->y0);
+				} else if (child->sub == NEMOSHOW_LINETO_PATH) {
+					NEMOSHOW_ITEM_CC(item, path)->lineTo(path->x0, path->y0);
+				} else if (child->sub == NEMOSHOW_CURVETO_PATH) {
+					NEMOSHOW_ITEM_CC(item, path)->cubicTo(
+							path->x0, path->y0,
+							path->x1, path->y1,
+							path->x2, path->y2);
+				} else if (child->sub == NEMOSHOW_CLOSE_PATH) {
+					NEMOSHOW_ITEM_CC(item, path)->close();
+				}
+			}
 		}
 	}
 

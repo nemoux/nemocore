@@ -6,6 +6,8 @@
 typedef struct _showitem {
 	SkPaint *fill;
 	SkPaint *stroke;
+
+	SkPath *path;
 } showitem_t;
 
 #define NEMOSHOW_ITEM_CC(base, name)				(((showitem_t *)((base)->cc))->name)

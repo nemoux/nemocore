@@ -117,6 +117,15 @@ static inline void nemoshow_canvas_draw_item(struct showcanvas *canvas, int type
 			NEMOSHOW_CANVAS_CC(canvas, canvas)->drawRect(rect, *NEMOSHOW_ITEM_CC(style, fill));
 		if (style->stroke != 0)
 			NEMOSHOW_CANVAS_CC(canvas, canvas)->drawRect(rect, *NEMOSHOW_ITEM_CC(style, stroke));
+	} else if (type == NEMOSHOW_PATH_ITEM) {
+		if (style->fill != 0)
+			NEMOSHOW_CANVAS_CC(canvas, canvas)->drawPath(
+					*NEMOSHOW_ITEM_CC(item, path),
+					*NEMOSHOW_ITEM_CC(style, fill));
+		if (style->stroke != 0)
+			NEMOSHOW_CANVAS_CC(canvas, canvas)->drawPath(
+					*NEMOSHOW_ITEM_CC(item, path),
+					*NEMOSHOW_ITEM_CC(style, stroke));
 	}
 }
 
