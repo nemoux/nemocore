@@ -155,11 +155,11 @@ static int nemoshow_canvas_update_vector(struct nemoshow *show, struct showcanva
 	for (i = 0; i < canvas->nitems; i++) {
 		struct showone *one = canvas->items[i];
 		struct showitem *item = NEMOSHOW_ITEM(one);
-		struct showitem *style = item->stone;
+		struct showitem *style = item->style;
 
-		if (item->mtone != NULL) {
+		if (item->matrix != NULL) {
 			NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
-			NEMOSHOW_CANVAS_CC(canvas, canvas)->setMatrix(*NEMOSHOW_MATRIX_CC(item->mtone, matrix));
+			NEMOSHOW_CANVAS_CC(canvas, canvas)->setMatrix(*NEMOSHOW_MATRIX_CC(item->matrix, matrix));
 
 			nemoshow_canvas_draw_item(canvas, one->sub, item, style);
 

@@ -58,10 +58,6 @@ struct showone *nemoshow_item_create(int type)
 
 	nemoobject_set_reserved(&one->object, "alpha", &item->alpha, sizeof(double));
 
-	nemoobject_set_reserved(&one->object, "style", item->style, NEMOSHOW_ID_MAX);
-
-	nemoobject_set_reserved(&one->object, "matrix", item->matrix, NEMOSHOW_ID_MAX);
-
 	item->ones = (struct showone **)malloc(sizeof(struct showone *) * 4);
 	item->nones = 0;
 	item->sones = 4;
@@ -84,24 +80,24 @@ void nemoshow_item_destroy(struct showone *one)
 int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
-	struct showone *stone;
-	struct showone *mtone;
+	struct showone *style;
+	struct showone *matrix;
 	struct showone *child;
 	int i;
 
-	stone = nemoshow_search_one(show, item->style);
-	if (stone != NULL) {
-		item->stone = NEMOSHOW_ITEM(stone);
+	style = nemoshow_search_one(show, nemoobject_gets(&one->object, "style"));
+	if (style != NULL) {
+		item->style = NEMOSHOW_ITEM(style);
 	} else {
 		NEMOSHOW_ITEM_CC(item, fill) = new SkPaint;
 		NEMOSHOW_ITEM_CC(item, stroke) = new SkPaint;
 
-		item->stone = item;
+		item->style = item;
 	}
 
-	mtone = nemoshow_search_one(show, item->matrix);
-	if (mtone != NULL) {
-		item->mtone = NEMOSHOW_MATRIX(mtone);
+	matrix = nemoshow_search_one(show, nemoobject_gets(&one->object, "matrix"));
+	if (matrix != NULL) {
+		item->matrix = NEMOSHOW_MATRIX(matrix);
 	}
 
 	if (one->sub == NEMOSHOW_PATH_ITEM) {
@@ -124,7 +120,7 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 	struct showone *child;
 	int i;
 
-	if (item->stone == item) {
+	if (item->style == item) {
 		if (item->fill != 0) {
 			NEMOSHOW_ITEM_CC(item, fill)->setStyle(SkPaint::kFill_Style);
 			NEMOSHOW_ITEM_CC(item, fill)->setColor(
@@ -160,6 +156,12 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 							path->x2, path->y2);
 				} else if (child->sub == NEMOSHOW_CLOSE_PATH) {
 					NEMOSHOW_ITEM_CC(item, path)->close();
+				} else if (child->sub == NEMOSHOW_CMD_PATH) {
+					SkPath cpath;
+
+					SkParsePath::FromSVGString(nemoobject_gets(&child->object, "d"), &cpath);
+
+					NEMOSHOW_ITEM_CC(item, path)->addPath(cpath);
 				}
 			}
 		}

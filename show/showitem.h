@@ -42,11 +42,8 @@ struct showitem {
 
 	double alpha;
 
-	char style[NEMOSHOW_ID_MAX];
-	struct showitem *stone;
-
-	char matrix[NEMOSHOW_ID_MAX];
-	struct showmatrix *mtone;
+	struct showitem *style;
+	struct showmatrix *matrix;
 
 	struct showone **ones;
 	int nones, sones;

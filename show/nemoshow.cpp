@@ -148,6 +148,8 @@ static struct showone *nemoshow_create_one(struct xmlnode *node)
 		one = nemoshow_path_create(NEMOSHOW_CURVETO_PATH);
 	} else if (strcmp(node->name, "close") == 0) {
 		one = nemoshow_path_create(NEMOSHOW_CLOSE_PATH);
+	} else if (strcmp(node->name, "cmd") == 0) {
+		one = nemoshow_path_create(NEMOSHOW_CMD_PATH);
 	}
 
 	if (one != NULL) {
