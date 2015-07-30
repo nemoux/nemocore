@@ -11,8 +11,6 @@ NEMO_BEGIN_EXTERN_C
 
 #include <showone.h>
 
-#define	NEMOSHOW_COLOR_STRING_MAX				(32)
-
 typedef enum {
 	NEMOSHOW_NONE_ITEM = 0,
 	NEMOSHOW_RECT_ITEM = 1,
@@ -30,9 +28,11 @@ struct showitem {
 
 	double from, to;
 
-	char stroke[NEMOSHOW_COLOR_STRING_MAX];
+	uint32_t stroke;
+	double strokes[4];
 	double stroke_width;
-	char fill[NEMOSHOW_COLOR_STRING_MAX];
+	uint32_t fill;
+	double fills[4];
 
 	double alpha;
 

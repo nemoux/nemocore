@@ -152,6 +152,20 @@ static struct showone *nemoshow_create_one(struct xmlnode *node)
 						nemoobject_setd(&one->object, node->attrs[i*2+0], strtod(node->attrs[i*2+1], NULL));
 					} else if (prop->type == NEMOSHOW_INTEGER_PROP) {
 						nemoobject_seti(&one->object, node->attrs[i*2+0], strtoul(node->attrs[i*2+1], NULL, 10));
+					} else if (prop->type == NEMOSHOW_COLOR_PROP) {
+						uint32_t c = nemoshow_color_parse(node->attrs[i*2+1]);
+						char attr[NEMOSHOW_ATTR_NAME_MAX];
+
+						snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:r", node->attrs[i*2+0]);
+						nemoobject_setd(&one->object, attr, (double)NEMOSHOW_COLOR_UINT32_R(c));
+						snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:g", node->attrs[i*2+0]);
+						nemoobject_setd(&one->object, attr, (double)NEMOSHOW_COLOR_UINT32_G(c));
+						snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:b", node->attrs[i*2+0]);
+						nemoobject_setd(&one->object, attr, (double)NEMOSHOW_COLOR_UINT32_B(c));
+						snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:a", node->attrs[i*2+0]);
+						nemoobject_setd(&one->object, attr, (double)NEMOSHOW_COLOR_UINT32_A(c));
+
+						nemoobject_seti(&one->object, node->attrs[i*2+0], 1);
 					}
 				}
 			}

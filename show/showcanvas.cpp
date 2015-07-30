@@ -119,9 +119,9 @@ static int nemoshow_canvas_update_vector(struct nemoshow *show, struct showcanva
 			struct showitem *style = item->stone;
 			SkRect rect = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
 
-			if (style->fill[0] != '\0')
+			if (style->fill != 0)
 				NEMOSHOW_CANVAS_CC(canvas, canvas)->drawRect(rect, *NEMOSHOW_ITEM_CC(style, fill));
-			if (style->stroke[0] != '\0')
+			if (style->stroke != 0)
 				NEMOSHOW_CANVAS_CC(canvas, canvas)->drawRect(rect, *NEMOSHOW_ITEM_CC(style, stroke));
 		}
 	}

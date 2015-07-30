@@ -7,6 +7,7 @@
 
 #include <showsequence.h>
 #include <nemoshow.h>
+#include <showmisc.h>
 #include <nemoxml.h>
 #include <nemomisc.h>
 
@@ -112,6 +113,7 @@ int nemoshow_sequence_arrange_set(struct nemoshow *show, struct showone *one)
 {
 	struct showset *set = NEMOSHOW_SET(one);
 	struct showone *src;
+	struct showprop *prop;
 	struct nemoattr *attr;
 	const char *name;
 	int i, count;
@@ -128,13 +130,53 @@ int nemoshow_sequence_arrange_set(struct nemoshow *show, struct showone *one)
 		if (strcmp(name, "id") == 0 || strcmp(name, "src") == 0)
 			continue;
 
-		attr = nemoobject_get(&src->object, name);
-		if (attr == NULL)
-			continue;
-		set->tattrs[set->nattrs] = attr;
-		set->eattrs[set->nattrs] = nemoobject_iget(&one->object, i);
+		prop = nemoshow_get_property(name);
+		if (prop != NULL) {
+			if (prop->type == NEMOSHOW_DOUBLE_PROP) {
+				attr = nemoobject_get(&src->object, name);
+				if (attr == NULL)
+					continue;
+				set->tattrs[set->nattrs] = attr;
+				set->eattrs[set->nattrs] = nemoobject_iget(&one->object, i);
+				set->nattrs++;
+			} else if (prop->type == NEMOSHOW_COLOR_PROP) {
+				char atname[NEMOSHOW_ATTR_NAME_MAX];
 
-		set->nattrs++;
+				snprintf(atname, NEMOSHOW_ATTR_NAME_MAX, "%s:r", name);
+				attr = nemoobject_get(&src->object, atname);
+				if (attr == NULL)
+					continue;
+				set->tattrs[set->nattrs] = attr;
+				set->eattrs[set->nattrs] = nemoobject_get(&one->object, atname);
+				set->nattrs++;
+
+				snprintf(atname, NEMOSHOW_ATTR_NAME_MAX, "%s:g", name);
+				attr = nemoobject_get(&src->object, atname);
+				if (attr == NULL)
+					continue;
+				set->tattrs[set->nattrs] = attr;
+				set->eattrs[set->nattrs] = nemoobject_get(&one->object, atname);
+				set->nattrs++;
+
+				snprintf(atname, NEMOSHOW_ATTR_NAME_MAX, "%s:b", name);
+				attr = nemoobject_get(&src->object, atname);
+				if (attr == NULL)
+					continue;
+				set->tattrs[set->nattrs] = attr;
+				set->eattrs[set->nattrs] = nemoobject_get(&one->object, atname);
+				set->nattrs++;
+
+				snprintf(atname, NEMOSHOW_ATTR_NAME_MAX, "%s:a", name);
+				attr = nemoobject_get(&src->object, atname);
+				if (attr == NULL)
+					continue;
+				set->tattrs[set->nattrs] = attr;
+				set->eattrs[set->nattrs] = nemoobject_get(&one->object, atname);
+				set->nattrs++;
+			} else if (prop->type == NEMOSHOW_INTEGER_PROP) {
+			} else if (prop->type == NEMOSHOW_STRING_PROP) {
+			}
+		}
 	}
 
 	return 0;
