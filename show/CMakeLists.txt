@@ -41,6 +41,7 @@ add_library(nemoshow SHARED
 	showsequence.cpp
 	showease.cpp
 	showtransition.cpp
+	showmatrix.cpp
 	showmisc.cpp
 	)
 
@@ -65,6 +66,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/show/showsequence.h
 	${CMAKE_SOURCE_DIR}/show/showease.h
 	${CMAKE_SOURCE_DIR}/show/showtransition.h
+	${CMAKE_SOURCE_DIR}/show/showmatrix.h
 	)
 
 set(NEMOSHOW_PKGCONFIG_REQUIRES "nemoasst nemotale")

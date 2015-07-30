@@ -17,5 +17,6 @@
 #include <SkBitmap.h>
 #include <SkStream.h>
 #include <SkString.h>
+#include <SkMatrix.h>
 
 #endif

@@ -124,6 +124,14 @@ static struct showone *nemoshow_create_one(struct xmlnode *node)
 		one = nemoshow_sequence_create_set();
 	} else if (strcmp(node->name, "ease") == 0) {
 		one = nemoshow_ease_create();
+	} else if (strcmp(node->name, "matrix") == 0) {
+		one = nemoshow_matrix_create(NEMOSHOW_MATRIX_MATRIX);
+	} else if (strcmp(node->name, "scale") == 0) {
+		one = nemoshow_matrix_create(NEMOSHOW_SCALE_MATRIX);
+	} else if (strcmp(node->name, "rotate") == 0) {
+		one = nemoshow_matrix_create(NEMOSHOW_ROTATE_MATRIX);
+	} else if (strcmp(node->name, "translate") == 0) {
+		one = nemoshow_matrix_create(NEMOSHOW_TRANSLATE_MATRIX);
 	}
 
 	if (one != NULL) {
@@ -212,6 +220,28 @@ static int nemoshow_load_canvas(struct nemoshow *show, struct showone *canvas, s
 	return 0;
 }
 
+static int nemoshow_load_matrix(struct nemoshow *show, struct showone *matrix, struct xmlnode *node)
+{
+	struct showmatrix *mone = NEMOSHOW_MATRIX(matrix);
+	struct xmlnode *child;
+	struct showone *one;
+
+	nemolist_for_each(child, &node->children, link) {
+		one = nemoshow_create_one(child);
+		if (one != NULL) {
+			NEMOBOX_APPEND(show->ones, show->sones, show->nones, one);
+
+			if (one->sub == NEMOSHOW_MATRIX_MATRIX) {
+				nemoshow_load_matrix(show, one, child);
+			}
+
+			NEMOBOX_APPEND(mone->matrices, mone->smatrices, mone->nmatrices, one);
+		}
+	}
+
+	return 0;
+}
+
 static int nemoshow_load_scene(struct nemoshow *show, struct showone *scene, struct xmlnode *node)
 {
 	struct showscene *sone = NEMOSHOW_SCENE(scene);
@@ -227,6 +257,8 @@ static int nemoshow_load_scene(struct nemoshow *show, struct showone *scene, str
 				nemoshow_load_canvas(show, one, child);
 
 				NEMOBOX_APPEND(sone->canvases, sone->scanvases, sone->ncanvases, one);
+			} else if (one->type == NEMOSHOW_MATRIX_TYPE) {
+				nemoshow_load_matrix(show, one, child);
 			}
 		}
 	}
@@ -374,6 +406,8 @@ void nemoshow_arrange_one(struct nemoshow *show)
 			nemoshow_canvas_arrange(show, one);
 		} else if (one->type == NEMOSHOW_ITEM_TYPE) {
 			nemoshow_item_arrange(show, one);
+		} else if (one->type == NEMOSHOW_MATRIX_TYPE) {
+			nemoshow_matrix_arrange(show, one);
 		}
 	}
 }
@@ -388,6 +422,8 @@ void nemoshow_update_one(struct nemoshow *show)
 
 		if (one->type == NEMOSHOW_ITEM_TYPE) {
 			nemoshow_item_update(show, one);
+		} else if (one->type == NEMOSHOW_MATRIX_TYPE) {
+			nemoshow_matrix_update(show, one);
 		}
 	}
 
