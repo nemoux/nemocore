@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <ft2build.h>
+#include <freetype.h>
 #include <fontconfig/fontconfig.h>
 
 #include <fonthelper.h>
@@ -187,4 +189,50 @@ const char *fontconfig_get_path(const char *fontfamily, const char *fontstyle, i
 	config->fonts[config->nfonts++] = info;
 
 	return info->fontpath;
+}
+
+struct freeconfig {
+	FT_Library library;
+};
+
+static struct freeconfig *fontconfig_create_freetype(void)
+{
+	struct freeconfig *config;
+
+	config = (struct freeconfig *)malloc(sizeof(struct freeconfig));
+	if (config == NULL)
+		return NULL;
+	memset(config, 0, sizeof(struct freeconfig));
+
+	FT_Init_FreeType(&config->library);
+
+	return config;
+}
+
+static void fontconfig_destroy_freetype(struct freeconfig *config)
+{
+	FT_Done_FreeType(config->library);
+
+	free(config);
+}
+
+int fontconfig_get_max_advance_height(const char *fontpath, unsigned int fontindex)
+{
+	static struct freeconfig *config = NULL;
+	FT_Library library;
+	FT_Face face;
+	int max_advance_height;
+
+	if (config == NULL) {
+		config = fontconfig_create_freetype();
+	}
+
+	if (FT_New_Face(config->library, fontpath, fontindex, &face))
+		return 0;
+
+	max_advance_height = face->max_advance_height;
+
+	FT_Done_Face(face);
+
+	return max_advance_height;
 }
