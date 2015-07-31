@@ -219,6 +219,9 @@ static int nemoshow_load_loop(struct nemoshow *show, struct showone *loop, struc
 		one = nemoshow_create_one(child);
 		if (one != NULL) {
 			NEMOBOX_APPEND(show->ones, show->sones, show->nones, one);
+
+			NEMOBOX_APPEND(loop->children, loop->schildren, loop->nchildren, one);
+			one->parent = loop;
 		}
 	}
 
@@ -240,7 +243,8 @@ static int nemoshow_load_item(struct nemoshow *show, struct showone *item, struc
 				nemoshow_load_matrix(show, one, child);
 			}
 
-			NEMOBOX_APPEND(ione->ones, ione->sones, ione->nones, one);
+			NEMOBOX_APPEND(item->children, item->schildren, item->nchildren, one);
+			one->parent = item;
 		}
 	}
 
@@ -261,10 +265,11 @@ static int nemoshow_load_canvas(struct nemoshow *show, struct showone *canvas, s
 			if (one->type == NEMOSHOW_LOOP_TYPE) {
 				nemoshow_load_loop(show, one, child);
 			} else if (one->type == NEMOSHOW_ITEM_TYPE) {
-				NEMOBOX_APPEND(cone->items, cone->sitems, cone->nitems, one);
-
 				nemoshow_load_item(show, one, child);
 			}
+
+			NEMOBOX_APPEND(canvas->children, canvas->schildren, canvas->nchildren, one);
+			one->parent = canvas;
 		}
 	}
 
@@ -286,7 +291,8 @@ static int nemoshow_load_matrix(struct nemoshow *show, struct showone *matrix, s
 				nemoshow_load_matrix(show, one, child);
 			}
 
-			NEMOBOX_APPEND(mone->matrices, mone->smatrices, mone->nmatrices, one);
+			NEMOBOX_APPEND(matrix->children, matrix->schildren, matrix->nchildren, one);
+			one->parent = matrix;
 		}
 	}
 
@@ -307,10 +313,12 @@ static int nemoshow_load_scene(struct nemoshow *show, struct showone *scene, str
 			if (one->type == NEMOSHOW_CANVAS_TYPE) {
 				nemoshow_load_canvas(show, one, child);
 
-				NEMOBOX_APPEND(sone->canvases, sone->scanvases, sone->ncanvases, one);
+				one->parent = scene;
 			} else if (one->type == NEMOSHOW_MATRIX_TYPE) {
 				nemoshow_load_matrix(show, one, child);
 			}
+
+			NEMOBOX_APPEND(scene->children, scene->schildren, scene->nchildren, one);
 		}
 	}
 
@@ -328,9 +336,7 @@ static int nemoshow_load_frame(struct nemoshow *show, struct showone *frame, str
 		if (one != NULL) {
 			NEMOBOX_APPEND(show->ones, show->sones, show->nones, one);
 
-			if (one->type == NEMOSHOW_SET_TYPE) {
-				NEMOBOX_APPEND(fone->sets, fone->ssets, fone->nsets, one);
-			}
+			NEMOBOX_APPEND(frame->children, frame->schildren, frame->nchildren, one);
 		}
 	}
 
@@ -350,9 +356,9 @@ static int nemoshow_load_sequence(struct nemoshow *show, struct showone *sequenc
 
 			if (one->type == NEMOSHOW_FRAME_TYPE) {
 				nemoshow_load_frame(show, one, child);
-
-				NEMOBOX_APPEND(sone->frames, sone->sframes, sone->nframes, one);
 			}
+
+			NEMOBOX_APPEND(sequence->children, sequence->schildren, sequence->nchildren, one);
 		}
 	}
 
@@ -471,18 +477,24 @@ void nemoshow_update_one(struct nemoshow *show)
 	for (i = 0; i < show->nones; i++) {
 		one = show->ones[i];
 
-		if (one->type == NEMOSHOW_ITEM_TYPE) {
-			nemoshow_item_update(show, one);
-		} else if (one->type == NEMOSHOW_MATRIX_TYPE) {
-			nemoshow_matrix_update(show, one);
+		if (one->dirty != 0) {
+			one->update(show, one);
+
+			one->dirty = 0;
 		}
 	}
+}
+
+void nemoshow_render_one(struct nemoshow *show)
+{
+	struct showone *one;
+	int i;
 
 	for (i = 0; i < show->nones; i++) {
 		one = show->ones[i];
 
 		if (one->type == NEMOSHOW_CANVAS_TYPE) {
-			nemoshow_canvas_update(show, one);
+			nemoshow_canvas_render(show, one);
 		}
 	}
 }
@@ -490,6 +502,7 @@ void nemoshow_update_one(struct nemoshow *show)
 int nemoshow_set_scene(struct nemoshow *show, struct showone *one)
 {
 	struct showscene *scene;
+	struct showone *child;
 	struct showcanvas *canvas;
 	int i;
 
@@ -503,10 +516,14 @@ int nemoshow_set_scene(struct nemoshow *show, struct showone *one)
 
 	scene = NEMOSHOW_SCENE(one);
 
-	for (i = 0; i < scene->ncanvases; i++) {
-		canvas = NEMOSHOW_CANVAS(scene->canvases[i]);
+	for (i = 0; i < one->nchildren; i++) {
+		child = one->children[i];
 
-		nemotale_attach_node(show->tale, canvas->node);
+		if (child->type == NEMOSHOW_CANVAS_TYPE) {
+			canvas = NEMOSHOW_CANVAS(child);
+
+			nemotale_attach_node(show->tale, canvas->node);
+		}
 	}
 
 	return 0;
@@ -514,17 +531,17 @@ int nemoshow_set_scene(struct nemoshow *show, struct showone *one)
 
 void nemoshow_put_scene(struct nemoshow *show)
 {
-	struct showscene *scene;
+	struct showone *one;
 	struct showcanvas *canvas;
 	int i;
 
 	if (show->scene == NULL)
 		return;
 
-	scene = NEMOSHOW_SCENE(show->scene);
+	one = show->scene;
 
-	for (i = 0; i < scene->ncanvases; i++) {
-		canvas = NEMOSHOW_CANVAS(scene->canvases[i]);
+	for (i = 0; i < one->nchildren; i++) {
+		canvas = NEMOSHOW_CANVAS(one->children[i]);
 
 		nemotale_detach_node(show->tale, canvas->node);
 	}

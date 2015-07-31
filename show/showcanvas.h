@@ -44,9 +44,6 @@ struct showcanvas {
 
 	double width, height;
 
-	struct showone **items;
-	int nitems, sitems;
-
 	void *cc;
 };
 
@@ -57,6 +54,7 @@ extern void nemoshow_canvas_destroy(struct showone *one);
 
 extern int nemoshow_canvas_arrange(struct nemoshow *show, struct showone *one);
 extern int nemoshow_canvas_update(struct nemoshow *show, struct showone *one);
+extern void nemoshow_canvas_render(struct nemoshow *show, struct showone *one);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

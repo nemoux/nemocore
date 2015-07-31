@@ -30,6 +30,7 @@ struct showone *nemoshow_canvas_create(void)
 
 	one = &canvas->base;
 	one->type = NEMOSHOW_CANVAS_TYPE;
+	one->update = nemoshow_canvas_update;
 	one->destroy = nemoshow_canvas_destroy;
 
 	nemoshow_one_prepare(one);
@@ -39,10 +40,6 @@ struct showone *nemoshow_canvas_create(void)
 	nemoobject_set_reserved(&one->object, "event", &canvas->event, sizeof(int32_t));
 	nemoobject_set_reserved(&one->object, "width", &canvas->width, sizeof(double));
 	nemoobject_set_reserved(&one->object, "height", &canvas->height, sizeof(double));
-
-	canvas->items = (struct showone **)malloc(sizeof(struct showone *) * 8);
-	canvas->nitems = 0;
-	canvas->sitems = 8;
 
 	return one;
 }
@@ -55,7 +52,6 @@ void nemoshow_canvas_destroy(struct showone *one)
 
 	delete static_cast<showcanvas_t *>(canvas->cc);
 
-	free(canvas->items);
 	free(canvas);
 }
 
@@ -108,7 +104,12 @@ int nemoshow_canvas_arrange(struct nemoshow *show, struct showone *one)
 	return 0;
 }
 
-static inline void nemoshow_canvas_draw_item(struct showcanvas *canvas, int type, struct showitem *item, struct showitem *style)
+int nemoshow_canvas_update(struct nemoshow *show, struct showone *one)
+{
+	return 0;
+}
+
+static inline void nemoshow_canvas_render_item(struct showcanvas *canvas, int type, struct showitem *item, struct showitem *style)
 {
 	if (type == NEMOSHOW_RECT_ITEM) {
 		SkRect rect = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
@@ -148,47 +149,45 @@ static inline void nemoshow_canvas_draw_item(struct showcanvas *canvas, int type
 	}
 }
 
-static int nemoshow_canvas_update_vector(struct nemoshow *show, struct showcanvas *canvas)
+static int nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 {
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 	int i;
 
-	for (i = 0; i < canvas->nitems; i++) {
-		struct showone *one = canvas->items[i];
-		struct showitem *item = NEMOSHOW_ITEM(one);
-		struct showitem *style = item->style;
+	for (i = 0; i < one->nchildren; i++) {
+		struct showone *child = one->children[i];
 
-		if (item->matrix != NULL) {
-			NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
-			NEMOSHOW_CANVAS_CC(canvas, canvas)->setMatrix(*NEMOSHOW_MATRIX_CC(item->matrix, matrix));
+		if (child->type == NEMOSHOW_ITEM_TYPE) {
+			struct showitem *item = NEMOSHOW_ITEM(child);
+			struct showitem *style = NEMOSHOW_ITEM(item->style);
 
-			nemoshow_canvas_draw_item(canvas, one->sub, item, style);
+			if (item->matrix != NULL) {
+				NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
+				NEMOSHOW_CANVAS_CC(canvas, canvas)->setMatrix(*NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(item->matrix), matrix));
 
-			NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
-		} else if (NEMOSHOW_ITEM_CC(item, matrix) != NULL) {
-			NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
-			NEMOSHOW_CANVAS_CC(canvas, canvas)->setMatrix(*NEMOSHOW_ITEM_CC(item, matrix));
+				nemoshow_canvas_render_item(canvas, child->sub, item, style);
 
-			nemoshow_canvas_draw_item(canvas, one->sub, item, style);
+				NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
+			} else if (NEMOSHOW_ITEM_CC(item, matrix) != NULL) {
+				NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
+				NEMOSHOW_CANVAS_CC(canvas, canvas)->setMatrix(*NEMOSHOW_ITEM_CC(item, matrix));
 
-			NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
-		} else {
-			nemoshow_canvas_draw_item(canvas, one->sub, item, style);
+				nemoshow_canvas_render_item(canvas, child->sub, item, style);
+
+				NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
+			} else {
+				nemoshow_canvas_render_item(canvas, child->sub, item, style);
+			}
 		}
 	}
 
 	return 0;
 }
 
-int nemoshow_canvas_update(struct nemoshow *show, struct showone *one)
+void nemoshow_canvas_render(struct nemoshow *show, struct showone *one)
 {
-	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
-
 	if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
-		nemoshow_canvas_update_vector(show, canvas);
+		nemoshow_canvas_render_vector(show, one);
 	} else if (one->sub == NEMOSHOW_CANVAS_SVG_TYPE) {
-	} else {
-		nemotale_node_fill_pixman(canvas->node, 0.0f, 1.0f, 1.0f, 1.0f);
 	}
-
-	return 0;
 }

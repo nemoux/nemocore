@@ -21,6 +21,7 @@ struct showone *nemoshow_ease_create(void)
 
 	one = &ease->base;
 	one->type = NEMOSHOW_EASE_TYPE;
+	one->update = nemoshow_ease_update;
 	one->destroy = nemoshow_ease_destroy;
 
 	nemoshow_one_prepare(one);
@@ -91,5 +92,10 @@ int nemoshow_ease_arrange(struct nemoshow *show, struct showone *one)
 		nemoease_set(&ease->ease, map->type);
 	}
 
+	return 0;
+}
+
+int nemoshow_ease_update(struct nemoshow *show, struct showone *one)
+{
 	return 0;
 }

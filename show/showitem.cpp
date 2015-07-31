@@ -13,6 +13,7 @@
 #include <showpath.h>
 #include <nemoshow.h>
 #include <nemoxml.h>
+#include <nemobox.h>
 #include <nemomisc.h>
 
 struct showone *nemoshow_item_create(int type)
@@ -31,6 +32,7 @@ struct showone *nemoshow_item_create(int type)
 	one = &item->base;
 	one->type = NEMOSHOW_ITEM_TYPE;
 	one->sub = type;
+	one->update = nemoshow_item_update;
 	one->destroy = nemoshow_item_destroy;
 
 	nemoshow_one_prepare(one);
@@ -58,10 +60,6 @@ struct showone *nemoshow_item_create(int type)
 
 	nemoobject_set_reserved(&one->object, "alpha", &item->alpha, sizeof(double));
 
-	item->ones = (struct showone **)malloc(sizeof(struct showone *) * 4);
-	item->nones = 0;
-	item->sones = 4;
-
 	return one;
 }
 
@@ -73,7 +71,6 @@ void nemoshow_item_destroy(struct showone *one)
 
 	delete static_cast<showitem_t *>(item->cc);
 
-	free(item->ones);
 	free(item);
 }
 
@@ -87,25 +84,29 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 
 	style = nemoshow_search_one(show, nemoobject_gets(&one->object, "style"));
 	if (style != NULL) {
-		item->style = NEMOSHOW_ITEM(style);
+		item->style = style;
+
+		NEMOBOX_APPEND(style->refs, style->srefs, style->nrefs, one);
 	} else {
 		NEMOSHOW_ITEM_CC(item, fill) = new SkPaint;
 		NEMOSHOW_ITEM_CC(item, stroke) = new SkPaint;
 
-		item->style = item;
+		item->style = one;
 	}
 
 	matrix = nemoshow_search_one(show, nemoobject_gets(&one->object, "matrix"));
 	if (matrix != NULL) {
-		item->matrix = NEMOSHOW_MATRIX(matrix);
+		item->matrix = matrix;
+
+		NEMOBOX_APPEND(matrix->refs, matrix->srefs, matrix->nrefs, one);
 	}
 
 	if (one->sub == NEMOSHOW_PATH_ITEM) {
 		NEMOSHOW_ITEM_CC(item, path) = new SkPath;
 	}
 
-	for (i = 0; i < item->nones; i++) {
-		if (item->ones[i]->type == NEMOSHOW_MATRIX_TYPE) {
+	for (i = 0; i < one->nchildren; i++) {
+		if (one->children[i]->type == NEMOSHOW_MATRIX_TYPE) {
 			NEMOSHOW_ITEM_CC(item, matrix) = new SkMatrix;
 			break;
 		}
@@ -120,7 +121,7 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 	struct showone *child;
 	int i;
 
-	if (item->style == item) {
+	if (item->style == one) {
 		if (item->fill != 0) {
 			NEMOSHOW_ITEM_CC(item, fill)->setStyle(SkPaint::kFill_Style);
 			NEMOSHOW_ITEM_CC(item, fill)->setColor(
@@ -139,8 +140,8 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 
 		NEMOSHOW_ITEM_CC(item, path)->reset();
 
-		for (i = 0; i < item->nones; i++) {
-			child = item->ones[i];
+		for (i = 0; i < one->nchildren; i++) {
+			child = one->children[i];
 
 			if (child->type == NEMOSHOW_PATH_TYPE) {
 				path = NEMOSHOW_PATH(child);
@@ -170,8 +171,8 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 	if (NEMOSHOW_ITEM_CC(item, matrix) != NULL) {
 		NEMOSHOW_ITEM_CC(item, matrix)->setIdentity();
 
-		for (i = 0; i < item->nones; i++) {
-			child = item->ones[i];
+		for (i = 0; i < one->nchildren; i++) {
+			child = one->children[i];
 
 			if (child->type == NEMOSHOW_MATRIX_TYPE) {
 				nemoshow_matrix_update(show, child);

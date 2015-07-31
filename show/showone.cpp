@@ -16,18 +16,27 @@ void nemoshow_one_prepare(struct showone *one)
 
 	nemoobject_set_reserved(&one->object, "id", one->id, NEMOSHOW_ID_MAX);
 
+	one->children = (struct showone **)malloc(sizeof(struct showone *) * 4);
+	one->nchildren = 0;
+	one->schildren = 4;
+
+	one->refs = (struct showone **)malloc(sizeof(struct showone *) * 4);
+	one->nrefs = 0;
+	one->srefs = 4;
+
 	one->attrs = (struct showattr **)malloc(sizeof(struct showattr *) * 4);
 	one->nattrs = 0;
 	one->sattrs = 4;
 
-	nemolist_init(&one->link);
+	one->dirty = 1;
 }
 
 void nemoshow_one_finish(struct showone *one)
 {
-	nemolist_remove(&one->link);
-
 	nemoobject_finish(&one->object);
+
+	free(one->children);
+	free(one->refs);
 
 	free(one->attrs);
 }
@@ -64,6 +73,26 @@ void nemoshow_one_destroy_attr(struct showattr *attr)
 {
 	free(attr->text);
 	free(attr);
+}
+
+void nemoshow_one_dirty(struct showone *one)
+{
+	if (one->dirty != 0)
+		return;
+
+	one->dirty = 1;
+
+	if (one->parent != NULL) {
+		nemoshow_one_dirty(one->parent);
+	}
+
+	if (one->nrefs > 0) {
+		int i;
+
+		for (i = 0; i < one->nrefs; i++) {
+			nemoshow_one_dirty(one->refs[i]);
+		}
+	}
 }
 
 void nemoshow_one_dump(struct showone *one, FILE *out)

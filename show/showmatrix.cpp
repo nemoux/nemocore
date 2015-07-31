@@ -26,16 +26,13 @@ struct showone *nemoshow_matrix_create(int type)
 	one = &matrix->base;
 	one->type = NEMOSHOW_MATRIX_TYPE;
 	one->sub = type;
+	one->update = nemoshow_matrix_update;
 	one->destroy = nemoshow_matrix_destroy;
 
 	nemoshow_one_prepare(one);
 
 	nemoobject_set_reserved(&one->object, "x", &matrix->x, sizeof(double));
 	nemoobject_set_reserved(&one->object, "y", &matrix->y, sizeof(double));
-
-	matrix->matrices = (struct showone **)malloc(sizeof(struct showone *) * 4);
-	matrix->nmatrices = 0;
-	matrix->smatrices = 4;
 
 	return one;
 }
@@ -48,7 +45,6 @@ void nemoshow_matrix_destroy(struct showone *one)
 
 	delete static_cast<showmatrix_t *>(matrix->cc);
 
-	free(matrix->matrices);
 	free(matrix);
 }
 
@@ -77,8 +73,8 @@ int nemoshow_matrix_update(struct nemoshow *show, struct showone *one)
 
 		NEMOSHOW_MATRIX_CC(matrix, matrix)->setIdentity();
 
-		for (i = 0; i < matrix->nmatrices; i++) {
-			child = matrix->matrices[i];
+		for (i = 0; i < one->nchildren; i++) {
+			child = one->children[i];
 
 			nemoshow_matrix_update(show, child);
 

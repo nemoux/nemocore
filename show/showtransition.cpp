@@ -66,7 +66,7 @@ int nemoshow_transition_update(struct showtransition *trans, uint32_t time)
 	}
 
 	for (i = 0; i < trans->nsequences; i++) {
-		nemoshow_sequence_update(trans->sequences[i], t);
+		nemoshow_sequence_dispatch(trans->sequences[i], t);
 	}
 
 	return done;

@@ -138,6 +138,7 @@ int main(int argc, char *argv[])
 	nemoshow_sort_one(show);
 	nemoshow_arrange_one(show);
 	nemoshow_update_one(show);
+	nemoshow_render_one(show);
 
 	nemoshow_set_scene(show,
 			nemoshow_search_one(show, "main"));

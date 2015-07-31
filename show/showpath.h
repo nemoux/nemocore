@@ -34,6 +34,8 @@ struct showpath {
 extern struct showone *nemoshow_path_create(int type);
 extern void nemoshow_path_destroy(struct showone *one);
 
+extern int nemoshow_path_update(struct nemoshow *show, struct showone *one);
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

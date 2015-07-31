@@ -34,8 +34,10 @@ typedef enum {
 	NEMOSHOW_LAST_TYPE
 } NemoShowOneType;
 
+struct nemoshow;
 struct showone;
 
+typedef int (*nemoshow_one_update_t)(struct nemoshow *show, struct showone *one);
 typedef void (*nemoshow_one_destroy_t)(struct showone *one);
 
 struct showattr {
@@ -52,12 +54,21 @@ struct showone {
 
 	struct nemoobject object;
 
-	struct nemolist link;
-
+	nemoshow_one_update_t update;
 	nemoshow_one_destroy_t destroy;
+
+	struct showone *parent;
+
+	struct showone **children;
+	int nchildren, schildren;
+
+	struct showone **refs;
+	int nrefs, srefs;
 
 	struct showattr **attrs;
 	int nattrs, sattrs;
+
+	int dirty;
 };
 
 extern void nemoshow_one_prepare(struct showone *one);
@@ -67,6 +78,8 @@ extern void nemoshow_one_destroy(struct showone *one);
 
 extern struct showattr *nemoshow_one_create_attr(const char *name, const char *text, struct nemoattr *ref);
 extern void nemoshow_one_destroy_attr(struct showattr *attr);
+
+extern void nemoshow_one_dirty(struct showone *one);
 
 extern void nemoshow_one_dump(struct showone *one, FILE *out);
 

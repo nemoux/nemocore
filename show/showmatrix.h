@@ -25,9 +25,6 @@ struct showmatrix {
 
 	double x, y;
 
-	struct showone **matrices;
-	int nmatrices, smatrices;
-
 	void *cc;
 };
 

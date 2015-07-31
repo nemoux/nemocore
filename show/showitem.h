@@ -42,11 +42,8 @@ struct showitem {
 
 	double alpha;
 
-	struct showitem *style;
-	struct showmatrix *matrix;
-
-	struct showone **ones;
-	int nones, sones;
+	struct showone *style;
+	struct showone *matrix;
 
 	void *cc;
 };

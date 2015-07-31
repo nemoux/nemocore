@@ -32,6 +32,7 @@ extern struct showone *nemoshow_ease_create(void);
 extern void nemoshow_ease_destroy(struct showone *one);
 
 extern int nemoshow_ease_arrange(struct nemoshow *show, struct showone *one);
+extern int nemoshow_ease_update(struct nemoshow *show, struct showone *one);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

@@ -23,6 +23,7 @@ struct showone *nemoshow_sequence_create(void)
 
 	one = &sequence->base;
 	one->type = NEMOSHOW_SEQUENCE_TYPE;
+	one->update = nemoshow_sequence_update;
 	one->destroy = nemoshow_sequence_destroy;
 
 	nemoshow_one_prepare(one);
@@ -44,6 +45,11 @@ void nemoshow_sequence_destroy(struct showone *one)
 	free(sequence);
 }
 
+int nemoshow_sequence_update(struct nemoshow *show, struct showone *one)
+{
+	return 0;
+}
+
 struct showone *nemoshow_sequence_create_frame(void)
 {
 	struct showframe *frame;
@@ -56,6 +62,7 @@ struct showone *nemoshow_sequence_create_frame(void)
 
 	one = &frame->base;
 	one->type = NEMOSHOW_FRAME_TYPE;
+	one->update = nemoshow_sequence_update_frame;
 	one->destroy = nemoshow_sequence_destroy_frame;
 
 	nemoshow_one_prepare(one);
@@ -79,6 +86,11 @@ void nemoshow_sequence_destroy_frame(struct showone *one)
 	free(frame);
 }
 
+int nemoshow_sequence_update_frame(struct nemoshow *show, struct showone *one)
+{
+	return 0;
+}
+
 struct showone *nemoshow_sequence_create_set(void)
 {
 	struct showset *set;
@@ -91,6 +103,7 @@ struct showone *nemoshow_sequence_create_set(void)
 
 	one = &set->base;
 	one->type = NEMOSHOW_SET_TYPE;
+	one->update = nemoshow_sequence_update_set;
 	one->destroy = nemoshow_sequence_destroy_set;
 
 	nemoshow_one_prepare(one);
@@ -182,6 +195,11 @@ int nemoshow_sequence_arrange_set(struct nemoshow *show, struct showone *one)
 	return 0;
 }
 
+int nemoshow_sequence_update_set(struct nemoshow *show, struct showone *one)
+{
+	return 0;
+}
+
 static void nemoshow_sequence_prepare_frame(struct showone *one)
 {
 	struct showframe *frame = NEMOSHOW_FRAME(one);
@@ -197,7 +215,7 @@ static void nemoshow_sequence_prepare_frame(struct showone *one)
 	}
 }
 
-static void nemoshow_sequence_update_frame(struct showone *one, double s, double t)
+static void nemoshow_sequence_dispatch_frame(struct showone *one, double s, double t)
 {
 	struct showframe *frame = NEMOSHOW_FRAME(one);
 	struct showset *set;
@@ -239,7 +257,7 @@ void nemoshow_sequence_prepare(struct showone *one)
 	nemoshow_sequence_prepare_frame(sequence->frames[sequence->iframe]);
 }
 
-void nemoshow_sequence_update(struct showone *one, double t)
+void nemoshow_sequence_dispatch(struct showone *one, double t)
 {
 	struct showsequence *sequence = NEMOSHOW_SEQUENCE(one);
 	struct showframe *frame = NEMOSHOW_FRAME(sequence->frames[sequence->iframe]);
@@ -254,6 +272,6 @@ void nemoshow_sequence_update(struct showone *one, double t)
 
 		nemoshow_sequence_prepare_frame(sequence->frames[sequence->iframe]);
 	} else {
-		nemoshow_sequence_update_frame(sequence->frames[sequence->iframe], sequence->t, t);
+		nemoshow_sequence_dispatch_frame(sequence->frames[sequence->iframe], sequence->t, t);
 	}
 }

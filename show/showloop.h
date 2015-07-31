@@ -22,6 +22,8 @@ struct showloop {
 extern struct showone *nemoshow_loop_create(void);
 extern void nemoshow_loop_destroy(struct showone *one);
 
+extern int nemoshow_loop_update(struct nemoshow *show, struct showone *one);
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

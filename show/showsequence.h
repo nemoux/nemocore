@@ -55,16 +55,21 @@ struct showsequence {
 extern struct showone *nemoshow_sequence_create(void);
 extern void nemoshow_sequence_destroy(struct showone *one);
 
+extern int nemoshow_sequence_update(struct nemoshow *show, struct showone *one);
+
 extern void nemoshow_sequence_prepare(struct showone *one);
-extern void nemoshow_sequence_update(struct showone *one, double t);
+extern void nemoshow_sequence_dispatch(struct showone *one, double t);
 
 extern struct showone *nemoshow_sequence_create_frame(void);
 extern void nemoshow_sequence_destroy_frame(struct showone *one);
+
+extern int nemoshow_sequence_update_frame(struct nemoshow *show, struct showone *one);
 
 extern struct showone *nemoshow_sequence_create_set(void);
 extern void nemoshow_sequence_destroy_set(struct showone *one);
 
 extern int nemoshow_sequence_arrange_set(struct nemoshow *show, struct showone *one);
+extern int nemoshow_sequence_update_set(struct nemoshow *show, struct showone *one);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

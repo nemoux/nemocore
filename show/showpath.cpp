@@ -22,6 +22,7 @@ struct showone *nemoshow_path_create(int type)
 	one = &path->base;
 	one->type = NEMOSHOW_PATH_TYPE;
 	one->sub = type;
+	one->update = nemoshow_path_update;
 	one->destroy = nemoshow_path_destroy;
 
 	nemoshow_one_prepare(one);
@@ -45,4 +46,9 @@ void nemoshow_path_destroy(struct showone *one)
 	nemoshow_one_finish(one);
 
 	free(path);
+}
+
+int nemoshow_path_update(struct nemoshow *show, struct showone *one)
+{
+	return 0;
 }

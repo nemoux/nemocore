@@ -21,6 +21,7 @@ struct showone *nemoshow_loop_create(void)
 
 	one = &loop->base;
 	one->type = NEMOSHOW_LOOP_TYPE;
+	one->update = nemoshow_loop_update;
 	one->destroy = nemoshow_loop_destroy;
 
 	nemoshow_one_prepare(one);
@@ -38,4 +39,9 @@ void nemoshow_loop_destroy(struct showone *one)
 	nemoshow_one_finish(one);
 
 	free(loop);
+}
+
+int nemoshow_loop_update(struct nemoshow *show, struct showone *one)
+{
+	return 0;
 }
