@@ -14,7 +14,6 @@ endif(WITH_EGL)
 
 add_library(nemoasst SHARED
 	nemoxml.c
-	nemotext.c
 	nemomatrix.c
 	nemohash.c
 	nemotoken.c
@@ -42,7 +41,6 @@ INSTALL(TARGETS nemoasst DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
 
 set(HEADER_FILES
 	nemoxml.h
-	nemotext.h
 	nemomatrix.h
 	nemohash.h
 	nemotoken.h

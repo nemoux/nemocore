@@ -7,11 +7,7 @@
 #include <talegl.h>
 #include <taleevent.h>
 #include <talegrab.h>
-#include <taletransition.h>
 #include <talegesture.h>
-#include <talemisc.h>
-#include <pathshape.h>
-#include <pathstyle.h>
 
 extern void nemotale_attach_actor(struct nemotale *tale, struct nemoactor *actor, nemotale_dispatch_event_t dispatch);
 

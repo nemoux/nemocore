@@ -9,7 +9,6 @@
 #include <GLES2/gl2ext.h>
 
 #include <glhelper.h>
-#include <nemomisc.h>
 
 GLuint glshader_compile(GLenum type, int count, const char **sources)
 {
