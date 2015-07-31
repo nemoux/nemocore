@@ -231,6 +231,8 @@ static int nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *
 		}
 	}
 
+	nemotale_node_damage_all(canvas->node);
+
 	return 0;
 }
 

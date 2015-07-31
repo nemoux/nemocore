@@ -20,6 +20,9 @@ struct showcontext {
 	struct nemoshow *show;
 
 	int width, height;
+
+	struct showone *one;
+	struct showtransition *trans;
 };
 
 static void nemoshow_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
@@ -69,6 +72,31 @@ static void nemoshow_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t w
 	nemotale_composite(tale, NULL);
 }
 
+static void nemoshow_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t secs, uint32_t nsecs)
+{
+	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
+	struct showcontext *context = (struct showcontext *)nemotale_get_userdata(tale);
+
+	if (secs == 0 && nsecs == 0) {
+		nemocanvas_feedback(canvas);
+	} else if (context->trans != NULL) {
+		int done;
+
+		done = nemoshow_transition_dispatch(context->trans, secs * 1000 + nsecs / 1000000);
+		if (done != 0) {
+			context->trans = NULL;
+		} else {
+			nemocanvas_feedback(canvas);
+		}
+
+		nemoshow_one_dirty(context->one);
+		nemoshow_update_one(context->show);
+		nemoshow_render_one(context->show);
+	}
+
+	nemotale_composite(tale, NULL);
+}
+
 static void nemoshow_dispatch_show_resize(struct nemoshow *show, int32_t width, int32_t height, void *userdata)
 {
 	struct showcontext *context = (struct showcontext *)userdata;
@@ -85,7 +113,7 @@ static void nemoshow_dispatch_show_composite(struct nemoshow *show, void *userda
 	struct showcontext *context = (struct showcontext *)userdata;
 	struct nemotale *tale = context->tale;
 
-	nemotale_composite(tale, NULL);
+	nemocanvas_dispatch_frame(NTEGL_CANVAS(context->canvas));
 }
 
 int main(int argc, char *argv[])
@@ -96,6 +124,7 @@ int main(int argc, char *argv[])
 	struct eglcanvas *canvas;
 	struct nemotale *tale;
 	struct nemoshow *show;
+	struct showtransition *trans;
 	int32_t width = 1000, height = 1000;
 
 	context = (struct showcontext *)malloc(sizeof(struct showcontext));
@@ -115,6 +144,7 @@ int main(int argc, char *argv[])
 	context->canvas = canvas = nemotool_create_egl_canvas(egl, width, height);
 	nemocanvas_set_nemosurface(NTEGL_CANVAS(canvas), NEMO_SHELL_SURFACE_TYPE_NORMAL);
 	nemocanvas_set_dispatch_resize(NTEGL_CANVAS(canvas), nemoshow_dispatch_canvas_resize);
+	nemocanvas_set_dispatch_frame(NTEGL_CANVAS(canvas), nemoshow_dispatch_canvas_frame);
 
 	context->tale = tale = nemotale_create_egl(
 			NTEGL_DISPLAY(egl),
@@ -128,7 +158,7 @@ int main(int argc, char *argv[])
 
 	nemoshow_initialize();
 
-	show = nemoshow_create();
+	context->show = show = nemoshow_create();
 	nemoshow_set_tale(show, tale);
 	nemoshow_set_dispatch_resize(show, nemoshow_dispatch_show_resize);
 	nemoshow_set_dispatch_composite(show, nemoshow_dispatch_show_composite);
@@ -143,9 +173,21 @@ int main(int argc, char *argv[])
 	nemoshow_set_scene(show,
 			nemoshow_search_one(show, "main"));
 
+	context->one = nemoshow_search_one(show, "hour-hand");
+
+	context->trans = trans = nemoshow_transition_create(
+			nemoshow_search_one(show, "ease0"),
+			3000,
+			100);
+
+	nemoshow_transition_attach_sequence(trans,
+			nemoshow_search_one(show, "hour-hand-sequence"));
+
 	nemoshow_dispatch_composite(show);
 
 	nemotool_run(tool);
+
+	nemoshow_transition_destroy(trans);
 
 	nemoshow_destroy(show);
 
