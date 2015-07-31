@@ -5,14 +5,7 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include <nemoconfig.h>
-
-NEMO_BEGIN_EXTERN_C
 #include <showcolor.h>
-#include <stringhelper.h>
-#include <nemotoken.h>
-#include <nemomisc.h>
-NEMO_END_EXTERN_C
 
 static int nemoshow_color_compare(const void *a, const void *b)
 {

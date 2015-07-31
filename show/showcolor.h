@@ -9,6 +9,10 @@ NEMO_BEGIN_EXTERN_C
 
 #include <stdint.h>
 
+#include <stringhelper.h>
+#include <nemotoken.h>
+#include <nemomisc.h>
+
 #define	NEMOSHOW_COLOR_TO_UINT32(b)	\
 	((uint32_t)b[3] << 24) | ((uint32_t)b[2] << 16) | ((uint32_t)b[1] << 8) | ((uint32_t)b[0] << 0)
 
