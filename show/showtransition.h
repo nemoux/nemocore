@@ -30,7 +30,7 @@ extern void nemoshow_transition_destroy(struct showtransition *trans);
 
 extern void nemoshow_transition_attach_sequence(struct showtransition *trans, struct showone *sequence);
 
-extern int nemoshow_transition_update(struct showtransition *trans, uint32_t time);
+extern int nemoshow_transition_dispatch(struct showtransition *trans, uint32_t time);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

@@ -32,17 +32,11 @@ struct showset {
 struct showframe {
 	struct showone base;
 
-	struct showone **sets;
-	int nsets, ssets;
-
 	double t;
 };
 
 struct showsequence {
 	struct showone base;
-
-	struct showone **frames;
-	int nframes, sframes;
 
 	double t;
 	int iframe;

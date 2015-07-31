@@ -44,7 +44,7 @@ void nemoshow_transition_attach_sequence(struct showtransition *trans, struct sh
 	nemoshow_sequence_prepare(sequence);
 }
 
-int nemoshow_transition_update(struct showtransition *trans, uint32_t time)
+int nemoshow_transition_dispatch(struct showtransition *trans, uint32_t time)
 {
 	double t;
 	int done = 0;

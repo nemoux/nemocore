@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 			nemoshow_search_one(show, "hour-text-sequence"));
 
 	do {
-		done = nemoshow_transition_update(trans, time_current_msecs());
+		done = nemoshow_transition_dispatch(trans, time_current_msecs());
 	} while (done == 0);
 
 	nemoshow_transition_destroy(trans);
