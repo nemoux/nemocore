@@ -11,6 +11,9 @@
 #include <showitem.hpp>
 #include <showmatrix.h>
 #include <showmatrix.hpp>
+#include <showpath.h>
+#include <showfont.h>
+#include <showfont.hpp>
 #include <nemoshow.h>
 #include <nemoxml.h>
 #include <nemomisc.h>
@@ -146,6 +149,53 @@ static inline void nemoshow_canvas_render_item(struct showcanvas *canvas, int ty
 			NEMOSHOW_CANVAS_CC(canvas, canvas)->drawPath(
 					*NEMOSHOW_ITEM_CC(item, path),
 					*NEMOSHOW_ITEM_CC(style, stroke));
+	} else if (type == NEMOSHOW_TEXT_ITEM) {
+		if (item->path == NULL) {
+			if (item->font->layout == NEMOSHOW_NORMAL_LAYOUT) {
+				if (style->fill != 0)
+					NEMOSHOW_CANVAS_CC(canvas, canvas)->drawText(
+							item->text,
+							strlen(item->text),
+							item->x,
+							item->y,
+							*NEMOSHOW_ITEM_CC(style, fill));
+				if (style->stroke != 0)
+					NEMOSHOW_CANVAS_CC(canvas, canvas)->drawText(
+							item->text,
+							strlen(item->text),
+							item->x,
+							item->y,
+							*NEMOSHOW_ITEM_CC(style, stroke));
+			} else {
+				if (style->fill != 0)
+					NEMOSHOW_CANVAS_CC(canvas, canvas)->drawPosText(
+							item->text,
+							strlen(item->text),
+							NEMOSHOW_ITEM_CC(item, points),
+							*NEMOSHOW_ITEM_CC(style, fill));
+				if (style->stroke != 0)
+					NEMOSHOW_CANVAS_CC(canvas, canvas)->drawPosText(
+							item->text,
+							strlen(item->text),
+							NEMOSHOW_ITEM_CC(item, points),
+							*NEMOSHOW_ITEM_CC(style, stroke));
+			}
+		} else {
+			if (style->fill != 0)
+				NEMOSHOW_CANVAS_CC(canvas, canvas)->drawTextOnPath(
+						item->text,
+						strlen(item->text),
+						*NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(item->path), path),
+						NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(item->matrix), matrix),
+						*NEMOSHOW_ITEM_CC(style, fill));
+			if (style->stroke != 0)
+				NEMOSHOW_CANVAS_CC(canvas, canvas)->drawTextOnPath(
+						item->text,
+						strlen(item->text),
+						*NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(item->path), path),
+						NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(item->matrix), matrix),
+						*NEMOSHOW_ITEM_CC(style, stroke));
+		}
 	}
 }
 

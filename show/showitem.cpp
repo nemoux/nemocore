@@ -11,6 +11,8 @@
 #include <showmatrix.h>
 #include <showmatrix.hpp>
 #include <showpath.h>
+#include <showfont.h>
+#include <showfont.hpp>
 #include <nemoshow.h>
 #include <nemoxml.h>
 #include <nemobox.h>
@@ -28,6 +30,7 @@ struct showone *nemoshow_item_create(int type)
 
 	item->cc = new showitem_t;
 	NEMOSHOW_ITEM_CC(item, matrix) = NULL;
+	NEMOSHOW_ITEM_CC(item, path) = NULL;
 
 	one = &item->base;
 	one->type = NEMOSHOW_ITEM_TYPE;
@@ -58,6 +61,8 @@ struct showone *nemoshow_item_create(int type)
 	nemoobject_set_reserved(&one->object, "fill:b", &item->fills[0], sizeof(double));
 	nemoobject_set_reserved(&one->object, "fill:a", &item->fills[3], sizeof(double));
 
+	nemoobject_set_reserved(&one->object, "font-size", &item->fontsize, sizeof(double));
+
 	nemoobject_set_reserved(&one->object, "alpha", &item->alpha, sizeof(double));
 
 	return one;
@@ -79,7 +84,9 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	struct showone *style;
 	struct showone *matrix;
+	struct showone *path;
 	struct showone *child;
+	const char *font;
 	int i;
 
 	style = nemoshow_search_one(show, nemoobject_gets(&one->object, "style"));
@@ -99,6 +106,38 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 		item->matrix = matrix;
 
 		NEMOBOX_APPEND(matrix->refs, matrix->srefs, matrix->nrefs, one);
+	}
+
+	path = nemoshow_search_one(show, nemoobject_gets(&one->object, "path"));
+	if (path != NULL) {
+		item->path = path;
+
+		NEMOBOX_APPEND(path->refs, path->srefs, path->nrefs, one);
+	}
+
+	font = nemoobject_gets(&one->object, "font");
+	if (font != NULL) {
+		const char *fontpath;
+
+		item->font = nemoshow_font_create();
+
+		fontpath = fontconfig_get_path(
+				font,
+				NULL,
+				FC_SLANT_ROMAN,
+				FC_WEIGHT_NORMAL,
+				FC_WIDTH_NORMAL,
+				FC_MONO);
+
+		nemoshow_font_load(item->font, fontpath);
+		nemoshow_font_use_harfbuzz(item->font);
+
+		SkSafeUnref(
+				NEMOSHOW_ITEM_CC(item, fill)->setTypeface(
+					NEMOSHOW_FONT_CC(item->font, face)));
+		SkSafeUnref(
+				NEMOSHOW_ITEM_CC(item, stroke)->setTypeface(
+					NEMOSHOW_FONT_CC(item->font, face)));
 	}
 
 	if (one->sub == NEMOSHOW_PATH_ITEM) {
@@ -163,6 +202,53 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 					SkParsePath::FromSVGString(nemoobject_gets(&child->object, "d"), &cpath);
 
 					NEMOSHOW_ITEM_CC(item, path)->addPath(cpath);
+				}
+			}
+		}
+	} else if (one->sub == NEMOSHOW_TEXT_ITEM) {
+		item->text = nemoobject_gets(&one->object, "d");
+		if (item->text != NULL) {
+			if (item->font->layout == NEMOSHOW_NORMAL_LAYOUT) {
+				NEMOSHOW_ITEM_CC(item, fill)->setTextSize(item->fontsize);
+				NEMOSHOW_ITEM_CC(item, stroke)->setTextSize(item->fontsize);
+			} else {
+				SkPaint::FontMetrics metrics;
+				hb_buffer_t *hbbuffer;
+				hb_glyph_info_t *hbglyphs;
+				hb_glyph_position_t *hbglyphspos;
+				double fontscale;
+				double fontx, fonty;
+				unsigned int nhbglyphs;
+				int i;
+
+				NEMOSHOW_ITEM_CC(item, fill)->setTextSize((item->font->upem / item->font->max_advance_height) * item->fontsize);
+				NEMOSHOW_ITEM_CC(item, stroke)->setTextSize((item->font->upem / item->font->max_advance_height) * item->fontsize);
+
+				NEMOSHOW_ITEM_CC(item, stroke)->getFontMetrics(&metrics, 0);
+
+				hbbuffer = hb_buffer_create();
+				hb_buffer_add_utf8(hbbuffer, item->text, strlen(item->text), 0, strlen(item->text));
+				hb_buffer_set_direction(hbbuffer, HB_DIRECTION_LTR);
+				hb_buffer_set_script(hbbuffer, HB_SCRIPT_LATIN);
+				hb_buffer_set_language(hbbuffer, HB_LANGUAGE_INVALID);
+				hb_shape_full(item->font->hbfont, hbbuffer, NULL, 0, NULL);
+
+				hbglyphs = hb_buffer_get_glyph_infos(hbbuffer, &nhbglyphs);
+				hbglyphspos = hb_buffer_get_glyph_positions(hbbuffer, NULL);
+
+				fontscale = item->fontsize / item->font->max_advance_height;
+
+				NEMOSHOW_ITEM_CC(item, points) = new SkPoint[strlen(item->text)];
+
+				fontx = item->x;
+				fonty = item->y;
+
+				for (i = 0; i < strlen(item->text); i++) {
+					NEMOSHOW_ITEM_CC(item, points)[i].set(
+							hbglyphspos[i].x_offset * fontscale + fontx, fonty - metrics.fAscent);
+
+					fontx += hbglyphspos[i].x_advance * fontscale;
+					fonty += hbglyphspos[i].y_advance * fontscale;
 				}
 			}
 		}

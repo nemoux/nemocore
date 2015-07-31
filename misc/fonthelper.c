@@ -5,8 +5,12 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <sys/mman.h>
+
 #include <ft2build.h>
 #include <freetype.h>
+#include <hb-ft.h>
+#include <hb-ot.h>
 #include <fontconfig/fontconfig.h>
 
 #include <fonthelper.h>
@@ -235,4 +239,73 @@ int fontconfig_get_max_advance_height(const char *fontpath, unsigned int fontind
 	FT_Done_Face(face);
 
 	return max_advance_height;
+}
+
+typedef struct {
+	char *data;
+	size_t length;
+} hb_file_t;
+
+static void fontconfig_destroy_hb_blob(hb_file_t *hbfile)
+{
+	if (hbfile != NULL) {
+		munmap(hbfile->data, hbfile->length);
+
+		free(hbfile);
+	}
+}
+
+hb_font_t *fontconfig_create_hb_font(const char *fontpath, unsigned int fontindex)
+{
+	hb_file_t *hbfile;
+	hb_blob_t *hbblob;
+	hb_face_t *hbface;
+	hb_font_t *hbfont;
+	char *data;
+	size_t length;
+	struct stat st;
+	double upem;
+	int fd;
+
+	fd = open(fontpath, O_RDONLY);
+	if (fd < 0)
+		return NULL;
+	fstat(fd, &st);
+	length = st.st_size;
+	data = mmap(NULL, length, PROT_READ, MAP_PRIVATE, fd, 0);
+	if (data == MAP_FAILED) {
+		close(fd);
+		return NULL;
+	}
+	close(fd);
+
+	hbfile = (hb_file_t *)malloc(sizeof(hb_file_t));
+	if (hbfile == NULL) {
+		munmap(data, length);
+		return NULL;
+	}
+	hbfile->data = data;
+	hbfile->length = length;
+
+	hbblob = hb_blob_create(data, length,
+			HB_MEMORY_MODE_READONLY_MAY_MAKE_WRITABLE,
+			hbfile,
+			(hb_destroy_func_t)fontconfig_destroy_hb_blob);
+
+	hbface = hb_face_create(hbblob, 0);
+	hb_blob_destroy(hbblob);
+	if (hbface == NULL)
+		return NULL;
+
+	upem = hb_face_get_upem(hbface);
+
+	hbfont = hb_font_create(hbface);
+	hb_face_destroy(hbface);
+	if (hbfont == NULL)
+		return NULL;
+
+	hb_font_set_scale(hbfont, upem, upem);
+	hb_ot_font_set_funcs(hbfont);
+
+	return hbfont;
 }

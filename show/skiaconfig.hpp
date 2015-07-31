@@ -19,5 +19,6 @@
 #include <SkString.h>
 #include <SkMatrix.h>
 #include <SkParsePath.h>
+#include <SkTypeface.h>
 
 #endif

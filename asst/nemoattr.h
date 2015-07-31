@@ -327,7 +327,7 @@ static inline const char *nemoobject_gets(struct nemoobject *object, const char 
 		return (const char *)(attr->p);
 	}
 
-	return "";
+	return NULL;
 }
 
 static inline void nemoobject_setp(struct nemoobject *object, const char *name, void *p)
