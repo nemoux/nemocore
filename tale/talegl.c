@@ -167,17 +167,11 @@ static void nemotale_use_shader(struct nemotale *tale, struct glshader *shader)
 
 	glUseProgram(shader->program);
 
-	context->current_shader = shader;
-}
-
-static void nemotale_update_uniforms(struct nemotale *tale)
-{
-	struct nemogltale *context = (struct nemogltale *)tale->glcontext;
-	struct glshader *shader = context->current_shader;
-
 	glUniformMatrix4fv(shader->proj_uniform, 1, GL_FALSE, context->matrix.d);
 	glUniform1f(shader->alpha_uniform, 1.0f);
 	glUniform1i(shader->tex_uniforms[0], 0);
+
+	context->current_shader = shader;
 }
 
 static int nemotale_calculate_edges(struct talenode *node, pixman_box32_t *rect, pixman_box32_t *rrect, GLfloat *ex, GLfloat *ey)
@@ -381,7 +375,6 @@ static void nemotale_repaint_node(struct nemotale *tale, struct talenode *node, 
 
 		if (pixman_region32_not_empty(&node->opaque)) {
 			nemotale_use_shader(tale, &context->texture_shader_rgba);
-			nemotale_update_uniforms(tale);
 
 			glDisable(GL_BLEND);
 
@@ -390,7 +383,6 @@ static void nemotale_repaint_node(struct nemotale *tale, struct talenode *node, 
 
 		if (pixman_region32_not_empty(&blend)) {
 			nemotale_use_shader(tale, &context->texture_shader_rgba);
-			nemotale_update_uniforms(tale);
 
 			glEnable(GL_BLEND);
 
