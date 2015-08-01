@@ -11,71 +11,6 @@
 #include <nemolistener.h>
 #include <nemomisc.h>
 
-void nemotale_destroy(struct nemotale *tale)
-{
-	tale->destroy(tale);
-}
-
-int nemotale_composite(struct nemotale *tale, pixman_region32_t *region)
-{
-	struct talenode *node;
-	int r;
-
-	nemolist_for_each(node, &tale->node_list, link) {
-		if (node->transform.dirty != 0) {
-			nemotale_damage_below(tale, node);
-			nemotale_node_transform_update(node);
-			nemotale_damage_below(tale, node);
-
-			node->transform.dirty = 0;
-		}
-
-		if (node->dirty != 0) {
-			pixman_region32_t damage;
-
-			pixman_region32_init(&damage);
-
-			pixman_region32_intersect(&node->damage, &node->damage, &node->region);
-
-			if (node->transform.enable != 0) {
-				pixman_box32_t *extents;
-
-				extents = pixman_region32_extents(&node->damage);
-				nemotale_node_boundingbox_update(node,
-						extents->x1, extents->y1,
-						extents->x2 - extents->x1,
-						extents->y2 - extents->y1,
-						&damage);
-			} else {
-				pixman_region32_copy(&damage, &node->damage);
-				pixman_region32_translate(&damage,
-						node->geometry.x, node->geometry.y);
-			}
-
-			pixman_region32_union(&tale->damage, &tale->damage, &damage);
-
-			pixman_region32_fini(&damage);
-		}
-	}
-
-	r = tale->composite(tale);
-
-	if (region != NULL)
-		pixman_region32_union(region, region, &tale->damage);
-
-	nemolist_for_each(node, &tale->node_list, link) {
-		if (node->dirty != 0) {
-			pixman_region32_clear(&node->damage);
-
-			node->dirty = 0;
-		}
-	}
-
-	pixman_region32_clear(&tale->damage);
-
-	return r;
-}
-
 int nemotale_prepare(struct nemotale *tale)
 {
 	nemosignal_init(&tale->destroy_signal);
@@ -87,6 +22,8 @@ int nemotale_prepare(struct nemotale *tale)
 	nemolist_init(&tale->grab_list);
 
 	pixman_region32_init(&tale->damage);
+
+	nemomatrix_init_identity(&tale->matrix);
 
 	return 0;
 }

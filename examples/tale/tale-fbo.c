@@ -95,6 +95,8 @@ int main(int argc, char *argv[])
 {
 	struct taleapp *app;
 	struct nemotale *tale0, *tale1;
+	struct taleegl *egl;
+	struct talefbo *fbo;
 	struct talenode *node00, *node01, *node10, *node11;
 	cairo_surface_t *surface;
 	cairo_t *cr;
@@ -119,12 +121,14 @@ int main(int argc, char *argv[])
 	xdg_surface_set_title(app->xdg_surface, "tale-fbo");
 
 	egl_prepare_context((EGLNativeDisplayType)app->display, &app->egl_display, &app->egl_context, &app->egl_config, 0, NULL);
+	egl_make_current(app->egl_display, app->egl_context);
 
 	app->egl_window = wl_egl_window_create(app->surface, app->width, app->height);
 
-	tale0 = nemotale_create_egl(app->egl_display, app->egl_context, app->egl_config);
-	nemotale_attach_egl(tale0, (EGLNativeWindowType)app->egl_window);
-	nemotale_resize_egl(tale0, app->width, app->height);
+	tale0 = nemotale_create_gl();
+	egl = nemotale_create_egl(app->egl_display, app->egl_context, app->egl_config, (EGLNativeWindowType)app->egl_window);
+	nemotale_set_backend(tale0, egl);
+	nemotale_resize_gl(tale0, app->width, app->height);
 
 	node00 = nemotale_node_create_pixman(80, 80);
 	nemotale_attach_node(tale0, node00);
@@ -139,8 +143,10 @@ int main(int argc, char *argv[])
 	nemotale_node_translate(node01, 40, 40);
 	nemotale_attach_node(tale0, node01);
 
-	tale1 = nemotale_create_fbo();
-	nemotale_attach_fbo(tale1, nemotale_node_get_texture(node01), 280, 280);
+	tale1 = nemotale_create_gl();
+	fbo = nemotale_create_fbo(nemotale_node_get_texture(node01), 280, 280);
+	nemotale_set_backend(tale1, fbo);
+	nemotale_resize_gl(tale1, 280, 280);
 
 	node10 = nemotale_node_create_pixman(180, 180);
 	nemotale_attach_node(tale1, node10);
@@ -161,8 +167,8 @@ int main(int argc, char *argv[])
 	cairo_paint(cr);
 	cairo_destroy(cr);
 
-	nemotale_composite(tale1, NULL);
-	nemotale_composite(tale0, NULL);
+	nemotale_composite_fbo(tale1, NULL);
+	nemotale_composite_egl(tale0, NULL);
 
 	while (1) {
 		wl_display_dispatch(app->display);
@@ -172,8 +178,10 @@ int main(int argc, char *argv[])
 	nemotale_node_destroy(node01);
 	nemotale_node_destroy(node10);
 	nemotale_node_destroy(node11);
-	nemotale_destroy(tale1);
-	nemotale_destroy(tale0);
+	nemotale_destroy_egl(egl);
+	nemotale_destroy_fbo(fbo);
+	nemotale_destroy_gl(tale1);
+	nemotale_destroy_gl(tale0);
 
 	wl_egl_window_destroy(app->egl_window);
 

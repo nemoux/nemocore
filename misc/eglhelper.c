@@ -106,3 +106,11 @@ int egl_prepare_context(EGLNativeDisplayType nativedisplay, EGLDisplay *egl_disp
 
 	return 0;
 }
+
+int egl_make_current(EGLDisplay *egl_display, EGLContext *egl_context)
+{
+	if (!eglMakeCurrent(egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE, egl_context))
+		return -1;
+
+	return 0;
+}

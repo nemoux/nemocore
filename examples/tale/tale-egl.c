@@ -95,6 +95,7 @@ int main(int argc, char *argv[])
 {
 	struct taleapp *app;
 	struct nemotale *tale;
+	struct taleegl *egl;
 	struct talenode *node0, *node1;
 	cairo_surface_t *surface;
 	cairo_t *cr;
@@ -119,12 +120,14 @@ int main(int argc, char *argv[])
 	xdg_surface_set_title(app->xdg_surface, "tale-egl");
 
 	egl_prepare_context((EGLNativeDisplayType)app->display, &app->egl_display, &app->egl_context, &app->egl_config, 0, NULL);
+	egl_make_current(app->egl_display, app->egl_context);
 
 	app->egl_window = wl_egl_window_create(app->surface, app->width, app->height);
 
-	tale = nemotale_create_egl(app->egl_display, app->egl_context, app->egl_config);
-	nemotale_attach_egl(tale, (EGLNativeWindowType)app->egl_window);
-	nemotale_resize_egl(tale, app->width, app->height);
+	tale = nemotale_create_gl();
+	egl = nemotale_create_egl(app->egl_display, app->egl_context, app->egl_config, (EGLNativeWindowType)app->egl_window);
+	nemotale_set_backend(tale, egl);
+	nemotale_resize_gl(tale, app->width, app->height);
 
 	node0 = nemotale_node_create_pixman(160, 160);
 	nemotale_attach_node(tale, node0);
@@ -145,7 +148,7 @@ int main(int argc, char *argv[])
 	cairo_paint(cr);
 	cairo_destroy(cr);
 
-	nemotale_composite(tale, NULL);
+	nemotale_composite_egl(tale, NULL);
 
 	while (1) {
 		wl_display_dispatch(app->display);
@@ -153,7 +156,8 @@ int main(int argc, char *argv[])
 
 	nemotale_node_destroy(node0);
 	nemotale_node_destroy(node1);
-	nemotale_destroy(tale);
+	nemotale_destroy_egl(egl);
+	nemotale_destroy_gl(tale);
 
 	wl_egl_window_destroy(app->egl_window);
 

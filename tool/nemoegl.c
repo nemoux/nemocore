@@ -30,6 +30,9 @@ struct eglcontext *nemotool_create_egl(struct nemotool *tool)
 			&egl->egl_context,
 			&egl->egl_config,
 			1, NULL);
+	egl_make_current(
+			egl->egl_display,
+			egl->egl_context);
 
 	return egl;
 }

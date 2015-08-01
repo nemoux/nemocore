@@ -70,7 +70,7 @@ int nemoshow_camera_update(struct nemoshow *show, struct showone *one)
 
 		NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(camera->matrix), matrix)->get9(d);
 
-		nemotale_transform_egl(show->tale, d);
+		nemotale_transform_gl(show->tale, d);
 
 		nemoshow_dirty_scene(show);
 	}

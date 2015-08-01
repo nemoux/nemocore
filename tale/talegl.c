@@ -34,13 +34,11 @@ struct nemogltale {
 	int has_unpack_subimage;
 };
 
-struct nemoegltale {
-	struct nemogltale base;
-
-	EGLDisplay egl_display;
-	EGLContext egl_context;
-	EGLConfig egl_config;
-	EGLSurface egl_surface;
+struct taleegl {
+	EGLDisplay display;
+	EGLContext context;
+	EGLConfig config;
+	EGLSurface surface;
 
 	pixman_region32_t damages[NEMOTALE_BUFFER_AGE_COUNT];
 
@@ -60,9 +58,7 @@ struct nemoegltale {
 	int has_egl_image_external;
 };
 
-struct nemofbotale {
-	struct nemogltale base;
-
+struct talefbo {
 	GLuint fbo, dbo;
 	GLuint texture;
 };
@@ -145,7 +141,7 @@ int nemotale_node_resize_gl(struct talenode *node, int32_t width, int32_t height
 	return 0;
 }
 
-static void nemotale_reset_shader(struct nemotale *tale)
+static void nemotale_clear_shader(struct nemotale *tale)
 {
 	struct nemogltale *context = (struct nemogltale *)tale->glcontext;
 
@@ -398,11 +394,11 @@ err1:
 	pixman_region32_fini(&repaint);
 }
 
-struct nemotale *nemotale_create_egl(EGLDisplay egl_display, EGLContext egl_context, EGLConfig egl_config)
+struct nemotale *nemotale_create_gl(void)
 {
-	const char *extensions;
 	struct nemotale *tale;
-	struct nemoegltale *context;
+	struct nemogltale *context;
+	const char *extensions;
 
 	tale = (struct nemotale *)malloc(sizeof(struct nemotale));
 	if (tale == NULL)
@@ -411,42 +407,10 @@ struct nemotale *nemotale_create_egl(EGLDisplay egl_display, EGLContext egl_cont
 
 	nemotale_prepare(tale);
 
-	tale->glcontext = context = (struct nemoegltale *)malloc(sizeof(struct nemoegltale));
+	tale->glcontext = context = (struct nemogltale *)malloc(sizeof(struct nemogltale));
 	if (context == NULL)
 		goto err1;
-	memset(context, 0, sizeof(struct nemoegltale));
-
-	nemomatrix_init_identity(&tale->matrix);
-
-	tale->destroy = nemotale_destroy_egl;
-	tale->composite = nemotale_composite_egl;
-
-	context->egl_display = egl_display;
-	context->egl_context = egl_context;
-	context->egl_config = egl_config;
-
-	extensions = (const char *)eglQueryString(context->egl_display, EGL_EXTENSIONS);
-	if (extensions == NULL)
-		goto err2;
-
-	if (strstr(extensions, "EGL_WL_bind_wayland_display"))
-		context->has_bind_display = 1;
-
-	if (strstr(extensions, "EGL_EXT_buffer_age"))
-		context->has_buffer_age = 1;
-
-#ifdef EGL_EXT_swap_buffers_with_damage
-	if (strstr(extensions, "EGL_EXT_swap_buffers_with_damage"))
-		context->swap_buffers_with_damage = (void *)eglGetProcAddress("eglSwapBuffersWithDamageEXT");
-#endif
-
-#ifdef EGL_MESA_configless_context
-	if (strstr(extensions, "EGL_MESA_configless_context"))
-		context->has_configless_context = 1;
-#endif
-
-	if (!eglMakeCurrent(context->egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE, context->egl_context))
-		goto err2;
+	memset(context, 0, sizeof(struct nemogltale));
 
 	extensions = (const char *)glGetString(GL_EXTENSIONS);
 	if (extensions == NULL)
@@ -462,33 +426,23 @@ struct nemotale *nemotale_create_egl(EGLDisplay egl_display, EGLContext egl_cont
 
 #ifdef GL_EXT_unpack_subimage
 	if (strstr(extensions, "GL_EXT_unpack_subimage"))
-		context->base.has_unpack_subimage = 1;
+		context->has_unpack_subimage = 1;
 #endif
 
-	if (strstr(extensions, "GL_OES_EGL_image_external"))
-		context->has_egl_image_external = 1;
-
-	context->create_image = (void *)eglGetProcAddress("eglCreateImageKHR");
-	context->destroy_image = (void *)eglGetProcAddress("eglDestroyImageKHR");
-	context->bind_display = (void *)eglGetProcAddress("eglBindWaylandDisplayWL");
-	context->unbind_display = (void *)eglGetProcAddress("eglUnbindWaylandDisplayWL");
-	context->query_buffer = (void *)eglGetProcAddress("eglQueryWaylandBufferWL");
-	context->image_target_texture_2d = (void *)eglGetProcAddress("glEGLImageTargetTexture2DOES");
-
-	context->base.texture_shader_rgba.vertex_source = vertex_shader;
-	context->base.texture_shader_rgba.fragment_source = texture_fragment_shader_rgba;
-	context->base.texture_shader_rgbx.vertex_source = vertex_shader;
-	context->base.texture_shader_rgbx.fragment_source = texture_fragment_shader_rgbx;
-	context->base.texture_shader_egl_external.vertex_source = vertex_shader;
-	context->base.texture_shader_egl_external.fragment_source = texture_fragment_shader_egl_external;
-	context->base.texture_shader_y_uv.vertex_source = vertex_shader;
-	context->base.texture_shader_y_uv.fragment_source = texture_fragment_shader_y_uv;
-	context->base.texture_shader_y_u_v.vertex_source = vertex_shader;
-	context->base.texture_shader_y_u_v.fragment_source = texture_fragment_shader_y_u_v;
-	context->base.texture_shader_y_xuxv.vertex_source = vertex_shader;
-	context->base.texture_shader_y_xuxv.fragment_source = texture_fragment_shader_y_xuxv;
-	context->base.solid_shader.vertex_source = vertex_shader;
-	context->base.solid_shader.fragment_source = solid_fragment_shader;
+	context->texture_shader_rgba.vertex_source = vertex_shader;
+	context->texture_shader_rgba.fragment_source = texture_fragment_shader_rgba;
+	context->texture_shader_rgbx.vertex_source = vertex_shader;
+	context->texture_shader_rgbx.fragment_source = texture_fragment_shader_rgbx;
+	context->texture_shader_egl_external.vertex_source = vertex_shader;
+	context->texture_shader_egl_external.fragment_source = texture_fragment_shader_egl_external;
+	context->texture_shader_y_uv.vertex_source = vertex_shader;
+	context->texture_shader_y_uv.fragment_source = texture_fragment_shader_y_uv;
+	context->texture_shader_y_u_v.vertex_source = vertex_shader;
+	context->texture_shader_y_u_v.fragment_source = texture_fragment_shader_y_u_v;
+	context->texture_shader_y_xuxv.vertex_source = vertex_shader;
+	context->texture_shader_y_xuxv.fragment_source = texture_fragment_shader_y_xuxv;
+	context->solid_shader.vertex_source = vertex_shader;
+	context->solid_shader.fragment_source = solid_fragment_shader;
 
 	return tale;
 
@@ -501,7 +455,7 @@ err1:
 	return NULL;
 }
 
-void nemotale_destroy_egl(struct nemotale *tale)
+void nemotale_destroy_gl(struct nemotale *tale)
 {
 	nemotale_finish(tale);
 
@@ -509,39 +463,9 @@ void nemotale_destroy_egl(struct nemotale *tale)
 	free(tale);
 }
 
-int nemotale_attach_egl(struct nemotale *tale, EGLNativeWindowType window)
+int nemotale_resize_gl(struct nemotale *tale, int32_t width, int32_t height)
 {
-	struct nemoegltale *context = (struct nemoegltale *)tale->glcontext;
-	int i;
-
-	context->egl_surface = eglCreateWindowSurface(context->egl_display, context->egl_config, window, NULL);
-	if (context->egl_surface == EGL_NO_SURFACE)
-		return -1;
-
-	for (i = 0; i < NEMOTALE_BUFFER_AGE_COUNT; i++) {
-		pixman_region32_init(&context->damages[i]);
-	}
-
-	return 0;
-}
-
-void nemotale_detach_egl(struct nemotale *tale)
-{
-	struct nemoegltale *context = (struct nemoegltale *)tale->glcontext;
-	int i;
-
-	for (i = 0; i < NEMOTALE_BUFFER_AGE_COUNT; i++) {
-		pixman_region32_fini(&context->damages[i]);
-	}
-
-	eglMakeCurrent(context->egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-
-	eglDestroySurface(context->egl_display, context->egl_surface);
-}
-
-int nemotale_resize_egl(struct nemotale *tale, int32_t width, int32_t height)
-{
-	struct nemoegltale *context = (struct nemoegltale *)tale->glcontext;
+	struct nemogltale *context = (struct nemogltale *)tale->glcontext;
 
 	tale->width = width;
 	tale->height = height;
@@ -549,36 +473,116 @@ int nemotale_resize_egl(struct nemotale *tale, int32_t width, int32_t height)
 	pixman_region32_init_rect(&tale->region, 0, 0, width, height);
 	pixman_region32_init_rect(&tale->input, 0, 0, width, height);
 
-	nemomatrix_init_identity(&context->base.matrix);
-	nemomatrix_multiply(&context->base.matrix, &tale->matrix);
-	nemomatrix_translate(&context->base.matrix, -width / 2.0f, -height / 2.0f);
-	nemomatrix_scale(&context->base.matrix, 2.0f / width, -2.0f / height);
+	nemomatrix_init_identity(&context->matrix);
+	nemomatrix_multiply(&context->matrix, &tale->matrix);
+	nemomatrix_translate(&context->matrix, -width / 2.0f, -height / 2.0f);
+	nemomatrix_scale(&context->matrix, 2.0f / width, -2.0f / height);
 
 	return 0;
 }
 
-int nemotale_transform_egl(struct nemotale *tale, float d[9])
+int nemotale_transform_gl(struct nemotale *tale, float d[9])
 {
-	struct nemoegltale *context = (struct nemoegltale *)tale->glcontext;
+	struct nemogltale *context = (struct nemogltale *)tale->glcontext;
 
 	nemomatrix_init_3x3(&tale->matrix, d);
 
-	nemomatrix_init_identity(&context->base.matrix);
-	nemomatrix_multiply(&context->base.matrix, &tale->matrix);
-	nemomatrix_translate(&context->base.matrix, -tale->width / 2.0f, -tale->height / 2.0f);
-	nemomatrix_scale(&context->base.matrix, 2.0f / tale->width, -2.0f / tale->height);
+	nemomatrix_init_identity(&context->matrix);
+	nemomatrix_multiply(&context->matrix, &tale->matrix);
+	nemomatrix_translate(&context->matrix, -tale->width / 2.0f, -tale->height / 2.0f);
+	nemomatrix_scale(&context->matrix, 2.0f / tale->width, -2.0f / tale->height);
 
 	return 0;
 }
 
-static void nemotale_get_egl_damage(struct nemotale *tale, pixman_region32_t *region, pixman_region32_t *damage)
+struct taleegl *nemotale_create_egl(EGLDisplay egl_display, EGLContext egl_context, EGLConfig egl_config, EGLNativeWindowType egl_window)
 {
-	struct nemoegltale *context = (struct nemoegltale *)tale->glcontext;
+	struct taleegl *egl;
+	const char *extensions;
+	struct nemotale *tale;
+	struct nemoegltale *context;
+	int i;
+
+	egl = (struct taleegl *)malloc(sizeof(struct taleegl));
+	if (egl == NULL)
+		return NULL;
+	memset(egl, 0, sizeof(struct taleegl));
+
+	egl->display = egl_display;
+	egl->context = egl_context;
+	egl->config = egl_config;
+
+	if (!eglMakeCurrent(egl->display, EGL_NO_SURFACE, EGL_NO_SURFACE, egl->context))
+		goto err1;
+
+	extensions = (const char *)eglQueryString(egl->display, EGL_EXTENSIONS);
+	if (extensions == NULL)
+		goto err1;
+
+	if (strstr(extensions, "EGL_WL_bind_wayland_display"))
+		egl->has_bind_display = 1;
+
+	if (strstr(extensions, "EGL_EXT_buffer_age"))
+		egl->has_buffer_age = 1;
+
+#ifdef EGL_EXT_swap_buffers_with_damage
+	if (strstr(extensions, "EGL_EXT_swap_buffers_with_damage"))
+		egl->swap_buffers_with_damage = (void *)eglGetProcAddress("eglSwapBuffersWithDamageEXT");
+#endif
+
+#ifdef EGL_MESA_configless_context
+	if (strstr(extensions, "EGL_MESA_configless_context"))
+		egl->has_configless_context = 1;
+#endif
+
+	if (strstr(extensions, "GL_OES_EGL_image_external"))
+		egl->has_egl_image_external = 1;
+
+	egl->create_image = (void *)eglGetProcAddress("eglCreateImageKHR");
+	egl->destroy_image = (void *)eglGetProcAddress("eglDestroyImageKHR");
+	egl->bind_display = (void *)eglGetProcAddress("eglBindWaylandDisplayWL");
+	egl->unbind_display = (void *)eglGetProcAddress("eglUnbindWaylandDisplayWL");
+	egl->query_buffer = (void *)eglGetProcAddress("eglQueryWaylandBufferWL");
+	egl->image_target_texture_2d = (void *)eglGetProcAddress("glEGLImageTargetTexture2DOES");
+
+	egl->surface = eglCreateWindowSurface(egl->display, egl->config, egl_window, NULL);
+	if (egl->surface == EGL_NO_SURFACE)
+		goto err1;
+
+	for (i = 0; i < NEMOTALE_BUFFER_AGE_COUNT; i++) {
+		pixman_region32_init(&egl->damages[i]);
+	}
+
+	return egl;
+
+err1:
+	free(egl);
+
+	return NULL;
+}
+
+void nemotale_destroy_egl(struct taleegl *egl)
+{
+	int i;
+
+	for (i = 0; i < NEMOTALE_BUFFER_AGE_COUNT; i++) {
+		pixman_region32_fini(&egl->damages[i]);
+	}
+
+	eglMakeCurrent(egl->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+
+	eglDestroySurface(egl->display, egl->surface);
+
+	free(egl);
+}
+
+static void nemotale_get_egl_damage(struct taleegl *egl, pixman_region32_t *region, pixman_region32_t *damage)
+{
 	EGLint buffer_age = 0;
 	int i;
 
-	if (context->has_buffer_age) {
-		if (eglQuerySurface(context->egl_display, context->egl_surface, EGL_BUFFER_AGE_EXT, &buffer_age) == EGL_FALSE) {
+	if (egl->has_buffer_age) {
+		if (eglQuerySurface(egl->display, egl->surface, EGL_BUFFER_AGE_EXT, &buffer_age) == EGL_FALSE) {
 			nemolog_error("TALEGL", "failed to query buffer age\n");
 		}
 	}
@@ -587,41 +591,78 @@ static void nemotale_get_egl_damage(struct nemotale *tale, pixman_region32_t *re
 		pixman_region32_copy(damage, region);
 	} else {
 		for (i = 0; i < buffer_age - 1; i++) {
-			pixman_region32_union(damage, damage, &context->damages[i]);
+			pixman_region32_union(damage, damage, &egl->damages[i]);
 		}
 	}
 }
 
-static void nemotale_rotate_egl_damage(struct nemotale *tale, pixman_region32_t *damage)
+static void nemotale_rotate_egl_damage(struct taleegl *egl, pixman_region32_t *damage)
 {
-	struct nemoegltale *context = (struct nemoegltale *)tale->glcontext;
 	int i;
 
-	if (!context->has_buffer_age)
+	if (!egl->has_buffer_age)
 		return;
 
 	for (i = NEMOTALE_BUFFER_AGE_COUNT - 1; i >= 1; i--) {
-		pixman_region32_copy(&context->damages[i], &context->damages[i - 1]);
+		pixman_region32_copy(&egl->damages[i], &egl->damages[i - 1]);
 	}
 
-	pixman_region32_copy(&context->damages[0], damage);
+	pixman_region32_copy(&egl->damages[0], damage);
 }
 
-int nemotale_composite_egl(struct nemotale *tale)
+int nemotale_composite_egl(struct nemotale *tale, pixman_region32_t *region)
 {
-	struct nemoegltale *context = (struct nemoegltale *)tale->glcontext;
+	struct nemogltale *context = (struct nemogltale *)tale->glcontext;
+	struct taleegl *egl = (struct taleegl *)tale->backend;
 	struct talenode *node;
 	pixman_region32_t buffer_damage, total_damage;
 	EGLBoolean r;
 
-	if (!eglMakeCurrent(context->egl_display, context->egl_surface, context->egl_surface, context->egl_context))
+	nemolist_for_each(node, &tale->node_list, link) {
+		if (node->transform.dirty != 0) {
+			nemotale_damage_below(tale, node);
+			nemotale_node_transform_update(node);
+			nemotale_damage_below(tale, node);
+
+			node->transform.dirty = 0;
+		}
+
+		if (node->dirty != 0) {
+			pixman_region32_t damage;
+
+			pixman_region32_init(&damage);
+
+			pixman_region32_intersect(&node->damage, &node->damage, &node->region);
+
+			if (node->transform.enable != 0) {
+				pixman_box32_t *extents;
+
+				extents = pixman_region32_extents(&node->damage);
+				nemotale_node_boundingbox_update(node,
+						extents->x1, extents->y1,
+						extents->x2 - extents->x1,
+						extents->y2 - extents->y1,
+						&damage);
+			} else {
+				pixman_region32_copy(&damage, &node->damage);
+				pixman_region32_translate(&damage,
+						node->geometry.x, node->geometry.y);
+			}
+
+			pixman_region32_union(&tale->damage, &tale->damage, &damage);
+
+			pixman_region32_fini(&damage);
+		}
+	}
+
+	if (!eglMakeCurrent(egl->display, egl->surface, egl->surface, egl->context))
 		return -1;
 
 	pixman_region32_init(&total_damage);
 	pixman_region32_init(&buffer_damage);
 
-	nemotale_get_egl_damage(tale, &tale->region, &buffer_damage);
-	nemotale_rotate_egl_damage(tale, &tale->damage);
+	nemotale_get_egl_damage(egl, &tale->region, &buffer_damage);
+	nemotale_rotate_egl_damage(egl, &tale->damage);
 
 	pixman_region32_union(&total_damage, &buffer_damage, &tale->damage);
 
@@ -629,7 +670,7 @@ int nemotale_composite_egl(struct nemotale *tale)
 
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-	nemotale_reset_shader(tale);
+	nemotale_clear_shader(tale);
 
 	nemolist_for_each_reverse(node, &tale->node_list, link) {
 		nemotale_repaint_node(tale, node, &total_damage);
@@ -639,7 +680,7 @@ int nemotale_composite_egl(struct nemotale *tale)
 	pixman_region32_fini(&buffer_damage);
 
 #ifdef EGL_EXT_swap_buffers_with_damage
-	if (context->swap_buffers_with_damage != NULL) {
+	if (egl->swap_buffers_with_damage != NULL) {
 		pixman_box32_t *rects;
 		EGLint *edamages, *edamage;
 		int i, nrects, buffer_height;
@@ -664,139 +705,140 @@ int nemotale_composite_egl(struct nemotale *tale)
 			*edamage++ = rects[i].y2 - rects[i].y1;
 		}
 
-		r = context->swap_buffers_with_damage(context->egl_display, context->egl_surface, edamages, nrects);
+		r = egl->swap_buffers_with_damage(egl->display, egl->surface, edamages, nrects);
 
 		free(edamages);
 		pixman_region32_fini(&buffer_damage);
 	} else {
-		r = eglSwapBuffers(context->egl_display, context->egl_surface);
+		r = eglSwapBuffers(egl->display, egl->surface);
 	}
 #else
-	r = eglSwapBuffers(context->egl_display, context->egl_surface);
+	r = eglSwapBuffers(egl->display, egl->surface);
 #endif
+
+	if (region != NULL)
+		pixman_region32_union(region, region, &tale->damage);
+
+	nemolist_for_each(node, &tale->node_list, link) {
+		if (node->dirty != 0) {
+			pixman_region32_clear(&node->damage);
+
+			node->dirty = 0;
+		}
+	}
+
+	pixman_region32_clear(&tale->damage);
 
 	return r == EGL_TRUE;
 }
 
-struct nemotale *nemotale_create_fbo(void)
+struct talefbo *nemotale_create_fbo(GLuint texture, int32_t width, int32_t height)
 {
-	struct nemotale *tale;
-	struct nemofbotale *context;
-	const char *extensions;
+	struct talefbo *fbo;
 
-	tale = (struct nemotale *)malloc(sizeof(struct nemotale));
-	if (tale == NULL)
+	fbo = (struct talefbo *)malloc(sizeof(struct talefbo));
+	if (fbo == NULL)
 		return NULL;
-	memset(tale, 0, sizeof(struct nemotale));
+	memset(fbo, 0, sizeof(struct talefbo));
 
-	nemotale_prepare(tale);
+	fbo->texture = texture;
 
-	tale->glcontext = context = (struct nemofbotale *)malloc(sizeof(struct nemofbotale));
-	if (context == NULL)
+	if (fbo_prepare_context(fbo->texture, width, height, &fbo->fbo, &fbo->dbo) < 0)
 		goto err1;
-	memset(context, 0, sizeof(struct nemofbotale));
 
-	tale->destroy = nemotale_destroy_fbo;
-	tale->composite = nemotale_composite_fbo;
-
-	extensions = (const char *)glGetString(GL_EXTENSIONS);
-	if (extensions == NULL)
-		goto err2;
-
-	if (!strstr(extensions, "GL_EXT_texture_format_BGRA8888"))
-		goto err2;
-
-	if (strstr(extensions, "GL_EXT_read_format_bgra"))
-		tale->read_format = PIXMAN_a8r8g8b8;
-	else
-		tale->read_format = PIXMAN_a8b8g8r8;
-
-#ifdef GL_EXT_unpack_subimage
-	if (strstr(extensions, "GL_EXT_unpack_subimage"))
-		context->base.has_unpack_subimage = 1;
-#endif
-
-	context->base.texture_shader_rgba.vertex_source = vertex_shader;
-	context->base.texture_shader_rgba.fragment_source = texture_fragment_shader_rgba;
-	context->base.texture_shader_rgbx.vertex_source = vertex_shader;
-	context->base.texture_shader_rgbx.fragment_source = texture_fragment_shader_rgbx;
-	context->base.texture_shader_egl_external.vertex_source = vertex_shader;
-	context->base.texture_shader_egl_external.fragment_source = texture_fragment_shader_egl_external;
-	context->base.texture_shader_y_uv.vertex_source = vertex_shader;
-	context->base.texture_shader_y_uv.fragment_source = texture_fragment_shader_y_uv;
-	context->base.texture_shader_y_u_v.vertex_source = vertex_shader;
-	context->base.texture_shader_y_u_v.fragment_source = texture_fragment_shader_y_u_v;
-	context->base.texture_shader_y_xuxv.vertex_source = vertex_shader;
-	context->base.texture_shader_y_xuxv.fragment_source = texture_fragment_shader_y_xuxv;
-	context->base.solid_shader.vertex_source = vertex_shader;
-	context->base.solid_shader.fragment_source = solid_fragment_shader;
-
-	return tale;
-
-err2:
-	free(tale->glcontext);
+	return fbo;
 
 err1:
-	free(tale);
+	free(fbo);
 
 	return NULL;
 }
 
-void nemotale_destroy_fbo(struct nemotale *tale)
+void nemotale_destroy_fbo(struct talefbo *fbo)
 {
-	nemotale_finish(tale);
+	glDeleteFramebuffers(1, &fbo->fbo);
+	glDeleteRenderbuffers(1, &fbo->dbo);
 
-	free(tale->glcontext);
-	free(tale);
+	free(fbo);
 }
 
-int nemotale_attach_fbo(struct nemotale *tale, GLuint texture, int32_t width, int32_t height)
+int nemotale_resize_fbo(struct talefbo *fbo, int32_t width, int32_t height)
 {
-	struct nemofbotale *context = (struct nemofbotale *)tale->glcontext;
+	glDeleteFramebuffers(1, &fbo->fbo);
+	glDeleteRenderbuffers(1, &fbo->dbo);
 
-	tale->width = width;
-	tale->height = height;
-
-	pixman_region32_init_rect(&tale->region, 0, 0, width, height);
-
-	context->texture = texture;
-
-	nemomatrix_init_identity(&context->base.matrix);
-	nemomatrix_translate(&context->base.matrix, -width / 2.0f, -height / 2.0f);
-	nemomatrix_scale(&context->base.matrix, 2.0f / width, 2.0f / height);
-
-	if (fbo_prepare_context(context->texture, width, height, &context->fbo, &context->dbo) < 0)
-		return -1;
-
-	return 0;
+	return fbo_prepare_context(fbo->texture, width, height, &fbo->fbo, &fbo->dbo);
 }
 
-void nemotale_detach_fbo(struct nemotale *tale)
+int nemotale_composite_fbo(struct nemotale *tale, pixman_region32_t *region)
 {
-	struct nemofbotale *context = (struct nemofbotale *)tale->glcontext;
-
-	glDeleteFramebuffers(1, &context->fbo);
-	glDeleteRenderbuffers(1, &context->dbo);
-}
-
-int nemotale_composite_fbo(struct nemotale *tale)
-{
-	struct nemofbotale *context = (struct nemofbotale *)tale->glcontext;
+	struct talefbo *fbo = (struct talefbo *)tale->backend;
 	struct talenode *node;
+	int r;
 
-	glBindFramebuffer(GL_FRAMEBUFFER, context->fbo);
+	nemolist_for_each(node, &tale->node_list, link) {
+		if (node->transform.dirty != 0) {
+			nemotale_damage_below(tale, node);
+			nemotale_node_transform_update(node);
+			nemotale_damage_below(tale, node);
+
+			node->transform.dirty = 0;
+		}
+
+		if (node->dirty != 0) {
+			pixman_region32_t damage;
+
+			pixman_region32_init(&damage);
+
+			pixman_region32_intersect(&node->damage, &node->damage, &node->region);
+
+			if (node->transform.enable != 0) {
+				pixman_box32_t *extents;
+
+				extents = pixman_region32_extents(&node->damage);
+				nemotale_node_boundingbox_update(node,
+						extents->x1, extents->y1,
+						extents->x2 - extents->x1,
+						extents->y2 - extents->y1,
+						&damage);
+			} else {
+				pixman_region32_copy(&damage, &node->damage);
+				pixman_region32_translate(&damage,
+						node->geometry.x, node->geometry.y);
+			}
+
+			pixman_region32_union(&tale->damage, &tale->damage, &damage);
+
+			pixman_region32_fini(&damage);
+		}
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo->fbo);
 
 	glViewport(0, 0, tale->width, tale->height);
 
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-	nemotale_reset_shader(tale);
+	nemotale_clear_shader(tale);
 
 	nemolist_for_each_reverse(node, &tale->node_list, link) {
 		nemotale_repaint_node(tale, node, &tale->damage);
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	if (region != NULL)
+		pixman_region32_union(region, region, &tale->damage);
+
+	nemolist_for_each(node, &tale->node_list, link) {
+		if (node->dirty != 0) {
+			pixman_region32_clear(&node->damage);
+
+			node->dirty = 0;
+		}
+	}
+
+	pixman_region32_clear(&tale->damage);
 
 	return 0;
 }

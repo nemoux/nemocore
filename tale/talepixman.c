@@ -25,9 +25,6 @@ struct nemotale *nemotale_create_pixman(void)
 		goto err1;
 	memset(tale->pmcontext, 0, sizeof(struct nemopmtale));
 
-	tale->destroy = nemotale_destroy_pixman;
-	tale->composite = nemotale_composite_pixman;
-
 	return tale;
 
 err1:
@@ -187,16 +184,66 @@ static void nemotale_repaint_node(struct nemotale *tale, struct talenode *node)
 	pixman_region32_fini(&repaint);
 }
 
-int nemotale_composite_pixman(struct nemotale *tale)
+int nemotale_composite_pixman(struct nemotale *tale, pixman_region32_t *region)
 {
-	struct nemopmtale *context = (struct nemopmtale *)tale->pmcontext;
 	struct talenode *node;
+	int r;
+
+	nemolist_for_each(node, &tale->node_list, link) {
+		if (node->transform.dirty != 0) {
+			nemotale_damage_below(tale, node);
+			nemotale_node_transform_update(node);
+			nemotale_damage_below(tale, node);
+
+			node->transform.dirty = 0;
+		}
+
+		if (node->dirty != 0) {
+			pixman_region32_t damage;
+
+			pixman_region32_init(&damage);
+
+			pixman_region32_intersect(&node->damage, &node->damage, &node->region);
+
+			if (node->transform.enable != 0) {
+				pixman_box32_t *extents;
+
+				extents = pixman_region32_extents(&node->damage);
+				nemotale_node_boundingbox_update(node,
+						extents->x1, extents->y1,
+						extents->x2 - extents->x1,
+						extents->y2 - extents->y1,
+						&damage);
+			} else {
+				pixman_region32_copy(&damage, &node->damage);
+				pixman_region32_translate(&damage,
+						node->geometry.x, node->geometry.y);
+			}
+
+			pixman_region32_union(&tale->damage, &tale->damage, &damage);
+
+			pixman_region32_fini(&damage);
+		}
+	}
 
 	nemolist_for_each_reverse(node, &tale->node_list, link) {
 		nemotale_repaint_node(tale, node);
 	}
 
-	return 0;
+	if (region != NULL)
+		pixman_region32_union(region, region, &tale->damage);
+
+	nemolist_for_each(node, &tale->node_list, link) {
+		if (node->dirty != 0) {
+			pixman_region32_clear(&node->damage);
+
+			node->dirty = 0;
+		}
+	}
+
+	pixman_region32_clear(&tale->damage);
+
+	return r;
 }
 
 static void nemotale_node_handle_destroy_signal(struct nemolistener *listener, void *data)

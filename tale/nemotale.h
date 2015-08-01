@@ -13,14 +13,12 @@ struct nemotale;
 struct talenode;
 struct taleevent;
 
-typedef void (*nemotale_destroy_t)(struct nemotale *tale);
-typedef int (*nemotale_composite_t)(struct nemotale *tale);
-
 typedef void (*nemotale_dispatch_event_t)(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event);
 
 struct nemotale {
 	void *pmcontext;
 	void *glcontext;
+	void *backend;
 
 	void *userdata;
 
@@ -33,12 +31,9 @@ struct nemotale {
 	pixman_region32_t input;
 	pixman_region32_t damage;
 
-	struct nemomatrix matrix;
-
 	pixman_format_code_t read_format;
 
-	nemotale_destroy_t destroy;
-	nemotale_composite_t composite;
+	struct nemomatrix matrix;
 
 	struct nemolist ptap_list;
 	struct nemolist tap_list;
@@ -49,9 +44,6 @@ struct nemotale {
 
 #define	NEMOTALE_DESTROY_SIGNAL(tale)		(&tale->destroy_signal)
 #define	NEMOTALE_DAMAGE(tale)						(&tale->damage)
-
-extern void nemotale_destroy(struct nemotale *tale);
-extern int nemotale_composite(struct nemotale *tale, pixman_region32_t *region);
 
 extern int nemotale_prepare(struct nemotale *tale);
 extern void nemotale_finish(struct nemotale *tale);
@@ -77,6 +69,16 @@ static inline int32_t nemotale_get_height(struct nemotale *tale)
 static inline void nemotale_set_dispatch_event(struct nemotale *tale, nemotale_dispatch_event_t dispatch)
 {
 	tale->dispatch_event = dispatch;
+}
+
+static inline void nemotale_set_backend(struct nemotale *tale, void *backend)
+{
+	tale->backend = backend;
+}
+
+static inline void *nemotale_get_backend(struct nemotale *tale)
+{
+	return tale->backend;
 }
 
 static inline void nemotale_set_userdata(struct nemotale *tale, void *data)

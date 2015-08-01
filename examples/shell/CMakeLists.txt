@@ -7,6 +7,7 @@ LINK_DIRECTORIES(${NEMOTALE_LIBRARY_DIRS})
 include_directories(
 	${CMAKE_SOURCE_DIR}/misc
 	${CMAKE_SOURCE_DIR}/asst
+	${CMAKE_SOURCE_DIR}/tale
 	${CMAKE_SOURCE_DIR}/compz
 	${CMAKE_BINARY_DIR}/compz
 	${CMAKE_SOURCE_DIR}/shell

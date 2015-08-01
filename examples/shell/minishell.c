@@ -267,7 +267,7 @@ static void minishell_dispatch_background_frame(struct nemoactor *actor, uint32_
 		nemoactor_feedback_done(actor);
 	}
 
-	nemotale_composite(tale, &region);
+	nemotale_composite_fbo(tale, &region);
 
 	nemoactor_damage_region(actor, &region);
 
@@ -277,9 +277,6 @@ static void minishell_dispatch_background_frame(struct nemoactor *actor, uint32_
 int main(int argc, char *argv[])
 {
 	struct option options[] = {
-		{ "use_pixman",					no_argument,				NULL,		'p' },
-		{ "use_pixman_shell",		no_argument,				NULL,		'x' },
-		{ "backend",						required_argument,	NULL,		'b' },
 		{ "node",								required_argument,	NULL,		'n' },
 		{ "seat",								required_argument,	NULL,		's' },
 		{ "tty",								required_argument,	NULL,		't' },
@@ -296,34 +293,19 @@ int main(int argc, char *argv[])
 	struct talenode *node;
 	struct pathone *group;
 	struct pathone *back;
-	char *backend = NULL;
 	char *rendernode = NULL;
 	char *configpath = NULL;
 	char *seat = NULL;
-	int use_pixman = 0;
-	int use_pixman_shell = 0;
 	int tty = 0;
 	int opt;
 
 	nemolog_set_file(stderr);
 
-	while (opt = getopt_long(argc, argv, "pxb:n:s:t:c:l:h", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "n:s:t:c:l:h", options, NULL)) {
 		if (opt == -1)
 			break;
 
 		switch (opt) {
-			case 'p':
-				use_pixman = 1;
-				break;
-
-			case 'x':
-				use_pixman_shell = 1;
-				break;
-
-			case 'b':
-				backend = strdup(optarg);
-				break;
-
 			case 'n':
 				rendernode = strdup(optarg);
 				break;
@@ -366,24 +348,14 @@ int main(int argc, char *argv[])
 	if (shell == NULL)
 		goto out;
 
-	compz->use_pixman = use_pixman;
-
 	if (seat != NULL)
 		nemosession_connect(compz->session, seat, tty);
 
 	minishell_handle_configs(shell, configpath);
 
-	if (backend == NULL || strcmp(backend, "drm") == 0) {
-		drmbackend_create(compz, rendernode);
-		evdevbackend_create(compz);
-		tuiobackend_create(compz);
-	} else if (strcmp(backend, "fb") == 0) {
-		fbbackend_create(compz, rendernode);
-		evdevbackend_create(compz);
-		tuiobackend_create(compz);
-
-		compz->use_pixman = 1;
-	}
+	drmbackend_create(compz, rendernode);
+	evdevbackend_create(compz);
+	tuiobackend_create(compz);
 
 	nemocompz_set_screen_frame_listener(compz, nemocompz_get_main_screen(compz));
 
@@ -392,28 +364,16 @@ int main(int argc, char *argv[])
 	nemocompz_add_button_binding(compz, BTN_RIGHT, minishell_handle_right_button, (void *)shell);
 	nemocompz_add_touch_binding(compz, minishell_handle_touch_down, (void *)shell);
 
-	if (use_pixman != 0 || use_pixman_shell != 0) {
-		actor = nemoactor_create_pixman(compz,
-				nemocompz_get_scene_width(compz),
-				nemocompz_get_scene_height(compz));
+	nemocompz_make_current(compz);
 
-		tale = nemotale_create_pixman();
-		nemotale_attach_pixman(tale,
-				pixman_image_get_data(actor->image),
-				pixman_image_get_width(actor->image),
-				pixman_image_get_height(actor->image),
-				pixman_image_get_stride(actor->image));
-	} else {
-		nemocompz_make_current(compz);
+	actor = nemoactor_create_gl(compz,
+			nemocompz_get_scene_width(compz),
+			nemocompz_get_scene_height(compz));
 
-		actor = nemoactor_create_gl(compz,
-				nemocompz_get_scene_width(compz),
-				nemocompz_get_scene_height(compz));
-
-		tale = nemotale_create_fbo();
-		nemotale_attach_fbo(tale, actor->texture, actor->base.width, actor->base.height);
-	}
-
+	tale = nemotale_create_gl();
+	nemotale_set_backend(tale,
+			nemotale_create_fbo(actor->texture, actor->base.width, actor->base.height));
+	nemotale_resize_gl(tale, actor->base.width, actor->base.height);
 	nemoactor_set_dispatch_frame(actor, minishell_dispatch_background_frame);
 
 	nemotale_attach_actor(tale, actor, minishell_dispatch_tale_event);

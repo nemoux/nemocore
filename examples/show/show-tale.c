@@ -64,9 +64,9 @@ static void nemoshow_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t w
 	struct showcontext *context = (struct showcontext *)nemotale_get_userdata(tale);
 
 	nemotool_resize_egl_canvas(context->canvas, width, height);
-	nemotale_resize_egl(tale, width, height);
+	nemotale_resize_gl(tale, width, height);
 
-	nemotale_composite(tale, NULL);
+	nemotale_composite_egl(tale, NULL);
 }
 
 static void nemoshow_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t secs, uint32_t nsecs)
@@ -85,7 +85,7 @@ static void nemoshow_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 		nemoshow_render_one(show);
 	}
 
-	nemotale_composite(tale, NULL);
+	nemotale_composite_egl(tale, NULL);
 }
 
 int main(int argc, char *argv[])
@@ -117,12 +117,14 @@ int main(int argc, char *argv[])
 	nemocanvas_set_dispatch_resize(NTEGL_CANVAS(canvas), nemoshow_dispatch_canvas_resize);
 	nemocanvas_set_dispatch_frame(NTEGL_CANVAS(canvas), nemoshow_dispatch_canvas_frame);
 
-	context->tale = tale = nemotale_create_egl(
-			NTEGL_DISPLAY(egl),
-			NTEGL_CONTEXT(egl),
-			NTEGL_CONFIG(egl));
-	nemotale_attach_egl(tale, (EGLNativeWindowType)NTEGL_WINDOW(canvas));
-	nemotale_resize_egl(tale, width, height);
+	context->tale = tale = nemotale_create_gl();
+	nemotale_set_backend(tale,
+			nemotale_create_egl(
+				NTEGL_DISPLAY(egl),
+				NTEGL_CONTEXT(egl),
+				NTEGL_CONFIG(egl),
+				(EGLNativeWindowType)NTEGL_WINDOW(canvas)));
+	nemotale_resize_gl(tale, width, height);
 
 	nemotale_attach_canvas(tale, NTEGL_CANVAS(canvas), nemoshow_dispatch_tale_event);
 	nemotale_set_userdata(tale, context);
@@ -146,7 +148,7 @@ int main(int argc, char *argv[])
 	nemoshow_render_one(show);
 
 	nemotool_resize_egl_canvas(canvas, NEMOSHOW_SCENE_AT(scene, width), NEMOSHOW_SCENE_AT(scene, height));
-	nemotale_resize_egl(tale, NEMOSHOW_SCENE_AT(scene, width), NEMOSHOW_SCENE_AT(scene, height));
+	nemotale_resize_gl(tale, NEMOSHOW_SCENE_AT(scene, width), NEMOSHOW_SCENE_AT(scene, height));
 
 	trans = nemoshow_transition_create(
 			nemoshow_search_one(show, "ease0"),
@@ -165,7 +167,7 @@ int main(int argc, char *argv[])
 
 	nemoshow_finalize();
 
-	nemotale_destroy(tale);
+	nemotale_destroy_gl(tale);
 
 	nemotool_destroy_egl_canvas(canvas);
 	nemotool_destroy_egl(egl);
