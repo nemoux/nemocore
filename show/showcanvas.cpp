@@ -199,7 +199,7 @@ static inline void nemoshow_canvas_render_item(struct showcanvas *canvas, int ty
 	}
 }
 
-static int nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
+void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 	struct showone *child;
@@ -251,14 +251,4 @@ static int nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *
 	}
 
 	NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
-
-	return 0;
-}
-
-void nemoshow_canvas_render(struct nemoshow *show, struct showone *one)
-{
-	if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
-		nemoshow_canvas_render_vector(show, one);
-	} else if (one->sub == NEMOSHOW_CANVAS_SVG_TYPE) {
-	}
 }

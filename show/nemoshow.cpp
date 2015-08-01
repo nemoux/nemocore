@@ -506,7 +506,10 @@ void nemoshow_render_one(struct nemoshow *show)
 		one = show->ones[i];
 
 		if (one->type == NEMOSHOW_CANVAS_TYPE) {
-			nemoshow_canvas_render(show, one);
+			if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
+				nemoshow_canvas_render_vector(show, one);
+			} else if (one->sub == NEMOSHOW_CANVAS_SVG_TYPE) {
+			}
 		}
 	}
 

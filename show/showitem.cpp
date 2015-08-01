@@ -31,6 +31,7 @@ struct showone *nemoshow_item_create(int type)
 	item->cc = new showitem_t;
 	NEMOSHOW_ITEM_CC(item, matrix) = NULL;
 	NEMOSHOW_ITEM_CC(item, path) = NULL;
+	NEMOSHOW_ITEM_CC(item, points) = NULL;
 
 	one = &item->base;
 	one->type = NEMOSHOW_ITEM_TYPE;
@@ -293,6 +294,9 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 
 				fontscale = item->fontsize / item->font->max_advance_height;
 
+				if (NEMOSHOW_ITEM_CC(item, points) != NULL)
+					delete NEMOSHOW_ITEM_CC(item, points);
+
 				NEMOSHOW_ITEM_CC(item, points) = new SkPoint[strlen(item->text)];
 
 				fontx = item->x;
@@ -305,6 +309,8 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 					fontx += hbglyphspos[i].x_advance * fontscale;
 					fonty += hbglyphspos[i].y_advance * fontscale;
 				}
+
+				hb_buffer_destroy(hbbuffer);
 			}
 		}
 	}
