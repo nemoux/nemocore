@@ -517,6 +517,8 @@ void nemoshow_render_one(struct nemoshow *show)
 				nemoshow_canvas_render_vector(show, one);
 			} else if (one->sub == NEMOSHOW_CANVAS_BACK_TYPE) {
 				nemoshow_canvas_render_back(show, one);
+			} else if (one->sub == NEMOSHOW_CANVAS_SCENE_TYPE) {
+				nemoshow_canvas_render_scene(show, one);
 			}
 		}
 	}

@@ -97,20 +97,28 @@ int nemoshow_canvas_arrange(struct nemoshow *show, struct showone *one)
 	else
 		one->sub = map->type;
 
-	canvas->node = nemotale_node_create_pixman(canvas->width, canvas->height);
+	if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
+		canvas->node = nemotale_node_create_pixman(canvas->width, canvas->height);
 
-	if (one->sub == NEMOSHOW_CANVAS_BACK_TYPE)
+		NEMOSHOW_CANVAS_CC(canvas, bitmap) = new SkBitmap;
+
+		NEMOSHOW_CANVAS_CC(canvas, bitmap)->setInfo(
+				SkImageInfo::Make(canvas->width, canvas->height, kN32_SkColorType, kPremul_SkAlphaType));
+		NEMOSHOW_CANVAS_CC(canvas, bitmap)->setPixels(
+				nemotale_node_get_buffer(canvas->node));
+
+		NEMOSHOW_CANVAS_CC(canvas, device) = new SkBitmapDevice(*NEMOSHOW_CANVAS_CC(canvas, bitmap));
+		NEMOSHOW_CANVAS_CC(canvas, canvas) = new SkCanvas(NEMOSHOW_CANVAS_CC(canvas, device));
+	} else if (one->sub == NEMOSHOW_CANVAS_PIXMAN_TYPE) {
+		canvas->node = nemotale_node_create_pixman(canvas->width, canvas->height);
+	} else if (one->sub == NEMOSHOW_CANVAS_OPENGL_TYPE) {
+		canvas->node = nemotale_node_create_gl(canvas->width, canvas->height);
+	} else if (one->sub == NEMOSHOW_CANVAS_SCENE_TYPE) {
+		canvas->node = nemotale_node_create_gl(canvas->width, canvas->height);
+	} else if (one->sub == NEMOSHOW_CANVAS_BACK_TYPE) {
+		canvas->node = nemotale_node_create_pixman(canvas->width, canvas->height);
 		nemotale_node_opaque(canvas->node, 0, 0, canvas->width, canvas->height);
-
-	NEMOSHOW_CANVAS_CC(canvas, bitmap) = new SkBitmap;
-
-	NEMOSHOW_CANVAS_CC(canvas, bitmap)->setInfo(
-			SkImageInfo::Make(canvas->width, canvas->height, kN32_SkColorType, kPremul_SkAlphaType));
-	NEMOSHOW_CANVAS_CC(canvas, bitmap)->setPixels(
-			nemotale_node_get_buffer(canvas->node));
-
-	NEMOSHOW_CANVAS_CC(canvas, device) = new SkBitmapDevice(*NEMOSHOW_CANVAS_CC(canvas, bitmap));
-	NEMOSHOW_CANVAS_CC(canvas, canvas) = new SkCanvas(NEMOSHOW_CANVAS_CC(canvas, device));
+	}
 
 	if (canvas->event == 0)
 		nemotale_node_set_pick_type(canvas->node, NEMOTALE_PICK_NO_TYPE);
@@ -293,4 +301,9 @@ void nemoshow_canvas_render_back(struct nemoshow *show, struct showone *one)
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
 	nemotale_node_fill_pixman(canvas->node, canvas->fills[2], canvas->fills[1], canvas->fills[0], canvas->fills[3] * canvas->alpha);
+}
+
+void nemoshow_canvas_render_scene(struct nemoshow *show, struct showone *one)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 }

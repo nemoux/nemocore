@@ -67,6 +67,12 @@ extern int nemoshow_canvas_update(struct nemoshow *show, struct showone *one);
 
 extern void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one);
 extern void nemoshow_canvas_render_back(struct nemoshow *show, struct showone *one);
+extern void nemoshow_canvas_render_scene(struct nemoshow *show, struct showone *one);
+
+static inline struct talenode *nemoshow_canvas_get_node(struct showone *one)
+{
+	return NEMOSHOW_CANVAS_AT(one, node);
+}
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
