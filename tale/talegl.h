@@ -33,6 +33,7 @@ extern void nemotale_destroy_egl(struct nemotale *tale);
 extern int nemotale_attach_egl(struct nemotale *tale, EGLNativeWindowType window);
 extern void nemotale_detach_egl(struct nemotale *tale);
 extern int nemotale_resize_egl(struct nemotale *tale, int32_t width, int32_t height);
+extern int nemotale_transform_egl(struct nemotale *tale, float d[9]);
 extern int nemotale_composite_egl(struct nemotale *tale);
 
 extern struct nemotale *nemotale_create_fbo(void);

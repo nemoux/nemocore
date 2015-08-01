@@ -182,7 +182,11 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 			child = one->children[i];
 
 			if (child->type == NEMOSHOW_MATRIX_TYPE) {
-				nemoshow_matrix_update(show, child);
+				if (child->dirty != 0) {
+					nemoshow_matrix_update(show, child);
+
+					child->dirty = 0;
+				}
 
 				NEMOSHOW_ITEM_CC(item, matrix)->postConcat(
 						*NEMOSHOW_MATRIX_CC(

@@ -31,6 +31,7 @@ typedef enum {
 	NEMOSHOW_LOOP_TYPE = 9,
 	NEMOSHOW_MATRIX_TYPE = 10,
 	NEMOSHOW_PATH_TYPE = 11,
+	NEMOSHOW_CAMERA_TYPE = 12,
 	NEMOSHOW_LAST_TYPE
 } NemoShowOneType;
 
@@ -68,7 +69,7 @@ struct showone {
 	struct showattr **attrs;
 	int nattrs, sattrs;
 
-	int dirty;
+	int dirty, redraw;
 	int32_t x, y, width, height;
 };
 

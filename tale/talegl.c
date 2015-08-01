@@ -416,6 +416,8 @@ struct nemotale *nemotale_create_egl(EGLDisplay egl_display, EGLContext egl_cont
 		goto err1;
 	memset(context, 0, sizeof(struct nemoegltale));
 
+	nemomatrix_init_identity(&tale->matrix);
+
 	tale->destroy = nemotale_destroy_egl;
 	tale->composite = nemotale_composite_egl;
 
@@ -548,8 +550,23 @@ int nemotale_resize_egl(struct nemotale *tale, int32_t width, int32_t height)
 	pixman_region32_init_rect(&tale->input, 0, 0, width, height);
 
 	nemomatrix_init_identity(&context->base.matrix);
+	nemomatrix_multiply(&context->base.matrix, &tale->matrix);
 	nemomatrix_translate(&context->base.matrix, -width / 2.0f, -height / 2.0f);
 	nemomatrix_scale(&context->base.matrix, 2.0f / width, -2.0f / height);
+
+	return 0;
+}
+
+int nemotale_transform_egl(struct nemotale *tale, float d[9])
+{
+	struct nemoegltale *context = (struct nemoegltale *)tale->glcontext;
+
+	nemomatrix_init_3x3(&tale->matrix, d);
+
+	nemomatrix_init_identity(&context->base.matrix);
+	nemomatrix_multiply(&context->base.matrix, &tale->matrix);
+	nemomatrix_translate(&context->base.matrix, -tale->width / 2.0f, -tale->height / 2.0f);
+	nemomatrix_scale(&context->base.matrix, 2.0f / tale->width, -2.0f / tale->height);
 
 	return 0;
 }

@@ -25,6 +25,7 @@ NEMO_BEGIN_EXTERN_C
 #include <showtransition.h>
 #include <showmatrix.h>
 #include <showpath.h>
+#include <showcamera.h>
 
 #include <nemotale.h>
 #include <nemolist.h>
@@ -39,6 +40,7 @@ struct nemoshow {
 	struct nemotale *tale;
 
 	struct showone *scene;
+	struct showone *camera;
 
 	struct nemolist transition_list;
 
@@ -66,6 +68,10 @@ extern void nemoshow_render_one(struct nemoshow *show);
 
 extern int nemoshow_set_scene(struct nemoshow *show, struct showone *one);
 extern void nemoshow_put_scene(struct nemoshow *show);
+extern void nemoshow_dirty_scene(struct nemoshow *show);
+
+extern int nemoshow_set_camera(struct nemoshow *show, struct showone *one);
+extern void nemoshow_put_camera(struct nemoshow *show);
 
 extern int nemoshow_attach_canvas(struct nemoshow *show, struct showone *one);
 extern void nemoshow_detach_canvas(struct nemoshow *show, struct showone *one);

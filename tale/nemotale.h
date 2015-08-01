@@ -7,6 +7,7 @@
 
 #include <nemolist.h>
 #include <nemolistener.h>
+#include <nemomatrix.h>
 
 struct nemotale;
 struct talenode;
@@ -31,6 +32,8 @@ struct nemotale {
 	pixman_region32_t region;
 	pixman_region32_t input;
 	pixman_region32_t damage;
+
+	struct nemomatrix matrix;
 
 	pixman_format_code_t read_format;
 

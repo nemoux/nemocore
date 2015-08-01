@@ -154,6 +154,8 @@ static struct showone *nemoshow_create_one(struct xmlnode *node)
 		one = nemoshow_path_create(NEMOSHOW_CLOSE_PATH);
 	} else if (strcmp(node->name, "cmd") == 0) {
 		one = nemoshow_path_create(NEMOSHOW_CMD_PATH);
+	} else if (strcmp(node->name, "camera") == 0) {
+		one = nemoshow_camera_create();
 	}
 
 	if (one != NULL) {
@@ -469,6 +471,8 @@ void nemoshow_arrange_one(struct nemoshow *show)
 			nemoshow_item_arrange(show, one);
 		} else if (one->type == NEMOSHOW_MATRIX_TYPE) {
 			nemoshow_matrix_arrange(show, one);
+		} else if (one->type == NEMOSHOW_CAMERA_TYPE) {
+			nemoshow_camera_arrange(show, one);
 		}
 	}
 }
@@ -499,6 +503,9 @@ void nemoshow_render_one(struct nemoshow *show)
 
 		if (one->dirty != 0) {
 			one->update(show, one);
+
+			one->redraw = 1;
+			one->dirty = 0;
 		}
 	}
 
@@ -512,12 +519,6 @@ void nemoshow_render_one(struct nemoshow *show)
 				nemoshow_canvas_render_back(show, one);
 			}
 		}
-	}
-
-	for (i = 0; i < show->nones; i++) {
-		one = show->ones[i];
-
-		one->dirty = 0;
 	}
 }
 
@@ -554,6 +555,7 @@ int nemoshow_set_scene(struct nemoshow *show, struct showone *one)
 void nemoshow_put_scene(struct nemoshow *show)
 {
 	struct showone *one;
+	struct showone *child;
 	struct showcanvas *canvas;
 	int i;
 
@@ -563,10 +565,54 @@ void nemoshow_put_scene(struct nemoshow *show)
 	one = show->scene;
 
 	for (i = 0; i < one->nchildren; i++) {
-		canvas = NEMOSHOW_CANVAS(one->children[i]);
+		child = one->children[i];
 
-		nemotale_detach_node(show->tale, canvas->node);
+		if (child->type == NEMOSHOW_CANVAS_TYPE) {
+			canvas = NEMOSHOW_CANVAS(child);
+
+			nemotale_detach_node(show->tale, canvas->node);
+		}
 	}
+
+	show->scene = NULL;
+}
+
+void nemoshow_dirty_scene(struct nemoshow *show)
+{
+	struct showone *one;
+	struct showone *child;
+	struct showcanvas *canvas;
+	int i;
+
+	one = show->scene;
+
+	for (i = 0; i < one->nchildren; i++) {
+		child = one->children[i];
+
+		if (child->type == NEMOSHOW_CANVAS_TYPE) {
+			canvas = NEMOSHOW_CANVAS(child);
+
+			nemotale_node_damage_all(canvas->node);
+		}
+	}
+}
+
+int nemoshow_set_camera(struct nemoshow *show, struct showone *one)
+{
+	if (show->camera == one)
+		return 0;
+
+	show->camera = one;
+
+	return 0;
+}
+
+void nemoshow_put_camera(struct nemoshow *show)
+{
+	if (show->camera == NULL)
+		return;
+
+	show->camera = NULL;
 }
 
 int nemoshow_attach_canvas(struct nemoshow *show, struct showone *one)

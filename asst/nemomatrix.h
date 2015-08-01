@@ -71,6 +71,9 @@ extern void nemovector_cross(struct nemovector *v0, struct nemovector *v1);
 extern void nemomatrix_init_quaternion(struct nemomatrix *matrix, struct nemoquaternion *quat);
 extern void nemomatrix_multiply_quaternion(struct nemomatrix *matrix, struct nemoquaternion *quat);
 
+extern void nemomatrix_init_3x3(struct nemomatrix *matrix, float m[9]);
+extern void nemomatrix_init_4x4(struct nemomatrix *matrix, float m[16]);
+
 extern void nemoquaternion_init_identity(struct nemoquaternion *quat);
 extern void nemoquaternion_multiply(struct nemoquaternion *l, struct nemoquaternion *r);
 extern void nemoquaternion_make_with_angle_axis(struct nemoquaternion *quat, float r, float x, float y, float z);

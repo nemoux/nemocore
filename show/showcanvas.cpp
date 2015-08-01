@@ -223,12 +223,14 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 	for (i = 0; i < one->nchildren; i++) {
 		child = one->children[i];
 
-		if (child->dirty != 0) {
+		if (child->redraw != 0) {
 			region.op(
 					SkIRect::MakeXYWH(child->x, child->y, child->width, child->height),
 					SkRegion::kUnion_Op);
 
 			nemotale_node_damage(canvas->node, child->x, child->y, child->width, child->height);
+
+			child->redraw = 0;
 		}
 	}
 

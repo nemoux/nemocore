@@ -156,6 +156,36 @@ int nemomatrix_invert(struct nemomatrix *inverse, const struct nemomatrix *matri
 	return 0;
 }
 
+void nemomatrix_init_3x3(struct nemomatrix *matrix, float m[9])
+{
+	struct nemomatrix target = {
+		.d = {
+			m[0], m[3], 0, m[6],
+			m[1], m[4], 0, m[7],
+			0, 0, 1, 0,
+			m[2], m[5], 0, 1
+		},
+		.type = 0,
+	};
+
+	memcpy(matrix, &target, sizeof(target));
+}
+
+void nemomatrix_init_4x4(struct nemomatrix *matrix, float m[16])
+{
+	struct nemomatrix target = {
+		.d = {
+			m[0], m[4], m[8], m[12],
+			m[1], m[5], m[9], m[13],
+			m[2], m[6], m[10], m[14],
+			m[3], m[7], m[11], m[15]
+		},
+		.type = 0,
+	};
+
+	memcpy(matrix, &target, sizeof(target));
+}
+
 void nemomatrix_init_identity(struct nemomatrix *matrix)
 {
 	static const struct nemomatrix identity = {

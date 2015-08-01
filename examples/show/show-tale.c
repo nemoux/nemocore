@@ -98,6 +98,7 @@ int main(int argc, char *argv[])
 	struct nemoshow *show;
 	struct showtransition *trans;
 	struct showone *scene;
+	struct showone *camera;
 	int32_t width = 100, height = 100;
 
 	context = (struct showcontext *)malloc(sizeof(struct showcontext));
@@ -135,10 +136,14 @@ int main(int argc, char *argv[])
 	nemoshow_load_xml(show, argv[1]);
 	nemoshow_sort_one(show);
 	nemoshow_arrange_one(show);
-	nemoshow_render_one(show);
 
-	scene = nemoshow_search_one(show, "main");
+	scene = nemoshow_search_one(show, "scene0");
 	nemoshow_set_scene(show, scene);
+
+	camera = nemoshow_search_one(show, "camera0");
+	nemoshow_set_camera(show, camera);
+
+	nemoshow_render_one(show);
 
 	nemotool_resize_egl_canvas(canvas, NEMOSHOW_SCENE_AT(scene, width), NEMOSHOW_SCENE_AT(scene, height));
 	nemotale_resize_egl(tale, NEMOSHOW_SCENE_AT(scene, width), NEMOSHOW_SCENE_AT(scene, height));
@@ -148,6 +153,8 @@ int main(int argc, char *argv[])
 			3000, 100);
 	nemoshow_transition_attach_sequence(trans,
 			nemoshow_search_one(show, "hour-hand-sequence"));
+	nemoshow_transition_attach_sequence(trans,
+			nemoshow_search_one(show, "camera-sequence"));
 	nemoshow_attach_transition(show, trans);
 
 	nemocanvas_dispatch_frame(NTEGL_CANVAS(canvas));
