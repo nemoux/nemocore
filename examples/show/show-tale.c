@@ -79,10 +79,8 @@ static void nemoshow_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 		nemocanvas_feedback(canvas);
 	} else if (nemoshow_has_transition(show) != 0) {
 		nemoshow_dispatch_transition(show, secs * 1000 + nsecs / 1000000);
-		nemocanvas_feedback(canvas);
 
-		nemoshow_one_dirty(
-				nemoshow_search_one(show, "hour-hand"));
+		nemocanvas_feedback(canvas);
 
 		nemoshow_update_one(show);
 		nemoshow_render_one(show);

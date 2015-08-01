@@ -98,8 +98,6 @@ struct showone *nemoshow_sequence_create_set(void)
 
 	nemoshow_one_prepare(one);
 
-	nemoobject_set_reserved(&one->object, "src", set->src, NEMOSHOW_ID_MAX);
-
 	return one;
 }
 
@@ -121,9 +119,10 @@ int nemoshow_sequence_arrange_set(struct nemoshow *show, struct showone *one)
 	const char *name;
 	int i, count;
 
-	src = nemoshow_search_one(show, set->src);
+	src = nemoshow_search_one(show, nemoobject_gets(&one->object, "src"));
 	if (src == NULL)
 		return -1;
+	set->src = src;
 
 	count = nemoobject_get_count(&one->object);
 
@@ -219,6 +218,8 @@ static void nemoshow_sequence_dispatch_frame(struct showone *one, double s, doub
 			nemoattr_setd(set->tattrs[j],
 					(nemoattr_getd(set->eattrs[j]) - set->sattrs[j]) * dt + set->sattrs[j]);
 		}
+
+		nemoshow_one_dirty(set->src);
 	}
 }
 

@@ -17,11 +17,12 @@ NEMO_BEGIN_EXTERN_C
 #define	NEMOSHOW_SEQUENCE_SET_ATTR_MAX	(8)
 
 struct nemoshow;
+struct showone;
 
 struct showset {
 	struct showone base;
 
-	char src[NEMOSHOW_ID_MAX];
+	struct showone *src;
 
 	double sattrs[NEMOSHOW_SEQUENCE_SET_ATTR_MAX];
 	struct nemoattr *tattrs[NEMOSHOW_SEQUENCE_SET_ATTR_MAX];
