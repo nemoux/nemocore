@@ -97,7 +97,9 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 		NEMOBOX_APPEND(style->refs, style->srefs, style->nrefs, one);
 	} else {
 		NEMOSHOW_ITEM_CC(item, fill) = new SkPaint;
+		NEMOSHOW_ITEM_CC(item, fill)->setAntiAlias(true);
 		NEMOSHOW_ITEM_CC(item, stroke) = new SkPaint;
+		NEMOSHOW_ITEM_CC(item, stroke)->setAntiAlias(true);
 
 		item->style = one;
 	}

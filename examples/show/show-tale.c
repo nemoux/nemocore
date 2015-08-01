@@ -150,7 +150,7 @@ int main(int argc, char *argv[])
 
 	trans = nemoshow_transition_create(
 			nemoshow_search_one(show, "ease0"),
-			3000, 100);
+			800, 100);
 	nemoshow_transition_attach_sequence(trans,
 			nemoshow_search_one(show, "hour-hand-sequence"));
 	nemoshow_transition_attach_sequence(trans,
