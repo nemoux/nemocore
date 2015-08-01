@@ -44,6 +44,14 @@ struct showone *nemoshow_canvas_create(void)
 	nemoobject_set_reserved(&one->object, "width", &canvas->width, sizeof(double));
 	nemoobject_set_reserved(&one->object, "height", &canvas->height, sizeof(double));
 
+	nemoobject_set_reserved(&one->object, "fill", &canvas->fill, sizeof(uint32_t));
+	nemoobject_set_reserved(&one->object, "fill:r", &canvas->fills[2], sizeof(double));
+	nemoobject_set_reserved(&one->object, "fill:g", &canvas->fills[1], sizeof(double));
+	nemoobject_set_reserved(&one->object, "fill:b", &canvas->fills[0], sizeof(double));
+	nemoobject_set_reserved(&one->object, "fill:a", &canvas->fills[3], sizeof(double));
+
+	nemoobject_set_reserved(&one->object, "alpha", &canvas->alpha, sizeof(double));
+
 	return one;
 }
 
@@ -70,6 +78,7 @@ int nemoshow_canvas_arrange(struct nemoshow *show, struct showone *one)
 
 		int type;
 	} maps[] = {
+		{ "back",				NEMOSHOW_CANVAS_BACK_TYPE },
 		{ "img",				NEMOSHOW_CANVAS_IMAGE_TYPE },
 		{ "opengl",			NEMOSHOW_CANVAS_OPENGL_TYPE },
 		{ "pixman",			NEMOSHOW_CANVAS_PIXMAN_TYPE },
@@ -88,6 +97,9 @@ int nemoshow_canvas_arrange(struct nemoshow *show, struct showone *one)
 		one->sub = map->type;
 
 	canvas->node = nemotale_node_create_pixman(canvas->width, canvas->height);
+
+	if (one->sub == NEMOSHOW_CANVAS_BACK_TYPE)
+		nemotale_node_opaque(canvas->node, 0, 0, canvas->width, canvas->height);
 
 	NEMOSHOW_CANVAS_CC(canvas, bitmap) = new SkBitmap;
 
@@ -223,6 +235,8 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 	NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
 	NEMOSHOW_CANVAS_CC(canvas, canvas)->clipRegion(region);
 
+	NEMOSHOW_CANVAS_CC(canvas, canvas)->clear(SK_ColorTRANSPARENT);
+
 	for (i = 0; i < one->nchildren; i++) {
 		child = one->children[i];
 
@@ -251,4 +265,11 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 	}
 
 	NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
+}
+
+void nemoshow_canvas_render_back(struct nemoshow *show, struct showone *one)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	nemotale_node_fill_pixman(canvas->node, canvas->fills[2], canvas->fills[1], canvas->fills[0], canvas->fills[3] * canvas->alpha);
 }
