@@ -12,6 +12,8 @@ NEMO_BEGIN_EXTERN_C
 #include <showsequence.h>
 #include <showease.h>
 
+#include <nemolist.h>
+
 struct showtransition {
 	struct showone **sequences;
 	int nsequences, ssequences;
@@ -23,6 +25,8 @@ struct showtransition {
 
 	uint32_t stime;
 	uint32_t etime;
+
+	struct nemolist link;
 };
 
 extern struct showtransition *nemoshow_transition_create(struct showone *ease, uint32_t duration, uint32_t delay);

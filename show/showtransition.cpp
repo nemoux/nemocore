@@ -19,6 +19,8 @@ struct showtransition *nemoshow_transition_create(struct showone *ease, uint32_t
 		return NULL;
 	memset(trans, 0, sizeof(struct showtransition));
 
+	nemolist_init(&trans->link);
+
 	trans->sequences = (struct showone **)malloc(sizeof(struct showone *) * 4);
 	trans->nsequences = 0;
 	trans->ssequences = 4;
@@ -33,6 +35,8 @@ struct showtransition *nemoshow_transition_create(struct showone *ease, uint32_t
 
 void nemoshow_transition_destroy(struct showtransition *trans)
 {
+	nemolist_remove(&trans->link);
+
 	free(trans->sequences);
 	free(trans);
 }

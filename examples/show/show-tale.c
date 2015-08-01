@@ -20,9 +20,6 @@ struct showcontext {
 	struct nemoshow *show;
 
 	int width, height;
-
-	struct showone *one;
-	struct showtransition *trans;
 };
 
 static void nemoshow_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
@@ -76,22 +73,19 @@ static void nemoshow_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 {
 	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
 	struct showcontext *context = (struct showcontext *)nemotale_get_userdata(tale);
+	struct nemoshow *show = context->show;
 
 	if (secs == 0 && nsecs == 0) {
 		nemocanvas_feedback(canvas);
-	} else if (context->trans != NULL) {
-		int done;
+	} else if (nemoshow_has_transition(show) != 0) {
+		nemoshow_dispatch_transition(show, secs * 1000 + nsecs / 1000000);
+		nemocanvas_feedback(canvas);
 
-		done = nemoshow_transition_dispatch(context->trans, secs * 1000 + nsecs / 1000000);
-		if (done != 0) {
-			context->trans = NULL;
-		} else {
-			nemocanvas_feedback(canvas);
-		}
+		nemoshow_one_dirty(
+				nemoshow_search_one(show, "hour-hand"));
 
-		nemoshow_one_dirty(context->one);
-		nemoshow_update_one(context->show);
-		nemoshow_render_one(context->show);
+		nemoshow_update_one(show);
+		nemoshow_render_one(show);
 	}
 
 	nemotale_composite(tale, NULL);
@@ -173,21 +167,16 @@ int main(int argc, char *argv[])
 	nemoshow_set_scene(show,
 			nemoshow_search_one(show, "main"));
 
-	context->one = nemoshow_search_one(show, "hour-hand");
-
-	context->trans = trans = nemoshow_transition_create(
+	trans = nemoshow_transition_create(
 			nemoshow_search_one(show, "ease0"),
-			3000,
-			100);
-
+			3000, 100);
 	nemoshow_transition_attach_sequence(trans,
 			nemoshow_search_one(show, "hour-hand-sequence"));
+	nemoshow_attach_transition(show, trans);
 
 	nemoshow_dispatch_composite(show);
 
 	nemotool_run(tool);
-
-	nemoshow_transition_destroy(trans);
 
 	nemoshow_destroy(show);
 

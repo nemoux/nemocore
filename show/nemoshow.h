@@ -27,6 +27,7 @@ NEMO_BEGIN_EXTERN_C
 #include <showpath.h>
 
 #include <nemotale.h>
+#include <nemolist.h>
 
 typedef void (*nemoshow_dispatch_resize_t)(struct nemoshow *show, int32_t width, int32_t height, void *userdata);
 typedef void (*nemoshow_dispatch_composite_t)(struct nemoshow *show, void *userdata);
@@ -43,6 +44,8 @@ struct nemoshow {
 	nemoshow_dispatch_composite_t dispatch_composite;
 
 	struct showone *scene;
+
+	struct nemolist transition_list;
 
 	void *userdata;
 };
@@ -71,6 +74,11 @@ extern void nemoshow_put_scene(struct nemoshow *show);
 
 extern int nemoshow_attach_canvas(struct nemoshow *show, struct showone *one);
 extern void nemoshow_detach_canvas(struct nemoshow *show, struct showone *one);
+
+extern int nemoshow_attach_transition(struct nemoshow *show, struct showtransition *trans);
+extern void nemoshow_detach_transition(struct nemoshow *show, struct showtransition *trans);
+extern void nemoshow_dispatch_transition(struct nemoshow *show, uint32_t msecs);
+extern int nemoshow_has_transition(struct nemoshow *show);
 
 extern void nemoshow_dump_all(struct nemoshow *show, FILE *out);
 

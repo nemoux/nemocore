@@ -42,6 +42,8 @@ struct nemoshow *nemoshow_create(void)
 
 	nemoshow_expr_add_symbol_table(show->expr, show->stable);
 
+	nemolist_init(&show->transition_list);
+
 	show->ones = (struct showone **)malloc(sizeof(struct showone *) * 8);
 	show->nones = 0;
 	show->sones = 8;
@@ -61,6 +63,8 @@ void nemoshow_destroy(struct nemoshow *show)
 {
 	nemoshow_expr_destroy(show->expr);
 	nemoshow_expr_destroy_symbol(show->stable);
+
+	nemolist_remove(&show->transition_list);
 
 	free(show->ones);
 	free(show);
@@ -559,6 +563,34 @@ void nemoshow_detach_canvas(struct nemoshow *show, struct showone *one)
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
 	nemotale_detach_node(show->tale, canvas->node);
+}
+
+int nemoshow_attach_transition(struct nemoshow *show, struct showtransition *trans)
+{
+	nemolist_insert(&show->transition_list, &trans->link);
+}
+
+void nemoshow_detach_transition(struct nemoshow *show, struct showtransition *trans)
+{
+	nemolist_remove(&trans->link);
+}
+
+void nemoshow_dispatch_transition(struct nemoshow *show, uint32_t msecs)
+{
+	struct showtransition *trans, *ntrans;
+	int done;
+
+	nemolist_for_each_safe(trans, ntrans, &show->transition_list, link) {
+		done = nemoshow_transition_dispatch(trans, msecs);
+		if (done != 0) {
+			nemoshow_transition_destroy(trans);
+		}
+	}
+}
+
+int nemoshow_has_transition(struct nemoshow *show)
+{
+	return !nemolist_empty(&show->transition_list);
 }
 
 void nemoshow_dump_all(struct nemoshow *show, FILE *out)
