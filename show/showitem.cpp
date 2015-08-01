@@ -174,7 +174,55 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 		}
 	}
 
-	if (one->sub == NEMOSHOW_PATH_ITEM) {
+	if (NEMOSHOW_ITEM_CC(item, matrix) != NULL) {
+		NEMOSHOW_ITEM_CC(item, matrix)->setIdentity();
+
+		for (i = 0; i < one->nchildren; i++) {
+			child = one->children[i];
+
+			if (child->type == NEMOSHOW_MATRIX_TYPE) {
+				nemoshow_matrix_update(show, child);
+
+				NEMOSHOW_ITEM_CC(item, matrix)->postConcat(
+						*NEMOSHOW_MATRIX_CC(
+							NEMOSHOW_MATRIX(child),
+							matrix));
+			}
+		}
+	}
+
+	if (one->sub == NEMOSHOW_RECT_ITEM) {
+		if (NEMOSHOW_ITEM_CC(item, matrix) != NULL) {
+			SkRect rect = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
+
+			NEMOSHOW_ITEM_CC(item, matrix)->mapRect(&rect);
+
+			one->x = floor(rect.x());
+			one->y = floor(rect.y());
+			one->width = ceil(rect.width());
+			one->height = ceil(rect.height());
+		} else {
+			one->x = floor(item->x);
+			one->y = floor(item->y);
+			one->width = ceil(item->width);
+			one->height = ceil(item->height);
+		}
+	} else if (one->sub == NEMOSHOW_CIRCLE_ITEM) {
+		one->x = floor(item->x - item->r);
+		one->y = floor(item->y - item->r);
+		one->width = ceil(item->r * 2);
+		one->height = ceil(item->r * 2);
+	} else if (one->sub == NEMOSHOW_ARC_ITEM) {
+		one->x = floor(item->x);
+		one->y = floor(item->y);
+		one->width = ceil(item->width);
+		one->height = ceil(item->height);
+	} else if (one->sub == NEMOSHOW_PIE_ITEM) {
+		one->x = floor(item->x);
+		one->y = floor(item->y);
+		one->width = ceil(item->width);
+		one->height = ceil(item->height);
+	} else if (one->sub == NEMOSHOW_PATH_ITEM) {
 		struct showpath *path;
 
 		NEMOSHOW_ITEM_CC(item, path)->reset();
@@ -205,6 +253,13 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 				}
 			}
 		}
+
+		SkRect rect = NEMOSHOW_ITEM_CC(item, path)->getBounds();
+
+		one->x = floor(rect.x());
+		one->y = floor(rect.y());
+		one->width = ceil(rect.width());
+		one->height = ceil(rect.height());
 	} else if (one->sub == NEMOSHOW_TEXT_ITEM) {
 		item->text = nemoobject_gets(&one->object, "d");
 		if (item->text != NULL) {
@@ -250,23 +305,6 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 					fontx += hbglyphspos[i].x_advance * fontscale;
 					fonty += hbglyphspos[i].y_advance * fontscale;
 				}
-			}
-		}
-	}
-
-	if (NEMOSHOW_ITEM_CC(item, matrix) != NULL) {
-		NEMOSHOW_ITEM_CC(item, matrix)->setIdentity();
-
-		for (i = 0; i < one->nchildren; i++) {
-			child = one->children[i];
-
-			if (child->type == NEMOSHOW_MATRIX_TYPE) {
-				nemoshow_matrix_update(show, child);
-
-				NEMOSHOW_ITEM_CC(item, matrix)->postConcat(
-						*NEMOSHOW_MATRIX_CC(
-							NEMOSHOW_MATRIX(child),
-							matrix));
 			}
 		}
 	}

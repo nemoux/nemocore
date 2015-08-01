@@ -69,6 +69,7 @@ struct showone {
 	int nattrs, sattrs;
 
 	int dirty;
+	int32_t x, y, width, height;
 };
 
 extern void nemoshow_one_prepare(struct showone *one);

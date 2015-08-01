@@ -18,6 +18,7 @@
 #include <SkStream.h>
 #include <SkString.h>
 #include <SkMatrix.h>
+#include <SkRegion.h>
 #include <SkParsePath.h>
 #include <SkTypeface.h>
 

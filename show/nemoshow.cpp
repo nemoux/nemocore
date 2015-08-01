@@ -497,9 +497,23 @@ void nemoshow_render_one(struct nemoshow *show)
 	for (i = 0; i < show->nones; i++) {
 		one = show->ones[i];
 
+		if (one->dirty != 0) {
+			one->update(show, one);
+		}
+	}
+
+	for (i = 0; i < show->nones; i++) {
+		one = show->ones[i];
+
 		if (one->type == NEMOSHOW_CANVAS_TYPE) {
 			nemoshow_canvas_render(show, one);
 		}
+	}
+
+	for (i = 0; i < show->nones; i++) {
+		one = show->ones[i];
+
+		one->dirty = 0;
 	}
 }
 

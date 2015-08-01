@@ -82,7 +82,6 @@ static void nemoshow_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 
 		nemocanvas_feedback(canvas);
 
-		nemoshow_update_one(show);
 		nemoshow_render_one(show);
 	}
 
@@ -136,7 +135,6 @@ int main(int argc, char *argv[])
 	nemoshow_load_xml(show, argv[1]);
 	nemoshow_sort_one(show);
 	nemoshow_arrange_one(show);
-	nemoshow_update_one(show);
 	nemoshow_render_one(show);
 
 	scene = nemoshow_search_one(show, "main");

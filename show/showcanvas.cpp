@@ -202,10 +202,29 @@ static inline void nemoshow_canvas_render_item(struct showcanvas *canvas, int ty
 static int nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+	struct showone *child;
+	SkRegion region;
 	int i;
 
+	region.setEmpty();
+
 	for (i = 0; i < one->nchildren; i++) {
-		struct showone *child = one->children[i];
+		child = one->children[i];
+
+		if (child->dirty != 0) {
+			region.op(
+					SkIRect::MakeXYWH(child->x, child->y, child->width, child->height),
+					SkRegion::kUnion_Op);
+
+			nemotale_node_damage(canvas->node, child->x, child->y, child->width, child->height);
+		}
+	}
+
+	NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
+	NEMOSHOW_CANVAS_CC(canvas, canvas)->clipRegion(region);
+
+	for (i = 0; i < one->nchildren; i++) {
+		child = one->children[i];
 
 		if (child->type == NEMOSHOW_ITEM_TYPE) {
 			struct showitem *item = NEMOSHOW_ITEM(child);
@@ -231,7 +250,7 @@ static int nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *
 		}
 	}
 
-	nemotale_node_damage_all(canvas->node);
+	NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
 
 	return 0;
 }

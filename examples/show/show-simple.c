@@ -11,9 +11,7 @@
 int main(int argc, char *argv[])
 {
 	struct nemoshow *show;
-	struct showone *one;
 	struct showtransition *trans;
-	int done;
 
 	show = nemoshow_create();
 	nemoshow_load_xml(show, argv[1]);
@@ -27,21 +25,15 @@ int main(int argc, char *argv[])
 
 	nemoshow_dump_all(show, stderr);
 
-	one = nemoshow_search_one(show, "hour-text");
-
 	trans = nemoshow_transition_create(
 			nemoshow_search_one(show, "ease1"),
-			3000,
-			1000);
-
+			3000, 1000);
 	nemoshow_transition_attach_sequence(trans,
 			nemoshow_search_one(show, "hour-text-sequence"));
 
-	do {
-		done = nemoshow_transition_dispatch(trans, time_current_msecs());
-	} while (done == 0);
-
-	nemoshow_transition_destroy(trans);
+	while (nemoshow_has_transition(show) != 0) {
+		nemoshow_dispatch_transition(show, time_current_msecs());
+	}
 
 	nemoshow_destroy(show);
 
