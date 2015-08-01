@@ -29,9 +29,6 @@ NEMO_BEGIN_EXTERN_C
 #include <nemotale.h>
 #include <nemolist.h>
 
-typedef void (*nemoshow_dispatch_resize_t)(struct nemoshow *show, int32_t width, int32_t height, void *userdata);
-typedef void (*nemoshow_dispatch_composite_t)(struct nemoshow *show, void *userdata);
-
 struct nemoshow {
 	struct showone **ones;
 	int nones, sones;
@@ -40,8 +37,6 @@ struct nemoshow {
 	struct showsymbol *stable;
 
 	struct nemotale *tale;
-	nemoshow_dispatch_resize_t dispatch_resize;
-	nemoshow_dispatch_composite_t dispatch_composite;
 
 	struct showone *scene;
 
@@ -85,26 +80,6 @@ extern void nemoshow_dump_all(struct nemoshow *show, FILE *out);
 static inline void nemoshow_set_tale(struct nemoshow *show, struct nemotale *tale)
 {
 	show->tale = tale;
-}
-
-static inline void nemoshow_set_dispatch_resize(struct nemoshow *show, nemoshow_dispatch_resize_t dispatch)
-{
-	show->dispatch_resize = dispatch;
-}
-
-static inline void nemoshow_dispatch_resize(struct nemoshow *show, int32_t width, int32_t height)
-{
-	show->dispatch_resize(show, width, height, show->userdata);
-}
-
-static inline void nemoshow_set_dispatch_composite(struct nemoshow *show, nemoshow_dispatch_composite_t dispatch)
-{
-	show->dispatch_composite = dispatch;
-}
-
-static inline void nemoshow_dispatch_composite(struct nemoshow *show)
-{
-	show->dispatch_composite(show, show->userdata);
 }
 
 static inline void nemoshow_set_userdata(struct nemoshow *show, void *data)

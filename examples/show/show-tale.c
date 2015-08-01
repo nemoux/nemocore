@@ -91,25 +91,6 @@ static void nemoshow_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 	nemotale_composite(tale, NULL);
 }
 
-static void nemoshow_dispatch_show_resize(struct nemoshow *show, int32_t width, int32_t height, void *userdata)
-{
-	struct showcontext *context = (struct showcontext *)userdata;
-	struct nemotale *tale = context->tale;
-
-	nemotool_resize_egl_canvas(context->canvas, width, height);
-	nemotale_resize_egl(tale, width, height);
-
-	nemotale_composite(tale, NULL);
-}
-
-static void nemoshow_dispatch_show_composite(struct nemoshow *show, void *userdata)
-{
-	struct showcontext *context = (struct showcontext *)userdata;
-	struct nemotale *tale = context->tale;
-
-	nemocanvas_dispatch_frame(NTEGL_CANVAS(context->canvas));
-}
-
 int main(int argc, char *argv[])
 {
 	struct showcontext *context;
@@ -154,8 +135,6 @@ int main(int argc, char *argv[])
 
 	context->show = show = nemoshow_create();
 	nemoshow_set_tale(show, tale);
-	nemoshow_set_dispatch_resize(show, nemoshow_dispatch_show_resize);
-	nemoshow_set_dispatch_composite(show, nemoshow_dispatch_show_composite);
 	nemoshow_set_userdata(show, context);
 
 	nemoshow_load_xml(show, argv[1]);
@@ -174,7 +153,7 @@ int main(int argc, char *argv[])
 			nemoshow_search_one(show, "hour-hand-sequence"));
 	nemoshow_attach_transition(show, trans);
 
-	nemoshow_dispatch_composite(show);
+	nemocanvas_dispatch_frame(NTEGL_CANVAS(canvas));
 
 	nemotool_run(tool);
 
