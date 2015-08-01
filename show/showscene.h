@@ -17,7 +17,8 @@ struct showscene {
 	double width, height;
 };
 
-#define	NEMOSHOW_SCENE(one)		((struct showscene *)container_of(one, struct showscene, base))
+#define NEMOSHOW_SCENE(one)					((struct showscene *)container_of(one, struct showscene, base))
+#define NEMOSHOW_SCENE_AT(one, at)	(NEMOSHOW_SCENE(one)->at)
 
 extern struct showone *nemoshow_scene_create(void);
 extern void nemoshow_scene_destroy(struct showone *one);

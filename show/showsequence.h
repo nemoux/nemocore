@@ -42,9 +42,12 @@ struct showsequence {
 	int iframe;
 };
 
-#define NEMOSHOW_SEQUENCE(one)		((struct showsequence *)container_of(one, struct showsequence, base))
-#define NEMOSHOW_FRAME(one)				((struct showframe *)container_of(one, struct showframe, base))
-#define NEMOSHOW_SET(one)					((struct showset *)container_of(one, struct showset, base))
+#define NEMOSHOW_SEQUENCE(one)					((struct showsequence *)container_of(one, struct showsequence, base))
+#define NEMOSHOW_SEQUENCE_AT(one, at)		(NEMOSHOW_SEQUENCE(one)->at)
+#define NEMOSHOW_FRAME(one)							((struct showframe *)container_of(one, struct showframe, base))
+#define NEMOSHOW_FRAME_AT(one, at)			(NEMOSHOW_FRAME(one)->at)
+#define NEMOSHOW_SET(one)								((struct showset *)container_of(one, struct showset, base))
+#define NEMOSHOW_SET_AT(one, at)				(NEMOSHOW_SET(one)->at)
 
 extern struct showone *nemoshow_sequence_create(void);
 extern void nemoshow_sequence_destroy(struct showone *one);

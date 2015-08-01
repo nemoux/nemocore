@@ -29,7 +29,8 @@ struct showpath {
 	double x2, y2;
 };
 
-#define NEMOSHOW_PATH(one)			((struct showpath *)container_of(one, struct showpath, base))
+#define NEMOSHOW_PATH(one)					((struct showpath *)container_of(one, struct showpath, base))
+#define	NEMOSHOW_PATH_AT(one, at)		(NEMOSHOW_PATH(one)->at)
 
 extern struct showone *nemoshow_path_create(int type);
 extern void nemoshow_path_destroy(struct showone *one);

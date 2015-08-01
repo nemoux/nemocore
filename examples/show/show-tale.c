@@ -100,14 +100,12 @@ int main(int argc, char *argv[])
 	struct nemotale *tale;
 	struct nemoshow *show;
 	struct showtransition *trans;
-	int32_t width = 1000, height = 1000;
+	struct showone *scene;
+	int32_t width = 100, height = 100;
 
 	context = (struct showcontext *)malloc(sizeof(struct showcontext));
 	if (context == NULL)
 		return -1;
-
-	context->width = width;
-	context->height = height;
 
 	tool = nemotool_create();
 	if (tool == NULL)
@@ -143,8 +141,11 @@ int main(int argc, char *argv[])
 	nemoshow_update_one(show);
 	nemoshow_render_one(show);
 
-	nemoshow_set_scene(show,
-			nemoshow_search_one(show, "main"));
+	scene = nemoshow_search_one(show, "main");
+	nemoshow_set_scene(show, scene);
+
+	nemotool_resize_egl_canvas(canvas, NEMOSHOW_SCENE_AT(scene, width), NEMOSHOW_SCENE_AT(scene, height));
+	nemotale_resize_egl(tale, NEMOSHOW_SCENE_AT(scene, width), NEMOSHOW_SCENE_AT(scene, height));
 
 	trans = nemoshow_transition_create(
 			nemoshow_search_one(show, "ease0"),

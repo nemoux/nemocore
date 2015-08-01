@@ -28,7 +28,8 @@ struct showmatrix {
 	void *cc;
 };
 
-#define NEMOSHOW_MATRIX(one)			((struct showmatrix *)container_of(one, struct showmatrix, base))
+#define NEMOSHOW_MATRIX(one)					((struct showmatrix *)container_of(one, struct showmatrix, base))
+#define	NEMOSHOW_MATRIX_AT(one, at)		(NEMOSHOW_MATRIX(one)->at)
 
 extern struct showone *nemoshow_matrix_create(int type);
 extern void nemoshow_matrix_destroy(struct showone *one);

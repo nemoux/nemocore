@@ -17,7 +17,8 @@ struct showloop {
 	int32_t begin, end;
 };
 
-#define	NEMOSHOW_LOOP(one)		((struct showloop *)container_of(one, struct showloop, base))
+#define	NEMOSHOW_LOOP(one)					((struct showloop *)container_of(one, struct showloop, base))
+#define	NEMOSHOW_LOOP_AT(one, at)		(NEMOSHOW_LOOP(one)->at)
 
 extern struct showone *nemoshow_loop_create(void);
 extern void nemoshow_loop_destroy(struct showone *one);

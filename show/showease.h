@@ -26,7 +26,8 @@ struct showease {
 	struct nemoease ease;
 };
 
-#define	NEMOSHOW_EASE(one)		((struct showease *)container_of(one, struct showease, base))
+#define	NEMOSHOW_EASE(one)					((struct showease *)container_of(one, struct showease, base))
+#define	NEMOSHOW_EASE_AT(one, at)		(NEMOSHOW_EASE(one)->at)
 
 extern struct showone *nemoshow_ease_create(void);
 extern void nemoshow_ease_destroy(struct showone *one);

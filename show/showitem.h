@@ -54,7 +54,8 @@ struct showitem {
 	void *cc;
 };
 
-#define NEMOSHOW_ITEM(one)			((struct showitem *)container_of(one, struct showitem, base))
+#define NEMOSHOW_ITEM(one)					((struct showitem *)container_of(one, struct showitem, base))
+#define	NEMOSHOW_ITEM_AT(one, at)		(NEMOSHOW_ITEM(one)->at)
 
 extern struct showone *nemoshow_item_create(int type);
 extern void nemoshow_item_destroy(struct showone *one);

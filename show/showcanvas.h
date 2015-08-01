@@ -47,7 +47,8 @@ struct showcanvas {
 	void *cc;
 };
 
-#define	NEMOSHOW_CANVAS(one)		((struct showcanvas *)container_of(one, struct showcanvas, base))
+#define NEMOSHOW_CANVAS(one)					((struct showcanvas *)container_of(one, struct showcanvas, base))
+#define NEMOSHOW_CANVAS_AT(one, at)		(NEMOSHOW_CANVAS(one)->at)
 
 extern struct showone *nemoshow_canvas_create(void);
 extern void nemoshow_canvas_destroy(struct showone *one);
