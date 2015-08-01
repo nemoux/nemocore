@@ -56,6 +56,9 @@ extern void nemotale_damage_all(struct nemotale *tale);
 extern void nemotale_attach_node(struct nemotale *tale, struct talenode *node);
 extern void nemotale_detach_node(struct nemotale *tale, struct talenode *node);
 
+extern void nemotale_prepare_composite(struct nemotale *tale);
+extern void nemotale_finish_composite(struct nemotale *tale, pixman_region32_t *region);
+
 static inline int32_t nemotale_get_width(struct nemotale *tale)
 {
 	return tale->width;
