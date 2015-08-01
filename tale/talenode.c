@@ -35,6 +35,7 @@ int nemotale_node_prepare(struct talenode *node)
 
 	node->transform.enable = 0;
 	node->transform.dirty = 1;
+	node->transform.custom = 0;
 
 	nemomatrix_init_identity(&node->transform.matrix);
 	nemomatrix_init_identity(&node->transform.inverse);
@@ -224,6 +225,9 @@ static int nemotale_node_transform_enable(struct talenode *node)
 
 void nemotale_node_transform_update(struct talenode *node)
 {
+	if (node->transform.custom != 0)
+		return;
+
 	if (node->transform.enable == 0) {
 		nemotale_node_transform_disable(node);
 	} else if (nemotale_node_transform_enable(node) < 0) {
@@ -267,4 +271,22 @@ void nemotale_node_pivot(struct talenode *node, float px, float py)
 {
 	node->geometry.px = px;
 	node->geometry.py = py;
+}
+
+int nemotale_node_transform(struct talenode *node, float d[9])
+{
+	struct nemomatrix *matrix = &node->transform.matrix;
+	struct nemomatrix *inverse = &node->transform.inverse;
+
+	node->transform.enable = 1;
+	node->transform.custom = 1;
+
+	nemomatrix_init_3x3(matrix, d);
+
+	if (nemomatrix_invert(inverse, matrix) < 0)
+		return -1;
+
+	nemotale_node_boundingbox_update(node, 0, 0, node->geometry.width, node->geometry.height, &node->boundingbox);
+
+	return 0;
 }

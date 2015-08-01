@@ -16,8 +16,8 @@
 #include <showfont.hpp>
 #include <nemoshow.h>
 #include <nemoxml.h>
+#include <nemobox.h>
 #include <nemomisc.h>
-#include <skiaconfig.hpp>
 
 struct showone *nemoshow_canvas_create(void)
 {
@@ -89,6 +89,7 @@ int nemoshow_canvas_arrange(struct nemoshow *show, struct showone *one)
 		{ "vec",				NEMOSHOW_CANVAS_VECTOR_TYPE },
 	}, *map;
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+	struct showone *matrix;
 
 	map = static_cast<struct canvasmap *>(bsearch(canvas->type, static_cast<void *>(maps), sizeof(maps) / sizeof(maps[0]), sizeof(maps[0]), nemoshow_canvas_compare));
 	if (map == NULL)
@@ -116,11 +117,29 @@ int nemoshow_canvas_arrange(struct nemoshow *show, struct showone *one)
 	else
 		nemotale_node_set_id(canvas->node, canvas->event);
 
+	matrix = nemoshow_search_one(show, nemoobject_gets(&one->object, "matrix"));
+	if (matrix != NULL) {
+		canvas->matrix = matrix;
+
+		NEMOBOX_APPEND(matrix->refs, matrix->srefs, matrix->nrefs, one);
+	}
+
 	return 0;
 }
 
 int nemoshow_canvas_update(struct nemoshow *show, struct showone *one)
 {
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	if (canvas->matrix != NULL) {
+		float d[9];
+
+		NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(canvas->matrix), matrix)->get9(d);
+
+		nemotale_node_transform(canvas->node, d);
+		nemotale_node_damage_all(canvas->node);
+	}
+
 	return 0;
 }
 
