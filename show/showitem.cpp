@@ -309,6 +309,9 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 				box = SkRect::MakeXYWH(item->x, item->y, item->textwidth, item->textheight);
 			}
 		} else {
+			box = NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(item->path), path)->getBounds();
+
+			box.outset(item->fontsize, item->fontsize);
 		}
 	}
 

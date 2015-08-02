@@ -250,14 +250,14 @@ static inline void nemoshow_canvas_render_item(struct showcanvas *canvas, int ty
 						item->text,
 						strlen(item->text),
 						*NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(item->path), path),
-						NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(item->matrix), matrix),
+						NULL,
 						*NEMOSHOW_ITEM_CC(style, fill));
 			if (style->stroke != 0)
 				NEMOSHOW_CANVAS_CC(canvas, canvas)->drawTextOnPath(
 						item->text,
 						strlen(item->text),
 						*NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(item->path), path),
-						NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(item->matrix), matrix),
+						NULL,
 						*NEMOSHOW_ITEM_CC(style, stroke));
 		}
 	}
