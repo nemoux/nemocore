@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
 	tale0 = nemotale_create_gl();
 	egl = nemotale_create_egl(app->egl_display, app->egl_context, app->egl_config, (EGLNativeWindowType)app->egl_window);
 	nemotale_set_backend(tale0, egl);
-	nemotale_resize_gl(tale0, app->width, app->height);
+	nemotale_resize(tale0, app->width, app->height);
 
 	node00 = nemotale_node_create_pixman(80, 80);
 	nemotale_attach_node(tale0, node00);
@@ -146,7 +146,7 @@ int main(int argc, char *argv[])
 	tale1 = nemotale_create_gl();
 	fbo = nemotale_create_fbo(nemotale_node_get_texture(node01), 280, 280);
 	nemotale_set_backend(tale1, fbo);
-	nemotale_resize_gl(tale1, 280, 280);
+	nemotale_resize(tale1, 280, 280);
 
 	node10 = nemotale_node_create_pixman(180, 180);
 	nemotale_attach_node(tale1, node10);

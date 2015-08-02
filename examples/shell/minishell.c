@@ -373,7 +373,7 @@ int main(int argc, char *argv[])
 	tale = nemotale_create_gl();
 	nemotale_set_backend(tale,
 			nemotale_create_fbo(actor->texture, actor->base.width, actor->base.height));
-	nemotale_resize_gl(tale, actor->base.width, actor->base.height);
+	nemotale_resize(tale, actor->base.width, actor->base.height);
 	nemoactor_set_dispatch_frame(actor, minishell_dispatch_background_frame);
 
 	nemotale_attach_actor(tale, actor, minishell_dispatch_tale_event);

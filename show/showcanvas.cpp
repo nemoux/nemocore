@@ -115,9 +115,13 @@ int nemoshow_canvas_arrange(struct nemoshow *show, struct showone *one)
 		canvas->node = nemotale_node_create_gl(canvas->width, canvas->height);
 	} else if (one->sub == NEMOSHOW_CANVAS_SCENE_TYPE) {
 		canvas->node = nemotale_node_create_gl(canvas->width, canvas->height);
+
+		canvas->tale = nemotale_create_gl();
 		canvas->fbo = nemotale_create_fbo(
 				nemotale_node_get_texture(canvas->node),
 				canvas->width, canvas->height);
+		nemotale_set_backend(canvas->tale, canvas->fbo);
+		nemotale_resize(canvas->tale, canvas->width, canvas->height);
 	} else if (one->sub == NEMOSHOW_CANVAS_BACK_TYPE) {
 		canvas->node = nemotale_node_create_pixman(canvas->width, canvas->height);
 		nemotale_node_opaque(canvas->node, 0, 0, canvas->width, canvas->height);
@@ -149,6 +153,28 @@ int nemoshow_canvas_update(struct nemoshow *show, struct showone *one)
 
 		nemotale_node_transform(canvas->node, d);
 		nemotale_node_damage_all(canvas->node);
+	}
+
+	if (one->sub == NEMOSHOW_CANVAS_SCENE_TYPE) {
+		struct showone *src;
+		struct showone *child;
+		struct showscene *scene;
+		int i;
+
+		src = nemoshow_search_one(show, canvas->src);
+		scene = NEMOSHOW_SCENE(src);
+
+		nemotale_clear_node(canvas->tale);
+
+		for (i = 0; i < src->nchildren; i++) {
+			child = src->children[i];
+
+			if (child->type == NEMOSHOW_CANVAS_TYPE && child != one) {
+				nemotale_attach_node(canvas->tale, NEMOSHOW_CANVAS_AT(child, node));
+			}
+		}
+
+		nemotale_scale(canvas->tale, canvas->width / scene->width, canvas->height / scene->height);
 	}
 
 	return 0;
@@ -309,4 +335,6 @@ void nemoshow_canvas_render_back(struct nemoshow *show, struct showone *one)
 void nemoshow_canvas_render_scene(struct nemoshow *show, struct showone *one)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	nemotale_composite_fbo_full(canvas->tale);
 }

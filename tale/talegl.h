@@ -33,17 +33,16 @@ struct talefbo;
 extern struct nemotale *nemotale_create_gl(void);
 extern void nemotale_destroy_gl(struct nemotale *tale);
 
-extern int nemotale_resize_gl(struct nemotale *tale, int32_t width, int32_t height);
-extern int nemotale_transform_gl(struct nemotale *tale, float d[9]);
-
 extern struct taleegl *nemotale_create_egl(EGLDisplay egl_display, EGLContext egl_context, EGLConfig egl_config, EGLNativeWindowType egl_window);
 extern void nemotale_destroy_egl(struct taleegl *egl);
 extern int nemotale_composite_egl(struct nemotale *tale, pixman_region32_t *region);
+extern int nemotale_composite_egl_full(struct nemotale *tale);
 
 extern struct talefbo *nemotale_create_fbo(GLuint texture, int32_t width, int32_t height);
 extern void nemotale_destroy_fbo(struct talefbo *fbo);
 extern int nemotale_resize_fbo(struct talefbo *fbo, int32_t width, int32_t height);
 extern int nemotale_composite_fbo(struct nemotale *tale, pixman_region32_t *region);
+extern int nemotale_composite_fbo_full(struct nemotale *tale);
 
 extern struct talenode *nemotale_node_create_gl(int32_t width, int32_t height);
 extern int nemotale_node_resize_gl(struct talenode *node, int32_t width, int32_t height);

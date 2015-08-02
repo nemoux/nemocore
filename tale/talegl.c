@@ -463,38 +463,6 @@ void nemotale_destroy_gl(struct nemotale *tale)
 	free(tale);
 }
 
-int nemotale_resize_gl(struct nemotale *tale, int32_t width, int32_t height)
-{
-	struct nemogltale *context = (struct nemogltale *)tale->glcontext;
-
-	tale->width = width;
-	tale->height = height;
-
-	pixman_region32_init_rect(&tale->region, 0, 0, width, height);
-	pixman_region32_init_rect(&tale->input, 0, 0, width, height);
-
-	nemomatrix_init_identity(&context->matrix);
-	nemomatrix_multiply(&context->matrix, &tale->matrix);
-	nemomatrix_translate(&context->matrix, -width / 2.0f, -height / 2.0f);
-	nemomatrix_scale(&context->matrix, 2.0f / width, -2.0f / height);
-
-	return 0;
-}
-
-int nemotale_transform_gl(struct nemotale *tale, float d[9])
-{
-	struct nemogltale *context = (struct nemogltale *)tale->glcontext;
-
-	nemomatrix_init_3x3(&tale->matrix, d);
-
-	nemomatrix_init_identity(&context->matrix);
-	nemomatrix_multiply(&context->matrix, &tale->matrix);
-	nemomatrix_translate(&context->matrix, -tale->width / 2.0f, -tale->height / 2.0f);
-	nemomatrix_scale(&context->matrix, 2.0f / tale->width, -2.0f / tale->height);
-
-	return 0;
-}
-
 struct taleegl *nemotale_create_egl(EGLDisplay egl_display, EGLContext egl_context, EGLConfig egl_config, EGLNativeWindowType egl_window)
 {
 	struct taleegl *egl;
@@ -610,7 +578,7 @@ static void nemotale_rotate_egl_damage(struct taleegl *egl, pixman_region32_t *d
 	pixman_region32_copy(&egl->damages[0], damage);
 }
 
-int nemotale_composite_egl(struct nemotale *tale, pixman_region32_t *region)
+static inline int nemotale_composite_egl_in(struct nemotale *tale)
 {
 	struct nemogltale *context = (struct nemogltale *)tale->glcontext;
 	struct taleegl *egl = (struct taleegl *)tale->backend;
@@ -619,10 +587,17 @@ int nemotale_composite_egl(struct nemotale *tale, pixman_region32_t *region)
 	EGLBoolean r;
 	int i;
 
-	nemotale_prepare_composite(tale);
-
 	if (!eglMakeCurrent(egl->display, egl->surface, egl->surface, egl->context))
 		return -1;
+
+	if (tale->transform.dirty != 0) {
+		nemomatrix_init_identity(&context->matrix);
+		nemomatrix_multiply(&context->matrix, &tale->transform.matrix);
+		nemomatrix_translate(&context->matrix, -tale->width / 2.0f, -tale->height / 2.0f);
+		nemomatrix_scale(&context->matrix, 2.0f / tale->width, -2.0f / tale->height);
+
+		tale->transform.dirty = 0;
+	}
 
 	pixman_region32_init(&total_damage);
 	pixman_region32_init(&buffer_damage);
@@ -684,9 +659,36 @@ int nemotale_composite_egl(struct nemotale *tale, pixman_region32_t *region)
 	r = eglSwapBuffers(egl->display, egl->surface);
 #endif
 
-	nemotale_finish_composite(tale, region);
-
 	return r == EGL_TRUE;
+}
+
+int nemotale_composite_egl(struct nemotale *tale, pixman_region32_t *region)
+{
+	int r;
+
+	nemotale_update_node(tale);
+	nemotale_accumulate_damage(tale);
+
+	r = nemotale_composite_egl_in(tale);
+
+	if (region != NULL)
+		pixman_region32_union(region, region, &tale->damage);
+
+	nemotale_flush_damage(tale);
+
+	return r;
+}
+
+int nemotale_composite_egl_full(struct nemotale *tale)
+{
+	int r;
+
+	nemotale_update_node(tale);
+	nemotale_damage_all(tale);
+
+	r = nemotale_composite_egl_in(tale);
+
+	return r;
 }
 
 struct talefbo *nemotale_create_fbo(GLuint texture, int32_t width, int32_t height)
@@ -729,11 +731,22 @@ int nemotale_resize_fbo(struct talefbo *fbo, int32_t width, int32_t height)
 
 int nemotale_composite_fbo(struct nemotale *tale, pixman_region32_t *region)
 {
+	struct nemogltale *context = (struct nemogltale *)tale->glcontext;
 	struct talefbo *fbo = (struct talefbo *)tale->backend;
 	struct talenode *node;
 	int i;
 
-	nemotale_prepare_composite(tale);
+	nemotale_update_node(tale);
+	nemotale_accumulate_damage(tale);
+
+	if (tale->transform.dirty != 0) {
+		nemomatrix_init_identity(&context->matrix);
+		nemomatrix_multiply(&context->matrix, &tale->transform.matrix);
+		nemomatrix_translate(&context->matrix, -tale->width / 2.0f, -tale->height / 2.0f);
+		nemomatrix_scale(&context->matrix, 2.0f / tale->width, 2.0f / tale->height);
+
+		tale->transform.dirty = 0;
+	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo->fbo);
 
@@ -751,7 +764,48 @@ int nemotale_composite_fbo(struct nemotale *tale, pixman_region32_t *region)
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	nemotale_finish_composite(tale, region);
+	if (region != NULL)
+		pixman_region32_union(region, region, &tale->damage);
+
+	nemotale_flush_damage(tale);
+
+	return 0;
+}
+
+int nemotale_composite_fbo_full(struct nemotale *tale)
+{
+	struct nemogltale *context = (struct nemogltale *)tale->glcontext;
+	struct talefbo *fbo = (struct talefbo *)tale->backend;
+	struct talenode *node;
+	int i;
+
+	nemotale_update_node(tale);
+	nemotale_damage_all(tale);
+
+	if (tale->transform.dirty != 0) {
+		nemomatrix_init_identity(&context->matrix);
+		nemomatrix_multiply(&context->matrix, &tale->transform.matrix);
+		nemomatrix_translate(&context->matrix, -tale->width / 2.0f, -tale->height / 2.0f);
+		nemomatrix_scale(&context->matrix, 2.0f / tale->width, 2.0f / tale->height);
+
+		tale->transform.dirty = 0;
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo->fbo);
+
+	glViewport(0, 0, tale->width, tale->height);
+
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+
+	nemotale_clear_shader(tale);
+
+	for (i = 0; i < tale->nnodes; i++) {
+		node = tale->nodes[i];
+
+		nemotale_repaint_node(tale, node, &tale->damage);
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	return 0;
 }

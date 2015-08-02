@@ -189,7 +189,8 @@ int nemotale_composite_pixman(struct nemotale *tale, pixman_region32_t *region)
 	struct talenode *node;
 	int i;
 
-	nemotale_prepare_composite(tale);
+	nemotale_update_node(tale);
+	nemotale_accumulate_damage(tale);
 
 	for (i = 0; i < tale->nnodes; i++) {
 		node = tale->nodes[i];
@@ -197,7 +198,27 @@ int nemotale_composite_pixman(struct nemotale *tale, pixman_region32_t *region)
 		nemotale_repaint_node(tale, node);
 	}
 
-	nemotale_finish_composite(tale, region);
+	if (region != NULL)
+		pixman_region32_union(region, region, &tale->damage);
+	
+	nemotale_flush_damage(tale);
+
+	return 0;
+}
+
+int nemotale_composite_pixman_full(struct nemotale *tale)
+{
+	struct talenode *node;
+	int i;
+
+	nemotale_update_node(tale);
+	nemotale_damage_all(tale);
+	
+	for (i = 0; i < tale->nnodes; i++) {
+		node = tale->nodes[i];
+
+		nemotale_repaint_node(tale, node);
+	}
 
 	return 0;
 }

@@ -51,6 +51,8 @@ struct showcanvas {
 	struct showone *matrix;
 
 	struct talenode *node;
+
+	struct nemotale *tale;
 	struct talefbo *fbo;
 
 	double width, height;

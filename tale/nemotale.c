@@ -21,7 +21,7 @@ int nemotale_prepare(struct nemotale *tale)
 
 	pixman_region32_init(&tale->damage);
 
-	nemomatrix_init_identity(&tale->matrix);
+	nemomatrix_init_identity(&tale->transform.matrix);
 
 	tale->nodes = (struct talenode **)malloc(sizeof(struct talenode *) * 8);
 	tale->nnodes = 0;
@@ -86,8 +86,6 @@ void nemotale_attach_node(struct nemotale *tale, struct talenode *node)
 {
 	NEMOBOX_APPEND(tale->nodes, tale->snodes, tale->nnodes, node);
 
-	node->tale = tale;
-
 	nemotale_damage_below(tale, node);
 }
 
@@ -102,12 +100,15 @@ void nemotale_detach_node(struct nemotale *tale, struct talenode *node)
 		}
 	}
 
-	node->tale = NULL;
-
 	nemotale_damage_below(tale, node);
 }
 
-void nemotale_prepare_composite(struct nemotale *tale)
+void nemotale_clear_node(struct nemotale *tale)
+{
+	tale->nnodes = 0;
+}
+
+void nemotale_update_node(struct nemotale *tale)
 {
 	struct talenode *node;
 	int i;
@@ -122,6 +123,16 @@ void nemotale_prepare_composite(struct nemotale *tale)
 
 			node->transform.dirty = 0;
 		}
+	}
+}
+
+void nemotale_accumulate_damage(struct nemotale *tale)
+{
+	struct talenode *node;
+	int i;
+
+	for (i = 0; i < tale->nnodes; i++) {
+		node = tale->nodes[i];
 
 		if (node->dirty != 0) {
 			pixman_region32_t damage;
@@ -152,13 +163,10 @@ void nemotale_prepare_composite(struct nemotale *tale)
 	}
 }
 
-void nemotale_finish_composite(struct nemotale *tale, pixman_region32_t *region)
+void nemotale_flush_damage(struct nemotale *tale)
 {
 	struct talenode *node;
 	int i;
-
-	if (region != NULL)
-		pixman_region32_union(region, region, &tale->damage);
 
 	for (i = 0; i < tale->nnodes; i++) {
 		node = tale->nodes[i];

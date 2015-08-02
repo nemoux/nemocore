@@ -29,6 +29,7 @@ extern void nemotale_destroy_pixman(struct nemotale *tale);
 extern int nemotale_attach_pixman(struct nemotale *tale, void *data, int32_t width, int32_t height, int32_t stride);
 extern void nemotale_detach_pixman(struct nemotale *tale);
 extern int nemotale_composite_pixman(struct nemotale *tale, pixman_region32_t *region);
+extern int nemotale_composite_pixman_full(struct nemotale *tale);
 
 extern struct talenode *nemotale_node_create_pixman(int32_t width, int32_t height);
 extern int nemotale_node_resize_pixman(struct talenode *node, int32_t width, int32_t height);

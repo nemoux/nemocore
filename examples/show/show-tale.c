@@ -48,6 +48,17 @@ static void nemoshow_dispatch_tale_event(struct nemotale *tale, struct talenode 
 
 			ntaps = nemotale_get_node_taps(tale, node, taps, type);
 			if (ntaps == 1) {
+				struct nemoshow *show = context->show;
+				struct showtransition *trans;
+
+				trans = nemoshow_transition_create(
+						nemoshow_search_one(show, "ease0"),
+						800, 100);
+				nemoshow_transition_attach_sequence(trans,
+						nemoshow_search_one(show, "hour-hand-sequence"));
+				nemoshow_attach_transition(show, trans);
+
+				nemocanvas_dispatch_frame(canvas);
 			} else if (ntaps == 2) {
 			} else if (ntaps == 3) {
 				struct nemotool *tool = nemocanvas_get_tool(canvas);
@@ -64,7 +75,7 @@ static void nemoshow_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t w
 	struct showcontext *context = (struct showcontext *)nemotale_get_userdata(tale);
 
 	nemotool_resize_egl_canvas(context->canvas, width, height);
-	nemotale_resize_gl(tale, width, height);
+	nemotale_resize(tale, width, height);
 
 	nemotale_composite_egl(tale, NULL);
 }
@@ -96,7 +107,6 @@ int main(int argc, char *argv[])
 	struct eglcanvas *canvas;
 	struct nemotale *tale;
 	struct nemoshow *show;
-	struct showtransition *trans;
 	struct showone *scene;
 	struct showone *camera;
 	int32_t width = 100, height = 100;
@@ -124,7 +134,7 @@ int main(int argc, char *argv[])
 				NTEGL_CONTEXT(egl),
 				NTEGL_CONFIG(egl),
 				(EGLNativeWindowType)NTEGL_WINDOW(canvas)));
-	nemotale_resize_gl(tale, width, height);
+	nemotale_resize(tale, width, height);
 
 	nemotale_attach_canvas(tale, NTEGL_CANVAS(canvas), nemoshow_dispatch_tale_event);
 	nemotale_set_userdata(tale, context);
@@ -148,16 +158,7 @@ int main(int argc, char *argv[])
 	nemoshow_render_one(show);
 
 	nemotool_resize_egl_canvas(canvas, NEMOSHOW_SCENE_AT(scene, width), NEMOSHOW_SCENE_AT(scene, height));
-	nemotale_resize_gl(tale, NEMOSHOW_SCENE_AT(scene, width), NEMOSHOW_SCENE_AT(scene, height));
-
-	trans = nemoshow_transition_create(
-			nemoshow_search_one(show, "ease0"),
-			800, 100);
-	nemoshow_transition_attach_sequence(trans,
-			nemoshow_search_one(show, "hour-hand-sequence"));
-	nemoshow_transition_attach_sequence(trans,
-			nemoshow_search_one(show, "camera-sequence"));
-	nemoshow_attach_transition(show, trans);
+	nemotale_resize(tale, NEMOSHOW_SCENE_AT(scene, width), NEMOSHOW_SCENE_AT(scene, height));
 
 	nemocanvas_dispatch_frame(NTEGL_CANVAS(canvas));
 

@@ -24,8 +24,6 @@ typedef int (*nemotale_node_pick_t)(struct talenode *node, double x, double y, v
 struct talenode;
 
 struct talenode {
-	struct nemotale *tale;
-
 	struct nemosignal destroy_signal;
 
 	void *pmcontext;
