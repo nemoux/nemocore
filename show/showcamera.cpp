@@ -6,6 +6,7 @@
 #include <errno.h>
 
 #include <showcamera.h>
+#include <showcamera.hpp>
 #include <showmatrix.h>
 #include <showmatrix.hpp>
 #include <nemoshow.h>
@@ -21,6 +22,8 @@ struct showone *nemoshow_camera_create(void)
 	if (camera == NULL)
 		return NULL;
 	memset(camera, 0, sizeof(struct showcamera));
+
+	camera->cc = new showcamera_t;
 
 	one = &camera->base;
 	one->type = NEMOSHOW_CAMERA_TYPE;
@@ -38,37 +41,58 @@ void nemoshow_camera_destroy(struct showone *one)
 
 	nemoshow_one_finish(one);
 
+	delete static_cast<showcamera_t *>(camera->cc);
+
 	free(camera);
 }
 
 int nemoshow_camera_arrange(struct nemoshow *show, struct showone *one)
 {
 	struct showcamera *camera = NEMOSHOW_CAMERA(one);
-	struct showone *matrix;
 
-	matrix = nemoshow_search_one(show, nemoobject_gets(&one->object, "matrix"));
-	if (matrix != NULL) {
-		camera->matrix = matrix;
-
-		NEMOBOX_APPEND(matrix->refs, matrix->srefs, matrix->nrefs, one);
-	}
+	NEMOSHOW_CAMERA_CC(camera, matrix) = new SkMatrix;
 
 	return 0;
 }
 
 int nemoshow_camera_update(struct nemoshow *show, struct showone *one)
 {
+	struct showcamera *camera = NEMOSHOW_CAMERA(one);
+	struct showone *child;
+	int i;
+
+	NEMOSHOW_CAMERA_CC(camera, matrix)->setIdentity();
+
+	camera->sx = 1.0f;
+	camera->sy = 1.0f;
+
+	for (i = 0; i < one->nchildren; i++) {
+		child = one->children[i];
+
+		if (child->type != NEMOSHOW_MATRIX_TYPE)
+			continue;
+
+		if (child->sub == NEMOSHOW_SCALE_MATRIX) {
+			NEMOSHOW_CAMERA_CC(camera, matrix)->postScale(
+					NEMOSHOW_MATRIX_AT(child, x),
+					NEMOSHOW_MATRIX_AT(child, y));
+
+			camera->sx = camera->sx * NEMOSHOW_MATRIX_AT(child, x);
+			camera->sy = camera->sy * NEMOSHOW_MATRIX_AT(child, y);
+		} else if (child->sub == NEMOSHOW_ROTATE_MATRIX) {
+			NEMOSHOW_CAMERA_CC(camera, matrix)->postRotate(
+					NEMOSHOW_MATRIX_AT(child, x));
+		} else if (child->sub == NEMOSHOW_TRANSLATE_MATRIX) {
+			NEMOSHOW_CAMERA_CC(camera, matrix)->postTranslate(
+					NEMOSHOW_MATRIX_AT(child, x),
+					NEMOSHOW_MATRIX_AT(child, y));
+		}
+	}
+
 	if (show->camera == one) {
-		struct showcamera *camera = NEMOSHOW_CAMERA(one);
 		float d[9];
 
-		if (camera->matrix->dirty != 0) {
-			nemoshow_matrix_update(show, camera->matrix);
-
-			camera->matrix->dirty = 0;
-		}
-
-		NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(camera->matrix), matrix)->get9(d);
+		NEMOSHOW_CAMERA_CC(camera, matrix)->get9(d);
 
 		nemotale_transform(show->tale, d);
 

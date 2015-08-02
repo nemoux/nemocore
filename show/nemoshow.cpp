@@ -193,7 +193,7 @@ static struct showone *nemoshow_create_one(struct xmlnode *node)
 	return one;
 }
 
-static int nemoshow_load_loop(struct nemoshow *show, struct showone *loop, struct xmlnode *node);
+static int nemoshow_load_one(struct nemoshow *show, struct showone *loop, struct xmlnode *node);
 static int nemoshow_load_item(struct nemoshow *show, struct showone *item, struct xmlnode *node);
 static int nemoshow_load_canvas(struct nemoshow *show, struct showone *canvas, struct xmlnode *node);
 static int nemoshow_load_matrix(struct nemoshow *show, struct showone *matrix, struct xmlnode *node);
@@ -202,7 +202,7 @@ static int nemoshow_load_frame(struct nemoshow *show, struct showone *frame, str
 static int nemoshow_load_sequence(struct nemoshow *show, struct showone *sequence, struct xmlnode *node);
 static int nemoshow_load_show(struct nemoshow *show, struct xmlnode *node);
 
-static int nemoshow_load_loop(struct nemoshow *show, struct showone *loop, struct xmlnode *node)
+static int nemoshow_load_one(struct nemoshow *show, struct showone *parent, struct xmlnode *node)
 {
 	struct xmlnode *child;
 	struct showone *one;
@@ -212,8 +212,8 @@ static int nemoshow_load_loop(struct nemoshow *show, struct showone *loop, struc
 		if (one != NULL) {
 			NEMOBOX_APPEND(show->ones, show->sones, show->nones, one);
 
-			NEMOBOX_APPEND(loop->children, loop->schildren, loop->nchildren, one);
-			one->parent = loop;
+			NEMOBOX_APPEND(parent->children, parent->schildren, parent->nchildren, one);
+			one->parent = parent;
 		}
 	}
 
@@ -255,7 +255,7 @@ static int nemoshow_load_canvas(struct nemoshow *show, struct showone *canvas, s
 			NEMOBOX_APPEND(show->ones, show->sones, show->nones, one);
 
 			if (one->type == NEMOSHOW_LOOP_TYPE) {
-				nemoshow_load_loop(show, one, child);
+				nemoshow_load_one(show, one, child);
 			} else if (one->type == NEMOSHOW_ITEM_TYPE) {
 				nemoshow_load_item(show, one, child);
 			}
@@ -308,6 +308,8 @@ static int nemoshow_load_scene(struct nemoshow *show, struct showone *scene, str
 				one->parent = scene;
 			} else if (one->type == NEMOSHOW_MATRIX_TYPE) {
 				nemoshow_load_matrix(show, one, child);
+			} else if (one->type == NEMOSHOW_CAMERA_TYPE) {
+				nemoshow_load_one(show, one, child);
 			}
 
 			NEMOBOX_APPEND(scene->children, scene->schildren, scene->nchildren, one);

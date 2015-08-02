@@ -17,7 +17,9 @@ NEMO_BEGIN_EXTERN_C
 struct showcamera {
 	struct showone base;
 
-	struct showone *matrix;
+	double sx, sy;
+
+	void *cc;
 };
 
 #define NEMOSHOW_CAMERA(one)					((struct showcamera *)container_of(one, struct showcamera, base))

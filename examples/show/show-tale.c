@@ -156,6 +156,9 @@ int main(int argc, char *argv[])
 	context->scene = scene = nemoshow_search_one(show, "scene0");
 	nemoshow_set_scene(show, scene);
 
+	nemoshow_set_camera(show,
+			nemoshow_search_one(show, "camera0"));
+
 	nemoshow_render_one(show);
 
 	nemotool_resize_egl_canvas(canvas, NEMOSHOW_SCENE_AT(scene, width), NEMOSHOW_SCENE_AT(scene, height));
