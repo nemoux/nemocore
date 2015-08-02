@@ -558,6 +558,8 @@ int nemoshow_set_scene(struct nemoshow *show, struct showone *one)
 		}
 	}
 
+	nemotale_resize(show->tale, scene->width, scene->height);
+
 	return 0;
 }
 
@@ -607,6 +609,19 @@ void nemoshow_put_camera(struct nemoshow *show)
 		return;
 
 	show->camera = NULL;
+}
+
+int nemoshow_set_size(struct nemoshow *show, uint32_t width, uint32_t height)
+{
+	if (show->width == width && show->height == height)
+		return 0;
+
+	nemotale_set_viewport(show->tale, width, height);
+
+	show->width = width;
+	show->height = height;
+
+	return 1;
 }
 
 int nemoshow_attach_canvas(struct nemoshow *show, struct showone *one)

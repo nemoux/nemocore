@@ -42,6 +42,8 @@ struct nemoshow {
 	struct showone *scene;
 	struct showone *camera;
 
+	uint32_t width, height;
+
 	struct nemolist transition_list;
 
 	void *userdata;
@@ -71,6 +73,8 @@ extern void nemoshow_dirty_scene(struct nemoshow *show);
 
 extern int nemoshow_set_camera(struct nemoshow *show, struct showone *one);
 extern void nemoshow_put_camera(struct nemoshow *show);
+
+extern int nemoshow_set_size(struct nemoshow *show, uint32_t width, uint32_t height);
 
 extern int nemoshow_attach_canvas(struct nemoshow *show, struct showone *one);
 extern void nemoshow_detach_canvas(struct nemoshow *show, struct showone *one);

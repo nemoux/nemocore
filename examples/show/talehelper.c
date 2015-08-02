@@ -12,6 +12,11 @@ static int nemotale_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t ty
 {
 	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
 
+	if (tale->viewport.enable != 0) {
+		event->x = event->x * tale->viewport.rx;
+		event->y = event->y * tale->viewport.ry;
+	}
+
 	if (type & NEMOTOOL_POINTER_ENTER_EVENT) {
 		nemotale_push_pointer_enter_event(tale, event->serial, event->device, event->x, event->y);
 	} else if (type & NEMOTOOL_POINTER_LEAVE_EVENT) {

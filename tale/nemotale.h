@@ -41,6 +41,15 @@ struct nemotale {
 		int dirty;
 	} transform;
 
+	struct {
+		int32_t width, height;
+
+		double sx, sy;
+		double rx, ry;
+
+		int enable;
+	} viewport;
+
 	struct nemolist ptap_list;
 	struct nemolist tap_list;
 	struct nemolist grab_list;
@@ -76,6 +85,24 @@ static inline void nemotale_resize(struct nemotale *tale, int32_t width, int32_t
 
 	pixman_region32_init_rect(&tale->region, 0, 0, width, height);
 	pixman_region32_init_rect(&tale->input, 0, 0, width, height);
+
+	if (tale->viewport.enable == 0) {
+		tale->viewport.width = width;
+		tale->viewport.height = height;
+	}
+}
+
+static inline void nemotale_set_viewport(struct nemotale *tale, int32_t width, int32_t height)
+{
+	tale->viewport.width = width;
+	tale->viewport.height = height;
+
+	tale->viewport.sx = (double)tale->viewport.width / (double)tale->width;
+	tale->viewport.sy = (double)tale->viewport.height / (double)tale->height;
+	tale->viewport.rx = (double)tale->width / (double)tale->viewport.width;
+	tale->viewport.ry = (double)tale->height / (double)tale->viewport.height;
+
+	tale->viewport.enable = 1;
 }
 
 static inline void nemotale_transform(struct nemotale *tale, float d[9])

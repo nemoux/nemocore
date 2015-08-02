@@ -592,9 +592,14 @@ static inline int nemotale_composite_egl_in(struct nemotale *tale)
 
 	if (tale->transform.dirty != 0) {
 		nemomatrix_init_identity(&context->matrix);
+
 		nemomatrix_multiply(&context->matrix, &tale->transform.matrix);
-		nemomatrix_translate(&context->matrix, -tale->width / 2.0f, -tale->height / 2.0f);
-		nemomatrix_scale(&context->matrix, 2.0f / tale->width, -2.0f / tale->height);
+
+		if (tale->viewport.enable != 0)
+			nemomatrix_scale(&context->matrix, tale->viewport.sx, tale->viewport.sy);
+
+		nemomatrix_translate(&context->matrix, -tale->viewport.width / 2.0f, -tale->viewport.height / 2.0f);
+		nemomatrix_scale(&context->matrix, 2.0f / tale->viewport.width, -2.0f / tale->viewport.height);
 
 		tale->transform.dirty = 0;
 	}
@@ -607,7 +612,7 @@ static inline int nemotale_composite_egl_in(struct nemotale *tale)
 
 	pixman_region32_union(&total_damage, &buffer_damage, &tale->damage);
 
-	glViewport(0, 0, tale->width, tale->height);
+	glViewport(0, 0, tale->viewport.width, tale->viewport.height);
 
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -741,16 +746,21 @@ int nemotale_composite_fbo(struct nemotale *tale, pixman_region32_t *region)
 
 	if (tale->transform.dirty != 0) {
 		nemomatrix_init_identity(&context->matrix);
+
 		nemomatrix_multiply(&context->matrix, &tale->transform.matrix);
-		nemomatrix_translate(&context->matrix, -tale->width / 2.0f, -tale->height / 2.0f);
-		nemomatrix_scale(&context->matrix, 2.0f / tale->width, 2.0f / tale->height);
+
+		if (tale->viewport.enable != 0)
+			nemomatrix_scale(&context->matrix, tale->viewport.sx, tale->viewport.sy);
+
+		nemomatrix_translate(&context->matrix, -tale->viewport.width / 2.0f, -tale->viewport.height / 2.0f);
+		nemomatrix_scale(&context->matrix, 2.0f / tale->viewport.width, -2.0f / tale->viewport.height);
 
 		tale->transform.dirty = 0;
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo->fbo);
 
-	glViewport(0, 0, tale->width, tale->height);
+	glViewport(0, 0, tale->viewport.width, tale->viewport.height);
 
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -784,16 +794,21 @@ int nemotale_composite_fbo_full(struct nemotale *tale)
 
 	if (tale->transform.dirty != 0) {
 		nemomatrix_init_identity(&context->matrix);
+
 		nemomatrix_multiply(&context->matrix, &tale->transform.matrix);
-		nemomatrix_translate(&context->matrix, -tale->width / 2.0f, -tale->height / 2.0f);
-		nemomatrix_scale(&context->matrix, 2.0f / tale->width, 2.0f / tale->height);
+
+		if (tale->viewport.enable != 0)
+			nemomatrix_scale(&context->matrix, tale->viewport.sx, tale->viewport.sy);
+
+		nemomatrix_translate(&context->matrix, -tale->viewport.width / 2.0f, -tale->viewport.height / 2.0f);
+		nemomatrix_scale(&context->matrix, 2.0f / tale->viewport.width, -2.0f / tale->viewport.height);
 
 		tale->transform.dirty = 0;
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo->fbo);
 
-	glViewport(0, 0, tale->width, tale->height);
+	glViewport(0, 0, tale->viewport.width, tale->viewport.height);
 
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
