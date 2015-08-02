@@ -187,10 +187,13 @@ static void nemotale_repaint_node(struct nemotale *tale, struct talenode *node)
 int nemotale_composite_pixman(struct nemotale *tale, pixman_region32_t *region)
 {
 	struct talenode *node;
+	int i;
 
 	nemotale_prepare_composite(tale);
 
-	nemolist_for_each_reverse(node, &tale->node_list, link) {
+	for (i = 0; i < tale->nnodes; i++) {
+		node = tale->nodes[i];
+
 		nemotale_repaint_node(tale, node);
 	}
 

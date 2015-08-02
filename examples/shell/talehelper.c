@@ -24,7 +24,7 @@ static int nemotale_dispatch_actor_pick_tale(struct nemocontent *content, float 
 	struct nemotale *tale = (struct nemotale *)actor->context;
 	float sx, sy;
 
-	if (nemolist_empty(&tale->node_list)) {
+	if (nemotale_get_node_count(tale) == 0) {
 		return pixman_region32_contains_point(&tale->input, x, y, NULL);
 	}
 

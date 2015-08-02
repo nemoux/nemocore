@@ -617,6 +617,7 @@ int nemotale_composite_egl(struct nemotale *tale, pixman_region32_t *region)
 	struct talenode *node;
 	pixman_region32_t buffer_damage, total_damage;
 	EGLBoolean r;
+	int i;
 
 	nemotale_prepare_composite(tale);
 
@@ -637,7 +638,9 @@ int nemotale_composite_egl(struct nemotale *tale, pixman_region32_t *region)
 
 	nemotale_clear_shader(tale);
 
-	nemolist_for_each_reverse(node, &tale->node_list, link) {
+	for (i = 0; i < tale->nnodes; i++) {
+		node = tale->nodes[i];
+
 		nemotale_repaint_node(tale, node, &total_damage);
 	}
 
@@ -728,6 +731,7 @@ int nemotale_composite_fbo(struct nemotale *tale, pixman_region32_t *region)
 {
 	struct talefbo *fbo = (struct talefbo *)tale->backend;
 	struct talenode *node;
+	int i;
 
 	nemotale_prepare_composite(tale);
 
@@ -739,7 +743,9 @@ int nemotale_composite_fbo(struct nemotale *tale, pixman_region32_t *region)
 
 	nemotale_clear_shader(tale);
 
-	nemolist_for_each_reverse(node, &tale->node_list, link) {
+	for (i = 0; i < tale->nnodes; i++) {
+		node = tale->nodes[i];
+
 		nemotale_repaint_node(tale, node, &tale->damage);
 	}
 

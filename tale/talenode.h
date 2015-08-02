@@ -26,7 +26,6 @@ struct talenode;
 struct talenode {
 	struct nemotale *tale;
 
-	struct nemolist link;
 	struct nemosignal destroy_signal;
 
 	void *pmcontext;

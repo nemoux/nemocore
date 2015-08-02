@@ -115,6 +115,9 @@ int nemoshow_canvas_arrange(struct nemoshow *show, struct showone *one)
 		canvas->node = nemotale_node_create_gl(canvas->width, canvas->height);
 	} else if (one->sub == NEMOSHOW_CANVAS_SCENE_TYPE) {
 		canvas->node = nemotale_node_create_gl(canvas->width, canvas->height);
+		canvas->fbo = nemotale_create_fbo(
+				nemotale_node_get_texture(canvas->node),
+				canvas->width, canvas->height);
 	} else if (one->sub == NEMOSHOW_CANVAS_BACK_TYPE) {
 		canvas->node = nemotale_node_create_pixman(canvas->width, canvas->height);
 		nemotale_node_opaque(canvas->node, 0, 0, canvas->width, canvas->height);

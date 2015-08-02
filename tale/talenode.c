@@ -23,8 +23,6 @@ int nemotale_node_prepare(struct talenode *node)
 {
 	nemosignal_init(&node->destroy_signal);
 
-	nemolist_init(&node->link);
-
 	node->geometry.x = 0.0f;
 	node->geometry.y = 0.0f;
 	node->geometry.r = 0.0f;
@@ -64,8 +62,6 @@ int nemotale_node_prepare(struct talenode *node)
 void nemotale_node_finish(struct talenode *node)
 {
 	nemosignal_emit(&node->destroy_signal, node);
-
-	nemolist_remove(&node->link);
 
 	nemoobject_finish(&node->object);
 

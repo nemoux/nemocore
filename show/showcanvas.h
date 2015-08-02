@@ -12,6 +12,7 @@ NEMO_BEGIN_EXTERN_C
 #include <nemotale.h>
 #include <talenode.h>
 #include <talepixman.h>
+#include <talegl.h>
 
 #include <showone.h>
 
@@ -50,6 +51,7 @@ struct showcanvas {
 	struct showone *matrix;
 
 	struct talenode *node;
+	struct talefbo *fbo;
 
 	double width, height;
 

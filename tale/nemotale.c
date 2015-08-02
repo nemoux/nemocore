@@ -15,8 +15,6 @@ int nemotale_prepare(struct nemotale *tale)
 {
 	nemosignal_init(&tale->destroy_signal);
 
-	nemolist_init(&tale->node_list);
-
 	nemolist_init(&tale->ptap_list);
 	nemolist_init(&tale->tap_list);
 	nemolist_init(&tale->grab_list);
@@ -24,6 +22,10 @@ int nemotale_prepare(struct nemotale *tale)
 	pixman_region32_init(&tale->damage);
 
 	nemomatrix_init_identity(&tale->matrix);
+
+	tale->nodes = (struct talenode **)malloc(sizeof(struct talenode *) * 8);
+	tale->nnodes = 0;
+	tale->snodes = 8;
 
 	return 0;
 }
@@ -34,18 +36,21 @@ void nemotale_finish(struct nemotale *tale)
 
 	pixman_region32_fini(&tale->damage);
 
-	nemolist_remove(&tale->node_list);
-
 	nemolist_remove(&tale->ptap_list);
 	nemolist_remove(&tale->tap_list);
 	nemolist_remove(&tale->grab_list);
+
+	free(tale->nodes);
 }
 
 struct talenode *nemotale_pick(struct nemotale *tale, float x, float y, float *sx, float *sy)
 {
 	struct talenode *node;
+	int i;
 
-	nemolist_for_each(node, &tale->node_list, link) {
+	for (i = tale->nnodes - 1; i >= 0; i--) {
+		node = tale->nodes[i];
+
 		if (node->picktype == NEMOTALE_PICK_DEFAULT_TYPE) {
 			nemotale_node_transform_from_global(node, x, y, sx, sy);
 
@@ -79,8 +84,7 @@ void nemotale_damage_all(struct nemotale *tale)
 
 void nemotale_attach_node(struct nemotale *tale, struct talenode *node)
 {
-	nemolist_remove(&node->link);
-	nemolist_insert(&tale->node_list, &node->link);
+	NEMOBOX_APPEND(tale->nodes, tale->snodes, tale->nnodes, node);
 
 	node->tale = tale;
 
@@ -89,8 +93,14 @@ void nemotale_attach_node(struct nemotale *tale, struct talenode *node)
 
 void nemotale_detach_node(struct nemotale *tale, struct talenode *node)
 {
-	nemolist_remove(&node->link);
-	nemolist_init(&node->link);
+	int i;
+
+	for (i = 0; i < tale->nnodes; i++) {
+		if (tale->nodes[i] == node) {
+			NEMOBOX_REMOVE(tale->nodes, tale->nnodes, i);
+			break;
+		}
+	}
 
 	node->tale = NULL;
 
@@ -100,8 +110,11 @@ void nemotale_detach_node(struct nemotale *tale, struct talenode *node)
 void nemotale_prepare_composite(struct nemotale *tale)
 {
 	struct talenode *node;
+	int i;
 
-	nemolist_for_each(node, &tale->node_list, link) {
+	for (i = 0; i < tale->nnodes; i++) {
+		node = tale->nodes[i];
+
 		if (node->transform.dirty != 0) {
 			nemotale_damage_below(tale, node);
 			nemotale_node_transform_update(node);
@@ -142,11 +155,14 @@ void nemotale_prepare_composite(struct nemotale *tale)
 void nemotale_finish_composite(struct nemotale *tale, pixman_region32_t *region)
 {
 	struct talenode *node;
+	int i;
 
 	if (region != NULL)
 		pixman_region32_union(region, region, &tale->damage);
 
-	nemolist_for_each(node, &tale->node_list, link) {
+	for (i = 0; i < tale->nnodes; i++) {
+		node = tale->nodes[i];
+
 		if (node->dirty != 0) {
 			pixman_region32_clear(&node->damage);
 

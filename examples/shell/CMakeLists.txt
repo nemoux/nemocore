@@ -1,9 +1,5 @@
 FIND_PACKAGE(PkgConfig REQUIRED)
 
-PKG_CHECK_MODULES(NEMOTALE REQUIRED nemotale)
-INCLUDE_DIRECTORIES(${NEMOTALE_INCLUDE_DIRS})
-LINK_DIRECTORIES(${NEMOTALE_LIBRARY_DIRS})
-
 include_directories(
 	${CMAKE_SOURCE_DIR}/misc
 	${CMAKE_SOURCE_DIR}/asst
@@ -24,8 +20,8 @@ add_executable(minishell
 	)
 
 TARGET_LINK_LIBRARIES(minishell
+	nemotale
 	nemocompz
 	nemoshell
-	${NEMOTALE_LIBRARIES}
 	${NEMOUX_COMMON_LIBRARIES}
 	)

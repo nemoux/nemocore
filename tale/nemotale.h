@@ -8,6 +8,7 @@
 #include <nemolist.h>
 #include <nemolistener.h>
 #include <nemomatrix.h>
+#include <nemobox.h>
 
 struct nemotale;
 struct talenode;
@@ -22,7 +23,8 @@ struct nemotale {
 
 	void *userdata;
 
-	struct nemolist node_list;
+	struct talenode **nodes;
+	int nnodes, snodes;
 
 	struct nemosignal destroy_signal;
 
@@ -58,6 +60,11 @@ extern void nemotale_detach_node(struct nemotale *tale, struct talenode *node);
 
 extern void nemotale_prepare_composite(struct nemotale *tale);
 extern void nemotale_finish_composite(struct nemotale *tale, pixman_region32_t *region);
+
+static inline int nemotale_get_node_count(struct nemotale *tale)
+{
+	return tale->nnodes;
+}
 
 static inline int32_t nemotale_get_width(struct nemotale *tale)
 {
