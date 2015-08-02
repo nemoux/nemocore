@@ -161,6 +161,7 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	struct showone *child;
+	SkRect box;
 	int i;
 
 	if (item->style == one) {
@@ -198,38 +199,7 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 		}
 	}
 
-	if (one->sub == NEMOSHOW_RECT_ITEM) {
-		if (NEMOSHOW_ITEM_CC(item, matrix) != NULL) {
-			SkRect rect = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
-
-			NEMOSHOW_ITEM_CC(item, matrix)->mapRect(&rect);
-
-			one->x = floor(rect.x());
-			one->y = floor(rect.y());
-			one->width = ceil(rect.width());
-			one->height = ceil(rect.height());
-		} else {
-			one->x = floor(item->x);
-			one->y = floor(item->y);
-			one->width = ceil(item->width);
-			one->height = ceil(item->height);
-		}
-	} else if (one->sub == NEMOSHOW_CIRCLE_ITEM) {
-		one->x = floor(item->x - item->r);
-		one->y = floor(item->y - item->r);
-		one->width = ceil(item->r * 2);
-		one->height = ceil(item->r * 2);
-	} else if (one->sub == NEMOSHOW_ARC_ITEM) {
-		one->x = floor(item->x);
-		one->y = floor(item->y);
-		one->width = ceil(item->width);
-		one->height = ceil(item->height);
-	} else if (one->sub == NEMOSHOW_PIE_ITEM) {
-		one->x = floor(item->x);
-		one->y = floor(item->y);
-		one->width = ceil(item->width);
-		one->height = ceil(item->height);
-	} else if (one->sub == NEMOSHOW_PATH_ITEM) {
+	if (one->sub == NEMOSHOW_PATH_ITEM) {
 		struct showpath *path;
 
 		NEMOSHOW_ITEM_CC(item, path)->reset();
@@ -260,13 +230,6 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 				}
 			}
 		}
-
-		SkRect rect = NEMOSHOW_ITEM_CC(item, path)->getBounds();
-
-		one->x = floor(rect.x());
-		one->y = floor(rect.y());
-		one->width = ceil(rect.width());
-		one->height = ceil(rect.height());
 	} else if (one->sub == NEMOSHOW_TEXT_ITEM) {
 		item->text = nemoobject_gets(&one->object, "d");
 		if (item->text != NULL) {
@@ -279,7 +242,6 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 				hb_glyph_info_t *hbglyphs;
 				hb_glyph_position_t *hbglyphspos;
 				double fontscale;
-				double fontx, fonty;
 				unsigned int nhbglyphs;
 				int i;
 
@@ -305,21 +267,65 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 
 				NEMOSHOW_ITEM_CC(item, points) = new SkPoint[strlen(item->text)];
 
-				fontx = item->x;
-				fonty = item->y;
+				item->textwidth = 0.0f;
+				item->textheight = 0.0f;
 
 				for (i = 0; i < strlen(item->text); i++) {
 					NEMOSHOW_ITEM_CC(item, points)[i].set(
-							hbglyphspos[i].x_offset * fontscale + fontx, fonty - metrics.fAscent);
+							hbglyphspos[i].x_offset * fontscale + item->textwidth + item->x,
+							item->textheight + item->y - metrics.fAscent);
 
-					fontx += hbglyphspos[i].x_advance * fontscale;
-					fonty += hbglyphspos[i].y_advance * fontscale;
+					item->textwidth += hbglyphspos[i].x_advance * fontscale;
+					item->textheight += hbglyphspos[i].y_advance * fontscale;
 				}
 
 				hb_buffer_destroy(hbbuffer);
 			}
 		}
 	}
+
+	if (one->sub == NEMOSHOW_RECT_ITEM) {
+		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
+	} else if (one->sub == NEMOSHOW_CIRCLE_ITEM) {
+		box = SkRect::MakeXYWH(item->x - item->r, item->y - item->r, item->r * 2, item->r * 2);
+	} else if (one->sub == NEMOSHOW_ARC_ITEM) {
+		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
+	} else if (one->sub == NEMOSHOW_PIE_ITEM) {
+		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
+	} else if (one->sub == NEMOSHOW_PATH_ITEM) {
+		box = NEMOSHOW_ITEM_CC(item, path)->getBounds();
+	} else if (one->sub == NEMOSHOW_TEXT_ITEM) {
+		if (item->path == NULL) {
+			if (item->font->layout == NEMOSHOW_NORMAL_LAYOUT) {
+				SkRect bounds[strlen(item->text)];
+				int i, count;
+
+				count = NEMOSHOW_ITEM_CC(item, stroke)->getTextWidths(item->text, strlen(item->text), NULL, bounds);
+
+				for (i = 0; i < count; i++) {
+					box.join(bounds[i]);
+				}
+			} else if (item->font->layout == NEMOSHOW_HARFBUZZ_LAYOUT) {
+				box = SkRect::MakeXYWH(item->x, item->y, item->textwidth, item->textheight);
+			}
+		} else {
+		}
+	}
+
+	if (item->stroke != 0)
+		box.outset(
+				item->stroke_width / 2.0f + 1.0f,
+				item->stroke_width / 2.0f + 1.0f);
+
+	if (item->matrix != NULL)
+		NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(item->matrix), matrix)->mapRect(&box);
+	else if (NEMOSHOW_ITEM_CC(item, matrix) != NULL)
+		NEMOSHOW_ITEM_CC(item, matrix)->mapRect(&box);
+
+	one->x = floor(box.x());
+	one->y = floor(box.y());
+	one->width = ceil(box.width());
+	one->height = ceil(box.height());
 
 	return 0;
 }

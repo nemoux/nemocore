@@ -18,6 +18,7 @@ struct showcontext {
 
 	struct nemotale *tale;
 	struct nemoshow *show;
+	struct showone *scene;
 
 	int width, height;
 };
@@ -77,7 +78,12 @@ static void nemoshow_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t w
 	nemotool_resize_egl_canvas(context->canvas, width, height);
 	nemotale_resize(tale, width, height);
 
-	nemotale_composite_egl(tale, NULL);
+	nemotale_identity(tale);
+	nemotale_scale(tale,
+			width / NEMOSHOW_SCENE_AT(context->scene, width),
+			height / NEMOSHOW_SCENE_AT(context->scene, height));
+
+	nemotale_composite_egl_full(tale);
 }
 
 static void nemoshow_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t secs, uint32_t nsecs)
@@ -108,7 +114,6 @@ int main(int argc, char *argv[])
 	struct nemotale *tale;
 	struct nemoshow *show;
 	struct showone *scene;
-	struct showone *camera;
 	int32_t width = 100, height = 100;
 
 	context = (struct showcontext *)malloc(sizeof(struct showcontext));
@@ -148,11 +153,8 @@ int main(int argc, char *argv[])
 	nemoshow_load_xml(show, argv[1]);
 	nemoshow_arrange_one(show);
 
-	scene = nemoshow_search_one(show, "scene0");
+	context->scene = scene = nemoshow_search_one(show, "scene0");
 	nemoshow_set_scene(show, scene);
-
-	camera = nemoshow_search_one(show, "camera0");
-	nemoshow_set_camera(show, camera);
 
 	nemoshow_render_one(show);
 

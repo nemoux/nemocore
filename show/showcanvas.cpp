@@ -230,7 +230,7 @@ static inline void nemoshow_canvas_render_item(struct showcanvas *canvas, int ty
 							item->x,
 							item->y,
 							*NEMOSHOW_ITEM_CC(style, stroke));
-			} else {
+			} else if (item->font->layout == NEMOSHOW_HARFBUZZ_LAYOUT) {
 				if (style->fill != 0)
 					NEMOSHOW_CANVAS_CC(canvas, canvas)->drawPosText(
 							item->text,

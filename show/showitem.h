@@ -50,6 +50,7 @@ struct showitem {
 	struct showfont *font;
 	double fontsize;
 	const char *text;
+	double textwidth, textheight;
 
 	void *cc;
 };
