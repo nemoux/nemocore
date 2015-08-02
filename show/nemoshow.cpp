@@ -70,36 +70,20 @@ void nemoshow_destroy(struct nemoshow *show)
 	free(show);
 }
 
-static int nemoshow_compare_qsort(const void *a, const void *b)
-{
-	struct showone *oa = *((struct showone **)a);
-	struct showone *ob = *((struct showone **)b);
-
-	return strcasecmp(oa->id, ob->id);
-}
-
-void nemoshow_sort_one(struct nemoshow *show)
-{
-	NEMOBOX_QSORT(show->ones, show->nones, nemoshow_compare_qsort);
-}
-
-static int nemoshow_compare_bsearch(const void *a, const void *b)
-{
-	struct showone *ob = *((struct showone **)b);
-
-	return strcasecmp((const char *)a, ob->id);
-}
-
 struct showone *nemoshow_search_one(struct nemoshow *show, const char *id)
 {
-	struct showone **op;
+	struct showone *one;
+	int i;
 
 	if (id == NULL || id[0] == '\0')
 		return NULL;
 
-	op = (struct showone **)NEMOBOX_BSEARCH(show->ones, show->nones, id, nemoshow_compare_bsearch);
-	if (op != NULL)
-		return *op;
+	for (i = 0; i < show->nones; i++) {
+		one = show->ones[i];
+
+		if (strcmp(one->id, id) == 0)
+			return one;
+	}
 
 	return NULL;
 }
@@ -465,7 +449,7 @@ void nemoshow_arrange_one(struct nemoshow *show)
 			nemoshow_sequence_arrange_set(show, one);
 		} else if (one->type == NEMOSHOW_EASE_TYPE) {
 			nemoshow_ease_arrange(show, one);
-		} else if (one->type == NEMOSHOW_CANVAS_TYPE) {
+		} else if (one->type == NEMOSHOW_CANVAS_TYPE && one->sub != NEMOSHOW_CANVAS_SCENE_TYPE) {
 			nemoshow_canvas_arrange(show, one);
 		} else if (one->type == NEMOSHOW_ITEM_TYPE) {
 			nemoshow_item_arrange(show, one);
@@ -473,6 +457,14 @@ void nemoshow_arrange_one(struct nemoshow *show)
 			nemoshow_matrix_arrange(show, one);
 		} else if (one->type == NEMOSHOW_CAMERA_TYPE) {
 			nemoshow_camera_arrange(show, one);
+		}
+	}
+
+	for (i = 0; i < show->nones; i++) {
+		one = show->ones[i];
+
+		if (one->type == NEMOSHOW_CANVAS_TYPE && one->sub == NEMOSHOW_CANVAS_SCENE_TYPE) {
+			nemoshow_canvas_arrange(show, one);
 		}
 	}
 }
@@ -495,6 +487,7 @@ void nemoshow_update_one(struct nemoshow *show)
 
 void nemoshow_render_one(struct nemoshow *show)
 {
+	struct showone *scene;
 	struct showone *one;
 	int i;
 
@@ -509,15 +502,25 @@ void nemoshow_render_one(struct nemoshow *show)
 		}
 	}
 
-	for (i = 0; i < show->nones; i++) {
-		one = show->ones[i];
+	scene = show->scene;
+
+	for (i = 0; i < scene->nchildren; i++) {
+		one = scene->children[i];
 
 		if (one->type == NEMOSHOW_CANVAS_TYPE) {
 			if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
 				nemoshow_canvas_render_vector(show, one);
 			} else if (one->sub == NEMOSHOW_CANVAS_BACK_TYPE) {
 				nemoshow_canvas_render_back(show, one);
-			} else if (one->sub == NEMOSHOW_CANVAS_SCENE_TYPE) {
+			}
+		}
+	}
+
+	for (i = 0; i < scene->nchildren; i++) {
+		one = scene->children[i];
+
+		if (one->type == NEMOSHOW_CANVAS_TYPE) {
+			if (one->sub == NEMOSHOW_CANVAS_SCENE_TYPE) {
 				nemoshow_canvas_render_scene(show, one);
 			}
 		}
@@ -556,27 +559,12 @@ int nemoshow_set_scene(struct nemoshow *show, struct showone *one)
 
 void nemoshow_put_scene(struct nemoshow *show)
 {
-	struct showone *one;
-	struct showone *child;
-	struct showcanvas *canvas;
-	int i;
-
 	if (show->scene == NULL)
 		return;
 
-	one = show->scene;
-
-	for (i = 0; i < one->nchildren; i++) {
-		child = one->children[i];
-
-		if (child->type == NEMOSHOW_CANVAS_TYPE) {
-			canvas = NEMOSHOW_CANVAS(child);
-
-			nemotale_detach_node(show->tale, canvas->node);
-		}
-	}
-
 	show->scene = NULL;
+
+	nemotale_clear_node(show->tale);
 }
 
 void nemoshow_dirty_scene(struct nemoshow *show)

@@ -114,6 +114,11 @@ int nemoshow_canvas_arrange(struct nemoshow *show, struct showone *one)
 	} else if (one->sub == NEMOSHOW_CANVAS_OPENGL_TYPE) {
 		canvas->node = nemotale_node_create_gl(canvas->width, canvas->height);
 	} else if (one->sub == NEMOSHOW_CANVAS_SCENE_TYPE) {
+		struct showone *src;
+		struct showone *child;
+		struct showscene *scene;
+		int i;
+
 		canvas->node = nemotale_node_create_gl(canvas->width, canvas->height);
 
 		canvas->tale = nemotale_create_gl();
@@ -122,6 +127,19 @@ int nemoshow_canvas_arrange(struct nemoshow *show, struct showone *one)
 				canvas->width, canvas->height);
 		nemotale_set_backend(canvas->tale, canvas->fbo);
 		nemotale_resize(canvas->tale, canvas->width, canvas->height);
+
+		src = nemoshow_search_one(show, canvas->src);
+		scene = NEMOSHOW_SCENE(src);
+
+		for (i = 0; i < src->nchildren; i++) {
+			child = src->children[i];
+
+			if (child->type == NEMOSHOW_CANVAS_TYPE && child != one) {
+				nemotale_attach_node(canvas->tale, NEMOSHOW_CANVAS_AT(child, node));
+			}
+		}
+
+		nemotale_scale(canvas->tale, canvas->width / scene->width, canvas->height / scene->height);
 	} else if (one->sub == NEMOSHOW_CANVAS_BACK_TYPE) {
 		canvas->node = nemotale_node_create_pixman(canvas->width, canvas->height);
 		nemotale_node_opaque(canvas->node, 0, 0, canvas->width, canvas->height);
@@ -153,28 +171,6 @@ int nemoshow_canvas_update(struct nemoshow *show, struct showone *one)
 
 		nemotale_node_transform(canvas->node, d);
 		nemotale_node_damage_all(canvas->node);
-	}
-
-	if (one->sub == NEMOSHOW_CANVAS_SCENE_TYPE) {
-		struct showone *src;
-		struct showone *child;
-		struct showscene *scene;
-		int i;
-
-		src = nemoshow_search_one(show, canvas->src);
-		scene = NEMOSHOW_SCENE(src);
-
-		nemotale_clear_node(canvas->tale);
-
-		for (i = 0; i < src->nchildren; i++) {
-			child = src->children[i];
-
-			if (child->type == NEMOSHOW_CANVAS_TYPE && child != one) {
-				nemotale_attach_node(canvas->tale, NEMOSHOW_CANVAS_AT(child, node));
-			}
-		}
-
-		nemotale_scale(canvas->tale, canvas->width / scene->width, canvas->height / scene->height);
 	}
 
 	return 0;

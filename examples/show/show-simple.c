@@ -15,7 +15,6 @@ int main(int argc, char *argv[])
 
 	show = nemoshow_create();
 	nemoshow_load_xml(show, argv[1]);
-	nemoshow_sort_one(show);
 	nemoshow_arrange_one(show);
 
 	nemoshow_update_symbol(show, "hour", 5.0f);

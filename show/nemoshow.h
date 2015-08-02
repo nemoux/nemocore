@@ -53,7 +53,6 @@ extern void nemoshow_finalize(void);
 extern struct nemoshow *nemoshow_create(void);
 extern void nemoshow_destroy(struct nemoshow *show);
 
-extern void nemoshow_sort_one(struct nemoshow *show);
 extern struct showone *nemoshow_search_one(struct nemoshow *show, const char *id);
 
 extern int nemoshow_load_xml(struct nemoshow *show, const char *path);

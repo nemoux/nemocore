@@ -146,7 +146,6 @@ int main(int argc, char *argv[])
 	nemoshow_set_userdata(show, context);
 
 	nemoshow_load_xml(show, argv[1]);
-	nemoshow_sort_one(show);
 	nemoshow_arrange_one(show);
 
 	scene = nemoshow_search_one(show, "scene0");
