@@ -222,11 +222,34 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 				} else if (child->sub == NEMOSHOW_CLOSE_PATH) {
 					NEMOSHOW_ITEM_CC(item, path)->close();
 				} else if (child->sub == NEMOSHOW_CMD_PATH) {
-					SkPath cpath;
+					SkPath rpath;
 
-					SkParsePath::FromSVGString(nemoobject_gets(&child->object, "d"), &cpath);
+					SkParsePath::FromSVGString(nemoobject_gets(&child->object, "d"), &rpath);
 
-					NEMOSHOW_ITEM_CC(item, path)->addPath(cpath);
+					NEMOSHOW_ITEM_CC(item, path)->addPath(rpath);
+				} else if (child->sub == NEMOSHOW_TEXT_PATH) {
+					SkPaint paint;
+					SkPath rpath;
+					SkTypeface *face;
+					const char *text;
+
+					text = nemoobject_gets(&child->object, "d");
+
+					SkSafeUnref(paint.setTypeface(
+								SkTypeface::CreateFromFile(
+									fontconfig_get_path(
+										nemoobject_gets(&child->object, "font"),
+										NULL,
+										FC_SLANT_ROMAN,
+										FC_WEIGHT_NORMAL,
+										FC_WIDTH_NORMAL,
+										FC_MONO), 0)));
+
+					paint.setAntiAlias(true);
+					paint.setTextSize(nemoobject_getd(&child->object, "font-size"));
+					paint.getTextPath(text, strlen(text), path->x0, path->y0, &rpath);
+
+					NEMOSHOW_ITEM_CC(item, path)->addPath(rpath);
 				}
 			}
 		}

@@ -138,6 +138,8 @@ static struct showone *nemoshow_create_one(struct xmlnode *node)
 		one = nemoshow_path_create(NEMOSHOW_CLOSE_PATH);
 	} else if (strcmp(node->name, "cmd") == 0) {
 		one = nemoshow_path_create(NEMOSHOW_CMD_PATH);
+	} else if (strcmp(node->name, "textto") == 0) {
+		one = nemoshow_path_create(NEMOSHOW_TEXT_PATH);
 	} else if (strcmp(node->name, "camera") == 0) {
 		one = nemoshow_camera_create();
 	}
