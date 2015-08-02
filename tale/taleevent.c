@@ -12,6 +12,12 @@
 #include <taleevent.h>
 #include <nemomisc.h>
 
+#define	NEMOTALE_CORRECT_EVENT_COORDS(t, x, y)		\
+	if ((t)->viewport.enable != 0) {	\
+		x *= (t)->viewport.rx;	\
+		y *= (t)->viewport.ry;	\
+	}
+
 static void taletap_handle_tale_destroy(struct nemolistener *listener, void *data)
 {
 	struct taletap *tap = (struct taletap *)container_of(listener, struct taletap, tale_destroy_listener);
@@ -67,6 +73,8 @@ void nemotale_push_pointer_enter_event(struct nemotale *tale, uint32_t serial, u
 {
 	struct taleevent event;
 	struct taletap *tap;
+
+	NEMOTALE_CORRECT_EVENT_COORDS(tale, x, y);
 
 	tap = nemotale_pointer_get_tap(tale, device);
 	if (tap == NULL) {
@@ -188,6 +196,8 @@ void nemotale_push_pointer_motion_event(struct nemotale *tale, uint32_t serial, 
 	struct taleevent event;
 	struct taletap *tap;
 
+	NEMOTALE_CORRECT_EVENT_COORDS(tale, x, y);
+
 	tap = nemotale_pointer_get_tap(tale, device);
 	if (tap == NULL)
 		return;
@@ -248,6 +258,8 @@ void nemotale_push_touch_down_event(struct nemotale *tale, uint32_t serial, uint
 	uint64_t value;
 	float sx, sy;
 
+	NEMOTALE_CORRECT_EVENT_COORDS(tale, x, y);
+
 	tap = nemotale_create_tap(tale, device);
 	if (tap == NULL)
 		return;
@@ -282,6 +294,8 @@ void nemotale_push_touch_up_event(struct nemotale *tale, uint32_t serial, uint64
 	struct taleevent event;
 	struct taletap *tap;
 
+	NEMOTALE_CORRECT_EVENT_COORDS(tale, dx, dy);
+
 	tap = nemotale_touch_get_tap(tale, device);
 	if (tap == NULL)
 		return;
@@ -303,6 +317,8 @@ void nemotale_push_touch_motion_event(struct nemotale *tale, uint32_t serial, ui
 {
 	struct taleevent event;
 	struct taletap *tap;
+
+	NEMOTALE_CORRECT_EVENT_COORDS(tale, x, y);
 
 	tap = nemotale_touch_get_tap(tale, device);
 	if (tap == NULL)
