@@ -320,7 +320,10 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 		for (i = 0; i < one->nchildren; i++) {
 			child = one->children[i];
 
-			if (child->redraw != 0) {
+			if (child->redraw == 0)
+				continue;
+
+			if (child->type != NEMOSHOW_LOOP_TYPE) {
 				region.op(
 						SkIRect::MakeXYWH(
 							child->x * canvas->viewport.sx,
@@ -330,9 +333,34 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 						SkRegion::kUnion_Op);
 
 				nemotale_node_damage(canvas->node, child->x, child->y, child->width, child->height);
+			} else {
+				struct showloop *loop = NEMOSHOW_LOOP(one);
+				struct showone *lone;
+				int j, k;
 
-				child->redraw = 0;
+				for (j = loop->begin; j <= loop->end; j++) {
+					for (k = 0; k < one->nchildren; k++) {
+						lone = one->children[k];
+
+						nemoshow_update_symbol(show, one->id, j);
+						nemoshow_update_one_expression(show, lone);
+
+						nemoshow_item_update(show, lone);
+
+						region.op(
+								SkIRect::MakeXYWH(
+									lone->x * canvas->viewport.sx,
+									lone->y * canvas->viewport.sy,
+									lone->width * canvas->viewport.sx,
+									lone->height * canvas->viewport.sy),
+								SkRegion::kUnion_Op);
+
+						nemotale_node_damage(canvas->node, lone->x, lone->y, lone->width, lone->height);
+					}
+				}
 			}
+
+			child->redraw = 0;
 		}
 
 		NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
