@@ -61,7 +61,7 @@ extern int nemoshow_load_xml(struct nemoshow *show, const char *path);
 
 extern void nemoshow_update_symbol(struct nemoshow *show, const char *name, double value);
 extern void nemoshow_update_expression(struct nemoshow *show);
-extern int nemoshow_update_one_expression(struct nemoshow *show, struct showone *one, const char *name);
+extern void nemoshow_update_one_expression(struct nemoshow *show, struct showone *one);
 
 extern void nemoshow_arrange_one(struct nemoshow *show);
 extern void nemoshow_update_one(struct nemoshow *show);

@@ -422,7 +422,7 @@ void nemoshow_update_expression(struct nemoshow *show)
 	}
 }
 
-int nemoshow_update_one_expression(struct nemoshow *show, struct showone *one, const char *name)
+void nemoshow_update_one_expression(struct nemoshow *show, struct showone *one)
 {
 	struct showattr *attr;
 	int i;
@@ -430,15 +430,13 @@ int nemoshow_update_one_expression(struct nemoshow *show, struct showone *one, c
 	for (i = 0; i < one->nattrs; i++) {
 		attr = one->attrs[i];
 
-		if (strcmp(attr->name, name) == 0) {
-			nemoattr_setd(attr->ref,
-					nemoshow_expr_dispatch_expression(show->expr, attr->text));
-
-			return 1;
-		}
+		nemoattr_setd(attr->ref,
+				nemoshow_expr_dispatch_expression(show->expr, attr->text));
 	}
 
-	return 0;
+	for (i = 0; i < one->nchildren; i++) {
+		nemoshow_update_one_expression(show, one->children[i]);
+	}
 }
 
 void nemoshow_arrange_one(struct nemoshow *show)
