@@ -31,6 +31,9 @@ struct showone *nemoshow_canvas_create(void)
 
 	canvas->cc = new showcanvas_t;
 
+	canvas->viewport.sx = 1.0f;
+	canvas->viewport.sy = 1.0f;
+
 	one = &canvas->base;
 	one->type = NEMOSHOW_CANVAS_TYPE;
 	one->update = nemoshow_canvas_update;
@@ -101,7 +104,6 @@ int nemoshow_canvas_arrange(struct nemoshow *show, struct showone *one)
 		canvas->node = nemotale_node_create_pixman(canvas->width, canvas->height);
 
 		NEMOSHOW_CANVAS_CC(canvas, bitmap) = new SkBitmap;
-
 		NEMOSHOW_CANVAS_CC(canvas, bitmap)->setInfo(
 				SkImageInfo::Make(canvas->width, canvas->height, kN32_SkColorType, kPremul_SkAlphaType));
 		NEMOSHOW_CANVAS_CC(canvas, bitmap)->setPixels(
@@ -267,58 +269,106 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 	struct showone *child;
-	SkRegion region;
 	int i;
 
-	region.setEmpty();
+	if (canvas->needs_redraw_full == 0) {
+		SkRegion region;
 
-	for (i = 0; i < one->nchildren; i++) {
-		child = one->children[i];
+		region.setEmpty();
 
-		if (child->redraw != 0) {
-			region.op(
-					SkIRect::MakeXYWH(child->x, child->y, child->width, child->height),
-					SkRegion::kUnion_Op);
+		for (i = 0; i < one->nchildren; i++) {
+			child = one->children[i];
 
-			nemotale_node_damage(canvas->node, child->x, child->y, child->width, child->height);
+			if (child->redraw != 0) {
+				region.op(
+						SkIRect::MakeXYWH(
+							child->x * canvas->viewport.sx,
+							child->y * canvas->viewport.sy,
+							child->width * canvas->viewport.sx,
+							child->height * canvas->viewport.sy),
+						SkRegion::kUnion_Op);
 
-			child->redraw = 0;
-		}
-	}
+				nemotale_node_damage(canvas->node, child->x, child->y, child->width, child->height);
 
-	NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
-	NEMOSHOW_CANVAS_CC(canvas, canvas)->clipRegion(region);
-
-	NEMOSHOW_CANVAS_CC(canvas, canvas)->clear(SK_ColorTRANSPARENT);
-
-	for (i = 0; i < one->nchildren; i++) {
-		child = one->children[i];
-
-		if (child->type == NEMOSHOW_ITEM_TYPE) {
-			struct showitem *item = NEMOSHOW_ITEM(child);
-			struct showitem *style = NEMOSHOW_ITEM(item->style);
-
-			if (item->matrix != NULL) {
-				NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
-				NEMOSHOW_CANVAS_CC(canvas, canvas)->setMatrix(*NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(item->matrix), matrix));
-
-				nemoshow_canvas_render_item(canvas, child->sub, item, style);
-
-				NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
-			} else if (NEMOSHOW_ITEM_CC(item, matrix) != NULL) {
-				NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
-				NEMOSHOW_CANVAS_CC(canvas, canvas)->setMatrix(*NEMOSHOW_ITEM_CC(item, matrix));
-
-				nemoshow_canvas_render_item(canvas, child->sub, item, style);
-
-				NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
-			} else {
-				nemoshow_canvas_render_item(canvas, child->sub, item, style);
+				child->redraw = 0;
 			}
 		}
-	}
 
-	NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
+		NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
+		NEMOSHOW_CANVAS_CC(canvas, canvas)->clipRegion(region);
+
+		NEMOSHOW_CANVAS_CC(canvas, canvas)->clear(SK_ColorTRANSPARENT);
+
+		NEMOSHOW_CANVAS_CC(canvas, canvas)->scale(canvas->viewport.sx, canvas->viewport.sy);
+
+		for (i = 0; i < one->nchildren; i++) {
+			child = one->children[i];
+
+			if (child->type == NEMOSHOW_ITEM_TYPE) {
+				struct showitem *item = NEMOSHOW_ITEM(child);
+				struct showitem *style = NEMOSHOW_ITEM(item->style);
+
+				if (item->matrix != NULL) {
+					NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
+					NEMOSHOW_CANVAS_CC(canvas, canvas)->concat(*NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(item->matrix), matrix));
+
+					nemoshow_canvas_render_item(canvas, child->sub, item, style);
+
+					NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
+				} else if (NEMOSHOW_ITEM_CC(item, matrix) != NULL) {
+					NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
+					NEMOSHOW_CANVAS_CC(canvas, canvas)->concat(*NEMOSHOW_ITEM_CC(item, matrix));
+
+					nemoshow_canvas_render_item(canvas, child->sub, item, style);
+
+					NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
+				} else {
+					nemoshow_canvas_render_item(canvas, child->sub, item, style);
+				}
+			}
+		}
+
+		NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
+	} else {
+		nemotale_node_damage_all(canvas->node);
+
+		NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
+
+		NEMOSHOW_CANVAS_CC(canvas, canvas)->clear(SK_ColorTRANSPARENT);
+
+		NEMOSHOW_CANVAS_CC(canvas, canvas)->scale(canvas->viewport.sx, canvas->viewport.sy);
+
+		for (i = 0; i < one->nchildren; i++) {
+			child = one->children[i];
+
+			if (child->type == NEMOSHOW_ITEM_TYPE) {
+				struct showitem *item = NEMOSHOW_ITEM(child);
+				struct showitem *style = NEMOSHOW_ITEM(item->style);
+
+				if (item->matrix != NULL) {
+					NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
+					NEMOSHOW_CANVAS_CC(canvas, canvas)->concat(*NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(item->matrix), matrix));
+
+					nemoshow_canvas_render_item(canvas, child->sub, item, style);
+
+					NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
+				} else if (NEMOSHOW_ITEM_CC(item, matrix) != NULL) {
+					NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
+					NEMOSHOW_CANVAS_CC(canvas, canvas)->concat(*NEMOSHOW_ITEM_CC(item, matrix));
+
+					nemoshow_canvas_render_item(canvas, child->sub, item, style);
+
+					NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
+				} else {
+					nemoshow_canvas_render_item(canvas, child->sub, item, style);
+				}
+			}
+		}
+
+		NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
+
+		canvas->needs_redraw_full = 0;
+	}
 }
 
 void nemoshow_canvas_render_back(struct nemoshow *show, struct showone *one)
@@ -333,4 +383,38 @@ void nemoshow_canvas_render_scene(struct nemoshow *show, struct showone *one)
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
 	nemotale_composite_fbo_full(canvas->tale);
+}
+
+int nemoshow_canvas_set_viewport(struct nemoshow *show, struct showone *one, double sx, double sy)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
+		canvas->viewport.sx = sx;
+		canvas->viewport.sy = sy;
+
+		canvas->viewport.width = canvas->width * sx;
+		canvas->viewport.height = canvas->height * sy;
+
+		delete NEMOSHOW_CANVAS_CC(canvas, canvas);
+		delete NEMOSHOW_CANVAS_CC(canvas, device);
+		delete NEMOSHOW_CANVAS_CC(canvas, bitmap);
+
+		nemotale_node_set_viewport_pixman(canvas->node, canvas->viewport.width, canvas->viewport.height);
+
+		NEMOSHOW_CANVAS_CC(canvas, bitmap) = new SkBitmap;
+		NEMOSHOW_CANVAS_CC(canvas, bitmap)->setInfo(
+				SkImageInfo::Make(canvas->viewport.width, canvas->viewport.height, kN32_SkColorType, kPremul_SkAlphaType));
+		NEMOSHOW_CANVAS_CC(canvas, bitmap)->setPixels(
+				nemotale_node_get_buffer(canvas->node));
+
+		NEMOSHOW_CANVAS_CC(canvas, device) = new SkBitmapDevice(*NEMOSHOW_CANVAS_CC(canvas, bitmap));
+		NEMOSHOW_CANVAS_CC(canvas, canvas) = new SkCanvas(NEMOSHOW_CANVAS_CC(canvas, device));
+
+		one->dirty = 1;
+
+		canvas->needs_redraw_full = 1;
+	}
+
+	return 0;
 }

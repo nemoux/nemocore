@@ -348,8 +348,8 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 	else if (NEMOSHOW_ITEM_CC(item, matrix) != NULL)
 		NEMOSHOW_ITEM_CC(item, matrix)->mapRect(&box);
 
-	one->x = floor(box.x());
-	one->y = floor(box.y());
+	one->x = MAX(floor(box.x()), 0);
+	one->y = MAX(floor(box.y()), 0);
 	one->width = ceil(box.width());
 	one->height = ceil(box.height());
 

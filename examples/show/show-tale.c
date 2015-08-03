@@ -77,6 +77,8 @@ static void nemoshow_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t w
 
 	nemoshow_set_size(context->show, width, height);
 
+	nemoshow_render_one(context->show);
+
 	nemotale_composite_egl_full(tale);
 }
 

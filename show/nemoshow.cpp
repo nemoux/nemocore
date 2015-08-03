@@ -613,6 +613,10 @@ void nemoshow_put_camera(struct nemoshow *show)
 
 int nemoshow_set_size(struct nemoshow *show, uint32_t width, uint32_t height)
 {
+	struct showone *one;
+	struct showone *child;
+	int i;
+
 	if (show->width == width && show->height == height)
 		return 0;
 
@@ -620,6 +624,18 @@ int nemoshow_set_size(struct nemoshow *show, uint32_t width, uint32_t height)
 
 	show->width = width;
 	show->height = height;
+
+	one = show->scene;
+
+	for (i = 0; i < one->nchildren; i++) {
+		child = one->children[i];
+
+		if (child->type == NEMOSHOW_CANVAS_TYPE) {
+			nemoshow_canvas_set_viewport(show, child,
+					(double)width / (double)NEMOSHOW_SCENE_AT(one, width),
+					(double)height / (double)NEMOSHOW_SCENE_AT(one, height));
+		}
+	}
 
 	return 1;
 }

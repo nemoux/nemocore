@@ -46,6 +46,14 @@ struct talenode {
 		float r;
 	} geometry;
 
+	struct {
+		int32_t width, height;
+
+		double sx, sy;
+
+		int enable;
+	} viewport;
+
 	pixman_region32_t region;
 	pixman_region32_t boundingbox;
 	pixman_region32_t opaque, blend;

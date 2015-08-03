@@ -57,6 +57,14 @@ struct showcanvas {
 
 	double width, height;
 
+	struct {
+		double width, height;
+
+		double sx, sy;
+	} viewport;
+
+	int needs_redraw_full;
+
 	void *cc;
 };
 
@@ -72,6 +80,8 @@ extern int nemoshow_canvas_update(struct nemoshow *show, struct showone *one);
 extern void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one);
 extern void nemoshow_canvas_render_back(struct nemoshow *show, struct showone *one);
 extern void nemoshow_canvas_render_scene(struct nemoshow *show, struct showone *one);
+
+extern int nemoshow_canvas_set_viewport(struct nemoshow *show, struct showone *one, double sx, double sy);
 
 static inline struct talenode *nemoshow_canvas_get_node(struct showone *one)
 {

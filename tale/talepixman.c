@@ -8,6 +8,7 @@
 #include <nemotale.h>
 #include <talenode.h>
 #include <talepixman.h>
+#include <nemomisc.h>
 
 struct nemotale *nemotale_create_pixman(void)
 {
@@ -200,7 +201,7 @@ int nemotale_composite_pixman(struct nemotale *tale, pixman_region32_t *region)
 
 	if (region != NULL)
 		pixman_region32_union(region, region, &tale->damage);
-	
+
 	nemotale_flush_damage(tale);
 
 	return 0;
@@ -213,7 +214,7 @@ int nemotale_composite_pixman_full(struct nemotale *tale)
 
 	nemotale_update_node(tale);
 	nemotale_damage_all(tale);
-	
+
 	for (i = 0; i < tale->nnodes; i++) {
 		node = tale->nodes[i];
 
@@ -265,6 +266,8 @@ struct talenode *nemotale_node_create_pixman(int32_t width, int32_t height)
 	node->needs_full_upload = 1;
 	node->geometry.width = width;
 	node->geometry.height = height;
+	node->viewport.width = width;
+	node->viewport.height = height;
 
 	pixman_region32_init_rect(&node->blend, 0, 0, width, height);
 	pixman_region32_init_rect(&node->region, 0, 0, width, height);
@@ -289,20 +292,7 @@ int nemotale_node_resize_pixman(struct talenode *node, int32_t width, int32_t he
 	if (node->geometry.width != width || node->geometry.height != height) {
 		struct talepmnode *context = (struct talepmnode *)node->pmcontext;
 
-		pixman_image_unref(context->image);
-		cairo_surface_destroy(context->surface);
-		free(context->data);
-
-		context->data = malloc(width * height * 4);
-		if (context->data == NULL)
-			return -1;
-		memset(context->data, 0, width * height * 4);
-
-		context->image = pixman_image_create_bits(PIXMAN_a8r8g8b8, width, height, context->data, width * 4);
-		context->surface = cairo_image_surface_create_for_data(context->data, CAIRO_FORMAT_ARGB32, width, height, width * 4);
-
 		node->dirty = 1;
-		node->needs_full_upload = 1;
 		node->geometry.width = width;
 		node->geometry.height = height;
 		node->transform.dirty = 1;
@@ -310,6 +300,25 @@ int nemotale_node_resize_pixman(struct talenode *node, int32_t width, int32_t he
 		pixman_region32_init_rect(&node->blend, 0, 0, width, height);
 		pixman_region32_init_rect(&node->region, 0, 0, width, height);
 		pixman_region32_init_rect(&node->input, 0, 0, width, height);
+
+		if (node->viewport.enable == 0) {
+			pixman_image_unref(context->image);
+			cairo_surface_destroy(context->surface);
+			free(context->data);
+
+			context->data = malloc(width * height * 4);
+			memset(context->data, 0, width * height * 4);
+
+			context->image = pixman_image_create_bits(PIXMAN_a8r8g8b8, width, height, context->data, width * 4);
+			context->surface = cairo_image_surface_create_for_data(context->data, CAIRO_FORMAT_ARGB32, width, height, width * 4);
+
+			node->viewport.width = width;
+			node->viewport.height = height;
+			node->needs_full_upload = 1;
+		} else {
+			node->viewport.sx = (double)node->viewport.width / (double)node->geometry.width;
+			node->viewport.sy = (double)node->viewport.height / (double)node->geometry.height;
+		}
 	}
 
 	return 0;
@@ -333,7 +342,34 @@ void nemotale_node_fill_pixman(struct talenode *node, double r, double g, double
 			NULL,
 			context->image,
 			0, 0, 0, 0, 0, 0,
-			node->geometry.width, node->geometry.height);
+			node->viewport.width, node->viewport.height);
 
 	pixman_image_unref(mask);
+}
+
+int nemotale_node_set_viewport_pixman(struct talenode *node, int32_t width, int32_t height)
+{
+	struct talepmnode *context = (struct talepmnode *)node->pmcontext;
+
+	node->viewport.width = width;
+	node->viewport.height = height;
+
+	node->viewport.sx = (double)node->viewport.width / (double)node->geometry.width;
+	node->viewport.sy = (double)node->viewport.height / (double)node->geometry.height;
+
+	node->viewport.enable = 1;
+
+	pixman_image_unref(context->image);
+	cairo_surface_destroy(context->surface);
+	free(context->data);
+
+	context->data = malloc(width * height * 4);
+	memset(context->data, 0, width * height * 4);
+
+	context->image = pixman_image_create_bits(PIXMAN_a8r8g8b8, width, height, context->data, width * 4);
+	context->surface = cairo_image_surface_create_for_data(context->data, CAIRO_FORMAT_ARGB32, width, height, width * 4);
+
+	node->needs_full_upload = 1;
+
+	return 0;
 }
