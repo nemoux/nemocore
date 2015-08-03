@@ -63,7 +63,7 @@ struct showcanvas {
 		double sx, sy;
 	} viewport;
 
-	int needs_redraw_full;
+	int needs_full_redraw;
 
 	void *cc;
 };

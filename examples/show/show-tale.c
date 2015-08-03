@@ -115,6 +115,7 @@ int main(int argc, char *argv[])
 	context = (struct showcontext *)malloc(sizeof(struct showcontext));
 	if (context == NULL)
 		return -1;
+	memset(context, 0, sizeof(struct showcontext));
 
 	tool = nemotool_create();
 	if (tool == NULL)

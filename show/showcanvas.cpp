@@ -196,16 +196,16 @@ static inline void nemoshow_canvas_render_item(struct showcanvas *canvas, int ty
 		SkRect rect = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
 
 		if (style->fill != 0)
-			NEMOSHOW_CANVAS_CC(canvas, canvas)->drawArc(rect, item->from, item->to, false, *NEMOSHOW_ITEM_CC(style, fill));
+			NEMOSHOW_CANVAS_CC(canvas, canvas)->drawArc(rect, item->from, item->to - item->from, false, *NEMOSHOW_ITEM_CC(style, fill));
 		if (style->stroke != 0)
-			NEMOSHOW_CANVAS_CC(canvas, canvas)->drawArc(rect, item->from, item->to, false, *NEMOSHOW_ITEM_CC(style, stroke));
+			NEMOSHOW_CANVAS_CC(canvas, canvas)->drawArc(rect, item->from, item->to - item->from, false, *NEMOSHOW_ITEM_CC(style, stroke));
 	} else if (type == NEMOSHOW_PIE_ITEM) {
 		SkRect rect = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
 
 		if (style->fill != 0)
-			NEMOSHOW_CANVAS_CC(canvas, canvas)->drawArc(rect, item->from, item->to, true, *NEMOSHOW_ITEM_CC(style, fill));
+			NEMOSHOW_CANVAS_CC(canvas, canvas)->drawArc(rect, item->from, item->to - item->from, true, *NEMOSHOW_ITEM_CC(style, fill));
 		if (style->stroke != 0)
-			NEMOSHOW_CANVAS_CC(canvas, canvas)->drawArc(rect, item->from, item->to, true, *NEMOSHOW_ITEM_CC(style, stroke));
+			NEMOSHOW_CANVAS_CC(canvas, canvas)->drawArc(rect, item->from, item->to - item->from, true, *NEMOSHOW_ITEM_CC(style, stroke));
 	} else if (type == NEMOSHOW_PATH_ITEM) {
 		if (style->fill != 0)
 			NEMOSHOW_CANVAS_CC(canvas, canvas)->drawPath(
@@ -271,7 +271,7 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 	struct showone *child;
 	int i;
 
-	if (canvas->needs_redraw_full == 0) {
+	if (canvas->needs_full_redraw == 0) {
 		SkRegion region;
 
 		region.setEmpty();
@@ -367,7 +367,7 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 
 		NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
 
-		canvas->needs_redraw_full = 0;
+		canvas->needs_full_redraw = 0;
 	}
 }
 
@@ -413,7 +413,7 @@ int nemoshow_canvas_set_viewport(struct nemoshow *show, struct showone *one, dou
 
 		one->dirty = 1;
 
-		canvas->needs_redraw_full = 1;
+		canvas->needs_full_redraw = 1;
 	}
 
 	return 0;

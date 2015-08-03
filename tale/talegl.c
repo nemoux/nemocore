@@ -690,13 +690,11 @@ static inline int nemotale_composite_egl_in(struct nemotale *tale)
 
 		buffer_height = tale->height;
 
-		edamage = edamages;
-
-		for (i = 0; i < nrects; i++) {
-			*edamage++ = rects[i].x1;
-			*edamage++ = buffer_height - rects[i].y2;
-			*edamage++ = rects[i].x2 - rects[i].x1;
-			*edamage++ = rects[i].y2 - rects[i].y1;
+		for (i = 0, edamage = edamages; i < nrects; i++) {
+			*edamage++ = MAX((rects[i].x1) * tale->viewport.sx - 1, 0);
+			*edamage++ = MAX((buffer_height - rects[i].y2) * tale->viewport.sy - 1, 0);
+			*edamage++ = MIN((rects[i].x2 - rects[i].x1) * tale->viewport.sx + 1, tale->viewport.width);
+			*edamage++ = MIN((rects[i].y2 - rects[i].y1) * tale->viewport.sy + 1, tale->viewport.height);
 		}
 
 		r = egl->swap_buffers_with_damage(egl->display, egl->surface, edamages, nrects);
