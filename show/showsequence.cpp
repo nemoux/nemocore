@@ -253,18 +253,21 @@ void nemoshow_sequence_prepare(struct showone *one)
 void nemoshow_sequence_dispatch(struct showone *one, double t)
 {
 	struct showsequence *sequence = NEMOSHOW_SEQUENCE(one);
-	struct showframe *frame = NEMOSHOW_FRAME(one->children[sequence->iframe]);
 
-	if (t >= 1.0f) {
-		nemoshow_sequence_finish_frame(one->children[sequence->iframe]);
-	} else if (frame->t < t) {
-		nemoshow_sequence_finish_frame(one->children[sequence->iframe]);
+	if (sequence->iframe < one->nchildren) {
+		struct showframe *frame = NEMOSHOW_FRAME(one->children[sequence->iframe]);
 
-		sequence->t = frame->t;
-		sequence->iframe++;
+		if (t >= 1.0f) {
+			nemoshow_sequence_finish_frame(one->children[sequence->iframe]);
+		} else if (frame->t < t) {
+			nemoshow_sequence_finish_frame(one->children[sequence->iframe]);
 
-		nemoshow_sequence_prepare_frame(one->children[sequence->iframe]);
-	} else {
-		nemoshow_sequence_dispatch_frame(one->children[sequence->iframe], sequence->t, t);
+			sequence->t = frame->t;
+			sequence->iframe++;
+
+			nemoshow_sequence_prepare_frame(one->children[sequence->iframe]);
+		} else {
+			nemoshow_sequence_dispatch_frame(one->children[sequence->iframe], sequence->t, t);
+		}
 	}
 }
