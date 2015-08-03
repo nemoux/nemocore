@@ -235,6 +235,8 @@ static void nemoshow_sequence_finish_frame(struct showone *one)
 		for (j = 0; j < set->nattrs; j++) {
 			nemoattr_setd(set->tattrs[j], nemoattr_getd(set->eattrs[j]));
 		}
+
+		nemoshow_one_dirty(set->src);
 	}
 }
 
