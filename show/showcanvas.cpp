@@ -178,7 +178,7 @@ int nemoshow_canvas_update(struct nemoshow *show, struct showone *one)
 	return 0;
 }
 
-static inline void nemoshow_canvas_render_item(struct showcanvas *canvas, int type, struct showitem *item, struct showitem *style)
+static inline void nemoshow_canvas_render_item(struct nemoshow *show, struct showcanvas *canvas, int type, struct showitem *item, struct showitem *style)
 {
 	if (type == NEMOSHOW_RECT_ITEM) {
 		SkRect rect = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
@@ -265,6 +265,47 @@ static inline void nemoshow_canvas_render_item(struct showcanvas *canvas, int ty
 	}
 }
 
+static inline void nemoshow_canvas_render_loop(struct nemoshow *show, struct showcanvas *canvas, struct showone *one)
+{
+	struct showloop *loop = NEMOSHOW_LOOP(one);
+	struct showone *child;
+	int i, j;
+
+	for (i = loop->begin; i <= loop->end; i++) {
+		for (j = 0; j < one->nchildren; j++) {
+			child = one->children[j];
+
+			nemoshow_update_symbol(show, one->id, i);
+			nemoshow_update_one_expression(show, child);
+
+			if (child->type == NEMOSHOW_ITEM_TYPE) {
+				struct showitem *item = NEMOSHOW_ITEM(child);
+				struct showitem *style = NEMOSHOW_ITEM(item->style);
+
+				nemoshow_item_update(show, child);
+
+				if (item->matrix != NULL) {
+					NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
+					NEMOSHOW_CANVAS_CC(canvas, canvas)->concat(*NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(item->matrix), matrix));
+
+					nemoshow_canvas_render_item(show, canvas, child->sub, item, style);
+
+					NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
+				} else if (NEMOSHOW_ITEM_CC(item, matrix) != NULL) {
+					NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
+					NEMOSHOW_CANVAS_CC(canvas, canvas)->concat(*NEMOSHOW_ITEM_CC(item, matrix));
+
+					nemoshow_canvas_render_item(show, canvas, child->sub, item, style);
+
+					NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
+				} else {
+					nemoshow_canvas_render_item(show, canvas, child->sub, item, style);
+				}
+			}
+		}
+	}
+}
+
 void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
@@ -312,19 +353,21 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 					NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
 					NEMOSHOW_CANVAS_CC(canvas, canvas)->concat(*NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(item->matrix), matrix));
 
-					nemoshow_canvas_render_item(canvas, child->sub, item, style);
+					nemoshow_canvas_render_item(show, canvas, child->sub, item, style);
 
 					NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
 				} else if (NEMOSHOW_ITEM_CC(item, matrix) != NULL) {
 					NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
 					NEMOSHOW_CANVAS_CC(canvas, canvas)->concat(*NEMOSHOW_ITEM_CC(item, matrix));
 
-					nemoshow_canvas_render_item(canvas, child->sub, item, style);
+					nemoshow_canvas_render_item(show, canvas, child->sub, item, style);
 
 					NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
 				} else {
-					nemoshow_canvas_render_item(canvas, child->sub, item, style);
+					nemoshow_canvas_render_item(show, canvas, child->sub, item, style);
 				}
+			} else if (child->type == NEMOSHOW_LOOP_TYPE) {
+				nemoshow_canvas_render_loop(show, canvas, child);
 			}
 		}
 
@@ -349,19 +392,21 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 					NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
 					NEMOSHOW_CANVAS_CC(canvas, canvas)->concat(*NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(item->matrix), matrix));
 
-					nemoshow_canvas_render_item(canvas, child->sub, item, style);
+					nemoshow_canvas_render_item(show, canvas, child->sub, item, style);
 
 					NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
 				} else if (NEMOSHOW_ITEM_CC(item, matrix) != NULL) {
 					NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
 					NEMOSHOW_CANVAS_CC(canvas, canvas)->concat(*NEMOSHOW_ITEM_CC(item, matrix));
 
-					nemoshow_canvas_render_item(canvas, child->sub, item, style);
+					nemoshow_canvas_render_item(show, canvas, child->sub, item, style);
 
 					NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
 				} else {
-					nemoshow_canvas_render_item(canvas, child->sub, item, style);
+					nemoshow_canvas_render_item(show, canvas, child->sub, item, style);
 				}
+			} else if (child->type == NEMOSHOW_LOOP_TYPE) {
+				nemoshow_canvas_render_loop(show, canvas, child);
 			}
 		}
 

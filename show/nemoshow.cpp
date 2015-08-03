@@ -195,6 +195,7 @@ static struct showone *nemoshow_create_one(struct xmlnode *node)
 
 static int nemoshow_load_one(struct nemoshow *show, struct showone *loop, struct xmlnode *node);
 static int nemoshow_load_item(struct nemoshow *show, struct showone *item, struct xmlnode *node);
+static int nemoshow_load_loop(struct nemoshow *show, struct showone *item, struct xmlnode *node);
 static int nemoshow_load_canvas(struct nemoshow *show, struct showone *canvas, struct xmlnode *node);
 static int nemoshow_load_matrix(struct nemoshow *show, struct showone *matrix, struct xmlnode *node);
 static int nemoshow_load_scene(struct nemoshow *show, struct showone *scene, struct xmlnode *node);
@@ -222,7 +223,6 @@ static int nemoshow_load_one(struct nemoshow *show, struct showone *parent, stru
 
 static int nemoshow_load_item(struct nemoshow *show, struct showone *item, struct xmlnode *node)
 {
-	struct showitem *ione = NEMOSHOW_ITEM(item);
 	struct xmlnode *child;
 	struct showone *one;
 
@@ -243,6 +243,28 @@ static int nemoshow_load_item(struct nemoshow *show, struct showone *item, struc
 	return 0;
 }
 
+static int nemoshow_load_loop(struct nemoshow *show, struct showone *loop, struct xmlnode *node)
+{
+	struct xmlnode *child;
+	struct showone *one;
+
+	nemolist_for_each(child, &node->children, link) {
+		one = nemoshow_create_one(child);
+		if (one != NULL) {
+			NEMOBOX_APPEND(show->ones, show->sones, show->nones, one);
+
+			if (one->type == NEMOSHOW_ITEM_TYPE) {
+				nemoshow_load_item(show, one, child);
+			}
+
+			NEMOBOX_APPEND(loop->children, loop->schildren, loop->nchildren, one);
+			one->parent = loop;
+		}
+	}
+
+	return 0;
+}
+
 static int nemoshow_load_canvas(struct nemoshow *show, struct showone *canvas, struct xmlnode *node)
 {
 	struct showcanvas *cone = NEMOSHOW_CANVAS(canvas);
@@ -255,7 +277,7 @@ static int nemoshow_load_canvas(struct nemoshow *show, struct showone *canvas, s
 			NEMOBOX_APPEND(show->ones, show->sones, show->nones, one);
 
 			if (one->type == NEMOSHOW_LOOP_TYPE) {
-				nemoshow_load_one(show, one, child);
+				nemoshow_load_loop(show, one, child);
 			} else if (one->type == NEMOSHOW_ITEM_TYPE) {
 				nemoshow_load_item(show, one, child);
 			}
@@ -419,6 +441,8 @@ void nemoshow_update_expression(struct nemoshow *show)
 			nemoattr_setd(attr->ref,
 					nemoshow_expr_dispatch_expression(show->expr, attr->text));
 		}
+
+		nemoshow_one_dirty(one);
 	}
 }
 
@@ -437,6 +461,34 @@ void nemoshow_update_one_expression(struct nemoshow *show, struct showone *one)
 	for (i = 0; i < one->nchildren; i++) {
 		nemoshow_update_one_expression(show, one->children[i]);
 	}
+
+	nemoshow_one_dirty(one);
+}
+
+static inline void nemoshow_arrange_one_in(struct nemoshow *show, struct showone *one)
+{
+	struct showone *child;
+	int i;
+
+	if (one->type == NEMOSHOW_SET_TYPE) {
+		nemoshow_sequence_arrange_set(show, one);
+	} else if (one->type == NEMOSHOW_EASE_TYPE) {
+		nemoshow_ease_arrange(show, one);
+	} else if (one->type == NEMOSHOW_CANVAS_TYPE && one->sub != NEMOSHOW_CANVAS_SCENE_TYPE) {
+		nemoshow_canvas_arrange(show, one);
+	} else if (one->type == NEMOSHOW_ITEM_TYPE) {
+		nemoshow_item_arrange(show, one);
+	} else if (one->type == NEMOSHOW_MATRIX_TYPE) {
+		nemoshow_matrix_arrange(show, one);
+	} else if (one->type == NEMOSHOW_CAMERA_TYPE) {
+		nemoshow_camera_arrange(show, one);
+	}
+
+	for (i = 0; i < one->nchildren; i++) {
+		child = one->children[i];
+
+		nemoshow_arrange_one_in(show, child);
+	}
 }
 
 void nemoshow_arrange_one(struct nemoshow *show)
@@ -447,19 +499,7 @@ void nemoshow_arrange_one(struct nemoshow *show)
 	for (i = 0; i < show->nones; i++) {
 		one = show->ones[i];
 
-		if (one->type == NEMOSHOW_SET_TYPE) {
-			nemoshow_sequence_arrange_set(show, one);
-		} else if (one->type == NEMOSHOW_EASE_TYPE) {
-			nemoshow_ease_arrange(show, one);
-		} else if (one->type == NEMOSHOW_CANVAS_TYPE && one->sub != NEMOSHOW_CANVAS_SCENE_TYPE) {
-			nemoshow_canvas_arrange(show, one);
-		} else if (one->type == NEMOSHOW_ITEM_TYPE) {
-			nemoshow_item_arrange(show, one);
-		} else if (one->type == NEMOSHOW_MATRIX_TYPE) {
-			nemoshow_matrix_arrange(show, one);
-		} else if (one->type == NEMOSHOW_CAMERA_TYPE) {
-			nemoshow_camera_arrange(show, one);
-		}
+		nemoshow_arrange_one_in(show, one);
 	}
 
 	for (i = 0; i < show->nones; i++) {
@@ -471,6 +511,22 @@ void nemoshow_arrange_one(struct nemoshow *show)
 	}
 }
 
+static inline void nemoshow_update_one_in(struct nemoshow *show, struct showone *one)
+{
+	struct showone *child;
+	int i;
+
+	if (one->dirty != 0) {
+		one->update(show, one);
+
+		one->dirty = 0;
+	}
+
+	for (i = 0; i < one->nchildren; i++) {
+		nemoshow_update_one_in(show, child);
+	}
+}
+
 void nemoshow_update_one(struct nemoshow *show)
 {
 	struct showone *one;
@@ -479,11 +535,7 @@ void nemoshow_update_one(struct nemoshow *show)
 	for (i = 0; i < show->nones; i++) {
 		one = show->ones[i];
 
-		if (one->dirty != 0) {
-			one->update(show, one);
-
-			one->dirty = 0;
-		}
+		nemoshow_update_one_in(show, one);
 	}
 }
 
