@@ -33,6 +33,8 @@ struct showone *nemoshow_item_create(int type)
 	NEMOSHOW_ITEM_CC(item, path) = NULL;
 	NEMOSHOW_ITEM_CC(item, points) = NULL;
 
+	item->alpha = 1.0f;
+
 	one = &item->base;
 	one->type = NEMOSHOW_ITEM_TYPE;
 	one->sub = type;
@@ -168,13 +170,13 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 		if (item->fill != 0) {
 			NEMOSHOW_ITEM_CC(item, fill)->setStyle(SkPaint::kFill_Style);
 			NEMOSHOW_ITEM_CC(item, fill)->setColor(
-					SkColorSetRGB(item->fills[2], item->fills[1], item->fills[0]));
+					SkColorSetARGB(255.0f * item->alpha, item->fills[2], item->fills[1], item->fills[0]));
 		}
 		if (item->stroke != 0) {
 			NEMOSHOW_ITEM_CC(item, stroke)->setStyle(SkPaint::kStroke_Style);
 			NEMOSHOW_ITEM_CC(item, stroke)->setStrokeWidth(item->stroke_width);
 			NEMOSHOW_ITEM_CC(item, stroke)->setColor(
-					SkColorSetRGB(item->strokes[2], item->strokes[1], item->strokes[0]));
+					SkColorSetARGB(255.0f * item->alpha, item->strokes[2], item->strokes[1], item->strokes[0]));
 		}
 	}
 
