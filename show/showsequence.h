@@ -14,7 +14,7 @@ NEMO_BEGIN_EXTERN_C
 #include <showone.h>
 
 #define	NEMOSHOW_SEQUENCE_TYPE_MAX			(32)
-#define	NEMOSHOW_SEQUENCE_SET_ATTR_MAX	(8)
+#define	NEMOSHOW_SEQUENCE_SET_ATTR_MAX	(16)
 
 struct nemoshow;
 struct showone;
