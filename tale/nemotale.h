@@ -89,6 +89,11 @@ static inline void nemotale_resize(struct nemotale *tale, int32_t width, int32_t
 	if (tale->viewport.enable == 0) {
 		tale->viewport.width = width;
 		tale->viewport.height = height;
+	} else {
+		tale->viewport.sx = (double)tale->viewport.width / (double)tale->width;
+		tale->viewport.sy = (double)tale->viewport.height / (double)tale->height;
+		tale->viewport.rx = (double)tale->width / (double)tale->viewport.width;
+		tale->viewport.ry = (double)tale->height / (double)tale->viewport.height;
 	}
 }
 
