@@ -293,7 +293,6 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 				NEMOSHOW_ITEM_CC(item, points) = new SkPoint[strlen(item->text)];
 
 				item->textwidth = 0.0f;
-				item->textheight = 0.0f;
 
 				for (i = 0; i < strlen(item->text); i++) {
 					NEMOSHOW_ITEM_CC(item, points)[i].set(
@@ -301,8 +300,9 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 							item->textheight + item->y - metrics.fAscent);
 
 					item->textwidth += hbglyphspos[i].x_advance * fontscale;
-					item->textheight += hbglyphspos[i].y_advance * fontscale;
 				}
+
+				item->textheight = metrics.fDescent - metrics.fAscent;
 
 				hb_buffer_destroy(hbbuffer);
 			}
