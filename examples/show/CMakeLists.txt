@@ -27,7 +27,7 @@ TARGET_LINK_LIBRARIES(show-simple
 
 add_executable(show-tale
 	show-tale.c
-	talehelper.c
+	showhelper.c
 	)
 
 TARGET_LINK_LIBRARIES(show-tale

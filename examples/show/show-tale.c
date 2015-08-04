@@ -9,22 +9,13 @@
 #include <nemocanvas.h>
 #include <nemoegl.h>
 #include <nemoshow.h>
-#include <talehelper.h>
-#include <pixmanhelper.h>
+#include <showhelper.h>
 #include <nemomisc.h>
-
-struct showcontext {
-	struct eglcanvas *canvas;
-
-	struct nemotale *tale;
-	struct nemoshow *show;
-	struct showone *scene;
-};
 
 static void nemoshow_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
 {
-	struct showcontext *context = (struct showcontext *)nemotale_get_userdata(tale);
-	struct nemocanvas *canvas = NTEGL_CANVAS(context->canvas);
+	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
+	struct nemocanvas *canvas = NEMOSHOW_AT(show, canvas);
 	uint32_t id = nemotale_node_get_id(node);
 
 	if (id == 1) {
@@ -47,7 +38,6 @@ static void nemoshow_dispatch_tale_event(struct nemotale *tale, struct talenode 
 
 			ntaps = nemotale_get_node_taps(tale, node, taps, type);
 			if (ntaps == 1) {
-				struct nemoshow *show = context->show;
 				struct showtransition *trans;
 
 				trans = nemoshow_transition_create(
@@ -68,113 +58,39 @@ static void nemoshow_dispatch_tale_event(struct nemotale *tale, struct talenode 
 	}
 }
 
-static void nemoshow_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t width, int32_t height)
-{
-	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
-	struct showcontext *context = (struct showcontext *)nemotale_get_userdata(tale);
-
-	nemotool_resize_egl_canvas(context->canvas, width, height);
-
-	nemoshow_set_size(context->show, width, height);
-
-	nemoshow_render_one(context->show);
-
-	nemotale_composite_egl_full(tale);
-}
-
-static void nemoshow_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t secs, uint32_t nsecs)
-{
-	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
-	struct showcontext *context = (struct showcontext *)nemotale_get_userdata(tale);
-	struct nemoshow *show = context->show;
-
-	if (secs == 0 && nsecs == 0) {
-		nemocanvas_feedback(canvas);
-	} else if (nemoshow_has_transition(show) != 0) {
-		nemoshow_dispatch_transition(show, secs * 1000 + nsecs / 1000000);
-
-		nemocanvas_feedback(canvas);
-
-		nemoshow_render_one(show);
-	}
-
-	nemotale_composite_egl(tale, NULL);
-}
-
 int main(int argc, char *argv[])
 {
-	struct showcontext *context;
 	struct nemotool *tool;
-	struct eglcontext *egl;
-	struct eglcanvas *canvas;
-	struct nemotale *tale;
 	struct nemoshow *show;
-	struct showone *scene;
-	int32_t width = 500, height = 500;
-
-	context = (struct showcontext *)malloc(sizeof(struct showcontext));
-	if (context == NULL)
-		return -1;
-	memset(context, 0, sizeof(struct showcontext));
 
 	tool = nemotool_create();
 	if (tool == NULL)
 		return -1;
 	nemotool_connect_wayland(tool, NULL);
 
-	egl = nemotool_create_egl(tool);
-
-	context->canvas = canvas = nemotool_create_egl_canvas(egl, width, height);
-	nemocanvas_set_nemosurface(NTEGL_CANVAS(canvas), NEMO_SHELL_SURFACE_TYPE_NORMAL);
-	nemocanvas_set_dispatch_resize(NTEGL_CANVAS(canvas), nemoshow_dispatch_canvas_resize);
-	nemocanvas_set_dispatch_frame(NTEGL_CANVAS(canvas), nemoshow_dispatch_canvas_frame);
-
-	context->tale = tale = nemotale_create_gl();
-	nemotale_set_backend(tale,
-			nemotale_create_egl(
-				NTEGL_DISPLAY(egl),
-				NTEGL_CONTEXT(egl),
-				NTEGL_CONFIG(egl),
-				(EGLNativeWindowType)NTEGL_WINDOW(canvas)));
-	nemotale_attach_canvas(tale, NTEGL_CANVAS(canvas), nemoshow_dispatch_tale_event);
-	nemotale_set_userdata(tale, context);
-
-	nemoshow_initialize();
-
-	context->show = show = nemoshow_create();
-	nemoshow_set_tale(show, tale);
-	nemoshow_set_userdata(show, context);
-
+	show = nemoshow_create_on_tale(tool, 500, 500, nemoshow_dispatch_tale_event);
+	if (show == NULL)
+		return -1;
 	nemoshow_load_xml(show, argv[1]);
 	nemoshow_arrange_one(show);
 
-	context->scene = scene = nemoshow_search_one(show, "scene0");
-	nemoshow_set_scene(show, scene);
+	nemoshow_set_scene(show,
+			nemoshow_search_one(show, "scene0"));
+	nemoshow_set_size(show, 500, 500);
 
 	nemoshow_set_camera(show,
 			nemoshow_search_one(show, "camera0"));
 
-	nemoshow_set_size(show, width, height);
-
 	nemoshow_render_one(show);
 
-	nemocanvas_dispatch_frame(NTEGL_CANVAS(canvas));
+	nemocanvas_dispatch_frame(NEMOSHOW_AT(show, canvas));
 
 	nemotool_run(tool);
 
-	nemoshow_destroy(show);
-
-	nemoshow_finalize();
-
-	nemotale_destroy_gl(tale);
-
-	nemotool_destroy_egl_canvas(canvas);
-	nemotool_destroy_egl(egl);
+	nemoshow_destroy_on_tale(show);
 
 	nemotool_disconnect_wayland(tool);
 	nemotool_destroy(tool);
-
-	free(context);
 
 	return 0;
 }

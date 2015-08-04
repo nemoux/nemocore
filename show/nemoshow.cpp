@@ -667,6 +667,9 @@ int nemoshow_set_size(struct nemoshow *show, uint32_t width, uint32_t height)
 	struct showone *child;
 	int i;
 
+	if (show->scene == NULL)
+		return 0;
+
 	if (show->width == width && show->height == height)
 		return 0;
 

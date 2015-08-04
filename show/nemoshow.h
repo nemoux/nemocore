@@ -46,6 +46,7 @@ struct nemoshow {
 
 	struct nemolist transition_list;
 
+	void *context;
 	void *userdata;
 };
 
@@ -89,6 +90,16 @@ extern void nemoshow_dump_all(struct nemoshow *show, FILE *out);
 static inline void nemoshow_set_tale(struct nemoshow *show, struct nemotale *tale)
 {
 	show->tale = tale;
+}
+
+static inline void nemoshow_set_context(struct nemoshow *show, void *context)
+{
+	show->context = context;
+}
+
+static inline void *nemoshow_get_context(struct nemoshow *show)
+{
+	return show->context;
 }
 
 static inline void nemoshow_set_userdata(struct nemoshow *show, void *data)
