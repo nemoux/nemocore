@@ -140,6 +140,7 @@ int nemoshow_sequence_arrange_set(struct nemoshow *show, struct showone *one)
 					continue;
 				set->tattrs[set->nattrs] = attr;
 				set->eattrs[set->nattrs] = nemoobject_iget(&one->object, i);
+				set->types[set->nattrs] = NEMOSHOW_DOUBLE_PROP;
 				set->nattrs++;
 			} else if (prop->type == NEMOSHOW_COLOR_PROP) {
 				char atname[NEMOSHOW_ATTR_NAME_MAX];
@@ -150,6 +151,7 @@ int nemoshow_sequence_arrange_set(struct nemoshow *show, struct showone *one)
 					continue;
 				set->tattrs[set->nattrs] = attr;
 				set->eattrs[set->nattrs] = nemoobject_get(&one->object, atname);
+				set->types[set->nattrs] = NEMOSHOW_DOUBLE_PROP;
 				set->nattrs++;
 
 				snprintf(atname, NEMOSHOW_ATTR_NAME_MAX, "%s:g", name);
@@ -158,6 +160,7 @@ int nemoshow_sequence_arrange_set(struct nemoshow *show, struct showone *one)
 					continue;
 				set->tattrs[set->nattrs] = attr;
 				set->eattrs[set->nattrs] = nemoobject_get(&one->object, atname);
+				set->types[set->nattrs] = NEMOSHOW_DOUBLE_PROP;
 				set->nattrs++;
 
 				snprintf(atname, NEMOSHOW_ATTR_NAME_MAX, "%s:b", name);
@@ -166,6 +169,7 @@ int nemoshow_sequence_arrange_set(struct nemoshow *show, struct showone *one)
 					continue;
 				set->tattrs[set->nattrs] = attr;
 				set->eattrs[set->nattrs] = nemoobject_get(&one->object, atname);
+				set->types[set->nattrs] = NEMOSHOW_DOUBLE_PROP;
 				set->nattrs++;
 
 				snprintf(atname, NEMOSHOW_ATTR_NAME_MAX, "%s:a", name);
@@ -174,9 +178,16 @@ int nemoshow_sequence_arrange_set(struct nemoshow *show, struct showone *one)
 					continue;
 				set->tattrs[set->nattrs] = attr;
 				set->eattrs[set->nattrs] = nemoobject_get(&one->object, atname);
+				set->types[set->nattrs] = NEMOSHOW_DOUBLE_PROP;
 				set->nattrs++;
-			} else if (prop->type == NEMOSHOW_INTEGER_PROP) {
 			} else if (prop->type == NEMOSHOW_STRING_PROP) {
+				attr = nemoobject_get(&src->object, name);
+				if (attr == NULL)
+					continue;
+				set->tattrs[set->nattrs] = attr;
+				set->eattrs[set->nattrs] = nemoobject_iget(&one->object, i);
+				set->types[set->nattrs] = NEMOSHOW_STRING_PROP;
+				set->nattrs++;
 			}
 		}
 	}
@@ -200,7 +211,9 @@ static void nemoshow_sequence_prepare_frame(struct showone *one, uint32_t serial
 
 		if (set->src->serial <= serial) {
 			for (j = 0; j < set->nattrs; j++) {
-				set->sattrs[j] = nemoattr_getd(set->tattrs[j]);
+				if (set->types[j] == NEMOSHOW_DOUBLE_PROP) {
+					set->sattrs[j] = nemoattr_getd(set->tattrs[j]);
+				}
 			}
 		}
 	}
@@ -218,8 +231,11 @@ static void nemoshow_sequence_dispatch_frame(struct showone *one, double s, doub
 
 		if (set->src->serial <= serial) {
 			for (j = 0; j < set->nattrs; j++) {
-				nemoattr_setd(set->tattrs[j],
-						(nemoattr_getd(set->eattrs[j]) - set->sattrs[j]) * dt + set->sattrs[j]);
+				if (set->types[j] == NEMOSHOW_DOUBLE_PROP) {
+					double d = (nemoattr_getd(set->eattrs[j]) - set->sattrs[j]) * dt + set->sattrs[j];
+
+					nemoattr_setd(set->tattrs[j], d);
+				}
 			}
 
 			nemoshow_one_dirty(set->src);
@@ -238,7 +254,15 @@ static void nemoshow_sequence_finish_frame(struct showone *one, uint32_t serial)
 
 		if (set->src->serial <= serial) {
 			for (j = 0; j < set->nattrs; j++) {
-				nemoattr_setd(set->tattrs[j], nemoattr_getd(set->eattrs[j]));
+				if (set->types[j] == NEMOSHOW_DOUBLE_PROP) {
+					double d = nemoattr_getd(set->eattrs[j]);
+
+					nemoattr_setd(set->tattrs[j], d);
+				} else if (set->types[j] == NEMOSHOW_STRING_PROP) {
+					const char *s = nemoattr_gets(set->eattrs[j]);
+
+					nemoattr_sets(set->tattrs[j], s, strlen(s));
+				}
 			}
 
 			nemoshow_one_dirty(set->src);
