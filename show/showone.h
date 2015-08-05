@@ -99,6 +99,8 @@ static inline void nemoshow_one_update(struct nemoshow *show, struct showone *on
 static inline void nemoshow_one_setd(struct showone *one, const char *attr, double value)
 {
 	nemoobject_setd(&one->object, attr, value);
+
+	one->dirty = 1;
 }
 
 static inline double nemoshow_one_getd(struct showone *one, const char *attr)
@@ -109,6 +111,8 @@ static inline double nemoshow_one_getd(struct showone *one, const char *attr)
 static inline void nemoshow_one_sets(struct showone *one, const char *attr, const char *value)
 {
 	nemoobject_sets(&one->object, attr, value, strlen(value));
+
+	one->dirty = 1;
 }
 
 static inline const char *nemoshow_one_gets(struct showone *one, const char *attr)
