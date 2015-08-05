@@ -344,9 +344,7 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 	}
 
 	if (item->stroke != 0)
-		box.outset(
-				item->stroke_width / 2.0f + 1.0f,
-				item->stroke_width / 2.0f + 1.0f);
+		box.outset(item->stroke_width, item->stroke_width);
 
 	if (item->matrix != NULL) {
 		nemoshow_one_update(show, item->matrix);
