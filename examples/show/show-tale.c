@@ -41,15 +41,11 @@ static void nemoshow_dispatch_tale_event(struct nemotale *tale, struct talenode 
 				static int direction = 0;
 				struct showtransition *trans;
 				struct showone *sequence;
+				struct showone *var;
 
-				nemoshow_one_sets(
-						nemoshow_search_one(show, "var0"),
-						"d",
-						"mine");
-				nemoshow_one_dirty(
-						nemoshow_search_one(show, "var0"));
-				nemoshow_one_update(show,
-						nemoshow_search_one(show, "var0"));
+				var = nemoshow_search_one(show, "var0");
+				nemoshow_one_sets(var, "d", "mine");
+				nemoshow_one_update(show, var);
 
 				trans = nemoshow_transition_create(
 						nemoshow_search_one(show, "ease0"),

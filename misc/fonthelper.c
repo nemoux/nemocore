@@ -154,9 +154,9 @@ const char *fontconfig_get_path(const char *fontfamily, const char *fontstyle, i
 	for (i = 0; i < config->nfonts; i++) {
 		info = config->fonts[i];
 
-		if (fontfamily == NULL || strcmp(info->fontfamily, fontfamily) != 0)
+		if (fontfamily != NULL && strcmp(info->fontfamily, fontfamily) != 0)
 			continue;
-		if (fontstyle == NULL || strcmp(info->fontstyle, fontstyle) != 0)
+		if (fontstyle != NULL && strcmp(info->fontstyle, fontstyle) != 0)
 			continue;
 		if (info->fontslant != fontslant)
 			continue;
@@ -177,6 +177,7 @@ const char *fontconfig_get_path(const char *fontfamily, const char *fontstyle, i
 	info = (struct fontinfo *)malloc(sizeof(struct fontinfo));
 	if (info == NULL)
 		return NULL;
+	memset(info, 0, sizeof(struct fontinfo));
 
 	strcpy(info->fontpath, path);
 
