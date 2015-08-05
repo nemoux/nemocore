@@ -36,7 +36,7 @@ struct nemoshow *nemoshow_create(void)
 	if (show->expr == NULL)
 		goto err1;
 
-	show->stable = nemoshow_expr_create_symbol();
+	show->stable = nemoshow_expr_create_symbol_table();
 	if (show->stable == NULL)
 		goto err2;
 
@@ -62,7 +62,7 @@ err1:
 void nemoshow_destroy(struct nemoshow *show)
 {
 	nemoshow_expr_destroy(show->expr);
-	nemoshow_expr_destroy_symbol(show->stable);
+	nemoshow_expr_destroy_symbol_table(show->stable);
 
 	nemolist_remove(&show->transition_list);
 

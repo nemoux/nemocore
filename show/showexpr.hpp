@@ -11,11 +11,11 @@ typedef struct _showexpr {
 	expression_t expression;
 } showexpr_t;
 
-typedef struct _showsymbol {
+typedef struct _showsymtable {
 	symbol_table_t symbol_table;
-} showsymbol_t;
+} showsymtable_t;
 
-#define	NEMOSHOW_EXPR_CC(base, name)				(((showexpr_t *)((base)->cc))->name)
-#define	NEMOSHOW_SYMBOL_CC(base, name)			(((showsymbol_t *)((base)->cc))->name)
+#define	NEMOSHOW_EXPR_CC(base, name)					(((showexpr_t *)((base)->cc))->name)
+#define	NEMOSHOW_SYMTABLE_CC(base, name)			(((showsymtable_t *)((base)->cc))->name)
 
 #endif

@@ -35,7 +35,7 @@ struct nemoshow {
 	int nones, sones;
 
 	struct showexpr *expr;
-	struct showsymbol *stable;
+	struct showsymtable *stable;
 
 	struct nemotale *tale;
 

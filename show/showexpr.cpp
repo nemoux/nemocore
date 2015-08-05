@@ -31,9 +31,9 @@ void nemoshow_expr_destroy(struct showexpr *expr)
 	free(expr);
 }
 
-void nemoshow_expr_add_symbol_table(struct showexpr *expr, struct showsymbol *stable)
+void nemoshow_expr_add_symbol_table(struct showexpr *expr, struct showsymtable *stable)
 {
-	NEMOSHOW_EXPR_CC(expr, expression).register_symbol_table(NEMOSHOW_SYMBOL_CC(stable, symbol_table));
+	NEMOSHOW_EXPR_CC(expr, expression).register_symbol_table(NEMOSHOW_SYMTABLE_CC(stable, symbol_table));
 }
 
 double nemoshow_expr_dispatch_expression(struct showexpr *expr, const char *text)
@@ -44,51 +44,76 @@ double nemoshow_expr_dispatch_expression(struct showexpr *expr, const char *text
 	return NEMOSHOW_EXPR_CC(expr, expression).value();
 }
 
-struct showsymbol *nemoshow_expr_create_symbol(void)
+struct showsymtable *nemoshow_expr_create_symbol_table(void)
 {
-	struct showsymbol *stable;
+	struct showsymtable *stable;
 
-	stable = (struct showsymbol *)malloc(sizeof(struct showsymbol));
+	stable = (struct showsymtable *)malloc(sizeof(struct showsymtable));
 	if (stable == NULL)
 		return NULL;
-	memset(stable, 0, sizeof(struct showsymbol));
+	memset(stable, 0, sizeof(struct showsymtable));
 
-	stable->cc = new showsymbol_t;
+	stable->cc = new showsymtable_t;
 
-	NEMOSHOW_SYMBOL_CC(stable, symbol_table).add_constants();
+	stable->symbols = (struct showsymbol **)malloc(sizeof(struct showsymbol *) * 8);
+	stable->nsymbols = 0;
+	stable->ssymbols = 8;
+
+	NEMOSHOW_SYMTABLE_CC(stable, symbol_table).add_constants();
 
 	return stable;
 }
 
-void nemoshow_expr_destroy_symbol(struct showsymbol *stable)
+void nemoshow_expr_destroy_symbol_table(struct showsymtable *stable)
 {
-	delete static_cast<showsymbol_t *>(stable->cc);
+	delete static_cast<showsymtable_t *>(stable->cc);
 
+	free(stable->symbols);
 	free(stable);
 }
 
-int nemoshow_expr_add_symbol(struct showsymbol *stable, const char *name, double value)
+struct showsymbol *nemoshow_expr_create_symbol(void)
 {
+	struct showsymbol *symbol;
+
+	symbol = (struct showsymbol *)malloc(sizeof(struct showsymbol));
+	if (symbol == NULL)
+		return NULL;
+	memset(symbol, 0, sizeof(struct showsymbol));
+
+	return symbol;
+}
+
+void nemoshow_expr_destroy_symbol(struct showsymbol *symbol)
+{
+	free(symbol);
+}
+
+int nemoshow_expr_add_symbol(struct showsymtable *stable, const char *name, double value)
+{
+	struct showsymbol *symbol;
 	int i;
-	int r = 0;
 
-	for (i = 0; i < NEMOSHOW_EXPR_SYMBOL_MAX; i++) {
-		if (strcmp(stable->names[i], name) == 0) {
-			break;
-		} else if (stable->names[i][0] == '\0') {
-			strcpy(stable->names[i], name);
+	for (i = 0; i < stable->nsymbols; i++) {
+		symbol = stable->symbols[i];
 
-			break;
+		if (strcmp(symbol->name, name) == 0) {
+			symbol->value = value;
+
+			return 1;
 		}
 	}
 
-	if (i < NEMOSHOW_EXPR_SYMBOL_MAX) {
-		stable->vars[i] = value;
+	symbol = nemoshow_expr_create_symbol();
+	if (symbol == NULL)
+		return 0;
 
-		NEMOSHOW_SYMBOL_CC(stable, symbol_table).add_variable(name, stable->vars[i]);
+	strcpy(symbol->name, name);
+	symbol->value = value;
 
-		r = 1;
-	}
+	NEMOSHOW_SYMTABLE_CC(stable, symbol_table).add_variable(name, symbol->value);
 
-	return r;
+	NEMOBOX_APPEND(stable->symbols, stable->ssymbols, stable->nsymbols, symbol);
+
+	return 1;
 }
