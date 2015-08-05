@@ -18,6 +18,8 @@
 #include <nemobox.h>
 #include <nemomisc.h>
 
+#define	NEMOSHOW_ANTIALIAS_EPSILON			(3.0f)
+
 struct showone *nemoshow_item_create(int type)
 {
 	struct showitem *item;
@@ -344,7 +346,13 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 	}
 
 	if (item->stroke != 0)
-		box.outset(item->stroke_width, item->stroke_width);
+		box.outset(
+				item->stroke_width / 2.0f + NEMOSHOW_ANTIALIAS_EPSILON,
+				item->stroke_width / 2.0f + NEMOSHOW_ANTIALIAS_EPSILON);
+	else if (item->fill != 0)
+		box.outset(
+				NEMOSHOW_ANTIALIAS_EPSILON,
+				NEMOSHOW_ANTIALIAS_EPSILON);
 
 	if (item->matrix != NULL) {
 		nemoshow_one_update(show, item->matrix);
