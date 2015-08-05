@@ -111,6 +111,8 @@ int nemoshow_canvas_arrange(struct nemoshow *show, struct showone *one)
 
 		NEMOSHOW_CANVAS_CC(canvas, device) = new SkBitmapDevice(*NEMOSHOW_CANVAS_CC(canvas, bitmap));
 		NEMOSHOW_CANVAS_CC(canvas, canvas) = new SkCanvas(NEMOSHOW_CANVAS_CC(canvas, device));
+
+		NEMOSHOW_CANVAS_CC(canvas, damage) = new SkRegion;
 	} else if (one->sub == NEMOSHOW_CANVAS_PIXMAN_TYPE) {
 		canvas->node = nemotale_node_create_pixman(canvas->width, canvas->height);
 	} else if (one->sub == NEMOSHOW_CANVAS_OPENGL_TYPE) {
@@ -313,58 +315,8 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 	int i;
 
 	if (canvas->needs_full_redraw == 0) {
-		SkRegion region;
-
-		region.setEmpty();
-
-		for (i = 0; i < one->nchildren; i++) {
-			child = one->children[i];
-
-			if (child->redraw == 0)
-				continue;
-
-			if (child->type != NEMOSHOW_LOOP_TYPE) {
-				region.op(
-						SkIRect::MakeXYWH(
-							child->x * canvas->viewport.sx,
-							child->y * canvas->viewport.sy,
-							child->width * canvas->viewport.sx,
-							child->height * canvas->viewport.sy),
-						SkRegion::kUnion_Op);
-
-				nemotale_node_damage(canvas->node, child->x, child->y, child->width, child->height);
-			} else {
-				struct showloop *loop = NEMOSHOW_LOOP(one);
-				struct showone *lone;
-				int j, k;
-
-				for (j = loop->begin; j <= loop->end; j++) {
-					for (k = 0; k < one->nchildren; k++) {
-						lone = one->children[k];
-
-						nemoshow_update_symbol(show, one->id, j);
-						nemoshow_update_one_expression(show, lone);
-
-						nemoshow_item_update(show, lone);
-
-						region.op(
-								SkIRect::MakeXYWH(
-									lone->x * canvas->viewport.sx,
-									lone->y * canvas->viewport.sy,
-									lone->width * canvas->viewport.sx,
-									lone->height * canvas->viewport.sy),
-								SkRegion::kUnion_Op);
-
-						nemotale_node_damage(canvas->node, lone->x, lone->y, lone->width, lone->height);
-					}
-				}
-			}
-
-			child->redraw = 0;
-		}
-
 		NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
-		NEMOSHOW_CANVAS_CC(canvas, canvas)->clipRegion(region);
+		NEMOSHOW_CANVAS_CC(canvas, canvas)->clipRegion(*NEMOSHOW_CANVAS_CC(canvas, damage));
 
 		NEMOSHOW_CANVAS_CC(canvas, canvas)->clear(SK_ColorTRANSPARENT);
 
@@ -442,6 +394,8 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 
 		canvas->needs_full_redraw = 0;
 	}
+
+	NEMOSHOW_CANVAS_CC(canvas, damage)->setEmpty();
 }
 
 void nemoshow_canvas_render_back(struct nemoshow *show, struct showone *one)
@@ -490,4 +444,65 @@ int nemoshow_canvas_set_viewport(struct nemoshow *show, struct showone *one, dou
 	}
 
 	return 0;
+}
+
+static inline void nemoshow_canvas_dirty_one(struct nemoshow *show, struct showcanvas *canvas, struct showone *child)
+{
+	if (child->type != NEMOSHOW_LOOP_TYPE) {
+		NEMOSHOW_CANVAS_CC(canvas, damage)->op(
+				SkIRect::MakeXYWH(
+					child->x * canvas->viewport.sx,
+					child->y * canvas->viewport.sy,
+					child->width * canvas->viewport.sx,
+					child->height * canvas->viewport.sy),
+				SkRegion::kUnion_Op);
+
+		nemotale_node_damage(canvas->node, child->x, child->y, child->width, child->height);
+	} else {
+		struct showloop *loop = NEMOSHOW_LOOP(child);
+		struct showone *one;
+		int i, j;
+
+		for (i = loop->begin; i <= loop->end; i++) {
+			for (j = 0; j < child->nchildren; j++) {
+				one = child->children[j];
+
+				nemoshow_update_symbol(show, child->id, i);
+				nemoshow_update_one_expression(show, one);
+
+				nemoshow_item_update(show, one);
+
+				NEMOSHOW_CANVAS_CC(canvas, damage)->op(
+						SkIRect::MakeXYWH(
+							one->x * canvas->viewport.sx,
+							one->y * canvas->viewport.sy,
+							one->width * canvas->viewport.sx,
+							one->height * canvas->viewport.sy),
+						SkRegion::kUnion_Op);
+
+				nemotale_node_damage(canvas->node, one->x, one->y, one->width, one->height);
+			}
+		}
+	}
+}
+
+void nemoshow_canvas_dirty(struct nemoshow *show, struct showone *one)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+	struct showone *child;
+	int i;
+
+	for (i = 0; i < one->nchildren; i++) {
+		child = one->children[i];
+
+		if (child->dirty != 0) {
+			nemoshow_canvas_dirty_one(show, canvas, child);
+
+			child->update(show, child);
+
+			nemoshow_canvas_dirty_one(show, canvas, child);
+
+			child->dirty = 0;
+		}
+	}
 }

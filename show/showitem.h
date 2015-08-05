@@ -25,6 +25,7 @@ typedef enum {
 
 struct showmatrix;
 struct showfont;
+struct showcanvas;
 
 struct showitem {
 	struct showone base;

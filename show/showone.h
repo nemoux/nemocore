@@ -71,7 +71,7 @@ struct showone {
 	struct showattr **attrs;
 	int nattrs, sattrs;
 
-	int dirty, redraw;
+	int dirty;
 	int32_t x, y, width, height;
 };
 
@@ -86,6 +86,15 @@ extern void nemoshow_one_destroy_attr(struct showattr *attr);
 extern void nemoshow_one_dirty(struct showone *one);
 
 extern void nemoshow_one_dump(struct showone *one, FILE *out);
+
+static inline void nemoshow_one_update(struct nemoshow *show, struct showone *one)
+{
+	if (one->dirty != 0) {
+		one->update(show, one);
+
+		one->dirty = 0;
+	}
+}
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

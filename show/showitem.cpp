@@ -339,6 +339,8 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 
 			box.outset(item->fontsize, item->fontsize);
 		}
+	} else {
+		box = SkRect::MakeXYWH(0, 0, 0, 0);
 	}
 
 	if (item->stroke != 0)
@@ -346,10 +348,13 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 				item->stroke_width / 2.0f + 1.0f,
 				item->stroke_width / 2.0f + 1.0f);
 
-	if (item->matrix != NULL)
+	if (item->matrix != NULL) {
+		nemoshow_one_update(show, item->matrix);
+
 		NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(item->matrix), matrix)->mapRect(&box);
-	else if (NEMOSHOW_ITEM_CC(item, matrix) != NULL)
+	} else if (NEMOSHOW_ITEM_CC(item, matrix) != NULL) {
 		NEMOSHOW_ITEM_CC(item, matrix)->mapRect(&box);
+	}
 
 	one->x = MAX(floor(box.x()), 0);
 	one->y = MAX(floor(box.y()), 0);

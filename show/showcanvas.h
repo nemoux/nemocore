@@ -83,6 +83,8 @@ extern void nemoshow_canvas_render_scene(struct nemoshow *show, struct showone *
 
 extern int nemoshow_canvas_set_viewport(struct nemoshow *show, struct showone *one, double sx, double sy);
 
+extern void nemoshow_canvas_dirty(struct nemoshow *show, struct showone *one);
+
 static inline struct talenode *nemoshow_canvas_get_node(struct showone *one)
 {
 	return NEMOSHOW_CANVAS_AT(one, node);

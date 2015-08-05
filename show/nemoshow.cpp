@@ -541,22 +541,24 @@ void nemoshow_update_one(struct nemoshow *show)
 
 void nemoshow_render_one(struct nemoshow *show)
 {
-	struct showone *scene;
+	struct showone *scene = show->scene;
 	struct showone *one;
 	int i;
+
+	for (i = 0; i < scene->nchildren; i++) {
+		one = scene->children[i];
+
+		if (one->type == NEMOSHOW_CANVAS_TYPE &&
+				one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
+			nemoshow_canvas_dirty(show, one);
+		}
+	}
 
 	for (i = 0; i < show->nones; i++) {
 		one = show->ones[i];
 
-		if (one->dirty != 0) {
-			one->update(show, one);
-
-			one->redraw = 1;
-			one->dirty = 0;
-		}
+		nemoshow_one_update(show, one);
 	}
-
-	scene = show->scene;
 
 	for (i = 0; i < scene->nchildren; i++) {
 		one = scene->children[i];
