@@ -40,6 +40,7 @@ static void nemoshow_dispatch_tale_event(struct nemotale *tale, struct talenode 
 			if (ntaps == 1) {
 				static int direction = 0;
 				struct showtransition *trans;
+				struct showone *sequence;
 
 				trans = nemoshow_transition_create(
 						nemoshow_search_one(show, "ease0"),
@@ -47,12 +48,12 @@ static void nemoshow_dispatch_tale_event(struct nemotale *tale, struct talenode 
 						nemoshow_get_next_serial(show));
 
 				if ((direction++ % 2) == 0) {
-					nemoshow_transition_attach_sequence(trans,
-							nemoshow_search_one(show, "hour-hand-sequence"));
+					sequence = nemoshow_search_one(show, "hour_hand_sequence");
 				} else {
-					nemoshow_transition_attach_sequence(trans,
-							nemoshow_search_one(show, "hour-hand-sequence-r"));
+					sequence = nemoshow_search_one(show, "hour_hand_sequence_r");
 				}
+				nemoshow_update_one_expression(show, sequence);
+				nemoshow_transition_attach_sequence(trans, sequence);
 
 				nemoshow_attach_transition(show, trans);
 

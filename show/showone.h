@@ -14,9 +14,10 @@ NEMO_BEGIN_EXTERN_C
 #include <nemolist.h>
 #include <nemolistener.h>
 
-#define	NEMOSHOW_ID_MAX					(32)
-#define	NEMOSHOW_ATTR_MAX				(32)
-#define	NEMOSHOW_ATTR_NAME_MAX	(32)
+#define NEMOSHOW_ID_MAX					(32)
+#define NEMOSHOW_ATTR_MAX				(32)
+#define NEMOSHOW_ATTR_NAME_MAX	(32)
+#define NEMOSHOW_SYMBOL_MAX			(32)
 
 typedef enum {
 	NEMOSHOW_NONE_TYPE = 0,

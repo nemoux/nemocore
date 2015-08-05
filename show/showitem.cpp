@@ -164,6 +164,7 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	struct showone *child;
 	SkRect box;
+	char attr[NEMOSHOW_SYMBOL_MAX];
 	int i;
 
 	if (item->style == one) {
@@ -354,6 +355,15 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 	one->y = MAX(floor(box.y()), 0);
 	one->width = ceil(box.width());
 	one->height = ceil(box.height());
+
+	snprintf(attr, NEMOSHOW_SYMBOL_MAX, "%s_x", one->id);
+	nemoshow_update_symbol(show, attr, one->x);
+	snprintf(attr, NEMOSHOW_SYMBOL_MAX, "%s_y", one->id);
+	nemoshow_update_symbol(show, attr, one->y);
+	snprintf(attr, NEMOSHOW_SYMBOL_MAX, "%s_w", one->id);
+	nemoshow_update_symbol(show, attr, one->width);
+	snprintf(attr, NEMOSHOW_SYMBOL_MAX, "%s_h", one->id);
+	nemoshow_update_symbol(show, attr, one->height);
 
 	return 0;
 }
