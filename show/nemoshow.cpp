@@ -523,6 +523,8 @@ static inline void nemoshow_update_one_in(struct nemoshow *show, struct showone 
 	}
 
 	for (i = 0; i < one->nchildren; i++) {
+		child = one->children[i];
+
 		nemoshow_update_one_in(show, child);
 	}
 }

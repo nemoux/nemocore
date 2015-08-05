@@ -83,6 +83,8 @@ int main(int argc, char *argv[])
 		return -1;
 	nemoshow_load_xml(show, argv[1]);
 	nemoshow_arrange_one(show);
+	nemoshow_update_one(show);
+	nemoshow_update_expression(show);
 
 	nemoshow_set_scene(show,
 			nemoshow_search_one(show, "scene0"));
