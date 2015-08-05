@@ -38,13 +38,22 @@ static void nemoshow_dispatch_tale_event(struct nemotale *tale, struct talenode 
 
 			ntaps = nemotale_get_node_taps(tale, node, taps, type);
 			if (ntaps == 1) {
+				static int direction = 0;
 				struct showtransition *trans;
 
 				trans = nemoshow_transition_create(
 						nemoshow_search_one(show, "ease0"),
-						800, 100);
-				nemoshow_transition_attach_sequence(trans,
-						nemoshow_search_one(show, "hour-hand-sequence"));
+						800, 0,
+						nemoshow_get_next_serial(show));
+
+				if ((direction++ % 2) == 0) {
+					nemoshow_transition_attach_sequence(trans,
+							nemoshow_search_one(show, "hour-hand-sequence"));
+				} else {
+					nemoshow_transition_attach_sequence(trans,
+							nemoshow_search_one(show, "hour-hand-sequence-r"));
+				}
+
 				nemoshow_attach_transition(show, trans);
 
 				nemocanvas_dispatch_frame(canvas);

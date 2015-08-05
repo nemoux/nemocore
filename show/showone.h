@@ -54,6 +54,7 @@ struct showone {
 	char id[NEMOSHOW_ID_MAX];
 
 	struct nemoobject object;
+	uint32_t serial;
 
 	nemoshow_one_update_t update;
 	nemoshow_one_destroy_t destroy;

@@ -26,10 +26,12 @@ struct showtransition {
 	uint32_t stime;
 	uint32_t etime;
 
+	uint32_t serial;
+
 	struct nemolist link;
 };
 
-extern struct showtransition *nemoshow_transition_create(struct showone *ease, uint32_t duration, uint32_t delay);
+extern struct showtransition *nemoshow_transition_create(struct showone *ease, uint32_t duration, uint32_t delay, uint32_t serial);
 extern void nemoshow_transition_destroy(struct showtransition *trans);
 
 extern void nemoshow_transition_attach_sequence(struct showtransition *trans, struct showone *sequence);

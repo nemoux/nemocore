@@ -707,7 +707,7 @@ void nemoshow_detach_canvas(struct nemoshow *show, struct showone *one)
 	nemotale_detach_node(show->tale, canvas->node);
 }
 
-int nemoshow_attach_transition(struct nemoshow *show, struct showtransition *trans)
+void nemoshow_attach_transition(struct nemoshow *show, struct showtransition *trans)
 {
 	nemolist_insert(&show->transition_list, &trans->link);
 }

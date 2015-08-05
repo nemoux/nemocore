@@ -26,7 +26,8 @@ int main(int argc, char *argv[])
 
 	trans = nemoshow_transition_create(
 			nemoshow_search_one(show, "ease1"),
-			3000, 1000);
+			3000, 1000,
+			nemoshow_get_next_serial(show));
 	nemoshow_transition_attach_sequence(trans,
 			nemoshow_search_one(show, "hour-text-sequence"));
 

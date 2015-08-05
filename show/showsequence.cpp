@@ -189,7 +189,7 @@ int nemoshow_sequence_update_set(struct nemoshow *show, struct showone *one)
 	return 0;
 }
 
-static void nemoshow_sequence_prepare_frame(struct showone *one)
+static void nemoshow_sequence_prepare_frame(struct showone *one, uint32_t serial)
 {
 	struct showframe *frame = NEMOSHOW_FRAME(one);
 	struct showset *set;
@@ -198,13 +198,15 @@ static void nemoshow_sequence_prepare_frame(struct showone *one)
 	for (i = 0; i < one->nchildren; i++) {
 		set = NEMOSHOW_SET(one->children[i]);
 
-		for (j = 0; j < set->nattrs; j++) {
-			set->sattrs[j] = nemoattr_getd(set->tattrs[j]);
+		if (set->src->serial <= serial) {
+			for (j = 0; j < set->nattrs; j++) {
+				set->sattrs[j] = nemoattr_getd(set->tattrs[j]);
+			}
 		}
 	}
 }
 
-static void nemoshow_sequence_dispatch_frame(struct showone *one, double s, double t)
+static void nemoshow_sequence_dispatch_frame(struct showone *one, double s, double t, uint32_t serial)
 {
 	struct showframe *frame = NEMOSHOW_FRAME(one);
 	struct showset *set;
@@ -214,16 +216,18 @@ static void nemoshow_sequence_dispatch_frame(struct showone *one, double s, doub
 	for (i = 0; i < one->nchildren; i++) {
 		set = NEMOSHOW_SET(one->children[i]);
 
-		for (j = 0; j < set->nattrs; j++) {
-			nemoattr_setd(set->tattrs[j],
-					(nemoattr_getd(set->eattrs[j]) - set->sattrs[j]) * dt + set->sattrs[j]);
-		}
+		if (set->src->serial <= serial) {
+			for (j = 0; j < set->nattrs; j++) {
+				nemoattr_setd(set->tattrs[j],
+						(nemoattr_getd(set->eattrs[j]) - set->sattrs[j]) * dt + set->sattrs[j]);
+			}
 
-		nemoshow_one_dirty(set->src);
+			nemoshow_one_dirty(set->src);
+		}
 	}
 }
 
-static void nemoshow_sequence_finish_frame(struct showone *one)
+static void nemoshow_sequence_finish_frame(struct showone *one, uint32_t serial)
 {
 	struct showframe *frame = NEMOSHOW_FRAME(one);
 	struct showset *set;
@@ -232,42 +236,62 @@ static void nemoshow_sequence_finish_frame(struct showone *one)
 	for (i = 0; i < one->nchildren; i++) {
 		set = NEMOSHOW_SET(one->children[i]);
 
-		for (j = 0; j < set->nattrs; j++) {
-			nemoattr_setd(set->tattrs[j], nemoattr_getd(set->eattrs[j]));
-		}
+		if (set->src->serial <= serial) {
+			for (j = 0; j < set->nattrs; j++) {
+				nemoattr_setd(set->tattrs[j], nemoattr_getd(set->eattrs[j]));
+			}
 
-		nemoshow_one_dirty(set->src);
+			nemoshow_one_dirty(set->src);
+		}
 	}
 }
 
-void nemoshow_sequence_prepare(struct showone *one)
+void nemoshow_sequence_prepare(struct showone *one, uint32_t serial)
 {
 	struct showsequence *sequence = NEMOSHOW_SEQUENCE(one);
+	struct showone *frame;
+	struct showone *set;
+	int i, j;
 
 	sequence->t = 0.0f;
 	sequence->iframe = 0;
 
-	nemoshow_sequence_prepare_frame(one->children[sequence->iframe]);
+	one->serial = serial;
+
+	for (i = 0; i < one->nchildren; i++) {
+		frame = one->children[i];
+
+		for (j = 0; j < frame->nchildren; j++) {
+			set = frame->children[j];
+
+			NEMOSHOW_SET_AT(set, src)->serial = serial;
+		}
+	}
+
+	nemoshow_sequence_prepare_frame(one->children[sequence->iframe], serial);
 }
 
-void nemoshow_sequence_dispatch(struct showone *one, double t)
+void nemoshow_sequence_dispatch(struct showone *one, double t, uint32_t serial)
 {
 	struct showsequence *sequence = NEMOSHOW_SEQUENCE(one);
+
+	if (one->serial > serial)
+		return;
 
 	if (sequence->iframe < one->nchildren) {
 		struct showframe *frame = NEMOSHOW_FRAME(one->children[sequence->iframe]);
 
 		if (t >= 1.0f) {
-			nemoshow_sequence_finish_frame(one->children[sequence->iframe]);
+			nemoshow_sequence_finish_frame(one->children[sequence->iframe], serial);
 		} else if (frame->t < t) {
-			nemoshow_sequence_finish_frame(one->children[sequence->iframe]);
+			nemoshow_sequence_finish_frame(one->children[sequence->iframe], serial);
 
 			sequence->t = frame->t;
 			sequence->iframe++;
 
-			nemoshow_sequence_prepare_frame(one->children[sequence->iframe]);
+			nemoshow_sequence_prepare_frame(one->children[sequence->iframe], serial);
 		} else {
-			nemoshow_sequence_dispatch_frame(one->children[sequence->iframe], sequence->t, t);
+			nemoshow_sequence_dispatch_frame(one->children[sequence->iframe], sequence->t, t, serial);
 		}
 	}
 }

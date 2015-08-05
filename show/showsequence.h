@@ -55,8 +55,8 @@ extern void nemoshow_sequence_destroy(struct showone *one);
 
 extern int nemoshow_sequence_update(struct nemoshow *show, struct showone *one);
 
-extern void nemoshow_sequence_prepare(struct showone *one);
-extern void nemoshow_sequence_dispatch(struct showone *one, double t);
+extern void nemoshow_sequence_prepare(struct showone *one, uint32_t serial);
+extern void nemoshow_sequence_dispatch(struct showone *one, double t, uint32_t serial);
 
 extern struct showone *nemoshow_sequence_create_frame(void);
 extern void nemoshow_sequence_destroy_frame(struct showone *one);

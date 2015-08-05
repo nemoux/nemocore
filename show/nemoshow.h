@@ -46,6 +46,8 @@ struct nemoshow {
 
 	struct nemolist transition_list;
 
+	uint32_t serial;
+
 	void *context;
 	void *userdata;
 };
@@ -80,7 +82,7 @@ extern int nemoshow_set_size(struct nemoshow *show, uint32_t width, uint32_t hei
 extern int nemoshow_attach_canvas(struct nemoshow *show, struct showone *one);
 extern void nemoshow_detach_canvas(struct nemoshow *show, struct showone *one);
 
-extern int nemoshow_attach_transition(struct nemoshow *show, struct showtransition *trans);
+extern void nemoshow_attach_transition(struct nemoshow *show, struct showtransition *trans);
 extern void nemoshow_detach_transition(struct nemoshow *show, struct showtransition *trans);
 extern void nemoshow_dispatch_transition(struct nemoshow *show, uint32_t msecs);
 extern int nemoshow_has_transition(struct nemoshow *show);
@@ -90,6 +92,11 @@ extern void nemoshow_dump_all(struct nemoshow *show, FILE *out);
 static inline void nemoshow_set_tale(struct nemoshow *show, struct nemotale *tale)
 {
 	show->tale = tale;
+}
+
+static inline uint32_t nemoshow_get_next_serial(struct nemoshow *show)
+{
+	return show->serial++;
 }
 
 static inline void nemoshow_set_context(struct nemoshow *show, void *context)
