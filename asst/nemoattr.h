@@ -81,7 +81,7 @@ static inline double nemoattr_getd(struct nemoattr *attr)
 
 static inline void nemoattr_sets(struct nemoattr *attr, const char *s, int size)
 {
-	if (attr->needs_free != 0 && attr->size < size) {
+	if (attr->needs_free != 0 && attr->size < size + 1) {
 		free(attr->p);
 
 		attr->p = malloc(size + 1);
@@ -298,7 +298,7 @@ static inline void nemoobject_sets(struct nemoobject *object, const char *name, 
 
 	attr = nemoobject_get(object, name);
 	if (attr != NULL) {
-		if (attr->needs_free != 0 && attr->size < size) {
+		if (attr->needs_free != 0 && attr->size < size + 1) {
 			free(attr->p);
 
 			attr->p = malloc(size + 1);
