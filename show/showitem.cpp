@@ -300,7 +300,7 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 				for (i = 0; i < strlen(item->text); i++) {
 					NEMOSHOW_ITEM_CC(item, points)[i].set(
 							hbglyphspos[i].x_offset * fontscale + item->textwidth + item->x,
-							item->textheight + item->y - metrics.fAscent);
+							item->y - metrics.fAscent);
 
 					item->textwidth += hbglyphspos[i].x_advance * fontscale;
 				}
