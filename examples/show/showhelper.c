@@ -29,7 +29,6 @@ static void nemoshow_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 {
 	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
 	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
-	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 
 	if (secs == 0 && nsecs == 0) {
 		nemocanvas_feedback(canvas);

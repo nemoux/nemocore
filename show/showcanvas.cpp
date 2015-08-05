@@ -467,20 +467,22 @@ static inline void nemoshow_canvas_dirty_one(struct nemoshow *show, struct showc
 			for (j = 0; j < child->nchildren; j++) {
 				one = child->children[j];
 
-				nemoshow_update_symbol(show, child->id, i);
-				nemoshow_update_one_expression(show, one);
+				if (one->type == NEMOSHOW_ITEM_TYPE) {
+					nemoshow_update_symbol(show, child->id, i);
+					nemoshow_update_one_expression(show, one);
 
-				nemoshow_item_update(show, one);
+					nemoshow_item_update(show, one);
 
-				NEMOSHOW_CANVAS_CC(canvas, damage)->op(
-						SkIRect::MakeXYWH(
-							one->x * canvas->viewport.sx,
-							one->y * canvas->viewport.sy,
-							one->width * canvas->viewport.sx,
-							one->height * canvas->viewport.sy),
-						SkRegion::kUnion_Op);
+					NEMOSHOW_CANVAS_CC(canvas, damage)->op(
+							SkIRect::MakeXYWH(
+								one->x * canvas->viewport.sx,
+								one->y * canvas->viewport.sy,
+								one->width * canvas->viewport.sx,
+								one->height * canvas->viewport.sy),
+							SkRegion::kUnion_Op);
 
-				nemotale_node_damage(canvas->node, one->x, one->y, one->width, one->height);
+					nemotale_node_damage(canvas->node, one->x, one->y, one->width, one->height);
+				}
 			}
 		}
 	}

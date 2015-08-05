@@ -291,7 +291,7 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 				fontscale = item->fontsize / item->font->max_advance_height;
 
 				if (NEMOSHOW_ITEM_CC(item, points) != NULL)
-					delete NEMOSHOW_ITEM_CC(item, points);
+					delete[] NEMOSHOW_ITEM_CC(item, points);
 
 				NEMOSHOW_ITEM_CC(item, points) = new SkPoint[strlen(item->text)];
 
