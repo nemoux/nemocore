@@ -438,7 +438,7 @@ int nemoshow_canvas_set_viewport(struct nemoshow *show, struct showone *one, dou
 		NEMOSHOW_CANVAS_CC(canvas, device) = new SkBitmapDevice(*NEMOSHOW_CANVAS_CC(canvas, bitmap));
 		NEMOSHOW_CANVAS_CC(canvas, canvas) = new SkCanvas(NEMOSHOW_CANVAS_CC(canvas, device));
 
-		one->dirty = 1;
+		nemoshow_one_dirty(one);
 
 		canvas->needs_full_redraw = 1;
 	}

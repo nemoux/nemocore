@@ -88,7 +88,7 @@ struct showone *nemoshow_search_one(struct nemoshow *show, const char *id)
 	return NULL;
 }
 
-static struct showone *nemoshow_create_one(struct xmlnode *node)
+static struct showone *nemoshow_create_one(struct nemoshow *show, struct xmlnode *node)
 {
 	struct showone *one = NULL;
 
@@ -142,13 +142,54 @@ static struct showone *nemoshow_create_one(struct xmlnode *node)
 		one = nemoshow_path_create(NEMOSHOW_TEXT_PATH);
 	} else if (strcmp(node->name, "camera") == 0) {
 		one = nemoshow_camera_create();
+	} else if (strcmp(node->name, "var") == 0) {
+		one = nemoshow_var_create();
 	}
 
 	if (one != NULL) {
 		int i;
 
 		for (i = 0; i < node->nattrs; i++) {
-			if (node->attrs[i*2+1][0] == '!') {
+			if (node->attrs[i*2+1][0] == '@') {
+				struct showone *vone;
+				struct showprop *prop;
+
+				vone = nemoshow_search_one(show, node->attrs[i*2+1] + 1);
+				if (vone != NULL) {
+					struct showvar *var = NEMOSHOW_VAR(vone);
+
+					prop = nemoshow_get_property(node->attrs[i*2+0]);
+					if (prop != NULL) {
+						const char *value = nemoobject_gets(&vone->object, "d");
+
+						if (prop->type == NEMOSHOW_STRING_PROP) {
+							nemoobject_sets(&one->object, node->attrs[i*2+0], value, strlen(value));
+						} else if (prop->type == NEMOSHOW_DOUBLE_PROP) {
+							nemoobject_setd(&one->object, node->attrs[i*2+0], strtod(value, NULL));
+						} else if (prop->type == NEMOSHOW_INTEGER_PROP) {
+							nemoobject_seti(&one->object, node->attrs[i*2+0], strtoul(value, NULL, 10));
+						} else if (prop->type == NEMOSHOW_COLOR_PROP) {
+							uint32_t c = nemoshow_color_parse(value);
+							char attr[NEMOSHOW_ATTR_NAME_MAX];
+
+							snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:r", node->attrs[i*2+0]);
+							nemoobject_setd(&one->object, attr, (double)NEMOSHOW_COLOR_UINT32_R(c));
+							snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:g", node->attrs[i*2+0]);
+							nemoobject_setd(&one->object, attr, (double)NEMOSHOW_COLOR_UINT32_G(c));
+							snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:b", node->attrs[i*2+0]);
+							nemoobject_setd(&one->object, attr, (double)NEMOSHOW_COLOR_UINT32_B(c));
+							snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:a", node->attrs[i*2+0]);
+							nemoobject_setd(&one->object, attr, (double)NEMOSHOW_COLOR_UINT32_A(c));
+
+							nemoobject_seti(&one->object, node->attrs[i*2+0], 1);
+						}
+					}
+
+					NEMOBOX_APPEND(vone->refs, vone->srefs, vone->nrefs, one);
+					NEMOBOX_APPEND(var->refs, var->srefs, var->nrefs,
+							nemoshow_var_create_ref(one, node->attrs[i*2+0], prop->type));
+				}
+			} else if (node->attrs[i*2+1][0] == '!') {
 				struct showattr *attr;
 
 				nemoobject_seti(&one->object, node->attrs[i*2+0], 0.0f);
@@ -209,7 +250,7 @@ static int nemoshow_load_one(struct nemoshow *show, struct showone *parent, stru
 	struct showone *one;
 
 	nemolist_for_each(child, &node->children, link) {
-		one = nemoshow_create_one(child);
+		one = nemoshow_create_one(show, child);
 		if (one != NULL) {
 			NEMOBOX_APPEND(show->ones, show->sones, show->nones, one);
 
@@ -227,7 +268,7 @@ static int nemoshow_load_item(struct nemoshow *show, struct showone *item, struc
 	struct showone *one;
 
 	nemolist_for_each(child, &node->children, link) {
-		one = nemoshow_create_one(child);
+		one = nemoshow_create_one(show, child);
 		if (one != NULL) {
 			NEMOBOX_APPEND(show->ones, show->sones, show->nones, one);
 
@@ -249,7 +290,7 @@ static int nemoshow_load_loop(struct nemoshow *show, struct showone *loop, struc
 	struct showone *one;
 
 	nemolist_for_each(child, &node->children, link) {
-		one = nemoshow_create_one(child);
+		one = nemoshow_create_one(show, child);
 		if (one != NULL) {
 			NEMOBOX_APPEND(show->ones, show->sones, show->nones, one);
 
@@ -272,7 +313,7 @@ static int nemoshow_load_canvas(struct nemoshow *show, struct showone *canvas, s
 	struct showone *one;
 
 	nemolist_for_each(child, &node->children, link) {
-		one = nemoshow_create_one(child);
+		one = nemoshow_create_one(show, child);
 		if (one != NULL) {
 			NEMOBOX_APPEND(show->ones, show->sones, show->nones, one);
 
@@ -297,7 +338,7 @@ static int nemoshow_load_matrix(struct nemoshow *show, struct showone *matrix, s
 	struct showone *one;
 
 	nemolist_for_each(child, &node->children, link) {
-		one = nemoshow_create_one(child);
+		one = nemoshow_create_one(show, child);
 		if (one != NULL) {
 			NEMOBOX_APPEND(show->ones, show->sones, show->nones, one);
 
@@ -320,7 +361,7 @@ static int nemoshow_load_scene(struct nemoshow *show, struct showone *scene, str
 	struct showone *one;
 
 	nemolist_for_each(child, &node->children, link) {
-		one = nemoshow_create_one(child);
+		one = nemoshow_create_one(show, child);
 		if (one != NULL) {
 			NEMOBOX_APPEND(show->ones, show->sones, show->nones, one);
 
@@ -348,7 +389,7 @@ static int nemoshow_load_frame(struct nemoshow *show, struct showone *frame, str
 	struct showone *one;
 
 	nemolist_for_each(child, &node->children, link) {
-		one = nemoshow_create_one(child);
+		one = nemoshow_create_one(show, child);
 		if (one != NULL) {
 			NEMOBOX_APPEND(show->ones, show->sones, show->nones, one);
 
@@ -366,7 +407,7 @@ static int nemoshow_load_sequence(struct nemoshow *show, struct showone *sequenc
 	struct showone *one;
 
 	nemolist_for_each(child, &node->children, link) {
-		one = nemoshow_create_one(child);
+		one = nemoshow_create_one(show, child);
 		if (one != NULL) {
 			NEMOBOX_APPEND(show->ones, show->sones, show->nones, one);
 
@@ -387,7 +428,7 @@ static int nemoshow_load_show(struct nemoshow *show, struct xmlnode *node)
 	struct showone *one;
 
 	nemolist_for_each(child, &node->children, link) {
-		one = nemoshow_create_one(child);
+		one = nemoshow_create_one(show, child);
 		if (one != NULL) {
 			NEMOBOX_APPEND(show->ones, show->sones, show->nones, one);
 

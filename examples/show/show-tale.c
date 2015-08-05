@@ -42,6 +42,15 @@ static void nemoshow_dispatch_tale_event(struct nemotale *tale, struct talenode 
 				struct showtransition *trans;
 				struct showone *sequence;
 
+				nemoshow_one_sets(
+						nemoshow_search_one(show, "var0"),
+						"d",
+						"mine");
+				nemoshow_one_dirty(
+						nemoshow_search_one(show, "var0"));
+				nemoshow_one_update(show,
+						nemoshow_search_one(show, "var0"));
+
 				trans = nemoshow_transition_create(
 						nemoshow_search_one(show, "ease0"),
 						800, 0,

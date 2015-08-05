@@ -33,6 +33,7 @@ typedef enum {
 	NEMOSHOW_MATRIX_TYPE = 10,
 	NEMOSHOW_PATH_TYPE = 11,
 	NEMOSHOW_CAMERA_TYPE = 12,
+	NEMOSHOW_VAR_TYPE = 13,
 	NEMOSHOW_LAST_TYPE
 } NemoShowOneType;
 
@@ -100,7 +101,7 @@ static inline void nemoshow_one_setd(struct showone *one, const char *attr, doub
 {
 	nemoobject_setd(&one->object, attr, value);
 
-	one->dirty = 1;
+	nemoshow_one_dirty(one);
 }
 
 static inline double nemoshow_one_getd(struct showone *one, const char *attr)
@@ -112,7 +113,7 @@ static inline void nemoshow_one_sets(struct showone *one, const char *attr, cons
 {
 	nemoobject_sets(&one->object, attr, value, strlen(value));
 
-	one->dirty = 1;
+	nemoshow_one_dirty(one);
 }
 
 static inline const char *nemoshow_one_gets(struct showone *one, const char *attr)
