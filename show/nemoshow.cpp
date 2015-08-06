@@ -152,6 +152,8 @@ static struct showone *nemoshow_create_one(struct nemoshow *show, struct xmlnode
 		one = nemoshow_stop_create();
 	} else if (strcmp(node->name, "var") == 0) {
 		one = nemoshow_var_create();
+	} else if (strcmp(node->name, "cons") == 0) {
+		one = nemoshow_cons_create();
 	}
 
 	if (one != NULL) {
