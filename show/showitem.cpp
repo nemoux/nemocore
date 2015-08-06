@@ -17,6 +17,7 @@
 #include <showpath.h>
 #include <showfont.h>
 #include <showfont.hpp>
+#include <showhelper.hpp>
 #include <nemoshow.h>
 #include <nemoxml.h>
 #include <nemobox.h>
@@ -291,6 +292,8 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 				}
 			}
 		}
+
+		nemoshow_helper_get_path_length(NEMOSHOW_ITEM_CC(item, path));
 	} else if (one->sub == NEMOSHOW_TEXT_ITEM) {
 		item->text = nemoobject_gets(&one->object, "d");
 		if (item->text != NULL) {

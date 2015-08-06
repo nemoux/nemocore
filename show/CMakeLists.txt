@@ -49,6 +49,7 @@ add_library(nemoshow SHARED
 	showvar.cpp
 	showcons.cpp
 	showfont.cpp
+	showhelper.cpp
 	showmisc.cpp
 	)
 
