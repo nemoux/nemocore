@@ -1,0 +1,61 @@
+#ifndef __NEMOSHOW_SHADER_H__
+#define __NEMOSHOW_SHADER_H__
+
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
+#include <stdint.h>
+
+#include <showone.h>
+
+typedef enum {
+	NEMOSHOW_NONE_SHADER = 0,
+	NEMOSHOW_LINEAR_GRADIENT_SHADER = 1,
+	NEMOSHOW_RADIAL_GRADIENT_SHADER = 2,
+	NEMOSHOW_LAST_SHADER
+} NemoShowGradientType;
+
+struct showstop {
+	struct showone base;
+
+	double offset;
+
+	uint32_t fill;
+	double fills[4];
+};
+
+struct showshader {
+	struct showone base;
+
+	double x0, y0;
+	double x1, y1;
+	double r;
+
+	void *cc;
+};
+
+#define NEMOSHOW_STOP(one)					((struct showstop *)container_of(one, struct showstop, base))
+#define	NEMOSHOW_STOP_AT(one, at)		(NEMOSHOW_STOP(one)->at)
+
+extern struct showone *nemoshow_stop_create(void);
+extern void nemoshow_stop_destroy(struct showone *one);
+
+extern int nemoshow_stop_update(struct nemoshow *show, struct showone *one);
+
+#define NEMOSHOW_SHADER(one)					((struct showshader *)container_of(one, struct showshader, base))
+#define	NEMOSHOW_SHADER_AT(one, at)		(NEMOSHOW_SHADER(one)->at)
+
+extern struct showone *nemoshow_shader_create(int type);
+extern void nemoshow_shader_destroy(struct showone *one);
+
+extern int nemoshow_shader_arrange(struct nemoshow *show, struct showone *one);
+extern int nemoshow_shader_update(struct nemoshow *show, struct showone *one);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
+
+#endif

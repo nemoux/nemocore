@@ -26,4 +26,6 @@
 #include <SkBlurMaskFilter.h>
 #include <SkEmbossMaskFilter.h>
 
+#include <SkGradientShader.h>
+
 #endif

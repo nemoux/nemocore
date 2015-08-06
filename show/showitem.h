@@ -46,6 +46,7 @@ struct showitem {
 
 	struct showone *style;
 	struct showone *blur;
+	struct showone *shader;
 	struct showone *matrix;
 	struct showone *path;
 

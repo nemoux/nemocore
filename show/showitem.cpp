@@ -12,6 +12,8 @@
 #include <showmatrix.hpp>
 #include <showblur.h>
 #include <showblur.hpp>
+#include <showshader.h>
+#include <showshader.hpp>
 #include <showpath.h>
 #include <showfont.h>
 #include <showfont.hpp>
@@ -91,6 +93,7 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	struct showone *style;
 	struct showone *blur;
+	struct showone *shader;
 	struct showone *matrix;
 	struct showone *path;
 	struct showone *child;
@@ -113,6 +116,13 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 			item->blur = blur;
 
 			NEMOBOX_APPEND(blur->refs, blur->srefs, blur->nrefs, one);
+		}
+
+		shader = nemoshow_search_one(show, nemoobject_gets(&one->object, "shader"));
+		if (shader != NULL) {
+			item->shader = shader;
+
+			NEMOBOX_APPEND(shader->refs, shader->srefs, shader->nrefs, one);
 		}
 
 		item->style = one;
@@ -199,6 +209,11 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 			NEMOSHOW_ITEM_CC(item, fill)->setMaskFilter(NEMOSHOW_BLUR_CC(NEMOSHOW_BLUR(item->blur), filter));
 		else
 			NEMOSHOW_ITEM_CC(item, stroke)->setMaskFilter(NEMOSHOW_BLUR_CC(NEMOSHOW_BLUR(item->blur), filter));
+	}
+
+	if (item->shader != NULL) {
+		if (item->fill != 0)
+			NEMOSHOW_ITEM_CC(item, fill)->setShader(NEMOSHOW_SHADER_CC(NEMOSHOW_SHADER(item->shader), shader));
 	}
 
 	if (NEMOSHOW_ITEM_CC(item, matrix) != NULL) {

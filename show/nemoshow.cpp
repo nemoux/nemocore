@@ -144,6 +144,12 @@ static struct showone *nemoshow_create_one(struct nemoshow *show, struct xmlnode
 		one = nemoshow_camera_create();
 	} else if (strcmp(node->name, "blur") == 0) {
 		one = nemoshow_blur_create();
+	} else if (strcmp(node->name, "linear") == 0) {
+		one = nemoshow_shader_create(NEMOSHOW_LINEAR_GRADIENT_SHADER);
+	} else if (strcmp(node->name, "radial") == 0) {
+		one = nemoshow_shader_create(NEMOSHOW_RADIAL_GRADIENT_SHADER);
+	} else if (strcmp(node->name, "stop") == 0) {
+		one = nemoshow_stop_create();
 	} else if (strcmp(node->name, "var") == 0) {
 		one = nemoshow_var_create();
 	}
@@ -323,6 +329,8 @@ static int nemoshow_load_canvas(struct nemoshow *show, struct showone *canvas, s
 				nemoshow_load_loop(show, one, child);
 			} else if (one->type == NEMOSHOW_ITEM_TYPE) {
 				nemoshow_load_item(show, one, child);
+			} else if (one->type == NEMOSHOW_SHADER_TYPE) {
+				nemoshow_load_one(show, one, child);
 			}
 
 			NEMOBOX_APPEND(canvas->children, canvas->schildren, canvas->nchildren, one);
@@ -530,6 +538,8 @@ void nemoshow_arrange_one(struct nemoshow *show)
 			nemoshow_camera_arrange(show, one);
 		} else if (one->type == NEMOSHOW_BLUR_TYPE) {
 			nemoshow_blur_arrange(show, one);
+		} else if (one->type == NEMOSHOW_SHADER_TYPE) {
+			nemoshow_shader_arrange(show, one);
 		}
 	}
 

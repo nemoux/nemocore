@@ -27,6 +27,7 @@ NEMO_BEGIN_EXTERN_C
 #include <showpath.h>
 #include <showcamera.h>
 #include <showblur.h>
+#include <showshader.h>
 #include <showvar.h>
 
 #include <nemotale.h>
