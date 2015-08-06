@@ -177,6 +177,7 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 	struct showone *child;
 	SkRect box;
 	char attr[NEMOSHOW_SYMBOL_MAX];
+	double outer;
 	int i;
 
 	if (item->style == one) {
@@ -194,7 +195,6 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 	}
 
 	if (item->blur != NULL) {
-		NEMO_DEBUG("%d > %d\n", item->fill, item->stroke);
 		if (item->fill != 0 && item->stroke == 0)
 			NEMOSHOW_ITEM_CC(item, fill)->setMaskFilter(NEMOSHOW_BLUR_CC(NEMOSHOW_BLUR(item->blur), filter));
 		else
@@ -363,14 +363,12 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 		box = SkRect::MakeXYWH(0, 0, 0, 0);
 	}
 
+	outer = NEMOSHOW_ANTIALIAS_EPSILON;
 	if (item->stroke != 0)
-		box.outset(
-				item->stroke_width / 2.0f + NEMOSHOW_ANTIALIAS_EPSILON,
-				item->stroke_width / 2.0f + NEMOSHOW_ANTIALIAS_EPSILON);
-	else if (item->fill != 0)
-		box.outset(
-				NEMOSHOW_ANTIALIAS_EPSILON,
-				NEMOSHOW_ANTIALIAS_EPSILON);
+		outer += item->stroke_width / 2.0f;
+	if (item->blur != NULL)
+		outer += NEMOSHOW_BLUR_AT(item->blur, r);
+	box.outset(outer, outer);
 
 	if (item->matrix != NULL) {
 		nemoshow_one_update(show, item->matrix);
