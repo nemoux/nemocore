@@ -22,4 +22,8 @@
 #include <SkParsePath.h>
 #include <SkTypeface.h>
 
+#include <SkBlurMask.h>
+#include <SkBlurMaskFilter.h>
+#include <SkEmbossMaskFilter.h>
+
 #endif

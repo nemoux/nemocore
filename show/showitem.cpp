@@ -10,6 +10,8 @@
 #include <showcolor.h>
 #include <showmatrix.h>
 #include <showmatrix.hpp>
+#include <showblur.h>
+#include <showblur.hpp>
 #include <showpath.h>
 #include <showfont.h>
 #include <showfont.hpp>
@@ -88,6 +90,7 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	struct showone *style;
+	struct showone *blur;
 	struct showone *matrix;
 	struct showone *path;
 	struct showone *child;
@@ -104,6 +107,13 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 		NEMOSHOW_ITEM_CC(item, fill)->setAntiAlias(true);
 		NEMOSHOW_ITEM_CC(item, stroke) = new SkPaint;
 		NEMOSHOW_ITEM_CC(item, stroke)->setAntiAlias(true);
+
+		blur = nemoshow_search_one(show, nemoobject_gets(&one->object, "blur"));
+		if (blur != NULL) {
+			item->blur = blur;
+
+			NEMOBOX_APPEND(blur->refs, blur->srefs, blur->nrefs, one);
+		}
 
 		item->style = one;
 	}
@@ -181,6 +191,14 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 			NEMOSHOW_ITEM_CC(item, stroke)->setColor(
 					SkColorSetARGB(255.0f * item->alpha, item->strokes[2], item->strokes[1], item->strokes[0]));
 		}
+	}
+
+	if (item->blur != NULL) {
+		NEMO_DEBUG("%d > %d\n", item->fill, item->stroke);
+		if (item->fill != 0 && item->stroke == 0)
+			NEMOSHOW_ITEM_CC(item, fill)->setMaskFilter(NEMOSHOW_BLUR_CC(NEMOSHOW_BLUR(item->blur), filter));
+		else
+			NEMOSHOW_ITEM_CC(item, stroke)->setMaskFilter(NEMOSHOW_BLUR_CC(NEMOSHOW_BLUR(item->blur), filter));
 	}
 
 	if (NEMOSHOW_ITEM_CC(item, matrix) != NULL) {

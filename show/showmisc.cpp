@@ -17,11 +17,13 @@ struct showprop *nemoshow_get_property(const char *name)
 	static struct showprop props[] = {
 		{ "alpha",						NEMOSHOW_DOUBLE_PROP },
 		{ "begin",						NEMOSHOW_INTEGER_PROP },
+		{ "blur",							NEMOSHOW_STRING_PROP },
 		{ "d",								NEMOSHOW_STRING_PROP },
 		{ "ease",							NEMOSHOW_STRING_PROP },
 		{ "end",							NEMOSHOW_INTEGER_PROP },
 		{ "event",						NEMOSHOW_INTEGER_PROP },
 		{ "fill",							NEMOSHOW_COLOR_PROP },
+		{ "flags",						NEMOSHOW_STRING_PROP },
 		{ "font",							NEMOSHOW_STRING_PROP },
 		{ "font-size",				NEMOSHOW_DOUBLE_PROP },
 		{ "from",							NEMOSHOW_DOUBLE_PROP },

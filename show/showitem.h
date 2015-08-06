@@ -45,6 +45,7 @@ struct showitem {
 	double alpha;
 
 	struct showone *style;
+	struct showone *blur;
 	struct showone *matrix;
 	struct showone *path;
 

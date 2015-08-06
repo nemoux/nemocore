@@ -142,6 +142,8 @@ static struct showone *nemoshow_create_one(struct nemoshow *show, struct xmlnode
 		one = nemoshow_path_create(NEMOSHOW_TEXT_PATH);
 	} else if (strcmp(node->name, "camera") == 0) {
 		one = nemoshow_camera_create();
+	} else if (strcmp(node->name, "blur") == 0) {
+		one = nemoshow_blur_create();
 	} else if (strcmp(node->name, "var") == 0) {
 		one = nemoshow_var_create();
 	}
@@ -506,32 +508,6 @@ void nemoshow_update_one_expression(struct nemoshow *show, struct showone *one)
 	nemoshow_one_dirty(one);
 }
 
-static inline void nemoshow_arrange_one_in(struct nemoshow *show, struct showone *one)
-{
-	struct showone *child;
-	int i;
-
-	if (one->type == NEMOSHOW_SET_TYPE) {
-		nemoshow_sequence_arrange_set(show, one);
-	} else if (one->type == NEMOSHOW_EASE_TYPE) {
-		nemoshow_ease_arrange(show, one);
-	} else if (one->type == NEMOSHOW_CANVAS_TYPE && one->sub != NEMOSHOW_CANVAS_SCENE_TYPE) {
-		nemoshow_canvas_arrange(show, one);
-	} else if (one->type == NEMOSHOW_ITEM_TYPE) {
-		nemoshow_item_arrange(show, one);
-	} else if (one->type == NEMOSHOW_MATRIX_TYPE) {
-		nemoshow_matrix_arrange(show, one);
-	} else if (one->type == NEMOSHOW_CAMERA_TYPE) {
-		nemoshow_camera_arrange(show, one);
-	}
-
-	for (i = 0; i < one->nchildren; i++) {
-		child = one->children[i];
-
-		nemoshow_arrange_one_in(show, child);
-	}
-}
-
 void nemoshow_arrange_one(struct nemoshow *show)
 {
 	struct showone *one;
@@ -540,7 +516,21 @@ void nemoshow_arrange_one(struct nemoshow *show)
 	for (i = 0; i < show->nones; i++) {
 		one = show->ones[i];
 
-		nemoshow_arrange_one_in(show, one);
+		if (one->type == NEMOSHOW_SET_TYPE) {
+			nemoshow_sequence_arrange_set(show, one);
+		} else if (one->type == NEMOSHOW_EASE_TYPE) {
+			nemoshow_ease_arrange(show, one);
+		} else if (one->type == NEMOSHOW_CANVAS_TYPE && one->sub != NEMOSHOW_CANVAS_SCENE_TYPE) {
+			nemoshow_canvas_arrange(show, one);
+		} else if (one->type == NEMOSHOW_ITEM_TYPE) {
+			nemoshow_item_arrange(show, one);
+		} else if (one->type == NEMOSHOW_MATRIX_TYPE) {
+			nemoshow_matrix_arrange(show, one);
+		} else if (one->type == NEMOSHOW_CAMERA_TYPE) {
+			nemoshow_camera_arrange(show, one);
+		} else if (one->type == NEMOSHOW_BLUR_TYPE) {
+			nemoshow_blur_arrange(show, one);
+		}
 	}
 
 	for (i = 0; i < show->nones; i++) {
