@@ -19,6 +19,7 @@ struct showprop *nemoshow_get_property(const char *name)
 		{ "alpha",						NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_STYLE_DIRTY },
 		{ "begin",						NEMOSHOW_INTEGER_PROP,			NEMOSHOW_NONE_DIRTY },
 		{ "blur",							NEMOSHOW_STRING_PROP,				NEMOSHOW_STYLE_DIRTY },
+		{ "child",						NEMOSHOW_INTEGER_PROP,			NEMOSHOW_NONE_DIRTY },
 		{ "d",								NEMOSHOW_STRING_PROP,				NEMOSHOW_TEXT_DIRTY },
 		{ "ease",							NEMOSHOW_STRING_PROP,				NEMOSHOW_NONE_DIRTY },
 		{ "end",							NEMOSHOW_INTEGER_PROP,			NEMOSHOW_NONE_DIRTY },

@@ -449,10 +449,11 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 			(one->dirty & NEMOSHOW_SHAPE_DIRTY) != 0)
 		nemoshow_item_update_text(show, one);
 
-	if ((one->dirty & NEMOSHOW_SHAPE_DIRTY) != 0)
+	if ((one->dirty & NEMOSHOW_SHAPE_DIRTY) != 0) {
 		nemoshow_canvas_damage_one(item->canvas, one);
 
-	nemoshow_item_update_boundingbox(show, one);
+		nemoshow_item_update_boundingbox(show, one);
+	}
 
 	nemoshow_canvas_damage_one(item->canvas, one);
 

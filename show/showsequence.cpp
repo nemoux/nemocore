@@ -122,6 +122,8 @@ int nemoshow_sequence_arrange_set(struct nemoshow *show, struct showone *one)
 	src = nemoshow_search_one(show, nemoobject_gets(&one->object, "src"));
 	if (src == NULL)
 		return -1;
+	if ((i = nemoobject_has(&one->object, "child")) >= 0)
+		src = nemoshow_one_get_child(src, nemoobject_igeti(&one->object, i));
 	set->src = src;
 
 	count = nemoobject_get_count(&one->object);

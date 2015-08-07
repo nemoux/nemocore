@@ -169,11 +169,11 @@ static inline int nemoobject_has(struct nemoobject *object, const char *name)
 
 	for (i = 0; i < object->nattrs; i++) {
 		if (strcmp(object->attrs[i].name, name) == 0) {
-			return 1;
+			return i;
 		}
 	}
 
-	return 0;
+	return -1;
 }
 
 static inline void nemoobject_seti(struct nemoobject *object, const char *name, uint32_t i)

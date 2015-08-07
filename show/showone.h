@@ -168,6 +168,14 @@ static inline struct showone *nemoshow_one_get_canvas(struct showone *one)
 	return parent;
 }
 
+static inline struct showone *nemoshow_one_get_child(struct showone *one, uint32_t index)
+{
+	if (index >= one->nchildren)
+		return NULL;
+
+	return one->children[index];
+}
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif
