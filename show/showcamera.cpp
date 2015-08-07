@@ -59,6 +59,7 @@ int nemoshow_camera_update(struct nemoshow *show, struct showone *one)
 {
 	struct showcamera *camera = NEMOSHOW_CAMERA(one);
 	struct showone *child;
+	int needs_scale = 0;
 	int i;
 
 	NEMOSHOW_CAMERA_CC(camera, matrix)->setIdentity();
@@ -79,6 +80,9 @@ int nemoshow_camera_update(struct nemoshow *show, struct showone *one)
 
 			camera->sx = camera->sx * NEMOSHOW_MATRIX_AT(child, x);
 			camera->sy = camera->sy * NEMOSHOW_MATRIX_AT(child, y);
+
+			if (child->state == NEMOSHOW_NORMAL_STATE)
+				needs_scale = 1;
 		} else if (child->sub == NEMOSHOW_ROTATE_MATRIX) {
 			NEMOSHOW_CAMERA_CC(camera, matrix)->postRotate(
 					NEMOSHOW_MATRIX_AT(child, x));
@@ -96,7 +100,8 @@ int nemoshow_camera_update(struct nemoshow *show, struct showone *one)
 
 		nemotale_transform(show->tale, d);
 
-		nemoshow_set_scale(show, camera->sx, camera->sy);
+		if (needs_scale != 0)
+			nemoshow_set_scale(show, camera->sx, camera->sy);
 	}
 
 	return 0;

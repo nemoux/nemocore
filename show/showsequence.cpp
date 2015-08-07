@@ -224,6 +224,8 @@ static void nemoshow_sequence_prepare_frame(struct showone *one, uint32_t serial
 				}
 			}
 		}
+
+		set->src->state = NEMOSHOW_TRANSITION_STATE;
 	}
 }
 
@@ -280,6 +282,8 @@ static void nemoshow_sequence_finish_frame(struct showone *one, uint32_t serial)
 
 				dirty |= set->dirties[j];
 			}
+
+			set->src->state = NEMOSHOW_NORMAL_STATE;
 
 			nemoshow_one_dirty(set->src, dirty);
 		}

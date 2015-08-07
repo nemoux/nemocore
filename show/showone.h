@@ -42,6 +42,12 @@ typedef enum {
 } NemoShowOneType;
 
 typedef enum {
+	NEMOSHOW_NORMAL_STATE = 0,
+	NEMOSHOW_TRANSITION_STATE = 1,
+	NEMOSHOW_LAST_STATE
+} NemoShowOneState;
+
+typedef enum {
 	NEMOSHOW_NONE_DIRTY = (0 << 0),
 	NEMOSHOW_SHAPE_DIRTY = (1 << 0),
 	NEMOSHOW_STYLE_DIRTY = (1 << 1),
@@ -68,6 +74,8 @@ struct showattr {
 struct showone {
 	int type, sub;
 	char id[NEMOSHOW_ID_MAX];
+
+	int state;
 
 	struct nemoobject object;
 	uint32_t serial;
