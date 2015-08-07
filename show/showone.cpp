@@ -52,7 +52,7 @@ void nemoshow_one_destroy(struct showone *one)
 	}
 }
 
-struct showattr *nemoshow_one_create_attr(const char *name, const char *text, struct nemoattr *ref)
+struct showattr *nemoshow_one_create_attr(const char *name, const char *text, struct nemoattr *ref, uint32_t dirty)
 {
 	struct showattr *attr;
 
@@ -65,6 +65,7 @@ struct showattr *nemoshow_one_create_attr(const char *name, const char *text, st
 
 	attr->text = strdup(text);
 	attr->ref = ref;
+	attr->dirty = dirty;
 
 	return attr;
 }
@@ -73,26 +74,6 @@ void nemoshow_one_destroy_attr(struct showattr *attr)
 {
 	free(attr->text);
 	free(attr);
-}
-
-void nemoshow_one_dirty(struct showone *one)
-{
-	if (one->dirty != 0)
-		return;
-
-	one->dirty = 1;
-
-	if (one->parent != NULL) {
-		nemoshow_one_dirty(one->parent);
-	}
-
-	if (one->nrefs > 0) {
-		int i;
-
-		for (i = 0; i < one->nrefs; i++) {
-			nemoshow_one_dirty(one->refs[i]);
-		}
-	}
 }
 
 void nemoshow_one_dump(struct showone *one, FILE *out)

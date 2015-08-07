@@ -41,6 +41,14 @@ typedef enum {
 	NEMOSHOW_LAST_TYPE
 } NemoShowOneType;
 
+typedef enum {
+	NEMOSHOW_NONE_DIRTY = (0 << 0),
+	NEMOSHOW_SHAPE_DIRTY = (1 << 0),
+	NEMOSHOW_STYLE_DIRTY = (1 << 1),
+	NEMOSHOW_CHILD_DIRTY = (1 << 2),
+	NEMOSHOW_ALL_DIRTY = NEMOSHOW_SHAPE_DIRTY | NEMOSHOW_STYLE_DIRTY | NEMOSHOW_CHILD_DIRTY
+} NemoShowDirtyType;
+
 struct nemoshow;
 struct showone;
 
@@ -53,6 +61,7 @@ struct showattr {
 	char *text;
 
 	struct nemoattr *ref;
+	uint32_t dirty;
 };
 
 struct showone {
@@ -76,7 +85,8 @@ struct showone {
 	struct showattr **attrs;
 	int nattrs, sattrs;
 
-	int dirty;
+	uint32_t dirty;
+
 	int32_t x, y, width, height;
 };
 
@@ -85,27 +95,54 @@ extern void nemoshow_one_finish(struct showone *one);
 
 extern void nemoshow_one_destroy(struct showone *one);
 
-extern struct showattr *nemoshow_one_create_attr(const char *name, const char *text, struct nemoattr *ref);
+extern struct showattr *nemoshow_one_create_attr(const char *name, const char *text, struct nemoattr *ref, uint32_t dirty);
 extern void nemoshow_one_destroy_attr(struct showattr *attr);
 
-extern void nemoshow_one_dirty(struct showone *one);
-
 extern void nemoshow_one_dump(struct showone *one, FILE *out);
+
+static inline void nemoshow_one_dirty(struct showone *one, uint32_t dirty)
+{
+	if ((one->dirty & dirty) != 0)
+		return;
+
+	one->dirty |= dirty;
+
+	if (one->parent != NULL)
+		nemoshow_one_dirty(one->parent, NEMOSHOW_CHILD_DIRTY);
+
+	if (one->nrefs > 0) {
+		int i;
+
+		for (i = 0; i < one->nrefs; i++) {
+			nemoshow_one_dirty(one->refs[i], dirty);
+		}
+	}
+}
 
 static inline void nemoshow_one_update(struct nemoshow *show, struct showone *one)
 {
 	if (one->dirty != 0) {
+		struct showone *child;
+		int i;
+
+		for (i = 0; i < one->nchildren; i++) {
+			child = one->children[i];
+
+			if (child->dirty != 0)
+				nemoshow_one_update(show, child);
+		}
+
 		one->update(show, one);
 
 		one->dirty = 0;
 	}
 }
 
-static inline void nemoshow_one_setd(struct showone *one, const char *attr, double value)
+static inline void nemoshow_one_setd(struct showone *one, const char *attr, double value, uint32_t dirty)
 {
 	nemoobject_setd(&one->object, attr, value);
 
-	nemoshow_one_dirty(one);
+	nemoshow_one_dirty(one, dirty);
 }
 
 static inline double nemoshow_one_getd(struct showone *one, const char *attr)
@@ -113,11 +150,11 @@ static inline double nemoshow_one_getd(struct showone *one, const char *attr)
 	return nemoobject_getd(&one->object, attr);
 }
 
-static inline void nemoshow_one_sets(struct showone *one, const char *attr, const char *value)
+static inline void nemoshow_one_sets(struct showone *one, const char *attr, const char *value, uint32_t dirty)
 {
 	nemoobject_sets(&one->object, attr, value, strlen(value));
 
-	nemoshow_one_dirty(one);
+	nemoshow_one_dirty(one, dirty);
 }
 
 static inline const char *nemoshow_one_gets(struct showone *one, const char *attr)

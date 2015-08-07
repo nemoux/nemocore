@@ -44,7 +44,7 @@ static void nemoshow_dispatch_tale_event(struct nemotale *tale, struct talenode 
 				struct showone *var;
 
 				var = nemoshow_search_one(show, "var0");
-				nemoshow_one_sets(var, "d", "mine");
+				nemoshow_one_sets(var, "d", "mine", NEMOSHOW_SHAPE_DIRTY);
 				nemoshow_one_update(show, var);
 
 				trans = nemoshow_transition_create(

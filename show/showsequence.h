@@ -27,6 +27,7 @@ struct showset {
 	double sattrs[NEMOSHOW_SEQUENCE_SET_ATTR_MAX];
 	struct nemoattr *tattrs[NEMOSHOW_SEQUENCE_SET_ATTR_MAX];
 	struct nemoattr *eattrs[NEMOSHOW_SEQUENCE_SET_ATTR_MAX];
+	uint32_t dirties[NEMOSHOW_SEQUENCE_SET_ATTR_MAX];
 	int types[NEMOSHOW_SEQUENCE_SET_ATTR_MAX];
 	int nattrs;
 };

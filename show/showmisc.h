@@ -20,6 +20,8 @@ struct showprop {
 	char name[32];
 
 	int type;
+
+	uint32_t dirty;
 };
 
 extern struct showprop *nemoshow_get_property(const char *name);

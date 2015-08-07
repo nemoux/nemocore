@@ -160,39 +160,40 @@ static struct showone *nemoshow_create_one(struct nemoshow *show, struct xmlnode
 		int i;
 
 		for (i = 0; i < node->nattrs; i++) {
+			struct showprop *prop;
+
+			prop = nemoshow_get_property(node->attrs[i*2+0]);
+			if (prop == NULL)
+				continue;
+
 			if (node->attrs[i*2+1][0] == '@') {
 				struct showone *vone;
-				struct showprop *prop;
 
 				vone = nemoshow_search_one(show, node->attrs[i*2+1] + 1);
 				if (vone != NULL) {
 					struct showvar *var = NEMOSHOW_VAR(vone);
+					const char *value = nemoobject_gets(&vone->object, "d");
 
-					prop = nemoshow_get_property(node->attrs[i*2+0]);
-					if (prop != NULL) {
-						const char *value = nemoobject_gets(&vone->object, "d");
+					if (prop->type == NEMOSHOW_STRING_PROP) {
+						nemoobject_sets(&one->object, node->attrs[i*2+0], value, strlen(value));
+					} else if (prop->type == NEMOSHOW_DOUBLE_PROP) {
+						nemoobject_setd(&one->object, node->attrs[i*2+0], strtod(value, NULL));
+					} else if (prop->type == NEMOSHOW_INTEGER_PROP) {
+						nemoobject_seti(&one->object, node->attrs[i*2+0], strtoul(value, NULL, 10));
+					} else if (prop->type == NEMOSHOW_COLOR_PROP) {
+						uint32_t c = nemoshow_color_parse(value);
+						char attr[NEMOSHOW_ATTR_NAME_MAX];
 
-						if (prop->type == NEMOSHOW_STRING_PROP) {
-							nemoobject_sets(&one->object, node->attrs[i*2+0], value, strlen(value));
-						} else if (prop->type == NEMOSHOW_DOUBLE_PROP) {
-							nemoobject_setd(&one->object, node->attrs[i*2+0], strtod(value, NULL));
-						} else if (prop->type == NEMOSHOW_INTEGER_PROP) {
-							nemoobject_seti(&one->object, node->attrs[i*2+0], strtoul(value, NULL, 10));
-						} else if (prop->type == NEMOSHOW_COLOR_PROP) {
-							uint32_t c = nemoshow_color_parse(value);
-							char attr[NEMOSHOW_ATTR_NAME_MAX];
+						snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:r", node->attrs[i*2+0]);
+						nemoobject_setd(&one->object, attr, (double)NEMOSHOW_COLOR_UINT32_R(c));
+						snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:g", node->attrs[i*2+0]);
+						nemoobject_setd(&one->object, attr, (double)NEMOSHOW_COLOR_UINT32_G(c));
+						snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:b", node->attrs[i*2+0]);
+						nemoobject_setd(&one->object, attr, (double)NEMOSHOW_COLOR_UINT32_B(c));
+						snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:a", node->attrs[i*2+0]);
+						nemoobject_setd(&one->object, attr, (double)NEMOSHOW_COLOR_UINT32_A(c));
 
-							snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:r", node->attrs[i*2+0]);
-							nemoobject_setd(&one->object, attr, (double)NEMOSHOW_COLOR_UINT32_R(c));
-							snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:g", node->attrs[i*2+0]);
-							nemoobject_setd(&one->object, attr, (double)NEMOSHOW_COLOR_UINT32_G(c));
-							snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:b", node->attrs[i*2+0]);
-							nemoobject_setd(&one->object, attr, (double)NEMOSHOW_COLOR_UINT32_B(c));
-							snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:a", node->attrs[i*2+0]);
-							nemoobject_setd(&one->object, attr, (double)NEMOSHOW_COLOR_UINT32_A(c));
-
-							nemoobject_seti(&one->object, node->attrs[i*2+0], 1);
-						}
+						nemoobject_seti(&one->object, node->attrs[i*2+0], 1);
 					}
 
 					NEMOBOX_APPEND(vone->refs, vone->srefs, vone->nrefs, one);
@@ -207,35 +208,31 @@ static struct showone *nemoshow_create_one(struct nemoshow *show, struct xmlnode
 				attr = nemoshow_one_create_attr(
 						node->attrs[i*2+0],
 						node->attrs[i*2+1] + 1,
-						nemoobject_get(&one->object, node->attrs[i*2+0]));
+						nemoobject_get(&one->object, node->attrs[i*2+0]),
+						prop->dirty);
 
 				NEMOBOX_APPEND(one->attrs, one->sattrs, one->nattrs, attr);
 			} else {
-				struct showprop *prop;
+				if (prop->type == NEMOSHOW_STRING_PROP) {
+					nemoobject_sets(&one->object, node->attrs[i*2+0], node->attrs[i*2+1], strlen(node->attrs[i*2+1]));
+				} else if (prop->type == NEMOSHOW_DOUBLE_PROP) {
+					nemoobject_setd(&one->object, node->attrs[i*2+0], strtod(node->attrs[i*2+1], NULL));
+				} else if (prop->type == NEMOSHOW_INTEGER_PROP) {
+					nemoobject_seti(&one->object, node->attrs[i*2+0], strtoul(node->attrs[i*2+1], NULL, 10));
+				} else if (prop->type == NEMOSHOW_COLOR_PROP) {
+					uint32_t c = nemoshow_color_parse(node->attrs[i*2+1]);
+					char attr[NEMOSHOW_ATTR_NAME_MAX];
 
-				prop = nemoshow_get_property(node->attrs[i*2+0]);
-				if (prop != NULL) {
-					if (prop->type == NEMOSHOW_STRING_PROP) {
-						nemoobject_sets(&one->object, node->attrs[i*2+0], node->attrs[i*2+1], strlen(node->attrs[i*2+1]));
-					} else if (prop->type == NEMOSHOW_DOUBLE_PROP) {
-						nemoobject_setd(&one->object, node->attrs[i*2+0], strtod(node->attrs[i*2+1], NULL));
-					} else if (prop->type == NEMOSHOW_INTEGER_PROP) {
-						nemoobject_seti(&one->object, node->attrs[i*2+0], strtoul(node->attrs[i*2+1], NULL, 10));
-					} else if (prop->type == NEMOSHOW_COLOR_PROP) {
-						uint32_t c = nemoshow_color_parse(node->attrs[i*2+1]);
-						char attr[NEMOSHOW_ATTR_NAME_MAX];
+					snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:r", node->attrs[i*2+0]);
+					nemoobject_setd(&one->object, attr, (double)NEMOSHOW_COLOR_UINT32_R(c));
+					snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:g", node->attrs[i*2+0]);
+					nemoobject_setd(&one->object, attr, (double)NEMOSHOW_COLOR_UINT32_G(c));
+					snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:b", node->attrs[i*2+0]);
+					nemoobject_setd(&one->object, attr, (double)NEMOSHOW_COLOR_UINT32_B(c));
+					snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:a", node->attrs[i*2+0]);
+					nemoobject_setd(&one->object, attr, (double)NEMOSHOW_COLOR_UINT32_A(c));
 
-						snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:r", node->attrs[i*2+0]);
-						nemoobject_setd(&one->object, attr, (double)NEMOSHOW_COLOR_UINT32_R(c));
-						snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:g", node->attrs[i*2+0]);
-						nemoobject_setd(&one->object, attr, (double)NEMOSHOW_COLOR_UINT32_G(c));
-						snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:b", node->attrs[i*2+0]);
-						nemoobject_setd(&one->object, attr, (double)NEMOSHOW_COLOR_UINT32_B(c));
-						snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:a", node->attrs[i*2+0]);
-						nemoobject_setd(&one->object, attr, (double)NEMOSHOW_COLOR_UINT32_A(c));
-
-						nemoobject_seti(&one->object, node->attrs[i*2+0], 1);
-					}
+					nemoobject_seti(&one->object, node->attrs[i*2+0], 1);
 				}
 			}
 		}
@@ -486,6 +483,8 @@ void nemoshow_update_expression(struct nemoshow *show)
 	int i, j;
 
 	for (i = 0; i < show->nones; i++) {
+		uint32_t dirty = 0x0;
+
 		one = show->ones[i];
 
 		for (j = 0; j < one->nattrs; j++) {
@@ -493,15 +492,18 @@ void nemoshow_update_expression(struct nemoshow *show)
 
 			nemoattr_setd(attr->ref,
 					nemoshow_expr_dispatch_expression(show->expr, attr->text));
+
+			dirty |= attr->dirty;
 		}
 
-		nemoshow_one_dirty(one);
+		nemoshow_one_dirty(one, dirty);
 	}
 }
 
 void nemoshow_update_one_expression(struct nemoshow *show, struct showone *one)
 {
 	struct showattr *attr;
+	uint32_t dirty = 0x0;
 	int i;
 
 	for (i = 0; i < one->nattrs; i++) {
@@ -509,13 +511,15 @@ void nemoshow_update_one_expression(struct nemoshow *show, struct showone *one)
 
 		nemoattr_setd(attr->ref,
 				nemoshow_expr_dispatch_expression(show->expr, attr->text));
+
+		dirty |= attr->dirty;
 	}
 
 	for (i = 0; i < one->nchildren; i++) {
 		nemoshow_update_one_expression(show, one->children[i]);
 	}
 
-	nemoshow_one_dirty(one);
+	nemoshow_one_dirty(one, dirty);
 }
 
 void nemoshow_arrange_one(struct nemoshow *show)
