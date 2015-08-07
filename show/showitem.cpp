@@ -443,7 +443,8 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 		nemoshow_item_update_style(show, one);
 	if ((one->dirty & NEMOSHOW_CHILD_DIRTY) != 0)
 		nemoshow_item_update_child(show, one);
-	if ((one->dirty & NEMOSHOW_TEXT_DIRTY) != 0)
+	if ((one->dirty & NEMOSHOW_TEXT_DIRTY) != 0 ||
+			(one->dirty & NEMOSHOW_SHAPE_DIRTY) != 0)
 		nemoshow_item_update_text(show, one);
 
 	if ((one->dirty & NEMOSHOW_SHAPE_DIRTY) != 0)
