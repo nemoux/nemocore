@@ -328,7 +328,7 @@ static inline void nemoshow_canvas_render_one(struct nemoshow *show, struct show
 					struct showitem *item = NEMOSHOW_ITEM(child);
 					struct showitem *style = NEMOSHOW_ITEM(item->style);
 
-					nemoshow_item_update(show, child);
+					nemoshow_one_update(show, child);
 
 					if (item->matrix != NULL) {
 						NEMOSHOW_CANVAS_CC(canvas, canvas)->save();

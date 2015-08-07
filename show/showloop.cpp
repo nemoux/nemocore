@@ -45,13 +45,8 @@ void nemoshow_loop_destroy(struct showone *one)
 int nemoshow_loop_arrange(struct nemoshow *show, struct showone *one)
 {
 	struct showloop *loop = NEMOSHOW_LOOP(one);
-	struct showone *parent;
 
-	for (parent = one->parent;
-			parent != NULL && parent->type != NEMOSHOW_CANVAS_TYPE;
-			parent = parent->parent);
-
-	loop->canvas = parent;
+	loop->canvas = nemoshow_one_get_canvas(one);
 }
 
 int nemoshow_loop_update(struct nemoshow *show, struct showone *one)

@@ -46,7 +46,8 @@ typedef enum {
 	NEMOSHOW_SHAPE_DIRTY = (1 << 0),
 	NEMOSHOW_STYLE_DIRTY = (1 << 1),
 	NEMOSHOW_CHILD_DIRTY = (1 << 2),
-	NEMOSHOW_ALL_DIRTY = NEMOSHOW_SHAPE_DIRTY | NEMOSHOW_STYLE_DIRTY | NEMOSHOW_CHILD_DIRTY
+	NEMOSHOW_TEXT_DIRTY = (1 << 3),
+	NEMOSHOW_ALL_DIRTY = NEMOSHOW_SHAPE_DIRTY | NEMOSHOW_STYLE_DIRTY | NEMOSHOW_CHILD_DIRTY | NEMOSHOW_TEXT_DIRTY
 } NemoShowDirtyType;
 
 struct nemoshow;
@@ -154,6 +155,17 @@ static inline void nemoshow_one_sets(struct showone *one, const char *attr, cons
 static inline const char *nemoshow_one_gets(struct showone *one, const char *attr)
 {
 	return nemoobject_gets(&one->object, attr);
+}
+
+static inline struct showone *nemoshow_one_get_canvas(struct showone *one)
+{
+	struct showone *parent;
+
+	for (parent = one->parent;
+			parent != NULL && parent->type != NEMOSHOW_CANVAS_TYPE;
+			parent = parent->parent);
+
+	return parent;
 }
 
 #ifdef __cplusplus

@@ -99,8 +99,6 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 	struct showone *shader;
 	struct showone *matrix;
 	struct showone *path;
-	struct showone *parent;
-	struct showone *child;
 	const char *font;
 	int i;
 
@@ -182,23 +180,14 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 		}
 	}
 
-	for (parent = one->parent;
-			parent != NULL && parent->type != NEMOSHOW_CANVAS_TYPE;
-			parent = parent->parent);
-
-	item->canvas = parent;
+	item->canvas = nemoshow_one_get_canvas(one);
 
 	return 0;
 }
 
-int nemoshow_item_update(struct nemoshow *show, struct showone *one)
+static inline void nemoshow_item_update_style(struct nemoshow *show, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
-	struct showone *child;
-	SkRect box;
-	char attr[NEMOSHOW_SYMBOL_MAX];
-	double outer;
-	int i;
 
 	if (item->style == one) {
 		if (item->fill != 0) {
@@ -225,6 +214,13 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 		if (item->fill != 0)
 			NEMOSHOW_ITEM_CC(item, fill)->setShader(NEMOSHOW_SHADER_CC(NEMOSHOW_SHADER(item->shader), shader));
 	}
+}
+
+static inline void nemoshow_item_update_child(struct nemoshow *show, struct showone *one)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+	struct showone *child;
+	int i;
 
 	if (NEMOSHOW_ITEM_CC(item, matrix) != NULL) {
 		NEMOSHOW_ITEM_CC(item, matrix)->setIdentity();
@@ -233,18 +229,14 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 			child = one->children[i];
 
 			if (child->type == NEMOSHOW_MATRIX_TYPE) {
-				if (child->dirty != 0) {
-					nemoshow_matrix_update(show, child);
-
-					child->dirty = 0;
-				}
-
 				NEMOSHOW_ITEM_CC(item, matrix)->postConcat(
 						*NEMOSHOW_MATRIX_CC(
 							NEMOSHOW_MATRIX(child),
 							matrix));
 			}
 		}
+
+		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 	}
 
 	if (one->sub == NEMOSHOW_PATH_ITEM) {
@@ -303,7 +295,16 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 		}
 
 		item->length = nemoshow_helper_get_path_length(NEMOSHOW_ITEM_CC(item, path));
-	} else if (one->sub == NEMOSHOW_TEXT_ITEM) {
+
+		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
+	}
+}
+
+static inline void nemoshow_item_update_text(struct nemoshow *show, struct showone *one)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	if (one->sub == NEMOSHOW_TEXT_ITEM) {
 		item->text = nemoobject_gets(&one->object, "d");
 		if (item->text != NULL) {
 			if (item->font->layout == NEMOSHOW_NORMAL_LAYOUT) {
@@ -356,6 +357,15 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 			}
 		}
 	}
+}
+
+static inline void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+	SkRect box;
+	char attr[NEMOSHOW_SYMBOL_MAX];
+	double outer;
+	int i;
 
 	if (one->sub == NEMOSHOW_RECT_ITEM) {
 		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
@@ -398,8 +408,6 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 	box.outset(outer, outer);
 
 	if (item->matrix != NULL) {
-		nemoshow_one_update(show, item->matrix);
-
 		NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(item->matrix), matrix)->mapRect(&box);
 	} else if (NEMOSHOW_ITEM_CC(item, matrix) != NULL) {
 		NEMOSHOW_ITEM_CC(item, matrix)->mapRect(&box);
@@ -425,6 +433,25 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 		snprintf(attr, NEMOSHOW_SYMBOL_MAX, "%s_h", one->id);
 		nemoshow_update_symbol(show, attr, one->height);
 	}
+}
+
+int nemoshow_item_update(struct nemoshow *show, struct showone *one)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	if ((one->dirty & NEMOSHOW_STYLE_DIRTY) != 0)
+		nemoshow_item_update_style(show, one);
+	if ((one->dirty & NEMOSHOW_CHILD_DIRTY) != 0)
+		nemoshow_item_update_child(show, one);
+	if ((one->dirty & NEMOSHOW_TEXT_DIRTY) != 0)
+		nemoshow_item_update_text(show, one);
+
+	if ((one->dirty & NEMOSHOW_SHAPE_DIRTY) != 0)
+		nemoshow_canvas_damage_one(item->canvas, one);
+
+	nemoshow_item_update_boundingbox(show, one);
+
+	nemoshow_canvas_damage_one(item->canvas, one);
 
 	return 0;
 }
