@@ -34,6 +34,10 @@
 #include <nemoitem.h>
 #include <nemomisc.h>
 
+#ifdef NEMOUX_WITH_XWAYLAND
+#include <xserver.h>
+#endif
+
 static void minishell_handle_configs(struct nemoshell *shell, const char *configpath)
 {
 	struct nemocompz *compz = shell->compz;
@@ -352,6 +356,11 @@ int main(int argc, char *argv[])
 		nemosession_connect(compz->session, seat, tty);
 
 	minishell_handle_configs(shell, configpath);
+
+#ifdef NEMOUX_WITH_XWAYLAND
+	nemoxserver_create(shell,
+			nemoitem_get_attr_named(shell->configs, "//nemoshell/xserver", "path"));
+#endif
 
 	drmbackend_create(compz, rendernode);
 	evdevbackend_create(compz);

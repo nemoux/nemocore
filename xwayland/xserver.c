@@ -250,6 +250,9 @@ struct nemoxserver *nemoxserver_create(struct nemoshell *shell, const char *xser
 	struct wl_display *display = compz->display;
 	struct nemoxserver *xserver;
 	char lockfile[256], dispname[8];
+	
+	if (xserverpath == NULL)
+		return NULL;
 
 	xserver = (struct nemoxserver *)malloc(sizeof(struct nemoxserver));
 	if (xserver == NULL)
