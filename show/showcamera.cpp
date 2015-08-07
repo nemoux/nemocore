@@ -96,7 +96,7 @@ int nemoshow_camera_update(struct nemoshow *show, struct showone *one)
 
 		nemotale_transform(show->tale, d);
 
-		nemoshow_dirty_scene(show);
+		nemoshow_set_scale(show, camera->sx, camera->sy);
 	}
 
 	return 0;

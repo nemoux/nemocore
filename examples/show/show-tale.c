@@ -53,9 +53,9 @@ static void nemoshow_dispatch_tale_event(struct nemotale *tale, struct talenode 
 						nemoshow_get_next_serial(show));
 
 				if ((direction++ % 2) == 0) {
-					sequence = nemoshow_search_one(show, "hour_hand_sequence");
+					sequence = nemoshow_search_one(show, "camera_sequence");
 				} else {
-					sequence = nemoshow_search_one(show, "hour_hand_sequence_r");
+					sequence = nemoshow_search_one(show, "camera_sequence_r");
 				}
 				nemoshow_update_one_expression(show, sequence);
 				nemoshow_transition_attach_sequence(trans, sequence);
