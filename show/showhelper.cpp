@@ -13,6 +13,8 @@ static inline double nemoshow_helper_get_quad_length(SkPoint *pts)
 	SkPoint a0 = pts[1] - pts[0];
 	SkPoint a1 = pts[0] - pts[1] * 2.0f + pts[2];
 
+	if (a0.isZero())
+		return a1.length() * 2.0f;
 	if (a1.isZero())
 		return a0.length() * 2.0f;
 
@@ -44,7 +46,7 @@ double nemoshow_helper_get_path_length(SkPath *path)
 	SkPath::RawIter iter(*path);
 	SkPoint lts;
 	SkPoint pts[4];
-	SkPoint qts[3];
+	SkPoint tts[3];
 	SkPath::Verb verb;
 	double length = 0.0f;
 
@@ -66,8 +68,8 @@ double nemoshow_helper_get_path_length(SkPath *path)
 				break;
 
 			case SkPath::kCubic_Verb:
-				nemoshow_helper_convert_cubic_to_quad(pts, qts);
-				length += nemoshow_helper_get_quad_length(qts);
+				nemoshow_helper_convert_cubic_to_quad(pts, tts);
+				length += nemoshow_helper_get_quad_length(tts);
 				break;
 
 			case SkPath::kClose_Verb:
@@ -80,4 +82,157 @@ double nemoshow_helper_get_path_length(SkPath *path)
 	}
 
 	return length;
+}
+
+void nemoshow_helper_draw_path(SkPath &dst, SkPath *src, SkPaint *paint, double length, double from, double to)
+{
+	SkPath::RawIter iter(*src);
+	SkPoint lts;
+	SkPoint pts[4];
+	SkPoint tts[4];
+	SkPoint nts[16];
+	SkScalar t[4];
+	SkPath::Verb verb;
+	double start = length * from;
+	double remain = length * to;
+	double l;
+
+	while (((verb = iter.next(pts)) != SkPath::kDone_Verb) && remain > 0.0f) {
+		if (start > 0.0f) {
+			switch (verb) {
+				case SkPath::kMove_Verb:
+					dst.moveTo(pts[0]);
+					lts = pts[0];
+					break;
+
+				case SkPath::kLine_Verb:
+					l = SkPoint::Distance(pts[0], pts[1]);
+					if (l > start && l <= remain) {
+						dst.moveTo(
+								SkPoint::Make(
+									(pts[1].x() - pts[0].x()) * (start / l) + pts[0].x(),
+									(pts[1].y() - pts[0].y()) * (start / l) + pts[0].y()));
+						dst.lineTo(pts[1]);
+					} else if (l > start) {
+						dst.moveTo(
+								SkPoint::Make(
+									(pts[1].x() - pts[0].x()) * (start / l) + pts[0].x(),
+									(pts[1].y() - pts[0].y()) * (start / l) + pts[0].y()));
+						dst.lineTo(
+								SkPoint::Make(
+									(pts[1].x() - pts[0].x()) * (remain / l) + pts[0].x(),
+									(pts[1].y() - pts[0].y()) * (remain / l) + pts[0].y()));
+					}
+
+					start -= l;
+					remain -= l;
+					break;
+
+				case SkPath::kQuad_Verb:
+					l = nemoshow_helper_get_quad_length(pts);
+					SkConvertQuadToCubic(pts, tts);
+					if (l > start && l <= remain) {
+						SkChopCubicAt(tts, nts, start / l);
+						dst.moveTo(nts[3]);
+						dst.cubicTo(nts[4], nts[5], nts[6]);
+					} else if (l > start) {
+						t[0] = start / l;
+						t[1] = remain / l;
+
+						SkChopCubicAt(tts, nts, t, 2);
+						dst.moveTo(nts[3]);
+						dst.cubicTo(nts[4], nts[5], nts[6]);
+					}
+
+					start -= l;
+					remain -= l;
+					break;
+
+				case SkPath::kConic_Verb:
+					break;
+
+				case SkPath::kCubic_Verb:
+					nemoshow_helper_convert_cubic_to_quad(pts, tts);
+					l = nemoshow_helper_get_quad_length(tts);
+					if (l > start && l <= remain) {
+						SkChopCubicAt(pts, nts, start / l);
+						dst.moveTo(nts[3]);
+						dst.cubicTo(nts[4], nts[5], nts[6]);
+					} else if (l > start) {
+						t[0] = start / l;
+						t[1] = remain / l;
+
+						SkChopCubicAt(pts, nts, t, 2);
+						dst.moveTo(nts[3]);
+						dst.cubicTo(nts[4], nts[5], nts[6]);
+					}
+
+					start -= l;
+					remain -= l;
+					break;
+
+				case SkPath::kClose_Verb:
+					break;
+
+				default:
+					break;
+			}
+		} else {
+			switch (verb) {
+				case SkPath::kMove_Verb:
+					dst.moveTo(pts[0]);
+					lts = pts[0];
+					break;
+
+				case SkPath::kLine_Verb:
+					l = SkPoint::Distance(pts[0], pts[1]);
+					if (l <= remain) {
+						dst.lineTo(pts[1]);
+					} else {
+						dst.lineTo(
+								SkPoint::Make(
+									(pts[1].x() - pts[0].x()) * (remain / l) + pts[0].x(),
+									(pts[1].y() - pts[0].y()) * (remain / l) + pts[0].y()));
+					}
+
+					remain -= l;
+					break;
+
+				case SkPath::kQuad_Verb:
+					l = nemoshow_helper_get_quad_length(pts);
+					SkConvertQuadToCubic(pts, tts);
+					if (l <= remain) {
+						dst.cubicTo(tts[1], tts[2], tts[3]);
+					} else {
+						SkChopCubicAt(tts, nts, remain / l);
+						dst.cubicTo(nts[1], nts[2], nts[3]);
+					}
+
+					remain -= l;
+					break;
+
+				case SkPath::kConic_Verb:
+					break;
+
+				case SkPath::kCubic_Verb:
+					nemoshow_helper_convert_cubic_to_quad(pts, tts);
+					l = nemoshow_helper_get_quad_length(tts);
+					if (l <= remain) {
+						dst.cubicTo(pts[1], pts[2], pts[3]);
+					} else {
+						SkChopCubicAt(pts, nts, remain / l);
+						dst.cubicTo(nts[1], nts[2], nts[3]);
+					}
+
+					remain -= l;
+					break;
+
+				case SkPath::kClose_Verb:
+					break;
+
+				default:
+					break;
+			}
+		}
+	}
 }

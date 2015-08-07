@@ -49,6 +49,7 @@ struct showitem {
 	struct showone *shader;
 	struct showone *matrix;
 	struct showone *path;
+	double length;
 
 	struct showfont *font;
 	double fontsize;

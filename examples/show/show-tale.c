@@ -48,8 +48,8 @@ static void nemoshow_dispatch_tale_event(struct nemotale *tale, struct talenode 
 				nemoshow_one_update(show, var);
 
 				trans = nemoshow_transition_create(
-						nemoshow_search_one(show, "ease0"),
-						800, 0,
+						nemoshow_search_one(show, "ease1"),
+						16000, 0,
 						nemoshow_get_next_serial(show));
 
 				if ((direction++ % 2) == 0) {

@@ -14,6 +14,7 @@
 #include <showpath.h>
 #include <showfont.h>
 #include <showfont.hpp>
+#include <showhelper.hpp>
 #include <nemoshow.h>
 #include <nemoxml.h>
 #include <nemobox.h>
@@ -209,14 +210,34 @@ static inline void nemoshow_canvas_render_item(struct nemoshow *show, struct sho
 		if (style->stroke != 0)
 			NEMOSHOW_CANVAS_CC(canvas, canvas)->drawArc(rect, item->from, item->to - item->from, true, *NEMOSHOW_ITEM_CC(style, stroke));
 	} else if (type == NEMOSHOW_PATH_ITEM) {
-		if (style->fill != 0)
-			NEMOSHOW_CANVAS_CC(canvas, canvas)->drawPath(
-					*NEMOSHOW_ITEM_CC(item, path),
-					*NEMOSHOW_ITEM_CC(style, fill));
-		if (style->stroke != 0)
-			NEMOSHOW_CANVAS_CC(canvas, canvas)->drawPath(
-					*NEMOSHOW_ITEM_CC(item, path),
-					*NEMOSHOW_ITEM_CC(style, stroke));
+		if (item->from == 0.0f && item->to == 1.0f) {
+			if (style->fill != 0)
+				NEMOSHOW_CANVAS_CC(canvas, canvas)->drawPath(
+						*NEMOSHOW_ITEM_CC(item, path),
+						*NEMOSHOW_ITEM_CC(style, fill));
+			if (style->stroke != 0)
+				NEMOSHOW_CANVAS_CC(canvas, canvas)->drawPath(
+						*NEMOSHOW_ITEM_CC(item, path),
+						*NEMOSHOW_ITEM_CC(style, stroke));
+		} else {
+			SkPath path;
+
+			nemoshow_helper_draw_path(
+					path,
+					NEMOSHOW_ITEM_CC(item, path),
+					NEMOSHOW_ITEM_CC(style, fill),
+					item->length,
+					item->from, item->to);
+
+			if (style->fill != 0)
+				NEMOSHOW_CANVAS_CC(canvas, canvas)->drawPath(
+						path,
+						*NEMOSHOW_ITEM_CC(style, fill));
+			if (style->stroke != 0)
+				NEMOSHOW_CANVAS_CC(canvas, canvas)->drawPath(
+						path,
+						*NEMOSHOW_ITEM_CC(style, stroke));
+		}
 	} else if (type == NEMOSHOW_TEXT_ITEM) {
 		if (item->path == NULL) {
 			if (item->font->layout == NEMOSHOW_NORMAL_LAYOUT) {

@@ -28,4 +28,6 @@
 
 #include <SkGradientShader.h>
 
+#include <SkGeometry.h>
+
 #endif

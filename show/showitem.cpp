@@ -41,6 +41,8 @@ struct showone *nemoshow_item_create(int type)
 	NEMOSHOW_ITEM_CC(item, points) = NULL;
 
 	item->alpha = 1.0f;
+	item->from = 0.0f;
+	item->to = 1.0f;
 
 	one = &item->base;
 	one->type = NEMOSHOW_ITEM_TYPE;
@@ -293,7 +295,7 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 			}
 		}
 
-		nemoshow_helper_get_path_length(NEMOSHOW_ITEM_CC(item, path));
+		item->length = nemoshow_helper_get_path_length(NEMOSHOW_ITEM_CC(item, path));
 	} else if (one->sub == NEMOSHOW_TEXT_ITEM) {
 		item->text = nemoobject_gets(&one->object, "d");
 		if (item->text != NULL) {
