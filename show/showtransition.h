@@ -14,6 +14,8 @@ NEMO_BEGIN_EXTERN_C
 
 #include <nemolist.h>
 
+typedef void (*nemoshow_transition_callback_t)(void *userdata);
+
 struct showtransition {
 	struct showone **sequences;
 	int nsequences, ssequences;
@@ -29,12 +31,17 @@ struct showtransition {
 	uint32_t serial;
 
 	struct nemolist link;
+
+	nemoshow_transition_callback_t callback;
+	void *userdata;
 };
 
 extern struct showtransition *nemoshow_transition_create(struct showone *ease, uint32_t duration, uint32_t delay, uint32_t serial);
 extern void nemoshow_transition_destroy(struct showtransition *trans);
 
 extern void nemoshow_transition_attach_sequence(struct showtransition *trans, struct showone *sequence);
+
+extern void nemoshow_transition_attach_callback(struct showtransition *trans, nemoshow_transition_callback_t callback, void *userdata);
 
 extern int nemoshow_transition_dispatch(struct showtransition *trans, uint32_t time);
 
