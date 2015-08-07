@@ -26,10 +26,10 @@ typedef enum {
 	NEMOSHOW_CANVAS_IMAGE_TYPE = 3,
 	NEMOSHOW_CANVAS_REF_TYPE = 4,
 	NEMOSHOW_CANVAS_USE_TYPE = 5,
-	NEMOSHOW_CANVAS_SCENE_TYPE = 6,
-	NEMOSHOW_CANVAS_OPENGL_TYPE = 7,
-	NEMOSHOW_CANVAS_PIXMAN_TYPE = 8,
-	NEMOSHOW_CANVAS_BACK_TYPE = 9,
+	NEMOSHOW_CANVAS_SCENE_TYPE = 7,
+	NEMOSHOW_CANVAS_OPENGL_TYPE = 8,
+	NEMOSHOW_CANVAS_PIXMAN_TYPE = 9,
+	NEMOSHOW_CANVAS_BACK_TYPE = 10,
 	NEMOSHOW_CANVAS_LAST_TYPE
 } NemoShowCanvasType;
 
@@ -63,6 +63,7 @@ struct showcanvas {
 		double sx, sy;
 	} viewport;
 
+	int needs_redraw;
 	int needs_full_redraw;
 
 	void *cc;
@@ -83,7 +84,8 @@ extern void nemoshow_canvas_render_scene(struct nemoshow *show, struct showone *
 
 extern int nemoshow_canvas_set_viewport(struct nemoshow *show, struct showone *one, double sx, double sy);
 
-extern void nemoshow_canvas_dirty(struct nemoshow *show, struct showone *one);
+extern void nemoshow_canvas_damage_one(struct showone *one, struct showone *child);
+extern void nemoshow_canvas_damage_all(struct showone *one);
 
 static inline struct talenode *nemoshow_canvas_get_node(struct showone *one)
 {

@@ -6,6 +6,7 @@
 #include <errno.h>
 
 #include <showloop.h>
+#include <showcanvas.h>
 #include <nemoxml.h>
 #include <nemomisc.h>
 
@@ -41,7 +42,25 @@ void nemoshow_loop_destroy(struct showone *one)
 	free(loop);
 }
 
+int nemoshow_loop_arrange(struct nemoshow *show, struct showone *one)
+{
+	struct showloop *loop = NEMOSHOW_LOOP(one);
+	struct showone *parent;
+
+	for (parent = one->parent;
+			parent != NULL && parent->type != NEMOSHOW_CANVAS_TYPE;
+			parent = parent->parent);
+
+	loop->canvas = parent;
+}
+
 int nemoshow_loop_update(struct nemoshow *show, struct showone *one)
 {
+	struct showloop *loop = NEMOSHOW_LOOP(one);
+
+	if (loop->canvas != NULL) {
+		nemoshow_canvas_damage_all(loop->canvas);
+	}
+
 	return 0;
 }

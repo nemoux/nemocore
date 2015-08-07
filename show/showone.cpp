@@ -28,7 +28,7 @@ void nemoshow_one_prepare(struct showone *one)
 	one->nattrs = 0;
 	one->sattrs = 4;
 
-	one->dirty = 1;
+	one->dirty = NEMOSHOW_ALL_DIRTY;
 }
 
 void nemoshow_one_finish(struct showone *one)

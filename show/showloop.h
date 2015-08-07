@@ -14,6 +14,8 @@ NEMO_BEGIN_EXTERN_C
 struct showloop {
 	struct showone base;
 
+	struct showone *canvas;
+
 	int32_t begin, end;
 };
 
@@ -23,6 +25,7 @@ struct showloop {
 extern struct showone *nemoshow_loop_create(void);
 extern void nemoshow_loop_destroy(struct showone *one);
 
+extern int nemoshow_loop_arrange(struct nemoshow *show, struct showone *one);
 extern int nemoshow_loop_update(struct nemoshow *show, struct showone *one);
 
 #ifdef __cplusplus

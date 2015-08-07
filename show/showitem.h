@@ -30,6 +30,8 @@ struct showcanvas;
 struct showitem {
 	struct showone base;
 
+	struct showone *canvas;
+
 	double x, y;
 	double width, height;
 	double r;

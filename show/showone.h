@@ -113,24 +113,18 @@ static inline void nemoshow_one_dirty(struct showone *one, uint32_t dirty)
 	if (one->nrefs > 0) {
 		int i;
 
-		for (i = 0; i < one->nrefs; i++) {
+		for (i = 0; i < one->nrefs; i++)
 			nemoshow_one_dirty(one->refs[i], dirty);
-		}
 	}
 }
 
 static inline void nemoshow_one_update(struct nemoshow *show, struct showone *one)
 {
 	if (one->dirty != 0) {
-		struct showone *child;
 		int i;
 
-		for (i = 0; i < one->nchildren; i++) {
-			child = one->children[i];
-
-			if (child->dirty != 0)
-				nemoshow_one_update(show, child);
-		}
+		for (i = 0; i < one->nchildren; i++)
+			nemoshow_one_update(show, one->children[i]);
 
 		one->update(show, one);
 

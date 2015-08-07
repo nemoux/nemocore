@@ -99,6 +99,7 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 	struct showone *shader;
 	struct showone *matrix;
 	struct showone *path;
+	struct showone *parent;
 	struct showone *child;
 	const char *font;
 	int i;
@@ -180,6 +181,12 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 			break;
 		}
 	}
+
+	for (parent = one->parent;
+			parent != NULL && parent->type != NEMOSHOW_CANVAS_TYPE;
+			parent = parent->parent);
+
+	item->canvas = parent;
 
 	return 0;
 }
@@ -398,19 +405,26 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 		NEMOSHOW_ITEM_CC(item, matrix)->mapRect(&box);
 	}
 
-	one->x = MAX(floor(box.x()), 0);
-	one->y = MAX(floor(box.y()), 0);
-	one->width = ceil(box.width());
-	one->height = ceil(box.height());
+	if (item->canvas != NULL) {
+		if ((one->dirty & NEMOSHOW_SHAPE_DIRTY) != 0)
+			nemoshow_canvas_damage_one(item->canvas, one);
 
-	snprintf(attr, NEMOSHOW_SYMBOL_MAX, "%s_x", one->id);
-	nemoshow_update_symbol(show, attr, one->x);
-	snprintf(attr, NEMOSHOW_SYMBOL_MAX, "%s_y", one->id);
-	nemoshow_update_symbol(show, attr, one->y);
-	snprintf(attr, NEMOSHOW_SYMBOL_MAX, "%s_w", one->id);
-	nemoshow_update_symbol(show, attr, one->width);
-	snprintf(attr, NEMOSHOW_SYMBOL_MAX, "%s_h", one->id);
-	nemoshow_update_symbol(show, attr, one->height);
+		one->x = MAX(floor(box.x()), 0);
+		one->y = MAX(floor(box.y()), 0);
+		one->width = ceil(box.width());
+		one->height = ceil(box.height());
+
+		nemoshow_canvas_damage_one(item->canvas, one);
+
+		snprintf(attr, NEMOSHOW_SYMBOL_MAX, "%s_x", one->id);
+		nemoshow_update_symbol(show, attr, one->x);
+		snprintf(attr, NEMOSHOW_SYMBOL_MAX, "%s_y", one->id);
+		nemoshow_update_symbol(show, attr, one->y);
+		snprintf(attr, NEMOSHOW_SYMBOL_MAX, "%s_w", one->id);
+		nemoshow_update_symbol(show, attr, one->width);
+		snprintf(attr, NEMOSHOW_SYMBOL_MAX, "%s_h", one->id);
+		nemoshow_update_symbol(show, attr, one->height);
+	}
 
 	return 0;
 }
