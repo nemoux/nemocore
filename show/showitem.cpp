@@ -355,9 +355,12 @@ static inline void nemoshow_item_update_text(struct nemoshow *show, struct showo
 
 				hb_buffer_destroy(hbbuffer);
 			}
-
-			one->dirty |= NEMOSHOW_SHAPE_DIRTY;
+		} else {
+			item->textwidth = 0.0f;
+			item->textheight = 0.0f;
 		}
+
+		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 	}
 }
 
