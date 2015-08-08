@@ -33,6 +33,34 @@ static void nemoshow_dispatch_tale_event(struct nemotale *tale, struct talenode 
 			nemotale_event_update_node_taps(tale, node, event, type);
 
 			if (event->tapcount == 1) {
+				struct showtransition *trans;
+				struct showtransition *ntrans;
+				struct showone *sequence;
+				struct showone *var;
+
+				var = nemoshow_search_one(show, "var0");
+				nemoshow_one_sets(var, "d", "mine", NEMOSHOW_SHAPE_DIRTY);
+				nemoshow_one_update(show, var);
+
+				trans = nemoshow_transition_create(
+						nemoshow_search_one(show, "ease0"),
+						6000, 0);
+				sequence = nemoshow_search_one(show, "hour_hand_sequence");
+				nemoshow_update_one_expression(show, sequence);
+				nemoshow_transition_attach_sequence(trans, sequence);
+
+				ntrans = nemoshow_transition_create(
+						nemoshow_search_one(show, "ease0"),
+						6000, 0);
+				sequence = nemoshow_search_one(show, "hour_hand_sequence_r");
+				nemoshow_update_one_expression(show, sequence);
+				nemoshow_transition_attach_sequence(ntrans, sequence);
+
+				nemoshow_transition_attach_transition(trans, ntrans);
+
+				nemoshow_attach_transition(show, trans);
+
+				nemocanvas_dispatch_frame(canvas);
 			} else if (event->tapcount == 2) {
 			} else if (event->tapcount == 3) {
 				struct nemotool *tool = nemocanvas_get_tool(canvas);
@@ -83,6 +111,9 @@ int main(int argc, char *argv[])
 	nemoshow_load_xml(show, argv[1]);
 	nemoshow_arrange_one(show);
 	nemoshow_update_one(show);
+	nemoshow_update_symbol(show, "hour", 5.0f);
+	nemoshow_update_symbol(show, "min", 10.0f);
+	nemoshow_update_symbol(show, "sec", 15.0f);
 	nemoshow_update_expression(show);
 
 	nemoshow_set_scene(show,

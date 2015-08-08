@@ -21,6 +21,9 @@ struct showtransition {
 	struct showone **sequences;
 	int nsequences, ssequences;
 
+	struct showtransition **transitions;
+	int ntransitions, stransitions;
+
 	struct showease *ease;
 
 	uint32_t duration;
@@ -39,10 +42,11 @@ struct showtransition {
 	void *userdata;
 };
 
-extern struct showtransition *nemoshow_transition_create(struct showone *ease, uint32_t duration, uint32_t delay, uint32_t serial);
+extern struct showtransition *nemoshow_transition_create(struct showone *ease, uint32_t duration, uint32_t delay);
 extern void nemoshow_transition_destroy(struct showtransition *trans);
 
 extern void nemoshow_transition_attach_sequence(struct showtransition *trans, struct showone *sequence);
+extern void nemoshow_transition_attach_transition(struct showtransition *trans, struct showtransition *ntrans);
 
 extern int nemoshow_transition_dispatch(struct showtransition *trans, uint32_t time);
 

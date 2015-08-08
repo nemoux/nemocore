@@ -10,7 +10,7 @@
 #include <nemobox.h>
 #include <nemomisc.h>
 
-struct showtransition *nemoshow_transition_create(struct showone *ease, uint32_t duration, uint32_t delay, uint32_t serial)
+struct showtransition *nemoshow_transition_create(struct showone *ease, uint32_t duration, uint32_t delay)
 {
 	struct showtransition *trans;
 
@@ -30,8 +30,6 @@ struct showtransition *nemoshow_transition_create(struct showone *ease, uint32_t
 	trans->duration = duration;
 	trans->delay = delay;
 
-	trans->serial = serial;
-
 	return trans;
 }
 
@@ -48,6 +46,11 @@ void nemoshow_transition_attach_sequence(struct showtransition *trans, struct sh
 	NEMOBOX_APPEND(trans->sequences, trans->ssequences, trans->nsequences, sequence);
 
 	nemoshow_sequence_prepare(sequence, trans->serial);
+}
+
+void nemoshow_transition_attach_transition(struct showtransition *trans, struct showtransition *ntrans)
+{
+	NEMOBOX_APPEND(trans->transitions, trans->stransitions, trans->ntransitions, ntrans);
 }
 
 int nemoshow_transition_dispatch(struct showtransition *trans, uint32_t time)

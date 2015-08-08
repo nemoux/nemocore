@@ -30,33 +30,12 @@ link_directories(
 
 set(CMAKE_INSTALL_RPATH "/usr/lib64/skia")
 
-add_executable(show-simple
-	show-simple.c
-	)
-
-TARGET_LINK_LIBRARIES(show-simple
-	nemoshow
-	${NEMOUX_COMMON_LIBRARIES}
-	)
-
 add_executable(show-tale
-	show-tale.c
+	show-tale.cpp
 	showhelper.c
 	)
 
 TARGET_LINK_LIBRARIES(show-tale
-	nemoshow
-	nemotale
-	nemotool
-	${NEMOUX_COMMON_LIBRARIES}
-	)
-
-add_executable(show-mote
-	show-mote.cpp
-	showhelper.c
-	)
-
-TARGET_LINK_LIBRARIES(show-mote
 	nemoshow
 	nemotale
 	nemotool
