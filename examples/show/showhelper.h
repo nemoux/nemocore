@@ -1,8 +1,15 @@
 #ifndef	__NEMOUX_SHOW_HELPER_H__
 #define	__NEMOUX_SHOW_HELPER_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <nemotool.h>
 #include <nemocanvas.h>
+#include <nemoegl.h>
 
 #include <nemotale.h>
 #include <talenode.h>
@@ -31,5 +38,9 @@ struct showcontext {
 
 extern struct nemoshow *nemoshow_create_on_tale(struct nemotool *tool, int32_t width, int32_t height, nemotale_dispatch_event_t dispatch);
 extern void nemoshow_destroy_on_tale(struct nemoshow *show);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

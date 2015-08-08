@@ -36,6 +36,8 @@ typedef enum {
 struct nemoshow;
 struct showmatrix;
 
+typedef void (*nemoshow_canvas_dispatch_render_t)(struct nemoshow *show, struct showone *one);
+
 struct showcanvas {
 	struct showone base;
 
@@ -66,6 +68,8 @@ struct showcanvas {
 	int needs_redraw;
 	int needs_full_redraw;
 
+	nemoshow_canvas_dispatch_render_t dispatch_render;
+
 	void *cc;
 };
 
@@ -87,9 +91,9 @@ extern int nemoshow_canvas_set_viewport(struct nemoshow *show, struct showone *o
 extern void nemoshow_canvas_damage_one(struct showone *one, struct showone *child);
 extern void nemoshow_canvas_damage_all(struct showone *one);
 
-static inline struct talenode *nemoshow_canvas_get_node(struct showone *one)
+static inline void nemoshow_canvas_set_dispatch_render(struct showone *one, nemoshow_canvas_dispatch_render_t dispatch_render)
 {
-	return NEMOSHOW_CANVAS_AT(one, node);
+	NEMOSHOW_CANVAS_AT(one, dispatch_render) = dispatch_render;
 }
 
 #ifdef __cplusplus

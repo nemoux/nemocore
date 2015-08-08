@@ -618,10 +618,14 @@ void nemoshow_render_one(struct nemoshow *show)
 			canvas = NEMOSHOW_CANVAS(one);
 
 			if (canvas->needs_redraw != 0) {
-				if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
-					nemoshow_canvas_render_vector(show, one);
-				} else if (one->sub == NEMOSHOW_CANVAS_BACK_TYPE) {
-					nemoshow_canvas_render_back(show, one);
+				if (canvas->dispatch_render == NULL) {
+					if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
+						nemoshow_canvas_render_vector(show, one);
+					} else if (one->sub == NEMOSHOW_CANVAS_BACK_TYPE) {
+						nemoshow_canvas_render_back(show, one);
+					}
+				} else {
+					canvas->dispatch_render(show, one);
 				}
 
 				canvas->needs_redraw = 0;
