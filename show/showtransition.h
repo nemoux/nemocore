@@ -14,7 +14,8 @@ NEMO_BEGIN_EXTERN_C
 
 #include <nemolist.h>
 
-typedef void (*nemoshow_transition_callback_t)(void *userdata);
+typedef void (*nemoshow_transition_dispatch_frame_t)(void *userdata, uint32_t time, double t);
+typedef void (*nemoshow_transition_dispatch_done_t)(void *userdata);
 
 struct showtransition {
 	struct showone **sequences;
@@ -32,7 +33,9 @@ struct showtransition {
 
 	struct nemolist link;
 
-	nemoshow_transition_callback_t callback;
+	nemoshow_transition_dispatch_frame_t dispatch_frame;
+	nemoshow_transition_dispatch_done_t dispatch_done;
+
 	void *userdata;
 };
 
@@ -41,9 +44,27 @@ extern void nemoshow_transition_destroy(struct showtransition *trans);
 
 extern void nemoshow_transition_attach_sequence(struct showtransition *trans, struct showone *sequence);
 
-extern void nemoshow_transition_attach_callback(struct showtransition *trans, nemoshow_transition_callback_t callback, void *userdata);
-
 extern int nemoshow_transition_dispatch(struct showtransition *trans, uint32_t time);
+
+static inline void nemoshow_transition_set_dispatch_frame(struct showtransition *trans, nemoshow_transition_dispatch_frame_t dispatch_frame)
+{
+	trans->dispatch_frame = dispatch_frame;
+}
+
+static inline void nemoshow_transition_set_dispatch_done(struct showtransition *trans, nemoshow_transition_dispatch_done_t dispatch_done)
+{
+	trans->dispatch_done = dispatch_done;
+}
+
+static inline void nemoshow_transition_set_userdata(struct showtransition *trans, void *data)
+{
+	trans->userdata = data;
+}
+
+static inline void *nemoshow_transition_get_userdata(struct showtransition *trans)
+{
+	return trans->userdata;
+}
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

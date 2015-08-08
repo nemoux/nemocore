@@ -802,9 +802,6 @@ void nemoshow_dispatch_transition(struct nemoshow *show, uint32_t msecs)
 	nemolist_for_each_safe(trans, ntrans, &show->transition_list, link) {
 		done = nemoshow_transition_dispatch(trans, msecs);
 		if (done != 0) {
-			if (trans->callback != NULL)
-				trans->callback(trans->userdata);
-
 			nemoshow_transition_destroy(trans);
 		}
 	}

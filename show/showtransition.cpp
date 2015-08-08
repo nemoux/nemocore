@@ -50,12 +50,6 @@ void nemoshow_transition_attach_sequence(struct showtransition *trans, struct sh
 	nemoshow_sequence_prepare(sequence, trans->serial);
 }
 
-void nemoshow_transition_attach_callback(struct showtransition *trans, nemoshow_transition_callback_t callback, void *userdata)
-{
-	trans->callback = callback;
-	trans->userdata = userdata;
-}
-
 int nemoshow_transition_dispatch(struct showtransition *trans, uint32_t time)
 {
 	double t;
@@ -79,6 +73,12 @@ int nemoshow_transition_dispatch(struct showtransition *trans, uint32_t time)
 
 	for (i = 0; i < trans->nsequences; i++) {
 		nemoshow_sequence_dispatch(trans->sequences[i], t, trans->serial);
+	}
+
+	if (done != 0 && trans->dispatch_done != NULL) {
+		trans->dispatch_done(trans->userdata);
+	} else if (done == 0 && trans->dispatch_frame != NULL) {
+		trans->dispatch_frame(trans->userdata, time, t);
 	}
 
 	return done;
