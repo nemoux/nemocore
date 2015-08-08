@@ -17,11 +17,13 @@ struct showprop *nemoshow_get_property(const char *name)
 {
 	static struct showprop props[] = {
 		{ "alpha",						NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_STYLE_DIRTY },
+		{ "attr",							NEMOSHOW_STRING_PROP,				NEMOSHOW_NONE_DIRTY },
 		{ "begin",						NEMOSHOW_INTEGER_PROP,			NEMOSHOW_NONE_DIRTY },
 		{ "blur",							NEMOSHOW_STRING_PROP,				NEMOSHOW_STYLE_DIRTY },
 		{ "child",						NEMOSHOW_INTEGER_PROP,			NEMOSHOW_NONE_DIRTY },
 		{ "d",								NEMOSHOW_STRING_PROP,				NEMOSHOW_TEXT_DIRTY },
 		{ "ease",							NEMOSHOW_STRING_PROP,				NEMOSHOW_NONE_DIRTY },
+		{ "element",					NEMOSHOW_STRING_PROP,				NEMOSHOW_NONE_DIRTY },
 		{ "end",							NEMOSHOW_INTEGER_PROP,			NEMOSHOW_NONE_DIRTY },
 		{ "event",						NEMOSHOW_INTEGER_PROP,			NEMOSHOW_NONE_DIRTY },
 		{ "fill",							NEMOSHOW_COLOR_PROP,				NEMOSHOW_STYLE_DIRTY },
@@ -34,6 +36,7 @@ struct showprop *nemoshow_get_property(const char *name)
 		{ "matrix",						NEMOSHOW_STRING_PROP,				NEMOSHOW_SHAPE_DIRTY },
 		{ "name",							NEMOSHOW_STRING_PROP,				NEMOSHOW_NONE_DIRTY },
 		{ "offset",						NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_SHAPE_DIRTY },
+		{ "path",							NEMOSHOW_STRING_PROP,				NEMOSHOW_NONE_DIRTY },
 		{ "r",								NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_SHAPE_DIRTY },
 		{ "rx",								NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_SHAPE_DIRTY },
 		{ "ry",								NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_SHAPE_DIRTY },

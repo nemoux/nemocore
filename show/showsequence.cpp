@@ -6,8 +6,11 @@
 #include <errno.h>
 
 #include <showsequence.h>
+#include <showitem.h>
+#include <showitem.hpp>
 #include <nemoshow.h>
 #include <showmisc.h>
+#include <showhelper.hpp>
 #include <nemoxml.h>
 #include <nemomisc.h>
 
@@ -208,24 +211,107 @@ int nemoshow_sequence_update_set(struct nemoshow *show, struct showone *one)
 	return 0;
 }
 
+struct showone *nemoshow_sequence_create_follow(void)
+{
+	struct showfollow *follow;
+	struct showone *one;
+
+	follow = (struct showfollow *)malloc(sizeof(struct showfollow));
+	if (follow == NULL)
+		return NULL;
+	memset(follow, 0, sizeof(struct showfollow));
+
+	one = &follow->base;
+	one->type = NEMOSHOW_FOLLOW_TYPE;
+	one->update = nemoshow_sequence_update_follow;
+	one->destroy = nemoshow_sequence_destroy_follow;
+
+	nemoshow_one_prepare(one);
+
+	nemoobject_set_reserved(&one->object, "from", &follow->from, sizeof(double));
+	nemoobject_set_reserved(&one->object, "to", &follow->to, sizeof(double));
+
+	return one;
+}
+
+void nemoshow_sequence_destroy_follow(struct showone *one)
+{
+	struct showfollow *follow = NEMOSHOW_FOLLOW(one);
+
+	nemoshow_one_finish(one);
+
+	free(follow);
+}
+
+int nemoshow_sequence_arrange_follow(struct nemoshow *show, struct showone *one)
+{
+	struct showfollow *follow = NEMOSHOW_FOLLOW(one);
+	struct showone *src;
+	struct showone *path;
+	struct nemoattr *attr;
+	const char *element;
+
+	src = nemoshow_search_one(show, nemoobject_gets(&one->object, "src"));
+	if (src == NULL)
+		return -1;
+
+	attr = nemoobject_get(&src->object, nemoobject_gets(&one->object, "attr"));
+	if (attr == NULL)
+		return -1;
+
+	path = nemoshow_search_one(show, nemoobject_gets(&one->object, "path"));
+	if (path == NULL)
+		return -1;
+
+	element = nemoobject_gets(&one->object, "element");
+	if (element == NULL)
+		return -1;
+
+	if (strcmp(element, "x") == 0) {
+		follow->element = NEMOSHOW_PATH_X_FOLLOW;
+	} else if (strcmp(element, "y") == 0) {
+		follow->element = NEMOSHOW_PATH_Y_FOLLOW;
+	} else if (strcmp(element, "r") == 0) {
+		follow->element = NEMOSHOW_PATH_R_FOLLOW;
+	}
+
+	follow->src = src;
+	follow->attr = attr;
+	follow->path = path;
+
+	return 0;
+}
+
+int nemoshow_sequence_update_follow(struct nemoshow *show, struct showone *one)
+{
+	return 0;
+}
+
 static void nemoshow_sequence_prepare_frame(struct showone *one, uint32_t serial)
 {
 	struct showframe *frame = NEMOSHOW_FRAME(one);
 	struct showset *set;
+	struct showfollow *follow;
 	int i, j;
 
 	for (i = 0; i < one->nchildren; i++) {
-		set = NEMOSHOW_SET(one->children[i]);
+		if (one->children[i]->type == NEMOSHOW_SET_TYPE) {
+			set = NEMOSHOW_SET(one->children[i]);
 
-		if (set->src->serial <= serial) {
-			for (j = 0; j < set->nattrs; j++) {
-				if (set->types[j] == NEMOSHOW_DOUBLE_PROP) {
-					set->sattrs[j] = nemoattr_getd(set->tattrs[j]);
+			if (set->src->serial <= serial) {
+				for (j = 0; j < set->nattrs; j++) {
+					if (set->types[j] == NEMOSHOW_DOUBLE_PROP) {
+						set->sattrs[j] = nemoattr_getd(set->tattrs[j]);
+					}
 				}
 			}
-		}
 
-		set->src->state = NEMOSHOW_TRANSITION_STATE;
+			set->src->state = NEMOSHOW_TRANSITION_STATE;
+		} else if (one->children[i]->type == NEMOSHOW_FOLLOW_TYPE) {
+			follow = NEMOSHOW_FOLLOW(one->children[i]);
+
+			follow->src->state = NEMOSHOW_TRANSITION_STATE;
+		}
 	}
 }
 
@@ -233,26 +319,50 @@ static void nemoshow_sequence_dispatch_frame(struct showone *one, double s, doub
 {
 	struct showframe *frame = NEMOSHOW_FRAME(one);
 	struct showset *set;
+	struct showfollow *follow;
 	double dt = (t - s) / (frame->t - s);
 	int i, j;
 
 	for (i = 0; i < one->nchildren; i++) {
-		set = NEMOSHOW_SET(one->children[i]);
+		if (one->children[i]->type == NEMOSHOW_SET_TYPE) {
+			set = NEMOSHOW_SET(one->children[i]);
 
-		if (set->src->serial <= serial) {
-			uint32_t dirty = 0x0;
+			if (set->src->serial <= serial) {
+				uint32_t dirty = 0x0;
 
-			for (j = 0; j < set->nattrs; j++) {
-				if (set->types[j] == NEMOSHOW_DOUBLE_PROP) {
-					double d = (nemoattr_getd(set->eattrs[j]) - set->sattrs[j]) * dt + set->sattrs[j];
+				for (j = 0; j < set->nattrs; j++) {
+					if (set->types[j] == NEMOSHOW_DOUBLE_PROP) {
+						double d = (nemoattr_getd(set->eattrs[j]) - set->sattrs[j]) * dt + set->sattrs[j];
 
-					nemoattr_setd(set->tattrs[j], d);
+						nemoattr_setd(set->tattrs[j], d);
+					}
+
+					dirty |= set->dirties[j];
 				}
 
-				dirty |= set->dirties[j];
+				nemoshow_one_dirty(set->src, dirty);
 			}
+		} else if (one->children[i]->type == NEMOSHOW_FOLLOW_TYPE) {
+			follow = NEMOSHOW_FOLLOW(one->children[i]);
 
-			nemoshow_one_dirty(set->src, dirty);
+			if (follow->src->serial <= serial) {
+				double x, y, r;
+
+				nemoshow_helper_evaluate_path(NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(follow->path), path),
+						NEMOSHOW_ITEM_AT(follow->path, length),
+						(follow->to - follow->from) * t + follow->from,
+						&x, &y, &r);
+
+				if (follow->element == NEMOSHOW_PATH_X_FOLLOW) {
+					nemoattr_setd(follow->attr, x);
+				} else if (follow->element == NEMOSHOW_PATH_Y_FOLLOW) {
+					nemoattr_setd(follow->attr, y);
+				} else if (follow->element == NEMOSHOW_PATH_R_FOLLOW) {
+					nemoattr_setd(follow->attr, r);
+				}
+
+				nemoshow_one_dirty(follow->src, NEMOSHOW_SHAPE_DIRTY);
+			}
 		}
 	}
 }
@@ -261,31 +371,55 @@ static void nemoshow_sequence_finish_frame(struct showone *one, uint32_t serial)
 {
 	struct showframe *frame = NEMOSHOW_FRAME(one);
 	struct showset *set;
+	struct showfollow *follow;
 	int i, j;
 
 	for (i = 0; i < one->nchildren; i++) {
-		set = NEMOSHOW_SET(one->children[i]);
+		if (one->children[i]->type == NEMOSHOW_SET_TYPE) {
+			set = NEMOSHOW_SET(one->children[i]);
 
-		if (set->src->serial <= serial) {
-			uint32_t dirty = 0x0;
+			if (set->src->serial <= serial) {
+				uint32_t dirty = 0x0;
 
-			for (j = 0; j < set->nattrs; j++) {
-				if (set->types[j] == NEMOSHOW_DOUBLE_PROP) {
-					double d = nemoattr_getd(set->eattrs[j]);
+				for (j = 0; j < set->nattrs; j++) {
+					if (set->types[j] == NEMOSHOW_DOUBLE_PROP) {
+						double d = nemoattr_getd(set->eattrs[j]);
 
-					nemoattr_setd(set->tattrs[j], d);
-				} else if (set->types[j] == NEMOSHOW_STRING_PROP) {
-					const char *s = nemoattr_gets(set->eattrs[j]);
+						nemoattr_setd(set->tattrs[j], d);
+					} else if (set->types[j] == NEMOSHOW_STRING_PROP) {
+						const char *s = nemoattr_gets(set->eattrs[j]);
 
-					nemoattr_sets(set->tattrs[j], s, strlen(s));
+						nemoattr_sets(set->tattrs[j], s, strlen(s));
+					}
+
+					dirty |= set->dirties[j];
 				}
 
-				dirty |= set->dirties[j];
+				set->src->state = NEMOSHOW_NORMAL_STATE;
+
+				nemoshow_one_dirty(set->src, dirty);
 			}
+		} else if (one->children[i]->type == NEMOSHOW_FOLLOW_TYPE) {
+			follow = NEMOSHOW_FOLLOW(one->children[i]);
 
-			set->src->state = NEMOSHOW_NORMAL_STATE;
+			if (follow->src->serial <= serial) {
+				double x, y, r;
 
-			nemoshow_one_dirty(set->src, dirty);
+				nemoshow_helper_evaluate_path(NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(follow->path), path),
+						NEMOSHOW_ITEM_AT(follow->path, length),
+						follow->to,
+						&x, &y, &r);
+
+				if (follow->element == NEMOSHOW_PATH_X_FOLLOW) {
+					nemoattr_setd(follow->attr, x);
+				} else if (follow->element == NEMOSHOW_PATH_Y_FOLLOW) {
+					nemoattr_setd(follow->attr, y);
+				} else if (follow->element == NEMOSHOW_PATH_R_FOLLOW) {
+					nemoattr_setd(follow->attr, r);
+				}
+
+				nemoshow_one_dirty(follow->src, NEMOSHOW_SHAPE_DIRTY);
+			}
 		}
 	}
 }
@@ -295,6 +429,7 @@ void nemoshow_sequence_prepare(struct showone *one, uint32_t serial)
 	struct showsequence *sequence = NEMOSHOW_SEQUENCE(one);
 	struct showone *frame;
 	struct showone *set;
+	struct showone *follow;
 	int i, j;
 
 	sequence->t = 0.0f;
@@ -306,9 +441,15 @@ void nemoshow_sequence_prepare(struct showone *one, uint32_t serial)
 		frame = one->children[i];
 
 		for (j = 0; j < frame->nchildren; j++) {
-			set = frame->children[j];
+			if (frame->children[j]->type == NEMOSHOW_SET_TYPE) {
+				set = frame->children[j];
 
-			NEMOSHOW_SET_AT(set, src)->serial = serial;
+				NEMOSHOW_SET_AT(set, src)->serial = serial;
+			} else if (frame->children[j]->type == NEMOSHOW_FOLLOW_TYPE) {
+				follow = frame->children[j];
+
+				NEMOSHOW_FOLLOW_AT(follow, src)->serial = serial;
+			}
 		}
 	}
 

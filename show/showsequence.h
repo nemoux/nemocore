@@ -16,8 +16,26 @@ NEMO_BEGIN_EXTERN_C
 #define	NEMOSHOW_SEQUENCE_TYPE_MAX			(32)
 #define	NEMOSHOW_SEQUENCE_SET_ATTR_MAX	(16)
 
+typedef enum {
+	NEMOSHOW_PATH_X_FOLLOW = 0,
+	NEMOSHOW_PATH_Y_FOLLOW = 1,
+	NEMOSHOW_PATH_R_FOLLOW = 2,
+	NEMOSHOW_PATH_LAST_FOLLOW
+} NemoShowFollowElement;
+
 struct nemoshow;
 struct showone;
+
+struct showfollow {
+	struct showone base;
+
+	struct showone *src;
+	struct nemoattr *attr;
+
+	struct showone *path;
+	double from, to;
+	int element;
+};
 
 struct showset {
 	struct showone base;
@@ -51,6 +69,8 @@ struct showsequence {
 #define NEMOSHOW_FRAME_AT(one, at)			(NEMOSHOW_FRAME(one)->at)
 #define NEMOSHOW_SET(one)								((struct showset *)container_of(one, struct showset, base))
 #define NEMOSHOW_SET_AT(one, at)				(NEMOSHOW_SET(one)->at)
+#define NEMOSHOW_FOLLOW(one)						((struct showfollow *)container_of(one, struct showfollow, base))
+#define NEMOSHOW_FOLLOW_AT(one, at)			(NEMOSHOW_FOLLOW(one)->at)
 
 extern struct showone *nemoshow_sequence_create(void);
 extern void nemoshow_sequence_destroy(struct showone *one);
@@ -70,6 +90,12 @@ extern void nemoshow_sequence_destroy_set(struct showone *one);
 
 extern int nemoshow_sequence_arrange_set(struct nemoshow *show, struct showone *one);
 extern int nemoshow_sequence_update_set(struct nemoshow *show, struct showone *one);
+
+extern struct showone *nemoshow_sequence_create_follow(void);
+extern void nemoshow_sequence_destroy_follow(struct showone *one);
+
+extern int nemoshow_sequence_arrange_follow(struct nemoshow *show, struct showone *one);
+extern int nemoshow_sequence_update_follow(struct nemoshow *show, struct showone *one);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
