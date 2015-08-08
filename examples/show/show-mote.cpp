@@ -18,27 +18,23 @@ static void nemoshow_dispatch_tale_event(struct nemotale *tale, struct talenode 
 	uint32_t id = nemotale_node_get_id(node);
 
 	if (id == 1) {
-		if (type & NEMOTALE_DOWN_EVENT) {
-			struct taletap *taps[16];
-			int ntaps;
+		if (nemotale_is_down_event(tale, event, type)) {
+			nemotale_event_update_node_taps(tale, node, event, type);
 
-			ntaps = nemotale_get_node_taps(tale, node, taps, type);
-			if (ntaps == 1) {
-				nemocanvas_move(canvas, taps[0]->serial);
-			} else if (ntaps == 2) {
+			if (event->tapcount == 1) {
+				nemocanvas_move(canvas, event->taps[0]->serial);
+			} else if (event->tapcount == 2) {
 				nemocanvas_pick(canvas,
-						taps[0]->serial,
-						taps[1]->serial,
+						event->taps[0]->serial,
+						event->taps[1]->serial,
 						(1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_SCALE));
 			}
 		} else if (nemotale_is_single_click(tale, event, type) != 0) {
-			struct taletap *taps[16];
-			int ntaps;
+			nemotale_event_update_node_taps(tale, node, event, type);
 
-			ntaps = nemotale_get_node_taps(tale, node, taps, type);
-			if (ntaps == 1) {
-			} else if (ntaps == 2) {
-			} else if (ntaps == 3) {
+			if (event->tapcount == 1) {
+			} else if (event->tapcount == 2) {
+			} else if (event->tapcount == 3) {
 				struct nemotool *tool = nemocanvas_get_tool(canvas);
 
 				nemotool_exit(tool);

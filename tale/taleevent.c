@@ -47,7 +47,6 @@ static struct taletap *nemotale_create_tap(struct nemotale *tale, uint64_t devic
 		return NULL;
 
 	tap->device = device;
-	tap->item = NULL;
 
 	nemolist_init(&tap->link);
 
@@ -185,9 +184,6 @@ void nemotale_push_pointer_up_event(struct nemotale *tale, uint32_t serial, uint
 		nemolist_init(&tap->node_destroy_listener.link);
 
 		tap->node = NULL;
-	}
-	if (tap->item != NULL) {
-		tap->item = NULL;
 	}
 }
 

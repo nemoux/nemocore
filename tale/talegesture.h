@@ -37,4 +37,19 @@ static inline int nemotale_is_single_click(struct nemotale *tale, struct taleeve
 	return 0;
 }
 
+static inline int nemotale_is_down_event(struct nemotale *tale, struct taleevent *event, uint32_t type)
+{
+	return type & NEMOTALE_DOWN_EVENT;
+}
+
+static inline int nemotale_is_motion_event(struct nemotale *tale, struct taleevent *event, uint32_t type)
+{
+	return type & NEMOTALE_MOTION_EVENT;
+}
+
+static inline int nemotale_is_up_event(struct nemotale *tale, struct taleevent *event, uint32_t type)
+{
+	return type & NEMOTALE_UP_EVENT;
+}
+
 #endif

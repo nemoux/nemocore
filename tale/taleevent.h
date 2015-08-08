@@ -9,6 +9,8 @@
 #include <nemotale.h>
 #include <talenode.h>
 
+#define	NEMOTALE_EVENT_TAPS_MAX			(16)
+
 typedef enum {
 	NEMOTALE_POINTER_ENTER_EVENT = (1 << 0),
 	NEMOTALE_POINTER_LEAVE_EVENT = (1 << 1),
@@ -40,7 +42,6 @@ struct talenode;
 
 struct taletap {
 	struct talenode *node;
-	void *item;
 
 	float x, y;
 
@@ -66,6 +67,9 @@ struct taleevent {
 
 	float x, y;
 	float dx, dy;
+
+	struct taletap *taps[NEMOTALE_EVENT_TAPS_MAX];
+	int tapcount;
 };
 
 extern void nemotale_push_pointer_enter_event(struct nemotale *tale, uint32_t serial, uint64_t device, float x, float y);
@@ -105,84 +109,25 @@ static inline struct taletap *nemotale_touch_get_tap(struct nemotale *tale, uint
 	return NULL;
 }
 
-static inline struct taletap *nemotale_get_tap(struct nemotale *tale, uint64_t device, uint32_t type)
-{
-	struct taletap *tap;
-
-	if (type & NEMOTALE_POINTER_EVENT) {
-		nemolist_for_each(tap, &tale->ptap_list, link) {
-			if (tap->device == device)
-				return tap;
-		}
-	} else if (type & NEMOTALE_TOUCH_EVENT) {
-		nemolist_for_each_reverse(tap, &tale->tap_list, link) {
-			if (tap->device == device)
-				return tap;
-		}
-	}
-
-	return NULL;
-}
-
-static inline int nemotale_touch_get_taps(struct nemotale *tale, struct taletap **taps)
-{
-	struct taletap *tap;
-	int count = 0;
-
-	nemolist_for_each(tap, &tale->tap_list, link) {
-		taps[count++] = tap;
-	}
-
-	return count;
-}
-
-static inline int nemotale_touch_get_node_taps(struct nemotale *tale, struct talenode *node, struct taletap **taps)
-{
-	struct taletap *tap;
-	int count = 0;
-
-	nemolist_for_each(tap, &tale->tap_list, link) {
-		if (tap->node == node) {
-			taps[count++] = tap;
-		}
-	}
-
-	return count;
-}
-
-static inline int nemotale_touch_get_item_taps(struct nemotale *tale, void *item, struct taletap **taps)
-{
-	struct taletap *tap;
-	int count = 0;
-
-	nemolist_for_each(tap, &tale->tap_list, link) {
-		if (tap->item == item) {
-			taps[count++] = tap;
-		}
-	}
-
-	return count;
-}
-
-static inline int nemotale_get_taps(struct nemotale *tale, struct taletap **taps, uint32_t type)
+static inline int nemotale_event_update_taps(struct nemotale *tale, struct taleevent *event, uint32_t type)
 {
 	struct taletap *tap;
 	int count = 0;
 
 	if (type & NEMOTALE_POINTER_EVENT) {
 		nemolist_for_each(tap, &tale->ptap_list, link) {
-			taps[count++] = tap;
+			event->taps[count++] = tap;
 		}
 	} else if (type & NEMOTALE_TOUCH_EVENT) {
 		nemolist_for_each(tap, &tale->tap_list, link) {
-			taps[count++] = tap;
+			event->taps[count++] = tap;
 		}
 	}
 
-	return count;
+	return event->tapcount = count;
 }
 
-static inline int nemotale_get_node_taps(struct nemotale *tale, struct talenode *node, struct taletap **taps, uint32_t type)
+static inline int nemotale_event_update_node_taps(struct nemotale *tale, struct talenode *node, struct taleevent *event, uint32_t type)
 {
 	struct taletap *tap;
 	int count = 0;
@@ -190,40 +135,18 @@ static inline int nemotale_get_node_taps(struct nemotale *tale, struct talenode 
 	if (type & NEMOTALE_POINTER_EVENT) {
 		nemolist_for_each(tap, &tale->ptap_list, link) {
 			if (tap->node == node) {
-				taps[count++] = tap;
+				event->taps[count++] = tap;
 			}
 		}
 	} else if (type & NEMOTALE_TOUCH_EVENT) {
 		nemolist_for_each(tap, &tale->tap_list, link) {
 			if (tap->node == node) {
-				taps[count++] = tap;
+				event->taps[count++] = tap;
 			}
 		}
 	}
 
-	return count;
-}
-
-static inline int nemotale_get_item_taps(struct nemotale *tale, void *item, struct taletap **taps, uint32_t type)
-{
-	struct taletap *tap;
-	int count = 0;
-
-	if (type & NEMOTALE_POINTER_EVENT) {
-		nemolist_for_each(tap, &tale->ptap_list, link) {
-			if (tap->item == item) {
-				taps[count++] = tap;
-			}
-		}
-	} else if (type & NEMOTALE_TOUCH_EVENT) {
-		nemolist_for_each(tap, &tale->tap_list, link) {
-			if (tap->item == item) {
-				taps[count++] = tap;
-			}
-		}
-	}
-
-	return count;
+	return event->tapcount = count;
 }
 
 #endif
