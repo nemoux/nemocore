@@ -825,7 +825,7 @@ void nemoshow_dispatch_transition(struct nemoshow *show, uint32_t msecs)
 	}
 
 	for (i = 0; i < scount; i++) {
-		nemolist_insert(&show->transition_list, &strans[i]->link);
+		nemoshow_attach_transition(show, strans[i]);
 	}
 }
 
