@@ -6,6 +6,7 @@
 #include <errno.h>
 
 #include <showcolor.h>
+#include <stringhelper.h>
 
 static int nemoshow_color_compare(const void *a, const void *b)
 {

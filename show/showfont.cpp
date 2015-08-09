@@ -8,6 +8,7 @@
 #include <showfont.h>
 #include <showfont.hpp>
 #include <nemoshow.h>
+#include <fonthelper.h>
 #include <nemomisc.h>
 
 struct showone *nemoshow_font_create(void)

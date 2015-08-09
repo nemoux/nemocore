@@ -1,6 +1,12 @@
 #ifndef	__STRING_HELPER_H__
 #define	__STRING_HELPER_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <stdint.h>
 
 extern int string_divide(char *str, int length, char div);
@@ -43,5 +49,9 @@ static inline int string_is_number(const char *str, int offset, int length)
 
 	return 1;
 }
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

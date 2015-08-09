@@ -9,7 +9,6 @@ NEMO_BEGIN_EXTERN_C
 
 #include <stdint.h>
 
-#include <stringhelper.h>
 #include <nemotoken.h>
 #include <nemomisc.h>
 

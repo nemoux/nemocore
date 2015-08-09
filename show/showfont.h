@@ -12,8 +12,6 @@ NEMO_BEGIN_EXTERN_C
 #include <hb-ft.h>
 #include <hb-ot.h>
 
-#include <fonthelper.h>
-
 #include <showone.h>
 
 typedef enum {
