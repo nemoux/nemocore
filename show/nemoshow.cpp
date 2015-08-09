@@ -790,7 +790,13 @@ void nemoshow_detach_canvas(struct nemoshow *show, struct showone *one)
 
 void nemoshow_attach_transition(struct nemoshow *show, struct showtransition *trans)
 {
+	int i;
+
 	trans->serial = nemoshow_get_next_serial(show);
+
+	for (i = 0; i < trans->nsequences; i++) {
+		nemoshow_sequence_prepare(trans->sequences[i], trans->serial);
+	}
 
 	nemolist_insert(&show->transition_list, &trans->link);
 }

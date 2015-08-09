@@ -47,6 +47,7 @@ add_library(nemoshow SHARED
 	showvar.cpp
 	showcons.cpp
 	showfont.cpp
+	showeasy.cpp
 	showhelper.cpp
 	showmisc.cpp
 	)
@@ -80,6 +81,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/show/showvar.h
 	${CMAKE_SOURCE_DIR}/show/showcons.h
 	${CMAKE_SOURCE_DIR}/show/showfont.h
+	${CMAKE_SOURCE_DIR}/show/showeasy.h
 	)
 
 set(NEMOSHOW_PKGCONFIG_REQUIRES "nemoasst nemotale")

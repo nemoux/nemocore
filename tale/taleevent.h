@@ -9,7 +9,7 @@
 #include <nemotale.h>
 #include <talenode.h>
 
-#define	NEMOTALE_EVENT_TAPS_MAX			(16)
+#define	NEMOTALE_EVENT_TAPS_MAX			(64)
 
 typedef enum {
 	NEMOTALE_POINTER_ENTER_EVENT = (1 << 0),

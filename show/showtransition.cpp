@@ -44,8 +44,6 @@ void nemoshow_transition_destroy(struct showtransition *trans)
 void nemoshow_transition_attach_sequence(struct showtransition *trans, struct showone *sequence)
 {
 	NEMOBOX_APPEND(trans->sequences, trans->ssequences, trans->nsequences, sequence);
-
-	nemoshow_sequence_prepare(sequence, trans->serial);
 }
 
 void nemoshow_transition_attach_transition(struct showtransition *trans, struct showtransition *ntrans)
