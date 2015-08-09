@@ -297,8 +297,14 @@ static inline void nemoshow_item_update_text(struct nemoshow *show, struct showo
 		item->text = nemoobject_gets(&one->object, "d");
 		if (item->text != NULL) {
 			if (NEMOSHOW_FONT_AT(item->font, layout) == NEMOSHOW_NORMAL_LAYOUT) {
+				SkPaint::FontMetrics metrics;
+
 				NEMOSHOW_ITEM_CC(item, fill)->setTextSize(item->fontsize);
 				NEMOSHOW_ITEM_CC(item, stroke)->setTextSize(item->fontsize);
+
+				NEMOSHOW_ITEM_CC(item, stroke)->getFontMetrics(&metrics, 0);
+				item->fontascent = metrics.fAscent;
+				item->fontdescent = metrics.fDescent;
 			} else {
 				SkPaint::FontMetrics metrics;
 				hb_buffer_t *hbbuffer;
@@ -312,6 +318,8 @@ static inline void nemoshow_item_update_text(struct nemoshow *show, struct showo
 				NEMOSHOW_ITEM_CC(item, stroke)->setTextSize((NEMOSHOW_FONT_AT(item->font, upem) / NEMOSHOW_FONT_AT(item->font, max_advance_height)) * item->fontsize);
 
 				NEMOSHOW_ITEM_CC(item, stroke)->getFontMetrics(&metrics, 0);
+				item->fontascent = metrics.fAscent;
+				item->fontdescent = metrics.fDescent;
 
 				hbbuffer = hb_buffer_create();
 				hb_buffer_add_utf8(hbbuffer, item->text, strlen(item->text), 0, strlen(item->text));
@@ -335,12 +343,12 @@ static inline void nemoshow_item_update_text(struct nemoshow *show, struct showo
 				for (i = 0; i < strlen(item->text); i++) {
 					NEMOSHOW_ITEM_CC(item, points)[i].set(
 							hbglyphspos[i].x_offset * fontscale + item->textwidth + item->x,
-							item->y - metrics.fAscent);
+							item->y - item->fontascent);
 
 					item->textwidth += hbglyphspos[i].x_advance * fontscale;
 				}
 
-				item->textheight = metrics.fDescent - metrics.fAscent;
+				item->textheight = item->fontdescent - item->fontascent;
 
 				hb_buffer_destroy(hbbuffer);
 			}

@@ -242,6 +242,9 @@ static inline void nemoshow_canvas_render_item(struct nemoshow *show, struct sho
 	} else if (type == NEMOSHOW_TEXT_ITEM) {
 		if (item->path == NULL) {
 			if (NEMOSHOW_FONT_AT(item->font, layout) == NEMOSHOW_NORMAL_LAYOUT) {
+				NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
+				NEMOSHOW_CANVAS_CC(canvas, canvas)->translate(0.0f, -item->fontascent);
+
 				if (style->fill != 0)
 					NEMOSHOW_CANVAS_CC(canvas, canvas)->drawText(
 							item->text,
@@ -256,6 +259,8 @@ static inline void nemoshow_canvas_render_item(struct nemoshow *show, struct sho
 							item->x,
 							item->y,
 							*NEMOSHOW_ITEM_CC(style, stroke));
+
+				NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
 			} else if (NEMOSHOW_FONT_AT(item->font, layout) == NEMOSHOW_HARFBUZZ_LAYOUT) {
 				if (style->fill != 0)
 					NEMOSHOW_CANVAS_CC(canvas, canvas)->drawPosText(

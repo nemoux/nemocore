@@ -54,6 +54,8 @@ struct showitem {
 
 	struct showone *font;
 	double fontsize;
+	double fontascent;
+	double fontdescent;
 	const char *text;
 	double textwidth, textheight;
 
