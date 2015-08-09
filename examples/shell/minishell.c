@@ -393,7 +393,7 @@ int main(int argc, char *argv[])
 	nemoview_update_transform(actor->view);
 
 	node = nemotale_node_create_pixman(actor->base.width, actor->base.height);
-	nemotale_node_fill_pixman(node, 0.0f, 0.3f, 0.3f, 1.0f);
+	nemotale_node_fill_pixman(node, 0.0f, 0.0f, 0.0f, 1.0f);
 	nemotale_node_set_id(node, 1);
 	nemotale_node_translate(node, 0.0f, 0.0f);
 	nemotale_attach_node(tale, node);
