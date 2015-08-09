@@ -10,9 +10,10 @@
 #include <nemoshow.h>
 #include <nemomisc.h>
 
-struct showfont *nemoshow_font_create(void)
+struct showone *nemoshow_font_create(void)
 {
 	struct showfont *font;
+	struct showone *one;
 
 	font = (struct showfont *)malloc(sizeof(struct showfont));
 	if (font == NULL)
@@ -21,11 +22,22 @@ struct showfont *nemoshow_font_create(void)
 
 	font->cc = new showfont_t;
 
-	return font;
+	one = &font->base;
+	one->type = NEMOSHOW_FONT_TYPE;
+	one->update = nemoshow_font_update;
+	one->destroy = nemoshow_font_destroy;
+
+	nemoshow_one_prepare(one);
+
+	return one;
 }
 
-void nemoshow_font_destroy(struct showfont *font)
+void nemoshow_font_destroy(struct showone *one)
 {
+	struct showfont *font = NEMOSHOW_FONT(one);
+
+	nemoshow_one_finish(one);
+
 	delete static_cast<showfont_t *>(font->cc);
 
 	if (font->path != NULL)
@@ -37,8 +49,45 @@ void nemoshow_font_destroy(struct showfont *font)
 	free(font);
 }
 
-int nemoshow_font_load(struct showfont *font, const char *path)
+int nemoshow_font_arrange(struct nemoshow *show, struct showone *one)
 {
+	struct showfont *font = NEMOSHOW_FONT(one);
+	const char *fontfamily;
+	const char *fontstyle;
+	const char *fontlayout;
+	const char *fontpath;
+
+	fontfamily = nemoobject_gets(&one->object, "font-family");
+	fontstyle = nemoobject_gets(&one->object, "font-style");
+
+	fontpath = fontconfig_get_path(
+			fontfamily,
+			fontstyle,
+			FC_SLANT_ROMAN,
+			FC_WEIGHT_NORMAL,
+			FC_WIDTH_NORMAL,
+			FC_MONO);
+
+	nemoshow_font_load(one, fontpath);
+
+	fontlayout = nemoobject_gets(&one->object, "font-layout");
+	if (fontlayout != NULL && strcmp(fontlayout, "harfbuzz") == 0)
+		nemoshow_font_use_harfbuzz(one);
+
+	return 0;
+}
+
+int nemoshow_font_update(struct nemoshow *show, struct showone *one)
+{
+	struct showfont *font = NEMOSHOW_FONT(one);
+
+	return 0;
+}
+
+int nemoshow_font_load(struct showone *one, const char *path)
+{
+	struct showfont *font = NEMOSHOW_FONT(one);
+
 	font->path = strdup(path);
 
 	NEMOSHOW_FONT_CC(font, face) = SkTypeface::CreateFromFile(path, 0);
@@ -49,8 +98,10 @@ int nemoshow_font_load(struct showfont *font, const char *path)
 	return 0;
 }
 
-int nemoshow_font_use_harfbuzz(struct showfont *font)
+int nemoshow_font_use_harfbuzz(struct showone *one)
 {
+	struct showfont *font = NEMOSHOW_FONT(one);
+
 	font->hbfont = fontconfig_create_hb_font(font->path, 0);
 	font->layout = NEMOSHOW_HARFBUZZ_LAYOUT;
 

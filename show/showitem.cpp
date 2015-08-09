@@ -99,7 +99,7 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 	struct showone *shader;
 	struct showone *matrix;
 	struct showone *path;
-	const char *font;
+	struct showone *font;
 	int i;
 
 	style = nemoshow_search_one(show, nemoobject_gets(&one->object, "style"));
@@ -144,29 +144,18 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 		NEMOBOX_APPEND(path->refs, path->srefs, path->nrefs, one);
 	}
 
-	font = nemoobject_gets(&one->object, "font");
+	font = nemoshow_search_one(show, nemoobject_gets(&one->object, "font"));
 	if (font != NULL) {
-		const char *fontpath;
-
-		item->font = nemoshow_font_create();
-
-		fontpath = fontconfig_get_path(
-				font,
-				NULL,
-				FC_SLANT_ROMAN,
-				FC_WEIGHT_NORMAL,
-				FC_WIDTH_NORMAL,
-				FC_MONO);
-
-		nemoshow_font_load(item->font, fontpath);
-		nemoshow_font_use_harfbuzz(item->font);
+		item->font = font;
 
 		SkSafeUnref(
 				NEMOSHOW_ITEM_CC(item, fill)->setTypeface(
-					NEMOSHOW_FONT_CC(item->font, face)));
+					NEMOSHOW_FONT_CC(NEMOSHOW_FONT(item->font), face)));
 		SkSafeUnref(
 				NEMOSHOW_ITEM_CC(item, stroke)->setTypeface(
-					NEMOSHOW_FONT_CC(item->font, face)));
+					NEMOSHOW_FONT_CC(NEMOSHOW_FONT(item->font), face)));
+
+		NEMOBOX_APPEND(font->refs, font->srefs, font->nrefs, one);
 	}
 
 	if (one->sub == NEMOSHOW_PATH_ITEM) {
@@ -307,7 +296,7 @@ static inline void nemoshow_item_update_text(struct nemoshow *show, struct showo
 	if (one->sub == NEMOSHOW_TEXT_ITEM) {
 		item->text = nemoobject_gets(&one->object, "d");
 		if (item->text != NULL) {
-			if (item->font->layout == NEMOSHOW_NORMAL_LAYOUT) {
+			if (NEMOSHOW_FONT_AT(item->font, layout) == NEMOSHOW_NORMAL_LAYOUT) {
 				NEMOSHOW_ITEM_CC(item, fill)->setTextSize(item->fontsize);
 				NEMOSHOW_ITEM_CC(item, stroke)->setTextSize(item->fontsize);
 			} else {
@@ -319,8 +308,8 @@ static inline void nemoshow_item_update_text(struct nemoshow *show, struct showo
 				unsigned int nhbglyphs;
 				int i;
 
-				NEMOSHOW_ITEM_CC(item, fill)->setTextSize((item->font->upem / item->font->max_advance_height) * item->fontsize);
-				NEMOSHOW_ITEM_CC(item, stroke)->setTextSize((item->font->upem / item->font->max_advance_height) * item->fontsize);
+				NEMOSHOW_ITEM_CC(item, fill)->setTextSize((NEMOSHOW_FONT_AT(item->font, upem) / NEMOSHOW_FONT_AT(item->font, max_advance_height)) * item->fontsize);
+				NEMOSHOW_ITEM_CC(item, stroke)->setTextSize((NEMOSHOW_FONT_AT(item->font, upem) / NEMOSHOW_FONT_AT(item->font, max_advance_height)) * item->fontsize);
 
 				NEMOSHOW_ITEM_CC(item, stroke)->getFontMetrics(&metrics, 0);
 
@@ -329,12 +318,12 @@ static inline void nemoshow_item_update_text(struct nemoshow *show, struct showo
 				hb_buffer_set_direction(hbbuffer, HB_DIRECTION_LTR);
 				hb_buffer_set_script(hbbuffer, HB_SCRIPT_LATIN);
 				hb_buffer_set_language(hbbuffer, HB_LANGUAGE_INVALID);
-				hb_shape_full(item->font->hbfont, hbbuffer, NULL, 0, NULL);
+				hb_shape_full(NEMOSHOW_FONT_AT(item->font, hbfont), hbbuffer, NULL, 0, NULL);
 
 				hbglyphs = hb_buffer_get_glyph_infos(hbbuffer, &nhbglyphs);
 				hbglyphspos = hb_buffer_get_glyph_positions(hbbuffer, NULL);
 
-				fontscale = item->fontsize / item->font->max_advance_height;
+				fontscale = item->fontsize / NEMOSHOW_FONT_AT(item->font, max_advance_height);
 
 				if (NEMOSHOW_ITEM_CC(item, points) != NULL)
 					delete[] NEMOSHOW_ITEM_CC(item, points);
@@ -384,7 +373,7 @@ static inline void nemoshow_item_update_boundingbox(struct nemoshow *show, struc
 		box = NEMOSHOW_ITEM_CC(item, path)->getBounds();
 	} else if (one->sub == NEMOSHOW_TEXT_ITEM) {
 		if (item->path == NULL) {
-			if (item->font->layout == NEMOSHOW_NORMAL_LAYOUT) {
+			if (NEMOSHOW_FONT_AT(item->font, layout) == NEMOSHOW_NORMAL_LAYOUT) {
 				SkRect bounds[strlen(item->text)];
 				int i, count;
 
@@ -393,7 +382,7 @@ static inline void nemoshow_item_update_boundingbox(struct nemoshow *show, struc
 				for (i = 0; i < count; i++) {
 					box.join(bounds[i]);
 				}
-			} else if (item->font->layout == NEMOSHOW_HARFBUZZ_LAYOUT) {
+			} else if (NEMOSHOW_FONT_AT(item->font, layout) == NEMOSHOW_HARFBUZZ_LAYOUT) {
 				box = SkRect::MakeXYWH(item->x, item->y, item->textwidth, item->textheight);
 			}
 		} else {

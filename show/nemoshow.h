@@ -30,6 +30,7 @@ NEMO_BEGIN_EXTERN_C
 #include <showshader.h>
 #include <showvar.h>
 #include <showcons.h>
+#include <showfont.h>
 
 #include <nemotale.h>
 #include <nemolist.h>

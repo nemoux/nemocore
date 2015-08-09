@@ -159,6 +159,8 @@ static struct showone *nemoshow_create_one(struct nemoshow *show, struct xmlnode
 		one = nemoshow_var_create();
 	} else if (strcmp(node->name, "cons") == 0) {
 		one = nemoshow_cons_create();
+	} else if (strcmp(node->name, "font") == 0) {
+		one = nemoshow_font_create();
 	}
 
 	if (one != NULL) {
@@ -555,6 +557,8 @@ void nemoshow_arrange_one(struct nemoshow *show)
 			nemoshow_shader_arrange(show, one);
 		} else if (one->type == NEMOSHOW_LOOP_TYPE) {
 			nemoshow_loop_arrange(show, one);
+		} else if (one->type == NEMOSHOW_FONT_TYPE) {
+			nemoshow_font_arrange(show, one);
 		}
 	}
 

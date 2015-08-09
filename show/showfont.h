@@ -14,6 +14,8 @@ NEMO_BEGIN_EXTERN_C
 
 #include <fonthelper.h>
 
+#include <showone.h>
+
 typedef enum {
 	NEMOSHOW_NORMAL_LAYOUT = 0,
 	NEMOSHOW_HARFBUZZ_LAYOUT = 1,
@@ -21,6 +23,8 @@ typedef enum {
 } NemoShowFontLayout;
 
 struct showfont {
+	struct showone base;
+
 	char *path;
 
 	int layout;
@@ -33,11 +37,17 @@ struct showfont {
 	void *cc;
 };
 
-extern struct showfont *nemoshow_font_create(void);
-extern void nemoshow_font_destroy(struct showfont *font);
+#define	NEMOSHOW_FONT(one)					((struct showfont *)container_of(one, struct showfont, base))
+#define	NEMOSHOW_FONT_AT(one, at)		(NEMOSHOW_FONT(one)->at)
 
-extern int nemoshow_font_load(struct showfont *font, const char *path);
-extern int nemoshow_font_use_harfbuzz(struct showfont *font);
+extern struct showone *nemoshow_font_create(void);
+extern void nemoshow_font_destroy(struct showone *one);
+
+extern int nemoshow_font_arrange(struct nemoshow *show, struct showone *one);
+extern int nemoshow_font_update(struct nemoshow *show, struct showone *one);
+
+extern int nemoshow_font_load(struct showone *one, const char *path);
+extern int nemoshow_font_use_harfbuzz(struct showone *one);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

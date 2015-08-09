@@ -24,7 +24,6 @@ typedef enum {
 } NemoShowItemType;
 
 struct showmatrix;
-struct showfont;
 struct showcanvas;
 
 struct showitem {
@@ -53,7 +52,7 @@ struct showitem {
 	struct showone *path;
 	double length;
 
-	struct showfont *font;
+	struct showone *font;
 	double fontsize;
 	const char *text;
 	double textwidth, textheight;
