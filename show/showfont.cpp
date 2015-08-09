@@ -72,7 +72,7 @@ int nemoshow_font_arrange(struct nemoshow *show, struct showone *one)
 	nemoshow_font_load(one, fontpath);
 
 	fontlayout = nemoobject_gets(&one->object, "font-layout");
-	if (fontlayout != NULL && strcmp(fontlayout, "harfbuzz") == 0)
+	if (fontlayout == NULL || strcmp(fontlayout, "harfbuzz") == 0)
 		nemoshow_font_use_harfbuzz(one);
 
 	return 0;
