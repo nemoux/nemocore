@@ -71,6 +71,7 @@ extern int nemoshow_load_xml(struct nemoshow *show, const char *path);
 extern void nemoshow_update_symbol(struct nemoshow *show, const char *name, double value);
 extern void nemoshow_update_expression(struct nemoshow *show);
 extern void nemoshow_update_one_expression(struct nemoshow *show, struct showone *one);
+extern void nemoshow_update_one_expression_without_dirty(struct nemoshow *show, struct showone *one);
 
 extern void nemoshow_arrange_one(struct nemoshow *show);
 extern void nemoshow_update_one(struct nemoshow *show);
@@ -85,8 +86,11 @@ extern void nemoshow_put_camera(struct nemoshow *show);
 extern int nemoshow_set_size(struct nemoshow *show, uint32_t width, uint32_t height);
 extern int nemoshow_set_scale(struct nemoshow *show, double sx, double sy);
 
-extern int nemoshow_attach_canvas(struct nemoshow *show, struct showone *one);
+extern void nemoshow_attach_canvas(struct nemoshow *show, struct showone *one);
 extern void nemoshow_detach_canvas(struct nemoshow *show, struct showone *one);
+
+extern void nemoshow_flush_canvas(struct nemoshow *show, struct showone *one);
+extern void nemoshow_flush_canvas_all(struct nemoshow *show);
 
 extern void nemoshow_attach_transition(struct nemoshow *show, struct showtransition *trans);
 extern void nemoshow_detach_transition(struct nemoshow *show, struct showtransition *trans);

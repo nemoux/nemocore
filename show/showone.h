@@ -143,6 +143,20 @@ static inline void nemoshow_one_update(struct nemoshow *show, struct showone *on
 	}
 }
 
+static inline void nemoshow_one_update_with_dirty(struct nemoshow *show, struct showone *one, uint32_t dirty)
+{
+	int i;
+
+	for (i = 0; i < one->nchildren; i++)
+		nemoshow_one_update_with_dirty(show, one->children[i], dirty);
+
+	one->dirty = dirty;
+
+	one->update(show, one);
+
+	one->dirty = 0;
+}
+
 static inline void nemoshow_one_setd(struct showone *one, const char *attr, double value, uint32_t dirty)
 {
 	nemoobject_setd(&one->object, attr, value);

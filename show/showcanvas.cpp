@@ -327,13 +327,13 @@ static inline void nemoshow_canvas_render_one(struct nemoshow *show, struct show
 				child = one->children[j];
 
 				nemoshow_update_symbol(show, one->id, i);
-				nemoshow_update_one_expression(show, child);
+				nemoshow_update_one_expression_without_dirty(show, child);
 
 				if (child->type == NEMOSHOW_ITEM_TYPE) {
 					struct showitem *item = NEMOSHOW_ITEM(child);
 					struct showitem *style = NEMOSHOW_ITEM(item->style);
 
-					nemoshow_one_update(show, child);
+					nemoshow_one_update_with_dirty(show, child, NEMOSHOW_ALL_DIRTY);
 
 					if (item->matrix != NULL) {
 						NEMOSHOW_CANVAS_CC(canvas, canvas)->save();

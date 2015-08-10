@@ -529,6 +529,23 @@ void nemoshow_update_one_expression(struct nemoshow *show, struct showone *one)
 	nemoshow_one_dirty(one, dirty);
 }
 
+void nemoshow_update_one_expression_without_dirty(struct nemoshow *show, struct showone *one)
+{
+	struct showattr *attr;
+	int i;
+
+	for (i = 0; i < one->nattrs; i++) {
+		attr = one->attrs[i];
+
+		nemoattr_setd(attr->ref,
+				nemoshow_expr_dispatch_expression(show->expr, attr->text));
+	}
+
+	for (i = 0; i < one->nchildren; i++) {
+		nemoshow_update_one_expression_without_dirty(show, one->children[i]);
+	}
+}
+
 void nemoshow_arrange_one(struct nemoshow *show)
 {
 	struct showone *one;
@@ -778,7 +795,7 @@ int nemoshow_set_scale(struct nemoshow *show, double sx, double sy)
 	return 1;
 }
 
-int nemoshow_attach_canvas(struct nemoshow *show, struct showone *one)
+void nemoshow_attach_canvas(struct nemoshow *show, struct showone *one)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
@@ -790,6 +807,31 @@ void nemoshow_detach_canvas(struct nemoshow *show, struct showone *one)
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
 	nemotale_detach_node(show->tale, canvas->node);
+}
+
+void nemoshow_flush_canvas(struct nemoshow *show, struct showone *one)
+{
+	nemotale_node_damage_all(NEMOSHOW_CANVAS_AT(one, node));
+}
+
+void nemoshow_flush_canvas_all(struct nemoshow *show)
+{
+	struct showone *one;
+	struct showone *child;
+	int i;
+
+	if (show->scene == NULL)
+		return;
+
+	one = show->scene;
+
+	for (i = 0; i < one->nchildren; i++) {
+		child = one->children[i];
+
+		if (child->type == NEMOSHOW_CANVAS_TYPE) {
+			nemotale_node_damage_all(NEMOSHOW_CANVAS_AT(child, node));
+		}
+	}
 }
 
 void nemoshow_attach_transition(struct nemoshow *show, struct showtransition *trans)
