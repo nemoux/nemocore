@@ -417,15 +417,10 @@ static inline void nemoshow_item_update_boundingbox(struct nemoshow *show, struc
 	}
 
 	if (item->canvas != NULL) {
-		if ((one->dirty & NEMOSHOW_SHAPE_DIRTY) != 0)
-			nemoshow_canvas_damage_one(item->canvas, one);
-
 		one->x = MAX(floor(box.x()), 0);
 		one->y = MAX(floor(box.y()), 0);
 		one->width = ceil(box.width());
 		one->height = ceil(box.height());
-
-		nemoshow_canvas_damage_one(item->canvas, one);
 
 		snprintf(attr, NEMOSHOW_SYMBOL_MAX, "%s_x", one->id);
 		nemoshow_update_symbol(show, attr, one->x);
