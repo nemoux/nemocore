@@ -53,9 +53,7 @@ int nemoshow_loop_update(struct nemoshow *show, struct showone *one)
 {
 	struct showloop *loop = NEMOSHOW_LOOP(one);
 
-	if (loop->canvas != NULL) {
-		nemoshow_canvas_damage_all(loop->canvas);
-	}
+	nemoshow_canvas_damage_all(loop->canvas);
 
 	return 0;
 }
