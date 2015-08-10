@@ -94,6 +94,7 @@ static inline void nemoattr_sets(struct nemoattr *attr, const char *s, int size)
 	}
 
 	strncpy((char *)(attr->p), s, attr->size);
+	((char *)attr->p)[attr->size] = '\0';
 }
 
 static inline const char *nemoattr_gets(struct nemoattr *attr)
@@ -307,6 +308,7 @@ static inline void nemoobject_sets(struct nemoobject *object, const char *name, 
 		}
 
 		strncpy((char *)(attr->p), s, attr->size);
+		((char *)attr->p)[attr->size] = '\0';
 	} else {
 		attr = nemoobject_set(object, name);
 
@@ -315,6 +317,7 @@ static inline void nemoobject_sets(struct nemoobject *object, const char *name, 
 		attr->needs_free = 1;
 
 		strncpy((char *)(attr->p), s, attr->size);
+		((char *)attr->p)[attr->size] = '\0';
 	}
 }
 
@@ -423,6 +426,7 @@ static inline void nemoobject_isets(struct nemoobject *object, int index, const 
 	struct nemoattr *attr = nemoobject_iget(object, index);
 
 	strncpy((char *)(attr->p), s, attr->size);
+	((char *)attr->p)[attr->size] = '\0';
 }
 
 static inline const char *nemoobject_igets(struct nemoobject *object, int index)
