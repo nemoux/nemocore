@@ -18,7 +18,8 @@
 #include <EGL/eglext.h>
 
 struct nemogltale {
-	struct nemomatrix matrix;
+	struct nemomatrix transform;
+	struct nemomatrix projection;
 
 	struct glshader texture_shader_rgba;
 	struct glshader texture_shader_rgbx;
@@ -192,7 +193,7 @@ static void nemotale_use_shader(struct nemotale *tale, struct glshader *shader)
 
 	glUseProgram(shader->program);
 
-	glUniformMatrix4fv(shader->proj_uniform, 1, GL_FALSE, context->matrix.d);
+	glUniformMatrix4fv(shader->proj_uniform, 1, GL_FALSE, context->projection.d);
 	glUniform1f(shader->alpha_uniform, 1.0f);
 	glUniform1i(shader->tex_uniforms[0], 0);
 
@@ -637,15 +638,14 @@ static inline int nemotale_composite_egl_in(struct nemotale *tale)
 		return -1;
 
 	if (tale->transform.dirty != 0) {
-		nemomatrix_init_identity(&context->matrix);
-
-		nemomatrix_multiply(&context->matrix, &tale->transform.matrix);
-
+		nemomatrix_init_identity(&context->transform);
+		nemomatrix_multiply(&context->transform, &tale->transform.matrix);
 		if (tale->viewport.enable != 0)
-			nemomatrix_scale(&context->matrix, tale->viewport.sx, tale->viewport.sy);
+			nemomatrix_scale(&context->transform, tale->viewport.sx, tale->viewport.sy);
 
-		nemomatrix_translate(&context->matrix, -tale->viewport.width / 2.0f, -tale->viewport.height / 2.0f);
-		nemomatrix_scale(&context->matrix, 2.0f / tale->viewport.width, -2.0f / tale->viewport.height);
+		context->projection = context->transform;
+		nemomatrix_translate(&context->projection, -tale->viewport.width / 2.0f, -tale->viewport.height / 2.0f);
+		nemomatrix_scale(&context->projection, 2.0f / tale->viewport.width, -2.0f / tale->viewport.height);
 
 		tale->transform.dirty = 0;
 	}
@@ -677,7 +677,7 @@ static inline int nemotale_composite_egl_in(struct nemotale *tale)
 	if (egl->swap_buffers_with_damage != NULL) {
 		pixman_box32_t *rects;
 		EGLint *edamages, *edamage;
-		int i, nrects, buffer_height;
+		int nrects;
 
 		pixman_region32_init(&buffer_damage);
 		pixman_region32_union(&buffer_damage, &buffer_damage, &tale->damage);
@@ -688,13 +688,22 @@ static inline int nemotale_composite_egl_in(struct nemotale *tale)
 		if (edamages == NULL)
 			return -1;
 
-		buffer_height = tale->height;
-
 		for (i = 0, edamage = edamages; i < nrects; i++) {
-			*edamage++ = MAX((rects[i].x1) * tale->viewport.sx - 1, 0);
-			*edamage++ = MAX((buffer_height - rects[i].y2) * tale->viewport.sy - 1, 0);
-			*edamage++ = MIN((rects[i].x2 - rects[i].x1) * tale->viewport.sx + 1, tale->viewport.width);
-			*edamage++ = MIN((rects[i].y2 - rects[i].y1) * tale->viewport.sy + 1, tale->viewport.height);
+			struct nemovector v1 = { rects[i].x1, rects[i].y1, 0.0f, 1.0f };
+			struct nemovector v2 = { rects[i].x2, rects[i].y2, 0.0f, 1.0f };
+
+			nemomatrix_transform(&context->transform, &v1);
+			nemomatrix_transform(&context->transform, &v2);
+
+			rects[i].x1 = v1.f[0] / v1.f[3];
+			rects[i].y1 = v1.f[1] / v1.f[3];
+			rects[i].x2 = v2.f[0] / v2.f[3];
+			rects[i].y2 = v2.f[1] / v2.f[3];
+
+			*edamage++ = MAX(rects[i].x1 - 1, 0);
+			*edamage++ = MAX(tale->viewport.height - rects[i].y2 - 1, 0);
+			*edamage++ = MIN(rects[i].x2 - rects[i].x1 + 1, tale->viewport.width);
+			*edamage++ = MIN(rects[i].y2 - rects[i].y1 + 1, tale->viewport.height);
 		}
 
 		r = egl->swap_buffers_with_damage(egl->display, egl->surface, edamages, nrects);
@@ -789,15 +798,14 @@ int nemotale_composite_fbo(struct nemotale *tale, pixman_region32_t *region)
 	nemotale_accumulate_damage(tale);
 
 	if (tale->transform.dirty != 0) {
-		nemomatrix_init_identity(&context->matrix);
-
-		nemomatrix_multiply(&context->matrix, &tale->transform.matrix);
-
+		nemomatrix_init_identity(&context->transform);
+		nemomatrix_multiply(&context->transform, &tale->transform.matrix);
 		if (tale->viewport.enable != 0)
-			nemomatrix_scale(&context->matrix, tale->viewport.sx, tale->viewport.sy);
+			nemomatrix_scale(&context->transform, tale->viewport.sx, tale->viewport.sy);
 
-		nemomatrix_translate(&context->matrix, -tale->viewport.width / 2.0f, -tale->viewport.height / 2.0f);
-		nemomatrix_scale(&context->matrix, 2.0f / tale->viewport.width, -2.0f / tale->viewport.height);
+		context->projection = context->transform;
+		nemomatrix_translate(&context->projection, -tale->viewport.width / 2.0f, -tale->viewport.height / 2.0f);
+		nemomatrix_scale(&context->projection, 2.0f / tale->viewport.width, -2.0f / tale->viewport.height);
 
 		tale->transform.dirty = 0;
 	}
@@ -837,15 +845,14 @@ int nemotale_composite_fbo_full(struct nemotale *tale)
 	nemotale_damage_all(tale);
 
 	if (tale->transform.dirty != 0) {
-		nemomatrix_init_identity(&context->matrix);
-
-		nemomatrix_multiply(&context->matrix, &tale->transform.matrix);
-
+		nemomatrix_init_identity(&context->transform);
+		nemomatrix_multiply(&context->transform, &tale->transform.matrix);
 		if (tale->viewport.enable != 0)
-			nemomatrix_scale(&context->matrix, tale->viewport.sx, tale->viewport.sy);
+			nemomatrix_scale(&context->transform, tale->viewport.sx, tale->viewport.sy);
 
-		nemomatrix_translate(&context->matrix, -tale->viewport.width / 2.0f, -tale->viewport.height / 2.0f);
-		nemomatrix_scale(&context->matrix, 2.0f / tale->viewport.width, -2.0f / tale->viewport.height);
+		context->projection = context->transform;
+		nemomatrix_translate(&context->projection, -tale->viewport.width / 2.0f, -tale->viewport.height / 2.0f);
+		nemomatrix_scale(&context->projection, 2.0f / tale->viewport.width, -2.0f / tale->viewport.height);
 
 		tale->transform.dirty = 0;
 	}
