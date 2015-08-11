@@ -108,6 +108,8 @@ static inline void nemotale_set_viewport(struct nemotale *tale, int32_t width, i
 	tale->viewport.ry = (double)tale->height / (double)tale->viewport.height;
 
 	tale->viewport.enable = 1;
+
+	tale->transform.dirty = 1;
 }
 
 static inline void nemotale_transform(struct nemotale *tale, float d[9])
