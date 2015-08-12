@@ -100,9 +100,7 @@ int nemoshow_camera_update(struct nemoshow *show, struct showone *one)
 
 		nemotale_transform(show->tale, d);
 
-		if (needs_scale != 0)
-			nemoshow_set_scale(show, camera->sx, camera->sy);
-		else
+		if (needs_scale == 0 || nemoshow_set_scale(show, camera->sx, camera->sy) == 0)
 			nemoshow_flush_canvas_all(show);
 	}
 
