@@ -14,12 +14,13 @@ NEMO_BEGIN_EXTERN_C
 typedef enum {
 	NEMOSHOW_NONE_ITEM = 0,
 	NEMOSHOW_RECT_ITEM = 1,
-	NEMOSHOW_CIRCLE_ITEM = 2,
-	NEMOSHOW_ARC_ITEM = 3,
-	NEMOSHOW_PIE_ITEM = 4,
-	NEMOSHOW_TEXT_ITEM = 5,
-	NEMOSHOW_PATH_ITEM = 6,
-	NEMOSHOW_STYLE_ITEM = 7,
+	NEMOSHOW_RRECT_ITEM = 2,
+	NEMOSHOW_CIRCLE_ITEM = 3,
+	NEMOSHOW_ARC_ITEM = 4,
+	NEMOSHOW_PIE_ITEM = 5,
+	NEMOSHOW_TEXT_ITEM = 6,
+	NEMOSHOW_PATH_ITEM = 7,
+	NEMOSHOW_STYLE_ITEM = 8,
 	NEMOSHOW_LAST_ITEM
 } NemoShowItemType;
 
@@ -32,6 +33,7 @@ struct showitem {
 	struct showone *canvas;
 
 	double x, y;
+	double rx, ry;
 	double width, height;
 	double r;
 

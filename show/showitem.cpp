@@ -55,6 +55,8 @@ struct showone *nemoshow_item_create(int type)
 
 	nemoobject_set_reserved(&one->object, "x", &item->x, sizeof(double));
 	nemoobject_set_reserved(&one->object, "y", &item->y, sizeof(double));
+	nemoobject_set_reserved(&one->object, "rx", &item->rx, sizeof(double));
+	nemoobject_set_reserved(&one->object, "ry", &item->ry, sizeof(double));
 	nemoobject_set_reserved(&one->object, "width", &item->width, sizeof(double));
 	nemoobject_set_reserved(&one->object, "height", &item->height, sizeof(double));
 	nemoobject_set_reserved(&one->object, "r", &item->r, sizeof(double));
@@ -371,6 +373,8 @@ static inline void nemoshow_item_update_boundingbox(struct nemoshow *show, struc
 	int i;
 
 	if (one->sub == NEMOSHOW_RECT_ITEM) {
+		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
+	} else if (one->sub == NEMOSHOW_RRECT_ITEM) {
 		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
 	} else if (one->sub == NEMOSHOW_CIRCLE_ITEM) {
 		box = SkRect::MakeXYWH(item->x - item->r, item->y - item->r, item->r * 2, item->r * 2);
