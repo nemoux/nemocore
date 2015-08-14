@@ -113,7 +113,7 @@ extern void nemoshow_one_dump(struct showone *one, FILE *out);
 
 static inline void nemoshow_one_dirty(struct showone *one, uint32_t dirty)
 {
-	if ((one->dirty & dirty) != 0)
+	if ((one->dirty & dirty) == dirty)
 		return;
 
 	one->dirty |= dirty;
