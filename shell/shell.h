@@ -112,6 +112,9 @@ struct shellbin {
 	uint32_t resize_edges;
 	uint32_t reset_scale;
 
+	uint32_t max_width;
+	uint32_t max_height;
+
 	struct nemoclient *client;
 
 	struct shellbin *parent;

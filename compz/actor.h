@@ -38,6 +38,9 @@ struct nemoactor {
 	cairo_surface_t *surface;
 	void *data;
 
+	uint32_t max_width;
+	uint32_t max_height;
+
 #ifdef NEMOUX_WITH_EGL
 	GLuint texture;
 #endif

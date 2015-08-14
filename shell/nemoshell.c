@@ -153,6 +153,14 @@ static void nemo_surface_set_size(struct wl_client *client, struct wl_resource *
 	bin->view->geometry.height = height;
 }
 
+static void nemo_surface_set_max_size(struct wl_client *client, struct wl_resource *resource, uint32_t width, uint32_t height)
+{
+	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
+
+	bin->max_width = width;
+	bin->max_height = height;
+}
+
 static void nemo_surface_set_input(struct wl_client *client, struct wl_resource *resource, uint32_t x, uint32_t y, uint32_t width, uint32_t height)
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
@@ -254,6 +262,7 @@ static const struct nemo_surface_interface nemo_surface_implementation = {
 	nemo_surface_follow,
 	nemo_surface_execute,
 	nemo_surface_set_size,
+	nemo_surface_set_max_size,
 	nemo_surface_set_input,
 	nemo_surface_set_pivot,
 	nemo_surface_set_anchor,

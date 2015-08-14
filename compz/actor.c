@@ -77,6 +77,9 @@ struct nemoactor *nemoactor_create_pixman(struct nemocompz *compz, int width, in
 	actor->dispatch_resize = NULL;
 	actor->dispatch_frame = NULL;
 
+	actor->max_width = UINT32_MAX;
+	actor->max_height = UINT32_MAX;
+
 	wl_signal_init(&actor->destroy_signal);
 	wl_signal_init(&actor->ungrab_signal);
 

@@ -129,6 +129,8 @@ int main(int argc, char *argv[])
 
 	nemocanvas_dispatch_frame(NEMOSHOW_AT(show, canvas));
 
+	nemocanvas_set_max_size(NEMOSHOW_AT(show, canvas), 1024, 1024);
+
 	nemotool_run(tool);
 
 	nemoshow_destroy_on_tale(show);
