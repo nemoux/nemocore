@@ -407,11 +407,8 @@ static inline void nemoshow_item_update_boundingbox(struct nemoshow *show, struc
 		box = SkRect::MakeXYWH(0, 0, 0, 0);
 	}
 
-	if (item->stroke != 0) {
-		box.outset(
-				item->stroke_width * 0.5f,
-				item->stroke_width * 0.5f);
-	}
+	if (item->stroke != 0)
+		box.outset(item->stroke_width, item->stroke_width);
 
 	if (item->matrix != NULL) {
 		NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(item->matrix), matrix)->mapRect(&box);
