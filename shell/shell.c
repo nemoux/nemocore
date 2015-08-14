@@ -380,6 +380,8 @@ struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas
 	bin->flags = NEMO_SHELL_SURFACE_ALL_FLAGS;
 	bin->layer = &shell->service_layer;
 
+	bin->min_width = 0;
+	bin->min_height = 0;
 	bin->max_width = UINT32_MAX;
 	bin->max_height = UINT32_MAX;
 

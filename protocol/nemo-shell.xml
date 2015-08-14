@@ -73,6 +73,11 @@
 			<arg name="height" type="uint"/>
 		</request>
 
+		<request name="set_min_size">
+			<arg name="width" type="uint"/>
+			<arg name="height" type="uint"/>
+		</request>
+
 		<request name="set_max_size">
 			<arg name="width" type="uint"/>
 			<arg name="height" type="uint"/>

@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
 		return -1;
 	nemotool_connect_wayland(tool, NULL);
 
-	show = nemoshow_create_on_tale(tool, 500, 500, nemoshow_dispatch_tale_event);
+	show = nemoshow_create_on_tale(tool, 512, 512, nemoshow_dispatch_tale_event);
 	if (show == NULL)
 		return -1;
 	nemoshow_load_xml(show, argv[1]);
@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
 
 	nemoshow_set_scene(show,
 			nemoshow_search_one(show, "scene0"));
-	nemoshow_set_size(show, 500, 500);
+	nemoshow_set_size(show, 512, 512);
 
 	nemoshow_set_camera(show,
 			nemoshow_search_one(show, "camera0"));
@@ -129,6 +129,7 @@ int main(int argc, char *argv[])
 
 	nemocanvas_dispatch_frame(NEMOSHOW_AT(show, canvas));
 
+	nemocanvas_set_min_size(NEMOSHOW_AT(show, canvas), 512, 512);
 	nemocanvas_set_max_size(NEMOSHOW_AT(show, canvas), 1024, 1024);
 
 	nemotool_run(tool);

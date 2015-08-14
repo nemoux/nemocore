@@ -54,6 +54,8 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		width = pick->width * (distance / pick->touch.distance);
 		height = pick->height * (distance / pick->touch.distance);
 
+		width = MAX(width, bin->min_width);
+		height = MAX(height, bin->min_height);
 		width = MIN(width, bin->max_width);
 		height = MIN(height, bin->max_height);
 
@@ -118,6 +120,11 @@ static void pick_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 			nemoview_set_scale(bin->view,
 					(double)bin->max_width / (double)pick->width,
 					(double)bin->max_height / (double)pick->height);
+		} else if (pick->sx * (distance / pick->touch.distance) * pick->width < bin->min_width ||
+				pick->sy * (distance / pick->touch.distance) * pick->height < bin->min_height) {
+			nemoview_set_scale(bin->view,
+					(double)bin->min_width / (double)pick->width,
+					(double)bin->min_height / (double)pick->height);
 		} else {
 			nemoview_set_scale(bin->view,
 					pick->sx * (distance / pick->touch.distance),
@@ -143,6 +150,8 @@ static void pick_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 			height = pick->height;
 		}
 
+		width = MAX(width, bin->min_width);
+		height = MAX(height, bin->min_height);
 		width = MIN(width, bin->max_width);
 		height = MIN(height, bin->max_height);
 
@@ -377,6 +386,11 @@ static void pick_actorgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 			nemoview_set_scale(actor->view,
 					(double)actor->max_width / (double)pick->width,
 					(double)actor->max_height / (double)pick->height);
+		} else if (pick->sx * (distance / pick->touch.distance) * pick->width < actor->min_width ||
+				pick->sy * (distance / pick->touch.distance) * pick->height < actor->min_height) {
+			nemoview_set_scale(actor->view,
+					(double)actor->min_width / (double)pick->width,
+					(double)actor->min_height / (double)pick->height);
 		} else {
 			nemoview_set_scale(actor->view,
 					pick->sx * (distance / pick->touch.distance),
@@ -388,8 +402,8 @@ static void pick_actorgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 		double distance = pickgrab_calculate_touchpoint_distance(pick->tp0, pick->tp1);
 
 		nemoactor_dispatch_resize(actor,
-				MIN(pick->width * (distance / pick->touch.distance), actor->max_width),
-				MIN(pick->height * (distance / pick->touch.distance), actor->max_height));
+				MAX(MIN(pick->width * (distance / pick->touch.distance), actor->max_width), actor->min_width),
+				MAX(MIN(pick->height * (distance / pick->touch.distance), actor->max_height), actor->min_height));
 	}
 
 	nemoview_schedule_repaint(actor->view);
