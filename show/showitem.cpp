@@ -407,6 +407,12 @@ static inline void nemoshow_item_update_boundingbox(struct nemoshow *show, struc
 		box = SkRect::MakeXYWH(0, 0, 0, 0);
 	}
 
+	if (item->stroke != 0) {
+		box.outset(
+				item->stroke_width * 0.5f,
+				item->stroke_width * 0.5f);
+	}
+
 	if (item->matrix != NULL) {
 		NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(item->matrix), matrix)->mapRect(&box);
 	} else if (NEMOSHOW_ITEM_CC(item, matrix) != NULL) {
@@ -414,8 +420,6 @@ static inline void nemoshow_item_update_boundingbox(struct nemoshow *show, struc
 	}
 
 	outer = NEMOSHOW_ANTIALIAS_EPSILON;
-	if (item->stroke != 0)
-		outer += item->stroke_width / 2.0f;
 	if (item->blur != NULL)
 		outer += NEMOSHOW_BLUR_AT(item->blur, r);
 	box.outset(outer, outer);
