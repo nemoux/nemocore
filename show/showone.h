@@ -136,7 +136,18 @@ static inline void nemoshow_one_update(struct nemoshow *show, struct showone *on
 
 		for (i = 0; i < one->nchildren; i++)
 			nemoshow_one_update(show, one->children[i]);
+	}
 
+	if (one->dirty != 0) {
+		one->update(show, one);
+
+		one->dirty = 0;
+	}
+}
+
+static inline void nemoshow_one_update_alone(struct nemoshow *show, struct showone *one)
+{
+	if (one->dirty != 0) {
 		one->update(show, one);
 
 		one->dirty = 0;
@@ -187,6 +198,17 @@ static inline struct showone *nemoshow_one_get_canvas(struct showone *one)
 
 	for (parent = one->parent;
 			parent != NULL && parent->type != NEMOSHOW_CANVAS_TYPE;
+			parent = parent->parent);
+
+	return parent;
+}
+
+static inline struct showone *nemoshow_one_get_parent(struct showone *one, int sub)
+{
+	struct showone *parent;
+
+	for (parent = one->parent;
+			parent != NULL && parent->type != NEMOSHOW_ITEM_TYPE && parent->sub != sub;
 			parent = parent->parent);
 
 	return parent;

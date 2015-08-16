@@ -173,6 +173,7 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 	}
 
 	item->canvas = nemoshow_one_get_canvas(one);
+	item->group = nemoshow_one_get_parent(one, NEMOSHOW_GROUP_ITEM);
 
 	return 0;
 }
@@ -367,6 +368,7 @@ static inline void nemoshow_item_update_text(struct nemoshow *show, struct showo
 static inline void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
+	struct showone *group;
 	SkRect box;
 	char attr[NEMOSHOW_SYMBOL_MAX];
 	double outer;
@@ -414,6 +416,18 @@ static inline void nemoshow_item_update_boundingbox(struct nemoshow *show, struc
 		NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(item->matrix), matrix)->mapRect(&box);
 	} else if (NEMOSHOW_ITEM_CC(item, matrix) != NULL) {
 		NEMOSHOW_ITEM_CC(item, matrix)->mapRect(&box);
+	}
+
+	for (group = item->group; group != NULL; group = NEMOSHOW_ITEM_AT(group, group)) {
+		struct showitem *pitem = NEMOSHOW_ITEM(group);
+
+		nemoshow_one_update_alone(show, group);
+
+		if (pitem->matrix != NULL) {
+			NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(pitem->matrix), matrix)->mapRect(&box);
+		} else if (NEMOSHOW_ITEM_CC(pitem, matrix) != NULL) {
+			NEMOSHOW_ITEM_CC(pitem, matrix)->mapRect(&box);
+		}
 	}
 
 	outer = NEMOSHOW_ANTIALIAS_EPSILON;

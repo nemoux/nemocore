@@ -115,6 +115,8 @@ static struct showone *nemoshow_create_one(struct nemoshow *show, struct xmlnode
 		one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
 	} else if (strcmp(node->name, "style") == 0) {
 		one = nemoshow_item_create(NEMOSHOW_STYLE_ITEM);
+	} else if (strcmp(node->name, "group") == 0) {
+		one = nemoshow_item_create(NEMOSHOW_GROUP_ITEM);
 	} else if (strcmp(node->name, "loop") == 0) {
 		one = nemoshow_loop_create();
 	} else if (strcmp(node->name, "sequence") == 0) {
@@ -290,6 +292,8 @@ static int nemoshow_load_item(struct nemoshow *show, struct showone *item, struc
 
 			if (one->type == NEMOSHOW_MATRIX_TYPE) {
 				nemoshow_load_matrix(show, one, child);
+			} else if (one->type == NEMOSHOW_ITEM_TYPE) {
+				nemoshow_load_item(show, one, child);
 			}
 
 			NEMOBOX_APPEND(item->children, item->schildren, item->nchildren, one);

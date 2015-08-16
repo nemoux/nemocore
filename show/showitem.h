@@ -21,6 +21,7 @@ typedef enum {
 	NEMOSHOW_TEXT_ITEM = 6,
 	NEMOSHOW_PATH_ITEM = 7,
 	NEMOSHOW_STYLE_ITEM = 8,
+	NEMOSHOW_GROUP_ITEM = 9,
 	NEMOSHOW_LAST_ITEM
 } NemoShowItemType;
 
@@ -31,6 +32,7 @@ struct showitem {
 	struct showone base;
 
 	struct showone *canvas;
+	struct showone *group;
 
 	double x, y;
 	double rx, ry;
