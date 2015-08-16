@@ -306,19 +306,9 @@ static inline void nemoshow_canvas_render_item(struct nemoshow *show, struct sho
 	} else if (one->sub == NEMOSHOW_GROUP_ITEM) {
 		int i;
 
-		NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
-
-		if (item->matrix != NULL) {
-			NEMOSHOW_CANVAS_CC(canvas, canvas)->concat(*NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(item->matrix), matrix));
-		} else if (NEMOSHOW_ITEM_CC(item, matrix) != NULL) {
-			NEMOSHOW_CANVAS_CC(canvas, canvas)->concat(*NEMOSHOW_ITEM_CC(item, matrix));
-		}
-
 		for (i = 0; i < one->nchildren; i++) {
 			nemoshow_canvas_render_one(show, canvas, one->children[i]);
 		}
-
-		NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
 	}
 }
 
