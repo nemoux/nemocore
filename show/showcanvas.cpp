@@ -9,6 +9,8 @@
 #include <showcanvas.hpp>
 #include <showitem.h>
 #include <showitem.hpp>
+#include <showsvg.h>
+#include <showsvg.hpp>
 #include <showmatrix.h>
 #include <showmatrix.hpp>
 #include <showpath.h>
@@ -371,6 +373,25 @@ static inline void nemoshow_canvas_render_one(struct nemoshow *show, struct show
 				}
 			}
 		}
+	} else if (one->type == NEMOSHOW_SVG_TYPE) {
+		struct showsvg *svg = NEMOSHOW_SVG(one);
+		int i;
+
+		NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
+
+		if (svg->matrix != NULL) {
+			NEMOSHOW_CANVAS_CC(canvas, canvas)->concat(*NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(svg->matrix), matrix));
+		} else if (NEMOSHOW_SVG_CC(svg, matrix) != NULL) {
+			NEMOSHOW_CANVAS_CC(canvas, canvas)->concat(*NEMOSHOW_SVG_CC(svg, matrix));
+		}
+
+		NEMOSHOW_CANVAS_CC(canvas, canvas)->concat(*NEMOSHOW_SVG_CC(NEMOSHOW_SVG(one), viewbox));
+
+		for (i = 0; i < one->nchildren; i++) {
+			nemoshow_canvas_render_one(show, canvas, one->children[i]);
+		}
+
+		NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
 	}
 }
 

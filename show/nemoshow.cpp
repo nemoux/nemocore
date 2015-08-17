@@ -117,6 +117,8 @@ static struct showone *nemoshow_create_one(struct nemoshow *show, struct xmlnode
 		one = nemoshow_item_create(NEMOSHOW_STYLE_ITEM);
 	} else if (strcmp(node->name, "group") == 0) {
 		one = nemoshow_item_create(NEMOSHOW_GROUP_ITEM);
+	} else if (strcmp(node->name, "svg") == 0) {
+		one = nemoshow_svg_create();
 	} else if (strcmp(node->name, "loop") == 0) {
 		one = nemoshow_loop_create();
 	} else if (strcmp(node->name, "sequence") == 0) {
@@ -252,9 +254,10 @@ static struct showone *nemoshow_create_one(struct nemoshow *show, struct xmlnode
 	return one;
 }
 
-static int nemoshow_load_one(struct nemoshow *show, struct showone *loop, struct xmlnode *node);
+static int nemoshow_load_one(struct nemoshow *show, struct showone *one, struct xmlnode *node);
 static int nemoshow_load_item(struct nemoshow *show, struct showone *item, struct xmlnode *node);
-static int nemoshow_load_loop(struct nemoshow *show, struct showone *item, struct xmlnode *node);
+static int nemoshow_load_loop(struct nemoshow *show, struct showone *loop, struct xmlnode *node);
+static int nemoshow_load_svg(struct nemoshow *show, struct showone *svg, struct xmlnode *node);
 static int nemoshow_load_canvas(struct nemoshow *show, struct showone *canvas, struct xmlnode *node);
 static int nemoshow_load_matrix(struct nemoshow *show, struct showone *matrix, struct xmlnode *node);
 static int nemoshow_load_scene(struct nemoshow *show, struct showone *scene, struct xmlnode *node);
@@ -326,6 +329,30 @@ static int nemoshow_load_loop(struct nemoshow *show, struct showone *loop, struc
 	return 0;
 }
 
+static int nemoshow_load_svg(struct nemoshow *show, struct showone *svg, struct xmlnode *node)
+{
+	struct xmlnode *child;
+	struct showone *one;
+
+	nemolist_for_each(child, &node->children, link) {
+		one = nemoshow_create_one(show, child);
+		if (one != NULL) {
+			NEMOBOX_APPEND(show->ones, show->sones, show->nones, one);
+
+			if (one->type == NEMOSHOW_MATRIX_TYPE) {
+				nemoshow_load_matrix(show, one, child);
+			} else if (one->type == NEMOSHOW_ITEM_TYPE) {
+				nemoshow_load_item(show, one, child);
+			}
+
+			NEMOBOX_APPEND(svg->children, svg->schildren, svg->nchildren, one);
+			one->parent = svg;
+		}
+	}
+
+	return 0;
+}
+
 static int nemoshow_load_canvas(struct nemoshow *show, struct showone *canvas, struct xmlnode *node)
 {
 	struct showcanvas *cone = NEMOSHOW_CANVAS(canvas);
@@ -341,6 +368,8 @@ static int nemoshow_load_canvas(struct nemoshow *show, struct showone *canvas, s
 				nemoshow_load_loop(show, one, child);
 			} else if (one->type == NEMOSHOW_ITEM_TYPE) {
 				nemoshow_load_item(show, one, child);
+			} else if (one->type == NEMOSHOW_SVG_TYPE) {
+				nemoshow_load_svg(show, one, child);
 			} else if (one->type == NEMOSHOW_SHADER_TYPE) {
 				nemoshow_load_one(show, one, child);
 			}
@@ -580,6 +609,8 @@ void nemoshow_arrange_one(struct nemoshow *show)
 			nemoshow_shader_arrange(show, one);
 		} else if (one->type == NEMOSHOW_LOOP_TYPE) {
 			nemoshow_loop_arrange(show, one);
+		} else if (one->type == NEMOSHOW_SVG_TYPE) {
+			nemoshow_svg_arrange(show, one);
 		} else if (one->type == NEMOSHOW_FONT_TYPE) {
 			nemoshow_font_arrange(show, one);
 		}

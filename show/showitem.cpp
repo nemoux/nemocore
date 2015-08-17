@@ -20,6 +20,7 @@
 #include <showhelper.hpp>
 #include <nemoshow.h>
 #include <fonthelper.h>
+#include <svghelper.h>
 #include <nemoxml.h>
 #include <nemobox.h>
 #include <nemomisc.h>

@@ -37,6 +37,7 @@ add_library(nemoshow SHARED
 	showpath.cpp
 	showexpr.cpp
 	showloop.cpp
+	showsvg.cpp
 	showsequence.cpp
 	showease.cpp
 	showtransition.cpp
@@ -50,6 +51,7 @@ add_library(nemoshow SHARED
 	showeasy.cpp
 	showhelper.cpp
 	showmisc.cpp
+	svghelper.cpp
 	)
 
 TARGET_LINK_LIBRARIES(nemoshow
@@ -71,6 +73,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/show/showpath.h
 	${CMAKE_SOURCE_DIR}/show/showexpr.h
 	${CMAKE_SOURCE_DIR}/show/showloop.h
+	${CMAKE_SOURCE_DIR}/show/showsvg.h
 	${CMAKE_SOURCE_DIR}/show/showsequence.h
 	${CMAKE_SOURCE_DIR}/show/showease.h
 	${CMAKE_SOURCE_DIR}/show/showtransition.h

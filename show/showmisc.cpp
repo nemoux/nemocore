@@ -52,6 +52,7 @@ struct showprop *nemoshow_get_property(const char *name)
 		{ "timing",						NEMOSHOW_STRING_PROP,				NEMOSHOW_NONE_DIRTY },
 		{ "to",								NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_SHAPE_DIRTY },
 		{ "type",							NEMOSHOW_STRING_PROP,				NEMOSHOW_STYLE_DIRTY },
+		{ "uri",							NEMOSHOW_STRING_PROP,				NEMOSHOW_NONE_DIRTY },
 		{ "value",						NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_NONE_DIRTY },
 		{ "width",						NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_SHAPE_DIRTY },
 		{ "x",								NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_SHAPE_DIRTY },

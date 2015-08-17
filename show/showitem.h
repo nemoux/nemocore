@@ -25,9 +25,6 @@ typedef enum {
 	NEMOSHOW_LAST_ITEM
 } NemoShowItemType;
 
-struct showmatrix;
-struct showcanvas;
-
 struct showitem {
 	struct showone base;
 
