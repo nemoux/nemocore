@@ -712,6 +712,8 @@ static inline int nemoshow_svg_load_linear_gradient(struct svgcontext *context, 
 
 	value = nemoxml_node_get_attr(node, "gradientUnits");
 	if (value != NULL && strcmp(value, "userSpaceOnUse") == 0)
+		context->viewport.is_bbox = 0;
+	else
 		context->viewport.is_bbox = 1;
 
 	value = nemoxml_node_get_attr(node, "gradientTransform");
@@ -774,6 +776,8 @@ static inline int nemoshow_svg_load_radial_gradient(struct svgcontext *context, 
 
 	value = nemoxml_node_get_attr(node, "gradientUnits");
 	if (value != NULL && strcmp(value, "userSpaceOnUse") == 0)
+		context->viewport.is_bbox = 0;
+	else
 		context->viewport.is_bbox = 1;
 
 	value = nemoxml_node_get_attr(node, "gradientTransform");
