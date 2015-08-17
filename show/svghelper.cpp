@@ -562,6 +562,7 @@ static inline void nemoshow_svg_load_style(struct svgcontext *context, struct xm
 
 static inline int nemoshow_svg_load_rect(struct svgcontext *context, struct xmlnode *node);
 static inline int nemoshow_svg_load_circle(struct svgcontext *context, struct xmlnode *node);
+static inline int nemoshow_svg_load_path(struct svgcontext *context, struct xmlnode *node);
 static inline int nemoshow_svg_load_group(struct svgcontext *context, struct xmlnode *node);
 static inline int nemoshow_svg_load_defs(struct svgcontext *context, struct xmlnode *node);
 static inline int nemoshow_svg_load_one(struct svgcontext *context, struct xmlnode *node);
@@ -599,6 +600,29 @@ static inline int nemoshow_svg_load_circle(struct svgcontext *context, struct xm
 	NEMOSHOW_ITEM_AT(one, x) = nemoshow_svg_get_length(context, nemoxml_node_get_attr(node, "cx"), NEMOSHOW_SVG_ORIENTATION_HORIZONTAL, "0");
 	NEMOSHOW_ITEM_AT(one, y) = nemoshow_svg_get_length(context, nemoxml_node_get_attr(node, "cy"), NEMOSHOW_SVG_ORIENTATION_VERTICAL, "0");
 	NEMOSHOW_ITEM_AT(one, r) = nemoshow_svg_get_length(context, nemoxml_node_get_attr(node, "r"), NEMOSHOW_SVG_ORIENTATION_HORIZONTAL, "0");
+
+	nemoshow_svg_load_style(context, node, one);
+
+	return 0;
+}
+
+static inline int nemoshow_svg_load_path(struct svgcontext *context, struct xmlnode *node)
+{
+	struct showone *one;
+	struct showone *cmd;
+	const char *value;
+	const char *d;
+
+	one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
+	nemoshow_attach_one(context->show, context->one, one);
+
+	strncpy(one->id, (value = nemoxml_node_get_attr(node, "id")) ? value : "", NEMOSHOW_ID_MAX);
+
+	d = nemoxml_node_get_attr(node, "d");
+
+	cmd = nemoshow_path_create(NEMOSHOW_CMD_PATH);
+	nemoobject_sets(&cmd->object, "d", d, strlen(d));
+	nemoshow_attach_one(context->show, one, cmd);
 
 	nemoshow_svg_load_style(context, node, one);
 
@@ -661,6 +685,8 @@ static inline int nemoshow_svg_load_one(struct svgcontext *context, struct xmlno
 		nemoshow_svg_load_rect(context, node);
 	} else if (strcmp(node->name, "circle") == 0) {
 		nemoshow_svg_load_circle(context, node);
+	} else if (strcmp(node->name, "path") == 0) {
+		nemoshow_svg_load_path(context, node);
 	} else if (strcmp(node->name, "g") == 0) {
 		nemoshow_svg_load_group(context, node);
 	} else if (strcmp(node->name, "defs") == 0) {

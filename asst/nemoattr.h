@@ -316,8 +316,8 @@ static inline void nemoobject_sets(struct nemoobject *object, const char *name, 
 		attr->size = size + 1;
 		attr->needs_free = 1;
 
-		strncpy((char *)(attr->p), s, attr->size);
-		((char *)attr->p)[attr->size] = '\0';
+		strncpy((char *)(attr->p), s, size);
+		((char *)attr->p)[size] = '\0';
 	}
 }
 
