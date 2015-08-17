@@ -721,6 +721,21 @@ static inline int nemoshow_svg_load_linear_gradient(struct svgcontext *context, 
 		nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
 	}
 
+	value = nemoxml_node_get_attr(node, "spreadMethod");
+	if (value != NULL) {
+		const char *flags;
+
+		if (strcmp(value, "pad") == 0) {
+			flags = "tile";
+		} else if (strcmp(value, "reflect") == 0) {
+			flags = "mirror";
+		} else if (strcmp(value, "repeat") == 0) {
+			flags = "repeat";
+		}
+
+		nemoobject_sets(&one->object, "flags", flags, strlen(flags));
+	}
+
 	NEMOSHOW_SHADER_AT(one, x0) = nemoshow_svg_get_length(context, nemoxml_node_get_attr(node, "x1"), NEMOSHOW_SVG_ORIENTATION_HORIZONTAL, "0");
 	NEMOSHOW_SHADER_AT(one, y0) = nemoshow_svg_get_length(context, nemoxml_node_get_attr(node, "y1"), NEMOSHOW_SVG_ORIENTATION_VERTICAL, "0");
 	NEMOSHOW_SHADER_AT(one, x1) = nemoshow_svg_get_length(context, nemoxml_node_get_attr(node, "x2"), NEMOSHOW_SVG_ORIENTATION_HORIZONTAL, "0");
@@ -766,6 +781,21 @@ static inline int nemoshow_svg_load_radial_gradient(struct svgcontext *context, 
 		nemoshow_svg_get_transform(NEMOSHOW_SHADER_CC(NEMOSHOW_SHADER(one), matrix), value);
 
 		nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
+	}
+
+	value = nemoxml_node_get_attr(node, "spreadMethod");
+	if (value != NULL) {
+		const char *flags;
+
+		if (strcmp(value, "pad") == 0) {
+			flags = "tile";
+		} else if (strcmp(value, "reflect") == 0) {
+			flags = "mirror";
+		} else if (strcmp(value, "repeat") == 0) {
+			flags = "repeat";
+		}
+
+		nemoobject_sets(&one->object, "flags", flags, strlen(flags));
 	}
 
 	NEMOSHOW_SHADER_AT(one, x0) = nemoshow_svg_get_length(context, nemoxml_node_get_attr(node, "fx"), NEMOSHOW_SVG_ORIENTATION_HORIZONTAL, "0");
