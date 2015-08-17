@@ -183,7 +183,7 @@ static inline int nemoshow_svg_load_rect(struct svgcontext *context, struct xmln
 	const char *value;
 
 	one = nemoshow_item_create(NEMOSHOW_RECT_ITEM);
-	one->parent = context->one;
+	nemoshow_attach_one(context->show, context->one, one);
 
 	value = nemoxml_node_get_attr(node, "id");
 	if (value != NULL) {
@@ -207,14 +207,7 @@ static inline int nemoshow_svg_load_rect(struct svgcontext *context, struct xmln
 		NEMOSHOW_ITEM_AT(one, height) = nemoshow_svg_get_length(context, value, NEMOSHOW_SVG_ORIENTATION_VERTICAL, "100%");
 	}
 
-	NEMOSHOW_ITEM_AT(one, fills[0]) = 255;
-	NEMOSHOW_ITEM_AT(one, fills[1]) = 0;
-	NEMOSHOW_ITEM_AT(one, fills[2]) = 0;
-	NEMOSHOW_ITEM_AT(one, fills[3]) = 255;
-	NEMOSHOW_ITEM_AT(one, fill) = 1;
-
-	NEMOBOX_APPEND(context->show->ones, context->show->sones, context->show->nones, one);
-	NEMOBOX_APPEND(context->one->children, context->one->schildren, context->one->nchildren, one);
+	nemoshow_item_set_fill_color(one, 255, 0, 0, 255);
 
 	return 0;
 }
@@ -225,7 +218,7 @@ static inline int nemoshow_svg_load_circle(struct svgcontext *context, struct xm
 	const char *value;
 
 	one = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
-	one->parent = context->one;
+	nemoshow_attach_one(context->show, context->one, one);
 
 	value = nemoxml_node_get_attr(node, "id");
 	if (value != NULL) {
@@ -245,14 +238,7 @@ static inline int nemoshow_svg_load_circle(struct svgcontext *context, struct xm
 		NEMOSHOW_ITEM_AT(one, r) = nemoshow_svg_get_length(context, value, NEMOSHOW_SVG_ORIENTATION_VERTICAL, "0");
 	}
 
-	NEMOSHOW_ITEM_AT(one, fills[0]) = 255;
-	NEMOSHOW_ITEM_AT(one, fills[1]) = 255;
-	NEMOSHOW_ITEM_AT(one, fills[2]) = 0;
-	NEMOSHOW_ITEM_AT(one, fills[3]) = 255;
-	NEMOSHOW_ITEM_AT(one, fill) = 1;
-
-	NEMOBOX_APPEND(context->show->ones, context->show->sones, context->show->nones, one);
-	NEMOBOX_APPEND(context->one->children, context->one->schildren, context->one->nchildren, one);
+	nemoshow_item_set_stroke_color(one, 255, 255, 0, 255);
 
 	return 0;
 }

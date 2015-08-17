@@ -72,6 +72,37 @@ extern void nemoshow_item_destroy(struct showone *one);
 extern int nemoshow_item_arrange(struct nemoshow *show, struct showone *one);
 extern int nemoshow_item_update(struct nemoshow *show, struct showone *one);
 
+static inline void nemoshow_item_set_fill_color(struct showone *one, double r, double g, double b, double a)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	item->fills[0] = r;
+	item->fills[1] = g;
+	item->fills[2] = b;
+	item->fills[3] = a;
+
+	item->fill = 1;
+}
+
+static inline void nemoshow_item_set_stroke_color(struct showone *one, double r, double g, double b, double a)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	item->strokes[0] = r;
+	item->strokes[1] = g;
+	item->strokes[2] = b;
+	item->strokes[3] = a;
+
+	item->stroke = 1;
+}
+
+static inline void nemoshow_item_set_stroke_width(struct showone *one, double width)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	item->stroke_width = width;
+}
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

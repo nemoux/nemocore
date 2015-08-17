@@ -871,6 +871,21 @@ void nemoshow_flush_canvas_all(struct nemoshow *show)
 	}
 }
 
+void nemoshow_attach_one(struct nemoshow *show, struct showone *parent, struct showone *one)
+{
+	NEMOBOX_APPEND(show->ones, show->sones, show->nones, one);
+
+	if (parent != NULL) {
+		NEMOBOX_APPEND(parent->children, parent->schildren, parent->nchildren, one);
+
+		one->parent = parent;
+	}
+}
+
+void nemoshow_detach_one(struct nemoshow *show, struct showone *one)
+{
+}
+
 void nemoshow_attach_transition(struct nemoshow *show, struct showtransition *trans)
 {
 	int i;
