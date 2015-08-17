@@ -61,6 +61,7 @@ struct showitem {
 	double textwidth, textheight;
 
 	int has_transform;
+	int has_transform_children;
 
 	void *cc;
 };

@@ -44,6 +44,12 @@ static inline int string_is_number(const char *str, int offset, int length)
 		if ('0' <= str[i] && str[i] <= '9')
 			continue;
 
+		if (str[i] == '-' || str[i] == '+' || str[i] == '.')
+			continue;
+
+		if (str[i] == 'e' || str[i] == 'E')
+			continue;
+
 		return 0;
 	}
 

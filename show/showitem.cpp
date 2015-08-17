@@ -169,6 +169,7 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 	for (i = 0; i < one->nchildren; i++) {
 		if (one->children[i]->type == NEMOSHOW_MATRIX_TYPE) {
 			item->has_transform = 1;
+			item->has_transform_children = 1;
 			break;
 		}
 	}
@@ -283,7 +284,7 @@ static inline void nemoshow_item_update_child(struct nemoshow *show, struct show
 	struct showone *child;
 	int i;
 
-	if (NEMOSHOW_ITEM_CC(item, matrix) != NULL) {
+	if (item->has_transform_children != 0) {
 		NEMOSHOW_ITEM_CC(item, matrix)->setIdentity();
 
 		for (i = 0; i < one->nchildren; i++) {

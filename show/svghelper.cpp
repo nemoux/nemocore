@@ -262,7 +262,8 @@ int nemoshow_svg_get_transform(SkMatrix *matrix, const char *value)
 {
 	struct nemotoken *token;
 	const char *type;
-	double args[8], nargs;
+	double args[8];
+	int nargs;
 	int i, count;
 
 	token = nemotoken_create(value, strlen(value));
@@ -328,9 +329,9 @@ int nemoshow_svg_get_transform(SkMatrix *matrix, const char *value)
 				nargs = nemoshow_svg_get_transform_args(token, i, args);
 				if (nargs == 6) {
 					SkScalar targs[9] = {
-						SkDoubleToScalar(args[0]), SkDoubleToScalar(args[1]), 0.0f,
-						SkDoubleToScalar(args[2]), SkDoubleToScalar(args[3]), 0.0f,
-						SkDoubleToScalar(args[4]), SkDoubleToScalar(args[5]), 1.0f
+						SkDoubleToScalar(args[0]), SkDoubleToScalar(args[2]), SkDoubleToScalar(args[4]),
+						SkDoubleToScalar(args[1]), SkDoubleToScalar(args[3]), SkDoubleToScalar(args[5]),
+						0.0f, 0.0f, 1.0f
 					};
 
 					matrix->set9(targs);
@@ -594,6 +595,8 @@ static inline void nemoshow_svg_set_style(struct svgcontext *context, struct sho
 		nemotoken_destroy(token);
 	} else if (strcmp(attr, "transform") == 0) {
 		nemoshow_svg_get_transform(NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(one), matrix), value);
+
+		NEMOSHOW_ITEM_AT(one, has_transform) = 1;
 	} else if (strcmp(attr, "offset") == 0) {
 		nemoshow_stop_set_offset(one, strtod(value, NULL));
 	} else if (strcmp(attr, "stop-color") == 0) {
