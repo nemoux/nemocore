@@ -24,6 +24,7 @@ struct showone *nemoshow_camera_create(void)
 	memset(camera, 0, sizeof(struct showcamera));
 
 	camera->cc = new showcamera_t;
+	NEMOSHOW_CAMERA_CC(camera, matrix) = new SkMatrix;
 
 	one = &camera->base;
 	one->type = NEMOSHOW_CAMERA_TYPE;
@@ -49,8 +50,6 @@ void nemoshow_camera_destroy(struct showone *one)
 int nemoshow_camera_arrange(struct nemoshow *show, struct showone *one)
 {
 	struct showcamera *camera = NEMOSHOW_CAMERA(one);
-
-	NEMOSHOW_CAMERA_CC(camera, matrix) = new SkMatrix;
 
 	return 0;
 }

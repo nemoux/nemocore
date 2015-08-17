@@ -22,6 +22,7 @@ struct showone *nemoshow_matrix_create(int type)
 	memset(matrix, 0, sizeof(struct showmatrix));
 
 	matrix->cc = new showmatrix_t;
+	NEMOSHOW_MATRIX_CC(matrix, matrix) = new SkMatrix;
 
 	one = &matrix->base;
 	one->type = NEMOSHOW_MATRIX_TYPE;
@@ -51,8 +52,6 @@ void nemoshow_matrix_destroy(struct showone *one)
 int nemoshow_matrix_arrange(struct nemoshow *show, struct showone *one)
 {
 	struct showmatrix *matrix = NEMOSHOW_MATRIX(one);
-
-	NEMOSHOW_MATRIX_CC(matrix, matrix) = new SkMatrix;
 
 	return 0;
 }

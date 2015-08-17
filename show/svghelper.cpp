@@ -9,6 +9,8 @@
 #include <nemoshow.h>
 #include <showsvg.h>
 #include <showsvg.hpp>
+#include <showitem.h>
+#include <showitem.hpp>
 #include <stringhelper.h>
 #include <nemomisc.h>
 
@@ -240,6 +242,110 @@ int nemoshow_svg_get_color(struct svgcontext *context, double *rgba, const char 
 	return 0;
 }
 
+static int nemoshow_svg_get_transform_args(struct nemotoken *token, int offset, double *args)
+{
+	const char *value;
+	int i;
+
+	for (i = 0; ; i++) {
+		value = nemotoken_get_token(token, i + offset);
+		if (value == NULL || string_is_number(value, 0, strlen(value)) == 0)
+			break;
+
+		args[i] = strtod(value, NULL);
+	}
+
+	return i;
+}
+
+int nemoshow_svg_get_transform(SkMatrix *matrix, const char *value)
+{
+	struct nemotoken *token;
+	const char *type;
+	double args[8], nargs;
+	int i, count;
+
+	token = nemotoken_create(value, strlen(value));
+	if (token == NULL)
+		return -1;
+	nemotoken_divide(token, ' ');
+	nemotoken_divide(token, '(');
+	nemotoken_divide(token, ')');
+	nemotoken_divide(token, ',');
+	nemotoken_divide(token, '\t');
+	nemotoken_update(token);
+
+	count = nemotoken_get_token_count(token);
+	i = 0;
+
+	while (i < count) {
+		type = nemotoken_get_token(token, i++);
+		if (type != NULL) {
+			if (strcmp(type, "translate") == 0) {
+				nargs = nemoshow_svg_get_transform_args(token, i, args);
+				if (nargs == 1) {
+					matrix->setTranslate(args[0], 0.0f);
+				} else if (nargs == 2) {
+					matrix->setTranslate(args[0], args[1]);
+				}
+
+				i += nargs;
+			} else if (strcmp(type, "rotate") == 0) {
+				nargs = nemoshow_svg_get_transform_args(token, i, args);
+				if (nargs == 1) {
+					matrix->setRotate(args[0]);
+				} else if (nargs == 3) {
+					matrix->setTranslate(args[1], args[2]);
+					matrix->postRotate(args[0]);
+					matrix->postTranslate(-args[1], -args[2]);
+				}
+
+				i += nargs;
+			} else if (strcmp(type, "scale") == 0) {
+				nargs = nemoshow_svg_get_transform_args(token, i, args);
+				if (nargs == 1) {
+					matrix->setScale(args[0], 0.0f);
+				} else if (nargs == 2) {
+					matrix->setScale(args[0], args[1]);
+				}
+
+				i += nargs;
+			} else if (strcmp(type, "skewX") == 0) {
+				nargs = nemoshow_svg_get_transform_args(token, i, args);
+				if (nargs == 1) {
+					matrix->setSkewX(args[0]);
+				}
+
+				i += nargs;
+			} else if (strcmp(type, "skewY") == 0) {
+				nargs = nemoshow_svg_get_transform_args(token, i, args);
+				if (nargs == 1) {
+					matrix->setSkewY(args[0]);
+				}
+
+				i += nargs;
+			} else if (strcmp(type, "matrix") == 0) {
+				nargs = nemoshow_svg_get_transform_args(token, i, args);
+				if (nargs == 6) {
+					SkScalar targs[9] = {
+						SkDoubleToScalar(args[0]), SkDoubleToScalar(args[1]), 0.0f,
+						SkDoubleToScalar(args[2]), SkDoubleToScalar(args[3]), 0.0f,
+						SkDoubleToScalar(args[4]), SkDoubleToScalar(args[5]), 1.0f
+					};
+
+					matrix->set9(targs);
+				}
+
+				i += nargs;
+			}
+		}
+	}
+
+	nemotoken_destroy(token);
+
+	return 0;
+}
+
 static double nemoshow_svg_get_length(struct svgcontext *context, const char *svalue, int orientation, const char *dvalue)
 {
 	const char *units = NULL;
@@ -438,6 +544,8 @@ static inline void nemoshow_svg_set_style(struct svgcontext *context, struct sho
 		}
 
 		nemotoken_destroy(token);
+	} else if (strcmp(attr, "transform") == 0) {
+		nemoshow_svg_get_transform(NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(one), matrix), value);
 	}
 }
 
@@ -508,6 +616,8 @@ static inline int nemoshow_svg_load_group(struct svgcontext *context, struct xml
 	nemoshow_attach_one(context->show, context->one, one);
 
 	strncpy(one->id, (value = nemoxml_node_get_attr(node, "id")) ? value : "", NEMOSHOW_ID_MAX);
+
+	nemoshow_svg_load_style(context, node, one);
 
 	pone = context->one;
 	context->one = one;

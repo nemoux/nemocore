@@ -60,6 +60,8 @@ struct showitem {
 	const char *text;
 	double textwidth, textheight;
 
+	int has_transform;
+
 	void *cc;
 };
 

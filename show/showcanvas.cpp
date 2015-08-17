@@ -326,7 +326,7 @@ static inline void nemoshow_canvas_render_one(struct nemoshow *show, struct show
 			nemoshow_canvas_render_item(show, canvas, one);
 
 			NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
-		} else if (NEMOSHOW_ITEM_CC(item, matrix) != NULL) {
+		} else if (item->has_transform != 0) {
 			NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
 			NEMOSHOW_CANVAS_CC(canvas, canvas)->concat(*NEMOSHOW_ITEM_CC(item, matrix));
 
@@ -360,7 +360,7 @@ static inline void nemoshow_canvas_render_one(struct nemoshow *show, struct show
 						nemoshow_canvas_render_item(show, canvas, child);
 
 						NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
-					} else if (NEMOSHOW_ITEM_CC(item, matrix) != NULL) {
+					} else if (item->has_transform != 0) {
 						NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
 						NEMOSHOW_CANVAS_CC(canvas, canvas)->concat(*NEMOSHOW_ITEM_CC(item, matrix));
 
@@ -381,7 +381,7 @@ static inline void nemoshow_canvas_render_one(struct nemoshow *show, struct show
 
 		if (svg->matrix != NULL) {
 			NEMOSHOW_CANVAS_CC(canvas, canvas)->concat(*NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(svg->matrix), matrix));
-		} else if (NEMOSHOW_SVG_CC(svg, matrix) != NULL) {
+		} else if (svg->has_transform != 0) {
 			NEMOSHOW_CANVAS_CC(canvas, canvas)->concat(*NEMOSHOW_SVG_CC(svg, matrix));
 		}
 

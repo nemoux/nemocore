@@ -38,7 +38,7 @@ struct showone *nemoshow_item_create(int type)
 	memset(item, 0, sizeof(struct showitem));
 
 	item->cc = new showitem_t;
-	NEMOSHOW_ITEM_CC(item, matrix) = NULL;
+	NEMOSHOW_ITEM_CC(item, matrix) = new SkMatrix;
 	NEMOSHOW_ITEM_CC(item, path) = NULL;
 	NEMOSHOW_ITEM_CC(item, points) = NULL;
 
@@ -168,7 +168,7 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 
 	for (i = 0; i < one->nchildren; i++) {
 		if (one->children[i]->type == NEMOSHOW_MATRIX_TYPE) {
-			NEMOSHOW_ITEM_CC(item, matrix) = new SkMatrix;
+			item->has_transform = 1;
 			break;
 		}
 	}

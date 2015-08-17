@@ -40,7 +40,8 @@ struct showone *nemoshow_svg_create(void)
 	memset(svg, 0, sizeof(struct showsvg));
 
 	svg->cc = new showsvg_t;
-	NEMOSHOW_SVG_CC(svg, matrix) = NULL;
+	NEMOSHOW_SVG_CC(svg, viewbox) = new SkMatrix;
+	NEMOSHOW_SVG_CC(svg, matrix) = new SkMatrix;
 
 	one = &svg->base;
 	one->type = NEMOSHOW_SVG_TYPE;
@@ -77,11 +78,9 @@ int nemoshow_svg_arrange(struct nemoshow *show, struct showone *one)
 		NEMOBOX_APPEND(matrix->refs, matrix->srefs, matrix->nrefs, one);
 	}
 
-	NEMOSHOW_SVG_CC(svg, viewbox) = new SkMatrix;
-
 	for (i = 0; i < one->nchildren; i++) {
 		if (one->children[i]->type == NEMOSHOW_MATRIX_TYPE) {
-			NEMOSHOW_SVG_CC(svg, matrix) = new SkMatrix;
+			svg->has_transform = 1;
 			break;
 		}
 	}
