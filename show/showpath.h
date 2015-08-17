@@ -19,6 +19,7 @@ typedef enum {
 	NEMOSHOW_CLOSE_PATH = 4,
 	NEMOSHOW_CMD_PATH = 5,
 	NEMOSHOW_TEXT_PATH = 6,
+	NEMOSHOW_SVG_PATH = 7,
 	NEMOSHOW_LAST_PATH
 } NemoShowPathType;
 
@@ -36,6 +37,7 @@ struct showpath {
 extern struct showone *nemoshow_path_create(int type);
 extern void nemoshow_path_destroy(struct showone *one);
 
+extern int nemoshow_path_arrange(struct nemoshow *show, struct showone *one);
 extern int nemoshow_path_update(struct nemoshow *show, struct showone *one);
 
 #ifdef __cplusplus

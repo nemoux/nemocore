@@ -897,3 +897,34 @@ int nemoshow_svg_load_uri(struct nemoshow *show, struct showone *one, const char
 
 	return 0;
 }
+
+int nemoshow_svg_load_uri_path(struct nemoshow *show, struct showone *one, const char *uri)
+{
+	struct nemoxml *xml;
+	struct xmlnode *node;
+	struct showone *child;
+
+	if (uri == NULL)
+		return -1;
+
+	xml = nemoxml_create();
+	nemoxml_load_file(xml, uri);
+	nemoxml_update(xml);
+
+	nemolist_for_each(node, &xml->nodes, nodelink) {
+		if (strcmp(node->name, "path") == 0) {
+			const char *d;
+
+			d = nemoxml_node_get_attr(node, "d");
+			if (d != NULL) {
+				child = nemoshow_path_create(NEMOSHOW_CMD_PATH);
+				nemoobject_sets(&child->object, "d", d, strlen(d));
+				nemoshow_attach_one(show, one, child);
+			}
+		}
+	}
+
+	nemoxml_destroy(xml);
+
+	return 0;
+}

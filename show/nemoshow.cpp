@@ -151,6 +151,8 @@ static struct showone *nemoshow_create_one(struct nemoshow *show, struct xmlnode
 		one = nemoshow_path_create(NEMOSHOW_CMD_PATH);
 	} else if (strcmp(node->name, "textto") == 0) {
 		one = nemoshow_path_create(NEMOSHOW_TEXT_PATH);
+	} else if (strcmp(node->name, "svgto") == 0) {
+		one = nemoshow_path_create(NEMOSHOW_SVG_PATH);
 	} else if (strcmp(node->name, "camera") == 0) {
 		one = nemoshow_camera_create();
 	} else if (strcmp(node->name, "blur") == 0) {
@@ -617,6 +619,8 @@ void nemoshow_arrange_one(struct nemoshow *show)
 			nemoshow_svg_arrange(show, one);
 		} else if (one->type == NEMOSHOW_FONT_TYPE) {
 			nemoshow_font_arrange(show, one);
+		} else if (one->type == NEMOSHOW_PATH_TYPE) {
+			nemoshow_path_arrange(show, one);
 		}
 	}
 

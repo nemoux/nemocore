@@ -7,6 +7,7 @@
 
 #include <showpath.h>
 #include <nemoshow.h>
+#include <svghelper.h>
 #include <nemomisc.h>
 
 struct showone *nemoshow_path_create(int type)
@@ -46,6 +47,15 @@ void nemoshow_path_destroy(struct showone *one)
 	nemoshow_one_finish(one);
 
 	free(path);
+}
+
+int nemoshow_path_arrange(struct nemoshow *show, struct showone *one)
+{
+	if (one->sub == NEMOSHOW_SVG_PATH) {
+		nemoshow_svg_load_uri_path(show, one, nemoobject_gets(&one->object, "uri"));
+	}
+
+	return 0;
 }
 
 int nemoshow_path_update(struct nemoshow *show, struct showone *one)

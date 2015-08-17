@@ -71,6 +71,7 @@ struct svgcontext {
 };
 
 extern int nemoshow_svg_load_uri(struct nemoshow *show, struct showone *one, const char *uri);
+extern int nemoshow_svg_load_uri_path(struct nemoshow *show, struct showone *one, const char *uri);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

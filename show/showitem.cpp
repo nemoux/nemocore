@@ -210,11 +210,70 @@ static inline void nemoshow_item_update_style(struct nemoshow *show, struct show
 	}
 }
 
+static inline void nemoshow_item_update_path(struct nemoshow *show, struct showitem *item, struct showone *one)
+{
+	struct showone *child;
+	struct showpath *path;
+	int i;
+
+	for (i = 0; i < one->nchildren; i++) {
+		child = one->children[i];
+
+		if (child->type == NEMOSHOW_PATH_TYPE) {
+			path = NEMOSHOW_PATH(child);
+
+			if (child->sub == NEMOSHOW_MOVETO_PATH) {
+				NEMOSHOW_ITEM_CC(item, path)->moveTo(path->x0, path->y0);
+			} else if (child->sub == NEMOSHOW_LINETO_PATH) {
+				NEMOSHOW_ITEM_CC(item, path)->lineTo(path->x0, path->y0);
+			} else if (child->sub == NEMOSHOW_CURVETO_PATH) {
+				NEMOSHOW_ITEM_CC(item, path)->cubicTo(
+						path->x0, path->y0,
+						path->x1, path->y1,
+						path->x2, path->y2);
+			} else if (child->sub == NEMOSHOW_CLOSE_PATH) {
+				NEMOSHOW_ITEM_CC(item, path)->close();
+			} else if (child->sub == NEMOSHOW_CMD_PATH) {
+				SkPath rpath;
+
+				SkParsePath::FromSVGString(nemoobject_gets(&child->object, "d"), &rpath);
+
+				NEMOSHOW_ITEM_CC(item, path)->addPath(rpath);
+			} else if (child->sub == NEMOSHOW_TEXT_PATH) {
+				SkPaint paint;
+				SkPath rpath;
+				SkTypeface *face;
+				const char *text;
+
+				text = nemoobject_gets(&child->object, "d");
+
+				SkSafeUnref(paint.setTypeface(
+							SkTypeface::CreateFromFile(
+								fontconfig_get_path(
+									nemoobject_gets(&child->object, "font"),
+									NULL,
+									FC_SLANT_ROMAN,
+									FC_WEIGHT_NORMAL,
+									FC_WIDTH_NORMAL,
+									FC_MONO), 0)));
+
+				paint.setAntiAlias(true);
+				paint.setTextSize(nemoobject_getd(&child->object, "font-size"));
+				paint.getTextPath(text, strlen(text), path->x0, path->y0, &rpath);
+
+				NEMOSHOW_ITEM_CC(item, path)->addPath(rpath);
+			} else if (child->sub == NEMOSHOW_SVG_PATH) {
+				nemoshow_item_update_path(show, item, child);
+			}
+		}
+	}
+}
+
 static inline void nemoshow_item_update_child(struct nemoshow *show, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	struct showone *child;
-	int i;
+	int i, j;
 
 	if (NEMOSHOW_ITEM_CC(item, matrix) != NULL) {
 		NEMOSHOW_ITEM_CC(item, matrix)->setIdentity();
@@ -234,59 +293,9 @@ static inline void nemoshow_item_update_child(struct nemoshow *show, struct show
 	}
 
 	if (one->sub == NEMOSHOW_PATH_ITEM) {
-		struct showpath *path;
-
 		NEMOSHOW_ITEM_CC(item, path)->reset();
 
-		for (i = 0; i < one->nchildren; i++) {
-			child = one->children[i];
-
-			if (child->type == NEMOSHOW_PATH_TYPE) {
-				path = NEMOSHOW_PATH(child);
-
-				if (child->sub == NEMOSHOW_MOVETO_PATH) {
-					NEMOSHOW_ITEM_CC(item, path)->moveTo(path->x0, path->y0);
-				} else if (child->sub == NEMOSHOW_LINETO_PATH) {
-					NEMOSHOW_ITEM_CC(item, path)->lineTo(path->x0, path->y0);
-				} else if (child->sub == NEMOSHOW_CURVETO_PATH) {
-					NEMOSHOW_ITEM_CC(item, path)->cubicTo(
-							path->x0, path->y0,
-							path->x1, path->y1,
-							path->x2, path->y2);
-				} else if (child->sub == NEMOSHOW_CLOSE_PATH) {
-					NEMOSHOW_ITEM_CC(item, path)->close();
-				} else if (child->sub == NEMOSHOW_CMD_PATH) {
-					SkPath rpath;
-
-					SkParsePath::FromSVGString(nemoobject_gets(&child->object, "d"), &rpath);
-
-					NEMOSHOW_ITEM_CC(item, path)->addPath(rpath);
-				} else if (child->sub == NEMOSHOW_TEXT_PATH) {
-					SkPaint paint;
-					SkPath rpath;
-					SkTypeface *face;
-					const char *text;
-
-					text = nemoobject_gets(&child->object, "d");
-
-					SkSafeUnref(paint.setTypeface(
-								SkTypeface::CreateFromFile(
-									fontconfig_get_path(
-										nemoobject_gets(&child->object, "font"),
-										NULL,
-										FC_SLANT_ROMAN,
-										FC_WEIGHT_NORMAL,
-										FC_WIDTH_NORMAL,
-										FC_MONO), 0)));
-
-					paint.setAntiAlias(true);
-					paint.setTextSize(nemoobject_getd(&child->object, "font-size"));
-					paint.getTextPath(text, strlen(text), path->x0, path->y0, &rpath);
-
-					NEMOSHOW_ITEM_CC(item, path)->addPath(rpath);
-				}
-			}
-		}
+		nemoshow_item_update_path(show, item, one);
 
 		item->length = nemoshow_helper_get_path_length(NEMOSHOW_ITEM_CC(item, path));
 
