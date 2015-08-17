@@ -67,6 +67,7 @@ struct svgcontext {
 	uint32_t width, height;
 
 	double fontsize;
+	double rgba[4];
 };
 
 extern int nemoshow_svg_load_uri(struct nemoshow *show, struct showone *one, const char *uri);
