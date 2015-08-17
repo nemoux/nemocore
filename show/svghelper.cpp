@@ -518,13 +518,61 @@ static inline void nemoshow_svg_set_style(struct svgcontext *context, struct sho
 	if (strcmp(attr, "color") == 0) {
 		nemoshow_svg_get_color(context, context->rgba, value);
 	} else if (strcmp(attr, "fill") == 0) {
-		nemoshow_svg_get_color(context, rgba, value);
+		if (strcmp(value, "none") == 0) {
+		} else if (strncmp(value, "url", 3) == 0) {
+			struct nemotoken *token;
+			const char *url;
 
-		nemoshow_item_set_fill_color(one, rgba[0], rgba[1], rgba[2], rgba[3]);
+			token = nemotoken_create(value, strlen(value));
+			nemotoken_divide(token, ' ');
+			nemotoken_divide(token, '(');
+			nemotoken_divide(token, ')');
+			nemotoken_update(token);
+
+			url = nemotoken_get_token(token, 1);
+			if (url != NULL) {
+				struct showone *shader;
+
+				shader = nemoshow_search_one(context->show, url);
+				if (shader != NULL) {
+					nemoshow_item_set_shader(one, shader);
+				}
+			}
+
+			nemotoken_destroy(token);
+		} else {
+			nemoshow_svg_get_color(context, rgba, value);
+
+			nemoshow_item_set_fill_color(one, rgba[0], rgba[1], rgba[2], rgba[3]);
+		}
 	} else if (strcmp(attr, "stroke") == 0) {
-		nemoshow_svg_get_color(context, rgba, value);
+		if (strcmp(value, "none") == 0) {
+		} else if (strncmp(value, "url", 3) == 0) {
+			struct nemotoken *token;
+			const char *url;
 
-		nemoshow_item_set_stroke_color(one, rgba[0], rgba[1], rgba[2], rgba[3]);
+			token = nemotoken_create(value, strlen(value));
+			nemotoken_divide(token, ' ');
+			nemotoken_divide(token, '(');
+			nemotoken_divide(token, ')');
+			nemotoken_update(token);
+
+			url = nemotoken_get_token(token, 1);
+			if (url != NULL) {
+				struct showone *shader;
+
+				shader = nemoshow_search_one(context->show, url);
+				if (shader != NULL) {
+					nemoshow_item_set_shader(one, shader);
+				}
+			}
+
+			nemotoken_destroy(token);
+		} else {
+			nemoshow_svg_get_color(context, rgba, value);
+
+			nemoshow_item_set_stroke_color(one, rgba[0], rgba[1], rgba[2], rgba[3]);
+		}
 	} else if (strcmp(attr, "stroke-width") == 0) {
 		nemoshow_item_set_stroke_width(one, strtod(value, NULL));
 	} else if (strcmp(attr, "style") == 0) {
@@ -546,6 +594,14 @@ static inline void nemoshow_svg_set_style(struct svgcontext *context, struct sho
 		nemotoken_destroy(token);
 	} else if (strcmp(attr, "transform") == 0) {
 		nemoshow_svg_get_transform(NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(one), matrix), value);
+	} else if (strcmp(attr, "offset") == 0) {
+		nemoshow_stop_set_offset(one, strtod(value, NULL));
+	} else if (strcmp(attr, "stop-color") == 0) {
+		nemoshow_svg_get_color(context, rgba, value);
+
+		nemoshow_stop_set_fill_color(one, rgba[0], rgba[1], rgba[2], rgba[3]);
+	} else if (strcmp(attr, "stop-opacity") == 0) {
+		nemoshow_stop_set_offset(one, strtod(value, NULL));
 	}
 }
 
@@ -563,6 +619,9 @@ static inline void nemoshow_svg_load_style(struct svgcontext *context, struct xm
 static inline int nemoshow_svg_load_rect(struct svgcontext *context, struct xmlnode *node);
 static inline int nemoshow_svg_load_circle(struct svgcontext *context, struct xmlnode *node);
 static inline int nemoshow_svg_load_path(struct svgcontext *context, struct xmlnode *node);
+static inline int nemoshow_svg_load_linear_gradient(struct svgcontext *context, struct xmlnode *node);
+static inline int nemoshow_svg_load_radial_gradient(struct svgcontext *context, struct xmlnode *node);
+static inline int nemoshow_svg_load_stop(struct svgcontext *context, struct xmlnode *node);
 static inline int nemoshow_svg_load_group(struct svgcontext *context, struct xmlnode *node);
 static inline int nemoshow_svg_load_defs(struct svgcontext *context, struct xmlnode *node);
 static inline int nemoshow_svg_load_one(struct svgcontext *context, struct xmlnode *node);
@@ -629,6 +688,90 @@ static inline int nemoshow_svg_load_path(struct svgcontext *context, struct xmln
 	return 0;
 }
 
+static inline int nemoshow_svg_load_linear_gradient(struct svgcontext *context, struct xmlnode *node)
+{
+	struct showone *one;
+	struct showone *pone;
+	struct xmlnode *child;
+	const char *value;
+
+	one = nemoshow_shader_create(NEMOSHOW_LINEAR_GRADIENT_SHADER);
+	nemoshow_attach_one(context->show, context->one, one);
+
+	strncpy(one->id, (value = nemoxml_node_get_attr(node, "id")) ? value : "", NEMOSHOW_ID_MAX);
+
+	value = nemoxml_node_get_attr(node, "gradientUnits");
+	if (value != NULL && strcmp(value, "userSpaceOnUse") == 0)
+		context->viewport.is_bbox = 1;
+
+	NEMOSHOW_SHADER_AT(one, x0) = nemoshow_svg_get_length(context, nemoxml_node_get_attr(node, "x1"), NEMOSHOW_SVG_ORIENTATION_HORIZONTAL, "0");
+	NEMOSHOW_SHADER_AT(one, y0) = nemoshow_svg_get_length(context, nemoxml_node_get_attr(node, "y1"), NEMOSHOW_SVG_ORIENTATION_VERTICAL, "0");
+	NEMOSHOW_SHADER_AT(one, x1) = nemoshow_svg_get_length(context, nemoxml_node_get_attr(node, "x2"), NEMOSHOW_SVG_ORIENTATION_HORIZONTAL, "0");
+	NEMOSHOW_SHADER_AT(one, y1) = nemoshow_svg_get_length(context, nemoxml_node_get_attr(node, "y2"), NEMOSHOW_SVG_ORIENTATION_VERTICAL, "0");
+
+	pone = context->one;
+	context->one = one;
+
+	nemolist_for_each(child, &node->children, link) {
+		nemoshow_svg_load_one(context, child);
+	}
+
+	context->one = pone;
+
+	context->viewport.is_bbox = 0;
+
+	return 0;
+}
+
+static inline int nemoshow_svg_load_radial_gradient(struct svgcontext *context, struct xmlnode *node)
+{
+	struct showone *one;
+	struct showone *pone;
+	struct xmlnode *child;
+	const char *value;
+
+	one = nemoshow_shader_create(NEMOSHOW_RADIAL_GRADIENT_SHADER);
+	nemoshow_attach_one(context->show, context->one, one);
+
+	strncpy(one->id, (value = nemoxml_node_get_attr(node, "id")) ? value : "", NEMOSHOW_ID_MAX);
+
+	value = nemoxml_node_get_attr(node, "gradientUnits");
+	if (value != NULL && strcmp(value, "userSpaceOnUse") == 0)
+		context->viewport.is_bbox = 1;
+
+	NEMOSHOW_SHADER_AT(one, x0) = nemoshow_svg_get_length(context, nemoxml_node_get_attr(node, "fx"), NEMOSHOW_SVG_ORIENTATION_HORIZONTAL, "0");
+	NEMOSHOW_SHADER_AT(one, y0) = nemoshow_svg_get_length(context, nemoxml_node_get_attr(node, "fy"), NEMOSHOW_SVG_ORIENTATION_VERTICAL, "0");
+	NEMOSHOW_SHADER_AT(one, r) = nemoshow_svg_get_length(context, nemoxml_node_get_attr(node, "r"), NEMOSHOW_SVG_ORIENTATION_HORIZONTAL, "0");
+
+	pone = context->one;
+	context->one = one;
+
+	nemolist_for_each(child, &node->children, link) {
+		nemoshow_svg_load_one(context, child);
+	}
+
+	context->one = pone;
+
+	context->viewport.is_bbox = 0;
+
+	return 0;
+}
+
+static inline int nemoshow_svg_load_stop(struct svgcontext *context, struct xmlnode *node)
+{
+	struct showone *one;
+	const char *value;
+
+	one = nemoshow_stop_create();
+	nemoshow_attach_one(context->show, context->one, one);
+
+	strncpy(one->id, (value = nemoxml_node_get_attr(node, "id")) ? value : "", NEMOSHOW_ID_MAX);
+
+	nemoshow_svg_load_style(context, node, one);
+
+	return 0;
+}
+
 static inline int nemoshow_svg_load_group(struct svgcontext *context, struct xmlnode *node)
 {
 	struct showone *one;
@@ -687,6 +830,12 @@ static inline int nemoshow_svg_load_one(struct svgcontext *context, struct xmlno
 		nemoshow_svg_load_circle(context, node);
 	} else if (strcmp(node->name, "path") == 0) {
 		nemoshow_svg_load_path(context, node);
+	} else if (strcmp(node->name, "linearGradient") == 0) {
+		nemoshow_svg_load_linear_gradient(context, node);
+	} else if (strcmp(node->name, "radialGradient") == 0) {
+		nemoshow_svg_load_radial_gradient(context, node);
+	} else if (strcmp(node->name, "stop") == 0) {
+		nemoshow_svg_load_stop(context, node);
 	} else if (strcmp(node->name, "g") == 0) {
 		nemoshow_svg_load_group(context, node);
 	} else if (strcmp(node->name, "defs") == 0) {

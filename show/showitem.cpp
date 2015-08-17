@@ -475,3 +475,13 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 
 	return 0;
 }
+
+void nemoshow_item_set_shader(struct showone *one, struct showone *shader)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	item->shader = shader;
+
+	NEMOBOX_APPEND(shader->refs, shader->srefs, shader->nrefs, one);
+}
+

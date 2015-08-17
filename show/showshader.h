@@ -45,6 +45,25 @@ extern void nemoshow_stop_destroy(struct showone *one);
 
 extern int nemoshow_stop_update(struct nemoshow *show, struct showone *one);
 
+static inline void nemoshow_stop_set_fill_color(struct showone *one, double r, double g, double b, double a)
+{
+	struct showstop *stop = NEMOSHOW_STOP(one);
+
+	stop->fills[0] = r;
+	stop->fills[1] = g;
+	stop->fills[2] = b;
+	stop->fills[3] = a;
+
+	stop->fill = 1;
+}
+
+static inline void nemoshow_stop_set_offset(struct showone *one, double offset)
+{
+	struct showstop *stop = NEMOSHOW_STOP(one);
+
+	stop->offset = offset;
+}
+
 #define NEMOSHOW_SHADER(one)					((struct showshader *)container_of(one, struct showshader, base))
 #define	NEMOSHOW_SHADER_AT(one, at)		(NEMOSHOW_SHADER(one)->at)
 

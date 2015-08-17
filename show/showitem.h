@@ -74,6 +74,8 @@ extern void nemoshow_item_destroy(struct showone *one);
 extern int nemoshow_item_arrange(struct nemoshow *show, struct showone *one);
 extern int nemoshow_item_update(struct nemoshow *show, struct showone *one);
 
+extern void nemoshow_item_set_shader(struct showone *one, struct showone *shader);
+
 static inline void nemoshow_item_set_fill_color(struct showone *one, double r, double g, double b, double a)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
