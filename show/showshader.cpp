@@ -127,11 +127,20 @@ int nemoshow_shader_arrange(struct nemoshow *show, struct showone *one)
 	SkColor colors[one->nchildren];
 	SkScalar offsets[one->nchildren];
 
-	for (i = 0; i < one->nchildren; i++) {
-		stop = NEMOSHOW_STOP(one->children[i]);
+	if (shader->ref != NULL) {
+		for (i = 0; i < shader->ref->nchildren; i++) {
+			stop = NEMOSHOW_STOP(shader->ref->children[i]);
 
-		colors[i] = SkColorSetARGB(stop->fills[3], stop->fills[2], stop->fills[1], stop->fills[0]);
-		offsets[i] = stop->offset;
+			colors[i] = SkColorSetARGB(stop->fills[3], stop->fills[2], stop->fills[1], stop->fills[0]);
+			offsets[i] = stop->offset;
+		}
+	} else {
+		for (i = 0; i < one->nchildren; i++) {
+			stop = NEMOSHOW_STOP(one->children[i]);
+
+			colors[i] = SkColorSetARGB(stop->fills[3], stop->fills[2], stop->fills[1], stop->fills[0]);
+			offsets[i] = stop->offset;
+		}
 	}
 
 	if (one->sub == NEMOSHOW_LINEAR_GRADIENT_SHADER) {

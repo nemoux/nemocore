@@ -694,11 +694,16 @@ static inline int nemoshow_svg_load_linear_gradient(struct svgcontext *context, 
 	struct showone *pone;
 	struct xmlnode *child;
 	const char *value;
+	const char *href;
 
 	one = nemoshow_shader_create(NEMOSHOW_LINEAR_GRADIENT_SHADER);
 	nemoshow_attach_one(context->show, context->one, one);
 
 	strncpy(one->id, (value = nemoxml_node_get_attr(node, "id")) ? value : "", NEMOSHOW_ID_MAX);
+
+	href = nemoxml_node_get_attr(node, "xlink:href");
+	if (href != NULL)
+		NEMOSHOW_SHADER_AT(one, ref) = nemoshow_search_one(context->show, href + 1);
 
 	value = nemoxml_node_get_attr(node, "gradientUnits");
 	if (value != NULL && strcmp(value, "userSpaceOnUse") == 0)
@@ -729,11 +734,16 @@ static inline int nemoshow_svg_load_radial_gradient(struct svgcontext *context, 
 	struct showone *pone;
 	struct xmlnode *child;
 	const char *value;
+	const char *href;
 
 	one = nemoshow_shader_create(NEMOSHOW_RADIAL_GRADIENT_SHADER);
 	nemoshow_attach_one(context->show, context->one, one);
 
 	strncpy(one->id, (value = nemoxml_node_get_attr(node, "id")) ? value : "", NEMOSHOW_ID_MAX);
+
+	href = nemoxml_node_get_attr(node, "xlink:href");
+	if (href != NULL)
+		NEMOSHOW_SHADER_AT(one, ref) = nemoshow_search_one(context->show, href + 1);
 
 	value = nemoxml_node_get_attr(node, "gradientUnits");
 	if (value != NULL && strcmp(value, "userSpaceOnUse") == 0)

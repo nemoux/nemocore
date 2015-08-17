@@ -30,6 +30,8 @@ struct showstop {
 struct showshader {
 	struct showone base;
 
+	struct showone *ref;
+
 	double x0, y0;
 	double x1, y1;
 	double r;
