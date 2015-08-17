@@ -167,6 +167,8 @@ static struct showone *nemoshow_create_one(struct nemoshow *show, struct xmlnode
 		one = nemoshow_cons_create();
 	} else if (strcmp(node->name, "font") == 0) {
 		one = nemoshow_font_create();
+	} else if (strcmp(node->name, "defs") == 0) {
+		one = nemoshow_one_create(NEMOSHOW_DEFS_TYPE);
 	}
 
 	if (one != NULL) {
@@ -371,6 +373,8 @@ static int nemoshow_load_canvas(struct nemoshow *show, struct showone *canvas, s
 			} else if (one->type == NEMOSHOW_SVG_TYPE) {
 				nemoshow_load_svg(show, one, child);
 			} else if (one->type == NEMOSHOW_SHADER_TYPE) {
+				nemoshow_load_one(show, one, child);
+			} else if (one->type == NEMOSHOW_DEFS_TYPE) {
 				nemoshow_load_one(show, one, child);
 			}
 

@@ -41,6 +41,7 @@ typedef enum {
 	NEMOSHOW_STOP_TYPE = 18,
 	NEMOSHOW_CONS_TYPE = 19,
 	NEMOSHOW_FONT_TYPE = 20,
+	NEMOSHOW_DEFS_TYPE = 21,
 	NEMOSHOW_LAST_TYPE
 } NemoShowOneType;
 
@@ -105,6 +106,7 @@ struct showone {
 extern void nemoshow_one_prepare(struct showone *one);
 extern void nemoshow_one_finish(struct showone *one);
 
+extern struct showone *nemoshow_one_create(int type);
 extern void nemoshow_one_destroy(struct showone *one);
 
 extern struct showattr *nemoshow_one_create_attr(const char *name, const char *text, struct nemoattr *ref, uint32_t dirty);

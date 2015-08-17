@@ -41,6 +41,28 @@ void nemoshow_one_finish(struct showone *one)
 	free(one->attrs);
 }
 
+static int nemoshow_one_update_none(struct nemoshow *show, struct showone *one)
+{
+	return 0;
+}
+
+struct showone *nemoshow_one_create(int type)
+{
+	struct showone *one;
+
+	one = (struct showone *)malloc(sizeof(struct showone));
+	if (one == NULL)
+		return NULL;
+	memset(one, 0, sizeof(struct showone));
+
+	one->type = type;
+	one->update = nemoshow_one_update_none;
+
+	nemoshow_one_prepare(one);
+
+	return one;
+}
+
 void nemoshow_one_destroy(struct showone *one)
 {
 	if (one->destroy != NULL) {
