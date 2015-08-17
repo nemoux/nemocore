@@ -725,17 +725,17 @@ static inline int nemoshow_svg_load_linear_gradient(struct svgcontext *context, 
 
 	value = nemoxml_node_get_attr(node, "spreadMethod");
 	if (value != NULL) {
-		const char *flags;
+		const char *mode;
 
 		if (strcmp(value, "pad") == 0) {
-			flags = "tile";
+			mode = "tile";
 		} else if (strcmp(value, "reflect") == 0) {
-			flags = "mirror";
+			mode = "mirror";
 		} else if (strcmp(value, "repeat") == 0) {
-			flags = "repeat";
+			mode = "repeat";
 		}
 
-		nemoobject_sets(&one->object, "flags", flags, strlen(flags));
+		nemoobject_sets(&one->object, "mode", mode, strlen(mode));
 	}
 
 	NEMOSHOW_SHADER_AT(one, x0) = nemoshow_svg_get_length(context, nemoxml_node_get_attr(node, "x1"), NEMOSHOW_SVG_ORIENTATION_HORIZONTAL, "0");
@@ -789,21 +789,21 @@ static inline int nemoshow_svg_load_radial_gradient(struct svgcontext *context, 
 
 	value = nemoxml_node_get_attr(node, "spreadMethod");
 	if (value != NULL) {
-		const char *flags;
+		const char *mode;
 
 		if (strcmp(value, "pad") == 0) {
-			flags = "tile";
+			mode = "tile";
 		} else if (strcmp(value, "reflect") == 0) {
-			flags = "mirror";
+			mode = "mirror";
 		} else if (strcmp(value, "repeat") == 0) {
-			flags = "repeat";
+			mode = "repeat";
 		}
 
-		nemoobject_sets(&one->object, "flags", flags, strlen(flags));
+		nemoobject_sets(&one->object, "mode", mode, strlen(mode));
 	}
 
-	NEMOSHOW_SHADER_AT(one, x0) = nemoshow_svg_get_length(context, nemoxml_node_get_attr(node, "fx"), NEMOSHOW_SVG_ORIENTATION_HORIZONTAL, "0");
-	NEMOSHOW_SHADER_AT(one, y0) = nemoshow_svg_get_length(context, nemoxml_node_get_attr(node, "fy"), NEMOSHOW_SVG_ORIENTATION_VERTICAL, "0");
+	NEMOSHOW_SHADER_AT(one, x0) = nemoshow_svg_get_length(context, nemoxml_node_get_attr(node, "cx"), NEMOSHOW_SVG_ORIENTATION_HORIZONTAL, "0");
+	NEMOSHOW_SHADER_AT(one, y0) = nemoshow_svg_get_length(context, nemoxml_node_get_attr(node, "cy"), NEMOSHOW_SVG_ORIENTATION_VERTICAL, "0");
 	NEMOSHOW_SHADER_AT(one, r) = nemoshow_svg_get_length(context, nemoxml_node_get_attr(node, "r"), NEMOSHOW_SVG_ORIENTATION_HORIZONTAL, "0");
 
 	pone = context->one;
