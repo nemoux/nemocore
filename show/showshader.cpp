@@ -72,6 +72,7 @@ struct showone *nemoshow_shader_create(int type)
 	memset(shader, 0, sizeof(struct showshader));
 
 	shader->cc = new showshader_t;
+	NEMOSHOW_SHADER_CC(shader, matrix) = new SkMatrix;
 	NEMOSHOW_SHADER_CC(shader, shader) = NULL;
 
 	one = &shader->base;
@@ -171,6 +172,12 @@ int nemoshow_shader_arrange(struct nemoshow *show, struct showone *one)
 int nemoshow_shader_update(struct nemoshow *show, struct showone *one)
 {
 	struct showshader *shader = NEMOSHOW_SHADER(one);
+
+	if ((one->dirty & NEMOSHOW_MATRIX_DIRTY) != 0) {
+		NEMOSHOW_SHADER_CC(shader, shader) = SkShader::CreateLocalMatrixShader(
+				NEMOSHOW_SHADER_CC(shader, shader),
+				*NEMOSHOW_SHADER_CC(shader, matrix));
+	}
 
 	return 0;
 }

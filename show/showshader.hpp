@@ -5,6 +5,7 @@
 
 typedef struct _showshader {
 	SkShader *shader;
+	SkMatrix *matrix;
 } showshader_t;
 
 #define NEMOSHOW_SHADER_CC(base, name)				(((showshader_t *)((base)->cc))->name)

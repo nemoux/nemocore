@@ -11,6 +11,8 @@
 #include <showsvg.hpp>
 #include <showitem.h>
 #include <showitem.hpp>
+#include <showshader.h>
+#include <showshader.hpp>
 #include <stringhelper.h>
 #include <nemomisc.h>
 
@@ -534,7 +536,7 @@ static inline void nemoshow_svg_set_style(struct svgcontext *context, struct sho
 			if (url != NULL) {
 				struct showone *shader;
 
-				shader = nemoshow_search_one(context->show, url);
+				shader = nemoshow_search_one(context->show, url + 1);
 				if (shader != NULL) {
 					nemoshow_item_set_shader(one, shader);
 				}
@@ -562,7 +564,7 @@ static inline void nemoshow_svg_set_style(struct svgcontext *context, struct sho
 			if (url != NULL) {
 				struct showone *shader;
 
-				shader = nemoshow_search_one(context->show, url);
+				shader = nemoshow_search_one(context->show, url + 1);
 				if (shader != NULL) {
 					nemoshow_item_set_shader(one, shader);
 				}
@@ -712,6 +714,13 @@ static inline int nemoshow_svg_load_linear_gradient(struct svgcontext *context, 
 	if (value != NULL && strcmp(value, "userSpaceOnUse") == 0)
 		context->viewport.is_bbox = 1;
 
+	value = nemoxml_node_get_attr(node, "gradientTransform");
+	if (value != NULL) {
+		nemoshow_svg_get_transform(NEMOSHOW_SHADER_CC(NEMOSHOW_SHADER(one), matrix), value);
+
+		nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
+	}
+
 	NEMOSHOW_SHADER_AT(one, x0) = nemoshow_svg_get_length(context, nemoxml_node_get_attr(node, "x1"), NEMOSHOW_SVG_ORIENTATION_HORIZONTAL, "0");
 	NEMOSHOW_SHADER_AT(one, y0) = nemoshow_svg_get_length(context, nemoxml_node_get_attr(node, "y1"), NEMOSHOW_SVG_ORIENTATION_VERTICAL, "0");
 	NEMOSHOW_SHADER_AT(one, x1) = nemoshow_svg_get_length(context, nemoxml_node_get_attr(node, "x2"), NEMOSHOW_SVG_ORIENTATION_HORIZONTAL, "0");
@@ -751,6 +760,13 @@ static inline int nemoshow_svg_load_radial_gradient(struct svgcontext *context, 
 	value = nemoxml_node_get_attr(node, "gradientUnits");
 	if (value != NULL && strcmp(value, "userSpaceOnUse") == 0)
 		context->viewport.is_bbox = 1;
+
+	value = nemoxml_node_get_attr(node, "gradientTransform");
+	if (value != NULL) {
+		nemoshow_svg_get_transform(NEMOSHOW_SHADER_CC(NEMOSHOW_SHADER(one), matrix), value);
+
+		nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
+	}
 
 	NEMOSHOW_SHADER_AT(one, x0) = nemoshow_svg_get_length(context, nemoxml_node_get_attr(node, "fx"), NEMOSHOW_SVG_ORIENTATION_HORIZONTAL, "0");
 	NEMOSHOW_SHADER_AT(one, y0) = nemoshow_svg_get_length(context, nemoxml_node_get_attr(node, "fy"), NEMOSHOW_SVG_ORIENTATION_VERTICAL, "0");
