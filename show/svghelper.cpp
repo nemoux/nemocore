@@ -921,6 +921,28 @@ int nemoshow_svg_load_uri_path(struct nemoshow *show, struct showone *one, const
 				nemoobject_sets(&child->object, "d", d, strlen(d));
 				nemoshow_attach_one(show, one, child);
 			}
+		} else if (strcmp(node->name, "rect") == 0) {
+			double x = strtod(nemoxml_node_get_attr(node, "x"), NULL);
+			double y = strtod(nemoxml_node_get_attr(node, "y"), NULL);
+			double width = strtod(nemoxml_node_get_attr(node, "width"), NULL);
+			double height = strtod(nemoxml_node_get_attr(node, "height"), NULL);
+
+			child = nemoshow_path_create(NEMOSHOW_RECT_PATH);
+			NEMOSHOW_PATH_AT(child, x0) = x;
+			NEMOSHOW_PATH_AT(child, y0) = y;
+			NEMOSHOW_PATH_AT(child, x1) = x + width;
+			NEMOSHOW_PATH_AT(child, y1) = y + height;
+			nemoshow_attach_one(show, one, child);
+		} else if (strcmp(node->name, "circle") == 0) {
+			double x = strtod(nemoxml_node_get_attr(node, "cx"), NULL);
+			double y = strtod(nemoxml_node_get_attr(node, "cy"), NULL);
+			double r = strtod(nemoxml_node_get_attr(node, "r"), NULL);
+
+			child = nemoshow_path_create(NEMOSHOW_CIRCLE_PATH);
+			NEMOSHOW_PATH_AT(child, x0) = x;
+			NEMOSHOW_PATH_AT(child, y0) = y;
+			NEMOSHOW_PATH_AT(child, r) = r;
+			nemoshow_attach_one(show, one, child);
 		}
 	}
 

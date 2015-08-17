@@ -264,6 +264,14 @@ static inline void nemoshow_item_update_path(struct nemoshow *show, struct showi
 				NEMOSHOW_ITEM_CC(item, path)->addPath(rpath);
 			} else if (child->sub == NEMOSHOW_SVG_PATH) {
 				nemoshow_item_update_path(show, item, child);
+			} else if (child->sub == NEMOSHOW_RECT_PATH) {
+				NEMOSHOW_ITEM_CC(item, path)->addRect(
+						path->x0, path->y0,
+						path->x1, path->y1);
+			} else if (child->sub == NEMOSHOW_CIRCLE_PATH) {
+				NEMOSHOW_ITEM_CC(item, path)->addCircle(
+						path->x0, path->y0,
+						path->r);
 			}
 		}
 	}
@@ -273,7 +281,7 @@ static inline void nemoshow_item_update_child(struct nemoshow *show, struct show
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	struct showone *child;
-	int i, j;
+	int i;
 
 	if (NEMOSHOW_ITEM_CC(item, matrix) != NULL) {
 		NEMOSHOW_ITEM_CC(item, matrix)->setIdentity();

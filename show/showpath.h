@@ -20,6 +20,8 @@ typedef enum {
 	NEMOSHOW_CMD_PATH = 5,
 	NEMOSHOW_TEXT_PATH = 6,
 	NEMOSHOW_SVG_PATH = 7,
+	NEMOSHOW_RECT_PATH = 8,
+	NEMOSHOW_CIRCLE_PATH = 9,
 	NEMOSHOW_LAST_PATH
 } NemoShowPathType;
 
@@ -29,6 +31,7 @@ struct showpath {
 	double x0, y0;
 	double x1, y1;
 	double x2, y2;
+	double r;
 };
 
 #define NEMOSHOW_PATH(one)					((struct showpath *)container_of(one, struct showpath, base))
