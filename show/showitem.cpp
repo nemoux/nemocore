@@ -500,5 +500,7 @@ void nemoshow_item_set_shader(struct showone *one, struct showone *shader)
 
 	item->shader = shader;
 
+	item->fill = 1;
+
 	NEMOBOX_APPEND(shader->refs, shader->srefs, shader->nrefs, one);
 }

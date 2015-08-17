@@ -127,6 +127,7 @@ int nemoshow_shader_arrange(struct nemoshow *show, struct showone *one)
 
 	SkColor colors[one->nchildren];
 	SkScalar offsets[one->nchildren];
+	int noffsets;
 
 	if (shader->ref != NULL) {
 		for (i = 0; i < shader->ref->nchildren; i++) {
@@ -135,6 +136,8 @@ int nemoshow_shader_arrange(struct nemoshow *show, struct showone *one)
 			colors[i] = SkColorSetARGB(stop->fills[3], stop->fills[2], stop->fills[1], stop->fills[0]);
 			offsets[i] = stop->offset;
 		}
+
+		noffsets = shader->ref->nchildren;
 	} else {
 		for (i = 0; i < one->nchildren; i++) {
 			stop = NEMOSHOW_STOP(one->children[i]);
@@ -142,6 +145,8 @@ int nemoshow_shader_arrange(struct nemoshow *show, struct showone *one)
 			colors[i] = SkColorSetARGB(stop->fills[3], stop->fills[2], stop->fills[1], stop->fills[0]);
 			offsets[i] = stop->offset;
 		}
+
+		noffsets = one->nchildren;
 	}
 
 	if (one->sub == NEMOSHOW_LINEAR_GRADIENT_SHADER) {
@@ -154,7 +159,7 @@ int nemoshow_shader_arrange(struct nemoshow *show, struct showone *one)
 				points,
 				colors,
 				offsets,
-				one->nchildren,
+				noffsets,
 				f);
 	} else if (one->sub == NEMOSHOW_RADIAL_GRADIENT_SHADER) {
 		NEMOSHOW_SHADER_CC(shader, shader) = SkGradientShader::CreateRadial(
@@ -162,7 +167,7 @@ int nemoshow_shader_arrange(struct nemoshow *show, struct showone *one)
 				shader->r,
 				colors,
 				offsets,
-				one->nchildren,
+				noffsets,
 				f);
 	}
 
