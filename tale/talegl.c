@@ -805,7 +805,7 @@ int nemotale_composite_fbo(struct nemotale *tale, pixman_region32_t *region)
 
 		context->projection = context->transform;
 		nemomatrix_translate(&context->projection, -tale->viewport.width / 2.0f, -tale->viewport.height / 2.0f);
-		nemomatrix_scale(&context->projection, 2.0f / tale->viewport.width, -2.0f / tale->viewport.height);
+		nemomatrix_scale(&context->projection, 2.0f / tale->viewport.width, 2.0f / tale->viewport.height);
 
 		tale->transform.dirty = 0;
 	}
@@ -852,7 +852,7 @@ int nemotale_composite_fbo_full(struct nemotale *tale)
 
 		context->projection = context->transform;
 		nemomatrix_translate(&context->projection, -tale->viewport.width / 2.0f, -tale->viewport.height / 2.0f);
-		nemomatrix_scale(&context->projection, 2.0f / tale->viewport.width, -2.0f / tale->viewport.height);
+		nemomatrix_scale(&context->projection, 2.0f / tale->viewport.width, 2.0f / tale->viewport.height);
 
 		tale->transform.dirty = 0;
 	}
