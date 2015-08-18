@@ -19,7 +19,6 @@ NEMO_BEGIN_EXTERN_C
 #include <showitem.h>
 #include <showcolor.h>
 #include <showexpr.h>
-#include <showloop.h>
 #include <showsvg.h>
 #include <showsequence.h>
 #include <showease.h>

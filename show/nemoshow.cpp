@@ -119,8 +119,6 @@ static struct showone *nemoshow_create_one(struct nemoshow *show, struct xmlnode
 		one = nemoshow_item_create(NEMOSHOW_GROUP_ITEM);
 	} else if (strcmp(node->name, "svg") == 0) {
 		one = nemoshow_svg_create();
-	} else if (strcmp(node->name, "loop") == 0) {
-		one = nemoshow_loop_create();
 	} else if (strcmp(node->name, "sequence") == 0) {
 		one = nemoshow_sequence_create();
 	} else if (strcmp(node->name, "frame") == 0) {
@@ -260,7 +258,6 @@ static struct showone *nemoshow_create_one(struct nemoshow *show, struct xmlnode
 
 static int nemoshow_load_one(struct nemoshow *show, struct showone *one, struct xmlnode *node);
 static int nemoshow_load_item(struct nemoshow *show, struct showone *item, struct xmlnode *node);
-static int nemoshow_load_loop(struct nemoshow *show, struct showone *loop, struct xmlnode *node);
 static int nemoshow_load_svg(struct nemoshow *show, struct showone *svg, struct xmlnode *node);
 static int nemoshow_load_canvas(struct nemoshow *show, struct showone *canvas, struct xmlnode *node);
 static int nemoshow_load_matrix(struct nemoshow *show, struct showone *matrix, struct xmlnode *node);
@@ -311,28 +308,6 @@ static int nemoshow_load_item(struct nemoshow *show, struct showone *item, struc
 	return 0;
 }
 
-static int nemoshow_load_loop(struct nemoshow *show, struct showone *loop, struct xmlnode *node)
-{
-	struct xmlnode *child;
-	struct showone *one;
-
-	nemolist_for_each(child, &node->children, link) {
-		one = nemoshow_create_one(show, child);
-		if (one != NULL) {
-			NEMOBOX_APPEND(show->ones, show->sones, show->nones, one);
-
-			if (one->type == NEMOSHOW_ITEM_TYPE) {
-				nemoshow_load_item(show, one, child);
-			}
-
-			NEMOBOX_APPEND(loop->children, loop->schildren, loop->nchildren, one);
-			one->parent = loop;
-		}
-	}
-
-	return 0;
-}
-
 static int nemoshow_load_svg(struct nemoshow *show, struct showone *svg, struct xmlnode *node)
 {
 	struct xmlnode *child;
@@ -368,9 +343,7 @@ static int nemoshow_load_canvas(struct nemoshow *show, struct showone *canvas, s
 		if (one != NULL) {
 			NEMOBOX_APPEND(show->ones, show->sones, show->nones, one);
 
-			if (one->type == NEMOSHOW_LOOP_TYPE) {
-				nemoshow_load_loop(show, one, child);
-			} else if (one->type == NEMOSHOW_ITEM_TYPE) {
+			if (one->type == NEMOSHOW_ITEM_TYPE) {
 				nemoshow_load_item(show, one, child);
 			} else if (one->type == NEMOSHOW_SVG_TYPE) {
 				nemoshow_load_svg(show, one, child);
@@ -613,8 +586,6 @@ void nemoshow_arrange_one(struct nemoshow *show)
 			nemoshow_blur_arrange(show, one);
 		} else if (one->type == NEMOSHOW_SHADER_TYPE) {
 			nemoshow_shader_arrange(show, one);
-		} else if (one->type == NEMOSHOW_LOOP_TYPE) {
-			nemoshow_loop_arrange(show, one);
 		} else if (one->type == NEMOSHOW_SVG_TYPE) {
 			nemoshow_svg_arrange(show, one);
 		} else if (one->type == NEMOSHOW_FONT_TYPE) {

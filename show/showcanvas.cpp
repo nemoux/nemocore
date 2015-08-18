@@ -336,43 +336,6 @@ static inline void nemoshow_canvas_render_one(struct nemoshow *show, struct show
 		} else {
 			nemoshow_canvas_render_item(show, canvas, one);
 		}
-	} else if (one->type == NEMOSHOW_LOOP_TYPE) {
-		struct showloop *loop = NEMOSHOW_LOOP(one);
-		struct showone *child;
-		int i, j;
-
-		for (i = loop->begin; i <= loop->end; i++) {
-			for (j = 0; j < one->nchildren; j++) {
-				child = one->children[j];
-
-				nemoshow_update_symbol(show, one->id, i);
-				nemoshow_update_one_expression_without_dirty(show, child);
-
-				if (child->type == NEMOSHOW_ITEM_TYPE) {
-					struct showitem *item = NEMOSHOW_ITEM(child);
-
-					nemoshow_one_update_with_dirty(show, child, NEMOSHOW_ALL_DIRTY);
-
-					if (item->transform == NEMOSHOW_EXTERN_TRANSFORM) {
-						NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
-						NEMOSHOW_CANVAS_CC(canvas, canvas)->concat(*NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(item->matrix), matrix));
-
-						nemoshow_canvas_render_item(show, canvas, child);
-
-						NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
-					} else if (item->transform == NEMOSHOW_INTERN_TRANSFORM || item->transform == NEMOSHOW_DIRECT_TRANSFORM) {
-						NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
-						NEMOSHOW_CANVAS_CC(canvas, canvas)->concat(*NEMOSHOW_ITEM_CC(item, matrix));
-
-						nemoshow_canvas_render_item(show, canvas, child);
-
-						NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
-					} else {
-						nemoshow_canvas_render_item(show, canvas, child);
-					}
-				}
-			}
-		}
 	} else if (one->type == NEMOSHOW_SVG_TYPE) {
 		struct showsvg *svg = NEMOSHOW_SVG(one);
 		int i;
