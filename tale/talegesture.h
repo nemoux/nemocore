@@ -58,6 +58,16 @@ static inline int nemotale_is_up_event(struct nemotale *tale, struct taleevent *
 	return type & NEMOTALE_UP_EVENT;
 }
 
+static inline int nemotale_is_pointer_enter(struct nemotale *tale, struct taleevent *event, uint32_t type)
+{
+	return type & NEMOTALE_POINTER_ENTER_EVENT;
+}
+
+static inline int nemotale_is_pointer_leave(struct nemotale *tale, struct taleevent *event, uint32_t type)
+{
+	return type & NEMOTALE_POINTER_LEAVE_EVENT;
+}
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

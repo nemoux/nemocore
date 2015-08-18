@@ -242,7 +242,7 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 {
 	uint32_t id = nemotale_node_get_id(node);
 
-	if (type & NEMOTALE_POINTER_ENTER_EVENT) {
+	if (nemotale_is_pointer_enter(tale, event, type)) {
 		struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
 		struct nemoshell *shell = NEMOSHOW_AT(show, shell);
 		struct nemocompz *compz = shell->compz;
@@ -257,7 +257,36 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 			if (cursor != NULL)
 				nemopointer_set_cursor_actor(pointer, cursor, dx, dy);
 		}
-	} else if (type & NEMOTALE_POINTER_LEAVE_EVENT) {
+	} else if (nemotale_is_pointer_leave(tale, event, type)) {
+	}
+
+	if (id == 1) {
+		struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
+		struct nemoactor *actor = NEMOSHOW_AT(show, actor);
+
+		if (nemotale_is_down_event(tale, event, type)) {
+			nemoshow_attach_transition_easy(show,
+					nemoshow_transition_create_easy(
+						show,
+						nemoshow_search_one(show, "ease0"),
+						800, 0,
+						"touch_down",
+						NULL),
+					NULL);
+
+			nemoactor_dispatch_frame(actor);
+		} else if (nemotale_is_up_event(tale, event, type)) {
+			nemoshow_attach_transition_easy(show,
+					nemoshow_transition_create_easy(
+						show,
+						nemoshow_search_one(show, "ease0"),
+						800, 0,
+						"touch_up",
+						NULL),
+					NULL);
+
+			nemoactor_dispatch_frame(actor);
+		}
 	}
 }
 
