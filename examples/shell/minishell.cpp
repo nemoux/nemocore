@@ -70,7 +70,8 @@ static void minishell_handle_configs(struct nemoshell *shell, const char *config
 		if (strcmp(node->name, "start") == 0 ||
 				strcmp(node->name, "item") == 0 ||
 				strcmp(node->name, "virtualkeyboard") == 0 ||
-				strcmp(node->name, "xserver") == 0) {
+				strcmp(node->name, "xserver") == 0 ||
+				strcmp(node->name, "scene") == 0) {
 			i = nemoitem_set(shell->configs, node->path);
 
 			for (j = 0; j < node->nattrs; j++) {
@@ -242,7 +243,8 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 	uint32_t id = nemotale_node_get_id(node);
 
 	if (type & NEMOTALE_POINTER_ENTER_EVENT) {
-		struct nemoshell *shell = (struct nemoshell *)nemotale_get_userdata(tale);
+		struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
+		struct nemoshell *shell = NEMOSHOW_AT(show, shell);
 		struct nemocompz *compz = shell->compz;
 		struct nemoseat *seat = compz->seat;
 		struct nemopointer *pointer;
@@ -259,32 +261,10 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 	}
 }
 
-static void minishell_dispatch_background_frame(struct nemoactor *actor, uint32_t msecs)
-{
-	struct nemotale *tale = (struct nemotale *)actor->context;
-	struct nemocompz *compz = actor->compz;
-	pixman_region32_t region;
-
-	pixman_region32_init(&region);
-
-	nemocompz_make_current(compz);
-
-	if (msecs == 0) {
-		nemoactor_feedback(actor);
-	} else {
-		nemoactor_feedback_done(actor);
-	}
-
-	nemotale_composite_fbo(tale, &region);
-
-	nemoactor_damage_region(actor, &region);
-
-	pixman_region32_fini(&region);
-}
-
 int main(int argc, char *argv[])
 {
 	struct option options[] = {
+		{ "scene",							required_argument,	NULL,		'x' },
 		{ "node",								required_argument,	NULL,		'n' },
 		{ "seat",								required_argument,	NULL,		's' },
 		{ "tty",								required_argument,	NULL,		't' },
@@ -296,11 +276,9 @@ int main(int argc, char *argv[])
 
 	struct nemoshell *shell;
 	struct nemocompz *compz;
+	struct nemoshow *show;
 	struct nemoactor *actor;
-	struct nemotale *tale;
-	struct talenode *node;
-	struct pathone *group;
-	struct pathone *back;
+	char *scenexml = NULL;
 	char *rendernode = NULL;
 	char *configpath = NULL;
 	char *seat = NULL;
@@ -309,11 +287,15 @@ int main(int argc, char *argv[])
 
 	nemolog_set_file(stderr);
 
-	while (opt = getopt_long(argc, argv, "n:s:t:c:l:h", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "x:n:s:t:c:l:h", options, NULL)) {
 		if (opt == -1)
 			break;
 
 		switch (opt) {
+			case 'x':
+				scenexml = strdup(optarg);
+				break;
+
 			case 'n':
 				rendernode = strdup(optarg);
 				break;
@@ -368,6 +350,9 @@ int main(int argc, char *argv[])
 			nemoitem_get_attr_named(shell->configs, "//nemoshell/xserver", "path"));
 #endif
 
+	if (scenexml == NULL)
+		scenexml = nemoitem_get_attr_named(shell->configs, "//nemoshell/scene", "path");
+
 	drmbackend_create(compz, rendernode);
 	evdevbackend_create(compz);
 	tuiobackend_create(compz);
@@ -381,28 +366,28 @@ int main(int argc, char *argv[])
 
 	nemocompz_make_current(compz);
 
-	actor = nemoactor_create_gl(compz,
+	show = nemoshow_create_on_actor(shell,
+			nemocompz_get_scene_width(compz),
+			nemocompz_get_scene_height(compz),
+			minishell_dispatch_tale_event);
+	if (show == NULL)
+		goto out;
+	nemoshow_load_xml(show, scenexml);
+	nemoshow_arrange_one(show);
+	nemoshow_update_one(show);
+
+	nemoshow_set_scene(show,
+			nemoshow_search_one(show, "scene0"));
+	nemoshow_set_size(show,
 			nemocompz_get_scene_width(compz),
 			nemocompz_get_scene_height(compz));
 
-	tale = nemotale_create_gl();
-	nemotale_set_backend(tale,
-			nemotale_create_fbo(actor->texture, actor->base.width, actor->base.height));
-	nemotale_resize(tale, actor->base.width, actor->base.height);
-	nemoactor_set_dispatch_frame(actor, minishell_dispatch_background_frame);
+	nemoshow_render_one(show);
 
-	nemotale_attach_actor(tale, actor, minishell_dispatch_tale_event);
-	nemotale_set_userdata(tale, shell);
-
+	actor = NEMOSHOW_AT(show, actor);
 	nemoview_attach_layer(actor->view, &shell->background_layer);
 	nemoview_set_position(actor->view, 0.0f, 0.0f);
 	nemoview_update_transform(actor->view);
-
-	node = nemotale_node_create_pixman(actor->base.width, actor->base.height);
-	nemotale_node_fill_pixman(node, 0.0f, 0.0f, 0.0f, 1.0f);
-	nemotale_node_set_id(node, 1);
-	nemotale_node_translate(node, 0.0f, 0.0f);
-	nemotale_attach_node(tale, node);
 
 	nemoactor_dispatch_frame(actor);
 
@@ -410,7 +395,7 @@ int main(int argc, char *argv[])
 
 	nemocompz_run(compz);
 
-	nemoactor_destroy(actor);
+	nemoshow_destroy_on_actor(show);
 
 	nemoshow_finalize();
 

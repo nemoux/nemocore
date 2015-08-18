@@ -7,6 +7,7 @@
 
 #include <wayland-server.h>
 
+#include <shell.h>
 #include <compz.h>
 #include <view.h>
 #include <actor.h>
@@ -203,8 +204,9 @@ static void nemoshow_dispatch_actor_frame(struct nemoactor *actor, uint32_t msec
 	pixman_region32_fini(&region);
 }
 
-struct nemoshow *nemoshow_create_on_actor(struct nemocompz *compz, int32_t width, int32_t height, nemotale_dispatch_event_t dispatch)
+struct nemoshow *nemoshow_create_on_actor(struct nemoshell *shell, int32_t width, int32_t height, nemotale_dispatch_event_t dispatch)
 {
+	struct nemocompz *compz = shell->compz;
 	struct showcontext *scon;
 	struct nemoshow *show;
 	struct nemoactor *actor;
@@ -218,7 +220,7 @@ struct nemoshow *nemoshow_create_on_actor(struct nemocompz *compz, int32_t width
 	if (actor == NULL)
 		goto err1;
 
-	scon->compz = compz;
+	scon->shell = shell;
 	scon->actor = actor;
 	scon->width = width;
 	scon->height = height;

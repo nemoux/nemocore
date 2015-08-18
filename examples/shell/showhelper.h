@@ -17,11 +17,11 @@ NEMO_BEGIN_EXTERN_C
 
 #include <nemoshow.h>
 
-struct nemocompz;
+struct nemoshell;
 struct nemoactor;
 
 struct showcontext {
-	struct nemocompz *compz;
+	struct nemoshell *shell;
 
 	struct nemoactor *actor;
 
@@ -32,7 +32,7 @@ struct showcontext {
 
 #define NEMOSHOW_AT(show, at)			(((struct showcontext *)nemoshow_get_context(show))->at)
 
-extern struct nemoshow *nemoshow_create_on_actor(struct nemocompz *compz, int32_t width, int32_t height, nemotale_dispatch_event_t dispatch);
+extern struct nemoshow *nemoshow_create_on_actor(struct nemoshell *shell, int32_t width, int32_t height, nemotale_dispatch_event_t dispatch);
 extern void nemoshow_destroy_on_actor(struct nemoshow *show);
 
 #ifdef __cplusplus
