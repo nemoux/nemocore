@@ -265,6 +265,37 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 		struct nemoactor *actor = NEMOSHOW_AT(show, actor);
 
 		if (nemotale_is_down_event(tale, event, type)) {
+			struct showone *canvas;
+			struct showone *one;
+			struct showtransition *trans;
+			struct showone *sequence;
+			struct showone *frame;
+			struct showone *set;
+
+			canvas = nemoshow_search_one(show, "mini");
+
+			one = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
+			nemoshow_attach_one(show, canvas, one);
+			nemoshow_item_arrange(show, one);
+			NEMOSHOW_ITEM_AT(one, x) = event->x;
+			NEMOSHOW_ITEM_AT(one, y) = event->y;
+			NEMOSHOW_ITEM_AT(one, r) = 0.0f;
+			nemoshow_item_set_fill_color(one, 255, 255, 0, 255);
+
+			sequence = nemoshow_sequence_create();
+			frame = nemoshow_sequence_create_frame();
+			NEMOSHOW_FRAME_AT(frame, t) = 1.0f;
+			nemoshow_attach_one(show, sequence, frame);
+			set = nemoshow_sequence_create_set();
+			nemoshow_sequence_arrange_set(show, set);
+			nemoshow_sequence_set_source(set, one);
+			nemoshow_sequence_set_attr(set, "r", "50.0");
+			nemoshow_attach_one(show, frame, set);
+
+			trans = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 300, 0);
+			nemoshow_transition_attach_sequence(trans, sequence);
+			nemoshow_attach_transition(show, trans);
+
 			nemoshow_attach_transition_easy(show,
 					nemoshow_transition_create_easy(
 						show,

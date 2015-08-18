@@ -195,6 +195,11 @@ static inline const char *nemoshow_one_gets(struct showone *one, const char *att
 	return nemoobject_gets(&one->object, attr);
 }
 
+static inline void nemoshow_one_set_id(struct showone *one, const char *id)
+{
+	strncpy(one->id, id, NEMOSHOW_ID_MAX);
+}
+
 static inline struct showone *nemoshow_one_get_canvas(struct showone *one)
 {
 	struct showone *parent;

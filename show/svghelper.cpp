@@ -649,7 +649,8 @@ static inline int nemoshow_svg_load_rect(struct svgcontext *context, struct xmln
 	one = nemoshow_item_create(NEMOSHOW_RECT_ITEM);
 	nemoshow_attach_one(context->show, context->one, one);
 
-	strncpy(one->id, (value = nemoxml_node_get_attr(node, "id")) ? value : "", NEMOSHOW_ID_MAX);
+	nemoshow_one_set_id(one,
+			(value = nemoxml_node_get_attr(node, "id")) ? value : "");
 
 	NEMOSHOW_ITEM_AT(one, x) = nemoshow_svg_get_length(context, nemoxml_node_get_attr(node, "x"), NEMOSHOW_SVG_ORIENTATION_HORIZONTAL, "0");
 	NEMOSHOW_ITEM_AT(one, y) = nemoshow_svg_get_length(context, nemoxml_node_get_attr(node, "y"), NEMOSHOW_SVG_ORIENTATION_VERTICAL, "0");
@@ -669,7 +670,8 @@ static inline int nemoshow_svg_load_circle(struct svgcontext *context, struct xm
 	one = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
 	nemoshow_attach_one(context->show, context->one, one);
 
-	strncpy(one->id, (value = nemoxml_node_get_attr(node, "id")) ? value : "", NEMOSHOW_ID_MAX);
+	nemoshow_one_set_id(one,
+			(value = nemoxml_node_get_attr(node, "id")) ? value : "");
 
 	NEMOSHOW_ITEM_AT(one, x) = nemoshow_svg_get_length(context, nemoxml_node_get_attr(node, "cx"), NEMOSHOW_SVG_ORIENTATION_HORIZONTAL, "0");
 	NEMOSHOW_ITEM_AT(one, y) = nemoshow_svg_get_length(context, nemoxml_node_get_attr(node, "cy"), NEMOSHOW_SVG_ORIENTATION_VERTICAL, "0");
@@ -690,7 +692,8 @@ static inline int nemoshow_svg_load_path(struct svgcontext *context, struct xmln
 	one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
 	nemoshow_attach_one(context->show, context->one, one);
 
-	strncpy(one->id, (value = nemoxml_node_get_attr(node, "id")) ? value : "", NEMOSHOW_ID_MAX);
+	nemoshow_one_set_id(one,
+			(value = nemoxml_node_get_attr(node, "id")) ? value : "");
 
 	d = nemoxml_node_get_attr(node, "d");
 
@@ -714,7 +717,8 @@ static inline int nemoshow_svg_load_linear_gradient(struct svgcontext *context, 
 	one = nemoshow_shader_create(NEMOSHOW_LINEAR_GRADIENT_SHADER);
 	nemoshow_attach_one(context->show, context->one, one);
 
-	strncpy(one->id, (value = nemoxml_node_get_attr(node, "id")) ? value : "", NEMOSHOW_ID_MAX);
+	nemoshow_one_set_id(one,
+			(value = nemoxml_node_get_attr(node, "id")) ? value : "");
 
 	href = nemoxml_node_get_attr(node, "xlink:href");
 	if (href != NULL)
@@ -778,7 +782,8 @@ static inline int nemoshow_svg_load_radial_gradient(struct svgcontext *context, 
 	one = nemoshow_shader_create(NEMOSHOW_RADIAL_GRADIENT_SHADER);
 	nemoshow_attach_one(context->show, context->one, one);
 
-	strncpy(one->id, (value = nemoxml_node_get_attr(node, "id")) ? value : "", NEMOSHOW_ID_MAX);
+	nemoshow_one_set_id(one,
+			(value = nemoxml_node_get_attr(node, "id")) ? value : "");
 
 	href = nemoxml_node_get_attr(node, "xlink:href");
 	if (href != NULL)
@@ -838,7 +843,8 @@ static inline int nemoshow_svg_load_stop(struct svgcontext *context, struct xmln
 	one = nemoshow_stop_create();
 	nemoshow_attach_one(context->show, context->one, one);
 
-	strncpy(one->id, (value = nemoxml_node_get_attr(node, "id")) ? value : "", NEMOSHOW_ID_MAX);
+	nemoshow_one_set_id(one,
+			(value = nemoxml_node_get_attr(node, "id")) ? value : "");
 
 	nemoshow_svg_load_style(context, node, one);
 
@@ -855,7 +861,8 @@ static inline int nemoshow_svg_load_group(struct svgcontext *context, struct xml
 	one = nemoshow_item_create(NEMOSHOW_GROUP_ITEM);
 	nemoshow_attach_one(context->show, context->one, one);
 
-	strncpy(one->id, (value = nemoxml_node_get_attr(node, "id")) ? value : "", NEMOSHOW_ID_MAX);
+	nemoshow_one_set_id(one,
+			(value = nemoxml_node_get_attr(node, "id")) ? value : "");
 
 	nemoshow_svg_load_style(context, node, one);
 
@@ -881,7 +888,8 @@ static inline int nemoshow_svg_load_defs(struct svgcontext *context, struct xmln
 	one = nemoshow_one_create(NEMOSHOW_DEFS_TYPE);
 	nemoshow_attach_one(context->show, context->one, one);
 
-	strncpy(one->id, (value = nemoxml_node_get_attr(node, "id")) ? value : "", NEMOSHOW_ID_MAX);
+	nemoshow_one_set_id(one,
+			(value = nemoxml_node_get_attr(node, "id")) ? value : "");
 
 	pone = context->one;
 	context->one = one;
