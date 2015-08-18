@@ -1,6 +1,12 @@
 #ifndef	__NEMO_MISC_H__
 #define	__NEMO_MISC_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <stdio.h>
 #include <stdint.h>
 
@@ -41,5 +47,9 @@ extern uint32_t time_current_msecs(void);
 
 extern int random_get_int(int min, int max);
 extern double random_get_double(double min, double max);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

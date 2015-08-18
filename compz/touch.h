@@ -1,6 +1,12 @@
 #ifndef	__NEMO_TOUCH_H__
 #define	__NEMO_TOUCH_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <nemohash.h>
 #include <input.h>
 
@@ -87,5 +93,9 @@ extern void touchpoint_end_grab(struct touchpoint *tp);
 extern void touchpoint_cancel_grab(struct touchpoint *tp);
 
 extern void touchpoint_update_grab(struct touchpoint *tp);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

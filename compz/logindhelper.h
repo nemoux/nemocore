@@ -1,6 +1,12 @@
 #ifndef	__LOGIND_HELPER_H__
 #define	__LOGIND_HELPER_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <compz.h>
 #include <dbushelper.h>
 
@@ -30,5 +36,9 @@ extern int logind_activate_vt(struct logindcontext *context, int vt);
 
 extern int logind_open(struct logindcontext *context, const char *path, int flags);
 extern void logind_close(struct logindcontext *context, int fd);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

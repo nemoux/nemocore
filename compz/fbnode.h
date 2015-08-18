@@ -1,6 +1,12 @@
 #ifndef	__FB_NODE_H__
 #define	__FB_NODE_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <stdint.h>
 #include <pixman.h>
 
@@ -39,5 +45,9 @@ struct fbnode {
 
 extern struct fbnode *fb_create_node(struct nemocompz *compz, const char *devpath);
 extern void fb_destroy_node(struct fbnode *node);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

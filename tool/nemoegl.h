@@ -1,6 +1,12 @@
 #ifndef	__NEMOTOOL_EGL_H__
 #define	__NEMOTOOL_EGL_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <GLES2/gl2.h>
 #include <EGL/egl.h>
 
@@ -39,5 +45,9 @@ extern struct eglcanvas *nemotool_create_egl_canvas(struct eglcontext *egl, int3
 extern void nemotool_destroy_egl_canvas(struct eglcanvas *canvas);
 
 extern void nemotool_resize_egl_canvas(struct eglcanvas *canvas, int32_t width, int32_t height);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

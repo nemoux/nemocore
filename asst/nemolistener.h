@@ -1,6 +1,12 @@
 #ifndef	__NEMO_LISTENER_H__
 #define	__NEMO_LISTENER_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <nemolist.h>
 
 struct nemolistener;
@@ -46,5 +52,9 @@ static inline void nemosignal_emit(struct nemosignal *signal, void *data)
 		listener->notify(listener, data);
 	}
 }
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

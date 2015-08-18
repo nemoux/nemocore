@@ -1,6 +1,12 @@
 #ifndef	__NEMO_XWAYLAND_SERVER_H__
 #define	__NEMO_XWAYLAND_SERVER_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <xcb/xcb.h>
 #include <xcb/xfixes.h>
 #include <xcb/composite.h>
@@ -46,5 +52,9 @@ struct nemoxserver {
 extern struct nemoxserver *nemoxserver_create(struct nemoshell *shell, const char *xserverpath);
 
 extern void nemoxserver_shutdown(struct nemoxserver *xserver);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

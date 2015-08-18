@@ -1,6 +1,12 @@
 #ifndef	__NEMOTALE_H__
 #define	__NEMOTALE_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <stdint.h>
 #include <pixman.h>
 #include <cairo.h>
@@ -186,5 +192,9 @@ static inline void *nemotale_get_userdata(struct nemotale *tale)
 {
 	return tale->userdata;
 }
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

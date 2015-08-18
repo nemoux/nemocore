@@ -1,6 +1,12 @@
 #ifndef	__NEMO_VIEW_H__
 #define	__NEMO_VIEW_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <pixman.h>
 
 #include <nemomatrix.h>
@@ -143,5 +149,9 @@ extern void nemoview_above_layer(struct nemoview *view, struct nemoview *above);
 extern void nemoview_set_overlay(struct nemoview *view, double r, double g, double b, double a);
 
 extern int nemoview_get_trapezoids(struct nemoview *view, int32_t x, int32_t y, int32_t width, int32_t height, pixman_trapezoid_t *traps);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

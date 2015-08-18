@@ -1,6 +1,12 @@
 #ifndef	__VIEW_ANIMATION_H__
 #define	__VIEW_ANIMATION_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <stdint.h>
 
 #include <animation.h>
@@ -55,5 +61,9 @@ extern void viewanimation_destroy(struct viewanimation *animation);
 extern void viewanimation_dispatch(struct nemocompz *compz, struct viewanimation *animation);
 
 extern int viewanimation_revoke(struct nemocompz *compz, struct nemoview *view);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

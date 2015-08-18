@@ -1,6 +1,12 @@
 #ifndef	__NEMO_ANIMATION_H__
 #define	__NEMO_ANIMATION_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <stdint.h>
 
 #include <nemoease.h>
@@ -32,5 +38,9 @@ struct nemoanimation {
 	nemoanimation_frame_t frame;
 	nemoanimation_done_t done;
 };
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

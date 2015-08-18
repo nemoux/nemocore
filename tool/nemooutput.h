@@ -1,6 +1,12 @@
 #ifndef	__NEMOTOOL_OUTPUT_H__
 #define	__NEMOTOOL_OUTPUT_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <nemotool.h>
 #include <nemolist.h>
 #include <nemolistener.h>
@@ -41,5 +47,9 @@ static inline void *nemooutput_get_userdata(struct nemooutput *output)
 {
 	return output->userdata;
 }
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

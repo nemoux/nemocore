@@ -1,6 +1,12 @@
 #ifndef	__NEMO_LIST_H__
 #define	__NEMO_LIST_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 struct nemolist {
 	struct nemolist *prev;
 	struct nemolist *next;
@@ -119,5 +125,9 @@ static inline void nemolist_insert_list(struct nemolist *list, struct nemolist *
 	list->next->prev = other->prev;
 	list->next = other->next;
 }
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

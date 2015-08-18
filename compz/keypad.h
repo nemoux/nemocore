@@ -1,6 +1,12 @@
 #ifndef	__NEMO_KEYPAD_H__
 #define	__NEMO_KEYPAD_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <stdint.h>
 #include <keymap.h>
 #include <keyboard.h>
@@ -71,5 +77,9 @@ extern void nemokeypad_notify_key(struct nemokeypad *keypad, uint32_t time, uint
 extern void nemokeypad_start_grab(struct nemokeypad *keypad, struct nemokeypad_grab *grab);
 extern void nemokeypad_end_grab(struct nemokeypad *keypad);
 extern void nemokeypad_cancel_grab(struct nemokeypad *keypad);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

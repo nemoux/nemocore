@@ -1,6 +1,12 @@
 #ifndef	__NEMO_CLIPBOARD_H__
 #define	__NEMO_CLIPBOARD_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <stdint.h>
 
 #include <datadevice.h>
@@ -29,5 +35,9 @@ struct clipboard {
 	struct wl_listener destroy_listener;
 	struct clipsource *source;
 };
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

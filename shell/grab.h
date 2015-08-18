@@ -1,6 +1,12 @@
 #ifndef	__NEMO_SHELL_GRAB_H__
 #define	__NEMO_SHELL_GRAB_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <pointer.h>
 #include <keyboard.h>
 #include <touch.h>
@@ -41,5 +47,9 @@ extern void nemoshell_start_touchpoint_shellgrab(struct shellgrab *grab, const s
 extern void nemoshell_end_touchpoint_shellgrab(struct shellgrab *grab);
 extern void nemoshell_start_touchpoint_actorgrab(struct actorgrab *grab, const struct touchpoint_grab_interface *interface, struct nemoactor *actor, struct touchpoint *tp);
 extern void nemoshell_end_touchpoint_actorgrab(struct actorgrab *grab);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

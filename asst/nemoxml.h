@@ -1,6 +1,12 @@
 #ifndef	__NEMO_XML_H__
 #define	__NEMO_XML_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <nemolist.h>
 
 #define	NEMOXML_NAME_MAX			(32)
@@ -52,5 +58,9 @@ extern void nemoxml_node_unlink_node(struct xmlnode *node, struct xmlnode *child
 extern int nemoxml_select_node(struct nemoxml *xml, struct xmlnode **nodes, int length, const char *name);
 extern int nemoxml_select_node_by_path(struct nemoxml *xml, struct xmlnode **nodes, int length, const char *path);
 extern int nemoxml_select_node_by_attr(struct nemoxml *xml, struct xmlnode **nodes, int length, const char *name, const char *attr, const char *value);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

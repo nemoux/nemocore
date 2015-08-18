@@ -1,6 +1,12 @@
 #ifndef	__NEMO_SEAT_H__
 #define	__NEMO_SEAT_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 struct nemoview;
 struct inputmethod;
 
@@ -80,5 +86,9 @@ extern int nemoseat_get_touchpoint_by_focus(struct nemoseat *seat, struct nemovi
 
 extern struct wl_resource *nemoseat_find_resource_for_view(struct wl_list *list, struct nemoview *view);
 extern void nemoseat_put_focus(struct nemoseat *seat, struct nemoview *view);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

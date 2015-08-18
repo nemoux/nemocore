@@ -1,6 +1,12 @@
 #ifndef	__NEMO_EASE_H__
 #define	__NEMO_EASE_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <stdint.h>
 #include <math.h>
 
@@ -273,5 +279,9 @@ static inline double nemoease_get(struct nemoease *ease, double elapsed, double 
 
 	return nemoease_get_y_bezier(ease, nemoease_get_x_offset(ease, elapsed / duration));
 }
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

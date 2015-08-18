@@ -1,6 +1,12 @@
 #ifndef	__GL_RENDERER_H__
 #define	__GL_RENDERER_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <EGL/egl.h>
 
 #include <nemomisc.h>
@@ -20,6 +26,10 @@ extern void glrenderer_finish_screen(struct nemorenderer *base, struct nemoscree
 
 #ifdef NEMOUX_WITH_MESA_RENDERNODE
 extern void glrenderer_set_render_nodes(struct nemocompz *compz);
+#endif
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
 #endif
 
 #endif

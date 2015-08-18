@@ -1,6 +1,12 @@
 #ifndef	__NEMOTOOL_H__
 #define	__NEMOTOOL_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <time.h>
 #include <sys/types.h>
 
@@ -181,5 +187,9 @@ extern void nemotool_destroy_queue(struct nemoqueue *queue);
 extern int nemotool_dispatch_queue(struct nemoqueue *queue);
 
 extern uint32_t nemotool_get_keysym(struct nemotool *tool, uint32_t code);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

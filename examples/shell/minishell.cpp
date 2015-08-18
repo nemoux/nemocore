@@ -25,12 +25,16 @@
 #include <session.h>
 #include <timer.h>
 #include <binding.h>
+#include <datadevice.h>
+#include <drmbackend.h>
 #include <fbbackend.h>
 #include <evdevbackend.h>
 #include <tuiobackend.h>
 #include <waylandhelper.h>
 #include <talehelper.h>
+#include <showhelper.h>
 #include <nemoxml.h>
+#include <nemolog.h>
 #include <nemoitem.h>
 #include <nemomisc.h>
 
@@ -352,6 +356,8 @@ int main(int argc, char *argv[])
 	if (shell == NULL)
 		goto out;
 
+	nemoshow_initialize();
+
 	if (seat != NULL)
 		nemosession_connect(compz->session, seat, tty);
 
@@ -405,6 +411,8 @@ int main(int argc, char *argv[])
 	nemocompz_run(compz);
 
 	nemoactor_destroy(actor);
+
+	nemoshow_finalize();
 
 	nemoshell_destroy(shell);
 

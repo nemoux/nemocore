@@ -1,6 +1,12 @@
 #ifndef	__NEMOCOMPZ_COMPZ_H__
 #define	__NEMOCOMPZ_COMPZ_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <time.h>
 #include <libudev.h>
 
@@ -138,5 +144,9 @@ extern void nemocompz_dispatch_effect(struct nemocompz *compz, struct nemoeffect
 extern int nemocompz_set_presentation_clock(struct nemocompz *compz, clockid_t id);
 extern int nemocompz_set_presentation_clock_software(struct nemocompz *compz);
 extern void nemocompz_get_presentation_clock(struct nemocompz *compz, struct timespec *ts);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

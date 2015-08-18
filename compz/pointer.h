@@ -1,6 +1,12 @@
 #ifndef	__NEMO_POINTER_H__
 #define	__NEMO_POINTER_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <input.h>
 
 #define	NEMOPOINTER_DEFAULT_BINDING_MAX			(4)
@@ -84,5 +90,9 @@ extern void nemopointer_end_grab(struct nemopointer *pointer);
 extern void nemopointer_cancel_grab(struct nemopointer *pointer);
 
 extern void nemopointer_set_cursor_actor(struct nemopointer *pointer, struct nemoactor *actor, int32_t dx, int32_t dy);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

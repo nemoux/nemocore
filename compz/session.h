@@ -1,6 +1,12 @@
 #ifndef __NEMO_SESSION_H__
 #define	__NEMO_SESSION_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <compz.h>
 #include <ttyhelper.h>
 
@@ -28,5 +34,9 @@ extern int nemosession_activate_vt(struct nemosession *session, int vt);
 
 extern int nemosession_open(struct nemosession *session, const char *path, int flags);
 extern void nemosession_close(struct nemosession *session, int fd);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

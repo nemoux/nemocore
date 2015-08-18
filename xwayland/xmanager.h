@@ -1,6 +1,12 @@
 #ifndef	__NEMO_XWAYLAND_WINDOW_MANAGER_H__
 #define	__NEMO_XWAYLAND_WINDOW_MANAGER_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <nemohash.h>
 
 struct wm_size_hints {
@@ -237,5 +243,9 @@ extern void nemoxmanager_del_window(struct nemoxmanager *xmanager, uint32_t id);
 extern struct nemoxwindow *nemoxmanager_get_window(struct nemoxmanager *xmanager, uint32_t id);
 extern struct nemoxwindow *nemoxmanager_get_canvas_window(struct nemocanvas *canvas);
 extern void nemoxmanager_map_canvas(struct nemoxwindow *xwindow, struct nemocanvas *canvas);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

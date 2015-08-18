@@ -1,6 +1,12 @@
 #ifndef	__XML_PARSER_H__
 #define	__XML_PARSER_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #define	XML_TOKEN_SIZE			(128)
 #define	XML_CONTENTS_SIZE		(1024)
 
@@ -39,5 +45,9 @@ static inline void *xmlparser_get_userdata(struct xmlparser *parser)
 {
 	return parser->userdata;
 }
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

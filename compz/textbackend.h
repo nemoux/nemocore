@@ -1,6 +1,12 @@
 #ifndef	__NEMO_TEXTBACKEND_H__
 #define	__NEMO_TEXTBACKEND_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <pixman.h>
 
 #include <task.h>
@@ -29,5 +35,9 @@ struct textbackend {
 };
 
 extern struct textbackend *textbackend_create(struct nemocompz *compz, const char *inputpath);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

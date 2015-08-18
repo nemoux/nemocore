@@ -1,6 +1,12 @@
 #ifndef	__NEMO_ITEM_H__
 #define	__NEMO_ITEM_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #define	NEMOITEM_ATTR_MAX			(16)
 
 struct itemnode {
@@ -53,5 +59,9 @@ static inline char *nemoitem_get_attr_named(struct nemoitem *item, const char *n
 
 	return NULL;
 }
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

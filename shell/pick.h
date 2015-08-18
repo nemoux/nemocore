@@ -1,6 +1,12 @@
 #ifndef	__NEMO_SHELL_PICK_H__
 #define	__NEMO_SHELL_PICK_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <grab.h>
 
 struct nemoshell;
@@ -55,5 +61,9 @@ extern int nemoshell_pick_canvas(struct nemoshell *shell, struct shellbin *bin, 
 
 extern int nemoshell_pick_actor_by_touchpoint(struct touchpoint *tp0, struct touchpoint *tp1, uint32_t type, struct nemoactor *actor);
 extern int nemoshell_pick_actor(struct nemoshell *shell, struct nemoactor *actor, uint32_t serial0, uint32_t serial1, uint32_t type);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

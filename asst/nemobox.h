@@ -1,6 +1,12 @@
 #ifndef	__NEMO_BOX_H__
 #define	__NEMO_BOX_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <stdio.h>
 
 #define	NEMOBOX_APPEND(a, s, n, v)	\
@@ -38,5 +44,9 @@
 
 #define	NEMOBOX_QSORT(a, n, c)	\
 	qsort(a, n, sizeof(a[0]), c)
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

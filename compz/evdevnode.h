@@ -1,6 +1,12 @@
 #ifndef	__EVDEV_NODE_H__
 #define	__EVDEV_NODE_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <mtdev.h>
 
 #include <compz.h>
@@ -78,5 +84,9 @@ struct evdevnode {
 
 extern struct evdevnode *evdev_create_node(struct nemocompz *compz, const char *path, int fd);
 extern void evdev_destroy_node(struct evdevnode *node);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

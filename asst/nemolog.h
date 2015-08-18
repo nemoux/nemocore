@@ -1,6 +1,12 @@
 #ifndef	__NEMO_LOG_H__
 #define	__NEMO_LOG_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #ifdef NEMO_LOG_ON
 
 extern int nemolog_open_file(const char *filepath);
@@ -21,6 +27,10 @@ static inline int nemolog_message(const char *tag, const char *fmt, ...) { retur
 static inline int nemolog_warning(const char *tag, const char *fmt, ...) { return 0; }
 static inline int nemolog_error(const char *tag, const char *fmt, ...) { return 0; }
 
+#endif
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
 #endif
 
 #endif

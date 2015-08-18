@@ -1,6 +1,12 @@
 #ifndef __NEMOTOOL_CANVAS_H__
 #define	__NEMOTOOL_CANVAS_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <pixman.h>
 #include <cairo.h>
 
@@ -148,5 +154,9 @@ static inline void *nemocanvas_get_userdata(struct nemocanvas *canvas)
 {
 	return canvas->userdata;
 }
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

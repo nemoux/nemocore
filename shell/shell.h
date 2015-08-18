@@ -1,6 +1,12 @@
 #ifndef	__NEMOSHELL_H__
 #define	__NEMOSHELL_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <compz.h>
 #include <pixman.h>
 #include <layer.h>
@@ -111,7 +117,7 @@ struct shellbin {
 
 	uint32_t resize_edges;
 	uint32_t reset_scale;
-	
+
 	uint32_t min_width, min_height;
 	uint32_t max_width, max_height;
 
@@ -186,5 +192,9 @@ extern struct clientstate *nemoshell_create_client_state(struct wl_client *clien
 extern void nemoshell_destroy_client_state(struct clientstate *state);
 extern struct clientstate *nemoshell_get_client_state(struct wl_client *client);
 extern void nemoshell_set_client_state(struct shellbin *bin, struct clientstate *state);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

@@ -1,6 +1,12 @@
 #ifndef	__GL_HELPER_H__
 #define	__GL_HELPER_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 static const char vertex_shader[] =
 "uniform mat4 proj;\n"
 "attribute vec2 position;\n"
@@ -115,5 +121,9 @@ extern GLuint glshader_compile(GLenum type, int count, const char **sources);
 
 extern int glshader_prepare(struct glshader *shader, const char *vertex_source, const char *fragment_source, int debug);
 extern void glshader_finish(struct glshader *shader);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

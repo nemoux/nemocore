@@ -156,7 +156,7 @@ static void nemotale_dispatch_actor_touch_frame(struct touchpoint *tp, struct ne
 {
 }
 
-static void nemotale_dispatch_actor_dispatch_actor_resize(struct nemoactor *actor, int32_t width, int32_t height)
+static void nemotale_dispatch_actor_dispatch_resize(struct nemoactor *actor, int32_t width, int32_t height)
 {
 }
 
@@ -186,7 +186,7 @@ void nemotale_attach_actor(struct nemotale *tale, struct nemoactor *actor, nemot
 	actor->base.touch_motion = nemotale_dispatch_actor_touch_motion;
 	actor->base.touch_frame = nemotale_dispatch_actor_touch_frame;
 
-	actor->dispatch_resize = nemotale_dispatch_actor_dispatch_actor_resize;
+	actor->dispatch_resize = nemotale_dispatch_actor_dispatch_resize;
 
 	nemotale_set_dispatch_event(tale, dispatch);
 }

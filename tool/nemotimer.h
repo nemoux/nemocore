@@ -1,6 +1,12 @@
 #ifndef	__NEMOTOOL_TIMER_H__
 #define	__NEMOTOOL_TIMER_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 struct nemotool;
 struct nemotimer;
 struct nemotask;
@@ -33,5 +39,9 @@ static inline void *nemotimer_get_userdata(struct nemotimer *timer)
 {
 	return timer->userdata;
 }
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

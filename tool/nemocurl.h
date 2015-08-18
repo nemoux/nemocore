@@ -1,6 +1,12 @@
 #ifndef	__NEMOTOOL_CURL_H__
 #define	__NEMOTOOL_CURL_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <curl/curl.h>
 
 #include <nemolist.h>
@@ -69,5 +75,9 @@ static inline void *nemocurl_get_userdata(struct nemocurl *curl)
 {
 	return curl->userdata;
 }
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

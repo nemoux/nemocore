@@ -1,6 +1,12 @@
 #ifndef	__NEMO_TEXTINPUT_H__
 #define	__NEMO_TEXTINPUT_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <pixman.h>
 
 struct nemocompz;
@@ -30,5 +36,9 @@ struct textinput {
 extern struct textmanager *textinput_create_manager(struct nemocompz *compz);
 
 extern void textinput_deactivate_input_method(struct textinput *textinput, struct inputmethod *inputmethod);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

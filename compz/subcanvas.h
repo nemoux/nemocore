@@ -1,6 +1,12 @@
 #ifndef	__NEMO_SUBCANVAS_H__
 #define	__NEMO_SUBCANVAS_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <pixman.h>
 
 struct nemocanvas;
@@ -43,5 +49,9 @@ extern int nemosubcanvas_is_sync(struct nemosubcanvas *sub);
 extern void nemosubcanvas_commit(struct nemosubcanvas *sub);
 extern void nemosubcanvas_commit_sync(struct nemosubcanvas *sub);
 extern void nemosubcanvas_commit_parent(struct nemosubcanvas *sub, int sync);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

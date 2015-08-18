@@ -1,6 +1,12 @@
 #ifndef	__NEMO_TOKEN_H__
 #define	__NEMO_TOKEN_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 struct nemotoken {
 	char *contents;
 	int length;
@@ -19,5 +25,9 @@ extern int nemotoken_get_token_count(struct nemotoken *token);
 extern char **nemotoken_get_tokens(struct nemotoken *token);
 extern char *nemotoken_get_token(struct nemotoken *token, int index);
 extern char *nemotoken_get_token_pair(struct nemotoken *token, const char *name);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

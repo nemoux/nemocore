@@ -1,6 +1,12 @@
 #ifndef	__NEMOTALE_PIXMAN_H__
 #define	__NEMOTALE_PIXMAN_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <stdint.h>
 #include <pixman.h>
 #include <cairo.h>
@@ -70,5 +76,9 @@ static inline cairo_surface_t *nemotale_node_get_cairo(struct talenode *node)
 
 	return context->surface;
 }
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

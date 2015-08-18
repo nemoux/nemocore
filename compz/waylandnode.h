@@ -1,6 +1,12 @@
 #ifndef	__WAYLAND_NODE_H__
 #define	__WAYLAND_NODE_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <compz.h>
 #include <backend.h>
 #include <screen.h>
@@ -62,5 +68,9 @@ struct waylandnode {
 
 extern struct waylandnode *wayland_create_node(struct nemocompz *compz, const char *name);
 extern void wayland_destroy_node(struct waylandnode *node);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

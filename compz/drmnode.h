@@ -1,6 +1,12 @@
 #ifndef	__DRM_NODE_H__
 #define	__DRM_NODE_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <time.h>
 #include <pixman.h>
 
@@ -103,5 +109,9 @@ struct drmnode {
 
 extern struct drmnode *drm_create_node(struct nemocompz *compz, uint32_t nodeid, const char *path, int fd);
 extern void drm_destroy_node(struct drmnode *node);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

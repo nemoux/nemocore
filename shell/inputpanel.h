@@ -1,6 +1,12 @@
 #ifndef	__NEMO_INPUTPANEL_H__
 #define	__NEMO_INPUTPANEL_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 struct nemoshell;
 struct nemolayer;
 
@@ -29,5 +35,9 @@ extern int inputpanel_prepare(struct nemoshell *shell);
 extern void inputpanel_finish(struct nemoshell *shell);
 
 extern struct inputbin *inputpanel_get_bin(struct nemocanvas *canvas);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

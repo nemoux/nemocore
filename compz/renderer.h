@@ -1,6 +1,12 @@
 #ifndef	__NEMO_RENDERER_H__
 #define	__NEMO_RENDERER_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <stdint.h>
 #include <pixman.h>
 
@@ -58,5 +64,9 @@ struct rendernode {
 
 extern void rendernode_prepare(struct rendernode *node);
 extern void rendernode_finish(struct rendernode *node);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

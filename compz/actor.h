@@ -1,6 +1,12 @@
 #ifndef	__NEMO_ACTOR_H__
 #define	__NEMO_ACTOR_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <stdint.h>
 #include <pixman.h>
 #include <cairo.h>
@@ -76,5 +82,9 @@ extern void nemoactor_dispatch_frame(struct nemoactor *actor);
 
 extern void nemoactor_feedback(struct nemoactor *actor);
 extern void nemoactor_feedback_done(struct nemoactor *actor);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

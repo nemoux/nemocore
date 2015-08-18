@@ -1,6 +1,12 @@
 #ifndef __TUIO_NODE_H__
 #define	__TUIO_NODE_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <xmlparser.h>
 
 #include <input.h>
@@ -75,5 +81,9 @@ struct tuionode {
 
 extern struct tuionode *tuio_create_node(struct nemocompz *compz, int protocol, int port, int max);
 extern void tuio_destroy_node(struct tuionode *node);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

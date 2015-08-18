@@ -1,6 +1,12 @@
 #ifndef	__NEMO_SCREEN_H__
 #define	__NEMO_SCREEN_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <stdint.h>
 #include <pixman.h>
 
@@ -102,5 +108,9 @@ extern void nemoscreen_transform_from_global(struct nemoscreen *screen, float x,
 extern int nemoscreen_get_config_mode(struct nemocompz *compz, uint32_t nodeid, uint32_t screenid, struct nemomode *mode);
 extern int nemoscreen_get_config_geometry(struct nemocompz *compz, uint32_t nodeid, uint32_t screenid, int32_t *x, int32_t *y, int32_t *width, int32_t *height, int32_t *r, int32_t *diagonal);
 extern const char *nemoscreen_get_config(struct nemocompz *compz, uint32_t nodeid, uint32_t screenid, const char *attr);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

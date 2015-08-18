@@ -1,6 +1,12 @@
 #ifndef	__NEMO_DATAOFFER_H__
 #define	__NEMO_DATAOFFER_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 struct nemodatasource;
 
 struct nemodataoffer {
@@ -10,5 +16,9 @@ struct nemodataoffer {
 };
 
 extern struct wl_resource *dataoffer_create(struct nemodatasource *source, struct wl_resource *target);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

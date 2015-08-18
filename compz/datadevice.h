@@ -1,6 +1,12 @@
 #ifndef	__NEMO_DATADEVICE_H__
 #define	__NEMO_DATADEVICE_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 struct nemoseat;
 struct nemoview;
 
@@ -17,5 +23,9 @@ struct nemodatasource {
 extern int datadevice_manager_init(struct wl_display *display);
 
 extern void datadevice_set_focus(struct nemoseat *seat, struct nemoview *view);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

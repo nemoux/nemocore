@@ -1,6 +1,12 @@
 #ifndef	__NEMO_CANVAS_H__
 #define	__NEMO_CANVAS_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <pixman.h>
 #include <content.h>
 
@@ -133,5 +139,9 @@ extern void nemocanvas_flush_damage(struct nemocanvas *canvas);
 extern struct nemoview *nemocanvas_get_default_view(struct nemocanvas *canvas);
 
 extern void nemobuffer_reference(struct nemobuffer_reference *ref, struct nemobuffer *buffer);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

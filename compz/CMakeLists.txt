@@ -140,7 +140,6 @@ add_library(nemocompz SHARED
 	renderer.c
 	fbbackend.c
 	fbnode.c
-	fbhelper.c
 	pixmanrenderer.c
 	pixmancanvas.c
 	pixmanactor.c
@@ -155,8 +154,9 @@ add_library(nemocompz SHARED
 	sound.c
 	viewanimation.c
 	vieweffect.c
-	ttyhelper.c
 	waylandhelper.c
+	${CMAKE_SOURCE_DIR}/misc/fbhelper.c
+	${CMAKE_SOURCE_DIR}/misc/ttyhelper.c
 	${EXTRA}
 	${PROTOCOLS}
 	)

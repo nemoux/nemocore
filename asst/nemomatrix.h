@@ -1,6 +1,12 @@
 #ifndef __NEMO_MATRIX_H__
 #define __NEMO_MATRIX_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <stdint.h>
 
 #include <math.h>
@@ -125,5 +131,9 @@ static inline double nemovector2d_distance_line_point(double x0, double y0, doub
 
 	return nemovector2d_distance(p0, p1, x0 + t * (x1 - x0), y0 + t * (y1 - y0));
 }
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

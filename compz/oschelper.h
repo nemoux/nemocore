@@ -1,6 +1,12 @@
 #ifndef	__OSC_HELPER_H__
 #define	__OSC_HELPER_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #define	OSC_TRUE_TAG					('T')
 #define	OSC_FALSE_TAG					('F')
 #define	OSC_NIL_TAG						('N')
@@ -154,5 +160,9 @@ static inline double osc_double(const char *p)
 
 	return u.d;
 }
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

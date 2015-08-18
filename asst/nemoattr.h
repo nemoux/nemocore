@@ -1,6 +1,12 @@
 #ifndef	__NEMO_ATTR_H__
 #define	__NEMO_ATTR_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <stdint.h>
 
 #define	NEMOATTR_NAME_MAX		(32)
@@ -512,5 +518,9 @@ static inline const char *nemoobject_get_name(struct nemoobject *object, int ind
 
 	return attr->name;
 }
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

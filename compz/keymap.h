@@ -1,6 +1,12 @@
 #ifndef	__NEMO_KEYMAP_H__
 #define	__NEMO_KEYMAP_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <xkbcommon/xkbcommon.h>
 
 struct nemoxkbinfo {
@@ -33,5 +39,9 @@ struct nemoxkb {
 extern struct nemoxkb *nemoxkb_create(void);
 extern void nemoxkb_destroy(struct nemoxkb *xkb);
 extern int nemoxkb_reset(struct nemoxkb *xkb);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

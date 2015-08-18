@@ -1,6 +1,12 @@
 #ifndef	__GL_RENDERER_PRIVATE_H__
 #define	__GL_RENDERER_PRIVATE_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 #include <EGL/egl.h>
@@ -101,5 +107,9 @@ struct glcontent {
 	struct wl_listener actor_destroy_listener;
 	struct wl_listener renderer_destroy_listener;
 };
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

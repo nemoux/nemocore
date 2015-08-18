@@ -1,6 +1,12 @@
 #ifndef	__NEMO_BINDING_H__
 #define	__NEMO_BINDING_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <stdint.h>
 #include <compz.h>
 
@@ -35,5 +41,9 @@ extern void nemocompz_run_button_binding(struct nemocompz *compz, struct nemopoi
 
 extern struct nemobinding *nemocompz_add_touch_binding(struct nemocompz *compz, nemobinding_touch_handler_t handler, void *data);
 extern void nemocompz_run_touch_binding(struct nemocompz *compz, struct touchpoint *tp, uint32_t time);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

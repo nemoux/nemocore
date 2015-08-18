@@ -1,6 +1,12 @@
 #ifndef	__FB_HELPER_H__
 #define	__FB_HELPER_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <stdint.h>
 #include <pixman.h>
 
@@ -22,5 +28,9 @@ struct fbscreeninfo {
 extern int framebuffer_query_screen_info(int fd, struct fbscreeninfo *info);
 extern int framebuffer_set_screen_info(int fd, struct fbscreeninfo *info);
 extern int framebuffer_open(const char *devpath, struct fbscreeninfo *info);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

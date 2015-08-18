@@ -1,6 +1,12 @@
 #ifndef	__NEMOTALE_GESTURE_H__
 #define	__NEMOTALE_GESTURE_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <nemotale.h>
 #include <talenode.h>
 #include <taleevent.h>
@@ -51,5 +57,9 @@ static inline int nemotale_is_up_event(struct nemotale *tale, struct taleevent *
 {
 	return type & NEMOTALE_UP_EVENT;
 }
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

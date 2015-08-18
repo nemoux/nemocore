@@ -1,6 +1,12 @@
 #ifndef	__NEMOTALE_EVENT_H__
 #define	__NEMOTALE_EVENT_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <stdint.h>
 
 #include <nemolist.h>
@@ -148,5 +154,9 @@ static inline int nemotale_event_update_node_taps(struct nemotale *tale, struct 
 
 	return event->tapcount = count;
 }
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

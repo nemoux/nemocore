@@ -1,6 +1,12 @@
 #ifndef	__NEMOTALE_GL_H__
 #define	__NEMOTALE_GL_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <stdint.h>
 #include <pixman.h>
 #include <cairo.h>
@@ -54,5 +60,9 @@ static inline GLuint nemotale_node_get_texture(struct talenode *node)
 
 	return context->texture;
 }
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

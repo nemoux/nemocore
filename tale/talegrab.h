@@ -1,6 +1,12 @@
 #ifndef	__NEMOTALE_GRAB_H__
 #define	__NEMOTALE_GRAB_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #include <stdint.h>
 
 #include <nemolist.h>
@@ -46,5 +52,9 @@ static inline int nemotale_dispatch_grab(struct nemotale *tale, uint64_t device,
 
 	return 0;
 }
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

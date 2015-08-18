@@ -1,6 +1,12 @@
 #ifndef	__NEMOTOOL_HTTP_H__
 #define	__NEMOTOOL_HTTP_H__
 
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
+
 #define	NEMOHTTP_MAX_FIELDS		(64)
 #define	NEMOHTTP_MAX_COOKIES	(64)
 
@@ -31,5 +37,9 @@ extern const char *nemohttp_get_cookie(struct nemohttp *http, const char *name);
 
 extern int nemohttp_need_follow(struct nemohttp *http);
 extern struct nemohttp *nemohttp_follow(struct nemohttp *http);
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif
