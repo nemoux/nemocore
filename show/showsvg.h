@@ -21,7 +21,7 @@ struct showsvg {
 
 	struct showone *matrix;
 
-	int has_transform;
+	int transform;
 
 	void *cc;
 };

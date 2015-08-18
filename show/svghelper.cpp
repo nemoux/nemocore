@@ -596,9 +596,19 @@ static inline void nemoshow_svg_set_style(struct svgcontext *context, struct sho
 
 		nemotoken_destroy(token);
 	} else if (strcmp(attr, "transform") == 0) {
-		nemoshow_svg_get_transform(NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(one), matrix), value);
+		SkMatrix matrix;
+		SkScalar s[9];
+		double m[9];
+		int i;
 
-		NEMOSHOW_ITEM_AT(one, has_transform) = 1;
+		nemoshow_svg_get_transform(&matrix, value);
+
+		matrix.get9(s);
+
+		for (i = 0; i < 9; i++)
+			m[i] = SkScalarToDouble(s[i]);
+
+		nemoshow_item_set_matrix(one, m);
 	} else if (strcmp(attr, "offset") == 0) {
 		nemoshow_stop_set_offset(one, strtod(value, NULL));
 	} else if (strcmp(attr, "stop-color") == 0) {

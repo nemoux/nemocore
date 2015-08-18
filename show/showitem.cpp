@@ -136,9 +136,19 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 
 	matrix = nemoshow_search_one(show, nemoobject_gets(&one->object, "matrix"));
 	if (matrix != NULL) {
+		item->transform = NEMOSHOW_EXTERN_TRANSFORM;
+
 		item->matrix = matrix;
 
 		NEMOBOX_APPEND(matrix->refs, matrix->srefs, matrix->nrefs, one);
+	} else {
+		for (i = 0; i < one->nchildren; i++) {
+			if (one->children[i]->type == NEMOSHOW_MATRIX_TYPE) {
+				item->transform = NEMOSHOW_INTERN_TRANSFORM;
+
+				break;
+			}
+		}
 	}
 
 	path = nemoshow_search_one(show, nemoobject_gets(&one->object, "path"));
@@ -164,14 +174,6 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 
 	if (one->sub == NEMOSHOW_PATH_ITEM) {
 		NEMOSHOW_ITEM_CC(item, path) = new SkPath;
-	}
-
-	for (i = 0; i < one->nchildren; i++) {
-		if (one->children[i]->type == NEMOSHOW_MATRIX_TYPE) {
-			item->has_transform = 1;
-			item->has_transform_children = 1;
-			break;
-		}
 	}
 
 	item->canvas = nemoshow_one_get_canvas(one);
@@ -284,7 +286,7 @@ static inline void nemoshow_item_update_child(struct nemoshow *show, struct show
 	struct showone *child;
 	int i;
 
-	if (item->has_transform_children != 0) {
+	if (item->transform == NEMOSHOW_INTERN_TRANSFORM) {
 		NEMOSHOW_ITEM_CC(item, matrix)->setIdentity();
 
 		for (i = 0; i < one->nchildren; i++) {
@@ -492,6 +494,20 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 	nemoshow_canvas_damage_one(item->canvas, one);
 
 	return 0;
+}
+
+void nemoshow_item_set_matrix(struct showone *one, double m[9])
+{
+	SkScalar args[9] = {
+		SkDoubleToScalar(m[0]), SkDoubleToScalar(m[1]), SkDoubleToScalar(m[2]),
+		SkDoubleToScalar(m[3]), SkDoubleToScalar(m[4]), SkDoubleToScalar(m[5]),
+		SkDoubleToScalar(m[6]), SkDoubleToScalar(m[7]), SkDoubleToScalar(m[8])
+	};
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	NEMOSHOW_ITEM_CC(item, matrix)->set9(args);
+
+	item->transform = NEMOSHOW_DIRECT_TRANSFORM;
 }
 
 void nemoshow_item_set_shader(struct showone *one, struct showone *shader)

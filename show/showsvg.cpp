@@ -73,15 +73,18 @@ int nemoshow_svg_arrange(struct nemoshow *show, struct showone *one)
 
 	matrix = nemoshow_search_one(show, nemoobject_gets(&one->object, "matrix"));
 	if (matrix != NULL) {
+		svg->transform = NEMOSHOW_EXTERN_TRANSFORM;
+
 		svg->matrix = matrix;
 
 		NEMOBOX_APPEND(matrix->refs, matrix->srefs, matrix->nrefs, one);
-	}
+	} else {
+		for (i = 0; i < one->nchildren; i++) {
+			if (one->children[i]->type == NEMOSHOW_MATRIX_TYPE) {
+				svg->transform = NEMOSHOW_INTERN_TRANSFORM;
 
-	for (i = 0; i < one->nchildren; i++) {
-		if (one->children[i]->type == NEMOSHOW_MATRIX_TYPE) {
-			svg->has_transform = 1;
-			break;
+				break;
+			}
 		}
 	}
 

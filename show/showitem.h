@@ -25,6 +25,14 @@ typedef enum {
 	NEMOSHOW_LAST_ITEM
 } NemoShowItemType;
 
+typedef enum {
+	NEMOSHOW_NONE_TRANSFORM = 0,
+	NEMOSHOW_DIRECT_TRANSFORM = 1,
+	NEMOSHOW_INTERN_TRANSFORM = 2,
+	NEMOSHOW_EXTERN_TRANSFORM = 3,
+	NEMOSHOW_LAST_TRANSFORM
+} NemoShowItemTransform;
+
 struct showitem {
 	struct showone base;
 
@@ -60,8 +68,7 @@ struct showitem {
 	const char *text;
 	double textwidth, textheight;
 
-	int has_transform;
-	int has_transform_children;
+	int transform;
 
 	void *cc;
 };
@@ -75,6 +82,7 @@ extern void nemoshow_item_destroy(struct showone *one);
 extern int nemoshow_item_arrange(struct nemoshow *show, struct showone *one);
 extern int nemoshow_item_update(struct nemoshow *show, struct showone *one);
 
+extern void nemoshow_item_set_matrix(struct showone *one, double m[9]);
 extern void nemoshow_item_set_shader(struct showone *one, struct showone *shader);
 
 static inline void nemoshow_item_set_fill_color(struct showone *one, double r, double g, double b, double a)

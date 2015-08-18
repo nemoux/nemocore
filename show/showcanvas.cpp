@@ -319,14 +319,14 @@ static inline void nemoshow_canvas_render_one(struct nemoshow *show, struct show
 	if (one->type == NEMOSHOW_ITEM_TYPE) {
 		struct showitem *item = NEMOSHOW_ITEM(one);
 
-		if (item->matrix != NULL) {
+		if (item->transform == NEMOSHOW_EXTERN_TRANSFORM) {
 			NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
 			NEMOSHOW_CANVAS_CC(canvas, canvas)->concat(*NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(item->matrix), matrix));
 
 			nemoshow_canvas_render_item(show, canvas, one);
 
 			NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
-		} else if (item->has_transform != 0) {
+		} else if (item->transform == NEMOSHOW_INTERN_TRANSFORM || item->transform == NEMOSHOW_DIRECT_TRANSFORM) {
 			NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
 			NEMOSHOW_CANVAS_CC(canvas, canvas)->concat(*NEMOSHOW_ITEM_CC(item, matrix));
 
@@ -353,14 +353,14 @@ static inline void nemoshow_canvas_render_one(struct nemoshow *show, struct show
 
 					nemoshow_one_update_with_dirty(show, child, NEMOSHOW_ALL_DIRTY);
 
-					if (item->matrix != NULL) {
+					if (item->transform == NEMOSHOW_EXTERN_TRANSFORM) {
 						NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
 						NEMOSHOW_CANVAS_CC(canvas, canvas)->concat(*NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(item->matrix), matrix));
 
 						nemoshow_canvas_render_item(show, canvas, child);
 
 						NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
-					} else if (item->has_transform != 0) {
+					} else if (item->transform == NEMOSHOW_INTERN_TRANSFORM || item->transform == NEMOSHOW_DIRECT_TRANSFORM) {
 						NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
 						NEMOSHOW_CANVAS_CC(canvas, canvas)->concat(*NEMOSHOW_ITEM_CC(item, matrix));
 
@@ -379,9 +379,9 @@ static inline void nemoshow_canvas_render_one(struct nemoshow *show, struct show
 
 		NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
 
-		if (svg->matrix != NULL) {
+		if (svg->transform == NEMOSHOW_EXTERN_TRANSFORM) {
 			NEMOSHOW_CANVAS_CC(canvas, canvas)->concat(*NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(svg->matrix), matrix));
-		} else if (svg->has_transform != 0) {
+		} else if (svg->transform == NEMOSHOW_INTERN_TRANSFORM) {
 			NEMOSHOW_CANVAS_CC(canvas, canvas)->concat(*NEMOSHOW_SVG_CC(svg, matrix));
 		}
 
