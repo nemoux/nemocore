@@ -351,6 +351,11 @@ static int minishell_dispatch_yoyo_grab(struct talegrab *base, uint32_t type, st
 	} else if (type & NEMOTALE_UP_EVENT) {
 		struct miniyoyo *yoyo = (struct miniyoyo *)grab->data;
 
+		nemoshow_canvas_damage_one(NEMOSHOW_ITEM_AT(yoyo->path, canvas), yoyo->path);
+		nemoshow_detach_one(show, NEMOSHOW_ITEM_AT(yoyo->path, canvas), yoyo->path);
+
+		nemoactor_dispatch_frame(actor);
+
 		minishell_yoyo_destroy(yoyo);
 
 		minishell_grab_destroy(grab);

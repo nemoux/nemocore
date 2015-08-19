@@ -863,6 +863,25 @@ void nemoshow_attach_one(struct nemoshow *show, struct showone *parent, struct s
 
 void nemoshow_detach_one(struct nemoshow *show, struct showone *parent, struct showone *one)
 {
+	int i;
+
+	for (i = 0; i < show->nones; i++) {
+		if (show->ones[i] == one) {
+			NEMOBOX_REMOVE(show->ones, show->nones, i);
+
+			break;
+		}
+	}
+
+	if (parent != NULL) {
+		for (i = 0; i < parent->nchildren; i++) {
+			if (parent->children[i] == one) {
+				NEMOBOX_REMOVE(parent->children, parent->nchildren, i);
+
+				break;
+			}
+		}
+	}
 }
 
 void nemoshow_attach_transition(struct nemoshow *show, struct showtransition *trans)

@@ -84,6 +84,15 @@ void nemoshow_one_attach_one(struct showone *parent, struct showone *one)
 
 void nemoshow_one_detach_one(struct showone *parent, struct showone *one)
 {
+	int i;
+
+	for (i = 0; i < parent->nchildren; i++) {
+		if (parent->children[i] == one) {
+			NEMOBOX_REMOVE(parent->children, parent->nchildren, i);
+
+			break;
+		}
+	}
 }
 
 struct showattr *nemoshow_one_create_attr(const char *name, const char *text, struct nemoattr *ref, uint32_t dirty)
