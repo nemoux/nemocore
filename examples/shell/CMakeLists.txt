@@ -41,6 +41,7 @@ set(CMAKE_INSTALL_RPATH "/usr/lib64/skia")
 
 add_executable(minishell
 	minishell.cpp
+	minigrab.cpp
 	talehelper.c
 	showhelper.c
 	)
@@ -58,4 +59,3 @@ if(WITH_XWAYLAND)
 		nemoxwayland
 		)
 endif(WITH_XWAYLAND)
-

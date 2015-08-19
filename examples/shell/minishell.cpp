@@ -38,6 +38,9 @@
 #include <nemoitem.h>
 #include <nemomisc.h>
 
+#include <minishell.h>
+#include <minigrab.h>
+
 #ifdef NEMOUX_WITH_XWAYLAND
 #include <xserver.h>
 #endif
@@ -238,6 +241,55 @@ struct nemoactor *minishell_create_cursor(struct nemoshell *shell, int width, in
 	return actor;
 }
 
+static int minishell_dispatch_touch_grab(struct talegrab *base, uint32_t type, struct taleevent *event)
+{
+	struct minigrab *grab = (struct minigrab *)container_of(base, struct minigrab, base);
+	struct minishell *mini = grab->mini;
+	struct nemoshow *show = mini->show;
+	struct nemoactor *actor = NEMOSHOW_AT(show, actor);
+
+	if (type & NEMOTALE_DOWN_EVENT) {
+		struct showone *one = (struct showone *)grab->data;
+
+		grab->dx = NEMOSHOW_ITEM_AT(one, x) - grab->x;
+		grab->dy = NEMOSHOW_ITEM_AT(one, y) - grab->y;
+	} else if (type & NEMOTALE_MOTION_EVENT) {
+		struct showone *one = (struct showone *)grab->data;
+
+		NEMOSHOW_ITEM_AT(one, x) = event->x + grab->dx;
+		NEMOSHOW_ITEM_AT(one, y) = event->y + grab->dy;
+		nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
+
+		nemoactor_dispatch_frame(actor);
+	} else if (type & NEMOTALE_UP_EVENT) {
+		struct showone *one = (struct showone *)grab->data;
+		struct showtransition *trans;
+		struct showone *sequence;
+
+		sequence = nemoshow_sequence_create_easy(show,
+				nemoshow_sequence_create_frame_easy(show,
+					1.0f,
+					nemoshow_sequence_create_set_easy(show,
+						one,
+						"r", "0.0",
+						NULL),
+					NULL),
+				NULL);
+
+		trans = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 100, 0);
+		nemoshow_transition_attach_sequence(trans, sequence);
+		nemoshow_attach_transition(show, trans);
+
+		nemoactor_dispatch_frame(actor);
+
+		minishell_grab_destroy(grab);
+
+		return 0;
+	}
+
+	return 1;
+}
+
 static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
 {
 	uint32_t id = nemotale_node_get_id(node);
@@ -261,60 +313,47 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 	}
 
 	if (id == 1) {
-		struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
-		struct nemoactor *actor = NEMOSHOW_AT(show, actor);
+		if (nemotale_dispatch_grab(tale, event->device, type, event) == 0) {
+			struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
+			struct nemoactor *actor = NEMOSHOW_AT(show, actor);
+			struct minishell *mini = (struct minishell *)nemoshow_get_userdata(show);
 
-		if (nemotale_is_down_event(tale, event, type)) {
-			struct showone *canvas;
-			struct showone *one;
-			struct showtransition *trans;
-			struct showone *sequence;
+			if (nemotale_is_down_event(tale, event, type)) {
+				struct showone *canvas;
+				struct showone *one;
+				struct showtransition *trans;
+				struct showone *sequence;
+				struct minigrab *grab;
 
-			canvas = nemoshow_search_one(show, "mini");
+				canvas = nemoshow_search_one(show, "mini");
 
-			one = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
-			nemoshow_attach_one(show, canvas, one);
-			nemoshow_item_arrange(show, one);
-			NEMOSHOW_ITEM_AT(one, x) = event->x;
-			NEMOSHOW_ITEM_AT(one, y) = event->y;
-			NEMOSHOW_ITEM_AT(one, r) = 0.0f;
-			nemoshow_item_set_fill_color(one, 255, 255, 0, 255);
+				one = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
+				nemoshow_attach_one(show, canvas, one);
+				nemoshow_item_arrange(show, one);
+				NEMOSHOW_ITEM_AT(one, x) = event->x;
+				NEMOSHOW_ITEM_AT(one, y) = event->y;
+				NEMOSHOW_ITEM_AT(one, r) = 0.0f;
+				nemoshow_item_set_fill_color(one, 255, 255, 0, 255);
 
-			sequence = nemoshow_sequence_create_easy(show,
-					nemoshow_sequence_create_frame_easy(show,
-						1.0f,
-						nemoshow_sequence_create_set_easy(show,
-							one,
-							"r", "50.0",
+				sequence = nemoshow_sequence_create_easy(show,
+						nemoshow_sequence_create_frame_easy(show,
+							1.0f,
+							nemoshow_sequence_create_set_easy(show,
+								one,
+								"r", "50.0",
+								NULL),
 							NULL),
-						NULL),
-					NULL);
+						NULL);
 
-			trans = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 300, 0);
-			nemoshow_transition_attach_sequence(trans, sequence);
-			nemoshow_attach_transition(show, trans);
+				trans = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 100, 0);
+				nemoshow_transition_attach_sequence(trans, sequence);
+				nemoshow_attach_transition(show, trans);
 
-			nemoshow_attach_transition_easy(show,
-					nemoshow_transition_create_easy(
-						show,
-						nemoshow_search_one(show, "ease0"),
-						800, 0,
-						"touch_down",
-						NULL),
-					NULL);
+				nemoactor_dispatch_frame(actor);
 
-			nemoactor_dispatch_frame(actor);
-		} else if (nemotale_is_up_event(tale, event, type)) {
-			nemoshow_attach_transition_easy(show,
-					nemoshow_transition_create_easy(
-						show,
-						nemoshow_search_one(show, "ease0"),
-						800, 0,
-						"touch_up",
-						NULL),
-					NULL);
-
-			nemoactor_dispatch_frame(actor);
+				grab = minishell_grab_create(mini, tale, event, minishell_dispatch_touch_grab, one);
+				nemotale_dispatch_grab(tale, event->device, type, event);
+			}
 		}
 	}
 }
@@ -332,6 +371,7 @@ int main(int argc, char *argv[])
 		{ 0 }
 	};
 
+	struct minishell *mini;
 	struct nemoshell *shell;
 	struct nemocompz *compz;
 	struct nemoshow *show;
@@ -388,11 +428,16 @@ int main(int argc, char *argv[])
 	if (configpath == NULL)
 		asprintf(&configpath, "%s/.config/nemoshell.xml", getenv("HOME"));
 
+	mini = (struct minishell *)malloc(sizeof(struct minishell));
+	if (mini == NULL)
+		return -1;
+	memset(mini, 0, sizeof(struct minishell));
+
 	compz = nemocompz_create();
 	if (compz == NULL)
 		return -1;
 
-	shell = nemoshell_create(compz);
+	mini->shell = shell = nemoshell_create(compz);
 	if (shell == NULL)
 		goto out;
 
@@ -424,7 +469,7 @@ int main(int argc, char *argv[])
 
 	nemocompz_make_current(compz);
 
-	show = nemoshow_create_on_actor(shell,
+	mini->show = show = nemoshow_create_on_actor(shell,
 			nemocompz_get_scene_width(compz),
 			nemocompz_get_scene_height(compz),
 			minishell_dispatch_tale_event);
@@ -433,6 +478,7 @@ int main(int argc, char *argv[])
 	nemoshow_load_xml(show, scenexml);
 	nemoshow_arrange_one(show);
 	nemoshow_update_one(show);
+	nemoshow_set_userdata(show, mini);
 
 	nemoshow_set_scene(show,
 			nemoshow_search_one(show, "scene0"));
@@ -463,6 +509,8 @@ out:
 	nemocompz_destroy(compz);
 
 	nemolog_message("SHELL", "end nemoshell...\n");
+
+	free(mini);
 
 	free(configpath);
 

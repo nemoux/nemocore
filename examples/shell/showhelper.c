@@ -191,11 +191,11 @@ static void nemoshow_dispatch_actor_frame(struct nemoactor *actor, uint32_t msec
 		nemoshow_dispatch_transition(show, msecs);
 
 		nemoactor_feedback(actor);
-
-		nemoshow_render_one(show);
 	} else {
 		nemoactor_feedback_done(actor);
 	}
+
+	nemoshow_render_one(show);
 
 	nemotale_composite_fbo(tale, &region);
 
