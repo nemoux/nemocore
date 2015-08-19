@@ -338,10 +338,10 @@ static int minishell_dispatch_yoyo_grab(struct talegrab *base, uint32_t type, st
 
 		outer = nemoshow_item_get_outer(yoyo->path);
 
-		minx = MIN(x0, MIN(x1, x2)) - outer;
-		miny = MIN(y0, MIN(y1, y2)) - outer;
-		maxx = MAX(x0, MAX(x1, x2)) + outer;
-		maxy = MAX(y0, MAX(y1, y2)) + outer;
+		minx = MIN(MIN(sx, x0), MIN(x1, x2)) - outer;
+		miny = MIN(MIN(sy, y0), MIN(y1, y2)) - outer;
+		maxx = MAX(MAX(sx, x0), MAX(x1, x2)) + outer;
+		maxy = MAX(MAX(sy, y0), MAX(y1, y2)) + outer;
 
 		nemoshow_item_update_boundingbox(show, yoyo->path);
 		nemoshow_canvas_damage_region(NEMOSHOW_ITEM_AT(yoyo->path, canvas),
