@@ -129,9 +129,9 @@ static inline void nemoshow_svg_update_boundingbox(struct nemoshow *show, struct
 
 	box = SkRect::MakeXYWH(0, 0, svg->width, svg->height);
 
-	if (svg->matrix != NULL) {
+	if (svg->transform == NEMOSHOW_EXTERN_TRANSFORM) {
 		NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(svg->matrix), matrix)->mapRect(&box);
-	} else if (NEMOSHOW_SVG_CC(svg, matrix) != NULL) {
+	} else if (svg->transform == NEMOSHOW_INTERN_TRANSFORM || svg->transform == NEMOSHOW_DIRECT_TRANSFORM) {
 		NEMOSHOW_SVG_CC(svg, matrix)->mapRect(&box);
 	}
 
@@ -140,9 +140,9 @@ static inline void nemoshow_svg_update_boundingbox(struct nemoshow *show, struct
 
 		nemoshow_one_update_alone(show, group);
 
-		if (pitem->matrix != NULL) {
+		if (pitem->transform == NEMOSHOW_EXTERN_TRANSFORM) {
 			NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(pitem->matrix), matrix)->mapRect(&box);
-		} else if (NEMOSHOW_ITEM_CC(pitem, matrix) != NULL) {
+		} else if (pitem->transform == NEMOSHOW_INTERN_TRANSFORM || pitem->transform == NEMOSHOW_DIRECT_TRANSFORM) {
 			NEMOSHOW_ITEM_CC(pitem, matrix)->mapRect(&box);
 		}
 	}
