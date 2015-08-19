@@ -436,6 +436,7 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 			if (nemotale_is_down_event(tale, event, type)) {
 				struct showone *canvas;
 				struct showone *one;
+				struct showone *blur;
 				struct minigrab *grab;
 				struct miniyoyo *yoyo;
 
@@ -443,8 +444,18 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 
 				canvas = nemoshow_search_one(show, "mini");
 
+				blur = nemoshow_blur_create();
+				nemoshow_attach_one(show, canvas, blur);
+				nemoshow_one_set_id(blur, "blur0");
+				nemoshow_one_setd(blur, "r", 5.0f);
+				nemoshow_one_sets(blur, "type", "solid");
+				nemoshow_one_sets(blur, "flags", "high");
+				nemoshow_one_dirty(blur, NEMOSHOW_SHAPE_DIRTY | NEMOSHOW_STYLE_DIRTY);
+				nemoshow_blur_arrange(show, blur);
+
 				yoyo->path = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
 				nemoshow_attach_one(show, canvas, one);
+				nemoshow_one_sets(one, "blur", "blur0");
 				nemoshow_item_arrange(show, one);
 				nemoshow_item_set_stroke_color(one, 255, 255, 0, 255);
 				nemoshow_item_set_stroke_width(one, 3.0f);
