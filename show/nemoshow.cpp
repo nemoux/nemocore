@@ -861,7 +861,7 @@ void nemoshow_attach_one(struct nemoshow *show, struct showone *parent, struct s
 	}
 }
 
-void nemoshow_detach_one(struct nemoshow *show, struct showone *one)
+void nemoshow_detach_one(struct nemoshow *show, struct showone *parent, struct showone *one)
 {
 }
 

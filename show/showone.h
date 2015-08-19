@@ -109,6 +109,9 @@ extern void nemoshow_one_finish(struct showone *one);
 extern struct showone *nemoshow_one_create(int type);
 extern void nemoshow_one_destroy(struct showone *one);
 
+extern void nemoshow_one_attach_one(struct showone *parent, struct showone *one);
+extern void nemoshow_one_detach_one(struct showone *parent, struct showone *one);
+
 extern struct showattr *nemoshow_one_create_attr(const char *name, const char *text, struct nemoattr *ref, uint32_t dirty);
 extern void nemoshow_one_destroy_attr(struct showattr *attr);
 

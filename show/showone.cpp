@@ -8,6 +8,7 @@
 #include <showone.h>
 #include <showcolor.h>
 #include <showmisc.h>
+#include <nemobox.h>
 #include <nemomisc.h>
 
 void nemoshow_one_prepare(struct showone *one)
@@ -72,6 +73,17 @@ void nemoshow_one_destroy(struct showone *one)
 
 		free(one);
 	}
+}
+
+void nemoshow_one_attach_one(struct showone *parent, struct showone *one)
+{
+	NEMOBOX_APPEND(parent->children, parent->schildren, parent->nchildren, one);
+
+	one->parent = parent;
+}
+
+void nemoshow_one_detach_one(struct showone *parent, struct showone *one)
+{
 }
 
 struct showattr *nemoshow_one_create_attr(const char *name, const char *text, struct nemoattr *ref, uint32_t dirty)

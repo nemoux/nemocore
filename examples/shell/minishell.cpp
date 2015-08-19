@@ -269,8 +269,6 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 			struct showone *one;
 			struct showtransition *trans;
 			struct showone *sequence;
-			struct showone *frame;
-			struct showone *set;
 
 			canvas = nemoshow_search_one(show, "mini");
 
@@ -282,15 +280,15 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 			NEMOSHOW_ITEM_AT(one, r) = 0.0f;
 			nemoshow_item_set_fill_color(one, 255, 255, 0, 255);
 
-			sequence = nemoshow_sequence_create();
-			frame = nemoshow_sequence_create_frame();
-			NEMOSHOW_FRAME_AT(frame, t) = 1.0f;
-			nemoshow_attach_one(show, sequence, frame);
-			set = nemoshow_sequence_create_set();
-			nemoshow_sequence_arrange_set(show, set);
-			nemoshow_sequence_set_source(set, one);
-			nemoshow_sequence_set_attr(set, "r", "50.0");
-			nemoshow_attach_one(show, frame, set);
+			sequence = nemoshow_sequence_create_easy(show,
+					nemoshow_sequence_create_frame_easy(show,
+						1.0f,
+						nemoshow_sequence_create_set_easy(show,
+							one,
+							"r", "50.0",
+							NULL),
+						NULL),
+					NULL);
 
 			trans = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 300, 0);
 			nemoshow_transition_attach_sequence(trans, sequence);

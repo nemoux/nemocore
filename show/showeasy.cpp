@@ -53,3 +53,62 @@ void nemoshow_attach_transition_easy(struct nemoshow *show, ...)
 
 	va_end(vargs);
 }
+
+struct showone *nemoshow_sequence_create_set_easy(struct nemoshow *show, struct showone *src, ...)
+{
+	struct showone *set;
+	va_list vargs;
+	const char *attr, *value;
+
+	set = nemoshow_sequence_create_set();
+	nemoshow_sequence_set_source(set, src);
+
+	va_start(vargs, src);
+
+	while ((attr = va_arg(vargs, const char *)) != NULL && (value = va_arg(vargs, const char *)) != NULL) {
+		nemoshow_sequence_set_attr(set, attr, value);
+	}
+
+	va_end(vargs);
+
+	return set;
+}
+
+struct showone *nemoshow_sequence_create_frame_easy(struct nemoshow *show, double t, ...)
+{
+	struct showone *frame;
+	struct showone *set;
+	va_list vargs;
+
+	frame = nemoshow_sequence_create_frame();
+	nemoshow_sequence_set_timing(frame, t);
+
+	va_start(vargs, t);
+
+	while ((set = va_arg(vargs, struct showone *)) != NULL) {
+		nemoshow_one_attach_one(frame, set);
+	}
+
+	va_end(vargs);
+
+	return frame;
+}
+
+struct showone *nemoshow_sequence_create_easy(struct nemoshow *show, ...)
+{
+	struct showone *sequence;
+	struct showone *frame;
+	va_list vargs;
+
+	sequence = nemoshow_sequence_create();
+
+	va_start(vargs, show);
+
+	while ((frame = va_arg(vargs, struct showone *)) != NULL) {
+		nemoshow_one_attach_one(sequence, frame);
+	}
+
+	va_end(vargs);
+
+	return sequence;
+}

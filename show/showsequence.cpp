@@ -84,6 +84,15 @@ int nemoshow_sequence_update_frame(struct nemoshow *show, struct showone *one)
 	return 0;
 }
 
+int nemoshow_sequence_set_timing(struct showone *one, double t)
+{
+	struct showframe *frame = NEMOSHOW_FRAME(one);
+
+	frame->t = t;
+
+	return 0;
+}
+
 struct showone *nemoshow_sequence_create_set(void)
 {
 	struct showset *set;
