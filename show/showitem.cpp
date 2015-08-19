@@ -182,7 +182,7 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 	return 0;
 }
 
-static inline void nemoshow_item_update_style(struct nemoshow *show, struct showone *one)
+void nemoshow_item_update_style(struct nemoshow *show, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
@@ -280,7 +280,7 @@ static inline void nemoshow_item_update_path(struct nemoshow *show, struct showi
 	}
 }
 
-static inline void nemoshow_item_update_child(struct nemoshow *show, struct showone *one)
+void nemoshow_item_update_child(struct nemoshow *show, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	struct showone *child;
@@ -314,7 +314,7 @@ static inline void nemoshow_item_update_child(struct nemoshow *show, struct show
 	}
 }
 
-static inline void nemoshow_item_update_text(struct nemoshow *show, struct showone *one)
+void nemoshow_item_update_text(struct nemoshow *show, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
@@ -386,7 +386,7 @@ static inline void nemoshow_item_update_text(struct nemoshow *show, struct showo
 	}
 }
 
-static inline void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one)
+void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	struct showone *group;
@@ -519,4 +519,19 @@ void nemoshow_item_set_shader(struct showone *one, struct showone *shader)
 	item->fill = 1;
 
 	NEMOBOX_APPEND(shader->refs, shader->srefs, shader->nrefs, one);
+}
+
+double nemoshow_item_get_outer(struct showone *one)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+	double outer = 0.0f;
+
+	if (item->stroke != 0)
+		outer += item->stroke_width;
+
+	outer += NEMOSHOW_ANTIALIAS_EPSILON;
+	if (item->blur != NULL)
+		outer += NEMOSHOW_BLUR_AT(item->blur, r);
+
+	return outer;
 }

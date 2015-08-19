@@ -445,6 +445,23 @@ int nemoshow_canvas_set_viewport(struct nemoshow *show, struct showone *one, dou
 	return 0;
 }
 
+void nemoshow_canvas_damage_region(struct showone *one, int32_t x, int32_t y, int32_t width, int32_t height)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	NEMOSHOW_CANVAS_CC(canvas, damage)->op(
+			SkIRect::MakeXYWH(
+				x * canvas->viewport.sx,
+				y * canvas->viewport.sy,
+				width * canvas->viewport.sx,
+				height * canvas->viewport.sy),
+			SkRegion::kUnion_Op);
+
+	nemotale_node_damage(canvas->node, x, y, width, height);
+
+	canvas->needs_redraw = 1;
+}
+
 void nemoshow_canvas_damage_one(struct showone *one, struct showone *child)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);

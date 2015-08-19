@@ -82,8 +82,15 @@ extern void nemoshow_item_destroy(struct showone *one);
 extern int nemoshow_item_arrange(struct nemoshow *show, struct showone *one);
 extern int nemoshow_item_update(struct nemoshow *show, struct showone *one);
 
+extern void nemoshow_item_update_style(struct nemoshow *show, struct showone *one);
+extern void nemoshow_item_update_child(struct nemoshow *show, struct showone *one);
+extern void nemoshow_item_update_text(struct nemoshow *show, struct showone *one);
+extern void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one);
+
 extern void nemoshow_item_set_matrix(struct showone *one, double m[9]);
 extern void nemoshow_item_set_shader(struct showone *one, struct showone *shader);
+
+extern double nemoshow_item_get_outer(struct showone *one);
 
 static inline void nemoshow_item_set_fill_color(struct showone *one, double r, double g, double b, double a)
 {

@@ -311,6 +311,9 @@ static int minishell_dispatch_yoyo_grab(struct talegrab *base, uint32_t type, st
 	} else if (type & NEMOTALE_MOTION_EVENT) {
 		struct miniyoyo *yoyo = (struct miniyoyo *)grab->data;
 		double sx, sy, ex, ey;
+		double x0, y0, x1, y1, x2, y2;
+		int32_t minx, miny, maxx, maxy;
+		double outer;
 
 		yoyo->x2 = yoyo->x1;
 		yoyo->y2 = yoyo->y1;
@@ -324,12 +327,25 @@ static int minishell_dispatch_yoyo_grab(struct talegrab *base, uint32_t type, st
 		ex = (yoyo->x1 + yoyo->x0) * 0.5f;
 		ey = (yoyo->y1 + yoyo->y0) * 0.5f;
 
-		NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(yoyo->path), path)->cubicTo(
-				(sx + 2.0f * yoyo->x1) / 3.0f, (sy + 2.0f * yoyo->y1) / 3.0f,
-				(ex + 2.0f * yoyo->x1) / 3.0f, (ey + 2.0f * yoyo->y1) / 3.0f,
-				ex, ey);
+		x0 = (sx + 2.0f * yoyo->x1) / 3.0f;
+		y0 = (sy + 2.0f * yoyo->y1) / 3.0f;
+		x1 = (ex + 2.0f * yoyo->x1) / 3.0f;
+		y1 = (ey + 2.0f * yoyo->y1) / 3.0f;
+		x2 = ex;
+		y2 = ey;
 
-		nemoshow_one_dirty(yoyo->path, NEMOSHOW_SHAPE_DIRTY);
+		NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(yoyo->path), path)->cubicTo(x0, y0, x1, y1, x2, y2);
+
+		outer = nemoshow_item_get_outer(yoyo->path);
+
+		minx = MIN(x0, MIN(x1, x2)) - outer;
+		miny = MIN(y0, MIN(y1, y2)) - outer;
+		maxx = MAX(x0, MAX(x1, x2)) + outer;
+		maxy = MAX(y0, MAX(y1, y2)) + outer;
+
+		nemoshow_item_update_boundingbox(show, yoyo->path);
+		nemoshow_canvas_damage_region(NEMOSHOW_ITEM_AT(yoyo->path, canvas),
+				minx, miny, maxx - minx, maxy - miny);
 
 		nemoactor_dispatch_frame(actor);
 	} else if (type & NEMOTALE_UP_EVENT) {
