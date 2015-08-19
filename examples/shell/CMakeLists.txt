@@ -42,6 +42,7 @@ set(CMAKE_INSTALL_RPATH "/usr/lib64/skia")
 add_executable(minishell
 	minishell.cpp
 	minigrab.cpp
+	miniyoyo.cpp
 	talehelper.c
 	showhelper.c
 	)

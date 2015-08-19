@@ -40,6 +40,10 @@
 
 #include <minishell.h>
 #include <minigrab.h>
+#include <miniyoyo.h>
+
+#include <showitem.h>
+#include <showitem.hpp>
 
 #ifdef NEMOUX_WITH_XWAYLAND
 #include <xserver.h>
@@ -290,6 +294,57 @@ static int minishell_dispatch_touch_grab(struct talegrab *base, uint32_t type, s
 	return 1;
 }
 
+static int minishell_dispatch_yoyo_grab(struct talegrab *base, uint32_t type, struct taleevent *event)
+{
+	struct minigrab *grab = (struct minigrab *)container_of(base, struct minigrab, base);
+	struct minishell *mini = grab->mini;
+	struct nemoshow *show = mini->show;
+	struct nemoactor *actor = NEMOSHOW_AT(show, actor);
+
+	if (type & NEMOTALE_DOWN_EVENT) {
+		struct miniyoyo *yoyo = (struct miniyoyo *)grab->data;
+
+		NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(yoyo->path), path)->moveTo(event->x, event->y);
+
+		yoyo->x0 = yoyo->x1 = yoyo->x2 = event->x;
+		yoyo->y0 = yoyo->y1 = yoyo->y2 = event->y;
+	} else if (type & NEMOTALE_MOTION_EVENT) {
+		struct miniyoyo *yoyo = (struct miniyoyo *)grab->data;
+		double sx, sy, ex, ey;
+
+		yoyo->x2 = yoyo->x1;
+		yoyo->y2 = yoyo->y1;
+		yoyo->x1 = yoyo->x0;
+		yoyo->y1 = yoyo->y0;
+		yoyo->x0 = event->x;
+		yoyo->y0 = event->y;
+
+		sx = (yoyo->x2 + yoyo->x1) * 0.5f;
+		sy = (yoyo->y2 + yoyo->y1) * 0.5f;
+		ex = (yoyo->x1 + yoyo->x0) * 0.5f;
+		ey = (yoyo->y1 + yoyo->y0) * 0.5f;
+
+		NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(yoyo->path), path)->cubicTo(
+				(sx + 2.0f * yoyo->x1) / 3.0f, (sy + 2.0f * yoyo->y1) / 3.0f,
+				(ex + 2.0f * yoyo->x1) / 3.0f, (ey + 2.0f * yoyo->y1) / 3.0f,
+				ex, ey);
+
+		nemoshow_one_dirty(yoyo->path, NEMOSHOW_SHAPE_DIRTY);
+
+		nemoactor_dispatch_frame(actor);
+	} else if (type & NEMOTALE_UP_EVENT) {
+		struct miniyoyo *yoyo = (struct miniyoyo *)grab->data;
+
+		minishell_yoyo_destroy(yoyo);
+
+		minishell_grab_destroy(grab);
+
+		return 0;
+	}
+
+	return 1;
+}
+
 static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
 {
 	uint32_t id = nemotale_node_get_id(node);
@@ -318,6 +373,7 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 			struct nemoactor *actor = NEMOSHOW_AT(show, actor);
 			struct minishell *mini = (struct minishell *)nemoshow_get_userdata(show);
 
+#if	0
 			if (nemotale_is_down_event(tale, event, type)) {
 				struct showone *canvas;
 				struct showone *one;
@@ -352,6 +408,29 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 				nemoactor_dispatch_frame(actor);
 
 				grab = minishell_grab_create(mini, tale, event, minishell_dispatch_touch_grab, one);
+				nemotale_dispatch_grab(tale, event->device, type, event);
+			}
+#endif
+
+			if (nemotale_is_down_event(tale, event, type)) {
+				struct showone *canvas;
+				struct showone *one;
+				struct minigrab *grab;
+				struct miniyoyo *yoyo;
+
+				yoyo = minishell_yoyo_create();
+
+				canvas = nemoshow_search_one(show, "mini");
+
+				yoyo->path = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
+				nemoshow_attach_one(show, canvas, one);
+				nemoshow_item_arrange(show, one);
+				nemoshow_item_set_stroke_color(one, 255, 255, 0, 255);
+				nemoshow_item_set_stroke_width(one, 3.0f);
+
+				nemoactor_dispatch_frame(actor);
+
+				grab = minishell_grab_create(mini, tale, event, minishell_dispatch_yoyo_grab, yoyo);
 				nemotale_dispatch_grab(tale, event->device, type, event);
 			}
 		}
