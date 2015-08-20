@@ -330,10 +330,33 @@ static int minishell_dispatch_yoyo_grab(struct talegrab *base, uint32_t type, st
 
 		minishell_yoyo_finish(yoyo);
 
+		nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
+
+#if	0
 		nemoshow_canvas_damage_one(NEMOSHOW_ITEM_AT(one, canvas), one);
 		nemoshow_detach_one(show, NEMOSHOW_ITEM_AT(one, canvas), one);
 
 		nemoactor_dispatch_frame(actor);
+#else
+		struct showtransition *trans;
+		struct showone *sequence;
+
+		sequence = nemoshow_sequence_create_easy(show,
+				nemoshow_sequence_create_frame_easy(show,
+					1.0f,
+					nemoshow_sequence_create_set_easy(show,
+						one,
+						"from", "1.0",
+						NULL),
+					NULL),
+				NULL);
+
+		trans = nemoshow_transition_create(nemoshow_search_one(show, "ease1"), 700, 0);
+		nemoshow_transition_attach_sequence(trans, sequence);
+		nemoshow_attach_transition(show, trans);
+
+		nemoactor_dispatch_frame(actor);
+#endif
 
 		minishell_yoyo_destroy(yoyo);
 

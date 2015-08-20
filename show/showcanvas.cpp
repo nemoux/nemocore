@@ -227,7 +227,7 @@ static inline void nemoshow_canvas_render_item(struct nemoshow *show, struct sho
 			NEMOSHOW_CANVAS_CC(canvas, canvas)->drawArc(rect, item->from, item->to - item->from, true, *NEMOSHOW_ITEM_CC(style, fill));
 		if (style->stroke != 0)
 			NEMOSHOW_CANVAS_CC(canvas, canvas)->drawArc(rect, item->from, item->to - item->from, true, *NEMOSHOW_ITEM_CC(style, stroke));
-	} else if (one->sub == NEMOSHOW_PATH_ITEM) {
+	} else if (one->sub == NEMOSHOW_PATH_ITEM || one->sub == NEMOSHOW_PATHGROUP_ITEM) {
 		if (item->from == 0.0f && item->to == 1.0f) {
 			if (style->fill != 0)
 				NEMOSHOW_CANVAS_CC(canvas, canvas)->drawPath(

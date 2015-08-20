@@ -172,7 +172,7 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 		NEMOBOX_APPEND(font->refs, font->srefs, font->nrefs, one);
 	}
 
-	if (one->sub == NEMOSHOW_PATH_ITEM) {
+	if (one->sub == NEMOSHOW_PATH_ITEM || one->sub == NEMOSHOW_PATHGROUP_ITEM) {
 		NEMOSHOW_ITEM_CC(item, path) = new SkPath;
 	}
 
@@ -303,7 +303,7 @@ void nemoshow_item_update_child(struct nemoshow *show, struct showone *one)
 		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 	}
 
-	if (one->sub == NEMOSHOW_PATH_ITEM) {
+	if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
 		NEMOSHOW_ITEM_CC(item, path)->reset();
 
 		nemoshow_item_update_path(show, item, one);
@@ -314,11 +314,13 @@ void nemoshow_item_update_child(struct nemoshow *show, struct showone *one)
 	}
 }
 
-void nemoshow_item_update_text(struct nemoshow *show, struct showone *one)
+void nemoshow_item_update_shape(struct nemoshow *show, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	if (one->sub == NEMOSHOW_TEXT_ITEM) {
+	if (one->sub == NEMOSHOW_PATH_ITEM) {
+		item->length = nemoshow_helper_get_path_length(NEMOSHOW_ITEM_CC(item, path));
+	} else if (one->sub == NEMOSHOW_TEXT_ITEM && (one->dirty & NEMOSHOW_TEXT_DIRTY) != 0) {
 		item->text = nemoobject_gets(&one->object, "d");
 		if (item->text != NULL) {
 			if (NEMOSHOW_FONT_AT(item->font, layout) == NEMOSHOW_NORMAL_LAYOUT) {
@@ -405,7 +407,7 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
 	} else if (one->sub == NEMOSHOW_PIE_ITEM) {
 		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
-	} else if (one->sub == NEMOSHOW_PATH_ITEM) {
+	} else if (one->sub == NEMOSHOW_PATH_ITEM || one->sub == NEMOSHOW_PATHGROUP_ITEM) {
 		box = NEMOSHOW_ITEM_CC(item, path)->getBounds();
 	} else if (one->sub == NEMOSHOW_TEXT_ITEM) {
 		if (item->path == NULL) {
@@ -481,12 +483,11 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 		nemoshow_item_update_style(show, one);
 	if ((one->dirty & NEMOSHOW_CHILD_DIRTY) != 0 && one->nchildren > 0)
 		nemoshow_item_update_child(show, one);
-	if ((one->dirty & NEMOSHOW_TEXT_DIRTY) != 0 ||
-			(one->dirty & NEMOSHOW_SHAPE_DIRTY) != 0)
-		nemoshow_item_update_text(show, one);
 
 	if ((one->dirty & NEMOSHOW_SHAPE_DIRTY) != 0) {
 		nemoshow_canvas_damage_one(item->canvas, one);
+
+		nemoshow_item_update_shape(show, one);
 
 		nemoshow_item_update_boundingbox(show, one);
 	}

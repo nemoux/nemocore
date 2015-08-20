@@ -689,7 +689,7 @@ static inline int nemoshow_svg_load_path(struct svgcontext *context, struct xmln
 	const char *value;
 	const char *d;
 
-	one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
+	one = nemoshow_item_create(NEMOSHOW_PATHGROUP_ITEM);
 	nemoshow_attach_one(context->show, context->one, one);
 
 	nemoshow_one_set_id(one,

@@ -26,10 +26,13 @@ static inline double nemoshow_helper_get_quad_length(SkPoint *pts)
 	double scba = c + b + a;
 	double m0 = 0.25f / c;
 	double m1 = q / (8 * pow(c, 1.5f));
+	double l0 = 2 * sqrt(c * scba) + tcb;
+	double l1 = 2 * sqrt(c * a) + b;
 
-	return
-		m0 * (tcb * sqrt(scba) - b * sqrt(a)) +
-		m1 * (log(2 * sqrt(c * scba) + tcb) - log(2 * sqrt(c * a) + b));
+	if (l0 == 0.0f || l1 == 0.0f)
+		return SkPoint::Distance(pts[0], pts[1]) + SkPoint::Distance(pts[1], pts[2]);
+
+	return m0 * (tcb * sqrt(scba) - b * sqrt(a)) + m1 * (log(l0) - log(l1));
 }
 
 static inline void nemoshow_helper_convert_cubic_to_quad(SkPoint *src, SkPoint *dst)
