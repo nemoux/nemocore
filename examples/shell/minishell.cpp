@@ -40,7 +40,7 @@
 
 #include <minishell.h>
 #include <minigrab.h>
-#include <miniyoyo.h>
+#include <miniyoyo.hpp>
 
 #include <showitem.h>
 #include <showitem.hpp>
@@ -304,52 +304,21 @@ static int minishell_dispatch_yoyo_grab(struct talegrab *base, uint32_t type, st
 	if (type & NEMOTALE_DOWN_EVENT) {
 		struct miniyoyo *yoyo = (struct miniyoyo *)grab->data;
 
-		NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(yoyo->path), path)->moveTo(event->x, event->y);
-
-		yoyo->x0 = yoyo->x1 = yoyo->x2 = event->x;
-		yoyo->y0 = yoyo->y1 = yoyo->y2 = event->y;
+		minishell_yoyo_dispatch_down_event(yoyo, event->x, event->y);
 	} else if (type & NEMOTALE_MOTION_EVENT) {
 		struct miniyoyo *yoyo = (struct miniyoyo *)grab->data;
-		double sx, sy, ex, ey;
-		double x0, y0, x1, y1, x2, y2;
-		int32_t minx, miny, maxx, maxy;
-		double outer;
 
-		yoyo->x2 = yoyo->x1;
-		yoyo->y2 = yoyo->y1;
-		yoyo->x1 = yoyo->x0;
-		yoyo->y1 = yoyo->y0;
-		yoyo->x0 = event->x;
-		yoyo->y0 = event->y;
-
-		sx = (yoyo->x2 + yoyo->x1) * 0.5f;
-		sy = (yoyo->y2 + yoyo->y1) * 0.5f;
-		ex = (yoyo->x1 + yoyo->x0) * 0.5f;
-		ey = (yoyo->y1 + yoyo->y0) * 0.5f;
-
-		x0 = (sx + 2.0f * yoyo->x1) / 3.0f;
-		y0 = (sy + 2.0f * yoyo->y1) / 3.0f;
-		x1 = (ex + 2.0f * yoyo->x1) / 3.0f;
-		y1 = (ey + 2.0f * yoyo->y1) / 3.0f;
-		x2 = ex;
-		y2 = ey;
-
-		NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(yoyo->path), path)->cubicTo(x0, y0, x1, y1, x2, y2);
-
-		outer = nemoshow_item_get_outer(yoyo->path);
-
-		minx = MIN(MIN(sx, x0), MIN(x1, x2)) - outer;
-		miny = MIN(MIN(sy, y0), MIN(y1, y2)) - outer;
-		maxx = MAX(MAX(sx, x0), MAX(x1, x2)) + outer;
-		maxy = MAX(MAX(sy, y0), MAX(y1, y2)) + outer;
+		minishell_yoyo_dispatch_motion_event(yoyo, event->x, event->y);
 
 		nemoshow_item_update_boundingbox(show, yoyo->path);
 		nemoshow_canvas_damage_region(NEMOSHOW_ITEM_AT(yoyo->path, canvas),
-				minx, miny, maxx - minx, maxy - miny);
+				yoyo->minx, yoyo->miny, yoyo->maxx - yoyo->minx, yoyo->maxy - yoyo->miny);
 
 		nemoactor_dispatch_frame(actor);
 	} else if (type & NEMOTALE_UP_EVENT) {
 		struct miniyoyo *yoyo = (struct miniyoyo *)grab->data;
+
+		minishell_yoyo_dispatch_up_event(yoyo);
 
 		nemoshow_canvas_damage_one(NEMOSHOW_ITEM_AT(yoyo->path, canvas), yoyo->path);
 		nemoshow_detach_one(show, NEMOSHOW_ITEM_AT(yoyo->path, canvas), yoyo->path);
@@ -440,8 +409,6 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 				struct minigrab *grab;
 				struct miniyoyo *yoyo;
 
-				yoyo = minishell_yoyo_create();
-
 				canvas = nemoshow_search_one(show, "mini");
 
 				blur = nemoshow_blur_create();
@@ -453,7 +420,7 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 				nemoshow_one_dirty(blur, NEMOSHOW_SHAPE_DIRTY | NEMOSHOW_STYLE_DIRTY);
 				nemoshow_blur_arrange(show, blur);
 
-				yoyo->path = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
+				one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
 				nemoshow_attach_one(show, canvas, one);
 				nemoshow_one_sets(one, "blur", "blur0");
 				nemoshow_item_arrange(show, one);
@@ -461,6 +428,11 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 				nemoshow_item_set_stroke_width(one, 3.0f);
 
 				nemoactor_dispatch_frame(actor);
+
+				yoyo = minishell_yoyo_create(
+						nemocompz_get_scene_width(actor->compz),
+						nemocompz_get_scene_height(actor->compz),
+						one);
 
 				grab = minishell_grab_create(mini, tale, event, minishell_dispatch_yoyo_grab, yoyo);
 				nemotale_dispatch_grab(tale, event->device, type, event);
