@@ -17,10 +17,10 @@ struct minigrab {
 	double dx, dy;
 
 	struct minishell *mini;
-	void *data;
+	void *userdata;
 };
 
-extern struct minigrab *minishell_grab_create(struct minishell *mini, struct nemotale *tale, struct taleevent *event, nemotale_dispatch_grab_t dispatch, void *data);
+extern struct minigrab *minishell_grab_create(struct minishell *mini, struct nemotale *tale, struct taleevent *event, nemotale_dispatch_grab_t dispatch, void *userdata);
 extern void minishell_grab_destroy(struct minigrab *grab);
 
 #ifdef __cplusplus

@@ -6,12 +6,9 @@
 #include <errno.h>
 
 #include <miniyoyo.hpp>
-
-#include <showitem.h>
-#include <showitem.hpp>
 #include <showhelper.h>
 
-struct miniyoyo *minishell_yoyo_create(int32_t width, int32_t height, struct showone *path)
+struct miniyoyo *minishell_yoyo_create(int32_t width, int32_t height, SkPath *path)
 {
 	struct miniyoyo *yoyo;
 
@@ -40,19 +37,18 @@ void minishell_yoyo_destroy(struct miniyoyo *yoyo)
 	free(yoyo);
 }
 
-void minishell_yoyo_dispatch_down_event(struct miniyoyo *yoyo, double x, double y)
+void minishell_yoyo_prepare(struct miniyoyo *yoyo, double x, double y)
 {
-	NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(yoyo->path), path)->moveTo(x, y);
+	yoyo->path->moveTo(x, y);
 
 	yoyo->x0 = yoyo->x1 = yoyo->x2 = x;
 	yoyo->y0 = yoyo->y1 = yoyo->y2 = y;
 }
 
-void minishell_yoyo_dispatch_motion_event(struct miniyoyo *yoyo, double x, double y)
+void minishell_yoyo_update(struct miniyoyo *yoyo, double x, double y, int32_t *minx, int32_t *miny, int32_t *maxx, int32_t *maxy)
 {
 	double sx, sy, ex, ey;
 	double x0, y0, x1, y1, x2, y2;
-	double outer;
 
 	yoyo->x2 = yoyo->x1;
 	yoyo->y2 = yoyo->y1;
@@ -73,17 +69,15 @@ void minishell_yoyo_dispatch_motion_event(struct miniyoyo *yoyo, double x, doubl
 	x2 = ex;
 	y2 = ey;
 
-	NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(yoyo->path), path)->cubicTo(x0, y0, x1, y1, x2, y2);
+	yoyo->path->cubicTo(x0, y0, x1, y1, x2, y2);
 
-	outer = nemoshow_item_get_outer(yoyo->path);
-
-	yoyo->minx = MIN(MIN(sx, x0), MIN(x1, x2)) - outer;
-	yoyo->miny = MIN(MIN(sy, y0), MIN(y1, y2)) - outer;
-	yoyo->maxx = MAX(MAX(sx, x0), MAX(x1, x2)) + outer;
-	yoyo->maxy = MAX(MAX(sy, y0), MAX(y1, y2)) + outer;
+	*minx = MIN(MIN(sx, x0), MIN(x1, x2));
+	*miny = MIN(MIN(sy, y0), MIN(y1, y2));
+	*maxx = MAX(MAX(sx, x0), MAX(x1, x2));
+	*maxy = MAX(MAX(sy, y0), MAX(y1, y2));
 }
 
-void minishell_yoyo_dispatch_up_event(struct miniyoyo *yoyo)
+void minishell_yoyo_finish(struct miniyoyo *yoyo)
 {
 	SkBitmapDevice device(*yoyo->bitmap);
 	SkCanvas canvas(&device);
@@ -92,7 +86,7 @@ void minishell_yoyo_dispatch_up_event(struct miniyoyo *yoyo)
 	paint.setStyle(SkPaint::kFill_Style);
 	paint.setColor(SK_ColorYELLOW);
 
-	canvas.drawPath(*NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(yoyo->path), path), paint);
+	canvas.drawPath(*yoyo->path, paint);
 }
 
 SkColor minishell_yoyo_get_pixel(struct miniyoyo *yoyo, int x, int y)

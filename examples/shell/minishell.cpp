@@ -253,12 +253,12 @@ static int minishell_dispatch_touch_grab(struct talegrab *base, uint32_t type, s
 	struct nemoactor *actor = NEMOSHOW_AT(show, actor);
 
 	if (type & NEMOTALE_DOWN_EVENT) {
-		struct showone *one = (struct showone *)grab->data;
+		struct showone *one = (struct showone *)grab->userdata;
 
 		grab->dx = NEMOSHOW_ITEM_AT(one, x) - grab->x;
 		grab->dy = NEMOSHOW_ITEM_AT(one, y) - grab->y;
 	} else if (type & NEMOTALE_MOTION_EVENT) {
-		struct showone *one = (struct showone *)grab->data;
+		struct showone *one = (struct showone *)grab->userdata;
 
 		NEMOSHOW_ITEM_AT(one, x) = event->x + grab->dx;
 		NEMOSHOW_ITEM_AT(one, y) = event->y + grab->dy;
@@ -266,7 +266,7 @@ static int minishell_dispatch_touch_grab(struct talegrab *base, uint32_t type, s
 
 		nemoactor_dispatch_frame(actor);
 	} else if (type & NEMOTALE_UP_EVENT) {
-		struct showone *one = (struct showone *)grab->data;
+		struct showone *one = (struct showone *)grab->userdata;
 		struct showtransition *trans;
 		struct showone *sequence;
 
@@ -302,26 +302,36 @@ static int minishell_dispatch_yoyo_grab(struct talegrab *base, uint32_t type, st
 	struct nemoactor *actor = NEMOSHOW_AT(show, actor);
 
 	if (type & NEMOTALE_DOWN_EVENT) {
-		struct miniyoyo *yoyo = (struct miniyoyo *)grab->data;
+		struct miniyoyo *yoyo = (struct miniyoyo *)grab->userdata;
 
-		minishell_yoyo_dispatch_down_event(yoyo, event->x, event->y);
+		minishell_yoyo_prepare(yoyo, event->x, event->y);
 	} else if (type & NEMOTALE_MOTION_EVENT) {
-		struct miniyoyo *yoyo = (struct miniyoyo *)grab->data;
+		struct miniyoyo *yoyo = (struct miniyoyo *)grab->userdata;
+		struct showone *one = (struct showone *)minishell_yoyo_get_userdata(yoyo);
+		int32_t minx, miny, maxx, maxy;
+		double outer;
 
-		minishell_yoyo_dispatch_motion_event(yoyo, event->x, event->y);
+		minishell_yoyo_update(yoyo, event->x, event->y, &minx, &miny, &maxx, &maxy);
 
-		nemoshow_item_update_boundingbox(show, yoyo->path);
-		nemoshow_canvas_damage_region(NEMOSHOW_ITEM_AT(yoyo->path, canvas),
-				yoyo->minx, yoyo->miny, yoyo->maxx - yoyo->minx, yoyo->maxy - yoyo->miny);
+		outer = nemoshow_item_get_outer(one);
+		minx -= outer;
+		miny -= outer;
+		maxx += outer;
+		maxy += outer;
+
+		nemoshow_item_update_boundingbox(show, one);
+		nemoshow_canvas_damage_region(NEMOSHOW_ITEM_AT(one, canvas),
+				minx, miny, maxx - minx, maxy - miny);
 
 		nemoactor_dispatch_frame(actor);
 	} else if (type & NEMOTALE_UP_EVENT) {
-		struct miniyoyo *yoyo = (struct miniyoyo *)grab->data;
+		struct miniyoyo *yoyo = (struct miniyoyo *)grab->userdata;
+		struct showone *one = (struct showone *)minishell_yoyo_get_userdata(yoyo);
 
-		minishell_yoyo_dispatch_up_event(yoyo);
+		minishell_yoyo_finish(yoyo);
 
-		nemoshow_canvas_damage_one(NEMOSHOW_ITEM_AT(yoyo->path, canvas), yoyo->path);
-		nemoshow_detach_one(show, NEMOSHOW_ITEM_AT(yoyo->path, canvas), yoyo->path);
+		nemoshow_canvas_damage_one(NEMOSHOW_ITEM_AT(one, canvas), one);
+		nemoshow_detach_one(show, NEMOSHOW_ITEM_AT(one, canvas), one);
 
 		nemoactor_dispatch_frame(actor);
 
@@ -432,7 +442,8 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 				yoyo = minishell_yoyo_create(
 						nemocompz_get_scene_width(actor->compz),
 						nemocompz_get_scene_height(actor->compz),
-						one);
+						NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(one), path));
+				minishell_yoyo_set_userdata(yoyo, one);
 
 				grab = minishell_grab_create(mini, tale, event, minishell_dispatch_yoyo_grab, yoyo);
 				nemotale_dispatch_grab(tale, event->device, type, event);

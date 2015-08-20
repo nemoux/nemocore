@@ -8,7 +8,7 @@
 #include <minigrab.h>
 #include <talehelper.h>
 
-struct minigrab *minishell_grab_create(struct minishell *mini, struct nemotale *tale, struct taleevent *event, nemotale_dispatch_grab_t dispatch, void *data)
+struct minigrab *minishell_grab_create(struct minishell *mini, struct nemotale *tale, struct taleevent *event, nemotale_dispatch_grab_t dispatch, void *userdata)
 {
 	struct minigrab *grab;
 
@@ -20,7 +20,7 @@ struct minigrab *minishell_grab_create(struct minishell *mini, struct nemotale *
 	grab->mini = mini;
 	grab->x = event->x;
 	grab->y = event->y;
-	grab->data = data;
+	grab->userdata = userdata;
 
 	nemotale_prepare_grab(&grab->base, tale, event->device, dispatch);
 
