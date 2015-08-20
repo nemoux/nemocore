@@ -58,6 +58,21 @@ static inline int nemotale_is_up_event(struct nemotale *tale, struct taleevent *
 	return type & NEMOTALE_UP_EVENT;
 }
 
+static inline int nemotale_is_touch_down(struct nemotale *tale, struct taleevent *event, uint32_t type)
+{
+	return type & NEMOTALE_TOUCH_DOWN_EVENT;
+}
+
+static inline int nemotale_is_touch_up(struct nemotale *tale, struct taleevent *event, uint32_t type)
+{
+	return type & NEMOTALE_TOUCH_UP_EVENT;
+}
+
+static inline int nemotale_is_touch_motion(struct nemotale *tale, struct taleevent *event, uint32_t type)
+{
+	return type & NEMOTALE_TOUCH_MOTION_EVENT;
+}
+
 static inline int nemotale_is_pointer_enter(struct nemotale *tale, struct taleevent *event, uint32_t type)
 {
 	return type & NEMOTALE_POINTER_ENTER_EVENT;
@@ -66,6 +81,31 @@ static inline int nemotale_is_pointer_enter(struct nemotale *tale, struct taleev
 static inline int nemotale_is_pointer_leave(struct nemotale *tale, struct taleevent *event, uint32_t type)
 {
 	return type & NEMOTALE_POINTER_LEAVE_EVENT;
+}
+
+static inline int nemotale_is_pointer_left_down(struct nemotale *tale, struct taleevent *event, uint32_t type)
+{
+	return type & NEMOTALE_POINTER_LEFT_DOWN_EVENT;
+}
+
+static inline int nemotale_is_pointer_left_up(struct nemotale *tale, struct taleevent *event, uint32_t type)
+{
+	return type & NEMOTALE_POINTER_LEFT_UP_EVENT;
+}
+
+static inline int nemotale_is_pointer_right_down(struct nemotale *tale, struct taleevent *event, uint32_t type)
+{
+	return type & NEMOTALE_POINTER_RIGHT_DOWN_EVENT;
+}
+
+static inline int nemotale_is_pointer_right_up(struct nemotale *tale, struct taleevent *event, uint32_t type)
+{
+	return type & NEMOTALE_POINTER_RIGHT_UP_EVENT;
+}
+
+static inline int nemotale_is_pointer_motion(struct nemotale *tale, struct taleevent *event, uint32_t type)
+{
+	return type & NEMOTALE_POINTER_MOTION_EVENT;
 }
 
 #ifdef __cplusplus

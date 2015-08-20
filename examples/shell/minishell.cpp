@@ -327,19 +327,12 @@ static int minishell_dispatch_yoyo_grab(struct talegrab *base, uint32_t type, st
 	} else if (type & NEMOTALE_UP_EVENT) {
 		struct miniyoyo *yoyo = (struct miniyoyo *)grab->userdata;
 		struct showone *one = (struct showone *)minishell_yoyo_get_userdata(yoyo);
+		struct showtransition *trans;
+		struct showone *sequence;
 
 		minishell_yoyo_finish(yoyo);
 
 		nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
-
-#if	0
-		nemoshow_canvas_damage_one(NEMOSHOW_ITEM_AT(one, canvas), one);
-		nemoshow_detach_one(show, NEMOSHOW_ITEM_AT(one, canvas), one);
-
-		nemoactor_dispatch_frame(actor);
-#else
-		struct showtransition *trans;
-		struct showone *sequence;
 
 		sequence = nemoshow_sequence_create_easy(show,
 				nemoshow_sequence_create_frame_easy(show,
@@ -356,7 +349,6 @@ static int minishell_dispatch_yoyo_grab(struct talegrab *base, uint32_t type, st
 		nemoshow_attach_transition(show, trans);
 
 		nemoactor_dispatch_frame(actor);
-#endif
 
 		minishell_yoyo_destroy(yoyo);
 
@@ -396,8 +388,7 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 			struct nemoactor *actor = NEMOSHOW_AT(show, actor);
 			struct minishell *mini = (struct minishell *)nemoshow_get_userdata(show);
 
-#if	0
-			if (nemotale_is_down_event(tale, event, type)) {
+			if (nemotale_is_touch_down(tale, event, type)) {
 				struct showone *canvas;
 				struct showone *one;
 				struct showtransition *trans;
@@ -433,9 +424,8 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 				grab = minishell_grab_create(mini, tale, event, minishell_dispatch_touch_grab, one);
 				nemotale_dispatch_grab(tale, event->device, type, event);
 			}
-#endif
 
-			if (nemotale_is_down_event(tale, event, type)) {
+			if (nemotale_is_pointer_left_down(tale, event, type)) {
 				struct showone *canvas;
 				struct showone *one;
 				struct showone *blur;
