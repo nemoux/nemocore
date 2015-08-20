@@ -48,6 +48,8 @@ extern uint32_t time_current_msecs(void);
 extern int random_get_int(int min, int max);
 extern double random_get_double(double min, double max);
 
+extern double point_get_distance(double x0, double y0, double x1, double y1);
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

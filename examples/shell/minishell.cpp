@@ -294,6 +294,9 @@ static int minishell_dispatch_touch_grab(struct talegrab *base, uint32_t type, s
 	return 1;
 }
 
+#define	MINISHELL_YOYO_UPDATE_INTERVAL		(300)
+#define	MINISHELL_YOYO_UPDATE_DISTANCE		(10.0f)
+
 static int minishell_dispatch_yoyo_grab(struct talegrab *base, uint32_t type, struct taleevent *event)
 {
 	struct minigrab *grab = (struct minigrab *)container_of(base, struct minigrab, base);
@@ -306,24 +309,31 @@ static int minishell_dispatch_yoyo_grab(struct talegrab *base, uint32_t type, st
 
 		minishell_yoyo_prepare(yoyo, event->x, event->y);
 	} else if (type & NEMOTALE_MOTION_EVENT) {
-		struct miniyoyo *yoyo = (struct miniyoyo *)grab->userdata;
-		struct showone *one = (struct showone *)minishell_yoyo_get_userdata(yoyo);
-		int32_t minx, miny, maxx, maxy;
-		double outer;
+		if (grab->ltime + MINISHELL_YOYO_UPDATE_INTERVAL < event->time ||
+				point_get_distance(grab->lx, grab->ly, event->x, event->y) > MINISHELL_YOYO_UPDATE_DISTANCE) {
+			struct miniyoyo *yoyo = (struct miniyoyo *)grab->userdata;
+			struct showone *one = (struct showone *)minishell_yoyo_get_userdata(yoyo);
+			int32_t minx, miny, maxx, maxy;
+			double outer;
 
-		minishell_yoyo_update(yoyo, event->x, event->y, &minx, &miny, &maxx, &maxy);
+			minishell_yoyo_update(yoyo, event->x, event->y, &minx, &miny, &maxx, &maxy);
 
-		outer = nemoshow_item_get_outer(one);
-		minx -= outer;
-		miny -= outer;
-		maxx += outer;
-		maxy += outer;
+			outer = nemoshow_item_get_outer(one);
+			minx -= outer;
+			miny -= outer;
+			maxx += outer;
+			maxy += outer;
 
-		nemoshow_item_update_boundingbox(show, one);
-		nemoshow_canvas_damage_region(NEMOSHOW_ITEM_AT(one, canvas),
-				minx, miny, maxx - minx, maxy - miny);
+			nemoshow_item_update_boundingbox(show, one);
+			nemoshow_canvas_damage_region(NEMOSHOW_ITEM_AT(one, canvas),
+					minx, miny, maxx - minx, maxy - miny);
 
-		nemoactor_dispatch_frame(actor);
+			nemoactor_dispatch_frame(actor);
+
+			grab->ltime = event->time;
+			grab->lx = event->x;
+			grab->ly = event->y;
+		}
 	} else if (type & NEMOTALE_UP_EVENT) {
 		struct miniyoyo *yoyo = (struct miniyoyo *)grab->userdata;
 		struct showone *one = (struct showone *)minishell_yoyo_get_userdata(yoyo);

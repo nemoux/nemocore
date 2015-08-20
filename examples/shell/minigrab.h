@@ -16,6 +16,9 @@ struct minigrab {
 	double x, y;
 	double dx, dy;
 
+	double lx, ly;
+	uint32_t ltime;
+
 	struct minishell *mini;
 	void *userdata;
 };
