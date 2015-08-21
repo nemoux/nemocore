@@ -81,7 +81,7 @@ int nemoshow_svg_arrange(struct nemoshow *show, struct showone *one)
 	} else {
 		for (i = 0; i < one->nchildren; i++) {
 			if (one->children[i]->type == NEMOSHOW_MATRIX_TYPE) {
-				svg->transform = NEMOSHOW_INTERN_TRANSFORM;
+				svg->transform = NEMOSHOW_CHILDREN_TRANSFORM;
 
 				break;
 			}
@@ -129,9 +129,9 @@ static inline void nemoshow_svg_update_boundingbox(struct nemoshow *show, struct
 
 	box = SkRect::MakeXYWH(0, 0, svg->width, svg->height);
 
-	if (svg->transform == NEMOSHOW_EXTERN_TRANSFORM) {
+	if (svg->transform & NEMOSHOW_EXTERN_TRANSFORM) {
 		NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(svg->matrix), matrix)->mapRect(&box);
-	} else if (svg->transform == NEMOSHOW_INTERN_TRANSFORM || svg->transform == NEMOSHOW_DIRECT_TRANSFORM) {
+	} else if (svg->transform & NEMOSHOW_INTERN_TRANSFORM) {
 		NEMOSHOW_SVG_CC(svg, matrix)->mapRect(&box);
 	}
 
@@ -140,9 +140,9 @@ static inline void nemoshow_svg_update_boundingbox(struct nemoshow *show, struct
 
 		nemoshow_one_update_alone(show, group);
 
-		if (pitem->transform == NEMOSHOW_EXTERN_TRANSFORM) {
+		if (pitem->transform & NEMOSHOW_EXTERN_TRANSFORM) {
 			NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(pitem->matrix), matrix)->mapRect(&box);
-		} else if (pitem->transform == NEMOSHOW_INTERN_TRANSFORM || pitem->transform == NEMOSHOW_DIRECT_TRANSFORM) {
+		} else if (pitem->transform & NEMOSHOW_INTERN_TRANSFORM) {
 			NEMOSHOW_ITEM_CC(pitem, matrix)->mapRect(&box);
 		}
 	}

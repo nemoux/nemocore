@@ -259,16 +259,14 @@ static int minishell_dispatch_touch_grab(struct talegrab *base, uint32_t type, s
 
 		minishell_palm_prepare(mini, grab);
 
-		grab->dx = NEMOSHOW_ITEM_AT(one, x) - grab->x;
-		grab->dy = NEMOSHOW_ITEM_AT(one, y) - grab->y;
+		grab->dx = NEMOSHOW_ITEM_AT(one, tx) - grab->x;
+		grab->dy = NEMOSHOW_ITEM_AT(one, ty) - grab->y;
 	} else if (type & NEMOTALE_MOTION_EVENT) {
 		struct showone *one = grab->one;
 
 		minishell_palm_update(mini, grab);
 
-		NEMOSHOW_ITEM_AT(one, x) = event->x + grab->dx;
-		NEMOSHOW_ITEM_AT(one, y) = event->y + grab->dy;
-		nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
+		nemoshow_item_translate(one, event->x + grab->dx, event->y + grab->dy);
 
 		nemoactor_dispatch_frame(actor);
 
@@ -403,10 +401,10 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 				one = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
 				nemoshow_attach_one(show, canvas, one);
 				nemoshow_item_arrange(show, one);
-				NEMOSHOW_ITEM_AT(one, x) = event->x;
-				NEMOSHOW_ITEM_AT(one, y) = event->y;
 				NEMOSHOW_ITEM_AT(one, r) = 0.0f;
 				nemoshow_item_set_fill_color(one, 255, 255, 0, 255);
+				nemoshow_item_set_tsr(one);
+				nemoshow_item_translate(one, event->x, event->y);
 
 				sequence = nemoshow_sequence_create_easy(show,
 						nemoshow_sequence_create_frame_easy(show,

@@ -28,9 +28,11 @@ typedef enum {
 
 typedef enum {
 	NEMOSHOW_NONE_TRANSFORM = 0,
-	NEMOSHOW_DIRECT_TRANSFORM = 1,
-	NEMOSHOW_INTERN_TRANSFORM = 2,
-	NEMOSHOW_EXTERN_TRANSFORM = 3,
+	NEMOSHOW_INTERN_TRANSFORM = (1 << 0),
+	NEMOSHOW_EXTERN_TRANSFORM = (1 << 1),
+	NEMOSHOW_CHILDREN_TRANSFORM = (1 << 8) | (1 << 0),
+	NEMOSHOW_DIRECT_TRANSFORM = (1 << 9) | (1 << 0),
+	NEMOSHOW_TSR_TRANSFORM = (1 << 10) | (1 << 0),
 	NEMOSHOW_LAST_TRANSFORM
 } NemoShowItemTransform;
 
@@ -71,6 +73,11 @@ struct showitem {
 
 	int transform;
 
+	double tx, ty;
+	double ro;
+	double sx, sy;
+	double px, py;
+
 	void *cc;
 };
 
@@ -85,10 +92,12 @@ extern int nemoshow_item_update(struct nemoshow *show, struct showone *one);
 
 extern void nemoshow_item_update_style(struct nemoshow *show, struct showone *one);
 extern void nemoshow_item_update_child(struct nemoshow *show, struct showone *one);
+extern void nemoshow_item_update_matrix(struct nemoshow *show, struct showone *one);
 extern void nemoshow_item_update_text(struct nemoshow *show, struct showone *one);
 extern void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one);
 
 extern void nemoshow_item_set_matrix(struct showone *one, double m[9]);
+extern void nemoshow_item_set_tsr(struct showone *one);
 extern void nemoshow_item_set_shader(struct showone *one, struct showone *shader);
 
 extern double nemoshow_item_get_outer(struct showone *one);
@@ -122,6 +131,45 @@ static inline void nemoshow_item_set_stroke_width(struct showone *one, double wi
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	item->stroke_width = width;
+}
+
+static inline void nemoshow_item_translate(struct showone *one, double tx, double ty)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	item->tx = tx;
+	item->ty = ty;
+
+	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
+}
+
+static inline void nemoshow_item_rotate(struct showone *one, double ro)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	item->ro = ro;
+
+	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
+}
+
+static inline void nemoshow_item_scale(struct showone *one, double sx, double sy)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	item->sx = sx;
+	item->sy = sy;
+
+	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
+}
+
+static inline void nemoshow_item_pivot(struct showone *one, double px, double py)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	item->px = px;
+	item->py = py;
+
+	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
 }
 
 #ifdef __cplusplus

@@ -46,6 +46,9 @@ struct showone *nemoshow_item_create(int type)
 	item->from = 0.0f;
 	item->to = 1.0f;
 
+	item->sx = 1.0f;
+	item->sy = 1.0f;
+
 	one = &item->base;
 	one->type = NEMOSHOW_ITEM_TYPE;
 	one->sub = type;
@@ -61,6 +64,14 @@ struct showone *nemoshow_item_create(int type)
 	nemoobject_set_reserved(&one->object, "width", &item->width, sizeof(double));
 	nemoobject_set_reserved(&one->object, "height", &item->height, sizeof(double));
 	nemoobject_set_reserved(&one->object, "r", &item->r, sizeof(double));
+
+	nemoobject_set_reserved(&one->object, "tx", &item->tx, sizeof(double));
+	nemoobject_set_reserved(&one->object, "ty", &item->ty, sizeof(double));
+	nemoobject_set_reserved(&one->object, "sx", &item->sx, sizeof(double));
+	nemoobject_set_reserved(&one->object, "sy", &item->sy, sizeof(double));
+	nemoobject_set_reserved(&one->object, "px", &item->px, sizeof(double));
+	nemoobject_set_reserved(&one->object, "py", &item->py, sizeof(double));
+	nemoobject_set_reserved(&one->object, "ro", &item->ro, sizeof(double));
 
 	nemoobject_set_reserved(&one->object, "from", &item->from, sizeof(double));
 	nemoobject_set_reserved(&one->object, "to", &item->to, sizeof(double));
@@ -144,7 +155,7 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 	} else {
 		for (i = 0; i < one->nchildren; i++) {
 			if (one->children[i]->type == NEMOSHOW_MATRIX_TYPE) {
-				item->transform = NEMOSHOW_INTERN_TRANSFORM;
+				item->transform = NEMOSHOW_CHILDREN_TRANSFORM;
 
 				break;
 			}
@@ -286,7 +297,7 @@ void nemoshow_item_update_child(struct nemoshow *show, struct showone *one)
 	struct showone *child;
 	int i;
 
-	if (item->transform == NEMOSHOW_INTERN_TRANSFORM) {
+	if (item->transform == NEMOSHOW_CHILDREN_TRANSFORM) {
 		NEMOSHOW_ITEM_CC(item, matrix)->setIdentity();
 
 		for (i = 0; i < one->nchildren; i++) {
@@ -309,6 +320,33 @@ void nemoshow_item_update_child(struct nemoshow *show, struct showone *one)
 		nemoshow_item_update_path(show, item, one);
 
 		item->length = nemoshow_helper_get_path_length(NEMOSHOW_ITEM_CC(item, path));
+
+		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
+	}
+}
+
+void nemoshow_item_update_matrix(struct nemoshow *show, struct showone *one)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	if (item->transform == NEMOSHOW_TSR_TRANSFORM) {
+		NEMOSHOW_ITEM_CC(item, matrix)->setIdentity();
+
+		if (item->ro != 0.0f) {
+			if (item->px != 0.0f || item->py != 0.0f) {
+				NEMOSHOW_ITEM_CC(item, matrix)->postTranslate(-item->px, -item->py);
+				NEMOSHOW_ITEM_CC(item, matrix)->postRotate(item->ro);
+				NEMOSHOW_ITEM_CC(item, matrix)->postTranslate(item->px, item->py);
+			} else {
+				NEMOSHOW_ITEM_CC(item, matrix)->postRotate(item->ro);
+			}
+		}
+
+		if (item->sx != 1.0f || item->sy != 1.0f) {
+			NEMOSHOW_ITEM_CC(item, matrix)->postScale(item->sx, item->sy);
+		}
+
+		NEMOSHOW_ITEM_CC(item, matrix)->postTranslate(item->tx, item->ty);
 
 		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 	}
@@ -435,9 +473,9 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 	if (item->stroke != 0)
 		box.outset(item->stroke_width, item->stroke_width);
 
-	if (item->transform == NEMOSHOW_EXTERN_TRANSFORM) {
+	if (item->transform & NEMOSHOW_EXTERN_TRANSFORM) {
 		NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(item->matrix), matrix)->mapRect(&box);
-	} else if (item->transform == NEMOSHOW_INTERN_TRANSFORM || item->transform == NEMOSHOW_DIRECT_TRANSFORM) {
+	} else if (item->transform & NEMOSHOW_INTERN_TRANSFORM) {
 		NEMOSHOW_ITEM_CC(item, matrix)->mapRect(&box);
 	}
 
@@ -446,9 +484,9 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 
 		nemoshow_one_update_alone(show, group);
 
-		if (pitem->transform == NEMOSHOW_EXTERN_TRANSFORM) {
+		if (pitem->transform & NEMOSHOW_EXTERN_TRANSFORM) {
 			NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(pitem->matrix), matrix)->mapRect(&box);
-		} else if (pitem->transform == NEMOSHOW_INTERN_TRANSFORM || pitem->transform == NEMOSHOW_DIRECT_TRANSFORM) {
+		} else if (pitem->transform & NEMOSHOW_INTERN_TRANSFORM) {
 			NEMOSHOW_ITEM_CC(pitem, matrix)->mapRect(&box);
 		}
 	}
@@ -483,6 +521,8 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 		nemoshow_item_update_style(show, one);
 	if ((one->dirty & NEMOSHOW_CHILD_DIRTY) != 0 && one->nchildren > 0)
 		nemoshow_item_update_child(show, one);
+	if ((one->dirty & NEMOSHOW_MATRIX_DIRTY) != 0)
+		nemoshow_item_update_matrix(show, one);
 
 	if ((one->dirty & NEMOSHOW_SHAPE_DIRTY) != 0) {
 		nemoshow_canvas_damage_one(item->canvas, one);
@@ -509,6 +549,13 @@ void nemoshow_item_set_matrix(struct showone *one, double m[9])
 	NEMOSHOW_ITEM_CC(item, matrix)->set9(args);
 
 	item->transform = NEMOSHOW_DIRECT_TRANSFORM;
+}
+
+void nemoshow_item_set_tsr(struct showone *one)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	item->transform = NEMOSHOW_TSR_TRANSFORM;
 }
 
 void nemoshow_item_set_shader(struct showone *one, struct showone *shader)
