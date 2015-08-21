@@ -97,9 +97,9 @@ static inline void nemoshow_item_set_fill_color(struct showone *one, double r, d
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	item->fills[0] = r;
+	item->fills[2] = r;
 	item->fills[1] = g;
-	item->fills[2] = b;
+	item->fills[0] = b;
 	item->fills[3] = a;
 
 	item->fill = 1;
@@ -109,9 +109,9 @@ static inline void nemoshow_item_set_stroke_color(struct showone *one, double r,
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	item->strokes[0] = r;
+	item->strokes[2] = r;
 	item->strokes[1] = g;
-	item->strokes[2] = b;
+	item->strokes[0] = b;
 	item->strokes[3] = a;
 
 	item->stroke = 1;

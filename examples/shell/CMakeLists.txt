@@ -43,6 +43,7 @@ add_executable(minishell
 	minishell.cpp
 	minigrab.cpp
 	miniyoyo.cpp
+	minipalm.cpp
 	talehelper.c
 	showhelper.c
 	)

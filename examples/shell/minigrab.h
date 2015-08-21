@@ -9,6 +9,7 @@ NEMO_BEGIN_EXTERN_C
 
 #include <minishell.h>
 #include <talehelper.h>
+#include <showhelper.h>
 
 typedef enum {
 	MINISHELL_NORMAL_GRAB = 0,
@@ -23,7 +24,8 @@ struct minigrab {
 
 	int type;
 	uint32_t serial;
-	int captain;
+
+	struct showone *one;
 
 	double x, y;
 	double dx, dy;
@@ -35,7 +37,7 @@ struct minigrab {
 	void *userdata;
 };
 
-extern struct minigrab *minishell_grab_create(struct minishell *mini, struct nemotale *tale, struct taleevent *event, nemotale_dispatch_grab_t dispatch, void *userdata);
+extern struct minigrab *minishell_grab_create(struct minishell *mini, struct nemotale *tale, struct taleevent *event, struct showone *one, nemotale_dispatch_grab_t dispatch, void *userdata);
 extern void minishell_grab_destroy(struct minigrab *grab);
 
 #ifdef __cplusplus

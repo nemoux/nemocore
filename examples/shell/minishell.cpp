@@ -31,6 +31,7 @@
 #include <evdevbackend.h>
 #include <tuiobackend.h>
 #include <waylandhelper.h>
+#include <geometryhelper.h>
 #include <talehelper.h>
 #include <showhelper.h>
 #include <nemoxml.h>
@@ -41,6 +42,7 @@
 #include <minishell.h>
 #include <minigrab.h>
 #include <miniyoyo.hpp>
+#include <minipalm.h>
 
 #include <showitem.h>
 #include <showitem.hpp>
@@ -253,117 +255,16 @@ static int minishell_dispatch_touch_grab(struct talegrab *base, uint32_t type, s
 	struct nemoactor *actor = NEMOSHOW_AT(show, actor);
 
 	if (type & NEMOTALE_DOWN_EVENT) {
-		struct showone *one = (struct showone *)grab->userdata;
+		struct showone *one = grab->one;
+
+		minishell_palm_prepare(mini, grab);
 
 		grab->dx = NEMOSHOW_ITEM_AT(one, x) - grab->x;
 		grab->dy = NEMOSHOW_ITEM_AT(one, y) - grab->y;
 	} else if (type & NEMOTALE_MOTION_EVENT) {
-		struct showone *one = (struct showone *)grab->userdata;
-		struct minigrab *other;
-		struct minigrab *fingers[5];
-		int nfingers = 0;
+		struct showone *one = grab->one;
 
-		if (grab->type == MINISHELL_NORMAL_GRAB) {
-			double maxd = FLT_MIN, d0, d1;
-			double maxx = grab->x;
-			double maxy = grab->y;
-
-			nemolist_for_each(other, &mini->grab_list, link) {
-				if (grab == other || other->type != MINISHELL_NORMAL_GRAB)
-					continue;
-
-				if (((d0 = point_get_distance(grab->x, grab->y, other->x, other->y)) < 500.0f) &&
-						((d1 = point_get_distance(maxx, maxy, other->x, other->y)) < 500.0f)) {
-					fingers[nfingers++] = other;
-
-					if (d0 > maxd) {
-						maxx = other->x;
-						maxy = other->y;
-						maxd = d0;
-					}
-				}
-			}
-
-			if (nfingers >= 4) {
-				grab->type = MINISHELL_PALM_GRAB;
-				fingers[0]->type = MINISHELL_PALM_GRAB;
-				fingers[1]->type = MINISHELL_PALM_GRAB;
-				fingers[2]->type = MINISHELL_PALM_GRAB;
-				fingers[3]->type = MINISHELL_PALM_GRAB;
-
-				grab->serial = ++mini->serial;
-				fingers[0]->serial = grab->serial;
-				fingers[1]->serial = grab->serial;
-				fingers[2]->serial = grab->serial;
-				fingers[3]->serial = grab->serial;
-
-				grab->captain = 1;
-
-				nemoshow_item_set_fill_color((struct showone *)grab->userdata, 255, 255, 255, 255);
-				nemoshow_item_set_fill_color((struct showone *)fingers[0]->userdata, 255, 0, 0, 255);
-				nemoshow_item_set_fill_color((struct showone *)fingers[1]->userdata, 255, 0, 0, 255);
-				nemoshow_item_set_fill_color((struct showone *)fingers[2]->userdata, 255, 0, 0, 255);
-				nemoshow_item_set_fill_color((struct showone *)fingers[3]->userdata, 255, 0, 0, 255);
-
-				nemoshow_one_dirty((struct showone *)grab->userdata, NEMOSHOW_STYLE_DIRTY);
-				nemoshow_one_dirty((struct showone *)fingers[0]->userdata, NEMOSHOW_STYLE_DIRTY);
-				nemoshow_one_dirty((struct showone *)fingers[1]->userdata, NEMOSHOW_STYLE_DIRTY);
-				nemoshow_one_dirty((struct showone *)fingers[2]->userdata, NEMOSHOW_STYLE_DIRTY);
-				nemoshow_one_dirty((struct showone *)fingers[3]->userdata, NEMOSHOW_STYLE_DIRTY);
-			}
-		} else if (grab->type == MINISHELL_PALM_GRAB) {
-			double d;
-			int done = 0, activated = 1;
-
-			nemolist_for_each(other, &mini->grab_list, link) {
-				if (grab == other || other->type != MINISHELL_PALM_GRAB || other->serial != grab->serial)
-					continue;
-
-				if (point_get_distance(grab->x, grab->y, other->x, other->y) > 200.0f) {
-					activated = 0;
-				}
-			}
-
-			nemolist_for_each(other, &mini->grab_list, link) {
-				if (grab == other || other->type != MINISHELL_PALM_GRAB || other->captain == 0 || other->serial != grab->serial)
-					continue;
-
-				if ((d = point_get_distance(grab->x, grab->y, other->x, other->y)) > 500.0f) {
-					done = 1;
-				}
-			}
-
-			if (activated != 0) {
-				nemolist_for_each(other, &mini->grab_list, link) {
-					if (grab == other || other->type != MINISHELL_PALM_GRAB || other->serial != grab->serial)
-						continue;
-
-					nemoshow_item_set_fill_color((struct showone *)other->userdata, 255, 255, 255, 255);
-					nemoshow_one_dirty((struct showone *)other->userdata, NEMOSHOW_STYLE_DIRTY);
-				}
-
-				nemoshow_item_set_fill_color((struct showone *)grab->userdata, 255, 255, 255, 255);
-				nemoshow_one_dirty((struct showone *)grab->userdata, NEMOSHOW_STYLE_DIRTY);
-			}
-
-			if (done != 0) {
-				nemolist_for_each(other, &mini->grab_list, link) {
-					if (grab == other || other->type != MINISHELL_PALM_GRAB || other->serial != grab->serial)
-						continue;
-
-					other->type = MINISHELL_NORMAL_GRAB;
-					other->captain = 0;
-
-					nemoshow_item_set_fill_color((struct showone *)other->userdata, 255, 255, 0, 255);
-					nemoshow_one_dirty((struct showone *)other->userdata, NEMOSHOW_STYLE_DIRTY);
-				}
-
-				grab->type = MINISHELL_NORMAL_GRAB;
-				grab->captain = 0;
-				nemoshow_item_set_fill_color((struct showone *)grab->userdata, 255, 255, 0, 255);
-				nemoshow_one_dirty((struct showone *)grab->userdata, NEMOSHOW_STYLE_DIRTY);
-			}
-		}
+		minishell_palm_update(mini, grab);
 
 		NEMOSHOW_ITEM_AT(one, x) = event->x + grab->dx;
 		NEMOSHOW_ITEM_AT(one, y) = event->y + grab->dy;
@@ -374,42 +275,7 @@ static int minishell_dispatch_touch_grab(struct talegrab *base, uint32_t type, s
 		grab->x = event->x;
 		grab->y = event->y;
 	} else if (type & NEMOTALE_UP_EVENT) {
-		struct showone *one = (struct showone *)grab->userdata;
-		struct showtransition *trans;
-		struct showone *sequence;
-		struct minigrab *other;
-
-		if (grab->type == MINISHELL_PALM_GRAB) {
-			nemolist_for_each(other, &mini->grab_list, link) {
-				if (grab == other || other->type != MINISHELL_PALM_GRAB || other->serial != grab->serial)
-					continue;
-
-				other->type = MINISHELL_NORMAL_GRAB;
-				other->captain = 0;
-
-				nemoshow_item_set_fill_color((struct showone *)other->userdata, 255, 255, 0, 255);
-				nemoshow_one_dirty((struct showone *)other->userdata, NEMOSHOW_STYLE_DIRTY);
-			}
-
-			grab->type = MINISHELL_NORMAL_GRAB;
-			grab->captain = 0;
-			nemoshow_item_set_fill_color((struct showone *)grab->userdata, 255, 255, 0, 255);
-			nemoshow_one_dirty((struct showone *)grab->userdata, NEMOSHOW_STYLE_DIRTY);
-		}
-
-		sequence = nemoshow_sequence_create_easy(show,
-				nemoshow_sequence_create_frame_easy(show,
-					1.0f,
-					nemoshow_sequence_create_set_easy(show,
-						one,
-						"r", "0.0",
-						NULL),
-					NULL),
-				NULL);
-
-		trans = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 300, 0);
-		nemoshow_transition_attach_sequence(trans, sequence);
-		nemoshow_attach_transition(show, trans);
+		minishell_palm_finish(mini, grab);
 
 		nemoactor_dispatch_frame(actor);
 
@@ -439,7 +305,7 @@ static int minishell_dispatch_yoyo_grab(struct talegrab *base, uint32_t type, st
 		if (grab->ltime + MINISHELL_YOYO_UPDATE_INTERVAL < event->time ||
 				point_get_distance(grab->lx, grab->ly, event->x, event->y) > MINISHELL_YOYO_UPDATE_DISTANCE) {
 			struct miniyoyo *yoyo = (struct miniyoyo *)grab->userdata;
-			struct showone *one = (struct showone *)minishell_yoyo_get_userdata(yoyo);
+			struct showone *one = grab->one;
 			int32_t minx, miny, maxx, maxy;
 			double outer;
 
@@ -463,7 +329,7 @@ static int minishell_dispatch_yoyo_grab(struct talegrab *base, uint32_t type, st
 		}
 	} else if (type & NEMOTALE_UP_EVENT) {
 		struct miniyoyo *yoyo = (struct miniyoyo *)grab->userdata;
-		struct showone *one = (struct showone *)minishell_yoyo_get_userdata(yoyo);
+		struct showone *one = grab->one;
 		struct showtransition *trans;
 		struct showone *sequence;
 
@@ -558,7 +424,7 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 
 				nemoactor_dispatch_frame(actor);
 
-				grab = minishell_grab_create(mini, tale, event, minishell_dispatch_touch_grab, one);
+				grab = minishell_grab_create(mini, tale, event, one, minishell_dispatch_touch_grab, NULL);
 				nemotale_dispatch_grab(tale, event->device, type, event);
 			}
 
@@ -593,9 +459,8 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 						nemocompz_get_scene_width(actor->compz),
 						nemocompz_get_scene_height(actor->compz),
 						NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(one), path));
-				minishell_yoyo_set_userdata(yoyo, one);
 
-				grab = minishell_grab_create(mini, tale, event, minishell_dispatch_yoyo_grab, yoyo);
+				grab = minishell_grab_create(mini, tale, event, one, minishell_dispatch_yoyo_grab, yoyo);
 				nemotale_dispatch_grab(tale, event->device, type, event);
 			}
 		}
