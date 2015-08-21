@@ -259,16 +259,108 @@ static int minishell_dispatch_touch_grab(struct talegrab *base, uint32_t type, s
 		grab->dy = NEMOSHOW_ITEM_AT(one, y) - grab->y;
 	} else if (type & NEMOTALE_MOTION_EVENT) {
 		struct showone *one = (struct showone *)grab->userdata;
+		struct minigrab *other;
+		struct minigrab *fingers[5];
+		int nfingers = 0;
+
+		if (grab->type == MINISHELL_NORMAL_GRAB) {
+			nemolist_for_each(other, &mini->grab_list, link) {
+				if (grab == other || other->type != MINISHELL_NORMAL_GRAB)
+					continue;
+
+				if (point_get_distance(grab->x, grab->y, other->x, other->y) < 500.0f)
+					fingers[nfingers++] = other;
+			}
+
+			if (nfingers >= 4) {
+				grab->type = MINISHELL_PALM_GRAB;
+				fingers[0]->type = MINISHELL_PALM_GRAB;
+				fingers[1]->type = MINISHELL_PALM_GRAB;
+				fingers[2]->type = MINISHELL_PALM_GRAB;
+				fingers[3]->type = MINISHELL_PALM_GRAB;
+
+				grab->serial = ++mini->serial;
+				fingers[0]->serial = grab->serial;
+				fingers[1]->serial = grab->serial;
+				fingers[2]->serial = grab->serial;
+				fingers[3]->serial = grab->serial;
+
+				grab->captain = 1;
+
+				nemoshow_item_set_fill_color((struct showone *)grab->userdata, 255, 255, 255, 255);
+				nemoshow_item_set_fill_color((struct showone *)fingers[0]->userdata, 255, 0, 0, 255);
+				nemoshow_item_set_fill_color((struct showone *)fingers[1]->userdata, 255, 0, 0, 255);
+				nemoshow_item_set_fill_color((struct showone *)fingers[2]->userdata, 255, 0, 0, 255);
+				nemoshow_item_set_fill_color((struct showone *)fingers[3]->userdata, 255, 0, 0, 255);
+
+				nemoshow_one_dirty((struct showone *)grab->userdata, NEMOSHOW_STYLE_DIRTY);
+				nemoshow_one_dirty((struct showone *)fingers[0]->userdata, NEMOSHOW_STYLE_DIRTY);
+				nemoshow_one_dirty((struct showone *)fingers[1]->userdata, NEMOSHOW_STYLE_DIRTY);
+				nemoshow_one_dirty((struct showone *)fingers[2]->userdata, NEMOSHOW_STYLE_DIRTY);
+				nemoshow_one_dirty((struct showone *)fingers[3]->userdata, NEMOSHOW_STYLE_DIRTY);
+			}
+		} else if (grab->type == MINISHELL_PALM_GRAB) {
+			int done = 0;
+
+			nemolist_for_each(other, &mini->grab_list, link) {
+				if (grab == other || other->type != MINISHELL_PALM_GRAB || other->captain == 0 || other->serial != grab->serial)
+					continue;
+
+				if (point_get_distance(grab->x, grab->y, other->x, other->y) > 500.0f) {
+					done = 1;
+				}
+			}
+
+			if (done != 0) {
+				nemolist_for_each(other, &mini->grab_list, link) {
+					if (grab == other || other->type != MINISHELL_PALM_GRAB || other->serial != grab->serial)
+						continue;
+
+					other->type = MINISHELL_NORMAL_GRAB;
+					other->captain = 0;
+
+					nemoshow_item_set_fill_color((struct showone *)other->userdata, 255, 255, 0, 255);
+					nemoshow_one_dirty((struct showone *)other->userdata, NEMOSHOW_STYLE_DIRTY);
+				}
+
+				grab->type = MINISHELL_NORMAL_GRAB;
+				grab->captain = 0;
+				nemoshow_item_set_fill_color((struct showone *)grab->userdata, 255, 255, 0, 255);
+				nemoshow_one_dirty((struct showone *)grab->userdata, NEMOSHOW_STYLE_DIRTY);
+			}
+		}
 
 		NEMOSHOW_ITEM_AT(one, x) = event->x + grab->dx;
 		NEMOSHOW_ITEM_AT(one, y) = event->y + grab->dy;
 		nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 
 		nemoactor_dispatch_frame(actor);
+
+		grab->x = event->x;
+		grab->y = event->y;
 	} else if (type & NEMOTALE_UP_EVENT) {
 		struct showone *one = (struct showone *)grab->userdata;
 		struct showtransition *trans;
 		struct showone *sequence;
+		struct minigrab *other;
+
+		if (grab->type == MINISHELL_PALM_GRAB) {
+			nemolist_for_each(other, &mini->grab_list, link) {
+				if (grab == other || other->type != MINISHELL_PALM_GRAB || other->serial != grab->serial)
+					continue;
+
+				other->type = MINISHELL_NORMAL_GRAB;
+				other->captain = 0;
+
+				nemoshow_item_set_fill_color((struct showone *)other->userdata, 255, 255, 0, 255);
+				nemoshow_one_dirty((struct showone *)other->userdata, NEMOSHOW_STYLE_DIRTY);
+			}
+
+			grab->type = MINISHELL_NORMAL_GRAB;
+			grab->captain = 0;
+			nemoshow_item_set_fill_color((struct showone *)grab->userdata, 255, 255, 0, 255);
+			nemoshow_one_dirty((struct showone *)grab->userdata, NEMOSHOW_STYLE_DIRTY);
+		}
 
 		sequence = nemoshow_sequence_create_easy(show,
 				nemoshow_sequence_create_frame_easy(show,
@@ -280,7 +372,7 @@ static int minishell_dispatch_touch_grab(struct talegrab *base, uint32_t type, s
 					NULL),
 				NULL);
 
-		trans = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 100, 0);
+		trans = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 300, 0);
 		nemoshow_transition_attach_sequence(trans, sequence);
 		nemoshow_attach_transition(show, trans);
 
@@ -420,12 +512,12 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 							1.0f,
 							nemoshow_sequence_create_set_easy(show,
 								one,
-								"r", "50.0",
+								"r", "45.0",
 								NULL),
 							NULL),
 						NULL);
 
-				trans = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 100, 0);
+				trans = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 300, 0);
 				nemoshow_transition_attach_sequence(trans, sequence);
 				nemoshow_attach_transition(show, trans);
 
@@ -549,6 +641,8 @@ int main(int argc, char *argv[])
 	if (mini == NULL)
 		return -1;
 	memset(mini, 0, sizeof(struct minishell));
+
+	nemolist_init(&mini->grab_list);
 
 	compz = nemocompz_create();
 	if (compz == NULL)

@@ -24,11 +24,15 @@ struct minigrab *minishell_grab_create(struct minishell *mini, struct nemotale *
 
 	nemotale_prepare_grab(&grab->base, tale, event->device, dispatch);
 
+	nemolist_insert(&mini->grab_list, &grab->link);
+
 	return grab;
 }
 
 void minishell_grab_destroy(struct minigrab *grab)
 {
+	nemolist_remove(&grab->link);
+
 	nemotale_finish_grab(&grab->base);
 
 	free(grab);

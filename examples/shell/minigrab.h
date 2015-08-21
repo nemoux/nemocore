@@ -10,8 +10,20 @@ NEMO_BEGIN_EXTERN_C
 #include <minishell.h>
 #include <talehelper.h>
 
+typedef enum {
+	MINISHELL_NORMAL_GRAB = 0,
+	MINISHELL_PALM_GRAB = 1,
+	MINISHELL_LAST_GRAB
+} MiniShellGrabType;
+
 struct minigrab {
 	struct talegrab base;
+
+	struct nemolist link;
+
+	int type;
+	uint32_t serial;
+	int captain;
 
 	double x, y;
 	double dx, dy;

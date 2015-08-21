@@ -74,11 +74,3 @@ double random_get_double(double min, double max)
 
 	return ((double)random() / (double)RAND_MAX) * (max - min) + min;
 }
-
-double point_get_distance(double x0, double y0, double x1, double y1)
-{
-	double dx = x1 - x0;
-	double dy = y1 - y0;
-	
-	return sqrtf(dx * dx + dy * dy);
-}
