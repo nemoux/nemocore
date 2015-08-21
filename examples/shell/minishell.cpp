@@ -264,12 +264,24 @@ static int minishell_dispatch_touch_grab(struct talegrab *base, uint32_t type, s
 		int nfingers = 0;
 
 		if (grab->type == MINISHELL_NORMAL_GRAB) {
+			double maxd = FLT_MIN, d0, d1;
+			double maxx = grab->x;
+			double maxy = grab->y;
+
 			nemolist_for_each(other, &mini->grab_list, link) {
 				if (grab == other || other->type != MINISHELL_NORMAL_GRAB)
 					continue;
 
-				if (point_get_distance(grab->x, grab->y, other->x, other->y) < 500.0f)
+				if (((d0 = point_get_distance(grab->x, grab->y, other->x, other->y)) < 500.0f) &&
+						((d1 = point_get_distance(maxx, maxy, other->x, other->y)) < 500.0f)) {
 					fingers[nfingers++] = other;
+
+					if (d0 > maxd) {
+						maxx = other->x;
+						maxy = other->y;
+						maxd = d0;
+					}
+				}
 			}
 
 			if (nfingers >= 4) {
@@ -300,15 +312,38 @@ static int minishell_dispatch_touch_grab(struct talegrab *base, uint32_t type, s
 				nemoshow_one_dirty((struct showone *)fingers[3]->userdata, NEMOSHOW_STYLE_DIRTY);
 			}
 		} else if (grab->type == MINISHELL_PALM_GRAB) {
-			int done = 0;
+			double d;
+			int done = 0, activated = 1;
+
+			nemolist_for_each(other, &mini->grab_list, link) {
+				if (grab == other || other->type != MINISHELL_PALM_GRAB || other->serial != grab->serial)
+					continue;
+
+				if (point_get_distance(grab->x, grab->y, other->x, other->y) > 200.0f) {
+					activated = 0;
+				}
+			}
 
 			nemolist_for_each(other, &mini->grab_list, link) {
 				if (grab == other || other->type != MINISHELL_PALM_GRAB || other->captain == 0 || other->serial != grab->serial)
 					continue;
 
-				if (point_get_distance(grab->x, grab->y, other->x, other->y) > 500.0f) {
+				if ((d = point_get_distance(grab->x, grab->y, other->x, other->y)) > 500.0f) {
 					done = 1;
 				}
+			}
+
+			if (activated != 0) {
+				nemolist_for_each(other, &mini->grab_list, link) {
+					if (grab == other || other->type != MINISHELL_PALM_GRAB || other->serial != grab->serial)
+						continue;
+
+					nemoshow_item_set_fill_color((struct showone *)other->userdata, 255, 255, 255, 255);
+					nemoshow_one_dirty((struct showone *)other->userdata, NEMOSHOW_STYLE_DIRTY);
+				}
+
+				nemoshow_item_set_fill_color((struct showone *)grab->userdata, 255, 255, 255, 255);
+				nemoshow_one_dirty((struct showone *)grab->userdata, NEMOSHOW_STYLE_DIRTY);
 			}
 
 			if (done != 0) {
