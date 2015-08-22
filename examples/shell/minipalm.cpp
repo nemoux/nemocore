@@ -87,24 +87,7 @@ void minishell_palm_update(struct minishell *mini, struct minigrab *grab)
 		}
 	} else if (grab->type == MINISHELL_PALM_GRAB) {
 		struct minipalm *palm = (struct minipalm *)grab->userdata;
-		double d;
-		int activated = 1;
 		int i;
-
-		for (i = 1; i < 5; i++) {
-			if (point_get_distance(
-						palm->fingers[0]->x, palm->fingers[0]->y,
-						palm->fingers[i]->x, palm->fingers[i]->y) > 200.0f) {
-				activated = 0;
-			}
-		}
-
-		if (activated != 0) {
-			for (i = 0; i < 5; i++) {
-				nemoshow_item_set_fill_color(palm->fingers[i]->one, 255, 255, 255, 255);
-				nemoshow_one_dirty(palm->fingers[i]->one, NEMOSHOW_STYLE_DIRTY);
-			}
-		}
 
 		if (point_get_distance(palm->fingers[0]->x, palm->fingers[0]->y, grab->x, grab->y) > 500.0f) {
 			for (i = 0; i < 5; i++) {
@@ -117,41 +100,90 @@ void minishell_palm_update(struct minishell *mini, struct minigrab *grab)
 
 			minishell_palm_destroy(palm);
 		}
+	} else if (grab->type == MINISHELL_ACTIVE_GRAB) {
 	}
 }
 
 void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 {
 	struct nemoshow *show = mini->show;
-	struct showtransition *trans;
-	struct showone *sequence;
 
-	if (grab->type == MINISHELL_PALM_GRAB) {
+	if (grab->type == MINISHELL_NORMAL_GRAB) {
+		struct showtransition *trans;
+		struct showone *sequence;
+
+		sequence = nemoshow_sequence_create_easy(show,
+				nemoshow_sequence_create_frame_easy(show,
+					1.0f,
+					nemoshow_sequence_create_set_easy(show,
+						grab->one,
+						"r", "0.0",
+						NULL),
+					NULL),
+				NULL);
+
+		trans = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 500, 0);
+		nemoshow_transition_attach_sequence(trans, sequence);
+		nemoshow_attach_transition(show, trans);
+	} else if (grab->type == MINISHELL_PALM_GRAB) {
 		struct minipalm *palm = (struct minipalm *)grab->userdata;
+		struct showtransition *trans0, *trans1;
+		struct showone *sequence;
+		struct showone *set;
+		double cx = 0.0f, cy = 0.0f;
 		int i;
 
+		cx += palm->fingers[0]->x;
+		cx += palm->fingers[1]->x;
+		cx += palm->fingers[2]->x;
+		cx += palm->fingers[3]->x;
+		cx += palm->fingers[4]->x;
+		cx /= 5;
+
+		cy += palm->fingers[0]->y;
+		cy += palm->fingers[1]->y;
+		cy += palm->fingers[2]->y;
+		cy += palm->fingers[3]->y;
+		cy += palm->fingers[4]->y;
+		cy /= 5;
+
+		trans0 = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 500, 0);
+		trans1 = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 500, 0);
+
 		for (i = 0; i < 5; i++) {
-			palm->fingers[i]->type = MINISHELL_NORMAL_GRAB;
+			palm->fingers[i]->type = MINISHELL_ACTIVE_GRAB;
 			palm->fingers[i]->userdata = NULL;
 
-			nemoshow_item_set_fill_color(palm->fingers[i]->one, 255, 255, 0, 255);
-			nemoshow_one_dirty(palm->fingers[i]->one, NEMOSHOW_STYLE_DIRTY);
+			sequence = nemoshow_sequence_create_easy(show,
+					nemoshow_sequence_create_frame_easy(show,
+						1.0f,
+						nemoshow_sequence_create_set_easy(show,
+							palm->fingers[i]->one,
+							"r", "15.0",
+							NULL),
+						NULL),
+					NULL);
+
+			nemoshow_transition_attach_sequence(trans0, sequence);
+
+			set = nemoshow_sequence_create_set();
+			nemoshow_sequence_set_source(set, palm->fingers[i]->one);
+			nemoshow_sequence_set_dattr(set, "tx", cx + cos(2 * M_PI / 5 * i) * 50.0f, NEMOSHOW_MATRIX_DIRTY);
+			nemoshow_sequence_set_dattr(set, "ty", cy + sin(2 * M_PI / 5 * i) * 50.0f, NEMOSHOW_MATRIX_DIRTY);
+
+			sequence = nemoshow_sequence_create_easy(show,
+					nemoshow_sequence_create_frame_easy(show,
+						1.0f, set, NULL),
+					NULL);
+
+			nemoshow_transition_attach_sequence(trans1, sequence);
 		}
 
+		nemoshow_transition_attach_transition(trans0, trans1);
+
+		nemoshow_attach_transition(show, trans0);
+
 		minishell_palm_destroy(palm);
+	} else if (grab->type == MINISHELL_ACTIVE_GRAB) {
 	}
-
-	sequence = nemoshow_sequence_create_easy(show,
-			nemoshow_sequence_create_frame_easy(show,
-				1.0f,
-				nemoshow_sequence_create_set_easy(show,
-					grab->one,
-					"r", "0.0",
-					NULL),
-				NULL),
-			NULL);
-
-	trans = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 300, 0);
-	nemoshow_transition_attach_sequence(trans, sequence);
-	nemoshow_attach_transition(show, trans);
 }

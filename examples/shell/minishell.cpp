@@ -273,7 +273,9 @@ static int minishell_dispatch_palm_grab(struct talegrab *base, uint32_t type, st
 			minishell_grab_update(grab, event);
 		}
 
-		nemoshow_item_translate(one, event->x + grab->dx, event->y + grab->dy);
+		if (grab->type == MINISHELL_NORMAL_GRAB || grab->type == MINISHELL_PALM_GRAB) {
+			nemoshow_item_translate(one, event->x + grab->dx, event->y + grab->dy);
+		}
 
 		nemoactor_dispatch_frame(actor);
 
@@ -420,7 +422,7 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 							NULL),
 						NULL);
 
-				trans = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 300, 0);
+				trans = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 500, 0);
 				nemoshow_transition_attach_sequence(trans, sequence);
 				nemoshow_attach_transition(show, trans);
 
