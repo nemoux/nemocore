@@ -419,8 +419,8 @@ static void nemoshow_sequence_prepare_frame(struct showone *one, uint32_t serial
 		if (one->children[i]->type == NEMOSHOW_SET_TYPE) {
 			set = NEMOSHOW_SET(one->children[i]);
 
-			if (set->src->serial <= serial) {
-				for (j = 0; j < set->nattrs; j++) {
+			for (j = 0; j < set->nattrs; j++) {
+				if (nemoattr_get_serial(set->tattrs[j]) <= serial) {
 					if (set->types[j] == NEMOSHOW_DOUBLE_PROP) {
 						set->sattrs[j] = nemoattr_getd(set->tattrs[j]);
 					}
@@ -446,12 +446,12 @@ static void nemoshow_sequence_dispatch_frame(struct showone *one, double s, doub
 
 	for (i = 0; i < one->nchildren; i++) {
 		if (one->children[i]->type == NEMOSHOW_SET_TYPE) {
+			uint32_t dirty = 0x0;
+
 			set = NEMOSHOW_SET(one->children[i]);
 
-			if (set->src->serial <= serial) {
-				uint32_t dirty = 0x0;
-
-				for (j = 0; j < set->nattrs; j++) {
+			for (j = 0; j < set->nattrs; j++) {
+				if (nemoattr_get_serial(set->tattrs[j]) <= serial) {
 					if (set->types[j] == NEMOSHOW_DOUBLE_PROP) {
 						double d = (nemoattr_getd(set->eattrs[j]) - set->sattrs[j]) * dt + set->sattrs[j];
 
@@ -460,13 +460,13 @@ static void nemoshow_sequence_dispatch_frame(struct showone *one, double s, doub
 
 					dirty |= set->dirties[j];
 				}
-
-				nemoshow_one_dirty(set->src, dirty);
 			}
+
+			nemoshow_one_dirty(set->src, dirty);
 		} else if (one->children[i]->type == NEMOSHOW_FOLLOW_TYPE) {
 			follow = NEMOSHOW_FOLLOW(one->children[i]);
 
-			if (follow->src->serial <= serial) {
+			if (nemoattr_get_serial(follow->attr) <= serial) {
 				double x, y, r;
 
 				nemoshow_helper_evaluate_path(NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(follow->path), path),
@@ -497,12 +497,12 @@ static void nemoshow_sequence_finish_frame(struct showone *one, uint32_t serial)
 
 	for (i = 0; i < one->nchildren; i++) {
 		if (one->children[i]->type == NEMOSHOW_SET_TYPE) {
+			uint32_t dirty = 0x0;
+
 			set = NEMOSHOW_SET(one->children[i]);
 
-			if (set->src->serial <= serial) {
-				uint32_t dirty = 0x0;
-
-				for (j = 0; j < set->nattrs; j++) {
+			for (j = 0; j < set->nattrs; j++) {
+				if (nemoattr_get_serial(set->tattrs[j]) <= serial) {
 					if (set->types[j] == NEMOSHOW_DOUBLE_PROP) {
 						double d = nemoattr_getd(set->eattrs[j]);
 
@@ -515,15 +515,15 @@ static void nemoshow_sequence_finish_frame(struct showone *one, uint32_t serial)
 
 					dirty |= set->dirties[j];
 				}
-
-				set->src->state = NEMOSHOW_NORMAL_STATE;
-
-				nemoshow_one_dirty(set->src, dirty);
 			}
+
+			set->src->state = NEMOSHOW_NORMAL_STATE;
+
+			nemoshow_one_dirty(set->src, dirty);
 		} else if (one->children[i]->type == NEMOSHOW_FOLLOW_TYPE) {
 			follow = NEMOSHOW_FOLLOW(one->children[i]);
 
-			if (follow->src->serial <= serial) {
+			if (nemoattr_get_serial(follow->attr) <= serial) {
 				double x, y, r;
 
 				nemoshow_helper_evaluate_path(NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(follow->path), path),
@@ -541,6 +541,8 @@ static void nemoshow_sequence_finish_frame(struct showone *one, uint32_t serial)
 
 				nemoshow_one_dirty(follow->src, NEMOSHOW_SHAPE_DIRTY);
 			}
+
+			follow->src->state = NEMOSHOW_NORMAL_STATE;
 		}
 	}
 }
@@ -549,9 +551,7 @@ void nemoshow_sequence_prepare(struct showone *one, uint32_t serial)
 {
 	struct showsequence *sequence = NEMOSHOW_SEQUENCE(one);
 	struct showone *frame;
-	struct showone *set;
-	struct showone *follow;
-	int i, j;
+	int i, j, k;
 
 	sequence->t = 0.0f;
 	sequence->iframe = 0;
@@ -563,13 +563,15 @@ void nemoshow_sequence_prepare(struct showone *one, uint32_t serial)
 
 		for (j = 0; j < frame->nchildren; j++) {
 			if (frame->children[j]->type == NEMOSHOW_SET_TYPE) {
-				set = frame->children[j];
+				struct showset *set = NEMOSHOW_SET(frame->children[j]);
 
-				NEMOSHOW_SET_AT(set, src)->serial = serial;
+				for (k = 0; k < set->nattrs; k++) {
+					nemoattr_set_serial(set->tattrs[k], serial);
+				}
 			} else if (frame->children[j]->type == NEMOSHOW_FOLLOW_TYPE) {
-				follow = frame->children[j];
+				struct showfollow *follow = NEMOSHOW_FOLLOW(frame->children[j]);
 
-				NEMOSHOW_FOLLOW_AT(follow, src)->serial = serial;
+				nemoattr_set_serial(follow->attr, serial);
 			}
 		}
 	}

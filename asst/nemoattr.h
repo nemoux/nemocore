@@ -14,6 +14,7 @@ NEMO_BEGIN_EXTERN_C
 
 struct nemoattr {
 	char name[NEMOATTR_NAME_MAX];
+	uint32_t serial;
 
 	void *p;
 	int size;
@@ -33,6 +34,16 @@ struct nemoobject {
 	int nattrs;
 	int mattrs;
 };
+
+static inline void nemoattr_set_serial(struct nemoattr *attr, uint32_t serial)
+{
+	attr->serial = serial;
+}
+
+static inline uint32_t nemoattr_get_serial(struct nemoattr *attr)
+{
+	return attr->serial;
+}
 
 static inline void nemoattr_seti(struct nemoattr *attr, uint32_t i)
 {
