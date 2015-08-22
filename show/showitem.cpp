@@ -39,7 +39,7 @@ struct showone *nemoshow_item_create(int type)
 
 	item->cc = new showitem_t;
 	NEMOSHOW_ITEM_CC(item, matrix) = new SkMatrix;
-	NEMOSHOW_ITEM_CC(item, path) = NULL;
+	NEMOSHOW_ITEM_CC(item, path) = new SkPath;
 	NEMOSHOW_ITEM_CC(item, points) = NULL;
 
 	item->alpha = 1.0f;
@@ -64,6 +64,7 @@ struct showone *nemoshow_item_create(int type)
 	nemoobject_set_reserved(&one->object, "width", &item->width, sizeof(double));
 	nemoobject_set_reserved(&one->object, "height", &item->height, sizeof(double));
 	nemoobject_set_reserved(&one->object, "r", &item->r, sizeof(double));
+	nemoobject_set_reserved(&one->object, "inner", &item->inner, sizeof(double));
 
 	nemoobject_set_reserved(&one->object, "tx", &item->tx, sizeof(double));
 	nemoobject_set_reserved(&one->object, "ty", &item->ty, sizeof(double));
@@ -196,10 +197,6 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 					NEMOSHOW_FONT_CC(NEMOSHOW_FONT(item->font), face)));
 
 		nemoshow_one_reference_one(one, font);
-	}
-
-	if (one->sub == NEMOSHOW_PATH_ITEM || one->sub == NEMOSHOW_PATHGROUP_ITEM) {
-		NEMOSHOW_ITEM_CC(item, path) = new SkPath;
 	}
 
 	item->canvas = nemoshow_one_get_canvas(one);
@@ -383,6 +380,26 @@ void nemoshow_item_update_shape(struct nemoshow *show, struct showone *one)
 
 	if (one->sub == NEMOSHOW_PATH_ITEM) {
 		item->length = nemoshow_helper_get_path_length(NEMOSHOW_ITEM_CC(item, path));
+	} else if (one->sub == NEMOSHOW_DONUT_ITEM) {
+		SkRect outr = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
+		SkRect inr = SkRect::MakeXYWH(item->x + item->inner, item->y + item->inner, item->width - item->inner * 2, item->height - item->inner * 2);
+
+		NEMOSHOW_ITEM_CC(item, path)->reset();
+
+		if (item->from == 0.0f && item->to == 360.0f) {
+			NEMOSHOW_ITEM_CC(item, path)->addArc(inr, 0.0f, 360.0f);
+			NEMOSHOW_ITEM_CC(item, path)->addArc(outr, 0.0f, 360.0f);
+			NEMOSHOW_ITEM_CC(item, path)->setFillType(SkPath::kEvenOdd_FillType);
+		} else if (item->from != item->to) {
+			NEMOSHOW_ITEM_CC(item, path)->addArc(outr, item->to, item->from - item->to);
+			NEMOSHOW_ITEM_CC(item, path)->lineTo(
+					item->x + item->width / 2.0f + cos(item->from * M_PI / 180.0f) * (item->width / 2.0f - item->inner),
+					item->y + item->height / 2.0f + sin(item->from * M_PI / 180.0f) * (item->height / 2.0f - item->inner));
+			NEMOSHOW_ITEM_CC(item, path)->addArc(inr, item->from, item->to - item->from);
+			NEMOSHOW_ITEM_CC(item, path)->lineTo(
+					item->x + item->width / 2.0f + cos(item->to * M_PI / 180.0f) * (item->width / 2.0f),
+					item->y + item->height / 2.0f + sin(item->to * M_PI / 180.0f) * (item->height / 2.0f));
+		}
 	} else if (one->sub == NEMOSHOW_TEXT_ITEM && (one->dirty & NEMOSHOW_TEXT_DIRTY) != 0) {
 		item->text = nemoobject_gets(&one->object, "d");
 		if (item->text != NULL) {
@@ -469,6 +486,8 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 	} else if (one->sub == NEMOSHOW_ARC_ITEM) {
 		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
 	} else if (one->sub == NEMOSHOW_PIE_ITEM) {
+		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
+	} else if (one->sub == NEMOSHOW_DONUT_ITEM) {
 		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
 	} else if (one->sub == NEMOSHOW_PATH_ITEM || one->sub == NEMOSHOW_PATHGROUP_ITEM) {
 		box = NEMOSHOW_ITEM_CC(item, path)->getBounds();

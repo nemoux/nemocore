@@ -18,11 +18,12 @@ typedef enum {
 	NEMOSHOW_CIRCLE_ITEM = 3,
 	NEMOSHOW_ARC_ITEM = 4,
 	NEMOSHOW_PIE_ITEM = 5,
-	NEMOSHOW_TEXT_ITEM = 6,
-	NEMOSHOW_PATH_ITEM = 7,
-	NEMOSHOW_PATHGROUP_ITEM = 8,
-	NEMOSHOW_STYLE_ITEM = 9,
-	NEMOSHOW_GROUP_ITEM = 10,
+	NEMOSHOW_DONUT_ITEM = 6,
+	NEMOSHOW_TEXT_ITEM = 7,
+	NEMOSHOW_PATH_ITEM = 8,
+	NEMOSHOW_PATHGROUP_ITEM = 9,
+	NEMOSHOW_STYLE_ITEM = 10,
+	NEMOSHOW_GROUP_ITEM = 11,
 	NEMOSHOW_LAST_ITEM
 } NemoShowItemType;
 
@@ -48,6 +49,7 @@ struct showitem {
 	double rx, ry;
 	double width, height;
 	double r;
+	double inner;
 
 	double from, to;
 
