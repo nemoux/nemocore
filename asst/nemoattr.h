@@ -7,6 +7,7 @@
 NEMO_BEGIN_EXTERN_C
 #endif
 
+#include <stdio.h>
 #include <stdint.h>
 
 #define	NEMOATTR_NAME_MAX		(32)
