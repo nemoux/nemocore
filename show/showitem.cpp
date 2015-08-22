@@ -92,6 +92,8 @@ struct showone *nemoshow_item_create(int type)
 
 	nemoobject_set_reserved(&one->object, "alpha", &item->alpha, sizeof(double));
 
+	nemoobject_set_reserved(&one->object, "event", &item->event, sizeof(int32_t));
+
 	return one;
 }
 
