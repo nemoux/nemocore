@@ -118,10 +118,11 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 	struct showone *path;
 	struct showone *clip;
 	struct showone *font;
+	const char *v;
 	int i;
 
-	style = nemoshow_search_one(show, nemoobject_gets(&one->object, "style"));
-	if (style != NULL) {
+	v = nemoobject_gets(&one->object, "style");
+	if (v != NULL && (style = nemoshow_search_one(show, v)) != NULL) {
 		item->style = style;
 
 		nemoshow_one_reference_one(one, style);
@@ -131,15 +132,15 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 		NEMOSHOW_ITEM_CC(item, stroke) = new SkPaint;
 		NEMOSHOW_ITEM_CC(item, stroke)->setAntiAlias(true);
 
-		blur = nemoshow_search_one(show, nemoobject_gets(&one->object, "blur"));
-		if (blur != NULL) {
+		v = nemoobject_gets(&one->object, "blur");
+		if (v != NULL && (blur = nemoshow_search_one(show, v)) != NULL) {
 			item->blur = blur;
 
 			nemoshow_one_reference_one(one, blur);
 		}
 
-		shader = nemoshow_search_one(show, nemoobject_gets(&one->object, "shader"));
-		if (shader != NULL) {
+		v = nemoobject_gets(&one->object, "shader");
+		if (v != NULL && (shader = nemoshow_search_one(show, v)) != NULL) {
 			item->shader = shader;
 
 			nemoshow_one_reference_one(one, shader);
@@ -148,13 +149,17 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 		item->style = one;
 	}
 
-	matrix = nemoshow_search_one(show, nemoobject_gets(&one->object, "matrix"));
-	if (matrix != NULL) {
-		item->transform = NEMOSHOW_EXTERN_TRANSFORM;
+	v = nemoobject_gets(&one->object, "matrix");
+	if (v != NULL) {
+		if (strcmp(v, "tsr") == 0) {
+			item->transform = NEMOSHOW_TSR_TRANSFORM;
+		} else if ((matrix = nemoshow_search_one(show, v)) != NULL) {
+			item->transform = NEMOSHOW_EXTERN_TRANSFORM;
 
-		item->matrix = matrix;
+			item->matrix = matrix;
 
-		nemoshow_one_reference_one(one, matrix);
+			nemoshow_one_reference_one(one, matrix);
+		}
 	} else {
 		for (i = 0; i < one->nchildren; i++) {
 			if (one->children[i]->type == NEMOSHOW_MATRIX_TYPE) {
@@ -165,22 +170,22 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 		}
 	}
 
-	clip = nemoshow_search_one(show, nemoobject_gets(&one->object, "clip"));
-	if (clip != NULL) {
+	v = nemoobject_gets(&one->object, "clip");
+	if (v != NULL && (clip = nemoshow_search_one(show, v)) != NULL) {
 		item->clip = clip;
 
 		nemoshow_one_reference_one(one, clip);
 	}
 
-	path = nemoshow_search_one(show, nemoobject_gets(&one->object, "path"));
-	if (path != NULL) {
+	v = nemoobject_gets(&one->object, "path");
+	if (v != NULL && (path = nemoshow_search_one(show, v)) != NULL) {
 		item->path = path;
 
 		nemoshow_one_reference_one(one, path);
 	}
 
-	font = nemoshow_search_one(show, nemoobject_gets(&one->object, "font"));
-	if (font != NULL) {
+	v = nemoobject_gets(&one->object, "font");
+	if (v != NULL && (font = nemoshow_search_one(show, v)) != NULL) {
 		item->font = font;
 
 		SkSafeUnref(
@@ -587,6 +592,24 @@ void nemoshow_item_set_shader(struct showone *one, struct showone *shader)
 	item->fill = 1;
 
 	nemoshow_one_reference_one(one, shader);
+}
+
+void nemoshow_item_set_blur(struct showone *one, struct showone *blur)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	item->blur = blur;
+
+	nemoshow_one_reference_one(one, blur);
+}
+
+void nemoshow_item_set_clip(struct showone *one, struct showone *clip)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	item->clip = clip;
+
+	nemoshow_one_reference_one(one, clip);
 }
 
 double nemoshow_item_get_outer(struct showone *one)

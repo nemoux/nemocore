@@ -26,6 +26,11 @@ struct showsvg {
 
 	int transform;
 
+	double tx, ty;
+	double ro;
+	double sx, sy;
+	double px, py;
+
 	void *cc;
 };
 
@@ -43,6 +48,45 @@ static inline void nemoshow_svg_set_event(struct showone *one, int32_t event)
 	struct showsvg *svg = NEMOSHOW_SVG(one);
 
 	svg->event = event;
+}
+
+static inline void nemoshow_svg_translate(struct showone *one, double tx, double ty)
+{
+	struct showsvg *svg = NEMOSHOW_SVG(one);
+
+	svg->tx = tx;
+	svg->ty = ty;
+
+	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
+}
+
+static inline void nemoshow_svg_rotate(struct showone *one, double ro)
+{
+	struct showsvg *svg = NEMOSHOW_SVG(one);
+
+	svg->ro = ro;
+
+	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
+}
+
+static inline void nemoshow_svg_scale(struct showone *one, double sx, double sy)
+{
+	struct showsvg *svg = NEMOSHOW_SVG(one);
+
+	svg->sx = sx;
+	svg->sy = sy;
+
+	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
+}
+
+static inline void nemoshow_svg_pivot(struct showone *one, double px, double py)
+{
+	struct showsvg *svg = NEMOSHOW_SVG(one);
+
+	svg->px = px;
+	svg->py = py;
+
+	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
 }
 
 #ifdef __cplusplus

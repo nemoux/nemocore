@@ -53,6 +53,14 @@ struct showone *nemoshow_svg_create(void)
 	nemoobject_set_reserved(&one->object, "width", &svg->width, sizeof(double));
 	nemoobject_set_reserved(&one->object, "height", &svg->height, sizeof(double));
 
+	nemoobject_set_reserved(&one->object, "tx", &svg->tx, sizeof(double));
+	nemoobject_set_reserved(&one->object, "ty", &svg->ty, sizeof(double));
+	nemoobject_set_reserved(&one->object, "sx", &svg->sx, sizeof(double));
+	nemoobject_set_reserved(&one->object, "sy", &svg->sy, sizeof(double));
+	nemoobject_set_reserved(&one->object, "px", &svg->px, sizeof(double));
+	nemoobject_set_reserved(&one->object, "py", &svg->py, sizeof(double));
+	nemoobject_set_reserved(&one->object, "ro", &svg->ro, sizeof(double));
+
 	return one;
 }
 
@@ -70,15 +78,20 @@ int nemoshow_svg_arrange(struct nemoshow *show, struct showone *one)
 	struct showsvg *svg = NEMOSHOW_SVG(one);
 	struct showone *matrix;
 	struct showone *clip;
+	const char *v;
 	int i;
 
-	matrix = nemoshow_search_one(show, nemoobject_gets(&one->object, "matrix"));
-	if (matrix != NULL) {
-		svg->transform = NEMOSHOW_EXTERN_TRANSFORM;
+	v = nemoobject_gets(&one->object, "matrix");
+	if (v != NULL) {
+		if (strcmp(v, "tsr") == 0) {
+			svg->transform = NEMOSHOW_TSR_TRANSFORM;
+		} else if ((matrix = nemoshow_search_one(show, v)) != NULL) {
+			svg->transform = NEMOSHOW_EXTERN_TRANSFORM;
 
-		svg->matrix = matrix;
+			svg->matrix = matrix;
 
-		nemoshow_one_reference_one(one, matrix);
+			nemoshow_one_reference_one(one, matrix);
+		}
 	} else {
 		for (i = 0; i < one->nchildren; i++) {
 			if (one->children[i]->type == NEMOSHOW_MATRIX_TYPE) {
@@ -89,8 +102,8 @@ int nemoshow_svg_arrange(struct nemoshow *show, struct showone *one)
 		}
 	}
 
-	clip = nemoshow_search_one(show, nemoobject_gets(&one->object, "clip"));
-	if (clip != NULL) {
+	v = nemoobject_gets(&one->object, "clip");
+	if (v != NULL && (clip = nemoshow_search_one(show, v)) != NULL) {
 		svg->clip = clip;
 
 		nemoshow_one_reference_one(one, clip);
@@ -123,6 +136,39 @@ static inline void nemoshow_svg_update_child(struct nemoshow *show, struct showo
 							matrix));
 			}
 		}
+
+		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
+	}
+}
+
+static inline void nemoshow_svg_update_matrix(struct nemoshow *show, struct showone *one)
+{
+	struct showsvg *svg = NEMOSHOW_SVG(one);
+
+	if (svg->transform == NEMOSHOW_TSR_TRANSFORM) {
+		NEMOSHOW_SVG_CC(svg, matrix)->setIdentity();
+
+		if (svg->px != 0.0f || svg->py != 0.0f) {
+			NEMOSHOW_SVG_CC(svg, matrix)->postTranslate(-svg->px, -svg->py);
+
+			if (svg->ro != 0.0f) {
+				NEMOSHOW_SVG_CC(svg, matrix)->postRotate(svg->ro);
+			}
+			if (svg->sx != 1.0f || svg->sy != 1.0f) {
+				NEMOSHOW_SVG_CC(svg, matrix)->postScale(svg->sx, svg->sy);
+			}
+
+			NEMOSHOW_SVG_CC(svg, matrix)->postTranslate(svg->px, svg->py);
+		} else {
+			if (svg->ro != 0.0f) {
+				NEMOSHOW_SVG_CC(svg, matrix)->postRotate(svg->ro);
+			}
+			if (svg->sx != 1.0f || svg->sy != 1.0f) {
+				NEMOSHOW_SVG_CC(svg, matrix)->postScale(svg->sx, svg->sy);
+			}
+		}
+
+		NEMOSHOW_SVG_CC(svg, matrix)->postTranslate(svg->tx, svg->ty);
 
 		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 	}
@@ -182,6 +228,8 @@ int nemoshow_svg_update(struct nemoshow *show, struct showone *one)
 
 	if ((one->dirty & NEMOSHOW_CHILD_DIRTY) != 0)
 		nemoshow_svg_update_child(show, one);
+	if ((one->dirty & NEMOSHOW_MATRIX_DIRTY) != 0)
+		nemoshow_svg_update_matrix(show, one);
 
 	if ((one->dirty & NEMOSHOW_SHAPE_DIRTY) != 0) {
 		nemoshow_canvas_damage_one(svg->canvas, one);

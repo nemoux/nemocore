@@ -102,6 +102,8 @@ extern void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showo
 extern void nemoshow_item_set_matrix(struct showone *one, double m[9]);
 extern void nemoshow_item_set_tsr(struct showone *one);
 extern void nemoshow_item_set_shader(struct showone *one, struct showone *shader);
+extern void nemoshow_item_set_blur(struct showone *one, struct showone *blur);
+extern void nemoshow_item_set_clip(struct showone *one, struct showone *clip);
 
 extern double nemoshow_item_get_outer(struct showone *one);
 
