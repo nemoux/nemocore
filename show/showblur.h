@@ -28,6 +28,8 @@ extern void nemoshow_blur_destroy(struct showone *one);
 extern int nemoshow_blur_arrange(struct nemoshow *show, struct showone *one);
 extern int nemoshow_blur_update(struct nemoshow *show, struct showone *one);
 
+extern void nemoshow_blur_set_filter(struct showone *one, const char *flags, const char *style, double r);
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

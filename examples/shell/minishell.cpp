@@ -438,11 +438,8 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 
 				blur = nemoshow_blur_create();
 				nemoshow_attach_one(show, canvas, blur);
-				nemoshow_one_setd(blur, "r", 5.0f);
-				nemoshow_one_sets(blur, "type", "solid");
-				nemoshow_one_sets(blur, "flags", "high");
-				nemoshow_one_dirty(blur, NEMOSHOW_SHAPE_DIRTY | NEMOSHOW_STYLE_DIRTY);
 				nemoshow_blur_arrange(show, blur);
+				nemoshow_blur_set_filter(blur, "high", "solid", 5.0f);
 
 				one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
 				nemoshow_attach_one(show, canvas, one);

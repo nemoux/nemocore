@@ -85,3 +85,33 @@ int nemoshow_blur_update(struct nemoshow *show, struct showone *one)
 
 	return 0;
 }
+
+void nemoshow_blur_set_filter(struct showone *one, const char *flags, const char *style, double r)
+{
+	struct showblur *blur = NEMOSHOW_BLUR(one);
+	SkBlurMaskFilter::BlurFlags f;
+	SkBlurStyle s;
+
+	blur->r = r;
+
+	if (NEMOSHOW_BLUR_CC(blur, filter) != NULL)
+		NEMOSHOW_BLUR_CC(blur, filter)->unref();
+
+	if (flags == NULL)
+		f = SkBlurMaskFilter::kNone_BlurFlag;
+	else if (strcmp(flags, "ignore") == 0)
+		f = SkBlurMaskFilter::kIgnoreTransform_BlurFlag;
+	else if (strcmp(flags, "high") == 0)
+		f = SkBlurMaskFilter::kHighQuality_BlurFlag;
+
+	if (style == NULL)
+		s = kNormal_SkBlurStyle;
+	else if (strcmp(style, "inner") == 0)
+		s = kInner_SkBlurStyle;
+	else if (strcmp(style, "outer") == 0)
+		s = kOuter_SkBlurStyle;
+	else if (strcmp(style, "solid") == 0)
+		s = kSolid_SkBlurStyle;
+
+	NEMOSHOW_BLUR_CC(blur, filter) = SkBlurMaskFilter::Create(s, SkBlurMask::ConvertRadiusToSigma(blur->r), f);
+}
