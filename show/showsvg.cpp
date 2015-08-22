@@ -69,6 +69,7 @@ int nemoshow_svg_arrange(struct nemoshow *show, struct showone *one)
 {
 	struct showsvg *svg = NEMOSHOW_SVG(one);
 	struct showone *matrix;
+	struct showone *clip;
 	int i;
 
 	matrix = nemoshow_search_one(show, nemoobject_gets(&one->object, "matrix"));
@@ -86,6 +87,13 @@ int nemoshow_svg_arrange(struct nemoshow *show, struct showone *one)
 				break;
 			}
 		}
+	}
+
+	clip = nemoshow_search_one(show, nemoobject_gets(&one->object, "clip"));
+	if (clip != NULL) {
+		svg->clip = clip;
+
+		NEMOBOX_APPEND(clip->refs, clip->srefs, clip->nrefs, one);
 	}
 
 	nemoshow_svg_load_uri(show, one, nemoobject_gets(&one->object, "uri"));

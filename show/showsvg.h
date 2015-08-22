@@ -22,6 +22,7 @@ struct showsvg {
 	double width, height;
 
 	struct showone *matrix;
+	struct showone *clip;
 
 	int transform;
 

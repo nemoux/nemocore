@@ -147,6 +147,10 @@ static struct showone *nemoshow_create_one(struct nemoshow *show, struct xmlnode
 		one = nemoshow_path_create(NEMOSHOW_CLOSE_PATH);
 	} else if (strcmp(node->name, "cmd") == 0) {
 		one = nemoshow_path_create(NEMOSHOW_CMD_PATH);
+	} else if (strcmp(node->name, "rectto") == 0) {
+		one = nemoshow_path_create(NEMOSHOW_RECT_PATH);
+	} else if (strcmp(node->name, "circleto") == 0) {
+		one = nemoshow_path_create(NEMOSHOW_CIRCLE_PATH);
 	} else if (strcmp(node->name, "textto") == 0) {
 		one = nemoshow_path_create(NEMOSHOW_TEXT_PATH);
 	} else if (strcmp(node->name, "svgto") == 0) {

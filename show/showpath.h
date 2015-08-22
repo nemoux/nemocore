@@ -31,6 +31,7 @@ struct showpath {
 	double x0, y0;
 	double x1, y1;
 	double x2, y2;
+	double width, height;
 	double r;
 };
 

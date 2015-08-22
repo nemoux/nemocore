@@ -329,6 +329,22 @@ static inline void nemoshow_canvas_render_item(struct nemoshow *show, struct sho
 	}
 }
 
+static inline void nemoshow_canvas_render_item_with_clip(struct nemoshow *show, struct showcanvas *canvas, struct showone *one)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	if (item->clip != NULL) {
+		NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
+		NEMOSHOW_CANVAS_CC(canvas, canvas)->clipPath(*NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(item->clip), path));
+
+		nemoshow_canvas_render_item(show, canvas, one);
+
+		NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
+	} else {
+		nemoshow_canvas_render_item(show, canvas, one);
+	}
+}
+
 static inline void nemoshow_canvas_render_one(struct nemoshow *show, struct showcanvas *canvas, struct showone *one)
 {
 	if (one->type == NEMOSHOW_ITEM_TYPE) {
@@ -338,18 +354,18 @@ static inline void nemoshow_canvas_render_one(struct nemoshow *show, struct show
 			NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
 			NEMOSHOW_CANVAS_CC(canvas, canvas)->concat(*NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(item->matrix), matrix));
 
-			nemoshow_canvas_render_item(show, canvas, one);
+			nemoshow_canvas_render_item_with_clip(show, canvas, one);
 
 			NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
 		} else if (item->transform & NEMOSHOW_INTERN_TRANSFORM) {
 			NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
 			NEMOSHOW_CANVAS_CC(canvas, canvas)->concat(*NEMOSHOW_ITEM_CC(item, matrix));
 
-			nemoshow_canvas_render_item(show, canvas, one);
+			nemoshow_canvas_render_item_with_clip(show, canvas, one);
 
 			NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
 		} else {
-			nemoshow_canvas_render_item(show, canvas, one);
+			nemoshow_canvas_render_item_with_clip(show, canvas, one);
 		}
 	} else if (one->type == NEMOSHOW_SVG_TYPE) {
 		struct showsvg *svg = NEMOSHOW_SVG(one);
@@ -364,6 +380,9 @@ static inline void nemoshow_canvas_render_one(struct nemoshow *show, struct show
 		}
 
 		NEMOSHOW_CANVAS_CC(canvas, canvas)->concat(*NEMOSHOW_SVG_CC(NEMOSHOW_SVG(one), viewbox));
+
+		if (svg->clip != NULL)
+			NEMOSHOW_CANVAS_CC(canvas, canvas)->clipPath(*NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(svg->clip), path));
 
 		for (i = 0; i < one->nchildren; i++) {
 			nemoshow_canvas_render_one(show, canvas, one->children[i]);

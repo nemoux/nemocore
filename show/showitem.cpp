@@ -116,6 +116,7 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 	struct showone *shader;
 	struct showone *matrix;
 	struct showone *path;
+	struct showone *clip;
 	struct showone *font;
 	int i;
 
@@ -162,6 +163,13 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 				break;
 			}
 		}
+	}
+
+	clip = nemoshow_search_one(show, nemoobject_gets(&one->object, "clip"));
+	if (clip != NULL) {
+		item->clip = clip;
+
+		NEMOBOX_APPEND(clip->refs, clip->srefs, clip->nrefs, one);
 	}
 
 	path = nemoshow_search_one(show, nemoobject_gets(&one->object, "path"));
@@ -255,6 +263,10 @@ static inline void nemoshow_item_update_path(struct nemoshow *show, struct showi
 				SkParsePath::FromSVGString(nemoobject_gets(&child->object, "d"), &rpath);
 
 				NEMOSHOW_ITEM_CC(item, path)->addPath(rpath);
+			} else if (child->sub == NEMOSHOW_RECT_PATH) {
+				NEMOSHOW_ITEM_CC(item, path)->addRect(path->x0, path->y0, path->x0 + path->width, path->y0 + path->height);
+			} else if (child->sub == NEMOSHOW_CIRCLE_PATH) {
+				NEMOSHOW_ITEM_CC(item, path)->addCircle(path->x0, path->y0, path->r);
 			} else if (child->sub == NEMOSHOW_TEXT_PATH) {
 				SkPaint paint;
 				SkPath rpath;

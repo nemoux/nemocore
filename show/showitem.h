@@ -60,6 +60,7 @@ struct showitem {
 	double alpha;
 
 	struct showone *style;
+	struct showone *clip;
 	struct showone *blur;
 	struct showone *shader;
 	struct showone *matrix;

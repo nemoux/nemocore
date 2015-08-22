@@ -36,6 +36,8 @@ struct showone *nemoshow_path_create(int type)
 	nemoobject_set_reserved(&one->object, "y1", &path->y1, sizeof(double));
 	nemoobject_set_reserved(&one->object, "x2", &path->x2, sizeof(double));
 	nemoobject_set_reserved(&one->object, "y2", &path->y2, sizeof(double));
+	nemoobject_set_reserved(&one->object, "width", &path->width, sizeof(double));
+	nemoobject_set_reserved(&one->object, "height", &path->height, sizeof(double));
 	nemoobject_set_reserved(&one->object, "r", &path->r, sizeof(double));
 
 	return one;
