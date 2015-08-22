@@ -21,6 +21,9 @@ struct minishell {
 	struct nemolist grab_list;
 
 	uint32_t serial;
+
+	struct showone *blur5;
+	struct showone *blur15;
 };
 
 #ifdef __cplusplus

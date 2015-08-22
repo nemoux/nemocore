@@ -406,6 +406,7 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 				nemoshow_attach_one(show, canvas, one);
 				nemoshow_item_arrange(show, one);
 				NEMOSHOW_ITEM_AT(one, r) = 0.0f;
+				nemoshow_item_set_blur(one, mini->blur15);
 				nemoshow_item_set_fill_color(one, 255, 255, 0, 255);
 				nemoshow_item_set_tsr(one);
 				nemoshow_item_translate(one, event->x, event->y);
@@ -432,19 +433,13 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 
 			if (nemotale_is_pointer_left_down(tale, event, type)) {
 				struct showone *one;
-				struct showone *blur;
 				struct minigrab *grab;
 				struct miniyoyo *yoyo;
-
-				blur = nemoshow_blur_create();
-				nemoshow_attach_one(show, canvas, blur);
-				nemoshow_blur_arrange(show, blur);
-				nemoshow_blur_set_filter(blur, "high", "solid", 5.0f);
 
 				one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
 				nemoshow_attach_one(show, canvas, one);
 				nemoshow_item_arrange(show, one);
-				nemoshow_item_set_blur(one, blur);
+				nemoshow_item_set_blur(one, mini->blur5);
 				nemoshow_item_set_stroke_color(one, 255, 255, 0, 255);
 				nemoshow_item_set_stroke_width(one, 3.0f);
 
@@ -483,8 +478,9 @@ int main(int argc, char *argv[])
 	struct minishell *mini;
 	struct nemoshell *shell;
 	struct nemocompz *compz;
-	struct nemoshow *show;
 	struct nemoactor *actor;
+	struct nemoshow *show;
+	struct showone *blur;
 	char *scenexml = NULL;
 	char *rendernode = NULL;
 	char *configpath = NULL;
@@ -598,6 +594,16 @@ int main(int argc, char *argv[])
 			nemocompz_get_scene_height(compz));
 
 	nemoshow_render_one(show);
+
+	mini->blur5 = blur = nemoshow_blur_create();
+	nemoshow_attach_one(show, NULL, blur);
+	nemoshow_blur_arrange(show, blur);
+	nemoshow_blur_set_filter(blur, "high", "solid", 5.0f);
+
+	mini->blur15 = blur = nemoshow_blur_create();
+	nemoshow_attach_one(show, NULL, blur);
+	nemoshow_blur_arrange(show, blur);
+	nemoshow_blur_set_filter(blur, "high", "solid", 15.0f);
 
 	actor = NEMOSHOW_AT(show, actor);
 	nemoview_attach_layer(actor->view, &shell->background_layer);
