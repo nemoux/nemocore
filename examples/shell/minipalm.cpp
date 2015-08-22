@@ -68,6 +68,7 @@ void minishell_palm_update(struct minishell *mini, struct minigrab *grab)
 		if (nfingers >= 4) {
 			struct showtransition *trans;
 			struct showone *sequence;
+			struct showone *set;
 			struct minipalm *palm;
 			uint32_t serial = ++mini->serial;
 
@@ -85,14 +86,13 @@ void minishell_palm_update(struct minishell *mini, struct minigrab *grab)
 				palm->fingers[i]->serial = serial;
 				palm->fingers[i]->userdata = palm;
 
+				set = nemoshow_sequence_create_set();
+				nemoshow_sequence_set_source(set, palm->fingers[i]->one);
+				nemoshow_sequence_set_cattr(set, "fill", 0, 0, 255, 255, NEMOSHOW_STYLE_DIRTY);
+
 				sequence = nemoshow_sequence_create_easy(show,
 						nemoshow_sequence_create_frame_easy(show,
-							1.0f,
-							nemoshow_sequence_create_set_easy(show,
-								palm->fingers[i]->one,
-								"fill", "#0000FF",
-								NULL),
-							NULL),
+							1.0f, set, NULL),
 						NULL);
 
 				nemoshow_transition_attach_sequence(trans, sequence);
@@ -107,6 +107,7 @@ void minishell_palm_update(struct minishell *mini, struct minigrab *grab)
 		if (point_get_distance(palm->fingers[0]->x, palm->fingers[0]->y, grab->x, grab->y) > 500.0f) {
 			struct showtransition *trans;
 			struct showone *sequence;
+			struct showone *set;
 
 			trans = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 500, 0);
 
@@ -114,14 +115,13 @@ void minishell_palm_update(struct minishell *mini, struct minigrab *grab)
 				palm->fingers[i]->type = MINISHELL_NORMAL_GRAB;
 				palm->fingers[i]->userdata = NULL;
 
+				set = nemoshow_sequence_create_set();
+				nemoshow_sequence_set_source(set, palm->fingers[i]->one);
+				nemoshow_sequence_set_cattr(set, "fill", 255, 255, 0, 255, NEMOSHOW_STYLE_DIRTY);
+
 				sequence = nemoshow_sequence_create_easy(show,
 						nemoshow_sequence_create_frame_easy(show,
-							1.0f,
-							nemoshow_sequence_create_set_easy(show,
-								palm->fingers[i]->one,
-								"fill", "#FFFF00",
-								NULL),
-							NULL),
+							1.0f, set, NULL),
 						NULL);
 
 				nemoshow_transition_attach_sequence(trans, sequence);

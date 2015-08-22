@@ -268,36 +268,36 @@ int nemoshow_sequence_set_attr(struct showone *one, const char *name, const char
 			set->types[set->nattrs] = NEMOSHOW_DOUBLE_PROP;
 			set->nattrs++;
 		} else if (prop->type == NEMOSHOW_COLOR_PROP) {
-			char atname[NEMOSHOW_ATTR_NAME_MAX];
+			char attr[NEMOSHOW_ATTR_NAME_MAX];
 
-			snprintf(atname, NEMOSHOW_ATTR_NAME_MAX, "%s:r", name);
-			sattr = nemoobject_get(&src->object, atname);
+			snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:r", name);
+			sattr = nemoobject_get(&src->object, attr);
 			set->tattrs[set->nattrs] = sattr;
-			set->eattrs[set->nattrs] = nemoobject_get(&one->object, atname);
+			set->eattrs[set->nattrs] = nemoobject_get(&one->object, attr);
 			set->dirties[set->nattrs] = prop->dirty;
 			set->types[set->nattrs] = NEMOSHOW_DOUBLE_PROP;
 			set->nattrs++;
 
-			snprintf(atname, NEMOSHOW_ATTR_NAME_MAX, "%s:g", name);
-			sattr = nemoobject_get(&src->object, atname);
+			snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:g", name);
+			sattr = nemoobject_get(&src->object, attr);
 			set->tattrs[set->nattrs] = sattr;
-			set->eattrs[set->nattrs] = nemoobject_get(&one->object, atname);
+			set->eattrs[set->nattrs] = nemoobject_get(&one->object, attr);
 			set->dirties[set->nattrs] = prop->dirty;
 			set->types[set->nattrs] = NEMOSHOW_DOUBLE_PROP;
 			set->nattrs++;
 
-			snprintf(atname, NEMOSHOW_ATTR_NAME_MAX, "%s:b", name);
-			sattr = nemoobject_get(&src->object, atname);
+			snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:b", name);
+			sattr = nemoobject_get(&src->object, attr);
 			set->tattrs[set->nattrs] = sattr;
-			set->eattrs[set->nattrs] = nemoobject_get(&one->object, atname);
+			set->eattrs[set->nattrs] = nemoobject_get(&one->object, attr);
 			set->dirties[set->nattrs] = prop->dirty;
 			set->types[set->nattrs] = NEMOSHOW_DOUBLE_PROP;
 			set->nattrs++;
 
-			snprintf(atname, NEMOSHOW_ATTR_NAME_MAX, "%s:a", name);
-			sattr = nemoobject_get(&src->object, atname);
+			snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:a", name);
+			sattr = nemoobject_get(&src->object, attr);
 			set->tattrs[set->nattrs] = sattr;
-			set->eattrs[set->nattrs] = nemoobject_get(&one->object, atname);
+			set->eattrs[set->nattrs] = nemoobject_get(&one->object, attr);
 			set->dirties[set->nattrs] = prop->dirty;
 			set->types[set->nattrs] = NEMOSHOW_DOUBLE_PROP;
 			set->nattrs++;
@@ -325,6 +325,59 @@ int nemoshow_sequence_set_dattr(struct showone *one, const char *name, double va
 	sattr = nemoobject_get(&src->object, name);
 	set->tattrs[set->nattrs] = sattr;
 	set->eattrs[set->nattrs] = nemoobject_get(&one->object, name);
+	set->dirties[set->nattrs] = dirty;
+	set->types[set->nattrs] = NEMOSHOW_DOUBLE_PROP;
+	set->nattrs++;
+
+	return 0;
+}
+
+int nemoshow_sequence_set_cattr(struct showone *one, const char *name, double r, double g, double b, double a, uint32_t dirty)
+{
+	struct showset *set = NEMOSHOW_SET(one);
+	struct showone *src = set->src;
+	struct nemoattr *sattr;
+	char attr[NEMOSHOW_ATTR_NAME_MAX];
+
+	snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:r", name);
+	nemoobject_setd(&one->object, attr, r);
+	snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:g", name);
+	nemoobject_setd(&one->object, attr, g);
+	snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:b", name);
+	nemoobject_setd(&one->object, attr, b);
+	snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:a", name);
+	nemoobject_setd(&one->object, attr, a);
+
+	nemoobject_seti(&one->object, name, 1);
+
+	snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:r", name);
+	sattr = nemoobject_get(&src->object, attr);
+	set->tattrs[set->nattrs] = sattr;
+	set->eattrs[set->nattrs] = nemoobject_get(&one->object, attr);
+	set->dirties[set->nattrs] = dirty;
+	set->types[set->nattrs] = NEMOSHOW_DOUBLE_PROP;
+	set->nattrs++;
+
+	snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:g", name);
+	sattr = nemoobject_get(&src->object, attr);
+	set->tattrs[set->nattrs] = sattr;
+	set->eattrs[set->nattrs] = nemoobject_get(&one->object, attr);
+	set->dirties[set->nattrs] = dirty;
+	set->types[set->nattrs] = NEMOSHOW_DOUBLE_PROP;
+	set->nattrs++;
+
+	snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:b", name);
+	sattr = nemoobject_get(&src->object, attr);
+	set->tattrs[set->nattrs] = sattr;
+	set->eattrs[set->nattrs] = nemoobject_get(&one->object, attr);
+	set->dirties[set->nattrs] = dirty;
+	set->types[set->nattrs] = NEMOSHOW_DOUBLE_PROP;
+	set->nattrs++;
+
+	snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:a", name);
+	sattr = nemoobject_get(&src->object, attr);
+	set->tattrs[set->nattrs] = sattr;
+	set->eattrs[set->nattrs] = nemoobject_get(&one->object, attr);
 	set->dirties[set->nattrs] = dirty;
 	set->types[set->nattrs] = NEMOSHOW_DOUBLE_PROP;
 	set->nattrs++;

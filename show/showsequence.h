@@ -96,6 +96,7 @@ extern int nemoshow_sequence_update_set(struct nemoshow *show, struct showone *o
 extern int nemoshow_sequence_set_source(struct showone *one, struct showone *src);
 extern int nemoshow_sequence_set_attr(struct showone *one, const char *name, const char *value);
 extern int nemoshow_sequence_set_dattr(struct showone *one, const char *name, double value, uint32_t dirty);
+extern int nemoshow_sequence_set_cattr(struct showone *one, const char *name, double r, double g, double b, double a, uint32_t dirty);
 
 extern struct showone *nemoshow_sequence_create_follow(void);
 extern void nemoshow_sequence_destroy_follow(struct showone *one);
