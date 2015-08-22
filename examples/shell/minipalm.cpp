@@ -66,6 +66,8 @@ void minishell_palm_update(struct minishell *mini, struct minigrab *grab)
 		}
 
 		if (nfingers >= 4) {
+			struct showtransition *trans;
+			struct showone *sequence;
 			struct minipalm *palm;
 			uint32_t serial = ++mini->serial;
 
@@ -76,27 +78,56 @@ void minishell_palm_update(struct minishell *mini, struct minigrab *grab)
 			palm->fingers[3] = fingers[2];
 			palm->fingers[4] = fingers[3];
 
+			trans = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 500, 0);
+
 			for (i = 0; i < 5; i++) {
 				palm->fingers[i]->type = MINISHELL_PALM_GRAB;
 				palm->fingers[i]->serial = serial;
 				palm->fingers[i]->userdata = palm;
 
-				nemoshow_item_set_fill_color(palm->fingers[i]->one, 0, 0, 255, 255);
-				nemoshow_one_dirty(palm->fingers[i]->one, NEMOSHOW_STYLE_DIRTY);
+				sequence = nemoshow_sequence_create_easy(show,
+						nemoshow_sequence_create_frame_easy(show,
+							1.0f,
+							nemoshow_sequence_create_set_easy(show,
+								palm->fingers[i]->one,
+								"fill", "#0000FF",
+								NULL),
+							NULL),
+						NULL);
+
+				nemoshow_transition_attach_sequence(trans, sequence);
 			}
+
+			nemoshow_attach_transition(show, trans);
 		}
 	} else if (grab->type == MINISHELL_PALM_GRAB) {
 		struct minipalm *palm = (struct minipalm *)grab->userdata;
 		int i;
 
 		if (point_get_distance(palm->fingers[0]->x, palm->fingers[0]->y, grab->x, grab->y) > 500.0f) {
+			struct showtransition *trans;
+			struct showone *sequence;
+
+			trans = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 500, 0);
+
 			for (i = 0; i < 5; i++) {
 				palm->fingers[i]->type = MINISHELL_NORMAL_GRAB;
 				palm->fingers[i]->userdata = NULL;
 
-				nemoshow_item_set_fill_color(palm->fingers[i]->one, 255, 255, 0, 255);
-				nemoshow_one_dirty(palm->fingers[i]->one, NEMOSHOW_STYLE_DIRTY);
+				sequence = nemoshow_sequence_create_easy(show,
+						nemoshow_sequence_create_frame_easy(show,
+							1.0f,
+							nemoshow_sequence_create_set_easy(show,
+								palm->fingers[i]->one,
+								"fill", "#FFFF00",
+								NULL),
+							NULL),
+						NULL);
+
+				nemoshow_transition_attach_sequence(trans, sequence);
 			}
+
+			nemoshow_attach_transition(show, trans);
 
 			minishell_palm_destroy(palm);
 		}
