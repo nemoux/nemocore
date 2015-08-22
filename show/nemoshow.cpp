@@ -925,11 +925,19 @@ void nemoshow_dispatch_transition(struct nemoshow *show, uint32_t msecs)
 	nemolist_for_each_safe(trans, ntrans, &show->transition_list, link) {
 		done = nemoshow_transition_dispatch(trans, msecs);
 		if (done != 0) {
-			for (i = 0; i < trans->ntransitions; i++) {
-				strans[scount++] = trans->transitions[i];
-			}
+			if (trans->repeat == 1) {
+				for (i = 0; i < trans->ntransitions; i++) {
+					strans[scount++] = trans->transitions[i];
+				}
 
-			nemoshow_transition_destroy(trans);
+				nemoshow_transition_destroy(trans);
+			} else if (trans->repeat == 0 || --trans->repeat) {
+				trans->stime = 0;
+
+				for (i = 0; i < trans->nsequences; i++) {
+					nemoshow_sequence_prepare(trans->sequences[i], trans->serial);
+				}
+			}
 		}
 	}
 

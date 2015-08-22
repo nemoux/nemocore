@@ -29,6 +29,7 @@ struct showtransition *nemoshow_transition_create(struct showone *ease, uint32_t
 
 	trans->duration = duration;
 	trans->delay = delay;
+	trans->repeat = 1;
 
 	return trans;
 }

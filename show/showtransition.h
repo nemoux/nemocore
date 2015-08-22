@@ -28,6 +28,7 @@ struct showtransition {
 
 	uint32_t duration;
 	uint32_t delay;
+	uint32_t repeat;
 
 	uint32_t stime;
 	uint32_t etime;
@@ -58,6 +59,11 @@ static inline void nemoshow_transition_set_dispatch_frame(struct showtransition 
 static inline void nemoshow_transition_set_dispatch_done(struct showtransition *trans, nemoshow_transition_dispatch_done_t dispatch_done)
 {
 	trans->dispatch_done = dispatch_done;
+}
+
+static inline void nemoshow_transition_set_repeat(struct showtransition *trans, uint32_t repeat)
+{
+	trans->repeat = repeat;
 }
 
 static inline void nemoshow_transition_set_userdata(struct showtransition *trans, void *data)
