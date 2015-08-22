@@ -332,18 +332,24 @@ void nemoshow_item_update_matrix(struct nemoshow *show, struct showone *one)
 	if (item->transform == NEMOSHOW_TSR_TRANSFORM) {
 		NEMOSHOW_ITEM_CC(item, matrix)->setIdentity();
 
-		if (item->ro != 0.0f) {
-			if (item->px != 0.0f || item->py != 0.0f) {
-				NEMOSHOW_ITEM_CC(item, matrix)->postTranslate(-item->px, -item->py);
-				NEMOSHOW_ITEM_CC(item, matrix)->postRotate(item->ro);
-				NEMOSHOW_ITEM_CC(item, matrix)->postTranslate(item->px, item->py);
-			} else {
+		if (item->px != 0.0f || item->py != 0.0f) {
+			NEMOSHOW_ITEM_CC(item, matrix)->postTranslate(-item->px, -item->py);
+
+			if (item->ro != 0.0f) {
 				NEMOSHOW_ITEM_CC(item, matrix)->postRotate(item->ro);
 			}
-		}
+			if (item->sx != 1.0f || item->sy != 1.0f) {
+				NEMOSHOW_ITEM_CC(item, matrix)->postScale(item->sx, item->sy);
+			}
 
-		if (item->sx != 1.0f || item->sy != 1.0f) {
-			NEMOSHOW_ITEM_CC(item, matrix)->postScale(item->sx, item->sy);
+			NEMOSHOW_ITEM_CC(item, matrix)->postTranslate(item->px, item->py);
+		} else {
+			if (item->ro != 0.0f) {
+				NEMOSHOW_ITEM_CC(item, matrix)->postRotate(item->ro);
+			}
+			if (item->sx != 1.0f || item->sy != 1.0f) {
+				NEMOSHOW_ITEM_CC(item, matrix)->postScale(item->sx, item->sy);
+			}
 		}
 
 		NEMOSHOW_ITEM_CC(item, matrix)->postTranslate(item->tx, item->ty);
