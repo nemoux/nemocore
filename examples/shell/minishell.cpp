@@ -459,6 +459,7 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 						NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(one), path));
 
 				grab = minishell_grab_create(mini, tale, event, one, minishell_dispatch_yoyo_grab, yoyo);
+				grab->type = MINISHELL_YOYO_GRAB;
 				nemotale_dispatch_grab(tale, event->device, type, event);
 			}
 
