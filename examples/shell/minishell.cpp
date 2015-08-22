@@ -248,7 +248,7 @@ struct nemoactor *minishell_create_cursor(struct nemoshell *shell, int width, in
 }
 
 #define MINISHELL_PALM_UPDATE_INTERVAL		(300)
-#define MINISHELL_PALM_UPDATE_DISTANCE		(5.0f)
+#define MINISHELL_PALM_UPDATE_DISTANCE		(10.0f)
 
 static int minishell_dispatch_palm_grab(struct talegrab *base, uint32_t type, struct taleevent *event)
 {
@@ -265,17 +265,17 @@ static int minishell_dispatch_palm_grab(struct talegrab *base, uint32_t type, st
 		grab->dx = NEMOSHOW_ITEM_AT(one, tx) - grab->x;
 		grab->dy = NEMOSHOW_ITEM_AT(one, ty) - grab->y;
 	} else if (type & NEMOTALE_MOTION_EVENT) {
+		struct showone *one = grab->one;
+
 		if (minishell_grab_check_update(grab, event, MINISHELL_PALM_UPDATE_INTERVAL, MINISHELL_PALM_UPDATE_DISTANCE) != 0) {
-			struct showone *one = grab->one;
-
 			minishell_palm_update(mini, grab);
-
-			nemoshow_item_translate(one, event->x + grab->dx, event->y + grab->dy);
-
-			nemoactor_dispatch_frame(actor);
 
 			minishell_grab_update(grab, event);
 		}
+
+		nemoshow_item_translate(one, event->x + grab->dx, event->y + grab->dy);
+
+		nemoactor_dispatch_frame(actor);
 
 		grab->x = event->x;
 		grab->y = event->y;
