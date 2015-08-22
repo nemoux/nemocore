@@ -314,6 +314,24 @@ int nemoshow_sequence_set_attr(struct showone *one, const char *name, const char
 	return 0;
 }
 
+int nemoshow_sequence_set_dattr(struct showone *one, const char *name, double value, uint32_t dirty)
+{
+	struct showset *set = NEMOSHOW_SET(one);
+	struct showone *src = set->src;
+	struct nemoattr *sattr;
+
+	nemoobject_setd(&one->object, name, value);
+
+	sattr = nemoobject_get(&src->object, name);
+	set->tattrs[set->nattrs] = sattr;
+	set->eattrs[set->nattrs] = nemoobject_get(&one->object, name);
+	set->dirties[set->nattrs] = dirty;
+	set->types[set->nattrs] = NEMOSHOW_DOUBLE_PROP;
+	set->nattrs++;
+
+	return 0;
+}
+
 struct showone *nemoshow_sequence_create_follow(void)
 {
 	struct showfollow *follow;
