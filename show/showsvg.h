@@ -14,6 +14,8 @@ NEMO_BEGIN_EXTERN_C
 struct showsvg {
 	struct showone base;
 
+	int32_t event;
+
 	struct showone *canvas;
 	struct showone *group;
 
@@ -34,6 +36,13 @@ extern void nemoshow_svg_destroy(struct showone *one);
 
 extern int nemoshow_svg_arrange(struct nemoshow *show, struct showone *one);
 extern int nemoshow_svg_update(struct nemoshow *show, struct showone *one);
+
+static inline void nemoshow_svg_set_event(struct showone *one, int32_t event)
+{
+	struct showsvg *svg = NEMOSHOW_SVG(one);
+
+	svg->event = event;
+}
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

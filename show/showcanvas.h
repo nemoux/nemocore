@@ -68,6 +68,9 @@ struct showcanvas {
 	int needs_redraw;
 	int needs_full_redraw;
 
+	int needs_redraw_picker;
+	int needs_full_redraw_picker;
+
 	nemoshow_canvas_dispatch_render_t dispatch_render;
 
 	void *cc;
@@ -83,6 +86,7 @@ extern int nemoshow_canvas_arrange(struct nemoshow *show, struct showone *one);
 extern int nemoshow_canvas_update(struct nemoshow *show, struct showone *one);
 
 extern void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one);
+extern void nemoshow_canvas_render_picker(struct nemoshow *show, struct showone *one);
 extern void nemoshow_canvas_render_back(struct nemoshow *show, struct showone *one);
 extern void nemoshow_canvas_render_scene(struct nemoshow *show, struct showone *one);
 
@@ -91,6 +95,8 @@ extern int nemoshow_canvas_set_viewport(struct nemoshow *show, struct showone *o
 extern void nemoshow_canvas_damage_region(struct showone *one, int32_t x, int32_t y, int32_t width, int32_t height);
 extern void nemoshow_canvas_damage_one(struct showone *one, struct showone *child);
 extern void nemoshow_canvas_damage_all(struct showone *one);
+
+extern int32_t nemoshow_canvas_get_pixel(struct showone *one, int x, int y);
 
 static inline void nemoshow_canvas_set_dispatch_render(struct showone *one, nemoshow_canvas_dispatch_render_t dispatch_render)
 {

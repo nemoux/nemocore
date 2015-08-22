@@ -394,15 +394,13 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 			struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
 			struct nemoactor *actor = NEMOSHOW_AT(show, actor);
 			struct minishell *mini = (struct minishell *)nemoshow_get_userdata(show);
+			struct showone *canvas = nemoshow_search_one(show, "mini");
 
 			if (nemotale_is_touch_down(tale, event, type)) {
-				struct showone *canvas;
 				struct showone *one;
 				struct showtransition *trans;
 				struct showone *sequence;
 				struct minigrab *grab;
-
-				canvas = nemoshow_search_one(show, "mini");
 
 				one = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
 				nemoshow_attach_one(show, canvas, one);
@@ -433,13 +431,10 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 			}
 
 			if (nemotale_is_pointer_left_down(tale, event, type)) {
-				struct showone *canvas;
 				struct showone *one;
 				struct showone *blur;
 				struct minigrab *grab;
 				struct miniyoyo *yoyo;
-
-				canvas = nemoshow_search_one(show, "mini");
 
 				blur = nemoshow_blur_create();
 				nemoshow_attach_one(show, canvas, blur);
@@ -466,6 +461,10 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 
 				grab = minishell_grab_create(mini, tale, event, one, minishell_dispatch_yoyo_grab, yoyo);
 				nemotale_dispatch_grab(tale, event->device, type, event);
+			}
+
+			if (nemotale_is_single_click(tale, event, type)) {
+				int32_t pid = nemoshow_canvas_get_pixel(canvas, event->x, event->y);
 			}
 		}
 	}

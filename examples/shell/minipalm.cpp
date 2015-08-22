@@ -154,6 +154,8 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 			palm->fingers[i]->type = MINISHELL_ACTIVE_GRAB;
 			palm->fingers[i]->userdata = NULL;
 
+			nemoshow_item_set_event(palm->fingers[i]->one, i + 1);
+
 			sequence = nemoshow_sequence_create_easy(show,
 					nemoshow_sequence_create_frame_easy(show,
 						1.0f,

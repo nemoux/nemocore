@@ -39,6 +39,8 @@ typedef enum {
 struct showitem {
 	struct showone base;
 
+	int32_t event;
+
 	struct showone *canvas;
 	struct showone *group;
 
@@ -101,6 +103,13 @@ extern void nemoshow_item_set_tsr(struct showone *one);
 extern void nemoshow_item_set_shader(struct showone *one, struct showone *shader);
 
 extern double nemoshow_item_get_outer(struct showone *one);
+
+static inline void nemoshow_item_set_event(struct showone *one, int32_t event)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	item->event = event;
+}
 
 static inline void nemoshow_item_set_fill_color(struct showone *one, double r, double g, double b, double a)
 {
