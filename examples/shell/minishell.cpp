@@ -247,7 +247,10 @@ struct nemoactor *minishell_create_cursor(struct nemoshell *shell, int width, in
 	return actor;
 }
 
-static int minishell_dispatch_touch_grab(struct talegrab *base, uint32_t type, struct taleevent *event)
+#define MINISHELL_PALM_UPDATE_INTERVAL		(300)
+#define MINISHELL_PALM_UPDATE_DISTANCE		(5.0f)
+
+static int minishell_dispatch_palm_grab(struct talegrab *base, uint32_t type, struct taleevent *event)
 {
 	struct minigrab *grab = (struct minigrab *)container_of(base, struct minigrab, base);
 	struct minishell *mini = grab->mini;
@@ -262,13 +265,17 @@ static int minishell_dispatch_touch_grab(struct talegrab *base, uint32_t type, s
 		grab->dx = NEMOSHOW_ITEM_AT(one, tx) - grab->x;
 		grab->dy = NEMOSHOW_ITEM_AT(one, ty) - grab->y;
 	} else if (type & NEMOTALE_MOTION_EVENT) {
-		struct showone *one = grab->one;
+		if (minishell_grab_check_update(grab, event, MINISHELL_PALM_UPDATE_INTERVAL, MINISHELL_PALM_UPDATE_DISTANCE) != 0) {
+			struct showone *one = grab->one;
 
-		minishell_palm_update(mini, grab);
+			minishell_palm_update(mini, grab);
 
-		nemoshow_item_translate(one, event->x + grab->dx, event->y + grab->dy);
+			nemoshow_item_translate(one, event->x + grab->dx, event->y + grab->dy);
 
-		nemoactor_dispatch_frame(actor);
+			nemoactor_dispatch_frame(actor);
+
+			minishell_grab_update(grab, event);
+		}
 
 		grab->x = event->x;
 		grab->y = event->y;
@@ -300,8 +307,7 @@ static int minishell_dispatch_yoyo_grab(struct talegrab *base, uint32_t type, st
 
 		minishell_yoyo_prepare(yoyo, event->x, event->y);
 	} else if (type & NEMOTALE_MOTION_EVENT) {
-		if (grab->ltime + MINISHELL_YOYO_UPDATE_INTERVAL < event->time ||
-				point_get_distance(grab->lx, grab->ly, event->x, event->y) > MINISHELL_YOYO_UPDATE_DISTANCE) {
+		if (minishell_grab_check_update(grab, event, MINISHELL_YOYO_UPDATE_INTERVAL, MINISHELL_YOYO_UPDATE_DISTANCE) != 0) {
 			struct miniyoyo *yoyo = (struct miniyoyo *)grab->userdata;
 			struct showone *one = grab->one;
 			int32_t minx, miny, maxx, maxy;
@@ -321,9 +327,7 @@ static int minishell_dispatch_yoyo_grab(struct talegrab *base, uint32_t type, st
 
 			nemoactor_dispatch_frame(actor);
 
-			grab->ltime = event->time;
-			grab->lx = event->x;
-			grab->ly = event->y;
+			minishell_grab_update(grab, event);
 		}
 	} else if (type & NEMOTALE_UP_EVENT) {
 		struct miniyoyo *yoyo = (struct miniyoyo *)grab->userdata;
@@ -422,7 +426,7 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 
 				nemoactor_dispatch_frame(actor);
 
-				grab = minishell_grab_create(mini, tale, event, one, minishell_dispatch_touch_grab, NULL);
+				grab = minishell_grab_create(mini, tale, event, one, minishell_dispatch_palm_grab, NULL);
 				nemotale_dispatch_grab(tale, event->device, type, event);
 			}
 
