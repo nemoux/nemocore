@@ -738,6 +738,8 @@ int nemoshow_set_camera(struct nemoshow *show, struct showone *one)
 
 	show->camera = one;
 
+	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
+
 	return 0;
 }
 
