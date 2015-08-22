@@ -518,7 +518,7 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 
 	outer = NEMOSHOW_ANTIALIAS_EPSILON;
 	if (item->blur != NULL)
-		outer += NEMOSHOW_BLUR_AT(item->blur, r);
+		outer += NEMOSHOW_BLUR_AT(item->blur, r) * 2.0f;
 	box.outset(outer, outer);
 
 	if (item->canvas != NULL) {
@@ -622,7 +622,7 @@ double nemoshow_item_get_outer(struct showone *one)
 
 	outer += NEMOSHOW_ANTIALIAS_EPSILON;
 	if (item->blur != NULL)
-		outer += NEMOSHOW_BLUR_AT(item->blur, r);
+		outer += NEMOSHOW_BLUR_AT(item->blur, r) * 2.0f;
 
 	return outer;
 }
