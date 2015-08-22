@@ -112,6 +112,9 @@ extern void nemoshow_one_destroy(struct showone *one);
 extern void nemoshow_one_attach_one(struct showone *parent, struct showone *one);
 extern void nemoshow_one_detach_one(struct showone *parent, struct showone *one);
 
+extern void nemoshow_one_reference_one(struct showone *one, struct showone *ref);
+extern void nemoshow_one_unreference_one(struct showone *one, struct showone *ref);
+
 extern struct showattr *nemoshow_one_create_attr(const char *name, const char *text, struct nemoattr *ref, uint32_t dirty);
 extern void nemoshow_one_destroy_attr(struct showattr *attr);
 

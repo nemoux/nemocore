@@ -124,7 +124,7 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 	if (style != NULL) {
 		item->style = style;
 
-		NEMOBOX_APPEND(style->refs, style->srefs, style->nrefs, one);
+		nemoshow_one_reference_one(one, style);
 	} else {
 		NEMOSHOW_ITEM_CC(item, fill) = new SkPaint;
 		NEMOSHOW_ITEM_CC(item, fill)->setAntiAlias(true);
@@ -135,14 +135,14 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 		if (blur != NULL) {
 			item->blur = blur;
 
-			NEMOBOX_APPEND(blur->refs, blur->srefs, blur->nrefs, one);
+			nemoshow_one_reference_one(one, blur);
 		}
 
 		shader = nemoshow_search_one(show, nemoobject_gets(&one->object, "shader"));
 		if (shader != NULL) {
 			item->shader = shader;
 
-			NEMOBOX_APPEND(shader->refs, shader->srefs, shader->nrefs, one);
+			nemoshow_one_reference_one(one, shader);
 		}
 
 		item->style = one;
@@ -154,7 +154,7 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 
 		item->matrix = matrix;
 
-		NEMOBOX_APPEND(matrix->refs, matrix->srefs, matrix->nrefs, one);
+		nemoshow_one_reference_one(one, matrix);
 	} else {
 		for (i = 0; i < one->nchildren; i++) {
 			if (one->children[i]->type == NEMOSHOW_MATRIX_TYPE) {
@@ -169,14 +169,14 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 	if (clip != NULL) {
 		item->clip = clip;
 
-		NEMOBOX_APPEND(clip->refs, clip->srefs, clip->nrefs, one);
+		nemoshow_one_reference_one(one, clip);
 	}
 
 	path = nemoshow_search_one(show, nemoobject_gets(&one->object, "path"));
 	if (path != NULL) {
 		item->path = path;
 
-		NEMOBOX_APPEND(path->refs, path->srefs, path->nrefs, one);
+		nemoshow_one_reference_one(one, path);
 	}
 
 	font = nemoshow_search_one(show, nemoobject_gets(&one->object, "font"));
@@ -190,7 +190,7 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 				NEMOSHOW_ITEM_CC(item, stroke)->setTypeface(
 					NEMOSHOW_FONT_CC(NEMOSHOW_FONT(item->font), face)));
 
-		NEMOBOX_APPEND(font->refs, font->srefs, font->nrefs, one);
+		nemoshow_one_reference_one(one, font);
 	}
 
 	if (one->sub == NEMOSHOW_PATH_ITEM || one->sub == NEMOSHOW_PATHGROUP_ITEM) {
@@ -586,7 +586,7 @@ void nemoshow_item_set_shader(struct showone *one, struct showone *shader)
 
 	item->fill = 1;
 
-	NEMOBOX_APPEND(shader->refs, shader->srefs, shader->nrefs, one);
+	nemoshow_one_reference_one(one, shader);
 }
 
 double nemoshow_item_get_outer(struct showone *one)

@@ -215,9 +215,10 @@ static struct showone *nemoshow_create_one(struct nemoshow *show, struct xmlnode
 						nemoobject_seti(&one->object, node->attrs[i*2+0], 1);
 					}
 
-					NEMOBOX_APPEND(vone->refs, vone->srefs, vone->nrefs, one);
 					NEMOBOX_APPEND(var->refs, var->srefs, var->nrefs,
 							nemoshow_var_create_ref(one, node->attrs[i*2+0], prop->type));
+
+					nemoshow_one_reference_one(one, vone);
 				}
 			} else if (node->attrs[i*2+1][0] == '!') {
 				struct showattr *attr;

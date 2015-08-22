@@ -176,7 +176,7 @@ int nemoshow_canvas_arrange(struct nemoshow *show, struct showone *one)
 	if (matrix != NULL) {
 		canvas->matrix = matrix;
 
-		NEMOBOX_APPEND(matrix->refs, matrix->srefs, matrix->nrefs, one);
+		nemoshow_one_reference_one(one, matrix);
 	}
 
 	return 0;

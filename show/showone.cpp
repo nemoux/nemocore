@@ -95,6 +95,24 @@ void nemoshow_one_detach_one(struct showone *parent, struct showone *one)
 	}
 }
 
+void nemoshow_one_reference_one(struct showone *one, struct showone *ref)
+{
+	NEMOBOX_APPEND(ref->refs, ref->srefs, ref->nrefs, one);
+}
+
+void nemoshow_one_unreference_one(struct showone *one, struct showone *ref)
+{
+	int i;
+
+	for (i = 0; i < ref->nrefs; i++) {
+		if (ref->refs[i] == one) {
+			NEMOBOX_REMOVE(ref->refs, ref->nrefs, i);
+
+			break;
+		}
+	}
+}
+
 struct showattr *nemoshow_one_create_attr(const char *name, const char *text, struct nemoattr *ref, uint32_t dirty)
 {
 	struct showattr *attr;
