@@ -101,6 +101,7 @@ struct showone {
 	uint32_t dirty;
 
 	int32_t x, y, width, height;
+	int32_t outer;
 };
 
 extern void nemoshow_one_prepare(struct showone *one);

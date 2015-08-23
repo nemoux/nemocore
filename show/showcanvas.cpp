@@ -439,25 +439,30 @@ static inline void nemoshow_canvas_render_picker_one(struct nemoshow *show, stru
 				nemoshow_canvas_render_picker_one(show, canvas, one->children[i]);
 			}
 		} else {
-			SkRect rect = SkRect::MakeXYWH(one->x, one->y, one->width, one->height);
+			if (item->event > 0) {
+				SkRect rect = SkRect::MakeXYWH(one->x + one->outer, one->y + one->outer, one->width - one->outer * 2, one->height - one->outer * 2);
+				SkPaint paint;
+
+				paint.setStyle(SkPaint::kFill_Style);
+				paint.setColor(SkColorSetARGB(255, item->event, 0, 0));
+				paint.setAntiAlias(false);
+
+				NEMOSHOW_CANVAS_CP(canvas, canvas)->drawRect(rect, paint);
+			}
+		}
+	} else if (one->type == NEMOSHOW_SVG_TYPE) {
+		struct showsvg *svg = NEMOSHOW_SVG(one);
+
+		if (svg->event > 0) {
+			SkRect rect = SkRect::MakeXYWH(one->x + one->outer, one->y + one->outer, one->width - one->outer * 2, one->height - one->outer * 2);
 			SkPaint paint;
 
 			paint.setStyle(SkPaint::kFill_Style);
-			paint.setColor(SkColorSetARGB(item->event, 0, 0, 0));
+			paint.setColor(SkColorSetARGB(255, svg->event, 0, 0));
 			paint.setAntiAlias(false);
 
 			NEMOSHOW_CANVAS_CP(canvas, canvas)->drawRect(rect, paint);
 		}
-	} else if (one->type == NEMOSHOW_SVG_TYPE) {
-		struct showsvg *svg = NEMOSHOW_SVG(one);
-		SkRect rect = SkRect::MakeXYWH(one->x, one->y, one->width, one->height);
-		SkPaint paint;
-
-		paint.setStyle(SkPaint::kFill_Style);
-		paint.setColor(SkColorSetARGB(svg->event, 0, 0, 0));
-		paint.setAntiAlias(false);
-
-		NEMOSHOW_CANVAS_CP(canvas, canvas)->drawRect(rect, paint);
 	}
 }
 
@@ -625,5 +630,5 @@ int32_t nemoshow_canvas_pick_one(struct showone *one, int x, int y)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
-	return SkColorGetA(NEMOSHOW_CANVAS_CP(canvas, bitmap)->getColor(x, y));
+	return SkColorGetR(NEMOSHOW_CANVAS_CP(canvas, bitmap)->getColor(x, y));
 }

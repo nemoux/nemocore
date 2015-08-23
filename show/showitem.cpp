@@ -543,6 +543,7 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 		one->y = MAX(floor(box.y()), 0);
 		one->width = ceil(box.width());
 		one->height = ceil(box.height());
+		one->outer = outer;
 
 		snprintf(attr, NEMOSHOW_SYMBOL_MAX, "%s_x", one->id);
 		nemoshow_update_symbol(show, attr, one->x);
