@@ -175,6 +175,8 @@ static struct showone *nemoshow_create_one(struct nemoshow *show, struct xmlnode
 		one = nemoshow_font_create();
 	} else if (strcmp(node->name, "defs") == 0) {
 		one = nemoshow_one_create(NEMOSHOW_DEFS_TYPE);
+	} else if (strcmp(node->name, "link") == 0) {
+		one = nemoshow_link_create();
 	}
 
 	if (one != NULL) {
@@ -605,6 +607,8 @@ void nemoshow_arrange_one(struct nemoshow *show)
 			nemoshow_font_arrange(show, one);
 		} else if (one->type == NEMOSHOW_PATH_TYPE) {
 			nemoshow_path_arrange(show, one);
+		} else if (one->type == NEMOSHOW_LINK_TYPE) {
+			nemoshow_link_arrange(show, one);
 		}
 	}
 
@@ -668,17 +672,20 @@ void nemoshow_render_one(struct nemoshow *show)
 			canvas = NEMOSHOW_CANVAS(one);
 
 			if (canvas->needs_redraw != 0) {
-				if (canvas->dispatch_render == NULL) {
-					if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
-						nemoshow_canvas_render_vector(show, one);
-					} else if (one->sub == NEMOSHOW_CANVAS_BACK_TYPE) {
-						nemoshow_canvas_render_back(show, one);
-					}
-				} else {
-					canvas->dispatch_render(show, one);
+				if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
+					nemoshow_canvas_render_vector(show, one);
+
+					canvas->needs_redraw = 0;
+				} else if (one->sub == NEMOSHOW_CANVAS_LINK_TYPE) {
+					nemoshow_canvas_render_link(show, one);
+				} else if (one->sub == NEMOSHOW_CANVAS_BACK_TYPE) {
+					nemoshow_canvas_render_back(show, one);
+
+					canvas->needs_redraw = 0;
 				}
 
-				canvas->needs_redraw = 0;
+				if (canvas->dispatch_render != NULL)
+					canvas->dispatch_render(show, one);
 			}
 
 			if (canvas->needs_redraw_picker != 0) {
@@ -696,13 +703,11 @@ void nemoshow_render_one(struct nemoshow *show)
 			canvas = NEMOSHOW_CANVAS(one);
 
 			if (canvas->needs_redraw != 0) {
-				if (one->type == NEMOSHOW_CANVAS_TYPE) {
-					if (one->sub == NEMOSHOW_CANVAS_SCENE_TYPE) {
-						nemoshow_canvas_render_scene(show, one);
-					}
-				}
+				if (one->sub == NEMOSHOW_CANVAS_SCENE_TYPE) {
+					nemoshow_canvas_render_scene(show, one);
 
-				canvas->needs_redraw = 0;
+					canvas->needs_redraw = 0;
+				}
 			}
 		}
 	}

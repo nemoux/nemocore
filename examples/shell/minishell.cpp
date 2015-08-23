@@ -525,10 +525,11 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 					struct showtransition *trans;
 					struct showone *sequence;
 					struct showone *set;
+					struct showone *link;
 
 					set = nemoshow_sequence_create_set();
 					nemoshow_sequence_set_source(set, one);
-					nemoshow_sequence_set_cattr(set, "fill", 255, 255, 0, 255, NEMOSHOW_STYLE_DIRTY);
+					nemoshow_sequence_set_cattr(set, "fill", 0, 255, 255, 255, NEMOSHOW_STYLE_DIRTY);
 
 					sequence = nemoshow_sequence_create_easy(show,
 							nemoshow_sequence_create_frame_easy(show,
@@ -614,6 +615,24 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 					nemoshow_attach_transition(show, trans0);
 					nemoshow_transition_attach_transition(trans0, trans1);
 					nemoshow_transition_attach_transition(trans1, trans2);
+
+					link = nemoshow_link_create();
+					nemoshow_attach_one(show, link);
+					nemoshow_one_attach_one(mini->links, link);
+					nemoshow_link_set_head(link, one);
+					nemoshow_link_set_tail(link, nut0);
+
+					link = nemoshow_link_create();
+					nemoshow_attach_one(show, link);
+					nemoshow_one_attach_one(mini->links, link);
+					nemoshow_link_set_head(link, nut0);
+					nemoshow_link_set_tail(link, nut1);
+
+					link = nemoshow_link_create();
+					nemoshow_attach_one(show, link);
+					nemoshow_one_attach_one(mini->links, link);
+					nemoshow_link_set_head(link, nut1);
+					nemoshow_link_set_tail(link, nut2);
 
 					nemoactor_dispatch_frame(actor);
 				}
@@ -763,6 +782,7 @@ int main(int argc, char *argv[])
 	nemoshow_render_one(show);
 
 	mini->canvas = nemoshow_search_one(show, "mini");
+	mini->links = nemoshow_search_one(show, "links");
 
 	mini->blur5 = blur = nemoshow_blur_create();
 	nemoshow_attach_one(show, blur);

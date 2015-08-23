@@ -41,6 +41,7 @@ typedef enum {
 	NEMOSHOW_CONS_TYPE = 18,
 	NEMOSHOW_FONT_TYPE = 19,
 	NEMOSHOW_DEFS_TYPE = 20,
+	NEMOSHOW_LINK_TYPE = 21,
 	NEMOSHOW_LAST_TYPE
 } NemoShowOneType;
 
@@ -102,6 +103,8 @@ struct showone {
 
 	int32_t x, y, width, height;
 	int32_t outer;
+
+	double ax, ay;
 };
 
 extern void nemoshow_one_prepare(struct showone *one);

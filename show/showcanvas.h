@@ -30,6 +30,7 @@ typedef enum {
 	NEMOSHOW_CANVAS_OPENGL_TYPE = 8,
 	NEMOSHOW_CANVAS_PIXMAN_TYPE = 9,
 	NEMOSHOW_CANVAS_BACK_TYPE = 10,
+	NEMOSHOW_CANVAS_LINK_TYPE = 11,
 	NEMOSHOW_CANVAS_LAST_TYPE
 } NemoShowCanvasType;
 
@@ -86,6 +87,7 @@ extern int nemoshow_canvas_arrange(struct nemoshow *show, struct showone *one);
 extern int nemoshow_canvas_update(struct nemoshow *show, struct showone *one);
 
 extern void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one);
+extern void nemoshow_canvas_render_link(struct nemoshow *show, struct showone *one);
 extern void nemoshow_canvas_render_picker(struct nemoshow *show, struct showone *one);
 extern void nemoshow_canvas_render_back(struct nemoshow *show, struct showone *one);
 extern void nemoshow_canvas_render_scene(struct nemoshow *show, struct showone *one);
