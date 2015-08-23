@@ -369,9 +369,9 @@ void nemoshow_item_update_matrix(struct nemoshow *show, struct showone *one)
 		}
 
 		NEMOSHOW_ITEM_CC(item, matrix)->postTranslate(item->tx, item->ty);
-
-		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 	}
+
+	one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 }
 
 void nemoshow_item_update_shape(struct nemoshow *show, struct showone *one)
@@ -644,4 +644,22 @@ double nemoshow_item_get_outer(struct showone *one)
 		outer += NEMOSHOW_BLUR_AT(item->blur, r) * 2.0f;
 
 	return outer;
+}
+
+void nemoshow_item_attach_one(struct nemoshow *show, struct showone *parent, struct showone *one)
+{
+	nemoshow_attach_one(show, one);
+	nemoshow_one_attach_one(parent, one);
+
+	if (parent->sub == NEMOSHOW_GROUP_ITEM)
+		nemoshow_one_reference_one(one, parent);
+}
+
+void nemoshow_item_detach_one(struct nemoshow *show, struct showone *parent, struct showone *one)
+{
+	nemoshow_detach_one(show, one);
+	nemoshow_one_detach_one(parent, one);
+
+	if (parent->sub == NEMOSHOW_GROUP_ITEM)
+		nemoshow_one_unreference_one(one, parent);
 }

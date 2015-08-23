@@ -28,6 +28,8 @@ struct minigrab {
 	int type;
 	uint32_t serial;
 
+	struct showone *group;
+	struct showone *edge;
 	struct showone *one;
 
 	double x, y;
@@ -40,7 +42,7 @@ struct minigrab {
 	void *userdata;
 };
 
-extern struct minigrab *minishell_grab_create(struct minishell *mini, struct nemotale *tale, struct taleevent *event, struct showone *one, nemotale_dispatch_grab_t dispatch, void *userdata);
+extern struct minigrab *minishell_grab_create(struct minishell *mini, struct nemotale *tale, struct taleevent *event, nemotale_dispatch_grab_t dispatch, void *userdata);
 extern void minishell_grab_destroy(struct minigrab *grab);
 
 static inline int minishell_grab_check_update(struct minigrab *grab, struct taleevent *event, uint32_t interval, double distance)

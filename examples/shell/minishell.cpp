@@ -258,14 +258,14 @@ static int minishell_dispatch_palm_grab(struct talegrab *base, uint32_t type, st
 	struct nemoactor *actor = NEMOSHOW_AT(show, actor);
 
 	if (type & NEMOTALE_DOWN_EVENT) {
-		struct showone *one = grab->one;
+		struct showone *group = grab->group;
 
 		minishell_palm_prepare(mini, grab);
 
-		grab->dx = NEMOSHOW_ITEM_AT(one, tx) - grab->x;
-		grab->dy = NEMOSHOW_ITEM_AT(one, ty) - grab->y;
+		grab->dx = NEMOSHOW_ITEM_AT(group, tx) - grab->x;
+		grab->dy = NEMOSHOW_ITEM_AT(group, ty) - grab->y;
 	} else if (type & NEMOTALE_MOTION_EVENT) {
-		struct showone *one = grab->one;
+		struct showone *group = grab->group;
 
 		if (minishell_grab_check_update(grab, event, MINISHELL_PALM_UPDATE_INTERVAL, MINISHELL_PALM_UPDATE_DISTANCE) != 0) {
 			minishell_palm_update(mini, grab);
@@ -274,7 +274,7 @@ static int minishell_dispatch_palm_grab(struct talegrab *base, uint32_t type, st
 		}
 
 		if (grab->type == MINISHELL_NORMAL_GRAB || grab->type == MINISHELL_PALM_GRAB) {
-			nemoshow_item_translate(one, event->x + grab->dx, event->y + grab->dy);
+			nemoshow_item_translate(group, event->x + grab->dx, event->y + grab->dy);
 		}
 
 		nemoactor_dispatch_frame(actor);
@@ -397,37 +397,69 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 			struct showone *canvas = nemoshow_search_one(show, "mini");
 
 			if (nemotale_is_touch_down(tale, event, type)) {
+				struct showone *group;
+				struct showone *edge;
 				struct showone *one;
 				struct showtransition *trans;
 				struct showone *sequence;
 				struct minigrab *grab;
 
+				group = nemoshow_item_create(NEMOSHOW_GROUP_ITEM);
+				nemoshow_attach_one(show, group);
+				nemoshow_one_attach_one(canvas, group);
+				nemoshow_item_arrange(show, group);
+				nemoshow_item_set_tsr(group);
+				nemoshow_item_translate(group, event->x - 50.0f, event->y - 50.0f);
+
+				edge = nemoshow_item_create(NEMOSHOW_DONUT_ITEM);
+				nemoshow_item_attach_one(show, group, edge);
+				nemoshow_item_arrange(show, edge);
+				NEMOSHOW_ITEM_AT(edge, x) = 0.0f;
+				NEMOSHOW_ITEM_AT(edge, y) = 0.0f;
+				NEMOSHOW_ITEM_AT(edge, width) = 100.0f;
+				NEMOSHOW_ITEM_AT(edge, height) = 100.0f;
+				NEMOSHOW_ITEM_AT(edge, inner) = 5.0f;
+				NEMOSHOW_ITEM_AT(edge, from) = 0.0f;
+				NEMOSHOW_ITEM_AT(edge, to) = 0.0f;
+				nemoshow_item_set_blur(edge, mini->blur5);
+				nemoshow_item_set_fill_color(edge, 255, 255, 0, 255);
+
 				one = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
-				nemoshow_attach_one(show, canvas, one);
+				nemoshow_item_attach_one(show, group, one);
 				nemoshow_item_arrange(show, one);
+				NEMOSHOW_ITEM_AT(one, x) = 50.0f;
+				NEMOSHOW_ITEM_AT(one, y) = 50.0f;
 				NEMOSHOW_ITEM_AT(one, r) = 0.0f;
 				nemoshow_item_set_blur(one, mini->blur15);
 				nemoshow_item_set_fill_color(one, 255, 255, 0, 255);
-				nemoshow_item_set_tsr(one);
-				nemoshow_item_translate(one, event->x, event->y);
 
 				sequence = nemoshow_sequence_create_easy(show,
 						nemoshow_sequence_create_frame_easy(show,
-							1.0f,
+							0.7f,
 							nemoshow_sequence_create_set_easy(show,
 								one,
-								"r", "45.0",
+								"r", "40.0",
+								NULL),
+							NULL),
+						nemoshow_sequence_create_frame_easy(show,
+							1.0f,
+							nemoshow_sequence_create_set_easy(show,
+								edge,
+								"to", "45.0",
 								NULL),
 							NULL),
 						NULL);
 
-				trans = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 500, 0);
+				trans = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 800, 0);
 				nemoshow_transition_attach_sequence(trans, sequence);
 				nemoshow_attach_transition(show, trans);
 
 				nemoactor_dispatch_frame(actor);
 
-				grab = minishell_grab_create(mini, tale, event, one, minishell_dispatch_palm_grab, NULL);
+				grab = minishell_grab_create(mini, tale, event, minishell_dispatch_palm_grab, NULL);
+				grab->group = group;
+				grab->edge = edge;
+				grab->one = one;
 				nemotale_dispatch_grab(tale, event->device, type, event);
 			}
 
@@ -437,7 +469,8 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 				struct miniyoyo *yoyo;
 
 				one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
-				nemoshow_attach_one(show, canvas, one);
+				nemoshow_attach_one(show, one);
+				nemoshow_one_attach_one(canvas, one);
 				nemoshow_item_arrange(show, one);
 				nemoshow_item_set_blur(one, mini->blur5);
 				nemoshow_item_set_stroke_color(one, 255, 255, 0, 255);
@@ -450,8 +483,9 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 						nemocompz_get_scene_height(actor->compz),
 						NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(one), path));
 
-				grab = minishell_grab_create(mini, tale, event, one, minishell_dispatch_yoyo_grab, yoyo);
+				grab = minishell_grab_create(mini, tale, event, minishell_dispatch_yoyo_grab, yoyo);
 				grab->type = MINISHELL_YOYO_GRAB;
+				grab->one = one;
 				nemotale_dispatch_grab(tale, event->device, type, event);
 			}
 
@@ -596,12 +630,12 @@ int main(int argc, char *argv[])
 	nemoshow_render_one(show);
 
 	mini->blur5 = blur = nemoshow_blur_create();
-	nemoshow_attach_one(show, NULL, blur);
+	nemoshow_attach_one(show, blur);
 	nemoshow_blur_arrange(show, blur);
 	nemoshow_blur_set_filter(blur, "high", "solid", 5.0f);
 
 	mini->blur15 = blur = nemoshow_blur_create();
-	nemoshow_attach_one(show, NULL, blur);
+	nemoshow_attach_one(show, blur);
 	nemoshow_blur_arrange(show, blur);
 	nemoshow_blur_set_filter(blur, "high", "solid", 15.0f);
 

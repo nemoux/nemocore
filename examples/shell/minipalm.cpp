@@ -68,7 +68,7 @@ void minishell_palm_update(struct minishell *mini, struct minigrab *grab)
 		if (nfingers >= 4) {
 			struct showtransition *trans;
 			struct showone *sequence;
-			struct showone *set;
+			struct showone *set0, *set1;
 			struct minipalm *palm;
 			uint32_t serial = ++mini->serial;
 
@@ -86,13 +86,17 @@ void minishell_palm_update(struct minishell *mini, struct minigrab *grab)
 				palm->fingers[i]->serial = serial;
 				palm->fingers[i]->userdata = palm;
 
-				set = nemoshow_sequence_create_set();
-				nemoshow_sequence_set_source(set, palm->fingers[i]->one);
-				nemoshow_sequence_set_cattr(set, "fill", 0, 0, 255, 255, NEMOSHOW_STYLE_DIRTY);
+				set0 = nemoshow_sequence_create_set();
+				nemoshow_sequence_set_source(set0, palm->fingers[i]->one);
+				nemoshow_sequence_set_cattr(set0, "fill", 0, 0, 255, 255, NEMOSHOW_STYLE_DIRTY);
+
+				set1 = nemoshow_sequence_create_set();
+				nemoshow_sequence_set_source(set1, palm->fingers[i]->edge);
+				nemoshow_sequence_set_cattr(set1, "fill", 0, 0, 255, 255, NEMOSHOW_STYLE_DIRTY);
 
 				sequence = nemoshow_sequence_create_easy(show,
 						nemoshow_sequence_create_frame_easy(show,
-							1.0f, set, NULL),
+							1.0f, set0, set1, NULL),
 						NULL);
 
 				nemoshow_transition_attach_sequence(trans, sequence);
@@ -107,7 +111,7 @@ void minishell_palm_update(struct minishell *mini, struct minigrab *grab)
 		if (point_get_distance(palm->fingers[0]->x, palm->fingers[0]->y, grab->x, grab->y) > 500.0f) {
 			struct showtransition *trans;
 			struct showone *sequence;
-			struct showone *set;
+			struct showone *set0, *set1;
 
 			trans = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 500, 0);
 
@@ -115,13 +119,17 @@ void minishell_palm_update(struct minishell *mini, struct minigrab *grab)
 				palm->fingers[i]->type = MINISHELL_NORMAL_GRAB;
 				palm->fingers[i]->userdata = NULL;
 
-				set = nemoshow_sequence_create_set();
-				nemoshow_sequence_set_source(set, palm->fingers[i]->one);
-				nemoshow_sequence_set_cattr(set, "fill", 255, 255, 0, 255, NEMOSHOW_STYLE_DIRTY);
+				set0 = nemoshow_sequence_create_set();
+				nemoshow_sequence_set_source(set0, palm->fingers[i]->one);
+				nemoshow_sequence_set_cattr(set0, "fill", 255, 255, 0, 255, NEMOSHOW_STYLE_DIRTY);
+
+				set1 = nemoshow_sequence_create_set();
+				nemoshow_sequence_set_source(set1, palm->fingers[i]->edge);
+				nemoshow_sequence_set_cattr(set1, "fill", 255, 255, 0, 255, NEMOSHOW_STYLE_DIRTY);
 
 				sequence = nemoshow_sequence_create_easy(show,
 						nemoshow_sequence_create_frame_easy(show,
-							1.0f, set, NULL),
+							1.0f, set0, set1, NULL),
 						NULL);
 
 				nemoshow_transition_attach_sequence(trans, sequence);
@@ -178,8 +186,8 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 		cy += palm->fingers[4]->y;
 		cy /= 5;
 
-		trans0 = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 500, 0);
-		trans1 = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 500, 0);
+		trans0 = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 800, 0);
+		trans1 = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 800, 0);
 
 		for (i = 0; i < 5; i++) {
 			palm->fingers[i]->type = MINISHELL_ACTIVE_GRAB;
@@ -188,6 +196,13 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 			nemoshow_item_set_event(palm->fingers[i]->one, i + 1);
 
 			sequence = nemoshow_sequence_create_easy(show,
+					nemoshow_sequence_create_frame_easy(show,
+						0.3f,
+						nemoshow_sequence_create_set_easy(show,
+							palm->fingers[i]->edge,
+							"to", "0.0",
+							NULL),
+						NULL),
 					nemoshow_sequence_create_frame_easy(show,
 						1.0f,
 						nemoshow_sequence_create_set_easy(show,
@@ -200,7 +215,7 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 			nemoshow_transition_attach_sequence(trans0, sequence);
 
 			set = nemoshow_sequence_create_set();
-			nemoshow_sequence_set_source(set, palm->fingers[i]->one);
+			nemoshow_sequence_set_source(set, palm->fingers[i]->group);
 			nemoshow_sequence_set_dattr(set, "tx", cx + cos(2 * M_PI / 5 * i) * 50.0f, NEMOSHOW_MATRIX_DIRTY);
 			nemoshow_sequence_set_dattr(set, "ty", cy + sin(2 * M_PI / 5 * i) * 50.0f, NEMOSHOW_MATRIX_DIRTY);
 

@@ -647,7 +647,7 @@ static inline int nemoshow_svg_load_rect(struct svgcontext *context, struct xmln
 	const char *value;
 
 	one = nemoshow_item_create(NEMOSHOW_RECT_ITEM);
-	nemoshow_attach_one(context->show, context->one, one);
+	nemoshow_item_attach_one(context->show, context->one, one);
 
 	nemoshow_one_set_id(one,
 			(value = nemoxml_node_get_attr(node, "id")) ? value : "");
@@ -668,7 +668,7 @@ static inline int nemoshow_svg_load_circle(struct svgcontext *context, struct xm
 	const char *value;
 
 	one = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
-	nemoshow_attach_one(context->show, context->one, one);
+	nemoshow_item_attach_one(context->show, context->one, one);
 
 	nemoshow_one_set_id(one,
 			(value = nemoxml_node_get_attr(node, "id")) ? value : "");
@@ -690,7 +690,7 @@ static inline int nemoshow_svg_load_path(struct svgcontext *context, struct xmln
 	const char *d;
 
 	one = nemoshow_item_create(NEMOSHOW_PATHGROUP_ITEM);
-	nemoshow_attach_one(context->show, context->one, one);
+	nemoshow_item_attach_one(context->show, context->one, one);
 
 	nemoshow_one_set_id(one,
 			(value = nemoxml_node_get_attr(node, "id")) ? value : "");
@@ -699,7 +699,8 @@ static inline int nemoshow_svg_load_path(struct svgcontext *context, struct xmln
 
 	cmd = nemoshow_path_create(NEMOSHOW_CMD_PATH);
 	nemoobject_sets(&cmd->object, "d", d, strlen(d));
-	nemoshow_attach_one(context->show, one, cmd);
+	nemoshow_attach_one(context->show, cmd);
+	nemoshow_one_attach_one(one, cmd);
 
 	nemoshow_svg_load_style(context, node, one);
 
@@ -715,7 +716,8 @@ static inline int nemoshow_svg_load_linear_gradient(struct svgcontext *context, 
 	const char *href;
 
 	one = nemoshow_shader_create(NEMOSHOW_LINEAR_GRADIENT_SHADER);
-	nemoshow_attach_one(context->show, context->one, one);
+	nemoshow_attach_one(context->show, one);
+	nemoshow_one_attach_one(context->one, one);
 
 	nemoshow_one_set_id(one,
 			(value = nemoxml_node_get_attr(node, "id")) ? value : "");
@@ -780,7 +782,8 @@ static inline int nemoshow_svg_load_radial_gradient(struct svgcontext *context, 
 	const char *href;
 
 	one = nemoshow_shader_create(NEMOSHOW_RADIAL_GRADIENT_SHADER);
-	nemoshow_attach_one(context->show, context->one, one);
+	nemoshow_attach_one(context->show, one);
+	nemoshow_one_attach_one(context->one, one);
 
 	nemoshow_one_set_id(one,
 			(value = nemoxml_node_get_attr(node, "id")) ? value : "");
@@ -841,7 +844,8 @@ static inline int nemoshow_svg_load_stop(struct svgcontext *context, struct xmln
 	const char *value;
 
 	one = nemoshow_stop_create();
-	nemoshow_attach_one(context->show, context->one, one);
+	nemoshow_attach_one(context->show, one);
+	nemoshow_one_attach_one(context->one, one);
 
 	nemoshow_one_set_id(one,
 			(value = nemoxml_node_get_attr(node, "id")) ? value : "");
@@ -859,7 +863,7 @@ static inline int nemoshow_svg_load_group(struct svgcontext *context, struct xml
 	const char *value;
 
 	one = nemoshow_item_create(NEMOSHOW_GROUP_ITEM);
-	nemoshow_attach_one(context->show, context->one, one);
+	nemoshow_item_attach_one(context->show, context->one, one);
 
 	nemoshow_one_set_id(one,
 			(value = nemoxml_node_get_attr(node, "id")) ? value : "");
@@ -886,7 +890,8 @@ static inline int nemoshow_svg_load_defs(struct svgcontext *context, struct xmln
 	const char *value;
 
 	one = nemoshow_one_create(NEMOSHOW_DEFS_TYPE);
-	nemoshow_attach_one(context->show, context->one, one);
+	nemoshow_attach_one(context->show, one);
+	nemoshow_one_attach_one(context->one, one);
 
 	nemoshow_one_set_id(one,
 			(value = nemoxml_node_get_attr(node, "id")) ? value : "");
@@ -1000,7 +1005,8 @@ int nemoshow_svg_load_uri_path(struct nemoshow *show, struct showone *one, const
 			if (d != NULL) {
 				child = nemoshow_path_create(NEMOSHOW_CMD_PATH);
 				nemoobject_sets(&child->object, "d", d, strlen(d));
-				nemoshow_attach_one(show, one, child);
+				nemoshow_attach_one(show, child);
+				nemoshow_one_attach_one(one, child);
 			}
 		} else if (strcmp(node->name, "rect") == 0) {
 			double x = strtod(nemoxml_node_get_attr(node, "x"), NULL);
@@ -1013,7 +1019,8 @@ int nemoshow_svg_load_uri_path(struct nemoshow *show, struct showone *one, const
 			NEMOSHOW_PATH_AT(child, y0) = y;
 			NEMOSHOW_PATH_AT(child, x1) = x + width;
 			NEMOSHOW_PATH_AT(child, y1) = y + height;
-			nemoshow_attach_one(show, one, child);
+			nemoshow_attach_one(show, child);
+			nemoshow_one_attach_one(one, child);
 		} else if (strcmp(node->name, "circle") == 0) {
 			double x = strtod(nemoxml_node_get_attr(node, "cx"), NULL);
 			double y = strtod(nemoxml_node_get_attr(node, "cy"), NULL);
@@ -1023,7 +1030,8 @@ int nemoshow_svg_load_uri_path(struct nemoshow *show, struct showone *one, const
 			NEMOSHOW_PATH_AT(child, x0) = x;
 			NEMOSHOW_PATH_AT(child, y0) = y;
 			NEMOSHOW_PATH_AT(child, r) = r;
-			nemoshow_attach_one(show, one, child);
+			nemoshow_attach_one(show, child);
+			nemoshow_one_attach_one(one, child);
 		}
 	}
 

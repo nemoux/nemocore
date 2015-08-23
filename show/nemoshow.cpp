@@ -865,18 +865,12 @@ void nemoshow_flush_canvas_all(struct nemoshow *show)
 	}
 }
 
-void nemoshow_attach_one(struct nemoshow *show, struct showone *parent, struct showone *one)
+void nemoshow_attach_one(struct nemoshow *show, struct showone *one)
 {
 	NEMOBOX_APPEND(show->ones, show->sones, show->nones, one);
-
-	if (parent != NULL) {
-		NEMOBOX_APPEND(parent->children, parent->schildren, parent->nchildren, one);
-
-		one->parent = parent;
-	}
 }
 
-void nemoshow_detach_one(struct nemoshow *show, struct showone *parent, struct showone *one)
+void nemoshow_detach_one(struct nemoshow *show, struct showone *one)
 {
 	int i;
 
@@ -885,16 +879,6 @@ void nemoshow_detach_one(struct nemoshow *show, struct showone *parent, struct s
 			NEMOBOX_REMOVE(show->ones, show->nones, i);
 
 			break;
-		}
-	}
-
-	if (parent != NULL) {
-		for (i = 0; i < parent->nchildren; i++) {
-			if (parent->children[i] == one) {
-				NEMOBOX_REMOVE(parent->children, parent->nchildren, i);
-
-				break;
-			}
 		}
 	}
 }
