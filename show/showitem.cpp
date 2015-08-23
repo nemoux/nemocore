@@ -40,6 +40,10 @@ struct showone *nemoshow_item_create(int type)
 	item->cc = new showitem_t;
 	NEMOSHOW_ITEM_CC(item, matrix) = new SkMatrix;
 	NEMOSHOW_ITEM_CC(item, path) = new SkPath;
+	NEMOSHOW_ITEM_CC(item, fill) = new SkPaint;
+	NEMOSHOW_ITEM_CC(item, fill)->setAntiAlias(true);
+	NEMOSHOW_ITEM_CC(item, stroke) = new SkPaint;
+	NEMOSHOW_ITEM_CC(item, stroke)->setAntiAlias(true);
 	NEMOSHOW_ITEM_CC(item, points) = NULL;
 
 	item->alpha = 1.0f;
@@ -48,6 +52,8 @@ struct showone *nemoshow_item_create(int type)
 
 	item->sx = 1.0f;
 	item->sy = 1.0f;
+
+	item->style = &item->base;
 
 	one = &item->base;
 	one->type = NEMOSHOW_ITEM_TYPE;
@@ -128,11 +134,6 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 
 		nemoshow_one_reference_one(one, style);
 	} else {
-		NEMOSHOW_ITEM_CC(item, fill) = new SkPaint;
-		NEMOSHOW_ITEM_CC(item, fill)->setAntiAlias(true);
-		NEMOSHOW_ITEM_CC(item, stroke) = new SkPaint;
-		NEMOSHOW_ITEM_CC(item, stroke)->setAntiAlias(true);
-
 		v = nemoobject_gets(&one->object, "blur");
 		if (v != NULL && (blur = nemoshow_search_one(show, v)) != NULL) {
 			item->blur = blur;
@@ -146,8 +147,6 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 
 			nemoshow_one_reference_one(one, shader);
 		}
-
-		item->style = one;
 	}
 
 	v = nemoobject_gets(&one->object, "matrix");

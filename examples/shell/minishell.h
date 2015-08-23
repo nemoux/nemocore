@@ -22,6 +22,7 @@ struct minishell {
 
 	uint32_t serial;
 
+	struct showone *canvas;
 	struct showone *blur5;
 	struct showone *blur15;
 };

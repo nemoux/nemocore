@@ -173,7 +173,7 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 		nemoshow_attach_transition(show, trans);
 	} else if (grab->type == MINISHELL_PALM_GRAB) {
 		struct minipalm *palm = (struct minipalm *)grab->userdata;
-		struct showone *canvas = nemoshow_search_one(show, "mini");
+		struct showone *canvas = mini->canvas;
 		struct showtransition *trans0, *trans1, *trans2;
 		struct showone *sequence;
 		struct showone *set;
@@ -199,7 +199,6 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 		nemoshow_attach_one(show, group);
 		nemoshow_one_attach_one(canvas, group);
 		nemoshow_item_set_canvas(group, canvas);
-		nemoshow_item_arrange(show, group);
 		nemoshow_item_set_tsr(group);
 		nemoshow_item_translate(group, cx, cy);
 

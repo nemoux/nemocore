@@ -394,7 +394,7 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 			struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
 			struct nemoactor *actor = NEMOSHOW_AT(show, actor);
 			struct minishell *mini = (struct minishell *)nemoshow_get_userdata(show);
-			struct showone *canvas = nemoshow_search_one(show, "mini");
+			struct showone *canvas = mini->canvas;
 
 			if (nemotale_is_touch_down(tale, event, type)) {
 				struct showone *group;
@@ -408,7 +408,6 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 				nemoshow_attach_one(show, group);
 				nemoshow_one_attach_one(canvas, group);
 				nemoshow_item_set_canvas(group, canvas);
-				nemoshow_item_arrange(show, group);
 				nemoshow_item_set_tsr(group);
 				nemoshow_item_translate(group, event->x, event->y);
 
@@ -416,7 +415,6 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 				nemoshow_attach_one(show, edge);
 				nemoshow_item_attach_one(group, edge);
 				nemoshow_item_set_canvas(edge, canvas);
-				nemoshow_item_arrange(show, edge);
 				NEMOSHOW_ITEM_AT(edge, x) = -50.0f;
 				NEMOSHOW_ITEM_AT(edge, y) = -50.0f;
 				NEMOSHOW_ITEM_AT(edge, width) = 100.0f;
@@ -431,7 +429,6 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 				nemoshow_attach_one(show, one);
 				nemoshow_item_attach_one(group, one);
 				nemoshow_item_set_canvas(one, canvas);
-				nemoshow_item_arrange(show, one);
 				NEMOSHOW_ITEM_AT(one, x) = 0.0f;
 				NEMOSHOW_ITEM_AT(one, y) = 0.0f;
 				NEMOSHOW_ITEM_AT(one, r) = 0.0f;
@@ -499,7 +496,6 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 				nemoshow_attach_one(show, one);
 				nemoshow_one_attach_one(canvas, one);
 				nemoshow_item_set_canvas(one, canvas);
-				nemoshow_item_arrange(show, one);
 				nemoshow_item_set_blur(one, mini->blur5);
 				nemoshow_item_set_stroke_color(one, 255, 255, 0, 255);
 				nemoshow_item_set_stroke_width(one, 3.0f);
@@ -657,14 +653,14 @@ int main(int argc, char *argv[])
 
 	nemoshow_render_one(show);
 
+	mini->canvas = nemoshow_search_one(show, "mini");
+
 	mini->blur5 = blur = nemoshow_blur_create();
 	nemoshow_attach_one(show, blur);
-	nemoshow_blur_arrange(show, blur);
 	nemoshow_blur_set_filter(blur, "high", "solid", 5.0f);
 
 	mini->blur15 = blur = nemoshow_blur_create();
 	nemoshow_attach_one(show, blur);
-	nemoshow_blur_arrange(show, blur);
 	nemoshow_blur_set_filter(blur, "high", "solid", 15.0f);
 
 	actor = NEMOSHOW_AT(show, actor);
