@@ -202,24 +202,19 @@ static inline void nemoshow_one_set_id(struct showone *one, const char *id)
 	strncpy(one->id, id, NEMOSHOW_ID_MAX);
 }
 
-static inline struct showone *nemoshow_one_get_canvas(struct showone *one)
+static inline struct showone *nemoshow_one_get_parent(struct showone *one, int type, int sub)
 {
 	struct showone *parent;
 
-	for (parent = one->parent;
-			parent != NULL && parent->type != NEMOSHOW_CANVAS_TYPE;
-			parent = parent->parent);
-
-	return parent;
-}
-
-static inline struct showone *nemoshow_one_get_parent(struct showone *one, int sub)
-{
-	struct showone *parent;
-
-	for (parent = one->parent;
-			parent != NULL && parent->type != NEMOSHOW_ITEM_TYPE && parent->sub != sub;
-			parent = parent->parent);
+	if (sub != 0) {
+		for (parent = one->parent;
+				parent != NULL && (parent->type != type || parent->sub != sub);
+				parent = parent->parent);
+	} else {
+		for (parent = one->parent;
+				parent != NULL && parent->type != type;
+				parent = parent->parent);
+	}
 
 	return parent;
 }

@@ -93,6 +93,8 @@ void nemoshow_one_detach_one(struct showone *parent, struct showone *one)
 			break;
 		}
 	}
+
+	one->parent = NULL;
 }
 
 void nemoshow_one_reference_one(struct showone *one, struct showone *ref)

@@ -647,7 +647,8 @@ static inline int nemoshow_svg_load_rect(struct svgcontext *context, struct xmln
 	const char *value;
 
 	one = nemoshow_item_create(NEMOSHOW_RECT_ITEM);
-	nemoshow_item_attach_one(context->show, context->one, one);
+	nemoshow_attach_one(context->show, one);
+	nemoshow_item_attach_one(context->one, one);
 
 	nemoshow_one_set_id(one,
 			(value = nemoxml_node_get_attr(node, "id")) ? value : "");
@@ -668,7 +669,8 @@ static inline int nemoshow_svg_load_circle(struct svgcontext *context, struct xm
 	const char *value;
 
 	one = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
-	nemoshow_item_attach_one(context->show, context->one, one);
+	nemoshow_attach_one(context->show, one);
+	nemoshow_item_attach_one(context->one, one);
 
 	nemoshow_one_set_id(one,
 			(value = nemoxml_node_get_attr(node, "id")) ? value : "");
@@ -690,7 +692,8 @@ static inline int nemoshow_svg_load_path(struct svgcontext *context, struct xmln
 	const char *d;
 
 	one = nemoshow_item_create(NEMOSHOW_PATHGROUP_ITEM);
-	nemoshow_item_attach_one(context->show, context->one, one);
+	nemoshow_attach_one(context->show, one);
+	nemoshow_item_attach_one(context->one, one);
 
 	nemoshow_one_set_id(one,
 			(value = nemoxml_node_get_attr(node, "id")) ? value : "");
@@ -863,7 +866,8 @@ static inline int nemoshow_svg_load_group(struct svgcontext *context, struct xml
 	const char *value;
 
 	one = nemoshow_item_create(NEMOSHOW_GROUP_ITEM);
-	nemoshow_item_attach_one(context->show, context->one, one);
+	nemoshow_attach_one(context->show, one);
+	nemoshow_item_attach_one(context->one, one);
 
 	nemoshow_one_set_id(one,
 			(value = nemoxml_node_get_attr(node, "id")) ? value : "");

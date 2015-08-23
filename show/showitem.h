@@ -43,7 +43,6 @@ struct showitem {
 	int32_t event;
 
 	struct showone *canvas;
-	struct showone *group;
 
 	double x, y;
 	double rx, ry;
@@ -109,14 +108,21 @@ extern void nemoshow_item_set_clip(struct showone *one, struct showone *clip);
 
 extern double nemoshow_item_get_outer(struct showone *one);
 
-extern void nemoshow_item_attach_one(struct nemoshow *show, struct showone *parent, struct showone *one);
-extern void nemoshow_item_detach_one(struct nemoshow *show, struct showone *parent, struct showone *one);
+extern void nemoshow_item_attach_one(struct showone *parent, struct showone *one);
+extern void nemoshow_item_detach_one(struct showone *parent, struct showone *one);
 
 static inline void nemoshow_item_set_event(struct showone *one, int32_t event)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	item->event = event;
+}
+
+static inline void nemoshow_item_set_canvas(struct showone *one, struct showone *canvas)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	item->canvas = canvas;
 }
 
 static inline void nemoshow_item_set_fill_color(struct showone *one, double r, double g, double b, double a)

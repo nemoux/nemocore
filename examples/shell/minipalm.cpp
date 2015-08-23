@@ -198,6 +198,7 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 		palm->group = group = nemoshow_item_create(NEMOSHOW_GROUP_ITEM);
 		nemoshow_attach_one(show, group);
 		nemoshow_one_attach_one(canvas, group);
+		nemoshow_item_set_canvas(group, canvas);
 		nemoshow_item_arrange(show, group);
 		nemoshow_item_set_tsr(group);
 		nemoshow_item_translate(group, cx, cy);
@@ -209,10 +210,7 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 			palm->fingers[i]->type = MINISHELL_ACTIVE_GRAB;
 			palm->fingers[i]->userdata = NULL;
 
-			nemoshow_one_detach_one(canvas, palm->fingers[i]->group);
-			nemoshow_detach_one(show, palm->fingers[i]->group);
-			nemoshow_item_attach_one(show, group, palm->fingers[i]->group);
-			nemoshow_item_arrange(show, palm->fingers[i]->group);
+			nemoshow_item_attach_one(group, palm->fingers[i]->group);
 			nemoshow_item_translate(palm->fingers[i]->group,
 					NEMOSHOW_ITEM_AT(palm->fingers[i]->group, tx) - cx,
 					NEMOSHOW_ITEM_AT(palm->fingers[i]->group, ty) - cy);

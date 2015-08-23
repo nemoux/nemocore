@@ -17,7 +17,6 @@ struct showsvg {
 	int32_t event;
 
 	struct showone *canvas;
-	struct showone *group;
 
 	double width, height;
 
@@ -48,6 +47,13 @@ static inline void nemoshow_svg_set_event(struct showone *one, int32_t event)
 	struct showsvg *svg = NEMOSHOW_SVG(one);
 
 	svg->event = event;
+}
+
+static inline void nemoshow_svg_set_canvas(struct showone *one, struct showone *canvas)
+{
+	struct showsvg *svg = NEMOSHOW_SVG(one);
+
+	svg->canvas = canvas;
 }
 
 static inline void nemoshow_svg_translate(struct showone *one, double tx, double ty)

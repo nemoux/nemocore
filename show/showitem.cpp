@@ -199,9 +199,6 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 		nemoshow_one_reference_one(one, font);
 	}
 
-	item->canvas = nemoshow_one_get_canvas(one);
-	item->group = nemoshow_one_get_parent(one, NEMOSHOW_GROUP_ITEM);
-
 	return 0;
 }
 
@@ -471,7 +468,7 @@ void nemoshow_item_update_shape(struct nemoshow *show, struct showone *one)
 void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
-	struct showone *group;
+	struct showone *parent;
 	SkRect box;
 	char attr[NEMOSHOW_SYMBOL_MAX];
 	double outer;
@@ -523,15 +520,17 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 		NEMOSHOW_ITEM_CC(item, matrix)->mapRect(&box);
 	}
 
-	for (group = item->group; group != NULL; group = NEMOSHOW_ITEM_AT(group, group)) {
-		struct showitem *pitem = NEMOSHOW_ITEM(group);
+	for (parent = one->parent; parent != NULL; parent = parent->parent) {
+		if (parent->type == NEMOSHOW_ITEM_TYPE && parent->sub == NEMOSHOW_GROUP_ITEM) {
+			struct showitem *group = NEMOSHOW_ITEM(parent);
 
-		nemoshow_one_update_alone(show, group);
+			nemoshow_one_update_alone(show, parent);
 
-		if (pitem->transform & NEMOSHOW_EXTERN_TRANSFORM) {
-			NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(pitem->matrix), matrix)->mapRect(&box);
-		} else if (pitem->transform & NEMOSHOW_INTERN_TRANSFORM) {
-			NEMOSHOW_ITEM_CC(pitem, matrix)->mapRect(&box);
+			if (group->transform & NEMOSHOW_EXTERN_TRANSFORM) {
+				NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(group->matrix), matrix)->mapRect(&box);
+			} else if (group->transform & NEMOSHOW_INTERN_TRANSFORM) {
+				NEMOSHOW_ITEM_CC(group, matrix)->mapRect(&box);
+			}
 		}
 	}
 
@@ -560,6 +559,9 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	if (item->canvas == NULL)
+		item->canvas = nemoshow_one_get_parent(one, NEMOSHOW_CANVAS_TYPE, 0);
 
 	if ((one->dirty & NEMOSHOW_STYLE_DIRTY) != 0)
 		nemoshow_item_update_style(show, one);
@@ -646,20 +648,25 @@ double nemoshow_item_get_outer(struct showone *one)
 	return outer;
 }
 
-void nemoshow_item_attach_one(struct nemoshow *show, struct showone *parent, struct showone *one)
+void nemoshow_item_attach_one(struct showone *parent, struct showone *one)
 {
-	nemoshow_attach_one(show, one);
+	if (one->parent != NULL) {
+		if (one->parent->sub == NEMOSHOW_GROUP_ITEM)
+			nemoshow_one_unreference_one(one, one->parent);
+
+		nemoshow_one_detach_one(one->parent, one);
+	}
+
 	nemoshow_one_attach_one(parent, one);
 
 	if (parent->sub == NEMOSHOW_GROUP_ITEM)
 		nemoshow_one_reference_one(one, parent);
 }
 
-void nemoshow_item_detach_one(struct nemoshow *show, struct showone *parent, struct showone *one)
+void nemoshow_item_detach_one(struct showone *parent, struct showone *one)
 {
-	nemoshow_detach_one(show, one);
-	nemoshow_one_detach_one(parent, one);
-
 	if (parent->sub == NEMOSHOW_GROUP_ITEM)
 		nemoshow_one_unreference_one(one, parent);
+
+	nemoshow_one_detach_one(parent, one);
 }

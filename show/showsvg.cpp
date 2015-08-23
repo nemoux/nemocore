@@ -111,9 +111,6 @@ int nemoshow_svg_arrange(struct nemoshow *show, struct showone *one)
 
 	nemoshow_svg_load_uri(show, one, nemoobject_gets(&one->object, "uri"));
 
-	svg->canvas = nemoshow_one_get_canvas(one);
-	svg->group = nemoshow_one_get_parent(one, NEMOSHOW_GROUP_ITEM);
-
 	return 0;
 }
 
@@ -177,7 +174,7 @@ static inline void nemoshow_svg_update_matrix(struct nemoshow *show, struct show
 static inline void nemoshow_svg_update_boundingbox(struct nemoshow *show, struct showone *one)
 {
 	struct showsvg *svg = NEMOSHOW_SVG(one);
-	struct showone *group;
+	struct showone *parent;
 	SkRect box;
 	char attr[NEMOSHOW_SYMBOL_MAX];
 
@@ -189,15 +186,17 @@ static inline void nemoshow_svg_update_boundingbox(struct nemoshow *show, struct
 		NEMOSHOW_SVG_CC(svg, matrix)->mapRect(&box);
 	}
 
-	for (group = svg->group; group != NULL; group = NEMOSHOW_ITEM_AT(group, group)) {
-		struct showitem *pitem = NEMOSHOW_ITEM(group);
+	for (parent = one->parent; parent != NULL; parent = parent->parent) {
+		if (parent->type == NEMOSHOW_ITEM_TYPE && parent->sub == NEMOSHOW_GROUP_ITEM) {
+			struct showitem *group = NEMOSHOW_ITEM(parent);
 
-		nemoshow_one_update_alone(show, group);
+			nemoshow_one_update_alone(show, parent);
 
-		if (pitem->transform & NEMOSHOW_EXTERN_TRANSFORM) {
-			NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(pitem->matrix), matrix)->mapRect(&box);
-		} else if (pitem->transform & NEMOSHOW_INTERN_TRANSFORM) {
-			NEMOSHOW_ITEM_CC(pitem, matrix)->mapRect(&box);
+			if (group->transform & NEMOSHOW_EXTERN_TRANSFORM) {
+				NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(group->matrix), matrix)->mapRect(&box);
+			} else if (group->transform & NEMOSHOW_INTERN_TRANSFORM) {
+				NEMOSHOW_ITEM_CC(group, matrix)->mapRect(&box);
+			}
 		}
 	}
 
@@ -225,6 +224,9 @@ static inline void nemoshow_svg_update_boundingbox(struct nemoshow *show, struct
 int nemoshow_svg_update(struct nemoshow *show, struct showone *one)
 {
 	struct showsvg *svg = NEMOSHOW_SVG(one);
+
+	if (svg->canvas == NULL)
+		svg->canvas = nemoshow_one_get_parent(one, NEMOSHOW_CANVAS_TYPE, 0);
 
 	if ((one->dirty & NEMOSHOW_CHILD_DIRTY) != 0)
 		nemoshow_svg_update_child(show, one);

@@ -407,12 +407,15 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 				group = nemoshow_item_create(NEMOSHOW_GROUP_ITEM);
 				nemoshow_attach_one(show, group);
 				nemoshow_one_attach_one(canvas, group);
+				nemoshow_item_set_canvas(group, canvas);
 				nemoshow_item_arrange(show, group);
 				nemoshow_item_set_tsr(group);
 				nemoshow_item_translate(group, event->x, event->y);
 
 				edge = nemoshow_item_create(NEMOSHOW_DONUT_ITEM);
-				nemoshow_item_attach_one(show, group, edge);
+				nemoshow_attach_one(show, edge);
+				nemoshow_item_attach_one(group, edge);
+				nemoshow_item_set_canvas(edge, canvas);
 				nemoshow_item_arrange(show, edge);
 				NEMOSHOW_ITEM_AT(edge, x) = -50.0f;
 				NEMOSHOW_ITEM_AT(edge, y) = -50.0f;
@@ -425,7 +428,9 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 				nemoshow_item_set_fill_color(edge, 255, 255, 0, 255);
 
 				one = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
-				nemoshow_item_attach_one(show, group, one);
+				nemoshow_attach_one(show, one);
+				nemoshow_item_attach_one(group, one);
+				nemoshow_item_set_canvas(one, canvas);
 				nemoshow_item_arrange(show, one);
 				NEMOSHOW_ITEM_AT(one, x) = 0.0f;
 				NEMOSHOW_ITEM_AT(one, y) = 0.0f;
@@ -493,6 +498,7 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 				one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
 				nemoshow_attach_one(show, one);
 				nemoshow_one_attach_one(canvas, one);
+				nemoshow_item_set_canvas(one, canvas);
 				nemoshow_item_arrange(show, one);
 				nemoshow_item_set_blur(one, mini->blur5);
 				nemoshow_item_set_stroke_color(one, 255, 255, 0, 255);
