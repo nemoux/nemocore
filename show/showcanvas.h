@@ -96,7 +96,7 @@ extern void nemoshow_canvas_damage_region(struct showone *one, int32_t x, int32_
 extern void nemoshow_canvas_damage_one(struct showone *one, struct showone *child);
 extern void nemoshow_canvas_damage_all(struct showone *one);
 
-extern int32_t nemoshow_canvas_get_pixel(struct showone *one, int x, int y);
+extern int32_t nemoshow_canvas_pick_one(struct showone *one, int x, int y);
 
 static inline void nemoshow_canvas_set_dispatch_render(struct showone *one, nemoshow_canvas_dispatch_render_t dispatch_render)
 {

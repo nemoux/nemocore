@@ -179,6 +179,7 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 		struct showone *set;
 		struct showone *group;
 		double cx = 0.0f, cy = 0.0f;
+		int slot;
 		int i;
 
 		cx += palm->fingers[0]->x;
@@ -214,7 +215,9 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 					NEMOSHOW_ITEM_AT(palm->fingers[i]->group, tx) - cx,
 					NEMOSHOW_ITEM_AT(palm->fingers[i]->group, ty) - cy);
 
-			nemoshow_item_set_event(palm->fingers[i]->one, i + 1);
+			slot = minishell_need_slot(mini);
+			minishell_set_slot(mini, slot, palm->fingers[i]->one);
+			nemoshow_item_set_event(palm->fingers[i]->one, slot);
 
 			sequence = nemoshow_sequence_create_easy(show,
 					nemoshow_sequence_create_frame_easy(show,
@@ -228,7 +231,7 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 						1.0f,
 						nemoshow_sequence_create_set_easy(show,
 							palm->fingers[i]->one,
-							"r", "15.0",
+							"r", "20.0",
 							NULL),
 						NULL),
 					NULL);

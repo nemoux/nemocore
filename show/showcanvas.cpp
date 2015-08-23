@@ -444,6 +444,7 @@ static inline void nemoshow_canvas_render_picker_one(struct nemoshow *show, stru
 
 			paint.setStyle(SkPaint::kFill_Style);
 			paint.setColor(SkColorSetARGB(item->event, 0, 0, 0));
+			paint.setAntiAlias(false);
 
 			NEMOSHOW_CANVAS_CP(canvas, canvas)->drawRect(rect, paint);
 		}
@@ -454,6 +455,7 @@ static inline void nemoshow_canvas_render_picker_one(struct nemoshow *show, stru
 
 		paint.setStyle(SkPaint::kFill_Style);
 		paint.setColor(SkColorSetARGB(svg->event, 0, 0, 0));
+		paint.setAntiAlias(false);
 
 		NEMOSHOW_CANVAS_CP(canvas, canvas)->drawRect(rect, paint);
 	}
@@ -619,7 +621,7 @@ void nemoshow_canvas_damage_all(struct showone *one)
 	canvas->needs_full_redraw_picker = 1;
 }
 
-int32_t nemoshow_canvas_get_pixel(struct showone *one, int x, int y)
+int32_t nemoshow_canvas_pick_one(struct showone *one, int x, int y)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 

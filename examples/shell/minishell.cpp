@@ -514,7 +514,29 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 			}
 
 			if (nemotale_is_single_click(tale, event, type)) {
-				int32_t pid = nemoshow_canvas_get_pixel(canvas, event->x, event->y);
+				int32_t pid = nemoshow_canvas_pick_one(canvas, event->x, event->y);
+
+				if (pid != 0 && minishell_has_slot(mini, pid) != 0) {
+					struct showone *one = (struct showone *)minishell_get_slot(mini, pid);
+					struct showtransition *trans;
+					struct showone *sequence;
+					struct showone *set;
+
+					set = nemoshow_sequence_create_set();
+					nemoshow_sequence_set_source(set, one);
+					nemoshow_sequence_set_cattr(set, "fill", 255, 255, 0, 255, NEMOSHOW_STYLE_DIRTY);
+
+					sequence = nemoshow_sequence_create_easy(show,
+							nemoshow_sequence_create_frame_easy(show,
+								1.0f, set, NULL),
+							NULL);
+
+					trans = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 800, 0);
+					nemoshow_transition_attach_sequence(trans, sequence);
+					nemoshow_attach_transition(show, trans);
+
+					nemoactor_dispatch_frame(actor);
+				}
 			}
 		}
 	}
@@ -595,6 +617,13 @@ int main(int argc, char *argv[])
 	if (mini == NULL)
 		return -1;
 	memset(mini, 0, sizeof(struct minishell));
+
+	mini->slots = (void **)malloc(sizeof(void *) * 256);
+	if (mini->slots == NULL)
+		return -1;
+	memset(mini->slots, 0, sizeof(void *) * 256);
+
+	mini->nslots = 256;
 
 	nemolist_init(&mini->grab_list);
 
@@ -685,6 +714,7 @@ out:
 
 	nemolog_message("SHELL", "end nemoshell...\n");
 
+	free(mini->slots);
 	free(mini);
 
 	free(configpath);
