@@ -153,6 +153,13 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 
 		sequence = nemoshow_sequence_create_easy(show,
 				nemoshow_sequence_create_frame_easy(show,
+					0.3f,
+					nemoshow_sequence_create_set_easy(show,
+						grab->edge,
+						"to", "0.0",
+						NULL),
+					NULL),
+				nemoshow_sequence_create_frame_easy(show,
 					1.0f,
 					nemoshow_sequence_create_set_easy(show,
 						grab->one,
@@ -161,7 +168,7 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 					NULL),
 				NULL);
 
-		trans = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 500, 0);
+		trans = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 800, 0);
 		nemoshow_transition_attach_sequence(trans, sequence);
 		nemoshow_attach_transition(show, trans);
 	} else if (grab->type == MINISHELL_PALM_GRAB) {

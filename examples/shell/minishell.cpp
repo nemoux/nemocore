@@ -409,6 +409,7 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 				nemoshow_one_attach_one(canvas, group);
 				nemoshow_item_arrange(show, group);
 				nemoshow_item_set_tsr(group);
+				nemoshow_item_pivot(group, 50.0f, 50.0f);
 				nemoshow_item_translate(group, event->x - 50.0f, event->y - 50.0f);
 
 				edge = nemoshow_item_create(NEMOSHOW_DONUT_ITEM);
@@ -451,6 +452,28 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 						NULL);
 
 				trans = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 800, 0);
+				nemoshow_transition_attach_sequence(trans, sequence);
+				nemoshow_attach_transition(show, trans);
+
+				sequence = nemoshow_sequence_create_easy(show,
+						nemoshow_sequence_create_frame_easy(show,
+							0.5f,
+							nemoshow_sequence_create_set_easy(show,
+								group,
+								"ro", "360.0",
+								NULL),
+							NULL),
+						nemoshow_sequence_create_frame_easy(show,
+							1.0f,
+							nemoshow_sequence_create_set_easy(show,
+								group,
+								"ro", "0.0",
+								NULL),
+							NULL),
+						NULL);
+
+				trans = nemoshow_transition_create(nemoshow_search_one(show, "ease2"), 5000, 0);
+				nemoshow_transition_set_repeat(trans, 0);
 				nemoshow_transition_attach_sequence(trans, sequence);
 				nemoshow_attach_transition(show, trans);
 
