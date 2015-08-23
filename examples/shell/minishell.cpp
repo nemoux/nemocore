@@ -409,14 +409,13 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 				nemoshow_one_attach_one(canvas, group);
 				nemoshow_item_arrange(show, group);
 				nemoshow_item_set_tsr(group);
-				nemoshow_item_pivot(group, 50.0f, 50.0f);
-				nemoshow_item_translate(group, event->x - 50.0f, event->y - 50.0f);
+				nemoshow_item_translate(group, event->x, event->y);
 
 				edge = nemoshow_item_create(NEMOSHOW_DONUT_ITEM);
 				nemoshow_item_attach_one(show, group, edge);
 				nemoshow_item_arrange(show, edge);
-				NEMOSHOW_ITEM_AT(edge, x) = 0.0f;
-				NEMOSHOW_ITEM_AT(edge, y) = 0.0f;
+				NEMOSHOW_ITEM_AT(edge, x) = -50.0f;
+				NEMOSHOW_ITEM_AT(edge, y) = -50.0f;
 				NEMOSHOW_ITEM_AT(edge, width) = 100.0f;
 				NEMOSHOW_ITEM_AT(edge, height) = 100.0f;
 				NEMOSHOW_ITEM_AT(edge, inner) = 5.0f;
@@ -428,8 +427,8 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 				one = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
 				nemoshow_item_attach_one(show, group, one);
 				nemoshow_item_arrange(show, one);
-				NEMOSHOW_ITEM_AT(one, x) = 50.0f;
-				NEMOSHOW_ITEM_AT(one, y) = 50.0f;
+				NEMOSHOW_ITEM_AT(one, x) = 0.0f;
+				NEMOSHOW_ITEM_AT(one, y) = 0.0f;
 				NEMOSHOW_ITEM_AT(one, r) = 0.0f;
 				nemoshow_item_set_blur(one, mini->blur15);
 				nemoshow_item_set_fill_color(one, 255, 255, 0, 255);

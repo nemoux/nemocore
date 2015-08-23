@@ -10,8 +10,12 @@ NEMO_BEGIN_EXTERN_C
 #include <minishell.h>
 #include <minigrab.h>
 
+#include <showhelper.h>
+
 struct minipalm {
 	struct minigrab *fingers[5];
+
+	struct showone *group;
 };
 
 extern struct minipalm *minishell_palm_create(void);

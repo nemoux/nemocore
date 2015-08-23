@@ -173,9 +173,11 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 		nemoshow_attach_transition(show, trans);
 	} else if (grab->type == MINISHELL_PALM_GRAB) {
 		struct minipalm *palm = (struct minipalm *)grab->userdata;
-		struct showtransition *trans0, *trans1;
+		struct showone *canvas = nemoshow_search_one(show, "mini");
+		struct showtransition *trans0, *trans1, *trans2;
 		struct showone *sequence;
 		struct showone *set;
+		struct showone *group;
 		double cx = 0.0f, cy = 0.0f;
 		int i;
 
@@ -193,12 +195,27 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 		cy += palm->fingers[4]->y;
 		cy /= 5;
 
+		palm->group = group = nemoshow_item_create(NEMOSHOW_GROUP_ITEM);
+		nemoshow_attach_one(show, group);
+		nemoshow_one_attach_one(canvas, group);
+		nemoshow_item_arrange(show, group);
+		nemoshow_item_set_tsr(group);
+		nemoshow_item_translate(group, cx, cy);
+
 		trans0 = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 800, 0);
 		trans1 = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 800, 0);
 
 		for (i = 0; i < 5; i++) {
 			palm->fingers[i]->type = MINISHELL_ACTIVE_GRAB;
 			palm->fingers[i]->userdata = NULL;
+
+			nemoshow_one_detach_one(canvas, palm->fingers[i]->group);
+			nemoshow_detach_one(show, palm->fingers[i]->group);
+			nemoshow_item_attach_one(show, group, palm->fingers[i]->group);
+			nemoshow_item_arrange(show, palm->fingers[i]->group);
+			nemoshow_item_translate(palm->fingers[i]->group,
+					NEMOSHOW_ITEM_AT(palm->fingers[i]->group, tx) - cx,
+					NEMOSHOW_ITEM_AT(palm->fingers[i]->group, ty) - cy);
 
 			nemoshow_item_set_event(palm->fingers[i]->one, i + 1);
 
@@ -223,8 +240,8 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 
 			set = nemoshow_sequence_create_set();
 			nemoshow_sequence_set_source(set, palm->fingers[i]->group);
-			nemoshow_sequence_set_dattr(set, "tx", cx + cos(2 * M_PI / 5 * i) * 50.0f, NEMOSHOW_MATRIX_DIRTY);
-			nemoshow_sequence_set_dattr(set, "ty", cy + sin(2 * M_PI / 5 * i) * 50.0f, NEMOSHOW_MATRIX_DIRTY);
+			nemoshow_sequence_set_dattr(set, "tx", cos(2 * M_PI / 5 * i) * 50.0f, NEMOSHOW_MATRIX_DIRTY);
+			nemoshow_sequence_set_dattr(set, "ty", sin(2 * M_PI / 5 * i) * 50.0f, NEMOSHOW_MATRIX_DIRTY);
 
 			sequence = nemoshow_sequence_create_easy(show,
 					nemoshow_sequence_create_frame_easy(show,
@@ -234,8 +251,29 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 			nemoshow_transition_attach_sequence(trans1, sequence);
 		}
 
-		nemoshow_transition_attach_transition(trans0, trans1);
+		sequence = nemoshow_sequence_create_easy(show,
+				nemoshow_sequence_create_frame_easy(show,
+					0.5f,
+					nemoshow_sequence_create_set_easy(show,
+						group,
+						"ro", "360.0",
+						NULL),
+					NULL),
+				nemoshow_sequence_create_frame_easy(show,
+					1.0f,
+					nemoshow_sequence_create_set_easy(show,
+						group,
+						"ro", "0.0",
+						NULL),
+					NULL),
+				NULL);
 
+		trans2 = nemoshow_transition_create(nemoshow_search_one(show, "ease2"), 30000, 0);
+		nemoshow_transition_set_repeat(trans2, 0);
+		nemoshow_transition_attach_sequence(trans2, sequence);
+
+		nemoshow_transition_attach_transition(trans1, trans2);
+		nemoshow_transition_attach_transition(trans0, trans1);
 		nemoshow_attach_transition(show, trans0);
 
 		minishell_palm_destroy(palm);
