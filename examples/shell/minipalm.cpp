@@ -210,6 +210,8 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 			palm->fingers[i]->type = MINISHELL_ACTIVE_GRAB;
 			palm->fingers[i]->userdata = NULL;
 
+			nemoshow_transition_destroy(palm->fingers[i]->trans);
+
 			nemoshow_item_attach_one(group, palm->fingers[i]->group);
 			nemoshow_item_translate(palm->fingers[i]->group,
 					NEMOSHOW_ITEM_AT(palm->fingers[i]->group, tx) - cx,

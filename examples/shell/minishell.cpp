@@ -484,6 +484,7 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 				grab->group = group;
 				grab->edge = edge;
 				grab->one = one;
+				grab->trans = trans;
 				nemotale_dispatch_grab(tale, event->device, type, event);
 			}
 
@@ -518,6 +519,9 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 
 				if (pid != 0 && minishell_has_slot(mini, pid) != 0) {
 					struct showone *one = (struct showone *)minishell_get_slot(mini, pid);
+					struct showone *group = nemoshow_one_get_parent(one, NEMOSHOW_ITEM_TYPE, NEMOSHOW_GROUP_ITEM);
+					struct showone *nut0, *nut1, *nut2;
+					struct showtransition *trans0, *trans1, *trans2;
 					struct showtransition *trans;
 					struct showone *sequence;
 					struct showone *set;
@@ -534,6 +538,82 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 					trans = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 800, 0);
 					nemoshow_transition_attach_sequence(trans, sequence);
 					nemoshow_attach_transition(show, trans);
+
+					nut0 = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
+					nemoshow_attach_one(show, nut0);
+					nemoshow_item_attach_one(group, nut0);
+					nemoshow_item_set_canvas(nut0, canvas);
+					NEMOSHOW_ITEM_AT(nut0, x) = 0.0f;
+					NEMOSHOW_ITEM_AT(nut0, y) = 0.0f;
+					NEMOSHOW_ITEM_AT(nut0, r) = 20.0f;
+					nemoshow_item_set_blur(nut0, mini->blur15);
+					nemoshow_item_set_fill_color(nut0, 0, 255, 255, 255);
+
+					nut1 = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
+					nemoshow_attach_one(show, nut1);
+					nemoshow_item_attach_one(group, nut1);
+					nemoshow_item_set_canvas(nut1, canvas);
+					NEMOSHOW_ITEM_AT(nut1, x) = 0.0f;
+					NEMOSHOW_ITEM_AT(nut1, y) = 0.0f;
+					NEMOSHOW_ITEM_AT(nut1, r) = 20.0f;
+					nemoshow_item_set_blur(nut1, mini->blur15);
+					nemoshow_item_set_fill_color(nut1, 0, 255, 255, 255);
+
+					nut2 = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
+					nemoshow_attach_one(show, nut2);
+					nemoshow_item_attach_one(group, nut2);
+					nemoshow_item_set_canvas(nut2, canvas);
+					NEMOSHOW_ITEM_AT(nut2, x) = 0.0f;
+					NEMOSHOW_ITEM_AT(nut2, y) = 0.0f;
+					NEMOSHOW_ITEM_AT(nut2, r) = 20.0f;
+					nemoshow_item_set_blur(nut2, mini->blur15);
+					nemoshow_item_set_fill_color(nut2, 0, 255, 255, 255);
+
+					sequence = nemoshow_sequence_create_easy(show,
+							nemoshow_sequence_create_frame_easy(show,
+								1.0f,
+								nemoshow_sequence_create_set_easy(show,
+									nut0,
+									"x", "50.0",
+									"y", "100.0",
+									NULL),
+								NULL),
+							NULL);
+
+					trans0 = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 500, 0);
+					nemoshow_transition_attach_sequence(trans0, sequence);
+
+					sequence = nemoshow_sequence_create_easy(show,
+							nemoshow_sequence_create_frame_easy(show,
+								1.0f,
+								nemoshow_sequence_create_set_easy(show,
+									nut1,
+									"x", "150.0",
+									"y", "100.0",
+									NULL),
+								NULL),
+							NULL);
+
+					trans1 = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 500, 0);
+					nemoshow_transition_attach_sequence(trans1, sequence);
+
+					sequence = nemoshow_sequence_create_easy(show,
+							nemoshow_sequence_create_frame_easy(show,
+								1.0f,
+								nemoshow_sequence_create_set_easy(show,
+									nut2,
+									"x", "150.0",
+									"y", "200.0",
+									NULL),
+								NULL),
+							NULL);
+
+					trans2 = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 500, 0);
+					nemoshow_transition_attach_sequence(trans2, sequence);
+
+					nemoshow_attach_transition(show, trans0);
+					nemoshow_transition_attach_transition(trans0, trans1);
+					nemoshow_transition_attach_transition(trans1, trans2);
 
 					nemoactor_dispatch_frame(actor);
 				}
