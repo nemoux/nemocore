@@ -47,6 +47,7 @@ static struct taletap *nemotale_create_tap(struct nemotale *tale, uint64_t devic
 		return NULL;
 
 	tap->device = device;
+	tap->node = NULL;
 
 	nemolist_init(&tap->link);
 
@@ -133,6 +134,8 @@ void nemotale_push_pointer_down_event(struct nemotale *tale, uint32_t serial, ui
 
 	tap->node = nemotale_pick(tale, tap->x, tap->y, &sx, &sy);
 	if (tap->node != NULL) {
+		nemolist_remove(&tap->node_destroy_listener.link);
+
 		nemosignal_add(&tap->node->destroy_signal, &tap->node_destroy_listener);
 	}
 
@@ -179,13 +182,6 @@ void nemotale_push_pointer_up_event(struct nemotale *tale, uint32_t serial, uint
 	event.serial = serial;
 
 	tale->dispatch_event(tale, tap->node, type, &event);
-
-	if (tap->node != NULL) {
-		nemolist_remove(&tap->node_destroy_listener.link);
-		nemolist_init(&tap->node_destroy_listener.link);
-
-		tap->node = NULL;
-	}
 }
 
 void nemotale_push_pointer_motion_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, float x, float y)
@@ -223,7 +219,7 @@ void nemotale_push_pointer_axis_event(struct nemotale *tale, uint32_t serial, ui
 	event.time = time;
 	event.axis = axis;
 	event.r = value;
-	
+
 	tale->dispatch_event(tale, tap->node, NEMOTALE_POINTER_AXIS_EVENT, &event);
 }
 

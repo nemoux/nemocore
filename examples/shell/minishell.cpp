@@ -515,6 +515,9 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 				nemotale_dispatch_grab(tale, event->device, type, event);
 			}
 
+			if (nemotale_is_pointer_axis(tale, event, type)) {
+			}
+
 			if (nemotale_is_single_click(tale, event, type)) {
 				int32_t pid = nemoshow_canvas_pick_one(canvas, event->x, event->y);
 
