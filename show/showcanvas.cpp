@@ -16,6 +16,8 @@
 #include <showpath.h>
 #include <showfont.h>
 #include <showfont.hpp>
+#include <showlink.h>
+#include <showlink.hpp>
 #include <showhelper.hpp>
 #include <nemoshow.h>
 #include <nemoxml.h>
@@ -445,14 +447,8 @@ static inline void nemoshow_canvas_render_link_one(struct nemoshow *show, struct
 	struct showlink *link = NEMOSHOW_LINK(one);
 	struct showone *head = link->head;
 	struct showone *tail = link->tail;
-	SkPaint paint;
 
-	paint.setStyle(SkPaint::kStroke_Style);
-	paint.setStrokeWidth(2.0f);
-	paint.setColor(SkColorSetARGB(255, 0, 255, 255));
-	paint.setAntiAlias(true);
-
-	NEMOSHOW_CANVAS_CC(canvas, canvas)->drawLine(head->ax, head->ay, tail->ax, tail->ay, paint);
+	NEMOSHOW_CANVAS_CC(canvas, canvas)->drawLine(head->ax, head->ay, tail->ax, tail->ay, *NEMOSHOW_LINK_CC(link, stroke));
 }
 
 void nemoshow_canvas_render_link(struct nemoshow *show, struct showone *one)

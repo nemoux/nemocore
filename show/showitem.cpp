@@ -41,8 +41,10 @@ struct showone *nemoshow_item_create(int type)
 	NEMOSHOW_ITEM_CC(item, matrix) = new SkMatrix;
 	NEMOSHOW_ITEM_CC(item, path) = new SkPath;
 	NEMOSHOW_ITEM_CC(item, fill) = new SkPaint;
+	NEMOSHOW_ITEM_CC(item, fill)->setStyle(SkPaint::kFill_Style);
 	NEMOSHOW_ITEM_CC(item, fill)->setAntiAlias(true);
 	NEMOSHOW_ITEM_CC(item, stroke) = new SkPaint;
+	NEMOSHOW_ITEM_CC(item, stroke)->setStyle(SkPaint::kStroke_Style);
 	NEMOSHOW_ITEM_CC(item, stroke)->setAntiAlias(true);
 	NEMOSHOW_ITEM_CC(item, points) = NULL;
 
@@ -207,12 +209,10 @@ void nemoshow_item_update_style(struct nemoshow *show, struct showone *one)
 
 	if (item->style == one) {
 		if (item->fill != 0) {
-			NEMOSHOW_ITEM_CC(item, fill)->setStyle(SkPaint::kFill_Style);
 			NEMOSHOW_ITEM_CC(item, fill)->setColor(
 					SkColorSetARGB(255.0f * item->alpha, item->fills[2], item->fills[1], item->fills[0]));
 		}
 		if (item->stroke != 0) {
-			NEMOSHOW_ITEM_CC(item, stroke)->setStyle(SkPaint::kStroke_Style);
 			NEMOSHOW_ITEM_CC(item, stroke)->setStrokeWidth(item->stroke_width);
 			NEMOSHOW_ITEM_CC(item, stroke)->setColor(
 					SkColorSetARGB(255.0f * item->alpha, item->strokes[2], item->strokes[1], item->strokes[0]));

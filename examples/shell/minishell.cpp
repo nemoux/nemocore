@@ -621,18 +621,27 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 					nemoshow_one_attach_one(mini->links, link);
 					nemoshow_link_set_head(link, one);
 					nemoshow_link_set_tail(link, nut0);
+					nemoshow_link_set_stroke_color(link, 0, 255, 255, 255);
+					nemoshow_link_set_stroke_width(link, 2.0f);
+					nemoshow_link_set_blur(link, mini->blur5);
 
 					link = nemoshow_link_create();
 					nemoshow_attach_one(show, link);
 					nemoshow_one_attach_one(mini->links, link);
 					nemoshow_link_set_head(link, nut0);
 					nemoshow_link_set_tail(link, nut1);
+					nemoshow_link_set_stroke_color(link, 0, 255, 255, 255);
+					nemoshow_link_set_stroke_width(link, 2.0f);
+					nemoshow_link_set_blur(link, mini->blur5);
 
 					link = nemoshow_link_create();
 					nemoshow_attach_one(show, link);
 					nemoshow_one_attach_one(mini->links, link);
 					nemoshow_link_set_head(link, nut1);
 					nemoshow_link_set_tail(link, nut2);
+					nemoshow_link_set_stroke_color(link, 0, 255, 255, 255);
+					nemoshow_link_set_stroke_width(link, 2.0f);
+					nemoshow_link_set_blur(link, mini->blur5);
 
 					nemoactor_dispatch_frame(actor);
 				}

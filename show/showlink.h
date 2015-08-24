@@ -16,6 +16,16 @@ struct showlink {
 
 	struct showone *head;
 	struct showone *tail;
+
+	uint32_t stroke;
+	double strokes[4];
+	double stroke_width;
+
+	double alpha;
+
+	struct showone *blur;
+
+	void *cc;
 };
 
 #define NEMOSHOW_LINK(one)					((struct showlink *)container_of(one, struct showlink, base))
@@ -26,6 +36,8 @@ extern void nemoshow_link_destroy(struct showone *one);
 
 extern int nemoshow_link_arrange(struct nemoshow *show, struct showone *one);
 extern int nemoshow_link_update(struct nemoshow *show, struct showone *one);
+
+extern void nemoshow_link_set_blur(struct showone *one, struct showone *blur);
 
 static inline void nemoshow_link_set_head(struct showone *one, struct showone *head)
 {
@@ -39,6 +51,23 @@ static inline void nemoshow_link_set_tail(struct showone *one, struct showone *t
 	struct showlink *link = NEMOSHOW_LINK(one);
 
 	link->tail = tail;
+}
+
+static inline void nemoshow_link_set_stroke_color(struct showone *one, double r, double g, double b, double a)
+{
+	struct showlink *link = NEMOSHOW_LINK(one);
+
+	link->strokes[2] = r;
+	link->strokes[1] = g;
+	link->strokes[0] = b;
+	link->strokes[3] = a;
+}
+
+static inline void nemoshow_link_set_stroke_width(struct showone *one, double width)
+{
+	struct showlink *link = NEMOSHOW_LINK(one);
+
+	link->stroke_width = width;
 }
 
 #ifdef __cplusplus
