@@ -105,6 +105,12 @@ static int evdev_flush_events(struct evdevnode *node, uint32_t time)
 			}
 			break;
 
+		case EVDEV_ABSOLUTE_AXIS:
+			if (node->seat_caps & EVDEV_SEAT_POINTER) {
+				nemopointer_notify_axis(node->pointer, time, node->abs.axis, node->abs.r);
+			}
+			break;
+
 		case EVDEV_ABSOLUTE_TOUCH_UP:
 			id = node->abs.seat_slot;
 			nemotouch_notify_up(node->touch, time, id);
@@ -231,6 +237,19 @@ static void evdev_process_absolute_motion(struct evdevnode *node, struct input_e
 			node->abs.y = (e->value - node->abs.min_y) * height / (node->abs.max_y - node->abs.min_y);
 			if (node->pending_event == EVDEV_NONE)
 				node->pending_event = EVDEV_ABSOLUTE_MOTION;
+			break;
+
+		case ABS_RX:
+			break;
+
+		case ABS_RY:
+			break;
+
+		case ABS_RZ:
+			node->abs.r = e->value;
+			node->abs.axis = EVDEV_Z_AXIS;
+			if (node->pending_event == EVDEV_NONE)
+				node->pending_event = EVDEV_ABSOLUTE_AXIS;
 			break;
 	}
 }

@@ -59,6 +59,7 @@ struct nemocontent {
 	void (*pointer_enter)(struct nemopointer *pointer, struct nemocontent *content);
 	void (*pointer_leave)(struct nemopointer *pointer, struct nemocontent *content);
 	void (*pointer_motion)(struct nemopointer *pointer, struct nemocontent *content, uint32_t time, float x, float y);
+	void (*pointer_axis)(struct nemopointer *pointer, struct nemocontent *content, uint32_t time, uint32_t axis, float value);
 	void (*pointer_button)(struct nemopointer *pointer, struct nemocontent *content, uint32_t time, uint32_t button, uint32_t state);
 
 	void (*keyboard_enter)(struct nemokeyboard *keyboard, struct nemocontent *content);
@@ -129,6 +130,12 @@ static inline void nemocontent_pointer_motion(struct nemopointer *pointer, struc
 {
 	if (content->pointer_motion != NULL)
 		content->pointer_motion(pointer, content, time, x, y);
+}
+
+static inline void nemocontent_pointer_axis(struct nemopointer *pointer, struct nemocontent *content, uint32_t time, uint32_t axis, float value)
+{
+	if (content->pointer_axis != NULL)
+		content->pointer_axis(pointer, content, time, axis, value);
 }
 
 static inline void nemocontent_pointer_button(struct nemopointer *pointer, struct nemocontent *content, uint32_t time, uint32_t button, uint32_t state)

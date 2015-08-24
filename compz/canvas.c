@@ -612,6 +612,35 @@ static void nemocanvas_pointer_motion(struct nemopointer *pointer, struct nemoco
 	}
 }
 
+static void nemocanvas_pointer_axis(struct nemopointer *pointer, struct nemocontent *content, uint32_t time, uint32_t axis, float value)
+{
+	struct nemocanvas *canvas = (struct nemocanvas *)container_of(content, struct nemocanvas, base);
+	struct wl_list *resource_list;
+	struct wl_client *client = wl_resource_get_client(canvas->resource);
+	struct wl_resource *resource;
+
+	resource_list = &pointer->seat->pointer.resource_list;
+
+	wl_resource_for_each(resource, resource_list) {
+		if (wl_resource_get_client(resource) == client) {
+			wl_pointer_send_axis(resource, time,
+					axis,
+					wl_fixed_from_double(value));
+		}
+	}
+
+	resource_list = &pointer->seat->pointer.nemo_resource_list;
+
+	wl_resource_for_each(resource, resource_list) {
+		if (wl_resource_get_client(resource) == client) {
+			nemo_pointer_send_axis(resource, time, canvas->resource,
+					pointer->id,
+					axis,
+					wl_fixed_from_double(value));
+		}
+	}
+}
+
 static void nemocanvas_pointer_button(struct nemopointer *pointer, struct nemocontent *content, uint32_t time, uint32_t button, uint32_t state)
 {
 	struct nemocanvas *canvas = (struct nemocanvas *)container_of(content, struct nemocanvas, base);
@@ -1160,6 +1189,7 @@ struct nemocanvas *nemocanvas_create(struct wl_client *client, struct wl_resourc
 	canvas->base.pointer_enter = nemocanvas_pointer_enter;
 	canvas->base.pointer_leave = nemocanvas_pointer_leave;
 	canvas->base.pointer_motion = nemocanvas_pointer_motion;
+	canvas->base.pointer_axis = nemocanvas_pointer_axis;
 	canvas->base.pointer_button = nemocanvas_pointer_button;
 
 	canvas->base.keyboard_enter = nemocanvas_keyboard_enter;

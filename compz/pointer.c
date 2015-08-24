@@ -56,6 +56,15 @@ static void default_pointer_grab_motion(struct nemopointer_grab *grab, uint32_t 
 	}
 }
 
+static void default_pointer_grab_axis(struct nemopointer_grab *grab, uint32_t time, uint32_t axis, float value)
+{
+	struct nemopointer *pointer = grab->pointer;
+
+	if (pointer->focus != NULL) {
+		nemocontent_pointer_axis(pointer, pointer->focus->content, time, axis, value);
+	}
+}
+
 static void default_pointer_grab_button(struct nemopointer_grab *grab, uint32_t time, uint32_t button, uint32_t state)
 {
 	struct nemopointer *pointer = grab->pointer;
@@ -82,6 +91,7 @@ static void default_pointer_grab_cancel(struct nemopointer_grab *grab)
 static const struct nemopointer_grab_interface default_pointer_grab_interface = {
 	default_pointer_grab_focus,
 	default_pointer_grab_motion,
+	default_pointer_grab_axis,
 	default_pointer_grab_button,
 	default_pointer_grab_cancel
 };
@@ -474,6 +484,8 @@ void nemopointer_notify_axis(struct nemopointer *pointer, uint32_t time, uint32_
 {
 	if (pointer == NULL)
 		return;
+
+	pointer->grab->interface->axis(pointer->grab, time, axis, value);
 }
 
 void nemopointer_set_keyboard(struct nemopointer *pointer, struct nemokeyboard *keyboard)

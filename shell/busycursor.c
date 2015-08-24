@@ -40,6 +40,10 @@ static void busy_cursor_grab_motion(struct nemopointer_grab *base, uint32_t time
 	nemopointer_move(pointer, x, y);
 }
 
+static void busy_cursor_grab_axis(struct nemopointer_grab *base, uint32_t time, uint32_t axis, float value)
+{
+}
+
 static void busy_cursor_grab_button(struct nemopointer_grab *base, uint32_t time, uint32_t button, uint32_t state)
 {
 	struct shellgrab *grab = (struct shellgrab *)container_of(base, struct shellgrab, base.pointer);
@@ -62,6 +66,7 @@ static void busy_cursor_grab_cancel(struct nemopointer_grab *base)
 static const struct nemopointer_grab_interface busy_cursor_grab_interface = {
 	busy_cursor_grab_focus,
 	busy_cursor_grab_motion,
+	busy_cursor_grab_axis,
 	busy_cursor_grab_button,
 	busy_cursor_grab_cancel
 };

@@ -55,6 +55,14 @@ static void nemotale_dispatch_actor_pointer_motion(struct nemopointer *pointer, 
 	nemotale_push_pointer_motion_event(tale, 0, (uint64_t)pointer->id, time, x, y);
 }
 
+static void nemotale_dispatch_actor_pointer_axis(struct nemopointer *pointer, struct nemocontent *content, uint32_t time, uint32_t axis, float value)
+{
+	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
+	struct nemotale *tale = (struct nemotale *)actor->context;
+	
+	nemotale_push_pointer_axis_event(tale, 0, (uint64_t)pointer->id, time, axis, value);
+}
+
 static void nemotale_dispatch_actor_pointer_button(struct nemopointer *pointer, struct nemocontent *content, uint32_t time, uint32_t button, uint32_t state)
 {
 	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
@@ -169,6 +177,7 @@ void nemotale_attach_actor(struct nemotale *tale, struct nemoactor *actor, nemot
 	actor->base.pointer_enter = nemotale_dispatch_actor_pointer_enter;
 	actor->base.pointer_leave = nemotale_dispatch_actor_pointer_leave;
 	actor->base.pointer_motion = nemotale_dispatch_actor_pointer_motion;
+	actor->base.pointer_axis = nemotale_dispatch_actor_pointer_axis;
 	actor->base.pointer_button = nemotale_dispatch_actor_pointer_button;
 
 	actor->base.keyboard_enter = nemotale_dispatch_actor_keyboard_enter;

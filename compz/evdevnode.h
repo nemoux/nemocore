@@ -18,12 +18,19 @@ typedef enum {
 	EVDEV_NONE = 0,
 	EVDEV_ABSOLUTE_TOUCH_DOWN = 1,
 	EVDEV_ABSOLUTE_MOTION = 2,
-	EVDEV_ABSOLUTE_TOUCH_UP = 3,
-	EVDEV_ABSOLUTE_MT_DOWN = 4,
-	EVDEV_ABSOLUTE_MT_MOTION = 5,
-	EVDEV_ABSOLUTE_MT_UP = 6,
-	EVDEV_RELATIVE_MOTION = 7,
+	EVDEV_ABSOLUTE_AXIS = 3,
+	EVDEV_ABSOLUTE_TOUCH_UP = 4,
+	EVDEV_ABSOLUTE_MT_DOWN = 5,
+	EVDEV_ABSOLUTE_MT_MOTION = 6,
+	EVDEV_ABSOLUTE_MT_UP = 7,
+	EVDEV_RELATIVE_MOTION = 8,
 } EvdevEventType;
+
+typedef enum {
+	EVDEV_X_AXIS = 0,
+	EVDEV_Y_AXIS = 1,
+	EVDEV_Z_AXIS = 2
+} EvdevAxisType;
 
 typedef enum {
 	EVDEV_SEAT_POINTER = (1 << 0),
@@ -54,6 +61,8 @@ struct evdevnode {
 		int min_x, max_x, min_y, max_y;
 		uint32_t seat_slot;
 		int32_t x, y;
+		int32_t r;
+		int axis;
 
 		int apply_calibration;
 		float calibration[6];

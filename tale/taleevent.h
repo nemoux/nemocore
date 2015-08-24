@@ -29,13 +29,14 @@ typedef enum {
 	NEMOTALE_POINTER_BUTTON_UP_EVENT = (1 << 7),
 	NEMOTALE_POINTER_UP_EVENT = NEMOTALE_POINTER_LEFT_UP_EVENT | NEMOTALE_POINTER_RIGHT_UP_EVENT | NEMOTALE_POINTER_BUTTON_UP_EVENT,
 	NEMOTALE_POINTER_MOTION_EVENT = (1 << 8),
-	NEMOTALE_KEYBOARD_ENTER_EVENT = (1 << 9),
-	NEMOTALE_KEYBOARD_LEAVE_EVENT = (1 << 10),
-	NEMOTALE_KEYBOARD_DOWN_EVENT = (1 << 11),
-	NEMOTALE_KEYBOARD_UP_EVENT = (1 << 12),
-	NEMOTALE_TOUCH_DOWN_EVENT = (1 << 13),
-	NEMOTALE_TOUCH_UP_EVENT = (1 << 14),
-	NEMOTALE_TOUCH_MOTION_EVENT = (1 << 15),
+	NEMOTALE_POINTER_AXIS_EVENT = (1 << 9),
+	NEMOTALE_KEYBOARD_ENTER_EVENT = (1 << 10),
+	NEMOTALE_KEYBOARD_LEAVE_EVENT = (1 << 11),
+	NEMOTALE_KEYBOARD_DOWN_EVENT = (1 << 12),
+	NEMOTALE_KEYBOARD_UP_EVENT = (1 << 13),
+	NEMOTALE_TOUCH_DOWN_EVENT = (1 << 14),
+	NEMOTALE_TOUCH_UP_EVENT = (1 << 15),
+	NEMOTALE_TOUCH_MOTION_EVENT = (1 << 16),
 	NEMOTALE_DOWN_EVENT = NEMOTALE_POINTER_DOWN_EVENT | NEMOTALE_TOUCH_DOWN_EVENT,
 	NEMOTALE_UP_EVENT = NEMOTALE_POINTER_UP_EVENT | NEMOTALE_TOUCH_UP_EVENT,
 	NEMOTALE_MOTION_EVENT = NEMOTALE_POINTER_MOTION_EVENT | NEMOTALE_TOUCH_MOTION_EVENT,
@@ -74,6 +75,9 @@ struct taleevent {
 	float x, y;
 	float dx, dy;
 
+	uint32_t axis;
+	float r;
+
 	struct taletap *taps[NEMOTALE_EVENT_TAPS_MAX];
 	int tapcount;
 };
@@ -83,6 +87,7 @@ extern void nemotale_push_pointer_leave_event(struct nemotale *tale, uint32_t se
 extern void nemotale_push_pointer_down_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, uint32_t button);
 extern void nemotale_push_pointer_up_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, uint32_t button);
 extern void nemotale_push_pointer_motion_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, float x, float y);
+extern void nemotale_push_pointer_axis_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, uint32_t axis, float value);
 extern void nemotale_push_keyboard_enter_event(struct nemotale *tale, uint32_t serial, uint64_t device);
 extern void nemotale_push_keyboard_leave_event(struct nemotale *tale, uint32_t serial, uint64_t device);
 extern void nemotale_push_keyboard_down_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, uint32_t key);

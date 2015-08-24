@@ -210,6 +210,23 @@ void nemotale_push_pointer_motion_event(struct nemotale *tale, uint32_t serial, 
 	tale->dispatch_event(tale, tap->node, NEMOTALE_POINTER_MOTION_EVENT, &event);
 }
 
+void nemotale_push_pointer_axis_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, uint32_t axis, float value)
+{
+	struct taleevent event;
+	struct taletap *tap;
+
+	tap = nemotale_pointer_get_tap(tale, device);
+	if (tap == NULL)
+		return;
+
+	event.device = device;
+	event.time = time;
+	event.axis = axis;
+	event.r = value;
+	
+	tale->dispatch_event(tale, tap->node, NEMOTALE_POINTER_AXIS_EVENT, &event);
+}
+
 void nemotale_push_keyboard_enter_event(struct nemotale *tale, uint32_t serial, uint64_t device)
 {
 	struct taleevent event;

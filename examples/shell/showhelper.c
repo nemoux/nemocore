@@ -58,6 +58,14 @@ static void nemoshow_dispatch_pointer_motion(struct nemopointer *pointer, struct
 	nemotale_push_pointer_motion_event(tale, 0, (uint64_t)pointer->id, time, x, y);
 }
 
+static void nemoshow_dispatch_pointer_axis(struct nemopointer *pointer, struct nemocontent *content, uint32_t time, uint32_t axis, float value)
+{
+	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
+	struct nemotale *tale = (struct nemotale *)actor->context;
+	
+	nemotale_push_pointer_axis_event(tale, 0, (uint64_t)pointer->id, time, axis, value);
+}
+
 static void nemoshow_dispatch_pointer_button(struct nemopointer *pointer, struct nemocontent *content, uint32_t time, uint32_t button, uint32_t state)
 {
 	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
@@ -230,6 +238,7 @@ struct nemoshow *nemoshow_create_on_actor(struct nemoshell *shell, int32_t width
 	actor->base.pointer_enter = nemoshow_dispatch_pointer_enter;
 	actor->base.pointer_leave = nemoshow_dispatch_pointer_leave;
 	actor->base.pointer_motion = nemoshow_dispatch_pointer_motion;
+	actor->base.pointer_axis = nemoshow_dispatch_pointer_axis;
 	actor->base.pointer_button = nemoshow_dispatch_pointer_button;
 
 	actor->base.keyboard_enter = nemoshow_dispatch_keyboard_enter;

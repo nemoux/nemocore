@@ -55,6 +55,10 @@ static void resize_grab_motion(struct nemopointer_grab *base, uint32_t time, flo
 	bin->client->send_configure(bin->canvas, width, height);
 }
 
+static void resize_grab_axis(struct nemopointer_grab *base, uint32_t time, uint32_t axis, float value)
+{
+}
+
 static void resize_grab_button(struct nemopointer_grab *base, uint32_t time, uint32_t button, uint32_t state)
 {
 	struct shellgrab *grab = (struct shellgrab *)container_of(base, struct shellgrab, base.pointer);
@@ -94,6 +98,7 @@ static void resize_grab_cancel(struct nemopointer_grab *base)
 static const struct nemopointer_grab_interface resize_grab_interface = {
 	resize_grab_focus,
 	resize_grab_motion,
+	resize_grab_axis,
 	resize_grab_button,
 	resize_grab_cancel
 };

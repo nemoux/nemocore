@@ -59,6 +59,10 @@ static void move_shellgrab_pointer_motion(struct nemopointer_grab *base, uint32_
 	nemoview_schedule_repaint(bin->view);
 }
 
+static void move_shellgrab_pointer_axis(struct nemopointer_grab *base, uint32_t time, uint32_t axis, float value)
+{
+}
+
 static void move_shellgrab_pointer_button(struct nemopointer_grab *base, uint32_t time, uint32_t button, uint32_t state)
 {
 	struct shellgrab *grab = (struct shellgrab *)container_of(base, struct shellgrab, base.pointer);
@@ -105,6 +109,7 @@ static void move_shellgrab_pointer_cancel(struct nemopointer_grab *base)
 static const struct nemopointer_grab_interface move_shellgrab_pointer_interface = {
 	move_shellgrab_pointer_focus,
 	move_shellgrab_pointer_motion,
+	move_shellgrab_pointer_axis,
 	move_shellgrab_pointer_button,
 	move_shellgrab_pointer_cancel
 };
@@ -290,6 +295,10 @@ static void move_actorgrab_pointer_motion(struct nemopointer_grab *base, uint32_
 	nemoview_schedule_repaint(actor->view);
 }
 
+static void move_actorgrab_pointer_axis(struct nemopointer_grab *base, uint32_t time, uint32_t axis, float value)
+{
+}
+
 static void move_actorgrab_pointer_button(struct nemopointer_grab *base, uint32_t time, uint32_t button, uint32_t state)
 {
 	struct actorgrab *grab = (struct actorgrab *)container_of(base, struct actorgrab, base.pointer);
@@ -336,6 +345,7 @@ static void move_actorgrab_pointer_cancel(struct nemopointer_grab *base)
 static const struct nemopointer_grab_interface move_actorgrab_pointer_interface = {
 	move_actorgrab_pointer_focus,
 	move_actorgrab_pointer_motion,
+	move_actorgrab_pointer_axis,
 	move_actorgrab_pointer_button,
 	move_actorgrab_pointer_cancel
 };

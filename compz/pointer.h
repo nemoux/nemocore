@@ -22,6 +22,7 @@ struct nemopointer_grab;
 struct nemopointer_grab_interface {
 	void (*focus)(struct nemopointer_grab *grab);
 	void (*motion)(struct nemopointer_grab *grab, uint32_t time, float x, float y);
+	void (*axis)(struct nemopointer_grab *grab, uint32_t time, uint32_t axis, float value);
 	void (*button)(struct nemopointer_grab *grab, uint32_t time, uint32_t button, uint32_t state);
 	void (*cancel)(struct nemopointer_grab *grab);
 };

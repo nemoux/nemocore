@@ -62,6 +62,7 @@ struct nemoactor *nemoactor_create_pixman(struct nemocompz *compz, int width, in
 	actor->base.pointer_enter = NULL;
 	actor->base.pointer_leave = NULL;
 	actor->base.pointer_motion = NULL;
+	actor->base.pointer_axis = NULL;
 	actor->base.pointer_button = NULL;
 
 	actor->base.keyboard_enter = NULL;
@@ -201,6 +202,7 @@ struct nemoactor *nemoactor_create_gl(struct nemocompz *compz, int width, int he
 	actor->base.pointer_enter = NULL;
 	actor->base.pointer_leave = NULL;
 	actor->base.pointer_motion = NULL;
+	actor->base.pointer_axis = NULL;
 	actor->base.pointer_button = NULL;
 
 	actor->base.keyboard_enter = NULL;

@@ -152,6 +152,10 @@ static void datadrag_pointer_grab_motion(struct nemopointer_grab *base, uint32_t
 	}
 }
 
+static void datadrag_pointer_grab_axis(struct nemopointer_grab *base, uint32_t time, uint32_t axis, float value)
+{
+}
+
 static void datadrag_pointer_grab_button(struct nemopointer_grab *base, uint32_t time, uint32_t button, uint32_t state)
 {
 	struct nemodatadrag *drag = (struct nemodatadrag *)container_of(base, struct nemodatadrag, base.pointer);
@@ -187,6 +191,7 @@ static void datadrag_pointer_grab_cancel(struct nemopointer_grab *base)
 static const struct nemopointer_grab_interface datadrag_pointer_grab_interface = {
 	datadrag_pointer_grab_focus,
 	datadrag_pointer_grab_motion,
+	datadrag_pointer_grab_axis,
 	datadrag_pointer_grab_button,
 	datadrag_pointer_grab_cancel
 };
