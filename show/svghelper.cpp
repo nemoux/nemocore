@@ -14,6 +14,7 @@
 #include <showshader.h>
 #include <showshader.hpp>
 #include <stringhelper.h>
+#include <nemotoken.h>
 #include <nemomisc.h>
 
 #define NEMOSHOW_SVG_COLOR_NAME_MAX			(32)
@@ -634,6 +635,8 @@ static inline void nemoshow_svg_load_style(struct svgcontext *context, struct xm
 static inline int nemoshow_svg_load_rect(struct svgcontext *context, struct xmlnode *node);
 static inline int nemoshow_svg_load_circle(struct svgcontext *context, struct xmlnode *node);
 static inline int nemoshow_svg_load_path(struct svgcontext *context, struct xmlnode *node);
+static inline int nemoshow_svg_load_polygon(struct svgcontext *context, struct xmlnode *node);
+static inline int nemoshow_svg_load_polyline(struct svgcontext *context, struct xmlnode *node);
 static inline int nemoshow_svg_load_linear_gradient(struct svgcontext *context, struct xmlnode *node);
 static inline int nemoshow_svg_load_radial_gradient(struct svgcontext *context, struct xmlnode *node);
 static inline int nemoshow_svg_load_stop(struct svgcontext *context, struct xmlnode *node);
@@ -704,6 +707,104 @@ static inline int nemoshow_svg_load_path(struct svgcontext *context, struct xmln
 	nemoobject_sets(&cmd->object, "d", d, strlen(d));
 	nemoshow_attach_one(context->show, cmd);
 	nemoshow_one_attach_one(one, cmd);
+
+	nemoshow_svg_load_style(context, node, one);
+
+	return 0;
+}
+
+static inline int nemoshow_svg_load_polygon(struct svgcontext *context, struct xmlnode *node)
+{
+	struct showone *one;
+	struct showone *child;
+	const char *value;
+	const char *points;
+	struct nemotoken *token;
+	int i, count;
+
+	one = nemoshow_item_create(NEMOSHOW_PATHGROUP_ITEM);
+	nemoshow_attach_one(context->show, one);
+	nemoshow_item_attach_one(context->one, one);
+
+	nemoshow_one_set_id(one,
+			(value = nemoxml_node_get_attr(node, "id")) ? value : "");
+
+	points = nemoxml_node_get_attr(node, "points");
+
+	token = nemotoken_create(points, strlen(points));
+	nemotoken_divide(token, ' ');
+	nemotoken_divide(token, '\t');
+	nemotoken_divide(token, ',');
+	nemotoken_update(token);
+
+	count = nemotoken_get_token_count(token);
+
+	child = nemoshow_path_create(NEMOSHOW_MOVETO_PATH);
+	NEMOSHOW_PATH_AT(child, x0) = strtod(nemotoken_get_token(token, 0), NULL);
+	NEMOSHOW_PATH_AT(child, y0) = strtod(nemotoken_get_token(token, 1), NULL);
+	nemoshow_attach_one(context->show, child);
+	nemoshow_one_attach_one(one, child);
+
+	for (i = 2; i < count; i += 2) {
+		child = nemoshow_path_create(NEMOSHOW_LINETO_PATH);
+		NEMOSHOW_PATH_AT(child, x0) = strtod(nemotoken_get_token(token, i + 0), NULL);
+		NEMOSHOW_PATH_AT(child, y0) = strtod(nemotoken_get_token(token, i + 1), NULL);
+		nemoshow_attach_one(context->show, child);
+		nemoshow_one_attach_one(one, child);
+	}
+
+	child = nemoshow_path_create(NEMOSHOW_CLOSE_PATH);
+	nemoshow_attach_one(context->show, child);
+	nemoshow_one_attach_one(one, child);
+
+	nemotoken_destroy(token);
+
+	nemoshow_svg_load_style(context, node, one);
+
+	return 0;
+}
+
+static inline int nemoshow_svg_load_polyline(struct svgcontext *context, struct xmlnode *node)
+{
+	struct showone *one;
+	struct showone *child;
+	const char *value;
+	const char *points;
+	struct nemotoken *token;
+	int i, count;
+
+	one = nemoshow_item_create(NEMOSHOW_PATHGROUP_ITEM);
+	nemoshow_attach_one(context->show, one);
+	nemoshow_item_attach_one(context->one, one);
+
+	nemoshow_one_set_id(one,
+			(value = nemoxml_node_get_attr(node, "id")) ? value : "");
+
+	points = nemoxml_node_get_attr(node, "points");
+
+	token = nemotoken_create(points, strlen(points));
+	nemotoken_divide(token, ' ');
+	nemotoken_divide(token, '\t');
+	nemotoken_divide(token, ',');
+	nemotoken_update(token);
+
+	count = nemotoken_get_token_count(token);
+
+	child = nemoshow_path_create(NEMOSHOW_MOVETO_PATH);
+	NEMOSHOW_PATH_AT(child, x0) = strtod(nemotoken_get_token(token, 0), NULL);
+	NEMOSHOW_PATH_AT(child, y0) = strtod(nemotoken_get_token(token, 1), NULL);
+	nemoshow_attach_one(context->show, child);
+	nemoshow_one_attach_one(one, child);
+
+	for (i = 2; i < count; i += 2) {
+		child = nemoshow_path_create(NEMOSHOW_LINETO_PATH);
+		NEMOSHOW_PATH_AT(child, x0) = strtod(nemotoken_get_token(token, i + 0), NULL);
+		NEMOSHOW_PATH_AT(child, y0) = strtod(nemotoken_get_token(token, i + 1), NULL);
+		nemoshow_attach_one(context->show, child);
+		nemoshow_one_attach_one(one, child);
+	}
+
+	nemotoken_destroy(token);
 
 	nemoshow_svg_load_style(context, node, one);
 
@@ -920,6 +1021,10 @@ static inline int nemoshow_svg_load_one(struct svgcontext *context, struct xmlno
 		nemoshow_svg_load_circle(context, node);
 	} else if (strcmp(node->name, "path") == 0) {
 		nemoshow_svg_load_path(context, node);
+	} else if (strcmp(node->name, "polygon") == 0) {
+		nemoshow_svg_load_polygon(context, node);
+	} else if (strcmp(node->name, "polyline") == 0) {
+		nemoshow_svg_load_polyline(context, node);
 	} else if (strcmp(node->name, "linearGradient") == 0) {
 		nemoshow_svg_load_linear_gradient(context, node);
 	} else if (strcmp(node->name, "radialGradient") == 0) {
@@ -1036,6 +1141,66 @@ int nemoshow_svg_load_uri_path(struct nemoshow *show, struct showone *one, const
 			NEMOSHOW_PATH_AT(child, r) = r;
 			nemoshow_attach_one(show, child);
 			nemoshow_one_attach_one(one, child);
+		} else if (strcmp(node->name, "polygon") == 0) {
+			const char *points = nemoxml_node_get_attr(node, "points");
+			struct nemotoken *token;
+			int i, count;
+
+			token = nemotoken_create(points, strlen(points));
+			nemotoken_divide(token, ' ');
+			nemotoken_divide(token, '\t');
+			nemotoken_divide(token, ',');
+			nemotoken_update(token);
+
+			count = nemotoken_get_token_count(token);
+
+			child = nemoshow_path_create(NEMOSHOW_MOVETO_PATH);
+			NEMOSHOW_PATH_AT(child, x0) = strtod(nemotoken_get_token(token, 0), NULL);
+			NEMOSHOW_PATH_AT(child, y0) = strtod(nemotoken_get_token(token, 1), NULL);
+			nemoshow_attach_one(show, child);
+			nemoshow_one_attach_one(one, child);
+
+			for (i = 2; i < count; i += 2) {
+				child = nemoshow_path_create(NEMOSHOW_LINETO_PATH);
+				NEMOSHOW_PATH_AT(child, x0) = strtod(nemotoken_get_token(token, i + 0), NULL);
+				NEMOSHOW_PATH_AT(child, y0) = strtod(nemotoken_get_token(token, i + 1), NULL);
+				nemoshow_attach_one(show, child);
+				nemoshow_one_attach_one(one, child);
+			}
+
+			child = nemoshow_path_create(NEMOSHOW_CLOSE_PATH);
+			nemoshow_attach_one(show, child);
+			nemoshow_one_attach_one(one, child);
+
+			nemotoken_destroy(token);
+		} else if (strcmp(node->name, "polyline") == 0) {
+			const char *points = nemoxml_node_get_attr(node, "points");
+			struct nemotoken *token;
+			int i, count;
+
+			token = nemotoken_create(points, strlen(points));
+			nemotoken_divide(token, ' ');
+			nemotoken_divide(token, '\t');
+			nemotoken_divide(token, ',');
+			nemotoken_update(token);
+
+			count = nemotoken_get_token_count(token);
+
+			child = nemoshow_path_create(NEMOSHOW_MOVETO_PATH);
+			NEMOSHOW_PATH_AT(child, x0) = strtod(nemotoken_get_token(token, 0), NULL);
+			NEMOSHOW_PATH_AT(child, y0) = strtod(nemotoken_get_token(token, 1), NULL);
+			nemoshow_attach_one(show, child);
+			nemoshow_one_attach_one(one, child);
+
+			for (i = 2; i < count; i += 2) {
+				child = nemoshow_path_create(NEMOSHOW_LINETO_PATH);
+				NEMOSHOW_PATH_AT(child, x0) = strtod(nemotoken_get_token(token, i + 0), NULL);
+				NEMOSHOW_PATH_AT(child, y0) = strtod(nemotoken_get_token(token, i + 1), NULL);
+				nemoshow_attach_one(show, child);
+				nemoshow_one_attach_one(one, child);
+			}
+
+			nemotoken_destroy(token);
 		}
 	}
 
