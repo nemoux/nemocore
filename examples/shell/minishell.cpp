@@ -596,7 +596,7 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 								NULL),
 							NULL);
 
-					trans1 = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 500, 0);
+					trans1 = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 500, 150);
 					nemoshow_transition_attach_sequence(trans1, sequence);
 
 					sequence = nemoshow_sequence_create_easy(show,
@@ -610,12 +610,12 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 								NULL),
 							NULL);
 
-					trans2 = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 500, 0);
+					trans2 = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 500, 300);
 					nemoshow_transition_attach_sequence(trans2, sequence);
 
 					nemoshow_attach_transition(show, trans0);
-					nemoshow_transition_attach_transition(trans0, trans1);
-					nemoshow_transition_attach_transition(trans1, trans2);
+					nemoshow_attach_transition(show, trans1);
+					nemoshow_attach_transition(show, trans2);
 
 					link = nemoshow_link_create();
 					nemoshow_attach_one(show, link);
