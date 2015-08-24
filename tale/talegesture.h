@@ -108,6 +108,16 @@ static inline int nemotale_is_pointer_motion(struct nemotale *tale, struct talee
 	return type & NEMOTALE_POINTER_MOTION_EVENT;
 }
 
+static inline int nemotale_is_pointer_button_down(struct nemotale *tale, struct taleevent *event, uint32_t type, uint32_t button)
+{
+	return (type & NEMOTALE_POINTER_DOWN_EVENT) && (event->value == button);
+}
+
+static inline int nemotale_is_pointer_button_up(struct nemotale *tale, struct taleevent *event, uint32_t type, uint32_t button)
+{
+	return (type & NEMOTALE_POINTER_UP_EVENT) && (event->value == button);
+}
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

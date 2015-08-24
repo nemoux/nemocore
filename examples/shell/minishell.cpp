@@ -488,7 +488,8 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 				nemotale_dispatch_grab(tale, event->device, type, event);
 			}
 
-			if (nemotale_is_pointer_left_down(tale, event, type)) {
+			if (nemotale_is_pointer_left_down(tale, event, type) ||
+					nemotale_is_pointer_button_down(tale, event, type, BTN_0)) {
 				struct showone *one;
 				struct minigrab *grab;
 				struct miniyoyo *yoyo;

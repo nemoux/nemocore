@@ -129,7 +129,7 @@ void nemotale_push_pointer_down_event(struct nemotale *tale, uint32_t serial, ui
 	else if (button == BTN_RIGHT)
 		type = NEMOTALE_POINTER_RIGHT_DOWN_EVENT;
 	else
-		type = NEMOTALE_POINTER_MIDDLE_DOWN_EVENT;
+		type = NEMOTALE_POINTER_BUTTON_DOWN_EVENT;
 
 	tap->node = nemotale_pick(tale, tap->x, tap->y, &sx, &sy);
 	if (tap->node != NULL) {
@@ -169,11 +169,12 @@ void nemotale_push_pointer_up_event(struct nemotale *tale, uint32_t serial, uint
 	else if (button == BTN_RIGHT)
 		type = NEMOTALE_POINTER_RIGHT_UP_EVENT;
 	else
-		type = NEMOTALE_POINTER_MIDDLE_UP_EVENT;
+		type = NEMOTALE_POINTER_BUTTON_UP_EVENT;
 
 	event.x = tap->x;
 	event.y = tap->y;
 	event.time = time;
+	event.value = button;
 	event.device = device;
 	event.serial = serial;
 

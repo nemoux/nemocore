@@ -262,6 +262,9 @@ static void evdev_process_key(struct evdevnode *node, struct input_event *e, uin
 			}
 			break;
 
+		case BTN_0:
+		case BTN_1:
+		case BTN_2:
 		case BTN_LEFT:
 		case BTN_RIGHT:
 		case BTN_MIDDLE:
