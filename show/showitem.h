@@ -106,8 +106,6 @@ extern void nemoshow_item_set_shader(struct showone *one, struct showone *shader
 extern void nemoshow_item_set_blur(struct showone *one, struct showone *blur);
 extern void nemoshow_item_set_clip(struct showone *one, struct showone *clip);
 
-extern double nemoshow_item_get_outer(struct showone *one);
-
 extern void nemoshow_item_attach_one(struct showone *parent, struct showone *one);
 extern void nemoshow_item_detach_one(struct showone *parent, struct showone *one);
 
@@ -154,6 +152,13 @@ static inline void nemoshow_item_set_stroke_width(struct showone *one, double wi
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	item->stroke_width = width;
+}
+
+static inline double nemoshow_item_get_outer(struct showone *one)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	return one->outer + item->stroke != 0 ? item->stroke_width : 0.0f;
 }
 
 static inline void nemoshow_item_translate(struct showone *one, double tx, double ty)

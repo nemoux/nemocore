@@ -12,6 +12,8 @@
 #include <nemoshow.h>
 #include <nemomisc.h>
 
+#define	NEMOSHOW_ANTIALIAS_EPSILON			(3.0f)
+
 struct showone *nemoshow_link_create(void)
 {
 	struct showlink *link;
@@ -71,6 +73,8 @@ int nemoshow_link_update(struct nemoshow *show, struct showone *one)
 	struct showlink *link = NEMOSHOW_LINK(one);
 
 	if ((one->dirty & NEMOSHOW_STYLE_DIRTY) != 0) {
+		double outer = 0.0f;
+
 		NEMOSHOW_LINK_CC(link, stroke)->setStrokeWidth(link->stroke_width);
 		NEMOSHOW_LINK_CC(link, stroke)->setColor(
 				SkColorSetARGB(255.0f * link->alpha, link->strokes[2], link->strokes[1], link->strokes[0]));
@@ -78,6 +82,13 @@ int nemoshow_link_update(struct nemoshow *show, struct showone *one)
 		if (link->blur != NULL) {
 			NEMOSHOW_LINK_CC(link, stroke)->setMaskFilter(NEMOSHOW_BLUR_CC(NEMOSHOW_BLUR(link->blur), filter));
 		}
+
+		outer += link->stroke_width;
+		outer += NEMOSHOW_ANTIALIAS_EPSILON;
+		if (link->blur != NULL)
+			outer += NEMOSHOW_BLUR_AT(link->blur, r) * 2.0f;
+		
+		one->outer = outer;
 	}
 
 	return 0;

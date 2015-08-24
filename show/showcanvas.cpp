@@ -442,33 +442,43 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 	NEMOSHOW_CANVAS_CC(canvas, damage)->setEmpty();
 }
 
-static inline void nemoshow_canvas_render_link_one(struct nemoshow *show, struct showcanvas *canvas, struct showone *one)
-{
-	struct showlink *link = NEMOSHOW_LINK(one);
-	struct showone *head = link->head;
-	struct showone *tail = link->tail;
-
-	NEMOSHOW_CANVAS_CC(canvas, canvas)->drawLine(head->ax, head->ay, tail->ax, tail->ay, *NEMOSHOW_LINK_CC(link, stroke));
-}
-
 void nemoshow_canvas_render_link(struct nemoshow *show, struct showone *one)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+	SkRegion region;
 	int i;
 
 	NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
-
-	NEMOSHOW_CANVAS_CC(canvas, canvas)->clear(SK_ColorTRANSPARENT);
-
 	NEMOSHOW_CANVAS_CC(canvas, canvas)->scale(canvas->viewport.sx, canvas->viewport.sy);
 
+	NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
+	NEMOSHOW_CANVAS_CC(canvas, canvas)->clipRegion(*NEMOSHOW_CANVAS_CC(canvas, damage));
+	NEMOSHOW_CANVAS_CC(canvas, canvas)->clear(SK_ColorTRANSPARENT);
+	NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
+
 	for (i = 0; i < one->nchildren; i++) {
-		nemoshow_canvas_render_link_one(show, canvas, one->children[i]);
+		struct showone *child = one->children[i];
+		struct showlink *link = NEMOSHOW_LINK(child);
+		struct showone *head = link->head;
+		struct showone *tail = link->tail;
+		int32_t outer = ceil(child->outer);
+		int32_t x0 = MIN(head->ax, tail->ax) - outer;
+		int32_t y0 = MIN(head->ay, tail->ay) - outer;
+		int32_t x1 = MAX(head->ax, tail->ax) + outer;
+		int32_t y1 = MAX(head->ay, tail->ay) + outer;
+
+		NEMOSHOW_CANVAS_CC(canvas, canvas)->drawLine(head->ax, head->ay, tail->ax, tail->ay, *NEMOSHOW_LINK_CC(link, stroke));
+
+		region.op(
+				SkIRect::MakeLTRB(x0, y0, x1, y1),
+				SkRegion::kUnion_Op);
+
+		nemotale_node_damage(canvas->node, x0, y0, x1 - x0, y1 - y0);
 	}
 
 	NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
 
-	nemotale_node_damage_all(canvas->node);
+	NEMOSHOW_CANVAS_CC(canvas, damage)->set(region);
 }
 
 static inline void nemoshow_canvas_render_picker_one(struct nemoshow *show, struct showcanvas *canvas, struct showone *one)

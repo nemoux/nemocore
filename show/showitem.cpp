@@ -643,21 +643,6 @@ void nemoshow_item_set_clip(struct showone *one, struct showone *clip)
 	nemoshow_one_reference_one(one, clip);
 }
 
-double nemoshow_item_get_outer(struct showone *one)
-{
-	struct showitem *item = NEMOSHOW_ITEM(one);
-	double outer = 0.0f;
-
-	if (item->stroke != 0)
-		outer += item->stroke_width;
-
-	outer += NEMOSHOW_ANTIALIAS_EPSILON;
-	if (item->blur != NULL)
-		outer += NEMOSHOW_BLUR_AT(item->blur, r) * 2.0f;
-
-	return outer;
-}
-
 void nemoshow_item_attach_one(struct showone *parent, struct showone *one)
 {
 	if (one->parent != NULL) {
