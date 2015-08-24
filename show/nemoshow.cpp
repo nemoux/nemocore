@@ -687,12 +687,6 @@ void nemoshow_render_one(struct nemoshow *show)
 				if (canvas->dispatch_render != NULL)
 					canvas->dispatch_render(show, one);
 			}
-
-			if (canvas->needs_redraw_picker != 0) {
-				if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
-					nemoshow_canvas_render_picker(show, one);
-				}
-			}
 		}
 	}
 
@@ -707,6 +701,28 @@ void nemoshow_render_one(struct nemoshow *show)
 					nemoshow_canvas_render_scene(show, one);
 
 					canvas->needs_redraw = 0;
+				}
+			}
+		}
+	}
+}
+
+void nemoshow_validate_one(struct nemoshow *show)
+{
+	struct showone *scene = show->scene;
+	struct showcanvas *canvas;
+	struct showone *one;
+	int i;
+
+	for (i = 0; i < scene->nchildren; i++) {
+		one = scene->children[i];
+
+		if (one->type == NEMOSHOW_CANVAS_TYPE) {
+			canvas = NEMOSHOW_CANVAS(one);
+
+			if (canvas->needs_redraw_picker != 0) {
+				if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
+					nemoshow_canvas_render_picker(show, one);
 				}
 			}
 		}

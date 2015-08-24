@@ -78,6 +78,7 @@ extern void nemoshow_update_one_expression_without_dirty(struct nemoshow *show, 
 extern void nemoshow_arrange_one(struct nemoshow *show);
 extern void nemoshow_update_one(struct nemoshow *show);
 extern void nemoshow_render_one(struct nemoshow *show);
+extern void nemoshow_validate_one(struct nemoshow *show);
 
 extern int nemoshow_set_scene(struct nemoshow *show, struct showone *one);
 extern void nemoshow_put_scene(struct nemoshow *show);

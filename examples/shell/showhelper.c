@@ -16,6 +16,7 @@
 #include <keypad.h>
 #include <pointer.h>
 #include <touch.h>
+#include <timer.h>
 
 #include <nemoshow.h>
 #include <showhelper.h>
@@ -62,7 +63,7 @@ static void nemoshow_dispatch_pointer_axis(struct nemopointer *pointer, struct n
 {
 	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
 	struct nemotale *tale = (struct nemotale *)actor->context;
-	
+
 	nemotale_push_pointer_axis_event(tale, 0, (uint64_t)pointer->id, time, axis, value);
 }
 
@@ -212,12 +213,22 @@ static void nemoshow_dispatch_actor_frame(struct nemoactor *actor, uint32_t msec
 	pixman_region32_fini(&region);
 }
 
+static void nemoshow_dispatch_timer(struct nemotimer *timer, void *data)
+{
+	struct showcontext *scon = (struct showcontext *)data;
+
+	nemoshow_validate_one(scon->show);
+
+	nemotimer_set_timeout(timer, 1000);
+}
+
 struct nemoshow *nemoshow_create_on_actor(struct nemoshell *shell, int32_t width, int32_t height, nemotale_dispatch_event_t dispatch)
 {
 	struct nemocompz *compz = shell->compz;
 	struct showcontext *scon;
 	struct nemoshow *show;
 	struct nemoactor *actor;
+	struct nemotimer *timer;
 
 	scon = (struct showcontext *)malloc(sizeof(struct showcontext));
 	if (scon == NULL)
@@ -228,10 +239,12 @@ struct nemoshow *nemoshow_create_on_actor(struct nemoshell *shell, int32_t width
 	if (actor == NULL)
 		goto err1;
 
-	scon->shell = shell;
-	scon->actor = actor;
-	scon->width = width;
-	scon->height = height;
+	timer = nemotimer_create(compz);
+	if (timer == NULL)
+		goto err2;
+	nemotimer_set_callback(timer, nemoshow_dispatch_timer);
+	nemotimer_set_timeout(timer, 1000);
+	nemotimer_set_userdata(timer, scon);
 
 	actor->base.pick = nemoshow_dispatch_pick_tale;
 
@@ -276,7 +289,17 @@ struct nemoshow *nemoshow_create_on_actor(struct nemoshell *shell, int32_t width
 
 	actor->context = scon->tale;
 
+	scon->shell = shell;
+	scon->actor = actor;
+	scon->timer = timer;
+	scon->width = width;
+	scon->height = height;
+	scon->show = show;
+
 	return show;
+
+err2:
+	nemoactor_destroy(actor);
 
 err1:
 	free(scon);
@@ -293,6 +316,8 @@ void nemoshow_destroy_on_actor(struct nemoshow *show)
 	nemotale_destroy_gl(scon->tale);
 
 	nemoactor_destroy(scon->actor);
+
+	nemotimer_destroy(scon->timer);
 
 	free(scon);
 }

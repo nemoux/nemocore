@@ -19,13 +19,16 @@ NEMO_BEGIN_EXTERN_C
 
 struct nemoshell;
 struct nemoactor;
+struct nemotimer;
 
 struct showcontext {
 	struct nemoshell *shell;
-
 	struct nemoactor *actor;
+	struct nemotimer *timer;
 
 	struct nemotale *tale;
+
+	struct nemoshow *show;
 
 	int32_t width, height;
 };
