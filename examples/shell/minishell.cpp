@@ -43,6 +43,7 @@
 #include <minigrab.h>
 #include <miniyoyo.hpp>
 #include <minipalm.h>
+#include <minimote.h>
 
 #include <showitem.h>
 #include <showitem.hpp>
@@ -220,7 +221,7 @@ static void minishell_handle_touch_down(struct nemocompz *compz, struct touchpoi
 	wl_signal_emit(&compz->activate_signal, tp->focus);
 }
 
-struct nemoactor *minishell_create_cursor(struct nemoshell *shell, int width, int height, int32_t *dx, int32_t *dy)
+static struct nemoactor *minishell_create_cursor(struct nemoshell *shell, int width, int height, int32_t *dx, int32_t *dy)
 {
 	struct nemoactor *actor;
 	cairo_t *cr;
@@ -727,6 +728,8 @@ int main(int argc, char *argv[])
 
 	mini->canvas = nemoshow_search_one(show, "mini");
 	mini->links = nemoshow_search_one(show, "links");
+
+	mini->mote = minishell_mote_create(nemoshow_search_one(show, "mote"));
 
 	mini->blur5 = blur = nemoshow_blur_create();
 	nemoshow_attach_one(show, blur);

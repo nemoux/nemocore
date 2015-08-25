@@ -105,6 +105,13 @@ static inline void nemoshow_canvas_set_dispatch_render(struct showone *one, nemo
 	NEMOSHOW_CANVAS_AT(one, dispatch_render) = dispatch_render;
 }
 
+static inline struct talenode *nemoshow_canvas_get_node(struct showone *one)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	return canvas->node;
+}
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif
