@@ -127,6 +127,8 @@ static struct showone *nemoshow_create_one(struct nemoshow *show, struct xmlnode
 		one = nemoshow_sequence_create_frame();
 	} else if (strcmp(node->name, "set") == 0) {
 		one = nemoshow_sequence_create_set();
+	} else if (strcmp(node->name, "fix") == 0) {
+		one = nemoshow_sequence_create_fix();
 	} else if (strcmp(node->name, "follow") == 0) {
 		one = nemoshow_sequence_create_follow();
 	} else if (strcmp(node->name, "ease") == 0) {
@@ -585,6 +587,8 @@ void nemoshow_arrange_one(struct nemoshow *show)
 
 		if (one->type == NEMOSHOW_SET_TYPE) {
 			nemoshow_sequence_arrange_set(show, one);
+		} else if (one->type == NEMOSHOW_FIX_TYPE) {
+			nemoshow_sequence_arrange_fix(show, one);
 		} else if (one->type == NEMOSHOW_FOLLOW_TYPE) {
 			nemoshow_sequence_arrange_follow(show, one);
 		} else if (one->type == NEMOSHOW_EASE_TYPE) {

@@ -74,6 +74,26 @@ struct showone *nemoshow_sequence_create_set_easy(struct nemoshow *show, struct 
 	return set;
 }
 
+struct showone *nemoshow_sequence_create_fix_easy(struct nemoshow *show, struct showone *src, ...)
+{
+	struct showone *fix;
+	va_list vargs;
+	const char *attr, *value;
+
+	fix = nemoshow_sequence_create_fix();
+	nemoshow_sequence_fix_source(fix, src);
+
+	va_start(vargs, src);
+
+	while ((attr = va_arg(vargs, const char *)) != NULL && (value = va_arg(vargs, const char *)) != NULL) {
+		nemoshow_sequence_fix_attr(fix, attr, value);
+	}
+
+	va_end(vargs);
+
+	return fix;
+}
+
 struct showone *nemoshow_sequence_create_frame_easy(struct nemoshow *show, double t, ...)
 {
 	struct showone *frame;

@@ -15,6 +15,7 @@ NEMO_BEGIN_EXTERN_C
 
 #define	NEMOSHOW_SEQUENCE_TYPE_MAX			(32)
 #define	NEMOSHOW_SEQUENCE_SET_ATTR_MAX	(16)
+#define	NEMOSHOW_SEQUENCE_FIX_ATTR_MAX	(16)
 
 typedef enum {
 	NEMOSHOW_PATH_X_FOLLOW = 0,
@@ -35,6 +36,18 @@ struct showfollow {
 	struct showone *path;
 	double from, to;
 	int element;
+};
+
+struct showfix {
+	struct showone base;
+
+	struct showone *src;
+
+	struct nemoattr *tattrs[NEMOSHOW_SEQUENCE_FIX_ATTR_MAX];
+	struct nemoattr *eattrs[NEMOSHOW_SEQUENCE_FIX_ATTR_MAX];
+	uint32_t dirties[NEMOSHOW_SEQUENCE_FIX_ATTR_MAX];
+	int types[NEMOSHOW_SEQUENCE_FIX_ATTR_MAX];
+	int nattrs;
 };
 
 struct showset {
@@ -69,6 +82,8 @@ struct showsequence {
 #define NEMOSHOW_FRAME_AT(one, at)			(NEMOSHOW_FRAME(one)->at)
 #define NEMOSHOW_SET(one)								((struct showset *)container_of(one, struct showset, base))
 #define NEMOSHOW_SET_AT(one, at)				(NEMOSHOW_SET(one)->at)
+#define NEMOSHOW_FIX(one)								((struct showfix *)container_of(one, struct showfix, base))
+#define NEMOSHOW_FIX_AT(one, at)				(NEMOSHOW_FIX(one)->at)
 #define NEMOSHOW_FOLLOW(one)						((struct showfollow *)container_of(one, struct showfollow, base))
 #define NEMOSHOW_FOLLOW_AT(one, at)			(NEMOSHOW_FOLLOW(one)->at)
 
@@ -97,6 +112,17 @@ extern int nemoshow_sequence_set_source(struct showone *one, struct showone *src
 extern int nemoshow_sequence_set_attr(struct showone *one, const char *name, const char *value);
 extern int nemoshow_sequence_set_dattr(struct showone *one, const char *name, double value, uint32_t dirty);
 extern int nemoshow_sequence_set_cattr(struct showone *one, const char *name, double r, double g, double b, double a, uint32_t dirty);
+
+extern struct showone *nemoshow_sequence_create_fix(void);
+extern void nemoshow_sequence_destroy_fix(struct showone *one);
+
+extern int nemoshow_sequence_arrange_fix(struct nemoshow *show, struct showone *one);
+extern int nemoshow_sequence_update_fix(struct nemoshow *show, struct showone *one);
+
+extern int nemoshow_sequence_fix_source(struct showone *one, struct showone *src);
+extern int nemoshow_sequence_fix_attr(struct showone *one, const char *name, const char *value);
+extern int nemoshow_sequence_fix_dattr(struct showone *one, const char *name, double value, uint32_t dirty);
+extern int nemoshow_sequence_fix_cattr(struct showone *one, const char *name, double r, double g, double b, double a, uint32_t dirty);
 
 extern struct showone *nemoshow_sequence_create_follow(void);
 extern void nemoshow_sequence_destroy_follow(struct showone *one);

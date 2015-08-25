@@ -14,6 +14,7 @@ extern struct showtransition *nemoshow_transition_create_easy(struct nemoshow *s
 extern void nemoshow_attach_transition_easy(struct nemoshow *show, ...);
 
 extern struct showone *nemoshow_sequence_create_set_easy(struct nemoshow *show, struct showone *src, ...);
+extern struct showone *nemoshow_sequence_create_fix_easy(struct nemoshow *show, struct showone *src, ...);
 extern struct showone *nemoshow_sequence_create_frame_easy(struct nemoshow *show, double t, ...);
 extern struct showone *nemoshow_sequence_create_easy(struct nemoshow *show, ...);
 
