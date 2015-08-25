@@ -160,7 +160,7 @@ static inline double nemoshow_item_get_outer(struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	return one->outer + item->stroke != 0 ? item->stroke_width : 0.0f;
+	return one->outer + (item->stroke != 0 ? item->stroke_width : 0.0f);
 }
 
 static inline void nemoshow_item_translate(struct showone *one, double tx, double ty)
