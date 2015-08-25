@@ -97,8 +97,6 @@ int main(int argc, char *argv[])
 	struct nemotale *tale;
 	struct taleegl *egl;
 	struct talenode *node0, *node1;
-	cairo_surface_t *surface;
-	cairo_t *cr;
 
 	app = (struct taleapp *)malloc(sizeof(struct taleapp));
 	if (app == NULL)
@@ -132,21 +130,9 @@ int main(int argc, char *argv[])
 	node0 = nemotale_node_create_pixman(160, 160);
 	nemotale_attach_node(tale, node0);
 
-	surface = nemotale_node_get_cairo(node0);
-	cr = cairo_create(surface);
-	cairo_set_source_rgba(cr, 1.0f, 0.0f, 1.0f, 1.0f);
-	cairo_paint(cr);
-	cairo_destroy(cr);
-
 	node1 = nemotale_node_create_pixman(120, 120);
 	nemotale_node_translate(node1, 80, 80);
 	nemotale_attach_node(tale, node1);
-
-	surface = nemotale_node_get_cairo(node1);
-	cr = cairo_create(surface);
-	cairo_set_source_rgba(cr, 1.0f, 1.0f, 0.0f, 1.0f);
-	cairo_paint(cr);
-	cairo_destroy(cr);
 
 	nemotale_composite_egl(tale, NULL);
 

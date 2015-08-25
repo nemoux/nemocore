@@ -45,7 +45,6 @@ struct waylandbuffer {
 	pixman_region32_t damage;
 
 	pixman_image_t *image;
-	cairo_surface_t *surface;
 };
 
 static void wayland_destroy_shm_buffer(struct waylandbuffer *buffer);
@@ -126,7 +125,6 @@ static struct waylandbuffer *wayland_create_shm_buffer(struct waylandscreen *scr
 
 	memset(data, 0, buffer->size);
 
-	buffer->surface = cairo_image_surface_create_for_data(data, CAIRO_FORMAT_ARGB32, width, height, stride);
 	buffer->image = pixman_image_create_bits(PIXMAN_a8r8g8b8, width, height, (uint32_t *)data, stride);
 
 	return buffer;
@@ -147,7 +145,6 @@ err1:
 
 static void wayland_destroy_shm_buffer(struct waylandbuffer *buffer)
 {
-	cairo_surface_destroy(buffer->surface);
 	pixman_image_unref(buffer->image);
 
 	wl_buffer_destroy(buffer->buffer);

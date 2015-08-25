@@ -47,7 +47,6 @@ int nemotale_attach_pixman(struct nemotale *tale, void *data, int32_t width, int
 	struct nemopmtale *context = (struct nemopmtale *)tale->pmcontext;
 
 	context->image = pixman_image_create_bits(PIXMAN_a8r8g8b8, width, height, data, stride);
-	context->surface = cairo_image_surface_create_for_data(data, CAIRO_FORMAT_ARGB32, width, height, stride);
 	context->data = data;
 
 	tale->width = width;
@@ -66,10 +65,8 @@ void nemotale_detach_pixman(struct nemotale *tale)
 
 	if (context->data != NULL) {
 		pixman_image_unref(context->image);
-		cairo_surface_destroy(context->surface);
 
 		context->image = NULL;
-		context->surface = NULL;
 		context->data = NULL;
 	}
 }
@@ -231,7 +228,6 @@ static void nemotale_node_handle_destroy_signal(struct nemolistener *listener, v
 	nemolist_remove(&context->destroy_listener.link);
 
 	pixman_image_unref(context->image);
-	cairo_surface_destroy(context->surface);
 	free(context->data);
 
 	free(context);
@@ -258,7 +254,6 @@ struct talenode *nemotale_node_create_pixman(int32_t width, int32_t height)
 	memset(context->data, 0, width * height * 4);
 
 	context->image = pixman_image_create_bits(PIXMAN_a8r8g8b8, width, height, context->data, width * 4);
-	context->surface = cairo_image_surface_create_for_data(context->data, CAIRO_FORMAT_ARGB32, width, height, width * 4);
 
 	nemotale_node_prepare(node);
 
@@ -303,14 +298,12 @@ int nemotale_node_resize_pixman(struct talenode *node, int32_t width, int32_t he
 
 		if (node->viewport.enable == 0) {
 			pixman_image_unref(context->image);
-			cairo_surface_destroy(context->surface);
 			free(context->data);
 
 			context->data = malloc(width * height * 4);
 			memset(context->data, 0, width * height * 4);
 
 			context->image = pixman_image_create_bits(PIXMAN_a8r8g8b8, width, height, context->data, width * 4);
-			context->surface = cairo_image_surface_create_for_data(context->data, CAIRO_FORMAT_ARGB32, width, height, width * 4);
 
 			node->viewport.width = width;
 			node->viewport.height = height;
@@ -360,14 +353,12 @@ int nemotale_node_set_viewport_pixman(struct talenode *node, int32_t width, int3
 	node->viewport.enable = 1;
 
 	pixman_image_unref(context->image);
-	cairo_surface_destroy(context->surface);
 	free(context->data);
 
 	context->data = malloc(width * height * 4);
 	memset(context->data, 0, width * height * 4);
 
 	context->image = pixman_image_create_bits(PIXMAN_a8r8g8b8, width, height, context->data, width * 4);
-	context->surface = cairo_image_surface_create_for_data(context->data, CAIRO_FORMAT_ARGB32, width, height, width * 4);
 
 	node->needs_full_upload = 1;
 

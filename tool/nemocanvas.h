@@ -73,7 +73,6 @@ extern void nemocanvas_damage_region(struct nemocanvas *canvas, pixman_region32_
 extern void nemocanvas_feedback(struct nemocanvas *canvas);
 extern void nemocanvas_commit(struct nemocanvas *canvas);
 
-extern cairo_surface_t *nemocanvas_get_cairo_surface(struct nemocanvas *canvas);
 extern pixman_image_t *nemocanvas_get_pixman_image(struct nemocanvas *canvas);
 
 extern void nemocanvas_move(struct nemocanvas *canvas, uint32_t serial);

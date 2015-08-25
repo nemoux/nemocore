@@ -302,18 +302,6 @@ void nemocanvas_destroy(struct nemocanvas *canvas)
 	free(canvas);
 }
 
-cairo_surface_t *nemocanvas_get_cairo_surface(struct nemocanvas *canvas)
-{
-	cairo_surface_t *surface;
-
-	if (canvas->buffer == NULL)
-		return NULL;
-
-	surface = cairo_image_surface_create_for_data(canvas->buffer->shm_data, CAIRO_FORMAT_ARGB32, canvas->width, canvas->height, canvas->width * 4);
-
-	return surface;
-}
-
 pixman_image_t *nemocanvas_get_pixman_image(struct nemocanvas *canvas)
 {
 	pixman_image_t *image;

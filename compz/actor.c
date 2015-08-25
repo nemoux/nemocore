@@ -44,7 +44,6 @@ struct nemoactor *nemoactor_create_pixman(struct nemocompz *compz, int width, in
 	actor->newly_attached = 1;
 
 	actor->image = pixman_image_create_bits(PIXMAN_a8r8g8b8, width, height, actor->data, width * 4);
-	actor->surface = cairo_image_surface_create_for_data(actor->data, CAIRO_FORMAT_ARGB32, width, height, width * 4);
 
 	actor->compz = compz;
 
@@ -108,7 +107,6 @@ int nemoactor_resize_pixman(struct nemoactor *actor, int width, int height)
 {
 	if (actor->base.width != width || actor->base.height != height) {
 		pixman_image_unref(actor->image);
-		cairo_surface_destroy(actor->surface);
 		free(actor->data);
 
 		actor->image = NULL;
@@ -118,7 +116,6 @@ int nemoactor_resize_pixman(struct nemoactor *actor, int width, int height)
 			return -1;
 
 		actor->image = pixman_image_create_bits(PIXMAN_a8r8g8b8, width, height, actor->data, width * 4);
-		actor->surface = cairo_image_surface_create_for_data(actor->data, CAIRO_FORMAT_ARGB32, width, height, width * 4);
 
 		actor->newly_attached = 1;
 
@@ -145,8 +142,6 @@ void nemoactor_destroy(struct nemoactor *actor)
 
 	if (actor->image != NULL) {
 		pixman_image_unref(actor->image);
-		cairo_surface_destroy(actor->surface);
-
 		free(actor->data);
 	}
 

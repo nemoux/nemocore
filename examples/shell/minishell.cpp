@@ -224,23 +224,31 @@ static void minishell_handle_touch_down(struct nemocompz *compz, struct touchpoi
 static struct nemoactor *minishell_create_cursor(struct nemoshell *shell, int width, int height, int32_t *dx, int32_t *dy)
 {
 	struct nemoactor *actor;
-	cairo_t *cr;
 
 	actor = nemoactor_create_pixman(shell->compz, width, height);
 	if (actor == NULL)
 		return NULL;
 
-	cr = cairo_create(actor->surface);
+	SkBitmap bitmap;
+	bitmap.setInfo(
+			SkImageInfo::Make(width, height, kN32_SkColorType, kPremul_SkAlphaType));
+	bitmap.setPixels(actor->data);
 
-	cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR);
-	cairo_paint(cr);
+	SkBitmapDevice device(bitmap);
+	SkCanvas canvas(&device);
 
-	cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
-	cairo_arc(cr, width * 0.5f, height * 0.5f, width * 0.4f, 0.0f, M_PI * 2.0f);
-	cairo_set_source_rgba(cr, 0.0f, 1.0f, 1.0f, 1.0f);
-	cairo_fill(cr);
+	SkMaskFilter *filter = SkBlurMaskFilter::Create(kSolid_SkBlurStyle, SkBlurMask::ConvertRadiusToSigma(5.0f), SkBlurMaskFilter::kHighQuality_BlurFlag);
 
-	cairo_destroy(cr);
+	SkPaint paint;
+	paint.setStyle(SkPaint::kFill_Style);
+	paint.setColor(SkColorSetARGB(255, 0, 255, 255));
+	paint.setAntiAlias(true);
+	paint.setMaskFilter(filter);
+
+	canvas.clear(SK_ColorTRANSPARENT);
+	canvas.drawCircle(width / 2, height / 2, width / 3, paint);
+
+	filter->unref();
 
 	*dx = width / 2;
 	*dy = height / 2;
@@ -383,7 +391,7 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 
 		pointer = nemoseat_get_pointer_by_id(seat, event->device);
 		if (pointer != NULL) {
-			cursor = minishell_create_cursor(shell, 16, 16, &dx, &dy);
+			cursor = minishell_create_cursor(shell, 32, 32, &dx, &dy);
 			if (cursor != NULL)
 				nemopointer_set_cursor_actor(pointer, cursor, dx, dy);
 		}

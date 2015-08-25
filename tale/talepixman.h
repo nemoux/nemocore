@@ -9,7 +9,6 @@ NEMO_BEGIN_EXTERN_C
 
 #include <stdint.h>
 #include <pixman.h>
-#include <cairo.h>
 
 #include <nemotale.h>
 #include <talenode.h>
@@ -17,13 +16,11 @@ NEMO_BEGIN_EXTERN_C
 
 struct nemopmtale {
 	pixman_image_t *image;
-	cairo_surface_t *surface;
 	void *data;
 };
 
 struct talepmnode {
 	pixman_image_t *image;
-	cairo_surface_t *surface;
 	void *data;
 
 	struct nemolistener destroy_listener;
@@ -49,13 +46,6 @@ static inline pixman_image_t *nemotale_get_pixman(struct nemotale *tale)
 	return context->image;
 }
 
-static inline cairo_surface_t *nemotale_get_cairo(struct nemotale *tale)
-{
-	struct nemopmtale *context = (struct nemopmtale *)tale->pmcontext;
-
-	return context->surface;
-}
-
 static inline void *nemotale_node_get_buffer(struct talenode *node)
 {
 	struct talepmnode *context = (struct talepmnode *)node->pmcontext;
@@ -68,13 +58,6 @@ static inline pixman_image_t *nemotale_node_get_pixman(struct talenode *node)
 	struct talepmnode *context = (struct talepmnode *)node->pmcontext;
 
 	return context->image;
-}
-
-static inline cairo_surface_t *nemotale_node_get_cairo(struct talenode *node)
-{
-	struct talepmnode *context = (struct talepmnode *)node->pmcontext;
-
-	return context->surface;
 }
 
 #ifdef __cplusplus

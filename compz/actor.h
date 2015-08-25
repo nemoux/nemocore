@@ -9,7 +9,6 @@ NEMO_BEGIN_EXTERN_C
 
 #include <stdint.h>
 #include <pixman.h>
-#include <cairo.h>
 
 #ifdef NEMOUX_WITH_EGL
 #include <GLES2/gl2.h>
@@ -41,7 +40,6 @@ struct nemoactor {
 	int newly_attached;
 
 	pixman_image_t *image;
-	cairo_surface_t *surface;
 	void *data;
 
 	uint32_t min_width, min_height;
