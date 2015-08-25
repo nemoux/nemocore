@@ -417,9 +417,7 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 	if (canvas->needs_full_redraw == 0) {
 		NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
 		NEMOSHOW_CANVAS_CC(canvas, canvas)->clipRegion(*NEMOSHOW_CANVAS_CC(canvas, damage));
-
 		NEMOSHOW_CANVAS_CC(canvas, canvas)->clear(SK_ColorTRANSPARENT);
-
 		NEMOSHOW_CANVAS_CC(canvas, canvas)->scale(canvas->viewport.sx, canvas->viewport.sy);
 
 		for (i = 0; i < one->nchildren; i++) {
@@ -429,9 +427,7 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 		NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
 	} else {
 		NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
-
 		NEMOSHOW_CANVAS_CC(canvas, canvas)->clear(SK_ColorTRANSPARENT);
-
 		NEMOSHOW_CANVAS_CC(canvas, canvas)->scale(canvas->viewport.sx, canvas->viewport.sy);
 
 		for (i = 0; i < one->nchildren; i++) {
@@ -453,12 +449,19 @@ void nemoshow_canvas_render_link(struct nemoshow *show, struct showone *one)
 	int i;
 
 	NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
-	NEMOSHOW_CANVAS_CC(canvas, canvas)->scale(canvas->viewport.sx, canvas->viewport.sy);
-
-	NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
 	NEMOSHOW_CANVAS_CC(canvas, canvas)->clipRegion(*NEMOSHOW_CANVAS_CC(canvas, damage));
 	NEMOSHOW_CANVAS_CC(canvas, canvas)->clear(SK_ColorTRANSPARENT);
 	NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
+
+	SkRegion::Iterator iter(*NEMOSHOW_CANVAS_CC(canvas, damage));
+	for (; !iter.done(); iter.next()) {
+		SkIRect rect = iter.rect();
+
+		nemotale_node_damage(canvas->node, rect.x(), rect.y(), rect.width(), rect.height());
+	}
+
+	NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
+	NEMOSHOW_CANVAS_CC(canvas, canvas)->scale(canvas->viewport.sx, canvas->viewport.sy);
 
 	for (i = 0; i < one->nchildren; i++) {
 		struct showone *child = one->children[i];
@@ -474,7 +477,11 @@ void nemoshow_canvas_render_link(struct nemoshow *show, struct showone *one)
 		NEMOSHOW_CANVAS_CC(canvas, canvas)->drawLine(head->ax, head->ay, tail->ax, tail->ay, *NEMOSHOW_LINK_CC(link, stroke));
 
 		region.op(
-				SkIRect::MakeLTRB(x0, y0, x1, y1),
+				SkIRect::MakeLTRB(
+					x0 * canvas->viewport.sx,
+					y0 * canvas->viewport.sy,
+					x1 * canvas->viewport.sx,
+					y1 * canvas->viewport.sy),
 				SkRegion::kUnion_Op);
 
 		nemotale_node_damage(canvas->node, x0, y0, x1 - x0, y1 - y0);
@@ -533,9 +540,7 @@ void nemoshow_canvas_render_picker(struct nemoshow *show, struct showone *one)
 	if (canvas->needs_full_redraw_picker == 0) {
 		NEMOSHOW_CANVAS_CP(canvas, canvas)->save();
 		NEMOSHOW_CANVAS_CP(canvas, canvas)->clipRegion(*NEMOSHOW_CANVAS_CP(canvas, damage));
-
 		NEMOSHOW_CANVAS_CP(canvas, canvas)->clear(SK_ColorTRANSPARENT);
-
 		NEMOSHOW_CANVAS_CP(canvas, canvas)->scale(canvas->viewport.sx, canvas->viewport.sy);
 
 		for (i = 0; i < one->nchildren; i++) {
@@ -545,9 +550,7 @@ void nemoshow_canvas_render_picker(struct nemoshow *show, struct showone *one)
 		NEMOSHOW_CANVAS_CP(canvas, canvas)->restore();
 	} else {
 		NEMOSHOW_CANVAS_CP(canvas, canvas)->save();
-
 		NEMOSHOW_CANVAS_CP(canvas, canvas)->clear(SK_ColorTRANSPARENT);
-
 		NEMOSHOW_CANVAS_CP(canvas, canvas)->scale(canvas->viewport.sx, canvas->viewport.sy);
 
 		for (i = 0; i < one->nchildren; i++) {
