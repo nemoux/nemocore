@@ -10,6 +10,7 @@ typedef struct _showitem {
 	SkMatrix *matrix;
 
 	SkPath *path;
+	SkBitmap *bitmap;
 
 	SkPoint *points;
 } showitem_t;

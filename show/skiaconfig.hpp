@@ -13,6 +13,7 @@
 #include <SkGraphics.h>
 #include <SkImageInfo.h>
 #include <SkImageEncoder.h>
+#include <SkImageDecoder.h>
 #include <SkBitmapDevice.h>
 #include <SkBitmap.h>
 #include <SkStream.h>

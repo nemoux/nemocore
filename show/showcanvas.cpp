@@ -333,6 +333,10 @@ static inline void nemoshow_canvas_render_item(struct nemoshow *show, struct sho
 						NULL,
 						*NEMOSHOW_ITEM_CC(style, stroke));
 		}
+	} else if (one->sub == NEMOSHOW_IMAGE_ITEM) {
+		SkRect rect = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
+
+		NEMOSHOW_CANVAS_CC(canvas, canvas)->drawBitmapRect(*NEMOSHOW_ITEM_CC(item, bitmap), rect);
 	} else if (one->sub == NEMOSHOW_GROUP_ITEM) {
 		int i;
 

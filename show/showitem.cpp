@@ -47,6 +47,7 @@ struct showone *nemoshow_item_create(int type)
 	NEMOSHOW_ITEM_CC(item, stroke)->setStyle(SkPaint::kStroke_Style);
 	NEMOSHOW_ITEM_CC(item, stroke)->setAntiAlias(true);
 	NEMOSHOW_ITEM_CC(item, points) = NULL;
+	NEMOSHOW_ITEM_CC(item, bitmap) = NULL;
 
 	item->alpha = 1.0f;
 	item->from = 0.0f;
@@ -198,6 +199,19 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 					NEMOSHOW_FONT_CC(NEMOSHOW_FONT(item->font), face)));
 
 		nemoshow_one_reference_one(one, font);
+	}
+
+	if (one->sub == NEMOSHOW_IMAGE_ITEM && (v = nemoobject_gets(&one->object, "uri")) != NULL) {
+		bool r;
+
+		NEMOSHOW_ITEM_CC(item, bitmap) = new SkBitmap;
+
+		r = SkImageDecoder::DecodeFile(v, NEMOSHOW_ITEM_CC(item, bitmap));
+		if (r == false) {
+			delete NEMOSHOW_ITEM_CC(item, bitmap);
+
+			NEMOSHOW_ITEM_CC(item, bitmap) = NULL;
+		}
 	}
 
 	return 0;
@@ -507,6 +521,8 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 
 			box.outset(item->fontsize, item->fontsize);
 		}
+	} else if (one->sub == NEMOSHOW_IMAGE_ITEM) {
+		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
 	} else {
 		box = SkRect::MakeXYWH(0, 0, 0, 0);
 	}
@@ -641,6 +657,24 @@ void nemoshow_item_set_clip(struct showone *one, struct showone *clip)
 	item->clip = clip;
 
 	nemoshow_one_reference_one(one, clip);
+}
+
+void nemoshow_item_set_image(struct showone *one, const char *uri)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+	bool r;
+
+	if (NEMOSHOW_ITEM_CC(item, bitmap) != NULL)
+		delete NEMOSHOW_ITEM_CC(item, bitmap);
+
+	NEMOSHOW_ITEM_CC(item, bitmap) = new SkBitmap;
+
+	r = SkImageDecoder::DecodeFile(uri, NEMOSHOW_ITEM_CC(item, bitmap));
+	if (r == false) {
+		delete NEMOSHOW_ITEM_CC(item, bitmap);
+
+		NEMOSHOW_ITEM_CC(item, bitmap) = NULL;
+	}
 }
 
 void nemoshow_item_attach_one(struct showone *parent, struct showone *one)
