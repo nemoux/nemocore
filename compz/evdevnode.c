@@ -24,7 +24,7 @@
 #define LONG(x)									((x) / BITS_PER_LONG)
 #define TEST_BIT(array, bit)		((array[LONG(bit)] >> OFF(bit)) & 1)
 
-static void evdev_transform_absolute(struct evdevnode *node, int32_t *x, int32_t *y)
+static void evdev_transform_absolute(struct evdevnode *node, float *x, float *y)
 {
 	if (!node->abs.apply_calibration) {
 		*x = node->abs.x;
@@ -43,7 +43,7 @@ static void evdev_transform_absolute(struct evdevnode *node, int32_t *x, int32_t
 static int evdev_flush_events(struct evdevnode *node, uint32_t time)
 {
 	float x, y;
-	int32_t cx, cy;
+	float cx, cy;
 	int slot, id = 0;
 
 	slot = node->mt.slot;
@@ -59,20 +59,30 @@ static int evdev_flush_events(struct evdevnode *node, uint32_t time)
 			break;
 
 		case EVDEV_ABSOLUTE_MT_DOWN:
-			if (node->base.screen == NULL)
-				break;
-			nemoscreen_transform_to_global(node->base.screen,
-					node->mt.slots[slot].x, node->mt.slots[slot].y, &x, &y);
+			if (node->base.screen != NULL) {
+				nemoscreen_transform_to_global(node->base.screen,
+						node->mt.slots[slot].x * node->base.screen->width,
+						node->mt.slots[slot].y * node->base.screen->height,
+						&x, &y);
+			} else {
+				x = node->mt.slots[slot].x * node->base.width + node->base.x;
+				y = node->mt.slots[slot].y * node->base.height + node->base.y;
+			}
 			id = ++node->tapsequence;
 			node->mt.slots[slot].seat_slot = id;
 			nemotouch_notify_down(node->touch, time, id, x, y);
 			break;
 
 		case EVDEV_ABSOLUTE_MT_MOTION:
-			if (node->base.screen == NULL)
-				break;
-			nemoscreen_transform_to_global(node->base.screen,
-					node->mt.slots[slot].x, node->mt.slots[slot].y, &x, &y);
+			if (node->base.screen != NULL) {
+				nemoscreen_transform_to_global(node->base.screen,
+						node->mt.slots[slot].x * node->base.screen->width,
+						node->mt.slots[slot].y * node->base.screen->height,
+						&x, &y);
+			} else {
+				x = node->mt.slots[slot].x * node->base.width + node->base.x;
+				y = node->mt.slots[slot].y * node->base.height + node->base.y;
+			}
 			id = node->mt.slots[slot].seat_slot;
 			nemotouch_notify_motion(node->touch, time, id, x, y);
 			break;
@@ -83,20 +93,32 @@ static int evdev_flush_events(struct evdevnode *node, uint32_t time)
 			break;
 
 		case EVDEV_ABSOLUTE_TOUCH_DOWN:
-			if (node->base.screen == NULL)
-				break;
 			evdev_transform_absolute(node, &cx, &cy);
-			nemoscreen_transform_to_global(node->base.screen, cx, cy, &x, &y);
+			if (node->base.screen != NULL) {
+				nemoscreen_transform_to_global(node->base.screen,
+						cx * node->base.screen->width,
+						cy * node->base.screen->height,
+						&x, &y);
+			} else {
+				x = cx * node->base.width + node->base.x;
+				y = cy * node->base.height + node->base.y;
+			}
 			id = ++node->tapsequence;
 			node->abs.seat_slot = id;
 			nemotouch_notify_down(node->touch, time, id, x, y);
 			break;
 
 		case EVDEV_ABSOLUTE_MOTION:
-			if (node->base.screen == NULL)
-				break;
 			evdev_transform_absolute(node, &cx, &cy);
-			nemoscreen_transform_to_global(node->base.screen, cx, cy, &x, &y);
+			if (node->base.screen != NULL) {
+				nemoscreen_transform_to_global(node->base.screen,
+						cx * node->base.screen->width,
+						cy * node->base.screen->height,
+						&x, &y);
+			} else {
+				x = cx * node->base.width + node->base.x;
+				y = cy * node->base.height + node->base.y;
+			}
 			if (node->seat_caps & EVDEV_SEAT_TOUCH) {
 				id = node->abs.seat_slot;
 				nemotouch_notify_motion(node->touch, time, id, x, y);
@@ -177,13 +199,7 @@ static void evdev_process_relative(struct evdevnode *node, struct input_event *e
 
 static void evdev_process_touch(struct evdevnode *node, struct input_event *e, uint32_t time)
 {
-	uint32_t width, height;
 	int id;
-
-	if (node->base.screen == NULL)
-		return;
-	width = node->base.screen->current_mode->width;
-	height = node->base.screen->current_mode->height;
 
 	switch (e->code) {
 		case ABS_MT_SLOT:
@@ -204,13 +220,13 @@ static void evdev_process_touch(struct evdevnode *node, struct input_event *e, u
 			break;
 
 		case ABS_MT_POSITION_X:
-			node->mt.slots[node->mt.slot].x = (e->value - node->abs.min_x) * width / (node->abs.max_x - node->abs.min_x);
+			node->mt.slots[node->mt.slot].x = (e->value - node->abs.min_x) / (node->abs.max_x - node->abs.min_x);
 			if (node->pending_event == EVDEV_NONE)
 				node->pending_event = EVDEV_ABSOLUTE_MT_MOTION;
 			break;
 
 		case ABS_MT_POSITION_Y:
-			node->mt.slots[node->mt.slot].y = (e->value - node->abs.min_y) * height / (node->abs.max_y - node->abs.min_y);
+			node->mt.slots[node->mt.slot].y = (e->value - node->abs.min_y) / (node->abs.max_y - node->abs.min_y);
 			if (node->pending_event == EVDEV_NONE)
 				node->pending_event = EVDEV_ABSOLUTE_MT_MOTION;
 			break;
@@ -219,22 +235,15 @@ static void evdev_process_touch(struct evdevnode *node, struct input_event *e, u
 
 static void evdev_process_absolute_motion(struct evdevnode *node, struct input_event *e, uint32_t time)
 {
-	uint32_t width, height;
-
-	if (node->base.screen == NULL)
-		return;
-	width = node->base.screen->current_mode->width;
-	height = node->base.screen->current_mode->height;
-
 	switch (e->code) {
 		case ABS_X:
-			node->abs.x = (e->value - node->abs.min_x) * width / (node->abs.max_x - node->abs.min_x);
+			node->abs.x = (e->value - node->abs.min_x) / (node->abs.max_x - node->abs.min_x);
 			if (node->pending_event == EVDEV_NONE)
 				node->pending_event = EVDEV_ABSOLUTE_MOTION;
 			break;
 
 		case ABS_Y:
-			node->abs.y = (e->value - node->abs.min_y) * height / (node->abs.max_y - node->abs.min_y);
+			node->abs.y = (e->value - node->abs.min_y) / (node->abs.max_y - node->abs.min_y);
 			if (node->pending_event == EVDEV_NONE)
 				node->pending_event = EVDEV_ABSOLUTE_MOTION;
 			break;
@@ -505,6 +514,7 @@ struct evdevnode *evdev_create_node(struct nemocompz *compz, const char *path, i
 	char devname[256] = "unknown";
 	char devphys[256];
 	uint32_t nodeid, screenid;
+	int32_t x, y, width, height;
 
 	node = (struct evdevnode *)malloc(sizeof(struct evdevnode));
 	if (node == NULL)
@@ -530,10 +540,13 @@ struct evdevnode *evdev_create_node(struct nemocompz *compz, const char *path, i
 
 	if (nemoinput_get_config_screen(compz, node->devphys, &nodeid, &screenid) > 0)
 		nemoinput_set_screen(&node->base, nemocompz_get_screen(compz, nodeid, screenid));
-	if (node->base.screen == NULL)
-		nemoinput_set_screen(&node->base, nemocompz_get_main_screen(compz));
-	if (node->base.screen == NULL)
-		goto err1;
+	else if (nemoinput_get_config_geometry(compz, node->devphys, &x, &y, &width, &height) > 0)
+		nemoinput_set_geometry(&node->base, x, y, width, height);
+	else
+		nemoinput_set_geometry(&node->base,
+				0, 0,
+				nemocompz_get_scene_width(compz),
+				nemocompz_get_scene_height(compz));
 
 	if (evdev_configure_node(node) < 0)
 		goto err1;

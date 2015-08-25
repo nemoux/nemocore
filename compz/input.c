@@ -40,7 +40,17 @@ void nemoinput_set_screen(struct inputnode *node, struct nemoscreen *screen)
 
 void nemoinput_put_screen(struct inputnode *node)
 {
+	node->screen = NULL;
+
 	wl_list_remove(&node->screen_destroy_listener.link);
+}
+
+void nemoinput_set_geometry(struct inputnode *node, int32_t x, int32_t y, int32_t width, int32_t height)
+{
+	node->x = x;
+	node->y = y;
+	node->width = width;
+	node->height = height;
 }
 
 int nemoinput_get_config_screen(struct nemocompz *compz, const char *devnode, uint32_t *nodeid, uint32_t *screenid)
@@ -54,14 +64,52 @@ int nemoinput_get_config_screen(struct nemocompz *compz, const char *devnode, ui
 		return 0;
 
 	value = nemoitem_get_attr(compz->configs, index, "nodeid");
-	if (value != NULL && nodeid != NULL) {
+	if (value != NULL && nodeid != NULL)
 		*nodeid = strtoul(value, 0, 10);
-	}
+	else
+		return 0;
 
 	value = nemoitem_get_attr(compz->configs, index, "screenid");
-	if (value != NULL && screenid != NULL) {
+	if (value != NULL && screenid != NULL)
 		*screenid = strtoul(value, 0, 10);
-	}
+	else
+		return 0;
+
+	return 1;
+}
+
+int nemoinput_get_config_geometry(struct nemocompz *compz, const char *devnode, int32_t *x, int32_t *y, int32_t *width, int32_t *height)
+{
+	const char *value;
+	int index;
+
+	index = nemoitem_get_ifone(compz->configs, "//nemoshell/input", 0, "devnode", devnode);
+	if (index < 0)
+		return 0;
+
+	value = nemoitem_get_attr(compz->configs, index, "x");
+	if (value != NULL && x != NULL)
+		*x = strtoul(value, 0, 10);
+	else
+		return 0;
+
+	value = nemoitem_get_attr(compz->configs, index, "y");
+	if (value != NULL && y != NULL)
+		*y = strtoul(value, 0, 10);
+	else
+		return 0;
+
+	value = nemoitem_get_attr(compz->configs, index, "width");
+	if (value != NULL && width != NULL)
+		*width = strtoul(value, 0, 10);
+	else
+		return 0;
+
+	value = nemoitem_get_attr(compz->configs, index, "height");
+	if (value != NULL && height != NULL)
+		*height = strtoul(value, 0, 10);
+	else
+		return 0;
 
 	return 1;
 }

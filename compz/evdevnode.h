@@ -58,9 +58,9 @@ struct evdevnode {
 	uint32_t seat_caps;
 
 	struct {
-		int min_x, max_x, min_y, max_y;
+		float min_x, max_x, min_y, max_y;
+		float x, y;
 		uint32_t seat_slot;
-		int32_t x, y;
 		int32_t r;
 		int axis;
 
@@ -71,7 +71,7 @@ struct evdevnode {
 	struct {
 		int slot;
 		struct {
-			int32_t x, y;
+			float x, y;
 			uint32_t seat_slot;
 		} slots[EVDEV_MAX_SLOTS];
 	} mt;
