@@ -10,6 +10,7 @@
 #include <minipalm.h>
 #include <showhelper.h>
 #include <geometryhelper.h>
+#include <nemobook.h>
 #include <nemomisc.h>
 
 struct minipalm *minishell_palm_create(void)
@@ -178,9 +179,13 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 		struct showone *sequence;
 		struct showone *set;
 		struct showone *group;
+		struct nemobook *book;
 		double cx = 0.0f, cy = 0.0f;
+		double dx, dy;
+		double min, d;
+		int imin;
 		int slot;
-		int i;
+		int i, j;
 
 		cx += palm->fingers[0]->x;
 		cx += palm->fingers[1]->x;
@@ -206,9 +211,28 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 		trans0 = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 800, 0);
 		trans1 = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 800, 0);
 
+		book = nemobook_create(5);
+
 		for (i = 0; i < 5; i++) {
 			palm->fingers[i]->type = MINISHELL_ACTIVE_GRAB;
 			palm->fingers[i]->userdata = NULL;
+
+			min = FLT_MAX;
+
+			for (j = 0; j < 5; j++) {
+				if (nemobook_is_empty(book, j) != 0) {
+					dx = NEMOSHOW_ITEM_AT(palm->fingers[i]->group, tx) - cx - cos(2 * M_PI / 5 * j) * 50.0f;
+					dy = NEMOSHOW_ITEM_AT(palm->fingers[i]->group, ty) - cy - sin(2 * M_PI / 5 * j) * 50.0f;
+
+					d = sqrtf(dx * dx + dy * dy);
+					if (d < min) {
+						min = d;
+						imin = j;
+					}
+				}
+			}
+
+			nemobook_set(book, imin, 1);
 
 			nemoshow_transition_destroy(palm->fingers[i]->trans);
 
@@ -242,8 +266,8 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 
 			set = nemoshow_sequence_create_set();
 			nemoshow_sequence_set_source(set, palm->fingers[i]->group);
-			nemoshow_sequence_set_dattr(set, "tx", cos(2 * M_PI / 5 * i) * 50.0f, NEMOSHOW_MATRIX_DIRTY);
-			nemoshow_sequence_set_dattr(set, "ty", sin(2 * M_PI / 5 * i) * 50.0f, NEMOSHOW_MATRIX_DIRTY);
+			nemoshow_sequence_set_dattr(set, "tx", cos(2 * M_PI / 5 * imin) * 50.0f, NEMOSHOW_MATRIX_DIRTY);
+			nemoshow_sequence_set_dattr(set, "ty", sin(2 * M_PI / 5 * imin) * 50.0f, NEMOSHOW_MATRIX_DIRTY);
 
 			sequence = nemoshow_sequence_create_easy(show,
 					nemoshow_sequence_create_frame_easy(show,
@@ -252,6 +276,8 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 
 			nemoshow_transition_attach_sequence(trans1, sequence);
 		}
+
+		nemobook_destroy(book);
 
 		sequence = nemoshow_sequence_create_easy(show,
 				nemoshow_sequence_create_frame_easy(show,
