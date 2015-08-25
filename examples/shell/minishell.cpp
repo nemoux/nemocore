@@ -524,128 +524,59 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 				if (pid != 0 && minishell_has_slot(mini, pid) != 0) {
 					struct showone *one = (struct showone *)minishell_get_slot(mini, pid);
 					struct showone *group = nemoshow_one_get_parent(one, NEMOSHOW_ITEM_TYPE, NEMOSHOW_GROUP_ITEM);
-					struct showone *nut0, *nut1, *nut2;
-					struct showtransition *trans0, *trans1, *trans2;
-					struct showtransition *trans;
+					struct showone *nuts[6];
+					struct showtransition *trans[6];
 					struct showone *sequence;
 					struct showone *set;
 					struct showone *link;
+					struct showone *nut, *nut0;
+					double x, y;
+					double r;
+					int i;
 
-					set = nemoshow_sequence_create_set();
-					nemoshow_sequence_set_source(set, one);
-					nemoshow_sequence_set_cattr(set, "fill", 0, 255, 255, 255, NEMOSHOW_STYLE_DIRTY);
+					r = atan2(NEMOSHOW_ITEM_AT(one, ty), NEMOSHOW_ITEM_AT(one, tx));
 
-					sequence = nemoshow_sequence_create_easy(show,
-							nemoshow_sequence_create_frame_easy(show,
-								1.0f, set, NULL),
-							NULL);
+					for (i = 0, nut0 = one; i < 6; i++, nut0 = nut) {
+						if ((i % 2) == 0) {
+							x = cos(r + i * 15.0f * M_PI / 180.0f) * 200.0f;
+							y = sin(r + i * 15.0f * M_PI / 180.0f) * 200.0f;
+						} else {
+							x = cos(r + i * 15.0f * M_PI / 180.0f) * 125.0f;
+							y = sin(r + i * 15.0f * M_PI / 180.0f) * 125.0f;
+						}
 
-					trans = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 800, 0);
-					nemoshow_transition_attach_sequence(trans, sequence);
-					nemoshow_attach_transition(show, trans);
+						nuts[i] = nut = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
+						nemoshow_attach_one(show, nut);
+						nemoshow_item_attach_one(group, nut);
+						nemoshow_item_set_canvas(nut, canvas);
+						NEMOSHOW_ITEM_AT(nut, x) = cos(r) * 50.0f;
+						NEMOSHOW_ITEM_AT(nut, y) = sin(r) * 50.0f;
+						NEMOSHOW_ITEM_AT(nut, r) = 20.0f;
+						nemoshow_item_set_blur(nut, mini->blur15);
+						nemoshow_item_set_fill_color(nut, 0, 255, 255, 255);
 
-					nut0 = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
-					nemoshow_attach_one(show, nut0);
-					nemoshow_item_attach_one(group, nut0);
-					nemoshow_item_set_canvas(nut0, canvas);
-					NEMOSHOW_ITEM_AT(nut0, x) = 0.0f;
-					NEMOSHOW_ITEM_AT(nut0, y) = 0.0f;
-					NEMOSHOW_ITEM_AT(nut0, r) = 20.0f;
-					nemoshow_item_set_blur(nut0, mini->blur15);
-					nemoshow_item_set_fill_color(nut0, 0, 255, 255, 255);
+						set = nemoshow_sequence_create_set();
+						nemoshow_sequence_set_source(set, nut);
+						nemoshow_sequence_set_dattr(set, "x", x, NEMOSHOW_SHAPE_DIRTY);
+						nemoshow_sequence_set_dattr(set, "y", y, NEMOSHOW_SHAPE_DIRTY);
 
-					nut1 = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
-					nemoshow_attach_one(show, nut1);
-					nemoshow_item_attach_one(group, nut1);
-					nemoshow_item_set_canvas(nut1, canvas);
-					NEMOSHOW_ITEM_AT(nut1, x) = 0.0f;
-					NEMOSHOW_ITEM_AT(nut1, y) = 0.0f;
-					NEMOSHOW_ITEM_AT(nut1, r) = 20.0f;
-					nemoshow_item_set_blur(nut1, mini->blur15);
-					nemoshow_item_set_fill_color(nut1, 0, 255, 255, 255);
+						sequence = nemoshow_sequence_create_easy(show,
+								nemoshow_sequence_create_frame_easy(show, 1.0f, set, NULL),
+								NULL);
 
-					nut2 = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
-					nemoshow_attach_one(show, nut2);
-					nemoshow_item_attach_one(group, nut2);
-					nemoshow_item_set_canvas(nut2, canvas);
-					NEMOSHOW_ITEM_AT(nut2, x) = 0.0f;
-					NEMOSHOW_ITEM_AT(nut2, y) = 0.0f;
-					NEMOSHOW_ITEM_AT(nut2, r) = 20.0f;
-					nemoshow_item_set_blur(nut2, mini->blur15);
-					nemoshow_item_set_fill_color(nut2, 0, 255, 255, 255);
+						trans[i] = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 700, i * 150);
+						nemoshow_transition_attach_sequence(trans[i], sequence);
+						nemoshow_attach_transition(show, trans[i]);
 
-					sequence = nemoshow_sequence_create_easy(show,
-							nemoshow_sequence_create_frame_easy(show,
-								1.0f,
-								nemoshow_sequence_create_set_easy(show,
-									nut0,
-									"x", "50.0",
-									"y", "100.0",
-									NULL),
-								NULL),
-							NULL);
-
-					trans0 = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 500, 0);
-					nemoshow_transition_attach_sequence(trans0, sequence);
-
-					sequence = nemoshow_sequence_create_easy(show,
-							nemoshow_sequence_create_frame_easy(show,
-								1.0f,
-								nemoshow_sequence_create_set_easy(show,
-									nut1,
-									"x", "150.0",
-									"y", "100.0",
-									NULL),
-								NULL),
-							NULL);
-
-					trans1 = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 500, 150);
-					nemoshow_transition_attach_sequence(trans1, sequence);
-
-					sequence = nemoshow_sequence_create_easy(show,
-							nemoshow_sequence_create_frame_easy(show,
-								1.0f,
-								nemoshow_sequence_create_set_easy(show,
-									nut2,
-									"x", "150.0",
-									"y", "200.0",
-									NULL),
-								NULL),
-							NULL);
-
-					trans2 = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 500, 300);
-					nemoshow_transition_attach_sequence(trans2, sequence);
-
-					nemoshow_attach_transition(show, trans0);
-					nemoshow_attach_transition(show, trans1);
-					nemoshow_attach_transition(show, trans2);
-
-					link = nemoshow_link_create();
-					nemoshow_attach_one(show, link);
-					nemoshow_one_attach_one(mini->links, link);
-					nemoshow_link_set_head(link, one);
-					nemoshow_link_set_tail(link, nut0);
-					nemoshow_link_set_stroke_color(link, 0, 255, 255, 255);
-					nemoshow_link_set_stroke_width(link, 2.0f);
-					nemoshow_link_set_blur(link, mini->blur5);
-
-					link = nemoshow_link_create();
-					nemoshow_attach_one(show, link);
-					nemoshow_one_attach_one(mini->links, link);
-					nemoshow_link_set_head(link, nut0);
-					nemoshow_link_set_tail(link, nut1);
-					nemoshow_link_set_stroke_color(link, 0, 255, 255, 255);
-					nemoshow_link_set_stroke_width(link, 2.0f);
-					nemoshow_link_set_blur(link, mini->blur5);
-
-					link = nemoshow_link_create();
-					nemoshow_attach_one(show, link);
-					nemoshow_one_attach_one(mini->links, link);
-					nemoshow_link_set_head(link, nut1);
-					nemoshow_link_set_tail(link, nut2);
-					nemoshow_link_set_stroke_color(link, 0, 255, 255, 255);
-					nemoshow_link_set_stroke_width(link, 2.0f);
-					nemoshow_link_set_blur(link, mini->blur5);
+						link = nemoshow_link_create();
+						nemoshow_attach_one(show, link);
+						nemoshow_one_attach_one(mini->links, link);
+						nemoshow_link_set_head(link, nut0);
+						nemoshow_link_set_tail(link, nut);
+						nemoshow_link_set_stroke_color(link, 0, 255, 255, 255);
+						nemoshow_link_set_stroke_width(link, 2.0f);
+						nemoshow_link_set_blur(link, mini->blur5);
+					}
 
 					nemoactor_dispatch_frame(actor);
 				}
