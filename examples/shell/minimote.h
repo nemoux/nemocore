@@ -21,11 +21,12 @@ struct minimote {
 	GLuint fbo, dbo;
 
 	GLuint program;
+	GLuint utex0;
 	GLuint uprojection;
 	GLuint ucolor;
 
 	struct nemomatrix matrix;
-	
+
 	GLuint vertex_array;
 	GLuint vertex_buffer;
 };

@@ -21,15 +21,20 @@ static GLuint minishell_mote_create_shader(void)
 {
 	static const char *vert_shader_text =
 		"uniform mat4 projection;\n"
-		"attribute vec3 vertex;\n"
+		"attribute vec2 position;\n"
+		"attribute vec2 texcoord;\n"
+		"varying vec2 v_texcoord;\n"
 		"void main() {\n"
-		"  gl_Position = projection * vec4(vertex, 1.0f);\n"
+		"  gl_Position = projection * vec4(position, 0.0, 1.0f);\n"
+		"  v_texcoord = texcoord;\n"
 		"}\n";
 	static const char *frag_shader_text =
 		"precision mediump float;\n"
+		"varying vec2 v_texcoord;\n"
+		"uniform sampler2D tex0;\n"
 		"uniform vec4 color;\n"
 		"void main() {\n"
-		"  gl_FragColor = color;\n"
+		"  gl_FragColor = texture2D(tex0, v_texcoord) * color;\n"
 		"}\n";
 	GLuint frag, vert;
 	GLuint program;
@@ -54,7 +59,8 @@ static GLuint minishell_mote_create_shader(void)
 
 	glUseProgram(program);
 
-	glBindAttribLocation(program, 0, "vertex");
+	glBindAttribLocation(program, 0, "position");
+	glBindAttribLocation(program, 1, "texcoord");
 	glLinkProgram(program);
 
 	return program;
@@ -63,12 +69,14 @@ static GLuint minishell_mote_create_shader(void)
 struct minimote *minishell_mote_create(struct showone *one)
 {
 	struct minimote *mote;
-	GLfloat vertices[9] = {
-		1.0f, -1.0f, 0.0f,
-		-1.0f, -1.0f, 0.0f,
-		0.0f, 1.0f, 0.0f,
+	GLfloat vertices[12] = {
+		1.0f, -1.0f, 1.0f, 0.0f,
+		-1.0f, -1.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f, 1.0f
 	};
 	GLfloat rgba[4] = { 0.0f, 1.0f, 1.0f, 1.0f };
+	GLuint texture;
+	uint8_t pixels[256 * 4];
 
 	mote = (struct minimote *)malloc(sizeof(struct minimote));
 	if (mote == NULL)
@@ -85,6 +93,7 @@ struct minimote *minishell_mote_create(struct showone *one)
 
 	mote->program = minishell_mote_create_shader();
 
+	mote->utex0 = glGetUniformLocation(mote->program, "tex0");
 	mote->uprojection = glGetUniformLocation(mote->program, "projection");
 	mote->ucolor = glGetUniformLocation(mote->program, "color");
 
@@ -99,22 +108,41 @@ struct minimote *minishell_mote_create(struct showone *one)
 	glGenBuffers(1, &mote->vertex_buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, mote->vertex_buffer);
 
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void *)0);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void *)0);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 9, vertices, GL_STATIC_DRAW);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void *)sizeof(GLfloat[2]));
+	glEnableVertexAttribArray(1);
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 12, vertices, GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+
+	memset(pixels, 0xff, sizeof(uint8_t) * 256 * 4);
+
+	glUseProgram(mote->program);
+
+	glActiveTexture(GL_TEXTURE0);
+
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
+	glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, 16, 16, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, (void *)pixels);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, mote->fbo);
 
 	glViewport(0, 0, mote->width, mote->height);
 
-	glUseProgram(mote->program);
-
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
+	glUniform1i(mote->utex0, 0);
 	glUniformMatrix4fv(mote->uprojection, 1, GL_FALSE, (GLfloat *)mote->matrix.d);
 	glUniform4fv(mote->ucolor, 1, rgba);
 
@@ -123,6 +151,8 @@ struct minimote *minishell_mote_create(struct showone *one)
 	glBindVertexArray(0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
 
 	return mote;
 
