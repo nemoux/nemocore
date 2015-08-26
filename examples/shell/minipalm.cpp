@@ -51,8 +51,8 @@ void minishell_palm_update(struct minishell *mini, struct minigrab *grab)
 			if (grab == other || other->type != MINISHELL_NORMAL_GRAB)
 				continue;
 
-			if (((d0 = point_get_distance(grab->x, grab->y, other->x, other->y)) < 450.0f) &&
-					((d1 = point_get_distance(maxx, maxy, other->x, other->y)) < 450.0f)) {
+			if (((d0 = point_get_distance(grab->x, grab->y, other->x, other->y)) < 400.0f) &&
+					((d1 = point_get_distance(maxx, maxy, other->x, other->y)) < 400.0f)) {
 				fingers[nfingers++] = other;
 
 				if (d0 > maxd) {

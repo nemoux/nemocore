@@ -417,8 +417,13 @@ void nemotouch_flush_tuio(struct nemotouch *touch, struct tuionode *node)
 			if (tp == NULL)
 				return;
 
-			nemoscreen_transform_to_global(node->base.screen,
-					node->taps[i].f[0], node->taps[i].f[1], &x, &y);
+			if (node->base.screen != NULL) {
+				nemoscreen_transform_to_global(node->base.screen,
+						node->taps[i].f[0], node->taps[i].f[1], &x, &y);
+			} else {
+				x = node->taps[i].f[0] + node->base.x;
+				y = node->taps[i].f[1] + node->base.y;
+			}
 
 			tp->grab_x = x;
 			tp->grab_y = y;
@@ -430,8 +435,13 @@ void nemotouch_flush_tuio(struct nemotouch *touch, struct tuionode *node)
 
 			nemocompz_run_touch_binding(touch->seat->compz, tp, msecs);
 		} else {
-			nemoscreen_transform_to_global(node->base.screen,
-					node->taps[i].f[0], node->taps[i].f[1], &x, &y);
+			if (node->base.screen != NULL) {
+				nemoscreen_transform_to_global(node->base.screen,
+						node->taps[i].f[0], node->taps[i].f[1], &x, &y);
+			} else {
+				x = node->taps[i].f[0] + node->base.x;
+				y = node->taps[i].f[1] + node->base.y;
+			}
 
 			tp->grab->interface->motion(tp->grab, msecs, tp->gid, x, y);
 
