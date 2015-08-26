@@ -42,7 +42,7 @@ add_library(nemoshow SHARED
 	showease.cpp
 	showtransition.cpp
 	showmatrix.cpp
-	showblur.cpp
+	showfilter.cpp
 	showshader.cpp
 	showcamera.cpp
 	showvar.cpp
@@ -78,7 +78,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/show/showease.h
 	${CMAKE_SOURCE_DIR}/show/showtransition.h
 	${CMAKE_SOURCE_DIR}/show/showmatrix.h
-	${CMAKE_SOURCE_DIR}/show/showblur.h
+	${CMAKE_SOURCE_DIR}/show/showfilter.h
 	${CMAKE_SOURCE_DIR}/show/showshader.h
 	${CMAKE_SOURCE_DIR}/show/showcamera.h
 	${CMAKE_SOURCE_DIR}/show/showvar.h

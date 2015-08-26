@@ -10,8 +10,8 @@
 #include <showcolor.h>
 #include <showmatrix.h>
 #include <showmatrix.hpp>
-#include <showblur.h>
-#include <showblur.hpp>
+#include <showfilter.h>
+#include <showfilter.hpp>
 #include <showshader.h>
 #include <showshader.hpp>
 #include <showpath.h>
@@ -122,7 +122,7 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	struct showone *style;
-	struct showone *blur;
+	struct showone *filter;
 	struct showone *shader;
 	struct showone *matrix;
 	struct showone *path;
@@ -137,11 +137,11 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 
 		nemoshow_one_reference_one(one, style);
 	} else {
-		v = nemoobject_gets(&one->object, "blur");
-		if (v != NULL && (blur = nemoshow_search_one(show, v)) != NULL) {
-			item->blur = blur;
+		v = nemoobject_gets(&one->object, "filter");
+		if (v != NULL && (filter = nemoshow_search_one(show, v)) != NULL) {
+			item->filter = filter;
 
-			nemoshow_one_reference_one(one, blur);
+			nemoshow_one_reference_one(one, filter);
 		}
 
 		v = nemoobject_gets(&one->object, "shader");
@@ -239,11 +239,11 @@ static inline void nemoshow_item_update_style(struct nemoshow *show, struct show
 		}
 	}
 
-	if (item->blur != NULL) {
+	if (item->filter != NULL) {
 		if (item->fill != 0 && item->stroke == 0)
-			NEMOSHOW_ITEM_CC(item, fill)->setMaskFilter(NEMOSHOW_BLUR_CC(NEMOSHOW_BLUR(item->blur), filter));
+			NEMOSHOW_ITEM_CC(item, fill)->setMaskFilter(NEMOSHOW_FILTER_CC(NEMOSHOW_FILTER(item->filter), filter));
 		else
-			NEMOSHOW_ITEM_CC(item, stroke)->setMaskFilter(NEMOSHOW_BLUR_CC(NEMOSHOW_BLUR(item->blur), filter));
+			NEMOSHOW_ITEM_CC(item, stroke)->setMaskFilter(NEMOSHOW_FILTER_CC(NEMOSHOW_FILTER(item->filter), filter));
 	}
 
 	if (item->shader != NULL) {
@@ -586,8 +586,8 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 	}
 
 	outer = NEMOSHOW_ANTIALIAS_EPSILON;
-	if (item->blur != NULL)
-		outer += NEMOSHOW_BLUR_AT(item->blur, r) * 2.0f;
+	if (item->filter != NULL)
+		outer += NEMOSHOW_FILTER_AT(item->filter, r) * 2.0f;
 	box.outset(outer, outer);
 
 	if (item->canvas != NULL) {
@@ -676,13 +676,13 @@ void nemoshow_item_set_shader(struct showone *one, struct showone *shader)
 	nemoshow_one_reference_one(one, shader);
 }
 
-void nemoshow_item_set_blur(struct showone *one, struct showone *blur)
+void nemoshow_item_set_filter(struct showone *one, struct showone *filter)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	item->blur = blur;
+	item->filter = filter;
 
-	nemoshow_one_reference_one(one, blur);
+	nemoshow_one_reference_one(one, filter);
 }
 
 void nemoshow_item_set_clip(struct showone *one, struct showone *clip)

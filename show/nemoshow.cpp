@@ -164,7 +164,7 @@ static struct showone *nemoshow_create_one(struct nemoshow *show, struct xmlnode
 	} else if (strcmp(node->name, "camera") == 0) {
 		one = nemoshow_camera_create();
 	} else if (strcmp(node->name, "blur") == 0) {
-		one = nemoshow_blur_create();
+		one = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
 	} else if (strcmp(node->name, "linear") == 0) {
 		one = nemoshow_shader_create(NEMOSHOW_LINEAR_GRADIENT_SHADER);
 	} else if (strcmp(node->name, "radial") == 0) {
@@ -622,8 +622,8 @@ void nemoshow_arrange_one(struct nemoshow *show)
 			nemoshow_camera_arrange(show, one);
 
 			nemoshow_one_set_state(one, NEMOSHOW_ARRANGE_STATE);
-		} else if (one->type == NEMOSHOW_BLUR_TYPE) {
-			nemoshow_blur_arrange(show, one);
+		} else if (one->type == NEMOSHOW_FILTER_TYPE) {
+			nemoshow_filter_arrange(show, one);
 
 			nemoshow_one_set_state(one, NEMOSHOW_ARRANGE_STATE);
 		} else if (one->type == NEMOSHOW_SHADER_TYPE) {

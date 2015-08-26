@@ -517,7 +517,7 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 					NEMOSHOW_ITEM_AT(edge, inner) = 5.0f;
 					NEMOSHOW_ITEM_AT(edge, from) = 0.0f;
 					NEMOSHOW_ITEM_AT(edge, to) = 0.0f;
-					nemoshow_item_set_blur(edge, mini->blur5);
+					nemoshow_item_set_filter(edge, mini->blur5);
 					nemoshow_item_set_fill_color(edge, 255, 255, 0, 255);
 
 					one = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
@@ -527,7 +527,7 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 					NEMOSHOW_ITEM_AT(one, x) = 0.0f;
 					NEMOSHOW_ITEM_AT(one, y) = 0.0f;
 					NEMOSHOW_ITEM_AT(one, r) = 0.0f;
-					nemoshow_item_set_blur(one, mini->blur15);
+					nemoshow_item_set_filter(one, mini->blur15);
 					nemoshow_item_set_fill_color(one, 255, 255, 0, 255);
 
 					sequence = nemoshow_sequence_create_easy(show,
@@ -594,7 +594,7 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 				nemoshow_attach_one(show, one);
 				nemoshow_one_attach_one(canvas, one);
 				nemoshow_item_set_canvas(one, canvas);
-				nemoshow_item_set_blur(one, mini->blur5);
+				nemoshow_item_set_filter(one, mini->blur5);
 				nemoshow_item_set_stroke_color(one, 255, 255, 0, 255);
 				nemoshow_item_set_stroke_width(one, 3.0f);
 
@@ -648,7 +648,7 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 						NEMOSHOW_ITEM_AT(nut, x) = cos(r) * 100.0f;
 						NEMOSHOW_ITEM_AT(nut, y) = sin(r) * 100.0f;
 						NEMOSHOW_ITEM_AT(nut, r) = 20.0f;
-						nemoshow_item_set_blur(nut, mini->blur15);
+						nemoshow_item_set_filter(nut, mini->blur15);
 						nemoshow_item_set_fill_color(nut, 0, 255, 255, 255);
 
 						set = nemoshow_sequence_create_set();
@@ -671,7 +671,7 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 						nemoshow_link_set_tail(link, nut);
 						nemoshow_link_set_stroke_color(link, 0, 255, 255, 255);
 						nemoshow_link_set_stroke_width(link, 2.0f);
-						nemoshow_link_set_blur(link, mini->blur5);
+						nemoshow_link_set_filter(link, mini->blur5);
 					}
 
 					nemoactor_dispatch_frame(actor);
@@ -826,13 +826,13 @@ int main(int argc, char *argv[])
 
 	mini->mote = minishell_mote_create(nemoshow_search_one(show, "mote"));
 
-	mini->blur5 = blur = nemoshow_blur_create();
+	mini->blur5 = blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
 	nemoshow_attach_one(show, blur);
-	nemoshow_blur_set_filter(blur, "high", "solid", 5.0f);
+	nemoshow_filter_set_blur(blur, "high", "solid", 5.0f);
 
-	mini->blur15 = blur = nemoshow_blur_create();
+	mini->blur15 = blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
 	nemoshow_attach_one(show, blur);
-	nemoshow_blur_set_filter(blur, "high", "solid", 15.0f);
+	nemoshow_filter_set_blur(blur, "high", "solid", 15.0f);
 
 	actor = NEMOSHOW_AT(show, actor);
 	nemoview_attach_layer(actor->view, &shell->background_layer);

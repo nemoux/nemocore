@@ -7,8 +7,8 @@
 
 #include <showlink.h>
 #include <showlink.hpp>
-#include <showblur.h>
-#include <showblur.hpp>
+#include <showfilter.h>
+#include <showfilter.hpp>
 #include <nemoshow.h>
 #include <nemomisc.h>
 
@@ -82,14 +82,14 @@ int nemoshow_link_update(struct nemoshow *show, struct showone *one)
 		NEMOSHOW_LINK_CC(link, stroke)->setColor(
 				SkColorSetARGB(255.0f * link->alpha, link->strokes[2], link->strokes[1], link->strokes[0]));
 
-		if (link->blur != NULL) {
-			NEMOSHOW_LINK_CC(link, stroke)->setMaskFilter(NEMOSHOW_BLUR_CC(NEMOSHOW_BLUR(link->blur), filter));
+		if (link->filter != NULL) {
+			NEMOSHOW_LINK_CC(link, stroke)->setMaskFilter(NEMOSHOW_FILTER_CC(NEMOSHOW_FILTER(link->filter), filter));
 		}
 
 		outer += link->stroke_width;
 		outer += NEMOSHOW_ANTIALIAS_EPSILON;
-		if (link->blur != NULL)
-			outer += NEMOSHOW_BLUR_AT(link->blur, r) * 2.0f;
+		if (link->filter != NULL)
+			outer += NEMOSHOW_FILTER_AT(link->filter, r) * 2.0f;
 
 		one->outer = outer;
 	}
@@ -102,11 +102,11 @@ int nemoshow_link_update(struct nemoshow *show, struct showone *one)
 	return 0;
 }
 
-void nemoshow_link_set_blur(struct showone *one, struct showone *blur)
+void nemoshow_link_set_filter(struct showone *one, struct showone *filter)
 {
 	struct showlink *link = NEMOSHOW_LINK(one);
 
-	link->blur = blur;
+	link->filter = filter;
 
-	nemoshow_one_reference_one(one, blur);
+	nemoshow_one_reference_one(one, filter);
 }

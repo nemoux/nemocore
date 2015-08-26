@@ -27,7 +27,7 @@ NEMO_BEGIN_EXTERN_C
 #include <showmatrix.h>
 #include <showpath.h>
 #include <showcamera.h>
-#include <showblur.h>
+#include <showfilter.h>
 #include <showshader.h>
 #include <showvar.h>
 #include <showcons.h>

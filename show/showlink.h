@@ -25,7 +25,7 @@ struct showlink {
 
 	double alpha;
 
-	struct showone *blur;
+	struct showone *filter;
 
 	void *cc;
 };
@@ -39,7 +39,7 @@ extern void nemoshow_link_destroy(struct showone *one);
 extern int nemoshow_link_arrange(struct nemoshow *show, struct showone *one);
 extern int nemoshow_link_update(struct nemoshow *show, struct showone *one);
 
-extern void nemoshow_link_set_blur(struct showone *one, struct showone *blur);
+extern void nemoshow_link_set_filter(struct showone *one, struct showone *filter);
 
 static inline void nemoshow_link_set_canvas(struct showone *one, struct showone *canvas)
 {
