@@ -772,11 +772,11 @@ static void nemoshow_sequence_prepare_frame(struct showone *one, uint32_t serial
 				}
 			}
 
-			set->src->state = NEMOSHOW_TRANSITION_STATE;
+			nemoshow_one_set_state(set->src, NEMOSHOW_TRANSITION_STATE);
 		} else if (one->children[i]->type == NEMOSHOW_FOLLOW_TYPE) {
 			follow = NEMOSHOW_FOLLOW(one->children[i]);
 
-			follow->src->state = NEMOSHOW_TRANSITION_STATE;
+			nemoshow_one_set_state(follow->src, NEMOSHOW_TRANSITION_STATE);
 		}
 	}
 }
@@ -863,7 +863,7 @@ static void nemoshow_sequence_finish_frame(struct showone *one, uint32_t serial)
 				}
 			}
 
-			set->src->state = NEMOSHOW_NORMAL_STATE;
+			nemoshow_one_put_state(set->src, NEMOSHOW_TRANSITION_STATE);
 
 			nemoshow_one_dirty(set->src, dirty);
 		} else if (one->children[i]->type == NEMOSHOW_FOLLOW_TYPE) {
@@ -888,7 +888,7 @@ static void nemoshow_sequence_finish_frame(struct showone *one, uint32_t serial)
 				nemoshow_one_dirty(follow->src, NEMOSHOW_SHAPE_DIRTY);
 			}
 
-			follow->src->state = NEMOSHOW_NORMAL_STATE;
+			nemoshow_one_put_state(follow->src, NEMOSHOW_TRANSITION_STATE);
 		}
 	}
 

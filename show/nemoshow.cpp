@@ -587,42 +587,78 @@ void nemoshow_arrange_one(struct nemoshow *show)
 	for (i = 0; i < show->nones; i++) {
 		one = show->ones[i];
 
+		if (nemoshow_one_has_state(one, NEMOSHOW_ARRANGE_STATE) != 0)
+			continue;
+
 		if (one->type == NEMOSHOW_SET_TYPE) {
 			nemoshow_sequence_arrange_set(show, one);
+
+			nemoshow_one_set_state(one, NEMOSHOW_ARRANGE_STATE);
 		} else if (one->type == NEMOSHOW_FIX_TYPE) {
 			nemoshow_sequence_arrange_fix(show, one);
+
+			nemoshow_one_set_state(one, NEMOSHOW_ARRANGE_STATE);
 		} else if (one->type == NEMOSHOW_FOLLOW_TYPE) {
 			nemoshow_sequence_arrange_follow(show, one);
+
+			nemoshow_one_set_state(one, NEMOSHOW_ARRANGE_STATE);
 		} else if (one->type == NEMOSHOW_EASE_TYPE) {
 			nemoshow_ease_arrange(show, one);
+
+			nemoshow_one_set_state(one, NEMOSHOW_ARRANGE_STATE);
 		} else if (one->type == NEMOSHOW_CANVAS_TYPE && one->sub != NEMOSHOW_CANVAS_SCENE_TYPE) {
 			nemoshow_canvas_arrange(show, one);
+
+			nemoshow_one_set_state(one, NEMOSHOW_ARRANGE_STATE);
 		} else if (one->type == NEMOSHOW_ITEM_TYPE) {
 			nemoshow_item_arrange(show, one);
+
+			nemoshow_one_set_state(one, NEMOSHOW_ARRANGE_STATE);
 		} else if (one->type == NEMOSHOW_MATRIX_TYPE) {
 			nemoshow_matrix_arrange(show, one);
+
+			nemoshow_one_set_state(one, NEMOSHOW_ARRANGE_STATE);
 		} else if (one->type == NEMOSHOW_CAMERA_TYPE) {
 			nemoshow_camera_arrange(show, one);
+
+			nemoshow_one_set_state(one, NEMOSHOW_ARRANGE_STATE);
 		} else if (one->type == NEMOSHOW_BLUR_TYPE) {
 			nemoshow_blur_arrange(show, one);
+
+			nemoshow_one_set_state(one, NEMOSHOW_ARRANGE_STATE);
 		} else if (one->type == NEMOSHOW_SHADER_TYPE) {
 			nemoshow_shader_arrange(show, one);
+
+			nemoshow_one_set_state(one, NEMOSHOW_ARRANGE_STATE);
 		} else if (one->type == NEMOSHOW_SVG_TYPE) {
 			nemoshow_svg_arrange(show, one);
+
+			nemoshow_one_set_state(one, NEMOSHOW_ARRANGE_STATE);
 		} else if (one->type == NEMOSHOW_FONT_TYPE) {
 			nemoshow_font_arrange(show, one);
+
+			nemoshow_one_set_state(one, NEMOSHOW_ARRANGE_STATE);
 		} else if (one->type == NEMOSHOW_PATH_TYPE) {
 			nemoshow_path_arrange(show, one);
+
+			nemoshow_one_set_state(one, NEMOSHOW_ARRANGE_STATE);
 		} else if (one->type == NEMOSHOW_LINK_TYPE) {
 			nemoshow_link_arrange(show, one);
+
+			nemoshow_one_set_state(one, NEMOSHOW_ARRANGE_STATE);
 		}
 	}
 
 	for (i = 0; i < show->nones; i++) {
 		one = show->ones[i];
 
+		if (nemoshow_one_has_state(one, NEMOSHOW_ARRANGE_STATE) != 0)
+			continue;
+
 		if (one->type == NEMOSHOW_CANVAS_TYPE && one->sub == NEMOSHOW_CANVAS_SCENE_TYPE) {
 			nemoshow_canvas_arrange(show, one);
+
+			nemoshow_one_set_state(one, NEMOSHOW_ARRANGE_STATE);
 		}
 	}
 }

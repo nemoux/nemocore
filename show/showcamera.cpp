@@ -80,7 +80,7 @@ int nemoshow_camera_update(struct nemoshow *show, struct showone *one)
 			camera->sx = camera->sx * NEMOSHOW_MATRIX_AT(child, x);
 			camera->sy = camera->sy * NEMOSHOW_MATRIX_AT(child, y);
 
-			if (child->state == NEMOSHOW_NORMAL_STATE)
+			if (nemoshow_one_has_state(child, NEMOSHOW_TRANSITION_STATE) == 0)
 				needs_scale = 1;
 		} else if (child->sub == NEMOSHOW_ROTATE_MATRIX) {
 			NEMOSHOW_CAMERA_CC(camera, matrix)->postRotate(

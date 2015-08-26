@@ -123,6 +123,8 @@ static inline void nemoshow_svg_update_uri(struct nemoshow *show, struct showone
 	if (svg->uri != NULL) {
 		nemoshow_svg_load_uri(show, one, svg->uri);
 
+		nemoshow_arrange_one(show);
+
 		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 	}
 }
