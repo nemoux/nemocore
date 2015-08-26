@@ -23,6 +23,8 @@ struct showsvg {
 	struct showone *matrix;
 	struct showone *clip;
 
+	char *uri;
+
 	int transform;
 
 	double tx, ty;
@@ -41,6 +43,8 @@ extern void nemoshow_svg_destroy(struct showone *one);
 
 extern int nemoshow_svg_arrange(struct nemoshow *show, struct showone *one);
 extern int nemoshow_svg_update(struct nemoshow *show, struct showone *one);
+
+extern void nemoshow_svg_set_uri(struct showone *one, const char *uri);
 
 static inline void nemoshow_svg_set_event(struct showone *one, int32_t event)
 {

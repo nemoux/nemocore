@@ -109,9 +109,22 @@ int nemoshow_svg_arrange(struct nemoshow *show, struct showone *one)
 		nemoshow_one_reference_one(one, clip);
 	}
 
-	nemoshow_svg_load_uri(show, one, nemoobject_gets(&one->object, "uri"));
+	v = nemoobject_gets(&one->object, "uri");
+	if (v != NULL)
+		svg->uri = strdup(v);
 
 	return 0;
+}
+
+static inline void nemoshow_svg_update_uri(struct nemoshow *show, struct showone *one)
+{
+	struct showsvg *svg = NEMOSHOW_SVG(one);
+
+	if (svg->uri != NULL) {
+		nemoshow_svg_load_uri(show, one, svg->uri);
+
+		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
+	}
 }
 
 static inline void nemoshow_svg_update_child(struct nemoshow *show, struct showone *one)
@@ -229,6 +242,8 @@ int nemoshow_svg_update(struct nemoshow *show, struct showone *one)
 	if (svg->canvas == NULL)
 		svg->canvas = nemoshow_one_get_parent(one, NEMOSHOW_CANVAS_TYPE, 0);
 
+	if ((one->dirty & NEMOSHOW_URI_DIRTY) != 0)
+		nemoshow_svg_update_uri(show, one);
 	if ((one->dirty & NEMOSHOW_CHILD_DIRTY) != 0)
 		nemoshow_svg_update_child(show, one);
 	if ((one->dirty & NEMOSHOW_MATRIX_DIRTY) != 0)
@@ -243,4 +258,16 @@ int nemoshow_svg_update(struct nemoshow *show, struct showone *one)
 	nemoshow_canvas_damage_one(svg->canvas, one);
 
 	return 0;
+}
+
+void nemoshow_svg_set_uri(struct showone *one, const char *uri)
+{
+	struct showsvg *svg = NEMOSHOW_SVG(one);
+
+	if (svg->uri != NULL)
+		free(svg->uri);
+
+	svg->uri = strdup(uri);
+
+	nemoshow_one_dirty(one, NEMOSHOW_URI_DIRTY);
 }

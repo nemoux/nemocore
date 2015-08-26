@@ -76,6 +76,8 @@ struct showitem {
 	const char *text;
 	double textwidth, textheight;
 
+	char *uri;
+
 	int transform;
 
 	double tx, ty;
@@ -95,10 +97,6 @@ extern void nemoshow_item_destroy(struct showone *one);
 extern int nemoshow_item_arrange(struct nemoshow *show, struct showone *one);
 extern int nemoshow_item_update(struct nemoshow *show, struct showone *one);
 
-extern void nemoshow_item_update_style(struct nemoshow *show, struct showone *one);
-extern void nemoshow_item_update_child(struct nemoshow *show, struct showone *one);
-extern void nemoshow_item_update_matrix(struct nemoshow *show, struct showone *one);
-extern void nemoshow_item_update_text(struct nemoshow *show, struct showone *one);
 extern void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one);
 
 extern void nemoshow_item_set_matrix(struct showone *one, double m[9]);
@@ -106,7 +104,7 @@ extern void nemoshow_item_set_tsr(struct showone *one);
 extern void nemoshow_item_set_shader(struct showone *one, struct showone *shader);
 extern void nemoshow_item_set_blur(struct showone *one, struct showone *blur);
 extern void nemoshow_item_set_clip(struct showone *one, struct showone *clip);
-extern void nemoshow_item_set_image(struct showone *one, const char *uri);
+extern void nemoshow_item_set_uri(struct showone *one, const char *uri);
 
 extern void nemoshow_item_attach_one(struct showone *parent, struct showone *one);
 extern void nemoshow_item_detach_one(struct showone *parent, struct showone *one);

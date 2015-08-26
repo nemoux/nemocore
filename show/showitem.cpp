@@ -201,23 +201,36 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 		nemoshow_one_reference_one(one, font);
 	}
 
-	if (one->sub == NEMOSHOW_IMAGE_ITEM && (v = nemoobject_gets(&one->object, "uri")) != NULL) {
-		bool r;
+	v = nemoobject_gets(&one->object, "uri");
+	if (v != NULL)
+		item->uri = strdup(v);
 
+	return 0;
+}
+
+static inline void nemoshow_item_update_uri(struct nemoshow *show, struct showone *one)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+	bool r;
+
+	if (NEMOSHOW_ITEM_CC(item, bitmap) != NULL)
+		delete NEMOSHOW_ITEM_CC(item, bitmap);
+
+	if (item->uri != NULL) {
 		NEMOSHOW_ITEM_CC(item, bitmap) = new SkBitmap;
 
-		r = SkImageDecoder::DecodeFile(v, NEMOSHOW_ITEM_CC(item, bitmap));
+		r = SkImageDecoder::DecodeFile(item->uri, NEMOSHOW_ITEM_CC(item, bitmap));
 		if (r == false) {
 			delete NEMOSHOW_ITEM_CC(item, bitmap);
 
 			NEMOSHOW_ITEM_CC(item, bitmap) = NULL;
 		}
-	}
 
-	return 0;
+		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
+	}
 }
 
-void nemoshow_item_update_style(struct nemoshow *show, struct showone *one)
+static inline void nemoshow_item_update_style(struct nemoshow *show, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
@@ -317,7 +330,7 @@ static inline void nemoshow_item_update_path(struct nemoshow *show, struct showi
 	}
 }
 
-void nemoshow_item_update_child(struct nemoshow *show, struct showone *one)
+static inline void nemoshow_item_update_child(struct nemoshow *show, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	struct showone *child;
@@ -351,7 +364,7 @@ void nemoshow_item_update_child(struct nemoshow *show, struct showone *one)
 	}
 }
 
-void nemoshow_item_update_matrix(struct nemoshow *show, struct showone *one)
+static inline void nemoshow_item_update_matrix(struct nemoshow *show, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
@@ -384,7 +397,7 @@ void nemoshow_item_update_matrix(struct nemoshow *show, struct showone *one)
 	one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 }
 
-void nemoshow_item_update_shape(struct nemoshow *show, struct showone *one)
+static inline void nemoshow_item_update_shape(struct nemoshow *show, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
@@ -589,6 +602,8 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 	if (item->canvas == NULL)
 		item->canvas = nemoshow_one_get_parent(one, NEMOSHOW_CANVAS_TYPE, 0);
 
+	if ((one->dirty & NEMOSHOW_URI_DIRTY) != 0)
+		nemoshow_item_update_uri(show, one);
 	if ((one->dirty & NEMOSHOW_STYLE_DIRTY) != 0)
 		nemoshow_item_update_style(show, one);
 	if ((one->dirty & NEMOSHOW_CHILD_DIRTY) != 0)
@@ -659,22 +674,16 @@ void nemoshow_item_set_clip(struct showone *one, struct showone *clip)
 	nemoshow_one_reference_one(one, clip);
 }
 
-void nemoshow_item_set_image(struct showone *one, const char *uri)
+void nemoshow_item_set_uri(struct showone *one, const char *uri)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
-	bool r;
 
-	if (NEMOSHOW_ITEM_CC(item, bitmap) != NULL)
-		delete NEMOSHOW_ITEM_CC(item, bitmap);
+	if (item->uri != NULL)
+		free(item->uri);
 
-	NEMOSHOW_ITEM_CC(item, bitmap) = new SkBitmap;
+	item->uri = strdup(uri);
 
-	r = SkImageDecoder::DecodeFile(uri, NEMOSHOW_ITEM_CC(item, bitmap));
-	if (r == false) {
-		delete NEMOSHOW_ITEM_CC(item, bitmap);
-
-		NEMOSHOW_ITEM_CC(item, bitmap) = NULL;
-	}
+	nemoshow_one_dirty(one, NEMOSHOW_URI_DIRTY);
 }
 
 void nemoshow_item_attach_one(struct showone *parent, struct showone *one)
