@@ -35,6 +35,7 @@ struct minigrab {
 
 	double x, y;
 	double dx, dy;
+	double ro;
 
 	double lx, ly;
 	uint32_t ltime;

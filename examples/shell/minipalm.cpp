@@ -224,6 +224,9 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 		nemoshow_svg_pivot(svg, 50.0f, 50.0f);
 		nemoshow_svg_scale(svg, 0.0f, 0.0f);
 
+		minishell_set_slot(mini, 10, svg);
+		nemoshow_svg_set_event(svg, 10);
+
 		set = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(set, svg);
 		nemoshow_sequence_set_dattr(set, "sx", 1.0f, NEMOSHOW_MATRIX_DIRTY);
@@ -304,6 +307,7 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 
 		nemobook_destroy(book);
 
+#if	0
 		sequence = nemoshow_sequence_create_easy(show,
 				nemoshow_sequence_create_frame_easy(show,
 					1.0f,
@@ -323,6 +327,8 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 		nemoshow_transition_attach_sequence(trans2, sequence);
 
 		nemoshow_transition_attach_transition(trans1, trans2);
+#endif
+
 		nemoshow_transition_attach_transition(trans0, trans1);
 		nemoshow_attach_transition(show, trans0);
 
