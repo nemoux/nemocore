@@ -76,15 +76,22 @@ int nemoshow_link_update(struct nemoshow *show, struct showone *one)
 		link->canvas = nemoshow_one_get_parent(one, NEMOSHOW_CANVAS_TYPE, 0);
 
 	if ((one->dirty & NEMOSHOW_STYLE_DIRTY) != 0) {
-		double outer = 0.0f;
-
 		NEMOSHOW_LINK_CC(link, stroke)->setStrokeWidth(link->stroke_width);
 		NEMOSHOW_LINK_CC(link, stroke)->setColor(
 				SkColorSetARGB(255.0f * link->alpha, link->strokes[2], link->strokes[1], link->strokes[0]));
+	}
 
+	if ((one->dirty & NEMOSHOW_FILTER_DIRTY) != 0) {
 		if (link->filter != NULL) {
 			NEMOSHOW_LINK_CC(link, stroke)->setMaskFilter(NEMOSHOW_FILTER_CC(NEMOSHOW_FILTER(link->filter), filter));
+
+			one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 		}
+	}
+
+	if ((one->dirty & NEMOSHOW_SHAPE_DIRTY) != 0 ||
+			(one->dirty & NEMOSHOW_MATRIX_DIRTY) != 0) {
+		double outer = 0.0f;
 
 		outer += link->stroke_width;
 		outer += NEMOSHOW_ANTIALIAS_EPSILON;
@@ -92,10 +99,7 @@ int nemoshow_link_update(struct nemoshow *show, struct showone *one)
 			outer += NEMOSHOW_FILTER_AT(link->filter, r) * 2.0f;
 
 		one->outer = outer;
-	}
 
-	if ((one->dirty & NEMOSHOW_SHAPE_DIRTY) != 0 ||
-			(one->dirty & NEMOSHOW_MATRIX_DIRTY) != 0) {
 		nemoshow_canvas_needs_redraw(link->canvas);
 	}
 

@@ -12,8 +12,6 @@
 #include <showcolor.h>
 #include <showmatrix.h>
 #include <showmatrix.hpp>
-#include <showfilter.h>
-#include <showfilter.hpp>
 #include <showshader.h>
 #include <showshader.hpp>
 #include <showpath.h>

@@ -182,6 +182,8 @@ int nemoshow_shader_update(struct nemoshow *show, struct showone *one)
 		NEMOSHOW_SHADER_CC(shader, shader) = SkShader::CreateLocalMatrixShader(
 				NEMOSHOW_SHADER_CC(shader, shader),
 				*NEMOSHOW_SHADER_CC(shader, matrix));
+
+		nemoshow_one_dirty(one, NEMOSHOW_SHADER_DIRTY);
 	}
 
 	return 0;
@@ -251,4 +253,6 @@ void nemoshow_shader_set_gradient(struct showone *one, const char *mode)
 				noffsets,
 				tilemode);
 	}
+
+	nemoshow_one_dirty(one, NEMOSHOW_SHADER_DIRTY);
 }

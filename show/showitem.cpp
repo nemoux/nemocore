@@ -238,13 +238,25 @@ static inline void nemoshow_item_update_style(struct nemoshow *show, struct show
 					SkColorSetARGB(255.0f * item->alpha, item->strokes[2], item->strokes[1], item->strokes[0]));
 		}
 	}
+}
+
+static inline void nemoshow_item_update_filter(struct nemoshow *show, struct showone *one)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	if (item->filter != NULL) {
 		if (item->fill != 0 && item->stroke == 0)
 			NEMOSHOW_ITEM_CC(item, fill)->setMaskFilter(NEMOSHOW_FILTER_CC(NEMOSHOW_FILTER(item->filter), filter));
 		else
 			NEMOSHOW_ITEM_CC(item, stroke)->setMaskFilter(NEMOSHOW_FILTER_CC(NEMOSHOW_FILTER(item->filter), filter));
+
+		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 	}
+}
+
+static inline void nemoshow_item_update_shader(struct nemoshow *show, struct showone *one)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	if (item->shader != NULL) {
 		if (item->fill != 0)
@@ -622,6 +634,10 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 		nemoshow_item_update_uri(show, one);
 	if ((one->dirty & NEMOSHOW_STYLE_DIRTY) != 0)
 		nemoshow_item_update_style(show, one);
+	if ((one->dirty & NEMOSHOW_FILTER_DIRTY) != 0)
+		nemoshow_item_update_filter(show, one);
+	if ((one->dirty & NEMOSHOW_SHADER_DIRTY) != 0)
+		nemoshow_item_update_shader(show, one);
 	if ((one->dirty & NEMOSHOW_FONT_DIRTY) != 0)
 		nemoshow_item_update_font(show, one);
 	if ((one->dirty & NEMOSHOW_TEXT_DIRTY) != 0)

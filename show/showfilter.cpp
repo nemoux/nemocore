@@ -95,4 +95,6 @@ void nemoshow_filter_set_blur(struct showone *one, const char *flags, const char
 		s = kSolid_SkBlurStyle;
 
 	NEMOSHOW_FILTER_CC(filter, filter) = SkBlurMaskFilter::Create(s, SkBlurMask::ConvertRadiusToSigma(filter->r), f);
+	
+	nemoshow_one_dirty(one, NEMOSHOW_FILTER_DIRTY);
 }
