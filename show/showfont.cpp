@@ -96,6 +96,26 @@ int nemoshow_font_load(struct showone *one, const char *path)
 	font->upem = NEMOSHOW_FONT_CC(font, face)->getUnitsPerEm();
 	font->max_advance_height = fontconfig_get_max_advance_height(path, 0);
 
+	nemoshow_one_dirty(one, NEMOSHOW_FONT_DIRTY);
+
+	return 0;
+}
+
+int nemoshow_font_load_fontconfig(struct showone *one, const char *fontfamily, const char *fontstyle)
+{
+	struct showfont *font = NEMOSHOW_FONT(one);
+	const char *fontpath;
+
+	fontpath = fontconfig_get_path(
+			fontfamily,
+			fontstyle,
+			FC_SLANT_ROMAN,
+			FC_WEIGHT_NORMAL,
+			FC_WIDTH_NORMAL,
+			FC_MONO);
+
+	nemoshow_font_load(one, fontpath);
+
 	return 0;
 }
 

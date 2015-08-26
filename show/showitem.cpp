@@ -191,13 +191,6 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 	if (v != NULL && (font = nemoshow_search_one(show, v)) != NULL) {
 		item->font = font;
 
-		SkSafeUnref(
-				NEMOSHOW_ITEM_CC(item, fill)->setTypeface(
-					NEMOSHOW_FONT_CC(NEMOSHOW_FONT(item->font), face)));
-		SkSafeUnref(
-				NEMOSHOW_ITEM_CC(item, stroke)->setTypeface(
-					NEMOSHOW_FONT_CC(NEMOSHOW_FONT(item->font), face)));
-
 		nemoshow_one_reference_one(one, font);
 	}
 
@@ -256,6 +249,94 @@ static inline void nemoshow_item_update_style(struct nemoshow *show, struct show
 	if (item->shader != NULL) {
 		if (item->fill != 0)
 			NEMOSHOW_ITEM_CC(item, fill)->setShader(NEMOSHOW_SHADER_CC(NEMOSHOW_SHADER(item->shader), shader));
+	}
+}
+
+static inline void nemoshow_item_update_font(struct nemoshow *show, struct showone *one)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	if (item->font != NULL) {
+		SkSafeUnref(
+				NEMOSHOW_ITEM_CC(item, fill)->setTypeface(
+					NEMOSHOW_FONT_CC(NEMOSHOW_FONT(item->font), face)));
+		SkSafeUnref(
+				NEMOSHOW_ITEM_CC(item, stroke)->setTypeface(
+					NEMOSHOW_FONT_CC(NEMOSHOW_FONT(item->font), face)));
+
+		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
+	}
+}
+
+static inline void nemoshow_item_update_text(struct nemoshow *show, struct showone *one)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	if (one->sub == NEMOSHOW_TEXT_ITEM) {
+		item->text = nemoobject_gets(&one->object, "d");
+		if (item->text != NULL) {
+			if (NEMOSHOW_FONT_AT(item->font, layout) == NEMOSHOW_NORMAL_LAYOUT) {
+				SkPaint::FontMetrics metrics;
+
+				NEMOSHOW_ITEM_CC(item, fill)->setTextSize(item->fontsize);
+				NEMOSHOW_ITEM_CC(item, stroke)->setTextSize(item->fontsize);
+
+				NEMOSHOW_ITEM_CC(item, stroke)->getFontMetrics(&metrics, 0);
+				item->fontascent = metrics.fAscent;
+				item->fontdescent = metrics.fDescent;
+			} else {
+				SkPaint::FontMetrics metrics;
+				hb_buffer_t *hbbuffer;
+				hb_glyph_info_t *hbglyphs;
+				hb_glyph_position_t *hbglyphspos;
+				double fontscale;
+				unsigned int nhbglyphs;
+				int i;
+
+				NEMOSHOW_ITEM_CC(item, fill)->setTextSize((NEMOSHOW_FONT_AT(item->font, upem) / NEMOSHOW_FONT_AT(item->font, max_advance_height)) * item->fontsize);
+				NEMOSHOW_ITEM_CC(item, stroke)->setTextSize((NEMOSHOW_FONT_AT(item->font, upem) / NEMOSHOW_FONT_AT(item->font, max_advance_height)) * item->fontsize);
+
+				NEMOSHOW_ITEM_CC(item, stroke)->getFontMetrics(&metrics, 0);
+				item->fontascent = metrics.fAscent;
+				item->fontdescent = metrics.fDescent;
+
+				hbbuffer = hb_buffer_create();
+				hb_buffer_add_utf8(hbbuffer, item->text, strlen(item->text), 0, strlen(item->text));
+				hb_buffer_set_direction(hbbuffer, HB_DIRECTION_LTR);
+				hb_buffer_set_script(hbbuffer, HB_SCRIPT_LATIN);
+				hb_buffer_set_language(hbbuffer, HB_LANGUAGE_INVALID);
+				hb_shape_full(NEMOSHOW_FONT_AT(item->font, hbfont), hbbuffer, NULL, 0, NULL);
+
+				hbglyphs = hb_buffer_get_glyph_infos(hbbuffer, &nhbglyphs);
+				hbglyphspos = hb_buffer_get_glyph_positions(hbbuffer, NULL);
+
+				fontscale = item->fontsize / NEMOSHOW_FONT_AT(item->font, max_advance_height);
+
+				if (NEMOSHOW_ITEM_CC(item, points) != NULL)
+					delete[] NEMOSHOW_ITEM_CC(item, points);
+
+				NEMOSHOW_ITEM_CC(item, points) = new SkPoint[strlen(item->text)];
+
+				item->textwidth = 0.0f;
+
+				for (i = 0; i < strlen(item->text); i++) {
+					NEMOSHOW_ITEM_CC(item, points)[i].set(
+							hbglyphspos[i].x_offset * fontscale + item->textwidth + item->x,
+							item->y - item->fontascent);
+
+					item->textwidth += hbglyphspos[i].x_advance * fontscale;
+				}
+
+				item->textheight = item->fontdescent - item->fontascent;
+
+				hb_buffer_destroy(hbbuffer);
+			}
+		} else {
+			item->textwidth = 0.0f;
+			item->textheight = 0.0f;
+		}
+
+		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 	}
 }
 
@@ -423,71 +504,6 @@ static inline void nemoshow_item_update_shape(struct nemoshow *show, struct show
 					item->x + item->width / 2.0f + cos(item->to * M_PI / 180.0f) * (item->width / 2.0f),
 					item->y + item->height / 2.0f + sin(item->to * M_PI / 180.0f) * (item->height / 2.0f));
 		}
-	} else if (one->sub == NEMOSHOW_TEXT_ITEM && (one->dirty & NEMOSHOW_TEXT_DIRTY) != 0) {
-		item->text = nemoobject_gets(&one->object, "d");
-		if (item->text != NULL) {
-			if (NEMOSHOW_FONT_AT(item->font, layout) == NEMOSHOW_NORMAL_LAYOUT) {
-				SkPaint::FontMetrics metrics;
-
-				NEMOSHOW_ITEM_CC(item, fill)->setTextSize(item->fontsize);
-				NEMOSHOW_ITEM_CC(item, stroke)->setTextSize(item->fontsize);
-
-				NEMOSHOW_ITEM_CC(item, stroke)->getFontMetrics(&metrics, 0);
-				item->fontascent = metrics.fAscent;
-				item->fontdescent = metrics.fDescent;
-			} else {
-				SkPaint::FontMetrics metrics;
-				hb_buffer_t *hbbuffer;
-				hb_glyph_info_t *hbglyphs;
-				hb_glyph_position_t *hbglyphspos;
-				double fontscale;
-				unsigned int nhbglyphs;
-				int i;
-
-				NEMOSHOW_ITEM_CC(item, fill)->setTextSize((NEMOSHOW_FONT_AT(item->font, upem) / NEMOSHOW_FONT_AT(item->font, max_advance_height)) * item->fontsize);
-				NEMOSHOW_ITEM_CC(item, stroke)->setTextSize((NEMOSHOW_FONT_AT(item->font, upem) / NEMOSHOW_FONT_AT(item->font, max_advance_height)) * item->fontsize);
-
-				NEMOSHOW_ITEM_CC(item, stroke)->getFontMetrics(&metrics, 0);
-				item->fontascent = metrics.fAscent;
-				item->fontdescent = metrics.fDescent;
-
-				hbbuffer = hb_buffer_create();
-				hb_buffer_add_utf8(hbbuffer, item->text, strlen(item->text), 0, strlen(item->text));
-				hb_buffer_set_direction(hbbuffer, HB_DIRECTION_LTR);
-				hb_buffer_set_script(hbbuffer, HB_SCRIPT_LATIN);
-				hb_buffer_set_language(hbbuffer, HB_LANGUAGE_INVALID);
-				hb_shape_full(NEMOSHOW_FONT_AT(item->font, hbfont), hbbuffer, NULL, 0, NULL);
-
-				hbglyphs = hb_buffer_get_glyph_infos(hbbuffer, &nhbglyphs);
-				hbglyphspos = hb_buffer_get_glyph_positions(hbbuffer, NULL);
-
-				fontscale = item->fontsize / NEMOSHOW_FONT_AT(item->font, max_advance_height);
-
-				if (NEMOSHOW_ITEM_CC(item, points) != NULL)
-					delete[] NEMOSHOW_ITEM_CC(item, points);
-
-				NEMOSHOW_ITEM_CC(item, points) = new SkPoint[strlen(item->text)];
-
-				item->textwidth = 0.0f;
-
-				for (i = 0; i < strlen(item->text); i++) {
-					NEMOSHOW_ITEM_CC(item, points)[i].set(
-							hbglyphspos[i].x_offset * fontscale + item->textwidth + item->x,
-							item->y - item->fontascent);
-
-					item->textwidth += hbglyphspos[i].x_advance * fontscale;
-				}
-
-				item->textheight = item->fontdescent - item->fontascent;
-
-				hb_buffer_destroy(hbbuffer);
-			}
-		} else {
-			item->textwidth = 0.0f;
-			item->textheight = 0.0f;
-		}
-
-		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 	}
 }
 
@@ -606,6 +622,10 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 		nemoshow_item_update_uri(show, one);
 	if ((one->dirty & NEMOSHOW_STYLE_DIRTY) != 0)
 		nemoshow_item_update_style(show, one);
+	if ((one->dirty & NEMOSHOW_FONT_DIRTY) != 0)
+		nemoshow_item_update_font(show, one);
+	if ((one->dirty & NEMOSHOW_TEXT_DIRTY) != 0)
+		nemoshow_item_update_text(show, one);
 	if ((one->dirty & NEMOSHOW_CHILD_DIRTY) != 0)
 		nemoshow_item_update_child(show, one);
 	if ((one->dirty & NEMOSHOW_MATRIX_DIRTY) != 0)
@@ -684,6 +704,13 @@ void nemoshow_item_set_uri(struct showone *one, const char *uri)
 	item->uri = strdup(uri);
 
 	nemoshow_one_dirty(one, NEMOSHOW_URI_DIRTY);
+}
+
+void nemoshow_item_set_text(struct showone *one, const char *text)
+{
+	nemoobject_sets(&one->object, "d", text, strlen(text));
+
+	nemoshow_one_dirty(one, NEMOSHOW_TEXT_DIRTY);
 }
 
 void nemoshow_item_attach_one(struct showone *parent, struct showone *one)

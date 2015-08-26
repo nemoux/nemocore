@@ -105,6 +105,7 @@ extern void nemoshow_item_set_shader(struct showone *one, struct showone *shader
 extern void nemoshow_item_set_blur(struct showone *one, struct showone *blur);
 extern void nemoshow_item_set_clip(struct showone *one, struct showone *clip);
 extern void nemoshow_item_set_uri(struct showone *one, const char *uri);
+extern void nemoshow_item_set_text(struct showone *one, const char *text);
 
 extern void nemoshow_item_attach_one(struct showone *parent, struct showone *one);
 extern void nemoshow_item_detach_one(struct showone *parent, struct showone *one);
