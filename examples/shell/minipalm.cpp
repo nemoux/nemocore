@@ -269,7 +269,7 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 					NEMOSHOW_ITEM_AT(palm->fingers[i]->group, tx) - cx,
 					NEMOSHOW_ITEM_AT(palm->fingers[i]->group, ty) - cy);
 
-			slot = minishell_need_slot(mini);
+			slot = minishell_needs_slot(mini);
 			minishell_set_slot(mini, slot, palm->fingers[i]->group);
 			nemoshow_item_set_event(palm->fingers[i]->one, slot);
 

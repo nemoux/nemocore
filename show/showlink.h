@@ -14,6 +14,8 @@ NEMO_BEGIN_EXTERN_C
 struct showlink {
 	struct showone base;
 
+	struct showone *canvas;
+
 	struct showone *head;
 	struct showone *tail;
 
@@ -39,11 +41,20 @@ extern int nemoshow_link_update(struct nemoshow *show, struct showone *one);
 
 extern void nemoshow_link_set_blur(struct showone *one, struct showone *blur);
 
+static inline void nemoshow_link_set_canvas(struct showone *one, struct showone *canvas)
+{
+	struct showlink *link = NEMOSHOW_LINK(one);
+
+	link->canvas = canvas;
+}
+
 static inline void nemoshow_link_set_head(struct showone *one, struct showone *head)
 {
 	struct showlink *link = NEMOSHOW_LINK(one);
 
 	link->head = head;
+
+	nemoshow_one_reference_one(one, head);
 }
 
 static inline void nemoshow_link_set_tail(struct showone *one, struct showone *tail)
@@ -51,6 +62,8 @@ static inline void nemoshow_link_set_tail(struct showone *one, struct showone *t
 	struct showlink *link = NEMOSHOW_LINK(one);
 
 	link->tail = tail;
+
+	nemoshow_one_reference_one(one, tail);
 }
 
 static inline void nemoshow_link_set_stroke_color(struct showone *one, double r, double g, double b, double a)

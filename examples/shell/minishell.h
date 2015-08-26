@@ -34,7 +34,7 @@ struct minishell {
 	int nslots;
 };
 
-static inline int minishell_need_slot(struct minishell *mini)
+static inline int minishell_needs_slot(struct minishell *mini)
 {
 	int i;
 

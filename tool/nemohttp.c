@@ -339,7 +339,7 @@ const char *nemohttp_get_cookie(struct nemohttp *http, const char *name)
 	return NULL;
 }
 
-int nemohttp_need_follow(struct nemohttp *http)
+int nemohttp_needs_follow(struct nemohttp *http)
 {
 	return http->status != NULL &&
 		(strcmp(http->status, "Found") == 0 || strcmp(http->status, "Redirect") == 0);

@@ -100,6 +100,13 @@ extern void nemoshow_canvas_damage_all(struct showone *one);
 
 extern int32_t nemoshow_canvas_pick_one(struct showone *one, int x, int y);
 
+static inline void nemoshow_canvas_needs_redraw(struct showone *one)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	canvas->needs_redraw = 1;
+}
+
 static inline void nemoshow_canvas_set_dispatch_render(struct showone *one, nemoshow_canvas_dispatch_render_t dispatch_render)
 {
 	NEMOSHOW_CANVAS_AT(one, dispatch_render) = dispatch_render;

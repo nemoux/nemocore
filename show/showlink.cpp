@@ -72,6 +72,9 @@ int nemoshow_link_update(struct nemoshow *show, struct showone *one)
 {
 	struct showlink *link = NEMOSHOW_LINK(one);
 
+	if (link->canvas == NULL)
+		link->canvas = nemoshow_one_get_parent(one, NEMOSHOW_CANVAS_TYPE, 0);
+
 	if ((one->dirty & NEMOSHOW_STYLE_DIRTY) != 0) {
 		double outer = 0.0f;
 
@@ -87,8 +90,12 @@ int nemoshow_link_update(struct nemoshow *show, struct showone *one)
 		outer += NEMOSHOW_ANTIALIAS_EPSILON;
 		if (link->blur != NULL)
 			outer += NEMOSHOW_BLUR_AT(link->blur, r) * 2.0f;
-		
+
 		one->outer = outer;
+	}
+
+	if ((one->dirty & NEMOSHOW_SHAPE_DIRTY) != 0) {
+		nemoshow_canvas_needs_redraw(link->canvas);
 	}
 
 	return 0;

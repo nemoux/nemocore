@@ -720,14 +720,19 @@ void nemoshow_render_one(struct nemoshow *show)
 					canvas->needs_redraw = 0;
 				} else if (one->sub == NEMOSHOW_CANVAS_LINK_TYPE) {
 					nemoshow_canvas_render_link(show, one);
+
+					canvas->needs_redraw = 0;
 				} else if (one->sub == NEMOSHOW_CANVAS_BACK_TYPE) {
 					nemoshow_canvas_render_back(show, one);
 
 					canvas->needs_redraw = 0;
 				}
 
-				if (canvas->dispatch_render != NULL)
+				if (canvas->dispatch_render != NULL) {
 					canvas->dispatch_render(show, one);
+
+					canvas->needs_redraw = 0;
+				}
 			}
 		}
 	}
