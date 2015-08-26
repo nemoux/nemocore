@@ -694,6 +694,28 @@ void nemoshow_item_set_clip(struct showone *one, struct showone *clip)
 	nemoshow_one_reference_one(one, clip);
 }
 
+void nemoshow_item_set_font(struct showone *one, struct showone *font)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	item->font = font;
+
+	nemoshow_one_reference_one(one, font);
+
+	nemoshow_one_dirty(one, NEMOSHOW_FONT_DIRTY);
+}
+
+void nemoshow_item_set_path(struct showone *one, struct showone *path)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	item->path = path;
+
+	nemoshow_one_reference_one(one, path);
+
+	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
+}
+
 void nemoshow_item_set_uri(struct showone *one, const char *uri)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
