@@ -94,7 +94,8 @@ int nemoshow_link_update(struct nemoshow *show, struct showone *one)
 		one->outer = outer;
 	}
 
-	if ((one->dirty & NEMOSHOW_SHAPE_DIRTY) != 0) {
+	if ((one->dirty & NEMOSHOW_SHAPE_DIRTY) != 0 ||
+			(one->dirty & NEMOSHOW_MATRIX_DIRTY) != 0) {
 		nemoshow_canvas_needs_redraw(link->canvas);
 	}
 
