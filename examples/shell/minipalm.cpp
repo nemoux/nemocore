@@ -202,6 +202,9 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 		cy += palm->fingers[4]->y;
 		cy /= 5;
 
+		trans0 = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 800, 0);
+		trans1 = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 800, 0);
+
 		palm->group = group = nemoshow_item_create(NEMOSHOW_GROUP_ITEM);
 		nemoshow_attach_one(show, group);
 		nemoshow_one_attach_one(canvas, group);
@@ -218,9 +221,20 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 		nemoshow_svg_set_uri(svg, "/home/root/.config/palm.svg");
 		nemoshow_svg_set_tsr(svg);
 		nemoshow_svg_translate(svg, -50.0f, -50.0f);
+		nemoshow_svg_pivot(svg, 50.0f, 50.0f);
+		nemoshow_svg_scale(svg, 0.0f, 0.0f);
 
-		trans0 = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 800, 0);
-		trans1 = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 800, 0);
+		set = nemoshow_sequence_create_set();
+		nemoshow_sequence_set_source(set, svg);
+		nemoshow_sequence_set_dattr(set, "sx", 1.0f, NEMOSHOW_MATRIX_DIRTY);
+		nemoshow_sequence_set_dattr(set, "sy", 1.0f, NEMOSHOW_MATRIX_DIRTY);
+
+		sequence = nemoshow_sequence_create_easy(show,
+				nemoshow_sequence_create_frame_easy(show,
+					1.0f, set, NULL),
+				NULL);
+
+		nemoshow_transition_attach_sequence(trans1, sequence);
 
 		book = nemobook_create(5);
 
