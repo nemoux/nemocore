@@ -15,6 +15,7 @@
 #include <showhelper.h>
 #include <glhelper.h>
 #include <fbohelper.h>
+#include <pixmanhelper.h>
 #include <nemomisc.h>
 
 static GLuint minishell_mote_create_shader(void)
@@ -69,14 +70,15 @@ static GLuint minishell_mote_create_shader(void)
 struct minimote *minishell_mote_create(struct showone *one)
 {
 	struct minimote *mote;
-	GLfloat vertices[12] = {
-		1.0f, -1.0f, 1.0f, 0.0f,
-		-1.0f, -1.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f, 1.0f
+	GLfloat vertices[16] = {
+		1.0f, -1.0f, 1.0f, 1.0f,
+		-1.0f, -1.0f, 0.0f, 1.0f,
+		-1.0f, 1.0f, 0.0f, 0.0f,
+		1.0f, 1.0f, 1.0f, 0.0f,
 	};
 	GLfloat rgba[4] = { 0.0f, 1.0f, 1.0f, 1.0f };
 	GLuint texture;
-	uint8_t pixels[256 * 4];
+	pixman_image_t *image;
 
 	mote = (struct minimote *)malloc(sizeof(struct minimote));
 	if (mote == NULL)
@@ -113,12 +115,10 @@ struct minimote *minishell_mote_create(struct showone *one)
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void *)sizeof(GLfloat[2]));
 	glEnableVertexAttribArray(1);
 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 12, vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 16, vertices, GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
-
-	memset(pixels, 0xff, sizeof(uint8_t) * 256 * 4);
 
 	glUseProgram(mote->program);
 
@@ -131,9 +131,13 @@ struct minimote *minishell_mote_create(struct showone *one)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-	glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
-	glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, 16, 16, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, (void *)pixels);
+	image = pixman_load_png_file("/home/root/.config/nemo.png");
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT,
+			pixman_image_get_width(image),
+			pixman_image_get_height(image),
+			0, GL_BGRA_EXT, GL_UNSIGNED_BYTE,
+			pixman_image_get_data(image));
+	pixman_image_unref(image);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, mote->fbo);
 
@@ -147,7 +151,7 @@ struct minimote *minishell_mote_create(struct showone *one)
 	glUniform4fv(mote->ucolor, 1, rgba);
 
 	glBindVertexArray(mote->vertex_array);
-	glDrawArrays(GL_TRIANGLES, 0, 3);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	glBindVertexArray(0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
