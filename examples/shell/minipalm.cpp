@@ -179,6 +179,7 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 		struct showone *sequence;
 		struct showone *set;
 		struct showone *group;
+		struct showone *svg;
 		struct nemobook *book;
 		double cx = 0.0f, cy = 0.0f;
 		double dx, dy;
@@ -208,6 +209,16 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 		nemoshow_item_set_tsr(group);
 		nemoshow_item_translate(group, cx, cy);
 
+		palm->svg = svg = nemoshow_svg_create();
+		nemoshow_attach_one(show, group);
+		nemoshow_item_attach_one(group, svg);
+		nemoshow_svg_set_canvas(svg, canvas);
+		NEMOSHOW_SVG_AT(svg, width) = 100;
+		NEMOSHOW_SVG_AT(svg, height) = 100;
+		nemoshow_svg_set_uri(svg, "/home/root/.config/palm.svg");
+		nemoshow_svg_set_tsr(svg);
+		nemoshow_svg_translate(svg, -50.0f, -50.0f);
+
 		trans0 = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 800, 0);
 		trans1 = nemoshow_transition_create(nemoshow_search_one(show, "ease0"), 800, 0);
 
@@ -221,8 +232,8 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 
 			for (j = 0; j < 5; j++) {
 				if (nemobook_is_empty(book, j) != 0) {
-					dx = NEMOSHOW_ITEM_AT(palm->fingers[i]->group, tx) - cx - cos(2 * M_PI / 5 * j) * 50.0f;
-					dy = NEMOSHOW_ITEM_AT(palm->fingers[i]->group, ty) - cy - sin(2 * M_PI / 5 * j) * 50.0f;
+					dx = NEMOSHOW_ITEM_AT(palm->fingers[i]->group, tx) - cx - cos(2 * M_PI / 5 * j) * 100.0f;
+					dy = NEMOSHOW_ITEM_AT(palm->fingers[i]->group, ty) - cy - sin(2 * M_PI / 5 * j) * 100.0f;
 
 					d = sqrtf(dx * dx + dy * dy);
 					if (d < min) {
@@ -266,8 +277,8 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 
 			set = nemoshow_sequence_create_set();
 			nemoshow_sequence_set_source(set, palm->fingers[i]->group);
-			nemoshow_sequence_set_dattr(set, "tx", cos(2 * M_PI / 5 * imin) * 50.0f, NEMOSHOW_MATRIX_DIRTY);
-			nemoshow_sequence_set_dattr(set, "ty", sin(2 * M_PI / 5 * imin) * 50.0f, NEMOSHOW_MATRIX_DIRTY);
+			nemoshow_sequence_set_dattr(set, "tx", cos(2 * M_PI / 5 * imin) * 100.0f, NEMOSHOW_MATRIX_DIRTY);
+			nemoshow_sequence_set_dattr(set, "ty", sin(2 * M_PI / 5 * imin) * 100.0f, NEMOSHOW_MATRIX_DIRTY);
 
 			sequence = nemoshow_sequence_create_easy(show,
 					nemoshow_sequence_create_frame_easy(show,

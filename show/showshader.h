@@ -75,6 +75,8 @@ extern void nemoshow_shader_destroy(struct showone *one);
 extern int nemoshow_shader_arrange(struct nemoshow *show, struct showone *one);
 extern int nemoshow_shader_update(struct nemoshow *show, struct showone *one);
 
+extern void nemoshow_shader_set_gradient(struct showone *one, const char *mode);
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

@@ -54,14 +54,37 @@ void nemoshow_path_destroy(struct showone *one)
 
 int nemoshow_path_arrange(struct nemoshow *show, struct showone *one)
 {
-	if (one->sub == NEMOSHOW_SVG_PATH) {
-		nemoshow_svg_load_uri_path(show, one, nemoobject_gets(&one->object, "uri"));
-	}
+	struct showpath *path = NEMOSHOW_PATH(one);
+	const char *v;
+
+	v = nemoobject_gets(&one->object, "uri");
+	if (v != NULL)
+		path->uri = strdup(v);
 
 	return 0;
 }
 
 int nemoshow_path_update(struct nemoshow *show, struct showone *one)
 {
+	struct showpath *path = NEMOSHOW_PATH(one);
+
+	if ((one->dirty & NEMOSHOW_URI_DIRTY) != 0) {
+		if (path->uri != NULL) {
+			nemoshow_svg_load_uri_path(show, one, path->uri);
+		}
+	}
+
 	return 0;
+}
+
+void nemoshow_path_set_uri(struct showone *one, const char *uri)
+{
+	struct showpath *path = NEMOSHOW_PATH(one);
+
+	if (path->uri != NULL)
+		free(path->uri);
+
+	path->uri = strdup(uri);
+
+	nemoshow_one_dirty(one, NEMOSHOW_URI_DIRTY);
 }

@@ -16,6 +16,7 @@ struct minipalm {
 	struct minigrab *fingers[5];
 
 	struct showone *group;
+	struct showone *svg;
 };
 
 extern struct minipalm *minishell_palm_create(void);

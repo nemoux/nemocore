@@ -43,6 +43,9 @@ struct showone *nemoshow_svg_create(void)
 	NEMOSHOW_SVG_CC(svg, viewbox) = new SkMatrix;
 	NEMOSHOW_SVG_CC(svg, matrix) = new SkMatrix;
 
+	svg->sx = 1.0f;
+	svg->sy = 1.0f;
+
 	one = &svg->base;
 	one->type = NEMOSHOW_SVG_TYPE;
 	one->update = nemoshow_svg_update;
@@ -123,8 +126,6 @@ static inline void nemoshow_svg_update_uri(struct nemoshow *show, struct showone
 	if (svg->uri != NULL) {
 		nemoshow_svg_load_uri(show, one, svg->uri);
 
-		nemoshow_arrange_one(show);
-
 		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 	}
 }
@@ -135,7 +136,7 @@ static inline void nemoshow_svg_update_child(struct nemoshow *show, struct showo
 	struct showone *child;
 	int i;
 
-	if (NEMOSHOW_SVG_CC(svg, matrix) != NULL) {
+	if (svg->transform == NEMOSHOW_CHILDREN_TRANSFORM) {
 		NEMOSHOW_SVG_CC(svg, matrix)->setIdentity();
 
 		for (i = 0; i < one->nchildren; i++) {
@@ -260,6 +261,13 @@ int nemoshow_svg_update(struct nemoshow *show, struct showone *one)
 	nemoshow_canvas_damage_one(svg->canvas, one);
 
 	return 0;
+}
+
+void nemoshow_svg_set_tsr(struct showone *one)
+{
+	struct showsvg *svg = NEMOSHOW_SVG(one);
+
+	svg->transform = NEMOSHOW_TSR_TRANSFORM;
 }
 
 void nemoshow_svg_set_uri(struct showone *one, const char *uri)

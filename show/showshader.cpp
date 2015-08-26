@@ -186,3 +186,69 @@ int nemoshow_shader_update(struct nemoshow *show, struct showone *one)
 
 	return 0;
 }
+
+void nemoshow_shader_set_gradient(struct showone *one, const char *mode)
+{
+	struct showshader *shader = NEMOSHOW_SHADER(one);
+	struct showstop *stop;
+	SkShader::TileMode tilemode;
+	int i;
+
+	if (NEMOSHOW_SHADER_CC(shader, shader) != NULL)
+		NEMOSHOW_SHADER_CC(shader, shader)->unref();
+
+	if (mode == NULL)
+		tilemode = SkShader::kClamp_TileMode;
+	else if (strcmp(mode, "tile"))
+		tilemode = SkShader::kClamp_TileMode;
+	else if (strcmp(mode, "repeat"))
+		tilemode = SkShader::kRepeat_TileMode;
+	else if (strcmp(mode, "mirror"))
+		tilemode = SkShader::kMirror_TileMode;
+
+	SkColor colors[one->nchildren];
+	SkScalar offsets[one->nchildren];
+	int noffsets;
+
+	if (shader->ref != NULL) {
+		for (i = 0; i < shader->ref->nchildren; i++) {
+			stop = NEMOSHOW_STOP(shader->ref->children[i]);
+
+			colors[i] = SkColorSetARGB(stop->fills[3], stop->fills[2], stop->fills[1], stop->fills[0]);
+			offsets[i] = stop->offset;
+		}
+
+		noffsets = shader->ref->nchildren;
+	} else {
+		for (i = 0; i < one->nchildren; i++) {
+			stop = NEMOSHOW_STOP(one->children[i]);
+
+			colors[i] = SkColorSetARGB(stop->fills[3], stop->fills[2], stop->fills[1], stop->fills[0]);
+			offsets[i] = stop->offset;
+		}
+
+		noffsets = one->nchildren;
+	}
+
+	if (one->sub == NEMOSHOW_LINEAR_GRADIENT_SHADER) {
+		SkPoint points[] = {
+			{ SkDoubleToScalar(shader->x0), SkDoubleToScalar(shader->y0) },
+			{ SkDoubleToScalar(shader->x1), SkDoubleToScalar(shader->y1) }
+		};
+
+		NEMOSHOW_SHADER_CC(shader, shader) = SkGradientShader::CreateLinear(
+				points,
+				colors,
+				offsets,
+				noffsets,
+				tilemode);
+	} else if (one->sub == NEMOSHOW_RADIAL_GRADIENT_SHADER) {
+		NEMOSHOW_SHADER_CC(shader, shader) = SkGradientShader::CreateRadial(
+				SkPoint::Make(shader->x0, shader->y0),
+				shader->r,
+				colors,
+				offsets,
+				noffsets,
+				tilemode);
+	}
+}

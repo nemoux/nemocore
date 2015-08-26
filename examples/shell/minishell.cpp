@@ -547,19 +547,19 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 
 					for (i = 0, nut0 = one; i < 6; i++, nut0 = nut) {
 						if ((i % 2) == 0) {
-							x = cos(r + i * 15.0f * M_PI / 180.0f) * 200.0f;
-							y = sin(r + i * 15.0f * M_PI / 180.0f) * 200.0f;
+							x = cos(r + i * 15.0f * M_PI / 180.0f) * 250.0f;
+							y = sin(r + i * 15.0f * M_PI / 180.0f) * 250.0f;
 						} else {
-							x = cos(r + i * 15.0f * M_PI / 180.0f) * 125.0f;
-							y = sin(r + i * 15.0f * M_PI / 180.0f) * 125.0f;
+							x = cos(r + i * 15.0f * M_PI / 180.0f) * 175.0f;
+							y = sin(r + i * 15.0f * M_PI / 180.0f) * 175.0f;
 						}
 
 						nuts[i] = nut = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
 						nemoshow_attach_one(show, nut);
 						nemoshow_item_attach_one(group, nut);
 						nemoshow_item_set_canvas(nut, canvas);
-						NEMOSHOW_ITEM_AT(nut, x) = cos(r) * 50.0f;
-						NEMOSHOW_ITEM_AT(nut, y) = sin(r) * 50.0f;
+						NEMOSHOW_ITEM_AT(nut, x) = cos(r) * 100.0f;
+						NEMOSHOW_ITEM_AT(nut, y) = sin(r) * 100.0f;
 						NEMOSHOW_ITEM_AT(nut, r) = 20.0f;
 						nemoshow_item_set_blur(nut, mini->blur15);
 						nemoshow_item_set_fill_color(nut, 0, 255, 255, 255);
