@@ -31,7 +31,6 @@ struct minigrab {
 	struct showone *group;
 	struct showone *edge;
 	struct showone *one;
-	struct showtransition *trans;
 
 	double x, y;
 	double dx, dy;

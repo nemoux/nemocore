@@ -551,35 +551,12 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 					nemoshow_transition_attach_sequence(trans, sequence);
 					nemoshow_attach_transition(show, trans);
 
-					sequence = nemoshow_sequence_create_easy(show,
-							nemoshow_sequence_create_frame_easy(show,
-								0.5f,
-								nemoshow_sequence_create_set_easy(show,
-									group,
-									"ro", "360.0",
-									NULL),
-								NULL),
-							nemoshow_sequence_create_frame_easy(show,
-								1.0f,
-								nemoshow_sequence_create_set_easy(show,
-									group,
-									"ro", "0.0",
-									NULL),
-								NULL),
-							NULL);
-
-					trans = nemoshow_transition_create(nemoshow_search_one(show, "ease2"), 5000, 0);
-					nemoshow_transition_set_repeat(trans, 0);
-					nemoshow_transition_attach_sequence(trans, sequence);
-					nemoshow_attach_transition(show, trans);
-
 					nemoactor_dispatch_frame(actor);
 
 					grab = minishell_grab_create(mini, tale, event, minishell_dispatch_palm_grab, NULL);
 					grab->group = group;
 					grab->edge = edge;
 					grab->one = one;
-					grab->trans = trans;
 					nemotale_dispatch_grab(tale, event->device, type, event);
 				}
 			}
