@@ -125,7 +125,6 @@ int nemoshow_canvas_arrange(struct nemoshow *show, struct showone *one)
 		NEMOSHOW_CANVAS_CC(canvas, canvas) = new SkCanvas(NEMOSHOW_CANVAS_CC(canvas, device));
 
 		NEMOSHOW_CANVAS_CC(canvas, damage) = new SkRegion;
-		NEMOSHOW_CANVAS_CC(canvas, region) = new SkRegion;
 
 		NEMOSHOW_CANVAS_CP(canvas, bitmap) = new SkBitmap;
 		NEMOSHOW_CANVAS_CP(canvas, bitmap)->allocPixels(
@@ -148,7 +147,6 @@ int nemoshow_canvas_arrange(struct nemoshow *show, struct showone *one)
 		NEMOSHOW_CANVAS_CC(canvas, canvas) = new SkCanvas(NEMOSHOW_CANVAS_CC(canvas, device));
 
 		NEMOSHOW_CANVAS_CC(canvas, damage) = new SkRegion;
-		NEMOSHOW_CANVAS_CC(canvas, region) = new SkRegion;
 	} else if (one->sub == NEMOSHOW_CANVAS_PIXMAN_TYPE) {
 		canvas->node = nemotale_node_create_pixman(canvas->width, canvas->height);
 	} else if (one->sub == NEMOSHOW_CANVAS_OPENGL_TYPE) {
@@ -452,20 +450,6 @@ void nemoshow_canvas_render_link(struct nemoshow *show, struct showone *one)
 	NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
 	NEMOSHOW_CANVAS_CC(canvas, canvas)->clipRegion(*NEMOSHOW_CANVAS_CC(canvas, damage));
 	NEMOSHOW_CANVAS_CC(canvas, canvas)->clear(SK_ColorTRANSPARENT);
-	NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
-
-	NEMOSHOW_CANVAS_CC(canvas, damage)->setEmpty();
-
-	SkRegion::Iterator iter(*NEMOSHOW_CANVAS_CC(canvas, region));
-	for (; !iter.done(); iter.next()) {
-		SkIRect rect = iter.rect();
-
-		nemotale_node_damage(canvas->node, rect.x(), rect.y(), rect.width(), rect.height());
-	}
-
-	NEMOSHOW_CANVAS_CC(canvas, region)->setEmpty();
-
-	NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
 	NEMOSHOW_CANVAS_CC(canvas, canvas)->scale(canvas->viewport.sx, canvas->viewport.sy);
 
 	for (i = 0; i < one->nchildren; i++) {
@@ -473,30 +457,16 @@ void nemoshow_canvas_render_link(struct nemoshow *show, struct showone *one)
 		struct showlink *link = NEMOSHOW_LINK(child);
 		struct showone *head = link->head;
 		struct showone *tail = link->tail;
-		int32_t outer = ceil(child->outer);
-		int32_t x0 = MIN(head->ax, tail->ax) - outer;
-		int32_t y0 = MIN(head->ay, tail->ay) - outer;
-		int32_t x1 = MAX(head->ax, tail->ax) + outer;
-		int32_t y1 = MAX(head->ay, tail->ay) + outer;
 
-		NEMOSHOW_CANVAS_CC(canvas, canvas)->drawLine(head->ax, head->ay, tail->ax, tail->ay, *NEMOSHOW_LINK_CC(link, stroke));
-
-		NEMOSHOW_CANVAS_CC(canvas, damage)->op(
-				SkIRect::MakeLTRB(
-					x0 * canvas->viewport.sx,
-					y0 * canvas->viewport.sy,
-					x1 * canvas->viewport.sx,
-					y1 * canvas->viewport.sy),
-				SkRegion::kUnion_Op);
-
-		NEMOSHOW_CANVAS_CC(canvas, region)->op(
-				SkIRect::MakeLTRB(x0, y0, x1, y1),
-				SkRegion::kUnion_Op);
-
-		nemotale_node_damage(canvas->node, x0, y0, x1 - x0, y1 - y0);
+		NEMOSHOW_CANVAS_CC(canvas, canvas)->drawLine(
+				head->ax, head->ay,
+				tail->ax, tail->ay,
+				*NEMOSHOW_LINK_CC(link, stroke));
 	}
 
 	NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
+
+	NEMOSHOW_CANVAS_CC(canvas, damage)->setEmpty();
 }
 
 static inline void nemoshow_canvas_render_picker_one(struct nemoshow *show, struct showcanvas *canvas, struct showone *one)

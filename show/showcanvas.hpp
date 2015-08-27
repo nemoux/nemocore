@@ -9,7 +9,6 @@ typedef struct _showcanvas {
 	SkCanvas *canvas;
 
 	SkRegion *damage;
-	SkRegion *region;
 
 	struct {
 		SkBitmapDevice *device;

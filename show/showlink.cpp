@@ -91,6 +91,9 @@ int nemoshow_link_update(struct nemoshow *show, struct showone *one)
 
 	if ((one->dirty & NEMOSHOW_SHAPE_DIRTY) != 0 ||
 			(one->dirty & NEMOSHOW_MATRIX_DIRTY) != 0) {
+		struct showone *head = link->head;
+		struct showone *tail = link->tail;
+		int32_t x0, y0, x1, y1;
 		double outer = 0.0f;
 
 		outer += link->stroke_width;
@@ -98,9 +101,20 @@ int nemoshow_link_update(struct nemoshow *show, struct showone *one)
 		if (link->filter != NULL)
 			outer += NEMOSHOW_FILTER_AT(link->filter, r) * 2.0f;
 
+		x0 = floor(MIN(head->ax, tail->ax) - outer);
+		y0 = floor(MIN(head->ay, tail->ay) - outer);
+		x1 = ceil(MAX(head->ax, tail->ax) + outer);
+		y1 = ceil(MAX(head->ay, tail->ay) + outer);
+
+		nemoshow_canvas_damage_one(link->canvas, one);
+
+		one->x = x0;
+		one->y = y0;
+		one->width = x1 - x0;
+		one->height = y1 - y0;
 		one->outer = outer;
 
-		nemoshow_canvas_needs_redraw(link->canvas);
+		nemoshow_canvas_damage_one(link->canvas, one);
 	}
 
 	return 0;
