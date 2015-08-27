@@ -35,6 +35,8 @@ struct showone *nemoshow_canvas_create(void)
 	memset(canvas, 0, sizeof(struct showcanvas));
 
 	canvas->cc = new showcanvas_t;
+	NEMOSHOW_CANVAS_CC(canvas, canvas) = NULL;
+	NEMOSHOW_CANVAS_CP(canvas, canvas) = NULL;
 
 	canvas->viewport.sx = 1.0f;
 	canvas->viewport.sy = 1.0f;
@@ -660,13 +662,15 @@ void nemoshow_canvas_damage_one(struct showone *one, struct showone *child)
 				child->height * canvas->viewport.sy),
 			SkRegion::kUnion_Op);
 
-	NEMOSHOW_CANVAS_CP(canvas, damage)->op(
-			SkIRect::MakeXYWH(
-				child->x * canvas->viewport.sx,
-				child->y * canvas->viewport.sy,
-				child->width * canvas->viewport.sx,
-				child->height * canvas->viewport.sy),
-			SkRegion::kUnion_Op);
+	if (NEMOSHOW_CANVAS_CP(canvas, canvas) != NULL) {
+		NEMOSHOW_CANVAS_CP(canvas, damage)->op(
+				SkIRect::MakeXYWH(
+					child->x * canvas->viewport.sx,
+					child->y * canvas->viewport.sy,
+					child->width * canvas->viewport.sx,
+					child->height * canvas->viewport.sy),
+				SkRegion::kUnion_Op);
+	}
 
 	nemotale_node_damage(canvas->node, child->x, child->y, child->width, child->height);
 
