@@ -181,6 +181,8 @@ int main(int argc, char *argv[])
 {
 	struct option options[] = {
 		{ "type",				required_argument,			NULL,		't' },
+		{ "width",			required_argument,			NULL,		'w' },
+		{ "height",			required_argument,			NULL,		'h' },
 		{ 0 }
 	};
 	struct miniback *mini;
@@ -190,17 +192,25 @@ int main(int argc, char *argv[])
 	struct nemotale *tale;
 	struct talenode *node;
 	const char *type = NULL;
-	int32_t width = 3840;
+	int32_t width = 1920;
 	int32_t height = 1080;
 	int opt;
 
-	while (opt = getopt_long(argc, argv, "t:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "t:w:h:", options, NULL)) {
 		if (opt == -1)
 			break;
 
 		switch (opt) {
 			case 't':
 				type = strdup(optarg);
+				break;
+
+			case 'w':
+				width = strtoul(optarg, NULL, 10);
+				break;
+
+			case 'h':
+				height = strtoul(optarg, NULL, 10);
 				break;
 
 			default:

@@ -75,22 +75,45 @@ static void minishell_handle_configs(struct nemoshell *shell, const char *config
 	}
 
 	nemolist_for_each(node, &xml->nodes, nodelink) {
-		if (strcmp(node->name, "start") == 0 ||
-				strcmp(node->name, "item") == 0 ||
-				strcmp(node->name, "virtualkeyboard") == 0 ||
-				strcmp(node->name, "xserver") == 0 ||
-				strcmp(node->name, "scene") == 0) {
-			i = nemoitem_set(shell->configs, node->path);
+		i = nemoitem_set(shell->configs, node->path);
 
-			for (j = 0; j < node->nattrs; j++) {
-				nemoitem_set_attr(shell->configs, i,
-						node->attrs[j*2+0],
-						node->attrs[j*2+1]);
-			}
+		for (j = 0; j < node->nattrs; j++) {
+			nemoitem_set_attr(shell->configs, i,
+					node->attrs[j*2+0],
+					node->attrs[j*2+1]);
 		}
 	}
 
 	nemoxml_destroy(xml);
+}
+
+static void minishell_launch_background(struct nemoshell *shell)
+{
+	struct nemocompz *compz = shell->compz;
+	int index;
+
+	index = nemoitem_get(shell->configs, "//nemoshell/background", 0);
+	if (index >= 0) {
+		char *argv[16];
+		int32_t width, height;
+
+		width = nemocompz_get_scene_width(compz);
+		height = nemocompz_get_scene_height(compz);
+
+		argv[0] = nemoitem_get_attr(shell->configs, index, "path");
+		argv[1] = strdup("-w");
+		asprintf(&argv[2], "%d", width);
+		argv[3] = strdup("-h");
+		asprintf(&argv[4], "%d", height);
+		argv[5] = NULL;
+
+		wayland_execute_client(compz->display, argv[0], argv, NULL, NULL);
+
+		free(argv[1]);
+		free(argv[2]);
+		free(argv[3]);
+		free(argv[4]);
+	}
 }
 
 static void minishell_launch_apps(struct nemoshell *shell)
@@ -814,6 +837,7 @@ int main(int argc, char *argv[])
 
 	nemoactor_dispatch_frame(actor);
 
+	minishell_launch_background(shell);
 	minishell_launch_apps(shell);
 
 	nemocompz_run(compz);
