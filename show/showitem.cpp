@@ -410,14 +410,6 @@ static inline void nemoshow_item_update_path(struct nemoshow *show, struct showi
 				NEMOSHOW_ITEM_CC(item, path)->addPath(rpath);
 			} else if (child->sub == NEMOSHOW_SVG_PATH) {
 				nemoshow_item_update_path(show, item, child);
-			} else if (child->sub == NEMOSHOW_RECT_PATH) {
-				NEMOSHOW_ITEM_CC(item, path)->addRect(
-						path->x0, path->y0,
-						path->x1, path->y1);
-			} else if (child->sub == NEMOSHOW_CIRCLE_PATH) {
-				NEMOSHOW_ITEM_CC(item, path)->addCircle(
-						path->x0, path->y0,
-						path->r);
 			}
 		}
 	}
@@ -772,4 +764,57 @@ void nemoshow_item_detach_one(struct showone *parent, struct showone *one)
 		nemoshow_one_unreference_one(one, parent);
 
 	nemoshow_one_detach_one(parent, one);
+}
+
+void nemoshow_item_path_clear(struct showone *one)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	NEMOSHOW_ITEM_CC(item, path)->reset();
+}
+
+void nemoshow_item_path_moveto(struct showone *one, double x, double y)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	NEMOSHOW_ITEM_CC(item, path)->moveTo(x, y);
+}
+
+void nemoshow_item_path_lineto(struct showone *one, double x, double y)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	NEMOSHOW_ITEM_CC(item, path)->lineTo(x, y);
+}
+
+void nemoshow_item_path_cubicto(struct showone *one, double x0, double y0, double x1, double y1, double x2, double y2)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	NEMOSHOW_ITEM_CC(item, path)->cubicTo(x0, y0, x1, y1, x2, y2);
+}
+
+void nemoshow_item_path_close(struct showone *one)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	NEMOSHOW_ITEM_CC(item, path)->close();
+}
+
+void nemoshow_item_path_cmd(struct showone *one, const char *cmd)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+	SkPath path;
+
+	SkParsePath::FromSVGString(cmd, &path);
+
+	NEMOSHOW_ITEM_CC(item, path)->addPath(path);
+}
+
+void nemoshow_item_path_arc(struct showone *one, double x, double y, double width, double height, double from, double to)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+	SkRect rect = SkRect::MakeXYWH(x, y, width, height);
+
+	NEMOSHOW_ITEM_CC(item, path)->addArc(rect, from, to);
 }
