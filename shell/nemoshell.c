@@ -205,8 +205,8 @@ static void nemo_surface_set_layer(struct wl_client *client, struct wl_resource 
 		bin->layer = &bin->shell->service_layer;
 	} else if (type == NEMO_SURFACE_LAYER_TYPE_OVERLAY) {
 		bin->layer = &bin->shell->overlay_layer;
-	} else if (type == NEMO_SURFACE_LAYER_TYPE_INTERFACE) {
-		bin->layer = &bin->shell->interface_layer;
+	} else if (type == NEMO_SURFACE_LAYER_TYPE_UNDERLAY) {
+		bin->layer = &bin->shell->underlay_layer;
 	}
 }
 

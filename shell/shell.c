@@ -534,10 +534,10 @@ struct nemoshell *nemoshell_create(struct nemocompz *compz)
 	if (shell->configs == NULL)
 		goto err1;
 
-	nemolayer_prepare(&shell->interface_layer, &compz->cursor_layer.link);
-	nemolayer_prepare(&shell->overlay_layer, &shell->interface_layer.link);
+	nemolayer_prepare(&shell->overlay_layer, &compz->cursor_layer.link);
 	nemolayer_prepare(&shell->service_layer, &shell->overlay_layer.link);
-	nemolayer_prepare(&shell->background_layer, &shell->service_layer.link);
+	nemolayer_prepare(&shell->underlay_layer, &shell->service_layer.link);
+	nemolayer_prepare(&shell->background_layer, &shell->underlay_layer.link);
 
 #ifdef NEMOUX_WITH_WAYLANDSHELL
 	if (!wl_global_create(compz->display, &wl_shell_interface, 1, shell, nemoshell_bind_wayland_shell))
@@ -576,9 +576,9 @@ err1:
 
 void nemoshell_destroy(struct nemoshell *shell)
 {
-	nemolayer_finish(&shell->interface_layer);
 	nemolayer_finish(&shell->overlay_layer);
 	nemolayer_finish(&shell->service_layer);
+	nemolayer_finish(&shell->underlay_layer);
 	nemolayer_finish(&shell->background_layer);
 
 	nemoitem_destroy(shell->configs);

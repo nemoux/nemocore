@@ -808,7 +808,7 @@ int main(int argc, char *argv[])
 	nemoshow_filter_set_blur(blur, "high", "solid", 15.0f);
 
 	actor = NEMOSHOW_AT(show, actor);
-	nemoview_attach_layer(actor->view, &shell->background_layer);
+	nemoview_attach_layer(actor->view, &shell->underlay_layer);
 	nemoview_set_position(actor->view, 0.0f, 0.0f);
 	nemoview_update_transform(actor->view);
 

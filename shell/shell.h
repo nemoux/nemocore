@@ -33,9 +33,9 @@ typedef enum {
 struct nemoshell {
 	struct nemocompz *compz;
 
-	struct nemolayer interface_layer;
 	struct nemolayer overlay_layer;
 	struct nemolayer service_layer;
+	struct nemolayer underlay_layer;
 	struct nemolayer background_layer;
 
 	struct wl_listener pointer_focus_listener;

@@ -225,6 +225,7 @@ int main(int argc, char *argv[])
 
 	mini->eglcanvas = canvas = nemotool_create_egl_canvas(egl, width, height);
 	nemocanvas_set_nemosurface(NTEGL_CANVAS(canvas), NEMO_SHELL_SURFACE_TYPE_NORMAL);
+	nemocanvas_set_layer(NTEGL_CANVAS(canvas), NEMO_SURFACE_LAYER_TYPE_BACKGROUND);
 	nemocanvas_set_dispatch_resize(NTEGL_CANVAS(canvas), miniback_dispatch_canvas_resize);
 
 	mini->canvas = NTEGL_CANVAS(canvas);

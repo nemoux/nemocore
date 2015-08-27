@@ -104,7 +104,7 @@
 			<entry name="background" value="0"/>
 			<entry name="service" value="1"/>
 			<entry name="overlay" value="2"/>
-			<entry name="interface" value="3"/>
+			<entry name="underlay" value="3"/>
 		</enum>
 
 		<request name="set_layer">
