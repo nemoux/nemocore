@@ -110,6 +110,8 @@ struct showone {
 	int32_t outer;
 
 	double ax, ay;
+
+	void *userdata;
 };
 
 extern void nemoshow_one_prepare(struct showone *one);
@@ -249,6 +251,16 @@ static inline struct showone *nemoshow_one_get_child(struct showone *one, uint32
 		return NULL;
 
 	return one->children[index];
+}
+
+static inline void nemoshow_one_set_userdata(struct showone *one, void *userdata)
+{
+	one->userdata = userdata;
+}
+
+static inline void *nemoshow_one_get_userdata(struct showone *one)
+{
+	return one->userdata;
 }
 
 #ifdef __cplusplus

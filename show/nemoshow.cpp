@@ -727,12 +727,10 @@ void nemoshow_render_one(struct nemoshow *show)
 
 					canvas->needs_redraw = 0;
 				}
+			}
 
-				if (canvas->dispatch_render != NULL) {
-					canvas->dispatch_render(show, one);
-
-					canvas->needs_redraw = 0;
-				}
+			if (canvas->dispatch_render != NULL) {
+				canvas->dispatch_render(show, one);
 			}
 		}
 	}

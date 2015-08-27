@@ -24,15 +24,21 @@ struct minimote {
 	GLuint utex0;
 	GLuint uprojection;
 	GLuint ucolor;
+	GLuint utimestamp;
+	GLuint utimestart;
 
 	struct nemomatrix matrix;
 
 	GLuint vertex_array;
 	GLuint vertex_buffer;
+
+	GLuint texture;
 };
 
 extern struct minimote *minishell_mote_create(struct showone *one);
 extern void minishell_mote_destroy(struct minimote *mote);
+
+extern void minishell_mote_update(struct minimote *mote, uint32_t msecs);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

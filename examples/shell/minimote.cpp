@@ -22,20 +22,25 @@ static GLuint minishell_mote_create_shader(void)
 {
 	static const char *vert_shader_text =
 		"uniform mat4 projection;\n"
+		"uniform highp float timestamp;\n"
+		"uniform highp float timestart;\n"
 		"attribute vec2 position;\n"
 		"attribute vec2 texcoord;\n"
 		"varying vec2 v_texcoord;\n"
+		"uniform vec4 color;\n"
+		"varying vec4 v_color;\n"
 		"void main() {\n"
-		"  gl_Position = projection * vec4(position, 0.0, 1.0f);\n"
+		"  gl_Position = projection * vec4(position.x * (timestamp - timestart) * 0.00001, position.y * (timestamp - timestart) * 0.00001, 0.0, 1.0f);\n"
 		"  v_texcoord = texcoord;\n"
+		"  v_color = color;\n"
 		"}\n";
 	static const char *frag_shader_text =
 		"precision mediump float;\n"
-		"varying vec2 v_texcoord;\n"
 		"uniform sampler2D tex0;\n"
-		"uniform vec4 color;\n"
+		"varying vec2 v_texcoord;\n"
+		"varying vec4 v_color;\n"
 		"void main() {\n"
-		"  gl_FragColor = texture2D(tex0, v_texcoord) * color;\n"
+		"  gl_FragColor = texture2D(tex0, v_texcoord) * v_color;\n"
 		"}\n";
 	GLuint frag, vert;
 	GLuint program;
@@ -67,6 +72,13 @@ static GLuint minishell_mote_create_shader(void)
 	return program;
 }
 
+static void minishell_mote_render_canvas(struct nemoshow *show, struct showone *one)
+{
+	struct minimote *mote = (struct minimote *)nemoshow_one_get_userdata(one);
+
+	minishell_mote_update(mote, time_current_msecs());
+}
+
 struct minimote *minishell_mote_create(struct showone *one)
 {
 	struct minimote *mote;
@@ -76,8 +88,6 @@ struct minimote *minishell_mote_create(struct showone *one)
 		-1.0f, 1.0f, 0.0f, 0.0f,
 		1.0f, 1.0f, 1.0f, 0.0f,
 	};
-	GLfloat rgba[4] = { 0.0f, 1.0f, 1.0f, 1.0f };
-	GLuint texture;
 	pixman_image_t *image;
 
 	mote = (struct minimote *)malloc(sizeof(struct minimote));
@@ -98,6 +108,8 @@ struct minimote *minishell_mote_create(struct showone *one)
 	mote->utex0 = glGetUniformLocation(mote->program, "tex0");
 	mote->uprojection = glGetUniformLocation(mote->program, "projection");
 	mote->ucolor = glGetUniformLocation(mote->program, "color");
+	mote->utimestamp = glGetUniformLocation(mote->program, "timestamp");
+	mote->utimestart = glGetUniformLocation(mote->program, "timestart");
 
 	fbo_prepare_context(mote->tex, mote->width, mote->height, &mote->fbo, &mote->dbo);
 
@@ -120,12 +132,10 @@ struct minimote *minishell_mote_create(struct showone *one)
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
-	glUseProgram(mote->program);
-
 	glActiveTexture(GL_TEXTURE0);
 
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
+	glGenTextures(1, &mote->texture);
+	glBindTexture(GL_TEXTURE_2D, mote->texture);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -139,24 +149,10 @@ struct minimote *minishell_mote_create(struct showone *one)
 			pixman_image_get_data(image));
 	pixman_image_unref(image);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, mote->fbo);
+	glUniform1f(mote->utimestart, time_current_msecs());
 
-	glViewport(0, 0, mote->width, mote->height);
-
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
-
-	glUniform1i(mote->utex0, 0);
-	glUniformMatrix4fv(mote->uprojection, 1, GL_FALSE, (GLfloat *)mote->matrix.d);
-	glUniform4fv(mote->ucolor, 1, rgba);
-
-	glBindVertexArray(mote->vertex_array);
-	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-	glBindVertexArray(0);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	glBindTexture(GL_TEXTURE_2D, 0);
+	nemoshow_one_set_userdata(one, mote);
+	nemoshow_canvas_set_dispatch_render(one, minishell_mote_render_canvas);
 
 	return mote;
 
@@ -175,4 +171,35 @@ void minishell_mote_destroy(struct minimote *mote)
 	glDeleteRenderbuffers(1, &mote->dbo);
 
 	free(mote);
+}
+
+void minishell_mote_update(struct minimote *mote, uint32_t msecs)
+{
+	GLfloat rgba[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+	glUseProgram(mote->program);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, mote->fbo);
+
+	glViewport(0, 0, mote->width, mote->height);
+
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	glBindTexture(GL_TEXTURE_2D, mote->texture);
+
+	glUniform1i(mote->utex0, 0);
+	glUniformMatrix4fv(mote->uprojection, 1, GL_FALSE, (GLfloat *)mote->matrix.d);
+	glUniform4fv(mote->ucolor, 1, rgba);
+	glUniform1f(mote->utimestamp, msecs);
+
+	glBindVertexArray(mote->vertex_array);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+	glBindVertexArray(0);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	nemotale_node_damage_all(mote->node);
 }

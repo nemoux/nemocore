@@ -23,7 +23,6 @@
 #include <pointer.h>
 #include <touch.h>
 #include <session.h>
-#include <timer.h>
 #include <binding.h>
 #include <datadevice.h>
 #include <drmbackend.h>
@@ -801,8 +800,6 @@ int main(int argc, char *argv[])
 	mini->canvas = nemoshow_search_one(show, "mini");
 	mini->links = nemoshow_search_one(show, "links");
 
-	mini->mote = minishell_mote_create(nemoshow_search_one(show, "mote"));
-
 	mini->blur5 = blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
 	nemoshow_attach_one(show, blur);
 	nemoshow_filter_set_blur(blur, "high", "solid", 5.0f);
@@ -815,6 +812,8 @@ int main(int argc, char *argv[])
 	nemoview_attach_layer(actor->view, &shell->background_layer);
 	nemoview_set_position(actor->view, 0.0f, 0.0f);
 	nemoview_update_transform(actor->view);
+
+	mini->mote = minishell_mote_create(nemoshow_search_one(show, "mote"));
 
 	nemoactor_dispatch_frame(actor);
 
