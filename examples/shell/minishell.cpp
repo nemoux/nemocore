@@ -42,7 +42,6 @@
 #include <minigrab.h>
 #include <miniyoyo.hpp>
 #include <minipalm.h>
-#include <minimote.h>
 
 #include <showitem.h>
 #include <showitem.hpp>
@@ -812,8 +811,6 @@ int main(int argc, char *argv[])
 	nemoview_attach_layer(actor->view, &shell->background_layer);
 	nemoview_set_position(actor->view, 0.0f, 0.0f);
 	nemoview_update_transform(actor->view);
-
-	mini->mote = minishell_mote_create(nemoshow_search_one(show, "mote"));
 
 	nemoactor_dispatch_frame(actor);
 

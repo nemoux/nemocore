@@ -8,7 +8,6 @@ NEMO_BEGIN_EXTERN_C
 #endif
 
 #include <minishell.h>
-#include <minimote.h>
 #include <showhelper.h>
 
 #include <nemolist.h>
@@ -27,8 +26,6 @@ struct minishell {
 	struct showone *links;
 	struct showone *blur5;
 	struct showone *blur15;
-
-	struct minimote *mote;
 
 	void **slots;
 	int nslots;
