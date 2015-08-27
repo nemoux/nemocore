@@ -72,6 +72,7 @@ extern void nemocanvas_damage(struct nemocanvas *canvas, int32_t x, int32_t y, i
 extern void nemocanvas_damage_region(struct nemocanvas *canvas, pixman_region32_t *region);
 extern void nemocanvas_feedback(struct nemocanvas *canvas);
 extern void nemocanvas_commit(struct nemocanvas *canvas);
+extern void nemocanvas_opaque(struct nemocanvas *canvas, int32_t x, int32_t y, int32_t width, int32_t height);
 
 extern pixman_image_t *nemocanvas_get_pixman_image(struct nemocanvas *canvas);
 

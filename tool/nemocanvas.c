@@ -193,6 +193,19 @@ void nemocanvas_commit(struct nemocanvas *canvas)
 	pixman_region32_clear(&canvas->damage);
 }
 
+void nemocanvas_opaque(struct nemocanvas *canvas, int32_t x, int32_t y, int32_t width, int32_t height)
+{
+	struct nemotool *tool = canvas->tool;
+	struct wl_region *region;
+
+	region = wl_compositor_create_region(tool->compositor);
+	wl_region_add(region, 0, 0, width, height);
+
+	wl_surface_set_opaque_region(canvas->surface, region);
+
+	wl_region_destroy(region);
+}
+
 static void surface_enter(void *data, struct wl_surface *surface, struct wl_output *_output)
 {
 	struct nemocanvas *canvas = (struct nemocanvas *)data;
