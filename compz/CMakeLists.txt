@@ -164,6 +164,7 @@ add_library(nemocompz SHARED
 	)
 
 TARGET_LINK_LIBRARIES(nemocompz
+	pthread
 	nemoasst
 	${WAYLANDCURSOR_LIBRARIES}
 	${WAYLANDSERVER_LIBRARIES}
