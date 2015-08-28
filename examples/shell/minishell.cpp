@@ -321,7 +321,7 @@ static int minishell_dispatch_rotate_grab(struct talegrab *base, uint32_t type, 
 
 		grab->dx = nemoshow_item_get_tx(group) - event->x;
 		grab->dy = nemoshow_item_get_ty(group) - event->y;
-		grab->ro = nemoshow_item_get_ro(group) - atan2(nemoshow_item_get_ty(group) - event->y, nemoshow_item_get_tx(group) - event->x) * 180.0f / M_PI;
+		grab->ro = nemoshow_item_get_rotate(group) - atan2(nemoshow_item_get_ty(group) - event->y, nemoshow_item_get_tx(group) - event->x) * 180.0f / M_PI;
 	} else if (type & NEMOTALE_MOTION_EVENT) {
 		struct showone *group = grab->group;
 

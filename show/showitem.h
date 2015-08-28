@@ -199,6 +199,11 @@ static inline void nemoshow_item_set_to(struct showone *one, double to)
 	NEMOSHOW_ITEM_AT(one, to) = to;
 }
 
+static inline void nemoshow_item_set_fontsize(struct showone *one, double fontsize)
+{
+	NEMOSHOW_ITEM_AT(one, fontsize) = fontsize;
+}
+
 static inline void nemoshow_item_set_alpha(struct showone *one, double alpha)
 {
 	NEMOSHOW_ITEM_AT(one, alpha) = alpha;
@@ -271,7 +276,7 @@ static inline void nemoshow_item_rotate(struct showone *one, double ro)
 	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
 }
 
-static inline double nemoshow_item_get_ro(struct showone *one)
+static inline double nemoshow_item_get_rotate(struct showone *one)
 {
 	return NEMOSHOW_ITEM_AT(one, ro);
 }
