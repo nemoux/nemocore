@@ -655,6 +655,14 @@ void nemocompz_dispatch_effect(struct nemocompz *compz, struct nemoeffect *effec
 	nemoscreen_schedule_repaint(compz->screen);
 }
 
+struct nemoevent *nemocompz_get_main_event(struct nemocompz *compz)
+{
+	if (compz->event == NULL)
+		compz->event = nemoevent_create(compz);
+
+	return compz->event;
+}
+
 int nemocompz_set_presentation_clock(struct nemocompz *compz, clockid_t id)
 {
 	struct timespec ts;
@@ -692,4 +700,9 @@ void nemocompz_get_presentation_clock(struct nemocompz *compz, struct timespec *
 		ts->tv_sec = 0;
 		ts->tv_nsec = 0;
 	}
+}
+
+int nemocompz_is_running(struct nemocompz *compz)
+{
+	return compz->state == NEMOCOMPZ_RUNNING_STATE;
 }

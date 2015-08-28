@@ -155,6 +155,7 @@ add_library(nemocompz SHARED
 	viewanimation.c
 	vieweffect.c
 	plugin.c
+	event.c
 	waylandhelper.c
 	${CMAKE_SOURCE_DIR}/misc/fbhelper.c
 	${CMAKE_SOURCE_DIR}/misc/ttyhelper.c
@@ -204,6 +205,7 @@ endif(WITH_LOGIND)
 INSTALL(TARGETS nemocompz DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
 
 set(HEADER_FILES
+	${CMAKE_SOURCE_DIR}/compz/nemocompz.h
 	)
 
 configure_file(

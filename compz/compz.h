@@ -13,6 +13,7 @@ NEMO_BEGIN_EXTERN_C
 #include <backend.h>
 #include <layer.h>
 #include <renderer.h>
+#include <event.h>
 #include <nemoitem.h>
 
 #define	NEMOCOMPZ_NODE_MAX				(4)
@@ -106,6 +107,8 @@ struct nemocompz {
 
 	struct nemosound *sound;
 
+	struct nemoevent *event;
+
 	struct nemoitem *configs;
 };
 
@@ -141,9 +144,13 @@ extern void nemocompz_update_subcanvas(struct nemocompz *compz);
 extern void nemocompz_dispatch_animation(struct nemocompz *compz, struct nemoanimation *animation);
 extern void nemocompz_dispatch_effect(struct nemocompz *compz, struct nemoeffect *effect);
 
+extern struct nemoevent *nemocompz_get_main_event(struct nemocompz *compz);
+
 extern int nemocompz_set_presentation_clock(struct nemocompz *compz, clockid_t id);
 extern int nemocompz_set_presentation_clock_software(struct nemocompz *compz);
 extern void nemocompz_get_presentation_clock(struct nemocompz *compz, struct timespec *ts);
+
+extern int nemocompz_is_running(struct nemocompz *compz);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

@@ -1,5 +1,6 @@
 include_directories(
 	${CMAKE_SOURCE_DIR}/asst
+	${CMAKE_SOURCE_DIR}/compz
 	)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DNEMO_LOG_ON -DNEMO_DEBUG_ON")
@@ -11,5 +12,6 @@ add_library(miniplugin SHARED
 	)
 
 TARGET_LINK_LIBRARIES(miniplugin
+	pthread
 	nemoasst
 	)
