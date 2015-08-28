@@ -216,8 +216,8 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 		nemoshow_attach_one(show, group);
 		nemoshow_item_attach_one(group, svg);
 		nemoshow_svg_set_canvas(svg, canvas);
-		NEMOSHOW_SVG_AT(svg, width) = 100;
-		NEMOSHOW_SVG_AT(svg, height) = 100;
+		nemoshow_svg_set_width(svg, 100);
+		nemoshow_svg_set_height(svg, 100);
 		nemoshow_svg_set_uri(svg, "/home/root/.config/palm.svg");
 		nemoshow_svg_set_tsr(svg);
 		nemoshow_svg_translate(svg, -50.0f, -50.0f);
@@ -249,8 +249,8 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 
 			for (j = 0; j < 5; j++) {
 				if (nemobook_is_empty(book, j) != 0) {
-					dx = NEMOSHOW_ITEM_AT(palm->fingers[i]->group, tx) - cx - cos(2 * M_PI / 5 * j) * 100.0f;
-					dy = NEMOSHOW_ITEM_AT(palm->fingers[i]->group, ty) - cy - sin(2 * M_PI / 5 * j) * 100.0f;
+					dx = nemoshow_item_get_tx(palm->fingers[i]->group) - cx - cos(2 * M_PI / 5 * j) * 100.0f;
+					dy = nemoshow_item_get_ty(palm->fingers[i]->group) - cy - sin(2 * M_PI / 5 * j) * 100.0f;
 
 					d = sqrtf(dx * dx + dy * dy);
 					if (d < min) {
@@ -264,8 +264,8 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 
 			nemoshow_item_attach_one(group, palm->fingers[i]->group);
 			nemoshow_item_translate(palm->fingers[i]->group,
-					NEMOSHOW_ITEM_AT(palm->fingers[i]->group, tx) - cx,
-					NEMOSHOW_ITEM_AT(palm->fingers[i]->group, ty) - cy);
+					nemoshow_item_get_tx(palm->fingers[i]->group) - cx,
+					nemoshow_item_get_ty(palm->fingers[i]->group) - cy);
 
 			slot = minishell_needs_slot(mini);
 			minishell_set_slot(mini, slot, palm->fingers[i]->group);

@@ -3,6 +3,8 @@
 
 #include <skiaconfig.hpp>
 
+#include <showcanvas.h>
+
 typedef struct _showcanvas {
 	SkBitmapDevice *device;
 	SkBitmap *bitmap;
@@ -21,5 +23,10 @@ typedef struct _showcanvas {
 
 #define NEMOSHOW_CANVAS_CC(base, name)				(((showcanvas_t *)((base)->cc))->name)
 #define	NEMOSHOW_CANVAS_CP(base, name)				(((showcanvas_t *)((base)->cc))->picker.name)
+
+static inline SkCanvas *nemoshow_canvas_get_skia_canvas(struct showone *one)
+{
+	return NEMOSHOW_CANVAS_CC(NEMOSHOW_CANVAS(one), canvas);
+}
 
 #endif

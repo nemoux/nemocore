@@ -134,6 +134,76 @@ static inline void nemoshow_item_set_canvas(struct showone *one, struct showone 
 	item->canvas = canvas;
 }
 
+static inline struct showone *nemoshow_item_get_canvas(struct showone *one)
+{
+	return NEMOSHOW_ITEM_AT(one, canvas);
+}
+
+static inline void nemoshow_item_set_x(struct showone *one, double x)
+{
+	NEMOSHOW_ITEM_AT(one, x) = x;
+}
+
+static inline double nemoshow_item_get_x(struct showone *one)
+{
+	return NEMOSHOW_ITEM_AT(one, x);
+}
+
+static inline void nemoshow_item_set_y(struct showone *one, double y)
+{
+	NEMOSHOW_ITEM_AT(one, y) = y;
+}
+
+static inline double nemoshow_item_get_y(struct showone *one)
+{
+	return NEMOSHOW_ITEM_AT(one, y);
+}
+
+static inline void nemoshow_item_set_rx(struct showone *one, double rx)
+{
+	NEMOSHOW_ITEM_AT(one, rx) = rx;
+}
+
+static inline void nemoshow_item_set_ry(struct showone *one, double ry)
+{
+	NEMOSHOW_ITEM_AT(one, ry) = ry;
+}
+
+static inline void nemoshow_item_set_width(struct showone *one, double width)
+{
+	NEMOSHOW_ITEM_AT(one, width) = width;
+}
+
+static inline void nemoshow_item_set_height(struct showone *one, double height)
+{
+	NEMOSHOW_ITEM_AT(one, height) = height;
+}
+
+static inline void nemoshow_item_set_r(struct showone *one, double r)
+{
+	NEMOSHOW_ITEM_AT(one, r) = r;
+}
+
+static inline void nemoshow_item_set_inner(struct showone *one, double inner)
+{
+	NEMOSHOW_ITEM_AT(one, inner) = inner;
+}
+
+static inline void nemoshow_item_set_from(struct showone *one, double from)
+{
+	NEMOSHOW_ITEM_AT(one, from) = from;
+}
+
+static inline void nemoshow_item_set_to(struct showone *one, double to)
+{
+	NEMOSHOW_ITEM_AT(one, to) = to;
+}
+
+static inline void nemoshow_item_set_alpha(struct showone *one, double alpha)
+{
+	NEMOSHOW_ITEM_AT(one, alpha) = alpha;
+}
+
 static inline void nemoshow_item_set_fill_color(struct showone *one, double r, double g, double b, double a)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
@@ -182,6 +252,16 @@ static inline void nemoshow_item_translate(struct showone *one, double tx, doubl
 	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
 }
 
+static inline double nemoshow_item_get_tx(struct showone *one)
+{
+	return NEMOSHOW_ITEM_AT(one, tx);
+}
+
+static inline double nemoshow_item_get_ty(struct showone *one)
+{
+	return NEMOSHOW_ITEM_AT(one, ty);
+}
+
 static inline void nemoshow_item_rotate(struct showone *one, double ro)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
@@ -189,6 +269,11 @@ static inline void nemoshow_item_rotate(struct showone *one, double ro)
 	item->ro = ro;
 
 	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
+}
+
+static inline double nemoshow_item_get_ro(struct showone *one)
+{
+	return NEMOSHOW_ITEM_AT(one, ro);
 }
 
 static inline void nemoshow_item_scale(struct showone *one, double sx, double sy)

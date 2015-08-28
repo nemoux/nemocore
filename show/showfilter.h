@@ -36,6 +36,11 @@ extern int nemoshow_filter_update(struct nemoshow *show, struct showone *one);
 
 extern void nemoshow_filter_set_blur(struct showone *one, const char *flags, const char *style, double r);
 
+static inline void nemoshow_filter_set_r(struct showone *one, double r)
+{
+	NEMOSHOW_FILTER_AT(one, r) = r;
+}
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

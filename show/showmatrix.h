@@ -37,6 +37,16 @@ extern void nemoshow_matrix_destroy(struct showone *one);
 extern int nemoshow_matrix_arrange(struct nemoshow *show, struct showone *one);
 extern int nemoshow_matrix_update(struct nemoshow *show, struct showone *one);
 
+static inline void nemoshow_matrix_set_x(struct showone *one, double x)
+{
+	NEMOSHOW_MATRIX_AT(one, x) = x;
+}
+
+static inline void nemoshow_matrix_set_y(struct showone *one, double y)
+{
+	NEMOSHOW_MATRIX_AT(one, y) = y;
+}
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

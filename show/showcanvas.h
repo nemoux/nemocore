@@ -119,6 +119,16 @@ static inline struct talenode *nemoshow_canvas_get_node(struct showone *one)
 	return canvas->node;
 }
 
+static inline double nemoshow_canvas_get_viewport_sx(struct showone *one)
+{
+	return NEMOSHOW_CANVAS_AT(one, viewport.sx);
+}
+
+static inline double nemoshow_canvas_get_viewport_sy(struct showone *one)
+{
+	return NEMOSHOW_CANVAS_AT(one, viewport.sy);
+}
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

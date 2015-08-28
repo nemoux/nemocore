@@ -61,6 +61,16 @@ static inline void nemoshow_svg_set_canvas(struct showone *one, struct showone *
 	svg->canvas = canvas;
 }
 
+static inline void nemoshow_svg_set_width(struct showone *one, double width)
+{
+	NEMOSHOW_SVG_AT(one, width) = width;
+}
+
+static inline void nemoshow_svg_set_height(struct showone *one, double height)
+{
+	NEMOSHOW_SVG_AT(one, height) = height;
+}
+
 static inline void nemoshow_svg_translate(struct showone *one, double tx, double ty)
 {
 	struct showsvg *svg = NEMOSHOW_SVG(one);

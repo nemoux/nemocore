@@ -3,6 +3,8 @@
 
 #include <skiaconfig.hpp>
 
+#include <showitem.h>
+
 typedef struct _showitem {
 	SkPaint *fill;
 	SkPaint *stroke;
@@ -16,5 +18,10 @@ typedef struct _showitem {
 } showitem_t;
 
 #define NEMOSHOW_ITEM_CC(base, name)				(((showitem_t *)((base)->cc))->name)
+
+static inline SkPath *nemoshow_item_get_skia_path(struct showone *one)
+{
+	return NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(one), path);
+}
 
 #endif

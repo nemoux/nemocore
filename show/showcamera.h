@@ -31,6 +31,16 @@ extern void nemoshow_camera_destroy(struct showone *one);
 extern int nemoshow_camera_arrange(struct nemoshow *show, struct showone *one);
 extern int nemoshow_camera_update(struct nemoshow *show, struct showone *one);
 
+static inline void nemoshow_camera_set_sx(struct showone *one, double sx)
+{
+	NEMOSHOW_CAMERA_AT(one, sx) = sx;
+}
+
+static inline void nemoshow_camera_set_sy(struct showone *one, double sy)
+{
+	NEMOSHOW_CAMERA_AT(one, sy) = sy;
+}
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

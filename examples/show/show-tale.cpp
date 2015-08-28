@@ -72,7 +72,7 @@ static void nemoshow_dispatch_tale_event(struct nemotale *tale, struct talenode 
 
 static void nemoshow_custom_canvas_dispatch_render(struct nemoshow *show, struct showone *one)
 {
-	SkCanvas *canvas = NEMOSHOW_CANVAS_CC(NEMOSHOW_CANVAS(one), canvas);
+	SkCanvas *canvas = nemoshow_canvas_get_skia_canvas(one);
 	SkPaint paint;
 
 	canvas->save();
@@ -80,8 +80,8 @@ static void nemoshow_custom_canvas_dispatch_render(struct nemoshow *show, struct
 	canvas->clear(SK_ColorTRANSPARENT);
 
 	canvas->scale(
-			NEMOSHOW_CANVAS_AT(one, viewport.sx),
-			NEMOSHOW_CANVAS_AT(one, viewport.sy));
+			nemoshow_canvas_get_viewport_sx(one),
+			nemoshow_canvas_get_viewport_sy(one));
 
 	paint.setStyle(SkPaint::kStroke_Style);
 	paint.setStrokeWidth(5.0f);

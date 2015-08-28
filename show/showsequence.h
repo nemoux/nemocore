@@ -130,6 +130,11 @@ extern void nemoshow_sequence_destroy_follow(struct showone *one);
 extern int nemoshow_sequence_arrange_follow(struct nemoshow *show, struct showone *one);
 extern int nemoshow_sequence_update_follow(struct nemoshow *show, struct showone *one);
 
+static inline void nemoshow_sequence_set_frame_t(struct showone *one, double t)
+{
+	NEMOSHOW_FRAME_AT(one, t) = t;
+}
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

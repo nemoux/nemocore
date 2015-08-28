@@ -66,6 +66,11 @@ static inline void nemoshow_link_set_tail(struct showone *one, struct showone *t
 	nemoshow_one_reference_one(one, tail);
 }
 
+static inline void nemoshow_link_set_alpha(struct showone *one, double alpha)
+{
+	NEMOSHOW_LINK_AT(one, alpha) = alpha;
+}
+
 static inline void nemoshow_link_set_stroke_color(struct showone *one, double r, double g, double b, double a)
 {
 	struct showlink *link = NEMOSHOW_LINK(one);
