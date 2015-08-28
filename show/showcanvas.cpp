@@ -694,9 +694,11 @@ void nemoshow_canvas_damage_all(struct showone *one)
 int32_t nemoshow_canvas_pick_one(struct showone *one, int x, int y)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+	double px = x * canvas->viewport.sx;
+	double py = y * canvas->viewport.sy;
 
-	if (x < 0 || y < 0 || x >= canvas->viewport.width || y >= canvas->viewport.height)
+	if (px < 0 || py < 0 || px >= canvas->viewport.width || py >= canvas->viewport.height)
 		return 0;
 
-	return SkColorGetR(NEMOSHOW_CANVAS_CP(canvas, bitmap)->getColor(x, y));
+	return SkColorGetR(NEMOSHOW_CANVAS_CP(canvas, bitmap)->getColor(px, py));
 }
