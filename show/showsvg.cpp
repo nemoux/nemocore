@@ -261,6 +261,15 @@ int nemoshow_svg_update(struct nemoshow *show, struct showone *one)
 	return 0;
 }
 
+void nemoshow_svg_set_clip(struct showone *one, struct showone *clip)
+{
+	struct showsvg *svg = NEMOSHOW_SVG(one);
+
+	svg->clip = clip;
+
+	nemoshow_one_reference_one(one, clip);
+}
+
 void nemoshow_svg_set_tsr(struct showone *one)
 {
 	struct showsvg *svg = NEMOSHOW_SVG(one);

@@ -45,6 +45,7 @@ extern int nemoshow_svg_arrange(struct nemoshow *show, struct showone *one);
 extern int nemoshow_svg_update(struct nemoshow *show, struct showone *one);
 
 extern void nemoshow_svg_set_tsr(struct showone *one);
+extern void nemoshow_svg_set_clip(struct showone *one, struct showone *clip);
 extern void nemoshow_svg_set_uri(struct showone *one, const char *uri);
 
 static inline void nemoshow_svg_set_event(struct showone *one, int32_t event)
