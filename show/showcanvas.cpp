@@ -398,10 +398,10 @@ static inline void nemoshow_canvas_render_one(struct nemoshow *show, struct show
 			NEMOSHOW_CANVAS_CC(canvas, canvas)->concat(*NEMOSHOW_SVG_CC(svg, matrix));
 		}
 
-		NEMOSHOW_CANVAS_CC(canvas, canvas)->concat(*NEMOSHOW_SVG_CC(NEMOSHOW_SVG(one), viewbox));
-
 		if (svg->clip != NULL)
 			NEMOSHOW_CANVAS_CC(canvas, canvas)->clipPath(*NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(svg->clip), path));
+
+		NEMOSHOW_CANVAS_CC(canvas, canvas)->concat(*NEMOSHOW_SVG_CC(NEMOSHOW_SVG(one), viewbox));
 
 		for (i = 0; i < one->nchildren; i++) {
 			nemoshow_canvas_render_one(show, canvas, one->children[i]);
