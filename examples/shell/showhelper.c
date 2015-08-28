@@ -180,7 +180,7 @@ static void nemoshow_dispatch_actor_resize(struct nemoactor *actor, int32_t widt
 
 	nemoshow_render_one(show);
 
-	nemotale_composite_egl_full(scon->tale);
+	nemotale_composite_fbo_full(scon->tale);
 }
 
 static void nemoshow_dispatch_actor_frame(struct nemoactor *actor, uint32_t msecs)

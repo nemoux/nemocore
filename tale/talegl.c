@@ -729,8 +729,25 @@ int nemotale_composite_egl(struct nemotale *tale, pixman_region32_t *region)
 
 	r = nemotale_composite_egl_in(tale);
 
-	if (region != NULL)
-		pixman_region32_union(region, region, &tale->damage);
+	if (region != NULL) {
+		if (tale->viewport.enable == 0) {
+			pixman_region32_union(region, region, &tale->damage);
+		} else {
+			pixman_box32_t *rects;
+			int nrects;
+			int i;
+
+			rects = pixman_region32_rectangles(&tale->damage, &nrects);
+
+			for (i = 0; i < nrects; i++) {
+				pixman_region32_union_rect(region, region,
+						rects[i].x1 * tale->viewport.sx,
+						rects[i].y1 * tale->viewport.sy,
+						rects[i].x2 * tale->viewport.sx,
+						rects[i].y2 * tale->viewport.sy);
+			}
+		}
+	}
 
 	nemotale_flush_damage(tale);
 
@@ -826,8 +843,24 @@ int nemotale_composite_fbo(struct nemotale *tale, pixman_region32_t *region)
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	if (region != NULL)
-		pixman_region32_union(region, region, &tale->damage);
+	if (region != NULL) {
+		if (tale->viewport.enable == 0) {
+			pixman_region32_union(region, region, &tale->damage);
+		} else {
+			pixman_box32_t *rects;
+			int nrects;
+
+			rects = pixman_region32_rectangles(&tale->damage, &nrects);
+
+			for (i = 0; i < nrects; i++) {
+				pixman_region32_union_rect(region, region,
+						rects[i].x1 * tale->viewport.sx,
+						rects[i].y1 * tale->viewport.sy,
+						rects[i].x2 * tale->viewport.sx,
+						rects[i].y2 * tale->viewport.sy);
+			}
+		}
+	}
 
 	nemotale_flush_damage(tale);
 
