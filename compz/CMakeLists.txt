@@ -154,6 +154,7 @@ add_library(nemocompz SHARED
 	sound.c
 	viewanimation.c
 	vieweffect.c
+	plugin.c
 	waylandhelper.c
 	${CMAKE_SOURCE_DIR}/misc/fbhelper.c
 	${CMAKE_SOURCE_DIR}/misc/ttyhelper.c

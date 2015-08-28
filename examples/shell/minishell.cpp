@@ -24,6 +24,7 @@
 #include <touch.h>
 #include <session.h>
 #include <binding.h>
+#include <plugin.h>
 #include <datadevice.h>
 #include <drmbackend.h>
 #include <fbbackend.h>
@@ -63,7 +64,8 @@ static void minishell_handle_configs(struct nemoshell *shell, const char *config
 
 	nemolist_for_each(node, &xml->nodes, nodelink) {
 		if (strcmp(node->name, "screen") == 0 ||
-				strcmp(node->name, "input") == 0) {
+				strcmp(node->name, "input") == 0 ||
+				strcmp(node->name, "plugin") == 0) {
 			i = nemoitem_set(compz->configs, node->path);
 
 			for (j = 0; j < node->nattrs; j++) {
@@ -790,6 +792,8 @@ int main(int argc, char *argv[])
 	drmbackend_create(compz, rendernode);
 	evdevbackend_create(compz);
 	tuiobackend_create(compz);
+
+	nemocompz_load_plugins(compz);
 
 	nemocompz_set_screen_frame_listener(compz, nemocompz_get_main_screen(compz));
 
