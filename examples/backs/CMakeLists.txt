@@ -40,3 +40,13 @@ TARGET_LINK_LIBRARIES(miniback
 	nemotool
 	${NEMOUX_COMMON_LIBRARIES}
 	)
+
+add_executable(skiaback
+	skiaback.cpp
+	)
+
+TARGET_LINK_LIBRARIES(skiaback
+	nemotool
+	skia
+	${NEMOUX_COMMON_LIBRARIES}
+	)
