@@ -1,0 +1,44 @@
+FIND_PACKAGE(PkgConfig REQUIRED)
+
+PKG_CHECK_MODULES(DBUS REQUIRED dbus-1)
+INCLUDE_DIRECTORIES(${DBUS_INCLUDE_DIRS})
+LINK_DIRECTORIES(${DBUS_LIBRARY_DIRS})
+
+PKG_CHECK_MODULES(JSON REQUIRED json-c)
+INCLUDE_DIRECTORIES(${JSON_INCLUDE_DIRS})
+LINK_DIRECTORIES(${JSON_LIBRARY_DIRS})
+
+include_directories(
+	${CMAKE_SOURCE_DIR}/asst
+	${CMAKE_SOURCE_DIR}/tool
+	${CMAKE_BINARY_DIR}/tool
+	${CMAKE_SOURCE_DIR}/tale
+	${CMAKE_SOURCE_DIR}/tale
+	)
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DNEMO_LOG_ON -DNEMO_DEBUG_ON")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
+set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
+
+if(WITH_MUPDF)
+	add_executable(nemopdf
+		nemopdf.c
+		pdfhelper.c
+		talehelper.c
+		)
+
+	TARGET_LINK_LIBRARIES(nemopdf
+		mupdf
+		mujs
+		muopenjpeg
+		mujpeg
+		mujbig2dec
+		freetype
+		crypto
+		z
+		nemotool
+		nemotale
+		)
+
+	INSTALL(TARGETS nemopdf DESTINATION bin)
+endif(WITH_MUPDF)

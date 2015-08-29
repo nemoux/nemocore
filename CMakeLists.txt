@@ -200,6 +200,7 @@ add_subdirectory(show)
 
 add_subdirectory(compz)
 add_subdirectory(shell)
+add_subdirectory(apps)
 
 if(WITH_EXAMPLE)
 	add_subdirectory(examples/tale)
