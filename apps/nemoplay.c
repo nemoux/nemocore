@@ -151,7 +151,6 @@ static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode 
 static void nemoplay_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t width, int32_t height)
 {
 	struct playcontext *context = (struct playcontext *)nemocanvas_get_userdata(canvas);
-	uint32_t nvwidth, nvheight;
 
 	if (width == 0 || height == 0)
 		return;
@@ -159,15 +158,12 @@ static void nemoplay_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t w
 	if (width < 200 || height < 200)
 		nemotool_exit(context->tool);
 
-	nvwidth = floor(height * nemogst_get_video_aspect_ratio(context->gst));
-	nvheight = height;
+	nemogst_resize_video(context->gst, width, height);
 
-	nemogst_resize_video(context->gst, nvwidth, nvheight);
-
-	nemotool_resize_egl_canvas(context->ecanvas, nvwidth, nvheight);
-	nemotale_resize(context->tale, nvwidth, nvheight);
-	nemotale_node_resize_pixman(context->node, nvwidth, nvheight);
-	nemotale_node_opaque(context->node, 0, 0, nvwidth, nvheight);
+	nemotool_resize_egl_canvas(context->ecanvas, width, height);
+	nemotale_resize(context->tale, width, height);
+	nemotale_node_resize_pixman(context->node, width, height);
+	nemotale_node_opaque(context->node, 0, 0, width, height);
 
 	nemotale_composite_egl(context->tale, NULL);
 }
@@ -197,6 +193,8 @@ int main(int argc, char *argv[])
 		{ "file",					required_argument,	NULL,		'f' },
 		{ "subtitle",			required_argument,	NULL,		's' },
 		{ "sounddevice",	required_argument,	NULL,		'd' },
+		{ "width",				required_argument,	NULL,		'w' },
+		{ "height",				required_argument,	NULL,		'h' },
 		{ 0 }
 	};
 
@@ -213,10 +211,10 @@ int main(int argc, char *argv[])
 	char *subtitlepath = NULL;
 	char *snddev = NULL;
 	char *uri;
-	int32_t width, height;
+	int32_t width = 0, height = 0;
 	int opt;
 
-	while (opt = getopt_long(argc, argv, "f:s:d:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "f:s:d:w:h:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -231,6 +229,14 @@ int main(int argc, char *argv[])
 
 			case 'd':
 				snddev = strdup(optarg);
+				break;
+
+			case 'w':
+				width = strtoul(optarg, NULL, 10);
+				break;
+
+			case 'h':
+				height = strtoul(optarg, NULL, 10);
 				break;
 
 			default:
@@ -281,8 +287,10 @@ int main(int argc, char *argv[])
 		nemogst_set_subtitle_path(context->gst, subtitlepath);
 	}
 
-	width = 320 * nemogst_get_video_aspect_ratio(context->gst);
-	height = 320;
+	if (width == 0 || height == 0) {
+		width = 320 * nemogst_get_video_aspect_ratio(context->gst);
+		height = 320;
+	}
 
 	nemogst_resize_video(context->gst, width, height);
 
