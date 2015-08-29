@@ -57,7 +57,7 @@ static void tuio_handle_xml_argument(struct tuionode *node, const char *type, co
 		} else if (node->state == NEMO_TUIO_FSEQ_STATE) {
 			node->fseq.id = strtoul(value, NULL, 10);
 
-			nemotouch_flush_tuio(node->touch, node);
+			nemotouch_flush_tuio(node);
 		}
 	}
 
@@ -162,7 +162,7 @@ static int tuio_handle_osc_message(struct tuionode *node, const char *msg, int l
 				} else if (node->state == NEMO_TUIO_FSEQ_STATE) {
 					node->fseq.id = osc_int32(arg);
 
-					nemotouch_flush_tuio(node->touch, node);
+					nemotouch_flush_tuio(node);
 				}
 
 				arg += 4;

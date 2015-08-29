@@ -14,10 +14,11 @@ NEMO_BEGIN_EXTERN_C
 
 struct nemocompz;
 
-typedef void (*nemoevent_dispatch_t)(struct nemocompz *compz, void *data);
+typedef void (*nemoevent_dispatch_t)(struct nemocompz *compz, void *context, void *data);
 
 struct eventone {
 	nemoevent_dispatch_t dispatch;
+	void *context;
 	void *data;
 
 	struct nemolist link;
@@ -38,7 +39,7 @@ extern void nemoevent_destroy(struct nemoevent *event);
 
 extern void nemoevent_trigger(struct nemoevent *event, uint64_t v);
 
-extern struct eventone *nemoevent_create_one(nemoevent_dispatch_t dispatch, void *data);
+extern struct eventone *nemoevent_create_one(nemoevent_dispatch_t dispatch, void *context, void *data);
 extern void nemoevent_destroy_one(struct eventone *one);
 
 extern void nemoevent_enqueue_one(struct nemoevent *event, struct eventone *one);

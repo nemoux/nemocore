@@ -396,8 +396,9 @@ void nemotouch_notify_frame(struct nemotouch *touch, int id)
 	tp->grab->interface->frame(tp->grab);
 }
 
-void nemotouch_flush_tuio(struct nemotouch *touch, struct tuionode *node)
+void nemotouch_flush_tuio(struct tuionode *node)
 {
+	struct nemotouch *touch = node->touch;
 	struct touchpoint *tp, *tnext;
 	struct wl_list touchpoint_list;
 	uint32_t msecs;
@@ -419,10 +420,12 @@ void nemotouch_flush_tuio(struct nemotouch *touch, struct tuionode *node)
 
 			if (node->base.screen != NULL) {
 				nemoscreen_transform_to_global(node->base.screen,
-						node->taps[i].f[0], node->taps[i].f[1], &x, &y);
+						node->taps[i].f[0] * node->base.screen->width,
+						node->taps[i].f[1] * node->base.screen->height,
+						&x, &y);
 			} else {
-				x = node->taps[i].f[0] + node->base.x;
-				y = node->taps[i].f[1] + node->base.y;
+				x = node->taps[i].f[0] * node->base.width + node->base.x;
+				y = node->taps[i].f[1] * node->base.height + node->base.y;
 			}
 
 			tp->grab_x = x;
@@ -437,10 +440,12 @@ void nemotouch_flush_tuio(struct nemotouch *touch, struct tuionode *node)
 		} else {
 			if (node->base.screen != NULL) {
 				nemoscreen_transform_to_global(node->base.screen,
-						node->taps[i].f[0], node->taps[i].f[1], &x, &y);
+						node->taps[i].f[0] * node->base.screen->width,
+						node->taps[i].f[1] * node->base.screen->height,
+						&x, &y);
 			} else {
-				x = node->taps[i].f[0] + node->base.x;
-				y = node->taps[i].f[1] + node->base.y;
+				x = node->taps[i].f[0] * node->base.width + node->base.x;
+				y = node->taps[i].f[1] * node->base.height + node->base.y;
 			}
 
 			tp->grab->interface->motion(tp->grab, msecs, tp->gid, x, y);
@@ -477,4 +482,171 @@ void touchpoint_update_grab(struct touchpoint *tp)
 {
 	tp->grab_x = tp->x;
 	tp->grab_y = tp->y;
+}
+
+struct touchnode *nemotouch_create_node(struct nemocompz *compz, const char *devnode)
+{
+	struct touchnode *node;
+	uint32_t nodeid, screenid;
+	int32_t x, y, width, height;
+
+	node = (struct touchnode *)malloc(sizeof(struct touchnode));
+	if (node == NULL)
+		return NULL;
+	memset(node, 0, sizeof(struct touchnode));
+
+	node->compz = compz;
+
+	node->touch = nemotouch_create(compz->seat, &node->base);
+	if (node->touch == NULL)
+		goto err1;
+
+	node->base.devnode = strdup(devnode);
+
+	if (nemoinput_get_config_screen(compz, node->base.devnode, &nodeid, &screenid) > 0)
+		nemoinput_set_screen(&node->base, nemocompz_get_screen(compz, nodeid, screenid));
+	else if (nemoinput_get_config_geometry(compz, node->base.devnode, &x, &y, &width, &height) > 0)
+		nemoinput_set_geometry(&node->base, x, y, width, height);
+	else
+		nemoinput_set_geometry(&node->base,
+				0, 0,
+				nemocompz_get_scene_width(compz),
+				nemocompz_get_scene_height(compz));
+
+	wl_list_insert(compz->touch_list.prev, &node->link);
+
+	return node;
+
+err1:
+	free(node);
+
+	return NULL;
+}
+
+void nemotouch_destroy_node(struct touchnode *node)
+{
+	wl_list_remove(&node->link);
+
+	if (node->base.screen != NULL)
+		nemoinput_put_screen(&node->base);
+
+	if (node->touch != NULL)
+		nemotouch_destroy(node->touch);
+
+	if (node->base.devnode != NULL)
+		free(node->base.devnode);
+
+	free(node);
+}
+
+struct touchtaps *nemotouch_create_taps(int max)
+{
+	struct touchtaps *taps;
+
+	taps = (struct touchtaps *)malloc(sizeof(struct touchtaps));
+	if (taps == NULL)
+		return NULL;
+
+	taps->ids = (uint64_t *)malloc(sizeof(uint64_t) * max);
+	if (taps->ids == NULL)
+		goto err1;
+
+	taps->points = (double *)malloc(sizeof(double[2]) * max);
+	if (taps->points == NULL)
+		goto err2;
+
+	taps->ntaps = 0;
+	taps->staps = max;
+
+	return taps;
+
+err2:
+	free(taps->ids);
+
+err1:
+	free(taps);
+
+	return NULL;
+}
+
+void nemotouch_destroy_taps(struct touchtaps *taps)
+{
+	free(taps->ids);
+	free(taps->points);
+	free(taps);
+}
+
+void nemotouch_attach_tap(struct touchtaps *taps, uint64_t id, double x, double y)
+{
+	taps->ids[taps->ntaps] = id;
+	taps->points[taps->ntaps * 2 + 0] = x;
+	taps->points[taps->ntaps * 2 + 1] = y;
+
+	taps->ntaps++;
+}
+
+void nemotouch_flush_taps(struct touchnode *node, struct touchtaps *taps)
+{
+	struct nemotouch *touch = node->touch;
+	struct touchpoint *tp, *tnext;
+	struct wl_list touchpoint_list;
+	uint32_t msecs;
+	float x, y;
+	int i;
+
+	msecs = time_current_msecs();
+
+	wl_list_init(&touchpoint_list);
+	wl_list_insert_list(&touchpoint_list, &touch->touchpoint_list);
+	wl_list_init(&touch->touchpoint_list);
+
+	for (i = 0; i < taps->ntaps; i++) {
+		tp = nemotouch_get_touchpoint_by_id(touch, taps->ids[i]);
+		if (tp == NULL) {
+			tp = nemotouch_create_touchpoint(touch, taps->ids[i]);
+			if (tp == NULL)
+				return;
+
+			if (node->base.screen != NULL) {
+				nemoscreen_transform_to_global(node->base.screen,
+						taps->points[i * 2 + 0] * node->base.screen->width,
+						taps->points[i * 2 + 1] * node->base.screen->height,
+						&x, &y);
+			} else {
+				x = taps->points[i * 2 + 0] * node->base.width + node->base.x;
+				y = taps->points[i * 2 + 1] * node->base.height + node->base.y;
+			}
+
+			tp->grab_x = x;
+			tp->grab_y = y;
+
+			tp->grab->interface->down(tp->grab, msecs, tp->gid, x, y);
+
+			tp->grab_serial = wl_display_get_serial(node->compz->display);
+			tp->grab_time = msecs;
+
+			nemocompz_run_touch_binding(touch->seat->compz, tp, msecs);
+		} else {
+			if (node->base.screen != NULL) {
+				nemoscreen_transform_to_global(node->base.screen,
+						taps->points[i * 2 + 0] * node->base.screen->width,
+						taps->points[i * 2 + 1] * node->base.screen->height,
+						&x, &y);
+			} else {
+				x = taps->points[i * 2 + 0] * node->base.width + node->base.x;
+				y = taps->points[i * 2 + 1] * node->base.height + node->base.y;
+			}
+
+			tp->grab->interface->motion(tp->grab, msecs, tp->gid, x, y);
+
+			wl_list_remove(&tp->link);
+			wl_list_insert(&touch->touchpoint_list, &tp->link);
+		}
+	}
+
+	wl_list_for_each_safe(tp, tnext, &touchpoint_list, link) {
+		tp->grab->interface->up(tp->grab, msecs, tp->gid);
+
+		nemotouch_destroy_touchpoint(touch, tp);
+	}
 }

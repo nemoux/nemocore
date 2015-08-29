@@ -241,6 +241,7 @@ struct nemocompz *nemocompz_create(void)
 	wl_list_init(&compz->screen_list);
 	wl_list_init(&compz->render_list);
 	wl_list_init(&compz->evdev_list);
+	wl_list_init(&compz->touch_list);
 	wl_list_init(&compz->tuio_list);
 	wl_list_init(&compz->animation_list);
 	wl_list_init(&compz->effect_list);

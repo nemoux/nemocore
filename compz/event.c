@@ -26,7 +26,7 @@ static int nemoevent_dispatch_event(int fd, uint32_t mask, void *data)
 		return 1;
 
 	while ((one = nemoevent_dequeue_one(event)) != NULL) {
-		one->dispatch(compz, one->data);
+		one->dispatch(compz, one->context, one->data);
 
 		nemoevent_destroy_one(one);
 	}
@@ -94,7 +94,7 @@ void nemoevent_trigger(struct nemoevent *event, uint64_t v)
 	write(event->eventfd, &v, sizeof(uint64_t));
 }
 
-struct eventone *nemoevent_create_one(nemoevent_dispatch_t dispatch, void *data)
+struct eventone *nemoevent_create_one(nemoevent_dispatch_t dispatch, void *context, void *data)
 {
 	struct eventone *one;
 
@@ -104,6 +104,7 @@ struct eventone *nemoevent_create_one(nemoevent_dispatch_t dispatch, void *data)
 	memset(one, 0, sizeof(struct eventone));
 
 	one->dispatch = dispatch;
+	one->context = context;
 	one->data = data;
 
 	nemolist_init(&one->link);

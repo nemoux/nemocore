@@ -56,6 +56,23 @@ struct touchpoint {
 	void *binding;
 };
 
+struct touchtaps {
+	uint64_t *ids;
+	double *points;
+
+	int ntaps, staps;
+};
+
+struct touchnode {
+	struct inputnode base;
+
+	struct nemocompz *compz;
+
+	struct nemotouch *touch;
+
+	struct wl_list link;
+};
+
 struct nemotouch {
 	struct nemoseat *seat;
 	struct inputnode *node;
@@ -82,7 +99,7 @@ extern void nemotouch_notify_up(struct nemotouch *touch, uint32_t time, int id);
 extern void nemotouch_notify_motion(struct nemotouch *touch, uint32_t time, int id, float x, float y);
 extern void nemotouch_notify_frame(struct nemotouch *touch, int id);
 
-extern void nemotouch_flush_tuio(struct nemotouch *touch, struct tuionode *node);
+extern void nemotouch_flush_tuio(struct tuionode *node);
 
 extern void touchpoint_move(struct touchpoint *tp, float x, float y);
 
@@ -93,6 +110,16 @@ extern void touchpoint_end_grab(struct touchpoint *tp);
 extern void touchpoint_cancel_grab(struct touchpoint *tp);
 
 extern void touchpoint_update_grab(struct touchpoint *tp);
+
+extern struct touchnode *nemotouch_create_node(struct nemocompz *compz, const char *devnode);
+extern void nemotouch_destroy_node(struct touchnode *node);
+
+extern struct touchtaps *nemotouch_create_taps(int max);
+extern void nemotouch_destroy_taps(struct touchtaps *taps);
+
+extern void nemotouch_attach_tap(struct touchtaps *taps, uint64_t id, double x, double y);
+
+extern void nemotouch_flush_taps(struct touchnode *node, struct touchtaps *taps);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
