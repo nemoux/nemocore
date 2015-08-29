@@ -20,6 +20,16 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DNEMO_LOG_ON -DNEMO_DEBUG_ON")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
 set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 
+add_executable(nemoimage
+	nemoimage.c
+	talehelper.c
+	)
+
+TARGET_LINK_LIBRARIES(nemoimage
+	nemotool
+	nemotale
+	)
+
 if(WITH_MUPDF)
 	add_executable(nemopdf
 		nemopdf.c
