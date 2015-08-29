@@ -40,11 +40,6 @@ static gboolean nemogst_watch_bus(GstBus *bus, GstMessage *msg, gpointer data)
 {
 	struct nemogst *gst = (struct nemogst *)data;
 
-	NEMO_DEBUG("[%s] %s (%d)\n",
-			GST_OBJECT_NAME(GST_MESSAGE_SRC(msg)),
-			GST_MESSAGE_TYPE_NAME(msg),
-			GST_MESSAGE_SEQNUM(msg));
-
 	switch (GST_MESSAGE_TYPE(msg)) {
 		case GST_MESSAGE_TAG:
 		case GST_MESSAGE_STEP_DONE:
@@ -65,11 +60,6 @@ static gboolean nemogst_watch_bus(GstBus *bus, GstMessage *msg, gpointer data)
 
 				gst_message_parse_state_changed(msg, &ostate, &nstate, &pstate);
 
-				NEMO_DEBUG("(%s) state changed from %s to %s\n",
-						GST_OBJECT_NAME(GST_MESSAGE_SRC(msg)),
-						gst_element_state_get_name(ostate),
-						gst_element_state_get_name(nstate));
-
 				if (GST_MESSAGE_SRC(msg) == GST_OBJECT(gst->player)) {
 					gst->is_playing = (nstate == GST_STATE_PLAYING);
 
@@ -88,11 +78,9 @@ static gboolean nemogst_watch_bus(GstBus *bus, GstMessage *msg, gpointer data)
 			break;
 
 		case GST_MESSAGE_SEGMENT_DONE:
-			NEMO_DEBUG("segment done...\n");
 			break;
 
 		case GST_MESSAGE_EOS:
-			NEMO_DEBUG("end of streaming...\n");
 			break;
 
 		case GST_MESSAGE_WARNING:
@@ -104,8 +92,6 @@ static gboolean nemogst_watch_bus(GstBus *bus, GstMessage *msg, gpointer data)
 				name = gst_object_get_path_string(GST_MESSAGE_SRC(msg));
 
 				gst_message_parse_warning(msg, &err, &debug);
-
-				NEMO_DEBUG("Warning: (%s) %s\n", name, err->message);
 
 				g_error_free(err);
 				g_free(debug);
@@ -122,8 +108,6 @@ static gboolean nemogst_watch_bus(GstBus *bus, GstMessage *msg, gpointer data)
 				name = gst_object_get_path_string(GST_MESSAGE_SRC(msg));
 
 				gst_message_parse_error(msg, &err, &debug);
-
-				NEMO_DEBUG("Error: (%s) %s\n", name, err->message);
 
 				g_error_free(err);
 				g_free(debug);

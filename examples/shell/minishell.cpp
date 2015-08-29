@@ -92,7 +92,7 @@ static void minishell_handle_configs(struct nemoshell *shell, const char *config
 static void minishell_launch_background(struct nemoshell *shell)
 {
 	struct nemocompz *compz = shell->compz;
-	int index;
+	int index, i;
 
 	index = nemoitem_get(shell->configs, "//nemoshell/background", 0);
 	if (index >= 0) {
@@ -107,7 +107,12 @@ static void minishell_launch_background(struct nemoshell *shell)
 		asprintf(&argv[2], "%d", width);
 		argv[3] = strdup("-h");
 		asprintf(&argv[4], "%d", height);
-		argv[5] = NULL;
+		argv[5] = strdup("-b");
+
+		for (i = 6;
+				(argv[i] = nemoitem_get_vattr(shell->configs, index, "arg%d", i - 6)) != NULL;
+				i++);
+		argv[i] = NULL;
 
 		wayland_execute_client(compz->display, argv[0], argv, NULL, NULL);
 
@@ -115,6 +120,7 @@ static void minishell_launch_background(struct nemoshell *shell)
 		free(argv[2]);
 		free(argv[3]);
 		free(argv[4]);
+		free(argv[5]);
 	}
 }
 

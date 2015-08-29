@@ -34,6 +34,7 @@ struct playcontext {
 	struct talenode *node;
 
 	int is_fullscreen;
+	int is_background;
 
 	float gx, gy;
 
@@ -52,6 +53,9 @@ static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode 
 {
 	struct playcontext *context = (struct playcontext *)nemotale_get_userdata(tale);
 	uint32_t id = nemotale_node_get_id(node);
+
+	if (context->is_background != 0)
+		return;
 
 	if (id == 1) {
 		if (nemotale_is_touch_down(tale, event, type)) {
@@ -195,6 +199,7 @@ int main(int argc, char *argv[])
 		{ "sounddevice",	required_argument,	NULL,		'd' },
 		{ "width",				required_argument,	NULL,		'w' },
 		{ "height",				required_argument,	NULL,		'h' },
+		{ "background",		no_argument,				NULL,		'b' },
 		{ 0 }
 	};
 
@@ -212,9 +217,10 @@ int main(int argc, char *argv[])
 	char *snddev = NULL;
 	char *uri;
 	int32_t width = 0, height = 0;
+	int is_background = 0;
 	int opt;
 
-	while (opt = getopt_long(argc, argv, "f:s:d:w:h:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "f:s:d:w:h:b", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -239,6 +245,10 @@ int main(int argc, char *argv[])
 				height = strtoul(optarg, NULL, 10);
 				break;
 
+			case 'b':
+				is_background = 1;
+				break;
+
 			default:
 				break;
 		}
@@ -254,6 +264,8 @@ int main(int argc, char *argv[])
 		return -1;
 	memset(context, 0, sizeof(struct playcontext));
 
+	context->is_background = is_background;
+
 	context->tool = tool = nemotool_create();
 	if (tool == NULL)
 		goto out1;
@@ -262,6 +274,8 @@ int main(int argc, char *argv[])
 	context->canvas = canvas = nemocanvas_create(tool);
 	nemocanvas_set_userdata(canvas, context);
 	nemocanvas_set_nemosurface(canvas, NEMO_SHELL_SURFACE_TYPE_NORMAL);
+	if (context->is_background != 0)
+		nemocanvas_set_layer(canvas, NEMO_SURFACE_LAYER_TYPE_BACKGROUND);
 	nemocanvas_set_anchor(canvas, -0.5f, -0.5f);
 	nemocanvas_set_dispatch_resize(canvas, nemoplay_dispatch_canvas_resize);
 	nemocanvas_set_dispatch_screen(canvas, nemoplay_dispatch_canvas_screen);
