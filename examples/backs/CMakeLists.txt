@@ -41,11 +41,11 @@ TARGET_LINK_LIBRARIES(miniback
 	${NEMOUX_COMMON_LIBRARIES}
 	)
 
-add_executable(skiaback
-	skiaback.cpp
+add_executable(plexback
+	plexback.cpp
 	)
 
-TARGET_LINK_LIBRARIES(skiaback
+TARGET_LINK_LIBRARIES(plexback
 	nemotool
 	skia
 	${NEMOUX_COMMON_LIBRARIES}

@@ -42,7 +42,7 @@
 #include <pixmanhelper.h>
 #include <nemomisc.h>
 
-static void skiaback_render_one(pixman_image_t *image)
+static void plexback_render_one(pixman_image_t *image)
 {
 	int32_t width = pixman_image_get_width(image);
 	int32_t height = pixman_image_get_height(image);
@@ -72,7 +72,7 @@ static void skiaback_render_one(pixman_image_t *image)
 	scanvas.drawRect(rect, paint);
 }
 
-static void skiaback_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t secs, uint32_t nsecs)
+static void plexback_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t secs, uint32_t nsecs)
 {
 	if (secs == 0 && nsecs == 0) {
 		nemocanvas_feedback(canvas);
@@ -82,13 +82,13 @@ static void skiaback_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 
 	nemocanvas_buffer(canvas);
 
-	skiaback_render_one(nemocanvas_get_pixman_image(canvas));
+	plexback_render_one(nemocanvas_get_pixman_image(canvas));
 
 	nemocanvas_damage(canvas, 0, 0, 0, 0);
 	nemocanvas_commit(canvas);
 }
 
-static int skiaback_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t type, struct nemoevent *event)
+static int plexback_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t type, struct nemoevent *event)
 {
 	return 0;
 }
@@ -133,8 +133,8 @@ int main(int argc, char *argv[])
 	canvas = nemocanvas_create(tool);
 	nemocanvas_set_nemosurface(canvas, NEMO_SHELL_SURFACE_TYPE_NORMAL);
 	nemocanvas_set_layer(canvas, NEMO_SURFACE_LAYER_TYPE_BACKGROUND);
-	nemocanvas_set_dispatch_frame(canvas, skiaback_dispatch_canvas_frame);
-	nemocanvas_set_dispatch_event(canvas, skiaback_dispatch_canvas_event);
+	nemocanvas_set_dispatch_frame(canvas, plexback_dispatch_canvas_frame);
+	nemocanvas_set_dispatch_event(canvas, plexback_dispatch_canvas_event);
 
 	nemocanvas_set_size(canvas, width, height);
 
