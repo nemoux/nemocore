@@ -12,9 +12,9 @@
 #include <compz.h>
 #include <nemomisc.h>
 
-int nemocompz_load_plugin(struct nemocompz *compz, const char *path)
+int nemocompz_load_plugin(struct nemocompz *compz, const char *path, const char *args)
 {
-	int (*init)(struct nemocompz *compz);
+	int (*init)(struct nemocompz *compz, const char *args);
 	void *handle;
 	char *err;
 
@@ -26,7 +26,7 @@ int nemocompz_load_plugin(struct nemocompz *compz, const char *path)
 	if ((err = dlerror()) != NULL)
 		return -1;
 
-	init(compz);
+	init(compz, args);
 
 	return 0;
 }
@@ -34,13 +34,15 @@ int nemocompz_load_plugin(struct nemocompz *compz, const char *path)
 void nemocompz_load_plugins(struct nemocompz *compz)
 {
 	const char *path;
+	const char *args;
 	int index = 0;
 
 	for (index = 0;
 			(index = nemoitem_get(compz->configs, "//nemoshell/plugin", index)) >= 0;
 			index++) {
 		path = nemoitem_get_attr(compz->configs, index, "path");
+		args = nemoitem_get_attr(compz->configs, index, "args");
 
-		nemocompz_load_plugin(compz, path);
+		nemocompz_load_plugin(compz, path, args);
 	}
 }

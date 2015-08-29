@@ -10,6 +10,12 @@
 #include <nemocompz.h>
 #include <nemomisc.h>
 
+struct miniplugin {
+	struct nemocompz *compz;
+
+	char *devnode;
+};
+
 static void miniplugin_dispatch_touch(struct nemocompz *compz, void *context, void *data)
 {
 	struct touchnode *node = (struct touchnode *)context;
@@ -22,13 +28,14 @@ static void miniplugin_dispatch_touch(struct nemocompz *compz, void *context, vo
 
 static void *miniplugin_dispatch_thread(void *arg)
 {
-	struct nemocompz *compz = (struct nemocompz *)arg;
+	struct miniplugin *mini = (struct miniplugin *)arg;
+	struct nemocompz *compz = mini->compz;
 	struct nemoevent *event = nemocompz_get_main_event(compz);
 	struct eventone *one;
 	struct touchnode *node;
 	struct touchtaps *taps;
 
-	node = nemotouch_create_node(compz, "vtouch");
+	node = nemotouch_create_node(compz, mini->devnode);
 
 	while (nemocompz_is_running(compz)) {
 		taps = nemotouch_create_taps(64);
@@ -45,14 +52,25 @@ static void *miniplugin_dispatch_thread(void *arg)
 
 	nemotouch_destroy_node(node);
 
+	free(mini->devnode);
+	free(mini);
+
 	return NULL;
 }
 
-int nemoplugin_init(struct nemocompz *compz)
+int nemoplugin_init(struct nemocompz *compz, const char *args)
 {
+	struct miniplugin *mini;
 	pthread_t thread;
 
-	pthread_create(&thread, NULL, miniplugin_dispatch_thread, (void *)compz);
+	mini = (struct miniplugin *)malloc(sizeof(struct miniplugin));
+	if (mini == NULL)
+		return -1;
+
+	mini->compz = compz;
+	mini->devnode = strdup(args);
+
+	pthread_create(&thread, NULL, miniplugin_dispatch_thread, (void *)mini);
 
 	return 0;
 }
