@@ -30,6 +30,8 @@ TARGET_LINK_LIBRARIES(nemoimage
 	nemotale
 	)
 
+INSTALL(TARGETS nemoimage DESTINATION bin)
+
 if(WITH_MUPDF)
 	add_executable(nemopdf
 		nemopdf.c
