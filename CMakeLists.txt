@@ -209,6 +209,8 @@ add_subdirectory(compz)
 add_subdirectory(shell)
 add_subdirectory(apps)
 
+add_subdirectory(thirds/poly2tri)
+
 if(WITH_EXAMPLE)
 	add_subdirectory(examples/tale)
 	add_subdirectory(examples/show)
