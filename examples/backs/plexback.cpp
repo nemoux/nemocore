@@ -37,6 +37,8 @@
 
 #include <SkGeometry.h>
 
+#include <poly2tri.h>
+
 #include <plexback.h>
 #include <nemotool.h>
 #include <nemoegl.h>
@@ -44,13 +46,14 @@
 #include <talehelper.h>
 #include <nemomisc.h>
 
-#include <poly2tri.h>
-
-static void plexback_render_one(pixman_image_t *image)
+static void plexback_render_one(struct plexback *plex, pixman_image_t *image, double t)
 {
 	int32_t width = pixman_image_get_width(image);
 	int32_t height = pixman_image_get_height(image);
 	int i;
+
+	if (t <= 0.0f)
+		return;
 
 	SkBitmap bitmap;
 	bitmap.setInfo(
@@ -91,10 +94,10 @@ static void plexback_render_one(pixman_image_t *image)
 
 	p2t::CDT *cdt = new p2t::CDT(polyline);
 
-	for (i = 0; i < 500; i++) {
+	for (i = 0; i < plex->spoints.size(); i++) {
 		cdt->AddPoint(new p2t::Point(
-					random_get_double(0, width),
-					random_get_double(0, height)));
+					(plex->dpoints[i]->x - plex->spoints[i]->x) * t + plex->spoints[i]->x,
+					(plex->dpoints[i]->y - plex->spoints[i]->y) * t + plex->spoints[i]->y));
 	}
 
 	cdt->Triangulate();
@@ -151,16 +154,19 @@ static void plexback_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
 	struct plexback *plex = (struct plexback *)nemotale_get_userdata(tale);
 	struct talenode *node = plex->node;
+	uint32_t msecs;
 
-#if	0
 	if (secs == 0 && nsecs == 0) {
+		plex->msecs = msecs = time_current_msecs();
+
 		nemocanvas_feedback(canvas);
 	} else {
+		msecs = time_current_msecs();
+
 		nemocanvas_feedback(canvas);
 	}
-#endif
 
-	plexback_render_one(nemotale_node_get_pixman(node));
+	plexback_render_one(plex, nemotale_node_get_pixman(node), (double)(msecs - plex->msecs) / 300000.0f);
 
 	nemotale_node_damage_all(node);
 
@@ -189,6 +195,7 @@ int main(int argc, char *argv[])
 	int32_t width = 1920;
 	int32_t height = 1080;
 	int opt;
+	int i;
 
 	while (opt = getopt_long(argc, argv, "w:h:b", options, NULL)) {
 		if (opt == -1)
@@ -215,6 +222,18 @@ int main(int argc, char *argv[])
 
 	plex->width = width;
 	plex->height = height;
+
+	for (i = 0; i < 500; i++) {
+		plex->spoints.push_back(new p2t::Point(
+					random_get_double(0, width),
+					random_get_double(0, height)));
+	}
+
+	for (i = 0; i < 500; i++) {
+		plex->dpoints.push_back(new p2t::Point(
+					random_get_double(0, width),
+					random_get_double(0, height)));
+	}
 
 	plex->tool = tool = nemotool_create();
 	if (tool == NULL)
@@ -245,6 +264,7 @@ int main(int argc, char *argv[])
 
 	plex->node = node = nemotale_node_create_pixman(width, height);
 	nemotale_node_set_id(node, 1);
+	nemotale_node_opaque(node, 0, 0, width, height);
 	nemotale_attach_node(tale, node);
 
 	nemocanvas_dispatch_frame(NTEGL_CANVAS(canvas));

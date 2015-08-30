@@ -19,6 +19,11 @@ struct plexback {
 	struct talenode *node;
 
 	int32_t width, height;
+
+	std::vector<p2t::Point *> spoints;
+	std::vector<p2t::Point *> dpoints;
+
+	uint32_t msecs;
 };
 
 #ifdef __cplusplus
