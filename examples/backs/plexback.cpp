@@ -44,10 +44,13 @@
 #include <talehelper.h>
 #include <nemomisc.h>
 
+#include <poly2tri.h>
+
 static void plexback_render_one(pixman_image_t *image)
 {
 	int32_t width = pixman_image_get_width(image);
 	int32_t height = pixman_image_get_height(image);
+	int i;
 
 	SkBitmap bitmap;
 	bitmap.setInfo(
@@ -60,18 +63,87 @@ static void plexback_render_one(pixman_image_t *image)
 
 	canvas.clear(SK_ColorTRANSPARENT);
 
-	SkPaint paint;
-	paint.setStyle(SkPaint::kStrokeAndFill_Style);
-	paint.setStrokeWidth(3.0f);
-	paint.setColor(
-			SkColorSetARGB(
-				random_get_double(0.0f, 255.0f),
-				random_get_double(0.0f, 255.0f),
-				random_get_double(0.0f, 255.0f),
-				random_get_double(0.0f, 255.0f)));
+	SkMaskFilter *filter = SkBlurMaskFilter::Create(
+			kSolid_SkBlurStyle,
+			SkBlurMask::ConvertRadiusToSigma(5.0f),
+			SkBlurMaskFilter::kHighQuality_BlurFlag);
 
-	SkRect rect = SkRect::MakeXYWH(width * 0.1f, height * 0.1f, width * 0.8f, height * 0.8f);
-	canvas.drawRect(rect, paint);
+	SkPaint stroke;
+	stroke.setAntiAlias(true);
+	stroke.setStyle(SkPaint::kStroke_Style);
+	stroke.setStrokeWidth(1.0f);
+	stroke.setColor(SkColorSetARGB(63.0f, 0.0f, 255.0f, 255.0f));
+	stroke.setMaskFilter(filter);
+
+	SkPaint fill;
+	fill.setAntiAlias(true);
+	fill.setStyle(SkPaint::kFill_Style);
+	fill.setColor(SkColorSetARGB(128.0f, 0.0f, 255.0f, 255.0f));
+	fill.setMaskFilter(filter);
+
+	SkPath path;
+
+	std::vector<p2t::Point *> polyline;
+	polyline.push_back(new p2t::Point(0.0f, 0.0f));
+	polyline.push_back(new p2t::Point(0.0f, height));
+	polyline.push_back(new p2t::Point(width, height));
+	polyline.push_back(new p2t::Point(width, 0.0f));
+
+	p2t::CDT *cdt = new p2t::CDT(polyline);
+
+	for (i = 0; i < 500; i++) {
+		cdt->AddPoint(new p2t::Point(
+					random_get_double(0, width),
+					random_get_double(0, height)));
+	}
+
+	cdt->Triangulate();
+
+	std::vector<p2t::Triangle *> triangles = cdt->GetTriangles();
+	std::list<p2t::Triangle *> maps = cdt->GetMap();
+
+#if	0
+	for (i = 0; i < triangles.size(); i++) {
+		p2t::Triangle *t = triangles[i];
+		p2t::Point *a = t->GetPoint(0);
+		p2t::Point *b = t->GetPoint(1);
+		p2t::Point *c = t->GetPoint(2);
+
+		SkPoint points[3] = {
+			SkPoint::Make(a->x, a->y),
+			SkPoint::Make(b->x, b->y),
+			SkPoint::Make(c->x, c->y)
+		};
+
+		path.addPoly(points, 3, true);
+	}
+#else
+	std::list<p2t::Triangle *>::iterator iter;
+
+	for (iter = maps.begin(); iter != maps.end(); iter++) {
+		p2t::Triangle *t = *iter;
+		p2t::Point *a = t->GetPoint(0);
+		p2t::Point *b = t->GetPoint(1);
+		p2t::Point *c = t->GetPoint(2);
+
+		path.moveTo(a->x, a->y);
+		path.lineTo(b->x, b->y);
+		path.lineTo(c->x, c->y);
+	}
+
+	for (iter = maps.begin(); iter != maps.end(); iter++) {
+		p2t::Triangle *t = *iter;
+		p2t::Point *a = t->GetPoint(0);
+		p2t::Point *b = t->GetPoint(1);
+		p2t::Point *c = t->GetPoint(2);
+
+		canvas.drawCircle(a->x, a->y, 5.0f, fill);
+		canvas.drawCircle(b->x, b->y, 5.0f, fill);
+		canvas.drawCircle(c->x, c->y, 5.0f, fill);
+	}
+#endif
+
+	canvas.drawPath(path, stroke);
 }
 
 static void plexback_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t secs, uint32_t nsecs)
@@ -80,11 +152,13 @@ static void plexback_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 	struct plexback *plex = (struct plexback *)nemotale_get_userdata(tale);
 	struct talenode *node = plex->node;
 
+#if	0
 	if (secs == 0 && nsecs == 0) {
 		nemocanvas_feedback(canvas);
 	} else {
 		nemocanvas_feedback(canvas);
 	}
+#endif
 
 	plexback_render_one(nemotale_node_get_pixman(node));
 

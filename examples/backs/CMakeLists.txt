@@ -8,6 +8,7 @@ include_directories(
 	${CMAKE_SOURCE_DIR}/tale
 	${CMAKE_SOURCE_DIR}/tool
 	${CMAKE_BINARY_DIR}/tool
+	${CMAKE_SOURCE_DIR}/thirds/poly2tri
 	/usr/include/skia/core
 	/usr/include/skia/config
 	/usr/include/skia/animator
@@ -50,5 +51,6 @@ TARGET_LINK_LIBRARIES(plexback
 	nemotool
 	nemotale
 	skia
+	poly2tri
 	${NEMOUX_COMMON_LIBRARIES}
 	)
