@@ -11,6 +11,7 @@
 
 #include <nemolog.h>
 
+#ifdef NEMO_LOG_ON
 static FILE *nemologfile = NULL;
 
 int nemolog_open_file(const char *filepath)
@@ -102,3 +103,4 @@ int nemolog_error(const char *tag, const char *fmt, ...)
 
 	return r;
 }
+#endif

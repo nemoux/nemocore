@@ -16,6 +16,7 @@
 #include <touch.h>
 #include <screen.h>
 #include <nemomisc.h>
+#include <nemolog.h>
 
 #define BITS_PER_LONG						(sizeof(unsigned long) * 8)
 #define NBITS(x)								((((x) - 1) / BITS_PER_LONG) + 1)

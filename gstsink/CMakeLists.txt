@@ -20,7 +20,7 @@ include_directories(
 	${CMAKE_SOURCE_DIR}/common
 	)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DNEMO_LOG_ON -DNEMO_DEBUG_ON")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 
 add_definitions(-DGST_PACKAGE_NAME="GStreamer NEMO Plug-ins git")

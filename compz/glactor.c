@@ -21,6 +21,7 @@
 #include <cliphelper.h>
 #include <waylandhelper.h>
 #include <nemomisc.h>
+#include <nemolog.h>
 
 static void glrenderer_prepare_textures(struct glcontent *glcontent, int count)
 {
