@@ -37,9 +37,11 @@
 
 #include <SkGeometry.h>
 
+#include <plexback.h>
 #include <nemotool.h>
-#include <nemocanvas.h>
+#include <nemoegl.h>
 #include <pixmanhelper.h>
+#include <talehelper.h>
 #include <nemomisc.h>
 
 static void plexback_render_one(pixman_image_t *image)
@@ -47,14 +49,16 @@ static void plexback_render_one(pixman_image_t *image)
 	int32_t width = pixman_image_get_width(image);
 	int32_t height = pixman_image_get_height(image);
 
-	SkBitmap sbitmap;
-	sbitmap.setInfo(
+	SkBitmap bitmap;
+	bitmap.setInfo(
 			SkImageInfo::Make(width, height, kN32_SkColorType, kPremul_SkAlphaType));
-	sbitmap.setPixels(
+	bitmap.setPixels(
 			pixman_image_get_data(image));
 
-	SkBitmapDevice sdevice(sbitmap);
-	SkCanvas scanvas(&sdevice);
+	SkBitmapDevice device(bitmap);
+	SkCanvas canvas(&device);
+
+	canvas.clear(SK_ColorTRANSPARENT);
 
 	SkPaint paint;
 	paint.setStyle(SkPaint::kStrokeAndFill_Style);
@@ -67,30 +71,31 @@ static void plexback_render_one(pixman_image_t *image)
 				random_get_double(0.0f, 255.0f)));
 
 	SkRect rect = SkRect::MakeXYWH(width * 0.1f, height * 0.1f, width * 0.8f, height * 0.8f);
-
-	scanvas.save();
-	scanvas.drawRect(rect, paint);
+	canvas.drawRect(rect, paint);
 }
 
 static void plexback_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t secs, uint32_t nsecs)
 {
+	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
+	struct plexback *plex = (struct plexback *)nemotale_get_userdata(tale);
+	struct talenode *node = plex->node;
+
 	if (secs == 0 && nsecs == 0) {
 		nemocanvas_feedback(canvas);
 	} else {
 		nemocanvas_feedback(canvas);
 	}
 
-	nemocanvas_buffer(canvas);
+	plexback_render_one(nemotale_node_get_pixman(node));
 
-	plexback_render_one(nemocanvas_get_pixman_image(canvas));
+	nemotale_node_damage_all(node);
 
-	nemocanvas_damage(canvas, 0, 0, 0, 0);
-	nemocanvas_commit(canvas);
+	nemotale_composite_egl(tale, NULL);
 }
 
-static int plexback_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t type, struct nemoevent *event)
+static void plexback_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
 {
-	return 0;
+	uint32_t id = nemotale_node_get_id(node);
 }
 
 int main(int argc, char *argv[])
@@ -101,8 +106,12 @@ int main(int argc, char *argv[])
 		{ "background",	no_argument,						NULL,		'b' },
 		{ 0 }
 	};
+	struct plexback *plex;
 	struct nemotool *tool;
-	struct nemocanvas *canvas;
+	struct eglcontext *egl;
+	struct eglcanvas *canvas;
+	struct nemotale *tale;
+	struct talenode *node;
 	int32_t width = 1920;
 	int32_t height = 1080;
 	int opt;
@@ -125,25 +134,58 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	tool = nemotool_create();
+	plex = (struct plexback *)malloc(sizeof(struct plexback));
+	if (plex == NULL)
+		return -1;
+	memset(plex, 0, sizeof(struct plexback));
+
+	plex->width = width;
+	plex->height = height;
+
+	plex->tool = tool = nemotool_create();
 	if (tool == NULL)
 		return -1;
 	nemotool_connect_wayland(tool, NULL);
 
-	canvas = nemocanvas_create(tool);
-	nemocanvas_set_nemosurface(canvas, NEMO_SHELL_SURFACE_TYPE_NORMAL);
-	nemocanvas_set_layer(canvas, NEMO_SURFACE_LAYER_TYPE_BACKGROUND);
-	nemocanvas_set_dispatch_frame(canvas, plexback_dispatch_canvas_frame);
-	nemocanvas_set_dispatch_event(canvas, plexback_dispatch_canvas_event);
+	plex->egl = egl = nemotool_create_egl(tool);
 
-	nemocanvas_set_size(canvas, width, height);
+	plex->eglcanvas = canvas = nemotool_create_egl_canvas(egl, width, height);
+	nemocanvas_opaque(NTEGL_CANVAS(canvas), 0, 0, width, height);
+	nemocanvas_set_nemosurface(NTEGL_CANVAS(canvas), NEMO_SHELL_SURFACE_TYPE_NORMAL);
+	nemocanvas_set_layer(NTEGL_CANVAS(canvas), NEMO_SURFACE_LAYER_TYPE_BACKGROUND);
+	nemocanvas_set_dispatch_frame(NTEGL_CANVAS(canvas), plexback_dispatch_canvas_frame);
 
-	nemocanvas_dispatch_frame(canvas);
+	plex->canvas = NTEGL_CANVAS(canvas);
+
+	plex->tale = tale = nemotale_create_gl();
+	nemotale_set_backend(tale,
+			nemotale_create_egl(
+				NTEGL_DISPLAY(egl),
+				NTEGL_CONTEXT(egl),
+				NTEGL_CONFIG(egl),
+				(EGLNativeWindowType)NTEGL_WINDOW(canvas)));
+	nemotale_resize(tale, width, height);
+
+	nemotale_attach_canvas(tale, NTEGL_CANVAS(canvas), plexback_dispatch_tale_event);
+	nemotale_set_userdata(tale, plex);
+
+	plex->node = node = nemotale_node_create_pixman(width, height);
+	nemotale_node_set_id(node, 1);
+	nemotale_attach_node(tale, node);
+
+	nemocanvas_dispatch_frame(NTEGL_CANVAS(canvas));
 
 	nemotool_run(tool);
 
+	nemotale_destroy_gl(tale);
+
+	nemotool_destroy_egl_canvas(canvas);
+	nemotool_destroy_egl(egl);
+
 	nemotool_disconnect_wayland(tool);
 	nemotool_destroy(tool);
+
+	free(plex);
 
 	return 0;
 }

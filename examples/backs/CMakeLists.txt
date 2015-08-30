@@ -43,10 +43,12 @@ TARGET_LINK_LIBRARIES(miniback
 
 add_executable(plexback
 	plexback.cpp
+	talehelper.c
 	)
 
 TARGET_LINK_LIBRARIES(plexback
 	nemotool
+	nemotale
 	skia
 	${NEMOUX_COMMON_LIBRARIES}
 	)
