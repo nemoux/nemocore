@@ -84,7 +84,28 @@ static void plexback_render_one(struct plexback *plex, pixman_image_t *image, do
 
 	SkPath path;
 
-#if	0
+#if PLEXBACK_VORONOI_ENABLE
+	plex->points[0] = Point(width * t, height * t);
+
+	voronoi_diagram<double> vd;
+	construct_voronoi(
+			plex->points.begin(), plex->points.end(),
+			plex->segments.begin(), plex->segments.end(),
+			&vd);
+
+	for (voronoi_diagram<double>::const_edge_iterator it = vd.edges().begin(); it != vd.edges().end(); it++) {
+		if (it->vertex0() != NULL && it->vertex1() != NULL) {
+			path.moveTo(it->vertex0()->x(), it->vertex0()->y());
+			path.lineTo(it->vertex1()->x(), it->vertex1()->y());
+		}
+	}
+
+	for (i = 0; i < plex->points.size(); i++) {
+		Point &p = plex->points[i];
+
+		canvas.drawCircle(x(p), y(p), 3.0f, fill);
+	}
+#else
 	std::vector<p2t::Point *> polyline;
 	polyline.push_back(new p2t::Point(0.0f, 0.0f));
 	polyline.push_back(new p2t::Point(0.0f, height));
@@ -104,7 +125,7 @@ static void plexback_render_one(struct plexback *plex, pixman_image_t *image, do
 	std::vector<p2t::Triangle *> triangles = cdt->GetTriangles();
 	std::list<p2t::Triangle *> maps = cdt->GetMap();
 
-#if	0
+#if 0
 	for (i = 0; i < triangles.size(); i++) {
 		p2t::Triangle *t = triangles[i];
 		p2t::Point *a = t->GetPoint(0);
@@ -120,7 +141,7 @@ static void plexback_render_one(struct plexback *plex, pixman_image_t *image, do
 		path.addPoly(points, 3, true);
 	}
 #else
-	std::list<p2t::Triangle *>::itator it;
+	std::list<p2t::Triangle *>::iterator it;
 
 	for (it = maps.begin(); it != maps.end(); it++) {
 		p2t::Triangle *t = *it;
@@ -144,27 +165,6 @@ static void plexback_render_one(struct plexback *plex, pixman_image_t *image, do
 		canvas.drawCircle(c->x, c->y, 5.0f, fill);
 	}
 #endif
-#else
-	plex->points[0] = Point(width * t, height * t);
-
-	voronoi_diagram<double> vd;
-	construct_voronoi(
-			plex->points.begin(), plex->points.end(),
-			plex->segments.begin(), plex->segments.end(),
-			&vd);
-
-	for (voronoi_diagram<double>::const_edge_iterator it = vd.edges().begin(); it != vd.edges().end(); it++) {
-		if (it->vertex0() != NULL && it->vertex1() != NULL) {
-			path.moveTo(it->vertex0()->x(), it->vertex0()->y());
-			path.lineTo(it->vertex1()->x(), it->vertex1()->y());
-		}
-	}
-
-	for (i = 0; i < plex->points.size(); i++) {
-		Point &p = plex->points[i];
-
-		canvas.drawCircle(x(p), y(p), 3.0f, fill);
-	}
 #endif
 
 	canvas.drawPath(path, stroke);
@@ -244,7 +244,13 @@ int main(int argc, char *argv[])
 	plex->width = width;
 	plex->height = height;
 
-#if	0
+#if PLEXBACK_VORONOI_ENABLE
+	for (i = 0; i < 500; i++) {
+		plex->points.push_back(Point(
+					random_get_double(0, width),
+					random_get_double(0, height)));
+	}
+#else
 	for (i = 0; i < 500; i++) {
 		plex->spoints.push_back(new p2t::Point(
 					random_get_double(0, width),
@@ -253,12 +259,6 @@ int main(int argc, char *argv[])
 
 	for (i = 0; i < 500; i++) {
 		plex->dpoints.push_back(new p2t::Point(
-					random_get_double(0, width),
-					random_get_double(0, height)));
-	}
-#else
-	for (i = 0; i < 500; i++) {
-		plex->points.push_back(Point(
 					random_get_double(0, width),
 					random_get_double(0, height)));
 	}

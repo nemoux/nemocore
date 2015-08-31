@@ -9,6 +9,8 @@
 NEMO_BEGIN_EXTERN_C
 #endif
 
+#define	PLEXBACK_VORONOI_ENABLE	(0)
+
 struct plexback {
 	struct nemotool *tool;
 
@@ -22,12 +24,12 @@ struct plexback {
 
 	int32_t width, height;
 
-#if	0
-	std::vector<p2t::Point *> spoints;
-	std::vector<p2t::Point *> dpoints;
-#else
+#if PLEXBACK_VORONOI_ENABLE
 	std::vector<Point> points;
 	std::vector<Segment> segments;
+#else
+	std::vector<p2t::Point *> spoints;
+	std::vector<p2t::Point *> dpoints;
 #endif
 
 	uint32_t msecs;
