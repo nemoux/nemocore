@@ -621,9 +621,42 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 			}
 
 			if (nemotale_is_single_click(tale, event, type)) {
+				struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
+				struct nemoshell *shell = NEMOSHOW_AT(show, shell);
+				struct nemocompz *compz = shell->compz;
 				int32_t pid = nemoshow_canvas_pick_one(canvas, event->x, event->y);
 
-				if (pid != 0 && minishell_has_slot(mini, pid) != 0) {
+				if (pid == 77) {
+					int index;
+
+					index = nemoitem_get_ifone(shell->configs, "//nemoshell/palm/item", 0, "id", "icon0");
+					if (index >= 0) {
+						char *itempath;
+
+						itempath = nemoitem_get_attr(shell->configs, index, "path");
+						if (itempath != NULL) {
+							struct wl_client *client;
+							char *argv[2];
+
+							argv[0] = itempath;
+							argv[1] = NULL;
+
+							client = wayland_execute_client(compz->display, argv[0], argv, NULL, NULL);
+							if (client != NULL) {
+								struct clientstate *state;
+
+								state = nemoshell_create_client_state(client);
+								if (state != NULL) {
+									state->x = event->x;
+									state->y = event->y;
+									state->dx = 0.5f;
+									state->dy = 0.5f;
+									state->flags = NEMO_SHELL_SURFACE_ALL_FLAGS;
+								}
+							}
+						}
+					}
+				} else if (pid != 0 && minishell_has_slot(mini, pid) != 0) {
 					struct showone *one = (struct showone *)minishell_get_slot(mini, pid);
 					struct showone *group = nemoshow_one_get_parent(one, NEMOSHOW_ITEM_TYPE, NEMOSHOW_GROUP_ITEM);
 					struct showone *nuts[6];
@@ -650,6 +683,7 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 						nuts[i] = nut = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
 						nemoshow_attach_one(show, nut);
 						nemoshow_item_attach_one(group, nut);
+						nemoshow_item_set_event(nut, 77);
 						nemoshow_item_set_canvas(nut, canvas);
 						nemoshow_item_set_x(nut, cos(r) * 100.0f);
 						nemoshow_item_set_y(nut, sin(r) * 100.0f);
