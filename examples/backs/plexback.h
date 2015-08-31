@@ -3,6 +3,8 @@
 
 #include <nemoconfig.h>
 
+#include <voronoihelper.h>
+
 #ifdef __cplusplus
 NEMO_BEGIN_EXTERN_C
 #endif
@@ -20,8 +22,13 @@ struct plexback {
 
 	int32_t width, height;
 
+#if	0
 	std::vector<p2t::Point *> spoints;
 	std::vector<p2t::Point *> dpoints;
+#else
+	std::vector<Point> points;
+	std::vector<Segment> segments;
+#endif
 
 	uint32_t msecs;
 };
