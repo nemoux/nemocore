@@ -18,14 +18,8 @@
 static void playback_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t secs, uint32_t nsecs)
 {
 	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
-	struct playback *play = (struct playback *)nemotale_get_userdata(tale);
-	struct talenode *node = play->node;
 
-	if (secs == 0 && nsecs == 0) {
-		nemocanvas_feedback(canvas);
-	} else {
-		nemocanvas_feedback(canvas);
-	}
+	nemocanvas_feedback(canvas);
 
 	nemotale_composite_egl(tale, NULL);
 }
@@ -132,8 +126,6 @@ int main(int argc, char *argv[])
 	nemotale_node_opaque(node, 0, 0, width, height);
 	nemotale_attach_node(tale, node);
 
-	nemocanvas_dispatch_frame(NTEGL_CANVAS(canvas));
-
 	play->gst = nemogst_create();
 	if (play->gst == NULL)
 		goto out;
@@ -150,6 +142,8 @@ int main(int argc, char *argv[])
 	nemogst_resize_video(play->gst, width, height);
 
 	nemogst_play_video(play->gst);
+
+	nemocanvas_dispatch_frame(play->canvas);
 
 	gmainloop = g_main_loop_new(NULL, FALSE);
 

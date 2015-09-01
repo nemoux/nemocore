@@ -7,6 +7,8 @@
 
 #include <assert.h>
 #include <sys/mman.h>
+#include <sys/epoll.h>
+#include <sys/eventfd.h>
 #include <linux/input.h>
 
 #include <pixman.h>
@@ -239,6 +241,13 @@ static const struct wl_surface_listener surface_listener = {
 	surface_leave
 };
 
+static void nemocanvas_dispatch_frame_event(struct nemotask *task, uint32_t events)
+{
+	struct nemocanvas *canvas = (struct nemocanvas *)container_of(task, struct nemocanvas, frame_task);
+
+	nemocanvas_dispatch_frame(canvas);
+}
+
 struct nemocanvas *nemocanvas_create(struct nemotool *tool)
 {
 	struct nemocanvas *canvas;
@@ -247,6 +256,13 @@ struct nemocanvas *nemocanvas_create(struct nemotool *tool)
 	if (canvas == NULL)
 		return NULL;
 	memset(canvas, 0, sizeof(struct nemocanvas));
+
+	canvas->eventfd = eventfd(0, EFD_CLOEXEC | EFD_NONBLOCK);
+	if (canvas->eventfd < 0)
+		goto err1;
+	canvas->frame_task.dispatch = nemocanvas_dispatch_frame_event;
+
+	nemotool_watch_fd(tool, canvas->eventfd, EPOLLIN, &canvas->frame_task);
 
 	nemosignal_init(&canvas->destroy_signal);
 
@@ -261,6 +277,11 @@ struct nemocanvas *nemocanvas_create(struct nemotool *tool)
 	wl_surface_set_user_data(canvas->surface, canvas);
 
 	return canvas;
+
+err1:
+	free(canvas);
+
+	return NULL;
 }
 
 void nemocanvas_destroy(struct nemocanvas *canvas)
@@ -311,6 +332,9 @@ void nemocanvas_destroy(struct nemocanvas *canvas)
 	pixman_region32_fini(&canvas->damage);
 
 	nemolist_remove(&canvas->repaint_task.link);
+
+	nemotool_unwatch_fd(canvas->tool, canvas->eventfd);
+	close(canvas->eventfd);
 
 	free(canvas);
 }
@@ -532,6 +556,13 @@ void nemocanvas_dispatch_frame(struct nemocanvas *canvas)
 	if (canvas->feedback == NULL) {
 		canvas->dispatch_frame(canvas, 0, 0);
 	}
+}
+
+void nemocanvas_dispatch_frame_async(struct nemocanvas *canvas)
+{
+	uint64_t v = 1;
+
+	write(canvas->eventfd, &v, sizeof(uint64_t));
 }
 
 void nemocanvas_attach_queue(struct nemocanvas *canvas, struct nemoqueue *queue)

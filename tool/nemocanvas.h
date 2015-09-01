@@ -15,6 +15,7 @@ NEMO_BEGIN_EXTERN_C
 #include <nemolistener.h>
 
 struct nemocanvas;
+struct nemotask;
 
 typedef int (*nemocanvas_dispatch_event_t)(struct nemocanvas *canvas, uint32_t type, struct nemoevent *event);
 typedef void (*nemocanvas_dispatch_resize_t)(struct nemocanvas *canvas, int32_t width, int32_t height);
@@ -56,6 +57,9 @@ struct nemocanvas {
 	nemocanvas_dispatch_frame_t dispatch_frame;
 	nemocanvas_dispatch_screen_t dispatch_screen;
 	nemocanvas_dispatch_sound_t dispatch_sound;
+
+	int eventfd;
+	struct nemotask frame_task;
 
 	struct nemosignal destroy_signal;
 
@@ -106,6 +110,7 @@ extern void nemocanvas_set_dispatch_screen(struct nemocanvas *canvas, nemocanvas
 extern void nemocanvas_set_dispatch_sound(struct nemocanvas *canvas, nemocanvas_dispatch_sound_t dispatch);
 
 extern void nemocanvas_dispatch_frame(struct nemocanvas *canvas);
+extern void nemocanvas_dispatch_frame_async(struct nemocanvas *canvas);
 
 extern void nemocanvas_attach_queue(struct nemocanvas *canvas, struct nemoqueue *queue);
 extern void nemocanvas_detach_queue(struct nemocanvas *canvas);
