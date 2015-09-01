@@ -269,6 +269,7 @@ struct talenode *nemotale_node_create_pixman(int32_t width, int32_t height)
 	pixman_region32_init_rect(&node->blend, 0, 0, width, height);
 	pixman_region32_init_rect(&node->region, 0, 0, width, height);
 	pixman_region32_init_rect(&node->input, 0, 0, width, height);
+	pixman_region32_init_rect(&node->damage, 0, 0, width, height);
 
 	context->destroy_listener.notify = nemotale_node_handle_destroy_signal;
 	nemosignal_add(&node->destroy_signal, &context->destroy_listener);
@@ -348,6 +349,7 @@ int nemotale_node_resize_pixman(struct talenode *node, int32_t width, int32_t he
 		pixman_region32_init_rect(&node->blend, 0, 0, width, height);
 		pixman_region32_init_rect(&node->region, 0, 0, width, height);
 		pixman_region32_init_rect(&node->input, 0, 0, width, height);
+		pixman_region32_init_rect(&node->damage, 0, 0, width, height);
 
 		if (node->viewport.enable == 0) {
 			if (context->needs_free != 0)
@@ -416,7 +418,9 @@ int nemotale_node_set_viewport_pixman(struct talenode *node, int32_t width, int3
 
 	context->image = pixman_image_create_bits(PIXMAN_a8r8g8b8, width, height, context->data, width * 4);
 
+	node->dirty = 1;
 	node->needs_full_upload = 1;
+	pixman_region32_init_rect(&node->damage, 0, 0, node->geometry.width, node->geometry.height);
 
 	return 0;
 }
