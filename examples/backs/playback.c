@@ -38,19 +38,8 @@ static void playback_dispatch_tale_event(struct nemotale *tale, struct talenode 
 static void playback_dispatch_video_frame(GstElement *base, GstVideoFormat format, guint8 *buffer, gsize size, gpointer data)
 {
 	struct playback *play = (struct playback *)data;
-	pixman_image_t *src, *dst;
 
-	src = pixman_image_create_bits(PIXMAN_x8r8g8b8, play->width, play->height, (void *)buffer, play->width * 4);
-	dst = nemotale_node_get_pixman(play->node);
-
-	pixman_image_composite32(PIXMAN_OP_SRC,
-			src,
-			NULL,
-			dst,
-			0, 0, 0, 0, 0, 0,
-			play->width, play->height);
-
-	nemotale_node_damage_all(play->node);
+	nemotale_node_attach_pixman(play->node, (void *)buffer, play->width, play->height);
 }
 
 int main(int argc, char *argv[])

@@ -388,13 +388,9 @@ static GstFlowReturn gst_mini_sink_render(GstBaseSink *base, GstBuffer *buffer)
 		goto done;
 
 	gst_buffer_replace(&sink->last_buffer, to_render);
-
+	
 	if (sink->callback != NULL) {
-		gst_buffer_map(to_render, &src, GST_MAP_READ);
-
-		sink->callback(GST_ELEMENT(base), sink->video_format, src.data, src.size, sink->data);
-
-		gst_buffer_unmap(to_render, &src);
+		sink->callback(GST_ELEMENT(base), sink->video_format, meta->data, meta->size, sink->data);
 	}
 
 	if (buffer != to_render)

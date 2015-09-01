@@ -22,6 +22,7 @@ struct nemopmtale {
 struct talepmnode {
 	pixman_image_t *image;
 	void *data;
+	int needs_free;
 
 	struct nemolistener destroy_listener;
 };
@@ -35,6 +36,10 @@ extern int nemotale_composite_pixman(struct nemotale *tale, pixman_region32_t *r
 extern int nemotale_composite_pixman_full(struct nemotale *tale);
 
 extern struct talenode *nemotale_node_create_pixman(int32_t width, int32_t height);
+
+extern int nemotale_node_attach_pixman(struct talenode *node, void *data, int32_t width, int32_t height);
+extern void nemotale_node_detach_pixman(struct talenode *node);
+
 extern int nemotale_node_resize_pixman(struct talenode *node, int32_t width, int32_t height);
 extern void nemotale_node_fill_pixman(struct talenode *node, double r, double g, double b, double a);
 extern int nemotale_node_set_viewport_pixman(struct talenode *node, int32_t width, int32_t height);

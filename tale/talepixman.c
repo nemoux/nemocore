@@ -255,6 +255,8 @@ struct talenode *nemotale_node_create_pixman(int32_t width, int32_t height)
 
 	context->image = pixman_image_create_bits(PIXMAN_a8r8g8b8, width, height, context->data, width * 4);
 
+	context->needs_free = 1;
+
 	nemotale_node_prepare(node);
 
 	node->dirty = 1;
@@ -282,12 +284,63 @@ err1:
 	return NULL;
 }
 
+int nemotale_node_attach_pixman(struct talenode *node, void *data, int32_t width, int32_t height)
+{
+	struct talepmnode *context = (struct talepmnode *)node->pmcontext;
+
+	node->dirty = 1;
+	node->needs_full_upload = 1;
+	node->geometry.width = width;
+	node->geometry.height = height;
+	node->transform.dirty = 1;
+
+	pixman_region32_init_rect(&node->blend, 0, 0, width, height);
+	pixman_region32_init_rect(&node->region, 0, 0, width, height);
+	pixman_region32_init_rect(&node->input, 0, 0, width, height);
+
+	if (node->viewport.enable == 0) {
+		if (context->needs_free != 0)
+			free(context->data);
+		if (context->image != NULL)
+			pixman_image_unref(context->image);
+
+		context->data = data;
+		context->image = pixman_image_create_bits(PIXMAN_a8r8g8b8, width, height, context->data, width * 4);
+
+		context->needs_free = 0;
+
+		node->viewport.width = width;
+		node->viewport.height = height;
+	} else {
+		node->viewport.sx = (double)node->viewport.width / (double)node->geometry.width;
+		node->viewport.sy = (double)node->viewport.height / (double)node->geometry.height;
+	}
+
+	return 0;
+}
+
+void nemotale_node_detach_pixman(struct talenode *node)
+{
+	struct talepmnode *context = (struct talepmnode *)node->pmcontext;
+
+	if (context->needs_free != 0)
+		free(context->data);
+	if (context->image != NULL)
+		pixman_image_unref(context->image);
+
+	context->data = NULL;
+	context->image = NULL;
+
+	context->needs_free = 0;
+}
+
 int nemotale_node_resize_pixman(struct talenode *node, int32_t width, int32_t height)
 {
 	if (node->geometry.width != width || node->geometry.height != height) {
 		struct talepmnode *context = (struct talepmnode *)node->pmcontext;
 
 		node->dirty = 1;
+		node->needs_full_upload = 1;
 		node->geometry.width = width;
 		node->geometry.height = height;
 		node->transform.dirty = 1;
@@ -297,17 +350,20 @@ int nemotale_node_resize_pixman(struct talenode *node, int32_t width, int32_t he
 		pixman_region32_init_rect(&node->input, 0, 0, width, height);
 
 		if (node->viewport.enable == 0) {
-			pixman_image_unref(context->image);
-			free(context->data);
+			if (context->needs_free != 0)
+				free(context->data);
+			if (context->image != NULL)
+				pixman_image_unref(context->image);
 
 			context->data = malloc(width * height * 4);
 			memset(context->data, 0, width * height * 4);
 
 			context->image = pixman_image_create_bits(PIXMAN_a8r8g8b8, width, height, context->data, width * 4);
 
+			context->needs_free = 1;
+
 			node->viewport.width = width;
 			node->viewport.height = height;
-			node->needs_full_upload = 1;
 		} else {
 			node->viewport.sx = (double)node->viewport.width / (double)node->geometry.width;
 			node->viewport.sy = (double)node->viewport.height / (double)node->geometry.height;
