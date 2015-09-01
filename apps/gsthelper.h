@@ -4,6 +4,9 @@
 #include <stdint.h>
 
 #include <gst/gst.h>
+#include <gst/video/video.h>
+#include <gst/video/gstvideosink.h>
+#include <gst/video/gstvideometa.h>
 #include <gst/video/navigation.h>
 #include <gst/pbutils/pbutils.h>
 
@@ -26,6 +29,7 @@ typedef enum {
 } GstPlayFlags;
 
 typedef void (*nemogst_subtitle_render_t)(GstElement *base, guint8 *buffer, gsize size, gpointer data);
+typedef void (*nemogst_minisink_render_t)(GstElement *base, GstVideoFormat format, guint8 *buffer, gsize size, gpointer data);
 
 struct nemogst {
 	GstElement *player;
@@ -72,6 +76,7 @@ extern void nemogst_destroy(struct nemogst *gst);
 
 extern int nemogst_prepare_nemo_sink(struct nemogst *gst, struct wl_display *display, struct wl_shm *shm, uint32_t formats, struct wl_surface *surface);
 extern int nemogst_prepare_nemo_subsink(struct nemogst *gst, nemogst_subtitle_render_t render, void *data);
+extern int nemogst_prepare_mini_sink(struct nemogst *gst, nemogst_minisink_render_t render, void *data);
 
 extern int nemogst_set_video_path(struct nemogst *gst, const char *uri);
 extern int nemogst_set_subtitle_path(struct nemogst *gst, const char *path);

@@ -203,6 +203,58 @@ int nemogst_prepare_nemo_subsink(struct nemogst *gst, nemogst_subtitle_render_t 
 	return 0;
 }
 
+int nemogst_prepare_mini_sink(struct nemogst *gst, nemogst_minisink_render_t render, void *data)
+{
+	GstPad *pad;
+
+	gst->sink = gst_element_factory_make("minisink", "minisink");
+	if (gst->sink == NULL)
+		return -1;
+	g_object_set(G_OBJECT(gst->sink), "render-callback", render, NULL);
+	g_object_set(G_OBJECT(gst->sink), "render-data", data, NULL);
+
+	gst->player = gst_element_factory_make("playbin", "playbin");
+	g_object_set(G_OBJECT(gst->player), "video-sink", gst->sink, NULL);
+
+	gst->pipeline = gst_pipeline_new("nemopipe");
+	gst->scale = gst_element_factory_make("videoscale", "nemoscale");
+	gst->filter = gst_element_factory_make("capsfilter", "nemofilter");
+
+	gst_bin_add_many(GST_BIN(gst->pipeline), gst->scale, gst->filter, gst->sink, NULL);
+	gst_element_link_many(gst->scale, gst->filter, gst->sink, NULL);
+
+	pad = gst_element_get_static_pad(gst->scale, "sink");
+	gst_element_add_pad(gst->pipeline, gst_ghost_pad_new("sink", pad));
+	gst_object_unref(pad);
+
+	g_object_set(G_OBJECT(gst->player), "video-sink", gst->pipeline, NULL);
+
+#ifdef NEMOUX_WITH_ALSA_MULTINODE
+	gst->audiobin = gst_element_factory_make("bin", "nemoaudio");
+
+	gst->audiotee = gst_element_factory_make("tee", "nemotee");
+	g_object_set(G_OBJECT(gst->audiotee), "allow-not-linked", TRUE, NULL);
+
+	gst->audioteepadtempl = gst_element_class_get_pad_template(GST_ELEMENT_GET_CLASS(gst->audiotee), "src_%u");
+
+	gst_bin_add(GST_BIN(gst->audiobin), gst->audiotee);
+
+	pad = gst_element_get_static_pad(gst->audiotee, "sink");
+	gst_element_add_pad(gst->audiobin, gst_ghost_pad_new("sink", pad));
+	gst_object_unref(pad);
+
+	g_object_set(G_OBJECT(gst->player), "audio-sink", gst->audiobin, NULL);
+#endif
+
+	gst->bus = gst_pipeline_get_bus(GST_PIPELINE(gst->player));
+	gst->busid = gst_bus_add_watch(gst->bus, nemogst_watch_bus, gst);
+
+	gst_element_set_state(gst->player, GST_STATE_READY);
+
+	return 0;
+	return 0;
+}
+
 int nemogst_set_video_path(struct nemogst *gst, const char *uri)
 {
 	GstDiscoverer *dc;
