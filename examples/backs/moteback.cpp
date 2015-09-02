@@ -50,10 +50,11 @@ static void moteback_update_one(struct moteback *mote, double secs)
 	nemomote_positionbuilder_update(&mote->mote, secs, &mote->zone);
 	nemomote_commit(&mote->mote);
 
-	nemomote_gravitywallactor_update(&mote->mote, secs, 960.0f, 270.0f, 0.0f, 10000.0f, 10000.0f);
-	nemomote_gravitywallactor_update(&mote->mote, secs, 960.0f, 810.0f, 0.0f, 10000.0f, 10000.0f);
-	nemomote_gravitywallactor_update(&mote->mote, secs, 2880.0f, 280.0f, 0.0f, 10000.0f, 10000.0f);
-	nemomote_gravitywallactor_update(&mote->mote, secs, 2800.0f, 810.0f, 0.0f, 10000.0f, 10000.0f);
+	nemomote_gravitywallactor_update(&mote->mote, secs, mote->width * 0.2f, mote->height * 0.2f, 0.0f, 1000000.0f, 100000.0f);
+	nemomote_gravitywallactor_update(&mote->mote, secs, mote->width * 0.2f, mote->height * 0.8f, 0.0f, 1000000.0f, 100000.0f);
+	nemomote_gravitywallactor_update(&mote->mote, secs, mote->width * 0.8f, mote->height * 0.2f, 0.0f, 1000000.0f, 100000.0f);
+	nemomote_gravitywallactor_update(&mote->mote, secs, mote->width * 0.8f, mote->height * 0.8f, 0.0f, 1000000.0f, 100000.0f);
+	nemomote_boundingboxactor_update(&mote->mote, secs, &mote->zone, 0.8f);
 	nemomote_moveactor_update(&mote->mote, secs);
 	nemomote_cleanup(&mote->mote);
 }
@@ -116,9 +117,9 @@ static void moteback_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 		if (mote->secs == 0.0f)
 			moteback_update_one(mote, 0.0f);
 		else
-			moteback_update_one(mote, (secs + nsecs / 1000000000) - mote->secs);
+			moteback_update_one(mote, ((double)secs + (double)nsecs / 1000000000) - mote->secs);
 
-		mote->secs = secs + nsecs / 1000000000;
+		mote->secs = (double)secs + (double)nsecs / 1000000000;
 	}
 
 	moteback_render_one(mote, nemotale_node_get_pixman(node));
@@ -179,10 +180,10 @@ int main(int argc, char *argv[])
 	mote->height = height;
 
 	nemomote_init(&mote->mote);
-	nemomote_set_max_particles(&mote->mote, 3000);
-	nemomote_blast_set_property(&mote->blastemitter, 300);
+	nemomote_set_max_particles(&mote->mote, 1200);
+	nemomote_blast_set_property(&mote->blastemitter, 1200);
 	nemomote_blast_ready(&mote->mote, &mote->blastemitter);
-	nemozone_set_cube(&mote->zone, 0, 3840, 0, 1920, 0, 0);
+	nemozone_set_cube(&mote->zone, mote->width * 0.0f, mote->width * 1.0f, mote->height * 0.0f, mote->height * 1.0f, 0.0f, 0.0f);
 
 	mote->tool = tool = nemotool_create();
 	if (tool == NULL)
