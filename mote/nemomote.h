@@ -8,7 +8,7 @@
 #include <emitters/sine.h>
 #include <actors/move.h>
 #include <actors/accelerate.h>
-#include <actors/gravitywall.h>
+#include <actors/gravitywell.h>
 #include <actors/mutualgravity.h>
 #include <actors/mousegravity.h>
 #include <actors/deathzone.h>

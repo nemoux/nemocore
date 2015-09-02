@@ -55,10 +55,10 @@ static void moteback_update_one(struct moteback *mote, double secs)
 	nemomote_type_update(&mote->mote, 2);
 	nemomote_commit(&mote->mote);
 
-	nemomote_gravitywall_update(&mote->mote, 1, secs, mote->width * 0.2f, mote->height * 0.2f, 0.0f, 1000000.0f, 100000.0f);
-	nemomote_gravitywall_update(&mote->mote, 1, secs, mote->width * 0.2f, mote->height * 0.8f, 0.0f, 1000000.0f, 100000.0f);
-	nemomote_gravitywall_update(&mote->mote, 1, secs, mote->width * 0.8f, mote->height * 0.2f, 0.0f, 1000000.0f, 100000.0f);
-	nemomote_gravitywall_update(&mote->mote, 1, secs, mote->width * 0.8f, mote->height * 0.8f, 0.0f, 1000000.0f, 100000.0f);
+	nemomote_gravitywell_update(&mote->mote, 1, secs, mote->width * 0.2f, mote->height * 0.2f, 0.0f, 1000000.0f, 100000.0f);
+	nemomote_gravitywell_update(&mote->mote, 1, secs, mote->width * 0.2f, mote->height * 0.8f, 0.0f, 1000000.0f, 100000.0f);
+	nemomote_gravitywell_update(&mote->mote, 1, secs, mote->width * 0.8f, mote->height * 0.2f, 0.0f, 1000000.0f, 100000.0f);
+	nemomote_gravitywell_update(&mote->mote, 1, secs, mote->width * 0.8f, mote->height * 0.8f, 0.0f, 1000000.0f, 100000.0f);
 	nemomote_boundingbox_update(&mote->mote, 1, secs, &mote->zone, 0.8f);
 	nemomote_move_update(&mote->mote, 1, secs);
 

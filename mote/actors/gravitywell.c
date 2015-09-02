@@ -8,9 +8,9 @@
 #include <math.h>
 
 #include <nemomote.h>
-#include <actors/gravitywall.h>
+#include <actors/gravitywell.h>
 
-int nemomote_gravitywall_update(struct nemomote *mote, uint32_t type, double secs, double x, double y, double z, double intensity, double epsilon)
+int nemomote_gravitywell_update(struct nemomote *mote, uint32_t type, double secs, double x, double y, double z, double intensity, double epsilon)
 {
 	int i;
 

@@ -19,7 +19,7 @@ add_library(nemomote SHARED
 	emitters/sine.c
 	actors/move.c
 	actors/accelerate.c
-	actors/gravitywall.c
+	actors/gravitywell.c
 	actors/mutualgravity.c
 	actors/mousegravity.c
 	actors/deathzone.c
