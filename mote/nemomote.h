@@ -1,6 +1,8 @@
 #ifndef	__NEMOMOTE_H__
 #define	__NEMOMOTE_H__
 
+#include <stdint.h>
+
 #include <emitters/blast.h>
 #include <emitters/random.h>
 #include <emitters/sine.h>
@@ -17,14 +19,17 @@
 #include <builders/position.h>
 #include <builders/velocity.h>
 #include <builders/mass.h>
+#include <builders/lifetime.h>
 #include <builders/color.h>
+#include <builders/type.h>
 #include <nemozone.h>
 
 #define	NEMOMOTE_DEAD_BIT			(1 << 0)
 
 struct nemomote {
 	double *buffers;
-	unsigned int *attrs;
+	uint32_t *types;
+	uint32_t *attrs;
 
 	int mcount;
 	int lcount;

@@ -10,11 +10,14 @@
 #include <nemomote.h>
 #include <actors/gravitywall.h>
 
-int nemomote_gravitywall_update(struct nemomote *mote, double secs, double x, double y, double z, double intensity, double epsilon)
+int nemomote_gravitywall_update(struct nemomote *mote, uint32_t type, double secs, double x, double y, double z, double intensity, double epsilon)
 {
 	int i;
 
 	for (i = 0; i < mote->lcount; i++) {
+		if (mote->types[i] != type)
+			continue;
+
 		double dx = x - NEMOMOTE_POSITION_X(mote, i);
 		double dy = y - NEMOMOTE_POSITION_Y(mote, i);
 		double dz = z - NEMOMOTE_POSITION_Z(mote, i);

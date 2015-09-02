@@ -11,7 +11,9 @@ add_library(nemomote SHARED
 	builders/position.c
 	builders/velocity.c
 	builders/mass.c
+	builders/lifetime.c
 	builders/color.c
+	builders/type.c
 	emitters/random.c
 	emitters/blast.c
 	emitters/sine.c
@@ -24,6 +26,7 @@ add_library(nemomote SHARED
 	actors/livezone.c
 	actors/boundingbox.c
 	actors/speedscale.c
+	actors/deadline.c
 	)
 
 INSTALL(TARGETS nemomote DESTINATION lib${CMAKE_LIBRARY_SUFFIX})

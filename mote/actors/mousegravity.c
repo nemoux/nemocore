@@ -10,13 +10,16 @@
 #include <nemomote.h>
 #include <actors/mousegravity.h>
 
-int nemomote_mousegravity_update(struct nemomote *mote, double secs, double x, double y, double z, double intensity)
+int nemomote_mousegravity_update(struct nemomote *mote, uint32_t type, double secs, double x, double y, double z, double intensity)
 {
 	double dx, dy, dz;
 	double dsq, d;
 	int i;
 
 	for (i = 0; i < mote->lcount; i++) {
+		if (mote->types[i] != type)
+			continue;
+
 		dx = NEMOMOTE_POSITION_X(mote, i) - x;
 		dy = NEMOMOTE_POSITION_Y(mote, i) - y;
 		dz = NEMOMOTE_POSITION_Z(mote, i) - z;

@@ -46,19 +46,26 @@
 
 static void moteback_update_one(struct moteback *mote, double secs)
 {
-	nemomote_blast_emit(&mote->mote, &mote->blast, secs);
 	nemomote_random_emit(&mote->mote, &mote->random, secs);
 	nemomote_position_update(&mote->mote, &mote->zone);
 	nemomote_color_update(&mote->mote, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.5f);
 	nemomote_mass_update(&mote->mote, 8.0f, 3.0f);
+	nemomote_lifetime_update(&mote->mote, 10.0f, 5.0f);
+	nemomote_velocity_update(&mote->mote, &mote->speed);
+	nemomote_type_update(&mote->mote, 2);
 	nemomote_commit(&mote->mote);
 
-	nemomote_gravitywall_update(&mote->mote, secs, mote->width * 0.2f, mote->height * 0.2f, 0.0f, 1000000.0f, 100000.0f);
-	nemomote_gravitywall_update(&mote->mote, secs, mote->width * 0.2f, mote->height * 0.8f, 0.0f, 1000000.0f, 100000.0f);
-	nemomote_gravitywall_update(&mote->mote, secs, mote->width * 0.8f, mote->height * 0.2f, 0.0f, 1000000.0f, 100000.0f);
-	nemomote_gravitywall_update(&mote->mote, secs, mote->width * 0.8f, mote->height * 0.8f, 0.0f, 1000000.0f, 100000.0f);
-	nemomote_boundingbox_update(&mote->mote, secs, &mote->zone, 0.8f);
-	nemomote_move_update(&mote->mote, secs);
+	nemomote_gravitywall_update(&mote->mote, 1, secs, mote->width * 0.2f, mote->height * 0.2f, 0.0f, 1000000.0f, 100000.0f);
+	nemomote_gravitywall_update(&mote->mote, 1, secs, mote->width * 0.2f, mote->height * 0.8f, 0.0f, 1000000.0f, 100000.0f);
+	nemomote_gravitywall_update(&mote->mote, 1, secs, mote->width * 0.8f, mote->height * 0.2f, 0.0f, 1000000.0f, 100000.0f);
+	nemomote_gravitywall_update(&mote->mote, 1, secs, mote->width * 0.8f, mote->height * 0.8f, 0.0f, 1000000.0f, 100000.0f);
+	nemomote_boundingbox_update(&mote->mote, 1, secs, &mote->zone, 0.8f);
+	nemomote_move_update(&mote->mote, 1, secs);
+
+	nemomote_deadline_update(&mote->mote, 2, secs);
+	nemomote_boundingbox_update(&mote->mote, 2, secs, &mote->zone, 0.8f);
+	nemomote_move_update(&mote->mote, 2, secs);
+
 	nemomote_cleanup(&mote->mote);
 }
 
@@ -182,11 +189,18 @@ int main(int argc, char *argv[])
 
 	nemomote_init(&mote->mote);
 	nemomote_set_max_particles(&mote->mote, 1200);
-	nemomote_blast_set_property(&mote->blast, 1000);
-	nemomote_blast_ready(&mote->mote, &mote->blast);
+	nemomote_blast_set_property(&mote->blast, 800);
 	nemomote_random_set_property(&mote->random, 5.0f, 1.0f);
-	nemomote_random_ready(&mote->mote, &mote->random);
 	nemozone_set_cube(&mote->zone, mote->width * 0.0f, mote->width * 1.0f, mote->height * 0.0f, mote->height * 1.0f, 0.0f, 0.0f);
+	nemozone_set_disc(&mote->speed, 0.0f, 0.0f, 0.0f, 100.0f);
+
+	nemomote_blast_ready(&mote->mote, &mote->blast);
+	nemomote_random_ready(&mote->mote, &mote->random);
+	nemomote_position_update(&mote->mote, &mote->zone);
+	nemomote_color_update(&mote->mote, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.5f);
+	nemomote_mass_update(&mote->mote, 8.0f, 3.0f);
+	nemomote_type_update(&mote->mote, 1);
+	nemomote_commit(&mote->mote);
 
 	mote->tool = tool = nemotool_create();
 	if (tool == NULL)

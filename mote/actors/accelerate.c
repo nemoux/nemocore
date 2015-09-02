@@ -8,11 +8,14 @@
 #include <nemomote.h>
 #include <actors/accelerate.h>
 
-int nemomote_accelerate_update(struct nemomote *mote, double secs, double x, double y, double z)
+int nemomote_accelerate_update(struct nemomote *mote, uint32_t type, double secs, double x, double y, double z)
 {
 	int i;
 
 	for (i = 0; i < mote->lcount; i++) {
+		if (mote->types[i] != type)
+			continue;
+
 		NEMOMOTE_VELOCITY_X(mote, i) += x * secs;
 		NEMOMOTE_VELOCITY_Y(mote, i) += y * secs;
 		NEMOMOTE_VELOCITY_Z(mote, i) += z * secs;

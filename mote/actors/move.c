@@ -8,11 +8,14 @@
 #include <nemomote.h>
 #include <actors/move.h>
 
-int nemomote_move_update(struct nemomote *mote, double secs)
+int nemomote_move_update(struct nemomote *mote, uint32_t type, double secs)
 {
 	int i;
 
 	for (i = 0; i < mote->lcount; i++) {
+		if (mote->types[i] != type)
+			continue;
+
 		NEMOMOTE_POSITION_X(mote, i) += NEMOMOTE_VELOCITY_X(mote, i) * secs;
 		NEMOMOTE_POSITION_Y(mote, i) += NEMOMOTE_VELOCITY_Y(mote, i) * secs;
 		NEMOMOTE_POSITION_Z(mote, i) += NEMOMOTE_VELOCITY_Z(mote, i) * secs;

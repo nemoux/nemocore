@@ -8,11 +8,14 @@
 #include <nemomote.h>
 #include <actors/boundingbox.h>
 
-int nemomote_boundingbox_update(struct nemomote *mote, double secs, struct nemozone *zone, double bounce)
+int nemomote_boundingbox_update(struct nemomote *mote, uint32_t type, double secs, struct nemozone *zone, double bounce)
 {
 	int i;
 
 	for (i = 0; i < mote->lcount; i++) {
+		if (mote->types[i] != type)
+			continue;
+
 		if (NEMOMOTE_VELOCITY_X(mote, i) > 0.0f && NEMOMOTE_POSITION_X(mote, i) >= zone->right) {
 			NEMOMOTE_VELOCITY_X(mote, i) = -NEMOMOTE_VELOCITY_X(mote, i) * bounce;
 			NEMOMOTE_POSITION_X(mote, i) += 2 * (zone->right - NEMOMOTE_POSITION_X(mote, i));

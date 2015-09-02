@@ -10,7 +10,7 @@
 #include <nemomote.h>
 #include <actors/mutualgravity.h>
 
-int nemomote_mutualgravity_update(struct nemomote *mote, double secs, double maxdist, double intensity, double epsilon)
+int nemomote_mutualgravity_update(struct nemomote *mote, uint32_t type, double secs, double maxdist, double intensity, double epsilon)
 {
 	double dx, dy, dz;
 	double factor;
@@ -18,7 +18,13 @@ int nemomote_mutualgravity_update(struct nemomote *mote, double secs, double max
 	int i, j;
 
 	for (i = 0; i < mote->lcount; i++) {
+		if (mote->types[i] != type)
+			continue;
+
 		for (j = 0; j < mote->lcount; j++) {
+			if (mote->types[j] != type)
+				continue;
+
 			if (i == j)
 				continue;
 

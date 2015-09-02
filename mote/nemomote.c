@@ -10,6 +10,7 @@
 int nemomote_init(struct nemomote *mote)
 {
 	mote->buffers = NULL;
+	mote->types = NULL;
 	mote->attrs = NULL;
 	mote->mcount = 0;
 	mote->lcount = 0;
@@ -22,6 +23,8 @@ int nemomote_exit(struct nemomote *mote)
 {
 	if (mote->buffers != NULL)
 		free(mote->buffers);
+	if (mote->types != NULL)
+		free(mote->types);
 	if (mote->attrs != NULL)
 		free(mote->attrs);
 
@@ -35,6 +38,8 @@ int nemomote_set_max_particles(struct nemomote *mote, unsigned int max)
 	if (mote->mcount != max) {
 		if (mote->buffers != NULL)
 			free(mote->buffers);
+		if (mote->types != NULL)
+			free(mote->types);
 		if (mote->attrs != NULL)
 			free(mote->attrs);
 
@@ -43,10 +48,15 @@ int nemomote_set_max_particles(struct nemomote *mote, unsigned int max)
 			return -1;
 		memset(mote->buffers, 0, sizeof(double[12]) * max);
 
-		mote->attrs = (unsigned int *)malloc(sizeof(unsigned int) * max);
+		mote->types = (uint32_t *)malloc(sizeof(uint32_t) * max);
+		if (mote->types == NULL)
+			return -1;
+		memset(mote->types, 0, sizeof(uint32_t) * max);
+
+		mote->attrs = (uint32_t *)malloc(sizeof(uint32_t) * max);
 		if (mote->attrs == NULL)
 			return -1;
-		memset(mote->attrs, 0, sizeof(unsigned int) * max);
+		memset(mote->attrs, 0, sizeof(uint32_t) * max);
 	}
 
 	mote->mcount = max;
@@ -104,6 +114,7 @@ int nemomote_cleanup(struct nemomote *mote)
 				mote->buffers[to * 12 + 9] = mote->buffers[from * 12 + 9];
 				mote->buffers[to * 12 + 10] = mote->buffers[from * 12 + 10];
 				mote->buffers[to * 12 + 11] = mote->buffers[from * 12 + 11];
+				mote->types[to] = mote->types[from];
 				mote->attrs[to] = mote->attrs[from];
 			}
 
