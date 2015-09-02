@@ -8,7 +8,7 @@
 #include <nemomote.h>
 #include <builders/velocity.h>
 
-int nemomote_velocitybuilder_update(struct nemomote *mote, double secs, struct nemozone *zone)
+int nemomote_velocity_update(struct nemomote *mote, struct nemozone *zone)
 {
 	double x, y, z;
 	int i;

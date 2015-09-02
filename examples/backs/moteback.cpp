@@ -46,16 +46,18 @@
 
 static void moteback_update_one(struct moteback *mote, double secs)
 {
-	nemomote_blast_update(&mote->mote, &mote->blastemitter, secs);
-	nemomote_positionbuilder_update(&mote->mote, secs, &mote->zone);
+	nemomote_blast_emit(&mote->mote, &mote->blast, secs);
+	nemomote_position_update(&mote->mote, &mote->zone);
+	nemomote_color_update(&mote->mote, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.5f);
+	nemomote_mass_update(&mote->mote, 8.0f, 3.0f);
 	nemomote_commit(&mote->mote);
 
-	nemomote_gravitywallactor_update(&mote->mote, secs, mote->width * 0.2f, mote->height * 0.2f, 0.0f, 1000000.0f, 100000.0f);
-	nemomote_gravitywallactor_update(&mote->mote, secs, mote->width * 0.2f, mote->height * 0.8f, 0.0f, 1000000.0f, 100000.0f);
-	nemomote_gravitywallactor_update(&mote->mote, secs, mote->width * 0.8f, mote->height * 0.2f, 0.0f, 1000000.0f, 100000.0f);
-	nemomote_gravitywallactor_update(&mote->mote, secs, mote->width * 0.8f, mote->height * 0.8f, 0.0f, 1000000.0f, 100000.0f);
-	nemomote_boundingboxactor_update(&mote->mote, secs, &mote->zone, 0.8f);
-	nemomote_moveactor_update(&mote->mote, secs);
+	nemomote_gravitywall_update(&mote->mote, secs, mote->width * 0.2f, mote->height * 0.2f, 0.0f, 1000000.0f, 100000.0f);
+	nemomote_gravitywall_update(&mote->mote, secs, mote->width * 0.2f, mote->height * 0.8f, 0.0f, 1000000.0f, 100000.0f);
+	nemomote_gravitywall_update(&mote->mote, secs, mote->width * 0.8f, mote->height * 0.2f, 0.0f, 1000000.0f, 100000.0f);
+	nemomote_gravitywall_update(&mote->mote, secs, mote->width * 0.8f, mote->height * 0.8f, 0.0f, 1000000.0f, 100000.0f);
+	nemomote_boundingbox_update(&mote->mote, secs, &mote->zone, 0.8f);
+	nemomote_move_update(&mote->mote, secs);
 	nemomote_cleanup(&mote->mote);
 }
 
@@ -81,24 +83,22 @@ static void moteback_render_one(struct moteback *mote, pixman_image_t *image)
 			SkBlurMask::ConvertRadiusToSigma(5.0f),
 			SkBlurMaskFilter::kHighQuality_BlurFlag);
 
-	SkPaint stroke;
-	stroke.setAntiAlias(true);
-	stroke.setStyle(SkPaint::kStroke_Style);
-	stroke.setStrokeWidth(1.0f);
-	stroke.setColor(SkColorSetARGB(63.0f, 0.0f, 255.0f, 255.0f));
-	stroke.setMaskFilter(filter);
-
-	SkPaint fill;
-	fill.setAntiAlias(true);
-	fill.setStyle(SkPaint::kFill_Style);
-	fill.setColor(SkColorSetARGB(128.0f, 0.0f, 255.0f, 255.0f));
-	fill.setMaskFilter(filter);
-
 	for (i = 0; i < nemomote_get_count(&mote->mote); i++) {
+		SkPaint fill;
+		fill.setAntiAlias(true);
+		fill.setStyle(SkPaint::kFill_Style);
+		fill.setColor(
+				SkColorSetARGB(
+					NEMOMOTE_COLOR_A(&mote->mote, i) * 255.0f,
+					NEMOMOTE_COLOR_R(&mote->mote, i) * 255.0f,
+					NEMOMOTE_COLOR_G(&mote->mote, i) * 255.0f,
+					NEMOMOTE_COLOR_B(&mote->mote, i) * 255.0f));
+		fill.setMaskFilter(filter);
+
 		canvas.drawCircle(
 				NEMOMOTE_POSITION_X(&mote->mote, i),
 				NEMOMOTE_POSITION_Y(&mote->mote, i),
-				5.0f,
+				NEMOMOTE_MASS(&mote->mote, i),
 				fill);
 	}
 }
@@ -181,8 +181,8 @@ int main(int argc, char *argv[])
 
 	nemomote_init(&mote->mote);
 	nemomote_set_max_particles(&mote->mote, 1200);
-	nemomote_blast_set_property(&mote->blastemitter, 1200);
-	nemomote_blast_ready(&mote->mote, &mote->blastemitter);
+	nemomote_blast_set_property(&mote->blast, 1200);
+	nemomote_blast_ready(&mote->mote, &mote->blast);
 	nemozone_set_cube(&mote->zone, mote->width * 0.0f, mote->width * 1.0f, mote->height * 0.0f, mote->height * 1.0f, 0.0f, 0.0f);
 
 	mote->tool = tool = nemotool_create();

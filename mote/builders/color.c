@@ -8,7 +8,7 @@
 #include <nemomote.h>
 #include <builders/color.h>
 
-int nemomote_colorbuilder_update(struct nemomote *mote, double secs, double rmax, double rmin, double gmax, double gmin, double bmax, double bmin, double amax, double amin)
+int nemomote_color_update(struct nemomote *mote, double rmax, double rmin, double gmax, double gmin, double bmax, double bmin, double amax, double amin)
 {
 	int i;
 

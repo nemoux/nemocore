@@ -10,7 +10,7 @@
 #include <nemomote.h>
 #include <actors/mousegravity.h>
 
-int nemomote_mousegravityactor_update(struct nemomote *mote, double secs, double x, double y, double z, double intensity)
+int nemomote_mousegravity_update(struct nemomote *mote, double secs, double x, double y, double z, double intensity)
 {
 	double dx, dy, dz;
 	double dsq, d;

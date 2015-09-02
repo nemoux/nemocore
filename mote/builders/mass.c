@@ -8,7 +8,7 @@
 #include <nemomote.h>
 #include <builders/mass.h>
 
-int nemomote_massbuilder_update(struct nemomote *mote, double secs, double max, double min)
+int nemomote_mass_update(struct nemomote *mote, double max, double min)
 {
 	int i;
 

@@ -8,7 +8,7 @@
 #include <nemomote.h>
 #include <actors/livezone.h>
 
-int nemomote_livezoneactor_update(struct nemomote *mote, double secs, struct nemozone *zone)
+int nemomote_livezone_update(struct nemomote *mote, double secs, struct nemozone *zone)
 {
 	int i;
 

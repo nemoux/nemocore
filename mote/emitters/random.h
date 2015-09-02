@@ -13,6 +13,6 @@ struct moterandom {
 extern int nemomote_random_set_property(struct moterandom *emitter, double maxrate, double minrate);
 
 extern int nemomote_random_ready(struct nemomote *mote, struct moterandom *emitter);
-extern int nemomote_random_update(struct nemomote *mote, struct moterandom *emitter, double secs);
+extern int nemomote_random_emit(struct nemomote *mote, struct moterandom *emitter, double secs);
 
 #endif

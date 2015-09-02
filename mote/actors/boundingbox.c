@@ -8,7 +8,7 @@
 #include <nemomote.h>
 #include <actors/boundingbox.h>
 
-int nemomote_boundingboxactor_update(struct nemomote *mote, double secs, struct nemozone *zone, double bounce)
+int nemomote_boundingbox_update(struct nemomote *mote, double secs, struct nemozone *zone, double bounce)
 {
 	int i;
 

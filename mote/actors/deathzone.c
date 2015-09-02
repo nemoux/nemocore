@@ -8,7 +8,7 @@
 #include <nemomote.h>
 #include <actors/deathzone.h>
 
-int nemomote_deathzoneactor_update(struct nemomote *mote, double secs, struct nemozone *zone)
+int nemomote_deathzone_update(struct nemomote *mote, double secs, struct nemozone *zone)
 {
 	double x, y, z;
 	int i;

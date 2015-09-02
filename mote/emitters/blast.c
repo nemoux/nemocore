@@ -22,7 +22,7 @@ int nemomote_blast_ready(struct nemomote *mote, struct moteblast *emitter)
 	return 0;
 }
 
-int nemomote_blast_update(struct nemomote *mote, struct moteblast *emitter, double secs)
+int nemomote_blast_emit(struct nemomote *mote, struct moteblast *emitter, double secs)
 {
 	return 0;
 }

@@ -10,7 +10,7 @@
 #include <nemomote.h>
 #include <actors/mutualgravity.h>
 
-int nemomote_mutualgravityactor_update(struct nemomote *mote, double secs, double maxdist, double intensity, double epsilon)
+int nemomote_mutualgravity_update(struct nemomote *mote, double secs, double maxdist, double intensity, double epsilon)
 {
 	double dx, dy, dz;
 	double factor;

@@ -3,6 +3,6 @@
 
 #include <nemozone.h>
 
-extern int nemomote_deathzoneactor_update(struct nemomote *mote, double secs, struct nemozone *zone);
+extern int nemomote_deathzone_update(struct nemomote *mote, double secs, struct nemozone *zone);
 
 #endif

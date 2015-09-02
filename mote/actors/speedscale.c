@@ -8,7 +8,7 @@
 #include <nemomote.h>
 #include <actors/speedscale.h>
 
-int nemomote_speedscaleactor_update(struct nemomote *mote, double secs, double x, double y, double z)
+int nemomote_speedscale_update(struct nemomote *mote, double secs, double x, double y, double z)
 {
 	int i;
 

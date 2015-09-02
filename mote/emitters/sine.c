@@ -28,7 +28,7 @@ int nemomote_sine_ready(struct nemomote *mote, struct motesine *emitter)
 	return 0;
 }
 
-int nemomote_sine_update(struct nemomote *mote, struct motesine *emitter, double secs)
+int nemomote_sine_emit(struct nemomote *mote, struct motesine *emitter, double secs)
 {
 	unsigned int count = 0;
 

@@ -8,7 +8,7 @@
 #include <nemomote.h>
 #include <builders/position.h>
 
-int nemomote_positionbuilder_update(struct nemomote *mote, double secs, struct nemozone *zone)
+int nemomote_position_update(struct nemomote *mote, struct nemozone *zone)
 {
 	double x, y, z;
 	int i;

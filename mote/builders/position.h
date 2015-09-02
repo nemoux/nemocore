@@ -1,6 +1,6 @@
 #ifndef __NEMOMOTE_POSITION_BUILDER_H__
 #define	__NEMOMOTE_POSITION_BUILDER_H__
 
-extern int nemomote_positionbuilder_update(struct nemomote *mote, double secs, struct nemozone *zone);
+extern int nemomote_position_update(struct nemomote *mote, struct nemozone *zone);
 
 #endif

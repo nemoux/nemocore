@@ -10,7 +10,7 @@
 #include <nemomote.h>
 #include <actors/gravitywall.h>
 
-int nemomote_gravitywallactor_update(struct nemomote *mote, double secs, double x, double y, double z, double intensity, double epsilon)
+int nemomote_gravitywall_update(struct nemomote *mote, double secs, double x, double y, double z, double intensity, double epsilon)
 {
 	int i;
 

@@ -32,7 +32,7 @@ int nemomote_random_ready(struct nemomote *mote, struct moterandom *emitter)
 	return 0;
 }
 
-int nemomote_random_update(struct nemomote *mote, struct moterandom *emitter, double secs)
+int nemomote_random_emit(struct nemomote *mote, struct moterandom *emitter, double secs)
 {
 	unsigned int count = 0;
 

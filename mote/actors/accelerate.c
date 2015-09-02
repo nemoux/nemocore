@@ -8,7 +8,7 @@
 #include <nemomote.h>
 #include <actors/accelerate.h>
 
-int nemomote_accelerateactor_update(struct nemomote *mote, double secs, double x, double y, double z)
+int nemomote_accelerate_update(struct nemomote *mote, double secs, double x, double y, double z)
 {
 	int i;
 

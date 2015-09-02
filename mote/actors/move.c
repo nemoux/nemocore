@@ -8,7 +8,7 @@
 #include <nemomote.h>
 #include <actors/move.h>
 
-int nemomote_moveactor_update(struct nemomote *mote, double secs)
+int nemomote_move_update(struct nemomote *mote, double secs)
 {
 	int i;
 
