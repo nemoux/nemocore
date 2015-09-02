@@ -41,9 +41,12 @@ int nemomote_set_max_particles(struct nemomote *mote, unsigned int max)
 		mote->buffers = (double *)malloc(sizeof(double[12]) * max);
 		if (mote->buffers == NULL)
 			return -1;
+		memset(mote->buffers, 0, sizeof(double[12]) * max);
+
 		mote->attrs = (unsigned int *)malloc(sizeof(unsigned int) * max);
 		if (mote->attrs == NULL)
 			return -1;
+		memset(mote->attrs, 0, sizeof(unsigned int) * max);
 	}
 
 	mote->mcount = max;

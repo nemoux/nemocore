@@ -10,6 +10,7 @@ include_directories(
 	${CMAKE_SOURCE_DIR}/tale
 	${CMAKE_SOURCE_DIR}/tool
 	${CMAKE_BINARY_DIR}/tool
+	${CMAKE_SOURCE_DIR}/mote
 	${CMAKE_SOURCE_DIR}/apps
 	${CMAKE_SOURCE_DIR}/thirds/poly2tri
 	/usr/include/skia/core
@@ -55,6 +56,19 @@ TARGET_LINK_LIBRARIES(plexback
 	nemotale
 	skia
 	poly2tri
+	${NEMOUX_COMMON_LIBRARIES}
+	)
+
+add_executable(moteback
+	moteback.cpp
+	talehelper.c
+	)
+
+TARGET_LINK_LIBRARIES(moteback
+	nemotool
+	nemotale
+	nemomote
+	skia
 	${NEMOUX_COMMON_LIBRARIES}
 	)
 

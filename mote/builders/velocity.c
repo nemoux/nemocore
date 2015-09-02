@@ -14,7 +14,7 @@ int nemomote_velocitybuilder_update(struct nemomote *mote, double secs, struct n
 	int i;
 
 	for (i = mote->lcount; i < mote->lcount + mote->rcount; i++) {
-		nemozone_get_location(zone, &x, &y, &z);
+		nemozone_locates(zone, &x, &y, &z);
 
 		NEMOMOTE_VELOCITY_X(mote, i) = x;
 		NEMOMOTE_VELOCITY_Y(mote, i) = y;

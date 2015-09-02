@@ -8,21 +8,21 @@
 #include <nemomote.h>
 #include <emitters/blast.h>
 
-int nemomote_moteblast_set_property(struct moteblast *emitter, unsigned int startcount)
+int nemomote_blast_set_property(struct moteblast *emitter, unsigned int startcount)
 {
 	emitter->startcount = startcount;
 
 	return 0;
 }
 
-int nemomote_moteblast_ready(struct nemomote *mote, struct moteblast *emitter)
+int nemomote_blast_ready(struct nemomote *mote, struct moteblast *emitter)
 {
 	nemomote_ready(mote, emitter->startcount);
 
 	return 0;
 }
 
-int nemomote_moteblast_update(struct nemomote *mote, struct moteblast *emitter, double secs)
+int nemomote_blast_update(struct nemomote *mote, struct moteblast *emitter, double secs)
 {
 	return 0;
 }

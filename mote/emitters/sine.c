@@ -10,7 +10,7 @@
 #include <nemomote.h>
 #include <emitters/sine.h>
 
-int nemomote_motesine_set_property(struct motesine *emitter, double maxrate, double minrate, double period)
+int nemomote_sine_set_property(struct motesine *emitter, double maxrate, double minrate, double period)
 {
 	emitter->maxrate = maxrate;
 	emitter->minrate = minrate;
@@ -21,14 +21,14 @@ int nemomote_motesine_set_property(struct motesine *emitter, double maxrate, dou
 	return 0;
 }
 
-int nemomote_motesine_ready(struct nemomote *mote, struct motesine *emitter)
+int nemomote_sine_ready(struct nemomote *mote, struct motesine *emitter)
 {
 	emitter->timepassed = 0.0f;
 
 	return 0;
 }
 
-int nemomote_motesine_update(struct nemomote *mote, struct motesine *emitter, double secs)
+int nemomote_sine_update(struct nemomote *mote, struct motesine *emitter, double secs)
 {
 	unsigned int count = 0;
 

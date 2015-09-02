@@ -1,6 +1,10 @@
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 
+include_directories(
+	${CMAKE_SOURCE_DIR}/mote
+	)
+
 add_library(nemomote SHARED
 	nemomote.c
 	nemozone.c

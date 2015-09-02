@@ -13,9 +13,9 @@ struct motesine {
 	double timepassed;
 };
 
-extern int nemomote_motesine_set_property(struct motesine *emitter, double maxrate, double minrate, double period);
+extern int nemomote_sine_set_property(struct motesine *emitter, double maxrate, double minrate, double period);
 
-extern int nemomote_motesine_ready(struct nemomote *mote, struct motesine *emitter);
-extern int nemomote_motesine_update(struct nemomote *mote, struct motesine *emitter, double secs);
+extern int nemomote_sine_ready(struct nemomote *mote, struct motesine *emitter);
+extern int nemomote_sine_update(struct nemomote *mote, struct motesine *emitter, double secs);
 
 #endif
