@@ -47,6 +47,7 @@
 static void moteback_update_one(struct moteback *mote, double secs)
 {
 	nemomote_blast_emit(&mote->mote, &mote->blast, secs);
+	nemomote_random_emit(&mote->mote, &mote->random, secs);
 	nemomote_position_update(&mote->mote, &mote->zone);
 	nemomote_color_update(&mote->mote, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.5f);
 	nemomote_mass_update(&mote->mote, 8.0f, 3.0f);
@@ -181,8 +182,10 @@ int main(int argc, char *argv[])
 
 	nemomote_init(&mote->mote);
 	nemomote_set_max_particles(&mote->mote, 1200);
-	nemomote_blast_set_property(&mote->blast, 1200);
+	nemomote_blast_set_property(&mote->blast, 1000);
 	nemomote_blast_ready(&mote->mote, &mote->blast);
+	nemomote_random_set_property(&mote->random, 5.0f, 1.0f);
+	nemomote_random_ready(&mote->mote, &mote->random);
 	nemozone_set_cube(&mote->zone, mote->width * 0.0f, mote->width * 1.0f, mote->height * 0.0f, mote->height * 1.0f, 0.0f, 0.0f);
 
 	mote->tool = tool = nemotool_create();

@@ -13,6 +13,7 @@
 #include <actors/livezone.h>
 #include <actors/boundingbox.h>
 #include <actors/speedscale.h>
+#include <actors/deadline.h>
 #include <builders/position.h>
 #include <builders/velocity.h>
 #include <builders/mass.h>

@@ -24,6 +24,7 @@ struct moteback {
 
 	struct nemomote mote;
 	struct moteblast blast;
+	struct moterandom random;
 	struct nemozone zone;
 
 	double secs;

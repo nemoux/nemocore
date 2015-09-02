@@ -66,7 +66,7 @@ int nemomote_reset(struct nemomote *mote)
 
 int nemomote_ready(struct nemomote *mote, unsigned int count)
 {
-	mote->rcount = count;
+	mote->rcount += count;
 
 	if (mote->lcount + mote->rcount > mote->mcount)
 		mote->rcount = mote->mcount - mote->lcount;
