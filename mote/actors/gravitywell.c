@@ -10,7 +10,7 @@
 #include <nemomote.h>
 #include <actors/gravitywell.h>
 
-int nemomote_gravitywell_update(struct nemomote *mote, uint32_t type, double secs, double x, double y, double z, double intensity, double epsilon)
+int nemomote_gravitywell_update(struct nemomote *mote, uint32_t type, double secs, double x, double y, double intensity, double epsilon)
 {
 	int i;
 
@@ -20,8 +20,7 @@ int nemomote_gravitywell_update(struct nemomote *mote, uint32_t type, double sec
 
 		double dx = x - NEMOMOTE_POSITION_X(mote, i);
 		double dy = y - NEMOMOTE_POSITION_Y(mote, i);
-		double dz = z - NEMOMOTE_POSITION_Z(mote, i);
-		double dsq = dx * dx + dy * dy + dz * dz;
+		double dsq = dx * dx + dy * dy;
 		double d;
 
 		if (dsq == 0.0f)
@@ -36,7 +35,6 @@ int nemomote_gravitywell_update(struct nemomote *mote, uint32_t type, double sec
 
 		NEMOMOTE_VELOCITY_X(mote, i) += dx * factor;
 		NEMOMOTE_VELOCITY_Y(mote, i) += dy * factor;
-		NEMOMOTE_VELOCITY_Z(mote, i) += dz * factor;
 	}
 
 	return 0;

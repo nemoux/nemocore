@@ -12,7 +12,7 @@
 
 int nemomote_mutualgravity_update(struct nemomote *mote, uint32_t type, double secs, double maxdist, double intensity, double epsilon)
 {
-	double dx, dy, dz;
+	double dx, dy;
 	double factor;
 	double dsq, d;
 	int i, j;
@@ -34,11 +34,8 @@ int nemomote_mutualgravity_update(struct nemomote *mote, uint32_t type, double s
 			dy = NEMOMOTE_POSITION_Y(mote, j) - NEMOMOTE_POSITION_Y(mote, i);
 			if (dy > maxdist || dy < -maxdist)
 				continue;
-			dz = NEMOMOTE_POSITION_Z(mote, j) - NEMOMOTE_POSITION_Z(mote, i);
-			if (dz > maxdist || dz < -maxdist)
-				continue;
 
-			dsq = dx * dx + dy * dy + dz * dz;
+			dsq = dx * dx + dy * dy;
 			if (dsq <= (maxdist * maxdist) && dsq > 0.0f) {
 				d = sqrtf(dsq);
 
@@ -48,14 +45,11 @@ int nemomote_mutualgravity_update(struct nemomote *mote, uint32_t type, double s
 				factor = (intensity * secs) / (dsq * d);
 				dx = dx * factor;
 				dy = dy * factor;
-				dz = dz * factor;
 
 				NEMOMOTE_VELOCITY_X(mote, i) += dx * NEMOMOTE_MASS(mote, j);
 				NEMOMOTE_VELOCITY_Y(mote, i) += dy * NEMOMOTE_MASS(mote, j);
-				NEMOMOTE_VELOCITY_Z(mote, i) += dz * NEMOMOTE_MASS(mote, j);
 				NEMOMOTE_VELOCITY_X(mote, j) += dx * NEMOMOTE_MASS(mote, i);
 				NEMOMOTE_VELOCITY_Y(mote, j) += dy * NEMOMOTE_MASS(mote, i);
-				NEMOMOTE_VELOCITY_Z(mote, j) += dz * NEMOMOTE_MASS(mote, i);
 			}
 		}
 	}

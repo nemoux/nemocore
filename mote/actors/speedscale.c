@@ -8,7 +8,7 @@
 #include <nemomote.h>
 #include <actors/speedscale.h>
 
-int nemomote_speedscale_update(struct nemomote *mote, uint32_t type, double secs, double x, double y, double z)
+int nemomote_speedscale_update(struct nemomote *mote, uint32_t type, double secs, double x, double y)
 {
 	int i;
 
@@ -18,7 +18,6 @@ int nemomote_speedscale_update(struct nemomote *mote, uint32_t type, double secs
 
 		NEMOMOTE_VELOCITY_X(mote, i) *= x;
 		NEMOMOTE_VELOCITY_Y(mote, i) *= y;
-		NEMOMOTE_VELOCITY_Z(mote, i) *= z;
 	}
 
 	return 0;

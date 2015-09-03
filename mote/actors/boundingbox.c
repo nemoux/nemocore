@@ -28,12 +28,6 @@ int nemomote_boundingbox_update(struct nemomote *mote, uint32_t type, double sec
 		} else if (NEMOMOTE_VELOCITY_Y(mote, i) < 0.0f && NEMOMOTE_POSITION_Y(mote, i) <= zone->top) {
 			NEMOMOTE_VELOCITY_Y(mote, i) = -NEMOMOTE_VELOCITY_Y(mote, i) * bounce;
 			NEMOMOTE_POSITION_Y(mote, i) += 2 * (zone->top - NEMOMOTE_POSITION_Y(mote, i));
-		} else if (NEMOMOTE_VELOCITY_Z(mote, i) > 0.0f && NEMOMOTE_POSITION_Z(mote, i) >= zone->front) {
-			NEMOMOTE_VELOCITY_Z(mote, i) = -NEMOMOTE_VELOCITY_Z(mote, i) * bounce;
-			NEMOMOTE_POSITION_Z(mote, i) += 2 * (zone->front - NEMOMOTE_POSITION_Z(mote, i));
-		} else if (NEMOMOTE_VELOCITY_Z(mote, i) < 0.0f && NEMOMOTE_POSITION_Z(mote, i) <= zone->back) {
-			NEMOMOTE_VELOCITY_Z(mote, i) = -NEMOMOTE_VELOCITY_Z(mote, i) * bounce;
-			NEMOMOTE_POSITION_Z(mote, i) += 2 * (zone->back - NEMOMOTE_POSITION_Z(mote, i));
 		}
 	}
 

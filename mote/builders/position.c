@@ -10,15 +10,14 @@
 
 int nemomote_position_update(struct nemomote *mote, struct nemozone *zone)
 {
-	double x, y, z;
+	double x, y;
 	int i;
 
 	for (i = mote->lcount; i < mote->lcount + mote->rcount; i++) {
-		nemozone_locates(zone, &x, &y, &z);
+		nemozone_locates(zone, &x, &y);
 
 		NEMOMOTE_POSITION_X(mote, i) = x;
 		NEMOMOTE_POSITION_Y(mote, i) = y;
-		NEMOMOTE_POSITION_Z(mote, i) = z;
 	}
 
 	return 0;
