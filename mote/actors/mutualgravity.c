@@ -25,12 +25,9 @@ int nemomote_mutualgravity_update(struct nemomote *mote, uint32_t type, double s
 			if (mote->types[j] != type)
 				continue;
 
-			if (i == j)
-				continue;
-
 			dx = NEMOMOTE_POSITION_X(mote, j) - NEMOMOTE_POSITION_X(mote, i);
-			if (dx > maxdist)
-				break;
+			if (dx <= 0.0f || dx > maxdist)
+				continue;
 			dy = NEMOMOTE_POSITION_Y(mote, j) - NEMOMOTE_POSITION_Y(mote, i);
 			if (dy > maxdist || dy < -maxdist)
 				continue;
@@ -48,8 +45,8 @@ int nemomote_mutualgravity_update(struct nemomote *mote, uint32_t type, double s
 
 				NEMOMOTE_VELOCITY_X(mote, i) += dx * NEMOMOTE_MASS(mote, j);
 				NEMOMOTE_VELOCITY_Y(mote, i) += dy * NEMOMOTE_MASS(mote, j);
-				NEMOMOTE_VELOCITY_X(mote, j) += dx * NEMOMOTE_MASS(mote, i);
-				NEMOMOTE_VELOCITY_Y(mote, j) += dy * NEMOMOTE_MASS(mote, i);
+				NEMOMOTE_VELOCITY_X(mote, j) -= dx * NEMOMOTE_MASS(mote, i);
+				NEMOMOTE_VELOCITY_Y(mote, j) -= dy * NEMOMOTE_MASS(mote, i);
 			}
 		}
 	}

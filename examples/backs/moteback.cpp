@@ -57,12 +57,16 @@ static void moteback_update_one(struct moteback *mote, double secs)
 	nemomote_commit(&mote->mote);
 #endif
 
+#if	0
 	nemomote_gravitywell_update(&mote->mote, 1, secs, mote->width * 0.3f, mote->height * 0.3f, 750000.0f, 10000.0f);
 	nemomote_gravitywell_update(&mote->mote, 1, secs, mote->width * 0.3f, mote->height * 0.7f, 750000.0f, 10000.0f);
 	nemomote_gravitywell_update(&mote->mote, 1, secs, mote->width * 0.7f, mote->height * 0.3f, 750000.0f, 10000.0f);
 	nemomote_gravitywell_update(&mote->mote, 1, secs, mote->width * 0.7f, mote->height * 0.7f, 750000.0f, 10000.0f);
 	nemomote_gravitywell_update(&mote->mote, 1, secs, mote->width * 0.5f, mote->height * 0.5f, 750000.0f, 10000.0f);
-	nemomote_boundingbox_update(&mote->mote, 1, secs, &mote->box, 0.8f);
+#else
+	nemomote_mutualgravity_update(&mote->mote, 1, secs, 100.0f, 5000.0f, 50.0f);
+#endif
+	nemomote_boundingbox_update(&mote->mote, 1, secs, &mote->box, 1.0f);
 	nemomote_move_update(&mote->mote, 1, secs);
 
 #if 0
@@ -194,15 +198,16 @@ int main(int argc, char *argv[])
 
 	nemomote_init(&mote->mote);
 	nemomote_set_max_particles(&mote->mote, 3000);
-	nemomote_blast_set_property(&mote->blast, 3000);
+	nemomote_blast_set_property(&mote->blast, 500);
 	nemomote_random_set_property(&mote->random, 5.0f, 1.0f);
 	nemozone_set_cube(&mote->box, mote->width * 0.0f, mote->width * 1.0f, mote->height * 0.0f, mote->height * 1.0f);
 	nemozone_set_disc(&mote->disc, mote->width * 0.5f, mote->height * 0.5f, mote->width * 0.2f);
-	nemozone_set_disc(&mote->speed, 0.0f, 0.0f, 100.0f);
+	nemozone_set_disc(&mote->speed, 0.0f, 0.0f, 50.0f);
 
 	nemomote_blast_ready(&mote->mote, &mote->blast);
 	nemomote_random_ready(&mote->mote, &mote->random);
-	nemomote_position_update(&mote->mote, &mote->disc);
+	nemomote_position_update(&mote->mote, &mote->box);
+	nemomote_velocity_update(&mote->mote, &mote->speed);
 	nemomote_color_update(&mote->mote, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.5f);
 	nemomote_mass_update(&mote->mote, 8.0f, 3.0f);
 	nemomote_type_update(&mote->mote, 1);
