@@ -18,6 +18,7 @@
 #include <actors/speedscale.h>
 #include <actors/speedlimit.h>
 #include <actors/deadline.h>
+#include <actors/collide.h>
 #include <builders/position.h>
 #include <builders/velocity.h>
 #include <builders/mass.h>

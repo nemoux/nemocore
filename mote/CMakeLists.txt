@@ -29,6 +29,7 @@ add_library(nemomote SHARED
 	actors/speedscale.c
 	actors/speedlimit.c
 	actors/deadline.c
+	actors/collide.c
 	)
 
 INSTALL(TARGETS nemomote DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
