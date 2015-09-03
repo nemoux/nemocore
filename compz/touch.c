@@ -681,3 +681,33 @@ void nemotouch_flush_taps(struct touchnode *node, struct touchtaps *taps)
 		nemotouch_destroy_touchpoint(touch, tp);
 	}
 }
+
+void nemotouch_bypass_event(struct nemocompz *compz, int32_t touchid, float sx, float sy)
+{
+	struct nemoseat *seat = compz->seat;
+	struct nemoview *view;
+	struct touchpoint *tp;
+	uint32_t time;
+	float x, y;
+	float tx, ty;
+
+	tp = nemoseat_get_touchpoint_by_id(seat, touchid);
+	if (tp == NULL || tp->focus == NULL)
+		return;
+
+	nemoview_transform_to_global(tp->focus, sx, sy, &x, &y);
+
+	view = nemocompz_pick_view_below(compz, x, y, &tx, &ty, tp->focus);
+	if (view != NULL) {
+		time = time_current_msecs();
+
+		nemocontent_touch_up(tp, tp->focus->content, time, touchid);
+
+		touchpoint_set_focus(tp, view);
+
+		nemocontent_touch_down(tp, tp->focus->content, time, touchid, tx, ty);
+
+		tp->grab_serial = wl_display_get_serial(compz->display);
+		tp->grab_time = time;
+	}
+}

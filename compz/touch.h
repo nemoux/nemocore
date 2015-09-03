@@ -121,6 +121,8 @@ extern void nemotouch_attach_tap(struct touchtaps *taps, uint64_t id, double x, 
 
 extern void nemotouch_flush_taps(struct touchnode *node, struct touchtaps *taps);
 
+extern void nemotouch_bypass_event(struct nemocompz *compz, int32_t touchid, float sx, float sy);
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif
