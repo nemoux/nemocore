@@ -11,6 +11,7 @@ struct nemocompz;
 struct nemoview;
 
 extern struct nemoview *nemocompz_pick_view(struct nemocompz *compz, float x, float y, float *sx, float *sy);
+extern struct nemoview *nemocompz_pick_view_below(struct nemocompz *compz, float x, float y, float *sx, float *sy, struct nemoview *below);
 extern struct nemoview *nemocompz_pick_canvas(struct nemocompz *compz, float x, float y, float *sx, float *sy);
 
 #ifdef __cplusplus

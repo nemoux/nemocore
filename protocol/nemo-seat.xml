@@ -187,5 +187,11 @@
 
 		<request name="release" type="destructor">
 		</request>
+
+		<request name="bypass">
+			<arg name="id" type="int"/>
+			<arg name="x" type="fixed"/>
+			<arg name="y" type="fixed"/>
+		</request>
 	</interface>
 </protocol>

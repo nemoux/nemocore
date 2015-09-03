@@ -188,6 +188,8 @@ extern int nemotool_dispatch_queue(struct nemoqueue *queue);
 
 extern uint32_t nemotool_get_keysym(struct nemotool *tool, uint32_t code);
 
+extern void nemotool_bypass_touch(struct nemotool *tool, int32_t id, float x, float y);
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

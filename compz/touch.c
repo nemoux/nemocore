@@ -119,8 +119,39 @@ static void nemo_touch_release(struct wl_client *client, struct wl_resource *res
 	wl_resource_destroy(resource);
 }
 
+static void nemo_touch_bypass(struct wl_client *client, struct wl_resource *resource, int32_t touchid, wl_fixed_t sx, wl_fixed_t sy)
+{
+	struct nemoseat *seat = (struct nemoseat *)wl_resource_get_user_data(resource);
+	struct nemoview *view;
+	struct touchpoint *tp;
+	uint32_t time;
+	float x, y;
+	float tx, ty;
+
+	tp = nemoseat_get_touchpoint_by_id(seat, touchid);
+	if (tp == NULL || tp->focus == NULL)
+		return;
+
+	nemoview_transform_to_global(tp->focus, wl_fixed_to_double(sx), wl_fixed_to_double(sy), &x, &y);
+
+	view = nemocompz_pick_view_below(seat->compz, x, y, &tx, &ty, tp->focus);
+	if (view != NULL) {
+		time = time_current_msecs();
+
+		nemocontent_touch_up(tp, tp->focus->content, time, touchid);
+
+		touchpoint_set_focus(tp, view);
+
+		nemocontent_touch_down(tp, tp->focus->content, time, touchid, tx, ty);
+
+		tp->grab_serial = wl_display_get_serial(seat->compz->display);
+		tp->grab_time = time;
+	}
+}
+
 static const struct nemo_touch_interface nemo_touch_implementation = {
-	nemo_touch_release
+	nemo_touch_release,
+	nemo_touch_bypass
 };
 
 static void nemotouch_unbind_nemo(struct wl_resource *resource)

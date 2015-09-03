@@ -329,6 +329,11 @@ static const struct nemo_touch_listener touch_listener = {
 	touch_handle_cancel
 };
 
+void nemotool_bypass_touch(struct nemotool *tool, int32_t id, float x, float y)
+{
+	nemo_touch_bypass(tool->touch, id, wl_fixed_from_double(x), wl_fixed_from_double(y));
+}
+
 static void seat_handle_capabilities(void *data, struct nemo_seat *seat, enum nemo_seat_capability caps)
 {
 	struct nemotool *tool = (struct nemotool *)data;
