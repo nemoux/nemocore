@@ -14,12 +14,16 @@
 #include <talehelper.h>
 #include <nemomisc.h>
 
+#define NEMOIMAGE_SIZE_MAX			(1024)
+
 struct imagecontext {
 	struct nemotool *tool;
 	struct eglcanvas *canvas;
 
 	struct nemotale *tale;
 	struct talenode *node;
+
+	int32_t screen_width, screen_height;
 };
 
 static void nemoimage_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
@@ -62,6 +66,20 @@ static void nemoimage_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t 
 
 	if (width < 200 || height < 200)
 		nemotool_exit(context->tool);
+
+	nemotool_resize_egl_canvas(context->canvas, width, height);
+	nemotale_set_viewport(tale, width, height);
+
+	nemotale_composite_egl(tale, NULL);
+}
+
+static void nemoimage_dispatch_canvas_screen(struct nemocanvas *canvas, int32_t x, int32_t y, int32_t width, int32_t height, int32_t mmwidth, int32_t mmheight, int left)
+{
+	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
+	struct imagecontext *context = (struct imagecontext *)nemotale_get_userdata(tale);
+
+	context->screen_width = width;
+	context->screen_height = height;
 }
 
 int main(int argc, char *argv[])
@@ -125,6 +143,7 @@ int main(int argc, char *argv[])
 	nemocanvas_set_nemosurface(NTEGL_CANVAS(canvas), NEMO_SHELL_SURFACE_TYPE_NORMAL);
 	nemocanvas_set_anchor(NTEGL_CANVAS(canvas), -0.5f, -0.5f);
 	nemocanvas_set_dispatch_resize(NTEGL_CANVAS(canvas), nemoimage_dispatch_canvas_resize);
+	nemocanvas_set_dispatch_screen(NTEGL_CANVAS(canvas), nemoimage_dispatch_canvas_screen);
 
 	context->tale = tale = nemotale_create_gl();
 	nemotale_set_backend(tale,
@@ -148,6 +167,12 @@ int main(int argc, char *argv[])
 			nemotale_node_get_pixman(node),
 			0, 0, 0, 0, 0, 0,
 			width, height);
+
+	if (width > NEMOIMAGE_SIZE_MAX) {
+		nemotool_resize_egl_canvas(context->canvas, NEMOIMAGE_SIZE_MAX, NEMOIMAGE_SIZE_MAX * ((double)height / (double)width));
+
+		nemotale_set_viewport(tale, NEMOIMAGE_SIZE_MAX, NEMOIMAGE_SIZE_MAX * ((double)height / (double)width));
+	}
 
 	nemotale_composite_egl(tale, NULL);
 

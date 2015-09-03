@@ -219,7 +219,7 @@ static void nemoshow_dispatch_timer(struct nemotimer *timer, void *data)
 
 	nemoshow_validate_one(scon->show);
 
-	nemotimer_set_timeout(timer, 1000);
+	nemotimer_set_timeout(timer, 500);
 }
 
 struct nemoshow *nemoshow_create_on_actor(struct nemoshell *shell, int32_t width, int32_t height, nemotale_dispatch_event_t dispatch)
@@ -243,7 +243,7 @@ struct nemoshow *nemoshow_create_on_actor(struct nemoshell *shell, int32_t width
 	if (timer == NULL)
 		goto err2;
 	nemotimer_set_callback(timer, nemoshow_dispatch_timer);
-	nemotimer_set_timeout(timer, 1000);
+	nemotimer_set_timeout(timer, 500);
 	nemotimer_set_userdata(timer, scon);
 
 	actor->base.pick = nemoshow_dispatch_pick_tale;
