@@ -9,12 +9,14 @@
 #include <actors/move.h>
 #include <actors/accelerate.h>
 #include <actors/gravitywell.h>
+#include <actors/antigravity.h>
 #include <actors/mutualgravity.h>
 #include <actors/mousegravity.h>
 #include <actors/deathzone.h>
 #include <actors/livezone.h>
 #include <actors/boundingbox.h>
 #include <actors/speedscale.h>
+#include <actors/speedlimit.h>
 #include <actors/deadline.h>
 #include <builders/position.h>
 #include <builders/velocity.h>

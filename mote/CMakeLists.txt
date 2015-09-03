@@ -20,12 +20,14 @@ add_library(nemomote SHARED
 	actors/move.c
 	actors/accelerate.c
 	actors/gravitywell.c
+	actors/antigravity.c
 	actors/mutualgravity.c
 	actors/mousegravity.c
 	actors/deathzone.c
 	actors/livezone.c
 	actors/boundingbox.c
 	actors/speedscale.c
+	actors/speedlimit.c
 	actors/deadline.c
 	)
 
