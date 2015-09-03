@@ -218,7 +218,7 @@ static void surface_enter(void *data, struct wl_surface *surface, struct wl_outp
 		if (output == NULL)
 			return;
 
-		canvas->dispatch_screen(canvas, output->x, output->y, output->width, output->height, 0);
+		canvas->dispatch_screen(canvas, output->x, output->y, output->width, output->height, output->mmwidth, output->mmheight, 0);
 	}
 }
 
@@ -232,7 +232,7 @@ static void surface_leave(void *data, struct wl_surface *surface, struct wl_outp
 		if (output == NULL)
 			return;
 
-		canvas->dispatch_screen(canvas, output->x, output->y, output->width, output->height, 1);
+		canvas->dispatch_screen(canvas, output->x, output->y, output->width, output->height, output->mmwidth, output->mmheight, 1);
 	}
 }
 

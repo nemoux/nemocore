@@ -172,7 +172,7 @@ static void nemoplay_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t w
 	nemotale_composite_egl(context->tale, NULL);
 }
 
-static void nemoplay_dispatch_canvas_screen(struct nemocanvas *canvas, int32_t x, int32_t y, int32_t width, int32_t height, int left)
+static void nemoplay_dispatch_canvas_screen(struct nemocanvas *canvas, int32_t x, int32_t y, int32_t width, int32_t height, int32_t mmwidth, int32_t mmheight, int left)
 {
 	struct playcontext *context = (struct playcontext *)nemocanvas_get_userdata(canvas);
 }

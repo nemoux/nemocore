@@ -24,6 +24,9 @@ static void output_handle_geometry(
 	output->x = x;
 	output->y = y;
 
+	output->mmwidth = physical_width;
+	output->mmheight = physical_height;
+
 	output->transform = transform;
 
 	if (output->make != NULL)
@@ -47,6 +50,8 @@ static void output_handle_mode(
 	if (flags & WL_OUTPUT_MODE_CURRENT) {
 		output->width = width;
 		output->height = height;
+
+		output->refresh = refresh;
 	}
 }
 

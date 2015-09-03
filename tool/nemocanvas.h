@@ -20,7 +20,7 @@ struct nemotask;
 typedef int (*nemocanvas_dispatch_event_t)(struct nemocanvas *canvas, uint32_t type, struct nemoevent *event);
 typedef void (*nemocanvas_dispatch_resize_t)(struct nemocanvas *canvas, int32_t width, int32_t height);
 typedef void (*nemocanvas_dispatch_frame_t)(struct nemocanvas *canvas, uint64_t secs, uint32_t nsecs);
-typedef void (*nemocanvas_dispatch_screen_t)(struct nemocanvas *canvas, int32_t x, int32_t y, int32_t width, int32_t height, int left);
+typedef void (*nemocanvas_dispatch_screen_t)(struct nemocanvas *canvas, int32_t x, int32_t y, int32_t width, int32_t height, int32_t mmwidth, int32_t mmheight, int left);
 typedef void (*nemocanvas_dispatch_sound_t)(struct nemocanvas *canvas, const char *device, int left);
 
 struct nemobuffer {

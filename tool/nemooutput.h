@@ -24,6 +24,9 @@ struct nemooutput {
 
 	int32_t x, y;
 	int32_t width, height;
+	int32_t mmwidth, mmheight;
+
+	int32_t refresh;
 
 	struct nemolist link;
 
