@@ -160,6 +160,17 @@ static inline int nemotale_event_update_node_taps(struct nemotale *tale, struct 
 	return event->tapcount = count;
 }
 
+static inline void nemotale_event_transform_to_viewport(struct nemotale *tale, float x, float y, float *sx, float *sy)
+{
+	if (tale->viewport.enable != 0) {
+		*sx = x * tale->viewport.sx;
+		*sy = y * tale->viewport.sy;
+	} else {
+		*sx = x;
+		*sy = y;
+	}
+}
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif
