@@ -214,14 +214,14 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 								state->y + canvas->base.height * view->geometry.ay);
 
 						if (bin->view->geometry.has_pivot == 0)
-							nemoview_correct_pivot(bin->view, -view->geometry.ax, -view->geometry.ay);
+							nemoview_correct_pivot(bin->view, view->content->width * -view->geometry.ax, view->content->height * -view->geometry.ay);
 					} else {
 						nemoview_set_position(view,
 								state->x - canvas->base.width * state->dx,
 								state->y - canvas->base.height * state->dy);
 
 						if (bin->view->geometry.has_pivot == 0)
-							nemoview_correct_pivot(bin->view, state->dx, state->dy);
+							nemoview_correct_pivot(bin->view, view->content->width * state->dx, view->content->height * state->dy);
 					}
 					nemoview_set_rotation(view, state->r);
 

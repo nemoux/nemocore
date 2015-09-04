@@ -129,8 +129,8 @@ void nemoview_set_pivot(struct nemoview *view, float px, float py)
 	if (view->geometry.px == px && view->geometry.py == py)
 		return;
 
-	view->geometry.px = px;
-	view->geometry.py = py;
+	nemoview_correct_pivot(view, px, py);
+
 	view->geometry.has_pivot = 1;
 	nemoview_geometry_dirty(view);
 }
@@ -148,8 +148,7 @@ void nemoview_set_anchor(struct nemoview *view, float ax, float ay)
 
 void nemoview_correct_pivot(struct nemoview *view, float px, float py)
 {
-	if (view->geometry.px != view->content->width * px ||
-			view->geometry.py != view->content->height * py) {
+	if (view->geometry.px != px || view->geometry.py != py) {
 		struct nemomatrix matrix;
 		struct nemovector vector;
 		float sx, sy, ex, ey;
@@ -183,8 +182,8 @@ void nemoview_correct_pivot(struct nemoview *view, float px, float py)
 			sy = vector.f[1] / vector.f[3];
 		}
 
-		view->geometry.px = view->content->width * px;
-		view->geometry.py = view->content->height * py;
+		view->geometry.px = px;
+		view->geometry.py = py;
 
 		nemomatrix_init_identity(&matrix);
 

@@ -262,7 +262,7 @@ int nemoshell_pick_canvas_by_touchpoint_on_area(struct touchpoint *tp0, struct t
 	pick1->other = pick0;
 
 	if (bin->view->geometry.has_pivot == 0)
-		nemoview_correct_pivot(bin->view, 0.5f, 0.5f);
+		nemoview_correct_pivot(bin->view, bin->view->content->width * 0.5f, bin->view->content->height * 0.5f);
 
 	nemoshell_start_touchpoint_shellgrab(&pick0->base, &pick_shellgrab_touchpoint_interface, bin, tp0);
 	nemoshell_start_touchpoint_shellgrab(&pick1->base, &pick_shellgrab_touchpoint_interface, bin, tp1);
@@ -310,7 +310,7 @@ int nemoshell_pick_canvas_by_touchpoint(struct touchpoint *tp0, struct touchpoin
 	pick1->other = pick0;
 
 	if (bin->view->geometry.has_pivot == 0)
-		nemoview_correct_pivot(bin->view, 0.5f, 0.5f);
+		nemoview_correct_pivot(bin->view, bin->view->content->width * 0.5f, bin->view->content->height * 0.5f);
 
 	nemoshell_start_touchpoint_shellgrab(&pick0->base, &pick_shellgrab_touchpoint_interface, bin, tp0);
 	nemoshell_start_touchpoint_shellgrab(&pick1->base, &pick_shellgrab_touchpoint_interface, bin, tp1);
@@ -472,7 +472,7 @@ int nemoshell_pick_actor_by_touchpoint(struct touchpoint *tp0, struct touchpoint
 	pick1->other = pick0;
 
 	if (actor->view->geometry.has_pivot == 0)
-		nemoview_correct_pivot(actor->view, 0.5f, 0.5f);
+		nemoview_correct_pivot(actor->view, actor->view->content->width * 0.5f, actor->view->content->height * 0.5f);
 
 	nemoshell_start_touchpoint_actorgrab(&pick0->base, &pick_actorgrab_touchpoint_interface, actor, tp0);
 	nemoshell_start_touchpoint_actorgrab(&pick1->base, &pick_actorgrab_touchpoint_interface, actor, tp1);
