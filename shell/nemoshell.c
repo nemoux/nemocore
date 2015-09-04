@@ -133,8 +133,8 @@ static void nemo_surface_execute(struct wl_client *client, struct wl_resource *r
 
 		state = nemoshell_create_client_state(child);
 		if (state != NULL) {
-			state->x = bin->view->geometry.x - bin->canvas->base.width * bin->view->geometry.ax;
-			state->y = bin->view->geometry.y - bin->canvas->base.height * bin->view->geometry.ay;
+			state->x = bin->view->geometry.x + bin->canvas->base.width * bin->view->geometry.ax;
+			state->y = bin->view->geometry.y + bin->canvas->base.height * bin->view->geometry.ay;
 			state->r = bin->view->geometry.r;
 			state->dx = 0.5f;
 			state->dy = 0.5f;
