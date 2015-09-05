@@ -6,6 +6,8 @@
 #include <errno.h>
 
 #include <getopt.h>
+#include <float.h>
+#include <math.h>
 
 #define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
@@ -23,6 +25,7 @@
 #include <pixmanhelper.h>
 #include <glhelper.h>
 #include <fbohelper.h>
+#include <nemobox.h>
 #include <nemomisc.h>
 
 static GLuint meshback_create_shader(void)
@@ -73,7 +76,18 @@ static void meshback_prepare(struct meshback *mesh, const char *filepath, const 
 	std::vector<tinyobj::shape_t> shapes;
 	std::vector<tinyobj::material_t> materials;
 	std::string r;
+	uint32_t base = 0;
+	float minx = FLT_MAX, miny = FLT_MAX, minz = FLT_MAX, maxx = FLT_MIN, maxy = FLT_MIN, maxz = FLT_MIN;
+	float max;
 	int i, j;
+
+	mesh->indices = (uint32_t *)malloc(sizeof(uint32_t) * 16);
+	mesh->nindices = 0;
+	mesh->sindices = 16;
+
+	mesh->vertices = (float *)malloc(sizeof(float) * 16);
+	mesh->nvertices = 0;
+	mesh->svertices = 16;
 
 	r = tinyobj::LoadObj(shapes, materials, filepath, basepath);
 	if (!r.empty())
@@ -81,19 +95,41 @@ static void meshback_prepare(struct meshback *mesh, const char *filepath, const 
 
 	for (i = 0; i < shapes.size(); i++) {
 		for (j = 0; j < shapes[i].mesh.indices.size() / 3; j++) {
-			NEMO_DEBUG("%d: %d %d %d\n", j,
-					shapes[i].mesh.indices[j * 3 + 0],
-					shapes[i].mesh.indices[j * 3 + 1],
-					shapes[i].mesh.indices[j * 3 + 2]);
+			NEMOBOX_APPEND(mesh->indices, mesh->sindices, mesh->nindices, shapes[i].mesh.indices[j * 3 + 0] + base);
+			NEMOBOX_APPEND(mesh->indices, mesh->sindices, mesh->nindices, shapes[i].mesh.indices[j * 3 + 1] + base);
+			NEMOBOX_APPEND(mesh->indices, mesh->sindices, mesh->nindices, shapes[i].mesh.indices[j * 3 + 1] + base);
+			NEMOBOX_APPEND(mesh->indices, mesh->sindices, mesh->nindices, shapes[i].mesh.indices[j * 3 + 2] + base);
 		}
 
-		for (j = 0; j < shapes[i].mesh.positions.size() / 3; j++) {
-			NEMO_DEBUG("%d: %f %f %f\n", j,
-					shapes[i].mesh.positions[j * 3 + 0],
-					shapes[i].mesh.positions[j * 3 + 1],
-					shapes[i].mesh.positions[j * 3 + 2]);
+		for (j = 0; j < shapes[i].mesh.positions.size() / 3; j++, base++) {
+			NEMOBOX_APPEND(mesh->vertices, mesh->svertices, mesh->nvertices, shapes[i].mesh.positions[j * 3 + 0]);
+			NEMOBOX_APPEND(mesh->vertices, mesh->svertices, mesh->nvertices, shapes[i].mesh.positions[j * 3 + 1]);
+			NEMOBOX_APPEND(mesh->vertices, mesh->svertices, mesh->nvertices, shapes[i].mesh.positions[j * 3 + 2]);
+
+			if (shapes[i].mesh.positions[j * 3 + 0] < minx)
+				minx = shapes[i].mesh.positions[j * 3 + 0];
+			if (shapes[i].mesh.positions[j * 3 + 1] < miny)
+				miny = shapes[i].mesh.positions[j * 3 + 1];
+			if (shapes[i].mesh.positions[j * 3 + 3] < minz)
+				minz = shapes[i].mesh.positions[j * 3 + 2];
+			if (shapes[i].mesh.positions[j * 3 + 0] > maxx)
+				maxx = shapes[i].mesh.positions[j * 3 + 0];
+			if (shapes[i].mesh.positions[j * 3 + 1] > maxy)
+				maxy = shapes[i].mesh.positions[j * 3 + 1];
+			if (shapes[i].mesh.positions[j * 3 + 2] > maxz)
+				maxz = shapes[i].mesh.positions[j * 3 + 2];
 		}
 	}
+
+	max = MAX(maxx - minx, MAX(maxy - miny, maxz - minz));
+
+	mesh->sx = 1.0f / max;
+	mesh->sy = 1.0f / max;
+	mesh->sz = 1.0f / max;
+
+	mesh->tx = -(maxx - minx) / 2.0f - minx;
+	mesh->ty = -(maxy - miny) / 2.0f - miny;
+	mesh->tz = -(maxz - minz) / 2.0f - minz;
 
 	mesh->program = meshback_create_shader();
 
@@ -108,10 +144,6 @@ static void meshback_prepare(struct meshback *mesh, const char *filepath, const 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 
-	nemomatrix_init_identity(&mesh->matrix);
-	nemomatrix_translate_xyz(&mesh->matrix, -1.0f, -1.0f, -1.0f);
-	nemomatrix_scale_xyz(&mesh->matrix, 1.0f, -1.0f, 1.0f);
-
 	glGenVertexArrays(1, &mesh->varray);
 	glBindVertexArray(mesh->varray);
 
@@ -119,12 +151,12 @@ static void meshback_prepare(struct meshback *mesh, const char *filepath, const 
 	glBindBuffer(GL_ARRAY_BUFFER, mesh->vbuffer);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void *)0);
 	glEnableVertexAttribArray(0);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 12, shapes[0].mesh.positions.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * mesh->nvertices, mesh->vertices, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	glGenBuffers(1, &mesh->vindex);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->vindex);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * 6, shapes[0].mesh.indices.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * mesh->nindices, mesh->indices, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	glBindVertexArray(0);
@@ -140,9 +172,24 @@ static void meshback_finish(struct meshback *mesh)
 	glDeleteRenderbuffers(1, &mesh->dbo);
 }
 
-static void meshback_render(struct meshback *mesh)
+static void meshback_render(struct meshback *mesh, double s, double r)
 {
-	GLfloat rgba[4] = { 0.0f, 1.0f, 1.0f, 1.0f };
+	GLfloat c = static_cast<GLfloat>(sin(r * 120.0f));
+	GLfloat rgba[4];
+
+	c = c >= 0.0f ? c : -c;
+	c = c * 0.8f + 0.2f;
+
+	rgba[0] = 0.0f;
+	rgba[1] = c;
+	rgba[2] = c;
+	rgba[3] = c;
+
+	nemomatrix_init_identity(&mesh->matrix);
+	nemomatrix_translate_xyz(&mesh->matrix, mesh->tx, mesh->ty, mesh->tz);
+	nemomatrix_rotate_y(&mesh->matrix, cos(r), sin(r));
+	nemomatrix_rotate_x(&mesh->matrix, cos(-M_PI / 36.0f), sin(-M_PI / 36.0f));
+	nemomatrix_scale_xyz(&mesh->matrix, mesh->sx * mesh->aspect * s, mesh->sy * s * -1.0f, mesh->sz * s);
 
 	glUseProgram(mesh->program);
 
@@ -158,12 +205,31 @@ static void meshback_render(struct meshback *mesh)
 	glUniform4fv(mesh->ucolor, 1, rgba);
 
 	glBindVertexArray(mesh->varray);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
+	glDrawElements(GL_LINES, mesh->nindices, GL_UNSIGNED_INT, NULL);
 	glBindVertexArray(0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+static void meshback_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t secs, uint32_t nsecs)
+{
+	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
+	struct meshback *mesh = (struct meshback *)nemotale_get_userdata(tale);
+	uint64_t msecs = secs * 1000 + nsecs / 1000000;
+
+	if (secs == 0 && nsecs == 0) {
+		nemocanvas_feedback(canvas);
+	} else {
+		nemocanvas_feedback(canvas);
+	}
+
+	meshback_render(mesh, 2.0f, ((double)msecs / 1000.0f) * M_PI / 360.0f);
+
+	nemotale_node_damage_all(mesh->node);
+
+	nemotale_composite_egl(mesh->tale, NULL);
 }
 
 static void meshback_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
@@ -239,6 +305,7 @@ int main(int argc, char *argv[])
 
 	mesh->width = width;
 	mesh->height = height;
+	mesh->aspect = (double)height / (double)width;
 
 	mesh->tool = tool = nemotool_create();
 	if (tool == NULL)
@@ -252,6 +319,7 @@ int main(int argc, char *argv[])
 	nemocanvas_set_nemosurface(NTEGL_CANVAS(canvas), NEMO_SHELL_SURFACE_TYPE_NORMAL);
 	nemocanvas_set_layer(NTEGL_CANVAS(canvas), NEMO_SURFACE_LAYER_TYPE_BACKGROUND);
 	nemocanvas_set_dispatch_resize(NTEGL_CANVAS(canvas), meshback_dispatch_canvas_resize);
+	nemocanvas_set_dispatch_frame(NTEGL_CANVAS(canvas), meshback_dispatch_canvas_frame);
 
 	mesh->canvas = NTEGL_CANVAS(canvas);
 
@@ -269,14 +337,12 @@ int main(int argc, char *argv[])
 
 	mesh->node = node = nemotale_node_create_gl(width, height);
 	nemotale_node_set_id(node, 1);
+	nemotale_node_opaque(node, 0, 0, width, height);
 	nemotale_attach_node(tale, node);
 
 	meshback_prepare(mesh, filepath, basepath);
-	meshback_render(mesh);
 
-	nemotale_node_damage_all(node);
-
-	nemotale_composite_egl(tale, NULL);
+	nemocanvas_dispatch_frame(NTEGL_CANVAS(canvas));
 
 	nemotool_run(tool);
 

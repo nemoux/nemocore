@@ -33,6 +33,16 @@ struct meshback {
 	GLuint varray;
 	GLuint vbuffer;
 	GLuint vindex;
+
+	uint32_t *indices;
+	int nindices, sindices;
+
+	float *vertices;
+	int nvertices, svertices;
+
+	float aspect;
+	float sx, sy, sz;
+	float tx, ty, tz;
 };
 
 #ifdef __cplusplus
