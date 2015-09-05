@@ -12,6 +12,7 @@ include_directories(
 	${CMAKE_BINARY_DIR}/tool
 	${CMAKE_SOURCE_DIR}/mote
 	${CMAKE_SOURCE_DIR}/apps
+	${CMAKE_SOURCE_DIR}/thirds
 	${CMAKE_SOURCE_DIR}/thirds/poly2tri
 	/usr/include/skia/core
 	/usr/include/skia/config
@@ -41,6 +42,18 @@ add_executable(miniback
 	)
 
 TARGET_LINK_LIBRARIES(miniback
+	nemotale
+	nemotool
+	${NEMOUX_COMMON_LIBRARIES}
+	)
+
+add_executable(meshback
+	meshback.cpp
+	talehelper.c
+	${CMAKE_SOURCE_DIR}/thirds/tiny_obj_loader.cc
+	)
+
+TARGET_LINK_LIBRARIES(meshback
 	nemotale
 	nemotool
 	${NEMOUX_COMMON_LIBRARIES}
