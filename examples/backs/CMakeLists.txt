@@ -85,6 +85,18 @@ TARGET_LINK_LIBRARIES(moteback
 	${NEMOUX_COMMON_LIBRARIES}
 	)
 
+add_executable(mosiback
+	mosiback.cpp
+	talehelper.c
+	)
+
+TARGET_LINK_LIBRARIES(mosiback
+	nemotool
+	nemotale
+	skia
+	${NEMOUX_COMMON_LIBRARIES}
+	)
+
 if(WITH_GSTREAMER)
 	PKG_CHECK_MODULES(GLIB REQUIRED glib-2.0)
 	INCLUDE_DIRECTORIES(${GLIB_INCLUDE_DIRS})
