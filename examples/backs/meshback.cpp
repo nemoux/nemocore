@@ -68,7 +68,7 @@ static GLuint meshback_create_shader(void)
 	return program;
 }
 
-static void meshback_prepare(struct meshback *mesh, const char *filepath)
+static void meshback_prepare(struct meshback *mesh, const char *filepath, const char *basepath)
 {
 	std::vector<tinyobj::shape_t> shapes;
 	std::vector<tinyobj::material_t> materials;
@@ -85,7 +85,7 @@ static void meshback_prepare(struct meshback *mesh, const char *filepath)
 	};
 	int i, j;
 
-	r = tinyobj::LoadObj(shapes, materials, filepath);
+	r = tinyobj::LoadObj(shapes, materials, filepath, basepath);
 	if (!r.empty())
 		exit(-1);
 
@@ -188,6 +188,7 @@ int main(int argc, char *argv[])
 {
 	struct option options[] = {
 		{ "file",				required_argument,			NULL,		'f' },
+		{ "path",				required_argument,			NULL,		'p' },
 		{ "type",				required_argument,			NULL,		't' },
 		{ "width",			required_argument,			NULL,		'w' },
 		{ "height",			required_argument,			NULL,		'h' },
@@ -200,19 +201,24 @@ int main(int argc, char *argv[])
 	struct eglcanvas *canvas;
 	struct nemotale *tale;
 	struct talenode *node;
-	const char *filepath = NULL;
-	const char *type = NULL;
+	char *filepath = NULL;
+	char *basepath = NULL;
+	char *type = NULL;
 	int32_t width = 1920;
 	int32_t height = 1080;
 	int opt;
 
-	while (opt = getopt_long(argc, argv, "f:t:w:h:b", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "f:p:t:w:h:b", options, NULL)) {
 		if (opt == -1)
 			break;
 
 		switch (opt) {
 			case 'f':
 				filepath = strdup(optarg);
+				break;
+
+			case 'p':
+				basepath = strdup(optarg);
 				break;
 
 			case 't':
@@ -274,7 +280,7 @@ int main(int argc, char *argv[])
 	nemotale_node_set_id(node, 1);
 	nemotale_attach_node(tale, node);
 
-	meshback_prepare(mesh, filepath);
+	meshback_prepare(mesh, filepath, basepath);
 	meshback_render(mesh);
 
 	nemotale_node_damage_all(node);
@@ -293,6 +299,8 @@ int main(int argc, char *argv[])
 	nemotool_disconnect_wayland(tool);
 	nemotool_destroy(tool);
 
+	free(filepath);
+	free(basepath);
 	free(mesh);
 
 	return 0;
