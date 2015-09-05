@@ -73,7 +73,16 @@ static void meshback_prepare(struct meshback *mesh, const char *filepath)
 	std::vector<tinyobj::shape_t> shapes;
 	std::vector<tinyobj::material_t> materials;
 	std::string r;
-	GLfloat vertices[9];
+	GLfloat vertices[12] = {
+		-1.0f, -1.0f, 0.0f,
+		-1.0f, 1.0f, 0.0f,
+		1.0f, 1.0f, 0.0f,
+		1.0f, -1.0f, 0.0f
+	};
+	GLuint indices[6] = {
+		0, 1, 2,
+		0, 2, 3
+	};
 	int i, j;
 
 	r = tinyobj::LoadObj(shapes, materials, filepath);
@@ -117,19 +126,23 @@ static void meshback_prepare(struct meshback *mesh, const char *filepath)
 
 	glGenBuffers(1, &mesh->vbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, mesh->vbuffer);
-
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void *)0);
 	glEnableVertexAttribArray(0);
-
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 9, vertices, GL_STATIC_DRAW);
-
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 12, vertices, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	glGenBuffers(1, &mesh->vindex);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->vindex);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * 6, indices, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
 	glBindVertexArray(0);
 }
 
 static void meshback_finish(struct meshback *mesh)
 {
 	glDeleteBuffers(1, &mesh->vbuffer);
+	glDeleteBuffers(1, &mesh->vindex);
 	glDeleteVertexArrays(1, &mesh->varray);
 
 	glDeleteFramebuffers(1, &mesh->fbo);
@@ -154,7 +167,7 @@ static void meshback_render(struct meshback *mesh)
 	glUniform4fv(mesh->ucolor, 1, rgba);
 
 	glBindVertexArray(mesh->varray);
-	glDrawArrays(GL_TRIANGLES, 0, 3);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
 	glBindVertexArray(0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);

@@ -32,6 +32,7 @@ struct meshback {
 
 	GLuint varray;
 	GLuint vbuffer;
+	GLuint vindex;
 };
 
 #ifdef __cplusplus
