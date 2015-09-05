@@ -73,16 +73,6 @@ static void meshback_prepare(struct meshback *mesh, const char *filepath, const 
 	std::vector<tinyobj::shape_t> shapes;
 	std::vector<tinyobj::material_t> materials;
 	std::string r;
-	GLfloat vertices[12] = {
-		-1.0f, -1.0f, 0.0f,
-		-1.0f, 1.0f, 0.0f,
-		1.0f, 1.0f, 0.0f,
-		1.0f, -1.0f, 0.0f
-	};
-	GLuint indices[6] = {
-		0, 1, 2,
-		0, 2, 3
-	};
 	int i, j;
 
 	r = tinyobj::LoadObj(shapes, materials, filepath, basepath);
@@ -119,7 +109,8 @@ static void meshback_prepare(struct meshback *mesh, const char *filepath, const 
 	glDepthFunc(GL_LEQUAL);
 
 	nemomatrix_init_identity(&mesh->matrix);
-	nemomatrix_scale(&mesh->matrix, 1.0f, -1.0f);
+	nemomatrix_translate_xyz(&mesh->matrix, -1.0f, -1.0f, -1.0f);
+	nemomatrix_scale_xyz(&mesh->matrix, 1.0f, -1.0f, 1.0f);
 
 	glGenVertexArrays(1, &mesh->varray);
 	glBindVertexArray(mesh->varray);
@@ -128,12 +119,12 @@ static void meshback_prepare(struct meshback *mesh, const char *filepath, const 
 	glBindBuffer(GL_ARRAY_BUFFER, mesh->vbuffer);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void *)0);
 	glEnableVertexAttribArray(0);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 12, vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 12, shapes[0].mesh.positions.data(), GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	glGenBuffers(1, &mesh->vindex);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->vindex);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * 6, indices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * 6, shapes[0].mesh.indices.data(), GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	glBindVertexArray(0);
