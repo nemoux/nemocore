@@ -37,10 +37,15 @@ struct mosiback {
 	int nimgs, iimgs;
 
 	int32_t col, row;
-	double radius;
+	double r;
 
 	struct mosione *ones;
 	int nones;
+
+	int type;
+
+	double radius;
+	uint32_t stime, etime;
 };
 
 #ifdef __cplusplus
