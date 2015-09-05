@@ -44,13 +44,11 @@
 #include <talehelper.h>
 #include <nemomisc.h>
 
-static void mosiback_prepare_one(struct mosiback *mosi, const char *filepath)
+static pixman_image_t *mosiback_prepare_one(const char *filepath, int32_t width, int32_t height)
 {
 	pixman_image_t *src;
 	pixman_image_t *dst;
 	pixman_transform_t transform;
-	int32_t width = mosi->col;
-	int32_t height = mosi->row;
 
 	src = pixman_load_png_file(filepath);
 	if (src == NULL)
@@ -81,14 +79,15 @@ static void mosiback_prepare_one(struct mosiback *mosi, const char *filepath)
 
 	pixman_image_unref(src);
 
-	mosi->img0 = dst;
+	return dst;
 }
 
 static void mosiback_render_one(struct mosiback *mosi, pixman_image_t *image, double t)
 {
 	int32_t width = pixman_image_get_width(image);
 	int32_t height = pixman_image_get_height(image);
-	uint8_t *data = (uint8_t *)pixman_image_get_data(mosi->img0);
+	uint8_t *src = (uint8_t *)pixman_image_get_data(mosi->img0);
+	uint8_t *dst = (uint8_t *)pixman_image_get_data(mosi->img1);
 	int i, j;
 
 	SkBitmap bitmap;
@@ -107,21 +106,19 @@ static void mosiback_render_one(struct mosiback *mosi, pixman_image_t *image, do
 			SkBlurMask::ConvertRadiusToSigma(5.0f),
 			SkBlurMaskFilter::kHighQuality_BlurFlag);
 
-	SkPaint stroke;
-	stroke.setAntiAlias(true);
-	stroke.setStyle(SkPaint::kStroke_Style);
-	stroke.setStrokeWidth(1.0f);
-	stroke.setColor(SkColorSetARGB(63.0f, 0.0f, 255.0f, 255.0f));
-	stroke.setMaskFilter(filter);
-
 	SkPaint fill;
 	fill.setAntiAlias(true);
 	fill.setStyle(SkPaint::kFill_Style);
 	fill.setMaskFilter(filter);
 
 	for (i = 0; i < mosi->row; i++) {
-		for (j = 0; j < mosi->col; j++, data += 4) {
-			fill.setColor(SkColorSetARGB(data[3], data[2], data[1], data[0]));
+		for (j = 0; j < mosi->col; j++, src += 4, dst += 4) {
+			fill.setColor(
+					SkColorSetARGB(
+						(dst[3] - src[3]) * t + src[3],
+						(dst[2] - src[2]) * t + src[2],
+						(dst[1] - src[1]) * t + src[1],
+						(dst[0] - src[0]) * t + src[0]));
 
 			canvas.drawCircle(mosi->radius + j * mosi->radius * 2.0f, mosi->radius + i * mosi->radius * 2.0f, mosi->radius, fill);
 		}
@@ -160,7 +157,8 @@ static void mosiback_dispatch_tale_event(struct nemotale *tale, struct talenode 
 int main(int argc, char *argv[])
 {
 	struct option options[] = {
-		{ "file",				required_argument,			NULL,		'f' },
+		{ "srcfile",		required_argument,			NULL,		's' },
+		{ "dstfile",		required_argument,			NULL,		'd' },
 		{ "width",			required_argument,			NULL,		'w' },
 		{ "height",			required_argument,			NULL,		'h' },
 		{ "background",	no_argument,						NULL,		'b' },
@@ -172,19 +170,24 @@ int main(int argc, char *argv[])
 	struct eglcanvas *canvas;
 	struct nemotale *tale;
 	struct talenode *node;
-	char *filepath = NULL;
+	char *srcpath = NULL;
+	char *dstpath = NULL;
 	int32_t width = 1920;
 	int32_t height = 1080;
 	int opt;
 	int i;
 
-	while (opt = getopt_long(argc, argv, "f:w:h:b", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "s:d:w:h:b", options, NULL)) {
 		if (opt == -1)
 			break;
 
 		switch (opt) {
-			case 'f':
-				filepath = strdup(optarg);
+			case 's':
+				srcpath = strdup(optarg);
+				break;
+
+			case 'd':
+				dstpath = strdup(optarg);
 				break;
 
 			case 'w':
@@ -200,7 +203,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	if (filepath == NULL)
+	if (srcpath == NULL || dstpath == NULL)
 		return 0;
 
 	mosi = (struct mosiback *)malloc(sizeof(struct mosiback));
@@ -247,7 +250,8 @@ int main(int argc, char *argv[])
 	nemotale_node_opaque(node, 0, 0, width, height);
 	nemotale_attach_node(tale, node);
 
-	mosiback_prepare_one(mosi, filepath);
+	mosi->img0 = mosiback_prepare_one(srcpath, mosi->col, mosi->row);
+	mosi->img1 = mosiback_prepare_one(dstpath, mosi->col, mosi->row);
 
 	nemocanvas_dispatch_frame(NTEGL_CANVAS(canvas));
 

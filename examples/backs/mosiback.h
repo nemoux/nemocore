@@ -23,6 +23,7 @@ struct mosiback {
 	int32_t width, height;
 
 	pixman_image_t *img0;
+	pixman_image_t *img1;
 	int32_t col, row;
 	double radius;
 	uint32_t msecs;
