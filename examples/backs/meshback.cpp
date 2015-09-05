@@ -85,6 +85,9 @@ static void meshback_prepare(struct meshback *mesh, const char *filepath, const 
 	mesh->nindices = 0;
 	mesh->sindices = 16;
 
+	mesh->cindices = 0;
+	mesh->iindices = 0;
+
 	mesh->vertices = (float *)malloc(sizeof(float) * 16);
 	mesh->nvertices = 0;
 	mesh->svertices = 16;
@@ -97,6 +100,8 @@ static void meshback_prepare(struct meshback *mesh, const char *filepath, const 
 		for (j = 0; j < shapes[i].mesh.indices.size() / 3; j++) {
 			NEMOBOX_APPEND(mesh->indices, mesh->sindices, mesh->nindices, shapes[i].mesh.indices[j * 3 + 0] + base);
 			NEMOBOX_APPEND(mesh->indices, mesh->sindices, mesh->nindices, shapes[i].mesh.indices[j * 3 + 1] + base);
+			NEMOBOX_APPEND(mesh->indices, mesh->sindices, mesh->nindices, shapes[i].mesh.indices[j * 3 + 0] + base);
+			NEMOBOX_APPEND(mesh->indices, mesh->sindices, mesh->nindices, shapes[i].mesh.indices[j * 3 + 2] + base);
 			NEMOBOX_APPEND(mesh->indices, mesh->sindices, mesh->nindices, shapes[i].mesh.indices[j * 3 + 1] + base);
 			NEMOBOX_APPEND(mesh->indices, mesh->sindices, mesh->nindices, shapes[i].mesh.indices[j * 3 + 2] + base);
 		}
@@ -178,7 +183,7 @@ static void meshback_render(struct meshback *mesh, double s, double r)
 	GLfloat rgba[4];
 
 	c = c >= 0.0f ? c : -c;
-	c = c * 0.8f + 0.2f;
+	c = c * 0.5f + 0.1f;
 
 	rgba[0] = 0.0f;
 	rgba[1] = c;
@@ -205,7 +210,7 @@ static void meshback_render(struct meshback *mesh, double s, double r)
 	glUniform4fv(mesh->ucolor, 1, rgba);
 
 	glBindVertexArray(mesh->varray);
-	glDrawElements(GL_LINES, mesh->nindices, GL_UNSIGNED_INT, NULL);
+	glDrawElements(GL_LINES, mesh->cindices, GL_UNSIGNED_INT, NULL);
 	glBindVertexArray(0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -225,7 +230,17 @@ static void meshback_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 		nemocanvas_feedback(canvas);
 	}
 
+	if (mesh->cindices <= 0) {
+		mesh->cindices = 0;
+		mesh->iindices = 128;
+	} else if (mesh->cindices >= mesh->nindices) {
+		mesh->cindices = mesh->nindices;
+		mesh->iindices = -128;
+	}
+
 	meshback_render(mesh, 2.0f, ((double)msecs / 1000.0f) * M_PI / 360.0f);
+
+	mesh->cindices += mesh->iindices;
 
 	nemotale_node_damage_all(mesh->node);
 
