@@ -9,6 +9,17 @@ NEMO_BEGIN_EXTERN_C
 
 #include <pixman.h>
 
+struct mosione {
+	double x, y;
+	double r;
+
+	uint8_t c[4];
+	uint8_t c0[4];
+	uint8_t c1[4];
+
+	uint32_t stime, etime;
+};
+
 struct mosiback {
 	struct nemotool *tool;
 
@@ -22,11 +33,14 @@ struct mosiback {
 
 	int32_t width, height;
 
-	pixman_image_t *img0;
-	pixman_image_t *img1;
+	pixman_image_t *imgs[8];
+	int nimgs, iimgs;
+
 	int32_t col, row;
 	double radius;
-	uint32_t msecs;
+
+	struct mosione *ones;
+	int nones;
 };
 
 #ifdef __cplusplus
