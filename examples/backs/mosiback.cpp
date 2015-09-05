@@ -44,11 +44,13 @@
 #include <talehelper.h>
 #include <nemomisc.h>
 
-static void mosiback_prepare_one(struct mosiback *mosi, const char *filepath, int32_t width, int32_t height)
+static void mosiback_prepare_one(struct mosiback *mosi, const char *filepath)
 {
 	pixman_image_t *src;
 	pixman_image_t *dst;
 	pixman_transform_t transform;
+	int32_t width = mosi->col;
+	int32_t height = mosi->row;
 
 	src = pixman_load_png_file(filepath);
 	if (src == NULL)
@@ -78,14 +80,16 @@ static void mosiback_prepare_one(struct mosiback *mosi, const char *filepath, in
 			width, height);
 
 	pixman_image_unref(src);
-	pixman_image_unref(dst);
+
+	mosi->img0 = dst;
 }
 
 static void mosiback_render_one(struct mosiback *mosi, pixman_image_t *image, double t)
 {
 	int32_t width = pixman_image_get_width(image);
 	int32_t height = pixman_image_get_height(image);
-	int i;
+	uint8_t *data = (uint8_t *)pixman_image_get_data(mosi->img0);
+	int i, j;
 
 	SkBitmap bitmap;
 	bitmap.setInfo(
@@ -113,8 +117,15 @@ static void mosiback_render_one(struct mosiback *mosi, pixman_image_t *image, do
 	SkPaint fill;
 	fill.setAntiAlias(true);
 	fill.setStyle(SkPaint::kFill_Style);
-	fill.setColor(SkColorSetARGB(128.0f, 0.0f, 255.0f, 255.0f));
 	fill.setMaskFilter(filter);
+
+	for (i = 0; i < mosi->row; i++) {
+		for (j = 0; j < mosi->col; j++, data += 4) {
+			fill.setColor(SkColorSetARGB(data[3], data[2], data[1], data[0]));
+
+			canvas.drawCircle(mosi->radius + j * mosi->radius * 2.0f, mosi->radius + i * mosi->radius * 2.0f, mosi->radius, fill);
+		}
+	}
 }
 
 static void mosiback_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t secs, uint32_t nsecs)
@@ -200,6 +211,10 @@ int main(int argc, char *argv[])
 	mosi->width = width;
 	mosi->height = height;
 
+	mosi->row = 128;
+	mosi->col = 128 * ((double)width / (double)height);
+	mosi->radius = (double)height / 128.0f / 2.0f;
+
 	mosi->tool = tool = nemotool_create();
 	if (tool == NULL)
 		return -1;
@@ -232,7 +247,7 @@ int main(int argc, char *argv[])
 	nemotale_node_opaque(node, 0, 0, width, height);
 	nemotale_attach_node(tale, node);
 
-	mosiback_prepare_one(mosi, filepath, 320, 320);
+	mosiback_prepare_one(mosi, filepath);
 
 	nemocanvas_dispatch_frame(NTEGL_CANVAS(canvas));
 

@@ -7,6 +7,8 @@
 NEMO_BEGIN_EXTERN_C
 #endif
 
+#include <pixman.h>
+
 struct mosiback {
 	struct nemotool *tool;
 
@@ -20,6 +22,9 @@ struct mosiback {
 
 	int32_t width, height;
 
+	pixman_image_t *img0;
+	int32_t col, row;
+	double radius;
 	uint32_t msecs;
 };
 
