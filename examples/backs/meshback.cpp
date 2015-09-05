@@ -91,7 +91,7 @@ static void meshback_prepare(struct meshback *mesh, const char *filepath, const 
 
 	r = tinyobj::LoadObj(shapes, materials, filepath, basepath);
 	if (!r.empty())
-		exit(-1);
+		exit(1);
 
 	for (i = 0; i < shapes.size(); i++) {
 		for (j = 0; j < shapes[i].mesh.indices.size() / 3; j++) {
@@ -356,8 +356,6 @@ int main(int argc, char *argv[])
 	nemotool_disconnect_wayland(tool);
 	nemotool_destroy(tool);
 
-	free(filepath);
-	free(basepath);
 	free(mesh);
 
 	return 0;

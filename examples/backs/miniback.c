@@ -73,7 +73,7 @@ static GLuint miniback_create_shader(void)
 	return program;
 }
 
-static void miniback_prepare(struct miniback *mini)
+static void miniback_prepare(struct miniback *mini, const char *filepath)
 {
 	GLfloat vertices[16] = {
 		1.0f, -1.0f, 1.0f, 1.0f,
@@ -95,7 +95,7 @@ static void miniback_prepare(struct miniback *mini)
 			&mini->fbo, &mini->dbo);
 
 	nemomatrix_init_identity(&mini->matrix);
-	nemomatrix_scale(&mini->matrix, 0.5f, -0.5f);
+	nemomatrix_scale(&mini->matrix, 1.0f, -1.0f);
 
 	glGenVertexArrays(1, &mini->varray);
 	glBindVertexArray(mini->varray);
@@ -122,7 +122,11 @@ static void miniback_prepare(struct miniback *mini)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-	image = pixman_load_png_file("/home/root/.config/nemo.png");
+	image = pixman_load_png_file(filepath);
+	if (image == NULL)
+		image = pixman_load_jpeg_file(filepath);
+	if (image == NULL)
+		exit(1);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT,
 			pixman_image_get_width(image),
 			pixman_image_get_height(image),
@@ -180,6 +184,7 @@ static void miniback_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t w
 int main(int argc, char *argv[])
 {
 	struct option options[] = {
+		{ "file",				required_argument,			NULL,		'f' },
 		{ "type",				required_argument,			NULL,		't' },
 		{ "width",			required_argument,			NULL,		'w' },
 		{ "height",			required_argument,			NULL,		'h' },
@@ -192,16 +197,21 @@ int main(int argc, char *argv[])
 	struct eglcanvas *canvas;
 	struct nemotale *tale;
 	struct talenode *node;
-	const char *type = NULL;
+	char *filepath = NULL;
+	char *type = NULL;
 	int32_t width = 1920;
 	int32_t height = 1080;
 	int opt;
 
-	while (opt = getopt_long(argc, argv, "t:w:h:b", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "f:t:w:h:b", options, NULL)) {
 		if (opt == -1)
 			break;
 
 		switch (opt) {
+			case 'f':
+				filepath = strdup(optarg);
+				break;
+
 			case 't':
 				type = strdup(optarg);
 				break;
@@ -218,6 +228,9 @@ int main(int argc, char *argv[])
 				break;
 		}
 	}
+
+	if (filepath == NULL)
+		return 0;
 
 	mini = (struct miniback *)malloc(sizeof(struct miniback));
 	if (mini == NULL)
@@ -258,7 +271,7 @@ int main(int argc, char *argv[])
 	nemotale_node_set_id(node, 1);
 	nemotale_attach_node(tale, node);
 
-	miniback_prepare(mini);
+	miniback_prepare(mini, filepath);
 	miniback_render(mini);
 
 	nemotale_node_damage_all(node);
