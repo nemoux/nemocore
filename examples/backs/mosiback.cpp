@@ -94,6 +94,7 @@ static void mosiback_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
 	struct mosiback *mosi = (struct mosiback *)nemotale_get_userdata(tale);
 	struct talenode *node = mosi->node;
+	uint32_t msecs = time_current_msecs();
 	int done;
 
 	if (secs == 0 && nsecs == 0) {
@@ -102,27 +103,33 @@ static void mosiback_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 		nemocanvas_feedback(canvas);
 	}
 
-	done = nemomosi_update(mosi->mosi, time_current_msecs());
+	done = nemomosi_update(mosi->mosi, msecs);
 	if (done != 0) {
 		mosi->iimgs = (mosi->iimgs + 1) % mosi->nimgs;
 
 		nemomosi_tween_image(mosi->mosi, (uint8_t *)pixman_image_get_data(mosi->imgs[mosi->iimgs]));
 
 		if (mosi->type == 0) {
-			nemomosi_wave_dispatch(mosi->mosi, time_current_msecs(),
-					0, 0,
-					(nemomosi_get_width(mosi->mosi) + nemomosi_get_height(mosi->mosi)) / 2,
+			nemomosi_wave_dispatch(mosi->mosi, msecs,
+					random_get_int(0, nemomosi_get_width(mosi->mosi)),
+					random_get_int(0, nemomosi_get_height(mosi->mosi)),
+					(nemomosi_get_width(mosi->mosi) + nemomosi_get_height(mosi->mosi)),
 					5000,
 					0, 500);
-			nemomosi_wave_dispatch(mosi->mosi, time_current_msecs(),
-					nemomosi_get_width(mosi->mosi), nemomosi_get_height(mosi->mosi),
-					(nemomosi_get_width(mosi->mosi) + nemomosi_get_height(mosi->mosi)) / 2,
+			nemomosi_wave_dispatch(mosi->mosi, msecs,
+					random_get_int(0, nemomosi_get_width(mosi->mosi)),
+					random_get_int(0, nemomosi_get_height(mosi->mosi)),
+					(nemomosi_get_width(mosi->mosi) + nemomosi_get_height(mosi->mosi)),
 					5000,
 					0, 500);
 
 			mosi->type = 1;
+		} else if (mosi->type == 1) {
+			nemomosi_flip_dispatch(mosi->mosi, msecs, 10, 150, 450);
+
+			mosi->type = 2;
 		} else {
-			nemomosi_random_dispatch(mosi->mosi, time_current_msecs(), 0, 5000, 500, 1500);
+			nemomosi_random_dispatch(mosi->mosi, msecs, 0, 5000, 500, 1500);
 
 			mosi->type = 0;
 		}
