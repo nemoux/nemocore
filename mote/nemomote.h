@@ -43,10 +43,9 @@ struct nemomote {
 	int rcount;
 };
 
-extern int nemomote_init(struct nemomote *mote);
-extern int nemomote_exit(struct nemomote *mote);
+extern struct nemomote *nemomote_create(int max);
+extern void nemomote_destroy(struct nemomote *mote);
 
-extern int nemomote_set_max_particles(struct nemomote *mote, unsigned int max);
 extern int nemomote_reset(struct nemomote *mote);
 
 extern int nemomote_ready(struct nemomote *mote, unsigned int count);

@@ -7,19 +7,49 @@
 
 #include <nemomote.h>
 
-int nemomote_init(struct nemomote *mote)
+struct nemomote *nemomote_create(int max)
 {
-	mote->buffers = NULL;
-	mote->types = NULL;
-	mote->attrs = NULL;
-	mote->mcount = 0;
+	struct nemomote *mote;
+
+	mote = (struct nemomote *)malloc(sizeof(struct nemomote));
+	if (mote == NULL)
+		return NULL;
+	memset(mote, 0, sizeof(struct nemomote));
+
+	mote->buffers = (double *)malloc(sizeof(double[10]) * max);
+	if (mote->buffers == NULL)
+		goto err1;
+	memset(mote->buffers, 0, sizeof(double[10]) * max);
+
+	mote->types = (uint32_t *)malloc(sizeof(uint32_t) * max);
+	if (mote->types == NULL)
+		goto err2;
+	memset(mote->types, 0, sizeof(uint32_t) * max);
+
+	mote->attrs = (uint32_t *)malloc(sizeof(uint32_t) * max);
+	if (mote->attrs == NULL)
+		goto err3;
+	memset(mote->attrs, 0, sizeof(uint32_t) * max);
+
+	mote->mcount = max;
 	mote->lcount = 0;
 	mote->rcount = 0;
 
-	return 0;
+	return mote;
+
+err3:
+	free(mote->types);
+
+err2:
+	free(mote->buffers);
+
+err1:
+	free(mote);
+
+	return NULL;
 }
 
-int nemomote_exit(struct nemomote *mote)
+void nemomote_destroy(struct nemomote *mote)
 {
 	if (mote->buffers != NULL)
 		free(mote->buffers);
@@ -28,42 +58,7 @@ int nemomote_exit(struct nemomote *mote)
 	if (mote->attrs != NULL)
 		free(mote->attrs);
 
-	return 0;
-}
-
-int nemomote_set_max_particles(struct nemomote *mote, unsigned int max)
-{
-	int i;
-
-	if (mote->mcount != max) {
-		if (mote->buffers != NULL)
-			free(mote->buffers);
-		if (mote->types != NULL)
-			free(mote->types);
-		if (mote->attrs != NULL)
-			free(mote->attrs);
-
-		mote->buffers = (double *)malloc(sizeof(double[10]) * max);
-		if (mote->buffers == NULL)
-			return -1;
-		memset(mote->buffers, 0, sizeof(double[10]) * max);
-
-		mote->types = (uint32_t *)malloc(sizeof(uint32_t) * max);
-		if (mote->types == NULL)
-			return -1;
-		memset(mote->types, 0, sizeof(uint32_t) * max);
-
-		mote->attrs = (uint32_t *)malloc(sizeof(uint32_t) * max);
-		if (mote->attrs == NULL)
-			return -1;
-		memset(mote->attrs, 0, sizeof(uint32_t) * max);
-	}
-
-	mote->mcount = max;
-	mote->lcount = 0;
-	mote->rcount = 0;
-
-	return 0;
+	free(mote);
 }
 
 int nemomote_reset(struct nemomote *mote)

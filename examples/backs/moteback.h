@@ -22,7 +22,7 @@ struct moteback {
 
 	int32_t width, height;
 
-	struct nemomote mote;
+	struct nemomote *mote;
 	struct moterandom random;
 	struct nemozone box;
 	struct nemozone disc;
