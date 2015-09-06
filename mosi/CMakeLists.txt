@@ -10,6 +10,7 @@ add_library(nemomosi SHARED
 	mosirandom.c
 	mosiwave.c
 	mosiflip.c
+	mosirain.c
 	mosioneshot.c
 	)
 
@@ -22,6 +23,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/mosi/mosirandom.h
 	${CMAKE_SOURCE_DIR}/mosi/mosiwave.h
 	${CMAKE_SOURCE_DIR}/mosi/mosiflip.h
+	${CMAKE_SOURCE_DIR}/mosi/mosirain.h
 	${CMAKE_SOURCE_DIR}/mosi/mosioneshot.h
 	)
 

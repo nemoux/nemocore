@@ -129,12 +129,7 @@ static void mosiback_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 
 			mosi->type = 2;
 		} else if (mosi->type == 2) {
-			nemomosi_wave_dispatch(mosi->mosi, msecs,
-					nemomosi_get_width(mosi->mosi) / 2,
-					nemomosi_get_height(mosi->mosi) / 2,
-					nemomosi_get_width(mosi->mosi),
-					0, 5000,
-					500, 1000);
+			nemomosi_rain_dispatch(mosi->mosi, msecs, 0, 5000, 10000, 0.1f, 0.3f);
 
 			mosi->type = 3;
 		} else if (mosi->type == 3) {
