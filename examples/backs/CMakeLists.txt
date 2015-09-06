@@ -11,6 +11,7 @@ include_directories(
 	${CMAKE_SOURCE_DIR}/tool
 	${CMAKE_BINARY_DIR}/tool
 	${CMAKE_SOURCE_DIR}/mote
+	${CMAKE_SOURCE_DIR}/mosi
 	${CMAKE_SOURCE_DIR}/apps
 	${CMAKE_SOURCE_DIR}/thirds
 	${CMAKE_SOURCE_DIR}/thirds/poly2tri
@@ -93,6 +94,7 @@ add_executable(mosiback
 TARGET_LINK_LIBRARIES(mosiback
 	nemotool
 	nemotale
+	nemomosi
 	skia
 	${NEMOUX_COMMON_LIBRARIES}
 	)

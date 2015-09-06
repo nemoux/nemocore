@@ -7,6 +7,8 @@ include_directories(
 
 add_library(nemomosi SHARED
 	nemomosi.c
+	mosirandom.c
+	mosiwave.c
 	)
 
 set(NEMOMOSI_PKGCONFIG_REQUIRES "")
@@ -15,6 +17,8 @@ INSTALL(TARGETS nemomosi DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
 
 set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/mosi/nemomosi.h
+	${CMAKE_SOURCE_DIR}/mosi/mosirandom.h
+	${CMAKE_SOURCE_DIR}/mosi/mosiwave.h
 	)
 
 configure_file(

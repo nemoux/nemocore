@@ -42,121 +42,14 @@
 #include <nemoegl.h>
 #include <pixmanhelper.h>
 #include <talehelper.h>
+#include <nemomosi.h>
 #include <nemomisc.h>
 
-static pixman_image_t *mosiback_prepare_image(const char *filepath, int32_t width, int32_t height)
-{
-	pixman_image_t *src;
-	pixman_image_t *dst;
-	pixman_transform_t transform;
-
-	src = pixman_load_png_file(filepath);
-	if (src == NULL)
-		src = pixman_load_jpeg_file(filepath);
-	if (src == NULL)
-		exit(1);
-
-	dst = pixman_image_create_bits(PIXMAN_a8r8g8b8,
-			width, height,
-			NULL,
-			width * 4);
-
-	pixman_transform_init_identity(&transform);
-	pixman_transform_scale(&transform, NULL,
-			pixman_double_to_fixed(
-				(double)pixman_image_get_width(src) / (double)pixman_image_get_width(dst)),
-			pixman_double_to_fixed(
-				(double)pixman_image_get_height(src) / (double)pixman_image_get_height(dst)));
-
-	pixman_image_set_transform(src, &transform);
-
-	pixman_image_composite32(PIXMAN_OP_SRC,
-			src,
-			NULL,
-			dst,
-			0, 0, 0, 0, 0, 0,
-			width, height);
-
-	pixman_image_unref(src);
-
-	return dst;
-}
-
-static void mosiback_prepare_one(struct mosiback *mosi, pixman_image_t *image)
-{
-	struct mosione *one;
-	uint8_t *src = (uint8_t *)pixman_image_get_data(image);
-	int i, j;
-
-	for (i = 0; i < mosi->row; i++) {
-		for (j = 0; j < mosi->col; j++, src += 4) {
-			one = &mosi->ones[i * mosi->col + j];
-
-			one->c[3] = src[3];
-			one->c[2] = src[2];
-			one->c[1] = src[1];
-			one->c[0] = src[0];
-
-			one->c0[3] = 0.0f;
-			one->c0[2] = 0.0f;
-			one->c0[1] = 0.0f;
-			one->c0[0] = 0.0f;
-
-			one->c1[3] = one->c[3];
-			one->c1[2] = one->c[2];
-			one->c1[1] = one->c[1];
-			one->c1[0] = one->c[0];
-		}
-	}
-}
-
-static void mosiback_prepare_two(struct mosiback *mosi, pixman_image_t *image)
-{
-	struct mosione *one;
-	uint8_t *dst = (uint8_t *)pixman_image_get_data(image);
-	int i, j;
-
-	for (i = 0; i < mosi->row; i++) {
-		for (j = 0; j < mosi->col; j++, dst += 4) {
-			one = &mosi->ones[i * mosi->col + j];
-
-			one->c0[3] = one->c[3];
-			one->c0[2] = one->c[2];
-			one->c0[1] = one->c[1];
-			one->c0[0] = one->c[0];
-
-			one->c1[3] = dst[3];
-			one->c1[2] = dst[2];
-			one->c1[1] = dst[1];
-			one->c1[0] = dst[0];
-		}
-	}
-}
-
-static void mosiback_prepare_tween(struct mosiback *mosi, uint32_t msecs)
-{
-	struct mosione *one;
-	int i, j;
-
-	for (i = 0; i < mosi->row; i++) {
-		for (j = 0; j < mosi->col; j++) {
-			one = &mosi->ones[i * mosi->col + j];
-
-			one->x = mosi->r + j * mosi->r * 2.0f;
-			one->y = mosi->r + i * mosi->r * 2.0f;
-
-			one->stime = msecs + random_get_int(0, 7000);
-			one->etime = one->stime + random_get_int(500, 1500);
-		}
-	}
-}
-
-static int mosiback_render_tween(struct mosiback *mosi, pixman_image_t *image, uint32_t msecs)
+static int mosiback_render(struct mosiback *mosi, pixman_image_t *image)
 {
 	struct mosione *one;
 	int32_t width = pixman_image_get_width(image);
 	int32_t height = pixman_image_get_height(image);
-	int done = 1;
 	int i, j;
 
 	SkBitmap bitmap;
@@ -174,29 +67,9 @@ static int mosiback_render_tween(struct mosiback *mosi, pixman_image_t *image, u
 	fill.setAntiAlias(true);
 	fill.setStyle(SkPaint::kFill_Style);
 
-	for (i = 0; i < mosi->row; i++) {
-		for (j = 0; j < mosi->col; j++) {
-			one = &mosi->ones[i * mosi->col + j];
-
-			if (msecs < one->stime) {
-				done = 0;
-			} else if (msecs >= one->stime && msecs < one->etime) {
-				double t = ((double)(msecs - one->stime) / (double)(one->etime - one->stime));
-
-				one->r = mosi->r;
-
-				one->c[3] = (one->c1[3] - one->c0[3]) * t + one->c0[3];
-				one->c[2] = (one->c1[2] - one->c0[2]) * t + one->c0[2];
-				one->c[1] = (one->c1[1] - one->c0[1]) * t + one->c0[1];
-				one->c[0] = (one->c1[0] - one->c0[0]) * t + one->c0[0];
-
-				done = 0;
-			} else if (msecs >= one->etime) {
-				one->c[3] = one->c1[3];
-				one->c[2] = one->c1[2];
-				one->c[1] = one->c1[1];
-				one->c[0] = one->c1[0];
-			}
+	for (i = 0; i < nemomosi_get_height(mosi->mosi); i++) {
+		for (j = 0; j < nemomosi_get_width(mosi->mosi); j++) {
+			one = nemomosi_get_one(mosi->mosi, j, i);
 
 			fill.setColor(
 					SkColorSetARGB(
@@ -205,88 +78,15 @@ static int mosiback_render_tween(struct mosiback *mosi, pixman_image_t *image, u
 						one->c[1],
 						one->c[0]));
 
-			canvas.drawCircle(one->x, one->y, one->r, fill);
+			canvas.drawCircle(
+					mosi->r + j * mosi->r * 2.0f,
+					mosi->r + i * mosi->r * 2.0f,
+					mosi->r,
+					fill);
 		}
 	}
 
-	return done;
-}
-
-static void mosiback_prepare_wave(struct mosiback *mosi, uint32_t msecs)
-{
-	struct mosione *one;
-	int i, j;
-
-	for (i = 0; i < mosi->row; i++) {
-		for (j = 0; j < mosi->col; j++) {
-			one = &mosi->ones[i * mosi->col + j];
-
-			one->x = mosi->r + j * mosi->r * 2.0f;
-			one->y = mosi->r + i * mosi->r * 2.0f;
-
-			one->stime = UINT_MAX;
-			one->etime = UINT_MAX;
-		}
-	}
-}
-
-static int mosiback_render_wave(struct mosiback *mosi, pixman_image_t *image, uint32_t msecs)
-{
-	struct mosione *one;
-	int32_t width = pixman_image_get_width(image);
-	int32_t height = pixman_image_get_height(image);
-	double r = mosi->radius * ((double)(msecs - mosi->stime) / (double)(mosi->etime - mosi->stime));
-	double d;
-	double min = FLT_MAX;
-	int done = 1;
-	int i, j;
-
-	SkBitmap bitmap;
-	bitmap.setInfo(
-			SkImageInfo::Make(width, height, kN32_SkColorType, kPremul_SkAlphaType));
-	bitmap.setPixels(
-			pixman_image_get_data(image));
-
-	SkBitmapDevice device(bitmap);
-	SkCanvas canvas(&device);
-
-	canvas.clear(SK_ColorTRANSPARENT);
-
-	SkPaint fill;
-	fill.setAntiAlias(true);
-	fill.setStyle(SkPaint::kFill_Style);
-
-	for (i = 0; i < mosi->row; i++) {
-		for (j = 0; j < mosi->col; j++) {
-			one = &mosi->ones[i * mosi->col + j];
-
-			d = sqrtf(one->x * one->x + one->y * one->y);
-			if (d <= r - 300.0f) {
-				one->c[3] = one->c1[3];
-				one->c[2] = one->c1[2];
-				one->c[1] = one->c1[1];
-				one->c[0] = one->c1[0];
-			} else if (d <= r) {
-				double t = (r - d) / 300.0f;
-
-				one->c[3] = (one->c1[3] - one->c0[3]) * t + one->c0[3];
-				one->c[2] = (one->c1[2] - one->c0[2]) * t + one->c0[2];
-				one->c[1] = (one->c1[1] - one->c0[1]) * t + one->c0[1];
-				one->c[0] = (one->c1[0] - one->c0[0]) * t + one->c0[0];
-			}
-
-			fill.setColor(
-					SkColorSetARGB(
-						one->c[3],
-						one->c[2],
-						one->c[1],
-						one->c[0]));
-
-			canvas.drawCircle(one->x, one->y, one->r, fill);
-		}
-	}
-
-	return msecs >= mosi->etime;
+	return 0;
 }
 
 static void mosiback_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t secs, uint32_t nsecs)
@@ -302,30 +102,33 @@ static void mosiback_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 		nemocanvas_feedback(canvas);
 	}
 
-	if (mosi->type == 0) {
-		done = mosiback_render_tween(mosi, nemotale_node_get_pixman(node), time_current_msecs());
-		if (done != 0) {
-			mosi->iimgs = (mosi->iimgs + 1) % mosi->nimgs;
+	done = nemomosi_update(mosi->mosi, time_current_msecs());
+	if (done != 0) {
+		mosi->iimgs = (mosi->iimgs + 1) % mosi->nimgs;
 
-			mosiback_prepare_two(mosi, mosi->imgs[mosi->iimgs]);
-			mosiback_prepare_wave(mosi, time_current_msecs());
+		nemomosi_tween_image(mosi->mosi, (uint8_t *)pixman_image_get_data(mosi->imgs[mosi->iimgs]));
+
+		if (mosi->type == 0) {
+			nemomosi_wave_update(mosi->mosi, time_current_msecs(),
+					0, 0,
+					(nemomosi_get_width(mosi->mosi) + nemomosi_get_height(mosi->mosi)) / 2,
+					5000,
+					0, 500);
+			nemomosi_wave_update(mosi->mosi, time_current_msecs(),
+					nemomosi_get_width(mosi->mosi), nemomosi_get_height(mosi->mosi),
+					(nemomosi_get_width(mosi->mosi) + nemomosi_get_height(mosi->mosi)) / 2,
+					5000,
+					0, 500);
 
 			mosi->type = 1;
-
-			mosi->stime = time_current_msecs();
-			mosi->etime = mosi->stime + 5000;
-		}
-	} else if (mosi->type == 1) {
-		done = mosiback_render_wave(mosi, nemotale_node_get_pixman(node), time_current_msecs());
-		if (done != 0) {
-			mosi->iimgs = (mosi->iimgs + 1) % mosi->nimgs;
-
-			mosiback_prepare_two(mosi, mosi->imgs[mosi->iimgs]);
-			mosiback_prepare_tween(mosi, time_current_msecs());
+		} else {
+			nemomosi_random_update(mosi->mosi, time_current_msecs(), 0, 5000, 500, 1500);
 
 			mosi->type = 0;
 		}
 	}
+
+	mosiback_render(mosi, nemotale_node_get_pixman(node));
 
 	nemotale_node_damage_all(node);
 
@@ -397,18 +200,10 @@ int main(int argc, char *argv[])
 	mosi->width = width;
 	mosi->height = height;
 
-	mosi->row = 128;
-	mosi->col = 128 * ((double)width / (double)height);
+	mosi->mosi = nemomosi_create(
+			128 * ((double)width / (double)height),
+			128);
 	mosi->r = (double)height / 128.0f / 2.0f;
-
-	mosi->radius = ceil(sqrtf(width * width + height * height) + 300.0f);
-
-	mosi->ones = (struct mosione *)malloc(sizeof(struct mosione) * mosi->row * mosi->col);
-	if (mosi->ones == NULL)
-		return -1;
-	memset(mosi->ones, 0, sizeof(struct mosione) * mosi->row * mosi->col);
-
-	mosi->nones = mosi->row * mosi->col;
 
 	mosi->tool = tool = nemotool_create();
 	if (tool == NULL)
@@ -442,13 +237,15 @@ int main(int argc, char *argv[])
 	nemotale_node_opaque(node, 0, 0, width, height);
 	nemotale_attach_node(tale, node);
 
-	mosi->imgs[0] = mosiback_prepare_image(srcpath, mosi->col, mosi->row);
-	mosi->imgs[1] = mosiback_prepare_image(dstpath, mosi->col, mosi->row);
+	mosi->imgs[0] = pixman_load_image(srcpath, nemomosi_get_width(mosi->mosi), nemomosi_get_height(mosi->mosi));
+	mosi->imgs[1] = pixman_load_image(dstpath, nemomosi_get_width(mosi->mosi), nemomosi_get_height(mosi->mosi));
 	mosi->nimgs = 2;
 	mosi->iimgs = 0;
 
-	mosiback_prepare_one(mosi, mosi->imgs[0]);
-	mosiback_prepare_tween(mosi, time_current_msecs());
+	nemomosi_clear_one(mosi->mosi, 0, 0, 0, 0);
+
+	nemomosi_tween_image(mosi->mosi, (uint8_t *)pixman_image_get_data(mosi->imgs[0]));
+	nemomosi_random_update(mosi->mosi, time_current_msecs(), 0, 5000, 500, 1500);
 
 	nemocanvas_dispatch_frame(NTEGL_CANVAS(canvas));
 
@@ -462,7 +259,8 @@ int main(int argc, char *argv[])
 	nemotool_disconnect_wayland(tool);
 	nemotool_destroy(tool);
 
-	free(mosi->ones);
+	nemomosi_destroy(mosi->mosi);
+
 	free(mosi);
 
 	return 0;
