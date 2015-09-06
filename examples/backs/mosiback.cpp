@@ -145,7 +145,7 @@ static void mosiback_prepare_tween(struct mosiback *mosi, uint32_t msecs)
 			one->x = mosi->r + j * mosi->r * 2.0f;
 			one->y = mosi->r + i * mosi->r * 2.0f;
 
-			one->stime = msecs + random_get_int(0, 10000);
+			one->stime = msecs + random_get_int(0, 7000);
 			one->etime = one->stime + random_get_int(500, 1500);
 		}
 	}
@@ -236,6 +236,7 @@ static int mosiback_render_wave(struct mosiback *mosi, pixman_image_t *image, ui
 	int32_t width = pixman_image_get_width(image);
 	int32_t height = pixman_image_get_height(image);
 	double r = mosi->radius * ((double)(msecs - mosi->stime) / (double)(mosi->etime - mosi->stime));
+	double d;
 	double min = FLT_MAX;
 	int done = 1;
 	int i, j;
@@ -259,27 +260,19 @@ static int mosiback_render_wave(struct mosiback *mosi, pixman_image_t *image, ui
 		for (j = 0; j < mosi->col; j++) {
 			one = &mosi->ones[i * mosi->col + j];
 
-			if (one->stime > msecs && r > sqrtf(one->x * one->x + one->y * one->y)) {
-				one->stime = msecs;
-				one->etime = one->stime + 800;
-			}
-
-			if (msecs < one->stime) {
-				done = 0;
-			} else if (msecs >= one->stime && msecs < one->etime) {
-				double t = ((double)(msecs - one->stime) / (double)(one->etime - one->stime));
+			d = sqrtf(one->x * one->x + one->y * one->y);
+			if (d <= r - 300.0f) {
+				one->c[3] = one->c1[3];
+				one->c[2] = one->c1[2];
+				one->c[1] = one->c1[1];
+				one->c[0] = one->c1[0];
+			} else if (d <= r) {
+				double t = (r - d) / 300.0f;
 
 				one->c[3] = (one->c1[3] - one->c0[3]) * t + one->c0[3];
 				one->c[2] = (one->c1[2] - one->c0[2]) * t + one->c0[2];
 				one->c[1] = (one->c1[1] - one->c0[1]) * t + one->c0[1];
 				one->c[0] = (one->c1[0] - one->c0[0]) * t + one->c0[0];
-
-				done = 0;
-			} else if (msecs >= one->etime) {
-				one->c[3] = one->c1[3];
-				one->c[2] = one->c1[2];
-				one->c[1] = one->c1[1];
-				one->c[0] = one->c1[0];
 			}
 
 			fill.setColor(
@@ -293,7 +286,7 @@ static int mosiback_render_wave(struct mosiback *mosi, pixman_image_t *image, ui
 		}
 	}
 
-	return done;
+	return msecs >= mosi->etime;
 }
 
 static void mosiback_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t secs, uint32_t nsecs)
@@ -320,7 +313,7 @@ static void mosiback_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 			mosi->type = 1;
 
 			mosi->stime = time_current_msecs();
-			mosi->etime = mosi->stime + 10000;
+			mosi->etime = mosi->stime + 5000;
 		}
 	} else if (mosi->type == 1) {
 		done = mosiback_render_wave(mosi, nemotale_node_get_pixman(node), time_current_msecs());
@@ -408,7 +401,7 @@ int main(int argc, char *argv[])
 	mosi->col = 128 * ((double)width / (double)height);
 	mosi->r = (double)height / 128.0f / 2.0f;
 
-	mosi->radius = ceil(sqrtf(width * width + height * height));
+	mosi->radius = ceil(sqrtf(width * width + height * height) + 300.0f);
 
 	mosi->ones = (struct mosione *)malloc(sizeof(struct mosione) * mosi->row * mosi->col);
 	if (mosi->ones == NULL)
