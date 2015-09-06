@@ -1,6 +1,10 @@
 #ifndef	__NEMOMOTE_H__
 #define	__NEMOMOTE_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 
 #include <emitters/blast.h>
@@ -67,5 +71,9 @@ static inline int nemomote_get_count(struct nemomote *mote)
 
 #define NEMOMOTE_MASS(m, i)						((m)->buffers[i * 10 + 8])
 #define NEMOMOTE_LIFETIME(m, i)				((m)->buffers[i * 10 + 9])
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
