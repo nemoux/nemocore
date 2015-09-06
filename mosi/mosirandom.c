@@ -9,7 +9,7 @@
 #include <mosirandom.h>
 #include <nemomisc.h>
 
-void nemomosi_random_update(struct nemomosi *mosi, uint32_t msecs, uint32_t s0, uint32_t s1, uint32_t d0, uint32_t d1)
+void nemomosi_random_dispatch(struct nemomosi *mosi, uint32_t msecs, uint32_t s0, uint32_t s1, uint32_t d0, uint32_t d1)
 {
 	struct mosione *one;
 	int i, j;

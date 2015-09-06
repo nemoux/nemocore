@@ -11,7 +11,7 @@
 #include <mosiwave.h>
 #include <nemomisc.h>
 
-void nemomosi_wave_update(struct nemomosi *mosi, uint32_t msecs, double x, double y, double r, uint32_t s, uint32_t d0, uint32_t d1)
+void nemomosi_wave_dispatch(struct nemomosi *mosi, uint32_t msecs, double x, double y, double r, uint32_t s, uint32_t d0, uint32_t d1)
 {
 	struct mosione *one;
 	double d, dx, dy;

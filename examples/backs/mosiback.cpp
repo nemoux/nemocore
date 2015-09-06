@@ -109,12 +109,12 @@ static void mosiback_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 		nemomosi_tween_image(mosi->mosi, (uint8_t *)pixman_image_get_data(mosi->imgs[mosi->iimgs]));
 
 		if (mosi->type == 0) {
-			nemomosi_wave_update(mosi->mosi, time_current_msecs(),
+			nemomosi_wave_dispatch(mosi->mosi, time_current_msecs(),
 					0, 0,
 					(nemomosi_get_width(mosi->mosi) + nemomosi_get_height(mosi->mosi)) / 2,
 					5000,
 					0, 500);
-			nemomosi_wave_update(mosi->mosi, time_current_msecs(),
+			nemomosi_wave_dispatch(mosi->mosi, time_current_msecs(),
 					nemomosi_get_width(mosi->mosi), nemomosi_get_height(mosi->mosi),
 					(nemomosi_get_width(mosi->mosi) + nemomosi_get_height(mosi->mosi)) / 2,
 					5000,
@@ -122,7 +122,7 @@ static void mosiback_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 
 			mosi->type = 1;
 		} else {
-			nemomosi_random_update(mosi->mosi, time_current_msecs(), 0, 5000, 500, 1500);
+			nemomosi_random_dispatch(mosi->mosi, time_current_msecs(), 0, 5000, 500, 1500);
 
 			mosi->type = 0;
 		}
@@ -245,7 +245,7 @@ int main(int argc, char *argv[])
 	nemomosi_clear_one(mosi->mosi, 0, 0, 0, 0);
 
 	nemomosi_tween_image(mosi->mosi, (uint8_t *)pixman_image_get_data(mosi->imgs[0]));
-	nemomosi_random_update(mosi->mosi, time_current_msecs(), 0, 5000, 500, 1500);
+	nemomosi_random_dispatch(mosi->mosi, time_current_msecs(), 0, 5000, 500, 1500);
 
 	nemocanvas_dispatch_frame(NTEGL_CANVAS(canvas));
 
