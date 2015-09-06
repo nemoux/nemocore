@@ -5,6 +5,6 @@
 
 struct nemomosi;
 
-extern void nemomosi_flip_dispatch(struct nemomosi *mosi, uint32_t msecs, uint32_t s, uint32_t d0, uint32_t d1);
+extern void nemomosi_flip_dispatch(struct nemomosi *mosi, uint32_t msecs, uint32_t s0, uint32_t s1, uint32_t d0, uint32_t d1);
 
 #endif

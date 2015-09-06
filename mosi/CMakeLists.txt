@@ -10,6 +10,7 @@ add_library(nemomosi SHARED
 	mosirandom.c
 	mosiwave.c
 	mosiflip.c
+	mosioneshot.c
 	)
 
 set(NEMOMOSI_PKGCONFIG_REQUIRES "")
@@ -21,6 +22,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/mosi/mosirandom.h
 	${CMAKE_SOURCE_DIR}/mosi/mosiwave.h
 	${CMAKE_SOURCE_DIR}/mosi/mosiflip.h
+	${CMAKE_SOURCE_DIR}/mosi/mosioneshot.h
 	)
 
 configure_file(

@@ -10,6 +10,7 @@ extern "C" {
 #include <mosirandom.h>
 #include <mosiwave.h>
 #include <mosiflip.h>
+#include <mosioneshot.h>
 
 struct mosione {
 	uint8_t c[4];

@@ -11,7 +11,7 @@
 #include <mosiwave.h>
 #include <nemomisc.h>
 
-void nemomosi_wave_dispatch(struct nemomosi *mosi, uint32_t msecs, double x, double y, double r, uint32_t s, uint32_t d0, uint32_t d1)
+void nemomosi_wave_dispatch(struct nemomosi *mosi, uint32_t msecs, double x, double y, double r, uint32_t s0, uint32_t s1, uint32_t d0, uint32_t d1)
 {
 	struct mosione *one;
 	double d, dx, dy;
@@ -28,7 +28,7 @@ void nemomosi_wave_dispatch(struct nemomosi *mosi, uint32_t msecs, double x, dou
 
 			d = sqrtf(dx * dx + dy * dy);
 			if (d <= r) {
-				stime = msecs + s * (d / r);
+				stime = msecs + s0 + s1 * (d / r);
 				etime = stime + random_get_int(d0, d1);
 
 				if (one->has_transition == 0 || one->stime > stime) {

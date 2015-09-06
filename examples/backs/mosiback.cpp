@@ -114,20 +114,33 @@ static void mosiback_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 					random_get_int(0, nemomosi_get_width(mosi->mosi)),
 					random_get_int(0, nemomosi_get_height(mosi->mosi)),
 					(nemomosi_get_width(mosi->mosi) + nemomosi_get_height(mosi->mosi)),
-					5000,
-					0, 500);
+					0, 5000,
+					500, 1000);
 			nemomosi_wave_dispatch(mosi->mosi, msecs,
 					random_get_int(0, nemomosi_get_width(mosi->mosi)),
 					random_get_int(0, nemomosi_get_height(mosi->mosi)),
 					(nemomosi_get_width(mosi->mosi) + nemomosi_get_height(mosi->mosi)),
-					5000,
-					0, 500);
+					0, 5000,
+					500, 1000);
 
 			mosi->type = 1;
 		} else if (mosi->type == 1) {
-			nemomosi_flip_dispatch(mosi->mosi, msecs, 10, 150, 450);
+			nemomosi_oneshot_dispatch(mosi->mosi, msecs, 0, 5000);
 
 			mosi->type = 2;
+		} else if (mosi->type == 2) {
+			nemomosi_wave_dispatch(mosi->mosi, msecs,
+					nemomosi_get_width(mosi->mosi) / 2,
+					nemomosi_get_height(mosi->mosi) / 2,
+					nemomosi_get_width(mosi->mosi),
+					0, 5000,
+					500, 1000);
+
+			mosi->type = 3;
+		} else if (mosi->type == 3) {
+			nemomosi_flip_dispatch(mosi->mosi, msecs, 0, 10, 500, 1000);
+
+			mosi->type = 4;
 		} else {
 			nemomosi_random_dispatch(mosi->mosi, msecs, 0, 5000, 500, 1500);
 
