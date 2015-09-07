@@ -69,7 +69,7 @@ static void moteback_prepare_number(struct moteback *mote, int n)
 		}
 	}
 
-	nemomote_tween_ready(mote->mote, &mote->tween, 2.0f);
+	nemomote_tween_ready(mote->mote, &mote->tween, 2.0f, NEMOEASE_QUADRATIC_INOUT_TYPE);
 }
 
 static void moteback_update_one(struct moteback *mote, double secs)

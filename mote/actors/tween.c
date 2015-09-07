@@ -83,7 +83,7 @@ void nemomote_tween_shuffle(struct motetween *tween)
 	}
 }
 
-void nemomote_tween_ready(struct nemomote *mote, struct motetween *tween, double secs)
+void nemomote_tween_ready(struct nemomote *mote, struct motetween *tween, double secs, int ease)
 {
 	int i;
 
@@ -94,6 +94,8 @@ void nemomote_tween_ready(struct nemomote *mote, struct motetween *tween, double
 
 	tween->dtime = secs;
 	tween->rtime = secs;
+
+	nemoease_set(&tween->ease, ease);
 
 	tween->done = 0;
 }
@@ -109,7 +111,7 @@ int nemomote_tween_update(struct nemomote *mote, struct motetween *tween, double
 	tween->rtime -= secs;
 
 	if (tween->rtime > 0.0f) {
-		t = nemoease_quadratic_inout_function(tween->dtime - tween->rtime, tween->dtime);
+		t = nemoease_get(&tween->ease, tween->dtime - tween->rtime, tween->dtime);
 	} else {
 		t = 1.0f;
 
