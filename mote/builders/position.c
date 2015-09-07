@@ -22,3 +22,18 @@ int nemomote_position_update(struct nemomote *mote, struct nemozone *zone)
 
 	return 0;
 }
+
+int nemomote_position_set(struct nemomote *mote, int base, int count, struct nemozone *zone)
+{
+	double x, y;
+	int i;
+
+	for (i = base; i < base + count; i++) {
+		nemozone_locates(zone, &x, &y);
+
+		NEMOMOTE_POSITION_X(mote, i) = x;
+		NEMOMOTE_POSITION_Y(mote, i) = y;
+	}
+
+	return 0;
+}

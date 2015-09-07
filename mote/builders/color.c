@@ -21,3 +21,17 @@ int nemomote_color_update(struct nemomote *mote, double rmax, double rmin, doubl
 
 	return 0;
 }
+
+int nemomote_color_set(struct nemomote *mote, int base, int count, double rmax, double rmin, double gmax, double gmin, double bmax, double bmin, double amax, double amin)
+{
+	int i;
+
+	for (i = base; i < base + count; i++) {
+		NEMOMOTE_COLOR_R(mote, i) = rmin + ((double)rand() / RAND_MAX) * (rmax - rmin);
+		NEMOMOTE_COLOR_G(mote, i) = gmin + ((double)rand() / RAND_MAX) * (gmax - gmin);
+		NEMOMOTE_COLOR_B(mote, i) = bmin + ((double)rand() / RAND_MAX) * (bmax - bmin);
+		NEMOMOTE_COLOR_A(mote, i) = amin + ((double)rand() / RAND_MAX) * (amax - amin);
+	}
+
+	return 0;
+}
