@@ -44,22 +44,43 @@
 #include <talehelper.h>
 #include <nemomisc.h>
 
-static void moteback_prepare_number(struct moteback *mote, int n)
+static void moteback_prepare_text(struct moteback *mote, const char *text)
 {
-	uint32_t *c = (uint32_t *)pixman_image_get_data(mote->numbers[n]);
 	double x, y;
-	int width = pixman_image_get_width(mote->numbers[n]);
-	int height = pixman_image_get_height(mote->numbers[n]);
+	int size = 16;
 	int i, j, p;
 
-	x = random_get_double(mote->width * 0.2f, mote->width * 0.8f);
-	y = random_get_double(mote->height * 0.2f, mote->height * 0.8f);
+	SkBitmap bitmap;
+	bitmap.allocPixels(SkImageInfo::Make(size, size, kN32_SkColorType, kPremul_SkAlphaType));
+
+	SkBitmapDevice device(bitmap);
+	SkCanvas canvas(&device);
+
+	canvas.clear(SK_ColorTRANSPARENT);
+
+	SkPaint paint;
+	paint.setAntiAlias(true);
+	paint.setStyle(SkPaint::kFill_Style);
+	paint.setColor(SK_ColorWHITE);
+	paint.setTypeface(SkTypeface::CreateFromFile("/usr/share/fonts/ttf/LiberationMono-Regular.ttf", 0));
+	paint.setTextSize(size);
+
+	SkPaint::FontMetrics metrics;
+	paint.getFontMetrics(&metrics, 0);
+
+	canvas.drawText(
+			text, strlen(text),
+			SkIntToScalar(0), SkIntToScalar(-metrics.fAscent),
+			paint);
+
+	x = random_get_double(mote->width * 0.1f, mote->width * 0.8f);
+	y = random_get_double(mote->height * 0.1f, mote->height * 0.8f);
 
 	nemomote_tween_clear(&mote->tween);
 
-	for (i = 0; i < height; i++) {
-		for (j = 0; j < width; j++) {
-			if ((c[i * width + j] & 0xff000000) != 0) {
+	for (i = 0; i < size; i++) {
+		for (j = 0; j < size; j++) {
+			if (bitmap.getColor(j, i) != SK_ColorTRANSPARENT) {
 				p = nemomote_get_one_by_type(mote->mote, 1);
 
 				nemomote_tween_add(&mote->tween, p, x + j * 16, y + i * 16);
@@ -69,7 +90,7 @@ static void moteback_prepare_number(struct moteback *mote, int n)
 		}
 	}
 
-	nemomote_tween_ready(mote->mote, &mote->tween, 2.0f, NEMOEASE_QUADRATIC_INOUT_TYPE);
+	nemomote_tween_ready(mote->mote, &mote->tween, 3.0f, NEMOEASE_QUADRATIC_INOUT_TYPE);
 }
 
 static void moteback_update_one(struct moteback *mote, double secs)
@@ -186,8 +207,9 @@ static void moteback_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 static void moteback_dispatch_timer_event(struct nemotimer *timer, void *data)
 {
 	struct moteback *mote = (struct moteback *)data;
+	char text[8] = { (char)(random_get_int(0, 9) + '0'), '\0' };
 
-	moteback_prepare_number(mote, random_get_int(0, 9));
+	moteback_prepare_text(mote, text);
 
 	nemotimer_set_timeout(mote->timer, 3000);
 }
@@ -265,17 +287,6 @@ int main(int argc, char *argv[])
 	nemomote_commit(mote->mote);
 
 	nemomote_tween_prepare(&mote->tween, 16 * 16);
-
-	mote->numbers[0] = pixman_load_image("/home/root/samples/numbers/0.png", 16, 16);
-	mote->numbers[1] = pixman_load_image("/home/root/samples/numbers/1.png", 16, 16);
-	mote->numbers[2] = pixman_load_image("/home/root/samples/numbers/2.png", 16, 16);
-	mote->numbers[3] = pixman_load_image("/home/root/samples/numbers/3.png", 16, 16);
-	mote->numbers[4] = pixman_load_image("/home/root/samples/numbers/4.png", 16, 16);
-	mote->numbers[5] = pixman_load_image("/home/root/samples/numbers/5.png", 16, 16);
-	mote->numbers[6] = pixman_load_image("/home/root/samples/numbers/6.png", 16, 16);
-	mote->numbers[7] = pixman_load_image("/home/root/samples/numbers/7.png", 16, 16);
-	mote->numbers[8] = pixman_load_image("/home/root/samples/numbers/8.png", 16, 16);
-	mote->numbers[9] = pixman_load_image("/home/root/samples/numbers/9.png", 16, 16);
 
 	mote->tool = tool = nemotool_create();
 	if (tool == NULL)

@@ -7,8 +7,6 @@
 NEMO_BEGIN_EXTERN_C
 #endif
 
-#include <pixman.h>
-
 #include <nemomote.h>
 
 #include <nemotool.h>
@@ -36,8 +34,6 @@ struct moteback {
 	struct motetween tween;
 
 	double secs;
-
-	pixman_image_t *numbers[10];
 
 	struct nemotimer *timer;
 };
