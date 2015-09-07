@@ -16,10 +16,10 @@ struct nemomote *nemomote_create(int max)
 		return NULL;
 	memset(mote, 0, sizeof(struct nemomote));
 
-	mote->buffers = (double *)malloc(sizeof(double[10]) * max);
+	mote->buffers = (double *)malloc(sizeof(double[12]) * max);
 	if (mote->buffers == NULL)
 		goto err1;
-	memset(mote->buffers, 0, sizeof(double[10]) * max);
+	memset(mote->buffers, 0, sizeof(double[12]) * max);
 
 	mote->types = (uint32_t *)malloc(sizeof(uint32_t) * max);
 	if (mote->types == NULL)
@@ -97,16 +97,17 @@ int nemomote_cleanup(struct nemomote *mote)
 				int to = i;
 				int from = mote->lcount - 1;
 
-				mote->buffers[to * 10 + 0] = mote->buffers[from * 10 + 0];
-				mote->buffers[to * 10 + 1] = mote->buffers[from * 10 + 1];
-				mote->buffers[to * 10 + 2] = mote->buffers[from * 10 + 2];
-				mote->buffers[to * 10 + 3] = mote->buffers[from * 10 + 3];
-				mote->buffers[to * 10 + 4] = mote->buffers[from * 10 + 4];
-				mote->buffers[to * 10 + 5] = mote->buffers[from * 10 + 5];
-				mote->buffers[to * 10 + 6] = mote->buffers[from * 10 + 6];
-				mote->buffers[to * 10 + 7] = mote->buffers[from * 10 + 7];
-				mote->buffers[to * 10 + 8] = mote->buffers[from * 10 + 8];
-				mote->buffers[to * 10 + 9] = mote->buffers[from * 10 + 9];
+				mote->buffers[to * 12 + 0] = mote->buffers[from * 12 + 0];
+				mote->buffers[to * 12 + 1] = mote->buffers[from * 12 + 1];
+				mote->buffers[to * 12 + 2] = mote->buffers[from * 12 + 2];
+				mote->buffers[to * 12 + 3] = mote->buffers[from * 12 + 3];
+				mote->buffers[to * 12 + 4] = mote->buffers[from * 12 + 4];
+				mote->buffers[to * 12 + 5] = mote->buffers[from * 12 + 5];
+				mote->buffers[to * 12 + 6] = mote->buffers[from * 12 + 6];
+				mote->buffers[to * 12 + 7] = mote->buffers[from * 12 + 7];
+				mote->buffers[to * 12 + 8] = mote->buffers[from * 12 + 8];
+				mote->buffers[to * 12 + 9] = mote->buffers[from * 12 + 9];
+				mote->buffers[to * 12 + 10] = mote->buffers[from * 12 + 10];
 				mote->types[to] = mote->types[from];
 				mote->attrs[to] = mote->attrs[from];
 			}

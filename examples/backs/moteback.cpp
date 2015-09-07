@@ -44,6 +44,33 @@
 #include <talehelper.h>
 #include <nemomisc.h>
 
+static void moteback_prepare_number(struct moteback *mote, int n)
+{
+	uint32_t *c = (uint32_t *)pixman_image_get_data(mote->numbers[n]);
+	double x, y;
+	int width = pixman_image_get_width(mote->numbers[n]);
+	int height = pixman_image_get_height(mote->numbers[n]);
+	int i, j;
+
+	x = random_get_double(mote->width * 0.2f, mote->width * 0.8f);
+	y = random_get_double(mote->height * 0.2f, mote->height * 0.8f);
+
+	nemomote_tween_clear(&mote->tween);
+
+	for (i = 0; i < height; i++) {
+		for (j = 0; j < width; j++) {
+			if ((c[i * width + j] & 0xff000000) != 0) {
+				nemomote_tween_add(&mote->tween, x + j * 16, y + i * 16);
+			}
+		}
+	}
+
+	nemomote_tween_shuffle(&mote->tween);
+
+	nemomote_type_set(mote->mote, 0, nemomote_tween_get_count(&mote->tween), 3);
+	nemomote_tween_ready(mote->mote, 3, &mote->tween, 2.0f);
+}
+
 static void moteback_update_one(struct moteback *mote, double secs)
 {
 #if	0
@@ -68,6 +95,14 @@ static void moteback_update_one(struct moteback *mote, double secs)
 	nemomote_collide_update(mote->mote, 2, 1, secs, 1.5f);
 	nemomote_speedlimit_update(mote->mote, 1, secs, 0.0f, 300.0f);
 #endif
+
+	if (nemomote_tween_update(mote->mote, 3, &mote->tween, secs) != 0) {
+		nemomote_explosion_update(mote->mote, 3, secs, -500.0f, 500.0f, -500.0f, 500.0f);
+
+		nemomote_sleeptime_set(mote->mote, 0, nemomote_tween_get_count(&mote->tween), 1.0f, 0.5f);
+		nemomote_type_set(mote->mote, 0, nemomote_tween_get_count(&mote->tween), 1);
+	}
+
 	nemomote_boundingbox_update(mote->mote, 1, secs, &mote->box, 0.8f);
 	nemomote_move_update(mote->mote, 1, secs);
 
@@ -148,6 +183,15 @@ static void moteback_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 	nemotale_composite_egl(tale, NULL);
 }
 
+static void moteback_dispatch_timer_event(struct nemotimer *timer, void *data)
+{
+	struct moteback *mote = (struct moteback *)data;
+
+	moteback_prepare_number(mote, random_get_int(0, 9));
+
+	nemotimer_set_timeout(mote->timer, 10000);
+}
+
 static void moteback_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
 {
 	uint32_t id = nemotale_node_get_id(node);
@@ -220,6 +264,19 @@ int main(int argc, char *argv[])
 	nemomote_type_update(mote->mote, 2);
 	nemomote_commit(mote->mote);
 
+	nemomote_tween_prepare(&mote->tween, 16 * 16);
+
+	mote->numbers[0] = pixman_load_image("/home/root/samples/numbers/0.png", 16, 16);
+	mote->numbers[1] = pixman_load_image("/home/root/samples/numbers/1.png", 16, 16);
+	mote->numbers[2] = pixman_load_image("/home/root/samples/numbers/2.png", 16, 16);
+	mote->numbers[3] = pixman_load_image("/home/root/samples/numbers/3.png", 16, 16);
+	mote->numbers[4] = pixman_load_image("/home/root/samples/numbers/4.png", 16, 16);
+	mote->numbers[5] = pixman_load_image("/home/root/samples/numbers/5.png", 16, 16);
+	mote->numbers[6] = pixman_load_image("/home/root/samples/numbers/6.png", 16, 16);
+	mote->numbers[7] = pixman_load_image("/home/root/samples/numbers/7.png", 16, 16);
+	mote->numbers[8] = pixman_load_image("/home/root/samples/numbers/8.png", 16, 16);
+	mote->numbers[9] = pixman_load_image("/home/root/samples/numbers/9.png", 16, 16);
+
 	mote->tool = tool = nemotool_create();
 	if (tool == NULL)
 		return -1;
@@ -251,6 +308,11 @@ int main(int argc, char *argv[])
 	nemotale_node_set_id(node, 1);
 	nemotale_node_opaque(node, 0, 0, width, height);
 	nemotale_attach_node(tale, node);
+
+	mote->timer = nemotimer_create(tool);
+	nemotimer_set_callback(mote->timer, moteback_dispatch_timer_event);
+	nemotimer_set_userdata(mote->timer, mote);
+	nemotimer_set_timeout(mote->timer, 3000);
 
 	nemocanvas_dispatch_frame(NTEGL_CANVAS(canvas));
 

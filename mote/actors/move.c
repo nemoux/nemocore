@@ -16,8 +16,12 @@ int nemomote_move_update(struct nemomote *mote, uint32_t type, double secs)
 		if (mote->types[i] != type)
 			continue;
 
-		NEMOMOTE_POSITION_X(mote, i) += NEMOMOTE_VELOCITY_X(mote, i) * secs;
-		NEMOMOTE_POSITION_Y(mote, i) += NEMOMOTE_VELOCITY_Y(mote, i) * secs;
+		if (NEMOMOTE_SLEEPTIME(mote, i) > 0.0f) {
+			NEMOMOTE_SLEEPTIME(mote, i) -= secs;
+		} else {
+			NEMOMOTE_POSITION_X(mote, i) += NEMOMOTE_VELOCITY_X(mote, i) * secs;
+			NEMOMOTE_POSITION_Y(mote, i) += NEMOMOTE_VELOCITY_Y(mote, i) * secs;
+		}
 	}
 
 	return 0;

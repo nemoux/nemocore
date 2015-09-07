@@ -12,6 +12,7 @@ extern "C" {
 #include <emitters/sine.h>
 #include <actors/move.h>
 #include <actors/accelerate.h>
+#include <actors/explosion.h>
 #include <actors/gravitywell.h>
 #include <actors/antigravity.h>
 #include <actors/mutualgravity.h>
@@ -23,10 +24,12 @@ extern "C" {
 #include <actors/speedlimit.h>
 #include <actors/deadline.h>
 #include <actors/collide.h>
+#include <actors/tween.h>
 #include <builders/position.h>
 #include <builders/velocity.h>
 #include <builders/mass.h>
 #include <builders/lifetime.h>
+#include <builders/sleeptime.h>
 #include <builders/color.h>
 #include <builders/type.h>
 #include <nemozone.h>
@@ -57,19 +60,20 @@ static inline int nemomote_get_count(struct nemomote *mote)
 	return mote->lcount;
 }
 
-#define NEMOMOTE_POSITION_X(m, i)			((m)->buffers[i * 10 + 0])
-#define NEMOMOTE_POSITION_Y(m, i)			((m)->buffers[i * 10 + 1])
+#define NEMOMOTE_POSITION_X(m, i)			((m)->buffers[i * 12 + 0])
+#define NEMOMOTE_POSITION_Y(m, i)			((m)->buffers[i * 12 + 1])
 
-#define NEMOMOTE_VELOCITY_X(m, i)			((m)->buffers[i * 10 + 2])
-#define NEMOMOTE_VELOCITY_Y(m, i)			((m)->buffers[i * 10 + 3])
+#define NEMOMOTE_VELOCITY_X(m, i)			((m)->buffers[i * 12 + 2])
+#define NEMOMOTE_VELOCITY_Y(m, i)			((m)->buffers[i * 12 + 3])
 
-#define NEMOMOTE_COLOR_R(m, i)				((m)->buffers[i * 10 + 4])
-#define NEMOMOTE_COLOR_G(m, i)				((m)->buffers[i * 10 + 5])
-#define NEMOMOTE_COLOR_B(m, i)				((m)->buffers[i * 10 + 6])
-#define NEMOMOTE_COLOR_A(m, i)				((m)->buffers[i * 10 + 7])
+#define NEMOMOTE_COLOR_R(m, i)				((m)->buffers[i * 12 + 4])
+#define NEMOMOTE_COLOR_G(m, i)				((m)->buffers[i * 12 + 5])
+#define NEMOMOTE_COLOR_B(m, i)				((m)->buffers[i * 12 + 6])
+#define NEMOMOTE_COLOR_A(m, i)				((m)->buffers[i * 12 + 7])
 
-#define NEMOMOTE_MASS(m, i)						((m)->buffers[i * 10 + 8])
-#define NEMOMOTE_LIFETIME(m, i)				((m)->buffers[i * 10 + 9])
+#define NEMOMOTE_MASS(m, i)						((m)->buffers[i * 12 + 8])
+#define NEMOMOTE_LIFETIME(m, i)				((m)->buffers[i * 12 + 9])
+#define NEMOMOTE_SLEEPTIME(m, i)			((m)->buffers[i * 12 + 10])
 
 #ifdef __cplusplus
 }

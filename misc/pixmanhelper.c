@@ -480,6 +480,10 @@ pixman_image_t *pixman_load_image(const char *filepath, int32_t width, int32_t h
 	if (src == NULL)
 		return NULL;
 
+	if (pixman_image_get_width(src) == width &&
+			pixman_image_get_height(src) == height)
+		return src;
+
 	dst = pixman_image_create_bits(PIXMAN_a8r8g8b8,
 			width, height,
 			NULL,

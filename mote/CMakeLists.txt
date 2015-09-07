@@ -12,6 +12,7 @@ add_library(nemomote SHARED
 	builders/velocity.c
 	builders/mass.c
 	builders/lifetime.c
+	builders/sleeptime.c
 	builders/color.c
 	builders/type.c
 	emitters/random.c
@@ -19,6 +20,7 @@ add_library(nemomote SHARED
 	emitters/sine.c
 	actors/move.c
 	actors/accelerate.c
+	actors/explosion.c
 	actors/gravitywell.c
 	actors/antigravity.c
 	actors/mutualgravity.c
@@ -30,6 +32,7 @@ add_library(nemomote SHARED
 	actors/speedlimit.c
 	actors/deadline.c
 	actors/collide.c
+	actors/tween.c
 	)
 
 set(NEMOMOTE_PKGCONFIG_REQUIRES "")
@@ -50,6 +53,7 @@ set(HEADER_EMITTER_FILES
 set(HEADER_ACTOR_FILES
 	${CMAKE_SOURCE_DIR}/mote/actors/move.h
 	${CMAKE_SOURCE_DIR}/mote/actors/accelerate.h
+	${CMAKE_SOURCE_DIR}/mote/actors/explosion.h
 	${CMAKE_SOURCE_DIR}/mote/actors/gravitywell.h
 	${CMAKE_SOURCE_DIR}/mote/actors/antigravity.h
 	${CMAKE_SOURCE_DIR}/mote/actors/mutualgravity.h
@@ -61,6 +65,7 @@ set(HEADER_ACTOR_FILES
 	${CMAKE_SOURCE_DIR}/mote/actors/speedlimit.h
 	${CMAKE_SOURCE_DIR}/mote/actors/deadline.h
 	${CMAKE_SOURCE_DIR}/mote/actors/collide.h
+	${CMAKE_SOURCE_DIR}/mote/actors/tween.h
 	)
 
 set(HEADER_BUILDER_FILES
@@ -68,6 +73,7 @@ set(HEADER_BUILDER_FILES
 	${CMAKE_SOURCE_DIR}/mote/builders/velocity.h
 	${CMAKE_SOURCE_DIR}/mote/builders/mass.h
 	${CMAKE_SOURCE_DIR}/mote/builders/lifetime.h
+	${CMAKE_SOURCE_DIR}/mote/builders/sleeptime.h
 	${CMAKE_SOURCE_DIR}/mote/builders/color.h
 	${CMAKE_SOURCE_DIR}/mote/builders/type.h
 	)

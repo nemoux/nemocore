@@ -7,7 +7,12 @@
 NEMO_BEGIN_EXTERN_C
 #endif
 
+#include <pixman.h>
+
 #include <nemomote.h>
+
+#include <nemotool.h>
+#include <nemotimer.h>
 
 struct moteback {
 	struct nemotool *tool;
@@ -28,7 +33,13 @@ struct moteback {
 	struct nemozone disc;
 	struct nemozone speed;
 
+	struct motetween tween;
+
 	double secs;
+
+	pixman_image_t *numbers[10];
+
+	struct nemotimer *timer;
 };
 
 #ifdef __cplusplus
