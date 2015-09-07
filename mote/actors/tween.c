@@ -19,10 +19,17 @@ int nemomote_tween_prepare(struct motetween *tween, int max)
 	if (tween->src == NULL)
 		goto err1;
 
+	tween->parts = (int *)malloc(sizeof(int) * max);
+	if (tween->parts == NULL)
+		goto err2;
+
 	tween->sparts = max;
 	tween->nparts = 0;
 
 	return 0;
+
+err2:
+	free(tween->src);
 
 err1:
 	free(tween->dst);
@@ -32,6 +39,8 @@ err1:
 
 void nemomote_tween_finish(struct motetween *tween)
 {
+	free(tween->parts);
+
 	free(tween->dst);
 	free(tween->src);
 }
@@ -41,8 +50,9 @@ void nemomote_tween_clear(struct motetween *tween)
 	tween->nparts = 0;
 }
 
-void nemomote_tween_add(struct motetween *tween, double x, double y)
+void nemomote_tween_add(struct motetween *tween, int p, double x, double y)
 {
+	tween->parts[tween->nparts] = p;
 	tween->dst[tween->nparts * 2 + 0] = x;
 	tween->dst[tween->nparts * 2 + 1] = y;
 
@@ -52,12 +62,16 @@ void nemomote_tween_add(struct motetween *tween, double x, double y)
 void nemomote_tween_shuffle(struct motetween *tween)
 {
 	double v;
-	int i, p;
+	int i, p, t;
 
 	for (i = 0; i < tween->nparts; i++) {
 		p = random_get_int(0, tween->nparts);
 
 		if (i != p) {
+			t = tween->parts[i];
+			tween->parts[i] = tween->parts[p];
+			tween->parts[p] = t;
+
 			v = tween->dst[i * 2 + 0];
 			tween->dst[i * 2 + 0] = tween->dst[p * 2 + 0];
 			tween->dst[p * 2 + 0] = v;
@@ -69,18 +83,13 @@ void nemomote_tween_shuffle(struct motetween *tween)
 	}
 }
 
-void nemomote_tween_ready(struct nemomote *mote, uint32_t type, struct motetween *tween, double secs)
+void nemomote_tween_ready(struct nemomote *mote, struct motetween *tween, double secs)
 {
-	int i, p;
+	int i;
 
-	for (i = 0, p = 0; i < mote->lcount && p < tween->nparts; i++) {
-		if (mote->types[i] != type)
-			continue;
-
-		tween->src[p * 2 + 0] = NEMOMOTE_POSITION_X(mote, i);
-		tween->src[p * 2 + 1] = NEMOMOTE_POSITION_Y(mote, i);
-
-		p++;
+	for (i = 0; i < tween->nparts; i++) {
+		tween->src[i * 2 + 0] = NEMOMOTE_POSITION_X(mote, tween->parts[i]);
+		tween->src[i * 2 + 1] = NEMOMOTE_POSITION_Y(mote, tween->parts[i]);
 	}
 
 	tween->dtime = secs;
@@ -89,10 +98,10 @@ void nemomote_tween_ready(struct nemomote *mote, uint32_t type, struct motetween
 	tween->done = 0;
 }
 
-int nemomote_tween_update(struct nemomote *mote, uint32_t type, struct motetween *tween, double secs)
+int nemomote_tween_update(struct nemomote *mote, struct motetween *tween, double secs)
 {
 	double t;
-	int i, p;
+	int i;
 
 	if (tween->done != 0)
 		return 0;
@@ -107,14 +116,9 @@ int nemomote_tween_update(struct nemomote *mote, uint32_t type, struct motetween
 		tween->done = 1;
 	}
 
-	for (i = 0, p = 0; i < mote->lcount && p < tween->nparts; i++) {
-		if (mote->types[i] != type)
-			continue;
-
-		NEMOMOTE_POSITION_X(mote, i) = (tween->dst[p * 2 + 0] - tween->src[p * 2 + 0]) * t + tween->src[p * 2 + 0];
-		NEMOMOTE_POSITION_Y(mote, i) = (tween->dst[p * 2 + 1] - tween->src[p * 2 + 1]) * t + tween->src[p * 2 + 1];
-
-		p++;
+	for (i = 0; i < tween->nparts; i++) {
+		NEMOMOTE_POSITION_X(mote, tween->parts[i]) = (tween->dst[i * 2 + 0] - tween->src[i * 2 + 0]) * t + tween->src[i * 2 + 0];
+		NEMOMOTE_POSITION_Y(mote, tween->parts[i]) = (tween->dst[i * 2 + 1] - tween->src[i * 2 + 1]) * t + tween->src[i * 2 + 1];
 	}
 
 	return tween->done;

@@ -55,6 +55,8 @@ extern int nemomote_ready(struct nemomote *mote, unsigned int count);
 extern int nemomote_commit(struct nemomote *mote);
 extern int nemomote_cleanup(struct nemomote *mote);
 
+extern int nemomote_get_one_by_type(struct nemomote *mote, uint32_t type);
+
 static inline int nemomote_get_count(struct nemomote *mote)
 {
 	return mote->lcount;

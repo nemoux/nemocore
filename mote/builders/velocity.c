@@ -23,16 +23,18 @@ int nemomote_velocity_update(struct nemomote *mote, struct nemozone *zone)
 	return 0;
 }
 
-int nemomote_velocity_set(struct nemomote *mote, int base, int count, struct nemozone *zone)
+int nemomote_velocity_set(struct nemomote *mote, uint32_t type, struct nemozone *zone)
 {
 	double x, y;
 	int i;
 
-	for (i = base; i < base + count; i++) {
-		nemozone_locates(zone, &x, &y);
+	for (i = 0; i < mote->lcount; i++) {
+		if (mote->types[i] == type) {
+			nemozone_locates(zone, &x, &y);
 
-		NEMOMOTE_VELOCITY_X(mote, i) = x;
-		NEMOMOTE_VELOCITY_Y(mote, i) = y;
+			NEMOMOTE_VELOCITY_X(mote, i) = x;
+			NEMOMOTE_VELOCITY_Y(mote, i) = y;
+		}
 	}
 
 	return 0;

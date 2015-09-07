@@ -19,13 +19,21 @@ int nemomote_type_update(struct nemomote *mote, uint32_t type)
 	return 0;
 }
 
-int nemomote_type_set(struct nemomote *mote, int base, int count, uint32_t type)
+int nemomote_type_set(struct nemomote *mote, uint32_t type, uint32_t ntype)
 {
 	int i;
 
-	for (i = base; i < base + count; i++) {
-		mote->types[i] = type;
+	for (i = 0; i < mote->lcount; i++) {
+		if (mote->types[i] == type)
+			mote->types[i] = ntype;
 	}
+
+	return 0;
+}
+
+int nemomote_type_set_one(struct nemomote *mote, int index, uint32_t type)
+{
+	mote->types[index] = type;
 
 	return 0;
 }

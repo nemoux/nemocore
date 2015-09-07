@@ -50,7 +50,7 @@ static void moteback_prepare_number(struct moteback *mote, int n)
 	double x, y;
 	int width = pixman_image_get_width(mote->numbers[n]);
 	int height = pixman_image_get_height(mote->numbers[n]);
-	int i, j;
+	int i, j, p;
 
 	x = random_get_double(mote->width * 0.2f, mote->width * 0.8f);
 	y = random_get_double(mote->height * 0.2f, mote->height * 0.8f);
@@ -60,15 +60,16 @@ static void moteback_prepare_number(struct moteback *mote, int n)
 	for (i = 0; i < height; i++) {
 		for (j = 0; j < width; j++) {
 			if ((c[i * width + j] & 0xff000000) != 0) {
-				nemomote_tween_add(&mote->tween, x + j * 16, y + i * 16);
+				p = nemomote_get_one_by_type(mote->mote, 1);
+
+				nemomote_tween_add(&mote->tween, p, x + j * 16, y + i * 16);
+
+				nemomote_type_set_one(mote->mote, p, 3);
 			}
 		}
 	}
 
-	nemomote_tween_shuffle(&mote->tween);
-
-	nemomote_type_set(mote->mote, 0, nemomote_tween_get_count(&mote->tween), 3);
-	nemomote_tween_ready(mote->mote, 3, &mote->tween, 2.0f);
+	nemomote_tween_ready(mote->mote, &mote->tween, 2.0f);
 }
 
 static void moteback_update_one(struct moteback *mote, double secs)
@@ -96,11 +97,10 @@ static void moteback_update_one(struct moteback *mote, double secs)
 	nemomote_speedlimit_update(mote->mote, 1, secs, 0.0f, 300.0f);
 #endif
 
-	if (nemomote_tween_update(mote->mote, 3, &mote->tween, secs) != 0) {
+	if (nemomote_tween_update(mote->mote, &mote->tween, secs) != 0) {
 		nemomote_explosion_update(mote->mote, 3, secs, -500.0f, 500.0f, -500.0f, 500.0f);
-
-		nemomote_sleeptime_set(mote->mote, 0, nemomote_tween_get_count(&mote->tween), 1.0f, 0.5f);
-		nemomote_type_set(mote->mote, 0, nemomote_tween_get_count(&mote->tween), 1);
+		nemomote_sleeptime_set(mote->mote, 3, 1.0f, 5.0f);
+		nemomote_type_set(mote->mote, 3, 1);
 	}
 
 	nemomote_boundingbox_update(mote->mote, 1, secs, &mote->box, 0.8f);
@@ -189,7 +189,7 @@ static void moteback_dispatch_timer_event(struct nemotimer *timer, void *data)
 
 	moteback_prepare_number(mote, random_get_int(0, 9));
 
-	nemotimer_set_timeout(mote->timer, 10000);
+	nemotimer_set_timeout(mote->timer, 3000);
 }
 
 static void moteback_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
