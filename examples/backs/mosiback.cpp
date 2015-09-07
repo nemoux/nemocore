@@ -136,10 +136,27 @@ static void mosiback_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 			nemomosi_flip_dispatch(mosi->mosi, msecs, 0, 10, 500, 1000);
 
 			mosi->type = 4;
+		} else if (mosi->type == 4) {
+			mosi->type = 5;
 		} else {
 			nemomosi_random_dispatch(mosi->mosi, msecs, 0, 5000, 500, 1500);
 
 			mosi->type = 0;
+		}
+	}
+
+	if (mosi->type == 5) {
+		int x, y;
+		int i;
+
+		for (i = 0; i < 8; i++) {
+			if (nemomosi_get_empty(mosi->mosi, &x, &y) > 0) {
+				nemomosi_cross_dispatch(mosi->mosi, msecs,
+						x, y,
+						0,
+						500, 1500,
+						0.1f, 0.3f);
+			}
 		}
 	}
 

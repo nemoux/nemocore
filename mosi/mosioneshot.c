@@ -18,10 +18,9 @@ void nemomosi_oneshot_dispatch(struct nemomosi *mosi, uint32_t msecs, uint32_t s
 		for (j = 0; j < mosi->width; j++) {
 			one = &mosi->ones[i * mosi->width + j];
 
-			one->stime = msecs + s;
-			one->etime = one->stime + d;
-
-			one->has_transition = 1;
+			nemomosi_one_set_transition(one,
+					msecs + s,
+					d);
 		}
 	}
 }

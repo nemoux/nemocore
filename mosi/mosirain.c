@@ -23,10 +23,9 @@ void nemomosi_rain_dispatch(struct nemomosi *mosi, uint32_t msecs, uint32_t s0, 
 		for (i = 0; i < mosi->height; i++) {
 			one = &mosi->ones[i * mosi->width + j];
 
-			one->stime = msecs + s0 + d9 * ((double)i / (double)mosi->height);
-			one->etime = one->stime + d9 * t9;
-
-			one->has_transition = 1;
+			nemomosi_one_set_transition(one,
+					msecs + s0 + d9 * ((double)i / (double)mosi->height),
+					d9 * t9);
 		}
 	}
 }

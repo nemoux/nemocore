@@ -15,8 +15,6 @@ void nemomosi_wave_dispatch(struct nemomosi *mosi, uint32_t msecs, double x, dou
 {
 	struct mosione *one;
 	double d, dx, dy;
-	uint32_t stime;
-	uint32_t etime;
 	int i, j;
 
 	for (i = 0; i < mosi->height; i++) {
@@ -28,15 +26,9 @@ void nemomosi_wave_dispatch(struct nemomosi *mosi, uint32_t msecs, double x, dou
 
 			d = sqrtf(dx * dx + dy * dy);
 			if (d <= r) {
-				stime = msecs + s0 + s1 * (d / r);
-				etime = stime + random_get_int(d0, d1);
-
-				if (one->has_transition == 0 || one->stime > stime) {
-					one->stime = stime;
-					one->etime = etime;
-
-					one->has_transition = 1;
-				}
+				nemomosi_one_set_transition(one,
+						msecs + s0 + s1 * (d / r),
+						random_get_int(d0, d1));
 			}
 		}
 	}
