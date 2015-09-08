@@ -207,15 +207,33 @@ INSTALL(TARGETS nemocompz DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
 
 set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/compz/compz.h
+	${CMAKE_SOURCE_DIR}/compz/layer.h
+	${CMAKE_SOURCE_DIR}/compz/backend.h
+	${CMAKE_SOURCE_DIR}/compz/drmbackend.h
+	${CMAKE_SOURCE_DIR}/compz/evdevbackend.h
+	${CMAKE_SOURCE_DIR}/compz/tuiobackend.h
+	${CMAKE_SOURCE_DIR}/compz/renderer.h
+	${CMAKE_SOURCE_DIR}/compz/view.h
+	${CMAKE_SOURCE_DIR}/compz/content.h
 	${CMAKE_SOURCE_DIR}/compz/actor.h
+	${CMAKE_SOURCE_DIR}/compz/canvas.h
+	${CMAKE_SOURCE_DIR}/compz/subcanvas.h
+	${CMAKE_SOURCE_DIR}/compz/screen.h
+	${CMAKE_SOURCE_DIR}/compz/input.h
 	${CMAKE_SOURCE_DIR}/compz/seat.h
+	${CMAKE_SOURCE_DIR}/compz/keymap.h
 	${CMAKE_SOURCE_DIR}/compz/keyboard.h
 	${CMAKE_SOURCE_DIR}/compz/keypad.h
 	${CMAKE_SOURCE_DIR}/compz/pointer.h
 	${CMAKE_SOURCE_DIR}/compz/touch.h
+	${CMAKE_SOURCE_DIR}/compz/datadevice.h
+	${CMAKE_SOURCE_DIR}/compz/session.h
 	${CMAKE_SOURCE_DIR}/compz/binding.h
+	${CMAKE_SOURCE_DIR}/compz/plugin.h
+	${CMAKE_SOURCE_DIR}/compz/task.h
 	${CMAKE_SOURCE_DIR}/compz/event.h
 	${CMAKE_SOURCE_DIR}/compz/timer.h
+	${CMAKE_SOURCE_DIR}/compz/waylandhelper.h
 	)
 
 configure_file(

@@ -8,11 +8,6 @@ NEMO_BEGIN_EXTERN_C
 #endif
 
 #include <compz.h>
-#include <ttyhelper.h>
-
-#ifdef NEMOUX_WITH_LOGIND
-#include <logindhelper.h>
-#endif
 
 struct nemosession {
 	struct nemocompz *compz;

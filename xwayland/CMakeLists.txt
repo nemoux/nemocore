@@ -57,7 +57,7 @@ TARGET_LINK_LIBRARIES(nemoxwayland
 	${XCURSOR_LIBRARIES}
 	)
 
-set(NEMOXWAYLAND_PKGCONFIG_REQUIRES "nemocompz nemoshell xcb-render xcb-fixes xcb-composite xcursor")
+set(NEMOXWAYLAND_PKGCONFIG_REQUIRES "nemocompz nemoshell xcb-render xcb-composite xcursor")
 
 INSTALL(TARGETS nemoxwayland DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
 

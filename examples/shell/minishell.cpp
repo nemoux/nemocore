@@ -51,7 +51,7 @@
 #include <xserver.h>
 #endif
 
-static void minishell_handle_configs(struct nemoshell *shell, const char *configpath)
+static void minishell_load_configs(struct nemoshell *shell, const char *configpath)
 {
 	struct nemocompz *compz = shell->compz;
 	struct nemoxml *xml;
@@ -819,7 +819,7 @@ int main(int argc, char *argv[])
 	if (seat != NULL)
 		nemosession_connect(compz->session, seat, tty);
 
-	minishell_handle_configs(shell, configpath);
+	minishell_load_configs(shell, configpath);
 
 #ifdef NEMOUX_WITH_XWAYLAND
 	nemoxserver_create(shell,
