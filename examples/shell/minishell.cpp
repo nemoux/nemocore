@@ -97,6 +97,7 @@ static void minishell_load_virtuio(struct nemoshell *shell)
 	char *v;
 	int index, i;
 	int port, fps;
+	int x, y, width, height;
 
 	for (index = 0;
 			(index = nemoitem_get(shell->configs, "//nemoshell/virtuio", index)) >= 0;
@@ -111,7 +112,31 @@ static void minishell_load_virtuio(struct nemoshell *shell)
 			continue;
 		fps = strtoul(v, NULL, 10);
 
-		virtuio_create(compz, port, fps);
+		v = nemoitem_get_attr(shell->configs, index, "x");
+		if (v == NULL)
+			x = 0;
+		else
+			x = strtoul(v, NULL, 10);
+
+		v = nemoitem_get_attr(shell->configs, index, "y");
+		if (v == NULL)
+			y = 0;
+		else
+			y = strtoul(v, NULL, 10);
+
+		v = nemoitem_get_attr(shell->configs, index, "width");
+		if (v == NULL)
+			width = 0;
+		else
+			width = strtoul(v, NULL, 10);
+
+		v = nemoitem_get_attr(shell->configs, index, "height");
+		if (v == NULL)
+			height = 0;
+		else
+			height = strtoul(v, NULL, 10);
+
+		virtuio_create(compz, port, fps, x, y, width, height);
 	}
 }
 
@@ -822,7 +847,6 @@ int main(int argc, char *argv[])
 		nemosession_connect(compz->session, seat, tty);
 
 	minishell_load_configs(shell, configpath);
-	minishell_load_virtuio(shell);
 
 #ifdef NEMOUX_WITH_XWAYLAND
 	nemoxserver_create(shell,
@@ -837,6 +861,8 @@ int main(int argc, char *argv[])
 	tuiobackend_create(compz);
 
 	nemocompz_load_plugins(compz);
+
+	minishell_load_virtuio(shell);
 
 	nemocompz_set_screen_frame_listener(compz, nemocompz_get_main_screen(compz));
 

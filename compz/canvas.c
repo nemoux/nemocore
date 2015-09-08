@@ -974,6 +974,7 @@ static void nemocanvas_touch_down(struct touchpoint *tp, struct nemocontent *con
 		}
 	}
 
+#ifdef NEMOUX_WITH_TOUCH_TO_POINTER
 	if (done == 0) {
 		resource_list = &tp->touch->seat->pointer.resource_list;
 
@@ -1009,6 +1010,7 @@ static void nemocanvas_touch_down(struct touchpoint *tp, struct nemocontent *con
 			}
 		}
 	}
+#endif
 }
 
 static void nemocanvas_touch_up(struct touchpoint *tp, struct nemocontent *content, uint32_t time, uint64_t touchid)
@@ -1049,6 +1051,7 @@ static void nemocanvas_touch_up(struct touchpoint *tp, struct nemocontent *conte
 		}
 	}
 
+#ifdef NEMOUX_WITH_TOUCH_TO_POINTER
 	if (done == 0) {
 		resource_list = &tp->touch->seat->pointer.resource_list;
 
@@ -1072,6 +1075,7 @@ static void nemocanvas_touch_up(struct touchpoint *tp, struct nemocontent *conte
 			}
 		}
 	}
+#endif
 }
 
 static void nemocanvas_touch_motion(struct touchpoint *tp, struct nemocontent *content, uint32_t time, uint64_t touchid, float x, float y)
@@ -1113,6 +1117,7 @@ static void nemocanvas_touch_motion(struct touchpoint *tp, struct nemocontent *c
 		}
 	}
 
+#ifdef NEMOUX_WITH_TOUCH_TO_POINTER
 	if (done == 0) {
 		resource_list = &tp->touch->seat->pointer.resource_list;
 
@@ -1135,6 +1140,7 @@ static void nemocanvas_touch_motion(struct touchpoint *tp, struct nemocontent *c
 			}
 		}
 	}
+#endif
 }
 
 static void nemocanvas_touch_frame(struct touchpoint *tp, struct nemocontent *content)

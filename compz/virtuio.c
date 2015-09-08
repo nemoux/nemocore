@@ -24,23 +24,71 @@ static int virtuio_dispatch_timer(void *data)
 	struct nemoseat *seat = compz->seat;
 	struct nemotouch *touch;
 	struct touchpoint *tp;
+	lo_timetag timetag;
+	lo_bundle bundle;
+	lo_message alive;
+	lo_message sets[NEMOCOMPZ_VIRTUIO_TOUCH_MAX];
+	lo_message fseq;
+	int nsets = 0;
+	int i;
+
+	lo_timetag_now(&timetag);
+
+	bundle = lo_bundle_new(timetag);
+	alive = lo_message_new();
+	fseq = lo_message_new();
+
+	lo_message_add_string(alive, "alive");
+	lo_message_add_string(fseq, "fseq");
 
 	wl_list_for_each(touch, &seat->touch.device_list, link) {
 		wl_list_for_each(tp, &touch->touchpoint_list, link) {
+			if (tp->x < vtuio->x ||
+					tp->y < vtuio->y ||
+					tp->x >= vtuio->x + vtuio->width ||
+					tp->y >= vtuio->y + vtuio->height)
+				continue;
+
+			lo_message_add_int32(alive, tp->gid);
+
+			sets[nsets] = lo_message_new();
+
+			lo_message_add_string(sets[nsets], "set");
+			lo_message_add_int32(sets[nsets], tp->gid);
+			lo_message_add_float(sets[nsets], (tp->x - vtuio->x) / vtuio->width);
+			lo_message_add_float(sets[nsets], (tp->y - vtuio->y) / vtuio->height);
+			lo_message_add_float(sets[nsets], 0.0f);
+			lo_message_add_float(sets[nsets], 0.0f);
+			lo_message_add_float(sets[nsets], 0.0f);
+
+			nsets++;
 		}
 	}
+
+	lo_message_add_int32(fseq, vtuio->fseq++);
+
+	lo_bundle_add_message(bundle, "/tuio/2Dcur", alive);
+	for (i = 0; i < nsets; i++)
+		lo_bundle_add_message(bundle, "/tuio/2Dcur", sets[i]);
+	lo_bundle_add_message(bundle, "/tuio/2Dcur", fseq);
+
+	lo_send_bundle(vtuio->addr, bundle);
+
+	lo_message_free(alive);
+	for (i = 0; i < nsets; i++)
+		lo_message_free(sets[i]);
+	lo_message_free(fseq);
+	lo_bundle_free(bundle);
 
 	wl_event_source_timer_update(vtuio->timer, 1000 / vtuio->fps);
 
 	return 1;
 }
 
-struct virtuio *virtuio_create(struct nemocompz *compz, int port, int fps)
+struct virtuio *virtuio_create(struct nemocompz *compz, int port, int fps, int x, int y, int width, int height)
 {
 	struct virtuio *vtuio;
-	struct sockaddr_in addr;
-	socklen_t len;
-	int r;
+	char str[32];
 
 	vtuio = (struct virtuio *)malloc(sizeof(struct virtuio));
 	if (vtuio == NULL)
@@ -48,32 +96,24 @@ struct virtuio *virtuio_create(struct nemocompz *compz, int port, int fps)
 	memset(vtuio, 0, sizeof(struct virtuio));
 
 	vtuio->compz = compz;
-
 	vtuio->fps = fps;
 
-	vtuio->fd = socket(AF_INET, SOCK_DGRAM, 0);
-	if (vtuio->fd < 0)
-		goto err1;
+	vtuio->x = x;
+	vtuio->y = y;
+	vtuio->width = width > 0 ? width : nemocompz_get_scene_width(compz);
+	vtuio->height = height > 0 ? height : nemocompz_get_scene_height(compz);
 
-	addr.sin_family = AF_INET;
-	addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-	addr.sin_port = htons(port);
-
-	r = bind(vtuio->fd, (struct sockaddr *)&addr, sizeof(addr));
-	if (r < 0)
-		goto err2;
+	snprintf(str, sizeof(str), "%d", port);
+	vtuio->addr = lo_address_new(NULL, str);
 
 	vtuio->timer = wl_event_loop_add_timer(compz->loop, virtuio_dispatch_timer, vtuio);
 	if (vtuio->timer == NULL)
-		goto err2;
+		goto err1;
 	wl_event_source_timer_update(vtuio->timer, 1000 / vtuio->fps);
 
 	wl_list_insert(compz->virtuio_list.prev, &vtuio->link);
 
 	return vtuio;
-
-err2:
-	close(vtuio->fd);
 
 err1:
 	free(vtuio);
@@ -84,8 +124,6 @@ err1:
 void virtuio_destroy(struct virtuio *vtuio)
 {
 	wl_event_source_remove(vtuio->timer);
-
-	close(vtuio->fd);
 
 	free(vtuio);
 }
