@@ -47,10 +47,15 @@ set(NEMOSHELL_PKGCONFIG_REQUIRES "nemocompz")
 
 INSTALL(TARGETS nemoshell DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
 
+set(HEADER_FILES
+	${CMAKE_SOURCE_DIR}/shell/shell.h
+	)
+
 configure_file(
 	nemoshell.pc.in
 	nemoshell.pc
 	@ONLY
 	)
 
+INSTALL(FILES ${HEADER_FILES} DESTINATION include/nemoshell)
 INSTALL(FILES ${CMAKE_BINARY_DIR}/shell/nemoshell.pc DESTINATION lib${CMAKE_LIBRARY_SUFFIX}/pkgconfig)

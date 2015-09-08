@@ -206,7 +206,16 @@ endif(WITH_LOGIND)
 INSTALL(TARGETS nemocompz DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
 
 set(HEADER_FILES
-	${CMAKE_SOURCE_DIR}/compz/nemocompz.h
+	${CMAKE_SOURCE_DIR}/compz/compz.h
+	${CMAKE_SOURCE_DIR}/compz/actor.h
+	${CMAKE_SOURCE_DIR}/compz/seat.h
+	${CMAKE_SOURCE_DIR}/compz/keyboard.h
+	${CMAKE_SOURCE_DIR}/compz/keypad.h
+	${CMAKE_SOURCE_DIR}/compz/pointer.h
+	${CMAKE_SOURCE_DIR}/compz/touch.h
+	${CMAKE_SOURCE_DIR}/compz/binding.h
+	${CMAKE_SOURCE_DIR}/compz/event.h
+	${CMAKE_SOURCE_DIR}/compz/timer.h
 	)
 
 configure_file(

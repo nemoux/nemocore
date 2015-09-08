@@ -6,8 +6,10 @@
 #include <errno.h>
 
 #include <pthread.h>
+#include <wayland-server.h>
 
-#include <nemocompz.h>
+#include <compz.h>
+#include <touch.h>
 #include <nemomisc.h>
 
 struct miniplugin {
