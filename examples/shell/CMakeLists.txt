@@ -46,6 +46,7 @@ add_executable(minishell
 	minipalm.cpp
 	talehelper.c
 	showhelper.c
+	skiahelper.cpp
 	)
 
 TARGET_LINK_LIBRARIES(minishell

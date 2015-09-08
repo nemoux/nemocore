@@ -1,7 +1,7 @@
 #ifndef	__MINISHELL_YOYO_HPP__
 #define	__MINISHELL_YOYO_HPP__
 
-#include <skiaconfig.hpp>
+#include <skiahelper.hpp>
 
 #include <minishell.h>
 

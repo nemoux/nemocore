@@ -43,6 +43,7 @@
 #include <minigrab.h>
 #include <miniyoyo.hpp>
 #include <minipalm.h>
+#include <skiahelper.hpp>
 
 #include <showitem.h>
 #include <showitem.hpp>
@@ -250,41 +251,6 @@ static void minishell_handle_touch_down(struct nemocompz *compz, struct touchpoi
 	wl_signal_emit(&compz->activate_signal, tp->focus);
 }
 
-static struct nemoactor *minishell_create_cursor(struct nemoshell *shell, int width, int height, int32_t *dx, int32_t *dy)
-{
-	struct nemoactor *actor;
-
-	actor = nemoactor_create_pixman(shell->compz, width, height);
-	if (actor == NULL)
-		return NULL;
-
-	SkBitmap bitmap;
-	bitmap.setInfo(
-			SkImageInfo::Make(width, height, kN32_SkColorType, kPremul_SkAlphaType));
-	bitmap.setPixels(actor->data);
-
-	SkBitmapDevice device(bitmap);
-	SkCanvas canvas(&device);
-
-	SkMaskFilter *filter = SkBlurMaskFilter::Create(kSolid_SkBlurStyle, SkBlurMask::ConvertRadiusToSigma(5.0f), SkBlurMaskFilter::kHighQuality_BlurFlag);
-
-	SkPaint paint;
-	paint.setStyle(SkPaint::kFill_Style);
-	paint.setColor(SkColorSetARGB(255, 0, 255, 255));
-	paint.setAntiAlias(true);
-	paint.setMaskFilter(filter);
-
-	canvas.clear(SK_ColorTRANSPARENT);
-	canvas.drawCircle(width / 2, height / 2, width / 3, paint);
-
-	filter->unref();
-
-	*dx = width / 2;
-	*dy = height / 2;
-
-	return actor;
-}
-
 static int minishell_dispatch_move_grab(struct talegrab *base, uint32_t type, struct taleevent *event)
 {
 	struct minigrab *grab = (struct minigrab *)container_of(base, struct minigrab, base);
@@ -485,9 +451,20 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 
 		pointer = nemoseat_get_pointer_by_id(seat, event->device);
 		if (pointer != NULL) {
-			cursor = minishell_create_cursor(shell, 32, 32, &dx, &dy);
-			if (cursor != NULL)
-				nemopointer_set_cursor_actor(pointer, cursor, dx, dy);
+			int32_t width = 32;
+			int32_t height = 32;
+
+			cursor = nemoactor_create_pixman(shell->compz, width, height);
+			if (cursor != NULL) {
+				skia_draw_circle(
+						cursor->data, width, height,
+						width / 2.0f, height / 2.0f, width / 3.0f,
+						SkPaint::kFill_Style,
+						SkColorSetARGB(255, 0, 255, 255),
+						5.0f);
+
+				nemopointer_set_cursor_actor(pointer, cursor, width / 2, height / 2);
+			}
 		}
 	} else if (nemotale_is_pointer_leave(tale, event, type)) {
 	}
