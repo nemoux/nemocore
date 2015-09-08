@@ -67,6 +67,7 @@ struct nemocompz {
 	struct wl_list evdev_list;
 	struct wl_list touch_list;
 	struct wl_list tuio_list;
+	struct wl_list virtuio_list;
 	struct wl_list animation_list;
 	struct wl_list effect_list;
 	struct wl_list task_list;

@@ -147,6 +147,7 @@ add_library(nemocompz SHARED
 	evdevnode.c
 	tuiobackend.c
 	tuionode.c
+	virtuio.c
 	picker.c
 	pitchfilter.c
 	binding.c
@@ -226,6 +227,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/compz/keypad.h
 	${CMAKE_SOURCE_DIR}/compz/pointer.h
 	${CMAKE_SOURCE_DIR}/compz/touch.h
+	${CMAKE_SOURCE_DIR}/compz/virtuio.h
 	${CMAKE_SOURCE_DIR}/compz/datadevice.h
 	${CMAKE_SOURCE_DIR}/compz/session.h
 	${CMAKE_SOURCE_DIR}/compz/binding.h

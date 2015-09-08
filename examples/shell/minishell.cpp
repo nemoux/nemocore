@@ -22,6 +22,7 @@
 #include <keyboard.h>
 #include <pointer.h>
 #include <touch.h>
+#include <virtuio.h>
 #include <session.h>
 #include <binding.h>
 #include <plugin.h>
@@ -88,6 +89,30 @@ static void minishell_load_configs(struct nemoshell *shell, const char *configpa
 	}
 
 	nemoxml_destroy(xml);
+}
+
+static void minishell_load_virtuio(struct nemoshell *shell)
+{
+	struct nemocompz *compz = shell->compz;
+	char *v;
+	int index, i;
+	int port, fps;
+
+	for (index = 0;
+			(index = nemoitem_get(shell->configs, "//nemoshell/virtuio", index)) >= 0;
+			index++) {
+		v = nemoitem_get_attr(shell->configs, index, "port");
+		if (v == NULL)
+			continue;
+		port = strtoul(v, NULL, 10);
+
+		v = nemoitem_get_attr(shell->configs, index, "fps");
+		if (v == NULL)
+			continue;
+		fps = strtoul(v, NULL, 10);
+
+		virtuio_create(compz, port, fps);
+	}
 }
 
 static void minishell_launch_background(struct nemoshell *shell)
@@ -797,6 +822,7 @@ int main(int argc, char *argv[])
 		nemosession_connect(compz->session, seat, tty);
 
 	minishell_load_configs(shell, configpath);
+	minishell_load_virtuio(shell);
 
 #ifdef NEMOUX_WITH_XWAYLAND
 	nemoxserver_create(shell,
