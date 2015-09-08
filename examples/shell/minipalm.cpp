@@ -9,7 +9,6 @@
 
 #include <minipalm.h>
 #include <showhelper.h>
-#include <geometryhelper.h>
 #include <nemobook.h>
 #include <nemomisc.h>
 

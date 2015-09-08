@@ -10,7 +10,7 @@ NEMO_BEGIN_EXTERN_C
 #include <minishell.h>
 #include <talehelper.h>
 #include <showhelper.h>
-#include <geometryhelper.h>
+#include <nemomisc.h>
 
 typedef enum {
 	MINISHELL_NORMAL_GRAB = 0,

@@ -32,7 +32,6 @@
 #include <evdevbackend.h>
 #include <tuiobackend.h>
 #include <waylandhelper.h>
-#include <geometryhelper.h>
 #include <talehelper.h>
 #include <showhelper.h>
 #include <nemoxml.h>

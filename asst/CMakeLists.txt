@@ -28,7 +28,6 @@ add_library(nemoasst SHARED
 	${CMAKE_SOURCE_DIR}/misc/utf8helper.c
 	${CMAKE_SOURCE_DIR}/misc/fonthelper.c
 	${CMAKE_SOURCE_DIR}/misc/stringhelper.c
-	${CMAKE_SOURCE_DIR}/misc/geometryhelper.c
 	${CMAKE_SOURCE_DIR}/misc/oshelper.c
 	${NEMOASST_EGL_SOURCES}
 	)

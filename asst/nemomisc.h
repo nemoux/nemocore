@@ -10,6 +10,8 @@ NEMO_BEGIN_EXTERN_C
 #include <stdio.h>
 #include <stdint.h>
 
+#include <math.h>
+
 #ifndef MIN
 #	define MIN(x,y) (((x) < (y)) ? (x) : (y))
 #endif
@@ -47,6 +49,24 @@ extern uint32_t time_current_msecs(void);
 
 extern int random_get_int(int min, int max);
 extern double random_get_double(double min, double max);
+
+static inline double point_get_angle_on_line(double x1, double y1, double x2, double y2, double x3, double y3)
+{
+	double px = x2 - x1, py = y2 - y1, dab = px * px + py * py;
+	double k = ((x3 - x1) * px + (y3 - y1) * py) / dab;
+	double x4 = x1 + k * px;
+	double y4 = y1 + k * py;
+
+	return atan2(y3 - y4, x3 - x4);
+}
+
+static inline double point_get_distance(double x0, double y0, double x1, double y1)
+{
+	double dx = x1 - x0;
+	double dy = y1 - y0;
+
+	return sqrtf(dx * dx + dy * dy);
+}
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
