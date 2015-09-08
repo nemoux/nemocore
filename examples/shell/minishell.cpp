@@ -94,7 +94,6 @@ static void minishell_load_configs(struct nemoshell *shell, const char *configpa
 static void minishell_load_virtuio(struct nemoshell *shell)
 {
 	struct nemocompz *compz = shell->compz;
-	char *v;
 	int index, i;
 	int port, fps;
 	int x, y, width, height;
@@ -102,39 +101,12 @@ static void minishell_load_virtuio(struct nemoshell *shell)
 	for (index = 0;
 			(index = nemoitem_get(shell->configs, "//nemoshell/virtuio", index)) >= 0;
 			index++) {
-		v = nemoitem_get_attr(shell->configs, index, "port");
-		if (v == NULL)
-			continue;
-		port = strtoul(v, NULL, 10);
-
-		v = nemoitem_get_attr(shell->configs, index, "fps");
-		if (v == NULL)
-			continue;
-		fps = strtoul(v, NULL, 10);
-
-		v = nemoitem_get_attr(shell->configs, index, "x");
-		if (v == NULL)
-			x = 0;
-		else
-			x = strtoul(v, NULL, 10);
-
-		v = nemoitem_get_attr(shell->configs, index, "y");
-		if (v == NULL)
-			y = 0;
-		else
-			y = strtoul(v, NULL, 10);
-
-		v = nemoitem_get_attr(shell->configs, index, "width");
-		if (v == NULL)
-			width = 0;
-		else
-			width = strtoul(v, NULL, 10);
-
-		v = nemoitem_get_attr(shell->configs, index, "height");
-		if (v == NULL)
-			height = 0;
-		else
-			height = strtoul(v, NULL, 10);
+		port = nemoitem_get_iattr(shell->configs, index, "port");
+		fps = nemoitem_get_iattr(shell->configs, index, "fps");
+		x = nemoitem_get_iattr(shell->configs, index, "x");
+		y = nemoitem_get_iattr(shell->configs, index, "y");
+		width = nemoitem_get_iattr(shell->configs, index, "width");
+		height = nemoitem_get_iattr(shell->configs, index, "height");
 
 		virtuio_create(compz, port, fps, x, y, width, height);
 	}

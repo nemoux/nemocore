@@ -32,6 +32,8 @@ extern int nemoitem_get_iftwo(struct nemoitem *item, const char *name, int index
 
 extern int nemoitem_set_attr(struct nemoitem *item, int index, const char *attr, const char *value);
 extern char *nemoitem_get_attr(struct nemoitem *item, int index, const char *attr);
+extern int nemoitem_get_iattr(struct nemoitem *item, int index, const char *attr);
+extern float nemoitem_get_fattr(struct nemoitem *item, int index, const char *attr);
 extern char *nemoitem_get_vattr(struct nemoitem *item, int index, const char *fmt, ...);
 
 extern void nemoitem_dump(struct nemoitem *item, FILE *out);
