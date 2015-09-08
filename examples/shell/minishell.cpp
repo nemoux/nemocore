@@ -500,8 +500,8 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 			if (nemotale_is_touch_down(tale, event, type)) {
 				int32_t pid = nemoshow_canvas_pick_one(canvas, event->x, event->y);
 
-				if (pid == 10 && minishell_has_slot(mini, pid) != 0) {
-					struct showone *one = (struct showone *)minishell_get_slot(mini, pid);
+				if (pid == 10 && nemobook_is_empty(mini->book, pid) == 0) {
+					struct showone *one = (struct showone *)nemobook_get(mini->book, pid);
 					struct showone *group = nemoshow_one_get_parent(one, NEMOSHOW_ITEM_TYPE, NEMOSHOW_GROUP_ITEM);
 					struct minigrab *grab;
 
@@ -509,8 +509,8 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 					grab->group = group;
 					grab->one = one;
 					nemotale_dispatch_grab(tale, event->device, type, event);
-				} else if (pid != 0 && minishell_has_slot(mini, pid) != 0) {
-					struct showone *one = (struct showone *)minishell_get_slot(mini, pid);
+				} else if (pid != 0 && nemobook_is_empty(mini->book, pid) == 0) {
+					struct showone *one = (struct showone *)nemobook_get(mini->book, pid);
 					struct showone *group = nemoshow_one_get_parent(one, NEMOSHOW_ITEM_TYPE, NEMOSHOW_GROUP_ITEM);
 					struct minigrab *grab;
 
@@ -654,8 +654,8 @@ static void minishell_dispatch_tale_event(struct nemotale *tale, struct talenode
 							}
 						}
 					}
-				} else if (pid != 0 && minishell_has_slot(mini, pid) != 0) {
-					struct showone *one = (struct showone *)minishell_get_slot(mini, pid);
+				} else if (pid != 0 && nemobook_is_empty(mini->book, pid) == 0) {
+					struct showone *one = (struct showone *)nemobook_get(mini->book, pid);
 					struct showone *group = nemoshow_one_get_parent(one, NEMOSHOW_ITEM_TYPE, NEMOSHOW_GROUP_ITEM);
 					struct showone *nuts[6];
 					struct showtransition *trans[6];
@@ -795,12 +795,10 @@ int main(int argc, char *argv[])
 		return -1;
 	memset(mini, 0, sizeof(struct minishell));
 
-	mini->slots = (void **)malloc(sizeof(void *) * 256);
-	if (mini->slots == NULL)
+	mini->book = nemobook_create(256);
+	if (mini->book == NULL)
 		return -1;
-	memset(mini->slots, 0, sizeof(void *) * 256);
-
-	mini->nslots = 256;
+	nemobook_iset(mini->book, 0, 0x12345678);
 
 	nemolist_init(&mini->grab_list);
 
@@ -897,7 +895,8 @@ out:
 
 	nemolog_message("SHELL", "end nemoshell...\n");
 
-	free(mini->slots);
+	nemobook_destroy(mini->book);
+
 	free(mini);
 
 	free(configpath);

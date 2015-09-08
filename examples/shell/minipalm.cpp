@@ -223,7 +223,7 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 		nemoshow_svg_pivot(svg, 50.0f, 50.0f);
 		nemoshow_svg_scale(svg, 0.0f, 0.0f);
 
-		minishell_set_slot(mini, 10, svg);
+		nemobook_set(mini->book, 10, svg);
 		nemoshow_svg_set_event(svg, 10);
 
 		set = nemoshow_sequence_create_set();
@@ -259,15 +259,15 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 				}
 			}
 
-			nemobook_set(book, imin, 1);
+			nemobook_iset(book, imin, 1);
 
 			nemoshow_item_attach_one(group, palm->fingers[i]->group);
 			nemoshow_item_translate(palm->fingers[i]->group,
 					nemoshow_item_get_tx(palm->fingers[i]->group) - cx,
 					nemoshow_item_get_ty(palm->fingers[i]->group) - cy);
 
-			slot = minishell_needs_slot(mini);
-			minishell_set_slot(mini, slot, palm->fingers[i]->group);
+			slot = nemobook_needs_empty(mini->book);
+			nemobook_set(mini->book, slot, palm->fingers[i]->group);
 			nemoshow_item_set_event(palm->fingers[i]->one, slot);
 
 			sequence = nemoshow_sequence_create_easy(show,
