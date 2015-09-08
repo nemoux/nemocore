@@ -24,7 +24,7 @@ int skia_draw_circle(
 
 	SkMaskFilter *filter = SkBlurMaskFilter::Create(
 			kSolid_SkBlurStyle,
-			SkBlurMask::ConvertRadiusToSigma(5.0f),
+			SkBlurMask::ConvertRadiusToSigma(blur),
 			SkBlurMaskFilter::kHighQuality_BlurFlag);
 
 	SkPaint paint;
