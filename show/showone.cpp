@@ -34,9 +34,15 @@ void nemoshow_one_prepare(struct showone *one)
 
 void nemoshow_one_finish(struct showone *one)
 {
+	int i;
+
 	if (one->parent != NULL) {
 		nemoshow_one_unreference_one(one, one->parent);
 		nemoshow_one_detach_one(one->parent, one);
+	}
+
+	for (i = 0; i < one->nchildren; i++) {
+		one->children[i]->parent = NULL;
 	}
 
 	nemoobject_finish(&one->object);
