@@ -16,6 +16,7 @@
 #include <view.h>
 #include <screen.h>
 #include <picker.h>
+#include <virtuio.h>
 #include <binding.h>
 #include <nemomisc.h>
 
@@ -35,6 +36,8 @@ static void default_touchpoint_grab_down(struct touchpoint_grab *grab, uint32_t 
 	if (tp->focus != NULL) {
 		nemocontent_touch_down(tp, tp->focus->content, time, touchid, sx, sy);
 	}
+	
+	virtuio_dispatch_events(tp->touch->seat->compz);
 }
 
 static void default_touchpoint_grab_up(struct touchpoint_grab *grab, uint32_t time, uint64_t touchid)

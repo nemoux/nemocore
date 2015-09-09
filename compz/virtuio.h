@@ -23,6 +23,8 @@ struct virtuio {
 
 	float x, y, width, height;
 
+	int waiting;
+
 	lo_address addr;
 
 	int fps;
@@ -35,6 +37,8 @@ struct virtuio {
 
 extern struct virtuio *virtuio_create(struct nemocompz *compz, int port, int fps, int x, int y, int width, int height);
 extern void virtuio_destroy(struct virtuio *vtuio);
+
+extern void virtuio_dispatch_events(struct nemocompz *compz);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

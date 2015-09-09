@@ -80,7 +80,10 @@ static int virtuio_dispatch_timer(void *data)
 	lo_message_free(fseq);
 	lo_bundle_free(bundle);
 
-	wl_event_source_timer_update(vtuio->timer, 1000 / vtuio->fps);
+	if (nsets > 0)
+		wl_event_source_timer_update(vtuio->timer, 1000 / vtuio->fps);
+	else
+		vtuio->waiting = 1;
 
 	return 1;
 }
@@ -103,13 +106,14 @@ struct virtuio *virtuio_create(struct nemocompz *compz, int port, int fps, int x
 	vtuio->width = width > 0 ? width : nemocompz_get_scene_width(compz);
 	vtuio->height = height > 0 ? height : nemocompz_get_scene_height(compz);
 
+	vtuio->waiting = 1;
+
 	snprintf(str, sizeof(str), "%d", port);
 	vtuio->addr = lo_address_new(NULL, str);
 
 	vtuio->timer = wl_event_loop_add_timer(compz->loop, virtuio_dispatch_timer, vtuio);
 	if (vtuio->timer == NULL)
 		goto err1;
-	wl_event_source_timer_update(vtuio->timer, 1000 / vtuio->fps);
 
 	wl_list_insert(compz->virtuio_list.prev, &vtuio->link);
 
@@ -126,4 +130,17 @@ void virtuio_destroy(struct virtuio *vtuio)
 	wl_event_source_remove(vtuio->timer);
 
 	free(vtuio);
+}
+
+void virtuio_dispatch_events(struct nemocompz *compz)
+{
+	struct virtuio *vtuio;
+
+	wl_list_for_each(vtuio, &compz->virtuio_list, link) {
+		if (vtuio->waiting != 0) {
+			wl_event_source_timer_update(vtuio->timer, 1000 / vtuio->fps);
+
+			vtuio->waiting = 0;
+		}
+	}
 }
