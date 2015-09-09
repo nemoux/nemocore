@@ -53,6 +53,7 @@ struct nemoshow {
 	double sx, sy;
 
 	struct nemolist transition_list;
+	struct nemolist transition_destroy_list;
 
 	uint32_t serial;
 
@@ -103,6 +104,7 @@ extern void nemoshow_detach_one(struct nemoshow *show, struct showone *one);
 extern void nemoshow_attach_transition(struct nemoshow *show, struct showtransition *trans);
 extern void nemoshow_detach_transition(struct nemoshow *show, struct showtransition *trans);
 extern void nemoshow_dispatch_transition(struct nemoshow *show, uint32_t msecs);
+extern void nemoshow_destroy_transition(struct nemoshow *show);
 extern int nemoshow_has_transition(struct nemoshow *show);
 
 extern void nemoshow_dump_all(struct nemoshow *show, FILE *out);

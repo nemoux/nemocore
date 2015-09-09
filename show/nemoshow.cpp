@@ -43,6 +43,7 @@ struct nemoshow *nemoshow_create(void)
 	nemoshow_expr_add_symbol_table(show->expr, show->stable);
 
 	nemolist_init(&show->transition_list);
+	nemolist_init(&show->transition_destroy_list);
 
 	show->ones = (struct showone **)malloc(sizeof(struct showone *) * 8);
 	show->nones = 0;
@@ -68,6 +69,7 @@ void nemoshow_destroy(struct nemoshow *show)
 	nemoshow_expr_destroy_symbol_table(show->stable);
 
 	nemolist_remove(&show->transition_list);
+	nemolist_remove(&show->transition_destroy_list);
 
 	free(show->ones);
 	free(show);
@@ -988,7 +990,8 @@ void nemoshow_dispatch_transition(struct nemoshow *show, uint32_t msecs)
 					strans[scount++] = trans->transitions[i];
 				}
 
-				nemoshow_transition_destroy(trans);
+				nemolist_remove(&trans->link);
+				nemolist_insert(&show->transition_destroy_list, &trans->link);
 			} else if (trans->repeat == 0 || --trans->repeat) {
 				trans->stime = 0;
 
@@ -1001,6 +1004,19 @@ void nemoshow_dispatch_transition(struct nemoshow *show, uint32_t msecs)
 
 	for (i = 0; i < scount; i++) {
 		nemoshow_attach_transition(show, strans[i]);
+	}
+}
+
+void nemoshow_destroy_transition(struct nemoshow *show)
+{
+	struct showtransition *trans, *ntrans;
+
+	nemolist_for_each_safe(trans, ntrans, &show->transition_destroy_list, link) {
+		if (trans->dispatch_done != NULL) {
+			trans->dispatch_done(trans->userdata);
+		}
+
+		nemoshow_transition_destroy(trans);
 	}
 }
 

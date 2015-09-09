@@ -206,6 +206,8 @@ static void nemoshow_dispatch_actor_frame(struct nemoactor *actor, uint32_t msec
 
 	nemoshow_render_one(show);
 
+	nemoshow_destroy_transition(show);
+
 	nemotale_composite_fbo(tale, &region);
 
 	nemoactor_damage_region(actor, &region);

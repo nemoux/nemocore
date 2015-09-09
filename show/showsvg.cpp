@@ -69,7 +69,14 @@ void nemoshow_svg_destroy(struct showone *one)
 {
 	struct showsvg *svg = NEMOSHOW_SVG(one);
 
+	if (svg->matrix != NULL)
+		nemoshow_one_unreference_one(one, svg->matrix);
+	if (svg->clip != NULL)
+		nemoshow_one_unreference_one(one, svg->clip);
+
 	nemoshow_one_finish(one);
+
+	delete static_cast<showsvg_t *>(svg->cc);
 
 	free(svg);
 }

@@ -40,6 +40,8 @@ static void nemoshow_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 
 	nemoshow_render_one(show);
 
+	nemoshow_destroy_transition(show);
+
 	nemotale_composite_egl(tale, NULL);
 }
 
