@@ -111,6 +111,21 @@ void nemoshow_item_destroy(struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
+	if (item->style != NULL && item->style != one)
+		nemoshow_one_unreference_one(one, item->style);
+	if (item->filter != NULL)
+		nemoshow_one_unreference_one(one, item->filter);
+	if (item->shader != NULL)
+		nemoshow_one_unreference_one(one, item->shader);
+	if (item->matrix != NULL)
+		nemoshow_one_unreference_one(one, item->matrix);
+	if (item->clip != NULL)
+		nemoshow_one_unreference_one(one, item->clip);
+	if (item->path != NULL)
+		nemoshow_one_unreference_one(one, item->path);
+	if (item->font != NULL)
+		nemoshow_one_unreference_one(one, item->font);
+
 	nemoshow_one_finish(one);
 
 	delete static_cast<showitem_t *>(item->cc);

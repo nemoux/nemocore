@@ -54,6 +54,13 @@ void nemoshow_link_destroy(struct showone *one)
 {
 	struct showlink *link = NEMOSHOW_LINK(one);
 
+	if (link->head != NULL)
+		nemoshow_one_unreference_one(one, link->head);
+	if (link->tail != NULL)
+		nemoshow_one_unreference_one(one, link->tail);
+	if (link->filter != NULL)
+		nemoshow_one_unreference_one(one, link->filter);
+
 	nemoshow_one_finish(one);
 
 	delete static_cast<showlink_t *>(link->cc);
