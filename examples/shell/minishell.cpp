@@ -861,7 +861,7 @@ int main(int argc, char *argv[])
 
 	nemoshow_render_one(show);
 
-	mini->canvas = nemoshow_search_one(show, "mini");
+	mini->canvas = nemoshow_search_one(show, "canvas");
 	mini->links = nemoshow_search_one(show, "links");
 
 	mini->blur5 = blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);

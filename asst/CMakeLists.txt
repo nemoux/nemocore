@@ -53,6 +53,7 @@ set(HEADER_FILES
 	nemolistener.h
 	nemoease.h
 	nemobox.h
+	nemobook.h
 	nemoconfig.h
 	)
 
