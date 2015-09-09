@@ -219,6 +219,8 @@ static void nemoshow_dispatch_timer(struct nemotimer *timer, void *data)
 
 	nemoshow_validate_one(scon->show);
 
+	nemotale_push_timer_event(scon->tale, time_current_msecs());
+
 	nemotimer_set_timeout(timer, 500);
 }
 

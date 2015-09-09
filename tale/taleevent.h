@@ -37,11 +37,14 @@ typedef enum {
 	NEMOTALE_TOUCH_DOWN_EVENT = (1 << 14),
 	NEMOTALE_TOUCH_UP_EVENT = (1 << 15),
 	NEMOTALE_TOUCH_MOTION_EVENT = (1 << 16),
+	NEMOTALE_POINTER_LONG_PRESS_EVENT = (1 << 17),
+	NEMOTALE_TOUCH_LONG_PRESS_EVENT = (1 << 18),
 	NEMOTALE_DOWN_EVENT = NEMOTALE_POINTER_DOWN_EVENT | NEMOTALE_TOUCH_DOWN_EVENT,
 	NEMOTALE_UP_EVENT = NEMOTALE_POINTER_UP_EVENT | NEMOTALE_TOUCH_UP_EVENT,
 	NEMOTALE_MOTION_EVENT = NEMOTALE_POINTER_MOTION_EVENT | NEMOTALE_TOUCH_MOTION_EVENT,
 	NEMOTALE_POINTER_EVENT = NEMOTALE_POINTER_ENTER_EVENT | NEMOTALE_POINTER_LEAVE_EVENT | NEMOTALE_POINTER_DOWN_EVENT | NEMOTALE_POINTER_UP_EVENT | NEMOTALE_POINTER_MOTION_EVENT,
-	NEMOTALE_TOUCH_EVENT = NEMOTALE_TOUCH_DOWN_EVENT | NEMOTALE_TOUCH_UP_EVENT | NEMOTALE_TOUCH_MOTION_EVENT
+	NEMOTALE_TOUCH_EVENT = NEMOTALE_TOUCH_DOWN_EVENT | NEMOTALE_TOUCH_UP_EVENT | NEMOTALE_TOUCH_MOTION_EVENT,
+	NEMOTALE_LONG_PRESS_EVENT = NEMOTALE_POINTER_LONG_PRESS_EVENT | NEMOTALE_TOUCH_LONG_PRESS_EVENT
 } NemoTaleEventType;
 
 struct nemotale;
@@ -72,6 +75,8 @@ struct taleevent {
 	uint32_t time;
 	uint32_t value;
 
+	uint32_t duration;
+
 	float x, y;
 	float dx, dy;
 
@@ -95,6 +100,8 @@ extern void nemotale_push_keyboard_up_event(struct nemotale *tale, uint32_t seri
 extern void nemotale_push_touch_down_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, float x, float y);
 extern void nemotale_push_touch_up_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, float dx, float dy);
 extern void nemotale_push_touch_motion_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, float x, float y);
+
+extern void nemotale_push_timer_event(struct nemotale *tale, uint32_t time);
 
 static inline struct taletap *nemotale_pointer_get_tap(struct nemotale *tale, uint64_t device)
 {

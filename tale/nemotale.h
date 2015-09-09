@@ -61,6 +61,9 @@ struct nemotale {
 	struct nemolist grab_list;
 
 	nemotale_dispatch_event_t dispatch_event;
+
+	uint32_t long_press_duration;
+	uint32_t long_press_distance;
 };
 
 #define	NEMOTALE_DESTROY_SIGNAL(tale)		(&tale->destroy_signal)
@@ -171,6 +174,12 @@ static inline int32_t nemotale_get_height(struct nemotale *tale)
 static inline void nemotale_set_dispatch_event(struct nemotale *tale, nemotale_dispatch_event_t dispatch)
 {
 	tale->dispatch_event = dispatch;
+}
+
+static inline void nemotale_set_long_press_gesture(struct nemotale *tale, uint32_t duration, uint32_t distance)
+{
+	tale->long_press_duration = duration;
+	tale->long_press_distance = distance;
 }
 
 static inline void nemotale_set_backend(struct nemotale *tale, void *backend)

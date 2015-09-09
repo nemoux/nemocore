@@ -27,6 +27,9 @@ int nemotale_prepare(struct nemotale *tale)
 	tale->nnodes = 0;
 	tale->snodes = 8;
 
+	tale->long_press_duration = 1500;
+	tale->long_press_distance = 50;
+
 	return 0;
 }
 

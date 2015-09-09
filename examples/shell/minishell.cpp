@@ -379,6 +379,7 @@ static int minishell_dispatch_palm_grab(struct talegrab *base, uint32_t type, st
 		minishell_grab_destroy(grab);
 
 		return 0;
+	} else if (type & NEMOTALE_LONG_PRESS_EVENT) {
 	}
 
 	return 1;

@@ -58,6 +58,11 @@ static inline int nemotale_is_up_event(struct nemotale *tale, struct taleevent *
 	return type & NEMOTALE_UP_EVENT;
 }
 
+static inline int nemotale_is_long_press_event(struct nemotale *tale, struct taleevent *event, uint32_t type)
+{
+	return type & NEMOTALE_LONG_PRESS_EVENT;
+}
+
 static inline int nemotale_is_touch_down(struct nemotale *tale, struct taleevent *event, uint32_t type)
 {
 	return type & NEMOTALE_TOUCH_DOWN_EVENT;
@@ -71,6 +76,11 @@ static inline int nemotale_is_touch_up(struct nemotale *tale, struct taleevent *
 static inline int nemotale_is_touch_motion(struct nemotale *tale, struct taleevent *event, uint32_t type)
 {
 	return type & NEMOTALE_TOUCH_MOTION_EVENT;
+}
+
+static inline int nemotale_is_touch_long_press_event(struct nemotale *tale, struct taleevent *event, uint32_t type)
+{
+	return type & NEMOTALE_TOUCH_LONG_PRESS_EVENT;
 }
 
 static inline int nemotale_is_pointer_enter(struct nemotale *tale, struct taleevent *event, uint32_t type)
@@ -121,6 +131,11 @@ static inline int nemotale_is_pointer_button_down(struct nemotale *tale, struct 
 static inline int nemotale_is_pointer_button_up(struct nemotale *tale, struct taleevent *event, uint32_t type, uint32_t button)
 {
 	return (type & NEMOTALE_POINTER_UP_EVENT) && (event->value == button);
+}
+
+static inline int nemotale_is_pointer_long_press_event(struct nemotale *tale, struct taleevent *event, uint32_t type)
+{
+	return type & NEMOTALE_POINTER_LONG_PRESS_EVENT;
 }
 
 #ifdef __cplusplus
