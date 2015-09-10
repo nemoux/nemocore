@@ -56,8 +56,6 @@ struct showone *nemoshow_item_create(int type)
 	item->sx = 1.0f;
 	item->sy = 1.0f;
 
-	item->style = &item->base;
-
 	one = &item->base;
 	one->type = NEMOSHOW_ITEM_TYPE;
 	one->sub = type;
@@ -104,6 +102,8 @@ struct showone *nemoshow_item_create(int type)
 
 	nemoobject_set_reserved(&one->object, "event", &item->event, sizeof(int32_t));
 
+	nemoshow_one_reference_one(one, one, NEMOSHOW_STYLE_REF);
+
 	return one;
 }
 
@@ -111,20 +111,7 @@ void nemoshow_item_destroy(struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	if (item->style != NULL && item->style != one)
-		nemoshow_one_unreference_one(one, item->style);
-	if (item->filter != NULL)
-		nemoshow_one_unreference_one(one, item->filter);
-	if (item->shader != NULL)
-		nemoshow_one_unreference_one(one, item->shader);
-	if (item->matrix != NULL)
-		nemoshow_one_unreference_one(one, item->matrix);
-	if (item->clip != NULL)
-		nemoshow_one_unreference_one(one, item->clip);
-	if (item->path != NULL)
-		nemoshow_one_unreference_one(one, item->path);
-	if (item->font != NULL)
-		nemoshow_one_unreference_one(one, item->font);
+	nemoshow_one_unreference_all(one);
 
 	nemoshow_one_finish(one);
 
@@ -148,22 +135,19 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 
 	v = nemoobject_gets(&one->object, "style");
 	if (v != NULL && (style = nemoshow_search_one(show, v)) != NULL) {
-		item->style = style;
-
-		nemoshow_one_reference_one(one, style);
+		nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_STYLE_REF));
+		nemoshow_one_reference_one(one, style, NEMOSHOW_STYLE_REF);
 	} else {
 		v = nemoobject_gets(&one->object, "filter");
 		if (v != NULL && (filter = nemoshow_search_one(show, v)) != NULL) {
-			item->filter = filter;
-
-			nemoshow_one_reference_one(one, filter);
+			nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF));
+			nemoshow_one_reference_one(one, filter, NEMOSHOW_FILTER_REF);
 		}
 
 		v = nemoobject_gets(&one->object, "shader");
 		if (v != NULL && (shader = nemoshow_search_one(show, v)) != NULL) {
-			item->shader = shader;
-
-			nemoshow_one_reference_one(one, shader);
+			nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_SHADER_REF));
+			nemoshow_one_reference_one(one, shader, NEMOSHOW_SHADER_REF);
 		}
 	}
 
@@ -174,9 +158,8 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 		} else if ((matrix = nemoshow_search_one(show, v)) != NULL) {
 			item->transform = NEMOSHOW_EXTERN_TRANSFORM;
 
-			item->matrix = matrix;
-
-			nemoshow_one_reference_one(one, matrix);
+			nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_MATRIX_REF));
+			nemoshow_one_reference_one(one, matrix, NEMOSHOW_MATRIX_REF);
 		}
 	} else {
 		for (i = 0; i < one->nchildren; i++) {
@@ -190,23 +173,20 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 
 	v = nemoobject_gets(&one->object, "clip");
 	if (v != NULL && (clip = nemoshow_search_one(show, v)) != NULL) {
-		item->clip = clip;
-
-		nemoshow_one_reference_one(one, clip);
+		nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_CLIP_REF));
+		nemoshow_one_reference_one(one, clip, NEMOSHOW_CLIP_REF);
 	}
 
 	v = nemoobject_gets(&one->object, "path");
 	if (v != NULL && (path = nemoshow_search_one(show, v)) != NULL) {
-		item->path = path;
-
-		nemoshow_one_reference_one(one, path);
+		nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_PATH_REF));
+		nemoshow_one_reference_one(one, path, NEMOSHOW_PATH_REF);
 	}
 
 	v = nemoobject_gets(&one->object, "font");
 	if (v != NULL && (font = nemoshow_search_one(show, v)) != NULL) {
-		item->font = font;
-
-		nemoshow_one_reference_one(one, font);
+		nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_FONT_REF));
+		nemoshow_one_reference_one(one, font, NEMOSHOW_FONT_REF);
 	}
 
 	v = nemoobject_gets(&one->object, "uri");
@@ -242,7 +222,7 @@ static inline void nemoshow_item_update_style(struct nemoshow *show, struct show
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	if (item->style == one) {
+	if (NEMOSHOW_REF(one, NEMOSHOW_STYLE_REF) == one) {
 		if (item->fill != 0) {
 			NEMOSHOW_ITEM_CC(item, fill)->setColor(
 					SkColorSetARGB(255.0f * item->alpha, item->fills[2], item->fills[1], item->fills[0]));
@@ -259,11 +239,11 @@ static inline void nemoshow_item_update_filter(struct nemoshow *show, struct sho
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	if (item->filter != NULL) {
+	if (NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF) != NULL) {
 		if (item->fill != 0 && item->stroke == 0)
-			NEMOSHOW_ITEM_CC(item, fill)->setMaskFilter(NEMOSHOW_FILTER_CC(NEMOSHOW_FILTER(item->filter), filter));
+			NEMOSHOW_ITEM_CC(item, fill)->setMaskFilter(NEMOSHOW_FILTER_CC(NEMOSHOW_FILTER(NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF)), filter));
 		else
-			NEMOSHOW_ITEM_CC(item, stroke)->setMaskFilter(NEMOSHOW_FILTER_CC(NEMOSHOW_FILTER(item->filter), filter));
+			NEMOSHOW_ITEM_CC(item, stroke)->setMaskFilter(NEMOSHOW_FILTER_CC(NEMOSHOW_FILTER(NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF)), filter));
 
 		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 	}
@@ -273,9 +253,9 @@ static inline void nemoshow_item_update_shader(struct nemoshow *show, struct sho
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	if (item->shader != NULL) {
+	if (NEMOSHOW_REF(one, NEMOSHOW_SHADER_REF) != NULL) {
 		if (item->fill != 0)
-			NEMOSHOW_ITEM_CC(item, fill)->setShader(NEMOSHOW_SHADER_CC(NEMOSHOW_SHADER(item->shader), shader));
+			NEMOSHOW_ITEM_CC(item, fill)->setShader(NEMOSHOW_SHADER_CC(NEMOSHOW_SHADER(NEMOSHOW_REF(one, NEMOSHOW_SHADER_REF)), shader));
 	}
 }
 
@@ -283,13 +263,13 @@ static inline void nemoshow_item_update_font(struct nemoshow *show, struct showo
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	if (item->font != NULL) {
+	if (NEMOSHOW_REF(one, NEMOSHOW_FONT_REF) != NULL) {
 		SkSafeUnref(
 				NEMOSHOW_ITEM_CC(item, fill)->setTypeface(
-					NEMOSHOW_FONT_CC(NEMOSHOW_FONT(item->font), face)));
+					NEMOSHOW_FONT_CC(NEMOSHOW_FONT(NEMOSHOW_REF(one, NEMOSHOW_FONT_REF)), face)));
 		SkSafeUnref(
 				NEMOSHOW_ITEM_CC(item, stroke)->setTypeface(
-					NEMOSHOW_FONT_CC(NEMOSHOW_FONT(item->font), face)));
+					NEMOSHOW_FONT_CC(NEMOSHOW_FONT(NEMOSHOW_REF(one, NEMOSHOW_FONT_REF)), face)));
 
 		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 	}
@@ -302,7 +282,7 @@ static inline void nemoshow_item_update_text(struct nemoshow *show, struct showo
 	if (one->sub == NEMOSHOW_TEXT_ITEM) {
 		item->text = nemoobject_gets(&one->object, "d");
 		if (item->text != NULL) {
-			if (NEMOSHOW_FONT_AT(item->font, layout) == NEMOSHOW_NORMAL_LAYOUT) {
+			if (NEMOSHOW_FONT_AT(NEMOSHOW_REF(one, NEMOSHOW_FONT_REF), layout) == NEMOSHOW_NORMAL_LAYOUT) {
 				SkPaint::FontMetrics metrics;
 
 				NEMOSHOW_ITEM_CC(item, fill)->setTextSize(item->fontsize);
@@ -320,8 +300,8 @@ static inline void nemoshow_item_update_text(struct nemoshow *show, struct showo
 				unsigned int nhbglyphs;
 				int i;
 
-				NEMOSHOW_ITEM_CC(item, fill)->setTextSize((NEMOSHOW_FONT_AT(item->font, upem) / NEMOSHOW_FONT_AT(item->font, max_advance_height)) * item->fontsize);
-				NEMOSHOW_ITEM_CC(item, stroke)->setTextSize((NEMOSHOW_FONT_AT(item->font, upem) / NEMOSHOW_FONT_AT(item->font, max_advance_height)) * item->fontsize);
+				NEMOSHOW_ITEM_CC(item, fill)->setTextSize((NEMOSHOW_FONT_AT(NEMOSHOW_REF(one, NEMOSHOW_FONT_REF), upem) / NEMOSHOW_FONT_AT(NEMOSHOW_REF(one, NEMOSHOW_FONT_REF), max_advance_height)) * item->fontsize);
+				NEMOSHOW_ITEM_CC(item, stroke)->setTextSize((NEMOSHOW_FONT_AT(NEMOSHOW_REF(one, NEMOSHOW_FONT_REF), upem) / NEMOSHOW_FONT_AT(NEMOSHOW_REF(one, NEMOSHOW_FONT_REF), max_advance_height)) * item->fontsize);
 
 				NEMOSHOW_ITEM_CC(item, stroke)->getFontMetrics(&metrics, 0);
 				item->fontascent = metrics.fAscent;
@@ -332,12 +312,12 @@ static inline void nemoshow_item_update_text(struct nemoshow *show, struct showo
 				hb_buffer_set_direction(hbbuffer, HB_DIRECTION_LTR);
 				hb_buffer_set_script(hbbuffer, HB_SCRIPT_LATIN);
 				hb_buffer_set_language(hbbuffer, HB_LANGUAGE_INVALID);
-				hb_shape_full(NEMOSHOW_FONT_AT(item->font, hbfont), hbbuffer, NULL, 0, NULL);
+				hb_shape_full(NEMOSHOW_FONT_AT(NEMOSHOW_REF(one, NEMOSHOW_FONT_REF), hbfont), hbbuffer, NULL, 0, NULL);
 
 				hbglyphs = hb_buffer_get_glyph_infos(hbbuffer, &nhbglyphs);
 				hbglyphspos = hb_buffer_get_glyph_positions(hbbuffer, NULL);
 
-				fontscale = item->fontsize / NEMOSHOW_FONT_AT(item->font, max_advance_height);
+				fontscale = item->fontsize / NEMOSHOW_FONT_AT(NEMOSHOW_REF(one, NEMOSHOW_FONT_REF), max_advance_height);
 
 				if (NEMOSHOW_ITEM_CC(item, points) != NULL)
 					delete[] NEMOSHOW_ITEM_CC(item, points);
@@ -458,7 +438,7 @@ static inline void nemoshow_item_update_child(struct nemoshow *show, struct show
 
 		nemoshow_item_update_path(show, item, one);
 
-		item->length = nemoshow_helper_get_path_length(NEMOSHOW_ITEM_CC(item, path));
+		item->pathlength = nemoshow_helper_get_path_length(NEMOSHOW_ITEM_CC(item, path));
 
 		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 	}
@@ -502,7 +482,7 @@ static inline void nemoshow_item_update_shape(struct nemoshow *show, struct show
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	if (one->sub == NEMOSHOW_PATH_ITEM) {
-		item->length = nemoshow_helper_get_path_length(NEMOSHOW_ITEM_CC(item, path));
+		item->pathlength = nemoshow_helper_get_path_length(NEMOSHOW_ITEM_CC(item, path));
 	} else if (one->sub == NEMOSHOW_DONUT_ITEM) {
 		SkRect outr = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
 		SkRect inr = SkRect::MakeXYWH(item->x + item->inner, item->y + item->inner, item->width - item->inner * 2, item->height - item->inner * 2);
@@ -551,8 +531,8 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 	} else if (one->sub == NEMOSHOW_PATH_ITEM || one->sub == NEMOSHOW_PATHGROUP_ITEM) {
 		box = NEMOSHOW_ITEM_CC(item, path)->getBounds();
 	} else if (one->sub == NEMOSHOW_TEXT_ITEM) {
-		if (item->path == NULL) {
-			if (NEMOSHOW_FONT_AT(item->font, layout) == NEMOSHOW_NORMAL_LAYOUT) {
+		if (NEMOSHOW_REF(one, NEMOSHOW_PATH_REF) == NULL) {
+			if (NEMOSHOW_FONT_AT(NEMOSHOW_REF(one, NEMOSHOW_FONT_REF), layout) == NEMOSHOW_NORMAL_LAYOUT) {
 				SkRect bounds[strlen(item->text)];
 				int i, count;
 
@@ -561,11 +541,11 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 				for (i = 0; i < count; i++) {
 					box.join(bounds[i]);
 				}
-			} else if (NEMOSHOW_FONT_AT(item->font, layout) == NEMOSHOW_HARFBUZZ_LAYOUT) {
+			} else if (NEMOSHOW_FONT_AT(NEMOSHOW_REF(one, NEMOSHOW_FONT_REF), layout) == NEMOSHOW_HARFBUZZ_LAYOUT) {
 				box = SkRect::MakeXYWH(item->x, item->y, item->textwidth, item->textheight);
 			}
 		} else {
-			box = NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(item->path), path)->getBounds();
+			box = NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(NEMOSHOW_REF(one, NEMOSHOW_PATH_REF)), path)->getBounds();
 
 			box.outset(item->fontsize, item->fontsize);
 		}
@@ -581,8 +561,8 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 		box.outset(item->stroke_width, item->stroke_width);
 
 	if (item->transform & NEMOSHOW_EXTERN_TRANSFORM) {
-		NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(item->matrix), matrix)->mapRect(&box);
-		NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(item->matrix), matrix)->mapPoints(&anchor, 1);
+		NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(NEMOSHOW_REF(one, NEMOSHOW_MATRIX_REF)), matrix)->mapRect(&box);
+		NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(NEMOSHOW_REF(one, NEMOSHOW_MATRIX_REF)), matrix)->mapPoints(&anchor, 1);
 	} else if (item->transform & NEMOSHOW_INTERN_TRANSFORM) {
 		NEMOSHOW_ITEM_CC(item, matrix)->mapRect(&box);
 		NEMOSHOW_ITEM_CC(item, matrix)->mapPoints(&anchor, 1);
@@ -595,8 +575,8 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 			nemoshow_one_update_alone(show, parent);
 
 			if (group->transform & NEMOSHOW_EXTERN_TRANSFORM) {
-				NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(group->matrix), matrix)->mapRect(&box);
-				NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(group->matrix), matrix)->mapPoints(&anchor, 1);
+				NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(NEMOSHOW_REF(parent, NEMOSHOW_MATRIX_REF)), matrix)->mapRect(&box);
+				NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(NEMOSHOW_REF(parent, NEMOSHOW_MATRIX_REF)), matrix)->mapPoints(&anchor, 1);
 			} else if (group->transform & NEMOSHOW_INTERN_TRANSFORM) {
 				NEMOSHOW_ITEM_CC(group, matrix)->mapRect(&box);
 				NEMOSHOW_ITEM_CC(group, matrix)->mapPoints(&anchor, 1);
@@ -605,8 +585,8 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 	}
 
 	outer = NEMOSHOW_ANTIALIAS_EPSILON;
-	if (item->filter != NULL)
-		outer += NEMOSHOW_FILTER_AT(item->filter, r) * 2.0f;
+	if (NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF) != NULL)
+		outer += NEMOSHOW_FILTER_AT(NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF), r) * 2.0f;
 	box.outset(outer, outer);
 
 	if (item->canvas != NULL) {
@@ -692,38 +672,34 @@ void nemoshow_item_set_shader(struct showone *one, struct showone *shader)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	item->shader = shader;
-
 	item->fill = 1;
 
-	nemoshow_one_reference_one(one, shader);
+	nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_SHADER_REF));
+	nemoshow_one_reference_one(one, shader, NEMOSHOW_SHADER_REF);
 }
 
 void nemoshow_item_set_filter(struct showone *one, struct showone *filter)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	item->filter = filter;
-
-	nemoshow_one_reference_one(one, filter);
+	nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF));
+	nemoshow_one_reference_one(one, filter, NEMOSHOW_FILTER_REF);
 }
 
 void nemoshow_item_set_clip(struct showone *one, struct showone *clip)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	item->clip = clip;
-
-	nemoshow_one_reference_one(one, clip);
+	nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_CLIP_REF));
+	nemoshow_one_reference_one(one, clip, NEMOSHOW_CLIP_REF);
 }
 
 void nemoshow_item_set_font(struct showone *one, struct showone *font)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	item->font = font;
-
-	nemoshow_one_reference_one(one, font);
+	nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_FONT_REF));
+	nemoshow_one_reference_one(one, font, NEMOSHOW_FONT_REF);
 
 	nemoshow_one_dirty(one, NEMOSHOW_FONT_DIRTY);
 }
@@ -732,9 +708,8 @@ void nemoshow_item_set_path(struct showone *one, struct showone *path)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	item->path = path;
-
-	nemoshow_one_reference_one(one, path);
+	nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_PATH_REF));
+	nemoshow_one_reference_one(one, path, NEMOSHOW_PATH_REF);
 
 	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
@@ -770,7 +745,7 @@ void nemoshow_item_attach_one(struct showone *parent, struct showone *one)
 	nemoshow_one_attach_one(parent, one);
 
 	if (parent->sub == NEMOSHOW_GROUP_ITEM)
-		nemoshow_one_reference_one(one, parent);
+		nemoshow_one_reference_one(one, parent, NEMOSHOW_GROUP_REF);
 }
 
 void nemoshow_item_detach_one(struct showone *parent, struct showone *one)

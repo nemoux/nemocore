@@ -54,12 +54,7 @@ void nemoshow_link_destroy(struct showone *one)
 {
 	struct showlink *link = NEMOSHOW_LINK(one);
 
-	if (link->head != NULL)
-		nemoshow_one_unreference_one(one, link->head);
-	if (link->tail != NULL)
-		nemoshow_one_unreference_one(one, link->tail);
-	if (link->filter != NULL)
-		nemoshow_one_unreference_one(one, link->filter);
+	nemoshow_one_unreference_all(one);
 
 	nemoshow_one_finish(one);
 
@@ -89,8 +84,8 @@ int nemoshow_link_update(struct nemoshow *show, struct showone *one)
 	}
 
 	if ((one->dirty & NEMOSHOW_FILTER_DIRTY) != 0) {
-		if (link->filter != NULL) {
-			NEMOSHOW_LINK_CC(link, stroke)->setMaskFilter(NEMOSHOW_FILTER_CC(NEMOSHOW_FILTER(link->filter), filter));
+		if (NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF) != NULL) {
+			NEMOSHOW_LINK_CC(link, stroke)->setMaskFilter(NEMOSHOW_FILTER_CC(NEMOSHOW_FILTER(NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF)), filter));
 
 			one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 		}
@@ -98,15 +93,15 @@ int nemoshow_link_update(struct nemoshow *show, struct showone *one)
 
 	if ((one->dirty & NEMOSHOW_SHAPE_DIRTY) != 0 ||
 			(one->dirty & NEMOSHOW_MATRIX_DIRTY) != 0) {
-		struct showone *head = link->head;
-		struct showone *tail = link->tail;
+		struct showone *head = NEMOSHOW_REF(one, NEMOSHOW_HEAD_REF);
+		struct showone *tail = NEMOSHOW_REF(one, NEMOSHOW_TAIL_REF);
 		int32_t x0, y0, x1, y1;
 		double outer = 0.0f;
 
 		outer += link->stroke_width;
 		outer += NEMOSHOW_ANTIALIAS_EPSILON;
-		if (link->filter != NULL)
-			outer += NEMOSHOW_FILTER_AT(link->filter, r) * 2.0f;
+		if (NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF) != NULL)
+			outer += NEMOSHOW_FILTER_AT(NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF), r) * 2.0f;
 
 		x0 = floor(MIN(head->ax, tail->ax) - outer);
 		y0 = floor(MIN(head->ay, tail->ay) - outer);
@@ -131,7 +126,5 @@ void nemoshow_link_set_filter(struct showone *one, struct showone *filter)
 {
 	struct showlink *link = NEMOSHOW_LINK(one);
 
-	link->filter = filter;
-
-	nemoshow_one_reference_one(one, filter);
+	nemoshow_one_reference_one(one, filter, NEMOSHOW_FILTER_REF);
 }

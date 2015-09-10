@@ -69,10 +69,7 @@ void nemoshow_svg_destroy(struct showone *one)
 {
 	struct showsvg *svg = NEMOSHOW_SVG(one);
 
-	if (svg->matrix != NULL)
-		nemoshow_one_unreference_one(one, svg->matrix);
-	if (svg->clip != NULL)
-		nemoshow_one_unreference_one(one, svg->clip);
+	nemoshow_one_unreference_all(one);
 
 	nemoshow_one_finish(one);
 
@@ -96,9 +93,8 @@ int nemoshow_svg_arrange(struct nemoshow *show, struct showone *one)
 		} else if ((matrix = nemoshow_search_one(show, v)) != NULL) {
 			svg->transform = NEMOSHOW_EXTERN_TRANSFORM;
 
-			svg->matrix = matrix;
-
-			nemoshow_one_reference_one(one, matrix);
+			nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_MATRIX_REF));
+			nemoshow_one_reference_one(one, matrix, NEMOSHOW_MATRIX_REF);
 		}
 	} else {
 		for (i = 0; i < one->nchildren; i++) {
@@ -112,9 +108,8 @@ int nemoshow_svg_arrange(struct nemoshow *show, struct showone *one)
 
 	v = nemoobject_gets(&one->object, "clip");
 	if (v != NULL && (clip = nemoshow_search_one(show, v)) != NULL) {
-		svg->clip = clip;
-
-		nemoshow_one_reference_one(one, clip);
+		nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_CLIP_REF));
+		nemoshow_one_reference_one(one, clip, NEMOSHOW_CLIP_REF);
 	}
 
 	v = nemoobject_gets(&one->object, "uri");
@@ -202,7 +197,7 @@ static inline void nemoshow_svg_update_boundingbox(struct nemoshow *show, struct
 	box = SkRect::MakeXYWH(0, 0, svg->width, svg->height);
 
 	if (svg->transform & NEMOSHOW_EXTERN_TRANSFORM) {
-		NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(svg->matrix), matrix)->mapRect(&box);
+		NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(NEMOSHOW_REF(one, NEMOSHOW_MATRIX_REF)), matrix)->mapRect(&box);
 	} else if (svg->transform & NEMOSHOW_INTERN_TRANSFORM) {
 		NEMOSHOW_SVG_CC(svg, matrix)->mapRect(&box);
 	}
@@ -214,7 +209,7 @@ static inline void nemoshow_svg_update_boundingbox(struct nemoshow *show, struct
 			nemoshow_one_update_alone(show, parent);
 
 			if (group->transform & NEMOSHOW_EXTERN_TRANSFORM) {
-				NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(group->matrix), matrix)->mapRect(&box);
+				NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(NEMOSHOW_REF(parent, NEMOSHOW_MATRIX_REF)), matrix)->mapRect(&box);
 			} else if (group->transform & NEMOSHOW_INTERN_TRANSFORM) {
 				NEMOSHOW_ITEM_CC(group, matrix)->mapRect(&box);
 			}
@@ -272,9 +267,8 @@ void nemoshow_svg_set_clip(struct showone *one, struct showone *clip)
 {
 	struct showsvg *svg = NEMOSHOW_SVG(one);
 
-	svg->clip = clip;
-
-	nemoshow_one_reference_one(one, clip);
+	nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_CLIP_REF));
+	nemoshow_one_reference_one(one, clip, NEMOSHOW_CLIP_REF);
 }
 
 void nemoshow_svg_set_tsr(struct showone *one)

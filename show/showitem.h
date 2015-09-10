@@ -61,15 +61,8 @@ struct showitem {
 
 	double alpha;
 
-	struct showone *style;
-	struct showone *clip;
-	struct showone *filter;
-	struct showone *shader;
-	struct showone *matrix;
-	struct showone *path;
-	double length;
+	double pathlength;
 
-	struct showone *font;
 	double fontsize;
 	double fontascent;
 	double fontdescent;

@@ -157,20 +157,65 @@ void nemoshow_one_below_one(struct showone *one, struct showone *below)
 	}
 }
 
-void nemoshow_one_reference_one(struct showone *one, struct showone *ref)
+void nemoshow_one_reference_one(struct showone *one, struct showone *ref, int index)
 {
 	NEMOBOX_APPEND(ref->refs, ref->srefs, ref->nrefs, one);
+
+	one->rrefs[index] = ref;
 }
 
 void nemoshow_one_unreference_one(struct showone *one, struct showone *ref)
 {
 	int i;
 
+	if (ref == NULL)
+		return;
+
 	for (i = 0; i < ref->nrefs; i++) {
 		if (ref->refs[i] == one) {
 			NEMOBOX_REMOVE(ref->refs, ref->nrefs, i);
 
 			break;
+		}
+	}
+
+	for (i = 0; i < NEMOSHOW_LAST_REF; i++) {
+		if (one->rrefs[i] == ref) {
+			one->rrefs[i] = NULL;
+
+			break;
+		}
+	}
+}
+
+void nemoshow_one_unreference_all(struct showone *one)
+{
+	struct showone *ref;
+	int i, j;
+
+	for (i = 0; i < NEMOSHOW_LAST_REF; i++) {
+		ref = one->rrefs[i];
+		if (ref == NULL)
+			continue;
+
+		for (j = 0; j < ref->nrefs; j++) {
+			if (ref->refs[j] == one) {
+				NEMOBOX_REMOVE(ref->refs, ref->nrefs, j);
+
+				break;
+			}
+		}
+	}
+
+	for (i = 0; i < one->nrefs; i++) {
+		ref = one->refs[i];
+
+		for (j = 0; j < NEMOSHOW_LAST_REF; j++) {
+			if (ref->rrefs[j] == one) {
+				ref->rrefs[j] = NULL;
+
+				break;
+			}
 		}
 	}
 }

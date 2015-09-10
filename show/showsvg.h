@@ -20,9 +20,6 @@ struct showsvg {
 
 	double width, height;
 
-	struct showone *matrix;
-	struct showone *clip;
-
 	char *uri;
 
 	int transform;

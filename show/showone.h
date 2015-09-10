@@ -47,6 +47,20 @@ typedef enum {
 } NemoShowOneType;
 
 typedef enum {
+	NEMOSHOW_STYLE_REF = 0,
+	NEMOSHOW_CLIP_REF = 1,
+	NEMOSHOW_FILTER_REF = 2,
+	NEMOSHOW_SHADER_REF = 3,
+	NEMOSHOW_MATRIX_REF = 4,
+	NEMOSHOW_PATH_REF = 5,
+	NEMOSHOW_GROUP_REF = 6,
+	NEMOSHOW_FONT_REF = 7,
+	NEMOSHOW_HEAD_REF = 8,
+	NEMOSHOW_TAIL_REF = 9,
+	NEMOSHOW_LAST_REF
+} NemoShowOneRef;
+
+typedef enum {
 	NEMOSHOW_ARRANGE_STATE = (1 << 0),
 	NEMOSHOW_TRANSITION_STATE = (1 << 1),
 	NEMOSHOW_LAST_STATE
@@ -102,6 +116,8 @@ struct showone {
 	struct showone **refs;
 	int nrefs, srefs;
 
+	struct showone *rrefs[NEMOSHOW_LAST_REF];
+
 	struct showattr **attrs;
 	int nattrs, sattrs;
 
@@ -115,6 +131,8 @@ struct showone {
 	void *userdata;
 };
 
+#define	NEMOSHOW_REF(one, index)			(one->rrefs[index])
+
 extern void nemoshow_one_prepare(struct showone *one);
 extern void nemoshow_one_finish(struct showone *one);
 
@@ -127,8 +145,9 @@ extern void nemoshow_one_detach_one(struct showone *parent, struct showone *one)
 extern void nemoshow_one_above_one(struct showone *one, struct showone *above);
 extern void nemoshow_one_below_one(struct showone *one, struct showone *below);
 
-extern void nemoshow_one_reference_one(struct showone *one, struct showone *ref);
+extern void nemoshow_one_reference_one(struct showone *one, struct showone *ref, int index);
 extern void nemoshow_one_unreference_one(struct showone *one, struct showone *ref);
+extern void nemoshow_one_unreference_all(struct showone *one);
 
 extern struct showattr *nemoshow_one_create_attr(const char *name, const char *text, struct nemoattr *ref, uint32_t dirty);
 extern void nemoshow_one_destroy_attr(struct showattr *attr);

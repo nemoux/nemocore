@@ -192,9 +192,8 @@ int nemoshow_canvas_arrange(struct nemoshow *show, struct showone *one)
 
 	matrix = nemoshow_search_one(show, nemoobject_gets(&one->object, "matrix"));
 	if (matrix != NULL) {
-		canvas->matrix = matrix;
-
-		nemoshow_one_reference_one(one, matrix);
+		nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_MATRIX_REF));
+		nemoshow_one_reference_one(one, matrix, NEMOSHOW_MATRIX_REF);
 	}
 
 	return 0;
@@ -204,10 +203,10 @@ int nemoshow_canvas_update(struct nemoshow *show, struct showone *one)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
-	if (canvas->matrix != NULL) {
+	if (NEMOSHOW_REF(one, NEMOSHOW_MATRIX_REF) != NULL) {
 		float d[9];
 
-		NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(canvas->matrix), matrix)->get9(d);
+		NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(NEMOSHOW_REF(one, NEMOSHOW_MATRIX_REF)), matrix)->get9(d);
 
 		nemotale_node_transform(canvas->node, d);
 
@@ -222,7 +221,7 @@ static inline void nemoshow_canvas_render_one(struct nemoshow *show, struct show
 static inline void nemoshow_canvas_render_item(struct nemoshow *show, struct showcanvas *canvas, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
-	struct showitem *style = NEMOSHOW_ITEM(item->style);
+	struct showitem *style = NEMOSHOW_ITEM(NEMOSHOW_REF(one, NEMOSHOW_STYLE_REF));
 
 	if (one->sub == NEMOSHOW_RECT_ITEM) {
 		SkRect rect = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
@@ -275,7 +274,7 @@ static inline void nemoshow_canvas_render_item(struct nemoshow *show, struct sho
 					path,
 					NEMOSHOW_ITEM_CC(item, path),
 					NEMOSHOW_ITEM_CC(style, fill),
-					item->length,
+					item->pathlength,
 					item->from, item->to);
 
 			if (style->fill != 0)
@@ -284,8 +283,8 @@ static inline void nemoshow_canvas_render_item(struct nemoshow *show, struct sho
 				NEMOSHOW_CANVAS_CC(canvas, canvas)->drawPath(path, *NEMOSHOW_ITEM_CC(style, stroke));
 		}
 	} else if (one->sub == NEMOSHOW_TEXT_ITEM) {
-		if (item->path == NULL) {
-			if (NEMOSHOW_FONT_AT(item->font, layout) == NEMOSHOW_NORMAL_LAYOUT) {
+		if (NEMOSHOW_REF(one, NEMOSHOW_PATH_REF) == NULL) {
+			if (NEMOSHOW_FONT_AT(NEMOSHOW_REF(one, NEMOSHOW_FONT_REF), layout) == NEMOSHOW_NORMAL_LAYOUT) {
 				NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
 				NEMOSHOW_CANVAS_CC(canvas, canvas)->translate(0.0f, -item->fontascent);
 
@@ -305,7 +304,7 @@ static inline void nemoshow_canvas_render_item(struct nemoshow *show, struct sho
 							*NEMOSHOW_ITEM_CC(style, stroke));
 
 				NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
-			} else if (NEMOSHOW_FONT_AT(item->font, layout) == NEMOSHOW_HARFBUZZ_LAYOUT) {
+			} else if (NEMOSHOW_FONT_AT(NEMOSHOW_REF(one, NEMOSHOW_FONT_REF), layout) == NEMOSHOW_HARFBUZZ_LAYOUT) {
 				if (style->fill != 0)
 					NEMOSHOW_CANVAS_CC(canvas, canvas)->drawPosText(
 							item->text,
@@ -324,14 +323,14 @@ static inline void nemoshow_canvas_render_item(struct nemoshow *show, struct sho
 				NEMOSHOW_CANVAS_CC(canvas, canvas)->drawTextOnPath(
 						item->text,
 						strlen(item->text),
-						*NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(item->path), path),
+						*NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(NEMOSHOW_REF(one, NEMOSHOW_PATH_REF)), path),
 						NULL,
 						*NEMOSHOW_ITEM_CC(style, fill));
 			if (style->stroke != 0)
 				NEMOSHOW_CANVAS_CC(canvas, canvas)->drawTextOnPath(
 						item->text,
 						strlen(item->text),
-						*NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(item->path), path),
+						*NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(NEMOSHOW_REF(one, NEMOSHOW_PATH_REF)), path),
 						NULL,
 						*NEMOSHOW_ITEM_CC(style, stroke));
 		}
@@ -352,9 +351,9 @@ static inline void nemoshow_canvas_render_item_with_clip(struct nemoshow *show, 
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	if (item->clip != NULL) {
+	if (NEMOSHOW_REF(one, NEMOSHOW_CLIP_REF) != NULL) {
 		NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
-		NEMOSHOW_CANVAS_CC(canvas, canvas)->clipPath(*NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(item->clip), path));
+		NEMOSHOW_CANVAS_CC(canvas, canvas)->clipPath(*NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(NEMOSHOW_REF(one, NEMOSHOW_CLIP_REF)), path));
 
 		nemoshow_canvas_render_item(show, canvas, one);
 
@@ -371,7 +370,7 @@ static inline void nemoshow_canvas_render_one(struct nemoshow *show, struct show
 
 		if (item->transform & NEMOSHOW_EXTERN_TRANSFORM) {
 			NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
-			NEMOSHOW_CANVAS_CC(canvas, canvas)->concat(*NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(item->matrix), matrix));
+			NEMOSHOW_CANVAS_CC(canvas, canvas)->concat(*NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(NEMOSHOW_REF(one, NEMOSHOW_MATRIX_REF)), matrix));
 
 			nemoshow_canvas_render_item_with_clip(show, canvas, one);
 
@@ -393,13 +392,13 @@ static inline void nemoshow_canvas_render_one(struct nemoshow *show, struct show
 		NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
 
 		if (svg->transform & NEMOSHOW_EXTERN_TRANSFORM) {
-			NEMOSHOW_CANVAS_CC(canvas, canvas)->concat(*NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(svg->matrix), matrix));
+			NEMOSHOW_CANVAS_CC(canvas, canvas)->concat(*NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(NEMOSHOW_REF(one, NEMOSHOW_MATRIX_REF)), matrix));
 		} else if (svg->transform & NEMOSHOW_INTERN_TRANSFORM) {
 			NEMOSHOW_CANVAS_CC(canvas, canvas)->concat(*NEMOSHOW_SVG_CC(svg, matrix));
 		}
 
-		if (svg->clip != NULL)
-			NEMOSHOW_CANVAS_CC(canvas, canvas)->clipPath(*NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(svg->clip), path));
+		if (NEMOSHOW_REF(one, NEMOSHOW_CLIP_REF) != NULL)
+			NEMOSHOW_CANVAS_CC(canvas, canvas)->clipPath(*NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(NEMOSHOW_REF(one, NEMOSHOW_CLIP_REF)), path));
 
 		NEMOSHOW_CANVAS_CC(canvas, canvas)->concat(*NEMOSHOW_SVG_CC(NEMOSHOW_SVG(one), viewbox));
 
@@ -457,8 +456,8 @@ void nemoshow_canvas_render_link(struct nemoshow *show, struct showone *one)
 	for (i = 0; i < one->nchildren; i++) {
 		struct showone *child = one->children[i];
 		struct showlink *link = NEMOSHOW_LINK(child);
-		struct showone *head = link->head;
-		struct showone *tail = link->tail;
+		struct showone *head = NEMOSHOW_REF(child, NEMOSHOW_HEAD_REF);
+		struct showone *tail = NEMOSHOW_REF(child, NEMOSHOW_TAIL_REF);
 
 		NEMOSHOW_CANVAS_CC(canvas, canvas)->drawLine(
 				head->ax, head->ay,

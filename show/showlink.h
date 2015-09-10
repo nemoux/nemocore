@@ -16,16 +16,11 @@ struct showlink {
 
 	struct showone *canvas;
 
-	struct showone *head;
-	struct showone *tail;
-
 	uint32_t stroke;
 	double strokes[4];
 	double stroke_width;
 
 	double alpha;
-
-	struct showone *filter;
 
 	void *cc;
 };
@@ -50,20 +45,12 @@ static inline void nemoshow_link_set_canvas(struct showone *one, struct showone 
 
 static inline void nemoshow_link_set_head(struct showone *one, struct showone *head)
 {
-	struct showlink *link = NEMOSHOW_LINK(one);
-
-	link->head = head;
-
-	nemoshow_one_reference_one(one, head);
+	nemoshow_one_reference_one(one, head, NEMOSHOW_HEAD_REF);
 }
 
 static inline void nemoshow_link_set_tail(struct showone *one, struct showone *tail)
 {
-	struct showlink *link = NEMOSHOW_LINK(one);
-
-	link->tail = tail;
-
-	nemoshow_one_reference_one(one, tail);
+	nemoshow_one_reference_one(one, tail, NEMOSHOW_TAIL_REF);
 }
 
 static inline void nemoshow_link_set_alpha(struct showone *one, double alpha)

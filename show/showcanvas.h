@@ -35,7 +35,6 @@ typedef enum {
 } NemoShowCanvasType;
 
 struct nemoshow;
-struct showmatrix;
 
 typedef void (*nemoshow_canvas_dispatch_render_t)(struct nemoshow *show, struct showone *one);
 
@@ -50,8 +49,6 @@ struct showcanvas {
 	double fills[4];
 
 	double alpha;
-
-	struct showone *matrix;
 
 	struct talenode *node;
 

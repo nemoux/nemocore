@@ -815,7 +815,7 @@ static void nemoshow_sequence_dispatch_frame(struct showone *one, double s, doub
 				double x, y, r;
 
 				nemoshow_helper_evaluate_path(NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(follow->path), path),
-						NEMOSHOW_ITEM_AT(follow->path, length),
+						NEMOSHOW_ITEM_AT(follow->path, pathlength),
 						(follow->to - follow->from) * t + follow->from,
 						&x, &y, &r);
 
@@ -873,7 +873,7 @@ static void nemoshow_sequence_finish_frame(struct showone *one, uint32_t serial)
 				double x, y, r;
 
 				nemoshow_helper_evaluate_path(NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(follow->path), path),
-						NEMOSHOW_ITEM_AT(follow->path, length),
+						NEMOSHOW_ITEM_AT(follow->path, pathlength),
 						follow->to,
 						&x, &y, &r);
 
