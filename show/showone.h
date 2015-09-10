@@ -92,7 +92,7 @@ struct showone {
 
 	nemoshow_one_update_t update;
 	nemoshow_one_destroy_t destroy;
-	
+
 	struct nemoshow *show;
 	struct showone *parent;
 
@@ -123,6 +123,9 @@ extern void nemoshow_one_destroy(struct showone *one);
 
 extern void nemoshow_one_attach_one(struct showone *parent, struct showone *one);
 extern void nemoshow_one_detach_one(struct showone *parent, struct showone *one);
+
+extern void nemoshow_one_above_one(struct showone *one, struct showone *above);
+extern void nemoshow_one_below_one(struct showone *one, struct showone *below);
 
 extern void nemoshow_one_reference_one(struct showone *one, struct showone *ref);
 extern void nemoshow_one_unreference_one(struct showone *one, struct showone *ref);

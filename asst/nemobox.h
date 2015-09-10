@@ -39,6 +39,20 @@ NEMO_BEGIN_EXTERN_C
 	}	\
 	n--
 
+#define	NEMOBOX_PUSH(a, s, n, i, v)	\
+	if (n >= s) {	\
+		a = (__typeof__(a))realloc(a, sizeof(a[0]) * s * 2);	\
+		s = s * 2;	\
+	}	\
+	if (i < n) {	\
+		int j;	\
+		for (j = n - 1; j >= i; j--) {	\
+			a[j + 1] = a[j];	\
+		}	\
+	}	\
+	a[i] = v;	\
+	n++;
+
 #define	NEMOBOX_BSEARCH(a, n, t, c)	\
 	bsearch(t, a, n, sizeof(a[0]), c)
 

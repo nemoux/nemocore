@@ -36,7 +36,7 @@ void nemoshow_one_prepare(struct showone *one)
 void nemoshow_one_finish(struct showone *one)
 {
 	int i;
-	
+
 	if (one->show != NULL) {
 		nemoshow_detach_one(one->show, one);
 	}
@@ -111,6 +111,50 @@ void nemoshow_one_detach_one(struct showone *parent, struct showone *one)
 	}
 
 	one->parent = NULL;
+}
+
+void nemoshow_one_above_one(struct showone *one, struct showone *above)
+{
+	struct showone *parent = one->parent;
+	int i;
+
+	for (i = 0; i < parent->nchildren; i++) {
+		if (parent->children[i] == one) {
+			NEMOBOX_REMOVE(parent->children, parent->nchildren, i);
+
+			break;
+		}
+	}
+
+	for (i = 0; i < parent->nchildren; i++) {
+		if (parent->children[i] == above) {
+			NEMOBOX_PUSH(parent->children, parent->schildren, parent->nchildren, i + 1, one);
+
+			break;
+		}
+	}
+}
+
+void nemoshow_one_below_one(struct showone *one, struct showone *below)
+{
+	struct showone *parent = one->parent;
+	int i;
+
+	for (i = 0; i < parent->nchildren; i++) {
+		if (parent->children[i] == one) {
+			NEMOBOX_REMOVE(parent->children, parent->nchildren, i);
+
+			break;
+		}
+	}
+
+	for (i = 0; i < parent->nchildren; i++) {
+		if (parent->children[i] == below) {
+			NEMOBOX_PUSH(parent->children, parent->schildren, parent->nchildren, i, one);
+
+			break;
+		}
+	}
 }
 
 void nemoshow_one_reference_one(struct showone *one, struct showone *ref)
