@@ -13,9 +13,17 @@ NEMO_BEGIN_EXTERN_C
 #include <showease.h>
 
 #include <nemolist.h>
+#include <nemolistener.h>
 
 typedef void (*nemoshow_transition_dispatch_frame_t)(void *userdata, uint32_t time, double t);
 typedef void (*nemoshow_transition_dispatch_done_t)(void *userdata);
+
+struct transitionsensor {
+	struct nemolist link;
+	struct nemolistener listener;
+
+	struct showtransition *transition;
+};
 
 struct showtransition {
 	struct showone **sequences;
@@ -37,6 +45,8 @@ struct showtransition {
 
 	struct nemolist link;
 
+	struct nemolist sensor_list;
+
 	nemoshow_transition_dispatch_frame_t dispatch_frame;
 	nemoshow_transition_dispatch_done_t dispatch_done;
 
@@ -45,6 +55,8 @@ struct showtransition {
 
 extern struct showtransition *nemoshow_transition_create(struct showone *ease, uint32_t duration, uint32_t delay);
 extern void nemoshow_transition_destroy(struct showtransition *trans);
+
+extern void nemoshow_transition_check_one(struct showtransition *trans, struct showone *one);
 
 extern void nemoshow_transition_attach_sequence(struct showtransition *trans, struct showone *sequence);
 extern void nemoshow_transition_attach_transition(struct showtransition *trans, struct showtransition *ntrans);

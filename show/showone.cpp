@@ -16,6 +16,8 @@ void nemoshow_one_prepare(struct showone *one)
 {
 	nemoobject_prepare(&one->object, NEMOSHOW_ATTR_MAX);
 
+	nemosignal_init(&one->destroy_signal);
+
 	nemoobject_set_reserved(&one->object, "id", one->id, NEMOSHOW_ID_MAX);
 
 	one->children = (struct showone **)malloc(sizeof(struct showone *) * 4);
@@ -36,6 +38,8 @@ void nemoshow_one_prepare(struct showone *one)
 void nemoshow_one_finish(struct showone *one)
 {
 	int i;
+
+	nemosignal_emit(&one->destroy_signal, one);
 
 	if (one->show != NULL) {
 		nemoshow_detach_one(one->show, one);

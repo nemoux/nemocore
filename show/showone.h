@@ -101,6 +101,8 @@ struct showone {
 
 	uint32_t state;
 
+	struct nemosignal destroy_signal;
+
 	struct nemoobject object;
 	uint32_t serial;
 
