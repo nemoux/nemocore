@@ -179,8 +179,6 @@ static struct showone *nemoshow_create_one(struct nemoshow *show, struct xmlnode
 		one = nemoshow_font_create();
 	} else if (strcmp(node->name, "defs") == 0) {
 		one = nemoshow_one_create(NEMOSHOW_DEFS_TYPE);
-	} else if (strcmp(node->name, "link") == 0) {
-		one = nemoshow_link_create();
 	}
 
 	if (one != NULL) {
@@ -607,10 +605,6 @@ void nemoshow_arrange_one(struct nemoshow *show)
 			nemoshow_path_arrange(show, one);
 
 			nemoshow_one_set_state(one, NEMOSHOW_ARRANGE_STATE);
-		} else if (one->type == NEMOSHOW_LINK_TYPE) {
-			nemoshow_link_arrange(show, one);
-
-			nemoshow_one_set_state(one, NEMOSHOW_ARRANGE_STATE);
 		}
 	}
 
@@ -681,10 +675,6 @@ void nemoshow_render_one(struct nemoshow *show)
 			if (canvas->needs_redraw != 0) {
 				if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
 					nemoshow_canvas_render_vector(show, one);
-
-					canvas->needs_redraw = 0;
-				} else if (one->sub == NEMOSHOW_CANVAS_LINK_TYPE) {
-					nemoshow_canvas_render_link(show, one);
 
 					canvas->needs_redraw = 0;
 				} else if (one->sub == NEMOSHOW_CANVAS_BACK_TYPE) {

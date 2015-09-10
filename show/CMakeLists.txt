@@ -33,7 +33,6 @@ add_library(nemoshow SHARED
 	showscene.cpp
 	showcanvas.cpp
 	showitem.cpp
-	showlink.cpp
 	showcolor.cpp
 	showpath.cpp
 	showexpr.cpp
@@ -68,7 +67,6 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/show/showscene.h
 	${CMAKE_SOURCE_DIR}/show/showcanvas.h
 	${CMAKE_SOURCE_DIR}/show/showitem.h
-	${CMAKE_SOURCE_DIR}/show/showlink.h
 	${CMAKE_SOURCE_DIR}/show/showcolor.h
 	${CMAKE_SOURCE_DIR}/show/showpath.h
 	${CMAKE_SOURCE_DIR}/show/showexpr.h

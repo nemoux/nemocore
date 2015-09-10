@@ -17,7 +17,6 @@ NEMO_BEGIN_EXTERN_C
 #include <showscene.h>
 #include <showcanvas.h>
 #include <showitem.h>
-#include <showlink.h>
 #include <showcolor.h>
 #include <showexpr.h>
 #include <showsvg.h>
