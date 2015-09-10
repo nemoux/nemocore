@@ -29,7 +29,6 @@ NEMO_BEGIN_EXTERN_C
 #include <showcamera.h>
 #include <showfilter.h>
 #include <showshader.h>
-#include <showvar.h>
 #include <showcons.h>
 #include <showfont.h>
 #include <showeasy.h>

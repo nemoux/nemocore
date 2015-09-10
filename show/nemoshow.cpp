@@ -173,8 +173,6 @@ static struct showone *nemoshow_create_one(struct nemoshow *show, struct xmlnode
 		one = nemoshow_shader_create(NEMOSHOW_RADIAL_GRADIENT_SHADER);
 	} else if (strcmp(node->name, "stop") == 0) {
 		one = nemoshow_stop_create();
-	} else if (strcmp(node->name, "var") == 0) {
-		one = nemoshow_var_create();
 	} else if (strcmp(node->name, "cons") == 0) {
 		one = nemoshow_cons_create();
 	} else if (strcmp(node->name, "font") == 0) {
@@ -195,42 +193,7 @@ static struct showone *nemoshow_create_one(struct nemoshow *show, struct xmlnode
 			if (prop == NULL)
 				continue;
 
-			if (node->attrs[i*2+1][0] == '@') {
-				struct showone *vone;
-
-				vone = nemoshow_search_one(show, node->attrs[i*2+1] + 1);
-				if (vone != NULL) {
-					struct showvar *var = NEMOSHOW_VAR(vone);
-					const char *value = nemoobject_gets(&vone->object, "d");
-
-					if (prop->type == NEMOSHOW_STRING_PROP) {
-						nemoobject_sets(&one->object, node->attrs[i*2+0], value, strlen(value));
-					} else if (prop->type == NEMOSHOW_DOUBLE_PROP) {
-						nemoobject_setd(&one->object, node->attrs[i*2+0], strtod(value, NULL));
-					} else if (prop->type == NEMOSHOW_INTEGER_PROP) {
-						nemoobject_seti(&one->object, node->attrs[i*2+0], strtoul(value, NULL, 10));
-					} else if (prop->type == NEMOSHOW_COLOR_PROP) {
-						uint32_t c = nemoshow_color_parse(value);
-						char attr[NEMOSHOW_ATTR_NAME_MAX];
-
-						snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:r", node->attrs[i*2+0]);
-						nemoobject_setd(&one->object, attr, (double)NEMOSHOW_COLOR_UINT32_R(c));
-						snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:g", node->attrs[i*2+0]);
-						nemoobject_setd(&one->object, attr, (double)NEMOSHOW_COLOR_UINT32_G(c));
-						snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:b", node->attrs[i*2+0]);
-						nemoobject_setd(&one->object, attr, (double)NEMOSHOW_COLOR_UINT32_B(c));
-						snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:a", node->attrs[i*2+0]);
-						nemoobject_setd(&one->object, attr, (double)NEMOSHOW_COLOR_UINT32_A(c));
-
-						nemoobject_seti(&one->object, node->attrs[i*2+0], 1);
-					}
-
-					NEMOBOX_APPEND(var->refs, var->srefs, var->nrefs,
-							nemoshow_var_create_ref(one, node->attrs[i*2+0], prop->type));
-
-					nemoshow_one_reference_one(one, vone);
-				}
-			} else if (node->attrs[i*2+1][0] == '!') {
+			if (node->attrs[i*2+1][0] == '!') {
 				struct showattr *attr;
 
 				nemoobject_seti(&one->object, node->attrs[i*2+0], 0.0f);
@@ -957,7 +920,7 @@ void nemoshow_detach_one(struct nemoshow *show, struct showone *one)
 			break;
 		}
 	}
-	
+
 	one->show = NULL;
 }
 

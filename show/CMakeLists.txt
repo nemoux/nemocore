@@ -45,7 +45,6 @@ add_library(nemoshow SHARED
 	showfilter.cpp
 	showshader.cpp
 	showcamera.cpp
-	showvar.cpp
 	showcons.cpp
 	showfont.cpp
 	showeasy.cpp
@@ -81,7 +80,6 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/show/showfilter.h
 	${CMAKE_SOURCE_DIR}/show/showshader.h
 	${CMAKE_SOURCE_DIR}/show/showcamera.h
-	${CMAKE_SOURCE_DIR}/show/showvar.h
 	${CMAKE_SOURCE_DIR}/show/showcons.h
 	${CMAKE_SOURCE_DIR}/show/showfont.h
 	${CMAKE_SOURCE_DIR}/show/showeasy.h
