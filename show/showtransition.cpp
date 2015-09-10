@@ -48,7 +48,6 @@ void nemoshow_transition_destroy(struct showtransition *trans)
 	}
 
 	nemolist_remove(&trans->link);
-
 	nemolist_remove(&trans->sensor_list);
 
 	free(trans->sequences);

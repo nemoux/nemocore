@@ -969,11 +969,14 @@ void nemoshow_destroy_transition(struct nemoshow *show)
 	struct showtransition *trans, *ntrans;
 
 	nemolist_for_each_safe(trans, ntrans, &show->transition_destroy_list, link) {
-		if (trans->dispatch_done != NULL) {
-			trans->dispatch_done(trans->userdata);
-		}
+		nemoshow_transition_dispatch_done_t dispatch_done = trans->dispatch_done;
+		void *userdata = trans->userdata;
 
 		nemoshow_transition_destroy(trans);
+
+		if (dispatch_done != NULL) {
+			dispatch_done(userdata);
+		}
 	}
 }
 
