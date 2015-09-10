@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <nemoshow.h>
 #include <showone.h>
 #include <showcolor.h>
 #include <showmisc.h>
@@ -35,6 +36,10 @@ void nemoshow_one_prepare(struct showone *one)
 void nemoshow_one_finish(struct showone *one)
 {
 	int i;
+	
+	if (one->show != NULL) {
+		nemoshow_detach_one(one->show, one);
+	}
 
 	if (one->parent != NULL) {
 		nemoshow_one_unreference_one(one, one->parent);

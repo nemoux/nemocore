@@ -92,7 +92,8 @@ struct showone {
 
 	nemoshow_one_update_t update;
 	nemoshow_one_destroy_t destroy;
-
+	
+	struct nemoshow *show;
 	struct showone *parent;
 
 	struct showone **children;

@@ -942,6 +942,8 @@ void nemoshow_flush_canvas_all(struct nemoshow *show)
 void nemoshow_attach_one(struct nemoshow *show, struct showone *one)
 {
 	NEMOBOX_APPEND(show->ones, show->sones, show->nones, one);
+
+	one->show = show;
 }
 
 void nemoshow_detach_one(struct nemoshow *show, struct showone *one)
@@ -955,6 +957,8 @@ void nemoshow_detach_one(struct nemoshow *show, struct showone *one)
 			break;
 		}
 	}
+	
+	one->show = NULL;
 }
 
 void nemoshow_attach_transition(struct nemoshow *show, struct showtransition *trans)
