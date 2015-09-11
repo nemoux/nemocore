@@ -113,6 +113,8 @@ static struct showone *nemoshow_create_one(struct nemoshow *show, struct xmlnode
 		one = nemoshow_item_create(NEMOSHOW_PIE_ITEM);
 	} else if (strcmp(node->name, "donut") == 0) {
 		one = nemoshow_item_create(NEMOSHOW_DONUT_ITEM);
+	} else if (strcmp(node->name, "ring") == 0) {
+		one = nemoshow_item_create(NEMOSHOW_RING_ITEM);
 	} else if (strcmp(node->name, "text") == 0) {
 		one = nemoshow_item_create(NEMOSHOW_TEXT_ITEM);
 	} else if (strcmp(node->name, "path") == 0) {
