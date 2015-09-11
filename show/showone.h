@@ -62,6 +62,7 @@ typedef enum {
 typedef enum {
 	NEMOSHOW_ARRANGE_STATE = (1 << 0),
 	NEMOSHOW_TRANSITION_STATE = (1 << 1),
+	NEMOSHOW_RECYCLE_STATE = (1 << 2),
 	NEMOSHOW_LAST_STATE
 } NemoShowOneState;
 

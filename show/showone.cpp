@@ -91,6 +91,9 @@ struct showone *nemoshow_one_create(int type)
 
 void nemoshow_one_destroy(struct showone *one)
 {
+	if (one->state & NEMOSHOW_RECYCLE_STATE)
+		return;
+
 	if (one->destroy != NULL) {
 		one->destroy(one);
 	} else {
@@ -102,6 +105,9 @@ void nemoshow_one_destroy(struct showone *one)
 
 void nemoshow_one_destroy_with_children(struct showone *one)
 {
+	if (one->state & NEMOSHOW_RECYCLE_STATE)
+		return;
+
 	while (one->nchildren > 0) {
 		nemoshow_one_destroy_with_children(one->children[0]);
 	}

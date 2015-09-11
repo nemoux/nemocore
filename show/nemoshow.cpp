@@ -450,6 +450,8 @@ static int nemoshow_load_show(struct nemoshow *show, struct xmlnode *node)
 				nemoshow_load_scene(show, one, child);
 			} else if (one->type == NEMOSHOW_SEQUENCE_TYPE) {
 				nemoshow_load_sequence(show, one, child);
+
+				nemoshow_one_set_state(one, NEMOSHOW_RECYCLE_STATE);
 			}
 		}
 	}
