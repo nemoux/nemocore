@@ -18,7 +18,7 @@
 #include <glibhelper.h>
 #include <nemomisc.h>
 
-#define	NEMOPLAY_SEEK_ENABLE						(0)
+#define	NEMOPLAY_SEEK_ENABLE						(1)
 
 #define	NEMOPLAY_SLIDE_DISTANCE_MIN			(5.0f)
 #define	NEMOPLAY_SLIDE_FRAME_TIME				(10000000000)
