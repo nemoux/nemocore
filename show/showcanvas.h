@@ -88,6 +88,10 @@ extern void nemoshow_canvas_damage_region(struct showone *one, int32_t x, int32_
 extern void nemoshow_canvas_damage_one(struct showone *one, struct showone *child);
 extern void nemoshow_canvas_damage_all(struct showone *one);
 
+extern void nemoshow_canvas_translate(struct showone *one, float x, float y);
+extern void nemoshow_canvas_rotate(struct showone *one, float r);
+extern void nemoshow_canvas_pivot(struct showone *one, float px, float py);
+
 extern int32_t nemoshow_canvas_pick_one(struct showone *one, int x, int y);
 
 static inline void nemoshow_canvas_needs_redraw(struct showone *one)

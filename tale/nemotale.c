@@ -106,6 +106,50 @@ void nemotale_detach_node(struct nemotale *tale, struct talenode *node)
 	nemotale_damage_below(tale, node);
 }
 
+void nemotale_above_node(struct nemotale *tale, struct talenode *node, struct talenode *above)
+{
+	int i;
+
+	for (i = 0; i < tale->nnodes; i++) {
+		if (tale->nodes[i] == node) {
+			NEMOBOX_REMOVE(tale->nodes, tale->nnodes, i);
+			break;
+		}
+	}
+
+	for (i = 0; i < tale->nnodes; i++) {
+		if (tale->nodes[i] == above) {
+			NEMOBOX_PUSH(tale->nodes, tale->snodes, tale->nnodes, i + 1, node);
+
+			break;
+		}
+	}
+
+	nemotale_damage_below(tale, node);
+}
+
+void nemotale_below_node(struct nemotale *tale, struct talenode *node, struct talenode *below)
+{
+	int i;
+
+	for (i = 0; i < tale->nnodes; i++) {
+		if (tale->nodes[i] == node) {
+			NEMOBOX_REMOVE(tale->nodes, tale->nnodes, i);
+			break;
+		}
+	}
+
+	for (i = 0; i < tale->nnodes; i++) {
+		if (tale->nodes[i] == below) {
+			NEMOBOX_PUSH(tale->nodes, tale->snodes, tale->nnodes, i, node);
+
+			break;
+		}
+	}
+
+	nemotale_damage_below(tale, node);
+}
+
 void nemotale_clear_node(struct nemotale *tale)
 {
 	tale->nnodes = 0;

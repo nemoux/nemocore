@@ -744,6 +744,20 @@ void nemoshow_put_scene(struct nemoshow *show)
 	nemotale_clear_node(show->tale);
 }
 
+void nemoshow_above_canvas(struct nemoshow *show, struct showone *one, struct showone *above)
+{
+	nemotale_above_node(show->tale,
+			NEMOSHOW_CANVAS_AT(one, node),
+			NEMOSHOW_CANVAS_AT(above, node));
+}
+
+void nemoshow_below_canvas(struct nemoshow *show, struct showone *one, struct showone *below)
+{
+	nemotale_below_node(show->tale,
+			NEMOSHOW_CANVAS_AT(one, node),
+			NEMOSHOW_CANVAS_AT(below, node));
+}
+
 int nemoshow_set_camera(struct nemoshow *show, struct showone *one)
 {
 	if (show->camera == one)

@@ -586,6 +586,27 @@ void nemoshow_canvas_damage_all(struct showone *one)
 	canvas->needs_full_redraw_picker = 1;
 }
 
+void nemoshow_canvas_translate(struct showone *one, float x, float y)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	nemotale_node_translate(canvas->node, x, y);
+}
+
+void nemoshow_canvas_rotate(struct showone *one, float r)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	nemotale_node_rotate(canvas->node, r);
+}
+
+void nemoshow_canvas_pivot(struct showone *one, float px, float py)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	nemotale_node_pivot(canvas->node, px, py);
+}
+
 int32_t nemoshow_canvas_pick_one(struct showone *one, int x, int y)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);

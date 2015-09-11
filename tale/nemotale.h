@@ -79,6 +79,9 @@ extern void nemotale_damage_below(struct nemotale *tale, struct talenode *node);
 extern void nemotale_damage_all(struct nemotale *tale);
 extern void nemotale_attach_node(struct nemotale *tale, struct talenode *node);
 extern void nemotale_detach_node(struct nemotale *tale, struct talenode *node);
+extern void nemotale_above_node(struct nemotale *tale, struct talenode *node, struct talenode *above);
+extern void nemotale_below_node(struct nemotale *tale, struct talenode *node, struct talenode *below);
+
 extern void nemotale_clear_node(struct nemotale *tale);
 
 extern void nemotale_update_node(struct nemotale *tale);
