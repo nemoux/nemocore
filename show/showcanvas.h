@@ -123,6 +123,33 @@ static inline double nemoshow_canvas_get_viewport_sy(struct showone *one)
 	return NEMOSHOW_CANVAS_AT(one, viewport.sy);
 }
 
+static inline void nemoshow_canvas_set_width(struct showone *one, double width)
+{
+	NEMOSHOW_CANVAS_AT(one, width) = width;
+}
+
+static inline void nemoshow_canvas_set_height(struct showone *one, double height)
+{
+	NEMOSHOW_CANVAS_AT(one, height) = height;
+}
+
+static inline void nemoshow_canvas_set_alpha(struct showone *one, double alpha)
+{
+	NEMOSHOW_CANVAS_AT(one, alpha) = alpha;
+}
+
+static inline void nemoshow_canvas_set_fill_color(struct showone *one, double r, double g, double b, double a)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	canvas->fills[2] = r;
+	canvas->fills[1] = g;
+	canvas->fills[0] = b;
+	canvas->fills[3] = a;
+
+	canvas->fill = 1;
+}
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif
