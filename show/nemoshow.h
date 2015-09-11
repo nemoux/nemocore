@@ -104,6 +104,7 @@ extern void nemoshow_below_canvas(struct nemoshow *show, struct showone *one, st
 
 extern void nemoshow_attach_transition(struct nemoshow *show, struct showtransition *trans);
 extern void nemoshow_detach_transition(struct nemoshow *show, struct showtransition *trans);
+extern void nemoshow_attach_transition_after(struct nemoshow *show, struct showtransition *trans, struct showtransition *ntrans);
 extern void nemoshow_dispatch_transition(struct nemoshow *show, uint32_t msecs);
 extern void nemoshow_destroy_transition(struct nemoshow *show);
 extern int nemoshow_has_transition(struct nemoshow *show);

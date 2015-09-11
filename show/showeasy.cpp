@@ -45,7 +45,7 @@ void nemoshow_attach_transition_easy(struct nemoshow *show, ...)
 		if (ptrans == NULL) {
 			nemoshow_attach_transition(show, trans);
 		} else {
-			nemoshow_transition_attach_transition(ptrans, trans);
+			nemoshow_attach_transition_after(show, ptrans, trans);
 		}
 
 		ptrans = trans;

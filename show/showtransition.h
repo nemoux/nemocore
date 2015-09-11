@@ -59,7 +59,6 @@ extern void nemoshow_transition_destroy(struct showtransition *trans);
 extern void nemoshow_transition_check_one(struct showtransition *trans, struct showone *one);
 
 extern void nemoshow_transition_attach_sequence(struct showtransition *trans, struct showone *sequence);
-extern void nemoshow_transition_attach_transition(struct showtransition *trans, struct showtransition *ntrans);
 
 extern int nemoshow_transition_dispatch(struct showtransition *trans, uint32_t time);
 

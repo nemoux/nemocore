@@ -95,11 +95,6 @@ void nemoshow_transition_attach_sequence(struct showtransition *trans, struct sh
 	NEMOBOX_APPEND(trans->sequences, trans->ssequences, trans->nsequences, sequence);
 }
 
-void nemoshow_transition_attach_transition(struct showtransition *trans, struct showtransition *ntrans)
-{
-	NEMOBOX_APPEND(trans->transitions, trans->stransitions, trans->ntransitions, ntrans);
-}
-
 int nemoshow_transition_dispatch(struct showtransition *trans, uint32_t time)
 {
 	double t;

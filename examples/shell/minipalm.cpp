@@ -323,10 +323,10 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 		nemoshow_transition_set_repeat(trans2, 0);
 		nemoshow_transition_attach_sequence(trans2, sequence);
 
-		nemoshow_transition_attach_transition(trans1, trans2);
+		nemoshow_attach_transition_after(show, trans1, trans2);
 #endif
 
-		nemoshow_transition_attach_transition(trans0, trans1);
+		nemoshow_attach_transition_after(show, trans0, trans1);
 		nemoshow_attach_transition(show, trans0);
 
 		minishell_palm_destroy(palm);

@@ -921,12 +921,19 @@ void nemoshow_detach_transition(struct nemoshow *show, struct showtransition *tr
 	nemolist_remove(&trans->link);
 }
 
+void nemoshow_attach_transition_after(struct nemoshow *show, struct showtransition *trans, struct showtransition *ntrans)
+{
+	NEMOBOX_APPEND(trans->transitions, trans->stransitions, trans->ntransitions, ntrans);
+
+	ntrans->serial = nemoshow_get_next_serial(show);
+}
+
 void nemoshow_dispatch_transition(struct nemoshow *show, uint32_t msecs)
 {
 	struct showtransition *trans, *ntrans;
 	struct showtransition *strans[64];
 	int scount = 0;
-	int done, i;
+	int done, i, j;
 
 	nemolist_for_each_safe(trans, ntrans, &show->transition_list, link) {
 		done = nemoshow_transition_dispatch(trans, msecs);
@@ -951,7 +958,13 @@ void nemoshow_dispatch_transition(struct nemoshow *show, uint32_t msecs)
 	}
 
 	for (i = 0; i < scount; i++) {
-		nemoshow_attach_transition(show, strans[i]);
+		trans = strans[i];
+
+		for (j = 0; j < trans->nsequences; j++) {
+			nemoshow_sequence_prepare(trans->sequences[j], trans->serial);
+		}
+
+		nemolist_insert(&show->transition_list, &trans->link);
 	}
 }
 
