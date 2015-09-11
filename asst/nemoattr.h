@@ -497,6 +497,8 @@ static inline void nemoobject_finish(struct nemoobject *object)
 	for (i = 0; i < object->nattrs; i++) {
 		nemoattr_put(&object->attrs[i]);
 	}
+
+	free(object->attrs);
 }
 
 static inline struct nemoobject *nemoobject_create(int mattrs)

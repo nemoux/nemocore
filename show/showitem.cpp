@@ -117,6 +117,9 @@ void nemoshow_item_destroy(struct showone *one)
 
 	delete static_cast<showitem_t *>(item->cc);
 
+	if (item->uri != NULL)
+		free(item->uri);
+
 	free(item);
 }
 

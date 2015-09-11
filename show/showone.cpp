@@ -55,6 +55,10 @@ void nemoshow_one_finish(struct showone *one)
 		nemoshow_one_detach_one(one, one->children[i]);
 	}
 
+	for (i = 0; i < one->nattrs; i++) {
+		nemoshow_one_destroy_attr(one->attrs[i]);
+	}
+
 	nemoobject_finish(&one->object);
 
 	free(one->children);
