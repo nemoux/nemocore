@@ -139,6 +139,7 @@ extern void nemoshow_one_finish(struct showone *one);
 
 extern struct showone *nemoshow_one_create(int type);
 extern void nemoshow_one_destroy(struct showone *one);
+extern void nemoshow_one_destroy_with_children(struct showone *one);
 
 extern void nemoshow_one_attach_one(struct showone *parent, struct showone *one);
 extern void nemoshow_one_detach_one(struct showone *parent, struct showone *one);

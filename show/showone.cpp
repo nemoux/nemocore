@@ -51,7 +51,8 @@ void nemoshow_one_finish(struct showone *one)
 	}
 
 	for (i = 0; i < one->nchildren; i++) {
-		one->children[i]->parent = NULL;
+		nemoshow_one_unreference_one(one->children[i], one);
+		nemoshow_one_detach_one(one, one->children[i]);
 	}
 
 	nemoobject_finish(&one->object);
@@ -86,6 +87,21 @@ struct showone *nemoshow_one_create(int type)
 
 void nemoshow_one_destroy(struct showone *one)
 {
+	if (one->destroy != NULL) {
+		one->destroy(one);
+	} else {
+		nemoshow_one_finish(one);
+
+		free(one);
+	}
+}
+
+void nemoshow_one_destroy_with_children(struct showone *one)
+{
+	while (one->nchildren > 0) {
+		nemoshow_one_destroy_with_children(one->children[0]);
+	}
+
 	if (one->destroy != NULL) {
 		one->destroy(one);
 	} else {

@@ -43,12 +43,21 @@ struct showtransition *nemoshow_transition_create(struct showone *ease, uint32_t
 void nemoshow_transition_destroy(struct showtransition *trans)
 {
 	struct transitionsensor *sensor, *nsensor;
+	int i;
 
 	nemolist_for_each_safe(sensor, nsensor, &trans->sensor_list, link) {
 		nemolist_remove(&sensor->link);
 		nemolist_remove(&sensor->listener.link);
 
 		free(sensor);
+	}
+
+	for (i = 0; i < trans->nsequences; i++) {
+		nemoshow_one_destroy_with_children(trans->sequences[i]);
+	}
+
+	for (i = 0; i < trans->ntransitions; i++) {
+		nemoshow_transition_destroy(trans->transitions[i]);
 	}
 
 	nemolist_remove(&trans->link);

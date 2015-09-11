@@ -934,6 +934,8 @@ void nemoshow_dispatch_transition(struct nemoshow *show, uint32_t msecs)
 					strans[scount++] = trans->transitions[i];
 				}
 
+				trans->ntransitions = 0;
+
 				nemolist_remove(&trans->link);
 				nemolist_insert(&show->transition_destroy_list, &trans->link);
 			} else if (trans->repeat == 0 || --trans->repeat) {
