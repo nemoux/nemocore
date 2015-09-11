@@ -100,6 +100,11 @@ void nemoshow_shader_destroy(struct showone *one)
 
 	nemoshow_one_finish(one);
 
+	if (NEMOSHOW_SHADER_CC(shader, matrix) != NULL)
+		delete NEMOSHOW_SHADER_CC(shader, matrix);
+	if (NEMOSHOW_SHADER_CC(shader, shader) != NULL)
+		delete NEMOSHOW_SHADER_CC(shader, shader);
+
 	delete static_cast<showshader_t *>(shader->cc);
 
 	free(shader);

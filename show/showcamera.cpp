@@ -42,6 +42,9 @@ void nemoshow_camera_destroy(struct showone *one)
 
 	nemoshow_one_finish(one);
 
+	if (NEMOSHOW_CAMERA_CC(camera, matrix) != NULL)
+		delete NEMOSHOW_CAMERA_CC(camera, matrix);
+
 	delete static_cast<showcamera_t *>(camera->cc);
 
 	free(camera);

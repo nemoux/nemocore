@@ -42,7 +42,14 @@ void nemoshow_matrix_destroy(struct showone *one)
 {
 	struct showmatrix *matrix = NEMOSHOW_MATRIX(one);
 
+	while (one->nchildren > 0) {
+		nemoshow_one_destroy_with_children(one->children[0]);
+	}
+
 	nemoshow_one_finish(one);
+
+	if (NEMOSHOW_MATRIX_CC(matrix, matrix) != NULL)
+		delete NEMOSHOW_MATRIX_CC(matrix, matrix);
 
 	delete static_cast<showmatrix_t *>(matrix->cc);
 

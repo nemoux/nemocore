@@ -74,6 +74,24 @@ void nemoshow_canvas_destroy(struct showone *one)
 
 	nemoshow_one_finish(one);
 
+	if (NEMOSHOW_CANVAS_CC(canvas, damage) != NULL)
+		delete NEMOSHOW_CANVAS_CC(canvas, damage);
+	if (NEMOSHOW_CANVAS_CC(canvas, canvas) != NULL)
+		delete NEMOSHOW_CANVAS_CC(canvas, canvas);
+	if (NEMOSHOW_CANVAS_CC(canvas, bitmap) != NULL)
+		delete NEMOSHOW_CANVAS_CC(canvas, bitmap);
+	if (NEMOSHOW_CANVAS_CC(canvas, device) != NULL)
+		delete NEMOSHOW_CANVAS_CC(canvas, device);
+
+	if (NEMOSHOW_CANVAS_CP(canvas, damage) != NULL)
+		delete NEMOSHOW_CANVAS_CP(canvas, damage);
+	if (NEMOSHOW_CANVAS_CP(canvas, canvas) != NULL)
+		delete NEMOSHOW_CANVAS_CP(canvas, canvas);
+	if (NEMOSHOW_CANVAS_CP(canvas, bitmap) != NULL)
+		delete NEMOSHOW_CANVAS_CP(canvas, bitmap);
+	if (NEMOSHOW_CANVAS_CP(canvas, device) != NULL)
+		delete NEMOSHOW_CANVAS_CP(canvas, device);
+
 	delete static_cast<showcanvas_t *>(canvas->cc);
 
 	free(canvas);
@@ -367,7 +385,7 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 	int i;
-	
+
 	if (canvas->needs_full_redraw == 0) {
 		NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
 		NEMOSHOW_CANVAS_CC(canvas, canvas)->clipRegion(*NEMOSHOW_CANVAS_CC(canvas, damage));

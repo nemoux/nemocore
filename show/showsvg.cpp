@@ -71,7 +71,16 @@ void nemoshow_svg_destroy(struct showone *one)
 
 	nemoshow_one_unreference_all(one);
 
+	while (one->nchildren > 0) {
+		nemoshow_one_destroy_with_children(one->children[0]);
+	}
+
 	nemoshow_one_finish(one);
+
+	if (NEMOSHOW_SVG_CC(svg, viewbox) != NULL)
+		delete NEMOSHOW_SVG_CC(svg, viewbox);
+	if (NEMOSHOW_SVG_CC(svg, matrix) != NULL)
+		delete NEMOSHOW_SVG_CC(svg, matrix);
 
 	delete static_cast<showsvg_t *>(svg->cc);
 

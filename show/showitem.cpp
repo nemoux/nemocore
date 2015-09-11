@@ -112,8 +112,25 @@ void nemoshow_item_destroy(struct showone *one)
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	nemoshow_one_unreference_all(one);
+	
+	while (one->nchildren > 0) {
+		nemoshow_one_destroy_with_children(one->children[0]);
+	}
 
 	nemoshow_one_finish(one);
+
+	if (NEMOSHOW_ITEM_CC(item, matrix) != NULL)
+		delete NEMOSHOW_ITEM_CC(item, matrix);
+	if (NEMOSHOW_ITEM_CC(item, path) != NULL)
+		delete NEMOSHOW_ITEM_CC(item, path);
+	if (NEMOSHOW_ITEM_CC(item, fill) != NULL)
+		delete NEMOSHOW_ITEM_CC(item, fill);
+	if (NEMOSHOW_ITEM_CC(item, stroke) != NULL)
+		delete NEMOSHOW_ITEM_CC(item, stroke);
+	if (NEMOSHOW_ITEM_CC(item, points) != NULL)
+		delete NEMOSHOW_ITEM_CC(item, points);
+	if (NEMOSHOW_ITEM_CC(item, bitmap) != NULL)
+		delete NEMOSHOW_ITEM_CC(item, bitmap);
 
 	delete static_cast<showitem_t *>(item->cc);
 

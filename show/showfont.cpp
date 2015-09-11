@@ -39,6 +39,9 @@ void nemoshow_font_destroy(struct showone *one)
 
 	nemoshow_one_finish(one);
 
+	if (NEMOSHOW_FONT_CC(font, face) != NULL)
+		SkSafeUnref(NEMOSHOW_FONT_CC(font, face));
+
 	delete static_cast<showfont_t *>(font->cc);
 
 	if (font->path != NULL)
