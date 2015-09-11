@@ -203,10 +203,10 @@ static void nemoshow_dispatch_actor_frame(struct nemoactor *actor, uint32_t msec
 	} else {
 		nemoactor_feedback_done(actor);
 	}
+	
+	nemoshow_destroy_transition(show);
 
 	nemoshow_render_one(show);
-
-	nemoshow_destroy_transition(show);
 
 	nemotale_composite_fbo(tale, &region);
 

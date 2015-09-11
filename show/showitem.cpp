@@ -111,8 +111,12 @@ void nemoshow_item_destroy(struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
+	if (item->canvas != NULL) {
+		nemoshow_canvas_damage_one(item->canvas, one);
+	}
+
 	nemoshow_one_unreference_all(one);
-	
+
 	while (one->nchildren > 0) {
 		nemoshow_one_destroy_with_children(one->children[0]);
 	}
