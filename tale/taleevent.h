@@ -54,6 +54,7 @@ struct taletap {
 	struct talenode *node;
 
 	float x, y;
+	float dist;
 
 	float grab_x, grab_y;
 	uint32_t grab_time;

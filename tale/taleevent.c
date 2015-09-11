@@ -49,6 +49,8 @@ static struct taletap *nemotale_create_tap(struct nemotale *tale, uint64_t devic
 	tap->device = device;
 	tap->node = NULL;
 
+	tap->dist = 0.0f;
+
 	nemolist_init(&tap->link);
 
 	tap->tale_destroy_listener.notify = taletap_handle_tale_destroy;
@@ -334,6 +336,8 @@ void nemotale_push_touch_motion_event(struct nemotale *tale, uint32_t serial, ui
 	if (tap == NULL)
 		return;
 
+	tap->dist += sqrtf((x - tap->x) * (x - tap->x) + (y - tap->y) * (y - tap->y));
+
 	tap->x = x;
 	tap->y = y;
 
@@ -349,34 +353,10 @@ void nemotale_push_touch_motion_event(struct nemotale *tale, uint32_t serial, ui
 void nemotale_push_timer_event(struct nemotale *tale, uint32_t time)
 {
 	struct taletap *tap;
-	float dx, dy;
-
-	nemolist_for_each(tap, &tale->ptap_list, link) {
-		if (tap->grab_time + tale->long_press_duration >= time) {
-			dx = tap->grab_x - tap->x;
-			dy = tap->grab_y - tap->y;
-
-			if (sqrtf(dx * dx + dy * dy) <= tale->long_press_distance) {
-				struct taleevent event;
-
-				event.device = tap->device;
-				event.serial = tap->serial;
-				event.time = time;
-				event.duration = time - tap->grab_time;
-				event.x = tap->x;
-				event.y = tap->y;
-
-				tale->dispatch_event(tale, tap->node, NEMOTALE_POINTER_LONG_PRESS_EVENT, &event);
-			}
-		}
-	}
 
 	nemolist_for_each(tap, &tale->tap_list, link) {
 		if (tap->grab_time + tale->long_press_duration <= time) {
-			dx = tap->grab_x - tap->x;
-			dy = tap->grab_y - tap->y;
-
-			if (sqrtf(dx * dx + dy * dy) <= tale->long_press_distance) {
+			if (tap->dist <= tale->long_press_distance) {
 				struct taleevent event;
 
 				event.device = tap->device;
