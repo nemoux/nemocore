@@ -25,6 +25,16 @@ extern void nemoshow_scene_destroy(struct showone *one);
 
 extern int nemoshow_scene_update(struct nemoshow *show, struct showone *one);
 
+static inline void nemoshow_scene_set_width(struct showone *one, double width)
+{
+	NEMOSHOW_SCENE_AT(one, width) = width;
+}
+
+static inline void nemoshow_scene_set_height(struct showone *one, double height)
+{
+	NEMOSHOW_SCENE_AT(one, height) = height;
+}
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

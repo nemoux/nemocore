@@ -367,7 +367,7 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 	int i;
-
+	
 	if (canvas->needs_full_redraw == 0) {
 		NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
 		NEMOSHOW_CANVAS_CC(canvas, canvas)->clipRegion(*NEMOSHOW_CANVAS_CC(canvas, damage));
