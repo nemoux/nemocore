@@ -27,6 +27,10 @@ struct showtransition *nemoshow_transition_create(struct showone *ease, uint32_t
 	trans->nsequences = 0;
 	trans->ssequences = 4;
 
+	trans->transitions = (struct showtransition **)malloc(sizeof(struct showtransition *) * 4);
+	trans->ntransitions = 0;
+	trans->stransitions = 4;
+
 	trans->ease = NEMOSHOW_EASE(ease);
 
 	trans->duration = duration;
@@ -51,6 +55,7 @@ void nemoshow_transition_destroy(struct showtransition *trans)
 	nemolist_remove(&trans->sensor_list);
 
 	free(trans->sequences);
+	free(trans->transitions);
 	free(trans);
 }
 
