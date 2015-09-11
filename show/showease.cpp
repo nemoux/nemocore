@@ -99,3 +99,17 @@ int nemoshow_ease_update(struct nemoshow *show, struct showone *one)
 {
 	return 0;
 }
+
+void nemoshow_ease_set_type(struct showone *one, int type)
+{
+	struct showease *ease = NEMOSHOW_EASE(one);
+
+	nemoease_set(&ease->ease, type);
+}
+
+void nemoshow_ease_set_bezier(struct showone *one, double x0, double y0, double x1, double y1)
+{
+	struct showease *ease = NEMOSHOW_EASE(one);
+
+	nemoease_set_cubic(&ease->ease, x0, y0, x1, y1);
+}
