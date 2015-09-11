@@ -40,8 +40,6 @@ struct playcontext {
 
 	int64_t position;
 	double volume;
-
-	char *snddev;
 };
 
 static void nemoplay_dispatch_subtitle(GstElement *base, guint8 *buffer, gsize size, gpointer data)
@@ -177,26 +175,11 @@ static void nemoplay_dispatch_canvas_screen(struct nemocanvas *canvas, int32_t x
 	struct playcontext *context = (struct playcontext *)nemocanvas_get_userdata(canvas);
 }
 
-static void nemoplay_dispatch_canvas_sound(struct nemocanvas *canvas, const char *device, int left)
-{
-#ifdef NEMOUX_WITH_ALSA_MULTINODE
-	struct playcontext *context = (struct playcontext *)nemocanvas_get_userdata(canvas);
-
-	if (context->snddev == NULL) {
-		if (left == 0)
-			nemogst_set_audio_device(context->gst, device);
-		else
-			nemogst_put_audio_device(context->gst, device);
-	}
-#endif
-}
-
 int main(int argc, char *argv[])
 {
 	struct option options[] = {
 		{ "file",					required_argument,	NULL,		'f' },
 		{ "subtitle",			required_argument,	NULL,		's' },
-		{ "sounddevice",	required_argument,	NULL,		'd' },
 		{ "width",				required_argument,	NULL,		'w' },
 		{ "height",				required_argument,	NULL,		'h' },
 		{ "background",		no_argument,				NULL,		'b' },
@@ -214,13 +197,12 @@ int main(int argc, char *argv[])
 	struct pathone *group, *one;
 	char *filepath = NULL;
 	char *subtitlepath = NULL;
-	char *snddev = NULL;
 	char *uri;
 	int32_t width = 0, height = 0;
 	int is_background = 0;
 	int opt;
 
-	while (opt = getopt_long(argc, argv, "f:s:d:w:h:b", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "f:s:w:h:b", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -231,10 +213,6 @@ int main(int argc, char *argv[])
 
 			case 's':
 				subtitlepath = strdup(optarg);
-				break;
-
-			case 'd':
-				snddev = strdup(optarg);
 				break;
 
 			case 'w':
@@ -279,7 +257,6 @@ int main(int argc, char *argv[])
 	nemocanvas_set_anchor(canvas, -0.5f, -0.5f);
 	nemocanvas_set_dispatch_resize(canvas, nemoplay_dispatch_canvas_resize);
 	nemocanvas_set_dispatch_screen(canvas, nemoplay_dispatch_canvas_screen);
-	nemocanvas_set_dispatch_sound(canvas, nemoplay_dispatch_canvas_sound);
 
 	context->gst = nemogst_create();
 	if (context->gst == NULL)
@@ -332,14 +309,6 @@ int main(int argc, char *argv[])
 	nemotale_node_opaque(node, 0, 0, width, height);
 
 	nemotale_composite_egl(context->tale, NULL);
-
-#ifdef NEMOUX_WITH_ALSA_MULTINODE
-	if (snddev != NULL) {
-		nemogst_set_audio_device(context->gst, snddev);
-
-		context->snddev = snddev;
-	}
-#endif
 
 	nemogst_play_video(context->gst);
 

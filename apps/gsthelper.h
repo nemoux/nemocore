@@ -12,8 +12,6 @@
 
 #include <wayland-client.h>
 
-#define	NEMOGST_AUDIO_SINK_MAX			(8)
-
 typedef enum {
 	GST_PLAY_FLAG_VIDEO = 0x00000001,
 	GST_PLAY_FLAG_AUDIO = 0x00000002,
@@ -37,15 +35,6 @@ struct nemogst {
 	GstElement *sink;
 	GstElement *scale;
 	GstElement *filter;
-
-#ifdef NEMOUX_WITH_ALSA_MULTINODE
-	GstElement *audiobin;
-	GstElement *audiotee;
-	GstPadTemplate *audioteepadtempl;
-	GstElement *audiosinks[NEMOGST_AUDIO_SINK_MAX];
-	GstPad *audioteepads[NEMOGST_AUDIO_SINK_MAX];
-	char *audiodevs[NEMOGST_AUDIO_SINK_MAX];
-#endif
 
 	GstElement *subpipeline;
 	GstElement *subfile;
@@ -91,13 +80,6 @@ extern int64_t nemogst_get_duration(struct nemogst *gst);
 extern int nemogst_set_position(struct nemogst *gst, int64_t position);
 extern int nemogst_set_position_rough(struct nemogst *gst, int64_t position);
 extern int nemogst_set_next_step(struct nemogst *gst, int steps, double rate);
-
-extern void nemogst_set_audio_volume(struct nemogst *gst, double volume);
-
-#ifdef NEMOUX_WITH_ALSA_MULTINODE
-extern int nemogst_set_audio_device(struct nemogst *gst, const char *dev);
-extern int nemogst_put_audio_device(struct nemogst *gst, const char *dev);
-#endif
 
 extern void nemogst_dump_state(struct nemogst *gst);
 

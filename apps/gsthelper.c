@@ -154,23 +154,6 @@ int nemogst_prepare_nemo_sink(struct nemogst *gst, struct wl_display *display, s
 
 	g_object_set(G_OBJECT(gst->player), "video-sink", gst->pipeline, NULL);
 
-#ifdef NEMOUX_WITH_ALSA_MULTINODE
-	gst->audiobin = gst_element_factory_make("bin", "nemoaudio");
-
-	gst->audiotee = gst_element_factory_make("tee", "nemotee");
-	g_object_set(G_OBJECT(gst->audiotee), "allow-not-linked", TRUE, NULL);
-
-	gst->audioteepadtempl = gst_element_class_get_pad_template(GST_ELEMENT_GET_CLASS(gst->audiotee), "src_%u");
-
-	gst_bin_add(GST_BIN(gst->audiobin), gst->audiotee);
-
-	pad = gst_element_get_static_pad(gst->audiotee, "sink");
-	gst_element_add_pad(gst->audiobin, gst_ghost_pad_new("sink", pad));
-	gst_object_unref(pad);
-
-	g_object_set(G_OBJECT(gst->player), "audio-sink", gst->audiobin, NULL);
-#endif
-
 	gst->bus = gst_pipeline_get_bus(GST_PIPELINE(gst->player));
 	gst->busid = gst_bus_add_watch(gst->bus, nemogst_watch_bus, gst);
 
@@ -229,29 +212,11 @@ int nemogst_prepare_mini_sink(struct nemogst *gst, nemogst_minisink_render_t ren
 
 	g_object_set(G_OBJECT(gst->player), "video-sink", gst->pipeline, NULL);
 
-#ifdef NEMOUX_WITH_ALSA_MULTINODE
-	gst->audiobin = gst_element_factory_make("bin", "nemoaudio");
-
-	gst->audiotee = gst_element_factory_make("tee", "nemotee");
-	g_object_set(G_OBJECT(gst->audiotee), "allow-not-linked", TRUE, NULL);
-
-	gst->audioteepadtempl = gst_element_class_get_pad_template(GST_ELEMENT_GET_CLASS(gst->audiotee), "src_%u");
-
-	gst_bin_add(GST_BIN(gst->audiobin), gst->audiotee);
-
-	pad = gst_element_get_static_pad(gst->audiotee, "sink");
-	gst_element_add_pad(gst->audiobin, gst_ghost_pad_new("sink", pad));
-	gst_object_unref(pad);
-
-	g_object_set(G_OBJECT(gst->player), "audio-sink", gst->audiobin, NULL);
-#endif
-
 	gst->bus = gst_pipeline_get_bus(GST_PIPELINE(gst->player));
 	gst->busid = gst_bus_add_watch(gst->bus, nemogst_watch_bus, gst);
 
 	gst_element_set_state(gst->player, GST_STATE_READY);
 
-	return 0;
 	return 0;
 }
 
@@ -449,74 +414,6 @@ void nemogst_set_audio_volume(struct nemogst *gst, double volume)
 	g_object_set(G_OBJECT(gst->player), "volume", &volume, NULL);
 }
 
-#ifdef NEMOUX_WITH_ALSA_MULTINODE
-int nemogst_set_audio_device(struct nemogst *gst, const char *dev)
-{
-	int i;
-
-	for (i = 0; i < NEMOGST_AUDIO_SINK_MAX; i++) {
-		if (gst->audiodevs[i] != NULL && strcmp(dev, gst->audiodevs[i]) == 0) {
-			gst->audioteepads[i] = gst_element_request_pad(gst->audiotee, gst->audioteepadtempl, NULL, NULL);
-
-			gst_pad_link(gst->audioteepads[i],
-					gst_element_get_static_pad(gst->audiosinks[i], "sink"));
-			gst_element_set_state(gst->audiosinks[i], GST_STATE_PLAYING);
-
-			return 1;
-		}
-	}
-
-	for (i = 0; i < NEMOGST_AUDIO_SINK_MAX; i++) {
-		if (gst->audiosinks[i] == NULL) {
-			char *sinkname;
-
-			asprintf(&sinkname, "nemoalsa%d", i);
-
-			gst->audiosinks[i] = gst_element_factory_make("alsasink", sinkname);
-
-			gst->audiodevs[i] = strdup(dev);
-
-			if (strcmp(dev, "default") != 0)
-				g_object_set(G_OBJECT(gst->audiosinks[i]), "device", dev, NULL);
-
-			gst_element_set_state(gst->audiosinks[i], GST_STATE_READY);
-
-			gst_bin_add(GST_BIN(gst->audiobin), gst->audiosinks[i]);
-
-			gst->audioteepads[i] = gst_element_request_pad(gst->audiotee, gst->audioteepadtempl, NULL, NULL);
-
-			gst_pad_link(gst->audioteepads[i],
-					gst_element_get_static_pad(gst->audiosinks[i], "sink"));
-			gst_element_set_state(gst->audiosinks[i], GST_STATE_PLAYING);
-
-			free(sinkname);
-
-			return 0;
-		}
-	}
-
-	return -1;
-}
-
-int nemogst_put_audio_device(struct nemogst *gst, const char *dev)
-{
-	int i;
-
-	for (i = 0; i < NEMOGST_AUDIO_SINK_MAX; i++) {
-		if (gst->audiodevs[i] != NULL && strcmp(dev, gst->audiodevs[i]) == 0) {
-			gst_pad_unlink(gst->audioteepads[i],
-					gst_element_get_static_pad(gst->audiosinks[i], "sink"));
-
-			gst_element_release_request_pad(gst->audiotee, gst->audioteepads[i]);
-
-			return 0;
-		}
-	}
-
-	return -1;
-}
-#endif
-
 static inline GstState nemogst_get_element_state(GstElement *element)
 {
 	GstState state;
@@ -533,15 +430,4 @@ void nemogst_dump_state(struct nemogst *gst)
 	NEMO_DEBUG("PLAYER = %s\n", gst_element_state_get_name(nemogst_get_element_state(gst->player)));
 	NEMO_DEBUG("PIPELINE = %s\n", gst_element_state_get_name(nemogst_get_element_state(gst->pipeline)));
 	NEMO_DEBUG("SINK = %s\n", gst_element_state_get_name(nemogst_get_element_state(gst->sink)));
-
-#ifdef NEMOUX_WITH_ALSA_MULTINODE
-	NEMO_DEBUG("AUDIOBIN = %s\n", gst_element_state_get_name(nemogst_get_element_state(gst->audiobin)));
-	NEMO_DEBUG("AUDIOTEE = %s\n", gst_element_state_get_name(nemogst_get_element_state(gst->audiotee)));
-
-	for (i = 0; i < NEMOGST_AUDIO_SINK_MAX; i++) {
-		if (gst->audiosinks[i] != NULL) {
-			NEMO_DEBUG("AUDIOSINK[%d] = %s\n", i, gst_element_state_get_name(nemogst_get_element_state(gst->audiosinks[i])));
-		}
-	}
-#endif
 }
