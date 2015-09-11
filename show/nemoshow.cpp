@@ -571,7 +571,7 @@ void nemoshow_arrange_one(struct nemoshow *show)
 			nemoshow_ease_arrange(show, one);
 
 			nemoshow_one_set_state(one, NEMOSHOW_ARRANGE_STATE);
-		} else if (one->type == NEMOSHOW_CANVAS_TYPE && one->sub != NEMOSHOW_CANVAS_SCENE_TYPE) {
+		} else if (one->type == NEMOSHOW_CANVAS_TYPE) {
 			nemoshow_canvas_arrange(show, one);
 
 			nemoshow_one_set_state(one, NEMOSHOW_ARRANGE_STATE);
@@ -605,19 +605,6 @@ void nemoshow_arrange_one(struct nemoshow *show)
 			nemoshow_one_set_state(one, NEMOSHOW_ARRANGE_STATE);
 		} else if (one->type == NEMOSHOW_PATH_TYPE) {
 			nemoshow_path_arrange(show, one);
-
-			nemoshow_one_set_state(one, NEMOSHOW_ARRANGE_STATE);
-		}
-	}
-
-	for (i = 0; i < show->nones; i++) {
-		one = show->ones[i];
-
-		if (nemoshow_one_has_state(one, NEMOSHOW_ARRANGE_STATE) != 0)
-			continue;
-
-		if (one->type == NEMOSHOW_CANVAS_TYPE && one->sub == NEMOSHOW_CANVAS_SCENE_TYPE) {
-			nemoshow_canvas_arrange(show, one);
 
 			nemoshow_one_set_state(one, NEMOSHOW_ARRANGE_STATE);
 		}
@@ -688,22 +675,6 @@ void nemoshow_render_one(struct nemoshow *show)
 
 			if (canvas->dispatch_render != NULL) {
 				canvas->dispatch_render(show, one);
-			}
-		}
-	}
-
-	for (i = 0; i < scene->nchildren; i++) {
-		one = scene->children[i];
-
-		if (one->type == NEMOSHOW_CANVAS_TYPE) {
-			canvas = NEMOSHOW_CANVAS(one);
-
-			if (canvas->needs_redraw != 0) {
-				if (one->sub == NEMOSHOW_CANVAS_SCENE_TYPE) {
-					nemoshow_canvas_render_scene(show, one);
-
-					canvas->needs_redraw = 0;
-				}
 			}
 		}
 	}

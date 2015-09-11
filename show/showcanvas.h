@@ -17,19 +17,13 @@ NEMO_BEGIN_EXTERN_C
 #include <showone.h>
 
 #define	NEMOSHOW_CANVAS_TYPE_MAX		(32)
-#define	NEMOSHOW_CANVAS_SRC_MAX			(64)
 
 typedef enum {
 	NEMOSHOW_CANVAS_NONE_TYPE = 0,
 	NEMOSHOW_CANVAS_VECTOR_TYPE = 1,
-	NEMOSHOW_CANVAS_SVG_TYPE = 2,
-	NEMOSHOW_CANVAS_IMAGE_TYPE = 3,
-	NEMOSHOW_CANVAS_REF_TYPE = 4,
-	NEMOSHOW_CANVAS_USE_TYPE = 5,
-	NEMOSHOW_CANVAS_SCENE_TYPE = 7,
-	NEMOSHOW_CANVAS_OPENGL_TYPE = 8,
-	NEMOSHOW_CANVAS_PIXMAN_TYPE = 9,
-	NEMOSHOW_CANVAS_BACK_TYPE = 10,
+	NEMOSHOW_CANVAS_OPENGL_TYPE = 2,
+	NEMOSHOW_CANVAS_PIXMAN_TYPE = 3,
+	NEMOSHOW_CANVAS_BACK_TYPE = 4,
 	NEMOSHOW_CANVAS_LAST_TYPE
 } NemoShowCanvasType;
 
@@ -41,8 +35,7 @@ struct showcanvas {
 	struct showone base;
 
 	char type[NEMOSHOW_CANVAS_TYPE_MAX];
-	char src[NEMOSHOW_CANVAS_SRC_MAX];
-	int32_t event;
+	uint32_t event;
 
 	uint32_t fill;
 	double fills[4];
@@ -82,11 +75,12 @@ extern void nemoshow_canvas_destroy(struct showone *one);
 extern int nemoshow_canvas_arrange(struct nemoshow *show, struct showone *one);
 extern int nemoshow_canvas_update(struct nemoshow *show, struct showone *one);
 
+extern int nemoshow_canvas_set_type(struct showone *one, int type);
+extern void nemoshow_canvas_set_event(struct showone *one, uint32_t event);
+
 extern void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one);
-extern void nemoshow_canvas_render_link(struct nemoshow *show, struct showone *one);
 extern void nemoshow_canvas_render_picker(struct nemoshow *show, struct showone *one);
 extern void nemoshow_canvas_render_back(struct nemoshow *show, struct showone *one);
-extern void nemoshow_canvas_render_scene(struct nemoshow *show, struct showone *one);
 
 extern int nemoshow_canvas_set_viewport(struct nemoshow *show, struct showone *one, double sx, double sy);
 

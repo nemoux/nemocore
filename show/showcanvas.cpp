@@ -53,8 +53,7 @@ struct showone *nemoshow_canvas_create(void)
 	nemoshow_one_prepare(one);
 
 	nemoobject_set_reserved(&one->object, "type", canvas->type, NEMOSHOW_CANVAS_TYPE_MAX);
-	nemoobject_set_reserved(&one->object, "src", canvas->src, NEMOSHOW_CANVAS_SRC_MAX);
-	nemoobject_set_reserved(&one->object, "event", &canvas->event, sizeof(int32_t));
+	nemoobject_set_reserved(&one->object, "event", &canvas->event, sizeof(uint32_t));
 	nemoobject_set_reserved(&one->object, "width", &canvas->width, sizeof(double));
 	nemoobject_set_reserved(&one->object, "height", &canvas->height, sizeof(double));
 
@@ -87,31 +86,28 @@ static int nemoshow_canvas_compare(const void *a, const void *b)
 
 int nemoshow_canvas_arrange(struct nemoshow *show, struct showone *one)
 {
-	static struct canvasmap {
-		char name[32];
-
-		int type;
-	} maps[] = {
-		{ "back",				NEMOSHOW_CANVAS_BACK_TYPE },
-		{ "img",				NEMOSHOW_CANVAS_IMAGE_TYPE },
-		{ "opengl",			NEMOSHOW_CANVAS_OPENGL_TYPE },
-		{ "pixman",			NEMOSHOW_CANVAS_PIXMAN_TYPE },
-		{ "ref",				NEMOSHOW_CANVAS_REF_TYPE },
-		{ "scene",			NEMOSHOW_CANVAS_SCENE_TYPE },
-		{ "svg",				NEMOSHOW_CANVAS_SVG_TYPE },
-		{ "use",				NEMOSHOW_CANVAS_USE_TYPE },
-		{ "vector",			NEMOSHOW_CANVAS_VECTOR_TYPE },
-	}, *map;
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
-	struct showone *matrix;
 
-	map = static_cast<struct canvasmap *>(bsearch(canvas->type, static_cast<void *>(maps), sizeof(maps) / sizeof(maps[0]), sizeof(maps[0]), nemoshow_canvas_compare));
-	if (map == NULL)
-		one->sub = NEMOSHOW_CANVAS_NONE_TYPE;
-	else
-		one->sub = map->type;
+	if (strcmp(canvas->type, "back") == 0) {
+		nemoshow_canvas_set_type(one, NEMOSHOW_CANVAS_BACK_TYPE);
+	} else if (strcmp(canvas->type, "opengl") == 0) {
+		nemoshow_canvas_set_type(one, NEMOSHOW_CANVAS_OPENGL_TYPE);
+	} else if (strcmp(canvas->type, "pixman") == 0) {
+		nemoshow_canvas_set_type(one, NEMOSHOW_CANVAS_PIXMAN_TYPE);
+	} else if (strcmp(canvas->type, "vector") == 0) {
+		nemoshow_canvas_set_type(one, NEMOSHOW_CANVAS_VECTOR_TYPE);
+	}
 
-	if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
+	nemoshow_canvas_set_event(one, canvas->event);
+
+	return 0;
+}
+
+int nemoshow_canvas_set_type(struct showone *one, int type)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	if (type == NEMOSHOW_CANVAS_VECTOR_TYPE) {
 		canvas->node = nemotale_node_create_pixman(canvas->width, canvas->height);
 
 		NEMOSHOW_CANVAS_CC(canvas, bitmap) = new SkBitmap;
@@ -133,69 +129,35 @@ int nemoshow_canvas_arrange(struct nemoshow *show, struct showone *one)
 		NEMOSHOW_CANVAS_CP(canvas, canvas) = new SkCanvas(NEMOSHOW_CANVAS_CP(canvas, device));
 
 		NEMOSHOW_CANVAS_CP(canvas, damage) = new SkRegion;
-	} else if (one->sub == NEMOSHOW_CANVAS_PIXMAN_TYPE) {
+	} else if (type == NEMOSHOW_CANVAS_PIXMAN_TYPE) {
 		canvas->node = nemotale_node_create_pixman(canvas->width, canvas->height);
-	} else if (one->sub == NEMOSHOW_CANVAS_OPENGL_TYPE) {
+	} else if (type == NEMOSHOW_CANVAS_OPENGL_TYPE) {
 		canvas->node = nemotale_node_create_gl(canvas->width, canvas->height);
-	} else if (one->sub == NEMOSHOW_CANVAS_SCENE_TYPE) {
-		struct showone *src;
-		struct showone *child;
-		struct showscene *scene;
-		int i;
-
-		canvas->node = nemotale_node_create_gl(canvas->width, canvas->height);
-
-		canvas->tale = nemotale_create_gl();
-		canvas->fbo = nemotale_create_fbo(
-				nemotale_node_get_texture(canvas->node),
-				canvas->width, canvas->height);
-		nemotale_set_backend(canvas->tale, canvas->fbo);
-		nemotale_resize(canvas->tale, canvas->width, canvas->height);
-
-		src = nemoshow_search_one(show, canvas->src);
-		scene = NEMOSHOW_SCENE(src);
-
-		for (i = 0; i < src->nchildren; i++) {
-			child = src->children[i];
-
-			if (child->type == NEMOSHOW_CANVAS_TYPE && child != one) {
-				nemotale_attach_node(canvas->tale, NEMOSHOW_CANVAS_AT(child, node));
-			}
-		}
-
-		nemotale_scale(canvas->tale, canvas->width / scene->width, canvas->height / scene->height);
-	} else if (one->sub == NEMOSHOW_CANVAS_BACK_TYPE) {
+	} else if (type == NEMOSHOW_CANVAS_BACK_TYPE) {
 		canvas->node = nemotale_node_create_pixman(canvas->width, canvas->height);
 		nemotale_node_opaque(canvas->node, 0, 0, canvas->width, canvas->height);
 	}
 
-	if (canvas->event == 0)
-		nemotale_node_set_pick_type(canvas->node, NEMOTALE_PICK_NO_TYPE);
-	else
-		nemotale_node_set_id(canvas->node, canvas->event);
-
-	matrix = nemoshow_search_one(show, nemoobject_gets(&one->object, "matrix"));
-	if (matrix != NULL) {
-		nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_MATRIX_REF));
-		nemoshow_one_reference_one(one, matrix, NEMOSHOW_MATRIX_REF);
-	}
+	one->sub = type;
 
 	return 0;
+}
+
+void nemoshow_canvas_set_event(struct showone *one, uint32_t event)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	if (event == 0)
+		nemotale_node_set_pick_type(canvas->node, NEMOTALE_PICK_NO_TYPE);
+	else
+		nemotale_node_set_id(canvas->node, event);
+
+	canvas->event = event;
 }
 
 int nemoshow_canvas_update(struct nemoshow *show, struct showone *one)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
-
-	if (NEMOSHOW_REF(one, NEMOSHOW_MATRIX_REF) != NULL) {
-		float d[9];
-
-		NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(NEMOSHOW_REF(one, NEMOSHOW_MATRIX_REF)), matrix)->get9(d);
-
-		nemotale_node_transform(canvas->node, d);
-
-		nemoshow_canvas_damage_all(one);
-	}
 
 	return 0;
 }
@@ -512,13 +474,6 @@ void nemoshow_canvas_render_back(struct nemoshow *show, struct showone *one)
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
 	nemotale_node_fill_pixman(canvas->node, canvas->fills[2], canvas->fills[1], canvas->fills[0], canvas->fills[3] * canvas->alpha);
-}
-
-void nemoshow_canvas_render_scene(struct nemoshow *show, struct showone *one)
-{
-	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
-
-	nemotale_composite_fbo_full(canvas->tale);
 }
 
 int nemoshow_canvas_set_viewport(struct nemoshow *show, struct showone *one, double sx, double sy)
