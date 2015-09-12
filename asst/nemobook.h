@@ -69,6 +69,11 @@ static inline void *nemobook_get(struct nemobook *book, int i)
 	return book->lists[i];
 }
 
+static inline void nemobook_put(struct nemobook *book, int i)
+{
+	book->lists[i] = NULL;
+}
+
 static inline void nemobook_iset(struct nemobook *book, int i, int64_t v)
 {
 	book->lists[i] = (void *)v;
