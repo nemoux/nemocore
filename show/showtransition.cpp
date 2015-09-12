@@ -45,6 +45,18 @@ void nemoshow_transition_destroy(struct showtransition *trans)
 	struct transitionsensor *sensor, *nsensor;
 	int i;
 
+	if (trans->parent != NULL) {
+		struct showtransition *ptrans = trans->parent;
+
+		for (i = 0; i < ptrans->ntransitions; i++) {
+			if (ptrans->transitions[i] == trans) {
+				NEMOBOX_REMOVE(ptrans->transitions, ptrans->ntransitions, i);
+
+				break;
+			}
+		}
+	}
+
 	nemolist_for_each_safe(sensor, nsensor, &trans->sensor_list, link) {
 		nemolist_remove(&sensor->link);
 		nemolist_remove(&sensor->listener.link);

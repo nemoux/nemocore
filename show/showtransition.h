@@ -32,6 +32,8 @@ struct showtransition {
 	struct showtransition **transitions;
 	int ntransitions, stransitions;
 
+	struct showtransition *parent;
+
 	struct showease *ease;
 
 	uint32_t duration;
