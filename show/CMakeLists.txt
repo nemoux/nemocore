@@ -1,3 +1,9 @@
+FIND_PACKAGE(PkgConfig REQUIRED)
+
+PKG_CHECK_MODULES(SKIA REQUIRED skia)
+INCLUDE_DIRECTORIES(${SKIA_INCLUDE_DIRS})
+LINK_DIRECTORIES(${SKIA_LIBRARY_DIRS})
+
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -std=c++11")
 set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
@@ -7,24 +13,6 @@ include_directories(
 	${CMAKE_SOURCE_DIR}/asst
 	${CMAKE_SOURCE_DIR}/tale
 	${CMAKE_SOURCE_DIR}/thirds
-	/usr/include/skia/core
-	/usr/include/skia/config
-	/usr/include/skia/animator
-	/usr/include/skia/codec
-	/usr/include/skia/device
-	/usr/include/skia/effects
-	/usr/include/skia/images
-	/usr/include/skia/pathops
-	/usr/include/skia/pipe
-	/usr/include/skia/ports
-	/usr/include/skia/svg
-	/usr/include/skia/utils
-	/usr/include/skia/views
-	/usr/include/skia/xml
-	)
-
-link_directories(
-	/usr/lib64/skia
 	)
 
 add_library(nemoshow SHARED
@@ -54,8 +42,8 @@ add_library(nemoshow SHARED
 TARGET_LINK_LIBRARIES(nemoshow
 	nemoasst
 	nemotale
-	skia
 	${NEMOUX_COMMON_LIBRARIES}
+	${SKIA_LIBRARIES}
 	)
 
 INSTALL(TARGETS nemoshow DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
@@ -82,7 +70,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/show/svghelper.h
 	)
 
-set(NEMOSHOW_PKGCONFIG_REQUIRES "nemoasst nemotale")
+set(NEMOSHOW_PKGCONFIG_REQUIRES "nemoasst nemotale skia")
 
 configure_file(
 	nemoshow.pc.in
