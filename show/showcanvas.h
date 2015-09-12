@@ -79,7 +79,6 @@ extern int nemoshow_canvas_set_type(struct showone *one, int type);
 extern void nemoshow_canvas_set_event(struct showone *one, uint32_t event);
 
 extern void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one);
-extern void nemoshow_canvas_render_vector_on_one(struct nemoshow *show, struct showone *one, struct showone *ref);
 extern void nemoshow_canvas_render_picker(struct nemoshow *show, struct showone *one);
 extern void nemoshow_canvas_render_back(struct nemoshow *show, struct showone *one);
 
