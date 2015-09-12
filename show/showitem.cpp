@@ -610,14 +610,17 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 	} else if (one->sub == NEMOSHOW_TEXT_ITEM) {
 		if (NEMOSHOW_REF(one, NEMOSHOW_PATH_REF) == NULL) {
 			if (NEMOSHOW_FONT_AT(NEMOSHOW_REF(one, NEMOSHOW_FONT_REF), layout) == NEMOSHOW_NORMAL_LAYOUT) {
-				SkRect bounds[strlen(item->text)];
+				SkScalar widths[strlen(item->text)];
+				double width = 0.0f;
 				int i, count;
 
-				count = NEMOSHOW_ITEM_CC(item, stroke)->getTextWidths(item->text, strlen(item->text), NULL, bounds);
+				count = NEMOSHOW_ITEM_CC(item, stroke)->getTextWidths(item->text, strlen(item->text), widths, NULL);
 
 				for (i = 0; i < count; i++) {
-					box.join(bounds[i]);
+					width += ceil(widths[i]);
 				}
+
+				box = SkRect::MakeXYWH(0, 0, width, item->fontdescent - item->fontascent);
 			} else if (NEMOSHOW_FONT_AT(NEMOSHOW_REF(one, NEMOSHOW_FONT_REF), layout) == NEMOSHOW_HARFBUZZ_LAYOUT) {
 				box = SkRect::MakeXYWH(item->x, item->y, item->textwidth, item->textheight);
 			}
