@@ -815,6 +815,11 @@ void nemoshow_item_attach_one(struct showone *parent, struct showone *one)
 
 	if (parent->sub == NEMOSHOW_GROUP_ITEM)
 		nemoshow_one_reference_one(one, parent, NEMOSHOW_GROUP_REF);
+
+	if (parent->type == NEMOSHOW_CANVAS_TYPE)
+		NEMOSHOW_ITEM_AT(one, canvas) = parent;
+	else
+		NEMOSHOW_ITEM_AT(one, canvas) = NEMOSHOW_ITEM_AT(parent, canvas);
 }
 
 void nemoshow_item_detach_one(struct showone *parent, struct showone *one)

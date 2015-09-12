@@ -206,15 +206,13 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 
 		palm->group = group = nemoshow_item_create(NEMOSHOW_GROUP_ITEM);
 		nemoshow_attach_one(show, group);
-		nemoshow_one_attach_one(canvas, group);
-		nemoshow_item_set_canvas(group, canvas);
+		nemoshow_item_attach_one(canvas, group);
 		nemoshow_item_set_tsr(group);
 		nemoshow_item_translate(group, cx, cy);
 
 		palm->svg = svg = nemoshow_item_create(NEMOSHOW_SVG_ITEM);
 		nemoshow_attach_one(show, group);
 		nemoshow_item_attach_one(group, svg);
-		nemoshow_item_set_canvas(svg, canvas);
 		nemoshow_item_set_width(svg, 100);
 		nemoshow_item_set_height(svg, 100);
 		nemoshow_item_set_uri(svg, "/home/root/.config/palm.svg");
