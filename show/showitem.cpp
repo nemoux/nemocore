@@ -39,6 +39,7 @@ struct showone *nemoshow_item_create(int type)
 
 	item->cc = new showitem_t;
 	NEMOSHOW_ITEM_CC(item, matrix) = new SkMatrix;
+	NEMOSHOW_ITEM_CC(item, viewbox) = new SkMatrix;
 	NEMOSHOW_ITEM_CC(item, path) = new SkPath;
 	NEMOSHOW_ITEM_CC(item, fill) = new SkPaint;
 	NEMOSHOW_ITEM_CC(item, fill)->setStyle(SkPaint::kFill_Style);
@@ -125,6 +126,8 @@ void nemoshow_item_destroy(struct showone *one)
 
 	if (NEMOSHOW_ITEM_CC(item, matrix) != NULL)
 		delete NEMOSHOW_ITEM_CC(item, matrix);
+	if (NEMOSHOW_ITEM_CC(item, viewbox) != NULL)
+		delete NEMOSHOW_ITEM_CC(item, viewbox);
 	if (NEMOSHOW_ITEM_CC(item, path) != NULL)
 		delete NEMOSHOW_ITEM_CC(item, path);
 	if (NEMOSHOW_ITEM_CC(item, fill) != NULL)
@@ -238,13 +241,13 @@ static inline void nemoshow_item_update_uri(struct nemoshow *show, struct showon
 
 				NEMOSHOW_ITEM_CC(item, bitmap) = NULL;
 			}
-		} else if (one->sub == NEMOSHOW_SVG_ITEM) {
-			NEMOSHOW_ITEM_CC(item, bitmap) = new SkBitmap;
-			NEMOSHOW_ITEM_CC(item, bitmap)->allocPixels(
-					SkImageInfo::Make(item->width, item->height, kN32_SkColorType, kPremul_SkAlphaType));
-		}
 
-		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
+			one->dirty |= NEMOSHOW_SHAPE_DIRTY;
+		} else if (one->sub == NEMOSHOW_SVG_ITEM) {
+			nemoshow_svg_load_uri(show, one, item->uri);
+
+			one->dirty |= NEMOSHOW_SHAPE_DIRTY;
+		}
 	}
 }
 
@@ -557,6 +560,13 @@ static inline void nemoshow_item_update_shape(struct nemoshow *show, struct show
 					item->x + cos(item->to * M_PI / 180.0f) * item->r,
 					item->y + sin(item->to * M_PI / 180.0f) * item->r);
 		}
+	} else if (one->sub == NEMOSHOW_BITMAP_ITEM) {
+		if (NEMOSHOW_ITEM_CC(item, bitmap) != NULL)
+			delete NEMOSHOW_ITEM_CC(item, bitmap);
+
+		NEMOSHOW_ITEM_CC(item, bitmap) = new SkBitmap;
+		NEMOSHOW_ITEM_CC(item, bitmap)->allocPixels(
+				SkImageInfo::Make(item->width, item->height, kN32_SkColorType, kPremul_SkAlphaType));
 	}
 }
 
@@ -605,8 +615,12 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 
 			box.outset(item->fontsize, item->fontsize);
 		}
-	} else if (one->sub == NEMOSHOW_IMAGE_ITEM || one->sub == NEMOSHOW_SVG_ITEM) {
+	} else if (one->sub == NEMOSHOW_BITMAP_ITEM) {
 		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
+	} else if (one->sub == NEMOSHOW_IMAGE_ITEM) {
+		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
+	} else if (one->sub == NEMOSHOW_SVG_ITEM) {
+		box = SkRect::MakeXYWH(0, 0, item->width, item->height);
 	} else {
 		box = SkRect::MakeXYWH(0, 0, 0, 0);
 	}

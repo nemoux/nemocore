@@ -9,8 +9,6 @@
 #include <showcanvas.hpp>
 #include <showitem.h>
 #include <showitem.hpp>
-#include <showsvg.h>
-#include <showsvg.hpp>
 #include <showmatrix.h>
 #include <showmatrix.hpp>
 #include <showpath.h>
@@ -365,6 +363,22 @@ static inline void nemoshow_canvas_render_item_bitmap(SkCanvas *canvas, struct s
 	canvas->drawBitmapRect(*NEMOSHOW_ITEM_CC(item, bitmap), rect);
 }
 
+static inline void nemoshow_canvas_render_item_svg(SkCanvas *canvas, struct showone *one)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+	struct showitem *style = NEMOSHOW_ITEM(NEMOSHOW_REF(one, NEMOSHOW_STYLE_REF));
+	int i;
+
+	canvas->save();
+	canvas->concat(*NEMOSHOW_ITEM_CC(item, viewbox));
+
+	for (i = 0; i < one->nchildren; i++) {
+		nemoshow_canvas_render_one(canvas, one->children[i]);
+	}
+
+	canvas->restore();
+}
+
 static inline void nemoshow_canvas_render_item_group(SkCanvas *canvas, struct showone *one)
 {
 	int i;
@@ -392,6 +406,7 @@ static inline void nemoshow_canvas_render_item(SkCanvas *canvas, struct showone 
 		nemoshow_canvas_render_item_path,
 		nemoshow_canvas_render_item_bitmap,
 		nemoshow_canvas_render_item_bitmap,
+		nemoshow_canvas_render_item_svg,
 		nemoshow_canvas_render_item_group
 	};
 
@@ -437,28 +452,6 @@ static inline void nemoshow_canvas_render_one(SkCanvas *canvas, struct showone *
 				nemoshow_canvas_render_item(canvas, one);
 			}
 		}
-	} else if (one->type == NEMOSHOW_SVG_TYPE) {
-		struct showsvg *svg = NEMOSHOW_SVG(one);
-		int i;
-
-		canvas->save();
-
-		if (svg->transform & NEMOSHOW_EXTERN_TRANSFORM) {
-			canvas->concat(*NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(NEMOSHOW_REF(one, NEMOSHOW_MATRIX_REF)), matrix));
-		} else if (svg->transform & NEMOSHOW_INTERN_TRANSFORM) {
-			canvas->concat(*NEMOSHOW_SVG_CC(svg, matrix));
-		}
-
-		if (NEMOSHOW_REF(one, NEMOSHOW_CLIP_REF) != NULL)
-			canvas->clipPath(*NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(NEMOSHOW_REF(one, NEMOSHOW_CLIP_REF)), path));
-
-		canvas->concat(*NEMOSHOW_SVG_CC(NEMOSHOW_SVG(one), viewbox));
-
-		for (i = 0; i < one->nchildren; i++) {
-			nemoshow_canvas_render_one(canvas, one->children[i]);
-		}
-
-		canvas->restore();
 	}
 }
 
@@ -517,19 +510,6 @@ static inline void nemoshow_canvas_render_picker_one(SkCanvas *canvas, struct sh
 
 				canvas->drawRect(rect, paint);
 			}
-		}
-	} else if (one->type == NEMOSHOW_SVG_TYPE) {
-		struct showsvg *svg = NEMOSHOW_SVG(one);
-
-		if (svg->event > 0) {
-			SkRect rect = SkRect::MakeXYWH(one->x + one->outer, one->y + one->outer, one->width - one->outer * 2, one->height - one->outer * 2);
-			SkPaint paint;
-
-			paint.setStyle(SkPaint::kFill_Style);
-			paint.setColor(SkColorSetARGB(255, svg->event, 0, 0));
-			paint.setAntiAlias(false);
-
-			canvas->drawRect(rect, paint);
 		}
 	}
 }

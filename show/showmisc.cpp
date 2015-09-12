@@ -62,7 +62,7 @@ struct showprop *nemoshow_get_property(const char *name)
 		{ "tx",								NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_MATRIX_DIRTY },
 		{ "ty",								NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_MATRIX_DIRTY },
 		{ "type",							NEMOSHOW_STRING_PROP,				NEMOSHOW_STYLE_DIRTY },
-		{ "uri",							NEMOSHOW_STRING_PROP,				NEMOSHOW_NONE_DIRTY },
+		{ "uri",							NEMOSHOW_STRING_PROP,				NEMOSHOW_URI_DIRTY },
 		{ "value",						NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_NONE_DIRTY },
 		{ "width",						NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_SHAPE_DIRTY },
 		{ "x",								NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_SHAPE_DIRTY },

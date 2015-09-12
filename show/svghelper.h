@@ -9,8 +9,6 @@ NEMO_BEGIN_EXTERN_C
 
 #include <stdint.h>
 
-#include <showsvg.h>
-
 #define	NEMOSHOW_SVG_DEFAULT_DPI				(100)
 
 typedef enum {
@@ -53,7 +51,7 @@ typedef enum {
 
 struct svgcontext {
 	struct nemoshow *show;
-	struct showsvg *svg;
+	struct showitem *svg;
 	struct showone *one;
 
 	struct nemoxml *xml;

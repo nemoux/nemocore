@@ -211,20 +211,20 @@ void minishell_palm_finish(struct minishell *mini, struct minigrab *grab)
 		nemoshow_item_set_tsr(group);
 		nemoshow_item_translate(group, cx, cy);
 
-		palm->svg = svg = nemoshow_svg_create();
+		palm->svg = svg = nemoshow_item_create(NEMOSHOW_SVG_ITEM);
 		nemoshow_attach_one(show, group);
 		nemoshow_item_attach_one(group, svg);
-		nemoshow_svg_set_canvas(svg, canvas);
-		nemoshow_svg_set_width(svg, 100);
-		nemoshow_svg_set_height(svg, 100);
-		nemoshow_svg_set_uri(svg, "/home/root/.config/palm.svg");
-		nemoshow_svg_set_tsr(svg);
-		nemoshow_svg_translate(svg, -50.0f, -50.0f);
-		nemoshow_svg_pivot(svg, 50.0f, 50.0f);
-		nemoshow_svg_scale(svg, 0.0f, 0.0f);
+		nemoshow_item_set_canvas(svg, canvas);
+		nemoshow_item_set_width(svg, 100);
+		nemoshow_item_set_height(svg, 100);
+		nemoshow_item_set_uri(svg, "/home/root/.config/palm.svg");
+		nemoshow_item_set_tsr(svg);
+		nemoshow_item_translate(svg, -50.0f, -50.0f);
+		nemoshow_item_pivot(svg, 50.0f, 50.0f);
+		nemoshow_item_scale(svg, 0.0f, 0.0f);
 
 		nemobook_set(mini->book, 10, svg);
-		nemoshow_svg_set_event(svg, 10);
+		nemoshow_item_set_event(svg, 10);
 
 		set = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(set, svg);

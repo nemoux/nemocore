@@ -7,8 +7,6 @@
 
 #include <svghelper.h>
 #include <nemoshow.h>
-#include <showsvg.h>
-#include <showsvg.hpp>
 #include <showitem.h>
 #include <showitem.hpp>
 #include <showshader.h>
@@ -410,8 +408,8 @@ static inline void nemoshow_svg_get_viewbox_transform(struct svgcontext *context
 	int aspect_ratio, meet_slice;
 	const char *value;
 
-	NEMOSHOW_SVG_CC(context->svg, viewbox)->setIdentity();
-	NEMOSHOW_SVG_CC(context->svg, viewbox)->postScale(sw / pw, sh / ph);
+	NEMOSHOW_ITEM_CC(context->svg, viewbox)->setIdentity();
+	NEMOSHOW_ITEM_CC(context->svg, viewbox)->postScale(sw / pw, sh / ph);
 
 	value = nemoxml_node_get_attr(node, "viewBox");
 	if (value != NULL) {
@@ -480,36 +478,36 @@ static inline void nemoshow_svg_get_viewbox_transform(struct svgcontext *context
 		par = pw / ph;
 
 		if (aspect_ratio == NEMOSHOW_SVG_ASPECT_RATIO_NONE) {
-			NEMOSHOW_SVG_CC(context->svg, viewbox)->postScale(pw / lw, ph / lh);
-			NEMOSHOW_SVG_CC(context->svg, viewbox)->postTranslate(-lx, -ly);
+			NEMOSHOW_ITEM_CC(context->svg, viewbox)->postScale(pw / lw, ph / lh);
+			NEMOSHOW_ITEM_CC(context->svg, viewbox)->postTranslate(-lx, -ly);
 		} else if((var < par && meet_slice == NEMOSHOW_SVG_MEETSLICE_MEET) ||
 				(var >= par && meet_slice == NEMOSHOW_SVG_MEETSLICE_SLICE)) {
-			NEMOSHOW_SVG_CC(context->svg, viewbox)->postScale(ph / lh, ph / lh);
+			NEMOSHOW_ITEM_CC(context->svg, viewbox)->postScale(ph / lh, ph / lh);
 
 			if (aspect_ratio == NEMOSHOW_SVG_ASPECT_RATIO_XMINYMIN ||
 					aspect_ratio == NEMOSHOW_SVG_ASPECT_RATIO_XMINYMID ||
 					aspect_ratio == NEMOSHOW_SVG_ASPECT_RATIO_XMINYMAX) {
-				NEMOSHOW_SVG_CC(context->svg, viewbox)->postTranslate(-lx, -ly);
+				NEMOSHOW_ITEM_CC(context->svg, viewbox)->postTranslate(-lx, -ly);
 			} else if (aspect_ratio == NEMOSHOW_SVG_ASPECT_RATIO_XMIDYMIN ||
 					aspect_ratio == NEMOSHOW_SVG_ASPECT_RATIO_XMIDYMID ||
 					aspect_ratio == NEMOSHOW_SVG_ASPECT_RATIO_XMIDYMAX) {
-				NEMOSHOW_SVG_CC(context->svg, viewbox)->postTranslate(-lx - (lw - pw * lh / ph) / 2.0f, -ly);
+				NEMOSHOW_ITEM_CC(context->svg, viewbox)->postTranslate(-lx - (lw - pw * lh / ph) / 2.0f, -ly);
 			} else {
-				NEMOSHOW_SVG_CC(context->svg, viewbox)->postTranslate(-lx - (lw - pw * lh / ph), -ly);
+				NEMOSHOW_ITEM_CC(context->svg, viewbox)->postTranslate(-lx - (lw - pw * lh / ph), -ly);
 			}
 		} else {
-			NEMOSHOW_SVG_CC(context->svg, viewbox)->postScale(pw / lw, pw / lw);
+			NEMOSHOW_ITEM_CC(context->svg, viewbox)->postScale(pw / lw, pw / lw);
 
 			if (aspect_ratio == NEMOSHOW_SVG_ASPECT_RATIO_XMINYMIN ||
 					aspect_ratio == NEMOSHOW_SVG_ASPECT_RATIO_XMIDYMIN ||
 					aspect_ratio == NEMOSHOW_SVG_ASPECT_RATIO_XMAXYMIN) {
-				NEMOSHOW_SVG_CC(context->svg, viewbox)->postTranslate(-lx, -ly);
+				NEMOSHOW_ITEM_CC(context->svg, viewbox)->postTranslate(-lx, -ly);
 			} else if (aspect_ratio == NEMOSHOW_SVG_ASPECT_RATIO_XMINYMID ||
 					aspect_ratio == NEMOSHOW_SVG_ASPECT_RATIO_XMIDYMID ||
 					aspect_ratio == NEMOSHOW_SVG_ASPECT_RATIO_XMAXYMID) {
-				NEMOSHOW_SVG_CC(context->svg, viewbox)->postTranslate(-lx, -ly - (lh - ph * lw / pw) / 2.0f);
+				NEMOSHOW_ITEM_CC(context->svg, viewbox)->postTranslate(-lx, -ly - (lh - ph * lw / pw) / 2.0f);
 			} else {
-				NEMOSHOW_SVG_CC(context->svg, viewbox)->postTranslate(-lx, -ly - (lh - ph * lw / pw));
+				NEMOSHOW_ITEM_CC(context->svg, viewbox)->postTranslate(-lx, -ly - (lh - ph * lw / pw));
 			}
 		}
 	}
@@ -1074,7 +1072,7 @@ int nemoshow_svg_load_uri(struct nemoshow *show, struct showone *one, const char
 	nemoxml_update(xml);
 
 	context->show = show;
-	context->svg = NEMOSHOW_SVG(one);
+	context->svg = NEMOSHOW_ITEM(one);
 	context->one = one;
 	context->xml = xml;
 
