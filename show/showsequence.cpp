@@ -925,10 +925,13 @@ void nemoshow_sequence_prepare(struct showone *one, uint32_t serial)
 	struct showone *frame;
 	int i, j, k;
 
-	sequence->t = 0.0f;
-	sequence->iframe = 0;
+	if (one->serial > serial)
+		return;
 
 	one->serial = serial;
+
+	sequence->t = 0.0f;
+	sequence->iframe = 0;
 
 	for (i = 0; i < one->nchildren; i++) {
 		frame = one->children[i];
@@ -938,18 +941,21 @@ void nemoshow_sequence_prepare(struct showone *one, uint32_t serial)
 				struct showset *set = NEMOSHOW_SET(frame->children[j]);
 
 				for (k = 0; k < set->nattrs; k++) {
-					nemoattr_set_serial(set->tattrs[k], serial);
+					if (nemoattr_get_serial(set->tattrs[k]) < serial)
+						nemoattr_set_serial(set->tattrs[k], serial);
 				}
 			} else if (frame->children[j]->type == NEMOSHOW_FIX_TYPE) {
 				struct showfix *fix = NEMOSHOW_FIX(frame->children[j]);
 
 				for (k = 0; k < fix->nattrs; k++) {
-					nemoattr_set_serial(fix->tattrs[k], serial);
+					if (nemoattr_get_serial(fix->tattrs[k]) < serial)
+						nemoattr_set_serial(fix->tattrs[k], serial);
 				}
 			} else if (frame->children[j]->type == NEMOSHOW_FOLLOW_TYPE) {
 				struct showfollow *follow = NEMOSHOW_FOLLOW(frame->children[j]);
 
-				nemoattr_set_serial(follow->attr, serial);
+				if (nemoattr_get_serial(follow->attr) < serial)
+					nemoattr_set_serial(follow->attr, serial);
 			}
 		}
 	}
