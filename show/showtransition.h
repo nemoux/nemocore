@@ -56,7 +56,7 @@ struct showtransition {
 };
 
 extern struct showtransition *nemoshow_transition_create(struct showone *ease, uint32_t duration, uint32_t delay);
-extern void nemoshow_transition_destroy(struct showtransition *trans);
+extern void nemoshow_transition_destroy(struct showtransition *trans, int done);
 
 extern void nemoshow_transition_check_one(struct showtransition *trans, struct showone *one);
 

@@ -40,7 +40,7 @@ struct showtransition *nemoshow_transition_create(struct showone *ease, uint32_t
 	return trans;
 }
 
-void nemoshow_transition_destroy(struct showtransition *trans)
+void nemoshow_transition_destroy(struct showtransition *trans, int done)
 {
 	nemoshow_transition_dispatch_done_t dispatch_done = trans->dispatch_done;
 	void *userdata = trans->userdata;
@@ -71,7 +71,7 @@ void nemoshow_transition_destroy(struct showtransition *trans)
 	}
 
 	for (i = 0; i < trans->ntransitions; i++) {
-		nemoshow_transition_destroy(trans->transitions[i]);
+		nemoshow_transition_destroy(trans->transitions[i], done);
 	}
 
 	nemolist_remove(&trans->link);
@@ -81,7 +81,7 @@ void nemoshow_transition_destroy(struct showtransition *trans)
 	free(trans->transitions);
 	free(trans);
 
-	if (dispatch_done != NULL) {
+	if (done != 0 && dispatch_done != NULL) {
 		dispatch_done(userdata);
 	}
 }
@@ -90,7 +90,7 @@ static void nemoshow_transition_handle_destroy_signal(struct nemolistener *liste
 {
 	struct transitionsensor *sensor = (struct transitionsensor *)container_of(listener, struct transitionsensor, listener);
 
-	nemoshow_transition_destroy(sensor->transition);
+	nemoshow_transition_destroy(sensor->transition, 0);
 }
 
 void nemoshow_transition_check_one(struct showtransition *trans, struct showone *one)
