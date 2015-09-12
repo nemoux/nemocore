@@ -124,6 +124,13 @@ static inline void nemoshow_item_set_event(struct showone *one, int32_t event)
 	item->event = event;
 }
 
+static inline int32_t nemoshow_item_get_event(struct showone *one)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	return item->event;
+}
+
 static inline void nemoshow_item_set_canvas(struct showone *one, struct showone *canvas)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
