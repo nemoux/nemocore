@@ -29,8 +29,6 @@
 #include <nemomisc.h>
 #include <nemolog.h>
 
-static void drm_screen_destroy(struct nemoscreen *base);
-
 static void drm_destroy_frame_callback(struct gbm_bo *bo, void *data)
 {
 	struct drmframe *frame = (struct drmframe *)data;

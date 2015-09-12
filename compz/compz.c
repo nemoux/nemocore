@@ -327,6 +327,8 @@ void nemocompz_destroy(struct nemocompz *compz)
 
 	nemolog_message("COMPZ", "destroy all screens\n");
 
+	wl_list_remove(&compz->frame_listener.link);
+
 	wl_list_for_each_safe(screen, snext, &compz->screen_list, link) {
 		if (screen->destroy != NULL)
 			screen->destroy(screen);
@@ -338,8 +340,6 @@ void nemocompz_destroy(struct nemocompz *compz)
 		if (backend->destroy != NULL)
 			backend->destroy(backend);
 	}
-
-	wl_list_remove(&compz->frame_listener.link);
 
 	pixman_region32_fini(&compz->damage);
 	pixman_region32_fini(&compz->region);
