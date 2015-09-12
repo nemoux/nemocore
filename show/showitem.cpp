@@ -567,6 +567,8 @@ static inline void nemoshow_item_update_shape(struct nemoshow *show, struct show
 		NEMOSHOW_ITEM_CC(item, bitmap) = new SkBitmap;
 		NEMOSHOW_ITEM_CC(item, bitmap)->allocPixels(
 				SkImageInfo::Make(item->width, item->height, kN32_SkColorType, kPremul_SkAlphaType));
+
+		nemoshow_canvas_render_vector_on_one(show, one, NEMOSHOW_REF(one, NEMOSHOW_SRC_REF));
 	}
 }
 
@@ -659,33 +661,28 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 		outer += NEMOSHOW_FILTER_AT(NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF), r) * 2.0f;
 	box.outset(outer, outer);
 
-	if (item->canvas != NULL) {
-		one->x = MAX(floor(box.x()), 0);
-		one->y = MAX(floor(box.y()), 0);
-		one->width = ceil(box.width());
-		one->height = ceil(box.height());
-		one->outer = outer;
+	one->x = MAX(floor(box.x()), 0);
+	one->y = MAX(floor(box.y()), 0);
+	one->width = ceil(box.width());
+	one->height = ceil(box.height());
+	one->outer = outer;
 
-		one->ax = anchor.x();
-		one->ay = anchor.y();
+	one->ax = anchor.x();
+	one->ay = anchor.y();
 
-		snprintf(attr, NEMOSHOW_SYMBOL_MAX, "%s_x", one->id);
-		nemoshow_update_symbol(show, attr, one->x);
-		snprintf(attr, NEMOSHOW_SYMBOL_MAX, "%s_y", one->id);
-		nemoshow_update_symbol(show, attr, one->y);
-		snprintf(attr, NEMOSHOW_SYMBOL_MAX, "%s_w", one->id);
-		nemoshow_update_symbol(show, attr, one->width);
-		snprintf(attr, NEMOSHOW_SYMBOL_MAX, "%s_h", one->id);
-		nemoshow_update_symbol(show, attr, one->height);
-	}
+	snprintf(attr, NEMOSHOW_SYMBOL_MAX, "%s_x", one->id);
+	nemoshow_update_symbol(show, attr, one->x);
+	snprintf(attr, NEMOSHOW_SYMBOL_MAX, "%s_y", one->id);
+	nemoshow_update_symbol(show, attr, one->y);
+	snprintf(attr, NEMOSHOW_SYMBOL_MAX, "%s_w", one->id);
+	nemoshow_update_symbol(show, attr, one->width);
+	snprintf(attr, NEMOSHOW_SYMBOL_MAX, "%s_h", one->id);
+	nemoshow_update_symbol(show, attr, one->height);
 }
 
 int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
-
-	if (item->canvas == NULL)
-		item->canvas = nemoshow_one_get_parent(one, NEMOSHOW_CANVAS_TYPE, 0);
 
 	if ((one->dirty & NEMOSHOW_URI_DIRTY) != 0)
 		nemoshow_item_update_uri(show, one);
@@ -705,14 +702,16 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 		nemoshow_item_update_matrix(show, one);
 
 	if ((one->dirty & NEMOSHOW_SHAPE_DIRTY) != 0) {
-		nemoshow_canvas_damage_one(item->canvas, one);
+		if (item->canvas != NULL)
+			nemoshow_canvas_damage_one(item->canvas, one);
 
 		nemoshow_item_update_shape(show, one);
 
 		nemoshow_item_update_boundingbox(show, one);
 	}
 
-	nemoshow_canvas_damage_one(item->canvas, one);
+	if (item->canvas != NULL)
+		nemoshow_canvas_damage_one(item->canvas, one);
 
 	return 0;
 }
@@ -750,24 +749,18 @@ void nemoshow_item_set_shader(struct showone *one, struct showone *shader)
 
 void nemoshow_item_set_filter(struct showone *one, struct showone *filter)
 {
-	struct showitem *item = NEMOSHOW_ITEM(one);
-
 	nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF));
 	nemoshow_one_reference_one(one, filter, NEMOSHOW_FILTER_REF);
 }
 
 void nemoshow_item_set_clip(struct showone *one, struct showone *clip)
 {
-	struct showitem *item = NEMOSHOW_ITEM(one);
-
 	nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_CLIP_REF));
 	nemoshow_one_reference_one(one, clip, NEMOSHOW_CLIP_REF);
 }
 
 void nemoshow_item_set_font(struct showone *one, struct showone *font)
 {
-	struct showitem *item = NEMOSHOW_ITEM(one);
-
 	nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_FONT_REF));
 	nemoshow_one_reference_one(one, font, NEMOSHOW_FONT_REF);
 
@@ -776,10 +769,16 @@ void nemoshow_item_set_font(struct showone *one, struct showone *font)
 
 void nemoshow_item_set_path(struct showone *one, struct showone *path)
 {
-	struct showitem *item = NEMOSHOW_ITEM(one);
-
 	nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_PATH_REF));
 	nemoshow_one_reference_one(one, path, NEMOSHOW_PATH_REF);
+
+	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
+}
+
+void nemoshow_item_set_src(struct showone *one, struct showone *src)
+{
+	nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_SRC_REF));
+	nemoshow_one_reference_one(one, src, NEMOSHOW_SRC_REF);
 
 	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }

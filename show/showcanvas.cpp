@@ -488,6 +488,24 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 	NEMOSHOW_CANVAS_CC(canvas, damage)->setEmpty();
 }
 
+void nemoshow_canvas_render_vector_on_one(struct nemoshow *show, struct showone *one, struct showone *ref)
+{
+	struct showitem *src = NEMOSHOW_ITEM(ref);
+	struct showitem *dst = NEMOSHOW_ITEM(one);
+	int i;
+
+	SkBitmapDevice device(*NEMOSHOW_ITEM_CC(dst, bitmap));
+	SkCanvas canvas(&device);
+
+	canvas.clear(SK_ColorTRANSPARENT);
+	canvas.scale(dst->width / src->width, dst->height / src->height);
+	canvas.concat(*NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(ref), viewbox));
+
+	for (i = 0; i < ref->nchildren; i++) {
+		nemoshow_canvas_render_one(&canvas, ref->children[i]);
+	}
+}
+
 static inline void nemoshow_canvas_render_picker_one(SkCanvas *canvas, struct showone *one)
 {
 	if (one->type == NEMOSHOW_ITEM_TYPE) {
