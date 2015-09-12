@@ -42,6 +42,8 @@ struct showtransition *nemoshow_transition_create(struct showone *ease, uint32_t
 
 void nemoshow_transition_destroy(struct showtransition *trans)
 {
+	nemoshow_transition_dispatch_done_t dispatch_done = trans->dispatch_done;
+	void *userdata = trans->userdata;
 	struct transitionsensor *sensor, *nsensor;
 	int i;
 
@@ -78,6 +80,10 @@ void nemoshow_transition_destroy(struct showtransition *trans)
 	free(trans->sequences);
 	free(trans->transitions);
 	free(trans);
+
+	if (dispatch_done != NULL) {
+		dispatch_done(userdata);
+	}
 }
 
 static void nemoshow_transition_handle_destroy_signal(struct nemolistener *listener, void *data)

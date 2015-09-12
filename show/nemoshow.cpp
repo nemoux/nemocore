@@ -939,14 +939,8 @@ void nemoshow_destroy_transition(struct nemoshow *show)
 {
 	while (nemolist_empty(&show->transition_destroy_list) == 0) {
 		struct showtransition *trans = nemolist_node0(&show->transition_destroy_list, struct showtransition, link);
-		nemoshow_transition_dispatch_done_t dispatch_done = trans->dispatch_done;
-		void *userdata = trans->userdata;
 
 		nemoshow_transition_destroy(trans);
-
-		if (dispatch_done != NULL) {
-			dispatch_done(userdata);
-		}
 	}
 }
 
