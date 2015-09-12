@@ -376,25 +376,11 @@ static inline void nemoshow_canvas_render_item_bitmap(SkCanvas *canvas, struct s
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	struct showitem *style = NEMOSHOW_ITEM(NEMOSHOW_REF(one, NEMOSHOW_STYLE_REF));
 	SkRect rect = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
-	int needs_redraw = 0;
 
-	if (NEMOSHOW_ITEM_CC(item, bitmap) != NULL) {
-		if (NEMOSHOW_ITEM_CC(item, bitmap)->width() != item->width ||
-				NEMOSHOW_ITEM_CC(item, bitmap)->height() != item->height) {
-			delete NEMOSHOW_ITEM_CC(item, bitmap);
-
-			needs_redraw = 1;
-		}
-	} else {
-		needs_redraw = 1;
-	}
-
-	if (needs_redraw != 0) {
-		NEMOSHOW_ITEM_CC(item, bitmap) = new SkBitmap;
-		NEMOSHOW_ITEM_CC(item, bitmap)->allocPixels(
-				SkImageInfo::Make(item->width, item->height, kN32_SkColorType, kPremul_SkAlphaType));
-
+	if (nemoshow_one_has_state(one, NEMOSHOW_REDRAW_STATE)) {
 		nemoshow_canvas_render_vector_on_bitmap(NEMOSHOW_ITEM_CC(item, bitmap), NEMOSHOW_REF(one, NEMOSHOW_SRC_REF));
+
+		nemoshow_one_put_state(one, NEMOSHOW_REDRAW_STATE);
 	}
 
 	canvas->drawBitmapRect(*NEMOSHOW_ITEM_CC(item, bitmap), rect);

@@ -560,6 +560,24 @@ static inline void nemoshow_item_update_shape(struct nemoshow *show, struct show
 					item->x + cos(item->to * M_PI / 180.0f) * item->r,
 					item->y + sin(item->to * M_PI / 180.0f) * item->r);
 		}
+	} else if (one->sub == NEMOSHOW_BITMAP_ITEM) {
+		if (NEMOSHOW_ITEM_CC(item, bitmap) == NULL) {
+			NEMOSHOW_ITEM_CC(item, bitmap) = new SkBitmap;
+			NEMOSHOW_ITEM_CC(item, bitmap)->allocPixels(
+					SkImageInfo::Make(item->width, item->height, kN32_SkColorType, kPremul_SkAlphaType));
+
+			nemoshow_one_set_state(one, NEMOSHOW_REDRAW_STATE);
+		} else if (
+				NEMOSHOW_ITEM_CC(item, bitmap)->width() != item->width ||
+				NEMOSHOW_ITEM_CC(item, bitmap)->height() != item->height) {
+			delete NEMOSHOW_ITEM_CC(item, bitmap);
+
+			NEMOSHOW_ITEM_CC(item, bitmap) = new SkBitmap;
+			NEMOSHOW_ITEM_CC(item, bitmap)->allocPixels(
+					SkImageInfo::Make(item->width, item->height, kN32_SkColorType, kPremul_SkAlphaType));
+
+			nemoshow_one_set_state(one, NEMOSHOW_REDRAW_STATE);
+		}
 	}
 }
 
