@@ -229,13 +229,19 @@ static inline void nemoshow_item_update_uri(struct nemoshow *show, struct showon
 		delete NEMOSHOW_ITEM_CC(item, bitmap);
 
 	if (item->uri != NULL) {
-		NEMOSHOW_ITEM_CC(item, bitmap) = new SkBitmap;
+		if (one->sub == NEMOSHOW_IMAGE_ITEM) {
+			NEMOSHOW_ITEM_CC(item, bitmap) = new SkBitmap;
 
-		r = SkImageDecoder::DecodeFile(item->uri, NEMOSHOW_ITEM_CC(item, bitmap));
-		if (r == false) {
-			delete NEMOSHOW_ITEM_CC(item, bitmap);
+			r = SkImageDecoder::DecodeFile(item->uri, NEMOSHOW_ITEM_CC(item, bitmap));
+			if (r == false) {
+				delete NEMOSHOW_ITEM_CC(item, bitmap);
 
-			NEMOSHOW_ITEM_CC(item, bitmap) = NULL;
+				NEMOSHOW_ITEM_CC(item, bitmap) = NULL;
+			}
+		} else if (one->sub == NEMOSHOW_SVG_ITEM) {
+			NEMOSHOW_ITEM_CC(item, bitmap) = new SkBitmap;
+			NEMOSHOW_ITEM_CC(item, bitmap)->allocPixels(
+					SkImageInfo::Make(item->width, item->height, kN32_SkColorType, kPremul_SkAlphaType));
 		}
 
 		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
@@ -599,7 +605,7 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 
 			box.outset(item->fontsize, item->fontsize);
 		}
-	} else if (one->sub == NEMOSHOW_IMAGE_ITEM) {
+	} else if (one->sub == NEMOSHOW_IMAGE_ITEM || one->sub == NEMOSHOW_SVG_ITEM) {
 		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
 	} else {
 		box = SkRect::MakeXYWH(0, 0, 0, 0);
