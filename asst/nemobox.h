@@ -35,7 +35,10 @@ NEMO_BEGIN_EXTERN_C
 
 #define	NEMOBOX_REMOVE(a, n, i)	\
 	if (i < n - 1) {	\
-		memcpy(a + i, a + i + 1, sizeof(a[0]) * (n - i - 1));	\
+		int j;	\
+		for (j = i; j < n - 1; j++) {	\
+			a[j] = a[j + 1];	\
+		}	\
 	}	\
 	n--
 
