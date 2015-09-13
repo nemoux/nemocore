@@ -32,7 +32,13 @@ struct showone *nemoshow_canvas_create(void)
 
 	canvas->cc = new showcanvas_t;
 	NEMOSHOW_CANVAS_CC(canvas, canvas) = NULL;
+	NEMOSHOW_CANVAS_CC(canvas, bitmap) = NULL;
+	NEMOSHOW_CANVAS_CC(canvas, device) = NULL;
+	NEMOSHOW_CANVAS_CC(canvas, damage) = NULL;
 	NEMOSHOW_CANVAS_CP(canvas, canvas) = NULL;
+	NEMOSHOW_CANVAS_CP(canvas, bitmap) = NULL;
+	NEMOSHOW_CANVAS_CP(canvas, device) = NULL;
+	NEMOSHOW_CANVAS_CP(canvas, damage) = NULL;
 
 	canvas->viewport.sx = 1.0f;
 	canvas->viewport.sy = 1.0f;

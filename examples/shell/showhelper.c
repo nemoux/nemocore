@@ -203,7 +203,7 @@ static void nemoshow_dispatch_actor_frame(struct nemoactor *actor, uint32_t msec
 	} else {
 		nemoactor_feedback_done(actor);
 	}
-	
+
 	nemoshow_destroy_transition(show);
 
 	nemoshow_render_one(show);
@@ -219,11 +219,11 @@ static void nemoshow_dispatch_timer(struct nemotimer *timer, void *data)
 {
 	struct showcontext *scon = (struct showcontext *)data;
 
+	nemotimer_set_timeout(timer, 500);
+
 	nemoshow_validate_one(scon->show);
 
 	nemotale_push_timer_event(scon->tale, time_current_msecs());
-
-	nemotimer_set_timeout(timer, 500);
 }
 
 struct nemoshow *nemoshow_create_on_actor(struct nemoshell *shell, int32_t width, int32_t height, nemotale_dispatch_event_t dispatch)
@@ -315,13 +315,13 @@ void nemoshow_destroy_on_actor(struct nemoshow *show)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 
+	nemotimer_destroy(scon->timer);
+
 	nemoshow_destroy(show);
 
 	nemotale_destroy_gl(scon->tale);
 
 	nemoactor_destroy(scon->actor);
-
-	nemotimer_destroy(scon->timer);
 
 	free(scon);
 }
