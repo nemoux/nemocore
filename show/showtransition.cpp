@@ -47,6 +47,8 @@ void nemoshow_transition_destroy(struct showtransition *trans, int done)
 	struct transitionsensor *sensor, *nsensor;
 	int i;
 
+	nemolist_remove(&trans->link);
+
 	if (trans->parent != NULL) {
 		struct showtransition *ptrans = trans->parent;
 
@@ -71,11 +73,10 @@ void nemoshow_transition_destroy(struct showtransition *trans, int done)
 	}
 
 	for (i = 0; i < trans->ntransitions; i++) {
+		trans->transitions[i]->parent = NULL;
+
 		nemoshow_transition_destroy(trans->transitions[i], done);
 	}
-
-	nemolist_remove(&trans->link);
-	nemolist_remove(&trans->sensor_list);
 
 	free(trans->sequences);
 	free(trans->transitions);
