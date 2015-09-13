@@ -50,6 +50,7 @@ INSTALL(TARGETS nemoshell DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
 
 set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/shell/shell.h
+	${CMAKE_SOURCE_DIR}/shell/grab.h
 	${CMAKE_SOURCE_DIR}/shell/move.h
 	${CMAKE_SOURCE_DIR}/shell/pick.h
 	${CMAKE_SOURCE_DIR}/shell/catch.h
