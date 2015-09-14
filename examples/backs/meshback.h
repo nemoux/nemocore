@@ -37,8 +37,6 @@ struct meshback {
 	uint32_t *indices;
 	int nindices, sindices;
 
-	int iindices, cindices;
-
 	float *vertices;
 	int nvertices, svertices;
 

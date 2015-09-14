@@ -28,7 +28,7 @@
 #include <nemobox.h>
 #include <nemomisc.h>
 
-static GLuint meshback_create_shader(void)
+static GLuint meshback_create_simple_shader(void)
 {
 	static const char *vert_shader_text =
 		"uniform mat4 projection;\n"
@@ -85,9 +85,6 @@ static void meshback_prepare(struct meshback *mesh, const char *filepath, const 
 	mesh->nindices = 0;
 	mesh->sindices = 16;
 
-	mesh->cindices = 0;
-	mesh->iindices = 0;
-
 	mesh->vertices = (float *)malloc(sizeof(float) * 16);
 	mesh->nvertices = 0;
 	mesh->svertices = 16;
@@ -128,15 +125,15 @@ static void meshback_prepare(struct meshback *mesh, const char *filepath, const 
 
 	max = MAX(maxx - minx, MAX(maxy - miny, maxz - minz));
 
-	mesh->sx = 1.0f / max;
-	mesh->sy = 1.0f / max;
-	mesh->sz = 1.0f / max;
+	mesh->sx = 2.0f / max;
+	mesh->sy = 2.0f / max;
+	mesh->sz = 2.0f / max;
 
-	mesh->tx = -(maxx - minx) / 2.0f - minx;
-	mesh->ty = -(maxy - miny) / 2.0f - miny;
-	mesh->tz = -(maxz - minz) / 2.0f - minz;
+	mesh->tx = -(maxx + minx) / 2.0f;
+	mesh->ty = -(maxy + miny) / 2.0f;
+	mesh->tz = -(maxz + minz) / 2.0f;
 
-	mesh->program = meshback_create_shader();
+	mesh->program = meshback_create_simple_shader();
 
 	mesh->uprojection = glGetUniformLocation(mesh->program, "projection");
 	mesh->ucolor = glGetUniformLocation(mesh->program, "color");
@@ -194,7 +191,7 @@ static void meshback_render(struct meshback *mesh, double s, double r)
 	nemomatrix_translate_xyz(&mesh->matrix, mesh->tx, mesh->ty, mesh->tz);
 	nemomatrix_rotate_y(&mesh->matrix, cos(r), sin(r));
 	nemomatrix_rotate_x(&mesh->matrix, cos(-M_PI / 36.0f), sin(-M_PI / 36.0f));
-	nemomatrix_scale_xyz(&mesh->matrix, mesh->sx * mesh->aspect * s, mesh->sy * s * -1.0f, mesh->sz * s);
+	nemomatrix_scale_xyz(&mesh->matrix, mesh->sx * mesh->aspect * s, mesh->sy * s * -1.0f, mesh->sz * mesh->aspect * s);
 
 	glUseProgram(mesh->program);
 
@@ -210,7 +207,7 @@ static void meshback_render(struct meshback *mesh, double s, double r)
 	glUniform4fv(mesh->ucolor, 1, rgba);
 
 	glBindVertexArray(mesh->varray);
-	glDrawElements(GL_LINES, mesh->cindices, GL_UNSIGNED_INT, NULL);
+	glDrawElements(GL_LINES, mesh->nindices, GL_UNSIGNED_INT, NULL);
 	glBindVertexArray(0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -230,17 +227,7 @@ static void meshback_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 		nemocanvas_feedback(canvas);
 	}
 
-	if (mesh->cindices <= 0) {
-		mesh->cindices = 0;
-		mesh->iindices = 128;
-	} else if (mesh->cindices >= mesh->nindices) {
-		mesh->cindices = mesh->nindices;
-		mesh->iindices = -128;
-	}
-
-	meshback_render(mesh, 2.0f, ((double)msecs / 1000.0f) * M_PI / 360.0f);
-
-	mesh->cindices += mesh->iindices;
+	meshback_render(mesh, 1.0f, ((double)msecs / 1000.0f) * M_PI / 360.0f);
 
 	nemotale_node_damage_all(mesh->node);
 
