@@ -56,11 +56,17 @@ struct meshcontext {
 	GLuint vbuffer;
 	GLuint vindex;
 
-	uint32_t *indices;
-	int nindices, sindices;
+	uint32_t *lines;
+	int nlines, slines;
+
+	uint32_t *meshes;
+	int nmeshes, smeshes;
 
 	float *vertices;
 	int nvertices, svertices;
+
+	GLenum mode;
+	int elements;
 
 	float aspect;
 	float sx, sy, sz;
@@ -143,7 +149,7 @@ static void nemomesh_prepare_shader(struct meshcontext *context, GLuint program)
 	context->ucolor = glGetUniformLocation(context->program, "color");
 }
 
-static void nemomesh_prepare(struct meshcontext *context, const char *filepath, const char *basepath)
+static void nemomesh_create_buffer(struct meshcontext *context, const char *filepath, const char *basepath)
 {
 	std::vector<tinyobj::shape_t> shapes;
 	std::vector<tinyobj::material_t> materials;
@@ -153,9 +159,13 @@ static void nemomesh_prepare(struct meshcontext *context, const char *filepath, 
 	float max;
 	int i, j;
 
-	context->indices = (uint32_t *)malloc(sizeof(uint32_t) * 16);
-	context->nindices = 0;
-	context->sindices = 16;
+	context->lines = (uint32_t *)malloc(sizeof(uint32_t) * 16);
+	context->nlines = 0;
+	context->slines = 16;
+
+	context->meshes = (uint32_t *)malloc(sizeof(uint32_t) * 16);
+	context->nmeshes = 0;
+	context->smeshes = 16;
 
 	context->vertices = (float *)malloc(sizeof(float) * 16);
 	context->nvertices = 0;
@@ -167,12 +177,16 @@ static void nemomesh_prepare(struct meshcontext *context, const char *filepath, 
 
 	for (i = 0; i < shapes.size(); i++) {
 		for (j = 0; j < shapes[i].mesh.indices.size() / 3; j++) {
-			NEMOBOX_APPEND(context->indices, context->sindices, context->nindices, shapes[i].mesh.indices[j * 3 + 0] + base);
-			NEMOBOX_APPEND(context->indices, context->sindices, context->nindices, shapes[i].mesh.indices[j * 3 + 1] + base);
-			NEMOBOX_APPEND(context->indices, context->sindices, context->nindices, shapes[i].mesh.indices[j * 3 + 0] + base);
-			NEMOBOX_APPEND(context->indices, context->sindices, context->nindices, shapes[i].mesh.indices[j * 3 + 2] + base);
-			NEMOBOX_APPEND(context->indices, context->sindices, context->nindices, shapes[i].mesh.indices[j * 3 + 1] + base);
-			NEMOBOX_APPEND(context->indices, context->sindices, context->nindices, shapes[i].mesh.indices[j * 3 + 2] + base);
+			NEMOBOX_APPEND(context->lines, context->slines, context->nlines, shapes[i].mesh.indices[j * 3 + 0] + base);
+			NEMOBOX_APPEND(context->lines, context->slines, context->nlines, shapes[i].mesh.indices[j * 3 + 1] + base);
+			NEMOBOX_APPEND(context->lines, context->slines, context->nlines, shapes[i].mesh.indices[j * 3 + 0] + base);
+			NEMOBOX_APPEND(context->lines, context->slines, context->nlines, shapes[i].mesh.indices[j * 3 + 2] + base);
+			NEMOBOX_APPEND(context->lines, context->slines, context->nlines, shapes[i].mesh.indices[j * 3 + 1] + base);
+			NEMOBOX_APPEND(context->lines, context->slines, context->nlines, shapes[i].mesh.indices[j * 3 + 2] + base);
+
+			NEMOBOX_APPEND(context->meshes, context->smeshes, context->nmeshes, shapes[i].mesh.indices[j * 3 + 0] + base);
+			NEMOBOX_APPEND(context->meshes, context->smeshes, context->nmeshes, shapes[i].mesh.indices[j * 3 + 1] + base);
+			NEMOBOX_APPEND(context->meshes, context->smeshes, context->nmeshes, shapes[i].mesh.indices[j * 3 + 2] + base);
 		}
 
 		if (shapes[i].mesh.normals.size() != shapes[i].mesh.positions.size()) {
@@ -232,16 +246,6 @@ static void nemomesh_prepare(struct meshcontext *context, const char *filepath, 
 	context->ty = -(maxy + miny) / 2.0f;
 	context->tz = -(maxz + minz) / 2.0f;
 
-	context->programs[0] = nemomesh_create_shader(simple_fragment_shader, simple_vertex_shader);
-	context->programs[1] = nemomesh_create_shader(light_fragment_shader, light_vertex_shader);
-
-	nemomesh_prepare_shader(context, context->programs[0]);
-
-	fbo_prepare_context(
-			nemotale_node_get_texture(context->node),
-			context->width, context->height,
-			&context->fbo, &context->dbo);
-
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 
@@ -258,21 +262,22 @@ static void nemomesh_prepare(struct meshcontext *context, const char *filepath, 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	glGenBuffers(1, &context->vindex);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, context->vindex);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * context->nindices, context->indices, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	glBindVertexArray(0);
 }
 
-static void nemomesh_finish(struct meshcontext *context)
+static void nemomesh_prepare_buffer(struct meshcontext *context, GLenum mode, uint32_t *buffers, int elements)
 {
-	glDeleteBuffers(1, &context->vbuffer);
-	glDeleteBuffers(1, &context->vindex);
-	glDeleteVertexArrays(1, &context->varray);
+	glBindVertexArray(context->varray);
 
-	glDeleteFramebuffers(1, &context->fbo);
-	glDeleteRenderbuffers(1, &context->dbo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, context->vindex);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * elements, buffers, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	glBindVertexArray(0);
+
+	context->mode = mode;
+	context->elements = elements;
 }
 
 static void nemomesh_render(struct meshcontext *context)
@@ -293,7 +298,7 @@ static void nemomesh_render(struct meshcontext *context)
 	glUniform4fv(context->ucolor, 1, rgba);
 
 	glBindVertexArray(context->varray);
-	glDrawElements(GL_LINES, context->nindices, GL_UNSIGNED_INT, NULL);
+	glDrawElements(context->mode, context->elements, GL_UNSIGNED_INT, NULL);
 	glBindVertexArray(0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -547,7 +552,17 @@ int main(int argc, char *argv[])
 	nemotale_node_opaque(node, 0, 0, width, height);
 	nemotale_attach_node(tale, node);
 
-	nemomesh_prepare(context, filepath, basepath);
+	nemomesh_create_buffer(context, filepath, basepath);
+	nemomesh_prepare_buffer(context, GL_LINES, context->lines, context->nlines);
+
+	context->programs[0] = nemomesh_create_shader(simple_fragment_shader, simple_vertex_shader);
+	context->programs[1] = nemomesh_create_shader(light_fragment_shader, light_vertex_shader);
+	nemomesh_prepare_shader(context, context->programs[0]);
+
+	fbo_prepare_context(
+			nemotale_node_get_texture(context->node),
+			context->width, context->height,
+			&context->fbo, &context->dbo);
 
 	nemoquaternion_init_identity(&context->cquat);
 
@@ -555,7 +570,12 @@ int main(int argc, char *argv[])
 
 	nemotool_run(tool);
 
-	nemomesh_finish(context);
+	glDeleteBuffers(1, &context->vbuffer);
+	glDeleteBuffers(1, &context->vindex);
+	glDeleteVertexArrays(1, &context->varray);
+
+	glDeleteFramebuffers(1, &context->fbo);
+	glDeleteRenderbuffers(1, &context->dbo);
 
 	nemotale_destroy_gl(tale);
 
