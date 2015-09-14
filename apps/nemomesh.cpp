@@ -48,9 +48,11 @@ struct meshcontext {
 
 	GLuint program;
 	GLuint uprojection;
+	GLuint ulight;
 	GLuint ucolor;
 
 	struct nemomatrix matrix;
+	struct nemomatrix inverse;
 
 	GLuint varray;
 	GLuint vbuffer;
@@ -81,11 +83,12 @@ static const char *simple_vertex_shader =
 "attribute vec3 vertex;\n"
 "attribute vec3 normal;\n"
 "void main() {\n"
-"  gl_Position = projection * vec4(vertex, 1.0f);\n"
+"  gl_Position = projection * vec4(vertex, 1.0);\n"
 "}\n";
 
 static const char *simple_fragment_shader =
 "precision mediump float;\n"
+"uniform vec4 light;\n"
 "uniform vec4 color;\n"
 "void main() {\n"
 "  gl_FragColor = color;\n"
@@ -95,15 +98,19 @@ static const char *light_vertex_shader =
 "uniform mat4 projection;\n"
 "attribute vec3 vertex;\n"
 "attribute vec3 normal;\n"
+"varying vec3 vnormal;\n"
 "void main() {\n"
-"  gl_Position = projection * vec4(vertex, 1.0f);\n"
+"  gl_Position = projection * vec4(vertex, 1.0);\n"
+"  vnormal = normal;\n"
 "}\n";
 
 static const char *light_fragment_shader =
 "precision mediump float;\n"
+"uniform vec4 light;\n"
 "uniform vec4 color;\n"
+"varying vec3 vnormal;\n"
 "void main() {\n"
-"  gl_FragColor = color;\n"
+"  gl_FragColor = vec4(color.xyz * normalize(max(dot(light.xyz, vnormal), 0.0)), color.z);\n"
 "}\n";
 
 static GLuint nemomesh_create_shader(const char *fshader, const char *vshader)
@@ -146,6 +153,7 @@ static void nemomesh_prepare_shader(struct meshcontext *context, GLuint program)
 	context->program = program;
 
 	context->uprojection = glGetUniformLocation(context->program, "projection");
+	context->ulight = glGetUniformLocation(context->program, "light");
 	context->ucolor = glGetUniformLocation(context->program, "color");
 }
 
@@ -282,6 +290,7 @@ static void nemomesh_prepare_buffer(struct meshcontext *context, GLenum mode, ui
 
 static void nemomesh_render(struct meshcontext *context)
 {
+	struct nemovector light = { 1.0f, 1.0f, -1.0f, 1.0f };
 	GLfloat rgba[4] = { 0.0f, 1.0f, 1.0f, 1.0f };
 
 	glUseProgram(context->program);
@@ -294,7 +303,10 @@ static void nemomesh_render(struct meshcontext *context)
 	glClearDepth(0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	nemomatrix_transform(&context->inverse, &light);
+
 	glUniformMatrix4fv(context->uprojection, 1, GL_FALSE, (GLfloat *)context->matrix.d);
+	glUniform4fv(context->ulight, 1, light.f);
 	glUniform4fv(context->ucolor, 1, rgba);
 
 	glBindVertexArray(context->varray);
@@ -355,6 +367,8 @@ static void nemomesh_update_transform(struct meshcontext *context)
 	nemomatrix_translate_xyz(&context->matrix, context->tx, context->ty, context->tz);
 	nemomatrix_multiply_quaternion(&context->matrix, &context->cquat);
 	nemomatrix_scale_xyz(&context->matrix, context->sx * context->aspect, context->sy * -1.0f, context->sz * context->aspect);
+
+	nemomatrix_invert(&context->inverse, &context->matrix);
 }
 
 static void nemomesh_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
@@ -400,7 +414,10 @@ static void nemomesh_dispatch_tale_event(struct nemotale *tale, struct talenode 
 		}
 
 		if (nemotale_is_single_click(tale, event, type)) {
-			nemoquaternion_init_identity(&context->cquat);
+			if (context->mode == GL_TRIANGLES)
+				nemomesh_prepare_buffer(context, GL_LINES, context->lines, context->nlines);
+			else
+				nemomesh_prepare_buffer(context, GL_TRIANGLES, context->meshes, context->nmeshes);
 
 			nemocanvas_dispatch_frame(context->canvas);
 		}
@@ -557,7 +574,7 @@ int main(int argc, char *argv[])
 
 	context->programs[0] = nemomesh_create_shader(simple_fragment_shader, simple_vertex_shader);
 	context->programs[1] = nemomesh_create_shader(light_fragment_shader, light_vertex_shader);
-	nemomesh_prepare_shader(context, context->programs[0]);
+	nemomesh_prepare_shader(context, context->programs[1]);
 
 	fbo_prepare_context(
 			nemotale_node_get_texture(context->node),
