@@ -27,6 +27,8 @@
 #include <nemobox.h>
 #include <nemomisc.h>
 
+#define	NEMOMESH_SHADERS_MAX			(2)
+
 struct meshcontext {
 	struct nemotool *tool;
 
@@ -41,6 +43,8 @@ struct meshcontext {
 	int32_t width, height;
 
 	GLuint fbo, dbo;
+
+	GLuint programs[NEMOMESH_SHADERS_MAX];
 
 	GLuint program;
 	GLuint uprojection;
@@ -66,26 +70,44 @@ struct meshcontext {
 	struct nemoquaternion squat, cquat;
 };
 
-static GLuint nemomesh_create_simple_shader(void)
+static const char *simple_vertex_shader =
+"uniform mat4 projection;\n"
+"attribute vec3 vertex;\n"
+"attribute vec3 normal;\n"
+"void main() {\n"
+"  gl_Position = projection * vec4(vertex, 1.0f);\n"
+"}\n";
+
+static const char *simple_fragment_shader =
+"precision mediump float;\n"
+"uniform vec4 color;\n"
+"void main() {\n"
+"  gl_FragColor = color;\n"
+"}\n";
+
+static const char *light_vertex_shader =
+"uniform mat4 projection;\n"
+"attribute vec3 vertex;\n"
+"attribute vec3 normal;\n"
+"void main() {\n"
+"  gl_Position = projection * vec4(vertex, 1.0f);\n"
+"}\n";
+
+static const char *light_fragment_shader =
+"precision mediump float;\n"
+"uniform vec4 color;\n"
+"void main() {\n"
+"  gl_FragColor = color;\n"
+"}\n";
+
+static GLuint nemomesh_create_shader(const char *fshader, const char *vshader)
 {
-	static const char *vert_shader_text =
-		"uniform mat4 projection;\n"
-		"attribute vec3 vertex;\n"
-		"void main() {\n"
-		"  gl_Position = projection * vec4(vertex, 1.0f);\n"
-		"}\n";
-	static const char *frag_shader_text =
-		"precision mediump float;\n"
-		"uniform vec4 color;\n"
-		"void main() {\n"
-		"  gl_FragColor = color;\n"
-		"}\n";
 	GLuint frag, vert;
 	GLuint program;
 	GLint status;
 
-	frag = glshader_compile(GL_FRAGMENT_SHADER, 1, &frag_shader_text);
-	vert = glshader_compile(GL_VERTEX_SHADER, 1, &vert_shader_text);
+	frag = glshader_compile(GL_FRAGMENT_SHADER, 1, &fshader);
+	vert = glshader_compile(GL_VERTEX_SHADER, 1, &vshader);
 
 	program = glCreateProgram();
 	glAttachShader(program, frag);
@@ -104,9 +126,21 @@ static GLuint nemomesh_create_simple_shader(void)
 	glUseProgram(program);
 
 	glBindAttribLocation(program, 0, "vertex");
+	glBindAttribLocation(program, 1, "normal");
 	glLinkProgram(program);
 
 	return program;
+}
+
+static void nemomesh_prepare_shader(struct meshcontext *context, GLuint program)
+{
+	if (context->program == program)
+		return;
+
+	context->program = program;
+
+	context->uprojection = glGetUniformLocation(context->program, "projection");
+	context->ucolor = glGetUniformLocation(context->program, "color");
 }
 
 static void nemomesh_prepare(struct meshcontext *context, const char *filepath, const char *basepath)
@@ -141,23 +175,50 @@ static void nemomesh_prepare(struct meshcontext *context, const char *filepath, 
 			NEMOBOX_APPEND(context->indices, context->sindices, context->nindices, shapes[i].mesh.indices[j * 3 + 2] + base);
 		}
 
-		for (j = 0; j < shapes[i].mesh.positions.size() / 3; j++, base++) {
-			NEMOBOX_APPEND(context->vertices, context->svertices, context->nvertices, shapes[i].mesh.positions[j * 3 + 0]);
-			NEMOBOX_APPEND(context->vertices, context->svertices, context->nvertices, shapes[i].mesh.positions[j * 3 + 1]);
-			NEMOBOX_APPEND(context->vertices, context->svertices, context->nvertices, shapes[i].mesh.positions[j * 3 + 2]);
+		if (shapes[i].mesh.normals.size() != shapes[i].mesh.positions.size()) {
+			for (j = 0; j < shapes[i].mesh.positions.size() / 3; j++, base++) {
+				NEMOBOX_APPEND(context->vertices, context->svertices, context->nvertices, shapes[i].mesh.positions[j * 3 + 0]);
+				NEMOBOX_APPEND(context->vertices, context->svertices, context->nvertices, shapes[i].mesh.positions[j * 3 + 1]);
+				NEMOBOX_APPEND(context->vertices, context->svertices, context->nvertices, shapes[i].mesh.positions[j * 3 + 2]);
+				NEMOBOX_APPEND(context->vertices, context->svertices, context->nvertices, 0.0f);
+				NEMOBOX_APPEND(context->vertices, context->svertices, context->nvertices, 0.0f);
+				NEMOBOX_APPEND(context->vertices, context->svertices, context->nvertices, 0.0f);
 
-			if (shapes[i].mesh.positions[j * 3 + 0] < minx)
-				minx = shapes[i].mesh.positions[j * 3 + 0];
-			if (shapes[i].mesh.positions[j * 3 + 1] < miny)
-				miny = shapes[i].mesh.positions[j * 3 + 1];
-			if (shapes[i].mesh.positions[j * 3 + 3] < minz)
-				minz = shapes[i].mesh.positions[j * 3 + 2];
-			if (shapes[i].mesh.positions[j * 3 + 0] > maxx)
-				maxx = shapes[i].mesh.positions[j * 3 + 0];
-			if (shapes[i].mesh.positions[j * 3 + 1] > maxy)
-				maxy = shapes[i].mesh.positions[j * 3 + 1];
-			if (shapes[i].mesh.positions[j * 3 + 2] > maxz)
-				maxz = shapes[i].mesh.positions[j * 3 + 2];
+				if (shapes[i].mesh.positions[j * 3 + 0] < minx)
+					minx = shapes[i].mesh.positions[j * 3 + 0];
+				if (shapes[i].mesh.positions[j * 3 + 1] < miny)
+					miny = shapes[i].mesh.positions[j * 3 + 1];
+				if (shapes[i].mesh.positions[j * 3 + 3] < minz)
+					minz = shapes[i].mesh.positions[j * 3 + 2];
+				if (shapes[i].mesh.positions[j * 3 + 0] > maxx)
+					maxx = shapes[i].mesh.positions[j * 3 + 0];
+				if (shapes[i].mesh.positions[j * 3 + 1] > maxy)
+					maxy = shapes[i].mesh.positions[j * 3 + 1];
+				if (shapes[i].mesh.positions[j * 3 + 2] > maxz)
+					maxz = shapes[i].mesh.positions[j * 3 + 2];
+			}
+		} else {
+			for (j = 0; j < shapes[i].mesh.positions.size() / 3; j++, base++) {
+				NEMOBOX_APPEND(context->vertices, context->svertices, context->nvertices, shapes[i].mesh.positions[j * 3 + 0]);
+				NEMOBOX_APPEND(context->vertices, context->svertices, context->nvertices, shapes[i].mesh.positions[j * 3 + 1]);
+				NEMOBOX_APPEND(context->vertices, context->svertices, context->nvertices, shapes[i].mesh.positions[j * 3 + 2]);
+				NEMOBOX_APPEND(context->vertices, context->svertices, context->nvertices, shapes[i].mesh.normals[j * 3 + 0]);
+				NEMOBOX_APPEND(context->vertices, context->svertices, context->nvertices, shapes[i].mesh.normals[j * 3 + 1]);
+				NEMOBOX_APPEND(context->vertices, context->svertices, context->nvertices, shapes[i].mesh.normals[j * 3 + 2]);
+
+				if (shapes[i].mesh.positions[j * 3 + 0] < minx)
+					minx = shapes[i].mesh.positions[j * 3 + 0];
+				if (shapes[i].mesh.positions[j * 3 + 1] < miny)
+					miny = shapes[i].mesh.positions[j * 3 + 1];
+				if (shapes[i].mesh.positions[j * 3 + 3] < minz)
+					minz = shapes[i].mesh.positions[j * 3 + 2];
+				if (shapes[i].mesh.positions[j * 3 + 0] > maxx)
+					maxx = shapes[i].mesh.positions[j * 3 + 0];
+				if (shapes[i].mesh.positions[j * 3 + 1] > maxy)
+					maxy = shapes[i].mesh.positions[j * 3 + 1];
+				if (shapes[i].mesh.positions[j * 3 + 2] > maxz)
+					maxz = shapes[i].mesh.positions[j * 3 + 2];
+			}
 		}
 	}
 
@@ -171,10 +232,10 @@ static void nemomesh_prepare(struct meshcontext *context, const char *filepath, 
 	context->ty = -(maxy + miny) / 2.0f;
 	context->tz = -(maxz + minz) / 2.0f;
 
-	context->program = nemomesh_create_simple_shader();
+	context->programs[0] = nemomesh_create_shader(simple_fragment_shader, simple_vertex_shader);
+	context->programs[1] = nemomesh_create_shader(light_fragment_shader, light_vertex_shader);
 
-	context->uprojection = glGetUniformLocation(context->program, "projection");
-	context->ucolor = glGetUniformLocation(context->program, "color");
+	nemomesh_prepare_shader(context, context->programs[0]);
 
 	fbo_prepare_context(
 			nemotale_node_get_texture(context->node),
@@ -189,8 +250,10 @@ static void nemomesh_prepare(struct meshcontext *context, const char *filepath, 
 
 	glGenBuffers(1, &context->vbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, context->vbuffer);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void *)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void *)0);
 	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void *)sizeof(GLfloat[3]));
+	glEnableVertexAttribArray(1);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * context->nvertices, context->vertices, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
