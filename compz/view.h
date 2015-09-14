@@ -30,6 +30,11 @@ typedef enum {
 	NEMO_VIEW_LAST_AREA = NEMO_VIEW_CENTER_AREA
 } NemoViewArea;
 
+typedef enum {
+	NEMO_VIEW_CATCHABLE_STATE = (1 << 0),
+	NEMO_VIEW_LAST_STATE
+} NemoViewState;
+
 struct nemocompz;
 struct nemolayer;
 struct nemocontent;
@@ -61,6 +66,8 @@ struct nemoview {
 	struct nemolayer *layer;
 
 	struct nemoscreen *screen;
+
+	uint32_t state;
 
 	uint32_t node_mask;
 	uint32_t screen_mask;
@@ -149,6 +156,21 @@ extern void nemoview_above_layer(struct nemoview *view, struct nemoview *above);
 extern void nemoview_set_overlay(struct nemoview *view, double r, double g, double b, double a);
 
 extern int nemoview_get_trapezoids(struct nemoview *view, int32_t x, int32_t y, int32_t width, int32_t height, pixman_trapezoid_t *traps);
+
+static inline void nemoview_set_state(struct nemoview *view, uint32_t state)
+{
+	view->state |= state;
+}
+
+static inline void nemoview_put_state(struct nemoview *view, uint32_t state)
+{
+	view->state &= ~state;
+}
+
+static inline int nemoview_has_state(struct nemoview *view, uint32_t state)
+{
+	return view->state & state;
+}
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

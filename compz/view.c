@@ -44,6 +44,8 @@ struct nemoview *nemoview_create(struct nemocompz *compz, struct nemocontent *co
 
 	pixman_region32_init(&view->clip);
 
+	view->state = NEMO_VIEW_CATCHABLE_STATE;
+
 	view->psf_flags = 0x0;
 
 	view->alpha = 1.0f;

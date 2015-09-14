@@ -201,6 +201,8 @@ static void nemo_surface_set_layer(struct wl_client *client, struct wl_resource 
 
 	if (type == NEMO_SURFACE_LAYER_TYPE_BACKGROUND) {
 		bin->layer = &bin->shell->background_layer;
+
+		nemoview_put_state(bin->view, NEMO_VIEW_CATCHABLE_STATE);
 	} else if (type == NEMO_SURFACE_LAYER_TYPE_SERVICE) {
 		bin->layer = &bin->shell->service_layer;
 	} else if (type == NEMO_SURFACE_LAYER_TYPE_OVERLAY) {

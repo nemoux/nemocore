@@ -39,6 +39,8 @@ struct nemoactor *nemoactor_create_pixman(struct nemocompz *compz, int width, in
 	if (actor->view == NULL)
 		goto err2;
 
+	nemoview_put_state(actor->view, NEMO_VIEW_CATCHABLE_STATE);
+
 	actor->view->actor = (struct nemoactor *)container_of(actor->view->content, struct nemoactor, base);
 
 	actor->newly_attached = 1;
@@ -167,6 +169,8 @@ struct nemoactor *nemoactor_create_gl(struct nemocompz *compz, int width, int he
 	actor->view = nemoview_create(compz, &actor->base);
 	if (actor->view == NULL)
 		goto err1;
+
+	nemoview_put_state(actor->view, NEMO_VIEW_CATCHABLE_STATE);
 
 	actor->view->actor = (struct nemoactor *)container_of(actor->view->content, struct nemoactor, base);
 
