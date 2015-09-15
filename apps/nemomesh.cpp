@@ -96,21 +96,24 @@ static const char *simple_fragment_shader =
 
 static const char *light_vertex_shader =
 "uniform mat4 projection;\n"
+"uniform vec4 light;\n"
 "attribute vec3 vertex;\n"
 "attribute vec3 normal;\n"
 "varying vec3 vnormal;\n"
+"varying vec3 vlight;\n"
 "void main() {\n"
 "  gl_Position = projection * vec4(vertex, 1.0);\n"
-"  vnormal = normal;\n"
+"  vlight = normalize(light.xyz - mat3(projection) * vertex);\n"
+"  vnormal = normalize(mat3(projection) * normal);\n"
 "}\n";
 
 static const char *light_fragment_shader =
 "precision mediump float;\n"
-"uniform vec4 light;\n"
 "uniform vec4 color;\n"
+"varying vec3 vlight;\n"
 "varying vec3 vnormal;\n"
 "void main() {\n"
-"  gl_FragColor = vec4(color.xyz * normalize(max(dot(light.xyz, vnormal), 0.0)), color.z);\n"
+"  gl_FragColor = vec4(color.xyz * max(dot(vlight, vnormal), 0.0), color.z);\n"
 "}\n";
 
 static GLuint nemomesh_create_shader(const char *fshader, const char *vshader)
@@ -290,7 +293,7 @@ static void nemomesh_prepare_buffer(struct meshcontext *context, GLenum mode, ui
 
 static void nemomesh_render(struct meshcontext *context)
 {
-	struct nemovector light = { 1.0f, 1.0f, -1.0f, 1.0f };
+	struct nemovector light = { 1.0f, -1.0f, -1.0f, 1.0f };
 	GLfloat rgba[4] = { 0.0f, 1.0f, 1.0f, 1.0f };
 
 	glUseProgram(context->program);
@@ -302,8 +305,6 @@ static void nemomesh_render(struct meshcontext *context)
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClearDepth(0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	nemomatrix_transform(&context->inverse, &light);
 
 	glUniformMatrix4fv(context->uprojection, 1, GL_FALSE, (GLfloat *)context->matrix.d);
 	glUniform4fv(context->ulight, 1, light.f);
