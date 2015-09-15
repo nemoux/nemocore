@@ -447,8 +447,18 @@ static inline void nemoshow_canvas_render_item(SkCanvas *canvas, struct showone 
 		nemoshow_canvas_render_item_svg,
 		nemoshow_canvas_render_item_group
 	};
+	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	renderers[one->sub](canvas, one);
+	if (item->has_anchor != 0) {
+		canvas->save();
+		canvas->translate(-one->width * item->ax, -one->height * item->ay);
+
+		renderers[one->sub](canvas, one);
+
+		canvas->restore();
+	} else {
+		renderers[one->sub](canvas, one);
+	}
 }
 
 static inline void nemoshow_canvas_render_one(SkCanvas *canvas, struct showone *one)

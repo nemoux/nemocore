@@ -586,7 +586,6 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	struct showone *parent;
 	SkRect box;
-	SkPoint anchor;
 	char attr[NEMOSHOW_SYMBOL_MAX];
 	double outer;
 	int i;
@@ -639,17 +638,13 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 		box = SkRect::MakeXYWH(0, 0, 0, 0);
 	}
 
-	anchor = SkPoint::Make(item->x + item->width / 2.0f, item->y + item->height / 2.0f);
-
 	if (item->stroke != 0)
 		box.outset(item->stroke_width, item->stroke_width);
 
 	if (item->transform & NEMOSHOW_EXTERN_TRANSFORM) {
 		NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(NEMOSHOW_REF(one, NEMOSHOW_MATRIX_REF)), matrix)->mapRect(&box);
-		NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(NEMOSHOW_REF(one, NEMOSHOW_MATRIX_REF)), matrix)->mapPoints(&anchor, 1);
 	} else if (item->transform & NEMOSHOW_INTERN_TRANSFORM) {
 		NEMOSHOW_ITEM_CC(item, matrix)->mapRect(&box);
-		NEMOSHOW_ITEM_CC(item, matrix)->mapPoints(&anchor, 1);
 	}
 
 	for (parent = one->parent; parent != NULL; parent = parent->parent) {
@@ -660,10 +655,8 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 
 			if (group->transform & NEMOSHOW_EXTERN_TRANSFORM) {
 				NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(NEMOSHOW_REF(parent, NEMOSHOW_MATRIX_REF)), matrix)->mapRect(&box);
-				NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(NEMOSHOW_REF(parent, NEMOSHOW_MATRIX_REF)), matrix)->mapPoints(&anchor, 1);
 			} else if (group->transform & NEMOSHOW_INTERN_TRANSFORM) {
 				NEMOSHOW_ITEM_CC(group, matrix)->mapRect(&box);
-				NEMOSHOW_ITEM_CC(group, matrix)->mapPoints(&anchor, 1);
 			}
 		}
 	}
@@ -678,9 +671,6 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 	one->width = ceil(box.width());
 	one->height = ceil(box.height());
 	one->outer = outer;
-
-	one->ax = anchor.x();
-	one->ay = anchor.y();
 
 	snprintf(attr, NEMOSHOW_SYMBOL_MAX, "%s_x", one->id);
 	nemoshow_update_symbol(show, attr, one->x);

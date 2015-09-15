@@ -130,8 +130,6 @@ struct showone {
 	int32_t x, y, width, height;
 	int32_t outer;
 
-	double ax, ay;
-
 	void *userdata;
 };
 

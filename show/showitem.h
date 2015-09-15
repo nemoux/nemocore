@@ -81,6 +81,9 @@ struct showitem {
 	double sx, sy;
 	double px, py;
 
+	double ax, ay;
+	int has_anchor;
+
 	void *cc;
 };
 
@@ -242,6 +245,16 @@ static inline void nemoshow_item_set_stroke_width(struct showone *one, double wi
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	item->stroke_width = width;
+}
+
+static inline void nemoshow_item_set_anchor(struct showone *one, double ax, double ay)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	item->ax = ax;
+	item->ay = ay;
+
+	item->has_anchor = 1;
 }
 
 static inline double nemoshow_item_get_outer(struct showone *one)
