@@ -228,6 +228,7 @@ static struct meshone *nemomesh_create_one(const char *filepath, const char *bas
 	if (!r.empty())
 		exit(1);
 
+#if	0
 	for (i = 0; i < shapes.size(); i++) {
 		for (j = 0; j < shapes[i].mesh.indices.size() / 3; j++) {
 			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, shapes[i].mesh.indices[j * 3 + 0] + base);
@@ -303,6 +304,128 @@ static struct meshone *nemomesh_create_one(const char *filepath, const char *bas
 			}
 		}
 	}
+#else
+	for (i = 0; i < shapes.size(); i++) {
+		for (j = 0; j < shapes[i].mesh.indices.size() / 3; j++) {
+			uint32_t v0 = shapes[i].mesh.indices[j * 3 + 0];
+			uint32_t v1 = shapes[i].mesh.indices[j * 3 + 1];
+			uint32_t v2 = shapes[i].mesh.indices[j * 3 + 2];
+			float p0[3], p1[3], p2[3];
+			float n0[3], n1[3], n2[3];
+			float r = 1.0f, g = 1.0f, b = 1.0f;
+
+			p0[0] = shapes[i].mesh.positions[v0 * 3 + 0];
+			p0[1] = shapes[i].mesh.positions[v0 * 3 + 1];
+			p0[2] = shapes[i].mesh.positions[v0 * 3 + 2];
+
+			p1[0] = shapes[i].mesh.positions[v1 * 3 + 0];
+			p1[1] = shapes[i].mesh.positions[v1 * 3 + 1];
+			p1[2] = shapes[i].mesh.positions[v1 * 3 + 2];
+
+			p2[0] = shapes[i].mesh.positions[v2 * 3 + 0];
+			p2[1] = shapes[i].mesh.positions[v2 * 3 + 1];
+			p2[2] = shapes[i].mesh.positions[v2 * 3 + 2];
+
+			if (shapes[i].mesh.normals.size() > 0) {
+				n0[0] = shapes[i].mesh.normals[v0 * 3 + 0];
+				n0[1] = shapes[i].mesh.normals[v0 * 3 + 1];
+				n0[2] = shapes[i].mesh.normals[v0 * 3 + 2];
+
+				n1[0] = shapes[i].mesh.normals[v1 * 3 + 0];
+				n1[1] = shapes[i].mesh.normals[v1 * 3 + 1];
+				n1[2] = shapes[i].mesh.normals[v1 * 3 + 2];
+
+				n2[0] = shapes[i].mesh.normals[v2 * 3 + 0];
+				n2[1] = shapes[i].mesh.normals[v2 * 3 + 1];
+				n2[2] = shapes[i].mesh.normals[v2 * 3 + 2];
+			} else {
+				struct nemovector t0 = { p0[0], p0[1], p0[2] };
+				struct nemovector t1 = { p1[0], p1[1], p1[2] };
+				struct nemovector t2 = { p2[0], p2[1], p2[2] };
+				struct nemovector s0, s1;
+
+				s0.f[0] = t1.f[0] - t0.f[0];
+				s0.f[1] = t1.f[1] - t0.f[1];
+				s0.f[2] = t1.f[2] - t0.f[2];
+
+				s1.f[0] = t2.f[0] - t0.f[0];
+				s1.f[1] = t2.f[1] - t0.f[1];
+				s1.f[2] = t2.f[2] - t0.f[2];
+
+				nemovector_cross(&s0, &s1);
+				nemovector_normalize(&s0);
+
+				n0[0] = n1[0] = n2[0] = s0.f[0];
+				n0[1] = n1[1] = n2[1] = s0.f[1];
+				n0[2] = n1[2] = n2[2] = s0.f[2];
+			}
+
+			if (shapes[i].mesh.material_ids.size() > 0) {
+				int32_t m = shapes[i].mesh.material_ids[j / 3];
+
+				if (m >= 0) {
+					r = materials[m].diffuse[0];
+					g = materials[m].diffuse[1];
+					b = materials[m].diffuse[2];
+				}
+			}
+
+			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, p0[0]);
+			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, p0[1]);
+			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, p0[2]);
+			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, n0[0]);
+			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, n0[1]);
+			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, n0[2]);
+			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, r);
+			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, g);
+			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, b);
+
+			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, p1[0]);
+			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, p1[1]);
+			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, p1[2]);
+			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, n1[0]);
+			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, n1[1]);
+			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, n1[2]);
+			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, r);
+			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, g);
+			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, b);
+
+			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, p2[0]);
+			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, p2[1]);
+			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, p2[2]);
+			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, n2[0]);
+			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, n2[1]);
+			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, n2[2]);
+			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, r);
+			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, g);
+			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, b);
+
+			minx = MIN(p0[0], minx);
+			minx = MIN(p1[0], minx);
+			minx = MIN(p2[0], minx);
+
+			miny = MIN(p0[1], miny);
+			miny = MIN(p1[1], miny);
+			miny = MIN(p2[1], miny);
+
+			minz = MIN(p0[2], minz);
+			minz = MIN(p1[2], minz);
+			minz = MIN(p2[2], minz);
+
+			maxx = MAX(p0[0], maxx);
+			maxx = MAX(p1[0], maxx);
+			maxx = MAX(p2[0], maxx);
+
+			maxy = MAX(p0[1], maxy);
+			maxy = MAX(p1[1], maxy);
+			maxy = MAX(p2[1], maxy);
+
+			maxz = MAX(p0[2], maxz);
+			maxz = MAX(p1[2], maxz);
+			maxz = MAX(p2[2], maxz);
+		}
+	}
+#endif
 
 #define	NEMOMESH_APPEND_GUIDE_VERTEX(x0, x1, y0, y1, z0, z1, xn, yn, zn, r, g, b)	\
 	NEMOBOX_APPEND(one->guides, one->sguides, one->nguides, x0);	\
@@ -463,9 +586,15 @@ static void nemomesh_render(struct meshcontext *context)
 
 	glUniform4fv(context->ucolor, 1, color);
 
+#if	0
 	glBindVertexArray(one->varray);
 	glDrawElements(one->mode, one->elements, GL_UNSIGNED_INT, NULL);
 	glBindVertexArray(0);
+#else
+	glBindVertexArray(one->varray);
+	glDrawArrays(one->mode, 0, one->nvertices);
+	glBindVertexArray(0);
+#endif
 
 	if (one->on_guides != 0) {
 		glPointSize(10.0f);
