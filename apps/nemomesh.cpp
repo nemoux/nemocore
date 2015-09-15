@@ -37,6 +37,9 @@ struct meshone {
 	GLuint vbuffer;
 	GLuint vindex;
 
+	GLuint garray;
+	GLuint gbuffer;
+
 	uint32_t *lines;
 	int nlines, slines;
 
@@ -45,6 +48,11 @@ struct meshone {
 
 	float *vertices;
 	int nvertices, svertices;
+
+	float *guides;
+	int nguides, sguides;
+
+	int on_guides;
 
 	GLenum mode;
 	int elements;
@@ -206,6 +214,10 @@ static struct meshone *nemomesh_create_one(const char *filepath, const char *bas
 	one->nvertices = 0;
 	one->svertices = 16;
 
+	one->guides = (float *)malloc(sizeof(float) * 16);
+	one->nguides = 0;
+	one->sguides = 16;
+
 	r = tinyobj::LoadObj(shapes, materials, filepath, basepath);
 	if (!r.empty())
 		exit(1);
@@ -280,6 +292,35 @@ static struct meshone *nemomesh_create_one(const char *filepath, const char *bas
 		}
 	}
 
+#define	NEMOMESH_APPEND_GUIDE_VERTEX(x0, x1, y0, y1, z0, z1, xn, yn, zn)	\
+	NEMOBOX_APPEND(one->guides, one->sguides, one->nguides, x0);	\
+	NEMOBOX_APPEND(one->guides, one->sguides, one->nguides, y0);	\
+	NEMOBOX_APPEND(one->guides, one->sguides, one->nguides, z0);	\
+	NEMOBOX_APPEND(one->guides, one->sguides, one->nguides, xn);	\
+	NEMOBOX_APPEND(one->guides, one->sguides, one->nguides, yn);	\
+	NEMOBOX_APPEND(one->guides, one->sguides, one->nguides, zn);	\
+	NEMOBOX_APPEND(one->guides, one->sguides, one->nguides, x1);	\
+	NEMOBOX_APPEND(one->guides, one->sguides, one->nguides, y1);	\
+	NEMOBOX_APPEND(one->guides, one->sguides, one->nguides, z1);	\
+	NEMOBOX_APPEND(one->guides, one->sguides, one->nguides, xn);	\
+	NEMOBOX_APPEND(one->guides, one->sguides, one->nguides, yn);	\
+	NEMOBOX_APPEND(one->guides, one->sguides, one->nguides, zn)
+
+	NEMOMESH_APPEND_GUIDE_VERTEX(minx, maxx, miny, miny, minz, minz, 0.0f, 0.5f, -0.5f);
+	NEMOMESH_APPEND_GUIDE_VERTEX(minx, maxx, maxy, maxy, minz, minz, 0.0f, -0.5f, -0.5f);
+	NEMOMESH_APPEND_GUIDE_VERTEX(minx, maxx, miny, miny, maxz, maxz, 0.0f, 0.5f, 0.5f);
+	NEMOMESH_APPEND_GUIDE_VERTEX(minx, maxx, maxy, maxy, maxz, maxz, 0.0f, -0.5f, 0.5f);
+
+	NEMOMESH_APPEND_GUIDE_VERTEX(minx, minx, miny, maxy, minz, minz, -0.5f, 0.0f, -0.5f);
+	NEMOMESH_APPEND_GUIDE_VERTEX(maxx, maxx, miny, maxy, minz, minz, 0.5f, 0.0f, -0.5f);
+	NEMOMESH_APPEND_GUIDE_VERTEX(minx, minx, miny, maxy, maxz, maxz, -0.5f, 0.0f, 0.5f);
+	NEMOMESH_APPEND_GUIDE_VERTEX(maxx, maxx, miny, maxy, maxz, maxz, 0.5f, 0.0f, 0.5f);
+
+	NEMOMESH_APPEND_GUIDE_VERTEX(minx, minx, miny, miny, minz, maxz, -0.5f, 0.5f, 0.0f);
+	NEMOMESH_APPEND_GUIDE_VERTEX(maxx, maxx, miny, miny, minz, maxz, 0.5f, 0.5f, 0.0f);
+	NEMOMESH_APPEND_GUIDE_VERTEX(minx, minx, maxy, maxy, minz, maxz, -0.5f, -0.5f, 0.0f);
+	NEMOMESH_APPEND_GUIDE_VERTEX(maxx, maxx, maxy, maxy, minz, maxz, 0.5f, -0.5f, 0.0f);
+
 	max = MAX(maxx - minx, MAX(maxy - miny, maxz - minz));
 
 	one->sx = 2.0f / max;
@@ -316,6 +357,20 @@ static struct meshone *nemomesh_create_one(const char *filepath, const char *bas
 
 	glBindVertexArray(0);
 
+	glGenVertexArrays(1, &one->garray);
+	glBindVertexArray(one->garray);
+
+	glGenBuffers(1, &one->gbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, one->gbuffer);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void *)0);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void *)sizeof(GLfloat[3]));
+	glEnableVertexAttribArray(1);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * one->nguides, one->guides, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	glBindVertexArray(0);
+
 	return one;
 }
 
@@ -325,9 +380,13 @@ static void nemomesh_destroy_one(struct meshone *one)
 	glDeleteBuffers(1, &one->vindex);
 	glDeleteVertexArrays(1, &one->varray);
 
+	glDeleteBuffers(1, &one->gbuffer);
+	glDeleteVertexArrays(1, &one->garray);
+
 	free(one->lines);
 	free(one->meshes);
 	free(one->vertices);
+	free(one->guides);
 }
 
 static void nemomesh_prepare_one(struct meshone *one, GLenum mode, uint32_t *buffers, int elements)
@@ -357,7 +416,8 @@ static void nemomesh_render(struct meshcontext *context)
 	struct meshone *one;
 	struct nemomatrix matrix;
 	struct nemovector light = { 1.0f, 1.0f, 1.0f, 1.0f };
-	GLfloat rgba[4] = { 0.0f, 1.0f, 1.0f, 1.0f };
+	GLfloat vcolor[4] = { 0.0f, 1.0f, 1.0f, 1.0f };
+	GLfloat gcolor[4] = { 1.0f, 1.0f, 0.0f, 1.0f };
 
 	glUseProgram(context->program);
 
@@ -379,11 +439,22 @@ static void nemomesh_render(struct meshcontext *context)
 
 	glUniformMatrix4fv(context->umvp, 1, GL_FALSE, (GLfloat *)matrix.d);
 	glUniformMatrix4fv(context->umodelview, 1, GL_FALSE, (GLfloat *)one->modelview.d);
-	glUniform4fv(context->ucolor, 1, rgba);
+
+	glUniform4fv(context->ucolor, 1, vcolor);
 
 	glBindVertexArray(one->varray);
 	glDrawElements(one->mode, one->elements, GL_UNSIGNED_INT, NULL);
 	glBindVertexArray(0);
+
+	if (one->on_guides != 0) {
+		glUniform4fv(context->ucolor, 1, gcolor);
+
+		glPointSize(10.0f);
+
+		glBindVertexArray(one->garray);
+		glDrawArrays(GL_LINES, 0, one->nguides);
+		glBindVertexArray(0);
+	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -527,6 +598,8 @@ static void nemomesh_dispatch_tale_event(struct nemotale *tale, struct talenode 
 					nemomesh_project_onto_surface(context->width, context->height, &one->avec);
 
 					one->squat = one->cquat;
+
+					one->on_guides = 1;
 				}
 			}
 		} else if (nemotale_is_touch_motion(tale, event, type)) {
@@ -541,6 +614,16 @@ static void nemomesh_dispatch_tale_event(struct nemotale *tale, struct talenode 
 
 				nemomesh_project_onto_surface(context->width, context->height, &one->cvec);
 				nemomesh_compute_quaternion(one);
+
+				nemocanvas_dispatch_frame(context->canvas);
+			}
+		} else if (nemotale_is_touch_up(tale, event, type)) {
+			nemotale_event_update_node_taps(tale, node, event, type);
+
+			if (event->tapcount <= 3) {
+				struct meshone *one = context->one;
+
+				one->on_guides = 0;
 
 				nemocanvas_dispatch_frame(context->canvas);
 			}
