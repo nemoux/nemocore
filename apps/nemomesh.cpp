@@ -29,30 +29,8 @@
 
 #define	NEMOMESH_SHADERS_MAX			(2)
 
-struct meshcontext {
-	struct nemotool *tool;
-
-	struct eglcontext *egl;
-	struct eglcanvas *eglcanvas;
-
-	struct nemocanvas *canvas;
-
-	struct nemotale *tale;
-	struct talenode *node;
-
-	int32_t width, height;
-
-	GLuint fbo, dbo;
-
-	GLuint programs[NEMOMESH_SHADERS_MAX];
-
-	GLuint program;
-	GLuint uprojection;
-	GLuint ulight;
-	GLuint ucolor;
-
-	struct nemomatrix matrix;
-	struct nemomatrix inverse;
+struct meshone {
+	struct nemomatrix modelview;
 
 	GLuint varray;
 	GLuint vbuffer;
@@ -70,7 +48,6 @@ struct meshcontext {
 	GLenum mode;
 	int elements;
 
-	float aspect;
 	float sx, sy, sz;
 	float tx, ty, tz;
 
@@ -78,12 +55,44 @@ struct meshcontext {
 	struct nemoquaternion squat, cquat;
 };
 
+struct meshcontext {
+	struct nemotool *tool;
+
+	struct eglcontext *egl;
+	struct eglcanvas *eglcanvas;
+
+	struct nemocanvas *canvas;
+
+	struct nemotale *tale;
+	struct talenode *node;
+
+	int32_t width, height;
+	float aspect;
+
+	GLuint fbo, dbo;
+
+	GLuint programs[NEMOMESH_SHADERS_MAX];
+
+	GLuint program;
+	GLuint umvp;
+	GLuint uprojection;
+	GLuint umodelview;
+	GLuint ulight;
+	GLuint ucolor;
+
+	struct nemomatrix projection;
+
+	struct meshone *one;
+};
+
 static const char *simple_vertex_shader =
+"uniform mat4 mvp;\n"
 "uniform mat4 projection;\n"
+"uniform mat4 modelview;\n"
 "attribute vec3 vertex;\n"
 "attribute vec3 normal;\n"
 "void main() {\n"
-"  gl_Position = projection * vec4(vertex, 1.0);\n"
+"  gl_Position = mvp * vec4(vertex, 1.0);\n"
 "}\n";
 
 static const char *simple_fragment_shader =
@@ -95,16 +104,18 @@ static const char *simple_fragment_shader =
 "}\n";
 
 static const char *light_vertex_shader =
+"uniform mat4 mvp;\n"
 "uniform mat4 projection;\n"
+"uniform mat4 modelview;\n"
 "uniform vec4 light;\n"
 "attribute vec3 vertex;\n"
 "attribute vec3 normal;\n"
 "varying vec3 vnormal;\n"
 "varying vec3 vlight;\n"
 "void main() {\n"
-"  gl_Position = projection * vec4(vertex, 1.0);\n"
-"  vlight = normalize(light.xyz - mat3(projection) * vertex);\n"
-"  vnormal = normalize(mat3(projection) * normal);\n"
+"  gl_Position = mvp * vec4(vertex, 1.0);\n"
+"  vlight = normalize(light.xyz - mat3(modelview) * vertex);\n"
+"  vnormal = normalize(mat3(modelview) * normal);\n"
 "}\n";
 
 static const char *light_fragment_shader =
@@ -155,13 +166,16 @@ static void nemomesh_prepare_shader(struct meshcontext *context, GLuint program)
 
 	context->program = program;
 
+	context->umvp = glGetUniformLocation(context->program, "mvp");
 	context->uprojection = glGetUniformLocation(context->program, "projection");
+	context->umodelview = glGetUniformLocation(context->program, "modelview");
 	context->ulight = glGetUniformLocation(context->program, "light");
 	context->ucolor = glGetUniformLocation(context->program, "color");
 }
 
-static void nemomesh_create_buffer(struct meshcontext *context, const char *filepath, const char *basepath)
+static struct meshone *nemomesh_create_one(const char *filepath, const char *basepath)
 {
+	struct meshone *one;
 	std::vector<tinyobj::shape_t> shapes;
 	std::vector<tinyobj::material_t> materials;
 	std::string r;
@@ -170,17 +184,24 @@ static void nemomesh_create_buffer(struct meshcontext *context, const char *file
 	float max;
 	int i, j;
 
-	context->lines = (uint32_t *)malloc(sizeof(uint32_t) * 16);
-	context->nlines = 0;
-	context->slines = 16;
+	one = (struct meshone *)malloc(sizeof(struct meshone));
+	if (one == NULL)
+		return NULL;
+	memset(one, 0, sizeof(struct meshone));
 
-	context->meshes = (uint32_t *)malloc(sizeof(uint32_t) * 16);
-	context->nmeshes = 0;
-	context->smeshes = 16;
+	nemoquaternion_init_identity(&one->cquat);
 
-	context->vertices = (float *)malloc(sizeof(float) * 16);
-	context->nvertices = 0;
-	context->svertices = 16;
+	one->lines = (uint32_t *)malloc(sizeof(uint32_t) * 16);
+	one->nlines = 0;
+	one->slines = 16;
+
+	one->meshes = (uint32_t *)malloc(sizeof(uint32_t) * 16);
+	one->nmeshes = 0;
+	one->smeshes = 16;
+
+	one->vertices = (float *)malloc(sizeof(float) * 16);
+	one->nvertices = 0;
+	one->svertices = 16;
 
 	r = tinyobj::LoadObj(shapes, materials, filepath, basepath);
 	if (!r.empty())
@@ -188,26 +209,26 @@ static void nemomesh_create_buffer(struct meshcontext *context, const char *file
 
 	for (i = 0; i < shapes.size(); i++) {
 		for (j = 0; j < shapes[i].mesh.indices.size() / 3; j++) {
-			NEMOBOX_APPEND(context->lines, context->slines, context->nlines, shapes[i].mesh.indices[j * 3 + 0] + base);
-			NEMOBOX_APPEND(context->lines, context->slines, context->nlines, shapes[i].mesh.indices[j * 3 + 1] + base);
-			NEMOBOX_APPEND(context->lines, context->slines, context->nlines, shapes[i].mesh.indices[j * 3 + 0] + base);
-			NEMOBOX_APPEND(context->lines, context->slines, context->nlines, shapes[i].mesh.indices[j * 3 + 2] + base);
-			NEMOBOX_APPEND(context->lines, context->slines, context->nlines, shapes[i].mesh.indices[j * 3 + 1] + base);
-			NEMOBOX_APPEND(context->lines, context->slines, context->nlines, shapes[i].mesh.indices[j * 3 + 2] + base);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, shapes[i].mesh.indices[j * 3 + 0] + base);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, shapes[i].mesh.indices[j * 3 + 1] + base);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, shapes[i].mesh.indices[j * 3 + 0] + base);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, shapes[i].mesh.indices[j * 3 + 2] + base);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, shapes[i].mesh.indices[j * 3 + 1] + base);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, shapes[i].mesh.indices[j * 3 + 2] + base);
 
-			NEMOBOX_APPEND(context->meshes, context->smeshes, context->nmeshes, shapes[i].mesh.indices[j * 3 + 0] + base);
-			NEMOBOX_APPEND(context->meshes, context->smeshes, context->nmeshes, shapes[i].mesh.indices[j * 3 + 1] + base);
-			NEMOBOX_APPEND(context->meshes, context->smeshes, context->nmeshes, shapes[i].mesh.indices[j * 3 + 2] + base);
+			NEMOBOX_APPEND(one->meshes, one->smeshes, one->nmeshes, shapes[i].mesh.indices[j * 3 + 0] + base);
+			NEMOBOX_APPEND(one->meshes, one->smeshes, one->nmeshes, shapes[i].mesh.indices[j * 3 + 1] + base);
+			NEMOBOX_APPEND(one->meshes, one->smeshes, one->nmeshes, shapes[i].mesh.indices[j * 3 + 2] + base);
 		}
 
 		if (shapes[i].mesh.normals.size() != shapes[i].mesh.positions.size()) {
 			for (j = 0; j < shapes[i].mesh.positions.size() / 3; j++, base++) {
-				NEMOBOX_APPEND(context->vertices, context->svertices, context->nvertices, shapes[i].mesh.positions[j * 3 + 0]);
-				NEMOBOX_APPEND(context->vertices, context->svertices, context->nvertices, shapes[i].mesh.positions[j * 3 + 1]);
-				NEMOBOX_APPEND(context->vertices, context->svertices, context->nvertices, shapes[i].mesh.positions[j * 3 + 2]);
-				NEMOBOX_APPEND(context->vertices, context->svertices, context->nvertices, 0.0f);
-				NEMOBOX_APPEND(context->vertices, context->svertices, context->nvertices, 0.0f);
-				NEMOBOX_APPEND(context->vertices, context->svertices, context->nvertices, 0.0f);
+				NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, shapes[i].mesh.positions[j * 3 + 0]);
+				NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, shapes[i].mesh.positions[j * 3 + 1]);
+				NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, shapes[i].mesh.positions[j * 3 + 2]);
+				NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, 0.0f);
+				NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, 0.0f);
+				NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, 0.0f);
 
 				if (shapes[i].mesh.positions[j * 3 + 0] < minx)
 					minx = shapes[i].mesh.positions[j * 3 + 0];
@@ -224,12 +245,12 @@ static void nemomesh_create_buffer(struct meshcontext *context, const char *file
 			}
 		} else {
 			for (j = 0; j < shapes[i].mesh.positions.size() / 3; j++, base++) {
-				NEMOBOX_APPEND(context->vertices, context->svertices, context->nvertices, shapes[i].mesh.positions[j * 3 + 0]);
-				NEMOBOX_APPEND(context->vertices, context->svertices, context->nvertices, shapes[i].mesh.positions[j * 3 + 1]);
-				NEMOBOX_APPEND(context->vertices, context->svertices, context->nvertices, shapes[i].mesh.positions[j * 3 + 2]);
-				NEMOBOX_APPEND(context->vertices, context->svertices, context->nvertices, shapes[i].mesh.normals[j * 3 + 0]);
-				NEMOBOX_APPEND(context->vertices, context->svertices, context->nvertices, shapes[i].mesh.normals[j * 3 + 1]);
-				NEMOBOX_APPEND(context->vertices, context->svertices, context->nvertices, shapes[i].mesh.normals[j * 3 + 2]);
+				NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, shapes[i].mesh.positions[j * 3 + 0]);
+				NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, shapes[i].mesh.positions[j * 3 + 1]);
+				NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, shapes[i].mesh.positions[j * 3 + 2]);
+				NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, shapes[i].mesh.normals[j * 3 + 0]);
+				NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, shapes[i].mesh.normals[j * 3 + 1]);
+				NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, shapes[i].mesh.normals[j * 3 + 2]);
 
 				if (shapes[i].mesh.positions[j * 3 + 0] < minx)
 					minx = shapes[i].mesh.positions[j * 3 + 0];
@@ -249,50 +270,73 @@ static void nemomesh_create_buffer(struct meshcontext *context, const char *file
 
 	max = MAX(maxx - minx, MAX(maxy - miny, maxz - minz));
 
-	context->sx = 2.0f / max;
-	context->sy = 2.0f / max;
-	context->sz = 2.0f / max;
+	one->sx = 2.0f / max;
+	one->sy = 2.0f / max;
+	one->sz = 2.0f / max;
 
-	context->tx = -(maxx + minx) / 2.0f;
-	context->ty = -(maxy + miny) / 2.0f;
-	context->tz = -(maxz + minz) / 2.0f;
+	one->tx = -(maxx + minx) / 2.0f;
+	one->ty = -(maxy + miny) / 2.0f;
+	one->tz = -(maxz + minz) / 2.0f;
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 
-	glGenVertexArrays(1, &context->varray);
-	glBindVertexArray(context->varray);
+	glGenVertexArrays(1, &one->varray);
+	glBindVertexArray(one->varray);
 
-	glGenBuffers(1, &context->vbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, context->vbuffer);
+	glGenBuffers(1, &one->vbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, one->vbuffer);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void *)0);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void *)sizeof(GLfloat[3]));
 	glEnableVertexAttribArray(1);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * context->nvertices, context->vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * one->nvertices, one->vertices, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	glGenBuffers(1, &context->vindex);
+	glGenBuffers(1, &one->vindex);
 
 	glBindVertexArray(0);
+
+	return one;
 }
 
-static void nemomesh_prepare_buffer(struct meshcontext *context, GLenum mode, uint32_t *buffers, int elements)
+static void nemomesh_destroy_one(struct meshone *one)
 {
-	glBindVertexArray(context->varray);
+	glDeleteBuffers(1, &one->vbuffer);
+	glDeleteBuffers(1, &one->vindex);
+	glDeleteVertexArrays(1, &one->varray);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, context->vindex);
+	free(one->lines);
+	free(one->meshes);
+	free(one->vertices);
+}
+
+static void nemomesh_prepare_one(struct meshone *one, GLenum mode, uint32_t *buffers, int elements)
+{
+	glBindVertexArray(one->varray);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, one->vindex);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * elements, buffers, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	glBindVertexArray(0);
 
-	context->mode = mode;
-	context->elements = elements;
+	one->mode = mode;
+	one->elements = elements;
+}
+
+static void nemomesh_update_one(struct meshone *one)
+{
+	nemomatrix_init_identity(&one->modelview);
+	nemomatrix_translate_xyz(&one->modelview, one->tx, one->ty, one->tz);
+	nemomatrix_multiply_quaternion(&one->modelview, &one->cquat);
+	nemomatrix_scale_xyz(&one->modelview, one->sx, one->sy, one->sz);
 }
 
 static void nemomesh_render(struct meshcontext *context)
 {
+	struct meshone *one;
+	struct nemomatrix matrix;
 	struct nemovector light = { 1.0f, -1.0f, -1.0f, 1.0f };
 	GLfloat rgba[4] = { 0.0f, 1.0f, 1.0f, 1.0f };
 
@@ -306,12 +350,20 @@ static void nemomesh_render(struct meshcontext *context)
 	glClearDepth(0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glUniformMatrix4fv(context->uprojection, 1, GL_FALSE, (GLfloat *)context->matrix.d);
+	glUniformMatrix4fv(context->uprojection, 1, GL_FALSE, (GLfloat *)context->projection.d);
 	glUniform4fv(context->ulight, 1, light.f);
+
+	one = context->one;
+
+	matrix = one->modelview;
+	nemomatrix_multiply(&matrix, &context->projection);
+
+	glUniformMatrix4fv(context->umvp, 1, GL_FALSE, (GLfloat *)matrix.d);
+	glUniformMatrix4fv(context->umodelview, 1, GL_FALSE, (GLfloat *)one->modelview.d);
 	glUniform4fv(context->ucolor, 1, rgba);
 
-	glBindVertexArray(context->varray);
-	glDrawElements(context->mode, context->elements, GL_UNSIGNED_INT, NULL);
+	glBindVertexArray(one->varray);
+	glDrawElements(one->mode, one->elements, GL_UNSIGNED_INT, NULL);
 	glBindVertexArray(0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -347,29 +399,19 @@ static void nemomesh_project_onto_surface(int32_t width, int32_t height, struct 
 	v->f[2] = pz / length;
 }
 
-static void nemomesh_compute_quaternion(struct meshcontext *context)
+static void nemomesh_compute_quaternion(struct meshone *one)
 {
-	struct nemovector v = context->avec;
-	float dot = nemovector_dot(&context->avec, &context->cvec);
+	struct nemovector v = one->avec;
+	float dot = nemovector_dot(&one->avec, &one->cvec);
 	float angle = acosf(dot);
 
 	if (isnan(angle) == 0) {
-		nemovector_cross(&v, &context->cvec);
+		nemovector_cross(&v, &one->cvec);
 
-		nemoquaternion_make_with_angle_axis(&context->cquat, angle * 2.0f, v.f[0], v.f[1], v.f[2]);
-		nemoquaternion_normalize(&context->cquat);
-		nemoquaternion_multiply(&context->cquat, &context->squat);
+		nemoquaternion_make_with_angle_axis(&one->cquat, angle * 2.0f, v.f[0], v.f[1], v.f[2]);
+		nemoquaternion_normalize(&one->cquat);
+		nemoquaternion_multiply(&one->cquat, &one->squat);
 	}
-}
-
-static void nemomesh_update_transform(struct meshcontext *context)
-{
-	nemomatrix_init_identity(&context->matrix);
-	nemomatrix_translate_xyz(&context->matrix, context->tx, context->ty, context->tz);
-	nemomatrix_multiply_quaternion(&context->matrix, &context->cquat);
-	nemomatrix_scale_xyz(&context->matrix, context->sx * context->aspect, context->sy * -1.0f, context->sz * context->aspect);
-
-	nemomatrix_invert(&context->inverse, &context->matrix);
 }
 
 static void nemomesh_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
@@ -389,36 +431,42 @@ static void nemomesh_dispatch_tale_event(struct nemotale *tale, struct talenode 
 						event->taps[1]->serial,
 						(1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_SCALE));
 			} else if (event->tapcount == 3) {
+				struct meshone *one = context->one;
+
 				nemocanvas_miss(context->canvas);
 
-				context->avec.f[0] = event->taps[2]->x;
-				context->avec.f[1] = event->taps[2]->y;
-				context->avec.f[2] = 0.0f;
+				one->avec.f[0] = event->taps[2]->x;
+				one->avec.f[1] = event->taps[2]->y;
+				one->avec.f[2] = 0.0f;
 
-				nemomesh_project_onto_surface(context->width, context->height, &context->avec);
+				nemomesh_project_onto_surface(context->width, context->height, &one->avec);
 
-				context->squat = context->cquat;
+				one->squat = one->cquat;
 			}
 		} else if (nemotale_is_touch_motion(tale, event, type)) {
 			nemotale_event_update_node_taps(tale, node, event, type);
 
 			if (event->tapcount == 3) {
-				context->cvec.f[0] = event->taps[2]->x;
-				context->cvec.f[1] = event->taps[2]->y;
-				context->cvec.f[2] = 0.0f;
+				struct meshone *one = context->one;
 
-				nemomesh_project_onto_surface(context->width, context->height, &context->cvec);
-				nemomesh_compute_quaternion(context);
+				one->cvec.f[0] = event->taps[2]->x;
+				one->cvec.f[1] = event->taps[2]->y;
+				one->cvec.f[2] = 0.0f;
+
+				nemomesh_project_onto_surface(context->width, context->height, &one->cvec);
+				nemomesh_compute_quaternion(one);
 
 				nemocanvas_dispatch_frame(context->canvas);
 			}
 		}
 
 		if (nemotale_is_single_click(tale, event, type)) {
-			if (context->mode == GL_TRIANGLES)
-				nemomesh_prepare_buffer(context, GL_LINES, context->lines, context->nlines);
+			struct meshone *one = context->one;
+
+			if (one->mode == GL_TRIANGLES)
+				nemomesh_prepare_one(one, GL_LINES, one->lines, one->nlines);
 			else
-				nemomesh_prepare_buffer(context, GL_TRIANGLES, context->meshes, context->nmeshes);
+				nemomesh_prepare_one(one, GL_TRIANGLES, one->meshes, one->nmeshes);
 
 			nemocanvas_dispatch_frame(context->canvas);
 		}
@@ -434,7 +482,7 @@ static void nemomesh_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 		nemocanvas_feedback(canvas);
 	}
 
-	nemomesh_update_transform(context);
+	nemomesh_update_one(context->one);
 
 	nemomesh_render(context);
 
@@ -451,7 +499,7 @@ static void nemomesh_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t w
 	if (width == 0 || height == 0)
 		return;
 
-	if (width < 200 || height < 200)
+	if (width < 300 || height < 300)
 		nemotool_exit(context->tool);
 
 	context->width = width;
@@ -484,6 +532,7 @@ int main(int argc, char *argv[])
 		{ 0 }
 	};
 	struct meshcontext *context;
+	struct meshone *one;
 	struct nemotool *tool;
 	struct eglcontext *egl;
 	struct eglcanvas *canvas;
@@ -538,6 +587,9 @@ int main(int argc, char *argv[])
 	context->height = height;
 	context->aspect = (double)height / (double)width;
 
+	nemomatrix_init_identity(&context->projection);
+	nemomatrix_scale_xyz(&context->projection, context->aspect, -1.0f, context->aspect);
+
 	context->tool = tool = nemotool_create();
 	if (tool == NULL)
 		return -1;
@@ -570,9 +622,6 @@ int main(int argc, char *argv[])
 	nemotale_node_opaque(node, 0, 0, width, height);
 	nemotale_attach_node(tale, node);
 
-	nemomesh_create_buffer(context, filepath, basepath);
-	nemomesh_prepare_buffer(context, GL_LINES, context->lines, context->nlines);
-
 	context->programs[0] = nemomesh_create_shader(simple_fragment_shader, simple_vertex_shader);
 	context->programs[1] = nemomesh_create_shader(light_fragment_shader, light_vertex_shader);
 	nemomesh_prepare_shader(context, context->programs[1]);
@@ -582,15 +631,14 @@ int main(int argc, char *argv[])
 			context->width, context->height,
 			&context->fbo, &context->dbo);
 
-	nemoquaternion_init_identity(&context->cquat);
+	context->one = one = nemomesh_create_one(filepath, basepath);
+	nemomesh_prepare_one(one, GL_LINES, one->lines, one->nlines);
 
 	nemocanvas_dispatch_frame(NTEGL_CANVAS(canvas));
 
 	nemotool_run(tool);
 
-	glDeleteBuffers(1, &context->vbuffer);
-	glDeleteBuffers(1, &context->vindex);
-	glDeleteVertexArrays(1, &context->varray);
+	nemomesh_destroy_one(context->one);
 
 	glDeleteFramebuffers(1, &context->fbo);
 	glDeleteRenderbuffers(1, &context->dbo);
