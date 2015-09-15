@@ -337,7 +337,7 @@ static void nemomesh_render(struct meshcontext *context)
 {
 	struct meshone *one;
 	struct nemomatrix matrix;
-	struct nemovector light = { 1.0f, -1.0f, -1.0f, 1.0f };
+	struct nemovector light = { 1.0f, 1.0f, 1.0f, 1.0f };
 	GLfloat rgba[4] = { 0.0f, 1.0f, 1.0f, 1.0f };
 
 	glUseProgram(context->program);
@@ -588,7 +588,7 @@ int main(int argc, char *argv[])
 	context->aspect = (double)height / (double)width;
 
 	nemomatrix_init_identity(&context->projection);
-	nemomatrix_scale_xyz(&context->projection, context->aspect, -1.0f, context->aspect);
+	nemomatrix_scale_xyz(&context->projection, context->aspect, -1.0f, context->aspect * -1.0f);
 
 	context->tool = tool = nemotool_create();
 	if (tool == NULL)
