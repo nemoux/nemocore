@@ -9,6 +9,19 @@ NEMO_BEGIN_EXTERN_C
 
 #include <math.h>
 
+typedef enum {
+	NEMO_METRO_NONE_PLANE = 0,
+	NEMO_METRO_FRONT_PLANE = 1,
+	NEMO_METRO_BACK_PLANE = 2,
+	NEMO_METRO_LEFT_PLANE = 3,
+	NEMO_METRO_RIGHT_PLANE = 4,
+	NEMO_METRO_TOP_PLANE = 5,
+	NEMO_METRO_BOTTOM_PLANE = 6,
+	NEMO_METRO_LAST_PLANE
+} NemoMetroPlaneDirection;
+
+extern int nemometro_cube_intersect(float *cube, float *o, float *d, float *mint, float *maxt);
+
 static inline double nemometro_point_get_angle_on_line(double x1, double y1, double x2, double y2, double x3, double y3)
 {
 	double px = x2 - x1, py = y2 - y1, dab = px * px + py * py;

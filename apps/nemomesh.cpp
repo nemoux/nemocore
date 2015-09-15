@@ -24,6 +24,7 @@
 #include <glhelper.h>
 #include <fbohelper.h>
 #include <nemomatrix.h>
+#include <nemometro.h>
 #include <nemobox.h>
 #include <nemomisc.h>
 
@@ -47,6 +48,8 @@ struct meshone {
 
 	GLenum mode;
 	int elements;
+
+	float boundingbox[6];
 
 	float sx, sy, sz;
 	float tx, ty, tz;
@@ -278,6 +281,13 @@ static struct meshone *nemomesh_create_one(const char *filepath, const char *bas
 	one->ty = -(maxy + miny) / 2.0f;
 	one->tz = -(maxz + minz) / 2.0f;
 
+	one->boundingbox[0] = minx;
+	one->boundingbox[1] = maxx;
+	one->boundingbox[2] = miny;
+	one->boundingbox[3] = maxy;
+	one->boundingbox[4] = minz;
+	one->boundingbox[5] = maxz;
+
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 
@@ -414,6 +424,63 @@ static void nemomesh_compute_quaternion(struct meshone *one)
 	}
 }
 
+static void nemomesh_unproject(struct meshcontext *context, struct meshone *one, float x, float y, float z, float *out)
+{
+	struct nemomatrix matrix;
+	struct nemomatrix inverse;
+	struct nemovector in;
+
+	matrix = one->modelview;
+	nemomatrix_multiply(&matrix, &context->projection);
+
+	nemomatrix_invert(&inverse, &matrix);
+
+	in.f[0] = x * 2.0f / context->width - 1.0f;
+	in.f[1] = y * 2.0f / context->height - 1.0f;
+	in.f[2] = z * 2.0f - 1.0f;
+	in.f[3] = 1.0f;
+
+	nemomatrix_transform(&inverse, &in);
+
+	if (fabsf(in.f[3]) < 1e-6) {
+		out[0] = 0.0f;
+		out[1] = 0.0f;
+		out[2] = 0.0f;
+	} else {
+		out[0] = in.f[0] / in.f[3];
+		out[1] = in.f[1] / in.f[3];
+		out[2] = in.f[2] / in.f[3];
+	}
+}
+
+static int nemomesh_pick_one(struct meshcontext *context, struct meshone *one, float x, float y)
+{
+	float near[3], far[3];
+	float rayorg[3];
+	float rayvec[3];
+	float raylen;
+	float mint, maxt;
+
+	nemomesh_unproject(context, one, x, y, -1.0f, near);
+	nemomesh_unproject(context, one, x, y, 1.0f, far);
+
+	rayvec[0] = far[0] - near[0];
+	rayvec[1] = far[1] - near[1];
+	rayvec[2] = far[2] - near[2];
+
+	raylen = sqrtf(rayvec[0] * rayvec[0] + rayvec[1] * rayvec[1] + rayvec[2] * rayvec[2]);
+
+	rayvec[0] /= raylen;
+	rayvec[1] /= raylen;
+	rayvec[2] /= raylen;
+
+	rayorg[0] = near[0];
+	rayorg[1] = near[1];
+	rayorg[2] = near[2];
+
+	return nemometro_cube_intersect(one->boundingbox, rayorg, rayvec, &mint, &maxt);
+}
+
 static void nemomesh_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
 {
 	struct meshcontext *context = (struct meshcontext *)nemotale_get_userdata(tale);
@@ -421,27 +488,37 @@ static void nemomesh_dispatch_tale_event(struct nemotale *tale, struct talenode 
 
 	if (id == 1) {
 		if (nemotale_is_touch_down(tale, event, type)) {
-			nemotale_event_update_node_taps(tale, node, event, type);
+			struct meshone *one = context->one;
+			int plane = nemomesh_pick_one(context, one, event->x, event->y);
 
-			if (event->tapcount == 1) {
-				nemocanvas_move(context->canvas, event->taps[0]->serial);
-			} else if (event->tapcount == 2) {
-				nemocanvas_pick(context->canvas,
-						event->taps[0]->serial,
-						event->taps[1]->serial,
-						(1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_SCALE));
-			} else if (event->tapcount == 3) {
-				struct meshone *one = context->one;
+			if (plane == NEMO_METRO_NONE_PLANE) {
+				float sx, sy;
 
-				nemocanvas_miss(context->canvas);
+				nemotale_event_transform_to_viewport(tale, event->x, event->y, &sx, &sy);
+				nemotool_bypass_touch(context->tool, event->device, sx, sy);
+			} else {
+				nemotale_event_update_node_taps(tale, node, event, type);
 
-				one->avec.f[0] = event->taps[2]->x;
-				one->avec.f[1] = event->taps[2]->y;
-				one->avec.f[2] = 0.0f;
+				if (event->tapcount == 1) {
+					nemocanvas_move(context->canvas, event->taps[0]->serial);
+				} else if (event->tapcount == 2) {
+					nemocanvas_pick(context->canvas,
+							event->taps[0]->serial,
+							event->taps[1]->serial,
+							(1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_SCALE));
+				} else if (event->tapcount == 3) {
+					struct meshone *one = context->one;
 
-				nemomesh_project_onto_surface(context->width, context->height, &one->avec);
+					nemocanvas_miss(context->canvas);
 
-				one->squat = one->cquat;
+					one->avec.f[0] = event->taps[2]->x;
+					one->avec.f[1] = event->taps[2]->y;
+					one->avec.f[2] = 0.0f;
+
+					nemomesh_project_onto_surface(context->width, context->height, &one->avec);
+
+					one->squat = one->cquat;
+				}
 			}
 		} else if (nemotale_is_touch_motion(tale, event, type)) {
 			nemotale_event_update_node_taps(tale, node, event, type);
@@ -462,13 +539,16 @@ static void nemomesh_dispatch_tale_event(struct nemotale *tale, struct talenode 
 
 		if (nemotale_is_single_click(tale, event, type)) {
 			struct meshone *one = context->one;
+			int plane = nemomesh_pick_one(context, one, event->x, event->y);
 
-			if (one->mode == GL_TRIANGLES)
-				nemomesh_prepare_one(one, GL_LINES, one->lines, one->nlines);
-			else
-				nemomesh_prepare_one(one, GL_TRIANGLES, one->meshes, one->nmeshes);
+			if (plane != NEMO_METRO_NONE_PLANE) {
+				if (one->mode == GL_TRIANGLES)
+					nemomesh_prepare_one(one, GL_LINES, one->lines, one->nlines);
+				else
+					nemomesh_prepare_one(one, GL_TRIANGLES, one->meshes, one->nmeshes);
 
-			nemocanvas_dispatch_frame(context->canvas);
+				nemocanvas_dispatch_frame(context->canvas);
+			}
 		}
 	}
 }
