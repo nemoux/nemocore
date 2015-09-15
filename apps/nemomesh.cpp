@@ -234,7 +234,7 @@ static struct meshone *nemomesh_create_one(const char *filepath, const char *bas
 					minx = shapes[i].mesh.positions[j * 3 + 0];
 				if (shapes[i].mesh.positions[j * 3 + 1] < miny)
 					miny = shapes[i].mesh.positions[j * 3 + 1];
-				if (shapes[i].mesh.positions[j * 3 + 3] < minz)
+				if (shapes[i].mesh.positions[j * 3 + 2] < minz)
 					minz = shapes[i].mesh.positions[j * 3 + 2];
 				if (shapes[i].mesh.positions[j * 3 + 0] > maxx)
 					maxx = shapes[i].mesh.positions[j * 3 + 0];
@@ -256,7 +256,7 @@ static struct meshone *nemomesh_create_one(const char *filepath, const char *bas
 					minx = shapes[i].mesh.positions[j * 3 + 0];
 				if (shapes[i].mesh.positions[j * 3 + 1] < miny)
 					miny = shapes[i].mesh.positions[j * 3 + 1];
-				if (shapes[i].mesh.positions[j * 3 + 3] < minz)
+				if (shapes[i].mesh.positions[j * 3 + 2] < minz)
 					minz = shapes[i].mesh.positions[j * 3 + 2];
 				if (shapes[i].mesh.positions[j * 3 + 0] > maxx)
 					maxx = shapes[i].mesh.positions[j * 3 + 0];
