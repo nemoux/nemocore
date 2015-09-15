@@ -73,6 +73,7 @@ extern void nemomatrix_rotate_z(struct nemomatrix *matrix, float cos, float sin)
 extern double nemovector_distance(struct nemovector *v0, struct nemovector *v1);
 extern double nemovector_dot(struct nemovector *v0, struct nemovector *v1);
 extern void nemovector_cross(struct nemovector *v0, struct nemovector *v1);
+extern void nemovector_normalize(struct nemovector *v0);
 
 extern void nemomatrix_init_quaternion(struct nemomatrix *matrix, struct nemoquaternion *quat);
 extern void nemomatrix_multiply_quaternion(struct nemomatrix *matrix, struct nemoquaternion *quat);

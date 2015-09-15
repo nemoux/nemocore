@@ -469,6 +469,15 @@ void nemovector_cross(struct nemovector *v0, struct nemovector *v1)
 	v0->f[2] = lx * ry - ly * rx;
 }
 
+void nemovector_normalize(struct nemovector *v0)
+{
+	double l = sqrtf(v0->f[0] * v0->f[0] + v0->f[1] * v0->f[1] + v0->f[2] * v0->f[2]);
+
+	v0->f[0] /= l;
+	v0->f[1] /= l;
+	v0->f[2] /= l;
+}
+
 void nemomatrix_init_quaternion(struct nemomatrix *matrix, struct nemoquaternion *quat)
 {
 	float qx = quat->q[0];

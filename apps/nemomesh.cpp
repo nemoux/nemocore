@@ -226,12 +226,21 @@ static struct meshone *nemomesh_create_one(const char *filepath, const char *bas
 
 		if (shapes[i].mesh.normals.size() != shapes[i].mesh.positions.size()) {
 			for (j = 0; j < shapes[i].mesh.positions.size() / 3; j++, base++) {
+				struct nemovector v0 = {
+					shapes[i].mesh.positions[j * 3 + 0],
+					shapes[i].mesh.positions[j * 3 + 1],
+					shapes[i].mesh.positions[j * 3 + 2],
+					1.0f
+				};
+
+				nemovector_normalize(&v0);
+
 				NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, shapes[i].mesh.positions[j * 3 + 0]);
 				NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, shapes[i].mesh.positions[j * 3 + 1]);
 				NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, shapes[i].mesh.positions[j * 3 + 2]);
-				NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, 0.0f);
-				NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, 0.0f);
-				NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, 0.0f);
+				NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, v0.f[0]);
+				NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, v0.f[1]);
+				NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, v0.f[2]);
 
 				if (shapes[i].mesh.positions[j * 3 + 0] < minx)
 					minx = shapes[i].mesh.positions[j * 3 + 0];
