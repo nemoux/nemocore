@@ -33,19 +33,6 @@ TARGET_LINK_LIBRARIES(miniback
 	${SKIA_LIBRARIES}
 	)
 
-add_executable(meshback
-	meshback.cpp
-	talehelper.c
-	${CMAKE_SOURCE_DIR}/thirds/tiny_obj_loader.cc
-	)
-
-TARGET_LINK_LIBRARIES(meshback
-	nemotale
-	nemotool
-	${NEMOUX_COMMON_LIBRARIES}
-	${SKIA_LIBRARIES}
-	)
-
 add_executable(plexback
 	plexback.cpp
 	talehelper.c
