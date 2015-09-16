@@ -734,6 +734,10 @@ static void nemomesh_dispatch_tale_event(struct nemotale *tale, struct talenode 
 							event->taps[0]->serial,
 							event->taps[1]->serial,
 							(1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_SCALE));
+
+					one->on_guides = 1;
+
+					nemocanvas_dispatch_frame(context->canvas);
 				} else if (event->tapcount == 3) {
 					struct meshone *one = context->one;
 
@@ -746,8 +750,6 @@ static void nemomesh_dispatch_tale_event(struct nemotale *tale, struct talenode 
 					nemomesh_project_onto_surface(context->width, context->height, &one->avec);
 
 					one->squat = one->cquat;
-
-					one->on_guides = 1;
 				}
 			}
 		} else if (nemotale_is_touch_motion(tale, event, type)) {
@@ -768,7 +770,7 @@ static void nemomesh_dispatch_tale_event(struct nemotale *tale, struct talenode 
 		} else if (nemotale_is_touch_up(tale, event, type)) {
 			nemotale_event_update_node_taps(tale, node, event, type);
 
-			if (event->tapcount <= 3) {
+			if (event->tapcount <= 2) {
 				struct meshone *one = context->one;
 
 				one->on_guides = 0;
