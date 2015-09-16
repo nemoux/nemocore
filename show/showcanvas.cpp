@@ -76,6 +76,8 @@ void nemoshow_canvas_destroy(struct showone *one)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
+	nemotale_node_destroy(canvas->node);
+
 	nemoshow_one_finish(one);
 
 	if (NEMOSHOW_CANVAS_CC(canvas, damage) != NULL)

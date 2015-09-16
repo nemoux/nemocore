@@ -616,6 +616,9 @@ void nemoshow_render_one(struct nemoshow *show)
 	struct showone *one;
 	int i;
 
+	if (scene == NULL)
+		return;
+
 	for (i = 0; i < show->nones; i++) {
 		one = show->ones[i];
 
@@ -653,6 +656,9 @@ void nemoshow_validate_one(struct nemoshow *show)
 	struct showcanvas *canvas;
 	struct showone *one;
 	int i;
+
+	if (scene == NULL)
+		return;
 
 	for (i = 0; i < scene->nchildren; i++) {
 		one = scene->children[i];

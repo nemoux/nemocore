@@ -301,12 +301,10 @@ static inline void nemoshow_item_update_font(struct nemoshow *show, struct showo
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	if (NEMOSHOW_REF(one, NEMOSHOW_FONT_REF) != NULL) {
-		SkSafeUnref(
-				NEMOSHOW_ITEM_CC(item, fill)->setTypeface(
-					NEMOSHOW_FONT_CC(NEMOSHOW_FONT(NEMOSHOW_REF(one, NEMOSHOW_FONT_REF)), face)));
-		SkSafeUnref(
-				NEMOSHOW_ITEM_CC(item, stroke)->setTypeface(
-					NEMOSHOW_FONT_CC(NEMOSHOW_FONT(NEMOSHOW_REF(one, NEMOSHOW_FONT_REF)), face)));
+		NEMOSHOW_ITEM_CC(item, fill)->setTypeface(
+				NEMOSHOW_FONT_CC(NEMOSHOW_FONT(NEMOSHOW_REF(one, NEMOSHOW_FONT_REF)), face));
+		NEMOSHOW_ITEM_CC(item, stroke)->setTypeface(
+				NEMOSHOW_FONT_CC(NEMOSHOW_FONT(NEMOSHOW_REF(one, NEMOSHOW_FONT_REF)), face));
 
 		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 	}
