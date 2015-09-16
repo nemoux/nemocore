@@ -52,7 +52,7 @@ struct nemoactor {
 	nemoactor_dispatch_resize_t dispatch_resize;
 	nemoactor_dispatch_frame_t dispatch_frame;
 
-	struct wl_listener frame_listener;
+	struct wl_list frame_link;
 
 	void *context;
 };

@@ -190,6 +190,94 @@ static char *nemocompz_get_display_name(void)
 	return dname;
 }
 
+static inline void nemocompz_dispatch_actor_frame(struct nemocompz *compz, uint32_t msecs)
+{
+	struct nemoactor *actor, *next;
+
+	wl_list_for_each_safe(actor, next, &compz->frame_list, frame_link) {
+		actor->dispatch_frame(actor, msecs);
+	}
+}
+
+static inline void nemocompz_dispatch_animation_frame(struct nemocompz *compz, uint32_t msecs)
+{
+	struct nemoanimation *anim, *next;
+	double progress;
+
+	wl_list_for_each_safe(anim, next, &compz->animation_list, link) {
+		if (msecs < anim->stime)
+			continue;
+
+		anim->frame_count++;
+
+		if (msecs >= anim->etime) {
+			progress = 1.0f;
+		} else {
+			progress = nemoease_get(&anim->ease, msecs - anim->stime, anim->duration);
+		}
+
+		anim->frame(anim, progress);
+
+		if (msecs >= anim->etime) {
+			wl_list_remove(&anim->link);
+			wl_list_init(&anim->link);
+
+			if (anim->done != NULL)
+				anim->done(anim);
+		}
+	}
+}
+
+static inline void nemocompz_dispatch_effect_frame(struct nemocompz *compz, uint32_t msecs)
+{
+	struct nemoeffect *effect, *next;
+	int done;
+
+	wl_list_for_each_safe(effect, next, &compz->effect_list, link) {
+		effect->frame_count++;
+
+		done = effect->frame(effect, msecs - effect->ptime);
+		if (done != 0) {
+			wl_list_remove(&effect->link);
+			wl_list_init(&effect->link);
+
+			if (effect->done != NULL)
+				effect->done(effect);
+		} else {
+			effect->ptime = msecs;
+		}
+	}
+}
+
+static int nemocompz_dispatch_frame_timeout(void *data)
+{
+	struct nemocompz *compz = (struct nemocompz *)data;
+	uint32_t msecs = time_current_msecs();
+
+	nemocompz_dispatch_actor_frame(compz, msecs);
+	nemocompz_dispatch_animation_frame(compz, msecs);
+	nemocompz_dispatch_effect_frame(compz, msecs);
+
+	if (!wl_list_empty(&compz->frame_list) ||
+			!wl_list_empty(&compz->animation_list) ||
+			!wl_list_empty(&compz->effect_list)) {
+		wl_event_source_timer_update(compz->frame_timer, compz->frame_timeout);
+	} else {
+		compz->frame_done = 1;
+	}
+
+	return 1;
+}
+
+void nemocompz_dispatch_frame(struct nemocompz *compz)
+{
+	if (compz->frame_done != 0) {
+		wl_event_source_timer_update(compz->frame_timer, compz->frame_timeout);
+
+		compz->frame_done = 0;
+	}
+}
+
 struct nemocompz *nemocompz_create(void)
 {
 	struct nemocompz *compz;
@@ -228,7 +316,6 @@ struct nemocompz *nemocompz_create(void)
 	compz->pointer_ids = 0;
 	compz->touch_ids = NEMOCOMPZ_POINTER_MAX;
 	compz->nodemax = NEMOCOMPZ_NODE_MAX;
-	compz->repaint_msecs = NEMOCOMPZ_REPAINT_MSECS;
 	compz->name = nemocompz_get_display_name();
 
 	wl_signal_init(&compz->destroy_signal);
@@ -263,8 +350,6 @@ struct nemocompz *nemocompz_create(void)
 	wl_signal_init(&compz->activate_signal);
 	wl_signal_init(&compz->transform_signal);
 	wl_signal_init(&compz->kill_signal);
-
-	wl_list_init(&compz->frame_listener.link);
 
 	nemolayer_prepare(&compz->cursor_layer, &compz->layer_list);
 
@@ -307,6 +392,15 @@ struct nemocompz *nemocompz_create(void)
 	if (wl_display_add_socket(compz->display, compz->name))
 		goto err1;
 
+	compz->frame_timer = wl_event_loop_add_timer(compz->loop, nemocompz_dispatch_frame_timeout, compz);
+	if (compz->frame_timer == NULL)
+		goto err1;
+
+	compz->frame_timeout = NEMOCOMPZ_DEFAULT_FRAME_TIMEOUT;
+	compz->frame_done = 1;
+
+	wl_list_init(&compz->frame_list);
+
 	return compz;
 
 err1:
@@ -326,8 +420,6 @@ void nemocompz_destroy(struct nemocompz *compz)
 	wl_signal_emit(&compz->destroy_signal, compz);
 
 	nemolog_message("COMPZ", "destroy all screens\n");
-
-	wl_list_remove(&compz->frame_listener.link);
 
 	wl_list_for_each_safe(screen, snext, &compz->screen_list, link) {
 		if (screen->destroy != NULL)
@@ -362,6 +454,9 @@ void nemocompz_destroy(struct nemocompz *compz)
 		if (compz->sigsrc[i] != NULL)
 			wl_event_source_remove(compz->sigsrc[i]);
 	}
+
+	if (compz->frame_timer != NULL)
+		wl_event_source_remove(compz->frame_timer);
 
 	nemolog_message("COMPZ", "destroy current session\n");
 
@@ -500,84 +595,6 @@ struct nemoscreen *nemocompz_get_screen(struct nemocompz *compz, uint32_t nodeid
 	return NULL;
 }
 
-static inline void nemocompz_dispatch_animation_frame(struct nemocompz *compz, uint32_t msecs)
-{
-	struct nemoanimation *anim, *next;
-	double progress;
-
-	wl_list_for_each_safe(anim, next, &compz->animation_list, link) {
-		if (msecs < anim->stime)
-			continue;
-
-		anim->frame_count++;
-
-		if (msecs >= anim->etime) {
-			progress = 1.0f;
-		} else {
-			progress = nemoease_get(&anim->ease, msecs - anim->stime, anim->duration);
-		}
-
-		anim->frame(anim, progress);
-
-		if (msecs >= anim->etime) {
-			wl_list_remove(&anim->link);
-			wl_list_init(&anim->link);
-
-			if (anim->done != NULL)
-				anim->done(anim);
-		}
-	}
-}
-
-static inline void nemocompz_dispatch_effect_frame(struct nemocompz *compz, uint32_t msecs)
-{
-	struct nemoeffect *effect, *next;
-	int done;
-
-	wl_list_for_each_safe(effect, next, &compz->effect_list, link) {
-		effect->frame_count++;
-
-		done = effect->frame(effect, msecs - effect->ptime);
-		if (done != 0) {
-			wl_list_remove(&effect->link);
-			wl_list_init(&effect->link);
-
-			if (effect->done != NULL)
-				effect->done(effect);
-		} else {
-			effect->ptime = msecs;
-		}
-	}
-}
-
-static void nemocompz_handle_screen_frame(struct wl_listener *listener, void *data)
-{
-	struct nemocompz *compz = (struct nemocompz *)container_of(listener, struct nemocompz, frame_listener);
-	uint32_t msecs = time_current_msecs();
-
-	nemocompz_dispatch_animation_frame(compz, msecs);
-	nemocompz_dispatch_effect_frame(compz, msecs);
-
-	if (!wl_list_empty(&compz->animation_list) ||
-			!wl_list_empty(&compz->effect_list)) {
-		nemoscreen_schedule_repaint(compz->screen);
-	}
-}
-
-void nemocompz_set_screen_frame_listener(struct nemocompz *compz, struct nemoscreen *screen)
-{
-	compz->screen = screen;
-	compz->frame_listener.notify = nemocompz_handle_screen_frame;
-
-	wl_signal_add(&screen->frame_signal, &compz->frame_listener);
-}
-
-void nemocompz_put_screen_frame_listener(struct nemocompz *compz)
-{
-	wl_list_remove(&compz->frame_listener.link);
-	wl_list_init(&compz->frame_listener.link);
-}
-
 int32_t nemocompz_get_scene_width(struct nemocompz *compz)
 {
 	pixman_box32_t *extents;
@@ -640,7 +657,7 @@ void nemocompz_dispatch_animation(struct nemocompz *compz, struct nemoanimation 
 	animation->stime = time_current_msecs() + animation->delay;
 	animation->etime = animation->stime + animation->duration;
 
-	nemoscreen_schedule_repaint(compz->screen);
+	nemocompz_dispatch_frame(compz);
 }
 
 void nemocompz_dispatch_effect(struct nemocompz *compz, struct nemoeffect *effect)
@@ -654,7 +671,12 @@ void nemocompz_dispatch_effect(struct nemocompz *compz, struct nemoeffect *effec
 	effect->stime = time_current_msecs();
 	effect->ptime = effect->stime;
 
-	nemoscreen_schedule_repaint(compz->screen);
+	nemocompz_dispatch_frame(compz);
+}
+
+void nemocompz_set_frame_timeout(struct nemocompz *compz, uint32_t timeout)
+{
+	compz->frame_timeout = timeout;
 }
 
 struct nemoevent *nemocompz_get_main_event(struct nemocompz *compz)

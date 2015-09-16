@@ -40,7 +40,7 @@ static int nemoscreen_repaint_frame(struct nemoscreen *screen)
 		compz->dirty = 0;
 	}
 
-	if (pixman_region32_not_empty(&screen->damage) || compz->screen == screen) {
+	if (pixman_region32_not_empty(&screen->damage)) {
 		r = screen->repaint_frame(screen, &screen->damage);
 	}
 
@@ -94,10 +94,6 @@ void nemoscreen_finish_frame(struct nemoscreen *screen, uint32_t secs, uint32_t 
 	}
 
 	screen->frame_msecs = secs * 1000 + usecs / 1000;
-
-	if (compz->screen == screen) {
-		wl_signal_emit(&screen->frame_signal, screen);
-	}
 
 	if (screen->repaint_needed != 0) {
 		if (nemoscreen_repaint_frame(screen) < 0)
@@ -192,7 +188,6 @@ void nemoscreen_prepare(struct nemoscreen *screen, int32_t x, int32_t y, int32_t
 
 	screen->snddev = NULL;
 
-	wl_signal_init(&screen->frame_signal);
 	wl_signal_init(&screen->destroy_signal);
 	wl_list_init(&screen->resource_list);
 

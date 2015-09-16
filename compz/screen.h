@@ -81,7 +81,6 @@ struct nemoscreen {
 
 	struct wl_list link;
 	struct wl_list resource_list;
-	struct wl_signal frame_signal;
 	struct wl_signal destroy_signal;
 	struct wl_global *global;
 

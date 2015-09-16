@@ -18,7 +18,8 @@ NEMO_BEGIN_EXTERN_C
 
 #define	NEMOCOMPZ_NODE_MAX				(4)
 #define	NEMOCOMPZ_POINTER_MAX			(32)
-#define	NEMOCOMPZ_REPAINT_MSECS		(7)
+
+#define	NEMOCOMPZ_DEFAULT_FRAME_TIMEOUT		(1000.0f / 60.0f)
 
 typedef enum {
 	NEMOCOMPZ_NONE_STATE = 0,
@@ -102,10 +103,11 @@ struct nemocompz {
 	struct wl_signal kill_signal;
 
 	clockid_t presentation_clock;
-	int32_t repaint_msecs;
 
-	struct nemoscreen *screen;
-	struct wl_listener frame_listener;
+	struct wl_event_source *frame_timer;
+	struct wl_list frame_list;
+	uint32_t frame_timeout;
+	int frame_done;
 
 	struct nemosound *sound;
 
@@ -145,6 +147,9 @@ extern void nemocompz_update_subcanvas(struct nemocompz *compz);
 
 extern void nemocompz_dispatch_animation(struct nemocompz *compz, struct nemoanimation *animation);
 extern void nemocompz_dispatch_effect(struct nemocompz *compz, struct nemoeffect *effect);
+
+extern void nemocompz_dispatch_frame(struct nemocompz *compz);
+extern void nemocompz_set_frame_timeout(struct nemocompz *compz, uint32_t timeout);
 
 extern struct nemoevent *nemocompz_get_main_event(struct nemocompz *compz);
 

@@ -87,10 +87,10 @@ struct nemoactor *nemoactor_create_pixman(struct nemocompz *compz, int width, in
 	wl_signal_init(&actor->destroy_signal);
 	wl_signal_init(&actor->ungrab_signal);
 
-	wl_list_init(&actor->frame_listener.link);
-
 	wl_list_init(&actor->link);
 	wl_list_insert(&compz->actor_list, &actor->link);
+
+	wl_list_init(&actor->frame_link);
 
 	nemocontent_prepare(&actor->base, compz->nodemax);
 
@@ -134,9 +134,9 @@ void nemoactor_destroy(struct nemoactor *actor)
 {
 	wl_signal_emit(&actor->destroy_signal, actor);
 
-	wl_list_remove(&actor->frame_listener.link);
-
 	wl_list_remove(&actor->link);
+
+	wl_list_remove(&actor->frame_link);
 
 	nemoview_destroy(actor->view);
 
@@ -220,10 +220,10 @@ struct nemoactor *nemoactor_create_gl(struct nemocompz *compz, int width, int he
 	wl_signal_init(&actor->destroy_signal);
 	wl_signal_init(&actor->ungrab_signal);
 
-	wl_list_init(&actor->frame_listener.link);
-
 	wl_list_init(&actor->link);
 	wl_list_insert(&compz->actor_list, &actor->link);
+
+	wl_list_init(&actor->frame_link);
 
 	nemocontent_prepare(&actor->base, compz->nodemax);
 
@@ -345,31 +345,24 @@ void nemoactor_dispatch_resize(struct nemoactor *actor, int32_t width, int32_t h
 
 void nemoactor_dispatch_frame(struct nemoactor *actor)
 {
-	if (wl_list_empty(&actor->frame_listener.link)) {
+	if (wl_list_empty(&actor->frame_link)) {
 		actor->dispatch_frame(actor, 0);
 	}
 }
 
-static void nemoactor_handle_screen_frame(struct wl_listener *listener, void *data)
-{
-	struct nemoactor *actor = (struct nemoactor *)container_of(listener, struct nemoactor, frame_listener);
-	struct nemoscreen *screen = (struct nemoscreen *)data;
-
-	actor->dispatch_frame(actor, screen->frame_msecs);
-}
-
 void nemoactor_feedback(struct nemoactor *actor)
 {
-	if (wl_list_empty(&actor->frame_listener.link)) {
-		struct nemoscreen *screen = actor->compz->screen;
+	if (wl_list_empty(&actor->frame_link)) {
+		struct nemocompz *compz = actor->compz;
 
-		actor->frame_listener.notify = nemoactor_handle_screen_frame;
-		wl_signal_add(&screen->frame_signal, &actor->frame_listener);
+		wl_list_insert(&compz->frame_list, &actor->frame_link);
+
+		nemocompz_dispatch_frame(compz);
 	}
 }
 
 void nemoactor_feedback_done(struct nemoactor *actor)
 {
-	wl_list_remove(&actor->frame_listener.link);
-	wl_list_init(&actor->frame_listener.link);
+	wl_list_remove(&actor->frame_link);
+	wl_list_init(&actor->frame_link);
 }
