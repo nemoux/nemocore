@@ -258,12 +258,12 @@ static inline void nemoshow_item_update_style(struct nemoshow *show, struct show
 	if (NEMOSHOW_REF(one, NEMOSHOW_STYLE_REF) == one) {
 		if (item->fill != 0) {
 			NEMOSHOW_ITEM_CC(item, fill)->setColor(
-					SkColorSetARGB(255.0f * item->alpha, item->fills[2], item->fills[1], item->fills[0]));
+					SkColorSetARGB(item->fills[3] * item->alpha, item->fills[2], item->fills[1], item->fills[0]));
 		}
 		if (item->stroke != 0) {
 			NEMOSHOW_ITEM_CC(item, stroke)->setStrokeWidth(item->stroke_width);
 			NEMOSHOW_ITEM_CC(item, stroke)->setColor(
-					SkColorSetARGB(255.0f * item->alpha, item->strokes[2], item->strokes[1], item->strokes[0]));
+					SkColorSetARGB(item->fills[3] * item->alpha, item->strokes[2], item->strokes[1], item->strokes[0]));
 		}
 	}
 
