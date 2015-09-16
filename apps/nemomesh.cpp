@@ -23,6 +23,7 @@
 #include <pixmanhelper.h>
 #include <glhelper.h>
 #include <fbohelper.h>
+#include <oshelper.h>
 #include <nemomatrix.h>
 #include <nemometro.h>
 #include <nemobox.h>
@@ -952,6 +953,9 @@ int main(int argc, char *argv[])
 			nemotale_node_get_texture(context->node),
 			context->width, context->height,
 			&context->fbo, &context->dbo);
+
+	if (basepath == NULL)
+		basepath = os_get_file_path(filepath);
 
 	context->one = one = nemomesh_create_one(filepath, basepath);
 	nemomesh_prepare_one(one, GL_LINES, one->lines, one->nlines);

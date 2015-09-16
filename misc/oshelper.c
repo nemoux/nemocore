@@ -250,6 +250,25 @@ const char *os_get_file_extension(const char *name)
 	return NULL;
 }
 
+char *os_get_file_path(const char *name)
+{
+	char *path = strdup(name);
+	int len = strlen(name);
+	int i;
+
+	for (i = len - 1; i >= 0; i--) {
+		if (path[i] == '/') {
+			path[i + 1] = '\0';
+
+			return path;
+		}
+	}
+
+	free(path);
+
+	return NULL;
+}
+
 int os_set_nonblocking_mode(int fd)
 {
 	int flags;
