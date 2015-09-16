@@ -263,7 +263,7 @@ static inline void nemoshow_item_update_style(struct nemoshow *show, struct show
 		if (item->stroke != 0) {
 			NEMOSHOW_ITEM_CC(item, stroke)->setStrokeWidth(item->stroke_width);
 			NEMOSHOW_ITEM_CC(item, stroke)->setColor(
-					SkColorSetARGB(item->fills[3] * item->alpha, item->strokes[2], item->strokes[1], item->strokes[0]));
+					SkColorSetARGB(item->strokes[3] * item->alpha, item->strokes[2], item->strokes[1], item->strokes[0]));
 		}
 	}
 
