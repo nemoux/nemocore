@@ -198,11 +198,22 @@ static void moteback_render_one(struct moteback *mote, pixman_image_t *image)
 					NEMOMOTE_COLOR_G(mote->mote, i) * 255.0f,
 					NEMOMOTE_COLOR_B(mote->mote, i) * 255.0f));
 
+		canvas.save();
+
+		canvas.clipRect(
+				SkRect::MakeXYWH(
+					MAX(NEMOMOTE_POSITION_X(mote->mote, i) - NEMOMOTE_MASS(mote->mote, i) - 8.0f, 0.0f),
+					MAX(NEMOMOTE_POSITION_Y(mote->mote, i) - NEMOMOTE_MASS(mote->mote, i) - 8.0f, 0.0f),
+					(NEMOMOTE_MASS(mote->mote, i) + 8.0f) * 2.0f,
+					(NEMOMOTE_MASS(mote->mote, i) + 8.0f) * 2.0f));
+
 		canvas.drawCircle(
 				NEMOMOTE_POSITION_X(mote->mote, i),
 				NEMOMOTE_POSITION_Y(mote->mote, i),
 				NEMOMOTE_MASS(mote->mote, i),
 				fill);
+
+		canvas.restore();
 	}
 }
 
