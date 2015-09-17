@@ -10,6 +10,7 @@
 
 #include <plugin.h>
 #include <compz.h>
+#include <nemolog.h>
 #include <nemomisc.h>
 
 int nemocompz_load_plugin(struct nemocompz *compz, const char *path, const char *args)
@@ -18,13 +19,21 @@ int nemocompz_load_plugin(struct nemocompz *compz, const char *path, const char 
 	void *handle;
 	char *err;
 
+	nemolog_message("PLUGIN", "load '%s' plugin...\n", path);
+
 	handle = dlopen(path, RTLD_LAZY);
-	if (handle == NULL)
+	if (handle == NULL) {
+		nemolog_error("PLUGIN", "failed to open '%s': %s\n", path, dlerror());
+
 		return -1;
+	}
 
 	init = dlsym(handle, "nemoplugin_init");
-	if ((err = dlerror()) != NULL)
+	if ((err = dlerror()) != NULL) {
+		nemolog_error("PLUGIN", "failed to open '%s:nemoplugin_init': %s\n", path, err);
+
 		return -1;
+	}
 
 	init(compz, args);
 
