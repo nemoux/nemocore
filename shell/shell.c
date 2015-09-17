@@ -586,6 +586,11 @@ void nemoshell_destroy(struct nemoshell *shell)
 	free(shell);
 }
 
+void nemoshell_set_default_layer(struct nemoshell *shell, struct nemolayer *layer)
+{
+	shell->default_layer = layer;
+}
+
 void nemoshell_send_bin_state(struct shellbin *bin)
 {
 	struct binstate *state;

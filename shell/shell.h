@@ -38,6 +38,8 @@ struct nemoshell {
 	struct nemolayer underlay_layer;
 	struct nemolayer background_layer;
 
+	struct nemolayer *default_layer;
+
 	struct wl_listener pointer_focus_listener;
 	struct wl_listener keyboard_focus_listener;
 	struct wl_listener keypad_focus_listener;
@@ -167,6 +169,8 @@ struct shellbin {
 
 extern struct nemoshell *nemoshell_create(struct nemocompz *compz);
 extern void nemoshell_destroy(struct nemoshell *shell);
+
+extern void nemoshell_set_default_layer(struct nemoshell *shell, struct nemolayer *layer);
 
 extern struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas *canvas, struct nemoclient *client);
 extern void nemoshell_destroy_bin(struct shellbin *bin);

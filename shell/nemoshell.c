@@ -320,6 +320,9 @@ static void nemo_get_nemo_surface(struct wl_client *client, struct wl_resource *
 				"failed to create shell surface");
 		return;
 	}
+	
+	if (shell->default_layer != NULL)
+		bin->layer = shell->default_layer;
 
 	bin->owner = sc;
 
