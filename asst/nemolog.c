@@ -8,43 +8,67 @@
 
 #include <time.h>
 #include <sys/time.h>
+#include <sys/socket.h>
+#include <sys/un.h>
 
 #include <nemolog.h>
+#include <nemomisc.h>
 
 #ifdef NEMO_LOG_ON
-static FILE *nemologfile = NULL;
+static int nemologfile = -1;
 
 int nemolog_open_file(const char *filepath)
 {
-	FILE *file;
+	nemologfile = open(filepath, O_RDWR | O_CREAT | O_TRUNC);
 
-	file = fopen(filepath, "a");
-	if (file == NULL)
-		return -1;
-
-	nemologfile = file;
-
-	return 0;
+	return nemologfile;
 }
 
 void nemolog_close_file(void)
 {
-	fclose(nemologfile);
+	close(nemologfile);
 
-	nemologfile = NULL;
+	nemologfile = -1;
 }
 
-void nemolog_set_file(FILE *file)
+void nemolog_set_file(int fd)
 {
-	nemologfile = file;
+	nemologfile = fd;
+}
+
+int nemolog_open_socket(const char *socketpath)
+{
+	struct sockaddr_un addr;
+	socklen_t size, namesize;
+	int soc;
+
+	soc = socket(PF_LOCAL, SOCK_STREAM | SOCK_CLOEXEC, 0);
+	if (soc < 0)
+		return -1;
+
+	addr.sun_family = AF_LOCAL;
+	namesize = snprintf(addr.sun_path, sizeof(addr.sun_path), socketpath);
+	size = offsetof(struct sockaddr_un, sun_path) + namesize;
+
+	if (connect(soc, (struct sockaddr *)&addr, size) < 0)
+		goto err1;
+
+	nemologfile = soc;
+
+	return soc;
+
+err1:
+	close(soc);
+
+	return -1;
 }
 
 static int nemolog_write(const char *syntax, const char *tag, const char *fmt, va_list vargs)
 {
 	struct timeval tv;
 	struct tm *tm;
+	char msg[1024];
 	char buffer[128] = "";
-	int r = 0;
 
 	gettimeofday(&tv, NULL);
 
@@ -53,10 +77,10 @@ static int nemolog_write(const char *syntax, const char *tag, const char *fmt, v
 		strftime(buffer, sizeof(buffer), "%H:%M:%S", tm);
 	}
 
-	r += fprintf(nemologfile, syntax, tag, buffer, tv.tv_usec / 1000);
-	r += vfprintf(nemologfile, fmt, vargs);
+	snprintf(msg, sizeof(msg), syntax, tag, buffer, tv.tv_usec / 1000);
+	vsnprintf(msg + strlen(msg), sizeof(msg) - strlen(msg), fmt, vargs);
 
-	return r;
+	return write(nemologfile, msg, strlen(msg));
 }
 
 int nemolog_message(const char *tag, const char *fmt, ...)
@@ -64,7 +88,7 @@ int nemolog_message(const char *tag, const char *fmt, ...)
 	va_list vargs;
 	int r;
 
-	if (nemologfile == NULL)
+	if (nemologfile < 0)
 		return 0;
 
 	va_start(vargs, fmt);
@@ -79,7 +103,7 @@ int nemolog_warning(const char *tag, const char *fmt, ...)
 	va_list vargs;
 	int r;
 
-	if (nemologfile == NULL)
+	if (nemologfile < 0)
 		return 0;
 
 	va_start(vargs, fmt);
@@ -94,7 +118,7 @@ int nemolog_error(const char *tag, const char *fmt, ...)
 	va_list vargs;
 	int r;
 
-	if (nemologfile == NULL)
+	if (nemologfile < 0)
 		return 0;
 
 	va_start(vargs, fmt);

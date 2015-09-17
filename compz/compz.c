@@ -148,6 +148,15 @@ static int on_fault_signal(int signum, void *data)
 	return 1;
 }
 
+static int on_pipe_signal(int signum, void *data)
+{
+	struct nemocompz *compz = (struct nemocompz *)data;
+
+	nemolog_error("COMPZ", "received %d fault signal\n", signum);
+
+	return 1;
+}
+
 static int nemocompz_check_xdg_runtime_dir(void)
 {
 	char *dir = getenv("XDG_RUNTIME_DIR");
@@ -325,6 +334,7 @@ struct nemocompz *nemocompz_create(void)
 	compz->sigsrc[2] = wl_event_loop_add_signal(loop, SIGQUIT, on_term_signal, compz);
 	compz->sigsrc[3] = wl_event_loop_add_signal(loop, SIGCHLD, on_chld_signal, compz);
 	compz->sigsrc[4] = wl_event_loop_add_signal(loop, SIGSEGV, on_fault_signal, compz);
+	compz->sigsrc[5] = wl_event_loop_add_signal(loop, SIGPIPE, on_pipe_signal, compz);
 
 	compz->display = display;
 	compz->loop = loop;

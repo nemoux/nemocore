@@ -11,7 +11,8 @@ NEMO_BEGIN_EXTERN_C
 
 extern int nemolog_open_file(const char *filepath);
 extern void nemolog_close_file(void);
-extern void nemolog_set_file(FILE *file);
+extern void nemolog_set_file(int fd);
+extern int nemolog_open_socket(const char *socketpath);
 
 extern int nemolog_message(const char *tag, const char *fmt, ...);
 extern int nemolog_warning(const char *tag, const char *fmt, ...);
@@ -21,7 +22,8 @@ extern int nemolog_error(const char *tag, const char *fmt, ...);
 
 static inline int nemolog_open_file(const char *filepath) { return 0; }
 static inline void nemolog_close_file(void) {}
-static inline void nemolog_set_file(FILE *file) {}
+static inline void nemolog_set_file(int fd) {}
+static inline int nemolog_open_socket(const char *socketpath) {}
 
 static inline int nemolog_message(const char *tag, const char *fmt, ...) { return 0; }
 static inline int nemolog_warning(const char *tag, const char *fmt, ...) { return 0; }

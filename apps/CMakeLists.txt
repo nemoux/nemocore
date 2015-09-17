@@ -20,6 +20,12 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
 set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 
+add_executable(nemolog
+	nemolog.c
+	)
+
+INSTALL(TARGETS nemolog DESTINATION bin)
+
 add_executable(nemoimage
 	nemoimage.c
 	talehelper.c
