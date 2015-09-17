@@ -109,6 +109,8 @@ struct nemocompz {
 	uint32_t frame_timeout;
 	int frame_done;
 
+	struct wl_event_source *framerate_timer;
+
 	struct nemosound *sound;
 
 	struct nemoevent *event;

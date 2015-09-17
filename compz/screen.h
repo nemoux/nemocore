@@ -44,6 +44,7 @@ struct nemoscreen {
 	int repaint_needed;
 	int repaint_scheduled;
 	uint32_t frame_msecs;
+	uint32_t frame_count;
 
 	uint64_t msc;
 
