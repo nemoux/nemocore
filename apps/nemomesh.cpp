@@ -41,14 +41,11 @@ struct meshone {
 	GLuint garray;
 	GLuint gbuffer;
 
-	uint32_t *lines;
+	float *lines;
 	int nlines, slines;
 
-	uint32_t *meshes;
+	float *meshes;
 	int nmeshes, smeshes;
-
-	float *vertices;
-	int nvertices, svertices;
 
 	float *guides;
 	int nguides, sguides;
@@ -209,17 +206,13 @@ static struct meshone *nemomesh_create_one(const char *filepath, const char *bas
 
 	nemoquaternion_init_identity(&one->cquat);
 
-	one->lines = (uint32_t *)malloc(sizeof(uint32_t) * 16);
+	one->lines = (float *)malloc(sizeof(float) * 16);
 	one->nlines = 0;
 	one->slines = 16;
 
-	one->meshes = (uint32_t *)malloc(sizeof(uint32_t) * 16);
+	one->meshes = (float *)malloc(sizeof(float) * 16);
 	one->nmeshes = 0;
 	one->smeshes = 16;
-
-	one->vertices = (float *)malloc(sizeof(float) * 16);
-	one->nvertices = 0;
-	one->svertices = 16;
 
 	one->guides = (float *)malloc(sizeof(float) * 16);
 	one->nguides = 0;
@@ -371,35 +364,73 @@ static struct meshone *nemomesh_create_one(const char *filepath, const char *bas
 				}
 			}
 
-			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, p0[0]);
-			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, p0[1]);
-			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, p0[2]);
-			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, n0[0]);
-			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, n0[1]);
-			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, n0[2]);
-			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, r);
-			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, g);
-			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, b);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, p0[0]);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, p0[1]);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, p0[2]);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, n0[0]);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, n0[1]);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, n0[2]);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, r);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, g);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, b);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, p1[0]);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, p1[1]);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, p1[2]);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, n1[0]);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, n1[1]);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, n1[2]);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, r);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, g);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, b);
 
-			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, p1[0]);
-			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, p1[1]);
-			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, p1[2]);
-			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, n1[0]);
-			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, n1[1]);
-			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, n1[2]);
-			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, r);
-			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, g);
-			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, b);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, p0[0]);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, p0[1]);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, p0[2]);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, n0[0]);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, n0[1]);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, n0[2]);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, r);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, g);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, b);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, p2[0]);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, p2[1]);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, p2[2]);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, n2[0]);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, n2[1]);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, n2[2]);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, r);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, g);
+			NEMOBOX_APPEND(one->lines, one->slines, one->nlines, b);
 
-			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, p2[0]);
-			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, p2[1]);
-			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, p2[2]);
-			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, n2[0]);
-			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, n2[1]);
-			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, n2[2]);
-			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, r);
-			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, g);
-			NEMOBOX_APPEND(one->vertices, one->svertices, one->nvertices, b);
+			NEMOBOX_APPEND(one->meshes, one->smeshes, one->nmeshes, p0[0]);
+			NEMOBOX_APPEND(one->meshes, one->smeshes, one->nmeshes, p0[1]);
+			NEMOBOX_APPEND(one->meshes, one->smeshes, one->nmeshes, p0[2]);
+			NEMOBOX_APPEND(one->meshes, one->smeshes, one->nmeshes, n0[0]);
+			NEMOBOX_APPEND(one->meshes, one->smeshes, one->nmeshes, n0[1]);
+			NEMOBOX_APPEND(one->meshes, one->smeshes, one->nmeshes, n0[2]);
+			NEMOBOX_APPEND(one->meshes, one->smeshes, one->nmeshes, r);
+			NEMOBOX_APPEND(one->meshes, one->smeshes, one->nmeshes, g);
+			NEMOBOX_APPEND(one->meshes, one->smeshes, one->nmeshes, b);
+
+			NEMOBOX_APPEND(one->meshes, one->smeshes, one->nmeshes, p1[0]);
+			NEMOBOX_APPEND(one->meshes, one->smeshes, one->nmeshes, p1[1]);
+			NEMOBOX_APPEND(one->meshes, one->smeshes, one->nmeshes, p1[2]);
+			NEMOBOX_APPEND(one->meshes, one->smeshes, one->nmeshes, n1[0]);
+			NEMOBOX_APPEND(one->meshes, one->smeshes, one->nmeshes, n1[1]);
+			NEMOBOX_APPEND(one->meshes, one->smeshes, one->nmeshes, n1[2]);
+			NEMOBOX_APPEND(one->meshes, one->smeshes, one->nmeshes, r);
+			NEMOBOX_APPEND(one->meshes, one->smeshes, one->nmeshes, g);
+			NEMOBOX_APPEND(one->meshes, one->smeshes, one->nmeshes, b);
+
+			NEMOBOX_APPEND(one->meshes, one->smeshes, one->nmeshes, p2[0]);
+			NEMOBOX_APPEND(one->meshes, one->smeshes, one->nmeshes, p2[1]);
+			NEMOBOX_APPEND(one->meshes, one->smeshes, one->nmeshes, p2[2]);
+			NEMOBOX_APPEND(one->meshes, one->smeshes, one->nmeshes, n2[0]);
+			NEMOBOX_APPEND(one->meshes, one->smeshes, one->nmeshes, n2[1]);
+			NEMOBOX_APPEND(one->meshes, one->smeshes, one->nmeshes, n2[2]);
+			NEMOBOX_APPEND(one->meshes, one->smeshes, one->nmeshes, r);
+			NEMOBOX_APPEND(one->meshes, one->smeshes, one->nmeshes, g);
+			NEMOBOX_APPEND(one->meshes, one->smeshes, one->nmeshes, b);
 
 			minx = MIN(p0[0], minx);
 			minx = MIN(p1[0], minx);
@@ -494,7 +525,7 @@ static struct meshone *nemomesh_create_one(const char *filepath, const char *bas
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (void *)sizeof(GLfloat[6]));
 	glEnableVertexAttribArray(2);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * one->nvertices, one->vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * one->nmeshes, one->meshes, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	glGenBuffers(1, &one->vindex);
@@ -531,17 +562,30 @@ static void nemomesh_destroy_one(struct meshone *one)
 
 	free(one->lines);
 	free(one->meshes);
-	free(one->vertices);
 	free(one->guides);
 }
 
-static void nemomesh_prepare_one(struct meshone *one, GLenum mode, uint32_t *buffers, int elements)
+static void nemomesh_prepare_buffer(struct meshone *one, GLenum mode, float *buffers, int elements)
+{
+	glBindVertexArray(one->varray);
+
+	glBindBuffer(GL_ARRAY_BUFFER, one->vbuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * elements, buffers, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	glBindVertexArray(0);
+
+	one->mode = mode;
+	one->elements = elements;
+}
+
+static void nemomesh_prepare_index(struct meshone *one, GLenum mode, uint32_t *buffers, int elements)
 {
 	glBindVertexArray(one->varray);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, one->vindex);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * elements, buffers, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	glBindVertexArray(0);
 
@@ -593,7 +637,7 @@ static void nemomesh_render(struct meshcontext *context)
 	glBindVertexArray(0);
 #else
 	glBindVertexArray(one->varray);
-	glDrawArrays(one->mode, 0, one->nvertices);
+	glDrawArrays(one->mode, 0, one->elements);
 	glBindVertexArray(0);
 #endif
 
@@ -786,9 +830,9 @@ static void nemomesh_dispatch_tale_event(struct nemotale *tale, struct talenode 
 
 			if (plane != NEMO_METRO_NONE_PLANE) {
 				if (one->mode == GL_TRIANGLES)
-					nemomesh_prepare_one(one, GL_LINES, one->lines, one->nlines);
+					nemomesh_prepare_buffer(one, GL_LINES, one->lines, one->nlines);
 				else
-					nemomesh_prepare_one(one, GL_TRIANGLES, one->meshes, one->nmeshes);
+					nemomesh_prepare_buffer(one, GL_TRIANGLES, one->meshes, one->nmeshes);
 
 				nemocanvas_dispatch_frame(context->canvas);
 			}
@@ -958,7 +1002,7 @@ int main(int argc, char *argv[])
 		basepath = os_get_file_path(filepath);
 
 	context->one = one = nemomesh_create_one(filepath, basepath);
-	nemomesh_prepare_one(one, GL_LINES, one->lines, one->nlines);
+	nemomesh_prepare_buffer(one, GL_LINES, one->lines, one->nlines);
 
 	nemocanvas_dispatch_frame(NTEGL_CANVAS(canvas));
 
