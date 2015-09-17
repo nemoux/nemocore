@@ -7,13 +7,28 @@
 
 #include <getopt.h>
 
-#include <playback.h>
 #include <nemotool.h>
 #include <nemoegl.h>
 #include <talehelper.h>
 #include <gsthelper.h>
 #include <glibhelper.h>
 #include <nemomisc.h>
+
+struct playback {
+	struct nemotool *tool;
+
+	struct eglcontext *egl;
+	struct eglcanvas *eglcanvas;
+
+	struct nemocanvas *canvas;
+
+	struct nemotale *tale;
+	struct talenode *node;
+
+	struct nemogst *gst;
+
+	int32_t width, height;
+};
 
 static void playback_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t secs, uint32_t nsecs)
 {

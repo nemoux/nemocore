@@ -13,13 +13,40 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
-#include <miniback.h>
-
 #include <nemotool.h>
 #include <nemoegl.h>
 #include <talehelper.h>
 #include <pixmanhelper.h>
+#include <nemomatrix.h>
 #include <nemomisc.h>
+
+struct miniback {
+	struct nemotool *tool;
+
+	struct eglcontext *egl;
+	struct eglcanvas *eglcanvas;
+
+	struct nemocanvas *canvas;
+
+	struct nemotale *tale;
+	struct talenode *node;
+
+	int32_t width, height;
+
+	GLuint fbo, dbo;
+
+	GLuint program;
+	GLuint utex0;
+	GLuint uprojection;
+	GLuint ucolor;
+
+	struct nemomatrix matrix;
+
+	GLuint varray;
+	GLuint vbuffer;
+
+	GLuint texture;
+};
 
 static GLuint miniback_create_shader(void)
 {

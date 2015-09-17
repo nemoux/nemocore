@@ -37,12 +37,39 @@
 
 #include <SkGeometry.h>
 
-#include <moteback.h>
+#include <nemomote.h>
 #include <nemotool.h>
+#include <nemotimer.h>
 #include <nemoegl.h>
 #include <pixmanhelper.h>
 #include <talehelper.h>
 #include <nemomisc.h>
+
+struct moteback {
+	struct nemotool *tool;
+
+	struct eglcontext *egl;
+	struct eglcanvas *eglcanvas;
+
+	struct nemocanvas *canvas;
+
+	struct nemotale *tale;
+	struct talenode *node;
+
+	int32_t width, height;
+
+	struct nemomote *mote;
+	struct moterandom random;
+	struct nemozone box;
+	struct nemozone disc;
+	struct nemozone speed;
+
+	struct motetween tween;
+
+	double secs;
+
+	struct nemotimer *timer;
+};
 
 static void moteback_prepare_text(struct moteback *mote, const char *text)
 {
@@ -158,17 +185,18 @@ static void moteback_render_one(struct moteback *mote, pixman_image_t *image)
 			SkBlurMask::ConvertRadiusToSigma(5.0f),
 			SkBlurMaskFilter::kHighQuality_BlurFlag);
 
+	SkPaint fill;
+	fill.setAntiAlias(true);
+	fill.setStyle(SkPaint::kFill_Style);
+	fill.setMaskFilter(filter);
+
 	for (i = 0; i < nemomote_get_count(mote->mote); i++) {
-		SkPaint fill;
-		fill.setAntiAlias(true);
-		fill.setStyle(SkPaint::kFill_Style);
 		fill.setColor(
 				SkColorSetARGB(
 					NEMOMOTE_COLOR_A(mote->mote, i) * 255.0f,
 					NEMOMOTE_COLOR_R(mote->mote, i) * 255.0f,
 					NEMOMOTE_COLOR_G(mote->mote, i) * 255.0f,
 					NEMOMOTE_COLOR_B(mote->mote, i) * 255.0f));
-		fill.setMaskFilter(filter);
 
 		canvas.drawCircle(
 				NEMOMOTE_POSITION_X(mote->mote, i),

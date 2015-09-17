@@ -37,13 +37,34 @@
 
 #include <SkGeometry.h>
 
-#include <mosiback.h>
 #include <nemotool.h>
 #include <nemoegl.h>
+#include <nemomosi.h>
 #include <pixmanhelper.h>
 #include <talehelper.h>
 #include <nemomosi.h>
 #include <nemomisc.h>
+
+struct mosiback {
+	struct nemotool *tool;
+
+	struct eglcontext *egl;
+	struct eglcanvas *eglcanvas;
+
+	struct nemocanvas *canvas;
+
+	struct nemotale *tale;
+	struct talenode *node;
+
+	int32_t width, height;
+
+	pixman_image_t *imgs[8];
+	int nimgs, iimgs;
+
+	int type;
+	double r;
+	struct nemomosi *mosi;
+};
 
 static int mosiback_render(struct mosiback *mosi, pixman_image_t *image)
 {

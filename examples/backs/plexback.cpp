@@ -39,13 +39,40 @@
 
 #include <poly2tri.h>
 
-#include <plexback.h>
 #include <nemotool.h>
 #include <nemoegl.h>
 #include <pixmanhelper.h>
 #include <talehelper.h>
 #include <voronoihelper.h>
 #include <nemomisc.h>
+
+#include <voronoihelper.h>
+
+#define	PLEXBACK_VORONOI_ENABLE	(0)
+
+struct plexback {
+	struct nemotool *tool;
+
+	struct eglcontext *egl;
+	struct eglcanvas *eglcanvas;
+
+	struct nemocanvas *canvas;
+
+	struct nemotale *tale;
+	struct talenode *node;
+
+	int32_t width, height;
+
+#if PLEXBACK_VORONOI_ENABLE
+	std::vector<Point> points;
+	std::vector<Segment> segments;
+#else
+	std::vector<p2t::Point *> spoints;
+	std::vector<p2t::Point *> dpoints;
+#endif
+
+	uint32_t msecs;
+};
 
 static void plexback_render_one(struct plexback *plex, pixman_image_t *image, double t)
 {
