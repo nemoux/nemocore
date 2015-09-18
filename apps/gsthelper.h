@@ -66,6 +66,7 @@ extern void nemogst_destroy(struct nemogst *gst);
 extern int nemogst_prepare_nemo_sink(struct nemogst *gst, struct wl_display *display, struct wl_shm *shm, uint32_t formats, struct wl_surface *surface);
 extern int nemogst_prepare_nemo_subsink(struct nemogst *gst, nemogst_subtitle_render_t render, void *data);
 extern int nemogst_prepare_mini_sink(struct nemogst *gst, nemogst_minisink_render_t render, void *data);
+extern int nemogst_prepare_audio_sink(struct nemogst *gst);
 
 extern int nemogst_load_media_info(struct nemogst *gst, const char *uri);
 

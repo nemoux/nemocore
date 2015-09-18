@@ -220,6 +220,20 @@ int nemogst_prepare_mini_sink(struct nemogst *gst, nemogst_minisink_render_t ren
 	return 0;
 }
 
+int nemogst_prepare_audio_sink(struct nemogst *gst)
+{
+	GstPad *pad;
+	
+	gst->player = gst_element_factory_make("playbin", "playbin");
+
+	gst->bus = gst_pipeline_get_bus(GST_PIPELINE(gst->player));
+	gst->busid = gst_bus_add_watch(gst->bus, nemogst_watch_bus, gst);
+
+	gst_element_set_state(gst->player, GST_STATE_READY);
+
+	return 0;
+}
+
 int nemogst_load_media_info(struct nemogst *gst, const char *uri)
 {
 	GstDiscoverer *dc;
