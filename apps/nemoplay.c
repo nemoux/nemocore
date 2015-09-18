@@ -16,6 +16,7 @@
 #include <gsthelper.h>
 #include <talehelper.h>
 #include <glibhelper.h>
+#include <nemolog.h>
 #include <nemomisc.h>
 
 #define	NEMOPLAY_SEEK_ENABLE						(1)
@@ -44,7 +45,7 @@ struct playcontext {
 
 static void nemoplay_dispatch_subtitle(GstElement *base, guint8 *buffer, gsize size, gpointer data)
 {
-	NEMO_DEBUG("[%s]\n", buffer);
+	nemolog_message("PLAY", "{%s}\n", buffer);
 }
 
 static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
@@ -183,6 +184,7 @@ int main(int argc, char *argv[])
 		{ "width",				required_argument,	NULL,		'w' },
 		{ "height",				required_argument,	NULL,		'h' },
 		{ "background",		no_argument,				NULL,		'b' },
+		{ "log",					required_argument,	NULL,		'l' },
 		{ 0 }
 	};
 
@@ -202,7 +204,9 @@ int main(int argc, char *argv[])
 	int is_background = 0;
 	int opt;
 
-	while (opt = getopt_long(argc, argv, "f:s:w:h:b", options, NULL)) {
+	nemolog_set_file(2);
+
+	while (opt = getopt_long(argc, argv, "f:s:w:h:bl:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -227,6 +231,10 @@ int main(int argc, char *argv[])
 				is_background = 1;
 				break;
 
+			case 'l':
+				nemolog_open_socket(optarg);
+				break;
+
 			default:
 				break;
 		}
@@ -234,6 +242,8 @@ int main(int argc, char *argv[])
 
 	if (filepath == NULL)
 		return 0;
+
+	nemolog_message("PLAY", "play '%s' video file...\n", filepath);
 
 	gst_init(&argc, &argv);
 
@@ -319,6 +329,8 @@ int main(int argc, char *argv[])
 	g_main_loop_unref(gmainloop);
 
 	nemogst_destroy(context->gst);
+
+	nemolog_message("PLAY", "done '%s' video file...\n", filepath);
 
 out2:
 	nemocanvas_destroy(canvas);

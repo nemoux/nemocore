@@ -16,6 +16,7 @@
 
 #ifdef NEMO_LOG_ON
 static int nemologfile = -1;
+static int nemologtype = 0;
 
 int nemolog_open_file(const char *filepath)
 {
@@ -54,6 +55,7 @@ int nemolog_open_socket(const char *socketpath)
 		goto err1;
 
 	nemologfile = soc;
+	nemologtype = 1;
 
 	return soc;
 
@@ -79,6 +81,9 @@ static int nemolog_write(const char *syntax, const char *tag, const char *fmt, v
 
 	snprintf(msg, sizeof(msg), syntax, tag, buffer, tv.tv_usec / 1000);
 	vsnprintf(msg + strlen(msg), sizeof(msg) - strlen(msg), fmt, vargs);
+
+	if (nemologtype == 1)
+		return send(nemologfile, msg, strlen(msg), MSG_NOSIGNAL | MSG_DONTWAIT);
 
 	return write(nemologfile, msg, strlen(msg));
 }

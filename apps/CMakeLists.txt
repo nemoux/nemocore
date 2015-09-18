@@ -24,6 +24,10 @@ add_executable(nemolog
 	nemolog.c
 	)
 
+TARGET_LINK_LIBRARIES(nemolog
+	nemoasst
+	)
+
 INSTALL(TARGETS nemolog DESTINATION bin)
 
 add_executable(nemoimage
