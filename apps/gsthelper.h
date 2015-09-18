@@ -67,12 +67,15 @@ extern int nemogst_prepare_nemo_sink(struct nemogst *gst, struct wl_display *dis
 extern int nemogst_prepare_nemo_subsink(struct nemogst *gst, nemogst_subtitle_render_t render, void *data);
 extern int nemogst_prepare_mini_sink(struct nemogst *gst, nemogst_minisink_render_t render, void *data);
 
-extern int nemogst_set_video_path(struct nemogst *gst, const char *uri);
+extern int nemogst_load_media_info(struct nemogst *gst, const char *uri);
+
+extern int nemogst_set_media_path(struct nemogst *gst, const char *uri);
 extern int nemogst_set_subtitle_path(struct nemogst *gst, const char *path);
 
-extern int nemogst_ready_video(struct nemogst *gst);
-extern int nemogst_play_video(struct nemogst *gst);
-extern int nemogst_pause_video(struct nemogst *gst);
+extern int nemogst_ready_media(struct nemogst *gst);
+extern int nemogst_play_media(struct nemogst *gst);
+extern int nemogst_pause_media(struct nemogst *gst);
+
 extern int nemogst_resize_video(struct nemogst *gst, uint32_t width, uint32_t height);
 
 extern int64_t nemogst_get_position(struct nemogst *gst);

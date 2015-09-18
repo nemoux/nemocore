@@ -220,7 +220,7 @@ int nemogst_prepare_mini_sink(struct nemogst *gst, nemogst_minisink_render_t ren
 	return 0;
 }
 
-int nemogst_set_video_path(struct nemogst *gst, const char *uri)
+int nemogst_load_media_info(struct nemogst *gst, const char *uri)
 {
 	GstDiscoverer *dc;
 	GstDiscovererInfo *info;
@@ -268,6 +268,11 @@ int nemogst_set_video_path(struct nemogst *gst, const char *uri)
 	gst->video.aspect_ratio = (double)gst->video.width / (double)gst->video.height;
 	gst->uri = strdup(uri);
 
+	return 0;
+}
+
+int nemogst_set_media_path(struct nemogst *gst, const char *uri)
+{
 	g_object_set(G_OBJECT(gst->player), "uri", uri, NULL);
 
 	return 0;
@@ -280,7 +285,7 @@ int nemogst_set_subtitle_path(struct nemogst *gst, const char *path)
 	return 0;
 }
 
-int nemogst_ready_video(struct nemogst *gst)
+int nemogst_ready_media(struct nemogst *gst)
 {
 	gst_element_set_state(gst->player, GST_STATE_READY);
 
@@ -290,7 +295,7 @@ int nemogst_ready_video(struct nemogst *gst)
 	return 0;
 }
 
-int nemogst_play_video(struct nemogst *gst)
+int nemogst_play_media(struct nemogst *gst)
 {
 	gst_element_set_state(gst->player, GST_STATE_PLAYING);
 
@@ -300,7 +305,7 @@ int nemogst_play_video(struct nemogst *gst)
 	return 0;
 }
 
-int nemogst_pause_video(struct nemogst *gst)
+int nemogst_pause_media(struct nemogst *gst)
 {
 	gst_element_set_state(gst->player, GST_STATE_PAUSED);
 

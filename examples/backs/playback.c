@@ -147,16 +147,18 @@ int main(int argc, char *argv[])
 
 	asprintf(&uri, "file://%s", filepath);
 
+	nemogst_load_media_info(play->gst, uri);
+
 	nemogst_prepare_mini_sink(play->gst,
 			playback_dispatch_video_frame,
 			play);
-	nemogst_set_video_path(play->gst, uri);
+	nemogst_set_media_path(play->gst, uri);
 
 	free(uri);
 
 	nemogst_resize_video(play->gst, width, height);
 
-	nemogst_play_video(play->gst);
+	nemogst_play_media(play->gst);
 
 	nemocanvas_dispatch_frame(play->canvas);
 

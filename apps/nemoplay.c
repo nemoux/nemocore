@@ -134,9 +134,9 @@ static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode 
 
 			if (event->tapcount == 1) {
 				if (nemogst_is_playing(context->gst)) {
-					nemogst_pause_video(context->gst);
+					nemogst_pause_media(context->gst);
 				} else {
-					nemogst_play_video(context->gst);
+					nemogst_play_media(context->gst);
 				}
 			} else if (event->tapcount == 2) {
 				nemogst_dump_state(context->gst);
@@ -243,7 +243,7 @@ int main(int argc, char *argv[])
 	if (filepath == NULL)
 		return 0;
 
-	nemolog_message("PLAY", "play '%s' video file...\n", filepath);
+	nemolog_message("PLAY", "play '%s' media file...\n", filepath);
 
 	gst_init(&argc, &argv);
 
@@ -274,12 +274,14 @@ int main(int argc, char *argv[])
 
 	asprintf(&uri, "file://%s", filepath);
 
+	nemogst_load_media_info(context->gst, uri);
+
 	nemogst_prepare_nemo_sink(context->gst,
 			nemotool_get_display(tool),
 			nemotool_get_shm(tool),
 			nemotool_get_formats(tool),
 			nemocanvas_get_surface(canvas));
-	nemogst_set_video_path(context->gst, uri);
+	nemogst_set_media_path(context->gst, uri);
 
 	free(uri);
 
@@ -320,7 +322,7 @@ int main(int argc, char *argv[])
 
 	nemotale_composite_egl(context->tale, NULL);
 
-	nemogst_play_video(context->gst);
+	nemogst_play_media(context->gst);
 
 	gmainloop = g_main_loop_new(NULL, FALSE);
 
@@ -330,7 +332,7 @@ int main(int argc, char *argv[])
 
 	nemogst_destroy(context->gst);
 
-	nemolog_message("PLAY", "done '%s' video file...\n", filepath);
+	nemolog_message("PLAY", "done '%s' media file...\n", filepath);
 
 out2:
 	nemocanvas_destroy(canvas);
