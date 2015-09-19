@@ -475,6 +475,8 @@ void nemomatrix_append_command(struct nemomatrix *matrix, const char *str)
 			nemomatrix_scale(matrix, x, y);
 		}
 	}
+	
+	nemotoken_destroy(token);
 }
 
 double nemovector_distance(struct nemovector *v0, struct nemovector *v1)

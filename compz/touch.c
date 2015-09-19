@@ -36,7 +36,7 @@ static void default_touchpoint_grab_down(struct touchpoint_grab *grab, uint32_t 
 	if (tp->focus != NULL) {
 		nemocontent_touch_down(tp, tp->focus->content, time, touchid, sx, sy);
 	}
-	
+
 	virtuio_dispatch_events(tp->touch->seat->compz);
 }
 
@@ -460,8 +460,10 @@ void nemotouch_flush_tuio(struct tuionode *node)
 						node->taps[i].f[1] * node->base.screen->height,
 						&x, &y);
 			} else {
-				x = node->taps[i].f[0] * node->base.width + node->base.x;
-				y = node->taps[i].f[1] * node->base.height + node->base.y;
+				nemoinput_transform_to_global(&node->base,
+						node->taps[i].f[0] * node->base.width,
+						node->taps[i].f[1] * node->base.height,
+						&x, &y);
 			}
 
 			tp->grab_x = x;
@@ -480,8 +482,10 @@ void nemotouch_flush_tuio(struct tuionode *node)
 						node->taps[i].f[1] * node->base.screen->height,
 						&x, &y);
 			} else {
-				x = node->taps[i].f[0] * node->base.width + node->base.x;
-				y = node->taps[i].f[1] * node->base.height + node->base.y;
+				nemoinput_transform_to_global(&node->base,
+						node->taps[i].f[0] * node->base.width,
+						node->taps[i].f[1] * node->base.height,
+						&x, &y);
 			}
 
 			tp->grab->interface->motion(tp->grab, msecs, tp->gid, x, y);
@@ -524,7 +528,6 @@ struct touchnode *nemotouch_create_node(struct nemocompz *compz, const char *dev
 {
 	struct touchnode *node;
 	uint32_t nodeid, screenid;
-	int32_t x, y, width, height;
 
 	node = (struct touchnode *)malloc(sizeof(struct touchnode));
 	if (node == NULL)
@@ -541,9 +544,7 @@ struct touchnode *nemotouch_create_node(struct nemocompz *compz, const char *dev
 
 	if (nemoinput_get_config_screen(compz, node->base.devnode, &nodeid, &screenid) > 0)
 		nemoinput_set_screen(&node->base, nemocompz_get_screen(compz, nodeid, screenid));
-	else if (nemoinput_get_config_geometry(compz, node->base.devnode, &x, &y, &width, &height) > 0)
-		nemoinput_set_geometry(&node->base, x, y, width, height);
-	else
+	else if (nemoinput_get_config_geometry(compz, node->base.devnode, &node->base) <= 0)
 		nemoinput_set_geometry(&node->base,
 				0, 0,
 				nemocompz_get_scene_width(compz),
@@ -649,8 +650,10 @@ void nemotouch_flush_taps(struct touchnode *node, struct touchtaps *taps)
 						taps->points[i * 2 + 1] * node->base.screen->height,
 						&x, &y);
 			} else {
-				x = taps->points[i * 2 + 0] * node->base.width + node->base.x;
-				y = taps->points[i * 2 + 1] * node->base.height + node->base.y;
+				nemoinput_transform_to_global(&node->base,
+						taps->points[i * 2 + 0] * node->base.width,
+						taps->points[i * 2 + 1] * node->base.height,
+						&x, &y);
 			}
 
 			tp->grab_x = x;
@@ -669,8 +672,10 @@ void nemotouch_flush_taps(struct touchnode *node, struct touchtaps *taps)
 						taps->points[i * 2 + 1] * node->base.screen->height,
 						&x, &y);
 			} else {
-				x = taps->points[i * 2 + 0] * node->base.width + node->base.x;
-				y = taps->points[i * 2 + 1] * node->base.height + node->base.y;
+				nemoinput_transform_to_global(&node->base,
+						taps->points[i * 2 + 0] * node->base.width,
+						taps->points[i * 2 + 1] * node->base.height,
+						&x, &y);
 			}
 
 			tp->grab->interface->motion(tp->grab, msecs, tp->gid, x, y);

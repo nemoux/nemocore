@@ -371,7 +371,6 @@ struct tuionode *tuio_create_node(struct nemocompz *compz, int protocol, int por
 {
 	struct tuionode *node;
 	uint32_t nodeid, screenid;
-	int32_t x, y, width, height;
 
 	node = (struct tuionode *)malloc(sizeof(struct tuionode));
 	if (node == NULL)
@@ -396,9 +395,7 @@ struct tuionode *tuio_create_node(struct nemocompz *compz, int protocol, int por
 
 	if (nemoinput_get_config_screen(compz, node->base.devnode, &nodeid, &screenid) > 0)
 		nemoinput_set_screen(&node->base, nemocompz_get_screen(compz, nodeid, screenid));
-	else if (nemoinput_get_config_geometry(compz, node->base.devnode, &x, &y, &width, &height) > 0)
-		nemoinput_set_geometry(&node->base, x, y, width, height);
-	else
+	else if (nemoinput_get_config_geometry(compz, node->base.devnode, &node->base) <= 0)
 		nemoinput_set_geometry(&node->base,
 				0, 0,
 				nemocompz_get_scene_width(compz),

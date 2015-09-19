@@ -66,8 +66,10 @@ static int evdev_flush_events(struct evdevnode *node, uint32_t time)
 						node->mt.slots[slot].y * node->base.screen->height,
 						&x, &y);
 			} else {
-				x = node->mt.slots[slot].x * node->base.width + node->base.x;
-				y = node->mt.slots[slot].y * node->base.height + node->base.y;
+				nemoinput_transform_to_global(&node->base,
+						node->mt.slots[slot].x * node->base.width,
+						node->mt.slots[slot].y * node->base.height,
+						&x, &y);
 			}
 			id = ++node->tapsequence;
 			node->mt.slots[slot].seat_slot = id;
@@ -81,8 +83,10 @@ static int evdev_flush_events(struct evdevnode *node, uint32_t time)
 						node->mt.slots[slot].y * node->base.screen->height,
 						&x, &y);
 			} else {
-				x = node->mt.slots[slot].x * node->base.width + node->base.x;
-				y = node->mt.slots[slot].y * node->base.height + node->base.y;
+				nemoinput_transform_to_global(&node->base,
+						node->mt.slots[slot].x * node->base.width,
+						node->mt.slots[slot].y * node->base.height,
+						&x, &y);
 			}
 			id = node->mt.slots[slot].seat_slot;
 			nemotouch_notify_motion(node->touch, time, id, x, y);
@@ -101,8 +105,10 @@ static int evdev_flush_events(struct evdevnode *node, uint32_t time)
 						cy * node->base.screen->height,
 						&x, &y);
 			} else {
-				x = cx * node->base.width + node->base.x;
-				y = cy * node->base.height + node->base.y;
+				nemoinput_transform_to_global(&node->base,
+						cx * node->base.width,
+						cy * node->base.height,
+						&x, &y);
 			}
 			id = ++node->tapsequence;
 			node->abs.seat_slot = id;
@@ -117,8 +123,10 @@ static int evdev_flush_events(struct evdevnode *node, uint32_t time)
 						cy * node->base.screen->height,
 						&x, &y);
 			} else {
-				x = cx * node->base.width + node->base.x;
-				y = cy * node->base.height + node->base.y;
+				nemoinput_transform_to_global(&node->base,
+						cx * node->base.width,
+						cy * node->base.height,
+						&x, &y);
 			}
 			if (node->seat_caps & EVDEV_SEAT_TOUCH) {
 				id = node->abs.seat_slot;
@@ -515,7 +523,6 @@ struct evdevnode *evdev_create_node(struct nemocompz *compz, const char *path, i
 	char devname[256] = "unknown";
 	char devphys[256];
 	uint32_t nodeid, screenid;
-	int32_t x, y, width, height;
 
 	node = (struct evdevnode *)malloc(sizeof(struct evdevnode));
 	if (node == NULL)
@@ -541,9 +548,7 @@ struct evdevnode *evdev_create_node(struct nemocompz *compz, const char *path, i
 
 	if (nemoinput_get_config_screen(compz, node->devphys, &nodeid, &screenid) > 0)
 		nemoinput_set_screen(&node->base, nemocompz_get_screen(compz, nodeid, screenid));
-	else if (nemoinput_get_config_geometry(compz, node->devphys, &x, &y, &width, &height) > 0)
-		nemoinput_set_geometry(&node->base, x, y, width, height);
-	else
+	else if (nemoinput_get_config_geometry(compz, node->devphys, &node->base) <= 0)
 		nemoinput_set_geometry(&node->base,
 				0, 0,
 				nemocompz_get_scene_width(compz),
