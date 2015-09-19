@@ -185,8 +185,6 @@ static int fb_create_screen(struct fbnode *node, const char *devpath)
 			0, 0,
 			screen->mode.width, screen->mode.height,
 			screen->fbinfo.mmwidth, screen->fbinfo.mmheight,
-			0,
-			screen->mode.width, screen->mode.height,
 			1);
 
 	width = screen->fbinfo.x_resolution;

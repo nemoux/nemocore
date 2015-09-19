@@ -50,9 +50,7 @@ struct nemoscreen {
 
 	int use_pixman;
 	int32_t x, y, width, height;
-	int32_t r;
 	int32_t mmwidth, mmheight;
-	int32_t pwidth, pheight;
 	uint32_t subpixel;
 
 	int32_t diagonal;
@@ -64,6 +62,8 @@ struct nemoscreen {
 	} render;
 
 	struct {
+		int enable;
+
 		struct nemomatrix matrix;
 		struct nemomatrix inverse;
 	} transform;
@@ -98,7 +98,7 @@ extern void nemoscreen_schedule_repaint(struct nemoscreen *screen);
 extern void nemoscreen_finish_frame(struct nemoscreen *screen, uint32_t secs, uint32_t usecs, uint32_t psf_flags);
 extern int nemoscreen_read_pixels(struct nemoscreen *screen, pixman_format_code_t format, void *pixels, uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 
-extern void nemoscreen_prepare(struct nemoscreen *screen, int32_t x, int32_t y, int32_t width, int32_t height, int32_t mmwidth, int32_t mmheight, int32_t r, int32_t pwidth, int32_t pheight, int32_t diagonal);
+extern void nemoscreen_prepare(struct nemoscreen *screen, int32_t x, int32_t y, int32_t width, int32_t height, int32_t mmwidth, int32_t mmheight, int32_t diagonal);
 extern void nemoscreen_finish(struct nemoscreen *screen);
 
 extern void nemoscreen_update_geometry(struct nemoscreen *screen);

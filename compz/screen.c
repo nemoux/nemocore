@@ -172,7 +172,7 @@ static void nemoscreen_bind_output(struct wl_client *client, void *data, uint32_
 		wl_output_send_done(resource);
 }
 
-void nemoscreen_prepare(struct nemoscreen *screen, int32_t x, int32_t y, int32_t width, int32_t height, int32_t mmwidth, int32_t mmheight, int32_t r, int32_t pwidth, int32_t pheight, int32_t diagonal)
+void nemoscreen_prepare(struct nemoscreen *screen, int32_t x, int32_t y, int32_t width, int32_t height, int32_t mmwidth, int32_t mmheight, int32_t diagonal)
 {
 	struct nemocompz *compz = screen->compz;
 
@@ -182,9 +182,6 @@ void nemoscreen_prepare(struct nemoscreen *screen, int32_t x, int32_t y, int32_t
 	screen->height = height;
 	screen->mmwidth = mmwidth;
 	screen->mmheight = mmheight;
-	screen->r = r;
-	screen->pwidth = pwidth;
-	screen->pheight = pheight;
 	screen->diagonal = diagonal;
 
 	screen->snddev = NULL;
@@ -225,15 +222,12 @@ static void nemoscreen_update_transform_matrix(struct nemoscreen *screen)
 {
 	pixman_region32_fini(&screen->region);
 
-	if (screen->r == 0) {
+	if (screen->transform.enable == 0) {
 		pixman_region32_init_rect(&screen->region,
 				screen->x, screen->y, screen->width, screen->height);
 	} else {
 		struct nemomatrix *matrix = &screen->transform.matrix;
 		struct nemomatrix *inverse = &screen->transform.inverse;
-		double radian = -screen->r / 180.0f * M_PI;
-		float cx = screen->width / 2.0f;
-		float cy = screen->height / 2.0f;
 		float minx = HUGE_VALF, miny = HUGE_VALF;
 		float maxx = -HUGE_VALF, maxy = -HUGE_VALF;
 		int32_t s[4][2] = {
@@ -248,12 +242,6 @@ static void nemoscreen_update_transform_matrix(struct nemoscreen *screen)
 
 		nemomatrix_init_identity(matrix);
 
-		nemomatrix_translate(matrix, -cx, -cy);
-		nemomatrix_rotate(matrix, cos(radian), sin(radian));
-		nemomatrix_translate(matrix, cx, cy);
-
-		nemomatrix_translate(matrix, screen->x, screen->y);
-
 		if (nemomatrix_invert(inverse, matrix) < 0) {
 			pixman_region32_init(&screen->region);
 			nemolog_warning("SCREEN", "failed to invert transform matrix\n");
@@ -263,7 +251,7 @@ static void nemoscreen_update_transform_matrix(struct nemoscreen *screen)
 		for (i = 0; i < 4; i++) {
 			struct nemovector v = { s[i][0], s[i][1], 0.0f, 1.0f };
 
-			nemomatrix_transform(matrix, &v);
+			nemomatrix_transform(inverse, &v);
 
 			if (fabsf(v.f[3]) < 1e-6) {
 				tx = 0.0f;
@@ -300,25 +288,13 @@ static void nemoscreen_update_render_matrix(struct nemoscreen *screen)
 			-screen->x,
 			-screen->y);
 
-	if (screen->width != screen->pwidth || screen->height != screen->pheight) {
-		nemomatrix_scale(&screen->render.matrix,
-				(double)screen->pwidth / (double)screen->width,
-				(double)screen->pheight / (double)screen->height);
-	}
-
 	nemomatrix_translate(&screen->render.matrix,
-			-screen->pwidth / 2.0f,
-			-screen->pheight / 2.0f);
-
-	if (screen->r != 0) {
-		nemomatrix_rotate(&screen->render.matrix,
-				cos(screen->r / 180.0f * M_PI),
-				sin(screen->r / 180.0f * M_PI));
-	}
+			-screen->width / 2.0f,
+			-screen->height / 2.0f);
 
 	nemomatrix_scale(&screen->render.matrix,
-			2.0f / screen->pwidth,
-			-2.0f / screen->pheight);
+			2.0f / screen->width,
+			-2.0f / screen->height);
 }
 
 void nemoscreen_update_geometry(struct nemoscreen *screen)
@@ -331,7 +307,7 @@ void nemoscreen_update_geometry(struct nemoscreen *screen)
 
 void nemoscreen_transform_to_global(struct nemoscreen *screen, float dx, float dy, float *x, float *y)
 {
-	if (screen->r != 0) {
+	if (screen->transform.enable != 0) {
 		struct nemovector v = { dx, dy, 0.0f, 1.0f };
 
 		nemomatrix_transform(&screen->transform.matrix, &v);
@@ -345,19 +321,14 @@ void nemoscreen_transform_to_global(struct nemoscreen *screen, float dx, float d
 		*x = v.f[0] / v.f[3];
 		*y = v.f[1] / v.f[3];
 	} else {
-		if (screen->width != screen->pwidth || screen->height != screen->pheight) {
-			*x = dx * (double)screen->width / (double)screen->pwidth + screen->x;
-			*y = dy * (double)screen->height / (double)screen->pheight + screen->y;
-		} else {
-			*x = dx + screen->x;
-			*y = dy + screen->y;
-		}
+		*x = dx + screen->x;
+		*y = dy + screen->y;
 	}
 }
 
 void nemoscreen_transform_from_global(struct nemoscreen *screen, float x, float y, float *dx, float *dy)
 {
-	if (screen->r != 0) {
+	if (screen->transform.enable != 0) {
 		struct nemovector v = { x, y, 0.0f, 1.0f };
 
 		nemomatrix_transform(&screen->transform.inverse, &v);
@@ -371,13 +342,8 @@ void nemoscreen_transform_from_global(struct nemoscreen *screen, float x, float 
 		*dx = v.f[0] / v.f[3];
 		*dy = v.f[1] / v.f[3];
 	} else {
-		if (screen->width != screen->pwidth || screen->height != screen->pheight) {
-			*dx = x * (double)screen->width / (double)screen->pwidth - screen->x;
-			*dy = y * (double)screen->height / (double)screen->pheight - screen->y;
-		} else {
-			*dx = x - screen->x;
-			*dy = y - screen->y;
-		}
+		*dx = x - screen->x;
+		*dy = y - screen->y;
 	}
 }
 
@@ -400,17 +366,13 @@ int nemoscreen_get_config_mode(struct nemocompz *compz, uint32_t nodeid, uint32_
 		return 0;
 	}
 
-	if ((value = nemoitem_get_attr(compz->configs, index, "pwidth")) != NULL) {
-		width = strtoul(value, 0, 10);
-	} else if ((value = nemoitem_get_attr(compz->configs, index, "width")) != NULL) {
+	if ((value = nemoitem_get_attr(compz->configs, index, "width")) != NULL) {
 		width = strtoul(value, 0, 10);
 	} else {
 		width = 0;
 	}
 
-	if ((value = nemoitem_get_attr(compz->configs, index, "pheight")) != NULL) {
-		height = strtoul(value, 0, 10);
-	} else if ((value = nemoitem_get_attr(compz->configs, index, "height")) != NULL) {
+	if ((value = nemoitem_get_attr(compz->configs, index, "height")) != NULL) {
 		height = strtoul(value, 0, 10);
 	} else {
 		height = 0;

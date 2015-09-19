@@ -1050,13 +1050,12 @@ static int drm_create_screen_for_connector(struct drmnode *node, drmModeRes *res
 	}
 #endif
 
-	nemolog_message("DRM", "screen(%d, %d) x = %d, y = %d, width = %d (%d), height = %d (%d), diagonal = %d\n", node->base.nodeid, screen->base.screenid, x, y, width, screen->base.current_mode->width, height, screen->base.current_mode->height, diagonal);
+	nemolog_message("DRM", "screen(%d, %d) x = %d, y = %d, width = %d, height = %d, diagonal = %d\n", node->base.nodeid, screen->base.screenid, x, y, width, height, diagonal);
 
 	nemoscreen_prepare(&screen->base,
 			x, y, width, height,
 			connector->mmWidth, connector->mmHeight,
-			r,
-			screen->base.current_mode->width, screen->base.current_mode->height, diagonal);
+			diagonal);
 
 #ifdef NEMOUX_WITH_EGL
 	if (compz->use_pixman != 0) {

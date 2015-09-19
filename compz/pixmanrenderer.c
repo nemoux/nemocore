@@ -148,10 +148,8 @@ static void pixmanrenderer_draw_region(struct pixmanrenderer *renderer, struct n
 
 	pixman_image_set_transform(pmcontent->image, &transform);
 
-	if (view->transform.enable ||
-			screen->width != screen->pwidth ||
-			screen->height != screen->pheight ||
-			screen->r != 0 ||
+	if (view->transform.enable != 0 ||
+			screen->transform.enable != 0 ||
 			nemocontent_get_buffer_scale(view->content) != 1)
 		pixman_image_set_filter(pmcontent->image, PIXMAN_FILTER_BILINEAR, NULL, 0);
 	else

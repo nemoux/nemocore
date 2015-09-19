@@ -274,10 +274,8 @@ static void glrenderer_draw_view(struct glrenderer *renderer, struct nemoview *v
 	glrenderer_use_shader(renderer, glcontent->shader);
 	glrenderer_use_uniforms(glcontent->shader, view, screen);
 
-	if (view->transform.enable ||
-			screen->width != screen->pwidth ||
-			screen->height != screen->pheight ||
-			screen->r != 0 ||
+	if (view->transform.enable != 0 ||
+			screen->transform.enable != 0 ||
 			nemocontent_get_buffer_scale(view->content) != 1)
 		filter = GL_LINEAR;
 	else
@@ -342,7 +340,7 @@ static void glrenderer_repaint_views(struct glrenderer *renderer, struct nemoscr
 	struct nemolayer *layer;
 	struct nemoview *view, *child;
 
-	glViewport(0, 0, screen->pwidth, screen->pheight);
+	glViewport(0, 0, screen->width, screen->height);
 
 	wl_list_for_each_reverse(layer, &compz->layer_list, link) {
 		wl_list_for_each_reverse(view, &layer->view_list, layer_link) {
