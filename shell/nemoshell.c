@@ -133,8 +133,10 @@ static void nemo_surface_execute(struct wl_client *client, struct wl_resource *r
 
 		state = nemoshell_create_client_state(child);
 		if (state != NULL) {
-			state->x = bin->view->geometry.x + bin->canvas->base.width * bin->view->geometry.ax;
-			state->y = bin->view->geometry.y + bin->canvas->base.height * bin->view->geometry.ay;
+			nemoview_transform_to_global(bin->view,
+					bin->canvas->base.width * bin->view->geometry.ax,
+					bin->canvas->base.height * bin->view->geometry.ay,
+					&state->x, &state->y);
 			state->r = bin->view->geometry.r;
 			state->dx = 0.5f;
 			state->dy = 0.5f;
@@ -320,7 +322,7 @@ static void nemo_get_nemo_surface(struct wl_client *client, struct wl_resource *
 				"failed to create shell surface");
 		return;
 	}
-	
+
 	if (shell->default_layer != NULL)
 		bin->layer = shell->default_layer;
 
