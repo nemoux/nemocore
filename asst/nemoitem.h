@@ -62,6 +62,30 @@ static inline char *nemoitem_get_attr_named(struct nemoitem *item, const char *n
 	return NULL;
 }
 
+static inline int nemoitem_get_iattr_named(struct nemoitem *item, const char *name, const char *attr)
+{
+	int index;
+
+	index = nemoitem_get(item, name, 0);
+	if (index >= 0) {
+		return nemoitem_get_iattr(item, index, attr);
+	}
+
+	return 0;
+}
+
+static inline float nemoitem_get_fattr_named(struct nemoitem *item, const char *name, const char *attr)
+{
+	int index;
+
+	index = nemoitem_get(item, name, 0);
+	if (index >= 0) {
+		return nemoitem_get_fattr(item, index, attr);
+	}
+
+	return 0.0f;
+}
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif
