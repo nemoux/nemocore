@@ -98,7 +98,7 @@ extern void nemoscreen_schedule_repaint(struct nemoscreen *screen);
 extern void nemoscreen_finish_frame(struct nemoscreen *screen, uint32_t secs, uint32_t usecs, uint32_t psf_flags);
 extern int nemoscreen_read_pixels(struct nemoscreen *screen, pixman_format_code_t format, void *pixels, uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 
-extern void nemoscreen_prepare(struct nemoscreen *screen, int32_t x, int32_t y, int32_t width, int32_t height, int32_t mmwidth, int32_t mmheight, int32_t diagonal);
+extern void nemoscreen_prepare(struct nemoscreen *screen);
 extern void nemoscreen_finish(struct nemoscreen *screen);
 
 extern void nemoscreen_update_geometry(struct nemoscreen *screen);
@@ -106,7 +106,7 @@ extern void nemoscreen_transform_to_global(struct nemoscreen *screen, float dx, 
 extern void nemoscreen_transform_from_global(struct nemoscreen *screen, float x, float y, float *dx, float *dy);
 
 extern int nemoscreen_get_config_mode(struct nemocompz *compz, uint32_t nodeid, uint32_t screenid, struct nemomode *mode);
-extern int nemoscreen_get_config_geometry(struct nemocompz *compz, uint32_t nodeid, uint32_t screenid, int32_t *x, int32_t *y, int32_t *width, int32_t *height, int32_t *r, int32_t *diagonal);
+extern int nemoscreen_get_config_geometry(struct nemocompz *compz, uint32_t nodeid, uint32_t screenid, struct nemoscreen *screen);
 extern const char *nemoscreen_get_config(struct nemocompz *compz, uint32_t nodeid, uint32_t screenid, const char *attr);
 
 #ifdef __cplusplus

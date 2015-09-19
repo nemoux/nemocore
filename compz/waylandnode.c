@@ -630,7 +630,15 @@ static int wayland_create_screen(struct waylandnode *node, int x, int y, int wid
 	}
 #endif
 
-	nemoscreen_prepare(&screen->base, x, y, width, height, width, height, 0, width, height, 1);
+	screen->base.x = x;
+	screen->base.y = y;
+	screen->base.width = width;
+	screen->base.height = height;
+	screen->base.mmwidth = width;
+	screen->base.mmheight = height;
+	screen->diagonal = 1;
+
+	nemoscreen_prepare(&screen->base);
 
 #ifdef NEMOUX_WITH_EGL
 	if (compz->use_pixman != 0) {

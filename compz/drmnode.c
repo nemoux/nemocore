@@ -941,7 +941,6 @@ static int drm_create_screen_for_connector(struct drmnode *node, drmModeRes *res
 	const char *typename;
 	const char *renderer;
 	const char *snddev;
-	int32_t x = 0, y = 0, width = 1920, height = 1080, r = 0, diagonal = 1;
 	int index = -1;
 	int i;
 
@@ -1033,7 +1032,7 @@ static int drm_create_screen_for_connector(struct drmnode *node, drmModeRes *res
 
 	screen->base.current_mode->flags |= WL_OUTPUT_MODE_CURRENT;
 
-	nemoscreen_get_config_geometry(compz, node->base.nodeid, screen->base.screenid, &x, &y, &width, &height, &r, &diagonal);
+	nemoscreen_get_config_geometry(compz, node->base.nodeid, screen->base.screenid, &screen->base);
 
 	renderer = nemoscreen_get_config(compz, node->base.nodeid, screen->base.screenid, "renderer");
 	if (renderer != NULL && strcmp(renderer, "pixman") == 0)
@@ -1050,12 +1049,19 @@ static int drm_create_screen_for_connector(struct drmnode *node, drmModeRes *res
 	}
 #endif
 
-	nemolog_message("DRM", "screen(%d, %d) x = %d, y = %d, width = %d, height = %d, diagonal = %d\n", node->base.nodeid, screen->base.screenid, x, y, width, height, diagonal);
+	nemolog_message("DRM", "screen(%d, %d) x = %d, y = %d, width = %d, height = %d, diagonal = %d\n",
+			node->base.nodeid,
+			screen->base.screenid,
+			screen->base.x,
+			screen->base.y,
+			screen->base.width,
+			screen->base.height,
+			screen->base.diagonal);
 
-	nemoscreen_prepare(&screen->base,
-			x, y, width, height,
-			connector->mmWidth, connector->mmHeight,
-			diagonal);
+	screen->base.mmwidth = connector->mmWidth;
+	screen->base.mmheight = connector->mmHeight;
+
+	nemoscreen_prepare(&screen->base);
 
 #ifdef NEMOUX_WITH_EGL
 	if (compz->use_pixman != 0) {

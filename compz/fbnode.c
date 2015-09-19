@@ -181,11 +181,15 @@ static int fb_create_screen(struct fbnode *node, const char *devpath)
 	screen->base.make = "framebuffer";
 	screen->base.model = screen->fbinfo.id;
 
-	nemoscreen_prepare(&screen->base,
-			0, 0,
-			screen->mode.width, screen->mode.height,
-			screen->fbinfo.mmwidth, screen->fbinfo.mmheight,
-			1);
+	screen->base.x = 0;
+	screen->base.y = 0;
+	screen->base.width = screen->mode.width;
+	screen->base.height = screen->mode.height;
+	screen->base.mmwidth = screen->fbinfo.mmwidth;
+	screen->base.mmheight = screen->fbinfo.mmheight;
+	screen->base.diagonal = 1;
+
+	nemoscreen_prepare(&screen->base);
 
 	width = screen->fbinfo.x_resolution;
 	height = screen->fbinfo.y_resolution;

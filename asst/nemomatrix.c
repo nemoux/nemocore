@@ -6,6 +6,7 @@
 #include <errno.h>
 
 #include <nemomatrix.h>
+#include <nemotoken.h>
 
 static inline void swap_rows(double *a, double *b)
 {
@@ -439,6 +440,41 @@ void nemomatrix_rotate_z(struct nemomatrix *matrix, float cos, float sin)
 	};
 
 	nemomatrix_multiply(matrix, &rotate);
+}
+
+void nemomatrix_append_command(struct nemomatrix *matrix, const char *str)
+{
+	struct nemotoken *token;
+	const char *cmd;
+	float x, y;
+	int i;
+
+	token = nemotoken_create(str, strlen(str));
+	nemotoken_divide(token, ':');
+	nemotoken_divide(token, ';');
+	nemotoken_divide(token, ',');
+	nemotoken_update(token);
+
+	for (i = 0; i < nemotoken_get_token_count(token); i++) {
+		cmd = nemotoken_get_token(token, i);
+		if (strcmp(cmd, "translate") == 0) {
+			x = strtod(nemotoken_get_token(token, ++i), NULL);
+			y = strtod(nemotoken_get_token(token, ++i), NULL);
+
+			nemomatrix_translate(matrix, x, y);
+		} else if (strcmp(cmd, "rotate") == 0) {
+			x = strtod(nemotoken_get_token(token, ++i), NULL);
+
+			nemomatrix_rotate(matrix,
+					cos(x / 180.0f * M_PI),
+					sin(x / 180.0f * M_PI));
+		} else if (strcmp(cmd, "scale") == 0) {
+			x = strtod(nemotoken_get_token(token, ++i), NULL);
+			y = strtod(nemotoken_get_token(token, ++i), NULL);
+
+			nemomatrix_scale(matrix, x, y);
+		}
+	}
 }
 
 double nemovector_distance(struct nemovector *v0, struct nemovector *v1)
