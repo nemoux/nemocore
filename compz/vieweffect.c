@@ -13,6 +13,7 @@
 #include <compz.h>
 #include <nemomisc.h>
 
+#if	0
 static int vieweffect_correct_position(struct nemoview *view, double *dx, double *dy, double *x, double *y)
 {
 	double tx, ty;
@@ -47,6 +48,23 @@ static int vieweffect_correct_position(struct nemoview *view, double *dx, double
 
 	return done;
 }
+#else
+static int vieweffect_correct_position(struct nemoview *view, double *dx, double *dy, double *x, double *y)
+{
+	double tx, ty;
+
+	tx = view->geometry.x + view->content->width * 0.5f + *dx;
+	ty = view->geometry.y + view->content->height * 0.5f + *dy;
+
+	*x = view->geometry.x + *dx;
+	*y = view->geometry.y + *dy;
+
+	if (!pixman_region32_contains_point(&view->compz->region, tx, ty, NULL))
+		return 1;
+
+	return 0;
+}
+#endif
 
 static int vieweffect_handle_frame(struct nemoeffect *base, uint32_t msecs)
 {
