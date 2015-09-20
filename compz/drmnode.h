@@ -60,23 +60,6 @@ struct drmscreen {
 	pixman_region32_t damage;
 };
 
-struct drmsprite {
-	struct wl_list link;
-
-	struct drmscreen *screen;
-	struct drmframe *current, *next;
-
-	uint32_t crtcs;
-	uint32_t id;
-	uint32_t nformats;
-
-	int32_t sx, sy;
-	uint32_t sw, sh;
-	uint32_t dx, dy, dw, dh;
-
-	uint32_t formats[];
-};
-
 struct drmnode {
 	struct rendernode base;
 
@@ -97,12 +80,8 @@ struct drmnode {
 	uint32_t min_height, max_height;
 	int no_addfb2;
 
-	int no_sprites;
-
 	struct gbm_device *gbm;
 	uint32_t format;
-
-	struct wl_list sprite_list;
 
 	struct wl_listener session_listener;
 };

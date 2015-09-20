@@ -159,7 +159,6 @@ static struct drmframe *drm_get_frame_from_bo(struct gbm_bo *bo, struct drmnode 
 		r = drmModeAddFB2(node->fd, width, height, format, handles, pitches, offsets, &frame->id, 0);
 		if (r < 0) {
 			node->no_addfb2 = 1;
-			node->no_sprites = 1;
 		}
 	}
 
@@ -229,16 +228,10 @@ static void drm_handle_page_flip(int fd, unsigned int frame, unsigned int secs, 
 
 static void drm_handle_vblank(int fd, unsigned int frame, unsigned int secs, unsigned int usecs, void *data)
 {
-	struct drmsprite *sprite = (struct drmsprite *)data;
-	struct drmscreen *screen = sprite->screen;
+	struct drmscreen *screen = (struct drmscreen *)data;
 
 	screen->base.msc += frame;
 	screen->vblank_pending = 0;
-
-	drm_release_screen_frame(screen, sprite->current);
-
-	sprite->current = sprite->next;
-	sprite->next = NULL;
 
 	if (screen->pageflip_pending == 0) {
 		nemoscreen_finish_frame(&screen->base, secs, usecs,
@@ -405,60 +398,6 @@ static void drm_finish_egl_screen(struct drmscreen *screen)
 }
 #endif
 
-static int drm_create_sprites(struct drmnode *node)
-{
-	struct drmsprite *sprite;
-	drmModePlaneRes *planes;
-	drmModePlane *plane;
-	int i;
-
-	planes = drmModeGetPlaneResources(node->fd);
-	if (planes == NULL) {
-		nemolog_error("DRM", "failed to get plane resources: %s\n", strerror(errno));
-		return -1;
-	}
-
-	nemolog_message("DRM", "node '%s' has %d planes\n", node->devnode, planes->count_planes);
-
-	for (i = 0; i < planes->count_planes; i++) {
-		plane = drmModeGetPlane(node->fd, planes->planes[i]);
-		if (plane == NULL)
-			continue;
-
-		sprite = (struct drmsprite *)malloc(sizeof(struct drmsprite) + (sizeof(uint32_t) * plane->count_formats));
-		if (sprite == NULL) {
-			drmModeFreePlane(plane);
-			continue;
-		}
-
-		sprite->crtcs = plane->possible_crtcs;
-		sprite->id = plane->plane_id;
-		sprite->current = NULL;
-		sprite->next = NULL;
-		sprite->nformats = plane->count_formats;
-		memcpy(sprite->formats, plane->formats, sizeof(plane->formats[0]) * plane->count_formats);
-
-		drmModeFreePlane(plane);
-
-		wl_list_insert(&node->sprite_list, &sprite->link);
-	}
-
-	drmModeFreePlaneResources(planes);
-
-	return 0;
-}
-
-static void drm_destroy_sprites(struct drmnode *node)
-{
-	struct drmsprite *sprite, *next;
-
-	wl_list_for_each_safe(sprite, next, &node->sprite_list, link) {
-
-		wl_list_remove(&sprite->link);
-		free(sprite);
-	}
-}
-
 static int drm_find_crtc_for_connector(struct drmnode *node, drmModeRes *resources, drmModeConnector *connector)
 {
 	drmModeEncoder *encoder;
@@ -588,22 +527,6 @@ static struct drmmode *drm_choose_mode(struct drmscreen *screen, struct nemomode
 	return tmode;
 }
 
-static int drm_support_sprite_crtc(struct drmscreen *screen, uint32_t supported)
-{
-	struct drmnode *node = screen->node;
-	int crtc;
-
-	for (crtc = 0; crtc < node->ncrtcs; crtc++) {
-		if (node->crtcs[crtc] != screen->crtc_id)
-			continue;
-
-		if (supported & (1 << crtc))
-			return 1;
-	}
-
-	return 0;
-}
-
 static void drm_screen_repaint(struct nemoscreen *base)
 {
 	struct drmscreen *screen = (struct drmscreen *)container_of(base, struct drmscreen, base);
@@ -690,7 +613,6 @@ static int drm_screen_repaint_frame(struct nemoscreen *base, pixman_region32_t *
 {
 	struct drmscreen *screen = (struct drmscreen *)container_of(base, struct drmscreen, base);
 	struct drmnode *node = screen->node;
-	struct drmsprite *sprite;
 
 	if (screen->next == NULL)
 		drm_screen_render_frame(screen, damage);
@@ -720,40 +642,6 @@ static int drm_screen_repaint_frame(struct nemoscreen *base, pixman_region32_t *
 	}
 
 	screen->pageflip_pending = 1;
-
-	wl_list_for_each(sprite, &node->sprite_list, link) {
-		drmVBlank vbl = {
-			.request.type = DRM_VBLANK_RELATIVE | DRM_VBLANK_EVENT,
-			.request.sequence = 1
-		};
-		uint32_t flags = 0, frameid = 0;
-
-		if ((sprite->current == NULL && sprite->next == NULL) ||
-				drm_support_sprite_crtc(screen, sprite->crtcs) == 0)
-			continue;
-
-		if (sprite->next != NULL)
-			frameid = sprite->next->id;
-
-		if (drmModeSetPlane(node->fd, sprite->id,
-					screen->crtc_id, frameid, flags,
-					sprite->dx, sprite->sy,
-					sprite->dw, sprite->dh,
-					sprite->sx, sprite->sy,
-					sprite->sw, sprite->sh) < 0) {
-			nemolog_error("DRM", "failed to set plane: %s\n", strerror(errno));
-		}
-
-		if (screen->pipe > 0)
-			vbl.request.type |= DRM_VBLANK_SECONDARY;
-		vbl.request.signal = (unsigned long)sprite;
-		if (drmWaitVBlank(node->fd, &vbl) < 0) {
-			nemolog_error("DRM", "failed to request vblank event: %s\n", strerror(errno));
-		}
-
-		sprite->screen = screen;
-		screen->vblank_pending = 1;
-	}
 
 	return 0;
 
@@ -1208,7 +1096,6 @@ struct drmnode *drm_create_node(struct nemocompz *compz, uint32_t nodeid, const 
 	node->devnode = strdup(path);
 
 	wl_list_init(&node->base.link);
-	wl_list_init(&node->sprite_list);
 	wl_list_init(&node->session_listener.link);
 
 	rendernode_prepare(&node->base);
@@ -1254,7 +1141,6 @@ struct drmnode *drm_create_node(struct nemocompz *compz, uint32_t nodeid, const 
 	}
 #endif
 
-	drm_create_sprites(node);
 	drm_prepare_screens(node);
 
 	node->session_listener.notify = drm_handle_session;
