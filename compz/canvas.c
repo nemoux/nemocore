@@ -71,6 +71,8 @@ void nemocanvas_state_finish(struct nemocanvas_state *state)
 	if (state->buffer != NULL)
 		wl_list_remove(&state->buffer_destroy_listener.link);
 
+	wl_list_remove(&state->feedback_list);
+
 	state->buffer = NULL;
 }
 
