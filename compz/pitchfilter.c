@@ -6,6 +6,7 @@
 #include <errno.h>
 
 #include <math.h>
+#include <float.h>
 
 #include <pitchfilter.h>
 #include <nemomisc.h>
@@ -106,6 +107,9 @@ int pitchfilter_flush(struct pitchfilter *filter)
 		filter->dx = dx / dist;
 		filter->dy = dy / dist;
 	}
+
+	if (advance <= 0 || isnan(filter->dx) || isnan(filter->dy))
+		return 0;
 
 	return advance;
 }
