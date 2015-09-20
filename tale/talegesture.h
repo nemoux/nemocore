@@ -15,7 +15,7 @@ static inline int nemotale_pointer_is_single_click(struct nemotale *tale, struct
 {
 	struct taletap *tap = nemotale_pointer_get_tap(tale, event->device);
 
-	if (tap != NULL && event->time - tap->grab_time < 150) {
+	if (tap != NULL && event->time - tap->grab_time < tale->single_click_duration) {
 		return 1;
 	}
 
@@ -26,8 +26,12 @@ static inline int nemotale_touch_is_single_click(struct nemotale *tale, struct t
 {
 	struct taletap *tap = nemotale_touch_get_tap(tale, event->device);
 
-	if (tap != NULL && event->time - tap->grab_time < 150 && sqrtf(event->dx * event->dx + event->dy * event->dy) < 30) {
-		return 1;
+	if (tap != NULL && event->time - tap->grab_time < tale->single_click_duration) {
+		float dx = tap->grab_gx - event->gx;
+		float dy = tap->grab_gy - event->gy;
+
+		if (sqrtf(dx * dx + dy * dy) < tale->single_click_distance)
+			return 1;
 	}
 
 	return 0;

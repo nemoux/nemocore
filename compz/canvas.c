@@ -932,7 +932,7 @@ static void nemocanvas_keypad_modifiers(struct nemokeypad *keypad, struct nemoco
 	}
 }
 
-static void nemocanvas_touch_down(struct touchpoint *tp, struct nemocontent *content, uint32_t time, uint64_t touchid, float x, float y)
+static void nemocanvas_touch_down(struct touchpoint *tp, struct nemocontent *content, uint32_t time, uint64_t touchid, float x, float y, float gx, float gy)
 {
 	struct nemocanvas *canvas = (struct nemocanvas *)container_of(content, struct nemocanvas, base);
 	struct wl_list *resource_list;
@@ -970,7 +970,9 @@ static void nemocanvas_touch_down(struct touchpoint *tp, struct nemocontent *con
 					canvas->resource,
 					touchid,
 					wl_fixed_from_double(x),
-					wl_fixed_from_double(y));
+					wl_fixed_from_double(y),
+					wl_fixed_from_double(gx),
+					wl_fixed_from_double(gy));
 
 			done = 1;
 		}
@@ -1045,9 +1047,7 @@ static void nemocanvas_touch_up(struct touchpoint *tp, struct nemocontent *conte
 
 	wl_resource_for_each(resource, resource_list) {
 		if (wl_resource_get_client(resource) == client) {
-			nemo_touch_send_up(resource, serial, time, canvas->resource, touchid,
-					wl_fixed_from_double(tp->x - tp->grab_x),
-					wl_fixed_from_double(tp->y - tp->grab_y));
+			nemo_touch_send_up(resource, serial, time, canvas->resource, touchid);
 
 			done = 1;
 		}
@@ -1080,7 +1080,7 @@ static void nemocanvas_touch_up(struct touchpoint *tp, struct nemocontent *conte
 #endif
 }
 
-static void nemocanvas_touch_motion(struct touchpoint *tp, struct nemocontent *content, uint32_t time, uint64_t touchid, float x, float y)
+static void nemocanvas_touch_motion(struct touchpoint *tp, struct nemocontent *content, uint32_t time, uint64_t touchid, float x, float y, float gx, float gy)
 {
 	struct nemocanvas *canvas = (struct nemocanvas *)container_of(content, struct nemocanvas, base);
 	struct wl_list *resource_list;
@@ -1113,7 +1113,9 @@ static void nemocanvas_touch_motion(struct touchpoint *tp, struct nemocontent *c
 					canvas->resource,
 					touchid,
 					wl_fixed_from_double(x),
-					wl_fixed_from_double(y));
+					wl_fixed_from_double(y),
+					wl_fixed_from_double(gx),
+					wl_fixed_from_double(gy));
 
 			done = 1;
 		}

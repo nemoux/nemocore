@@ -60,22 +60,6 @@ struct nemoactor *nemoactor_create_pixman(struct nemocompz *compz, int width, in
 	actor->base.update_output = NULL;
 	actor->base.read_pixels = nemoactor_read_pixels;
 
-	actor->base.pointer_enter = NULL;
-	actor->base.pointer_leave = NULL;
-	actor->base.pointer_motion = NULL;
-	actor->base.pointer_axis = NULL;
-	actor->base.pointer_button = NULL;
-
-	actor->base.keyboard_enter = NULL;
-	actor->base.keyboard_leave = NULL;
-	actor->base.keyboard_key = NULL;
-	actor->base.keyboard_modifiers = NULL;
-
-	actor->base.keypad_enter = NULL;
-	actor->base.keypad_leave = NULL;
-	actor->base.keypad_key = NULL;
-	actor->base.keypad_modifiers = NULL;
-
 	actor->dispatch_resize = NULL;
 	actor->dispatch_frame = NULL;
 
@@ -197,22 +181,6 @@ struct nemoactor *nemoactor_create_gl(struct nemocompz *compz, int width, int he
 
 	actor->base.update_output = NULL;
 	actor->base.read_pixels = nemoactor_read_pixels;
-
-	actor->base.pointer_enter = NULL;
-	actor->base.pointer_leave = NULL;
-	actor->base.pointer_motion = NULL;
-	actor->base.pointer_axis = NULL;
-	actor->base.pointer_button = NULL;
-
-	actor->base.keyboard_enter = NULL;
-	actor->base.keyboard_leave = NULL;
-	actor->base.keyboard_key = NULL;
-	actor->base.keyboard_modifiers = NULL;
-
-	actor->base.keypad_enter = NULL;
-	actor->base.keypad_leave = NULL;
-	actor->base.keypad_key = NULL;
-	actor->base.keypad_modifiers = NULL;
 
 	actor->dispatch_resize = NULL;
 	actor->dispatch_frame = NULL;

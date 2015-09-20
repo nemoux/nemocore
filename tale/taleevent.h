@@ -54,9 +54,11 @@ struct taletap {
 	struct talenode *node;
 
 	float x, y;
+	float gx, gy;
 	float dist;
 
 	float grab_x, grab_y;
+	float grab_gx, grab_gy;
 	uint32_t grab_time;
 	uint32_t grab_value;
 
@@ -79,7 +81,7 @@ struct taleevent {
 	uint32_t duration;
 
 	float x, y;
-	float dx, dy;
+	float gx, gy;
 
 	uint32_t axis;
 	float r;
@@ -98,9 +100,9 @@ extern void nemotale_push_keyboard_enter_event(struct nemotale *tale, uint32_t s
 extern void nemotale_push_keyboard_leave_event(struct nemotale *tale, uint32_t serial, uint64_t device);
 extern void nemotale_push_keyboard_down_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, uint32_t key);
 extern void nemotale_push_keyboard_up_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, uint32_t key);
-extern void nemotale_push_touch_down_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, float x, float y);
-extern void nemotale_push_touch_up_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, float dx, float dy);
-extern void nemotale_push_touch_motion_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, float x, float y);
+extern void nemotale_push_touch_down_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, float x, float y, float gx, float gy);
+extern void nemotale_push_touch_up_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time);
+extern void nemotale_push_touch_motion_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, float x, float y, float gx, float gy);
 
 extern void nemotale_push_timer_event(struct nemotale *tale, uint32_t time);
 

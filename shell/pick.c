@@ -103,7 +103,7 @@ static void pick_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 
 		nemoview_transform_from_global(tp->focus, x, y, &sx, &sy);
 
-		nemocontent_touch_motion(tp, tp->focus->content, time, touchid, sx, sy);
+		nemocontent_touch_motion(tp, tp->focus->content, time, touchid, sx, sy, x, y);
 	}
 
 	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_ROTATE)) {
@@ -369,7 +369,7 @@ static void pick_actorgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 
 		nemoview_transform_from_global(tp->focus, x, y, &sx, &sy);
 
-		nemocontent_touch_motion(tp, tp->focus->content, time, touchid, sx, sy);
+		nemocontent_touch_motion(tp, tp->focus->content, time, touchid, sx, sy, x, y);
 	}
 
 	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_ROTATE)) {

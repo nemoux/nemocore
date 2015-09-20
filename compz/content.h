@@ -72,9 +72,9 @@ struct nemocontent {
 	void (*keypad_key)(struct nemokeypad *keypad, struct nemocontent *content, uint32_t time, uint32_t key, uint32_t state);
 	void (*keypad_modifiers)(struct nemokeypad *keypad, struct nemocontent *content, uint32_t mods_depressed, uint32_t mods_latched, uint32_t mods_locked, uint32_t group);
 
-	void (*touch_down)(struct touchpoint *tp, struct nemocontent *content, uint32_t time, uint64_t touchid, float x, float y);
+	void (*touch_down)(struct touchpoint *tp, struct nemocontent *content, uint32_t time, uint64_t touchid, float x, float y, float gx, float gy);
 	void (*touch_up)(struct touchpoint *tp, struct nemocontent *content, uint32_t time, uint64_t touchid);
-	void (*touch_motion)(struct touchpoint *tp, struct nemocontent *content, uint32_t time, uint64_t touchid, float x, float y);
+	void (*touch_motion)(struct touchpoint *tp, struct nemocontent *content, uint32_t time, uint64_t touchid, float x, float y, float gx, float gy);
 	void (*touch_frame)(struct touchpoint *tp, struct nemocontent *content);
 };
 
@@ -200,12 +200,12 @@ static inline void nemocontent_keypad_modifiers(struct nemokeypad *keypad, struc
 		content->keypad_modifiers(keypad, content, mods_depressed, mods_latched, mods_locked, group);
 }
 
-static inline void nemocontent_touch_down(struct touchpoint *tp, struct nemocontent *content, uint32_t time, uint64_t touchid, float x, float y)
+static inline void nemocontent_touch_down(struct touchpoint *tp, struct nemocontent *content, uint32_t time, uint64_t touchid, float x, float y, float gx, float gy)
 {
 	if (content->touch_handler != NULL)
 		content->touch_handler(tp, content, time, content->data);
 	else if (content->touch_down != NULL)
-		content->touch_down(tp, content, time, touchid, x, y);
+		content->touch_down(tp, content, time, touchid, x, y, gx, gy);
 }
 
 static inline void nemocontent_touch_up(struct touchpoint *tp, struct nemocontent *content, uint32_t time, uint64_t touchid)
@@ -214,10 +214,10 @@ static inline void nemocontent_touch_up(struct touchpoint *tp, struct nemoconten
 		content->touch_up(tp, content, time, touchid);
 }
 
-static inline void nemocontent_touch_motion(struct touchpoint *tp, struct nemocontent *content, uint32_t time, uint64_t touchid, float x, float y)
+static inline void nemocontent_touch_motion(struct touchpoint *tp, struct nemocontent *content, uint32_t time, uint64_t touchid, float x, float y, float gx, float gy)
 {
 	if (content->touch_motion != NULL)
-		content->touch_motion(tp, content, time, touchid, x, y);
+		content->touch_motion(tp, content, time, touchid, x, y, gx, gy);
 }
 
 static inline void nemocontent_touch_frame(struct touchpoint *tp, struct nemocontent *content)

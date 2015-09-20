@@ -160,6 +160,8 @@
 			<arg name="id" type="int"/>
 			<arg name="x" type="fixed"/>
 			<arg name="y" type="fixed"/>
+			<arg name="gx" type="fixed"/>
+			<arg name="gy" type="fixed"/>
 		</event>
 
 		<event name="up">
@@ -167,8 +169,6 @@
 			<arg name="time" type="uint"/>
 			<arg name="surface" type="object" interface="wl_surface"/>
 			<arg name="id" type="int"/>
-			<arg name="dx" type="fixed"/>
-			<arg name="dy" type="fixed"/>
 		</event>
 
 		<event name="motion">
@@ -177,6 +177,8 @@
 			<arg name="id" type="int"/>
 			<arg name="x" type="fixed"/>
 			<arg name="y" type="fixed"/>
+			<arg name="gx" type="fixed"/>
+			<arg name="gy" type="fixed"/>
 		</event>
 
 		<event name="frame">

@@ -257,7 +257,7 @@ static const struct nemo_keyboard_listener keyboard_listener = {
 	keyboard_handle_modifiers
 };
 
-static void touch_handle_down(void *data, struct nemo_touch *touch, uint32_t serial, uint32_t time, struct wl_surface *surface, int32_t id, wl_fixed_t sx, wl_fixed_t sy)
+static void touch_handle_down(void *data, struct nemo_touch *touch, uint32_t serial, uint32_t time, struct wl_surface *surface, int32_t id, wl_fixed_t sx, wl_fixed_t sy, wl_fixed_t x, wl_fixed_t y)
 {
 	if (surface != NULL) {
 		struct nemocanvas *canvas = (struct nemocanvas *)wl_surface_get_user_data(surface);
@@ -270,13 +270,15 @@ static void touch_handle_down(void *data, struct nemo_touch *touch, uint32_t ser
 			event.time = time;
 			event.x = wl_fixed_to_double(sx);
 			event.y = wl_fixed_to_double(sy);
+			event.gx = wl_fixed_to_double(x);
+			event.gy = wl_fixed_to_double(y);
 
 			canvas->dispatch_event(canvas, NEMOTOOL_TOUCH_DOWN_EVENT, &event);
 		}
 	}
 }
 
-static void touch_handle_up(void *data, struct nemo_touch *touch, uint32_t serial, uint32_t time, struct wl_surface *surface, int32_t id, wl_fixed_t dx, wl_fixed_t dy)
+static void touch_handle_up(void *data, struct nemo_touch *touch, uint32_t serial, uint32_t time, struct wl_surface *surface, int32_t id)
 {
 	if (surface != NULL) {
 		struct nemocanvas *canvas = (struct nemocanvas *)wl_surface_get_user_data(surface);
@@ -287,15 +289,13 @@ static void touch_handle_up(void *data, struct nemo_touch *touch, uint32_t seria
 			event.device = id;
 			event.serial = serial;
 			event.time = time;
-			event.x = wl_fixed_to_double(dx);
-			event.y = wl_fixed_to_double(dy);
 
 			canvas->dispatch_event(canvas, NEMOTOOL_TOUCH_UP_EVENT, &event);
 		}
 	}
 }
 
-static void touch_handle_motion(void *data, struct nemo_touch *touch, uint32_t time, struct wl_surface *surface, int32_t id, wl_fixed_t sx, wl_fixed_t sy)
+static void touch_handle_motion(void *data, struct nemo_touch *touch, uint32_t time, struct wl_surface *surface, int32_t id, wl_fixed_t sx, wl_fixed_t sy, wl_fixed_t x, wl_fixed_t y)
 {
 	if (surface != NULL) {
 		struct nemocanvas *canvas = (struct nemocanvas *)wl_surface_get_user_data(surface);
@@ -307,6 +307,8 @@ static void touch_handle_motion(void *data, struct nemo_touch *touch, uint32_t t
 			event.time = time;
 			event.x = wl_fixed_to_double(sx);
 			event.y = wl_fixed_to_double(sy);
+			event.gx = wl_fixed_to_double(x);
+			event.gy = wl_fixed_to_double(y);
 
 			canvas->dispatch_event(canvas, NEMOTOOL_TOUCH_MOTION_EVENT, &event);
 		}

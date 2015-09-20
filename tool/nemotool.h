@@ -67,6 +67,7 @@ struct nemoevent {
 	uint32_t state;
 
 	float x, y;
+	float gx, gy;
 };
 
 struct nemoglobal {

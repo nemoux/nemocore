@@ -64,6 +64,9 @@ struct nemotale {
 
 	uint32_t long_press_duration;
 	uint32_t long_press_distance;
+
+	uint32_t single_click_duration;
+	uint32_t single_click_distance;
 };
 
 #define	NEMOTALE_DESTROY_SIGNAL(tale)		(&tale->destroy_signal)
@@ -183,6 +186,12 @@ static inline void nemotale_set_long_press_gesture(struct nemotale *tale, uint32
 {
 	tale->long_press_duration = duration;
 	tale->long_press_distance = distance;
+}
+
+static inline void nemotale_set_single_click_gesture(struct nemotale *tale, uint32_t duration, uint32_t distance)
+{
+	tale->single_click_duration = duration;
+	tale->single_click_distance = distance;
 }
 
 static inline void nemotale_set_backend(struct nemotale *tale, void *backend)

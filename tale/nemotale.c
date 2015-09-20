@@ -30,6 +30,9 @@ int nemotale_prepare(struct nemotale *tale)
 	tale->long_press_duration = 1500;
 	tale->long_press_distance = 50;
 
+	tale->single_click_duration = 150;
+	tale->single_click_distance = 50;
+
 	return 0;
 }
 

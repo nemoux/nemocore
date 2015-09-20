@@ -34,7 +34,7 @@ static void default_touchpoint_grab_down(struct touchpoint_grab *grab, uint32_t 
 	touchpoint_move(tp, x, y);
 
 	if (tp->focus != NULL) {
-		nemocontent_touch_down(tp, tp->focus->content, time, touchid, sx, sy);
+		nemocontent_touch_down(tp, tp->focus->content, time, touchid, sx, sy, x, y);
 	}
 
 	virtuio_dispatch_events(tp->touch->seat->compz);
@@ -60,7 +60,7 @@ static void default_touchpoint_grab_motion(struct touchpoint_grab *grab, uint32_
 
 		nemoview_transform_from_global(tp->focus, x, y, &sx, &sy);
 
-		nemocontent_touch_motion(tp, tp->focus->content, time, touchid, sx, sy);
+		nemocontent_touch_motion(tp, tp->focus->content, time, touchid, sx, sy, x, y);
 	}
 }
 
@@ -145,7 +145,7 @@ static void nemo_touch_bypass(struct wl_client *client, struct wl_resource *reso
 
 		touchpoint_set_focus(tp, view);
 
-		nemocontent_touch_down(tp, tp->focus->content, time, touchid, tx, ty);
+		nemocontent_touch_down(tp, tp->focus->content, time, touchid, tx, ty, x, y);
 
 		tp->grab_serial = wl_display_get_serial(seat->compz->display);
 		tp->grab_time = time;
@@ -715,7 +715,7 @@ void nemotouch_bypass_event(struct nemocompz *compz, int32_t touchid, float sx, 
 
 		touchpoint_set_focus(tp, view);
 
-		nemocontent_touch_down(tp, tp->focus->content, time, touchid, tx, ty);
+		nemocontent_touch_down(tp, tp->focus->content, time, touchid, tx, ty, x, y);
 
 		tp->grab_serial = wl_display_get_serial(compz->display);
 		tp->grab_time = time;
