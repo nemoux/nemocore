@@ -154,7 +154,8 @@ static void move_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 	struct pitchfilter *filter = move->filter;
 
 	if (tp->focus != NULL &&
-			tp->focus->canvas != NULL) {
+			tp->focus->canvas != NULL &&
+			nemoshell_is_nemo_surface_for_canvas(tp->focus->canvas)) {
 		nemocontent_touch_up(tp, tp->focus->content, time, touchid);
 	}
 
@@ -194,6 +195,16 @@ static void move_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 
 	if (grab->bin == NULL)
 		return;
+
+	if (tp->focus != NULL &&
+			tp->focus->canvas != NULL &&
+			nemoshell_is_nemo_surface_for_canvas(tp->focus->canvas)) {
+		float sx, sy;
+
+		nemoview_transform_from_global(tp->focus, x, y, &sx, &sy);
+
+		nemocontent_touch_motion(tp, tp->focus->content, time, touchid, sx, sy, x, y);
+	}
 
 	cx = x + move->dx;
 	cy = y + move->dy;
@@ -429,6 +440,14 @@ static void move_actorgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 
 	if (grab->actor == NULL)
 		return;
+
+	if (tp->focus != NULL) {
+		float sx, sy;
+
+		nemoview_transform_from_global(tp->focus, x, y, &sx, &sy);
+
+		nemocontent_touch_motion(tp, tp->focus->content, time, touchid, sx, sy, x, y);
+	}
 
 	cx = x + move->dx;
 	cy = y + move->dy;
