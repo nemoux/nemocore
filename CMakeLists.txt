@@ -32,7 +32,6 @@ option(WITH_MESA_RENDERNODE "Build with MESA's RENDERNODE" OFF)
 
 option(WITH_TOUCH_TO_POINTER "Build with Touch to Pointer" OFF)
 
-option(WITH_EXAMPLE "Build with EXAMPLE" ON)
 option(WITH_OPTIMIZE "Build with OPTIMIZE" ON)
 option(WITH_DEBUG "Build with DEBUG" OFF)
 option(WITH_PROFILE "Build with PROFILE" OFF)
@@ -215,11 +214,6 @@ add_subdirectory(mosi)
 add_subdirectory(compz)
 add_subdirectory(shell)
 add_subdirectory(apps)
+add_subdirectory(backs)
 
 add_subdirectory(thirds/poly2tri)
-
-if(WITH_EXAMPLE)
-	add_subdirectory(examples/tale)
-	add_subdirectory(examples/backs)
-	add_subdirectory(examples/plugins)
-endif(WITH_EXAMPLE)

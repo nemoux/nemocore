@@ -21,24 +21,26 @@ include_directories(
 	${CMAKE_SOURCE_DIR}/thirds/poly2tri
 	)
 
-add_executable(miniback
+add_executable(nemoback-mini
 	miniback.c
 	talehelper.c
 	)
 
-TARGET_LINK_LIBRARIES(miniback
+TARGET_LINK_LIBRARIES(nemoback-mini
 	nemotale
 	nemotool
 	${NEMOUX_COMMON_LIBRARIES}
 	${SKIA_LIBRARIES}
 	)
 
-add_executable(plexback
+INSTALL(TARGETS nemoback-mini DESTINATION bin)
+
+add_executable(nemoback-plex
 	plexback.cpp
 	talehelper.c
 	)
 
-TARGET_LINK_LIBRARIES(plexback
+TARGET_LINK_LIBRARIES(nemoback-plex
 	nemotool
 	nemotale
 	poly2tri
@@ -46,12 +48,14 @@ TARGET_LINK_LIBRARIES(plexback
 	${SKIA_LIBRARIES}
 	)
 
-add_executable(moteback
+INSTALL(TARGETS nemoback-plex DESTINATION bin)
+
+add_executable(nemoback-mote
 	moteback.cpp
 	talehelper.c
 	)
 
-TARGET_LINK_LIBRARIES(moteback
+TARGET_LINK_LIBRARIES(nemoback-mote
 	nemotool
 	nemotale
 	nemomote
@@ -59,18 +63,22 @@ TARGET_LINK_LIBRARIES(moteback
 	${SKIA_LIBRARIES}
 	)
 
-add_executable(mosiback
+INSTALL(TARGETS nemoback-mote DESTINATION bin)
+
+add_executable(nemoback-mosi
 	mosiback.cpp
 	talehelper.c
 	)
 
-TARGET_LINK_LIBRARIES(mosiback
+TARGET_LINK_LIBRARIES(nemoback-mosi
 	nemotool
 	nemotale
 	nemomosi
 	${NEMOUX_COMMON_LIBRARIES}
 	${SKIA_LIBRARIES}
 	)
+
+INSTALL(TARGETS nemoback-mosi DESTINATION bin)
 
 if(WITH_GSTREAMER)
 	PKG_CHECK_MODULES(GLIB REQUIRED glib-2.0)
@@ -85,18 +93,20 @@ if(WITH_GSTREAMER)
 	INCLUDE_DIRECTORIES(${GSTPBUTILS_INCLUDE_DIRS})
 	LINK_DIRECTORIES(${GSTPBUTILS_LIBRARY_DIRS})
 
-	add_executable(playback
+	add_executable(nemoback-play
 		playback.c
 		talehelper.c
 		${CMAKE_SOURCE_DIR}/apps/gsthelper.c
 		${CMAKE_SOURCE_DIR}/apps/glibhelper.c
 		)
 
-	TARGET_LINK_LIBRARIES(playback
+	TARGET_LINK_LIBRARIES(nemoback-play
 		nemotool
 		nemotale
 		${GLIB_LIBRARIES}
 		${GST_LIBRARIES}
 		${GSTPBUTILS_LIBRARIES}
 		)
+
+	INSTALL(TARGETS nemoback-play DESTINATION bin)
 endif(WITH_GSTREAMER)
