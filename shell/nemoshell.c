@@ -242,10 +242,10 @@ static void nemo_surface_set_fullscreen(struct wl_client *client, struct wl_reso
 
 		if ((screen != NULL) ||
 				(screen = nemocompz_get_main_screen(bin->shell->compz)) != NULL) {
-			bin->screen.x = screen->x;
-			bin->screen.y = screen->y;
-			bin->screen.width = screen->width;
-			bin->screen.height = screen->height;
+			bin->screen.x = screen->rx;
+			bin->screen.y = screen->ry;
+			bin->screen.width = screen->rw;
+			bin->screen.height = screen->rh;
 			bin->has_screen = 1;
 		}
 

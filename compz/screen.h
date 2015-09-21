@@ -67,6 +67,8 @@ struct nemoscreen {
 		struct nemomatrix matrix;
 		struct nemomatrix inverse;
 	} transform;
+	
+	int32_t rx, ry, rw, rh;
 
 	pixman_region32_t region;
 	pixman_region32_t damage;

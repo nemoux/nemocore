@@ -217,6 +217,11 @@ static void nemoscreen_update_transform_matrix(struct nemoscreen *screen)
 	if (screen->transform.enable == 0) {
 		pixman_region32_init_rect(&screen->region,
 				screen->x, screen->y, screen->width, screen->height);
+
+		screen->rx = screen->x;
+		screen->ry = screen->y;
+		screen->rw = screen->width;
+		screen->rh = screen->height;
 	} else {
 		float minx = HUGE_VALF, miny = HUGE_VALF;
 		float maxx = -HUGE_VALF, maxy = -HUGE_VALF;
@@ -253,12 +258,17 @@ static void nemoscreen_update_transform_matrix(struct nemoscreen *screen)
 				maxy = ty;
 		}
 
-		sx = floorf(minx);
-		sy = floorf(miny);
+		sx = MAX(floorf(minx), 0.0f);
+		sy = MAX(floorf(miny), 0.0f);
 		ex = ceilf(maxx);
 		ey = ceilf(maxy);
 
 		pixman_region32_init_rect(&screen->region, sx, sy, ex - sx, ey - sy);
+
+		screen->rx = sx;
+		screen->ry = sy;
+		screen->rw = ex - sx;
+		screen->rh = ey - sy;
 	}
 }
 
