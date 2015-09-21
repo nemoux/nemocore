@@ -723,3 +723,14 @@ void nemotouch_bypass_event(struct nemocompz *compz, int32_t touchid, float sx, 
 		nemocompz_run_touch_binding(compz, tp, time);
 	}
 }
+
+void nemotouch_dump_touchpoint(struct nemotouch *touch)
+{
+	struct touchpoint *tp;
+
+	nemolog_message("TOUCH", "dump '%s' touch's taps...\n", touch->node->devnode);
+
+	wl_list_for_each(tp, &touch->touchpoint_list, link) {
+		nemolog_message("TOUCH", "[%llu:%llu] %f %f\n", tp->id, tp->gid, tp->x, tp->y);
+	}
+}
