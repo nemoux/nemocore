@@ -12,7 +12,7 @@ NEMO_BEGIN_EXTERN_C
 #include <compz.h>
 #include <input.h>
 
-#define	EVDEV_MAX_SLOTS			(16)
+#define	EVDEV_MAX_SLOTS			(128)
 
 typedef enum {
 	EVDEV_NONE = 0,
