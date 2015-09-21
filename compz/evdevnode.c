@@ -48,6 +48,10 @@ static int evdev_flush_events(struct evdevnode *node, uint32_t time)
 	int slot, id = 0;
 
 	slot = node->mt.slot;
+	if (slot >= EVDEV_MAX_SLOTS) {
+		nemolog_error("EVDEV", "multitouch slot index is overflow!\n");
+		return -1;
+	}
 
 	switch (node->pending_event) {
 		case EVDEV_NONE:
@@ -209,6 +213,11 @@ static void evdev_process_relative(struct evdevnode *node, struct input_event *e
 static void evdev_process_touch(struct evdevnode *node, struct input_event *e, uint32_t time)
 {
 	int id;
+
+	if (node->mt.slot >= EVDEV_MAX_SLOTS) {
+		nemolog_error("EVDEV", "multitouch slot index is overflow!\n");
+		return;
+	}
 
 	switch (e->code) {
 		case ABS_MT_SLOT:
