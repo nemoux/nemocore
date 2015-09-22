@@ -51,41 +51,65 @@ static inline void nemobook_clear(struct nemobook *book)
 
 static inline void nemobook_set_type(struct nemobook *book, int i, uint32_t type)
 {
+	if (i < 0 || i >= book->nlists)
+		return;
+
 	book->types[i] = type;
 }
 
 static inline uint32_t nemobook_get_type(struct nemobook *book, int i)
 {
+	if (i < 0 || i >= book->nlists)
+		return 0;
+
 	return book->types[i];
 }
 
 static inline void nemobook_set(struct nemobook *book, int i, void *v)
 {
+	if (i < 0 || i >= book->nlists)
+		return;
+
 	book->lists[i] = v;
 }
 
 static inline void *nemobook_get(struct nemobook *book, int i)
 {
+	if (i < 0 || i >= book->nlists)
+		return NULL;
+
 	return book->lists[i];
 }
 
 static inline void nemobook_put(struct nemobook *book, int i)
 {
+	if (i < 0 || i >= book->nlists)
+		return;
+
 	book->lists[i] = NULL;
 }
 
 static inline void nemobook_iset(struct nemobook *book, int i, int64_t v)
 {
+	if (i < 0 || i >= book->nlists)
+		return;
+
 	book->lists[i] = (void *)v;
 }
 
 static inline int64_t nemobook_iget(struct nemobook *book, int i)
 {
+	if (i < 0 || i >= book->nlists)
+		return 0;
+
 	return (int64_t)book->lists[i];
 }
 
 static inline int nemobook_is_empty(struct nemobook *book, int i)
 {
+	if (i < 0 || i >= book->nlists)
+		return -1;
+
 	return book->lists[i] == NULL;
 }
 

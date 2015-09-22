@@ -555,7 +555,7 @@ static inline void nemoshow_canvas_render_picker_one(SkCanvas *canvas, struct sh
 				SkPaint paint;
 
 				paint.setStyle(SkPaint::kFill_Style);
-				paint.setColor(SkColorSetARGB(255, item->event, 0, 0));
+				paint.setColor(SkColorSetARGB(255, item->event / 256, item->event % 256, 0));
 				paint.setAntiAlias(false);
 
 				canvas->drawRect(rect, paint);
@@ -745,5 +745,7 @@ int32_t nemoshow_canvas_pick_one(struct showone *one, int x, int y)
 	if (px < 0 || py < 0 || px >= canvas->viewport.width || py >= canvas->viewport.height)
 		return 0;
 
-	return SkColorGetR(NEMOSHOW_CANVAS_CP(canvas, bitmap)->getColor(px, py));
+	return
+		SkColorGetR(NEMOSHOW_CANVAS_CP(canvas, bitmap)->getColor(px, py)) * 256 +
+		SkColorGetG(NEMOSHOW_CANVAS_CP(canvas, bitmap)->getColor(px, py));
 }
