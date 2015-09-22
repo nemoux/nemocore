@@ -745,7 +745,7 @@ int32_t nemoshow_canvas_pick_one(struct showone *one, int x, int y)
 	if (px < 0 || py < 0 || px >= canvas->viewport.width || py >= canvas->viewport.height)
 		return 0;
 
-	return
-		SkColorGetR(NEMOSHOW_CANVAS_CP(canvas, bitmap)->getColor(px, py)) * 256 +
-		SkColorGetG(NEMOSHOW_CANVAS_CP(canvas, bitmap)->getColor(px, py));
+	SkColor c = NEMOSHOW_CANVAS_CP(canvas, bitmap)->getColor(px, py);
+
+	return SkColorGetR(c) * 256 + SkColorGetG(c);
 }
