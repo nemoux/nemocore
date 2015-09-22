@@ -54,6 +54,7 @@ struct moteback {
 	struct nemocanvas *canvas;
 
 	struct nemotale *tale;
+	struct talenode *back;
 	struct talenode *node;
 
 	int32_t width, height;
@@ -122,28 +123,9 @@ static void moteback_prepare_text(struct moteback *mote, const char *text)
 
 static void moteback_update_one(struct moteback *mote, double secs)
 {
-#if	0
-	nemomote_random_emit(mote->mote, &mote->random, secs);
-	nemomote_position_update(mote->mote, &mote->box);
-	nemomote_color_update(mote->mote, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.5f);
-	nemomote_mass_update(mote->mote, 8.0f, 3.0f);
-	nemomote_lifetime_update(mote->mote, 10.0f, 5.0f);
-	nemomote_velocity_update(mote->mote, &mote->speed);
-	nemomote_type_update(mote->mote, 2);
-	nemomote_commit(mote->mote);
-#endif
-
-#if	0
-	nemomote_gravitywell_update(mote->mote, 1, secs, mote->width * 0.3f, mote->height * 0.3f, 750000.0f, 10000.0f);
-	nemomote_gravitywell_update(mote->mote, 1, secs, mote->width * 0.3f, mote->height * 0.7f, 750000.0f, 10000.0f);
-	nemomote_gravitywell_update(mote->mote, 1, secs, mote->width * 0.7f, mote->height * 0.3f, 750000.0f, 10000.0f);
-	nemomote_gravitywell_update(mote->mote, 1, secs, mote->width * 0.7f, mote->height * 0.7f, 750000.0f, 10000.0f);
-	nemomote_gravitywell_update(mote->mote, 1, secs, mote->width * 0.5f, mote->height * 0.5f, 750000.0f, 10000.0f);
-#else
 	nemomote_mutualgravity_update(mote->mote, 1, secs, 100.0f, 5000.0f, 50.0f);
 	nemomote_collide_update(mote->mote, 2, 1, secs, 1.5f);
 	nemomote_speedlimit_update(mote->mote, 1, secs, 0.0f, 300.0f);
-#endif
 
 	if (nemomote_tween_update(mote->mote, &mote->tween, secs) != 0) {
 		nemomote_explosion_update(mote->mote, 3, secs, -500.0f, 500.0f, -500.0f, 500.0f);
@@ -154,13 +136,28 @@ static void moteback_update_one(struct moteback *mote, double secs)
 	nemomote_boundingbox_update(mote->mote, 1, secs, &mote->box, 0.8f);
 	nemomote_move_update(mote->mote, 1, secs);
 
-#if 0
-	nemomote_deadline_update(mote->mote, 2, secs);
-	nemomote_boundingbox_update(mote->mote, 2, secs, &mote->box, 0.8f);
-	nemomote_move_update(mote->mote, 2, secs);
-#endif
-
 	nemomote_cleanup(mote->mote);
+}
+
+static void moteback_render_back(struct moteback *mote, pixman_image_t *image, const char *uri)
+{
+	int32_t width = pixman_image_get_width(image);
+	int32_t height = pixman_image_get_height(image);
+
+	SkBitmap back;
+	SkImageDecoder::DecodeFile(uri, &back);
+
+	SkBitmap bitmap;
+	bitmap.setInfo(
+			SkImageInfo::Make(width, height, kN32_SkColorType, kPremul_SkAlphaType));
+	bitmap.setPixels(
+			pixman_image_get_data(image));
+
+	SkBitmapDevice device(bitmap);
+	SkCanvas canvas(&device);
+
+	canvas.drawBitmapRect(back,
+			SkRect::MakeXYWH(0, 0, width, height));
 }
 
 static void moteback_render_one(struct moteback *mote, pixman_image_t *image)
@@ -263,6 +260,7 @@ int main(int argc, char *argv[])
 	struct option options[] = {
 		{ "width",			required_argument,			NULL,		'w' },
 		{ "height",			required_argument,			NULL,		'h' },
+		{ "uri",				required_argument,			NULL,		'u' },
 		{ "background",	no_argument,						NULL,		'b' },
 		{ 0 }
 	};
@@ -271,13 +269,13 @@ int main(int argc, char *argv[])
 	struct eglcontext *egl;
 	struct eglcanvas *canvas;
 	struct nemotale *tale;
-	struct talenode *node;
 	int32_t width = 1920;
 	int32_t height = 1080;
+	char *uri = NULL;
 	int opt;
 	int i;
 
-	while (opt = getopt_long(argc, argv, "w:h:b", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:u:b", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -288,6 +286,10 @@ int main(int argc, char *argv[])
 
 			case 'h':
 				height = strtoul(optarg, NULL, 10);
+				break;
+
+			case 'u':
+				uri = strdup(optarg);
 				break;
 
 			default:
@@ -312,7 +314,7 @@ int main(int argc, char *argv[])
 	nemomote_blast_emit(mote->mote, 500);
 	nemomote_position_update(mote->mote, &mote->box);
 	nemomote_velocity_update(mote->mote, &mote->speed);
-	nemomote_color_update(mote->mote, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.5f);
+	nemomote_color_update(mote->mote, 0.0f, 0.0f, 0.7f, 0.3f, 0.7f, 0.3f, 0.7f, 0.3f);
 	nemomote_mass_update(mote->mote, 8.0f, 3.0f);
 	nemomote_type_update(mote->mote, 1);
 	nemomote_commit(mote->mote);
@@ -320,8 +322,8 @@ int main(int argc, char *argv[])
 	nemomote_blast_emit(mote->mote, 50);
 	nemomote_position_update(mote->mote, &mote->box);
 	nemomote_velocity_update(mote->mote, &mote->speed);
-	nemomote_color_update(mote->mote, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.5f);
-	nemomote_mass_update(mote->mote, 30.0f, 15.0f);
+	nemomote_color_update(mote->mote, 0.0f, 0.0f, 1.0f, 0.8f, 1.0f, 0.8f, 1.0f, 0.7f);
+	nemomote_mass_update(mote->mote, 15.0f, 5.0f);
 	nemomote_type_update(mote->mote, 2);
 	nemomote_commit(mote->mote);
 
@@ -354,10 +356,16 @@ int main(int argc, char *argv[])
 	nemotale_attach_canvas(tale, NTEGL_CANVAS(canvas), moteback_dispatch_tale_event);
 	nemotale_set_userdata(tale, mote);
 
-	mote->node = node = nemotale_node_create_pixman(width, height);
-	nemotale_node_set_id(node, 1);
-	nemotale_node_opaque(node, 0, 0, width, height);
-	nemotale_attach_node(tale, node);
+	mote->back = nemotale_node_create_pixman(width, height);
+	nemotale_node_set_id(mote->back, 0);
+	nemotale_node_opaque(mote->back, 0, 0, width, height);
+	nemotale_attach_node(tale, mote->back);
+
+	moteback_render_back(mote, nemotale_node_get_pixman(mote->back), uri);
+
+	mote->node = nemotale_node_create_pixman(width, height);
+	nemotale_node_set_id(mote->node, 1);
+	nemotale_attach_node(tale, mote->node);
 
 	mote->timer = nemotimer_create(tool);
 	nemotimer_set_callback(mote->timer, moteback_dispatch_timer_event);
