@@ -30,6 +30,8 @@ struct showone *nemoshow_matrix_create(int type)
 	one->update = nemoshow_matrix_update;
 	one->destroy = nemoshow_matrix_destroy;
 
+	one->flags = NEMOSHOW_MATRIX_DIRTY;
+
 	nemoshow_one_prepare(one);
 
 	nemoobject_set_reserved(&one->object, "x", &matrix->x, sizeof(double));

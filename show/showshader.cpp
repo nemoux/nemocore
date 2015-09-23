@@ -26,6 +26,8 @@ struct showone *nemoshow_stop_create(void)
 	one->update = nemoshow_stop_update;
 	one->destroy = nemoshow_stop_destroy;
 
+	one->flags = NEMOSHOW_SHADER_DIRTY;
+
 	nemoshow_one_prepare(one);
 
 	nemoobject_set_reserved(&one->object, "offset", &stop->offset, sizeof(double));

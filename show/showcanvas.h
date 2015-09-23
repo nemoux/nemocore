@@ -58,9 +58,6 @@ struct showcanvas {
 	int needs_redraw;
 	int needs_full_redraw;
 
-	int needs_redraw_picker;
-	int needs_full_redraw_picker;
-
 	nemoshow_canvas_dispatch_render_t dispatch_render;
 
 	void *cc;
@@ -79,7 +76,6 @@ extern int nemoshow_canvas_set_type(struct showone *one, int type);
 extern void nemoshow_canvas_set_event(struct showone *one, uint32_t event);
 
 extern void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one);
-extern void nemoshow_canvas_render_picker(struct nemoshow *show, struct showone *one);
 extern void nemoshow_canvas_render_back(struct nemoshow *show, struct showone *one);
 
 extern int nemoshow_canvas_set_viewport(struct nemoshow *show, struct showone *one, double sx, double sy);
@@ -92,7 +88,7 @@ extern void nemoshow_canvas_translate(struct showone *one, float x, float y);
 extern void nemoshow_canvas_rotate(struct showone *one, float r);
 extern void nemoshow_canvas_pivot(struct showone *one, float px, float py);
 
-extern int32_t nemoshow_canvas_pick_one(struct showone *one, int x, int y);
+extern struct showone *nemoshow_canvas_pick_one(struct showone *one, int x, int y);
 
 static inline void nemoshow_canvas_needs_redraw(struct showone *one)
 {

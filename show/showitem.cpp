@@ -39,6 +39,8 @@ struct showone *nemoshow_item_create(int type)
 
 	item->cc = new showitem_t;
 	NEMOSHOW_ITEM_CC(item, matrix) = new SkMatrix;
+	NEMOSHOW_ITEM_CC(item, inverse) = new SkMatrix;
+	NEMOSHOW_ITEM_CC(item, modelview) = new SkMatrix;
 	NEMOSHOW_ITEM_CC(item, viewbox) = new SkMatrix;
 	NEMOSHOW_ITEM_CC(item, path) = new SkPath;
 	NEMOSHOW_ITEM_CC(item, fill) = new SkPaint;
@@ -101,10 +103,6 @@ struct showone *nemoshow_item_create(int type)
 
 	nemoobject_set_reserved(&one->object, "alpha", &item->alpha, sizeof(double));
 
-	nemoobject_set_reserved(&one->object, "event", &item->event, sizeof(int32_t));
-
-	nemoshow_one_reference_one(one, one, NEMOSHOW_STYLE_REF);
-
 	return one;
 }
 
@@ -126,6 +124,10 @@ void nemoshow_item_destroy(struct showone *one)
 
 	if (NEMOSHOW_ITEM_CC(item, matrix) != NULL)
 		delete NEMOSHOW_ITEM_CC(item, matrix);
+	if (NEMOSHOW_ITEM_CC(item, inverse) != NULL)
+		delete NEMOSHOW_ITEM_CC(item, inverse);
+	if (NEMOSHOW_ITEM_CC(item, modelview) != NULL)
+		delete NEMOSHOW_ITEM_CC(item, modelview);
 	if (NEMOSHOW_ITEM_CC(item, viewbox) != NULL)
 		delete NEMOSHOW_ITEM_CC(item, viewbox);
 	if (NEMOSHOW_ITEM_CC(item, path) != NULL)
@@ -255,16 +257,14 @@ static inline void nemoshow_item_update_style(struct nemoshow *show, struct show
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	if (NEMOSHOW_REF(one, NEMOSHOW_STYLE_REF) == one) {
-		if (item->fill != 0) {
-			NEMOSHOW_ITEM_CC(item, fill)->setColor(
-					SkColorSetARGB(item->fills[3] * item->alpha, item->fills[2], item->fills[1], item->fills[0]));
-		}
-		if (item->stroke != 0) {
-			NEMOSHOW_ITEM_CC(item, stroke)->setStrokeWidth(item->stroke_width);
-			NEMOSHOW_ITEM_CC(item, stroke)->setColor(
-					SkColorSetARGB(item->strokes[3] * item->alpha, item->strokes[2], item->strokes[1], item->strokes[0]));
-		}
+	if (item->fill != 0) {
+		NEMOSHOW_ITEM_CC(item, fill)->setColor(
+				SkColorSetARGB(item->fills[3] * item->alpha, item->fills[2], item->fills[1], item->fills[0]));
+	}
+	if (item->stroke != 0) {
+		NEMOSHOW_ITEM_CC(item, stroke)->setStrokeWidth(item->stroke_width);
+		NEMOSHOW_ITEM_CC(item, stroke)->setColor(
+				SkColorSetARGB(item->strokes[3] * item->alpha, item->strokes[2], item->strokes[1], item->strokes[0]));
 	}
 
 	if (one->sub == NEMOSHOW_RING_ITEM) {
@@ -382,7 +382,7 @@ static inline void nemoshow_item_update_text(struct nemoshow *show, struct showo
 	}
 }
 
-static inline void nemoshow_item_update_path(struct nemoshow *show, struct showitem *item, struct showone *one)
+static inline void nemoshow_item_update_path_children(struct nemoshow *show, struct showitem *item, struct showone *one)
 {
 	struct showone *child;
 	struct showpath *path;
@@ -439,75 +439,111 @@ static inline void nemoshow_item_update_path(struct nemoshow *show, struct showi
 
 				NEMOSHOW_ITEM_CC(item, path)->addPath(rpath);
 			} else if (child->sub == NEMOSHOW_SVG_PATH) {
-				nemoshow_item_update_path(show, item, child);
+				nemoshow_item_update_path_children(show, item, child);
 			}
 		}
 	}
 }
 
-static inline void nemoshow_item_update_child(struct nemoshow *show, struct showone *one)
+static inline void nemoshow_item_update_path(struct nemoshow *show, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
-	struct showone *child;
-	int i;
 
-	if (item->transform == NEMOSHOW_CHILDREN_TRANSFORM) {
-		NEMOSHOW_ITEM_CC(item, matrix)->setIdentity();
+	NEMOSHOW_ITEM_CC(item, path)->reset();
 
-		for (i = 0; i < one->nchildren; i++) {
-			child = one->children[i];
+	nemoshow_item_update_path_children(show, item, one);
 
-			if (child->type == NEMOSHOW_MATRIX_TYPE) {
-				NEMOSHOW_ITEM_CC(item, matrix)->postConcat(
-						*NEMOSHOW_MATRIX_CC(
-							NEMOSHOW_MATRIX(child),
-							matrix));
-			}
-		}
-
-		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
-	}
-
-	if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
-		NEMOSHOW_ITEM_CC(item, path)->reset();
-
-		nemoshow_item_update_path(show, item, one);
-
-		item->pathlength = nemoshow_helper_get_path_length(NEMOSHOW_ITEM_CC(item, path));
-
-		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
-	}
+	one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 }
 
 static inline void nemoshow_item_update_matrix(struct nemoshow *show, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
+	struct showone *ref;
 
-	if (item->transform == NEMOSHOW_TSR_TRANSFORM) {
-		NEMOSHOW_ITEM_CC(item, matrix)->setIdentity();
+	NEMOSHOW_ITEM_CC(item, matrix)->setIdentity();
 
-		if (item->px != 0.0f || item->py != 0.0f) {
-			NEMOSHOW_ITEM_CC(item, matrix)->postTranslate(-item->px, -item->py);
+	if (item->transform != 0) {
+		if (item->transform == NEMOSHOW_EXTERN_TRANSFORM) {
+			NEMOSHOW_ITEM_CC(item, modelview)->setIdentity();
 
-			if (item->ro != 0.0f) {
-				NEMOSHOW_ITEM_CC(item, matrix)->postRotate(item->ro);
-			}
-			if (item->sx != 1.0f || item->sy != 1.0f) {
-				NEMOSHOW_ITEM_CC(item, matrix)->postScale(item->sx, item->sy);
+			NEMOSHOW_ITEM_CC(item, modelview)->postConcat(
+					*NEMOSHOW_MATRIX_CC(
+						NEMOSHOW_MATRIX(
+							NEMOSHOW_REF(one, NEMOSHOW_MATRIX_REF)),
+						matrix));
+		} else if (item->transform == NEMOSHOW_TSR_TRANSFORM) {
+			NEMOSHOW_ITEM_CC(item, modelview)->setIdentity();
+
+			if (item->px != 0.0f || item->py != 0.0f) {
+				NEMOSHOW_ITEM_CC(item, modelview)->postTranslate(-item->px, -item->py);
+
+				if (item->ro != 0.0f) {
+					NEMOSHOW_ITEM_CC(item, modelview)->postRotate(item->ro);
+				}
+				if (item->sx != 1.0f || item->sy != 1.0f) {
+					NEMOSHOW_ITEM_CC(item, modelview)->postScale(item->sx, item->sy);
+				}
+
+				NEMOSHOW_ITEM_CC(item, modelview)->postTranslate(item->px, item->py);
+			} else {
+				if (item->ro != 0.0f) {
+					NEMOSHOW_ITEM_CC(item, modelview)->postRotate(item->ro);
+				}
+				if (item->sx != 1.0f || item->sy != 1.0f) {
+					NEMOSHOW_ITEM_CC(item, modelview)->postScale(item->sx, item->sy);
+				}
 			}
 
-			NEMOSHOW_ITEM_CC(item, matrix)->postTranslate(item->px, item->py);
-		} else {
-			if (item->ro != 0.0f) {
-				NEMOSHOW_ITEM_CC(item, matrix)->postRotate(item->ro);
+			NEMOSHOW_ITEM_CC(item, modelview)->postTranslate(item->tx, item->ty);
+		} else if (item->transform == NEMOSHOW_CHILDREN_TRANSFORM) {
+			struct showone *child;
+			int i;
+
+			NEMOSHOW_ITEM_CC(item, modelview)->setIdentity();
+
+			for (i = 0; i < one->nchildren; i++) {
+				child = one->children[i];
+
+				if (child->type == NEMOSHOW_MATRIX_TYPE) {
+					NEMOSHOW_ITEM_CC(item, modelview)->postConcat(
+							*NEMOSHOW_MATRIX_CC(
+								NEMOSHOW_MATRIX(child),
+								matrix));
+				}
 			}
-			if (item->sx != 1.0f || item->sy != 1.0f) {
-				NEMOSHOW_ITEM_CC(item, matrix)->postScale(item->sx, item->sy);
-			}
+		} else if (item->transform == NEMOSHOW_DIRECT_TRANSFORM) {
+			SkScalar args[9] = {
+				SkDoubleToScalar(item->matrix[0]),
+				SkDoubleToScalar(item->matrix[1]),
+				SkDoubleToScalar(item->matrix[2]),
+				SkDoubleToScalar(item->matrix[3]),
+				SkDoubleToScalar(item->matrix[4]),
+				SkDoubleToScalar(item->matrix[5]),
+				SkDoubleToScalar(item->matrix[6]),
+				SkDoubleToScalar(item->matrix[7]),
+				SkDoubleToScalar(item->matrix[8])
+			};
+
+			NEMOSHOW_ITEM_CC(item, modelview)->set9(args);
 		}
 
-		NEMOSHOW_ITEM_CC(item, matrix)->postTranslate(item->tx, item->ty);
+		NEMOSHOW_ITEM_CC(item, matrix)->postConcat(
+				*NEMOSHOW_ITEM_CC(item, modelview));
 	}
+
+	ref = NEMOSHOW_REF(one, NEMOSHOW_GROUP_REF);
+	if (ref != NULL) {
+		struct showitem *group = NEMOSHOW_ITEM(ref);
+
+		nemoshow_one_update(show, ref);
+
+		NEMOSHOW_ITEM_CC(item, matrix)->postConcat(
+				*NEMOSHOW_ITEM_CC(group, matrix));
+	}
+
+	NEMOSHOW_ITEM_CC(item, matrix)->invert(
+			NEMOSHOW_ITEM_CC(item, inverse));
 
 	one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 }
@@ -582,7 +618,6 @@ static inline void nemoshow_item_update_shape(struct nemoshow *show, struct show
 void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
-	struct showone *parent;
 	SkRect box;
 	char attr[NEMOSHOW_SYMBOL_MAX];
 	double outer;
@@ -639,25 +674,12 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 	if (item->stroke != 0)
 		box.outset(item->stroke_width, item->stroke_width);
 
-	if (item->transform & NEMOSHOW_EXTERN_TRANSFORM) {
-		NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(NEMOSHOW_REF(one, NEMOSHOW_MATRIX_REF)), matrix)->mapRect(&box);
-	} else if (item->transform & NEMOSHOW_INTERN_TRANSFORM) {
-		NEMOSHOW_ITEM_CC(item, matrix)->mapRect(&box);
-	}
+	one->x0 = box.x();
+	one->y0 = box.y();
+	one->x1 = box.x() + box.width();
+	one->y1 = box.y() + box.height();
 
-	for (parent = one->parent; parent != NULL; parent = parent->parent) {
-		if (parent->type == NEMOSHOW_ITEM_TYPE && parent->sub == NEMOSHOW_GROUP_ITEM) {
-			struct showitem *group = NEMOSHOW_ITEM(parent);
-
-			nemoshow_one_update_alone(show, parent);
-
-			if (group->transform & NEMOSHOW_EXTERN_TRANSFORM) {
-				NEMOSHOW_MATRIX_CC(NEMOSHOW_MATRIX(NEMOSHOW_REF(parent, NEMOSHOW_MATRIX_REF)), matrix)->mapRect(&box);
-			} else if (group->transform & NEMOSHOW_INTERN_TRANSFORM) {
-				NEMOSHOW_ITEM_CC(group, matrix)->mapRect(&box);
-			}
-		}
-	}
+	NEMOSHOW_ITEM_CC(item, matrix)->mapRect(&box);
 
 	outer = NEMOSHOW_ANTIALIAS_EPSILON;
 	if (NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF) != NULL)
@@ -696,8 +718,8 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 		nemoshow_item_update_font(show, one);
 	if ((one->dirty & NEMOSHOW_TEXT_DIRTY) != 0)
 		nemoshow_item_update_text(show, one);
-	if ((one->dirty & NEMOSHOW_CHILD_DIRTY) != 0)
-		nemoshow_item_update_child(show, one);
+	if ((one->dirty & NEMOSHOW_PATH_DIRTY) != 0)
+		nemoshow_item_update_path(show, one);
 	if ((one->dirty & NEMOSHOW_MATRIX_DIRTY) != 0)
 		nemoshow_item_update_matrix(show, one);
 
@@ -718,16 +740,15 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 
 void nemoshow_item_set_matrix(struct showone *one, double m[9])
 {
-	SkScalar args[9] = {
-		SkDoubleToScalar(m[0]), SkDoubleToScalar(m[1]), SkDoubleToScalar(m[2]),
-		SkDoubleToScalar(m[3]), SkDoubleToScalar(m[4]), SkDoubleToScalar(m[5]),
-		SkDoubleToScalar(m[6]), SkDoubleToScalar(m[7]), SkDoubleToScalar(m[8])
-	};
 	struct showitem *item = NEMOSHOW_ITEM(one);
+	int i;
 
-	NEMOSHOW_ITEM_CC(item, matrix)->set9(args);
+	for (i = 0; i < 9; i++)
+		item->matrix[i] = m[i];
 
 	item->transform = NEMOSHOW_DIRECT_TRANSFORM;
+
+	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
 }
 
 void nemoshow_item_set_tsr(struct showone *one)
@@ -735,6 +756,8 @@ void nemoshow_item_set_tsr(struct showone *one)
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	item->transform = NEMOSHOW_TSR_TRANSFORM;
+
+	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
 }
 
 void nemoshow_item_set_shader(struct showone *one, struct showone *shader)

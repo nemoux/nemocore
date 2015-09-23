@@ -26,6 +26,8 @@ struct showone *nemoshow_path_create(int type)
 	one->update = nemoshow_path_update;
 	one->destroy = nemoshow_path_destroy;
 
+	one->flags = NEMOSHOW_PATH_DIRTY;
+
 	nemoshow_one_prepare(one);
 
 	nemoobject_set_reserved(&one->object, "x", &path->x0, sizeof(double));

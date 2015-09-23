@@ -11,18 +11,9 @@ typedef struct _showcanvas {
 	SkCanvas *canvas;
 
 	SkRegion *damage;
-
-	struct {
-		SkBitmapDevice *device;
-		SkBitmap *bitmap;
-		SkCanvas *canvas;
-
-		SkRegion *damage;
-	} picker;
 } showcanvas_t;
 
 #define NEMOSHOW_CANVAS_CC(base, name)				(((showcanvas_t *)((base)->cc))->name)
-#define	NEMOSHOW_CANVAS_CP(base, name)				(((showcanvas_t *)((base)->cc))->picker.name)
 
 static inline SkCanvas *nemoshow_canvas_get_skia_canvas(struct showone *one)
 {

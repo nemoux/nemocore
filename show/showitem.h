@@ -32,19 +32,17 @@ typedef enum {
 } NemoShowItemType;
 
 typedef enum {
-	NEMOSHOW_NONE_TRANSFORM = 0,
-	NEMOSHOW_INTERN_TRANSFORM = (1 << 0),
-	NEMOSHOW_EXTERN_TRANSFORM = (1 << 1),
-	NEMOSHOW_CHILDREN_TRANSFORM = (1 << 8) | (1 << 0),
-	NEMOSHOW_DIRECT_TRANSFORM = (1 << 9) | (1 << 0),
-	NEMOSHOW_TSR_TRANSFORM = (1 << 10) | (1 << 0),
+	NEMOSHOW_NONE_TRANSFORM = (0 << 0),
+	NEMOSHOW_EXTERN_TRANSFORM = (1 << 0),
+	NEMOSHOW_INTERN_TRANSFORM = (1 << 1),
+	NEMOSHOW_CHILDREN_TRANSFORM = (1 << 7) | (1 << 1),
+	NEMOSHOW_DIRECT_TRANSFORM = (1 << 8) | (1 << 1),
+	NEMOSHOW_TSR_TRANSFORM = (1 << 9) | (1 << 1),
 	NEMOSHOW_LAST_TRANSFORM
 } NemoShowItemTransform;
 
 struct showitem {
 	struct showone base;
-
-	int32_t event;
 
 	struct showone *canvas;
 
@@ -75,6 +73,8 @@ struct showitem {
 	char *uri;
 
 	int transform;
+
+	double matrix[9];
 
 	double tx, ty;
 	double ro;
@@ -120,20 +120,6 @@ extern void nemoshow_item_path_close(struct showone *one);
 extern void nemoshow_item_path_cmd(struct showone *one, const char *cmd);
 extern void nemoshow_item_path_arc(struct showone *one, double x, double y, double width, double height, double from, double to);
 
-static inline void nemoshow_item_set_event(struct showone *one, int32_t event)
-{
-	struct showitem *item = NEMOSHOW_ITEM(one);
-
-	item->event = event;
-}
-
-static inline int32_t nemoshow_item_get_event(struct showone *one)
-{
-	struct showitem *item = NEMOSHOW_ITEM(one);
-
-	return item->event;
-}
-
 static inline void nemoshow_item_set_canvas(struct showone *one, struct showone *canvas)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
@@ -144,6 +130,13 @@ static inline void nemoshow_item_set_canvas(struct showone *one, struct showone 
 static inline struct showone *nemoshow_item_get_canvas(struct showone *one)
 {
 	return NEMOSHOW_ITEM_AT(one, canvas);
+}
+
+static inline struct showone *nemoshow_item_get_style(struct showone *one)
+{
+	struct showone *style = NEMOSHOW_REF(one, NEMOSHOW_STYLE_REF);
+
+	return style != NULL ? style : one;
 }
 
 static inline void nemoshow_item_set_x(struct showone *one, double x)

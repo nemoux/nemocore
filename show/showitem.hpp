@@ -10,6 +10,8 @@ typedef struct _showitem {
 	SkPaint *stroke;
 
 	SkMatrix *matrix;
+	SkMatrix *inverse;
+	SkMatrix *modelview;
 	SkMatrix *viewbox;
 
 	SkPath *path;

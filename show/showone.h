@@ -72,14 +72,14 @@ typedef enum {
 	NEMOSHOW_NONE_DIRTY = (0 << 0),
 	NEMOSHOW_SHAPE_DIRTY = (1 << 0),
 	NEMOSHOW_STYLE_DIRTY = (1 << 1),
-	NEMOSHOW_CHILD_DIRTY = (1 << 2),
-	NEMOSHOW_TEXT_DIRTY = (1 << 3),
-	NEMOSHOW_FONT_DIRTY = (1 << 4),
+	NEMOSHOW_TEXT_DIRTY = (1 << 2),
+	NEMOSHOW_FONT_DIRTY = (1 << 3),
+	NEMOSHOW_PATH_DIRTY = (1 << 4),
 	NEMOSHOW_MATRIX_DIRTY = (1 << 5),
 	NEMOSHOW_FILTER_DIRTY = (1 << 6),
 	NEMOSHOW_SHADER_DIRTY = (1 << 7),
 	NEMOSHOW_URI_DIRTY = (1 << 8),
-	NEMOSHOW_ALL_DIRTY = NEMOSHOW_SHAPE_DIRTY | NEMOSHOW_STYLE_DIRTY | NEMOSHOW_CHILD_DIRTY | NEMOSHOW_TEXT_DIRTY | NEMOSHOW_FONT_DIRTY | NEMOSHOW_MATRIX_DIRTY | NEMOSHOW_FILTER_DIRTY | NEMOSHOW_SHADER_DIRTY | NEMOSHOW_URI_DIRTY
+	NEMOSHOW_ALL_DIRTY = NEMOSHOW_SHAPE_DIRTY | NEMOSHOW_STYLE_DIRTY | NEMOSHOW_TEXT_DIRTY | NEMOSHOW_FONT_DIRTY | NEMOSHOW_PATH_DIRTY | NEMOSHOW_MATRIX_DIRTY | NEMOSHOW_FILTER_DIRTY | NEMOSHOW_SHADER_DIRTY | NEMOSHOW_URI_DIRTY
 } NemoShowDirtyType;
 
 struct nemoshow;
@@ -102,6 +102,8 @@ struct showone {
 	char id[NEMOSHOW_ID_MAX];
 
 	uint32_t state;
+
+	uint32_t tag;
 
 	struct nemosignal destroy_signal;
 
@@ -126,9 +128,12 @@ struct showone {
 	int nattrs, sattrs;
 
 	uint32_t dirty;
+	uint32_t flags;
 
 	int32_t x, y, width, height;
 	int32_t outer;
+
+	int32_t x0, y0, x1, y1;
 
 	void *userdata;
 };
@@ -164,14 +169,30 @@ static inline void nemoshow_one_dirty(struct showone *one, uint32_t dirty)
 
 	one->dirty |= dirty;
 
-	if (one->parent != NULL)
-		nemoshow_one_dirty(one->parent, NEMOSHOW_CHILD_DIRTY);
+	if (one->flags != 0)
+		nemoshow_one_dirty(one->parent, one->flags);
 
 	if (one->nrefs > 0) {
 		int i;
 
 		for (i = 0; i < one->nrefs; i++)
 			nemoshow_one_dirty(one->refs[i], dirty);
+	}
+}
+
+static inline void nemoshow_one_update(struct nemoshow *show, struct showone *one)
+{
+	if (one->dirty != 0) {
+		int i;
+
+		for (i = 0; i < one->nchildren; i++) {
+			if (one->children[i]->flags != 0)
+				nemoshow_one_update(show, one->children[i]);
+		}
+
+		one->update(show, one);
+
+		one->dirty = 0;
 	}
 }
 
@@ -190,43 +211,14 @@ static inline int nemoshow_one_has_state(struct showone *one, uint32_t state)
 	return one->state & state;
 }
 
-static inline void nemoshow_one_update(struct nemoshow *show, struct showone *one)
+static inline void nemoshow_one_set_tag(struct showone *one, uint32_t tag)
 {
-	if (one->dirty != 0) {
-		int i;
-
-		for (i = 0; i < one->nchildren; i++)
-			nemoshow_one_update(show, one->children[i]);
-	}
-
-	if (one->dirty != 0) {
-		one->update(show, one);
-
-		one->dirty = 0;
-	}
+	one->tag = tag;
 }
 
-static inline void nemoshow_one_update_alone(struct nemoshow *show, struct showone *one)
+static inline uint32_t nemoshow_one_get_tag(struct showone *one)
 {
-	if (one->dirty != 0) {
-		one->update(show, one);
-
-		one->dirty = 0;
-	}
-}
-
-static inline void nemoshow_one_update_with_dirty(struct nemoshow *show, struct showone *one, uint32_t dirty)
-{
-	int i;
-
-	for (i = 0; i < one->nchildren; i++)
-		nemoshow_one_update_with_dirty(show, one->children[i], dirty);
-
-	one->dirty = dirty;
-
-	one->update(show, one);
-
-	one->dirty = 0;
+	return one == NULL ? 0 : one->tag;
 }
 
 static inline void nemoshow_one_setd(struct showone *one, const char *attr, double value)

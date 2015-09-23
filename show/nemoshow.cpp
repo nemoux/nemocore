@@ -578,25 +578,6 @@ void nemoshow_arrange_one(struct nemoshow *show)
 	}
 }
 
-static inline void nemoshow_update_one_in(struct nemoshow *show, struct showone *one)
-{
-	if (one->dirty != 0) {
-		struct showone *child;
-		int i;
-
-		for (i = 0; i < one->nchildren; i++) {
-			child = one->children[i];
-
-			if (child->dirty != 0)
-				nemoshow_update_one_in(show, child);
-		}
-
-		one->update(show, one);
-
-		one->dirty = 0;
-	}
-}
-
 void nemoshow_update_one(struct nemoshow *show)
 {
 	struct showone *one;
@@ -605,7 +586,7 @@ void nemoshow_update_one(struct nemoshow *show)
 	for (i = 0; i < show->nones; i++) {
 		one = show->ones[i];
 
-		nemoshow_update_one_in(show, one);
+		nemoshow_one_update(show, one);
 	}
 }
 
@@ -645,31 +626,6 @@ void nemoshow_render_one(struct nemoshow *show)
 
 			if (canvas->dispatch_render != NULL) {
 				canvas->dispatch_render(show, one);
-			}
-		}
-	}
-}
-
-void nemoshow_validate_one(struct nemoshow *show)
-{
-	struct showone *scene = show->scene;
-	struct showcanvas *canvas;
-	struct showone *one;
-	int i;
-
-	if (scene == NULL)
-		return;
-
-	for (i = 0; i < scene->nchildren; i++) {
-		one = scene->children[i];
-
-		if (one->type == NEMOSHOW_CANVAS_TYPE) {
-			canvas = NEMOSHOW_CANVAS(one);
-
-			if (canvas->needs_redraw_picker != 0) {
-				if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
-					nemoshow_canvas_render_picker(show, one);
-				}
 			}
 		}
 	}
