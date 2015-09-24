@@ -607,7 +607,7 @@ void nemoshow_canvas_pivot(struct showone *one, float px, float py)
 	nemotale_node_pivot(canvas->node, px, py);
 }
 
-static inline struct showone *nemoshow_canvas_pick_children(struct showone *one, float px, float py)
+static inline struct showone *nemoshow_canvas_pick_one_in(struct showone *one, float px, float py)
 {
 	struct showone *child;
 	int i;
@@ -622,7 +622,7 @@ static inline struct showone *nemoshow_canvas_pick_children(struct showone *one,
 			if (child->sub == NEMOSHOW_GROUP_ITEM) {
 				struct showone *pick;
 
-				pick = nemoshow_canvas_pick_children(child, px, py);
+				pick = nemoshow_canvas_pick_one_in(child, px, py);
 				if (pick != NULL)
 					return pick;
 			} else if (child->tag != 0) {
@@ -641,5 +641,5 @@ static inline struct showone *nemoshow_canvas_pick_children(struct showone *one,
 
 struct showone *nemoshow_canvas_pick_one(struct showone *one, int x, int y)
 {
-	return nemoshow_canvas_pick_children(one, x, y);
+	return nemoshow_canvas_pick_one_in(one, x, y);
 }

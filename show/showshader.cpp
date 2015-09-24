@@ -26,7 +26,7 @@ struct showone *nemoshow_stop_create(void)
 	one->update = nemoshow_stop_update;
 	one->destroy = nemoshow_stop_destroy;
 
-	one->flags = NEMOSHOW_SHADER_DIRTY;
+	one->effect = NEMOSHOW_SHADER_DIRTY;
 
 	nemoshow_one_prepare(one);
 

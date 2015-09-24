@@ -382,7 +382,7 @@ static inline void nemoshow_item_update_text(struct nemoshow *show, struct showo
 	}
 }
 
-static inline void nemoshow_item_update_path_children(struct nemoshow *show, struct showitem *item, struct showone *one)
+static inline void nemoshow_item_update_path_in(struct nemoshow *show, struct showitem *item, struct showone *one)
 {
 	struct showone *child;
 	struct showpath *path;
@@ -439,7 +439,7 @@ static inline void nemoshow_item_update_path_children(struct nemoshow *show, str
 
 				NEMOSHOW_ITEM_CC(item, path)->addPath(rpath);
 			} else if (child->sub == NEMOSHOW_SVG_PATH) {
-				nemoshow_item_update_path_children(show, item, child);
+				nemoshow_item_update_path_in(show, item, child);
 			}
 		}
 	}
@@ -451,7 +451,7 @@ static inline void nemoshow_item_update_path(struct nemoshow *show, struct showo
 
 	NEMOSHOW_ITEM_CC(item, path)->reset();
 
-	nemoshow_item_update_path_children(show, item, one);
+	nemoshow_item_update_path_in(show, item, one);
 
 	one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 }

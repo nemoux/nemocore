@@ -128,7 +128,7 @@ struct showone {
 	int nattrs, sattrs;
 
 	uint32_t dirty;
-	uint32_t flags;
+	uint32_t effect;
 
 	int32_t x, y, width, height;
 	int32_t outer;
@@ -169,8 +169,8 @@ static inline void nemoshow_one_dirty(struct showone *one, uint32_t dirty)
 
 	one->dirty |= dirty;
 
-	if (one->flags != 0)
-		nemoshow_one_dirty(one->parent, one->flags);
+	if (one->effect != 0)
+		nemoshow_one_dirty(one->parent, one->effect);
 
 	if (one->nrefs > 0) {
 		int i;
@@ -186,7 +186,7 @@ static inline void nemoshow_one_update(struct nemoshow *show, struct showone *on
 		int i;
 
 		for (i = 0; i < one->nchildren; i++) {
-			if (one->children[i]->flags != 0)
+			if (one->children[i]->effect != 0)
 				nemoshow_one_update(show, one->children[i]);
 		}
 

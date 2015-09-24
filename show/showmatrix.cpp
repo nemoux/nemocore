@@ -29,8 +29,8 @@ struct showone *nemoshow_matrix_create(int type)
 	one->sub = type;
 	one->update = nemoshow_matrix_update;
 	one->destroy = nemoshow_matrix_destroy;
-
-	one->flags = NEMOSHOW_MATRIX_DIRTY;
+	
+	one->effect = NEMOSHOW_MATRIX_DIRTY;
 
 	nemoshow_one_prepare(one);
 
