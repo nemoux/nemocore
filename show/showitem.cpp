@@ -455,11 +455,13 @@ static inline void nemoshow_item_update_path(struct nemoshow *show, struct showo
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	NEMOSHOW_ITEM_CC(item, path)->reset();
+	if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
+		NEMOSHOW_ITEM_CC(item, path)->reset();
 
-	nemoshow_item_update_path_in(show, item, one);
+		nemoshow_item_update_path_in(show, item, one);
 
-	one->dirty |= NEMOSHOW_SHAPE_DIRTY;
+		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
+	}
 }
 
 static inline void nemoshow_item_update_matrix(struct nemoshow *show, struct showone *one)
