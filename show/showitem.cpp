@@ -84,6 +84,9 @@ struct showone *nemoshow_item_create(int type)
 	nemoobject_set_reserved(&one->object, "py", &item->py, sizeof(double));
 	nemoobject_set_reserved(&one->object, "ro", &item->ro, sizeof(double));
 
+	nemoobject_set_reserved(&one->object, "ax", &item->ax, sizeof(double));
+	nemoobject_set_reserved(&one->object, "ay", &item->ay, sizeof(double));
+
 	nemoobject_set_reserved(&one->object, "from", &item->from, sizeof(double));
 	nemoobject_set_reserved(&one->object, "to", &item->to, sizeof(double));
 
@@ -221,6 +224,9 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 	v = nemoobject_gets(&one->object, "uri");
 	if (v != NULL)
 		item->uri = strdup(v);
+
+	if (nemoobject_has(&one->object, "ax") || nemoobject_has(&one->object, "ay"))
+		item->has_anchor = 1;
 
 	return 0;
 }
@@ -619,9 +625,7 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	SkRect box;
-	char attr[NEMOSHOW_SYMBOL_MAX];
 	double outer;
-	int i;
 
 	if (one->sub == NEMOSHOW_RECT_ITEM) {
 		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
@@ -691,15 +695,6 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 	one->width = ceil(box.width());
 	one->height = ceil(box.height());
 	one->outer = outer;
-
-	snprintf(attr, NEMOSHOW_SYMBOL_MAX, "%s_x", one->id);
-	nemoshow_update_symbol(show, attr, one->x);
-	snprintf(attr, NEMOSHOW_SYMBOL_MAX, "%s_y", one->id);
-	nemoshow_update_symbol(show, attr, one->y);
-	snprintf(attr, NEMOSHOW_SYMBOL_MAX, "%s_w", one->id);
-	nemoshow_update_symbol(show, attr, one->width);
-	snprintf(attr, NEMOSHOW_SYMBOL_MAX, "%s_h", one->id);
-	nemoshow_update_symbol(show, attr, one->height);
 }
 
 int nemoshow_item_update(struct nemoshow *show, struct showone *one)
