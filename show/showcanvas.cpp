@@ -427,7 +427,7 @@ static inline void nemoshow_canvas_render_item(SkCanvas *canvas, struct showone 
 
 	if (item->has_anchor != 0) {
 		canvas->save();
-		canvas->translate(-one->width * item->ax, -one->height * item->ay);
+		canvas->translate(-item->width * item->ax, -item->height * item->ay);
 
 		renderers[one->sub](canvas, one);
 

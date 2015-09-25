@@ -633,6 +633,9 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
 	} else if (one->sub == NEMOSHOW_CIRCLE_ITEM) {
 		box = SkRect::MakeXYWH(item->x - item->r, item->y - item->r, item->r * 2, item->r * 2);
+
+		item->width = item->r * 2;
+		item->height = item->r * 2;
 	} else if (one->sub == NEMOSHOW_ARC_ITEM) {
 		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
 	} else if (one->sub == NEMOSHOW_PIE_ITEM) {
@@ -641,6 +644,9 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
 	} else if (one->sub == NEMOSHOW_RING_ITEM) {
 		box = SkRect::MakeXYWH(item->x - item->r, item->y - item->r, item->r * 2, item->r * 2);
+
+		item->width = item->r * 2;
+		item->height = item->r * 2;
 	} else if (one->sub == NEMOSHOW_PATH_ITEM || one->sub == NEMOSHOW_PATHGROUP_ITEM) {
 		box = NEMOSHOW_ITEM_CC(item, path)->getBounds();
 	} else if (one->sub == NEMOSHOW_TEXT_ITEM) {
@@ -665,6 +671,9 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 
 			box.outset(item->fontsize, item->fontsize);
 		}
+
+		item->width = box.width();
+		item->height = box.height();
 	} else if (one->sub == NEMOSHOW_BITMAP_ITEM) {
 		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
 	} else if (one->sub == NEMOSHOW_IMAGE_ITEM) {
@@ -674,6 +683,13 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 	} else {
 		box = SkRect::MakeXYWH(0, 0, 0, 0);
 	}
+
+	if (item->has_anchor != 0)
+		box.setXYWH(
+				box.x() - box.width() * item->ax,
+				box.y() - box.height() * item->ay,
+				box.width(),
+				box.height());
 
 	if (item->stroke != 0)
 		box.outset(item->stroke_width, item->stroke_width);
