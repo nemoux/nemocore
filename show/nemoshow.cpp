@@ -580,13 +580,28 @@ void nemoshow_arrange_one(struct nemoshow *show)
 
 void nemoshow_update_one(struct nemoshow *show)
 {
+	struct showone *scene = show->scene;
 	struct showone *one;
-	int i;
+	int i, j;
+
+	if (scene == NULL)
+		return;
 
 	for (i = 0; i < show->nones; i++) {
 		one = show->ones[i];
 
-		nemoshow_one_update(show, one);
+		if (one->type != NEMOSHOW_ITEM_TYPE)
+			nemoshow_one_update(show, one);
+	}
+
+	for (i = 0; i < scene->nchildren; i++) {
+		one = scene->children[i];
+
+		if (one->type == NEMOSHOW_CANVAS_TYPE) {
+			for (j = 0; j < one->nchildren; j++) {
+				nemoshow_one_update_preorder(show, one->children[j]);
+			}
+		}
 	}
 }
 
@@ -595,7 +610,7 @@ void nemoshow_render_one(struct nemoshow *show)
 	struct showone *scene = show->scene;
 	struct showcanvas *canvas;
 	struct showone *one;
-	int i;
+	int i, j;
 
 	if (scene == NULL)
 		return;
@@ -603,7 +618,8 @@ void nemoshow_render_one(struct nemoshow *show)
 	for (i = 0; i < show->nones; i++) {
 		one = show->ones[i];
 
-		nemoshow_one_update(show, one);
+		if (one->type != NEMOSHOW_ITEM_TYPE)
+			nemoshow_one_update(show, one);
 	}
 
 	for (i = 0; i < scene->nchildren; i++) {
@@ -611,6 +627,10 @@ void nemoshow_render_one(struct nemoshow *show)
 
 		if (one->type == NEMOSHOW_CANVAS_TYPE) {
 			canvas = NEMOSHOW_CANVAS(one);
+
+			for (j = 0; j < one->nchildren; j++) {
+				nemoshow_one_update_preorder(show, one->children[j]);
+			}
 
 			if (canvas->needs_redraw != 0) {
 				if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {

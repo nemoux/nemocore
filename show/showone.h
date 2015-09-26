@@ -164,7 +164,7 @@ extern void nemoshow_one_dump(struct showone *one, FILE *out);
 
 static inline void nemoshow_one_dirty(struct showone *one, uint32_t dirty)
 {
-	if ((one->dirty & dirty) == dirty)
+	if (dirty == 0x0 || (one->dirty & dirty) == dirty)
 		return;
 
 	one->dirty |= dirty;
@@ -193,6 +193,26 @@ static inline void nemoshow_one_update(struct nemoshow *show, struct showone *on
 		one->update(show, one);
 
 		one->dirty = 0;
+	}
+}
+
+static inline void nemoshow_one_update_preorder(struct nemoshow *show, struct showone *one)
+{
+	int i;
+
+	if (one->dirty != 0) {
+		for (i = 0; i < one->nchildren; i++) {
+			if (one->children[i]->effect != 0)
+				nemoshow_one_update(show, one->children[i]);
+		}
+
+		one->update(show, one);
+
+		one->dirty = 0;
+	}
+
+	for (i = 0; i < one->nchildren; i++) {
+		nemoshow_one_update_preorder(show, one->children[i]);
 	}
 }
 

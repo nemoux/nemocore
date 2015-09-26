@@ -35,9 +35,9 @@ NEMO_BEGIN_EXTERN_C
 
 #define	NEMOBOX_REMOVE(a, n, i)	\
 	if (i < n - 1) {	\
-		int j;	\
-		for (j = i; j < n - 1; j++) {	\
-			a[j] = a[j + 1];	\
+		int _i;	\
+		for (_i = i; _i < n - 1; _i++) {	\
+			a[_i] = a[_i + 1];	\
 		}	\
 	}	\
 	n--
@@ -48,9 +48,9 @@ NEMO_BEGIN_EXTERN_C
 		s = s * 2;	\
 	}	\
 	if (i < n) {	\
-		int j;	\
-		for (j = n - 1; j >= i; j--) {	\
-			a[j + 1] = a[j];	\
+		int _i;	\
+		for (_i = n - 1; _i >= i; _i--) {	\
+			a[_i + 1] = a[_i];	\
 		}	\
 	}	\
 	a[i] = v;	\

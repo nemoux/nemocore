@@ -544,8 +544,6 @@ static inline void nemoshow_item_update_matrix(struct nemoshow *show, struct sho
 	if (ref != NULL) {
 		struct showitem *group = NEMOSHOW_ITEM(ref);
 
-		nemoshow_one_update(show, ref);
-
 		NEMOSHOW_ITEM_CC(item, matrix)->postConcat(
 				*NEMOSHOW_ITEM_CC(group, matrix));
 	}

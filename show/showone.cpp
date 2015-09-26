@@ -106,20 +106,12 @@ void nemoshow_one_destroy(struct showone *one)
 
 void nemoshow_one_destroy_with_children(struct showone *one)
 {
-	int i;
-
 	if (one->state & NEMOSHOW_RECYCLE_STATE)
 		return;
 
-	for (i = 0; i < one->nchildren; i++) {
-		nemoshow_one_unreference_one(one->children[i], one);
-
-		one->children[i]->parent = NULL;
-
-		nemoshow_one_destroy_with_children(one->children[i]);
+	while (one->nchildren > 0) {
+		nemoshow_one_destroy_with_children(one->children[0]);
 	}
-
-	one->nchildren = 0;
 
 	if (one->destroy != NULL) {
 		one->destroy(one);
@@ -290,7 +282,7 @@ void nemoshow_one_dump(struct showone *one, FILE *out)
 	const char *name;
 	int i, count;
 
-	fprintf(out, "[%s]\n", one->id);
+	fprintf(out, "[%s] %u\n", one->id, one->tag);
 
 	count = nemoobject_get_count(&one->object);
 
@@ -312,5 +304,9 @@ void nemoshow_one_dump(struct showone *one, FILE *out)
 		attr = one->attrs[i];
 
 		fprintf(out, "  %s = <%s>\n", attr->name, attr->text);
+	}
+
+	for (i = 0; i < one->nchildren; i++) {
+		nemoshow_one_dump(one->children[i], out);
 	}
 }
