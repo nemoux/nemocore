@@ -25,7 +25,7 @@
 #include <nemobox.h>
 #include <nemomisc.h>
 
-#define	NEMOSHOW_ANTIALIAS_EPSILON			(3.0f)
+#define	NEMOSHOW_ANTIALIAS_EPSILON			(5.0f)
 
 struct showone *nemoshow_item_create(int type)
 {
