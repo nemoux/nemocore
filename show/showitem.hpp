@@ -13,6 +13,7 @@ typedef struct _showitem {
 	SkMatrix *inverse;
 	SkMatrix *modelview;
 	SkMatrix *viewbox;
+	bool has_inverse;
 
 	SkPath *path;
 	SkBitmap *bitmap;

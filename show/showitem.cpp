@@ -550,8 +550,9 @@ static inline void nemoshow_item_update_matrix(struct nemoshow *show, struct sho
 				*NEMOSHOW_ITEM_CC(group, matrix));
 	}
 
-	NEMOSHOW_ITEM_CC(item, matrix)->invert(
-			NEMOSHOW_ITEM_CC(item, inverse));
+	NEMOSHOW_ITEM_CC(item, has_inverse) =
+		NEMOSHOW_ITEM_CC(item, matrix)->invert(
+				NEMOSHOW_ITEM_CC(item, inverse));
 
 	one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 }
