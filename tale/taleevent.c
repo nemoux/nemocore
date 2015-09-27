@@ -12,11 +12,8 @@
 #include <taleevent.h>
 #include <nemomisc.h>
 
-#define	NEMOTALE_CORRECT_EVENT_COORDS(t, x, y)		\
-	if ((t)->viewport.enable != 0) {	\
-		x *= (t)->viewport.rx;	\
-		y *= (t)->viewport.ry;	\
-	}
+#define	NEMOTALE_CORRECT_EVENT_COORDS(t, x, y)	\
+	x *= (t)->viewport.rx; y *= (t)->viewport.ry;
 
 static void taletap_handle_tale_destroy(struct nemolistener *listener, void *data)
 {

@@ -23,9 +23,20 @@ int nemotale_prepare(struct nemotale *tale)
 
 	nemomatrix_init_identity(&tale->transform.matrix);
 
+	tale->viewport.sx = 1.0f;
+	tale->viewport.sy = 1.0f;
+	tale->viewport.rx = 1.0f;
+	tale->viewport.ry = 1.0f;
+
 	tale->nodes = (struct talenode **)malloc(sizeof(struct talenode *) * 8);
 	tale->nnodes = 0;
 	tale->snodes = 8;
+
+#ifdef NEMOUX_WITH_TAP_MINIMUM_DISTANCE
+	tale->tap_minimum_distance = NEMOUX_WITH_TAP_MINIMUM_DISTANCE;
+#else
+	tale->tap_minimum_distance = 0;
+#endif
 
 	tale->long_press_duration = 1500;
 	tale->long_press_distance = 50;

@@ -133,7 +133,10 @@ static inline struct taletap *nemotale_touch_get_tap(struct nemotale *tale, uint
 static inline int nemotale_event_update_taps(struct nemotale *tale, struct taleevent *event, uint32_t type)
 {
 	struct taletap *tap;
+	double dx, dy;
+	double dist;
 	int count = 0;
+	int i;
 
 	if (type & NEMOTALE_POINTER_EVENT) {
 		nemolist_for_each(tap, &tale->ptap_list, link) {
@@ -141,17 +144,34 @@ static inline int nemotale_event_update_taps(struct nemotale *tale, struct talee
 		}
 	} else if (type & NEMOTALE_TOUCH_EVENT) {
 		nemolist_for_each(tap, &tale->tap_list, link) {
-			event->taps[count++] = tap;
+			if (tale->tap_minimum_distance == 0) {
+				event->taps[count++] = tap;
+			} else {
+				for (i = 0; i < count; i++) {
+					dx = (tap->x - event->taps[i]->x) * tale->viewport.sx;
+					dy = (tap->y - event->taps[i]->y) * tale->viewport.sy;
+					dist = sqrtf(dx * dx + dy * dy);
+
+					if (dist < tale->tap_minimum_distance)
+						break;
+				}
+
+				if (i >= count)
+					event->taps[count++] = tap;
+			}
 		}
 	}
 
-	return event->tapcount = count;
+	return (event->tapcount = count);
 }
 
 static inline int nemotale_event_update_node_taps(struct nemotale *tale, struct talenode *node, struct taleevent *event, uint32_t type)
 {
 	struct taletap *tap;
+	double dx, dy;
+	double dist;
 	int count = 0;
+	int i;
 
 	if (type & NEMOTALE_POINTER_EVENT) {
 		nemolist_for_each(tap, &tale->ptap_list, link) {
@@ -162,12 +182,26 @@ static inline int nemotale_event_update_node_taps(struct nemotale *tale, struct 
 	} else if (type & NEMOTALE_TOUCH_EVENT) {
 		nemolist_for_each(tap, &tale->tap_list, link) {
 			if (tap->node == node) {
-				event->taps[count++] = tap;
+				if (tale->tap_minimum_distance == 0) {
+					event->taps[count++] = tap;
+				} else {
+					for (i = 0; i < count; i++) {
+						dx = (tap->x - event->taps[i]->x) * tale->viewport.sx;
+						dy = (tap->y - event->taps[i]->y) * tale->viewport.sy;
+						dist = sqrtf(dx * dx + dy * dy);
+
+						if (dist < tale->tap_minimum_distance)
+							break;
+					}
+
+					if (i >= count)
+						event->taps[count++] = tap;
+				}
 			}
 		}
 	}
 
-	return event->tapcount = count;
+	return (event->tapcount = count);
 }
 
 static inline void nemotale_event_transform_to_viewport(struct nemotale *tale, float x, float y, float *sx, float *sy)

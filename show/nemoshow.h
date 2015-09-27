@@ -115,6 +115,11 @@ static inline void nemoshow_set_tale(struct nemoshow *show, struct nemotale *tal
 	show->tale = tale;
 }
 
+static inline struct nemotale *nemoshow_get_tale(struct nemoshow *show)
+{
+	return show->tale;
+}
+
 static inline uint32_t nemoshow_get_next_serial(struct nemoshow *show)
 {
 	return show->serial++;

@@ -251,8 +251,8 @@ int nemoshell_move_canvas_by_touchpoint(struct touchpoint *tp, struct shellbin *
 		return -1;
 	memset(move, 0, sizeof(struct shellgrab_move));
 
-	move->dx = bin->view->geometry.x - tp->grab_x;
-	move->dy = bin->view->geometry.y - tp->grab_y;
+	move->dx = bin->view->geometry.x - tp->x;
+	move->dy = bin->view->geometry.y - tp->y;
 
 	move->filter = pitchfilter_create(20.0f, 30);
 
@@ -494,8 +494,8 @@ int nemoshell_move_actor_by_touchpoint(struct touchpoint *tp, struct nemoactor *
 		return -1;
 	memset(move, 0, sizeof(struct actorgrab_move));
 
-	move->dx = actor->view->geometry.x - tp->grab_x;
-	move->dy = actor->view->geometry.y - tp->grab_y;
+	move->dx = actor->view->geometry.x - tp->x;
+	move->dy = actor->view->geometry.y - tp->y;
 
 	move->filter = pitchfilter_create(20.0f, 30);
 
