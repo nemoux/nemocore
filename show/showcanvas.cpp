@@ -441,32 +441,37 @@ static inline void nemoshow_canvas_render_one(SkCanvas *canvas, struct showone *
 {
 	if (one->type == NEMOSHOW_ITEM_TYPE) {
 		struct showitem *item = NEMOSHOW_ITEM(one);
+		struct showitem *clip = NEMOSHOW_REF(one, NEMOSHOW_CLIP_REF) == NULL ? NULL : NEMOSHOW_ITEM(NEMOSHOW_REF(one, NEMOSHOW_CLIP_REF));
+		int has_context = item->transform != 0 || clip != NULL;
 
-		if (item->transform != 0 && NEMOSHOW_REF(one, NEMOSHOW_CLIP_REF) != NULL) {
+		if (has_context != 0)
 			canvas->save();
-			canvas->concat(*NEMOSHOW_ITEM_CC(item, modelview));
-			canvas->clipPath(*NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(NEMOSHOW_REF(one, NEMOSHOW_CLIP_REF)), path));
 
-			nemoshow_canvas_render_item(canvas, one);
-
-			canvas->restore();
-		} else if (item->transform != 0) {
-			canvas->save();
+		if (item->transform != 0)
 			canvas->concat(*NEMOSHOW_ITEM_CC(item, modelview));
 
-			nemoshow_canvas_render_item(canvas, one);
+		if (clip != NULL) {
+			if (clip->transform == 0) {
+				canvas->clipPath(*NEMOSHOW_ITEM_CC(clip, path));
+			} else {
+				SkMatrix matrix = canvas->getTotalMatrix();
 
-			canvas->restore();
-		} else if (NEMOSHOW_REF(one, NEMOSHOW_CLIP_REF) != NULL) {
-			canvas->save();
-			canvas->clipPath(*NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(NEMOSHOW_REF(one, NEMOSHOW_CLIP_REF)), path));
+				canvas->resetMatrix();
+				canvas->scale(
+						nemoshow_canvas_get_viewport_sx(item->canvas),
+						nemoshow_canvas_get_viewport_sy(item->canvas));
+				canvas->concat(*NEMOSHOW_ITEM_CC(clip, modelview));
 
-			nemoshow_canvas_render_item(canvas, one);
+				canvas->clipPath(*NEMOSHOW_ITEM_CC(clip, path));
 
-			canvas->restore();
-		} else {
-			nemoshow_canvas_render_item(canvas, one);
+				canvas->setMatrix(matrix);
+			}
 		}
+
+		nemoshow_canvas_render_item(canvas, one);
+
+		if (has_context != 0)
+			canvas->restore();
 	}
 }
 
