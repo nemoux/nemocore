@@ -627,11 +627,14 @@ static inline struct showone *nemoshow_canvas_pick_one_in(struct showone *one, f
 					return pick;
 			} else if (child->tag != 0) {
 				struct showitem *item = NEMOSHOW_ITEM(child);
-				SkPoint p = NEMOSHOW_ITEM_CC(item, inverse)->mapXY(px, py);
 
-				if (child->x0 < p.x() && p.x() < child->x1 &&
-						child->y0 < p.y() && p.y() < child->y1)
-					return child;
+				if (NEMOSHOW_ITEM_CC(item, has_inverse)) {
+					SkPoint p = NEMOSHOW_ITEM_CC(item, inverse)->mapXY(px, py);
+
+					if (child->x0 < p.x() && p.x() < child->x1 &&
+							child->y0 < p.y() && p.y() < child->y1)
+						return child;
+				}
 			}
 		}
 	}
