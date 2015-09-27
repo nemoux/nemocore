@@ -77,6 +77,8 @@ static inline int nemomote_get_count(struct nemomote *mote)
 #define NEMOMOTE_LIFETIME(m, i)				((m)->buffers[i * 12 + 9])
 #define NEMOMOTE_SLEEPTIME(m, i)			((m)->buffers[i * 12 + 10])
 
+#define	NEMOMOTE_TYPE(m, i)						((m)->types[i])
+
 #ifdef __cplusplus
 }
 #endif

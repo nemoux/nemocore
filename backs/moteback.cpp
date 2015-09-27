@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <time.h>
 #include <getopt.h>
 
 #define	SK_RELEASE			1
@@ -70,16 +71,19 @@ struct moteback {
 	double secs;
 
 	struct nemotimer *timer;
+
+	int type;
 };
 
-static void moteback_prepare_text(struct moteback *mote, const char *text)
+static void moteback_prepare_text(struct moteback *mote, const char *text, int ntext)
 {
 	double x, y;
 	int size = 16;
+	int fontsize = 16;
 	int i, j, p;
 
 	SkBitmap bitmap;
-	bitmap.allocPixels(SkImageInfo::Make(size, size, kN32_SkColorType, kPremul_SkAlphaType));
+	bitmap.allocPixels(SkImageInfo::Make(size * ntext, size, kN32_SkColorType, kPremul_SkAlphaType));
 
 	SkBitmapDevice device(bitmap);
 	SkCanvas canvas(&device);
@@ -91,25 +95,37 @@ static void moteback_prepare_text(struct moteback *mote, const char *text)
 	paint.setStyle(SkPaint::kFill_Style);
 	paint.setColor(SK_ColorWHITE);
 	paint.setTypeface(SkTypeface::CreateFromFile("/usr/share/fonts/ttf/LiberationMono-Regular.ttf", 0));
-	paint.setTextSize(size);
+	paint.setTextSize(fontsize);
 
 	SkPaint::FontMetrics metrics;
 	paint.getFontMetrics(&metrics, 0);
 
 	canvas.drawText(
-			text, strlen(text),
+			text, ntext,
 			SkIntToScalar(0), SkIntToScalar(-metrics.fAscent),
 			paint);
 
-	x = random_get_double(mote->width * 0.1f, mote->width * 0.8f);
-	y = random_get_double(mote->height * 0.1f, mote->height * 0.8f);
+	SkScalar widths[ntext];
+	double width = 0.0f;
+	int count;
+
+	count = paint.getTextWidths(text, ntext, widths, NULL);
+
+	for (i = 0; i < count; i++) {
+		width += ceil(widths[i]);
+	}
+
+	x = random_get_double(0.0f, mote->width - width * 16.0f);
+	y = random_get_double(0.0f, mote->height - size * 16.0f);
 
 	nemomote_tween_clear(&mote->tween);
 
 	for (i = 0; i < size; i++) {
-		for (j = 0; j < size; j++) {
+		for (j = 0; j < size * ntext; j++) {
 			if (bitmap.getColor(j, i) != SK_ColorTRANSPARENT) {
 				p = nemomote_get_one_by_type(mote->mote, 1);
+				if (p < 0)
+					goto out;
 
 				nemomote_tween_add(&mote->tween, p, x + j * 16, y + i * 16);
 
@@ -118,7 +134,8 @@ static void moteback_prepare_text(struct moteback *mote, const char *text)
 		}
 	}
 
-	nemomote_tween_ready(mote->mote, &mote->tween, 3.0f, NEMOEASE_QUADRATIC_INOUT_TYPE);
+out:
+	nemomote_tween_ready(mote->mote, &mote->tween, 5.0f, NEMOEASE_QUADRATIC_INOUT_TYPE);
 }
 
 static void moteback_update_one(struct moteback *mote, double secs)
@@ -128,8 +145,8 @@ static void moteback_update_one(struct moteback *mote, double secs)
 	nemomote_speedlimit_update(mote->mote, 1, secs, 0.0f, 300.0f);
 
 	if (nemomote_tween_update(mote->mote, &mote->tween, secs) != 0) {
-		nemomote_explosion_update(mote->mote, 3, secs, -500.0f, 500.0f, -500.0f, 500.0f);
-		nemomote_sleeptime_set(mote->mote, 3, 1.0f, 5.0f);
+		nemomote_explosion_update(mote->mote, 3, secs, -30.0f, 30.0f, -30.0f, 30.0f);
+		nemomote_sleeptime_set(mote->mote, 3, 15.0f, 5.0f);
 		nemomote_type_set(mote->mote, 3, 1);
 	}
 
@@ -177,24 +194,27 @@ static void moteback_render_one(struct moteback *mote, pixman_image_t *image)
 
 	canvas.clear(SK_ColorTRANSPARENT);
 
-	SkMaskFilter *filter = SkBlurMaskFilter::Create(
+	SkMaskFilter *dfilter = SkBlurMaskFilter::Create(
 			kSolid_SkBlurStyle,
 			SkBlurMask::ConvertRadiusToSigma(5.0f),
 			SkBlurMaskFilter::kHighQuality_BlurFlag);
 
-	SkPaint fill;
-	fill.setAntiAlias(true);
-	fill.setStyle(SkPaint::kFill_Style);
-	fill.setMaskFilter(filter);
+	SkMaskFilter *sfilter = SkBlurMaskFilter::Create(
+			kOuter_SkBlurStyle,
+			SkBlurMask::ConvertRadiusToSigma(5.0f),
+			SkBlurMaskFilter::kHighQuality_BlurFlag);
+
+	SkPaint dfill;
+	dfill.setAntiAlias(true);
+	dfill.setStyle(SkPaint::kFill_Style);
+	dfill.setMaskFilter(dfilter);
+
+	SkPaint sfill;
+	sfill.setAntiAlias(true);
+	sfill.setStyle(SkPaint::kFill_Style);
+	sfill.setMaskFilter(sfilter);
 
 	for (i = 0; i < nemomote_get_count(mote->mote); i++) {
-		fill.setColor(
-				SkColorSetARGB(
-					NEMOMOTE_COLOR_A(mote->mote, i) * 255.0f,
-					NEMOMOTE_COLOR_R(mote->mote, i) * 255.0f,
-					NEMOMOTE_COLOR_G(mote->mote, i) * 255.0f,
-					NEMOMOTE_COLOR_B(mote->mote, i) * 255.0f));
-
 		canvas.save();
 
 		canvas.clipRect(
@@ -204,11 +224,33 @@ static void moteback_render_one(struct moteback *mote, pixman_image_t *image)
 					(NEMOMOTE_MASS(mote->mote, i) + 8.0f) * 2.0f,
 					(NEMOMOTE_MASS(mote->mote, i) + 8.0f) * 2.0f));
 
-		canvas.drawCircle(
-				NEMOMOTE_POSITION_X(mote->mote, i),
-				NEMOMOTE_POSITION_Y(mote->mote, i),
-				NEMOMOTE_MASS(mote->mote, i),
-				fill);
+		if (NEMOMOTE_TYPE(mote->mote, i) != 2) {
+			dfill.setColor(
+					SkColorSetARGB(
+						NEMOMOTE_COLOR_A(mote->mote, i) * 255.0f,
+						NEMOMOTE_COLOR_R(mote->mote, i) * 255.0f,
+						NEMOMOTE_COLOR_G(mote->mote, i) * 255.0f,
+						NEMOMOTE_COLOR_B(mote->mote, i) * 255.0f));
+
+			canvas.drawCircle(
+					NEMOMOTE_POSITION_X(mote->mote, i),
+					NEMOMOTE_POSITION_Y(mote->mote, i),
+					NEMOMOTE_MASS(mote->mote, i),
+					dfill);
+		} else {
+			sfill.setColor(
+					SkColorSetARGB(
+						NEMOMOTE_COLOR_A(mote->mote, i) * 255.0f,
+						NEMOMOTE_COLOR_R(mote->mote, i) * 255.0f,
+						NEMOMOTE_COLOR_G(mote->mote, i) * 255.0f,
+						NEMOMOTE_COLOR_B(mote->mote, i) * 255.0f));
+
+			canvas.drawCircle(
+					NEMOMOTE_POSITION_X(mote->mote, i),
+					NEMOMOTE_POSITION_Y(mote->mote, i),
+					NEMOMOTE_MASS(mote->mote, i),
+					sfill);
+		}
 
 		canvas.restore();
 	}
@@ -243,11 +285,27 @@ static void moteback_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 static void moteback_dispatch_timer_event(struct nemotimer *timer, void *data)
 {
 	struct moteback *mote = (struct moteback *)data;
-	char text[8] = { (char)(random_get_int(0, 9) + '0'), '\0' };
+	char msg[64];
 
-	moteback_prepare_text(mote, text);
+	if (mote->type == 0) {
+		time_t tt;
+		struct tm *tm;
 
-	nemotimer_set_timeout(mote->timer, 3000);
+		time(&tt);
+		tm = localtime(&tt);
+
+		strftime(msg, sizeof(msg), "%I:%M-%S", tm);
+
+		moteback_prepare_text(mote, msg, strlen(msg));
+	} else {
+		strcpy(msg, "NEMO-UX");
+
+		moteback_prepare_text(mote, msg, strlen(msg));
+	}
+
+	mote->type = (mote->type + 1) % 2;
+
+	nemotimer_set_timeout(mote->timer, 30 * 1000);
 }
 
 static void moteback_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
@@ -309,12 +367,12 @@ int main(int argc, char *argv[])
 	nemomote_random_set_property(&mote->random, 5.0f, 1.0f);
 	nemozone_set_cube(&mote->box, mote->width * 0.0f, mote->width * 1.0f, mote->height * 0.0f, mote->height * 1.0f);
 	nemozone_set_disc(&mote->disc, mote->width * 0.5f, mote->height * 0.5f, mote->width * 0.2f);
-	nemozone_set_disc(&mote->speed, 0.0f, 0.0f, 50.0f);
+	nemozone_set_disc(&mote->speed, 0.0f, 0.0f, 30.0f);
 
 	nemomote_blast_emit(mote->mote, 500);
 	nemomote_position_update(mote->mote, &mote->box);
 	nemomote_velocity_update(mote->mote, &mote->speed);
-	nemomote_color_update(mote->mote, 0.0f, 0.0f, 0.7f, 0.3f, 0.7f, 0.3f, 0.7f, 0.3f);
+	nemomote_color_update(mote->mote, 0.0f, 0.0f, 0.5f, 0.5f, 0.5f, 0.5f, 0.7f, 0.3f);
 	nemomote_mass_update(mote->mote, 8.0f, 3.0f);
 	nemomote_type_update(mote->mote, 1);
 	nemomote_commit(mote->mote);
@@ -322,12 +380,12 @@ int main(int argc, char *argv[])
 	nemomote_blast_emit(mote->mote, 50);
 	nemomote_position_update(mote->mote, &mote->box);
 	nemomote_velocity_update(mote->mote, &mote->speed);
-	nemomote_color_update(mote->mote, 0.0f, 0.0f, 1.0f, 0.8f, 1.0f, 0.8f, 1.0f, 0.7f);
+	nemomote_color_update(mote->mote, 0.0f, 0.0f, 0.8f, 0.8f, 0.8f, 0.8f, 1.0f, 0.7f);
 	nemomote_mass_update(mote->mote, 15.0f, 5.0f);
 	nemomote_type_update(mote->mote, 2);
 	nemomote_commit(mote->mote);
 
-	nemomote_tween_prepare(&mote->tween, 16 * 16);
+	nemomote_tween_prepare(&mote->tween, 500);
 
 	mote->tool = tool = nemotool_create();
 	if (tool == NULL)
@@ -370,7 +428,7 @@ int main(int argc, char *argv[])
 	mote->timer = nemotimer_create(tool);
 	nemotimer_set_callback(mote->timer, moteback_dispatch_timer_event);
 	nemotimer_set_userdata(mote->timer, mote);
-	nemotimer_set_timeout(mote->timer, 3000);
+	nemotimer_set_timeout(mote->timer, 5000);
 
 	nemocanvas_dispatch_frame(NTEGL_CANVAS(canvas));
 

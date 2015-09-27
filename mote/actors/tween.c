@@ -52,6 +52,9 @@ void nemomote_tween_clear(struct motetween *tween)
 
 void nemomote_tween_add(struct motetween *tween, int p, double x, double y)
 {
+	if (tween->nparts >= tween->sparts)
+		return;
+
 	tween->parts[tween->nparts] = p;
 	tween->dst[tween->nparts * 2 + 0] = x;
 	tween->dst[tween->nparts * 2 + 1] = y;
