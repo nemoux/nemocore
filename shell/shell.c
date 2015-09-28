@@ -328,6 +328,8 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 
 		bin->last_width = canvas->base.width;
 		bin->last_height = canvas->base.height;
+
+		wl_signal_emit(&bin->resize_signal, bin);
 	}
 }
 
@@ -370,6 +372,7 @@ struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas
 	wl_signal_init(&bin->destroy_signal);
 	wl_signal_init(&bin->ungrab_signal);
 	wl_signal_init(&bin->change_signal);
+	wl_signal_init(&bin->resize_signal);
 
 	wl_list_init(&bin->children_list);
 	wl_list_init(&bin->children_link);

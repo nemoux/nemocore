@@ -102,6 +102,7 @@ struct shellbin {
 
 	struct wl_signal ungrab_signal;
 	struct wl_signal change_signal;
+	struct wl_signal resize_signal;
 
 	int type;
 
