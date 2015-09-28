@@ -694,21 +694,6 @@ void nemoview_above_layer(struct nemoview *view, struct nemoview *above)
 	view->layer = above->layer;
 }
 
-void nemoview_set_overlay(struct nemoview *view, double r, double g, double b, double a)
-{
-	view->overlay.r = r;
-	view->overlay.g = g;
-	view->overlay.b = b;
-	view->overlay.a = a;
-
-	if (r < 1e-6 && g < 1e-6 && b < 1e-6 && a < 1e-6)
-		view->overlay.enable = 0;
-	else
-		view->overlay.enable = 1;
-
-	nemoview_damage_below(view);
-}
-
 int nemoview_get_trapezoids(struct nemoview *view, int32_t x, int32_t y, int32_t width, int32_t height, pixman_trapezoid_t *traps)
 {
 	float s[4][2] = {

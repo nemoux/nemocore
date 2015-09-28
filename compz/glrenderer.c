@@ -312,22 +312,6 @@ static void glrenderer_draw_view(struct glrenderer *renderer, struct nemoview *v
 		glrenderer_draw_region(renderer, view, &repaint, &blend);
 	}
 
-	if (view->overlay.enable != 0) {
-		pixman_region32_init_rect(&blend, 0, 0, view->content->width, view->content->height);
-
-		glcontent->colors[0] = view->overlay.r;
-		glcontent->colors[1] = view->overlay.g;
-		glcontent->colors[2] = view->overlay.b;
-		glcontent->colors[3] = view->overlay.a;
-
-		glrenderer_use_shader(renderer, &renderer->solid_shader);
-		glrenderer_use_uniforms(&renderer->solid_shader, view, screen);
-
-		glEnable(GL_BLEND);
-
-		glrenderer_draw_region(renderer, view, &repaint, &blend);
-	}
-
 	pixman_region32_fini(&blend);
 
 out:

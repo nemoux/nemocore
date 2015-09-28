@@ -109,13 +109,7 @@ struct nemoview {
 
 		struct nemomatrix matrix, inverse;
 	} transform;
-
-	struct {
-		int enable;
-
-		double r, g, b, a;
-	} overlay;
-
+	
 	void *data;
 };
 
@@ -152,8 +146,6 @@ extern void nemoview_attach_layer(struct nemoview *view, struct nemolayer *layer
 extern void nemoview_detach_layer(struct nemoview *view);
 extern void nemoview_update_layer(struct nemoview *view);
 extern void nemoview_above_layer(struct nemoview *view, struct nemoview *above);
-
-extern void nemoview_set_overlay(struct nemoview *view, double r, double g, double b, double a);
 
 extern int nemoview_get_trapezoids(struct nemoview *view, int32_t x, int32_t y, int32_t width, int32_t height, pixman_trapezoid_t *traps);
 

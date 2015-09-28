@@ -30,7 +30,6 @@ add_library(nemoshell SHARED
 	move.c
 	resize.c
 	pick.c
-	catch.c
 	inputpanel.c
 	waylandshell.c
 	xdgshell.c
@@ -53,7 +52,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/shell/grab.h
 	${CMAKE_SOURCE_DIR}/shell/move.h
 	${CMAKE_SOURCE_DIR}/shell/pick.h
-	${CMAKE_SOURCE_DIR}/shell/catch.h
+	${CMAKE_SOURCE_DIR}/shell/nemoshell.h
 	)
 
 configure_file(

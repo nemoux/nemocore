@@ -186,55 +186,6 @@ static void pixmanrenderer_draw_region(struct pixmanrenderer *renderer, struct n
 	pixman_region32_fini(&final_region);
 }
 
-static void pixmanrenderer_draw_overlay(struct pixmanrenderer *renderer, struct nemoview *view, struct nemoscreen *screen, pixman_region32_t *repaint)
-{
-	struct pixmansurface *surface = (struct pixmansurface *)screen->pcontext;
-	pixman_region32_t final_region;
-	pixman_trapezoid_t traps[4];
-	pixman_color_t color;
-	pixman_image_t *overlay;
-	int ntraps;
-
-	pixman_region32_init(&final_region);
-	pixman_region32_copy(&final_region, repaint);
-	pixman_region32_translate(&final_region, -screen->x, -screen->y);
-	wayland_transform_region(screen->width, screen->height, WL_OUTPUT_TRANSFORM_NORMAL, 1, &final_region, &final_region);
-
-	pixman_image_set_clip_region32(surface->shadow_image, &final_region);
-
-	color.red = view->overlay.r * 0xffff;
-	color.green = view->overlay.g * 0xffff;
-	color.blue = view->overlay.b * 0xffff;
-	color.alpha = view->overlay.a * 0xffff;
-
-	overlay = pixman_image_create_solid_fill(&color);
-
-	if (view->transform.enable != 0 && view->geometry.r != 0) {
-		ntraps = nemoview_get_trapezoids(view, 0, 0, view->content->width, view->content->height, traps);
-
-		pixman_composite_trapezoids(PIXMAN_OP_OVER,
-				overlay,
-				surface->shadow_image, PIXMAN_a8,
-				0, 0, 0, 0, ntraps, traps);
-	} else {
-		pixman_image_composite32(PIXMAN_OP_OVER,
-				overlay,
-				NULL,
-				surface->shadow_image,
-				0, 0,
-				0, 0,
-				0, 0,
-				pixman_image_get_width(surface->shadow_image),
-				pixman_image_get_height(surface->shadow_image));
-	}
-
-	pixman_image_unref(overlay);
-
-	pixman_image_set_clip_region32(surface->shadow_image, NULL);
-
-	pixman_region32_fini(&final_region);
-}
-
 static void pixmanrenderer_draw_view(struct pixmanrenderer *renderer, struct nemoview *view, struct nemoscreen *screen, pixman_region32_t *damage)
 {
 	struct pixmancontent *pmcontent = (struct pixmancontent *)nemocontent_get_pixman_context(view->content, renderer->base.node);
@@ -267,10 +218,6 @@ static void pixmanrenderer_draw_view(struct pixmanrenderer *renderer, struct nem
 		}
 
 		pixman_region32_fini(&blend);
-	}
-
-	if (view->overlay.enable != 0) {
-		pixmanrenderer_draw_overlay(renderer, view, screen, &repaint);
 	}
 
 out:
