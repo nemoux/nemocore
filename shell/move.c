@@ -122,7 +122,7 @@ int nemoshell_move_canvas_by_pointer(struct nemopointer *pointer, struct shellbi
 		return -1;
 
 	if (bin->grabbed > 0)
-		wl_signal_emit(&bin->ungrab_signal, bin);
+		return 0;
 
 	move = (struct shellgrab_move *)malloc(sizeof(struct shellgrab_move));
 	if (move == NULL)
@@ -244,7 +244,7 @@ int nemoshell_move_canvas_by_touchpoint(struct touchpoint *tp, struct shellbin *
 		return -1;
 
 	if (bin->grabbed > 0)
-		wl_signal_emit(&bin->ungrab_signal, bin);
+		return 0;
 
 	move = (struct shellgrab_move *)malloc(sizeof(struct shellgrab_move));
 	if (move == NULL)
@@ -372,7 +372,7 @@ int nemoshell_move_actor_by_pointer(struct nemopointer *pointer, struct nemoacto
 		return -1;
 
 	if (actor->grabbed > 0)
-		wl_signal_emit(&actor->ungrab_signal, actor);
+		return 0;
 
 	move = (struct actorgrab_move *)malloc(sizeof(struct actorgrab_move));
 	if (move == NULL)
@@ -487,7 +487,7 @@ int nemoshell_move_actor_by_touchpoint(struct touchpoint *tp, struct nemoactor *
 		return -1;
 
 	if (actor->grabbed > 0)
-		wl_signal_emit(&actor->ungrab_signal, actor);
+		return 0;
 
 	move = (struct actorgrab_move *)malloc(sizeof(struct actorgrab_move));
 	if (move == NULL)
