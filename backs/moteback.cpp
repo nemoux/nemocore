@@ -141,11 +141,12 @@ out:
 static void moteback_update_one(struct moteback *mote, double secs)
 {
 	nemomote_mutualgravity_update(mote->mote, 1, secs, 100.0f, 5000.0f, 50.0f);
+	nemomote_speedlimit_update(mote->mote, 2, secs, 0.0f, 0.0f);
 	nemomote_collide_update(mote->mote, 2, 1, secs, 1.5f);
 	nemomote_speedlimit_update(mote->mote, 1, secs, 0.0f, 300.0f);
 
 	if (nemomote_tween_update(mote->mote, &mote->tween, secs) != 0) {
-		nemomote_explosion_update(mote->mote, 3, secs, -30.0f, 30.0f, -30.0f, 30.0f);
+		nemomote_explosion_update(mote->mote, 3, secs, -15.0f, 15.0f, -15.0f, 15.0f);
 		nemomote_sleeptime_set(mote->mote, 3, 15.0f, 5.0f);
 		nemomote_type_set(mote->mote, 3, 1);
 	}
@@ -367,7 +368,7 @@ int main(int argc, char *argv[])
 	nemomote_random_set_property(&mote->random, 5.0f, 1.0f);
 	nemozone_set_cube(&mote->box, mote->width * 0.0f, mote->width * 1.0f, mote->height * 0.0f, mote->height * 1.0f);
 	nemozone_set_disc(&mote->disc, mote->width * 0.5f, mote->height * 0.5f, mote->width * 0.2f);
-	nemozone_set_disc(&mote->speed, 0.0f, 0.0f, 30.0f);
+	nemozone_set_disc(&mote->speed, 0.0f, 0.0f, 50.0f);
 
 	nemomote_blast_emit(mote->mote, 500);
 	nemomote_position_update(mote->mote, &mote->box);
