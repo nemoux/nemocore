@@ -214,22 +214,26 @@ int nemoshell_pick_canvas_by_touchpoint_on_area(struct touchpoint *tp0, struct t
 
 	if (area0 == NEMO_VIEW_CENTER_AREA || area1 == NEMO_VIEW_CENTER_AREA) {
 		bin->resize_edges = 0;
-	} else if (area0 == NEMO_VIEW_TOP_AREA && area1 == NEMO_VIEW_BOTTOM_AREA) {
-		bin->resize_edges = WL_SHELL_SURFACE_RESIZE_TOP;
-	} else if (area0 == NEMO_VIEW_BOTTOM_AREA && area1 == NEMO_VIEW_TOP_AREA) {
-		bin->resize_edges = WL_SHELL_SURFACE_RESIZE_BOTTOM;
-	} else if (area0 == NEMO_VIEW_LEFT_AREA && area1 == NEMO_VIEW_RIGHT_AREA) {
-		bin->resize_edges = WL_SHELL_SURFACE_RESIZE_LEFT;
-	} else if (area0 == NEMO_VIEW_RIGHT_AREA && area1 == NEMO_VIEW_LEFT_AREA) {
-		bin->resize_edges = WL_SHELL_SURFACE_RESIZE_RIGHT;
-	} else if (
-			(area0 == NEMO_VIEW_LEFT_AREA && area1 == NEMO_VIEW_TOP_AREA) ||
-			(area1 == NEMO_VIEW_LEFT_AREA && area0 == NEMO_VIEW_TOP_AREA) ||
-			(area0 == NEMO_VIEW_LEFT_AREA && area1 == NEMO_VIEW_LEFT_AREA) ||
-			(area0 == NEMO_VIEW_TOP_AREA && area1 == NEMO_VIEW_TOP_AREA)) {
-		bin->resize_edges = WL_SHELL_SURFACE_RESIZE_LEFT | WL_SHELL_SURFACE_RESIZE_TOP;
-	} else {
+	} else if (area0 == NEMO_VIEW_LEFTTOP_AREA && area1 == NEMO_VIEW_RIGHTBOTTOM_AREA) {
 		bin->resize_edges = WL_SHELL_SURFACE_RESIZE_RIGHT | WL_SHELL_SURFACE_RESIZE_BOTTOM;
+	} else if (area0 == NEMO_VIEW_RIGHTBOTTOM_AREA && area1 == NEMO_VIEW_LEFTTOP_AREA) {
+		bin->resize_edges = WL_SHELL_SURFACE_RESIZE_LEFT | WL_SHELL_SURFACE_RESIZE_TOP;
+	} else if (area0 == NEMO_VIEW_LEFTBOTTOM_AREA && area1 == NEMO_VIEW_RIGHTTOP_AREA) {
+		bin->resize_edges = WL_SHELL_SURFACE_RESIZE_RIGHT | WL_SHELL_SURFACE_RESIZE_TOP;
+	} else if (area0 == NEMO_VIEW_RIGHTTOP_AREA && area1 == NEMO_VIEW_LEFTBOTTOM_AREA) {
+		bin->resize_edges = WL_SHELL_SURFACE_RESIZE_LEFT | WL_SHELL_SURFACE_RESIZE_BOTTOM;
+	} else if ((area0 == NEMO_VIEW_TOP_AREA || area0 == NEMO_VIEW_LEFTTOP_AREA || area0 == NEMO_VIEW_RIGHTTOP_AREA) &&
+			(area1 == NEMO_VIEW_BOTTOM_AREA || area1 == NEMO_VIEW_LEFTBOTTOM_AREA || area1 == NEMO_VIEW_RIGHTBOTTOM_AREA)) {
+		bin->resize_edges = WL_SHELL_SURFACE_RESIZE_BOTTOM;
+	} else if ((area0 == NEMO_VIEW_BOTTOM_AREA || area0 == NEMO_VIEW_LEFTBOTTOM_AREA || area0 == NEMO_VIEW_RIGHTBOTTOM_AREA) &&
+			(area1 == NEMO_VIEW_TOP_AREA || area1 == NEMO_VIEW_LEFTTOP_AREA || area1 == NEMO_VIEW_RIGHTTOP_AREA)) {
+		bin->resize_edges = WL_SHELL_SURFACE_RESIZE_TOP;
+	} else if ((area0 == NEMO_VIEW_LEFT_AREA || area0 == NEMO_VIEW_LEFTTOP_AREA || area0 == NEMO_VIEW_LEFTBOTTOM_AREA) &&
+			(area1 == NEMO_VIEW_RIGHT_AREA || area1 == NEMO_VIEW_RIGHTTOP_AREA || area1 == NEMO_VIEW_RIGHTBOTTOM_AREA)) {
+		bin->resize_edges = WL_SHELL_SURFACE_RESIZE_RIGHT;
+	} else if ((area0 == NEMO_VIEW_RIGHT_AREA || area0 == NEMO_VIEW_RIGHTTOP_AREA || area0 == NEMO_VIEW_RIGHTBOTTOM_AREA) &&
+			(area1 == NEMO_VIEW_LEFT_AREA || area1 == NEMO_VIEW_LEFTTOP_AREA || area1 == NEMO_VIEW_LEFTBOTTOM_AREA)) {
+		bin->resize_edges = WL_SHELL_SURFACE_RESIZE_LEFT;
 	}
 
 	if (bin->resize_edges == 0) {
