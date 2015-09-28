@@ -31,11 +31,19 @@ struct nemomote *nemomote_create(int max)
 		goto err3;
 	memset(mote->attrs, 0, sizeof(uint32_t) * max);
 
+	mote->tweens = (double *)malloc(sizeof(double[6]) * max);
+	if (mote->tweens == NULL)
+		goto err4;
+	memset(mote->tweens, 0, sizeof(double[6]) * max);
+
 	mote->mcount = max;
 	mote->lcount = 0;
 	mote->rcount = 0;
 
 	return mote;
+
+err4:
+	free(mote->attrs);
 
 err3:
 	free(mote->types);
@@ -57,6 +65,8 @@ void nemomote_destroy(struct nemomote *mote)
 		free(mote->types);
 	if (mote->attrs != NULL)
 		free(mote->attrs);
+	if (mote->tweens != NULL)
+		free(mote->tweens);
 
 	free(mote);
 }
@@ -110,6 +120,12 @@ int nemomote_cleanup(struct nemomote *mote)
 				mote->buffers[to * 12 + 10] = mote->buffers[from * 12 + 10];
 				mote->types[to] = mote->types[from];
 				mote->attrs[to] = mote->attrs[from];
+				mote->tweens[to * 6 + 0] = mote->tweens[from * 6 + 0];
+				mote->tweens[to * 6 + 1] = mote->tweens[from * 6 + 1];
+				mote->tweens[to * 6 + 2] = mote->tweens[from * 6 + 2];
+				mote->tweens[to * 6 + 3] = mote->tweens[from * 6 + 3];
+				mote->tweens[to * 6 + 4] = mote->tweens[from * 6 + 4];
+				mote->tweens[to * 6 + 5] = mote->tweens[from * 6 + 5];
 			}
 
 			mote->lcount--;

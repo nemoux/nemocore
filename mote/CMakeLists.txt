@@ -15,6 +15,7 @@ add_library(nemomote SHARED
 	builders/sleeptime.c
 	builders/color.c
 	builders/type.c
+	builders/tweener.c
 	emitters/random.c
 	emitters/blast.c
 	emitters/sine.c
@@ -76,6 +77,7 @@ set(HEADER_BUILDER_FILES
 	${CMAKE_SOURCE_DIR}/mote/builders/sleeptime.h
 	${CMAKE_SOURCE_DIR}/mote/builders/color.h
 	${CMAKE_SOURCE_DIR}/mote/builders/type.h
+	${CMAKE_SOURCE_DIR}/mote/builders/tweener.h
 	)
 
 configure_file(

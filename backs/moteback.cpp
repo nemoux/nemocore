@@ -66,7 +66,7 @@ struct moteback {
 	struct nemozone disc;
 	struct nemozone speed;
 
-	struct motetween tween;
+	struct nemoease ease;
 
 	double secs;
 
@@ -118,24 +118,21 @@ static void moteback_prepare_text(struct moteback *mote, const char *text, int n
 	x = random_get_double(0.0f, mote->width - width * 16.0f);
 	y = random_get_double(0.0f, mote->height - size * 16.0f);
 
-	nemomote_tween_clear(&mote->tween);
-
 	for (i = 0; i < size; i++) {
 		for (j = 0; j < size * ntext; j++) {
 			if (bitmap.getColor(j, i) != SK_ColorTRANSPARENT) {
 				p = nemomote_get_one_by_type(mote->mote, 1);
 				if (p < 0)
-					goto out;
+					return;
 
-				nemomote_tween_add(&mote->tween, p, x + j * 16, y + i * 16);
-
-				nemomote_type_set_one(mote->mote, p, 3);
+				nemomote_tweener_set_one(mote->mote, p,
+						x + j * 16,
+						y + i * 16,
+						random_get_double(1.0f, 5.0f));
+				nemomote_type_set_one(mote->mote, p, 5);
 			}
 		}
 	}
-
-out:
-	nemomote_tween_ready(mote->mote, &mote->tween, 5.0f, NEMOEASE_QUADRATIC_INOUT_TYPE);
 }
 
 static void moteback_update_one(struct moteback *mote, double secs)
@@ -145,11 +142,11 @@ static void moteback_update_one(struct moteback *mote, double secs)
 	nemomote_collide_update(mote->mote, 2, 1, secs, 1.5f);
 	nemomote_speedlimit_update(mote->mote, 1, secs, 0.0f, 300.0f);
 
-	if (nemomote_tween_update(mote->mote, &mote->tween, secs) != 0) {
-		nemomote_explosion_update(mote->mote, 3, secs, -15.0f, 15.0f, -15.0f, 15.0f);
-		nemomote_sleeptime_set(mote->mote, 3, 15.0f, 5.0f);
-		nemomote_type_set(mote->mote, 3, 1);
-	}
+	nemomote_tween_update(mote->mote, 5, secs, &mote->ease, 6);
+
+	nemomote_explosion_update(mote->mote, 6, secs, -30.0f, 30.0f, -30.0f, 30.0f);
+	nemomote_sleeptime_set(mote->mote, 6, 15.0f, 5.0f);
+	nemomote_type_set(mote->mote, 6, 1);
 
 	nemomote_boundingbox_update(mote->mote, 1, secs, &mote->box, 0.8f);
 	nemomote_move_update(mote->mote, 1, secs);
@@ -386,7 +383,7 @@ int main(int argc, char *argv[])
 	nemomote_type_update(mote->mote, 2);
 	nemomote_commit(mote->mote);
 
-	nemomote_tween_prepare(&mote->tween, 500);
+	nemoease_set(&mote->ease, NEMOEASE_CUBIC_INOUT_TYPE);
 
 	mote->tool = tool = nemotool_create();
 	if (tool == NULL)

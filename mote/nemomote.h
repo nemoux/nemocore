@@ -32,6 +32,7 @@ extern "C" {
 #include <builders/sleeptime.h>
 #include <builders/color.h>
 #include <builders/type.h>
+#include <builders/tweener.h>
 #include <nemozone.h>
 
 #define	NEMOMOTE_DEAD_BIT			(1 << 0)
@@ -40,6 +41,7 @@ struct nemomote {
 	double *buffers;
 	uint32_t *types;
 	uint32_t *attrs;
+	double *tweens;
 
 	int mcount;
 	int lcount;
@@ -78,6 +80,15 @@ static inline int nemomote_get_count(struct nemomote *mote)
 #define NEMOMOTE_SLEEPTIME(m, i)			((m)->buffers[i * 12 + 10])
 
 #define	NEMOMOTE_TYPE(m, i)						((m)->types[i])
+
+#define	NEMOMOTE_TWEEN_SX(m, i)				((m)->tweens[i * 6 + 0])
+#define	NEMOMOTE_TWEEN_SY(m, i)				((m)->tweens[i * 6 + 1])
+
+#define	NEMOMOTE_TWEEN_DX(m, i)				((m)->tweens[i * 6 + 2])
+#define	NEMOMOTE_TWEEN_DY(m, i)				((m)->tweens[i * 6 + 3])
+
+#define NEMOMOTE_TWEEN_DT(m, i)				((m)->tweens[i * 6 + 4])
+#define NEMOMOTE_TWEEN_RT(m, i)				((m)->tweens[i * 6 + 5])
 
 #ifdef __cplusplus
 }

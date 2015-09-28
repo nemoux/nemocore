@@ -3,32 +3,6 @@
 
 #include <nemoease.h>
 
-struct motetween {
-	int *parts;
-	int sparts, nparts;
-
-	double *dst;
-	double *src;
-
-	double dtime, rtime;
-	int done;
-
-	struct nemoease ease;
-};
-
-extern int nemomote_tween_prepare(struct motetween *tween, int max);
-extern void nemomote_tween_finish(struct motetween *tween);
-
-extern void nemomote_tween_clear(struct motetween *tween);
-extern void nemomote_tween_add(struct motetween *tween, int p, double x, double y);
-extern void nemomote_tween_shuffle(struct motetween *tween);
-
-extern void nemomote_tween_ready(struct nemomote *mote, struct motetween *tween, double secs, int ease);
-extern int nemomote_tween_update(struct nemomote *mote, struct motetween *tween, double secs);
-
-static inline int nemomote_tween_get_count(struct motetween *tween)
-{
-	return tween->nparts;
-}
+extern int nemomote_tween_update(struct nemomote *mote, uint32_t type, double secs, struct nemoease *ease, uint32_t dtype);
 
 #endif
