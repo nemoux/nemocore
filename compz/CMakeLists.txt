@@ -241,6 +241,8 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/compz/task.h
 	${CMAKE_SOURCE_DIR}/compz/event.h
 	${CMAKE_SOURCE_DIR}/compz/timer.h
+	${CMAKE_SOURCE_DIR}/compz/animation.h
+	${CMAKE_SOURCE_DIR}/compz/viewanimation.h
 	${CMAKE_SOURCE_DIR}/compz/waylandhelper.h
 	)
 
