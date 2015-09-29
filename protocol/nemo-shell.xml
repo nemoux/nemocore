@@ -115,8 +115,17 @@
 			<arg name="parent" type="object" interface="nemo_surface"/>
 		</request>
 
+		<enum name="fullscreen_type">
+			<entry name="normal" value="0"/>
+			<entry name="pick" value="1"/>
+		</enum>
+
+		<request name="set_fullscreen_type">
+			<arg name="type" type="uint"/>
+		</request>
+
 		<request name="set_fullscreen">
-			<arg name="output" type="object" interface="wl_output" allow-null="true"/>
+			<arg name="id" type="uint"/>
 		</request>
 
 		<request name="unset_fullscreen">

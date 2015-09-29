@@ -426,9 +426,14 @@ void nemocanvas_set_parent(struct nemocanvas *canvas, struct nemocanvas *parent)
 	}
 }
 
-void nemocanvas_set_fullscreen(struct nemocanvas *canvas)
+void nemocanvas_set_fullscreen_type(struct nemocanvas *canvas, uint32_t type)
 {
-	nemo_surface_set_fullscreen(canvas->nemo_surface, NULL);
+	nemo_surface_set_fullscreen_type(canvas->nemo_surface, type);
+}
+
+void nemocanvas_set_fullscreen(struct nemocanvas *canvas, uint32_t id)
+{
+	nemo_surface_set_fullscreen(canvas->nemo_surface, id);
 }
 
 void nemocanvas_unset_fullscreen(struct nemocanvas *canvas)

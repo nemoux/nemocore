@@ -298,6 +298,7 @@ int main(int argc, char *argv[])
 		context->canvas = canvas = nemocanvas_create(tool);
 		nemocanvas_set_userdata(canvas, context);
 		nemocanvas_set_nemosurface(canvas, NEMO_SHELL_SURFACE_TYPE_NORMAL);
+		nemocanvas_set_fullscreen_type(canvas, NEMO_SURFACE_FULLSCREEN_TYPE_PICK);
 		if (context->is_background != 0)
 			nemocanvas_set_layer(canvas, NEMO_SURFACE_LAYER_TYPE_BACKGROUND);
 		nemocanvas_set_anchor(canvas, -0.5f, -0.5f);
@@ -356,6 +357,7 @@ int main(int argc, char *argv[])
 		context->ecanvas = ecanvas = nemotool_create_egl_canvas(context->egl, width, height);
 		context->canvas = NTEGL_CANVAS(ecanvas);
 		nemocanvas_set_nemosurface(NTEGL_CANVAS(ecanvas), NEMO_SHELL_SURFACE_TYPE_NORMAL);
+		nemocanvas_set_fullscreen_type(NTEGL_CANVAS(ecanvas), NEMO_SURFACE_FULLSCREEN_TYPE_PICK);
 		if (context->is_background != 0)
 			nemocanvas_set_layer(NTEGL_CANVAS(ecanvas), NEMO_SURFACE_LAYER_TYPE_BACKGROUND);
 		nemocanvas_set_dispatch_frame(NTEGL_CANVAS(ecanvas), nemoplay_dispatch_audio_frame);

@@ -967,6 +967,7 @@ int main(int argc, char *argv[])
 	context->eglcanvas = canvas = nemotool_create_egl_canvas(egl, width, height);
 	nemocanvas_set_userdata(NTEGL_CANVAS(canvas), context);
 	nemocanvas_set_nemosurface(NTEGL_CANVAS(canvas), NEMO_SHELL_SURFACE_TYPE_NORMAL);
+	nemocanvas_set_max_size(NTEGL_CANVAS(canvas), 1920 * 4, 1080 * 4);
 	nemocanvas_set_dispatch_resize(NTEGL_CANVAS(canvas), nemomesh_dispatch_canvas_resize);
 	nemocanvas_set_dispatch_frame(NTEGL_CANVAS(canvas), nemomesh_dispatch_canvas_frame);
 

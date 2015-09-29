@@ -93,7 +93,8 @@ extern void nemocanvas_set_pivot(struct nemocanvas *canvas, int px, int py);
 extern void nemocanvas_set_anchor(struct nemocanvas *canvas, float ax, float ay);
 extern void nemocanvas_set_layer(struct nemocanvas *canvas, uint32_t type);
 extern void nemocanvas_set_parent(struct nemocanvas *canvas, struct nemocanvas *parent);
-extern void nemocanvas_set_fullscreen(struct nemocanvas *canvas);
+extern void nemocanvas_set_fullscreen_type(struct nemocanvas *canvas, uint32_t type);
+extern void nemocanvas_set_fullscreen(struct nemocanvas *canvas, uint32_t id);
 extern void nemocanvas_unset_fullscreen(struct nemocanvas *canvas);
 
 extern void nemocanvas_set_nemosurface(struct nemocanvas *canvas, uint32_t type);

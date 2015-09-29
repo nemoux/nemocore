@@ -151,6 +151,8 @@ struct shellbin {
 		float r;
 	} fullscreen;
 
+	int on_pickscreen;
+
 	struct {
 		float x, y;
 		int32_t width, height;

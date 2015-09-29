@@ -222,34 +222,47 @@ static void nemo_surface_set_parent(struct wl_client *client, struct wl_resource
 	nemoshell_set_parent_bin(bin, pbin);
 }
 
-static void nemo_surface_set_fullscreen(struct wl_client *client, struct wl_resource *resource, struct wl_resource *output_resource)
+static void nemo_surface_set_fullscreen_type(struct wl_client *client, struct wl_resource *resource, uint32_t type)
+{
+#ifdef NEMOUX_WITH_FULLSCREEN
+	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
+
+	if (type == NEMO_SURFACE_FULLSCREEN_TYPE_NORMAL) {
+		bin->on_pickscreen = 0;
+	} else if (type == NEMO_SURFACE_FULLSCREEN_TYPE_PICK) {
+		bin->on_pickscreen = 1;
+	}
+#endif
+}
+
+static void nemo_surface_set_fullscreen(struct wl_client *client, struct wl_resource *resource, uint32_t id)
 {
 #ifdef NEMOUX_WITH_FULLSCREEN
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 
 	if (bin->flags & NEMO_SHELL_SURFACE_MAXIMIZABLE_FLAG) {
-		struct nemoscreen *screen = output_resource != NULL ? (struct nemoscreen *)wl_resource_get_user_data(output_resource) : NULL;
+		struct shellscreen *screen;
 
-		if (bin->grabbed > 0)
-			wl_signal_emit(&bin->ungrab_signal, bin);
+		screen = nemoshell_get_fullscreen(bin->shell, id);
+		if (screen != NULL) {
+			if (bin->grabbed > 0)
+				wl_signal_emit(&bin->ungrab_signal, bin);
 
-		nemoshell_clear_bin_next_state(bin);
-		bin->next_state.fullscreen = 1;
-		bin->state_changed = 1;
+			nemoshell_clear_bin_next_state(bin);
+			bin->next_state.fullscreen = 1;
+			bin->state_changed = 1;
 
-		bin->type = NEMO_SHELL_SURFACE_NORMAL_TYPE;
-		nemoshell_set_parent_bin(bin, NULL);
+			bin->type = NEMO_SHELL_SURFACE_NORMAL_TYPE;
+			nemoshell_set_parent_bin(bin, NULL);
 
-		if ((screen != NULL) ||
-				(screen = nemocompz_get_main_screen(bin->shell->compz)) != NULL) {
-			bin->screen.x = screen->rx;
-			bin->screen.y = screen->ry;
-			bin->screen.width = screen->rw;
-			bin->screen.height = screen->rh;
+			bin->screen.x = screen->dx;
+			bin->screen.y = screen->dy;
+			bin->screen.width = screen->dw;
+			bin->screen.height = screen->dh;
 			bin->has_screen = 1;
-		}
 
-		nemoshell_send_bin_state(bin);
+			nemoshell_send_bin_state(bin);
+		}
 	}
 #endif
 }
@@ -281,6 +294,7 @@ static const struct nemo_surface_interface nemo_surface_implementation = {
 	nemo_surface_set_anchor,
 	nemo_surface_set_layer,
 	nemo_surface_set_parent,
+	nemo_surface_set_fullscreen_type,
 	nemo_surface_set_fullscreen,
 	nemo_surface_unset_fullscreen
 };
