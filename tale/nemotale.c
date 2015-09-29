@@ -13,6 +13,8 @@
 
 int nemotale_prepare(struct nemotale *tale)
 {
+	char *env;
+
 	nemosignal_init(&tale->destroy_signal);
 
 	nemolist_init(&tale->ptap_list);
@@ -32,17 +34,35 @@ int nemotale_prepare(struct nemotale *tale)
 	tale->nnodes = 0;
 	tale->snodes = 8;
 
-#ifdef NEMOUX_WITH_TAP_MINIMUM_DISTANCE
-	tale->tap_minimum_distance = NEMOUX_WITH_TAP_MINIMUM_DISTANCE;
-#else
-	tale->tap_minimum_distance = 0;
-#endif
+	env = getenv("NEMOTALE_TAP_MINIMUM_DISTANCE");
+	if (env != NULL)
+		tale->tap_minimum_distance = strtoul(env, NULL, 10);
+	else
+		tale->tap_minimum_distance = 0;
 
-	tale->long_press_duration = 1500;
-	tale->long_press_distance = 50;
+	env = getenv("NEMOTALE_LONG_PRESS_DURATION");
+	if (env != NULL)
+		tale->long_press_duration = strtoul(env, NULL, 10);
+	else
+		tale->long_press_duration = 1500;
 
-	tale->single_click_duration = 150;
-	tale->single_click_distance = 50;
+	env = getenv("NEMOTALE_LONG_PRESS_DISTANCE");
+	if (env != NULL)
+		tale->long_press_distance = strtoul(env, NULL, 10);
+	else
+		tale->long_press_distance = 50;
+
+	env = getenv("NEMOTALE_SINGLE_CLICK_DURATION");
+	if (env != NULL)
+		tale->single_click_duration = strtoul(env, NULL, 10);
+	else
+		tale->single_click_duration = 150;
+
+	env = getenv("NEMOTALE_SINGLE_CLICK_DISTANCE");
+	if (env != NULL)
+		tale->single_click_distance = strtoul(env, NULL, 10);
+	else
+		tale->single_click_distance = 50;
 
 	return 0;
 }
