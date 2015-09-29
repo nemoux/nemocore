@@ -810,8 +810,8 @@ struct shellscreen *nemoshell_get_fullscreen_on(struct nemoshell *shell, int32_t
 	struct shellscreen *screen;
 
 	wl_list_for_each(screen, &shell->fullscreen_list, link) {
-		if (screen->sx <= x && x < screen->sx + screen->sw &&
-				screen->sy <= y && y < screen->sy + screen->sh)
+		if (screen->sx <= x && x <= screen->sx + screen->sw &&
+				screen->sy <= y && y <= screen->sy + screen->sh)
 			return screen;
 	}
 

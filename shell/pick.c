@@ -50,6 +50,7 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 	if (bin != NULL && (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALE))) {
 		struct nemoshell *shell = bin->shell;
 		struct nemocompz *compz = shell->compz;
+		struct shellscreen *screen = NULL;
 		double distance = pickgrab_calculate_touchpoint_distance(pick->tp0, pick->tp1);
 		int32_t width, height;
 
@@ -63,27 +64,24 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 
 		bin->reset_scale = 1;
 
-		if (nemocompz_get_scene_width(compz) <= width ||
-				nemocompz_get_scene_height(compz) <= height) {
-			struct shellscreen *screen;
-
+		if (nemocompz_get_scene_width(compz) <= width || nemocompz_get_scene_height(compz) <= height)
 			screen = nemoshell_get_fullscreen_on(shell, tp0->x, tp0->y);
-			if (screen != NULL) {
-				nemoshell_clear_bin_next_state(bin);
-				bin->next_state.fullscreen = 1;
-				bin->state_changed = 1;
 
-				bin->type = NEMO_SHELL_SURFACE_NORMAL_TYPE;
-				nemoshell_set_parent_bin(bin, NULL);
+		if (screen != NULL) {
+			nemoshell_clear_bin_next_state(bin);
+			bin->next_state.fullscreen = 1;
+			bin->state_changed = 1;
 
-				bin->screen.x = screen->dx;
-				bin->screen.y = screen->dy;
-				bin->screen.width = screen->dw;
-				bin->screen.height = screen->dh;
-				bin->has_screen = 1;
+			bin->type = NEMO_SHELL_SURFACE_NORMAL_TYPE;
+			nemoshell_set_parent_bin(bin, NULL);
 
-				nemoshell_send_bin_state(bin);
-			}
+			bin->screen.x = screen->dx;
+			bin->screen.y = screen->dy;
+			bin->screen.width = screen->dw;
+			bin->screen.height = screen->dh;
+			bin->has_screen = 1;
+
+			nemoshell_send_bin_state(bin);
 		} else {
 			bin->client->send_configure(bin->canvas, width, height);
 		}
