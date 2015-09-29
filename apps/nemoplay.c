@@ -36,7 +36,6 @@ struct playcontext {
 	struct nemotale *tale;
 	struct talenode *node;
 
-	int is_fullscreen;
 	int is_background;
 
 	int is_audio_only;
@@ -65,16 +64,8 @@ static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode 
 			nemotale_event_update_node_taps(tale, node, event, type);
 
 			if (event->tapcount == 1) {
-				if (context->is_fullscreen == 0) {
-					nemocanvas_move(context->canvas, event->taps[0]->serial);
-				}
+				nemocanvas_move(context->canvas, event->taps[0]->serial);
 			} else if (event->tapcount == 2) {
-				if (context->is_fullscreen != 0) {
-					nemocanvas_unset_fullscreen(context->canvas);
-
-					context->is_fullscreen = 0;
-				}
-
 				nemocanvas_pick(context->canvas,
 						event->taps[0]->serial,
 						event->taps[1]->serial,
@@ -144,12 +135,6 @@ static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode 
 				}
 			} else if (event->tapcount == 2) {
 				nemogst_dump_state(context->gst);
-			} else if (event->tapcount == 4) {
-				if (context->is_fullscreen == 0) {
-					nemocanvas_set_fullscreen(context->canvas);
-
-					context->is_fullscreen = 1;
-				}
 			}
 		}
 	}

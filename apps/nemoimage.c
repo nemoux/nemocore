@@ -49,7 +49,6 @@ static void nemoimage_dispatch_tale_event(struct nemotale *tale, struct talenode
 
 			if (event->tapcount == 1) {
 			} else if (event->tapcount == 2) {
-			} else if (event->tapcount == 3) {
 			}
 		}
 	}

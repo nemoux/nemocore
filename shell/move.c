@@ -239,7 +239,7 @@ int nemoshell_move_canvas_by_touchpoint(struct touchpoint *tp, struct shellbin *
 	if (bin == NULL)
 		return -1;
 
-	if (bin->grabbed > 0)
+	if (bin->grabbed > 0 || bin->state.fullscreen != 0 || bin->state.maximized != 0)
 		return 0;
 
 	move = (struct shellgrab_move *)malloc(sizeof(struct shellgrab_move));

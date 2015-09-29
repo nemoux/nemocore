@@ -48,6 +48,8 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 	struct shellbin *bin = grab->bin;
 
 	if (bin != NULL && (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALE))) {
+		struct nemoshell *shell = bin->shell;
+		struct nemocompz *compz = shell->compz;
 		double distance = pickgrab_calculate_touchpoint_distance(pick->tp0, pick->tp1);
 		int32_t width, height;
 
@@ -61,7 +63,30 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 
 		bin->reset_scale = 1;
 
-		bin->client->send_configure(bin->canvas, width, height);
+		if (nemocompz_get_scene_width(compz) <= width ||
+				nemocompz_get_scene_height(compz) <= height) {
+			struct shellscreen *screen;
+
+			screen = nemoshell_get_fullscreen_on(shell, tp0->x, tp0->y);
+			if (screen != NULL) {
+				nemoshell_clear_bin_next_state(bin);
+				bin->next_state.fullscreen = 1;
+				bin->state_changed = 1;
+
+				bin->type = NEMO_SHELL_SURFACE_NORMAL_TYPE;
+				nemoshell_set_parent_bin(bin, NULL);
+
+				bin->screen.x = screen->dx;
+				bin->screen.y = screen->dy;
+				bin->screen.width = screen->dw;
+				bin->screen.height = screen->dh;
+				bin->has_screen = 1;
+
+				nemoshell_send_bin_state(bin);
+			}
+		} else {
+			bin->client->send_configure(bin->canvas, width, height);
+		}
 	}
 
 	if (tp0->focus != NULL) {
@@ -92,7 +117,7 @@ static void pick_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 
 	touchpoint_move(tp, x, y);
 
-	if (grab->bin == NULL)
+	if (bin == NULL)
 		return;
 
 	if (tp->focus != NULL) {
@@ -195,9 +220,8 @@ int nemoshell_pick_canvas_by_touchpoint_on_area(struct touchpoint *tp0, struct t
 	if (bin == NULL)
 		return -1;
 
-	if (bin->grabbed > 0) {
+	if (bin->grabbed > 0)
 		wl_signal_emit(&bin->ungrab_signal, bin);
-	}
 
 	pick0 = (struct shellgrab_pick *)malloc(sizeof(struct shellgrab_pick));
 	if (pick0 == NULL)
@@ -278,8 +302,14 @@ int nemoshell_pick_canvas_by_touchpoint(struct touchpoint *tp0, struct touchpoin
 	if (bin == NULL)
 		return -1;
 
-	if (bin->grabbed > 0) {
+	if (bin->grabbed > 0)
 		wl_signal_emit(&bin->ungrab_signal, bin);
+
+	if (bin->state.fullscreen != 0 || bin->state.maximized != 0) {
+		bin->state_changed = 1;
+		bin->next_state.fullscreen = 0;
+
+		nemoshell_send_bin_state(bin);
 	}
 
 	pick0 = (struct shellgrab_pick *)malloc(sizeof(struct shellgrab_pick));
@@ -440,9 +470,8 @@ int nemoshell_pick_actor_by_touchpoint(struct touchpoint *tp0, struct touchpoint
 	if (actor == NULL)
 		return -1;
 
-	if (actor->grabbed > 0) {
+	if (actor->grabbed > 0)
 		wl_signal_emit(&actor->ungrab_signal, actor);
-	}
 
 	pick0 = (struct actorgrab_pick *)malloc(sizeof(struct actorgrab_pick));
 	if (pick0 == NULL)

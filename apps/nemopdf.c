@@ -23,8 +23,6 @@ struct pdfcontext {
 	struct talenode *node;
 
 	struct nemopdf *pdf;
-
-	int is_fullscreen;
 };
 
 static uint32_t nemopdf_get_touch_location(int32_t sx, int32_t sy, int32_t sw, int32_t sh, int32_t x, int32_t y)
@@ -60,16 +58,8 @@ static void nemopdf_dispatch_tale_event(struct nemotale *tale, struct talenode *
 			nemotale_event_update_node_taps(tale, node, event, type);
 
 			if (event->tapcount == 1) {
-				if (context->is_fullscreen == 0) {
-					nemocanvas_move(canvas, event->taps[0]->serial);
-				}
+				nemocanvas_move(canvas, event->taps[0]->serial);
 			} else if (event->tapcount == 2) {
-				if (context->is_fullscreen != 0) {
-					nemocanvas_unset_fullscreen(canvas);
-
-					context->is_fullscreen = 0;
-				}
-
 				nemocanvas_pick(canvas,
 						event->taps[0]->serial,
 						event->taps[1]->serial,
@@ -104,12 +94,6 @@ static void nemopdf_dispatch_tale_event(struct nemotale *tale, struct talenode *
 					}
 				}
 			} else if (event->tapcount == 2) {
-			} else if (event->tapcount == 3) {
-				if (context->is_fullscreen == 0) {
-					nemocanvas_set_fullscreen(canvas);
-
-					context->is_fullscreen = 1;
-				}
 			}
 		}
 	}

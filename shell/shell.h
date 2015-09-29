@@ -50,6 +50,8 @@ struct nemoshell {
 	struct wl_listener update_input_panel_listener;
 	int showing_input_panels;
 
+	struct wl_list fullscreen_list;
+
 	struct {
 		struct nemocanvas *canvas;
 		pixman_box32_t cursor;
@@ -168,6 +170,15 @@ struct shellbin {
 	int grabbed;
 };
 
+struct shellscreen {
+	uint32_t id;
+
+	int32_t sx, sy, sw, sh;
+	int32_t dx, dy, dw, dh;
+
+	struct wl_list link;
+};
+
 extern struct nemoshell *nemoshell_create(struct nemocompz *compz);
 extern void nemoshell_destroy(struct nemoshell *shell);
 
@@ -197,6 +208,10 @@ extern struct clientstate *nemoshell_create_client_state(struct wl_client *clien
 extern void nemoshell_destroy_client_state(struct clientstate *state);
 extern struct clientstate *nemoshell_get_client_state(struct wl_client *client);
 extern void nemoshell_set_client_state(struct shellbin *bin, struct clientstate *state);
+
+extern void nemoshell_load_fullscreens(struct nemoshell *shell);
+extern struct shellscreen *nemoshell_get_fullscreen(struct nemoshell *shell, uint32_t id);
+extern struct shellscreen *nemoshell_get_fullscreen_on(struct nemoshell *shell, int32_t x, int32_t y);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

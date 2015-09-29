@@ -569,6 +569,8 @@ struct nemoshell *nemoshell_create(struct nemocompz *compz)
 	shell->touch_focus_listener.notify = nemoshell_handle_touch_focus;
 	wl_signal_add(&compz->seat->touch.focus_signal, &shell->touch_focus_listener);
 
+	wl_list_init(&shell->fullscreen_list);
+
 	return shell;
 
 err1:
@@ -762,4 +764,56 @@ void nemoshell_set_client_state(struct shellbin *bin, struct clientstate *state)
 	}
 
 	bin->flags = state->flags;
+}
+
+void nemoshell_load_fullscreens(struct nemoshell *shell)
+{
+	struct shellscreen *screen;
+	int index = 0;
+
+	for (index = 0;
+			(index = nemoitem_get(shell->configs, "//nemoshell/fullscreen", index)) >= 0;
+			index++) {
+		screen = (struct shellscreen *)malloc(sizeof(struct shellscreen));
+		if (screen == NULL)
+			break;
+		memset(screen, 0, sizeof(struct shellscreen));
+
+		screen->sx = nemoitem_get_iattr(shell->configs, index, "sx");
+		screen->sy = nemoitem_get_iattr(shell->configs, index, "sy");
+		screen->sw = nemoitem_get_iattr(shell->configs, index, "sw");
+		screen->sh = nemoitem_get_iattr(shell->configs, index, "sh");
+		screen->dx = nemoitem_get_iattr(shell->configs, index, "dx");
+		screen->dy = nemoitem_get_iattr(shell->configs, index, "dy");
+		screen->dw = nemoitem_get_iattr(shell->configs, index, "dw");
+		screen->dh = nemoitem_get_iattr(shell->configs, index, "dh");
+		screen->id = nemoitem_get_iattr(shell->configs, index, "id");
+
+		wl_list_insert(&shell->fullscreen_list, &screen->link);
+	}
+}
+
+struct shellscreen *nemoshell_get_fullscreen(struct nemoshell *shell, uint32_t id)
+{
+	struct shellscreen *screen;
+
+	wl_list_for_each(screen, &shell->fullscreen_list, link) {
+		if (screen->id == id)
+			return screen;
+	}
+
+	return NULL;
+}
+
+struct shellscreen *nemoshell_get_fullscreen_on(struct nemoshell *shell, int32_t x, int32_t y)
+{
+	struct shellscreen *screen;
+
+	wl_list_for_each(screen, &shell->fullscreen_list, link) {
+		if (screen->sx <= x && x < screen->sx + screen->sw &&
+				screen->sy <= y && y < screen->sy + screen->sh)
+			return screen;
+	}
+
+	return NULL;
 }
