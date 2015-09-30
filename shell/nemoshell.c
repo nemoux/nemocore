@@ -337,6 +337,8 @@ static void nemo_get_nemo_surface(struct wl_client *client, struct wl_resource *
 		return;
 	}
 
+	nemoview_put_state(bin->view, NEMO_VIEW_CATCHABLE_STATE);
+
 	if (shell->default_layer != NULL)
 		bin->layer = shell->default_layer;
 
