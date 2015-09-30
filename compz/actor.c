@@ -185,6 +185,11 @@ struct nemoactor *nemoactor_create_gl(struct nemocompz *compz, int width, int he
 	actor->dispatch_resize = NULL;
 	actor->dispatch_frame = NULL;
 
+	actor->min_width = 0;
+	actor->min_height = 0;
+	actor->max_width = UINT32_MAX;
+	actor->max_height = UINT32_MAX;
+
 	wl_signal_init(&actor->destroy_signal);
 	wl_signal_init(&actor->ungrab_signal);
 
