@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <limits.h>
+
 #include <nemotale.h>
 #include <talenode.h>
 #include <nemolist.h>
@@ -39,6 +41,12 @@ int nemotale_prepare(struct nemotale *tale)
 		tale->tap_minimum_distance = strtoul(env, NULL, 10);
 	else
 		tale->tap_minimum_distance = 0;
+
+	env = getenv("NEMOTALE_TAP_MOVING_DISTANCE");
+	if (env != NULL)
+		tale->tap_moving_distance = strtoul(env, NULL, 10);
+	else
+		tale->tap_moving_distance = UINT_MAX;
 
 	env = getenv("NEMOTALE_LONG_PRESS_DURATION");
 	if (env != NULL)

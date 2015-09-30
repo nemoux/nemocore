@@ -63,6 +63,7 @@ struct nemotale {
 	nemotale_dispatch_event_t dispatch_event;
 
 	uint32_t tap_minimum_distance;
+	uint32_t tap_moving_distance;
 
 	uint32_t long_press_duration;
 	uint32_t long_press_distance;

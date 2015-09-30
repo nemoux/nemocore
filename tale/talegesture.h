@@ -11,7 +11,7 @@ NEMO_BEGIN_EXTERN_C
 #include <talenode.h>
 #include <taleevent.h>
 
-static inline int nemotale_pointer_is_single_click(struct nemotale *tale, struct taleevent *event)
+static inline int nemotale_is_pointer_single_click(struct nemotale *tale, struct taleevent *event)
 {
 	struct taletap *tap = nemotale_pointer_get_tap(tale, event->device);
 
@@ -22,7 +22,7 @@ static inline int nemotale_pointer_is_single_click(struct nemotale *tale, struct
 	return 0;
 }
 
-static inline int nemotale_touch_is_single_click(struct nemotale *tale, struct taleevent *event)
+static inline int nemotale_is_touch_single_click(struct nemotale *tale, struct taleevent *event)
 {
 	struct taletap *tap = nemotale_touch_get_tap(tale, event->device);
 
@@ -40,9 +40,9 @@ static inline int nemotale_touch_is_single_click(struct nemotale *tale, struct t
 static inline int nemotale_is_single_click(struct nemotale *tale, struct taleevent *event, uint32_t type)
 {
 	if (type & NEMOTALE_POINTER_UP_EVENT)
-		return nemotale_pointer_is_single_click(tale, event);
+		return nemotale_is_pointer_single_click(tale, event);
 	else if (type & NEMOTALE_TOUCH_UP_EVENT)
-		return nemotale_touch_is_single_click(tale, event);
+		return nemotale_is_touch_single_click(tale, event);
 
 	return 0;
 }
@@ -140,6 +140,19 @@ static inline int nemotale_is_pointer_button_up(struct nemotale *tale, struct ta
 static inline int nemotale_is_pointer_long_press(struct nemotale *tale, struct taleevent *event, uint32_t type)
 {
 	return type & NEMOTALE_POINTER_LONG_PRESS_EVENT;
+}
+
+static inline int nemotale_tap_is_moving(struct nemotale *tale, struct taletap *tap)
+{
+	if (tap != NULL) {
+		float dx = tap->grab_gx - tap->gx;
+		float dy = tap->grab_gy - tap->gy;
+
+		if (sqrtf(dx * dx + dy * dy) >= tale->tap_moving_distance)
+			return 1;
+	}
+
+	return 0;
 }
 
 #ifdef __cplusplus
