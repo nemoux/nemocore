@@ -374,6 +374,40 @@ static void pick_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 	struct actorgrab *grab = (struct actorgrab *)container_of(base, struct actorgrab, base.touchpoint);
 	struct actorgrab_pick *pick = (struct actorgrab_pick *)container_of(grab, struct actorgrab_pick, base);
 	struct touchpoint *tp = base->touchpoint;
+	struct nemoactor *actor = grab->actor;
+
+	if (actor != NULL && (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALE))) {
+		struct nemocompz *compz = actor->compz;
+		struct nemoview *view = actor->view;
+		double distance = pickgrab_calculate_touchpoint_distance(pick->tp0, pick->tp1);
+		int32_t width, height;
+		int32_t sx, sy;
+		float fromx, fromy, tox, toy;
+
+		width = pick->width * (distance / pick->touch.distance);
+		height = pick->height * (distance / pick->touch.distance);
+
+		width = MAX(width, actor->min_width);
+		height = MAX(height, actor->min_height);
+		width = MIN(width, actor->max_width);
+		height = MIN(height, actor->max_height);
+
+		nemoview_set_scale(view, 1.0f, 1.0f);
+		nemoview_update_transform(view);
+
+		sx = (width - actor->base.width) * -0.5f;
+		sy = (height - actor->base.height) * -0.5f;
+
+		nemoview_transform_to_global(view, 0.0f, 0.0f, &fromx, &fromy);
+		nemoview_transform_to_global(view, sx, sy, &tox, &toy);
+
+		nemoview_set_position(view,
+				view->geometry.x + tox - fromx,
+				view->geometry.y + toy - fromy);
+
+		nemoactor_dispatch_resize(actor, width, height);
+		nemoactor_dispatch_frame(actor);
+	}
 
 	if (tp->focus != NULL) {
 		nemocontent_touch_up(tp, tp->focus->content, time, touchid);
