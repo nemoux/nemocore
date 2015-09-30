@@ -18,6 +18,12 @@ typedef enum {
 } NemoViewTransformType;
 
 typedef enum {
+	NEMO_VIEW_INPUT_NORMAL = 0,
+	NEMO_VIEW_INPUT_TOUCH = 1,
+	NEMO_VIEW_INPUT_LAST
+} NemoViewInputType;
+
+typedef enum {
 	NEMO_VIEW_TOP_AREA = 0,
 	NEMO_VIEW_BOTTOM_AREA = 1,
 	NEMO_VIEW_LEFT_AREA = 2,
@@ -109,7 +115,11 @@ struct nemoview {
 
 		struct nemomatrix matrix, inverse;
 	} transform;
-	
+
+	struct {
+		int type;
+	} input;
+
 	void *data;
 };
 
@@ -162,6 +172,11 @@ static inline void nemoview_put_state(struct nemoview *view, uint32_t state)
 static inline int nemoview_has_state(struct nemoview *view, uint32_t state)
 {
 	return view->state & state;
+}
+
+static inline int nemoview_support_touch_only(struct nemoview *view)
+{
+	return view->input.type == NEMO_VIEW_INPUT_TOUCH;
 }
 
 #ifdef __cplusplus

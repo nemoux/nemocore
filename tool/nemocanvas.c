@@ -397,6 +397,11 @@ void nemocanvas_set_max_size(struct nemocanvas *canvas, int32_t width, int32_t h
 		nemo_surface_set_max_size(canvas->nemo_surface, width, height);
 }
 
+void nemocanvas_set_input_type(struct nemocanvas *canvas, uint32_t type)
+{
+	nemo_surface_set_input_type(canvas->nemo_surface, type);
+}
+
 void nemocanvas_set_input(struct nemocanvas *canvas, int32_t x, int32_t y, int32_t width, int32_t height)
 {
 	nemo_surface_set_input(canvas->nemo_surface, x, y, width, height);

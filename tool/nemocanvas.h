@@ -88,6 +88,7 @@ extern void nemocanvas_execute(struct nemocanvas *canvas, const char *name, cons
 extern void nemocanvas_set_size(struct nemocanvas *canvas, int32_t width, int32_t height);
 extern void nemocanvas_set_min_size(struct nemocanvas *canvas, int32_t width, int32_t height);
 extern void nemocanvas_set_max_size(struct nemocanvas *canvas, int32_t width, int32_t height);
+extern void nemocanvas_set_input_type(struct nemocanvas *canvas, uint32_t type);
 extern void nemocanvas_set_input(struct nemocanvas *canvas, int32_t x, int32_t y, int32_t width, int32_t height);
 extern void nemocanvas_set_pivot(struct nemocanvas *canvas, int px, int py);
 extern void nemocanvas_set_anchor(struct nemocanvas *canvas, float ax, float ay);

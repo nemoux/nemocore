@@ -171,6 +171,17 @@ static void nemo_surface_set_max_size(struct wl_client *client, struct wl_resour
 	bin->max_height = height;
 }
 
+static void nemo_surface_set_input_type(struct wl_client *client, struct wl_resource *resource, uint32_t type)
+{
+	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
+
+	if (type == NEMO_SURFACE_INPUT_TYPE_NORMAL) {
+		bin->view->input.type = NEMO_VIEW_INPUT_NORMAL;
+	} else if (type == NEMO_SURFACE_INPUT_TYPE_TOUCH) {
+		bin->view->input.type = NEMO_VIEW_INPUT_TOUCH;
+	}
+}
+
 static void nemo_surface_set_input(struct wl_client *client, struct wl_resource *resource, uint32_t x, uint32_t y, uint32_t width, uint32_t height)
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
@@ -289,6 +300,7 @@ static const struct nemo_surface_interface nemo_surface_implementation = {
 	nemo_surface_set_size,
 	nemo_surface_set_min_size,
 	nemo_surface_set_max_size,
+	nemo_surface_set_input_type,
 	nemo_surface_set_input,
 	nemo_surface_set_pivot,
 	nemo_surface_set_anchor,
