@@ -8,6 +8,10 @@ PKG_CHECK_MODULES(JSON REQUIRED json-c)
 INCLUDE_DIRECTORIES(${JSON_INCLUDE_DIRS})
 LINK_DIRECTORIES(${JSON_LIBRARY_DIRS})
 
+PKG_CHECK_MODULES(SKIA REQUIRED skia)
+INCLUDE_DIRECTORIES(${SKIA_INCLUDE_DIRS})
+LINK_DIRECTORIES(${SKIA_LIBRARY_DIRS})
+
 include_directories(
 	${CMAKE_SOURCE_DIR}/asst
 	${CMAKE_SOURCE_DIR}/tool
@@ -17,7 +21,7 @@ include_directories(
 	)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -std=c++11")
 set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 
 add_executable(nemolog
@@ -29,6 +33,21 @@ TARGET_LINK_LIBRARIES(nemolog
 	)
 
 INSTALL(TARGETS nemolog DESTINATION bin)
+
+add_executable(nemotouch
+	nemotouch.cpp
+	talehelper.c
+	)
+
+TARGET_LINK_LIBRARIES(nemotouch
+	nemoasst
+	nemotool
+	nemotale
+	${NEMOUX_COMMON_LIBRARIES}
+	${SKIA_LIBRARIES}
+	)
+
+INSTALL(TARGETS nemotouch DESTINATION bin)
 
 add_executable(nemoimage
 	nemoimage.c
