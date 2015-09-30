@@ -47,6 +47,33 @@ static inline int nemotale_is_single_click(struct nemotale *tale, struct taleeve
 	return 0;
 }
 
+static inline int nemotale_is_touch_cup(struct nemotale *tale, struct taleevent *event, uint32_t type)
+{
+	struct taletap *tap0, *tap;
+	float dx, dy;
+	float d0, d1;
+	int i, count = 0;
+
+	tap0 = event->taps[0];
+
+	for (i = 1; i < event->tapcount; i++) {
+		tap = event->taps[i];
+
+		dx = tap0->grab_gx - tap->grab_gx;
+		dy = tap0->grab_gy - tap->grab_gy;
+		d0 = sqrtf(dx * dx + dy * dy);
+
+		dx = tap0->gx - tap->gx;
+		dy = tap0->gy - tap->gy;
+		d1 = sqrtf(dx * dx + dy * dy);
+
+		if (d0 > d1 && d0 - d1 > tale->cup_minimum_distance)
+			count++;
+	}
+
+	return count >= 2;
+}
+
 static inline int nemotale_is_down_event(struct nemotale *tale, struct taleevent *event, uint32_t type)
 {
 	return type & NEMOTALE_DOWN_EVENT;

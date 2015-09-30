@@ -124,6 +124,10 @@ static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode 
 				}
 			}
 #endif
+
+			if (event->tapcount >= 3 && nemotale_is_touch_cup(tale, event, type) != 0) {
+				nemotool_exit(context->tool);
+			}
 		} else if (nemotale_is_single_click(tale, event, type) != 0) {
 			nemotale_event_update_node_taps(tale, node, event, type);
 
@@ -146,9 +150,6 @@ static void nemoplay_dispatch_video_resize(struct nemocanvas *canvas, int32_t wi
 
 	if (width == 0 || height == 0)
 		return;
-
-	if (width < 200 || height < 200)
-		nemotool_exit(context->tool);
 
 	nemogst_resize_video(context->gst, width, height);
 
@@ -384,6 +385,8 @@ int main(int argc, char *argv[])
 	}
 
 	free(uri);
+
+	nemocanvas_set_min_size(context->canvas, width / 2, height / 2);
 
 	nemogst_play_media(context->gst);
 
