@@ -97,6 +97,9 @@ struct nemoview *nemocompz_pick_canvas(struct nemocompz *compz, float x, float y
 
 			if (!wl_list_empty(&view->children_list)) {
 				wl_list_for_each(child, &view->children_list, children_link) {
+					if (child->canvas == NULL)
+						continue;
+
 					NEMOCOMPZ_PICK_VIEW(child, x, y, sx, sy);
 				}
 			}
