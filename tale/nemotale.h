@@ -70,7 +70,7 @@ struct nemotale {
 
 	uint32_t single_click_duration;
 	uint32_t single_click_distance;
-	
+
 	uint32_t cup_minimum_distance;
 };
 
@@ -185,6 +185,11 @@ static inline int32_t nemotale_get_height(struct nemotale *tale)
 static inline void nemotale_set_dispatch_event(struct nemotale *tale, nemotale_dispatch_event_t dispatch)
 {
 	tale->dispatch_event = dispatch;
+}
+
+static inline int nemotale_has_dispatch_event(struct nemotale *tale)
+{
+	return tale->dispatch_event != NULL;
 }
 
 static inline void nemotale_set_tap_minimum_distance(struct nemotale *tale, uint32_t distance)
