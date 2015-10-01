@@ -36,6 +36,8 @@ struct nemoeffect;
 struct nemoscreen;
 struct nemosound;
 
+typedef void (*nemocompz_dispatch_idle_t)(void *data);
+
 struct nemocompz {
 	struct wl_display *display;
 	struct wl_event_loop *loop;
@@ -152,6 +154,8 @@ extern void nemocompz_dispatch_effect(struct nemocompz *compz, struct nemoeffect
 
 extern void nemocompz_dispatch_frame(struct nemocompz *compz);
 extern void nemocompz_set_frame_timeout(struct nemocompz *compz, uint32_t timeout);
+
+extern void nemocompz_dispatch_idle(struct nemocompz *compz, nemocompz_dispatch_idle_t dispatch, void *data);
 
 extern struct nemoevent *nemocompz_get_main_event(struct nemocompz *compz);
 

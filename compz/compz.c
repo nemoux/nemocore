@@ -304,6 +304,11 @@ static int nemocompz_dispatch_framerate_timeout(void *data)
 	wl_event_source_timer_update(compz->framerate_timer, 1000);
 }
 
+void nemocompz_dispatch_idle(struct nemocompz *compz, nemocompz_dispatch_idle_t dispatch, void *data)
+{
+	wl_event_loop_add_idle(compz->loop, dispatch, data);
+}
+
 struct nemocompz *nemocompz_create(void)
 {
 	struct nemocompz *compz;
