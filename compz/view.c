@@ -137,6 +137,17 @@ void nemoview_set_pivot(struct nemoview *view, float px, float py)
 	nemoview_geometry_dirty(view);
 }
 
+void nemoview_put_pivot(struct nemoview *view)
+{
+	if (view->geometry.has_pivot == 0)
+		return;
+	
+	nemoview_correct_pivot(view, 0.5f, 0.5f);
+	
+	view->geometry.has_pivot = 0;
+	nemoview_geometry_dirty(view);
+}
+
 void nemoview_set_anchor(struct nemoview *view, float ax, float ay)
 {
 	if (view->geometry.ax == ax && view->geometry.ay == ay)

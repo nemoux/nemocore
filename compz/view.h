@@ -130,6 +130,7 @@ extern void nemoview_set_position(struct nemoview *view, float x, float y);
 extern void nemoview_set_rotation(struct nemoview *view, float r);
 extern void nemoview_set_scale(struct nemoview *view, float sx, float sy);
 extern void nemoview_set_pivot(struct nemoview *view, float px, float py);
+extern void nemoview_put_pivot(struct nemoview *view);
 extern void nemoview_set_anchor(struct nemoview *view, float ax, float ay);
 extern void nemoview_correct_pivot(struct nemoview *view, float px, float py);
 extern void nemoview_geometry_dirty(struct nemoview *view);
