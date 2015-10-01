@@ -287,7 +287,6 @@ void nemocompz_dispatch_frame(struct nemocompz *compz)
 	}
 }
 
-#ifdef NEMO_FRAMERATE_LOG
 static int nemocompz_dispatch_framerate_timeout(void *data)
 {
 	struct nemocompz *compz = (struct nemocompz *)data;
@@ -304,13 +303,13 @@ static int nemocompz_dispatch_framerate_timeout(void *data)
 
 	wl_event_source_timer_update(compz->framerate_timer, 1000);
 }
-#endif
 
 struct nemocompz *nemocompz_create(void)
 {
 	struct nemocompz *compz;
 	struct wl_display *display;
 	struct wl_event_loop *loop;
+	char *env;
 
 	compz = (struct nemocompz *)malloc(sizeof(struct nemocompz));
 	if (compz == NULL)
@@ -428,13 +427,14 @@ struct nemocompz *nemocompz_create(void)
 	compz->frame_timeout = NEMOCOMPZ_DEFAULT_FRAME_TIMEOUT;
 	compz->frame_done = 1;
 
-#ifdef NEMO_FRAMERATE_LOG
-	compz->framerate_timer = wl_event_loop_add_timer(compz->loop, nemocompz_dispatch_framerate_timeout, compz);
-	if (compz->framerate_timer == NULL)
-		goto err1;
+	env = getenv("NEMOUX_FRAMERATE_LOG");
+	if (env != NULL && strcmp(env, "ON") == 0) {
+		compz->framerate_timer = wl_event_loop_add_timer(compz->loop, nemocompz_dispatch_framerate_timeout, compz);
+		if (compz->framerate_timer == NULL)
+			goto err1;
 
-	wl_event_source_timer_update(compz->framerate_timer, 1000);
-#endif
+		wl_event_source_timer_update(compz->framerate_timer, 1000);
+	}
 
 	wl_list_init(&compz->frame_list);
 
@@ -495,10 +495,8 @@ void nemocompz_destroy(struct nemocompz *compz)
 	if (compz->frame_timer != NULL)
 		wl_event_source_remove(compz->frame_timer);
 
-#ifdef NEMO_FRAMERATE_LOG
 	if (compz->framerate_timer != NULL)
 		wl_event_source_remove(compz->framerate_timer);
-#endif
 
 	nemolog_message("COMPZ", "destroy current session\n");
 
