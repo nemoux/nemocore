@@ -68,8 +68,6 @@ void pitchfilter_dispatch(struct pitchfilter *filter, double x, double y, double
 
 int pitchfilter_flush(struct pitchfilter *filter)
 {
-	double prev = 0.0f;
-	int advance = 0;
 	int i;
 
 	filter->dist = 0.0f;
@@ -83,12 +81,8 @@ int pitchfilter_flush(struct pitchfilter *filter)
 		uint32_t dtime = filter->samples[i].dt;
 		double dist = sqrtf(dx * dx + dy * dy);
 
-		advance = advance + (prev < dist ? +1 : -1);
-
 		filter->dist = filter->dist + dist;
 		filter->dtime = filter->dtime + dtime;
-
-		prev = dist;
 	}
 
 	if (filter->index > 0) {
@@ -108,8 +102,8 @@ int pitchfilter_flush(struct pitchfilter *filter)
 		filter->dy = dy / dist;
 	}
 
-	if (advance <= 0 || isnan(filter->dx) || isnan(filter->dy))
+	if (isnan(filter->dx) || isnan(filter->dy))
 		return 0;
 
-	return advance;
+	return 1;
 }
