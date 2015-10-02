@@ -3,6 +3,12 @@
 
 #include <nemoease.h>
 
-extern int nemomote_tween_update(struct nemomote *mote, uint32_t type, double secs, struct nemoease *ease, uint32_t dtype);
+typedef enum {
+	NEMOMOTE_POSITION_TWEEN = (1 << 0),
+	NEMOMOTE_ALPHA_TWEEN = (1 << 1),
+	NEMOMOTE_MASS_TWEEN = (1 << 2),
+} NemoMoteTween;
+
+extern int nemomote_tween_update(struct nemomote *mote, uint32_t type, double secs, struct nemoease *ease, uint32_t dtype, uint32_t tween);
 
 #endif

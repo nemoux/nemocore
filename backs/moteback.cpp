@@ -115,8 +115,8 @@ static void moteback_prepare_text(struct moteback *mote, const char *text, int n
 		width += ceil(widths[i]);
 	}
 
-	x = random_get_double(0.0f, mote->width - width * 16.0f);
-	y = random_get_double(0.0f, mote->height - size * 16.0f);
+	x = random_get_double(0.0f, mote->width - width * 24.0f);
+	y = random_get_double(0.0f, mote->height - size * 24.0f);
 
 	for (i = 0; i < size; i++) {
 		for (j = 0; j < size * ntext; j++) {
@@ -126,9 +126,11 @@ static void moteback_prepare_text(struct moteback *mote, const char *text, int n
 					return;
 
 				nemomote_tweener_set_one(mote->mote, p,
-						x + j * 16,
-						y + i * 16,
-						random_get_double(1.0f, 5.0f));
+						x + j * 24,
+						y + i * 24,
+						1.0f, 0.8f,
+						12.0f, 8.0f,
+						5.0f, 1.0f);
 				nemomote_type_set_one(mote->mote, p, 5);
 			}
 		}
@@ -142,11 +144,19 @@ static void moteback_update_one(struct moteback *mote, double secs)
 	nemomote_collide_update(mote->mote, 2, 1, secs, 1.5f);
 	nemomote_speedlimit_update(mote->mote, 1, secs, 0.0f, 300.0f);
 
-	nemomote_tween_update(mote->mote, 5, secs, &mote->ease, 6);
+	if (nemomote_tween_update(mote->mote, 5, secs, &mote->ease, 6, NEMOMOTE_POSITION_TWEEN | NEMOMOTE_ALPHA_TWEEN | NEMOMOTE_MASS_TWEEN) != 0) {
+		nemomote_tweener_set(mote->mote, 6,
+				0.0f, 0.0f,
+				0.5f, 0.3f,
+				8.0f, 3.0f,
+				5.0f, 1.0f);
+	}
 
-	nemomote_explosion_update(mote->mote, 6, secs, -30.0f, 30.0f, -30.0f, 30.0f);
-	nemomote_sleeptime_set(mote->mote, 6, 15.0f, 5.0f);
-	nemomote_type_set(mote->mote, 6, 1);
+	if (nemomote_tween_update(mote->mote, 6, secs, &mote->ease, 7, NEMOMOTE_ALPHA_TWEEN | NEMOMOTE_MASS_TWEEN) != 0) {
+		nemomote_explosion_update(mote->mote, 7, secs, -30.0f, 30.0f, -30.0f, 30.0f);
+		nemomote_sleeptime_set(mote->mote, 7, 9.0f, 3.0f);
+		nemomote_type_set(mote->mote, 7, 1);
+	}
 
 	nemomote_boundingbox_update(mote->mote, 1, secs, &mote->box, 0.8f);
 	nemomote_move_update(mote->mote, 1, secs);
@@ -370,7 +380,7 @@ int main(int argc, char *argv[])
 	nemomote_blast_emit(mote->mote, 500);
 	nemomote_position_update(mote->mote, &mote->box);
 	nemomote_velocity_update(mote->mote, &mote->speed);
-	nemomote_color_update(mote->mote, 0.0f, 0.0f, 0.5f, 0.5f, 0.5f, 0.5f, 0.7f, 0.3f);
+	nemomote_color_update(mote->mote, 0.0f, 0.0f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.3f);
 	nemomote_mass_update(mote->mote, 8.0f, 3.0f);
 	nemomote_type_update(mote->mote, 1);
 	nemomote_commit(mote->mote);
@@ -378,7 +388,7 @@ int main(int argc, char *argv[])
 	nemomote_blast_emit(mote->mote, 50);
 	nemomote_position_update(mote->mote, &mote->box);
 	nemomote_velocity_update(mote->mote, &mote->speed);
-	nemomote_color_update(mote->mote, 0.0f, 0.0f, 0.8f, 0.8f, 0.8f, 0.8f, 1.0f, 0.7f);
+	nemomote_color_update(mote->mote, 0.0f, 0.0f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.6f);
 	nemomote_mass_update(mote->mote, 15.0f, 5.0f);
 	nemomote_type_update(mote->mote, 2);
 	nemomote_commit(mote->mote);
