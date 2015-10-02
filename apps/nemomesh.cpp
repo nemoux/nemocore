@@ -778,7 +778,7 @@ static void nemomesh_dispatch_tale_event(struct nemotale *tale, struct talenode 
 					nemocanvas_pick(context->canvas,
 							event->taps[0]->serial,
 							event->taps[1]->serial,
-							(1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_SCALE));
+							(1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_SCALE) | (1 << NEMO_SURFACE_PICK_TYPE_MOVE));
 
 					one->on_guides = 1;
 

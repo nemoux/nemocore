@@ -63,7 +63,7 @@ static void nemopdf_dispatch_tale_event(struct nemotale *tale, struct talenode *
 				nemocanvas_pick(canvas,
 						event->taps[0]->serial,
 						event->taps[1]->serial,
-						(1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_SCALE));
+						(1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_SCALE) | (1 << NEMO_SURFACE_PICK_TYPE_MOVE));
 			}
 		} else if (nemotale_is_touch_motion(tale, event, type)) {
 			nemotale_event_update_node_taps(tale, node, event, type);

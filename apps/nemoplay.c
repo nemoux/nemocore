@@ -69,7 +69,7 @@ static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode 
 				nemocanvas_pick(context->canvas,
 						event->taps[0]->serial,
 						event->taps[1]->serial,
-						(1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_SCALE));
+						(1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_SCALE) | (1 << NEMO_SURFACE_PICK_TYPE_MOVE));
 			} else if (event->tapcount == 3 && nemotale_tap_is_moving(tale, event->taps[0]) == 0) {
 #if	NEMOPLAY_SEEK_ENABLE
 				nemocanvas_miss(context->canvas);

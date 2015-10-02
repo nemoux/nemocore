@@ -24,9 +24,8 @@ struct shellgrab_pick {
 	} touch;
 
 	int32_t width, height;
-	float x, y;
-	float cx, cy;
 	float sx, sy;
+	float dx, dy;
 	float r;
 
 	struct touchpoint *tp0, *tp1;
@@ -45,9 +44,8 @@ struct actorgrab_pick {
 	} touch;
 
 	int32_t width, height;
-	float x, y;
-	float cx, cy;
 	float sx, sy;
+	float dx, dy;
 	float r;
 
 	struct touchpoint *tp0, *tp1;

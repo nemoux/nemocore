@@ -141,9 +141,9 @@ void nemoview_put_pivot(struct nemoview *view)
 {
 	if (view->geometry.has_pivot == 0)
 		return;
-	
-	nemoview_correct_pivot(view, 0.5f, 0.5f);
-	
+
+	nemoview_correct_pivot(view, 0.0f, 0.0f);
+
 	view->geometry.has_pivot = 0;
 	nemoview_geometry_dirty(view);
 }

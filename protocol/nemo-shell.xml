@@ -43,6 +43,7 @@
 			<entry name="scale" value="0"/>
 			<entry name="rotate" value="1"/>
 			<entry name="resize" value="2"/>
+			<entry name="move" value="3"/>
 		</enum>
 
 		<request name="pick">
