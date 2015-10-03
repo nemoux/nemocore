@@ -49,8 +49,6 @@ static void nemoimage_dispatch_tale_event(struct nemotale *tale, struct talenode
 
 			if (event->tapcount == 1) {
 			} else if (event->tapcount == 2) {
-			} else if (event->tapcount >= 3 && nemotale_is_touch_cup(tale, event, type) != 0) {
-				nemotool_exit(context->tool);
 			}
 		}
 	}
@@ -64,6 +62,11 @@ static void nemoimage_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t 
 
 	if (width == 0 || height == 0)
 		return;
+
+	if (width < nemotale_get_minimum_width(tale) || height < nemotale_get_minimum_height(tale)) {
+		nemotool_exit(context->tool);
+		return;
+	}
 
 	nemotool_resize_egl_canvas(context->canvas, width, height);
 	nemotale_set_viewport(tale, width, height);
@@ -139,8 +142,6 @@ int main(int argc, char *argv[])
 
 	context->canvas = canvas = nemotool_create_egl_canvas(egl, width, height);
 	nemocanvas_set_nemosurface(NTEGL_CANVAS(canvas), NEMO_SHELL_SURFACE_TYPE_NORMAL);
-	nemocanvas_set_fullscreen_type(NTEGL_CANVAS(canvas), NEMO_SURFACE_FULLSCREEN_TYPE_PICK);
-	nemocanvas_set_min_size(NTEGL_CANVAS(canvas), width / 8, height / 8);
 	nemocanvas_set_anchor(NTEGL_CANVAS(canvas), -0.5f, -0.5f);
 	nemocanvas_set_dispatch_resize(NTEGL_CANVAS(canvas), nemoimage_dispatch_canvas_resize);
 	nemocanvas_set_dispatch_screen(NTEGL_CANVAS(canvas), nemoimage_dispatch_canvas_screen);

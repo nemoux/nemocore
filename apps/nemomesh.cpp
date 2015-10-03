@@ -812,10 +812,6 @@ static void nemomesh_dispatch_tale_event(struct nemotale *tale, struct talenode 
 
 				nemocanvas_dispatch_frame(context->canvas);
 			}
-
-			if (event->tapcount >= 3 && nemotale_is_touch_cup(tale, event, type) != 0) {
-				nemotool_exit(context->tool);
-			}
 		} else if (nemotale_is_touch_up(tale, event, type)) {
 			nemotale_event_update_node_taps(tale, node, event, type);
 
@@ -869,6 +865,11 @@ static void nemomesh_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t w
 
 	if (width == 0 || height == 0)
 		return;
+
+	if (width < nemotale_get_minimum_width(tale) * 2 || height < nemotale_get_minimum_height(tale) * 2) {
+		nemotool_exit(context->tool);
+		return;
+	}
 
 	context->width = width;
 	context->height = height;
@@ -968,7 +969,6 @@ int main(int argc, char *argv[])
 	context->eglcanvas = canvas = nemotool_create_egl_canvas(egl, width, height);
 	nemocanvas_set_userdata(NTEGL_CANVAS(canvas), context);
 	nemocanvas_set_nemosurface(NTEGL_CANVAS(canvas), NEMO_SHELL_SURFACE_TYPE_NORMAL);
-	nemocanvas_set_min_size(NTEGL_CANVAS(canvas), width / 2, height / 2);
 	nemocanvas_set_max_size(NTEGL_CANVAS(canvas), width * 4, height * 4);
 	nemocanvas_set_dispatch_resize(NTEGL_CANVAS(canvas), nemomesh_dispatch_canvas_resize);
 	nemocanvas_set_dispatch_frame(NTEGL_CANVAS(canvas), nemomesh_dispatch_canvas_frame);
