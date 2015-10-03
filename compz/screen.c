@@ -349,7 +349,6 @@ int nemoscreen_get_config_mode(struct nemocompz *compz, uint32_t nodeid, uint32_
 	int32_t width, height;
 	uint32_t refresh;
 	char *attr0, *attr1;
-	const char *value;
 	int index;
 
 	asprintf(&attr0, "%d", nodeid);
@@ -363,23 +362,9 @@ int nemoscreen_get_config_mode(struct nemocompz *compz, uint32_t nodeid, uint32_
 		return 0;
 	}
 
-	if ((value = nemoitem_get_attr(compz->configs, index, "width")) != NULL) {
-		width = strtoul(value, 0, 10);
-	} else {
-		width = 0;
-	}
-
-	if ((value = nemoitem_get_attr(compz->configs, index, "height")) != NULL) {
-		height = strtoul(value, 0, 10);
-	} else {
-		height = 0;
-	}
-
-	if ((value = nemoitem_get_attr(compz->configs, index, "refresh")) != NULL) {
-		refresh = strtoul(value, 0, 10);
-	} else {
-		refresh = 0;
-	}
+	width = nemoitem_get_iattr(compz->configs, index, "width", 0);
+	height = nemoitem_get_iattr(compz->configs, index, "height", 0);
+	refresh = nemoitem_get_iattr(compz->configs, index, "refresh", 0);
 
 	mode->width = width;
 	mode->height = height;
@@ -408,30 +393,11 @@ int nemoscreen_get_config_geometry(struct nemocompz *compz, uint32_t nodeid, uin
 		return 0;
 	}
 
-	value = nemoitem_get_attr(compz->configs, index, "x");
-	if (value != NULL) {
-		screen->x = strtoul(value, 0, 10);
-	}
-
-	value = nemoitem_get_attr(compz->configs, index, "y");
-	if (value != NULL) {
-		screen->y = strtoul(value, 0, 10);
-	}
-
-	value = nemoitem_get_attr(compz->configs, index, "width");
-	if (value != NULL) {
-		screen->width = strtoul(value, 0, 10);
-	}
-
-	value = nemoitem_get_attr(compz->configs, index, "height");
-	if (value != NULL) {
-		screen->height = strtoul(value, 0, 10);
-	}
-
-	value = nemoitem_get_attr(compz->configs, index, "diagonal");
-	if (value != NULL) {
-		screen->diagonal = strtoul(value, 0, 10);
-	}
+	screen->x = nemoitem_get_iattr(compz->configs, index, "x", 0);
+	screen->y = nemoitem_get_iattr(compz->configs, index, "y", 0);
+	screen->width = nemoitem_get_iattr(compz->configs, index, "width", 1920);
+	screen->height = nemoitem_get_iattr(compz->configs, index, "height", 1080);
+	screen->diagonal = nemoitem_get_iattr(compz->configs, index, "diagonal", 1);
 
 	value = nemoitem_get_attr(compz->configs, index, "transform");
 	if (value != NULL) {

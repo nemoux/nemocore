@@ -87,21 +87,10 @@ int nemoinput_get_config_geometry(struct nemocompz *compz, const char *devnode, 
 	if (index < 0)
 		return 0;
 
-	value = nemoitem_get_attr(compz->configs, index, "x");
-	if (value != NULL)
-		node->x = strtoul(value, 0, 10);
-
-	value = nemoitem_get_attr(compz->configs, index, "y");
-	if (value != NULL)
-		node->y = strtoul(value, 0, 10);
-
-	value = nemoitem_get_attr(compz->configs, index, "width");
-	if (value != NULL)
-		node->width = strtoul(value, 0, 10);
-
-	value = nemoitem_get_attr(compz->configs, index, "height");
-	if (value != NULL)
-		node->height = strtoul(value, 0, 10);
+	node->x = nemoitem_get_iattr(compz->configs, index, "x", 0);
+	node->y = nemoitem_get_iattr(compz->configs, index, "y", 0);
+	node->width = nemoitem_get_iattr(compz->configs, index, "width", nemocompz_get_scene_width(compz));
+	node->height = nemoitem_get_iattr(compz->configs, index, "height", nemocompz_get_scene_height(compz));
 
 	value = nemoitem_get_attr(compz->configs, index, "transform");
 	if (value != NULL) {

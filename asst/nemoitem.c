@@ -172,13 +172,13 @@ char *nemoitem_get_attr(struct nemoitem *item, int index, const char *attr)
 	return NULL;
 }
 
-int nemoitem_get_iattr(struct nemoitem *item, int index, const char *attr)
+int nemoitem_get_iattr(struct nemoitem *item, int index, const char *attr, int value)
 {
 	struct itemnode *node;
 	int i;
 
 	if (index >= item->mnodes)
-		return 0;
+		return value;
 
 	node = &item->nodes[index];
 
@@ -188,16 +188,16 @@ int nemoitem_get_iattr(struct nemoitem *item, int index, const char *attr)
 		}
 	}
 
-	return 0;
+	return value;
 }
 
-float nemoitem_get_fattr(struct nemoitem *item, int index, const char *attr)
+float nemoitem_get_fattr(struct nemoitem *item, int index, const char *attr, float value)
 {
 	struct itemnode *node;
 	int i;
 
 	if (index >= item->mnodes)
-		return 0.0f;
+		return value;
 
 	node = &item->nodes[index];
 
@@ -207,7 +207,7 @@ float nemoitem_get_fattr(struct nemoitem *item, int index, const char *attr)
 		}
 	}
 
-	return 0.0f;
+	return value;
 }
 
 char *nemoitem_get_vattr(struct nemoitem *item, int index, const char *fmt, ...)

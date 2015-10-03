@@ -768,6 +768,7 @@ void nemoshell_set_client_state(struct shellbin *bin, struct clientstate *state)
 
 void nemoshell_load_fullscreens(struct nemoshell *shell)
 {
+	struct nemocompz *compz = shell->compz;
 	struct shellscreen *screen;
 	int index = 0;
 
@@ -779,15 +780,15 @@ void nemoshell_load_fullscreens(struct nemoshell *shell)
 			break;
 		memset(screen, 0, sizeof(struct shellscreen));
 
-		screen->sx = nemoitem_get_iattr(shell->configs, index, "sx");
-		screen->sy = nemoitem_get_iattr(shell->configs, index, "sy");
-		screen->sw = nemoitem_get_iattr(shell->configs, index, "sw");
-		screen->sh = nemoitem_get_iattr(shell->configs, index, "sh");
-		screen->dx = nemoitem_get_iattr(shell->configs, index, "dx");
-		screen->dy = nemoitem_get_iattr(shell->configs, index, "dy");
-		screen->dw = nemoitem_get_iattr(shell->configs, index, "dw");
-		screen->dh = nemoitem_get_iattr(shell->configs, index, "dh");
-		screen->id = nemoitem_get_iattr(shell->configs, index, "id");
+		screen->sx = nemoitem_get_iattr(shell->configs, index, "sx", 0);
+		screen->sy = nemoitem_get_iattr(shell->configs, index, "sy", 0);
+		screen->sw = nemoitem_get_iattr(shell->configs, index, "sw", nemocompz_get_scene_width(compz));
+		screen->sh = nemoitem_get_iattr(shell->configs, index, "sh", nemocompz_get_scene_height(compz));
+		screen->dx = nemoitem_get_iattr(shell->configs, index, "dx", 0);
+		screen->dy = nemoitem_get_iattr(shell->configs, index, "dy", 0);
+		screen->dw = nemoitem_get_iattr(shell->configs, index, "dw", nemocompz_get_scene_width(compz));
+		screen->dh = nemoitem_get_iattr(shell->configs, index, "dh", nemocompz_get_scene_height(compz));
+		screen->id = nemoitem_get_iattr(shell->configs, index, "id", 0);
 
 		wl_list_insert(&shell->fullscreen_list, &screen->link);
 	}

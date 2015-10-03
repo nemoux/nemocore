@@ -40,17 +40,8 @@ struct nemobackend *tuiobackend_create(struct nemocompz *compz)
 		else
 			protocol = NEMO_TUIO_OSC_PROTOCOL;
 
-		value = nemoitem_get_attr(compz->configs, index, "port");
-		if (value == NULL)
-			port = 3333;
-		else
-			port = strtoul(value, 0, 10);
-
-		value = nemoitem_get_attr(compz->configs, index, "max");
-		if (value == NULL)
-			max = 16;
-		else
-			max = strtoul(value, 0, 10);
+		port = nemoitem_get_iattr(compz->configs, index, "port", 3333);
+		max = nemoitem_get_iattr(compz->configs, index, "max", 16);
 
 		node = tuio_create_node(compz, protocol, port, max);
 		if (node == NULL)
