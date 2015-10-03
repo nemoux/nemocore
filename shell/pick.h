@@ -12,7 +12,6 @@ NEMO_BEGIN_EXTERN_C
 struct nemoshell;
 struct shellbin;
 struct nemoactor;
-struct pitchfilter;
 
 struct shellgrab_pick {
 	struct shellgrab base;
@@ -26,15 +25,12 @@ struct shellgrab_pick {
 
 	int32_t width, height;
 	float sx, sy;
-	float cx, cy;
 	float dx, dy;
 	float r;
 
 	struct touchpoint *tp0, *tp1;
 
 	struct shellgrab_pick *other;
-
-	struct pitchfilter *filter;
 };
 
 struct actorgrab_pick {
@@ -49,15 +45,12 @@ struct actorgrab_pick {
 
 	int32_t width, height;
 	float sx, sy;
-	float cx, cy;
 	float dx, dy;
 	float r;
 
 	struct touchpoint *tp0, *tp1;
 
 	struct actorgrab_pick *other;
-
-	struct pitchfilter *filter;
 };
 
 extern int nemoshell_pick_canvas_by_touchpoint_on_area(struct touchpoint *tp0, struct touchpoint *tp1, struct shellbin *bin);

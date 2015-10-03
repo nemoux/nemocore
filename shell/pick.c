@@ -20,7 +20,6 @@
 #include <actor.h>
 #include <content.h>
 #include <vieweffect.h>
-#include <pitchfilter.h>
 #include <nemomisc.h>
 
 static float pickgrab_calculate_touchpoint_distance(struct touchpoint *tp0, struct touchpoint *tp1)
@@ -98,25 +97,6 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		nemocontent_touch_up(tp0, tp0->focus->content, time, tp0->gid);
 	}
 
-	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_MOVE)) {
-		if (bin != NULL && pitchfilter_flush(pick->filter) > 0) {
-			struct pitchfilter *filter = pick->filter;
-			struct vieweffect *effect;
-
-			effect = vieweffect_create(bin->view);
-			effect->type = NEMO_VIEW_PITCH_EFFECT;
-			if (tp0->touch->node->screen != NULL)
-				effect->pitch.velocity = MIN(tp0->touch->node->screen->diagonal * filter->dist / filter->dtime * 1000.0f, 5000.0f);
-			else
-				effect->pitch.velocity = 5000.0f;
-			effect->pitch.dx = filter->dx;
-			effect->pitch.dy = filter->dy;
-			effect->pitch.friction = 12.0f * 1000.0f;
-
-			vieweffect_dispatch(bin->shell->compz, effect);
-		}
-	}
-
 	touchpoint_set_focus(tp0, NULL);
 
 	touchpoint_update_grab(tp1);
@@ -126,7 +106,6 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		nemoshell_send_bin_configure(bin);
 	}
 
-	pitchfilter_destroy(pick->filter);
 	nemoshell_end_touchpoint_shellgrab(grab);
 	nemoshell_end_touchpoint_shellgrab(&pick->other->base);
 	free(pick->other);
@@ -210,11 +189,6 @@ static void pick_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 
 		cx = pick->dx + (pick->tp0->x + pick->tp1->x) / 2.0f;
 		cy = pick->dy + (pick->tp0->y + pick->tp1->y) / 2.0f;
-
-		pitchfilter_dispatch(pick->filter, cx, cy, cx - pick->cx, cy - pick->cy, time);
-
-		pick->cx = pick->other->cx = cx;
-		pick->cy = pick->other->cy = cy;
 
 		nemoview_set_position(bin->view, cx, cy);
 	}
@@ -313,8 +287,6 @@ int nemoshell_pick_canvas_by_touchpoint_on_area(struct touchpoint *tp0, struct t
 	pick0->height = pick1->height = bin->geometry.height;
 	pick0->sx = pick1->sx = bin->view->geometry.sx;
 	pick0->sy = pick1->sy = bin->view->geometry.sy;
-	pick0->cx = pick1->cx = (tp0->x + tp1->x) / 2.0f;
-	pick0->cy = pick1->cy = (tp0->y + tp1->y) / 2.0f;
 	pick0->r = pick1->r = bin->view->geometry.r;
 	pick0->touch.distance = pick1->touch.distance = pickgrab_calculate_touchpoint_distance(tp0, tp1);
 	pick0->touch.r = pick1->touch.r = pickgrab_calculate_touchpoint_angle(tp0, tp1);
@@ -322,10 +294,8 @@ int nemoshell_pick_canvas_by_touchpoint_on_area(struct touchpoint *tp0, struct t
 	if (bin->view->geometry.has_pivot == 0)
 		nemoview_correct_pivot(bin->view, bin->view->content->width * 0.5f, bin->view->content->height * 0.5f);
 
-	pick0->dx = pick1->dx = bin->view->geometry.x - pick0->cx;
-	pick0->dy = pick1->dy = bin->view->geometry.y - pick0->cy;
-
-	pick0->filter = pick1->filter = pitchfilter_create(20.0f, 30);
+	pick0->dx = pick1->dx = bin->view->geometry.x - (tp0->x + tp1->x) / 2.0f;
+	pick0->dy = pick1->dy = bin->view->geometry.y - (tp0->y + tp1->y) / 2.0f;
 
 	pick0->tp0 = pick1->tp0 = tp0;
 	pick0->tp1 = pick1->tp1 = tp1;
@@ -372,8 +342,6 @@ int nemoshell_pick_canvas_by_touchpoint(struct touchpoint *tp0, struct touchpoin
 	pick0->height = pick1->height = bin->geometry.height;
 	pick0->sx = pick1->sx = bin->view->geometry.sx;
 	pick0->sy = pick1->sy = bin->view->geometry.sy;
-	pick0->cx = pick1->cx = (tp0->x + tp1->x) / 2.0f;
-	pick0->cy = pick1->cy = (tp0->y + tp1->y) / 2.0f;
 	pick0->r = pick1->r = bin->view->geometry.r;
 	pick0->touch.distance = pick1->touch.distance = pickgrab_calculate_touchpoint_distance(tp0, tp1);
 	pick0->touch.r = pick1->touch.r = pickgrab_calculate_touchpoint_angle(tp0, tp1);
@@ -381,10 +349,8 @@ int nemoshell_pick_canvas_by_touchpoint(struct touchpoint *tp0, struct touchpoin
 	if (bin->view->geometry.has_pivot == 0)
 		nemoview_correct_pivot(bin->view, bin->view->content->width * 0.5f, bin->view->content->height * 0.5f);
 
-	pick0->dx = pick1->dx = bin->view->geometry.x - pick0->cx;
-	pick0->dy = pick1->dy = bin->view->geometry.y - pick0->cy;
-
-	pick0->filter = pick1->filter = pitchfilter_create(20.0f, 30);
+	pick0->dx = pick1->dx = bin->view->geometry.x - (tp0->x + tp1->x) / 2.0f;
+	pick0->dy = pick1->dy = bin->view->geometry.y - (tp0->y + tp1->y) / 2.0f;
 
 	pick0->tp0 = pick1->tp0 = tp0;
 	pick0->tp1 = pick1->tp1 = tp1;
@@ -460,26 +426,6 @@ static void pick_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		nemocontent_touch_up(tp, tp->focus->content, time, touchid);
 	}
 
-	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_MOVE)) {
-		if (actor != NULL && pitchfilter_flush(pick->filter) > 0) {
-			struct pitchfilter *filter = pick->filter;
-			struct vieweffect *effect;
-
-			effect = vieweffect_create(actor->view);
-			effect->type = NEMO_VIEW_PITCH_EFFECT;
-			if (tp->touch->node->screen != NULL)
-				effect->pitch.velocity = MIN(tp->touch->node->screen->diagonal * filter->dist / filter->dtime * 1000.0f, 5000.0f);
-			else
-				effect->pitch.velocity = 5000.0f;
-			effect->pitch.dx = filter->dx;
-			effect->pitch.dy = filter->dy;
-			effect->pitch.friction = 12.0f * 1000.0f;
-
-			vieweffect_dispatch(actor->compz, effect);
-		}
-	}
-
-	pitchfilter_destroy(pick->filter);
 	nemoshell_end_touchpoint_actorgrab(grab);
 	nemoshell_end_touchpoint_actorgrab(&pick->other->base);
 	free(pick->other);
@@ -546,11 +492,6 @@ static void pick_actorgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 		cx = pick->dx + (pick->tp0->x + pick->tp1->x) / 2.0f;
 		cy = pick->dy + (pick->tp0->y + pick->tp1->y) / 2.0f;
 
-		pitchfilter_dispatch(pick->filter, cx, cy, cx - pick->cx, cy - pick->cy, time);
-
-		pick->cx = pick->other->cx = cx;
-		pick->cy = pick->other->cy = cy;
-
 		nemoview_set_position(actor->view, cx, cy);
 	}
 
@@ -606,8 +547,6 @@ int nemoshell_pick_actor_by_touchpoint(struct touchpoint *tp0, struct touchpoint
 	pick0->height = pick1->height = actor->view->content->height;
 	pick0->sx = pick1->sx = actor->view->geometry.sx;
 	pick0->sy = pick1->sy = actor->view->geometry.sy;
-	pick0->cx = pick1->cx = (tp0->x + tp1->x) / 2.0f;
-	pick0->cy = pick1->cy = (tp0->y + tp1->y) / 2.0f;
 	pick0->r = pick1->r = actor->view->geometry.r;
 	pick0->touch.distance = pick1->touch.distance = pickgrab_calculate_touchpoint_distance(tp0, tp1);
 	pick0->touch.r = pick1->touch.r = pickgrab_calculate_touchpoint_angle(tp0, tp1);
@@ -615,10 +554,8 @@ int nemoshell_pick_actor_by_touchpoint(struct touchpoint *tp0, struct touchpoint
 	if (actor->view->geometry.has_pivot == 0)
 		nemoview_correct_pivot(actor->view, actor->view->content->width * 0.5f, actor->view->content->height * 0.5f);
 
-	pick0->dx = pick1->dx = actor->view->geometry.x - pick0->cx;
-	pick0->dy = pick1->dy = actor->view->geometry.y - pick0->cy;
-
-	pick0->filter = pick1->filter = pitchfilter_create(20.0f, 30);
+	pick0->dx = pick1->dx = actor->view->geometry.x - (tp0->x + tp1->x) / 2.0f;
+	pick0->dy = pick1->dy = actor->view->geometry.y - (tp0->y + tp1->y) / 2.0f;
 
 	pick0->tp0 = pick1->tp0 = tp0;
 	pick0->tp1 = pick1->tp1 = tp1;
