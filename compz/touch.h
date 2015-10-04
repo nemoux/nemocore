@@ -7,7 +7,6 @@
 NEMO_BEGIN_EXTERN_C
 #endif
 
-#include <nemohash.h>
 #include <input.h>
 
 struct nemoseat;
@@ -80,7 +79,6 @@ struct nemotouch {
 	struct wl_list link;
 
 	struct wl_list touchpoint_list;
-	struct nemohash *touchpoint_hash;
 
 	struct wl_event_source *timeout;
 };

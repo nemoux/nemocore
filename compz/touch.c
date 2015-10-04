@@ -219,13 +219,9 @@ struct nemotouch *nemotouch_create(struct nemoseat *seat, struct inputnode *node
 	touch->seat = seat;
 	touch->node = node;
 
-	touch->touchpoint_hash = nemohash_create(8);
-	if (touch->touchpoint_hash == NULL)
-		goto err1;
-
 	touch->timeout = wl_event_loop_add_timer(compz->loop, nemotouch_dispatch_timeout, touch);
 	if (touch->timeout == NULL)
-		goto err2;
+		goto err1;
 	wl_event_source_timer_update(touch->timeout, compz->touch_timeout);
 
 	wl_list_init(&touch->touchpoint_list);
@@ -233,9 +229,6 @@ struct nemotouch *nemotouch_create(struct nemoseat *seat, struct inputnode *node
 	wl_list_insert(&seat->touch.device_list, &touch->link);
 
 	return touch;
-
-err2:
-	nemohash_destroy(touch->touchpoint_hash);
 
 err1:
 	free(touch);
@@ -249,9 +242,6 @@ void nemotouch_destroy(struct nemotouch *touch)
 
 	if (touch->timeout != NULL)
 		wl_event_source_remove(touch->timeout);
-
-	if (touch->touchpoint_hash != NULL)
-		nemohash_destroy(touch->touchpoint_hash);
 
 	free(touch);
 }
@@ -270,8 +260,6 @@ static void nemotouch_destroy_touchpoint(struct nemotouch *touch, struct touchpo
 	wl_list_remove(&tp->focus_view_listener.link);
 
 	wl_list_remove(&tp->link);
-
-	nemohash_put_value(touch->touchpoint_hash, tp->id);
 
 	free(tp);
 }
@@ -336,17 +324,18 @@ static struct touchpoint *nemotouch_create_touchpoint(struct nemotouch *touch, u
 	tp->focus_view_listener.notify = touchpoint_handle_focus_view_destroy;
 
 	wl_list_insert(&touch->touchpoint_list, &tp->link);
-	nemohash_set_value(touch->touchpoint_hash, id, (uint64_t)tp);
 
 	return tp;
 }
 
 struct touchpoint *nemotouch_get_touchpoint_by_id(struct nemotouch *touch, uint64_t id)
 {
-	uint64_t value;
+	struct touchpoint *tp;
 
-	if (nemohash_get_value(touch->touchpoint_hash, id, &value) != 0)
-		return (struct touchpoint *)value;
+	wl_list_for_each(tp, &touch->touchpoint_list, link) {
+		if (tp->id == id)
+			return tp;
+	}
 
 	return NULL;
 }
