@@ -437,34 +437,32 @@ void nemotouch_flush_tuio(struct tuionode *node)
 	struct nemotouch *touch = node->touch;
 	struct touchpoint *tp, *tnext;
 	struct wl_list touchpoint_list;
-	uint32_t msecs;
+	uint32_t msecs = time_current_msecs();
 	float x, y;
 	int i;
-
-	msecs = time_current_msecs();
 
 	wl_list_init(&touchpoint_list);
 	wl_list_insert_list(&touchpoint_list, &touch->touchpoint_list);
 	wl_list_init(&touch->touchpoint_list);
 
 	for (i = 0; i < node->alive.index; i++) {
+		if (node->base.screen != NULL) {
+			nemoscreen_transform_to_global(node->base.screen,
+					node->taps[i].f[0] * node->base.screen->width,
+					node->taps[i].f[1] * node->base.screen->height,
+					&x, &y);
+		} else {
+			nemoinput_transform_to_global(&node->base,
+					node->taps[i].f[0] * node->base.width,
+					node->taps[i].f[1] * node->base.height,
+					&x, &y);
+		}
+
 		tp = nemotouch_get_touchpoint_by_id(touch, node->taps[i].id);
 		if (tp == NULL) {
 			tp = nemotouch_create_touchpoint(touch, node->taps[i].id);
 			if (tp == NULL)
 				return;
-
-			if (node->base.screen != NULL) {
-				nemoscreen_transform_to_global(node->base.screen,
-						node->taps[i].f[0] * node->base.screen->width,
-						node->taps[i].f[1] * node->base.screen->height,
-						&x, &y);
-			} else {
-				nemoinput_transform_to_global(&node->base,
-						node->taps[i].f[0] * node->base.width,
-						node->taps[i].f[1] * node->base.height,
-						&x, &y);
-			}
 
 			tp->grab_x = x;
 			tp->grab_y = y;
@@ -476,18 +474,6 @@ void nemotouch_flush_tuio(struct tuionode *node)
 
 			nemocompz_run_touch_binding(touch->seat->compz, tp, msecs);
 		} else {
-			if (node->base.screen != NULL) {
-				nemoscreen_transform_to_global(node->base.screen,
-						node->taps[i].f[0] * node->base.screen->width,
-						node->taps[i].f[1] * node->base.screen->height,
-						&x, &y);
-			} else {
-				nemoinput_transform_to_global(&node->base,
-						node->taps[i].f[0] * node->base.width,
-						node->taps[i].f[1] * node->base.height,
-						&x, &y);
-			}
-
 			tp->grab->interface->motion(tp->grab, msecs, tp->gid, x, y);
 
 			wl_list_remove(&tp->link);
@@ -627,34 +613,32 @@ void nemotouch_flush_taps(struct touchnode *node, struct touchtaps *taps)
 	struct nemotouch *touch = node->touch;
 	struct touchpoint *tp, *tnext;
 	struct wl_list touchpoint_list;
-	uint32_t msecs;
+	uint32_t msecs = time_current_msecs();
 	float x, y;
 	int i;
-
-	msecs = time_current_msecs();
 
 	wl_list_init(&touchpoint_list);
 	wl_list_insert_list(&touchpoint_list, &touch->touchpoint_list);
 	wl_list_init(&touch->touchpoint_list);
 
 	for (i = 0; i < taps->ntaps; i++) {
+		if (node->base.screen != NULL) {
+			nemoscreen_transform_to_global(node->base.screen,
+					taps->points[i * 2 + 0] * node->base.screen->width,
+					taps->points[i * 2 + 1] * node->base.screen->height,
+					&x, &y);
+		} else {
+			nemoinput_transform_to_global(&node->base,
+					taps->points[i * 2 + 0] * node->base.width,
+					taps->points[i * 2 + 1] * node->base.height,
+					&x, &y);
+		}
+
 		tp = nemotouch_get_touchpoint_by_id(touch, taps->ids[i]);
 		if (tp == NULL) {
 			tp = nemotouch_create_touchpoint(touch, taps->ids[i]);
 			if (tp == NULL)
 				return;
-
-			if (node->base.screen != NULL) {
-				nemoscreen_transform_to_global(node->base.screen,
-						taps->points[i * 2 + 0] * node->base.screen->width,
-						taps->points[i * 2 + 1] * node->base.screen->height,
-						&x, &y);
-			} else {
-				nemoinput_transform_to_global(&node->base,
-						taps->points[i * 2 + 0] * node->base.width,
-						taps->points[i * 2 + 1] * node->base.height,
-						&x, &y);
-			}
 
 			tp->grab_x = x;
 			tp->grab_y = y;
@@ -666,18 +650,6 @@ void nemotouch_flush_taps(struct touchnode *node, struct touchtaps *taps)
 
 			nemocompz_run_touch_binding(touch->seat->compz, tp, msecs);
 		} else {
-			if (node->base.screen != NULL) {
-				nemoscreen_transform_to_global(node->base.screen,
-						taps->points[i * 2 + 0] * node->base.screen->width,
-						taps->points[i * 2 + 1] * node->base.screen->height,
-						&x, &y);
-			} else {
-				nemoinput_transform_to_global(&node->base,
-						taps->points[i * 2 + 0] * node->base.width,
-						taps->points[i * 2 + 1] * node->base.height,
-						&x, &y);
-			}
-
 			tp->grab->interface->motion(tp->grab, msecs, tp->gid, x, y);
 
 			wl_list_remove(&tp->link);
