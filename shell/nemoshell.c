@@ -26,8 +26,9 @@
 static void nemo_send_configure(struct nemocanvas *canvas, int32_t width, int32_t height)
 {
 	struct shellbin *bin = nemoshell_get_bin(canvas);
+	int32_t fixed = bin->next_state.fullscreen || bin->next_state.maximized;
 
-	nemo_surface_send_configure(bin->resource, width, height);
+	nemo_surface_send_configure(bin->resource, width, height, fixed);
 }
 
 static struct nemoclient nemo_client = {

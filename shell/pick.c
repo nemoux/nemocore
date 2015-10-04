@@ -418,7 +418,7 @@ static void pick_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 				view->geometry.x + tox - fromx,
 				view->geometry.y + toy - fromy);
 
-		nemoactor_dispatch_resize(actor, width, height);
+		nemoactor_dispatch_resize(actor, width, height, 0);
 		nemoactor_dispatch_frame(actor);
 	}
 
@@ -483,7 +483,8 @@ static void pick_actorgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 
 		nemoactor_dispatch_resize(actor,
 				MAX(MIN(pick->width * (distance / pick->touch.distance), actor->max_width), actor->min_width),
-				MAX(MIN(pick->height * (distance / pick->touch.distance), actor->max_height), actor->min_height));
+				MAX(MIN(pick->height * (distance / pick->touch.distance), actor->max_height), actor->min_height),
+				0);
 	}
 
 	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_MOVE)) {

@@ -858,7 +858,7 @@ static void nemomesh_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 	nemotale_composite_egl(context->tale, NULL);
 }
 
-static void nemomesh_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t width, int32_t height)
+static void nemomesh_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t width, int32_t height, int32_t fixed)
 {
 	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
 	struct meshcontext *context = (struct meshcontext *)nemotale_get_userdata(tale);

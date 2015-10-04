@@ -204,7 +204,7 @@ static void miniback_dispatch_tale_event(struct nemotale *tale, struct talenode 
 	uint32_t id = nemotale_node_get_id(node);
 }
 
-static void miniback_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t width, int32_t height)
+static void miniback_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t width, int32_t height, int32_t fixed)
 {
 }
 

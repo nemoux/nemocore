@@ -140,7 +140,7 @@ static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode 
 	}
 }
 
-static void nemoplay_dispatch_video_resize(struct nemocanvas *canvas, int32_t width, int32_t height)
+static void nemoplay_dispatch_video_resize(struct nemocanvas *canvas, int32_t width, int32_t height, int32_t fixed)
 {
 	struct playcontext *context = (struct playcontext *)nemocanvas_get_userdata(canvas);
 	struct nemotale *tale = context->tale;
@@ -151,6 +151,10 @@ static void nemoplay_dispatch_video_resize(struct nemocanvas *canvas, int32_t wi
 	if (width < nemotale_get_minimum_width(tale) || height < nemotale_get_minimum_height(tale)) {
 		nemotool_exit(context->tool);
 		return;
+	}
+
+	if (fixed == 0) {
+		height = width / nemogst_get_video_aspect_ratio(context->gst);
 	}
 
 	nemogst_resize_video(context->gst, width, height);
@@ -185,7 +189,7 @@ static void nemoplay_dispatch_audio_frame(struct nemocanvas *canvas, uint64_t se
 	nemotale_composite_egl(context->tale, NULL);
 }
 
-static void nemoplay_dispatch_audio_resize(struct nemocanvas *canvas, int32_t width, int32_t height)
+static void nemoplay_dispatch_audio_resize(struct nemocanvas *canvas, int32_t width, int32_t height, int32_t fixed)
 {
 	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
 	struct playcontext *context = (struct playcontext *)nemotale_get_userdata(tale);
@@ -322,8 +326,8 @@ int main(int argc, char *argv[])
 		}
 
 		if (width == 0 || height == 0) {
-			width = 320 * nemogst_get_video_aspect_ratio(context->gst);
-			height = 320;
+			width = 480;
+			height = 480 / nemogst_get_video_aspect_ratio(context->gst);
 		}
 
 		nemogst_resize_video(context->gst, width, height);
@@ -355,8 +359,8 @@ int main(int argc, char *argv[])
 		nemogst_set_media_path(context->gst, uri);
 
 		if (width == 0 || height == 0) {
-			width = 320;
-			height = 320;
+			width = 480;
+			height = 480;
 		}
 
 		context->ecanvas = ecanvas = nemotool_create_egl_canvas(context->egl, width, height);

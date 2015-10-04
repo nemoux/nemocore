@@ -20,7 +20,7 @@ NEMO_BEGIN_EXTERN_C
 struct nemoview;
 struct nemoscreen;
 
-typedef void (*nemoactor_dispatch_resize_t)(struct nemoactor *actor, int32_t width, int32_t height);
+typedef void (*nemoactor_dispatch_resize_t)(struct nemoactor *actor, int32_t width, int32_t height, int32_t fixed);
 typedef void (*nemoactor_dispatch_frame_t)(struct nemoactor *actor, uint32_t msecs);
 
 struct nemoactor {
@@ -75,7 +75,7 @@ extern void nemoactor_flush_damage(struct nemoactor *actor);
 extern void nemoactor_set_dispatch_resize(struct nemoactor *actor, nemoactor_dispatch_resize_t dispatch);
 extern void nemoactor_set_dispatch_frame(struct nemoactor *actor, nemoactor_dispatch_frame_t dispatch);
 
-extern void nemoactor_dispatch_resize(struct nemoactor *actor, int32_t width, int32_t height);
+extern void nemoactor_dispatch_resize(struct nemoactor *actor, int32_t width, int32_t height, int32_t fixed);
 extern void nemoactor_dispatch_frame(struct nemoactor *actor);
 
 extern void nemoactor_feedback(struct nemoactor *actor);

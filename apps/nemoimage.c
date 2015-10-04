@@ -54,7 +54,7 @@ static void nemoimage_dispatch_tale_event(struct nemotale *tale, struct talenode
 	}
 }
 
-static void nemoimage_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t width, int32_t height)
+static void nemoimage_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t width, int32_t height, int32_t fixed)
 {
 	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
 	struct imagecontext *context = (struct imagecontext *)nemotale_get_userdata(tale);

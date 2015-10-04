@@ -223,7 +223,7 @@ int nemogst_prepare_mini_sink(struct nemogst *gst, nemogst_minisink_render_t ren
 int nemogst_prepare_audio_sink(struct nemogst *gst)
 {
 	GstPad *pad;
-	
+
 	gst->player = gst_element_factory_make("playbin", "playbin");
 
 	gst->bus = gst_pipeline_get_bus(GST_PIPELINE(gst->player));
@@ -337,7 +337,9 @@ int nemogst_resize_video(struct nemogst *gst, uint32_t width, uint32_t height)
 	caps = gst_caps_new_empty();
 	gs = gst_structure_new("video/x-raw",
 			"width", G_TYPE_INT, width,
-			"height", G_TYPE_INT, height, NULL);
+			"height", G_TYPE_INT, height,
+			"pixel-aspect-ratio", GST_TYPE_FRACTION, 1, 1,
+			NULL);
 	gst_caps_append_structure(caps, gs);
 	g_object_set(G_OBJECT(gst->filter), "caps", caps, NULL);
 	gst_caps_unref(caps);

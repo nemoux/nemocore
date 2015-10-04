@@ -25,12 +25,12 @@
 #include <pixmanhelper.h>
 #include <nemomisc.h>
 
-static void nemo_surface_handle_configure(void *data, struct nemo_surface *surface, int32_t width, int32_t height)
+static void nemo_surface_handle_configure(void *data, struct nemo_surface *surface, int32_t width, int32_t height, int32_t fixed)
 {
 	struct nemocanvas *canvas = (struct nemocanvas *)data;
 
 	if (canvas->dispatch_resize != NULL)
-		canvas->dispatch_resize(canvas, width, height);
+		canvas->dispatch_resize(canvas, width, height, fixed);
 }
 
 static const struct nemo_surface_listener nemo_surface_listener = {
