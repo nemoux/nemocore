@@ -541,8 +541,12 @@ int nemoshell_pick_actor_by_touchpoint(struct touchpoint *tp0, struct touchpoint
 	if (actor == NULL)
 		return -1;
 
-	if (actor->grabbed > 0)
-		return 0;
+	if (actor->grabbed > 0) {
+		if (actor->retained != 0)
+			return 0;
+
+		wl_signal_emit(&actor->ungrab_signal, actor);
+	}
 
 	pick0 = (struct actorgrab_pick *)malloc(sizeof(struct actorgrab_pick));
 	if (pick0 == NULL)
@@ -575,6 +579,8 @@ int nemoshell_pick_actor_by_touchpoint(struct touchpoint *tp0, struct touchpoint
 
 	pick0->other = pick1;
 	pick1->other = pick0;
+
+	actor->retained = 1;
 
 	nemoshell_start_touchpoint_actorgrab(&pick0->base, &pick_actorgrab_touchpoint_interface, actor, tp0);
 	nemoshell_start_touchpoint_actorgrab(&pick1->base, &pick_actorgrab_touchpoint_interface, actor, tp1);
