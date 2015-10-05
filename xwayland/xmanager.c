@@ -62,6 +62,35 @@ static void nemoxmanager_set_net_window_manager_state(struct nemoxwindow *xwindo
 			property);
 }
 
+static void nemoxmanager_set_net_active_window(struct nemoxmanager *xmanager, xcb_window_t window)
+{
+	xcb_change_property(xmanager->conn,
+			XCB_PROP_MODE_REPLACE,
+			xmanager->screen->root,
+			xmanager->atom.net_active_window,
+			xmanager->atom.window,
+			32, 1,
+			&window);
+}
+
+static void nemoxmanager_send_focus_window(struct nemoxmanager *xmanager, struct nemoxwindow *xwindow)
+{
+	xcb_client_message_event_t message;
+
+	if (xwindow != NULL) {
+		message.response_type = XCB_CLIENT_MESSAGE;
+		message.format = 32;
+		message.window = xwindow->id;
+		message.type = xmanager->atom.wm_protocols;
+		message.data.data32[0] = xmanager->atom.wm_take_focus;
+		message.data.data32[1] = XCB_TIME_CURRENT_TIME;
+
+		xcb_send_event(xmanager->conn, 0, xwindow->id, XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT, (char *)&message);
+
+		xcb_set_input_focus(xmanager->conn, XCB_INPUT_FOCUS_POINTER_ROOT, xwindow->id, XCB_TIME_CURRENT_TIME);
+	}
+}
+
 static int nemoxmanager_our_resource(struct nemoxmanager *xmanager, uint32_t id)
 {
 	const xcb_setup_t *setup;
@@ -89,7 +118,7 @@ static void nemoxmanager_create_window(struct nemoxmanager *xmanager, xcb_window
 
 	geometry_cookie = xcb_get_geometry(xmanager->conn, id);
 
-	values[0] = XCB_EVENT_MASK_PROPERTY_CHANGE;
+	values[0] = XCB_EVENT_MASK_PROPERTY_CHANGE | XCB_EVENT_MASK_FOCUS_CHANGE;
 	xcb_change_window_attributes(xmanager->conn, id, XCB_CW_EVENT_MASK, values);
 
 	xwindow->xmanager = xmanager;
@@ -330,6 +359,14 @@ static void nemoxmanager_handle_client_message(struct nemoxmanager *xmanager, xc
 	}
 }
 
+static void nemoxmanager_handle_focus_in(struct nemoxmanager *xmanager, xcb_generic_event_t *event)
+{
+	xcb_focus_in_event_t *focus = (xcb_focus_in_event_t *)event;
+
+	if (xmanager->focus == NULL || focus->event != xmanager->focus->id)
+		nemoxmanager_send_focus_window(xmanager, xmanager->focus);
+}
+
 static int nemoxmanager_handle_event(int fd, uint32_t mask, void *data)
 {
 	struct nemoxmanager *xmanager = (struct nemoxmanager *)data;
@@ -410,6 +447,10 @@ static int nemoxmanager_handle_event(int fd, uint32_t mask, void *data)
 			case XCB_CLIENT_MESSAGE:
 				nemoxmanager_handle_client_message(xmanager, event);
 				break;
+
+			case XCB_FOCUS_IN:
+				nemoxmanager_handle_focus_in(xmanager, event);
+				break;
 		}
 
 		free(event);
@@ -488,6 +529,7 @@ static void nemoxmanager_get_resources(struct nemoxmanager *xmanager)
 		{ "_NET_WM_MOVERESIZE", F(atom.net_wm_moveresize) },
 		{ "_NET_SUPPORTING_WM_CHECK", F(atom.net_supporting_wm_check) },
 		{ "_NET_SUPPORTED", F(atom.net_supported) },
+		{ "_NET_ACTIVE_WINDOW", F(atom.net_active_window) },
 		{ "_MOTIF_WM_HINTS", F(atom.motif_wm_hints) },
 		{ "CLIPBOARD", F(atom.clipboard) },
 		{ "CLIPBOARD_MANAGER", F(atom.clipboard_manager) },
@@ -501,6 +543,7 @@ static void nemoxmanager_get_resources(struct nemoxmanager *xmanager)
 		{ "COMPOUND_TEXT", F(atom.compound_text) },
 		{ "TEXT", F(atom.text) },
 		{ "STRING", F(atom.string) },
+		{ "WINDOW", F(atom.window) },
 		{ "text/plain;charset=utf-8", F(atom.text_plain_utf8) },
 		{ "text/plain", F(atom.text_plain) },
 		{ "XdndSelection", F(atom.xdnd_selection) },
@@ -652,19 +695,14 @@ static void nemoxmanager_handle_activate(struct wl_listener *listener, void *dat
 		xwindow = nemoxmanager_get_canvas_window(view->canvas);
 
 	if (xwindow != NULL) {
-		message.response_type = XCB_CLIENT_MESSAGE;
-		message.format = 32;
-		message.window = xwindow->id;
-		message.type = xmanager->atom.wm_protocols;
-		message.data.data32[0] = xmanager->atom.wm_take_focus;
-		message.data.data32[1] = XCB_TIME_CURRENT_TIME;
+		nemoxmanager_set_net_active_window(xmanager, xwindow->id);
 
-		xcb_send_event(xmanager->conn, 0, xwindow->id, XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT, (char *)&message);
-
-		xcb_set_input_focus(xmanager->conn, XCB_INPUT_FOCUS_POINTER_ROOT, xwindow->id, XCB_TIME_CURRENT_TIME);
+		nemoxmanager_send_focus_window(xmanager, xwindow);
 	}
 
 	xmanager->focus = xwindow;
+	
+	xcb_flush(xmanager->conn);
 }
 
 static void nemoxmanager_handle_transform(struct wl_listener *listener, void *data)
@@ -753,6 +791,7 @@ struct nemoxmanager *nemoxmanager_create(struct nemoxserver *xserver, int fd)
 	supported[0] = xmanager->atom.net_wm_moveresize;
 	supported[1] = xmanager->atom.net_wm_state;
 	supported[2] = xmanager->atom.net_wm_state_fullscreen;
+	supported[3] = xmanager->atom.net_active_window;
 
 	xcb_change_property(xmanager->conn,
 			XCB_PROP_MODE_REPLACE,
@@ -762,6 +801,8 @@ struct nemoxmanager *nemoxmanager_create(struct nemoxserver *xserver, int fd)
 			32,
 			ARRAY_LENGTH(supported),
 			supported);
+
+	nemoxmanager_set_net_active_window(xmanager, XCB_WINDOW_NONE);
 
 	nemoxmanager_init_selection(xmanager);
 	nemoxmanager_init_dnd(xmanager);
@@ -874,7 +915,7 @@ void nemoxmanager_map_window(struct nemoxmanager *xmanager, struct nemoxwindow *
 		wl_resource_post_no_memory(canvas->resource);
 		return;
 	}
-
+	
 	bin->type = NEMO_SHELL_SURFACE_XWAYLAND_TYPE;
 }
 
