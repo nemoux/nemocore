@@ -287,8 +287,8 @@ int nemoshell_pick_canvas_by_touchpoint_on_area(struct touchpoint *tp0, struct t
 
 	pick0->type = pick1->type = type;
 
-	pick0->width = pick1->width = bin->geometry.width;
-	pick0->height = pick1->height = bin->geometry.height;
+	pick0->width = pick1->width = bin->view->content->width;
+	pick0->height = pick1->height = bin->view->content->height;
 	pick0->sx = pick1->sx = bin->view->geometry.sx;
 	pick0->sy = pick1->sy = bin->view->geometry.sy;
 	pick0->r = pick1->r = bin->view->geometry.r;
@@ -348,8 +348,8 @@ int nemoshell_pick_canvas_by_touchpoint(struct touchpoint *tp0, struct touchpoin
 
 	pick0->type = pick1->type = type;
 
-	pick0->width = pick1->width = bin->geometry.width;
-	pick0->height = pick1->height = bin->geometry.height;
+	pick0->width = pick1->width = bin->view->content->width;
+	pick0->height = pick1->height = bin->view->content->height;
 	pick0->sx = pick1->sx = bin->view->geometry.sx;
 	pick0->sy = pick1->sy = bin->view->geometry.sy;
 	pick0->r = pick1->r = bin->view->geometry.r;
