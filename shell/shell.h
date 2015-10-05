@@ -161,6 +161,7 @@ struct shellbin {
 
 	struct {
 		float x, y;
+		float r;
 		int32_t width, height;
 	} geometry, next_geometry;
 	int has_set_geometry, has_next_geometry;

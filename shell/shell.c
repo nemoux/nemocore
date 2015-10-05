@@ -254,7 +254,11 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 			nemoview_damage_below(view);
 		} else if (bin->type == NEMO_SHELL_SURFACE_XWAYLAND_TYPE) {
 			nemoview_attach_layer(view, bin->layer);
-			nemoview_set_position(view, sx, sy);
+			nemoview_set_position(view,
+					bin->geometry.x - canvas->base.width * 0.5f,
+					bin->geometry.y - canvas->base.height * 0.5f);
+			nemoview_correct_pivot(view, view->content->width * 0.5f, view->content->height * 0.5f);
+			nemoview_set_rotation(view, bin->geometry.r);
 			nemoview_update_transform(view);
 			nemoview_damage_below(view);
 		}
@@ -722,8 +726,12 @@ struct clientstate *nemoshell_create_client_state(struct wl_client *client)
 		return NULL;
 	memset(state, 0, sizeof(struct clientstate));
 
-	state->destroy_listener.notify = clientstate_handle_client_destroy;
-	wl_client_add_destroy_listener(client, &state->destroy_listener);
+	if (client != NULL) {
+		state->destroy_listener.notify = clientstate_handle_client_destroy;
+		wl_client_add_destroy_listener(client, &state->destroy_listener);
+	} else {
+		wl_list_init(&state->destroy_listener.link);
+	}
 
 	return state;
 }
@@ -761,6 +769,11 @@ void nemoshell_set_client_state(struct shellbin *bin, struct clientstate *state)
 		bin->has_screen = 1;
 
 		nemoshell_send_bin_state(bin);
+	} else {
+		bin->geometry.x = state->x;
+		bin->geometry.y = state->y;
+		bin->geometry.r = state->r;
+		bin->has_set_geometry = 1;
 	}
 
 	bin->flags = state->flags;

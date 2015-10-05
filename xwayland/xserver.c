@@ -250,7 +250,7 @@ struct nemoxserver *nemoxserver_create(struct nemoshell *shell, const char *xser
 	struct wl_display *display = compz->display;
 	struct nemoxserver *xserver;
 	char lockfile[256], dispname[8];
-	
+
 	if (xserverpath == NULL)
 		return NULL;
 
@@ -341,4 +341,12 @@ void nemoxserver_shutdown(struct nemoxserver *xserver)
 		nemoxmanager_destroy(xserver->xmanager);
 
 	xserver->loop = NULL;
+}
+
+void nemoxserver_set_client_state(struct nemoxserver *xserver, struct clientstate *state)
+{
+	if (xserver->state != NULL)
+		nemoshell_destroy_client_state(xserver->state);
+
+	xserver->state = state;
 }

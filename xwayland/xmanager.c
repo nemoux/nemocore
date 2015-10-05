@@ -913,12 +913,21 @@ void nemoxmanager_map_window(struct nemoxmanager *xmanager, struct nemoxwindow *
 {
 	struct nemoshell *shell = xmanager->xserver->shell;
 	struct nemocanvas *canvas = xwindow->canvas;
+	struct nemoxserver *xserver = xmanager->xserver;
 	struct shellbin *bin;
 
 	bin = nemoshell_create_bin(shell, canvas, &xserver_client);
 	if (bin == NULL) {
 		wl_resource_post_no_memory(canvas->resource);
 		return;
+	}
+
+	if (xserver->state != NULL) {
+		nemoshell_set_client_state(bin, xserver->state);
+
+		nemoshell_destroy_client_state(xserver->state);
+
+		xserver->state = NULL;
 	}
 
 	bin->type = NEMO_SHELL_SURFACE_XWAYLAND_TYPE;
