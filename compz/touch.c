@@ -432,6 +432,8 @@ void nemotouch_notify_motion(struct nemotouch *touch, uint32_t time, int id, flo
 	if (touch == NULL)
 		return;
 
+	touch->frame_count++;
+
 	tp = nemotouch_get_touchpoint_by_id(touch, id);
 	if (tp == NULL)
 		return;

@@ -541,7 +541,6 @@ struct evdevnode *evdev_create_node(struct nemocompz *compz, const char *path, i
 
 	node->compz = compz;
 	node->fd = fd;
-	node->base.devnode = strdup(path);
 
 	wl_list_init(&node->link);
 
@@ -549,6 +548,8 @@ struct evdevnode *evdev_create_node(struct nemocompz *compz, const char *path, i
 	devname[sizeof(devname) - 1] = '\0';
 	ioctl(node->fd, EVIOCGPHYS(sizeof(devphys)), devphys);
 	devphys[sizeof(devphys) - 1] = '\0';
+
+	node->base.devnode = strdup(devphys);
 
 	node->devname = strdup(devname);
 	node->devphys = strdup(devphys);

@@ -105,6 +105,8 @@ struct nemotouch {
 	struct nemoseat *seat;
 	struct inputnode *node;
 
+	uint32_t frame_count;
+
 	struct wl_list link;
 
 	struct wl_list touchpoint_list;

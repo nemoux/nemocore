@@ -26,6 +26,7 @@
 #include <presentation.h>
 #include <subcompz.h>
 #include <seat.h>
+#include <touch.h>
 #include <session.h>
 #include <task.h>
 #include <clipboard.h>
@@ -290,7 +291,9 @@ void nemocompz_dispatch_frame(struct nemocompz *compz)
 static int nemocompz_dispatch_framerate_timeout(void *data)
 {
 	struct nemocompz *compz = (struct nemocompz *)data;
+	struct nemoseat *seat = compz->seat;
 	struct nemoscreen *screen;
+	struct nemotouch *touch;
 	uint32_t msecs = time_current_msecs();
 
 	nemolog_message("COMPZ", "%fs frametime\n", (double)msecs / 1000.0f);
@@ -299,6 +302,12 @@ static int nemocompz_dispatch_framerate_timeout(void *data)
 		nemolog_message("COMPZ", "  [%d:%d] screen %u frames...\n", screen->node->nodeid, screen->screenid, screen->frame_count);
 
 		screen->frame_count = 0;
+	}
+
+	wl_list_for_each(touch, &seat->touch.device_list, link) {
+		nemolog_message("COMPZ", "  [%s] touch %u frames...\n", touch->node->devnode, touch->frame_count);
+
+		touch->frame_count = 0;
 	}
 
 	wl_event_source_timer_update(compz->framerate_timer, 1000);
@@ -432,6 +441,8 @@ struct nemocompz *nemocompz_create(void)
 	compz->frame_timeout = NEMOCOMPZ_DEFAULT_FRAME_TIMEOUT;
 	compz->frame_done = 1;
 
+	wl_list_init(&compz->frame_list);
+
 	env = getenv("NEMOUX_FRAMERATE_LOG");
 	if (env != NULL && strcmp(env, "ON") == 0) {
 		compz->framerate_timer = wl_event_loop_add_timer(compz->loop, nemocompz_dispatch_framerate_timeout, compz);
@@ -440,8 +451,6 @@ struct nemocompz *nemocompz_create(void)
 
 		wl_event_source_timer_update(compz->framerate_timer, 1000);
 	}
-
-	wl_list_init(&compz->frame_list);
 
 	return compz;
 
