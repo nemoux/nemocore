@@ -9,6 +9,8 @@ NEMO_BEGIN_EXTERN_C
 
 #include <input.h>
 
+#define	NEMOTOUCH_DELAY_MAX			(50)
+
 typedef enum {
 	NEMO_TOUCH_NONE_EVENT = 0,
 	NEMO_TOUCH_DOWN_EVENT = 1,

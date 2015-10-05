@@ -440,15 +440,17 @@ void nemotouch_notify_motion(struct nemotouch *touch, uint32_t time, int id, flo
 		struct touchevent *event;
 		int i;
 
-		for (i = 0; i < touch->interpolation; i++) {
-			event = nemotouch_create_touchevent(touch);
-			event->tp = tp;
-			event->type = NEMO_TOUCH_INTERMOTION_EVENT;
-			event->age = tp->age++;
-			event->index = i;
-			event->id = id;
-			event->x = x;
-			event->y = y;
+		if (tp->age < NEMOTOUCH_DELAY_MAX / touch->interval) {
+			for (i = 0; i < touch->interpolation; i++) {
+				event = nemotouch_create_touchevent(touch);
+				event->tp = tp;
+				event->type = NEMO_TOUCH_INTERMOTION_EVENT;
+				event->age = tp->age++;
+				event->index = i;
+				event->id = id;
+				event->x = x;
+				event->y = y;
+			}
 		}
 
 		event = nemotouch_create_touchevent(touch);
