@@ -662,8 +662,6 @@ static void nemoxmanager_handle_activate(struct wl_listener *listener, void *dat
 		xcb_send_event(xmanager->conn, 0, xwindow->id, XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT, (char *)&message);
 
 		xcb_set_input_focus(xmanager->conn, XCB_INPUT_FOCUS_POINTER_ROOT, xwindow->id, XCB_TIME_CURRENT_TIME);
-	} else {
-		xcb_set_input_focus(xmanager->conn, XCB_INPUT_FOCUS_POINTER_ROOT, XCB_NONE, XCB_TIME_CURRENT_TIME);
 	}
 
 	xmanager->focus = xwindow;
