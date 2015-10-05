@@ -56,7 +56,6 @@ void nemoinput_set_geometry(struct inputnode *node, int32_t x, int32_t y, int32_
 int nemoinput_get_config_screen(struct nemocompz *compz, const char *devnode, uint32_t *nodeid, uint32_t *screenid)
 {
 	const char *value;
-	int renderer = 0;
 	int index;
 
 	index = nemoitem_get_ifone(compz->configs, "//nemoshell/input", 0, "devnode", devnode);
@@ -64,13 +63,13 @@ int nemoinput_get_config_screen(struct nemocompz *compz, const char *devnode, ui
 		return 0;
 
 	value = nemoitem_get_attr(compz->configs, index, "nodeid");
-	if (value != NULL && nodeid != NULL)
+	if (value != NULL)
 		*nodeid = strtoul(value, 0, 10);
 	else
 		return 0;
 
 	value = nemoitem_get_attr(compz->configs, index, "screenid");
-	if (value != NULL && screenid != NULL)
+	if (value != NULL)
 		*screenid = strtoul(value, 0, 10);
 	else
 		return 0;
@@ -104,6 +103,30 @@ int nemoinput_get_config_geometry(struct nemocompz *compz, const char *devnode, 
 			node->transform.enable = 1;
 		}
 	}
+
+	return 1;
+}
+
+int nemoinput_get_config_event(struct nemocompz *compz, const char *devnode, uint32_t *interval, uint32_t *interpolation)
+{
+	const char *value;
+	int index;
+
+	index = nemoitem_get_ifone(compz->configs, "//nemoshell/input", 0, "devnode", devnode);
+	if (index < 0)
+		return 0;
+
+	value = nemoitem_get_attr(compz->configs, index, "interval");
+	if (value != NULL)
+		*interval = strtoul(value, 0, 10);
+	else
+		return 0;
+
+	value = nemoitem_get_attr(compz->configs, index, "interpolation");
+	if (value != NULL)
+		*interpolation = strtoul(value, 0, 10);
+	else
+		return 0;
 
 	return 1;
 }

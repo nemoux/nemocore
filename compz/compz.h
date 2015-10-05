@@ -88,7 +88,6 @@ struct nemocompz {
 	uint32_t pointer_ids;
 
 	uint64_t touch_ids;
-	uint32_t touch_timeout;
 
 	int32_t nodemax;
 

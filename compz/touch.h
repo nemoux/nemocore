@@ -9,6 +9,15 @@ NEMO_BEGIN_EXTERN_C
 
 #include <input.h>
 
+typedef enum {
+	NEMO_TOUCH_NONE_EVENT = 0,
+	NEMO_TOUCH_DOWN_EVENT = 1,
+	NEMO_TOUCH_MOTION_EVENT = 2,
+	NEMO_TOUCH_INTERMOTION_EVENT = 3,
+	NEMO_TOUCH_UP_EVENT = 4,
+	NEMO_TOUCH_LAST_EVENT
+} NemoTouchEventType;
+
 struct nemoseat;
 struct nemotouch;
 struct tuionode;
@@ -52,6 +61,9 @@ struct touchpoint {
 
 	float x, y;
 
+	float x0, y0;
+	uint32_t age;
+
 	void *binding;
 };
 
@@ -72,6 +84,21 @@ struct touchnode {
 	struct wl_list link;
 };
 
+struct touchevent {
+	struct touchpoint *tp;
+
+	uint32_t age;
+
+	uint32_t type;
+
+	uint32_t index;
+
+	int id;
+	float x, y;
+
+	struct wl_list link;
+};
+
 struct nemotouch {
 	struct nemoseat *seat;
 	struct inputnode *node;
@@ -80,7 +107,11 @@ struct nemotouch {
 
 	struct wl_list touchpoint_list;
 
-	struct wl_event_source *timeout;
+	struct wl_event_source *timer;
+	uint32_t interval;
+	uint32_t interpolation;
+
+	struct wl_list touchevent_list;
 };
 
 extern int nemotouch_bind_wayland(struct wl_client *client, struct wl_resource *seat_resource, uint32_t id);
@@ -90,6 +121,7 @@ extern struct nemotouch *nemotouch_create(struct nemoseat *seat, struct inputnod
 extern void nemotouch_destroy(struct nemotouch *touch);
 
 extern struct touchpoint *nemotouch_get_touchpoint_by_id(struct nemotouch *touch, uint64_t id);
+extern struct touchpoint *nemotouch_get_touchpoint_list_by_id(struct nemotouch *touch, struct wl_list *list, uint64_t id);
 extern struct touchpoint *nemotouch_get_touchpoint_by_serial(struct nemotouch *touch, uint32_t serial);
 
 extern void nemotouch_notify_down(struct nemotouch *touch, uint32_t time, int id, float x, float y);
@@ -120,6 +152,8 @@ extern void nemotouch_attach_tap(struct touchtaps *taps, uint64_t id, double x, 
 extern void nemotouch_flush_taps(struct touchnode *node, struct touchtaps *taps);
 
 extern void nemotouch_bypass_event(struct nemocompz *compz, int32_t touchid, float sx, float sy);
+
+extern int nemotouch_use_event_timer(struct nemotouch *touch, uint32_t interval, uint32_t interpolation);
 
 extern void nemotouch_dump_touchpoint(struct nemotouch *touch);
 

@@ -532,6 +532,7 @@ struct evdevnode *evdev_create_node(struct nemocompz *compz, const char *path, i
 	char devname[256] = "unknown";
 	char devphys[256];
 	uint32_t nodeid, screenid;
+	uint32_t interval, interpolation;
 
 	node = (struct evdevnode *)malloc(sizeof(struct evdevnode));
 	if (node == NULL)
@@ -565,6 +566,11 @@ struct evdevnode *evdev_create_node(struct nemocompz *compz, const char *path, i
 
 	if (evdev_configure_node(node) < 0)
 		goto err1;
+
+	if (node->touch != NULL &&
+			nemoinput_get_config_event(compz, node->devphys, &interval, &interpolation) > 0) {
+		nemotouch_use_event_timer(node->touch, interval, interpolation);
+	}
 
 	if (node->seat_caps == 0)
 		goto err1;
