@@ -371,6 +371,8 @@ static void nemo_get_nemo_surface(struct wl_client *client, struct wl_resource *
 
 		if ((state = nemoshell_get_client_state(client)) != NULL) {
 			nemoshell_set_client_state(bin, state);
+
+			nemoshell_destroy_client_state(state);
 		}
 	} else if (type == NEMO_SHELL_SURFACE_TYPE_FOLLOW) {
 		bin->type = NEMO_SHELL_SURFACE_NORMAL_TYPE;

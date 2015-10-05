@@ -305,6 +305,8 @@ static void xdg_get_xdg_surface(struct wl_client *client, struct wl_resource *re
 	state = nemoshell_get_client_state(client);
 	if (state != NULL) {
 		nemoshell_set_client_state(bin, state);
+
+		nemoshell_destroy_client_state(state);
 	}
 }
 

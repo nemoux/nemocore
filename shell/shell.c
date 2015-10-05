@@ -167,15 +167,10 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 	if (canvas->base.width == 0)
 		return;
 
-	if (bin->has_next_geometry) {
+	if (bin->has_set_geometry == 0 && bin->has_next_geometry != 0) {
 		bin->geometry = bin->next_geometry;
 		bin->has_next_geometry = 0;
 		bin->has_set_geometry = 1;
-	} else if (!bin->has_set_geometry) {
-		bin->geometry.x = 0.0f;
-		bin->geometry.y = 0.0f;
-		bin->geometry.width = canvas->base.width;
-		bin->geometry.height = canvas->base.height;
 	}
 
 	if (bin->state_changed != 0) {
@@ -191,47 +186,34 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 
 	if (!nemoview_is_mapped(view)) {
 		if (bin->type == NEMO_SHELL_SURFACE_NORMAL_TYPE) {
-			struct wl_client *client = wl_resource_get_client(bin->resource);
-			struct clientstate *state = nemoshell_get_client_state(client);
-
-			if (state != NULL) {
-				if (state->is_fullscreen || state->is_maximized) {
-					if (bin->screen.width == canvas->base.width && bin->screen.height == canvas->base.height) {
-						nemoview_set_position(view,
-								bin->screen.x, bin->screen.y);
-						nemoview_set_rotation(view, 0);
-
-						nemoview_attach_layer(view, bin->layer);
-						nemoview_update_transform(view);
-						nemoview_damage_below(view);
-
-						nemoshell_destroy_client_state(state);
-					}
-				} else {
-					if (view->geometry.has_anchor != 0) {
-						nemoview_set_position(view,
-								state->x + canvas->base.width * view->geometry.ax,
-								state->y + canvas->base.height * view->geometry.ay);
-
-						if (bin->view->geometry.has_pivot == 0)
-							nemoview_correct_pivot(bin->view, view->content->width * -view->geometry.ax, view->content->height * -view->geometry.ay);
-					} else {
-						nemoview_set_position(view,
-								state->x - canvas->base.width * state->dx,
-								state->y - canvas->base.height * state->dy);
-
-						if (bin->view->geometry.has_pivot == 0)
-							nemoview_correct_pivot(bin->view, view->content->width * state->dx, view->content->height * state->dy);
-					}
-					nemoview_set_rotation(view, state->r);
+			if (bin->has_screen != 0) {
+				if (bin->screen.width == canvas->base.width && bin->screen.height == canvas->base.height) {
+					nemoview_set_position(view,
+							bin->screen.x, bin->screen.y);
+					nemoview_set_rotation(view, 0);
 
 					nemoview_attach_layer(view, bin->layer);
 					nemoview_update_transform(view);
 					nemoview_damage_below(view);
-
-					nemoshell_destroy_client_state(state);
 				}
 			} else {
+				if (view->geometry.has_anchor != 0) {
+					nemoview_set_position(view,
+							bin->geometry.x + canvas->base.width * view->geometry.ax,
+							bin->geometry.y + canvas->base.height * view->geometry.ay);
+
+					if (bin->view->geometry.has_pivot == 0)
+						nemoview_correct_pivot(bin->view, view->content->width * -view->geometry.ax, view->content->height * -view->geometry.ay);
+				} else {
+					nemoview_set_position(view,
+							bin->geometry.x - canvas->base.width * bin->geometry.dx,
+							bin->geometry.y - canvas->base.height * bin->geometry.dy);
+
+					if (bin->view->geometry.has_pivot == 0)
+						nemoview_correct_pivot(bin->view, view->content->width * bin->geometry.dx, view->content->height * bin->geometry.dy);
+				}
+				nemoview_set_rotation(view, bin->geometry.r);
+
 				nemoview_attach_layer(view, bin->layer);
 				nemoview_update_transform(view);
 				nemoview_damage_below(view);
@@ -255,9 +237,9 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 		} else if (bin->type == NEMO_SHELL_SURFACE_XWAYLAND_TYPE) {
 			nemoview_attach_layer(view, bin->layer);
 			nemoview_set_position(view,
-					bin->geometry.x - canvas->base.width * 0.5f,
-					bin->geometry.y - canvas->base.height * 0.5f);
-			nemoview_correct_pivot(view, view->content->width * 0.5f, view->content->height * 0.5f);
+					bin->geometry.x - canvas->base.width * bin->geometry.dx,
+					bin->geometry.y - canvas->base.height * bin->geometry.dy);
+			nemoview_correct_pivot(view, view->content->width * bin->geometry.dx, view->content->height * bin->geometry.dy);
 			nemoview_set_rotation(view, bin->geometry.r);
 			nemoview_update_transform(view);
 			nemoview_damage_below(view);
@@ -773,6 +755,8 @@ void nemoshell_set_client_state(struct shellbin *bin, struct clientstate *state)
 		bin->geometry.x = state->x;
 		bin->geometry.y = state->y;
 		bin->geometry.r = state->r;
+		bin->geometry.dx = state->dx;
+		bin->geometry.dy = state->dy;
 		bin->has_set_geometry = 1;
 	}
 
