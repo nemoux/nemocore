@@ -62,9 +62,6 @@ struct nemotale {
 
 	nemotale_dispatch_event_t dispatch_event;
 
-	uint32_t tap_minimum_distance;
-	uint32_t tap_moving_distance;
-
 	uint32_t long_press_duration;
 	uint32_t long_press_distance;
 
@@ -203,11 +200,6 @@ static inline void nemotale_set_dispatch_event(struct nemotale *tale, nemotale_d
 static inline int nemotale_has_dispatch_event(struct nemotale *tale)
 {
 	return tale->dispatch_event != NULL;
-}
-
-static inline void nemotale_set_tap_minimum_distance(struct nemotale *tale, uint32_t distance)
-{
-	tale->tap_minimum_distance = distance;
 }
 
 static inline void nemotale_set_long_press_gesture(struct nemotale *tale, uint32_t duration, uint32_t distance)

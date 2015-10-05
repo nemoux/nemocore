@@ -170,6 +170,7 @@ struct shellbin {
 	int state_requested;
 
 	int grabbed;
+	int retained;
 };
 
 struct shellscreen {

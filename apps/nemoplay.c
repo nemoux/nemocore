@@ -65,15 +65,13 @@ static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode 
 
 			if (event->tapcount == 1) {
 				nemocanvas_move(context->canvas, event->taps[0]->serial);
-			} else if (event->tapcount == 2 && nemotale_tap_is_moving(tale, event->taps[0]) == 0) {
+			} else if (event->tapcount == 2) {
 				nemocanvas_pick(context->canvas,
 						event->taps[0]->serial,
 						event->taps[1]->serial,
 						(1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_SCALE) | (1 << NEMO_SURFACE_PICK_TYPE_MOVE));
-			} else if (event->tapcount == 3 && nemotale_tap_is_moving(tale, event->taps[0]) == 0) {
+			} else if (event->tapcount == 3) {
 #if	NEMOPLAY_SEEK_ENABLE
-				nemocanvas_miss(context->canvas);
-
 				context->position = nemogst_get_position(context->gst);
 
 				context->gx = event->x;
@@ -84,7 +82,7 @@ static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode 
 #if NEMOPLAY_SEEK_ENABLE
 			nemotale_event_update_node_taps(tale, node, event, type);
 
-			if (event->tapcount == 3 && nemotale_tap_is_moving(tale, event->taps[0]) == 0) {
+			if (event->tapcount == 3) {
 				if (context->gx - NEMOPLAY_SLIDE_DISTANCE_MIN > event->taps[2]->x) {
 					if (context->position != 0) {
 						context->position = MAX(context->position - NEMOPLAY_SLIDE_FRAME_TIME, 0);

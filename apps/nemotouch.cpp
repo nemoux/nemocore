@@ -220,7 +220,6 @@ int main(int argc, char *argv[])
 				NTEGL_CONFIG(egl),
 				(EGLNativeWindowType)NTEGL_WINDOW(canvas)));
 	nemotale_resize(tale, width, height);
-	nemotale_set_tap_minimum_distance(tale, 0);
 
 	nemotale_attach_canvas(tale, NTEGL_CANVAS(canvas), nemotouch_dispatch_tale_event);
 	nemotale_set_userdata(tale, touch);

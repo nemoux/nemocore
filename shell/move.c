@@ -120,9 +120,13 @@ int nemoshell_move_canvas_by_pointer(struct nemopointer *pointer, struct shellbi
 
 	if (bin == NULL)
 		return -1;
-
-	if (bin->grabbed > 0)
-		return 0;
+	
+	if (bin->grabbed > 0) {
+		if (bin->retained != 0)
+			return 0;
+		
+		wl_signal_emit(&bin->ungrab_signal, bin);
+	}
 
 	move = (struct shellgrab_move *)malloc(sizeof(struct shellgrab_move));
 	if (move == NULL)
@@ -133,6 +137,8 @@ int nemoshell_move_canvas_by_pointer(struct nemopointer *pointer, struct shellbi
 	move->dy = bin->view->geometry.y - pointer->grab_y;
 
 	move->filter = pitchfilter_create(20.0f, 10);
+	
+	bin->retained = 0;
 
 	nemoshell_start_pointer_shellgrab(&move->base, &move_shellgrab_pointer_interface, bin, pointer);
 
@@ -238,9 +244,16 @@ int nemoshell_move_canvas_by_touchpoint(struct touchpoint *tp, struct shellbin *
 
 	if (bin == NULL)
 		return -1;
-
-	if (bin->grabbed > 0 || bin->state.fullscreen != 0 || bin->state.maximized != 0)
+	
+	if (bin->state.fullscreen != 0 || bin->state.maximized != 0)
 		return 0;
+
+	if (bin->grabbed > 0) {
+		if (bin->retained != 0)
+			return 0;
+		
+		wl_signal_emit(&bin->ungrab_signal, bin);
+	}
 
 	move = (struct shellgrab_move *)malloc(sizeof(struct shellgrab_move));
 	if (move == NULL)
@@ -251,6 +264,8 @@ int nemoshell_move_canvas_by_touchpoint(struct touchpoint *tp, struct shellbin *
 	move->dy = bin->view->geometry.y - tp->y;
 
 	move->filter = pitchfilter_create(20.0f, 30);
+	
+	bin->retained = 0;
 
 	nemoshell_start_touchpoint_shellgrab(&move->base, &move_shellgrab_touchpoint_interface, bin, tp);
 

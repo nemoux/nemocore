@@ -144,21 +144,7 @@ static inline int nemotale_event_update_taps(struct nemotale *tale, struct talee
 		}
 	} else if (type & NEMOTALE_TOUCH_EVENT) {
 		nemolist_for_each(tap, &tale->tap_list, link) {
-			if (tale->tap_minimum_distance == 0) {
-				event->taps[count++] = tap;
-			} else {
-				for (i = 0; i < count; i++) {
-					dx = (tap->x - event->taps[i]->x) * tale->viewport.sx;
-					dy = (tap->y - event->taps[i]->y) * tale->viewport.sy;
-					dist = sqrtf(dx * dx + dy * dy);
-
-					if (dist < tale->tap_minimum_distance)
-						break;
-				}
-
-				if (i >= count)
-					event->taps[count++] = tap;
-			}
+			event->taps[count++] = tap;
 		}
 	}
 
@@ -182,21 +168,7 @@ static inline int nemotale_event_update_node_taps(struct nemotale *tale, struct 
 	} else if (type & NEMOTALE_TOUCH_EVENT) {
 		nemolist_for_each(tap, &tale->tap_list, link) {
 			if (tap->node == node) {
-				if (tale->tap_minimum_distance == 0) {
-					event->taps[count++] = tap;
-				} else {
-					for (i = 0; i < count; i++) {
-						dx = (tap->x - event->taps[i]->x) * tale->viewport.sx;
-						dy = (tap->y - event->taps[i]->y) * tale->viewport.sy;
-						dist = sqrtf(dx * dx + dy * dy);
-
-						if (dist < tale->tap_minimum_distance)
-							break;
-					}
-
-					if (i >= count)
-						event->taps[count++] = tap;
-				}
+				event->taps[count++] = tap;
 			}
 		}
 	}

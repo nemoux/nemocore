@@ -36,18 +36,6 @@ int nemotale_prepare(struct nemotale *tale)
 	tale->nnodes = 0;
 	tale->snodes = 8;
 
-	env = getenv("NEMOTALE_TAP_MINIMUM_DISTANCE");
-	if (env != NULL)
-		tale->tap_minimum_distance = strtoul(env, NULL, 10);
-	else
-		tale->tap_minimum_distance = 0;
-
-	env = getenv("NEMOTALE_TAP_MOVING_DISTANCE");
-	if (env != NULL)
-		tale->tap_moving_distance = strtoul(env, NULL, 10);
-	else
-		tale->tap_moving_distance = UINT_MAX;
-
 	env = getenv("NEMOTALE_LONG_PRESS_DURATION");
 	if (env != NULL)
 		tale->long_press_duration = strtoul(env, NULL, 10);

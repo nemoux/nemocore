@@ -169,19 +169,6 @@ static inline int nemotale_is_pointer_long_press(struct nemotale *tale, struct t
 	return type & NEMOTALE_POINTER_LONG_PRESS_EVENT;
 }
 
-static inline int nemotale_tap_is_moving(struct nemotale *tale, struct taletap *tap)
-{
-	if (tap != NULL) {
-		float dx = tap->grab_gx - tap->gx;
-		float dy = tap->grab_gy - tap->gy;
-
-		if (sqrtf(dx * dx + dy * dy) >= tale->tap_moving_distance)
-			return 1;
-	}
-
-	return 0;
-}
-
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

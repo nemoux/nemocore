@@ -59,7 +59,7 @@ static void nemopdf_dispatch_tale_event(struct nemotale *tale, struct talenode *
 
 			if (event->tapcount == 1) {
 				nemocanvas_move(canvas, event->taps[0]->serial);
-			} else if (event->tapcount == 2 && nemotale_tap_is_moving(tale, event->taps[0]) == 0) {
+			} else if (event->tapcount == 2) {
 				nemocanvas_pick(canvas,
 						event->taps[0]->serial,
 						event->taps[1]->serial,
