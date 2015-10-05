@@ -78,6 +78,8 @@ static void nemoxmanager_send_focus_window(struct nemoxmanager *xmanager, struct
 	xcb_client_message_event_t message;
 
 	if (xwindow != NULL) {
+		uint32_t values[1];
+
 		message.response_type = XCB_CLIENT_MESSAGE;
 		message.format = 32;
 		message.window = xwindow->id;
@@ -88,6 +90,9 @@ static void nemoxmanager_send_focus_window(struct nemoxmanager *xmanager, struct
 		xcb_send_event(xmanager->conn, 0, xwindow->id, XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT, (char *)&message);
 
 		xcb_set_input_focus(xmanager->conn, XCB_INPUT_FOCUS_POINTER_ROOT, xwindow->id, XCB_TIME_CURRENT_TIME);
+
+		values[0] = XCB_STACK_MODE_ABOVE;
+		xcb_configure_window(xmanager->conn, xwindow->id, XCB_CONFIG_WINDOW_STACK_MODE, values);
 	}
 }
 
@@ -701,7 +706,7 @@ static void nemoxmanager_handle_activate(struct wl_listener *listener, void *dat
 	}
 
 	xmanager->focus = xwindow;
-	
+
 	xcb_flush(xmanager->conn);
 }
 
@@ -786,8 +791,6 @@ struct nemoxmanager *nemoxmanager_create(struct nemoxserver *xserver, int fd)
 
 	xcb_composite_redirect_subwindows(xmanager->conn, xmanager->screen->root, XCB_COMPOSITE_REDIRECT_MANUAL);
 
-	nemoxmanager_create_window_manager(xmanager);
-
 	supported[0] = xmanager->atom.net_wm_moveresize;
 	supported[1] = xmanager->atom.net_wm_state;
 	supported[2] = xmanager->atom.net_wm_state_fullscreen;
@@ -823,6 +826,8 @@ struct nemoxmanager *nemoxmanager_create(struct nemoxserver *xserver, int fd)
 
 	nemoxmanager_create_cursors(xmanager);
 	nemoxmanager_set_cursor(xmanager, xmanager->screen->root, NEMOX_CURSOR_LEFT_PTR);
+
+	nemoxmanager_create_window_manager(xmanager);
 
 	return xmanager;
 
@@ -915,7 +920,7 @@ void nemoxmanager_map_window(struct nemoxmanager *xmanager, struct nemoxwindow *
 		wl_resource_post_no_memory(canvas->resource);
 		return;
 	}
-	
+
 	bin->type = NEMO_SHELL_SURFACE_XWAYLAND_TYPE;
 }
 
