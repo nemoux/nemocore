@@ -13,58 +13,23 @@
 #include <compz.h>
 #include <nemomisc.h>
 
-#if	0
 static int vieweffect_correct_position(struct nemoview *view, double *dx, double *dy, double *x, double *y)
 {
-	double tx, ty;
-	int done = 0;
+	float tx, ty;
 
-	tx = *dx < 0.0f ? view->geometry.x + *dx : view->geometry.x + view->content->width + *dx;
-	ty = *dy < 0.0f ? view->geometry.y + *dy : view->geometry.y + view->content->height + *dy;
+	nemoview_transform_to_global(view,
+			view->content->width * 0.5f,
+			view->content->height * 0.5f,
+			&tx, &ty);
 
-	if (pixman_region32_contains_point(&view->compz->region, tx, ty, NULL)) {
-		*x = view->geometry.x + *dx;
-		*y = view->geometry.y + *dy;
-	} else {
-		pixman_box32_t *extents;
-
-		extents = pixman_region32_extents(&view->compz->region);
-		if (view->geometry.x + *dx < extents->x1)
-			*x = extents->x1;
-		else if (view->geometry.x + view->content->width + *dx > extents->x2)
-			*x = extents->x2 - view->content->width;
-		else
-			*x = view->geometry.x;
-
-		if (view->geometry.y + *dy < extents->y1)
-			*y = extents->y1;
-		else if (view->geometry.y + view->content->height + *dy > extents->y2)
-			*y = extents->y2 - view->content->height;
-		else
-			*y = view->geometry.y;
-
-		done = 1;
-	}
-
-	return done;
-}
-#else
-static int vieweffect_correct_position(struct nemoview *view, double *dx, double *dy, double *x, double *y)
-{
-	double tx, ty;
-
-	tx = view->geometry.x + view->content->width * 0.5f + *dx;
-	ty = view->geometry.y + view->content->height * 0.5f + *dy;
+	if (!pixman_region32_contains_point(&view->compz->region, tx + *dx, ty + *dy, NULL))
+		return -1;
 
 	*x = view->geometry.x + *dx;
 	*y = view->geometry.y + *dy;
 
-	if (!pixman_region32_contains_point(&view->compz->region, tx, ty, NULL))
-		return 1;
-
 	return 0;
 }
-#endif
 
 static int vieweffect_handle_frame(struct nemoeffect *base, uint32_t msecs)
 {
@@ -80,9 +45,9 @@ static int vieweffect_handle_frame(struct nemoeffect *base, uint32_t msecs)
 
 		if (vieweffect_correct_position(effect->view, &dx, &dy, &x, &y) != 0) {
 			effect->type &= ~NEMO_VIEW_PITCH_EFFECT;
+		} else {
+			nemoview_set_position(effect->view, x, y);
 		}
-
-		nemoview_set_position(effect->view, x, y);
 
 		if (effect->pitch.velocity <= 1e-6) {
 			effect->type &= ~NEMO_VIEW_PITCH_EFFECT;

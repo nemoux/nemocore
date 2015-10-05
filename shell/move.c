@@ -165,7 +165,7 @@ static void move_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		if (tp->touch->node->screen != NULL)
 			effect->pitch.velocity = MIN(tp->touch->node->screen->diagonal * filter->dist / filter->dtime * 1000.0f, 5000.0f);
 		else
-			effect->pitch.velocity = 5000.0f;
+			effect->pitch.velocity = MIN(filter->dist / filter->dtime * 1000.0f, 5000.0f);
 		effect->pitch.dx = filter->dx;
 		effect->pitch.dy = filter->dy;
 		effect->pitch.friction = 12.0f * 1000.0f;
@@ -408,7 +408,7 @@ static void move_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		if (tp->touch->node->screen != NULL)
 			effect->pitch.velocity = MIN(tp->touch->node->screen->diagonal * filter->dist / filter->dtime * 1000.0f, 5000.0f);
 		else
-			effect->pitch.velocity = 5000.0f;
+			effect->pitch.velocity = MIN(filter->dist / filter->dtime * 1000.0f, 5000.0f);
 		effect->pitch.dx = filter->dx;
 		effect->pitch.dy = filter->dy;
 		effect->pitch.friction = 12.0f * 1000.0f;
