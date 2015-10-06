@@ -81,6 +81,11 @@ static gboolean nemogst_watch_bus(GstBus *bus, GstMessage *msg, gpointer data)
 			break;
 
 		case GST_MESSAGE_EOS:
+			if (gst->repeat > 0) {
+				nemogst_replay_media(gst);
+
+				gst->repeat--;
+			}
 			break;
 
 		case GST_MESSAGE_WARNING:
@@ -325,6 +330,25 @@ int nemogst_pause_media(struct nemogst *gst)
 
 	if (gst->subpipeline != NULL)
 		gst_element_set_state(gst->subpipeline, GST_STATE_PAUSED);
+
+	return 0;
+}
+
+int nemogst_replay_media(struct nemogst *gst)
+{
+	gst_element_seek_simple(gst->player,
+			GST_FORMAT_TIME,
+			GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_SEGMENT | GST_SEEK_FLAG_ACCURATE,
+			0);
+
+	if (gst->subpipeline != NULL) {
+		gst_element_seek_simple(gst->subpipeline,
+				GST_FORMAT_TIME,
+				GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_SEGMENT | GST_SEEK_FLAG_ACCURATE,
+				0);
+	}
+
+	gst->is_blocked = 1;
 
 	return 0;
 }

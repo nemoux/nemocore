@@ -392,6 +392,7 @@ int main(int argc, char *argv[])
 
 	free(uri);
 
+	nemogst_set_repeat(context->gst, UINT32_MAX);
 	nemogst_play_media(context->gst);
 
 	gmainloop = g_main_loop_new(NULL, FALSE);
