@@ -30,7 +30,7 @@ option(WITH_FULLSCREEN "Build with FULLSCREEN" ON)
 option(WITH_MESA_DMABUF "Build with MESA's DMABUF" OFF)
 option(WITH_MESA_RENDERNODE "Build with MESA's RENDERNODE" OFF)
 
-option(WITH_TOUCH_TO_POINTER "Build with Touch to Pointer" OFF)
+option(WITH_TOUCH_TO_POINTER "Build with Touch to Pointer" ON)
 
 option(WITH_OPTIMIZE "Build with OPTIMIZE" ON)
 option(WITH_DEBUG "Build with DEBUG" OFF)
