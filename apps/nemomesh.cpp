@@ -786,8 +786,6 @@ static void nemomesh_dispatch_tale_event(struct nemotale *tale, struct talenode 
 				} else if (event->tapcount == 3) {
 					struct meshone *one = context->one;
 
-					nemocanvas_miss(context->canvas);
-
 					one->avec.f[0] = event->taps[2]->x;
 					one->avec.f[1] = event->taps[2]->y;
 					one->avec.f[2] = 0.0f;
