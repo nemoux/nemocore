@@ -68,8 +68,6 @@ struct nemotale {
 	uint32_t single_click_duration;
 	uint32_t single_click_distance;
 
-	uint32_t cup_minimum_distance;
-
 	int32_t minimum_width;
 	int32_t minimum_height;
 };

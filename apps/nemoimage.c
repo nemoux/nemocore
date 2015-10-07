@@ -36,19 +36,13 @@ static void nemoimage_dispatch_tale_event(struct nemotale *tale, struct talenode
 		if (nemotale_is_touch_down(tale, event, type)) {
 			nemotale_event_update_node_taps(tale, node, event, type);
 
-			if (event->tapcount == 1) {
+			if (nemotale_is_single_tap(tale, event, type)) {
 				nemocanvas_move(canvas, event->taps[0]->serial);
-			} else if (event->tapcount == 2) {
+			} else if (nemotale_is_double_taps(tale, event, type)) {
 				nemocanvas_pick(canvas,
 						event->taps[0]->serial,
 						event->taps[1]->serial,
 						(1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_SCALE) | (1 << NEMO_SURFACE_PICK_TYPE_MOVE));
-			}
-		} else if (nemotale_is_touch_motion(tale, event, type)) {
-			nemotale_event_update_node_taps(tale, node, event, type);
-
-			if (event->tapcount == 1) {
-			} else if (event->tapcount == 2) {
 			}
 		}
 	}

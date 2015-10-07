@@ -63,14 +63,14 @@ static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode 
 		if (nemotale_is_touch_down(tale, event, type)) {
 			nemotale_event_update_node_taps(tale, node, event, type);
 
-			if (event->tapcount == 1) {
+			if (nemotale_is_single_tap(tale, event, type)) {
 				nemocanvas_move(context->canvas, event->taps[0]->serial);
-			} else if (event->tapcount == 2) {
+			} else if (nemotale_is_double_taps(tale, event, type)) {
 				nemocanvas_pick(context->canvas,
 						event->taps[0]->serial,
 						event->taps[1]->serial,
 						(1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_SCALE) | (1 << NEMO_SURFACE_PICK_TYPE_MOVE));
-			} else if (event->tapcount == 3) {
+			} else if (nemotale_is_triple_taps(tale, event, type)) {
 #if	NEMOPLAY_SEEK_ENABLE
 				context->position = nemogst_get_position(context->gst);
 
@@ -82,7 +82,7 @@ static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode 
 #if NEMOPLAY_SEEK_ENABLE
 			nemotale_event_update_node_taps(tale, node, event, type);
 
-			if (event->tapcount == 3) {
+			if (nemotale_is_triple_taps(tale, event, type)) {
 				if (context->gx - NEMOPLAY_SLIDE_DISTANCE_MIN > event->taps[2]->x) {
 					if (context->position != 0) {
 						context->position = MAX(context->position - NEMOPLAY_SLIDE_FRAME_TIME, 0);
@@ -125,14 +125,12 @@ static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode 
 		} else if (nemotale_is_single_click(tale, event, type) != 0) {
 			nemotale_event_update_node_taps(tale, node, event, type);
 
-			if (event->tapcount == 1) {
+			if (nemotale_is_single_tap(tale, event, type)) {
 				if (nemogst_is_playing(context->gst)) {
 					nemogst_pause_media(context->gst);
 				} else {
 					nemogst_play_media(context->gst);
 				}
-			} else if (event->tapcount == 2) {
-				nemogst_dump_state(context->gst);
 			}
 		}
 	}

@@ -772,9 +772,9 @@ static void nemomesh_dispatch_tale_event(struct nemotale *tale, struct talenode 
 			} else {
 				nemotale_event_update_node_taps(tale, node, event, type);
 
-				if (event->tapcount == 1) {
+				if (nemotale_is_single_tap(tale, event, type)) {
 					nemocanvas_move(context->canvas, event->taps[0]->serial);
-				} else if (event->tapcount == 2) {
+				} else if (nemotale_is_double_taps(tale, event, type)) {
 					nemocanvas_pick(context->canvas,
 							event->taps[0]->serial,
 							event->taps[1]->serial,
@@ -783,7 +783,7 @@ static void nemomesh_dispatch_tale_event(struct nemotale *tale, struct talenode 
 					one->on_guides = 1;
 
 					nemocanvas_dispatch_frame(context->canvas);
-				} else if (event->tapcount == 3) {
+				} else if (nemotale_is_triple_taps(tale, event, type)) {
 					struct meshone *one = context->one;
 
 					one->avec.f[0] = event->taps[2]->x;
@@ -798,7 +798,7 @@ static void nemomesh_dispatch_tale_event(struct nemotale *tale, struct talenode 
 		} else if (nemotale_is_touch_motion(tale, event, type)) {
 			nemotale_event_update_node_taps(tale, node, event, type);
 
-			if (event->tapcount == 3) {
+			if (nemotale_is_triple_taps(tale, event, type)) {
 				struct meshone *one = context->one;
 
 				one->cvec.f[0] = event->taps[2]->x;
@@ -813,7 +813,7 @@ static void nemomesh_dispatch_tale_event(struct nemotale *tale, struct talenode 
 		} else if (nemotale_is_touch_up(tale, event, type)) {
 			nemotale_event_update_node_taps(tale, node, event, type);
 
-			if (event->tapcount <= 2) {
+			if (nemotale_is_double_taps(tale, event, type)) {
 				struct meshone *one = context->one;
 
 				one->on_guides = 0;
