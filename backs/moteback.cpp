@@ -73,6 +73,7 @@ struct moteback {
 	struct nemotimer *timer;
 
 	int type;
+	char *logo;
 };
 
 static void moteback_prepare_text(struct moteback *mote, const char *text, int ntext)
@@ -80,6 +81,7 @@ static void moteback_prepare_text(struct moteback *mote, const char *text, int n
 	double x, y;
 	int size = 16;
 	int fontsize = 16;
+	int pixelsize = 18;
 	int i, j, p;
 
 	SkBitmap bitmap;
@@ -115,8 +117,8 @@ static void moteback_prepare_text(struct moteback *mote, const char *text, int n
 		width += ceil(widths[i]);
 	}
 
-	x = random_get_double(0.0f, mote->width - width * 24.0f);
-	y = random_get_double(0.0f, mote->height - size * 24.0f);
+	x = random_get_double(0.0f, mote->width - width * pixelsize);
+	y = random_get_double(0.0f, mote->height - size * pixelsize);
 
 	for (i = 0; i < size; i++) {
 		for (j = 0; j < size * ntext; j++) {
@@ -126,10 +128,10 @@ static void moteback_prepare_text(struct moteback *mote, const char *text, int n
 					return;
 
 				nemomote_tweener_set_one(mote->mote, p,
-						x + j * 24,
-						y + i * 24,
+						x + j * pixelsize,
+						y + i * pixelsize,
 						1.0f, 0.8f,
-						12.0f, 8.0f,
+						pixelsize * 0.5f, pixelsize * 0.3f,
 						5.0f, 1.0f);
 				nemomote_type_set_one(mote->mote, p, 5);
 			}
@@ -302,11 +304,11 @@ static void moteback_dispatch_timer_event(struct nemotimer *timer, void *data)
 		time(&tt);
 		tm = localtime(&tt);
 
-		strftime(msg, sizeof(msg), "%I:%M-%S", tm);
+		strftime(msg, sizeof(msg), "%m:%d-%I:%M", tm);
 
 		moteback_prepare_text(mote, msg, strlen(msg));
 	} else {
-		strcpy(msg, "NEMO-UX");
+		strcpy(msg, mote->logo);
 
 		moteback_prepare_text(mote, msg, strlen(msg));
 	}
@@ -327,6 +329,7 @@ int main(int argc, char *argv[])
 		{ "width",			required_argument,			NULL,		'w' },
 		{ "height",			required_argument,			NULL,		'h' },
 		{ "uri",				required_argument,			NULL,		'u' },
+		{ "logo",				required_argument,			NULL,		'l' },
 		{ "background",	no_argument,						NULL,		'b' },
 		{ 0 }
 	};
@@ -338,10 +341,11 @@ int main(int argc, char *argv[])
 	int32_t width = 1920;
 	int32_t height = 1080;
 	char *uri = NULL;
+	char *logo = NULL;
 	int opt;
 	int i;
 
-	while (opt = getopt_long(argc, argv, "w:h:u:b", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:u:l:b", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -358,6 +362,10 @@ int main(int argc, char *argv[])
 				uri = strdup(optarg);
 				break;
 
+			case 'l':
+				logo = strdup(optarg);
+				break;
+
 			default:
 				break;
 		}
@@ -370,6 +378,11 @@ int main(int argc, char *argv[])
 
 	mote->width = width;
 	mote->height = height;
+
+	if (logo != NULL)
+		mote->logo = logo;
+	else
+		mote->logo = strdup("NEMO-UX");
 
 	mote->mote = nemomote_create(3000);
 	nemomote_random_set_property(&mote->random, 5.0f, 1.0f);
@@ -453,6 +466,7 @@ int main(int argc, char *argv[])
 
 	nemomote_destroy(mote->mote);
 
+	free(mote->logo);
 	free(mote);
 
 	return 0;
