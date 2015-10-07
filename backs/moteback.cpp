@@ -74,14 +74,15 @@ struct moteback {
 
 	int type;
 	char *logo;
+	double pixelsize;
 };
 
 static void moteback_prepare_text(struct moteback *mote, const char *text, int ntext)
 {
+	double pixelsize = mote->pixelsize;
 	double x, y;
 	int size = 16;
 	int fontsize = 16;
-	int pixelsize = 18;
 	int i, j, p;
 
 	SkBitmap bitmap;
@@ -330,6 +331,7 @@ int main(int argc, char *argv[])
 		{ "height",			required_argument,			NULL,		'h' },
 		{ "uri",				required_argument,			NULL,		'u' },
 		{ "logo",				required_argument,			NULL,		'l' },
+		{ "pixelsize",	required_argument,			NULL,		's' },
 		{ "background",	no_argument,						NULL,		'b' },
 		{ 0 }
 	};
@@ -340,12 +342,13 @@ int main(int argc, char *argv[])
 	struct nemotale *tale;
 	int32_t width = 1920;
 	int32_t height = 1080;
+	double pixelsize = 18.0f;
 	char *uri = NULL;
 	char *logo = NULL;
 	int opt;
 	int i;
 
-	while (opt = getopt_long(argc, argv, "w:h:u:l:b", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:u:l:s:b", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -366,6 +369,10 @@ int main(int argc, char *argv[])
 				logo = strdup(optarg);
 				break;
 
+			case 's':
+				pixelsize = strtod(optarg, NULL);
+				break;
+
 			default:
 				break;
 		}
@@ -383,6 +390,8 @@ int main(int argc, char *argv[])
 		mote->logo = logo;
 	else
 		mote->logo = strdup("NEMO-UX");
+
+	mote->pixelsize = pixelsize;
 
 	mote->mote = nemomote_create(3000);
 	nemomote_random_set_property(&mote->random, 5.0f, 1.0f);
