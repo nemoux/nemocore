@@ -77,14 +77,15 @@ static void move_shellgrab_pointer_button(struct nemopointer_grab *base, uint32_
 	if (pointer->button_count == 0 &&
 			state == WL_POINTER_BUTTON_STATE_RELEASED) {
 		if (grab->bin != NULL && pitchfilter_flush(filter) > 0) {
+			struct nemoshell *shell = grab->bin->shell;
 			struct vieweffect *effect;
 
 			effect = vieweffect_create(grab->bin->view);
 			effect->type = NEMO_VIEW_PITCH_EFFECT;
-			effect->pitch.velocity = MIN(filter->dist / filter->dtime * 1000.0f, 5000.0f);
+			effect->pitch.velocity = MIN(filter->dist / filter->dtime * shell->pitch.velocity, shell->pitch.max_velocity);
 			effect->pitch.dx = filter->dx;
 			effect->pitch.dy = filter->dy;
-			effect->pitch.friction = 18.0f * 1000.0f;
+			effect->pitch.friction = shell->pitch.friction;
 
 			vieweffect_dispatch(grab->bin->shell->compz, effect);
 		}
@@ -114,7 +115,7 @@ static const struct nemopointer_grab_interface move_shellgrab_pointer_interface 
 	move_shellgrab_pointer_cancel
 };
 
-int nemoshell_move_canvas_by_pointer(struct nemopointer *pointer, struct shellbin *bin)
+int nemoshell_move_canvas_by_pointer(struct nemoshell *shell, struct nemopointer *pointer, struct shellbin *bin)
 {
 	struct shellgrab_move *move;
 
@@ -136,7 +137,7 @@ int nemoshell_move_canvas_by_pointer(struct nemopointer *pointer, struct shellbi
 	move->dx = bin->view->geometry.x - pointer->grab_x;
 	move->dy = bin->view->geometry.y - pointer->grab_y;
 
-	move->filter = pitchfilter_create(20.0f, 10);
+	move->filter = pitchfilter_create(shell->pitch.min_distance, shell->pitch.max_samples);
 
 	bin->retained = 0;
 
@@ -164,14 +165,15 @@ static void move_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 	}
 
 	if (grab->bin != NULL && pitchfilter_flush(filter) > 0) {
+		struct nemoshell *shell = grab->bin->shell;
 		struct vieweffect *effect;
 
 		effect = vieweffect_create(grab->bin->view);
 		effect->type = NEMO_VIEW_PITCH_EFFECT;
-		effect->pitch.velocity = MIN(filter->dist / filter->dtime * 1000.0f, 5000.0f);
+		effect->pitch.velocity = MIN(filter->dist / filter->dtime * shell->pitch.velocity, shell->pitch.max_velocity);
 		effect->pitch.dx = filter->dx;
 		effect->pitch.dy = filter->dy;
-		effect->pitch.friction = 12.0f * 1000.0f;
+		effect->pitch.friction = shell->pitch.friction;
 
 		vieweffect_dispatch(grab->bin->shell->compz, effect);
 	}
@@ -235,7 +237,7 @@ static const struct touchpoint_grab_interface move_shellgrab_touchpoint_interfac
 	move_shellgrab_touchpoint_cancel
 };
 
-int nemoshell_move_canvas_by_touchpoint(struct touchpoint *tp, struct shellbin *bin)
+int nemoshell_move_canvas_by_touchpoint(struct nemoshell *shell, struct touchpoint *tp, struct shellbin *bin)
 {
 	struct shellgrab_move *move;
 
@@ -260,7 +262,7 @@ int nemoshell_move_canvas_by_touchpoint(struct touchpoint *tp, struct shellbin *
 	move->dx = bin->view->geometry.x - tp->x;
 	move->dy = bin->view->geometry.y - tp->y;
 
-	move->filter = pitchfilter_create(20.0f, 30);
+	move->filter = pitchfilter_create(shell->pitch.min_distance, shell->pitch.max_samples);
 
 	bin->retained = 0;
 
@@ -279,12 +281,12 @@ int nemoshell_move_canvas(struct nemoshell *shell, struct shellbin *bin, uint32_
 
 	pointer = nemoseat_get_pointer_by_grab_serial(shell->compz->seat, serial);
 	if (pointer != NULL) {
-		return nemoshell_move_canvas_by_pointer(pointer, bin);
+		return nemoshell_move_canvas_by_pointer(shell, pointer, bin);
 	}
 
 	tp = nemoseat_get_touchpoint_by_grab_serial(shell->compz->seat, serial);
 	if (tp != NULL) {
-		return nemoshell_move_canvas_by_touchpoint(tp, bin);
+		return nemoshell_move_canvas_by_touchpoint(shell, tp, bin);
 	}
 
 	return 0;
@@ -335,14 +337,15 @@ static void move_actorgrab_pointer_button(struct nemopointer_grab *base, uint32_
 	if (pointer->button_count == 0 &&
 			state == WL_POINTER_BUTTON_STATE_RELEASED) {
 		if (grab->actor != NULL && pitchfilter_flush(filter) > 0) {
+			struct nemoshell *shell = grab->shell;
 			struct vieweffect *effect;
 
 			effect = vieweffect_create(grab->actor->view);
 			effect->type = NEMO_VIEW_PITCH_EFFECT;
-			effect->pitch.velocity = MIN(filter->dist / filter->dtime * 1000.0f, 5000.0f);
+			effect->pitch.velocity = MIN(filter->dist / filter->dtime * shell->pitch.velocity, shell->pitch.max_velocity);
 			effect->pitch.dx = filter->dx;
 			effect->pitch.dy = filter->dy;
-			effect->pitch.friction = 18.0f * 1000.0f;
+			effect->pitch.friction = shell->pitch.friction;
 
 			vieweffect_dispatch(pointer->seat->compz, effect);
 		}
@@ -372,7 +375,7 @@ static const struct nemopointer_grab_interface move_actorgrab_pointer_interface 
 	move_actorgrab_pointer_cancel
 };
 
-int nemoshell_move_actor_by_pointer(struct nemopointer *pointer, struct nemoactor *actor)
+int nemoshell_move_actor_by_pointer(struct nemoshell *shell, struct nemopointer *pointer, struct nemoactor *actor)
 {
 	struct actorgrab_move *move;
 
@@ -391,10 +394,12 @@ int nemoshell_move_actor_by_pointer(struct nemopointer *pointer, struct nemoacto
 		return -1;
 	memset(move, 0, sizeof(struct actorgrab_move));
 
+	move->base.shell = shell;
+
 	move->dx = actor->view->geometry.x - pointer->grab_x;
 	move->dy = actor->view->geometry.y - pointer->grab_y;
 
-	move->filter = pitchfilter_create(20.0f, 10);
+	move->filter = pitchfilter_create(shell->pitch.min_distance, shell->pitch.max_samples);
 
 	actor->retained = 0;
 
@@ -419,14 +424,15 @@ static void move_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 	}
 
 	if (grab->actor != NULL && pitchfilter_flush(filter) > 0) {
+		struct nemoshell *shell = grab->shell;
 		struct vieweffect *effect;
 
 		effect = vieweffect_create(grab->actor->view);
 		effect->type = NEMO_VIEW_PITCH_EFFECT;
-		effect->pitch.velocity = MIN(filter->dist / filter->dtime * 1000.0f, 5000.0f);
+		effect->pitch.velocity = MIN(filter->dist / filter->dtime * shell->pitch.velocity, shell->pitch.max_velocity);
 		effect->pitch.dx = filter->dx;
 		effect->pitch.dy = filter->dy;
-		effect->pitch.friction = 12.0f * 1000.0f;
+		effect->pitch.friction = shell->pitch.friction;
 
 		vieweffect_dispatch(tp->touch->seat->compz, effect);
 	}
@@ -490,7 +496,7 @@ static const struct touchpoint_grab_interface move_actorgrab_touchpoint_interfac
 	move_actorgrab_touchpoint_cancel
 };
 
-int nemoshell_move_actor_by_touchpoint(struct touchpoint *tp, struct nemoactor *actor)
+int nemoshell_move_actor_by_touchpoint(struct nemoshell *shell, struct touchpoint *tp, struct nemoactor *actor)
 {
 	struct actorgrab_move *move;
 
@@ -509,10 +515,12 @@ int nemoshell_move_actor_by_touchpoint(struct touchpoint *tp, struct nemoactor *
 		return -1;
 	memset(move, 0, sizeof(struct actorgrab_move));
 
+	move->base.shell = shell;
+
 	move->dx = actor->view->geometry.x - tp->x;
 	move->dy = actor->view->geometry.y - tp->y;
 
-	move->filter = pitchfilter_create(20.0f, 30);
+	move->filter = pitchfilter_create(shell->pitch.min_distance, shell->pitch.max_samples);
 
 	actor->retained = 0;
 
@@ -528,12 +536,12 @@ int nemoshell_move_actor(struct nemoshell *shell, struct nemoactor *actor, uint3
 
 	pointer = nemoseat_get_pointer_by_grab_serial(shell->compz->seat, serial);
 	if (pointer != NULL) {
-		return nemoshell_move_actor_by_pointer(pointer, actor);
+		return nemoshell_move_actor_by_pointer(shell, pointer, actor);
 	}
 
 	tp = nemoseat_get_touchpoint_by_grab_serial(shell->compz->seat, serial);
 	if (tp != NULL) {
-		return nemoshell_move_actor_by_touchpoint(tp, actor);
+		return nemoshell_move_actor_by_touchpoint(shell, tp, actor);
 	}
 
 	return 0;

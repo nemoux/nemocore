@@ -32,8 +32,9 @@ struct actorgrab {
 		struct nemokeyboard_grab keyboard;
 		struct touchpoint_grab touchpoint;
 	} base;
-
+	
 	struct nemoactor *actor;
+	struct nemoshell *shell;
 	struct wl_listener actor_destroy_listener;
 	struct wl_listener actor_ungrab_listener;
 };

@@ -62,6 +62,16 @@ struct nemoshell {
 		struct wl_list bin_list;
 	} inputpanel;
 
+	struct {
+		double min_distance;
+		uint32_t max_samples;
+
+		double velocity;
+		double max_velocity;
+
+		double friction;
+	} pitch;
+
 	struct nemoitem *configs;
 };
 
@@ -217,6 +227,8 @@ extern void nemoshell_set_client_state(struct shellbin *bin, struct clientstate 
 extern void nemoshell_load_fullscreens(struct nemoshell *shell);
 extern struct shellscreen *nemoshell_get_fullscreen(struct nemoshell *shell, uint32_t id);
 extern struct shellscreen *nemoshell_get_fullscreen_on(struct nemoshell *shell, int32_t x, int32_t y);
+
+extern void nemoshell_load_pitch(struct nemoshell *shell);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
