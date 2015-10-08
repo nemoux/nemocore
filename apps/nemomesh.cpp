@@ -798,7 +798,9 @@ static void nemomesh_dispatch_tale_event(struct nemotale *tale, struct talenode 
 		} else if (nemotale_is_touch_motion(tale, event, type)) {
 			nemotale_event_update_node_taps(tale, node, event, type);
 
-			if (nemotale_is_triple_taps(tale, event, type)) {
+			if (nemotale_is_close_event(tale, event, type)) {
+				nemotool_exit(context->tool);
+			} else if (nemotale_is_triple_taps(tale, event, type)) {
 				struct meshone *one = context->one;
 
 				one->cvec.f[0] = event->taps[2]->x;
@@ -863,11 +865,6 @@ static void nemomesh_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t w
 
 	if (width == 0 || height == 0)
 		return;
-
-	if (width < nemotale_get_minimum_width(tale) * 2 || height < nemotale_get_minimum_height(tale) * 2) {
-		nemotool_exit(context->tool);
-		return;
-	}
 
 	context->width = width;
 	context->height = height;

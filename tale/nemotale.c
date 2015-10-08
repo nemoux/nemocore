@@ -66,17 +66,11 @@ int nemotale_prepare(struct nemotale *tale)
 	else
 		tale->tap_minimum_distance = 0;
 
-	env = getenv("NEMOTALE_MINIMUM_WIDTH");
+	env = getenv("NEMOTALE_CLOSE_DISTANCE");
 	if (env != NULL)
-		tale->minimum_width = strtoul(env, NULL, 10);
+		tale->close_distance = strtoul(env, NULL, 10);
 	else
-		tale->minimum_width = 150;
-
-	env = getenv("NEMOTALE_MINIMUM_HEIGHT");
-	if (env != NULL)
-		tale->minimum_height = strtoul(env, NULL, 10);
-	else
-		tale->minimum_height = 150;
+		tale->close_distance = 150;
 
 	return 0;
 }

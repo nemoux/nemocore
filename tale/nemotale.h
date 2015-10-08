@@ -70,8 +70,7 @@ struct nemotale {
 
 	uint32_t tap_minimum_distance;
 
-	int32_t minimum_width;
-	int32_t minimum_height;
+	uint32_t close_distance;
 };
 
 #define	NEMOTALE_DESTROY_SIGNAL(tale)		(&tale->destroy_signal)
@@ -182,16 +181,6 @@ static inline int32_t nemotale_get_height(struct nemotale *tale)
 	return tale->height;
 }
 
-static inline int32_t nemotale_get_minimum_width(struct nemotale *tale)
-{
-	return tale->minimum_width;
-}
-
-static inline int32_t nemotale_get_minimum_height(struct nemotale *tale)
-{
-	return tale->minimum_height;
-}
-
 static inline void nemotale_set_dispatch_event(struct nemotale *tale, nemotale_dispatch_event_t dispatch)
 {
 	tale->dispatch_event = dispatch;
@@ -217,6 +206,11 @@ static inline void nemotale_set_single_click_gesture(struct nemotale *tale, uint
 static inline void nemotale_set_tap_minimum_distance(struct nemotale *tale, uint32_t distance)
 {
 	tale->tap_minimum_distance = distance;
+}
+
+static inline void nemotale_set_close_distance(struct nemotale *tale, uint32_t distance)
+{
+	tale->close_distance = distance;
 }
 
 static inline void nemotale_set_backend(struct nemotale *tale, void *backend)

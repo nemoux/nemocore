@@ -82,7 +82,9 @@ static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode 
 #if NEMOPLAY_SEEK_ENABLE
 			nemotale_event_update_node_taps(tale, node, event, type);
 
-			if (nemotale_is_triple_taps(tale, event, type)) {
+			if (nemotale_is_close_event(tale, event, type)) {
+				nemotool_exit(context->tool);
+			} else if (nemotale_is_triple_taps(tale, event, type)) {
 				if (context->gx - NEMOPLAY_SLIDE_DISTANCE_MIN > event->taps[2]->x) {
 					if (context->position != 0) {
 						context->position = MAX(context->position - NEMOPLAY_SLIDE_FRAME_TIME, 0);
@@ -144,11 +146,6 @@ static void nemoplay_dispatch_video_resize(struct nemocanvas *canvas, int32_t wi
 	if (width == 0 || height == 0)
 		return;
 
-	if (width < nemotale_get_minimum_width(tale) || height < nemotale_get_minimum_height(tale)) {
-		nemotool_exit(context->tool);
-		return;
-	}
-
 	if (fixed == 0) {
 		height = width / nemogst_get_video_aspect_ratio(context->gst);
 	}
@@ -192,11 +189,6 @@ static void nemoplay_dispatch_audio_resize(struct nemocanvas *canvas, int32_t wi
 
 	if (width == 0 || height == 0)
 		return;
-
-	if (width < nemotale_get_minimum_width(tale) || height < nemotale_get_minimum_height(tale)) {
-		nemotool_exit(context->tool);
-		return;
-	}
 
 	nemotool_resize_egl_canvas(context->ecanvas, width, height);
 	nemotale_resize(context->tale, width, height);

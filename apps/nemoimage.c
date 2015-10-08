@@ -44,6 +44,12 @@ static void nemoimage_dispatch_tale_event(struct nemotale *tale, struct talenode
 						event->taps[1]->serial,
 						(1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_SCALE) | (1 << NEMO_SURFACE_PICK_TYPE_MOVE));
 			}
+		} else if (nemotale_is_touch_motion(tale, event, type)) {
+			nemotale_event_update_node_taps(tale, node, event, type);
+
+			if (nemotale_is_close_event(tale, event, type)) {
+				nemotool_exit(context->tool);
+			}
 		}
 	}
 }
@@ -56,11 +62,6 @@ static void nemoimage_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t 
 
 	if (width == 0 || height == 0)
 		return;
-
-	if (width < nemotale_get_minimum_width(tale) || height < nemotale_get_minimum_height(tale)) {
-		nemotool_exit(context->tool);
-		return;
-	}
 
 	nemotool_resize_egl_canvas(context->canvas, width, height);
 	nemotale_set_viewport(tale, width, height);
