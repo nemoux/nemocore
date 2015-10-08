@@ -937,14 +937,13 @@ static int drm_create_screen_for_connector(struct drmnode *node, drmModeRes *res
 	}
 #endif
 
-	nemolog_message("DRM", "screen(%d, %d) x = %d, y = %d, width = %d, height = %d, diagonal = %d\n",
+	nemolog_message("DRM", "screen(%d, %d) x = %d, y = %d, width = %d, height = %d\n",
 			node->base.nodeid,
 			screen->base.screenid,
 			screen->base.x,
 			screen->base.y,
 			screen->base.width,
-			screen->base.height,
-			screen->base.diagonal);
+			screen->base.height);
 
 	screen->base.mmwidth = connector->mmWidth;
 	screen->base.mmheight = connector->mmHeight;

@@ -397,7 +397,6 @@ int nemoscreen_get_config_geometry(struct nemocompz *compz, uint32_t nodeid, uin
 	screen->y = nemoitem_get_iattr(compz->configs, index, "y", 0);
 	screen->width = nemoitem_get_iattr(compz->configs, index, "width", 1920);
 	screen->height = nemoitem_get_iattr(compz->configs, index, "height", 1080);
-	screen->diagonal = nemoitem_get_iattr(compz->configs, index, "diagonal", 1);
 
 	value = nemoitem_get_attr(compz->configs, index, "transform");
 	if (value != NULL) {

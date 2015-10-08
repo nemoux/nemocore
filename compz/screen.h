@@ -53,8 +53,6 @@ struct nemoscreen {
 	int32_t mmwidth, mmheight;
 	uint32_t subpixel;
 
-	int32_t diagonal;
-
 	char *snddev;
 
 	struct {

@@ -187,7 +187,6 @@ static int fb_create_screen(struct fbnode *node, const char *devpath)
 	screen->base.height = screen->mode.height;
 	screen->base.mmwidth = screen->fbinfo.mmwidth;
 	screen->base.mmheight = screen->fbinfo.mmheight;
-	screen->base.diagonal = 1;
 
 	nemoscreen_prepare(&screen->base);
 

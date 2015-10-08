@@ -636,7 +636,6 @@ static int wayland_create_screen(struct waylandnode *node, int x, int y, int wid
 	screen->base.height = height;
 	screen->base.mmwidth = width;
 	screen->base.mmheight = height;
-	screen->diagonal = 1;
 
 	nemoscreen_prepare(&screen->base);
 
