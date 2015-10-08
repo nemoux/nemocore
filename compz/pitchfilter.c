@@ -96,7 +96,21 @@ int pitchfilter_flush(struct pitchfilter *filter)
 
 		dx = x1 - x0;
 		dy = y1 - y0;
+
 		dist = sqrtf(dx * dx + dy * dy);
+
+		dx = 0.0f;
+		dy = 0.0f;
+
+		for (i = 0; i < filter->index - 1; i++) {
+			x0 = filter->samples[i + 0].x;
+			y0 = filter->samples[i + 0].y;
+			x1 = filter->samples[i + 1].x;
+			y1 = filter->samples[i + 1].y;
+
+			dx += (x1 - x0);
+			dy += (y1 - y0);
+		}
 
 		filter->dx = dx / dist;
 		filter->dy = dy / dist;
