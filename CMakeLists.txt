@@ -31,6 +31,7 @@ option(WITH_MESA_DMABUF "Build with MESA's DMABUF" OFF)
 option(WITH_MESA_RENDERNODE "Build with MESA's RENDERNODE" OFF)
 
 option(WITH_TOUCH_TO_POINTER "Build with Touch to Pointer" ON)
+option(WITH_TAP_MINIMUM_DISTANCE "Build with Tap minimum distance" ON)
 
 option(WITH_OPTIMIZE "Build with OPTIMIZE" ON)
 option(WITH_DEBUG "Build with DEBUG" OFF)
@@ -181,6 +182,10 @@ endif(WITH_MESA_RENDERNODE)
 if(WITH_TOUCH_TO_POINTER)
 	add_definitions(-DNEMOUX_WITH_TOUCH_TO_POINTER=1)
 endif(WITH_TOUCH_TO_POINTER)
+
+if(WITH_TAP_MINIMUM_DISTANCE)
+	add_definitions(-DNEMOUX_WITH_TAP_MINIMUM_DISTANCE=1)
+endif(WITH_TAP_MINIMUM_DISTANCE)
 
 if(WITH_GLIB)
 	add_definitions(-DNEMOUX_WITH_GLIB=1)

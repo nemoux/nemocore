@@ -68,6 +68,8 @@ struct nemotale {
 	uint32_t single_click_duration;
 	uint32_t single_click_distance;
 
+	uint32_t tap_minimum_distance;
+
 	int32_t minimum_width;
 	int32_t minimum_height;
 };
@@ -210,6 +212,11 @@ static inline void nemotale_set_single_click_gesture(struct nemotale *tale, uint
 {
 	tale->single_click_duration = duration;
 	tale->single_click_distance = distance;
+}
+
+static inline void nemotale_set_tap_minimum_distance(struct nemotale *tale, uint32_t distance)
+{
+	tale->tap_minimum_distance = distance;
 }
 
 static inline void nemotale_set_backend(struct nemotale *tale, void *backend)

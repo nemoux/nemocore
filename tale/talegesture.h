@@ -7,6 +7,8 @@
 NEMO_BEGIN_EXTERN_C
 #endif
 
+#include <math.h>
+
 #include <nemotale.h>
 #include <talenode.h>
 #include <taleevent.h>
@@ -54,7 +56,19 @@ static inline int nemotale_is_single_tap(struct nemotale *tale, struct taleevent
 
 static inline int nemotale_is_double_taps(struct nemotale *tale, struct taleevent *event, uint32_t type)
 {
+#ifdef NEMOUX_WITH_TAP_MINIMUM_DISTANCE
+	if (event->tapcount == 2) {
+		double dx = event->taps[1]->gx - event->taps[0]->gx;
+		double dy = event->taps[1]->gy - event->taps[0]->gy;
+
+		if (sqrtf(dx * dx + dy * dy) >= tale->tap_minimum_distance)
+			return 1;
+	}
+
+	return 0;
+#else
 	return event->tapcount == 2;
+#endif
 }
 
 static inline int nemotale_is_triple_taps(struct nemotale *tale, struct taleevent *event, uint32_t type)

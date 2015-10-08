@@ -60,6 +60,12 @@ int nemotale_prepare(struct nemotale *tale)
 	else
 		tale->single_click_distance = 50;
 
+	env = getenv("NEMOTALE_TAP_MINIMUM_DISTANCE");
+	if (env != NULL)
+		tale->tap_minimum_distance = strtoul(env, NULL, 10);
+	else
+		tale->tap_minimum_distance = 0;
+
 	env = getenv("NEMOTALE_MINIMUM_WIDTH");
 	if (env != NULL)
 		tale->minimum_width = strtoul(env, NULL, 10);
