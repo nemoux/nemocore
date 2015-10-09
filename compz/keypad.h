@@ -78,7 +78,7 @@ extern void nemokeypad_start_grab(struct nemokeypad *keypad, struct nemokeypad_g
 extern void nemokeypad_end_grab(struct nemokeypad *keypad);
 extern void nemokeypad_cancel_grab(struct nemokeypad *keypad);
 
-extern int nemokeypad_is_normal_layout(struct nemokeypad *keypad);
+extern int nemokeypad_is_caps_on(struct nemokeypad *keypad);
 extern int nemokeypad_is_shift_on(struct nemokeypad *keypad);
 
 #ifdef __cplusplus
