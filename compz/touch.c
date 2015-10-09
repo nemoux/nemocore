@@ -218,6 +218,14 @@ void nemotouch_destroy(struct nemotouch *touch)
 	free(touch);
 }
 
+float touchpoint_get_moving_distance(struct touchpoint *tp, float x, float y)
+{
+	float dx = x - tp->x;
+	float dy = y - tp->y;
+	
+	return sqrtf(dx * dx + dy * dy);
+}
+
 void touchpoint_move(struct touchpoint *tp, float x, float y)
 {
 	tp->x = x;

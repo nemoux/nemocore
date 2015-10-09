@@ -135,6 +135,7 @@ extern void nemotouch_notify_frame(struct nemotouch *touch, int id);
 
 extern void nemotouch_flush_tuio(struct tuionode *node);
 
+extern float touchpoint_get_moving_distance(struct touchpoint *tp, float x, float y);
 extern void touchpoint_move(struct touchpoint *tp, float x, float y);
 
 extern void touchpoint_set_focus(struct touchpoint *tp, struct nemoview *view);
