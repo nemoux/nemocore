@@ -33,8 +33,6 @@ struct showpath {
 	double x2, y2;
 	double width, height;
 	double r;
-
-	char *uri;
 };
 
 #define NEMOSHOW_PATH(one)					((struct showpath *)container_of(one, struct showpath, base))
@@ -45,8 +43,6 @@ extern void nemoshow_path_destroy(struct showone *one);
 
 extern int nemoshow_path_arrange(struct nemoshow *show, struct showone *one);
 extern int nemoshow_path_update(struct nemoshow *show, struct showone *one);
-
-extern void nemoshow_path_set_uri(struct showone *one, const char *uri);
 
 static inline void nemoshow_path_set_x0(struct showone *one, double x0)
 {

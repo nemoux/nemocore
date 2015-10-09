@@ -120,6 +120,8 @@ extern void nemoshow_item_path_close(struct showone *one);
 extern void nemoshow_item_path_cmd(struct showone *one, const char *cmd);
 extern void nemoshow_item_path_arc(struct showone *one, double x, double y, double width, double height, double from, double to);
 
+extern int nemoshow_item_load_svg(struct showone *one, const char *uri);
+
 static inline void nemoshow_item_set_canvas(struct showone *one, struct showone *canvas)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);

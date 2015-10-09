@@ -921,3 +921,99 @@ void nemoshow_item_path_arc(struct showone *one, double x, double y, double widt
 
 	NEMOSHOW_ITEM_CC(item, path)->addArc(rect, from, to);
 }
+
+int nemoshow_item_load_svg(struct showone *one, const char *uri)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+	struct nemoxml *xml;
+	struct xmlnode *node;
+
+	if (uri == NULL)
+		return -1;
+
+	xml = nemoxml_create();
+	nemoxml_load_file(xml, uri);
+	nemoxml_update(xml);
+
+	nemolist_for_each(node, &xml->nodes, nodelink) {
+		if (strcmp(node->name, "path") == 0) {
+			const char *d;
+
+			d = nemoxml_node_get_attr(node, "d");
+			if (d != NULL) {
+				SkPath rpath;
+
+				SkParsePath::FromSVGString(d, &rpath);
+
+				NEMOSHOW_ITEM_CC(item, path)->addPath(rpath);
+			}
+		} else if (strcmp(node->name, "rect") == 0) {
+			double x = strtod(nemoxml_node_get_attr(node, "x"), NULL);
+			double y = strtod(nemoxml_node_get_attr(node, "y"), NULL);
+			double width = strtod(nemoxml_node_get_attr(node, "width"), NULL);
+			double height = strtod(nemoxml_node_get_attr(node, "height"), NULL);
+
+			NEMOSHOW_ITEM_CC(item, path)->addRect(x, y, x + width, y + height);
+		} else if (strcmp(node->name, "circle") == 0) {
+			double x = strtod(nemoxml_node_get_attr(node, "cx"), NULL);
+			double y = strtod(nemoxml_node_get_attr(node, "cy"), NULL);
+			double r = strtod(nemoxml_node_get_attr(node, "r"), NULL);
+
+			NEMOSHOW_ITEM_CC(item, path)->addCircle(x, y, r);
+		} else if (strcmp(node->name, "polygon") == 0) {
+			const char *points = nemoxml_node_get_attr(node, "points");
+			struct nemotoken *token;
+			int i, count;
+
+			token = nemotoken_create(points, strlen(points));
+			nemotoken_divide(token, ' ');
+			nemotoken_divide(token, '\t');
+			nemotoken_divide(token, ',');
+			nemotoken_update(token);
+
+			count = nemotoken_get_token_count(token);
+
+			NEMOSHOW_ITEM_CC(item, path)->moveTo(
+					strtod(nemotoken_get_token(token, 0), NULL),
+					strtod(nemotoken_get_token(token, 1), NULL));
+
+			for (i = 2; i < count; i += 2) {
+				NEMOSHOW_ITEM_CC(item, path)->moveTo(
+						strtod(nemotoken_get_token(token, i + 0), NULL),
+						strtod(nemotoken_get_token(token, i + 1), NULL));
+			}
+
+			NEMOSHOW_ITEM_CC(item, path)->close();
+
+			nemotoken_destroy(token);
+		} else if (strcmp(node->name, "polyline") == 0) {
+			const char *points = nemoxml_node_get_attr(node, "points");
+			struct nemotoken *token;
+			int i, count;
+
+			token = nemotoken_create(points, strlen(points));
+			nemotoken_divide(token, ' ');
+			nemotoken_divide(token, '\t');
+			nemotoken_divide(token, ',');
+			nemotoken_update(token);
+
+			count = nemotoken_get_token_count(token);
+
+			NEMOSHOW_ITEM_CC(item, path)->moveTo(
+					strtod(nemotoken_get_token(token, 0), NULL),
+					strtod(nemotoken_get_token(token, 1), NULL));
+
+			for (i = 2; i < count; i += 2) {
+				NEMOSHOW_ITEM_CC(item, path)->moveTo(
+						strtod(nemotoken_get_token(token, i + 0), NULL),
+						strtod(nemotoken_get_token(token, i + 1), NULL));
+			}
+
+			nemotoken_destroy(token);
+		}
+	}
+
+	nemoxml_destroy(xml);
+
+	return 0;
+}
