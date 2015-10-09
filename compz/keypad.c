@@ -249,3 +249,8 @@ int nemokeypad_is_normal_layout(struct nemokeypad *keypad)
 
 	return on_caps ^ on_shift == 0;
 }
+
+int nemokeypad_is_shift_on(struct nemokeypad *keypad)
+{
+	return xkb_state_mod_index_is_active(keypad->xkb->state, keypad->xkb->xkbinfo->shift_mod, XKB_STATE_MODS_EFFECTIVE);
+}
