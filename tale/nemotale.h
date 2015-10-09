@@ -69,7 +69,8 @@ struct nemotale {
 	uint32_t single_click_distance;
 
 	uint32_t tap_minimum_distance;
-
+	
+	uint32_t close_duration;
 	uint32_t close_distance;
 };
 

@@ -66,11 +66,17 @@ int nemotale_prepare(struct nemotale *tale)
 	else
 		tale->tap_minimum_distance = 0;
 
+	env = getenv("NEMOTALE_CLOSE_DURATION");
+	if (env != NULL)
+		tale->close_duration = strtoul(env, NULL, 10);
+	else
+		tale->close_duration = 1000;
+
 	env = getenv("NEMOTALE_CLOSE_DISTANCE");
 	if (env != NULL)
 		tale->close_distance = strtoul(env, NULL, 10);
 	else
-		tale->close_distance = 150;
+		tale->close_distance = 100;
 
 	return 0;
 }
