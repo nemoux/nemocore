@@ -72,8 +72,8 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		double distance = pickgrab_calculate_touchpoint_distance(pick->tp0, pick->tp1);
 		int32_t width, height;
 
-		width = pick->width * (distance / pick->touch.distance);
-		height = pick->height * (distance / pick->touch.distance);
+		width = pick->width * pick->sx * (distance / pick->touch.distance);
+		height = pick->height * pick->sy * (distance / pick->touch.distance);
 
 		width = MAX(width, bin->min_width);
 		height = MAX(height, bin->min_height);
@@ -443,8 +443,8 @@ static void pick_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		int32_t sx, sy;
 		float fromx, fromy, tox, toy;
 
-		width = pick->width * (distance / pick->touch.distance);
-		height = pick->height * (distance / pick->touch.distance);
+		width = pick->width * pick->sx * (distance / pick->touch.distance);
+		height = pick->height * pick->sy * (distance / pick->touch.distance);
 
 		width = MAX(width, actor->min_width);
 		height = MAX(height, actor->min_height);
