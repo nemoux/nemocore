@@ -241,3 +241,11 @@ void nemokeypad_cancel_grab(struct nemokeypad *keypad)
 {
 	keypad->grab->interface->cancel(keypad->grab);
 }
+
+int nemokeypad_is_normal_layout(struct nemokeypad *keypad)
+{
+	int on_caps = xkb_state_mod_index_is_active(keypad->xkb->state, keypad->xkb->xkbinfo->caps_mod, XKB_STATE_MODS_EFFECTIVE);
+	int on_shift = xkb_state_mod_index_is_active(keypad->xkb->state, keypad->xkb->xkbinfo->shift_mod, XKB_STATE_MODS_EFFECTIVE);
+
+	return on_caps ^ on_shift == 0;
+}
