@@ -44,8 +44,8 @@ struct showone *nemoshow_item_create(int type)
 	NEMOSHOW_ITEM_CC(item, modelview) = new SkMatrix;
 	NEMOSHOW_ITEM_CC(item, viewbox) = new SkMatrix;
 	NEMOSHOW_ITEM_CC(item, path) = new SkPath;
-	NEMOSHOW_ITEM_CC(item, strokepath) = new SkPath;
-	NEMOSHOW_ITEM_CC(item, fillpath) = new SkPath;
+	NEMOSHOW_ITEM_CC(item, strokepath) = NULL;
+	NEMOSHOW_ITEM_CC(item, fillpath) = NULL;
 	NEMOSHOW_ITEM_CC(item, fill) = new SkPaint;
 	NEMOSHOW_ITEM_CC(item, fill)->setStyle(SkPaint::kFill_Style);
 	NEMOSHOW_ITEM_CC(item, fill)->setAntiAlias(true);
@@ -947,6 +947,11 @@ int nemoshow_item_load_svg(struct showone *one, const char *uri)
 
 	if (uri == NULL)
 		return -1;
+
+	if (NEMOSHOW_ITEM_CC(item, strokepath) == NULL)
+		NEMOSHOW_ITEM_CC(item, strokepath) = new SkPath;
+	if (NEMOSHOW_ITEM_CC(item, fillpath) == NULL)
+		NEMOSHOW_ITEM_CC(item, fillpath) = new SkPath;
 
 	xml = nemoxml_create();
 	nemoxml_load_file(xml, uri);

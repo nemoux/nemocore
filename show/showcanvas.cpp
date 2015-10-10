@@ -258,10 +258,17 @@ static inline void nemoshow_canvas_render_item_path(SkCanvas *canvas, struct sho
 	struct showitem *style = NEMOSHOW_ITEM(nemoshow_item_get_style(one));
 
 	if (item->from == 0.0f && item->to == 1.0f) {
-		if (style->fill != 0)
-			canvas->drawPath(*NEMOSHOW_ITEM_CC(item, fillpath), *NEMOSHOW_ITEM_CC(style, fill));
-		if (style->stroke != 0)
-			canvas->drawPath(*NEMOSHOW_ITEM_CC(item, strokepath), *NEMOSHOW_ITEM_CC(style, stroke));
+		if (NEMOSHOW_ITEM_CC(item, fillpath) != NULL && NEMOSHOW_ITEM_CC(item, strokepath) != NULL) {
+			if (style->fill != 0)
+				canvas->drawPath(*NEMOSHOW_ITEM_CC(item, fillpath), *NEMOSHOW_ITEM_CC(style, fill));
+			if (style->stroke != 0)
+				canvas->drawPath(*NEMOSHOW_ITEM_CC(item, strokepath), *NEMOSHOW_ITEM_CC(style, stroke));
+		} else {
+			if (style->fill != 0)
+				canvas->drawPath(*NEMOSHOW_ITEM_CC(item, path), *NEMOSHOW_ITEM_CC(style, fill));
+			if (style->stroke != 0)
+				canvas->drawPath(*NEMOSHOW_ITEM_CC(item, path), *NEMOSHOW_ITEM_CC(style, stroke));
+		}
 	} else {
 		SkPath path;
 
