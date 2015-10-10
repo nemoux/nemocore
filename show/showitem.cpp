@@ -21,6 +21,7 @@
 #include <nemoshow.h>
 #include <fonthelper.h>
 #include <svghelper.h>
+#include <stringhelper.h>
 #include <nemoxml.h>
 #include <nemobox.h>
 #include <nemomisc.h>
@@ -927,6 +928,12 @@ int nemoshow_item_load_svg(struct showone *one, const char *uri)
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	struct nemoxml *xml;
 	struct xmlnode *node;
+	double sw, sh;
+	double pw, ph;
+	const char *units;
+	const char *attr0, *attr1;
+	SkMatrix matrix;
+	int has_transform = 0;
 
 	if (uri == NULL)
 		return -1;
@@ -934,6 +941,30 @@ int nemoshow_item_load_svg(struct showone *one, const char *uri)
 	xml = nemoxml_create();
 	nemoxml_load_file(xml, uri);
 	nemoxml_update(xml);
+
+	nemolist_for_each(node, &xml->nodes, nodelink) {
+		if (strcmp(node->name, "svg") == 0) {
+			attr0 = nemoxml_node_get_attr(node, "width");
+			attr1 = nemoxml_node_get_attr(node, "height");
+
+			if (attr0 != NULL && attr1 != NULL) {
+				sw = item->width;
+				sh = item->height;
+
+				pw = string_parse_float_with_endptr(attr0, 0, strlen(attr0), &units);
+				ph = string_parse_float_with_endptr(attr1, 0, strlen(attr1), &units);
+
+				if (sw != pw || sh != ph) {
+					matrix.setIdentity();
+					matrix.postScale(sw / pw, sh / ph);
+
+					has_transform = 1;
+				}
+			}
+
+			break;
+		}
+	}
 
 	nemolist_for_each(node, &xml->nodes, nodelink) {
 		if (strcmp(node->name, "path") == 0) {
@@ -1014,6 +1045,9 @@ int nemoshow_item_load_svg(struct showone *one, const char *uri)
 	}
 
 	nemoxml_destroy(xml);
+
+	if (has_transform != 0)
+		NEMOSHOW_ITEM_CC(item, path)->transform(matrix);
 
 	return 0;
 }
