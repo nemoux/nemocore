@@ -259,6 +259,30 @@ static inline void nemoshow_canvas_render_item_path(SkCanvas *canvas, struct sho
 
 	if (item->from == 0.0f && item->to == 1.0f) {
 		if (style->fill != 0)
+			canvas->drawPath(*NEMOSHOW_ITEM_CC(item, fillpath), *NEMOSHOW_ITEM_CC(style, fill));
+		if (style->stroke != 0)
+			canvas->drawPath(*NEMOSHOW_ITEM_CC(item, strokepath), *NEMOSHOW_ITEM_CC(style, stroke));
+	} else {
+		SkPath path;
+
+		nemoshow_helper_draw_path(
+				path,
+				NEMOSHOW_ITEM_CC(item, path),
+				NEMOSHOW_ITEM_CC(style, fill),
+				item->pathlength,
+				item->from, item->to);
+
+		canvas->drawPath(path, *NEMOSHOW_ITEM_CC(style, stroke));
+	}
+}
+
+static inline void nemoshow_canvas_render_item_path_group(SkCanvas *canvas, struct showone *one)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+	struct showitem *style = NEMOSHOW_ITEM(nemoshow_item_get_style(one));
+
+	if (item->from == 0.0f && item->to == 1.0f) {
+		if (style->fill != 0)
 			canvas->drawPath(*NEMOSHOW_ITEM_CC(item, path), *NEMOSHOW_ITEM_CC(style, fill));
 		if (style->stroke != 0)
 			canvas->drawPath(*NEMOSHOW_ITEM_CC(item, path), *NEMOSHOW_ITEM_CC(style, stroke));
@@ -417,7 +441,7 @@ static inline void nemoshow_canvas_render_item(SkCanvas *canvas, struct showone 
 		nemoshow_canvas_render_item_ring,
 		nemoshow_canvas_render_item_text,
 		nemoshow_canvas_render_item_path,
-		nemoshow_canvas_render_item_path,
+		nemoshow_canvas_render_item_path_group,
 		nemoshow_canvas_render_item_bitmap,
 		nemoshow_canvas_render_item_image,
 		nemoshow_canvas_render_item_svg,
