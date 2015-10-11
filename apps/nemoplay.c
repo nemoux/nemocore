@@ -158,8 +158,6 @@ static void nemoplay_dispatch_video_frame(GstElement *base, guint8 *data, gint w
 	context->video_height = height;
 
 	pthread_mutex_unlock(&context->lock);
-
-	nemocanvas_dispatch_frame_async(context->canvas);
 }
 
 static void nemoplay_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t secs, uint32_t nsecs)
@@ -191,9 +189,9 @@ static void nemoplay_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 		nemotale_node_attach_pixman(context->node, data, width, height);
 
 		nemogst_frame_done(context->gst);
-
-		nemocanvas_feedback(canvas);
 	}
+
+	nemocanvas_feedback(context->canvas);
 
 	nemotale_composite_egl(context->tale, NULL);
 }
@@ -376,10 +374,10 @@ int main(int argc, char *argv[])
 
 	nemogst_play_media(context->gst);
 
+	nemocanvas_dispatch_frame(context->canvas);
+
 	gmainloop = g_main_loop_new(NULL, FALSE);
-
 	nemoglib_run_tool(gmainloop, context->tool);
-
 	g_main_loop_unref(gmainloop);
 
 	nemotool_destroy_egl_canvas(context->ecanvas);
