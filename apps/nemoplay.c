@@ -209,14 +209,12 @@ static void nemoplay_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t w
 	if (context->is_audio_only == 0) {
 		if (fixed == 0) {
 			height = width / nemogst_get_video_aspect_ratio(context->gst);
+		}
 
-			nemogst_resize_video(context->gst, width, height);
-		} else {
-			nemogst_resize_video(context->gst, width, height);
+		nemogst_resize_video(context->gst, width, height);
 
-			if (nemogst_is_playing(context->gst) == 0) {
-				nemogst_play_media(context->gst);
-			}
+		if (nemogst_is_playing(context->gst) == 0) {
+			nemogst_set_next_step(context->gst, 1, 1.0f);
 		}
 	}
 }
