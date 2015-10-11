@@ -49,6 +49,9 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 	struct touchpoint *tp1 = pick->other->base.base.touchpoint.touchpoint;
 	struct shellbin *bin = grab->bin;
 
+	if (bin == NULL)
+		goto out;
+
 	if (pick->has_reset != 0 && bin->reset_scale == 0) {
 		pick->sx = 1.0f;
 		pick->sy = 1.0f;
@@ -65,7 +68,7 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		pick->has_reset = 0;
 	}
 
-	if (bin != NULL && (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALE))) {
+	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALE)) {
 		struct nemoshell *shell = bin->shell;
 		struct nemocompz *compz = shell->compz;
 		struct shellscreen *screen = NULL;
@@ -117,11 +120,10 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 
 	touchpoint_update_grab(tp1);
 
-	if (bin != NULL) {
-		bin->resize_edges = 0;
-		nemoshell_send_bin_configure(bin);
-	}
+	bin->resize_edges = 0;
+	nemoshell_send_bin_configure(bin);
 
+out:
 	nemoshell_end_touchpoint_shellgrab(grab);
 	nemoshell_end_touchpoint_shellgrab(&pick->other->base);
 	free(pick->other);
