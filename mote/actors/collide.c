@@ -27,7 +27,7 @@ int nemomote_collide_update(struct nemomote *mote, uint32_t src, uint32_t dst, d
 			continue;
 
 		for (j = 0; j < mote->lcount; j++) {
-			if (mote->types[j] != dst)
+			if (mote->types[j] != dst || i == j)
 				continue;
 
 			dx = NEMOMOTE_POSITION_X(mote, j) - NEMOMOTE_POSITION_X(mote, i);
