@@ -82,7 +82,7 @@ extern int nemogst_replay_media(struct nemogst *gst);
 
 extern int nemogst_resize_video(struct nemogst *gst, uint32_t width, uint32_t height);
 
-extern void nemogst_frame_done(struct nemogst *gst);
+extern void nemogst_set_sink(struct nemogst *gst, const char *name, uint32_t value);
 
 extern int64_t nemogst_get_position(struct nemogst *gst);
 extern int64_t nemogst_get_duration(struct nemogst *gst);

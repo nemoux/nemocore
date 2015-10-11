@@ -374,9 +374,9 @@ int nemogst_resize_video(struct nemogst *gst, uint32_t width, uint32_t height)
 	return 0;
 }
 
-void nemogst_frame_done(struct nemogst *gst)
+void nemogst_set_sink(struct nemogst *gst, const char *name, uint32_t value)
 {
-	g_object_set(G_OBJECT(gst->sink), "frame-done", 1, NULL);
+	g_object_set(G_OBJECT(gst->sink), name, value, NULL);
 }
 
 int64_t nemogst_get_position(struct nemogst *gst)
