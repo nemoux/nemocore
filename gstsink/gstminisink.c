@@ -23,7 +23,8 @@ enum {
 	PROP_SURFACE_WIDTH,
 	PROP_SURFACE_HEIGHT,
 	PROP_RENDER_CALLBACK,
-	PROP_RENDER_DATA
+	PROP_RENDER_USERDATA,
+	PROP_FRAME_DONE
 };
 
 GST_DEBUG_CATEGORY(gstmini_debug);
@@ -98,18 +99,26 @@ static void gst_mini_sink_class_init(GstMiniSinkClass *klass)
 				"Minisink rendering callback created by the application ",
 				G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
-	g_object_class_install_property(gobject_class, PROP_RENDER_DATA,
-			g_param_spec_pointer("render-data", "Render Data",
+	g_object_class_install_property(gobject_class, PROP_RENDER_USERDATA,
+			g_param_spec_pointer("render-userdata", "Render Userdata",
 				"Minisink rendering data created by the application ",
+				G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+
+	g_object_class_install_property(gobject_class, PROP_FRAME_DONE,
+			g_param_spec_uint("frame-done", "Frame Done",
+				"Frame Done ",
+				0, G_MAXINT, 0,
 				G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 }
 
 static void gst_mini_sink_init(GstMiniSink *sink)
 {
-	sink->last_buffer = NULL;
-
 	sink->callback = NULL;
-	sink->data = NULL;
+	sink->userdata = NULL;
+
+	sink->redraw_pending = FALSE;
+
+	sink->last_buffer = NULL;
 
 	g_mutex_init(&sink->mini_lock);
 }
@@ -131,8 +140,12 @@ static void gst_mini_sink_get_property(GObject *object, guint prop_id, GValue *v
 			g_value_set_pointer(value, sink->callback);
 			break;
 
-		case PROP_RENDER_DATA:
-			g_value_set_pointer(value, sink->data);
+		case PROP_RENDER_USERDATA:
+			g_value_set_pointer(value, sink->userdata);
+			break;
+
+		case PROP_FRAME_DONE:
+			g_value_set_uint(value, 0);
 			break;
 
 		default:
@@ -158,8 +171,12 @@ static void gst_mini_sink_set_property(GObject *object, guint prop_id, const GVa
 			sink->callback = g_value_get_pointer(value);
 			break;
 
-		case PROP_RENDER_DATA:
-			sink->data = g_value_get_pointer(value);
+		case PROP_RENDER_USERDATA:
+			sink->userdata = g_value_get_pointer(value);
+			break;
+
+		case PROP_FRAME_DONE:
+			g_atomic_int_set(&sink->redraw_pending, FALSE);
 			break;
 
 		default:
@@ -361,6 +378,9 @@ static GstFlowReturn gst_mini_sink_render(GstBaseSink *base, GstBuffer *buffer)
 
 	GST_LOG_OBJECT(sink, "render buffer %p", buffer);
 
+	if (g_atomic_int_get(&sink->redraw_pending) == TRUE)
+		goto done;
+
 	meta = gst_buffer_get_mini_meta(buffer);
 
 	if (meta && meta->id == GST_MINI_SINK_BUFFER_ID) {
@@ -380,17 +400,17 @@ static GstFlowReturn gst_mini_sink_render(GstBaseSink *base, GstBuffer *buffer)
 		gst_buffer_map(buffer, &src, GST_MAP_READ);
 		gst_buffer_fill(to_render, 0, src.data, src.size);
 		gst_buffer_unmap(buffer, &src);
-
-		meta = gst_buffer_get_mini_meta(to_render);
 	}
 
 	if (G_UNLIKELY(to_render == sink->last_buffer))
 		goto done;
 
 	gst_buffer_replace(&sink->last_buffer, to_render);
-	
+
+	g_atomic_int_set(&sink->redraw_pending, TRUE);
+
 	if (sink->callback != NULL) {
-		sink->callback(GST_ELEMENT(base), sink->video_format, meta->data, meta->size, sink->data);
+		sink->callback(GST_ELEMENT(base), meta->data, sink->video_width, sink->video_height, sink->video_format, sink->userdata);
 	}
 
 	if (buffer != to_render)

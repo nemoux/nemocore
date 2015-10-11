@@ -26,7 +26,7 @@ G_BEGIN_DECLS
 typedef struct _GstMiniSink				GstMiniSink;
 typedef struct _GstMiniSinkClass	GstMiniSinkClass;
 
-typedef void (*GstMiniSinkRenderCallback)(GstElement *base, GstVideoFormat format, guint8 *buffer, gsize size, gpointer data);
+typedef void (*GstMiniSinkRenderCallback)(GstElement *base, guint8 *data, gint width, gint height, GstVideoFormat format, gpointer userdata);
 
 struct _GstMiniSink {
 	GstVideoSink parent;
@@ -43,7 +43,9 @@ struct _GstMiniSink {
 	gint video_height;
 
 	GstMiniSinkRenderCallback callback;
-	gpointer data;
+	gpointer userdata;
+
+	gboolean redraw_pending;
 };
 
 struct _GstMiniSinkClass {

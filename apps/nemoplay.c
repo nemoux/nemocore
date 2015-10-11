@@ -9,6 +9,7 @@
 #include <getopt.h>
 
 #include <glib.h>
+#include <pthread.h>
 
 #include <nemotool.h>
 #include <nemocanvas.h>
@@ -36,6 +37,14 @@ struct playcontext {
 	struct nemotale *tale;
 	struct talenode *node;
 
+	int32_t width, height;
+
+	pthread_mutex_t lock;
+
+	gint video_width;
+	gint video_height;
+	guint8 *video_buffer;
+
 	int is_background;
 
 	int is_audio_only;
@@ -46,9 +55,9 @@ struct playcontext {
 	double volume;
 };
 
-static void nemoplay_dispatch_subtitle(GstElement *base, guint8 *buffer, gsize size, gpointer data)
+static void nemoplay_dispatch_subtitle(GstElement *base, guint8 *data, gsize size, gpointer userdata)
 {
-	nemolog_message("PLAY", "{%s}\n", buffer);
+	nemolog_message("PLAY", "{%s}\n", data);
 }
 
 static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
@@ -138,51 +147,58 @@ static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode 
 	}
 }
 
-static void nemoplay_dispatch_video_resize(struct nemocanvas *canvas, int32_t width, int32_t height, int32_t fixed)
+static void nemoplay_dispatch_video_frame(GstElement *base, guint8 *data, gint width, gint height, GstVideoFormat format, gpointer userdata)
 {
-	struct playcontext *context = (struct playcontext *)nemocanvas_get_userdata(canvas);
-	struct nemotale *tale = context->tale;
+	struct playcontext *context = (struct playcontext *)userdata;
 
-	if (width == 0 || height == 0)
-		return;
+	pthread_mutex_lock(&context->lock);
 
-	if (fixed == 0) {
-		height = width / nemogst_get_video_aspect_ratio(context->gst);
+	context->video_buffer = data;
+	context->video_width = width;
+	context->video_height = height;
+
+	pthread_mutex_unlock(&context->lock);
+
+	nemocanvas_dispatch_frame_async(context->canvas);
+}
+
+static void nemoplay_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t secs, uint32_t nsecs)
+{
+	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
+	struct playcontext *context = (struct playcontext *)nemotale_get_userdata(tale);
+	int32_t width, height;
+	void *data;
+
+	pthread_mutex_lock(&context->lock);
+
+	width = context->video_width;
+	height = context->video_height;
+	data = context->video_buffer;
+
+	pthread_mutex_unlock(&context->lock);
+
+	if (data != NULL) {
+		if (context->width != width || context->height != height) {
+			nemotool_resize_egl_canvas(context->ecanvas, width, height);
+			nemotale_resize(context->tale, width, height);
+			nemotale_node_resize_pixman(context->node, width, height);
+			nemotale_node_opaque(context->node, 0, 0, width, height);
+
+			context->width = width;
+			context->height = height;
+		}
+
+		nemotale_node_attach_pixman(context->node, data, width, height);
+
+		nemogst_frame_done(context->gst);
+
+		nemocanvas_feedback(canvas);
 	}
-
-	nemogst_resize_video(context->gst, width, height);
-
-	nemotool_resize_egl_canvas(context->ecanvas, width, height);
-	nemotale_resize(context->tale, width, height);
-	nemotale_node_resize_pixman(context->node, width, height);
-	nemotale_node_opaque(context->node, 0, 0, width, height);
 
 	nemotale_composite_egl(context->tale, NULL);
 }
 
-static void nemoplay_dispatch_audio_frame(struct nemocanvas *canvas, uint64_t secs, uint32_t nsecs)
-{
-	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
-	struct playcontext *context = (struct playcontext *)nemotale_get_userdata(tale);
-
-	if (secs == 0 && nsecs == 0) {
-		nemocanvas_feedback(canvas);
-	} else {
-		nemocanvas_feedback(canvas);
-	}
-
-	nemotale_node_fill_pixman(context->node,
-			random_get_double(0.0f, 1.0f),
-			random_get_double(0.0f, 1.0f),
-			random_get_double(0.0f, 1.0f),
-			random_get_double(0.0f, 1.0f));
-
-	nemotale_node_damage_all(context->node);
-
-	nemotale_composite_egl(context->tale, NULL);
-}
-
-static void nemoplay_dispatch_audio_resize(struct nemocanvas *canvas, int32_t width, int32_t height, int32_t fixed)
+static void nemoplay_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t width, int32_t height, int32_t fixed)
 {
 	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
 	struct playcontext *context = (struct playcontext *)nemotale_get_userdata(tale);
@@ -190,12 +206,13 @@ static void nemoplay_dispatch_audio_resize(struct nemocanvas *canvas, int32_t wi
 	if (width == 0 || height == 0)
 		return;
 
-	nemotool_resize_egl_canvas(context->ecanvas, width, height);
-	nemotale_resize(context->tale, width, height);
-	nemotale_node_resize_pixman(context->node, width, height);
-	nemotale_node_opaque(context->node, 0, 0, width, height);
+	if (context->is_audio_only == 0) {
+		if (fixed == 0) {
+			height = width / nemogst_get_video_aspect_ratio(context->gst);
+		}
 
-	nemocanvas_dispatch_frame(canvas);
+		nemogst_resize_video(context->gst, width, height);
+	}
 }
 
 int main(int argc, char *argv[])
@@ -213,11 +230,10 @@ int main(int argc, char *argv[])
 	GMainLoop *gmainloop;
 	struct playcontext *context;
 	struct nemotool *tool;
-	struct nemocanvas *canvas = NULL;
+	struct nemocanvas *canvas;
 	struct eglcanvas *ecanvas;
 	struct nemotale *tale;
 	struct talenode *node;
-	struct pathone *group, *one;
 	char *filepath = NULL;
 	char *subtitlepath = NULL;
 	char *uri;
@@ -280,32 +296,65 @@ int main(int argc, char *argv[])
 		goto out1;
 	nemotool_connect_wayland(tool, NULL);
 
-	context->egl = nemotool_create_egl(tool);
-
 	context->gst = nemogst_create();
 	if (context->gst == NULL)
 		goto out2;
+
+	if (pthread_mutex_init(&context->lock, NULL) != 0)
+		goto out3;
 
 	asprintf(&uri, "file://%s", filepath);
 
 	nemogst_load_media_info(context->gst, uri);
 
 	context->is_audio_only = nemogst_get_video_width(context->gst) == 0 || nemogst_get_video_height(context->gst) == 0;
-	if (context->is_audio_only == 0) {
-		context->canvas = canvas = nemocanvas_create(tool);
-		nemocanvas_set_userdata(canvas, context);
-		nemocanvas_set_nemosurface(canvas, NEMO_SHELL_SURFACE_TYPE_NORMAL);
-		nemocanvas_set_fullscreen_type(canvas, NEMO_SURFACE_FULLSCREEN_TYPE_PICK);
-		if (context->is_background != 0)
-			nemocanvas_set_layer(canvas, NEMO_SURFACE_LAYER_TYPE_BACKGROUND);
-		nemocanvas_set_anchor(canvas, -0.5f, -0.5f);
-		nemocanvas_set_dispatch_resize(canvas, nemoplay_dispatch_video_resize);
 
-		nemogst_prepare_nemo_sink(context->gst,
-				nemotool_get_display(tool),
-				nemotool_get_shm(tool),
-				nemotool_get_formats(tool),
-				nemocanvas_get_surface(canvas));
+	if (width == 0 || height == 0) {
+		if (context->is_audio_only == 0) {
+			width = 480;
+			height = 480 / nemogst_get_video_aspect_ratio(context->gst);
+		} else {
+			width = 480;
+			height = 480;
+		}
+	}
+
+	context->width = width;
+	context->height = height;
+
+	context->egl = nemotool_create_egl(tool);
+
+	context->ecanvas = ecanvas = nemotool_create_egl_canvas(context->egl, width, height);
+	context->canvas = canvas = NTEGL_CANVAS(ecanvas);
+	nemocanvas_set_nemosurface(canvas, NEMO_SHELL_SURFACE_TYPE_NORMAL);
+	nemocanvas_set_fullscreen_type(canvas, NEMO_SURFACE_FULLSCREEN_TYPE_PICK);
+	if (context->is_background != 0)
+		nemocanvas_set_layer(canvas, NEMO_SURFACE_LAYER_TYPE_BACKGROUND);
+	nemocanvas_set_anchor(canvas, -0.5f, -0.5f);
+	nemocanvas_set_dispatch_frame(canvas, nemoplay_dispatch_canvas_frame);
+	nemocanvas_set_dispatch_resize(canvas, nemoplay_dispatch_canvas_resize);
+
+	context->tale = tale = nemotale_create_gl();
+	nemotale_set_backend(tale,
+			nemotale_create_egl(
+				NTEGL_DISPLAY(context->egl),
+				NTEGL_CONTEXT(context->egl),
+				NTEGL_CONFIG(context->egl),
+				(EGLNativeWindowType)NTEGL_WINDOW(ecanvas)));
+	nemotale_resize(tale, width, height);
+
+	nemotale_attach_canvas(tale, canvas, nemoplay_dispatch_tale_event);
+	nemotale_set_userdata(tale, context);
+
+	context->node = node = nemotale_node_create_pixman(width, height);
+	nemotale_attach_node(tale, node);
+	nemotale_node_set_id(node, 1);
+	nemotale_node_opaque(node, 0, 0, width, height);
+
+	if (context->is_audio_only == 0) {
+		nemogst_prepare_mini_sink(context->gst,
+				nemoplay_dispatch_video_frame,
+				context);
 		nemogst_set_media_path(context->gst, uri);
 
 		if (subtitlepath != NULL) {
@@ -313,76 +362,18 @@ int main(int argc, char *argv[])
 			nemogst_set_subtitle_path(context->gst, subtitlepath);
 		}
 
-		if (width == 0 || height == 0) {
-			width = 480;
-			height = 480 / nemogst_get_video_aspect_ratio(context->gst);
-		}
-
 		nemogst_resize_video(context->gst, width, height);
-
-		context->ecanvas = ecanvas = nemotool_create_egl_canvas(context->egl, width, height);
-		nemocanvas_set_nemosurface(NTEGL_CANVAS(ecanvas), NEMO_SHELL_SURFACE_TYPE_OVERLAY);
-		nemocanvas_set_parent(NTEGL_CANVAS(ecanvas), canvas);
-
-		context->tale = tale = nemotale_create_gl();
-		nemotale_set_backend(tale,
-				nemotale_create_egl(
-					NTEGL_DISPLAY(context->egl),
-					NTEGL_CONTEXT(context->egl),
-					NTEGL_CONFIG(context->egl),
-					(EGLNativeWindowType)NTEGL_WINDOW(ecanvas)));
-		nemotale_resize(tale, width, height);
-
-		nemotale_attach_canvas(tale, NTEGL_CANVAS(ecanvas), nemoplay_dispatch_tale_event);
-		nemotale_set_userdata(tale, context);
-
-		context->node = node = nemotale_node_create_pixman(width, height);
-		nemotale_node_set_id(node, 1);
-		nemotale_attach_node(tale, node);
-		nemotale_node_opaque(node, 0, 0, width, height);
-
-		nemotale_composite_egl(context->tale, NULL);
 	} else {
 		nemogst_prepare_audio_sink(context->gst);
 		nemogst_set_media_path(context->gst, uri);
 
-		if (width == 0 || height == 0) {
-			width = 480;
-			height = 480;
-		}
-
-		context->ecanvas = ecanvas = nemotool_create_egl_canvas(context->egl, width, height);
-		context->canvas = NTEGL_CANVAS(ecanvas);
-		nemocanvas_set_nemosurface(NTEGL_CANVAS(ecanvas), NEMO_SHELL_SURFACE_TYPE_NORMAL);
-		nemocanvas_set_fullscreen_type(NTEGL_CANVAS(ecanvas), NEMO_SURFACE_FULLSCREEN_TYPE_PICK);
-		if (context->is_background != 0)
-			nemocanvas_set_layer(NTEGL_CANVAS(ecanvas), NEMO_SURFACE_LAYER_TYPE_BACKGROUND);
-		nemocanvas_set_dispatch_frame(NTEGL_CANVAS(ecanvas), nemoplay_dispatch_audio_frame);
-		nemocanvas_set_dispatch_resize(NTEGL_CANVAS(ecanvas), nemoplay_dispatch_audio_resize);
-
-		context->tale = tale = nemotale_create_gl();
-		nemotale_set_backend(tale,
-				nemotale_create_egl(
-					NTEGL_DISPLAY(context->egl),
-					NTEGL_CONTEXT(context->egl),
-					NTEGL_CONFIG(context->egl),
-					(EGLNativeWindowType)NTEGL_WINDOW(ecanvas)));
-		nemotale_resize(tale, width, height);
-
-		nemotale_attach_canvas(tale, NTEGL_CANVAS(ecanvas), nemoplay_dispatch_tale_event);
-		nemotale_set_userdata(tale, context);
-
-		context->node = node = nemotale_node_create_pixman(width, height);
-		nemotale_node_set_id(node, 1);
-		nemotale_attach_node(tale, node);
-		nemotale_node_opaque(node, 0, 0, width, height);
-
-		nemocanvas_dispatch_frame(NTEGL_CANVAS(ecanvas));
+		nemotale_node_fill_pixman(context->node,
+				random_get_double(0.0f, 1.0f),
+				random_get_double(0.0f, 1.0f),
+				random_get_double(0.0f, 1.0f),
+				random_get_double(0.0f, 1.0f));
 	}
 
-	free(uri);
-
-	nemogst_set_repeat(context->gst, UINT32_MAX);
 	nemogst_play_media(context->gst);
 
 	gmainloop = g_main_loop_new(NULL, FALSE);
@@ -391,18 +382,17 @@ int main(int argc, char *argv[])
 
 	g_main_loop_unref(gmainloop);
 
-	nemogst_destroy(context->gst);
-
-	if (context->is_audio_only == 0) {
-		nemotool_destroy_egl_canvas(context->ecanvas);
-		nemocanvas_destroy(context->canvas);
-	} else {
-		nemotool_destroy_egl_canvas(context->ecanvas);
-	}
-
+	nemotool_destroy_egl_canvas(context->ecanvas);
 	nemotool_destroy_egl(context->egl);
 
 	nemolog_message("PLAY", "done '%s' media file...\n", filepath);
+
+	free(uri);
+
+	pthread_mutex_destroy(&context->lock);
+
+out3:
+	nemogst_destroy(context->gst);
 
 out2:
 	nemotool_disconnect_wayland(tool);

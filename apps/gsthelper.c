@@ -167,7 +167,7 @@ int nemogst_prepare_nemo_sink(struct nemogst *gst, struct wl_display *display, s
 	return 0;
 }
 
-int nemogst_prepare_nemo_subsink(struct nemogst *gst, nemogst_subtitle_render_t render, void *data)
+int nemogst_prepare_nemo_subsink(struct nemogst *gst, nemogst_subtitle_render_t render, void *userdata)
 {
 	gst->subpipeline = gst_pipeline_new("nemosubpipe");
 
@@ -181,7 +181,7 @@ int nemogst_prepare_nemo_subsink(struct nemogst *gst, nemogst_subtitle_render_t 
 	if (gst->subsink == NULL)
 		return -1;
 	g_object_set(G_OBJECT(gst->subsink), "render-callback", render, NULL);
-	g_object_set(G_OBJECT(gst->subsink), "render-data", data, NULL);
+	g_object_set(G_OBJECT(gst->subsink), "render-userdata", userdata, NULL);
 
 	gst_bin_add_many(GST_BIN(gst->subpipeline), gst->subfile, gst->subparse, gst->subsink, NULL);
 	gst_element_link_many(gst->subfile, gst->subparse, gst->subsink, NULL);
@@ -191,7 +191,7 @@ int nemogst_prepare_nemo_subsink(struct nemogst *gst, nemogst_subtitle_render_t 
 	return 0;
 }
 
-int nemogst_prepare_mini_sink(struct nemogst *gst, nemogst_minisink_render_t render, void *data)
+int nemogst_prepare_mini_sink(struct nemogst *gst, nemogst_minisink_render_t render, void *userdata)
 {
 	GstPad *pad;
 
@@ -199,7 +199,7 @@ int nemogst_prepare_mini_sink(struct nemogst *gst, nemogst_minisink_render_t ren
 	if (gst->sink == NULL)
 		return -1;
 	g_object_set(G_OBJECT(gst->sink), "render-callback", render, NULL);
-	g_object_set(G_OBJECT(gst->sink), "render-data", data, NULL);
+	g_object_set(G_OBJECT(gst->sink), "render-userdata", userdata, NULL);
 
 	gst->player = gst_element_factory_make("playbin", "playbin");
 	g_object_set(G_OBJECT(gst->player), "video-sink", gst->sink, NULL);
@@ -372,6 +372,11 @@ int nemogst_resize_video(struct nemogst *gst, uint32_t width, uint32_t height)
 	gst->height = height;
 
 	return 0;
+}
+
+void nemogst_frame_done(struct nemogst *gst)
+{
+	g_object_set(G_OBJECT(gst->sink), "frame-done", 1, NULL);
 }
 
 int64_t nemogst_get_position(struct nemogst *gst)

@@ -21,7 +21,7 @@ enum {
 enum {
 	PROP_0,
 	PROP_RENDER_CALLBACK,
-	PROP_RENDER_DATA
+	PROP_RENDER_USERDATA
 };
 
 #define	GST_NEMO_SUBSINK_BUFFER_ID			(0x2)
@@ -43,8 +43,8 @@ static void gst_nemo_subsink_get_property(GObject *object, guint prop_id, GValue
 			g_value_set_pointer(value, subsink->callback);
 			break;
 
-		case PROP_RENDER_DATA:
-			g_value_set_pointer(value, subsink->data);
+		case PROP_RENDER_USERDATA:
+			g_value_set_pointer(value, subsink->userdata);
 			break;
 
 		default:
@@ -62,8 +62,8 @@ static void gst_nemo_subsink_set_property(GObject *object, guint prop_id, const 
 			subsink->callback = g_value_get_pointer(value);
 			break;
 
-		case PROP_RENDER_DATA:
-			subsink->data = g_value_get_pointer(value);
+		case PROP_RENDER_USERDATA:
+			subsink->userdata = g_value_get_pointer(value);
 			break;
 
 		default:
@@ -127,7 +127,7 @@ static GstFlowReturn gst_nemo_subsink_render(GstBaseSink *base, GstBuffer *buffe
 	gst_buffer_map(buffer, &src, GST_MAP_READ);
 
 	if (subsink->callback != NULL)
-		subsink->callback(GST_ELEMENT(base), src.data, src.size, subsink->data);
+		subsink->callback(GST_ELEMENT(base), src.data, src.size, subsink->userdata);
 
 	gst_buffer_unmap(buffer, &src);
 
@@ -151,7 +151,7 @@ static gboolean gst_nemo_subsink_query(GstBaseSink *base, GstQuery *query)
 static void gst_nemo_subsink_init(GstNemoSubSink *subsink)
 {
 	subsink->callback = NULL;
-	subsink->data = NULL;
+	subsink->userdata = NULL;
 }
 
 static void gst_nemo_subsink_dispose(GObject *object)
@@ -193,8 +193,8 @@ static void gst_nemo_subsink_class_init(GstNemoSubSinkClass *klass)
 				"Subtitle rendering callback created by the application ",
 				G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
-	g_object_class_install_property(gobject_class, PROP_RENDER_DATA,
-			g_param_spec_pointer("render-data", "Render Data",
+	g_object_class_install_property(gobject_class, PROP_RENDER_USERDATA,
+			g_param_spec_pointer("render-userdata", "Render Userdata",
 				"Subtitle rendering data created by the application ",
 				G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 

@@ -22,13 +22,13 @@ G_BEGIN_DECLS
 typedef struct _GstNemoSubSink				GstNemoSubSink;
 typedef struct _GstNemoSubSinkClass		GstNemoSubSinkClass;
 
-typedef void (*GstNemoSubSinkRenderCallback)(GstElement *base, guint8 *buffer, gsize size, gpointer data);
+typedef void (*GstNemoSubSinkRenderCallback)(GstElement *base, guint8 *data, gsize size, gpointer userdata);
 
 struct _GstNemoSubSink {
 	GstBaseSink parent;
 
 	GstNemoSubSinkRenderCallback callback;
-	gpointer data;
+	gpointer userdata;
 
 	GstPad *sinkpad;
 };
