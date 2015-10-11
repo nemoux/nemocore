@@ -173,6 +173,8 @@ static void nemoplay_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 	height = context->video_height;
 	data = context->video_buffer;
 
+	context->video_buffer = NULL;
+
 	pthread_mutex_unlock(&context->lock);
 
 	if (data != NULL) {
