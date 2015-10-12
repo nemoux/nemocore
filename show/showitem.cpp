@@ -982,16 +982,20 @@ int nemoshow_item_load_svg(struct showone *one, const char *uri)
 	}
 
 	nemolist_for_each(node, &xml->nodes, nodelink) {
-		if ((attr0 = nemoxml_node_get_attr(node, "stroke")) != NULL && strcmp(attr0, "none") != 0) {
-			has_stroke = 1;
-		} else {
-			has_stroke = 0;
-		}
+		has_stroke = 0;
+		has_fill = 0;
 
-		if ((attr0 = nemoxml_node_get_attr(node, "fill")) != NULL && strcmp(attr0, "none") != 0) {
+		if ((attr0 = nemoxml_node_get_attr(node, "stroke")) != NULL && strcmp(attr0, "none") != 0)
+			has_stroke = 1;
+
+		if ((attr0 = nemoxml_node_get_attr(node, "fill")) != NULL && strcmp(attr0, "none") != 0)
 			has_fill = 1;
-		} else {
-			has_fill = 0;
+
+		if ((attr0 = nemoxml_node_get_attr(node, "style")) != NULL) {
+			if (strstr(attr0, "fill") != NULL)
+				has_fill = 1;
+			if (strstr(attr0, "stroke") != NULL)
+				has_stroke = 1;
 		}
 
 		if (has_stroke == 0 && has_fill == 0)
