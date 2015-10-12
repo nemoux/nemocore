@@ -1063,16 +1063,16 @@ int nemoshow_item_load_svg(struct showone *one, const char *uri)
 						strtod(nemotoken_get_token(token, 1), NULL));
 
 			for (i = 2; i < count; i += 2) {
-				NEMOSHOW_ITEM_CC(item, path)->moveTo(
+				NEMOSHOW_ITEM_CC(item, path)->lineTo(
 						strtod(nemotoken_get_token(token, i + 0), NULL),
 						strtod(nemotoken_get_token(token, i + 1), NULL));
 
 				if (has_stroke != 0)
-					NEMOSHOW_ITEM_CC(item, strokepath)->moveTo(
+					NEMOSHOW_ITEM_CC(item, strokepath)->lineTo(
 							strtod(nemotoken_get_token(token, i + 0), NULL),
 							strtod(nemotoken_get_token(token, i + 1), NULL));
 				if (has_fill != 0)
-					NEMOSHOW_ITEM_CC(item, fillpath)->moveTo(
+					NEMOSHOW_ITEM_CC(item, fillpath)->lineTo(
 							strtod(nemotoken_get_token(token, i + 0), NULL),
 							strtod(nemotoken_get_token(token, i + 1), NULL));
 			}
@@ -1112,16 +1112,16 @@ int nemoshow_item_load_svg(struct showone *one, const char *uri)
 						strtod(nemotoken_get_token(token, 1), NULL));
 
 			for (i = 2; i < count; i += 2) {
-				NEMOSHOW_ITEM_CC(item, path)->moveTo(
+				NEMOSHOW_ITEM_CC(item, path)->lineTo(
 						strtod(nemotoken_get_token(token, i + 0), NULL),
 						strtod(nemotoken_get_token(token, i + 1), NULL));
 
 				if (has_stroke != 0)
-					NEMOSHOW_ITEM_CC(item, strokepath)->moveTo(
+					NEMOSHOW_ITEM_CC(item, strokepath)->lineTo(
 							strtod(nemotoken_get_token(token, i + 0), NULL),
 							strtod(nemotoken_get_token(token, i + 1), NULL));
 				if (has_fill != 0)
-					NEMOSHOW_ITEM_CC(item, fillpath)->moveTo(
+					NEMOSHOW_ITEM_CC(item, fillpath)->lineTo(
 							strtod(nemotoken_get_token(token, i + 0), NULL),
 							strtod(nemotoken_get_token(token, i + 1), NULL));
 			}
