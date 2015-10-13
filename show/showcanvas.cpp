@@ -39,6 +39,8 @@ struct showone *nemoshow_canvas_create(void)
 	canvas->viewport.sx = 1.0f;
 	canvas->viewport.sy = 1.0f;
 
+	canvas->alpha = 1.0f;
+
 	canvas->needs_redraw = 1;
 	canvas->needs_full_redraw = 1;
 
