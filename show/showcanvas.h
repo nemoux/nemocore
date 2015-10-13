@@ -78,6 +78,7 @@ extern int nemoshow_canvas_update(struct nemoshow *show, struct showone *one);
 
 extern int nemoshow_canvas_set_type(struct showone *one, int type);
 extern void nemoshow_canvas_set_event(struct showone *one, uint32_t event);
+extern void nemoshow_canvas_set_alpha(struct showone *one, double alpha);
 
 extern void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one);
 extern void nemoshow_canvas_render_back(struct nemoshow *show, struct showone *one);
@@ -131,11 +132,6 @@ static inline void nemoshow_canvas_set_width(struct showone *one, double width)
 static inline void nemoshow_canvas_set_height(struct showone *one, double height)
 {
 	NEMOSHOW_CANVAS_AT(one, height) = height;
-}
-
-static inline void nemoshow_canvas_set_alpha(struct showone *one, double alpha)
-{
-	NEMOSHOW_CANVAS_AT(one, alpha) = alpha;
 }
 
 static inline void nemoshow_canvas_set_fill_color(struct showone *one, double r, double g, double b, double a)

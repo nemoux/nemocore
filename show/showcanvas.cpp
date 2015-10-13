@@ -158,9 +158,20 @@ void nemoshow_canvas_set_event(struct showone *one, uint32_t event)
 	canvas->event = event;
 }
 
+void nemoshow_canvas_set_alpha(struct showone *one, double alpha)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	nemotale_node_set_alpha(canvas->node, alpha);
+
+	canvas->alpha = alpha;
+}
+
 static inline void nemoshow_canvas_update_style(struct nemoshow *show, struct showone *one)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	nemotale_node_set_alpha(canvas->node, canvas->alpha);
 
 	nemotale_node_damage_all(canvas->node);
 }
