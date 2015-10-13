@@ -77,6 +77,8 @@ struct talenode {
 
 		struct nemomatrix matrix, inverse;
 	} transform;
+
+	double alpha;
 };
 
 #define	NTNODE_OBJECT(node)						(&node->object)
@@ -104,6 +106,11 @@ extern void nemotale_node_translate(struct talenode *node, float x, float y);
 extern void nemotale_node_rotate(struct talenode *node, float r);
 extern void nemotale_node_pivot(struct talenode *node, float px, float py);
 extern int nemotale_node_transform(struct talenode *node, float d[9]);
+
+static inline void nemotale_node_set_alpha(struct talenode *node, double alpha)
+{
+	node->alpha = alpha;
+}
 
 static inline void nemotale_node_dirty(struct talenode *node)
 {

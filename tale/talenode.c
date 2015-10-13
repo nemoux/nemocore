@@ -35,6 +35,8 @@ int nemotale_node_prepare(struct talenode *node)
 	node->transform.dirty = 1;
 	node->transform.custom = 0;
 
+	node->alpha = 1.0f;
+
 	nemomatrix_init_identity(&node->transform.matrix);
 	nemomatrix_init_identity(&node->transform.inverse);
 
