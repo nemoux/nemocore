@@ -55,6 +55,10 @@ struct showcanvas {
 		double sx, sy;
 	} viewport;
 
+	double tx, ty;
+	double ro;
+	double px, py;
+
 	int needs_redraw;
 	int needs_full_redraw;
 
@@ -84,8 +88,8 @@ extern void nemoshow_canvas_damage_region(struct showone *one, int32_t x, int32_
 extern void nemoshow_canvas_damage_one(struct showone *one, struct showone *child);
 extern void nemoshow_canvas_damage_all(struct showone *one);
 
-extern void nemoshow_canvas_translate(struct showone *one, float x, float y);
-extern void nemoshow_canvas_rotate(struct showone *one, float r);
+extern void nemoshow_canvas_translate(struct showone *one, float tx, float ty);
+extern void nemoshow_canvas_rotate(struct showone *one, float ro);
 extern void nemoshow_canvas_pivot(struct showone *one, float px, float py);
 
 extern struct showone *nemoshow_canvas_pick_one(struct showone *one, int x, int y);

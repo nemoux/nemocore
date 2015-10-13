@@ -60,6 +60,10 @@ struct showone *nemoshow_canvas_create(void)
 	nemoobject_set_reserved(&one->object, "fill:b", &canvas->fills[0], sizeof(double));
 	nemoobject_set_reserved(&one->object, "fill:a", &canvas->fills[3], sizeof(double));
 
+	nemoobject_set_reserved(&one->object, "tx", &canvas->tx, sizeof(double));
+	nemoobject_set_reserved(&one->object, "ty", &canvas->ty, sizeof(double));
+	nemoobject_set_reserved(&one->object, "ro", &canvas->ro, sizeof(double));
+
 	nemoobject_set_reserved(&one->object, "alpha", &canvas->alpha, sizeof(double));
 
 	return one;
@@ -154,9 +158,32 @@ void nemoshow_canvas_set_event(struct showone *one, uint32_t event)
 	canvas->event = event;
 }
 
+static inline void nemoshow_canvas_update_style(struct nemoshow *show, struct showone *one)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	nemotale_node_damage_all(canvas->node);
+}
+
+static inline void nemoshow_canvas_update_matrix(struct nemoshow *show, struct showone *one)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	nemotale_node_translate(canvas->node, canvas->tx, canvas->ty);
+	nemotale_node_rotate(canvas->node, canvas->ro * M_PI / 180.0f);
+	nemotale_node_pivot(canvas->node, canvas->px, canvas->py);
+
+	nemotale_node_damage_all(canvas->node);
+}
+
 int nemoshow_canvas_update(struct nemoshow *show, struct showone *one)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	if ((one->dirty & NEMOSHOW_STYLE_DIRTY) != 0)
+		nemoshow_canvas_update_style(show, one);
+	if ((one->dirty & NEMOSHOW_MATRIX_DIRTY) != 0)
+		nemoshow_canvas_update_matrix(show, one);
 
 	return 0;
 }
@@ -622,18 +649,23 @@ void nemoshow_canvas_damage_all(struct showone *one)
 	canvas->needs_full_redraw = 1;
 }
 
-void nemoshow_canvas_translate(struct showone *one, float x, float y)
+void nemoshow_canvas_translate(struct showone *one, float tx, float ty)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
-	nemotale_node_translate(canvas->node, x, y);
+	nemotale_node_translate(canvas->node, tx, ty);
+
+	canvas->tx = tx;
+	canvas->ty = ty;
 }
 
-void nemoshow_canvas_rotate(struct showone *one, float r)
+void nemoshow_canvas_rotate(struct showone *one, float ro)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
-	nemotale_node_rotate(canvas->node, r);
+	nemotale_node_rotate(canvas->node, ro * M_PI / 180.0f);
+
+	canvas->ro = ro;
 }
 
 void nemoshow_canvas_pivot(struct showone *one, float px, float py)
@@ -641,6 +673,9 @@ void nemoshow_canvas_pivot(struct showone *one, float px, float py)
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
 	nemotale_node_pivot(canvas->node, px, py);
+
+	canvas->px = px;
+	canvas->py = py;
 }
 
 static inline struct showone *nemoshow_canvas_pick_one_in(struct showone *one, float px, float py)
