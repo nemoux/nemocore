@@ -80,6 +80,10 @@ extern int nemoshow_canvas_set_type(struct showone *one, int type);
 extern void nemoshow_canvas_set_event(struct showone *one, uint32_t event);
 extern void nemoshow_canvas_set_alpha(struct showone *one, double alpha);
 
+extern int nemoshow_canvas_attach_pixman(struct showone *one, void *data, int32_t width, int32_t height);
+extern void nemoshow_canvas_detach_pixman(struct showone *one);
+extern int nemoshow_canvas_resize_pixman(struct showone *one, int32_t width, int32_t height);
+
 extern void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one);
 extern void nemoshow_canvas_render_back(struct nemoshow *show, struct showone *one);
 
@@ -112,6 +116,13 @@ static inline struct talenode *nemoshow_canvas_get_node(struct showone *one)
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
 	return canvas->node;
+}
+
+static inline pixman_image_t *nemoshow_canvas_get_pixman(struct showone *one)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	return nemotale_node_get_pixman(canvas->node);
 }
 
 static inline double nemoshow_canvas_get_viewport_sx(struct showone *one)

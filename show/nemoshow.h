@@ -92,14 +92,14 @@ extern int nemoshow_set_scale(struct nemoshow *show, double sx, double sy);
 extern void nemoshow_attach_canvas(struct nemoshow *show, struct showone *one);
 extern void nemoshow_detach_canvas(struct nemoshow *show, struct showone *one);
 
+extern void nemoshow_above_canvas(struct nemoshow *show, struct showone *one, struct showone *above);
+extern void nemoshow_below_canvas(struct nemoshow *show, struct showone *one, struct showone *below);
+
 extern void nemoshow_flush_canvas(struct nemoshow *show, struct showone *one);
 extern void nemoshow_flush_canvas_all(struct nemoshow *show);
 
 extern void nemoshow_attach_one(struct nemoshow *show, struct showone *one);
 extern void nemoshow_detach_one(struct nemoshow *show, struct showone *one);
-
-extern void nemoshow_above_canvas(struct nemoshow *show, struct showone *one, struct showone *above);
-extern void nemoshow_below_canvas(struct nemoshow *show, struct showone *one, struct showone *below);
 
 extern void nemoshow_attach_transition(struct nemoshow *show, struct showtransition *trans);
 extern void nemoshow_detach_transition(struct nemoshow *show, struct showtransition *trans);
