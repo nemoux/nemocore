@@ -427,7 +427,7 @@ static void nemoview_update_boundingbox(struct nemoview *view, int32_t x, int32_
 	pixman_region32_init_rect(bbox, sx, sy, ex - sx, ey - sy);
 }
 
-static void nemoview_update_output(struct nemoview *view)
+void nemoview_update_output(struct nemoview *view)
 {
 	struct nemocompz *compz = view->compz;
 	struct nemoscreen *screen;

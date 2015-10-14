@@ -147,7 +147,7 @@ extern void nemocompz_update_scene(struct nemocompz *compz);
 extern void nemocompz_set_scene(struct nemocompz *compz, int32_t x, int32_t y, int32_t width, int32_t height);
 
 extern void nemocompz_update_transform(struct nemocompz *compz);
-extern void nemocompz_update_subcanvas(struct nemocompz *compz);
+extern void nemocompz_update_output(struct nemocompz *compz);
 
 extern void nemocompz_dispatch_animation(struct nemocompz *compz, struct nemoanimation *animation);
 extern void nemocompz_dispatch_effect(struct nemocompz *compz, struct nemoeffect *effect);

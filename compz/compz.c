@@ -716,6 +716,24 @@ void nemocompz_update_transform(struct nemocompz *compz)
 	}
 }
 
+void nemocompz_update_output(struct nemocompz *compz)
+{
+	struct nemolayer *layer;
+	struct nemoview *view, *child;
+
+	wl_list_for_each(layer, &compz->layer_list, link) {
+		wl_list_for_each(view, &layer->view_list, layer_link) {
+			if (!wl_list_empty(&view->children_list)) {
+				wl_list_for_each(child, &view->children_list, children_link) {
+					nemoview_update_output(child);
+				}
+			}
+
+			nemoview_update_output(view);
+		}
+	}
+}
+
 void nemocompz_dispatch_animation(struct nemocompz *compz, struct nemoanimation *animation)
 {
 	if (animation->frame == NULL || animation->duration == 0)

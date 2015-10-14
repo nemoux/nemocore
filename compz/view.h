@@ -146,6 +146,7 @@ extern void nemoview_schedule_repaint(struct nemoview *view);
 extern void nemoview_transform_to_global(struct nemoview *view, float sx, float sy, float *x, float *y);
 extern void nemoview_transform_from_global(struct nemoview *view, float x, float y, float *sx, float *sy);
 extern int nemoview_get_point_area(struct nemoview *view, float x, float y);
+extern void nemoview_update_output(struct nemoview *view);
 extern void nemoview_update_transform(struct nemoview *view);
 extern void nemoview_update_transform_children(struct nemoview *view);
 extern void nemoview_update_transform_parent(struct nemoview *view);
