@@ -21,6 +21,7 @@ option(WITH_UNWIND "Build with UNWIND" OFF)
 option(WITH_XWAYLAND "Build with XWAYLAND" ON)
 option(WITH_GLIB "Build with GLIB" ON)
 option(WITH_GSTREAMER "Build with GSTREAMER" ON)
+option(WITH_PULSEAUDIO "Build with PULSEAUDIO" ON)
 option(WITH_MUPDF "Build with MUPDF" ON)
 
 option(WITH_WAYLANDSHELL "Build with WAYLANDSHELL" ON)
@@ -196,6 +197,10 @@ if(WITH_GSTREAMER)
 
 	add_subdirectory(gstsink)
 endif(WITH_GSTREAMER)
+
+if(WITH_PULSEAUDIO)
+	add_definitions(-DNEMOUX_WITH_PULSEAUDIO=1)
+endif(WITH_PULSEAUDIO)
 
 if(WITH_XWAYLAND)
 	add_definitions(-DNEMOUX_WITH_XWAYLAND=1)
