@@ -63,6 +63,7 @@ INSTALL(TARGETS nemoimage DESTINATION bin)
 
 add_executable(nemomesh
 	nemomesh.cpp
+	meshhelper.cpp
 	talehelper.c
 	${CMAKE_SOURCE_DIR}/thirds/tiny_obj_loader.cc
 	)
