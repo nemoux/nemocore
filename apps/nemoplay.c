@@ -190,7 +190,7 @@ static void nemoplay_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 
 		nemotale_node_attach_pixman(context->node, data, width, height);
 
-		nemogst_set_sink(context->gst, "frame-done", 1);
+		nemogst_sink_set_property(context->gst, "frame-done", 1);
 	}
 
 	nemocanvas_feedback(context->canvas);

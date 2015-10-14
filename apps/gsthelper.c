@@ -374,7 +374,7 @@ int nemogst_resize_video(struct nemogst *gst, uint32_t width, uint32_t height)
 	return 0;
 }
 
-void nemogst_set_sink(struct nemogst *gst, const char *name, uint32_t value)
+void nemogst_sink_set_property(struct nemogst *gst, const char *name, uint32_t value)
 {
 	g_object_set(G_OBJECT(gst->sink), name, value, NULL);
 }
