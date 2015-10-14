@@ -291,7 +291,6 @@ static void nemoscreen_update_region(struct nemoscreen *screen)
 			{ screen->width, screen->height }
 		};
 		float tx, ty;
-		float sx, sy, ex, ey;
 		int i;
 
 		for (i = 0; i < 4; i++) {
@@ -317,17 +316,14 @@ static void nemoscreen_update_region(struct nemoscreen *screen)
 				maxy = ty;
 		}
 
-		sx = MAX(floorf(minx), 0.0f);
-		sy = MAX(floorf(miny), 0.0f);
-		ex = ceilf(maxx);
-		ey = ceilf(maxy);
+		screen->rx = floorf(minx + 0.5f);
+		screen->ry = floorf(miny + 0.5f);
+		screen->rw = floorf(maxx - minx + 0.5f);
+		screen->rh = floorf(maxy - miny + 0.5f);
 
-		pixman_region32_init_rect(&screen->region, sx, sy, ex - sx, ey - sy);
-
-		screen->rx = sx;
-		screen->ry = sy;
-		screen->rw = ex - sx;
-		screen->rh = ey - sy;
+		pixman_region32_init_rect(&screen->region,
+				screen->rx, screen->ry,
+				screen->rw, screen->rh);
 	}
 }
 
