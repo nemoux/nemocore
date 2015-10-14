@@ -608,7 +608,7 @@ void nemoshow_canvas_render_back(struct nemoshow *show, struct showone *one)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
-	nemotale_node_fill_pixman(canvas->node, canvas->fills[2], canvas->fills[1], canvas->fills[0], canvas->fills[3] * canvas->alpha);
+	nemotale_node_fill_pixman(canvas->node, canvas->fills[2], canvas->fills[1], canvas->fills[0], canvas->fills[3]);
 }
 
 int nemoshow_canvas_set_viewport(struct nemoshow *show, struct showone *one, double sx, double sy)
