@@ -36,3 +36,16 @@ void nemoanimation_destroy(struct nemoanimation *animation)
 
 	free(animation);
 }
+
+int nemoanimation_revoke(struct nemocompz *compz, void *object)
+{
+	struct nemoanimation *anim, *next;
+
+	wl_list_for_each_safe(anim, next, &compz->animation_list, link) {
+		if (anim->object == object) {
+			nemoanimation_destroy(anim);
+		}
+	}
+
+	return 0;
+}
