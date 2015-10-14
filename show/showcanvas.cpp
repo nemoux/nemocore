@@ -39,6 +39,11 @@ struct showone *nemoshow_canvas_create(void)
 	canvas->viewport.sx = 1.0f;
 	canvas->viewport.sy = 1.0f;
 
+	canvas->sx = 1.0f;
+	canvas->sy = 1.0f;
+	canvas->px = 0.5f;
+	canvas->py = 0.5f;
+
 	canvas->alpha = 1.0f;
 
 	canvas->needs_redraw = 1;
@@ -209,6 +214,7 @@ static inline void nemoshow_canvas_update_matrix(struct nemoshow *show, struct s
 
 	nemotale_node_translate(canvas->node, canvas->tx, canvas->ty);
 	nemotale_node_rotate(canvas->node, canvas->ro * M_PI / 180.0f);
+	nemotale_node_scale(canvas->node, canvas->sx, canvas->sy);
 	nemotale_node_pivot(canvas->node, canvas->px, canvas->py);
 
 	nemotale_node_damage_all(canvas->node);
