@@ -65,6 +65,10 @@ struct showone *nemoshow_canvas_create(void)
 	nemoobject_set_reserved(&one->object, "tx", &canvas->tx, sizeof(double));
 	nemoobject_set_reserved(&one->object, "ty", &canvas->ty, sizeof(double));
 	nemoobject_set_reserved(&one->object, "ro", &canvas->ro, sizeof(double));
+	nemoobject_set_reserved(&one->object, "px", &canvas->px, sizeof(double));
+	nemoobject_set_reserved(&one->object, "py", &canvas->py, sizeof(double));
+	nemoobject_set_reserved(&one->object, "sx", &canvas->sx, sizeof(double));
+	nemoobject_set_reserved(&one->object, "sy", &canvas->sy, sizeof(double));
 
 	nemoobject_set_reserved(&one->object, "alpha", &canvas->alpha, sizeof(double));
 
@@ -683,7 +687,7 @@ void nemoshow_canvas_damage_all(struct showone *one)
 	canvas->needs_full_redraw = 1;
 }
 
-void nemoshow_canvas_translate(struct showone *one, float tx, float ty)
+void nemoshow_canvas_translate(struct showone *one, double tx, double ty)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
@@ -693,7 +697,7 @@ void nemoshow_canvas_translate(struct showone *one, float tx, float ty)
 	canvas->ty = ty;
 }
 
-void nemoshow_canvas_rotate(struct showone *one, float ro)
+void nemoshow_canvas_rotate(struct showone *one, double ro)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
@@ -702,7 +706,7 @@ void nemoshow_canvas_rotate(struct showone *one, float ro)
 	canvas->ro = ro;
 }
 
-void nemoshow_canvas_pivot(struct showone *one, float px, float py)
+void nemoshow_canvas_pivot(struct showone *one, double px, double py)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
@@ -712,7 +716,17 @@ void nemoshow_canvas_pivot(struct showone *one, float px, float py)
 	canvas->py = py;
 }
 
-static inline struct showone *nemoshow_canvas_pick_one_in(struct showone *one, float px, float py)
+void nemoshow_canvas_scale(struct showone *one, double sx, double sy)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	nemotale_node_scale(canvas->node, sx, sy);
+
+	canvas->sx = sx;
+	canvas->sy = sy;
+}
+
+static inline struct showone *nemoshow_canvas_pick_one_in(struct showone *one, double px, double py)
 {
 	struct showone *child;
 	int i;

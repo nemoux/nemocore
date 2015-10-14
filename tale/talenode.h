@@ -50,6 +50,7 @@ struct talenode {
 		int32_t width, height;
 		float px, py;
 		float r;
+		float sx, sy;
 	} geometry;
 
 	struct {
@@ -105,6 +106,7 @@ extern void nemotale_node_set_picker(struct talenode *node, nemotale_node_pick_t
 extern void nemotale_node_translate(struct talenode *node, float x, float y);
 extern void nemotale_node_rotate(struct talenode *node, float r);
 extern void nemotale_node_pivot(struct talenode *node, float px, float py);
+extern void nemotale_node_scale(struct talenode *node, float sx, float sy);
 extern int nemotale_node_transform(struct talenode *node, float d[9]);
 
 static inline void nemotale_node_set_alpha(struct talenode *node, double alpha)

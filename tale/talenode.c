@@ -211,6 +211,15 @@ static int nemotale_node_transform_enable(struct talenode *node)
 		nemomatrix_translate(matrix, cx, cy);
 	}
 
+	if (node->geometry.sx != 1.0f || node->geometry.sy != 1.0f) {
+		float cx = node->geometry.width * node->geometry.px;
+		float cy = node->geometry.height * node->geometry.py;
+
+		nemomatrix_translate(matrix, -cx, -cy);
+		nemomatrix_scale(matrix, node->geometry.sx, node->geometry.sy);
+		nemomatrix_translate(matrix, cx, cy);
+	}
+
 	nemomatrix_translate(matrix, node->geometry.x, node->geometry.y);
 
 	if (nemomatrix_invert(inverse, matrix) < 0)
@@ -267,8 +276,25 @@ void nemotale_node_rotate(struct talenode *node, float r)
 
 void nemotale_node_pivot(struct talenode *node, float px, float py)
 {
+	if (node->geometry.px == px && node->geometry.py == py)
+		return;
+
 	node->geometry.px = px;
 	node->geometry.py = py;
+
+	node->transform.dirty = 1;
+}
+
+void nemotale_node_scale(struct talenode *node, float sx, float sy)
+{
+	if (node->geometry.sx == sx && node->geometry.sy == sy)
+		return;
+
+	node->geometry.sx = sx;
+	node->geometry.sy = sy;
+
+	node->transform.enable = 1;
+	node->transform.dirty = 1;
 }
 
 int nemotale_node_transform(struct talenode *node, float d[9])
