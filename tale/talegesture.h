@@ -75,14 +75,28 @@ static inline int nemotale_is_close_event(struct nemotale *tale, struct taleeven
 {
 	if (event->tapcount >= 3 &&
 			event->time - event->taps[0]->grab_time < tale->close_duration) {
+		double cx = 0.0f;
+		double cy = 0.0f;
 		int count = 0;
 		int i;
 
 		for (i = 0; i < event->tapcount; i++) {
-			double dx = event->taps[i]->gx - event->taps[i]->grab_gx;
-			double dy = event->taps[i]->gy - event->taps[i]->grab_gy;
+			cx += event->taps[i]->gx;
+			cy += event->taps[i]->gy;
+		}
 
-			if (sqrtf(dx * dx + dy * dy) > tale->close_distance && ++count >= 2)
+		cx /= event->tapcount;
+		cy /= event->tapcount;
+
+		for (i = 0; i < event->tapcount; i++) {
+			double dx0 = event->taps[i]->grab_gx - cx;
+			double dy0 = event->taps[i]->grab_gy - cy;
+			double dx1 = event->taps[i]->gx - cx;
+			double dy1 = event->taps[i]->gy - cy;
+
+			if (sqrtf(dx0 * dx0 + dy0 * dy0) > tale->close_distance &&
+					sqrtf(dx1 * dx1 + dy1 * dy1) < tale->close_distance &&
+					++count >= 2)
 				return 1;
 		}
 	}
