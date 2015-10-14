@@ -144,6 +144,7 @@ extern void nemocompz_put_screen_frame_listener(struct nemocompz *compz);
 extern int32_t nemocompz_get_scene_width(struct nemocompz *compz);
 extern int32_t nemocompz_get_scene_height(struct nemocompz *compz);
 extern void nemocompz_update_scene(struct nemocompz *compz);
+extern void nemocompz_set_scene(struct nemocompz *compz, int32_t x, int32_t y, int32_t width, int32_t height);
 
 extern void nemocompz_update_transform(struct nemocompz *compz);
 extern void nemocompz_update_subcanvas(struct nemocompz *compz);

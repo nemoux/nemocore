@@ -156,12 +156,10 @@ int viewanimation_revoke(struct nemocompz *compz, struct nemoview *view)
 	struct nemoanimation *anim, *next;
 
 	wl_list_for_each_safe(anim, next, &compz->animation_list, link) {
-		if (anim->type == NEMO_VIEW_ANIMATION_EASE_TYPE || anim->type == NEMO_VIEW_ANIMATION_CUBIC_TYPE) {
-			struct viewanimation *animation = (struct viewanimation *)container_of(anim, struct viewanimation, base);
+		struct viewanimation *animation = (struct viewanimation *)container_of(anim, struct viewanimation, base);
 
-			if (animation->view == view) {
-				viewanimation_destroy(animation);
-			}
+		if (animation->view == view) {
+			viewanimation_destroy(animation);
 		}
 	}
 

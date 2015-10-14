@@ -60,12 +60,24 @@ struct nemoscreen {
 	} render;
 
 	struct {
+		float px, py;
+		int has_pivot;
+
+		float x, y;
+		float r;
+		float sx, sy;
+	} geometry;
+
+	struct {
 		int enable;
+		int dirty;
+
+		float cosr, sinr;
 
 		struct nemomatrix matrix;
 		struct nemomatrix inverse;
 	} transform;
-	
+
 	int32_t rx, ry, rw, rh;
 
 	pixman_region32_t region;
@@ -104,6 +116,13 @@ extern void nemoscreen_finish(struct nemoscreen *screen);
 extern void nemoscreen_update_geometry(struct nemoscreen *screen);
 extern void nemoscreen_transform_to_global(struct nemoscreen *screen, float dx, float dy, float *x, float *y);
 extern void nemoscreen_transform_from_global(struct nemoscreen *screen, float x, float y, float *dx, float *dy);
+
+extern void nemoscreen_set_position(struct nemoscreen *screen, float x, float y);
+extern void nemoscreen_set_rotation(struct nemoscreen *screen, float r);
+extern void nemoscreen_set_scale(struct nemoscreen *screen, float sx, float sy);
+extern void nemoscreen_set_pivot(struct nemoscreen *screen, float px, float py);
+
+extern void nemoscreen_damage_dirty(struct nemoscreen *screen);
 
 extern int nemoscreen_get_config_mode(struct nemocompz *compz, uint32_t nodeid, uint32_t screenid, struct nemomode *mode);
 extern int nemoscreen_get_config_geometry(struct nemocompz *compz, uint32_t nodeid, uint32_t screenid, struct nemoscreen *screen);

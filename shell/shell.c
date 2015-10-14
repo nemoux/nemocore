@@ -247,6 +247,8 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 
 		bin->last_width = canvas->base.width;
 		bin->last_height = canvas->base.height;
+
+		nemoview_set_state(view, NEMO_VIEW_MAPPED_STATE);
 	} else if (bin->type == NEMO_SHELL_SURFACE_OVERLAY_TYPE) {
 		nemoview_update_transform_parent(view);
 

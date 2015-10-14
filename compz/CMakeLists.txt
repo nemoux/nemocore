@@ -157,6 +157,7 @@ add_library(nemocompz SHARED
 	binding.c
 	keymap.c
 	sound.c
+	animation.c
 	viewanimation.c
 	vieweffect.c
 	plugin.c

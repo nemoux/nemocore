@@ -27,6 +27,10 @@ static int nemoscreen_repaint_frame(struct nemoscreen *screen)
 
 	wl_list_init(&frame_callback_list);
 
+	if (screen->transform.dirty != 0) {
+		nemoscreen_update_geometry(screen);
+	}
+
 	if (compz->dirty != 0) {
 		wl_list_for_each(canvas, &compz->canvas_list, link) {
 			wl_list_insert_list(&frame_callback_list, &canvas->frame_callback_list);
@@ -178,6 +182,9 @@ void nemoscreen_prepare(struct nemoscreen *screen)
 
 	screen->snddev = NULL;
 
+	screen->geometry.sx = 1.0f;
+	screen->geometry.sy = 1.0f;
+
 	wl_signal_init(&screen->destroy_signal);
 	wl_list_init(&screen->resource_list);
 
@@ -210,7 +217,59 @@ void nemoscreen_finish(struct nemoscreen *screen)
 		free(screen->snddev);
 }
 
-static void nemoscreen_update_transform_matrix(struct nemoscreen *screen)
+static int nemoscreen_update_transform_matrix(struct nemoscreen *screen)
+{
+	struct nemomatrix *matrix = &screen->transform.matrix;
+	struct nemomatrix *inverse = &screen->transform.inverse;
+
+	nemomatrix_init_identity(matrix);
+
+	if (screen->geometry.r != 0.0f) {
+		nemomatrix_translate(matrix, -screen->geometry.px, -screen->geometry.py);
+		nemomatrix_rotate(matrix, screen->transform.cosr, screen->transform.sinr);
+		nemomatrix_translate(matrix, screen->geometry.px, screen->geometry.py);
+	}
+
+	if (screen->geometry.sx != 1.0f || screen->geometry.sy != 1.0f) {
+		nemomatrix_translate(matrix, -screen->geometry.px, -screen->geometry.py);
+		nemomatrix_scale(matrix, screen->geometry.sx, screen->geometry.sy);
+		nemomatrix_translate(matrix, screen->geometry.px, screen->geometry.py);
+	}
+
+	nemomatrix_translate(matrix, screen->geometry.x, screen->geometry.y);
+
+	if (nemomatrix_invert(inverse, matrix) < 0) {
+		screen->transform.enable = 0;
+
+		return -1;
+	}
+
+	return 0;
+}
+
+static void nemoscreen_update_render_matrix(struct nemoscreen *screen)
+{
+	nemomatrix_init_identity(&screen->render.matrix);
+
+	if (screen->transform.enable == 0) {
+		nemomatrix_translate(&screen->render.matrix,
+				-screen->x,
+				-screen->y);
+	} else {
+		nemomatrix_multiply(&screen->render.matrix,
+				&screen->transform.matrix);
+	}
+
+	nemomatrix_translate(&screen->render.matrix,
+			-screen->width / 2.0f,
+			-screen->height / 2.0f);
+
+	nemomatrix_scale(&screen->render.matrix,
+			2.0f / screen->width,
+			-2.0f / screen->height);
+}
+
+static void nemoscreen_update_region(struct nemoscreen *screen)
 {
 	pixman_region32_fini(&screen->region);
 
@@ -272,34 +331,16 @@ static void nemoscreen_update_transform_matrix(struct nemoscreen *screen)
 	}
 }
 
-static void nemoscreen_update_render_matrix(struct nemoscreen *screen)
-{
-	nemomatrix_init_identity(&screen->render.matrix);
-
-	if (screen->transform.enable == 0) {
-		nemomatrix_translate(&screen->render.matrix,
-				-screen->x,
-				-screen->y);
-	} else {
-		nemomatrix_multiply(&screen->render.matrix,
-				&screen->transform.matrix);
-	}
-
-	nemomatrix_translate(&screen->render.matrix,
-			-screen->width / 2.0f,
-			-screen->height / 2.0f);
-
-	nemomatrix_scale(&screen->render.matrix,
-			2.0f / screen->width,
-			-2.0f / screen->height);
-}
-
 void nemoscreen_update_geometry(struct nemoscreen *screen)
 {
-	nemoscreen_update_render_matrix(screen);
-	nemoscreen_update_transform_matrix(screen);
+	screen->transform.dirty = 0;
 
-	nemocompz_update_scene(screen->compz);
+	if (screen->transform.enable != 0)
+		nemoscreen_update_transform_matrix(screen);
+
+	nemoscreen_update_render_matrix(screen);
+
+	nemoscreen_update_region(screen);
 }
 
 void nemoscreen_transform_to_global(struct nemoscreen *screen, float dx, float dy, float *x, float *y)
@@ -342,6 +383,59 @@ void nemoscreen_transform_from_global(struct nemoscreen *screen, float x, float 
 		*dx = x - screen->x;
 		*dy = y - screen->y;
 	}
+}
+
+void nemoscreen_set_position(struct nemoscreen *screen, float x, float y)
+{
+	if (screen->geometry.x == x && screen->geometry.y == y)
+		return;
+
+	screen->geometry.x = x;
+	screen->geometry.y = y;
+
+	screen->transform.enable = 1;
+	screen->transform.dirty = 1;
+}
+
+void nemoscreen_set_rotation(struct nemoscreen *screen, float r)
+{
+	if (screen->geometry.r == r)
+		return;
+
+	screen->geometry.r = r;
+	screen->transform.cosr = cos(r);
+	screen->transform.sinr = sin(r);
+
+	screen->transform.enable = 1;
+	screen->transform.dirty = 1;
+}
+
+void nemoscreen_set_scale(struct nemoscreen *screen, float sx, float sy)
+{
+	if (screen->geometry.sx == sx && screen->geometry.sy == sy)
+		return;
+
+	screen->geometry.sx = sx;
+	screen->geometry.sy = sy;
+
+	screen->transform.enable = 1;
+	screen->transform.dirty = 1;
+}
+
+void nemoscreen_set_pivot(struct nemoscreen *screen, float px, float py)
+{
+	if (screen->geometry.px == px && screen->geometry.py == py)
+		return;
+
+	screen->geometry.px = px;
+	screen->geometry.py = py;
+
+	screen->transform.dirty = 1;
+}
+
+void nemoscreen_damage_dirty(struct nemoscreen *screen)
+{
+	pixman_region32_union(&screen->damage, &screen->damage, &screen->region);
 }
 
 int nemoscreen_get_config_mode(struct nemocompz *compz, uint32_t nodeid, uint32_t screenid, struct nemomode *mode)

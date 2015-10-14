@@ -10,12 +10,7 @@ NEMO_BEGIN_EXTERN_C
 #include <stdint.h>
 
 #include <nemoease.h>
-
-typedef enum {
-	NEMO_VIEW_ANIMATION_EASE_TYPE = 0,
-	NEMO_VIEW_ANIMATION_CUBIC_TYPE = 1,
-	NEMO_VIEW_ANIMATION_LAST_TYPE
-} NemoViewAnimationEaseType;
+#include <nemolist.h>
 
 struct nemoanimation;
 
@@ -27,8 +22,6 @@ struct nemoanimation {
 
 	uint32_t frame_count;
 
-	int type;
-
 	uint32_t stime, etime;
 	uint32_t delay;
 	uint32_t duration;
@@ -37,7 +30,32 @@ struct nemoanimation {
 
 	nemoanimation_frame_t frame;
 	nemoanimation_done_t done;
+
+	void *userdata;
 };
+
+extern struct nemoanimation *nemoanimation_create(uint32_t ease, uint32_t delay, uint32_t duration);
+extern void nemoanimation_destroy(struct nemoanimation *animation);
+
+static inline void nemoanimation_set_dispatch_frame(struct nemoanimation *animation, nemoanimation_frame_t dispatch)
+{
+	animation->frame = dispatch;
+}
+
+static inline void nemoanimation_set_dispatch_done(struct nemoanimation *animation, nemoanimation_done_t dispatch)
+{
+	animation->done = dispatch;
+}
+
+static inline void nemoanimation_set_userdata(struct nemoanimation *animation, void *data)
+{
+	animation->userdata = data;
+}
+
+static inline void *nemoanimation_get_userdata(struct nemoanimation *animation)
+{
+	return animation->userdata;
+}
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

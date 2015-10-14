@@ -270,7 +270,7 @@ void nemoview_damage_below(struct nemoview *view)
 
 int nemoview_is_mapped(struct nemoview *view)
 {
-	return view->screen_mask != 0;
+	return view->state & NEMO_VIEW_MAPPED_STATE;
 }
 
 void nemoview_unmap(struct nemoview *view)
@@ -282,6 +282,8 @@ void nemoview_unmap(struct nemoview *view)
 
 	view->node_mask = 0;
 	view->screen_mask = 0;
+
+	nemoview_put_state(view, NEMO_VIEW_MAPPED_STATE);
 
 	nemocontent_update_output(view->content, 0, 0);
 

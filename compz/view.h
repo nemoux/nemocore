@@ -37,7 +37,8 @@ typedef enum {
 } NemoViewArea;
 
 typedef enum {
-	NEMO_VIEW_CATCHABLE_STATE = (1 << 0),
+	NEMO_VIEW_MAPPED_STATE = (1 << 0),
+	NEMO_VIEW_CATCHABLE_STATE = (1 << 1),
 	NEMO_VIEW_LAST_STATE
 } NemoViewState;
 
