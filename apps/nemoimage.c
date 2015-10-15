@@ -150,6 +150,10 @@ int main(int argc, char *argv[])
 				(EGLNativeWindowType)NTEGL_WINDOW(canvas)));
 	nemotale_resize(tale, width, height);
 
+	nemocanvas_set_min_size(NTEGL_CANVAS(canvas),
+			nemotale_get_minimum_width(tale),
+			nemotale_get_minimum_height(tale));
+
 	nemotale_attach_canvas(tale, NTEGL_CANVAS(canvas), nemoimage_dispatch_tale_event);
 	nemotale_set_userdata(tale, context);
 

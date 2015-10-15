@@ -358,6 +358,10 @@ int main(int argc, char *argv[])
 				(EGLNativeWindowType)NTEGL_WINDOW(ecanvas)));
 	nemotale_resize(tale, width, height);
 
+	nemocanvas_set_min_size(canvas,
+			nemotale_get_minimum_width(tale),
+			nemotale_get_minimum_height(tale));
+
 	nemotale_attach_canvas(tale, canvas, nemoplay_dispatch_tale_event);
 	nemotale_set_userdata(tale, context);
 
