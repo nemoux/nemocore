@@ -670,19 +670,11 @@ int32_t nemocompz_get_scene_height(struct nemocompz *compz)
 void nemocompz_update_scene(struct nemocompz *compz)
 {
 	struct nemoscreen *screen;
-	int index;
-	int32_t x, y;
-	int32_t width, height;
 
-	index = nemoitem_get(compz->configs, "//nemoshell/scene", 0);
-	if (index >= 0) {
-		x = nemoitem_get_iattr(compz->configs, index, "x", 0);
-		y = nemoitem_get_iattr(compz->configs, index, "y", 0);
-		width = nemoitem_get_iattr(compz->configs, index, "width", 0);
-		height = nemoitem_get_iattr(compz->configs, index, "height", 0);
+	if (compz->has_scene != 0)
+		return;
 
-		pixman_region32_union_rect(&compz->region, &compz->region, x, y, width, height);
-	}
+	pixman_region32_clear(&compz->region);
 
 	wl_list_for_each(screen, &compz->screen_list, link) {
 		pixman_region32_union(&compz->region, &compz->region, &screen->region);
@@ -692,6 +684,8 @@ void nemocompz_update_scene(struct nemocompz *compz)
 void nemocompz_set_scene(struct nemocompz *compz, int32_t x, int32_t y, int32_t width, int32_t height)
 {
 	pixman_region32_union_rect(&compz->region, &compz->region, x, y, width, height);
+
+	compz->has_scene = 1;
 }
 
 void nemocompz_update_transform(struct nemocompz *compz)

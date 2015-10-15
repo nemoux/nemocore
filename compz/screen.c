@@ -337,6 +337,8 @@ void nemoscreen_update_geometry(struct nemoscreen *screen)
 	nemoscreen_update_render_matrix(screen);
 
 	nemoscreen_update_region(screen);
+
+	nemocompz_update_scene(screen->compz);
 }
 
 void nemoscreen_transform_to_global(struct nemoscreen *screen, float dx, float dy, float *x, float *y)

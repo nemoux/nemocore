@@ -49,6 +49,7 @@ struct nemocompz {
 	int dirty;
 	pixman_region32_t damage;
 	pixman_region32_t region;
+	int has_scene;
 
 	struct wl_event_source *sigsrc[8];
 
