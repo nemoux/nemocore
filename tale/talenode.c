@@ -203,16 +203,15 @@ static int nemotale_node_transform_enable(struct talenode *node)
 	nemomatrix_init_identity(matrix);
 
 	if (node->geometry.r != 0.0f) {
-		float cx = node->geometry.width * node->geometry.px;
-		float cy = node->geometry.height * node->geometry.py;
-
-		nemomatrix_translate(matrix, -cx, -cy);
+		nemomatrix_translate(matrix, -node->geometry.width * node->geometry.px, -node->geometry.height * node->geometry.py);
 		nemomatrix_rotate(matrix, node->transform.cosr, node->transform.sinr);
-		nemomatrix_translate(matrix, cx, cy);
+		nemomatrix_translate(matrix, node->geometry.width * node->geometry.px, node->geometry.height * node->geometry.py);
 	}
 
 	if (node->geometry.sx != 1.0f || node->geometry.sy != 1.0f) {
+		nemomatrix_translate(matrix, -node->geometry.width * node->geometry.px, -node->geometry.height * node->geometry.py);
 		nemomatrix_scale(matrix, node->geometry.sx, node->geometry.sy);
+		nemomatrix_translate(matrix, node->geometry.width * node->geometry.px, node->geometry.height * node->geometry.py);
 	}
 
 	nemomatrix_translate(matrix, node->geometry.x, node->geometry.y);
@@ -274,8 +273,7 @@ void nemotale_node_pivot(struct talenode *node, float px, float py)
 	if (node->geometry.px == px && node->geometry.py == py)
 		return;
 
-	node->geometry.px = px;
-	node->geometry.py = py;
+	nemotale_node_correct_pivot(node, px, py);
 
 	node->transform.dirty = 1;
 }
@@ -290,6 +288,79 @@ void nemotale_node_scale(struct talenode *node, float sx, float sy)
 
 	node->transform.enable = 1;
 	node->transform.dirty = 1;
+}
+
+void nemotale_node_correct_pivot(struct talenode *node, float px, float py)
+{
+	if (node->geometry.px != px || node->geometry.py != py) {
+		struct nemomatrix matrix;
+		struct nemovector vector;
+		float sx, sy, ex, ey;
+
+		nemomatrix_init_identity(&matrix);
+
+		if (node->geometry.r != 0.0f) {
+			nemomatrix_translate(&matrix, -node->geometry.width * node->geometry.px, -node->geometry.height * node->geometry.py);
+			nemomatrix_rotate(&matrix, node->transform.cosr, node->transform.sinr);
+			nemomatrix_translate(&matrix, node->geometry.width * node->geometry.px, node->geometry.height * node->geometry.py);
+		}
+
+		if (node->geometry.sx != 1.0f || node->geometry.sy != 1.0f) {
+			nemomatrix_translate(&matrix, -node->geometry.width * node->geometry.px, -node->geometry.height * node->geometry.py);
+			nemomatrix_scale(&matrix, node->geometry.sx, node->geometry.sy);
+			nemomatrix_translate(&matrix, node->geometry.width * node->geometry.px, node->geometry.height * node->geometry.py);
+		}
+
+		vector.f[0] = 0.0f;
+		vector.f[1] = 0.0f;
+		vector.f[2] = 0.0f;
+		vector.f[3] = 1.0f;
+
+		nemomatrix_transform(&matrix, &vector);
+
+		if (fabsf(vector.f[3]) < 1e-6) {
+			sx = 0.0f;
+			sy = 0.0f;
+		} else {
+			sx = vector.f[0] / vector.f[3];
+			sy = vector.f[1] / vector.f[3];
+		}
+
+		node->geometry.px = px;
+		node->geometry.py = py;
+
+		nemomatrix_init_identity(&matrix);
+
+		if (node->geometry.r != 0.0f) {
+			nemomatrix_translate(&matrix, -node->geometry.width * node->geometry.px, -node->geometry.height * node->geometry.py);
+			nemomatrix_rotate(&matrix, node->transform.cosr, node->transform.sinr);
+			nemomatrix_translate(&matrix, node->geometry.width * node->geometry.px, node->geometry.height * node->geometry.py);
+		}
+
+		if (node->geometry.sx != 1.0f || node->geometry.sy != 1.0f) {
+			nemomatrix_translate(&matrix, -node->geometry.width * node->geometry.px, -node->geometry.height * node->geometry.py);
+			nemomatrix_scale(&matrix, node->geometry.sx, node->geometry.sy);
+			nemomatrix_translate(&matrix, node->geometry.width * node->geometry.px, node->geometry.height * node->geometry.py);
+		}
+
+		vector.f[0] = 0.0f;
+		vector.f[1] = 0.0f;
+		vector.f[2] = 0.0f;
+		vector.f[3] = 1.0f;
+
+		nemomatrix_transform(&matrix, &vector);
+
+		if (fabsf(vector.f[3]) < 1e-6) {
+			ex = 0.0f;
+			ey = 0.0f;
+		} else {
+			ex = vector.f[0] / vector.f[3];
+			ey = vector.f[1] / vector.f[3];
+		}
+
+		node->geometry.x = node->geometry.x - (ex - sx);
+		node->geometry.y = node->geometry.y - (ey - sy);
+	}
 }
 
 int nemotale_node_transform(struct talenode *node, float d[9])
