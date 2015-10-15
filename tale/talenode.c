@@ -212,12 +212,7 @@ static int nemotale_node_transform_enable(struct talenode *node)
 	}
 
 	if (node->geometry.sx != 1.0f || node->geometry.sy != 1.0f) {
-		float cx = node->geometry.width * node->geometry.px;
-		float cy = node->geometry.height * node->geometry.py;
-
-		nemomatrix_translate(matrix, -cx, -cy);
 		nemomatrix_scale(matrix, node->geometry.sx, node->geometry.sy);
-		nemomatrix_translate(matrix, cx, cy);
 	}
 
 	nemomatrix_translate(matrix, node->geometry.x, node->geometry.y);
