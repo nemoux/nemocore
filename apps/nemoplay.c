@@ -46,6 +46,7 @@ struct playcontext {
 	guint8 *video_buffer;
 
 	int is_background;
+	int is_fullscreen;
 
 	int is_audio_only;
 
@@ -227,6 +228,7 @@ int main(int argc, char *argv[])
 		{ "width",				required_argument,	NULL,		'w' },
 		{ "height",				required_argument,	NULL,		'h' },
 		{ "background",		no_argument,				NULL,		'b' },
+		{ "fullscreen",		no_argument,				NULL,		'u' },
 		{ "log",					required_argument,	NULL,		'l' },
 		{ 0 }
 	};
@@ -243,11 +245,12 @@ int main(int argc, char *argv[])
 	char *uri;
 	int32_t width = 0, height = 0;
 	int is_background = 0;
+	int is_fullscreen = 0;
 	int opt;
 
 	nemolog_set_file(2);
 
-	while (opt = getopt_long(argc, argv, "f:s:w:h:bl:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "f:s:w:h:bul:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -272,6 +275,10 @@ int main(int argc, char *argv[])
 				is_background = 1;
 				break;
 
+			case 'u':
+				is_fullscreen = 1;
+				break;
+
 			case 'l':
 				nemolog_open_socket(optarg);
 				break;
@@ -294,6 +301,7 @@ int main(int argc, char *argv[])
 	memset(context, 0, sizeof(struct playcontext));
 
 	context->is_background = is_background;
+	context->is_fullscreen = is_fullscreen;
 
 	context->tool = tool = nemotool_create();
 	if (tool == NULL)
@@ -334,7 +342,10 @@ int main(int argc, char *argv[])
 	nemocanvas_set_fullscreen_type(canvas, NEMO_SURFACE_FULLSCREEN_TYPE_PICK);
 	if (context->is_background != 0)
 		nemocanvas_set_layer(canvas, NEMO_SURFACE_LAYER_TYPE_BACKGROUND);
-	nemocanvas_set_anchor(canvas, -0.5f, -0.5f);
+	if (context->is_fullscreen != 0)
+		nemocanvas_set_fullscreen(canvas, 0);
+	else
+		nemocanvas_set_anchor(canvas, -0.5f, -0.5f);
 	nemocanvas_set_dispatch_frame(canvas, nemoplay_dispatch_canvas_frame);
 	nemocanvas_set_dispatch_resize(canvas, nemoplay_dispatch_canvas_resize);
 

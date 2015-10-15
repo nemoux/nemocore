@@ -187,15 +187,13 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 	if (!nemoview_is_mapped(view)) {
 		if (bin->type == NEMO_SHELL_SURFACE_NORMAL_TYPE) {
 			if (bin->has_screen != 0) {
-				if (bin->screen.width == canvas->base.width && bin->screen.height == canvas->base.height) {
-					nemoview_set_position(view,
-							bin->screen.x, bin->screen.y);
-					nemoview_set_rotation(view, 0);
+				nemoview_set_position(view,
+						bin->screen.x, bin->screen.y);
+				nemoview_set_rotation(view, 0);
 
-					nemoview_attach_layer(view, bin->layer);
-					nemoview_update_transform(view);
-					nemoview_damage_below(view);
-				}
+				nemoview_attach_layer(view, bin->layer);
+				nemoview_update_transform(view);
+				nemoview_damage_below(view);
 			} else {
 				if (view->geometry.has_anchor != 0) {
 					nemoview_set_position(view,
