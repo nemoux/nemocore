@@ -331,7 +331,7 @@ void nemoscreen_update_geometry(struct nemoscreen *screen)
 {
 	screen->transform.dirty = 0;
 
-	if (screen->transform.enable != 0)
+	if (screen->transform.enable != 0 && screen->transform.custom == 0)
 		nemoscreen_update_transform_matrix(screen);
 
 	nemoscreen_update_render_matrix(screen);
@@ -500,6 +500,8 @@ int nemoscreen_get_config_geometry(struct nemocompz *compz, uint32_t nodeid, uin
 
 		if (nemomatrix_invert(inverse, matrix) >= 0) {
 			screen->transform.enable = 1;
+			screen->transform.dirty = 1;
+			screen->transform.custom = 1;
 		}
 	}
 

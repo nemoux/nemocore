@@ -71,6 +71,7 @@ struct nemoscreen {
 	struct {
 		int enable;
 		int dirty;
+		int custom;
 
 		float cosr, sinr;
 
