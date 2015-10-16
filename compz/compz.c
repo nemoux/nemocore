@@ -107,6 +107,7 @@ static int on_chld_signal(int signum, void *data)
 {
 	struct nemocompz *compz = (struct nemocompz *)data;
 	struct nemotask *task;
+	struct nemoproc proc;
 	pid_t pid;
 	int state;
 
@@ -118,6 +119,9 @@ static int on_chld_signal(int signum, void *data)
 			return 1;
 		if (pid == 0)
 			return 1;
+
+		proc.pid = pid;
+		wl_signal_emit(&compz->child_signal, &proc);
 
 		wl_list_for_each(task, &compz->task_list, link) {
 			if (task->pid == pid)
@@ -392,6 +396,7 @@ struct nemocompz *nemocompz_create(void)
 	wl_signal_init(&compz->activate_signal);
 	wl_signal_init(&compz->transform_signal);
 	wl_signal_init(&compz->kill_signal);
+	wl_signal_init(&compz->child_signal);
 
 	nemolayer_prepare(&compz->cursor_layer, &compz->layer_list);
 

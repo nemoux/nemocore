@@ -38,6 +38,10 @@ struct nemosound;
 
 typedef void (*nemocompz_dispatch_idle_t)(void *data);
 
+struct nemoproc {
+	pid_t pid;
+};
+
 struct nemocompz {
 	struct wl_display *display;
 	struct wl_event_loop *loop;
@@ -103,6 +107,7 @@ struct nemocompz {
 	struct wl_signal activate_signal;
 	struct wl_signal transform_signal;
 	struct wl_signal kill_signal;
+	struct wl_signal child_signal;
 
 	clockid_t presentation_clock;
 

@@ -915,6 +915,7 @@ void nemoxmanager_map_window(struct nemoxmanager *xmanager, struct nemoxwindow *
 	struct nemocanvas *canvas = xwindow->canvas;
 	struct nemoxserver *xserver = xmanager->xserver;
 	struct shellbin *bin;
+	struct clientstate *state;
 
 	bin = nemoshell_create_bin(shell, canvas, &xserver_client);
 	if (bin == NULL) {
@@ -922,12 +923,10 @@ void nemoxmanager_map_window(struct nemoxmanager *xmanager, struct nemoxwindow *
 		return;
 	}
 
-	if (xserver->state != NULL) {
-		nemoshell_set_client_state(bin, xserver->state);
-
-		nemoshell_destroy_client_state(xserver->state);
-
-		xserver->state = NULL;
+	state = nemoshell_get_client_state(shell, xwindow->pid);
+	if (state != NULL) {
+		nemoshell_set_client_state(bin, state);
+		nemoshell_put_client_state(shell, state);
 	}
 
 	bin->type = NEMO_SHELL_SURFACE_XWAYLAND_TYPE;

@@ -121,18 +121,19 @@ static void nemo_surface_follow(struct wl_client *client, struct wl_resource *re
 static void nemo_surface_execute(struct wl_client *client, struct wl_resource *resource, const char *name, const char *cmds)
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
+	struct nemoshell *shell = bin->shell;
 	struct nemotoken *token;
-	struct wl_client *child;
+	pid_t pid;
 
 	token = nemotoken_create(cmds, strlen(cmds));
 	nemotoken_divide(token, ':');
 	nemotoken_update(token);
 
-	child = wayland_execute_client(bin->shell->compz->display, name, nemotoken_get_tokens(token), NULL, NULL);
-	if (child != NULL) {
+	pid = wayland_execute_path(name, nemotoken_get_tokens(token), NULL);
+	if (pid > 0) {
 		struct clientstate *state;
 
-		state = nemoshell_create_client_state(child);
+		state = nemoshell_get_client_state(shell, pid);
 		if (state != NULL) {
 			nemoview_transform_to_global(bin->view,
 					bin->canvas->base.width * bin->view->geometry.ax,
@@ -333,7 +334,6 @@ static void nemo_get_nemo_surface(struct wl_client *client, struct wl_resource *
 	struct shellclient *sc = (struct shellclient *)wl_resource_get_user_data(resource);
 	struct nemoshell *shell = sc->shell;
 	struct shellbin *bin;
-	struct clientstate *state;
 
 	if (nemoshell_get_bin(canvas)) {
 		wl_resource_post_error(surface_resource,
@@ -367,12 +367,16 @@ static void nemo_get_nemo_surface(struct wl_client *client, struct wl_resource *
 	wl_resource_set_implementation(bin->resource, &nemo_surface_implementation, bin, nemoshell_unbind_nemo_surface);
 
 	if (type == NEMO_SHELL_SURFACE_TYPE_NORMAL) {
+		struct clientstate *state;
+		pid_t pid;
+
 		bin->type = NEMO_SHELL_SURFACE_NORMAL_TYPE;
 
-		if ((state = nemoshell_get_client_state(client)) != NULL) {
-			nemoshell_set_client_state(bin, state);
+		wl_client_get_credentials(client, &pid, NULL, NULL);
 
-			nemoshell_destroy_client_state(state);
+		if ((state = nemoshell_get_client_state(shell, pid)) != NULL) {
+			nemoshell_set_client_state(bin, state);
+			nemoshell_put_client_state(shell, state);
 		}
 	} else if (type == NEMO_SHELL_SURFACE_TYPE_FOLLOW) {
 		bin->type = NEMO_SHELL_SURFACE_NORMAL_TYPE;

@@ -50,7 +50,11 @@ struct nemoshell {
 	struct wl_listener update_input_panel_listener;
 	int showing_input_panels;
 
+	struct wl_listener child_signal_listener;
+
 	struct wl_list fullscreen_list;
+
+	struct wl_list clientstate_list;
 
 	struct {
 		struct nemocanvas *canvas;
@@ -86,7 +90,9 @@ struct shellclient {
 };
 
 struct clientstate {
-	struct wl_listener destroy_listener;
+	uint32_t pid;
+
+	struct wl_list link;
 
 	float x, y;
 	float r;
@@ -219,9 +225,8 @@ extern void nemoshell_clear_bin_next_state(struct shellbin *bin);
 
 extern struct nemoview *nemoshell_get_default_view(struct nemocanvas *canvas);
 
-extern struct clientstate *nemoshell_create_client_state(struct wl_client *client);
-extern void nemoshell_destroy_client_state(struct clientstate *state);
-extern struct clientstate *nemoshell_get_client_state(struct wl_client *client);
+extern struct clientstate *nemoshell_get_client_state(struct nemoshell *shell, uint32_t pid);
+extern void nemoshell_put_client_state(struct nemoshell *shell, struct clientstate *state);
 extern void nemoshell_set_client_state(struct shellbin *bin, struct clientstate *state);
 
 extern void nemoshell_load_fullscreens(struct nemoshell *shell);

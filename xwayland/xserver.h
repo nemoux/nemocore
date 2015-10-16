@@ -43,8 +43,6 @@ struct nemoxserver {
 
 	struct wl_resource *resource;
 	struct wl_client *client;
-	
-	struct clientstate *state;
 
 	struct nemoxmanager *xmanager;
 
@@ -54,8 +52,6 @@ struct nemoxserver {
 extern struct nemoxserver *nemoxserver_create(struct nemoshell *shell, const char *xserverpath);
 
 extern void nemoxserver_shutdown(struct nemoxserver *xserver);
-
-extern void nemoxserver_set_client_state(struct nemoxserver *xserver, struct clientstate *state);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

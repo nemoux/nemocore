@@ -13,7 +13,39 @@
 #include <oshelper.h>
 #include <nemolog.h>
 
-void wayland_execute_path(int sockfd, const char *path, char *const argv[], char *const envp[])
+uint32_t wayland_execute_path(const char *path, char *const argv[], char *const envp[])
+{
+	sigset_t allsigs;
+	pid_t pid;
+
+	pid = fork();
+	if (pid == -1)
+		return 0;
+
+	if (pid > 0)
+		return pid;
+
+	sigfillset(&allsigs);
+	sigprocmask(SIG_UNBLOCK, &allsigs, NULL);
+
+	if (seteuid(getuid()) == -1)
+		return 0;
+
+	if (argv == NULL || argv[0] == NULL) {
+		if (execl(path, path, NULL) < 0)
+			nemolog_warning("WAYLAND", "failed to execute '%s' with errno %d\n", path, errno);
+	} else if (envp == NULL || envp[0] == NULL) {
+		if (execv(path, argv) < 0)
+			nemolog_warning("WAYLAND", "failed to execute '%s' with errno %d\n", path, errno);
+	} else {
+		if (execve(path, argv, envp) < 0)
+			nemolog_warning("WAYLAND", "failed to execute '%s' with errno %d\n", path, errno);
+	}
+
+	return 0;
+}
+
+static inline void wayland_execute_client_in(int sockfd, const char *path, char *const argv[], char *const envp[])
 {
 	int clientfd;
 	char fdstr[32];
@@ -23,9 +55,8 @@ void wayland_execute_path(int sockfd, const char *path, char *const argv[], char
 	sigfillset(&allsigs);
 	sigprocmask(SIG_UNBLOCK, &allsigs, NULL);
 
-	if (seteuid(getuid()) == -1) {
+	if (seteuid(getuid()) == -1)
 		return;
-	}
 
 	clientfd = dup(sockfd);
 	if (clientfd == -1) {
@@ -60,7 +91,7 @@ void wayland_execute_path(int sockfd, const char *path, char *const argv[], char
 	}
 }
 
-struct wl_client *wayland_execute_client(struct wl_display *display, const char *path, char *const argv[], char *const envp[], uint64_t *child)
+struct wl_client *wayland_execute_client(struct wl_display *display, const char *path, char *const argv[], char *const envp[])
 {
 	int sv[2];
 	pid_t pid;
@@ -78,7 +109,7 @@ struct wl_client *wayland_execute_client(struct wl_display *display, const char 
 	}
 
 	if (pid == 0) {
-		wayland_execute_path(sv[1], path, argv, envp);
+		wayland_execute_client_in(sv[1], path, argv, envp);
 		exit(-1);
 	}
 
@@ -89,9 +120,6 @@ struct wl_client *wayland_execute_client(struct wl_display *display, const char 
 		close(sv[0]);
 		return NULL;
 	}
-
-	if (child != NULL)
-		*child = pid;
 
 	return client;
 }

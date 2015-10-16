@@ -271,6 +271,7 @@ static void xdg_get_xdg_surface(struct wl_client *client, struct wl_resource *re
 	struct nemoshell *shell = sc->shell;
 	struct shellbin *bin;
 	struct clientstate *state;
+	pid_t pid;
 
 	if (nemoshell_get_bin(canvas)) {
 		wl_resource_post_error(surface_resource,
@@ -302,11 +303,12 @@ static void xdg_get_xdg_surface(struct wl_client *client, struct wl_resource *re
 
 	wl_resource_set_implementation(bin->resource, &xdg_surface_implementation, bin, xdgshell_unbind_xdg_surface);
 
-	state = nemoshell_get_client_state(client);
+	wl_client_get_credentials(client, &pid, NULL, NULL);
+	
+	state = nemoshell_get_client_state(shell, pid);
 	if (state != NULL) {
 		nemoshell_set_client_state(bin, state);
-
-		nemoshell_destroy_client_state(state);
+		nemoshell_put_client_state(shell, state);
 	}
 }
 

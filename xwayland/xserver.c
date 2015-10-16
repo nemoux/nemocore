@@ -342,11 +342,3 @@ void nemoxserver_shutdown(struct nemoxserver *xserver)
 
 	xserver->loop = NULL;
 }
-
-void nemoxserver_set_client_state(struct nemoxserver *xserver, struct clientstate *state)
-{
-	if (xserver->state != NULL)
-		nemoshell_destroy_client_state(xserver->state);
-
-	xserver->state = state;
-}

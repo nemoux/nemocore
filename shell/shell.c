@@ -508,6 +508,17 @@ static void nemoshell_handle_touch_focus(struct wl_listener *listener, void *dat
 	struct nemoshell *shell = (struct nemoshell *)container_of(listener, struct nemoshell, touch_focus_listener);
 }
 
+static void nemoshell_handle_child_signal(struct wl_listener *listener, void *data)
+{
+	struct nemoshell *shell = (struct nemoshell *)container_of(listener, struct nemoshell, child_signal_listener);
+	struct nemoproc *proc = (struct nemoproc *)data;
+	struct clientstate *state;
+
+	state = nemoshell_get_client_state(shell, proc->pid);
+	if (state != NULL)
+		nemoshell_put_client_state(shell, state);
+}
+
 struct nemoshell *nemoshell_create(struct nemocompz *compz)
 {
 	struct nemoshell *shell;
@@ -555,7 +566,12 @@ struct nemoshell *nemoshell_create(struct nemocompz *compz)
 	shell->touch_focus_listener.notify = nemoshell_handle_touch_focus;
 	wl_signal_add(&compz->seat->touch.focus_signal, &shell->touch_focus_listener);
 
+	wl_list_init(&shell->child_signal_listener.link);
+	shell->child_signal_listener.notify = nemoshell_handle_child_signal;
+	wl_signal_add(&compz->child_signal, &shell->child_signal_listener);
+
 	wl_list_init(&shell->fullscreen_list);
+	wl_list_init(&shell->clientstate_list);
 
 	return shell;
 
@@ -692,48 +708,32 @@ struct nemoview *nemoshell_get_default_view(struct nemocanvas *canvas)
 	return container_of(canvas->view_list.next, struct nemoview, link);
 }
 
-static void clientstate_handle_client_destroy(struct wl_listener *listener, void *data)
-{
-	struct clientstate *state = (struct clientstate *)container_of(listener, struct clientstate, destroy_listener);
-
-	nemoshell_destroy_client_state(state);
-}
-
-struct clientstate *nemoshell_create_client_state(struct wl_client *client)
+struct clientstate *nemoshell_get_client_state(struct nemoshell *shell, uint32_t pid)
 {
 	struct clientstate *state;
+
+	wl_list_for_each(state, &shell->clientstate_list, link) {
+		if (state->pid == pid)
+			return state;
+	}
 
 	state = (struct clientstate *)malloc(sizeof(struct clientstate));
 	if (state == NULL)
 		return NULL;
 	memset(state, 0, sizeof(struct clientstate));
 
-	if (client != NULL) {
-		state->destroy_listener.notify = clientstate_handle_client_destroy;
-		wl_client_add_destroy_listener(client, &state->destroy_listener);
-	} else {
-		wl_list_init(&state->destroy_listener.link);
-	}
+	state->pid = pid;
+
+	wl_list_insert(&shell->clientstate_list, &state->link);
 
 	return state;
 }
 
-void nemoshell_destroy_client_state(struct clientstate *state)
+void nemoshell_put_client_state(struct nemoshell *shell, struct clientstate *state)
 {
-	wl_list_remove(&state->destroy_listener.link);
+	wl_list_remove(&state->link);
 
 	free(state);
-}
-
-struct clientstate *nemoshell_get_client_state(struct wl_client *client)
-{
-	struct wl_listener *listener;
-
-	listener = wl_client_get_destroy_listener(client, clientstate_handle_client_destroy);
-	if (listener == NULL)
-		return NULL;
-
-	return (struct clientstate *)container_of(listener, struct clientstate, destroy_listener);
 }
 
 void nemoshell_set_client_state(struct shellbin *bin, struct clientstate *state)
