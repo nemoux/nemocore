@@ -552,12 +552,21 @@ void nemocompz_exit(struct nemocompz *compz)
 void nemocompz_destroy_clients(struct nemocompz *compz)
 {
 	struct nemocanvas *canvas;
+	struct wl_client *client;
+	pid_t cid = getpid();
+	pid_t pid;
 
 	while (!wl_list_empty(&compz->canvas_list)) {
 		canvas = (struct nemocanvas *)container_of(compz->canvas_list.next, struct nemocanvas, link);
 
-		if (canvas != NULL && canvas->resource != NULL) {
-			wl_client_destroy(wl_resource_get_client(canvas->resource));
+		if ((canvas != NULL) && (canvas->resource != NULL) &&
+				(client = wl_resource_get_client(canvas->resource)) != NULL) {
+			wl_client_get_credentials(client, &pid, NULL, NULL);
+
+			if (cid != pid)
+				kill(pid, SIGKILL);
+			else
+				wl_client_destroy(client);
 		}
 	}
 }
