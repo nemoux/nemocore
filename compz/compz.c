@@ -559,6 +559,9 @@ void nemocompz_destroy_clients(struct nemocompz *compz)
 	while (!wl_list_empty(&compz->canvas_list)) {
 		canvas = (struct nemocanvas *)container_of(compz->canvas_list.next, struct nemocanvas, link);
 
+		wl_list_remove(&canvas->link);
+		wl_list_init(&canvas->link);
+
 		if ((canvas != NULL) && (canvas->resource != NULL) &&
 				(client = wl_resource_get_client(canvas->resource)) != NULL) {
 			wl_client_get_credentials(client, &pid, NULL, NULL);
