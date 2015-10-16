@@ -82,6 +82,9 @@ extern void nemoactor_dispatch_frame(struct nemoactor *actor);
 extern void nemoactor_feedback(struct nemoactor *actor);
 extern void nemoactor_feedback_done(struct nemoactor *actor);
 
+extern void nemoactor_set_min_size(struct nemoactor *actor, uint32_t width, uint32_t height);
+extern void nemoactor_set_max_size(struct nemoactor *actor, uint32_t width, uint32_t height);
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

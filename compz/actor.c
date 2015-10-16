@@ -339,3 +339,15 @@ void nemoactor_feedback_done(struct nemoactor *actor)
 	wl_list_remove(&actor->frame_link);
 	wl_list_init(&actor->frame_link);
 }
+
+void nemoactor_set_min_size(struct nemoactor *actor, uint32_t width, uint32_t height)
+{
+	actor->min_width = width;
+	actor->min_height = height;
+}
+
+void nemoactor_set_max_size(struct nemoactor *actor, uint32_t width, uint32_t height)
+{
+	actor->max_width = width;
+	actor->max_height = height;
+}
