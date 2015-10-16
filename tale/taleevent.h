@@ -47,11 +47,17 @@ typedef enum {
 	NEMOTALE_LONG_PRESS_EVENT = NEMOTALE_POINTER_LONG_PRESS_EVENT | NEMOTALE_TOUCH_LONG_PRESS_EVENT
 } NemoTaleEventType;
 
+typedef enum {
+	NEMOTALE_TAP_USED_STATE = (1 << 0)
+} NemoTaleTapState;
+
 struct nemotale;
 struct talenode;
 
 struct taletap {
 	struct talenode *node;
+
+	uint32_t state;
 
 	float x, y;
 	float gx, gy;
@@ -105,6 +111,21 @@ extern void nemotale_push_touch_up_event(struct nemotale *tale, uint32_t serial,
 extern void nemotale_push_touch_motion_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, float x, float y, float gx, float gy);
 
 extern void nemotale_push_timer_event(struct nemotale *tale, uint32_t time);
+
+static inline void nemotale_tap_set_state(struct taletap *tap, uint32_t state)
+{
+	tap->state |= state;
+}
+
+static inline void nemotale_tap_put_state(struct taletap *tap, uint32_t state)
+{
+	tap->state &= ~state;
+}
+
+static inline int nemotale_tap_has_state(struct taletap *tap, uint32_t state)
+{
+	return tap->state & state;
+}
 
 static inline struct taletap *nemotale_pointer_get_tap(struct nemotale *tale, uint64_t device)
 {
