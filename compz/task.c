@@ -42,8 +42,8 @@ struct wl_client *nemotask_launch(struct nemocompz *compz, struct nemotask *task
 		setenv("WAYLAND_SOCKET", fdstr, 1);
 
 		execl(path, path, NULL);
-
-		exit(-1);
+		
+		exit(EXIT_FAILURE);
 	}
 
 	close(sv[1]);

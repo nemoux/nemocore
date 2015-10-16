@@ -42,6 +42,8 @@ uint32_t wayland_execute_path(const char *path, char *const argv[], char *const 
 			nemolog_warning("WAYLAND", "failed to execute '%s' with errno %d\n", path, errno);
 	}
 
+	exit(EXIT_FAILURE);
+
 	return 0;
 }
 
@@ -110,7 +112,8 @@ struct wl_client *wayland_execute_client(struct wl_display *display, const char 
 
 	if (pid == 0) {
 		wayland_execute_client_in(sv[1], path, argv, envp);
-		exit(-1);
+
+		exit(EXIT_FAILURE);
 	}
 
 	close(sv[1]);
