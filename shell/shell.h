@@ -225,9 +225,12 @@ extern void nemoshell_clear_bin_next_state(struct shellbin *bin);
 
 extern struct nemoview *nemoshell_get_default_view(struct nemocanvas *canvas);
 
+extern struct clientstate *nemoshell_create_client_state(struct nemoshell *shell, uint32_t pid);
+extern void nemoshell_destroy_client_state(struct nemoshell *shell, struct clientstate *state);
 extern struct clientstate *nemoshell_get_client_state(struct nemoshell *shell, uint32_t pid);
-extern void nemoshell_put_client_state(struct nemoshell *shell, struct clientstate *state);
-extern void nemoshell_set_client_state(struct shellbin *bin, struct clientstate *state);
+
+extern int nemoshell_use_client_state(struct nemoshell *shell, struct shellbin *bin, struct wl_client *client);
+extern int nemoshell_use_client_state_by_pid(struct nemoshell *shell, struct shellbin *bin, pid_t pid);
 
 extern void nemoshell_load_fullscreens(struct nemoshell *shell);
 extern struct shellscreen *nemoshell_get_fullscreen(struct nemoshell *shell, uint32_t id);

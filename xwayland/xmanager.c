@@ -923,13 +923,9 @@ void nemoxmanager_map_window(struct nemoxmanager *xmanager, struct nemoxwindow *
 		return;
 	}
 
-	state = nemoshell_get_client_state(shell, xwindow->pid);
-	if (state != NULL) {
-		nemoshell_set_client_state(bin, state);
-		nemoshell_put_client_state(shell, state);
-	}
-
 	bin->type = NEMO_SHELL_SURFACE_XWAYLAND_TYPE;
+
+	nemoshell_use_client_state_by_pid(shell, bin, xwindow->pid);
 }
 
 #define TYPE_WM_PROTOCOLS	XCB_ATOM_CUT_BUFFER0

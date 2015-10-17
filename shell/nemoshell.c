@@ -133,7 +133,7 @@ static void nemo_surface_execute(struct wl_client *client, struct wl_resource *r
 	if (pid > 0) {
 		struct clientstate *state;
 
-		state = nemoshell_get_client_state(shell, pid);
+		state = nemoshell_create_client_state(shell, pid);
 		if (state != NULL) {
 			nemoview_transform_to_global(bin->view,
 					bin->canvas->base.width * bin->view->geometry.ax,
@@ -367,17 +367,9 @@ static void nemo_get_nemo_surface(struct wl_client *client, struct wl_resource *
 	wl_resource_set_implementation(bin->resource, &nemo_surface_implementation, bin, nemoshell_unbind_nemo_surface);
 
 	if (type == NEMO_SHELL_SURFACE_TYPE_NORMAL) {
-		struct clientstate *state;
-		pid_t pid;
-
 		bin->type = NEMO_SHELL_SURFACE_NORMAL_TYPE;
 
-		wl_client_get_credentials(client, &pid, NULL, NULL);
-
-		if ((state = nemoshell_get_client_state(shell, pid)) != NULL) {
-			nemoshell_set_client_state(bin, state);
-			nemoshell_put_client_state(shell, state);
-		}
+		nemoshell_use_client_state(shell, bin, client);
 	} else if (type == NEMO_SHELL_SURFACE_TYPE_FOLLOW) {
 		bin->type = NEMO_SHELL_SURFACE_NORMAL_TYPE;
 	} else if (type == NEMO_SHELL_SURFACE_TYPE_OVERLAY) {

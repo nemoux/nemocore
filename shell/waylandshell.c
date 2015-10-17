@@ -16,6 +16,7 @@
 #include <screen.h>
 #include <move.h>
 #include <resize.h>
+#include <prochelper.h>
 #include <nemomisc.h>
 
 static void shell_send_configure(struct nemocanvas *canvas, int32_t width, int32_t height)
@@ -209,13 +210,7 @@ static void shell_get_shell_surface(struct wl_client *client, struct wl_resource
 
 	wl_resource_set_implementation(bin->resource, &shell_surface_implementation, bin, shell_unbind_shell_surface);
 
-	wl_client_get_credentials(client, &pid, NULL, NULL);
-
-	state = nemoshell_get_client_state(shell, pid);
-	if (state != NULL) {
-		nemoshell_set_client_state(bin, state);
-		nemoshell_put_client_state(shell, state);
-	}
+	nemoshell_use_client_state(shell, bin, client);
 }
 
 static const struct wl_shell_interface shell_implementation = {

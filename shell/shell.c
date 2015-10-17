@@ -516,7 +516,7 @@ static void nemoshell_handle_child_signal(struct wl_listener *listener, void *da
 
 	state = nemoshell_get_client_state(shell, proc->pid);
 	if (state != NULL)
-		nemoshell_put_client_state(shell, state);
+		nemoshell_destroy_client_state(shell, state);
 }
 
 struct nemoshell *nemoshell_create(struct nemocompz *compz)
@@ -708,7 +708,7 @@ struct nemoview *nemoshell_get_default_view(struct nemocanvas *canvas)
 	return container_of(canvas->view_list.next, struct nemoview, link);
 }
 
-struct clientstate *nemoshell_get_client_state(struct nemoshell *shell, uint32_t pid)
+struct clientstate *nemoshell_create_client_state(struct nemoshell *shell, uint32_t pid)
 {
 	struct clientstate *state;
 
@@ -729,14 +729,26 @@ struct clientstate *nemoshell_get_client_state(struct nemoshell *shell, uint32_t
 	return state;
 }
 
-void nemoshell_put_client_state(struct nemoshell *shell, struct clientstate *state)
+void nemoshell_destroy_client_state(struct nemoshell *shell, struct clientstate *state)
 {
 	wl_list_remove(&state->link);
 
 	free(state);
 }
 
-void nemoshell_set_client_state(struct shellbin *bin, struct clientstate *state)
+struct clientstate *nemoshell_get_client_state(struct nemoshell *shell, uint32_t pid)
+{
+	struct clientstate *state;
+
+	wl_list_for_each(state, &shell->clientstate_list, link) {
+		if (state->pid == pid)
+			return state;
+	}
+
+	return NULL;
+}
+
+static inline void nemoshell_set_client_state(struct shellbin *bin, struct clientstate *state)
 {
 	if (state->is_fullscreen || state->is_maximized) {
 		nemoshell_clear_bin_next_state(bin);
@@ -761,6 +773,59 @@ void nemoshell_set_client_state(struct shellbin *bin, struct clientstate *state)
 	}
 
 	bin->flags = state->flags;
+}
+
+int nemoshell_use_client_state(struct nemoshell *shell, struct shellbin *bin, struct wl_client *client)
+{
+	struct clientstate *state;
+	pid_t pid;
+
+	wl_client_get_credentials(client, &pid, NULL, NULL);
+
+	state = nemoshell_get_client_state(shell, pid);
+	if (state != NULL) {
+		nemoshell_set_client_state(bin, state);
+
+		return 1;
+	} else {
+		pid_t ppid;
+
+		if (proc_get_process_parent_id(pid, &ppid) > 0) {
+			state = nemoshell_get_client_state(shell, ppid);
+			if (state != NULL) {
+				nemoshell_set_client_state(bin, state);
+
+				return 1;
+			}
+		}
+	}
+
+	return 0;
+}
+
+int nemoshell_use_client_state_by_pid(struct nemoshell *shell, struct shellbin *bin, pid_t pid)
+{
+	struct clientstate *state;
+
+	state = nemoshell_get_client_state(shell, pid);
+	if (state != NULL) {
+		nemoshell_set_client_state(bin, state);
+
+		return 1;
+	} else {
+		pid_t ppid;
+
+		if (proc_get_process_parent_id(pid, &ppid) > 0) {
+			state = nemoshell_get_client_state(shell, ppid);
+			if (state != NULL) {
+				nemoshell_set_client_state(bin, state);
+
+				return 1;
+			}
+		}
+	}
+
+	return 0;
 }
 
 void nemoshell_load_fullscreens(struct nemoshell *shell)
