@@ -63,8 +63,7 @@ static void vieweffect_handle_done(struct nemoeffect *base)
 {
 	struct vieweffect *effect = (struct vieweffect *)container_of(base, struct vieweffect, base);
 
-	if (wl_list_empty(&base->link))
-		vieweffect_destroy(effect);
+	vieweffect_destroy(effect);
 }
 
 static void vieweffect_handle_destroy(struct wl_listener *listener, void *data)

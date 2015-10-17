@@ -353,7 +353,7 @@ int main(int argc, char *argv[])
 	context->ecanvas = ecanvas = nemotool_create_egl_canvas(context->egl, width, height);
 	context->canvas = canvas = NTEGL_CANVAS(ecanvas);
 	nemocanvas_set_nemosurface(canvas, NEMO_SHELL_SURFACE_TYPE_NORMAL);
-	nemocanvas_set_fullscreen_type(canvas, NEMO_SURFACE_FULLSCREEN_TYPE_PICK);
+	nemocanvas_set_fullscreen_type(canvas, (1 << NEMO_SURFACE_FULLSCREEN_TYPE_PICK) | (1 << NEMO_SURFACE_FULLSCREEN_TYPE_PITCH));
 	if (context->is_background != 0)
 		nemocanvas_set_layer(canvas, NEMO_SURFACE_LAYER_TYPE_BACKGROUND);
 	if (context->is_fullscreen != 0)

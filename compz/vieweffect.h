@@ -32,12 +32,29 @@ struct vieweffect {
 		double velocity;
 		double friction;
 	} pitch;
+
+	void *userdata;
 };
 
 extern struct vieweffect *vieweffect_create(struct nemoview *view);
 extern void vieweffect_destroy(struct vieweffect *effect);
 
 extern void vieweffect_dispatch(struct nemocompz *compz, struct vieweffect *effect);
+
+static inline void vieweffect_set_dispatch_done(struct vieweffect *effect, nemoeffect_done_t dispatch)
+{
+	effect->base.done = dispatch;
+}
+
+static inline void vieweffect_set_userdata(struct vieweffect *effect, void *data)
+{
+	effect->userdata = data;
+}
+
+static inline void *vieweffect_get_userdata(struct vieweffect *effect)
+{
+	return effect->userdata;
+}
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

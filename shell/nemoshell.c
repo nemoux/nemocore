@@ -240,10 +240,16 @@ static void nemo_surface_set_fullscreen_type(struct wl_client *client, struct wl
 #ifdef NEMOUX_WITH_FULLSCREEN
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 
-	if (type == NEMO_SURFACE_FULLSCREEN_TYPE_NORMAL) {
-		bin->on_pickscreen = 0;
-	} else if (type == NEMO_SURFACE_FULLSCREEN_TYPE_PICK) {
+	if (type & (1 << NEMO_SURFACE_FULLSCREEN_TYPE_PICK)) {
 		bin->on_pickscreen = 1;
+	} else {
+		bin->on_pickscreen = 0;
+	}
+
+	if (type & (1 << NEMO_SURFACE_FULLSCREEN_TYPE_PITCH)) {
+		bin->on_pitchscreen = 1;
+	} else {
+		bin->on_pitchscreen = 0;
 	}
 #endif
 }

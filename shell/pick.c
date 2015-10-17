@@ -108,7 +108,7 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 
 		if (bin->on_pickscreen != 0) {
 			if (nemocompz_get_scene_width(compz) <= width || nemocompz_get_scene_height(compz) <= height)
-				screen = nemoshell_get_fullscreen_on(shell, tp0->x, tp0->y);
+				screen = nemoshell_get_fullscreen_on(shell, tp0->x, tp0->y, NEMO_SHELL_FULLSCREEN_PICK_TYPE);
 
 			if (screen != NULL) {
 				nemoshell_clear_bin_next_state(bin);

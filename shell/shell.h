@@ -30,6 +30,13 @@ typedef enum {
 	NEMO_SHELL_SURFACE_ALL_FLAGS = NEMO_SHELL_SURFACE_MOVABLE_FLAG | NEMO_SHELL_SURFACE_RESIZABLE_FLAG | NEMO_SHELL_SURFACE_PICKABLE_FLAG | NEMO_SHELL_SURFACE_MAXIMIZABLE_FLAG | NEMO_SHELL_SURFACE_MINIMIZABLE_FLAG,
 } NemoShellSurfaceFlag;
 
+typedef enum {
+	NEMO_SHELL_FULLSCREEN_NORMAL_TYPE = 0,
+	NEMO_SHELL_FULLSCREEN_PICK_TYPE = 1,
+	NEMO_SHELL_FULLSCREEN_PITCH_TYPE = 2,
+	NEMO_SHELL_FULLSCREEN_LAST_TYPE
+} NemoShellFullscreenType;
+
 struct nemoshell {
 	struct nemocompz *compz;
 
@@ -172,6 +179,7 @@ struct shellbin {
 	} fullscreen;
 
 	int on_pickscreen;
+	int on_pitchscreen;
 
 	struct {
 		float x, y;
@@ -197,6 +205,7 @@ struct shellbin {
 
 struct shellscreen {
 	uint32_t id;
+	uint32_t type;
 
 	int32_t sx, sy, sw, sh;
 	int32_t dx, dy, dw, dh;
@@ -238,7 +247,7 @@ extern int nemoshell_use_client_state_by_pid(struct nemoshell *shell, struct she
 
 extern void nemoshell_load_fullscreens(struct nemoshell *shell);
 extern struct shellscreen *nemoshell_get_fullscreen(struct nemoshell *shell, uint32_t id);
-extern struct shellscreen *nemoshell_get_fullscreen_on(struct nemoshell *shell, int32_t x, int32_t y);
+extern struct shellscreen *nemoshell_get_fullscreen_on(struct nemoshell *shell, int32_t x, int32_t y, uint32_t type);
 
 extern void nemoshell_load_gestures(struct nemoshell *shell);
 

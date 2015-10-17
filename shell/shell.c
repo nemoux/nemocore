@@ -832,6 +832,7 @@ void nemoshell_load_fullscreens(struct nemoshell *shell)
 {
 	struct nemocompz *compz = shell->compz;
 	struct shellscreen *screen;
+	char *type;
 	int index = 0;
 
 	for (index = 0;
@@ -851,6 +852,14 @@ void nemoshell_load_fullscreens(struct nemoshell *shell)
 		screen->dw = nemoitem_get_iattr(shell->configs, index, "dw", nemocompz_get_scene_width(compz));
 		screen->dh = nemoitem_get_iattr(shell->configs, index, "dh", nemocompz_get_scene_height(compz));
 		screen->id = nemoitem_get_iattr(shell->configs, index, "id", 0);
+		
+		type = nemoitem_get_attr(shell->configs, index, "type");
+		if (type == NULL)
+			screen->type = NEMO_SHELL_FULLSCREEN_NORMAL_TYPE;
+		else if (strcmp(type, "pick") == 0)
+			screen->type = NEMO_SHELL_FULLSCREEN_PICK_TYPE;
+		else if (strcmp(type, "pitch") == 0)
+			screen->type = NEMO_SHELL_FULLSCREEN_PITCH_TYPE;
 
 		wl_list_insert(&shell->fullscreen_list, &screen->link);
 	}
@@ -868,11 +877,14 @@ struct shellscreen *nemoshell_get_fullscreen(struct nemoshell *shell, uint32_t i
 	return NULL;
 }
 
-struct shellscreen *nemoshell_get_fullscreen_on(struct nemoshell *shell, int32_t x, int32_t y)
+struct shellscreen *nemoshell_get_fullscreen_on(struct nemoshell *shell, int32_t x, int32_t y, uint32_t type)
 {
 	struct shellscreen *screen;
 
 	wl_list_for_each(screen, &shell->fullscreen_list, link) {
+		if (screen->type != type)
+			continue;
+
 		if (screen->sx <= x && x <= screen->sx + screen->sw &&
 				screen->sy <= y && y <= screen->sy + screen->sh)
 			return screen;

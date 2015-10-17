@@ -153,6 +153,40 @@ static void move_shellgrab_touchpoint_down(struct touchpoint_grab *base, uint32_
 {
 }
 
+static void move_shellgrab_dispatch_effect_done(struct nemoeffect *base)
+{
+	struct vieweffect *effect = (struct vieweffect *)container_of(base, struct vieweffect, base);
+	struct shellbin *bin = (struct shellbin *)vieweffect_get_userdata(effect);
+	struct nemoshell *shell = bin->shell;
+	struct shellscreen *screen;
+	float tx, ty;
+
+	nemoview_transform_to_global(bin->view,
+			bin->view->content->width * 0.5f,
+			bin->view->content->height * 0.5f,
+			&tx, &ty);
+
+	screen = nemoshell_get_fullscreen_on(shell, tx, ty, NEMO_SHELL_FULLSCREEN_PITCH_TYPE);
+	if (screen != NULL) {
+		nemoshell_clear_bin_next_state(bin);
+		bin->next_state.fullscreen = 1;
+		bin->state_changed = 1;
+
+		bin->type = NEMO_SHELL_SURFACE_NORMAL_TYPE;
+		nemoshell_set_parent_bin(bin, NULL);
+
+		bin->screen.x = screen->dx;
+		bin->screen.y = screen->dy;
+		bin->screen.width = screen->dw;
+		bin->screen.height = screen->dh;
+		bin->has_screen = 1;
+
+		nemoshell_send_bin_state(bin);
+	}
+
+	vieweffect_destroy(effect);
+}
+
 static void move_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t time, uint64_t touchid)
 {
 	struct shellgrab *grab = (struct shellgrab *)container_of(base, struct shellgrab, base.touchpoint);
@@ -174,6 +208,11 @@ static void move_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		effect->pitch.dx = filter->dx;
 		effect->pitch.dy = filter->dy;
 		effect->pitch.friction = shell->pitch.friction;
+
+		if (grab->bin->on_pitchscreen != 0) {
+			vieweffect_set_dispatch_done(effect, move_shellgrab_dispatch_effect_done);
+			vieweffect_set_userdata(effect, grab->bin);
+		}
 
 		vieweffect_dispatch(grab->bin->shell->compz, effect);
 	}
