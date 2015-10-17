@@ -347,14 +347,14 @@ void nemoview_transform_from_global(struct nemoview *view, float x, float y, flo
 	}
 }
 
-int nemoview_get_point_area(struct nemoview *view, float x, float y)
+int nemoview_get_point_area(struct nemoview *view, float x, float y, float b)
 {
 	float sx, sy;
 	float dx, dy;
-	float mx = view->content->width / 2.0f;
-	float my = view->content->height / 2.0f;
-	float ex = view->content->width / 6.0f;
-	float ey = view->content->height / 6.0f;
+	float mx = view->content->width * 0.5f;
+	float my = view->content->height * 0.5f;
+	float ex = view->content->width * b;
+	float ey = view->content->height * b;
 	int area = NEMO_VIEW_CENTER_AREA;
 	int i;
 
