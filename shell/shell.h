@@ -76,6 +76,10 @@ struct nemoshell {
 		double friction;
 	} pitch;
 
+	struct {
+		double min_distance;
+	} pick;
+
 	struct nemoitem *configs;
 };
 
@@ -236,7 +240,7 @@ extern void nemoshell_load_fullscreens(struct nemoshell *shell);
 extern struct shellscreen *nemoshell_get_fullscreen(struct nemoshell *shell, uint32_t id);
 extern struct shellscreen *nemoshell_get_fullscreen_on(struct nemoshell *shell, int32_t x, int32_t y);
 
-extern void nemoshell_load_pitch(struct nemoshell *shell);
+extern void nemoshell_load_gestures(struct nemoshell *shell);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

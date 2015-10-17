@@ -54,11 +54,11 @@ struct actorgrab_pick {
 	struct actorgrab_pick *other;
 };
 
-extern int nemoshell_pick_canvas_by_touchpoint_on_area(struct touchpoint *tp0, struct touchpoint *tp1, struct shellbin *bin);
-extern int nemoshell_pick_canvas_by_touchpoint(struct touchpoint *tp0, struct touchpoint *tp1, uint32_t type, struct shellbin *bin);
+extern int nemoshell_pick_canvas_by_touchpoint_on_area(struct nemoshell *shell, struct touchpoint *tp0, struct touchpoint *tp1, struct shellbin *bin);
+extern int nemoshell_pick_canvas_by_touchpoint(struct nemoshell *shell, struct touchpoint *tp0, struct touchpoint *tp1, uint32_t type, struct shellbin *bin);
 extern int nemoshell_pick_canvas(struct nemoshell *shell, struct shellbin *bin, uint32_t serial0, uint32_t serial1, uint32_t type);
 
-extern int nemoshell_pick_actor_by_touchpoint(struct touchpoint *tp0, struct touchpoint *tp1, uint32_t type, struct nemoactor *actor);
+extern int nemoshell_pick_actor_by_touchpoint(struct nemoshell *shell, struct touchpoint *tp0, struct touchpoint *tp1, uint32_t type, struct nemoactor *actor);
 extern int nemoshell_pick_actor(struct nemoshell *shell, struct nemoactor *actor, uint32_t serial0, uint32_t serial1, uint32_t type);
 
 #ifdef __cplusplus
