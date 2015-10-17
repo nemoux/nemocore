@@ -14,6 +14,7 @@
 #include <nemotool.h>
 #include <nemocanvas.h>
 #include <nemoegl.h>
+#include <nemotimer.h>
 #include <gsthelper.h>
 #include <talehelper.h>
 #include <glibhelper.h>
@@ -70,9 +71,9 @@ static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode 
 		return;
 
 	if (id == 1) {
-		if (nemotale_is_touch_down(tale, event, type)) {
-			nemotale_event_update_node_taps(tale, node, event, type);
+		nemotale_event_update_node_taps(tale, node, event, type);
 
+		if (nemotale_is_touch_down(tale, event, type)) {
 			if (nemotale_is_single_tap(tale, event, type)) {
 				nemocanvas_move(context->canvas, event->taps[0]->serial);
 			} else if (nemotale_is_double_taps(tale, event, type)) {
@@ -80,6 +81,9 @@ static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode 
 						event->taps[0]->serial,
 						event->taps[1]->serial,
 						(1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_SCALE) | (1 << NEMO_SURFACE_PICK_TYPE_MOVE));
+
+				nemotale_tap_set_state(event->taps[0], NEMOTALE_TAP_USED_STATE);
+				nemotale_tap_set_state(event->taps[1], NEMOTALE_TAP_USED_STATE);
 			} else if (nemotale_is_triple_taps(tale, event, type)) {
 #if	NEMOPLAY_SEEK_ENABLE
 				context->position = nemogst_get_position(context->gst);
@@ -90,8 +94,6 @@ static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode 
 			}
 		} else if (nemotale_is_motion_event(tale, event, type)) {
 #if NEMOPLAY_SEEK_ENABLE
-			nemotale_event_update_node_taps(tale, node, event, type);
-
 			if (nemotale_is_close_event(tale, event, type)) {
 				nemotool_exit(context->tool);
 			} else if (nemotale_is_triple_taps(tale, event, type)) {
@@ -134,18 +136,29 @@ static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode 
 				}
 			}
 #endif
-		} else if (nemotale_is_single_click(tale, event, type) != 0) {
-			nemotale_event_update_node_taps(tale, node, event, type);
+		}
 
-			if (nemotale_is_single_tap(tale, event, type)) {
-				if (nemogst_is_playing(context->gst)) {
-					nemogst_pause_media(context->gst);
-				} else {
-					nemogst_play_media(context->gst);
-				}
+		if (nemotale_is_long_press(tale, event, type)) {
+			if (nemogst_is_playing(context->gst) != 0) {
+				nemogst_pause_media(context->gst);
+			}
+		}
+
+		if (nemotale_is_single_click(tale, event, type)) {
+			if (nemogst_is_playing(context->gst) == 0) {
+				nemogst_play_media(context->gst);
 			}
 		}
 	}
+}
+
+static void nemoplay_dispatch_tale_timer(struct nemotimer *timer, void *data)
+{
+	struct playcontext *context = (struct playcontext *)data;
+
+	nemotimer_set_timeout(timer, 500);
+
+	nemotale_push_timer_event(context->tale, time_current_msecs());
 }
 
 static void nemoplay_dispatch_video_frame(GstElement *base, guint8 *data, gint width, gint height, GstVideoFormat format, gpointer userdata)
@@ -238,6 +251,7 @@ int main(int argc, char *argv[])
 	struct nemotool *tool;
 	struct nemocanvas *canvas;
 	struct eglcanvas *ecanvas;
+	struct nemotimer *timer;
 	struct nemotale *tale;
 	struct talenode *node;
 	char *filepath = NULL;
@@ -393,6 +407,11 @@ int main(int argc, char *argv[])
 				random_get_double(0.0f, 1.0f));
 	}
 
+	timer = nemotimer_create(context->tool);
+	nemotimer_set_callback(timer, nemoplay_dispatch_tale_timer);
+	nemotimer_set_timeout(timer, 500);
+	nemotimer_set_userdata(timer, context);
+
 	nemogst_play_media(context->gst);
 
 	nemocanvas_dispatch_frame(context->canvas);
@@ -409,6 +428,8 @@ int main(int argc, char *argv[])
 	free(uri);
 
 	pthread_mutex_destroy(&context->lock);
+
+	nemotimer_destroy(timer);
 
 out3:
 	nemogst_destroy(context->gst);
