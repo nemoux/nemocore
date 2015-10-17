@@ -363,6 +363,8 @@ struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas
 	wl_list_init(&bin->children_list);
 	wl_list_init(&bin->children_link);
 
+	wl_list_init(&bin->screen_link);
+
 	bin->shell = shell;
 	bin->canvas = canvas;
 	bin->client = client;
@@ -402,6 +404,7 @@ void nemoshell_destroy_bin(struct shellbin *bin)
 	nemoview_destroy(bin->view);
 
 	wl_list_remove(&bin->children_link);
+	wl_list_remove(&bin->screen_link);
 
 	wl_list_for_each_safe(child, cnext, &bin->children_list, children_link) {
 		nemoshell_set_parent_bin(child, NULL);
@@ -852,7 +855,7 @@ void nemoshell_load_fullscreens(struct nemoshell *shell)
 		screen->dw = nemoitem_get_iattr(shell->configs, index, "dw", nemocompz_get_scene_width(compz));
 		screen->dh = nemoitem_get_iattr(shell->configs, index, "dh", nemocompz_get_scene_height(compz));
 		screen->id = nemoitem_get_iattr(shell->configs, index, "id", 0);
-		
+
 		type = nemoitem_get_attr(shell->configs, index, "type");
 		if (type == NULL)
 			screen->type = NEMO_SHELL_FULLSCREEN_NORMAL_TYPE;
@@ -860,6 +863,8 @@ void nemoshell_load_fullscreens(struct nemoshell *shell)
 			screen->type = NEMO_SHELL_FULLSCREEN_PICK_TYPE;
 		else if (strcmp(type, "pitch") == 0)
 			screen->type = NEMO_SHELL_FULLSCREEN_PITCH_TYPE;
+
+		wl_list_init(&screen->bin_list);
 
 		wl_list_insert(&shell->fullscreen_list, &screen->link);
 	}

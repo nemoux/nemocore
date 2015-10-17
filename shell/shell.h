@@ -159,6 +159,8 @@ struct shellbin {
 	struct wl_list children_list;
 	struct wl_list children_link;
 
+	struct wl_list screen_link;
+
 	struct {
 		float x, y;
 		uint32_t serial;
@@ -211,6 +213,8 @@ struct shellscreen {
 	int32_t dx, dy, dw, dh;
 
 	struct wl_list link;
+
+	struct wl_list bin_list;
 };
 
 extern struct nemoshell *nemoshell_create(struct nemocompz *compz);

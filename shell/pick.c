@@ -111,6 +111,8 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 				screen = nemoshell_get_fullscreen_on(shell, tp0->x, tp0->y, NEMO_SHELL_FULLSCREEN_PICK_TYPE);
 
 			if (screen != NULL) {
+				wl_list_insert(&screen->bin_list, &bin->screen_link);
+
 				nemoshell_clear_bin_next_state(bin);
 				bin->next_state.fullscreen = 1;
 				bin->state_changed = 1;
@@ -400,6 +402,9 @@ int nemoshell_pick_canvas_by_touchpoint(struct nemoshell *shell, struct touchpoi
 	}
 
 	if (bin->state.fullscreen != 0 || bin->state.maximized != 0) {
+		wl_list_remove(&bin->screen_link);
+		wl_list_init(&bin->screen_link);
+
 		bin->state_changed = 1;
 		bin->next_state.fullscreen = 0;
 

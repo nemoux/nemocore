@@ -267,6 +267,8 @@ static void nemo_surface_set_fullscreen(struct wl_client *client, struct wl_reso
 			if (bin->grabbed > 0)
 				wl_signal_emit(&bin->ungrab_signal, bin);
 
+			wl_list_insert(&screen->bin_list, &bin->screen_link);
+
 			nemoshell_clear_bin_next_state(bin);
 			bin->next_state.fullscreen = 1;
 			bin->state_changed = 1;

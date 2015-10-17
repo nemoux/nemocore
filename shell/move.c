@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <signal.h>
 #include <limits.h>
 #include <wayland-server.h>
 
@@ -168,6 +169,24 @@ static void move_shellgrab_dispatch_effect_done(struct nemoeffect *base)
 
 	screen = nemoshell_get_fullscreen_on(shell, tx, ty, NEMO_SHELL_FULLSCREEN_PITCH_TYPE);
 	if (screen != NULL) {
+		struct shellbin *sbin, *nbin;
+
+		wl_list_for_each_safe(sbin, nbin, &screen->bin_list, screen_link) {
+			wl_list_remove(&sbin->screen_link);
+			wl_list_init(&sbin->screen_link);
+
+			if (sbin->resource != NULL) {
+				struct wl_client *client = wl_resource_get_client(sbin->resource);
+				pid_t pid;
+
+				wl_client_get_credentials(client, &pid, NULL, NULL);
+
+				kill(pid, SIGKILL);
+			}
+		}
+
+		wl_list_insert(&screen->bin_list, &bin->screen_link);
+
 		nemoshell_clear_bin_next_state(bin);
 		bin->next_state.fullscreen = 1;
 		bin->state_changed = 1;
