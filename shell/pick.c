@@ -670,6 +670,9 @@ int nemoshell_pick_actor_by_touchpoint(struct nemoshell *shell, struct touchpoin
 		return -1;
 	memset(pick1, 0, sizeof(struct actorgrab_pick));
 
+	pick0->base.shell = shell;
+	pick1->base.shell = shell;
+
 	pick0->type = pick1->type = type;
 
 	pick0->width = pick1->width = actor->view->content->width;
