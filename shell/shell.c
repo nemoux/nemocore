@@ -287,23 +287,28 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 		}
 
 		if (bin->state.fullscreen || bin->state.maximized) {
+			nemoview_attach_layer(view, &bin->shell->fullscreen_layer);
 			nemoview_set_position(view, bin->screen.x, bin->screen.y);
 			nemoview_set_rotation(view, 0.0f);
-		} else if (sx != 0 || sy != 0) {
-			float fromx, fromy, tox, toy;
+		} else {
+			nemoview_attach_layer(view, bin->layer);
 
-			nemoview_transform_to_global(view, 0.0f, 0.0f, &fromx, &fromy);
-			nemoview_transform_to_global(view, sx, sy, &tox, &toy);
+			if (sx != 0 || sy != 0) {
+				float fromx, fromy, tox, toy;
 
-			nemoview_set_position(view,
-					view->geometry.x + tox - fromx,
-					view->geometry.y + toy - fromy);
+				nemoview_transform_to_global(view, 0.0f, 0.0f, &fromx, &fromy);
+				nemoview_transform_to_global(view, sx, sy, &tox, &toy);
 
-			if (bin->grabbed > 0) {
-				bin->last_sx = sx;
-				bin->last_sy = sy;
+				nemoview_set_position(view,
+						view->geometry.x + tox - fromx,
+						view->geometry.y + toy - fromy);
 
-				wl_signal_emit(&bin->change_signal, bin);
+				if (bin->grabbed > 0) {
+					bin->last_sx = sx;
+					bin->last_sy = sy;
+
+					wl_signal_emit(&bin->change_signal, bin);
+				}
 			}
 		}
 
@@ -538,7 +543,8 @@ struct nemoshell *nemoshell_create(struct nemocompz *compz)
 		goto err1;
 
 	nemolayer_prepare(&shell->overlay_layer, &compz->cursor_layer.link);
-	nemolayer_prepare(&shell->service_layer, &shell->overlay_layer.link);
+	nemolayer_prepare(&shell->fullscreen_layer, &shell->overlay_layer.link);
+	nemolayer_prepare(&shell->service_layer, &shell->fullscreen_layer.link);
 	nemolayer_prepare(&shell->underlay_layer, &shell->service_layer.link);
 	nemolayer_prepare(&shell->background_layer, &shell->underlay_layer.link);
 
@@ -587,6 +593,7 @@ err1:
 void nemoshell_destroy(struct nemoshell *shell)
 {
 	nemolayer_finish(&shell->overlay_layer);
+	nemolayer_finish(&shell->fullscreen_layer);
 	nemolayer_finish(&shell->service_layer);
 	nemolayer_finish(&shell->underlay_layer);
 	nemolayer_finish(&shell->background_layer);
