@@ -40,17 +40,18 @@ static int vieweffect_handle_frame(struct nemoeffect *base, uint32_t msecs)
 
 		effect->pitch.velocity = MAX(effect->pitch.velocity - effect->pitch.friction * msecs / 1000.0f, 0.0f);
 
+retry:
 		dx = (effect->pitch.dx * effect->pitch.velocity) * msecs / 1000.0f;
 		dy = (effect->pitch.dy * effect->pitch.velocity) * msecs / 1000.0f;
 
-		if (vieweffect_correct_position(effect->view, &dx, &dy, &x, &y) != 0) {
+		if (effect->pitch.velocity <= 1.0f) {
 			effect->type &= ~NEMO_VIEW_PITCH_EFFECT;
+		} else if (vieweffect_correct_position(effect->view, &dx, &dy, &x, &y) != 0) {
+			effect->pitch.velocity *= 0.5f;
+
+			goto retry;
 		} else {
 			nemoview_set_position(effect->view, x, y);
-		}
-
-		if (effect->pitch.velocity <= 1e-6) {
-			effect->type &= ~NEMO_VIEW_PITCH_EFFECT;
 		}
 	}
 
