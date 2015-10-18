@@ -52,8 +52,12 @@ struct nemocompz {
 	int state;
 	int dirty;
 	pixman_region32_t damage;
-	pixman_region32_t region;
+
+	pixman_region32_t scene;
 	int has_scene;
+
+	pixman_region32_t scope;
+	int has_scope;
 
 	struct wl_event_source *sigsrc[8];
 
@@ -151,6 +155,7 @@ extern int32_t nemocompz_get_scene_width(struct nemocompz *compz);
 extern int32_t nemocompz_get_scene_height(struct nemocompz *compz);
 extern void nemocompz_update_scene(struct nemocompz *compz);
 extern void nemocompz_set_scene(struct nemocompz *compz, int32_t x, int32_t y, int32_t width, int32_t height);
+extern void nemocompz_set_scope(struct nemocompz *compz, int32_t x, int32_t y, int32_t width, int32_t height);
 
 extern void nemocompz_update_transform(struct nemocompz *compz);
 extern void nemocompz_update_output(struct nemocompz *compz);

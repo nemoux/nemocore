@@ -387,12 +387,12 @@ void nemopointer_move(struct nemopointer *pointer, float x, float y)
 {
 	struct nemocompz *compz = pointer->seat->compz;
 
-	if (pixman_region32_contains_point(&compz->region, x, y, NULL)) {
+	if (pixman_region32_contains_point(&compz->scene, x, y, NULL)) {
 		pointer->x = x;
 		pointer->y = y;
-	} else if (pixman_region32_contains_point(&compz->region, pointer->x, y, NULL)) {
+	} else if (pixman_region32_contains_point(&compz->scene, pointer->x, y, NULL)) {
 		pointer->y = y;
-	} else if (pixman_region32_contains_point(&compz->region, x, pointer->y, NULL)) {
+	} else if (pixman_region32_contains_point(&compz->scene, x, pointer->y, NULL)) {
 		pointer->x = x;
 	}
 

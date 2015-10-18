@@ -15,6 +15,7 @@
 
 static int vieweffect_correct_position(struct nemoview *view, double *dx, double *dy, double *x, double *y)
 {
+	struct nemocompz *compz = view->compz;
 	float tx, ty;
 
 	nemoview_transform_to_global(view,
@@ -22,7 +23,7 @@ static int vieweffect_correct_position(struct nemoview *view, double *dx, double
 			view->content->height * 0.5f,
 			&tx, &ty);
 
-	if (!pixman_region32_contains_point(&view->compz->region, tx + *dx, ty + *dy, NULL))
+	if (!pixman_region32_contains_point(&compz->scope, tx + *dx, ty + *dy, NULL))
 		return -1;
 
 	*x = view->geometry.x + *dx;

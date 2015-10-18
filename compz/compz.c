@@ -401,7 +401,8 @@ struct nemocompz *nemocompz_create(void)
 	nemolayer_prepare(&compz->cursor_layer, &compz->layer_list);
 
 	pixman_region32_init(&compz->damage);
-	pixman_region32_init(&compz->region);
+	pixman_region32_init(&compz->scene);
+	pixman_region32_init(&compz->scope);
 
 	compz->udev = udev_new();
 	if (compz->udev == NULL)
@@ -490,7 +491,8 @@ void nemocompz_destroy(struct nemocompz *compz)
 	}
 
 	pixman_region32_fini(&compz->damage);
-	pixman_region32_fini(&compz->region);
+	pixman_region32_fini(&compz->scene);
+	pixman_region32_fini(&compz->scope);
 
 	if (compz->udev != NULL)
 		udev_unref(compz->udev);
@@ -670,7 +672,7 @@ int32_t nemocompz_get_scene_width(struct nemocompz *compz)
 {
 	pixman_box32_t *extents;
 
-	extents = pixman_region32_extents(&compz->region);
+	extents = pixman_region32_extents(&compz->scene);
 
 	return extents->x2;
 }
@@ -679,7 +681,7 @@ int32_t nemocompz_get_scene_height(struct nemocompz *compz)
 {
 	pixman_box32_t *extents;
 
-	extents = pixman_region32_extents(&compz->region);
+	extents = pixman_region32_extents(&compz->scene);
 
 	return extents->y2;
 }
@@ -691,18 +693,31 @@ void nemocompz_update_scene(struct nemocompz *compz)
 	if (compz->has_scene != 0)
 		return;
 
-	pixman_region32_clear(&compz->region);
+	pixman_region32_clear(&compz->scene);
 
 	wl_list_for_each(screen, &compz->screen_list, link) {
-		pixman_region32_union(&compz->region, &compz->region, &screen->region);
+		pixman_region32_union(&compz->scene, &compz->scene, &screen->region);
 	}
+
+	if (compz->has_scope == 0)
+		pixman_region32_copy(&compz->scope, &compz->scene);
 }
 
 void nemocompz_set_scene(struct nemocompz *compz, int32_t x, int32_t y, int32_t width, int32_t height)
 {
-	pixman_region32_union_rect(&compz->region, &compz->region, x, y, width, height);
+	pixman_region32_init_rect(&compz->scene, x, y, width, height);
 
 	compz->has_scene = 1;
+
+	if (compz->has_scope == 0)
+		pixman_region32_init_rect(&compz->scope, x, y, width, height);
+}
+
+void nemocompz_set_scope(struct nemocompz *compz, int32_t x, int32_t y, int32_t width, int32_t height)
+{
+	pixman_region32_init_rect(&compz->scope, x, y, width, height);
+
+	compz->has_scope = 1;
 }
 
 void nemocompz_update_transform(struct nemocompz *compz)
