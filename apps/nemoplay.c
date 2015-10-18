@@ -181,14 +181,14 @@ static void nemoplay_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 	int32_t width, height;
 	void *data;
 
-	pthread_mutex_lock(&context->lock);
+	if (nemogst_is_done_media(context->gst) != 0)
+		nemogst_replay_media(context->gst);
 
+	pthread_mutex_lock(&context->lock);
 	width = context->video_width;
 	height = context->video_height;
 	data = context->video_buffer;
-
 	context->video_buffer = NULL;
-
 	pthread_mutex_unlock(&context->lock);
 
 	if (data != NULL) {

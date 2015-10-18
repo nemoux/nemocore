@@ -81,11 +81,6 @@ static gboolean nemogst_watch_bus(GstBus *bus, GstMessage *msg, gpointer data)
 			break;
 
 		case GST_MESSAGE_EOS:
-			if (gst->repeat > 0) {
-				nemogst_replay_media(gst);
-
-				gst->repeat--;
-			}
 			break;
 
 		case GST_MESSAGE_WARNING:
@@ -349,6 +344,18 @@ int nemogst_replay_media(struct nemogst *gst)
 	}
 
 	gst->is_blocked = 1;
+
+	return 0;
+}
+
+int nemogst_is_done_media(struct nemogst *gst)
+{
+	if (gst->duration == 0)
+		gst->duration = nemogst_get_duration(gst);
+
+	gst->position = nemogst_get_position(gst);
+	if (gst->duration > 1000000000 && gst->position >= gst->duration - 1000000000)
+		return 1;
 
 	return 0;
 }

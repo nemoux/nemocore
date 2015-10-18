@@ -56,10 +56,11 @@ struct nemogst {
 	int is_playing;
 	int is_blocked;
 
-	uint32_t repeat;
-
 	gboolean is_seekable;
 	gint64 seekstart, seekend;
+
+	int64_t position;
+	int64_t duration;
 };
 
 extern struct nemogst *nemogst_create(void);
@@ -79,6 +80,7 @@ extern int nemogst_ready_media(struct nemogst *gst);
 extern int nemogst_play_media(struct nemogst *gst);
 extern int nemogst_pause_media(struct nemogst *gst);
 extern int nemogst_replay_media(struct nemogst *gst);
+extern int nemogst_is_done_media(struct nemogst *gst);
 
 extern int nemogst_resize_video(struct nemogst *gst, uint32_t width, uint32_t height);
 
@@ -125,11 +127,6 @@ static inline int nemogst_is_playing(struct nemogst *gst)
 static inline int nemogst_is_blocked(struct nemogst *gst)
 {
 	return gst->is_blocked;
-}
-
-static inline void nemogst_set_repeat(struct nemogst *gst, uint32_t repeat)
-{
-	gst->repeat = repeat;
 }
 
 #endif
