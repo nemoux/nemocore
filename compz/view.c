@@ -75,9 +75,8 @@ void nemoview_destroy(struct nemoview *view)
 
 	assert(wl_list_empty(&view->children_list));
 
-	if (nemoview_is_mapped(view)) {
+	if (nemoview_is_mapped(view))
 		nemoview_unmap(view);
-	}
 
 	wl_list_remove(&view->link);
 

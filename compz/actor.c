@@ -40,6 +40,7 @@ struct nemoactor *nemoactor_create_pixman(struct nemocompz *compz, int width, in
 		goto err2;
 
 	nemoview_put_state(actor->view, NEMO_VIEW_CATCHABLE_STATE);
+	nemoview_set_state(actor->view, NEMO_VIEW_MAPPED_STATE);
 
 	actor->view->actor = (struct nemoactor *)container_of(actor->view->content, struct nemoactor, base);
 
@@ -155,6 +156,7 @@ struct nemoactor *nemoactor_create_gl(struct nemocompz *compz, int width, int he
 		goto err1;
 
 	nemoview_put_state(actor->view, NEMO_VIEW_CATCHABLE_STATE);
+	nemoview_set_state(actor->view, NEMO_VIEW_MAPPED_STATE);
 
 	actor->view->actor = (struct nemoactor *)container_of(actor->view->content, struct nemoactor, base);
 
