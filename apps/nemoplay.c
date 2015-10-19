@@ -60,7 +60,6 @@ struct playcontext {
 	uint32_t volume;
 	uint32_t device;
 	uint32_t pdevice;
-	int on_pulseaudio;
 };
 
 static void nemoplay_dispatch_subtitle(GstElement *base, guint8 *data, gsize size, gpointer userdata)
@@ -156,16 +155,8 @@ static void nemoplay_dispatch_tale_timer(struct nemotimer *timer, void *data)
 
 	nemotimer_set_timeout(timer, 500);
 
-	if (context->on_pulseaudio == 0) {
-		if (nemopulse_has_sink_input(context->pulse) == 0) {
-			nemopulse_fetch_sink_input(context->pulse, getpid());
-		} else {
-			nemopulse_set_volume(context->pulse, context->volume);
-			nemopulse_set_sink(context->pulse, context->device);
-
-			context->on_pulseaudio = 1;
-		}
-	}
+	if (nemopulse_has_sink_input(context->pulse) == 0)
+		nemopulse_fetch_sink_input(context->pulse, getpid());
 
 	nemotale_push_timer_event(context->tale, time_current_msecs());
 }
@@ -346,7 +337,6 @@ int main(int argc, char *argv[])
 
 	context->volume = 50;
 	context->device = 0;
-	context->on_pulseaudio = 0;
 
 	context->tool = tool = nemotool_create();
 	if (tool == NULL)

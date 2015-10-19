@@ -13,6 +13,7 @@ struct nemopulse {
 	pa_context *context;
 
 	uint32_t pid;
+	uint32_t sink;
 	uint32_t sinkinput;
 	int has_sinkinput;
 

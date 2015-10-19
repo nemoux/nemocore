@@ -75,6 +75,8 @@ static void nemopulse_dispatch_sink_input_info_callback(pa_context *context, con
 		pulse->sinkinput = info->index;
 		pulse->has_sinkinput = 1;
 
+		nemopulse_set_sink(pulse, pulse->sink);
+
 		nemolog_message("PULSE", "has sinkinput #%u\n", pulse->sinkinput);
 	}
 }
@@ -96,7 +98,6 @@ static void nemopulse_dispatch_sink_input_volume_callback(pa_context *context, c
 	pulse->current_volume = MAX(MIN(info->volume.values[0] + (double)PA_VOLUME_NORM / 100.0f * pulse->volume_control, PA_VOLUME_NORM), 0.0f);
 
 	pa_cvolume_set(&cv, info->channel_map.channels, pulse->current_volume);
-
 	op = pa_context_set_sink_input_volume(context, pulse->sinkinput, &cv, nemopulse_dispatch_simple_callback, pulse);
 	if (op != NULL)
 		pa_operation_unref(op);
@@ -115,13 +116,11 @@ static void nemopulse_dispatch_state_callback(pa_context *context, void *userdat
 
 		case PA_CONTEXT_READY:
 			op = pa_context_get_client_info_list(context, nemopulse_dispatch_client_info_callback, pulse);
-			if (op != NULL) {
+			if (op != NULL)
 				pa_operation_unref(op);
-			}
 			op = pa_context_get_sink_info_list(context, nemopulse_dispatch_sink_info_callback, pulse);
-			if (op != NULL) {
+			if (op != NULL)
 				pa_operation_unref(op);
-			}
 			break;
 
 		case PA_CONTEXT_TERMINATED:
@@ -142,6 +141,8 @@ struct nemopulse *nemopulse_create(GMainContext *context)
 	if (pulse == NULL)
 		return NULL;
 	memset(pulse, 0, sizeof(struct nemopulse));
+
+	pulse->current_volume = (double)PA_VOLUME_NORM * 0.5f;
 
 	pulse->mainloop = pa_glib_mainloop_new(context);
 	if (pulse->mainloop == NULL)
@@ -199,9 +200,8 @@ void nemopulse_fetch_sink_input(struct nemopulse *pulse, uint32_t pid)
 	pulse->pid = pid;
 
 	op = pa_context_get_sink_input_info_list(pulse->context, nemopulse_dispatch_sink_input_info_callback, pulse);
-	if (op != NULL) {
+	if (op != NULL)
 		pa_operation_unref(op);
-	}
 }
 
 void nemopulse_set_volume(struct nemopulse *pulse, int volume)
@@ -214,9 +214,8 @@ void nemopulse_set_volume(struct nemopulse *pulse, int volume)
 	pulse->volume_control = volume;
 
 	op = pa_context_get_sink_input_info(pulse->context, pulse->sinkinput, nemopulse_dispatch_sink_input_volume_callback, pulse);
-	if (op != NULL) {
+	if (op != NULL)
 		pa_operation_unref(op);
-	}
 }
 
 void nemopulse_set_mute(struct nemopulse *pulse, int mute)
@@ -227,9 +226,8 @@ void nemopulse_set_mute(struct nemopulse *pulse, int mute)
 		return;
 
 	op = pa_context_set_sink_input_mute(pulse->context, pulse->sinkinput, mute, nemopulse_dispatch_simple_callback, pulse);
-	if (op != NULL) {
+	if (op != NULL)
 		pa_operation_unref(op);
-	}
 }
 
 void nemopulse_set_sink(struct nemopulse *pulse, int sink)
@@ -237,18 +235,17 @@ void nemopulse_set_sink(struct nemopulse *pulse, int sink)
 	pa_operation *op = NULL;
 	pa_cvolume cv;
 
+	pulse->sink = sink;
+
 	if (pulse->has_sinkinput == 0)
 		return;
 
 	op = pa_context_move_sink_input_by_index(pulse->context, pulse->sinkinput, sink, nemopulse_dispatch_simple_callback, pulse);
-	if (op != NULL) {
+	if (op != NULL)
 		pa_operation_unref(op);
-	}
 
 	pa_cvolume_set(&cv, 1, pulse->current_volume);
-
 	op = pa_context_set_sink_input_volume(pulse->context, pulse->sinkinput, &cv, nemopulse_dispatch_simple_callback, pulse);
-	if (op != NULL) {
+	if (op != NULL)
 		pa_operation_unref(op);
-	}
 }
