@@ -18,6 +18,7 @@
 #include <gsthelper.h>
 #include <talehelper.h>
 #include <glibhelper.h>
+#include <pulsehelper.h>
 #include <nemolog.h>
 #include <nemomisc.h>
 
@@ -29,6 +30,7 @@
 struct playcontext {
 	struct nemotool *tool;
 	struct nemogst *gst;
+	struct nemopulse *pulse;
 
 	struct eglcontext *egl;
 
@@ -54,7 +56,6 @@ struct playcontext {
 	float gx, gy;
 
 	int64_t position;
-	double volume;
 };
 
 static void nemoplay_dispatch_subtitle(GstElement *base, guint8 *data, gsize size, gpointer userdata)
@@ -116,23 +117,21 @@ static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode 
 						context->gy = event->y;
 					}
 				} else if (context->gy - NEMOPLAY_SLIDE_DISTANCE_MIN > event->taps[2]->y) {
-					if (context->volume < 1.0f) {
-						context->volume = MIN(context->volume + 0.1f, 1.0f);
+					if (context->pulse == NULL)
+						context->pulse = nemopulse_create(NULL, getpid());
 
-						nemogst_set_audio_volume(context->gst, context->volume);
+					nemopulse_set_volume(context->pulse, 1);
 
-						context->gx = event->x;
-						context->gy = event->y;
-					}
+					context->gx = event->x;
+					context->gy = event->y;
 				} else if (context->gy + NEMOPLAY_SLIDE_DISTANCE_MIN < event->taps[2]->y) {
-					if (context->volume > 0.0f) {
-						context->volume = MAX(context->volume - 0.1f, 0.0f);
+					if (context->pulse == NULL)
+						context->pulse = nemopulse_create(NULL, getpid());
 
-						nemogst_set_audio_volume(context->gst, context->volume);
+					nemopulse_set_volume(context->pulse, -1);
 
-						context->gx = event->x;
-						context->gy = event->y;
-					}
+					context->gx = event->x;
+					context->gy = event->y;
 				}
 			}
 #endif
@@ -430,6 +429,8 @@ int main(int argc, char *argv[])
 	pthread_mutex_destroy(&context->lock);
 
 	nemotimer_destroy(timer);
+
+	nemopulse_destroy(context->pulse);
 
 out3:
 	nemogst_destroy(context->gst);

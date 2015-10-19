@@ -463,14 +463,6 @@ int nemogst_set_next_step(struct nemogst *gst, int steps, double rate)
 	return r;
 }
 
-void nemogst_set_audio_volume(struct nemogst *gst, double volume)
-{
-	volume = MIN(volume, 1.0f);
-	volume = MAX(volume, 0.0f);
-
-	g_object_set(G_OBJECT(gst->player), "volume", &volume, NULL);
-}
-
 static inline GstState nemogst_get_element_state(GstElement *element)
 {
 	GstState state;

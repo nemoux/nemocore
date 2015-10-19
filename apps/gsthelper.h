@@ -1,5 +1,5 @@
-#ifndef	__NEMOTOOL_GST_HELPER_H__
-#define	__NEMOTOOL_GST_HELPER_H__
+#ifndef __NEMOUX_GST_HELPER_H__
+#define __NEMOUX_GST_HELPER_H__
 
 #include <stdint.h>
 
