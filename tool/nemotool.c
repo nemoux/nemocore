@@ -374,7 +374,7 @@ static const struct nemo_seat_listener seat_listener = {
 	seat_handle_name
 };
 
-static void sound_handle_enter(void *data, struct nemo_sound *sound, struct wl_surface *surface, const char *device)
+static void sound_handle_enter(void *data, struct nemo_sound *sound, struct wl_surface *surface, int device)
 {
 	struct nemotool *tool = (struct nemotool *)data;
 
@@ -387,7 +387,7 @@ static void sound_handle_enter(void *data, struct nemo_sound *sound, struct wl_s
 	}
 }
 
-static void sound_handle_leave(void *data, struct nemo_sound *sound, struct wl_surface *surface, const char *device)
+static void sound_handle_leave(void *data, struct nemo_sound *sound, struct wl_surface *surface, int device)
 {
 	struct nemotool *tool = (struct nemotool *)data;
 

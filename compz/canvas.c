@@ -502,14 +502,12 @@ static void nemocanvas_update_output(struct nemocontent *content, uint32_t node_
 						wl_surface_send_leave(canvas->resource, resource);
 				}
 
-				if (screen->snddev != NULL) {
-					resource = wl_resource_find_for_client(&canvas->compz->sound->resource_list, client);
-					if (resource != NULL) {
-						if (emask & (1 << screen->id))
-							nemo_sound_send_enter(resource, canvas->resource, screen->snddev);
-						if (lmask & (1 << screen->id))
-							nemo_sound_send_leave(resource, canvas->resource, screen->snddev);
-					}
+				resource = wl_resource_find_for_client(&canvas->compz->sound->resource_list, client);
+				if (resource != NULL) {
+					if (emask & (1 << screen->id))
+						nemo_sound_send_enter(resource, canvas->resource, screen->snddev);
+					if (lmask & (1 << screen->id))
+						nemo_sound_send_leave(resource, canvas->resource, screen->snddev);
 				}
 			}
 		}

@@ -180,7 +180,7 @@ void nemoscreen_prepare(struct nemoscreen *screen)
 {
 	struct nemocompz *compz = screen->compz;
 
-	screen->snddev = NULL;
+	screen->snddev = 0;
 
 	screen->geometry.sx = 1.0f;
 	screen->geometry.sy = 1.0f;
@@ -212,9 +212,6 @@ void nemoscreen_finish(struct nemoscreen *screen)
 
 	pixman_region32_fini(&screen->region);
 	pixman_region32_fini(&screen->damage);
-
-	if (screen->snddev != NULL)
-		free(screen->snddev);
 }
 
 static int nemoscreen_update_transform_matrix(struct nemoscreen *screen)

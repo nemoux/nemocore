@@ -53,7 +53,7 @@ struct nemoscreen {
 	int32_t mmwidth, mmheight;
 	uint32_t subpixel;
 
-	char *snddev;
+	int snddev;
 
 	struct {
 		struct nemomatrix matrix;

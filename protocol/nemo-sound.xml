@@ -3,12 +3,12 @@
 	<interface name="nemo_sound" version="1">
 		<event name="enter">
 			<arg name="surface" type="object" interface="wl_surface"/>
-			<arg name="device" type="string"/>
+			<arg name="device" type="int"/>
 		</event>
 
 		<event name="leave">
 			<arg name="surface" type="object" interface="wl_surface"/>
-			<arg name="device" type="string"/>
+			<arg name="device" type="int"/>
 		</event>
 	</interface>
 </protocol>

@@ -980,7 +980,7 @@ static int drm_create_screen_for_connector(struct drmnode *node, drmModeRes *res
 
 	snddev = nemoscreen_get_config(compz, node->base.nodeid, screen->base.screenid, "sound");
 	if (snddev != NULL)
-		screen->base.snddev = strdup(snddev);
+		screen->base.snddev = strtoul(snddev, NULL, 10);
 
 	screen->base.repaint = drm_screen_repaint;
 	screen->base.repaint_frame = drm_screen_repaint_frame;

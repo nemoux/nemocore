@@ -56,6 +56,11 @@ struct playcontext {
 	float gx, gy;
 
 	int64_t position;
+
+	uint32_t volume;
+	uint32_t device;
+	uint32_t pdevice;
+	int on_pulseaudio;
 };
 
 static void nemoplay_dispatch_subtitle(GstElement *base, guint8 *data, gsize size, gpointer userdata)
@@ -117,17 +122,11 @@ static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode 
 						context->gy = event->y;
 					}
 				} else if (context->gy - NEMOPLAY_SLIDE_DISTANCE_MIN > event->taps[2]->y) {
-					if (context->pulse == NULL)
-						context->pulse = nemopulse_create(NULL, getpid());
-
 					nemopulse_set_volume(context->pulse, 1);
 
 					context->gx = event->x;
 					context->gy = event->y;
 				} else if (context->gy + NEMOPLAY_SLIDE_DISTANCE_MIN < event->taps[2]->y) {
-					if (context->pulse == NULL)
-						context->pulse = nemopulse_create(NULL, getpid());
-
 					nemopulse_set_volume(context->pulse, -1);
 
 					context->gx = event->x;
@@ -156,6 +155,17 @@ static void nemoplay_dispatch_tale_timer(struct nemotimer *timer, void *data)
 	struct playcontext *context = (struct playcontext *)data;
 
 	nemotimer_set_timeout(timer, 500);
+
+	if (context->on_pulseaudio == 0) {
+		if (nemopulse_has_sink_input(context->pulse) == 0) {
+			nemopulse_fetch_sink_input(context->pulse, getpid());
+		} else {
+			nemopulse_set_volume(context->pulse, context->volume);
+			nemopulse_set_sink(context->pulse, context->device);
+
+			context->on_pulseaudio = 1;
+		}
+	}
 
 	nemotale_push_timer_event(context->tale, time_current_msecs());
 }
@@ -229,6 +239,24 @@ static void nemoplay_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t w
 		if (nemogst_is_playing(context->gst) == 0) {
 			nemogst_set_next_step(context->gst, 1, 1.0f);
 		}
+	}
+}
+
+static void nemoplay_dispatch_canvas_sound(struct nemocanvas *canvas, int device, int left)
+{
+	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
+	struct playcontext *context = (struct playcontext *)nemotale_get_userdata(tale);
+
+	if (left == 0) {
+		nemopulse_set_sink(context->pulse, device);
+
+		context->pdevice = context->device;
+		context->device = device;
+	} else if (context->device == device) {
+		nemopulse_set_sink(context->pulse, context->pdevice);
+
+		context->device = context->pdevice;
+		context->pdevice = device;
 	}
 }
 
@@ -316,6 +344,10 @@ int main(int argc, char *argv[])
 	context->is_background = is_background;
 	context->is_fullscreen = is_fullscreen;
 
+	context->volume = 50;
+	context->device = 0;
+	context->on_pulseaudio = 0;
+
 	context->tool = tool = nemotool_create();
 	if (tool == NULL)
 		goto out1;
@@ -361,6 +393,7 @@ int main(int argc, char *argv[])
 		nemocanvas_set_anchor(canvas, -0.5f, -0.5f);
 	nemocanvas_set_dispatch_frame(canvas, nemoplay_dispatch_canvas_frame);
 	nemocanvas_set_dispatch_resize(canvas, nemoplay_dispatch_canvas_resize);
+	nemocanvas_set_dispatch_sound(canvas, nemoplay_dispatch_canvas_sound);
 
 	context->tale = tale = nemotale_create_gl();
 	nemotale_set_backend(tale,
@@ -416,7 +449,13 @@ int main(int argc, char *argv[])
 	nemocanvas_dispatch_frame(context->canvas);
 
 	gmainloop = g_main_loop_new(NULL, FALSE);
+
+	context->pulse = nemopulse_create(NULL);
+
 	nemoglib_run_tool(gmainloop, context->tool);
+
+	nemopulse_destroy(context->pulse);
+
 	g_main_loop_unref(gmainloop);
 
 	nemotool_destroy_egl_canvas(context->ecanvas);
@@ -429,8 +468,6 @@ int main(int argc, char *argv[])
 	pthread_mutex_destroy(&context->lock);
 
 	nemotimer_destroy(timer);
-
-	nemopulse_destroy(context->pulse);
 
 out3:
 	nemogst_destroy(context->gst);
