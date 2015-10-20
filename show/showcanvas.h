@@ -34,6 +34,8 @@ typedef void (*nemoshow_canvas_dispatch_render_t)(struct nemoshow *show, struct 
 struct showcanvas {
 	struct showone base;
 
+	struct nemoshow *show;
+
 	char type[NEMOSHOW_CANVAS_TYPE_MAX];
 	uint32_t event;
 
@@ -44,7 +46,6 @@ struct showcanvas {
 
 	struct talenode *node;
 
-	struct nemotale *tale;
 	struct talefbo *fbo;
 
 	double width, height;

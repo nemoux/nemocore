@@ -84,6 +84,10 @@ void nemoshow_canvas_destroy(struct showone *one)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
+	if (canvas->show != NULL) {
+		nemoshow_detach_canvas(canvas->show, one);
+	}
+
 	nemotale_node_destroy(canvas->node);
 
 	nemoshow_one_finish(one);

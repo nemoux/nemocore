@@ -780,6 +780,8 @@ void nemoshow_attach_canvas(struct nemoshow *show, struct showone *one)
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
 	nemotale_attach_node(show->tale, canvas->node);
+
+	canvas->show = show;
 }
 
 void nemoshow_detach_canvas(struct nemoshow *show, struct showone *one)
@@ -787,6 +789,8 @@ void nemoshow_detach_canvas(struct nemoshow *show, struct showone *one)
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
 	nemotale_detach_node(show->tale, canvas->node);
+
+	canvas->show = NULL;
 }
 
 void nemoshow_above_canvas(struct nemoshow *show, struct showone *one, struct showone *above)
