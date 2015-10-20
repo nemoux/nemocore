@@ -147,7 +147,7 @@ void nemoshow_item_destroy(struct showone *one)
 	if (NEMOSHOW_ITEM_CC(item, stroke) != NULL)
 		delete NEMOSHOW_ITEM_CC(item, stroke);
 	if (NEMOSHOW_ITEM_CC(item, points) != NULL)
-		delete NEMOSHOW_ITEM_CC(item, points);
+		delete[] NEMOSHOW_ITEM_CC(item, points);
 	if (NEMOSHOW_ITEM_CC(item, bitmap) != NULL)
 		delete NEMOSHOW_ITEM_CC(item, bitmap);
 
