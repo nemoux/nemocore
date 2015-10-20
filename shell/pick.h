@@ -23,6 +23,10 @@ struct shellgrab_pick {
 		float r;
 	} touch;
 
+	struct {
+		double distance;
+	} resize;
+
 	int32_t width, height;
 	float sx, sy;
 	float dx, dy;

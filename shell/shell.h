@@ -86,6 +86,7 @@ struct nemoshell {
 
 	struct {
 		double min_distance;
+		double resize_interval;
 	} pick;
 
 	struct nemoitem *configs;
