@@ -1,8 +1,6 @@
 #ifndef __NEMOSHOW_ITEM_HPP__
 #define __NEMOSHOW_ITEM_HPP__
 
-#include <skiaconfig.hpp>
-
 #include <showitem.h>
 
 typedef struct _showitem {

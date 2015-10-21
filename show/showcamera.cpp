@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <skiaconfig.hpp>
+
 #include <showcamera.h>
 #include <showcamera.hpp>
 #include <showmatrix.h>

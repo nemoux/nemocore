@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <skiaconfig.hpp>
+
 #include <showitem.h>
 #include <showitem.hpp>
 #include <showcolor.h>

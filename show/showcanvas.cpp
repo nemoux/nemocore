@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <skiaconfig.hpp>
+
 #include <showcanvas.h>
 #include <showcanvas.hpp>
 #include <showitem.h>

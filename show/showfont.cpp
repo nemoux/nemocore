@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <skiaconfig.hpp>
+
 #include <showfont.h>
 #include <showfont.hpp>
 #include <nemoshow.h>

@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <skiaconfig.hpp>
+
 #include <svghelper.h>
 #include <nemoshow.h>
 #include <showitem.h>

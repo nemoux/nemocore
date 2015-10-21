@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <skiaconfig.hpp>
+
 #include <showfilter.h>
 #include <showfilter.hpp>
 #include <nemoshow.h>

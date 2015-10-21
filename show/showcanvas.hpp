@@ -1,8 +1,6 @@
 #ifndef __NEMOSHOW_CANVAS_HPP__
 #define __NEMOSHOW_CANVAS_HPP__
 
-#include <skiaconfig.hpp>
-
 #include <showcanvas.h>
 
 typedef struct _showcanvas {

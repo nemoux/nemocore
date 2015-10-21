@@ -1,8 +1,6 @@
 #ifndef __NEMOSHOW_MATRIX_HPP__
 #define __NEMOSHOW_MATRIX_HPP__
 
-#include <skiaconfig.hpp>
-
 typedef struct _showmatrix {
 	SkMatrix *matrix;
 } showmatrix_t;
