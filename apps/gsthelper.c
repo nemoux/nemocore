@@ -61,9 +61,7 @@ static gboolean nemogst_watch_bus(GstBus *bus, GstMessage *msg, gpointer data)
 				gst_message_parse_state_changed(msg, &ostate, &nstate, &pstate);
 
 				if (GST_MESSAGE_SRC(msg) == GST_OBJECT(gst->player)) {
-					gst->is_playing = (nstate == GST_STATE_PLAYING);
-
-					if (gst->is_playing != 0) {
+					if (nstate == GST_STATE_PLAYING) {
 						GstQuery *query;
 
 						query = gst_query_new_seeking(GST_FORMAT_TIME);
@@ -373,6 +371,18 @@ int nemogst_is_done_media(struct nemogst *gst)
 	return 0;
 }
 
+int nemogst_is_playing_media(struct nemogst *gst)
+{
+	GstState state;
+	GstStateChangeReturn r;
+
+	r = gst_element_get_state(gst->player, &state, NULL, GST_CLOCK_TIME_NONE);
+	if (r == GST_STATE_CHANGE_SUCCESS && state == GST_STATE_PLAYING)
+		return 1;
+
+	return 0;
+}
+
 int nemogst_resize_video(struct nemogst *gst, uint32_t width, uint32_t height)
 {
 	GstCaps *caps;
@@ -441,28 +451,6 @@ int nemogst_set_position(struct nemogst *gst, int64_t position)
 	return 0;
 }
 
-int nemogst_set_position_rough(struct nemogst *gst, int64_t position)
-{
-	if (gst->is_seekable != 0 && gst->is_blocked == 0 &&
-			gst->seekstart <= position && gst->seekend >= position) {
-		gst_element_seek_simple(gst->player,
-				GST_FORMAT_TIME,
-				GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_SEGMENT | GST_SEEK_FLAG_KEY_UNIT,
-				position);
-
-		if (gst->subpipeline != NULL) {
-			gst_element_seek_simple(gst->subpipeline,
-					GST_FORMAT_TIME,
-					GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_SEGMENT | GST_SEEK_FLAG_KEY_UNIT,
-					position);
-		}
-
-		gst->is_blocked = 1;
-	}
-
-	return 0;
-}
-
 int nemogst_set_next_step(struct nemogst *gst, int steps, double rate)
 {
 	gboolean r;
@@ -474,22 +462,4 @@ int nemogst_set_next_step(struct nemogst *gst, int steps, double rate)
 	}
 
 	return r;
-}
-
-static inline GstState nemogst_get_element_state(GstElement *element)
-{
-	GstState state;
-
-	gst_element_get_state(element, &state, NULL, GST_CLOCK_TIME_NONE);
-
-	return state;
-}
-
-void nemogst_dump_state(struct nemogst *gst)
-{
-	int i;
-
-	NEMO_DEBUG("PLAYER = %s\n", gst_element_state_get_name(nemogst_get_element_state(gst->player)));
-	NEMO_DEBUG("PIPELINE = %s\n", gst_element_state_get_name(nemogst_get_element_state(gst->pipeline)));
-	NEMO_DEBUG("SINK = %s\n", gst_element_state_get_name(nemogst_get_element_state(gst->sink)));
 }

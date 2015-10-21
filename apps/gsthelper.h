@@ -53,7 +53,6 @@ struct nemogst {
 
 	char *uri;
 
-	int is_playing;
 	int is_blocked;
 	int is_changed;
 
@@ -82,6 +81,7 @@ extern int nemogst_play_media(struct nemogst *gst);
 extern int nemogst_pause_media(struct nemogst *gst);
 extern int nemogst_replay_media(struct nemogst *gst);
 extern int nemogst_is_done_media(struct nemogst *gst);
+extern int nemogst_is_playing_media(struct nemogst *gst);
 
 extern int nemogst_resize_video(struct nemogst *gst, uint32_t width, uint32_t height);
 
@@ -90,10 +90,7 @@ extern void nemogst_sink_set_property(struct nemogst *gst, const char *name, uin
 extern int64_t nemogst_get_position(struct nemogst *gst);
 extern int64_t nemogst_get_duration(struct nemogst *gst);
 extern int nemogst_set_position(struct nemogst *gst, int64_t position);
-extern int nemogst_set_position_rough(struct nemogst *gst, int64_t position);
 extern int nemogst_set_next_step(struct nemogst *gst, int steps, double rate);
-
-extern void nemogst_dump_state(struct nemogst *gst);
 
 static inline uint32_t nemogst_get_video_width(struct nemogst *gst)
 {
@@ -118,11 +115,6 @@ static inline uint32_t nemogst_get_width(struct nemogst *gst)
 static inline uint32_t nemogst_get_height(struct nemogst *gst)
 {
 	return gst->height;
-}
-
-static inline int nemogst_is_playing(struct nemogst *gst)
-{
-	return gst->is_playing;
 }
 
 static inline int nemogst_is_blocked(struct nemogst *gst)

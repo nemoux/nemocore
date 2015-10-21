@@ -136,13 +136,13 @@ static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode 
 		}
 
 		if (nemotale_is_long_press(tale, event, type)) {
-			if (nemogst_is_playing(context->gst) != 0) {
+			if (nemogst_is_playing_media(context->gst) != 0) {
 				nemogst_pause_media(context->gst);
 			}
 		}
 
 		if (nemotale_is_single_click(tale, event, type)) {
-			if (nemogst_is_playing(context->gst) == 0) {
+			if (nemogst_is_playing_media(context->gst) == 0) {
 				nemogst_play_media(context->gst);
 			}
 		}
@@ -227,7 +227,7 @@ static void nemoplay_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t w
 
 		nemogst_resize_video(context->gst, width, height);
 
-		if (nemogst_is_playing(context->gst) == 0) {
+		if (nemogst_is_playing_media(context->gst) == 0) {
 			nemogst_set_next_step(context->gst, 1, 1.0f);
 		}
 	}
