@@ -55,6 +55,7 @@ struct nemogst {
 
 	int is_playing;
 	int is_blocked;
+	int is_changed;
 
 	gboolean is_seekable;
 	gint64 seekstart, seekend;
@@ -127,6 +128,11 @@ static inline int nemogst_is_playing(struct nemogst *gst)
 static inline int nemogst_is_blocked(struct nemogst *gst)
 {
 	return gst->is_blocked;
+}
+
+static inline int nemogst_is_changed(struct nemogst *gst)
+{
+	return gst->is_changed;
 }
 
 #endif
