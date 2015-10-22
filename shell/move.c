@@ -77,6 +77,8 @@ static void move_shellgrab_pointer_button(struct nemopointer_grab *base, uint32_
 
 	if (pointer->button_count == 0 &&
 			state == WL_POINTER_BUTTON_STATE_RELEASED) {
+		pitchfilter_dispatch(filter, pointer->x, pointer->y, 0.0f, 0.0f, time);
+
 		if (grab->bin != NULL && pitchfilter_flush(filter) > 0) {
 			struct nemoshell *shell = grab->bin->shell;
 			struct vieweffect *effect;
@@ -216,6 +218,8 @@ static void move_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 	if (tp->focus != NULL) {
 		nemocontent_touch_up(tp, tp->focus->content, time, touchid);
 	}
+
+	pitchfilter_dispatch(filter, tp->x, tp->y, 0.0f, 0.0f, time);
 
 	if (grab->bin != NULL && pitchfilter_flush(filter) > 0) {
 		struct nemoshell *shell = grab->bin->shell;
@@ -394,6 +398,8 @@ static void move_actorgrab_pointer_button(struct nemopointer_grab *base, uint32_
 
 	if (pointer->button_count == 0 &&
 			state == WL_POINTER_BUTTON_STATE_RELEASED) {
+		pitchfilter_dispatch(filter, pointer->x, pointer->y, 0.0f, 0.0f, time);
+
 		if (grab->actor != NULL && pitchfilter_flush(filter) > 0) {
 			struct nemoshell *shell = grab->shell;
 			struct vieweffect *effect;
@@ -480,6 +486,8 @@ static void move_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 	if (tp->focus != NULL) {
 		nemocontent_touch_up(tp, tp->focus->content, time, touchid);
 	}
+
+	pitchfilter_dispatch(filter, tp->x, tp->y, 0.0f, 0.0f, time);
 
 	if (grab->actor != NULL && pitchfilter_flush(filter) > 0) {
 		struct nemoshell *shell = grab->shell;
