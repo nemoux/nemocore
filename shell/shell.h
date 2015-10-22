@@ -75,8 +75,8 @@ struct nemoshell {
 	} inputpanel;
 
 	struct {
-		double min_distance;
 		uint32_t max_samples;
+		uint32_t dir_samples;
 
 		double velocity;
 		double max_velocity;

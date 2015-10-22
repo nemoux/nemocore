@@ -11,7 +11,7 @@
 #include <pitchfilter.h>
 #include <nemomisc.h>
 
-struct pitchfilter *pitchfilter_create(double min_dist, uint32_t max_sample)
+struct pitchfilter *pitchfilter_create(uint32_t max_samples, uint32_t dir_samples)
 {
 	struct pitchfilter *filter;
 
@@ -20,15 +20,16 @@ struct pitchfilter *pitchfilter_create(double min_dist, uint32_t max_sample)
 		return NULL;
 	memset(filter, 0, sizeof(struct pitchfilter));
 
-	filter->samples = (struct pitchsample *)malloc(sizeof(struct pitchsample) * max_sample);
+	filter->samples = (struct pitchsample *)malloc(sizeof(struct pitchsample) * max_samples);
 	if (filter->samples == NULL)
 		goto err1;
-	memset(filter->samples, 0, sizeof(struct pitchsample) * max_sample);
+	memset(filter->samples, 0, sizeof(struct pitchsample) * max_samples);
 
-	filter->min_dist = min_dist;
-	filter->max_sample = max_sample;
+	filter->max_samples = max_samples;
+	filter->dir_samples = dir_samples;
 
-	filter->index = 0;
+	filter->sindex = 0;
+	filter->eindex = 0;
 
 	return filter;
 
@@ -51,72 +52,65 @@ void pitchfilter_dispatch(struct pitchfilter *filter, double x, double y, double
 	if (filter->time == 0)
 		filter->time = time;
 
-	if (dist < filter->min_dist) {
-		filter->index = 0;
-	} else if (filter->index < filter->max_sample) {
-		filter->samples[filter->index].x = x;
-		filter->samples[filter->index].y = y;
-		filter->samples[filter->index].dx = dx;
-		filter->samples[filter->index].dy = dy;
-		filter->samples[filter->index].dt = time - filter->time;
+	filter->samples[filter->eindex].x = x;
+	filter->samples[filter->eindex].y = y;
+	filter->samples[filter->eindex].dx = dx;
+	filter->samples[filter->eindex].dy = dy;
+	filter->samples[filter->eindex].dt = time - filter->time;
 
-		filter->index++;
-	}
+	filter->eindex = (filter->eindex + 1) % filter->max_samples;
+
+	if (filter->sindex == filter->eindex)
+		filter->sindex = (filter->sindex + 1) % filter->max_samples;
 
 	filter->time = time;
 }
 
 int pitchfilter_flush(struct pitchfilter *filter)
 {
+	double dx, dy, dist;
+	uint32_t dtime;
+	int index;
 	int i;
+
+	if (filter->sindex == filter->eindex)
+		return 0;
 
 	filter->dist = 0.0f;
 	filter->dtime = 0;
 	filter->dx = 0.0f;
 	filter->dy = 0.0f;
 
-	for (i = 0; i < filter->index; i++) {
-		double dx = filter->samples[i].dx;
-		double dy = filter->samples[i].dy;
-		uint32_t dtime = filter->samples[i].dt;
-		double dist = sqrtf(dx * dx + dy * dy);
+	for (i = 0; i < filter->max_samples; i++) {
+		index = (filter->sindex + i) % filter->max_samples;
+		if (index == filter->eindex)
+			break;
+
+		dx = filter->samples[index].dx;
+		dy = filter->samples[index].dy;
+		dtime = filter->samples[index].dt;
+		dist = sqrtf(dx * dx + dy * dy);
 
 		filter->dist = filter->dist + dist;
 		filter->dtime = filter->dtime + dtime;
 	}
 
-	if (filter->index > 0) {
-		double dx, dy, dist;
-		double x0, y0, x1, y1;
+	for (i = 0; i < filter->dir_samples; i++) {
+		index = (filter->eindex + filter->max_samples - i - 1) % filter->max_samples;
 
-		x0 = filter->samples[0].x;
-		y0 = filter->samples[0].y;
-		x1 = filter->samples[filter->index - 1].x;
-		y1 = filter->samples[filter->index - 1].y;
+		filter->dx = filter->dx + filter->samples[index].dx;
+		filter->dy = filter->dy + filter->samples[index].dy;
 
-		dx = x1 - x0;
-		dy = y1 - y0;
-
-		dist = sqrtf(dx * dx + dy * dy);
-
-		dx = 0.0f;
-		dy = 0.0f;
-
-		for (i = 0; i < filter->index - 1; i++) {
-			x0 = filter->samples[i + 0].x;
-			y0 = filter->samples[i + 0].y;
-			x1 = filter->samples[i + 1].x;
-			y1 = filter->samples[i + 1].y;
-
-			dx += (x1 - x0);
-			dy += (y1 - y0);
-		}
-
-		filter->dx = dx / dist;
-		filter->dy = dy / dist;
+		if (index == filter->sindex)
+			break;
 	}
 
-	if (isnan(filter->dx) || isnan(filter->dy))
+	dist = sqrtf(filter->dx * filter->dx + filter->dy * filter->dy);
+
+	filter->dx = filter->dx / dist;
+	filter->dy = filter->dy / dist;
+
+	if (isnan(filter->dx) || isnan(filter->dy) || filter->dtime == 0)
 		return 0;
 
 	return 1;

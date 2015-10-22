@@ -915,7 +915,6 @@ void nemoxmanager_map_window(struct nemoxmanager *xmanager, struct nemoxwindow *
 	struct nemocanvas *canvas = xwindow->canvas;
 	struct nemoxserver *xserver = xmanager->xserver;
 	struct shellbin *bin;
-	struct clientstate *state;
 
 	bin = nemoshell_create_bin(shell, canvas, &xserver_client);
 	if (bin == NULL) {

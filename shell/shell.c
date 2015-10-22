@@ -907,8 +907,8 @@ struct shellscreen *nemoshell_get_fullscreen_on(struct nemoshell *shell, int32_t
 
 void nemoshell_load_gestures(struct nemoshell *shell)
 {
-	shell->pitch.min_distance = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pitch", "min_distance", 20.0f);
 	shell->pitch.max_samples = nemoitem_get_iattr_named(shell->configs, "//nemoshell/pitch", "max_samples", 30);
+	shell->pitch.dir_samples = nemoitem_get_iattr_named(shell->configs, "//nemoshell/pitch", "dir_samples", 5);
 	shell->pitch.velocity = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pitch", "velocity", 1000.0f);
 	shell->pitch.max_velocity = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pitch", "max_velocity", 5000.0f);
 	shell->pitch.friction = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pitch", "friction", 12000.0f);
