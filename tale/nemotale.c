@@ -52,7 +52,7 @@ int nemotale_prepare(struct nemotale *tale)
 	if (env != NULL)
 		tale->single_click_duration = strtoul(env, NULL, 10);
 	else
-		tale->single_click_duration = 150;
+		tale->single_click_duration = 1200;
 
 	env = getenv("NEMOTALE_SINGLE_CLICK_DISTANCE");
 	if (env != NULL)
