@@ -907,6 +907,8 @@ struct shellscreen *nemoshell_get_fullscreen_on(struct nemoshell *shell, int32_t
 
 void nemoshell_load_gestures(struct nemoshell *shell)
 {
+	char *mode;
+
 	shell->pitch.max_samples = nemoitem_get_iattr_named(shell->configs, "//nemoshell/pitch", "max_samples", 30);
 	shell->pitch.dir_samples = nemoitem_get_iattr_named(shell->configs, "//nemoshell/pitch", "dir_samples", 5);
 	shell->pitch.velocity = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pitch", "velocity", 1000.0f);
@@ -915,4 +917,15 @@ void nemoshell_load_gestures(struct nemoshell *shell)
 
 	shell->pick.min_distance = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "min_distance", 0.0f);
 	shell->pick.resize_interval = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "resize_interval", 50.0f);
+
+	mode = nemoitem_get_attr_named(shell->configs, "//nemoshell/pick", "mode");
+	if (mode != NULL && strcmp(mode, "progressive") == 0)
+		shell->pick.mode = NEMO_SHELL_PICK_PROGRESSIVE_MODE;
+	else
+		shell->pick.mode = NEMO_SHELL_PICK_SENSITIVE_MODE;
+
+	shell->pick.scale_increment = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "scale_increment", 0.1f);
+	shell->pick.scale_interval = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "scale_interval", 5.0f);
+	shell->pick.rotate_increment = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "rotate_increment", 0.1f);
+	shell->pick.rotate_interval = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "rotate_interval", 0.1f);
 }
