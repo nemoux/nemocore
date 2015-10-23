@@ -46,7 +46,7 @@ static void move_shellgrab_pointer_motion(struct nemopointer_grab *base, uint32_
 	struct shellbin *bin = grab->bin;
 	int32_t cx, cy;
 
-	pitchfilter_dispatch(filter, x, y, x - pointer->x, y - pointer->y, time);
+	pitchfilter_dispatch(filter, x - pointer->x, y - pointer->y, time);
 
 	nemopointer_move(pointer, x, y);
 
@@ -77,7 +77,7 @@ static void move_shellgrab_pointer_button(struct nemopointer_grab *base, uint32_
 
 	if (pointer->button_count == 0 &&
 			state == WL_POINTER_BUTTON_STATE_RELEASED) {
-		pitchfilter_dispatch(filter, pointer->x, pointer->y, 0.0f, 0.0f, time);
+		pitchfilter_dispatch(filter, 0.0f, 0.0f, time);
 
 		if (grab->bin != NULL && pitchfilter_flush(filter) > 0) {
 			struct nemoshell *shell = grab->bin->shell;
@@ -219,7 +219,7 @@ static void move_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		nemocontent_touch_up(tp, tp->focus->content, time, touchid);
 	}
 
-	pitchfilter_dispatch(filter, tp->x, tp->y, 0.0f, 0.0f, time);
+	pitchfilter_dispatch(filter, 0.0f, 0.0f, time);
 
 	if (grab->bin != NULL && pitchfilter_flush(filter) > 0) {
 		struct nemoshell *shell = grab->bin->shell;
@@ -254,7 +254,7 @@ static void move_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 	struct shellbin *bin = grab->bin;
 	int32_t cx, cy;
 
-	pitchfilter_dispatch(filter, x, y, x - tp->x, y - tp->y, time);
+	pitchfilter_dispatch(filter, x - tp->x, y - tp->y, time);
 
 	touchpoint_move(tp, x, y);
 
@@ -367,7 +367,7 @@ static void move_actorgrab_pointer_motion(struct nemopointer_grab *base, uint32_
 	struct nemoactor *actor = grab->actor;
 	int32_t cx, cy;
 
-	pitchfilter_dispatch(filter, x, y, x - pointer->x, y - pointer->y, time);
+	pitchfilter_dispatch(filter, x - pointer->x, y - pointer->y, time);
 
 	nemopointer_move(pointer, x, y);
 
@@ -398,7 +398,7 @@ static void move_actorgrab_pointer_button(struct nemopointer_grab *base, uint32_
 
 	if (pointer->button_count == 0 &&
 			state == WL_POINTER_BUTTON_STATE_RELEASED) {
-		pitchfilter_dispatch(filter, pointer->x, pointer->y, 0.0f, 0.0f, time);
+		pitchfilter_dispatch(filter, 0.0f, 0.0f, time);
 
 		if (grab->actor != NULL && pitchfilter_flush(filter) > 0) {
 			struct nemoshell *shell = grab->shell;
@@ -487,7 +487,7 @@ static void move_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		nemocontent_touch_up(tp, tp->focus->content, time, touchid);
 	}
 
-	pitchfilter_dispatch(filter, tp->x, tp->y, 0.0f, 0.0f, time);
+	pitchfilter_dispatch(filter, 0.0f, 0.0f, time);
 
 	if (grab->actor != NULL && pitchfilter_flush(filter) > 0) {
 		struct nemoshell *shell = grab->shell;
@@ -517,7 +517,7 @@ static void move_actorgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 	struct nemoactor *actor = grab->actor;
 	int32_t cx, cy;
 
-	pitchfilter_dispatch(filter, x, y, x - tp->x, y - tp->y, time);
+	pitchfilter_dispatch(filter, x - tp->x, y - tp->y, time);
 
 	touchpoint_move(tp, x, y);
 

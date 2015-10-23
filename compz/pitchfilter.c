@@ -45,15 +45,11 @@ void pitchfilter_destroy(struct pitchfilter *filter)
 	free(filter);
 }
 
-void pitchfilter_dispatch(struct pitchfilter *filter, double x, double y, double dx, double dy, uint32_t time)
+void pitchfilter_dispatch(struct pitchfilter *filter, double dx, double dy, uint32_t time)
 {
-	double dist = sqrtf(dx * dx + dy * dy);
-
 	if (filter->time == 0)
 		filter->time = time;
 
-	filter->samples[filter->eindex].x = x;
-	filter->samples[filter->eindex].y = y;
 	filter->samples[filter->eindex].dx = dx;
 	filter->samples[filter->eindex].dy = dy;
 	filter->samples[filter->eindex].dt = time - filter->time;
