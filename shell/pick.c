@@ -48,10 +48,11 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 	struct touchpoint *tp0 = base->touchpoint;
 	struct touchpoint *tp1 = pick->other->base.base.touchpoint.touchpoint;
 	struct shellbin *bin = grab->bin;
-	struct nemoshell *shell = bin->shell;
+	struct nemoshell *shell;
 
 	if (bin == NULL)
 		goto out;
+	shell = bin->shell;
 
 	if (pick->has_reset != 0 && bin->reset_scale == 0) {
 		pick->sx = 1.0f;
@@ -226,12 +227,13 @@ static void pick_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 	struct shellgrab_pick *pick = (struct shellgrab_pick *)container_of(grab, struct shellgrab_pick, base);
 	struct touchpoint *tp = base->touchpoint;
 	struct shellbin *bin = grab->bin;
-	struct nemoshell *shell = bin->shell;
+	struct nemoshell *shell;
 
 	touchpoint_move(tp, x, y);
 
 	if (bin == NULL)
 		return;
+	shell = bin->shell;
 
 	if (tp->focus != NULL) {
 		float sx, sy;
