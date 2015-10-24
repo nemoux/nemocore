@@ -116,6 +116,8 @@ struct nemotouch {
 	uint32_t interpolation;
 
 	struct wl_list touchevent_list;
+
+	int is_logging;
 };
 
 extern int nemotouch_bind_wayland(struct wl_client *client, struct wl_resource *seat_resource, uint32_t id);
