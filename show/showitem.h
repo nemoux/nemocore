@@ -122,6 +122,10 @@ extern void nemoshow_item_path_close(struct showone *one);
 extern void nemoshow_item_path_cmd(struct showone *one, const char *cmd);
 extern void nemoshow_item_path_arc(struct showone *one, double x, double y, double width, double height, double from, double to);
 
+extern void nemoshow_item_path_translate(struct showone *one, double x, double y);
+extern void nemoshow_item_path_scale(struct showone *one, double sx, double sy);
+extern void nemoshow_item_path_rotate(struct showone *one, double ro);
+
 extern int nemoshow_item_load_svg(struct showone *one, const char *uri);
 
 static inline void nemoshow_item_set_canvas(struct showone *one, struct showone *canvas)

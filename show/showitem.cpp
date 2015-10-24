@@ -939,6 +939,60 @@ void nemoshow_item_path_arc(struct showone *one, double x, double y, double widt
 	NEMOSHOW_ITEM_CC(item, path)->addArc(rect, from, to);
 }
 
+void nemoshow_item_path_translate(struct showone *one, double x, double y)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+	SkMatrix matrix;
+
+	matrix.setIdentity();
+	matrix.postTranslate(x, y);
+
+	NEMOSHOW_ITEM_CC(item, path)->transform(matrix);
+
+	if (NEMOSHOW_ITEM_CC(item, strokepath) != NULL)
+		NEMOSHOW_ITEM_CC(item, strokepath)->transform(matrix);
+	if (NEMOSHOW_ITEM_CC(item, fillpath) != NULL)
+		NEMOSHOW_ITEM_CC(item, fillpath)->transform(matrix);
+
+	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
+}
+
+void nemoshow_item_path_scale(struct showone *one, double sx, double sy)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+	SkMatrix matrix;
+
+	matrix.setIdentity();
+	matrix.postScale(sx, sy);
+
+	NEMOSHOW_ITEM_CC(item, path)->transform(matrix);
+
+	if (NEMOSHOW_ITEM_CC(item, strokepath) != NULL)
+		NEMOSHOW_ITEM_CC(item, strokepath)->transform(matrix);
+	if (NEMOSHOW_ITEM_CC(item, fillpath) != NULL)
+		NEMOSHOW_ITEM_CC(item, fillpath)->transform(matrix);
+
+	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
+}
+
+void nemoshow_item_path_rotate(struct showone *one, double ro)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+	SkMatrix matrix;
+
+	matrix.setIdentity();
+	matrix.postRotate(ro);
+
+	NEMOSHOW_ITEM_CC(item, path)->transform(matrix);
+
+	if (NEMOSHOW_ITEM_CC(item, strokepath) != NULL)
+		NEMOSHOW_ITEM_CC(item, strokepath)->transform(matrix);
+	if (NEMOSHOW_ITEM_CC(item, fillpath) != NULL)
+		NEMOSHOW_ITEM_CC(item, fillpath)->transform(matrix);
+
+	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
+}
+
 int nemoshow_item_load_svg(struct showone *one, const char *uri)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
