@@ -530,6 +530,7 @@ static void nemoshell_handle_child_signal(struct wl_listener *listener, void *da
 struct nemoshell *nemoshell_create(struct nemocompz *compz)
 {
 	struct nemoshell *shell;
+	char *env;
 
 	shell = (struct nemoshell *)malloc(sizeof(struct nemoshell));
 	if (shell == NULL)
@@ -581,6 +582,10 @@ struct nemoshell *nemoshell_create(struct nemocompz *compz)
 
 	wl_list_init(&shell->fullscreen_list);
 	wl_list_init(&shell->clientstate_list);
+
+	env = getenv("NEMOUX_SHELL_GRAB_LOG");
+	if (env != NULL && strcmp(env, "ON") == 0)
+		shell->is_logging_grab = 1;
 
 	return shell;
 

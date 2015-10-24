@@ -102,6 +102,8 @@ struct nemoshell {
 	} pick;
 
 	struct nemoitem *configs;
+
+	int is_logging_grab;
 };
 
 struct shellclient {

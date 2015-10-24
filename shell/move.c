@@ -214,15 +214,19 @@ static void move_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 	struct shellgrab_move *move = (struct shellgrab_move *)container_of(grab, struct shellgrab_move, base);
 	struct touchpoint *tp = base->touchpoint;
 	struct pitchfilter *filter = move->filter;
+	struct shellbin *bin = grab->bin;
 
 	if (tp->focus != NULL) {
 		nemocontent_touch_up(tp, tp->focus->content, time, touchid);
 	}
 
+	if (bin != NULL && bin->shell->is_logging_grab != 0)
+		nemolog_message("MOVE", "[UP] %llu: (%u)\n", touchid, time);
+
 	pitchfilter_dispatch(filter, 0.0f, 0.0f, time);
 
-	if (grab->bin != NULL && pitchfilter_flush(filter) > 0) {
-		struct nemoshell *shell = grab->bin->shell;
+	if (bin != NULL && pitchfilter_flush(filter) > 0) {
+		struct nemoshell *shell = bin->shell;
 		struct vieweffect *effect;
 
 		effect = vieweffect_create(grab->bin->view);
@@ -231,6 +235,9 @@ static void move_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		effect->pitch.dx = filter->dx;
 		effect->pitch.dy = filter->dy;
 		effect->pitch.friction = shell->pitch.friction;
+
+		if (shell->is_logging_grab != 0)
+			nemolog_message("MOVE", "[PITCH] %llu: dx(%f) dy(%f) velocity(%f) (%u)\n", touchid, effect->pitch.dx, effect->pitch.dy, effect->pitch.velocity, time);
 
 		if (grab->bin->on_pitchscreen != 0) {
 			vieweffect_set_dispatch_done(effect, move_shellgrab_dispatch_effect_done);
@@ -258,7 +265,7 @@ static void move_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 
 	touchpoint_move(tp, x, y);
 
-	if (grab->bin == NULL)
+	if (bin == NULL)
 		return;
 
 	if (tp->focus != NULL) {
@@ -274,6 +281,9 @@ static void move_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 
 	nemoview_set_position(bin->view, cx, cy);
 	nemoview_schedule_repaint(bin->view);
+
+	if (bin->shell->is_logging_grab != 0)
+		nemolog_message("MOVE", "[MOTION] %llu: x(%f) y(%f) (%u)\n", touchid, bin->view->geometry.x, bin->view->geometry.y, time);
 }
 
 static void move_shellgrab_touchpoint_frame(struct touchpoint_grab *base)
@@ -327,6 +337,9 @@ int nemoshell_move_canvas_by_touchpoint(struct nemoshell *shell, struct touchpoi
 	move->filter = pitchfilter_create(shell->pitch.max_samples, shell->pitch.dir_samples);
 
 	bin->retained = 0;
+
+	if (shell->is_logging_grab != 0)
+		nemolog_message("MOVE", "[DOWN] %llu: x(%f) y(%f)\n", tp->gid, bin->view->geometry.x, bin->view->geometry.y);
 
 	nemoshell_start_touchpoint_shellgrab(&move->base, &move_shellgrab_touchpoint_interface, bin, tp);
 

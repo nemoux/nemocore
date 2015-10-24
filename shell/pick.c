@@ -68,6 +68,9 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		pick->dy = bin->view->geometry.y - (pick->tp0->y + pick->tp1->y) / 2.0f;
 
 		pick->has_reset = 0;
+
+		if (shell->is_logging_grab != 0)
+			nemolog_message("PICK", "[UP:RESET] %llu: width(%d) height(%d) (%u)\n", touchid, pick->width, pick->height, time);
 	}
 
 	if (shell->pick.mode == NEMO_SHELL_PICK_PROGRESSIVE_MODE) {
@@ -106,6 +109,9 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 			}
 
 			bin->reset_scale = 1;
+
+			if (shell->is_logging_grab != 0)
+				nemolog_message("PICK", "[UP:SCALE] %llu: sx(%f) sy(%f) width(%d) height(%d) (%u)\n", touchid, pick->sx, pick->sy, width, height, time);
 
 			if (bin->on_pickscreen != 0) {
 				if (nemocompz_get_scene_width(compz) <= width || nemocompz_get_scene_height(compz) <= height)
@@ -172,6 +178,9 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 			}
 
 			bin->reset_scale = 1;
+
+			if (shell->is_logging_grab != 0)
+				nemolog_message("PICK", "[UP:SCALE] %llu: sx(%f) sy(%f) width(%d) height(%d) (%u)\n", touchid, pick->sx * (distance / pick->touch.distance), pick->sy * (distance / pick->touch.distance), width, height, time);
 
 			if (bin->on_pickscreen != 0) {
 				if (nemocompz_get_scene_width(compz) <= width || nemocompz_get_scene_height(compz) <= height)
@@ -257,6 +266,9 @@ static void pick_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 		pick->dy = bin->view->geometry.y - (pick->tp0->y + pick->tp1->y) / 2.0f;
 
 		pick->has_reset = 0;
+
+		if (shell->is_logging_grab != 0)
+			nemolog_message("PICK", "[MOTION:RESET] %llu: width(%d) height(%d) (%u)\n", touchid, pick->width, pick->height, time);
 	}
 
 	if (shell->pick.mode == NEMO_SHELL_PICK_PROGRESSIVE_MODE) {
@@ -276,6 +288,9 @@ static void pick_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 
 				pick->other->r = pick->r;
 				pick->other->touch.r = pick->touch.r;
+
+				if (shell->is_logging_grab != 0)
+					nemolog_message("PICK", "[MOTION:ROTATE] %llu: r(%f) touch(%f) (%u)\n", touchid, pick->r, pick->touch.r, time);
 			}
 		}
 
@@ -318,6 +333,9 @@ static void pick_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 				pick->other->sx = pick->sx;
 				pick->other->sy = pick->sy;
 				pick->other->touch.distance = pick->touch.distance;
+
+				if (shell->is_logging_grab != 0)
+					nemolog_message("PICK", "[MOTION:SCALE] %llu: sx(%f) sy(%f) touch(%f) (%u)\n", touchid, pick->sx, pick->sy, pick->touch.distance, time);
 			}
 		}
 	} else {
@@ -328,6 +346,9 @@ static void pick_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 				float r = pickgrab_calculate_touchpoint_angle(pick->tp0, pick->tp1);
 
 				nemoview_set_rotation(bin->view, pick->r + pick->touch.r - r);
+
+				if (shell->is_logging_grab != 0)
+					nemolog_message("PICK", "[MOTION:ROTATE] %llu: r(%f) touch(%f) (%u)\n", touchid, bin->view->geometry.r, r, time);
 			}
 		}
 
@@ -357,6 +378,9 @@ static void pick_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 						pick->sx * (distance / pick->touch.distance),
 						pick->sy * (distance / pick->touch.distance));
 			}
+
+			if (shell->is_logging_grab != 0)
+				nemolog_message("PICK", "[MOTION:SCALE] %llu: sx(%f) sy(%f) touch(%f) (%u)\n", touchid, bin->view->geometry.sx, bin->view->geometry.sy, distance, time);
 		}
 	}
 
@@ -585,6 +609,15 @@ int nemoshell_pick_canvas_by_touchpoint(struct nemoshell *shell, struct touchpoi
 	pick1->other = pick0;
 
 	bin->retained = 1;
+
+	if (shell->is_logging_grab != 0)
+		nemolog_message("PICK", "[DOWN] %llu+%llu: x(%f) y(%f) sx(%f) sy(%f) r(%f) reset(%d) touch(%f, %f)\n",
+				tp0->gid, tp1->gid,
+				bin->view->geometry.x, bin->view->geometry.y,
+				bin->view->geometry.sx, bin->view->geometry.sy,
+				bin->view->geometry.r,
+				bin->reset_scale,
+				pick0->touch.distance, pick0->touch.r);
 
 	nemoshell_start_touchpoint_shellgrab(&pick0->base, &pick_shellgrab_touchpoint_interface, bin, tp0);
 	nemoshell_start_touchpoint_shellgrab(&pick1->base, &pick_shellgrab_touchpoint_interface, bin, tp1);
