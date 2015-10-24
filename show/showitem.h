@@ -52,6 +52,8 @@ struct showitem {
 	double r;
 	double inner;
 
+	int has_size;
+
 	double from, to;
 
 	uint32_t stroke;
@@ -173,12 +175,18 @@ static inline void nemoshow_item_set_ry(struct showone *one, double ry)
 
 static inline void nemoshow_item_set_width(struct showone *one, double width)
 {
-	NEMOSHOW_ITEM_AT(one, width) = width;
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	item->width = width;
+	item->has_size = 1;
 }
 
 static inline void nemoshow_item_set_height(struct showone *one, double height)
 {
-	NEMOSHOW_ITEM_AT(one, height) = height;
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	item->height = height;
+	item->has_size = 1;
 }
 
 static inline void nemoshow_item_set_r(struct showone *one, double r)

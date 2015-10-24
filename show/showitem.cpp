@@ -662,9 +662,15 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 		item->width = item->r * 2;
 		item->height = item->r * 2;
 	} else if (one->sub == NEMOSHOW_PATH_ITEM) {
-		box = NEMOSHOW_ITEM_CC(item, path)->getBounds();
+		if (item->has_size == 0)
+			box = NEMOSHOW_ITEM_CC(item, path)->getBounds();
+		else
+			box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
 	} else if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
-		box = NEMOSHOW_ITEM_CC(item, path)->getBounds();
+		if (item->has_size == 0)
+			box = NEMOSHOW_ITEM_CC(item, path)->getBounds();
+		else
+			box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
 	} else if (one->sub == NEMOSHOW_TEXT_ITEM) {
 		if (NEMOSHOW_REF(one, NEMOSHOW_PATH_REF) == NULL) {
 			if (NEMOSHOW_FONT_AT(NEMOSHOW_REF(one, NEMOSHOW_FONT_REF), layout) == NEMOSHOW_NORMAL_LAYOUT) {
