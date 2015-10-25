@@ -62,6 +62,7 @@ struct playcontext {
 	uint32_t pdevice;
 
 	double alpha;
+	int is_alpha_mode;
 };
 
 static void nemoplay_dispatch_subtitle(GstElement *base, guint8 *data, gsize size, gpointer userdata)
@@ -123,7 +124,7 @@ static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode 
 						context->gy = event->y;
 					}
 				} else if (context->gy - NEMOPLAY_SLIDE_DISTANCE_MIN > event->taps[2]->y) {
-					if (nemogst_is_playing_media(context->gst) != 0) {
+					if (context->is_alpha_mode == 0) {
 						nemopulse_set_volume(context->pulse, 1);
 
 						context->gx = event->x;
@@ -135,7 +136,7 @@ static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode 
 						nemotale_node_damage_all(context->node);
 					}
 				} else if (context->gy + NEMOPLAY_SLIDE_DISTANCE_MIN < event->taps[2]->y) {
-					if (nemogst_is_playing_media(context->gst) != 0) {
+					if (context->is_alpha_mode == 0) {
 						nemopulse_set_volume(context->pulse, -1);
 
 						context->gx = event->x;
@@ -161,6 +162,8 @@ static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode 
 			if (nemogst_is_playing_media(context->gst) == 0) {
 				nemogst_play_media(context->gst);
 			}
+
+			context->is_alpha_mode = !context->is_alpha_mode;
 		}
 	}
 }
