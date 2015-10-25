@@ -221,6 +221,7 @@ add_subdirectory(mosi)
 add_subdirectory(compz)
 add_subdirectory(shell)
 add_subdirectory(apps)
+add_subdirectory(games)
 add_subdirectory(backs)
 
 add_subdirectory(thirds/poly2tri)
