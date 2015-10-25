@@ -29,6 +29,9 @@
 
 #include <SkGradientShader.h>
 
+#include <SkPathEffect.h>
+#include <SkDiscretePathEffect.h>
+
 #include <SkGeometry.h>
 
 #endif

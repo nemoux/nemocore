@@ -63,8 +63,11 @@ struct showitem {
 	double fills[4];
 
 	double alpha;
-
+	
 	double pathlength;
+	double pathsegment;
+	double pathdeviation;
+	uint32_t pathseed;
 
 	double fontsize;
 	double fontascent;
@@ -125,6 +128,8 @@ extern void nemoshow_item_path_arc(struct showone *one, double x, double y, doub
 extern void nemoshow_item_path_translate(struct showone *one, double x, double y);
 extern void nemoshow_item_path_scale(struct showone *one, double sx, double sy);
 extern void nemoshow_item_path_rotate(struct showone *one, double ro);
+
+extern void nemoshow_item_path_set_discrete_effect(struct showone *one, double segment, double deviation, uint32_t seed);
 
 extern int nemoshow_item_load_svg(struct showone *one, const char *uri);
 

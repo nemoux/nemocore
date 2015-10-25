@@ -109,6 +109,10 @@ struct showone *nemoshow_item_create(int type)
 
 	nemoobject_set_reserved(&one->object, "font-size", &item->fontsize, sizeof(double));
 
+	nemoobject_set_reserved(&one->object, "pathsegment", &item->pathsegment, sizeof(double));
+	nemoobject_set_reserved(&one->object, "pathdeviation", &item->pathdeviation, sizeof(double));
+	nemoobject_set_reserved(&one->object, "pathseed", &item->pathseed, sizeof(uint32_t));
+
 	nemoobject_set_reserved(&one->object, "alpha", &item->alpha, sizeof(double));
 
 	return one;
@@ -401,7 +405,7 @@ static inline void nemoshow_item_update_text(struct nemoshow *show, struct showo
 	}
 }
 
-static inline void nemoshow_item_update_path_in(struct nemoshow *show, struct showitem *item, struct showone *one)
+static inline void nemoshow_item_update_pathgroup(struct nemoshow *show, struct showitem *item, struct showone *one)
 {
 	struct showone *child;
 	struct showpath *path;
@@ -458,7 +462,7 @@ static inline void nemoshow_item_update_path_in(struct nemoshow *show, struct sh
 
 				NEMOSHOW_ITEM_CC(item, path)->addPath(rpath);
 			} else if (child->sub == NEMOSHOW_SVG_PATH) {
-				nemoshow_item_update_path_in(show, item, child);
+				nemoshow_item_update_pathgroup(show, item, child);
 			}
 		}
 	}
@@ -468,10 +472,23 @@ static inline void nemoshow_item_update_path(struct nemoshow *show, struct showo
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
+	if (one->sub == NEMOSHOW_PATH_ITEM) {
+		if (item->pathsegment >= 1.0f) {
+			SkPathEffect *effect;
+
+			effect = SkDiscretePathEffect::Create(item->pathsegment, item->pathdeviation, item->pathseed);
+			if (effect != NULL) {
+				NEMOSHOW_ITEM_CC(item, stroke)->setPathEffect(effect);
+				NEMOSHOW_ITEM_CC(item, fill)->setPathEffect(effect);
+				effect->unref();
+			}
+
+			one->dirty |= NEMOSHOW_SHAPE_DIRTY;
+		}
+	} else if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
 		NEMOSHOW_ITEM_CC(item, path)->reset();
 
-		nemoshow_item_update_path_in(show, item, one);
+		nemoshow_item_update_pathgroup(show, item, one);
 
 		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 	}
@@ -662,10 +679,14 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 		item->width = item->r * 2;
 		item->height = item->r * 2;
 	} else if (one->sub == NEMOSHOW_PATH_ITEM) {
-		if (item->has_size == 0)
+		if (item->has_size == 0) {
 			box = NEMOSHOW_ITEM_CC(item, path)->getBounds();
-		else
+
+			if (item->pathsegment >= 1.0f)
+				box.outset(fabs(item->pathdeviation), fabs(item->pathdeviation));
+		} else {
 			box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
+		}
 	} else if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
 		if (item->has_size == 0)
 			box = NEMOSHOW_ITEM_CC(item, path)->getBounds();
@@ -991,6 +1012,17 @@ void nemoshow_item_path_rotate(struct showone *one, double ro)
 		NEMOSHOW_ITEM_CC(item, fillpath)->transform(matrix);
 
 	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
+}
+
+void nemoshow_item_path_set_discrete_effect(struct showone *one, double segment, double deviation, uint32_t seed)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	item->pathsegment = segment;
+	item->pathdeviation = deviation;
+	item->pathseed = seed;
+
+	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 }
 
 int nemoshow_item_load_svg(struct showone *one, const char *uri)
