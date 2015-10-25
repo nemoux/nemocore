@@ -60,6 +60,8 @@ struct playcontext {
 	uint32_t volume;
 	uint32_t device;
 	uint32_t pdevice;
+
+	double alpha;
 };
 
 static void nemoplay_dispatch_subtitle(GstElement *base, guint8 *data, gsize size, gpointer userdata)
@@ -121,15 +123,29 @@ static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode 
 						context->gy = event->y;
 					}
 				} else if (context->gy - NEMOPLAY_SLIDE_DISTANCE_MIN > event->taps[2]->y) {
-					nemopulse_set_volume(context->pulse, 1);
+					if (nemogst_is_playing_media(context->gst) != 0) {
+						nemopulse_set_volume(context->pulse, 1);
 
-					context->gx = event->x;
-					context->gy = event->y;
+						context->gx = event->x;
+						context->gy = event->y;
+					} else {
+						context->alpha = MIN(context->alpha + 0.001f, 1.0f);
+
+						nemotale_node_set_alpha(context->node, context->alpha);
+						nemotale_node_damage_all(context->node);
+					}
 				} else if (context->gy + NEMOPLAY_SLIDE_DISTANCE_MIN < event->taps[2]->y) {
-					nemopulse_set_volume(context->pulse, -1);
+					if (nemogst_is_playing_media(context->gst) != 0) {
+						nemopulse_set_volume(context->pulse, -1);
 
-					context->gx = event->x;
-					context->gy = event->y;
+						context->gx = event->x;
+						context->gy = event->y;
+					} else {
+						context->alpha = MAX(context->alpha - 0.001f, 0.0f);
+
+						nemotale_node_set_alpha(context->node, context->alpha);
+						nemotale_node_damage_all(context->node);
+					}
 				}
 			}
 #endif
@@ -337,6 +353,8 @@ int main(int argc, char *argv[])
 
 	context->volume = 50;
 	context->device = 0;
+
+	context->alpha = 1.0f;
 
 	context->tool = tool = nemotool_create();
 	if (tool == NULL)
