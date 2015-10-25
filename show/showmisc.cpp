@@ -58,7 +58,7 @@ struct showprop *nemoshow_get_property(const char *name)
 		{ "src",							NEMOSHOW_STRING_PROP,				NEMOSHOW_NONE_DIRTY },
 		{ "stroke",						NEMOSHOW_COLOR_PROP,				NEMOSHOW_STYLE_DIRTY },
 		{ "stroke-width",			NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_SHAPE_DIRTY | NEMOSHOW_STYLE_DIRTY },
-		{ "style",						NEMOSHOW_STRING_PROP,				NEMOSHOW_NONE_DIRTY },
+		{ "style",						NEMOSHOW_STRING_PROP,				NEMOSHOW_STYLE_DIRTY },
 		{ "sx",								NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_MATRIX_DIRTY },
 		{ "sy",								NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_MATRIX_DIRTY },
 		{ "t",								NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_SHAPE_DIRTY },

@@ -168,7 +168,6 @@ void nemoshow_item_destroy(struct showone *one)
 int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
-	struct showone *style;
 	struct showone *filter;
 	struct showone *shader;
 	struct showone *matrix;
@@ -178,22 +177,16 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 	const char *v;
 	int i;
 
-	v = nemoobject_gets(&one->object, "style");
-	if (v != NULL && (style = nemoshow_search_one(show, v)) != NULL) {
-		nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_STYLE_REF));
-		nemoshow_one_reference_one(one, style, NEMOSHOW_STYLE_REF);
-	} else {
-		v = nemoobject_gets(&one->object, "filter");
-		if (v != NULL && (filter = nemoshow_search_one(show, v)) != NULL) {
-			nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF));
-			nemoshow_one_reference_one(one, filter, NEMOSHOW_FILTER_REF);
-		}
+	v = nemoobject_gets(&one->object, "filter");
+	if (v != NULL && (filter = nemoshow_search_one(show, v)) != NULL) {
+		nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF));
+		nemoshow_one_reference_one(one, filter, NEMOSHOW_FILTER_REF);
+	}
 
-		v = nemoobject_gets(&one->object, "shader");
-		if (v != NULL && (shader = nemoshow_search_one(show, v)) != NULL) {
-			nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_SHADER_REF));
-			nemoshow_one_reference_one(one, shader, NEMOSHOW_SHADER_REF);
-		}
+	v = nemoobject_gets(&one->object, "shader");
+	if (v != NULL && (shader = nemoshow_search_one(show, v)) != NULL) {
+		nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_SHADER_REF));
+		nemoshow_one_reference_one(one, shader, NEMOSHOW_SHADER_REF);
 	}
 
 	v = nemoobject_gets(&one->object, "matrix");

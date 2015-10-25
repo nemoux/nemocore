@@ -27,7 +27,6 @@ typedef enum {
 	NEMOSHOW_IMAGE_ITEM = 12,
 	NEMOSHOW_SVG_ITEM = 13,
 	NEMOSHOW_GROUP_ITEM = 14,
-	NEMOSHOW_STYLE_ITEM = 15,
 	NEMOSHOW_LAST_ITEM
 } NemoShowItemType;
 
@@ -143,13 +142,6 @@ static inline void nemoshow_item_set_canvas(struct showone *one, struct showone 
 static inline struct showone *nemoshow_item_get_canvas(struct showone *one)
 {
 	return NEMOSHOW_ITEM_AT(one, canvas);
-}
-
-static inline struct showone *nemoshow_item_get_style(struct showone *one)
-{
-	struct showone *style = NEMOSHOW_REF(one, NEMOSHOW_STYLE_REF);
-
-	return style != NULL ? style : one;
 }
 
 static inline void nemoshow_item_set_x(struct showone *one, double x)

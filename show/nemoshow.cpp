@@ -121,8 +121,6 @@ static struct showone *nemoshow_create_one(struct nemoshow *show, struct xmlnode
 		one = nemoshow_item_create(NEMOSHOW_PATHGROUP_ITEM);
 	} else if (strcmp(node->name, "image") == 0) {
 		one = nemoshow_item_create(NEMOSHOW_IMAGE_ITEM);
-	} else if (strcmp(node->name, "style") == 0) {
-		one = nemoshow_item_create(NEMOSHOW_STYLE_ITEM);
 	} else if (strcmp(node->name, "group") == 0) {
 		one = nemoshow_item_create(NEMOSHOW_GROUP_ITEM);
 	} else if (strcmp(node->name, "svg") == 0) {
