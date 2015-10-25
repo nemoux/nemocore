@@ -905,6 +905,11 @@ void nemoshow_item_path_clear(struct showone *one)
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	NEMOSHOW_ITEM_CC(item, path)->reset();
+
+	if (NEMOSHOW_ITEM_CC(item, strokepath) != NULL)
+		NEMOSHOW_ITEM_CC(item, strokepath)->reset();
+	if (NEMOSHOW_ITEM_CC(item, fillpath) != NULL)
+		NEMOSHOW_ITEM_CC(item, fillpath)->reset();
 }
 
 void nemoshow_item_path_moveto(struct showone *one, double x, double y)
@@ -951,6 +956,19 @@ void nemoshow_item_path_arc(struct showone *one, double x, double y, double widt
 	SkRect rect = SkRect::MakeXYWH(x, y, width, height);
 
 	NEMOSHOW_ITEM_CC(item, path)->addArc(rect, from, to);
+}
+
+void nemoshow_item_path_append(struct showone *one, struct showone *src)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+	struct showitem *other = NEMOSHOW_ITEM(src);
+
+	NEMOSHOW_ITEM_CC(item, path)->addPath(*NEMOSHOW_ITEM_CC(other, path));
+
+	if (NEMOSHOW_ITEM_CC(item, strokepath) != NULL && NEMOSHOW_ITEM_CC(other, strokepath) != NULL)
+		NEMOSHOW_ITEM_CC(item, strokepath)->addPath(*NEMOSHOW_ITEM_CC(other, strokepath));
+	if (NEMOSHOW_ITEM_CC(item, fillpath) != NULL && NEMOSHOW_ITEM_CC(other, fillpath) != NULL)
+		NEMOSHOW_ITEM_CC(item, fillpath)->addPath(*NEMOSHOW_ITEM_CC(other, fillpath));
 }
 
 void nemoshow_item_path_translate(struct showone *one, double x, double y)

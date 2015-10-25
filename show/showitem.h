@@ -62,7 +62,7 @@ struct showitem {
 	double fills[4];
 
 	double alpha;
-	
+
 	double pathlength;
 	double pathsegment;
 	double pathdeviation;
@@ -123,6 +123,7 @@ extern void nemoshow_item_path_cubicto(struct showone *one, double x0, double y0
 extern void nemoshow_item_path_close(struct showone *one);
 extern void nemoshow_item_path_cmd(struct showone *one, const char *cmd);
 extern void nemoshow_item_path_arc(struct showone *one, double x, double y, double width, double height, double from, double to);
+extern void nemoshow_item_path_append(struct showone *one, struct showone *src);
 
 extern void nemoshow_item_path_translate(struct showone *one, double x, double y);
 extern void nemoshow_item_path_scale(struct showone *one, double sx, double sy);
