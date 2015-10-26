@@ -965,10 +965,18 @@ void nemoshow_item_path_append(struct showone *one, struct showone *src)
 
 	NEMOSHOW_ITEM_CC(item, path)->addPath(*NEMOSHOW_ITEM_CC(other, path));
 
-	if (NEMOSHOW_ITEM_CC(item, strokepath) != NULL && NEMOSHOW_ITEM_CC(other, strokepath) != NULL)
+	if (NEMOSHOW_ITEM_CC(other, strokepath) != NULL) {
+		if (NEMOSHOW_ITEM_CC(item, strokepath) == NULL)
+			NEMOSHOW_ITEM_CC(item, strokepath) = new SkPath;
+
 		NEMOSHOW_ITEM_CC(item, strokepath)->addPath(*NEMOSHOW_ITEM_CC(other, strokepath));
-	if (NEMOSHOW_ITEM_CC(item, fillpath) != NULL && NEMOSHOW_ITEM_CC(other, fillpath) != NULL)
+	}
+	if (NEMOSHOW_ITEM_CC(other, fillpath) != NULL) {
+		if (NEMOSHOW_ITEM_CC(item, fillpath) == NULL)
+			NEMOSHOW_ITEM_CC(item, fillpath) = new SkPath;
+
 		NEMOSHOW_ITEM_CC(item, fillpath)->addPath(*NEMOSHOW_ITEM_CC(other, fillpath));
+	}
 }
 
 void nemoshow_item_path_translate(struct showone *one, double x, double y)
@@ -1046,7 +1054,6 @@ int nemoshow_item_load_svg(struct showone *one, const char *uri)
 	const char *units;
 	const char *attr0, *attr1;
 	SkMatrix matrix;
-	int has_transform = 0;
 	int has_fill;
 	int has_stroke;
 
@@ -1062,6 +1069,8 @@ int nemoshow_item_load_svg(struct showone *one, const char *uri)
 	nemoxml_load_file(xml, uri);
 	nemoxml_update(xml);
 
+	matrix.setIdentity();
+
 	nemolist_for_each(node, &xml->nodes, nodelink) {
 		if (strcmp(node->name, "svg") == 0) {
 			attr0 = nemoxml_node_get_attr(node, "width");
@@ -1075,16 +1084,15 @@ int nemoshow_item_load_svg(struct showone *one, const char *uri)
 				ph = string_parse_float_with_endptr(attr1, 0, strlen(attr1), &units);
 
 				if (sw != pw || sh != ph) {
-					matrix.setIdentity();
 					matrix.postScale(sw / pw, sh / ph);
-
-					has_transform = 1;
 				}
 			}
 
 			break;
 		}
 	}
+
+	matrix.postTranslate(item->x, item->y);
 
 	nemolist_for_each(node, &xml->nodes, nodelink) {
 		has_stroke = 0;
@@ -1241,11 +1249,9 @@ int nemoshow_item_load_svg(struct showone *one, const char *uri)
 
 	nemoxml_destroy(xml);
 
-	if (has_transform != 0) {
-		NEMOSHOW_ITEM_CC(item, path)->transform(matrix);
-		NEMOSHOW_ITEM_CC(item, strokepath)->transform(matrix);
-		NEMOSHOW_ITEM_CC(item, fillpath)->transform(matrix);
-	}
+	NEMOSHOW_ITEM_CC(item, path)->transform(matrix);
+	NEMOSHOW_ITEM_CC(item, strokepath)->transform(matrix);
+	NEMOSHOW_ITEM_CC(item, fillpath)->transform(matrix);
 
 	return 0;
 }
