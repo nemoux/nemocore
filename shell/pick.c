@@ -131,6 +131,7 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 					bin->screen.y = screen->dy;
 					bin->screen.width = screen->dw;
 					bin->screen.height = screen->dh;
+					bin->screen.r = screen->dr * M_PI / 180.0f;
 					bin->has_screen = 1;
 
 					nemoshell_send_bin_state(bin);
@@ -200,6 +201,7 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 					bin->screen.y = screen->dy;
 					bin->screen.width = screen->dw;
 					bin->screen.height = screen->dh;
+					bin->screen.r = screen->dr * M_PI / 180.0f;
 					bin->has_screen = 1;
 
 					nemoshell_send_bin_state(bin);

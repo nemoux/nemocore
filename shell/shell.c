@@ -289,7 +289,8 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 		if (bin->state.fullscreen || bin->state.maximized) {
 			nemoview_attach_layer(view, &bin->shell->fullscreen_layer);
 			nemoview_set_position(view, bin->screen.x, bin->screen.y);
-			nemoview_set_rotation(view, 0.0f);
+			nemoview_correct_pivot(view, bin->screen.width / 2.0f, bin->screen.height / 2.0f);
+			nemoview_set_rotation(view, bin->screen.r);
 		} else {
 			nemoview_attach_layer(view, bin->layer);
 
@@ -866,6 +867,7 @@ void nemoshell_load_fullscreens(struct nemoshell *shell)
 		screen->dy = nemoitem_get_iattr(shell->configs, index, "dy", 0);
 		screen->dw = nemoitem_get_iattr(shell->configs, index, "dw", nemocompz_get_scene_width(compz));
 		screen->dh = nemoitem_get_iattr(shell->configs, index, "dh", nemocompz_get_scene_height(compz));
+		screen->dr = nemoitem_get_iattr(shell->configs, index, "dr", 0);
 		screen->id = nemoitem_get_iattr(shell->configs, index, "id", 0);
 
 		type = nemoitem_get_attr(shell->configs, index, "type");

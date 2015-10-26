@@ -201,6 +201,7 @@ struct shellbin {
 
 	struct {
 		float x, y;
+		float r;
 		int32_t width, height;
 	} screen;
 	int has_screen;
@@ -226,7 +227,7 @@ struct shellscreen {
 	uint32_t type;
 
 	int32_t sx, sy, sw, sh;
-	int32_t dx, dy, dw, dh;
+	int32_t dx, dy, dw, dh, dr;
 
 	struct wl_list link;
 
