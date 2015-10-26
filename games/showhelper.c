@@ -85,15 +85,32 @@ static int nemoshow_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t ty
 	return 0;
 }
 
+static void nemoshow_dispatch_timer(struct nemotimer *timer, void *data)
+{
+	struct showcontext *scon = (struct showcontext *)data;
+
+	nemotimer_set_timeout(timer, 500);
+
+	nemotale_push_timer_event(scon->tale, time_current_msecs());
+}
+
 struct nemoshow *nemoshow_create_on_tale(struct nemotool *tool, int32_t width, int32_t height, nemotale_dispatch_event_t dispatch)
 {
 	struct showcontext *scon;
 	struct nemoshow *show;
+	struct nemotimer *timer;
 
 	scon = (struct showcontext *)malloc(sizeof(struct showcontext));
 	if (scon == NULL)
 		return NULL;
 	memset(scon, 0, sizeof(struct showcontext));
+
+	scon->timer = timer = nemotimer_create(tool);
+	if (timer == NULL)
+		goto err1;
+	nemotimer_set_callback(timer, nemoshow_dispatch_timer);
+	nemotimer_set_timeout(timer, 500);
+	nemotimer_set_userdata(timer, scon);
 
 	scon->tool = tool;
 	scon->width = width;
@@ -128,6 +145,11 @@ struct nemoshow *nemoshow_create_on_tale(struct nemotool *tool, int32_t width, i
 	nemotale_set_userdata(scon->tale, show);
 
 	return show;
+
+err1:
+	free(scon);
+
+	return NULL;
 }
 
 void nemoshow_destroy_on_tale(struct nemoshow *show)

@@ -8,18 +8,31 @@
 #include <getopt.h>
 
 #include <nemotool.h>
+#include <nemotimer.h>
 #include <showhelper.h>
 #include <nemolog.h>
 #include <nemomisc.h>
 
 typedef enum {
-	NEMOMINE_BOMB_STATE = (1 << 0),
-	NEMOMINE_CHECK_STATE = (1 << 1),
-	NEMOMINE_SAFE_STATE = (1 << 2),
+	NEMOMINE_NONE_STATE = 0,
+	NEMOMINE_CHECK_STATE = 1,
+	NEMOMINE_CONFIRM_STATE = 2,
+	NEMOMINE_LAST_STATE
 } NemoMineState;
+
+struct mineone {
+	struct showone *box;
+	struct showone *one;
+
+	int is_bomb;
+
+	int state;
+};
 
 struct minecontext {
 	struct nemotool *tool;
+
+	struct nemotimer *timer;
 
 	struct nemotale *tale;
 
@@ -33,21 +46,26 @@ struct minecontext {
 	struct showone *box;
 	struct showone *flag;
 
-	struct showone *icons[4];
+	struct showone *font;
 
-	struct showone **boxes;
-	struct showone **ones;
-	uint32_t *mines;
+	struct showone *exit;
+	struct showone *pin;
+	struct showone *reset;
+	struct showone *time;
+
+	struct mineone *ones;
 
 	int is_pinning;
-	int is_helping;
+	int is_playing;
 
 	int columns;
 	int rows;
 	int bombs;
 	int size;
 
-	int safes;
+	int found;
+
+	uint32_t secs;
 
 	int width, height;
 };
@@ -64,6 +82,7 @@ static int nemomine_count_neighbors(struct minecontext *context, int index)
 		context->columns - 0,
 		context->columns + 1
 	};
+	struct mineone *mone;
 	int count = 0;
 	int i;
 
@@ -71,7 +90,9 @@ static int nemomine_count_neighbors(struct minecontext *context, int index)
 		if (neighbors[i] + index < 0 || neighbors[i] + index >= context->columns * context->rows)
 			continue;
 
-		if (context->mines[neighbors[i] + index] & NEMOMINE_BOMB_STATE)
+		mone = &context->ones[neighbors[i] + index];
+
+		if (mone->is_bomb != 0)
 			count++;
 	}
 
@@ -80,32 +101,174 @@ static int nemomine_count_neighbors(struct minecontext *context, int index)
 
 static void nemomine_prepare_mines(struct minecontext *context)
 {
+	struct mineone *mone;
 	int index;
 	int i;
 
-	memset(context->mines, 0, sizeof(uint32_t) * context->columns * context->rows);
+	for (i = 0; i < context->columns * context->rows; i++) {
+		mone = &context->ones[i];
+
+		mone->is_bomb = 0;
+
+		mone->state = NEMOMINE_NONE_STATE;
+
+		nemoshow_item_set_stroke_color(mone->box, 0x1e, 0xdc, 0xdc, 0xff);
+
+		nemoshow_item_set_alpha(mone->one, 0.0f);
+		nemoshow_item_set_fill_color(mone->one, 0x1e, 0xdc, 0xdc, 0xff);
+		nemoshow_item_path_clear(mone->one);
+
+		nemoshow_one_dirty(mone->box, NEMOSHOW_STYLE_DIRTY);
+		nemoshow_one_dirty(mone->one, NEMOSHOW_PATH_DIRTY);
+	}
 
 	for (i = 0; i < context->bombs; i++) {
 retry:
 		index = random_get_int(0, context->columns * context->rows);
 
-		if (context->mines[index] & NEMOMINE_BOMB_STATE)
+		mone = &context->ones[index];
+
+		if (mone->is_bomb != 0)
 			goto retry;
 
-		context->mines[index] = NEMOMINE_BOMB_STATE;
+		mone->is_bomb = 1;
 	}
+
+	nemoshow_item_set_fill_color(context->reset, 0x1e, 0xdc, 0xdc, 0xff);
+	nemoshow_one_dirty(context->reset, NEMOSHOW_STYLE_DIRTY);
+
+	nemotimer_set_timeout(context->timer, 1000);
+
+	context->secs = 0;
+	context->found = 0;
+
+	context->is_playing = 1;
 }
 
 static void nemomine_finish_mines(struct minecontext *context)
 {
+	struct mineone *mone;
 	int i;
 
 	for (i = 0; i < context->columns * context->rows; i++) {
-		if (context->ones[i] != NULL) {
-			nemoshow_one_destroy(context->ones[i]);
+		mone = &context->ones[i];
 
-			context->ones[i] = NULL;
+		if (mone->is_bomb == 0)
+			continue;
+
+		nemoshow_item_set_alpha(mone->one, 1.0f);
+		nemoshow_item_path_append(mone->one, context->flag);
+
+		nemoshow_one_dirty(mone->one, NEMOSHOW_STYLE_DIRTY);
+		nemoshow_one_dirty(mone->one, NEMOSHOW_PATH_DIRTY);
+	}
+
+	nemoshow_item_set_fill_color(context->reset, 0xcc, 0x27, 0x84, 0xff);
+	nemoshow_one_dirty(context->reset, NEMOSHOW_STYLE_DIRTY);
+
+	nemotimer_set_timeout(context->timer, 0);
+
+	context->is_playing = 0;
+}
+
+static void nemomine_check_mine(struct minecontext *context, uint32_t tag)
+{
+	struct mineone *mone = &context->ones[tag];
+	struct showtransition *trans;
+	struct showone *sequence;
+	struct showone *frame;
+	struct showone *set0;
+
+	mone->state = NEMOMINE_CHECK_STATE;
+
+	nemoshow_item_path_append(mone->one, context->flag);
+
+	frame = nemoshow_sequence_create_frame();
+	nemoshow_sequence_set_timing(frame, 1.0f);
+
+	set0 = nemoshow_sequence_create_set();
+	nemoshow_sequence_set_source(set0, mone->one);
+	nemoshow_sequence_set_dattr(set0, "alpha", 1.0f, NEMOSHOW_STYLE_DIRTY);
+	nemoshow_one_attach_one(frame, set0);
+
+	sequence = nemoshow_sequence_create_easy(context->show, frame, NULL);
+
+	trans = nemoshow_transition_create(context->ease, 500, 0);
+	nemoshow_transition_check_one(trans, mone->one);
+	nemoshow_transition_attach_sequence(trans, sequence);
+	nemoshow_attach_transition(context->show, trans);
+}
+
+static void nemomine_confirm_mine(struct minecontext *context, uint32_t tag)
+{
+	static int neighbors[4] = {
+		-context->columns,
+		-1,
+		+1,
+		context->columns,
+	};
+	struct mineone *mone = &context->ones[tag];
+	struct mineone *none;
+	struct showtransition *trans;
+	struct showone *sequence;
+	struct showone *frame;
+	struct showone *set0, *set1;
+	int nneighbors;
+	int i;
+
+	mone->state = NEMOMINE_CONFIRM_STATE;
+
+	nneighbors = nemomine_count_neighbors(context, tag);
+	if (nneighbors == 0) {
+		for (i = 0; i < 4; i++) {
+			if (neighbors[i] + tag < 0 || neighbors[i] + tag >= context->columns * context->rows)
+				continue;
+
+			none = &context->ones[neighbors[i] + tag];
+			if (none->is_bomb != 0 || none->state == NEMOMINE_CONFIRM_STATE)
+				continue;
+
+			nemomine_confirm_mine(context, neighbors[i] + tag);
 		}
+
+		frame = nemoshow_sequence_create_frame();
+		nemoshow_sequence_set_timing(frame, 1.0f);
+
+		set0 = nemoshow_sequence_create_set();
+		nemoshow_sequence_set_source(set0, mone->box);
+		nemoshow_sequence_set_cattr(set0, "stroke", 0xff, 0x8c, 0x32, 0xff, NEMOSHOW_STYLE_DIRTY);
+		nemoshow_one_attach_one(frame, set0);
+
+		set1 = nemoshow_sequence_create_set();
+		nemoshow_sequence_set_source(set1, mone->one);
+		nemoshow_sequence_set_dattr(set1, "alpha", 0.0f, NEMOSHOW_STYLE_DIRTY);
+		nemoshow_one_attach_one(frame, set1);
+
+		sequence = nemoshow_sequence_create_easy(context->show, frame, NULL);
+
+		trans = nemoshow_transition_create(context->ease, 500, 0);
+		nemoshow_transition_check_one(trans, mone->box);
+		nemoshow_transition_check_one(trans, mone->one);
+		nemoshow_transition_attach_sequence(trans, sequence);
+		nemoshow_attach_transition(context->show, trans);
+	} else {
+		nemoshow_item_path_append(mone->one, context->flag);
+
+		frame = nemoshow_sequence_create_frame();
+		nemoshow_sequence_set_timing(frame, 1.0f);
+
+		set0 = nemoshow_sequence_create_set();
+		nemoshow_sequence_set_source(set0, mone->one);
+		nemoshow_sequence_set_cattr(set0, "fill", 0xff, 0x8c, 0x32, 0xff, NEMOSHOW_STYLE_DIRTY);
+		nemoshow_sequence_set_dattr(set0, "alpha", 1.0f, NEMOSHOW_STYLE_DIRTY);
+		nemoshow_one_attach_one(frame, set0);
+
+		sequence = nemoshow_sequence_create_easy(context->show, frame, NULL);
+
+		trans = nemoshow_transition_create(context->ease, 500, 0);
+		nemoshow_transition_check_one(trans, mone->one);
+		nemoshow_transition_attach_sequence(trans, sequence);
+		nemoshow_attach_transition(context->show, trans);
 	}
 }
 
@@ -114,246 +277,83 @@ static void nemomine_dispatch_tale_event(struct nemotale *tale, struct talenode 
 	uint32_t id = nemotale_node_get_id(node);
 
 	if (id == 1) {
-		if (nemotale_dispatch_grab(tale, event->device, type, event) == 0) {
-			struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
-			struct minecontext *context = (struct minecontext *)nemoshow_get_userdata(show);
-			struct nemocanvas *canvas = NEMOSHOW_AT(show, canvas);
+		struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
+		struct minecontext *context = (struct minecontext *)nemoshow_get_userdata(show);
+		struct nemocanvas *canvas = NEMOSHOW_AT(show, canvas);
 
-			if (context->is_pinning != 0) {
-				if (nemotale_is_touch_down(tale, event, type)) {
-					nemotale_event_update_node_taps(tale, node, event, type);
+		if (context->is_pinning != 0 || context->is_playing == 0) {
+			if (nemotale_is_touch_down(tale, event, type)) {
+				nemotale_event_update_node_taps(tale, node, event, type);
 
-					if (nemotale_is_single_tap(tale, event, type)) {
-						nemocanvas_move(canvas, event->taps[0]->serial);
-					} else if (nemotale_is_double_taps(tale, event, type)) {
-						nemocanvas_pick(canvas,
-								event->taps[0]->serial,
-								event->taps[1]->serial,
-								(1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_SCALE) | (1 << NEMO_SURFACE_PICK_TYPE_MOVE));
-					}
+				if (nemotale_is_single_tap(tale, event, type)) {
+					nemocanvas_move(canvas, event->taps[0]->serial);
+				} else if (nemotale_is_double_taps(tale, event, type)) {
+					nemocanvas_pick(canvas,
+							event->taps[0]->serial,
+							event->taps[1]->serial,
+							(1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_SCALE) | (1 << NEMO_SURFACE_PICK_TYPE_MOVE));
 				}
+			}
 
-				if (nemotale_is_single_click(tale, event, type)) {
-					struct showone *pick;
-					struct showone *one;
-					uint32_t tag;
-
-					pick = nemoshow_canvas_pick_one(context->canvas, event->x, event->y);
-					if (pick != NULL) {
-						tag = nemoshow_one_get_tag(pick) - 1;
-
-						if (tag == 10000) {
-							nemotool_exit(context->tool);
-						} else if (tag == 10001) {
-							context->is_pinning = !context->is_pinning;
-						} else if (tag == 10002) {
-							nemomine_finish_mines(context);
-							nemomine_prepare_mines(context);
-
-							nemocanvas_dispatch_frame(canvas);
-						}
-					}
-				}
-			} else {
+			if (nemotale_is_single_click(tale, event, type)) {
 				struct showone *pick;
+				struct showone *one;
 				uint32_t tag;
 
 				pick = nemoshow_canvas_pick_one(context->canvas, event->x, event->y);
 				if (pick != NULL) {
 					tag = nemoshow_one_get_tag(pick) - 1;
 
-					if (nemotale_is_touch_down(tale, event, type)) {
-						if (tag == 10000) {
-							context->is_helping = 1;
-						}
+					if (tag == 10000) {
+						nemotool_exit(context->tool);
+					} else if (tag == 10001) {
+						context->is_pinning = !context->is_pinning;
+					} else if (tag == 10002) {
+						nemomine_prepare_mines(context);
+
+						nemocanvas_dispatch_frame(canvas);
 					}
+				}
+			}
+		} else {
+			struct showone *pick;
+			uint32_t tag;
 
-					if (nemotale_is_touch_up(tale, event, type)) {
-						if (tag == 10000) {
-							context->is_helping = 0;
-						}
-					}
+			pick = nemoshow_canvas_pick_one(context->canvas, event->x, event->y);
+			if (pick != NULL) {
+				tag = nemoshow_one_get_tag(pick) - 1;
 
-					if (nemotale_is_single_click(tale, event, type)) {
-						struct showtransition *trans;
-						struct showone *sequence;
-						struct showone *frame;
-						struct showone *set0;
-						struct showone *one;
-						int neighbors;
+				if (nemotale_is_single_click(tale, event, type)) {
+					if (tag < 10000 && context->is_playing != 0) {
+						struct mineone *mone = &context->ones[tag];
 
-						if (tag < 10000) {
-							if (context->is_helping == 0) {
-								if (!(context->mines[tag] & NEMOMINE_SAFE_STATE)) {
-									if ((context->mines[tag] & NEMOMINE_CHECK_STATE)) {
-										if ((context->mines[tag] & NEMOMINE_BOMB_STATE)) {
-											nemomine_finish_mines(context);
-											nemomine_prepare_mines(context);
+						if (mone->state != NEMOMINE_CONFIRM_STATE) {
+							if (mone->is_bomb != 0) {
+								nemomine_finish_mines(context);
 
-											nemocanvas_dispatch_frame(canvas);
-										} else {
-											neighbors = nemomine_count_neighbors(context, tag);
-
-											frame = nemoshow_sequence_create_frame();
-											nemoshow_sequence_set_timing(frame, 1.0f);
-
-											set0 = nemoshow_sequence_create_set();
-											nemoshow_sequence_set_source(set0, context->ones[tag]);
-											nemoshow_sequence_set_cattr(set0, "fill", 0xff, 0x8c, 0x32, 0xff, NEMOSHOW_STYLE_DIRTY);
-											nemoshow_one_attach_one(frame, set0);
-
-											sequence = nemoshow_sequence_create_easy(show, frame, NULL);
-
-											trans = nemoshow_transition_create(context->ease, 500, 0);
-											nemoshow_transition_check_one(trans, context->ones[tag]);
-											nemoshow_transition_attach_sequence(trans, sequence);
-											nemoshow_attach_transition(show, trans);
-
-											nemocanvas_dispatch_frame(canvas);
-
-											context->mines[tag] |= NEMOMINE_SAFE_STATE;
-										}
-									} else {
-										context->ones[tag] = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
-										nemoshow_attach_one(context->show, one);
-										nemoshow_item_attach_one(context->canvas, one);
-										nemoshow_one_set_tag(one, tag + 1);
-										nemoshow_item_set_x(one, 0.0f);
-										nemoshow_item_set_y(one, 0.0f);
-										nemoshow_item_set_width(one, context->size);
-										nemoshow_item_set_height(one, context->size);
-										nemoshow_item_set_filter(one, context->inner);
-										nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
-										nemoshow_item_set_alpha(one, 0.0f);
-										nemoshow_item_set_tsr(one);
-										nemoshow_item_translate(one, (tag % context->columns) * context->size, (tag / context->columns) * context->size + context->size);
-										nemoshow_item_path_append(one, context->flag);
-
-										frame = nemoshow_sequence_create_frame();
-										nemoshow_sequence_set_timing(frame, 1.0f);
-
-										set0 = nemoshow_sequence_create_set();
-										nemoshow_sequence_set_source(set0, one);
-										nemoshow_sequence_set_dattr(set0, "alpha", 1.0f, NEMOSHOW_STYLE_DIRTY);
-										nemoshow_one_attach_one(frame, set0);
-
-										sequence = nemoshow_sequence_create_easy(show, frame, NULL);
-
-										trans = nemoshow_transition_create(context->ease, 500, 0);
-										nemoshow_transition_check_one(trans, one);
-										nemoshow_transition_attach_sequence(trans, sequence);
-										nemoshow_attach_transition(show, trans);
-
-										nemocanvas_dispatch_frame(canvas);
-
-										context->mines[tag] |= NEMOMINE_CHECK_STATE;
-									}
-								}
+								nemocanvas_dispatch_frame(canvas);
 							} else {
-								if (!(context->mines[tag] & NEMOMINE_SAFE_STATE)) {
-									if ((context->mines[tag] & NEMOMINE_BOMB_STATE)) {
-										if (!(context->mines[tag] & NEMOMINE_CHECK_STATE)) {
-											context->ones[tag] = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
-											nemoshow_attach_one(context->show, one);
-											nemoshow_item_attach_one(context->canvas, one);
-											nemoshow_one_set_tag(one, tag + 1);
-											nemoshow_item_set_x(one, 0.0f);
-											nemoshow_item_set_y(one, 0.0f);
-											nemoshow_item_set_width(one, context->size);
-											nemoshow_item_set_height(one, context->size);
-											nemoshow_item_set_filter(one, context->inner);
-											nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
-											nemoshow_item_set_alpha(one, 0.0f);
-											nemoshow_item_set_tsr(one);
-											nemoshow_item_translate(one, (tag % context->columns) * context->size, (tag / context->columns) * context->size + context->size);
-											nemoshow_item_path_append(one, context->flag);
+								nemomine_confirm_mine(context, tag);
 
-											frame = nemoshow_sequence_create_frame();
-											nemoshow_sequence_set_timing(frame, 1.0f);
-
-											set0 = nemoshow_sequence_create_set();
-											nemoshow_sequence_set_source(set0, one);
-											nemoshow_sequence_set_dattr(set0, "alpha", 1.0f, NEMOSHOW_STYLE_DIRTY);
-											nemoshow_one_attach_one(frame, set0);
-
-											sequence = nemoshow_sequence_create_easy(show, frame, NULL);
-
-											trans = nemoshow_transition_create(context->ease, 500, 0);
-											nemoshow_transition_check_one(trans, one);
-											nemoshow_transition_attach_sequence(trans, sequence);
-											nemoshow_attach_transition(show, trans);
-
-											nemocanvas_dispatch_frame(canvas);
-
-											context->mines[tag] |= NEMOMINE_CHECK_STATE;
-										}
-									} else {
-										if (!(context->mines[tag] & NEMOMINE_CHECK_STATE)) {
-											context->ones[tag] = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
-											nemoshow_attach_one(context->show, one);
-											nemoshow_item_attach_one(context->canvas, one);
-											nemoshow_one_set_tag(one, tag + 1);
-											nemoshow_item_set_x(one, 0.0f);
-											nemoshow_item_set_y(one, 0.0f);
-											nemoshow_item_set_width(one, context->size);
-											nemoshow_item_set_height(one, context->size);
-											nemoshow_item_set_filter(one, context->inner);
-											nemoshow_item_set_fill_color(one, 0xff, 0x8c, 0x32, 0xff);
-											nemoshow_item_set_alpha(one, 0.0f);
-											nemoshow_item_set_tsr(one);
-											nemoshow_item_translate(one, (tag % context->columns) * context->size, (tag / context->columns) * context->size + context->size);
-											nemoshow_item_path_append(one, context->flag);
-
-											frame = nemoshow_sequence_create_frame();
-											nemoshow_sequence_set_timing(frame, 1.0f);
-
-											set0 = nemoshow_sequence_create_set();
-											nemoshow_sequence_set_source(set0, one);
-											nemoshow_sequence_set_dattr(set0, "alpha", 1.0f, NEMOSHOW_STYLE_DIRTY);
-											nemoshow_one_attach_one(frame, set0);
-
-											sequence = nemoshow_sequence_create_easy(show, frame, NULL);
-
-											trans = nemoshow_transition_create(context->ease, 500, 0);
-											nemoshow_transition_check_one(trans, one);
-											nemoshow_transition_attach_sequence(trans, sequence);
-											nemoshow_attach_transition(show, trans);
-
-											nemocanvas_dispatch_frame(canvas);
-
-											context->mines[tag] |= NEMOMINE_CHECK_STATE;
-										} else {
-											neighbors = nemomine_count_neighbors(context, tag);
-
-											frame = nemoshow_sequence_create_frame();
-											nemoshow_sequence_set_timing(frame, 1.0f);
-
-											set0 = nemoshow_sequence_create_set();
-											nemoshow_sequence_set_source(set0, context->ones[tag]);
-											nemoshow_sequence_set_cattr(set0, "fill", 0xff, 0x8c, 0x32, 0xff, NEMOSHOW_STYLE_DIRTY);
-											nemoshow_one_attach_one(frame, set0);
-
-											sequence = nemoshow_sequence_create_easy(show, frame, NULL);
-
-											trans = nemoshow_transition_create(context->ease, 500, 0);
-											nemoshow_transition_check_one(trans, context->ones[tag]);
-											nemoshow_transition_attach_sequence(trans, sequence);
-											nemoshow_attach_transition(show, trans);
-
-											nemocanvas_dispatch_frame(canvas);
-										}
-									}
-
-									context->mines[tag] |= NEMOMINE_SAFE_STATE;
-								}
+								nemocanvas_dispatch_frame(canvas);
 							}
-						} else if (tag == 10000) {
-							nemotool_exit(context->tool);
-						} else if (tag == 10001) {
-							context->is_pinning = !context->is_pinning;
-						} else if (tag == 10002) {
-							nemomine_finish_mines(context);
-							nemomine_prepare_mines(context);
+						}
+					} else if (tag == 10000) {
+					} else if (tag == 10001) {
+						context->is_pinning = !context->is_pinning;
+					} else if (tag == 10002) {
+						nemomine_prepare_mines(context);
+
+						nemocanvas_dispatch_frame(canvas);
+					}
+				}
+
+				if (nemotale_is_long_press(tale, event, type)) {
+					if (tag < 10000 && context->is_playing != 0) {
+						struct mineone *mone = &context->ones[tag];
+
+						if (mone->state == NEMOMINE_NONE_STATE) {
+							nemomine_check_mine(context, tag);
 
 							nemocanvas_dispatch_frame(canvas);
 						}
@@ -364,8 +364,24 @@ static void nemomine_dispatch_tale_event(struct nemotale *tale, struct talenode 
 	}
 }
 
+static void nemomine_dispatch_timer(struct nemotimer *timer, void *data)
+{
+	struct minecontext *context = (struct minecontext *)data;
+	struct nemocanvas *canvas = NEMOSHOW_AT(context->show, canvas);
+	char text[64];
+
+	nemotimer_set_timeout(timer, 1000);
+
+	snprintf(text, sizeof(text), "%d", ++context->secs);
+
+	nemoshow_item_set_text(context->time, text);
+
+	nemocanvas_dispatch_frame(canvas);
+}
+
 static void nemomine_prepare_boxes(struct minecontext *context)
 {
+	struct mineone *mone;
 	struct showone *one;
 	int index;
 	int i, j;
@@ -374,7 +390,9 @@ static void nemomine_prepare_boxes(struct minecontext *context)
 		for (j = 0; j < context->columns; j++) {
 			index = i * context->columns + j;
 
-			context->boxes[index] = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
+			mone = &context->ones[index];
+
+			mone->box = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
 			nemoshow_attach_one(context->show, one);
 			nemoshow_item_attach_one(context->canvas, one);
 			nemoshow_one_set_tag(one, index + 1);
@@ -388,6 +406,19 @@ static void nemomine_prepare_boxes(struct minecontext *context)
 			nemoshow_item_set_tsr(one);
 			nemoshow_item_translate(one, j * context->size, i * context->size + context->size);
 			nemoshow_item_path_append(one, context->box);
+
+			mone->one = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
+			nemoshow_attach_one(context->show, one);
+			nemoshow_item_attach_one(context->canvas, one);
+			nemoshow_one_set_tag(one, index + 1);
+			nemoshow_item_set_x(one, 0.0f);
+			nemoshow_item_set_y(one, 0.0f);
+			nemoshow_item_set_width(one, context->size);
+			nemoshow_item_set_height(one, context->size);
+			nemoshow_item_set_filter(one, context->inner);
+			nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
+			nemoshow_item_set_tsr(one);
+			nemoshow_item_translate(one, j * context->size, i * context->size + context->size);
 		}
 	}
 }
@@ -408,12 +439,14 @@ int main(int argc, char *argv[])
 
 	struct minecontext *context;
 	struct nemotool *tool;
+	struct nemotimer *timer;
 	struct nemotale *tale;
 	struct nemoshow *show;
 	struct showone *scene;
 	struct showone *canvas;
 	struct showone *blur;
 	struct showone *ease;
+	struct showone *font;
 	struct showone *one;
 	int columns = 30;
 	int rows = 16;
@@ -476,6 +509,8 @@ int main(int argc, char *argv[])
 	nemoshow_set_userdata(show, context);
 
 	context->tale = tale = NEMOSHOW_AT(show, tale);
+	nemotale_set_single_click_gesture(tale, 150, 50);
+	nemotale_set_long_press_gesture(tale, 500, 50);
 
 	nemocanvas_set_min_size(NEMOSHOW_AT(show, canvas),
 			width * 1.0f, height * 1.0f);
@@ -538,7 +573,7 @@ int main(int argc, char *argv[])
 	nemoshow_item_set_height(one, size);
 	nemoshow_item_load_svg(one, "/home/root/images/STE-SHELL/MAIN-ICON/System.svg");
 
-	context->icons[0] = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
+	context->exit = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
 	nemoshow_attach_one(show, one);
 	nemoshow_item_attach_one(canvas, one);
 	nemoshow_one_set_tag(one, 10000 + 1);
@@ -552,7 +587,7 @@ int main(int argc, char *argv[])
 	nemoshow_item_translate(one, 0.0f, 0.0f);
 	nemoshow_item_load_svg(one, "/home/root/images/STE-SHELL/MAIN-ICON/System.svg");
 
-	context->icons[1] = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
+	context->pin = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
 	nemoshow_attach_one(show, one);
 	nemoshow_item_attach_one(canvas, one);
 	nemoshow_one_set_tag(one, 10001 + 1);
@@ -566,7 +601,7 @@ int main(int argc, char *argv[])
 	nemoshow_item_translate(one, (context->columns - 1) * context->size, 0.0f);
 	nemoshow_item_load_svg(one, "/home/root/images/STE-SHELL/MAIN-ICON/System.svg");
 
-	context->icons[2] = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
+	context->reset = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
 	nemoshow_attach_one(show, one);
 	nemoshow_item_attach_one(canvas, one);
 	nemoshow_one_set_tag(one, 10002 + 1);
@@ -580,20 +615,30 @@ int main(int argc, char *argv[])
 	nemoshow_item_translate(one, (context->columns / 2) * context->size, 0.0f);
 	nemoshow_item_load_svg(one, "/home/root/images/STE-SHELL/MAIN-ICON/System.svg");
 
-	context->boxes = (struct showone **)malloc(sizeof(struct showone *) * context->columns * context->rows);
-	if (context->boxes == NULL)
-		goto err3;
-	memset(context->boxes, 0, sizeof(struct showone *) * context->columns * context->rows);
+	context->font = font = nemoshow_font_create();
+	nemoshow_attach_one(show, font);
+	nemoshow_font_load(font, "/usr/share/fonts/ttf/LiberationMono-Regular.ttf");
+	nemoshow_font_use_harfbuzz(font);
 
-	context->ones = (struct showone **)malloc(sizeof(struct showone *) * context->columns * context->rows);
+	context->time = one = nemoshow_item_create(NEMOSHOW_TEXT_ITEM);
+	nemoshow_attach_one(show, one);
+	nemoshow_item_attach_one(canvas, one);
+	nemoshow_item_set_font(one, font);
+	nemoshow_item_set_fontsize(one, size);
+	nemoshow_item_set_anchor(one, 1.0f, 0.5f);
+	nemoshow_item_set_stroke_color(one, 0x1e, 0xdc, 0xdc, 0xff);
+	nemoshow_item_set_tsr(one);
+	nemoshow_item_translate(one, (context->columns - 1) * context->size, context->size / 2.0f);
+	nemoshow_item_set_text(one, "0");
+
+	context->ones = (struct mineone *)malloc(sizeof(struct mineone) * context->columns * context->rows);
 	if (context->ones == NULL)
 		goto err3;
-	memset(context->ones, 0, sizeof(struct showone *) * context->columns * context->rows);
+	memset(context->ones, 0, sizeof(struct mineone) * context->columns * context->rows);
 
-	context->mines = (uint32_t *)malloc(sizeof(uint32_t) * context->columns * context->rows);
-	if (context->mines == NULL)
-		goto err3;
-	memset(context->mines, 0, sizeof(uint32_t) * context->columns * context->rows);
+	context->timer = timer = nemotimer_create(tool);
+	nemotimer_set_callback(timer, nemomine_dispatch_timer);
+	nemotimer_set_userdata(timer, context);
 
 	nemomine_prepare_boxes(context);
 	nemomine_prepare_mines(context);
