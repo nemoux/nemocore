@@ -200,6 +200,7 @@ static void move_shellgrab_dispatch_effect_done(struct nemoeffect *base)
 		bin->screen.y = screen->dy;
 		bin->screen.width = screen->dw;
 		bin->screen.height = screen->dh;
+		bin->screen.r = screen->dr * M_PI / 180.0f;
 		bin->has_screen = 1;
 
 		nemoshell_send_bin_state(bin);

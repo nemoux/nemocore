@@ -280,6 +280,7 @@ static void nemo_surface_set_fullscreen(struct wl_client *client, struct wl_reso
 			bin->screen.y = screen->dy;
 			bin->screen.width = screen->dw;
 			bin->screen.height = screen->dh;
+			bin->screen.r = screen->dr * M_PI / 180.0f;
 			bin->has_screen = 1;
 
 			nemoshell_send_bin_state(bin);
