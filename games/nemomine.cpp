@@ -433,7 +433,7 @@ static void nemomine_dispatch_tale_event(struct nemotale *tale, struct talenode 
 				}
 
 				if (nemotale_is_long_press(tale, event, type)) {
-					struct taletap *tap = nemotale_touch_get_tap(tale, event->device);
+					struct taletap *tap = event->tap;
 
 					if (tag < 10000 && context->is_playing != 0) {
 						struct mineone *mone = &context->ones[tag];

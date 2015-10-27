@@ -59,6 +59,8 @@ struct taletap {
 
 	uint32_t state;
 
+	uint32_t tag;
+
 	float x, y;
 	float gx, gy;
 	float dist;
@@ -91,6 +93,8 @@ struct taleevent {
 
 	uint32_t axis;
 	float r;
+
+	struct taletap *tap;
 
 	struct taletap *taps[NEMOTALE_EVENT_TAPS_MAX];
 	int tapcount;
@@ -125,6 +129,16 @@ static inline void nemotale_tap_put_state(struct taletap *tap, uint32_t state)
 static inline int nemotale_tap_has_state(struct taletap *tap, uint32_t state)
 {
 	return tap->state & state;
+}
+
+static inline void nemotale_tap_set_tag(struct taletap *tap, uint32_t tag)
+{
+	tap->tag = tag;
+}
+
+static inline uint32_t nemotale_tap_get_tag(struct taletap *tap)
+{
+	return tap->tag;
 }
 
 static inline struct taletap *nemotale_pointer_get_tap(struct nemotale *tale, uint64_t device)
@@ -191,6 +205,29 @@ static inline int nemotale_event_update_node_taps(struct nemotale *tale, struct 
 			if (tap->node == node) {
 				event->taps[count++] = tap;
 			}
+		}
+	}
+
+	return (event->tapcount = count);
+}
+
+static inline int nemotale_event_update_taps_by_tag(struct nemotale *tale, struct taleevent *event, uint32_t type, uint32_t tag)
+{
+	struct taletap *tap;
+	double dx, dy;
+	double dist;
+	int count = 0;
+	int i;
+
+	if (type & NEMOTALE_POINTER_EVENT) {
+		nemolist_for_each(tap, &tale->ptap_list, link) {
+			if (tap->tag == tag)
+				event->taps[count++] = tap;
+		}
+	} else if (type & NEMOTALE_TOUCH_EVENT) {
+		nemolist_for_each(tap, &tale->tap_list, link) {
+			if (tap->tag == tag)
+				event->taps[count++] = tap;
 		}
 	}
 
