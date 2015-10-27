@@ -11,6 +11,9 @@ NEMO_BEGIN_EXTERN_C
 
 #include <showone.h>
 
+#include <nemolist.h>
+#include <nemolistener.h>
+
 typedef enum {
 	NEMOSHOW_NONE_ITEM = 0,
 	NEMOSHOW_RECT_ITEM = 1,
@@ -44,6 +47,8 @@ struct showitem {
 	struct showone base;
 
 	struct showone *canvas;
+
+	struct nemolistener canvas_destroy_listener;
 
 	double x, y;
 	double rx, ry;

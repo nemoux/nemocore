@@ -126,6 +126,8 @@ void nemoshow_item_destroy(struct showone *one)
 		nemoshow_canvas_damage_one(item->canvas, one);
 	}
 
+	nemolist_remove(&item->canvas_destroy_listener.link);
+
 	nemoshow_one_unreference_all(one);
 
 	while (one->nchildren > 0) {
@@ -872,8 +874,17 @@ void nemoshow_item_set_text(struct showone *one, const char *text)
 	nemoshow_one_dirty(one, NEMOSHOW_TEXT_DIRTY);
 }
 
+static void nemoshow_item_handle_canvas_destroy_signal(struct nemolistener *listener, void *data)
+{
+	struct showitem *item = (struct showitem *)container_of(listener, struct showitem, canvas_destroy_listener);
+
+	item->canvas = NULL;
+}
+
 void nemoshow_item_attach_one(struct showone *parent, struct showone *one)
 {
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
 	if (one->parent != NULL) {
 		if (one->parent->sub == NEMOSHOW_GROUP_ITEM)
 			nemoshow_one_unreference_one(one, one->parent);
@@ -886,18 +897,30 @@ void nemoshow_item_attach_one(struct showone *parent, struct showone *one)
 	if (parent->sub == NEMOSHOW_GROUP_ITEM)
 		nemoshow_one_reference_one(one, parent, NEMOSHOW_GROUP_REF);
 
-	if (parent->type == NEMOSHOW_CANVAS_TYPE)
-		NEMOSHOW_ITEM_AT(one, canvas) = parent;
-	else
-		NEMOSHOW_ITEM_AT(one, canvas) = NEMOSHOW_ITEM_AT(parent, canvas);
+	if (parent->type == NEMOSHOW_CANVAS_TYPE) {
+		item->canvas = parent;
+
+		item->canvas_destroy_listener.notify = nemoshow_item_handle_canvas_destroy_signal;
+		nemosignal_add(&parent->destroy_signal, &item->canvas_destroy_listener);
+	} else {
+		item->canvas = NEMOSHOW_ITEM_AT(parent, canvas);
+
+		item->canvas_destroy_listener.notify = nemoshow_item_handle_canvas_destroy_signal;
+		nemosignal_add(&NEMOSHOW_ITEM_AT(parent, canvas)->destroy_signal, &item->canvas_destroy_listener);
+	}
 }
 
 void nemoshow_item_detach_one(struct showone *parent, struct showone *one)
 {
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
 	if (parent->sub == NEMOSHOW_GROUP_ITEM)
 		nemoshow_one_unreference_one(one, parent);
 
 	nemoshow_one_detach_one(parent, one);
+
+	nemolist_remove(&item->canvas_destroy_listener.link);
+	nemolist_init(&item->canvas_destroy_listener.link);
 }
 
 void nemoshow_item_path_clear(struct showone *one)

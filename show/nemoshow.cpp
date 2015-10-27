@@ -65,11 +65,25 @@ err1:
 
 void nemoshow_destroy(struct nemoshow *show)
 {
-	nemoshow_expr_destroy(show->expr);
-	nemoshow_expr_destroy_symbol_table(show->stable);
+	struct showtransition *trans;
+
+	while (nemolist_empty(&show->transition_destroy_list) == 0) {
+		trans = nemolist_node0(&show->transition_destroy_list, struct showtransition, link);
+
+		nemoshow_transition_destroy(trans, 1);
+	}
+
+	while (nemolist_empty(&show->transition_list) == 0) {
+		trans = nemolist_node0(&show->transition_list, struct showtransition, link);
+
+		nemoshow_transition_destroy(trans, 1);
+	}
 
 	nemolist_remove(&show->transition_list);
 	nemolist_remove(&show->transition_destroy_list);
+
+	nemoshow_expr_destroy(show->expr);
+	nemoshow_expr_destroy_symbol_table(show->stable);
 
 	free(show->ones);
 	free(show);
