@@ -19,6 +19,7 @@ struct pitchfilter {
 
 	uint32_t max_samples;
 	uint32_t dir_samples;
+	uint32_t min_duration;
 
 	uint32_t sindex, eindex;
 
@@ -29,7 +30,7 @@ struct pitchfilter {
 	uint32_t time;
 };
 
-extern struct pitchfilter *pitchfilter_create(uint32_t max_samples, uint32_t dir_samples);
+extern struct pitchfilter *pitchfilter_create(uint32_t max_samples, uint32_t dir_samples, uint32_t min_duration);
 extern void pitchfilter_destroy(struct pitchfilter *filter);
 
 extern void pitchfilter_dispatch(struct pitchfilter *filter, double dx, double dy, uint32_t time);

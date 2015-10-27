@@ -140,7 +140,7 @@ int nemoshell_move_canvas_by_pointer(struct nemoshell *shell, struct nemopointer
 	move->dx = bin->view->geometry.x - pointer->grab_x;
 	move->dy = bin->view->geometry.y - pointer->grab_y;
 
-	move->filter = pitchfilter_create(shell->pitch.max_samples, shell->pitch.dir_samples);
+	move->filter = pitchfilter_create(shell->pitch.max_samples, shell->pitch.dir_samples, shell->pitch.min_duration);
 
 	bin->retained = 0;
 
@@ -335,7 +335,7 @@ int nemoshell_move_canvas_by_touchpoint(struct nemoshell *shell, struct touchpoi
 	move->dx = bin->view->geometry.x - tp->x;
 	move->dy = bin->view->geometry.y - tp->y;
 
-	move->filter = pitchfilter_create(shell->pitch.max_samples, shell->pitch.dir_samples);
+	move->filter = pitchfilter_create(shell->pitch.max_samples, shell->pitch.dir_samples, shell->pitch.min_duration);
 
 	bin->retained = 0;
 
@@ -477,7 +477,7 @@ int nemoshell_move_actor_by_pointer(struct nemoshell *shell, struct nemopointer 
 	move->dx = actor->view->geometry.x - pointer->grab_x;
 	move->dy = actor->view->geometry.y - pointer->grab_y;
 
-	move->filter = pitchfilter_create(shell->pitch.max_samples, shell->pitch.dir_samples);
+	move->filter = pitchfilter_create(shell->pitch.max_samples, shell->pitch.dir_samples, shell->pitch.min_duration);
 
 	actor->retained = 0;
 
@@ -600,7 +600,7 @@ int nemoshell_move_actor_by_touchpoint(struct nemoshell *shell, struct touchpoin
 	move->dx = actor->view->geometry.x - tp->x;
 	move->dy = actor->view->geometry.y - tp->y;
 
-	move->filter = pitchfilter_create(shell->pitch.max_samples, shell->pitch.dir_samples);
+	move->filter = pitchfilter_create(shell->pitch.max_samples, shell->pitch.dir_samples, shell->pitch.min_duration);
 
 	actor->retained = 0;
 

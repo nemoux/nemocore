@@ -11,7 +11,7 @@
 #include <pitchfilter.h>
 #include <nemomisc.h>
 
-struct pitchfilter *pitchfilter_create(uint32_t max_samples, uint32_t dir_samples)
+struct pitchfilter *pitchfilter_create(uint32_t max_samples, uint32_t dir_samples, uint32_t min_duration)
 {
 	struct pitchfilter *filter;
 
@@ -27,6 +27,7 @@ struct pitchfilter *pitchfilter_create(uint32_t max_samples, uint32_t dir_sample
 
 	filter->max_samples = max_samples;
 	filter->dir_samples = dir_samples;
+	filter->min_duration = min_duration;
 
 	filter->sindex = 0;
 	filter->eindex = 0;
@@ -106,7 +107,7 @@ int pitchfilter_flush(struct pitchfilter *filter)
 	filter->dx = filter->dx / dist;
 	filter->dy = filter->dy / dist;
 
-	if (isnan(filter->dx) || isnan(filter->dy) || filter->dtime == 0)
+	if (isnan(filter->dx) || isnan(filter->dy) || filter->dtime < filter->min_duration)
 		return 0;
 
 	return 1;

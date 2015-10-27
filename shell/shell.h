@@ -83,6 +83,7 @@ struct nemoshell {
 	struct {
 		uint32_t max_samples;
 		uint32_t dir_samples;
+		uint32_t min_duration;
 
 		double velocity;
 		double max_velocity;
