@@ -100,7 +100,7 @@ static int nemomine_count_neighbors(struct minecontext *context, int index)
 	return count;
 }
 
-static void nemomine_prepare_mines(struct minecontext *context)
+static void nemomine_prepare_game(struct minecontext *context)
 {
 	struct mineone *mone;
 	int index;
@@ -113,8 +113,8 @@ static void nemomine_prepare_mines(struct minecontext *context)
 
 		mone->state = NEMOMINE_NONE_STATE;
 
-		nemoshow_item_set_fill_color(mone->box, 0x1e, 0xdc, 0xdc, 0x20);
-		nemoshow_item_set_stroke_color(mone->box, 0x1e, 0xdc, 0xdc, 0x20);
+		nemoshow_item_set_fill_color(mone->box, 0x1e, 0xdc, 0xdc, 0xff);
+		nemoshow_item_set_stroke_color(mone->box, 0x1e, 0xdc, 0xdc, 0xff);
 		nemoshow_item_set_stroke_width(mone->box, 0.0f);
 
 		nemoshow_item_set_alpha(mone->one, 0.0f);
@@ -148,7 +148,7 @@ retry:
 	context->is_playing = 1;
 }
 
-static void nemomine_finish_mines(struct minecontext *context)
+static void nemomine_finish_game(struct minecontext *context)
 {
 	struct mineone *mone;
 	int i;
@@ -205,7 +205,7 @@ static void nemomine_check_mine(struct minecontext *context, uint32_t tag)
 	struct showtransition *trans;
 	struct showone *sequence;
 	struct showone *frame;
-	struct showone *set0;
+	struct showone *set0, *set1;
 
 	mone->state = NEMOMINE_CHECK_STATE;
 
@@ -215,10 +215,15 @@ static void nemomine_check_mine(struct minecontext *context, uint32_t tag)
 	nemoshow_sequence_set_timing(frame, 1.0f);
 
 	set0 = nemoshow_sequence_create_set();
-	nemoshow_sequence_set_source(set0, mone->one);
-	nemoshow_sequence_set_cattr(set0, "fill", 0xbb, 0xe5, 0xa9, 0xff, NEMOSHOW_STYLE_DIRTY);
-	nemoshow_sequence_set_dattr(set0, "alpha", 1.0f, NEMOSHOW_STYLE_DIRTY);
+	nemoshow_sequence_set_source(set0, mone->box);
+	nemoshow_sequence_set_cattr(set0, "fill", 0x1e, 0xdc, 0xdc, 0x40, NEMOSHOW_STYLE_DIRTY);
 	nemoshow_one_attach_one(frame, set0);
+
+	set1 = nemoshow_sequence_create_set();
+	nemoshow_sequence_set_source(set1, mone->one);
+	nemoshow_sequence_set_cattr(set1, "fill", 0xbb, 0xe5, 0xa9, 0xff, NEMOSHOW_STYLE_DIRTY);
+	nemoshow_sequence_set_dattr(set1, "alpha", 1.0f, NEMOSHOW_STYLE_DIRTY);
+	nemoshow_one_attach_one(frame, set1);
 
 	sequence = nemoshow_sequence_create_easy(context->show, frame, NULL);
 
@@ -234,7 +239,7 @@ static void nemomine_uncheck_mine(struct minecontext *context, uint32_t tag)
 	struct showtransition *trans;
 	struct showone *sequence;
 	struct showone *frame;
-	struct showone *set0;
+	struct showone *set0, *set1;
 
 	mone->state = NEMOMINE_NONE_STATE;
 
@@ -244,9 +249,14 @@ static void nemomine_uncheck_mine(struct minecontext *context, uint32_t tag)
 	nemoshow_sequence_set_timing(frame, 1.0f);
 
 	set0 = nemoshow_sequence_create_set();
-	nemoshow_sequence_set_source(set0, mone->one);
-	nemoshow_sequence_set_dattr(set0, "alpha", 0.0f, NEMOSHOW_STYLE_DIRTY);
+	nemoshow_sequence_set_source(set0, mone->box);
+	nemoshow_sequence_set_cattr(set0, "fill", 0x1e, 0xdc, 0xdc, 0xff, NEMOSHOW_STYLE_DIRTY);
 	nemoshow_one_attach_one(frame, set0);
+
+	set1 = nemoshow_sequence_create_set();
+	nemoshow_sequence_set_source(set1, mone->one);
+	nemoshow_sequence_set_dattr(set1, "alpha", 0.0f, NEMOSHOW_STYLE_DIRTY);
+	nemoshow_one_attach_one(frame, set1);
 
 	sequence = nemoshow_sequence_create_easy(context->show, frame, NULL);
 
@@ -378,7 +388,7 @@ static void nemomine_dispatch_tale_event(struct nemotale *tale, struct talenode 
 
 						nemocanvas_dispatch_frame(canvas);
 					} else if (tag == 10002) {
-						nemomine_prepare_mines(context);
+						nemomine_prepare_game(context);
 
 						nemocanvas_dispatch_frame(canvas);
 					}
@@ -398,7 +408,7 @@ static void nemomine_dispatch_tale_event(struct nemotale *tale, struct talenode 
 
 						if (mone->state != NEMOMINE_CONFIRM_STATE) {
 							if (mone->is_bomb != 0) {
-								nemomine_finish_mines(context);
+								nemomine_finish_game(context);
 
 								nemocanvas_dispatch_frame(canvas);
 							} else {
@@ -416,7 +426,7 @@ static void nemomine_dispatch_tale_event(struct nemotale *tale, struct talenode 
 
 						nemocanvas_dispatch_frame(canvas);
 					} else if (tag == 10002) {
-						nemomine_prepare_mines(context);
+						nemomine_prepare_game(context);
 
 						nemocanvas_dispatch_frame(canvas);
 					}
@@ -461,7 +471,7 @@ static void nemomine_dispatch_timer(struct nemotimer *timer, void *data)
 	nemocanvas_dispatch_frame(canvas);
 }
 
-static void nemomine_prepare_boxes(struct minecontext *context)
+static void nemomine_prepare_ui(struct minecontext *context)
 {
 	struct mineone *mone;
 	struct showone *one;
@@ -485,8 +495,8 @@ static void nemomine_prepare_boxes(struct minecontext *context)
 			nemoshow_item_set_width(one, context->size - 2.0f);
 			nemoshow_item_set_height(one, context->size - 2.0f);
 			nemoshow_item_set_filter(one, context->inner);
-			nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0x40);
-			nemoshow_item_set_stroke_color(one, 0x1e, 0xdc, 0xdc, 0x40);
+			nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
+			nemoshow_item_set_stroke_color(one, 0x1e, 0xdc, 0xdc, 0xff);
 			nemoshow_item_set_stroke_width(one, 0.0f);
 			nemoshow_item_set_tsr(one);
 			nemoshow_item_translate(one, j * context->size, i * context->size + context->size);
@@ -507,7 +517,7 @@ static void nemomine_prepare_boxes(struct minecontext *context)
 	}
 }
 
-static void nemomine_finish_boxes(struct minecontext *context)
+static void nemomine_finish_ui(struct minecontext *context)
 {
 }
 
@@ -726,7 +736,7 @@ int main(int argc, char *argv[])
 	nemoshow_item_set_font(one, font);
 	nemoshow_item_set_fontsize(one, size);
 	nemoshow_item_set_anchor(one, 1.0f, 0.5f);
-	nemoshow_item_set_stroke_color(one, 0x1e, 0xdc, 0xdc, 0xff);
+	nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
 	nemoshow_item_set_tsr(one);
 	nemoshow_item_translate(one, (context->columns - 2) * context->size, context->size / 2.0f);
 	nemoshow_item_set_text(one, "0");
@@ -740,14 +750,14 @@ int main(int argc, char *argv[])
 	nemotimer_set_callback(timer, nemomine_dispatch_timer);
 	nemotimer_set_userdata(timer, context);
 
-	nemomine_prepare_boxes(context);
-	nemomine_prepare_mines(context);
+	nemomine_prepare_ui(context);
+	nemomine_prepare_game(context);
 
 	nemocanvas_dispatch_frame(NEMOSHOW_AT(show, canvas));
 
 	nemotool_run(tool);
 
-	nemomine_finish_boxes(context);
+	nemomine_finish_ui(context);
 
 err3:
 	nemoshow_destroy_on_tale(show);
