@@ -1171,6 +1171,30 @@ static void nemocanvas_touch_frame(struct touchpoint *tp, struct nemocontent *co
 	}
 }
 
+static void nemocanvas_sound_enter(uint32_t snddev, struct nemocontent *content)
+{
+	struct nemocanvas *canvas = (struct nemocanvas *)container_of(content, struct nemocanvas, base);
+	struct wl_client *client = wl_resource_get_client(canvas->resource);
+	struct wl_resource *resource;
+
+	resource = wl_resource_find_for_client(&canvas->compz->sound->resource_list, client);
+	if (resource != NULL) {
+		nemo_sound_send_enter(resource, canvas->resource, snddev);
+	}
+}
+
+static void nemocanvas_sound_leave(uint32_t snddev, struct nemocontent *content)
+{
+	struct nemocanvas *canvas = (struct nemocanvas *)container_of(content, struct nemocanvas, base);
+	struct wl_client *client = wl_resource_get_client(canvas->resource);
+	struct wl_resource *resource;
+
+	resource = wl_resource_find_for_client(&canvas->compz->sound->resource_list, client);
+	if (resource != NULL) {
+		nemo_sound_send_leave(resource, canvas->resource, snddev);
+	}
+}
+
 struct nemocanvas *nemocanvas_create(struct wl_client *client, struct wl_resource *compositor_resource, uint32_t id)
 {
 	struct nemocompz *compz = (struct nemocompz *)wl_resource_get_user_data(compositor_resource);
@@ -1216,6 +1240,9 @@ struct nemocanvas *nemocanvas_create(struct wl_client *client, struct wl_resourc
 	canvas->base.touch_up = nemocanvas_touch_up;
 	canvas->base.touch_motion = nemocanvas_touch_motion;
 	canvas->base.touch_frame = nemocanvas_touch_frame;
+
+	canvas->base.sound_enter = nemocanvas_sound_enter;
+	canvas->base.sound_leave = nemocanvas_sound_leave;
 
 	canvas->buffer_viewport.buffer.transform = WL_OUTPUT_TRANSFORM_NORMAL;
 	canvas->buffer_viewport.buffer.scale = 1;
