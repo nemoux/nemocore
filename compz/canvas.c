@@ -493,21 +493,23 @@ static void nemocanvas_update_output(struct nemocontent *content, uint32_t node_
 		client = wl_resource_get_client(canvas->resource);
 
 		wl_list_for_each(screen, &canvas->compz->screen_list, link) {
-			if (dmask & (1 << screen->id)) {
-				resource = wl_resource_find_for_client(&screen->resource_list, client);
-				if (resource != NULL) {
-					if (emask & (1 << screen->id))
-						wl_surface_send_enter(canvas->resource, resource);
-					if (lmask & (1 << screen->id))
-						wl_surface_send_leave(canvas->resource, resource);
-				}
+			if (screen->snddev >= 0) {
+				if (dmask & (1 << screen->id)) {
+					resource = wl_resource_find_for_client(&screen->resource_list, client);
+					if (resource != NULL) {
+						if (emask & (1 << screen->id))
+							wl_surface_send_enter(canvas->resource, resource);
+						if (lmask & (1 << screen->id))
+							wl_surface_send_leave(canvas->resource, resource);
+					}
 
-				resource = wl_resource_find_for_client(&canvas->compz->sound->resource_list, client);
-				if (resource != NULL) {
-					if (emask & (1 << screen->id))
-						nemo_sound_send_enter(resource, canvas->resource, screen->snddev);
-					if (lmask & (1 << screen->id))
-						nemo_sound_send_leave(resource, canvas->resource, screen->snddev);
+					resource = wl_resource_find_for_client(&canvas->compz->sound->resource_list, client);
+					if (resource != NULL) {
+						if (emask & (1 << screen->id))
+							nemo_sound_send_enter(resource, canvas->resource, screen->snddev);
+						if (lmask & (1 << screen->id))
+							nemo_sound_send_leave(resource, canvas->resource, screen->snddev);
+					}
 				}
 			}
 		}

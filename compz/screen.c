@@ -179,8 +179,8 @@ static void nemoscreen_bind_output(struct wl_client *client, void *data, uint32_
 void nemoscreen_prepare(struct nemoscreen *screen)
 {
 	struct nemocompz *compz = screen->compz;
-
-	screen->snddev = 0;
+	
+	screen->snddev = -1;
 
 	screen->geometry.sx = 1.0f;
 	screen->geometry.sy = 1.0f;
