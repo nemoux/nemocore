@@ -49,16 +49,12 @@ static void nemokeypad_handle_focus_resource_destroy(struct wl_listener *listene
 {
 	struct nemokeypad *keypad = (struct nemokeypad *)container_of(listener, struct nemokeypad, focus_resource_listener);
 
-	keypad->focus = NULL;
-
 	nemokeypad_set_focus(keypad, NULL);
 }
 
 static void nemokeypad_handle_focus_view_destroy(struct wl_listener *listener, void *data)
 {
 	struct nemokeypad *keypad = (struct nemokeypad *)container_of(listener, struct nemokeypad, focus_view_listener);
-
-	keypad->focus = NULL;
 
 	nemokeypad_set_focus(keypad, NULL);
 }
