@@ -49,6 +49,16 @@ TARGET_LINK_LIBRARIES(nemotouch
 
 INSTALL(TARGETS nemotouch DESTINATION bin)
 
+add_executable(nemoexec
+	nemoexec.c
+	)
+
+TARGET_LINK_LIBRARIES(nemoexec
+	nemoasst
+	)
+
+INSTALL(TARGETS nemoexec DESTINATION bin)
+
 if(WITH_PULSEAUDIO)
 	PKG_CHECK_MODULES(LIBPULSE REQUIRED libpulse)
 	INCLUDE_DIRECTORIES(${LIBPULSE_INCLUDE_DIRS})
