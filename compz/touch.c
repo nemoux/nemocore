@@ -563,6 +563,9 @@ void nemotouch_flush_tuio(struct tuionode *node)
 
 void touchpoint_start_grab(struct touchpoint *tp, struct touchpoint_grab *grab)
 {
+	if (tp->grab != &tp->default_grab)
+		tp->grab->interface->cancel(tp->grab);
+
 	tp->grab = grab;
 	grab->touchpoint = tp;
 }
