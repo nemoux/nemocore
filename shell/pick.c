@@ -483,8 +483,8 @@ int nemoshell_pick_canvas_by_touchpoint_on_area(struct nemoshell *shell, struct 
 		return -1;
 	memset(pick1, 0, sizeof(struct shellgrab_pick));
 
-	area0 = nemoview_get_point_area(bin->view, tp0->x, tp0->y, 0.5f);
-	area1 = nemoview_get_point_area(bin->view, tp1->x, tp1->y, 0.5f);
+	area0 = nemoview_get_point_area(bin->view, tp0->x, tp0->y, 0.3f);
+	area1 = nemoview_get_point_area(bin->view, tp1->x, tp1->y, 0.3f);
 
 	if (area0 == NEMO_VIEW_CENTER_AREA || area1 == NEMO_VIEW_CENTER_AREA) {
 		bin->resize_edges = 0;
@@ -513,7 +513,7 @@ int nemoshell_pick_canvas_by_touchpoint_on_area(struct nemoshell *shell, struct 
 	if (bin->resize_edges == 0) {
 		type = (1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_MOVE);
 	} else {
-		type = (1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_MOVE) | (1 << NEMO_SURFACE_PICK_TYPE_RESIZE);
+		type = (1 << NEMO_SURFACE_PICK_TYPE_RESIZE);
 
 		nemoshell_send_bin_configure(bin);
 	}
