@@ -309,7 +309,7 @@ static int nemocompz_dispatch_framerate_timeout(void *data)
 	}
 
 	wl_list_for_each(touch, &seat->touch.device_list, link) {
-		nemolog_message("COMPZ", "  [%s] touch %u frames...\n", touch->node->devnode, touch->frame_count);
+		nemolog_message("COMPZ", "  [%s] touch %u frames...(%d)\n", touch->node->devnode, touch->frame_count, !wl_list_empty(&touch->touchpoint_list));
 
 		touch->frame_count = 0;
 	}
