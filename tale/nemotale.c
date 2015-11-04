@@ -76,7 +76,7 @@ int nemotale_prepare(struct nemotale *tale)
 	if (env != NULL)
 		tale->close_distance = strtoul(env, NULL, 10);
 	else
-		tale->close_distance = 75;
+		tale->close_distance = 100;
 
 	env = getenv("NEMOTALE_MINIMUM_WIDTH");
 	if (env != NULL)
