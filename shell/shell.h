@@ -167,6 +167,8 @@ struct shellbin {
 
 	uint32_t resize_edges;
 	uint32_t reset_scale;
+	float px, py;
+	float ax, ay;
 
 	uint32_t min_width, min_height;
 	uint32_t max_width, max_height;

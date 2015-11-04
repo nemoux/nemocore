@@ -30,6 +30,9 @@ struct nemoactor {
 
 	struct nemoview *view;
 
+	float px, py;
+	float ax, ay;
+
 	struct wl_signal destroy_signal;
 	struct wl_signal ungrab_signal;
 

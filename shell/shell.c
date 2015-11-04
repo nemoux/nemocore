@@ -264,8 +264,8 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 					nemoview_update_transform_children(view);
 				}
 
-				sx = (canvas->base.width - bin->last_width) * -0.5f;
-				sy = (canvas->base.height - bin->last_height) * -0.5f;
+				sx = (canvas->base.width - bin->last_width) * -bin->ax;
+				sy = (canvas->base.height - bin->last_height) * -bin->ay;
 
 				bin->reset_scale = 0;
 			} else {
@@ -381,6 +381,9 @@ struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas
 	bin->min_height = 0;
 	bin->max_width = UINT32_MAX;
 	bin->max_height = UINT32_MAX;
+
+	bin->ax = 0.5f;
+	bin->ay = 0.5f;
 
 	canvas->configure = shellbin_configure_canvas;
 	canvas->configure_private = (void *)bin;
