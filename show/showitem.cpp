@@ -71,6 +71,8 @@ struct showone *nemoshow_item_create(int type)
 	one->sub = type;
 	one->update = nemoshow_item_update;
 	one->destroy = nemoshow_item_destroy;
+	one->attach = nemoshow_item_attach_one;
+	one->detach = nemoshow_item_detach_one;
 
 	nemoshow_one_prepare(one);
 

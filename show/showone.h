@@ -86,6 +86,8 @@ struct showone;
 
 typedef int (*nemoshow_one_update_t)(struct nemoshow *show, struct showone *one);
 typedef void (*nemoshow_one_destroy_t)(struct showone *one);
+typedef void (*nemoshow_one_attach_t)(struct showone *parent, struct showone *one);
+typedef void (*nemoshow_one_detach_t)(struct showone *parent, struct showone *one);
 
 struct showattr {
 	char name[NEMOSHOW_ATTR_NAME_MAX];
@@ -125,6 +127,8 @@ struct showone {
 
 	nemoshow_one_update_t update;
 	nemoshow_one_destroy_t destroy;
+	nemoshow_one_attach_t attach;
+	nemoshow_one_detach_t detach;
 
 	struct nemoshow *show;
 
@@ -188,6 +192,24 @@ static inline void nemoshow_one_dirty(struct showone *one, uint32_t dirty)
 		nemoshow_one_dirty(one->parent, one->effect);
 
 	nemosignal_emit(&one->dirty_signal, &event);
+}
+
+static inline void nemoshow_one_attach(struct showone *parent, struct showone *one)
+{
+	if (one->attach != NULL) {
+		one->attach(parent, one);
+	} else {
+		nemoshow_one_attach_one(parent, one);
+	}
+}
+
+static inline void nemoshow_one_detach(struct showone *parent, struct showone *one)
+{
+	if (one->detach != NULL) {
+		one->detach(parent, one);
+	} else {
+		nemoshow_one_detach_one(parent, one);
+	}
 }
 
 static inline void nemoshow_one_update(struct nemoshow *show, struct showone *one)
