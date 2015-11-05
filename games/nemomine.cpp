@@ -189,7 +189,7 @@ static void nemomine_rotate_pin(struct minecontext *context, double ro)
 	set0 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set0, context->pin);
 	nemoshow_sequence_set_dattr(set0, "ro", ro, NEMOSHOW_MATRIX_DIRTY);
-	nemoshow_one_attach_one(frame, set0);
+	nemoshow_one_attach(frame, set0);
 
 	sequence = nemoshow_sequence_create_easy(context->show, frame, NULL);
 
@@ -217,13 +217,13 @@ static void nemomine_check_mine(struct minecontext *context, uint32_t tag)
 	set0 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set0, mone->box);
 	nemoshow_sequence_set_cattr(set0, "fill", 0x1e, 0xdc, 0xdc, 0x40, NEMOSHOW_STYLE_DIRTY);
-	nemoshow_one_attach_one(frame, set0);
+	nemoshow_one_attach(frame, set0);
 
 	set1 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set1, mone->one);
 	nemoshow_sequence_set_cattr(set1, "fill", 0xbb, 0xe5, 0xa9, 0xff, NEMOSHOW_STYLE_DIRTY);
 	nemoshow_sequence_set_dattr(set1, "alpha", 1.0f, NEMOSHOW_STYLE_DIRTY);
-	nemoshow_one_attach_one(frame, set1);
+	nemoshow_one_attach(frame, set1);
 
 	sequence = nemoshow_sequence_create_easy(context->show, frame, NULL);
 
@@ -251,12 +251,12 @@ static void nemomine_uncheck_mine(struct minecontext *context, uint32_t tag)
 	set0 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set0, mone->box);
 	nemoshow_sequence_set_cattr(set0, "fill", 0x1e, 0xdc, 0xdc, 0xff, NEMOSHOW_STYLE_DIRTY);
-	nemoshow_one_attach_one(frame, set0);
+	nemoshow_one_attach(frame, set0);
 
 	set1 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set1, mone->one);
 	nemoshow_sequence_set_dattr(set1, "alpha", 0.0f, NEMOSHOW_STYLE_DIRTY);
-	nemoshow_one_attach_one(frame, set1);
+	nemoshow_one_attach(frame, set1);
 
 	sequence = nemoshow_sequence_create_easy(context->show, frame, NULL);
 
@@ -305,12 +305,12 @@ static void nemomine_confirm_mine(struct minecontext *context, uint32_t tag)
 		nemoshow_sequence_set_source(set0, mone->box);
 		nemoshow_sequence_set_cattr(set0, "fill", 0x0, 0x0, 0x0, 0x0, NEMOSHOW_STYLE_DIRTY);
 		nemoshow_sequence_set_dattr(set0, "stroke-width", 1.0f, NEMOSHOW_SHAPE_DIRTY | NEMOSHOW_STYLE_DIRTY);
-		nemoshow_one_attach_one(frame, set0);
+		nemoshow_one_attach(frame, set0);
 
 		set1 = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(set1, mone->one);
 		nemoshow_sequence_set_dattr(set1, "alpha", 0.0f, NEMOSHOW_STYLE_DIRTY);
-		nemoshow_one_attach_one(frame, set1);
+		nemoshow_one_attach(frame, set1);
 
 		sequence = nemoshow_sequence_create_easy(context->show, frame, NULL);
 
@@ -330,13 +330,13 @@ static void nemomine_confirm_mine(struct minecontext *context, uint32_t tag)
 		nemoshow_sequence_set_source(set0, mone->one);
 		nemoshow_sequence_set_cattr(set0, "fill", 0xff, 0x8c, 0x32, 0xff, NEMOSHOW_STYLE_DIRTY);
 		nemoshow_sequence_set_dattr(set0, "alpha", 1.0f, NEMOSHOW_STYLE_DIRTY);
-		nemoshow_one_attach_one(frame, set0);
+		nemoshow_one_attach(frame, set0);
 
 		set1 = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(set1, mone->box);
 		nemoshow_sequence_set_cattr(set1, "fill", 0x0, 0x0, 0x0, 0x0, NEMOSHOW_STYLE_DIRTY);
 		nemoshow_sequence_set_dattr(set1, "stroke-width", 1.0f, NEMOSHOW_SHAPE_DIRTY | NEMOSHOW_STYLE_DIRTY);
-		nemoshow_one_attach_one(frame, set1);
+		nemoshow_one_attach(frame, set1);
 
 		sequence = nemoshow_sequence_create_easy(context->show, frame, NULL);
 
@@ -486,7 +486,7 @@ static void nemomine_prepare_ui(struct minecontext *context)
 
 			mone->box = one = nemoshow_item_create(NEMOSHOW_RRECT_ITEM);
 			nemoshow_attach_one(context->show, one);
-			nemoshow_item_attach_one(context->canvas, one);
+			nemoshow_one_attach(context->canvas, one);
 			nemoshow_one_set_tag(one, index + 1);
 			nemoshow_item_set_x(one, 1.0f);
 			nemoshow_item_set_y(one, 1.0f);
@@ -503,7 +503,7 @@ static void nemomine_prepare_ui(struct minecontext *context)
 
 			mone->one = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
 			nemoshow_attach_one(context->show, one);
-			nemoshow_item_attach_one(context->canvas, one);
+			nemoshow_one_attach(context->canvas, one);
 			nemoshow_one_set_tag(one, index + 1);
 			nemoshow_item_set_x(one, 2.0f);
 			nemoshow_item_set_y(one, 2.0f);
@@ -625,7 +625,7 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_fill_color(canvas, 0.0f, 0.0f, 0.0f, 0.0f);
 	nemoshow_canvas_set_alpha(canvas, 0.0f);
 	nemoshow_attach_one(show, canvas);
-	nemoshow_one_attach_one(scene, canvas);
+	nemoshow_one_attach(scene, canvas);
 
 	context->canvas = canvas = nemoshow_canvas_create();
 	nemoshow_canvas_set_width(canvas, width);
@@ -633,7 +633,7 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
 	nemoshow_canvas_set_event(canvas, 1);
 	nemoshow_attach_one(show, canvas);
-	nemoshow_one_attach_one(scene, canvas);
+	nemoshow_one_attach(scene, canvas);
 
 	nemoshow_set_scene(show, scene);
 	nemoshow_set_size(show, width, height);
@@ -683,7 +683,7 @@ int main(int argc, char *argv[])
 
 	context->exit = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
 	nemoshow_attach_one(show, one);
-	nemoshow_item_attach_one(canvas, one);
+	nemoshow_one_attach(canvas, one);
 	nemoshow_one_set_tag(one, 10000 + 1);
 	nemoshow_item_set_x(one, 0.0f);
 	nemoshow_item_set_y(one, 0.0f);
@@ -697,7 +697,7 @@ int main(int argc, char *argv[])
 
 	context->pin = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
 	nemoshow_attach_one(show, one);
-	nemoshow_item_attach_one(canvas, one);
+	nemoshow_one_attach(canvas, one);
 	nemoshow_one_set_tag(one, 10001 + 1);
 	nemoshow_item_set_x(one, 0.0f);
 	nemoshow_item_set_y(one, 0.0f);
@@ -713,7 +713,7 @@ int main(int argc, char *argv[])
 
 	context->reset = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
 	nemoshow_attach_one(show, one);
-	nemoshow_item_attach_one(canvas, one);
+	nemoshow_one_attach(canvas, one);
 	nemoshow_one_set_tag(one, 10002 + 1);
 	nemoshow_item_set_x(one, 0.0f);
 	nemoshow_item_set_y(one, 0.0f);
@@ -732,7 +732,7 @@ int main(int argc, char *argv[])
 
 	context->time = one = nemoshow_item_create(NEMOSHOW_TEXT_ITEM);
 	nemoshow_attach_one(show, one);
-	nemoshow_item_attach_one(canvas, one);
+	nemoshow_one_attach(canvas, one);
 	nemoshow_item_set_font(one, font);
 	nemoshow_item_set_fontsize(one, size);
 	nemoshow_item_set_anchor(one, 1.0f, 0.5f);

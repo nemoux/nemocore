@@ -106,7 +106,7 @@ struct showone *nemoshow_sequence_create_frame_easy(struct nemoshow *show, doubl
 	va_start(vargs, t);
 
 	while ((set = va_arg(vargs, struct showone *)) != NULL) {
-		nemoshow_one_attach_one(frame, set);
+		nemoshow_one_attach(frame, set);
 	}
 
 	va_end(vargs);
@@ -125,7 +125,7 @@ struct showone *nemoshow_sequence_create_easy(struct nemoshow *show, ...)
 	va_start(vargs, show);
 
 	while ((frame = va_arg(vargs, struct showone *)) != NULL) {
-		nemoshow_one_attach_one(sequence, frame);
+		nemoshow_one_attach(sequence, frame);
 	}
 
 	va_end(vargs);
