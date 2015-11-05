@@ -17,16 +17,16 @@ void nemoshow_one_prepare(struct showone *one)
 	nemoobject_prepare(&one->object, NEMOSHOW_ATTR_MAX);
 
 	nemosignal_init(&one->destroy_signal);
+	nemosignal_init(&one->unreference_signal);
+	nemosignal_init(&one->dirty_signal);
+
+	nemolist_init(&one->parent_destroy_listener.link);
 
 	nemoobject_set_reserved(&one->object, "id", one->id, NEMOSHOW_ID_MAX);
 
 	one->children = (struct showone **)malloc(sizeof(struct showone *) * 4);
 	one->nchildren = 0;
 	one->schildren = 4;
-
-	one->refs = (struct showone **)malloc(sizeof(struct showone *) * 4);
-	one->nrefs = 0;
-	one->srefs = 4;
 
 	one->attrs = (struct showattr **)malloc(sizeof(struct showattr *) * 4);
 	one->nattrs = 0;
@@ -40,31 +40,27 @@ void nemoshow_one_finish(struct showone *one)
 	int i;
 
 	nemosignal_emit(&one->destroy_signal, one);
+	nemosignal_emit(&one->unreference_signal, one);
 
 	if (one->show != NULL) {
 		nemoshow_detach_one(one->show, one);
 	}
 
 	if (one->parent != NULL) {
-		nemoshow_one_unreference_one(one, one->parent);
 		nemoshow_one_detach_one(one->parent, one);
-	}
-
-	for (i = 0; i < one->nchildren; i++) {
-		nemoshow_one_unreference_one(one->children[i], one);
-
-		one->children[i]->parent = NULL;
 	}
 
 	for (i = 0; i < one->nattrs; i++) {
 		nemoshow_one_destroy_attr(one->attrs[i]);
 	}
 
+	nemolist_remove(&one->parent_destroy_listener.link);
+
+	nemoshow_one_unreference_all(one);
+
 	nemoobject_finish(&one->object);
 
 	free(one->children);
-	free(one->refs);
-
 	free(one->attrs);
 }
 
@@ -122,11 +118,24 @@ void nemoshow_one_destroy_with_children(struct showone *one)
 	}
 }
 
+static void nemoshow_one_handle_parent_destroy_signal(struct nemolistener *listener, void *data)
+{
+	struct showone *one = (struct showone *)container_of(listener, struct showone, parent_destroy_listener);
+
+	one->parent = NULL;
+
+	nemolist_remove(&one->parent_destroy_listener.link);
+	nemolist_init(&one->parent_destroy_listener.link);
+}
+
 void nemoshow_one_attach_one(struct showone *parent, struct showone *one)
 {
 	NEMOBOX_APPEND(parent->children, parent->schildren, parent->nchildren, one);
 
 	one->parent = parent;
+
+	one->parent_destroy_listener.notify = nemoshow_one_handle_parent_destroy_signal;
+	nemosignal_add(&parent->destroy_signal, &one->parent_destroy_listener);
 }
 
 void nemoshow_one_detach_one(struct showone *parent, struct showone *one)
@@ -142,6 +151,9 @@ void nemoshow_one_detach_one(struct showone *parent, struct showone *one)
 	}
 
 	one->parent = NULL;
+
+	nemolist_remove(&one->parent_destroy_listener.link);
+	nemolist_init(&one->parent_destroy_listener.link);
 }
 
 void nemoshow_one_above_one(struct showone *one, struct showone *above)
@@ -188,31 +200,67 @@ void nemoshow_one_below_one(struct showone *one, struct showone *below)
 	}
 }
 
-void nemoshow_one_reference_one(struct showone *one, struct showone *ref, int index)
+static void nemoshow_one_handle_unreference_signal(struct nemolistener *listener, void *data)
 {
-	NEMOBOX_APPEND(ref->refs, ref->srefs, ref->nrefs, one);
+	struct showref *ref = (struct showref *)container_of(listener, struct showref, unreference_listener);
 
-	one->rrefs[index] = ref;
+	ref->one->refs[ref->index] = NULL;
+	ref->one->rrefs[ref->index] = NULL;
+
+	nemolist_remove(&ref->unreference_listener.link);
+
+	free(ref);
 }
 
-void nemoshow_one_unreference_one(struct showone *one, struct showone *ref)
+static void nemoshow_one_handle_dirty_signal(struct nemolistener *listener, void *data)
+{
+	struct showref *ref = (struct showref *)container_of(listener, struct showref, dirty_listener);
+	struct showevent *event = (struct showevent *)data;
+
+	nemoshow_one_dirty(ref->one, event->dirty);
+}
+
+int nemoshow_one_reference_one(struct showone *one, struct showone *src, int index)
+{
+	struct showref *ref;
+
+	ref = (struct showref *)malloc(sizeof(struct showref));
+	if (ref == NULL)
+		return -1;
+
+	ref->one = one;
+	ref->index = index;
+
+	ref->unreference_listener.notify = nemoshow_one_handle_unreference_signal;
+	nemosignal_add(&src->unreference_signal, &ref->unreference_listener);
+
+	ref->dirty_listener.notify = nemoshow_one_handle_dirty_signal;
+	nemosignal_add(&src->dirty_signal, &ref->dirty_listener);
+
+	one->refs[index] = src;
+	one->rrefs[index] = ref;
+
+	return 0;
+}
+
+void nemoshow_one_unreference_one(struct showone *one, struct showone *src)
 {
 	int i;
 
-	if (ref == NULL)
+	if (src == NULL)
 		return;
 
-	for (i = 0; i < ref->nrefs; i++) {
-		if (ref->refs[i] == one) {
-			NEMOBOX_REMOVE(ref->refs, ref->nrefs, i);
-
-			break;
-		}
-	}
-
 	for (i = 0; i < NEMOSHOW_LAST_REF; i++) {
-		if (one->rrefs[i] == ref) {
+		if (one->refs[i] == src) {
+			struct showref *ref = one->rrefs[i];
+
+			one->refs[i] = NULL;
 			one->rrefs[i] = NULL;
+
+			nemolist_remove(&ref->unreference_listener.link);
+			nemolist_remove(&ref->dirty_listener.link);
+
+			free(ref);
 
 			break;
 		}
@@ -221,32 +269,21 @@ void nemoshow_one_unreference_one(struct showone *one, struct showone *ref)
 
 void nemoshow_one_unreference_all(struct showone *one)
 {
-	struct showone *ref;
+	struct showone *src;
+	struct showref *ref;
 	int i, j;
 
 	for (i = 0; i < NEMOSHOW_LAST_REF; i++) {
+		one->refs[i] = NULL;
+
 		ref = one->rrefs[i];
-		if (ref == NULL)
-			continue;
+		if (ref != NULL) {
+			one->rrefs[i] = NULL;
 
-		for (j = 0; j < ref->nrefs; j++) {
-			if (ref->refs[j] == one) {
-				NEMOBOX_REMOVE(ref->refs, ref->nrefs, j);
+			nemolist_remove(&ref->unreference_listener.link);
+			nemolist_remove(&ref->dirty_listener.link);
 
-				break;
-			}
-		}
-	}
-
-	for (i = 0; i < one->nrefs; i++) {
-		ref = one->refs[i];
-
-		for (j = 0; j < NEMOSHOW_LAST_REF; j++) {
-			if (ref->rrefs[j] == one) {
-				ref->rrefs[j] = NULL;
-
-				break;
-			}
+			free(ref);
 		}
 	}
 }

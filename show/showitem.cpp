@@ -130,8 +130,6 @@ void nemoshow_item_destroy(struct showone *one)
 
 	nemolist_remove(&item->canvas_destroy_listener.link);
 
-	nemoshow_one_unreference_all(one);
-
 	while (one->nchildren > 0) {
 		nemoshow_one_destroy_with_children(one->children[0]);
 	}

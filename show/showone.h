@@ -96,6 +96,18 @@ struct showattr {
 	uint32_t dirty;
 };
 
+struct showref {
+	struct nemolistener unreference_listener;
+	struct nemolistener dirty_listener;
+
+	struct showone *one;
+	int index;
+};
+
+struct showevent {
+	uint32_t dirty;
+};
+
 struct showone {
 	int type, sub;
 	char id[NEMOSHOW_ID_MAX];
@@ -105,6 +117,8 @@ struct showone {
 	uint32_t tag;
 
 	struct nemosignal destroy_signal;
+	struct nemosignal unreference_signal;
+	struct nemosignal dirty_signal;
 
 	struct nemoobject object;
 	uint32_t serial;
@@ -113,15 +127,15 @@ struct showone {
 	nemoshow_one_destroy_t destroy;
 
 	struct nemoshow *show;
+
 	struct showone *parent;
+	struct nemolistener parent_destroy_listener;
+
+	struct showone *refs[NEMOSHOW_LAST_REF];
+	struct showref *rrefs[NEMOSHOW_LAST_REF];
 
 	struct showone **children;
 	int nchildren, schildren;
-
-	struct showone **refs;
-	int nrefs, srefs;
-
-	struct showone *rrefs[NEMOSHOW_LAST_REF];
 
 	struct showattr **attrs;
 	int nattrs, sattrs;
@@ -137,7 +151,7 @@ struct showone {
 	void *userdata;
 };
 
-#define	NEMOSHOW_REF(one, index)			(one->rrefs[index])
+#define	NEMOSHOW_REF(one, index)			(one->refs[index])
 
 extern void nemoshow_one_prepare(struct showone *one);
 extern void nemoshow_one_finish(struct showone *one);
@@ -152,8 +166,8 @@ extern void nemoshow_one_detach_one(struct showone *parent, struct showone *one)
 extern void nemoshow_one_above_one(struct showone *one, struct showone *above);
 extern void nemoshow_one_below_one(struct showone *one, struct showone *below);
 
-extern void nemoshow_one_reference_one(struct showone *one, struct showone *ref, int index);
-extern void nemoshow_one_unreference_one(struct showone *one, struct showone *ref);
+extern int nemoshow_one_reference_one(struct showone *one, struct showone *src, int index);
+extern void nemoshow_one_unreference_one(struct showone *one, struct showone *src);
 extern void nemoshow_one_unreference_all(struct showone *one);
 
 extern struct showattr *nemoshow_one_create_attr(const char *name, const char *text, struct nemoattr *ref, uint32_t dirty);
@@ -163,6 +177,8 @@ extern void nemoshow_one_dump(struct showone *one, FILE *out);
 
 static inline void nemoshow_one_dirty(struct showone *one, uint32_t dirty)
 {
+	struct showevent event = { .dirty = dirty };
+
 	if (dirty == 0x0 || (one->dirty & dirty) == dirty)
 		return;
 
@@ -171,12 +187,7 @@ static inline void nemoshow_one_dirty(struct showone *one, uint32_t dirty)
 	if (one->effect != 0)
 		nemoshow_one_dirty(one->parent, one->effect);
 
-	if (one->nrefs > 0) {
-		int i;
-
-		for (i = 0; i < one->nrefs; i++)
-			nemoshow_one_dirty(one->refs[i], dirty);
-	}
+	nemosignal_emit(&one->dirty_signal, &event);
 }
 
 static inline void nemoshow_one_update(struct nemoshow *show, struct showone *one)
