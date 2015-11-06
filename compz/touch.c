@@ -141,7 +141,7 @@ static void nemo_touch_bypass(struct wl_client *client, struct wl_resource *reso
 	if (view != NULL) {
 		time = time_current_msecs();
 
-		nemocontent_touch_up(tp, tp->focus->content, time, touchid);
+		tp->grab->interface->up(tp->grab, time, tp->gid);
 
 		touchpoint_set_focus(tp, view);
 
@@ -759,7 +759,7 @@ void nemotouch_bypass_event(struct nemocompz *compz, int32_t touchid, float sx, 
 	if (view != NULL) {
 		time = time_current_msecs();
 
-		nemocontent_touch_up(tp, tp->focus->content, time, touchid);
+		tp->grab->interface->up(tp->grab, time, tp->gid);
 
 		touchpoint_set_focus(tp, view);
 
