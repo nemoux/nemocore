@@ -82,7 +82,7 @@ int nemotale_prepare(struct nemotale *tale)
 	if (env != NULL)
 		tale->minimum_width = strtoul(env, NULL, 10);
 	else
-		tale->minimum_width = 0;
+		tale->minimum_width = 150;
 
 	env = getenv("NEMOTALE_MAXIMUM_WIDTH");
 	if (env != NULL)
@@ -94,7 +94,7 @@ int nemotale_prepare(struct nemotale *tale)
 	if (env != NULL)
 		tale->minimum_height = strtoul(env, NULL, 10);
 	else
-		tale->minimum_height = 0;
+		tale->minimum_height = 150;
 
 	env = getenv("NEMOTALE_MAXIMUM_HEIGHT");
 	if (env != NULL)

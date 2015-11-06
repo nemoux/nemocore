@@ -65,12 +65,6 @@ static void nemopdf_dispatch_tale_event(struct nemotale *tale, struct talenode *
 						event->taps[1]->serial,
 						(1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_SCALE) | (1 << NEMO_SURFACE_PICK_TYPE_MOVE));
 			}
-		} else if (nemotale_is_touch_motion(tale, event, type)) {
-			nemotale_event_update_node_taps(tale, node, event, type);
-
-			if (nemotale_is_close_event(tale, event, type)) {
-				nemotool_exit(context->tool);
-			}
 		}
 
 		if (nemotale_is_single_click(tale, event, type)) {
@@ -115,6 +109,11 @@ static void nemopdf_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t wi
 
 	if (width == 0 || height == 0)
 		return;
+
+	if (width < nemotale_get_minimum_width(tale) || height < nemotale_get_minimum_height(tale)) {
+		nemotool_exit(context->tool);
+		return;
+	}
 
 	nemotool_resize_egl_canvas(context->canvas, width, height);
 	nemotale_resize(tale, width, height);
@@ -194,10 +193,6 @@ int main(int argc, char *argv[])
 				NTEGL_CONFIG(egl),
 				(EGLNativeWindowType)NTEGL_WINDOW(canvas)));
 	nemotale_resize(tale, width, height);
-
-	nemocanvas_set_min_size(NTEGL_CANVAS(canvas),
-			nemotale_get_minimum_width(tale),
-			nemotale_get_minimum_height(tale));
 
 	nemotale_attach_canvas(tale, NTEGL_CANVAS(canvas), nemopdf_dispatch_tale_event);
 	nemotale_set_userdata(tale, context);

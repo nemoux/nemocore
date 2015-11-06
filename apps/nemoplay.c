@@ -102,9 +102,7 @@ static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode 
 			}
 		} else if (nemotale_is_motion_event(tale, event, type)) {
 #if NEMOPLAY_SEEK_ENABLE
-			if (nemotale_is_close_event(tale, event, type)) {
-				nemotool_exit(context->tool);
-			} else if (nemotale_is_triple_taps(tale, event, type)) {
+			if (nemotale_is_triple_taps(tale, event, type)) {
 				if (context->gx - NEMOPLAY_SLIDE_DISTANCE_MIN > event->taps[2]->x) {
 					if (context->position != 0) {
 						context->position = MAX(context->position - NEMOPLAY_SLIDE_FRAME_TIME, 0);
@@ -238,6 +236,11 @@ static void nemoplay_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t w
 
 	if (width == 0 || height == 0)
 		return;
+
+	if (width < nemotale_get_minimum_width(tale) || height < nemotale_get_minimum_height(tale)) {
+		nemotool_exit(context->tool);
+		return;
+	}
 
 	if (context->is_audio_only == 0) {
 		if (fixed == 0) {
@@ -414,10 +417,6 @@ int main(int argc, char *argv[])
 				NTEGL_CONFIG(context->egl),
 				(EGLNativeWindowType)NTEGL_WINDOW(ecanvas)));
 	nemotale_resize(tale, width, height);
-
-	nemocanvas_set_min_size(canvas,
-			nemotale_get_minimum_width(tale),
-			nemotale_get_minimum_height(tale));
 
 	nemotale_attach_canvas(tale, canvas, nemoplay_dispatch_tale_event);
 	nemotale_set_userdata(tale, context);
