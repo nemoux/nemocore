@@ -31,10 +31,10 @@ struct nemomote *nemomote_create(int max)
 		goto err3;
 	memset(mote->attrs, 0, sizeof(uint32_t) * max);
 
-	mote->tweens = (double *)malloc(sizeof(double[10]) * max);
+	mote->tweens = (double *)malloc(sizeof(double[16]) * max);
 	if (mote->tweens == NULL)
 		goto err4;
-	memset(mote->tweens, 0, sizeof(double[10]) * max);
+	memset(mote->tweens, 0, sizeof(double[16]) * max);
 
 	mote->mcount = max;
 	mote->lcount = 0;
@@ -120,16 +120,22 @@ int nemomote_cleanup(struct nemomote *mote)
 				mote->buffers[to * 12 + 10] = mote->buffers[from * 12 + 10];
 				mote->types[to] = mote->types[from];
 				mote->attrs[to] = mote->attrs[from];
-				mote->tweens[to * 10 + 0] = mote->tweens[from * 10 + 0];
-				mote->tweens[to * 10 + 1] = mote->tweens[from * 10 + 1];
-				mote->tweens[to * 10 + 2] = mote->tweens[from * 10 + 2];
-				mote->tweens[to * 10 + 3] = mote->tweens[from * 10 + 3];
-				mote->tweens[to * 10 + 4] = mote->tweens[from * 10 + 4];
-				mote->tweens[to * 10 + 5] = mote->tweens[from * 10 + 5];
-				mote->tweens[to * 10 + 6] = mote->tweens[from * 10 + 6];
-				mote->tweens[to * 10 + 7] = mote->tweens[from * 10 + 7];
-				mote->tweens[to * 10 + 8] = mote->tweens[from * 10 + 8];
-				mote->tweens[to * 10 + 9] = mote->tweens[from * 10 + 9];
+				mote->tweens[to * 16 + 0] = mote->tweens[from * 16 + 0];
+				mote->tweens[to * 16 + 1] = mote->tweens[from * 16 + 1];
+				mote->tweens[to * 16 + 2] = mote->tweens[from * 16 + 2];
+				mote->tweens[to * 16 + 3] = mote->tweens[from * 16 + 3];
+				mote->tweens[to * 16 + 4] = mote->tweens[from * 16 + 4];
+				mote->tweens[to * 16 + 5] = mote->tweens[from * 16 + 5];
+				mote->tweens[to * 16 + 6] = mote->tweens[from * 16 + 6];
+				mote->tweens[to * 16 + 7] = mote->tweens[from * 16 + 7];
+				mote->tweens[to * 16 + 8] = mote->tweens[from * 16 + 8];
+				mote->tweens[to * 16 + 9] = mote->tweens[from * 16 + 9];
+				mote->tweens[to * 16 + 10] = mote->tweens[from * 16 + 10];
+				mote->tweens[to * 16 + 11] = mote->tweens[from * 16 + 11];
+				mote->tweens[to * 16 + 12] = mote->tweens[from * 16 + 12];
+				mote->tweens[to * 16 + 13] = mote->tweens[from * 16 + 13];
+				mote->tweens[to * 16 + 14] = mote->tweens[from * 16 + 14];
+				mote->tweens[to * 16 + 15] = mote->tweens[from * 16 + 15];
 			}
 
 			mote->lcount--;

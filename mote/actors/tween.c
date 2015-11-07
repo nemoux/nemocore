@@ -38,7 +38,10 @@ int nemomote_tween_update(struct nemomote *mote, uint32_t type, double secs, str
 			NEMOMOTE_POSITION_Y(mote, i) = (NEMOMOTE_TWEEN_DY(mote, i) - NEMOMOTE_TWEEN_SY(mote, i)) * t + NEMOMOTE_TWEEN_SY(mote, i);
 		}
 
-		if (tween & NEMOMOTE_ALPHA_TWEEN) {
+		if (tween & NEMOMOTE_COLOR_TWEEN) {
+			NEMOMOTE_COLOR_R(mote, i) = (NEMOMOTE_TWEEN_DR(mote, i) - NEMOMOTE_TWEEN_SR(mote, i)) * t + NEMOMOTE_TWEEN_SR(mote, i);
+			NEMOMOTE_COLOR_G(mote, i) = (NEMOMOTE_TWEEN_DG(mote, i) - NEMOMOTE_TWEEN_SG(mote, i)) * t + NEMOMOTE_TWEEN_SG(mote, i);
+			NEMOMOTE_COLOR_B(mote, i) = (NEMOMOTE_TWEEN_DB(mote, i) - NEMOMOTE_TWEEN_SB(mote, i)) * t + NEMOMOTE_TWEEN_SB(mote, i);
 			NEMOMOTE_COLOR_A(mote, i) = (NEMOMOTE_TWEEN_DA(mote, i) - NEMOMOTE_TWEEN_SA(mote, i)) * t + NEMOMOTE_TWEEN_SA(mote, i);
 		}
 

@@ -81,20 +81,26 @@ static inline int nemomote_get_count(struct nemomote *mote)
 
 #define	NEMOMOTE_TYPE(m, i)						((m)->types[i])
 
-#define	NEMOMOTE_TWEEN_SX(m, i)				((m)->tweens[i * 10 + 0])
-#define	NEMOMOTE_TWEEN_SY(m, i)				((m)->tweens[i * 10 + 1])
+#define	NEMOMOTE_TWEEN_SX(m, i)				((m)->tweens[i * 16 + 0])
+#define	NEMOMOTE_TWEEN_SY(m, i)				((m)->tweens[i * 16 + 1])
 
-#define	NEMOMOTE_TWEEN_DX(m, i)				((m)->tweens[i * 10 + 2])
-#define	NEMOMOTE_TWEEN_DY(m, i)				((m)->tweens[i * 10 + 3])
+#define	NEMOMOTE_TWEEN_DX(m, i)				((m)->tweens[i * 16 + 2])
+#define	NEMOMOTE_TWEEN_DY(m, i)				((m)->tweens[i * 16 + 3])
 
-#define	NEMOMOTE_TWEEN_SA(m, i)				((m)->tweens[i * 10 + 4])
-#define	NEMOMOTE_TWEEN_DA(m, i)				((m)->tweens[i * 10 + 5])
+#define	NEMOMOTE_TWEEN_SR(m, i)				((m)->tweens[i * 16 + 4])
+#define	NEMOMOTE_TWEEN_DR(m, i)				((m)->tweens[i * 16 + 5])
+#define	NEMOMOTE_TWEEN_SG(m, i)				((m)->tweens[i * 16 + 6])
+#define	NEMOMOTE_TWEEN_DG(m, i)				((m)->tweens[i * 16 + 7])
+#define	NEMOMOTE_TWEEN_SB(m, i)				((m)->tweens[i * 16 + 8])
+#define	NEMOMOTE_TWEEN_DB(m, i)				((m)->tweens[i * 16 + 9])
+#define	NEMOMOTE_TWEEN_SA(m, i)				((m)->tweens[i * 16 + 10])
+#define	NEMOMOTE_TWEEN_DA(m, i)				((m)->tweens[i * 16 + 11])
 
-#define	NEMOMOTE_TWEEN_SM(m, i)				((m)->tweens[i * 10 + 6])
-#define	NEMOMOTE_TWEEN_DM(m, i)				((m)->tweens[i * 10 + 7])
+#define	NEMOMOTE_TWEEN_SM(m, i)				((m)->tweens[i * 16 + 12])
+#define	NEMOMOTE_TWEEN_DM(m, i)				((m)->tweens[i * 16 + 13])
 
-#define NEMOMOTE_TWEEN_DT(m, i)				((m)->tweens[i * 10 + 8])
-#define NEMOMOTE_TWEEN_RT(m, i)				((m)->tweens[i * 10 + 9])
+#define NEMOMOTE_TWEEN_DT(m, i)				((m)->tweens[i * 16 + 14])
+#define NEMOMOTE_TWEEN_RT(m, i)				((m)->tweens[i * 16 + 15])
 
 #ifdef __cplusplus
 }

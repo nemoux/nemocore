@@ -43,6 +43,7 @@
 #include <nemotimer.h>
 #include <nemoegl.h>
 #include <pixmanhelper.h>
+#include <colorhelper.h>
 #include <talehelper.h>
 #include <nemomisc.h>
 
@@ -75,6 +76,11 @@ struct moteback {
 	int type;
 	char *logo;
 	double pixelsize;
+
+	double colors0[4];
+	double colors1[4];
+	double tcolors0[4];
+	double tcolors1[4];
 };
 
 static void moteback_prepare_text(struct moteback *mote, const char *text, int ntext)
@@ -131,7 +137,7 @@ static void moteback_prepare_text(struct moteback *mote, const char *text, int n
 				nemomote_tweener_set_one(mote->mote, p,
 						x + j * pixelsize,
 						y + i * pixelsize,
-						1.0f, 0.8f,
+						mote->tcolors1, mote->tcolors0,
 						pixelsize * 0.5f, pixelsize * 0.3f,
 						5.0f, 1.0f);
 				nemomote_type_set_one(mote->mote, p, 5);
@@ -148,15 +154,15 @@ static void moteback_update_one(struct moteback *mote, double secs)
 	nemomote_collide_update(mote->mote, 2, 2, secs, 1.5f);
 	nemomote_speedlimit_update(mote->mote, 1, secs, 0.0f, 300.0f);
 
-	if (nemomote_tween_update(mote->mote, 5, secs, &mote->ease, 6, NEMOMOTE_POSITION_TWEEN | NEMOMOTE_ALPHA_TWEEN | NEMOMOTE_MASS_TWEEN) != 0) {
+	if (nemomote_tween_update(mote->mote, 5, secs, &mote->ease, 6, NEMOMOTE_POSITION_TWEEN | NEMOMOTE_COLOR_TWEEN | NEMOMOTE_MASS_TWEEN) != 0) {
 		nemomote_tweener_set(mote->mote, 6,
 				0.0f, 0.0f,
-				0.3f, 0.1f,
+				mote->colors1, mote->colors0,
 				8.0f, 3.0f,
 				5.0f, 1.0f);
 	}
 
-	if (nemomote_tween_update(mote->mote, 6, secs, &mote->ease, 7, NEMOMOTE_ALPHA_TWEEN | NEMOMOTE_MASS_TWEEN) != 0) {
+	if (nemomote_tween_update(mote->mote, 6, secs, &mote->ease, 7, NEMOMOTE_COLOR_TWEEN | NEMOMOTE_MASS_TWEEN) != 0) {
 		nemomote_explosion_update(mote->mote, 7, secs, -30.0f, 30.0f, -30.0f, 30.0f);
 		nemomote_sleeptime_set(mote->mote, 7, 9.0f, 3.0f);
 		nemomote_type_set(mote->mote, 7, 1);
@@ -330,12 +336,13 @@ static void moteback_dispatch_tale_event(struct nemotale *tale, struct talenode 
 int main(int argc, char *argv[])
 {
 	struct option options[] = {
-		{ "width",			required_argument,			NULL,		'w' },
-		{ "height",			required_argument,			NULL,		'h' },
-		{ "uri",				required_argument,			NULL,		'u' },
-		{ "logo",				required_argument,			NULL,		'l' },
-		{ "pixelsize",	required_argument,			NULL,		's' },
-		{ "background",	no_argument,						NULL,		'b' },
+		{ "width",				required_argument,			NULL,		'w' },
+		{ "height",				required_argument,			NULL,		'h' },
+		{ "uri",					required_argument,			NULL,		'u' },
+		{ "logo",					required_argument,			NULL,		'l' },
+		{ "pixelsize",		required_argument,			NULL,		's' },
+		{ "color",				required_argument,			NULL,		'c' },
+		{ "textcolor",		required_argument,			NULL,		't' },
 		{ 0 }
 	};
 	struct moteback *mote;
@@ -346,12 +353,15 @@ int main(int argc, char *argv[])
 	int32_t width = 1920;
 	int32_t height = 1080;
 	double pixelsize = 18.0f;
+	double color[4] = { 0.0f, 0.3f, 0.3f, 0.0f };
+	double textcolor[4] = { 0.0f, 1.0f, 1.0f, 0.0f };
+	uint32_t uc;
 	char *uri = NULL;
 	char *logo = NULL;
 	int opt;
 	int i;
 
-	while (opt = getopt_long(argc, argv, "w:h:u:l:s:b", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:u:l:s:c:t:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -376,6 +386,22 @@ int main(int argc, char *argv[])
 				pixelsize = strtod(optarg, NULL);
 				break;
 
+			case 'c':
+				uc = nemocolor_parse(optarg);
+
+				color[0] = NEMOCOLOR_DOUBLE_R(uc);
+				color[1] = NEMOCOLOR_DOUBLE_G(uc);
+				color[2] = NEMOCOLOR_DOUBLE_B(uc);
+				break;
+
+			case 't':
+				uc = nemocolor_parse(optarg);
+
+				textcolor[0] = NEMOCOLOR_DOUBLE_R(uc);
+				textcolor[1] = NEMOCOLOR_DOUBLE_G(uc);
+				textcolor[2] = NEMOCOLOR_DOUBLE_B(uc);
+				break;
+
 			default:
 				break;
 		}
@@ -396,6 +422,24 @@ int main(int argc, char *argv[])
 
 	mote->pixelsize = pixelsize;
 
+	mote->colors0[0] = color[0];
+	mote->colors1[0] = color[0];
+	mote->colors0[1] = color[1];
+	mote->colors1[1] = color[1];
+	mote->colors0[2] = color[2];
+	mote->colors1[2] = color[2];
+	mote->colors0[3] = 0.1f;
+	mote->colors1[3] = 0.3f;
+
+	mote->tcolors0[0] = textcolor[0];
+	mote->tcolors1[0] = textcolor[0];
+	mote->tcolors0[1] = textcolor[1];
+	mote->tcolors1[1] = textcolor[1];
+	mote->tcolors0[2] = textcolor[2];
+	mote->tcolors1[2] = textcolor[2];
+	mote->tcolors0[3] = 1.0f;
+	mote->tcolors1[3] = 1.0f;
+
 	mote->mote = nemomote_create(3000);
 	nemomote_random_set_property(&mote->random, 5.0f, 1.0f);
 	nemozone_set_cube(&mote->box, mote->width * 0.0f, mote->width * 1.0f, mote->height * 0.0f, mote->height * 1.0f);
@@ -405,7 +449,11 @@ int main(int argc, char *argv[])
 	nemomote_blast_emit(mote->mote, 500);
 	nemomote_position_update(mote->mote, &mote->box);
 	nemomote_velocity_update(mote->mote, &mote->speed);
-	nemomote_color_update(mote->mote, 0.0f, 0.0f, 0.3f, 0.3f, 0.3f, 0.3f, 0.3f, 0.1f);
+	nemomote_color_update(mote->mote,
+			mote->colors1[0], mote->colors0[0],
+			mote->colors1[1], mote->colors0[1],
+			mote->colors1[2], mote->colors0[2],
+			mote->colors1[3], mote->colors0[3]);
 	nemomote_mass_update(mote->mote, 8.0f, 3.0f);
 	nemomote_type_update(mote->mote, 1);
 	nemomote_commit(mote->mote);
@@ -413,7 +461,11 @@ int main(int argc, char *argv[])
 	nemomote_blast_emit(mote->mote, 50);
 	nemomote_position_update(mote->mote, &mote->box);
 	nemomote_velocity_update(mote->mote, &mote->speed);
-	nemomote_color_update(mote->mote, 0.0f, 0.0f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.3f);
+	nemomote_color_update(mote->mote,
+			mote->colors1[0], mote->colors0[0],
+			mote->colors1[1], mote->colors0[1],
+			mote->colors1[2], mote->colors0[2],
+			mote->colors1[3] * 1.5f, mote->colors0[3] * 1.5f);
 	nemomote_mass_update(mote->mote, 15.0f, 5.0f);
 	nemomote_type_update(mote->mote, 2);
 	nemomote_commit(mote->mote);
