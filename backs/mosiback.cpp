@@ -200,7 +200,6 @@ int main(int argc, char *argv[])
 		{ "dstfile",		required_argument,			NULL,		'd' },
 		{ "width",			required_argument,			NULL,		'w' },
 		{ "height",			required_argument,			NULL,		'h' },
-		{ "background",	no_argument,						NULL,		'b' },
 		{ 0 }
 	};
 	struct mosiback *mosi;
@@ -216,7 +215,7 @@ int main(int argc, char *argv[])
 	int opt;
 	int i;
 
-	while (opt = getopt_long(argc, argv, "s:d:w:h:b", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "s:d:w:h:", options, NULL)) {
 		if (opt == -1)
 			break;
 

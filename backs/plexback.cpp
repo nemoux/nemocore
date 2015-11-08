@@ -231,7 +231,6 @@ int main(int argc, char *argv[])
 	struct option options[] = {
 		{ "width",			required_argument,			NULL,		'w' },
 		{ "height",			required_argument,			NULL,		'h' },
-		{ "background",	no_argument,						NULL,		'b' },
 		{ 0 }
 	};
 	struct plexback *plex;
@@ -245,7 +244,7 @@ int main(int argc, char *argv[])
 	int opt;
 	int i;
 
-	while (opt = getopt_long(argc, argv, "w:h:b", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:", options, NULL)) {
 		if (opt == -1)
 			break;
 

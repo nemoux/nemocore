@@ -215,7 +215,6 @@ int main(int argc, char *argv[])
 		{ "type",				required_argument,			NULL,		't' },
 		{ "width",			required_argument,			NULL,		'w' },
 		{ "height",			required_argument,			NULL,		'h' },
-		{ "background",	no_argument,						NULL,		'b' },
 		{ 0 }
 	};
 	struct miniback *mini;
@@ -230,7 +229,7 @@ int main(int argc, char *argv[])
 	int32_t height = 1080;
 	int opt;
 
-	while (opt = getopt_long(argc, argv, "f:t:w:h:b", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "f:t:w:h:", options, NULL)) {
 		if (opt == -1)
 			break;
 
