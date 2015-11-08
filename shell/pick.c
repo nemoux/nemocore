@@ -78,144 +78,73 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 			nemolog_message("PICK", "[UP:RESET] %llu: width(%d) height(%d) (%u)\n", touchid, pick->width, pick->height, time);
 	}
 
-	if (shell->pick.mode == NEMO_SHELL_PICK_PROGRESSIVE_MODE) {
-		if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALE)) {
-			struct nemocompz *compz = shell->compz;
-			struct shellscreen *screen = NULL;
-			int32_t width, height;
+	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALE)) {
+		struct nemocompz *compz = shell->compz;
+		struct shellscreen *screen = NULL;
+		double distance = MAX(pickgrab_calculate_touchpoint_distance(pick->tp0, pick->tp1), shell->pick.min_distance);
+		int32_t width, height;
 
-			if (pick->sx * pick->width > bin->max_width ||
-					pick->sy * pick->height > bin->max_height) {
-				double sx = (double)bin->max_width / (double)pick->width;
-				double sy = (double)bin->max_height / (double)pick->height;
+		if (pick->sx * (distance / pick->touch.distance) * pick->width > bin->max_width ||
+				pick->sy * (distance / pick->touch.distance) * pick->height > bin->max_height) {
+			double sx = (double)bin->max_width / (double)pick->width;
+			double sy = (double)bin->max_height / (double)pick->height;
 
-				if (sx > sy) {
-					width = pick->width * sy;
-					height = pick->height * sy;
-				} else {
-					width = pick->width * sx;
-					height = pick->height * sx;
-				}
-			} else if (pick->sx * pick->width < bin->min_width ||
-					pick->sy * pick->height < bin->min_height) {
-				double sx = (double)bin->min_width / (double)pick->width;
-				double sy = (double)bin->min_height / (double)pick->height;
-
-				if (sx > sy) {
-					width = pick->width * sx;
-					height = pick->height * sx;
-				} else {
-					width = pick->width * sy;
-					height = pick->height * sy;
-				}
+			if (sx > sy) {
+				width = pick->width * sy;
+				height = pick->height * sy;
 			} else {
-				width = pick->width * pick->sx;
-				height = pick->height * pick->sy;
+				width = pick->width * sx;
+				height = pick->height * sx;
 			}
+		} else if (pick->sx * (distance / pick->touch.distance) * pick->width < bin->min_width ||
+				pick->sy * (distance / pick->touch.distance) * pick->height < bin->min_height) {
+			double sx = (double)bin->min_width / (double)pick->width;
+			double sy = (double)bin->min_height / (double)pick->height;
 
-			bin->reset_scale = 1;
-
-			if (shell->is_logging_grab != 0)
-				nemolog_message("PICK", "[UP:SCALE] %llu: sx(%f) sy(%f) width(%d) height(%d) (%u)\n", touchid, pick->sx, pick->sy, width, height, time);
-
-			if (bin->on_pickscreen != 0) {
-				if (nemocompz_get_scene_width(compz) <= width || nemocompz_get_scene_height(compz) <= height)
-					screen = nemoshell_get_fullscreen_on(shell, tp0->x, tp0->y, NEMO_SHELL_FULLSCREEN_PICK_TYPE);
-
-				if (screen != NULL) {
-					wl_list_insert(&screen->bin_list, &bin->screen_link);
-
-					nemoshell_clear_bin_next_state(bin);
-					bin->next_state.fullscreen = 1;
-					bin->state_changed = 1;
-
-					bin->type = NEMO_SHELL_SURFACE_NORMAL_TYPE;
-					nemoshell_set_parent_bin(bin, NULL);
-
-					bin->screen.x = screen->dx;
-					bin->screen.y = screen->dy;
-					bin->screen.width = screen->dw;
-					bin->screen.height = screen->dh;
-					bin->screen.r = screen->dr * M_PI / 180.0f;
-					bin->has_screen = 1;
-
-					nemoshell_send_bin_state(bin);
-				} else {
-					bin->client->send_configure(bin->canvas, width, height);
-				}
+			if (sx > sy) {
+				width = pick->width * sx;
+				height = pick->height * sx;
 			} else {
-				bin->client->send_configure(bin->canvas, width, height);
+				width = pick->width * sy;
+				height = pick->height * sy;
 			}
+		} else {
+			width = pick->width * pick->sx * (distance / pick->touch.distance);
+			height = pick->height * pick->sy * (distance / pick->touch.distance);
 		}
-	} else {
-		if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALE)) {
-			struct nemocompz *compz = shell->compz;
-			struct shellscreen *screen = NULL;
-			double distance = MAX(pickgrab_calculate_touchpoint_distance(pick->tp0, pick->tp1), shell->pick.min_distance);
-			int32_t width, height;
 
-			if (pick->sx * (distance / pick->touch.distance) * pick->width > bin->max_width ||
-					pick->sy * (distance / pick->touch.distance) * pick->height > bin->max_height) {
-				double sx = (double)bin->max_width / (double)pick->width;
-				double sy = (double)bin->max_height / (double)pick->height;
+		bin->reset_scale = 1;
 
-				if (sx > sy) {
-					width = pick->width * sy;
-					height = pick->height * sy;
-				} else {
-					width = pick->width * sx;
-					height = pick->height * sx;
-				}
-			} else if (pick->sx * (distance / pick->touch.distance) * pick->width < bin->min_width ||
-					pick->sy * (distance / pick->touch.distance) * pick->height < bin->min_height) {
-				double sx = (double)bin->min_width / (double)pick->width;
-				double sy = (double)bin->min_height / (double)pick->height;
+		if (shell->is_logging_grab != 0)
+			nemolog_message("PICK", "[UP:SCALE] %llu: sx(%f) sy(%f) width(%d) height(%d) (%u)\n", touchid, pick->sx * (distance / pick->touch.distance), pick->sy * (distance / pick->touch.distance), width, height, time);
 
-				if (sx > sy) {
-					width = pick->width * sx;
-					height = pick->height * sx;
-				} else {
-					width = pick->width * sy;
-					height = pick->height * sy;
-				}
-			} else {
-				width = pick->width * pick->sx * (distance / pick->touch.distance);
-				height = pick->height * pick->sy * (distance / pick->touch.distance);
-			}
+		if (bin->on_pickscreen != 0) {
+			if (nemocompz_get_scene_width(compz) <= width || nemocompz_get_scene_height(compz) <= height)
+				screen = nemoshell_get_fullscreen_on(shell, tp0->x, tp0->y, NEMO_SHELL_FULLSCREEN_PICK_TYPE);
 
-			bin->reset_scale = 1;
+			if (screen != NULL) {
+				wl_list_insert(&screen->bin_list, &bin->screen_link);
 
-			if (shell->is_logging_grab != 0)
-				nemolog_message("PICK", "[UP:SCALE] %llu: sx(%f) sy(%f) width(%d) height(%d) (%u)\n", touchid, pick->sx * (distance / pick->touch.distance), pick->sy * (distance / pick->touch.distance), width, height, time);
+				nemoshell_clear_bin_next_state(bin);
+				bin->next_state.fullscreen = 1;
+				bin->state_changed = 1;
 
-			if (bin->on_pickscreen != 0) {
-				if (nemocompz_get_scene_width(compz) <= width || nemocompz_get_scene_height(compz) <= height)
-					screen = nemoshell_get_fullscreen_on(shell, tp0->x, tp0->y, NEMO_SHELL_FULLSCREEN_PICK_TYPE);
+				bin->type = NEMO_SHELL_SURFACE_NORMAL_TYPE;
+				nemoshell_set_parent_bin(bin, NULL);
 
-				if (screen != NULL) {
-					wl_list_insert(&screen->bin_list, &bin->screen_link);
+				bin->screen.x = screen->dx;
+				bin->screen.y = screen->dy;
+				bin->screen.width = screen->dw;
+				bin->screen.height = screen->dh;
+				bin->screen.r = screen->dr * M_PI / 180.0f;
+				bin->has_screen = 1;
 
-					nemoshell_clear_bin_next_state(bin);
-					bin->next_state.fullscreen = 1;
-					bin->state_changed = 1;
-
-					bin->type = NEMO_SHELL_SURFACE_NORMAL_TYPE;
-					nemoshell_set_parent_bin(bin, NULL);
-
-					bin->screen.x = screen->dx;
-					bin->screen.y = screen->dy;
-					bin->screen.width = screen->dw;
-					bin->screen.height = screen->dh;
-					bin->screen.r = screen->dr * M_PI / 180.0f;
-					bin->has_screen = 1;
-
-					nemoshell_send_bin_state(bin);
-				} else {
-					bin->client->send_configure(bin->canvas, width, height);
-				}
+				nemoshell_send_bin_state(bin);
 			} else {
 				bin->client->send_configure(bin->canvas, width, height);
 			}
+		} else {
+			bin->client->send_configure(bin->canvas, width, height);
 		}
 	}
 
@@ -283,117 +212,48 @@ static void pick_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 			nemolog_message("PICK", "[MOTION:RESET] %llu: width(%d) height(%d) (%u)\n", touchid, pick->width, pick->height, time);
 	}
 
-	if (shell->pick.mode == NEMO_SHELL_PICK_PROGRESSIVE_MODE) {
-		if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_ROTATE)) {
+	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_ROTATE)) {
+		double distance = pickgrab_calculate_touchpoint_distance(pick->tp0, pick->tp1);
+
+		if (distance > shell->pick.min_distance) {
 			float r = pickgrab_calculate_touchpoint_angle(pick->tp0, pick->tp1);
 
-			if (fabs(r - pick->touch.r) > shell->pick.rotate_interval) {
-				if (r > pick->touch.r) {
-					pick->r -= shell->pick.rotate_increment;
-				} else {
-					pick->r += shell->pick.rotate_increment;
-				}
-
-				nemoview_set_rotation(bin->view, pick->r);
-
-				pick->touch.r = r;
-
-				pick->other->r = pick->r;
-				pick->other->touch.r = pick->touch.r;
-
-				if (shell->is_logging_grab != 0)
-					nemolog_message("PICK", "[MOTION:ROTATE] %llu: r(%f) touch(%f) (%u)\n", touchid, pick->r, pick->touch.r, time);
-			}
-		}
-
-		if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALE)) {
-			double distance = MAX(pickgrab_calculate_touchpoint_distance(pick->tp0, pick->tp1), shell->pick.min_distance);
-
-			if (fabs(distance - pick->touch.distance) > shell->pick.scale_interval) {
-				if (distance > pick->touch.distance) {
-					pick->sx *= shell->pick.scale_increment;
-					pick->sy *= shell->pick.scale_increment;
-				} else {
-					pick->sx /= shell->pick.scale_increment;
-					pick->sy /= shell->pick.scale_increment;
-				}
-
-				if (pick->sx * pick->width > bin->max_width ||
-						pick->sy * pick->height > bin->max_height) {
-					double sx = (double)bin->max_width / (double)pick->width;
-					double sy = (double)bin->max_height / (double)pick->height;
-
-					if (sx > sy)
-						nemoview_set_scale(bin->view, sy, sy);
-					else
-						nemoview_set_scale(bin->view, sx, sx);
-				} else if (pick->sx * pick->width < bin->min_width ||
-						pick->sy * pick->height < bin->min_height) {
-					double sx = (double)bin->min_width / (double)pick->width;
-					double sy = (double)bin->min_height / (double)pick->height;
-
-					if (sx > sy)
-						nemoview_set_scale(bin->view, sx, sx);
-					else
-						nemoview_set_scale(bin->view, sy, sy);
-				} else {
-					nemoview_set_scale(bin->view, pick->sx, pick->sy);
-				}
-
-				pick->touch.distance = distance;
-
-				pick->other->sx = pick->sx;
-				pick->other->sy = pick->sy;
-				pick->other->touch.distance = pick->touch.distance;
-
-				if (shell->is_logging_grab != 0)
-					nemolog_message("PICK", "[MOTION:SCALE] %llu: sx(%f) sy(%f) touch(%f) (%u)\n", touchid, pick->sx, pick->sy, pick->touch.distance, time);
-			}
-		}
-	} else {
-		if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_ROTATE)) {
-			double distance = pickgrab_calculate_touchpoint_distance(pick->tp0, pick->tp1);
-
-			if (distance > shell->pick.min_distance) {
-				float r = pickgrab_calculate_touchpoint_angle(pick->tp0, pick->tp1);
-
-				nemoview_set_rotation(bin->view, pick->r + pick->touch.r - r);
-
-				if (shell->is_logging_grab != 0)
-					nemolog_message("PICK", "[MOTION:ROTATE] %llu: r(%f) touch(%f) (%u)\n", touchid, bin->view->geometry.r, r, time);
-			}
-		}
-
-		if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALE)) {
-			double distance = MAX(pickgrab_calculate_touchpoint_distance(pick->tp0, pick->tp1), shell->pick.min_distance);
-
-			if (pick->sx * (distance / pick->touch.distance) * pick->width > bin->max_width ||
-					pick->sy * (distance / pick->touch.distance) * pick->height > bin->max_height) {
-				double sx = (double)bin->max_width / (double)pick->width;
-				double sy = (double)bin->max_height / (double)pick->height;
-
-				if (sx > sy)
-					nemoview_set_scale(bin->view, sy, sy);
-				else
-					nemoview_set_scale(bin->view, sx, sx);
-			} else if (pick->sx * (distance / pick->touch.distance) * pick->width < bin->min_width ||
-					pick->sy * (distance / pick->touch.distance) * pick->height < bin->min_height) {
-				double sx = (double)bin->min_width / (double)pick->width;
-				double sy = (double)bin->min_height / (double)pick->height;
-
-				if (sx > sy)
-					nemoview_set_scale(bin->view, sx, sx);
-				else
-					nemoview_set_scale(bin->view, sy, sy);
-			} else {
-				nemoview_set_scale(bin->view,
-						pick->sx * (distance / pick->touch.distance),
-						pick->sy * (distance / pick->touch.distance));
-			}
+			nemoview_set_rotation(bin->view, pick->r + pick->touch.r - r);
 
 			if (shell->is_logging_grab != 0)
-				nemolog_message("PICK", "[MOTION:SCALE] %llu: sx(%f) sy(%f) touch(%f) (%u)\n", touchid, bin->view->geometry.sx, bin->view->geometry.sy, distance, time);
+				nemolog_message("PICK", "[MOTION:ROTATE] %llu: r(%f) touch(%f) (%u)\n", touchid, bin->view->geometry.r, r, time);
 		}
+	}
+
+	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALE)) {
+		double distance = MAX(pickgrab_calculate_touchpoint_distance(pick->tp0, pick->tp1), shell->pick.min_distance);
+
+		if (pick->sx * (distance / pick->touch.distance) * pick->width > bin->max_width ||
+				pick->sy * (distance / pick->touch.distance) * pick->height > bin->max_height) {
+			double sx = (double)bin->max_width / (double)pick->width;
+			double sy = (double)bin->max_height / (double)pick->height;
+
+			if (sx > sy)
+				nemoview_set_scale(bin->view, sy, sy);
+			else
+				nemoview_set_scale(bin->view, sx, sx);
+		} else if (pick->sx * (distance / pick->touch.distance) * pick->width < bin->min_width ||
+				pick->sy * (distance / pick->touch.distance) * pick->height < bin->min_height) {
+			double sx = (double)bin->min_width / (double)pick->width;
+			double sy = (double)bin->min_height / (double)pick->height;
+
+			if (sx > sy)
+				nemoview_set_scale(bin->view, sx, sx);
+			else
+				nemoview_set_scale(bin->view, sy, sy);
+		} else {
+			nemoview_set_scale(bin->view,
+					pick->sx * (distance / pick->touch.distance),
+					pick->sy * (distance / pick->touch.distance));
+		}
+
+		if (shell->is_logging_grab != 0)
+			nemolog_message("PICK", "[MOTION:SCALE] %llu: sx(%f) sy(%f) touch(%f) (%u)\n", touchid, bin->view->geometry.sx, bin->view->geometry.sy, distance, time);
 	}
 
 	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_RESIZE)) {
@@ -687,113 +547,58 @@ static void pick_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 	struct nemoactor *actor = grab->actor;
 	struct nemoshell *shell = grab->shell;
 
-	if (shell->pick.mode == NEMO_SHELL_PICK_PROGRESSIVE_MODE) {
-		if (actor != NULL && (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALE))) {
-			struct nemocompz *compz = actor->compz;
-			struct nemoview *view = actor->view;
-			int32_t width, height;
-			int32_t sx, sy;
-			float fromx, fromy, tox, toy;
+	if (actor != NULL && (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALE))) {
+		struct nemocompz *compz = actor->compz;
+		struct nemoview *view = actor->view;
+		double distance = MAX(pickgrab_calculate_touchpoint_distance(pick->tp0, pick->tp1), shell->pick.min_distance);
+		int32_t width, height;
+		int32_t sx, sy;
+		float fromx, fromy, tox, toy;
 
-			if (pick->sx * pick->width > actor->max_width ||
-					pick->sy * pick->height > actor->max_height) {
-				double sx = (double)actor->max_width / (double)pick->width;
-				double sy = (double)actor->max_height / (double)pick->height;
+		if (pick->sx * (distance / pick->touch.distance) * pick->width > actor->max_width ||
+				pick->sy * (distance / pick->touch.distance) * pick->height > actor->max_height) {
+			double sx = (double)actor->max_width / (double)pick->width;
+			double sy = (double)actor->max_height / (double)pick->height;
 
-				if (sx > sy) {
-					width = pick->width * sy;
-					height = pick->height * sy;
-				} else {
-					width = pick->width * sx;
-					height = pick->height * sx;
-				}
-			} else if (pick->sx * pick->width < actor->min_width ||
-					pick->sy * pick->height < actor->min_height) {
-				double sx = (double)actor->min_width / (double)pick->width;
-				double sy = (double)actor->min_height / (double)pick->height;
-
-				if (sx > sy) {
-					width = pick->width * sx;
-					height = pick->height * sx;
-				} else {
-					width = pick->width * sy;
-					height = pick->height * sy;
-				}
+			if (sx > sy) {
+				width = pick->width * sy;
+				height = pick->height * sy;
 			} else {
-				width = pick->width * pick->sx;
-				height = pick->height * pick->sy;
+				width = pick->width * sx;
+				height = pick->height * sx;
 			}
+		} else if (pick->sx * (distance / pick->touch.distance) * pick->width < actor->min_width ||
+				pick->sy * (distance / pick->touch.distance) * pick->height < actor->min_height) {
+			double sx = (double)actor->min_width / (double)pick->width;
+			double sy = (double)actor->min_height / (double)pick->height;
 
-			nemoview_set_scale(view, 1.0f, 1.0f);
-			nemoview_update_transform(view);
-
-			sx = (width - actor->base.width) * -actor->ax;
-			sy = (height - actor->base.height) * -actor->ay;
-
-			nemoview_transform_to_global(view, 0.0f, 0.0f, &fromx, &fromy);
-			nemoview_transform_to_global(view, sx, sy, &tox, &toy);
-
-			nemoview_set_position(view,
-					view->geometry.x + tox - fromx,
-					view->geometry.y + toy - fromy);
-
-			nemoactor_dispatch_resize(actor, width, height, 0);
-			nemoactor_dispatch_frame(actor);
-		}
-	} else {
-		if (actor != NULL && (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALE))) {
-			struct nemocompz *compz = actor->compz;
-			struct nemoview *view = actor->view;
-			double distance = MAX(pickgrab_calculate_touchpoint_distance(pick->tp0, pick->tp1), shell->pick.min_distance);
-			int32_t width, height;
-			int32_t sx, sy;
-			float fromx, fromy, tox, toy;
-
-			if (pick->sx * (distance / pick->touch.distance) * pick->width > actor->max_width ||
-					pick->sy * (distance / pick->touch.distance) * pick->height > actor->max_height) {
-				double sx = (double)actor->max_width / (double)pick->width;
-				double sy = (double)actor->max_height / (double)pick->height;
-
-				if (sx > sy) {
-					width = pick->width * sy;
-					height = pick->height * sy;
-				} else {
-					width = pick->width * sx;
-					height = pick->height * sx;
-				}
-			} else if (pick->sx * (distance / pick->touch.distance) * pick->width < actor->min_width ||
-					pick->sy * (distance / pick->touch.distance) * pick->height < actor->min_height) {
-				double sx = (double)actor->min_width / (double)pick->width;
-				double sy = (double)actor->min_height / (double)pick->height;
-
-				if (sx > sy) {
-					width = pick->width * sx;
-					height = pick->height * sx;
-				} else {
-					width = pick->width * sy;
-					height = pick->height * sy;
-				}
+			if (sx > sy) {
+				width = pick->width * sx;
+				height = pick->height * sx;
 			} else {
-				width = pick->width * pick->sx * (distance / pick->touch.distance);
-				height = pick->height * pick->sy * (distance / pick->touch.distance);
+				width = pick->width * sy;
+				height = pick->height * sy;
 			}
-
-			nemoview_set_scale(view, 1.0f, 1.0f);
-			nemoview_update_transform(view);
-
-			sx = (width - actor->base.width) * -actor->ax;
-			sy = (height - actor->base.height) * -actor->ay;
-
-			nemoview_transform_to_global(view, 0.0f, 0.0f, &fromx, &fromy);
-			nemoview_transform_to_global(view, sx, sy, &tox, &toy);
-
-			nemoview_set_position(view,
-					view->geometry.x + tox - fromx,
-					view->geometry.y + toy - fromy);
-
-			nemoactor_dispatch_resize(actor, width, height, 0);
-			nemoactor_dispatch_frame(actor);
+		} else {
+			width = pick->width * pick->sx * (distance / pick->touch.distance);
+			height = pick->height * pick->sy * (distance / pick->touch.distance);
 		}
+
+		nemoview_set_scale(view, 1.0f, 1.0f);
+		nemoview_update_transform(view);
+
+		sx = (width - actor->base.width) * -actor->ax;
+		sy = (height - actor->base.height) * -actor->ay;
+
+		nemoview_transform_to_global(view, 0.0f, 0.0f, &fromx, &fromy);
+		nemoview_transform_to_global(view, sx, sy, &tox, &toy);
+
+		nemoview_set_position(view,
+				view->geometry.x + tox - fromx,
+				view->geometry.y + toy - fromy);
+
+		nemoactor_dispatch_resize(actor, width, height, 0);
+		nemoactor_dispatch_frame(actor);
 	}
 
 	if (tp->focus != NULL) {
@@ -827,104 +632,41 @@ static void pick_actorgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 		nemocontent_touch_motion(tp, tp->focus->content, time, touchid, sx, sy, x, y);
 	}
 
-	if (shell->pick.mode == NEMO_SHELL_PICK_PROGRESSIVE_MODE) {
-		if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_ROTATE)) {
+	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_ROTATE)) {
+		double distance = pickgrab_calculate_touchpoint_distance(pick->tp0, pick->tp1);
+
+		if (distance > shell->pick.min_distance) {
 			float r = pickgrab_calculate_touchpoint_angle(pick->tp0, pick->tp1);
 
-			if (fabs(r - pick->touch.r) > shell->pick.rotate_interval) {
-				if (r > pick->touch.r) {
-					pick->r -= shell->pick.rotate_increment;
-				} else {
-					pick->r += shell->pick.rotate_increment;
-				}
-
-				nemoview_set_rotation(actor->view, pick->r);
-
-				pick->touch.r = r;
-
-				pick->other->r = pick->r;
-				pick->other->touch.r = pick->touch.r;
-			}
+			nemoview_set_rotation(actor->view, pick->r + pick->touch.r - r);
 		}
+	}
 
-		if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALE)) {
-			double distance = MAX(pickgrab_calculate_touchpoint_distance(pick->tp0, pick->tp1), shell->pick.min_distance);
+	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALE)) {
+		double distance = MAX(pickgrab_calculate_touchpoint_distance(pick->tp0, pick->tp1), shell->pick.min_distance);
 
-			if (fabs(distance - pick->touch.distance) > shell->pick.scale_interval) {
-				if (distance > pick->touch.distance) {
-					pick->sx *= shell->pick.scale_increment;
-					pick->sy *= shell->pick.scale_increment;
-				} else {
-					pick->sx /= shell->pick.scale_increment;
-					pick->sy /= shell->pick.scale_increment;
-				}
+		if (pick->sx * (distance / pick->touch.distance) * pick->width > actor->max_width ||
+				pick->sy * (distance / pick->touch.distance) * pick->height > actor->max_height) {
+			double sx = (double)actor->max_width / (double)pick->width;
+			double sy = (double)actor->max_height / (double)pick->height;
 
-				if (pick->sx * pick->width > actor->max_width ||
-						pick->sy * pick->height > actor->max_height) {
-					double sx = (double)actor->max_width / (double)pick->width;
-					double sy = (double)actor->max_height / (double)pick->height;
+			if (sx > sy)
+				nemoview_set_scale(actor->view, sy, sy);
+			else
+				nemoview_set_scale(actor->view, sx, sx);
+		} else if (pick->sx * (distance / pick->touch.distance) * pick->width < actor->min_width ||
+				pick->sy * (distance / pick->touch.distance) * pick->height < actor->min_height) {
+			double sx = (double)actor->min_width / (double)pick->width;
+			double sy = (double)actor->min_height / (double)pick->height;
 
-					if (sx > sy)
-						nemoview_set_scale(actor->view, sy, sy);
-					else
-						nemoview_set_scale(actor->view, sx, sx);
-				} else if (pick->sx * pick->width < actor->min_width ||
-						pick->sy * pick->height < actor->min_height) {
-					double sx = (double)actor->min_width / (double)pick->width;
-					double sy = (double)actor->min_height / (double)pick->height;
-
-					if (sx > sy)
-						nemoview_set_scale(actor->view, sx, sx);
-					else
-						nemoview_set_scale(actor->view, sy, sy);
-				} else {
-					nemoview_set_scale(actor->view, pick->sx, pick->sy);
-				}
-
-				pick->touch.distance = distance;
-
-				pick->other->sx = pick->sx;
-				pick->other->sy = pick->sy;
-				pick->other->touch.distance = pick->touch.distance;
-			}
-		}
-	} else {
-		if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_ROTATE)) {
-			double distance = pickgrab_calculate_touchpoint_distance(pick->tp0, pick->tp1);
-
-			if (distance > shell->pick.min_distance) {
-				float r = pickgrab_calculate_touchpoint_angle(pick->tp0, pick->tp1);
-
-				nemoview_set_rotation(actor->view, pick->r + pick->touch.r - r);
-			}
-		}
-
-		if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALE)) {
-			double distance = MAX(pickgrab_calculate_touchpoint_distance(pick->tp0, pick->tp1), shell->pick.min_distance);
-
-			if (pick->sx * (distance / pick->touch.distance) * pick->width > actor->max_width ||
-					pick->sy * (distance / pick->touch.distance) * pick->height > actor->max_height) {
-				double sx = (double)actor->max_width / (double)pick->width;
-				double sy = (double)actor->max_height / (double)pick->height;
-
-				if (sx > sy)
-					nemoview_set_scale(actor->view, sy, sy);
-				else
-					nemoview_set_scale(actor->view, sx, sx);
-			} else if (pick->sx * (distance / pick->touch.distance) * pick->width < actor->min_width ||
-					pick->sy * (distance / pick->touch.distance) * pick->height < actor->min_height) {
-				double sx = (double)actor->min_width / (double)pick->width;
-				double sy = (double)actor->min_height / (double)pick->height;
-
-				if (sx > sy)
-					nemoview_set_scale(actor->view, sx, sx);
-				else
-					nemoview_set_scale(actor->view, sy, sy);
-			} else {
-				nemoview_set_scale(actor->view,
-						pick->sx * (distance / pick->touch.distance),
-						pick->sy * (distance / pick->touch.distance));
-			}
+			if (sx > sy)
+				nemoview_set_scale(actor->view, sx, sx);
+			else
+				nemoview_set_scale(actor->view, sy, sy);
+		} else {
+			nemoview_set_scale(actor->view,
+					pick->sx * (distance / pick->touch.distance),
+					pick->sy * (distance / pick->touch.distance));
 		}
 	}
 

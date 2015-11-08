@@ -38,12 +38,6 @@ typedef enum {
 	NEMO_SHELL_FULLSCREEN_LAST_TYPE
 } NemoShellFullscreenType;
 
-typedef enum {
-	NEMO_SHELL_PICK_SENSITIVE_MODE = 0,
-	NEMO_SHELL_PICK_PROGRESSIVE_MODE = 1,
-	NEMO_SHELL_PICK_LAST_MODE
-} NemoShellPickMode;
-
 struct nemoshell {
 	struct nemocompz *compz;
 
@@ -95,12 +89,6 @@ struct nemoshell {
 	struct {
 		double min_distance;
 		double resize_interval;
-
-		int mode;
-		double scale_increment;
-		double scale_interval;
-		double rotate_increment;
-		double rotate_interval;
 	} pick;
 
 	struct nemoitem *configs;
