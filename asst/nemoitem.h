@@ -7,7 +7,7 @@
 NEMO_BEGIN_EXTERN_C
 #endif
 
-#define	NEMOITEM_ATTR_MAX			(16)
+#define	NEMOITEM_ATTR_MAX			(32)
 
 struct itemnode {
 	char *name;

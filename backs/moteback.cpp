@@ -341,7 +341,8 @@ int main(int argc, char *argv[])
 		{ "uri",					required_argument,			NULL,		'u' },
 		{ "logo",					required_argument,			NULL,		'l' },
 		{ "pixelsize",		required_argument,			NULL,		's' },
-		{ "color",				required_argument,			NULL,		'c' },
+		{ "mincolor",			required_argument,			NULL,		'n' },
+		{ "maxcolor",			required_argument,			NULL,		'm' },
 		{ "textcolor",		required_argument,			NULL,		't' },
 		{ 0 }
 	};
@@ -353,15 +354,16 @@ int main(int argc, char *argv[])
 	int32_t width = 1920;
 	int32_t height = 1080;
 	double pixelsize = 18.0f;
-	double color[4] = { 0.0f, 0.3f, 0.3f, 0.0f };
-	double textcolor[4] = { 0.0f, 1.0f, 1.0f, 0.0f };
+	double color0[4] = { 0.0f, 0.5f, 0.5f, 0.1f };
+	double color1[4] = { 0.0f, 0.5f, 0.5f, 0.3f };
+	double textcolor[4] = { 0.0f, 1.0f, 1.0f, 1.0f };
 	uint32_t uc;
 	char *uri = NULL;
 	char *logo = NULL;
 	int opt;
 	int i;
 
-	while (opt = getopt_long(argc, argv, "w:h:u:l:s:c:t:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:u:l:s:n:m:t:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -386,12 +388,22 @@ int main(int argc, char *argv[])
 				pixelsize = strtod(optarg, NULL);
 				break;
 
-			case 'c':
+			case 'n':
 				uc = nemocolor_parse(optarg);
 
-				color[0] = NEMOCOLOR_DOUBLE_R(uc);
-				color[1] = NEMOCOLOR_DOUBLE_G(uc);
-				color[2] = NEMOCOLOR_DOUBLE_B(uc);
+				color0[0] = NEMOCOLOR_DOUBLE_R(uc);
+				color0[1] = NEMOCOLOR_DOUBLE_G(uc);
+				color0[2] = NEMOCOLOR_DOUBLE_B(uc);
+				color0[3] = NEMOCOLOR_DOUBLE_A(uc);
+				break;
+
+			case 'm':
+				uc = nemocolor_parse(optarg);
+
+				color1[0] = NEMOCOLOR_DOUBLE_R(uc);
+				color1[1] = NEMOCOLOR_DOUBLE_G(uc);
+				color1[2] = NEMOCOLOR_DOUBLE_B(uc);
+				color1[3] = NEMOCOLOR_DOUBLE_A(uc);
 				break;
 
 			case 't':
@@ -400,6 +412,7 @@ int main(int argc, char *argv[])
 				textcolor[0] = NEMOCOLOR_DOUBLE_R(uc);
 				textcolor[1] = NEMOCOLOR_DOUBLE_G(uc);
 				textcolor[2] = NEMOCOLOR_DOUBLE_B(uc);
+				textcolor[3] = NEMOCOLOR_DOUBLE_A(uc);
 				break;
 
 			default:
@@ -422,14 +435,14 @@ int main(int argc, char *argv[])
 
 	mote->pixelsize = pixelsize;
 
-	mote->colors0[0] = color[0];
-	mote->colors1[0] = color[0];
-	mote->colors0[1] = color[1];
-	mote->colors1[1] = color[1];
-	mote->colors0[2] = color[2];
-	mote->colors1[2] = color[2];
-	mote->colors0[3] = 0.1f;
-	mote->colors1[3] = 0.3f;
+	mote->colors0[0] = color0[0];
+	mote->colors1[0] = color1[0];
+	mote->colors0[1] = color0[1];
+	mote->colors1[1] = color1[1];
+	mote->colors0[2] = color0[2];
+	mote->colors1[2] = color1[2];
+	mote->colors0[3] = color0[3];
+	mote->colors1[3] = color1[3];
 
 	mote->tcolors0[0] = textcolor[0];
 	mote->tcolors1[0] = textcolor[0];
@@ -437,8 +450,8 @@ int main(int argc, char *argv[])
 	mote->tcolors1[1] = textcolor[1];
 	mote->tcolors0[2] = textcolor[2];
 	mote->tcolors1[2] = textcolor[2];
-	mote->tcolors0[3] = 1.0f;
-	mote->tcolors1[3] = 1.0f;
+	mote->tcolors0[3] = textcolor[3];
+	mote->tcolors1[3] = textcolor[3];
 
 	mote->mote = nemomote_create(3000);
 	nemomote_random_set_property(&mote->random, 5.0f, 1.0f);
@@ -465,7 +478,7 @@ int main(int argc, char *argv[])
 			mote->colors1[0], mote->colors0[0],
 			mote->colors1[1], mote->colors0[1],
 			mote->colors1[2], mote->colors0[2],
-			mote->colors1[3] * 1.5f, mote->colors0[3] * 1.5f);
+			mote->colors1[3], mote->colors1[3]);
 	nemomote_mass_update(mote->mote, 15.0f, 5.0f);
 	nemomote_type_update(mote->mote, 2);
 	nemomote_commit(mote->mote);

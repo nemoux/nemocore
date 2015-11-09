@@ -185,7 +185,12 @@ uint32_t nemocolor_parse(const char *value)
 		return 0;
 
 	if (value[0] == '#') {
-		if (strlen(value) >= 7) {
+		if (strlen(value) >= 9) {
+			rgba[2] = (uint8_t)string_parse_hexadecimal(value, 1, 2);
+			rgba[1] = (uint8_t)string_parse_hexadecimal(value, 3, 2);
+			rgba[0] = (uint8_t)string_parse_hexadecimal(value, 5, 2);
+			rgba[3] = (uint8_t)string_parse_hexadecimal(value, 7, 2);
+		} else if (strlen(value) >= 7) {
 			rgba[2] = (uint8_t)string_parse_hexadecimal(value, 1, 2);
 			rgba[1] = (uint8_t)string_parse_hexadecimal(value, 3, 2);
 			rgba[0] = (uint8_t)string_parse_hexadecimal(value, 5, 2);
