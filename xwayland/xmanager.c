@@ -925,6 +925,8 @@ void nemoxmanager_map_window(struct nemoxmanager *xmanager, struct nemoxwindow *
 	bin->type = NEMO_SHELL_SURFACE_XWAYLAND_TYPE;
 
 	nemoshell_use_client_state_by_pid(shell, bin, xwindow->pid);
+	
+	bin->flags |= NEMO_SHELL_SURFACE_BINDABLE_FLAG;
 }
 
 #define TYPE_WM_PROTOCOLS	XCB_ATOM_CUT_BUFFER0
