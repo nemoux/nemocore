@@ -168,10 +168,7 @@ static inline struct taletap *nemotale_touch_get_tap(struct nemotale *tale, uint
 static inline int nemotale_event_update_taps(struct nemotale *tale, struct taleevent *event, uint32_t type)
 {
 	struct taletap *tap;
-	double dx, dy;
-	double dist;
 	int count = 0;
-	int i;
 
 	if (type & NEMOTALE_POINTER_EVENT) {
 		nemolist_for_each(tap, &tale->ptap_list, link) {
@@ -189,10 +186,7 @@ static inline int nemotale_event_update_taps(struct nemotale *tale, struct talee
 static inline int nemotale_event_update_node_taps(struct nemotale *tale, struct talenode *node, struct taleevent *event, uint32_t type)
 {
 	struct taletap *tap;
-	double dx, dy;
-	double dist;
 	int count = 0;
-	int i;
 
 	if (type & NEMOTALE_POINTER_EVENT) {
 		nemolist_for_each(tap, &tale->ptap_list, link) {
@@ -214,10 +208,7 @@ static inline int nemotale_event_update_node_taps(struct nemotale *tale, struct 
 static inline int nemotale_event_update_taps_by_tag(struct nemotale *tale, struct taleevent *event, uint32_t type, uint32_t tag)
 {
 	struct taletap *tap;
-	double dx, dy;
-	double dist;
 	int count = 0;
-	int i;
 
 	if (type & NEMOTALE_POINTER_EVENT) {
 		nemolist_for_each(tap, &tale->ptap_list, link) {
