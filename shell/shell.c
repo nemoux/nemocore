@@ -379,8 +379,8 @@ struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas
 
 	bin->min_width = 0;
 	bin->min_height = 0;
-	bin->max_width = UINT32_MAX;
-	bin->max_height = UINT32_MAX;
+	bin->max_width = nemocompz_get_scene_width(shell->compz);
+	bin->max_height = nemocompz_get_scene_height(shell->compz);
 
 	bin->ax = 0.5f;
 	bin->ay = 0.5f;
