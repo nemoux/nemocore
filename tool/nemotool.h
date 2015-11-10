@@ -46,6 +46,8 @@ struct nemotool;
 
 typedef void (*nemotask_dispatch_t)(struct nemotask *task, uint32_t events);
 
+typedef void (*nemotool_dispatch_global_t)(struct nemotool *tool, uint32_t id, const char *interface, uint32_t version);
+
 struct nemotask {
 	nemotask_dispatch_t dispatch;
 	struct nemolist link;
@@ -99,6 +101,8 @@ struct nemotool {
 	int display_fd;
 	uint32_t display_events;
 	struct nemotask display_task;
+
+	nemotool_dispatch_global_t dispatch_global;
 
 	struct nemolist global_list;
 	struct nemolist output_list;
@@ -170,6 +174,11 @@ static inline clockid_t nemotool_get_clock_id(struct nemotool *tool)
 static inline int nemotool_is_running(struct nemotool *tool)
 {
 	return tool->running;
+}
+
+static inline void nemotool_set_dispatch_global(struct nemotool *tool, nemotool_dispatch_global_t dispatch)
+{
+	tool->dispatch_global = dispatch;
 }
 
 static inline void nemotool_set_userdata(struct nemotool *tool, void *data)

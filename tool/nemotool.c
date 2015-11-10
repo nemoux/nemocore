@@ -475,6 +475,9 @@ static void registry_handle_global(void *data, struct wl_registry *registry, uin
 		tool->presentation = wl_registry_bind(registry, id, &presentation_interface, 1);
 		presentation_add_listener(tool->presentation, &presentation_listener, data);
 	}
+
+	if (tool->dispatch_global != NULL)
+		tool->dispatch_global(tool, id, interface, version);
 }
 
 static void registry_handle_global_remove(void *data, struct wl_registry *registry, uint32_t name)
