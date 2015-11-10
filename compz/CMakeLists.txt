@@ -45,6 +45,11 @@ wayland_add_protocol_server(PROTOCOLS
 	nemo-seat
 	)
 
+wayland_add_protocol_server(PROTOCOLS
+	${CMAKE_SOURCE_DIR}/protocol/nemo-sound.xml
+	nemo-sound
+	)
+
 include_directories(
 	${CMAKE_SOURCE_DIR}/asst
 	${CMAKE_SOURCE_DIR}/misc
@@ -147,6 +152,7 @@ add_library(nemocompz SHARED
 	tuiobackend.c
 	tuionode.c
 	virtuio.c
+	sound.c
 	picker.c
 	pitchfilter.c
 	binding.c

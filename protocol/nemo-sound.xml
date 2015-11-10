@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="nemo_sound">
+	<interface name="nemo_sound" version="1">
+		<request name="set_sink">
+			<arg name="pid" type="uint"/>
+			<arg name="sink" type="uint"/>
+		</request>
+
+		<request name="set_mute">
+			<arg name="pid" type="uint"/>
+			<arg name="mute" type="uint"/>
+		</request>
+
+		<request name="set_mute_sink">
+			<arg name="sink" type="uint"/>
+			<arg name="mute" type="uint"/>
+		</request>
+
+		<request name="set_volume">
+			<arg name="pid" type="uint"/>
+			<arg name="volume" type="uint"/>
+		</request>
+
+		<request name="set_volume_sink">
+			<arg name="sink" type="uint"/>
+			<arg name="volume" type="uint"/>
+		</request>
+	</interface>
+
+	<interface name="nemo_sound_manager" version="1">
+		<event name="set_sink">
+			<arg name="pid" type="uint"/>
+			<arg name="sink" type="uint"/>
+		</event>
+
+		<event name="set_mute">
+			<arg name="pid" type="uint"/>
+			<arg name="mute" type="uint"/>
+		</event>
+
+		<event name="set_mute_sink">
+			<arg name="sink" type="uint"/>
+			<arg name="mute" type="uint"/>
+		</event>
+
+		<event name="set_volume">
+			<arg name="pid" type="uint"/>
+			<arg name="volume" type="uint"/>
+		</event>
+
+		<event name="set_volume_sink">
+			<arg name="sink" type="uint"/>
+			<arg name="volume" type="uint"/>
+		</event>
+
+		<request name="sink">
+			<arg name="sink" type="uint"/>
+			<arg name="desc" type="string"/>
+		</request>
+	</interface>
+</protocol>

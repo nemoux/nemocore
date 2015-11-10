@@ -30,6 +30,7 @@ typedef enum {
 
 struct nemosession;
 struct nemoseat;
+struct nemosound;
 struct nemolayer;
 struct nemoanimation;
 struct nemoeffect;
@@ -64,6 +65,8 @@ struct nemocompz {
 
 	struct nemoseat *seat;
 	struct nemosession *session;
+
+	struct nemosound *sound;
 
 	int use_pixman;
 	struct nemorenderer *renderer;
