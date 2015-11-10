@@ -49,7 +49,6 @@ struct minecontext {
 
 	struct showone *font;
 
-	struct showone *exit;
 	struct showone *pin;
 	struct showone *reset;
 	struct showone *time;
@@ -379,9 +378,7 @@ static void nemomine_dispatch_tale_event(struct nemotale *tale, struct talenode 
 				if (pick != NULL) {
 					tag = nemoshow_one_get_tag(pick) - 1;
 
-					if (tag == 10000) {
-						nemotool_exit(context->tool);
-					} else if (tag == 10001) {
+					if (tag == 10001) {
 						context->is_pinning = !context->is_pinning;
 
 						nemomine_rotate_pin(context, 0.0f);
@@ -417,8 +414,6 @@ static void nemomine_dispatch_tale_event(struct nemotale *tale, struct talenode 
 								nemocanvas_dispatch_frame(canvas);
 							}
 						}
-					} else if (tag == 10000) {
-						nemotool_exit(context->tool);
 					} else if (tag == 10001) {
 						context->is_pinning = !context->is_pinning;
 
@@ -608,11 +603,6 @@ int main(int argc, char *argv[])
 	nemotale_set_single_click_gesture(tale, 150, 50);
 	nemotale_set_long_press_gesture(tale, 300, 50);
 
-	nemocanvas_set_min_size(NEMOSHOW_AT(show, canvas),
-			width * 1.0f, height * 1.0f);
-	nemocanvas_set_max_size(NEMOSHOW_AT(show, canvas),
-			width * 5.0f, height * 5.0f);
-
 	context->scene = scene = nemoshow_scene_create();
 	nemoshow_scene_set_width(scene, width);
 	nemoshow_scene_set_height(scene, height);
@@ -680,20 +670,6 @@ int main(int argc, char *argv[])
 	nemoshow_item_set_width(one, size - 4.0f);
 	nemoshow_item_set_height(one, size - 4.0f);
 	nemoshow_item_load_svg(one, "/home/root/images/Game/Mine/Mine-finder.svg");
-
-	context->exit = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
-	nemoshow_attach_one(show, one);
-	nemoshow_one_attach(canvas, one);
-	nemoshow_one_set_tag(one, 10000 + 1);
-	nemoshow_item_set_x(one, 0.0f);
-	nemoshow_item_set_y(one, 0.0f);
-	nemoshow_item_set_width(one, size);
-	nemoshow_item_set_height(one, size);
-	nemoshow_item_set_filter(one, context->inner);
-	nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
-	nemoshow_item_set_tsr(one);
-	nemoshow_item_translate(one, 0.0f, 0.0f);
-	nemoshow_item_load_svg(one, "/home/root/images/Game/Mine/Mine-Quit.svg");
 
 	context->pin = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
 	nemoshow_attach_one(show, one);

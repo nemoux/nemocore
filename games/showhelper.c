@@ -19,6 +19,11 @@ static void nemoshow_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t w
 	if (width == 0 || height == 0)
 		return;
 
+	if (width < nemotale_get_minimum_width(tale) || height < nemotale_get_minimum_height(tale)) {
+		nemotool_exit(scon->tool);
+		return;
+	}
+
 	nemotool_resize_egl_canvas(scon->eglcanvas, width, height);
 
 	nemoshow_set_size(show, width, height);
