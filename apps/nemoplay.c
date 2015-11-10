@@ -58,8 +58,6 @@ struct playcontext {
 	int64_t position;
 
 	uint32_t volume;
-	uint32_t device;
-	uint32_t pdevice;
 
 	double alpha;
 	int is_alpha_mode;
@@ -255,24 +253,6 @@ static void nemoplay_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t w
 	}
 }
 
-static void nemoplay_dispatch_canvas_sound(struct nemocanvas *canvas, int device, int left)
-{
-	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
-	struct playcontext *context = (struct playcontext *)nemotale_get_userdata(tale);
-
-	if (left == 0) {
-		nemopulse_set_sink(context->pulse, device);
-
-		context->pdevice = context->device;
-		context->device = device;
-	} else if (context->device == device) {
-		nemopulse_set_sink(context->pulse, context->pdevice);
-
-		context->device = context->pdevice;
-		context->pdevice = device;
-	}
-}
-
 int main(int argc, char *argv[])
 {
 	struct option options[] = {
@@ -358,7 +338,6 @@ int main(int argc, char *argv[])
 	context->is_fullscreen = is_fullscreen;
 
 	context->volume = 50;
-	context->device = 0;
 
 	context->alpha = 1.0f;
 
@@ -407,7 +386,6 @@ int main(int argc, char *argv[])
 		nemocanvas_set_anchor(canvas, -0.5f, -0.5f);
 	nemocanvas_set_dispatch_frame(canvas, nemoplay_dispatch_canvas_frame);
 	nemocanvas_set_dispatch_resize(canvas, nemoplay_dispatch_canvas_resize);
-	nemocanvas_set_dispatch_sound(canvas, nemoplay_dispatch_canvas_sound);
 
 	context->tale = tale = nemotale_create_gl();
 	nemotale_set_backend(tale,

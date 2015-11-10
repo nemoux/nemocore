@@ -15,11 +15,6 @@ wayland_add_protocol_client(PROTOCOLS
 	)
 
 wayland_add_protocol_client(PROTOCOLS
-	${CMAKE_SOURCE_DIR}/protocol/nemo-sound.xml
-	nemo-sound
-	)
-
-wayland_add_protocol_client(PROTOCOLS
 	${CMAKE_SOURCE_DIR}/protocol/nemo-shell.xml
 	nemo-shell
 	)

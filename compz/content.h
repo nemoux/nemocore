@@ -76,9 +76,6 @@ struct nemocontent {
 	void (*touch_up)(struct touchpoint *tp, struct nemocontent *content, uint32_t time, uint64_t touchid);
 	void (*touch_motion)(struct touchpoint *tp, struct nemocontent *content, uint32_t time, uint64_t touchid, float x, float y, float gx, float gy);
 	void (*touch_frame)(struct touchpoint *tp, struct nemocontent *content);
-
-	void (*sound_enter)(uint32_t snddev, struct nemocontent *content);
-	void (*sound_leave)(uint32_t snddev, struct nemocontent *content);
 };
 
 extern int nemocontent_prepare(struct nemocontent *content, int nodemax);
@@ -227,18 +224,6 @@ static inline void nemocontent_touch_frame(struct touchpoint *tp, struct nemocon
 {
 	if (content->touch_frame != NULL)
 		content->touch_frame(tp, content);
-}
-
-static inline void nemocontent_sound_enter(uint32_t snddev, struct nemocontent *content)
-{
-	if (content->sound_enter != NULL)
-		content->sound_enter(snddev, content);
-}
-
-static inline void nemocontent_sound_leave(uint32_t snddev, struct nemocontent *content)
-{
-	if (content->sound_leave != NULL)
-		content->sound_leave(snddev, content);
 }
 
 static inline void nemocontent_set_pixman_context(struct nemocontent *content, struct rendernode *node, void *context)

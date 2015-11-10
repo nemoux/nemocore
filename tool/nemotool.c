@@ -15,7 +15,6 @@
 
 #include <wayland-client.h>
 #include <wayland-nemo-seat-client-protocol.h>
-#include <wayland-nemo-sound-client-protocol.h>
 #include <wayland-nemo-shell-client-protocol.h>
 
 #include <nemotool.h>
@@ -374,37 +373,6 @@ static const struct nemo_seat_listener seat_listener = {
 	seat_handle_name
 };
 
-static void sound_handle_enter(void *data, struct nemo_sound *sound, struct wl_surface *surface, int device)
-{
-	struct nemotool *tool = (struct nemotool *)data;
-
-	if (surface != NULL) {
-		struct nemocanvas *canvas = (struct nemocanvas *)wl_surface_get_user_data(surface);
-
-		if (canvas->dispatch_sound != NULL) {
-			canvas->dispatch_sound(canvas, device, 0);
-		}
-	}
-}
-
-static void sound_handle_leave(void *data, struct nemo_sound *sound, struct wl_surface *surface, int device)
-{
-	struct nemotool *tool = (struct nemotool *)data;
-
-	if (surface != NULL) {
-		struct nemocanvas *canvas = (struct nemocanvas *)wl_surface_get_user_data(surface);
-
-		if (canvas->dispatch_sound != NULL) {
-			canvas->dispatch_sound(canvas, device, 1);
-		}
-	}
-}
-
-static const struct nemo_sound_listener sound_listener = {
-	sound_handle_enter,
-	sound_handle_leave
-};
-
 static void shm_format(void *data, struct wl_shm *shm, uint32_t format)
 {
 	struct nemotool *tool = (struct nemotool *)data;
@@ -461,9 +429,6 @@ static void registry_handle_global(void *data, struct wl_registry *registry, uin
 	} else if (strcmp(interface, "nemo_seat") == 0) {
 		tool->seat = wl_registry_bind(registry, id, &nemo_seat_interface, 1);
 		nemo_seat_add_listener(tool->seat, &seat_listener, data);
-	} else if (strcmp(interface, "nemo_sound") == 0) {
-		tool->sound = wl_registry_bind(registry, id, &nemo_sound_interface, 1);
-		nemo_sound_add_listener(tool->sound, &sound_listener, data);
 	} else if (strcmp(interface, "wl_shm") == 0) {
 		tool->shm = wl_registry_bind(registry, id, &wl_shm_interface, 1);
 		wl_shm_add_listener(tool->shm, &shm_listener, data);

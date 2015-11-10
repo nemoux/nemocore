@@ -37,7 +37,6 @@
 #include <waylandbackend.h>
 #include <evdevbackend.h>
 #include <tuiobackend.h>
-#include <sound.h>
 #include <nemomisc.h>
 #include <nemoease.h>
 #include <nemolog.h>
@@ -431,10 +430,6 @@ struct nemocompz *nemocompz_create(void)
 	if (compz->seat == NULL)
 		goto err1;
 
-	compz->sound = nemosound_create(compz);
-	if (compz->sound == NULL)
-		goto err1;
-
 	clipboard_create(compz->seat);
 
 	if (wl_display_add_socket(compz->display, compz->name))
@@ -499,9 +494,6 @@ void nemocompz_destroy(struct nemocompz *compz)
 
 	if (compz->seat != NULL)
 		nemoseat_destroy(compz->seat);
-
-	if (compz->sound != NULL)
-		nemosound_destroy(compz->sound);
 
 	if (compz->name != NULL)
 		free(compz->name);

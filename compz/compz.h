@@ -34,7 +34,6 @@ struct nemolayer;
 struct nemoanimation;
 struct nemoeffect;
 struct nemoscreen;
-struct nemosound;
 
 typedef void (*nemocompz_dispatch_idle_t)(void *data);
 
@@ -121,8 +120,6 @@ struct nemocompz {
 	int frame_done;
 
 	struct wl_event_source *framerate_timer;
-
-	struct nemosound *sound;
 
 	struct nemoevent *event;
 

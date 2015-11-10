@@ -508,11 +508,6 @@ void nemocanvas_set_dispatch_screen(struct nemocanvas *canvas, nemocanvas_dispat
 	canvas->dispatch_screen = dispatch;
 }
 
-void nemocanvas_set_dispatch_sound(struct nemocanvas *canvas, nemocanvas_dispatch_sound_t dispatch)
-{
-	canvas->dispatch_sound = dispatch;
-}
-
 static void presentation_feedback_sync_output(void *data, struct presentation_feedback *feedback, struct wl_output *output)
 {
 }

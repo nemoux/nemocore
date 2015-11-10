@@ -9,7 +9,6 @@
 #include <linux/input.h>
 #include <wayland-server.h>
 #include <wayland-nemo-seat-server-protocol.h>
-#include <wayland-nemo-sound-server-protocol.h>
 
 #include <canvas.h>
 #include <compz.h>
@@ -23,7 +22,6 @@
 #include <keyboard.h>
 #include <keypad.h>
 #include <touch.h>
-#include <sound.h>
 #include <presentation.h>
 #include <waylandhelper.h>
 #include <nemomisc.h>
@@ -488,32 +486,6 @@ static void nemocanvas_update_output(struct nemocontent *content, uint32_t node_
 
 	content->node_mask = node_next;
 	content->screen_mask = screen_next;
-
-	if (canvas->resource != NULL) {
-		client = wl_resource_get_client(canvas->resource);
-
-		wl_list_for_each(screen, &canvas->compz->screen_list, link) {
-			if (screen->snddev >= 0) {
-				if (dmask & (1 << screen->id)) {
-					resource = wl_resource_find_for_client(&screen->resource_list, client);
-					if (resource != NULL) {
-						if (emask & (1 << screen->id))
-							wl_surface_send_enter(canvas->resource, resource);
-						if (lmask & (1 << screen->id))
-							wl_surface_send_leave(canvas->resource, resource);
-					}
-
-					resource = wl_resource_find_for_client(&canvas->compz->sound->resource_list, client);
-					if (resource != NULL) {
-						if (emask & (1 << screen->id))
-							nemo_sound_send_enter(resource, canvas->resource, screen->snddev);
-						if (lmask & (1 << screen->id))
-							nemo_sound_send_leave(resource, canvas->resource, screen->snddev);
-					}
-				}
-			}
-		}
-	}
 }
 
 static int nemocanvas_read_pixels(struct nemocontent *content, pixman_format_code_t format, void *pixels)
@@ -1171,30 +1143,6 @@ static void nemocanvas_touch_frame(struct touchpoint *tp, struct nemocontent *co
 	}
 }
 
-static void nemocanvas_sound_enter(uint32_t snddev, struct nemocontent *content)
-{
-	struct nemocanvas *canvas = (struct nemocanvas *)container_of(content, struct nemocanvas, base);
-	struct wl_client *client = wl_resource_get_client(canvas->resource);
-	struct wl_resource *resource;
-
-	resource = wl_resource_find_for_client(&canvas->compz->sound->resource_list, client);
-	if (resource != NULL) {
-		nemo_sound_send_enter(resource, canvas->resource, snddev);
-	}
-}
-
-static void nemocanvas_sound_leave(uint32_t snddev, struct nemocontent *content)
-{
-	struct nemocanvas *canvas = (struct nemocanvas *)container_of(content, struct nemocanvas, base);
-	struct wl_client *client = wl_resource_get_client(canvas->resource);
-	struct wl_resource *resource;
-
-	resource = wl_resource_find_for_client(&canvas->compz->sound->resource_list, client);
-	if (resource != NULL) {
-		nemo_sound_send_leave(resource, canvas->resource, snddev);
-	}
-}
-
 struct nemocanvas *nemocanvas_create(struct wl_client *client, struct wl_resource *compositor_resource, uint32_t id)
 {
 	struct nemocompz *compz = (struct nemocompz *)wl_resource_get_user_data(compositor_resource);
@@ -1240,9 +1188,6 @@ struct nemocanvas *nemocanvas_create(struct wl_client *client, struct wl_resourc
 	canvas->base.touch_up = nemocanvas_touch_up;
 	canvas->base.touch_motion = nemocanvas_touch_motion;
 	canvas->base.touch_frame = nemocanvas_touch_frame;
-
-	canvas->base.sound_enter = nemocanvas_sound_enter;
-	canvas->base.sound_leave = nemocanvas_sound_leave;
 
 	canvas->buffer_viewport.buffer.transform = WL_OUTPUT_TRANSFORM_NORMAL;
 	canvas->buffer_viewport.buffer.scale = 1;
