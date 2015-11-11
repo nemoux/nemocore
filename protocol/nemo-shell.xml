@@ -44,6 +44,7 @@
 			<entry name="rotate" value="1"/>
 			<entry name="resize" value="2"/>
 			<entry name="move" value="3"/>
+			<entry name="scaleonly" value="4"/>
 		</enum>
 
 		<request name="pick">

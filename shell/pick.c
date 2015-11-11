@@ -225,7 +225,7 @@ static void pick_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 		}
 	}
 
-	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALE)) {
+	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALE) || pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALEONLY)) {
 		double distance = MAX(pickgrab_calculate_touchpoint_distance(pick->tp0, pick->tp1), shell->pick.min_distance);
 
 		if (pick->sx * (distance / pick->touch.distance) * pick->width > bin->max_width ||
@@ -642,7 +642,7 @@ static void pick_actorgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 		}
 	}
 
-	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALE)) {
+	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALE) || pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALEONLY)) {
 		double distance = MAX(pickgrab_calculate_touchpoint_distance(pick->tp0, pick->tp1), shell->pick.min_distance);
 
 		if (pick->sx * (distance / pick->touch.distance) * pick->width > actor->max_width ||
