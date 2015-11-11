@@ -53,9 +53,13 @@
 			<arg name="volume" type="uint"/>
 		</event>
 
-		<request name="sink">
+		<request name="register_sink">
 			<arg name="sink" type="uint"/>
 			<arg name="desc" type="string"/>
+		</request>
+
+		<request name="unregister_sink">
+			<arg name="sink" type="uint"/>
 		</request>
 	</interface>
 </protocol>

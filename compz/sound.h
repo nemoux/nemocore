@@ -7,6 +7,14 @@
 NEMO_BEGIN_EXTERN_C
 #endif
 
+struct soundsink {
+	uint32_t id;
+
+	char *desc;
+
+	struct wl_list link;
+};
+
 struct nemosound {
 	struct nemocompz *compz;
 
@@ -15,6 +23,8 @@ struct nemosound {
 	struct wl_list resource_list;
 
 	struct wl_resource *manager;
+
+	struct wl_list sink_list;
 };
 
 extern struct nemosound *nemosound_create(struct nemocompz *compz);

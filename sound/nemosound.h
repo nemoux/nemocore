@@ -3,10 +3,85 @@
 
 #include <nemotool.h>
 
+#include <pulse/pulseaudio.h>
+#include <pulse/glib-mainloop.h>
+
+#include <nemolist.h>
+#include <nemolistener.h>
+
+typedef enum {
+	NEMOSOUND_NONE_COMMAND = 0,
+	NEMOSOUND_SET_SINK_COMMAND = 1,
+	NEMOSOUND_SET_MUTE_COMMAND = 2,
+	NEMOSOUND_SET_VOLUME_COMMAND = 3,
+	NEMOSOUND_LAST_COMMAND
+} NemoSoundCommand;
+
+struct soundcmd {
+	int type;
+	struct soundone *one;
+
+	uint32_t sink;
+	uint32_t mute;
+	uint32_t volume;
+
+	struct nemolist link;
+};
+
+struct soundone {
+	struct nemosound *sound;
+
+	uint32_t pid;
+
+	struct nemolist link;
+
+	struct nemolist cmd_list;
+
+	uint32_t sinkinput;
+	int has_sinkinput;
+
+	uint32_t sink;
+	uint32_t next_sink;
+	int has_sink;
+
+	uint32_t next_volume;
+};
+
+struct soundsink {
+	struct nemosound *sound;
+
+	uint32_t id;
+
+	struct nemolist link;
+};
+
 struct nemosound {
 	struct nemotool *tool;
 
+	struct nemolist list;
+
+	struct nemolist sink_list;
+
 	struct nemo_sound_manager *manager;
+
+	pa_glib_mainloop *mainloop;
+	pa_mainloop_api *mainapi;
+
+	pa_proplist *proplist;
+	pa_context *context;
 };
+
+extern struct soundone *nemosound_create_one(struct nemosound *sound, uint32_t pid);
+extern void nemosound_destroy_one(struct soundone *one);
+extern struct soundone *nemosound_get_one(struct nemosound *sound, uint32_t pid);
+
+extern void nemosound_flush_command(struct nemosound *sound, struct soundone *one);
+
+extern struct soundsink *nemosound_create_sink(struct nemosound *sound, uint32_t id);
+extern void nemosound_destroy_sink(struct soundsink *sink);
+extern struct soundsink *nemosound_get_sink(struct nemosound *sound, uint32_t id);
+
+extern struct soundcmd *nemosound_create_command(struct soundone *one, int type);
+extern void nemosound_destroy_command(struct soundcmd *cmd);
 
 #endif
