@@ -85,6 +85,11 @@
 			<arg name="height" type="uint"/>
 		</request>
 
+		<request name="set_scale">
+			<arg name="sx" type="fixed"/>
+			<arg name="sy" type="fixed"/>
+		</request>
+
 		<enum name="input_type">
 			<entry name="normal" value="0"/>
 			<entry name="touch" value="1"/>
