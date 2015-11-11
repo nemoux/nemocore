@@ -220,6 +220,7 @@ add_subdirectory(mosi)
 
 add_subdirectory(compz)
 add_subdirectory(shell)
+add_subdirectory(sound)
 add_subdirectory(apps)
 add_subdirectory(games)
 add_subdirectory(backs)

@@ -14,6 +14,7 @@ NEMO_BEGIN_EXTERN_C
 #include <wayland-client.h>
 #include <wayland-presentation-timing-client-protocol.h>
 #include <wayland-nemo-seat-client-protocol.h>
+#include <wayland-nemo-sound-client-protocol.h>
 #include <wayland-nemo-shell-client-protocol.h>
 
 #include <nemolist.h>
@@ -89,6 +90,7 @@ struct nemotool {
 	struct nemo_pointer *pointer;
 	struct nemo_keyboard *keyboard;
 	struct nemo_touch *touch;
+	struct nemo_sound *sound;
 	struct nemo_shell *shell;
 	struct wl_shm *shm;
 	uint32_t formats;

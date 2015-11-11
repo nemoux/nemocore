@@ -429,6 +429,8 @@ static void registry_handle_global(void *data, struct wl_registry *registry, uin
 	} else if (strcmp(interface, "nemo_seat") == 0) {
 		tool->seat = wl_registry_bind(registry, id, &nemo_seat_interface, 1);
 		nemo_seat_add_listener(tool->seat, &seat_listener, data);
+	} else if (strcmp(interface, "nemo_sound") == 0) {
+		tool->sound = wl_registry_bind(registry, id, &nemo_sound_interface, 1);
 	} else if (strcmp(interface, "wl_shm") == 0) {
 		tool->shm = wl_registry_bind(registry, id, &wl_shm_interface, 1);
 		wl_shm_add_listener(tool->shm, &shm_listener, data);

@@ -8,7 +8,7 @@
 #include <glib.h>
 
 #include <nemotool.h>
-#include <glibhelper.h>
+#include <nemoglib.h>
 
 struct nemosource {
 	GSource source;

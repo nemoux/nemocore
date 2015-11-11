@@ -48,7 +48,9 @@ add_library(nemotool SHARED
 	nemotool.c
 	nemocanvas.c
 	nemooutput.c
+	nemosound.c
 	nemotimer.c
+	nemoglib.c
 	nemocurl.c
 	nemohttp.c
 	${EXTRA}
@@ -79,7 +81,9 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/tool/nemotool.h
 	${CMAKE_SOURCE_DIR}/tool/nemocanvas.h
 	${CMAKE_SOURCE_DIR}/tool/nemooutput.h
+	${CMAKE_SOURCE_DIR}/tool/nemosound.h
 	${CMAKE_SOURCE_DIR}/tool/nemotimer.h
+	${CMAKE_SOURCE_DIR}/tool/nemoglib.h
 	${CMAKE_SOURCE_DIR}/tool/nemocurl.h
 	${EXTRA_HEADERS}
 	)

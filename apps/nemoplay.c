@@ -8,17 +8,16 @@
 
 #include <getopt.h>
 
-#include <glib.h>
 #include <pthread.h>
 
 #include <nemotool.h>
 #include <nemocanvas.h>
 #include <nemoegl.h>
+#include <nemosound.h>
 #include <nemotimer.h>
+#include <nemoglib.h>
 #include <gsthelper.h>
 #include <talehelper.h>
-#include <glibhelper.h>
-#include <pulsehelper.h>
 #include <nemolog.h>
 #include <nemomisc.h>
 
@@ -30,7 +29,6 @@
 struct playcontext {
 	struct nemotool *tool;
 	struct nemogst *gst;
-	struct nemopulse *pulse;
 
 	struct eglcontext *egl;
 
@@ -57,7 +55,8 @@ struct playcontext {
 
 	int64_t position;
 
-	uint32_t volume;
+	uint32_t pid;
+	int32_t volume;
 
 	double alpha;
 	int is_alpha_mode;
@@ -121,7 +120,9 @@ static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode 
 					}
 				} else if (context->gy - NEMOPLAY_SLIDE_DISTANCE_MIN > event->taps[2]->y) {
 					if (context->is_alpha_mode == 0) {
-						nemopulse_set_volume(context->pulse, 1);
+						context->volume = MIN(context->volume + 1, 100);
+
+						nemosound_set_volume(context->tool, context->pid, context->volume);
 
 						context->gx = event->x;
 						context->gy = event->y;
@@ -133,7 +134,9 @@ static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode 
 					}
 				} else if (context->gy + NEMOPLAY_SLIDE_DISTANCE_MIN < event->taps[2]->y) {
 					if (context->is_alpha_mode == 0) {
-						nemopulse_set_volume(context->pulse, -1);
+						context->volume = MAX(context->volume - 1, 0);
+
+						nemosound_set_volume(context->tool, context->pid, context->volume);
 
 						context->gx = event->x;
 						context->gy = event->y;
@@ -169,9 +172,6 @@ static void nemoplay_dispatch_tale_timer(struct nemotimer *timer, void *data)
 	struct playcontext *context = (struct playcontext *)data;
 
 	nemotimer_set_timeout(timer, 500);
-
-	if (nemopulse_has_sink_input(context->pulse) == 0)
-		nemopulse_fetch_sink_input(context->pulse, getpid());
 
 	nemotale_push_timer_event(context->tale, time_current_msecs());
 }
@@ -337,6 +337,7 @@ int main(int argc, char *argv[])
 	context->is_background = is_background;
 	context->is_fullscreen = is_fullscreen;
 
+	context->pid = getpid();
 	context->volume = 50;
 
 	context->alpha = 1.0f;
@@ -433,18 +434,14 @@ int main(int argc, char *argv[])
 	nemotimer_set_timeout(timer, 500);
 	nemotimer_set_userdata(timer, context);
 
+	nemosound_set_volume(context->tool, context->pid, context->volume);
+
 	nemogst_play_media(context->gst);
 
 	nemocanvas_dispatch_frame(context->canvas);
 
 	gmainloop = g_main_loop_new(NULL, FALSE);
-
-	context->pulse = nemopulse_create(NULL);
-
 	nemoglib_run_tool(gmainloop, context->tool);
-
-	nemopulse_destroy(context->pulse);
-
 	g_main_loop_unref(gmainloop);
 
 	nemotool_destroy_egl_canvas(context->ecanvas);

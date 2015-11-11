@@ -1,5 +1,5 @@
-#ifndef	__NEMOUX_GLIB_HELPER_H__
-#define	__NEMOUX_GLIB_HELPER_H__
+#ifndef	__NEMOTOOL_GLIB_H__
+#define	__NEMOTOOL_GLIB_H__
 
 #include <glib.h>
 
