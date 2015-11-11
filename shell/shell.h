@@ -121,6 +121,10 @@ struct clientstate {
 	int is_maximized;
 	int is_fullscreen;
 
+	uint32_t min_width, min_height;
+	uint32_t max_width, max_height;
+	int has_min_size, has_max_size;
+
 	uint32_t flags;
 };
 

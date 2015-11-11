@@ -791,6 +791,15 @@ static inline void nemoshell_set_client_state(struct shellbin *bin, struct clien
 		bin->has_set_geometry = 1;
 	}
 
+	if (state->has_max_size != 0) {
+		bin->max_width = state->max_width;
+		bin->max_height = state->max_height;
+	}
+	if (state->has_min_size != 0) {
+		bin->min_width = state->min_width;
+		bin->min_height = state->min_height;
+	}
+
 	bin->flags = state->flags;
 }
 
