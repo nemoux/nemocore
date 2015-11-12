@@ -84,7 +84,7 @@ void nemotale_node_opaque(struct talenode *node, int32_t x, int32_t y, int32_t w
 
 void nemotale_node_input(struct talenode *node, int32_t x, int32_t y, int32_t width, int32_t height)
 {
-	pixman_region32_init_rect(&node->input, x, y, width, height);
+	pixman_region32_init_rect(&node->input, x, y, width + 1, height + 1);
 }
 
 void nemotale_node_damage(struct talenode *node, int32_t x, int32_t y, int32_t width, int32_t height)

@@ -109,7 +109,7 @@ struct talenode *nemotale_node_create_gl(int32_t width, int32_t height)
 
 	pixman_region32_init_rect(&node->blend, 0, 0, width, height);
 	pixman_region32_init_rect(&node->region, 0, 0, width, height);
-	pixman_region32_init_rect(&node->input, 0, 0, width, height);
+	pixman_region32_init_rect(&node->input, 0, 0, width + 1, height + 1);
 
 	context->destroy_listener.notify = nemotale_node_handle_destroy_signal;
 	nemosignal_add(&node->destroy_signal, &context->destroy_listener);
@@ -134,7 +134,7 @@ int nemotale_node_resize_gl(struct talenode *node, int32_t width, int32_t height
 
 		pixman_region32_init_rect(&node->blend, 0, 0, width, height);
 		pixman_region32_init_rect(&node->region, 0, 0, width, height);
-		pixman_region32_init_rect(&node->input, 0, 0, width, height);
+		pixman_region32_init_rect(&node->input, 0, 0, width + 1, height + 1);
 
 		if (node->viewport.enable == 0) {
 			glBindTexture(GL_TEXTURE_2D, context->texture);
