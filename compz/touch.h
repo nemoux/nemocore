@@ -76,6 +76,10 @@ struct touchtaps {
 	int ntaps, staps;
 };
 
+struct touchnode;
+
+typedef void (*nemotouch_calibrate_t)(struct touchnode *node, double x0, double y0, double x1, double y1, double x2, double y2, double x3, double y3);
+
 struct touchnode {
 	struct inputnode base;
 
@@ -83,7 +87,11 @@ struct touchnode {
 
 	struct nemotouch *touch;
 
+	nemotouch_calibrate_t calibrate;
+
 	struct wl_list link;
+
+	void *userdata;
 };
 
 struct touchevent {
@@ -150,6 +158,7 @@ extern void touchpoint_update_grab(struct touchpoint *tp);
 
 extern struct touchnode *nemotouch_create_node(struct nemocompz *compz, const char *devnode);
 extern void nemotouch_destroy_node(struct touchnode *node);
+extern struct touchnode *nemotouch_get_node_by_name(struct nemocompz *compz, const char *name);
 
 extern struct touchtaps *nemotouch_create_taps(int max);
 extern void nemotouch_destroy_taps(struct touchtaps *taps);
@@ -163,6 +172,21 @@ extern void nemotouch_bypass_event(struct nemocompz *compz, int32_t touchid, flo
 extern int nemotouch_use_event_timer(struct nemotouch *touch, uint32_t interval, uint32_t interpolation);
 
 extern void nemotouch_dump_touchpoint(struct nemotouch *touch);
+
+static inline void nemotouch_set_calibrate_node(struct touchnode *node, nemotouch_calibrate_t calibrate)
+{
+	node->calibrate = calibrate;
+}
+
+static inline void *nemotouch_set_nodedata(struct touchnode *node, void *data)
+{
+	node->userdata = data;
+}
+
+static inline void *nemotouch_get_nodedata(struct touchnode *node)
+{
+	return node->userdata;
+}
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
