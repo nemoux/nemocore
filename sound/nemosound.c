@@ -105,6 +105,13 @@ static void nemosound_dispatch_move_sink_callback(pa_context *context, int succe
 	nemolog_message("SOUND", "MOVE-SINK #%u: success(%d)\n", one->sinkinput, success);
 }
 
+static void nemosound_dispatch_put_sink_callback(pa_context *context, int success, void *userdata)
+{
+	struct soundone *one = (struct soundone *)userdata;
+
+	nemolog_message("SOUND", "PUT-SINK #%u: success(%d)\n", one->sinkinput, success);
+}
+
 static void nemosound_dispatch_set_sink_input_mute_callback(pa_context *context, int success, void *userdata)
 {
 	struct soundone *one = (struct soundone *)userdata;
@@ -198,6 +205,33 @@ static void nemo_sound_manager_set_sink(void *data, struct nemo_sound_manager *m
 	nemosound_flush_command(sound, one);
 }
 
+static void nemo_sound_manager_put_sink(void *data, struct nemo_sound_manager *manager, uint32_t pid)
+{
+	struct nemosound *sound = (struct nemosound *)data;
+	struct soundone *one;
+	struct soundcmd *cmd;
+
+	one = nemosound_get_one(sound, pid);
+	if (one == NULL)
+		one = nemosound_create_one(sound, pid);
+
+	cmd = nemosound_create_command(one, NEMOSOUND_PUT_SINK_COMMAND);
+	if (cmd == NULL)
+		return;
+
+	if (one->has_sinkinput == 0) {
+		pa_operation *op;
+
+		op = pa_context_get_sink_input_info_list(sound->context, nemosound_dispatch_sink_input_info_callback, sound);
+		if (op != NULL)
+			pa_operation_unref(op);
+
+		return;
+	}
+
+	nemosound_flush_command(sound, one);
+}
+
 static void nemo_sound_manager_set_mute(void *data, struct nemo_sound_manager *manager, uint32_t pid, uint32_t mute)
 {
 	struct nemosound *sound = (struct nemosound *)data;
@@ -266,6 +300,7 @@ static void nemo_sound_manager_set_volume_sink(void *data, struct nemo_sound_man
 
 static struct nemo_sound_manager_listener nemo_sound_manager_listener = {
 	nemo_sound_manager_set_sink,
+	nemo_sound_manager_put_sink,
 	nemo_sound_manager_set_mute,
 	nemo_sound_manager_set_mute_sink,
 	nemo_sound_manager_set_volume,
@@ -418,6 +453,8 @@ void nemosound_flush_command(struct nemosound *sound, struct soundone *one)
 			op = pa_context_move_sink_input_by_index(sound->context, one->sinkinput, cmd->sink, nemosound_dispatch_move_sink_callback, one);
 
 			one->next_sink = cmd->sink;
+		} else if (cmd->type == NEMOSOUND_PUT_SINK_COMMAND) {
+			op = pa_context_move_sink_input_by_name(sound->context, one->sinkinput, NEMOSOUND_NULL_SINK_NAME, nemosound_dispatch_put_sink_callback, one);
 		} else if (cmd->type == NEMOSOUND_SET_MUTE_COMMAND) {
 			op = pa_context_set_sink_input_mute(sound->context, one->sinkinput, cmd->mute, nemosound_dispatch_set_sink_input_mute_callback, one);
 		} else if (cmd->type == NEMOSOUND_SET_VOLUME_COMMAND) {

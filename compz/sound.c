@@ -20,6 +20,14 @@ static void nemo_sound_set_sink(struct wl_client *client, struct wl_resource *so
 		nemo_sound_manager_send_set_sink(sound->manager, pid, sink);
 }
 
+static void nemo_sound_put_sink(struct wl_client *client, struct wl_resource *sound_resource, uint32_t pid)
+{
+	struct nemosound *sound = (struct nemosound *)wl_resource_get_user_data(sound_resource);
+
+	if (sound->manager != NULL)
+		nemo_sound_manager_send_put_sink(sound->manager, pid);
+}
+
 static void nemo_sound_set_mute(struct wl_client *client, struct wl_resource *sound_resource, uint32_t pid, uint32_t mute)
 {
 	struct nemosound *sound = (struct nemosound *)wl_resource_get_user_data(sound_resource);
@@ -54,6 +62,7 @@ static void nemo_sound_set_volume_sink(struct wl_client *client, struct wl_resou
 
 static const struct nemo_sound_interface nemo_sound_implementation = {
 	nemo_sound_set_sink,
+	nemo_sound_put_sink,
 	nemo_sound_set_mute,
 	nemo_sound_set_mute_sink,
 	nemo_sound_set_volume,

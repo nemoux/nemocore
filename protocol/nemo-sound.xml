@@ -6,6 +6,10 @@
 			<arg name="sink" type="uint"/>
 		</request>
 
+		<request name="put_sink">
+			<arg name="pid" type="uint"/>
+		</request>
+
 		<request name="set_mute">
 			<arg name="pid" type="uint"/>
 			<arg name="mute" type="uint"/>
@@ -31,6 +35,10 @@
 		<event name="set_sink">
 			<arg name="pid" type="uint"/>
 			<arg name="sink" type="uint"/>
+		</event>
+
+		<event name="put_sink">
+			<arg name="pid" type="uint"/>
 		</event>
 
 		<event name="set_mute">
