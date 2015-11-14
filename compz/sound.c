@@ -175,3 +175,39 @@ void nemosound_destroy(struct nemosound *sound)
 
 	free(sound);
 }
+
+void nemosound_set_sink(struct nemosound *sound, uint32_t pid, uint32_t sink)
+{
+	if (sound->manager != NULL)
+		nemo_sound_manager_send_set_sink(sound->manager, pid, sink);
+}
+
+void nemosound_put_sink(struct nemosound *sound, uint32_t pid)
+{
+	if (sound->manager != NULL)
+		nemo_sound_manager_send_put_sink(sound->manager, pid);
+}
+
+void nemosound_set_mute(struct nemosound *sound, uint32_t pid, uint32_t mute)
+{
+	if (sound->manager != NULL)
+		nemo_sound_manager_send_set_mute(sound->manager, pid, mute);
+}
+
+void nemosound_set_mute_sink(struct nemosound *sound, uint32_t sink, uint32_t mute)
+{
+	if (sound->manager != NULL)
+		nemo_sound_manager_send_set_mute_sink(sound->manager, sink, mute);
+}
+
+void nemosound_set_volume(struct nemosound *sound, uint32_t pid, uint32_t volume)
+{
+	if (sound->manager != NULL)
+		nemo_sound_manager_send_set_volume(sound->manager, pid, volume);
+}
+
+void nemosound_set_volume_sink(struct nemosound *sound, uint32_t sink, uint32_t volume)
+{
+	if (sound->manager != NULL)
+		nemo_sound_manager_send_set_volume_sink(sound->manager, sink, volume);
+}
