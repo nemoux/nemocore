@@ -18,6 +18,8 @@ struct nemopulse {
 	int sinkinput;
 	int sink;
 
+	char *name;
+
 	int mute;
 	uint32_t volume;
 
@@ -186,6 +188,15 @@ static void nemopulse_dispatch_state_callback(pa_context *context, void *userdat
 
 					pulse->actions++;
 				}
+			} else if (strcmp(pulse->cmd, "default") == 0) {
+				if (pulse->name != NULL) {
+					op = pa_context_set_default_sink(context, pulse->name, nemopulse_dispatch_simple_callback, pulse);
+					if (op != NULL) {
+						pa_operation_unref(op);
+
+						pulse->actions++;
+					}
+				}
 			} else if (strcmp(pulse->cmd, "move") == 0) {
 				if (pulse->sinkinput >= 0 && pulse->sink >= 0) {
 					op = pa_context_move_sink_input_by_index(context, pulse->sinkinput, pulse->sink, nemopulse_dispatch_simple_callback, pulse);
@@ -250,6 +261,7 @@ int main(int argc, char *argv[])
 		{ "command",			required_argument,		NULL,		'c' },
 		{ "sinkinput",		required_argument,		NULL,		'i' },
 		{ "sink",					required_argument,		NULL,		's' },
+		{ "name",					required_argument,		NULL,		'n' },
 		{ "mute",					required_argument,		NULL,		'm' },
 		{ "volume",				required_argument,		NULL,		'v' },
 		{ 0 }
@@ -260,6 +272,7 @@ int main(int argc, char *argv[])
 	pa_proplist *proplist;
 	pa_context *context;
 	char *cmd = NULL;
+	char *name = NULL;
 	int sinkinput = -1;
 	int sink = -1;
 	int mute = 0;
@@ -267,7 +280,7 @@ int main(int argc, char *argv[])
 	int opt;
 	int r;
 
-	while (opt = getopt_long(argc, argv, "c:i:s:m:v:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "c:i:s:n:m:v:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -282,6 +295,10 @@ int main(int argc, char *argv[])
 
 			case 's':
 				sink = strtoul(optarg, NULL, 10);
+				break;
+
+			case 'n':
+				name = strdup(optarg);
 				break;
 
 			case 'm':
@@ -307,6 +324,7 @@ int main(int argc, char *argv[])
 	pulse->cmd = cmd;
 	pulse->sinkinput = sinkinput;
 	pulse->sink = sink;
+	pulse->name = name;
 	pulse->mute = mute;
 	pulse->volume = MIN(volume, 100);
 
@@ -338,6 +356,8 @@ out1:
 
 	if (pulse->cmd != NULL)
 		free(pulse->cmd);
+	if (pulse->name != NULL)
+		free(pulse->name);
 
 	free(pulse);
 
