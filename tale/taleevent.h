@@ -98,6 +98,8 @@ struct taleevent {
 
 	struct taletap *taps[NEMOTALE_EVENT_TAPS_MAX];
 	int tapcount;
+
+	struct taletap *tap0, *tap1;
 };
 
 extern void nemotale_push_pointer_enter_event(struct nemotale *tale, uint32_t serial, uint64_t device, float x, float y);
@@ -223,6 +225,34 @@ static inline int nemotale_event_update_taps_by_tag(struct nemotale *tale, struc
 	}
 
 	return (event->tapcount = count);
+}
+
+static inline void nemotale_event_update_faraway_taps(struct nemotale *tale, struct taleevent *event)
+{
+	struct taletap *tap0, *tap1;
+	float dm = 0.0f;
+	float dd;
+	float dx, dy;
+	int i, j;
+
+	for (i = 0; i < event->tapcount - 1; i++) {
+		tap0 = event->taps[i];
+
+		for (j = i + 1; j < event->tapcount; j++) {
+			tap1 = event->taps[j];
+
+			dx = tap1->x - tap0->x;
+			dy = tap1->y - tap0->y;
+			dd = sqrtf(dx * dx + dy * dy);
+
+			if (dd > dm) {
+				dm = dd;
+
+				event->tap0 = tap0;
+				event->tap1 = tap1;
+			}
+		}
+	}
 }
 
 static inline void nemotale_event_transform_to_viewport(struct nemotale *tale, float x, float y, float *sx, float *sy)

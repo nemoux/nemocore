@@ -307,10 +307,11 @@ static void pick_shellgrab_touchpoint_cancel(struct touchpoint_grab *base)
 {
 	struct shellgrab *grab = (struct shellgrab *)container_of(base, struct shellgrab, base.touchpoint);
 	struct shellgrab_pick *pick = (struct shellgrab_pick *)container_of(grab, struct shellgrab_pick, base);
+	struct shellbin *bin = grab->bin;
 
-	if (grab->bin != NULL) {
-		grab->bin->resize_edges = 0;
-		nemoshell_send_bin_configure(grab->bin);
+	if (bin != NULL) {
+		bin->resize_edges = 0;
+		nemoshell_send_bin_configure(bin);
 	}
 
 	nemoshell_end_touchpoint_shellgrab(grab);
@@ -336,12 +337,8 @@ int nemoshell_pick_canvas_by_touchpoint_on_area(struct nemoshell *shell, struct 
 	if (bin == NULL)
 		return -1;
 
-	if (bin->grabbed > 0) {
-		if (bin->retained != 0)
-			return 0;
-
+	if (bin->grabbed > 0)
 		wl_signal_emit(&bin->ungrab_signal, bin);
-	}
 
 	pick0 = (struct shellgrab_pick *)malloc(sizeof(struct shellgrab_pick));
 	if (pick0 == NULL)
@@ -412,8 +409,8 @@ int nemoshell_pick_canvas_by_touchpoint_on_area(struct nemoshell *shell, struct 
 
 		bin->px = cx;
 		bin->py = cy;
-		bin->ax = sx / (bin->view->content->width * bin->view->geometry.sx);
-		bin->ay = sy / (bin->view->content->height * bin->view->geometry.sy);
+		bin->ax = sx / bin->view->content->width;
+		bin->ay = sy / bin->view->content->height;
 	}
 
 	pick0->dx = pick1->dx = bin->view->geometry.x - (tp0->x + tp1->x) / 2.0f;
@@ -424,8 +421,6 @@ int nemoshell_pick_canvas_by_touchpoint_on_area(struct nemoshell *shell, struct 
 
 	pick0->other = pick1;
 	pick1->other = pick0;
-
-	bin->retained = 1;
 
 	nemoshell_start_touchpoint_shellgrab(&pick0->base, &pick_shellgrab_touchpoint_interface, bin, tp0);
 	nemoshell_start_touchpoint_shellgrab(&pick1->base, &pick_shellgrab_touchpoint_interface, bin, tp1);
@@ -440,12 +435,8 @@ int nemoshell_pick_canvas_by_touchpoint(struct nemoshell *shell, struct touchpoi
 	if (bin == NULL)
 		return -1;
 
-	if (bin->grabbed > 0) {
-		if (bin->retained != 0)
-			return 0;
-
+	if (bin->grabbed > 0)
 		wl_signal_emit(&bin->ungrab_signal, bin);
-	}
 
 	if (bin->state.fullscreen != 0 || bin->state.maximized != 0) {
 		wl_list_remove(&bin->screen_link);
@@ -491,8 +482,8 @@ int nemoshell_pick_canvas_by_touchpoint(struct nemoshell *shell, struct touchpoi
 
 		bin->px = cx;
 		bin->py = cy;
-		bin->ax = sx / (bin->view->content->width * bin->view->geometry.sx);
-		bin->ay = sy / (bin->view->content->height * bin->view->geometry.sy);
+		bin->ax = sx / bin->view->content->width;
+		bin->ay = sy / bin->view->content->height;
 	}
 
 	pick0->dx = pick1->dx = bin->view->geometry.x - (tp0->x + tp1->x) / 2.0f;
@@ -503,8 +494,6 @@ int nemoshell_pick_canvas_by_touchpoint(struct nemoshell *shell, struct touchpoi
 
 	pick0->other = pick1;
 	pick1->other = pick0;
-
-	bin->retained = 1;
 
 	if (shell->is_logging_grab != 0)
 		nemolog_message("PICK", "[DOWN] %llu+%llu: x(%f) y(%f) sx(%f) sy(%f) r(%f) reset(%d) touch(%f, %f)\n",
@@ -721,12 +710,8 @@ int nemoshell_pick_actor_by_touchpoint(struct nemoshell *shell, struct touchpoin
 	if (actor == NULL)
 		return -1;
 
-	if (actor->grabbed > 0) {
-		if (actor->retained != 0)
-			return 0;
-
+	if (actor->grabbed > 0)
 		wl_signal_emit(&actor->ungrab_signal, actor);
-	}
 
 	pick0 = (struct actorgrab_pick *)malloc(sizeof(struct actorgrab_pick));
 	if (pick0 == NULL)
@@ -774,8 +759,6 @@ int nemoshell_pick_actor_by_touchpoint(struct nemoshell *shell, struct touchpoin
 
 	pick0->other = pick1;
 	pick1->other = pick0;
-
-	actor->retained = 1;
 
 	nemoshell_start_touchpoint_actorgrab(&pick0->base, &pick_actorgrab_touchpoint_interface, actor, tp0);
 	nemoshell_start_touchpoint_actorgrab(&pick1->base, &pick_actorgrab_touchpoint_interface, actor, tp1);

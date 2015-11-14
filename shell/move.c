@@ -125,12 +125,8 @@ int nemoshell_move_canvas_by_pointer(struct nemoshell *shell, struct nemopointer
 	if (bin == NULL)
 		return -1;
 
-	if (bin->grabbed > 0) {
-		if (bin->retained != 0)
-			return 0;
-
+	if (bin->grabbed > 0)
 		wl_signal_emit(&bin->ungrab_signal, bin);
-	}
 
 	move = (struct shellgrab_move *)malloc(sizeof(struct shellgrab_move));
 	if (move == NULL)
@@ -141,8 +137,6 @@ int nemoshell_move_canvas_by_pointer(struct nemoshell *shell, struct nemopointer
 	move->dy = bin->view->geometry.y - pointer->grab_y;
 
 	move->filter = pitchfilter_create(shell->pitch.max_samples, shell->pitch.dir_samples, shell->pitch.min_duration);
-
-	bin->retained = 0;
 
 	nemoshell_start_pointer_shellgrab(&move->base, &move_shellgrab_pointer_interface, bin, pointer);
 
@@ -320,12 +314,8 @@ int nemoshell_move_canvas_by_touchpoint(struct nemoshell *shell, struct touchpoi
 	if (bin->state.fullscreen != 0 || bin->state.maximized != 0)
 		return 0;
 
-	if (bin->grabbed > 0) {
-		if (bin->retained != 0)
-			return 0;
-
+	if (bin->grabbed > 0)
 		wl_signal_emit(&bin->ungrab_signal, bin);
-	}
 
 	move = (struct shellgrab_move *)malloc(sizeof(struct shellgrab_move));
 	if (move == NULL)
@@ -336,8 +326,6 @@ int nemoshell_move_canvas_by_touchpoint(struct nemoshell *shell, struct touchpoi
 	move->dy = bin->view->geometry.y - tp->y;
 
 	move->filter = pitchfilter_create(shell->pitch.max_samples, shell->pitch.dir_samples, shell->pitch.min_duration);
-
-	bin->retained = 0;
 
 	if (shell->is_logging_grab != 0)
 		nemolog_message("MOVE", "[DOWN] %llu: x(%f) y(%f)\n", tp->gid, bin->view->geometry.x, bin->view->geometry.y);
@@ -460,12 +448,8 @@ int nemoshell_move_actor_by_pointer(struct nemoshell *shell, struct nemopointer 
 	if (actor == NULL)
 		return -1;
 
-	if (actor->grabbed > 0) {
-		if (actor->retained != 0)
-			return 0;
-
+	if (actor->grabbed > 0)
 		wl_signal_emit(&actor->ungrab_signal, actor);
-	}
 
 	move = (struct actorgrab_move *)malloc(sizeof(struct actorgrab_move));
 	if (move == NULL)
@@ -478,8 +462,6 @@ int nemoshell_move_actor_by_pointer(struct nemoshell *shell, struct nemopointer 
 	move->dy = actor->view->geometry.y - pointer->grab_y;
 
 	move->filter = pitchfilter_create(shell->pitch.max_samples, shell->pitch.dir_samples, shell->pitch.min_duration);
-
-	actor->retained = 0;
 
 	nemoshell_start_pointer_actorgrab(&move->base, &move_actorgrab_pointer_interface, actor, pointer);
 
@@ -583,12 +565,8 @@ int nemoshell_move_actor_by_touchpoint(struct nemoshell *shell, struct touchpoin
 	if (actor == NULL)
 		return -1;
 
-	if (actor->grabbed > 0) {
-		if (actor->retained != 0)
-			return 0;
-
+	if (actor->grabbed > 0)
 		wl_signal_emit(&actor->ungrab_signal, actor);
-	}
 
 	move = (struct actorgrab_move *)malloc(sizeof(struct actorgrab_move));
 	if (move == NULL)
@@ -601,8 +579,6 @@ int nemoshell_move_actor_by_touchpoint(struct nemoshell *shell, struct touchpoin
 	move->dy = actor->view->geometry.y - tp->y;
 
 	move->filter = pitchfilter_create(shell->pitch.max_samples, shell->pitch.dir_samples, shell->pitch.min_duration);
-
-	actor->retained = 0;
 
 	nemoshell_start_touchpoint_actorgrab(&move->base, &move_actorgrab_touchpoint_interface, actor, tp);
 

@@ -77,6 +77,16 @@ static inline int nemotale_is_double_taps(struct nemotale *tale, struct taleeven
 #endif
 }
 
+static inline int nemotale_is_triple_taps(struct nemotale *tale, struct taleevent *event, uint32_t type)
+{
+	return event->tapcount == 3;
+}
+
+static inline int nemotale_is_many_taps(struct nemotale *tale, struct taleevent *event, uint32_t type)
+{
+	return event->tapcount >= 2;
+}
+
 static inline int nemotale_is_close_event(struct nemotale *tale, struct taleevent *event, uint32_t type)
 {
 	if (event->tapcount >= 3 &&
@@ -108,11 +118,6 @@ static inline int nemotale_is_close_event(struct nemotale *tale, struct taleeven
 	}
 
 	return 0;
-}
-
-static inline int nemotale_is_triple_taps(struct nemotale *tale, struct taleevent *event, uint32_t type)
-{
-	return event->tapcount == 3;
 }
 
 static inline int nemotale_is_down_event(struct nemotale *tale, struct taleevent *event, uint32_t type)

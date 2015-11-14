@@ -21,7 +21,7 @@
 #include <nemolog.h>
 #include <nemomisc.h>
 
-#define	NEMOPLAY_SEEK_ENABLE						(1)
+#define	NEMOPLAY_SEEK_ENABLE						(0)
 
 #define	NEMOPLAY_SLIDE_DISTANCE_MIN			(5.0f)
 #define	NEMOPLAY_SLIDE_FRAME_TIME				(10000000000)
@@ -81,24 +81,23 @@ static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode 
 		if (nemotale_is_touch_down(tale, event, type)) {
 			if (nemotale_is_single_tap(tale, event, type)) {
 				nemocanvas_move(context->canvas, event->taps[0]->serial);
-			} else if (nemotale_is_double_taps(tale, event, type)) {
-				nemocanvas_pick(context->canvas,
-						event->taps[0]->serial,
-						event->taps[1]->serial,
-						(1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_SCALE) | (1 << NEMO_SURFACE_PICK_TYPE_MOVE));
+			} else if (nemotale_is_many_taps(tale, event, type)) {
+				nemotale_event_update_faraway_taps(tale, event);
 
-				nemotale_tap_set_state(event->taps[0], NEMOTALE_TAP_USED_STATE);
-				nemotale_tap_set_state(event->taps[1], NEMOTALE_TAP_USED_STATE);
-			} else if (nemotale_is_triple_taps(tale, event, type)) {
+				nemocanvas_pick(context->canvas,
+						event->tap0->serial,
+						event->tap1->serial,
+						(1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_SCALE) | (1 << NEMO_SURFACE_PICK_TYPE_MOVE));
 #if	NEMOPLAY_SEEK_ENABLE
+			} else if (nemotale_is_triple_taps(tale, event, type)) {
 				context->position = nemogst_get_position(context->gst);
 
 				context->gx = event->x;
 				context->gy = event->y;
 #endif
 			}
-		} else if (nemotale_is_motion_event(tale, event, type)) {
 #if NEMOPLAY_SEEK_ENABLE
+		} else if (nemotale_is_motion_event(tale, event, type)) {
 			if (nemotale_is_triple_taps(tale, event, type)) {
 				if (context->gx - NEMOPLAY_SLIDE_DISTANCE_MIN > event->taps[2]->x) {
 					if (context->position != 0) {
@@ -151,6 +150,7 @@ static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode 
 #endif
 		}
 
+#if	0
 		if (nemotale_is_long_press(tale, event, type)) {
 			if (nemogst_is_playing_media(context->gst) != 0) {
 				nemogst_pause_media(context->gst);
@@ -164,6 +164,7 @@ static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode 
 
 			context->is_alpha_mode = !context->is_alpha_mode;
 		}
+#endif
 	}
 }
 

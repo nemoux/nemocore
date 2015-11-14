@@ -214,9 +214,8 @@ struct shellbin {
 	struct binstate state, next_state, requested_state;
 	int state_changed;
 	int state_requested;
-
+	
 	int grabbed;
-	int retained;
 };
 
 struct shellscreen {
