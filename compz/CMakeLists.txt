@@ -231,6 +231,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/compz/keymap.h
 	${CMAKE_SOURCE_DIR}/compz/keyboard.h
 	${CMAKE_SOURCE_DIR}/compz/keypad.h
+	${CMAKE_SOURCE_DIR}/compz/sound.h
 	${CMAKE_SOURCE_DIR}/compz/picker.h
 	${CMAKE_SOURCE_DIR}/compz/pointer.h
 	${CMAKE_SOURCE_DIR}/compz/touch.h
