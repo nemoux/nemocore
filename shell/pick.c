@@ -747,8 +747,8 @@ int nemoshell_pick_actor_by_touchpoint(struct nemoshell *shell, struct touchpoin
 
 		actor->px = cx;
 		actor->py = cy;
-		actor->ax = sx / (actor->view->content->width * actor->view->geometry.sx);
-		actor->ay = sy / (actor->view->content->height * actor->view->geometry.sy);
+		actor->ax = sx / actor->view->content->width;
+		actor->ay = sy / actor->view->content->height;
 	}
 
 	pick0->dx = pick1->dx = actor->view->geometry.x - (tp0->x + tp1->x) / 2.0f;

@@ -119,6 +119,13 @@ static void nemosound_dispatch_set_sink_input_mute_callback(pa_context *context,
 	nemolog_message("SOUND", "SET-MUTE #%u: success(%d)\n", one->sinkinput, success);
 }
 
+static void nemosound_dispatch_set_sink_mute_callback(pa_context *context, int success, void *userdata)
+{
+	struct nemosound *sound = (struct nemosound *)userdata;
+
+	nemolog_message("SOUND", "SET-MUTE-SINK : success(%d)\n", success);
+}
+
 static void nemosound_dispatch_set_sink_input_volume_callback(pa_context *context, int success, void *userdata)
 {
 	struct soundone *one = (struct soundone *)userdata;
@@ -145,6 +152,34 @@ static void nemosound_dispatch_sink_input_volume_callback(pa_context *context, c
 	op = pa_context_set_sink_input_volume(context, one->sinkinput, &cv, nemosound_dispatch_set_sink_input_volume_callback, one);
 	if (op != NULL)
 		pa_operation_unref(op);
+}
+
+static void nemosound_dispatch_set_sink_volume_callback(pa_context *context, int success, void *userdata)
+{
+	nemolog_message("SOUND", "SET-VOLUME-SINK : success(%d)\n", success);
+}
+
+static void nemosound_dispatch_sink_volume_callback(pa_context *context, const pa_sink_info *info, int is_last, void *userdata)
+{
+	struct soundcmd *cmd = (struct soundcmd *)userdata;
+	pa_operation *op;
+	pa_cvolume cv;
+
+	if (is_last < 0) {
+		nemolog_error("SOUND", "failed to get sink input volume: %s\n", pa_strerror(pa_context_errno(context)));
+		return;
+	}
+
+	if (is_last != 0)
+		return;
+
+	pa_cvolume_set(&cv, info->channel_map.channels, (double)PA_VOLUME_NORM * (double)cmd->volume / 100.0f);
+
+	op = pa_context_set_sink_volume_by_index(context, cmd->sink, &cv, nemosound_dispatch_set_sink_volume_callback, NULL);
+	if (op != NULL)
+		pa_operation_unref(op);
+
+	nemosound_destroy_command(cmd);
 }
 
 static void nemosound_dispatch_state_callback(pa_context *context, void *userdata)
@@ -263,6 +298,11 @@ static void nemo_sound_manager_set_mute(void *data, struct nemo_sound_manager *m
 static void nemo_sound_manager_set_mute_sink(void *data, struct nemo_sound_manager *manager, uint32_t sink, uint32_t mute)
 {
 	struct nemosound *sound = (struct nemosound *)data;
+	pa_operation *op;
+
+	op = pa_context_set_sink_mute_by_index(sound->context, sink, mute, nemosound_dispatch_set_sink_mute_callback, sound);
+	if (op != NULL)
+		pa_operation_unref(op);
 }
 
 static void nemo_sound_manager_set_volume(void *data, struct nemo_sound_manager *manager, uint32_t pid, uint32_t volume)
@@ -296,6 +336,18 @@ static void nemo_sound_manager_set_volume(void *data, struct nemo_sound_manager 
 static void nemo_sound_manager_set_volume_sink(void *data, struct nemo_sound_manager *manager, uint32_t sink, uint32_t volume)
 {
 	struct nemosound *sound = (struct nemosound *)data;
+	struct soundcmd *cmd;
+	pa_operation *op;
+
+	cmd = nemosound_create_command(NULL, NEMOSOUND_SET_VOLUME_SINK_COMMAND);
+	if (cmd == NULL)
+		return;
+	cmd->sink = sink;
+	cmd->volume = volume;
+
+	op = pa_context_get_sink_info_by_index(sound->context, sink, nemosound_dispatch_sink_volume_callback, cmd);
+	if (op != NULL)
+		pa_operation_unref(op);
 }
 
 static struct nemo_sound_manager_listener nemo_sound_manager_listener = {
@@ -518,7 +570,10 @@ struct soundcmd *nemosound_create_command(struct soundone *one, int type)
 	cmd->type = type;
 	cmd->one = one;
 
-	nemolist_insert(&one->cmd_list, &cmd->link);
+	if (one != NULL)
+		nemolist_insert(&one->cmd_list, &cmd->link);
+	else
+		nemolist_init(&cmd->link);
 
 	return cmd;
 }
