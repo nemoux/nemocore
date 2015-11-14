@@ -104,7 +104,7 @@ static void nemo_sound_manager_register_sink(struct wl_client *client, struct wl
 	sink->id = sinkid;
 	sink->desc = strdup(desc);
 
-	wl_list_insert(&sound->sink_list, &sink->link);
+	wl_list_insert(sound->sink_list.prev, &sink->link);
 }
 
 static void nemo_sound_manager_unregister_sink(struct wl_client *client, struct wl_resource *resource, uint32_t sinkid)
@@ -174,6 +174,14 @@ void nemosound_destroy(struct nemosound *sound)
 	wl_signal_emit(&sound->destroy_signal, sound);
 
 	free(sound);
+}
+
+struct soundsink *nemosound_get_main_sink(struct nemosound *sound)
+{
+	if (wl_list_empty(&sound->sink_list))
+		return NULL;
+
+	return (struct soundsink *)container_of(sound->sink_list.next, struct soundsink, link);
 }
 
 void nemosound_set_sink(struct nemosound *sound, uint32_t pid, uint32_t sink)

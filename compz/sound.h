@@ -30,6 +30,8 @@ struct nemosound {
 extern struct nemosound *nemosound_create(struct nemocompz *compz);
 extern void nemosound_destroy(struct nemosound *sound);
 
+extern struct soundsink *nemosound_get_main_sink(struct nemosound *sound);
+
 extern void nemosound_set_sink(struct nemosound *sound, uint32_t pid, uint32_t sink);
 extern void nemosound_put_sink(struct nemosound *sound, uint32_t pid);
 extern void nemosound_set_mute(struct nemosound *sound, uint32_t pid, uint32_t mute);
