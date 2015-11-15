@@ -287,6 +287,8 @@ void nemoactor_flush_damage(struct nemoactor *actor)
 
 				if (actor->newly_attached != 0) {
 					renderer->attach_actor(renderer, actor);
+
+					actor->newly_attached = 0;
 				}
 
 				renderer->flush_actor(renderer, actor);
@@ -296,6 +298,8 @@ void nemoactor_flush_damage(struct nemoactor *actor)
 
 				if (actor->newly_attached != 0) {
 					renderer->attach_actor(renderer, actor);
+
+					actor->newly_attached = 0;
 				}
 
 				renderer->flush_actor(renderer, actor);
