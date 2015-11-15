@@ -316,10 +316,12 @@ void nemoactor_set_dispatch_frame(struct nemoactor *actor, nemoactor_dispatch_fr
 	actor->dispatch_frame = dispatch;
 }
 
-void nemoactor_dispatch_resize(struct nemoactor *actor, int32_t width, int32_t height, int32_t fixed)
+int nemoactor_dispatch_resize(struct nemoactor *actor, int32_t width, int32_t height, int32_t fixed)
 {
 	if (actor->dispatch_resize != NULL)
-		actor->dispatch_resize(actor, width, height, fixed);
+		return actor->dispatch_resize(actor, width, height, fixed);
+
+	return 0;
 }
 
 void nemoactor_dispatch_frame(struct nemoactor *actor)
