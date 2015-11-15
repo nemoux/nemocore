@@ -44,6 +44,7 @@ static void nemosound_dispatch_client_info_callback(pa_context *context, const p
 static void nemosound_dispatch_sink_info_callback(pa_context *context, const pa_sink_info *info, int is_last, void *userdata)
 {
 	struct nemosound *sound = (struct nemosound *)userdata;
+	uint32_t volume;
 
 	if (is_last < 0) {
 		nemolog_error("SOUND", "failed to get sink information: %s\n", pa_strerror(pa_context_errno(context)));
@@ -53,11 +54,14 @@ static void nemosound_dispatch_sink_info_callback(pa_context *context, const pa_
 	if (is_last != 0)
 		return;
 
-	nemolog_message("SOUND", "SINK #%u: description(%s)\n",
-			info->index,
-			pa_proplist_gets(info->proplist, PA_PROP_DEVICE_DESCRIPTION));
+	volume = ((double)info->volume.values[0] / (double)PA_VOLUME_NORM) * 100.0f;
 
-	nemo_sound_manager_register_sink(sound->manager, info->index, pa_proplist_gets(info->proplist, PA_PROP_DEVICE_DESCRIPTION));
+	nemolog_message("SOUND", "SINK #%u: description(%s) volume(%u)\n",
+			info->index,
+			pa_proplist_gets(info->proplist, PA_PROP_DEVICE_DESCRIPTION),
+			volume);
+
+	nemo_sound_manager_register_sink(sound->manager, info->index, volume, pa_proplist_gets(info->proplist, PA_PROP_DEVICE_DESCRIPTION));
 }
 
 static void nemosound_dispatch_sink_input_info_callback(pa_context *context, const pa_sink_input_info *info, int is_last, void *userdata)

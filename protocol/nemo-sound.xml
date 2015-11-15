@@ -63,6 +63,7 @@
 
 		<request name="register_sink">
 			<arg name="sink" type="uint"/>
+			<arg name="volume" type="uint"/>
 			<arg name="desc" type="string"/>
 		</request>
 

@@ -10,6 +10,8 @@ NEMO_BEGIN_EXTERN_C
 struct soundsink {
 	uint32_t id;
 
+	uint32_t volume;
+
 	char *desc;
 
 	struct wl_list link;
