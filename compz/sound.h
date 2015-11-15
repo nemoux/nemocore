@@ -12,6 +12,7 @@ struct soundsink {
 
 	uint32_t volume;
 
+	char *name;
 	char *desc;
 
 	struct wl_list link;
@@ -33,6 +34,7 @@ extern struct nemosound *nemosound_create(struct nemocompz *compz);
 extern void nemosound_destroy(struct nemosound *sound);
 
 extern struct soundsink *nemosound_get_main_sink(struct nemosound *sound);
+extern struct soundsink *nemosound_get_sink_by_name(struct nemosound *sound, const char *name);
 
 extern void nemosound_set_sink(struct nemosound *sound, uint32_t pid, uint32_t sink);
 extern void nemosound_put_sink(struct nemosound *sound, uint32_t pid);
