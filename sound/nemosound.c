@@ -56,12 +56,14 @@ static void nemosound_dispatch_sink_info_callback(pa_context *context, const pa_
 
 	volume = ((double)info->volume.values[0] / (double)PA_VOLUME_NORM) * 100.0f;
 
-	nemolog_message("SOUND", "SINK #%u: description(%s) volume(%u)\n",
+	nemolog_message("SOUND", "SINK #%u: name(%s) description(%s) volume(%u)\n",
 			info->index,
+			info->name,
 			pa_proplist_gets(info->proplist, PA_PROP_DEVICE_DESCRIPTION),
 			volume);
 
-	nemo_sound_manager_register_sink(sound->manager, info->index, volume, pa_proplist_gets(info->proplist, PA_PROP_DEVICE_DESCRIPTION));
+	if (strcmp(info->name, "nullsink") != 0)
+		nemo_sound_manager_register_sink(sound->manager, info->index, volume, pa_proplist_gets(info->proplist, PA_PROP_DEVICE_DESCRIPTION));
 }
 
 static void nemosound_dispatch_sink_input_info_callback(pa_context *context, const pa_sink_input_info *info, int is_last, void *userdata)
