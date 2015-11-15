@@ -614,20 +614,9 @@ static inline void nemoshow_item_update_shape(struct nemoshow *show, struct show
 
 		NEMOSHOW_ITEM_CC(item, path)->reset();
 
-		if (item->from == 0.0f && item->to == 360.0f) {
-			NEMOSHOW_ITEM_CC(item, path)->addArc(inr, 0.0f, 360.0f);
-			NEMOSHOW_ITEM_CC(item, path)->addArc(outr, 0.0f, 360.0f);
-			NEMOSHOW_ITEM_CC(item, path)->setFillType(SkPath::kEvenOdd_FillType);
-		} else if (item->from != item->to) {
-			NEMOSHOW_ITEM_CC(item, path)->addArc(outr, item->to, item->from - item->to);
-			NEMOSHOW_ITEM_CC(item, path)->lineTo(
-					item->x + cos(item->from * M_PI / 180.0f) * (item->r - item->inner),
-					item->y + sin(item->from * M_PI / 180.0f) * (item->r - item->inner));
-			NEMOSHOW_ITEM_CC(item, path)->addArc(inr, item->from, item->to - item->from);
-			NEMOSHOW_ITEM_CC(item, path)->lineTo(
-					item->x + cos(item->to * M_PI / 180.0f) * item->r,
-					item->y + sin(item->to * M_PI / 180.0f) * item->r);
-		}
+		NEMOSHOW_ITEM_CC(item, path)->addArc(inr, 0.0f, 360.0f);
+		NEMOSHOW_ITEM_CC(item, path)->addArc(outr, 0.0f, 360.0f);
+		NEMOSHOW_ITEM_CC(item, path)->setFillType(SkPath::kEvenOdd_FillType);
 	} else if (one->sub == NEMOSHOW_BITMAP_ITEM) {
 		if (NEMOSHOW_ITEM_CC(item, bitmap) == NULL) {
 			NEMOSHOW_ITEM_CC(item, bitmap) = new SkBitmap;
