@@ -37,6 +37,7 @@ struct soundone {
 	struct nemosound *sound;
 
 	uint32_t pid;
+	uint32_t ppid;
 
 	struct nemolist link;
 

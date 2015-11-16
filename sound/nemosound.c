@@ -90,7 +90,7 @@ static void nemosound_dispatch_sink_input_info_callback(pa_context *context, con
 	pid = strtoul(spid, NULL, 10);
 
 	nemolist_for_each(one, &sound->list, link) {
-		if (one->pid == pid) {
+		if (one->pid == pid || one->ppid == pid) {
 			one->sinkinput = info->index;
 			one->has_sinkinput = 1;
 
@@ -473,6 +473,8 @@ struct soundone *nemosound_create_one(struct nemosound *sound, uint32_t pid)
 
 	one->sound = sound;
 	one->pid = pid;
+
+	proc_get_process_parent_id(pid, &one->ppid);
 
 	nemolist_init(&one->cmd_list);
 
