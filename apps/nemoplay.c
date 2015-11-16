@@ -435,8 +435,6 @@ int main(int argc, char *argv[])
 	nemotimer_set_timeout(timer, 500);
 	nemotimer_set_userdata(timer, context);
 
-	nemosound_set_volume(context->tool, context->pid, context->volume);
-
 	nemogst_play_media(context->gst);
 
 	nemocanvas_dispatch_frame(context->canvas);
