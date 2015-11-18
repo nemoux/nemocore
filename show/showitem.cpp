@@ -1155,6 +1155,23 @@ int nemoshow_item_load_svg(struct showone *one, const char *uri)
 				if (has_fill != 0)
 					NEMOSHOW_ITEM_CC(item, fillpath)->addPath(rpath);
 			}
+		} else if (strcmp(node->name, "line") == 0) {
+			double x1 = strtod(nemoxml_node_get_attr(node, "x1"), NULL);
+			double y1 = strtod(nemoxml_node_get_attr(node, "y1"), NULL);
+			double x2 = strtod(nemoxml_node_get_attr(node, "x2"), NULL);
+			double y2 = strtod(nemoxml_node_get_attr(node, "y2"), NULL);
+
+			NEMOSHOW_ITEM_CC(item, path)->moveTo(x1, y1);
+			NEMOSHOW_ITEM_CC(item, path)->lineTo(x2, y2);
+
+			if (has_stroke != 0) {
+				NEMOSHOW_ITEM_CC(item, strokepath)->moveTo(x1, y1);
+				NEMOSHOW_ITEM_CC(item, strokepath)->lineTo(x2, y2);
+			}
+			if (has_fill != 0) {
+				NEMOSHOW_ITEM_CC(item, fillpath)->moveTo(x1, y1);
+				NEMOSHOW_ITEM_CC(item, fillpath)->lineTo(x2, y2);
+			}
 		} else if (strcmp(node->name, "rect") == 0) {
 			double x = strtod(nemoxml_node_get_attr(node, "x"), NULL);
 			double y = strtod(nemoxml_node_get_attr(node, "y"), NULL);
