@@ -141,6 +141,7 @@ struct shellbin {
 	struct shellclient *owner;
 
 	struct wl_signal ungrab_signal;
+	struct wl_signal endgrab_signal;
 	struct wl_signal change_signal;
 	struct wl_signal resize_signal;
 
@@ -214,7 +215,7 @@ struct shellbin {
 	struct binstate state, next_state, requested_state;
 	int state_changed;
 	int state_requested;
-	
+
 	int grabbed;
 };
 
