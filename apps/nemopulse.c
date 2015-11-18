@@ -88,9 +88,12 @@ static void nemopulse_dispatch_sink_info_callback(pa_context *context, const pa_
 		return;
 	}
 
-	nemolog_message("PULSE", "SINK #%u: description(%s)\n",
+	nemolog_message("PULSE", "SINK #%u: name(%s) description(%s) volume(%d) mute(%d)\n",
 			info->index,
-			pa_proplist_gets(info->proplist, PA_PROP_DEVICE_DESCRIPTION));
+			info->name,
+			pa_proplist_gets(info->proplist, PA_PROP_DEVICE_DESCRIPTION),
+			info->volume.values[0],
+			info->mute);
 }
 
 static void nemopulse_dispatch_sink_input_info_callback(pa_context *context, const pa_sink_input_info *info, int is_last, void *userdata)
@@ -105,10 +108,12 @@ static void nemopulse_dispatch_sink_input_info_callback(pa_context *context, con
 		return;
 	}
 
-	nemolog_message("PULSE", "SINK-INPUT #%u: name(%s), pid(%s)\n",
+	nemolog_message("PULSE", "SINK-INPUT #%u: name(%s), pid(%s) volume(%d) mute(%d)\n",
 			info->index,
 			pa_proplist_gets(info->proplist, PA_PROP_APPLICATION_NAME),
-			pa_proplist_gets(info->proplist, PA_PROP_APPLICATION_PROCESS_ID));
+			pa_proplist_gets(info->proplist, PA_PROP_APPLICATION_PROCESS_ID),
+			info->volume.values[0],
+			info->mute);
 }
 
 static void nemopulse_dispatch_sink_volume_callback(pa_context *context, const pa_sink_info *info, int is_last, void *userdata)
