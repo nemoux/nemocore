@@ -16,6 +16,7 @@
 #include <touch.h>
 #include <canvas.h>
 #include <view.h>
+#include <picker.h>
 #include <nemomisc.h>
 
 static void wayland_seat_get_pointer(struct wl_client *client, struct wl_resource *seat_resource, uint32_t id)
@@ -336,6 +337,38 @@ int nemoseat_get_touchpoint_by_focus(struct nemoseat *seat, struct nemoview *vie
 	}
 
 	return tpcount;
+}
+
+void nemoseat_bypass_touchpoint_by_focus(struct nemoseat *seat, struct nemoview *view)
+{
+	struct nemocompz *compz = seat->compz;
+	struct nemotouch *touch;
+	struct touchpoint *tp;
+	struct nemoview *pick;
+	uint32_t time;
+	float tx, ty;
+
+	wl_list_for_each(touch, &seat->touch.device_list, link) {
+		wl_list_for_each(tp, &touch->touchpoint_list, link) {
+			if (tp->focus == view) {
+				pick = nemocompz_pick_view(compz, tp->x, tp->y, &tx, &ty);
+				if (pick != NULL) {
+					time = time_current_msecs();
+
+					tp->grab->interface->up(tp->grab, time, tp->gid);
+
+					touchpoint_set_focus(tp, pick);
+
+					nemocontent_touch_down(tp, tp->focus->content, time, tp->gid, tx, ty, tp->x, tp->y);
+
+					tp->grab_serial = wl_display_get_serial(compz->display);
+					tp->grab_time = time;
+
+					nemocompz_run_touch_binding(compz, tp, time);
+				}
+			}
+		}
+	}
 }
 
 struct wl_resource *nemoseat_find_resource_for_view(struct wl_list *list, struct nemoview *view)
