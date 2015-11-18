@@ -125,6 +125,9 @@ int nemoshell_move_canvas_by_pointer(struct nemoshell *shell, struct nemopointer
 	if (bin == NULL)
 		return -1;
 
+	if (bin->state.fullscreen != 0 || bin->state.maximized != 0)
+		return 0;
+
 	if (bin->grabbed > 0)
 		wl_signal_emit(&bin->ungrab_signal, bin);
 
