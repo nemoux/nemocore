@@ -379,6 +379,24 @@ struct wl_resource *nemoseat_find_resource_for_view(struct wl_list *list, struct
 	return wl_resource_find_for_client(list, wl_resource_get_client(view->canvas->resource));
 }
 
+void nemoseat_set_keyboard_focus(struct nemoseat *seat, struct nemoview *view)
+{
+	struct nemokeyboard *keyboard;
+
+	wl_list_for_each(keyboard, &seat->keyboard.device_list, link) {
+		nemokeyboard_set_focus(keyboard, view);
+	}
+}
+
+void nemoseat_set_pointer_focus(struct nemoseat *seat, struct nemoview *view)
+{
+	struct nemopointer *pointer;
+
+	wl_list_for_each(pointer, &seat->pointer.device_list, link) {
+		nemopointer_set_focus(pointer, view, 0, 0);
+	}
+}
+
 void nemoseat_put_focus(struct nemoseat *seat, struct nemoview *view)
 {
 	struct nemopointer *pointer;

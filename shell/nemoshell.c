@@ -292,6 +292,11 @@ static void nemo_surface_set_fullscreen(struct wl_client *client, struct wl_reso
 			bin->screen.r = screen->dr * M_PI / 180.0f;
 			bin->has_screen = 1;
 
+			if (screen->focus == NEMO_SHELL_FULLSCREEN_ALL_FOCUS) {
+				nemoseat_set_keyboard_focus(bin->shell->compz->seat, bin->view);
+				nemoseat_set_pointer_focus(bin->shell->compz->seat, bin->view);
+			}
+
 			nemoshell_send_bin_state(bin);
 		}
 	}

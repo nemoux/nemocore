@@ -39,6 +39,12 @@ typedef enum {
 	NEMO_SHELL_FULLSCREEN_LAST_TYPE
 } NemoShellFullscreenType;
 
+typedef enum {
+	NEMO_SHELL_FULLSCREEN_NONE_FOCUS = 0,
+	NEMO_SHELL_FULLSCREEN_ALL_FOCUS = 1,
+	NEMO_SHELL_FULLSCREEN_LAST_FOCUS
+} NemoShellFullscreenFocus;
+
 struct nemoshell {
 	struct nemocompz *compz;
 
@@ -120,6 +126,7 @@ struct clientstate {
 
 	int is_maximized;
 	int is_fullscreen;
+	uint32_t focus;
 
 	uint32_t min_width, min_height;
 	uint32_t max_width, max_height;
@@ -222,6 +229,7 @@ struct shellbin {
 struct shellscreen {
 	uint32_t id;
 	uint32_t type;
+	uint32_t focus;
 
 	int32_t sx, sy, sw, sh;
 	int32_t dx, dy, dw, dh, dr;

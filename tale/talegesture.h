@@ -215,6 +215,26 @@ static inline int nemotale_is_pointer_long_press(struct nemotale *tale, struct t
 	return type & NEMOTALE_POINTER_LONG_PRESS_EVENT;
 }
 
+static inline int nemotale_is_keyboard_enter(struct nemotale *tale, struct taleevent *event, uint32_t type)
+{
+	return type & NEMOTALE_KEYBOARD_ENTER_EVENT;
+}
+
+static inline int nemotale_is_keyboard_leave(struct nemotale *tale, struct taleevent *event, uint32_t type)
+{
+	return type & NEMOTALE_KEYBOARD_LEAVE_EVENT;
+}
+
+static inline int nemotale_is_keyboard_down(struct nemotale *tale, struct taleevent *event, uint32_t type)
+{
+	return type & NEMOTALE_KEYBOARD_DOWN_EVENT;
+}
+
+static inline int nemotale_is_keyboard_up(struct nemotale *tale, struct taleevent *event, uint32_t type)
+{
+	return type & NEMOTALE_KEYBOARD_UP_EVENT;
+}
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

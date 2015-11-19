@@ -862,6 +862,7 @@ void nemoshell_load_fullscreens(struct nemoshell *shell)
 	struct nemocompz *compz = shell->compz;
 	struct shellscreen *screen;
 	char *type;
+	char *focus;
 	int index = 0;
 
 	for (index = 0;
@@ -890,6 +891,12 @@ void nemoshell_load_fullscreens(struct nemoshell *shell)
 			screen->type = NEMO_SHELL_FULLSCREEN_PICK_TYPE;
 		else if (strcmp(type, "pitch") == 0)
 			screen->type = NEMO_SHELL_FULLSCREEN_PITCH_TYPE;
+
+		focus = nemoitem_get_attr(shell->configs, index, "focus");
+		if (focus == NULL)
+			screen->focus = NEMO_SHELL_FULLSCREEN_NONE_FOCUS;
+		else if (strcmp(focus, "all") == 0)
+			screen->focus = NEMO_SHELL_FULLSCREEN_ALL_FOCUS;
 
 		wl_list_init(&screen->bin_list);
 
