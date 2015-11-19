@@ -35,7 +35,7 @@ static void nemosound_dispatch_client_info_callback(pa_context *context, const p
 	if (info == NULL)
 		return;
 
-	nemolog_message("SOUND", "CLIENT #%u: name(%s), pid(%s)\n",
+	nemolog_message("SOUND", "CLIENT #%u: name(%s) pid(%s)\n",
 			info->index,
 			pa_proplist_gets(info->proplist, PA_PROP_APPLICATION_NAME),
 			pa_proplist_gets(info->proplist, PA_PROP_APPLICATION_PROCESS_ID));
@@ -72,16 +72,26 @@ static void nemosound_dispatch_sink_input_info_callback(pa_context *context, con
 	struct soundone *one;
 	const char *spid;
 	uint32_t pid;
+	int done = 0;
 
 	if (is_last < 0) {
 		nemolog_error("SOUND", "failed to get sink input information: %s\n", pa_strerror(pa_context_errno(context)));
 		return;
 	}
 
-	if (is_last != 0)
-		return;
+	if (is_last != 0) {
+		nemolist_for_each(one, &sound->list, link) {
+			if (one->has_sinkinput == 0) {
+				nemotimer_set_timeout(sound->timer, NEMOSOUND_SINKINPUT_TIMEOUT);
 
-	nemolog_message("SOUND", "SINK-INPUT #%u: name(%s), pid(%s)\n",
+				break;
+			}
+		}
+
+		return;
+	}
+
+	nemolog_message("SOUND", "SINK-INPUT #%u: name(%s) pid(%s)\n",
 			info->index,
 			pa_proplist_gets(info->proplist, PA_PROP_APPLICATION_NAME),
 			pa_proplist_gets(info->proplist, PA_PROP_APPLICATION_PROCESS_ID));
@@ -96,8 +106,14 @@ static void nemosound_dispatch_sink_input_info_callback(pa_context *context, con
 
 			nemosound_flush_command(one->sound, one);
 
+			done = 1;
+
 			break;
 		}
+	}
+
+	if (done == 0) {
+		nemotimer_set_timeout(sound->timer, NEMOSOUND_SINKINPUT_TIMEOUT);
 	}
 }
 
@@ -375,6 +391,16 @@ static void nemosound_dispatch_global(struct nemotool *tool, uint32_t id, const 
 	}
 }
 
+static void nemosound_dispatch_timer(struct nemotimer *timer, void *data)
+{
+	struct nemosound *sound = (struct nemosound *)data;
+	pa_operation *op;
+
+	op = pa_context_get_sink_input_info_list(sound->context, nemosound_dispatch_sink_input_info_callback, sound);
+	if (op != NULL)
+		pa_operation_unref(op);
+}
+
 int main(int argc, char *argv[])
 {
 	struct option options[] = {
@@ -418,6 +444,10 @@ int main(int argc, char *argv[])
 	nemotool_set_userdata(tool, sound);
 	nemotool_connect_wayland(tool, NULL);
 
+	sound->timer = nemotimer_create(tool);
+	nemotimer_set_callback(sound->timer, nemosound_dispatch_timer);
+	nemotimer_set_userdata(sound->timer, sound);
+
 	sound->mainloop = pa_glib_mainloop_new(NULL);
 	if (sound->mainloop == NULL)
 		goto out2;
@@ -453,6 +483,8 @@ out3:
 	pa_glib_mainloop_free(sound->mainloop);
 
 out2:
+	nemotimer_destroy(sound->timer);
+
 	nemotool_disconnect_wayland(tool);
 	nemotool_destroy(tool);
 

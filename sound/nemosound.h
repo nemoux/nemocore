@@ -6,10 +6,14 @@
 #include <pulse/pulseaudio.h>
 #include <pulse/glib-mainloop.h>
 
+#include <nemotimer.h>
+
 #include <nemolist.h>
 #include <nemolistener.h>
 
 #define	NEMOSOUND_NULL_SINK_NAME		("nullsink")
+
+#define	NEMOSOUND_SINKINPUT_TIMEOUT	(500)
 
 typedef enum {
 	NEMOSOUND_NONE_COMMAND = 0,
@@ -63,6 +67,8 @@ struct soundsink {
 
 struct nemosound {
 	struct nemotool *tool;
+
+	struct nemotimer *timer;
 
 	struct nemolist list;
 

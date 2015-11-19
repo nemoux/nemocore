@@ -70,7 +70,7 @@ static void nemopulse_dispatch_client_info_callback(pa_context *context, const p
 	if (info == NULL)
 		return;
 
-	nemolog_message("PULSE", "CLIENT #%u: name(%s), pid(%s)\n",
+	nemolog_message("PULSE", "CLIENT #%u: name(%s) pid(%s)\n",
 			info->index,
 			pa_proplist_gets(info->proplist, PA_PROP_APPLICATION_NAME),
 			pa_proplist_gets(info->proplist, PA_PROP_APPLICATION_PROCESS_ID));
@@ -108,7 +108,7 @@ static void nemopulse_dispatch_sink_input_info_callback(pa_context *context, con
 		return;
 	}
 
-	nemolog_message("PULSE", "SINK-INPUT #%u: name(%s), pid(%s) volume(%d) mute(%d)\n",
+	nemolog_message("PULSE", "SINK-INPUT #%u: name(%s) pid(%s) volume(%d) mute(%d)\n",
 			info->index,
 			pa_proplist_gets(info->proplist, PA_PROP_APPLICATION_NAME),
 			pa_proplist_gets(info->proplist, PA_PROP_APPLICATION_PROCESS_ID),
