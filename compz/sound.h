@@ -11,6 +11,7 @@ struct soundsink {
 	uint32_t id;
 
 	uint32_t volume;
+	uint32_t mute;
 
 	char *name;
 	char *desc;

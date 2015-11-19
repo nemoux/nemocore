@@ -62,14 +62,25 @@
 		</event>
 
 		<request name="register_sink">
-			<arg name="sink" type="uint"/>
-			<arg name="volume" type="uint"/>
+			<arg name="id" type="uint"/>
 			<arg name="name" type="string"/>
 			<arg name="desc" type="string"/>
+			<arg name="volume" type="uint"/>
+			<arg name="mute" type="uint"/>
 		</request>
 
 		<request name="unregister_sink">
-			<arg name="sink" type="uint"/>
+			<arg name="id" type="uint"/>
+		</request>
+
+		<request name="register_sinkinput">
+			<arg name="id" type="uint"/>
+			<arg name="volume" type="uint"/>
+			<arg name="mute" type="uint"/>
+		</request>
+
+		<request name="unregister_sinkinput">
+			<arg name="id" type="uint"/>
 		</request>
 	</interface>
 </protocol>

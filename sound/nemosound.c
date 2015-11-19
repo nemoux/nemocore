@@ -56,14 +56,15 @@ static void nemosound_dispatch_sink_info_callback(pa_context *context, const pa_
 
 	volume = ((double)info->volume.values[0] / (double)PA_VOLUME_NORM) * 100.0f;
 
-	nemolog_message("SOUND", "SINK #%u: name(%s) description(%s) volume(%u)\n",
+	nemolog_message("SOUND", "SINK #%u: name(%s) description(%s) volume(%u) mute(%d)\n",
 			info->index,
 			info->name,
 			pa_proplist_gets(info->proplist, PA_PROP_DEVICE_DESCRIPTION),
-			volume);
+			volume,
+			info->mute);
 
 	if (strcmp(info->name, "nullsink") != 0)
-		nemo_sound_manager_register_sink(sound->manager, info->index, volume, info->name, pa_proplist_gets(info->proplist, PA_PROP_DEVICE_DESCRIPTION));
+		nemo_sound_manager_register_sink(sound->manager, info->index, info->name, pa_proplist_gets(info->proplist, PA_PROP_DEVICE_DESCRIPTION), volume, info->mute);
 }
 
 static void nemosound_dispatch_sink_input_info_callback(pa_context *context, const pa_sink_input_info *info, int is_last, void *userdata)
@@ -72,6 +73,7 @@ static void nemosound_dispatch_sink_input_info_callback(pa_context *context, con
 	struct soundone *one;
 	const char *spid;
 	uint32_t pid;
+	uint32_t volume;
 	int done = 0;
 
 	if (is_last < 0) {
@@ -91,10 +93,16 @@ static void nemosound_dispatch_sink_input_info_callback(pa_context *context, con
 		return;
 	}
 
-	nemolog_message("SOUND", "SINK-INPUT #%u: name(%s) pid(%s)\n",
+	volume = ((double)info->volume.values[0] / (double)PA_VOLUME_NORM) * 100.0f;
+
+	nemolog_message("SOUND", "SINK-INPUT #%u: name(%s) pid(%s) volume(%u) mute(%d)\n",
 			info->index,
 			pa_proplist_gets(info->proplist, PA_PROP_APPLICATION_NAME),
-			pa_proplist_gets(info->proplist, PA_PROP_APPLICATION_PROCESS_ID));
+			pa_proplist_gets(info->proplist, PA_PROP_APPLICATION_PROCESS_ID),
+			volume,
+			info->mute);
+
+	nemo_sound_manager_register_sinkinput(sound->manager, info->index, volume, info->mute);
 
 	spid = pa_proplist_gets(info->proplist, PA_PROP_APPLICATION_PROCESS_ID);
 	pid = strtoul(spid, NULL, 10);
@@ -112,9 +120,8 @@ static void nemosound_dispatch_sink_input_info_callback(pa_context *context, con
 		}
 	}
 
-	if (done == 0) {
+	if (done == 0)
 		nemotimer_set_timeout(sound->timer, NEMOSOUND_SINKINPUT_TIMEOUT);
-	}
 }
 
 static void nemosound_dispatch_move_sink_callback(pa_context *context, int success, void *userdata)

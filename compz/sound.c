@@ -89,7 +89,7 @@ static void nemosound_bind(struct wl_client *client, void *data, uint32_t versio
 	wl_resource_set_implementation(resource, &nemo_sound_implementation, sound, nemosound_unbind);
 }
 
-static void nemo_sound_manager_register_sink(struct wl_client *client, struct wl_resource *resource, uint32_t sinkid, uint32_t volume, const char *name, const char *desc)
+static void nemo_sound_manager_register_sink(struct wl_client *client, struct wl_resource *resource, uint32_t sinkid, const char *name, const char *desc, uint32_t volume, uint32_t mute)
 {
 	struct nemosound *sound = (struct nemosound *)wl_resource_get_user_data(resource);
 	struct soundsink *sink;
@@ -102,9 +102,10 @@ static void nemo_sound_manager_register_sink(struct wl_client *client, struct wl
 	memset(sink, 0, sizeof(struct soundsink));
 
 	sink->id = sinkid;
-	sink->volume = volume;
 	sink->name = strdup(name);
 	sink->desc = strdup(desc);
+	sink->volume = volume;
+	sink->mute = mute;
 
 	wl_list_insert(sound->sink_list.prev, &sink->link);
 }
@@ -113,9 +114,19 @@ static void nemo_sound_manager_unregister_sink(struct wl_client *client, struct 
 {
 }
 
+static void nemo_sound_manager_register_sinkinput(struct wl_client *client, struct wl_resource *resource, uint32_t sinkinputid, uint32_t volume, uint32_t mute)
+{
+}
+
+static void nemo_sound_manager_unregister_sinkinput(struct wl_client *client, struct wl_resource *resource, uint32_t sinkinputid)
+{
+}
+
 static const struct nemo_sound_manager_interface nemo_sound_manager_implementation = {
 	nemo_sound_manager_register_sink,
-	nemo_sound_manager_unregister_sink
+	nemo_sound_manager_unregister_sink,
+	nemo_sound_manager_register_sinkinput,
+	nemo_sound_manager_unregister_sinkinput
 };
 
 static void nemosound_unbind_manager(struct wl_resource *resource)
