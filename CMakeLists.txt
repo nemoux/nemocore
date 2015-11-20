@@ -23,6 +23,7 @@ option(WITH_XWAYLAND "Build with XWAYLAND" ON)
 option(WITH_GLIB "Build with GLIB" ON)
 option(WITH_GSTREAMER "Build with GSTREAMER" ON)
 option(WITH_PULSEAUDIO "Build with PULSEAUDIO" ON)
+option(WITH_GRILO "Build with GRILO" ON)
 option(WITH_MUPDF "Build with MUPDF" ON)
 
 option(WITH_WAYLANDSHELL "Build with WAYLANDSHELL" ON)
@@ -203,6 +204,10 @@ endif(WITH_GSTREAMER)
 if(WITH_PULSEAUDIO)
 	add_definitions(-DNEMOUX_WITH_PULSEAUDIO=1)
 endif(WITH_PULSEAUDIO)
+
+if(WITH_GRILO)
+	add_definitions(-DNEMOUX_WITH_GRILO=1)
+endif(WITH_GRILO)
 
 if(WITH_XWAYLAND)
 	add_definitions(-DNEMOUX_WITH_XWAYLAND=1)

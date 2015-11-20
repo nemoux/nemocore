@@ -76,6 +76,23 @@ if(WITH_PULSEAUDIO)
 	INSTALL(TARGETS nemopulse DESTINATION bin)
 endif(WITH_PULSEAUDIO)
 
+if(WITH_GRILO)
+	PKG_CHECK_MODULES(GRILO REQUIRED grilo-0.2)
+	INCLUDE_DIRECTORIES(${GRILO_INCLUDE_DIRS})
+	LINK_DIRECTORIES(${GRILO_LIBRARY_DIRS})
+
+	add_executable(nemogrilo
+		nemogrilo.c
+		)
+
+	TARGET_LINK_LIBRARIES(nemogrilo
+		nemoasst
+		${GRILO_LIBRARIES}
+		)
+
+	INSTALL(TARGETS nemogrilo DESTINATION bin)
+endif(WITH_GRILO)
+
 add_executable(nemoimage
 	nemoimage.c
 	talehelper.c

@@ -285,6 +285,8 @@ int main(int argc, char *argv[])
 	int opt;
 	int r;
 
+	nemolog_set_file(2);
+
 	while (opt = getopt_long(argc, argv, "c:i:s:n:m:v:", options, NULL)) {
 		if (opt == -1)
 			break;
@@ -318,8 +320,6 @@ int main(int argc, char *argv[])
 				break;
 		}
 	}
-
-	nemolog_set_file(2);
 
 	pulse = (struct nemopulse *)malloc(sizeof(struct nemopulse));
 	if (pulse == NULL)
