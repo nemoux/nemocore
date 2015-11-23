@@ -466,9 +466,12 @@ static inline void nemoshow_canvas_render_item_bitmap(SkCanvas *canvas, struct s
 static inline void nemoshow_canvas_render_item_image(SkCanvas *canvas, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
-	SkRect rect = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
 
-	canvas->drawBitmapRect(*NEMOSHOW_ITEM_CC(item, bitmap), rect);
+	if (NEMOSHOW_ITEM_CC(item, bitmap) != NULL) {
+		SkRect rect = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
+
+		canvas->drawBitmapRect(*NEMOSHOW_ITEM_CC(item, bitmap), rect);
+	}
 }
 
 static inline void nemoshow_canvas_render_item_svg(SkCanvas *canvas, struct showone *one)

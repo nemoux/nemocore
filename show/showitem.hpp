@@ -15,6 +15,7 @@ typedef struct _showitem {
 
 	SkPath *path;
 	SkBitmap *bitmap;
+	uint32_t width, height;
 
 	SkPath *strokepath;
 	SkPath *fillpath;

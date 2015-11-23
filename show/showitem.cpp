@@ -56,6 +56,8 @@ struct showone *nemoshow_item_create(int type)
 	NEMOSHOW_ITEM_CC(item, stroke)->setAntiAlias(true);
 	NEMOSHOW_ITEM_CC(item, points) = NULL;
 	NEMOSHOW_ITEM_CC(item, bitmap) = NULL;
+	NEMOSHOW_ITEM_CC(item, width) = 0;
+	NEMOSHOW_ITEM_CC(item, height) = 0;
 
 	nemolist_init(&item->canvas_destroy_listener.link);
 
@@ -246,10 +248,10 @@ static inline void nemoshow_item_update_uri(struct nemoshow *show, struct showon
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	bool r;
 
-	if (NEMOSHOW_ITEM_CC(item, bitmap) != NULL)
-		delete NEMOSHOW_ITEM_CC(item, bitmap);
-
 	if (item->uri != NULL) {
+		if (NEMOSHOW_ITEM_CC(item, bitmap) != NULL)
+			delete NEMOSHOW_ITEM_CC(item, bitmap);
+
 		if (one->sub == NEMOSHOW_IMAGE_ITEM) {
 			NEMOSHOW_ITEM_CC(item, bitmap) = new SkBitmap;
 
@@ -1294,6 +1296,69 @@ int nemoshow_item_load_svg(struct showone *one, const char *uri)
 	NEMOSHOW_ITEM_CC(item, path)->transform(matrix);
 	NEMOSHOW_ITEM_CC(item, strokepath)->transform(matrix);
 	NEMOSHOW_ITEM_CC(item, fillpath)->transform(matrix);
+
+	return 0;
+}
+
+int nemoshow_item_set_buffer(struct showone *one, char *buffer, uint32_t width, uint32_t height)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	if (NEMOSHOW_ITEM_CC(item, bitmap) != NULL)
+		delete NEMOSHOW_ITEM_CC(item, bitmap);
+
+	NEMOSHOW_ITEM_CC(item, bitmap) = new SkBitmap;
+	NEMOSHOW_ITEM_CC(item, bitmap)->setInfo(
+			SkImageInfo::Make(width, height, kN32_SkColorType, kPremul_SkAlphaType));
+	NEMOSHOW_ITEM_CC(item, bitmap)->setPixels(
+			buffer);
+
+	NEMOSHOW_ITEM_CC(item, width) = width;
+	NEMOSHOW_ITEM_CC(item, height) = height;
+
+	one->dirty |= NEMOSHOW_SHAPE_DIRTY;
+
+	return 0;
+}
+
+void nemoshow_item_put_buffer(struct showone *one)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	delete NEMOSHOW_ITEM_CC(item, bitmap);
+
+	NEMOSHOW_ITEM_CC(item, bitmap) = NULL;
+
+	NEMOSHOW_ITEM_CC(item, width) = 0;
+	NEMOSHOW_ITEM_CC(item, height) = 0;
+
+	one->dirty |= NEMOSHOW_SHAPE_DIRTY;
+}
+
+int nemoshow_item_copy_buffer(struct showone *one, char *buffer, uint32_t width, uint32_t height)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+	SkBitmap bitmap;
+
+	if (NEMOSHOW_ITEM_CC(item, width) != width ||
+			NEMOSHOW_ITEM_CC(item, height) != height) {
+		if (NEMOSHOW_ITEM_CC(item, bitmap) != NULL)
+			delete NEMOSHOW_ITEM_CC(item, bitmap);
+
+		NEMOSHOW_ITEM_CC(item, bitmap) = new SkBitmap;
+		NEMOSHOW_ITEM_CC(item, bitmap)->allocPixels(
+				SkImageInfo::Make(width, height, kN32_SkColorType, kPremul_SkAlphaType));
+
+		NEMOSHOW_ITEM_CC(item, width) = width;
+		NEMOSHOW_ITEM_CC(item, height) = height;
+	}
+
+	bitmap.setInfo(SkImageInfo::Make(width, height, kN32_SkColorType, kPremul_SkAlphaType));
+	bitmap.setPixels(buffer);
+
+	bitmap.copyTo(NEMOSHOW_ITEM_CC(item, bitmap));
+
+	one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 
 	return 0;
 }
