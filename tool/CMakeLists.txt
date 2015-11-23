@@ -86,6 +86,10 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/tool/nemoglib.h
 	${CMAKE_SOURCE_DIR}/tool/nemocurl.h
 	${EXTRA_HEADERS}
+	${CMAKE_BINARY_DIR}/tool/wayland-presentation-timing-client-protocol.h
+	${CMAKE_BINARY_DIR}/tool/wayland-nemo-shell-client-protocol.h
+	${CMAKE_BINARY_DIR}/tool/wayland-nemo-seat-client-protocol.h
+	${CMAKE_BINARY_DIR}/tool/wayland-nemo-sound-client-protocol.h
 	)
 
 configure_file(
