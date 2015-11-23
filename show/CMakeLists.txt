@@ -71,7 +71,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/show/svghelper.h
 	)
 
-set(NEMOSHOW_PKGCONFIG_REQUIRES "nemoasst nemotale skia")
+set(NEMOSHOW_PKGCONFIG_REQUIRES "nemoasst nemotale skia harfbuzz")
 
 configure_file(
 	nemoshow.pc.in
