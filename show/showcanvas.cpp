@@ -432,6 +432,15 @@ static inline void nemoshow_canvas_render_item_text(SkCanvas *canvas, struct sho
 	}
 }
 
+static inline void nemoshow_canvas_render_item_textbox(SkCanvas *canvas, struct showone *one)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	if (item->text != NULL) {
+		NEMOSHOW_ITEM_CC(item, textbox)->draw(canvas);
+	}
+}
+
 static inline void nemoshow_canvas_render_vector_on_bitmap(SkBitmap *bitmap, struct showone *one)
 {
 	struct showitem *src = NEMOSHOW_ITEM(one);
@@ -512,6 +521,7 @@ static inline void nemoshow_canvas_render_item(SkCanvas *canvas, struct showone 
 		nemoshow_canvas_render_item_donut,
 		nemoshow_canvas_render_item_ring,
 		nemoshow_canvas_render_item_text,
+		nemoshow_canvas_render_item_textbox,
 		nemoshow_canvas_render_item_path,
 		nemoshow_canvas_render_item_path_group,
 		nemoshow_canvas_render_item_bitmap,

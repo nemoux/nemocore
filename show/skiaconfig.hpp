@@ -22,6 +22,7 @@
 #include <SkRegion.h>
 #include <SkParsePath.h>
 #include <SkTypeface.h>
+#include <SkTextBox.h>
 
 #include <SkBlurMask.h>
 #include <SkBlurMaskFilter.h>

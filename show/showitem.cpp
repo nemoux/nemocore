@@ -55,6 +55,7 @@ struct showone *nemoshow_item_create(int type)
 	NEMOSHOW_ITEM_CC(item, stroke)->setStyle(SkPaint::kStroke_Style);
 	NEMOSHOW_ITEM_CC(item, stroke)->setAntiAlias(true);
 	NEMOSHOW_ITEM_CC(item, points) = NULL;
+	NEMOSHOW_ITEM_CC(item, textbox) = NULL;
 	NEMOSHOW_ITEM_CC(item, bitmap) = NULL;
 	NEMOSHOW_ITEM_CC(item, width) = 0;
 	NEMOSHOW_ITEM_CC(item, height) = 0;
@@ -121,6 +122,11 @@ struct showone *nemoshow_item_create(int type)
 
 	nemoobject_set_reserved(&one->object, "alpha", &item->alpha, sizeof(double));
 
+	if (one->sub == NEMOSHOW_TEXTBOX_ITEM) {
+		NEMOSHOW_ITEM_CC(item, textbox) = new SkTextBox;
+		NEMOSHOW_ITEM_CC(item, textbox)->setMode(SkTextBox::kLineBreak_Mode);
+	}
+
 	return one;
 }
 
@@ -160,6 +166,8 @@ void nemoshow_item_destroy(struct showone *one)
 		delete NEMOSHOW_ITEM_CC(item, stroke);
 	if (NEMOSHOW_ITEM_CC(item, points) != NULL)
 		delete[] NEMOSHOW_ITEM_CC(item, points);
+	if (NEMOSHOW_ITEM_CC(item, textbox) != NULL)
+		delete NEMOSHOW_ITEM_CC(item, textbox);
 	if (NEMOSHOW_ITEM_CC(item, bitmap) != NULL)
 		delete NEMOSHOW_ITEM_CC(item, bitmap);
 
@@ -291,6 +299,10 @@ static inline void nemoshow_item_update_style(struct nemoshow *show, struct show
 
 	if (one->sub == NEMOSHOW_RING_ITEM) {
 		NEMOSHOW_ITEM_CC(item, stroke)->setStyle(SkPaint::kFill_Style);
+	} else if (one->sub == NEMOSHOW_TEXTBOX_ITEM) {
+		if (item->text != NULL) {
+			NEMOSHOW_ITEM_CC(item, textbox)->setText(item->text, strlen(item->text), *NEMOSHOW_ITEM_CC(item, stroke));
+		}
 	}
 }
 
@@ -398,6 +410,16 @@ static inline void nemoshow_item_update_text(struct nemoshow *show, struct showo
 		} else {
 			item->textwidth = 0.0f;
 			item->textheight = 0.0f;
+		}
+
+		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
+	} else if (one->sub == NEMOSHOW_TEXTBOX_ITEM) {
+		item->text = nemoobject_gets(&one->object, "d");
+		if (item->text != NULL) {
+			NEMOSHOW_ITEM_CC(item, stroke)->setTextSize(item->fontsize);
+
+			NEMOSHOW_ITEM_CC(item, textbox)->setSpacing(item->spacingmul, item->spacingadd);
+			NEMOSHOW_ITEM_CC(item, textbox)->setText(item->text, strlen(item->text), *NEMOSHOW_ITEM_CC(item, stroke));
 		}
 
 		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
@@ -637,6 +659,8 @@ static inline void nemoshow_item_update_shape(struct nemoshow *show, struct show
 
 			nemoshow_one_set_state(one, NEMOSHOW_REDRAW_STATE);
 		}
+	} else if (one->sub == NEMOSHOW_TEXTBOX_ITEM) {
+		NEMOSHOW_ITEM_CC(item, textbox)->setBox(item->x, item->y, item->width, item->height);
 	}
 }
 
@@ -705,6 +729,8 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 
 		item->width = box.width();
 		item->height = box.height();
+	} else if (one->sub == NEMOSHOW_TEXTBOX_ITEM) {
+		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
 	} else if (one->sub == NEMOSHOW_BITMAP_ITEM) {
 		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
 	} else if (one->sub == NEMOSHOW_IMAGE_ITEM) {

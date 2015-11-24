@@ -21,6 +21,8 @@ typedef struct _showitem {
 	SkPath *fillpath;
 
 	SkPoint *points;
+
+	SkTextBox *textbox;
 } showitem_t;
 
 #define NEMOSHOW_ITEM_CC(base, name)				(((showitem_t *)((base)->cc))->name)

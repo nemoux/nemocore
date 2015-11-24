@@ -24,12 +24,13 @@ typedef enum {
 	NEMOSHOW_DONUT_ITEM = 6,
 	NEMOSHOW_RING_ITEM = 7,
 	NEMOSHOW_TEXT_ITEM = 8,
-	NEMOSHOW_PATH_ITEM = 9,
-	NEMOSHOW_PATHGROUP_ITEM = 10,
-	NEMOSHOW_BITMAP_ITEM = 11,
-	NEMOSHOW_IMAGE_ITEM = 12,
-	NEMOSHOW_SVG_ITEM = 13,
-	NEMOSHOW_GROUP_ITEM = 14,
+	NEMOSHOW_TEXTBOX_ITEM = 9,
+	NEMOSHOW_PATH_ITEM = 10,
+	NEMOSHOW_PATHGROUP_ITEM = 11,
+	NEMOSHOW_BITMAP_ITEM = 12,
+	NEMOSHOW_IMAGE_ITEM = 13,
+	NEMOSHOW_SVG_ITEM = 14,
+	NEMOSHOW_GROUP_ITEM = 15,
 	NEMOSHOW_LAST_ITEM
 } NemoShowItemType;
 
@@ -78,6 +79,7 @@ struct showitem {
 	double fontdescent;
 	const char *text;
 	double textwidth, textheight;
+	double spacingmul, spacingadd;
 
 	char *uri;
 
@@ -223,6 +225,12 @@ static inline void nemoshow_item_set_to(struct showone *one, double to)
 static inline void nemoshow_item_set_fontsize(struct showone *one, double fontsize)
 {
 	NEMOSHOW_ITEM_AT(one, fontsize) = fontsize;
+}
+
+static inline void nemoshow_item_set_spacing(struct showone *one, double spacingmul, double spacingadd)
+{
+	NEMOSHOW_ITEM_AT(one, spacingmul) = spacingmul;
+	NEMOSHOW_ITEM_AT(one, spacingadd) = spacingadd;
 }
 
 static inline void nemoshow_item_set_alpha(struct showone *one, double alpha)
