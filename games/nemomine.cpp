@@ -70,27 +70,28 @@ struct minecontext {
 	int width, height;
 };
 
-static int nemomine_count_neighbors(struct minecontext *context, int index)
+static int nemomine_count_neighbors(struct minecontext *context, int x, int y)
 {
-	static int neighbors[8] = {
-		-context->columns - 1,
-		-context->columns - 0,
-		-context->columns + 1,
-		-1,
-		+1,
-		context->columns - 1,
-		context->columns - 0,
-		context->columns + 1
+	static int neighbors[8][2] = {
+		{ -1, -1 },
+		{ 0, -1 },
+		{ +1, -1 },
+		{ -1, 0 },
+		{ +1, 0 },
+		{ -1, +1 },
+		{ 0, +1 },
+		{ +1, +1 },
 	};
 	struct mineone *mone;
 	int count = 0;
 	int i;
 
 	for (i = 0; i < 8; i++) {
-		if (neighbors[i] + index < 0 || neighbors[i] + index >= context->columns * context->rows)
+		if (neighbors[i][0] + x < 0 || neighbors[i][0] + x >= context->columns ||
+				neighbors[i][1] + y < 0 || neighbors[i][1] + y >= context->rows)
 			continue;
 
-		mone = &context->ones[neighbors[i] + index];
+		mone = &context->ones[(neighbors[i][0] + x) + (neighbors[i][1] + y) * context->columns];
 
 		if (mone->is_bomb != 0)
 			count++;
@@ -267,11 +268,11 @@ static void nemomine_uncheck_mine(struct minecontext *context, uint32_t tag)
 
 static void nemomine_confirm_mine(struct minecontext *context, uint32_t tag)
 {
-	static int neighbors[4] = {
-		-context->columns,
-		-1,
-		+1,
-		context->columns,
+	static int neighbors[4][2] = {
+		{ 0, -1 },
+		{ -1, 0 },
+		{ +1, 0 },
+		{ 0, +1 }
 	};
 	struct mineone *mone = &context->ones[tag];
 	struct mineone *none;
@@ -279,22 +280,25 @@ static void nemomine_confirm_mine(struct minecontext *context, uint32_t tag)
 	struct showone *sequence;
 	struct showone *frame;
 	struct showone *set0, *set1;
+	int x = tag % context->columns;
+	int y = tag / context->columns;
 	int nneighbors;
 	int i;
 
 	mone->state = NEMOMINE_CONFIRM_STATE;
 
-	nneighbors = nemomine_count_neighbors(context, tag);
+	nneighbors = nemomine_count_neighbors(context, x, y);
 	if (nneighbors == 0) {
 		for (i = 0; i < 4; i++) {
-			if (neighbors[i] + tag < 0 || neighbors[i] + tag >= context->columns * context->rows)
+			if (neighbors[i][0] + x < 0 || neighbors[i][0] + x >= context->columns ||
+					neighbors[i][1] + y < 0 || neighbors[i][1] + y >= context->rows)
 				continue;
 
-			none = &context->ones[neighbors[i] + tag];
+			none = &context->ones[(neighbors[i][0] + x) + (neighbors[i][1] + y) * context->columns];
 			if (none->is_bomb != 0 || none->state == NEMOMINE_CONFIRM_STATE)
 				continue;
 
-			nemomine_confirm_mine(context, neighbors[i] + tag);
+			nemomine_confirm_mine(context, (neighbors[i][0] + x) + (neighbors[i][1] + y) * context->columns);
 		}
 
 		frame = nemoshow_sequence_create_frame();
