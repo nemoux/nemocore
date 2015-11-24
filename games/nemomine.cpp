@@ -376,14 +376,11 @@ static void nemomine_dispatch_tale_event(struct nemotale *tale, struct talenode 
 			}
 
 			if (nemotale_is_single_click(tale, event, type)) {
-				struct showone *pick;
 				struct showone *one;
 				uint32_t tag;
 
-				pick = nemoshow_canvas_pick_one(context->canvas, event->x, event->y);
-				if (pick != NULL) {
-					tag = nemoshow_one_get_tag(pick) - 1;
-
+				tag = nemoshow_canvas_pick_tag(context->canvas, event->x, event->y);
+				if (tag-- > 0) {
 					if (tag == 10001) {
 						context->is_pinning = !context->is_pinning;
 
@@ -398,13 +395,10 @@ static void nemomine_dispatch_tale_event(struct nemotale *tale, struct talenode 
 				}
 			}
 		} else {
-			struct showone *pick;
 			uint32_t tag;
 
-			pick = nemoshow_canvas_pick_one(context->canvas, event->x, event->y);
-			if (pick != NULL) {
-				tag = nemoshow_one_get_tag(pick) - 1;
-
+			tag = nemoshow_canvas_pick_tag(context->canvas, event->x, event->y);
+			if (tag-- > 0) {
 				if (nemotale_is_single_click(tale, event, type)) {
 					if (tag < 10000 && context->is_playing != 0) {
 						struct mineone *mone = &context->ones[tag];

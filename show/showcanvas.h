@@ -167,6 +167,12 @@ static inline void nemoshow_canvas_set_fill_color(struct showone *one, double r,
 	canvas->fill = 1;
 }
 
+static inline uint32_t nemoshow_canvas_pick_tag(struct showone *one, int x, int y)
+{
+	return nemoshow_one_get_tag(
+			nemoshow_canvas_pick_one(one, x, y));
+}
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif
