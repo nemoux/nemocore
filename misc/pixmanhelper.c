@@ -42,7 +42,6 @@ int pixman_save_png_file(pixman_image_t *image, const char *path)
 {
 	int width = pixman_image_get_width(image);
 	int height = pixman_image_get_height(image);
-	int stride = pixman_image_get_stride(image);
 	uint8_t *data;
 	pixman_image_t *copy;
 	png_struct *write_struct;
@@ -56,7 +55,7 @@ int pixman_save_png_file(pixman_image_t *image, const char *path)
 	if (f == NULL)
 		return 0;
 
-	data = (uint8_t *)malloc(sizeof(uint8_t) * height * stride);
+	data = (uint8_t *)malloc(sizeof(uint8_t[4]) * width * height);
 	if (data == NULL)
 		goto out1;
 
@@ -64,14 +63,14 @@ int pixman_save_png_file(pixman_image_t *image, const char *path)
 	if (row_pointers == NULL)
 		goto out2;
 
-	copy = pixman_image_create_bits(PIXMAN_a8r8g8b8, width, height, (uint32_t *)data, stride);
+	copy = pixman_image_create_bits(PIXMAN_a8r8g8b8, width, height, (uint32_t *)data, width * 4);
 
 	pixman_image_composite32(PIXMAN_OP_SRC, image, NULL, copy, 0, 0, 0, 0, 0, 0, width, height);
 
-	a8r8g8b8_to_rgba_np(data, data, width, height, stride);
+	a8r8g8b8_to_rgba_np(data, data, width, height, width * 4);
 
 	for (i = 0; i < height; ++i)
-		row_pointers[i] = (png_bytep)(data + i * stride);
+		row_pointers[i] = (png_bytep)(data + i * width * 4);
 
 	if (!(write_struct = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL)))
 		goto out3;
