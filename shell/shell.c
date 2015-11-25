@@ -187,9 +187,9 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 	if (!nemoview_is_mapped(view)) {
 		if (bin->type == NEMO_SHELL_SURFACE_NORMAL_TYPE) {
 			if (bin->has_screen != 0) {
-				nemoview_set_position(view,
-						bin->screen.x, bin->screen.y);
-				nemoview_set_rotation(view, 0);
+				nemoview_correct_pivot(view, bin->screen.width / 2.0f, bin->screen.height / 2.0f);
+				nemoview_set_position(view, bin->screen.x, bin->screen.y);
+				nemoview_set_rotation(view, bin->screen.r);
 
 				nemoview_attach_layer(view, bin->layer);
 				nemoview_update_transform(view);
