@@ -122,6 +122,9 @@ struct nemotool {
 
 	uint32_t modifiers;
 
+	uint32_t fullscreen_width;
+	uint32_t fullscreen_height;
+
 	void *userdata;
 };
 
@@ -179,6 +182,16 @@ static inline int nemotool_is_running(struct nemotool *tool)
 static inline void nemotool_set_dispatch_global(struct nemotool *tool, nemotool_dispatch_global_t dispatch)
 {
 	tool->dispatch_global = dispatch;
+}
+
+static inline uint32_t nemotool_get_fullscreen_width(struct nemotool *tool)
+{
+	return tool->fullscreen_width;
+}
+
+static inline uint32_t nemotool_get_fullscreen_height(struct nemotool *tool)
+{
+	return tool->fullscreen_height;
 }
 
 static inline void nemotool_set_userdata(struct nemotool *tool, void *data)
