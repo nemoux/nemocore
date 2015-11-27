@@ -30,22 +30,22 @@ TARGET_LINK_LIBRARIES(nemomine
 	)
 
 set(ICON_FILES
-	${CMAKE_CURRENT_SOURCE_DIR}/icons/Mine-0.svg
-	${CMAKE_CURRENT_SOURCE_DIR}/icons/Mine-1.svg
-	${CMAKE_CURRENT_SOURCE_DIR}/icons/Mine-2.svg
-	${CMAKE_CURRENT_SOURCE_DIR}/icons/Mine-3.svg
-	${CMAKE_CURRENT_SOURCE_DIR}/icons/Mine-4.svg
-	${CMAKE_CURRENT_SOURCE_DIR}/icons/Mine-5.svg
-	${CMAKE_CURRENT_SOURCE_DIR}/icons/Mine-6.svg
-	${CMAKE_CURRENT_SOURCE_DIR}/icons/Mine-7.svg
-	${CMAKE_CURRENT_SOURCE_DIR}/icons/Mine-8.svg
-	${CMAKE_CURRENT_SOURCE_DIR}/icons/Mine-9.svg
-	${CMAKE_CURRENT_SOURCE_DIR}/icons/Mine-bomb.svg
-	${CMAKE_CURRENT_SOURCE_DIR}/icons/Mine-finder.svg
-	${CMAKE_CURRENT_SOURCE_DIR}/icons/Mine-help.svg
-	${CMAKE_CURRENT_SOURCE_DIR}/icons/Mine-pin.svg
-	${CMAKE_CURRENT_SOURCE_DIR}/icons/Mine-quit.svg
-	${CMAKE_CURRENT_SOURCE_DIR}/icons/Mine-square.svg
+	${CMAKE_CURRENT_SOURCE_DIR}/icons/mine-0.svg
+	${CMAKE_CURRENT_SOURCE_DIR}/icons/mine-1.svg
+	${CMAKE_CURRENT_SOURCE_DIR}/icons/mine-2.svg
+	${CMAKE_CURRENT_SOURCE_DIR}/icons/mine-3.svg
+	${CMAKE_CURRENT_SOURCE_DIR}/icons/mine-4.svg
+	${CMAKE_CURRENT_SOURCE_DIR}/icons/mine-5.svg
+	${CMAKE_CURRENT_SOURCE_DIR}/icons/mine-6.svg
+	${CMAKE_CURRENT_SOURCE_DIR}/icons/mine-7.svg
+	${CMAKE_CURRENT_SOURCE_DIR}/icons/mine-8.svg
+	${CMAKE_CURRENT_SOURCE_DIR}/icons/mine-9.svg
+	${CMAKE_CURRENT_SOURCE_DIR}/icons/mine-bomb.svg
+	${CMAKE_CURRENT_SOURCE_DIR}/icons/mine-finder.svg
+	${CMAKE_CURRENT_SOURCE_DIR}/icons/mine-help.svg
+	${CMAKE_CURRENT_SOURCE_DIR}/icons/mine-pin.svg
+	${CMAKE_CURRENT_SOURCE_DIR}/icons/mine-quit.svg
+	${CMAKE_CURRENT_SOURCE_DIR}/icons/mine-square.svg
 	)
 
 INSTALL(TARGETS nemomine DESTINATION bin)

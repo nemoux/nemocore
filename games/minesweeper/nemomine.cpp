@@ -644,7 +644,7 @@ int main(int argc, char *argv[])
 	nemoshow_filter_set_blur(blur, "high", "solid", 5.0f);
 
 	for (i = 0; i < 10; i++) {
-		snprintf(name, sizeof(name), NEMOUX_MINESWEEPER_ICONS "/Mine-%d.svg", i);
+		snprintf(name, sizeof(name), NEMOUX_MINESWEEPER_ICONS "/mine-%d.svg", i);
 
 		context->numbers[i] = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
 		nemoshow_attach_one(show, one);
@@ -661,7 +661,7 @@ int main(int argc, char *argv[])
 	nemoshow_item_set_y(one, 2.0f);
 	nemoshow_item_set_width(one, size - 4.0f);
 	nemoshow_item_set_height(one, size - 4.0f);
-	nemoshow_item_load_svg(one, NEMOUX_MINESWEEPER_ICONS "/Mine-bomb.svg");
+	nemoshow_item_load_svg(one, NEMOUX_MINESWEEPER_ICONS "/mine-bomb.svg");
 
 	context->flag = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
 	nemoshow_attach_one(show, one);
@@ -669,7 +669,7 @@ int main(int argc, char *argv[])
 	nemoshow_item_set_y(one, 2.0f);
 	nemoshow_item_set_width(one, size - 4.0f);
 	nemoshow_item_set_height(one, size - 4.0f);
-	nemoshow_item_load_svg(one, NEMOUX_MINESWEEPER_ICONS "/Mine-finder.svg");
+	nemoshow_item_load_svg(one, NEMOUX_MINESWEEPER_ICONS "/mine-finder.svg");
 
 	context->pin = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
 	nemoshow_attach_one(show, one);
@@ -685,7 +685,7 @@ int main(int argc, char *argv[])
 	nemoshow_item_pivot(one, size / 2.0f, size / 2.0f);
 	nemoshow_item_translate(one, (context->columns - 1) * context->size, 0.0f);
 	nemoshow_item_rotate(one, 45.0f);
-	nemoshow_item_load_svg(one, NEMOUX_MINESWEEPER_ICONS "/Mine-pin.svg");
+	nemoshow_item_load_svg(one, NEMOUX_MINESWEEPER_ICONS "/mine-pin.svg");
 
 	context->reset = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
 	nemoshow_attach_one(show, one);
@@ -699,7 +699,7 @@ int main(int argc, char *argv[])
 	nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
 	nemoshow_item_set_tsr(one);
 	nemoshow_item_translate(one, (context->columns / 2) * context->size, 0.0f);
-	nemoshow_item_load_svg(one, NEMOUX_MINESWEEPER_ICONS "/Mine-bomb.svg");
+	nemoshow_item_load_svg(one, NEMOUX_MINESWEEPER_ICONS "/mine-bomb.svg");
 
 	context->font = font = nemoshow_font_create();
 	nemoshow_attach_one(show, font);
