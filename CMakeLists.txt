@@ -227,7 +227,7 @@ add_subdirectory(compz)
 add_subdirectory(shell)
 add_subdirectory(sound)
 add_subdirectory(apps)
-add_subdirectory(games)
+add_subdirectory(games/minesweeper)
 add_subdirectory(backs)
 
 add_subdirectory(thirds/poly2tri)
