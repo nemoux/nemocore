@@ -548,6 +548,7 @@ int main(int argc, char *argv[])
 	nemocanvas_set_layer(NTEGL_CANVAS(canvas), NEMO_SURFACE_LAYER_TYPE_BACKGROUND);
 	nemocanvas_set_dispatch_frame(NTEGL_CANVAS(canvas), moteback_dispatch_canvas_frame);
 	nemocanvas_set_scale(NTEGL_CANVAS(canvas), sx, sy);
+	nemocanvas_unset_sound(NTEGL_CANVAS(canvas));
 
 	mote->canvas = NTEGL_CANVAS(canvas);
 

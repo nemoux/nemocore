@@ -454,6 +454,16 @@ void nemocanvas_unset_fullscreen(struct nemocanvas *canvas)
 	nemo_surface_unset_fullscreen(canvas->nemo_surface);
 }
 
+void nemocanvas_set_sound(struct nemocanvas *canvas)
+{
+	nemo_surface_set_sound(canvas->nemo_surface);
+}
+
+void nemocanvas_unset_sound(struct nemocanvas *canvas)
+{
+	nemo_surface_unset_sound(canvas->nemo_surface);
+}
+
 void nemocanvas_set_nemosurface(struct nemocanvas *canvas, uint32_t type)
 {
 	struct nemo_shell *shell = canvas->tool->shell;

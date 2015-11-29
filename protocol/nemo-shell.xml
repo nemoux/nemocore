@@ -148,6 +148,12 @@
 		<request name="unset_fullscreen">
 		</request>
 
+		<request name="set_sound">
+		</request>
+
+		<request name="unset_sound">
+		</request>
+
 		<event name="configure">
 			<arg name="width" type="int"/>
 			<arg name="height" type="int"/>

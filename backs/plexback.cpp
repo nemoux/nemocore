@@ -302,6 +302,7 @@ int main(int argc, char *argv[])
 	nemocanvas_set_nemosurface(NTEGL_CANVAS(canvas), NEMO_SHELL_SURFACE_TYPE_NORMAL);
 	nemocanvas_set_layer(NTEGL_CANVAS(canvas), NEMO_SURFACE_LAYER_TYPE_BACKGROUND);
 	nemocanvas_set_dispatch_frame(NTEGL_CANVAS(canvas), plexback_dispatch_canvas_frame);
+	nemocanvas_unset_sound(NTEGL_CANVAS(canvas));
 
 	plex->canvas = NTEGL_CANVAS(canvas);
 

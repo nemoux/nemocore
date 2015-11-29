@@ -279,6 +279,7 @@ int main(int argc, char *argv[])
 	nemocanvas_set_input_type(NTEGL_CANVAS(canvas), NEMO_SURFACE_INPUT_TYPE_TOUCH);
 	nemocanvas_set_layer(NTEGL_CANVAS(canvas), NEMO_SURFACE_LAYER_TYPE_BACKGROUND);
 	nemocanvas_set_dispatch_resize(NTEGL_CANVAS(canvas), miniback_dispatch_canvas_resize);
+	nemocanvas_unset_sound(NTEGL_CANVAS(canvas));
 
 	mini->canvas = NTEGL_CANVAS(canvas);
 
