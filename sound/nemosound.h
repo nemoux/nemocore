@@ -23,11 +23,14 @@ typedef enum {
 	NEMOSOUND_SET_MUTE_SINK_COMMAND = 4,
 	NEMOSOUND_SET_VOLUME_COMMAND = 5,
 	NEMOSOUND_SET_VOLUME_SINK_COMMAND = 6,
+	NEMOSOUND_GET_INFO_COMMAND = 7,
+	NEMOSOUND_GET_INFO_SINK_COMMAND = 8,
 	NEMOSOUND_LAST_COMMAND
 } NemoSoundCommand;
 
 struct soundcmd {
 	int type;
+	struct nemosound *sound;
 	struct soundone *one;
 
 	uint32_t sink;
@@ -93,7 +96,7 @@ extern struct soundsink *nemosound_create_sink(struct nemosound *sound, uint32_t
 extern void nemosound_destroy_sink(struct soundsink *sink);
 extern struct soundsink *nemosound_get_sink(struct nemosound *sound, uint32_t id);
 
-extern struct soundcmd *nemosound_create_command(struct soundone *one, int type);
+extern struct soundcmd *nemosound_create_command(struct nemosound *sound, struct soundone *one, int type);
 extern void nemosound_destroy_command(struct soundcmd *cmd);
 
 #endif

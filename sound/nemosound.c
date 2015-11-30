@@ -16,11 +16,7 @@
 #include <nemolog.h>
 #include <nemomisc.h>
 
-static void nemosound_dispatch_simple_callback(pa_context *context, int success, void *userdata)
-{
-}
-
-static void nemosound_dispatch_client_info_callback(pa_context *context, const pa_client_info *info, int is_last, void *userdata)
+static void nemosound_dispatch_get_client_info_list(pa_context *context, const pa_client_info *info, int is_last, void *userdata)
 {
 	struct nemosound *sound = (struct nemosound *)userdata;
 
@@ -41,10 +37,9 @@ static void nemosound_dispatch_client_info_callback(pa_context *context, const p
 			pa_proplist_gets(info->proplist, PA_PROP_APPLICATION_PROCESS_ID));
 }
 
-static void nemosound_dispatch_sink_info_callback(pa_context *context, const pa_sink_info *info, int is_last, void *userdata)
+static void nemosound_dispatch_get_sink_info_list(pa_context *context, const pa_sink_info *info, int is_last, void *userdata)
 {
 	struct nemosound *sound = (struct nemosound *)userdata;
-	uint32_t volume;
 
 	if (is_last < 0) {
 		nemolog_error("SOUND", "failed to get sink information: %s\n", pa_strerror(pa_context_errno(context)));
@@ -54,77 +49,50 @@ static void nemosound_dispatch_sink_info_callback(pa_context *context, const pa_
 	if (is_last != 0)
 		return;
 
-	volume = ((double)info->volume.values[0] / (double)PA_VOLUME_NORM) * 100.0f;
-
-	nemolog_message("SOUND", "SINK #%u: name(%s) description(%s) volume(%u) mute(%d)\n",
+	nemolog_message("SOUND", "SINK #%u: name(%s) description(%s)\n",
 			info->index,
 			info->name,
-			pa_proplist_gets(info->proplist, PA_PROP_DEVICE_DESCRIPTION),
-			volume,
-			info->mute);
+			pa_proplist_gets(info->proplist, PA_PROP_DEVICE_DESCRIPTION));
 
 	if (strcmp(info->name, "nullsink") != 0)
-		nemo_sound_manager_register_sink(sound->manager, info->index, info->name, pa_proplist_gets(info->proplist, PA_PROP_DEVICE_DESCRIPTION), volume, info->mute);
+		nemo_sound_manager_register_sink(sound->manager, info->index, info->name, pa_proplist_gets(info->proplist, PA_PROP_DEVICE_DESCRIPTION));
 }
 
-static void nemosound_dispatch_sink_input_info_callback(pa_context *context, const pa_sink_input_info *info, int is_last, void *userdata)
+static void nemosound_dispatch_state_callback(pa_context *context, void *userdata)
 {
 	struct nemosound *sound = (struct nemosound *)userdata;
-	struct soundone *one;
-	const char *spid;
-	uint32_t pid;
-	uint32_t volume;
-	int done = 0;
+	pa_operation *op;
 
-	if (is_last < 0) {
-		nemolog_error("SOUND", "failed to get sink input information: %s\n", pa_strerror(pa_context_errno(context)));
-		return;
-	}
-
-	if (is_last != 0) {
-		nemolist_for_each(one, &sound->list, link) {
-			if (one->has_sinkinput == 0) {
-				nemotimer_set_timeout(sound->timer, NEMOSOUND_SINKINPUT_TIMEOUT);
-
-				break;
-			}
-		}
-
-		return;
-	}
-
-	volume = ((double)info->volume.values[0] / (double)PA_VOLUME_NORM) * 100.0f;
-
-	nemolog_message("SOUND", "SINK-INPUT #%u: name(%s) pid(%s) volume(%u) mute(%d)\n",
-			info->index,
-			pa_proplist_gets(info->proplist, PA_PROP_APPLICATION_NAME),
-			pa_proplist_gets(info->proplist, PA_PROP_APPLICATION_PROCESS_ID),
-			volume,
-			info->mute);
-
-	nemo_sound_manager_register_sinkinput(sound->manager, info->index, volume, info->mute);
-
-	spid = pa_proplist_gets(info->proplist, PA_PROP_APPLICATION_PROCESS_ID);
-	pid = strtoul(spid, NULL, 10);
-
-	nemolist_for_each(one, &sound->list, link) {
-		if (one->pid == pid || one->ppid == pid) {
-			one->sinkinput = info->index;
-			one->has_sinkinput = 1;
-
-			nemosound_flush_command(one->sound, one);
-
-			done = 1;
-
+	switch (pa_context_get_state(context)) {
+		case PA_CONTEXT_CONNECTING:
+		case PA_CONTEXT_AUTHORIZING:
+		case PA_CONTEXT_SETTING_NAME:
 			break;
-		}
-	}
 
-	if (done == 0)
-		nemotimer_set_timeout(sound->timer, NEMOSOUND_SINKINPUT_TIMEOUT);
+		case PA_CONTEXT_READY:
+			op = pa_context_get_client_info_list(context, nemosound_dispatch_get_client_info_list, sound);
+			if (op != NULL)
+				pa_operation_unref(op);
+			op = pa_context_get_sink_info_list(context, nemosound_dispatch_get_sink_info_list, sound);
+			if (op != NULL)
+				pa_operation_unref(op);
+			break;
+
+		case PA_CONTEXT_TERMINATED:
+			sound->mainapi->quit(sound->mainapi, 0);
+			break;
+
+		case PA_CONTEXT_FAILED:
+		default:
+			break;
+	}
 }
 
-static void nemosound_dispatch_move_sink_callback(pa_context *context, int success, void *userdata)
+static void nemosound_dispatch_simple_callback(pa_context *context, int success, void *userdata)
+{
+}
+
+static void nemosound_dispatch_set_sink_callback(pa_context *context, int success, void *userdata)
 {
 	struct soundone *one = (struct soundone *)userdata;
 
@@ -162,7 +130,62 @@ static void nemosound_dispatch_set_sink_input_volume_callback(pa_context *contex
 	nemolog_message("SOUND", "SET-VOLUME #%u: success(%d)\n", one->sinkinput, success);
 }
 
-static void nemosound_dispatch_sink_input_volume_callback(pa_context *context, const pa_sink_input_info *info, int is_last, void *userdata)
+static void nemosound_dispatch_set_sink_volume_callback(pa_context *context, int success, void *userdata)
+{
+	nemolog_message("SOUND", "SET-VOLUME-SINK : success(%d)\n", success);
+}
+
+static void nemosound_dispatch_get_sink_input_info_list(pa_context *context, const pa_sink_input_info *info, int is_last, void *userdata)
+{
+	struct nemosound *sound = (struct nemosound *)userdata;
+	struct soundone *one;
+	const char *spid;
+	uint32_t pid;
+	int done = 0;
+
+	if (is_last < 0) {
+		nemolog_error("SOUND", "failed to get sink input information: %s\n", pa_strerror(pa_context_errno(context)));
+		return;
+	}
+
+	if (is_last != 0) {
+		nemolist_for_each(one, &sound->list, link) {
+			if (one->has_sinkinput == 0) {
+				nemotimer_set_timeout(sound->timer, NEMOSOUND_SINKINPUT_TIMEOUT);
+
+				break;
+			}
+		}
+
+		return;
+	}
+
+	nemolog_message("SOUND", "SINK-INPUT #%u: name(%s) pid(%s)\n",
+			info->index,
+			pa_proplist_gets(info->proplist, PA_PROP_APPLICATION_NAME),
+			pa_proplist_gets(info->proplist, PA_PROP_APPLICATION_PROCESS_ID));
+
+	spid = pa_proplist_gets(info->proplist, PA_PROP_APPLICATION_PROCESS_ID);
+	pid = strtoul(spid, NULL, 10);
+
+	nemolist_for_each(one, &sound->list, link) {
+		if (one->pid == pid || one->ppid == pid) {
+			one->sinkinput = info->index;
+			one->has_sinkinput = 1;
+
+			nemosound_flush_command(one->sound, one);
+
+			done = 1;
+
+			break;
+		}
+	}
+
+	if (done == 0)
+		nemotimer_set_timeout(sound->timer, NEMOSOUND_SINKINPUT_TIMEOUT);
+}
+
+static void nemosound_dispatch_set_sink_input_volume(pa_context *context, const pa_sink_input_info *info, int is_last, void *userdata)
 {
 	struct soundone *one = (struct soundone *)userdata;
 	pa_operation *op;
@@ -183,12 +206,7 @@ static void nemosound_dispatch_sink_input_volume_callback(pa_context *context, c
 		pa_operation_unref(op);
 }
 
-static void nemosound_dispatch_set_sink_volume_callback(pa_context *context, int success, void *userdata)
-{
-	nemolog_message("SOUND", "SET-VOLUME-SINK : success(%d)\n", success);
-}
-
-static void nemosound_dispatch_sink_volume_callback(pa_context *context, const pa_sink_info *info, int is_last, void *userdata)
+static void nemosound_dispatch_set_sink_volume(pa_context *context, const pa_sink_info *info, int is_last, void *userdata)
 {
 	struct soundcmd *cmd = (struct soundcmd *)userdata;
 	pa_operation *op;
@@ -211,34 +229,44 @@ static void nemosound_dispatch_sink_volume_callback(pa_context *context, const p
 	nemosound_destroy_command(cmd);
 }
 
-static void nemosound_dispatch_state_callback(pa_context *context, void *userdata)
+static void nemosound_dispatch_get_sink_input_info(pa_context *context, const pa_sink_input_info *info, int is_last, void *userdata)
 {
-	struct nemosound *sound = (struct nemosound *)userdata;
-	pa_operation *op;
+	struct soundone *one = (struct soundone *)userdata;
+	struct nemosound *sound = one->sound;
+	uint32_t volume;
 
-	switch (pa_context_get_state(context)) {
-		case PA_CONTEXT_CONNECTING:
-		case PA_CONTEXT_AUTHORIZING:
-		case PA_CONTEXT_SETTING_NAME:
-			break;
-
-		case PA_CONTEXT_READY:
-			op = pa_context_get_client_info_list(context, nemosound_dispatch_client_info_callback, sound);
-			if (op != NULL)
-				pa_operation_unref(op);
-			op = pa_context_get_sink_info_list(context, nemosound_dispatch_sink_info_callback, sound);
-			if (op != NULL)
-				pa_operation_unref(op);
-			break;
-
-		case PA_CONTEXT_TERMINATED:
-			sound->mainapi->quit(sound->mainapi, 0);
-			break;
-
-		case PA_CONTEXT_FAILED:
-		default:
-			break;
+	if (is_last < 0) {
+		nemolog_error("SOUND", "failed to get sink input volume: %s\n", pa_strerror(pa_context_errno(context)));
+		return;
 	}
+
+	if (is_last != 0)
+		return;
+
+	volume = ((double)info->volume.values[0] / (double)PA_VOLUME_NORM) * 100.0f;
+
+	nemo_sound_manager_synchronize_sinkinput(sound->manager, one->pid, volume, info->mute);
+}
+
+static void nemosound_dispatch_get_sink_info(pa_context *context, const pa_sink_info *info, int is_last, void *userdata)
+{
+	struct soundcmd *cmd = (struct soundcmd *)userdata;
+	struct nemosound *sound = cmd->sound;
+	uint32_t volume;
+
+	if (is_last < 0) {
+		nemolog_error("SOUND", "failed to get sink input volume: %s\n", pa_strerror(pa_context_errno(context)));
+		return;
+	}
+
+	if (is_last != 0)
+		return;
+
+	volume = ((double)info->volume.values[0] / (double)PA_VOLUME_NORM) * 100.0f;
+
+	nemo_sound_manager_synchronize_sink(sound->manager, cmd->sink, volume, info->mute);
+
+	nemosound_destroy_command(cmd);
 }
 
 static void nemo_sound_manager_set_sink(void *data, struct nemo_sound_manager *manager, uint32_t pid, uint32_t sink)
@@ -251,7 +279,7 @@ static void nemo_sound_manager_set_sink(void *data, struct nemo_sound_manager *m
 	if (one == NULL)
 		one = nemosound_create_one(sound, pid);
 
-	cmd = nemosound_create_command(one, NEMOSOUND_SET_SINK_COMMAND);
+	cmd = nemosound_create_command(sound, one, NEMOSOUND_SET_SINK_COMMAND);
 	if (cmd == NULL)
 		return;
 	cmd->sink = sink;
@@ -259,7 +287,7 @@ static void nemo_sound_manager_set_sink(void *data, struct nemo_sound_manager *m
 	if (one->has_sinkinput == 0) {
 		pa_operation *op;
 
-		op = pa_context_get_sink_input_info_list(sound->context, nemosound_dispatch_sink_input_info_callback, sound);
+		op = pa_context_get_sink_input_info_list(sound->context, nemosound_dispatch_get_sink_input_info_list, sound);
 		if (op != NULL)
 			pa_operation_unref(op);
 
@@ -279,14 +307,14 @@ static void nemo_sound_manager_put_sink(void *data, struct nemo_sound_manager *m
 	if (one == NULL)
 		one = nemosound_create_one(sound, pid);
 
-	cmd = nemosound_create_command(one, NEMOSOUND_PUT_SINK_COMMAND);
+	cmd = nemosound_create_command(sound, one, NEMOSOUND_PUT_SINK_COMMAND);
 	if (cmd == NULL)
 		return;
 
 	if (one->has_sinkinput == 0) {
 		pa_operation *op;
 
-		op = pa_context_get_sink_input_info_list(sound->context, nemosound_dispatch_sink_input_info_callback, sound);
+		op = pa_context_get_sink_input_info_list(sound->context, nemosound_dispatch_get_sink_input_info_list, sound);
 		if (op != NULL)
 			pa_operation_unref(op);
 
@@ -306,7 +334,7 @@ static void nemo_sound_manager_set_mute(void *data, struct nemo_sound_manager *m
 	if (one == NULL)
 		one = nemosound_create_one(sound, pid);
 
-	cmd = nemosound_create_command(one, NEMOSOUND_SET_MUTE_COMMAND);
+	cmd = nemosound_create_command(sound, one, NEMOSOUND_SET_MUTE_COMMAND);
 	if (cmd == NULL)
 		return;
 	cmd->mute = mute;
@@ -314,7 +342,7 @@ static void nemo_sound_manager_set_mute(void *data, struct nemo_sound_manager *m
 	if (one->has_sinkinput == 0) {
 		pa_operation *op;
 
-		op = pa_context_get_sink_input_info_list(sound->context, nemosound_dispatch_sink_input_info_callback, sound);
+		op = pa_context_get_sink_input_info_list(sound->context, nemosound_dispatch_get_sink_input_info_list, sound);
 		if (op != NULL)
 			pa_operation_unref(op);
 
@@ -344,7 +372,7 @@ static void nemo_sound_manager_set_volume(void *data, struct nemo_sound_manager 
 	if (one == NULL)
 		one = nemosound_create_one(sound, pid);
 
-	cmd = nemosound_create_command(one, NEMOSOUND_SET_VOLUME_COMMAND);
+	cmd = nemosound_create_command(sound, one, NEMOSOUND_SET_VOLUME_COMMAND);
 	if (cmd == NULL)
 		return;
 	cmd->volume = volume;
@@ -352,7 +380,7 @@ static void nemo_sound_manager_set_volume(void *data, struct nemo_sound_manager 
 	if (one->has_sinkinput == 0) {
 		pa_operation *op;
 
-		op = pa_context_get_sink_input_info_list(sound->context, nemosound_dispatch_sink_input_info_callback, sound);
+		op = pa_context_get_sink_input_info_list(sound->context, nemosound_dispatch_get_sink_input_info_list, sound);
 		if (op != NULL)
 			pa_operation_unref(op);
 
@@ -368,13 +396,56 @@ static void nemo_sound_manager_set_volume_sink(void *data, struct nemo_sound_man
 	struct soundcmd *cmd;
 	pa_operation *op;
 
-	cmd = nemosound_create_command(NULL, NEMOSOUND_SET_VOLUME_SINK_COMMAND);
+	cmd = nemosound_create_command(sound, NULL, NEMOSOUND_SET_VOLUME_SINK_COMMAND);
 	if (cmd == NULL)
 		return;
 	cmd->sink = sink;
 	cmd->volume = volume;
 
-	op = pa_context_get_sink_info_by_index(sound->context, sink, nemosound_dispatch_sink_volume_callback, cmd);
+	op = pa_context_get_sink_info_by_index(sound->context, sink, nemosound_dispatch_set_sink_volume, cmd);
+	if (op != NULL)
+		pa_operation_unref(op);
+}
+
+static void nemo_sound_manager_get_info(void *data, struct nemo_sound_manager *manager, uint32_t pid)
+{
+	struct nemosound *sound = (struct nemosound *)data;
+	struct soundone *one;
+	struct soundcmd *cmd;
+
+	one = nemosound_get_one(sound, pid);
+	if (one == NULL)
+		one = nemosound_create_one(sound, pid);
+
+	cmd = nemosound_create_command(sound, one, NEMOSOUND_GET_INFO_COMMAND);
+	if (cmd == NULL)
+		return;
+
+	if (one->has_sinkinput == 0) {
+		pa_operation *op;
+
+		op = pa_context_get_sink_input_info_list(sound->context, nemosound_dispatch_get_sink_input_info_list, sound);
+		if (op != NULL)
+			pa_operation_unref(op);
+
+		return;
+	}
+
+	nemosound_flush_command(sound, one);
+}
+
+static void nemo_sound_manager_get_info_sink(void *data, struct nemo_sound_manager *manager, uint32_t sink)
+{
+	struct nemosound *sound = (struct nemosound *)data;
+	struct soundcmd *cmd;
+	pa_operation *op;
+
+	cmd = nemosound_create_command(sound, NULL, NEMOSOUND_GET_INFO_SINK_COMMAND);
+	if (cmd == NULL)
+		return;
+	cmd->sink = sink;
+
+	op = pa_context_get_sink_info_by_index(sound->context, sink, nemosound_dispatch_get_sink_info, cmd);
 	if (op != NULL)
 		pa_operation_unref(op);
 }
@@ -385,7 +456,9 @@ static struct nemo_sound_manager_listener nemo_sound_manager_listener = {
 	nemo_sound_manager_set_mute,
 	nemo_sound_manager_set_mute_sink,
 	nemo_sound_manager_set_volume,
-	nemo_sound_manager_set_volume_sink
+	nemo_sound_manager_set_volume_sink,
+	nemo_sound_manager_get_info,
+	nemo_sound_manager_get_info_sink,
 };
 
 static void nemosound_dispatch_global(struct nemotool *tool, uint32_t id, const char *interface, uint32_t version)
@@ -403,7 +476,7 @@ static void nemosound_dispatch_timer(struct nemotimer *timer, void *data)
 	struct nemosound *sound = (struct nemosound *)data;
 	pa_operation *op;
 
-	op = pa_context_get_sink_input_info_list(sound->context, nemosound_dispatch_sink_input_info_callback, sound);
+	op = pa_context_get_sink_input_info_list(sound->context, nemosound_dispatch_get_sink_input_info_list, sound);
 	if (op != NULL)
 		pa_operation_unref(op);
 }
@@ -549,7 +622,7 @@ void nemosound_flush_command(struct nemosound *sound, struct soundone *one)
 		pa_operation *op = NULL;
 
 		if (cmd->type == NEMOSOUND_SET_SINK_COMMAND) {
-			op = pa_context_move_sink_input_by_index(sound->context, one->sinkinput, cmd->sink, nemosound_dispatch_move_sink_callback, one);
+			op = pa_context_move_sink_input_by_index(sound->context, one->sinkinput, cmd->sink, nemosound_dispatch_set_sink_callback, one);
 
 			one->next_sink = cmd->sink;
 		} else if (cmd->type == NEMOSOUND_PUT_SINK_COMMAND) {
@@ -557,9 +630,10 @@ void nemosound_flush_command(struct nemosound *sound, struct soundone *one)
 		} else if (cmd->type == NEMOSOUND_SET_MUTE_COMMAND) {
 			op = pa_context_set_sink_input_mute(sound->context, one->sinkinput, cmd->mute, nemosound_dispatch_set_sink_input_mute_callback, one);
 		} else if (cmd->type == NEMOSOUND_SET_VOLUME_COMMAND) {
-			op = pa_context_get_sink_input_info(sound->context, one->sinkinput, nemosound_dispatch_sink_input_volume_callback, one);
-
+			op = pa_context_get_sink_input_info(sound->context, one->sinkinput, nemosound_dispatch_set_sink_input_volume, one);
 			one->next_volume = cmd->volume;
+		} else if (cmd->type == NEMOSOUND_GET_INFO_COMMAND) {
+			op = pa_context_get_sink_input_info(sound->context, one->sinkinput, nemosound_dispatch_get_sink_input_info, one);
 		}
 
 		if (op != NULL)
@@ -605,7 +679,7 @@ struct soundsink *nemosound_get_sink(struct nemosound *sound, uint32_t id)
 	return NULL;
 }
 
-struct soundcmd *nemosound_create_command(struct soundone *one, int type)
+struct soundcmd *nemosound_create_command(struct nemosound *sound, struct soundone *one, int type)
 {
 	struct soundcmd *cmd;
 
@@ -615,6 +689,7 @@ struct soundcmd *nemosound_create_command(struct soundone *one, int type)
 	memset(cmd, 0, sizeof(struct soundcmd));
 
 	cmd->type = type;
+	cmd->sound = sound;
 	cmd->one = one;
 
 	if (one != NULL)
