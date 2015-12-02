@@ -122,7 +122,7 @@ if(WITH_GRILO)
 endif(WITH_GRILO)
 
 add_executable(nemoimage
-	nemoimage.c
+	nemoimage.cpp
 	)
 
 TARGET_LINK_LIBRARIES(nemoimage

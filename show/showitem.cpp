@@ -1388,3 +1388,15 @@ int nemoshow_item_copy_buffer(struct showone *one, char *buffer, uint32_t width,
 
 	return 0;
 }
+
+int nemoshow_item_set_bitmap(struct showone *one, SkBitmap *bitmap)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	if (NEMOSHOW_ITEM_CC(item, bitmap) != NULL)
+		delete NEMOSHOW_ITEM_CC(item, bitmap);
+
+	NEMOSHOW_ITEM_CC(item, bitmap) = bitmap;
+
+	return 0;
+}
