@@ -110,12 +110,12 @@ int main(int argc, char *argv[])
 	height = bitmap->height();
 
 	if (width > NEMOIMAGE_SIZE_MAX) {
+		height = height * ((double)NEMOIMAGE_SIZE_MAX / (double)width);
 		width = NEMOIMAGE_SIZE_MAX;
-		height = NEMOIMAGE_SIZE_MAX * ((double)height / (double)width);
 	}
 	if (height > NEMOIMAGE_SIZE_MAX) {
+		width = width * ((double)NEMOIMAGE_SIZE_MAX / (double)height);
 		height = NEMOIMAGE_SIZE_MAX;
-		width = NEMOIMAGE_SIZE_MAX * ((double)width / (double)height);
 	}
 
 	context->show = show = nemoshow_create_on_tale(tool, width, height, nemoimage_dispatch_tale_event);
