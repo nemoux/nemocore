@@ -17,12 +17,43 @@ include_directories(
 	${CMAKE_SOURCE_DIR}/tool
 	${CMAKE_BINARY_DIR}/tool
 	${CMAKE_SOURCE_DIR}/tale
+	${CMAKE_SOURCE_DIR}/show
 	${CMAKE_SOURCE_DIR}/thirds
 	)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -std=c++11")
 set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
+
+add_library(nemoapps SHARED
+	talehelper.c
+	showhelper.c
+	)
+
+TARGET_LINK_LIBRARIES(nemoapps
+	nemoasst
+	nemotool
+	nemotale
+	nemoshow
+	)
+
+set(NEMOAPPS_PKGCONFIG_REQUIRED "nemoasst nemotool nemotale nemoshow")
+
+INSTALL(TARGETS nemoapps DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
+
+set(HEADER_FILES
+	talehelper.h
+	showhelper.h
+	)
+
+configure_file(
+	nemoapps.pc.in
+	nemoapps.pc
+	@ONLY
+	)
+
+INSTALL(FILES ${HEADER_FILES} DESTINATION include/nemoapps)
+INSTALL(FILES ${CMAKE_BINARY_DIR}/apps/nemoapps.pc DESTINATION lib${CMAKE_LIBRARY_SUFFIX}/pkgconfig)
 
 add_executable(nemolog
 	nemolog.c
@@ -36,13 +67,10 @@ INSTALL(TARGETS nemolog DESTINATION bin)
 
 add_executable(nemotouch
 	nemotouch.cpp
-	talehelper.c
 	)
 
 TARGET_LINK_LIBRARIES(nemotouch
-	nemoasst
-	nemotool
-	nemotale
+	nemoapps
 	${NEMOUX_COMMON_LIBRARIES}
 	${SKIA_LIBRARIES}
 	)
@@ -95,12 +123,10 @@ endif(WITH_GRILO)
 
 add_executable(nemoimage
 	nemoimage.c
-	talehelper.c
 	)
 
 TARGET_LINK_LIBRARIES(nemoimage
-	nemotool
-	nemotale
+	nemoapps
 	)
 
 INSTALL(TARGETS nemoimage DESTINATION bin)
@@ -108,13 +134,11 @@ INSTALL(TARGETS nemoimage DESTINATION bin)
 add_executable(nemomesh
 	nemomesh.cpp
 	meshhelper.cpp
-	talehelper.c
 	${CMAKE_SOURCE_DIR}/thirds/tiny_obj_loader.cc
 	)
 
 TARGET_LINK_LIBRARIES(nemomesh
-	nemotool
-	nemotale
+	nemoapps
 	)
 
 INSTALL(TARGETS nemomesh DESTINATION bin)
@@ -123,7 +147,6 @@ if(WITH_MUPDF)
 	add_executable(nemopdf
 		nemopdf.c
 		pdfhelper.c
-		talehelper.c
 		)
 
 	TARGET_LINK_LIBRARIES(nemopdf
@@ -135,8 +158,7 @@ if(WITH_MUPDF)
 		freetype
 		crypto
 		z
-		nemotool
-		nemotale
+		nemoapps
 		)
 
 	INSTALL(TARGETS nemopdf DESTINATION bin)
@@ -158,12 +180,10 @@ if(WITH_GSTREAMER AND WITH_PULSEAUDIO)
 	add_executable(nemoplay
 		nemoplay.c
 		gsthelper.c
-		talehelper.c
 		)
 
 	TARGET_LINK_LIBRARIES(nemoplay
-		nemotool
-		nemotale
+		nemoapps
 		${GLIB_LIBRARIES}
 		${GST_LIBRARIES}
 		${GSTPBUTILS_LIBRARIES}

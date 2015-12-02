@@ -7,6 +7,7 @@ LINK_DIRECTORIES(${SKIA_LIBRARY_DIRS})
 include_directories(
 	${CMAKE_SOURCE_DIR}/tool
 	${CMAKE_BINARY_DIR}/tool
+	${CMAKE_SOURCE_DIR}/apps
 	${CMAKE_SOURCE_DIR}/tale
 	${CMAKE_SOURCE_DIR}/show
 	)
@@ -19,14 +20,10 @@ add_definitions(-DNEMOUX_MINESWEEPER_RESOURCES="${CMAKE_INSTALL_PREFIX}/share/ne
 
 add_executable(nemomine
 	nemomine.cpp
-	showhelper.c
 	)
 
 TARGET_LINK_LIBRARIES(nemomine
-	nemoasst
-	nemotool
-	nemotale
-	nemoshow
+	nemoapps
 	)
 
 set(RESOURCE_FILES

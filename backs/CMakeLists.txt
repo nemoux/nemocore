@@ -23,12 +23,10 @@ include_directories(
 
 add_executable(nemoback-mini
 	miniback.c
-	talehelper.c
 	)
 
 TARGET_LINK_LIBRARIES(nemoback-mini
-	nemotale
-	nemotool
+	nemoapps
 	${NEMOUX_COMMON_LIBRARIES}
 	${SKIA_LIBRARIES}
 	)
@@ -37,12 +35,10 @@ INSTALL(TARGETS nemoback-mini DESTINATION bin)
 
 add_executable(nemoback-plex
 	plexback.cpp
-	talehelper.c
 	)
 
 TARGET_LINK_LIBRARIES(nemoback-plex
-	nemotool
-	nemotale
+	nemoapps
 	poly2tri
 	${NEMOUX_COMMON_LIBRARIES}
 	${SKIA_LIBRARIES}
@@ -52,12 +48,10 @@ INSTALL(TARGETS nemoback-plex DESTINATION bin)
 
 add_executable(nemoback-mote
 	moteback.cpp
-	talehelper.c
 	)
 
 TARGET_LINK_LIBRARIES(nemoback-mote
-	nemotool
-	nemotale
+	nemoapps
 	nemomote
 	${NEMOUX_COMMON_LIBRARIES}
 	${SKIA_LIBRARIES}
@@ -67,12 +61,10 @@ INSTALL(TARGETS nemoback-mote DESTINATION bin)
 
 add_executable(nemoback-mosi
 	mosiback.cpp
-	talehelper.c
 	)
 
 TARGET_LINK_LIBRARIES(nemoback-mosi
-	nemotool
-	nemotale
+	nemoapps
 	nemomosi
 	${NEMOUX_COMMON_LIBRARIES}
 	${SKIA_LIBRARIES}
