@@ -280,13 +280,18 @@ static void nemomesh_dispatch_tale_event(struct nemotale *tale, struct talenode 
 
 				if (nemotale_is_single_tap(tale, event, type)) {
 					nemocanvas_move(context->canvas, event->taps[0]->serial);
+				} else if (nemotale_is_double_taps(tale, event, type)) {
+					nemocanvas_pick(context->canvas,
+							event->taps[0]->serial,
+							event->taps[1]->serial,
+							(1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_SCALE) | (1 << NEMO_SURFACE_PICK_TYPE_MOVE));
 				} else if (nemotale_is_many_taps(tale, event, type)) {
 					nemotale_event_update_faraway_taps(tale, event);
 
 					nemocanvas_pick(context->canvas,
 							event->tap0->serial,
 							event->tap1->serial,
-							(1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_SCALE) | (1 << NEMO_SURFACE_PICK_TYPE_MOVE));
+							(1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_MOVE));
 
 					nemomesh_turn_on_guides(mesh);
 
