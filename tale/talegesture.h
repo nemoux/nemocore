@@ -55,6 +55,11 @@ static inline int nemotale_is_single_click(struct nemotale *tale, struct taleeve
 	return 0;
 }
 
+static inline int nemotale_is_no_tap(struct nemotale *tale, struct taleevent *event, uint32_t type)
+{
+	return event->tapcount == 0;
+}
+
 static inline int nemotale_is_single_tap(struct nemotale *tale, struct taleevent *event, uint32_t type)
 {
 	return event->tapcount == 1;
