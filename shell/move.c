@@ -219,10 +219,6 @@ static void move_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 	struct pitchfilter *filter = move->filter;
 	struct shellbin *bin = grab->bin;
 
-	if (tp->focus != NULL) {
-		nemocontent_touch_up(tp, tp->focus->content, time, touchid);
-	}
-
 	if (bin != NULL && bin->shell->is_logging_grab != 0)
 		nemolog_message("MOVE", "[UP] %llu: (%u)\n", touchid, time);
 
@@ -251,8 +247,13 @@ static void move_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 	}
 
 	pitchfilter_destroy(filter);
+
 	nemoshell_end_touchpoint_shellgrab(grab);
 	free(move);
+
+	if (tp->focus != NULL) {
+		nemocontent_touch_up(tp, tp->focus->content, time, touchid);
+	}
 }
 
 static void move_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint32_t time, uint64_t touchid, float x, float y)
@@ -487,10 +488,6 @@ static void move_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 	struct touchpoint *tp = base->touchpoint;
 	struct pitchfilter *filter = move->filter;
 
-	if (tp->focus != NULL) {
-		nemocontent_touch_up(tp, tp->focus->content, time, touchid);
-	}
-
 	pitchfilter_dispatch(filter, 0.0f, 0.0f, time);
 
 	if (grab->actor != NULL && pitchfilter_flush(filter) > 0) {
@@ -508,8 +505,13 @@ static void move_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 	}
 
 	pitchfilter_destroy(filter);
+
 	nemoshell_end_touchpoint_actorgrab(grab);
 	free(move);
+
+	if (tp->focus != NULL) {
+		nemocontent_touch_up(tp, tp->focus->content, time, touchid);
+	}
 }
 
 static void move_actorgrab_touchpoint_motion(struct touchpoint_grab *base, uint32_t time, uint64_t touchid, float x, float y)

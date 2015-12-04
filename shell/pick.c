@@ -124,14 +124,6 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		}
 	}
 
-	if (tp0->focus != NULL) {
-		nemocontent_touch_up(tp0, tp0->focus->content, time, tp0->gid);
-	}
-
-	touchpoint_set_focus(tp0, NULL);
-
-	touchpoint_update_grab(tp1);
-
 	bin->resize_edges = 0;
 	nemoshell_send_bin_configure(bin);
 
@@ -140,6 +132,14 @@ out:
 	nemoshell_end_touchpoint_shellgrab(&pick->other->base);
 	free(pick->other);
 	free(pick);
+
+	if (tp0->focus != NULL) {
+		nemocontent_touch_up(tp0, tp0->focus->content, time, tp0->gid);
+	}
+
+	touchpoint_set_focus(tp0, NULL);
+
+	touchpoint_update_grab(tp1);
 }
 
 static void pick_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint32_t time, uint64_t touchid, float x, float y)
@@ -339,8 +339,8 @@ int nemoshell_pick_canvas_by_touchpoint_on_area(struct nemoshell *shell, struct 
 		return -1;
 	memset(pick1, 0, sizeof(struct shellgrab_pick));
 
-	area0 = nemoview_get_point_area(bin->view, tp0->x, tp0->y, 0.3f);
-	area1 = nemoview_get_point_area(bin->view, tp1->x, tp1->y, 0.3f);
+	area0 = nemoview_get_point_area(bin->view, tp0->x, tp0->y, 0.35f);
+	area1 = nemoview_get_point_area(bin->view, tp1->x, tp1->y, 0.35f);
 
 	if (area0 == NEMO_VIEW_CENTER_AREA || area1 == NEMO_VIEW_CENTER_AREA) {
 		bin->resize_edges = 0;
@@ -550,14 +550,14 @@ static void pick_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 			nemoactor_dispatch_frame(actor);
 	}
 
-	if (tp->focus != NULL) {
-		nemocontent_touch_up(tp, tp->focus->content, time, touchid);
-	}
-
 	nemoshell_end_touchpoint_actorgrab(grab);
 	nemoshell_end_touchpoint_actorgrab(&pick->other->base);
 	free(pick->other);
 	free(pick);
+
+	if (tp->focus != NULL) {
+		nemocontent_touch_up(tp, tp->focus->content, time, touchid);
+	}
 }
 
 static void pick_actorgrab_touchpoint_motion(struct touchpoint_grab *base, uint32_t time, uint64_t touchid, float x, float y)
