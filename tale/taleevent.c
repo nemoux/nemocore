@@ -70,6 +70,12 @@ static void nemotale_destroy_tap(struct taletap *tap)
 	free(tap);
 }
 
+static void nemotale_remove_tap(struct taletap *tap)
+{
+	nemolist_remove(&tap->link);
+	nemolist_init(&tap->link);
+}
+
 void nemotale_push_pointer_enter_event(struct nemotale *tale, uint32_t serial, uint64_t device, float x, float y)
 {
 	struct taleevent event;
@@ -330,6 +336,8 @@ void nemotale_push_touch_up_event(struct nemotale *tale, uint32_t serial, uint64
 	event.serial = serial;
 	event.time = time;
 	event.tap = tap;
+
+	nemotale_remove_tap(tap);
 
 	tale->dispatch_event(tale, tap->node, NEMOTALE_TOUCH_UP_EVENT, &event);
 
