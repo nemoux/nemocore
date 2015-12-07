@@ -143,6 +143,7 @@ extern int nemoshow_item_load_svg(struct showone *one, const char *uri);
 extern int nemoshow_item_set_buffer(struct showone *one, char *buffer, uint32_t width, uint32_t height);
 extern void nemoshow_item_put_buffer(struct showone *one);
 extern int nemoshow_item_copy_buffer(struct showone *one, char *buffer, uint32_t width, uint32_t height);
+extern int nemoshow_item_fill_buffer(struct showone *one, double r, double g, double b, double a);
 
 static inline void nemoshow_item_set_canvas(struct showone *one, struct showone *canvas)
 {
