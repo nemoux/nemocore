@@ -366,6 +366,7 @@ static inline void nemoshow_item_update_text(struct nemoshow *show, struct showo
 				hb_glyph_info_t *hbglyphs;
 				hb_glyph_position_t *hbglyphspos;
 				double fontscale;
+				unsigned int nhbglyphinfos;
 				unsigned int nhbglyphs;
 				int i;
 
@@ -383,8 +384,8 @@ static inline void nemoshow_item_update_text(struct nemoshow *show, struct showo
 				hb_buffer_set_language(hbbuffer, HB_LANGUAGE_INVALID);
 				hb_shape_full(NEMOSHOW_FONT_AT(NEMOSHOW_REF(one, NEMOSHOW_FONT_REF), hbfont), hbbuffer, NULL, 0, NULL);
 
-				hbglyphs = hb_buffer_get_glyph_infos(hbbuffer, &nhbglyphs);
-				hbglyphspos = hb_buffer_get_glyph_positions(hbbuffer, NULL);
+				hbglyphs = hb_buffer_get_glyph_infos(hbbuffer, &nhbglyphinfos);
+				hbglyphspos = hb_buffer_get_glyph_positions(hbbuffer, &nhbglyphs);
 
 				fontscale = item->fontsize / NEMOSHOW_FONT_AT(NEMOSHOW_REF(one, NEMOSHOW_FONT_REF), max_advance_height);
 
@@ -395,7 +396,7 @@ static inline void nemoshow_item_update_text(struct nemoshow *show, struct showo
 
 				item->textwidth = 0.0f;
 
-				for (i = 0; i < strlen(item->text); i++) {
+				for (i = 0; i < nhbglyphs; i++) {
 					NEMOSHOW_ITEM_CC(item, points)[i].set(
 							hbglyphspos[i].x_offset * fontscale + item->textwidth + item->x,
 							item->y - item->fontascent);
