@@ -122,7 +122,9 @@ struct showone *nemoshow_item_create(int type)
 
 	nemoobject_set_reserved(&one->object, "alpha", &item->alpha, sizeof(double));
 
-	if (one->sub == NEMOSHOW_TEXTBOX_ITEM) {
+	if (one->sub == NEMOSHOW_RING_ITEM) {
+		NEMOSHOW_ITEM_CC(item, stroke)->setStyle(SkPaint::kFill_Style);
+	} else if (one->sub == NEMOSHOW_TEXTBOX_ITEM) {
 		NEMOSHOW_ITEM_CC(item, textbox) = new SkTextBox;
 		NEMOSHOW_ITEM_CC(item, textbox)->setMode(SkTextBox::kLineBreak_Mode);
 	}
@@ -296,14 +298,6 @@ static inline void nemoshow_item_update_style(struct nemoshow *show, struct show
 		NEMOSHOW_ITEM_CC(item, stroke)->setColor(
 				SkColorSetARGB(item->strokes[3] * item->alpha, item->strokes[2], item->strokes[1], item->strokes[0]));
 	}
-
-	if (one->sub == NEMOSHOW_RING_ITEM) {
-		NEMOSHOW_ITEM_CC(item, stroke)->setStyle(SkPaint::kFill_Style);
-	} else if (one->sub == NEMOSHOW_TEXTBOX_ITEM) {
-		if (item->text != NULL) {
-			NEMOSHOW_ITEM_CC(item, textbox)->setText(item->text, strlen(item->text), *NEMOSHOW_ITEM_CC(item, stroke));
-		}
-	}
 }
 
 static inline void nemoshow_item_update_filter(struct nemoshow *show, struct showone *one)
@@ -417,10 +411,9 @@ static inline void nemoshow_item_update_text(struct nemoshow *show, struct showo
 	} else if (one->sub == NEMOSHOW_TEXTBOX_ITEM) {
 		item->text = nemoobject_gets(&one->object, "d");
 		if (item->text != NULL) {
+			NEMOSHOW_ITEM_CC(item, fill)->setTextSize(item->fontsize);
 			NEMOSHOW_ITEM_CC(item, stroke)->setTextSize(item->fontsize);
-
 			NEMOSHOW_ITEM_CC(item, textbox)->setSpacing(item->spacingmul, item->spacingadd);
-			NEMOSHOW_ITEM_CC(item, textbox)->setText(item->text, strlen(item->text), *NEMOSHOW_ITEM_CC(item, stroke));
 		}
 
 		one->dirty |= NEMOSHOW_SHAPE_DIRTY;

@@ -437,7 +437,14 @@ static inline void nemoshow_canvas_render_item_textbox(SkCanvas *canvas, struct 
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	if (item->text != NULL) {
-		NEMOSHOW_ITEM_CC(item, textbox)->draw(canvas);
+		if (item->fill != 0) {
+			NEMOSHOW_ITEM_CC(item, textbox)->setText(item->text, strlen(item->text), *NEMOSHOW_ITEM_CC(item, fill));
+			NEMOSHOW_ITEM_CC(item, textbox)->draw(canvas);
+		}
+		if (item->stroke != 0) {
+			NEMOSHOW_ITEM_CC(item, textbox)->setText(item->text, strlen(item->text), *NEMOSHOW_ITEM_CC(item, stroke));
+			NEMOSHOW_ITEM_CC(item, textbox)->draw(canvas);
+		}
 	}
 }
 
