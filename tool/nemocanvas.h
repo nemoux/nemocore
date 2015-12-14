@@ -112,6 +112,7 @@ extern void nemocanvas_set_dispatch_frame(struct nemocanvas *canvas, nemocanvas_
 extern void nemocanvas_set_dispatch_screen(struct nemocanvas *canvas, nemocanvas_dispatch_screen_t dispatch);
 
 extern void nemocanvas_dispatch_frame(struct nemocanvas *canvas);
+extern void nemocanvas_dispatch_frame_force(struct nemocanvas *canvas);
 extern void nemocanvas_dispatch_frame_async(struct nemocanvas *canvas);
 
 extern void nemocanvas_attach_queue(struct nemocanvas *canvas, struct nemoqueue *queue);

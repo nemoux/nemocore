@@ -581,6 +581,11 @@ void nemocanvas_dispatch_frame(struct nemocanvas *canvas)
 	}
 }
 
+void nemocanvas_dispatch_frame_force(struct nemocanvas *canvas)
+{
+	canvas->dispatch_frame(canvas, 0, 0);
+}
+
 void nemocanvas_dispatch_frame_async(struct nemocanvas *canvas)
 {
 	uint64_t v = 1;
