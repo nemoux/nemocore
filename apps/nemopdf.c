@@ -78,7 +78,7 @@ static void nemopdf_dispatch_tale_event(struct nemotale *tale, struct talenode *
 		if (nemotale_is_single_click(tale, event, type)) {
 			nemotale_event_update_node_taps(tale, node, event, type);
 
-			if (nemotale_is_single_tap(tale, event, type)) {
+			if (nemotale_is_no_tap(tale, event, type)) {
 				uint32_t location;
 
 				location = nemopdf_get_touch_location(0, 0,
@@ -192,6 +192,7 @@ int main(int argc, char *argv[])
 	nemocanvas_set_fullscreen_type(NTEGL_CANVAS(canvas), (1 << NEMO_SURFACE_FULLSCREEN_TYPE_PICK) | (1 << NEMO_SURFACE_FULLSCREEN_TYPE_PITCH));
 	nemocanvas_set_anchor(NTEGL_CANVAS(canvas), -0.5f, -0.5f);
 	nemocanvas_set_dispatch_resize(NTEGL_CANVAS(canvas), nemopdf_dispatch_canvas_resize);
+	nemocanvas_set_max_size(NTEGL_CANVAS(canvas), UINT32_MAX, UINT32_MAX);
 
 	context->tale = tale = nemotale_create_gl();
 	nemotale_set_backend(tale,
