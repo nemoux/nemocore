@@ -133,6 +133,8 @@ struct clientstate {
 	int has_min_size, has_max_size;
 
 	uint32_t flags;
+
+	uint32_t input_type;
 };
 
 struct binstate {

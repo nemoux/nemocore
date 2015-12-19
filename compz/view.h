@@ -178,6 +178,11 @@ static inline int nemoview_has_state(struct nemoview *view, uint32_t state)
 	return view->state & state;
 }
 
+static inline void nemoview_set_input_type(struct nemoview *view, int type)
+{
+	view->input.type = type;
+}
+
 static inline int nemoview_support_touch_only(struct nemoview *view)
 {
 	return view->input.type == NEMO_VIEW_INPUT_TOUCH;

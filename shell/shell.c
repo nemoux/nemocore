@@ -805,6 +805,8 @@ static inline void nemoshell_set_client_state(struct shellbin *bin, struct clien
 	}
 
 	bin->flags = state->flags;
+
+	nemoview_set_input_type(bin->view, state->input_type);
 }
 
 int nemoshell_use_client_state(struct nemoshell *shell, struct shellbin *bin, struct wl_client *client)
