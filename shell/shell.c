@@ -863,6 +863,7 @@ void nemoshell_load_fullscreens(struct nemoshell *shell)
 	struct shellscreen *screen;
 	char *type;
 	char *focus;
+	char *fixed;
 	int index = 0;
 
 	for (index = 0;
@@ -897,6 +898,12 @@ void nemoshell_load_fullscreens(struct nemoshell *shell)
 			screen->focus = NEMO_SHELL_FULLSCREEN_NONE_FOCUS;
 		else if (strcmp(focus, "all") == 0)
 			screen->focus = NEMO_SHELL_FULLSCREEN_ALL_FOCUS;
+
+		fixed = nemoitem_get_attr(shell->configs, index, "fixed");
+		if (fixed == NULL)
+			screen->fixed = 0;
+		else if (strcmp(fixed, "on") == 0)
+			screen->fixed = 1;
 
 		wl_list_init(&screen->bin_list);
 
@@ -988,6 +995,8 @@ void nemoshell_set_fullscreen_bin(struct nemoshell *shell, struct shellbin *bin,
 	bin->screen.r = screen->dr * M_PI / 180.0f;
 	bin->has_screen = 1;
 
+	bin->fixed = screen->fixed;
+
 	nemoshell_send_bin_state(bin);
 }
 
@@ -998,6 +1007,8 @@ void nemoshell_put_fullscreen_bin(struct nemoshell *shell, struct shellbin *bin)
 
 	bin->state_changed = 1;
 	bin->next_state.fullscreen = 0;
+
+	bin->fixed = 0;
 
 	nemoshell_send_bin_state(bin);
 }

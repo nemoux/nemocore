@@ -224,12 +224,15 @@ struct shellbin {
 	int state_requested;
 
 	int grabbed;
+	int fixed;
 };
 
 struct shellscreen {
 	uint32_t id;
 	uint32_t type;
 	uint32_t focus;
+
+	int fixed;
 
 	int32_t sx, sy, sw, sh;
 	int32_t dx, dy, dw, dh, dr;

@@ -310,6 +310,9 @@ int nemoshell_pick_canvas_by_touchpoint_on_area(struct nemoshell *shell, struct 
 	if (bin == NULL)
 		return -1;
 
+	if (bin->fixed > 0)
+		return 0;
+
 	if (bin->grabbed > 0)
 		wl_signal_emit(&bin->ungrab_signal, bin);
 
@@ -407,6 +410,9 @@ int nemoshell_pick_canvas_by_touchpoint(struct nemoshell *shell, struct touchpoi
 
 	if (bin == NULL)
 		return -1;
+
+	if (bin->fixed > 0)
+		return 0;
 
 	if (bin->grabbed > 0)
 		wl_signal_emit(&bin->ungrab_signal, bin);
