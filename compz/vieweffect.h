@@ -41,6 +41,8 @@ extern void vieweffect_destroy(struct vieweffect *effect);
 
 extern void vieweffect_dispatch(struct nemocompz *compz, struct vieweffect *effect);
 
+extern int vieweffect_revoke(struct nemocompz *compz, struct nemoview *view);
+
 static inline void vieweffect_set_dispatch_done(struct vieweffect *effect, nemoeffect_done_t dispatch)
 {
 	effect->base.done = dispatch;

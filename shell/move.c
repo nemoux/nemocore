@@ -208,7 +208,10 @@ static void move_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 
 	pitchfilter_dispatch(filter, 0.0f, 0.0f, time);
 
-	if (bin != NULL && pitchfilter_flush(filter) > 0) {
+	if (bin != NULL &&
+			bin->state.fullscreen == 0 &&
+			bin->state.maximized == 0 &&
+			pitchfilter_flush(filter) > 0) {
 		struct nemoshell *shell = bin->shell;
 		struct vieweffect *effect;
 
@@ -247,31 +250,33 @@ static void move_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 	struct touchpoint *tp = base->touchpoint;
 	struct pitchfilter *filter = move->filter;
 	struct shellbin *bin = grab->bin;
-	int32_t cx, cy;
 
 	pitchfilter_dispatch(filter, x - tp->x, y - tp->y, time);
 
 	touchpoint_move(tp, x, y);
 
-	if (bin == NULL)
-		return;
+	if (bin != NULL &&
+			bin->state.fullscreen == 0 &&
+			bin->state.maximized == 0) {
+		int32_t cx, cy;
 
-	if (tp->focus != NULL) {
-		float sx, sy;
+		cx = x + move->dx;
+		cy = y + move->dy;
 
-		nemoview_transform_from_global(tp->focus, x, y, &sx, &sy);
+		nemoview_set_position(bin->view, cx, cy);
+		nemoview_schedule_repaint(bin->view);
 
-		nemocontent_touch_motion(tp, tp->focus->content, time, touchid, sx, sy, x, y);
+		if (tp->focus != NULL) {
+			float sx, sy;
+
+			nemoview_transform_from_global(tp->focus, x, y, &sx, &sy);
+
+			nemocontent_touch_motion(tp, tp->focus->content, time, touchid, sx, sy, x, y);
+		}
+
+		if (bin->shell->is_logging_grab != 0)
+			nemolog_message("MOVE", "[MOTION] %llu: x(%f) y(%f) (%u)\n", touchid, bin->view->geometry.x, bin->view->geometry.y, time);
 	}
-
-	cx = x + move->dx;
-	cy = y + move->dy;
-
-	nemoview_set_position(bin->view, cx, cy);
-	nemoview_schedule_repaint(bin->view);
-
-	if (bin->shell->is_logging_grab != 0)
-		nemolog_message("MOVE", "[MOTION] %llu: x(%f) y(%f) (%u)\n", touchid, bin->view->geometry.x, bin->view->geometry.y, time);
 }
 
 static void move_shellgrab_touchpoint_frame(struct touchpoint_grab *base)

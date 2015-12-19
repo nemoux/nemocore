@@ -110,3 +110,18 @@ void vieweffect_dispatch(struct nemocompz *compz, struct vieweffect *effect)
 {
 	nemocompz_dispatch_effect(compz, &effect->base);
 }
+
+int vieweffect_revoke(struct nemocompz *compz, struct nemoview *view)
+{
+	struct nemoeffect *anim, *next;
+
+	wl_list_for_each_safe(anim, next, &compz->effect_list, link) {
+		struct vieweffect *effect = (struct vieweffect *)container_of(anim, struct vieweffect, base);
+
+		if (effect->view == view) {
+			vieweffect_destroy(effect);
+		}
+	}
+
+	return 0;
+}
