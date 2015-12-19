@@ -267,37 +267,22 @@ static void nemo_surface_set_fullscreen(struct wl_client *client, struct wl_reso
 {
 #ifdef NEMOUX_WITH_FULLSCREEN
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
+	struct nemoshell *shell = bin->shell;
 
 	if (bin->flags & NEMO_SHELL_SURFACE_MAXIMIZABLE_FLAG) {
 		struct shellscreen *screen;
 
-		screen = nemoshell_get_fullscreen(bin->shell, id);
+		screen = nemoshell_get_fullscreen(shell, id);
 		if (screen != NULL) {
 			if (bin->grabbed > 0)
 				wl_signal_emit(&bin->ungrab_signal, bin);
 
-			wl_list_insert(&screen->bin_list, &bin->screen_link);
-
-			nemoshell_clear_bin_next_state(bin);
-			bin->next_state.fullscreen = 1;
-			bin->state_changed = 1;
-
-			bin->type = NEMO_SHELL_SURFACE_NORMAL_TYPE;
-			nemoshell_set_parent_bin(bin, NULL);
-
-			bin->screen.x = screen->dx;
-			bin->screen.y = screen->dy;
-			bin->screen.width = screen->dw;
-			bin->screen.height = screen->dh;
-			bin->screen.r = screen->dr * M_PI / 180.0f;
-			bin->has_screen = 1;
+			nemoshell_set_fullscreen_bin(shell, bin, screen);
 
 			if (screen->focus == NEMO_SHELL_FULLSCREEN_ALL_FOCUS) {
 				nemoseat_set_keyboard_focus(bin->shell->compz->seat, bin->view);
 				nemoseat_set_pointer_focus(bin->shell->compz->seat, bin->view);
 			}
-
-			nemoshell_send_bin_state(bin);
 		}
 	}
 #endif
@@ -306,12 +291,10 @@ static void nemo_surface_set_fullscreen(struct wl_client *client, struct wl_reso
 static void nemo_surface_unset_fullscreen(struct wl_client *client, struct wl_resource *resource)
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
+	struct nemoshell *shell = bin->shell;
 
 	if (bin->flags & NEMO_SHELL_SURFACE_MAXIMIZABLE_FLAG) {
-		bin->state_changed = 1;
-		bin->next_state.fullscreen = 0;
-
-		nemoshell_send_bin_state(bin);
+		nemoshell_put_fullscreen_bin(shell, bin);
 	}
 }
 

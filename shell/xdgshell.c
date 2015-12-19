@@ -133,27 +133,15 @@ static void xdg_surface_set_maximized(struct wl_client *client, struct wl_resour
 {
 #ifdef NEMOUX_WITH_FULLSCREEN
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
+	struct nemoshell *shell = bin->shell;
 
 	if (bin->flags & NEMO_SHELL_SURFACE_MAXIMIZABLE_FLAG) {
 		struct nemoscreen *screen;
 
-		nemoshell_clear_bin_next_state(bin);
-		bin->requested_state.maximized = 1;
-		bin->state_requested = 1;
+		screen = nemocompz_get_main_screen(shell->compz);
 
-		bin->type = NEMO_SHELL_SURFACE_NORMAL_TYPE;
-		nemoshell_set_parent_bin(bin, NULL);
-
-		if ((bin->has_screen == 0) &&
-				(screen = nemocompz_get_main_screen(bin->shell->compz)) != NULL) {
-			bin->screen.x = screen->rx;
-			bin->screen.y = screen->ry;
-			bin->screen.width = screen->rw;
-			bin->screen.height = screen->rh;
-			bin->has_screen = 1;
-		}
-
-		nemoshell_send_bin_state(bin);
+		if (screen != NULL)
+			nemoshell_set_maximized_bin_on_screen(shell, bin, screen);
 	}
 #endif
 }
@@ -161,12 +149,10 @@ static void xdg_surface_set_maximized(struct wl_client *client, struct wl_resour
 static void xdg_surface_unset_maximized(struct wl_client *client, struct wl_resource *resource)
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
+	struct nemoshell *shell = bin->shell;
 
 	if (bin->flags & NEMO_SHELL_SURFACE_MAXIMIZABLE_FLAG) {
-		bin->state_requested = 1;
-		bin->requested_state.maximized = 0;
-
-		nemoshell_send_bin_state(bin);
+		nemoshell_put_maximized_bin(shell, bin);
 	}
 }
 
@@ -174,27 +160,16 @@ static void xdg_surface_set_fullscreen(struct wl_client *client, struct wl_resou
 {
 #ifdef NEMOUX_WITH_FULLSCREEN
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
+	struct nemoshell *shell = bin->shell;
 
 	if (bin->flags & NEMO_SHELL_SURFACE_MAXIMIZABLE_FLAG) {
 		struct nemoscreen *screen = output_resource != NULL ? (struct nemoscreen *)wl_resource_get_user_data(output_resource) : NULL;
 
-		nemoshell_clear_bin_next_state(bin);
-		bin->requested_state.fullscreen = 1;
-		bin->state_requested = 1;
+		if (screen == NULL)
+			screen = nemocompz_get_main_screen(shell->compz);
 
-		bin->type = NEMO_SHELL_SURFACE_NORMAL_TYPE;
-		nemoshell_set_parent_bin(bin, NULL);
-
-		if ((screen != NULL) ||
-				(screen = nemocompz_get_main_screen(bin->shell->compz)) != NULL) {
-			bin->screen.x = screen->rx;
-			bin->screen.y = screen->ry;
-			bin->screen.width = screen->rw;
-			bin->screen.height = screen->rh;
-			bin->has_screen = 1;
-		}
-
-		nemoshell_send_bin_state(bin);
+		if (screen != NULL)
+			nemoshell_set_fullscreen_bin_on_screen(shell, bin, screen);
 	}
 #endif
 }
@@ -202,12 +177,10 @@ static void xdg_surface_set_fullscreen(struct wl_client *client, struct wl_resou
 static void xdg_surface_unset_fullscreen(struct wl_client *client, struct wl_resource *resource)
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
+	struct nemoshell *shell = bin->shell;
 
 	if (bin->flags & NEMO_SHELL_SURFACE_MAXIMIZABLE_FLAG) {
-		bin->state_requested = 1;
-		bin->requested_state.fullscreen = 0;
-
-		nemoshell_send_bin_state(bin);
+		nemoshell_put_fullscreen_bin(shell, bin);
 	}
 }
 
@@ -302,9 +275,9 @@ static void xdg_get_xdg_surface(struct wl_client *client, struct wl_resource *re
 	}
 
 	wl_resource_set_implementation(bin->resource, &xdg_surface_implementation, bin, xdgshell_unbind_xdg_surface);
-	
+
 	nemoshell_use_client_state(shell, bin, client);
-	
+
 	bin->flags |= NEMO_SHELL_SURFACE_BINDABLE_FLAG;
 }
 

@@ -184,28 +184,12 @@ static void move_shellgrab_dispatch_effect_done(struct nemoeffect *base)
 			}
 		}
 
-		wl_list_insert(&screen->bin_list, &bin->screen_link);
-
-		nemoshell_clear_bin_next_state(bin);
-		bin->next_state.fullscreen = 1;
-		bin->state_changed = 1;
-
-		bin->type = NEMO_SHELL_SURFACE_NORMAL_TYPE;
-		nemoshell_set_parent_bin(bin, NULL);
-
-		bin->screen.x = screen->dx;
-		bin->screen.y = screen->dy;
-		bin->screen.width = screen->dw;
-		bin->screen.height = screen->dh;
-		bin->screen.r = screen->dr * M_PI / 180.0f;
-		bin->has_screen = 1;
+		nemoshell_set_fullscreen_bin(shell, bin, screen);
 
 		if (screen->focus == NEMO_SHELL_FULLSCREEN_ALL_FOCUS) {
 			nemoseat_set_keyboard_focus(shell->compz->seat, bin->view);
 			nemoseat_set_pointer_focus(shell->compz->seat, bin->view);
 		}
-
-		nemoshell_send_bin_state(bin);
 	}
 
 	vieweffect_destroy(effect);

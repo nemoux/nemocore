@@ -94,28 +94,12 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 				screen = nemoshell_get_fullscreen_on(shell, tp0->x, tp0->y, NEMO_SHELL_FULLSCREEN_PICK_TYPE);
 
 			if (screen != NULL) {
-				wl_list_insert(&screen->bin_list, &bin->screen_link);
-
-				nemoshell_clear_bin_next_state(bin);
-				bin->next_state.fullscreen = 1;
-				bin->state_changed = 1;
-
-				bin->type = NEMO_SHELL_SURFACE_NORMAL_TYPE;
-				nemoshell_set_parent_bin(bin, NULL);
-
-				bin->screen.x = screen->dx;
-				bin->screen.y = screen->dy;
-				bin->screen.width = screen->dw;
-				bin->screen.height = screen->dh;
-				bin->screen.r = screen->dr * M_PI / 180.0f;
-				bin->has_screen = 1;
+				nemoshell_set_fullscreen_bin(shell, bin, screen);
 
 				if (screen->focus == NEMO_SHELL_FULLSCREEN_ALL_FOCUS) {
 					nemoseat_set_keyboard_focus(compz->seat, bin->view);
 					nemoseat_set_pointer_focus(compz->seat, bin->view);
 				}
-
-				nemoshell_send_bin_state(bin);
 			} else {
 				bin->client->send_configure(bin->canvas, width, height);
 			}
@@ -427,15 +411,8 @@ int nemoshell_pick_canvas_by_touchpoint(struct nemoshell *shell, struct touchpoi
 	if (bin->grabbed > 0)
 		wl_signal_emit(&bin->ungrab_signal, bin);
 
-	if (bin->state.fullscreen != 0 || bin->state.maximized != 0) {
-		wl_list_remove(&bin->screen_link);
-		wl_list_init(&bin->screen_link);
-
-		bin->state_changed = 1;
-		bin->next_state.fullscreen = 0;
-
-		nemoshell_send_bin_state(bin);
-	}
+	if (bin->state.fullscreen != 0 || bin->state.maximized != 0)
+		nemoshell_put_fullscreen_bin(shell, bin);
 
 	pick0 = (struct shellgrab_pick *)malloc(sizeof(struct shellgrab_pick));
 	if (pick0 == NULL)

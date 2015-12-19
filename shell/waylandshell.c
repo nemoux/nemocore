@@ -63,11 +63,9 @@ static void shell_surface_resize(struct wl_client *client, struct wl_resource *r
 static void shell_surface_set_toplevel(struct wl_client *client, struct wl_resource *resource)
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
+	struct nemoshell *shell = bin->shell;
 
-	nemoshell_clear_bin_next_state(bin);
-
-	bin->type = NEMO_SHELL_SURFACE_NORMAL_TYPE;
-	nemoshell_set_parent_bin(bin, NULL);
+	nemoshell_set_toplevel_bin(shell, bin);
 }
 
 static void shell_surface_set_transient(struct wl_client *client, struct wl_resource *resource, struct wl_resource *parent_resource, int x, int y, uint32_t flags)
@@ -78,27 +76,16 @@ static void shell_surface_set_fullscreen(struct wl_client *client, struct wl_res
 {
 #ifdef NEMOUX_WITH_FULLSCREEN
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
+	struct nemoshell *shell = bin->shell;
 
 	if (bin->flags & NEMO_SHELL_SURFACE_MAXIMIZABLE_FLAG) {
 		struct nemoscreen *screen = output_resource != NULL ? (struct nemoscreen *)wl_resource_get_user_data(output_resource) : NULL;
 
-		nemoshell_clear_bin_next_state(bin);
-		bin->next_state.fullscreen = 1;
-		bin->state_changed = 1;
+		if (screen == NULL)
+			screen = nemocompz_get_main_screen(shell->compz);
 
-		bin->type = NEMO_SHELL_SURFACE_NORMAL_TYPE;
-		nemoshell_set_parent_bin(bin, NULL);
-
-		if ((screen != NULL) ||
-				(screen = nemocompz_get_main_screen(bin->shell->compz)) != NULL) {
-			bin->screen.x = screen->rx;
-			bin->screen.y = screen->ry;
-			bin->screen.width = screen->rw;
-			bin->screen.height = screen->rh;
-			bin->has_screen = 1;
-		}
-
-		nemoshell_send_bin_state(bin);
+		if (screen != NULL)
+			nemoshell_set_fullscreen_bin_on_screen(shell, bin, screen);
 	}
 #endif
 }
@@ -107,41 +94,25 @@ static void shell_surface_set_popup(struct wl_client *client, struct wl_resource
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 	struct nemocanvas *parent = (struct nemocanvas *)wl_resource_get_user_data(parent_resource);
+	struct nemoshell *shell = bin->shell;
 
-	nemoshell_clear_bin_next_state(bin);
-
-	bin->type = NEMO_SHELL_SURFACE_POPUP_TYPE;
-	bin->popup.x = x;
-	bin->popup.y = y;
-	bin->popup.serial = serial;
-	nemoshell_set_parent_bin(bin, nemoshell_get_bin(parent));
+	nemoshell_set_popup_bin(shell, bin, nemoshell_get_bin(parent), x, y, serial);
 }
 
 static void shell_surface_set_maximized(struct wl_client *client, struct wl_resource *resource, struct wl_resource *output_resource)
 {
 #ifdef NEMOUX_WITH_FULLSCREEN
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
+	struct nemoshell *shell = bin->shell;
 
 	if (bin->flags & NEMO_SHELL_SURFACE_MAXIMIZABLE_FLAG) {
 		struct nemoscreen *screen = output_resource != NULL ? (struct nemoscreen *)wl_resource_get_user_data(output_resource) : NULL;
 
-		nemoshell_clear_bin_next_state(bin);
-		bin->next_state.maximized = 1;
-		bin->state_changed = 1;
+		if (screen == NULL)
+			screen = nemocompz_get_main_screen(shell->compz);
 
-		bin->type = NEMO_SHELL_SURFACE_NORMAL_TYPE;
-		nemoshell_set_parent_bin(bin, NULL);
-
-		if ((screen != NULL) ||
-				(screen = nemocompz_get_main_screen(bin->shell->compz)) != NULL) {
-			bin->screen.x = screen->rx;
-			bin->screen.y = screen->ry;
-			bin->screen.width = screen->rw;
-			bin->screen.height = screen->rh;
-			bin->has_screen = 1;
-		}
-
-		nemoshell_send_bin_state(bin);
+		if (screen != NULL)
+			nemoshell_set_maximized_bin_on_screen(shell, bin, screen);
 	}
 #endif
 }

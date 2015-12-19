@@ -275,6 +275,15 @@ extern void nemoshell_load_fullscreens(struct nemoshell *shell);
 extern struct shellscreen *nemoshell_get_fullscreen(struct nemoshell *shell, uint32_t id);
 extern struct shellscreen *nemoshell_get_fullscreen_on(struct nemoshell *shell, int32_t x, int32_t y, uint32_t type);
 
+extern void nemoshell_set_toplevel_bin(struct nemoshell *shell, struct shellbin *bin);
+extern void nemoshell_set_popup_bin(struct nemoshell *shell, struct shellbin *bin, struct shellbin *parent, int32_t x, int32_t y, uint32_t serial);
+extern void nemoshell_set_fullscreen_bin_on_screen(struct nemoshell *shell, struct shellbin *bin, struct nemoscreen *screen);
+extern void nemoshell_set_fullscreen_bin(struct nemoshell *shell, struct shellbin *bin, struct shellscreen *screen);
+extern void nemoshell_put_fullscreen_bin(struct nemoshell *shell, struct shellbin *bin);
+extern void nemoshell_set_maximized_bin_on_screen(struct nemoshell *shell, struct shellbin *bin, struct nemoscreen *screen);
+extern void nemoshell_set_maximized_bin(struct nemoshell *shell, struct shellbin *bin, struct shellscreen *screen);
+extern void nemoshell_put_maximized_bin(struct nemoshell *shell, struct shellbin *bin);
+
 extern void nemoshell_load_gestures(struct nemoshell *shell);
 
 #ifdef __cplusplus

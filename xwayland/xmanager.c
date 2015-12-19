@@ -23,6 +23,37 @@
 #define ICCCM_NORMAL_STATE			1
 #define ICCCM_ICONIC_STATE			3
 
+#define _NET_WM_STATE_REMOVE		0
+#define _NET_WM_STATE_ADD				1
+#define _NET_WM_STATE_TOGGLE		2
+
+static int nemoxmanager_update_state(int action, int *state)
+{
+	int new_state, changed;
+
+	switch (action) {
+		case _NET_WM_STATE_REMOVE:
+			new_state = 0;
+			break;
+
+		case _NET_WM_STATE_ADD:
+			new_state = 1;
+			break;
+
+		case _NET_WM_STATE_TOGGLE:
+			new_state = !*state;
+			break;
+
+		default:
+			return 0;
+	}
+
+	changed = (*state != new_state);
+	*state = new_state;
+
+	return changed;
+}
+
 static void nemoxmanager_set_window_manager_state(struct nemoxwindow *xwindow, int32_t state)
 {
 	struct nemoxmanager *xmanager = xwindow->xmanager;
@@ -44,13 +75,17 @@ static void nemoxmanager_set_window_manager_state(struct nemoxwindow *xwindow, i
 static void nemoxmanager_set_net_window_manager_state(struct nemoxwindow *xwindow)
 {
 	struct nemoxmanager *xmanager = xwindow->xmanager;
-	uint32_t property[1];
+	uint32_t property[3];
 	int i;
 
 	i = 0;
 
 	if (xwindow->fullscreen)
 		property[i++] = xmanager->atom.net_wm_state_fullscreen;
+	if (xwindow->maximized_vert)
+		property[i++] = xmanager->atom.net_wm_state_maximized_vert;
+	if (xwindow->maximized_horz)
+		property[i++] = xmanager->atom.net_wm_state_maximized_horz;
 
 	xcb_change_property(xmanager->conn,
 			XCB_PROP_MODE_REPLACE,
@@ -60,6 +95,26 @@ static void nemoxmanager_set_net_window_manager_state(struct nemoxwindow *xwindo
 			32,
 			i,
 			property);
+}
+
+static void nemoxmanager_set_net_window_virtual_desktop(struct nemoxwindow *xwindow, int desktop)
+{
+	struct nemoxmanager *xmanager = xwindow->xmanager;
+
+	if (desktop >= 0) {
+		xcb_change_property(xmanager->conn,
+				XCB_PROP_MODE_REPLACE,
+				xwindow->id,
+				xmanager->atom.net_wm_desktop,
+				XCB_ATOM_CARDINAL,
+				32,
+				1,
+				&desktop);
+	} else {
+		xcb_delete_property(xmanager->conn,
+				xwindow->id,
+				xmanager->atom.net_wm_desktop);
+	}
 }
 
 static void nemoxmanager_set_net_active_window(struct nemoxmanager *xmanager, xcb_window_t window)
@@ -120,6 +175,7 @@ static void nemoxmanager_create_window(struct nemoxmanager *xmanager, xcb_window
 	memset(xwindow, 0, sizeof(struct nemoxwindow));
 
 	wl_list_init(&xwindow->link);
+	wl_list_init(&xwindow->canvas_destroy_listener.link);
 
 	geometry_cookie = xcb_get_geometry(xmanager->conn, id);
 
@@ -142,6 +198,18 @@ static void nemoxmanager_create_window(struct nemoxmanager *xmanager, xcb_window
 	free(geometry_reply);
 
 	nemoxmanager_add_window(xmanager, id, xwindow);
+}
+
+static void nemoxmanager_destroy_window(struct nemoxwindow *xwindow)
+{
+	struct nemoxmanager *xmanager = xwindow->xmanager;
+
+	wl_list_remove(&xwindow->link);
+	wl_list_remove(&xwindow->canvas_destroy_listener.link);
+
+	nemoxmanager_del_window(xmanager, xwindow->id);
+
+	free(xwindow);
 }
 
 static void nemoxmanager_handle_button(struct nemoxmanager *xmanager, xcb_generic_event_t *event)
@@ -206,6 +274,7 @@ static void nemoxmanager_handle_map_request(struct nemoxmanager *xmanager, xcb_g
 
 	nemoxmanager_set_window_manager_state(xwindow, ICCCM_NORMAL_STATE);
 	nemoxmanager_set_net_window_manager_state(xwindow);
+	nemoxmanager_set_net_window_virtual_desktop(xwindow, 0);
 
 	xcb_map_window(xmanager->conn, map_request->window);
 }
@@ -220,10 +289,60 @@ static void nemoxmanager_handle_map_notify(struct nemoxmanager *xmanager, xcb_ge
 
 static void nemoxmanager_handle_unmap_notify(struct nemoxmanager *xmanager, xcb_generic_event_t *event)
 {
+	xcb_unmap_notify_event_t *unmap_notify = (xcb_unmap_notify_event_t *)event;
+	struct nemoxwindow *xwindow;
+
+	if (nemoxmanager_our_resource(xmanager, unmap_notify->window))
+		return;
+
+	if (unmap_notify->response_type & SEND_EVENT_MASK)
+		return;
+
+	xwindow = nemoxmanager_get_window(xmanager, unmap_notify->window);
+	if (xwindow == NULL)
+		return;
+
+	if (xwindow->canvas_id) {
+		wl_list_remove(&xwindow->link);
+		wl_list_init(&xwindow->link);
+
+		xwindow->canvas_id = 0;
+	}
+
+	if (xmanager->focus == xwindow)
+		xmanager->focus = NULL;
+
+	if (xwindow->canvas != NULL) {
+		wl_list_remove(&xwindow->canvas_destroy_listener.link);
+		wl_list_init(&xwindow->canvas_destroy_listener.link);
+	}
+
+	xwindow->canvas = NULL;
+	xwindow->bin = NULL;
+
+	nemoxmanager_set_window_manager_state(xwindow, ICCCM_WITHDRAWN_STATE);
+	nemoxmanager_set_net_window_virtual_desktop(xwindow, -1);
 }
 
 static void nemoxmanager_handle_reparent_notify(struct nemoxmanager *xmanager, xcb_generic_event_t *event)
 {
+	xcb_reparent_notify_event_t *reparent_notify = (xcb_reparent_notify_event_t *)event;
+	struct nemoxwindow *xwindow;
+
+	if (reparent_notify->parent == xmanager->screen->root) {
+		nemoxmanager_create_window(xmanager,
+				reparent_notify->window,
+				10, 10,
+				reparent_notify->x,
+				reparent_notify->y,
+				reparent_notify->override_redirect);
+	} else if (!nemoxmanager_our_resource(xmanager, reparent_notify->parent)) {
+		xwindow = nemoxmanager_get_window(xmanager, reparent_notify->window);
+		if (xwindow == NULL)
+			return;
+
+		nemoxmanager_destroy_window(xwindow);
+	}
 }
 
 static void nemoxmanager_handle_configure_request(struct nemoxmanager *xmanager, xcb_generic_event_t *event)
@@ -305,6 +424,17 @@ static void nemoxmanager_handle_configure_notify(struct nemoxmanager *xmanager, 
 
 static void nemoxmanager_handle_destroy_notify(struct nemoxmanager *xmanager, xcb_generic_event_t *event)
 {
+	xcb_destroy_notify_event_t *destroy_notify = (xcb_destroy_notify_event_t *)event;
+	struct nemoxwindow *xwindow;
+
+	if (nemoxmanager_our_resource(xmanager, destroy_notify->window))
+		return;
+
+	xwindow = nemoxmanager_get_window(xmanager, destroy_notify->window);
+	if (xwindow == NULL)
+		return;
+
+	nemoxmanager_destroy_window(xwindow);
 }
 
 static void nemoxmanager_handle_mapping_notify(struct nemoxmanager *xmanager, xcb_generic_event_t *event)
@@ -325,6 +455,61 @@ static void nemoxmanager_handle_property_notify(struct nemoxmanager *xmanager, x
 	if (property_notify->atom == xmanager->atom.net_wm_name ||
 			property_notify->atom == XCB_ATOM_WM_NAME)
 		nemoxmanager_repaint_window(xwindow);
+}
+
+static void nemoxmanager_handle_moveresize(struct nemoxwindow *xwindow, xcb_client_message_event_t *client_message)
+{
+}
+
+static void nemoxmanager_handle_state(struct nemoxwindow *xwindow, xcb_client_message_event_t *client_message)
+{
+	struct nemoxmanager *xmanager = xwindow->xmanager;
+	struct nemoshell *shell = xmanager->xserver->shell;
+	uint32_t action, property;
+	int maximized = (xwindow->maximized_horz && xwindow->maximized_vert);
+
+	action = client_message->data.data32[0];
+	property = client_message->data.data32[1];
+
+	if (property == xmanager->atom.net_wm_state_fullscreen &&
+			nemoxmanager_update_state(action, &xwindow->fullscreen)) {
+		nemoxmanager_set_net_window_manager_state(xwindow);
+
+		if (xwindow->fullscreen) {
+			xwindow->saved_width = xwindow->width;
+			xwindow->saved_height = xwindow->height;
+
+			if (xwindow->bin != NULL) {
+				nemoshell_set_fullscreen_bin(shell, xwindow->bin, nemoshell_get_fullscreen(shell, 0));
+			}
+		} else {
+			if (xwindow->bin != NULL) {
+				nemoshell_put_fullscreen_bin(shell, xwindow->bin);
+			}
+		}
+	} else {
+		if (property == xmanager->atom.net_wm_state_maximized_vert &&
+				nemoxmanager_update_state(action, &xwindow->maximized_vert))
+			nemoxmanager_set_net_window_manager_state(xwindow);
+		if (property == xmanager->atom.net_wm_state_maximized_horz &&
+				nemoxmanager_update_state(action, &xwindow->maximized_horz))
+			nemoxmanager_set_net_window_manager_state(xwindow);
+
+		if (maximized != (xwindow->maximized_vert && xwindow->maximized_horz)) {
+			if (xwindow->maximized_vert && xwindow->maximized_horz) {
+				xwindow->saved_width = xwindow->width;
+				xwindow->saved_height = xwindow->height;
+
+				if (xwindow->bin != NULL) {
+					nemoshell_set_maximized_bin(shell, xwindow->bin, nemoshell_get_fullscreen(shell, 0));
+				}
+			} else {
+				if (xwindow->bin != NULL) {
+					nemoshell_put_maximized_bin(shell, xwindow->bin);
+				}
+			}
+		}
+	}
 }
 
 static void nemoxmanager_handle_surface_id(struct nemoxwindow *xwindow, xcb_client_message_event_t *client_message)
@@ -358,7 +543,9 @@ static void nemoxmanager_handle_client_message(struct nemoxmanager *xmanager, xc
 		return;
 
 	if (client_message->type == xmanager->atom.net_wm_moveresize) {
+		nemoxmanager_handle_moveresize(xwindow, client_message);
 	} else if (client_message->type == xmanager->atom.net_wm_state) {
+		nemoxmanager_handle_state(xwindow, client_message);
 	} else if (client_message->type == xmanager->atom.wl_surface_id) {
 		nemoxmanager_handle_surface_id(xwindow, client_message);
 	}
@@ -511,9 +698,12 @@ static void nemoxmanager_get_resources(struct nemoxmanager *xmanager)
 		{ "_NET_WM_PID", F(atom.net_wm_pid) },
 		{ "_NET_WM_ICON", F(atom.net_wm_icon) },
 		{ "_NET_WM_STATE", F(atom.net_wm_state) },
+		{ "_NET_WM_STATE_MAXIMIZED_VERT", F(atom.net_wm_state_maximized_vert) },
+		{ "_NET_WM_STATE_MAXIMIZED_HORZ", F(atom.net_wm_state_maximized_horz) },
 		{ "_NET_WM_STATE_FULLSCREEN", F(atom.net_wm_state_fullscreen) },
 		{ "_NET_WM_USER_TIME", F(atom.net_wm_user_time) },
 		{ "_NET_WM_ICON_NAME", F(atom.net_wm_icon_name) },
+		{ "_NET_WM_DESKTOP", F(atom.net_wm_desktop) },
 		{ "_NET_WM_WINDOW_TYPE", F(atom.net_wm_window_type) },
 
 		{ "_NET_WM_WINDOW_TYPE_DESKTOP", F(atom.net_wm_window_type_desktop) },
@@ -749,7 +939,7 @@ struct nemoxmanager *nemoxmanager_create(struct nemoxserver *xserver, int fd)
 	struct wl_event_loop *loop;
 	xcb_screen_iterator_t s;
 	uint32_t values[1];
-	xcb_atom_t supported[3];
+	xcb_atom_t supported[6];
 
 	xmanager = (struct nemoxmanager *)malloc(sizeof(struct nemoxmanager));
 	if (xmanager == NULL)
@@ -794,7 +984,9 @@ struct nemoxmanager *nemoxmanager_create(struct nemoxserver *xserver, int fd)
 	supported[0] = xmanager->atom.net_wm_moveresize;
 	supported[1] = xmanager->atom.net_wm_state;
 	supported[2] = xmanager->atom.net_wm_state_fullscreen;
-	supported[3] = xmanager->atom.net_active_window;
+	supported[3] = xmanager->atom.net_wm_state_maximized_vert;
+	supported[4] = xmanager->atom.net_wm_state_maximized_horz;
+	supported[5] = xmanager->atom.net_active_window;
 
 	xcb_change_property(xmanager->conn,
 			XCB_PROP_MODE_REPLACE,
@@ -925,8 +1117,17 @@ void nemoxmanager_map_window(struct nemoxmanager *xmanager, struct nemoxwindow *
 	bin->type = NEMO_SHELL_SURFACE_XWAYLAND_TYPE;
 
 	nemoshell_use_client_state_by_pid(shell, bin, xwindow->pid);
-	
+
 	bin->flags |= NEMO_SHELL_SURFACE_BINDABLE_FLAG;
+
+	xwindow->bin = bin;
+
+	if (xwindow->fullscreen) {
+		xwindow->saved_width = xwindow->width;
+		xwindow->saved_height = xwindow->height;
+
+		nemoshell_set_fullscreen_bin(shell, xwindow->bin, nemoshell_get_fullscreen(shell, 0));
+	}
 }
 
 #define TYPE_WM_PROTOCOLS	XCB_ATOM_CUT_BUFFER0
@@ -1027,9 +1228,14 @@ void nemoxmanager_read_properties(struct nemoxwindow *xwindow)
 				xwindow->fullscreen = 0;
 				atom = xcb_get_property_value(reply);
 
-				for (i = 0; i < reply->value_len; i++)
+				for (i = 0; i < reply->value_len; i++) {
 					if (atom[i] == xmanager->atom.net_wm_state_fullscreen)
 						xwindow->fullscreen = 1;
+					else if (atom[i] == xmanager->atom.net_wm_state_maximized_vert)
+						xwindow->maximized_vert = 1;
+					else if (atom[i] == xmanager->atom.net_wm_state_maximized_horz)
+						xwindow->maximized_horz = 1;
+				}
 				break;
 
 			case TYPE_MOTIF_WM_HINTS:
@@ -1072,6 +1278,8 @@ static void nemoxmanager_handle_canvas_destroy(struct wl_listener *listener, voi
 
 	xwindow->bin = NULL;
 	xwindow->canvas = NULL;
+
+	wl_list_remove(&xwindow->canvas_destroy_listener.link);
 }
 
 struct nemoxwindow *nemoxmanager_get_canvas_window(struct nemocanvas *canvas)

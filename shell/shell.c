@@ -932,6 +932,126 @@ struct shellscreen *nemoshell_get_fullscreen_on(struct nemoshell *shell, int32_t
 	return NULL;
 }
 
+void nemoshell_set_toplevel_bin(struct nemoshell *shell, struct shellbin *bin)
+{
+	nemoshell_clear_bin_next_state(bin);
+
+	bin->type = NEMO_SHELL_SURFACE_NORMAL_TYPE;
+	nemoshell_set_parent_bin(bin, NULL);
+}
+
+void nemoshell_set_popup_bin(struct nemoshell *shell, struct shellbin *bin, struct shellbin *parent, int32_t x, int32_t y, uint32_t serial)
+{
+	nemoshell_clear_bin_next_state(bin);
+
+	bin->type = NEMO_SHELL_SURFACE_POPUP_TYPE;
+	bin->popup.x = x;
+	bin->popup.y = y;
+	bin->popup.serial = serial;
+
+	nemoshell_set_parent_bin(bin, parent);
+}
+
+void nemoshell_set_fullscreen_bin_on_screen(struct nemoshell *shell, struct shellbin *bin, struct nemoscreen *screen)
+{
+	nemoshell_clear_bin_next_state(bin);
+	bin->next_state.fullscreen = 1;
+	bin->state_changed = 1;
+
+	bin->type = NEMO_SHELL_SURFACE_NORMAL_TYPE;
+	nemoshell_set_parent_bin(bin, NULL);
+
+	bin->screen.x = screen->rx;
+	bin->screen.y = screen->ry;
+	bin->screen.width = screen->rw;
+	bin->screen.height = screen->rh;
+	bin->has_screen = 1;
+
+	nemoshell_send_bin_state(bin);
+}
+
+void nemoshell_set_fullscreen_bin(struct nemoshell *shell, struct shellbin *bin, struct shellscreen *screen)
+{
+	wl_list_insert(&screen->bin_list, &bin->screen_link);
+
+	nemoshell_clear_bin_next_state(bin);
+	bin->next_state.fullscreen = 1;
+	bin->state_changed = 1;
+
+	bin->type = NEMO_SHELL_SURFACE_NORMAL_TYPE;
+	nemoshell_set_parent_bin(bin, NULL);
+
+	bin->screen.x = screen->dx;
+	bin->screen.y = screen->dy;
+	bin->screen.width = screen->dw;
+	bin->screen.height = screen->dh;
+	bin->screen.r = screen->dr * M_PI / 180.0f;
+	bin->has_screen = 1;
+
+	nemoshell_send_bin_state(bin);
+}
+
+void nemoshell_put_fullscreen_bin(struct nemoshell *shell, struct shellbin *bin)
+{
+	wl_list_remove(&bin->screen_link);
+	wl_list_init(&bin->screen_link);
+
+	bin->state_changed = 1;
+	bin->next_state.fullscreen = 0;
+
+	nemoshell_send_bin_state(bin);
+}
+
+void nemoshell_set_maximized_bin_on_screen(struct nemoshell *shell, struct shellbin *bin, struct nemoscreen *screen)
+{
+	nemoshell_clear_bin_next_state(bin);
+	bin->next_state.maximized = 1;
+	bin->state_changed = 1;
+
+	bin->type = NEMO_SHELL_SURFACE_NORMAL_TYPE;
+	nemoshell_set_parent_bin(bin, NULL);
+
+	bin->screen.x = screen->rx;
+	bin->screen.y = screen->ry;
+	bin->screen.width = screen->rw;
+	bin->screen.height = screen->rh;
+	bin->has_screen = 1;
+
+	nemoshell_send_bin_state(bin);
+}
+
+void nemoshell_set_maximized_bin(struct nemoshell *shell, struct shellbin *bin, struct shellscreen *screen)
+{
+	wl_list_insert(&screen->bin_list, &bin->screen_link);
+
+	nemoshell_clear_bin_next_state(bin);
+	bin->next_state.maximized = 1;
+	bin->state_changed = 1;
+
+	bin->type = NEMO_SHELL_SURFACE_NORMAL_TYPE;
+	nemoshell_set_parent_bin(bin, NULL);
+
+	bin->screen.x = screen->dx;
+	bin->screen.y = screen->dy;
+	bin->screen.width = screen->dw;
+	bin->screen.height = screen->dh;
+	bin->screen.r = screen->dr * M_PI / 180.0f;
+	bin->has_screen = 1;
+
+	nemoshell_send_bin_state(bin);
+}
+
+void nemoshell_put_maximized_bin(struct nemoshell *shell, struct shellbin *bin)
+{
+	wl_list_remove(&bin->screen_link);
+	wl_list_init(&bin->screen_link);
+
+	bin->state_changed = 1;
+	bin->next_state.maximized = 0;
+
+	nemoshell_send_bin_state(bin);
+}
+
 void nemoshell_load_gestures(struct nemoshell *shell)
 {
 	shell->pitch.max_samples = nemoitem_get_iattr_named(shell->configs, "//nemoshell/pitch", "max_samples", 30);
