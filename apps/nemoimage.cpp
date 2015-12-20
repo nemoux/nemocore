@@ -129,6 +129,8 @@ int main(int argc, char *argv[])
 		goto out2;
 	nemoshow_set_userdata(show, context);
 
+	nemocanvas_set_input_type(NEMOSHOW_AT(show, canvas), NEMO_SURFACE_INPUT_TYPE_TOUCH);
+
 	context->scene = scene = nemoshow_scene_create();
 	nemoshow_scene_set_width(scene, width);
 	nemoshow_scene_set_height(scene, height);

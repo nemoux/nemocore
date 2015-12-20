@@ -477,6 +477,7 @@ int main(int argc, char *argv[])
 	nemocanvas_set_max_size(NTEGL_CANVAS(canvas), width * 4, height * 4);
 	nemocanvas_set_dispatch_resize(NTEGL_CANVAS(canvas), nemomesh_dispatch_canvas_resize);
 	nemocanvas_set_dispatch_frame(NTEGL_CANVAS(canvas), nemomesh_dispatch_canvas_frame);
+	nemocanvas_set_input_type(NTEGL_CANVAS(canvas), NEMO_SURFACE_INPUT_TYPE_TOUCH);
 
 	context->canvas = NTEGL_CANVAS(canvas);
 
