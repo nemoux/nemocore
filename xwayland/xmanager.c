@@ -874,6 +874,7 @@ static void nemoxmanager_handle_create_surface(struct wl_listener *listener, voi
 			nemoxmanager_map_canvas(xwindow, canvas);
 			xwindow->canvas_id = 0;
 			wl_list_remove(&xwindow->link);
+			wl_list_init(&xwindow->link);
 			break;
 		}
 	}
