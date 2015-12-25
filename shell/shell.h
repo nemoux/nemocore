@@ -93,11 +93,6 @@ struct nemoshell {
 		double friction;
 	} pitch;
 
-	struct {
-		double min_distance;
-		double resize_interval;
-	} pick;
-
 	struct nemoitem *configs;
 
 	int is_logging_grab;

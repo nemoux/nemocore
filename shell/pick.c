@@ -173,24 +173,20 @@ static void pick_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 	}
 
 	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_ROTATE)) {
-		double distance = pickgrab_calculate_touchpoint_distance(pick->tp0, pick->tp1);
+		float r = pickgrab_calculate_touchpoint_angle(pick->tp0, pick->tp1);
 
-		if (distance > shell->pick.min_distance) {
-			float r = pickgrab_calculate_touchpoint_angle(pick->tp0, pick->tp1);
+		pick->r = pick->other->r = pick->r + pick->touch.r - r;
 
-			pick->r = pick->other->r = pick->r + pick->touch.r - r;
+		pick->touch.r = pick->other->touch.r = r;
 
-			pick->touch.r = pick->other->touch.r = r;
+		nemoview_set_rotation(bin->view, pick->r);
 
-			nemoview_set_rotation(bin->view, pick->r);
-
-			if (shell->is_logging_grab != 0)
-				nemolog_message("PICK", "[MOTION:ROTATE] %llu: r(%f) touch(%f) (%u)\n", touchid, bin->view->geometry.r, r, time);
-		}
+		if (shell->is_logging_grab != 0)
+			nemolog_message("PICK", "[MOTION:ROTATE] %llu: r(%f) touch(%f) (%u)\n", touchid, bin->view->geometry.r, r, time);
 	}
 
 	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALE) || pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALEONLY)) {
-		double distance = MAX(pickgrab_calculate_touchpoint_distance(pick->tp0, pick->tp1), shell->pick.min_distance);
+		double distance = pickgrab_calculate_touchpoint_distance(pick->tp0, pick->tp1);
 
 		if (pick->sx * (distance / pick->touch.distance) * pick->width > bin->max_width ||
 				pick->sy * (distance / pick->touch.distance) * pick->height > bin->max_height) {
@@ -231,33 +227,30 @@ static void pick_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 
 	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_RESIZE)) {
 		double distance = pickgrab_calculate_touchpoint_distance(pick->tp0, pick->tp1);
+		int32_t width, height;
 
-		if (fabs(distance - pick->resize.distance) > shell->pick.resize_interval) {
-			int32_t width, height;
-
-			if (bin->resize_edges & WL_SHELL_SURFACE_RESIZE_LEFT ||
-					bin->resize_edges & WL_SHELL_SURFACE_RESIZE_RIGHT) {
-				width = pick->width + (distance - pick->touch.distance);
-			} else {
-				width = pick->width;
-			}
-
-			if (bin->resize_edges & WL_SHELL_SURFACE_RESIZE_TOP ||
-					bin->resize_edges & WL_SHELL_SURFACE_RESIZE_BOTTOM) {
-				height = pick->height + (distance - pick->touch.distance);
-			} else {
-				height = pick->height;
-			}
-
-			width = MAX(width, bin->min_width);
-			height = MAX(height, bin->min_height);
-			width = MIN(width, bin->max_width);
-			height = MIN(height, bin->max_height);
-
-			bin->client->send_configure(bin->canvas, width, height);
-
-			pick->resize.distance = pick->other->resize.distance = distance;
+		if (bin->resize_edges & WL_SHELL_SURFACE_RESIZE_LEFT ||
+				bin->resize_edges & WL_SHELL_SURFACE_RESIZE_RIGHT) {
+			width = pick->width + (distance - pick->touch.distance);
+		} else {
+			width = pick->width;
 		}
+
+		if (bin->resize_edges & WL_SHELL_SURFACE_RESIZE_TOP ||
+				bin->resize_edges & WL_SHELL_SURFACE_RESIZE_BOTTOM) {
+			height = pick->height + (distance - pick->touch.distance);
+		} else {
+			height = pick->height;
+		}
+
+		width = MAX(width, bin->min_width);
+		height = MAX(height, bin->min_height);
+		width = MIN(width, bin->max_width);
+		height = MIN(height, bin->max_height);
+
+		bin->client->send_configure(bin->canvas, width, height);
+
+		pick->resize.distance = pick->other->resize.distance = distance;
 	}
 
 	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_MOVE)) {
@@ -369,7 +362,7 @@ int nemoshell_pick_canvas_by_touchpoint_on_area(struct nemoshell *shell, struct 
 	pick0->sy = pick1->sy = bin->view->geometry.sy;
 	pick0->r = pick1->r = bin->view->geometry.r;
 	pick0->has_reset = pick1->has_reset = bin->reset_scale;
-	pick0->touch.distance = pick1->touch.distance = MAX(pickgrab_calculate_touchpoint_distance(tp0, tp1), shell->pick.min_distance);
+	pick0->touch.distance = pick1->touch.distance = pickgrab_calculate_touchpoint_distance(tp0, tp1);
 	pick0->touch.r = pick1->touch.r = pickgrab_calculate_touchpoint_angle(tp0, tp1);
 
 	pick0->resize.distance = pick1->resize.distance = pick0->touch.distance;
@@ -438,7 +431,7 @@ int nemoshell_pick_canvas_by_touchpoint(struct nemoshell *shell, struct touchpoi
 	pick0->sy = pick1->sy = bin->view->geometry.sy;
 	pick0->r = pick1->r = bin->view->geometry.r;
 	pick0->has_reset = pick1->has_reset = bin->reset_scale;
-	pick0->touch.distance = pick1->touch.distance = MAX(pickgrab_calculate_touchpoint_distance(tp0, tp1), shell->pick.min_distance);
+	pick0->touch.distance = pick1->touch.distance = pickgrab_calculate_touchpoint_distance(tp0, tp1);
 	pick0->touch.r = pick1->touch.r = pickgrab_calculate_touchpoint_angle(tp0, tp1);
 
 	pick0->resize.distance = pick1->resize.distance = pick0->touch.distance;
@@ -565,21 +558,17 @@ static void pick_actorgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 	}
 
 	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_ROTATE)) {
-		double distance = pickgrab_calculate_touchpoint_distance(pick->tp0, pick->tp1);
+		float r = pickgrab_calculate_touchpoint_angle(pick->tp0, pick->tp1);
 
-		if (distance > shell->pick.min_distance) {
-			float r = pickgrab_calculate_touchpoint_angle(pick->tp0, pick->tp1);
+		pick->r = pick->other->r = pick->r + pick->touch.r - r;
 
-			pick->r = pick->other->r = pick->r + pick->touch.r - r;
+		pick->touch.r = pick->other->touch.r = r;
 
-			pick->touch.r = pick->other->touch.r = r;
-
-			nemoview_set_rotation(actor->view, pick->r);
-		}
+		nemoview_set_rotation(actor->view, pick->r);
 	}
 
 	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALE) || pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALEONLY)) {
-		double distance = MAX(pickgrab_calculate_touchpoint_distance(pick->tp0, pick->tp1), shell->pick.min_distance);
+		double distance = pickgrab_calculate_touchpoint_distance(pick->tp0, pick->tp1);
 
 		if (pick->sx * (distance / pick->touch.distance) * pick->width > actor->max_width ||
 				pick->sy * (distance / pick->touch.distance) * pick->height > actor->max_height) {
@@ -680,7 +669,7 @@ int nemoshell_pick_actor_by_touchpoint(struct nemoshell *shell, struct touchpoin
 	pick0->sx = pick1->sx = actor->view->geometry.sx;
 	pick0->sy = pick1->sy = actor->view->geometry.sy;
 	pick0->r = pick1->r = actor->view->geometry.r;
-	pick0->touch.distance = pick1->touch.distance = MAX(pickgrab_calculate_touchpoint_distance(tp0, tp1), shell->pick.min_distance);
+	pick0->touch.distance = pick1->touch.distance = pickgrab_calculate_touchpoint_distance(tp0, tp1);
 	pick0->touch.r = pick1->touch.r = pickgrab_calculate_touchpoint_angle(tp0, tp1);
 
 	if (actor->view->geometry.has_pivot == 0) {
