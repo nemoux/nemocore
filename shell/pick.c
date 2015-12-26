@@ -177,12 +177,12 @@ static void pick_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 
 		pick->r = pick->other->r = pick->r + pick->touch.r - r;
 
-		pick->touch.r = pick->other->touch.r = r;
-
 		nemoview_set_rotation(bin->view, pick->r);
 
 		if (shell->is_logging_grab != 0)
-			nemolog_message("PICK", "[MOTION:ROTATE] %llu: r(%f) touch(%f) (%u)\n", touchid, bin->view->geometry.r, r, time);
+			nemolog_message("PICK", "[MOTION:ROTATE] %llu: r(%f) diff(%f) (%u)\n", touchid, pick->r, pick->touch.r - r, time);
+
+		pick->touch.r = pick->other->touch.r = r;
 	}
 
 	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALE) || pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALEONLY)) {
@@ -217,12 +217,12 @@ static void pick_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 			pick->sy = pick->other->sy = pick->sy * (distance / pick->touch.distance);
 		}
 
-		pick->touch.distance = pick->other->touch.distance = distance;
-
 		nemoview_set_scale(bin->view, pick->sx, pick->sy);
 
 		if (shell->is_logging_grab != 0)
-			nemolog_message("PICK", "[MOTION:SCALE] %llu: sx(%f) sy(%f) touch(%f) (%u)\n", touchid, bin->view->geometry.sx, bin->view->geometry.sy, distance, time);
+			nemolog_message("PICK", "[MOTION:SCALE] %llu: sx(%f) sy(%f) diff(%f) (%u)\n", touchid, pick->sx, pick->sy, distance / pick->touch.distance, time);
+
+		pick->touch.distance = pick->other->touch.distance = distance;
 	}
 
 	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_RESIZE)) {
@@ -562,9 +562,9 @@ static void pick_actorgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 
 		pick->r = pick->other->r = pick->r + pick->touch.r - r;
 
-		pick->touch.r = pick->other->touch.r = r;
-
 		nemoview_set_rotation(actor->view, pick->r);
+
+		pick->touch.r = pick->other->touch.r = r;
 	}
 
 	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALE) || pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALEONLY)) {
@@ -599,9 +599,9 @@ static void pick_actorgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 			pick->sy = pick->other->sy = pick->sy * (distance / pick->touch.distance);
 		}
 
-		pick->touch.distance = pick->other->touch.distance = distance;
-
 		nemoview_set_scale(actor->view, pick->sx, pick->sy);
+
+		pick->touch.distance = pick->other->touch.distance = distance;
 	}
 
 	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_MOVE)) {
