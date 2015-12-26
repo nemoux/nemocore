@@ -1076,4 +1076,9 @@ void nemoshell_load_gestures(struct nemoshell *shell)
 	shell->pitch.velocity = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pitch", "velocity", 1000.0f);
 	shell->pitch.max_velocity = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pitch", "max_velocity", 5000.0f);
 	shell->pitch.friction = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pitch", "friction", 12000.0f);
+
+	shell->pick.max_rotate = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "max_rotate", 45.0f);
+	shell->pick.max_rotate = shell->pick.max_rotate * M_PI / 180.0f;
+
+	shell->pick.max_scale = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "max_scale", 0.15f);
 }

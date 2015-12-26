@@ -93,6 +93,11 @@ struct nemoshell {
 		double friction;
 	} pitch;
 
+	struct {
+		double max_rotate;
+		double max_scale;
+	} pick;
+
 	struct nemoitem *configs;
 
 	int is_logging_grab;
