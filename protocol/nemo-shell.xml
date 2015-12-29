@@ -116,6 +116,11 @@
 			<arg name="ay" type="fixed"/>
 		</request>
 
+		<request name="set_flag">
+			<arg name="fx" type="fixed"/>
+			<arg name="fy" type="fixed"/>
+		</request>
+
 		<enum name="layer_type">
 			<entry name="background" value="0"/>
 			<entry name="service" value="1"/>

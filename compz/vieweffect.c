@@ -30,7 +30,7 @@ retry:
 
 		if (effect->pitch.velocity <= 1.0f) {
 			effect->type &= ~NEMO_VIEW_PITCH_EFFECT;
-		} else if (nemocompz_contains_view(compz, view, dx, dy) == 0) {
+		} else if (nemocompz_contains_view_near(compz, view, dx, dy) == 0) {
 			effect->pitch.velocity *= 0.5f;
 
 			goto retry;

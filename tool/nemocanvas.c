@@ -427,6 +427,13 @@ void nemocanvas_set_anchor(struct nemocanvas *canvas, float ax, float ay)
 			wl_fixed_from_double(ay));
 }
 
+void nemocanvas_set_flag(struct nemocanvas *canvas, float fx, float fy)
+{
+	nemo_surface_set_flag(canvas->nemo_surface,
+			wl_fixed_from_double(fx),
+			wl_fixed_from_double(fy));
+}
+
 void nemocanvas_set_layer(struct nemocanvas *canvas, uint32_t type)
 {
 	nemo_surface_set_layer(canvas->nemo_surface, type);

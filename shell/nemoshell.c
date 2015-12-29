@@ -219,6 +219,15 @@ static void nemo_surface_set_anchor(struct wl_client *client, struct wl_resource
 			wl_fixed_to_double(ay));
 }
 
+static void nemo_surface_set_flag(struct wl_client *client, struct wl_resource *resource, wl_fixed_t fx, wl_fixed_t fy)
+{
+	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
+
+	nemoview_set_flag(bin->view,
+			wl_fixed_to_double(fx),
+			wl_fixed_to_double(fy));
+}
+
 static void nemo_surface_set_layer(struct wl_client *client, struct wl_resource *resource, uint32_t type)
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
@@ -327,6 +336,7 @@ static const struct nemo_surface_interface nemo_surface_implementation = {
 	nemo_surface_set_input,
 	nemo_surface_set_pivot,
 	nemo_surface_set_anchor,
+	nemo_surface_set_flag,
 	nemo_surface_set_layer,
 	nemo_surface_set_parent,
 	nemo_surface_set_fullscreen_type,

@@ -177,7 +177,8 @@ extern void nemocompz_get_presentation_clock(struct nemocompz *compz, struct tim
 
 extern int nemocompz_is_running(struct nemocompz *compz);
 
-extern int nemocompz_contains_view(struct nemocompz *compz, struct nemoview *view, float dx, float dy);
+extern int nemocompz_contains_view(struct nemocompz *compz, struct nemoview *view);
+extern int nemocompz_contains_view_near(struct nemocompz *compz, struct nemoview *view, float dx, float dy);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
