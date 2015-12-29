@@ -96,6 +96,8 @@ struct nemoshell {
 	struct {
 		double max_rotate;
 		double max_scale;
+
+		double resize_interval;
 	} pick;
 
 	struct nemoitem *configs;

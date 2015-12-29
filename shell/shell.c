@@ -1081,4 +1081,5 @@ void nemoshell_load_gestures(struct nemoshell *shell)
 	shell->pick.max_rotate = shell->pick.max_rotate * M_PI / 180.0f;
 
 	shell->pick.max_scale = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "max_scale", 0.15f);
+	shell->pick.resize_interval = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "resize_interval", 50.0f);
 }

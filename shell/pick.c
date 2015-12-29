@@ -231,30 +231,33 @@ static void pick_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 
 	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_RESIZE)) {
 		double distance = pickgrab_calculate_touchpoint_distance(pick->tp0, pick->tp1);
-		int32_t width, height;
 
-		if (bin->resize_edges & WL_SHELL_SURFACE_RESIZE_LEFT ||
-				bin->resize_edges & WL_SHELL_SURFACE_RESIZE_RIGHT) {
-			width = pick->width + (distance - pick->touch.distance);
-		} else {
-			width = pick->width;
+		if (fabsf(distance - pick->resize.distance) > shell->pick.resize_interval) {
+			int32_t width, height;
+
+			if (bin->resize_edges & WL_SHELL_SURFACE_RESIZE_LEFT ||
+					bin->resize_edges & WL_SHELL_SURFACE_RESIZE_RIGHT) {
+				width = pick->width + (distance - pick->touch.distance);
+			} else {
+				width = pick->width;
+			}
+
+			if (bin->resize_edges & WL_SHELL_SURFACE_RESIZE_TOP ||
+					bin->resize_edges & WL_SHELL_SURFACE_RESIZE_BOTTOM) {
+				height = pick->height + (distance - pick->touch.distance);
+			} else {
+				height = pick->height;
+			}
+
+			width = MAX(width, bin->min_width);
+			height = MAX(height, bin->min_height);
+			width = MIN(width, bin->max_width);
+			height = MIN(height, bin->max_height);
+
+			bin->client->send_configure(bin->canvas, width, height);
+
+			pick->resize.distance = pick->other->resize.distance = distance;
 		}
-
-		if (bin->resize_edges & WL_SHELL_SURFACE_RESIZE_TOP ||
-				bin->resize_edges & WL_SHELL_SURFACE_RESIZE_BOTTOM) {
-			height = pick->height + (distance - pick->touch.distance);
-		} else {
-			height = pick->height;
-		}
-
-		width = MAX(width, bin->min_width);
-		height = MAX(height, bin->min_height);
-		width = MIN(width, bin->max_width);
-		height = MIN(height, bin->max_height);
-
-		bin->client->send_configure(bin->canvas, width, height);
-
-		pick->resize.distance = pick->other->resize.distance = distance;
 	}
 
 	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_MOVE)) {
