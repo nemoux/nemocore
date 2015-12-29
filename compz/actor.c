@@ -24,6 +24,16 @@ static void nemoactor_update_output(struct nemocontent *content, uint32_t node_m
 
 	if (actor->dispatch_output != NULL)
 		actor->dispatch_output(actor, node_mask, screen_mask);
+
+	if (content->node_mask != node_mask) {
+		content->dirty = 1;
+
+		pixman_region32_union_rect(&content->damage, &content->damage,
+				0, 0, content->width, content->height);
+	}
+
+	content->node_mask = node_mask;
+	content->screen_mask = screen_mask;
 }
 
 static void nemoactor_update_transform(struct nemocontent *content, int visible)

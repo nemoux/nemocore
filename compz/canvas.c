@@ -466,7 +466,6 @@ static void nemocanvas_update_output(struct nemocontent *content, uint32_t node_
 	struct wl_client *client;
 	uint32_t node_next = 0;
 	uint32_t screen_next = 0;
-	uint32_t dmask, emask, lmask;
 
 	wl_list_for_each(view, &canvas->view_list, link) {
 		node_next |= view->node_mask;
@@ -479,10 +478,6 @@ static void nemocanvas_update_output(struct nemocontent *content, uint32_t node_
 		pixman_region32_union_rect(&content->damage, &content->damage,
 				0, 0, content->width, content->height);
 	}
-
-	dmask = content->screen_mask ^ screen_next;
-	emask = dmask & screen_next;
-	lmask = content->screen_mask & dmask;
 
 	content->node_mask = node_next;
 	content->screen_mask = screen_next;
