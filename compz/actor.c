@@ -18,6 +18,22 @@
 #include <keyboard.h>
 #include <nemomisc.h>
 
+static void nemoactor_update_output(struct nemocontent *content, uint32_t node_mask, uint32_t screen_mask)
+{
+	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
+
+	if (actor->dispatch_output != NULL)
+		actor->dispatch_output(actor, node_mask, screen_mask);
+}
+
+static void nemoactor_update_transform(struct nemocontent *content, int visible)
+{
+	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
+
+	if (actor->dispatch_transform != NULL)
+		actor->dispatch_transform(actor, visible);
+}
+
 static int nemoactor_read_pixels(struct nemocontent *content, pixman_format_code_t format, void *pixels)
 {
 }
@@ -57,10 +73,12 @@ struct nemoactor *nemoactor_create_pixman(struct nemocompz *compz, int width, in
 	actor->base.transform_to_buffer_point = NULL;
 	actor->base.transform_to_buffer_rect = NULL;
 
-	actor->base.update_output = NULL;
+	actor->base.update_output = nemoactor_update_output;
+	actor->base.update_transform = nemoactor_update_transform;
 	actor->base.read_pixels = nemoactor_read_pixels;
 
 	actor->dispatch_resize = NULL;
+	actor->dispatch_output = NULL;
 	actor->dispatch_frame = NULL;
 
 	actor->min_width = 0;
@@ -183,10 +201,12 @@ struct nemoactor *nemoactor_create_gl(struct nemocompz *compz, int width, int he
 	actor->base.transform_to_buffer_point = NULL;
 	actor->base.transform_to_buffer_rect = NULL;
 
-	actor->base.update_output = NULL;
+	actor->base.update_output = nemoactor_update_output;
+	actor->base.update_transform = nemoactor_update_transform;
 	actor->base.read_pixels = nemoactor_read_pixels;
 
 	actor->dispatch_resize = NULL;
+	actor->dispatch_output = NULL;
 	actor->dispatch_frame = NULL;
 
 	actor->min_width = 0;
@@ -317,6 +337,16 @@ void nemoactor_set_dispatch_resize(struct nemoactor *actor, nemoactor_dispatch_r
 	actor->dispatch_resize = dispatch;
 }
 
+void nemoactor_set_dispatch_output(struct nemoactor *actor, nemoactor_dispatch_output_t dispatch)
+{
+	actor->dispatch_output = dispatch;
+}
+
+void nemoactor_set_dispatch_transform(struct nemoactor *actor, nemoactor_dispatch_transform_t dispatch)
+{
+	actor->dispatch_transform = dispatch;
+}
+
 void nemoactor_set_dispatch_frame(struct nemoactor *actor, nemoactor_dispatch_frame_t dispatch)
 {
 	actor->dispatch_frame = dispatch;
@@ -328,6 +358,18 @@ int nemoactor_dispatch_resize(struct nemoactor *actor, int32_t width, int32_t he
 		return actor->dispatch_resize(actor, width, height, fixed);
 
 	return 0;
+}
+
+void nemoactor_dispatch_output(struct nemoactor *actor, uint32_t node_mask, uint32_t screen_mask)
+{
+	if (actor->dispatch_output != NULL)
+		actor->dispatch_output(actor, node_mask, screen_mask);
+}
+
+void nemoactor_dispatch_transform(struct nemoactor *actor, int visible)
+{
+	if (actor->dispatch_transform != NULL)
+		actor->dispatch_transform(actor, visible);
 }
 
 void nemoactor_dispatch_frame(struct nemoactor *actor)

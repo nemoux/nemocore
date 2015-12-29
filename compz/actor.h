@@ -21,6 +21,8 @@ struct nemoview;
 struct nemoscreen;
 
 typedef int (*nemoactor_dispatch_resize_t)(struct nemoactor *actor, int32_t width, int32_t height, int32_t fixed);
+typedef void (*nemoactor_dispatch_output_t)(struct nemoactor *actor, uint32_t node_mask, uint32_t screen_mask);
+typedef void (*nemoactor_dispatch_transform_t)(struct nemoactor *actor, int32_t visible);
 typedef void (*nemoactor_dispatch_frame_t)(struct nemoactor *actor, uint32_t msecs);
 
 struct nemoactor {
@@ -54,6 +56,8 @@ struct nemoactor {
 #endif
 
 	nemoactor_dispatch_resize_t dispatch_resize;
+	nemoactor_dispatch_output_t dispatch_output;
+	nemoactor_dispatch_transform_t dispatch_transform;
 	nemoactor_dispatch_frame_t dispatch_frame;
 
 	struct wl_list frame_link;
@@ -77,9 +81,13 @@ extern void nemoactor_damage_region(struct nemoactor *actor, pixman_region32_t *
 extern void nemoactor_flush_damage(struct nemoactor *actor);
 
 extern void nemoactor_set_dispatch_resize(struct nemoactor *actor, nemoactor_dispatch_resize_t dispatch);
+extern void nemoactor_set_dispatch_output(struct nemoactor *actor, nemoactor_dispatch_output_t dispatch);
+extern void nemoactor_set_dispatch_transform(struct nemoactor *actor, nemoactor_dispatch_transform_t dispatch);
 extern void nemoactor_set_dispatch_frame(struct nemoactor *actor, nemoactor_dispatch_frame_t dispatch);
 
 extern int nemoactor_dispatch_resize(struct nemoactor *actor, int32_t width, int32_t height, int32_t fixed);
+extern void nemoactor_dispatch_output(struct nemoactor *actor, uint32_t node_mask, uint32_t screen_mask);
+extern void nemoactor_dispatch_transform(struct nemoactor *actor, int visible);
 extern void nemoactor_dispatch_frame(struct nemoactor *actor);
 
 extern void nemoactor_feedback(struct nemoactor *actor);
