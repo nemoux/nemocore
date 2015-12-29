@@ -110,6 +110,7 @@ struct nemoview {
 	struct {
 		int enable;
 		int dirty;
+		int done;
 		int type;
 
 		float cosr, sinr;
@@ -138,7 +139,8 @@ extern void nemoview_put_pivot(struct nemoview *view);
 extern void nemoview_set_anchor(struct nemoview *view, float ax, float ay);
 extern void nemoview_set_flag(struct nemoview *view, float fx, float fy);
 extern void nemoview_correct_pivot(struct nemoview *view, float px, float py);
-extern void nemoview_geometry_dirty(struct nemoview *view);
+extern void nemoview_transform_dirty(struct nemoview *view);
+extern void nemoview_transform_done(struct nemoview *view);
 
 extern void nemoview_damage_dirty(struct nemoview *view);
 extern void nemoview_clip_dirty(struct nemoview *view);
@@ -152,6 +154,7 @@ extern void nemoview_transform_from_global(struct nemoview *view, float x, float
 extern int nemoview_get_point_area(struct nemoview *view, float x, float y, float b);
 extern void nemoview_update_output(struct nemoview *view);
 extern void nemoview_update_transform(struct nemoview *view);
+extern void nemoview_update_transform_done(struct nemoview *view);
 extern void nemoview_update_transform_children(struct nemoview *view);
 extern void nemoview_update_transform_parent(struct nemoview *view);
 

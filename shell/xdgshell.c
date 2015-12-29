@@ -55,8 +55,13 @@ static void xdg_send_configure(struct nemocanvas *canvas, int32_t width, int32_t
 	wl_array_release(&states);
 }
 
+static void xdg_send_transform(struct nemocanvas *canvas, int visible)
+{
+}
+
 static struct nemoclient xdg_client = {
-	xdg_send_configure
+	xdg_send_configure,
+	xdg_send_transform
 };
 
 static void xdg_surface_destroy(struct wl_client *client, struct wl_resource *resource)

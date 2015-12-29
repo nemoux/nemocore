@@ -164,5 +164,9 @@
 			<arg name="height" type="int"/>
 			<arg name="fixed" type="int"/>
 		</event>
+
+		<event name="transform">
+			<arg name="visible" type="int"/>
+		</event>
 	</interface>
 </protocol>

@@ -108,6 +108,8 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		}
 	}
 
+	nemoview_transform_done(bin->view);
+
 	bin->resize_edges = 0;
 	nemoshell_send_bin_configure(bin);
 
@@ -532,6 +534,8 @@ static void pick_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		if (nemoactor_dispatch_resize(actor, width, height, 0) == 0)
 			nemoactor_dispatch_frame(actor);
 	}
+
+	nemoview_transform_done(actor->view);
 
 	nemoshell_end_touchpoint_actorgrab(grab);
 	nemoshell_end_touchpoint_actorgrab(&pick->other->base);

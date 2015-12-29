@@ -30,8 +30,13 @@ static void shell_send_configure(struct nemocanvas *canvas, int32_t width, int32
 	}
 }
 
+static void shell_send_transform(struct nemocanvas *canvas, int visible)
+{
+}
+
 static struct nemoclient shell_client = {
-	shell_send_configure
+	shell_send_configure,
+	shell_send_transform
 };
 
 static void shell_surface_pong(struct wl_client *client, struct wl_resource *resource, uint32_t serial)

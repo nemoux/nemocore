@@ -31,8 +31,16 @@ static void nemo_send_configure(struct nemocanvas *canvas, int32_t width, int32_
 	nemo_surface_send_configure(bin->resource, width, height, fixed);
 }
 
+static void nemo_send_transform(struct nemocanvas *canvas, int visible)
+{
+	struct shellbin *bin = nemoshell_get_bin(canvas);
+
+	nemo_surface_send_transform(bin->resource, visible);
+}
+
 static struct nemoclient nemo_client = {
-	nemo_send_configure
+	nemo_send_configure,
+	nemo_send_transform
 };
 
 static void nemo_surface_destroy(struct wl_client *client, struct wl_resource *resource)

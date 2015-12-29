@@ -112,7 +112,7 @@ int nemoactor_resize_pixman(struct nemoactor *actor, int width, int height)
 		actor->base.width = width;
 		actor->base.height = height;
 
-		nemoview_geometry_dirty(actor->view);
+		nemoview_transform_dirty(actor->view);
 	}
 
 	return 0;
@@ -228,7 +228,7 @@ int nemoactor_resize_gl(struct nemoactor *actor, int width, int height)
 		actor->base.width = width;
 		actor->base.height = height;
 
-		nemoview_geometry_dirty(actor->view);
+		nemoview_transform_dirty(actor->view);
 	}
 
 	return 0;

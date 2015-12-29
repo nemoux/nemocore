@@ -243,6 +243,8 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 			nemoview_damage_below(view);
 		}
 
+		nemoview_transform_done(bin->view);
+
 		bin->last_width = canvas->base.width;
 		bin->last_height = canvas->base.height;
 
@@ -321,11 +323,20 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 			nemoview_update_transform_children(view);
 		}
 
+		nemoview_transform_done(bin->view);
+
 		bin->last_width = canvas->base.width;
 		bin->last_height = canvas->base.height;
 
 		wl_signal_emit(&bin->resize_signal, bin);
 	}
+}
+
+static void shellbin_transform_canvas(struct nemocanvas *canvas, int visible)
+{
+	struct shellbin *bin = nemoshell_get_bin(canvas);
+
+	bin->client->send_transform(canvas, visible);
 }
 
 static void shellbin_handle_canvas_destroy(struct wl_listener *listener, void *data)
@@ -391,6 +402,8 @@ struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas
 
 	canvas->configure = shellbin_configure_canvas;
 	canvas->configure_private = (void *)bin;
+
+	canvas->transform = shellbin_transform_canvas;
 
 	bin->canvas_destroy_listener.notify = shellbin_handle_canvas_destroy;
 	wl_signal_add(&canvas->destroy_signal, &bin->canvas_destroy_listener);

@@ -260,6 +260,10 @@ static void nemoplay_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t w
 	}
 }
 
+static void nemoplay_dispatch_canvas_transform(struct nemocanvas *canvas, int32_t visible)
+{
+}
+
 int main(int argc, char *argv[])
 {
 	struct option options[] = {
@@ -394,6 +398,7 @@ int main(int argc, char *argv[])
 		nemocanvas_set_anchor(canvas, -0.5f, -0.5f);
 	nemocanvas_set_dispatch_frame(canvas, nemoplay_dispatch_canvas_frame);
 	nemocanvas_set_dispatch_resize(canvas, nemoplay_dispatch_canvas_resize);
+	nemocanvas_set_dispatch_transform(canvas, nemoplay_dispatch_canvas_transform);
 	nemocanvas_set_max_size(canvas, UINT32_MAX, UINT32_MAX);
 	nemocanvas_set_input_type(canvas, NEMO_SURFACE_INPUT_TYPE_TOUCH);
 

@@ -732,11 +732,19 @@ void nemocompz_update_transform(struct nemocompz *compz)
 					if (child->transform.dirty != 0) {
 						nemoview_update_transform(child);
 					}
+
+					if (child->transform.done != 0) {
+						nemoview_update_transform_done(child);
+					}
 				}
 			}
 
 			if (view->transform.dirty != 0) {
 				nemoview_update_transform(view);
+			}
+
+			if (view->transform.done != 0) {
+				nemoview_update_transform_done(view);
 			}
 		}
 	}

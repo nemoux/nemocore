@@ -488,6 +488,14 @@ static void nemocanvas_update_output(struct nemocontent *content, uint32_t node_
 	content->screen_mask = screen_next;
 }
 
+static void nemocanvas_update_transform(struct nemocontent *content, int visible)
+{
+	struct nemocanvas *canvas = (struct nemocanvas *)container_of(content, struct nemocanvas, base);
+
+	if (canvas->transform != NULL)
+		canvas->transform(canvas, visible);
+}
+
 static int nemocanvas_read_pixels(struct nemocontent *content, pixman_format_code_t format, void *pixels)
 {
 	struct nemocanvas *canvas = (struct nemocanvas *)container_of(content, struct nemocanvas, base);
@@ -1166,6 +1174,7 @@ struct nemocanvas *nemocanvas_create(struct wl_client *client, struct wl_resourc
 	canvas->base.transform_to_buffer_rect = nemocanvas_transform_to_buffer_rect;
 
 	canvas->base.update_output = nemocanvas_update_output;
+	canvas->base.update_transform = nemocanvas_update_transform;
 	canvas->base.read_pixels = nemocanvas_read_pixels;
 
 	canvas->base.pointer_enter = nemocanvas_pointer_enter;
@@ -1296,7 +1305,7 @@ void nemocanvas_set_size(struct nemocanvas *canvas, int32_t width, int32_t heigh
 	canvas->base.height = height;
 
 	wl_list_for_each(view, &canvas->view_list, link) {
-		nemoview_geometry_dirty(view);
+		nemoview_transform_dirty(view);
 	}
 }
 
@@ -1383,7 +1392,7 @@ void nemocanvas_commit_state(struct nemocanvas *canvas, struct nemocanvas_state 
 		pixman_region32_copy(&canvas->base.opaque, &opaque);
 
 		wl_list_for_each(view, &canvas->view_list, link) {
-			nemoview_geometry_dirty(view);
+			nemoview_transform_dirty(view);
 		}
 	}
 

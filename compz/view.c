@@ -100,7 +100,7 @@ void nemoview_set_position(struct nemoview *view, float x, float y)
 
 	view->geometry.x = x;
 	view->geometry.y = y;
-	nemoview_geometry_dirty(view);
+	nemoview_transform_dirty(view);
 }
 
 void nemoview_set_rotation(struct nemoview *view, float r)
@@ -113,7 +113,7 @@ void nemoview_set_rotation(struct nemoview *view, float r)
 	view->geometry.r = r;
 	view->transform.cosr = cos(r);
 	view->transform.sinr = sin(r);
-	nemoview_geometry_dirty(view);
+	nemoview_transform_dirty(view);
 }
 
 void nemoview_set_scale(struct nemoview *view, float sx, float sy)
@@ -125,7 +125,7 @@ void nemoview_set_scale(struct nemoview *view, float sx, float sy)
 
 	view->geometry.sx = sx;
 	view->geometry.sy = sy;
-	nemoview_geometry_dirty(view);
+	nemoview_transform_dirty(view);
 }
 
 void nemoview_set_pivot(struct nemoview *view, float px, float py)
@@ -136,7 +136,7 @@ void nemoview_set_pivot(struct nemoview *view, float px, float py)
 	nemoview_correct_pivot(view, px, py);
 
 	view->geometry.has_pivot = 1;
-	nemoview_geometry_dirty(view);
+	nemoview_transform_dirty(view);
 }
 
 void nemoview_put_pivot(struct nemoview *view)
@@ -147,7 +147,7 @@ void nemoview_put_pivot(struct nemoview *view)
 	nemoview_correct_pivot(view, 0.0f, 0.0f);
 
 	view->geometry.has_pivot = 0;
-	nemoview_geometry_dirty(view);
+	nemoview_transform_dirty(view);
 }
 
 void nemoview_set_anchor(struct nemoview *view, float ax, float ay)
@@ -158,7 +158,7 @@ void nemoview_set_anchor(struct nemoview *view, float ax, float ay)
 	view->geometry.ax = ax;
 	view->geometry.ay = ay;
 	view->geometry.has_anchor = 1;
-	nemoview_geometry_dirty(view);
+	nemoview_transform_dirty(view);
 }
 
 void nemoview_set_flag(struct nemoview *view, float fx, float fy)
@@ -240,7 +240,7 @@ void nemoview_correct_pivot(struct nemoview *view, float px, float py)
 	}
 }
 
-void nemoview_geometry_dirty(struct nemoview *view)
+void nemoview_transform_dirty(struct nemoview *view)
 {
 	struct nemoview *child;
 
@@ -250,8 +250,13 @@ void nemoview_geometry_dirty(struct nemoview *view)
 	view->transform.dirty = 1;
 
 	wl_list_for_each(child, &view->children_list, children_link) {
-		nemoview_geometry_dirty(child);
+		nemoview_transform_dirty(child);
 	}
+}
+
+void nemoview_transform_done(struct nemoview *view)
+{
+	view->transform.done = 1;
 }
 
 void nemoview_damage_dirty(struct nemoview *view)
@@ -553,6 +558,14 @@ void nemoview_update_transform(struct nemoview *view)
 	nemoview_update_output(view);
 }
 
+void nemoview_update_transform_done(struct nemoview *view)
+{
+	view->transform.done = 0;
+
+	nemocontent_update_transform(view->content,
+			nemocompz_contains_view(view->compz, view));
+}
+
 void nemoview_update_transform_children(struct nemoview *view)
 {
 	struct nemoview *child;
@@ -567,7 +580,7 @@ void nemoview_update_transform_children(struct nemoview *view)
 				child->geometry.sy = 1.0f;
 			}
 
-			nemoview_geometry_dirty(child);
+			nemoview_transform_dirty(child);
 			nemoview_update_transform(child);
 		}
 	}
@@ -586,7 +599,7 @@ void nemoview_update_transform_parent(struct nemoview *view)
 			view->geometry.sy = 1.0f;
 		}
 
-		nemoview_geometry_dirty(view);
+		nemoview_transform_dirty(view);
 		nemoview_update_transform(view);
 	}
 }
@@ -615,7 +628,7 @@ void nemoview_set_parent(struct nemoview *view, struct nemoview *parent)
 		wl_list_insert(&parent->children_list, &view->children_link);
 	}
 
-	nemoview_geometry_dirty(view);
+	nemoview_transform_dirty(view);
 }
 
 void nemoview_accumulate_damage(struct nemoview *view, pixman_region32_t *opaque)
@@ -652,7 +665,7 @@ void nemoview_attach_layer(struct nemoview *view, struct nemolayer *layer)
 	if (layer_link == &view->layer_link)
 		return;
 
-	nemoview_geometry_dirty(view);
+	nemoview_transform_dirty(view);
 	wl_list_remove(&view->layer_link);
 	wl_list_insert(layer_link, &view->layer_link);
 	nemoview_clip_dirty(view);
@@ -666,7 +679,7 @@ void nemoview_detach_layer(struct nemoview *view)
 	if (view->layer == NULL)
 		return;
 
-	nemoview_geometry_dirty(view);
+	nemoview_transform_dirty(view);
 	wl_list_remove(&view->layer_link);
 	wl_list_init(&view->layer_link);
 
@@ -685,7 +698,7 @@ void nemoview_update_layer(struct nemoview *view)
 
 	layer_link = &view->layer->view_list;
 
-	nemoview_geometry_dirty(view);
+	nemoview_transform_dirty(view);
 	wl_list_remove(&view->layer_link);
 	wl_list_insert(layer_link, &view->layer_link);
 	nemoview_clip_dirty(view);
@@ -699,7 +712,7 @@ void nemoview_above_layer(struct nemoview *view, struct nemoview *above)
 	assert(view != NULL && above != NULL);
 
 	if (view->layer != NULL) {
-		nemoview_geometry_dirty(view);
+		nemoview_transform_dirty(view);
 		wl_list_remove(&view->layer_link);
 		wl_list_init(&view->layer_link);
 

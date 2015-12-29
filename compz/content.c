@@ -109,3 +109,10 @@ void nemocontent_update_output(struct nemocontent *content, uint32_t node_mask, 
 		content->screen_mask = screen_mask;
 	}
 }
+
+void nemocontent_update_transform(struct nemocontent *content, int visible)
+{
+	if (content->update_transform != NULL) {
+		content->update_transform(content, visible);
+	}
+}
