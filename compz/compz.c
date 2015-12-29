@@ -844,3 +844,18 @@ int nemocompz_is_running(struct nemocompz *compz)
 {
 	return compz->state == NEMOCOMPZ_RUNNING_STATE;
 }
+
+int nemocompz_contains_view(struct nemocompz *compz, struct nemoview *view, float dx, float dy)
+{
+	float tx, ty;
+
+	nemoview_transform_to_global(view,
+			view->content->width * view->geometry.fx,
+			view->content->height * view->geometry.fy,
+			&tx, &ty);
+
+	if (!pixman_region32_contains_point(&compz->scope, tx + dx, ty + dy, NULL))
+		return 0;
+
+	return 1;
+}

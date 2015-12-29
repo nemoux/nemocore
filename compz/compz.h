@@ -35,6 +35,7 @@ struct nemolayer;
 struct nemoanimation;
 struct nemoeffect;
 struct nemoscreen;
+struct nemoview;
 
 typedef void (*nemocompz_dispatch_idle_t)(void *data);
 
@@ -175,6 +176,8 @@ extern int nemocompz_set_presentation_clock_software(struct nemocompz *compz);
 extern void nemocompz_get_presentation_clock(struct nemocompz *compz, struct timespec *ts);
 
 extern int nemocompz_is_running(struct nemocompz *compz);
+
+extern int nemocompz_contains_view(struct nemocompz *compz, struct nemoview *view, float dx, float dy);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

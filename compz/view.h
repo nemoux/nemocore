@@ -96,6 +96,8 @@ struct nemoview {
 		float ax, ay;
 		int has_anchor;
 
+		float fx, fy;
+
 		float x, y;
 		float r;
 		float sx, sy;
@@ -134,6 +136,7 @@ extern void nemoview_set_scale(struct nemoview *view, float sx, float sy);
 extern void nemoview_set_pivot(struct nemoview *view, float px, float py);
 extern void nemoview_put_pivot(struct nemoview *view);
 extern void nemoview_set_anchor(struct nemoview *view, float ax, float ay);
+extern void nemoview_set_flag(struct nemoview *view, float fx, float fy);
 extern void nemoview_correct_pivot(struct nemoview *view, float px, float py);
 extern void nemoview_geometry_dirty(struct nemoview *view);
 

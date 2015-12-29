@@ -61,6 +61,9 @@ struct nemoview *nemoview_create(struct nemocompz *compz, struct nemocontent *co
 	view->geometry.py = 0.0f;
 	view->geometry.has_pivot = 0;
 
+	view->geometry.fx = 0.5f;
+	view->geometry.fy = 0.5f;
+
 	view->geometry.width = 0;
 	view->geometry.height = 0;
 
@@ -156,6 +159,12 @@ void nemoview_set_anchor(struct nemoview *view, float ax, float ay)
 	view->geometry.ay = ay;
 	view->geometry.has_anchor = 1;
 	nemoview_geometry_dirty(view);
+}
+
+void nemoview_set_flag(struct nemoview *view, float fx, float fy)
+{
+	view->geometry.fx = fx;
+	view->geometry.fy = fy;
 }
 
 void nemoview_correct_pivot(struct nemoview *view, float px, float py)

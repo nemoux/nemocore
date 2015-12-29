@@ -13,30 +13,13 @@
 #include <compz.h>
 #include <nemomisc.h>
 
-static int vieweffect_correct_position(struct nemoview *view, double *dx, double *dy, double *x, double *y)
-{
-	struct nemocompz *compz = view->compz;
-	float tx, ty;
-
-	nemoview_transform_to_global(view,
-			view->content->width * 0.5f,
-			view->content->height * 0.5f,
-			&tx, &ty);
-
-	if (!pixman_region32_contains_point(&compz->scope, tx + *dx, ty + *dy, NULL))
-		return -1;
-
-	*x = view->geometry.x + *dx;
-	*y = view->geometry.y + *dy;
-
-	return 0;
-}
-
 static int vieweffect_handle_frame(struct nemoeffect *base, uint32_t msecs)
 {
 	struct vieweffect *effect = (struct vieweffect *)container_of(base, struct vieweffect, base);
+	struct nemoview *view = effect->view;
 
 	if (effect->type & NEMO_VIEW_PITCH_EFFECT) {
+		struct nemocompz *compz = view->compz;
 		double x, y, dx, dy;
 
 		effect->pitch.velocity = MAX(effect->pitch.velocity - effect->pitch.friction * msecs / 1000.0f, 0.0f);
@@ -47,16 +30,19 @@ retry:
 
 		if (effect->pitch.velocity <= 1.0f) {
 			effect->type &= ~NEMO_VIEW_PITCH_EFFECT;
-		} else if (vieweffect_correct_position(effect->view, &dx, &dy, &x, &y) != 0) {
+		} else if (nemocompz_contains_view(compz, view, dx, dy) == 0) {
 			effect->pitch.velocity *= 0.5f;
 
 			goto retry;
 		} else {
-			nemoview_set_position(effect->view, x, y);
+			x = view->geometry.x + dx;
+			y = view->geometry.y + dy;
+
+			nemoview_set_position(view, x, y);
 		}
 	}
 
-	nemoview_schedule_repaint(effect->view);
+	nemoview_schedule_repaint(view);
 
 	return effect->type == 0x0;
 }
