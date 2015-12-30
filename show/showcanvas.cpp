@@ -655,6 +655,16 @@ int nemoshow_canvas_set_viewport(struct nemoshow *show, struct showone *one, dou
 		NEMOSHOW_CANVAS_CC(canvas, canvas) = new SkCanvas(NEMOSHOW_CANVAS_CC(canvas, device));
 
 		nemoshow_canvas_damage_all(one);
+	} else if (one->sub == NEMOSHOW_CANVAS_OPENGL_TYPE) {
+		canvas->viewport.sx = sx;
+		canvas->viewport.sy = sy;
+
+		canvas->viewport.width = canvas->width * sx;
+		canvas->viewport.height = canvas->height * sy;
+
+		nemotale_node_set_viewport_gl(canvas->node, canvas->viewport.width, canvas->viewport.height);
+
+		nemoshow_canvas_damage_all(one);
 	}
 
 	return 0;
