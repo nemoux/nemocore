@@ -392,10 +392,10 @@ struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas
 	bin->flags = NEMO_SHELL_SURFACE_ALL_FLAGS;
 	bin->layer = &shell->service_layer;
 
-	bin->min_width = 0;
-	bin->min_height = 0;
-	bin->max_width = nemocompz_get_scene_width(shell->compz);
-	bin->max_height = nemocompz_get_scene_height(shell->compz);
+	bin->min_width = shell->bin.min_width;
+	bin->min_height = shell->bin.min_height;
+	bin->max_width = shell->bin.max_width;
+	bin->max_height = shell->bin.max_height;
 
 	bin->ax = 0.5f;
 	bin->ay = 0.5f;
@@ -1095,4 +1095,9 @@ void nemoshell_load_gestures(struct nemoshell *shell)
 
 	shell->pick.max_scale = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "max_scale", 0.15f);
 	shell->pick.resize_interval = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "resize_interval", 50.0f);
+
+	shell->bin.min_width = nemoitem_get_iattr_named(shell->configs, "//nemoshell/bin", "min_width", 0);
+	shell->bin.min_height = nemoitem_get_iattr_named(shell->configs, "//nemoshell/bin", "min_height", 0);
+	shell->bin.max_width = nemoitem_get_iattr_named(shell->configs, "//nemoshell/bin", "max_width", nemocompz_get_scene_width(shell->compz) * 1.5f);
+	shell->bin.max_height = nemoitem_get_iattr_named(shell->configs, "//nemoshell/bin", "max_height", nemocompz_get_scene_height(shell->compz) * 1.5f);
 }

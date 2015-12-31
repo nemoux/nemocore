@@ -100,6 +100,11 @@ struct nemoshell {
 		double resize_interval;
 	} pick;
 
+	struct {
+		uint32_t min_width, min_height;
+		uint32_t max_width, max_height;
+	} bin;
+
 	struct nemoitem *configs;
 
 	int is_logging_grab;
