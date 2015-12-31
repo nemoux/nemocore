@@ -196,9 +196,11 @@ static void pick_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 		double distance = pickgrab_calculate_touchpoint_distance(pick->tp0, pick->tp1);
 
 		if (distance > shell->pick.min_distance) {
-			if (fabsf(1.0f - distance / pick->touch.distance) < shell->pick.max_scale) {
-				if (pick->sx * (distance / pick->touch.distance) * pick->width > bin->max_width ||
-						pick->sy * (distance / pick->touch.distance) * pick->height > bin->max_height) {
+			float s = distance / pick->touch.distance;
+
+			if (fabsf(1.0f - s) < shell->pick.max_scale) {
+				if (pick->sx * s * pick->width > bin->max_width ||
+						pick->sy * s * pick->height > bin->max_height) {
 					double sx = (double)bin->max_width / (double)pick->width;
 					double sy = (double)bin->max_height / (double)pick->height;
 
@@ -209,8 +211,8 @@ static void pick_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 						pick->sx = pick->other->sx = sx;
 						pick->sy = pick->other->sy = sx;
 					}
-				} else if (pick->sx * (distance / pick->touch.distance) * pick->width < bin->min_width ||
-						pick->sy * (distance / pick->touch.distance) * pick->height < bin->min_height) {
+				} else if (pick->sx * s * pick->width < bin->min_width ||
+						pick->sy * s * pick->height < bin->min_height) {
 					double sx = (double)bin->min_width / (double)pick->width;
 					double sy = (double)bin->min_height / (double)pick->height;
 
@@ -222,8 +224,8 @@ static void pick_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 						pick->sy = pick->other->sy = sy;
 					}
 				} else {
-					pick->sx = pick->other->sx = pick->sx * (distance / pick->touch.distance);
-					pick->sy = pick->other->sy = pick->sy * (distance / pick->touch.distance);
+					pick->sx = pick->other->sx = pick->sx * s;
+					pick->sy = pick->other->sy = pick->sy * s;
 				}
 
 				nemoview_set_scale(bin->view, pick->sx, pick->sy);
@@ -592,9 +594,11 @@ static void pick_actorgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 		double distance = pickgrab_calculate_touchpoint_distance(pick->tp0, pick->tp1);
 
 		if (distance > shell->pick.min_distance) {
-			if (fabsf(1.0f - distance / pick->touch.distance) < shell->pick.max_scale) {
-				if (pick->sx * (distance / pick->touch.distance) * pick->width > actor->max_width ||
-						pick->sy * (distance / pick->touch.distance) * pick->height > actor->max_height) {
+			float s = distance / pick->touch.distance;
+
+			if (fabsf(1.0f - s) < shell->pick.max_scale) {
+				if (pick->sx * s * pick->width > actor->max_width ||
+						pick->sy * s * pick->height > actor->max_height) {
 					double sx = (double)actor->max_width / (double)pick->width;
 					double sy = (double)actor->max_height / (double)pick->height;
 
@@ -605,8 +609,8 @@ static void pick_actorgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 						pick->sx = pick->other->sx = sx;
 						pick->sy = pick->other->sy = sx;
 					}
-				} else if (pick->sx * (distance / pick->touch.distance) * pick->width < actor->min_width ||
-						pick->sy * (distance / pick->touch.distance) * pick->height < actor->min_height) {
+				} else if (pick->sx * s * pick->width < actor->min_width ||
+						pick->sy * s * pick->height < actor->min_height) {
 					double sx = (double)actor->min_width / (double)pick->width;
 					double sy = (double)actor->min_height / (double)pick->height;
 
@@ -618,8 +622,8 @@ static void pick_actorgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 						pick->sy = pick->other->sy = sy;
 					}
 				} else {
-					pick->sx = pick->other->sx = pick->sx * (distance / pick->touch.distance);
-					pick->sy = pick->other->sy = pick->sy * (distance / pick->touch.distance);
+					pick->sx = pick->other->sx = pick->sx * s;
+					pick->sy = pick->other->sy = pick->sy * s;
 				}
 
 				nemoview_set_scale(actor->view, pick->sx, pick->sy);
