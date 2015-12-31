@@ -519,6 +519,9 @@ void nemotouch_notify_frame(struct nemotouch *touch, int id)
 	if (touch == NULL)
 		return;
 
+	if (touch->is_logging != 0)
+		nemolog_message("TOUCH", "[FRAME] %d:\n", id);
+
 	tp = nemotouch_get_touchpoint_by_id(touch, id);
 	if (tp == NULL)
 		return;
