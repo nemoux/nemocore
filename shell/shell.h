@@ -96,10 +96,10 @@ struct nemoshell {
 	struct {
 		double max_rotate;
 		double max_scale;
+		double fullscreen_scale;
 
+		double scale_interval;
 		double resize_interval;
-
-		uint32_t min_distance;
 	} pick;
 
 	struct {

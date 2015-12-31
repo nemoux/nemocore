@@ -19,9 +19,12 @@ struct shellgrab_pick {
 	uint32_t type;
 
 	struct {
-		double distance;
 		float r;
-	} touch;
+	} rotate;
+
+	struct {
+		double distance;
+	} scale;
 
 	struct {
 		double distance;
@@ -44,9 +47,12 @@ struct actorgrab_pick {
 	uint32_t type;
 
 	struct {
-		double distance;
 		float r;
-	} touch;
+	} rotate;
+
+	struct {
+		double distance;
+	} scale;
 
 	int32_t width, height;
 	float sx, sy;

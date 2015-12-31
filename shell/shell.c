@@ -1092,10 +1092,10 @@ void nemoshell_load_gestures(struct nemoshell *shell)
 
 	shell->pick.max_rotate = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "max_rotate", 45.0f);
 	shell->pick.max_rotate = shell->pick.max_rotate * M_PI / 180.0f;
-
 	shell->pick.max_scale = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "max_scale", 0.15f);
+	shell->pick.fullscreen_scale = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "fullscreen_scale", 1.5f);
+	shell->pick.scale_interval = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "scale_interval", 1.0f);
 	shell->pick.resize_interval = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "resize_interval", 50.0f);
-	shell->pick.min_distance = nemoitem_get_iattr_named(shell->configs, "//nemoshell/pick", "min_distance", 50);
 
 	shell->bin.min_width = nemoitem_get_iattr_named(shell->configs, "//nemoshell/bin", "min_width", 0);
 	shell->bin.min_height = nemoitem_get_iattr_named(shell->configs, "//nemoshell/bin", "min_height", 0);
