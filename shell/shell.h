@@ -98,6 +98,8 @@ struct nemoshell {
 		double max_scale;
 
 		double resize_interval;
+
+		uint32_t min_distance;
 	} pick;
 
 	struct {
