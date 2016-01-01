@@ -131,19 +131,9 @@ out:
 
 static void pick_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint32_t time, uint64_t touchid, float x, float y)
 {
-	struct shellgrab *grab = (struct shellgrab *)container_of(base, struct shellgrab, base.touchpoint);
-	struct shellgrab_pick *pick = (struct shellgrab_pick *)container_of(grab, struct shellgrab_pick, base);
 	struct touchpoint *tp = base->touchpoint;
-	struct shellbin *bin = grab->bin;
-	struct nemoshell *shell;
-	double distance = pickgrab_calculate_touchpoint_distance(pick->tp0, pick->tp1);
-	float r = pickgrab_calculate_touchpoint_angle(pick->tp0, pick->tp1);
 
 	touchpoint_move(tp, x, y);
-
-	if (bin == NULL)
-		return;
-	shell = bin->shell;
 
 	if (tp->focus != NULL) {
 		float sx, sy;
@@ -152,6 +142,26 @@ static void pick_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 
 		nemocontent_touch_motion(tp, tp->focus->content, time, touchid, sx, sy, x, y);
 	}
+}
+
+static void pick_shellgrab_touchpoint_frame(struct touchpoint_grab *base, uint32_t frameid)
+{
+	struct shellgrab *grab = (struct shellgrab *)container_of(base, struct shellgrab, base.touchpoint);
+	struct shellgrab_pick *pick = (struct shellgrab_pick *)container_of(grab, struct shellgrab_pick, base);
+	struct touchpoint *tp = base->touchpoint;
+	struct shellbin *bin = grab->bin;
+	struct nemoshell *shell;
+	double distance = pickgrab_calculate_touchpoint_distance(pick->tp0, pick->tp1);
+	float r = pickgrab_calculate_touchpoint_angle(pick->tp0, pick->tp1);
+	uint64_t touchid = tp->id;
+
+	if (bin == NULL)
+		return;
+	shell = bin->shell;
+
+	if (pick->frameid == frameid)
+		return;
+	pick->frameid = pick->other->frameid = frameid;
 
 	if (pick->has_reset != 0 && bin->reset_scale == 0) {
 		pick->sx = 1.0f;
@@ -171,10 +181,10 @@ static void pick_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 		pick->dx = bin->view->geometry.x - (pick->tp0->x + pick->tp1->x) / 2.0f;
 		pick->dy = bin->view->geometry.y - (pick->tp0->y + pick->tp1->y) / 2.0f;
 
-		pick->has_reset = 0;
+		pick->has_reset = pick->other->has_reset = 0;
 
 		if (shell->is_logging_grab != 0)
-			nemolog_message("PICK", "[MOTION:RESET] %llu: width(%d) height(%d) (%u)\n", touchid, pick->width, pick->height, time);
+			nemolog_message("PICK", "[FRAME:RESET] %llu: width(%d) height(%d) (%u)\n", touchid, pick->width, pick->height, time);
 	}
 
 	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_ROTATE)) {
@@ -185,7 +195,7 @@ static void pick_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 		}
 
 		if (shell->is_logging_grab != 0)
-			nemolog_message("PICK", "[MOTION:ROTATE] %llu: r(%f) (%u)\n", touchid, pick->r, time);
+			nemolog_message("PICK", "[FRAME:ROTATE] %llu: r(%f) (%u)\n", touchid, pick->r, time);
 
 		pick->rotate.r = pick->other->rotate.r = r;
 	}
@@ -228,7 +238,7 @@ static void pick_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 			}
 
 			if (shell->is_logging_grab != 0)
-				nemolog_message("PICK", "[MOTION:SCALE] %llu: sx(%f) sy(%f) (%u)\n", touchid, pick->sx, pick->sy, time);
+				nemolog_message("PICK", "[FRAME:SCALE] %llu: sx(%f) sy(%f) (%u)\n", touchid, pick->sx, pick->sy, time);
 
 			pick->scale.distance = pick->other->scale.distance = distance;
 		}
@@ -273,10 +283,6 @@ static void pick_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 	}
 
 	nemoview_schedule_repaint(bin->view);
-}
-
-static void pick_shellgrab_touchpoint_frame(struct touchpoint_grab *base)
-{
 }
 
 static void pick_shellgrab_touchpoint_cancel(struct touchpoint_grab *base)
@@ -551,18 +557,9 @@ static void pick_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 
 static void pick_actorgrab_touchpoint_motion(struct touchpoint_grab *base, uint32_t time, uint64_t touchid, float x, float y)
 {
-	struct actorgrab *grab = (struct actorgrab *)container_of(base, struct actorgrab, base.touchpoint);
-	struct actorgrab_pick *pick = (struct actorgrab_pick *)container_of(grab, struct actorgrab_pick, base);
 	struct touchpoint *tp = base->touchpoint;
-	struct nemoactor *actor = grab->actor;
-	struct nemoshell *shell = grab->shell;
-	double distance = pickgrab_calculate_touchpoint_distance(pick->tp0, pick->tp1);
-	float r = pickgrab_calculate_touchpoint_angle(pick->tp0, pick->tp1);
 
 	touchpoint_move(tp, x, y);
-
-	if (actor == NULL)
-		return;
 
 	if (tp->focus != NULL) {
 		float sx, sy;
@@ -571,6 +568,25 @@ static void pick_actorgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 
 		nemocontent_touch_motion(tp, tp->focus->content, time, touchid, sx, sy, x, y);
 	}
+}
+
+static void pick_actorgrab_touchpoint_frame(struct touchpoint_grab *base, uint32_t frameid)
+{
+	struct actorgrab *grab = (struct actorgrab *)container_of(base, struct actorgrab, base.touchpoint);
+	struct actorgrab_pick *pick = (struct actorgrab_pick *)container_of(grab, struct actorgrab_pick, base);
+	struct touchpoint *tp = base->touchpoint;
+	struct nemoactor *actor = grab->actor;
+	struct nemoshell *shell = grab->shell;
+	double distance = pickgrab_calculate_touchpoint_distance(pick->tp0, pick->tp1);
+	float r = pickgrab_calculate_touchpoint_angle(pick->tp0, pick->tp1);
+	uint64_t touchid = tp->id;
+
+	if (actor == NULL)
+		return;
+
+	if (pick->frameid == frameid)
+		return;
+	pick->frameid = pick->other->frameid = frameid;
 
 	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_ROTATE)) {
 		if (fabsf(pick->rotate.r - r) < shell->pick.max_rotate) {
@@ -633,10 +649,6 @@ static void pick_actorgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 	}
 
 	nemoview_schedule_repaint(actor->view);
-}
-
-static void pick_actorgrab_touchpoint_frame(struct touchpoint_grab *base)
-{
 }
 
 static void pick_actorgrab_touchpoint_cancel(struct touchpoint_grab *base)

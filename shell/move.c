@@ -279,7 +279,7 @@ static void move_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 	}
 }
 
-static void move_shellgrab_touchpoint_frame(struct touchpoint_grab *base)
+static void move_shellgrab_touchpoint_frame(struct touchpoint_grab *base, uint32_t frameid)
 {
 }
 
@@ -534,7 +534,7 @@ static void move_actorgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 	nemoview_schedule_repaint(actor->view);
 }
 
-static void move_actorgrab_touchpoint_frame(struct touchpoint_grab *base)
+static void move_actorgrab_touchpoint_frame(struct touchpoint_grab *base, uint32_t frameid)
 {
 }
 

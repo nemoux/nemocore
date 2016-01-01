@@ -30,7 +30,7 @@ struct touchpoint_grab_interface {
 	void (*down)(struct touchpoint_grab *grab, uint32_t time, uint64_t touchid, float x, float y);
 	void (*up)(struct touchpoint_grab *grab, uint32_t time, uint64_t touchid);
 	void (*motion)(struct touchpoint_grab *grab, uint32_t time, uint64_t touchid, float x, float y);
-	void (*frame)(struct touchpoint_grab *grab);
+	void (*frame)(struct touchpoint_grab *grab, uint32_t frameid);
 	void (*cancel)(struct touchpoint_grab *grab);
 };
 

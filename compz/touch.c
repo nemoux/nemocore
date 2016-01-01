@@ -64,7 +64,7 @@ static void default_touchpoint_grab_motion(struct touchpoint_grab *grab, uint32_
 	}
 }
 
-static void default_touchpoint_grab_frame(struct touchpoint_grab *grab)
+static void default_touchpoint_grab_frame(struct touchpoint_grab *grab, uint32_t frameid)
 {
 	struct touchpoint *tp = grab->touchpoint;
 
@@ -524,7 +524,7 @@ void nemotouch_notify_frame(struct nemotouch *touch, int id)
 	if (tp == NULL)
 		return;
 
-	tp->grab->interface->frame(tp->grab);
+	tp->grab->interface->frame(tp->grab, touch->frame_count);
 }
 
 void nemotouch_notify_frames(struct nemotouch *touch)
@@ -537,7 +537,7 @@ void nemotouch_notify_frames(struct nemotouch *touch)
 	touch->frame_count++;
 
 	wl_list_for_each(tp, &touch->touchpoint_list, link) {
-		tp->grab->interface->frame(tp->grab);
+		tp->grab->interface->frame(tp->grab, touch->frame_count);
 	}
 }
 
@@ -599,7 +599,7 @@ void nemotouch_flush_tuio(struct tuionode *node)
 	touch->frame_count++;
 
 	wl_list_for_each(tp, &touch->touchpoint_list, link) {
-		tp->grab->interface->frame(tp->grab);
+		tp->grab->interface->frame(tp->grab, touch->frame_count);
 	}
 }
 
@@ -796,7 +796,7 @@ void nemotouch_flush_taps(struct touchnode *node, struct touchtaps *taps)
 	touch->frame_count++;
 
 	wl_list_for_each(tp, &touch->touchpoint_list, link) {
-		tp->grab->interface->frame(tp->grab);
+		tp->grab->interface->frame(tp->grab, touch->frame_count);
 	}
 }
 
