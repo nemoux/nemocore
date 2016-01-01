@@ -475,8 +475,6 @@ void nemotouch_notify_motion(struct nemotouch *touch, uint32_t time, int id, flo
 	if (touch->is_logging != 0)
 		nemolog_message("TOUCH", "[MOTION] %d: %f %f (%u)\n", id, x, y, time);
 
-	touch->frame_count++;
-
 	tp = nemotouch_get_touchpoint_by_id(touch, id);
 	if (tp == NULL)
 		return;
@@ -527,6 +525,20 @@ void nemotouch_notify_frame(struct nemotouch *touch, int id)
 		return;
 
 	tp->grab->interface->frame(tp->grab);
+}
+
+void nemotouch_notify_frames(struct nemotouch *touch)
+{
+	struct touchpoint *tp;
+
+	if (touch->is_logging != 0)
+		nemolog_message("TOUCH", "[FRAME]\n");
+
+	touch->frame_count++;
+
+	wl_list_for_each(tp, &touch->touchpoint_list, link) {
+		tp->grab->interface->frame(tp->grab);
+	}
 }
 
 void nemotouch_flush_tuio(struct tuionode *node)
@@ -582,6 +594,12 @@ void nemotouch_flush_tuio(struct tuionode *node)
 		tp->grab->interface->up(tp->grab, msecs, tp->gid);
 
 		nemotouch_destroy_touchpoint(touch, tp);
+	}
+
+	touch->frame_count++;
+
+	wl_list_for_each(tp, &touch->touchpoint_list, link) {
+		tp->grab->interface->frame(tp->grab);
 	}
 }
 
@@ -773,6 +791,12 @@ void nemotouch_flush_taps(struct touchnode *node, struct touchtaps *taps)
 		tp->grab->interface->up(tp->grab, msecs, tp->gid);
 
 		nemotouch_destroy_touchpoint(touch, tp);
+	}
+
+	touch->frame_count++;
+
+	wl_list_for_each(tp, &touch->touchpoint_list, link) {
+		tp->grab->interface->frame(tp->grab);
 	}
 }
 

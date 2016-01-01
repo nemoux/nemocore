@@ -142,6 +142,7 @@ extern void nemotouch_notify_down(struct nemotouch *touch, uint32_t time, int id
 extern void nemotouch_notify_up(struct nemotouch *touch, uint32_t time, int id);
 extern void nemotouch_notify_motion(struct nemotouch *touch, uint32_t time, int id, float x, float y);
 extern void nemotouch_notify_frame(struct nemotouch *touch, int id);
+extern void nemotouch_notify_frames(struct nemotouch *touch);
 
 extern void nemotouch_flush_tuio(struct tuionode *node);
 
