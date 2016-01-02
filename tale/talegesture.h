@@ -35,10 +35,7 @@ static inline int nemotale_is_touch_single_click(struct nemotale *tale, struct t
 		return 0;
 
 	if (tap != NULL && event->time - tap->grab_time < tale->single_click_duration) {
-		float dx = tap->grab_gx - event->gx;
-		float dy = tap->grab_gy - event->gy;
-
-		if (sqrtf(dx * dx + dy * dy) < tale->single_click_distance)
+		if (tap->dist <= tale->single_click_distance)
 			return 1;
 	}
 
