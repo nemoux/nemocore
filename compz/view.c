@@ -53,6 +53,7 @@ struct nemoview *nemoview_create(struct nemocompz *compz, struct nemocontent *co
 
 	view->transform.enable = 0;
 	view->transform.dirty = 1;
+	view->transform.done = 1;
 
 	view->geometry.r = 0.0f;
 	view->geometry.sx = 1.0f;
