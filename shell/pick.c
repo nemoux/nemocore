@@ -97,6 +97,8 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 			if (screen != NULL) {
 				nemoshell_set_fullscreen_bin(shell, bin, screen);
 
+				nemoseat_put_touchpoint_by_view(compz->seat, bin->view);
+
 				if (screen->focus == NEMO_SHELL_FULLSCREEN_ALL_FOCUS) {
 					nemoseat_set_keyboard_focus(compz->seat, bin->view);
 					nemoseat_set_pointer_focus(compz->seat, bin->view);
@@ -122,9 +124,9 @@ out:
 
 	if (tp0->focus != NULL) {
 		nemocontent_touch_up(tp0, tp0->focus->content, time, tp0->gid);
-	}
 
-	touchpoint_set_focus(tp0, NULL);
+		touchpoint_set_focus(tp0, NULL);
+	}
 
 	touchpoint_update_grab(tp1);
 }

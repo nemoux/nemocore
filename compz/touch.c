@@ -141,7 +141,7 @@ static void nemo_touch_bypass(struct wl_client *client, struct wl_resource *reso
 	if (view != NULL) {
 		time = time_current_msecs();
 
-		tp->grab->interface->up(tp->grab, time, tp->gid);
+		nemocontent_touch_up(tp, tp->focus->content, time, tp->gid);
 
 		touchpoint_set_focus(tp, view);
 
@@ -258,18 +258,6 @@ void touchpoint_move(struct touchpoint *tp, float x, float y)
 	tp->y = y;
 }
 
-static void nemotouch_destroy_touchpoint(struct nemotouch *touch, struct touchpoint *tp)
-{
-	wl_signal_emit(&tp->destroy_signal, tp);
-
-	wl_list_remove(&tp->focus_resource_listener.link);
-	wl_list_remove(&tp->focus_view_listener.link);
-
-	wl_list_remove(&tp->link);
-
-	free(tp);
-}
-
 static void touchpoint_handle_focus_resource_destroy(struct wl_listener *listener, void *data)
 {
 	struct touchpoint *tp = (struct touchpoint *)container_of(listener, struct touchpoint, focus_resource_listener);
@@ -332,6 +320,18 @@ static struct touchpoint *nemotouch_create_touchpoint(struct nemotouch *touch, u
 	wl_list_insert(&touch->touchpoint_list, &tp->link);
 
 	return tp;
+}
+
+static void nemotouch_destroy_touchpoint(struct nemotouch *touch, struct touchpoint *tp)
+{
+	wl_signal_emit(&tp->destroy_signal, tp);
+
+	wl_list_remove(&tp->focus_resource_listener.link);
+	wl_list_remove(&tp->focus_view_listener.link);
+
+	wl_list_remove(&tp->link);
+
+	free(tp);
 }
 
 struct touchpoint *nemotouch_get_touchpoint_by_id(struct nemotouch *touch, uint64_t id)
@@ -819,7 +819,7 @@ void nemotouch_bypass_event(struct nemocompz *compz, int32_t touchid, float sx, 
 	if (view != NULL) {
 		time = time_current_msecs();
 
-		tp->grab->interface->up(tp->grab, time, tp->gid);
+		nemocontent_touch_up(tp, tp->focus->content, time, tp->gid);
 
 		touchpoint_set_focus(tp, view);
 

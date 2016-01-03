@@ -72,18 +72,19 @@ extern struct nemokeyboard *nemoseat_get_first_keyboard(struct nemoseat *seat);
 extern struct nemopointer *nemoseat_get_pointer_by_focus_serial(struct nemoseat *seat, uint32_t serial);
 extern struct nemopointer *nemoseat_get_pointer_by_grab_serial(struct nemoseat *seat, uint32_t serial);
 extern struct nemopointer *nemoseat_get_pointer_by_id(struct nemoseat *seat, uint64_t id);
-extern int nemoseat_get_pointer_by_focus(struct nemoseat *seat, struct nemoview *view, struct nemopointer *ptrs[], int max);
+extern int nemoseat_get_pointer_by_view(struct nemoseat *seat, struct nemoview *view, struct nemopointer *ptrs[], int max);
 
 extern struct nemokeyboard *nemoseat_get_keyboard_by_focus_serial(struct nemoseat *seat, uint32_t serial);
 extern struct nemokeyboard *nemoseat_get_keyboard_by_id(struct nemoseat *seat, uint64_t id);
-extern int nemoseat_get_keyboard_by_focus(struct nemoseat *seat, struct nemoview *view, struct nemokeyboard *kbds[], int max);
+extern int nemoseat_get_keyboard_by_view(struct nemoseat *seat, struct nemoview *view, struct nemokeyboard *kbds[], int max);
 
 extern struct nemokeypad *nemoseat_get_keypad_by_id(struct nemoseat *seat, uint64_t id);
 
 extern struct touchpoint *nemoseat_get_touchpoint_by_grab_serial(struct nemoseat *seat, uint32_t serial);
 extern struct touchpoint *nemoseat_get_touchpoint_by_id(struct nemoseat *seat, uint64_t id);
-extern int nemoseat_get_touchpoint_by_focus(struct nemoseat *seat, struct nemoview *view, struct touchpoint *tps[], int max);
-extern void nemoseat_bypass_touchpoint_by_focus(struct nemoseat *seat, struct nemoview *view);
+extern int nemoseat_get_touchpoint_by_view(struct nemoseat *seat, struct nemoview *view, struct touchpoint *tps[], int max);
+extern int nemoseat_put_touchpoint_by_view(struct nemoseat *seat, struct nemoview *view);
+extern void nemoseat_bypass_touchpoint_by_view(struct nemoseat *seat, struct nemoview *view);
 
 extern struct wl_resource *nemoseat_find_resource_for_view(struct wl_list *list, struct nemoview *view);
 
