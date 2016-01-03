@@ -16,14 +16,18 @@ struct pitchfilter;
 
 struct shellgrab_move {
 	struct shellgrab base;
+
 	float dx, dy;
+	int has_reset;
 
 	struct pitchfilter *filter;
 };
 
 struct actorgrab_move {
 	struct actorgrab base;
+
 	float dx, dy;
+	int has_reset;
 
 	struct pitchfilter *filter;
 };
