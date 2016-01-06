@@ -309,9 +309,9 @@ static inline void nemoshow_item_update_filter(struct nemoshow *show, struct sho
 			NEMOSHOW_ITEM_CC(item, fill)->setMaskFilter(NEMOSHOW_FILTER_CC(NEMOSHOW_FILTER(NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF)), filter));
 		else
 			NEMOSHOW_ITEM_CC(item, stroke)->setMaskFilter(NEMOSHOW_FILTER_CC(NEMOSHOW_FILTER(NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF)), filter));
-
-		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 	}
+
+	one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 }
 
 static inline void nemoshow_item_update_shader(struct nemoshow *show, struct showone *one)
@@ -322,6 +322,8 @@ static inline void nemoshow_item_update_shader(struct nemoshow *show, struct sho
 		if (item->fill != 0)
 			NEMOSHOW_ITEM_CC(item, fill)->setShader(NEMOSHOW_SHADER_CC(NEMOSHOW_SHADER(NEMOSHOW_REF(one, NEMOSHOW_SHADER_REF)), shader));
 	}
+
+	one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 }
 
 static inline void nemoshow_item_update_font(struct nemoshow *show, struct showone *one)
@@ -334,7 +336,7 @@ static inline void nemoshow_item_update_font(struct nemoshow *show, struct showo
 		NEMOSHOW_ITEM_CC(item, stroke)->setTypeface(
 				NEMOSHOW_FONT_CC(NEMOSHOW_FONT(NEMOSHOW_REF(one, NEMOSHOW_FONT_REF)), face));
 
-		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
+		one->dirty |= NEMOSHOW_TEXT_DIRTY;
 	}
 }
 
@@ -786,16 +788,14 @@ int nemoshow_item_update(struct nemoshow *show, struct showone *one)
 		nemoshow_item_update_matrix(show, one);
 
 	if ((one->dirty & NEMOSHOW_SHAPE_DIRTY) != 0) {
-		if (item->canvas != NULL)
-			nemoshow_canvas_damage_one(item->canvas, one);
+		nemoshow_canvas_damage_one(item->canvas, one);
 
 		nemoshow_item_update_shape(show, one);
 
 		nemoshow_item_update_boundingbox(show, one);
 	}
 
-	if (item->canvas != NULL)
-		nemoshow_canvas_damage_one(item->canvas, one);
+	nemoshow_canvas_damage_one(item->canvas, one);
 
 	return 0;
 }
@@ -957,6 +957,8 @@ void nemoshow_item_path_clear(struct showone *one)
 		NEMOSHOW_ITEM_CC(item, strokepath)->reset();
 	if (NEMOSHOW_ITEM_CC(item, fillpath) != NULL)
 		NEMOSHOW_ITEM_CC(item, fillpath)->reset();
+
+	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
 
 void nemoshow_item_path_moveto(struct showone *one, double x, double y)
@@ -964,6 +966,8 @@ void nemoshow_item_path_moveto(struct showone *one, double x, double y)
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	NEMOSHOW_ITEM_CC(item, path)->moveTo(x, y);
+
+	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
 
 void nemoshow_item_path_lineto(struct showone *one, double x, double y)
@@ -971,6 +975,8 @@ void nemoshow_item_path_lineto(struct showone *one, double x, double y)
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	NEMOSHOW_ITEM_CC(item, path)->lineTo(x, y);
+
+	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
 
 void nemoshow_item_path_cubicto(struct showone *one, double x0, double y0, double x1, double y1, double x2, double y2)
@@ -978,6 +984,8 @@ void nemoshow_item_path_cubicto(struct showone *one, double x0, double y0, doubl
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	NEMOSHOW_ITEM_CC(item, path)->cubicTo(x0, y0, x1, y1, x2, y2);
+
+	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
 
 void nemoshow_item_path_close(struct showone *one)
@@ -985,6 +993,8 @@ void nemoshow_item_path_close(struct showone *one)
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	NEMOSHOW_ITEM_CC(item, path)->close();
+
+	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
 
 void nemoshow_item_path_cmd(struct showone *one, const char *cmd)
@@ -995,6 +1005,8 @@ void nemoshow_item_path_cmd(struct showone *one, const char *cmd)
 	SkParsePath::FromSVGString(cmd, &path);
 
 	NEMOSHOW_ITEM_CC(item, path)->addPath(path);
+
+	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
 
 void nemoshow_item_path_arc(struct showone *one, double x, double y, double width, double height, double from, double to)
@@ -1003,6 +1015,8 @@ void nemoshow_item_path_arc(struct showone *one, double x, double y, double widt
 	SkRect rect = SkRect::MakeXYWH(x, y, width, height);
 
 	NEMOSHOW_ITEM_CC(item, path)->addArc(rect, from, to);
+
+	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
 
 void nemoshow_item_path_append(struct showone *one, struct showone *src)
@@ -1024,6 +1038,8 @@ void nemoshow_item_path_append(struct showone *one, struct showone *src)
 
 		NEMOSHOW_ITEM_CC(item, fillpath)->addPath(*NEMOSHOW_ITEM_CC(other, fillpath));
 	}
+
+	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
 
 void nemoshow_item_path_translate(struct showone *one, double x, double y)
@@ -1342,7 +1358,7 @@ int nemoshow_item_set_buffer(struct showone *one, char *buffer, uint32_t width, 
 	NEMOSHOW_ITEM_CC(item, width) = width;
 	NEMOSHOW_ITEM_CC(item, height) = height;
 
-	one->dirty |= NEMOSHOW_SHAPE_DIRTY;
+	nemoshow_one_dirty(one, NEMOSHOW_REDRAW_DIRTY);
 
 	return 0;
 }
@@ -1358,7 +1374,7 @@ void nemoshow_item_put_buffer(struct showone *one)
 	NEMOSHOW_ITEM_CC(item, width) = 0;
 	NEMOSHOW_ITEM_CC(item, height) = 0;
 
-	one->dirty |= NEMOSHOW_SHAPE_DIRTY;
+	nemoshow_one_dirty(one, NEMOSHOW_REDRAW_DIRTY);
 }
 
 int nemoshow_item_copy_buffer(struct showone *one, char *buffer, uint32_t width, uint32_t height)
@@ -1384,7 +1400,7 @@ int nemoshow_item_copy_buffer(struct showone *one, char *buffer, uint32_t width,
 
 	bitmap.copyTo(NEMOSHOW_ITEM_CC(item, bitmap));
 
-	one->dirty |= NEMOSHOW_SHAPE_DIRTY;
+	nemoshow_one_dirty(one, NEMOSHOW_REDRAW_DIRTY);
 
 	return 0;
 }
@@ -1398,9 +1414,9 @@ int nemoshow_item_fill_buffer(struct showone *one, double r, double g, double b,
 		SkCanvas canvas(&device);
 
 		canvas.clear(SkColorSetARGB(a, r, g, b));
-
-		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 	}
+
+	nemoshow_one_dirty(one, NEMOSHOW_REDRAW_DIRTY);
 
 	return 0;
 }
@@ -1413,6 +1429,8 @@ int nemoshow_item_set_bitmap(struct showone *one, SkBitmap *bitmap)
 		delete NEMOSHOW_ITEM_CC(item, bitmap);
 
 	NEMOSHOW_ITEM_CC(item, bitmap) = bitmap;
+
+	nemoshow_one_dirty(one, NEMOSHOW_REDRAW_DIRTY);
 
 	return 0;
 }

@@ -160,6 +160,8 @@ static inline struct showone *nemoshow_item_get_canvas(struct showone *one)
 static inline void nemoshow_item_set_x(struct showone *one, double x)
 {
 	NEMOSHOW_ITEM_AT(one, x) = x;
+
+	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
 
 static inline double nemoshow_item_get_x(struct showone *one)
@@ -170,6 +172,8 @@ static inline double nemoshow_item_get_x(struct showone *one)
 static inline void nemoshow_item_set_y(struct showone *one, double y)
 {
 	NEMOSHOW_ITEM_AT(one, y) = y;
+
+	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
 
 static inline double nemoshow_item_get_y(struct showone *one)
@@ -180,11 +184,15 @@ static inline double nemoshow_item_get_y(struct showone *one)
 static inline void nemoshow_item_set_rx(struct showone *one, double rx)
 {
 	NEMOSHOW_ITEM_AT(one, rx) = rx;
+
+	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
 
 static inline void nemoshow_item_set_ry(struct showone *one, double ry)
 {
 	NEMOSHOW_ITEM_AT(one, ry) = ry;
+
+	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
 
 static inline void nemoshow_item_set_width(struct showone *one, double width)
@@ -193,6 +201,8 @@ static inline void nemoshow_item_set_width(struct showone *one, double width)
 
 	item->width = width;
 	item->has_size = 1;
+
+	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
 
 static inline void nemoshow_item_set_height(struct showone *one, double height)
@@ -201,42 +211,58 @@ static inline void nemoshow_item_set_height(struct showone *one, double height)
 
 	item->height = height;
 	item->has_size = 1;
+
+	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
 
 static inline void nemoshow_item_set_r(struct showone *one, double r)
 {
 	NEMOSHOW_ITEM_AT(one, r) = r;
+
+	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
 
 static inline void nemoshow_item_set_inner(struct showone *one, double inner)
 {
 	NEMOSHOW_ITEM_AT(one, inner) = inner;
+
+	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
 
 static inline void nemoshow_item_set_from(struct showone *one, double from)
 {
 	NEMOSHOW_ITEM_AT(one, from) = from;
+
+	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
 
 static inline void nemoshow_item_set_to(struct showone *one, double to)
 {
 	NEMOSHOW_ITEM_AT(one, to) = to;
+
+	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
 
 static inline void nemoshow_item_set_fontsize(struct showone *one, double fontsize)
 {
 	NEMOSHOW_ITEM_AT(one, fontsize) = fontsize;
+
+	nemoshow_one_dirty(one, NEMOSHOW_TEXT_DIRTY);
 }
 
 static inline void nemoshow_item_set_spacing(struct showone *one, double spacingmul, double spacingadd)
 {
 	NEMOSHOW_ITEM_AT(one, spacingmul) = spacingmul;
 	NEMOSHOW_ITEM_AT(one, spacingadd) = spacingadd;
+
+	nemoshow_one_dirty(one, NEMOSHOW_TEXT_DIRTY);
 }
 
 static inline void nemoshow_item_set_alpha(struct showone *one, double alpha)
 {
 	NEMOSHOW_ITEM_AT(one, alpha) = alpha;
+
+	nemoshow_one_dirty(one, NEMOSHOW_STYLE_DIRTY);
 }
 
 static inline void nemoshow_item_set_fill_color(struct showone *one, double r, double g, double b, double a)
@@ -249,6 +275,8 @@ static inline void nemoshow_item_set_fill_color(struct showone *one, double r, d
 	item->fills[3] = a;
 
 	item->fill = 1;
+
+	nemoshow_one_dirty(one, NEMOSHOW_STYLE_DIRTY);
 }
 
 static inline void nemoshow_item_set_stroke_color(struct showone *one, double r, double g, double b, double a)
@@ -261,6 +289,8 @@ static inline void nemoshow_item_set_stroke_color(struct showone *one, double r,
 	item->strokes[3] = a;
 
 	item->stroke = 1;
+
+	nemoshow_one_dirty(one, NEMOSHOW_STYLE_DIRTY);
 }
 
 static inline void nemoshow_item_set_stroke_width(struct showone *one, double width)
@@ -268,6 +298,8 @@ static inline void nemoshow_item_set_stroke_width(struct showone *one, double wi
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	item->stroke_width = width;
+
+	nemoshow_one_dirty(one, NEMOSHOW_STYLE_DIRTY | NEMOSHOW_SHAPE_DIRTY);
 }
 
 static inline void nemoshow_item_set_anchor(struct showone *one, double ax, double ay)
@@ -278,6 +310,8 @@ static inline void nemoshow_item_set_anchor(struct showone *one, double ax, doub
 	item->ay = ay;
 
 	item->has_anchor = 1;
+
+	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
 
 static inline double nemoshow_item_get_outer(struct showone *one)

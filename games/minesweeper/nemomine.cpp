@@ -120,9 +120,6 @@ static void nemomine_prepare_game(struct minecontext *context)
 		nemoshow_item_set_alpha(mone->one, 0.0f);
 		nemoshow_item_set_fill_color(mone->one, 0x1e, 0xdc, 0xdc, 0xff);
 		nemoshow_item_path_clear(mone->one);
-
-		nemoshow_one_dirty(mone->box, NEMOSHOW_STYLE_DIRTY);
-		nemoshow_one_dirty(mone->one, NEMOSHOW_PATH_DIRTY);
 	}
 
 	for (i = 0; i < context->bombs; i++) {
@@ -138,7 +135,6 @@ retry:
 	}
 
 	nemoshow_item_set_fill_color(context->reset, 0x1e, 0xdc, 0xdc, 0xff);
-	nemoshow_one_dirty(context->reset, NEMOSHOW_STYLE_DIRTY);
 
 	nemotimer_set_timeout(context->timer, 1000);
 
@@ -163,13 +159,9 @@ static void nemomine_finish_game(struct minecontext *context)
 		nemoshow_item_set_fill_color(mone->one, 0xed, 0x1c, 0x24, 0xff);
 		nemoshow_item_path_clear(mone->one);
 		nemoshow_item_path_append(mone->one, context->bomb);
-
-		nemoshow_one_dirty(mone->one, NEMOSHOW_STYLE_DIRTY);
-		nemoshow_one_dirty(mone->one, NEMOSHOW_PATH_DIRTY);
 	}
 
 	nemoshow_item_set_fill_color(context->reset, 0xed, 0x1c, 0x24, 0xff);
-	nemoshow_one_dirty(context->reset, NEMOSHOW_STYLE_DIRTY);
 
 	nemotimer_set_timeout(context->timer, 0);
 
