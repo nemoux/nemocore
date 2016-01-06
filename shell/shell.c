@@ -565,10 +565,7 @@ struct nemoshell *nemoshell_create(struct nemocompz *compz)
 	memset(shell, 0, sizeof(struct nemoshell));
 
 	shell->compz = compz;
-
-	shell->configs = nemoitem_create(64);
-	if (shell->configs == NULL)
-		goto err1;
+	shell->configs = compz->configs;
 
 	nemolayer_prepare(&shell->overlay_layer, &compz->cursor_layer.link);
 	nemolayer_prepare(&shell->fullscreen_layer, &shell->overlay_layer.link);
@@ -629,8 +626,6 @@ void nemoshell_destroy(struct nemoshell *shell)
 	nemolayer_finish(&shell->service_layer);
 	nemolayer_finish(&shell->underlay_layer);
 	nemolayer_finish(&shell->background_layer);
-
-	nemoitem_destroy(shell->configs);
 
 	free(shell);
 }
