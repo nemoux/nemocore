@@ -100,6 +100,8 @@ struct nemoshell {
 
 		double scale_interval;
 		double resize_interval;
+
+		double min_distance;
 	} pick;
 
 	struct {
