@@ -387,379 +387,10 @@ int nemoshow_sequence_set_cattr(struct showone *one, const char *name, double r,
 	return 0;
 }
 
-struct showone *nemoshow_sequence_create_fix(void)
-{
-	struct showfix *fix;
-	struct showone *one;
-
-	fix = (struct showfix *)malloc(sizeof(struct showfix));
-	if (fix == NULL)
-		return NULL;
-	memset(fix, 0, sizeof(struct showfix));
-
-	one = &fix->base;
-	one->type = NEMOSHOW_FIX_TYPE;
-	one->update = nemoshow_sequence_update_fix;
-	one->destroy = nemoshow_sequence_destroy_fix;
-
-	nemoshow_one_prepare(one);
-
-	return one;
-}
-
-void nemoshow_sequence_destroy_fix(struct showone *one)
-{
-	struct showfix *fix = NEMOSHOW_FIX(one);
-
-	nemoshow_one_finish(one);
-
-	free(fix);
-}
-
-int nemoshow_sequence_arrange_fix(struct nemoshow *show, struct showone *one)
-{
-	struct showfix *fix = NEMOSHOW_FIX(one);
-	struct showone *src;
-	struct showprop *prop;
-	struct nemoattr *attr;
-	const char *name;
-	int i, count;
-
-	src = nemoshow_search_one(show, nemoobject_gets(&one->object, "src"));
-	if (src == NULL)
-		return -1;
-	if ((i = nemoobject_has(&one->object, "child")) >= 0)
-		src = nemoshow_one_get_child(src, nemoobject_igeti(&one->object, i));
-	fix->src = src;
-
-	count = nemoobject_get_count(&one->object);
-
-	for (i = 0; i < count; i++) {
-		name = nemoobject_get_name(&one->object, i);
-
-		if (strcmp(name, "id") == 0 || strcmp(name, "src") == 0)
-			continue;
-
-		prop = nemoshow_get_property(name);
-		if (prop != NULL) {
-			if (prop->type == NEMOSHOW_DOUBLE_PROP) {
-				attr = nemoobject_get(&src->object, name);
-				if (attr == NULL)
-					continue;
-				fix->tattrs[fix->nattrs] = attr;
-				fix->eattrs[fix->nattrs] = nemoobject_iget(&one->object, i);
-				fix->dirties[fix->nattrs] = prop->dirty;
-				fix->types[fix->nattrs] = NEMOSHOW_DOUBLE_PROP;
-				fix->nattrs++;
-			} else if (prop->type == NEMOSHOW_COLOR_PROP) {
-				char atname[NEMOSHOW_ATTR_NAME_MAX];
-
-				snprintf(atname, NEMOSHOW_ATTR_NAME_MAX, "%s:r", name);
-				attr = nemoobject_get(&src->object, atname);
-				if (attr == NULL)
-					continue;
-				fix->tattrs[fix->nattrs] = attr;
-				fix->eattrs[fix->nattrs] = nemoobject_get(&one->object, atname);
-				fix->dirties[fix->nattrs] = prop->dirty;
-				fix->types[fix->nattrs] = NEMOSHOW_DOUBLE_PROP;
-				fix->nattrs++;
-
-				snprintf(atname, NEMOSHOW_ATTR_NAME_MAX, "%s:g", name);
-				attr = nemoobject_get(&src->object, atname);
-				if (attr == NULL)
-					continue;
-				fix->tattrs[fix->nattrs] = attr;
-				fix->eattrs[fix->nattrs] = nemoobject_get(&one->object, atname);
-				fix->dirties[fix->nattrs] = prop->dirty;
-				fix->types[fix->nattrs] = NEMOSHOW_DOUBLE_PROP;
-				fix->nattrs++;
-
-				snprintf(atname, NEMOSHOW_ATTR_NAME_MAX, "%s:b", name);
-				attr = nemoobject_get(&src->object, atname);
-				if (attr == NULL)
-					continue;
-				fix->tattrs[fix->nattrs] = attr;
-				fix->eattrs[fix->nattrs] = nemoobject_get(&one->object, atname);
-				fix->dirties[fix->nattrs] = prop->dirty;
-				fix->types[fix->nattrs] = NEMOSHOW_DOUBLE_PROP;
-				fix->nattrs++;
-
-				snprintf(atname, NEMOSHOW_ATTR_NAME_MAX, "%s:a", name);
-				attr = nemoobject_get(&src->object, atname);
-				if (attr == NULL)
-					continue;
-				fix->tattrs[fix->nattrs] = attr;
-				fix->eattrs[fix->nattrs] = nemoobject_get(&one->object, atname);
-				fix->dirties[fix->nattrs] = prop->dirty;
-				fix->types[fix->nattrs] = NEMOSHOW_DOUBLE_PROP;
-				fix->nattrs++;
-			} else if (prop->type == NEMOSHOW_STRING_PROP) {
-				attr = nemoobject_get(&src->object, name);
-				if (attr == NULL)
-					continue;
-				fix->tattrs[fix->nattrs] = attr;
-				fix->eattrs[fix->nattrs] = nemoobject_iget(&one->object, i);
-				fix->dirties[fix->nattrs] = prop->dirty;
-				fix->types[fix->nattrs] = NEMOSHOW_STRING_PROP;
-				fix->nattrs++;
-			}
-		}
-	}
-
-	return 0;
-}
-
-int nemoshow_sequence_update_fix(struct nemoshow *show, struct showone *one)
-{
-	return 0;
-}
-
-int nemoshow_sequence_fix_source(struct showone *one, struct showone *src)
-{
-	struct showfix *fix = NEMOSHOW_FIX(one);
-
-	fix->src = src;
-
-	return 0;
-}
-
-int nemoshow_sequence_fix_attr(struct showone *one, const char *name, const char *value)
-{
-	struct showfix *fix = NEMOSHOW_FIX(one);
-	struct showone *src = fix->src;
-	struct showprop *prop;
-	struct nemoattr *sattr;
-
-	prop = nemoshow_get_property(name);
-	if (prop != NULL) {
-		if (prop->type == NEMOSHOW_STRING_PROP) {
-			nemoobject_sets(&one->object, name, value, strlen(value));
-		} else if (prop->type == NEMOSHOW_DOUBLE_PROP) {
-			nemoobject_setd(&one->object, name, strtod(value, NULL));
-		} else if (prop->type == NEMOSHOW_INTEGER_PROP) {
-			nemoobject_seti(&one->object, name, strtoul(value, NULL, 10));
-		} else if (prop->type == NEMOSHOW_COLOR_PROP) {
-			uint32_t c = nemoshow_color_parse(value);
-			char attr[NEMOSHOW_ATTR_NAME_MAX];
-
-			snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:r", name);
-			nemoobject_setd(&one->object, attr, (double)NEMOSHOW_COLOR_UINT32_R(c));
-			snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:g", name);
-			nemoobject_setd(&one->object, attr, (double)NEMOSHOW_COLOR_UINT32_G(c));
-			snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:b", name);
-			nemoobject_setd(&one->object, attr, (double)NEMOSHOW_COLOR_UINT32_B(c));
-			snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:a", name);
-			nemoobject_setd(&one->object, attr, (double)NEMOSHOW_COLOR_UINT32_A(c));
-
-			nemoobject_seti(&one->object, name, 1);
-		}
-
-		if (prop->type == NEMOSHOW_DOUBLE_PROP) {
-			sattr = nemoobject_get(&src->object, name);
-			fix->tattrs[fix->nattrs] = sattr;
-			fix->eattrs[fix->nattrs] = nemoobject_get(&one->object, name);
-			fix->dirties[fix->nattrs] = prop->dirty;
-			fix->types[fix->nattrs] = NEMOSHOW_DOUBLE_PROP;
-			fix->nattrs++;
-		} else if (prop->type == NEMOSHOW_COLOR_PROP) {
-			char attr[NEMOSHOW_ATTR_NAME_MAX];
-
-			snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:r", name);
-			sattr = nemoobject_get(&src->object, attr);
-			fix->tattrs[fix->nattrs] = sattr;
-			fix->eattrs[fix->nattrs] = nemoobject_get(&one->object, attr);
-			fix->dirties[fix->nattrs] = prop->dirty;
-			fix->types[fix->nattrs] = NEMOSHOW_DOUBLE_PROP;
-			fix->nattrs++;
-
-			snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:g", name);
-			sattr = nemoobject_get(&src->object, attr);
-			fix->tattrs[fix->nattrs] = sattr;
-			fix->eattrs[fix->nattrs] = nemoobject_get(&one->object, attr);
-			fix->dirties[fix->nattrs] = prop->dirty;
-			fix->types[fix->nattrs] = NEMOSHOW_DOUBLE_PROP;
-			fix->nattrs++;
-
-			snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:b", name);
-			sattr = nemoobject_get(&src->object, attr);
-			fix->tattrs[fix->nattrs] = sattr;
-			fix->eattrs[fix->nattrs] = nemoobject_get(&one->object, attr);
-			fix->dirties[fix->nattrs] = prop->dirty;
-			fix->types[fix->nattrs] = NEMOSHOW_DOUBLE_PROP;
-			fix->nattrs++;
-
-			snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:a", name);
-			sattr = nemoobject_get(&src->object, attr);
-			fix->tattrs[fix->nattrs] = sattr;
-			fix->eattrs[fix->nattrs] = nemoobject_get(&one->object, attr);
-			fix->dirties[fix->nattrs] = prop->dirty;
-			fix->types[fix->nattrs] = NEMOSHOW_DOUBLE_PROP;
-			fix->nattrs++;
-		} else if (prop->type == NEMOSHOW_STRING_PROP) {
-			sattr = nemoobject_get(&src->object, name);
-			fix->tattrs[fix->nattrs] = sattr;
-			fix->eattrs[fix->nattrs] = nemoobject_get(&one->object, name);
-			fix->dirties[fix->nattrs] = prop->dirty;
-			fix->types[fix->nattrs] = NEMOSHOW_STRING_PROP;
-			fix->nattrs++;
-		}
-	}
-
-	return 0;
-}
-
-int nemoshow_sequence_fix_dattr(struct showone *one, const char *name, double value, uint32_t dirty)
-{
-	struct showfix *fix = NEMOSHOW_FIX(one);
-	struct showone *src = fix->src;
-	struct nemoattr *sattr;
-
-	nemoobject_setd(&one->object, name, value);
-
-	sattr = nemoobject_get(&src->object, name);
-	fix->tattrs[fix->nattrs] = sattr;
-	fix->eattrs[fix->nattrs] = nemoobject_get(&one->object, name);
-	fix->dirties[fix->nattrs] = dirty;
-	fix->types[fix->nattrs] = NEMOSHOW_DOUBLE_PROP;
-	fix->nattrs++;
-
-	return 0;
-}
-
-int nemoshow_sequence_fix_cattr(struct showone *one, const char *name, double r, double g, double b, double a, uint32_t dirty)
-{
-	struct showfix *fix = NEMOSHOW_FIX(one);
-	struct showone *src = fix->src;
-	struct nemoattr *sattr;
-	char attr[NEMOSHOW_ATTR_NAME_MAX];
-
-	snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:r", name);
-	nemoobject_setd(&one->object, attr, r);
-	snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:g", name);
-	nemoobject_setd(&one->object, attr, g);
-	snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:b", name);
-	nemoobject_setd(&one->object, attr, b);
-	snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:a", name);
-	nemoobject_setd(&one->object, attr, a);
-
-	nemoobject_seti(&one->object, name, 1);
-
-	snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:r", name);
-	sattr = nemoobject_get(&src->object, attr);
-	fix->tattrs[fix->nattrs] = sattr;
-	fix->eattrs[fix->nattrs] = nemoobject_get(&one->object, attr);
-	fix->dirties[fix->nattrs] = dirty;
-	fix->types[fix->nattrs] = NEMOSHOW_DOUBLE_PROP;
-	fix->nattrs++;
-
-	snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:g", name);
-	sattr = nemoobject_get(&src->object, attr);
-	fix->tattrs[fix->nattrs] = sattr;
-	fix->eattrs[fix->nattrs] = nemoobject_get(&one->object, attr);
-	fix->dirties[fix->nattrs] = dirty;
-	fix->types[fix->nattrs] = NEMOSHOW_DOUBLE_PROP;
-	fix->nattrs++;
-
-	snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:b", name);
-	sattr = nemoobject_get(&src->object, attr);
-	fix->tattrs[fix->nattrs] = sattr;
-	fix->eattrs[fix->nattrs] = nemoobject_get(&one->object, attr);
-	fix->dirties[fix->nattrs] = dirty;
-	fix->types[fix->nattrs] = NEMOSHOW_DOUBLE_PROP;
-	fix->nattrs++;
-
-	snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:a", name);
-	sattr = nemoobject_get(&src->object, attr);
-	fix->tattrs[fix->nattrs] = sattr;
-	fix->eattrs[fix->nattrs] = nemoobject_get(&one->object, attr);
-	fix->dirties[fix->nattrs] = dirty;
-	fix->types[fix->nattrs] = NEMOSHOW_DOUBLE_PROP;
-	fix->nattrs++;
-
-	return 0;
-}
-
-struct showone *nemoshow_sequence_create_follow(void)
-{
-	struct showfollow *follow;
-	struct showone *one;
-
-	follow = (struct showfollow *)malloc(sizeof(struct showfollow));
-	if (follow == NULL)
-		return NULL;
-	memset(follow, 0, sizeof(struct showfollow));
-
-	one = &follow->base;
-	one->type = NEMOSHOW_FOLLOW_TYPE;
-	one->update = nemoshow_sequence_update_follow;
-	one->destroy = nemoshow_sequence_destroy_follow;
-
-	nemoshow_one_prepare(one);
-
-	nemoobject_set_reserved(&one->object, "from", &follow->from, sizeof(double));
-	nemoobject_set_reserved(&one->object, "to", &follow->to, sizeof(double));
-
-	return one;
-}
-
-void nemoshow_sequence_destroy_follow(struct showone *one)
-{
-	struct showfollow *follow = NEMOSHOW_FOLLOW(one);
-
-	nemoshow_one_finish(one);
-
-	free(follow);
-}
-
-int nemoshow_sequence_arrange_follow(struct nemoshow *show, struct showone *one)
-{
-	struct showfollow *follow = NEMOSHOW_FOLLOW(one);
-	struct showone *src;
-	struct showone *path;
-	struct nemoattr *attr;
-	const char *element;
-
-	src = nemoshow_search_one(show, nemoobject_gets(&one->object, "src"));
-	if (src == NULL)
-		return -1;
-
-	attr = nemoobject_get(&src->object, nemoobject_gets(&one->object, "attr"));
-	if (attr == NULL)
-		return -1;
-
-	path = nemoshow_search_one(show, nemoobject_gets(&one->object, "path"));
-	if (path == NULL)
-		return -1;
-
-	element = nemoobject_gets(&one->object, "element");
-	if (element == NULL)
-		return -1;
-
-	if (strcmp(element, "x") == 0) {
-		follow->element = NEMOSHOW_PATH_X_FOLLOW;
-	} else if (strcmp(element, "y") == 0) {
-		follow->element = NEMOSHOW_PATH_Y_FOLLOW;
-	} else if (strcmp(element, "r") == 0) {
-		follow->element = NEMOSHOW_PATH_R_FOLLOW;
-	}
-
-	follow->src = src;
-	follow->attr = attr;
-	follow->path = path;
-
-	return 0;
-}
-
-int nemoshow_sequence_update_follow(struct nemoshow *show, struct showone *one)
-{
-	return 0;
-}
-
 static void nemoshow_sequence_prepare_frame(struct showone *one, uint32_t serial)
 {
 	struct showframe *frame = NEMOSHOW_FRAME(one);
 	struct showset *set;
-	struct showfollow *follow;
 	int i, j;
 
 	for (i = 0; i < one->nchildren; i++) {
@@ -775,10 +406,6 @@ static void nemoshow_sequence_prepare_frame(struct showone *one, uint32_t serial
 			}
 
 			nemoshow_one_set_state(set->src, NEMOSHOW_TRANSITION_STATE);
-		} else if (one->children[i]->type == NEMOSHOW_FOLLOW_TYPE) {
-			follow = NEMOSHOW_FOLLOW(one->children[i]);
-
-			nemoshow_one_set_state(follow->src, NEMOSHOW_TRANSITION_STATE);
 		}
 	}
 }
@@ -787,7 +414,6 @@ static void nemoshow_sequence_dispatch_frame(struct showone *one, double s, doub
 {
 	struct showframe *frame = NEMOSHOW_FRAME(one);
 	struct showset *set;
-	struct showfollow *follow;
 	double dt = (t - s) / (frame->t - s);
 	int i, j;
 
@@ -810,27 +436,6 @@ static void nemoshow_sequence_dispatch_frame(struct showone *one, double s, doub
 			}
 
 			nemoshow_one_dirty(set->src, dirty);
-		} else if (one->children[i]->type == NEMOSHOW_FOLLOW_TYPE) {
-			follow = NEMOSHOW_FOLLOW(one->children[i]);
-
-			if (nemoattr_get_serial(follow->attr) <= serial) {
-				double x, y, r;
-
-				nemoshow_helper_evaluate_path(NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(follow->path), path),
-						NEMOSHOW_ITEM_AT(follow->path, pathlength),
-						(follow->to - follow->from) * t + follow->from,
-						&x, &y, &r);
-
-				if (follow->element == NEMOSHOW_PATH_X_FOLLOW) {
-					nemoattr_setd(follow->attr, x);
-				} else if (follow->element == NEMOSHOW_PATH_Y_FOLLOW) {
-					nemoattr_setd(follow->attr, y);
-				} else if (follow->element == NEMOSHOW_PATH_R_FOLLOW) {
-					nemoattr_setd(follow->attr, r);
-				}
-
-				nemoshow_one_dirty(follow->src, NEMOSHOW_SHAPE_DIRTY);
-			}
 		}
 	}
 }
@@ -839,8 +444,6 @@ static void nemoshow_sequence_finish_frame(struct showone *one, uint32_t serial)
 {
 	struct showframe *frame = NEMOSHOW_FRAME(one);
 	struct showset *set;
-	struct showfix *fix;
-	struct showfollow *follow;
 	int i, j;
 
 	for (i = 0; i < one->nchildren; i++) {
@@ -868,55 +471,6 @@ static void nemoshow_sequence_finish_frame(struct showone *one, uint32_t serial)
 			nemoshow_one_put_state(set->src, NEMOSHOW_TRANSITION_STATE);
 
 			nemoshow_one_dirty(set->src, dirty);
-		} else if (one->children[i]->type == NEMOSHOW_FOLLOW_TYPE) {
-			follow = NEMOSHOW_FOLLOW(one->children[i]);
-
-			if (nemoattr_get_serial(follow->attr) <= serial) {
-				double x, y, r;
-
-				nemoshow_helper_evaluate_path(NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(follow->path), path),
-						NEMOSHOW_ITEM_AT(follow->path, pathlength),
-						follow->to,
-						&x, &y, &r);
-
-				if (follow->element == NEMOSHOW_PATH_X_FOLLOW) {
-					nemoattr_setd(follow->attr, x);
-				} else if (follow->element == NEMOSHOW_PATH_Y_FOLLOW) {
-					nemoattr_setd(follow->attr, y);
-				} else if (follow->element == NEMOSHOW_PATH_R_FOLLOW) {
-					nemoattr_setd(follow->attr, r);
-				}
-
-				nemoshow_one_dirty(follow->src, NEMOSHOW_SHAPE_DIRTY);
-			}
-
-			nemoshow_one_put_state(follow->src, NEMOSHOW_TRANSITION_STATE);
-		}
-	}
-
-	for (i = 0; i < one->nchildren; i++) {
-		if (one->children[i]->type == NEMOSHOW_FIX_TYPE) {
-			uint32_t dirty = 0x0;
-
-			fix = NEMOSHOW_FIX(one->children[i]);
-
-			for (j = 0; j < fix->nattrs; j++) {
-				if (nemoattr_get_serial(fix->tattrs[j]) <= serial) {
-					if (fix->types[j] == NEMOSHOW_DOUBLE_PROP) {
-						double d = nemoattr_getd(fix->eattrs[j]);
-
-						nemoattr_setd(fix->tattrs[j], d);
-					} else if (fix->types[j] == NEMOSHOW_STRING_PROP) {
-						const char *s = nemoattr_gets(fix->eattrs[j]);
-
-						nemoattr_sets(fix->tattrs[j], s, strlen(s));
-					}
-
-					dirty |= fix->dirties[j];
-				}
-			}
-
-			nemoshow_one_dirty(fix->src, dirty);
 		}
 	}
 }
@@ -946,18 +500,6 @@ void nemoshow_sequence_prepare(struct showone *one, uint32_t serial)
 					if (nemoattr_get_serial(set->tattrs[k]) < serial)
 						nemoattr_set_serial(set->tattrs[k], serial);
 				}
-			} else if (frame->children[j]->type == NEMOSHOW_FIX_TYPE) {
-				struct showfix *fix = NEMOSHOW_FIX(frame->children[j]);
-
-				for (k = 0; k < fix->nattrs; k++) {
-					if (nemoattr_get_serial(fix->tattrs[k]) < serial)
-						nemoattr_set_serial(fix->tattrs[k], serial);
-				}
-			} else if (frame->children[j]->type == NEMOSHOW_FOLLOW_TYPE) {
-				struct showfollow *follow = NEMOSHOW_FOLLOW(frame->children[j]);
-
-				if (nemoattr_get_serial(follow->attr) < serial)
-					nemoattr_set_serial(follow->attr, serial);
 			}
 		}
 	}
