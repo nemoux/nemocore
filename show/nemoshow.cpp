@@ -70,13 +70,13 @@ void nemoshow_destroy(struct nemoshow *show)
 	while (nemolist_empty(&show->transition_destroy_list) == 0) {
 		trans = nemolist_node0(&show->transition_destroy_list, struct showtransition, link);
 
-		nemoshow_transition_destroy(trans, 1);
+		nemoshow_transition_destroy(trans, 0);
 	}
 
 	while (nemolist_empty(&show->transition_list) == 0) {
 		trans = nemolist_node0(&show->transition_list, struct showtransition, link);
 
-		nemoshow_transition_destroy(trans, 1);
+		nemoshow_transition_destroy(trans, 0);
 	}
 
 	nemolist_remove(&show->transition_list);
