@@ -1098,8 +1098,13 @@ static void xserver_send_configure(struct nemocanvas *canvas, int32_t width, int
 	xwindow->configure_source = wl_event_loop_add_idle(xmanager->xserver->loop, xserver_handle_configure, xwindow);
 }
 
+static void xserver_send_transform(struct nemocanvas *canvas, int visible)
+{
+}
+
 static struct nemoclient xserver_client = {
-	xserver_send_configure
+	xserver_send_configure,
+	xserver_send_transform
 };
 
 void nemoxmanager_map_window(struct nemoxmanager *xmanager, struct nemoxwindow *xwindow)
