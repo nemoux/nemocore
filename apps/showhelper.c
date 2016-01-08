@@ -99,7 +99,7 @@ static void nemoshow_dispatch_timer(struct nemotimer *timer, void *data)
 	nemotale_push_timer_event(scon->tale, time_current_msecs());
 }
 
-struct nemoshow *nemoshow_create_on_tale(struct nemotool *tool, int32_t width, int32_t height, nemotale_dispatch_event_t dispatch)
+struct nemoshow *nemoshow_create_canvas(struct nemotool *tool, int32_t width, int32_t height, nemotale_dispatch_event_t dispatch)
 {
 	struct showcontext *scon;
 	struct nemoshow *show;
@@ -157,7 +157,7 @@ err1:
 	return NULL;
 }
 
-void nemoshow_destroy_on_tale(struct nemoshow *show)
+void nemoshow_destroy_canvas(struct nemoshow *show)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 
@@ -171,4 +171,25 @@ void nemoshow_destroy_on_tale(struct nemoshow *show)
 	nemotool_destroy_egl(scon->egl);
 
 	free(scon);
+}
+
+static void nemoshow_dispatch_destroy_canvas(void *data)
+{
+	struct nemoshow *show = (struct nemoshow *)data;
+
+	nemoshow_destroy_canvas(show);
+}
+
+void nemoshow_destroy_canvas_on_idle(struct nemoshow *show)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+
+	nemotool_dispatch_idle(scon->tool, nemoshow_dispatch_destroy_canvas, show);
+}
+
+void nemoshow_revoke_canvas(struct nemoshow *show)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+
+	nemocanvas_set_dispatch_event(scon->canvas, NULL);
 }

@@ -587,7 +587,7 @@ int main(int argc, char *argv[])
 		goto err1;
 	nemotool_connect_wayland(tool, NULL);
 
-	context->show = show = nemoshow_create_on_tale(tool, width, height, nemomine_dispatch_tale_event);
+	context->show = show = nemoshow_create_canvas(tool, width, height, nemomine_dispatch_tale_event);
 	if (show == NULL)
 		goto err2;
 	nemoshow_set_userdata(show, context);
@@ -729,7 +729,7 @@ int main(int argc, char *argv[])
 	nemomine_finish_ui(context);
 
 err3:
-	nemoshow_destroy_on_tale(show);
+	nemoshow_destroy_canvas(show);
 
 err2:
 	nemotool_disconnect_wayland(tool);

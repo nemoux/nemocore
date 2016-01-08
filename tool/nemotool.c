@@ -538,14 +538,18 @@ void nemotool_disconnect_wayland(struct nemotool *tool)
 void nemotool_dispatch(struct nemotool *tool)
 {
 	struct nemotask *task;
+	struct nemoidle *idle;
 	struct epoll_event ep[16];
 	int i, count, ret;
 
 	while (!nemolist_empty(&tool->idle_list)) {
-		task = (struct nemotask *)container_of(tool->idle_list.prev, struct nemotask, link);
-		nemolist_remove(&task->link);
-		nemolist_init(&task->link);
-		task->dispatch(task, 0);
+		idle = (struct nemoidle *)container_of(tool->idle_list.prev, struct nemoidle, link);
+
+		idle->dispatch(idle->data);
+
+		nemolist_remove(&idle->link);
+
+		free(idle);
 	}
 
 	if (tool->display != NULL) {
@@ -679,15 +683,21 @@ void nemotool_destroy(struct nemotool *tool)
 	free(tool);
 }
 
-void nemotool_idle_task(struct nemotool *tool, struct nemotask *task)
+int nemotool_dispatch_idle(struct nemotool *tool, nemotool_dispatch_idle_t dispatch, void *data)
 {
-	nemolist_insert(&tool->idle_list, &task->link);
-}
+	struct nemoidle *idle;
 
-void nemotool_remove_task(struct nemotool *tool, struct nemotask *task)
-{
-	nemolist_remove(&task->link);
-	nemolist_init(&task->link);
+	idle = (struct nemoidle *)malloc(sizeof(struct nemoidle));
+	if (idle == NULL)
+		return -1;
+	memset(idle, 0, sizeof(struct nemoidle));
+
+	idle->dispatch = dispatch;
+	idle->data = data;
+
+	nemolist_insert(&tool->idle_list, &idle->link);
+
+	return 0;
 }
 
 struct nemoqueue *nemotool_create_queue(struct nemotool *tool)

@@ -44,12 +44,23 @@ typedef enum {
 struct nemotask;
 struct nemotool;
 
-typedef void (*nemotask_dispatch_t)(struct nemotask *task, uint32_t events);
+typedef void (*nemotool_dispatch_task_t)(struct nemotask *task, uint32_t events);
+
+typedef void (*nemotool_dispatch_idle_t)(void *data);
 
 typedef void (*nemotool_dispatch_global_t)(struct nemotool *tool, uint32_t id, const char *interface, uint32_t version);
 
 struct nemotask {
-	nemotask_dispatch_t dispatch;
+	nemotool_dispatch_task_t dispatch;
+	struct nemolist link;
+
+	void *data;
+};
+
+struct nemoidle {
+	nemotool_dispatch_idle_t dispatch;
+	void *data;
+
 	struct nemolist link;
 };
 
@@ -143,8 +154,7 @@ extern int nemotool_get_fd(struct nemotool *tool);
 extern struct nemotool *nemotool_create(void);
 extern void nemotool_destroy(struct nemotool *tool);
 
-extern void nemotool_idle_task(struct nemotool *tool, struct nemotask *task);
-extern void nemotool_remove_task(struct nemotool *tool, struct nemotask *task);
+extern int nemotool_dispatch_idle(struct nemotool *tool, nemotool_dispatch_idle_t dispatch, void *data);
 
 static inline struct wl_display *nemotool_get_display(struct nemotool *tool)
 {

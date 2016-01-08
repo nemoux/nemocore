@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
 		height = NEMOIMAGE_SIZE_MAX;
 	}
 
-	context->show = show = nemoshow_create_on_tale(tool, width, height, nemoimage_dispatch_tale_event);
+	context->show = show = nemoshow_create_canvas(tool, width, height, nemoimage_dispatch_tale_event);
 	if (show == NULL)
 		goto out2;
 	nemoshow_set_userdata(show, context);
@@ -164,7 +164,7 @@ int main(int argc, char *argv[])
 
 	nemotool_run(tool);
 
-	nemoshow_destroy_on_tale(show);
+	nemoshow_destroy_canvas(show);
 
 out2:
 	nemotool_disconnect_wayland(tool);
