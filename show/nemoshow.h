@@ -35,6 +35,8 @@ NEMO_BEGIN_EXTERN_C
 #include <nemotale.h>
 #include <nemolist.h>
 
+typedef void (*nemoshow_dispatch_transition_done_t)(void *userdata);
+
 struct nemoshow {
 	struct showone **ones;
 	int nones, sones;
@@ -52,6 +54,9 @@ struct nemoshow {
 
 	struct nemolist transition_list;
 	struct nemolist transition_destroy_list;
+
+	nemoshow_dispatch_transition_done_t dispatch_done;
+	void *dispatch_data;
 
 	uint32_t serial;
 
@@ -143,6 +148,12 @@ static inline void nemoshow_set_userdata(struct nemoshow *show, void *data)
 static inline void *nemoshow_get_userdata(struct nemoshow *show)
 {
 	return show->userdata;
+}
+
+static inline void nemoshow_set_dispatch_transition_done(struct nemoshow *show, nemoshow_dispatch_transition_done_t dispatch, void *data)
+{
+	show->dispatch_done = dispatch;
+	show->dispatch_data = data;
 }
 
 #ifdef __cplusplus

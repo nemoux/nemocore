@@ -923,10 +923,16 @@ void nemoshow_dispatch_transition(struct nemoshow *show, uint32_t msecs)
 
 void nemoshow_destroy_transition(struct nemoshow *show)
 {
+	int had_transitions = nemolist_empty(&show->transition_destroy_list) != 0;
+
 	while (nemolist_empty(&show->transition_destroy_list) == 0) {
 		struct showtransition *trans = nemolist_node0(&show->transition_destroy_list, struct showtransition, link);
 
 		nemoshow_transition_destroy(trans, 1);
+	}
+
+	if (had_transitions != 0 && show->dispatch_done != NULL && nemolist_empty(&show->transition_list) != 0) {
+		show->dispatch_done(show->dispatch_data);
 	}
 }
 
