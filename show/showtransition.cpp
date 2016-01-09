@@ -31,6 +31,10 @@ struct showtransition *nemoshow_transition_create(struct showone *ease, uint32_t
 	trans->ntransitions = 0;
 	trans->stransitions = 4;
 
+	trans->dones = (struct showone **)malloc(sizeof(struct showone *) * 4);
+	trans->ndones = 0;
+	trans->sdones = 4;
+
 	trans->ease = NEMOSHOW_EASE(ease);
 
 	trans->duration = duration;
@@ -78,8 +82,13 @@ void nemoshow_transition_destroy(struct showtransition *trans, int done)
 		nemoshow_transition_destroy(trans->transitions[i], done);
 	}
 
+	for (i = 0; i < trans->ndones; i++) {
+		nemoshow_one_destroy(trans->dones[i]);
+	}
+
 	free(trans->sequences);
 	free(trans->transitions);
+	free(trans->dones);
 	free(trans);
 
 	if (done != 0 && dispatch_done != NULL) {
@@ -107,6 +116,11 @@ void nemoshow_transition_check_one(struct showtransition *trans, struct showone 
 
 		nemolist_insert_tail(&trans->sensor_list, &sensor->link);
 	}
+}
+
+void nemoshow_transition_destroy_one(struct showtransition *trans, struct showone *one)
+{
+	NEMOBOX_APPEND(trans->dones, trans->sdones, trans->ndones, one);
 }
 
 void nemoshow_transition_attach_sequence(struct showtransition *trans, struct showone *sequence)

@@ -32,6 +32,9 @@ struct showtransition {
 	struct showtransition **transitions;
 	int ntransitions, stransitions;
 
+	struct showone **dones;
+	int ndones, sdones;
+
 	struct showtransition *parent;
 
 	struct showease *ease;
@@ -59,6 +62,7 @@ extern struct showtransition *nemoshow_transition_create(struct showone *ease, u
 extern void nemoshow_transition_destroy(struct showtransition *trans, int done);
 
 extern void nemoshow_transition_check_one(struct showtransition *trans, struct showone *one);
+extern void nemoshow_transition_destroy_one(struct showtransition *trans, struct showone *one);
 
 extern void nemoshow_transition_attach_sequence(struct showtransition *trans, struct showone *sequence);
 
