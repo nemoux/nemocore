@@ -14,9 +14,13 @@
 struct miroback {
 	struct nemotool *tool;
 
+	struct nemotimer *timer;
+
 	int32_t width, height;
 
 	int32_t columns, rows;
+
+	int32_t nmices, mmices;
 
 	struct nemoshow *show;
 	struct showone *scene;
@@ -30,6 +34,15 @@ struct miroback {
 	struct showone **rones;
 };
 
+struct miromice {
+	struct miroback *miro;
+
+	struct showone *one;
+
+	int32_t c0, r0;
+	int32_t c1, r1;
+};
+
 static void nemomiro_dispatch_show(struct miroback *miro, uint32_t duration, uint32_t interval);
 static void nemomiro_dispatch_hide(struct miroback *miro, uint32_t duration, uint32_t interval);
 
@@ -41,11 +54,152 @@ static void nemomiro_dispatch_tale_event(struct nemotale *tale, struct talenode 
 	}
 }
 
+static void nemomiro_dispatch_mice_destroy_done(void *data)
+{
+	struct miromice *mice = (struct miromice *)data;
+	struct miroback *miro = mice->miro;
+
+	miro->nmices--;
+
+	nemoshow_one_destroy(mice->one);
+
+	free(mice);
+}
+
+static void nemomiro_dispatch_mice_transition_done(void *data)
+{
+	struct miromice *mice = (struct miromice *)data;
+	struct miroback *miro = mice->miro;
+	struct showtransition *trans;
+	struct showone *sequence;
+	struct showone *set0;
+
+	if (mice->c1 <= 0 || mice->c1 >= miro->columns ||
+			mice->r1 <= 0 || mice->r1 >= miro->rows) {
+		set0 = nemoshow_sequence_create_set();
+		nemoshow_sequence_set_source(set0, mice->one);
+		nemoshow_sequence_set_dattr(set0, "r", 0.0f, NEMOSHOW_SHAPE_DIRTY);
+
+		sequence = nemoshow_sequence_create_easy(miro->show,
+				nemoshow_sequence_create_frame_easy(miro->show,
+					1.0f, set0, NULL),
+				NULL);
+
+		trans = nemoshow_transition_create(miro->ease0, 1000, 0);
+		nemoshow_transition_set_dispatch_done(trans, nemomiro_dispatch_mice_destroy_done);
+		nemoshow_transition_set_userdata(trans, mice);
+		nemoshow_transition_check_one(trans, mice->one);
+		nemoshow_transition_attach_sequence(trans, sequence);
+		nemoshow_attach_transition(miro->show, trans);
+	} else {
+		int dir = random_get_int(0, 4);
+
+		mice->c0 = mice->c1;
+		mice->r0 = mice->r1;
+
+		if (dir == 0) {
+			mice->c1 = mice->c0 + 1;
+			mice->r1 = mice->r1;
+		} else if (dir == 1) {
+			mice->c1 = mice->c0 - 1;
+			mice->r1 = mice->r1;
+		} else if (dir == 2) {
+			mice->c1 = mice->c0;
+			mice->r1 = mice->r1 + 1;
+		} else if (dir == 3) {
+			mice->c1 = mice->c0;
+			mice->r1 = mice->r1 - 1;
+		}
+
+		set0 = nemoshow_sequence_create_set();
+		nemoshow_sequence_set_source(set0, mice->one);
+		nemoshow_sequence_set_dattr(set0, "x", mice->c1 * (miro->width / miro->columns), NEMOSHOW_SHAPE_DIRTY);
+		nemoshow_sequence_set_dattr(set0, "y", mice->r1 * (miro->height / miro->rows), NEMOSHOW_SHAPE_DIRTY);
+
+		sequence = nemoshow_sequence_create_easy(miro->show,
+				nemoshow_sequence_create_frame_easy(miro->show,
+					1.0f, set0, NULL),
+				NULL);
+
+		trans = nemoshow_transition_create(miro->ease1, 2400, 0);
+		nemoshow_transition_set_dispatch_done(trans, nemomiro_dispatch_mice_transition_done);
+		nemoshow_transition_set_userdata(trans, mice);
+		nemoshow_transition_check_one(trans, mice->one);
+		nemoshow_transition_attach_sequence(trans, sequence);
+		nemoshow_attach_transition(miro->show, trans);
+	}
+}
+
+static int nemomiro_shoot_mice(struct miroback *miro)
+{
+	struct miromice *mice;
+	struct showone *one;
+	struct showtransition *trans;
+	struct showone *sequence;
+	struct showone *set0;
+
+	mice = (struct miromice *)malloc(sizeof(struct miromice));
+	if (mice == NULL)
+		return -1;
+	memset(mice, 0, sizeof(struct miromice));
+
+	mice->miro = miro;
+
+	mice->c0 = random_get_int(1, miro->columns);
+	mice->r0 = random_get_int(1, miro->rows);
+	mice->c1 = mice->c0;
+	mice->r1 = mice->r0;
+
+	mice->one = one = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
+	nemoshow_attach_one(miro->show, one);
+	nemoshow_one_attach(miro->canvas, one);
+	nemoshow_item_set_x(one, mice->c0 * (miro->width / miro->columns));
+	nemoshow_item_set_y(one, mice->r0 * (miro->height / miro->rows));
+	nemoshow_item_set_r(one, 0.0f);
+	nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
+	nemoshow_item_set_filter(one, miro->solid);
+
+	set0 = nemoshow_sequence_create_set();
+	nemoshow_sequence_set_source(set0, one);
+	nemoshow_sequence_set_dattr(set0, "r", 5.0f, NEMOSHOW_SHAPE_DIRTY);
+
+	sequence = nemoshow_sequence_create_easy(miro->show,
+			nemoshow_sequence_create_frame_easy(miro->show,
+				1.0f, set0, NULL),
+			NULL);
+
+	trans = nemoshow_transition_create(miro->ease0, 1000, 0);
+	nemoshow_transition_set_dispatch_done(trans, nemomiro_dispatch_mice_transition_done);
+	nemoshow_transition_set_userdata(trans, mice);
+	nemoshow_transition_check_one(trans, one);
+	nemoshow_transition_attach_sequence(trans, sequence);
+	nemoshow_attach_transition(miro->show, trans);
+
+	return 0;
+}
+
+static void nemomiro_dispatch_timer_event(struct nemotimer *timer, void *data)
+{
+	struct miroback *miro = (struct miroback *)data;
+
+	if (miro->nmices < miro->mmices) {
+		nemomiro_shoot_mice(miro);
+
+		miro->nmices++;
+
+		nemocanvas_dispatch_frame(NEMOSHOW_AT(miro->show, canvas));
+	}
+
+	nemotimer_set_timeout(miro->timer, 3000);
+}
+
 static void nemomiro_dispatch_show_transition_done(void *userdata)
 {
 	struct miroback *miro = (struct miroback *)userdata;
 
-	nemomiro_dispatch_hide(miro, 1800, 100);
+	nemotimer_set_timeout(miro->timer, 1000);
+
+	nemoshow_set_dispatch_transition_done(miro->show, NULL, NULL);
 }
 
 static void nemomiro_dispatch_show(struct miroback *miro, uint32_t duration, uint32_t interval)
@@ -92,13 +246,6 @@ static void nemomiro_dispatch_show(struct miroback *miro, uint32_t duration, uin
 	nemocanvas_dispatch_frame(NEMOSHOW_AT(miro->show, canvas));
 }
 
-static void nemomiro_dispatch_hide_transition_done(void *userdata)
-{
-	struct miroback *miro = (struct miroback *)userdata;
-
-	nemomiro_dispatch_show(miro, 1800, 100);
-}
-
 static void nemomiro_dispatch_hide(struct miroback *miro, uint32_t duration, uint32_t interval)
 {
 	struct showtransition *trans;
@@ -138,8 +285,6 @@ static void nemomiro_dispatch_hide(struct miroback *miro, uint32_t duration, uin
 		nemoshow_attach_transition(miro->show, trans);
 	}
 
-	nemoshow_set_dispatch_transition_done(miro->show, nemomiro_dispatch_hide_transition_done, miro);
-
 	nemocanvas_dispatch_frame(NEMOSHOW_AT(miro->show, canvas));
 }
 
@@ -150,11 +295,13 @@ int main(int argc, char *argv[])
 		{ "height",			required_argument,			NULL,		'h' },
 		{ "columns",		required_argument,			NULL,		'c' },
 		{ "rows",				required_argument,			NULL,		'r' },
+		{ "mices",			required_argument,			NULL,		'm' },
 		{ 0 }
 	};
 
 	struct miroback *miro;
 	struct nemotool *tool;
+	struct nemotimer *timer;
 	struct nemoshow *show;
 	struct showone *scene;
 	struct showone *canvas;
@@ -165,10 +312,11 @@ int main(int argc, char *argv[])
 	int32_t height = 1080;
 	int32_t columns = 16;
 	int32_t rows = 8;
+	int32_t mices = 16;
 	int opt;
 	int i;
 
-	while (opt = getopt_long(argc, argv, "w:h:c:r:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:c:r:m:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -189,6 +337,10 @@ int main(int argc, char *argv[])
 				rows = strtoul(optarg, NULL, 10);
 				break;
 
+			case 'm':
+				mices = strtoul(optarg, NULL, 10);
+				break;
+
 			default:
 				break;
 		}
@@ -205,10 +357,17 @@ int main(int argc, char *argv[])
 	miro->columns = columns;
 	miro->rows = rows;
 
+	miro->nmices = 0;
+	miro->mmices = mices;
+
 	miro->tool = tool = nemotool_create();
 	if (tool == NULL)
 		goto err1;
 	nemotool_connect_wayland(tool, NULL);
+
+	miro->timer = timer = nemotimer_create(tool);
+	nemotimer_set_callback(timer, nemomiro_dispatch_timer_event);
+	nemotimer_set_userdata(timer, miro);
 
 	miro->show = show = nemoshow_create_canvas(tool, width, height, nemomiro_dispatch_tale_event);
 	if (show == NULL)
@@ -275,6 +434,7 @@ int main(int argc, char *argv[])
 		nemoshow_item_set_stroke_color(one, 0x1e, 0xdc, 0xdc, 0xff);
 		nemoshow_item_set_stroke_width(one, 2.0f);
 		nemoshow_item_set_filter(one, miro->solid);
+		nemoshow_item_set_alpha(one, 0.5f);
 	}
 
 	for (i = 0; i <= rows; i++) {
@@ -288,6 +448,7 @@ int main(int argc, char *argv[])
 		nemoshow_item_set_stroke_color(one, 0x1e, 0xdc, 0xdc, 0xff);
 		nemoshow_item_set_stroke_width(one, 2.0f);
 		nemoshow_item_set_filter(one, miro->solid);
+		nemoshow_item_set_alpha(one, 0.5f);
 	}
 
 	nemomiro_dispatch_show(miro, 1800, 100);
