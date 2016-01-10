@@ -827,3 +827,8 @@ void nemopad_deactivate(struct nemopad *pad)
 
 	nemoshow_revoke_actor(show);
 }
+
+void nemopad_set_focus(struct nemopad *pad, struct nemoview *view)
+{
+	nemokeypad_set_focus(pad->keypad, view);
+}

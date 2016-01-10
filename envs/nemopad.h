@@ -70,6 +70,8 @@ extern void nemopad_destroy(struct nemopad *pad);
 extern int nemopad_activate(struct nemopad *pad, double x, double y, double r);
 extern void nemopad_deactivate(struct nemopad *pad);
 
+extern void nemopad_set_focus(struct nemopad *pad, struct nemoview *view);
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif
