@@ -23,7 +23,6 @@
 #include <timer.h>
 
 #include <nemopad.h>
-#include <nemoshell.h>
 #include <nemograb.h>
 #include <talehelper.h>
 #include <showhelper.h>

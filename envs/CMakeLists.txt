@@ -21,6 +21,7 @@ add_definitions(-DNEMOENVS_RESOURCES="${CMAKE_INSTALL_PREFIX}/share/nemoenvs")
 
 add_library(nemoenvs SHARED
 	nemopad.c
+	nemopack.c
 	nemograb.c
 	talehelper.c
 	showhelper.c
@@ -40,6 +41,7 @@ INSTALL(TARGETS nemoenvs DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
 
 set(HEADER_FILES
 	nemopad.h
+	nemopack.h
 	nemograb.h
 	talehelper.h
 	showhelper.h
@@ -56,6 +58,7 @@ INSTALL(FILES ${CMAKE_BINARY_DIR}/envs/nemoenvs.pc DESTINATION lib${CMAKE_LIBRAR
 
 set(RESOURCE_DIRS
 	${CMAKE_CURRENT_SOURCE_DIR}/resources/keyboard
+	${CMAKE_CURRENT_SOURCE_DIR}/resources/misc-icons
 	)
 
 INSTALL(DIRECTORY ${RESOURCE_DIRS} DESTINATION share/nemoenvs)
