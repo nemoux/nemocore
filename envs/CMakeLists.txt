@@ -1,0 +1,56 @@
+FIND_PACKAGE(PkgConfig REQUIRED)
+
+PKG_CHECK_MODULES(DBUS REQUIRED dbus-1)
+INCLUDE_DIRECTORIES(${DBUS_INCLUDE_DIRS})
+LINK_DIRECTORIES(${DBUS_LIBRARY_DIRS})
+
+PKG_CHECK_MODULES(JSON REQUIRED json-c)
+INCLUDE_DIRECTORIES(${JSON_INCLUDE_DIRS})
+LINK_DIRECTORIES(${JSON_LIBRARY_DIRS})
+
+PKG_CHECK_MODULES(SKIA REQUIRED skia)
+INCLUDE_DIRECTORIES(${SKIA_INCLUDE_DIRS})
+LINK_DIRECTORIES(${SKIA_LIBRARY_DIRS})
+
+include_directories(
+	${CMAKE_SOURCE_DIR}/asst
+	${CMAKE_SOURCE_DIR}/compz
+	${CMAKE_SOURCE_DIR}/shell
+	${CMAKE_SOURCE_DIR}/tale
+	${CMAKE_SOURCE_DIR}/show
+	)
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -std=c++11")
+set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
+
+add_library(nemoenvs SHARED
+	talehelper.c
+	showhelper.c
+	)
+
+TARGET_LINK_LIBRARIES(nemoenvs
+	nemoasst
+	nemocompz
+	nemoshell
+	nemotale
+	nemoshow
+	)
+
+set(NEMOENVS_PKGCONFIG_REQUIRES "nemoasst nemocompz nemoshell nemoshow")
+
+INSTALL(TARGETS nemoenvs DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
+
+set(HEADER_FILES
+	talehelper.h
+	showhelper.h
+	)
+
+configure_file(
+	nemoenvs.pc.in
+	nemoenvs.pc
+	@ONLY
+	)
+
+INSTALL(FILES ${HEADER_FILES} DESTINATION include/nemoenvs)
+INSTALL(FILES ${CMAKE_BINARY_DIR}/envs/nemoenvs.pc DESTINATION lib${CMAKE_LIBRARY_SUFFIX}/pkgconfig)
