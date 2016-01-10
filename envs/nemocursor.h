@@ -3,6 +3,8 @@
 
 #include <nemoconfig.h>
 
+#include <skiahelper.hpp>
+
 #ifdef __cplusplus
 NEMO_BEGIN_EXTERN_C
 #endif

@@ -5,8 +5,6 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include <skiahelper.hpp>
-
 #include <nemocursor.h>
 
 int nemocursor_make_circle(
