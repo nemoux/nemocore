@@ -245,6 +245,16 @@ static inline void nemoshow_canvas_render_item_none(SkCanvas *canvas, struct sho
 	struct showitem *item = NEMOSHOW_ITEM(one);
 }
 
+static inline void nemoshow_canvas_render_item_line(SkCanvas *canvas, struct showone *one)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	if (item->fill != 0)
+		canvas->drawLine(item->x, item->y, item->width, item->height, *NEMOSHOW_ITEM_CC(item, fill));
+	if (item->stroke != 0)
+		canvas->drawLine(item->x, item->y, item->width, item->height, *NEMOSHOW_ITEM_CC(item, stroke));
+}
+
 static inline void nemoshow_canvas_render_item_rect(SkCanvas *canvas, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
@@ -520,6 +530,7 @@ static inline void nemoshow_canvas_render_item(SkCanvas *canvas, struct showone 
 {
 	static nemoshow_canvas_render_t renderers[NEMOSHOW_LAST_ITEM] = {
 		nemoshow_canvas_render_item_none,
+		nemoshow_canvas_render_item_line,
 		nemoshow_canvas_render_item_rect,
 		nemoshow_canvas_render_item_rrect,
 		nemoshow_canvas_render_item_circle,

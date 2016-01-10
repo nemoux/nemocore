@@ -666,7 +666,9 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 	SkRect box;
 	double outer;
 
-	if (one->sub == NEMOSHOW_RECT_ITEM) {
+	if (one->sub == NEMOSHOW_LINE_ITEM) {
+		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
+	} else if (one->sub == NEMOSHOW_RECT_ITEM) {
 		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
 	} else if (one->sub == NEMOSHOW_RRECT_ITEM) {
 		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);

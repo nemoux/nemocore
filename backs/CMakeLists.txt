@@ -33,6 +33,18 @@ TARGET_LINK_LIBRARIES(nemoback-mini
 
 INSTALL(TARGETS nemoback-mini DESTINATION bin)
 
+add_executable(nemoback-miro
+	miroback.c
+	)
+
+TARGET_LINK_LIBRARIES(nemoback-miro
+	nemoapps
+	${NEMOUX_COMMON_LIBRARIES}
+	${SKIA_LIBRARIES}
+	)
+
+INSTALL(TARGETS nemoback-miro DESTINATION bin)
+
 add_executable(nemoback-plex
 	plexback.cpp
 	)
