@@ -23,6 +23,7 @@ add_library(nemoenvs SHARED
 	nemopad.c
 	nemopack.c
 	nemograb.c
+	nemocursor.cpp
 	talehelper.c
 	showhelper.c
 	)
@@ -43,8 +44,10 @@ set(HEADER_FILES
 	nemopad.h
 	nemopack.h
 	nemograb.h
+	nemocursor.h
 	talehelper.h
 	showhelper.h
+	skiahelper.hpp
 	)
 
 configure_file(
