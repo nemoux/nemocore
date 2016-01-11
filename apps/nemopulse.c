@@ -174,7 +174,10 @@ static void nemopulse_dispatch_state_callback(pa_context *context, void *userdat
 			break;
 
 		case PA_CONTEXT_READY:
-			if (pulse->cmd == NULL || strcmp(pulse->cmd, "list") == 0) {
+			if (pulse->cmd == NULL)
+				break;
+
+			if (strcmp(pulse->cmd, "list") == 0) {
 				op = pa_context_get_client_info_list(context, nemopulse_dispatch_client_info_callback, pulse);
 				if (op != NULL) {
 					pa_operation_unref(op);
@@ -263,7 +266,6 @@ static void nemopulse_dispatch_state_callback(pa_context *context, void *userdat
 int main(int argc, char *argv[])
 {
 	struct option options[] = {
-		{ "command",			required_argument,		NULL,		'c' },
 		{ "sinkinput",		required_argument,		NULL,		'i' },
 		{ "sink",					required_argument,		NULL,		's' },
 		{ "name",					required_argument,		NULL,		'n' },
@@ -287,15 +289,11 @@ int main(int argc, char *argv[])
 
 	nemolog_set_file(2);
 
-	while (opt = getopt_long(argc, argv, "c:i:s:n:m:v:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "i:s:n:m:v:", options, NULL)) {
 		if (opt == -1)
 			break;
 
 		switch (opt) {
-			case 'c':
-				cmd = strdup(optarg);
-				break;
-
 			case 'i':
 				sinkinput = strtoul(optarg, NULL, 10);
 				break;
@@ -320,6 +318,9 @@ int main(int argc, char *argv[])
 				break;
 		}
 	}
+
+	if (optind < argc)
+		cmd = strdup(argv[optind]);
 
 	pulse = (struct nemopulse *)malloc(sizeof(struct nemopulse));
 	if (pulse == NULL)
