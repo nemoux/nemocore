@@ -32,6 +32,8 @@ struct miroback {
 
 	struct showone **cones;
 	struct showone **rones;
+
+	struct showone **bones;
 };
 
 struct miromice {
@@ -178,6 +180,41 @@ static int nemomiro_shoot_mice(struct miroback *miro)
 	return 0;
 }
 
+static int nemomiro_shoot_box(struct miroback *miro)
+{
+	struct showtransition *trans;
+	struct showone *sequence;
+	struct showone *set0, *set1;
+	int index;
+	int i;
+
+	for (i = 0; i < 8; i++) {
+		index = random_get_int(0, miro->columns * miro->rows);
+
+		set0 = nemoshow_sequence_create_set();
+		nemoshow_sequence_set_source(set0, miro->bones[index]);
+		nemoshow_sequence_set_dattr(set0, "alpha", 1.0f, NEMOSHOW_STYLE_DIRTY);
+
+		set1 = nemoshow_sequence_create_set();
+		nemoshow_sequence_set_source(set1, miro->bones[index]);
+		nemoshow_sequence_set_dattr(set1, "alpha", 0.0f, NEMOSHOW_STYLE_DIRTY);
+
+		sequence = nemoshow_sequence_create_easy(miro->show,
+				nemoshow_sequence_create_frame_easy(miro->show,
+					0.5f, set0, NULL),
+				nemoshow_sequence_create_frame_easy(miro->show,
+					1.0f, set1, NULL),
+				NULL);
+
+		trans = nemoshow_transition_create(miro->ease0, 1500, i * 300);
+		nemoshow_transition_check_one(trans, miro->bones[index]);
+		nemoshow_transition_attach_sequence(trans, sequence);
+		nemoshow_attach_transition(miro->show, trans);
+	}
+
+	return 0;
+}
+
 static void nemomiro_dispatch_timer_event(struct nemotimer *timer, void *data)
 {
 	struct miroback *miro = (struct miroback *)data;
@@ -186,9 +223,11 @@ static void nemomiro_dispatch_timer_event(struct nemotimer *timer, void *data)
 		nemomiro_shoot_mice(miro);
 
 		miro->nmices++;
-
-		nemocanvas_dispatch_frame(NEMOSHOW_AT(miro->show, canvas));
 	}
+
+	nemomiro_shoot_box(miro);
+
+	nemocanvas_dispatch_frame(NEMOSHOW_AT(miro->show, canvas));
 
 	nemotimer_set_timeout(miro->timer, 3000);
 }
@@ -422,6 +461,19 @@ int main(int argc, char *argv[])
 
 	miro->cones = (struct showone **)malloc(sizeof(struct showone *) * (columns + 1));
 	miro->rones = (struct showone **)malloc(sizeof(struct showone *) * (rows + 1));
+	miro->bones = (struct showone **)malloc(sizeof(struct showone *) * (columns * rows));
+
+	for (i = 0; i < columns * rows; i++) {
+		miro->bones[i] = one = nemoshow_item_create(NEMOSHOW_RECT_ITEM);
+		nemoshow_attach_one(show, one);
+		nemoshow_one_attach(canvas, one);
+		nemoshow_item_set_x(one, (i % columns) * (width / columns));
+		nemoshow_item_set_y(one, (i / columns) * (height / rows));
+		nemoshow_item_set_width(one, width / columns);
+		nemoshow_item_set_height(one, height / rows);
+		nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
+		nemoshow_item_set_alpha(one, 0.0f);
+	}
 
 	for (i = 0; i <= columns; i++) {
 		miro->cones[i] = one = nemoshow_item_create(NEMOSHOW_LINE_ITEM);
