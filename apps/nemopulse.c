@@ -174,10 +174,7 @@ static void nemopulse_dispatch_state_callback(pa_context *context, void *userdat
 			break;
 
 		case PA_CONTEXT_READY:
-			if (pulse->cmd == NULL)
-				break;
-
-			if (strcmp(pulse->cmd, "list") == 0) {
+			if (pulse->cmd == NULL || strcmp(pulse->cmd, "list") == 0) {
 				op = pa_context_get_client_info_list(context, nemopulse_dispatch_client_info_callback, pulse);
 				if (op != NULL) {
 					pa_operation_unref(op);

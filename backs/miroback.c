@@ -7,9 +7,24 @@
 
 #include <getopt.h>
 
+#include <pthread.h>
+
+#include <pulse/simple.h>
+#include <pulse/error.h>
+
+#include <fftw3.h>
+
 #include <nemotool.h>
 #include <showhelper.h>
+#include <nemolog.h>
 #include <nemomisc.h>
+
+#define NEMOMIRO_PA_SAMPLING_RATE				(44100)
+#define NEMOMIRO_PA_SAMPLING_CHANNELS		(2)
+#define NEMOMIRO_PA_SAMPLING_FRAMES			(30)
+#define NEMOMIRO_PA_BUFFER_SIZE					(NEMOMIRO_PA_SAMPLING_RATE / NEMOMIRO_PA_SAMPLING_FRAMES)
+#define	NEMOMIRO_PA_UPPER_FREQUENCY			(3520.0f)
+#define NEMOMIRO_PA_VOLUME_DECIBELS			(100)
 
 struct miroback {
 	struct nemotool *tool;
@@ -34,6 +49,12 @@ struct miroback {
 	struct showone **rones;
 
 	struct showone **bones;
+	int32_t *nodes;
+
+	char *snddev;
+
+	struct nemotimer *ptimer;
+	pthread_mutex_t plock;
 };
 
 struct miromice {
@@ -223,13 +244,164 @@ static void nemomiro_dispatch_timer_event(struct nemotimer *timer, void *data)
 		nemomiro_shoot_mice(miro);
 
 		miro->nmices++;
+
+		nemocanvas_dispatch_frame(NEMOSHOW_AT(miro->show, canvas));
 	}
 
-	nemomiro_shoot_box(miro);
+	nemotimer_set_timeout(miro->timer, 3000);
+}
+
+static void *nemomiro_dispatch_pulse_monitor_thread(void *data)
+{
+	static const pa_sample_spec psample = {
+		.format = PA_SAMPLE_FLOAT32LE,
+		.rate = NEMOMIRO_PA_SAMPLING_RATE,
+		.channels = NEMOMIRO_PA_SAMPLING_CHANNELS
+	};
+
+	struct miroback *miro = (struct miroback *)data;
+	pa_simple *psimple;
+	double pin[NEMOMIRO_PA_BUFFER_SIZE];
+	fftw_complex pout[NEMOMIRO_PA_BUFFER_SIZE];
+	fftw_plan pplan;
+	float window[NEMOMIRO_PA_BUFFER_SIZE];
+	float buffer[NEMOMIRO_PA_BUFFER_SIZE * NEMOMIRO_PA_SAMPLING_CHANNELS];
+	double scale = 2.0f / NEMOMIRO_PA_BUFFER_SIZE;
+	double power, re, im;
+	int nodes = miro->columns * miro->rows / 2;
+	int units = ceil(NEMOMIRO_PA_UPPER_FREQUENCY / (NEMOMIRO_PA_SAMPLING_FRAMES * nodes));
+	int error;
+	int db;
+	int i, j, s;
+
+	psimple = pa_simple_new(NULL, "miro", PA_STREAM_RECORD, miro->snddev, "miro", &psample, NULL, NULL, &error);
+	if (psimple == NULL) {
+		nemolog_error("MIRO", "can't create pulseaudio: %s\n", pa_strerror(error));
+		return NULL;
+	}
+
+	pplan = fftw_plan_dft_r2c_1d(NEMOMIRO_PA_BUFFER_SIZE, pin, pout, FFTW_MEASURE);
+
+	for (i = 0; i < NEMOMIRO_PA_BUFFER_SIZE; i++) {
+		window[i] = 0.5f * (1.0f - cosf(2.0f * M_PI * i / (NEMOMIRO_PA_BUFFER_SIZE - 1.0f)));
+	}
+
+	while (1) {
+		if (pa_simple_read(psimple, buffer, sizeof(buffer), &error) < 0) {
+			nemolog_error("MIRO", "can't read pulseaudio: %s\n", pa_strerror(error));
+			break;
+		}
+
+		for (i = 0; i < NEMOMIRO_PA_BUFFER_SIZE; i++)
+			pin[i] = (double)(window[i] * buffer[i * 2 + 0]);
+
+		fftw_execute(pplan);
+
+		pthread_mutex_lock(&miro->plock);
+
+		for (i = 0, s = 0; i < nodes; i++) {
+			power = 0.0f;
+
+			for (j = 0; j < units && s < NEMOMIRO_PA_BUFFER_SIZE; j++, s++) {
+				re = pout[i][0] * scale;
+				im = pout[i][1] * scale;
+
+				power += re * re + im * im;
+			}
+
+			power *= (1.0f / units);
+			power = power < 1e-15 ? 1e-15 : power;
+
+			db = NEMOMIRO_PA_VOLUME_DECIBELS + 10.0f * log10(power);
+			db = db > NEMOMIRO_PA_VOLUME_DECIBELS ? NEMOMIRO_PA_VOLUME_DECIBELS : db;
+			db = db < 0 ? 0 : db;
+
+			miro->nodes[(i / (miro->columns / 2)) * miro->columns + (i % (miro->columns / 2))] = db;
+		}
+
+		for (i = 0; i < NEMOMIRO_PA_BUFFER_SIZE; i++)
+			pin[i] = (double)(window[i] * buffer[i * 2 + 1]);
+
+		fftw_execute(pplan);
+
+		for (i = 0, s = 0; i < nodes; i++) {
+			power = 0.0f;
+
+			for (j = 0; j < units && s < NEMOMIRO_PA_BUFFER_SIZE; j++, s++) {
+				re = pout[i][0] * scale;
+				im = pout[i][1] * scale;
+
+				power += re * re + im * im;
+			}
+
+			power *= (1.0f / units);
+			power = power < 1e-15 ? 1e-15 : power;
+
+			db = NEMOMIRO_PA_VOLUME_DECIBELS + 10.0f * log10(power);
+			db = db > NEMOMIRO_PA_VOLUME_DECIBELS ? NEMOMIRO_PA_VOLUME_DECIBELS : db;
+			db = db < 0 ? 0 : db;
+
+			miro->nodes[(i / (miro->columns / 2)) * miro->columns + (i % (miro->columns / 2)) + (miro->columns / 2)] = db;
+		}
+
+		pthread_mutex_unlock(&miro->plock);
+	}
+
+	return NULL;
+}
+
+static void nemomiro_dispatch_pulse_timer_event(struct nemotimer *timer, void *data)
+{
+	struct miroback *miro = (struct miroback *)data;
+	struct showtransition *trans;
+	struct showone *sequence;
+	struct showone *frame;
+	struct showone *set0;
+	int i;
+
+	frame = nemoshow_sequence_create_frame();
+	nemoshow_sequence_set_timing(frame, 1.0f);
+
+	pthread_mutex_lock(&miro->plock);
+
+	for (i = 0; i < miro->columns * miro->rows; i++) {
+		set0 = nemoshow_sequence_create_set();
+		nemoshow_sequence_set_source(set0, miro->bones[i]);
+		nemoshow_sequence_set_dattr(set0, "alpha", (double)miro->nodes[i] / 100.0f, NEMOSHOW_STYLE_DIRTY);
+
+		nemoshow_one_attach(frame, set0);
+	}
+
+	pthread_mutex_unlock(&miro->plock);
+
+	sequence = nemoshow_sequence_create();
+	nemoshow_one_attach(sequence, frame);
+
+	trans = nemoshow_transition_create(miro->ease0, 300, 0);
+	nemoshow_transition_attach_sequence(trans, sequence);
+	nemoshow_attach_transition(miro->show, trans);
 
 	nemocanvas_dispatch_frame(NEMOSHOW_AT(miro->show, canvas));
 
-	nemotimer_set_timeout(miro->timer, 3000);
+	nemotimer_set_timeout(timer, 300);
+}
+
+static int nemomiro_dispatch_pulse_monitor(struct miroback *miro)
+{
+	struct nemotimer *timer;
+	pthread_t th;
+
+	pthread_mutex_init(&miro->plock, NULL);
+
+	pthread_create(&th, NULL, nemomiro_dispatch_pulse_monitor_thread, (void *)miro);
+
+	miro->ptimer = timer = nemotimer_create(miro->tool);
+	nemotimer_set_callback(timer, nemomiro_dispatch_pulse_timer_event);
+	nemotimer_set_userdata(timer, miro);
+
+	nemotimer_set_timeout(timer, 100);
+
+	return 0;
 }
 
 static void nemomiro_dispatch_show_transition_done(void *userdata)
@@ -237,6 +409,8 @@ static void nemomiro_dispatch_show_transition_done(void *userdata)
 	struct miroback *miro = (struct miroback *)userdata;
 
 	nemotimer_set_timeout(miro->timer, 1000);
+
+	nemomiro_dispatch_pulse_monitor(miro);
 
 	nemoshow_set_dispatch_transition_done(miro->show, NULL, NULL);
 }
@@ -335,6 +509,8 @@ int main(int argc, char *argv[])
 		{ "columns",		required_argument,			NULL,		'c' },
 		{ "rows",				required_argument,			NULL,		'r' },
 		{ "mices",			required_argument,			NULL,		'm' },
+		{ "sounddev",		required_argument,			NULL,		's' },
+		{ "log",				required_argument,			NULL,		'l' },
 		{ 0 }
 	};
 
@@ -352,10 +528,13 @@ int main(int argc, char *argv[])
 	int32_t columns = 16;
 	int32_t rows = 8;
 	int32_t mices = 16;
+	char *snddev = NULL;
 	int opt;
 	int i;
 
-	while (opt = getopt_long(argc, argv, "w:h:c:r:m:", options, NULL)) {
+	nemolog_set_file(2);
+
+	while (opt = getopt_long(argc, argv, "w:h:c:r:m:s:l:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -380,6 +559,14 @@ int main(int argc, char *argv[])
 				mices = strtoul(optarg, NULL, 10);
 				break;
 
+			case 's':
+				snddev = strdup(optarg);
+				break;
+
+			case 'l':
+				nemolog_open_socket(optarg);
+				break;
+
 			default:
 				break;
 		}
@@ -390,6 +577,11 @@ int main(int argc, char *argv[])
 		return -1;
 	memset(miro, 0, sizeof(struct miroback));
 
+	miro->nodes = (int32_t *)malloc(sizeof(int32_t) * columns * rows);
+	if (miro->nodes == NULL)
+		return -1;
+	memset(miro->nodes, 0, sizeof(int32_t) * columns * rows);
+
 	miro->width = width;
 	miro->height = height;
 
@@ -398,6 +590,8 @@ int main(int argc, char *argv[])
 
 	miro->nmices = 0;
 	miro->mmices = mices;
+
+	miro->snddev = snddev;
 
 	miro->tool = tool = nemotool_create();
 	if (tool == NULL)
@@ -505,8 +699,6 @@ int main(int argc, char *argv[])
 
 	nemomiro_dispatch_show(miro, 1800, 100);
 
-	nemocanvas_dispatch_frame(NEMOSHOW_AT(show, canvas));
-
 	nemotool_run(tool);
 
 err3:
@@ -517,6 +709,7 @@ err2:
 	nemotool_destroy(tool);
 
 err1:
+	free(miro->nodes);
 	free(miro);
 
 	return 0;
