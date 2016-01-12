@@ -44,11 +44,9 @@ void nemocompz_load_plugins(struct nemocompz *compz)
 {
 	const char *path;
 	const char *args;
-	int index = 0;
+	int index;
 
-	for (index = 0;
-			(index = nemoitem_get(compz->configs, "//nemoshell/plugin", index)) >= 0;
-			index++) {
+	nemoitem_for_each(compz->configs, index, "//nemoshell/plugin", 0) {
 		path = nemoitem_get_attr(compz->configs, index, "path");
 		args = nemoitem_get_attr(compz->configs, index, "args");
 

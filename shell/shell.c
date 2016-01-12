@@ -883,11 +883,9 @@ void nemoshell_load_fullscreens(struct nemoshell *shell)
 	char *type;
 	char *focus;
 	char *fixed;
-	int index = 0;
+	int index;
 
-	for (index = 0;
-			(index = nemoitem_get(shell->configs, "//nemoshell/fullscreen", index)) >= 0;
-			index++) {
+	nemoitem_for_each(shell->configs, index, "//nemoshell/fullscreen", 0) {
 		screen = (struct shellscreen *)malloc(sizeof(struct shellscreen));
 		if (screen == NULL)
 			break;

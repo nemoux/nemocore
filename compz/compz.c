@@ -912,9 +912,7 @@ void nemocompz_load_backends(struct nemocompz *compz)
 	const char *name;
 	int index;
 
-	for (index = 0;
-			(index = nemoitem_get(compz->configs, "//nemoshell/backend", index)) >= 0;
-			(index++)) {
+	nemoitem_for_each(compz->configs, index, "//nemoshell/backend", 0) {
 		name = nemoitem_get_attr(compz->configs, index, "name");
 		if (name == NULL)
 			continue;
@@ -968,9 +966,7 @@ void nemocompz_load_virtuios(struct nemocompz *compz)
 	int port, fps;
 	int x, y, width, height;
 
-	for (index = 0;
-			(index = nemoitem_get(compz->configs, "//nemoshell/virtuio", index)) >= 0;
-			(index++)) {
+	nemoitem_for_each(compz->configs, index, "//nemoshell/virtuio", 0) {
 		port = nemoitem_get_iattr(compz->configs, index, "port", 3333);
 		fps = nemoitem_get_iattr(compz->configs, index, "fps", 60);
 		x = nemoitem_get_iattr(compz->configs, index, "x", 0);

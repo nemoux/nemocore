@@ -30,9 +30,7 @@ struct nemobackend *tuiobackend_create(struct nemocompz *compz, int index)
 
 	tuio->compz = compz;
 
-	for (i = 0;
-			(i = nemoitem_get(compz->configs, "//nemoshell/tuio", i)) >= 0;
-			(i++)) {
+	nemoitem_for_each(compz->configs, i, "//nemoshell/tuio", 0) {
 		value = nemoitem_get_attr(compz->configs, i, "protocol");
 		if (value == NULL || strcmp(value, "osc") != 0)
 			protocol = NEMO_TUIO_XML_PROTOCOL;

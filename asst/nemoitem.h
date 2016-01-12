@@ -21,6 +21,9 @@ struct nemoitem {
 	int mnodes;
 };
 
+#define nemoitem_for_each(item, ivar, iname, ibase)	\
+	for (ivar = ibase; (ivar = nemoitem_get(item, iname, ivar)) >= 0; ivar++)
+
 extern struct nemoitem *nemoitem_create(int mnodes);
 extern void nemoitem_destroy(struct nemoitem *item);
 
