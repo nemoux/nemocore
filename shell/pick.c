@@ -69,11 +69,6 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 			nemoview_correct_pivot(bin->view, sx, sy);
 		}
 
-		pick->dx = bin->view->geometry.x - (pick->tp0->x + pick->tp1->x) / 2.0f;
-		pick->dy = bin->view->geometry.y - (pick->tp0->y + pick->tp1->y) / 2.0f;
-
-		pick->has_reset = 0;
-
 		if (shell->is_logging_grab != 0)
 			nemolog_message("PICK", "[UP:RESET] %llu: width(%d) height(%d) (%u)\n", touchid, pick->width, pick->height, time);
 	}
@@ -166,11 +161,11 @@ static void pick_shellgrab_touchpoint_frame(struct touchpoint_grab *base, uint32
 	pick->frameid = pick->other->frameid = frameid;
 
 	if (pick->has_reset != 0 && bin->reset_scale == 0) {
-		pick->sx = 1.0f;
-		pick->sy = 1.0f;
+		pick->sx = pick->other->sx = 1.0f;
+		pick->sy = pick->other->sy = 1.0f;
 
-		pick->width = bin->view->content->width;
-		pick->height = bin->view->content->height;
+		pick->width = pick->other->width = bin->view->content->width;
+		pick->height = pick->other->height = bin->view->content->height;
 
 		if (bin->view->geometry.has_pivot == 0) {
 			float sx, sy;
@@ -180,8 +175,8 @@ static void pick_shellgrab_touchpoint_frame(struct touchpoint_grab *base, uint32
 			nemoview_correct_pivot(bin->view, sx, sy);
 		}
 
-		pick->dx = bin->view->geometry.x - (pick->tp0->x + pick->tp1->x) / 2.0f;
-		pick->dy = bin->view->geometry.y - (pick->tp0->y + pick->tp1->y) / 2.0f;
+		pick->dx = pick->other->dx = bin->view->geometry.x - (pick->tp0->x + pick->tp1->x) / 2.0f;
+		pick->dy = pick->other->dy = bin->view->geometry.y - (pick->tp0->y + pick->tp1->y) / 2.0f;
 
 		pick->has_reset = pick->other->has_reset = 0;
 
