@@ -13,10 +13,11 @@
 #include <nemomisc.h>
 #include <nemolog.h>
 
-struct nemobackend *fbbackend_create(struct nemocompz *compz, const char *rendernode)
+struct nemobackend *fbbackend_create(struct nemocompz *compz, int index)
 {
 	struct fbbackend *fb;
 	struct fbnode *node;
+	const char *rendernode;
 
 	fb = (struct fbbackend *)malloc(sizeof(struct fbbackend));
 	if (fb == NULL)
@@ -28,6 +29,7 @@ struct nemobackend *fbbackend_create(struct nemocompz *compz, const char *render
 	fb->compz = compz;
 	fb->udev = udev_ref(compz->udev);
 
+	rendernode = nemoitem_get_attr(compz->configs, index, "rendernode");
 	if (rendernode == NULL)
 		rendernode = "/dev/fb0";
 

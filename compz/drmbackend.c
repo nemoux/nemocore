@@ -162,9 +162,10 @@ err1:
 	return -1;
 }
 
-struct nemobackend *drmbackend_create(struct nemocompz *compz, const char *rendernode)
+struct nemobackend *drmbackend_create(struct nemocompz *compz, int index)
 {
 	struct drmbackend *drm;
+	const char *rendernode;
 
 	nemolog_message("DRM", "create drm backend\n");
 
@@ -178,6 +179,7 @@ struct nemobackend *drmbackend_create(struct nemocompz *compz, const char *rende
 	drm->compz = compz;
 	drm->udev = udev_ref(compz->udev);
 
+	rendernode = nemoitem_get_attr(compz->configs, index, "rendernode");
 	if (rendernode != NULL) {
 		drmbackend_add_dev(drm, rendernode);
 	} else {

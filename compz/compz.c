@@ -40,6 +40,7 @@
 #include <tuiobackend.h>
 #include <nemomisc.h>
 #include <nemoease.h>
+#include <nemoxml.h>
 #include <nemolog.h>
 
 #ifdef NEMOUX_WITH_DRM
@@ -881,4 +882,102 @@ int nemocompz_contains_view_near(struct nemocompz *compz, struct nemoview *view,
 		return 0;
 
 	return 1;
+}
+
+void nemocompz_load_configs(struct nemocompz *compz, const char *configpath)
+{
+	struct nemoxml *xml;
+	struct xmlnode *node;
+	int i, j;
+
+	xml = nemoxml_create();
+	nemoxml_load_file(xml, configpath);
+	nemoxml_update(xml);
+
+	nemolist_for_each(node, &xml->nodes, nodelink) {
+		i = nemoitem_set(compz->configs, node->path);
+
+		for (j = 0; j < node->nattrs; j++) {
+			nemoitem_set_attr(compz->configs, i,
+					node->attrs[j*2+0],
+					node->attrs[j*2+1]);
+		}
+	}
+
+	nemoxml_destroy(xml);
+}
+
+void nemocompz_load_backends(struct nemocompz *compz)
+{
+	const char *name;
+	int index;
+
+	for (index = 0;
+			(index = nemoitem_get(compz->configs, "//nemoshell/backend", index)) >= 0;
+			(index++)) {
+		name = nemoitem_get_attr(compz->configs, index, "name");
+		if (name == NULL)
+			continue;
+
+		if (strcmp(name, "drm") == 0) {
+			drmbackend_create(compz, index);
+		} else if (strcmp(name, "fb") == 0) {
+			fbbackend_create(compz, index);
+		} else if (strcmp(name, "evdev") == 0) {
+			evdevbackend_create(compz, index);
+		} else if (strcmp(name, "tuio") == 0) {
+			tuiobackend_create(compz, index);
+		}
+	}
+}
+
+void nemocompz_load_scenes(struct nemocompz *compz)
+{
+	int index;
+
+	index = nemoitem_get(compz->configs, "//nemoshell/scene", 0);
+	if (index >= 0) {
+		int32_t x, y;
+		int32_t width, height;
+
+		x = nemoitem_get_iattr(compz->configs, index, "x", 0);
+		y = nemoitem_get_iattr(compz->configs, index, "y", 0);
+		width = nemoitem_get_iattr(compz->configs, index, "width", 0);
+		height = nemoitem_get_iattr(compz->configs, index, "height", 0);
+
+		nemocompz_set_scene(compz, x, y, width, height);
+	}
+
+	index = nemoitem_get(compz->configs, "//nemoshell/scope", 0);
+	if (index >= 0) {
+		int32_t x, y;
+		int32_t width, height;
+
+		x = nemoitem_get_iattr(compz->configs, index, "x", 0);
+		y = nemoitem_get_iattr(compz->configs, index, "y", 0);
+		width = nemoitem_get_iattr(compz->configs, index, "width", 0);
+		height = nemoitem_get_iattr(compz->configs, index, "height", 0);
+
+		nemocompz_set_scope(compz, x, y, width, height);
+	}
+}
+
+void nemocompz_load_virtuios(struct nemocompz *compz)
+{
+	int index, i;
+	int port, fps;
+	int x, y, width, height;
+
+	for (index = 0;
+			(index = nemoitem_get(compz->configs, "//nemoshell/virtuio", index)) >= 0;
+			(index++)) {
+		port = nemoitem_get_iattr(compz->configs, index, "port", 3333);
+		fps = nemoitem_get_iattr(compz->configs, index, "fps", 60);
+		x = nemoitem_get_iattr(compz->configs, index, "x", 0);
+		y = nemoitem_get_iattr(compz->configs, index, "y", 0);
+		width = nemoitem_get_iattr(compz->configs, index, "width", nemocompz_get_scene_width(compz));
+		height = nemoitem_get_iattr(compz->configs, index, "height", nemocompz_get_scene_height(compz));
+
+		virtuio_create(compz, port, fps, x, y, width, height);
+	}
 }

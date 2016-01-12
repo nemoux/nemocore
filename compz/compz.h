@@ -180,6 +180,11 @@ extern int nemocompz_is_running(struct nemocompz *compz);
 extern int nemocompz_contains_view(struct nemocompz *compz, struct nemoview *view);
 extern int nemocompz_contains_view_near(struct nemocompz *compz, struct nemoview *view, float dx, float dy);
 
+extern void nemocompz_load_configs(struct nemocompz *compz, const char *configpath);
+extern void nemocompz_load_backends(struct nemocompz *compz);
+extern void nemocompz_load_scenes(struct nemocompz *compz);
+extern void nemocompz_load_virtuios(struct nemocompz *compz);
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

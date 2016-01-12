@@ -13,14 +13,13 @@
 #include <nemoitem.h>
 #include <nemomisc.h>
 
-struct nemobackend *tuiobackend_create(struct nemocompz *compz)
+struct nemobackend *tuiobackend_create(struct nemocompz *compz, int index)
 {
 	struct tuiobackend *tuio;
 	struct tuionode *node;
 	const char *value;
-	int index = 0;
 	int protocol, port, max;
-	int i, count;
+	int i;
 
 	tuio = (struct tuiobackend *)malloc(sizeof(struct tuiobackend));
 	if (tuio == NULL)
@@ -31,17 +30,17 @@ struct nemobackend *tuiobackend_create(struct nemocompz *compz)
 
 	tuio->compz = compz;
 
-	for (index = 0;
-			(index = nemoitem_get(compz->configs, "//nemoshell/tuio", index)) >= 0;
-			index++) {
-		value = nemoitem_get_attr(compz->configs, index, "protocol");
+	for (i = 0;
+			(i = nemoitem_get(compz->configs, "//nemoshell/tuio", i)) >= 0;
+			(i++)) {
+		value = nemoitem_get_attr(compz->configs, i, "protocol");
 		if (value == NULL || strcmp(value, "osc") != 0)
 			protocol = NEMO_TUIO_XML_PROTOCOL;
 		else
 			protocol = NEMO_TUIO_OSC_PROTOCOL;
 
-		port = nemoitem_get_iattr(compz->configs, index, "port", 3333);
-		max = nemoitem_get_iattr(compz->configs, index, "max", 16);
+		port = nemoitem_get_iattr(compz->configs, i, "port", 3333);
+		max = nemoitem_get_iattr(compz->configs, i, "max", 16);
 
 		node = tuio_create_node(compz, protocol, port, max);
 		if (node == NULL)

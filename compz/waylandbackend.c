@@ -13,7 +13,7 @@
 #include <compz.h>
 #include <nemomisc.h>
 
-struct nemobackend *waylandbackend_create(struct nemocompz *compz)
+struct nemobackend *waylandbackend_create(struct nemocompz *compz, int index)
 {
 	struct waylandbackend *wl;
 	struct waylandnode *node;

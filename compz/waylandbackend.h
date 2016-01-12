@@ -16,7 +16,7 @@ struct waylandbackend {
 	struct nemocompz *compz;
 };
 
-extern struct nemobackend *waylandbackend_create(struct nemocompz *compz);
+extern struct nemobackend *waylandbackend_create(struct nemocompz *compz, int index);
 extern void waylandbackend_destroy(struct nemobackend *base);
 
 #ifdef __cplusplus

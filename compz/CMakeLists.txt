@@ -137,9 +137,6 @@ add_library(nemocompz SHARED
 	datadrag.c
 	dataselection.c
 	clipboard.c
-	textbackend.c
-	textinput.c
-	inputmethod.c
 	screen.c
 	renderer.c
 	fbbackend.c

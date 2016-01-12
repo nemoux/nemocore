@@ -20,7 +20,7 @@ struct evdevbackend {
 	struct wl_event_source *udev_monitor_source;
 };
 
-extern struct nemobackend *evdevbackend_create(struct nemocompz *compz);
+extern struct nemobackend *evdevbackend_create(struct nemocompz *compz, int index);
 extern void evdevbackend_destroy(struct nemobackend *base);
 
 #ifdef __cplusplus
