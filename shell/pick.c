@@ -64,6 +64,7 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		if (bin->view->geometry.has_pivot == 0) {
 			float sx, sy;
 
+			nemoview_update_transform(bin->view);
 			nemoview_transform_from_global(bin->view, bin->px, bin->py, &sx, &sy);
 
 			nemoview_correct_pivot(bin->view, sx, sy);
@@ -135,6 +136,7 @@ static void pick_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 	if (tp->focus != NULL) {
 		float sx, sy;
 
+		nemoview_update_transform(tp->focus);
 		nemoview_transform_from_global(tp->focus, x, y, &sx, &sy);
 
 		nemocontent_touch_motion(tp, tp->focus->content, time, touchid, sx, sy, x, y);
@@ -170,6 +172,7 @@ static void pick_shellgrab_touchpoint_frame(struct touchpoint_grab *base, uint32
 		if (bin->view->geometry.has_pivot == 0) {
 			float sx, sy;
 
+			nemoview_update_transform(bin->view);
 			nemoview_transform_from_global(bin->view, bin->px, bin->py, &sx, &sy);
 
 			nemoview_correct_pivot(bin->view, sx, sy);
@@ -390,6 +393,7 @@ int nemoshell_pick_canvas_by_touchpoint_on_area(struct nemoshell *shell, struct 
 		float cy = (tp0->y + tp1->y) / 2.0f;
 		float sx, sy;
 
+		nemoview_update_transform(bin->view);
 		nemoview_transform_from_global(bin->view, cx, cy, &sx, &sy);
 
 		nemoview_correct_pivot(bin->view, sx, sy);
@@ -460,6 +464,7 @@ int nemoshell_pick_canvas_by_touchpoint(struct nemoshell *shell, struct touchpoi
 		float cy = (tp0->y + tp1->y) / 2.0f;
 		float sx, sy;
 
+		nemoview_update_transform(bin->view);
 		nemoview_transform_from_global(bin->view, cx, cy, &sx, &sy);
 
 		nemoview_correct_pivot(bin->view, sx, sy);
@@ -565,6 +570,7 @@ static void pick_actorgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 	if (tp->focus != NULL) {
 		float sx, sy;
 
+		nemoview_update_transform(tp->focus);
 		nemoview_transform_from_global(tp->focus, x, y, &sx, &sy);
 
 		nemocontent_touch_motion(tp, tp->focus->content, time, touchid, sx, sy, x, y);
@@ -715,6 +721,7 @@ int nemoshell_pick_actor_by_touchpoint(struct nemoshell *shell, struct touchpoin
 		float cy = (tp0->y + tp1->y) / 2.0f;
 		float sx, sy;
 
+		nemoview_update_transform(actor->view);
 		nemoview_transform_from_global(actor->view, cx, cy, &sx, &sy);
 
 		nemoview_correct_pivot(actor->view, sx, sy);
