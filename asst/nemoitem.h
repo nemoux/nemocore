@@ -24,6 +24,9 @@ struct nemoitem {
 #define nemoitem_for_each(item, ivar, iname, ibase)	\
 	for (ivar = ibase; (ivar = nemoitem_get(item, iname, ivar)) >= 0; ivar++)
 
+#define nemoitem_for_vattr(item, ivar, fmt, iattr, ibase, attr)	\
+	for (iattr = ibase; (attr = nemoitem_get_vattr(item, ivar, fmt, iattr)) != NULL; iattr++)
+
 extern struct nemoitem *nemoitem_create(int mnodes);
 extern void nemoitem_destroy(struct nemoitem *item);
 
