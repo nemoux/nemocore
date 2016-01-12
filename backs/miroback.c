@@ -49,7 +49,8 @@ struct miroback {
 	struct showone **rones;
 
 	struct showone **bones;
-	int32_t *nodes;
+	int32_t *nodes0;
+	int32_t *nodes1;
 
 	char *snddev;
 
@@ -316,7 +317,7 @@ static void *nemomiro_dispatch_pulse_monitor_thread(void *data)
 			db = db > NEMOMIRO_PA_VOLUME_DECIBELS ? NEMOMIRO_PA_VOLUME_DECIBELS : db;
 			db = db < 0 ? 0 : db;
 
-			miro->nodes[(i / (miro->columns / 2)) * miro->columns + (i % (miro->columns / 2))] = db;
+			miro->nodes1[i] = db;
 		}
 
 		for (i = 0; i < NEMOMIRO_PA_BUFFER_SIZE; i++)
@@ -341,7 +342,7 @@ static void *nemomiro_dispatch_pulse_monitor_thread(void *data)
 			db = db > NEMOMIRO_PA_VOLUME_DECIBELS ? NEMOMIRO_PA_VOLUME_DECIBELS : db;
 			db = db < 0 ? 0 : db;
 
-			miro->nodes[(i / (miro->columns / 2)) * miro->columns + (i % (miro->columns / 2)) + (miro->columns / 2)] = db;
+			miro->nodes1[miro->columns * miro->rows - i - 1] = db;
 		}
 
 		pthread_mutex_unlock(&miro->plock);
@@ -365,11 +366,15 @@ static void nemomiro_dispatch_pulse_timer_event(struct nemotimer *timer, void *d
 	pthread_mutex_lock(&miro->plock);
 
 	for (i = 0; i < miro->columns * miro->rows; i++) {
-		set0 = nemoshow_sequence_create_set();
-		nemoshow_sequence_set_source(set0, miro->bones[i]);
-		nemoshow_sequence_set_dattr(set0, "alpha", (double)miro->nodes[i] / 100.0f, NEMOSHOW_STYLE_DIRTY);
+		if (miro->nodes0[i] != miro->nodes1[i]) {
+			set0 = nemoshow_sequence_create_set();
+			nemoshow_sequence_set_source(set0, miro->bones[i]);
+			nemoshow_sequence_set_dattr(set0, "alpha", (double)miro->nodes1[i] / 100.0f, NEMOSHOW_STYLE_DIRTY);
 
-		nemoshow_one_attach(frame, set0);
+			nemoshow_one_attach(frame, set0);
+
+			miro->nodes0[i] = miro->nodes1[i];
+		}
 	}
 
 	pthread_mutex_unlock(&miro->plock);
@@ -377,13 +382,13 @@ static void nemomiro_dispatch_pulse_timer_event(struct nemotimer *timer, void *d
 	sequence = nemoshow_sequence_create();
 	nemoshow_one_attach(sequence, frame);
 
-	trans = nemoshow_transition_create(miro->ease0, 300, 0);
+	trans = nemoshow_transition_create(miro->ease1, 150, 0);
 	nemoshow_transition_attach_sequence(trans, sequence);
 	nemoshow_attach_transition(miro->show, trans);
 
 	nemocanvas_dispatch_frame(NEMOSHOW_AT(miro->show, canvas));
 
-	nemotimer_set_timeout(timer, 300);
+	nemotimer_set_timeout(timer, 100);
 }
 
 static int nemomiro_dispatch_pulse_monitor(struct miroback *miro)
@@ -577,10 +582,15 @@ int main(int argc, char *argv[])
 		return -1;
 	memset(miro, 0, sizeof(struct miroback));
 
-	miro->nodes = (int32_t *)malloc(sizeof(int32_t) * columns * rows);
-	if (miro->nodes == NULL)
+	miro->nodes0 = (int32_t *)malloc(sizeof(int32_t) * columns * rows);
+	if (miro->nodes0 == NULL)
 		return -1;
-	memset(miro->nodes, 0, sizeof(int32_t) * columns * rows);
+	memset(miro->nodes0, 0, sizeof(int32_t) * columns * rows);
+
+	miro->nodes1 = (int32_t *)malloc(sizeof(int32_t) * columns * rows);
+	if (miro->nodes1 == NULL)
+		return -1;
+	memset(miro->nodes1, 0, sizeof(int32_t) * columns * rows);
 
 	miro->width = width;
 	miro->height = height;
@@ -709,7 +719,8 @@ err2:
 	nemotool_destroy(tool);
 
 err1:
-	free(miro->nodes);
+	free(miro->nodes0);
+	free(miro->nodes1);
 	free(miro);
 
 	return 0;
