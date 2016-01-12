@@ -276,7 +276,6 @@ static void move_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 		if (tp->focus != NULL) {
 			float sx, sy;
 
-			nemoview_update_transform(tp->focus);
 			nemoview_transform_from_global(tp->focus, x, y, &sx, &sy);
 
 			nemocontent_touch_motion(tp, tp->focus->content, time, touchid, sx, sy, x, y);
@@ -531,7 +530,6 @@ static void move_actorgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 	if (tp->focus != NULL) {
 		float sx, sy;
 
-		nemoview_update_transform(tp->focus);
 		nemoview_transform_from_global(tp->focus, x, y, &sx, &sy);
 
 		nemocontent_touch_motion(tp, tp->focus->content, time, touchid, sx, sy, x, y);

@@ -64,7 +64,6 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		if (bin->view->geometry.has_pivot == 0) {
 			float sx, sy;
 
-			nemoview_update_transform(bin->view);
 			nemoview_transform_from_global(bin->view, bin->px, bin->py, &sx, &sy);
 
 			nemoview_correct_pivot(bin->view, sx, sy);
@@ -136,7 +135,6 @@ static void pick_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 	if (tp->focus != NULL) {
 		float sx, sy;
 
-		nemoview_update_transform(tp->focus);
 		nemoview_transform_from_global(tp->focus, x, y, &sx, &sy);
 
 		nemocontent_touch_motion(tp, tp->focus->content, time, touchid, sx, sy, x, y);
@@ -172,7 +170,6 @@ static void pick_shellgrab_touchpoint_frame(struct touchpoint_grab *base, uint32
 		if (bin->view->geometry.has_pivot == 0) {
 			float sx, sy;
 
-			nemoview_update_transform(bin->view);
 			nemoview_transform_from_global(bin->view, bin->px, bin->py, &sx, &sy);
 
 			nemoview_correct_pivot(bin->view, sx, sy);
@@ -314,6 +311,59 @@ static const struct touchpoint_grab_interface pick_shellgrab_touchpoint_interfac
 	pick_shellgrab_touchpoint_cancel
 };
 
+typedef enum {
+	NEMOSHELL_VIEW_TOP_AREA = 0,
+	NEMOSHELL_VIEW_BOTTOM_AREA = 1,
+	NEMOSHELL_VIEW_LEFT_AREA = 2,
+	NEMOSHELL_VIEW_RIGHT_AREA = 3,
+	NEMOSHELL_VIEW_LEFTTOP_AREA = 4,
+	NEMOSHELL_VIEW_RIGHTTOP_AREA = 5,
+	NEMOSHELL_VIEW_LEFTBOTTOM_AREA = 6,
+	NEMOSHELL_VIEW_RIGHTBOTTOM_AREA = 7,
+	NEMOSHELL_VIEW_CENTER_AREA,
+	NEMOSHELL_VIEW_LAST_AREA = NEMOSHELL_VIEW_CENTER_AREA
+} NemoShellViewArea;
+
+static int nemoshell_pick_get_view_point_area(struct nemoview *view, float x, float y, float b)
+{
+	float sx, sy;
+	float dx, dy;
+	float mx = view->content->width * 0.5f;
+	float my = view->content->height * 0.5f;
+	float ex = view->content->width * b;
+	float ey = view->content->height * b;
+	int area = NEMOSHELL_VIEW_CENTER_AREA;
+	int i;
+
+	nemoview_transform_from_global(view, x, y, &sx, &sy);
+
+	dx = sx > mx ? view->content->width - sx : sx;
+	dy = sy > my ? view->content->height - sy : sy;
+
+	if (dx < ex && dy < ey) {
+		if (sx < mx && sy < my)
+			area = NEMOSHELL_VIEW_LEFTTOP_AREA;
+		else if (sx > mx && sy < my)
+			area = NEMOSHELL_VIEW_RIGHTTOP_AREA;
+		else if (sx < mx && sy > my)
+			area = NEMOSHELL_VIEW_LEFTBOTTOM_AREA;
+		else if (sx > mx && sy > my)
+			area = NEMOSHELL_VIEW_RIGHTBOTTOM_AREA;
+	} else if (dx < dy && dx < ex) {
+		if (sx < mx)
+			area = NEMOSHELL_VIEW_LEFT_AREA;
+		else
+			area = NEMOSHELL_VIEW_RIGHT_AREA;
+	} else if (dy < dx && dy < ey) {
+		if (sy < my)
+			area = NEMOSHELL_VIEW_TOP_AREA;
+		else
+			area = NEMOSHELL_VIEW_BOTTOM_AREA;
+	}
+
+	return area;
+}
+
 int nemoshell_pick_canvas_by_touchpoint_on_area(struct nemoshell *shell, struct touchpoint *tp0, struct touchpoint *tp1, struct shellbin *bin)
 {
 	struct shellgrab_pick *pick0, *pick1;
@@ -339,30 +389,30 @@ int nemoshell_pick_canvas_by_touchpoint_on_area(struct nemoshell *shell, struct 
 		return -1;
 	memset(pick1, 0, sizeof(struct shellgrab_pick));
 
-	area0 = nemoview_get_point_area(bin->view, tp0->x, tp0->y, 0.35f);
-	area1 = nemoview_get_point_area(bin->view, tp1->x, tp1->y, 0.35f);
+	area0 = nemoshell_pick_get_view_point_area(bin->view, tp0->x, tp0->y, 0.35f);
+	area1 = nemoshell_pick_get_view_point_area(bin->view, tp1->x, tp1->y, 0.35f);
 
-	if (area0 == NEMO_VIEW_CENTER_AREA || area1 == NEMO_VIEW_CENTER_AREA) {
+	if (area0 == NEMOSHELL_VIEW_CENTER_AREA || area1 == NEMOSHELL_VIEW_CENTER_AREA) {
 		bin->resize_edges = 0;
-	} else if (area0 == NEMO_VIEW_LEFTTOP_AREA && area1 == NEMO_VIEW_RIGHTBOTTOM_AREA) {
+	} else if (area0 == NEMOSHELL_VIEW_LEFTTOP_AREA && area1 == NEMOSHELL_VIEW_RIGHTBOTTOM_AREA) {
 		bin->resize_edges = WL_SHELL_SURFACE_RESIZE_RIGHT | WL_SHELL_SURFACE_RESIZE_BOTTOM;
-	} else if (area0 == NEMO_VIEW_RIGHTBOTTOM_AREA && area1 == NEMO_VIEW_LEFTTOP_AREA) {
+	} else if (area0 == NEMOSHELL_VIEW_RIGHTBOTTOM_AREA && area1 == NEMOSHELL_VIEW_LEFTTOP_AREA) {
 		bin->resize_edges = WL_SHELL_SURFACE_RESIZE_LEFT | WL_SHELL_SURFACE_RESIZE_TOP;
-	} else if (area0 == NEMO_VIEW_LEFTBOTTOM_AREA && area1 == NEMO_VIEW_RIGHTTOP_AREA) {
+	} else if (area0 == NEMOSHELL_VIEW_LEFTBOTTOM_AREA && area1 == NEMOSHELL_VIEW_RIGHTTOP_AREA) {
 		bin->resize_edges = WL_SHELL_SURFACE_RESIZE_RIGHT | WL_SHELL_SURFACE_RESIZE_TOP;
-	} else if (area0 == NEMO_VIEW_RIGHTTOP_AREA && area1 == NEMO_VIEW_LEFTBOTTOM_AREA) {
+	} else if (area0 == NEMOSHELL_VIEW_RIGHTTOP_AREA && area1 == NEMOSHELL_VIEW_LEFTBOTTOM_AREA) {
 		bin->resize_edges = WL_SHELL_SURFACE_RESIZE_LEFT | WL_SHELL_SURFACE_RESIZE_BOTTOM;
-	} else if ((area0 == NEMO_VIEW_TOP_AREA || area0 == NEMO_VIEW_LEFTTOP_AREA || area0 == NEMO_VIEW_RIGHTTOP_AREA) &&
-			(area1 == NEMO_VIEW_BOTTOM_AREA || area1 == NEMO_VIEW_LEFTBOTTOM_AREA || area1 == NEMO_VIEW_RIGHTBOTTOM_AREA)) {
+	} else if ((area0 == NEMOSHELL_VIEW_TOP_AREA || area0 == NEMOSHELL_VIEW_LEFTTOP_AREA || area0 == NEMOSHELL_VIEW_RIGHTTOP_AREA) &&
+			(area1 == NEMOSHELL_VIEW_BOTTOM_AREA || area1 == NEMOSHELL_VIEW_LEFTBOTTOM_AREA || area1 == NEMOSHELL_VIEW_RIGHTBOTTOM_AREA)) {
 		bin->resize_edges = WL_SHELL_SURFACE_RESIZE_BOTTOM;
-	} else if ((area0 == NEMO_VIEW_BOTTOM_AREA || area0 == NEMO_VIEW_LEFTBOTTOM_AREA || area0 == NEMO_VIEW_RIGHTBOTTOM_AREA) &&
-			(area1 == NEMO_VIEW_TOP_AREA || area1 == NEMO_VIEW_LEFTTOP_AREA || area1 == NEMO_VIEW_RIGHTTOP_AREA)) {
+	} else if ((area0 == NEMOSHELL_VIEW_BOTTOM_AREA || area0 == NEMOSHELL_VIEW_LEFTBOTTOM_AREA || area0 == NEMOSHELL_VIEW_RIGHTBOTTOM_AREA) &&
+			(area1 == NEMOSHELL_VIEW_TOP_AREA || area1 == NEMOSHELL_VIEW_LEFTTOP_AREA || area1 == NEMOSHELL_VIEW_RIGHTTOP_AREA)) {
 		bin->resize_edges = WL_SHELL_SURFACE_RESIZE_TOP;
-	} else if ((area0 == NEMO_VIEW_LEFT_AREA || area0 == NEMO_VIEW_LEFTTOP_AREA || area0 == NEMO_VIEW_LEFTBOTTOM_AREA) &&
-			(area1 == NEMO_VIEW_RIGHT_AREA || area1 == NEMO_VIEW_RIGHTTOP_AREA || area1 == NEMO_VIEW_RIGHTBOTTOM_AREA)) {
+	} else if ((area0 == NEMOSHELL_VIEW_LEFT_AREA || area0 == NEMOSHELL_VIEW_LEFTTOP_AREA || area0 == NEMOSHELL_VIEW_LEFTBOTTOM_AREA) &&
+			(area1 == NEMOSHELL_VIEW_RIGHT_AREA || area1 == NEMOSHELL_VIEW_RIGHTTOP_AREA || area1 == NEMOSHELL_VIEW_RIGHTBOTTOM_AREA)) {
 		bin->resize_edges = WL_SHELL_SURFACE_RESIZE_RIGHT;
-	} else if ((area0 == NEMO_VIEW_RIGHT_AREA || area0 == NEMO_VIEW_RIGHTTOP_AREA || area0 == NEMO_VIEW_RIGHTBOTTOM_AREA) &&
-			(area1 == NEMO_VIEW_LEFT_AREA || area1 == NEMO_VIEW_LEFTTOP_AREA || area1 == NEMO_VIEW_LEFTBOTTOM_AREA)) {
+	} else if ((area0 == NEMOSHELL_VIEW_RIGHT_AREA || area0 == NEMOSHELL_VIEW_RIGHTTOP_AREA || area0 == NEMOSHELL_VIEW_RIGHTBOTTOM_AREA) &&
+			(area1 == NEMOSHELL_VIEW_LEFT_AREA || area1 == NEMOSHELL_VIEW_LEFTTOP_AREA || area1 == NEMOSHELL_VIEW_LEFTBOTTOM_AREA)) {
 		bin->resize_edges = WL_SHELL_SURFACE_RESIZE_LEFT;
 	}
 
@@ -393,7 +443,6 @@ int nemoshell_pick_canvas_by_touchpoint_on_area(struct nemoshell *shell, struct 
 		float cy = (tp0->y + tp1->y) / 2.0f;
 		float sx, sy;
 
-		nemoview_update_transform(bin->view);
 		nemoview_transform_from_global(bin->view, cx, cy, &sx, &sy);
 
 		nemoview_correct_pivot(bin->view, sx, sy);
@@ -464,7 +513,6 @@ int nemoshell_pick_canvas_by_touchpoint(struct nemoshell *shell, struct touchpoi
 		float cy = (tp0->y + tp1->y) / 2.0f;
 		float sx, sy;
 
-		nemoview_update_transform(bin->view);
 		nemoview_transform_from_global(bin->view, cx, cy, &sx, &sy);
 
 		nemoview_correct_pivot(bin->view, sx, sy);
@@ -570,7 +618,6 @@ static void pick_actorgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 	if (tp->focus != NULL) {
 		float sx, sy;
 
-		nemoview_update_transform(tp->focus);
 		nemoview_transform_from_global(tp->focus, x, y, &sx, &sy);
 
 		nemocontent_touch_motion(tp, tp->focus->content, time, touchid, sx, sy, x, y);
@@ -721,7 +768,6 @@ int nemoshell_pick_actor_by_touchpoint(struct nemoshell *shell, struct touchpoin
 		float cy = (tp0->y + tp1->y) / 2.0f;
 		float sx, sy;
 
-		nemoview_update_transform(actor->view);
 		nemoview_transform_from_global(actor->view, cx, cy, &sx, &sy);
 
 		nemoview_correct_pivot(actor->view, sx, sy);

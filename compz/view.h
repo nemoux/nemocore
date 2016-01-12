@@ -9,6 +9,8 @@ NEMO_BEGIN_EXTERN_C
 
 #include <pixman.h>
 
+#include <compz.h>
+#include <content.h>
 #include <nemomatrix.h>
 
 typedef enum {
@@ -22,19 +24,6 @@ typedef enum {
 	NEMO_VIEW_INPUT_TOUCH = 1,
 	NEMO_VIEW_INPUT_LAST
 } NemoViewInputType;
-
-typedef enum {
-	NEMO_VIEW_TOP_AREA = 0,
-	NEMO_VIEW_BOTTOM_AREA = 1,
-	NEMO_VIEW_LEFT_AREA = 2,
-	NEMO_VIEW_RIGHT_AREA = 3,
-	NEMO_VIEW_LEFTTOP_AREA = 4,
-	NEMO_VIEW_RIGHTTOP_AREA = 5,
-	NEMO_VIEW_LEFTBOTTOM_AREA = 6,
-	NEMO_VIEW_RIGHTBOTTOM_AREA = 7,
-	NEMO_VIEW_CENTER_AREA,
-	NEMO_VIEW_LAST_AREA = NEMO_VIEW_CENTER_AREA
-} NemoViewArea;
 
 typedef enum {
 	NEMO_VIEW_MAPPED_STATE = (1 << 0),
@@ -131,27 +120,11 @@ struct nemoview {
 extern struct nemoview *nemoview_create(struct nemocompz *compz, struct nemocontent *content);
 extern void nemoview_destroy(struct nemoview *view);
 
-extern void nemoview_set_position(struct nemoview *view, float x, float y);
-extern void nemoview_set_rotation(struct nemoview *view, float r);
-extern void nemoview_set_scale(struct nemoview *view, float sx, float sy);
-extern void nemoview_set_pivot(struct nemoview *view, float px, float py);
-extern void nemoview_put_pivot(struct nemoview *view);
-extern void nemoview_set_anchor(struct nemoview *view, float ax, float ay);
-extern void nemoview_set_flag(struct nemoview *view, float fx, float fy);
 extern void nemoview_correct_pivot(struct nemoview *view, float px, float py);
-extern void nemoview_transform_dirty(struct nemoview *view);
-extern void nemoview_transform_done(struct nemoview *view);
-
-extern void nemoview_damage_dirty(struct nemoview *view);
-extern void nemoview_clip_dirty(struct nemoview *view);
-extern void nemoview_damage_below(struct nemoview *view);
-extern int nemoview_is_mapped(struct nemoview *view);
 extern void nemoview_unmap(struct nemoview *view);
+
 extern void nemoview_schedule_repaint(struct nemoview *view);
 
-extern void nemoview_transform_to_global(struct nemoview *view, float sx, float sy, float *x, float *y);
-extern void nemoview_transform_from_global(struct nemoview *view, float x, float y, float *sx, float *sy);
-extern int nemoview_get_point_area(struct nemoview *view, float x, float y, float b);
 extern void nemoview_update_output(struct nemoview *view);
 extern void nemoview_update_transform(struct nemoview *view);
 extern void nemoview_update_transform_done(struct nemoview *view);
@@ -168,6 +141,213 @@ extern void nemoview_update_layer(struct nemoview *view);
 extern void nemoview_above_layer(struct nemoview *view, struct nemoview *above);
 
 extern int nemoview_get_trapezoids(struct nemoview *view, int32_t x, int32_t y, int32_t width, int32_t height, pixman_trapezoid_t *traps);
+
+static inline void nemoview_transform_dirty(struct nemoview *view)
+{
+	struct nemoview *child;
+
+	if (view->transform.dirty)
+		return;
+
+	view->transform.dirty = 1;
+
+	wl_list_for_each(child, &view->children_list, children_link) {
+		nemoview_transform_dirty(child);
+	}
+}
+
+static inline void nemoview_transform_done(struct nemoview *view)
+{
+	view->transform.done = 1;
+}
+
+static inline void nemoview_damage_dirty(struct nemoview *view)
+{
+	pixman_region32_union_rect(&view->content->damage, &view->content->damage, 0, 0, view->content->width, view->content->height);
+}
+
+static inline void nemoview_clip_dirty(struct nemoview *view)
+{
+	pixman_region32_clear(&view->clip);
+}
+
+static inline void nemoview_damage_below(struct nemoview *view)
+{
+	pixman_region32_t damage;
+
+	pixman_region32_init(&damage);
+	pixman_region32_subtract(&damage, &view->transform.boundingbox, &view->clip);
+	pixman_region32_union(&view->compz->damage, &view->compz->damage, &damage);
+	pixman_region32_fini(&damage);
+
+	nemoview_schedule_repaint(view);
+}
+
+static inline void nemoview_set_position(struct nemoview *view, float x, float y)
+{
+	if (view->geometry.x == x && view->geometry.y == y)
+		return;
+
+	view->geometry.x = x;
+	view->geometry.y = y;
+	nemoview_transform_dirty(view);
+}
+
+static inline void nemoview_set_rotation(struct nemoview *view, float r)
+{
+	if (view->geometry.r == r)
+		return;
+
+	view->transform.enable = 1;
+
+	view->geometry.r = r;
+	view->transform.cosr = cos(r);
+	view->transform.sinr = sin(r);
+	nemoview_transform_dirty(view);
+}
+
+static inline void nemoview_set_scale(struct nemoview *view, float sx, float sy)
+{
+	if (view->geometry.sx == sx && view->geometry.sy == sy)
+		return;
+
+	view->transform.enable = 1;
+
+	view->geometry.sx = sx;
+	view->geometry.sy = sy;
+	nemoview_transform_dirty(view);
+}
+
+static inline void nemoview_set_pivot(struct nemoview *view, float px, float py)
+{
+	if (view->geometry.px == px && view->geometry.py == py)
+		return;
+
+	nemoview_correct_pivot(view, px, py);
+
+	view->geometry.has_pivot = 1;
+	nemoview_transform_dirty(view);
+}
+
+static inline void nemoview_put_pivot(struct nemoview *view)
+{
+	if (view->geometry.has_pivot == 0)
+		return;
+
+	nemoview_correct_pivot(view, 0.0f, 0.0f);
+
+	view->geometry.has_pivot = 0;
+	nemoview_transform_dirty(view);
+}
+
+static inline void nemoview_set_anchor(struct nemoview *view, float ax, float ay)
+{
+	if (view->geometry.ax == ax && view->geometry.ay == ay)
+		return;
+
+	view->geometry.ax = ax;
+	view->geometry.ay = ay;
+	view->geometry.has_anchor = 1;
+	nemoview_transform_dirty(view);
+}
+
+static inline void nemoview_set_flag(struct nemoview *view, float fx, float fy)
+{
+	view->geometry.fx = fx;
+	view->geometry.fy = fy;
+}
+
+static inline void nemoview_transform_to_global(struct nemoview *view, float sx, float sy, float *x, float *y)
+{
+	if (view->transform.dirty) {
+		nemoview_update_transform(view);
+	}
+
+	if (view->transform.enable) {
+		struct nemovector v = { sx, sy, 0.0f, 1.0f };
+
+		nemomatrix_transform(&view->transform.matrix, &v);
+
+		if (fabsf(v.f[3]) < 1e-6) {
+			*x = 0.0f;
+			*y = 0.0f;
+			return;
+		}
+
+		*x = v.f[0] / v.f[3];
+		*y = v.f[1] / v.f[3];
+	} else {
+		*x = sx + view->geometry.x;
+		*y = sy + view->geometry.y;
+	}
+}
+
+static inline void nemoview_transform_from_global(struct nemoview *view, float x, float y, float *sx, float *sy)
+{
+	if (view->transform.dirty) {
+		nemoview_update_transform(view);
+	}
+
+	if (view->transform.enable) {
+		struct nemovector v = { x, y, 0.0f, 1.0f };
+
+		nemomatrix_transform(&view->transform.inverse, &v);
+
+		if (fabsf(v.f[3]) < 1e-6) {
+			*sx = 0.0f;
+			*sy = 0.0f;
+			return;
+		}
+
+		*sx = v.f[0] / v.f[3];
+		*sy = v.f[1] / v.f[3];
+	} else {
+		*sx = x - view->geometry.x;
+		*sy = y - view->geometry.y;
+	}
+}
+
+static inline void nemoview_transform_to_global_nocheck(struct nemoview *view, float sx, float sy, float *x, float *y)
+{
+	if (view->transform.enable) {
+		struct nemovector v = { sx, sy, 0.0f, 1.0f };
+
+		nemomatrix_transform(&view->transform.matrix, &v);
+
+		if (fabsf(v.f[3]) < 1e-6) {
+			*x = 0.0f;
+			*y = 0.0f;
+			return;
+		}
+
+		*x = v.f[0] / v.f[3];
+		*y = v.f[1] / v.f[3];
+	} else {
+		*x = sx + view->geometry.x;
+		*y = sy + view->geometry.y;
+	}
+}
+
+static inline void nemoview_transform_from_global_nocheck(struct nemoview *view, float x, float y, float *sx, float *sy)
+{
+	if (view->transform.enable) {
+		struct nemovector v = { x, y, 0.0f, 1.0f };
+
+		nemomatrix_transform(&view->transform.inverse, &v);
+
+		if (fabsf(v.f[3]) < 1e-6) {
+			*sx = 0.0f;
+			*sy = 0.0f;
+			return;
+		}
+
+		*sx = v.f[0] / v.f[3];
+		*sy = v.f[1] / v.f[3];
+	} else {
+		*sx = x - view->geometry.x;
+		*sy = y - view->geometry.y;
+	}
+}
 
 static inline void nemoview_set_state(struct nemoview *view, uint32_t state)
 {
@@ -187,6 +367,11 @@ static inline int nemoview_has_state(struct nemoview *view, uint32_t state)
 static inline void nemoview_set_input_type(struct nemoview *view, int type)
 {
 	view->input.type = type;
+}
+
+static inline int nemoview_is_mapped(struct nemoview *view)
+{
+	return view->state & NEMO_VIEW_MAPPED_STATE;
 }
 
 static inline int nemoview_support_touch_only(struct nemoview *view)

@@ -142,7 +142,7 @@ static int glrenderer_calculate_edges(struct nemoview *view, pixman_box32_t *rec
 	ctx.clip.y2 = rect->y2;
 
 	for (i = 0; i < surf.n; i++) {
-		nemoview_transform_to_global(view, surf.x[i], surf.y[i], &surf.x[i], &surf.y[i]);
+		nemoview_transform_to_global_nocheck(view, surf.x[i], surf.y[i], &surf.x[i], &surf.y[i]);
 	}
 
 	min_x = max_x = surf.x[0];
@@ -201,7 +201,7 @@ static int glrenderer_texture_region(struct glrenderer *renderer, struct nemovie
 				continue;
 
 			for (k = 0; k < n; k++) {
-				nemoview_transform_from_global(view, ex[k], ey[k], &sx, &sy);
+				nemoview_transform_from_global_nocheck(view, ex[k], ey[k], &sx, &sy);
 				*(v++) = ex[k];
 				*(v++) = ey[k];
 

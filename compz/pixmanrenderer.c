@@ -98,7 +98,7 @@ static void pixmanrenderer_draw_region(struct pixmanrenderer *renderer, struct n
 		if (!view->transform.enable) {
 			pixman_region32_translate(&final_region, view->geometry.x, view->geometry.y);
 		} else {
-			nemoview_transform_to_global(view, 0, 0, &x, &y);
+			nemoview_transform_to_global_nocheck(view, 0, 0, &x, &y);
 			pixman_region32_translate(&final_region, (int)x, (int)y);
 		}
 
