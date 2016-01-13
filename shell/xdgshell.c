@@ -214,8 +214,13 @@ static void xdg_popup_send_configure(struct nemocanvas *canvas, int32_t width, i
 {
 }
 
+static void xdg_popup_send_transform(struct nemocanvas *canvas, int visible)
+{
+}
+
 static struct nemoclient xdg_popup_client = {
-	xdg_popup_send_configure
+	xdg_popup_send_configure,
+	xdg_popup_send_transform
 };
 
 static void xdg_popup_destroy(struct wl_client *client, struct wl_resource *resource)
