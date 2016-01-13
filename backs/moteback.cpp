@@ -86,6 +86,8 @@ struct moteback {
 	double colors1[4];
 	double tcolors0[4];
 	double tcolors1[4];
+
+	int is_sleeping;
 };
 
 static void moteback_prepare_text(struct moteback *mote, const char *text, int ntext)
@@ -287,6 +289,9 @@ static void moteback_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 	struct moteback *mote = (struct moteback *)nemotale_get_userdata(tale);
 	struct talenode *node = mote->node;
 
+	if (mote->is_sleeping != 0)
+		return;
+
 	if (secs == 0 && nsecs == 0) {
 		nemocanvas_feedback(canvas);
 	} else {
@@ -312,23 +317,25 @@ static void moteback_dispatch_timer_event(struct nemotimer *timer, void *data)
 	struct moteback *mote = (struct moteback *)data;
 	char msg[64];
 
-	if (mote->type == 0) {
-		time_t tt;
-		struct tm *tm;
+	if (mote->is_sleeping == 0) {
+		if (mote->type == 0) {
+			time_t tt;
+			struct tm *tm;
 
-		time(&tt);
-		tm = localtime(&tt);
+			time(&tt);
+			tm = localtime(&tt);
 
-		strftime(msg, sizeof(msg), "%m:%d-%I:%M", tm);
+			strftime(msg, sizeof(msg), "%m:%d-%I:%M", tm);
 
-		moteback_prepare_text(mote, msg, strlen(msg));
-	} else {
-		strcpy(msg, mote->logo);
+			moteback_prepare_text(mote, msg, strlen(msg));
+		} else {
+			strcpy(msg, mote->logo);
 
-		moteback_prepare_text(mote, msg, strlen(msg));
+			moteback_prepare_text(mote, msg, strlen(msg));
+		}
+
+		mote->type = (mote->type + 1) % 2;
 	}
-
-	mote->type = (mote->type + 1) % 2;
 
 	nemotimer_set_timeout(mote->timer, 30 * 1000);
 }
@@ -336,6 +343,20 @@ static void moteback_dispatch_timer_event(struct nemotimer *timer, void *data)
 static void moteback_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
 {
 	uint32_t id = nemotale_node_get_id(node);
+}
+
+static void moteback_dispatch_canvas_fullscreen(struct nemocanvas *canvas, int32_t active, int32_t opaque)
+{
+	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
+	struct moteback *mote = (struct moteback *)nemotale_get_userdata(tale);
+
+	if (active == 0) {
+		mote->is_sleeping = 0;
+
+		nemocanvas_dispatch_frame(canvas);
+	} else {
+		mote->is_sleeping = 1;
+	}
 }
 
 int main(int argc, char *argv[])
@@ -547,6 +568,7 @@ int main(int argc, char *argv[])
 	nemocanvas_set_input_type(NTEGL_CANVAS(canvas), NEMO_SURFACE_INPUT_TYPE_TOUCH);
 	nemocanvas_set_layer(NTEGL_CANVAS(canvas), NEMO_SURFACE_LAYER_TYPE_BACKGROUND);
 	nemocanvas_set_dispatch_frame(NTEGL_CANVAS(canvas), moteback_dispatch_canvas_frame);
+	nemocanvas_set_dispatch_fullscreen(NTEGL_CANVAS(canvas), moteback_dispatch_canvas_fullscreen);
 	nemocanvas_set_scale(NTEGL_CANVAS(canvas), sx, sy);
 	nemocanvas_unset_sound(NTEGL_CANVAS(canvas));
 
