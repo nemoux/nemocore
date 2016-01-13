@@ -637,24 +637,6 @@ static inline void nemoshow_item_update_shape(struct nemoshow *show, struct show
 		NEMOSHOW_ITEM_CC(item, path)->addArc(inr, 0.0f, 360.0f);
 		NEMOSHOW_ITEM_CC(item, path)->addArc(outr, 0.0f, 360.0f);
 		NEMOSHOW_ITEM_CC(item, path)->setFillType(SkPath::kEvenOdd_FillType);
-	} else if (one->sub == NEMOSHOW_BITMAP_ITEM) {
-		if (NEMOSHOW_ITEM_CC(item, bitmap) == NULL) {
-			NEMOSHOW_ITEM_CC(item, bitmap) = new SkBitmap;
-			NEMOSHOW_ITEM_CC(item, bitmap)->allocPixels(
-					SkImageInfo::Make(item->width, item->height, kN32_SkColorType, kPremul_SkAlphaType));
-
-			nemoshow_one_set_state(one, NEMOSHOW_REDRAW_STATE);
-		} else if (
-				NEMOSHOW_ITEM_CC(item, bitmap)->width() != item->width ||
-				NEMOSHOW_ITEM_CC(item, bitmap)->height() != item->height) {
-			delete NEMOSHOW_ITEM_CC(item, bitmap);
-
-			NEMOSHOW_ITEM_CC(item, bitmap) = new SkBitmap;
-			NEMOSHOW_ITEM_CC(item, bitmap)->allocPixels(
-					SkImageInfo::Make(item->width, item->height, kN32_SkColorType, kPremul_SkAlphaType));
-
-			nemoshow_one_set_state(one, NEMOSHOW_REDRAW_STATE);
-		}
 	} else if (one->sub == NEMOSHOW_TEXTBOX_ITEM) {
 		NEMOSHOW_ITEM_CC(item, textbox)->setBox(item->x, item->y, item->width, item->height);
 	}
@@ -728,8 +710,6 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 		item->width = box.width();
 		item->height = box.height();
 	} else if (one->sub == NEMOSHOW_TEXTBOX_ITEM) {
-		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
-	} else if (one->sub == NEMOSHOW_BITMAP_ITEM) {
 		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
 	} else if (one->sub == NEMOSHOW_IMAGE_ITEM) {
 		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
@@ -858,14 +838,6 @@ void nemoshow_item_set_path(struct showone *one, struct showone *path)
 {
 	nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_PATH_REF));
 	nemoshow_one_reference_one(one, path, NEMOSHOW_PATH_REF);
-
-	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
-}
-
-void nemoshow_item_set_src(struct showone *one, struct showone *src)
-{
-	nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_SRC_REF));
-	nemoshow_one_reference_one(one, src, NEMOSHOW_SRC_REF);
 
 	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }

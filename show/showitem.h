@@ -28,10 +28,9 @@ typedef enum {
 	NEMOSHOW_TEXTBOX_ITEM = 10,
 	NEMOSHOW_PATH_ITEM = 11,
 	NEMOSHOW_PATHGROUP_ITEM = 12,
-	NEMOSHOW_BITMAP_ITEM = 13,
-	NEMOSHOW_IMAGE_ITEM = 14,
-	NEMOSHOW_SVG_ITEM = 15,
-	NEMOSHOW_GROUP_ITEM = 16,
+	NEMOSHOW_IMAGE_ITEM = 13,
+	NEMOSHOW_SVG_ITEM = 14,
+	NEMOSHOW_GROUP_ITEM = 15,
 	NEMOSHOW_LAST_ITEM
 } NemoShowItemType;
 
@@ -117,7 +116,6 @@ extern void nemoshow_item_set_filter(struct showone *one, struct showone *filter
 extern void nemoshow_item_set_clip(struct showone *one, struct showone *clip);
 extern void nemoshow_item_set_font(struct showone *one, struct showone *font);
 extern void nemoshow_item_set_path(struct showone *one, struct showone *path);
-extern void nemoshow_item_set_src(struct showone *one, struct showone *src);
 extern void nemoshow_item_set_uri(struct showone *one, const char *uri);
 extern void nemoshow_item_set_text(struct showone *one, const char *text);
 

@@ -458,37 +458,6 @@ static inline void nemoshow_canvas_render_item_textbox(SkCanvas *canvas, struct 
 	}
 }
 
-static inline void nemoshow_canvas_render_vector_on_bitmap(SkBitmap *bitmap, struct showone *one)
-{
-	struct showitem *src = NEMOSHOW_ITEM(one);
-	int i;
-
-	SkBitmapDevice device(*bitmap);
-	SkCanvas canvas(&device);
-
-	canvas.clear(SK_ColorTRANSPARENT);
-	canvas.scale(bitmap->width() / src->width, bitmap->height() / src->height);
-	canvas.concat(*NEMOSHOW_ITEM_CC(src, viewbox));
-
-	for (i = 0; i < one->nchildren; i++) {
-		nemoshow_canvas_render_one(&canvas, one->children[i]);
-	}
-}
-
-static inline void nemoshow_canvas_render_item_bitmap(SkCanvas *canvas, struct showone *one)
-{
-	struct showitem *item = NEMOSHOW_ITEM(one);
-	SkRect rect = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
-
-	if (nemoshow_one_has_state(one, NEMOSHOW_REDRAW_STATE)) {
-		nemoshow_canvas_render_vector_on_bitmap(NEMOSHOW_ITEM_CC(item, bitmap), NEMOSHOW_REF(one, NEMOSHOW_SRC_REF));
-
-		nemoshow_one_put_state(one, NEMOSHOW_REDRAW_STATE);
-	}
-
-	canvas->drawBitmapRect(*NEMOSHOW_ITEM_CC(item, bitmap), rect);
-}
-
 static inline void nemoshow_canvas_render_item_image(SkCanvas *canvas, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
@@ -542,7 +511,6 @@ static inline void nemoshow_canvas_render_item(SkCanvas *canvas, struct showone 
 		nemoshow_canvas_render_item_textbox,
 		nemoshow_canvas_render_item_path,
 		nemoshow_canvas_render_item_path_group,
-		nemoshow_canvas_render_item_bitmap,
 		nemoshow_canvas_render_item_image,
 		nemoshow_canvas_render_item_svg,
 		nemoshow_canvas_render_item_group
