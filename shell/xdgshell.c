@@ -59,9 +59,14 @@ static void xdg_send_transform(struct nemocanvas *canvas, int visible)
 {
 }
 
+static void xdg_send_fullscreen(struct nemocanvas *canvas, int active, int opaque)
+{
+}
+
 static struct nemoclient xdg_client = {
 	xdg_send_configure,
-	xdg_send_transform
+	xdg_send_transform,
+	xdg_send_fullscreen
 };
 
 static void xdg_surface_destroy(struct wl_client *client, struct wl_resource *resource)
@@ -218,9 +223,14 @@ static void xdg_popup_send_transform(struct nemocanvas *canvas, int visible)
 {
 }
 
+static void xdg_popup_send_fullscreen(struct nemocanvas *canvas, int active, int opaque)
+{
+}
+
 static struct nemoclient xdg_popup_client = {
 	xdg_popup_send_configure,
-	xdg_popup_send_transform
+	xdg_popup_send_transform,
+	xdg_popup_send_fullscreen
 };
 
 static void xdg_popup_destroy(struct wl_client *client, struct wl_resource *resource)

@@ -56,6 +56,8 @@ struct miroback {
 
 	struct nemotimer *ptimer;
 	pthread_mutex_t plock;
+
+	int is_sleeping;
 };
 
 struct miromice {
@@ -98,7 +100,8 @@ static void nemomiro_dispatch_mice_transition_done(void *data)
 	struct showone *sequence;
 	struct showone *set0;
 
-	if (mice->c1 <= 0 || mice->c1 >= miro->columns ||
+	if (miro->is_sleeping != 0 ||
+			mice->c1 <= 0 || mice->c1 >= miro->columns ||
 			mice->r1 <= 0 || mice->r1 >= miro->rows) {
 		set0 = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(set0, mice->one);
@@ -241,7 +244,7 @@ static void nemomiro_dispatch_timer_event(struct nemotimer *timer, void *data)
 {
 	struct miroback *miro = (struct miroback *)data;
 
-	if (miro->nmices < miro->mmices) {
+	if (miro->is_sleeping == 0 && miro->nmices < miro->mmices) {
 		nemomiro_shoot_mice(miro);
 
 		miro->nmices++;
@@ -360,33 +363,35 @@ static void nemomiro_dispatch_pulse_timer_event(struct nemotimer *timer, void *d
 	struct showone *set0;
 	int i;
 
-	frame = nemoshow_sequence_create_frame();
-	nemoshow_sequence_set_timing(frame, 1.0f);
+	if (miro->is_sleeping == 0) {
+		frame = nemoshow_sequence_create_frame();
+		nemoshow_sequence_set_timing(frame, 1.0f);
 
-	pthread_mutex_lock(&miro->plock);
+		pthread_mutex_lock(&miro->plock);
 
-	for (i = 0; i < miro->columns * miro->rows; i++) {
-		if (miro->nodes0[i] != miro->nodes1[i]) {
-			set0 = nemoshow_sequence_create_set();
-			nemoshow_sequence_set_source(set0, miro->bones[i]);
-			nemoshow_sequence_set_dattr(set0, "alpha", (double)miro->nodes1[i] / 100.0f, NEMOSHOW_STYLE_DIRTY);
+		for (i = 0; i < miro->columns * miro->rows; i++) {
+			if (miro->nodes0[i] != miro->nodes1[i]) {
+				set0 = nemoshow_sequence_create_set();
+				nemoshow_sequence_set_source(set0, miro->bones[i]);
+				nemoshow_sequence_set_dattr(set0, "alpha", (double)miro->nodes1[i] / 100.0f, NEMOSHOW_STYLE_DIRTY);
 
-			nemoshow_one_attach(frame, set0);
+				nemoshow_one_attach(frame, set0);
 
-			miro->nodes0[i] = miro->nodes1[i];
+				miro->nodes0[i] = miro->nodes1[i];
+			}
 		}
+
+		pthread_mutex_unlock(&miro->plock);
+
+		sequence = nemoshow_sequence_create();
+		nemoshow_one_attach(sequence, frame);
+
+		trans = nemoshow_transition_create(miro->ease1, 150, 0);
+		nemoshow_transition_attach_sequence(trans, sequence);
+		nemoshow_attach_transition(miro->show, trans);
+
+		nemocanvas_dispatch_frame(NEMOSHOW_AT(miro->show, canvas));
 	}
-
-	pthread_mutex_unlock(&miro->plock);
-
-	sequence = nemoshow_sequence_create();
-	nemoshow_one_attach(sequence, frame);
-
-	trans = nemoshow_transition_create(miro->ease1, 150, 0);
-	nemoshow_transition_attach_sequence(trans, sequence);
-	nemoshow_attach_transition(miro->show, trans);
-
-	nemocanvas_dispatch_frame(NEMOSHOW_AT(miro->show, canvas));
 
 	nemotimer_set_timeout(timer, 100);
 }
@@ -506,6 +511,18 @@ static void nemomiro_dispatch_hide(struct miroback *miro, uint32_t duration, uin
 	nemocanvas_dispatch_frame(NEMOSHOW_AT(miro->show, canvas));
 }
 
+static void nemomiro_dispatch_canvas_fullscreen(struct nemocanvas *canvas, int32_t active, int32_t opaque)
+{
+	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
+	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
+	struct miroback *miro = (struct miroback *)nemoshow_get_userdata(show);
+
+	if (active == 0)
+		miro->is_sleeping = 0;
+	else
+		miro->is_sleeping = 1;
+}
+
 int main(int argc, char *argv[])
 {
 	struct option options[] = {
@@ -619,6 +636,7 @@ int main(int argc, char *argv[])
 
 	nemocanvas_opaque(NEMOSHOW_AT(show, canvas), 0, 0, width, height);
 	nemocanvas_set_layer(NEMOSHOW_AT(show, canvas), NEMO_SURFACE_LAYER_TYPE_BACKGROUND);
+	nemocanvas_set_dispatch_fullscreen(NEMOSHOW_AT(show, canvas), nemomiro_dispatch_canvas_fullscreen);
 
 	miro->scene = scene = nemoshow_scene_create();
 	nemoshow_scene_set_width(scene, width);

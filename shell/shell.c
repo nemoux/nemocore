@@ -345,6 +345,13 @@ static void shellbin_transform_canvas(struct nemocanvas *canvas, int visible)
 	bin->client->send_transform(canvas, visible);
 }
 
+static void shellbin_fullscreen_canvas(struct nemocanvas *canvas, int active, int opaque)
+{
+	struct shellbin *bin = nemoshell_get_bin(canvas);
+
+	bin->client->send_fullscreen(canvas, active, opaque);
+}
+
 static void shellbin_handle_canvas_destroy(struct wl_listener *listener, void *data)
 {
 	struct shellbin *bin = (struct shellbin *)container_of(listener, struct shellbin, canvas_destroy_listener);
@@ -410,6 +417,7 @@ struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas
 	canvas->configure_private = (void *)bin;
 
 	canvas->transform = shellbin_transform_canvas;
+	canvas->fullscreen = shellbin_fullscreen_canvas;
 
 	bin->canvas_destroy_listener.notify = shellbin_handle_canvas_destroy;
 	wl_signal_add(&canvas->destroy_signal, &bin->canvas_destroy_listener);
@@ -1028,6 +1036,70 @@ void nemoshell_put_fullscreen_bin(struct nemoshell *shell, struct shellbin *bin)
 	bin->fixed = 0;
 
 	nemoshell_send_bin_state(bin);
+}
+
+static inline int nemoshell_bin_contains_view(struct shellbin *bin, struct nemoview *view)
+{
+	float s[4][2] = {
+		{ 0.0f, 0.0f },
+		{ view->content->width, 0.0f },
+		{ 0.0f, view->content->height },
+		{ view->content->width, view->content->height }
+	};
+	float x, y;
+	int i;
+
+	for (i = 0; i < 4; i++) {
+		nemoview_transform_to_global(view, s[i][0], s[i][1], &x, &y);
+
+		if (x < bin->screen.x || x > bin->screen.x + bin->screen.width ||
+				y < bin->screen.y || y > bin->screen.y + bin->screen.height)
+			return 0;
+	}
+
+	return 1;
+}
+
+void nemoshell_set_fullscreen_opaque(struct nemoshell *shell, struct shellbin *bin)
+{
+	struct nemocompz *compz = shell->compz;
+	struct nemolayer *layer;
+	struct nemoview *view, *child;
+
+	wl_list_for_each(layer, &compz->layer_list, link) {
+		wl_list_for_each(view, &layer->view_list, layer_link) {
+			if (!wl_list_empty(&view->children_list)) {
+				wl_list_for_each(child, &view->children_list, children_link) {
+					if (nemoshell_bin_contains_view(bin, child) != 0)
+						nemocontent_update_fullscreen(child->content, 1, bin->on_opaquescreen);
+				}
+			}
+
+			if (nemoshell_bin_contains_view(bin, view) != 0)
+				nemocontent_update_fullscreen(view->content, 1, bin->on_opaquescreen);
+		}
+	}
+}
+
+void nemoshell_put_fullscreen_opaque(struct nemoshell *shell, struct shellbin *bin)
+{
+	struct nemocompz *compz = shell->compz;
+	struct nemolayer *layer;
+	struct nemoview *view, *child;
+
+	wl_list_for_each(layer, &compz->layer_list, link) {
+		wl_list_for_each(view, &layer->view_list, layer_link) {
+			if (!wl_list_empty(&view->children_list)) {
+				wl_list_for_each(child, &view->children_list, children_link) {
+					if (nemoshell_bin_contains_view(bin, child) != 0)
+						nemocontent_update_fullscreen(child->content, 0, bin->on_opaquescreen);
+				}
+			}
+
+			if (nemoshell_bin_contains_view(bin, view) != 0)
+				nemocontent_update_fullscreen(view->content, 0, bin->on_opaquescreen);
+		}
+	}
 }
 
 void nemoshell_set_maximized_bin_on_screen(struct nemoshell *shell, struct shellbin *bin, struct nemoscreen *screen)

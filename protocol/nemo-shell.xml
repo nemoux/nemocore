@@ -146,6 +146,10 @@
 			<arg name="type" type="uint"/>
 		</request>
 
+		<request name="set_fullscreen_opaque">
+			<arg name="opaque" type="uint"/>
+		</request>
+
 		<request name="set_fullscreen">
 			<arg name="id" type="uint"/>
 		</request>
@@ -167,6 +171,11 @@
 
 		<event name="transform">
 			<arg name="visible" type="int"/>
+		</event>
+
+		<event name="fullscreen">
+			<arg name="active" type="int"/>
+			<arg name="opaque" type="int"/>
 		</event>
 	</interface>
 </protocol>

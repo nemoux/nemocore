@@ -44,6 +44,14 @@ static void nemoactor_update_transform(struct nemocontent *content, int visible)
 		actor->dispatch_transform(actor, visible);
 }
 
+static void nemoactor_update_fullscreen(struct nemocontent *content, int active, int opaque)
+{
+	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
+
+	if (actor->dispatch_fullscreen != NULL)
+		actor->dispatch_fullscreen(actor, active, opaque);
+}
+
 static int nemoactor_read_pixels(struct nemocontent *content, pixman_format_code_t format, void *pixels)
 {
 }
@@ -85,6 +93,7 @@ struct nemoactor *nemoactor_create_pixman(struct nemocompz *compz, int width, in
 
 	actor->base.update_output = nemoactor_update_output;
 	actor->base.update_transform = nemoactor_update_transform;
+	actor->base.update_fullscreen = nemoactor_update_fullscreen;
 	actor->base.read_pixels = nemoactor_read_pixels;
 
 	actor->dispatch_resize = NULL;
@@ -213,6 +222,7 @@ struct nemoactor *nemoactor_create_gl(struct nemocompz *compz, int width, int he
 
 	actor->base.update_output = nemoactor_update_output;
 	actor->base.update_transform = nemoactor_update_transform;
+	actor->base.update_fullscreen = nemoactor_update_fullscreen;
 	actor->base.read_pixels = nemoactor_read_pixels;
 
 	actor->dispatch_resize = NULL;
@@ -357,6 +367,11 @@ void nemoactor_set_dispatch_transform(struct nemoactor *actor, nemoactor_dispatc
 	actor->dispatch_transform = dispatch;
 }
 
+void nemoactor_set_dispatch_fullscreen(struct nemoactor *actor, nemoactor_dispatch_fullscreen_t dispatch)
+{
+	actor->dispatch_fullscreen = dispatch;
+}
+
 void nemoactor_set_dispatch_frame(struct nemoactor *actor, nemoactor_dispatch_frame_t dispatch)
 {
 	actor->dispatch_frame = dispatch;
@@ -380,6 +395,12 @@ void nemoactor_dispatch_transform(struct nemoactor *actor, int visible)
 {
 	if (actor->dispatch_transform != NULL)
 		actor->dispatch_transform(actor, visible);
+}
+
+void nemoactor_dispatch_fullscreen(struct nemoactor *actor, int active, int opaque)
+{
+	if (actor->dispatch_fullscreen != NULL)
+		actor->dispatch_fullscreen(actor, active, opaque);
 }
 
 void nemoactor_dispatch_frame(struct nemoactor *actor)

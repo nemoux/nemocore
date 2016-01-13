@@ -34,9 +34,14 @@ static void shell_send_transform(struct nemocanvas *canvas, int visible)
 {
 }
 
+static void shell_send_fullscreen(struct nemocanvas *canvas, int active, int opaque)
+{
+}
+
 static struct nemoclient shell_client = {
 	shell_send_configure,
-	shell_send_transform
+	shell_send_transform,
+	shell_send_fullscreen
 };
 
 static void shell_surface_pong(struct wl_client *client, struct wl_resource *resource, uint32_t serial)

@@ -185,6 +185,7 @@ int main(int argc, char *argv[])
 	context->canvas = canvas = nemotool_create_egl_canvas(egl, width, height);
 	nemocanvas_set_nemosurface(NTEGL_CANVAS(canvas), NEMO_SHELL_SURFACE_TYPE_NORMAL);
 	nemocanvas_set_fullscreen_type(NTEGL_CANVAS(canvas), (1 << NEMO_SURFACE_FULLSCREEN_TYPE_PICK) | (1 << NEMO_SURFACE_FULLSCREEN_TYPE_PITCH));
+	nemocanvas_set_fullscreen_opaque(NTEGL_CANVAS(canvas), 1);
 	nemocanvas_set_anchor(NTEGL_CANVAS(canvas), -0.5f, -0.5f);
 	nemocanvas_set_dispatch_resize(NTEGL_CANVAS(canvas), nemopdf_dispatch_canvas_resize);
 	nemocanvas_set_max_size(NTEGL_CANVAS(canvas), UINT32_MAX, UINT32_MAX);
