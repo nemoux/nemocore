@@ -142,9 +142,8 @@ void nemoshow_item_destroy(struct showone *one)
 
 	nemolist_remove(&item->canvas_destroy_listener.link);
 
-	while (one->nchildren > 0) {
-		nemoshow_one_destroy_with_children(one->children[0]);
-	}
+	while (one->nchildren > 0)
+		nemoshow_one_destroy_all(one->children[0]);
 
 	nemoshow_one_finish(one);
 
@@ -274,9 +273,8 @@ static inline void nemoshow_item_update_uri(struct nemoshow *show, struct showon
 
 			one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 		} else if (one->sub == NEMOSHOW_SVG_ITEM) {
-			while (one->nchildren > 0) {
-				nemoshow_one_destroy_with_children(one->children[0]);
-			}
+			while (one->nchildren > 0)
+				nemoshow_one_destroy_all(one->children[0]);
 
 			nemoshow_svg_load_uri(show, one, item->uri);
 

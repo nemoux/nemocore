@@ -73,7 +73,7 @@ void nemoshow_transition_destroy(struct showtransition *trans, int done)
 	}
 
 	for (i = 0; i < trans->nsequences; i++) {
-		nemoshow_one_destroy_with_children(trans->sequences[i]);
+		nemoshow_one_destroy_all(trans->sequences[i]);
 	}
 
 	for (i = 0; i < trans->ntransitions; i++) {

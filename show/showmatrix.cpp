@@ -31,7 +31,7 @@ struct showone *nemoshow_matrix_create(int type)
 	one->sub = type;
 	one->update = nemoshow_matrix_update;
 	one->destroy = nemoshow_matrix_destroy;
-	
+
 	one->effect = NEMOSHOW_MATRIX_DIRTY;
 
 	nemoshow_one_prepare(one);
@@ -46,9 +46,8 @@ void nemoshow_matrix_destroy(struct showone *one)
 {
 	struct showmatrix *matrix = NEMOSHOW_MATRIX(one);
 
-	while (one->nchildren > 0) {
-		nemoshow_one_destroy_with_children(one->children[0]);
-	}
+	while (one->nchildren > 0)
+		nemoshow_one_destroy_all(one->children[0]);
 
 	nemoshow_one_finish(one);
 
