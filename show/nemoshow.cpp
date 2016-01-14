@@ -62,17 +62,13 @@ err1:
 
 void nemoshow_destroy(struct nemoshow *show)
 {
-	struct showtransition *trans;
+	struct showtransition *trans, *ntrans;
 
-	while (nemolist_empty(&show->transition_destroy_list) == 0) {
-		trans = nemolist_node0(&show->transition_destroy_list, struct showtransition, link);
-
+	nemolist_for_each_safe(trans, ntrans, &show->transition_destroy_list, link) {
 		nemoshow_transition_destroy(trans, 0);
 	}
 
-	while (nemolist_empty(&show->transition_list) == 0) {
-		trans = nemolist_node0(&show->transition_list, struct showtransition, link);
-
+	nemolist_for_each_safe(trans, ntrans, &show->transition_list, link) {
 		nemoshow_transition_destroy(trans, 0);
 	}
 
@@ -89,7 +85,6 @@ void nemoshow_destroy(struct nemoshow *show)
 struct showone *nemoshow_search_one(struct nemoshow *show, const char *id)
 {
 	struct showone *one;
-	int i;
 
 	if (id == NULL || id[0] == '\0')
 		return NULL;
@@ -595,7 +590,6 @@ void nemoshow_render_one(struct nemoshow *show)
 	struct showone *scene = show->scene;
 	struct showcanvas *canvas;
 	struct showone *one, *child;
-	int i, j;
 
 	if (scene == NULL)
 		return;
@@ -885,11 +879,10 @@ void nemoshow_dispatch_transition(struct nemoshow *show, uint32_t msecs)
 
 void nemoshow_destroy_transition(struct nemoshow *show)
 {
+	struct showtransition *trans, *ntrans;
 	int had_transitions = nemolist_empty(&show->transition_destroy_list) == 0;
 
-	while (nemolist_empty(&show->transition_destroy_list) == 0) {
-		struct showtransition *trans = nemolist_node0(&show->transition_destroy_list, struct showtransition, link);
-
+	nemolist_for_each_safe(trans, ntrans, &show->transition_destroy_list, link) {
 		nemoshow_transition_destroy(trans, 1);
 	}
 
