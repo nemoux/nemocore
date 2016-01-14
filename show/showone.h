@@ -140,7 +140,6 @@ struct showone {
 	int nattrs, sattrs;
 
 	uint32_t dirty;
-	uint32_t effect;
 
 	int32_t x, y, width, height;
 	int32_t outer;
@@ -183,9 +182,6 @@ static inline void nemoshow_one_dirty(struct showone *one, uint32_t dirty)
 
 	one->dirty |= dirty;
 
-	if (one->effect != 0)
-		nemoshow_one_dirty(one->parent, one->effect);
-
 	nemolist_for_each(ref, &one->reference_list, link)
 		nemoshow_one_dirty(ref->one, ref->dirty);
 }
@@ -211,13 +207,6 @@ static inline void nemoshow_one_detach(struct showone *parent, struct showone *o
 static inline void nemoshow_one_update(struct nemoshow *show, struct showone *one)
 {
 	if (one->dirty != 0) {
-		int i;
-
-		for (i = 0; i < one->nchildren; i++) {
-			if (one->children[i]->effect != 0)
-				nemoshow_one_update(show, one->children[i]);
-		}
-
 		one->update(show, one);
 
 		one->dirty = 0;
@@ -229,11 +218,6 @@ static inline void nemoshow_one_update_preorder(struct nemoshow *show, struct sh
 	int i;
 
 	if (one->dirty != 0) {
-		for (i = 0; i < one->nchildren; i++) {
-			if (one->children[i]->effect != 0)
-				nemoshow_one_update(show, one->children[i]);
-		}
-
 		one->update(show, one);
 
 		one->dirty = 0;

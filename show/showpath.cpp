@@ -25,8 +25,8 @@ struct showone *nemoshow_path_create(int type)
 	one->sub = type;
 	one->update = nemoshow_path_update;
 	one->destroy = nemoshow_path_destroy;
-
-	one->effect = NEMOSHOW_PATH_DIRTY;
+	one->attach = nemoshow_path_attach_one;
+	one->detach = nemoshow_path_detach_one;
 
 	nemoshow_one_prepare(one);
 
@@ -52,6 +52,18 @@ void nemoshow_path_destroy(struct showone *one)
 	nemoshow_one_finish(one);
 
 	free(path);
+}
+
+void nemoshow_path_attach_one(struct showone *parent, struct showone *one)
+{
+	nemoshow_one_attach_one(parent, one);
+
+	nemoshow_one_reference_one(parent, one, NEMOSHOW_PATH_DIRTY, -1);
+}
+
+void nemoshow_path_detach_one(struct showone *parent, struct showone *one)
+{
+	nemoshow_one_detach_one(parent, one);
 }
 
 int nemoshow_path_arrange(struct nemoshow *show, struct showone *one)

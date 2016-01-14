@@ -220,7 +220,8 @@ int nemoshow_one_reference_one(struct showone *one, struct showone *src, uint32_
 	ref->one = one;
 	ref->index = index;
 
-	one->refs[index] = ref;
+	if (index >= 0)
+		one->refs[index] = ref;
 
 	nemolist_insert(&src->reference_list, &ref->link);
 
