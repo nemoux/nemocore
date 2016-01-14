@@ -472,25 +472,23 @@ static inline void nemoshow_canvas_render_item_image(SkCanvas *canvas, struct sh
 static inline void nemoshow_canvas_render_item_svg(SkCanvas *canvas, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
-	int i;
+	struct showone *child;
 
 	canvas->save();
 	canvas->concat(*NEMOSHOW_ITEM_CC(item, viewbox));
 
-	for (i = 0; i < one->nchildren; i++) {
-		nemoshow_canvas_render_one(canvas, one->children[i]);
-	}
+	nemolist_for_each(child, &one->children_list, children_link)
+		nemoshow_canvas_render_one(canvas, child);
 
 	canvas->restore();
 }
 
 static inline void nemoshow_canvas_render_item_group(SkCanvas *canvas, struct showone *one)
 {
-	int i;
+	struct showone *child;
 
-	for (i = 0; i < one->nchildren; i++) {
-		nemoshow_canvas_render_one(canvas, one->children[i]);
-	}
+	nemolist_for_each(child, &one->children_list, children_link)
+		nemoshow_canvas_render_one(canvas, child);
 }
 
 typedef void (*nemoshow_canvas_render_t)(SkCanvas *canvas, struct showone *one);
@@ -570,6 +568,7 @@ static inline void nemoshow_canvas_render_one(SkCanvas *canvas, struct showone *
 void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+	struct showone *child;
 	int i;
 
 	if (canvas->needs_full_redraw == 0) {
@@ -578,9 +577,8 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 		NEMOSHOW_CANVAS_CC(canvas, canvas)->clear(SK_ColorTRANSPARENT);
 		NEMOSHOW_CANVAS_CC(canvas, canvas)->scale(canvas->viewport.sx, canvas->viewport.sy);
 
-		for (i = 0; i < one->nchildren; i++) {
-			nemoshow_canvas_render_one(NEMOSHOW_CANVAS_CC(canvas, canvas), one->children[i]);
-		}
+		nemolist_for_each(child, &one->children_list, children_link)
+			nemoshow_canvas_render_one(NEMOSHOW_CANVAS_CC(canvas, canvas), child);
 
 		NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
 	} else {
@@ -588,9 +586,8 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 		NEMOSHOW_CANVAS_CC(canvas, canvas)->clear(SK_ColorTRANSPARENT);
 		NEMOSHOW_CANVAS_CC(canvas, canvas)->scale(canvas->viewport.sx, canvas->viewport.sy);
 
-		for (i = 0; i < one->nchildren; i++) {
-			nemoshow_canvas_render_one(NEMOSHOW_CANVAS_CC(canvas, canvas), one->children[i]);
-		}
+		nemolist_for_each(child, &one->children_list, children_link)
+			nemoshow_canvas_render_one(NEMOSHOW_CANVAS_CC(canvas, canvas), child);
 
 		NEMOSHOW_CANVAS_CC(canvas, canvas)->restore();
 
@@ -745,14 +742,8 @@ void nemoshow_canvas_scale(struct showone *one, double sx, double sy)
 static inline struct showone *nemoshow_canvas_pick_one_in(struct showone *one, double px, double py)
 {
 	struct showone *child;
-	int i;
 
-	if (one->nchildren <= 0)
-		return NULL;
-
-	for (i = one->nchildren - 1; i >= 0; i--) {
-		child = one->children[i];
-
+	nemolist_for_each_reverse(child, &one->children_list, children_link) {
 		if (child->type == NEMOSHOW_ITEM_TYPE) {
 			if (child->sub == NEMOSHOW_GROUP_ITEM) {
 				struct showone *pick;

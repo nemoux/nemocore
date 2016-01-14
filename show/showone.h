@@ -110,12 +110,16 @@ struct showone {
 	int type, sub;
 	char id[NEMOSHOW_ID_MAX];
 
+	struct nemolist link;
+	struct nemolist children_link;
+
 	uint32_t state;
 
 	uint32_t tag;
 
 	struct nemosignal destroy_signal;
 
+	struct nemolist children_list;
 	struct nemolist reference_list;
 
 	struct nemoobject object;
@@ -132,9 +136,6 @@ struct showone {
 	struct nemolistener parent_destroy_listener;
 
 	struct showref *refs[NEMOSHOW_LAST_REF];
-
-	struct showone **children;
-	int nchildren, schildren;
 
 	struct showattr **attrs;
 	int nattrs, sattrs;
@@ -215,6 +216,7 @@ static inline void nemoshow_one_update(struct nemoshow *show, struct showone *on
 
 static inline void nemoshow_one_update_preorder(struct nemoshow *show, struct showone *one)
 {
+	struct showone *child;
 	int i;
 
 	if (one->dirty != 0) {
@@ -223,8 +225,8 @@ static inline void nemoshow_one_update_preorder(struct nemoshow *show, struct sh
 		one->dirty = 0;
 	}
 
-	for (i = 0; i < one->nchildren; i++) {
-		nemoshow_one_update_preorder(show, one->children[i]);
+	nemolist_for_each(child, &one->children_list, children_link) {
+		nemoshow_one_update_preorder(show, child);
 	}
 }
 
@@ -293,14 +295,6 @@ static inline struct showone *nemoshow_one_get_parent(struct showone *one, int t
 	}
 
 	return parent;
-}
-
-static inline struct showone *nemoshow_one_get_child(struct showone *one, uint32_t index)
-{
-	if (index >= one->nchildren)
-		return NULL;
-
-	return one->children[index];
 }
 
 static inline void nemoshow_one_set_userdata(struct showone *one, void *userdata)

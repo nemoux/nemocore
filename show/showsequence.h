@@ -43,7 +43,8 @@ struct showsequence {
 	struct showone base;
 
 	double t;
-	int iframe;
+	
+	struct showone *frame;
 };
 
 #define NEMOSHOW_SEQUENCE(one)					((struct showsequence *)container_of(one, struct showsequence, base))

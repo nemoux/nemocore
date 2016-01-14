@@ -18,15 +18,15 @@ void nemoshow_one_prepare(struct showone *one)
 
 	nemosignal_init(&one->destroy_signal);
 
+	nemolist_init(&one->link);
+	nemolist_init(&one->children_link);
+
+	nemolist_init(&one->children_list);
 	nemolist_init(&one->reference_list);
 
 	nemolist_init(&one->parent_destroy_listener.link);
 
 	nemoobject_set_reserved(&one->object, "id", one->id, NEMOSHOW_ID_MAX);
-
-	one->children = (struct showone **)malloc(sizeof(struct showone *) * 4);
-	one->nchildren = 0;
-	one->schildren = 4;
 
 	one->attrs = (struct showattr **)malloc(sizeof(struct showattr *) * 4);
 	one->nattrs = 0;
@@ -64,11 +64,13 @@ void nemoshow_one_finish(struct showone *one)
 
 	nemolist_remove(&one->parent_destroy_listener.link);
 
+	nemolist_remove(&one->link);
+	nemolist_remove(&one->children_link);
+
 	nemoshow_one_unreference_all(one);
 
 	nemoobject_finish(&one->object);
 
-	free(one->children);
 	free(one->attrs);
 }
 
@@ -110,11 +112,13 @@ void nemoshow_one_destroy(struct showone *one)
 
 void nemoshow_one_destroy_all(struct showone *one)
 {
+	struct showone *child, *nchild;
+
 	if (one->state & NEMOSHOW_RECYCLE_STATE)
 		return;
 
-	while (one->nchildren > 0)
-		nemoshow_one_destroy_all(one->children[0]);
+	nemolist_for_each_safe(child, nchild, &one->children_list, children_link)
+		nemoshow_one_destroy_all(child);
 
 	if (one->destroy != NULL) {
 		one->destroy(one);
@@ -137,7 +141,7 @@ static void nemoshow_one_handle_parent_destroy_signal(struct nemolistener *liste
 
 void nemoshow_one_attach_one(struct showone *parent, struct showone *one)
 {
-	NEMOBOX_APPEND(parent->children, parent->schildren, parent->nchildren, one);
+	nemolist_insert_tail(&parent->children_list, &one->children_link);
 
 	one->parent = parent;
 
@@ -147,15 +151,8 @@ void nemoshow_one_attach_one(struct showone *parent, struct showone *one)
 
 void nemoshow_one_detach_one(struct showone *parent, struct showone *one)
 {
-	int i;
-
-	for (i = 0; i < parent->nchildren; i++) {
-		if (parent->children[i] == one) {
-			NEMOBOX_REMOVE(parent->children, parent->nchildren, i);
-
-			break;
-		}
-	}
+	nemolist_remove(&one->children_link);
+	nemolist_init(&one->children_link);
 
 	one->parent = NULL;
 
@@ -166,45 +163,17 @@ void nemoshow_one_detach_one(struct showone *parent, struct showone *one)
 void nemoshow_one_above_one(struct showone *one, struct showone *above)
 {
 	struct showone *parent = one->parent;
-	int i;
 
-	for (i = 0; i < parent->nchildren; i++) {
-		if (parent->children[i] == one) {
-			NEMOBOX_REMOVE(parent->children, parent->nchildren, i);
-
-			break;
-		}
-	}
-
-	for (i = 0; i < parent->nchildren; i++) {
-		if (parent->children[i] == above) {
-			NEMOBOX_PUSH(parent->children, parent->schildren, parent->nchildren, i + 1, one);
-
-			break;
-		}
-	}
+	nemolist_remove(&one->link);
+	nemolist_insert_tail(&above->link, &one->link);
 }
 
 void nemoshow_one_below_one(struct showone *one, struct showone *below)
 {
 	struct showone *parent = one->parent;
-	int i;
 
-	for (i = 0; i < parent->nchildren; i++) {
-		if (parent->children[i] == one) {
-			NEMOBOX_REMOVE(parent->children, parent->nchildren, i);
-
-			break;
-		}
-	}
-
-	for (i = 0; i < parent->nchildren; i++) {
-		if (parent->children[i] == below) {
-			NEMOBOX_PUSH(parent->children, parent->schildren, parent->nchildren, i, one);
-
-			break;
-		}
-	}
+	nemolist_remove(&one->link);
+	nemolist_insert(&below->link, &one->link);
 }
 
 int nemoshow_one_reference_one(struct showone *one, struct showone *src, uint32_t dirty, int index)
@@ -295,6 +264,7 @@ void nemoshow_one_dump(struct showone *one, FILE *out)
 {
 	struct showprop *prop;
 	struct showattr *attr;
+	struct showone *child;
 	const char *name;
 	int i, count;
 
@@ -322,7 +292,6 @@ void nemoshow_one_dump(struct showone *one, FILE *out)
 		fprintf(out, "  %s = <%s>\n", attr->name, attr->text);
 	}
 
-	for (i = 0; i < one->nchildren; i++) {
-		nemoshow_one_dump(one->children[i], out);
-	}
+	nemolist_for_each(child, &one->children_list, children_link)
+		nemoshow_one_dump(child, out);
 }

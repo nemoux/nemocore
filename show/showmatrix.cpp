@@ -45,9 +45,10 @@ struct showone *nemoshow_matrix_create(int type)
 void nemoshow_matrix_destroy(struct showone *one)
 {
 	struct showmatrix *matrix = NEMOSHOW_MATRIX(one);
+	struct showone *child, *nchild;
 
-	while (one->nchildren > 0)
-		nemoshow_one_destroy_all(one->children[0]);
+	nemolist_for_each_safe(child, nchild, &one->children_list, children_link)
+		nemoshow_one_destroy_all(child);
 
 	nemoshow_one_finish(one);
 
@@ -94,9 +95,7 @@ int nemoshow_matrix_update(struct nemoshow *show, struct showone *one)
 
 		NEMOSHOW_MATRIX_CC(matrix, matrix)->setIdentity();
 
-		for (i = 0; i < one->nchildren; i++) {
-			child = one->children[i];
-
+		nemolist_for_each(child, &one->children_list, children_link) {
 			nemoshow_matrix_update(show, child);
 
 			NEMOSHOW_MATRIX_CC(matrix, matrix)->postConcat(

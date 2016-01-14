@@ -38,13 +38,10 @@ NEMO_BEGIN_EXTERN_C
 typedef void (*nemoshow_dispatch_transition_done_t)(void *userdata);
 
 struct nemoshow {
-	struct showone **ones;
-	int nones, sones;
+	struct nemotale *tale;
 
 	struct showexpr *expr;
 	struct showsymtable *stable;
-
-	struct nemotale *tale;
 
 	struct showone *scene;
 	struct showone *camera;
@@ -52,6 +49,7 @@ struct nemoshow {
 	uint32_t width, height;
 	double sx, sy;
 
+	struct nemolist one_list;
 	struct nemolist transition_list;
 	struct nemolist transition_destroy_list;
 

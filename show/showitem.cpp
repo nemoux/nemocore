@@ -135,6 +135,7 @@ struct showone *nemoshow_item_create(int type)
 void nemoshow_item_destroy(struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
+	struct showone *child, *nchild;
 
 	if (item->canvas != NULL) {
 		nemoshow_canvas_damage_one(item->canvas, one);
@@ -142,8 +143,8 @@ void nemoshow_item_destroy(struct showone *one)
 
 	nemolist_remove(&item->canvas_destroy_listener.link);
 
-	while (one->nchildren > 0)
-		nemoshow_one_destroy_all(one->children[0]);
+	nemolist_for_each_safe(child, nchild, &one->children_list, children_link)
+		nemoshow_one_destroy_all(child);
 
 	nemoshow_one_finish(one);
 
@@ -189,6 +190,7 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 	struct showone *path;
 	struct showone *clip;
 	struct showone *font;
+	struct showone *child;
 	const char *v;
 	int i;
 
@@ -215,8 +217,8 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 			nemoshow_one_reference_one(one, matrix, NEMOSHOW_MATRIX_DIRTY, NEMOSHOW_MATRIX_REF);
 		}
 	} else {
-		for (i = 0; i < one->nchildren; i++) {
-			if (one->children[i]->type == NEMOSHOW_MATRIX_TYPE) {
+		nemolist_for_each(child, &one->children_list, children_link) {
+			if (child->type == NEMOSHOW_MATRIX_TYPE) {
 				item->transform = NEMOSHOW_CHILDREN_TRANSFORM;
 
 				break;
@@ -273,8 +275,10 @@ static inline void nemoshow_item_update_uri(struct nemoshow *show, struct showon
 
 			one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 		} else if (one->sub == NEMOSHOW_SVG_ITEM) {
-			while (one->nchildren > 0)
-				nemoshow_one_destroy_all(one->children[0]);
+			struct showone *child, *nchild;
+
+			nemolist_for_each_safe(child, nchild, &one->children_list, children_link)
+				nemoshow_one_destroy_all(child);
 
 			nemoshow_svg_load_uri(show, one, item->uri);
 
@@ -424,11 +428,8 @@ static inline void nemoshow_item_update_pathgroup(struct nemoshow *show, struct 
 {
 	struct showone *child;
 	struct showpath *path;
-	int i;
 
-	for (i = 0; i < one->nchildren; i++) {
-		child = one->children[i];
-
+	nemolist_for_each(child, &one->children_list, children_link) {
 		if (child->type == NEMOSHOW_PATH_TYPE) {
 			path = NEMOSHOW_PATH(child);
 
@@ -551,13 +552,10 @@ static inline void nemoshow_item_update_matrix(struct nemoshow *show, struct sho
 			NEMOSHOW_ITEM_CC(item, modelview)->postTranslate(item->tx, item->ty);
 		} else if (item->transform == NEMOSHOW_CHILDREN_TRANSFORM) {
 			struct showone *child;
-			int i;
 
 			NEMOSHOW_ITEM_CC(item, modelview)->setIdentity();
 
-			for (i = 0; i < one->nchildren; i++) {
-				child = one->children[i];
-
+			nemolist_for_each(child, &one->children_list, children_link) {
 				if (child->type == NEMOSHOW_MATRIX_TYPE) {
 					NEMOSHOW_ITEM_CC(item, modelview)->postConcat(
 							*NEMOSHOW_MATRIX_CC(
