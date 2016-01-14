@@ -207,7 +207,7 @@ void nemoshow_one_below_one(struct showone *one, struct showone *below)
 	}
 }
 
-int nemoshow_one_reference_one(struct showone *one, struct showone *src, int index)
+int nemoshow_one_reference_one(struct showone *one, struct showone *src, uint32_t dirty, int index)
 {
 	struct showref *ref;
 
@@ -216,6 +216,7 @@ int nemoshow_one_reference_one(struct showone *one, struct showone *src, int ind
 		return -1;
 
 	ref->src = src;
+	ref->dirty = dirty;
 	ref->one = one;
 	ref->index = index;
 

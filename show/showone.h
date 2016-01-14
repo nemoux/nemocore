@@ -97,6 +97,7 @@ struct showref {
 	struct nemolist link;
 
 	struct showone *src;
+	uint32_t dirty;
 	struct showone *one;
 	int index;
 };
@@ -164,7 +165,7 @@ extern void nemoshow_one_detach_one(struct showone *parent, struct showone *one)
 extern void nemoshow_one_above_one(struct showone *one, struct showone *above);
 extern void nemoshow_one_below_one(struct showone *one, struct showone *below);
 
-extern int nemoshow_one_reference_one(struct showone *one, struct showone *src, int index);
+extern int nemoshow_one_reference_one(struct showone *one, struct showone *src, uint32_t dirty, int index);
 extern void nemoshow_one_unreference_one(struct showone *one, struct showone *src);
 extern void nemoshow_one_unreference_all(struct showone *one);
 
@@ -186,7 +187,7 @@ static inline void nemoshow_one_dirty(struct showone *one, uint32_t dirty)
 		nemoshow_one_dirty(one->parent, one->effect);
 
 	nemolist_for_each(ref, &one->reference_list, link)
-		nemoshow_one_dirty(ref->one, dirty);
+		nemoshow_one_dirty(ref->one, ref->dirty);
 }
 
 static inline void nemoshow_one_attach(struct showone *parent, struct showone *one)

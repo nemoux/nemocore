@@ -195,13 +195,13 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 	v = nemoobject_gets(&one->object, "filter");
 	if (v != NULL && (filter = nemoshow_search_one(show, v)) != NULL) {
 		nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF));
-		nemoshow_one_reference_one(one, filter, NEMOSHOW_FILTER_REF);
+		nemoshow_one_reference_one(one, filter, NEMOSHOW_FILTER_DIRTY, NEMOSHOW_FILTER_REF);
 	}
 
 	v = nemoobject_gets(&one->object, "shader");
 	if (v != NULL && (shader = nemoshow_search_one(show, v)) != NULL) {
 		nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_SHADER_REF));
-		nemoshow_one_reference_one(one, shader, NEMOSHOW_SHADER_REF);
+		nemoshow_one_reference_one(one, shader, NEMOSHOW_SHADER_DIRTY, NEMOSHOW_SHADER_REF);
 	}
 
 	v = nemoobject_gets(&one->object, "matrix");
@@ -212,7 +212,7 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 			item->transform = NEMOSHOW_EXTERN_TRANSFORM;
 
 			nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_MATRIX_REF));
-			nemoshow_one_reference_one(one, matrix, NEMOSHOW_MATRIX_REF);
+			nemoshow_one_reference_one(one, matrix, NEMOSHOW_MATRIX_DIRTY, NEMOSHOW_MATRIX_REF);
 		}
 	} else {
 		for (i = 0; i < one->nchildren; i++) {
@@ -227,19 +227,19 @@ int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
 	v = nemoobject_gets(&one->object, "clip");
 	if (v != NULL && (clip = nemoshow_search_one(show, v)) != NULL) {
 		nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_CLIP_REF));
-		nemoshow_one_reference_one(one, clip, NEMOSHOW_CLIP_REF);
+		nemoshow_one_reference_one(one, clip, NEMOSHOW_REDRAW_DIRTY, NEMOSHOW_CLIP_REF);
 	}
 
 	v = nemoobject_gets(&one->object, "path");
 	if (v != NULL && (path = nemoshow_search_one(show, v)) != NULL) {
 		nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_PATH_REF));
-		nemoshow_one_reference_one(one, path, NEMOSHOW_PATH_REF);
+		nemoshow_one_reference_one(one, path, NEMOSHOW_SHAPE_DIRTY, NEMOSHOW_PATH_REF);
 	}
 
 	v = nemoobject_gets(&one->object, "font");
 	if (v != NULL && (font = nemoshow_search_one(show, v)) != NULL) {
 		nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_FONT_REF));
-		nemoshow_one_reference_one(one, font, NEMOSHOW_FONT_REF);
+		nemoshow_one_reference_one(one, font, NEMOSHOW_FONT_DIRTY, NEMOSHOW_FONT_REF);
 	}
 
 	v = nemoobject_gets(&one->object, "uri");
@@ -809,25 +809,25 @@ void nemoshow_item_set_shader(struct showone *one, struct showone *shader)
 	item->fill = 1;
 
 	nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_SHADER_REF));
-	nemoshow_one_reference_one(one, shader, NEMOSHOW_SHADER_REF);
+	nemoshow_one_reference_one(one, shader, NEMOSHOW_SHADER_DIRTY, NEMOSHOW_SHADER_REF);
 }
 
 void nemoshow_item_set_filter(struct showone *one, struct showone *filter)
 {
 	nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF));
-	nemoshow_one_reference_one(one, filter, NEMOSHOW_FILTER_REF);
+	nemoshow_one_reference_one(one, filter, NEMOSHOW_FILTER_DIRTY, NEMOSHOW_FILTER_REF);
 }
 
 void nemoshow_item_set_clip(struct showone *one, struct showone *clip)
 {
 	nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_CLIP_REF));
-	nemoshow_one_reference_one(one, clip, NEMOSHOW_CLIP_REF);
+	nemoshow_one_reference_one(one, clip, NEMOSHOW_REDRAW_DIRTY, NEMOSHOW_CLIP_REF);
 }
 
 void nemoshow_item_set_font(struct showone *one, struct showone *font)
 {
 	nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_FONT_REF));
-	nemoshow_one_reference_one(one, font, NEMOSHOW_FONT_REF);
+	nemoshow_one_reference_one(one, font, NEMOSHOW_FONT_DIRTY, NEMOSHOW_FONT_REF);
 
 	nemoshow_one_dirty(one, NEMOSHOW_FONT_DIRTY);
 }
@@ -835,7 +835,7 @@ void nemoshow_item_set_font(struct showone *one, struct showone *font)
 void nemoshow_item_set_path(struct showone *one, struct showone *path)
 {
 	nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_PATH_REF));
-	nemoshow_one_reference_one(one, path, NEMOSHOW_PATH_REF);
+	nemoshow_one_reference_one(one, path, NEMOSHOW_SHAPE_DIRTY, NEMOSHOW_PATH_REF);
 
 	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
@@ -883,7 +883,7 @@ void nemoshow_item_attach_one(struct showone *parent, struct showone *one)
 	nemoshow_one_attach_one(parent, one);
 
 	if (parent->sub == NEMOSHOW_GROUP_ITEM)
-		nemoshow_one_reference_one(one, parent, NEMOSHOW_GROUP_REF);
+		nemoshow_one_reference_one(one, parent, NEMOSHOW_MATRIX_DIRTY, NEMOSHOW_GROUP_REF);
 
 	if (item->canvas != NULL) {
 		nemolist_remove(&item->canvas_destroy_listener.link);
