@@ -208,13 +208,12 @@ static void nemoshow_dispatch_actor_frame(struct nemoactor *actor, uint32_t msec
 		nemoactor_feedback(actor);
 	} else if (nemoshow_has_transition(show) != 0) {
 		nemoshow_dispatch_transition(show, msecs);
+		nemoshow_destroy_transition(show);
 
 		nemoactor_feedback(actor);
 	} else {
 		nemoactor_feedback_done(actor);
 	}
-
-	nemoshow_destroy_transition(show);
 
 	nemoshow_render_one(show);
 

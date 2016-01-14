@@ -42,11 +42,10 @@ static void nemoshow_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 		nemocanvas_feedback(canvas);
 	} else if (nemoshow_has_transition(show) != 0) {
 		nemoshow_dispatch_transition(show, secs * 1000 + nsecs / 1000000);
+		nemoshow_destroy_transition(show);
 
 		nemocanvas_feedback(canvas);
 	}
-
-	nemoshow_destroy_transition(show);
 
 	nemoshow_render_one(show);
 
