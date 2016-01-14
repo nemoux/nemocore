@@ -104,8 +104,8 @@ struct showitem {
 extern struct showone *nemoshow_item_create(int type);
 extern void nemoshow_item_destroy(struct showone *one);
 
-extern int nemoshow_item_arrange(struct nemoshow *show, struct showone *one);
-extern int nemoshow_item_update(struct nemoshow *show, struct showone *one);
+extern int nemoshow_item_arrange(struct showone *one);
+extern int nemoshow_item_update(struct showone *one);
 
 extern void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one);
 

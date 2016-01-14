@@ -25,8 +25,8 @@ struct showcons {
 extern struct showone *nemoshow_cons_create(void);
 extern void nemoshow_cons_destroy(struct showone *one);
 
-extern int nemoshow_cons_arrange(struct nemoshow *show, struct showone *one);
-extern int nemoshow_cons_update(struct nemoshow *show, struct showone *one);
+extern int nemoshow_cons_arrange(struct showone *one);
+extern int nemoshow_cons_update(struct showone *one);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

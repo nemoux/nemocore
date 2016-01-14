@@ -23,7 +23,7 @@ struct showscene {
 extern struct showone *nemoshow_scene_create(void);
 extern void nemoshow_scene_destroy(struct showone *one);
 
-extern int nemoshow_scene_update(struct nemoshow *show, struct showone *one);
+extern int nemoshow_scene_update(struct showone *one);
 
 static inline void nemoshow_scene_set_width(struct showone *one, double width)
 {

@@ -45,7 +45,7 @@ void nemoshow_sequence_destroy(struct showone *one)
 	free(sequence);
 }
 
-int nemoshow_sequence_update(struct nemoshow *show, struct showone *one)
+int nemoshow_sequence_update(struct showone *one)
 {
 	return 0;
 }
@@ -81,7 +81,7 @@ void nemoshow_sequence_destroy_frame(struct showone *one)
 	free(frame);
 }
 
-int nemoshow_sequence_update_frame(struct nemoshow *show, struct showone *one)
+int nemoshow_sequence_update_frame(struct showone *one)
 {
 	return 0;
 }
@@ -124,8 +124,9 @@ void nemoshow_sequence_destroy_set(struct showone *one)
 	free(set);
 }
 
-int nemoshow_sequence_arrange_set(struct nemoshow *show, struct showone *one)
+int nemoshow_sequence_arrange_set(struct showone *one)
 {
+	struct nemoshow *show = one->show;
 	struct showset *set = NEMOSHOW_SET(one);
 	struct showone *src;
 	struct showprop *prop;
@@ -206,7 +207,7 @@ int nemoshow_sequence_arrange_set(struct nemoshow *show, struct showone *one)
 	return 0;
 }
 
-int nemoshow_sequence_update_set(struct nemoshow *show, struct showone *one)
+int nemoshow_sequence_update_set(struct showone *one)
 {
 	return 0;
 }

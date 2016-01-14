@@ -181,8 +181,9 @@ void nemoshow_item_destroy(struct showone *one)
 	free(item);
 }
 
-int nemoshow_item_arrange(struct nemoshow *show, struct showone *one)
+int nemoshow_item_arrange(struct showone *one)
 {
+	struct nemoshow *show = one->show;
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	struct showone *filter;
 	struct showone *shader;
@@ -744,8 +745,9 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 	one->outer = outer;
 }
 
-int nemoshow_item_update(struct nemoshow *show, struct showone *one)
+int nemoshow_item_update(struct showone *one)
 {
+	struct nemoshow *show = one->show;
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	if ((one->dirty & NEMOSHOW_URI_DIRTY) != 0)

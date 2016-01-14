@@ -66,12 +66,12 @@ void nemoshow_path_detach_one(struct showone *parent, struct showone *one)
 	nemoshow_one_detach_one(parent, one);
 }
 
-int nemoshow_path_arrange(struct nemoshow *show, struct showone *one)
+int nemoshow_path_arrange(struct showone *one)
 {
 	return 0;
 }
 
-int nemoshow_path_update(struct nemoshow *show, struct showone *one)
+int nemoshow_path_update(struct showone *one)
 {
 	return 0;
 }

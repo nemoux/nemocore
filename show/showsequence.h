@@ -43,7 +43,7 @@ struct showsequence {
 	struct showone base;
 
 	double t;
-	
+
 	struct showone *frame;
 };
 
@@ -57,7 +57,7 @@ struct showsequence {
 extern struct showone *nemoshow_sequence_create(void);
 extern void nemoshow_sequence_destroy(struct showone *one);
 
-extern int nemoshow_sequence_update(struct nemoshow *show, struct showone *one);
+extern int nemoshow_sequence_update(struct showone *one);
 
 extern void nemoshow_sequence_prepare(struct showone *one, uint32_t serial);
 extern void nemoshow_sequence_dispatch(struct showone *one, double t, uint32_t serial);
@@ -65,15 +65,15 @@ extern void nemoshow_sequence_dispatch(struct showone *one, double t, uint32_t s
 extern struct showone *nemoshow_sequence_create_frame(void);
 extern void nemoshow_sequence_destroy_frame(struct showone *one);
 
-extern int nemoshow_sequence_update_frame(struct nemoshow *show, struct showone *one);
+extern int nemoshow_sequence_update_frame(struct showone *one);
 
 extern int nemoshow_sequence_set_timing(struct showone *one, double t);
 
 extern struct showone *nemoshow_sequence_create_set(void);
 extern void nemoshow_sequence_destroy_set(struct showone *one);
 
-extern int nemoshow_sequence_arrange_set(struct nemoshow *show, struct showone *one);
-extern int nemoshow_sequence_update_set(struct nemoshow *show, struct showone *one);
+extern int nemoshow_sequence_arrange_set(struct showone *one);
+extern int nemoshow_sequence_update_set(struct showone *one);
 
 extern int nemoshow_sequence_set_source(struct showone *one, struct showone *src);
 extern int nemoshow_sequence_set_attr(struct showone *one, const char *name, const char *value);

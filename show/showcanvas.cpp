@@ -113,7 +113,7 @@ static int nemoshow_canvas_compare(const void *a, const void *b)
 	return strcasecmp((const char *)a, (const char *)b);
 }
 
-int nemoshow_canvas_arrange(struct nemoshow *show, struct showone *one)
+int nemoshow_canvas_arrange(struct showone *one)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
@@ -226,8 +226,9 @@ static inline void nemoshow_canvas_update_matrix(struct nemoshow *show, struct s
 	nemotale_node_damage_all(canvas->node);
 }
 
-int nemoshow_canvas_update(struct nemoshow *show, struct showone *one)
+int nemoshow_canvas_update(struct showone *one)
 {
+	struct nemoshow *show = one->show;
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
 	if ((one->dirty & NEMOSHOW_STYLE_DIRTY) != 0)

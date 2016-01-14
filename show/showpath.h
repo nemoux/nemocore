@@ -44,8 +44,8 @@ extern void nemoshow_path_destroy(struct showone *one);
 extern void nemoshow_path_attach_one(struct showone *parent, struct showone *one);
 extern void nemoshow_path_detach_one(struct showone *parent, struct showone *one);
 
-extern int nemoshow_path_arrange(struct nemoshow *show, struct showone *one);
-extern int nemoshow_path_update(struct nemoshow *show, struct showone *one);
+extern int nemoshow_path_arrange(struct showone *one);
+extern int nemoshow_path_update(struct showone *one);
 
 static inline void nemoshow_path_set_x0(struct showone *one, double x0)
 {

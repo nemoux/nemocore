@@ -52,15 +52,16 @@ void nemoshow_camera_destroy(struct showone *one)
 	free(camera);
 }
 
-int nemoshow_camera_arrange(struct nemoshow *show, struct showone *one)
+int nemoshow_camera_arrange(struct showone *one)
 {
 	struct showcamera *camera = NEMOSHOW_CAMERA(one);
 
 	return 0;
 }
 
-int nemoshow_camera_update(struct nemoshow *show, struct showone *one)
+int nemoshow_camera_update(struct showone *one)
 {
+	struct nemoshow *show = one->show;
 	struct showcamera *camera = NEMOSHOW_CAMERA(one);
 	struct showone *child;
 	int needs_scale = 0;

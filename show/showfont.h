@@ -41,8 +41,8 @@ struct showfont {
 extern struct showone *nemoshow_font_create(void);
 extern void nemoshow_font_destroy(struct showone *one);
 
-extern int nemoshow_font_arrange(struct nemoshow *show, struct showone *one);
-extern int nemoshow_font_update(struct nemoshow *show, struct showone *one);
+extern int nemoshow_font_arrange(struct showone *one);
+extern int nemoshow_font_update(struct showone *one);
 
 extern int nemoshow_font_load(struct showone *one, const char *path);
 extern int nemoshow_font_load_fontconfig(struct showone *one, const char *fontfamily, const char *fontstyle);

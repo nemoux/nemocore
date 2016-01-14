@@ -20,6 +20,7 @@ void nemoshow_one_prepare(struct showone *one)
 
 	nemolist_init(&one->link);
 	nemolist_init(&one->children_link);
+	nemolist_init(&one->dirty_link);
 
 	nemolist_init(&one->children_list);
 	nemolist_init(&one->reference_list);
@@ -31,8 +32,6 @@ void nemoshow_one_prepare(struct showone *one)
 	one->attrs = (struct showattr **)malloc(sizeof(struct showattr *) * 4);
 	one->nattrs = 0;
 	one->sattrs = 4;
-
-	one->dirty = NEMOSHOW_ALL_DIRTY;
 }
 
 void nemoshow_one_finish(struct showone *one)
@@ -66,6 +65,7 @@ void nemoshow_one_finish(struct showone *one)
 
 	nemolist_remove(&one->link);
 	nemolist_remove(&one->children_link);
+	nemolist_remove(&one->dirty_link);
 
 	nemoshow_one_unreference_all(one);
 
@@ -74,7 +74,7 @@ void nemoshow_one_finish(struct showone *one)
 	free(one->attrs);
 }
 
-static int nemoshow_one_update_none(struct nemoshow *show, struct showone *one)
+static int nemoshow_one_update_none(struct showone *one)
 {
 	return 0;
 }
@@ -127,6 +127,40 @@ void nemoshow_one_destroy_all(struct showone *one)
 
 		free(one);
 	}
+}
+
+static inline void nemoshow_one_dirty_backwards(struct showone *one, uint32_t dirty)
+{
+	struct nemoshow *show = one->show;
+	struct showref *ref;
+
+	if (show == NULL)
+		return;
+
+	one->dirty |= dirty;
+
+	nemolist_remove(&one->dirty_link);
+	nemolist_insert_tail(&show->dirty_list, &one->dirty_link);
+
+	nemolist_for_each(ref, &one->reference_list, link)
+		nemoshow_one_dirty_backwards(ref->one, ref->dirty);
+}
+
+void nemoshow_one_dirty(struct showone *one, uint32_t dirty)
+{
+	struct nemoshow *show = one->show;
+	struct showref *ref;
+
+	if (show == NULL || dirty == 0x0 || (one->dirty & dirty) == dirty)
+		return;
+
+	one->dirty |= dirty;
+
+	if (nemolist_empty(&one->dirty_link) != 0)
+		nemolist_insert_tail(&show->dirty_list, &one->dirty_link);
+
+	nemolist_for_each(ref, &one->reference_list, link)
+		nemoshow_one_dirty_backwards(ref->one, ref->dirty);
 }
 
 static void nemoshow_one_handle_parent_destroy_signal(struct nemolistener *listener, void *data)

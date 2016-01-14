@@ -28,8 +28,8 @@ struct showcamera {
 extern struct showone *nemoshow_camera_create(void);
 extern void nemoshow_camera_destroy(struct showone *one);
 
-extern int nemoshow_camera_arrange(struct nemoshow *show, struct showone *one);
-extern int nemoshow_camera_update(struct nemoshow *show, struct showone *one);
+extern int nemoshow_camera_arrange(struct showone *one);
+extern int nemoshow_camera_update(struct showone *one);
 
 static inline void nemoshow_camera_set_sx(struct showone *one, double sx)
 {

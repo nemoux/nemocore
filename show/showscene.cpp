@@ -41,7 +41,7 @@ void nemoshow_scene_destroy(struct showone *one)
 	free(scene);
 }
 
-int nemoshow_scene_update(struct nemoshow *show, struct showone *one)
+int nemoshow_scene_update(struct showone *one)
 {
 	return 0;
 }

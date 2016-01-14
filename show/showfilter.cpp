@@ -50,7 +50,7 @@ void nemoshow_filter_destroy(struct showone *one)
 	free(filter);
 }
 
-int nemoshow_filter_arrange(struct nemoshow *show, struct showone *one)
+int nemoshow_filter_arrange(struct showone *one)
 {
 	struct showfilter *filter = NEMOSHOW_FILTER(one);
 	const char *flags = nemoobject_gets(&one->object, "flags");
@@ -62,7 +62,7 @@ int nemoshow_filter_arrange(struct nemoshow *show, struct showone *one)
 	return 0;
 }
 
-int nemoshow_filter_update(struct nemoshow *show, struct showone *one)
+int nemoshow_filter_update(struct showone *one)
 {
 	struct showfilter *filter = NEMOSHOW_FILTER(one);
 
@@ -97,6 +97,6 @@ void nemoshow_filter_set_blur(struct showone *one, const char *flags, const char
 		s = kSolid_SkBlurStyle;
 
 	NEMOSHOW_FILTER_CC(filter, filter) = SkBlurMaskFilter::Create(s, SkBlurMask::ConvertRadiusToSigma(filter->r), f);
-	
+
 	nemoshow_one_dirty(one, NEMOSHOW_FILTER_DIRTY);
 }

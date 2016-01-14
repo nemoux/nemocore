@@ -79,7 +79,7 @@ typedef enum {
 struct nemoshow;
 struct showone;
 
-typedef int (*nemoshow_one_update_t)(struct nemoshow *show, struct showone *one);
+typedef int (*nemoshow_one_update_t)(struct showone *one);
 typedef void (*nemoshow_one_destroy_t)(struct showone *one);
 typedef void (*nemoshow_one_attach_t)(struct showone *parent, struct showone *one);
 typedef void (*nemoshow_one_detach_t)(struct showone *parent, struct showone *one);
@@ -112,6 +112,7 @@ struct showone {
 
 	struct nemolist link;
 	struct nemolist children_link;
+	struct nemolist dirty_link;
 
 	uint32_t state;
 
@@ -159,6 +160,8 @@ extern struct showone *nemoshow_one_create(int type);
 extern void nemoshow_one_destroy(struct showone *one);
 extern void nemoshow_one_destroy_all(struct showone *one);
 
+extern void nemoshow_one_dirty(struct showone *one, uint32_t dirty);
+
 extern void nemoshow_one_attach_one(struct showone *parent, struct showone *one);
 extern void nemoshow_one_detach_one(struct showone *parent, struct showone *one);
 
@@ -173,19 +176,6 @@ extern struct showattr *nemoshow_one_create_attr(const char *name, const char *t
 extern void nemoshow_one_destroy_attr(struct showattr *attr);
 
 extern void nemoshow_one_dump(struct showone *one, FILE *out);
-
-static inline void nemoshow_one_dirty(struct showone *one, uint32_t dirty)
-{
-	struct showref *ref;
-
-	if (dirty == 0x0 || (one->dirty & dirty) == dirty)
-		return;
-
-	one->dirty |= dirty;
-
-	nemolist_for_each(ref, &one->reference_list, link)
-		nemoshow_one_dirty(ref->one, ref->dirty);
-}
 
 static inline void nemoshow_one_attach(struct showone *parent, struct showone *one)
 {
@@ -205,29 +195,14 @@ static inline void nemoshow_one_detach(struct showone *parent, struct showone *o
 	}
 }
 
-static inline void nemoshow_one_update(struct nemoshow *show, struct showone *one)
+static inline void nemoshow_one_update(struct showone *one)
 {
-	if (one->dirty != 0) {
-		one->update(show, one);
+	one->update(one);
 
-		one->dirty = 0;
-	}
-}
+	one->dirty = 0;
 
-static inline void nemoshow_one_update_preorder(struct nemoshow *show, struct showone *one)
-{
-	struct showone *child;
-	int i;
-
-	if (one->dirty != 0) {
-		one->update(show, one);
-
-		one->dirty = 0;
-	}
-
-	nemolist_for_each(child, &one->children_list, children_link) {
-		nemoshow_one_update_preorder(show, child);
-	}
+	nemolist_remove(&one->dirty_link);
+	nemolist_init(&one->dirty_link);
 }
 
 static inline void nemoshow_one_set_state(struct showone *one, uint32_t state)

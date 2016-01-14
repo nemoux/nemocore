@@ -63,14 +63,14 @@ void nemoshow_stop_detach_one(struct showone *parent, struct showone *one)
 	nemoshow_one_detach_one(parent, one);
 }
 
-int nemoshow_stop_arrange(struct nemoshow *show, struct showone *one)
+int nemoshow_stop_arrange(struct showone *one)
 {
 	struct showstop *stop = NEMOSHOW_STOP(one);
 
 	return 0;
 }
 
-int nemoshow_stop_update(struct nemoshow *show, struct showone *one)
+int nemoshow_stop_update(struct showone *one)
 {
 	struct showstop *stop = NEMOSHOW_STOP(one);
 
@@ -126,7 +126,7 @@ void nemoshow_shader_destroy(struct showone *one)
 	free(shader);
 }
 
-int nemoshow_shader_arrange(struct nemoshow *show, struct showone *one)
+int nemoshow_shader_arrange(struct showone *one)
 {
 	struct showshader *shader = NEMOSHOW_SHADER(one);
 	struct showstop *stop;
@@ -195,7 +195,7 @@ int nemoshow_shader_arrange(struct nemoshow *show, struct showone *one)
 	return 0;
 }
 
-int nemoshow_shader_update(struct nemoshow *show, struct showone *one)
+int nemoshow_shader_update(struct showone *one)
 {
 	struct showshader *shader = NEMOSHOW_SHADER(one);
 

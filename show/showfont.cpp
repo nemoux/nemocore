@@ -55,7 +55,7 @@ void nemoshow_font_destroy(struct showone *one)
 	free(font);
 }
 
-int nemoshow_font_arrange(struct nemoshow *show, struct showone *one)
+int nemoshow_font_arrange(struct showone *one)
 {
 	struct showfont *font = NEMOSHOW_FONT(one);
 	const char *fontfamily;
@@ -83,7 +83,7 @@ int nemoshow_font_arrange(struct nemoshow *show, struct showone *one)
 	return 0;
 }
 
-int nemoshow_font_update(struct nemoshow *show, struct showone *one)
+int nemoshow_font_update(struct showone *one)
 {
 	struct showfont *font = NEMOSHOW_FONT(one);
 

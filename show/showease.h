@@ -32,8 +32,8 @@ struct showease {
 extern struct showone *nemoshow_ease_create(void);
 extern void nemoshow_ease_destroy(struct showone *one);
 
-extern int nemoshow_ease_arrange(struct nemoshow *show, struct showone *one);
-extern int nemoshow_ease_update(struct nemoshow *show, struct showone *one);
+extern int nemoshow_ease_arrange(struct showone *one);
+extern int nemoshow_ease_update(struct showone *one);
 
 extern void nemoshow_ease_set_type(struct showone *one, int type);
 extern void nemoshow_ease_set_bezier(struct showone *one, double x0, double y0, double x1, double y1);

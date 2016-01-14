@@ -72,14 +72,14 @@ void nemoshow_matrix_detach_one(struct showone *parent, struct showone *one)
 	nemoshow_one_detach_one(parent, one);
 }
 
-int nemoshow_matrix_arrange(struct nemoshow *show, struct showone *one)
+int nemoshow_matrix_arrange(struct showone *one)
 {
 	struct showmatrix *matrix = NEMOSHOW_MATRIX(one);
 
 	return 0;
 }
 
-int nemoshow_matrix_update(struct nemoshow *show, struct showone *one)
+int nemoshow_matrix_update(struct showone *one)
 {
 	struct showmatrix *matrix = NEMOSHOW_MATRIX(one);
 
@@ -96,7 +96,7 @@ int nemoshow_matrix_update(struct nemoshow *show, struct showone *one)
 		NEMOSHOW_MATRIX_CC(matrix, matrix)->setIdentity();
 
 		nemolist_for_each(child, &one->children_list, children_link) {
-			nemoshow_matrix_update(show, child);
+			nemoshow_matrix_update(child);
 
 			NEMOSHOW_MATRIX_CC(matrix, matrix)->postConcat(
 					*NEMOSHOW_MATRIX_CC(

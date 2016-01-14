@@ -42,18 +42,18 @@ void nemoshow_cons_destroy(struct showone *one)
 	free(cons);
 }
 
-int nemoshow_cons_arrange(struct nemoshow *show, struct showone *one)
+int nemoshow_cons_arrange(struct showone *one)
 {
 	struct showcons *cons = NEMOSHOW_CONS(one);
 
 	return 0;
 }
 
-int nemoshow_cons_update(struct nemoshow *show, struct showone *one)
+int nemoshow_cons_update(struct showone *one)
 {
 	struct showcons *cons = NEMOSHOW_CONS(one);
 
-	nemoshow_update_symbol(show, cons->name, cons->value);
+	nemoshow_update_symbol(one->show, cons->name, cons->value);
 
 	return 0;
 }

@@ -49,7 +49,7 @@ static int nemoshow_ease_compare(const void *a, const void *b)
 	return strcasecmp((const char *)a, (const char *)b);
 }
 
-int nemoshow_ease_arrange(struct nemoshow *show, struct showone *one)
+int nemoshow_ease_arrange(struct showone *one)
 {
 	struct showease *ease = NEMOSHOW_EASE(one);
 
@@ -95,7 +95,7 @@ int nemoshow_ease_arrange(struct nemoshow *show, struct showone *one)
 	return 0;
 }
 
-int nemoshow_ease_update(struct nemoshow *show, struct showone *one)
+int nemoshow_ease_update(struct showone *one)
 {
 	return 0;
 }
