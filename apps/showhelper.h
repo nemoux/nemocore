@@ -46,6 +46,8 @@ extern void nemoshow_destroy_canvas_on_idle(struct nemoshow *show);
 
 extern void nemoshow_revoke_canvas(struct nemoshow *show);
 
+extern void nemoshow_dispatch_frame(struct nemoshow *show);
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

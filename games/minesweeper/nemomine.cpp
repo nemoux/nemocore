@@ -379,11 +379,11 @@ static void nemomine_dispatch_tale_event(struct nemotale *tale, struct talenode 
 
 						nemomine_rotate_pin(context, 0.0f);
 
-						nemocanvas_dispatch_frame(canvas);
+						nemoshow_dispatch_frame(context->show);
 					} else if (tag == 10002) {
 						nemomine_prepare_game(context);
 
-						nemocanvas_dispatch_frame(canvas);
+						nemoshow_dispatch_frame(context->show);
 					}
 				}
 			}
@@ -400,11 +400,11 @@ static void nemomine_dispatch_tale_event(struct nemotale *tale, struct talenode 
 							if (mone->is_bomb != 0) {
 								nemomine_finish_game(context);
 
-								nemocanvas_dispatch_frame(canvas);
+								nemoshow_dispatch_frame(context->show);
 							} else {
 								nemomine_confirm_mine(context, tag);
 
-								nemocanvas_dispatch_frame(canvas);
+								nemoshow_dispatch_frame(context->show);
 							}
 						}
 					} else if (tag == 10001) {
@@ -412,11 +412,11 @@ static void nemomine_dispatch_tale_event(struct nemotale *tale, struct talenode 
 
 						nemomine_rotate_pin(context, 45.0f);
 
-						nemocanvas_dispatch_frame(canvas);
+						nemoshow_dispatch_frame(context->show);
 					} else if (tag == 10002) {
 						nemomine_prepare_game(context);
 
-						nemocanvas_dispatch_frame(canvas);
+						nemoshow_dispatch_frame(context->show);
 					}
 				}
 
@@ -429,11 +429,11 @@ static void nemomine_dispatch_tale_event(struct nemotale *tale, struct talenode 
 						if (mone->state == NEMOMINE_NONE_STATE) {
 							nemomine_check_mine(context, tag);
 
-							nemocanvas_dispatch_frame(canvas);
+							nemoshow_dispatch_frame(context->show);
 						} else if (mone->state == NEMOMINE_CHECK_STATE) {
 							nemomine_uncheck_mine(context, tag);
 
-							nemocanvas_dispatch_frame(canvas);
+							nemoshow_dispatch_frame(context->show);
 						}
 					}
 
@@ -456,7 +456,7 @@ static void nemomine_dispatch_timer(struct nemotimer *timer, void *data)
 
 	nemoshow_item_set_text(context->time, text);
 
-	nemocanvas_dispatch_frame(canvas);
+	nemoshow_dispatch_frame(context->show);
 }
 
 static void nemomine_prepare_ui(struct minecontext *context)
@@ -722,7 +722,7 @@ int main(int argc, char *argv[])
 	nemomine_prepare_ui(context);
 	nemomine_prepare_game(context);
 
-	nemocanvas_dispatch_frame(NEMOSHOW_AT(show, canvas));
+	nemoshow_dispatch_frame(show);
 
 	nemotool_run(tool);
 

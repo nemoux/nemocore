@@ -193,3 +193,10 @@ void nemoshow_revoke_canvas(struct nemoshow *show)
 
 	nemocanvas_set_dispatch_event(scon->canvas, NULL);
 }
+
+void nemoshow_dispatch_frame(struct nemoshow *show)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+
+	nemocanvas_dispatch_frame(scon->canvas);
+}

@@ -249,7 +249,7 @@ static void nemomiro_dispatch_timer_event(struct nemotimer *timer, void *data)
 
 		miro->nmices++;
 
-		nemocanvas_dispatch_frame(NEMOSHOW_AT(miro->show, canvas));
+		nemoshow_dispatch_frame(miro->show);
 	}
 
 	nemotimer_set_timeout(miro->timer, 3000);
@@ -390,7 +390,7 @@ static void nemomiro_dispatch_pulse_timer_event(struct nemotimer *timer, void *d
 		nemoshow_transition_attach_sequence(trans, sequence);
 		nemoshow_attach_transition(miro->show, trans);
 
-		nemocanvas_dispatch_frame(NEMOSHOW_AT(miro->show, canvas));
+		nemoshow_dispatch_frame(miro->show);
 	}
 
 	nemotimer_set_timeout(timer, 100);
@@ -466,7 +466,7 @@ static void nemomiro_dispatch_show(struct miroback *miro, uint32_t duration, uin
 
 	nemoshow_set_dispatch_transition_done(miro->show, nemomiro_dispatch_show_transition_done, miro);
 
-	nemocanvas_dispatch_frame(NEMOSHOW_AT(miro->show, canvas));
+	nemoshow_dispatch_frame(miro->show);
 }
 
 static void nemomiro_dispatch_hide(struct miroback *miro, uint32_t duration, uint32_t interval)
@@ -508,7 +508,7 @@ static void nemomiro_dispatch_hide(struct miroback *miro, uint32_t duration, uin
 		nemoshow_attach_transition(miro->show, trans);
 	}
 
-	nemocanvas_dispatch_frame(NEMOSHOW_AT(miro->show, canvas));
+	nemoshow_dispatch_frame(miro->show);
 }
 
 static void nemomiro_dispatch_canvas_fullscreen(struct nemocanvas *canvas, int32_t active, int32_t opaque)

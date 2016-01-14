@@ -377,3 +377,10 @@ void nemoshow_revoke_actor(struct nemoshow *show)
 	actor->base.touch_motion = NULL;
 	actor->base.touch_frame = NULL;
 }
+
+void nemoshow_dispatch_frame(struct nemoshow *show)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+
+	nemoactor_dispatch_frame(scon->actor);
+}

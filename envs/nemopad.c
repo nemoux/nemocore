@@ -286,7 +286,7 @@ static int nemopad_dispatch_key_grab(struct talegrab *base, uint32_t type, struc
 			}
 		}
 
-		nemoactor_dispatch_frame(actor);
+		nemoshow_dispatch_frame(show);
 	} else if (type & NEMOTALE_UP_EVENT) {
 		struct nemoshow *show = pad->show;
 		struct nemoshell *shell = NEMOSHOW_AT(show, shell);
@@ -307,7 +307,7 @@ static int nemopad_dispatch_key_grab(struct talegrab *base, uint32_t type, struc
 			nemoshow_item_set_fill_color(pad->borders[tag], 0x0, 0x0, 0x0, 0x0);
 		}
 
-		nemoactor_dispatch_frame(actor);
+		nemoshow_dispatch_frame(show);
 
 		nemograb_destroy(grab);
 
@@ -421,7 +421,7 @@ static void nemopad_dispatch_tale_event(struct nemotale *tale, struct talenode *
 						}
 					}
 
-					nemoactor_dispatch_frame(actor);
+					nemoshow_dispatch_frame(show);
 
 					pad->is_upper_case = (caps_on ^ shift_on);
 				}
@@ -448,7 +448,7 @@ static void nemopad_dispatch_tale_event(struct nemotale *tale, struct talenode *
 						}
 					}
 
-					nemoactor_dispatch_frame(actor);
+					nemoshow_dispatch_frame(show);
 
 					pad->is_shift_case = shift_on;
 				}
@@ -533,7 +533,7 @@ static void nemopad_dispatch_timer(struct nemotimer *timer, void *data)
 				}
 			}
 
-			nemoactor_dispatch_frame(actor);
+			nemoshow_dispatch_frame(show);
 		}
 	}
 }
@@ -730,7 +730,7 @@ int nemopad_activate(struct nemopad *pad, double x, double y, double r)
 
 	nemoshow_render_one(show);
 
-	pad->actor = actor = NEMOSHOW_AT(show, actor);
+	actor = NEMOSHOW_AT(show, actor);
 	nemoview_attach_layer(actor->view, &shell->overlay_layer);
 	nemoview_set_state(actor->view, NEMO_VIEW_MAPPED_STATE);
 	nemoview_set_position(actor->view, x - pad->width / 2.0f, y - 0.0f);
@@ -745,7 +745,7 @@ int nemopad_activate(struct nemopad *pad, double x, double y, double r)
 
 	nemoactor_set_min_size(actor, pad->minwidth, pad->minheight);
 
-	nemoactor_dispatch_frame(actor);
+	nemoshow_dispatch_frame(show);
 
 	pad->state |= NEMOPAD_ACTIVE_STATE;
 
@@ -823,7 +823,7 @@ void nemopad_deactivate(struct nemopad *pad)
 	nemoshow_transition_set_dispatch_done(trans, nemopad_dispatch_deactivate_done);
 	nemoshow_transition_set_userdata(trans, pad);
 
-	nemoactor_dispatch_frame(actor);
+	nemoshow_dispatch_frame(show);
 
 	nemoshow_revoke_actor(show);
 }

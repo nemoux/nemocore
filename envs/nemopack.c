@@ -70,7 +70,8 @@ static void nemopack_handle_bin_resize(struct wl_listener *listener, void *data)
 	uint32_t height = pack->view->content->height;
 
 	nemoactor_dispatch_resize(actor, width, height, 0);
-	nemoactor_dispatch_frame(actor);
+
+	nemoshow_dispatch_frame(pack->show);
 }
 
 static void nemopack_handle_bin_endgrab(struct wl_listener *listener, void *data)
@@ -275,7 +276,7 @@ struct nemopack *nemopack_create(struct nemoshell *shell, struct nemoview *view,
 	nemoview_set_state(actor->view, NEMO_VIEW_MAPPED_STATE);
 	nemoview_update_transform(actor->view);
 
-	nemoactor_dispatch_frame(actor);
+	nemoshow_dispatch_frame(show);
 
 	pack->view = view;
 	pack->bin = nemoshell_get_bin(view->canvas);

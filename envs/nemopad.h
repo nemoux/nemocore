@@ -42,8 +42,6 @@ struct nemopad {
 	struct showone *borders[NEMOPAD_KEYS_MAX];
 	struct showone *keys[NEMOPAD_KEYS_MAX];
 
-	struct nemoactor *actor;
-
 	uint32_t state;
 
 	int is_upper_case;

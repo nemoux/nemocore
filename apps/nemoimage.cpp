@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
 	nemoshow_item_set_height(one, height);
 	nemoshow_item_set_bitmap(one, bitmap);
 
-	nemocanvas_dispatch_frame(NEMOSHOW_AT(show, canvas));
+	nemoshow_dispatch_frame(show);
 
 	nemotool_run(tool);
 
