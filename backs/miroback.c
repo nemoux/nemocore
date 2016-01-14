@@ -24,7 +24,7 @@
 #define NEMOMIRO_PA_SAMPLING_FRAMES			(30)
 #define NEMOMIRO_PA_BUFFER_SIZE					(NEMOMIRO_PA_SAMPLING_RATE / NEMOMIRO_PA_SAMPLING_FRAMES)
 #define	NEMOMIRO_PA_UPPER_FREQUENCY			(3520.0f)
-#define NEMOMIRO_PA_VOLUME_DECIBELS			(100)
+#define NEMOMIRO_PA_VOLUME_DECIBELS			(100.0f)
 
 struct miroback {
 	struct nemotool *tool;
@@ -373,7 +373,7 @@ static void nemomiro_dispatch_pulse_timer_event(struct nemotimer *timer, void *d
 			if (miro->nodes0[i] != miro->nodes1[i]) {
 				set0 = nemoshow_sequence_create_set();
 				nemoshow_sequence_set_source(set0, miro->bones[i]);
-				nemoshow_sequence_set_dattr(set0, "alpha", (double)miro->nodes1[i] / 100.0f, NEMOSHOW_STYLE_DIRTY);
+				nemoshow_sequence_set_dattr(set0, "alpha", (double)miro->nodes1[i] / NEMOMIRO_PA_VOLUME_DECIBELS, NEMOSHOW_STYLE_DIRTY);
 
 				nemoshow_one_attach(frame, set0);
 

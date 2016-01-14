@@ -1167,7 +1167,7 @@ void nemoshell_load_gestures(struct nemoshell *shell)
 	shell->pick.fullscreen_scale = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "fullscreen_scale", 1.5f);
 	shell->pick.scale_interval = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "scale_interval", 1.0f);
 	shell->pick.resize_interval = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "resize_interval", 50.0f);
-	shell->pick.min_distance = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "min_distance", 100.0f);
+	shell->pick.min_distance = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "min_distance", 50.0f);
 
 	shell->bin.min_width = nemoitem_get_iattr_named(shell->configs, "//nemoshell/bin", "min_width", 0);
 	shell->bin.min_height = nemoitem_get_iattr_named(shell->configs, "//nemoshell/bin", "min_height", 0);
