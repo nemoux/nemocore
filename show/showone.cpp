@@ -133,6 +133,9 @@ static void nemoshow_one_handle_parent_destroy_signal(struct nemolistener *liste
 {
 	struct showone *one = (struct showone *)container_of(listener, struct showone, parent_destroy_listener);
 
+	nemolist_remove(&one->children_link);
+	nemolist_init(&one->children_link);
+
 	one->parent = NULL;
 
 	nemolist_remove(&one->parent_destroy_listener.link);
