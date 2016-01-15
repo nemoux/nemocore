@@ -42,7 +42,8 @@ void nemoshow_one_finish(struct showone *one)
 	nemosignal_emit(&one->destroy_signal, one);
 
 	nemolist_for_each_safe(ref, nref, &one->reference_list, link) {
-		ref->one->refs[ref->index] = NULL;
+		if (ref->index >= 0)
+			ref->one->refs[ref->index] = NULL;
 
 		nemolist_remove(&ref->link);
 
