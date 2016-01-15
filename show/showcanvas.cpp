@@ -167,10 +167,13 @@ void nemoshow_canvas_set_event(struct showone *one, uint32_t event)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
-	if (event == 0)
+	if (event == 0) {
 		nemotale_node_set_pick_type(canvas->node, NEMOTALE_PICK_NO_TYPE);
-	else
+	} else {
+		nemotale_node_set_pick_type(canvas->node, NEMOTALE_PICK_DEFAULT_TYPE);
+
 		nemotale_node_set_id(canvas->node, event);
+	}
 
 	canvas->event = event;
 }
