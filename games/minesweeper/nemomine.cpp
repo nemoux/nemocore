@@ -640,7 +640,6 @@ int main(int argc, char *argv[])
 		snprintf(name, sizeof(name), NEMOUX_MINESWEEPER_RESOURCES "/mine-%d.svg", i);
 
 		context->numbers[i] = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
-		nemoshow_attach_one(show, one);
 		nemoshow_item_set_x(one, 2.0f);
 		nemoshow_item_set_y(one, 2.0f);
 		nemoshow_item_set_width(one, size - 4.0f);
@@ -649,7 +648,6 @@ int main(int argc, char *argv[])
 	}
 
 	context->bomb = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
-	nemoshow_attach_one(show, one);
 	nemoshow_item_set_x(one, 2.0f);
 	nemoshow_item_set_y(one, 2.0f);
 	nemoshow_item_set_width(one, size - 4.0f);
@@ -657,7 +655,6 @@ int main(int argc, char *argv[])
 	nemoshow_item_load_svg(one, NEMOUX_MINESWEEPER_RESOURCES "/mine-bomb.svg");
 
 	context->flag = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
-	nemoshow_attach_one(show, one);
 	nemoshow_item_set_x(one, 2.0f);
 	nemoshow_item_set_y(one, 2.0f);
 	nemoshow_item_set_width(one, size - 4.0f);
