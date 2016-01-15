@@ -251,11 +251,8 @@ static int nemoshow_load_one(struct nemoshow *show, struct showone *parent, stru
 	nemolist_for_each(child, &node->children, link) {
 		one = nemoshow_create_one(show, child);
 		if (one != NULL) {
-			nemolist_insert_tail(&show->one_list, &one->link);
-			one->show = show;
-
-			nemolist_insert_tail(&parent->children_list, &one->children_link);
-			one->parent = parent;
+			nemoshow_attach_one(show, one);
+			nemoshow_one_attach(parent, one);
 		}
 	}
 
@@ -270,17 +267,14 @@ static int nemoshow_load_item(struct nemoshow *show, struct showone *item, struc
 	nemolist_for_each(child, &node->children, link) {
 		one = nemoshow_create_one(show, child);
 		if (one != NULL) {
-			nemolist_insert_tail(&show->one_list, &one->link);
-			one->show = show;
+			nemoshow_attach_one(show, one);
+			nemoshow_one_attach(item, one);
 
 			if (one->type == NEMOSHOW_MATRIX_TYPE) {
 				nemoshow_load_matrix(show, one, child);
 			} else if (one->type == NEMOSHOW_ITEM_TYPE) {
 				nemoshow_load_item(show, one, child);
 			}
-
-			nemolist_insert_tail(&item->children_list, &one->children_link);
-			one->parent = item;
 		}
 	}
 
@@ -296,21 +290,16 @@ static int nemoshow_load_canvas(struct nemoshow *show, struct showone *canvas, s
 	nemolist_for_each(child, &node->children, link) {
 		one = nemoshow_create_one(show, child);
 		if (one != NULL) {
-			nemolist_insert_tail(&show->one_list, &one->link);
-			one->show = show;
+			nemoshow_attach_one(show, one);
+			nemoshow_one_attach(canvas, one);
 
 			if (one->type == NEMOSHOW_ITEM_TYPE) {
 				nemoshow_load_item(show, one, child);
-
-				nemoshow_item_set_canvas(one, canvas);
 			} else if (one->type == NEMOSHOW_SHADER_TYPE) {
 				nemoshow_load_one(show, one, child);
 			} else if (one->type == NEMOSHOW_DEFS_TYPE) {
 				nemoshow_load_one(show, one, child);
 			}
-
-			nemolist_insert_tail(&canvas->children_list, &one->children_link);
-			one->parent = canvas;
 		}
 	}
 
@@ -326,15 +315,12 @@ static int nemoshow_load_matrix(struct nemoshow *show, struct showone *matrix, s
 	nemolist_for_each(child, &node->children, link) {
 		one = nemoshow_create_one(show, child);
 		if (one != NULL) {
-			nemolist_insert_tail(&show->one_list, &one->link);
-			one->show = show;
+			nemoshow_attach_one(show, one);
+			nemoshow_one_attach(matrix, one);
 
 			if (one->sub == NEMOSHOW_MATRIX_MATRIX) {
 				nemoshow_load_matrix(show, one, child);
 			}
-
-			nemolist_insert_tail(&matrix->children_list, &one->children_link);
-			one->parent = matrix;
 		}
 	}
 
@@ -350,20 +336,16 @@ static int nemoshow_load_scene(struct nemoshow *show, struct showone *scene, str
 	nemolist_for_each(child, &node->children, link) {
 		one = nemoshow_create_one(show, child);
 		if (one != NULL) {
-			nemolist_insert_tail(&show->one_list, &one->link);
-			one->show = show;
+			nemoshow_attach_one(show, one);
+			nemoshow_one_attach(scene, one);
 
 			if (one->type == NEMOSHOW_CANVAS_TYPE) {
 				nemoshow_load_canvas(show, one, child);
-
-				one->parent = scene;
 			} else if (one->type == NEMOSHOW_MATRIX_TYPE) {
 				nemoshow_load_matrix(show, one, child);
 			} else if (one->type == NEMOSHOW_CAMERA_TYPE) {
 				nemoshow_load_one(show, one, child);
 			}
-
-			nemolist_insert_tail(&scene->children_list, &one->children_link);
 		}
 	}
 
@@ -379,10 +361,8 @@ static int nemoshow_load_frame(struct nemoshow *show, struct showone *frame, str
 	nemolist_for_each(child, &node->children, link) {
 		one = nemoshow_create_one(show, child);
 		if (one != NULL) {
-			nemolist_insert_tail(&show->one_list, &one->link);
-			one->show = show;
-
-			nemolist_insert_tail(&frame->children_list, &one->children_link);
+			nemoshow_attach_one(show, one);
+			nemoshow_one_attach(frame, one);
 		}
 	}
 
@@ -398,14 +378,12 @@ static int nemoshow_load_sequence(struct nemoshow *show, struct showone *sequenc
 	nemolist_for_each(child, &node->children, link) {
 		one = nemoshow_create_one(show, child);
 		if (one != NULL) {
-			nemolist_insert_tail(&show->one_list, &one->link);
-			one->show = show;
+			nemoshow_attach_one(show, one);
+			nemoshow_one_attach(sequence, one);
 
 			if (one->type == NEMOSHOW_FRAME_TYPE) {
 				nemoshow_load_frame(show, one, child);
 			}
-
-			nemolist_insert_tail(&sequence->children_list, &one->children_link);
 		}
 	}
 
@@ -420,8 +398,7 @@ static int nemoshow_load_show(struct nemoshow *show, struct xmlnode *node)
 	nemolist_for_each(child, &node->children, link) {
 		one = nemoshow_create_one(show, child);
 		if (one != NULL) {
-			nemolist_insert_tail(&show->one_list, &one->link);
-			one->show = show;
+			nemoshow_attach_one(show, one);
 
 			if (one->type == NEMOSHOW_SCENE_TYPE) {
 				nemoshow_load_scene(show, one, child);
@@ -795,7 +772,7 @@ void nemoshow_attach_one(struct nemoshow *show, struct showone *one)
 {
 	nemolist_insert_tail(&show->one_list, &one->link);
 	one->show = show;
-	
+
 	nemoshow_one_dirty(one, NEMOSHOW_ALL_DIRTY);
 }
 
