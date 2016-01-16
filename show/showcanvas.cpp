@@ -551,11 +551,7 @@ static inline void nemoshow_canvas_render_item(struct showcanvas *canvas, SkCanv
 static inline int nemoshow_canvas_check_one(struct showcanvas *canvas, struct showone *one)
 {
 	if (one->sub != NEMOSHOW_GROUP_ITEM) {
-		SkIRect boundingbox = SkIRect::MakeXYWH(
-				floor(one->x * canvas->viewport.sx),
-				floor(one->y * canvas->viewport.sy),
-				ceil(one->width * canvas->viewport.sx),
-				ceil(one->height * canvas->viewport.sy));
+		SkIRect boundingbox = SkIRect::MakeXYWH(one->sx, one->sy, one->sw, one->sh);
 
 		return NEMOSHOW_CANVAS_CC(canvas, damage)->intersects(boundingbox);
 	}
@@ -668,6 +664,7 @@ int nemoshow_canvas_set_viewport(struct nemoshow *show, struct showone *one, dou
 		NEMOSHOW_CANVAS_CC(canvas, canvas) = new SkCanvas(NEMOSHOW_CANVAS_CC(canvas, device));
 
 		nemoshow_canvas_damage_all(one);
+		nemoshow_canvas_dirty_all(one, NEMOSHOW_SHAPE_DIRTY);
 	} else if (one->sub == NEMOSHOW_CANVAS_PIXMAN_TYPE) {
 		canvas->viewport.sx = sx;
 		canvas->viewport.sy = sy;
@@ -693,36 +690,15 @@ int nemoshow_canvas_set_viewport(struct nemoshow *show, struct showone *one, dou
 	return 0;
 }
 
-void nemoshow_canvas_damage_region(struct showone *one, int32_t x, int32_t y, int32_t width, int32_t height)
-{
-	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
-
-	NEMOSHOW_CANVAS_CC(canvas, damage)->op(
-			SkIRect::MakeXYWH(
-				floor(x * canvas->viewport.sx),
-				floor(y * canvas->viewport.sy),
-				ceil(width * canvas->viewport.sx),
-				ceil(height * canvas->viewport.sy)),
-			SkRegion::kUnion_Op);
-
-	nemotale_node_damage(canvas->node, x, y, width, height);
-
-	canvas->needs_redraw = 1;
-}
-
 void nemoshow_canvas_damage_one(struct showone *one, struct showone *child)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
 	NEMOSHOW_CANVAS_CC(canvas, damage)->op(
-			SkIRect::MakeXYWH(
-				floor(child->x * canvas->viewport.sx),
-				floor(child->y * canvas->viewport.sy),
-				ceil(child->width * canvas->viewport.sx),
-				ceil(child->height * canvas->viewport.sy)),
+			SkIRect::MakeXYWH(child->sx, child->sy, child->sw, child->sh),
 			SkRegion::kUnion_Op);
 
-	nemotale_node_damage(canvas->node, child->x, child->y, child->width, child->height);
+	nemotale_node_damage(canvas->node, child->x, child->y, child->w, child->h);
 
 	canvas->needs_redraw = 1;
 }
@@ -735,6 +711,14 @@ void nemoshow_canvas_damage_all(struct showone *one)
 
 	canvas->needs_redraw = 1;
 	canvas->needs_full_redraw = 1;
+}
+
+void nemoshow_canvas_dirty_all(struct showone *one, uint32_t dirty)
+{
+	struct showone *child;
+
+	nemoshow_children_for_each(child, one)
+		nemoshow_one_dirty(child, dirty);
 }
 
 void nemoshow_canvas_translate(struct showone *one, double tx, double ty)

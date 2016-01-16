@@ -91,9 +91,9 @@ extern void nemoshow_canvas_render_back(struct nemoshow *show, struct showone *o
 
 extern int nemoshow_canvas_set_viewport(struct nemoshow *show, struct showone *one, double sx, double sy);
 
-extern void nemoshow_canvas_damage_region(struct showone *one, int32_t x, int32_t y, int32_t width, int32_t height);
 extern void nemoshow_canvas_damage_one(struct showone *one, struct showone *child);
 extern void nemoshow_canvas_damage_all(struct showone *one);
+extern void nemoshow_canvas_dirty_all(struct showone *one, uint32_t dirty);
 
 extern void nemoshow_canvas_translate(struct showone *one, double tx, double ty);
 extern void nemoshow_canvas_rotate(struct showone *one, double ro);

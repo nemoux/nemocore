@@ -642,6 +642,7 @@ static inline void nemoshow_item_update_shape(struct nemoshow *show, struct show
 void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(item->canvas);
 	SkRect box;
 	double outer;
 
@@ -740,8 +741,12 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 
 	one->x = MAX(floor(box.x()), 0);
 	one->y = MAX(floor(box.y()), 0);
-	one->width = ceil(box.width());
-	one->height = ceil(box.height());
+	one->w = ceil(box.width());
+	one->h = ceil(box.height());
+	one->sx = floor(one->x * canvas->viewport.sx);
+	one->sy = floor(one->y * canvas->viewport.sy);
+	one->sw = ceil(one->w * canvas->viewport.sx);
+	one->sh = ceil(one->h * canvas->viewport.sy);
 	one->outer = outer;
 }
 

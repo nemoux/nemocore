@@ -143,7 +143,8 @@ struct showone {
 
 	uint32_t dirty;
 
-	int32_t x, y, width, height;
+	int32_t x, y, w, h;
+	int32_t sx, sy, sw, sh;
 	int32_t outer;
 
 	int32_t x0, y0, x1, y1;
