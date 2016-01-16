@@ -63,6 +63,9 @@ struct nemoshow {
 	void *userdata;
 };
 
+#define nemoshow_for_each(one, show)	\
+	nemolist_for_each(one, &((show)->one_list), link)
+
 extern void nemoshow_initialize(void);
 extern void nemoshow_finalize(void);
 

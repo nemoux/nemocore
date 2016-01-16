@@ -153,6 +153,9 @@ struct showone {
 
 #define NEMOSHOW_REF(one, index)			(one->refs[index] != NULL ? one->refs[index]->src : NULL)
 
+#define nemoshow_children_for_each(child, one)	\
+	nemolist_for_each(child, &((one)->children_list), children_link)
+
 extern void nemoshow_one_prepare(struct showone *one);
 extern void nemoshow_one_finish(struct showone *one);
 
