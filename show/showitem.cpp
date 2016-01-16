@@ -771,6 +771,33 @@ int nemoshow_item_update(struct showone *one)
 		nemoshow_item_update_path(show, one);
 	if ((one->dirty & NEMOSHOW_MATRIX_DIRTY) != 0)
 		nemoshow_item_update_matrix(show, one);
+	if ((one->dirty & NEMOSHOW_SHAPE_DIRTY) != 0)
+		nemoshow_item_update_shape(show, one);
+
+	return 0;
+}
+
+int nemoshow_item_update_with_canvas(struct showone *one)
+{
+	struct nemoshow *show = one->show;
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	if ((one->dirty & NEMOSHOW_URI_DIRTY) != 0)
+		nemoshow_item_update_uri(show, one);
+	if ((one->dirty & NEMOSHOW_STYLE_DIRTY) != 0)
+		nemoshow_item_update_style(show, one);
+	if ((one->dirty & NEMOSHOW_FILTER_DIRTY) != 0)
+		nemoshow_item_update_filter(show, one);
+	if ((one->dirty & NEMOSHOW_SHADER_DIRTY) != 0)
+		nemoshow_item_update_shader(show, one);
+	if ((one->dirty & NEMOSHOW_FONT_DIRTY) != 0)
+		nemoshow_item_update_font(show, one);
+	if ((one->dirty & NEMOSHOW_TEXT_DIRTY) != 0)
+		nemoshow_item_update_text(show, one);
+	if ((one->dirty & NEMOSHOW_PATH_DIRTY) != 0)
+		nemoshow_item_update_path(show, one);
+	if ((one->dirty & NEMOSHOW_MATRIX_DIRTY) != 0)
+		nemoshow_item_update_matrix(show, one);
 
 	if ((one->dirty & NEMOSHOW_SHAPE_DIRTY) != 0) {
 		nemoshow_canvas_damage_one(item->canvas, one);
@@ -902,6 +929,8 @@ void nemoshow_item_attach_one(struct showone *parent, struct showone *one)
 	}
 
 	if (item->canvas != NULL) {
+		one->update = nemoshow_item_update_with_canvas;
+
 		item->canvas_destroy_listener.notify = nemoshow_item_handle_canvas_destroy_signal;
 		nemosignal_add(&item->canvas->destroy_signal, &item->canvas_destroy_listener);
 	}
@@ -918,6 +947,8 @@ void nemoshow_item_detach_one(struct showone *parent, struct showone *one)
 
 	if (item->canvas == parent) {
 		item->canvas = NULL;
+
+		one->update = nemoshow_item_update;
 
 		nemolist_remove(&item->canvas_destroy_listener.link);
 		nemolist_init(&item->canvas_destroy_listener.link);

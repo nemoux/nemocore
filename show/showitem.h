@@ -106,6 +106,7 @@ extern void nemoshow_item_destroy(struct showone *one);
 
 extern int nemoshow_item_arrange(struct showone *one);
 extern int nemoshow_item_update(struct showone *one);
+extern int nemoshow_item_update_with_canvas(struct showone *one);
 
 extern void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one);
 

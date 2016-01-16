@@ -512,9 +512,20 @@ static inline void nemoshow_canvas_render_item_group(struct showcanvas *canvas, 
 	}
 }
 
+static inline int nemoshow_canvas_check_one(struct showcanvas *canvas, struct showone *one)
+{
+	if (one->sub != NEMOSHOW_GROUP_ITEM) {
+		SkIRect boundingbox = SkIRect::MakeXYWH(one->sx, one->sy, one->sw, one->sh);
+
+		return NEMOSHOW_CANVAS_CC(canvas, damage)->intersects(boundingbox);
+	}
+
+	return 1;
+}
+
 typedef void (*nemoshow_canvas_render_t)(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one);
 
-static inline void nemoshow_canvas_render_item(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one)
+static inline void nemoshow_canvas_render_one(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one)
 {
 	static nemoshow_canvas_render_t renderers[NEMOSHOW_LAST_ITEM] = {
 		nemoshow_canvas_render_item_none,
@@ -535,41 +546,17 @@ static inline void nemoshow_canvas_render_item(struct showcanvas *canvas, SkCanv
 		nemoshow_canvas_render_item_group
 	};
 	struct showitem *item = NEMOSHOW_ITEM(one);
-
-	if (item->has_anchor != 0) {
-		_canvas->save();
-		_canvas->translate(-item->width * item->ax, -item->height * item->ay);
-
-		renderers[one->sub](canvas, _canvas, one);
-
-		_canvas->restore();
-	} else {
-		renderers[one->sub](canvas, _canvas, one);
-	}
-}
-
-static inline int nemoshow_canvas_check_one(struct showcanvas *canvas, struct showone *one)
-{
-	if (one->sub != NEMOSHOW_GROUP_ITEM) {
-		SkIRect boundingbox = SkIRect::MakeXYWH(one->sx, one->sy, one->sw, one->sh);
-
-		return NEMOSHOW_CANVAS_CC(canvas, damage)->intersects(boundingbox);
-	}
-
-	return 1;
-}
-
-static inline void nemoshow_canvas_render_one(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one)
-{
-	struct showitem *item = NEMOSHOW_ITEM(one);
 	struct showitem *clip = NEMOSHOW_REF(one, NEMOSHOW_CLIP_REF) == NULL ? NULL : NEMOSHOW_ITEM(NEMOSHOW_REF(one, NEMOSHOW_CLIP_REF));
-	int has_context = item->transform != 0 || clip != NULL;
+	int has_context = item->transform != 0 || item->has_anchor != 0 || clip != NULL;
 
 	if (has_context != 0)
 		_canvas->save();
 
 	if (item->transform != 0)
 		_canvas->concat(*NEMOSHOW_ITEM_CC(item, modelview));
+
+	if (item->has_anchor != 0)
+		_canvas->translate(-item->width * item->ax, -item->height * item->ay);
 
 	if (clip != NULL) {
 		if (clip->transform == 0) {
@@ -589,7 +576,7 @@ static inline void nemoshow_canvas_render_one(struct showcanvas *canvas, SkCanva
 		}
 	}
 
-	nemoshow_canvas_render_item(canvas, _canvas, one);
+	renderers[one->sub](canvas, _canvas, one);
 
 	if (has_context != 0)
 		_canvas->restore();
