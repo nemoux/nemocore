@@ -20,7 +20,7 @@ static void nemoshow_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t w
 		return;
 
 	if (width < nemotale_get_minimum_width(tale) || height < nemotale_get_minimum_height(tale)) {
-		nemotool_exit(scon->tool);
+		nemocanvas_dispatch_destroy(canvas);
 		return;
 	}
 
@@ -89,6 +89,11 @@ static int nemoshow_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t ty
 	return 0;
 }
 
+static void nemoshow_dispatch_canvas_destroy(struct nemocanvas *canvas)
+{
+	nemotool_exit(canvas->tool);
+}
+
 static void nemoshow_dispatch_timer(struct nemotimer *timer, void *data)
 {
 	struct showcontext *scon = (struct showcontext *)data;
@@ -129,6 +134,7 @@ struct nemoshow *nemoshow_create_canvas(struct nemotool *tool, int32_t width, in
 	nemocanvas_set_dispatch_resize(scon->canvas, nemoshow_dispatch_canvas_resize);
 	nemocanvas_set_dispatch_frame(scon->canvas, nemoshow_dispatch_canvas_frame);
 	nemocanvas_set_dispatch_event(scon->canvas, nemoshow_dispatch_canvas_event);
+	nemocanvas_set_dispatch_destroy(scon->canvas, nemoshow_dispatch_canvas_destroy);
 
 	scon->tale = nemotale_create_gl();
 	nemotale_set_backend(scon->tale,

@@ -377,6 +377,11 @@ void nemoactor_set_dispatch_frame(struct nemoactor *actor, nemoactor_dispatch_fr
 	actor->dispatch_frame = dispatch;
 }
 
+void nemoactor_set_dispatch_destroy(struct nemoactor *actor, nemoactor_dispatch_destroy_t dispatch)
+{
+	actor->dispatch_destroy = dispatch;
+}
+
 int nemoactor_dispatch_resize(struct nemoactor *actor, int32_t width, int32_t height, int32_t fixed)
 {
 	if (actor->dispatch_resize != NULL)
@@ -408,6 +413,12 @@ void nemoactor_dispatch_frame(struct nemoactor *actor)
 	if (wl_list_empty(&actor->frame_link)) {
 		actor->dispatch_frame(actor, 0);
 	}
+}
+
+void nemoactor_dispatch_destroy(struct nemoactor *actor)
+{
+	if (actor->dispatch_destroy != NULL)
+		actor->dispatch_destroy(actor);
 }
 
 void nemoactor_feedback(struct nemoactor *actor)

@@ -566,6 +566,11 @@ void nemocanvas_set_dispatch_screen(struct nemocanvas *canvas, nemocanvas_dispat
 	canvas->dispatch_screen = dispatch;
 }
 
+void nemocanvas_set_dispatch_destroy(struct nemocanvas *canvas, nemocanvas_dispatch_destroy_t dispatch)
+{
+	canvas->dispatch_destroy = dispatch;
+}
+
 static void presentation_feedback_sync_output(void *data, struct presentation_feedback *feedback, struct wl_output *output)
 {
 }
@@ -631,6 +636,12 @@ void nemocanvas_dispatch_frame_async(struct nemocanvas *canvas)
 	uint64_t v = 1;
 
 	write(canvas->eventfd, &v, sizeof(uint64_t));
+}
+
+void nemocanvas_dispatch_destroy(struct nemocanvas *canvas)
+{
+	if (canvas->dispatch_destroy != NULL)
+		canvas->dispatch_destroy(canvas);
 }
 
 void nemocanvas_attach_queue(struct nemocanvas *canvas, struct nemoqueue *queue)

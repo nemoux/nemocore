@@ -178,6 +178,11 @@ static int nemoshow_dispatch_actor_resize(struct nemoactor *actor, int32_t width
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct talefbo *fbo = (struct talefbo *)nemotale_get_backend(tale);
 
+	if (width < nemotale_get_minimum_width(tale) || height < nemotale_get_minimum_height(tale)) {
+		nemoactor_dispatch_destroy(actor);
+		return 0;
+	}
+
 	nemoactor_resize_gl(actor, width, height);
 
 	nemoshow_set_size(show, width, height);
