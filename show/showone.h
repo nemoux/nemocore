@@ -155,6 +155,16 @@ struct showone {
 
 #define nemoshow_children_for_each(child, one)	\
 	nemolist_for_each(child, &((one)->children_list), children_link)
+#define nemoshow_children_for_each_reverse(child, one)	\
+	nemolist_for_each_reverse(child, &((one)->children_list), children_link)
+#define nemoshow_children_for_each_safe(child, tmp, one)	\
+	nemolist_for_each_safe(child, tmp, &((one)->children_list), children_link)
+#define nemoshow_children0(one)	\
+	nemolist_node0(&((one)->children_list), struct showone, children_link)
+#define nemoshow_children_next(one, child)	\
+	nemolist_next(&((one)->children_list), child, struct showone, children_link)
+#define nemoshow_children_empty(one)	\
+	nemolist_empty(&((one)->children_list))
 
 extern void nemoshow_one_prepare(struct showone *one);
 extern void nemoshow_one_finish(struct showone *one);

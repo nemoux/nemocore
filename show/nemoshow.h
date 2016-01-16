@@ -65,6 +65,8 @@ struct nemoshow {
 
 #define nemoshow_for_each(one, show)	\
 	nemolist_for_each(one, &((show)->one_list), link)
+#define nemoshow_for_each_reverse(one, show)	\
+	nemolist_for_each_reverse(one, &((show)->one_list), link)
 
 extern void nemoshow_initialize(void);
 extern void nemoshow_finalize(void);

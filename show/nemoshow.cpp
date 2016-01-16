@@ -91,7 +91,7 @@ struct showone *nemoshow_search_one(struct nemoshow *show, const char *id)
 	if (id == NULL || id[0] == '\0')
 		return NULL;
 
-	nemolist_for_each(one, &show->one_list, link) {
+	nemoshow_for_each(one, show) {
 		if (strcmp(one->id, id) == 0)
 			return one;
 	}
@@ -443,7 +443,7 @@ void nemoshow_update_expression(struct nemoshow *show)
 	struct showattr *attr;
 	int i;
 
-	nemolist_for_each(one, &show->one_list, link) {
+	nemoshow_for_each(one, show) {
 		uint32_t dirty = 0x0;
 
 		for (i = 0; i < one->nattrs; i++) {
@@ -475,7 +475,7 @@ void nemoshow_update_one_expression(struct nemoshow *show, struct showone *one)
 		dirty |= attr->dirty;
 	}
 
-	nemolist_for_each(child, &one->children_list, children_link)
+	nemoshow_children_for_each(child, one)
 		nemoshow_update_one_expression(show, child);
 
 	nemoshow_one_dirty(one, dirty);
@@ -494,7 +494,7 @@ void nemoshow_update_one_expression_without_dirty(struct nemoshow *show, struct 
 				nemoshow_expr_dispatch_expression(show->expr, attr->text));
 	}
 
-	nemolist_for_each(child, &one->children_list, children_link)
+	nemoshow_children_for_each(child, one)
 		nemoshow_update_one_expression_without_dirty(show, child);
 }
 
@@ -502,7 +502,7 @@ void nemoshow_arrange_one(struct nemoshow *show)
 {
 	struct showone *one;
 
-	nemolist_for_each(one, &show->one_list, link) {
+	nemoshow_for_each(one, show) {
 		if (nemoshow_one_has_state(one, NEMOSHOW_ARRANGE_STATE) != 0)
 			continue;
 
@@ -576,7 +576,7 @@ void nemoshow_render_one(struct nemoshow *show)
 		nemoshow_one_update(one);
 	}
 
-	nemolist_for_each(one, &scene->children_list, children_link) {
+	nemoshow_children_for_each(one, scene) {
 		if (one->type == NEMOSHOW_CANVAS_TYPE) {
 			canvas = NEMOSHOW_CANVAS(one);
 
@@ -615,7 +615,7 @@ int nemoshow_set_scene(struct nemoshow *show, struct showone *one)
 
 	scene = NEMOSHOW_SCENE(one);
 
-	nemolist_for_each(child, &one->children_list, children_link) {
+	nemoshow_children_for_each(child, one) {
 		if (child->type == NEMOSHOW_CANVAS_TYPE) {
 			canvas = NEMOSHOW_CANVAS(child);
 
@@ -676,7 +676,7 @@ int nemoshow_set_size(struct nemoshow *show, uint32_t width, uint32_t height)
 
 	one = show->scene;
 
-	nemolist_for_each(child, &one->children_list, children_link) {
+	nemoshow_children_for_each(child, one) {
 		if (child->type == NEMOSHOW_CANVAS_TYPE) {
 			nemoshow_canvas_set_viewport(show, child,
 					(double)show->width / (double)NEMOSHOW_SCENE_AT(one, width) * show->sx,
@@ -703,7 +703,7 @@ int nemoshow_set_scale(struct nemoshow *show, double sx, double sy)
 
 	one = show->scene;
 
-	nemolist_for_each(child, &one->children_list, children_link) {
+	nemoshow_children_for_each(child, one) {
 		if (child->type == NEMOSHOW_CANVAS_TYPE) {
 			nemoshow_canvas_set_viewport(show, child,
 					(double)show->width / (double)NEMOSHOW_SCENE_AT(one, width) * show->sx,
@@ -761,7 +761,7 @@ void nemoshow_flush_canvas_all(struct nemoshow *show)
 
 	one = show->scene;
 
-	nemolist_for_each(child, &one->children_list, children_link) {
+	nemoshow_children_for_each(child, one) {
 		if (child->type == NEMOSHOW_CANVAS_TYPE) {
 			nemotale_node_damage_all(NEMOSHOW_CANVAS_AT(child, node));
 		}
@@ -874,7 +874,7 @@ void nemoshow_dump_all(struct nemoshow *show, FILE *out)
 {
 	struct showone *one;
 
-	nemolist_for_each(one, &show->one_list, link) {
+	nemoshow_for_each(one, show) {
 		nemoshow_one_dump(one, out);
 	}
 }

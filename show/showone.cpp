@@ -118,7 +118,7 @@ void nemoshow_one_destroy_all(struct showone *one)
 	if (one->state & NEMOSHOW_RECYCLE_STATE)
 		return;
 
-	nemolist_for_each_safe(child, nchild, &one->children_list, children_link)
+	nemoshow_children_for_each_safe(child, nchild, one)
 		nemoshow_one_destroy_all(child);
 
 	if (one->destroy != NULL) {
@@ -180,7 +180,6 @@ static void nemoshow_one_handle_parent_destroy_signal(struct nemolistener *liste
 void nemoshow_one_attach_one(struct showone *parent, struct showone *one)
 {
 	nemolist_insert_tail(&parent->children_list, &one->children_link);
-
 	one->parent = parent;
 
 	one->parent_destroy_listener.notify = nemoshow_one_handle_parent_destroy_signal;
@@ -330,6 +329,6 @@ void nemoshow_one_dump(struct showone *one, FILE *out)
 		fprintf(out, "  %s = <%s>\n", attr->name, attr->text);
 	}
 
-	nemolist_for_each(child, &one->children_list, children_link)
+	nemoshow_children_for_each(child, one)
 		nemoshow_one_dump(child, out);
 }

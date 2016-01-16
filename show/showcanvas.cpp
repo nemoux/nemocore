@@ -483,12 +483,12 @@ static inline void nemoshow_canvas_render_item_svg(struct showcanvas *canvas, Sk
 	_canvas->concat(*NEMOSHOW_ITEM_CC(item, viewbox));
 
 	if (canvas->needs_full_redraw == 0) {
-		nemolist_for_each(child, &one->children_list, children_link) {
+		nemoshow_children_for_each(child, one) {
 			if (nemoshow_canvas_check_one(canvas, child) != 0)
 				nemoshow_canvas_render_one(canvas, _canvas, child);
 		}
 	} else {
-		nemolist_for_each(child, &one->children_list, children_link) {
+		nemoshow_children_for_each(child, one) {
 			nemoshow_canvas_render_one(canvas, _canvas, child);
 		}
 	}
@@ -501,12 +501,12 @@ static inline void nemoshow_canvas_render_item_group(struct showcanvas *canvas, 
 	struct showone *child;
 
 	if (canvas->needs_full_redraw == 0) {
-		nemolist_for_each(child, &one->children_list, children_link) {
+		nemoshow_children_for_each(child, one) {
 			if (nemoshow_canvas_check_one(canvas, child) != 0)
 				nemoshow_canvas_render_one(canvas, _canvas, child);
 		}
 	} else {
-		nemolist_for_each(child, &one->children_list, children_link) {
+		nemoshow_children_for_each(child, one) {
 			nemoshow_canvas_render_one(canvas, _canvas, child);
 		}
 	}
@@ -611,7 +611,7 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 		NEMOSHOW_CANVAS_CC(canvas, canvas)->clear(SK_ColorTRANSPARENT);
 		NEMOSHOW_CANVAS_CC(canvas, canvas)->scale(canvas->viewport.sx, canvas->viewport.sy);
 
-		nemolist_for_each(child, &one->children_list, children_link) {
+		nemoshow_children_for_each(child, one) {
 			if (nemoshow_canvas_check_one(canvas, child) != 0)
 				nemoshow_canvas_render_one(canvas, NEMOSHOW_CANVAS_CC(canvas, canvas), child);
 		}
@@ -622,7 +622,7 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 		NEMOSHOW_CANVAS_CC(canvas, canvas)->clear(SK_ColorTRANSPARENT);
 		NEMOSHOW_CANVAS_CC(canvas, canvas)->scale(canvas->viewport.sx, canvas->viewport.sy);
 
-		nemolist_for_each(child, &one->children_list, children_link) {
+		nemoshow_children_for_each(child, one) {
 			nemoshow_canvas_render_one(canvas, NEMOSHOW_CANVAS_CC(canvas, canvas), child);
 		}
 
@@ -780,7 +780,7 @@ static inline struct showone *nemoshow_canvas_pick_one_in(struct showone *one, d
 {
 	struct showone *child;
 
-	nemolist_for_each_reverse(child, &one->children_list, children_link) {
+	nemoshow_children_for_each_reverse(child, one) {
 		if (child->sub == NEMOSHOW_GROUP_ITEM) {
 			struct showone *pick;
 

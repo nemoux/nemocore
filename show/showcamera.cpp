@@ -72,7 +72,7 @@ int nemoshow_camera_update(struct showone *one)
 	camera->sx = 1.0f;
 	camera->sy = 1.0f;
 
-	nemolist_for_each(child, &one->children_list, children_link) {
+	nemoshow_children_for_each(child, one) {
 		if (child->type != NEMOSHOW_MATRIX_TYPE)
 			continue;
 

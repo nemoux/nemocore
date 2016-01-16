@@ -151,7 +151,7 @@ int nemoshow_shader_arrange(struct showone *one)
 	int noffsets = 0;
 
 	if (shader->ref != NULL) {
-		nemolist_for_each(child, &shader->ref->children_list, children_link) {
+		nemoshow_children_for_each(child, shader->ref) {
 			stop = NEMOSHOW_STOP(child);
 
 			colors[noffsets] = SkColorSetARGB(stop->fills[3], stop->fills[2], stop->fills[1], stop->fills[0]);
@@ -160,7 +160,7 @@ int nemoshow_shader_arrange(struct showone *one)
 			noffsets++;
 		}
 	} else {
-		nemolist_for_each(child, &one->children_list, children_link) {
+		nemoshow_children_for_each(child, one) {
 			stop = NEMOSHOW_STOP(child);
 
 			colors[noffsets] = SkColorSetARGB(stop->fills[3], stop->fills[2], stop->fills[1], stop->fills[0]);
@@ -234,7 +234,7 @@ void nemoshow_shader_set_gradient(struct showone *one, const char *mode)
 	int noffsets = 0;
 
 	if (shader->ref != NULL) {
-		nemolist_for_each(child, &shader->ref->children_list, children_link) {
+		nemoshow_children_for_each(child, shader->ref) {
 			stop = NEMOSHOW_STOP(child);
 
 			colors[noffsets] = SkColorSetARGB(stop->fills[3], stop->fills[2], stop->fills[1], stop->fills[0]);
@@ -243,7 +243,7 @@ void nemoshow_shader_set_gradient(struct showone *one, const char *mode)
 			noffsets++;
 		}
 	} else {
-		nemolist_for_each(child, &one->children_list, children_link) {
+		nemoshow_children_for_each(child, one) {
 			stop = NEMOSHOW_STOP(child);
 
 			colors[noffsets] = SkColorSetARGB(stop->fills[3], stop->fills[2], stop->fills[1], stop->fills[0]);

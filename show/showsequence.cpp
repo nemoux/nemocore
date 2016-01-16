@@ -384,7 +384,7 @@ static void nemoshow_sequence_prepare_frame(struct showone *one, uint32_t serial
 	struct showone *child;
 	int i;
 
-	nemolist_for_each(child, &one->children_list, children_link) {
+	nemoshow_children_for_each(child, one) {
 		if (child->type == NEMOSHOW_SET_TYPE) {
 			set = NEMOSHOW_SET(child);
 
@@ -407,7 +407,7 @@ static void nemoshow_sequence_dispatch_frame(struct showone *one, double s, doub
 	double dt = (t - s) / (frame->t - s);
 	int i;
 
-	nemolist_for_each(child, &one->children_list, children_link) {
+	nemoshow_children_for_each(child, one) {
 		if (child->type == NEMOSHOW_SET_TYPE) {
 			uint32_t dirty = 0x0;
 
@@ -434,7 +434,7 @@ static void nemoshow_sequence_finish_frame(struct showone *one, uint32_t serial)
 	struct showone *child;
 	int i;
 
-	nemolist_for_each(child, &one->children_list, children_link) {
+	nemoshow_children_for_each(child, one) {
 		if (child->type == NEMOSHOW_SET_TYPE) {
 			uint32_t dirty = 0x0;
 
@@ -469,10 +469,10 @@ void nemoshow_sequence_prepare(struct showone *one, uint32_t serial)
 
 	sequence->t = 0.0f;
 
-	sequence->frame = nemolist_node0(&one->children_list, struct showone, children_link);
+	sequence->frame = nemoshow_children0(one);
 
-	nemolist_for_each(frame, &one->children_list, children_link) {
-		nemolist_for_each(child, &frame->children_list, children_link) {
+	nemoshow_children_for_each(frame, one) {
+		nemoshow_children_for_each(child, frame) {
 			if (child->type == NEMOSHOW_SET_TYPE) {
 				struct showset *set = NEMOSHOW_SET(child);
 
@@ -504,7 +504,7 @@ void nemoshow_sequence_dispatch(struct showone *one, double t, uint32_t serial)
 
 			sequence->t = frame->t;
 
-			sequence->frame = nemolist_next(&one->children_list, sequence->frame, struct showone, children_link);
+			sequence->frame = nemoshow_children_next(one, sequence->frame);
 			if (sequence->frame != NULL)
 				nemoshow_sequence_prepare_frame(sequence->frame, serial);
 		} else {
