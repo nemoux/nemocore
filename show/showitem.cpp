@@ -933,6 +933,8 @@ void nemoshow_item_attach_one(struct showone *parent, struct showone *one)
 
 		item->canvas_destroy_listener.notify = nemoshow_item_handle_canvas_destroy_signal;
 		nemosignal_add(&item->canvas->destroy_signal, &item->canvas_destroy_listener);
+	} else {
+		one->update = nemoshow_item_update;
 	}
 }
 
