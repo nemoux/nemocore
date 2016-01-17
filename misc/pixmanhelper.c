@@ -508,3 +508,27 @@ pixman_image_t *pixman_load_image(const char *filepath, int32_t width, int32_t h
 
 	return dst;
 }
+
+int pixman_copy_image(pixman_image_t *dst, pixman_image_t *src)
+{
+	pixman_transform_t transform;
+
+	pixman_transform_init_identity(&transform);
+	pixman_transform_scale(&transform, NULL,
+			pixman_double_to_fixed(
+				(double)pixman_image_get_width(src) / (double)pixman_image_get_width(dst)),
+			pixman_double_to_fixed(
+				(double)pixman_image_get_height(src) / (double)pixman_image_get_height(dst)));
+
+	pixman_image_set_transform(src, &transform);
+
+	pixman_image_composite32(PIXMAN_OP_SRC,
+			src,
+			NULL,
+			dst,
+			0, 0, 0, 0, 0, 0,
+			pixman_image_get_width(dst),
+			pixman_image_get_height(dst));
+
+	return 0;
+}

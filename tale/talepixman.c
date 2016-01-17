@@ -8,6 +8,7 @@
 #include <nemotale.h>
 #include <talenode.h>
 #include <talepixman.h>
+#include <pixmanhelper.h>
 #include <nemomisc.h>
 
 struct nemotale *nemotale_create_pixman(void)
@@ -401,6 +402,8 @@ void nemotale_node_fill_pixman(struct talenode *node, double r, double g, double
 int nemotale_node_set_viewport_pixman(struct talenode *node, int32_t width, int32_t height)
 {
 	struct talepmnode *context = (struct talepmnode *)node->pmcontext;
+	pixman_image_t *pimage = context->image;
+	void *pdata = context->data;
 
 	node->viewport.width = width;
 	node->viewport.height = height;
@@ -410,13 +413,17 @@ int nemotale_node_set_viewport_pixman(struct talenode *node, int32_t width, int3
 
 	node->viewport.enable = 1;
 
-	pixman_image_unref(context->image);
-	free(context->data);
-
 	context->data = malloc(width * height * 4);
+	if (context->data == NULL)
+		return -1;
 	memset(context->data, 0, width * height * 4);
 
 	context->image = pixman_image_create_bits(PIXMAN_a8r8g8b8, width, height, context->data, width * 4);
+
+	pixman_copy_image(context->image, pimage);
+
+	pixman_image_unref(pimage);
+	free(pdata);
 
 	node->dirty = 1;
 	node->needs_full_upload = 1;

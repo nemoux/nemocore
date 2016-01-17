@@ -19,6 +19,8 @@ extern pixman_image_t *pixman_load_jpeg_data(uint32_t *data, int length);
 
 extern pixman_image_t *pixman_load_image(const char *filepath, int32_t width, int32_t height);
 
+extern int pixman_copy_image(pixman_image_t *dst, pixman_image_t *src);
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif
