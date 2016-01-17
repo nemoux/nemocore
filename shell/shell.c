@@ -422,6 +422,8 @@ struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas
 	bin->canvas_destroy_listener.notify = shellbin_handle_canvas_destroy;
 	wl_signal_add(&canvas->destroy_signal, &bin->canvas_destroy_listener);
 
+	wl_list_init(&bin->fullscreen_opaque_listener.link);
+
 	return bin;
 
 err1:
@@ -437,6 +439,7 @@ void nemoshell_destroy_bin(struct shellbin *bin)
 	wl_signal_emit(&bin->destroy_signal, bin);
 
 	wl_list_remove(&bin->canvas_destroy_listener.link);
+	wl_list_remove(&bin->fullscreen_opaque_listener.link);
 
 	bin->canvas->configure = NULL;
 	bin->canvas->configure_private = NULL;
@@ -445,10 +448,6 @@ void nemoshell_destroy_bin(struct shellbin *bin)
 
 	wl_list_remove(&bin->children_link);
 	wl_list_remove(&bin->screen_link);
-
-	if (bin->on_fullscreen_opaque != 0) {
-		nemoshell_put_fullscreen_opaque(bin->shell, bin);
-	}
 
 	wl_list_for_each_safe(child, cnext, &bin->children_list, children_link) {
 		nemoshell_set_parent_bin(child, NULL);
@@ -1064,6 +1063,13 @@ static inline int nemoshell_bin_contains_view(struct shellbin *bin, struct nemov
 	return 1;
 }
 
+static void shellbin_handle_fullscreen_opaque(struct wl_listener *listener, void *data)
+{
+	struct shellbin *bin = (struct shellbin *)container_of(listener, struct shellbin, fullscreen_opaque_listener);
+
+	nemoshell_put_fullscreen_opaque(bin->shell, bin);
+}
+
 void nemoshell_set_fullscreen_opaque(struct nemoshell *shell, struct shellbin *bin)
 {
 	struct nemocompz *compz = shell->compz;
@@ -1084,7 +1090,10 @@ void nemoshell_set_fullscreen_opaque(struct nemoshell *shell, struct shellbin *b
 		}
 	}
 
-	bin->on_fullscreen_opaque = 1;
+	wl_list_remove(&bin->fullscreen_opaque_listener.link);
+
+	bin->fullscreen_opaque_listener.notify = shellbin_handle_fullscreen_opaque;
+	wl_signal_add(&bin->destroy_signal, &bin->fullscreen_opaque_listener);
 }
 
 void nemoshell_put_fullscreen_opaque(struct nemoshell *shell, struct shellbin *bin)
@@ -1107,7 +1116,8 @@ void nemoshell_put_fullscreen_opaque(struct nemoshell *shell, struct shellbin *b
 		}
 	}
 
-	bin->on_fullscreen_opaque = 0;
+	wl_list_remove(&bin->fullscreen_opaque_listener.link);
+	wl_list_init(&bin->fullscreen_opaque_listener.link);
 }
 
 void nemoshell_set_maximized_bin_on_screen(struct nemoshell *shell, struct shellbin *bin, struct nemoscreen *screen)

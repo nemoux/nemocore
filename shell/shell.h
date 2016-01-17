@@ -178,6 +178,7 @@ struct shellbin {
 	int32_t last_sx, last_sy;
 
 	struct wl_listener canvas_destroy_listener;
+	struct wl_listener fullscreen_opaque_listener;
 
 	uint32_t resize_edges;
 	uint32_t reset_scale;
@@ -217,8 +218,6 @@ struct shellbin {
 	int on_pickscreen;
 	int on_pitchscreen;
 	int on_opaquescreen;
-
-	int on_fullscreen_opaque;
 
 	struct {
 		float x, y;
