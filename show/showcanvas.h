@@ -51,6 +51,8 @@ struct showcanvas {
 	double width, height;
 
 	struct {
+		int dirty;
+
 		double width, height;
 
 		double sx, sy;

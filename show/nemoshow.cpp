@@ -584,6 +584,14 @@ void nemoshow_render_one(struct nemoshow *show)
 		if (one->type == NEMOSHOW_CANVAS_TYPE) {
 			canvas = NEMOSHOW_CANVAS(one);
 
+			if (canvas->viewport.dirty != 0) {
+				nemoshow_canvas_set_viewport(show, one,
+						(double)show->width / (double)NEMOSHOW_SCENE_AT(show->scene, width) * show->sx,
+						(double)show->height / (double)NEMOSHOW_SCENE_AT(show->scene, height) * show->sy);
+
+				canvas->viewport.dirty = 0;
+			}
+
 			if (canvas->needs_redraw != 0) {
 				if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
 					nemoshow_canvas_render_vector(show, one);
@@ -682,9 +690,7 @@ int nemoshow_set_size(struct nemoshow *show, uint32_t width, uint32_t height)
 
 	nemoshow_children_for_each(child, one) {
 		if (child->type == NEMOSHOW_CANVAS_TYPE) {
-			nemoshow_canvas_set_viewport(show, child,
-					(double)show->width / (double)NEMOSHOW_SCENE_AT(one, width) * show->sx,
-					(double)show->height / (double)NEMOSHOW_SCENE_AT(one, height) * show->sy);
+			NEMOSHOW_CANVAS_AT(child, viewport.dirty) = 1;
 		}
 	}
 
@@ -709,9 +715,7 @@ int nemoshow_set_scale(struct nemoshow *show, double sx, double sy)
 
 	nemoshow_children_for_each(child, one) {
 		if (child->type == NEMOSHOW_CANVAS_TYPE) {
-			nemoshow_canvas_set_viewport(show, child,
-					(double)show->width / (double)NEMOSHOW_SCENE_AT(one, width) * show->sx,
-					(double)show->height / (double)NEMOSHOW_SCENE_AT(one, height) * show->sy);
+			NEMOSHOW_CANVAS_AT(child, viewport.dirty) = 1;
 		}
 	}
 
