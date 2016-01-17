@@ -40,7 +40,8 @@ struct minecontext {
 	struct showone *scene;
 	struct showone *back;
 	struct showone *canvas;
-	struct showone *inner, *outer, *solid;
+	struct showone *filter0;
+	struct showone *filter1;
 	struct showone *ease;
 
 	struct showone *numbers[10];
@@ -115,7 +116,7 @@ static void nemomine_prepare_game(struct minecontext *context)
 
 		nemoshow_item_set_fill_color(mone->box, 0x1e, 0xdc, 0xdc, 0xff);
 		nemoshow_item_set_stroke_color(mone->box, 0x1e, 0xdc, 0xdc, 0xff);
-		nemoshow_item_set_stroke_width(mone->box, 0.0f);
+		nemoshow_item_set_stroke_width(mone->box, 1.0f);
 
 		nemoshow_item_set_alpha(mone->one, 0.0f);
 		nemoshow_item_set_fill_color(mone->one, 0x1e, 0xdc, 0xdc, 0xff);
@@ -482,10 +483,10 @@ static void nemomine_prepare_ui(struct minecontext *context)
 			nemoshow_item_set_ry(one, 2.0f);
 			nemoshow_item_set_width(one, context->size - 2.0f);
 			nemoshow_item_set_height(one, context->size - 2.0f);
-			nemoshow_item_set_filter(one, context->inner);
+			nemoshow_item_set_filter(one, context->filter1);
 			nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
 			nemoshow_item_set_stroke_color(one, 0x1e, 0xdc, 0xdc, 0xff);
-			nemoshow_item_set_stroke_width(one, 0.0f);
+			nemoshow_item_set_stroke_width(one, 1.0f);
 			nemoshow_item_set_tsr(one);
 			nemoshow_item_translate(one, j * context->size, i * context->size + context->size);
 
@@ -497,7 +498,7 @@ static void nemomine_prepare_ui(struct minecontext *context)
 			nemoshow_item_set_y(one, 2.0f);
 			nemoshow_item_set_width(one, context->size - 4.0f);
 			nemoshow_item_set_height(one, context->size - 4.0f);
-			nemoshow_item_set_filter(one, context->inner);
+			nemoshow_item_set_filter(one, context->filter0);
 			nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
 			nemoshow_item_set_tsr(one);
 			nemoshow_item_translate(one, j * context->size, i * context->size + context->size);
@@ -526,7 +527,7 @@ int main(int argc, char *argv[])
 	struct nemoshow *show;
 	struct showone *scene;
 	struct showone *canvas;
-	struct showone *blur;
+	struct showone *filter;
 	struct showone *ease;
 	struct showone *font;
 	struct showone *one;
@@ -624,17 +625,15 @@ int main(int argc, char *argv[])
 	context->ease = ease = nemoshow_ease_create();
 	nemoshow_ease_set_type(ease, NEMOEASE_CUBIC_INOUT_TYPE);
 
-	context->inner = blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
-	nemoshow_attach_one(show, blur);
-	nemoshow_filter_set_blur(blur, "high", "inner", 3.0f);
+	context->filter0 = filter = nemoshow_filter_create(NEMOSHOW_EMBOSS_FILTER);
+	nemoshow_attach_one(show, filter);
+	nemoshow_filter_set_light(filter, 1.0f, 1.0f, 1.0f, 128.0f, 32.0f);
+	nemoshow_filter_set_radius(filter, 0.5f);
 
-	context->outer = blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
-	nemoshow_attach_one(show, blur);
-	nemoshow_filter_set_blur(blur, "high", "outer", 3.0f);
-
-	context->solid = blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
-	nemoshow_attach_one(show, blur);
-	nemoshow_filter_set_blur(blur, "high", "solid", 5.0f);
+	context->filter1 = filter = nemoshow_filter_create(NEMOSHOW_EMBOSS_FILTER);
+	nemoshow_attach_one(show, filter);
+	nemoshow_filter_set_light(filter, 1.0f, 1.0f, 1.0f, 128.0f, 32.0f);
+	nemoshow_filter_set_radius(filter, 1.0f);
 
 	for (i = 0; i < 10; i++) {
 		snprintf(name, sizeof(name), NEMOUX_MINESWEEPER_RESOURCES "/mine-%d.svg", i);
@@ -669,7 +668,7 @@ int main(int argc, char *argv[])
 	nemoshow_item_set_y(one, 0.0f);
 	nemoshow_item_set_width(one, size);
 	nemoshow_item_set_height(one, size);
-	nemoshow_item_set_filter(one, context->inner);
+	nemoshow_item_set_filter(one, context->filter0);
 	nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
 	nemoshow_item_set_tsr(one);
 	nemoshow_item_pivot(one, size / 2.0f, size / 2.0f);
@@ -685,7 +684,7 @@ int main(int argc, char *argv[])
 	nemoshow_item_set_y(one, 0.0f);
 	nemoshow_item_set_width(one, size);
 	nemoshow_item_set_height(one, size);
-	nemoshow_item_set_filter(one, context->inner);
+	nemoshow_item_set_filter(one, context->filter0);
 	nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
 	nemoshow_item_set_tsr(one);
 	nemoshow_item_translate(one, (context->columns / 2) * context->size, 0.0f);
@@ -702,6 +701,7 @@ int main(int argc, char *argv[])
 	nemoshow_item_set_font(one, font);
 	nemoshow_item_set_fontsize(one, size);
 	nemoshow_item_set_anchor(one, 1.0f, 0.5f);
+	nemoshow_item_set_filter(one, context->filter0);
 	nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
 	nemoshow_item_set_tsr(one);
 	nemoshow_item_translate(one, (context->columns - 2) * context->size, context->size / 2.0f);

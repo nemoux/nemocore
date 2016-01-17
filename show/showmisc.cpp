@@ -17,6 +17,7 @@ struct showprop *nemoshow_get_property(const char *name)
 {
 	static struct showprop props[] = {
 		{ "alpha",						NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_STYLE_DIRTY },
+		{ "ambient",					NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_FILTER_DIRTY },
 		{ "attr",							NEMOSHOW_STRING_PROP,				NEMOSHOW_NONE_DIRTY },
 		{ "ax",								NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_SHAPE_DIRTY },
 		{ "ay",								NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_SHAPE_DIRTY },
@@ -24,6 +25,9 @@ struct showprop *nemoshow_get_property(const char *name)
 		{ "child",						NEMOSHOW_INTEGER_PROP,			NEMOSHOW_NONE_DIRTY },
 		{ "clip",							NEMOSHOW_STRING_PROP,				NEMOSHOW_SHAPE_DIRTY },
 		{ "d",								NEMOSHOW_STRING_PROP,				NEMOSHOW_TEXT_DIRTY },
+		{ "dx",								NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_FILTER_DIRTY },
+		{ "dy",								NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_FILTER_DIRTY },
+		{ "dz",								NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_FILTER_DIRTY },
 		{ "ease",							NEMOSHOW_STRING_PROP,				NEMOSHOW_NONE_DIRTY },
 		{ "element",					NEMOSHOW_STRING_PROP,				NEMOSHOW_NONE_DIRTY },
 		{ "end",							NEMOSHOW_INTEGER_PROP,			NEMOSHOW_NONE_DIRTY },
@@ -55,6 +59,7 @@ struct showprop *nemoshow_get_property(const char *name)
 		{ "rx",								NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_SHAPE_DIRTY },
 		{ "ry",								NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_SHAPE_DIRTY },
 		{ "shader",						NEMOSHOW_STRING_PROP,				NEMOSHOW_STYLE_DIRTY },
+		{ "specular",					NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_FILTER_DIRTY },
 		{ "src",							NEMOSHOW_STRING_PROP,				NEMOSHOW_NONE_DIRTY },
 		{ "stroke",						NEMOSHOW_COLOR_PROP,				NEMOSHOW_STYLE_DIRTY },
 		{ "stroke-width",			NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_SHAPE_DIRTY | NEMOSHOW_STYLE_DIRTY },

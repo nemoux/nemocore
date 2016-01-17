@@ -14,6 +14,7 @@ NEMO_BEGIN_EXTERN_C
 typedef enum {
 	NEMOSHOW_NONE_FILTER = 0,
 	NEMOSHOW_BLUR_FILTER = 1,
+	NEMOSHOW_EMBOSS_FILTER = 2,
 	NEMOSHOW_LAST_FILTER
 } NemoShowFilterType;
 
@@ -21,6 +22,10 @@ struct showfilter {
 	struct showone base;
 
 	double r;
+
+	double dx, dy, dz;
+	double ambient;
+	double specular;
 
 	void *cc;
 };
@@ -35,12 +40,12 @@ extern int nemoshow_filter_arrange(struct showone *one);
 extern int nemoshow_filter_update(struct showone *one);
 
 extern void nemoshow_filter_set_blur(struct showone *one, const char *flags, const char *style, double r);
-extern void nemoshow_filter_set_radius(struct showone *one, double r);
+extern void nemoshow_filter_set_light(struct showone *one, double dx, double dy, double dz, double ambient, double specular);
 
-static inline void nemoshow_filter_set_r(struct showone *one, double r)
-{
-	NEMOSHOW_FILTER_AT(one, r) = r;
-}
+extern void nemoshow_filter_set_radius(struct showone *one, double r);
+extern void nemoshow_filter_set_direction(struct showone *one, double dx, double dy, double dz);
+extern void nemoshow_filter_set_ambient(struct showone *one, double ambient);
+extern void nemoshow_filter_set_specular(struct showone *one, double specular);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
