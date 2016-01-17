@@ -145,6 +145,16 @@ static inline int32_t nemotale_node_get_height(struct talenode *node)
 	return node->geometry.height;
 }
 
+static inline int32_t nemotale_node_get_viewport_width(struct talenode *node)
+{
+	return node->viewport.width;
+}
+
+static inline int32_t nemotale_node_get_viewport_height(struct talenode *node)
+{
+	return node->viewport.height;
+}
+
 static inline void nemotale_node_set_data(struct talenode *node, void *data)
 {
 	node->userdata = data;
