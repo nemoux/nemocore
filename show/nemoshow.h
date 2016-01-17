@@ -57,7 +57,8 @@ struct nemoshow {
 	nemoshow_dispatch_transition_done_t dispatch_done;
 	void *dispatch_data;
 
-	uint32_t serial;
+	uint32_t dirty_serial;
+	uint32_t transition_serial;
 
 	void *context;
 	void *userdata;
@@ -125,11 +126,6 @@ static inline void nemoshow_set_tale(struct nemoshow *show, struct nemotale *tal
 static inline struct nemotale *nemoshow_get_tale(struct nemoshow *show)
 {
 	return show->tale;
-}
-
-static inline uint32_t nemoshow_get_next_serial(struct nemoshow *show)
-{
-	return show->serial++;
 }
 
 static inline void nemoshow_set_context(struct nemoshow *show, void *context)

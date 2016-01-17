@@ -561,6 +561,8 @@ void nemoshow_update_one(struct nemoshow *show)
 	nemolist_for_each_safe(one, none, &show->dirty_list, dirty_link) {
 		nemoshow_one_update(one);
 	}
+
+	show->dirty_serial = 0;
 }
 
 void nemoshow_render_one(struct nemoshow *show)
@@ -575,6 +577,8 @@ void nemoshow_render_one(struct nemoshow *show)
 	nemolist_for_each_safe(one, none, &show->dirty_list, dirty_link) {
 		nemoshow_one_update(one);
 	}
+
+	show->dirty_serial = 0;
 
 	nemoshow_children_for_each(one, scene) {
 		if (one->type == NEMOSHOW_CANVAS_TYPE) {
@@ -788,7 +792,7 @@ void nemoshow_attach_transition(struct nemoshow *show, struct showtransition *tr
 {
 	int i;
 
-	trans->serial = nemoshow_get_next_serial(show);
+	trans->serial = ++show->transition_serial;
 
 	for (i = 0; i < trans->nsequences; i++) {
 		nemoshow_sequence_prepare(trans->sequences[i], trans->serial);
@@ -806,7 +810,7 @@ void nemoshow_attach_transition_after(struct nemoshow *show, struct showtransiti
 {
 	NEMOBOX_APPEND(trans->transitions, trans->stransitions, trans->ntransitions, ntrans);
 
-	ntrans->serial = nemoshow_get_next_serial(show);
+	ntrans->serial = ++show->transition_serial;
 	ntrans->parent = trans;
 }
 

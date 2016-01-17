@@ -126,6 +126,8 @@ struct showone {
 	struct nemoobject object;
 	uint32_t serial;
 
+	uint32_t dirty_serial;
+
 	nemoshow_one_update_t update;
 	nemoshow_one_destroy_t destroy;
 	nemoshow_one_attach_t attach;
@@ -212,8 +214,10 @@ static inline void nemoshow_one_detach(struct showone *parent, struct showone *o
 static inline void nemoshow_one_update(struct showone *one)
 {
 	one->update(one);
-
+	
 	one->dirty = 0;
+	
+	one->dirty_serial = 0;
 
 	nemolist_remove(&one->dirty_link);
 	nemolist_init(&one->dirty_link);

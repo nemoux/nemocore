@@ -140,11 +140,16 @@ static inline void nemoshow_one_dirty_backwards(struct showone *one, uint32_t di
 
 	one->dirty |= dirty;
 
+	one->dirty_serial = ++show->dirty_serial;
+
 	nemolist_remove(&one->dirty_link);
 	nemolist_insert_tail(&show->dirty_list, &one->dirty_link);
 
-	nemolist_for_each(ref, &one->reference_list, link)
-		nemoshow_one_dirty_backwards(ref->one, ref->dirty);
+	nemolist_for_each(ref, &one->reference_list, link) {
+		if (ref->one->dirty_serial == 0 ||
+				ref->one->dirty_serial < one->dirty_serial)
+			nemoshow_one_dirty_backwards(ref->one, ref->dirty);
+	}
 }
 
 void nemoshow_one_dirty(struct showone *one, uint32_t dirty)
@@ -157,11 +162,17 @@ void nemoshow_one_dirty(struct showone *one, uint32_t dirty)
 
 	one->dirty |= dirty;
 
-	if (nemolist_empty(&one->dirty_link) != 0)
-		nemolist_insert_tail(&show->dirty_list, &one->dirty_link);
+	if (one->dirty_serial == 0) {
+		one->dirty_serial = ++show->dirty_serial;
 
-	nemolist_for_each(ref, &one->reference_list, link)
-		nemoshow_one_dirty_backwards(ref->one, ref->dirty);
+		nemolist_insert_tail(&show->dirty_list, &one->dirty_link);
+	}
+
+	nemolist_for_each(ref, &one->reference_list, link) {
+		if (ref->one->dirty_serial == 0 ||
+				ref->one->dirty_serial < one->dirty_serial)
+			nemoshow_one_dirty_backwards(ref->one, ref->dirty);
+	}
 }
 
 static void nemoshow_one_handle_parent_destroy_signal(struct nemolistener *listener, void *data)
