@@ -45,6 +45,9 @@ void nemoshow_filter_destroy(struct showone *one)
 
 	nemoshow_one_finish(one);
 
+	if (NEMOSHOW_FILTER_CC(filter, filter) != NULL)
+		NEMOSHOW_FILTER_CC(filter, filter)->unref();
+
 	delete static_cast<showfilter_t *>(filter->cc);
 
 	free(filter);
@@ -66,37 +69,47 @@ int nemoshow_filter_update(struct showone *one)
 {
 	struct showfilter *filter = NEMOSHOW_FILTER(one);
 
+	if (NEMOSHOW_FILTER_CC(filter, filter) != NULL)
+		NEMOSHOW_FILTER_CC(filter, filter)->unref();
+
+	NEMOSHOW_FILTER_CC(filter, filter) = SkBlurMaskFilter::Create(
+			NEMOSHOW_FILTER_CC(filter, style),
+			SkBlurMask::ConvertRadiusToSigma(filter->r),
+			NEMOSHOW_FILTER_CC(filter, flags));
+
 	return 0;
 }
 
 void nemoshow_filter_set_blur(struct showone *one, const char *flags, const char *style, double r)
 {
 	struct showfilter *filter = NEMOSHOW_FILTER(one);
-	SkBlurMaskFilter::BlurFlags f;
-	SkBlurStyle s;
 
 	filter->r = r;
 
-	if (NEMOSHOW_FILTER_CC(filter, filter) != NULL)
-		NEMOSHOW_FILTER_CC(filter, filter)->unref();
-
 	if (flags == NULL)
-		f = SkBlurMaskFilter::kNone_BlurFlag;
+		NEMOSHOW_FILTER_CC(filter, flags) = SkBlurMaskFilter::kNone_BlurFlag;
 	else if (strcmp(flags, "ignore") == 0)
-		f = SkBlurMaskFilter::kIgnoreTransform_BlurFlag;
+		NEMOSHOW_FILTER_CC(filter, flags) = SkBlurMaskFilter::kIgnoreTransform_BlurFlag;
 	else if (strcmp(flags, "high") == 0)
-		f = SkBlurMaskFilter::kHighQuality_BlurFlag;
+		NEMOSHOW_FILTER_CC(filter, flags) = SkBlurMaskFilter::kHighQuality_BlurFlag;
 
 	if (style == NULL)
-		s = kNormal_SkBlurStyle;
+		NEMOSHOW_FILTER_CC(filter, style) = kNormal_SkBlurStyle;
 	else if (strcmp(style, "inner") == 0)
-		s = kInner_SkBlurStyle;
+		NEMOSHOW_FILTER_CC(filter, style) = kInner_SkBlurStyle;
 	else if (strcmp(style, "outer") == 0)
-		s = kOuter_SkBlurStyle;
+		NEMOSHOW_FILTER_CC(filter, style) = kOuter_SkBlurStyle;
 	else if (strcmp(style, "solid") == 0)
-		s = kSolid_SkBlurStyle;
+		NEMOSHOW_FILTER_CC(filter, style) = kSolid_SkBlurStyle;
 
-	NEMOSHOW_FILTER_CC(filter, filter) = SkBlurMaskFilter::Create(s, SkBlurMask::ConvertRadiusToSigma(filter->r), f);
+	nemoshow_one_dirty(one, NEMOSHOW_FILTER_DIRTY | NEMOSHOW_SHAPE_DIRTY);
+}
 
-	nemoshow_one_dirty(one, NEMOSHOW_FILTER_DIRTY);
+void nemoshow_filter_set_radius(struct showone *one, double r)
+{
+	struct showfilter *filter = NEMOSHOW_FILTER(one);
+
+	filter->r = r;
+
+	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }

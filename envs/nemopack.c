@@ -33,26 +33,21 @@
 #include <nemolog.h>
 #include <nemomisc.h>
 
-static struct showone *nemopackblur0;
-static struct showone *nemopackblur1;
-static struct showone *nemopackease;
+static struct showone *nemopackease0;
+static struct showone *nemopackease1;
 
 void nemopack_prepare_envs(void)
 {
-	nemopackblur0 = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
-	nemoshow_filter_set_blur(nemopackblur0, "high", "inner", 5.0f);
-	nemopackblur1 = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
-	nemoshow_filter_set_blur(nemopackblur1, "high", "outer", 5.0f);
-
-	nemopackease = nemoshow_ease_create();
-	nemoshow_ease_set_type(nemopackease, NEMOEASE_CUBIC_OUT_TYPE);
+	nemopackease0 = nemoshow_ease_create();
+	nemoshow_ease_set_type(nemopackease0, NEMOEASE_CUBIC_INOUT_TYPE);
+	nemopackease1 = nemoshow_ease_create();
+	nemoshow_ease_set_type(nemopackease1, NEMOEASE_CUBIC_OUT_TYPE);
 }
 
 void nemopack_finish_envs(void)
 {
-	nemoshow_one_destroy(nemopackblur0);
-	nemoshow_one_destroy(nemopackblur1);
-	nemoshow_one_destroy(nemopackease);
+	nemoshow_one_destroy(nemopackease0);
+	nemoshow_one_destroy(nemopackease1);
 }
 
 static void nemopack_handle_view_destroy(struct wl_listener *listener, void *data)
@@ -176,6 +171,7 @@ struct nemopack *nemopack_create(struct nemoshell *shell, struct nemoview *view,
 	struct showone *scene;
 	struct showone *canvas;
 	struct showone *one;
+	struct showone *blur;
 	struct showtransition *trans;
 	struct showone *sequence;
 	struct showone *set0;
@@ -229,6 +225,13 @@ struct nemopack *nemopack_create(struct nemoshell *shell, struct nemoview *view,
 	nemoshow_set_scene(show, scene);
 	nemoshow_set_size(show, view->content->width, view->content->height);
 
+	pack->blur0 = blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
+	nemoshow_attach_one(show, blur);
+	nemoshow_filter_set_blur(blur, "high", "inner", 5.0f);
+	pack->blur1 = blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
+	nemoshow_attach_one(show, blur);
+	nemoshow_filter_set_blur(blur, "high", "outer", 0.0f);
+
 	pack->one = one = nemoshow_item_create(NEMOSHOW_RECT_ITEM);
 	nemoshow_attach_one(show, one);
 	nemoshow_one_attach(canvas, one);
@@ -237,7 +240,7 @@ struct nemopack *nemopack_create(struct nemoshell *shell, struct nemoview *view,
 	nemoshow_item_set_width(one, view->content->width);
 	nemoshow_item_set_height(one, view->content->height);
 	nemoshow_item_set_fill_color(one, 0.0f, 0.0f, 0.0f, 0.0f);
-	nemoshow_item_set_filter(one, nemopackblur0);
+	nemoshow_item_set_filter(one, pack->blur0);
 
 	set0 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set0, one);
@@ -254,7 +257,7 @@ struct nemopack *nemopack_create(struct nemoshell *shell, struct nemoview *view,
 	nemoshow_item_set_fill_color(one, 0.0f, 0.0f, 0.0f, 0.0f);
 	nemoshow_item_set_stroke_color(one, 0.0f, 0.0f, 0.0f, 0.0f);
 	nemoshow_item_set_stroke_width(one, MIN(view->content->width, view->content->height) / 64);
-	nemoshow_item_set_filter(one, nemopackblur1);
+	nemoshow_item_set_filter(one, pack->blur1);
 
 	set1 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set1, one);
@@ -266,9 +269,30 @@ struct nemopack *nemopack_create(struct nemoshell *shell, struct nemoview *view,
 				1.0f, set0, set1, NULL),
 			NULL);
 
-	trans = nemoshow_transition_create(nemopackease, 500, 0);
+	trans = nemoshow_transition_create(nemopackease1, 500, 0);
 	nemoshow_transition_check_one(trans, one);
 	nemoshow_transition_attach_sequence(trans, sequence);
+	nemoshow_attach_transition(show, trans);
+
+	set0 = nemoshow_sequence_create_set();
+	nemoshow_sequence_set_source(set0, pack->blur1);
+	nemoshow_sequence_set_dattr(set0, "r", 8.0f, NEMOSHOW_SHAPE_DIRTY);
+
+	set1 = nemoshow_sequence_create_set();
+	nemoshow_sequence_set_source(set1, pack->blur1);
+	nemoshow_sequence_set_dattr(set1, "r", 3.0f, NEMOSHOW_SHAPE_DIRTY);
+
+	sequence = nemoshow_sequence_create_easy(show,
+			nemoshow_sequence_create_frame_easy(show,
+				0.5f, set0, NULL),
+			nemoshow_sequence_create_frame_easy(show,
+				1.0f, set1, NULL),
+			NULL);
+
+	trans = nemoshow_transition_create(nemopackease0, 1200, 0);
+	nemoshow_transition_check_one(trans, pack->blur1);
+	nemoshow_transition_attach_sequence(trans, sequence);
+	nemoshow_transition_set_repeat(trans, 0);
 	nemoshow_attach_transition(show, trans);
 
 	pack->actor = actor = NEMOSHOW_AT(show, actor);
@@ -311,6 +335,9 @@ void nemopack_destroy(struct nemopack *pack)
 	wl_list_remove(&pack->bin_endgrab_listener.link);
 
 	nemotimer_destroy(pack->timer);
+
+	nemoshow_one_destroy(pack->blur0);
+	nemoshow_one_destroy(pack->blur1);
 
 	nemoshow_one_destroy(pack->one);
 	nemoshow_one_destroy(pack->icon);

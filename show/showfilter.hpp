@@ -3,6 +3,9 @@
 
 typedef struct _showfilter {
 	SkMaskFilter *filter;
+
+	SkBlurMaskFilter::BlurFlags flags;
+	SkBlurStyle style;
 } showfilter_t;
 
 #define NEMOSHOW_FILTER_CC(base, name)				(((showfilter_t *)((base)->cc))->name)

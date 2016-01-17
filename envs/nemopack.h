@@ -41,6 +41,9 @@ struct nemopack {
 	struct showone *one;
 	struct showone *icon;
 
+	struct showone *blur0;
+	struct showone *blur1;
+
 	struct nemoactor *actor;
 
 	struct nemotimer *timer;

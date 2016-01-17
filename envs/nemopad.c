@@ -146,7 +146,6 @@ static double nemopadcolors[][3] = {
 	{ 0xff, 0x8c, 0x32 }
 };
 
-static struct showone *nemopadblur;
 static struct showone *nemopadease;
 
 void nemopad_prepare_envs(void)
@@ -205,9 +204,6 @@ void nemopad_prepare_envs(void)
 		}
 	}
 
-	nemopadblur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
-	nemoshow_filter_set_blur(nemopadblur, "high", "solid", 3.0f);
-
 	nemopadease = nemoshow_ease_create();
 	nemoshow_ease_set_type(nemopadease, NEMOEASE_CUBIC_INOUT_TYPE);
 }
@@ -227,7 +223,6 @@ void nemopad_finish_envs(void)
 			nemoshow_one_destroy(nemopadshifts[i]);
 	}
 
-	nemoshow_one_destroy(nemopadblur);
 	nemoshow_one_destroy(nemopadease);
 }
 
@@ -583,6 +578,8 @@ void nemopad_destroy(struct nemopad *pad)
 		nemoshow_one_destroy(pad->canvas);
 		nemoshow_one_destroy(pad->scene);
 
+		nemoshow_one_destroy(pad->blur);
+
 		for (i = 0; i < NEMOPAD_KEYS_MAX; i++) {
 			if (pad->borders[i] != NULL)
 				nemoshow_one_destroy(pad->borders[i]);
@@ -610,6 +607,7 @@ int nemopad_activate(struct nemopad *pad, double x, double y, double r)
 	struct showone *scene;
 	struct showone *canvas;
 	struct showone *one;
+	struct showone *blur;
 	struct showtransition *trans;
 	struct showone *sequence;
 	struct showone *frame;
@@ -653,6 +651,10 @@ int nemopad_activate(struct nemopad *pad, double x, double y, double r)
 	nemoshow_set_scene(show, scene);
 	nemoshow_set_size(show, pad->width, pad->height);
 
+	pad->blur = blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
+	nemoshow_attach_one(show, blur);
+	nemoshow_filter_set_blur(blur, "high", "solid", 3.0f);
+
 	for (i = 0; i < NEMOPAD_KEYS_MAX; i++) {
 		if (nemopadborders[i] != NULL) {
 			pad->borders[i] = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
@@ -665,7 +667,7 @@ int nemopad_activate(struct nemopad *pad, double x, double y, double r)
 					nemopadkeys[i].x1 - nemopadkeys[i].x0);
 			nemoshow_item_set_height(one,
 					nemopadkeys[i].y1 - nemopadkeys[i].y0);
-			nemoshow_item_set_filter(one, nemopadblur);
+			nemoshow_item_set_filter(one, pad->blur);
 			nemoshow_item_set_stroke_color(one,
 					nemopadcolors[nemopadkeys[i].color0][0],
 					nemopadcolors[nemopadkeys[i].color0][1],
@@ -691,7 +693,7 @@ int nemopad_activate(struct nemopad *pad, double x, double y, double r)
 					nemopadkeys[i].x1 - nemopadkeys[i].x0);
 			nemoshow_item_set_height(one,
 					nemopadkeys[i].y1 - nemopadkeys[i].y0);
-			nemoshow_item_set_filter(one, nemopadblur);
+			nemoshow_item_set_filter(one, pad->blur);
 			nemoshow_item_set_fill_color(one,
 					nemopadcolors[nemopadkeys[i].color0][0],
 					nemopadcolors[nemopadkeys[i].color0][1],
