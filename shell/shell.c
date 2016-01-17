@@ -446,6 +446,10 @@ void nemoshell_destroy_bin(struct shellbin *bin)
 	wl_list_remove(&bin->children_link);
 	wl_list_remove(&bin->screen_link);
 
+	if (bin->on_fullscreen_opaque != 0) {
+		nemoshell_put_fullscreen_opaque(bin->shell, bin);
+	}
+
 	wl_list_for_each_safe(child, cnext, &bin->children_list, children_link) {
 		nemoshell_set_parent_bin(child, NULL);
 	}
@@ -1079,6 +1083,8 @@ void nemoshell_set_fullscreen_opaque(struct nemoshell *shell, struct shellbin *b
 				nemocontent_update_fullscreen(view->content, 1, bin->on_opaquescreen);
 		}
 	}
+
+	bin->on_fullscreen_opaque = 1;
 }
 
 void nemoshell_put_fullscreen_opaque(struct nemoshell *shell, struct shellbin *bin)
@@ -1100,6 +1106,8 @@ void nemoshell_put_fullscreen_opaque(struct nemoshell *shell, struct shellbin *b
 				nemocontent_update_fullscreen(view->content, 0, bin->on_opaquescreen);
 		}
 	}
+
+	bin->on_fullscreen_opaque = 0;
 }
 
 void nemoshell_set_maximized_bin_on_screen(struct nemoshell *shell, struct shellbin *bin, struct nemoscreen *screen)

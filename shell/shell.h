@@ -218,6 +218,8 @@ struct shellbin {
 	int on_pitchscreen;
 	int on_opaquescreen;
 
+	int on_fullscreen_opaque;
+
 	struct {
 		float x, y;
 		float r;
