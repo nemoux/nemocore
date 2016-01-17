@@ -271,6 +271,9 @@ static void pick_shellgrab_touchpoint_frame(struct touchpoint_grab *base, uint32
 
 			bin->client->send_configure(bin->canvas, width, height);
 
+			pick->width = pick->other->width = width;
+			pick->height = pick->other->height = height;
+
 			pick->resize.distance = pick->other->resize.distance = distance;
 		}
 	}
