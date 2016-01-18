@@ -781,7 +781,7 @@ static inline struct showone *nemoshow_canvas_pick_one_in(struct showone *one, d
 	return NULL;
 }
 
-struct showone *nemoshow_canvas_pick_one(struct showone *one, int x, int y)
+struct showone *nemoshow_canvas_pick_one(struct showone *one, double x, double y)
 {
 	return nemoshow_canvas_pick_one_in(one, x, y);
 }

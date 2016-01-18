@@ -138,6 +138,8 @@ extern void nemoshow_item_path_rotate(struct showone *one, double ro);
 
 extern void nemoshow_item_path_set_discrete_effect(struct showone *one, double segment, double deviation, uint32_t seed);
 
+extern int nemoshow_item_path_contains_point(struct showone *one, double x, double y);
+
 extern int nemoshow_item_load_svg(struct showone *one, const char *uri);
 
 extern int nemoshow_item_set_buffer(struct showone *one, char *buffer, uint32_t width, uint32_t height);

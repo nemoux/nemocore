@@ -1114,6 +1114,27 @@ void nemoshow_item_path_set_discrete_effect(struct showone *one, double segment,
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 }
 
+int nemoshow_item_path_contains_point(struct showone *one, double x, double y)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	if (NEMOSHOW_ITEM_CC(item, has_inverse)) {
+		SkPoint p = NEMOSHOW_ITEM_CC(item, inverse)->mapXY(x, y);
+
+		if (one->x0 < p.x() && p.x() < one->x1 &&
+				one->y0 < p.y() && p.y() < one->y1) {
+			SkRegion region;
+			SkRegion clip;
+
+			clip.setRect(p.x(), p.y(), p.x() + 1, p.y() + 1);
+
+			return region.setPath(*NEMOSHOW_ITEM_CC(item, path), clip) == true;
+		}
+	}
+
+	return 0;
+}
+
 int nemoshow_item_load_svg(struct showone *one, const char *uri)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);

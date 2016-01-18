@@ -102,7 +102,7 @@ extern void nemoshow_canvas_rotate(struct showone *one, double ro);
 extern void nemoshow_canvas_pivot(struct showone *one, double px, double py);
 extern void nemoshow_canvas_scale(struct showone *one, double sx, double sy);
 
-extern struct showone *nemoshow_canvas_pick_one(struct showone *one, int x, int y);
+extern struct showone *nemoshow_canvas_pick_one(struct showone *one, double x, double y);
 
 static inline void nemoshow_canvas_needs_redraw(struct showone *one)
 {
