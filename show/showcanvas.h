@@ -97,14 +97,6 @@ extern void nemoshow_canvas_damage_one(struct showone *one, struct showone *chil
 extern void nemoshow_canvas_damage_all(struct showone *one);
 extern void nemoshow_canvas_dirty_all(struct showone *one, uint32_t dirty);
 
-extern void nemoshow_canvas_translate(struct showone *one, double tx, double ty);
-extern void nemoshow_canvas_rotate(struct showone *one, double ro);
-extern void nemoshow_canvas_pivot(struct showone *one, double px, double py);
-extern void nemoshow_canvas_scale(struct showone *one, double sx, double sy);
-
-extern void nemoshow_canvas_transform_to_global(struct showone *one, float sx, float sy, float *x, float *y);
-extern void nemoshow_canvas_transform_from_global(struct showone *one, float x, float y, float *sx, float *sy);
-
 extern struct showone *nemoshow_canvas_pick_one(struct showone *one, double x, double y);
 
 static inline void nemoshow_canvas_needs_redraw(struct showone *one)
@@ -176,6 +168,59 @@ static inline uint32_t nemoshow_canvas_pick_tag(struct showone *one, int x, int 
 {
 	return nemoshow_one_get_tag(
 			nemoshow_canvas_pick_one(one, x, y));
+}
+
+static inline void nemoshow_canvas_translate(struct showone *one, double tx, double ty)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	nemotale_node_translate(canvas->node, tx, ty);
+
+	canvas->tx = tx;
+	canvas->ty = ty;
+}
+
+static inline void nemoshow_canvas_rotate(struct showone *one, double ro)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	nemotale_node_rotate(canvas->node, ro * M_PI / 180.0f);
+
+	canvas->ro = ro;
+}
+
+static inline void nemoshow_canvas_pivot(struct showone *one, double px, double py)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	nemotale_node_pivot(canvas->node, px, py);
+
+	canvas->px = px;
+	canvas->py = py;
+}
+
+static inline void nemoshow_canvas_scale(struct showone *one, double sx, double sy)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	nemotale_node_scale(canvas->node, sx, sy);
+
+	canvas->sx = sx;
+	canvas->sy = sy;
+}
+
+static inline void nemoshow_canvas_transform_to_global(struct showone *one, float sx, float sy, float *x, float *y)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	nemotale_node_transform_to_global(canvas->node, sx, sy, x, y);
+}
+
+static inline void nemoshow_canvas_transform_from_global(struct showone *one, float x, float y, float *sx, float *sy)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	nemotale_node_transform_from_global(canvas->node, x, y, sx, sy);
 }
 
 #ifdef __cplusplus
