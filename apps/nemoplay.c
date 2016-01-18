@@ -265,7 +265,7 @@ int main(int argc, char *argv[])
 		{ "subtitle",			required_argument,	NULL,		's' },
 		{ "width",				required_argument,	NULL,		'w' },
 		{ "height",				required_argument,	NULL,		'h' },
-		{ "fullscreen",		no_argument,				NULL,		'u' },
+		{ "background",		no_argument,				NULL,		'b' },
 		{ "log",					required_argument,	NULL,		'l' },
 		{ 0 }
 	};
