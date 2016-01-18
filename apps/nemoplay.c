@@ -47,7 +47,6 @@ struct playcontext {
 	guint8 *video_buffer;
 
 	int is_background;
-	int is_fullscreen;
 
 	int is_audio_only;
 
@@ -266,7 +265,6 @@ int main(int argc, char *argv[])
 		{ "subtitle",			required_argument,	NULL,		's' },
 		{ "width",				required_argument,	NULL,		'w' },
 		{ "height",				required_argument,	NULL,		'h' },
-		{ "background",		no_argument,				NULL,		'b' },
 		{ "fullscreen",		no_argument,				NULL,		'u' },
 		{ "log",					required_argument,	NULL,		'l' },
 		{ 0 }
@@ -285,12 +283,11 @@ int main(int argc, char *argv[])
 	char *uri;
 	int32_t width = 0, height = 0;
 	int is_background = 0;
-	int is_fullscreen = 0;
 	int opt;
 
 	nemolog_set_file(2);
 
-	while (opt = getopt_long(argc, argv, "f:s:w:h:bul:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "f:s:w:h:bl:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -315,10 +312,6 @@ int main(int argc, char *argv[])
 				is_background = 1;
 				break;
 
-			case 'u':
-				is_fullscreen = 1;
-				break;
-
 			case 'l':
 				nemolog_open_socket(optarg);
 				break;
@@ -341,7 +334,6 @@ int main(int argc, char *argv[])
 	memset(context, 0, sizeof(struct playcontext));
 
 	context->is_background = is_background;
-	context->is_fullscreen = is_fullscreen;
 
 	context->pid = getpid();
 	context->volume = 50;
@@ -386,12 +378,12 @@ int main(int argc, char *argv[])
 	nemocanvas_set_nemosurface(canvas, NEMO_SHELL_SURFACE_TYPE_NORMAL);
 	nemocanvas_set_fullscreen_type(canvas, (1 << NEMO_SURFACE_FULLSCREEN_TYPE_PICK) | (1 << NEMO_SURFACE_FULLSCREEN_TYPE_PITCH));
 	nemocanvas_set_fullscreen_opaque(canvas, 1);
-	if (context->is_background != 0)
+	if (context->is_background != 0) {
 		nemocanvas_set_layer(canvas, NEMO_SURFACE_LAYER_TYPE_BACKGROUND);
-	if (context->is_fullscreen != 0)
 		nemocanvas_set_fullscreen(canvas, 0);
-	else
+	} else {
 		nemocanvas_set_anchor(canvas, -0.5f, -0.5f);
+	}
 	nemocanvas_set_dispatch_frame(canvas, nemoplay_dispatch_canvas_frame);
 	nemocanvas_set_dispatch_resize(canvas, nemoplay_dispatch_canvas_resize);
 	nemocanvas_set_dispatch_transform(canvas, nemoplay_dispatch_canvas_transform);
