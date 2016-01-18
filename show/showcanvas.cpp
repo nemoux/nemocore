@@ -471,7 +471,13 @@ static inline void nemoshow_canvas_render_item_image(struct showcanvas *canvas, 
 	if (NEMOSHOW_ITEM_CC(item, bitmap) != NULL) {
 		SkRect rect = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
 
-		_canvas->drawBitmapRect(*NEMOSHOW_ITEM_CC(item, bitmap), rect);
+		if (item->alpha == 1.0f) {
+			_canvas->drawBitmapRect(*NEMOSHOW_ITEM_CC(item, bitmap), rect);
+		} else {
+			_canvas->saveLayerAlpha(&rect, 0xff * item->alpha);
+			_canvas->drawBitmapRect(*NEMOSHOW_ITEM_CC(item, bitmap), rect);
+			_canvas->restore();
+		}
 	}
 }
 
