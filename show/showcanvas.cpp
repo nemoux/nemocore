@@ -754,6 +754,20 @@ void nemoshow_canvas_scale(struct showone *one, double sx, double sy)
 	canvas->sy = sy;
 }
 
+void nemoshow_canvas_transform_to_global(struct showone *one, float sx, float sy, float *x, float *y)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	nemotale_node_transform_to_global(canvas->node, sx, sy, x, y);
+}
+
+void nemoshow_canvas_transform_from_global(struct showone *one, float x, float y, float *sx, float *sy)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	nemotale_node_transform_from_global(canvas->node, x, y, sx, sy);
+}
+
 static inline struct showone *nemoshow_canvas_pick_one_in(struct showone *one, double px, double py)
 {
 	struct showone *child;
