@@ -153,7 +153,7 @@ int nemoshow_transition_dispatch(struct showtransition *trans, uint32_t time)
 		nemoshow_sequence_dispatch(trans->sequences[i], t, trans->serial);
 	}
 
-	if (done == 0 && trans->dispatch_frame != NULL) {
+	if (trans->dispatch_frame != NULL) {
 		trans->dispatch_frame(trans->userdata, time, t);
 	}
 
