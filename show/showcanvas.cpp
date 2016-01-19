@@ -733,8 +733,19 @@ static inline struct showone *nemoshow_canvas_pick_one_in(struct showone *one, d
 				SkPoint p = NEMOSHOW_ITEM_CC(item, inverse)->mapXY(px, py);
 
 				if (child->x0 < p.x() && p.x() < child->x1 &&
-						child->y0 < p.y() && p.y() < child->y1)
-					return child;
+						child->y0 < p.y() && p.y() < child->y1) {
+					if (item->pick == NEMOSHOW_NORMAL_PICK) {
+						return child;
+					} else if (item->pick == NEMOSHOW_PATH_PICK) {
+						SkRegion region;
+						SkRegion clip;
+
+						clip.setRect(p.x(), p.y(), p.x() + 1, p.y() + 1);
+
+						if (region.setPath(*NEMOSHOW_ITEM_CC(item, path), clip) == true)
+							return child;
+					}
+				}
 			}
 		}
 	}

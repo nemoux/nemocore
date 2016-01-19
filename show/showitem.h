@@ -44,6 +44,12 @@ typedef enum {
 	NEMOSHOW_LAST_TRANSFORM
 } NemoShowItemTransform;
 
+typedef enum {
+	NEMOSHOW_NORMAL_PICK = 0,
+	NEMOSHOW_PATH_PICK = 1,
+	NEMOSHOW_LAST_PICK
+} NemoShowItemPick;
+
 struct showitem {
 	struct showone base;
 
@@ -84,6 +90,7 @@ struct showitem {
 	char *uri;
 
 	int transform;
+	int pick;
 
 	double matrix[9];
 
@@ -375,6 +382,13 @@ static inline void nemoshow_item_pivot(struct showone *one, double px, double py
 	item->py = py;
 
 	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
+}
+
+static inline void nemoshow_item_set_pick(struct showone *one, int pick)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	item->pick = pick;
 }
 
 #ifdef __cplusplus
