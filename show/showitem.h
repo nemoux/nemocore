@@ -131,12 +131,12 @@ extern void nemoshow_item_attach_one(struct showone *parent, struct showone *one
 extern void nemoshow_item_detach_one(struct showone *parent, struct showone *one);
 
 extern void nemoshow_item_path_clear(struct showone *one);
-extern void nemoshow_item_path_moveto(struct showone *one, double x, double y);
-extern void nemoshow_item_path_lineto(struct showone *one, double x, double y);
-extern void nemoshow_item_path_cubicto(struct showone *one, double x0, double y0, double x1, double y1, double x2, double y2);
-extern void nemoshow_item_path_close(struct showone *one);
-extern void nemoshow_item_path_cmd(struct showone *one, const char *cmd);
-extern void nemoshow_item_path_arc(struct showone *one, double x, double y, double width, double height, double from, double to);
+extern void nemoshow_item_path_moveto(struct showone *one, double x, double y, int has_stroke, int has_fill);
+extern void nemoshow_item_path_lineto(struct showone *one, double x, double y, int has_stroke, int has_fill);
+extern void nemoshow_item_path_cubicto(struct showone *one, double x0, double y0, double x1, double y1, double x2, double y2, int has_stroke, int has_fill);
+extern void nemoshow_item_path_close(struct showone *one, int has_stroke, int has_fill);
+extern void nemoshow_item_path_cmd(struct showone *one, const char *cmd, int has_stroke, int has_fill);
+extern void nemoshow_item_path_arc(struct showone *one, double x, double y, double width, double height, double from, double to, int has_stroke, int has_fill);
 extern void nemoshow_item_path_append(struct showone *one, struct showone *src);
 
 extern void nemoshow_item_path_translate(struct showone *one, double x, double y);

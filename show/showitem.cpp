@@ -971,43 +971,95 @@ void nemoshow_item_path_clear(struct showone *one)
 	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
 
-void nemoshow_item_path_moveto(struct showone *one, double x, double y)
+void nemoshow_item_path_moveto(struct showone *one, double x, double y, int has_stroke, int has_fill)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	NEMOSHOW_ITEM_CC(item, path)->moveTo(x, y);
 
+	if (has_stroke != 0) {
+		if (NEMOSHOW_ITEM_CC(item, strokepath) == NULL)
+			NEMOSHOW_ITEM_CC(item, strokepath) = new SkPath;
+
+		NEMOSHOW_ITEM_CC(item, strokepath)->moveTo(x, y);
+	}
+	if (has_fill != 0) {
+		if (NEMOSHOW_ITEM_CC(item, fillpath) == NULL)
+			NEMOSHOW_ITEM_CC(item, fillpath) = new SkPath;
+
+		NEMOSHOW_ITEM_CC(item, fillpath)->moveTo(x, y);
+	}
+
 	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
 
-void nemoshow_item_path_lineto(struct showone *one, double x, double y)
+void nemoshow_item_path_lineto(struct showone *one, double x, double y, int has_stroke, int has_fill)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	NEMOSHOW_ITEM_CC(item, path)->lineTo(x, y);
 
+	if (has_stroke != 0) {
+		if (NEMOSHOW_ITEM_CC(item, strokepath) == NULL)
+			NEMOSHOW_ITEM_CC(item, strokepath) = new SkPath;
+
+		NEMOSHOW_ITEM_CC(item, strokepath)->lineTo(x, y);
+	}
+	if (has_fill != 0) {
+		if (NEMOSHOW_ITEM_CC(item, fillpath) == NULL)
+			NEMOSHOW_ITEM_CC(item, fillpath) = new SkPath;
+
+		NEMOSHOW_ITEM_CC(item, fillpath)->lineTo(x, y);
+	}
+
 	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
 
-void nemoshow_item_path_cubicto(struct showone *one, double x0, double y0, double x1, double y1, double x2, double y2)
+void nemoshow_item_path_cubicto(struct showone *one, double x0, double y0, double x1, double y1, double x2, double y2, int has_stroke, int has_fill)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	NEMOSHOW_ITEM_CC(item, path)->cubicTo(x0, y0, x1, y1, x2, y2);
 
+	if (has_stroke != 0) {
+		if (NEMOSHOW_ITEM_CC(item, strokepath) == NULL)
+			NEMOSHOW_ITEM_CC(item, strokepath) = new SkPath;
+
+		NEMOSHOW_ITEM_CC(item, strokepath)->cubicTo(x0, y0, x1, y1, x2, y2);
+	}
+	if (has_fill != 0) {
+		if (NEMOSHOW_ITEM_CC(item, fillpath) == NULL)
+			NEMOSHOW_ITEM_CC(item, fillpath) = new SkPath;
+
+		NEMOSHOW_ITEM_CC(item, fillpath)->cubicTo(x0, y0, x1, y1, x2, y2);
+	}
+
 	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
 
-void nemoshow_item_path_close(struct showone *one)
+void nemoshow_item_path_close(struct showone *one, int has_stroke, int has_fill)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	NEMOSHOW_ITEM_CC(item, path)->close();
 
+	if (has_stroke != 0) {
+		if (NEMOSHOW_ITEM_CC(item, strokepath) == NULL)
+			NEMOSHOW_ITEM_CC(item, strokepath) = new SkPath;
+
+		NEMOSHOW_ITEM_CC(item, strokepath)->close();
+	}
+	if (has_fill != 0) {
+		if (NEMOSHOW_ITEM_CC(item, fillpath) == NULL)
+			NEMOSHOW_ITEM_CC(item, fillpath) = new SkPath;
+
+		NEMOSHOW_ITEM_CC(item, fillpath)->close();
+	}
+
 	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
 
-void nemoshow_item_path_cmd(struct showone *one, const char *cmd)
+void nemoshow_item_path_cmd(struct showone *one, const char *cmd, int has_stroke, int has_fill)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	SkPath path;
@@ -1016,15 +1068,41 @@ void nemoshow_item_path_cmd(struct showone *one, const char *cmd)
 
 	NEMOSHOW_ITEM_CC(item, path)->addPath(path);
 
+	if (has_stroke != 0) {
+		if (NEMOSHOW_ITEM_CC(item, strokepath) == NULL)
+			NEMOSHOW_ITEM_CC(item, strokepath) = new SkPath;
+
+		NEMOSHOW_ITEM_CC(item, strokepath)->addPath(path);
+	}
+	if (has_fill != 0) {
+		if (NEMOSHOW_ITEM_CC(item, fillpath) == NULL)
+			NEMOSHOW_ITEM_CC(item, fillpath) = new SkPath;
+
+		NEMOSHOW_ITEM_CC(item, fillpath)->addPath(path);
+	}
+
 	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
 
-void nemoshow_item_path_arc(struct showone *one, double x, double y, double width, double height, double from, double to)
+void nemoshow_item_path_arc(struct showone *one, double x, double y, double width, double height, double from, double to, int has_stroke, int has_fill)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	SkRect rect = SkRect::MakeXYWH(x, y, width, height);
 
 	NEMOSHOW_ITEM_CC(item, path)->addArc(rect, from, to);
+
+	if (has_stroke != 0) {
+		if (NEMOSHOW_ITEM_CC(item, strokepath) == NULL)
+			NEMOSHOW_ITEM_CC(item, strokepath) = new SkPath;
+
+		NEMOSHOW_ITEM_CC(item, strokepath)->addArc(rect, from, to);
+	}
+	if (has_fill != 0) {
+		if (NEMOSHOW_ITEM_CC(item, fillpath) == NULL)
+			NEMOSHOW_ITEM_CC(item, fillpath) = new SkPath;
+
+		NEMOSHOW_ITEM_CC(item, fillpath)->addArc(rect, from, to);
+	}
 
 	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
@@ -1034,17 +1112,20 @@ void nemoshow_item_path_append(struct showone *one, struct showone *src)
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	struct showitem *other = NEMOSHOW_ITEM(src);
 
-	if (NEMOSHOW_ITEM_CC(item, strokepath) == NULL)
-		NEMOSHOW_ITEM_CC(item, strokepath) = new SkPath;
-	if (NEMOSHOW_ITEM_CC(item, fillpath) == NULL)
-		NEMOSHOW_ITEM_CC(item, fillpath) = new SkPath;
-
 	NEMOSHOW_ITEM_CC(item, path)->addPath(*NEMOSHOW_ITEM_CC(other, path));
 
-	if (NEMOSHOW_ITEM_CC(other, strokepath) != NULL)
+	if (NEMOSHOW_ITEM_CC(other, strokepath) != NULL) {
+		if (NEMOSHOW_ITEM_CC(item, strokepath) == NULL)
+			NEMOSHOW_ITEM_CC(item, strokepath) = new SkPath;
+
 		NEMOSHOW_ITEM_CC(item, strokepath)->addPath(*NEMOSHOW_ITEM_CC(other, strokepath));
-	if (NEMOSHOW_ITEM_CC(other, fillpath) != NULL)
+	}
+	if (NEMOSHOW_ITEM_CC(other, fillpath) != NULL) {
+		if (NEMOSHOW_ITEM_CC(item, fillpath) == NULL)
+			NEMOSHOW_ITEM_CC(item, fillpath) = new SkPath;
+
 		NEMOSHOW_ITEM_CC(item, fillpath)->addPath(*NEMOSHOW_ITEM_CC(other, fillpath));
+	}
 
 	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }

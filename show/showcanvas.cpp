@@ -340,15 +340,16 @@ static inline void nemoshow_canvas_render_item_path(struct showcanvas *canvas, S
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	if (item->from == 0.0f && item->to == 1.0f) {
-		if (NEMOSHOW_ITEM_CC(item, fillpath) != NULL) {
-			if (item->fill != 0)
+		if (item->fill != 0) {
+			if (NEMOSHOW_ITEM_CC(item, fillpath) != NULL)
 				_canvas->drawPath(*NEMOSHOW_ITEM_CC(item, fillpath), *NEMOSHOW_ITEM_CC(item, fill));
-			if (item->stroke != 0)
-				_canvas->drawPath(*NEMOSHOW_ITEM_CC(item, strokepath), *NEMOSHOW_ITEM_CC(item, stroke));
-		} else {
-			if (item->fill != 0)
+			else
 				_canvas->drawPath(*NEMOSHOW_ITEM_CC(item, path), *NEMOSHOW_ITEM_CC(item, fill));
-			if (item->stroke != 0)
+		}
+		if (item->stroke != 0) {
+			if (NEMOSHOW_ITEM_CC(item, strokepath) != NULL)
+				_canvas->drawPath(*NEMOSHOW_ITEM_CC(item, strokepath), *NEMOSHOW_ITEM_CC(item, stroke));
+			else
 				_canvas->drawPath(*NEMOSHOW_ITEM_CC(item, path), *NEMOSHOW_ITEM_CC(item, stroke));
 		}
 	} else {
@@ -357,7 +358,6 @@ static inline void nemoshow_canvas_render_item_path(struct showcanvas *canvas, S
 		nemoshow_helper_draw_path(
 				path,
 				NEMOSHOW_ITEM_CC(item, path),
-				NEMOSHOW_ITEM_CC(item, fill),
 				item->pathlength,
 				item->from, item->to);
 
@@ -380,14 +380,10 @@ static inline void nemoshow_canvas_render_item_path_group(struct showcanvas *can
 		nemoshow_helper_draw_path(
 				path,
 				NEMOSHOW_ITEM_CC(item, path),
-				NEMOSHOW_ITEM_CC(item, fill),
 				item->pathlength,
 				item->from, item->to);
 
-		if (item->fill != 0)
-			_canvas->drawPath(path, *NEMOSHOW_ITEM_CC(item, fill));
-		if (item->stroke != 0)
-			_canvas->drawPath(path, *NEMOSHOW_ITEM_CC(item, stroke));
+		_canvas->drawPath(path, *NEMOSHOW_ITEM_CC(item, stroke));
 	}
 }
 

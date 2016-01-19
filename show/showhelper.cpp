@@ -89,7 +89,7 @@ double nemoshow_helper_get_path_length(SkPath *path)
 	return length;
 }
 
-void nemoshow_helper_draw_path(SkPath &dst, SkPath *src, SkPaint *paint, double length, double from, double to)
+void nemoshow_helper_draw_path(SkPath &dst, SkPath *src, double length, double from, double to)
 {
 	SkPath::RawIter iter(*src);
 	SkPoint lts;
