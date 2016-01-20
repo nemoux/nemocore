@@ -76,6 +76,8 @@ struct showone *nemoshow_item_create(int type)
 	one->destroy = nemoshow_item_destroy;
 	one->attach = nemoshow_item_attach_one;
 	one->detach = nemoshow_item_detach_one;
+	one->above = nemoshow_item_above_one;
+	one->below = nemoshow_item_below_one;
 
 	nemoshow_one_prepare(one);
 
@@ -955,6 +957,20 @@ void nemoshow_item_detach_one(struct showone *parent, struct showone *one)
 		nemolist_remove(&item->canvas_destroy_listener.link);
 		nemolist_init(&item->canvas_destroy_listener.link);
 	}
+}
+
+void nemoshow_item_above_one(struct showone *one, struct showone *above)
+{
+	nemoshow_one_above_one(one, above);
+
+	nemoshow_one_dirty(one, NEMOSHOW_REDRAW_DIRTY);
+}
+
+void nemoshow_item_below_one(struct showone *one, struct showone *below)
+{
+	nemoshow_one_below_one(one, below);
+
+	nemoshow_one_dirty(one, NEMOSHOW_REDRAW_DIRTY);
 }
 
 void nemoshow_item_path_clear(struct showone *one)

@@ -83,6 +83,8 @@ typedef int (*nemoshow_one_update_t)(struct showone *one);
 typedef void (*nemoshow_one_destroy_t)(struct showone *one);
 typedef void (*nemoshow_one_attach_t)(struct showone *parent, struct showone *one);
 typedef void (*nemoshow_one_detach_t)(struct showone *parent, struct showone *one);
+typedef void (*nemoshow_one_above_t)(struct showone *one, struct showone *above);
+typedef void (*nemoshow_one_below_t)(struct showone *one, struct showone *below);
 
 struct showattr {
 	char name[NEMOSHOW_ATTR_NAME_MAX];
@@ -132,6 +134,8 @@ struct showone {
 	nemoshow_one_destroy_t destroy;
 	nemoshow_one_attach_t attach;
 	nemoshow_one_detach_t detach;
+	nemoshow_one_above_t above;
+	nemoshow_one_below_t below;
 
 	struct nemoshow *show;
 
@@ -211,12 +215,30 @@ static inline void nemoshow_one_detach(struct showone *parent, struct showone *o
 	}
 }
 
+static inline void nemoshow_one_above(struct showone *one, struct showone *above)
+{
+	if (one->above != NULL) {
+		one->above(one, above);
+	} else {
+		nemoshow_one_above_one(one, above);
+	}
+}
+
+static inline void nemoshow_one_below(struct showone *one, struct showone *below)
+{
+	if (one->below != NULL) {
+		one->below(one, below);
+	} else {
+		nemoshow_one_below_one(one, below);
+	}
+}
+
 static inline void nemoshow_one_update(struct showone *one)
 {
 	one->update(one);
-	
+
 	one->dirty = 0;
-	
+
 	one->dirty_serial = 0;
 
 	nemolist_remove(&one->dirty_link);
