@@ -573,6 +573,9 @@ static inline void nemoshow_canvas_render_one(struct showcanvas *canvas, SkCanva
 					nemoshow_canvas_get_viewport_sy(item->canvas));
 			_canvas->concat(*NEMOSHOW_ITEM_CC(clip, modelview));
 
+			if (clip->has_anchor != 0)
+				_canvas->translate(-clip->width * clip->ax, -clip->height * clip->ay);
+
 			_canvas->clipPath(*NEMOSHOW_ITEM_CC(clip, path));
 
 			_canvas->setMatrix(matrix);
