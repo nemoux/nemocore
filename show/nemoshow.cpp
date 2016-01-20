@@ -839,6 +839,7 @@ void nemoshow_dispatch_transition(struct nemoshow *show, uint32_t msecs)
 				nemolist_insert(&show->transition_destroy_list, &trans->link);
 			} else if (trans->repeat == 0 || --trans->repeat) {
 				trans->stime = 0;
+				trans->delay = 0;
 
 				for (i = 0; i < trans->nsequences; i++) {
 					nemoshow_sequence_prepare(trans->sequences[i], trans->serial);
