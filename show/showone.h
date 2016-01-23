@@ -160,6 +160,11 @@ struct showone {
 
 #define NEMOSHOW_REF(one, index)			(one->refs[index] != NULL ? one->refs[index]->src : NULL)
 
+#define NEMOSHOW_ONE_TAG(tag)								((tag >> 0) & 0xffff)
+#define NEMOSHOW_ONE_GROUP(tag)							((tag >> 16) & 0xffff)
+
+#define NEMOSHOW_ONE_TAGGROUP(tag, group)		(((tag & 0xffff) << 0) | ((group & 0xffff) << 16))
+
 #define nemoshow_children_for_each(child, one)	\
 	nemolist_for_each(child, &((one)->children_list), children_link)
 #define nemoshow_children_for_each_reverse(child, one)	\
