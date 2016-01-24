@@ -80,8 +80,7 @@ void nemoshell_ping(struct shellbin *bin, uint32_t serial)
 
 	wl_event_source_timer_update(sc->ping_timer, 200);
 
-	if (xdgshell_is_xdg_surface(bin) ||
-			xdgshell_is_xdg_popup(bin))
+	if (xdgshell_is_xdg_surface(bin) || xdgshell_is_xdg_popup(bin))
 		xdg_shell_send_ping(sc->resource, serial);
 	else if (waylandshell_is_shell_surface(bin))
 		wl_shell_surface_send_ping(bin->resource, serial);
@@ -989,8 +988,14 @@ void nemoshell_set_popup_bin(struct nemoshell *shell, struct shellbin *bin, stru
 void nemoshell_set_fullscreen_bin_on_screen(struct nemoshell *shell, struct shellbin *bin, struct nemoscreen *screen)
 {
 	nemoshell_clear_bin_next_state(bin);
-	bin->next_state.fullscreen = 1;
-	bin->state_changed = 1;
+
+	if (xdgshell_is_xdg_surface(bin) || xdgshell_is_xdg_popup(bin)) {
+		bin->requested_state.fullscreen = 1;
+		bin->state_requested = 1;
+	} else {
+		bin->next_state.fullscreen = 1;
+		bin->state_changed = 1;
+	}
 
 	bin->type = NEMO_SHELL_SURFACE_NORMAL_TYPE;
 	nemoshell_set_parent_bin(bin, NULL);
@@ -1034,8 +1039,13 @@ void nemoshell_put_fullscreen_bin(struct nemoshell *shell, struct shellbin *bin)
 	wl_list_remove(&bin->screen_link);
 	wl_list_init(&bin->screen_link);
 
-	bin->state_changed = 1;
-	bin->next_state.fullscreen = 0;
+	if (xdgshell_is_xdg_surface(bin) || xdgshell_is_xdg_popup(bin)) {
+		bin->state_requested = 1;
+		bin->requested_state.fullscreen = 0;
+	} else {
+		bin->state_changed = 1;
+		bin->next_state.fullscreen = 0;
+	}
 
 	bin->fixed = 0;
 
@@ -1124,8 +1134,14 @@ void nemoshell_put_fullscreen_opaque(struct nemoshell *shell, struct shellbin *b
 void nemoshell_set_maximized_bin_on_screen(struct nemoshell *shell, struct shellbin *bin, struct nemoscreen *screen)
 {
 	nemoshell_clear_bin_next_state(bin);
-	bin->next_state.maximized = 1;
-	bin->state_changed = 1;
+
+	if (xdgshell_is_xdg_surface(bin) || xdgshell_is_xdg_popup(bin)) {
+		bin->requested_state.maximized = 1;
+		bin->state_requested = 1;
+	} else {
+		bin->next_state.maximized = 1;
+		bin->state_changed = 1;
+	}
 
 	bin->type = NEMO_SHELL_SURFACE_NORMAL_TYPE;
 	nemoshell_set_parent_bin(bin, NULL);
@@ -1169,8 +1185,13 @@ void nemoshell_put_maximized_bin(struct nemoshell *shell, struct shellbin *bin)
 	wl_list_remove(&bin->screen_link);
 	wl_list_init(&bin->screen_link);
 
-	bin->state_changed = 1;
-	bin->next_state.maximized = 0;
+	if (xdgshell_is_xdg_surface(bin) || xdgshell_is_xdg_popup(bin)) {
+		bin->state_requested = 1;
+		bin->requested_state.maximized = 0;
+	} else {
+		bin->state_changed = 1;
+		bin->next_state.maximized = 0;
+	}
 
 	bin->fixed = 0;
 
