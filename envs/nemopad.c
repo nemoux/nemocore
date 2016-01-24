@@ -325,7 +325,8 @@ static void nemopad_dispatch_tale_event(struct nemotale *tale, struct talenode *
 			struct nemopad *pad = (struct nemopad *)nemoshow_get_userdata(show);
 
 			if (pad->is_pickable != 0) {
-				if (nemotale_is_touch_down(tale, event, type)) {
+				if (nemotale_is_touch_down(tale, event, type) ||
+						nemotale_is_touch_up(tale, event, type)) {
 					struct nemoseat *seat = compz->seat;
 
 					nemotale_event_update_taps(tale, event, type);
