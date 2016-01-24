@@ -390,7 +390,6 @@ struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas
 
 	wl_signal_init(&bin->destroy_signal);
 	wl_signal_init(&bin->ungrab_signal);
-	wl_signal_init(&bin->endgrab_signal);
 	wl_signal_init(&bin->change_signal);
 	wl_signal_init(&bin->resize_signal);
 

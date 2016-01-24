@@ -110,7 +110,6 @@ struct nemoactor *nemoactor_create_pixman(struct nemocompz *compz, int width, in
 
 	wl_signal_init(&actor->destroy_signal);
 	wl_signal_init(&actor->ungrab_signal);
-	wl_signal_init(&actor->endgrab_signal);
 
 	wl_list_init(&actor->link);
 	wl_list_insert(&compz->actor_list, &actor->link);
@@ -239,7 +238,6 @@ struct nemoactor *nemoactor_create_gl(struct nemocompz *compz, int width, int he
 
 	wl_signal_init(&actor->destroy_signal);
 	wl_signal_init(&actor->ungrab_signal);
-	wl_signal_init(&actor->endgrab_signal);
 
 	wl_list_init(&actor->link);
 	wl_list_insert(&compz->actor_list, &actor->link);

@@ -69,13 +69,6 @@ static void nemopack_handle_bin_resize(struct wl_listener *listener, void *data)
 	nemoshow_dispatch_frame(pack->show);
 }
 
-static void nemopack_handle_bin_endgrab(struct wl_listener *listener, void *data)
-{
-	struct nemopack *pack = (struct nemopack *)container_of(listener, struct nemopack, bin_endgrab_listener);
-
-	nemotimer_set_timeout(pack->timer, pack->timeout);
-}
-
 static void nemopack_dispatch_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
 {
 	uint32_t id = nemotale_node_get_id(node);
@@ -92,18 +85,14 @@ static void nemopack_dispatch_event(struct nemotale *tale, struct talenode *node
 				nemotale_is_touch_up(tale, event, type)) {
 			nemotale_event_update_node_taps(tale, node, event, type);
 
-			if (nemotale_is_single_tap(tale, event, type)) {
+			if (nemotale_is_no_tap(tale, event, type)) {
+				nemotimer_set_timeout(pack->timer, pack->timeout);
+			} else if (nemotale_is_single_tap(tale, event, type)) {
 				struct touchpoint *tp;
 
 				tp = nemoseat_get_touchpoint_by_id(seat, event->taps[0]->device);
 				if (tp != NULL) {
 					nemoshell_move_canvas_by_touchpoint(shell, tp, pack->bin);
-
-					wl_list_remove(&pack->bin_endgrab_listener.link);
-					wl_list_init(&pack->bin_endgrab_listener.link);
-
-					pack->bin_endgrab_listener.notify = nemopack_handle_bin_endgrab;
-					wl_signal_add(&pack->bin->endgrab_signal, &pack->bin_endgrab_listener);
 
 					nemotimer_set_timeout(pack->timer, 0);
 				}
@@ -121,12 +110,6 @@ static void nemopack_dispatch_event(struct nemotale *tale, struct talenode *node
 						nemoshell_pick_canvas_by_touchpoint(shell, tp0, tp1, (1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_MOVE), pack->bin);
 					}
 
-					wl_list_remove(&pack->bin_endgrab_listener.link);
-					wl_list_init(&pack->bin_endgrab_listener.link);
-
-					pack->bin_endgrab_listener.notify = nemopack_handle_bin_endgrab;
-					wl_signal_add(&pack->bin->endgrab_signal, &pack->bin_endgrab_listener);
-
 					nemotimer_set_timeout(pack->timer, 0);
 				}
 			} else if (nemotale_is_many_taps(tale, event, type)) {
@@ -142,12 +125,6 @@ static void nemopack_dispatch_event(struct nemotale *tale, struct talenode *node
 					} else {
 						nemoshell_pick_canvas_by_touchpoint(shell, tp0, tp1, (1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_MOVE), pack->bin);
 					}
-
-					wl_list_remove(&pack->bin_endgrab_listener.link);
-					wl_list_init(&pack->bin_endgrab_listener.link);
-
-					pack->bin_endgrab_listener.notify = nemopack_handle_bin_endgrab;
-					wl_signal_add(&pack->bin->endgrab_signal, &pack->bin_endgrab_listener);
 
 					nemotimer_set_timeout(pack->timer, 0);
 				}
@@ -311,8 +288,6 @@ struct nemopack *nemopack_create(struct nemoshell *shell, struct nemoview *view,
 	pack->bin_resize_listener.notify = nemopack_handle_bin_resize;
 	wl_signal_add(&pack->bin->resize_signal, &pack->bin_resize_listener);
 
-	wl_list_init(&pack->bin_endgrab_listener.link);
-
 	nemolist_init(&pack->destroy_listener.link);
 
 	return pack;
@@ -332,7 +307,6 @@ void nemopack_destroy(struct nemopack *pack)
 
 	wl_list_remove(&pack->view_destroy_listener.link);
 	wl_list_remove(&pack->bin_resize_listener.link);
-	wl_list_remove(&pack->bin_endgrab_listener.link);
 
 	nemotimer_destroy(pack->timer);
 

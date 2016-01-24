@@ -138,9 +138,6 @@ void nemoshell_end_touchpoint_shellgrab(struct shellgrab *grab)
 		wl_list_remove(&grab->bin_ungrab_listener.link);
 		wl_list_remove(&grab->bin_change_listener.link);
 		grab->bin->grabbed--;
-
-		if (grab->bin->grabbed <= 0)
-			wl_signal_emit(&grab->bin->endgrab_signal, grab->bin);
 	}
 
 	touchpoint_end_grab(grab->base.touchpoint.touchpoint);
@@ -177,9 +174,6 @@ void nemoshell_end_touchpoint_actorgrab(struct actorgrab *grab)
 		wl_list_remove(&grab->actor_destroy_listener.link);
 		wl_list_remove(&grab->actor_ungrab_listener.link);
 		grab->actor->grabbed--;
-
-		if (grab->actor->grabbed <= 0)
-			wl_signal_emit(&grab->actor->endgrab_signal, grab->actor);
 	}
 
 	touchpoint_end_grab(grab->base.touchpoint.touchpoint);

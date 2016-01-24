@@ -312,13 +312,6 @@ static int nemopad_dispatch_key_grab(struct talegrab *base, uint32_t type, struc
 	return 1;
 }
 
-static void nemopad_handle_actor_endgrab(struct wl_listener *listener, void *data)
-{
-	struct nemopad *pad = (struct nemopad *)container_of(listener, struct nemopad, actor_endgrab_listener);
-
-	nemotimer_set_timeout(pad->timer, pad->timeout);
-}
-
 static void nemopad_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
 {
 	uint32_t id = nemotale_node_get_id(node);
@@ -337,18 +330,14 @@ static void nemopad_dispatch_tale_event(struct nemotale *tale, struct talenode *
 
 					nemotale_event_update_taps(tale, event, type);
 
-					if (nemotale_is_single_tap(tale, event, type)) {
+					if (nemotale_is_no_tap(tale, event, type)) {
+						nemotimer_set_timeout(pad->timer, pad->timeout);
+					} else if (nemotale_is_single_tap(tale, event, type)) {
 						struct touchpoint *tp;
 
 						tp = nemoseat_get_touchpoint_by_id(seat, event->device);
 						if (tp != NULL) {
 							nemoshell_move_actor_by_touchpoint(shell, tp, actor);
-
-							wl_list_remove(&pad->actor_endgrab_listener.link);
-							wl_list_init(&pad->actor_endgrab_listener.link);
-
-							pad->actor_endgrab_listener.notify = nemopad_handle_actor_endgrab;
-							wl_signal_add(&actor->endgrab_signal, &pad->actor_endgrab_listener);
 
 							nemotimer_set_timeout(pad->timer, 0);
 						}
@@ -363,12 +352,6 @@ static void nemopad_dispatch_tale_event(struct nemotale *tale, struct talenode *
 							nemoview_put_pivot(actor->view);
 
 							nemoshell_pick_actor_by_touchpoint(shell, tp0, tp1, (1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_SCALE) | (1 << NEMO_SURFACE_PICK_TYPE_MOVE), actor);
-
-							wl_list_remove(&pad->actor_endgrab_listener.link);
-							wl_list_init(&pad->actor_endgrab_listener.link);
-
-							pad->actor_endgrab_listener.notify = nemopad_handle_actor_endgrab;
-							wl_signal_add(&actor->endgrab_signal, &pad->actor_endgrab_listener);
 
 							nemotimer_set_timeout(pad->timer, 0);
 						}
@@ -548,8 +531,6 @@ struct nemopad *nemopad_create(struct nemoshell *shell, uint32_t width, uint32_t
 
 	nemosignal_init(&pad->destroy_signal);
 
-	wl_list_init(&pad->actor_endgrab_listener.link);
-
 	pad->timer = timer = nemotimer_create(compz);
 	nemotimer_set_callback(timer, nemopad_dispatch_timer);
 	nemotimer_set_userdata(timer, pad);
@@ -566,8 +547,6 @@ struct nemopad *nemopad_create(struct nemoshell *shell, uint32_t width, uint32_t
 void nemopad_destroy(struct nemopad *pad)
 {
 	nemosignal_emit(&pad->destroy_signal, pad);
-
-	wl_list_remove(&pad->actor_endgrab_listener.link);
 
 	nemotimer_destroy(pad->timer);
 

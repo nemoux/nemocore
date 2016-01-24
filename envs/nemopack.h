@@ -28,9 +28,7 @@ struct nemopack {
 
 	struct wl_listener view_destroy_listener;
 	struct wl_listener bin_resize_listener;
-
-	struct wl_listener bin_endgrab_listener;
-
+	
 	struct nemoshow *show;
 
 	struct showone *scene;

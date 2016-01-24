@@ -39,7 +39,6 @@ struct nemoactor {
 
 	struct wl_signal destroy_signal;
 	struct wl_signal ungrab_signal;
-	struct wl_signal endgrab_signal;
 
 	struct wl_list link;
 

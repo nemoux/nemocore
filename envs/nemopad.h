@@ -52,8 +52,6 @@ struct nemopad {
 	int is_pickable;
 	int is_visible;
 
-	struct wl_listener actor_endgrab_listener;
-
 	uint32_t width;
 	uint32_t height;
 	uint32_t minwidth;
