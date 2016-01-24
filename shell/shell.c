@@ -1001,6 +1001,8 @@ void nemoshell_set_fullscreen_bin_on_screen(struct nemoshell *shell, struct shel
 	bin->screen.height = screen->rh;
 	bin->has_screen = 1;
 
+	bin->fixed = 1;
+
 	nemoshell_send_bin_state(bin);
 }
 
@@ -1033,7 +1035,7 @@ void nemoshell_put_fullscreen_bin(struct nemoshell *shell, struct shellbin *bin)
 	wl_list_init(&bin->screen_link);
 
 	bin->state_changed = 1;
-	bin->next_state.fullscreen = 0;
+	bin->requested_state.fullscreen = 0;
 
 	bin->fixed = 0;
 
@@ -1134,6 +1136,8 @@ void nemoshell_set_maximized_bin_on_screen(struct nemoshell *shell, struct shell
 	bin->screen.height = screen->rh;
 	bin->has_screen = 1;
 
+	bin->fixed = 1;
+
 	nemoshell_send_bin_state(bin);
 }
 
@@ -1155,6 +1159,8 @@ void nemoshell_set_maximized_bin(struct nemoshell *shell, struct shellbin *bin, 
 	bin->screen.r = screen->dr * M_PI / 180.0f;
 	bin->has_screen = 1;
 
+	bin->fixed = screen->fixed;
+
 	nemoshell_send_bin_state(bin);
 }
 
@@ -1164,7 +1170,9 @@ void nemoshell_put_maximized_bin(struct nemoshell *shell, struct shellbin *bin)
 	wl_list_init(&bin->screen_link);
 
 	bin->state_changed = 1;
-	bin->next_state.maximized = 0;
+	bin->requested_state.maximized = 0;
+
+	bin->fixed = 0;
 
 	nemoshell_send_bin_state(bin);
 }
