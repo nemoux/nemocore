@@ -1035,7 +1035,7 @@ void nemoshell_put_fullscreen_bin(struct nemoshell *shell, struct shellbin *bin)
 	wl_list_init(&bin->screen_link);
 
 	bin->state_changed = 1;
-	bin->requested_state.fullscreen = 0;
+	bin->next_state.fullscreen = 0;
 
 	bin->fixed = 0;
 
@@ -1170,7 +1170,7 @@ void nemoshell_put_maximized_bin(struct nemoshell *shell, struct shellbin *bin)
 	wl_list_init(&bin->screen_link);
 
 	bin->state_changed = 1;
-	bin->requested_state.maximized = 0;
+	bin->next_state.maximized = 0;
 
 	bin->fixed = 0;
 
