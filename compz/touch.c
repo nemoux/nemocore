@@ -254,6 +254,17 @@ void touchpoint_move(struct touchpoint *tp, float x, float y)
 	tp->y = y;
 }
 
+void touchpoint_move_with_direction(struct touchpoint *tp, float x, float y)
+{
+	if (tp->x != x || tp->y != y) {
+		tp->dx = x - tp->x;
+		tp->dy = y - tp->y;
+
+		tp->x = x;
+		tp->y = y;
+	}
+}
+
 static void touchpoint_handle_focus_resource_destroy(struct wl_listener *listener, void *data)
 {
 	struct touchpoint *tp = (struct touchpoint *)container_of(listener, struct touchpoint, focus_resource_listener);

@@ -51,6 +51,7 @@ struct touchpoint {
 	uint32_t grab_time;
 
 	float x, y;
+	float dx, dy;
 
 	void *binding;
 };
@@ -113,6 +114,7 @@ extern void nemotouch_flush_tuio(struct tuionode *node);
 
 extern float touchpoint_get_moving_distance(struct touchpoint *tp, float x, float y);
 extern void touchpoint_move(struct touchpoint *tp, float x, float y);
+extern void touchpoint_move_with_direction(struct touchpoint *tp, float x, float y);
 
 extern void touchpoint_set_focus(struct touchpoint *tp, struct nemoview *view);
 

@@ -98,8 +98,10 @@ struct nemoshell {
 		double max_scale;
 		double fullscreen_scale;
 
-		double scale_interval;
 		double resize_interval;
+
+		double rotate_degree;
+		double scale_degree;
 
 		double min_distance;
 	} pick;
