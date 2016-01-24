@@ -107,30 +107,6 @@ int nemoinput_get_config_geometry(struct nemocompz *compz, const char *devnode, 
 	return 1;
 }
 
-int nemoinput_get_config_event(struct nemocompz *compz, const char *devnode, uint32_t *interval, uint32_t *interpolation)
-{
-	const char *value;
-	int index;
-
-	index = nemoitem_get_ifone(compz->configs, "//nemoshell/input", 0, "devnode", devnode);
-	if (index < 0)
-		return 0;
-
-	value = nemoitem_get_attr(compz->configs, index, "interval");
-	if (value != NULL)
-		*interval = strtoul(value, 0, 10);
-	else
-		return 0;
-
-	value = nemoitem_get_attr(compz->configs, index, "interpolation");
-	if (value != NULL)
-		*interpolation = strtoul(value, 0, 10);
-	else
-		return 0;
-
-	return 1;
-}
-
 void nemoinput_transform_to_global(struct inputnode *node, float dx, float dy, float *x, float *y)
 {
 	if (node->transform.enable != 0) {

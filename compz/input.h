@@ -36,7 +36,6 @@ extern void nemoinput_set_geometry(struct inputnode *node, int32_t x, int32_t y,
 
 extern int nemoinput_get_config_screen(struct nemocompz *compz, const char *devnode, uint32_t *nodeid, uint32_t *screenid);
 extern int nemoinput_get_config_geometry(struct nemocompz *compz, const char *devnode, struct inputnode *node);
-extern int nemoinput_get_config_event(struct nemocompz *compz, const char *devnode, uint32_t *interval, uint32_t *interpolation);
 
 extern void nemoinput_transform_to_global(struct inputnode *node, float dx, float dy, float *x, float *y);
 extern void nemoinput_transform_from_global(struct inputnode *node, float x, float y, float *dx, float *dy);

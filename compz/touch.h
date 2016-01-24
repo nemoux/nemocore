@@ -9,17 +9,6 @@ NEMO_BEGIN_EXTERN_C
 
 #include <input.h>
 
-#define	NEMOTOUCH_DELAY_MAX			(50)
-
-typedef enum {
-	NEMO_TOUCH_NONE_EVENT = 0,
-	NEMO_TOUCH_DOWN_EVENT = 1,
-	NEMO_TOUCH_MOTION_EVENT = 2,
-	NEMO_TOUCH_INTERMOTION_EVENT = 3,
-	NEMO_TOUCH_UP_EVENT = 4,
-	NEMO_TOUCH_LAST_EVENT
-} NemoTouchEventType;
-
 struct nemoseat;
 struct nemotouch;
 struct tuionode;
@@ -63,9 +52,6 @@ struct touchpoint {
 
 	float x, y;
 
-	float x0, y0;
-	uint32_t age;
-
 	void *binding;
 };
 
@@ -94,21 +80,6 @@ struct touchnode {
 	void *userdata;
 };
 
-struct touchevent {
-	struct touchpoint *tp;
-
-	uint32_t age;
-
-	uint32_t type;
-
-	uint32_t index;
-
-	int id;
-	float x, y;
-
-	struct wl_list link;
-};
-
 struct nemotouch {
 	struct nemoseat *seat;
 	struct inputnode *node;
@@ -118,12 +89,6 @@ struct nemotouch {
 	struct wl_list link;
 
 	struct wl_list touchpoint_list;
-
-	struct wl_event_source *timer;
-	uint32_t interval;
-	uint32_t interpolation;
-
-	struct wl_list touchevent_list;
 
 	int is_logging;
 };
@@ -169,8 +134,6 @@ extern void nemotouch_attach_tap(struct touchtaps *taps, uint64_t id, double x, 
 extern void nemotouch_flush_taps(struct touchnode *node, struct touchtaps *taps);
 
 extern void nemotouch_bypass_event(struct nemocompz *compz, int32_t touchid, float sx, float sy);
-
-extern int nemotouch_use_event_timer(struct nemotouch *touch, uint32_t interval, uint32_t interpolation);
 
 extern void nemotouch_dump_touchpoint(struct nemotouch *touch);
 

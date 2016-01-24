@@ -218,7 +218,6 @@ struct nemotouch *nemotouch_create(struct nemoseat *seat, struct inputnode *node
 	touch->node = node;
 
 	wl_list_init(&touch->touchpoint_list);
-	wl_list_init(&touch->touchevent_list);
 
 	wl_list_insert(&seat->touch.device_list, &touch->link);
 
@@ -237,9 +236,6 @@ err1:
 void nemotouch_destroy(struct nemotouch *touch)
 {
 	wl_list_remove(&touch->link);
-
-	if (touch->timer != NULL)
-		wl_event_source_remove(touch->timer);
 
 	free(touch);
 }
@@ -375,26 +371,6 @@ struct touchpoint *nemotouch_get_touchpoint_by_serial(struct nemotouch *touch, u
 	return NULL;
 }
 
-static struct touchevent *nemotouch_create_touchevent(struct nemotouch *touch)
-{
-	struct touchevent *event;
-
-	event = (struct touchevent *)malloc(sizeof(struct touchevent));
-	if (event == NULL)
-		return NULL;
-
-	wl_list_insert(touch->touchevent_list.prev, &event->link);
-
-	return event;
-}
-
-static void nemotouch_destroy_touchevent(struct nemotouch *touch, struct touchevent *event)
-{
-	wl_list_remove(&event->link);
-
-	free(event);
-}
-
 void nemotouch_notify_down(struct nemotouch *touch, uint32_t time, int id, float x, float y)
 {
 	struct touchpoint *tp;
@@ -408,20 +384,6 @@ void nemotouch_notify_down(struct nemotouch *touch, uint32_t time, int id, float
 	tp = nemotouch_create_touchpoint(touch, id);
 	if (tp == NULL)
 		return;
-
-	if (touch->timer != NULL) {
-		struct touchevent *event;
-
-		event = nemotouch_create_touchevent(touch);
-		event->tp = tp;
-		event->type = NEMO_TOUCH_DOWN_EVENT;
-		event->age = tp->age;
-		event->id = id;
-		event->x = x;
-		event->y = y;
-
-		return;
-	}
 
 	tp->grab_x = x;
 	tp->grab_y = y;
@@ -448,18 +410,6 @@ void nemotouch_notify_up(struct nemotouch *touch, uint32_t time, int id)
 	if (tp == NULL)
 		return;
 
-	if (touch->timer != NULL) {
-		struct touchevent *event;
-
-		event = nemotouch_create_touchevent(touch);
-		event->tp = tp;
-		event->type = NEMO_TOUCH_UP_EVENT;
-		event->age = tp->age;
-		event->id = id;
-
-		return;
-	}
-
 	tp->grab->interface->up(tp->grab, time, tp->gid);
 
 	nemotouch_destroy_touchpoint(touch, tp);
@@ -478,34 +428,6 @@ void nemotouch_notify_motion(struct nemotouch *touch, uint32_t time, int id, flo
 	tp = nemotouch_get_touchpoint_by_id(touch, id);
 	if (tp == NULL)
 		return;
-
-	if (touch->timer != NULL) {
-		struct touchevent *event;
-		int i;
-
-		if (tp->age < NEMOTOUCH_DELAY_MAX / touch->interval) {
-			for (i = 0; i < touch->interpolation; i++) {
-				event = nemotouch_create_touchevent(touch);
-				event->tp = tp;
-				event->type = NEMO_TOUCH_INTERMOTION_EVENT;
-				event->age = tp->age++;
-				event->index = i;
-				event->id = id;
-				event->x = x;
-				event->y = y;
-			}
-		}
-
-		event = nemotouch_create_touchevent(touch);
-		event->tp = tp;
-		event->type = NEMO_TOUCH_MOTION_EVENT;
-		event->age = tp->age++;
-		event->id = id;
-		event->x = x;
-		event->y = y;
-
-		return;
-	}
 
 	tp->grab->interface->motion(tp->grab, time, tp->gid, x, y);
 }
@@ -830,80 +752,6 @@ void nemotouch_bypass_event(struct nemocompz *compz, int32_t touchid, float sx, 
 
 		nemocompz_run_touch_binding(compz, tp, time);
 	}
-}
-
-static int nemotouch_dispatch_timer(void *data)
-{
-	struct nemotouch *touch = (struct nemotouch *)data;
-	struct nemocompz *compz = touch->seat->compz;
-	struct touchpoint *tp;
-	struct touchevent *event, *next;
-	uint32_t msecs = time_current_msecs();
-
-	wl_list_for_each_safe(event, next, &touch->touchevent_list, link) {
-		if (event->age > 0) {
-			event->age--;
-			continue;
-		}
-
-		tp = event->tp;
-
-		if (event->type == NEMO_TOUCH_MOTION_EVENT) {
-			tp->grab->interface->motion(tp->grab, msecs, tp->gid, event->x, event->y);
-
-			tp->x0 = event->x;
-			tp->y0 = event->y;
-
-			tp->age--;
-		} else if (event->type == NEMO_TOUCH_INTERMOTION_EVENT) {
-			float t = (float)(event->index + 1) / (float)(touch->interpolation + 1);
-			float x = (event->x - tp->x0) * t + tp->x0;
-			float y = (event->y - tp->y0) * t + tp->y0;
-
-			tp->grab->interface->motion(tp->grab, msecs, tp->gid, x, y);
-
-			tp->age--;
-		} else if (event->type == NEMO_TOUCH_DOWN_EVENT) {
-			tp->grab_x = event->x;
-			tp->grab_y = event->y;
-
-			tp->grab->interface->down(tp->grab, msecs, tp->gid, event->x, event->y);
-
-			tp->grab_serial = wl_display_get_serial(compz->display);
-			tp->grab_time = msecs;
-
-			tp->x0 = event->x;
-			tp->y0 = event->y;
-
-			nemocompz_run_touch_binding(compz, tp, msecs);
-		} else if (event->type == NEMO_TOUCH_UP_EVENT) {
-			tp->grab->interface->up(tp->grab, msecs, tp->gid);
-
-			nemotouch_destroy_touchpoint(touch, tp);
-		}
-
-		nemotouch_destroy_touchevent(touch, event);
-	}
-
-	wl_event_source_timer_update(touch->timer, touch->interval);
-
-	return 1;
-}
-
-int nemotouch_use_event_timer(struct nemotouch *touch, uint32_t interval, uint32_t interpolation)
-{
-	struct nemocompz *compz = touch->seat->compz;
-
-	touch->interval = interval;
-	touch->interpolation = interpolation;
-
-	touch->timer = wl_event_loop_add_timer(compz->loop, nemotouch_dispatch_timer, touch);
-	if (touch->timer == NULL)
-		return -1;
-
-	wl_event_source_timer_update(touch->timer, touch->interval);
-
-	return 0;
 }
 
 void nemotouch_dump_touchpoint(struct nemotouch *touch)
