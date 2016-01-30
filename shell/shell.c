@@ -1200,8 +1200,7 @@ void nemoshell_put_maximized_bin(struct nemoshell *shell, struct shellbin *bin)
 
 void nemoshell_load_gestures(struct nemoshell *shell)
 {
-	shell->pitch.samples = nemoitem_get_iattr_named(shell->configs, "//nemoshell/pitch", "samples", 10);
-	shell->pitch.min_distance = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pitch", "min_distance", 100.0f);
+	shell->pitch.samples = nemoitem_get_iattr_named(shell->configs, "//nemoshell/pitch", "samples", 5);
 	shell->pitch.friction = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pitch", "friction", 0.012f);
 
 	shell->pick.max_rotate = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "max_rotate", 45.0f);

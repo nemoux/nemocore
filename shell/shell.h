@@ -85,7 +85,6 @@ struct nemoshell {
 	struct {
 		uint32_t samples;
 
-		double min_distance;
 		double friction;
 	} pitch;
 
