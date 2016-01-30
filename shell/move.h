@@ -12,15 +12,12 @@ NEMO_BEGIN_EXTERN_C
 struct nemoshell;
 struct shellbin;
 struct nemoactor;
-struct pitchfilter;
 
 struct shellgrab_move {
 	struct shellgrab base;
 
 	float dx, dy;
 	int has_reset;
-
-	struct pitchfilter *filter;
 };
 
 struct actorgrab_move {
@@ -28,8 +25,6 @@ struct actorgrab_move {
 
 	float dx, dy;
 	int has_reset;
-
-	struct pitchfilter *filter;
 };
 
 extern int nemoshell_move_canvas_by_pointer(struct nemoshell *shell, struct nemopointer *pointer, struct shellbin *bin);

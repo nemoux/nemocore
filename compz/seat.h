@@ -92,6 +92,8 @@ extern void nemoseat_set_keyboard_focus(struct nemoseat *seat, struct nemoview *
 extern void nemoseat_set_pointer_focus(struct nemoseat *seat, struct nemoview *view);
 extern void nemoseat_put_focus(struct nemoseat *seat, struct nemoview *view);
 
+extern void nemoseat_update_touchpoints(struct nemoseat *seat, uint32_t msecs);
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

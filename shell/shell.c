@@ -1200,12 +1200,9 @@ void nemoshell_put_maximized_bin(struct nemoshell *shell, struct shellbin *bin)
 
 void nemoshell_load_gestures(struct nemoshell *shell)
 {
-	shell->pitch.max_samples = nemoitem_get_iattr_named(shell->configs, "//nemoshell/pitch", "max_samples", 30);
-	shell->pitch.dir_samples = nemoitem_get_iattr_named(shell->configs, "//nemoshell/pitch", "dir_samples", 5);
-	shell->pitch.min_duration = nemoitem_get_iattr_named(shell->configs, "//nemoshell/pitch", "min_duration", 30);
-	shell->pitch.velocity = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pitch", "velocity", 1000.0f);
-	shell->pitch.max_velocity = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pitch", "max_velocity", 5000.0f);
-	shell->pitch.friction = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pitch", "friction", 12000.0f);
+	shell->pitch.samples = nemoitem_get_iattr_named(shell->configs, "//nemoshell/pitch", "samples", 10);
+	shell->pitch.min_distance = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pitch", "min_distance", 100.0f);
+	shell->pitch.friction = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pitch", "friction", 0.012f);
 
 	shell->pick.max_rotate = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "max_rotate", 45.0f);
 	shell->pick.max_rotate = shell->pick.max_rotate * M_PI / 180.0f;

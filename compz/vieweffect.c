@@ -22,18 +22,18 @@ static int vieweffect_handle_frame(struct nemoeffect *base, uint32_t msecs)
 		struct nemocompz *compz = view->compz;
 		double x, y, dx, dy;
 
-		effect->pitch.velocity = MAX(effect->pitch.velocity - effect->pitch.friction * msecs / 1000.0f, 0.0f);
+		effect->pitch.velocity = MAX(effect->pitch.velocity - effect->pitch.friction * msecs, 0.0f);
 
 retry:
-		dx = (effect->pitch.dx * effect->pitch.velocity) * msecs / 1000.0f;
-		dy = (effect->pitch.dy * effect->pitch.velocity) * msecs / 1000.0f;
+		dx = (effect->pitch.dx * effect->pitch.velocity) * msecs;
+		dy = (effect->pitch.dy * effect->pitch.velocity) * msecs;
 
 		if (effect->pitch.velocity <= 1.0f) {
 			nemoview_transform_done(view);
 
 			effect->type &= ~NEMO_VIEW_PITCH_EFFECT;
 		} else if (nemocompz_contains_view_near(compz, view, dx, dy) == 0) {
-			effect->pitch.velocity *= 0.5f;
+			effect->pitch.velocity *= 0.7f;
 
 			goto retry;
 		} else {

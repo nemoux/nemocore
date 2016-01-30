@@ -138,7 +138,7 @@ static void pick_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 {
 	struct touchpoint *tp = base->touchpoint;
 
-	touchpoint_move_with_direction(tp, x, y);
+	touchpoint_update_direction(tp, x, y);
 
 	if (tp->focus != NULL) {
 		float sx, sy;
@@ -625,7 +625,7 @@ static void pick_actorgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 {
 	struct touchpoint *tp = base->touchpoint;
 
-	touchpoint_move_with_direction(tp, x, y);
+	touchpoint_update_direction(tp, x, y);
 
 	if (tp->focus != NULL) {
 		float sx, sy;

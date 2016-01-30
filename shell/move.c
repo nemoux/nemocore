@@ -20,7 +20,6 @@
 #include <canvas.h>
 #include <actor.h>
 #include <vieweffect.h>
-#include <pitchfilter.h>
 #include <nemomisc.h>
 
 static void move_shellgrab_handle_bin_change(struct wl_listener *listener, void *data)
@@ -42,11 +41,8 @@ static void move_shellgrab_pointer_motion(struct nemopointer_grab *base, uint32_
 	struct shellgrab *grab = (struct shellgrab *)container_of(base, struct shellgrab, base.pointer);
 	struct shellgrab_move *move = (struct shellgrab_move *)container_of(grab, struct shellgrab_move, base);
 	struct nemopointer *pointer = base->pointer;
-	struct pitchfilter *filter = move->filter;
 	struct shellbin *bin = grab->bin;
 	int32_t cx, cy;
-
-	pitchfilter_dispatch(filter, x - pointer->x, y - pointer->y, time);
 
 	nemopointer_move(pointer, x, y);
 
@@ -69,31 +65,12 @@ static void move_shellgrab_pointer_button(struct nemopointer_grab *base, uint32_
 	struct shellgrab *grab = (struct shellgrab *)container_of(base, struct shellgrab, base.pointer);
 	struct shellgrab_move *move = (struct shellgrab_move *)container_of(grab, struct shellgrab_move, base);
 	struct nemopointer *pointer = base->pointer;
-	struct pitchfilter *filter = move->filter;
 
 	if (pointer->focus != NULL) {
 		nemocontent_pointer_button(pointer, pointer->focus->content, time, button, state);
 	}
 
-	if (pointer->button_count == 0 &&
-			state == WL_POINTER_BUTTON_STATE_RELEASED) {
-		pitchfilter_dispatch(filter, 0.0f, 0.0f, time);
-
-		if (grab->bin != NULL && pitchfilter_flush(filter) > 0) {
-			struct nemoshell *shell = grab->bin->shell;
-			struct vieweffect *effect;
-
-			effect = vieweffect_create(grab->bin->view);
-			effect->type = NEMO_VIEW_PITCH_EFFECT;
-			effect->pitch.velocity = MIN(filter->dist / filter->dtime * shell->pitch.velocity, shell->pitch.max_velocity);
-			effect->pitch.dx = filter->dx;
-			effect->pitch.dy = filter->dy;
-			effect->pitch.friction = shell->pitch.friction;
-
-			vieweffect_dispatch(grab->bin->shell->compz, effect);
-		}
-
-		pitchfilter_destroy(filter);
+	if (pointer->button_count == 0 && state == WL_POINTER_BUTTON_STATE_RELEASED) {
 		nemoshell_end_pointer_shellgrab(grab);
 		free(move);
 	}
@@ -103,9 +80,7 @@ static void move_shellgrab_pointer_cancel(struct nemopointer_grab *base)
 {
 	struct shellgrab *grab = (struct shellgrab *)container_of(base, struct shellgrab, base.pointer);
 	struct shellgrab_move *move = (struct shellgrab_move *)container_of(grab, struct shellgrab_move, base);
-	struct pitchfilter *filter = move->filter;
 
-	pitchfilter_destroy(filter);
 	nemoshell_end_pointer_shellgrab(grab);
 	free(move);
 }
@@ -138,8 +113,6 @@ int nemoshell_move_canvas_by_pointer(struct nemoshell *shell, struct nemopointer
 
 	move->dx = bin->view->geometry.x - pointer->grab_x;
 	move->dy = bin->view->geometry.y - pointer->grab_y;
-
-	move->filter = pitchfilter_create(shell->pitch.max_samples, shell->pitch.dir_samples, shell->pitch.min_duration);
 
 	nemoshell_start_pointer_shellgrab(&move->base, &move_shellgrab_pointer_interface, bin, pointer);
 
@@ -201,30 +174,27 @@ static void move_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 	struct shellgrab *grab = (struct shellgrab *)container_of(base, struct shellgrab, base.touchpoint);
 	struct shellgrab_move *move = (struct shellgrab_move *)container_of(grab, struct shellgrab_move, base);
 	struct touchpoint *tp = base->touchpoint;
-	struct pitchfilter *filter = move->filter;
 	struct shellbin *bin = grab->bin;
 
 	if (bin != NULL && bin->shell->is_logging_grab != 0)
 		nemolog_message("MOVE", "[UP] %llu: (%u)\n", touchid, time);
 
-	pitchfilter_dispatch(filter, 0.0f, 0.0f, time);
-
 	if (bin != NULL &&
 			bin->state.fullscreen == 0 &&
 			bin->state.maximized == 0 &&
-			pitchfilter_flush(filter) > 0) {
+			touchpoint_update_velocity(tp, bin->shell->pitch.samples) > 0) {
 		struct nemoshell *shell = bin->shell;
 		struct vieweffect *effect;
 
 		effect = vieweffect_create(grab->bin->view);
 		effect->type = NEMO_VIEW_PITCH_EFFECT;
-		effect->pitch.velocity = MIN(filter->dist / filter->dtime * shell->pitch.velocity, shell->pitch.max_velocity);
-		effect->pitch.dx = filter->dx;
-		effect->pitch.dy = filter->dy;
+		effect->pitch.velocity = sqrtf(tp->dx * tp->dx + tp->dy * tp->dy);
+		effect->pitch.dx = tp->dx / effect->pitch.velocity;
+		effect->pitch.dy = tp->dy / effect->pitch.velocity;
 		effect->pitch.friction = shell->pitch.friction;
 
 		if (shell->is_logging_grab != 0)
-			nemolog_message("MOVE", "[PITCH] %llu: dx(%f) dy(%f) velocity(%f) (%u)\n", touchid, effect->pitch.dx, effect->pitch.dy, effect->pitch.velocity, time);
+			nemolog_message("MOVE", "[PITCH] %llu: dx(%f) dy(%f) (%u)\n", touchid, effect->pitch.dx, effect->pitch.dy, time);
 
 		if (grab->bin->on_pitchscreen != 0) {
 			vieweffect_set_dispatch_done(effect, move_shellgrab_dispatch_effect_done);
@@ -233,8 +203,6 @@ static void move_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 
 		vieweffect_dispatch(grab->bin->shell->compz, effect);
 	}
-
-	pitchfilter_destroy(filter);
 
 	nemoshell_end_touchpoint_shellgrab(grab);
 	free(move);
@@ -249,12 +217,9 @@ static void move_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 	struct shellgrab *grab = (struct shellgrab *)container_of(base, struct shellgrab, base.touchpoint);
 	struct shellgrab_move *move = (struct shellgrab_move *)container_of(grab, struct shellgrab_move, base);
 	struct touchpoint *tp = base->touchpoint;
-	struct pitchfilter *filter = move->filter;
 	struct shellbin *bin = grab->bin;
 
-	pitchfilter_dispatch(filter, x - tp->x, y - tp->y, time);
-
-	touchpoint_move(tp, x, y);
+	touchpoint_update(tp, x, y);
 
 	if (bin != NULL &&
 			bin->state.fullscreen == 0 &&
@@ -295,9 +260,7 @@ static void move_shellgrab_touchpoint_cancel(struct touchpoint_grab *base)
 {
 	struct shellgrab *grab = (struct shellgrab *)container_of(base, struct shellgrab, base.touchpoint);
 	struct shellgrab_move *move = (struct shellgrab_move *)container_of(grab, struct shellgrab_move, base);
-	struct pitchfilter *filter = move->filter;
 
-	pitchfilter_destroy(filter);
 	nemoshell_end_touchpoint_shellgrab(grab);
 	free(move);
 }
@@ -331,8 +294,6 @@ int nemoshell_move_canvas_by_touchpoint(struct nemoshell *shell, struct touchpoi
 	move->dx = bin->view->geometry.x - tp->x;
 	move->dy = bin->view->geometry.y - tp->y;
 	move->has_reset = bin->reset_scale;
-
-	move->filter = pitchfilter_create(shell->pitch.max_samples, shell->pitch.dir_samples, shell->pitch.min_duration);
 
 	if (shell->is_logging_grab != 0)
 		nemolog_message("MOVE", "[DOWN] %llu: x(%f) y(%f)\n", tp->gid, bin->view->geometry.x, bin->view->geometry.y);
@@ -372,11 +333,8 @@ static void move_actorgrab_pointer_motion(struct nemopointer_grab *base, uint32_
 	struct actorgrab *grab = (struct actorgrab *)container_of(base, struct actorgrab, base.pointer);
 	struct actorgrab_move *move = (struct actorgrab_move *)container_of(grab, struct actorgrab_move, base);
 	struct nemopointer *pointer = base->pointer;
-	struct pitchfilter *filter = move->filter;
 	struct nemoactor *actor = grab->actor;
 	int32_t cx, cy;
-
-	pitchfilter_dispatch(filter, x - pointer->x, y - pointer->y, time);
 
 	nemopointer_move(pointer, x, y);
 
@@ -399,31 +357,12 @@ static void move_actorgrab_pointer_button(struct nemopointer_grab *base, uint32_
 	struct actorgrab *grab = (struct actorgrab *)container_of(base, struct actorgrab, base.pointer);
 	struct actorgrab_move *move = (struct actorgrab_move *)container_of(grab, struct actorgrab_move, base);
 	struct nemopointer *pointer = base->pointer;
-	struct pitchfilter *filter = move->filter;
 
 	if (pointer->focus != NULL) {
 		nemocontent_pointer_button(pointer, pointer->focus->content, time, button, state);
 	}
 
-	if (pointer->button_count == 0 &&
-			state == WL_POINTER_BUTTON_STATE_RELEASED) {
-		pitchfilter_dispatch(filter, 0.0f, 0.0f, time);
-
-		if (grab->actor != NULL && pitchfilter_flush(filter) > 0) {
-			struct nemoshell *shell = grab->shell;
-			struct vieweffect *effect;
-
-			effect = vieweffect_create(grab->actor->view);
-			effect->type = NEMO_VIEW_PITCH_EFFECT;
-			effect->pitch.velocity = MIN(filter->dist / filter->dtime * shell->pitch.velocity, shell->pitch.max_velocity);
-			effect->pitch.dx = filter->dx;
-			effect->pitch.dy = filter->dy;
-			effect->pitch.friction = shell->pitch.friction;
-
-			vieweffect_dispatch(pointer->seat->compz, effect);
-		}
-
-		pitchfilter_destroy(filter);
+	if (pointer->button_count == 0 && state == WL_POINTER_BUTTON_STATE_RELEASED) {
 		nemoshell_end_pointer_actorgrab(grab);
 		free(move);
 	}
@@ -433,9 +372,7 @@ static void move_actorgrab_pointer_cancel(struct nemopointer_grab *base)
 {
 	struct actorgrab *grab = (struct actorgrab *)container_of(base, struct actorgrab, base.pointer);
 	struct actorgrab_move *move = (struct actorgrab_move *)container_of(grab, struct actorgrab_move, base);
-	struct pitchfilter *filter = move->filter;
 
-	pitchfilter_destroy(filter);
 	nemoshell_end_pointer_actorgrab(grab);
 	free(move);
 }
@@ -468,8 +405,6 @@ int nemoshell_move_actor_by_pointer(struct nemoshell *shell, struct nemopointer 
 	move->dx = actor->view->geometry.x - pointer->grab_x;
 	move->dy = actor->view->geometry.y - pointer->grab_y;
 
-	move->filter = pitchfilter_create(shell->pitch.max_samples, shell->pitch.dir_samples, shell->pitch.min_duration);
-
 	nemoshell_start_pointer_actorgrab(&move->base, &move_actorgrab_pointer_interface, actor, pointer);
 
 	return 0;
@@ -484,25 +419,20 @@ static void move_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 	struct actorgrab *grab = (struct actorgrab *)container_of(base, struct actorgrab, base.touchpoint);
 	struct actorgrab_move *move = (struct actorgrab_move *)container_of(grab, struct actorgrab_move, base);
 	struct touchpoint *tp = base->touchpoint;
-	struct pitchfilter *filter = move->filter;
+	struct nemoshell *shell = grab->shell;
 
-	pitchfilter_dispatch(filter, 0.0f, 0.0f, time);
-
-	if (grab->actor != NULL && pitchfilter_flush(filter) > 0) {
-		struct nemoshell *shell = grab->shell;
+	if (grab->actor != NULL && touchpoint_update_velocity(tp, shell->pitch.samples) > 0) {
 		struct vieweffect *effect;
 
 		effect = vieweffect_create(grab->actor->view);
 		effect->type = NEMO_VIEW_PITCH_EFFECT;
-		effect->pitch.velocity = MIN(filter->dist / filter->dtime * shell->pitch.velocity, shell->pitch.max_velocity);
-		effect->pitch.dx = filter->dx;
-		effect->pitch.dy = filter->dy;
+		effect->pitch.velocity = sqrtf(tp->dx * tp->dx + tp->dy * tp->dy);
+		effect->pitch.dx = tp->dx / effect->pitch.velocity;
+		effect->pitch.dy = tp->dy / effect->pitch.velocity;
 		effect->pitch.friction = shell->pitch.friction;
 
 		vieweffect_dispatch(tp->touch->seat->compz, effect);
 	}
-
-	pitchfilter_destroy(filter);
 
 	nemoshell_end_touchpoint_actorgrab(grab);
 	free(move);
@@ -517,13 +447,10 @@ static void move_actorgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 	struct actorgrab *grab = (struct actorgrab *)container_of(base, struct actorgrab, base.touchpoint);
 	struct actorgrab_move *move = (struct actorgrab_move *)container_of(grab, struct actorgrab_move, base);
 	struct touchpoint *tp = base->touchpoint;
-	struct pitchfilter *filter = move->filter;
 	struct nemoactor *actor = grab->actor;
 	int32_t cx, cy;
 
-	pitchfilter_dispatch(filter, x - tp->x, y - tp->y, time);
-
-	touchpoint_move(tp, x, y);
+	touchpoint_update(tp, x, y);
 
 	if (grab->actor == NULL)
 		return;
@@ -551,9 +478,7 @@ static void move_actorgrab_touchpoint_cancel(struct touchpoint_grab *base)
 {
 	struct actorgrab *grab = (struct actorgrab *)container_of(base, struct actorgrab, base.touchpoint);
 	struct actorgrab_move *move = (struct actorgrab_move *)container_of(grab, struct actorgrab_move, base);
-	struct pitchfilter *filter = move->filter;
 
-	pitchfilter_destroy(filter);
 	nemoshell_end_touchpoint_actorgrab(grab);
 	free(move);
 }
@@ -585,8 +510,6 @@ int nemoshell_move_actor_by_touchpoint(struct nemoshell *shell, struct touchpoin
 
 	move->dx = actor->view->geometry.x - tp->x;
 	move->dy = actor->view->geometry.y - tp->y;
-
-	move->filter = pitchfilter_create(shell->pitch.max_samples, shell->pitch.dir_samples, shell->pitch.min_duration);
 
 	nemoshell_start_touchpoint_actorgrab(&move->base, &move_actorgrab_touchpoint_interface, actor, tp);
 

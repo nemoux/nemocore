@@ -151,7 +151,6 @@ add_library(nemocompz SHARED
 	virtuio.c
 	sound.c
 	picker.c
-	pitchfilter.c
 	binding.c
 	keymap.c
 	animation.c

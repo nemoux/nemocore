@@ -31,7 +31,7 @@ static void default_touchpoint_grab_down(struct touchpoint_grab *grab, uint32_t 
 		touchpoint_set_focus(tp, view);
 	}
 
-	touchpoint_move(tp, x, y);
+	touchpoint_update(tp, x, y);
 
 	if (tp->focus != NULL) {
 		nemocontent_touch_down(tp, tp->focus->content, time, touchid, sx, sy, x, y);
@@ -53,7 +53,7 @@ static void default_touchpoint_grab_motion(struct touchpoint_grab *grab, uint32_
 {
 	struct touchpoint *tp = grab->touchpoint;
 
-	touchpoint_move(tp, x, y);
+	touchpoint_update(tp, x, y);
 
 	if (tp->focus != NULL) {
 		float sx, sy;
@@ -248,13 +248,13 @@ float touchpoint_get_moving_distance(struct touchpoint *tp, float x, float y)
 	return sqrtf(dx * dx + dy * dy);
 }
 
-void touchpoint_move(struct touchpoint *tp, float x, float y)
+void touchpoint_update(struct touchpoint *tp, float x, float y)
 {
 	tp->x = x;
 	tp->y = y;
 }
 
-void touchpoint_move_with_direction(struct touchpoint *tp, float x, float y)
+void touchpoint_update_direction(struct touchpoint *tp, float x, float y)
 {
 	if (tp->x != x || tp->y != y) {
 		tp->dx = x - tp->x;
@@ -263,6 +263,33 @@ void touchpoint_move_with_direction(struct touchpoint *tp, float x, float y)
 		tp->x = x;
 		tp->y = y;
 	}
+}
+
+int touchpoint_update_velocity(struct touchpoint *tp, uint32_t nsamples)
+{
+	float x0, y0;
+	float x1, y1;
+	uint32_t t0, t1;
+	uint32_t i0, i1;
+
+	if (tp->nsamples < nsamples)
+		return 0;
+
+	i0 = (tp->esample - nsamples) % NEMOCOMPZ_TOUCH_SAMPLE_MAX;
+	i1 = (tp->esample - 1) % NEMOCOMPZ_TOUCH_SAMPLE_MAX;
+
+	x0 = tp->samples[i0].x;
+	y0 = tp->samples[i0].y;
+	t0 = tp->samples[i0].time;
+
+	x1 = tp->samples[i1].x;
+	y1 = tp->samples[i1].y;
+	t1 = tp->samples[i1].time;
+
+	tp->dx = (x1 - x0) / (float)(t1 - t0);
+	tp->dy = (y1 - y0) / (float)(t1 - t0);
+
+	return 1;
 }
 
 static void touchpoint_handle_focus_resource_destroy(struct wl_listener *listener, void *data)

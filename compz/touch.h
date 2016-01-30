@@ -9,6 +9,8 @@ NEMO_BEGIN_EXTERN_C
 
 #include <input.h>
 
+#define NEMOCOMPZ_TOUCH_SAMPLE_MAX			(60)
+
 struct nemoseat;
 struct nemotouch;
 struct tuionode;
@@ -26,6 +28,11 @@ struct touchpoint_grab_interface {
 struct touchpoint_grab {
 	const struct touchpoint_grab_interface *interface;
 	struct touchpoint *touchpoint;
+};
+
+struct touchsample {
+	float x, y;
+	uint32_t time;
 };
 
 struct touchpoint {
@@ -52,6 +59,10 @@ struct touchpoint {
 
 	float x, y;
 	float dx, dy;
+
+	struct touchsample samples[NEMOCOMPZ_TOUCH_SAMPLE_MAX];
+	uint32_t nsamples;
+	uint32_t ssample, esample;
 
 	void *binding;
 };
@@ -113,8 +124,9 @@ extern void nemotouch_notify_frames(struct nemotouch *touch);
 extern void nemotouch_flush_tuio(struct tuionode *node);
 
 extern float touchpoint_get_moving_distance(struct touchpoint *tp, float x, float y);
-extern void touchpoint_move(struct touchpoint *tp, float x, float y);
-extern void touchpoint_move_with_direction(struct touchpoint *tp, float x, float y);
+extern void touchpoint_update(struct touchpoint *tp, float x, float y);
+extern void touchpoint_update_direction(struct touchpoint *tp, float x, float y);
+extern int touchpoint_update_velocity(struct touchpoint *tp, uint32_t nsamples);
 
 extern void touchpoint_set_focus(struct touchpoint *tp, struct nemoview *view);
 

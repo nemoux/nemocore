@@ -19,7 +19,8 @@ NEMO_BEGIN_EXTERN_C
 #define	NEMOCOMPZ_NODE_MAX				(4)
 #define	NEMOCOMPZ_POINTER_MAX			(32)
 
-#define	NEMOCOMPZ_DEFAULT_FRAME_TIMEOUT		(1000.0f / 60.0f)
+#define NEMOCOMPZ_DEFAULT_FRAME_TIMEOUT		(1000.0f / 60.0f)
+#define NEMOCOMPZ_DEFAULT_TOUCH_TIMEOUT		(1000.0f / 120.0f)
 
 typedef enum {
 	NEMOCOMPZ_NONE_STATE = 0,
@@ -123,6 +124,9 @@ struct nemocompz {
 	uint32_t frame_timeout;
 	int frame_done;
 
+	struct wl_event_source *touch_timer;
+	uint32_t touch_timeout;
+
 	struct wl_event_source *framerate_timer;
 
 	struct nemoevent *event;
@@ -166,6 +170,8 @@ extern void nemocompz_dispatch_effect(struct nemocompz *compz, struct nemoeffect
 
 extern void nemocompz_dispatch_frame(struct nemocompz *compz);
 extern void nemocompz_set_frame_timeout(struct nemocompz *compz, uint32_t timeout);
+
+extern void nemocompz_set_touch_timeout(struct nemocompz *compz, uint32_t timeout);
 
 extern void nemocompz_dispatch_idle(struct nemocompz *compz, nemocompz_dispatch_idle_t dispatch, void *data);
 
