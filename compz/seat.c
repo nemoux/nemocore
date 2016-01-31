@@ -112,7 +112,7 @@ static void nemoseat_bind_nemo(struct wl_client *client, void *data, uint32_t ve
 	wl_list_insert(&seat->resource_list, wl_resource_get_link(resource));
 	wl_resource_set_implementation(resource, &nemo_seat_implementation, seat, nemoseat_unbind_nemo);
 
-	wl_seat_send_capabilities(resource, NEMO_SEAT_CAPABILITY_POINTER | NEMO_SEAT_CAPABILITY_KEYBOARD | NEMO_SEAT_CAPABILITY_TOUCH);
+	wl_seat_send_capabilities(resource, NEMO_SEAT_CAPABILITY_POINTER | NEMO_SEAT_CAPABILITY_KEYBOARD | NEMO_SEAT_CAPABILITY_TOUCH | NEMO_SEAT_CAPABILITY_STICK);
 
 	wl_seat_send_name(resource, "seat0");
 }
