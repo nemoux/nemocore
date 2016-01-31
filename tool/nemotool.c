@@ -104,7 +104,7 @@ static void pointer_handle_axis(void *data, struct nemo_pointer *pointer, uint32
 
 			event.device = id;
 			event.time = time;
-			event.value = wl_fixed_to_double(value);
+			event.r = wl_fixed_to_double(value);
 			event.state = axis;
 
 			canvas->dispatch_event(canvas, NEMOTOOL_POINTER_AXIS_EVENT, &event);

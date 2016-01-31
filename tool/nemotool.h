@@ -81,6 +81,7 @@ struct nemoevent {
 
 	float x, y;
 	float gx, gy;
+	float r;
 };
 
 struct nemoglobal {
