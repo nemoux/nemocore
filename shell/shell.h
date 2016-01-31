@@ -45,6 +45,11 @@ typedef enum {
 	NEMO_SHELL_FULLSCREEN_LAST_FOCUS
 } NemoShellFullscreenFocus;
 
+typedef enum {
+	NEMO_SHELL_FADEIN_ALPHA_FLAG = (1 << 0),
+	NEMO_SHELL_FADEIN_SCALE_FLAG = (1 << 1)
+} NemoShellFadeinFlag;
+
 struct nemoshell {
 	struct nemocompz *compz;
 
@@ -143,6 +148,11 @@ struct clientstate {
 	uint32_t flags;
 
 	uint32_t input_type;
+
+	uint32_t fadein_type;
+	uint32_t fadein_ease;
+	uint32_t fadein_delay;
+	uint32_t fadein_duration;
 };
 
 struct binstate {

@@ -262,6 +262,58 @@ static inline void nemoease_set(struct nemoease *ease, uint32_t type)
 	ease->dispatch = functions[type];
 }
 
+static inline uint32_t nemoease_get_type(const char *name)
+{
+	uint32_t type = NEMOEASE_LINEAR_TYPE;
+
+	if (strcmp(name, "linear") == 0)
+		type = NEMOEASE_LINEAR_TYPE;
+	else if (strcmp(name, "quadratic_in") == 0)
+		type = NEMOEASE_QUADRATIC_IN_TYPE;
+	else if (strcmp(name, "quadratic_out") == 0)
+		type = NEMOEASE_QUADRATIC_OUT_TYPE;
+	else if (strcmp(name, "quadratic_inout") == 0)
+		type = NEMOEASE_QUADRATIC_INOUT_TYPE;
+	else if (strcmp(name, "cubic_in") == 0)
+		type = NEMOEASE_CUBIC_IN_TYPE;
+	else if (strcmp(name, "cubic_out") == 0)
+		type = NEMOEASE_CUBIC_OUT_TYPE;
+	else if (strcmp(name, "cubic_inout") == 0)
+		type = NEMOEASE_CUBIC_INOUT_TYPE;
+	else if (strcmp(name, "quartic_in") == 0)
+		type = NEMOEASE_QUARTIC_IN_TYPE;
+	else if (strcmp(name, "quartic_out") == 0)
+		type = NEMOEASE_QUARTIC_OUT_TYPE;
+	else if (strcmp(name, "quartic_inout") == 0)
+		type = NEMOEASE_QUARTIC_INOUT_TYPE;
+	else if (strcmp(name, "quintic_in") == 0)
+		type = NEMOEASE_QUINTIC_IN_TYPE;
+	else if (strcmp(name, "quintic_out") == 0)
+		type = NEMOEASE_QUINTIC_OUT_TYPE;
+	else if (strcmp(name, "quintic_inout") == 0)
+		type = NEMOEASE_QUINTIC_INOUT_TYPE;
+	else if (strcmp(name, "sinusoidal_in") == 0)
+		type = NEMOEASE_SINUSOIDAL_IN_TYPE;
+	else if (strcmp(name, "sinusoidal_out") == 0)
+		type = NEMOEASE_SINUSOIDAL_OUT_TYPE;
+	else if (strcmp(name, "sinusoidal_inout") == 0)
+		type = NEMOEASE_SINUSOIDAL_INOUT_TYPE;
+	else if (strcmp(name, "exponential_in") == 0)
+		type = NEMOEASE_EXPONENTIAL_IN_TYPE;
+	else if (strcmp(name, "exponential_out") == 0)
+		type = NEMOEASE_EXPONENTIAL_OUT_TYPE;
+	else if (strcmp(name, "exponential_inout") == 0)
+		type = NEMOEASE_EXPONENTIAL_INOUT_TYPE;
+	else if (strcmp(name, "circular_in") == 0)
+		type = NEMOEASE_CIRCULAR_IN_TYPE;
+	else if (strcmp(name, "circular_out") == 0)
+		type = NEMOEASE_CIRCULAR_OUT_TYPE;
+	else if (strcmp(name, "circular_inout") == 0)
+		type = NEMOEASE_CIRCULAR_INOUT_TYPE;
+
+	return type;
+}
+
 static inline void nemoease_set_cubic(struct nemoease *ease, double sx, double sy, double ex, double ey)
 {
 	ease->sx = sx;

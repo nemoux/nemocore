@@ -23,6 +23,7 @@
 #include <keypad.h>
 #include <datadevice.h>
 #include <screen.h>
+#include <viewanimation.h>
 #include <busycursor.h>
 #include <waylandshell.h>
 #include <xdgshell.h>
@@ -826,6 +827,25 @@ static inline void nemoshell_set_client_state(struct shellbin *bin, struct clien
 	if (state->has_min_size != 0) {
 		bin->min_width = state->min_width;
 		bin->min_height = state->min_height;
+	}
+
+	if (state->fadein_type != 0) {
+		struct viewanimation *animation;
+
+		animation = viewanimation_create(bin->view, state->fadein_ease, state->fadein_delay, state->fadein_duration);
+		if (state->fadein_type & NEMO_SHELL_FADEIN_ALPHA_FLAG) {
+			nemoview_set_alpha(bin->view, 0.0f);
+
+			viewanimation_set_alpha(animation, 1.0f);
+		}
+
+		if (state->fadein_type & NEMO_SHELL_FADEIN_SCALE_FLAG) {
+			nemoview_set_scale(bin->view, 0.0f, 0.0f);
+
+			viewanimation_set_scale(animation, 1.0f, 1.0f);
+		}
+
+		viewanimation_dispatch(bin->shell->compz, animation);
 	}
 
 	bin->flags = state->flags;
