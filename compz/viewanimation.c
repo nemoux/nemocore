@@ -51,6 +51,14 @@ static void viewanimation_handle_frame(struct nemoanimation *base, double progre
 				(ey - sy) * progress + sy);
 	}
 
+	if (animation->type & NEMO_VIEW_ALPHA_ANIMATION) {
+		float sv = animation->alpha.base.v;
+		float ev = animation->alpha.v;
+
+		nemoview_set_alpha(animation->view,
+				(ev - sv) * progress + sv);
+	}
+
 	nemoview_schedule_repaint(animation->view);
 }
 
@@ -146,6 +154,10 @@ void viewanimation_dispatch(struct nemocompz *compz, struct viewanimation *anima
 	if (animation->type & NEMO_VIEW_SCALE_ANIMATION) {
 		animation->scale.base.sx = view->geometry.sx;
 		animation->scale.base.sy = view->geometry.sy;
+	}
+
+	if (animation->type & NEMO_VIEW_ALPHA_ANIMATION) {
+		animation->alpha.base.v = view->alpha;
 	}
 
 	nemocompz_dispatch_animation(compz, &animation->base);

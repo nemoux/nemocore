@@ -163,12 +163,12 @@ static inline void nemoview_transform_done(struct nemoview *view)
 
 static inline void nemoview_damage_dirty(struct nemoview *view)
 {
-	pixman_region32_union_rect(&view->content->damage, &view->content->damage, 0, 0, view->content->width, view->content->height);
-}
+	pixman_region32_t damage;
 
-static inline void nemoview_clip_dirty(struct nemoview *view)
-{
-	pixman_region32_clear(&view->clip);
+	pixman_region32_init(&damage);
+	pixman_region32_subtract(&damage, &view->transform.boundingbox, &view->clip);
+	pixman_region32_union(&view->compz->damage, &view->compz->damage, &damage);
+	pixman_region32_fini(&damage);
 }
 
 static inline void nemoview_damage_below(struct nemoview *view)
@@ -181,6 +181,11 @@ static inline void nemoview_damage_below(struct nemoview *view)
 	pixman_region32_fini(&damage);
 
 	nemoview_schedule_repaint(view);
+}
+
+static inline void nemoview_clip_dirty(struct nemoview *view)
+{
+	pixman_region32_clear(&view->clip);
 }
 
 static inline void nemoview_set_position(struct nemoview *view, float x, float y)
@@ -255,6 +260,12 @@ static inline void nemoview_set_flag(struct nemoview *view, float fx, float fy)
 {
 	view->geometry.fx = fx;
 	view->geometry.fy = fy;
+}
+
+static inline void nemoview_set_alpha(struct nemoview *view, float alpha)
+{
+	view->alpha = alpha;
+	nemoview_damage_dirty(view);
 }
 
 static inline void nemoview_transform_to_global(struct nemoview *view, float sx, float sy, float *x, float *y)

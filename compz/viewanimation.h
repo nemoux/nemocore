@@ -14,7 +14,8 @@ NEMO_BEGIN_EXTERN_C
 typedef enum {
 	NEMO_VIEW_TRANSLATE_ANIMATION = (1 << 0),
 	NEMO_VIEW_ROTATE_ANIMATION = (1 << 1),
-	NEMO_VIEW_SCALE_ANIMATION = (1 << 2)
+	NEMO_VIEW_SCALE_ANIMATION = (1 << 2),
+	NEMO_VIEW_ALPHA_ANIMATION = (1 << 3)
 } NemoViewAnimationType;
 
 struct nemocompz;
@@ -52,6 +53,14 @@ struct viewanimation {
 
 		float sx, sy;
 	} scale;
+
+	struct {
+		struct {
+			float v;
+		} base;
+
+		float v;
+	} alpha;
 };
 
 extern struct viewanimation *viewanimation_create(struct nemoview *view, uint32_t ease, uint32_t delay, uint32_t duration);
@@ -61,6 +70,32 @@ extern void viewanimation_destroy(struct viewanimation *animation);
 extern void viewanimation_dispatch(struct nemocompz *compz, struct viewanimation *animation);
 
 extern int viewanimation_revoke(struct nemocompz *compz, struct nemoview *view);
+
+static inline void viewanimation_set_translate(struct viewanimation *animation, float x, float y)
+{
+	animation->type |= NEMO_VIEW_TRANSLATE_ANIMATION;
+	animation->translate.x = x;
+	animation->translate.y = y;
+}
+
+static inline void viewanimation_set_rotate(struct viewanimation *animation, float r)
+{
+	animation->type |= NEMO_VIEW_ROTATE_ANIMATION;
+	animation->rotate.r = r;
+}
+
+static inline void viewanimation_set_scale(struct viewanimation *animation, float sx, float sy)
+{
+	animation->type |= NEMO_VIEW_SCALE_ANIMATION;
+	animation->scale.sx = sx;
+	animation->scale.sy = sy;
+}
+
+static inline void viewanimation_set_alpha(struct viewanimation *animation, float v)
+{
+	animation->type |= NEMO_VIEW_ALPHA_ANIMATION;
+	animation->alpha.v = v;
+}
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

@@ -124,10 +124,11 @@ static void nemo_surface_follow(struct wl_client *client, struct wl_resource *re
 		struct viewanimation *animation;
 
 		animation = viewanimation_create(bin->view, NEMOEASE_CUBIC_OUT_TYPE, delay, duration);
-		animation->type = NEMO_VIEW_TRANSLATE_ANIMATION | NEMO_VIEW_ROTATE_ANIMATION;
-		animation->translate.x = px + diag * cos(radian) - 0 * sin(radian);
-		animation->translate.y = py + diag * sin(radian) + 0 * cos(radian);
-		animation->rotate.r = dradian + pr;
+		viewanimation_set_translate(animation,
+				px + diag * cos(radian) - 0 * sin(radian),
+				py + diag * sin(radian) + 0 * cos(radian));
+		viewanimation_set_rotate(animation,
+				dradian + pr);
 
 		viewanimation_revoke(bin->shell->compz, bin->view);
 		viewanimation_dispatch(bin->shell->compz, animation);
