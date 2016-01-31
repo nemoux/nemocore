@@ -7,6 +7,7 @@
 
 #include <linux/input.h>
 #include <wayland-server.h>
+#include <wayland-nemo-seat-server-protocol.h>
 
 #include <evdevnode.h>
 #include <compz.h>
@@ -183,7 +184,7 @@ static void evdev_process_relative(struct evdevnode *node, struct input_event *e
 			switch (e->value) {
 				case -1:
 				case 1:
-					nemopointer_notify_axis(node->pointer, time, WL_POINTER_AXIS_VERTICAL_SCROLL, -1 * e->value * 10);
+					nemopointer_notify_axis(node->pointer, time, NEMO_POINTER_AXIS_ROTATE_Y, -1 * e->value * 10);
 					break;
 
 				default:
@@ -197,7 +198,7 @@ static void evdev_process_relative(struct evdevnode *node, struct input_event *e
 			switch (e->value) {
 				case -1:
 				case 1:
-					nemopointer_notify_axis(node->pointer, time, WL_POINTER_AXIS_HORIZONTAL_SCROLL, e->value * 10);
+					nemopointer_notify_axis(node->pointer, time, NEMO_POINTER_AXIS_ROTATE_X, e->value * 10);
 					break;
 
 				default:
@@ -263,28 +264,29 @@ static void evdev_process_absolute_motion(struct evdevnode *node, struct input_e
 			break;
 
 		case ABS_Z:
-			node->abs.z = (e->value - node->abs.min_z) / (node->abs.max_z - node->abs.min_z);
+			node->abs.r = (e->value - node->abs.min_z) / (node->abs.max_z - node->abs.min_z);
+			node->abs.axis = NEMO_POINTER_AXIS_TRANSLATE_Z;
 			if (node->pending_event == EVDEV_NONE)
-				node->pending_event = EVDEV_ABSOLUTE_MOTION;
+				node->pending_event = EVDEV_ABSOLUTE_AXIS;
 			break;
 
 		case ABS_RX:
 			node->abs.r = e->value;
-			node->abs.axis = EVDEV_X_AXIS;
+			node->abs.axis = NEMO_POINTER_AXIS_ROTATE_X;
 			if (node->pending_event == EVDEV_NONE)
 				node->pending_event = EVDEV_ABSOLUTE_AXIS;
 			break;
 
 		case ABS_RY:
 			node->abs.r = e->value;
-			node->abs.axis = EVDEV_Y_AXIS;
+			node->abs.axis = NEMO_POINTER_AXIS_ROTATE_Y;
 			if (node->pending_event == EVDEV_NONE)
 				node->pending_event = EVDEV_ABSOLUTE_AXIS;
 			break;
 
 		case ABS_RZ:
 			node->abs.r = e->value;
-			node->abs.axis = EVDEV_Z_AXIS;
+			node->abs.axis = NEMO_POINTER_AXIS_ROTATE_Z;
 			if (node->pending_event == EVDEV_NONE)
 				node->pending_event = EVDEV_ABSOLUTE_AXIS;
 			break;

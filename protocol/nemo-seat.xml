@@ -78,8 +78,12 @@
 		</event>
 
 		<enum name="axis">
-			<entry name="vertical_scroll" value="0"/>
-			<entry name="horizontal_scroll" value="1"/>
+			<entry name="rotate_x" value="0"/>
+			<entry name="rotate_y" value="1"/>
+			<entry name="rotate_z" value="2"/>
+			<entry name="translate_x" value="3"/>
+			<entry name="translate_y" value="4"/>
+			<entry name="translate_z" value="5"/>
 		</enum>
 
 		<event name="axis">
