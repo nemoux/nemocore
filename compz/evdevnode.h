@@ -58,8 +58,8 @@ struct evdevnode {
 	uint32_t seat_caps;
 
 	struct {
-		float min_x, max_x, min_y, max_y;
-		float x, y;
+		float min_x, max_x, min_y, max_y, min_z, max_z;
+		float x, y, z;
 		uint32_t seat_slot;
 		int32_t r;
 		int axis;

@@ -262,10 +262,24 @@ static void evdev_process_absolute_motion(struct evdevnode *node, struct input_e
 				node->pending_event = EVDEV_ABSOLUTE_MOTION;
 			break;
 
+		case ABS_Z:
+			node->abs.z = (e->value - node->abs.min_z) / (node->abs.max_z - node->abs.min_z);
+			if (node->pending_event == EVDEV_NONE)
+				node->pending_event = EVDEV_ABSOLUTE_MOTION;
+			break;
+
 		case ABS_RX:
+			node->abs.r = e->value;
+			node->abs.axis = EVDEV_X_AXIS;
+			if (node->pending_event == EVDEV_NONE)
+				node->pending_event = EVDEV_ABSOLUTE_AXIS;
 			break;
 
 		case ABS_RY:
+			node->abs.r = e->value;
+			node->abs.axis = EVDEV_Y_AXIS;
+			if (node->pending_event == EVDEV_NONE)
+				node->pending_event = EVDEV_ABSOLUTE_AXIS;
 			break;
 
 		case ABS_RZ:
@@ -435,6 +449,12 @@ static int evdev_configure_node(struct evdevnode *node)
 			ioctl(node->fd, EVIOCGABS(ABS_Y), &absinfo);
 			node->abs.min_y = absinfo.minimum;
 			node->abs.max_y = absinfo.maximum;
+			has_abs = 1;
+		}
+		if (TEST_BIT(abs_bits, ABS_Z)) {
+			ioctl(node->fd, EVIOCGABS(ABS_Z), &absinfo);
+			node->abs.min_z = absinfo.minimum;
+			node->abs.max_z = absinfo.maximum;
 			has_abs = 1;
 		}
 		if (TEST_BIT(abs_bits, ABS_MT_POSITION_X) &&

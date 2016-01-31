@@ -68,6 +68,7 @@ static int nemoshow_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t ty
 		else
 			nemotale_push_pointer_up_event(tale, event->serial, event->device, event->time, event->value);
 	} else if (type & NEMOTOOL_POINTER_AXIS_EVENT) {
+		nemotale_push_pointer_axis_event(tale, event->serial, event->device, event->time, event->state, event->value);
 	} else if (type & NEMOTOOL_KEYBOARD_ENTER_EVENT) {
 		nemotale_push_keyboard_enter_event(tale, event->serial, event->device);
 	} else if (type & NEMOTOOL_KEYBOARD_LEAVE_EVENT) {
