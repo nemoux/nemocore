@@ -55,6 +55,7 @@ struct evdevnode {
 		float min_x, max_x, min_y, max_y, min_z, max_z;
 		float min_rx, max_rx, min_ry, max_ry, min_rz, max_rz;
 		float x, y, z;
+		float rx, ry, rz;
 		float r;
 		uint32_t seat_slot;
 		int axis;

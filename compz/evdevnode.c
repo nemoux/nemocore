@@ -211,94 +211,84 @@ static void evdev_process_relative(struct evdevnode *node, struct input_event *e
 	}
 }
 
-static void evdev_process_touch(struct evdevnode *node, struct input_event *e, uint32_t time)
-{
-	if (node->mt.slot >= EVDEV_MAX_SLOTS) {
-		nemolog_error("EVDEV", "multitouch slot index is overflow!\n");
-		return;
-	}
-
-	switch (e->code) {
-		case ABS_MT_SLOT:
-			evdev_flush_events(node, time);
-			node->mt.slot = e->value;
-			break;
-
-		case ABS_MT_TRACKING_ID:
-			if (node->pending_event != EVDEV_NONE &&
-					node->pending_event != EVDEV_ABSOLUTE_MT_MOTION)
-				evdev_flush_events(node, time);
-			if (e->value >= 0)
-				node->pending_event = EVDEV_ABSOLUTE_MT_DOWN;
-			else
-				node->pending_event = EVDEV_ABSOLUTE_MT_UP;
-			break;
-
-		case ABS_MT_POSITION_X:
-			node->mt.slots[node->mt.slot].x = (e->value - node->abs.min_x) / (node->abs.max_x - node->abs.min_x);
-			if (node->pending_event == EVDEV_NONE)
-				node->pending_event = EVDEV_ABSOLUTE_MT_MOTION;
-			break;
-
-		case ABS_MT_POSITION_Y:
-			node->mt.slots[node->mt.slot].y = (e->value - node->abs.min_y) / (node->abs.max_y - node->abs.min_y);
-			if (node->pending_event == EVDEV_NONE)
-				node->pending_event = EVDEV_ABSOLUTE_MT_MOTION;
-			break;
-	}
-}
-
-static void evdev_process_absolute_motion(struct evdevnode *node, struct input_event *e, uint32_t time)
-{
-	switch (e->code) {
-		case ABS_X:
-			node->abs.x = (e->value - node->abs.min_x) / (node->abs.max_x - node->abs.min_x);
-			if (node->pending_event == EVDEV_NONE)
-				node->pending_event = EVDEV_ABSOLUTE_MOTION;
-			break;
-
-		case ABS_Y:
-			node->abs.y = (e->value - node->abs.min_y) / (node->abs.max_y - node->abs.min_y);
-			if (node->pending_event == EVDEV_NONE)
-				node->pending_event = EVDEV_ABSOLUTE_MOTION;
-			break;
-
-		case ABS_Z:
-			node->abs.r = (e->value - node->abs.min_z) / (node->abs.max_z - node->abs.min_z);
-			node->abs.axis = NEMO_POINTER_AXIS_TRANSLATE_Z;
-			if (node->pending_event == EVDEV_NONE)
-				node->pending_event = EVDEV_ABSOLUTE_AXIS;
-			break;
-
-		case ABS_RX:
-			node->abs.r = (e->value - node->abs.min_rx) / (node->abs.max_rx - node->abs.min_rx);
-			node->abs.axis = NEMO_POINTER_AXIS_ROTATE_X;
-			if (node->pending_event == EVDEV_NONE)
-				node->pending_event = EVDEV_ABSOLUTE_AXIS;
-			break;
-
-		case ABS_RY:
-			node->abs.r = (e->value - node->abs.min_ry) / (node->abs.max_ry - node->abs.min_ry);
-			node->abs.axis = NEMO_POINTER_AXIS_ROTATE_Y;
-			if (node->pending_event == EVDEV_NONE)
-				node->pending_event = EVDEV_ABSOLUTE_AXIS;
-			break;
-
-		case ABS_RZ:
-			node->abs.r = (e->value - node->abs.min_rz) / (node->abs.max_rz - node->abs.min_rz);
-			node->abs.axis = NEMO_POINTER_AXIS_ROTATE_Z;
-			if (node->pending_event == EVDEV_NONE)
-				node->pending_event = EVDEV_ABSOLUTE_AXIS;
-			break;
-	}
-}
-
 static void evdev_process_absolute(struct evdevnode *node, struct input_event *e, uint32_t time)
 {
 	if (node->is_mt != 0) {
-		evdev_process_touch(node, e, time);
+		if (node->mt.slot >= EVDEV_MAX_SLOTS) {
+			nemolog_error("EVDEV", "multitouch slot index is overflow!\n");
+			return;
+		}
+
+		switch (e->code) {
+			case ABS_MT_SLOT:
+				evdev_flush_events(node, time);
+				node->mt.slot = e->value;
+				break;
+
+			case ABS_MT_TRACKING_ID:
+				if (node->pending_event != EVDEV_NONE &&
+						node->pending_event != EVDEV_ABSOLUTE_MT_MOTION)
+					evdev_flush_events(node, time);
+				if (e->value >= 0)
+					node->pending_event = EVDEV_ABSOLUTE_MT_DOWN;
+				else
+					node->pending_event = EVDEV_ABSOLUTE_MT_UP;
+				break;
+
+			case ABS_MT_POSITION_X:
+				node->mt.slots[node->mt.slot].x = (e->value - node->abs.min_x) / (node->abs.max_x - node->abs.min_x);
+				if (node->pending_event == EVDEV_NONE)
+					node->pending_event = EVDEV_ABSOLUTE_MT_MOTION;
+				break;
+
+			case ABS_MT_POSITION_Y:
+				node->mt.slots[node->mt.slot].y = (e->value - node->abs.min_y) / (node->abs.max_y - node->abs.min_y);
+				if (node->pending_event == EVDEV_NONE)
+					node->pending_event = EVDEV_ABSOLUTE_MT_MOTION;
+				break;
+		}
 	} else {
-		evdev_process_absolute_motion(node, e, time);
+		switch (e->code) {
+			case ABS_X:
+				node->abs.x = (e->value - node->abs.min_x) / (node->abs.max_x - node->abs.min_x);
+				if (node->pending_event == EVDEV_NONE)
+					node->pending_event = EVDEV_ABSOLUTE_MOTION;
+				break;
+
+			case ABS_Y:
+				node->abs.y = (e->value - node->abs.min_y) / (node->abs.max_y - node->abs.min_y);
+				if (node->pending_event == EVDEV_NONE)
+					node->pending_event = EVDEV_ABSOLUTE_MOTION;
+				break;
+
+			case ABS_Z:
+				node->abs.r = (e->value - node->abs.min_z) / (node->abs.max_z - node->abs.min_z);
+				node->abs.axis = NEMO_POINTER_AXIS_TRANSLATE_Z;
+				if (node->pending_event == EVDEV_NONE)
+					node->pending_event = EVDEV_ABSOLUTE_AXIS;
+				break;
+
+			case ABS_RX:
+				node->abs.r = (e->value - node->abs.min_rx) / (node->abs.max_rx - node->abs.min_rx);
+				node->abs.axis = NEMO_POINTER_AXIS_ROTATE_X;
+				if (node->pending_event == EVDEV_NONE)
+					node->pending_event = EVDEV_ABSOLUTE_AXIS;
+				break;
+
+			case ABS_RY:
+				node->abs.r = (e->value - node->abs.min_ry) / (node->abs.max_ry - node->abs.min_ry);
+				node->abs.axis = NEMO_POINTER_AXIS_ROTATE_Y;
+				if (node->pending_event == EVDEV_NONE)
+					node->pending_event = EVDEV_ABSOLUTE_AXIS;
+				break;
+
+			case ABS_RZ:
+				node->abs.r = (e->value - node->abs.min_rz) / (node->abs.max_rz - node->abs.min_rz);
+				node->abs.axis = NEMO_POINTER_AXIS_ROTATE_Z;
+				if (node->pending_event == EVDEV_NONE)
+					node->pending_event = EVDEV_ABSOLUTE_AXIS;
+				break;
+		}
 	}
 }
 
