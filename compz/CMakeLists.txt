@@ -131,6 +131,7 @@ add_library(nemocompz SHARED
 	keyboard.c
 	pointer.c
 	touch.c
+	stick.c
 	keypad.c
 	datadevice.c
 	dataoffer.c
@@ -231,6 +232,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/compz/picker.h
 	${CMAKE_SOURCE_DIR}/compz/pointer.h
 	${CMAKE_SOURCE_DIR}/compz/touch.h
+	${CMAKE_SOURCE_DIR}/compz/stick.h
 	${CMAKE_SOURCE_DIR}/compz/virtuio.h
 	${CMAKE_SOURCE_DIR}/compz/datadevice.h
 	${CMAKE_SOURCE_DIR}/compz/session.h

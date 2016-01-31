@@ -5,6 +5,7 @@
 			<entry name="pointer" value="1"/>
 			<entry name="keyboard" value="2"/>
 			<entry name="touch" value="4"/>
+			<entry name="stick" value="8"/>
 		</enum>
 
 		<event name="capabilities">
@@ -21,6 +22,10 @@
 
 		<request name="get_touch">
 			<arg name="id" type="new_id" interface="nemo_touch"/>
+		</request>
+
+		<request name="get_stick">
+			<arg name="id" type="new_id" interface="nemo_stick"/>
 		</request>
 
 		<event name="name">
@@ -210,6 +215,55 @@
 			<arg name="y2" type="fixed"/>
 			<arg name="x3" type="fixed"/>
 			<arg name="y3" type="fixed"/>
+		</request>
+	</interface>
+
+	<interface name="nemo_stick" version="1">
+		<event name="enter">
+			<arg name="serial" type="uint"/>
+			<arg name="surface" type="object" interface="wl_surface"/>
+			<arg name="id" type="int"/>
+		</event>
+
+		<event name="leave">
+			<arg name="serial" type="uint"/>
+			<arg name="surface" type="object" interface="wl_surface"/>
+			<arg name="id" type="int"/>
+		</event>
+
+		<event name="translate">
+			<arg name="time" type="uint"/>
+			<arg name="surface" type="object" interface="wl_surface"/>
+			<arg name="id" type="int"/>
+			<arg name="x" type="fixed"/>
+			<arg name="y" type="fixed"/>
+			<arg name="z" type="fixed"/>
+		</event>
+
+		<event name="rotate">
+			<arg name="time" type="uint"/>
+			<arg name="surface" type="object" interface="wl_surface"/>
+			<arg name="id" type="int"/>
+			<arg name="rx" type="fixed"/>
+			<arg name="ry" type="fixed"/>
+			<arg name="rz" type="fixed"/>
+		</event>
+
+		<enum name="button_state">
+			<entry name="released" value="0"/>
+			<entry name="pressed" value="1"/>
+		</enum>
+
+		<event name="button">
+			<arg name="serial" type="uint"/>
+			<arg name="time" type="uint"/>
+			<arg name="surface" type="object" interface="wl_surface"/>
+			<arg name="id" type="int"/>
+			<arg name="button" type="uint"/>
+			<arg name="state" type="uint"/>
+		</event>
+
+		<request name="release" type="destructor">
 		</request>
 	</interface>
 </protocol>

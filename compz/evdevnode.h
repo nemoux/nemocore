@@ -24,17 +24,21 @@ typedef enum {
 	EVDEV_ABSOLUTE_MT_MOTION = 6,
 	EVDEV_ABSOLUTE_MT_UP = 7,
 	EVDEV_RELATIVE_MOTION = 8,
+	EVDEV_ABSOLUTE_TRANSLATE = 9,
+	EVDEV_ABSOLUTE_ROTATE = 10
 } EvdevEventType;
 
 typedef enum {
 	EVDEV_SEAT_POINTER = (1 << 0),
 	EVDEV_SEAT_KEYBOARD = (1 << 1),
-	EVDEV_SEAT_TOUCH = (1 << 2)
+	EVDEV_SEAT_TOUCH = (1 << 2),
+	EVDEV_SEAT_STICK = (1 << 3)
 } EvdevSeatCapability;
 
 struct nemopointer;
 struct nemokeyboard;
 struct nemotouch;
+struct nemostick;
 struct nemoscreen;
 
 struct evdevnode {
@@ -85,6 +89,7 @@ struct evdevnode {
 	struct nemopointer *pointer;
 	struct nemokeyboard *keyboard;
 	struct nemotouch *touch;
+	struct nemostick *stick;
 };
 
 extern struct evdevnode *evdev_create_node(struct nemocompz *compz, const char *path, int fd);

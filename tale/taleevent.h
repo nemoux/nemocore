@@ -37,8 +37,14 @@ typedef enum {
 	NEMOTALE_TOUCH_DOWN_EVENT = (1 << 14),
 	NEMOTALE_TOUCH_UP_EVENT = (1 << 15),
 	NEMOTALE_TOUCH_MOTION_EVENT = (1 << 16),
-	NEMOTALE_POINTER_LONG_PRESS_EVENT = (1 << 17),
-	NEMOTALE_TOUCH_LONG_PRESS_EVENT = (1 << 18),
+	NEMOTALE_STICK_ENTER_EVENT = (1 << 17),
+	NEMOTALE_STICK_LEAVE_EVENT = (1 << 18),
+	NEMOTALE_STICK_TRANSLATE_EVENT = (1 << 19),
+	NEMOTALE_STICK_ROTATE_EVENT = (1 << 20),
+	NEMOTALE_STICK_BUTTON_DOWN_EVENT = (1 << 21),
+	NEMOTALE_STICK_BUTTON_UP_EVENT = (1 << 22),
+	NEMOTALE_POINTER_LONG_PRESS_EVENT = (1 << 23),
+	NEMOTALE_TOUCH_LONG_PRESS_EVENT = (1 << 24),
 	NEMOTALE_DOWN_EVENT = NEMOTALE_POINTER_DOWN_EVENT | NEMOTALE_TOUCH_DOWN_EVENT,
 	NEMOTALE_UP_EVENT = NEMOTALE_POINTER_UP_EVENT | NEMOTALE_TOUCH_UP_EVENT,
 	NEMOTALE_MOTION_EVENT = NEMOTALE_POINTER_MOTION_EVENT | NEMOTALE_TOUCH_MOTION_EVENT,
@@ -88,7 +94,7 @@ struct taleevent {
 
 	uint32_t duration;
 
-	float x, y;
+	float x, y, z;
 	float gx, gy;
 
 	uint32_t axis;
@@ -115,6 +121,12 @@ extern void nemotale_push_keyboard_up_event(struct nemotale *tale, uint32_t seri
 extern void nemotale_push_touch_down_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, float x, float y, float gx, float gy);
 extern void nemotale_push_touch_up_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time);
 extern void nemotale_push_touch_motion_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, float x, float y, float gx, float gy);
+extern void nemotale_push_stick_enter_event(struct nemotale *tale, uint32_t serial, uint64_t device);
+extern void nemotale_push_stick_leave_event(struct nemotale *tale, uint32_t serial, uint64_t device);
+extern void nemotale_push_stick_down_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, uint32_t button);
+extern void nemotale_push_stick_up_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, uint32_t button);
+extern void nemotale_push_stick_translate_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, float x, float y, float z);
+extern void nemotale_push_stick_rotate_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, float x, float y, float z);
 
 extern void nemotale_push_timer_event(struct nemotale *tale, uint32_t time);
 

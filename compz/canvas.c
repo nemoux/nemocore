@@ -22,6 +22,7 @@
 #include <keyboard.h>
 #include <keypad.h>
 #include <touch.h>
+#include <stick.h>
 #include <presentation.h>
 #include <waylandhelper.h>
 #include <nemomisc.h>
@@ -1154,6 +1155,107 @@ static void nemocanvas_touch_frame(struct touchpoint *tp, struct nemocontent *co
 	}
 }
 
+static void nemocanvas_stick_enter(struct nemostick *stick, struct nemocontent *content)
+{
+	struct nemocanvas *canvas = (struct nemocanvas *)container_of(content, struct nemocanvas, base);
+	struct wl_list *resource_list;
+	struct wl_client *client = wl_resource_get_client(canvas->resource);
+	struct wl_resource *resource;
+	uint32_t serial;
+
+	serial = wl_display_next_serial(stick->seat->compz->display);
+
+	resource_list = &stick->seat->stick.nemo_resource_list;
+
+	wl_resource_for_each(resource, resource_list) {
+		if (wl_resource_get_client(resource) == client) {
+			nemo_stick_send_enter(resource, serial, canvas->resource, stick->id);
+		}
+	}
+
+	stick->focus_serial = serial;
+}
+
+static void nemocanvas_stick_leave(struct nemostick *stick, struct nemocontent *content)
+{
+	struct nemocanvas *canvas = (struct nemocanvas *)container_of(content, struct nemocanvas, base);
+	struct wl_list *resource_list;
+	struct wl_client *client = wl_resource_get_client(canvas->resource);
+	struct wl_resource *resource;
+	uint32_t serial;
+
+	serial = wl_display_next_serial(stick->seat->compz->display);
+
+	resource_list = &stick->seat->stick.nemo_resource_list;
+
+	wl_resource_for_each(resource, resource_list) {
+		if (wl_resource_get_client(resource) == client) {
+			nemo_stick_send_leave(resource, serial, canvas->resource, stick->id);
+		}
+	}
+}
+
+static void nemocanvas_stick_translate(struct nemostick *stick, struct nemocontent *content, uint32_t time, float x, float y, float z)
+{
+	struct nemocanvas *canvas = (struct nemocanvas *)container_of(content, struct nemocanvas, base);
+	struct wl_list *resource_list;
+	struct wl_client *client = wl_resource_get_client(canvas->resource);
+	struct wl_resource *resource;
+
+	resource_list = &stick->seat->stick.nemo_resource_list;
+
+	wl_resource_for_each(resource, resource_list) {
+		if (wl_resource_get_client(resource) == client) {
+			nemo_stick_send_translate(resource, time, canvas->resource,
+					stick->id,
+					wl_fixed_from_double(x),
+					wl_fixed_from_double(y),
+					wl_fixed_from_double(z));
+		}
+	}
+}
+
+static void nemocanvas_stick_rotate(struct nemostick *stick, struct nemocontent *content, uint32_t time, float rx, float ry, float rz)
+{
+	struct nemocanvas *canvas = (struct nemocanvas *)container_of(content, struct nemocanvas, base);
+	struct wl_list *resource_list;
+	struct wl_client *client = wl_resource_get_client(canvas->resource);
+	struct wl_resource *resource;
+
+	resource_list = &stick->seat->stick.nemo_resource_list;
+
+	wl_resource_for_each(resource, resource_list) {
+		if (wl_resource_get_client(resource) == client) {
+			nemo_stick_send_rotate(resource, time, canvas->resource,
+					stick->id,
+					wl_fixed_from_double(rx),
+					wl_fixed_from_double(ry),
+					wl_fixed_from_double(rz));
+		}
+	}
+}
+
+static void nemocanvas_stick_button(struct nemostick *stick, struct nemocontent *content, uint32_t time, uint32_t button, uint32_t state)
+{
+	struct nemocanvas *canvas = (struct nemocanvas *)container_of(content, struct nemocanvas, base);
+	struct wl_list *resource_list;
+	struct wl_client *client = wl_resource_get_client(canvas->resource);
+	struct wl_resource *resource;
+	uint32_t serial;
+
+	serial = wl_display_next_serial(stick->seat->compz->display);
+
+	resource_list = &stick->seat->stick.nemo_resource_list;
+
+	wl_resource_for_each(resource, resource_list) {
+		if (wl_resource_get_client(resource) == client) {
+			nemo_stick_send_button(resource, serial, time, canvas->resource,
+					stick->id,
+					button, state);
+		}
+	}
+}
+
 struct nemocanvas *nemocanvas_create(struct wl_client *client, struct wl_resource *compositor_resource, uint32_t id)
 {
 	struct nemocompz *compz = (struct nemocompz *)wl_resource_get_user_data(compositor_resource);
@@ -1201,6 +1303,12 @@ struct nemocanvas *nemocanvas_create(struct wl_client *client, struct wl_resourc
 	canvas->base.touch_up = nemocanvas_touch_up;
 	canvas->base.touch_motion = nemocanvas_touch_motion;
 	canvas->base.touch_frame = nemocanvas_touch_frame;
+
+	canvas->base.stick_enter = nemocanvas_stick_enter;
+	canvas->base.stick_leave = nemocanvas_stick_leave;
+	canvas->base.stick_translate = nemocanvas_stick_translate;
+	canvas->base.stick_rotate = nemocanvas_stick_rotate;
+	canvas->base.stick_button = nemocanvas_stick_button;
 
 	canvas->buffer_viewport.buffer.transform = WL_OUTPUT_TRANSFORM_NORMAL;
 	canvas->buffer_viewport.buffer.scale = 1;

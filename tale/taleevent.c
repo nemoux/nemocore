@@ -401,3 +401,75 @@ void nemotale_push_timer_event(struct nemotale *tale, uint32_t time)
 		}
 	}
 }
+
+void nemotale_push_stick_enter_event(struct nemotale *tale, uint32_t serial, uint64_t device)
+{
+	struct taleevent event;
+
+	event.device = device;
+	event.serial = serial;
+
+	tale->dispatch_event(tale, NULL, NEMOTALE_STICK_ENTER_EVENT, &event);
+}
+
+void nemotale_push_stick_leave_event(struct nemotale *tale, uint32_t serial, uint64_t device)
+{
+	struct taleevent event;
+
+	event.device = device;
+	event.serial = serial;
+
+	tale->dispatch_event(tale, NULL, NEMOTALE_STICK_LEAVE_EVENT, &event);
+}
+
+void nemotale_push_stick_down_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, uint32_t button)
+{
+	struct taleevent event;
+
+	event.device = device;
+	event.serial = serial;
+	event.time = time;
+	event.value = button;
+
+	tale->dispatch_event(tale, NULL, NEMOTALE_STICK_BUTTON_DOWN_EVENT, &event);
+}
+
+void nemotale_push_stick_up_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, uint32_t button)
+{
+	struct taleevent event;
+
+	event.time = time;
+	event.value = button;
+	event.device = device;
+	event.serial = serial;
+
+	tale->dispatch_event(tale, NULL, NEMOTALE_STICK_BUTTON_UP_EVENT, &event);
+}
+
+void nemotale_push_stick_translate_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, float x, float y, float z)
+{
+	struct taleevent event;
+
+	event.serial = serial;
+	event.device = device;
+	event.time = time;
+	event.x = x;
+	event.y = y;
+	event.z = z;
+
+	tale->dispatch_event(tale, NULL, NEMOTALE_STICK_TRANSLATE_EVENT, &event);
+}
+
+void nemotale_push_stick_rotate_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, float x, float y, float z)
+{
+	struct taleevent event;
+
+	event.serial = serial;
+	event.device = device;
+	event.time = time;
+	event.x = x;
+	event.y = y;
+	event.z = z;
+
+	tale->dispatch_event(tale, NULL, NEMOTALE_STICK_ROTATE_EVENT, &event);
+}
