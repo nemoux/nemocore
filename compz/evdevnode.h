@@ -27,12 +27,6 @@ typedef enum {
 } EvdevEventType;
 
 typedef enum {
-	EVDEV_X_AXIS = 0,
-	EVDEV_Y_AXIS = 1,
-	EVDEV_Z_AXIS = 2
-} EvdevAxisType;
-
-typedef enum {
 	EVDEV_SEAT_POINTER = (1 << 0),
 	EVDEV_SEAT_KEYBOARD = (1 << 1),
 	EVDEV_SEAT_TOUCH = (1 << 2)
@@ -59,6 +53,7 @@ struct evdevnode {
 
 	struct {
 		float min_x, max_x, min_y, max_y, min_z, max_z;
+		float min_rx, max_rx, min_ry, max_ry, min_rz, max_rz;
 		float x, y, z;
 		float r;
 		uint32_t seat_slot;

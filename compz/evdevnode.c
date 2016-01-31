@@ -271,21 +271,21 @@ static void evdev_process_absolute_motion(struct evdevnode *node, struct input_e
 			break;
 
 		case ABS_RX:
-			node->abs.r = e->value;
+			node->abs.r = (e->value - node->abs.min_rx) / (node->abs.max_rx - node->abs.min_rx);
 			node->abs.axis = NEMO_POINTER_AXIS_ROTATE_X;
 			if (node->pending_event == EVDEV_NONE)
 				node->pending_event = EVDEV_ABSOLUTE_AXIS;
 			break;
 
 		case ABS_RY:
-			node->abs.r = e->value;
+			node->abs.r = (e->value - node->abs.min_ry) / (node->abs.max_ry - node->abs.min_ry);
 			node->abs.axis = NEMO_POINTER_AXIS_ROTATE_Y;
 			if (node->pending_event == EVDEV_NONE)
 				node->pending_event = EVDEV_ABSOLUTE_AXIS;
 			break;
 
 		case ABS_RZ:
-			node->abs.r = e->value;
+			node->abs.r = (e->value - node->abs.min_rz) / (node->abs.max_rz - node->abs.min_rz);
 			node->abs.axis = NEMO_POINTER_AXIS_ROTATE_Z;
 			if (node->pending_event == EVDEV_NONE)
 				node->pending_event = EVDEV_ABSOLUTE_AXIS;
@@ -457,6 +457,24 @@ static int evdev_configure_node(struct evdevnode *node)
 			ioctl(node->fd, EVIOCGABS(ABS_Z), &absinfo);
 			node->abs.min_z = absinfo.minimum;
 			node->abs.max_z = absinfo.maximum;
+			has_abs = 1;
+		}
+		if (TEST_BIT(abs_bits, ABS_RX)) {
+			ioctl(node->fd, EVIOCGABS(ABS_RX), &absinfo);
+			node->abs.min_rx = absinfo.minimum;
+			node->abs.max_rx = absinfo.maximum;
+			has_abs = 1;
+		}
+		if (TEST_BIT(abs_bits, ABS_RY)) {
+			ioctl(node->fd, EVIOCGABS(ABS_RY), &absinfo);
+			node->abs.min_ry = absinfo.minimum;
+			node->abs.max_ry = absinfo.maximum;
+			has_abs = 1;
+		}
+		if (TEST_BIT(abs_bits, ABS_RZ)) {
+			ioctl(node->fd, EVIOCGABS(ABS_RZ), &absinfo);
+			node->abs.min_rz = absinfo.minimum;
+			node->abs.max_rz = absinfo.maximum;
 			has_abs = 1;
 		}
 		if (TEST_BIT(abs_bits, ABS_MT_POSITION_X) &&
