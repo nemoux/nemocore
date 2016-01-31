@@ -576,8 +576,7 @@ static int evdev_configure_node(struct evdevnode *node)
 			nemolog_message("EVDEV", "%s [%s] is a stick\n", node->devname, node->base.devnode);
 		}
 	}
-
-	if ((has_abs || has_rel) && has_button) {
+	if ((has_abs || has_rel) && has_button && !has_z) {
 		// add pointer device
 		node->pointer = nemopointer_create(node->compz->seat, &node->base);
 		if (node->pointer != NULL) {

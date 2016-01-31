@@ -105,6 +105,7 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 				if (screen->focus == NEMO_SHELL_FULLSCREEN_ALL_FOCUS) {
 					nemoseat_set_keyboard_focus(compz->seat, bin->view);
 					nemoseat_set_pointer_focus(compz->seat, bin->view);
+					nemoseat_set_stick_focus(compz->seat, bin->view);
 				}
 			} else {
 				bin->client->send_configure(bin->canvas, width, height);
