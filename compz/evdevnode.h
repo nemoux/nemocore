@@ -60,8 +60,8 @@ struct evdevnode {
 	struct {
 		float min_x, max_x, min_y, max_y, min_z, max_z;
 		float x, y, z;
+		float r;
 		uint32_t seat_slot;
-		int32_t r;
 		int axis;
 
 		int apply_calibration;
