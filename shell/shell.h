@@ -139,7 +139,6 @@ struct clientstate {
 
 	int is_maximized;
 	int is_fullscreen;
-	uint32_t focus;
 
 	uint32_t min_width, min_height;
 	uint32_t max_width, max_height;
@@ -311,6 +310,71 @@ extern void nemoshell_set_maximized_bin(struct nemoshell *shell, struct shellbin
 extern void nemoshell_put_maximized_bin(struct nemoshell *shell, struct shellbin *bin);
 
 extern void nemoshell_load_gestures(struct nemoshell *shell);
+
+static inline void clientstate_set_position(struct clientstate *state, float x, float y)
+{
+	state->x = x;
+	state->y = y;
+}
+
+static inline void clientstate_set_rotate(struct clientstate *state, float r)
+{
+	state->r = r;
+}
+
+static inline void clientstate_set_anchor(struct clientstate *state, float dx, float dy)
+{
+	state->dx = dx;
+	state->dy = dy;
+}
+
+static inline void clientstate_set_size(struct clientstate *state, uint32_t width, uint32_t height)
+{
+	state->width = width;
+	state->height = height;
+}
+
+static inline void clientstate_set_max_size(struct clientstate *state, uint32_t width, uint32_t height)
+{
+	state->max_width = width;
+	state->max_height = height;
+	state->has_max_size = 1;
+}
+
+static inline void clientstate_set_min_size(struct clientstate *state, uint32_t width, uint32_t height)
+{
+	state->min_width = width;
+	state->min_height = height;
+	state->has_min_size = 1;
+}
+
+static inline void clientstate_set_bin_flags(struct clientstate *state, uint32_t flags)
+{
+	state->flags = flags;
+}
+
+static inline void clientstate_set_input_type(struct clientstate *state, uint32_t type)
+{
+	state->input_type = type;
+}
+
+static inline void clientstate_set_fadein_style(struct clientstate *state, uint32_t type, uint32_t ease, uint32_t delay, uint32_t duration)
+{
+	state->fadein_type = type;
+	state->fadein_ease = ease;
+	state->fadein_delay = delay;
+	state->fadein_duration = duration;
+}
+
+static inline void clientstate_set_maximized(struct clientstate *state, int is_maximized)
+{
+	state->is_maximized = is_maximized;
+}
+
+static inline void clientstate_set_fullscreen(struct clientstate *state, int is_fullscreen)
+{
+	state->is_fullscreen = is_fullscreen;
+}
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
