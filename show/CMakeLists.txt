@@ -68,6 +68,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/show/showcons.h
 	${CMAKE_SOURCE_DIR}/show/showfont.h
 	${CMAKE_SOURCE_DIR}/show/showeasy.h
+	${CMAKE_SOURCE_DIR}/show/showmisc.h
 	${CMAKE_SOURCE_DIR}/show/svghelper.h
 	)
 
