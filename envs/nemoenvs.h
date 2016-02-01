@@ -10,6 +10,7 @@ NEMO_BEGIN_EXTERN_C
 struct nemoshell;
 
 extern void nemoenvs_load_background(struct nemoshell *shell);
+extern void nemoenvs_load_soundmanager(struct nemoshell *shell);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

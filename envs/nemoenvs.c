@@ -63,3 +63,26 @@ void nemoenvs_load_background(struct nemoshell *shell)
 		free(argv[4]);
 	}
 }
+
+void nemoenvs_load_soundmanager(struct nemoshell *shell)
+{
+	int index;
+
+	index = nemoitem_get(shell->configs, "//nemoshell/sound", 0);
+	if (index >= 0) {
+		char *path;
+		char *attr;
+		char *argv[32];
+		int argc = 0;
+		int i;
+
+		argv[argc++] = nemoitem_get_attr(shell->configs, index, "path");
+
+		nemoitem_for_vattr(shell->configs, index, "arg%d", i, 0, attr)
+			argv[argc++] = attr;
+
+		argv[argc++] = NULL;
+
+		wayland_execute_path(argv[0], argv, NULL);
+	}
+}
