@@ -1136,6 +1136,9 @@ void nemoshell_put_fullscreen_opaque(struct nemoshell *shell, struct shellbin *b
 
 	wl_list_for_each(layer, &compz->layer_list, link) {
 		wl_list_for_each(view, &layer->view_list, layer_link) {
+			if (bin->view == view)
+				continue;
+
 			if (!wl_list_empty(&view->children_list)) {
 				wl_list_for_each(child, &view->children_list, children_link) {
 					if (nemoshell_bin_contains_view(bin, child) != 0)
