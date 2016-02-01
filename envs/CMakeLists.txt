@@ -20,6 +20,7 @@ set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 add_definitions(-DNEMOENVS_RESOURCES="${CMAKE_INSTALL_PREFIX}/share/nemoenvs")
 
 add_library(nemoenvs SHARED
+	nemoenvs.c
 	nemopad.c
 	nemopack.c
 	nemograb.c
@@ -41,6 +42,7 @@ set(NEMOENVS_PKGCONFIG_REQUIRES "nemoasst nemocompz nemoshell nemoshow")
 INSTALL(TARGETS nemoenvs DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
 
 set(HEADER_FILES
+	nemoenvs.h
 	nemopad.h
 	nemopack.h
 	nemograb.h
