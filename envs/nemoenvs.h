@@ -47,8 +47,6 @@ struct nemoaction {
 	uint32_t fadein_ease;
 	uint32_t fadein_delay;
 	uint32_t fadein_duration;
-
-	uint32_t time;
 };
 
 struct nemogroup {
