@@ -91,6 +91,7 @@ struct nemoshell {
 		uint32_t samples;
 
 		double friction;
+		double coefficient;
 	} pitch;
 
 	struct {

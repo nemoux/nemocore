@@ -189,7 +189,7 @@ static void move_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 
 		effect = vieweffect_create(grab->bin->view);
 		effect->type = NEMO_VIEW_PITCH_EFFECT;
-		effect->pitch.velocity = sqrtf(tp->dx * tp->dx + tp->dy * tp->dy);
+		effect->pitch.velocity = sqrtf(tp->dx * tp->dx + tp->dy * tp->dy) * shell->pitch.coefficient;
 		effect->pitch.dx = tp->dx / effect->pitch.velocity;
 		effect->pitch.dy = tp->dy / effect->pitch.velocity;
 		effect->pitch.friction = shell->pitch.friction;
@@ -427,7 +427,7 @@ static void move_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 
 		effect = vieweffect_create(grab->actor->view);
 		effect->type = NEMO_VIEW_PITCH_EFFECT;
-		effect->pitch.velocity = sqrtf(tp->dx * tp->dx + tp->dy * tp->dy);
+		effect->pitch.velocity = sqrtf(tp->dx * tp->dx + tp->dy * tp->dy) * shell->pitch.coefficient;
 		effect->pitch.dx = tp->dx / effect->pitch.velocity;
 		effect->pitch.dy = tp->dy / effect->pitch.velocity;
 		effect->pitch.friction = shell->pitch.friction;

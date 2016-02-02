@@ -1225,7 +1225,8 @@ void nemoshell_put_maximized_bin(struct nemoshell *shell, struct shellbin *bin)
 void nemoshell_load_gestures(struct nemoshell *shell)
 {
 	shell->pitch.samples = nemoitem_get_iattr_named(shell->configs, "//nemoshell/pitch", "samples", 5);
-	shell->pitch.friction = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pitch", "friction", 0.012f);
+	shell->pitch.friction = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pitch", "friction", 0.015f);
+	shell->pitch.coefficient = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pitch", "coefficient", 1.8f);
 
 	shell->pick.max_rotate = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "max_rotate", 45.0f);
 	shell->pick.max_rotate = shell->pick.max_rotate * M_PI / 180.0f;
