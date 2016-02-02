@@ -38,6 +38,8 @@ void nemoenvs_destroy_action(struct nemoaction *action)
 		free(action->icon);
 	if (action->ring != NULL)
 		free(action->ring);
+	if (action->user != NULL)
+		free(action->user);
 
 	free(action);
 }
@@ -172,6 +174,7 @@ void nemoenvs_load_actions(struct nemoshell *shell, struct nemoenvs *envs)
 {
 	struct nemogroup *group;
 	struct nemoaction *action;
+	char *chromepath;
 	char *path;
 	char *icon;
 	char *ring;
@@ -182,15 +185,19 @@ void nemoenvs_load_actions(struct nemoshell *shell, struct nemoenvs *envs)
 	int index;
 	int i;
 
+	chromepath = nemoitem_get_attr_named(shell->configs, "//nemoshell/chrome", "path");
+
 	nemoitem_for_each(shell->configs, index, "//nemoshell/group", 0) {
 		icon = nemoitem_get_attr(shell->configs, index, "icon");
 		ring = nemoitem_get_attr(shell->configs, index, "ring");
-		if (icon == NULL || ring == NULL)
+		if (icon == NULL)
 			continue;
 
 		group = nemoenvs_create_group();
 		group->icon = strdup(icon);
-		group->ring = strdup(ring);
+
+		if (ring != NULL)
+			group->ring = strdup(ring);
 
 		NEMOBOX_APPEND(envs->groups, envs->sgroups, envs->ngroups, group);
 	}
@@ -200,23 +207,29 @@ void nemoenvs_load_actions(struct nemoshell *shell, struct nemoenvs *envs)
 		path = nemoitem_get_attr(shell->configs, index, "path");
 		icon = nemoitem_get_attr(shell->configs, index, "icon");
 		ring = nemoitem_get_attr(shell->configs, index, "ring");
-		if (igroup < 0 || igroup >= envs->ngroups || icon == NULL || ring == NULL)
+		if (igroup < 0 || igroup >= envs->ngroups || icon == NULL)
 			continue;
 
 		group = envs->groups[igroup];
 
 		action = nemoenvs_create_action();
 		action->icon = strdup(icon);
-		action->ring = strdup(ring);
+
+		if (ring != NULL)
+			action->ring = strdup(ring);
 
 		action->type = NEMOENVS_ACTION_APP_TYPE;
 
 		attr = nemoitem_get_attr(shell->configs, index, "type");
 		if (attr != NULL) {
-			if (strcmp(attr, "keypad") == 0)
+			if (strcmp(attr, "chrome") == 0)
+				action->type = NEMOENVS_ACTION_CHROME_TYPE;
+			else if (strcmp(attr, "keypad") == 0)
 				action->type = NEMOENVS_ACTION_KEYPAD_TYPE;
 			else if (strcmp(attr, "speaker") == 0)
 				action->type = NEMOENVS_ACTION_SPEAKER_TYPE;
+			else if (strcmp(attr, "none") == 0)
+				action->type = NEMOENVS_ACTION_NONE_TYPE;
 		}
 
 		action->input = NEMO_VIEW_INPUT_NORMAL;
@@ -225,6 +238,14 @@ void nemoenvs_load_actions(struct nemoshell *shell, struct nemoenvs *envs)
 		if (attr != NULL) {
 			if (strcmp(attr, "touch") == 0)
 				action->input = NEMO_VIEW_INPUT_TOUCH;
+		}
+
+		action->network = NEMOENVS_NETWORK_NORMAL_STATE;
+
+		attr = nemoitem_get_attr(shell->configs, index, "network");
+		if (attr != NULL) {
+			if (strcmp(attr, "block") == 0)
+				action->network = NEMOENVS_NETWORK_BLOCK_STATE;
 		}
 
 		action->flags = NEMO_SHELL_SURFACE_MOVABLE_FLAG | NEMO_SHELL_SURFACE_PICKABLE_FLAG | NEMO_SHELL_SURFACE_MAXIMIZABLE_FLAG | NEMO_SHELL_SURFACE_MINIMIZABLE_FLAG;
@@ -288,6 +309,15 @@ void nemoenvs_load_actions(struct nemoshell *shell, struct nemoenvs *envs)
 		if (action->type == NEMOENVS_ACTION_APP_TYPE) {
 			action->path = strdup(path);
 			action->args[argc++] = action->path;
+		} else if (action->type == NEMOENVS_ACTION_CHROME_TYPE) {
+			action->path = strdup(chromepath);
+			action->args[argc++] = action->path;
+
+			attr = nemoitem_get_attr(shell->configs, index, "user");
+			if (attr != NULL) {
+				asprintf(&action->user, "--user-data-dir=%s", attr);
+				action->args[argc++] = action->user;
+			}
 		}
 
 		nemoitem_for_vattr(shell->configs, index, "arg%d", i, 0, attr)

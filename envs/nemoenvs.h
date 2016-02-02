@@ -11,10 +11,18 @@ NEMO_BEGIN_EXTERN_C
 
 typedef enum {
 	NEMOENVS_ACTION_APP_TYPE = 0,
-	NEMOENVS_ACTION_KEYPAD_TYPE = 1,
-	NEMOENVS_ACTION_SPEAKER_TYPE = 2,
+	NEMOENVS_ACTION_CHROME_TYPE = 1,
+	NEMOENVS_ACTION_KEYPAD_TYPE = 2,
+	NEMOENVS_ACTION_SPEAKER_TYPE = 3,
+	NEMOENVS_ACTION_NONE_TYPE = 4,
 	NEMOENVS_ACTION_LAST_TYPE
 } NemoEnvsActionType;
+
+typedef enum {
+	NEMOENVS_NETWORK_NORMAL_STATE = 0,
+	NEMOENVS_NETWORK_BLOCK_STATE = 1,
+	NEMOENVS_NETWORK_LAST_STATE
+} NemoEnvsNetworkState;
 
 struct nemoshell;
 
@@ -22,12 +30,14 @@ struct nemoaction {
 	char *path;
 	char *icon;
 	char *ring;
+	char *user;
 	char *args[16];
 
 	uint32_t flags;
 
 	int type;
 	int input;
+	int network;
 
 	uint32_t max_width, max_height;
 	uint32_t min_width, min_height;
