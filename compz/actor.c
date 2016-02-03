@@ -16,6 +16,7 @@
 #include <seat.h>
 #include <pointer.h>
 #include <keyboard.h>
+#include <timer.h>
 #include <nemomisc.h>
 
 static void nemoactor_update_output(struct nemocontent *content, uint32_t node_mask, uint32_t screen_mask)
@@ -50,6 +51,15 @@ static void nemoactor_update_fullscreen(struct nemocontent *content, int active,
 
 	if (actor->dispatch_fullscreen != NULL)
 		actor->dispatch_fullscreen(actor, active, opaque);
+}
+
+static void nemoactor_dispatch_frame_timer(struct nemotimer *timer, void *data)
+{
+	struct nemoactor *actor = (struct nemoactor *)data;
+
+	actor->framefeed = 0;
+
+	actor->dispatch_frame(actor, time_current_msecs());
 }
 
 static int nemoactor_read_pixels(struct nemocontent *content, pixman_format_code_t format, void *pixels)
@@ -116,6 +126,10 @@ struct nemoactor *nemoactor_create_pixman(struct nemocompz *compz, int width, in
 
 	wl_list_init(&actor->frame_link);
 
+	actor->frametimer = nemotimer_create(compz);
+	nemotimer_set_callback(actor->frametimer, nemoactor_dispatch_frame_timer);
+	nemotimer_set_userdata(actor->frametimer, actor);
+
 	nemocontent_prepare(&actor->base, compz->nodemax);
 
 	return actor;
@@ -161,6 +175,8 @@ void nemoactor_destroy(struct nemoactor *actor)
 	wl_list_remove(&actor->link);
 
 	wl_list_remove(&actor->frame_link);
+
+	nemotimer_destroy(actor->frametimer);
 
 	nemoview_destroy(actor->view);
 
@@ -243,6 +259,10 @@ struct nemoactor *nemoactor_create_gl(struct nemocompz *compz, int width, int he
 	wl_list_insert(&compz->actor_list, &actor->link);
 
 	wl_list_init(&actor->frame_link);
+
+	actor->frametimer = nemotimer_create(compz);
+	nemotimer_set_callback(actor->frametimer, nemoactor_dispatch_frame_timer);
+	nemotimer_set_userdata(actor->frametimer, actor);
 
 	nemocontent_prepare(&actor->base, compz->nodemax);
 
@@ -380,6 +400,11 @@ void nemoactor_set_dispatch_destroy(struct nemoactor *actor, nemoactor_dispatch_
 	actor->dispatch_destroy = dispatch;
 }
 
+void nemoactor_set_framerate(struct nemoactor *actor, uint32_t framerate)
+{
+	actor->framerate = framerate;
+}
+
 int nemoactor_dispatch_resize(struct nemoactor *actor, int32_t width, int32_t height, int32_t fixed)
 {
 	if (actor->dispatch_resize != NULL)
@@ -408,8 +433,19 @@ void nemoactor_dispatch_fullscreen(struct nemoactor *actor, int active, int opaq
 
 void nemoactor_dispatch_frame(struct nemoactor *actor)
 {
-	if (wl_list_empty(&actor->frame_link)) {
-		actor->dispatch_frame(actor, 0);
+	if (actor->framerate == 0) {
+		if (wl_list_empty(&actor->frame_link)) {
+			actor->dispatch_frame(actor, 0);
+		}
+	} else {
+		if (!wl_list_empty(&actor->frame_link)) {
+			wl_list_remove(&actor->frame_link);
+			wl_list_init(&actor->frame_link);
+		}
+
+		if (actor->framefeed == 0) {
+			actor->dispatch_frame(actor, 0);
+		}
 	}
 }
 
@@ -421,12 +457,17 @@ void nemoactor_dispatch_destroy(struct nemoactor *actor)
 
 void nemoactor_feedback(struct nemoactor *actor)
 {
-	if (wl_list_empty(&actor->frame_link)) {
-		struct nemocompz *compz = actor->compz;
+	if (actor->framerate == 0) {
+		if (wl_list_empty(&actor->frame_link)) {
+			struct nemocompz *compz = actor->compz;
 
-		wl_list_insert(&compz->frame_list, &actor->frame_link);
+			wl_list_insert(&compz->frame_list, &actor->frame_link);
 
-		nemocompz_dispatch_frame(compz);
+			nemocompz_dispatch_frame(compz);
+		}
+	} else {
+		actor->framefeed = 1;
+		nemotimer_set_timeout(actor->frametimer, 1000 / actor->framerate);
 	}
 }
 

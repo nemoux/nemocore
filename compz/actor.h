@@ -65,6 +65,10 @@ struct nemoactor {
 
 	struct wl_list frame_link;
 
+	struct nemotimer *frametimer;
+	uint32_t framerate;
+	int framefeed;
+
 	void *context;
 };
 
@@ -89,6 +93,8 @@ extern void nemoactor_set_dispatch_transform(struct nemoactor *actor, nemoactor_
 extern void nemoactor_set_dispatch_fullscreen(struct nemoactor *actor, nemoactor_dispatch_fullscreen_t dispatch);
 extern void nemoactor_set_dispatch_frame(struct nemoactor *actor, nemoactor_dispatch_frame_t dispatch);
 extern void nemoactor_set_dispatch_destroy(struct nemoactor *actor, nemoactor_dispatch_destroy_t dispatch);
+
+extern void nemoactor_set_framerate(struct nemoactor *actor, uint32_t framerate);
 
 extern int nemoactor_dispatch_resize(struct nemoactor *actor, int32_t width, int32_t height, int32_t fixed);
 extern void nemoactor_dispatch_output(struct nemoactor *actor, uint32_t node_mask, uint32_t screen_mask);
