@@ -201,7 +201,7 @@ static void moteback_render_back(struct moteback *mote, pixman_image_t *image, c
 	SkCanvas canvas(&device);
 
 	canvas.drawBitmapRect(back,
-			SkRect::MakeXYWH(0, 0, width, height));
+			SkRect::MakeXYWH(0, 0, width, height), NULL);
 }
 
 static void moteback_render_one(struct moteback *mote, pixman_image_t *image)
