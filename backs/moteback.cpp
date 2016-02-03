@@ -376,6 +376,7 @@ int main(int argc, char *argv[])
 		{ "mincolor",				required_argument,			NULL,		'n' },
 		{ "maxcolor",				required_argument,			NULL,		'm' },
 		{ "textcolor",			required_argument,			NULL,		't' },
+		{ "framerate",			required_argument,			NULL,		'f' },
 		{ 0 }
 	};
 	struct moteback *mote;
@@ -395,13 +396,14 @@ int main(int argc, char *argv[])
 	double sx = 1.0f;
 	double sy = 1.0f;
 	uint32_t uc;
+	uint32_t framerate = 0;
 	char *uri = NULL;
 	char *logo = NULL;
 	int pixelcount = 500;
 	int opt;
 	int i;
 
-	while (opt = getopt_long(argc, argv, "w:h:x:y:u:l:s:p:c:e:g:n:m:t:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:x:y:u:l:s:p:c:e:g:n:m:t:f:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -475,6 +477,10 @@ int main(int argc, char *argv[])
 				textcolor[1] = NEMOCOLOR_DOUBLE_G(uc);
 				textcolor[2] = NEMOCOLOR_DOUBLE_B(uc);
 				textcolor[3] = NEMOCOLOR_DOUBLE_A(uc);
+				break;
+
+			case 'f':
+				framerate = strtoul(optarg, NULL, 10);
 				break;
 
 			default:
@@ -570,6 +576,7 @@ int main(int argc, char *argv[])
 	nemocanvas_set_dispatch_frame(NTEGL_CANVAS(canvas), moteback_dispatch_canvas_frame);
 	nemocanvas_set_dispatch_fullscreen(NTEGL_CANVAS(canvas), moteback_dispatch_canvas_fullscreen);
 	nemocanvas_set_scale(NTEGL_CANVAS(canvas), sx, sy);
+	nemocanvas_set_framerate(NTEGL_CANVAS(canvas), framerate);
 	nemocanvas_unset_sound(NTEGL_CANVAS(canvas));
 
 	mote->canvas = NTEGL_CANVAS(canvas);

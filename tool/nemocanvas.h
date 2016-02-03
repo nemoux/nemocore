@@ -11,6 +11,7 @@ NEMO_BEGIN_EXTERN_C
 #include <cairo.h>
 
 #include <nemotool.h>
+#include <nemotimer.h>
 #include <nemolist.h>
 #include <nemolistener.h>
 
@@ -42,6 +43,10 @@ struct nemocanvas {
 	struct nemo_surface *nemo_surface;
 
 	struct presentation_feedback *feedback;
+
+	struct nemotimer *frametimer;
+	uint32_t framerate;
+	int framefeed;
 
 	struct nemocanvas *parent;
 
@@ -121,6 +126,8 @@ extern void nemocanvas_set_dispatch_fullscreen(struct nemocanvas *canvas, nemoca
 extern void nemocanvas_set_dispatch_frame(struct nemocanvas *canvas, nemocanvas_dispatch_frame_t dispatch);
 extern void nemocanvas_set_dispatch_screen(struct nemocanvas *canvas, nemocanvas_dispatch_screen_t dispatch);
 extern void nemocanvas_set_dispatch_destroy(struct nemocanvas *canvas, nemocanvas_dispatch_destroy_t dispatch);
+
+extern void nemocanvas_set_framerate(struct nemocanvas *canvas, uint32_t framerate);
 
 extern void nemocanvas_dispatch_frame(struct nemocanvas *canvas);
 extern void nemocanvas_dispatch_frame_force(struct nemocanvas *canvas);
