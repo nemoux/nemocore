@@ -336,7 +336,7 @@ static void nemopad_dispatch_tale_event(struct nemotale *tale, struct talenode *
 					} else if (nemotale_is_single_tap(tale, event, type)) {
 						struct touchpoint *tp;
 
-						tp = nemoseat_get_touchpoint_by_id(seat, event->device);
+						tp = nemoseat_get_touchpoint_by_id(seat, event->taps[0]->device);
 						if (tp != NULL) {
 							nemoshell_move_actor_by_touchpoint(shell, tp, actor);
 
