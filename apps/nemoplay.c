@@ -47,6 +47,7 @@ struct playcontext {
 	guint8 *video_buffer;
 
 	int is_background;
+	int is_minisink;
 
 	int is_audio_only;
 
@@ -197,33 +198,37 @@ static void nemoplay_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 	int32_t width, height;
 	void *data;
 
-	if (nemogst_is_done_media(context->gst) != 0)
-		nemogst_replay_media(context->gst);
+	if (context->is_minisink != 0) {
+		if (nemogst_is_done_media(context->gst) != 0)
+			nemogst_replay_media(context->gst);
 
-	pthread_mutex_lock(&context->lock);
-	width = context->video_width;
-	height = context->video_height;
-	data = context->video_buffer;
-	context->video_buffer = NULL;
-	pthread_mutex_unlock(&context->lock);
+		pthread_mutex_lock(&context->lock);
 
-	if (data != NULL) {
-		if (context->width != width || context->height != height) {
-			nemotool_resize_egl_canvas(context->ecanvas, width, height);
-			nemotale_resize(context->tale, width, height);
-			nemotale_node_resize_pixman(context->node, width, height);
-			nemotale_node_opaque(context->node, 0, 0, width, height);
+		width = context->video_width;
+		height = context->video_height;
+		data = context->video_buffer;
+		context->video_buffer = NULL;
 
-			context->width = width;
-			context->height = height;
+		pthread_mutex_unlock(&context->lock);
+
+		if (data != NULL) {
+			if (context->width != width || context->height != height) {
+				nemotool_resize_egl_canvas(context->ecanvas, width, height);
+				nemotale_resize(context->tale, width, height);
+				nemotale_node_resize_pixman(context->node, width, height);
+				nemotale_node_opaque(context->node, 0, 0, width, height);
+
+				context->width = width;
+				context->height = height;
+			}
+
+			nemotale_node_attach_pixman(context->node, data, width, height);
+
+			nemogst_sink_set_property(context->gst, "frame-done", 1);
 		}
 
-		nemotale_node_attach_pixman(context->node, data, width, height);
-
-		nemogst_sink_set_property(context->gst, "frame-done", 1);
+		nemocanvas_feedback(context->canvas);
 	}
-
-	nemocanvas_feedback(context->canvas);
 
 	nemotale_composite_egl(context->tale, NULL);
 }
@@ -251,6 +256,16 @@ static void nemoplay_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t w
 		if (nemogst_is_playing_media(context->gst) == 0) {
 			nemogst_set_next_step(context->gst, 1, 1.0f);
 		}
+
+		if (context->is_minisink == 0) {
+			nemotool_resize_egl_canvas(context->ecanvas, width, height);
+			nemotale_resize(context->tale, width, height);
+			nemotale_node_resize_pixman(context->node, width, height);
+			nemotale_node_opaque(context->node, 0, 0, width, height);
+
+			context->width = width;
+			context->height = height;
+		}
 	}
 }
 
@@ -266,6 +281,7 @@ int main(int argc, char *argv[])
 		{ "width",				required_argument,	NULL,		'w' },
 		{ "height",				required_argument,	NULL,		'h' },
 		{ "background",		no_argument,				NULL,		'b' },
+		{ "minisink",			no_argument,				NULL,		'm' },
 		{ "log",					required_argument,	NULL,		'l' },
 		{ 0 }
 	};
@@ -283,11 +299,12 @@ int main(int argc, char *argv[])
 	char *uri;
 	int32_t width = 0, height = 0;
 	int is_background = 0;
+	int is_minisink = 0;
 	int opt;
 
 	nemolog_set_file(2);
 
-	while (opt = getopt_long(argc, argv, "f:s:w:h:bl:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "f:s:w:h:bml:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -312,6 +329,10 @@ int main(int argc, char *argv[])
 				is_background = 1;
 				break;
 
+			case 'm':
+				is_minisink = 1;
+				break;
+
 			case 'l':
 				nemolog_open_socket(optarg);
 				break;
@@ -334,6 +355,7 @@ int main(int argc, char *argv[])
 	memset(context, 0, sizeof(struct playcontext));
 
 	context->is_background = is_background;
+	context->is_minisink = is_minisink;
 
 	context->pid = getpid();
 	context->volume = 50;
@@ -345,11 +367,11 @@ int main(int argc, char *argv[])
 		goto out1;
 	nemotool_connect_wayland(tool, NULL);
 
-	context->gst = nemogst_create();
-	if (context->gst == NULL)
+	if (pthread_mutex_init(&context->lock, NULL) != 0)
 		goto out2;
 
-	if (pthread_mutex_init(&context->lock, NULL) != 0)
+	context->gst = nemogst_create();
+	if (context->gst == NULL)
 		goto out3;
 
 	asprintf(&uri, "file://%s", filepath);
@@ -408,9 +430,17 @@ int main(int argc, char *argv[])
 	nemotale_node_opaque(node, 0, 0, width, height);
 
 	if (context->is_audio_only == 0) {
-		nemogst_prepare_mini_sink(context->gst,
-				nemoplay_dispatch_video_frame,
-				context);
+		if (context->is_minisink == 0) {
+			nemogst_prepare_nemo_sink(context->gst,
+					nemotool_get_display(tool),
+					nemotool_get_shm(tool),
+					nemotool_get_formats(tool),
+					nemocanvas_get_surface(canvas));
+		} else {
+			nemogst_prepare_mini_sink(context->gst,
+					nemoplay_dispatch_video_frame,
+					context);
+		}
 		nemogst_set_media_path(context->gst, uri);
 
 		if (subtitlepath != NULL) {
@@ -443,6 +473,8 @@ int main(int argc, char *argv[])
 	nemoglib_run_tool(gmainloop, context->tool);
 	g_main_loop_unref(gmainloop);
 
+	nemogst_destroy(context->gst);
+
 	nemotool_destroy_egl_canvas(context->ecanvas);
 	nemotool_destroy_egl(context->egl);
 
@@ -450,12 +482,10 @@ int main(int argc, char *argv[])
 
 	free(uri);
 
-	pthread_mutex_destroy(&context->lock);
-
 	nemotimer_destroy(timer);
 
 out3:
-	nemogst_destroy(context->gst);
+	pthread_mutex_destroy(&context->lock);
 
 out2:
 	nemotool_disconnect_wayland(tool);
