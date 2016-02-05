@@ -175,6 +175,9 @@ static void nemoplay_dispatch_tale_timer(struct nemotimer *timer, void *data)
 
 	nemotimer_set_timeout(timer, 500);
 
+	if (nemogst_is_done_media(context->gst) != 0)
+		nemogst_replay_media(context->gst);
+
 	nemotale_push_timer_event(context->tale, time_current_msecs());
 }
 
@@ -199,9 +202,6 @@ static void nemoplay_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 	void *data;
 
 	if (context->is_minisink != 0) {
-		if (nemogst_is_done_media(context->gst) != 0)
-			nemogst_replay_media(context->gst);
-
 		pthread_mutex_lock(&context->lock);
 
 		width = context->video_width;
