@@ -158,7 +158,6 @@ static void shell_get_shell_surface(struct wl_client *client, struct wl_resource
 	struct shellclient *sc = (struct shellclient *)wl_resource_get_user_data(resource);
 	struct nemoshell *shell = sc->shell;
 	struct shellbin *bin;
-	struct clientstate *state;
 	pid_t pid;
 
 	if (nemoshell_get_bin(canvas)) {
