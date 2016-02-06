@@ -21,31 +21,6 @@ include_directories(
 	${CMAKE_SOURCE_DIR}/thirds/poly2tri
 	)
 
-add_executable(nemoback-mini
-	miniback.c
-	)
-
-TARGET_LINK_LIBRARIES(nemoback-mini
-	nemoapps
-	${NEMOUX_COMMON_LIBRARIES}
-	${SKIA_LIBRARIES}
-	)
-
-INSTALL(TARGETS nemoback-mini DESTINATION bin)
-
-add_executable(nemoback-plex
-	plexback.cpp
-	)
-
-TARGET_LINK_LIBRARIES(nemoback-plex
-	nemoapps
-	poly2tri
-	${NEMOUX_COMMON_LIBRARIES}
-	${SKIA_LIBRARIES}
-	)
-
-INSTALL(TARGETS nemoback-plex DESTINATION bin)
-
 add_executable(nemoback-mote
 	moteback.cpp
 	)
@@ -58,16 +33,3 @@ TARGET_LINK_LIBRARIES(nemoback-mote
 	)
 
 INSTALL(TARGETS nemoback-mote DESTINATION bin)
-
-add_executable(nemoback-mosi
-	mosiback.cpp
-	)
-
-TARGET_LINK_LIBRARIES(nemoback-mosi
-	nemoapps
-	nemomosi
-	${NEMOUX_COMMON_LIBRARIES}
-	${SKIA_LIBRARIES}
-	)
-
-INSTALL(TARGETS nemoback-mosi DESTINATION bin)

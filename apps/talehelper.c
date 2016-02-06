@@ -5,6 +5,9 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <nemotool.h>
+#include <nemocanvas.h>
+
 #include <talehelper.h>
 #include <nemomisc.h>
 

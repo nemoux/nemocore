@@ -15,6 +15,8 @@ NEMO_BEGIN_EXTERN_C
 #include <talegrab.h>
 #include <talegesture.h>
 
+struct nemoactor;
+
 extern void nemotale_attach_actor(struct nemotale *tale, struct nemoactor *actor, nemotale_dispatch_event_t dispatch);
 
 #ifdef __cplusplus

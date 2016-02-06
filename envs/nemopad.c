@@ -368,7 +368,7 @@ static void nemopad_dispatch_tale_event(struct nemotale *tale, struct talenode *
 				if (nemotale_is_touch_down(tale, event, type)) {
 					struct nemograb *grab;
 
-					grab = nemograb_create(shell, tale, event, nemopad_dispatch_key_grab);
+					grab = nemograb_create(tale, event, nemopad_dispatch_key_grab);
 					nemograb_set_userdata(grab, pad);
 					nemograb_set_tag(grab, tag);
 					nemograb_check_signal(grab, &pad->destroy_signal);
