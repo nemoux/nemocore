@@ -27,6 +27,7 @@ set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 
 add_library(nemoapps SHARED
 	nemograb.c
+	nemoenvs.c
 	talehelper.c
 	showhelper.c
 	)
@@ -44,6 +45,7 @@ INSTALL(TARGETS nemoapps DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
 
 set(HEADER_FILES
 	nemograb.h
+	nemoenvs.h
 	talehelper.h
 	showhelper.h
 	)

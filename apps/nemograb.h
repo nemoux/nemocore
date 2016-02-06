@@ -1,5 +1,5 @@
-#ifndef	__NEMOSHELL_GRAB_H__
-#define	__NEMOSHELL_GRAB_H__
+#ifndef	__NEMOUX_GRAB_H__
+#define	__NEMOUX_GRAB_H__
 
 #include <nemoconfig.h>
 
