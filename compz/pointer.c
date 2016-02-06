@@ -96,6 +96,26 @@ static const struct nemopointer_grab_interface default_pointer_grab_interface = 
 	default_pointer_grab_cancel
 };
 
+static void nemopointer_destroy_sprite(struct nemopointer *pointer)
+{
+	if (nemoview_is_mapped(pointer->sprite))
+		nemoview_unmap(pointer->sprite);
+
+	wl_list_remove(&pointer->sprite_destroy_listener.link);
+	wl_list_init(&pointer->sprite_destroy_listener.link);
+
+	if (pointer->sprite->canvas != NULL) {
+		pointer->sprite->canvas->configure = NULL;
+		pointer->sprite->canvas->configure_private = NULL;
+
+		nemoview_destroy(pointer->sprite);
+	} else if (pointer->sprite->actor != NULL) {
+		nemoactor_destroy(pointer->sprite->actor);
+	}
+
+	pointer->sprite = NULL;
+}
+
 static void nemopointer_handle_focus_view_destroy(struct wl_listener *listener, void *data)
 {
 	struct nemopointer *pointer = (struct nemopointer *)container_of(listener, struct nemopointer, focus_view_listener);
@@ -118,10 +138,11 @@ static void nemopointer_handle_sprite_destroy(struct wl_listener *listener, void
 {
 	struct nemopointer *pointer = (struct nemopointer *)container_of(listener, struct nemopointer, sprite_destroy_listener);
 
-	wl_list_remove(&pointer->sprite_destroy_listener.link);
-	wl_list_init(&pointer->sprite_destroy_listener.link);
+	if (pointer->sprite) {
+		nemopointer_destroy_sprite(pointer);
 
-	pointer->sprite = NULL;
+		wl_signal_emit(&pointer->seat->pointer.sprite_signal, pointer);
+	}
 }
 
 static void nemopointer_handle_keyboard_destroy(struct wl_listener *listener, void *data)
@@ -132,25 +153,6 @@ static void nemopointer_handle_keyboard_destroy(struct wl_listener *listener, vo
 	wl_list_init(&pointer->keyboard_destroy_listener.link);
 
 	pointer->keyboard = NULL;
-}
-
-static void nemopointer_destroy_sprite(struct nemopointer *pointer)
-{
-	if (nemoview_is_mapped(pointer->sprite))
-		nemoview_unmap(pointer->sprite);
-
-	wl_list_remove(&pointer->sprite_destroy_listener.link);
-
-	if (pointer->sprite->canvas != NULL) {
-		pointer->sprite->canvas->configure = NULL;
-		pointer->sprite->canvas->configure_private = NULL;
-
-		nemoview_destroy(pointer->sprite);
-	} else if (pointer->sprite->actor != NULL) {
-		nemoactor_destroy(pointer->sprite->actor);
-	}
-
-	pointer->sprite = NULL;
 }
 
 static void nemopointer_configure_canvas(struct nemocanvas *canvas, int32_t dx, int32_t dy)
@@ -367,8 +369,6 @@ struct nemopointer *nemopointer_create(struct nemoseat *seat, struct inputnode *
 
 	wl_list_insert(&seat->pointer.device_list, &pointer->link);
 
-	wl_signal_emit(&seat->pointer.create_signal, pointer);
-
 	return pointer;
 }
 
@@ -397,6 +397,9 @@ void nemopointer_move(struct nemopointer *pointer, float x, float y)
 	} else if (pixman_region32_contains_point(&compz->scene, x, pointer->y, NULL)) {
 		pointer->x = x;
 	}
+
+	if (pointer->sprite == NULL)
+		wl_signal_emit(&pointer->seat->pointer.sprite_signal, pointer);
 
 	if (pointer->sprite != NULL) {
 		nemoview_set_position(pointer->sprite,
