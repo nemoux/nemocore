@@ -19,8 +19,6 @@
 #include <pick.h>
 #include <screen.h>
 #include <viewanimation.h>
-#include <nemotoken.h>
-#include <waylandhelper.h>
 #include <nemomisc.h>
 
 static void nemo_send_configure(struct nemocanvas *canvas, int32_t width, int32_t height)
@@ -83,87 +81,13 @@ static void nemo_surface_miss(struct wl_client *client, struct wl_resource *reso
 		wl_signal_emit(&bin->ungrab_signal, bin);
 }
 
-static void nemo_surface_follow(struct wl_client *client, struct wl_resource *resource, int32_t x, int32_t y, int32_t degree, uint32_t delay, uint32_t duration)
-{
-	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
-	struct shellbin *pbin = bin->parent;
-	double px, py, pr;
-	double fx, fy;
-	double diag, radian, fradian, dradian;
-
-	if (bin == NULL || pbin == NULL)
-		return;
-
-	px = pbin->view->geometry.x;
-	py = pbin->view->geometry.y;
-	pr = pbin->view->geometry.r;
-
-	fx = x;
-	fy = y;
-	diag = sqrtf(fx * fx + fy * fy);
-	radian = pr;
-	if (fx == 0.0f)
-		fx = 0.00000001f;
-	fradian = atan(fy / fx);
-	if (fx < 0.0f)
-		fradian += M_PI;
-	if (fx >= 0.0f && fy >= 0.0f)
-		fradian += 2.0f * M_PI;
-	if (diag != 0)
-		radian += fradian;
-	dradian = degree * M_PI / 180.0f;
-
-	if (duration == 0) {
-		nemoview_set_position(bin->view,
-				px + diag * cos(radian) - 0 * sin(radian),
-				py + diag * sin(radian) + 0 * cos(radian));
-		nemoview_set_rotation(bin->view, dradian + pr);
-
-		nemoview_schedule_repaint(bin->view);
-	} else {
-		struct viewanimation *animation;
-
-		animation = viewanimation_create(bin->view, NEMOEASE_CUBIC_OUT_TYPE, delay, duration);
-		viewanimation_set_translate(animation,
-				px + diag * cos(radian) - 0 * sin(radian),
-				py + diag * sin(radian) + 0 * cos(radian));
-		viewanimation_set_rotate(animation,
-				dradian + pr);
-
-		viewanimation_revoke(bin->shell->compz, bin->view);
-		viewanimation_dispatch(bin->shell->compz, animation);
-	}
-}
-
-static void nemo_surface_execute(struct wl_client *client, struct wl_resource *resource, const char *name, const char *cmds)
+static void nemo_surface_execute_command(struct wl_client *client, struct wl_resource *resource, const char *name, const char *cmds)
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 	struct nemoshell *shell = bin->shell;
-	struct nemotoken *token;
-	pid_t pid;
 
-	token = nemotoken_create(cmds, strlen(cmds));
-	nemotoken_divide(token, ':');
-	nemotoken_update(token);
-
-	pid = wayland_execute_path(name, nemotoken_get_tokens(token), NULL);
-	if (pid > 0) {
-		struct clientstate *state;
-
-		state = nemoshell_create_client_state(shell, pid);
-		if (state != NULL) {
-			nemoview_transform_to_global(bin->view,
-					bin->canvas->base.width * bin->view->geometry.ax,
-					bin->canvas->base.height * bin->view->geometry.ay,
-					&state->x, &state->y);
-			state->r = bin->view->geometry.r;
-			state->dx = 0.5f;
-			state->dy = 0.5f;
-			state->flags = NEMO_SHELL_SURFACE_ALL_FLAGS;
-		}
-	}
-
-	nemotoken_destroy(token);
+	if (shell->execute_command != NULL)
+		shell->execute_command(shell->userdata, bin, name, cmds);
 }
 
 static void nemo_surface_set_size(struct wl_client *client, struct wl_resource *resource, uint32_t width, uint32_t height)
@@ -355,8 +279,7 @@ static const struct nemo_surface_interface nemo_surface_implementation = {
 	nemo_surface_move,
 	nemo_surface_pick,
 	nemo_surface_miss,
-	nemo_surface_follow,
-	nemo_surface_execute,
+	nemo_surface_execute_command,
 	nemo_surface_set_size,
 	nemo_surface_set_min_size,
 	nemo_surface_set_max_size,
@@ -433,8 +356,6 @@ static void nemo_get_nemo_surface(struct wl_client *client, struct wl_resource *
 		bin->type = NEMO_SHELL_SURFACE_NORMAL_TYPE;
 
 		nemoshell_use_client_state(shell, bin, client);
-	} else if (type == NEMO_SHELL_SURFACE_TYPE_FOLLOW) {
-		bin->type = NEMO_SHELL_SURFACE_NORMAL_TYPE;
 	} else if (type == NEMO_SHELL_SURFACE_TYPE_OVERLAY) {
 		bin->type = NEMO_SHELL_SURFACE_OVERLAY_TYPE;
 		bin->view->transform.type = NEMO_VIEW_TRANSFORM_OVERLAY;

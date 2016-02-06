@@ -50,6 +50,10 @@ typedef enum {
 	NEMO_SHELL_FADEIN_SCALE_FLAG = (1 << 1)
 } NemoShellFadeinFlag;
 
+struct shellbin;
+
+typedef int (*nemoshell_execute_command_t)(void *data, struct shellbin *bin, const char *name, const char *cmds);
+
 struct nemoshell {
 	struct nemocompz *compz;
 
@@ -113,6 +117,9 @@ struct nemoshell {
 	} bin;
 
 	struct nemoitem *configs;
+
+	nemoshell_execute_command_t execute_command;
+	void *userdata;
 
 	int is_logging_grab;
 };
@@ -311,6 +318,16 @@ extern void nemoshell_set_maximized_bin(struct nemoshell *shell, struct shellbin
 extern void nemoshell_put_maximized_bin(struct nemoshell *shell, struct shellbin *bin);
 
 extern void nemoshell_load_gestures(struct nemoshell *shell);
+
+static inline void nemoshell_set_execute_command(struct nemoshell *shell, nemoshell_execute_command_t execute)
+{
+	shell->execute_command = execute;
+}
+
+static inline void nemoshell_set_userdata(struct nemoshell *shell, void *data)
+{
+	shell->userdata = data;
+}
 
 static inline void clientstate_set_position(struct clientstate *state, float x, float y)
 {

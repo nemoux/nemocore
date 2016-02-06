@@ -403,14 +403,9 @@ void nemocanvas_miss(struct nemocanvas *canvas)
 	nemo_surface_miss(canvas->nemo_surface);
 }
 
-void nemocanvas_follow(struct nemocanvas *canvas, int32_t x, int32_t y, int32_t degree, uint32_t delay, uint32_t duration)
+void nemocanvas_execute_command(struct nemocanvas *canvas, const char *name, const char *cmds)
 {
-	nemo_surface_follow(canvas->nemo_surface, x, y, degree, delay, duration);
-}
-
-void nemocanvas_execute(struct nemocanvas *canvas, const char *name, const char *cmds)
-{
-	nemo_surface_execute(canvas->nemo_surface, name, cmds);
+	nemo_surface_execute_command(canvas->nemo_surface, name, cmds);
 }
 
 void nemocanvas_set_size(struct nemocanvas *canvas, int32_t width, int32_t height)
