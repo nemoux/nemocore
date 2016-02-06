@@ -61,6 +61,14 @@
 			<arg name="cmds" type="string"/>
 		</request>
 
+		<request name="execute_action">
+			<arg name="group" type="uint"/>
+			<arg name="action" type="uint"/>
+			<arg name="x" type="fixed"/>
+			<arg name="y" type="fixed"/>
+			<arg name="r" type="fixed"/>
+		</request>
+
 		<request name="set_size">
 			<arg name="width" type="uint"/>
 			<arg name="height" type="uint"/>

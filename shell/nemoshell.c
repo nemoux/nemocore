@@ -90,6 +90,19 @@ static void nemo_surface_execute_command(struct wl_client *client, struct wl_res
 		shell->execute_command(shell->userdata, bin, name, cmds);
 }
 
+static void nemo_surface_execute_action(struct wl_client *client, struct wl_resource *resource, uint32_t group, uint32_t action, wl_fixed_t x, wl_fixed_t y, wl_fixed_t r)
+{
+	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
+	struct nemoshell *shell = bin->shell;
+
+	if (shell->execute_action != NULL)
+		shell->execute_action(shell->userdata, bin,
+				group, action,
+				wl_fixed_to_double(x),
+				wl_fixed_to_double(y),
+				wl_fixed_to_double(r));
+}
+
 static void nemo_surface_set_size(struct wl_client *client, struct wl_resource *resource, uint32_t width, uint32_t height)
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
@@ -280,6 +293,7 @@ static const struct nemo_surface_interface nemo_surface_implementation = {
 	nemo_surface_pick,
 	nemo_surface_miss,
 	nemo_surface_execute_command,
+	nemo_surface_execute_action,
 	nemo_surface_set_size,
 	nemo_surface_set_min_size,
 	nemo_surface_set_max_size,

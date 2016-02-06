@@ -232,6 +232,7 @@ add_subdirectory(backs/mini)
 add_subdirectory(backs/mote)
 add_subdirectory(backs/mosi)
 add_subdirectory(backs/miro)
+add_subdirectory(backs/edge)
 add_subdirectory(backs/plex)
 add_subdirectory(games/minesweeper)
 
