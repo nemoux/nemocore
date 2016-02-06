@@ -40,6 +40,7 @@ struct nemoseat {
 		struct wl_list device_list;
 
 		struct wl_signal focus_signal;
+		struct wl_signal create_signal;
 	} pointer;
 
 	struct {

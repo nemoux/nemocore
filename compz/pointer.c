@@ -367,6 +367,8 @@ struct nemopointer *nemopointer_create(struct nemoseat *seat, struct inputnode *
 
 	wl_list_insert(&seat->pointer.device_list, &pointer->link);
 
+	wl_signal_emit(&seat->pointer.create_signal, pointer);
+
 	return pointer;
 }
 

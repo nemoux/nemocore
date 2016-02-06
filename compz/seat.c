@@ -145,6 +145,7 @@ struct nemoseat *nemoseat_create(struct nemocompz *compz)
 	wl_list_init(&seat->pointer.nemo_resource_list);
 	wl_list_init(&seat->pointer.device_list);
 	wl_signal_init(&seat->pointer.focus_signal);
+	wl_signal_init(&seat->pointer.create_signal);
 
 	wl_list_init(&seat->touch.resource_list);
 	wl_list_init(&seat->touch.nemo_resource_list);
