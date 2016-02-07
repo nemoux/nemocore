@@ -165,6 +165,7 @@ int main(int argc, char *argv[])
 		{ "rollsize",			required_argument,			NULL,		's' },
 		{ "rollrange",		required_argument,			NULL,		'r' },
 		{ "rolltimeout",	required_argument,			NULL,		't' },
+		{ "layer",				required_argument,			NULL,		'y' },
 		{ "config",				required_argument,			NULL,		'c' },
 		{ "log",					required_argument,			NULL,		'l' },
 		{ 0 }
@@ -184,13 +185,14 @@ int main(int argc, char *argv[])
 	float rollsize = 100.0f;
 	float rollrange = 50.0f;
 	uint32_t rolltimeout = 1500;
+	char *layer = NULL;
 	char *configpath = NULL;
 	int opt;
 	int i;
 
 	nemolog_set_file(2);
 
-	while (opt = getopt_long(argc, argv, "w:h:s:r:t:c:l:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:s:r:t:y:c:l:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -213,6 +215,10 @@ int main(int argc, char *argv[])
 
 			case 't':
 				rolltimeout = strtoul(optarg, NULL, 10);
+				break;
+
+			case 'y':
+				layer = strdup(optarg);
 				break;
 
 			case 'c':
@@ -253,7 +259,13 @@ int main(int argc, char *argv[])
 		goto err2;
 	nemoshow_set_userdata(show, edge);
 
-	nemocanvas_set_layer(NEMOSHOW_AT(show, canvas), NEMO_SURFACE_LAYER_TYPE_UNDERLAY);
+	if (layer == NULL || strcmp(layer, "underlay") == 0)
+		nemocanvas_set_layer(NEMOSHOW_AT(show, canvas), NEMO_SURFACE_LAYER_TYPE_UNDERLAY);
+	else if (strcmp(layer, "overlay") == 0)
+		nemocanvas_set_layer(NEMOSHOW_AT(show, canvas), NEMO_SURFACE_LAYER_TYPE_OVERLAY);
+	else
+		nemocanvas_set_layer(NEMOSHOW_AT(show, canvas), NEMO_SURFACE_LAYER_TYPE_BACKGROUND);
+
 	nemocanvas_set_dispatch_fullscreen(NEMOSHOW_AT(show, canvas), edgeback_dispatch_canvas_fullscreen);
 
 	edge->scene = scene = nemoshow_scene_create();
