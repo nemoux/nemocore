@@ -19,6 +19,12 @@ typedef enum {
 } NemoEnvsActionType;
 
 typedef enum {
+	NEMOENVS_APP_BACKGROUND_TYPE = 0,
+	NEMOENVS_APP_SOUNDMANAGER_TYPE = 1,
+	NEMOENVS_APP_LAST_TYPE
+} NemoEnvsAppType;
+
+typedef enum {
 	NEMOENVS_NETWORK_NORMAL_STATE = 0,
 	NEMOENVS_NETWORK_BLOCK_STATE = 1,
 	NEMOENVS_NETWORK_LAST_STATE
@@ -57,18 +63,46 @@ struct nemogroup {
 	char *ring;
 };
 
-struct nemoenvs {
-	struct nemogroup **groups;
-	int sgroups, ngroups;
+struct nemoapp {
+	pid_t pid;
+
+	int type;
+	int index;
+
+	struct nemolist link;
 };
 
-extern struct nemoenvs *nemoenvs_create(void);
+struct nemoenvs {
+	struct nemoshell *shell;
+
+	struct nemogroup **groups;
+	int sgroups, ngroups;
+
+	struct nemolist app_list;
+};
+
+extern struct nemoenvs *nemoenvs_create(struct nemoshell *shell);
 extern void nemoenvs_destroy(struct nemoenvs *envs);
 
-extern void nemoenvs_load_actions(struct nemoshell *shell, struct nemoenvs *envs);
+extern struct nemoaction *nemoenvs_create_action(void);
+extern void nemoenvs_destroy_action(struct nemoaction *action);
 
-extern void nemoenvs_load_background(struct nemoshell *shell);
-extern void nemoenvs_load_soundmanager(struct nemoshell *shell);
+extern struct nemogroup *nemoenvs_create_group(void);
+extern void nemoenvs_destroy_group(struct nemogroup *group);
+
+extern struct nemoapp *nemoenvs_create_app(void);
+extern void nemoenvs_destroy_app(struct nemoapp *app);
+
+extern int nemoenvs_attach_app(struct nemoenvs *envs, int type, int index, pid_t pid);
+extern void nemoenvs_detach_app(struct nemoenvs *envs, pid_t pid);
+
+extern int nemoenvs_respawn_app(struct nemoenvs *envs, pid_t pid);
+
+extern void nemoenvs_load_actions(struct nemoenvs *envs);
+
+extern void nemoenvs_execute_background(struct nemoenvs *envs, int index);
+extern void nemoenvs_execute_backgrounds(struct nemoenvs *envs);
+extern void nemoenvs_execute_soundmanager(struct nemoenvs *envs);
 
 static inline int nemoenvs_get_groups_count(struct nemoenvs *envs)
 {

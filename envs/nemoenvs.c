@@ -71,7 +71,28 @@ void nemoenvs_destroy_group(struct nemogroup *group)
 	free(group);
 }
 
-struct nemoenvs *nemoenvs_create(void)
+struct nemoapp *nemoenvs_create_app(void)
+{
+	struct nemoapp *app;
+
+	app = (struct nemoapp *)malloc(sizeof(struct nemoapp));
+	if (app == NULL)
+		return NULL;
+	memset(app, 0, sizeof(struct nemoapp));
+
+	nemolist_init(&app->link);
+
+	return app;
+}
+
+void nemoenvs_destroy_app(struct nemoapp *app)
+{
+	nemolist_remove(&app->link);
+
+	free(app);
+}
+
+struct nemoenvs *nemoenvs_create(struct nemoshell *shell)
 {
 	struct nemoenvs *envs;
 
@@ -80,9 +101,13 @@ struct nemoenvs *nemoenvs_create(void)
 		return NULL;
 	memset(envs, 0, sizeof(struct nemoenvs));
 
+	envs->shell = shell;
+
 	envs->groups = (struct nemogroup **)malloc(sizeof(struct nemogroup *) * 8);
 	envs->ngroups = 0;
 	envs->sgroups = 8;
+
+	nemolist_init(&envs->app_list);
 
 	return envs;
 }
@@ -94,65 +119,129 @@ void nemoenvs_destroy(struct nemoenvs *envs)
 	for (i = 0; i < envs->ngroups; i++)
 		nemoenvs_destroy_group(envs->groups[i]);
 
+	nemolist_remove(&envs->app_list);
+
 	free(envs->groups);
 	free(envs);
 }
 
-void nemoenvs_load_background(struct nemoshell *shell)
+int nemoenvs_attach_app(struct nemoenvs *envs, int type, int index, pid_t pid)
 {
+	struct nemoapp *app;
+
+	app = nemoenvs_create_app();
+	if (app == NULL)
+		return -1;
+
+	app->type = type;
+	app->index = index;
+	app->pid = pid;
+
+	nemolist_insert(&envs->app_list, &app->link);
+
+	return 0;
+}
+
+void nemoenvs_detach_app(struct nemoenvs *envs, pid_t pid)
+{
+	struct nemoapp *app, *napp;
+
+	nemolist_for_each_safe(app, napp, &envs->app_list, link) {
+		if (app->pid == pid) {
+			nemoenvs_destroy_app(app);
+			return;
+		}
+	}
+}
+
+int nemoenvs_respawn_app(struct nemoenvs *envs, pid_t pid)
+{
+	struct nemoapp *app, *napp;
+
+	nemolist_for_each_safe(app, napp, &envs->app_list, link) {
+		if (app->pid == pid) {
+			if (app->type == NEMOENVS_APP_BACKGROUND_TYPE) {
+				nemoenvs_execute_background(envs, app->index);
+			} else if (app->type == NEMOENVS_APP_SOUNDMANAGER_TYPE) {
+				nemoenvs_execute_soundmanager(envs);
+			}
+
+			nemoenvs_destroy_app(app);
+
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+void nemoenvs_execute_background(struct nemoenvs *envs, int index)
+{
+	struct nemoshell *shell = envs->shell;
+	struct nemocompz *compz = shell->compz;
+	pid_t pid;
+	int32_t x, y;
+	int32_t width, height;
+	char *argv[32];
+	char *attr;
+	int argc = 0;
+	int iattr;
+
+	x = nemoitem_get_iattr(shell->configs, index, "x", 0);
+	y = nemoitem_get_iattr(shell->configs, index, "y", 0);
+	width = nemoitem_get_iattr(shell->configs, index, "width", nemocompz_get_scene_width(compz));
+	height = nemoitem_get_iattr(shell->configs, index, "height", nemocompz_get_scene_height(compz));
+
+	argv[argc++] = nemoitem_get_attr(shell->configs, index, "path");
+	argv[argc++] = strdup("-w");
+	asprintf(&argv[argc++], "%d", width);
+	argv[argc++] = strdup("-h");
+	asprintf(&argv[argc++], "%d", height);
+
+	nemoitem_for_vattr(shell->configs, index, "arg%d", iattr, 0, attr)
+		argv[argc++] = attr;
+
+	argv[argc++] = NULL;
+
+	pid = wayland_execute_path(argv[0], argv, NULL);
+	if (pid > 0) {
+		struct clientstate *state;
+
+		state = nemoshell_create_client_state(shell, pid);
+		if (state != NULL) {
+			clientstate_set_position(state, x, y);
+			clientstate_set_anchor(state, 0.0f, 0.0f);
+			clientstate_set_bin_flags(state, NEMO_SHELL_SURFACE_ALL_FLAGS);
+		}
+
+		nemoenvs_attach_app(envs, NEMOENVS_APP_BACKGROUND_TYPE, index, pid);
+	}
+
+	free(argv[1]);
+	free(argv[2]);
+	free(argv[3]);
+	free(argv[4]);
+}
+
+void nemoenvs_execute_backgrounds(struct nemoenvs *envs)
+{
+	struct nemoshell *shell = envs->shell;
 	struct nemocompz *compz = shell->compz;
 	int index;
 
 	nemoitem_for_each(shell->configs, index, "//nemoshell/background", 0) {
-		pid_t pid;
-		char *argv[32];
-		char *attr;
-		int argc = 0;
-		int iattr;
-		int32_t x, y;
-		int32_t width, height;
-
-		x = nemoitem_get_iattr(shell->configs, index, "x", 0);
-		y = nemoitem_get_iattr(shell->configs, index, "y", 0);
-		width = nemoitem_get_iattr(shell->configs, index, "width", nemocompz_get_scene_width(compz));
-		height = nemoitem_get_iattr(shell->configs, index, "height", nemocompz_get_scene_height(compz));
-
-		argv[argc++] = nemoitem_get_attr(shell->configs, index, "path");
-		argv[argc++] = strdup("-w");
-		asprintf(&argv[argc++], "%d", width);
-		argv[argc++] = strdup("-h");
-		asprintf(&argv[argc++], "%d", height);
-
-		nemoitem_for_vattr(shell->configs, index, "arg%d", iattr, 0, attr)
-			argv[argc++] = attr;
-
-		argv[argc++] = NULL;
-
-		pid = wayland_execute_path(argv[0], argv, NULL);
-		if (pid > 0) {
-			struct clientstate *state;
-
-			state = nemoshell_create_client_state(shell, pid);
-			if (state != NULL) {
-				clientstate_set_position(state, x, y);
-				clientstate_set_anchor(state, 0.0f, 0.0f);
-				clientstate_set_bin_flags(state, NEMO_SHELL_SURFACE_ALL_FLAGS);
-			}
-		}
-
-		free(argv[1]);
-		free(argv[2]);
-		free(argv[3]);
-		free(argv[4]);
+		nemoenvs_execute_background(envs, index);
 	}
 }
 
-void nemoenvs_load_soundmanager(struct nemoshell *shell)
+void nemoenvs_execute_soundmanager(struct nemoenvs *envs)
 {
+	struct nemoshell *shell = envs->shell;
 	int index;
 
 	index = nemoitem_get(shell->configs, "//nemoshell/sound", 0);
 	if (index >= 0) {
+		pid_t pid;
 		char *path;
 		char *attr;
 		char *argv[32];
@@ -166,12 +255,16 @@ void nemoenvs_load_soundmanager(struct nemoshell *shell)
 
 		argv[argc++] = NULL;
 
-		wayland_execute_path(argv[0], argv, NULL);
+		pid = wayland_execute_path(argv[0], argv, NULL);
+		if (pid > 0) {
+			nemoenvs_attach_app(envs, NEMOENVS_APP_SOUNDMANAGER_TYPE, index, pid);
+		}
 	}
 }
 
-void nemoenvs_load_actions(struct nemoshell *shell, struct nemoenvs *envs)
+void nemoenvs_load_actions(struct nemoenvs *envs)
 {
+	struct nemoshell *shell = envs->shell;
 	struct nemogroup *group;
 	struct nemoaction *action;
 	char *chromepath;
