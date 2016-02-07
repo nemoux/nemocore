@@ -14,7 +14,7 @@
 #include <nemolog.h>
 #include <nemomisc.h>
 
-struct mirotap *miroback_tap_create(struct miroback *miro)
+struct mirotap *nemoback_mirotap_create(struct miroback *miro)
 {
 	struct mirotap *tap;
 
@@ -32,7 +32,7 @@ struct mirotap *miroback_tap_create(struct miroback *miro)
 	return tap;
 }
 
-void miroback_tap_destroy(struct mirotap *tap)
+void nemoback_mirotap_destroy(struct mirotap *tap)
 {
 	nemolist_remove(&tap->link);
 
@@ -44,7 +44,7 @@ void miroback_tap_destroy(struct mirotap *tap)
 	free(tap);
 }
 
-static void miroback_tap_dispatch_timer(struct nemotimer *timer, void *data)
+static void nemoback_mirotap_dispatch_timer(struct nemotimer *timer, void *data)
 {
 	struct mirotap *tap = (struct mirotap *)data;
 	struct miroback *miro = tap->miro;
@@ -117,7 +117,7 @@ static void miroback_tap_dispatch_timer(struct nemotimer *timer, void *data)
 	nemotimer_set_timeout(timer, 1500);
 }
 
-int miroback_tap_down(struct miroback *miro, struct mirotap *tap, double x, double y)
+int nemoback_mirotap_down(struct miroback *miro, struct mirotap *tap, double x, double y)
 {
 	struct showone *one;
 	struct showone *blur;
@@ -283,14 +283,14 @@ int miroback_tap_down(struct miroback *miro, struct mirotap *tap, double x, doub
 	nemoshow_attach_transition_after(miro->show, trans0, trans1);
 
 	tap->timer = timer = nemotimer_create(miro->tool);
-	nemotimer_set_callback(timer, miroback_tap_dispatch_timer);
+	nemotimer_set_callback(timer, nemoback_mirotap_dispatch_timer);
 	nemotimer_set_userdata(timer, tap);
 	nemotimer_set_timeout(timer, 1000);
 
 	return 0;
 }
 
-int miroback_tap_motion(struct miroback *miro, struct mirotap *tap, double x, double y)
+int nemoback_mirotap_motion(struct miroback *miro, struct mirotap *tap, double x, double y)
 {
 	struct showtransition *trans;
 	struct showone *sequence;
@@ -413,7 +413,7 @@ int miroback_tap_motion(struct miroback *miro, struct mirotap *tap, double x, do
 	return 0;
 }
 
-static void miroback_tap_dispatch_destroy_done(void *data)
+static void nemoback_mirotap_dispatch_destroy_done(void *data)
 {
 	struct mirotap *tap = (struct mirotap *)data;
 
@@ -425,10 +425,10 @@ static void miroback_tap_dispatch_destroy_done(void *data)
 	nemoshow_one_destroy(tap->one4);
 	nemoshow_one_destroy(tap->oner);
 
-	miroback_tap_destroy(tap);
+	nemoback_mirotap_destroy(tap);
 }
 
-int miroback_tap_up(struct miroback *miro, struct mirotap *tap, double x, double y)
+int nemoback_mirotap_up(struct miroback *miro, struct mirotap *tap, double x, double y)
 {
 	struct showtransition *trans;
 	struct showone *sequence;
@@ -469,7 +469,7 @@ int miroback_tap_up(struct miroback *miro, struct mirotap *tap, double x, double
 			NULL);
 
 	trans = nemoshow_transition_create(miro->ease0, 700, 0);
-	nemoshow_transition_set_dispatch_done(trans, miroback_tap_dispatch_destroy_done);
+	nemoshow_transition_set_dispatch_done(trans, nemoback_mirotap_dispatch_destroy_done);
 	nemoshow_transition_set_userdata(trans, tap);
 	nemoshow_transition_check_one(trans, tap->one0);
 	nemoshow_transition_check_one(trans, tap->one1);

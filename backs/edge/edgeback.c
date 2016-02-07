@@ -16,22 +16,22 @@
 #include <nemolog.h>
 #include <nemomisc.h>
 
-static int edgeback_dispatch_roll_grab(struct talegrab *base, uint32_t type, struct taleevent *event)
+static int nemoback_edge_dispatch_roll_grab(struct talegrab *base, uint32_t type, struct taleevent *event)
 {
 	struct nemograb *grab = (struct nemograb *)container_of(base, struct nemograb, base);
 	struct edgeroll *roll = (struct edgeroll *)nemograb_get_userdata(grab);
 	struct edgeback *edge = roll->edge;
 
 	if (type & NEMOTALE_DOWN_EVENT) {
-		edgeback_roll_down(edge, roll, event->x, event->y);
+		nemoback_edgeroll_down(edge, roll, event->x, event->y);
 
 		nemoshow_dispatch_frame(edge->show);
 	} else if (type & NEMOTALE_MOTION_EVENT) {
-		edgeback_roll_motion(edge, roll, event->x, event->y);
+		nemoback_edgeroll_motion(edge, roll, event->x, event->y);
 
 		nemoshow_dispatch_frame(edge->show);
 	} else if (type & NEMOTALE_UP_EVENT) {
-		edgeback_roll_up(edge, roll, event->x, event->y);
+		nemoback_edgeroll_up(edge, roll, event->x, event->y);
 
 		nemoshow_dispatch_frame(edge->show);
 
@@ -43,7 +43,7 @@ static int edgeback_dispatch_roll_grab(struct talegrab *base, uint32_t type, str
 	return 1;
 }
 
-static int edgeback_dispatch_roll_group_grab(struct talegrab *base, uint32_t type, struct taleevent *event)
+static int nemoback_edge_dispatch_roll_group_grab(struct talegrab *base, uint32_t type, struct taleevent *event)
 {
 	struct nemograb *grab = (struct nemograb *)container_of(base, struct nemograb, base);
 	struct edgeroll *roll = (struct edgeroll *)nemograb_get_userdata(grab);
@@ -51,7 +51,7 @@ static int edgeback_dispatch_roll_group_grab(struct talegrab *base, uint32_t typ
 	struct nemoshow *show = edge->show;
 
 	if (type & NEMOTALE_DOWN_EVENT) {
-		edgeback_roll_activate_group(edge, roll, nemograb_get_tag(grab));
+		nemoback_edgeroll_activate_group(edge, roll, nemograb_get_tag(grab));
 
 		roll->tapcount++;
 	} else if (type & NEMOTALE_MOTION_EVENT) {
@@ -65,20 +65,20 @@ static int edgeback_dispatch_roll_group_grab(struct talegrab *base, uint32_t typ
 
 		if (roll->serial == group && 1000 <= tag && tag < 2000) {
 			if (roll->groupidx != tag - 1000) {
-				edgeback_roll_deactivate_group(edge, roll);
-				edgeback_roll_activate_group(edge, roll, tag - 1000);
+				nemoback_edgeroll_deactivate_group(edge, roll);
+				nemoback_edgeroll_activate_group(edge, roll, tag - 1000);
 			} else {
-				edgeback_roll_deactivate_action(edge, roll);
+				nemoback_edgeroll_deactivate_action(edge, roll);
 			}
 		} else if (roll->serial == group && 2000 <= tag && tag < 3000) {
 			if (roll->actionidx < 0) {
-				edgeback_roll_activate_action(edge, roll, tag - 2000);
+				nemoback_edgeroll_activate_action(edge, roll, tag - 2000);
 			} else if (roll->actionidx != tag - 2000) {
-				edgeback_roll_deactivate_action(edge, roll);
-				edgeback_roll_activate_action(edge, roll, tag - 2000);
+				nemoback_edgeroll_deactivate_action(edge, roll);
+				nemoback_edgeroll_activate_action(edge, roll, tag - 2000);
 			}
 		} else {
-			edgeback_roll_deactivate_action(edge, roll);
+			nemoback_edgeroll_deactivate_action(edge, roll);
 		}
 	} else if (type & NEMOTALE_UP_EVENT) {
 		roll->tapcount--;
@@ -88,9 +88,9 @@ static int edgeback_dispatch_roll_group_grab(struct talegrab *base, uint32_t typ
 					roll->groupidx, roll->actionidx,
 					event->x, event->y, roll->r);
 
-			edgeback_roll_shutdown(edge, roll);
+			nemoback_edgeroll_shutdown(edge, roll);
 		} else {
-			edgeback_roll_deactivate_group(edge, roll);
+			nemoback_edgeroll_deactivate_group(edge, roll);
 		}
 
 		nemograb_destroy(grab);
@@ -101,7 +101,7 @@ static int edgeback_dispatch_roll_group_grab(struct talegrab *base, uint32_t typ
 	return 1;
 }
 
-static void edgeback_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
+static void nemoback_edge_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
 {
 	uint32_t id = nemotale_node_get_id(node);
 
@@ -123,23 +123,23 @@ static void edgeback_dispatch_tale_event(struct nemotale *tale, struct talenode 
 					struct edgeroll *roll = (struct edgeroll *)nemoshow_one_get_userdata(one);
 
 					if (roll->tapcount == 0) {
-						grab = nemograb_create(tale, event, edgeback_dispatch_roll_group_grab);
+						grab = nemograb_create(tale, event, nemoback_edge_dispatch_roll_group_grab);
 						nemograb_set_userdata(grab, roll);
 						nemograb_set_tag(grab, tag - 1000);
 						nemograb_check_signal(grab, &roll->destroy_signal);
 						nemotale_dispatch_grab(tale, event->device, type, event);
 					}
 				} else {
-					int site = edgeback_get_edge(edge, event->x, event->y, edge->rollrange);
+					int site = nemoback_edge_get_edge(edge, event->x, event->y, edge->rollrange);
 
 					if (site == EDGEBACK_NONE_SITE) {
 						nemotool_bypass_touch(edge->tool, event->device, event->x, event->y);
 					} else {
 						struct edgeroll *roll;
 
-						roll = edgeback_roll_create(edge, site);
+						roll = nemoback_edgeroll_create(edge, site);
 
-						grab = nemograb_create(tale, event, edgeback_dispatch_roll_grab);
+						grab = nemograb_create(tale, event, nemoback_edge_dispatch_roll_grab);
 						nemograb_set_userdata(grab, roll);
 						nemograb_check_signal(grab, &roll->destroy_signal);
 						nemotale_dispatch_grab(tale, event->device, type, event);
@@ -150,7 +150,7 @@ static void edgeback_dispatch_tale_event(struct nemotale *tale, struct talenode 
 	}
 }
 
-static void edgeback_dispatch_canvas_fullscreen(struct nemocanvas *canvas, int32_t active, int32_t opaque)
+static void nemoback_edge_dispatch_canvas_fullscreen(struct nemocanvas *canvas, int32_t active, int32_t opaque)
 {
 	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
 	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
@@ -254,7 +254,7 @@ int main(int argc, char *argv[])
 		goto err1;
 	nemotool_connect_wayland(tool, NULL);
 
-	edge->show = show = nemoshow_create_canvas(tool, width, height, edgeback_dispatch_tale_event);
+	edge->show = show = nemoshow_create_canvas(tool, width, height, nemoback_edge_dispatch_tale_event);
 	if (show == NULL)
 		goto err2;
 	nemoshow_set_userdata(show, edge);
@@ -266,7 +266,7 @@ int main(int argc, char *argv[])
 	else
 		nemocanvas_set_layer(NEMOSHOW_AT(show, canvas), NEMO_SURFACE_LAYER_TYPE_BACKGROUND);
 
-	nemocanvas_set_dispatch_fullscreen(NEMOSHOW_AT(show, canvas), edgeback_dispatch_canvas_fullscreen);
+	nemocanvas_set_dispatch_fullscreen(NEMOSHOW_AT(show, canvas), nemoback_edge_dispatch_canvas_fullscreen);
 
 	edge->scene = scene = nemoshow_scene_create();
 	nemoshow_scene_set_width(scene, width);

@@ -90,7 +90,7 @@ struct moteback {
 	int is_sleeping;
 };
 
-static void moteback_prepare_text(struct moteback *mote, const char *text, int ntext)
+static void nemoback_mote_prepare_text(struct moteback *mote, const char *text, int ntext)
 {
 	double textsize = mote->textsize;
 	double x, y;
@@ -153,7 +153,7 @@ static void moteback_prepare_text(struct moteback *mote, const char *text, int n
 	}
 }
 
-static void moteback_update_one(struct moteback *mote, double secs)
+static void nemoback_mote_update_one(struct moteback *mote, double secs)
 {
 	nemomote_mutualgravity_update(mote->mote, 1, secs, 100.0f, mote->mutualgravity, 50.0f);
 	nemomote_speedlimit_update(mote->mote, 2, secs, 0.0f, mote->speedmax * 0.2f);
@@ -183,7 +183,7 @@ static void moteback_update_one(struct moteback *mote, double secs)
 	nemomote_cleanup(mote->mote);
 }
 
-static void moteback_render_back(struct moteback *mote, pixman_image_t *image, const char *uri)
+static void nemoback_mote_render_back(struct moteback *mote, pixman_image_t *image, const char *uri)
 {
 	int32_t width = pixman_image_get_width(image);
 	int32_t height = pixman_image_get_height(image);
@@ -204,7 +204,7 @@ static void moteback_render_back(struct moteback *mote, pixman_image_t *image, c
 			SkRect::MakeXYWH(0, 0, width, height), NULL);
 }
 
-static void moteback_render_one(struct moteback *mote, pixman_image_t *image)
+static void nemoback_mote_render_one(struct moteback *mote, pixman_image_t *image)
 {
 	int32_t width = pixman_image_get_width(image);
 	int32_t height = pixman_image_get_height(image);
@@ -283,7 +283,7 @@ static void moteback_render_one(struct moteback *mote, pixman_image_t *image)
 	}
 }
 
-static void moteback_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t secs, uint32_t nsecs)
+static void nemoback_mote_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t secs, uint32_t nsecs)
 {
 	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
 	struct moteback *mote = (struct moteback *)nemotale_get_userdata(tale);
@@ -298,21 +298,21 @@ static void moteback_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 		nemocanvas_feedback(canvas);
 
 		if (mote->secs == 0.0f)
-			moteback_update_one(mote, 0.0f);
+			nemoback_mote_update_one(mote, 0.0f);
 		else
-			moteback_update_one(mote, ((double)secs + (double)nsecs / 1000000000) - mote->secs);
+			nemoback_mote_update_one(mote, ((double)secs + (double)nsecs / 1000000000) - mote->secs);
 
 		mote->secs = (double)secs + (double)nsecs / 1000000000;
 	}
 
-	moteback_render_one(mote, nemotale_node_get_pixman(node));
+	nemoback_mote_render_one(mote, nemotale_node_get_pixman(node));
 
 	nemotale_node_damage_all(node);
 
 	nemotale_composite_egl(tale, NULL);
 }
 
-static void moteback_dispatch_timer_event(struct nemotimer *timer, void *data)
+static void nemoback_mote_dispatch_timer_event(struct nemotimer *timer, void *data)
 {
 	struct moteback *mote = (struct moteback *)data;
 	char msg[64];
@@ -327,11 +327,11 @@ static void moteback_dispatch_timer_event(struct nemotimer *timer, void *data)
 
 			strftime(msg, sizeof(msg), "%m:%d-%I:%M", tm);
 
-			moteback_prepare_text(mote, msg, strlen(msg));
+			nemoback_mote_prepare_text(mote, msg, strlen(msg));
 		} else {
 			strcpy(msg, mote->logo);
 
-			moteback_prepare_text(mote, msg, strlen(msg));
+			nemoback_mote_prepare_text(mote, msg, strlen(msg));
 		}
 
 		mote->type = (mote->type + 1) % 2;
@@ -340,12 +340,12 @@ static void moteback_dispatch_timer_event(struct nemotimer *timer, void *data)
 	nemotimer_set_timeout(mote->timer, 30 * 1000);
 }
 
-static void moteback_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
+static void nemoback_mote_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
 {
 	uint32_t id = nemotale_node_get_id(node);
 }
 
-static void moteback_dispatch_canvas_fullscreen(struct nemocanvas *canvas, int32_t active, int32_t opaque)
+static void nemoback_mote_dispatch_canvas_fullscreen(struct nemocanvas *canvas, int32_t active, int32_t opaque)
 {
 	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
 	struct moteback *mote = (struct moteback *)nemotale_get_userdata(tale);
@@ -573,8 +573,8 @@ int main(int argc, char *argv[])
 	nemocanvas_set_nemosurface(NTEGL_CANVAS(canvas), NEMO_SHELL_SURFACE_TYPE_NORMAL);
 	nemocanvas_set_input_type(NTEGL_CANVAS(canvas), NEMO_SURFACE_INPUT_TYPE_TOUCH);
 	nemocanvas_set_layer(NTEGL_CANVAS(canvas), NEMO_SURFACE_LAYER_TYPE_BACKGROUND);
-	nemocanvas_set_dispatch_frame(NTEGL_CANVAS(canvas), moteback_dispatch_canvas_frame);
-	nemocanvas_set_dispatch_fullscreen(NTEGL_CANVAS(canvas), moteback_dispatch_canvas_fullscreen);
+	nemocanvas_set_dispatch_frame(NTEGL_CANVAS(canvas), nemoback_mote_dispatch_canvas_frame);
+	nemocanvas_set_dispatch_fullscreen(NTEGL_CANVAS(canvas), nemoback_mote_dispatch_canvas_fullscreen);
 	nemocanvas_set_scale(NTEGL_CANVAS(canvas), sx, sy);
 	nemocanvas_set_framerate(NTEGL_CANVAS(canvas), framerate);
 	nemocanvas_unset_sound(NTEGL_CANVAS(canvas));
@@ -590,7 +590,7 @@ int main(int argc, char *argv[])
 				(EGLNativeWindowType)NTEGL_WINDOW(canvas)));
 	nemotale_resize(tale, width, height);
 
-	nemotale_attach_canvas(tale, NTEGL_CANVAS(canvas), moteback_dispatch_tale_event);
+	nemotale_attach_canvas(tale, NTEGL_CANVAS(canvas), nemoback_mote_dispatch_tale_event);
 	nemotale_set_userdata(tale, mote);
 
 	mote->back = nemotale_node_create_pixman(width, height);
@@ -598,14 +598,14 @@ int main(int argc, char *argv[])
 	nemotale_node_opaque(mote->back, 0, 0, width, height);
 	nemotale_attach_node(tale, mote->back);
 
-	moteback_render_back(mote, nemotale_node_get_pixman(mote->back), uri);
+	nemoback_mote_render_back(mote, nemotale_node_get_pixman(mote->back), uri);
 
 	mote->node = nemotale_node_create_pixman(width, height);
 	nemotale_node_set_id(mote->node, 1);
 	nemotale_attach_node(tale, mote->node);
 
 	mote->timer = nemotimer_create(tool);
-	nemotimer_set_callback(mote->timer, moteback_dispatch_timer_event);
+	nemotimer_set_callback(mote->timer, nemoback_mote_dispatch_timer_event);
 	nemotimer_set_userdata(mote->timer, mote);
 	nemotimer_set_timeout(mote->timer, 5000);
 

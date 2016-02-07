@@ -42,12 +42,12 @@ struct mirotap {
 	double x, y;
 };
 
-extern struct mirotap *miroback_tap_create(struct miroback *mini);
-extern void miroback_tap_destroy(struct mirotap *tap);
+extern struct mirotap *nemoback_mirotap_create(struct miroback *mini);
+extern void nemoback_mirotap_destroy(struct mirotap *tap);
 
-extern int miroback_tap_down(struct miroback *mini, struct mirotap *tap, double x, double y);
-extern int miroback_tap_motion(struct miroback *mini, struct mirotap *tap, double x, double y);
-extern int miroback_tap_up(struct miroback *mini, struct mirotap *tap, double x, double y);
+extern int nemoback_mirotap_down(struct miroback *mini, struct mirotap *tap, double x, double y);
+extern int nemoback_mirotap_motion(struct miroback *mini, struct mirotap *tap, double x, double y);
+extern int nemoback_mirotap_up(struct miroback *mini, struct mirotap *tap, double x, double y);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

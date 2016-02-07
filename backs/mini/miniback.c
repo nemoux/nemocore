@@ -48,7 +48,7 @@ struct miniback {
 	GLuint texture;
 };
 
-static GLuint miniback_create_shader(void)
+static GLuint nemoback_mini_create_shader(void)
 {
 	static const char *vert_shader_text =
 		"uniform mat4 projection;\n"
@@ -100,7 +100,7 @@ static GLuint miniback_create_shader(void)
 	return program;
 }
 
-static void miniback_prepare(struct miniback *mini, const char *filepath)
+static void nemoback_mini_prepare(struct miniback *mini, const char *filepath)
 {
 	GLfloat vertices[16] = {
 		1.0f, -1.0f, 1.0f, 1.0f,
@@ -110,7 +110,7 @@ static void miniback_prepare(struct miniback *mini, const char *filepath)
 	};
 	pixman_image_t *image;
 
-	mini->program = miniback_create_shader();
+	mini->program = nemoback_mini_create_shader();
 
 	mini->utex0 = glGetUniformLocation(mini->program, "tex0");
 	mini->uprojection = glGetUniformLocation(mini->program, "projection");
@@ -162,7 +162,7 @@ static void miniback_prepare(struct miniback *mini, const char *filepath)
 	pixman_image_unref(image);
 }
 
-static void miniback_finish(struct miniback *mini)
+static void nemoback_mini_finish(struct miniback *mini)
 {
 	glDeleteBuffers(1, &mini->vbuffer);
 	glDeleteVertexArrays(1, &mini->varray);
@@ -171,7 +171,7 @@ static void miniback_finish(struct miniback *mini)
 	glDeleteRenderbuffers(1, &mini->dbo);
 }
 
-static void miniback_render(struct miniback *mini)
+static void nemoback_mini_render(struct miniback *mini)
 {
 	GLfloat rgba[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
@@ -199,12 +199,12 @@ static void miniback_render(struct miniback *mini)
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-static void miniback_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
+static void nemoback_mini_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
 {
 	uint32_t id = nemotale_node_get_id(node);
 }
 
-static void miniback_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t width, int32_t height, int32_t fixed)
+static void nemoback_mini_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t width, int32_t height, int32_t fixed)
 {
 }
 
@@ -278,7 +278,7 @@ int main(int argc, char *argv[])
 	nemocanvas_set_nemosurface(NTEGL_CANVAS(canvas), NEMO_SHELL_SURFACE_TYPE_NORMAL);
 	nemocanvas_set_input_type(NTEGL_CANVAS(canvas), NEMO_SURFACE_INPUT_TYPE_TOUCH);
 	nemocanvas_set_layer(NTEGL_CANVAS(canvas), NEMO_SURFACE_LAYER_TYPE_BACKGROUND);
-	nemocanvas_set_dispatch_resize(NTEGL_CANVAS(canvas), miniback_dispatch_canvas_resize);
+	nemocanvas_set_dispatch_resize(NTEGL_CANVAS(canvas), nemoback_mini_dispatch_canvas_resize);
 	nemocanvas_unset_sound(NTEGL_CANVAS(canvas));
 
 	mini->canvas = NTEGL_CANVAS(canvas);
@@ -292,15 +292,15 @@ int main(int argc, char *argv[])
 				(EGLNativeWindowType)NTEGL_WINDOW(canvas)));
 	nemotale_resize(tale, width, height);
 
-	nemotale_attach_canvas(tale, NTEGL_CANVAS(canvas), miniback_dispatch_tale_event);
+	nemotale_attach_canvas(tale, NTEGL_CANVAS(canvas), nemoback_mini_dispatch_tale_event);
 	nemotale_set_userdata(tale, mini);
 
 	mini->node = node = nemotale_node_create_gl(width, height);
 	nemotale_node_set_id(node, 1);
 	nemotale_attach_node(tale, node);
 
-	miniback_prepare(mini, filepath);
-	miniback_render(mini);
+	nemoback_mini_prepare(mini, filepath);
+	nemoback_mini_render(mini);
 
 	nemotale_node_damage_all(node);
 
@@ -308,7 +308,7 @@ int main(int argc, char *argv[])
 
 	nemotool_run(tool);
 
-	miniback_finish(mini);
+	nemoback_mini_finish(mini);
 
 	nemotale_destroy_gl(tale);
 

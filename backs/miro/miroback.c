@@ -38,25 +38,25 @@ struct miromice {
 	int32_t c1, r1;
 };
 
-static void miroback_dispatch_show(struct miroback *miro, uint32_t duration, uint32_t interval);
-static void miroback_dispatch_hide(struct miroback *miro, uint32_t duration, uint32_t interval);
+static void nemoback_miro_dispatch_show(struct miroback *miro, uint32_t duration, uint32_t interval);
+static void nemoback_miro_dispatch_hide(struct miroback *miro, uint32_t duration, uint32_t interval);
 
-static int miroback_dispatch_tap_grab(struct talegrab *base, uint32_t type, struct taleevent *event)
+static int nemoback_miro_dispatch_tap_grab(struct talegrab *base, uint32_t type, struct taleevent *event)
 {
 	struct nemograb *grab = (struct nemograb *)container_of(base, struct nemograb, base);
 	struct mirotap *tap = (struct mirotap *)nemograb_get_userdata(grab);
 	struct miroback *miro = tap->miro;
 
 	if (type & NEMOTALE_DOWN_EVENT) {
-		miroback_tap_down(miro, tap, event->x, event->y);
+		nemoback_mirotap_down(miro, tap, event->x, event->y);
 
 		nemoshow_dispatch_frame(miro->show);
 	} else if (type & NEMOTALE_MOTION_EVENT) {
-		miroback_tap_motion(miro, tap, event->x, event->y);
+		nemoback_mirotap_motion(miro, tap, event->x, event->y);
 
 		nemoshow_dispatch_frame(miro->show);
 	} else if (type & NEMOTALE_UP_EVENT) {
-		miroback_tap_up(miro, tap, event->x, event->y);
+		nemoback_mirotap_up(miro, tap, event->x, event->y);
 
 		nemoshow_dispatch_frame(miro->show);
 
@@ -66,7 +66,7 @@ static int miroback_dispatch_tap_grab(struct talegrab *base, uint32_t type, stru
 	return 1;
 }
 
-static void miroback_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
+static void nemoback_miro_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
 {
 	uint32_t id = nemotale_node_get_id(node);
 
@@ -79,9 +79,9 @@ static void miroback_dispatch_tale_event(struct nemotale *tale, struct talenode 
 				struct mirotap *tap;
 				struct nemograb *grab;
 
-				tap = miroback_tap_create(miro);
+				tap = nemoback_mirotap_create(miro);
 
-				grab = nemograb_create(tale, event, miroback_dispatch_tap_grab);
+				grab = nemograb_create(tale, event, nemoback_miro_dispatch_tap_grab);
 				nemograb_set_userdata(grab, tap);
 				nemograb_check_signal(grab, &tap->destroy_signal);
 				nemotale_dispatch_grab(tale, event->device, type, event);
@@ -90,7 +90,7 @@ static void miroback_dispatch_tale_event(struct nemotale *tale, struct talenode 
 	}
 }
 
-static void miroback_dispatch_mice_destroy_done(void *data)
+static void nemoback_miro_dispatch_mice_destroy_done(void *data)
 {
 	struct miromice *mice = (struct miromice *)data;
 	struct miroback *miro = mice->miro;
@@ -102,7 +102,7 @@ static void miroback_dispatch_mice_destroy_done(void *data)
 	free(mice);
 }
 
-static void miroback_dispatch_mice_transition_done(void *data)
+static void nemoback_miro_dispatch_mice_transition_done(void *data)
 {
 	struct miromice *mice = (struct miromice *)data;
 	struct miroback *miro = mice->miro;
@@ -123,7 +123,7 @@ static void miroback_dispatch_mice_transition_done(void *data)
 				NULL);
 
 		trans = nemoshow_transition_create(miro->ease1, 1000, 0);
-		nemoshow_transition_set_dispatch_done(trans, miroback_dispatch_mice_destroy_done);
+		nemoshow_transition_set_dispatch_done(trans, nemoback_miro_dispatch_mice_destroy_done);
 		nemoshow_transition_set_userdata(trans, mice);
 		nemoshow_transition_check_one(trans, mice->one);
 		nemoshow_transition_attach_sequence(trans, sequence);
@@ -159,7 +159,7 @@ static void miroback_dispatch_mice_transition_done(void *data)
 				NULL);
 
 		trans = nemoshow_transition_create(miro->ease2, 2400, 0);
-		nemoshow_transition_set_dispatch_done(trans, miroback_dispatch_mice_transition_done);
+		nemoshow_transition_set_dispatch_done(trans, nemoback_miro_dispatch_mice_transition_done);
 		nemoshow_transition_set_userdata(trans, mice);
 		nemoshow_transition_check_one(trans, mice->one);
 		nemoshow_transition_attach_sequence(trans, sequence);
@@ -167,7 +167,7 @@ static void miroback_dispatch_mice_transition_done(void *data)
 	}
 }
 
-static int miroback_shoot_mice(struct miroback *miro)
+static int nemoback_miro_shoot_mice(struct miroback *miro)
 {
 	struct miromice *mice;
 	struct showone *one;
@@ -206,7 +206,7 @@ static int miroback_shoot_mice(struct miroback *miro)
 			NULL);
 
 	trans = nemoshow_transition_create(miro->ease1, 1000, 0);
-	nemoshow_transition_set_dispatch_done(trans, miroback_dispatch_mice_transition_done);
+	nemoshow_transition_set_dispatch_done(trans, nemoback_miro_dispatch_mice_transition_done);
 	nemoshow_transition_set_userdata(trans, mice);
 	nemoshow_transition_check_one(trans, one);
 	nemoshow_transition_attach_sequence(trans, sequence);
@@ -215,7 +215,7 @@ static int miroback_shoot_mice(struct miroback *miro)
 	return 0;
 }
 
-static int miroback_shoot_box(struct miroback *miro)
+static int nemoback_miro_shoot_box(struct miroback *miro)
 {
 	struct showtransition *trans;
 	struct showone *sequence;
@@ -250,12 +250,12 @@ static int miroback_shoot_box(struct miroback *miro)
 	return 0;
 }
 
-static void miroback_dispatch_timer_event(struct nemotimer *timer, void *data)
+static void nemoback_miro_dispatch_timer_event(struct nemotimer *timer, void *data)
 {
 	struct miroback *miro = (struct miroback *)data;
 
 	if (miro->is_sleeping == 0 && miro->nmices < miro->mmices) {
-		miroback_shoot_mice(miro);
+		nemoback_miro_shoot_mice(miro);
 
 		miro->nmices++;
 
@@ -265,7 +265,7 @@ static void miroback_dispatch_timer_event(struct nemotimer *timer, void *data)
 	nemotimer_set_timeout(miro->timer, 3000);
 }
 
-static void *miroback_dispatch_pulse_monitor_thread(void *data)
+static void *nemoback_miro_dispatch_pulse_monitor_thread(void *data)
 {
 	static const pa_sample_spec psample = {
 		.format = PA_SAMPLE_FLOAT32LE,
@@ -364,7 +364,7 @@ static void *miroback_dispatch_pulse_monitor_thread(void *data)
 	return NULL;
 }
 
-static void miroback_dispatch_pulse_timer_event(struct nemotimer *timer, void *data)
+static void nemoback_miro_dispatch_pulse_timer_event(struct nemotimer *timer, void *data)
 {
 	struct miroback *miro = (struct miroback *)data;
 	struct showtransition *trans;
@@ -406,17 +406,17 @@ static void miroback_dispatch_pulse_timer_event(struct nemotimer *timer, void *d
 	nemotimer_set_timeout(timer, 100);
 }
 
-static int miroback_dispatch_pulse_monitor(struct miroback *miro)
+static int nemoback_miro_dispatch_pulse_monitor(struct miroback *miro)
 {
 	struct nemotimer *timer;
 	pthread_t th;
 
 	pthread_mutex_init(&miro->plock, NULL);
 
-	pthread_create(&th, NULL, miroback_dispatch_pulse_monitor_thread, (void *)miro);
+	pthread_create(&th, NULL, nemoback_miro_dispatch_pulse_monitor_thread, (void *)miro);
 
 	miro->ptimer = timer = nemotimer_create(miro->tool);
-	nemotimer_set_callback(timer, miroback_dispatch_pulse_timer_event);
+	nemotimer_set_callback(timer, nemoback_miro_dispatch_pulse_timer_event);
 	nemotimer_set_userdata(timer, miro);
 
 	nemotimer_set_timeout(timer, 100);
@@ -424,18 +424,18 @@ static int miroback_dispatch_pulse_monitor(struct miroback *miro)
 	return 0;
 }
 
-static void miroback_dispatch_show_transition_done(void *userdata)
+static void nemoback_miro_dispatch_show_transition_done(void *userdata)
 {
 	struct miroback *miro = (struct miroback *)userdata;
 
 	nemotimer_set_timeout(miro->timer, 1000);
 
-	miroback_dispatch_pulse_monitor(miro);
+	nemoback_miro_dispatch_pulse_monitor(miro);
 
 	nemoshow_set_dispatch_transition_done(miro->show, NULL, NULL);
 }
 
-static void miroback_dispatch_show(struct miroback *miro, uint32_t duration, uint32_t interval)
+static void nemoback_miro_dispatch_show(struct miroback *miro, uint32_t duration, uint32_t interval)
 {
 	struct showtransition *trans;
 	struct showone *sequence;
@@ -474,12 +474,12 @@ static void miroback_dispatch_show(struct miroback *miro, uint32_t duration, uin
 		nemoshow_attach_transition(miro->show, trans);
 	}
 
-	nemoshow_set_dispatch_transition_done(miro->show, miroback_dispatch_show_transition_done, miro);
+	nemoshow_set_dispatch_transition_done(miro->show, nemoback_miro_dispatch_show_transition_done, miro);
 
 	nemoshow_dispatch_frame(miro->show);
 }
 
-static void miroback_dispatch_hide(struct miroback *miro, uint32_t duration, uint32_t interval)
+static void nemoback_miro_dispatch_hide(struct miroback *miro, uint32_t duration, uint32_t interval)
 {
 	struct showtransition *trans;
 	struct showone *sequence;
@@ -521,7 +521,7 @@ static void miroback_dispatch_hide(struct miroback *miro, uint32_t duration, uin
 	nemoshow_dispatch_frame(miro->show);
 }
 
-static void miroback_dispatch_canvas_fullscreen(struct nemocanvas *canvas, int32_t active, int32_t opaque)
+static void nemoback_miro_dispatch_canvas_fullscreen(struct nemocanvas *canvas, int32_t active, int32_t opaque)
 {
 	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
 	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
@@ -646,17 +646,17 @@ int main(int argc, char *argv[])
 	nemotool_connect_wayland(tool, NULL);
 
 	miro->timer = timer = nemotimer_create(tool);
-	nemotimer_set_callback(timer, miroback_dispatch_timer_event);
+	nemotimer_set_callback(timer, nemoback_miro_dispatch_timer_event);
 	nemotimer_set_userdata(timer, miro);
 
-	miro->show = show = nemoshow_create_canvas(tool, width, height, miroback_dispatch_tale_event);
+	miro->show = show = nemoshow_create_canvas(tool, width, height, nemoback_miro_dispatch_tale_event);
 	if (show == NULL)
 		goto err2;
 	nemoshow_set_userdata(show, miro);
 
 	nemocanvas_opaque(NEMOSHOW_AT(show, canvas), 0, 0, width, height);
 	nemocanvas_set_layer(NEMOSHOW_AT(show, canvas), NEMO_SURFACE_LAYER_TYPE_BACKGROUND);
-	nemocanvas_set_dispatch_fullscreen(NEMOSHOW_AT(show, canvas), miroback_dispatch_canvas_fullscreen);
+	nemocanvas_set_dispatch_fullscreen(NEMOSHOW_AT(show, canvas), nemoback_miro_dispatch_canvas_fullscreen);
 
 	miro->scene = scene = nemoshow_scene_create();
 	nemoshow_scene_set_width(scene, width);
@@ -748,7 +748,7 @@ int main(int argc, char *argv[])
 		nemoshow_item_set_alpha(one, 0.5f);
 	}
 
-	miroback_dispatch_show(miro, 1800, 100);
+	nemoback_miro_dispatch_show(miro, 1800, 100);
 
 	nemotool_run(tool);
 

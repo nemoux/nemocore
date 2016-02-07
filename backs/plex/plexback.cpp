@@ -74,7 +74,7 @@ struct plexback {
 	uint32_t msecs;
 };
 
-static void plexback_render_one(struct plexback *plex, pixman_image_t *image, double t)
+static void nemoback_plex_render_one(struct plexback *plex, pixman_image_t *image, double t)
 {
 	int32_t width = pixman_image_get_width(image);
 	int32_t height = pixman_image_get_height(image);
@@ -197,7 +197,7 @@ static void plexback_render_one(struct plexback *plex, pixman_image_t *image, do
 	canvas.drawPath(path, stroke);
 }
 
-static void plexback_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t secs, uint32_t nsecs)
+static void nemoback_plex_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t secs, uint32_t nsecs)
 {
 	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
 	struct plexback *plex = (struct plexback *)nemotale_get_userdata(tale);
@@ -214,14 +214,14 @@ static void plexback_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 		nemocanvas_feedback(canvas);
 	}
 
-	plexback_render_one(plex, nemotale_node_get_pixman(node), (double)(msecs - plex->msecs) / 100000.0f);
+	nemoback_plex_render_one(plex, nemotale_node_get_pixman(node), (double)(msecs - plex->msecs) / 100000.0f);
 
 	nemotale_node_damage_all(node);
 
 	nemotale_composite_egl(tale, NULL);
 }
 
-static void plexback_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
+static void nemoback_plex_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
 {
 	uint32_t id = nemotale_node_get_id(node);
 }
@@ -301,7 +301,7 @@ int main(int argc, char *argv[])
 	nemocanvas_opaque(NTEGL_CANVAS(canvas), 0, 0, width, height);
 	nemocanvas_set_nemosurface(NTEGL_CANVAS(canvas), NEMO_SHELL_SURFACE_TYPE_NORMAL);
 	nemocanvas_set_layer(NTEGL_CANVAS(canvas), NEMO_SURFACE_LAYER_TYPE_BACKGROUND);
-	nemocanvas_set_dispatch_frame(NTEGL_CANVAS(canvas), plexback_dispatch_canvas_frame);
+	nemocanvas_set_dispatch_frame(NTEGL_CANVAS(canvas), nemoback_plex_dispatch_canvas_frame);
 	nemocanvas_unset_sound(NTEGL_CANVAS(canvas));
 
 	plex->canvas = NTEGL_CANVAS(canvas);
@@ -315,7 +315,7 @@ int main(int argc, char *argv[])
 				(EGLNativeWindowType)NTEGL_WINDOW(canvas)));
 	nemotale_resize(tale, width, height);
 
-	nemotale_attach_canvas(tale, NTEGL_CANVAS(canvas), plexback_dispatch_tale_event);
+	nemotale_attach_canvas(tale, NTEGL_CANVAS(canvas), nemoback_plex_dispatch_tale_event);
 	nemotale_set_userdata(tale, plex);
 
 	plex->node = node = nemotale_node_create_pixman(width, height);

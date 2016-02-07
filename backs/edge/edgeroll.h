@@ -57,27 +57,27 @@ struct edgeroll {
 	int tapcount;
 };
 
-extern struct edgeroll *edgeback_roll_create(struct edgeback *edge, int site);
-extern void edgeback_roll_destroy(struct edgeroll *roll);
+extern struct edgeroll *nemoback_edgeroll_create(struct edgeback *edge, int site);
+extern void nemoback_edgeroll_destroy(struct edgeroll *roll);
 
-extern int edgeback_roll_shutdown(struct edgeback *edge, struct edgeroll *roll);
+extern int nemoback_edgeroll_shutdown(struct edgeback *edge, struct edgeroll *roll);
 
-extern int edgeback_roll_down(struct edgeback *edge, struct edgeroll *roll, double x, double y);
-extern int edgeback_roll_motion(struct edgeback *edge, struct edgeroll *roll, double x, double y);
-extern int edgeback_roll_up(struct edgeback *edge, struct edgeroll *roll, double x, double y);
+extern int nemoback_edgeroll_down(struct edgeback *edge, struct edgeroll *roll, double x, double y);
+extern int nemoback_edgeroll_motion(struct edgeback *edge, struct edgeroll *roll, double x, double y);
+extern int nemoback_edgeroll_up(struct edgeback *edge, struct edgeroll *roll, double x, double y);
 
-extern int edgeback_roll_activate_group(struct edgeback *edge, struct edgeroll *roll, uint32_t group);
-extern int edgeback_roll_deactivate_group(struct edgeback *edge, struct edgeroll *roll);
+extern int nemoback_edgeroll_activate_group(struct edgeback *edge, struct edgeroll *roll, uint32_t group);
+extern int nemoback_edgeroll_deactivate_group(struct edgeback *edge, struct edgeroll *roll);
 
-extern int edgeback_roll_activate_action(struct edgeback *edge, struct edgeroll *roll, uint32_t action);
-extern int edgeback_roll_deactivate_action(struct edgeback *edge, struct edgeroll *roll);
+extern int nemoback_edgeroll_activate_action(struct edgeback *edge, struct edgeroll *roll, uint32_t action);
+extern int nemoback_edgeroll_deactivate_action(struct edgeback *edge, struct edgeroll *roll);
 
-static inline void edgeback_roll_reference(struct edgeroll *roll)
+static inline void nemoback_edgeroll_reference(struct edgeroll *roll)
 {
 	roll->refs++;
 }
 
-static inline uint32_t edgeback_roll_unreference(struct edgeroll *roll)
+static inline uint32_t nemoback_edgeroll_unreference(struct edgeroll *roll)
 {
 	return --roll->refs;
 }

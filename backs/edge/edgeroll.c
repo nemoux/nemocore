@@ -18,7 +18,7 @@
 #include <nemolog.h>
 #include <nemomisc.h>
 
-struct edgeroll *edgeback_roll_create(struct edgeback *edge, int site)
+struct edgeroll *nemoback_edgeroll_create(struct edgeback *edge, int site)
 {
 	struct edgeroll *roll;
 
@@ -41,7 +41,7 @@ struct edgeroll *edgeback_roll_create(struct edgeback *edge, int site)
 	return roll;
 }
 
-void edgeback_roll_destroy(struct edgeroll *roll)
+void nemoback_edgeroll_destroy(struct edgeroll *roll)
 {
 	int i;
 
@@ -60,15 +60,15 @@ void edgeback_roll_destroy(struct edgeroll *roll)
 	free(roll);
 }
 
-static void edgeback_roll_dispatch_destroy_done(void *data)
+static void nemoback_edgeroll_dispatch_destroy_done(void *data)
 {
 	struct edgeroll *roll = (struct edgeroll *)data;
 
-	if (edgeback_roll_unreference(roll) == 0)
-		edgeback_roll_destroy(roll);
+	if (nemoback_edgeroll_unreference(roll) == 0)
+		nemoback_edgeroll_destroy(roll);
 }
 
-static void edgeback_roll_show_rings(struct edgeback *edge, struct edgeroll *roll, uint32_t ngroups)
+static void nemoback_edgeroll_show_rings(struct edgeback *edge, struct edgeroll *roll, uint32_t ngroups)
 {
 	struct showone *one;
 	struct showtransition *trans;
@@ -131,7 +131,7 @@ static void edgeback_roll_show_rings(struct edgeback *edge, struct edgeroll *rol
 	roll->ngroups = i;
 }
 
-static void edgeback_roll_hide_rings(struct edgeback *edge, struct edgeroll *roll, int needs_destroy)
+static void nemoback_edgeroll_hide_rings(struct edgeback *edge, struct edgeroll *roll, int needs_destroy)
 {
 	struct showtransition *trans;
 	struct showone *sequence;
@@ -152,9 +152,9 @@ static void edgeback_roll_hide_rings(struct edgeback *edge, struct edgeroll *rol
 
 		trans = nemoshow_transition_create(edge->ease0, 700, 0);
 		if (needs_destroy != 0) {
-			edgeback_roll_reference(roll);
+			nemoback_edgeroll_reference(roll);
 
-			nemoshow_transition_set_dispatch_done(trans, edgeback_roll_dispatch_destroy_done);
+			nemoshow_transition_set_dispatch_done(trans, nemoback_edgeroll_dispatch_destroy_done);
 			nemoshow_transition_set_userdata(trans, roll);
 		}
 		nemoshow_transition_check_one(trans, roll->grouprings[i]);
@@ -163,7 +163,7 @@ static void edgeback_roll_hide_rings(struct edgeback *edge, struct edgeroll *rol
 	}
 }
 
-static void edgeback_roll_show_groups(struct edgeback *edge, struct edgeroll *roll)
+static void nemoback_edgeroll_show_groups(struct edgeback *edge, struct edgeroll *roll)
 {
 	struct showone *one;
 	struct showtransition *trans;
@@ -228,7 +228,7 @@ static void edgeback_roll_show_groups(struct edgeback *edge, struct edgeroll *ro
 	}
 }
 
-static void edgeback_roll_hide_groups(struct edgeback *edge, struct edgeroll *roll, int needs_destroy)
+static void nemoback_edgeroll_hide_groups(struct edgeback *edge, struct edgeroll *roll, int needs_destroy)
 {
 	struct showtransition *trans;
 	struct showone *sequence;
@@ -249,9 +249,9 @@ static void edgeback_roll_hide_groups(struct edgeback *edge, struct edgeroll *ro
 
 		trans = nemoshow_transition_create(edge->ease0, 700, 0);
 		if (needs_destroy != 0) {
-			edgeback_roll_reference(roll);
+			nemoback_edgeroll_reference(roll);
 
-			nemoshow_transition_set_dispatch_done(trans, edgeback_roll_dispatch_destroy_done);
+			nemoshow_transition_set_dispatch_done(trans, nemoback_edgeroll_dispatch_destroy_done);
 			nemoshow_transition_set_userdata(trans, roll);
 		}
 		nemoshow_transition_check_one(trans, roll->groups[i]);
@@ -260,12 +260,12 @@ static void edgeback_roll_hide_groups(struct edgeback *edge, struct edgeroll *ro
 	}
 }
 
-int edgeback_roll_shutdown(struct edgeback *edge, struct edgeroll *roll)
+int nemoback_edgeroll_shutdown(struct edgeback *edge, struct edgeroll *roll)
 {
-	edgeback_roll_deactivate_group(edge, roll);
+	nemoback_edgeroll_deactivate_group(edge, roll);
 
-	edgeback_roll_hide_rings(edge, roll, 1);
-	edgeback_roll_hide_groups(edge, roll, 1);
+	nemoback_edgeroll_hide_rings(edge, roll, 1);
+	nemoback_edgeroll_hide_groups(edge, roll, 1);
 
 	nemoshow_dispatch_frame(edge->show);
 
@@ -276,7 +276,7 @@ int edgeback_roll_shutdown(struct edgeback *edge, struct edgeroll *roll)
 	return 0;
 }
 
-int edgeback_roll_down(struct edgeback *edge, struct edgeroll *roll, double x, double y)
+int nemoback_edgeroll_down(struct edgeback *edge, struct edgeroll *roll, double x, double y)
 {
 	if (roll->site == EDGEBACK_TOP_SITE) {
 		roll->x0 = x;
@@ -311,15 +311,15 @@ int edgeback_roll_down(struct edgeback *edge, struct edgeroll *roll, double x, d
 	return 0;
 }
 
-static void edgeback_roll_dispatch_timer(struct nemotimer *timer, void *data)
+static void nemoback_edgeroll_dispatch_timer(struct nemotimer *timer, void *data)
 {
 	struct edgeroll *roll = (struct edgeroll *)data;
 	struct edgeback *edge = roll->edge;
 
-	edgeback_roll_shutdown(edge, roll);
+	nemoback_edgeroll_shutdown(edge, roll);
 }
 
-int edgeback_roll_motion(struct edgeback *edge, struct edgeroll *roll, double x, double y)
+int nemoback_edgeroll_motion(struct edgeback *edge, struct edgeroll *roll, double x, double y)
 {
 	if (roll->state == EDGEBACK_ROLL_READY_STATE) {
 		double size;
@@ -342,19 +342,19 @@ int edgeback_roll_motion(struct edgeback *edge, struct edgeroll *roll, double x,
 			size = roll->x1 - roll->x0;
 		}
 
-		edgeback_roll_show_rings(edge, roll, MIN(floor(size / edge->rollsize) + 1, nemoenvs_get_groups_count(edge->envs)));
+		nemoback_edgeroll_show_rings(edge, roll, MIN(floor(size / edge->rollsize) + 1, nemoenvs_get_groups_count(edge->envs)));
 
 		if (roll->ngroups >= nemoenvs_get_groups_count(edge->envs)) {
 			struct nemotimer *timer;
 
 			roll->timer = timer = nemotimer_create(edge->tool);
-			nemotimer_set_callback(timer, edgeback_roll_dispatch_timer);
+			nemotimer_set_callback(timer, nemoback_edgeroll_dispatch_timer);
 			nemotimer_set_userdata(timer, roll);
 			nemotimer_set_timeout(timer, edge->rolltimeout);
 
 			roll->state = EDGEBACK_ROLL_ACTIVE_STATE;
 
-			edgeback_roll_show_groups(edge, roll);
+			nemoback_edgeroll_show_groups(edge, roll);
 		}
 	} else if (roll->state == EDGEBACK_ROLL_ACTIVE_STATE) {
 	}
@@ -362,16 +362,16 @@ int edgeback_roll_motion(struct edgeback *edge, struct edgeroll *roll, double x,
 	return 0;
 }
 
-int edgeback_roll_up(struct edgeback *edge, struct edgeroll *roll, double x, double y)
+int nemoback_edgeroll_up(struct edgeback *edge, struct edgeroll *roll, double x, double y)
 {
 	if (roll->state == EDGEBACK_ROLL_READY_STATE) {
-		edgeback_roll_hide_rings(edge, roll, 1);
+		nemoback_edgeroll_hide_rings(edge, roll, 1);
 	}
 
 	return 0;
 }
 
-int edgeback_roll_activate_group(struct edgeback *edge, struct edgeroll *roll, uint32_t group)
+int nemoback_edgeroll_activate_group(struct edgeback *edge, struct edgeroll *roll, uint32_t group)
 {
 	struct showone *one;
 	struct showtransition *trans;
@@ -546,7 +546,7 @@ int edgeback_roll_activate_group(struct edgeback *edge, struct edgeroll *roll, u
 	return 0;
 }
 
-int edgeback_roll_deactivate_group(struct edgeback *edge, struct edgeroll *roll)
+int nemoback_edgeroll_deactivate_group(struct edgeback *edge, struct edgeroll *roll)
 {
 	struct showtransition *trans;
 	struct showone *sequence;
@@ -615,7 +615,7 @@ int edgeback_roll_deactivate_group(struct edgeback *edge, struct edgeroll *roll)
 	return 0;
 }
 
-int edgeback_roll_activate_action(struct edgeback *edge, struct edgeroll *roll, uint32_t action)
+int nemoback_edgeroll_activate_action(struct edgeback *edge, struct edgeroll *roll, uint32_t action)
 {
 	struct showtransition *trans;
 	struct showone *sequence;
@@ -655,7 +655,7 @@ int edgeback_roll_activate_action(struct edgeback *edge, struct edgeroll *roll, 
 	return 0;
 }
 
-int edgeback_roll_deactivate_action(struct edgeback *edge, struct edgeroll *roll)
+int nemoback_edgeroll_deactivate_action(struct edgeback *edge, struct edgeroll *roll)
 {
 	struct showtransition *trans;
 	struct showone *sequence;

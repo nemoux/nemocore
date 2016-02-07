@@ -10,7 +10,7 @@
 #include <edgeback.h>
 #include <edgemisc.h>
 
-int edgeback_get_site(struct edgeback *edge, double x, double y)
+int nemoback_edge_get_site(struct edgeback *edge, double x, double y)
 {
 	double dt, db, dl, dr;
 
@@ -29,7 +29,7 @@ int edgeback_get_site(struct edgeback *edge, double x, double y)
 	return EDGEBACK_BOTTOM_SITE;
 }
 
-double edgeback_get_site_rotation(struct edgeback *edge, int site)
+double nemoback_edge_get_site_rotation(struct edgeback *edge, int site)
 {
 	if (site == EDGEBACK_TOP_SITE)
 		return 180.0f;
@@ -41,7 +41,7 @@ double edgeback_get_site_rotation(struct edgeback *edge, int site)
 	return 0.0f;
 }
 
-int edgeback_get_edge(struct edgeback *edge, double x, double y, uint32_t edgesize)
+int nemoback_edge_get_edge(struct edgeback *edge, double x, double y, uint32_t edgesize)
 {
 	double dt, db, dl, dr;
 

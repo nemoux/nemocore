@@ -16,9 +16,9 @@ typedef enum {
 	EDGEBACK_LAST_SITE
 } EdgeBackSite;
 
-extern int edgeback_get_site(struct edgeback *edge, double x, double y);
-extern double edgeback_get_site_rotation(struct edgeback *edge, int site);
-extern int edgeback_get_edge(struct edgeback *edge, double x, double y, uint32_t edgesize);
+extern int nemoback_edge_get_site(struct edgeback *edge, double x, double y);
+extern double nemoback_edge_get_site_rotation(struct edgeback *edge, int site);
+extern int nemoback_edge_get_edge(struct edgeback *edge, double x, double y, uint32_t edgesize);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
