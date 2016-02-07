@@ -1512,10 +1512,10 @@ void nemocanvas_commit_state(struct nemocanvas *canvas, struct nemocanvas_state 
 
 	if (canvas->base.region.has_input == 0) {
 		pixman_region32_intersect_rect(&canvas->base.input, &state->input,
-				0, 0, canvas->base.width, canvas->base.height);
+				0, 0, canvas->base.width + 1, canvas->base.height + 1);
 	} else {
 		pixman_region32_intersect_rect(&canvas->base.input, &canvas->base.region.input,
-				0, 0, canvas->base.width, canvas->base.height);
+				0, 0, canvas->base.width + 1, canvas->base.height + 1);
 	}
 
 	wl_list_insert_list(&canvas->frame_callback_list, &state->frame_callback_list);
