@@ -208,16 +208,20 @@ void nemoshow_one_detach_one(struct showone *parent, struct showone *one)
 	nemolist_init(&one->parent_destroy_listener.link);
 }
 
-void nemoshow_one_above_one(struct showone *one, struct showone *above)
+int nemoshow_one_above_one(struct showone *one, struct showone *above)
 {
 	nemolist_remove(&one->link);
 	nemolist_insert_tail(&above->link, &one->link);
+
+	return 0;
 }
 
-void nemoshow_one_below_one(struct showone *one, struct showone *below)
+int nemoshow_one_below_one(struct showone *one, struct showone *below)
 {
 	nemolist_remove(&one->link);
 	nemolist_insert(&below->link, &one->link);
+
+	return 0;
 }
 
 int nemoshow_one_reference_one(struct showone *one, struct showone *src, uint32_t dirty, int index)

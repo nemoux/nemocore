@@ -83,8 +83,8 @@ typedef int (*nemoshow_one_update_t)(struct showone *one);
 typedef void (*nemoshow_one_destroy_t)(struct showone *one);
 typedef void (*nemoshow_one_attach_t)(struct showone *parent, struct showone *one);
 typedef void (*nemoshow_one_detach_t)(struct showone *parent, struct showone *one);
-typedef void (*nemoshow_one_above_t)(struct showone *one, struct showone *above);
-typedef void (*nemoshow_one_below_t)(struct showone *one, struct showone *below);
+typedef int (*nemoshow_one_above_t)(struct showone *one, struct showone *above);
+typedef int (*nemoshow_one_below_t)(struct showone *one, struct showone *below);
 
 struct showattr {
 	char name[NEMOSHOW_ATTR_NAME_MAX];
@@ -190,8 +190,8 @@ extern void nemoshow_one_dirty(struct showone *one, uint32_t dirty);
 extern void nemoshow_one_attach_one(struct showone *parent, struct showone *one);
 extern void nemoshow_one_detach_one(struct showone *parent, struct showone *one);
 
-extern void nemoshow_one_above_one(struct showone *one, struct showone *above);
-extern void nemoshow_one_below_one(struct showone *one, struct showone *below);
+extern int nemoshow_one_above_one(struct showone *one, struct showone *above);
+extern int nemoshow_one_below_one(struct showone *one, struct showone *below);
 
 extern int nemoshow_one_reference_one(struct showone *one, struct showone *src, uint32_t dirty, int index);
 extern void nemoshow_one_unreference_one(struct showone *one, struct showone *src);
@@ -220,22 +220,20 @@ static inline void nemoshow_one_detach(struct showone *parent, struct showone *o
 	}
 }
 
-static inline void nemoshow_one_above(struct showone *one, struct showone *above)
+static inline int nemoshow_one_above(struct showone *one, struct showone *above)
 {
-	if (one->above != NULL) {
-		one->above(one, above);
-	} else {
-		nemoshow_one_above_one(one, above);
-	}
+	if (one->above != NULL)
+		return one->above(one, above);
+
+	return nemoshow_one_above_one(one, above);
 }
 
-static inline void nemoshow_one_below(struct showone *one, struct showone *below)
+static inline int nemoshow_one_below(struct showone *one, struct showone *below)
 {
-	if (one->below != NULL) {
-		one->below(one, below);
-	} else {
-		nemoshow_one_below_one(one, below);
-	}
+	if (one->below != NULL)
+		return one->below(one, below);
+
+	return nemoshow_one_below_one(one, below);
 }
 
 static inline void nemoshow_one_update(struct showone *one)

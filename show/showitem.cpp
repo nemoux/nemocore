@@ -959,18 +959,28 @@ void nemoshow_item_detach_one(struct showone *parent, struct showone *one)
 	}
 }
 
-void nemoshow_item_above_one(struct showone *one, struct showone *above)
+int nemoshow_item_above_one(struct showone *one, struct showone *above)
 {
+	if (one->parent != above->parent)
+		return -1;
+
 	nemoshow_one_above_one(one, above);
 
 	nemoshow_one_dirty(one, NEMOSHOW_REDRAW_DIRTY);
+
+	return 0;
 }
 
-void nemoshow_item_below_one(struct showone *one, struct showone *below)
+int nemoshow_item_below_one(struct showone *one, struct showone *below)
 {
+	if (one->parent != below->parent)
+		return -1;
+
 	nemoshow_one_below_one(one, below);
 
 	nemoshow_one_dirty(one, NEMOSHOW_REDRAW_DIRTY);
+
+	return 0;
 }
 
 void nemoshow_item_path_clear(struct showone *one)
