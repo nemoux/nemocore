@@ -13,12 +13,12 @@
 #include <nemomisc.h>
 #include <skiaconfig.hpp>
 
-void nemoshow_initialize(void)
+void __attribute__((constructor(101))) nemoshow_initialize(void)
 {
 	SkGraphics::Init();
 }
 
-void nemoshow_finalize(void)
+void __attribute__((destructor(101))) nemoshow_finalize(void)
 {
 	SkGraphics::Term();
 }

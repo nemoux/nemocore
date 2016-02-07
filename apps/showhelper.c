@@ -159,8 +159,6 @@ struct nemoshow *nemoshow_create_canvas(struct nemotool *tool, int32_t width, in
 				(EGLNativeWindowType)NTEGL_WINDOW(scon->eglcanvas)));
 	nemotale_set_dispatch_event(scon->tale, dispatch);
 
-	nemoshow_initialize();
-
 	show = nemoshow_create();
 	nemoshow_set_tale(show, scon->tale);
 	nemoshow_set_context(show, scon);

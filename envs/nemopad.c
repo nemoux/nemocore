@@ -148,7 +148,7 @@ static double nemopadcolors[][3] = {
 
 static struct showone *nemopadease;
 
-void nemopad_prepare_envs(void)
+void __attribute__((constructor(101))) nemopad_prepare_envs(void)
 {
 	struct showone *one;
 	int i;
@@ -208,7 +208,7 @@ void nemopad_prepare_envs(void)
 	nemoshow_ease_set_type(nemopadease, NEMOEASE_CUBIC_INOUT_TYPE);
 }
 
-void nemopad_finish_envs(void)
+void __attribute__((destructor(101))) nemopad_finish_envs(void)
 {
 	int i;
 

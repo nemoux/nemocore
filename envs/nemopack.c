@@ -36,7 +36,7 @@
 static struct showone *nemopackease0;
 static struct showone *nemopackease1;
 
-void nemopack_prepare_envs(void)
+void __attribute__((constructor(101))) nemopack_prepare_envs(void)
 {
 	nemopackease0 = nemoshow_ease_create();
 	nemoshow_ease_set_type(nemopackease0, NEMOEASE_CUBIC_INOUT_TYPE);
@@ -44,7 +44,7 @@ void nemopack_prepare_envs(void)
 	nemoshow_ease_set_type(nemopackease1, NEMOEASE_CUBIC_OUT_TYPE);
 }
 
-void nemopack_finish_envs(void)
+void __attribute__((destructor(101))) nemopack_finish_envs(void)
 {
 	nemoshow_one_destroy(nemopackease0);
 	nemoshow_one_destroy(nemopackease1);
