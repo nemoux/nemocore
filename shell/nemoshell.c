@@ -95,12 +95,19 @@ static void nemo_surface_execute_action(struct wl_client *client, struct wl_reso
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 	struct nemoshell *shell = bin->shell;
 
-	if (shell->execute_action != NULL)
-		shell->execute_action(shell->userdata, bin,
-				group, action,
+	if (shell->execute_action != NULL) {
+		float gx, gy;
+
+		nemoview_transform_to_global(bin->view,
 				wl_fixed_to_double(x),
 				wl_fixed_to_double(y),
+				&gx, &gy);
+
+		shell->execute_action(shell->userdata, bin,
+				group, action,
+				gx, gy,
 				wl_fixed_to_double(r));
+	}
 }
 
 static void nemo_surface_set_size(struct wl_client *client, struct wl_resource *resource, uint32_t width, uint32_t height)
