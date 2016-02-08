@@ -1,0 +1,35 @@
+FIND_PACKAGE(PkgConfig REQUIRED)
+
+PKG_CHECK_MODULES(SKIA REQUIRED skia)
+INCLUDE_DIRECTORIES(${SKIA_INCLUDE_DIRS})
+LINK_DIRECTORIES(${SKIA_LIBRARY_DIRS})
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
+set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
+
+include_directories(
+	${CMAKE_CURRENT_BINARY_DIR}
+	${CMAKE_SOURCE_DIR}/show
+	${CMAKE_SOURCE_DIR}/tale
+	${CMAKE_SOURCE_DIR}/tool
+	${CMAKE_BINARY_DIR}/tool
+	${CMAKE_SOURCE_DIR}/mote
+	${CMAKE_SOURCE_DIR}/apps
+	${CMAKE_SOURCE_DIR}/thirds
+	${CMAKE_SOURCE_DIR}/thirds/poly2tri
+	)
+
+add_executable(nemoback-atom
+	atomback.c
+	atommisc.c
+	)
+
+TARGET_LINK_LIBRARIES(nemoback-atom
+	nemoapps
+	nemomote
+	${NEMOUX_COMMON_LIBRARIES}
+	${SKIA_LIBRARIES}
+	)
+
+INSTALL(TARGETS nemoback-atom DESTINATION bin)

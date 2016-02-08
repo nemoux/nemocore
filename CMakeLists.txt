@@ -234,6 +234,7 @@ add_subdirectory(backs/mosi)
 add_subdirectory(backs/miro)
 add_subdirectory(backs/edge)
 add_subdirectory(backs/plex)
+add_subdirectory(backs/atom)
 add_subdirectory(games/minesweeper)
 
 add_subdirectory(thirds/poly2tri)

@@ -593,6 +593,9 @@ void nemoshow_render_one(struct nemoshow *show)
 						(double)show->width / (double)NEMOSHOW_SCENE_AT(show->scene, width) * show->sx,
 						(double)show->height / (double)NEMOSHOW_SCENE_AT(show->scene, height) * show->sy);
 
+				if (canvas->dispatch_resize != NULL)
+					canvas->dispatch_resize(show, one, canvas->viewport.width, canvas->viewport.height);
+
 				canvas->viewport.dirty = 0;
 			}
 
@@ -608,9 +611,8 @@ void nemoshow_render_one(struct nemoshow *show)
 				}
 			}
 
-			if (canvas->dispatch_render != NULL) {
+			if (canvas->dispatch_render != NULL)
 				canvas->dispatch_render(show, one);
-			}
 		}
 	}
 }

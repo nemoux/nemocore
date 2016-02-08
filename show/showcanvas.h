@@ -30,6 +30,7 @@ typedef enum {
 struct nemoshow;
 
 typedef void (*nemoshow_canvas_dispatch_render_t)(struct nemoshow *show, struct showone *one);
+typedef void (*nemoshow_canvas_dispatch_resize_t)(struct nemoshow *show, struct showone *one, int32_t width, int32_t height);
 
 struct showcanvas {
 	struct showone base;
@@ -67,6 +68,7 @@ struct showcanvas {
 	int needs_full_redraw;
 
 	nemoshow_canvas_dispatch_render_t dispatch_render;
+	nemoshow_canvas_dispatch_resize_t dispatch_resize;
 
 	void *cc;
 };
@@ -111,6 +113,11 @@ static inline void nemoshow_canvas_set_dispatch_render(struct showone *one, nemo
 	NEMOSHOW_CANVAS_AT(one, dispatch_render) = dispatch_render;
 }
 
+static inline void nemoshow_canvas_set_dispatch_resize(struct showone *one, nemoshow_canvas_dispatch_resize_t dispatch_resize)
+{
+	NEMOSHOW_CANVAS_AT(one, dispatch_resize) = dispatch_resize;
+}
+
 static inline struct talenode *nemoshow_canvas_get_node(struct showone *one)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
@@ -140,6 +147,16 @@ static inline double nemoshow_canvas_get_viewport_sx(struct showone *one)
 static inline double nemoshow_canvas_get_viewport_sy(struct showone *one)
 {
 	return NEMOSHOW_CANVAS_AT(one, viewport.sy);
+}
+
+static inline int32_t nemoshow_canvas_get_viewport_width(struct showone *one)
+{
+	return NEMOSHOW_CANVAS_AT(one, viewport.width);
+}
+
+static inline int32_t nemoshow_canvas_get_viewport_height(struct showone *one)
+{
+	return NEMOSHOW_CANVAS_AT(one, viewport.height);
 }
 
 static inline void nemoshow_canvas_set_width(struct showone *one, double width)
