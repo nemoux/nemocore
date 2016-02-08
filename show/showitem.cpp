@@ -50,9 +50,13 @@ struct showone *nemoshow_item_create(int type)
 	NEMOSHOW_ITEM_CC(item, fillpath) = NULL;
 	NEMOSHOW_ITEM_CC(item, fill) = new SkPaint;
 	NEMOSHOW_ITEM_CC(item, fill)->setStyle(SkPaint::kFill_Style);
+	NEMOSHOW_ITEM_CC(item, fill)->setStrokeCap(SkPaint::kRound_Cap);
+	NEMOSHOW_ITEM_CC(item, fill)->setStrokeJoin(SkPaint::kRound_Join);
 	NEMOSHOW_ITEM_CC(item, fill)->setAntiAlias(true);
 	NEMOSHOW_ITEM_CC(item, stroke) = new SkPaint;
 	NEMOSHOW_ITEM_CC(item, stroke)->setStyle(SkPaint::kStroke_Style);
+	NEMOSHOW_ITEM_CC(item, stroke)->setStrokeCap(SkPaint::kRound_Cap);
+	NEMOSHOW_ITEM_CC(item, stroke)->setStrokeJoin(SkPaint::kRound_Join);
 	NEMOSHOW_ITEM_CC(item, stroke)->setAntiAlias(true);
 	NEMOSHOW_ITEM_CC(item, points) = NULL;
 	NEMOSHOW_ITEM_CC(item, textbox) = NULL;
@@ -835,6 +839,32 @@ int nemoshow_item_update_with_canvas(struct showone *one)
 	nemoshow_canvas_damage_one(item->canvas, one);
 
 	return 0;
+}
+
+void nemoshow_item_set_stroke_cap(struct showone *one, int cap)
+{
+	const SkPaint::Cap caps[] = {
+		SkPaint::kButt_Cap,
+		SkPaint::kRound_Cap,
+		SkPaint::kSquare_Cap
+	};
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	NEMOSHOW_ITEM_CC(item, stroke)->setStrokeCap(caps[cap]);
+	NEMOSHOW_ITEM_CC(item, fill)->setStrokeCap(caps[cap]);
+}
+
+void nemoshow_item_set_stroke_join(struct showone *one, int join)
+{
+	const SkPaint::Join joins[] = {
+		SkPaint::kMiter_Join,
+		SkPaint::kRound_Join,
+		SkPaint::kBevel_Join
+	};
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	NEMOSHOW_ITEM_CC(item, stroke)->setStrokeJoin(joins[join]);
+	NEMOSHOW_ITEM_CC(item, fill)->setStrokeJoin(joins[join]);
 }
 
 void nemoshow_item_set_matrix(struct showone *one, double m[9])

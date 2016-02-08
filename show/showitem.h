@@ -47,6 +47,20 @@ typedef enum {
 } NemoShowItemTransform;
 
 typedef enum {
+	NEMOSHOW_ITEM_BUTT_CAP = 0,
+	NEMOSHOW_ITEM_ROUND_CAP = 1,
+	NEMOSHOW_ITEM_SQUARE_CAP = 2,
+	NEMOSHOW_ITEM_LAST_CAP
+} NemoShowItemCapType;
+
+typedef enum {
+	NEMOSHOW_ITEM_MITER_JOIN = 0,
+	NEMOSHOW_ITEM_ROUND_JOIN = 1,
+	NEMOSHOW_ITEM_BEVEL_JOIN = 2,
+	NEMOSHOW_ITEM_LAST_JOIN
+} NemoShowItemJoinType;
+
+typedef enum {
 	NEMOSHOW_NORMAL_PICK = 0,
 	NEMOSHOW_PATH_PICK = 1,
 	NEMOSHOW_LAST_PICK
@@ -121,6 +135,9 @@ extern int nemoshow_item_update(struct showone *one);
 extern int nemoshow_item_update_with_canvas(struct showone *one);
 
 extern void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one);
+
+extern void nemoshow_item_set_stroke_cap(struct showone *one, int cap);
+extern void nemoshow_item_set_stroke_join(struct showone *one, int join);
 
 extern void nemoshow_item_set_matrix(struct showone *one, double m[9]);
 extern void nemoshow_item_set_tsr(struct showone *one);
