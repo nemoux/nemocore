@@ -14,6 +14,8 @@ NEMO_BEGIN_EXTERN_C
 #include <nemolist.h>
 #include <nemolistener.h>
 
+#define NEMOSHOW_ITEM_PATH_DASH_MAX			(4)
+
 typedef enum {
 	NEMOSHOW_NONE_ITEM = 0,
 	NEMOSHOW_LINE_ITEM = 1,
@@ -79,6 +81,9 @@ struct showitem {
 	double pathsegment;
 	double pathdeviation;
 	uint32_t pathseed;
+
+	double pathdashes[NEMOSHOW_ITEM_PATH_DASH_MAX];
+	int pathdashcount;
 
 	double fontsize;
 	double fontascent;
@@ -146,6 +151,7 @@ extern void nemoshow_item_path_scale(struct showone *one, double sx, double sy);
 extern void nemoshow_item_path_rotate(struct showone *one, double ro);
 
 extern void nemoshow_item_path_set_discrete_effect(struct showone *one, double segment, double deviation, uint32_t seed);
+extern void nemoshow_item_path_set_dash_effect(struct showone *one, double *dashes, int dashcount);
 
 extern int nemoshow_item_path_contains_point(struct showone *one, double x, double y);
 

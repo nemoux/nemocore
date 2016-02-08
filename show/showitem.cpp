@@ -122,6 +122,11 @@ struct showone *nemoshow_item_create(int type)
 	nemoobject_set_reserved(&one->object, "pathdeviation", &item->pathdeviation, sizeof(double));
 	nemoobject_set_reserved(&one->object, "pathseed", &item->pathseed, sizeof(uint32_t));
 
+	nemoobject_set_reserved(&one->object, "pathdashes0", &item->pathdashes[0], sizeof(double));
+	nemoobject_set_reserved(&one->object, "pathdashes1", &item->pathdashes[1], sizeof(double));
+	nemoobject_set_reserved(&one->object, "pathdashes2", &item->pathdashes[2], sizeof(double));
+	nemoobject_set_reserved(&one->object, "pathdashes3", &item->pathdashes[3], sizeof(double));
+
 	nemoobject_set_reserved(&one->object, "alpha", &item->alpha, sizeof(double));
 
 	if (one->sub == NEMOSHOW_RING_ITEM) {
@@ -496,6 +501,24 @@ static inline void nemoshow_item_update_path(struct nemoshow *show, struct showo
 			SkPathEffect *effect;
 
 			effect = SkDiscretePathEffect::Create(item->pathsegment, item->pathdeviation, item->pathseed);
+			if (effect != NULL) {
+				NEMOSHOW_ITEM_CC(item, stroke)->setPathEffect(effect);
+				NEMOSHOW_ITEM_CC(item, fill)->setPathEffect(effect);
+				effect->unref();
+			}
+
+			one->dirty |= NEMOSHOW_SHAPE_DIRTY;
+		}
+
+		if (item->pathdashcount > 0) {
+			SkPathEffect *effect;
+			SkScalar dashes[NEMOSHOW_ITEM_PATH_DASH_MAX];
+			int i;
+
+			for (i = 0; i < item->pathdashcount; i++)
+				dashes[i] = item->pathdashes[i];
+
+			effect = SkDashPathEffect::Create(dashes, item->pathdashcount, 0);
 			if (effect != NULL) {
 				NEMOSHOW_ITEM_CC(item, stroke)->setPathEffect(effect);
 				NEMOSHOW_ITEM_CC(item, fill)->setPathEffect(effect);
@@ -1219,6 +1242,22 @@ void nemoshow_item_path_set_discrete_effect(struct showone *one, double segment,
 	item->pathseed = seed;
 
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
+}
+
+void nemoshow_item_path_set_dash_effect(struct showone *one, double *dashes, int dashcount)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+	int i;
+
+	item->pathdashcount = MIN(NEMOSHOW_ITEM_PATH_DASH_MAX, dashcount);
+
+	if (dashes != NULL) {
+		for (i = 0; i < item->pathdashcount; i++)
+			item->pathdashes[i] = dashes[i];
+	} else {
+		for (i = 0; i < item->pathdashcount; i++)
+			item->pathdashes[i] = 0.0f;
+	}
 }
 
 int nemoshow_item_path_contains_point(struct showone *one, double x, double y)

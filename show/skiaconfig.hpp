@@ -32,6 +32,7 @@
 
 #include <SkPathEffect.h>
 #include <SkDiscretePathEffect.h>
+#include <SkDashPathEffect.h>
 
 #include <SkGeometry.h>
 
