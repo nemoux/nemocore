@@ -64,3 +64,40 @@ void nemoback_atom_prepare_shader(struct atomback *atom, GLuint program)
 	atom->umatrix = glGetUniformLocation(atom->program, "matrix");
 	atom->ucolor = glGetUniformLocation(atom->program, "color");
 }
+
+void nemoback_atom_create_buffer(struct atomback *atom)
+{
+	glGenVertexArrays(1, &atom->varray);
+	glGenBuffers(1, &atom->vbuffer);
+	glGenBuffers(1, &atom->vindex);
+}
+
+void nemoback_atom_prepare_buffer(struct atomback *atom, GLenum mode, float *buffers, int elements)
+{
+	glBindVertexArray(atom->varray);
+
+	glBindBuffer(GL_ARRAY_BUFFER, atom->vbuffer);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void *)0);
+	glEnableVertexAttribArray(0);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * elements, buffers, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	glBindVertexArray(0);
+
+	atom->mode = mode;
+	atom->elements = elements / 3;
+}
+
+void nemoback_atom_prepare_index(struct atomback *atom, GLenum mode, uint32_t *buffers, int elements)
+{
+	glBindVertexArray(atom->varray);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, atom->vindex);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * elements, buffers, GL_STATIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	glBindVertexArray(0);
+
+	atom->mode = mode;
+	atom->elements = elements / 3;
+}

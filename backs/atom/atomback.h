@@ -37,6 +37,12 @@ struct atomback {
 	GLuint ucolor;
 	struct nemomatrix matrix;
 
+	GLuint varray;
+	GLuint vbuffer;
+	GLuint vindex;
+	GLenum mode;
+	int elements;
+
 	int is_sleeping;
 };
 

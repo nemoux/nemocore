@@ -13,6 +13,10 @@ extern const char *simple_fragment_shader;
 extern GLuint nemoback_atom_create_shader(const char *fshader, const char *vshader);
 extern void nemoback_atom_prepare_shader(struct atomback *atom, GLuint program);
 
+extern void nemoback_atom_create_buffer(struct atomback *atom);
+extern void nemoback_atom_prepare_buffer(struct atomback *atom, GLenum mode, float *buffers, int elements);
+extern void nemoback_atom_prepare_index(struct atomback *atom, GLenum mode, uint32_t *buffers, int elements);
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

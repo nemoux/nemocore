@@ -22,20 +22,24 @@ static void nemoback_atom_dispatch_show_render_canvas(struct nemoshow *show, str
 	struct atomback *atom = (struct atomback *)nemoshow_get_userdata(show);
 	GLfloat color[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
-	glUseProgram(atom->program);
-
 	glBindFramebuffer(GL_FRAMEBUFFER, atom->fbo);
 
 	glViewport(0, 0,
 			nemoshow_canvas_get_viewport_width(atom->canvas0),
 			nemoshow_canvas_get_viewport_height(atom->canvas0));
 
-	glClearColor(0.0f, 0.3f, 0.0f, 0.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClearDepth(0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	glUseProgram(atom->program);
+
 	glUniformMatrix4fv(atom->umatrix, 1, GL_FALSE, (GLfloat *)atom->matrix.d);
 	glUniform4fv(atom->ucolor, 1, color);
+
+	glBindVertexArray(atom->varray);
+	glDrawArrays(atom->mode, 0, atom->elements);
+	glBindVertexArray(0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
@@ -129,7 +133,6 @@ int main(int argc, char *argv[])
 	atom->aspect = (double)height / (double)width;
 
 	nemomatrix_init_identity(&atom->matrix);
-	nemomatrix_scale_xyz(&atom->matrix, atom->aspect, -1.0f, atom->aspect * -1.0f);
 
 	atom->tool = tool = nemotool_create();
 	if (tool == NULL)
@@ -200,8 +203,20 @@ int main(int argc, char *argv[])
 	nemoshow_attach_one(show, blur);
 	nemoshow_filter_set_blur(blur, "high", "solid", 5.0f);
 
-	atom->program = nemoback_atom_create_shader(simple_fragment_shader, simple_vertex_shader);
-	nemoback_atom_prepare_shader(atom, atom->program);
+	nemoback_atom_prepare_shader(atom,
+			nemoback_atom_create_shader(simple_fragment_shader, simple_vertex_shader));
+
+	float vertices[] = {
+		-0.5f, -0.5f, 0.0f,
+		0.5f, -0.5f, 0.0f,
+		0.5f, 0.5f, 0.0f,
+		-0.5f, -0.5f, 0.0f,
+		0.5f, 0.5f, 0.0f,
+		-0.5f, 0.5f, 0.0f
+	};
+
+	nemoback_atom_create_buffer(atom);
+	nemoback_atom_prepare_buffer(atom, GL_TRIANGLES, vertices, sizeof(vertices) / sizeof(vertices[0]));
 
 	nemoshow_dispatch_frame(show);
 
