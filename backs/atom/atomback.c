@@ -34,8 +34,12 @@ static void nemoback_atom_dispatch_show_render_canvas(struct nemoshow *show, str
 
 	glUseProgram(atom->program);
 
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_texture(atom->canvas1));
+
 	glUniformMatrix4fv(atom->umatrix, 1, GL_FALSE, (GLfloat *)atom->matrix.d);
 	glUniform4fv(atom->ucolor, 1, color);
+	glUniform1i(atom->utex0, 0);
 
 	glBindVertexArray(atom->varray);
 	glDrawArrays(atom->mode, 0, atom->elements);
@@ -162,20 +166,20 @@ int main(int argc, char *argv[])
 	nemoshow_attach_one(show, canvas);
 	nemoshow_one_attach(scene, canvas);
 
+	atom->canvas1 = canvas = nemoshow_canvas_create();
+	nemoshow_canvas_set_width(canvas, width);
+	nemoshow_canvas_set_height(canvas, height);
+	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
+	nemoshow_canvas_set_event(canvas, 1);
+	nemoshow_attach_one(show, canvas);
+	nemoshow_one_attach(scene, canvas);
+
 	atom->canvas0 = canvas = nemoshow_canvas_create();
 	nemoshow_canvas_set_width(canvas, width);
 	nemoshow_canvas_set_height(canvas, height);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_OPENGL_TYPE);
 	nemoshow_canvas_set_dispatch_render(canvas, nemoback_atom_dispatch_show_render_canvas);
 	nemoshow_canvas_set_dispatch_resize(canvas, nemoback_atom_dispatch_show_resize_canvas);
-	nemoshow_attach_one(show, canvas);
-	nemoshow_one_attach(scene, canvas);
-
-	atom->canvas1 = canvas = nemoshow_canvas_create();
-	nemoshow_canvas_set_width(canvas, width);
-	nemoshow_canvas_set_height(canvas, height);
-	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
-	nemoshow_canvas_set_event(canvas, 1);
 	nemoshow_attach_one(show, canvas);
 	nemoshow_one_attach(scene, canvas);
 
@@ -203,16 +207,27 @@ int main(int argc, char *argv[])
 	nemoshow_attach_one(show, blur);
 	nemoshow_filter_set_blur(blur, "high", "solid", 5.0f);
 
+	one = nemoshow_item_create(NEMOSHOW_RRECT_ITEM);
+	nemoshow_attach_one(atom->show, one);
+	nemoshow_one_attach(atom->canvas1, one);
+	nemoshow_item_set_x(one, 0.0f);
+	nemoshow_item_set_y(one, 0.0f);
+	nemoshow_item_set_width(one, width);
+	nemoshow_item_set_height(one, height);
+	nemoshow_item_set_rx(one, 10.0f);
+	nemoshow_item_set_ry(one, 10.0f);
+	nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
+
 	nemoback_atom_prepare_shader(atom,
-			nemoback_atom_create_shader(simple_fragment_shader, simple_vertex_shader));
+			nemoback_atom_create_shader(texture_fragment_shader, simple_vertex_shader));
 
 	float vertices[] = {
-		-0.5f, -0.5f, 0.0f,
-		0.5f, -0.5f, 0.0f,
-		0.5f, 0.5f, 0.0f,
-		-0.5f, -0.5f, 0.0f,
-		0.5f, 0.5f, 0.0f,
-		-0.5f, 0.5f, 0.0f
+		-0.5f, -0.5f, 0.0f, 0.0f, 1.0f,
+		0.5f, -0.5f, 0.0f, 1.0f, 1.0f,
+		0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
+		-0.5f, -0.5f, 0.0f, 0.0f, 1.0f,
+		0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
+		-0.5f, 0.5f, 0.0f, 0.0f, 0.0f,
 	};
 
 	nemoback_atom_create_buffer(atom);

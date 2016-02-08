@@ -12,8 +12,11 @@
 const char *simple_vertex_shader =
 "uniform mat4 matrix;\n"
 "attribute vec3 vertex;\n"
+"attribute vec2 texcoord;\n"
+"varying vec2 v_texcoord;\n"
 "void main() {\n"
 "  gl_Position = matrix * vec4(vertex, 1.0);\n"
+"  v_texcoord = texcoord;\n"
 "}\n";
 
 const char *simple_fragment_shader =
@@ -21,6 +24,15 @@ const char *simple_fragment_shader =
 "uniform vec4 color;\n"
 "void main() {\n"
 "  gl_FragColor = color;\n"
+"}\n";
+
+const char *texture_fragment_shader =
+"precision mediump float;\n"
+"varying vec2 v_texcoord;\n"
+"uniform sampler2D tex0;\n"
+"uniform vec4 color;\n"
+"void main() {\n"
+"  gl_FragColor = color * texture2D(tex0, v_texcoord);\n"
 "}\n";
 
 GLuint nemoback_atom_create_shader(const char *fshader, const char *vshader)
@@ -49,6 +61,7 @@ GLuint nemoback_atom_create_shader(const char *fshader, const char *vshader)
 	glUseProgram(program);
 
 	glBindAttribLocation(program, 0, "vertex");
+	glBindAttribLocation(program, 1, "texcoord");
 	glLinkProgram(program);
 
 	return program;
@@ -63,6 +76,8 @@ void nemoback_atom_prepare_shader(struct atomback *atom, GLuint program)
 
 	atom->umatrix = glGetUniformLocation(atom->program, "matrix");
 	atom->ucolor = glGetUniformLocation(atom->program, "color");
+
+	atom->utex0 = glGetUniformLocation(atom->program, "tex0");
 }
 
 void nemoback_atom_create_buffer(struct atomback *atom)
@@ -77,15 +92,17 @@ void nemoback_atom_prepare_buffer(struct atomback *atom, GLenum mode, float *buf
 	glBindVertexArray(atom->varray);
 
 	glBindBuffer(GL_ARRAY_BUFFER, atom->vbuffer);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void *)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void *)0);
 	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void *)sizeof(GLfloat[3]));
+	glEnableVertexAttribArray(1);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * elements, buffers, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	glBindVertexArray(0);
 
 	atom->mode = mode;
-	atom->elements = elements / 3;
+	atom->elements = elements / 5;
 }
 
 void nemoback_atom_prepare_index(struct atomback *atom, GLenum mode, uint32_t *buffers, int elements)
@@ -99,5 +116,5 @@ void nemoback_atom_prepare_index(struct atomback *atom, GLenum mode, uint32_t *b
 	glBindVertexArray(0);
 
 	atom->mode = mode;
-	atom->elements = elements / 3;
+	atom->elements = elements / 5;
 }

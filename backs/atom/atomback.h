@@ -35,6 +35,7 @@ struct atomback {
 	GLuint program;
 	GLuint umatrix;
 	GLuint ucolor;
+	GLuint utex0;
 	struct nemomatrix matrix;
 
 	GLuint varray;
