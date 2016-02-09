@@ -150,7 +150,7 @@ static void nemotouch_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t 
 	struct talenode *node = touch->node;
 
 	if (secs == 0 && nsecs == 0) {
-		nemocanvas_feedback(canvas);
+		nemocanvas_dispatch_feedback(canvas);
 	}
 
 	if (touch->is_calibration == 0) {

@@ -207,11 +207,11 @@ static void nemoback_plex_dispatch_canvas_frame(struct nemocanvas *canvas, uint6
 	if (secs == 0 && nsecs == 0) {
 		plex->msecs = msecs = time_current_msecs();
 
-		nemocanvas_feedback(canvas);
+		nemocanvas_dispatch_feedback(canvas);
 	} else {
 		msecs = time_current_msecs();
 
-		nemocanvas_feedback(canvas);
+		nemocanvas_dispatch_feedback(canvas);
 	}
 
 	nemoback_plex_render_one(plex, nemotale_node_get_pixman(node), (double)(msecs - plex->msecs) / 100000.0f);

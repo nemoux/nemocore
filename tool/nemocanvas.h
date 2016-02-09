@@ -83,7 +83,6 @@ extern void nemocanvas_destroy(struct nemocanvas *canvas);
 extern int nemocanvas_buffer(struct nemocanvas *canvas);
 extern void nemocanvas_damage(struct nemocanvas *canvas, int32_t x, int32_t y, int32_t width, int32_t height);
 extern void nemocanvas_damage_region(struct nemocanvas *canvas, pixman_region32_t *region);
-extern void nemocanvas_feedback(struct nemocanvas *canvas);
 extern void nemocanvas_commit(struct nemocanvas *canvas);
 extern void nemocanvas_opaque(struct nemocanvas *canvas, int32_t x, int32_t y, int32_t width, int32_t height);
 
@@ -128,6 +127,9 @@ extern void nemocanvas_set_dispatch_screen(struct nemocanvas *canvas, nemocanvas
 extern void nemocanvas_set_dispatch_destroy(struct nemocanvas *canvas, nemocanvas_dispatch_destroy_t dispatch);
 
 extern void nemocanvas_set_framerate(struct nemocanvas *canvas, uint32_t framerate);
+
+extern void nemocanvas_dispatch_feedback(struct nemocanvas *canvas);
+extern void nemocanvas_terminate_feedback(struct nemocanvas *canvas);
 
 extern void nemocanvas_dispatch_frame(struct nemocanvas *canvas);
 extern void nemocanvas_dispatch_frame_force(struct nemocanvas *canvas);

@@ -591,6 +591,8 @@ static inline void nemoshow_render_canvas(struct nemoshow *show, struct showone 
 	struct showcref *ref;
 
 	if (canvas->needs_redraw != 0) {
+		canvas->needs_redraw = 0;
+
 		nemolist_for_each(ref, &canvas->reference_list, link) {
 			nemoshow_render_canvas(show, ref->src);
 		}
@@ -607,8 +609,6 @@ static inline void nemoshow_render_canvas(struct nemoshow *show, struct showone 
 
 		if (canvas->dispatch_render != NULL)
 			canvas->dispatch_render(show, one);
-
-		canvas->needs_redraw = 0;
 	}
 }
 

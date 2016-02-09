@@ -119,9 +119,9 @@ static void nemoback_mosi_dispatch_canvas_frame(struct nemocanvas *canvas, uint6
 	int done;
 
 	if (secs == 0 && nsecs == 0) {
-		nemocanvas_feedback(canvas);
+		nemocanvas_dispatch_feedback(canvas);
 	} else {
-		nemocanvas_feedback(canvas);
+		nemocanvas_dispatch_feedback(canvas);
 	}
 
 	done = nemomosi_update(mosi->mosi, msecs);

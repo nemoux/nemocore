@@ -46,6 +46,9 @@ static void nemoback_atom_dispatch_show_render_canvas(struct nemoshow *show, str
 	glBindVertexArray(0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	nemoshow_canvas_damage_all(one);
+	nemoshow_dispatch_feedback(show);
 }
 
 static void nemoback_atom_dispatch_show_resize_canvas(struct nemoshow *show, struct showone *one, int32_t width, int32_t height)

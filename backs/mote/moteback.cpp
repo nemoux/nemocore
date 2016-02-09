@@ -293,9 +293,9 @@ static void nemoback_mote_dispatch_canvas_frame(struct nemocanvas *canvas, uint6
 		return;
 
 	if (secs == 0 && nsecs == 0) {
-		nemocanvas_feedback(canvas);
+		nemocanvas_dispatch_feedback(canvas);
 	} else {
-		nemocanvas_feedback(canvas);
+		nemocanvas_dispatch_feedback(canvas);
 
 		if (mote->secs == 0.0f)
 			nemoback_mote_update_one(mote, 0.0f);

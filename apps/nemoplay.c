@@ -227,7 +227,7 @@ static void nemoplay_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 			nemogst_sink_set_property(context->gst, "frame-done", 1);
 		}
 
-		nemocanvas_feedback(context->canvas);
+		nemocanvas_dispatch_feedback(context->canvas);
 	}
 
 	nemotale_composite_egl(context->tale, NULL);

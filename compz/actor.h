@@ -103,8 +103,8 @@ extern void nemoactor_dispatch_fullscreen(struct nemoactor *actor, int active, i
 extern void nemoactor_dispatch_frame(struct nemoactor *actor);
 extern void nemoactor_dispatch_destroy(struct nemoactor *actor);
 
-extern void nemoactor_feedback(struct nemoactor *actor);
-extern void nemoactor_feedback_done(struct nemoactor *actor);
+extern void nemoactor_dispatch_feedback(struct nemoactor *actor);
+extern void nemoactor_terminate_feedback(struct nemoactor *actor);
 
 extern void nemoactor_set_min_size(struct nemoactor *actor, uint32_t width, uint32_t height);
 extern void nemoactor_set_max_size(struct nemoactor *actor, uint32_t width, uint32_t height);

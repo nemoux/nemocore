@@ -635,7 +635,7 @@ static const struct presentation_feedback_listener presentation_feedback_listene
 	presentation_feedback_discarded
 };
 
-void nemocanvas_feedback(struct nemocanvas *canvas)
+void nemocanvas_dispatch_feedback(struct nemocanvas *canvas)
 {
 	if (canvas->framerate == 0) {
 		if (canvas->feedback != NULL) {
@@ -647,6 +647,23 @@ void nemocanvas_feedback(struct nemocanvas *canvas)
 	} else {
 		canvas->framefeed = 1;
 		nemotimer_set_timeout(canvas->frametimer, 1000 / canvas->framerate);
+	}
+}
+
+void nemocanvas_terminate_feedback(struct nemocanvas *canvas)
+{
+	if (canvas->framerate == 0) {
+		if (canvas->feedback != NULL) {
+			presentation_feedback_destroy(canvas->feedback);
+			
+			canvas->feedback = NULL;
+		}
+	} else {
+		if (canvas->framefeed != 0) {
+			nemotimer_set_timeout(canvas->frametimer, 0);
+			
+			canvas->framefeed = 0;
+		}
 	}
 }
 

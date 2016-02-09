@@ -347,7 +347,7 @@ static void nemomesh_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 	struct meshcontext *context = (struct meshcontext *)nemotale_get_userdata(tale);
 
 	if (secs == 0 && nsecs == 0) {
-		nemocanvas_feedback(canvas);
+		nemocanvas_dispatch_feedback(canvas);
 	}
 
 	nemomesh_update_transform(context->mesh);

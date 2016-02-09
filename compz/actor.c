@@ -455,7 +455,7 @@ void nemoactor_dispatch_destroy(struct nemoactor *actor)
 		actor->dispatch_destroy(actor);
 }
 
-void nemoactor_feedback(struct nemoactor *actor)
+void nemoactor_dispatch_feedback(struct nemoactor *actor)
 {
 	if (actor->framerate == 0) {
 		if (wl_list_empty(&actor->frame_link)) {
@@ -471,7 +471,7 @@ void nemoactor_feedback(struct nemoactor *actor)
 	}
 }
 
-void nemoactor_feedback_done(struct nemoactor *actor)
+void nemoactor_terminate_feedback(struct nemoactor *actor)
 {
 	wl_list_remove(&actor->frame_link);
 	wl_list_init(&actor->frame_link);

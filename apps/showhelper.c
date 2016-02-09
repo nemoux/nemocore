@@ -39,12 +39,12 @@ static void nemoshow_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
 
 	if (secs == 0 && nsecs == 0) {
-		nemocanvas_feedback(canvas);
+		nemocanvas_dispatch_feedback(canvas);
 	} else if (nemoshow_has_transition(show) != 0) {
 		nemoshow_dispatch_transition(show, secs * 1000 + nsecs / 1000000);
 		nemoshow_destroy_transition(show);
 
-		nemocanvas_feedback(canvas);
+		nemocanvas_dispatch_feedback(canvas);
 	}
 
 	nemoshow_render_one(show);
@@ -216,4 +216,18 @@ void nemoshow_dispatch_frame(struct nemoshow *show)
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 
 	nemocanvas_dispatch_frame(scon->canvas);
+}
+
+void nemoshow_dispatch_feedback(struct nemoshow *show)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+
+	nemocanvas_dispatch_feedback(scon->canvas);
+}
+
+void nemoshow_terminate_feedback(struct nemoshow *show)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+
+	nemocanvas_terminate_feedback(scon->canvas);
 }
