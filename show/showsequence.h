@@ -29,6 +29,7 @@ struct showset {
 	double sattrs[NEMOSHOW_SEQUENCE_SET_ATTR_MAX];
 	double eattrs[NEMOSHOW_SEQUENCE_SET_ATTR_MAX];
 	double fattrs[NEMOSHOW_SEQUENCE_SET_ATTR_MAX];
+	uint32_t offsets[NEMOSHOW_SEQUENCE_SET_ATTR_MAX];
 	uint32_t dirties[NEMOSHOW_SEQUENCE_SET_ATTR_MAX];
 	int nattrs;
 };
@@ -72,12 +73,12 @@ extern int nemoshow_sequence_set_timing(struct showone *one, double t);
 extern struct showone *nemoshow_sequence_create_set(void);
 extern void nemoshow_sequence_destroy_set(struct showone *one);
 
-extern int nemoshow_sequence_arrange_set(struct showone *one);
 extern int nemoshow_sequence_update_set(struct showone *one);
 
 extern int nemoshow_sequence_set_source(struct showone *one, struct showone *src);
 extern int nemoshow_sequence_set_attr(struct showone *one, const char *name, const char *value);
 extern int nemoshow_sequence_set_dattr(struct showone *one, const char *name, double value, uint32_t dirty);
+extern int nemoshow_sequence_set_dattr_offset(struct showone *one, const char *name, int offset, double value, uint32_t dirty);
 extern int nemoshow_sequence_set_cattr(struct showone *one, const char *name, double r, double g, double b, double a, uint32_t dirty);
 
 extern int nemoshow_sequence_fix_dattr(struct showone *one, int index, double value);

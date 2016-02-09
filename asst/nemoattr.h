@@ -58,6 +58,16 @@ static inline uint32_t nemoattr_geti(struct nemoattr *attr)
 	return *(uint32_t *)(attr->p);
 }
 
+static inline void nemoattr_seti_offset(struct nemoattr *attr, int offset, uint32_t i)
+{
+	((uint32_t *)(attr->p))[offset] = i;
+}
+
+static inline uint32_t nemoattr_geti_offset(struct nemoattr *attr, int offset)
+{
+	return ((uint32_t *)(attr->p))[offset];
+}
+
 static inline void nemoattr_setl(struct nemoattr *attr, uint64_t l)
 {
 	if (attr->p == NULL)
@@ -69,6 +79,16 @@ static inline void nemoattr_setl(struct nemoattr *attr, uint64_t l)
 static inline uint64_t nemoattr_getl(struct nemoattr *attr)
 {
 	return *(uint64_t *)(attr->p);
+}
+
+static inline void nemoattr_setl_offset(struct nemoattr *attr, int offset, uint64_t l)
+{
+	((uint64_t *)(attr->p))[offset] = l;
+}
+
+static inline uint64_t nemoattr_getl_offset(struct nemoattr *attr, int offset)
+{
+	return ((uint64_t *)(attr->p))[offset];
 }
 
 static inline void nemoattr_setf(struct nemoattr *attr, float f)
@@ -84,6 +104,16 @@ static inline float nemoattr_getf(struct nemoattr *attr)
 	return *(float *)(attr->p);
 }
 
+static inline void nemoattr_setf_offset(struct nemoattr *attr, int offset, float f)
+{
+	((float *)(attr->p))[offset] = f;
+}
+
+static inline float nemoattr_getf_offset(struct nemoattr *attr, int offset)
+{
+	return ((float *)(attr->p))[offset];
+}
+
 static inline void nemoattr_setd(struct nemoattr *attr, double d)
 {
 	if (attr->p == NULL)
@@ -95,6 +125,16 @@ static inline void nemoattr_setd(struct nemoattr *attr, double d)
 static inline double nemoattr_getd(struct nemoattr *attr)
 {
 	return *(double *)(attr->p);
+}
+
+static inline void nemoattr_setd_offset(struct nemoattr *attr, int offset, float d)
+{
+	((double *)(attr->p))[offset] = d;
+}
+
+static inline double nemoattr_getd_offset(struct nemoattr *attr, int offset)
+{
+	return ((double *)(attr->p))[offset];
 }
 
 static inline void nemoattr_sets(struct nemoattr *attr, const char *s, int size)
@@ -224,6 +264,28 @@ static inline uint32_t nemoobject_geti(struct nemoobject *object, const char *na
 	return 0;
 }
 
+static inline void nemoobject_seti_offset(struct nemoobject *object, const char *name, int offset, uint32_t i)
+{
+	struct nemoattr *attr;
+
+	attr = nemoobject_get(object, name);
+	if (attr != NULL) {
+		((uint32_t *)(attr->p))[offset] = i;
+	}
+}
+
+static inline uint32_t nemoobject_geti_offset(struct nemoobject *object, const char *name, int offset)
+{
+	struct nemoattr *attr;
+
+	attr = nemoobject_get(object, name);
+	if (attr != NULL) {
+		return ((uint32_t *)(attr->p))[offset];
+	}
+
+	return 0;
+}
+
 static inline void nemoobject_setl(struct nemoobject *object, const char *name, uint64_t l)
 {
 	struct nemoattr *attr;
@@ -248,6 +310,28 @@ static inline uint64_t nemoobject_getl(struct nemoobject *object, const char *na
 	attr = nemoobject_get(object, name);
 	if (attr != NULL) {
 		return *(uint64_t *)(attr->p);
+	}
+
+	return 0;
+}
+
+static inline void nemoobject_setl_offset(struct nemoobject *object, const char *name, int offset, uint64_t l)
+{
+	struct nemoattr *attr;
+
+	attr = nemoobject_get(object, name);
+	if (attr != NULL) {
+		((uint64_t *)(attr->p))[offset] = l;
+	}
+}
+
+static inline uint64_t nemoobject_getl_offset(struct nemoobject *object, const char *name, int offset)
+{
+	struct nemoattr *attr;
+
+	attr = nemoobject_get(object, name);
+	if (attr != NULL) {
+		return ((uint64_t *)(attr->p))[offset];
 	}
 
 	return 0;
@@ -282,6 +366,28 @@ static inline float nemoobject_getf(struct nemoobject *object, const char *name)
 	return 0.0f;
 }
 
+static inline void nemoobject_setf_offset(struct nemoobject *object, const char *name, int offset, float f)
+{
+	struct nemoattr *attr;
+
+	attr = nemoobject_get(object, name);
+	if (attr != NULL) {
+		((float *)(attr->p))[offset] = f;
+	}
+}
+
+static inline float nemoobject_getf_offset(struct nemoobject *object, const char *name, int offset)
+{
+	struct nemoattr *attr;
+
+	attr = nemoobject_get(object, name);
+	if (attr != NULL) {
+		return ((float *)(attr->p))[offset];
+	}
+
+	return 0.0f;
+}
+
 static inline void nemoobject_setd(struct nemoobject *object, const char *name, double d)
 {
 	struct nemoattr *attr;
@@ -306,6 +412,28 @@ static inline double nemoobject_getd(struct nemoobject *object, const char *name
 	attr = nemoobject_get(object, name);
 	if (attr != NULL) {
 		return *(double *)(attr->p);
+	}
+
+	return 0.0f;
+}
+
+static inline void nemoobject_setd_offset(struct nemoobject *object, const char *name, int offset, double d)
+{
+	struct nemoattr *attr;
+
+	attr = nemoobject_get(object, name);
+	if (attr != NULL) {
+		((double *)(attr->p))[offset] = d;
+	}
+}
+
+static inline double nemoobject_getd_offset(struct nemoobject *object, const char *name, int offset)
+{
+	struct nemoattr *attr;
+
+	attr = nemoobject_get(object, name);
+	if (attr != NULL) {
+		return ((double *)(attr->p))[offset];
 	}
 
 	return 0.0f;
@@ -397,6 +525,20 @@ static inline uint32_t nemoobject_igeti(struct nemoobject *object, int index)
 	return *(uint32_t *)(attr->p);
 }
 
+static inline void nemoobject_iseti_offset(struct nemoobject *object, int index, int offset, uint32_t i)
+{
+	struct nemoattr *attr = nemoobject_iget(object, index);
+
+	((uint32_t *)(attr->p))[offset] = i;
+}
+
+static inline uint32_t nemoobject_igeti_offset(struct nemoobject *object, int index, int offset)
+{
+	struct nemoattr *attr = nemoobject_iget(object, index);
+
+	return ((uint32_t *)(attr->p))[offset];
+}
+
 static inline void nemoobject_isetl(struct nemoobject *object, int index, uint64_t l)
 {
 	struct nemoattr *attr = nemoobject_iget(object, index);
@@ -409,6 +551,20 @@ static inline uint64_t nemoobject_igetl(struct nemoobject *object, int index)
 	struct nemoattr *attr = nemoobject_iget(object, index);
 
 	return *(uint64_t *)(attr->p);
+}
+
+static inline void nemoobject_isetl_offset(struct nemoobject *object, int index, int offset, uint64_t l)
+{
+	struct nemoattr *attr = nemoobject_iget(object, index);
+
+	((uint64_t *)(attr->p))[offset] = l;
+}
+
+static inline uint64_t nemoobject_igetl_offset(struct nemoobject *object, int index, int offset)
+{
+	struct nemoattr *attr = nemoobject_iget(object, index);
+
+	return ((uint64_t *)(attr->p))[offset];
 }
 
 static inline void nemoobject_isetf(struct nemoobject *object, int index, float f)
@@ -425,6 +581,20 @@ static inline float nemoobject_igetf(struct nemoobject *object, int index)
 	return *(float *)(attr->p);
 }
 
+static inline void nemoobject_isetf_offset(struct nemoobject *object, int index, int offset, float f)
+{
+	struct nemoattr *attr = nemoobject_iget(object, index);
+
+	((float *)(attr->p))[offset] = f;
+}
+
+static inline float nemoobject_igetf_offset(struct nemoobject *object, int index, int offset)
+{
+	struct nemoattr *attr = nemoobject_iget(object, index);
+
+	return ((float *)(attr->p))[offset];
+}
+
 static inline void nemoobject_isetd(struct nemoobject *object, int index, double d)
 {
 	struct nemoattr *attr = nemoobject_iget(object, index);
@@ -437,6 +607,20 @@ static inline double nemoobject_igetd(struct nemoobject *object, int index)
 	struct nemoattr *attr = nemoobject_iget(object, index);
 
 	return *(double *)(attr->p);
+}
+
+static inline void nemoobject_isetd_offset(struct nemoobject *object, int index, int offset, double d)
+{
+	struct nemoattr *attr = nemoobject_iget(object, index);
+
+	((double *)(attr->p))[offset] = d;
+}
+
+static inline double nemoobject_igetd_offset(struct nemoobject *object, int index, int offset)
+{
+	struct nemoattr *attr = nemoobject_iget(object, index);
+
+	return ((double *)(attr->p))[offset];
 }
 
 static inline void nemoobject_isets(struct nemoobject *object, int index, const char *s, int size)

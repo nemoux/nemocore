@@ -510,11 +510,7 @@ void nemoshow_arrange_one(struct nemoshow *show)
 		if (nemoshow_one_has_state(one, NEMOSHOW_ARRANGE_STATE) != 0)
 			continue;
 
-		if (one->type == NEMOSHOW_SET_TYPE) {
-			nemoshow_sequence_arrange_set(one);
-
-			nemoshow_one_set_state(one, NEMOSHOW_ARRANGE_STATE);
-		} else if (one->type == NEMOSHOW_EASE_TYPE) {
+		if (one->type == NEMOSHOW_EASE_TYPE) {
 			nemoshow_ease_arrange(one);
 
 			nemoshow_one_set_state(one, NEMOSHOW_ARRANGE_STATE);

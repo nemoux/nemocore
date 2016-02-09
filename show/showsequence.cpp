@@ -124,89 +124,6 @@ void nemoshow_sequence_destroy_set(struct showone *one)
 	free(set);
 }
 
-int nemoshow_sequence_arrange_set(struct showone *one)
-{
-	struct nemoshow *show = one->show;
-	struct showset *set = NEMOSHOW_SET(one);
-	struct showone *src;
-	struct showprop *prop;
-	struct nemoattr *attr;
-	const char *name;
-	int i, count;
-
-	src = nemoshow_search_one(show, nemoobject_gets(&one->object, "src"));
-	if (src == NULL)
-		return -1;
-	set->src = src;
-
-	count = nemoobject_get_count(&one->object);
-
-	for (i = 0; i < count; i++) {
-		name = nemoobject_get_name(&one->object, i);
-
-		if (strcmp(name, "id") == 0 || strcmp(name, "src") == 0)
-			continue;
-
-		prop = nemoshow_get_property(name);
-		if (prop != NULL) {
-			if (prop->type == NEMOSHOW_DOUBLE_PROP) {
-				attr = nemoobject_get(&src->object, name);
-				if (attr == NULL)
-					continue;
-				set->attrs[set->nattrs] = attr;
-				set->eattrs[set->nattrs] = nemoobject_igetd(&one->object, i);
-				set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
-				set->dirties[set->nattrs] = prop->dirty;
-				set->nattrs++;
-			} else if (prop->type == NEMOSHOW_COLOR_PROP) {
-				char atname[NEMOSHOW_ATTR_NAME_MAX];
-
-				snprintf(atname, NEMOSHOW_ATTR_NAME_MAX, "%s:r", name);
-				attr = nemoobject_get(&src->object, atname);
-				if (attr == NULL)
-					continue;
-				set->attrs[set->nattrs] = attr;
-				set->eattrs[set->nattrs] = nemoobject_getd(&one->object, atname);
-				set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
-				set->dirties[set->nattrs] = prop->dirty;
-				set->nattrs++;
-
-				snprintf(atname, NEMOSHOW_ATTR_NAME_MAX, "%s:g", name);
-				attr = nemoobject_get(&src->object, atname);
-				if (attr == NULL)
-					continue;
-				set->attrs[set->nattrs] = attr;
-				set->eattrs[set->nattrs] = nemoobject_getd(&one->object, atname);
-				set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
-				set->dirties[set->nattrs] = prop->dirty;
-				set->nattrs++;
-
-				snprintf(atname, NEMOSHOW_ATTR_NAME_MAX, "%s:b", name);
-				attr = nemoobject_get(&src->object, atname);
-				if (attr == NULL)
-					continue;
-				set->attrs[set->nattrs] = attr;
-				set->eattrs[set->nattrs] = nemoobject_getd(&one->object, atname);
-				set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
-				set->dirties[set->nattrs] = prop->dirty;
-				set->nattrs++;
-
-				snprintf(atname, NEMOSHOW_ATTR_NAME_MAX, "%s:a", name);
-				attr = nemoobject_get(&src->object, atname);
-				if (attr == NULL)
-					continue;
-				set->attrs[set->nattrs] = attr;
-				set->eattrs[set->nattrs] = nemoobject_getd(&one->object, atname);
-				set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
-				set->dirties[set->nattrs] = prop->dirty;
-				set->nattrs++;
-			}
-		}
-	}
-
-	return 0;
-}
-
 int nemoshow_sequence_update_set(struct showone *one)
 {
 	return 0;
@@ -231,64 +148,44 @@ int nemoshow_sequence_set_attr(struct showone *one, const char *name, const char
 	prop = nemoshow_get_property(name);
 	if (prop != NULL) {
 		if (prop->type == NEMOSHOW_DOUBLE_PROP) {
-			nemoobject_setd(&one->object, name, strtod(value, NULL));
-		} else if (prop->type == NEMOSHOW_INTEGER_PROP) {
-			nemoobject_setd(&one->object, name, strtoul(value, NULL, 10));
-		} else if (prop->type == NEMOSHOW_COLOR_PROP) {
-			uint32_t c = nemoshow_color_parse(value);
-			char attr[NEMOSHOW_ATTR_NAME_MAX];
+			double d = strtod(value, NULL);
 
-			snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:r", name);
-			nemoobject_setd(&one->object, attr, (double)NEMOSHOW_COLOR_UINT32_R(c));
-			snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:g", name);
-			nemoobject_setd(&one->object, attr, (double)NEMOSHOW_COLOR_UINT32_G(c));
-			snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:b", name);
-			nemoobject_setd(&one->object, attr, (double)NEMOSHOW_COLOR_UINT32_B(c));
-			snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:a", name);
-			nemoobject_setd(&one->object, attr, (double)NEMOSHOW_COLOR_UINT32_A(c));
-
-			nemoobject_seti(&one->object, name, 1);
-		}
-
-		if (prop->type == NEMOSHOW_DOUBLE_PROP) {
 			sattr = nemoobject_get(&src->object, name);
 			set->attrs[set->nattrs] = sattr;
-			set->eattrs[set->nattrs] = nemoobject_getd(&one->object, name);
+			set->eattrs[set->nattrs] = d;
 			set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
 			set->dirties[set->nattrs] = prop->dirty;
 			set->nattrs++;
 		} else if (prop->type == NEMOSHOW_COLOR_PROP) {
-			char attr[NEMOSHOW_ATTR_NAME_MAX];
+			uint32_t c = nemoshow_color_parse(value);
 
-			snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:r", name);
-			sattr = nemoobject_get(&src->object, attr);
+			sattr = nemoobject_get(&src->object, name);
+
 			set->attrs[set->nattrs] = sattr;
-			set->eattrs[set->nattrs] = nemoobject_getd(&one->object, attr);
+			set->eattrs[set->nattrs] = (double)NEMOSHOW_COLOR_UINT32_R(c);
 			set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
+			set->offsets[set->nattrs] = NEMOSHOW_ITEM_RED_COLOR;
 			set->dirties[set->nattrs] = prop->dirty;
 			set->nattrs++;
 
-			snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:g", name);
-			sattr = nemoobject_get(&src->object, attr);
 			set->attrs[set->nattrs] = sattr;
-			set->eattrs[set->nattrs] = nemoobject_getd(&one->object, attr);
+			set->eattrs[set->nattrs] = (double)NEMOSHOW_COLOR_UINT32_G(c);
 			set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
+			set->offsets[set->nattrs] = NEMOSHOW_ITEM_GREEN_COLOR;
 			set->dirties[set->nattrs] = prop->dirty;
 			set->nattrs++;
 
-			snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:b", name);
-			sattr = nemoobject_get(&src->object, attr);
 			set->attrs[set->nattrs] = sattr;
-			set->eattrs[set->nattrs] = nemoobject_getd(&one->object, attr);
+			set->eattrs[set->nattrs] = (double)NEMOSHOW_COLOR_UINT32_B(c);
 			set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
+			set->offsets[set->nattrs] = NEMOSHOW_ITEM_BLUE_COLOR;
 			set->dirties[set->nattrs] = prop->dirty;
 			set->nattrs++;
 
-			snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:a", name);
-			sattr = nemoobject_get(&src->object, attr);
 			set->attrs[set->nattrs] = sattr;
-			set->eattrs[set->nattrs] = nemoobject_getd(&one->object, attr);
+			set->eattrs[set->nattrs] = (double)NEMOSHOW_COLOR_UINT32_A(c);
 			set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
+			set->offsets[set->nattrs] = NEMOSHOW_ITEM_ALPHA_COLOR;
 			set->dirties[set->nattrs] = prop->dirty;
 			set->nattrs++;
 		}
@@ -303,12 +200,27 @@ int nemoshow_sequence_set_dattr(struct showone *one, const char *name, double va
 	struct showone *src = set->src;
 	struct nemoattr *sattr;
 
-	nemoobject_setd(&one->object, name, value);
+	sattr = nemoobject_get(&src->object, name);
+	set->attrs[set->nattrs] = sattr;
+	set->eattrs[set->nattrs] = value;
+	set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
+	set->offsets[set->nattrs] = 0;
+	set->dirties[set->nattrs] = dirty;
+
+	return set->nattrs++;
+}
+
+int nemoshow_sequence_set_dattr_offset(struct showone *one, const char *name, int offset, double value, uint32_t dirty)
+{
+	struct showset *set = NEMOSHOW_SET(one);
+	struct showone *src = set->src;
+	struct nemoattr *sattr;
 
 	sattr = nemoobject_get(&src->object, name);
 	set->attrs[set->nattrs] = sattr;
-	set->eattrs[set->nattrs] = nemoobject_getd(&one->object, name);
+	set->eattrs[set->nattrs] = value;
 	set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
+	set->offsets[set->nattrs] = offset;
 	set->dirties[set->nattrs] = dirty;
 
 	return set->nattrs++;
@@ -319,53 +231,38 @@ int nemoshow_sequence_set_cattr(struct showone *one, const char *name, double r,
 	struct showset *set = NEMOSHOW_SET(one);
 	struct showone *src = set->src;
 	struct nemoattr *sattr;
-	char attr[NEMOSHOW_ATTR_NAME_MAX];
-	int index;
 
-	snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:r", name);
-	nemoobject_setd(&one->object, attr, r);
-	snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:g", name);
-	nemoobject_setd(&one->object, attr, g);
-	snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:b", name);
-	nemoobject_setd(&one->object, attr, b);
-	snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:a", name);
-	nemoobject_setd(&one->object, attr, a);
+	sattr = nemoobject_get(&src->object, name);
 
-	nemoobject_seti(&one->object, name, 1);
-
-	snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:r", name);
-	sattr = nemoobject_get(&src->object, attr);
 	set->attrs[set->nattrs] = sattr;
-	set->eattrs[set->nattrs] = nemoobject_getd(&one->object, attr);
+	set->eattrs[set->nattrs] = r;
 	set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
-	set->dirties[set->nattrs] = dirty;
-	index = set->nattrs++;
-
-	snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:g", name);
-	sattr = nemoobject_get(&src->object, attr);
-	set->attrs[set->nattrs] = sattr;
-	set->eattrs[set->nattrs] = nemoobject_getd(&one->object, attr);
-	set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
+	set->offsets[set->nattrs] = NEMOSHOW_ITEM_RED_COLOR;
 	set->dirties[set->nattrs] = dirty;
 	set->nattrs++;
 
-	snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:b", name);
-	sattr = nemoobject_get(&src->object, attr);
 	set->attrs[set->nattrs] = sattr;
-	set->eattrs[set->nattrs] = nemoobject_getd(&one->object, attr);
+	set->eattrs[set->nattrs] = g;
 	set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
+	set->offsets[set->nattrs] = NEMOSHOW_ITEM_GREEN_COLOR;
 	set->dirties[set->nattrs] = dirty;
 	set->nattrs++;
 
-	snprintf(attr, NEMOSHOW_ATTR_NAME_MAX, "%s:a", name);
-	sattr = nemoobject_get(&src->object, attr);
 	set->attrs[set->nattrs] = sattr;
-	set->eattrs[set->nattrs] = nemoobject_getd(&one->object, attr);
+	set->eattrs[set->nattrs] = b;
 	set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
+	set->offsets[set->nattrs] = NEMOSHOW_ITEM_BLUE_COLOR;
 	set->dirties[set->nattrs] = dirty;
 	set->nattrs++;
 
-	return index;
+	set->attrs[set->nattrs] = sattr;
+	set->eattrs[set->nattrs] = a;
+	set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
+	set->offsets[set->nattrs] = NEMOSHOW_ITEM_ALPHA_COLOR;
+	set->dirties[set->nattrs] = dirty;
+	set->nattrs++;
+
+	return set->nattrs;
 }
 
 int nemoshow_sequence_fix_dattr(struct showone *one, int index, double value)
@@ -390,7 +287,7 @@ static void nemoshow_sequence_prepare_frame(struct showone *one, uint32_t serial
 
 			for (i = 0; i < set->nattrs; i++) {
 				if (nemoattr_get_serial(set->attrs[i]) <= serial) {
-					set->sattrs[i] = nemoattr_getd(set->attrs[i]);
+					set->sattrs[i] = nemoattr_getd_offset(set->attrs[i], set->offsets[i]);
 				}
 			}
 
@@ -415,7 +312,7 @@ static void nemoshow_sequence_dispatch_frame(struct showone *one, double s, doub
 
 			for (i = 0; i < set->nattrs; i++) {
 				if (nemoattr_get_serial(set->attrs[i]) <= serial) {
-					nemoattr_setd(set->attrs[i],
+					nemoattr_setd_offset(set->attrs[i], set->offsets[i],
 							(set->eattrs[i] - set->sattrs[i]) * dt + set->sattrs[i]);
 
 					dirty |= set->dirties[i];
@@ -442,7 +339,7 @@ static void nemoshow_sequence_finish_frame(struct showone *one, uint32_t serial)
 
 			for (i = 0; i < set->nattrs; i++) {
 				if (nemoattr_get_serial(set->attrs[i]) <= serial) {
-					nemoattr_setd(set->attrs[i], set->fattrs[i]);
+					nemoattr_setd_offset(set->attrs[i], set->offsets[i], set->fattrs[i]);
 
 					dirty |= set->dirties[i];
 				}

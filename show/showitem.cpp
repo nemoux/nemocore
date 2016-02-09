@@ -108,17 +108,9 @@ struct showone *nemoshow_item_create(int type)
 	nemoobject_set_reserved(&one->object, "from", &item->from, sizeof(double));
 	nemoobject_set_reserved(&one->object, "to", &item->to, sizeof(double));
 
-	nemoobject_set_reserved(&one->object, "stroke", &item->stroke, sizeof(uint32_t));
-	nemoobject_set_reserved(&one->object, "stroke:r", &item->strokes[2], sizeof(double));
-	nemoobject_set_reserved(&one->object, "stroke:g", &item->strokes[1], sizeof(double));
-	nemoobject_set_reserved(&one->object, "stroke:b", &item->strokes[0], sizeof(double));
-	nemoobject_set_reserved(&one->object, "stroke:a", &item->strokes[3], sizeof(double));
+	nemoobject_set_reserved(&one->object, "stroke", item->strokes, sizeof(double[4]));
 	nemoobject_set_reserved(&one->object, "stroke-width", &item->stroke_width, sizeof(double));
-	nemoobject_set_reserved(&one->object, "fill", &item->fill, sizeof(uint32_t));
-	nemoobject_set_reserved(&one->object, "fill:r", &item->fills[2], sizeof(double));
-	nemoobject_set_reserved(&one->object, "fill:g", &item->fills[1], sizeof(double));
-	nemoobject_set_reserved(&one->object, "fill:b", &item->fills[0], sizeof(double));
-	nemoobject_set_reserved(&one->object, "fill:a", &item->fills[3], sizeof(double));
+	nemoobject_set_reserved(&one->object, "fill", item->fills, sizeof(double[4]));
 
 	nemoobject_set_reserved(&one->object, "font-size", &item->fontsize, sizeof(double));
 
@@ -305,12 +297,20 @@ static inline void nemoshow_item_update_style(struct nemoshow *show, struct show
 
 	if (item->fill != 0) {
 		NEMOSHOW_ITEM_CC(item, fill)->setColor(
-				SkColorSetARGB(item->fills[3] * item->alpha, item->fills[2], item->fills[1], item->fills[0]));
+				SkColorSetARGB(
+					item->fills[NEMOSHOW_ITEM_ALPHA_COLOR] * item->alpha,
+					item->fills[NEMOSHOW_ITEM_RED_COLOR],
+					item->fills[NEMOSHOW_ITEM_GREEN_COLOR],
+					item->fills[NEMOSHOW_ITEM_BLUE_COLOR]));
 	}
 	if (item->stroke != 0) {
 		NEMOSHOW_ITEM_CC(item, stroke)->setStrokeWidth(item->stroke_width);
 		NEMOSHOW_ITEM_CC(item, stroke)->setColor(
-				SkColorSetARGB(item->strokes[3] * item->alpha, item->strokes[2], item->strokes[1], item->strokes[0]));
+				SkColorSetARGB(
+					item->strokes[NEMOSHOW_ITEM_ALPHA_COLOR] * item->alpha,
+					item->strokes[NEMOSHOW_ITEM_RED_COLOR],
+					item->strokes[NEMOSHOW_ITEM_GREEN_COLOR],
+					item->strokes[NEMOSHOW_ITEM_BLUE_COLOR]));
 	}
 }
 
