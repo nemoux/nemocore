@@ -195,20 +195,6 @@ static inline struct nemoattr *nemoobject_set(struct nemoobject *object, const c
 	return &object->attrs[i];
 }
 
-static inline struct nemoattr *nemoobject_set_reserved(struct nemoobject *object, const char *name, void *p, int size)
-{
-	struct nemoattr *attr;
-
-	attr = nemoobject_set(object, name);
-	if (attr != NULL) {
-		attr->p = p;
-		attr->size = size;
-		attr->needs_free = 0;
-	}
-
-	return attr;
-}
-
 static inline struct nemoattr *nemoobject_get(struct nemoobject *object, const char *name)
 {
 	int i;
@@ -220,6 +206,25 @@ static inline struct nemoattr *nemoobject_get(struct nemoobject *object, const c
 	}
 
 	return NULL;
+}
+
+static inline struct nemoattr *nemoobject_set_reserved(struct nemoobject *object, const char *name, void *p, int size)
+{
+	struct nemoattr *attr;
+
+	attr = nemoobject_get(object, name);
+	if (attr == NULL)
+		attr = nemoobject_set(object, name);
+	if (attr != NULL) {
+		if (attr->needs_free != 0)
+			free(attr->p);
+
+		attr->p = p;
+		attr->size = size;
+		attr->needs_free = 0;
+	}
+
+	return attr;
 }
 
 static inline int nemoobject_has(struct nemoobject *object, const char *name)

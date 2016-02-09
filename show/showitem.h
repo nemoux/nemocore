@@ -14,7 +14,7 @@ NEMO_BEGIN_EXTERN_C
 #include <nemolist.h>
 #include <nemolistener.h>
 
-#define NEMOSHOW_ITEM_PATH_DASH_MAX			(4)
+#define NEMOSHOW_ITEM_PATH_DASH_MAX			(32)
 
 typedef enum {
 	NEMOSHOW_NONE_ITEM = 0,
@@ -103,7 +103,7 @@ struct showitem {
 	double pathdeviation;
 	uint32_t pathseed;
 
-	double pathdashes[NEMOSHOW_ITEM_PATH_DASH_MAX];
+	double *pathdashes;
 	int pathdashcount;
 
 	double fontsize;

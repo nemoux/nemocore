@@ -118,11 +118,6 @@ struct showone *nemoshow_item_create(int type)
 	nemoobject_set_reserved(&one->object, "pathdeviation", &item->pathdeviation, sizeof(double));
 	nemoobject_set_reserved(&one->object, "pathseed", &item->pathseed, sizeof(uint32_t));
 
-	nemoobject_set_reserved(&one->object, "pathdashes0", &item->pathdashes[0], sizeof(double));
-	nemoobject_set_reserved(&one->object, "pathdashes1", &item->pathdashes[1], sizeof(double));
-	nemoobject_set_reserved(&one->object, "pathdashes2", &item->pathdashes[2], sizeof(double));
-	nemoobject_set_reserved(&one->object, "pathdashes3", &item->pathdashes[3], sizeof(double));
-
 	nemoobject_set_reserved(&one->object, "alpha", &item->alpha, sizeof(double));
 
 	if (one->sub == NEMOSHOW_RING_ITEM) {
@@ -1275,15 +1270,16 @@ void nemoshow_item_path_set_dash_effect(struct showone *one, double *dashes, int
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	int i;
 
-	item->pathdashcount = MIN(NEMOSHOW_ITEM_PATH_DASH_MAX, dashcount);
+	if (item->pathdashes != NULL)
+		free(item->pathdashes);
 
-	if (dashes != NULL) {
-		for (i = 0; i < item->pathdashcount; i++)
-			item->pathdashes[i] = dashes[i];
-	} else {
-		for (i = 0; i < item->pathdashcount; i++)
-			item->pathdashes[i] = 0.0f;
-	}
+	item->pathdashes = (double *)malloc(sizeof(double) * dashcount);
+	item->pathdashcount = dashcount;
+
+	for (i = 0; i < dashcount; i++)
+		item->pathdashes[i] = dashes[i];
+
+	nemoobject_set_reserved(&one->object, "pathdash", item->pathdashes, sizeof(double) * dashcount);
 }
 
 int nemoshow_item_path_contains_point(struct showone *one, double x, double y)
