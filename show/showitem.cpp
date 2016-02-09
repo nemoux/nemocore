@@ -915,16 +915,12 @@ void nemoshow_item_set_font(struct showone *one, struct showone *font)
 {
 	nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_FONT_REF));
 	nemoshow_one_reference_one(one, font, NEMOSHOW_FONT_DIRTY, NEMOSHOW_FONT_REF);
-
-	nemoshow_one_dirty(one, NEMOSHOW_FONT_DIRTY);
 }
 
 void nemoshow_item_set_path(struct showone *one, struct showone *path)
 {
 	nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_PATH_REF));
 	nemoshow_one_reference_one(one, path, NEMOSHOW_SHAPE_DIRTY, NEMOSHOW_PATH_REF);
-
-	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
 
 void nemoshow_item_set_uri(struct showone *one, const char *uri)
