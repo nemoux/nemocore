@@ -7,6 +7,7 @@
 
 #include <atomback.h>
 #include <atommisc.h>
+#include <pixmanhelper.h>
 #include <nemomisc.h>
 
 const char *simple_vertex_shader =
@@ -32,7 +33,7 @@ const char *texture_fragment_shader =
 "uniform sampler2D tex0;\n"
 "uniform vec4 color;\n"
 "void main() {\n"
-"  gl_FragColor = color * texture2D(tex0, v_texcoord);\n"
+"  gl_FragColor = texture2D(tex0, v_texcoord) * color;\n"
 "}\n";
 
 GLuint nemoback_atom_create_shader(const char *fshader, const char *vshader)
@@ -117,4 +118,31 @@ void nemoback_atom_prepare_index(struct atomback *atom, GLenum mode, uint32_t *b
 
 	atom->mode = mode;
 	atom->elements = elements / 5;
+}
+
+GLuint nemoback_atom_create_texture_from_image(const char *filepath)
+{
+	pixman_image_t *image;
+	GLuint texture;
+
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	image = pixman_load_png_file(filepath);
+	if (image == NULL)
+		image = pixman_load_jpeg_file(filepath);
+	if (image == NULL)
+		exit(1);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT,
+			pixman_image_get_width(image),
+			pixman_image_get_height(image),
+			0, GL_BGRA_EXT, GL_UNSIGNED_BYTE,
+			pixman_image_get_data(image));
+	pixman_image_unref(image);
+
+	return texture;
 }

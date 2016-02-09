@@ -163,13 +163,6 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_BACK_TYPE);
 	nemoshow_canvas_set_fill_color(canvas, 0.0f, 0.0f, 0.0f, 255.0f);
 	nemoshow_canvas_set_alpha(canvas, 0.0f);
-	nemoshow_attach_one(show, canvas);
-	nemoshow_one_attach(scene, canvas);
-
-	atom->canvas1 = canvas = nemoshow_canvas_create();
-	nemoshow_canvas_set_width(canvas, width);
-	nemoshow_canvas_set_height(canvas, height);
-	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
 	nemoshow_canvas_set_event(canvas, 1);
 	nemoshow_attach_one(show, canvas);
 	nemoshow_one_attach(scene, canvas);
@@ -182,6 +175,24 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_dispatch_resize(canvas, nemoback_atom_dispatch_show_resize_canvas);
 	nemoshow_attach_one(show, canvas);
 	nemoshow_one_attach(scene, canvas);
+
+	atom->canvas1 = canvas = nemoshow_canvas_create();
+	nemoshow_canvas_set_width(canvas, width);
+	nemoshow_canvas_set_height(canvas, height);
+	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
+	nemoshow_attach_one(show, canvas);
+	nemoshow_one_attach(atom->canvas0, canvas);
+
+	one = nemoshow_item_create(NEMOSHOW_RRECT_ITEM);
+	nemoshow_attach_one(atom->show, one);
+	nemoshow_one_attach(atom->canvas1, one);
+	nemoshow_item_set_x(one, 0.0f);
+	nemoshow_item_set_y(one, 0.0f);
+	nemoshow_item_set_width(one, width);
+	nemoshow_item_set_height(one, height);
+	nemoshow_item_set_rx(one, 10.0f);
+	nemoshow_item_set_ry(one, 10.0f);
+	nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
 
 	nemoshow_set_scene(show, scene);
 	nemoshow_set_size(show, width, height);
@@ -206,17 +217,6 @@ int main(int argc, char *argv[])
 	atom->solid = blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
 	nemoshow_attach_one(show, blur);
 	nemoshow_filter_set_blur(blur, "high", "solid", 5.0f);
-
-	one = nemoshow_item_create(NEMOSHOW_RRECT_ITEM);
-	nemoshow_attach_one(atom->show, one);
-	nemoshow_one_attach(atom->canvas1, one);
-	nemoshow_item_set_x(one, 0.0f);
-	nemoshow_item_set_y(one, 0.0f);
-	nemoshow_item_set_width(one, width);
-	nemoshow_item_set_height(one, height);
-	nemoshow_item_set_rx(one, 10.0f);
-	nemoshow_item_set_ry(one, 10.0f);
-	nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
 
 	nemoback_atom_prepare_shader(atom,
 			nemoback_atom_create_shader(texture_fragment_shader, simple_vertex_shader));

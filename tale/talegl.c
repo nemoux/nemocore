@@ -312,24 +312,24 @@ static void nemotale_repaint_node(struct nemotale *tale, struct talenode *node, 
 	struct nemogltale *context = (struct nemogltale *)tale->glcontext;
 	pixman_region32_t repaint;
 	pixman_region32_t blend;
-	GLint filter;
 
 	pixman_region32_init(&repaint);
 	pixman_region32_intersect(&repaint, &node->boundingbox, damage);
 
 	if (pixman_region32_not_empty(&repaint)) {
-		if (node->pmcontext != NULL)
+		if (node->pmcontext != NULL && node->needs_flush != 0)
 			nemotale_node_flush_gl(tale, node);
-
-		if (node->transform.enable != 0)
-			filter = GL_LINEAR;
-		else
-			filter = GL_NEAREST;
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, nemotale_node_get_texture(node));
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
+
+		if (node->transform.enable != 0) {
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		} else {
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		}
 
 		pixman_region32_init_rect(&blend, 0, 0, node->geometry.width, node->geometry.height);
 		pixman_region32_subtract(&blend, &blend, &node->opaque);
@@ -841,6 +841,8 @@ int nemotale_node_flush_gl(struct nemotale *tale, struct talenode *node)
 
 		glGenTextures(1, &gcontext->texture);
 		glBindTexture(GL_TEXTURE_2D, gcontext->texture);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
@@ -850,7 +852,7 @@ int nemotale_node_flush_gl(struct nemotale *tale, struct talenode *node)
 		nemosignal_add(&node->destroy_signal, &gcontext->destroy_listener);
 	}
 
-	if (node->dirty != 0) {
+	if (node->needs_flush != 0) {
 		glBindTexture(GL_TEXTURE_2D, gcontext->texture);
 
 		if (!context->has_unpack_subimage) {
@@ -880,6 +882,11 @@ int nemotale_node_flush_gl(struct nemotale *tale, struct talenode *node)
 					for (i = 0; i < n; i++) {
 						pixman_box32_t box = rects[i];
 
+						box.x1 = MAX(box.x1, 0);
+						box.y1 = MAX(box.y1, 0);
+						box.x2 = MIN(box.x2, node->viewport.width);
+						box.y2 = MIN(box.y2, node->viewport.height);
+
 						glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, box.x1);
 						glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, box.y1);
 						glTexSubImage2D(GL_TEXTURE_2D, 0, box.x1, box.y1,
@@ -905,6 +912,8 @@ int nemotale_node_flush_gl(struct nemotale *tale, struct talenode *node)
 			}
 #endif
 		}
+
+		node->needs_flush = 0;
 	}
 
 	return 0;

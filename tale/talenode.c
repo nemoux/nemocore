@@ -46,7 +46,6 @@ int nemotale_node_prepare(struct talenode *node)
 	pixman_region32_init(&node->blend);
 	pixman_region32_init(&node->input);
 	pixman_region32_init(&node->damage);
-	node->dirty = 0;
 
 	nemoobject_prepare(&node->object, NEMOTALE_NODE_ATTR_MAX);
 

@@ -569,6 +569,49 @@ void nemoshow_update_one(struct nemoshow *show)
 	show->dirty_serial = 0;
 }
 
+static inline void nemoshow_update_canvas(struct nemoshow *show, struct showone *one)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	if (canvas->viewport.dirty != 0) {
+		nemoshow_canvas_set_viewport(show, one,
+				(double)show->width / (double)NEMOSHOW_SCENE_AT(show->scene, width) * show->sx,
+				(double)show->height / (double)NEMOSHOW_SCENE_AT(show->scene, height) * show->sy);
+
+		if (canvas->dispatch_resize != NULL)
+			canvas->dispatch_resize(show, one, canvas->viewport.width, canvas->viewport.height);
+
+		canvas->viewport.dirty = 0;
+	}
+}
+
+static inline void nemoshow_render_canvas(struct nemoshow *show, struct showone *one)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+	struct showcref *ref;
+
+	if (canvas->needs_redraw != 0) {
+		nemolist_for_each(ref, &canvas->reference_list, link) {
+			nemoshow_render_canvas(show, ref->src);
+		}
+
+		if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
+			nemoshow_canvas_render_vector(show, one);
+
+			nemotale_node_flush_gl(show->tale, canvas->node);
+		} else if (one->sub == NEMOSHOW_CANVAS_BACK_TYPE) {
+			nemoshow_canvas_render_back(show, one);
+
+			nemotale_node_flush_gl(show->tale, canvas->node);
+		}
+
+		if (canvas->dispatch_render != NULL)
+			canvas->dispatch_render(show, one);
+
+		canvas->needs_redraw = 0;
+	}
+}
+
 void nemoshow_render_one(struct nemoshow *show)
 {
 	struct showone *scene = show->scene;
@@ -586,31 +629,8 @@ void nemoshow_render_one(struct nemoshow *show)
 
 	nemoshow_children_for_each(one, scene) {
 		if (one->type == NEMOSHOW_CANVAS_TYPE) {
-			canvas = NEMOSHOW_CANVAS(one);
-
-			if (canvas->viewport.dirty != 0) {
-				nemoshow_canvas_set_viewport(show, one,
-						(double)show->width / (double)NEMOSHOW_SCENE_AT(show->scene, width) * show->sx,
-						(double)show->height / (double)NEMOSHOW_SCENE_AT(show->scene, height) * show->sy);
-
-				if (canvas->dispatch_resize != NULL)
-					canvas->dispatch_resize(show, one, canvas->viewport.width, canvas->viewport.height);
-
-				canvas->viewport.dirty = 0;
-			}
-
-			if (canvas->needs_redraw != 0) {
-				if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
-					nemoshow_canvas_render_vector(show, one);
-				} else if (one->sub == NEMOSHOW_CANVAS_BACK_TYPE) {
-					nemoshow_canvas_render_back(show, one);
-				}
-
-				if (canvas->dispatch_render != NULL)
-					canvas->dispatch_render(show, one);
-
-				canvas->needs_redraw = 0;
-			}
+			nemoshow_update_canvas(show, one);
+			nemoshow_render_canvas(show, one);
 		}
 	}
 }
@@ -758,12 +778,7 @@ void nemoshow_below_canvas(struct nemoshow *show, struct showone *one, struct sh
 			NEMOSHOW_CANVAS_AT(below, node));
 }
 
-void nemoshow_flush_canvas(struct nemoshow *show, struct showone *one)
-{
-	nemotale_node_damage_all(NEMOSHOW_CANVAS_AT(one, node));
-}
-
-void nemoshow_flush_canvas_all(struct nemoshow *show)
+void nemoshow_damage_canvas_all(struct nemoshow *show)
 {
 	struct showone *one;
 	struct showone *child;
