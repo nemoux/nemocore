@@ -65,6 +65,10 @@ struct showpoly {
 	int on_vbo;
 
 	struct nemomatrix modelview;
+
+	double tx, ty, tz;
+	double sx, sy, sz;
+	double rx, ry, rz;
 };
 
 #define NEMOSHOW_POLY(one)					((struct showpoly *)container_of(one, struct showpoly, base))
@@ -178,6 +182,39 @@ static inline void nemoshow_poly_set_color(struct showone *one, float r, float g
 	poly->colors[NEMOSHOW_POLY_ALPHA_COLOR] = a;
 
 	nemoshow_one_dirty(one, NEMOSHOW_STYLE_DIRTY);
+}
+
+static inline void nemoshow_poly_set_translate(struct showone *one, float tx, float ty, float tz)
+{
+	struct showpoly *poly = NEMOSHOW_POLY(one);
+
+	poly->tx = tx;
+	poly->ty = ty;
+	poly->tz = tz;
+
+	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
+}
+
+static inline void nemoshow_poly_set_scale(struct showone *one, float sx, float sy, float sz)
+{
+	struct showpoly *poly = NEMOSHOW_POLY(one);
+
+	poly->sx = sx;
+	poly->sy = sy;
+	poly->sz = sz;
+
+	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
+}
+
+static inline void nemoshow_poly_set_rotate(struct showone *one, float rx, float ry, float rz)
+{
+	struct showpoly *poly = NEMOSHOW_POLY(one);
+
+	poly->rx = rx;
+	poly->ry = ry;
+	poly->rz = rz;
+
+	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
 }
 
 #ifdef __cplusplus

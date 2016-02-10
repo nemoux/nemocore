@@ -85,7 +85,9 @@ struct showone *nemoshow_pipe_create(int type)
 		return NULL;
 	memset(pipe, 0, sizeof(struct showpipe));
 
-	nemomatrix_init_identity(&pipe->projection);
+	pipe->sx = 1.0f;
+	pipe->sy = 1.0f;
+	pipe->sz = 1.0f;
 
 	one = &pipe->base;
 	one->type = NEMOSHOW_PIPE_TYPE;
@@ -97,6 +99,16 @@ struct showone *nemoshow_pipe_create(int type)
 
 	nemoobject_set_reserved(&one->object, "light", pipe->lights, sizeof(float[4]));
 	nemoobject_set_reserved(&one->object, "matrix", pipe->projection.d, sizeof(float[16]));
+
+	nemoobject_set_reserved(&one->object, "tx", &pipe->tx, sizeof(double));
+	nemoobject_set_reserved(&one->object, "ty", &pipe->ty, sizeof(double));
+	nemoobject_set_reserved(&one->object, "tz", &pipe->tz, sizeof(double));
+	nemoobject_set_reserved(&one->object, "sx", &pipe->sx, sizeof(double));
+	nemoobject_set_reserved(&one->object, "sy", &pipe->sy, sizeof(double));
+	nemoobject_set_reserved(&one->object, "sz", &pipe->sz, sizeof(double));
+	nemoobject_set_reserved(&one->object, "rx", &pipe->rx, sizeof(double));
+	nemoobject_set_reserved(&one->object, "ry", &pipe->ry, sizeof(double));
+	nemoobject_set_reserved(&one->object, "rz", &pipe->rz, sizeof(double));
 
 	if (one->sub == NEMOSHOW_SIMPLE_PIPE) {
 		pipe->program = glshader_create_program(simple_fragment_shader, simple_vertex_shader);
@@ -156,6 +168,15 @@ int nemoshow_pipe_arrange(struct showone *one)
 int nemoshow_pipe_update(struct showone *one)
 {
 	struct showpipe *pipe = NEMOSHOW_PIPE(one);
+
+	if ((one->dirty & NEMOSHOW_MATRIX_DIRTY) != 0) {
+		nemomatrix_init_identity(&pipe->projection);
+		nemomatrix_rotate_x(&pipe->projection, cos(pipe->rx), sin(pipe->rx));
+		nemomatrix_rotate_y(&pipe->projection, cos(pipe->ry), sin(pipe->ry));
+		nemomatrix_rotate_z(&pipe->projection, cos(pipe->rz), sin(pipe->rz));
+		nemomatrix_scale_xyz(&pipe->projection, pipe->sx, pipe->sy * -1.0f, pipe->sz);
+		nemomatrix_translate_xyz(&pipe->projection, pipe->tx, pipe->ty, pipe->tz);
+	}
 
 	nemoshow_canvas_damage_all(one->parent);
 
@@ -295,6 +316,9 @@ void nemoshow_canvas_render_pipeline(struct nemoshow *show, struct showone *one)
 	glBindFramebuffer(GL_FRAMEBUFFER, canvas->fbo);
 
 	glViewport(0, 0, canvas->viewport.width, canvas->viewport.height);
+
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
 
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClearDepth(0.0f);

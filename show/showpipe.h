@@ -40,6 +40,10 @@ struct showpipe {
 	float lights[4];
 
 	struct nemomatrix projection;
+
+	double tx, ty, tz;
+	double sx, sy, sz;
+	double rx, ry, rz;
 };
 
 #define NEMOSHOW_PIPE(one)					((struct showpipe *)container_of(one, struct showpipe, base))
@@ -51,16 +55,49 @@ extern void nemoshow_pipe_destroy(struct showone *one);
 extern int nemoshow_pipe_arrange(struct showone *one);
 extern int nemoshow_pipe_update(struct showone *one);
 
-static inline void nemoshow_pipe_set_light(struct showone *one, float x, float y, float z)
+static inline void nemoshow_pipe_set_light(struct showone *one, float x, float y, float z, float a)
 {
 	struct showpipe *pipe = NEMOSHOW_PIPE(one);
 
 	pipe->lights[0] = x;
 	pipe->lights[1] = y;
 	pipe->lights[2] = z;
-	pipe->lights[3] = 1.0f;
+	pipe->lights[3] = a;
 
 	nemoshow_one_dirty(one, NEMOSHOW_REDRAW_DIRTY);
+}
+
+static inline void nemoshow_pipe_set_translate(struct showone *one, float tx, float ty, float tz)
+{
+	struct showpipe *pipe = NEMOSHOW_PIPE(one);
+
+	pipe->tx = tx;
+	pipe->ty = ty;
+	pipe->tz = tz;
+
+	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
+}
+
+static inline void nemoshow_pipe_set_scale(struct showone *one, float sx, float sy, float sz)
+{
+	struct showpipe *pipe = NEMOSHOW_PIPE(one);
+
+	pipe->sx = sx;
+	pipe->sy = sy;
+	pipe->sz = sz;
+
+	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
+}
+
+static inline void nemoshow_pipe_set_rotate(struct showone *one, float rx, float ry, float rz)
+{
+	struct showpipe *pipe = NEMOSHOW_PIPE(one);
+
+	pipe->rx = rx;
+	pipe->ry = ry;
+	pipe->rz = rz;
+
+	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
 }
 
 extern int nemoshow_pipe_dispatch_one(struct showone *canvas, struct showone *one);
