@@ -15,11 +15,18 @@ static const float quad_vertices[] = {
 	-1.0f, 1.0f, 0.0f
 };
 
-static const float quad_tex_vertices[] = {
-	-1.0f, -1.0f, 0.0f, 0.0f, 1.0f,
-	1.0f, -1.0f, 0.0f, 1.0f, 1.0f,
-	1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-	-1.0f, 1.0f, 0.0f, 0.0f, 0.0f
+static const float quad_texcoords[] = {
+	0.0f, 1.0f,
+	1.0f, 1.0f,
+	1.0f, 0.0f,
+	0.0f, 0.0f
+};
+
+static const float quad_normals[] = {
+	0.0f, 0.0f, 1.0f,
+	0.0f, 0.0f, 1.0f,
+	0.0f, 0.0f, 1.0f,
+	0.0f, 0.0f, 1.0f
 };
 
 static const float cube_vertices[] = {
@@ -51,39 +58,71 @@ static const float cube_vertices[] = {
 	-1.0f, 1.0f, 1.0f,
 	-1.0f, -1.0f, 1.0f,
 	1.0f, -1.0f, 1.0f,
-	1.0f, 1.0f, 1.0f,
+	1.0f, 1.0f, 1.0f
 };
 
-static const float cube_tex_vertices[] = {
-	-1.0f, -1.0f, -1.0f, 0.0f, 1.0f,
-	1.0f, -1.0f, -1.0f, 1.0f, 1.0f,
-	1.0f, -1.0f, 1.0f, 1.0f, 0.0f,
-	-1.0f, -1.0f, 1.0f, 0.0f, 0.0f,
+static const float cube_texcoords[] = {
+	0.0f, 1.0f,
+	1.0f, 1.0f,
+	1.0f, 0.0f,
+	0.0f, 0.0f,
 
-	-1.0f, 1.0f, -1.0f, 0.0f, 1.0f,
-	-1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-	1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-	1.0f, 1.0f, -1.0f, 0.0f, 0.0f,
+	0.0f, 1.0f,
+	1.0f, 1.0f,
+	1.0f, 0.0f,
+	0.0f, 0.0f,
 
-	-1.0f, -1.0f, -1.0f, 0.0f, 1.0f,
-	-1.0f, -1.0f, 1.0f, 1.0f, 1.0f,
-	-1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-	-1.0f, 1.0f, -1.0f, 0.0f, 0.0f,
+	0.0f, 1.0f,
+	1.0f, 1.0f,
+	1.0f, 0.0f,
+	0.0f, 0.0f,
 
-	1.0f, -1.0f, -1.0f, 0.0f, 1.0f,
-	1.0f, 1.0f, -1.0f, 1.0f, 1.0f,
-	1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-	1.0f, -1.0f, 1.0f, 0.0f, 0.0f,
+	0.0f, 1.0f,
+	1.0f, 1.0f,
+	1.0f, 0.0f,
+	0.0f, 0.0f,
 
-	-1.0f, -1.0f, -1.0f, 0.0f, 1.0f,
-	-1.0f, 1.0f, -1.0f, 1.0f, 1.0f,
-	1.0f, 1.0f, -1.0f, 1.0f, 0.0f,
-	1.0f, -1.0f, -1.0f, 0.0f, 0.0f,
+	0.0f, 1.0f,
+	1.0f, 1.0f,
+	1.0f, 0.0f,
+	0.0f, 0.0f,
 
-	-1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-	-1.0f, -1.0f, 1.0f, 1.0f, 1.0f,
-	1.0f, -1.0f, 1.0f, 1.0f, 0.0f,
-	1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+	0.0f, 1.0f,
+	1.0f, 1.0f,
+	1.0f, 0.0f,
+	0.0f, 0.0f
+};
+
+static const float cube_normals[] = {
+	0.0f, 1.0f, 0.0f,
+	0.0f, 1.0f, 0.0f,
+	0.0f, 1.0f, 0.0f,
+	0.0f, 1.0f, 0.0f,
+
+	0.0f, -1.0f, 0.0f,
+	0.0f, -1.0f, 0.0f,
+	0.0f, -1.0f, 0.0f,
+	0.0f, -1.0f, 0.0f,
+
+	-1.0f, 0.0f, 0.0f,
+	-1.0f, 0.0f, 0.0f,
+	-1.0f, 0.0f, 0.0f,
+	-1.0f, 0.0f, 0.0f,
+
+	1.0f, 0.0f, 0.0f,
+	1.0f, 0.0f, 0.0f,
+	1.0f, 0.0f, 0.0f,
+	1.0f, 0.0f, 0.0f,
+
+	0.0f, 0.0f, 1.0f,
+	0.0f, 0.0f, 1.0f,
+	0.0f, 0.0f, 1.0f,
+	0.0f, 0.0f, 1.0f,
+
+	0.0f, 0.0f, -1.0f,
+	0.0f, 0.0f, -1.0f,
+	0.0f, 0.0f, -1.0f,
+	0.0f, 0.0f, -1.0f
 };
 
 struct showone *nemoshow_poly_create(int type)
@@ -113,48 +152,22 @@ struct showone *nemoshow_poly_create(int type)
 
 	if (one->sub == NEMOSHOW_QUAD_POLY) {
 		poly->vertices = (float *)malloc(sizeof(float) * 12);
-		poly->nvertices = 12 / 3;
-		poly->stride = 3;
+		poly->elements = 12 / 3;
 
 		poly->mode = GL_TRIANGLE_FAN;
-		poly->elements = 12 / 3;
 
 		nemoobject_set_reserved(&one->object, "vertex", poly->vertices, sizeof(float[12]));
 
 		memcpy(poly->vertices, quad_vertices, sizeof(float[12]));
-	} else if (one->sub == NEMOSHOW_QUAD_TEX_POLY) {
-		poly->vertices = (float *)malloc(sizeof(float) * 20);
-		poly->nvertices = 20 / 5;
-		poly->stride = 5;
-
-		poly->mode = GL_TRIANGLE_FAN;
-		poly->elements = 20 / 5;
-
-		nemoobject_set_reserved(&one->object, "vertex", poly->vertices, sizeof(float[20]));
-
-		memcpy(poly->vertices, quad_tex_vertices, sizeof(float[20]));
 	} else if (one->sub == NEMOSHOW_CUBE_POLY) {
 		poly->vertices = (float *)malloc(sizeof(float) * 12 * 6);
-		poly->nvertices = 12 * 6 / 3;
-		poly->stride = 3;
+		poly->elements = 12 * 6 / 3;
 
 		poly->mode = GL_TRIANGLE_FAN;
-		poly->elements = 12 * 6 / 3;
 
 		nemoobject_set_reserved(&one->object, "vertex", poly->vertices, sizeof(float[12 * 6]));
 
 		memcpy(poly->vertices, cube_vertices, sizeof(float[12 * 6]));
-	} else if (one->sub == NEMOSHOW_CUBE_TEX_POLY) {
-		poly->vertices = (float *)malloc(sizeof(float) * 20 * 6);
-		poly->nvertices = 20 * 6 / 5;
-		poly->stride = 5;
-
-		poly->mode = GL_TRIANGLE_FAN;
-		poly->elements = 20 * 6 / 5;
-
-		nemoobject_set_reserved(&one->object, "vertex", poly->vertices, sizeof(float[20 * 6]));
-
-		memcpy(poly->vertices, cube_tex_vertices, sizeof(float[20 * 6]));
 	}
 
 	return one;
@@ -165,6 +178,23 @@ void nemoshow_poly_destroy(struct showone *one)
 	struct showpoly *poly = NEMOSHOW_POLY(one);
 
 	nemoshow_one_finish(one);
+
+	if (poly->vertices != NULL)
+		free(poly->vertices);
+
+	if (poly->on_texcoords != 0) {
+		free(poly->texcoords);
+	}
+	if (poly->on_normals != 0) {
+		free(poly->normals);
+	}
+	if (poly->on_vbo != 0) {
+		glDeleteBuffers(1, &poly->vvertex);
+		glDeleteBuffers(1, &poly->vtexcoord);
+		glDeleteBuffers(1, &poly->vnormal);
+		glDeleteBuffers(1, &poly->vindex);
+		glDeleteVertexArrays(1, &poly->varray);
+	}
 
 	free(poly);
 }
@@ -200,24 +230,29 @@ int nemoshow_poly_update(struct showone *one)
 	}
 
 	if ((one->dirty & NEMOSHOW_SHAPE_DIRTY) != 0) {
-		if (poly->has_vbo != 0) {
+		if (poly->on_vbo != 0) {
 			glBindVertexArray(poly->varray);
 
-			if (one->sub == NEMOSHOW_QUAD_POLY) {
-				glBindBuffer(GL_ARRAY_BUFFER, poly->vbuffer);
-				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void *)0);
-				glEnableVertexAttribArray(0);
-				glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat[3]) * poly->nvertices, poly->vertices, GL_STATIC_DRAW);
-				glBindBuffer(GL_ARRAY_BUFFER, 0);
-			} else if (one->sub == NEMOSHOW_QUAD_TEX_POLY) {
-				glBindBuffer(GL_ARRAY_BUFFER, poly->vbuffer);
-				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void *)0);
-				glEnableVertexAttribArray(0);
-				glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void *)sizeof(GLfloat[3]));
+			glBindBuffer(GL_ARRAY_BUFFER, poly->vvertex);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void *)0);
+			glEnableVertexAttribArray(0);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat[3]) * poly->elements, poly->vertices, GL_STATIC_DRAW);
+
+			if (poly->on_texcoords != 0) {
+				glBindBuffer(GL_ARRAY_BUFFER, poly->vtexcoord);
+				glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (void *)0);
 				glEnableVertexAttribArray(1);
-				glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat[5]) * poly->nvertices, poly->vertices, GL_STATIC_DRAW);
-				glBindBuffer(GL_ARRAY_BUFFER, 0);
+				glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat[2]) * poly->elements, poly->texcoords, GL_STATIC_DRAW);
 			}
+
+			if (poly->on_normals != 0) {
+				glBindBuffer(GL_ARRAY_BUFFER, poly->vnormal);
+				glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void *)0);
+				glEnableVertexAttribArray(2);
+				glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat[3]) * poly->elements, poly->normals, GL_STATIC_DRAW);
+			}
+
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 			glBindVertexArray(0);
 		}
@@ -235,21 +270,63 @@ void nemoshow_poly_set_canvas(struct showone *one, struct showone *canvas)
 	nemoshow_one_reference_one(one, canvas, NEMOSHOW_CANVAS_DIRTY, NEMOSHOW_CANVAS_REF);
 }
 
-void nemoshow_poly_set_vbo(struct showone *one, int has_vbo)
+void nemoshow_poly_use_texcoords(struct showone *one, int on_texcoords)
 {
 	struct showpoly *poly = NEMOSHOW_POLY(one);
 
-	if (poly->has_vbo == 0 && has_vbo != 0) {
+	if (poly->on_texcoords == 0 && on_texcoords != 0) {
+		poly->texcoords = (float *)malloc(sizeof(float[2]) * poly->elements);
+
+		nemoobject_set_reserved(&one->object, "texcoord", poly->texcoords, sizeof(float[2]) * poly->elements);
+
+		if (one->sub == NEMOSHOW_QUAD_POLY)
+			memcpy(poly->texcoords, quad_texcoords, sizeof(float[2]) * poly->elements);
+		else if (one->sub == NEMOSHOW_CUBE_POLY)
+			memcpy(poly->texcoords, cube_texcoords, sizeof(float[2]) * poly->elements);
+	} else if (poly->on_texcoords != 0 && on_texcoords == 0) {
+		free(poly->texcoords);
+	}
+
+	poly->on_texcoords = on_texcoords;
+}
+
+void nemoshow_poly_use_normals(struct showone *one, int on_normals)
+{
+	struct showpoly *poly = NEMOSHOW_POLY(one);
+
+	if (poly->on_normals == 0 && on_normals != 0) {
+		poly->normals = (float *)malloc(sizeof(float[2]) * poly->elements);
+
+		nemoobject_set_reserved(&one->object, "normal", poly->normals, sizeof(float[3]) * poly->elements);
+
+		if (one->sub == NEMOSHOW_QUAD_POLY)
+			memcpy(poly->normals, quad_normals, sizeof(float[3]) * poly->elements);
+		else if (one->sub == NEMOSHOW_CUBE_POLY)
+			memcpy(poly->normals, cube_normals, sizeof(float[3]) * poly->elements);
+	} else if (poly->on_normals != 0 && on_normals == 0) {
+		free(poly->normals);
+	}
+
+	poly->on_normals = on_normals;
+}
+
+void nemoshow_poly_use_vbo(struct showone *one, int on_vbo)
+{
+	struct showpoly *poly = NEMOSHOW_POLY(one);
+
+	if (poly->on_vbo == 0 && on_vbo != 0) {
 		glGenVertexArrays(1, &poly->varray);
-		glGenBuffers(1, &poly->vbuffer);
+		glGenBuffers(1, &poly->vvertex);
+		glGenBuffers(1, &poly->vtexcoord);
+		glGenBuffers(1, &poly->vnormal);
 		glGenBuffers(1, &poly->vindex);
-	} else if (poly->has_vbo != 0 && has_vbo == 0) {
-		glDeleteBuffers(1, &poly->vbuffer);
+	} else if (poly->on_vbo != 0 && on_vbo == 0) {
+		glDeleteBuffers(1, &poly->vvertex);
+		glDeleteBuffers(1, &poly->vtexcoord);
+		glDeleteBuffers(1, &poly->vnormal);
 		glDeleteBuffers(1, &poly->vindex);
 		glDeleteVertexArrays(1, &poly->varray);
 	}
 
-	poly->has_vbo = has_vbo;
-
-	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
+	poly->on_vbo = on_vbo;
 }

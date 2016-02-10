@@ -22,9 +22,12 @@ typedef enum {
 	NEMOSHOW_POLY_X_VERTEX = 0,
 	NEMOSHOW_POLY_Y_VERTEX = 1,
 	NEMOSHOW_POLY_Z_VERTEX = 2,
-	NEMOSHOW_POLY_TX_VERTEX = 3,
-	NEMOSHOW_POLY_TY_VERTEX = 4,
-} NemoShowPolyVertex;
+	NEMOSHOW_POLY_TX_VERTEX = 0,
+	NEMOSHOW_POLY_TY_VERTEX = 1,
+	NEMOSHOW_POLY_X_NORMAL = 0,
+	NEMOSHOW_POLY_Y_NORMAL = 1,
+	NEMOSHOW_POLY_Z_NORMAL = 2,
+} NemoShowPolyOffset;
 
 typedef enum {
 	NEMOSHOW_POLY_BLUE_COLOR = 0,
@@ -36,9 +39,7 @@ typedef enum {
 typedef enum {
 	NEMOSHOW_NONE_POLY = 0,
 	NEMOSHOW_QUAD_POLY = 1,
-	NEMOSHOW_QUAD_TEX_POLY = 2,
-	NEMOSHOW_CUBE_POLY = 3,
-	NEMOSHOW_CUBE_TEX_POLY = 4,
+	NEMOSHOW_CUBE_POLY = 2,
 	NEMOSHOW_LAST_POLY
 } NemoShowPolyType;
 
@@ -48,16 +49,20 @@ struct showpoly {
 	float colors[4];
 
 	float *vertices;
-	int nvertices;
-	int stride;
-
-	GLuint varray;
-	GLuint vbuffer;
-	GLuint vindex;
-	GLenum mode;
+	float *texcoords;
+	float *normals;
 	int elements;
 
-	int has_vbo;
+	GLuint varray;
+	GLuint vvertex;
+	GLuint vtexcoord;
+	GLuint vnormal;
+	GLuint vindex;
+	GLenum mode;
+
+	int on_texcoords;
+	int on_normals;
+	int on_vbo;
 
 	struct nemomatrix modelview;
 };
@@ -65,11 +70,11 @@ struct showpoly {
 #define NEMOSHOW_POLY(one)					((struct showpoly *)container_of(one, struct showpoly, base))
 #define NEMOSHOW_POLY_AT(one, at)		(NEMOSHOW_POLY(one)->at)
 
-#define NEMOSHOW_POLY_X_OFFSET(one, index)	(NEMOSHOW_POLY(one)->stride * index + NEMOSHOW_POLY_X_VERTEX)
-#define NEMOSHOW_POLY_Y_OFFSET(one, index)	(NEMOSHOW_POLY(one)->stride * index + NEMOSHOW_POLY_Y_VERTEX)
-#define NEMOSHOW_POLY_Z_OFFSET(one, index)	(NEMOSHOW_POLY(one)->stride * index + NEMOSHOW_POLY_Z_VERTEX)
-#define NEMOSHOW_POLY_TX_OFFSET(one, index)	(NEMOSHOW_POLY(one)->stride * index + NEMOSHOW_POLY_TX_VERTEX)
-#define NEMOSHOW_POLY_TY_OFFSET(one, index)	(NEMOSHOW_POLY(one)->stride * index + NEMOSHOW_POLY_TY_VERTEX)
+#define NEMOSHOW_POLY_X_OFFSET(one, index)		(3 * index + NEMOSHOW_POLY_X_VERTEX)
+#define NEMOSHOW_POLY_Y_OFFSET(one, index)		(3 * index + NEMOSHOW_POLY_Y_VERTEX)
+#define NEMOSHOW_POLY_Z_OFFSET(one, index)		(3 * index + NEMOSHOW_POLY_Z_VERTEX)
+#define NEMOSHOW_POLY_TX_OFFSET(one, index)		(2 * index + NEMOSHOW_POLY_TX_VERTEX)
+#define NEMOSHOW_POLY_TY_OFFSET(one, index)		(2 * index + NEMOSHOW_POLY_TY_VERTEX)
 
 extern struct showone *nemoshow_poly_create(int type);
 extern void nemoshow_poly_destroy(struct showone *one);
@@ -81,13 +86,16 @@ extern int nemoshow_poly_arrange(struct showone *one);
 extern int nemoshow_poly_update(struct showone *one);
 
 extern void nemoshow_poly_set_canvas(struct showone *one, struct showone *canvas);
-extern void nemoshow_poly_set_vbo(struct showone *one, int has_vbo);
+
+extern void nemoshow_poly_use_texcoords(struct showone *one, int on_texcoords);
+extern void nemoshow_poly_use_normals(struct showone *one, int on_normals);
+extern void nemoshow_poly_use_vbo(struct showone *one, int on_vbo);
 
 static inline void nemoshow_poly_set_x(struct showone *one, int index, float x)
 {
 	struct showpoly *poly = NEMOSHOW_POLY(one);
 
-	poly->vertices[poly->stride * index + NEMOSHOW_POLY_X_VERTEX] = x;
+	poly->vertices[3 * index + NEMOSHOW_POLY_X_VERTEX] = x;
 
 	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
@@ -96,7 +104,7 @@ static inline void nemoshow_poly_set_y(struct showone *one, int index, float y)
 {
 	struct showpoly *poly = NEMOSHOW_POLY(one);
 
-	poly->vertices[poly->stride * index + NEMOSHOW_POLY_Y_VERTEX] = y;
+	poly->vertices[3 * index + NEMOSHOW_POLY_Y_VERTEX] = y;
 
 	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
@@ -105,7 +113,7 @@ static inline void nemoshow_poly_set_z(struct showone *one, int index, float z)
 {
 	struct showpoly *poly = NEMOSHOW_POLY(one);
 
-	poly->vertices[poly->stride * index + NEMOSHOW_POLY_Z_VERTEX] = z;
+	poly->vertices[3 * index + NEMOSHOW_POLY_Z_VERTEX] = z;
 
 	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
@@ -114,9 +122,9 @@ static inline void nemoshow_poly_set_vertex(struct showone *one, int index, floa
 {
 	struct showpoly *poly = NEMOSHOW_POLY(one);
 
-	poly->vertices[poly->stride * index + NEMOSHOW_POLY_X_VERTEX] = x;
-	poly->vertices[poly->stride * index + NEMOSHOW_POLY_Y_VERTEX] = y;
-	poly->vertices[poly->stride * index + NEMOSHOW_POLY_Z_VERTEX] = z;
+	poly->vertices[3 * index + NEMOSHOW_POLY_X_VERTEX] = x;
+	poly->vertices[3 * index + NEMOSHOW_POLY_Y_VERTEX] = y;
+	poly->vertices[3 * index + NEMOSHOW_POLY_Z_VERTEX] = z;
 
 	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
@@ -125,7 +133,7 @@ static inline void nemoshow_poly_set_tx(struct showone *one, int index, float tx
 {
 	struct showpoly *poly = NEMOSHOW_POLY(one);
 
-	poly->vertices[poly->stride * index + NEMOSHOW_POLY_TX_VERTEX] = tx;
+	poly->texcoords[2 * index + NEMOSHOW_POLY_TX_VERTEX] = tx;
 
 	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
@@ -134,7 +142,7 @@ static inline void nemoshow_poly_set_ty(struct showone *one, int index, float ty
 {
 	struct showpoly *poly = NEMOSHOW_POLY(one);
 
-	poly->vertices[poly->stride * index + NEMOSHOW_POLY_TY_VERTEX] = ty;
+	poly->texcoords[2 * index + NEMOSHOW_POLY_TY_VERTEX] = ty;
 
 	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
@@ -143,8 +151,19 @@ static inline void nemoshow_poly_set_texcoord(struct showone *one, int index, fl
 {
 	struct showpoly *poly = NEMOSHOW_POLY(one);
 
-	poly->vertices[poly->stride * index + NEMOSHOW_POLY_TX_VERTEX] = tx;
-	poly->vertices[poly->stride * index + NEMOSHOW_POLY_TY_VERTEX] = ty;
+	poly->texcoords[2 * index + NEMOSHOW_POLY_TX_VERTEX] = tx;
+	poly->texcoords[2 * index + NEMOSHOW_POLY_TY_VERTEX] = ty;
+
+	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
+}
+
+static inline void nemoshow_poly_set_normal(struct showone *one, int index, float x, float y, float z)
+{
+	struct showpoly *poly = NEMOSHOW_POLY(one);
+
+	poly->normals[3 * index + NEMOSHOW_POLY_X_NORMAL] = x;
+	poly->normals[3 * index + NEMOSHOW_POLY_Y_NORMAL] = y;
+	poly->normals[3 * index + NEMOSHOW_POLY_Z_NORMAL] = z;
 
 	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }

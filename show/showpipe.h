@@ -35,6 +35,9 @@ struct showpipe {
 	GLuint umodelview;
 	GLuint ucolor;
 	GLuint utex0;
+	GLuint ulight;
+
+	float lights[4];
 
 	struct nemomatrix projection;
 };
@@ -47,6 +50,18 @@ extern void nemoshow_pipe_destroy(struct showone *one);
 
 extern int nemoshow_pipe_arrange(struct showone *one);
 extern int nemoshow_pipe_update(struct showone *one);
+
+static inline void nemoshow_pipe_set_light(struct showone *one, float x, float y, float z)
+{
+	struct showpipe *pipe = NEMOSHOW_PIPE(one);
+
+	pipe->lights[0] = x;
+	pipe->lights[1] = y;
+	pipe->lights[2] = z;
+	pipe->lights[3] = 1.0f;
+
+	nemoshow_one_dirty(one, NEMOSHOW_REDRAW_DIRTY);
+}
 
 extern int nemoshow_pipe_dispatch_one(struct showone *canvas, struct showone *one);
 

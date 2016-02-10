@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
 	nemoshow_one_attach(canvas, pipe);
 
 #if	0
-	atom->one = one = nemoshow_poly_create(NEMOSHOW_QUAD_TEX_POLY);
+	atom->one = one = nemoshow_poly_create(NEMOSHOW_QUAD_POLY);
 	nemoshow_attach_one(show, one);
 	nemoshow_one_attach(pipe, one);
 	nemoshow_poly_set_vertex(one, 0, -0.5f, -0.5f, 0.0f);
@@ -170,13 +170,16 @@ int main(int argc, char *argv[])
 	nemoshow_poly_set_texcoord(one, 3, 0.0f, 0.0f);
 	nemoshow_poly_set_color(one, 0.0f, 0.0f, 0.0f, 1.0f);
 	nemoshow_poly_set_canvas(one, atom->canvast);
-	nemoshow_poly_set_vbo(one, 1);
+	nemoshow_poly_use_texcoords(one, 1);
+	nemoshow_poly_use_vbo(one, 1);
 #else
-	atom->one = one = nemoshow_poly_create(NEMOSHOW_CUBE_TEX_POLY);
+	atom->one = one = nemoshow_poly_create(NEMOSHOW_CUBE_POLY);
 	nemoshow_attach_one(show, one);
 	nemoshow_one_attach(pipe, one);
 	nemoshow_poly_set_canvas(one, atom->canvast);
 	nemoshow_poly_set_color(one, 0.0f, 0.0f, 0.0f, 1.0f);
+	nemoshow_poly_use_texcoords(one, 1);
+	nemoshow_poly_use_vbo(one, 1);
 #endif
 
 	nemoshow_set_scene(show, scene);
