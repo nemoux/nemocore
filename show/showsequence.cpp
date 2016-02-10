@@ -320,6 +320,28 @@ int nemoshow_sequence_set_cattr(struct showone *one, const char *name, double r,
 	return set->nattrs;
 }
 
+int nemoshow_sequence_set_mattr(struct showone *one, const char *name, float *m, uint32_t dirty)
+{
+	struct showset *set = NEMOSHOW_SET(one);
+	struct showone *src = set->src;
+	struct nemoattr *sattr;
+	int i;
+
+	sattr = nemoobject_get(&src->object, name);
+
+	for (i = 0; i < 16; i++) {
+		set->attrs[set->nattrs] = sattr;
+		set->eattrs[set->nattrs] = m[i];
+		set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
+		set->offsets[set->nattrs] = i;
+		set->dirties[set->nattrs] = dirty;
+		set->types[set->nattrs] = NEMOSHOW_FLOAT_PROP;
+		set->nattrs++;
+	}
+
+	return set->nattrs;
+}
+
 int nemoshow_sequence_fix_dattr(struct showone *one, int index, double value)
 {
 	struct showset *set = NEMOSHOW_SET(one);

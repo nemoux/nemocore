@@ -14,7 +14,7 @@ NEMO_BEGIN_EXTERN_C
 #include <showone.h>
 
 #define	NEMOSHOW_SEQUENCE_TYPE_MAX			(32)
-#define	NEMOSHOW_SEQUENCE_SET_ATTR_MAX	(16)
+#define	NEMOSHOW_SEQUENCE_SET_ATTR_MAX	(32)
 
 struct nemoshow;
 struct showone;
@@ -83,6 +83,7 @@ extern int nemoshow_sequence_set_dattr_offset(struct showone *one, const char *n
 extern int nemoshow_sequence_set_fattr(struct showone *one, const char *name, double value, uint32_t dirty);
 extern int nemoshow_sequence_set_fattr_offset(struct showone *one, const char *name, int offset, double value, uint32_t dirty);
 extern int nemoshow_sequence_set_cattr(struct showone *one, const char *name, double r, double g, double b, double a, uint32_t dirty);
+extern int nemoshow_sequence_set_mattr(struct showone *one, const char *name, float *m, uint32_t dirty);
 
 extern int nemoshow_sequence_fix_dattr(struct showone *one, int index, double value);
 

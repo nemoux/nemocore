@@ -62,6 +62,7 @@ int main(int argc, char *argv[])
 	struct showone *sequence;
 	struct showone *set0;
 	struct showone *set1;
+	struct nemomatrix matrix;
 	int32_t width = 1920;
 	int32_t height = 1080;
 	int opt;
@@ -194,6 +195,9 @@ int main(int argc, char *argv[])
 	nemoshow_attach_one(show, blur);
 	nemoshow_filter_set_blur(blur, "high", "solid", 5.0f);
 
+	nemomatrix_init_identity(&matrix);
+	nemomatrix_rotate_y(&matrix, cos(M_PI), sin(M_PI));
+
 	set0 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set0, atom->one);
 	nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_RED_COLOR, 1.0f, NEMOSHOW_STYLE_DIRTY);
@@ -201,6 +205,7 @@ int main(int argc, char *argv[])
 	nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_BLUE_COLOR, 1.0f, NEMOSHOW_STYLE_DIRTY);
 	nemoshow_sequence_set_fattr_offset(set0, "vertex", NEMOSHOW_POLY_X_OFFSET(atom->one, 0), -0.5f, NEMOSHOW_SHAPE_DIRTY);
 	nemoshow_sequence_set_fattr_offset(set0, "vertex", NEMOSHOW_POLY_Y_OFFSET(atom->one, 0), -0.5f, NEMOSHOW_SHAPE_DIRTY);
+	nemoshow_sequence_set_mattr(set0, "matrix", matrix.d, NEMOSHOW_MATRIX_DIRTY);
 
 	set1 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set1, atom->onet);

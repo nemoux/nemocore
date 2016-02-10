@@ -66,6 +66,8 @@ struct showone *nemoshow_pipe_create(int type)
 
 	nemoshow_one_prepare(one);
 
+	nemoobject_set_reserved(&one->object, "matrix", pipe->projection.d, sizeof(float[16]));
+
 	if (one->sub == NEMOSHOW_SIMPLE_PIPE) {
 		pipe->program = glshader_create_program(simple_fragment_shader, simple_vertex_shader);
 

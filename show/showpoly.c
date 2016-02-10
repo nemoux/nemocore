@@ -31,6 +31,7 @@ struct showone *nemoshow_poly_create(int type)
 	nemoshow_one_prepare(one);
 
 	nemoobject_set_reserved(&one->object, "color", poly->colors, sizeof(float[4]));
+	nemoobject_set_reserved(&one->object, "matrix", poly->modelview.d, sizeof(float[16]));
 
 	if (one->sub == NEMOSHOW_QUAD_POLY) {
 		poly->vertices = (float *)malloc(sizeof(float) * 12);
@@ -116,6 +117,9 @@ int nemoshow_poly_update(struct showone *one)
 
 			glBindVertexArray(0);
 		}
+	}
+
+	if ((one->dirty & NEMOSHOW_MATRIX_DIRTY) != 0) {
 	}
 
 	return 0;
