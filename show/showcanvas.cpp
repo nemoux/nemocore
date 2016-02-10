@@ -19,6 +19,7 @@
 #include <showfont.h>
 #include <showfont.hpp>
 #include <showhelper.hpp>
+#include <fbohelper.h>
 #include <nemoshow.h>
 #include <nemoxml.h>
 #include <nemobox.h>
@@ -151,6 +152,8 @@ int nemoshow_canvas_set_type(struct showone *one, int type)
 		NEMOSHOW_CANVAS_CC(canvas, canvas) = new SkCanvas(NEMOSHOW_CANVAS_CC(canvas, device));
 
 		NEMOSHOW_CANVAS_CC(canvas, damage) = new SkRegion;
+	} else if (type == NEMOSHOW_CANVAS_PIPELINE_TYPE) {
+		canvas->node = nemotale_node_create_gl(canvas->width, canvas->height);
 	} else if (type == NEMOSHOW_CANVAS_PIXMAN_TYPE) {
 		canvas->node = nemotale_node_create_pixman(canvas->width, canvas->height);
 	} else if (type == NEMOSHOW_CANVAS_OPENGL_TYPE) {
@@ -623,16 +626,6 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 	NEMOSHOW_CANVAS_CC(canvas, damage)->setEmpty();
 }
 
-void nemoshow_canvas_render_pipeline(struct nemoshow *show, struct showone *one)
-{
-	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
-	struct showone *child;
-
-	nemoshow_children_for_each(child, one) {
-		nemoshow_pipe_dispatch(one, child);
-	}
-}
-
 void nemoshow_canvas_render_back(struct nemoshow *show, struct showone *one)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
@@ -675,6 +668,22 @@ int nemoshow_canvas_set_viewport(struct nemoshow *show, struct showone *one, dou
 
 		nemoshow_canvas_damage_all(one);
 		nemoshow_canvas_dirty_all(one, NEMOSHOW_SHAPE_DIRTY);
+	} else if (one->sub == NEMOSHOW_CANVAS_PIPELINE_TYPE) {
+		canvas->viewport.sx = sx;
+		canvas->viewport.sy = sy;
+
+		canvas->viewport.width = canvas->width * sx;
+		canvas->viewport.height = canvas->height * sy;
+
+		nemotale_node_set_viewport_gl(canvas->node, canvas->viewport.width, canvas->viewport.height);
+
+		fbo_prepare_context(
+				nemotale_node_get_texture(canvas->node),
+				canvas->viewport.width,
+				canvas->viewport.height,
+				&canvas->fbo, &canvas->dbo);
+
+		nemoshow_canvas_damage_all(one);
 	} else if (one->sub == NEMOSHOW_CANVAS_PIXMAN_TYPE) {
 		canvas->viewport.sx = sx;
 		canvas->viewport.sy = sy;

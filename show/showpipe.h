@@ -47,7 +47,9 @@ extern void nemoshow_pipe_destroy(struct showone *one);
 extern int nemoshow_pipe_arrange(struct showone *one);
 extern int nemoshow_pipe_update(struct showone *one);
 
-extern int nemoshow_pipe_dispatch(struct showone *canvas, struct showone *one);
+extern int nemoshow_pipe_dispatch_one(struct showone *canvas, struct showone *one);
+
+extern void nemoshow_canvas_render_pipeline(struct nemoshow *show, struct showone *one);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

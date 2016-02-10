@@ -12,40 +12,9 @@
 #include <nemotimer.h>
 #include <nemoegl.h>
 #include <atomback.h>
-#include <atommisc.h>
 #include <showhelper.h>
 #include <nemolog.h>
 #include <nemomisc.h>
-
-static void nemoback_atom_dispatch_show_render_canvas(struct nemoshow *show, struct showone *one)
-{
-	struct atomback *atom = (struct atomback *)nemoshow_get_userdata(show);
-	GLfloat color[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
-
-	glBindFramebuffer(GL_FRAMEBUFFER, atom->fbo);
-
-	glViewport(0, 0,
-			nemoshow_canvas_get_viewport_width(atom->canvas0),
-			nemoshow_canvas_get_viewport_height(atom->canvas0));
-
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	glClearDepth(0.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	nemoshow_pipe_dispatch(one, atom->pipe);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
-static void nemoback_atom_dispatch_show_resize_canvas(struct nemoshow *show, struct showone *one, int32_t width, int32_t height)
-{
-	struct atomback *atom = (struct atomback *)nemoshow_get_userdata(show);
-
-	fbo_prepare_context(
-			nemoshow_canvas_get_texture(atom->canvas0),
-			width, height,
-			&atom->fbo, &atom->dbo);
-}
 
 static void nemoback_atom_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
 {
@@ -128,9 +97,6 @@ int main(int argc, char *argv[])
 
 	atom->width = width;
 	atom->height = height;
-	atom->aspect = (double)height / (double)width;
-
-	nemomatrix_init_identity(&atom->matrix);
 
 	atom->tool = tool = nemotool_create();
 	if (tool == NULL)
@@ -181,9 +147,7 @@ int main(int argc, char *argv[])
 	atom->canvas0 = canvas = nemoshow_canvas_create();
 	nemoshow_canvas_set_width(canvas, width);
 	nemoshow_canvas_set_height(canvas, height);
-	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_OPENGL_TYPE);
-	nemoshow_canvas_set_dispatch_render(canvas, nemoback_atom_dispatch_show_render_canvas);
-	nemoshow_canvas_set_dispatch_resize(canvas, nemoback_atom_dispatch_show_resize_canvas);
+	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_PIPELINE_TYPE);
 	nemoshow_attach_one(show, canvas);
 	nemoshow_one_attach(scene, canvas);
 

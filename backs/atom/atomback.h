@@ -19,13 +19,11 @@ struct atomback {
 	struct nemotimer *timer;
 
 	int32_t width, height;
-	float aspect;
 
 	struct nemoshow *show;
 	struct showone *scene;
 	struct showone *back;
 	struct showone *canvas0;
-	struct showone *canvas9;
 	struct showone *inner, *outer, *solid;
 	struct showone *ease0;
 	struct showone *ease1;
@@ -36,19 +34,6 @@ struct atomback {
 
 	struct showone *canvast;
 	struct showone *onet;
-
-	GLuint fbo, dbo;
-	GLuint program;
-	GLuint umatrix;
-	GLuint ucolor;
-	GLuint utex0;
-	struct nemomatrix matrix;
-
-	GLuint varray;
-	GLuint vbuffer;
-	GLuint vindex;
-	GLenum mode;
-	int elements;
 
 	int is_sleeping;
 };

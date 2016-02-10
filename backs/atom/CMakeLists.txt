@@ -22,7 +22,6 @@ include_directories(
 
 add_executable(nemoback-atom
 	atomback.c
-	atommisc.c
 	)
 
 TARGET_LINK_LIBRARIES(nemoback-atom

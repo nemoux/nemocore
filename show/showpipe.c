@@ -180,7 +180,7 @@ static inline int nemoshow_pipe_dispatch_texture(struct showone *canvas, struct 
 	return 0;
 }
 
-int nemoshow_pipe_dispatch(struct showone *canvas, struct showone *one)
+int nemoshow_pipe_dispatch_one(struct showone *canvas, struct showone *one)
 {
 	if (one->sub == NEMOSHOW_SIMPLE_PIPE) {
 		return nemoshow_pipe_dispatch_simple(canvas, one);
@@ -189,4 +189,24 @@ int nemoshow_pipe_dispatch(struct showone *canvas, struct showone *one)
 	}
 
 	return 0;
+}
+
+void nemoshow_canvas_render_pipeline(struct nemoshow *show, struct showone *one)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+	struct showone *child;
+
+	glBindFramebuffer(GL_FRAMEBUFFER, canvas->fbo);
+
+	glViewport(0, 0, canvas->viewport.width, canvas->viewport.height);
+
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClearDepth(0.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	nemoshow_children_for_each(child, one) {
+		nemoshow_pipe_dispatch_one(one, child);
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

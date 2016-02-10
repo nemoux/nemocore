@@ -48,7 +48,7 @@ struct showcanvas {
 
 	struct talenode *node;
 
-	struct talefbo *fbo;
+	GLuint fbo, dbo;
 
 	double width, height;
 
@@ -95,7 +95,6 @@ extern void nemoshow_canvas_detach_pixman(struct showone *one);
 extern int nemoshow_canvas_resize_pixman(struct showone *one, int32_t width, int32_t height);
 
 extern void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one);
-extern void nemoshow_canvas_render_pipeline(struct nemoshow *show, struct showone *one);
 extern void nemoshow_canvas_render_back(struct nemoshow *show, struct showone *one);
 
 extern void nemoshow_canvas_flush_vector(struct nemoshow *show, struct showone *one);
