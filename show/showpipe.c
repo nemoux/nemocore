@@ -145,10 +145,37 @@ static inline int nemoshow_pipe_dispatch_simple(struct showone *canvas, struct s
 static inline int nemoshow_pipe_dispatch_texture(struct showone *canvas, struct showone *one)
 {
 	struct showpipe *pipe = NEMOSHOW_PIPE(one);
+	struct showpoly *poly;
+	struct showone *child;
+	struct showone *ref;
 
 	glUseProgram(pipe->program);
 
 	glUniformMatrix4fv(pipe->uprojection, 1, GL_FALSE, (GLfloat *)pipe->projection.d);
+	glUniform1i(pipe->utex0, 0);
+
+	nemoshow_children_for_each(child, one) {
+		poly = NEMOSHOW_POLY(child);
+
+		glUniform4fv(pipe->ucolor, 1, poly->colors);
+
+		ref = NEMOSHOW_REF(child, NEMOSHOW_CANVAS_REF);
+		if (ref != NULL)
+			glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_texture(ref));
+
+		if (poly->has_vbo == 0) {
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void *)&poly->vertices[0]);
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void *)&poly->vertices[3]);
+			glEnableVertexAttribArray(1);
+
+			glDrawArrays(poly->mode, 0, poly->elements);
+		} else {
+			glBindVertexArray(poly->varray);
+			glDrawArrays(poly->mode, 0, poly->elements);
+			glBindVertexArray(0);
+		}
+	}
 
 	return 0;
 }

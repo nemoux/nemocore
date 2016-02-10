@@ -75,6 +75,8 @@ extern void nemoshow_poly_detach_one(struct showone *parent, struct showone *one
 extern int nemoshow_poly_arrange(struct showone *one);
 extern int nemoshow_poly_update(struct showone *one);
 
+extern void nemoshow_poly_set_canvas(struct showone *one, struct showone *canvas);
+
 static inline void nemoshow_poly_set_x(struct showone *one, int index, float x)
 {
 	struct showpoly *poly = NEMOSHOW_POLY(one);

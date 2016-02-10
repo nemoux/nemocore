@@ -83,5 +83,20 @@ int nemoshow_poly_update(struct showone *one)
 {
 	struct showpoly *poly = NEMOSHOW_POLY(one);
 
+	if ((one->dirty & NEMOSHOW_CANVAS_DIRTY) != 0) {
+		struct showone *canvas = NEMOSHOW_REF(one, NEMOSHOW_CANVAS_REF);
+
+		if (canvas != NULL) {
+			nemoshow_canvas_render_vector(canvas->show, canvas);
+			nemoshow_canvas_flush_vector(canvas->show, canvas);
+		}
+	}
+
 	return 0;
+}
+
+void nemoshow_poly_set_canvas(struct showone *one, struct showone *canvas)
+{
+	nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_CANVAS_REF));
+	nemoshow_one_reference_one(one, canvas, NEMOSHOW_CANVAS_DIRTY, NEMOSHOW_CANVAS_REF);
 }

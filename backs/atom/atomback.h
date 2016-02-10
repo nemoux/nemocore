@@ -25,7 +25,6 @@ struct atomback {
 	struct showone *scene;
 	struct showone *back;
 	struct showone *canvas0;
-	struct showone *canvas1;
 	struct showone *canvas9;
 	struct showone *inner, *outer, *solid;
 	struct showone *ease0;
@@ -34,6 +33,9 @@ struct atomback {
 
 	struct showone *pipe;
 	struct showone *one;
+
+	struct showone *canvast;
+	struct showone *onet;
 
 	GLuint fbo, dbo;
 	GLuint program;

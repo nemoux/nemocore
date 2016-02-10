@@ -584,19 +584,12 @@ static inline void nemoshow_update_canvas(struct nemoshow *show, struct showone 
 static inline void nemoshow_render_canvas(struct nemoshow *show, struct showone *one)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
-	struct showcref *ref;
 
 	if (canvas->needs_redraw != 0) {
 		canvas->needs_redraw = 0;
 
-		nemolist_for_each(ref, &canvas->reference_list, link) {
-			nemoshow_render_canvas(show, ref->src);
-		}
-
 		if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
 			nemoshow_canvas_render_vector(show, one);
-
-			nemotale_node_flush_gl(show->tale, canvas->node);
 		} else if (one->sub == NEMOSHOW_CANVAS_PIPELINE_TYPE) {
 			nemoshow_canvas_render_pipeline(show, one);
 		} else if (one->sub == NEMOSHOW_CANVAS_BACK_TYPE) {

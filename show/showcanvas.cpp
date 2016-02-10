@@ -54,16 +54,10 @@ struct showone *nemoshow_canvas_create(void)
 	canvas->needs_redraw = 1;
 	canvas->needs_full_redraw = 1;
 
-	nemosignal_init(&canvas->redraw_signal);
-
-	nemolist_init(&canvas->reference_list);
-
 	one = &canvas->base;
 	one->type = NEMOSHOW_CANVAS_TYPE;
 	one->update = nemoshow_canvas_update;
 	one->destroy = nemoshow_canvas_destroy;
-	one->attach = nemoshow_canvas_attach_one;
-	one->detach = nemoshow_canvas_detach_one;
 
 	nemoshow_one_prepare(one);
 
@@ -94,19 +88,9 @@ struct showone *nemoshow_canvas_create(void)
 void nemoshow_canvas_destroy(struct showone *one)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
-	struct showcref *ref, *nref;
 
-	if (canvas->show != NULL) {
+	if (canvas->show != NULL)
 		nemoshow_detach_canvas(canvas->show, one);
-	}
-
-	nemolist_for_each_safe(ref, nref, &canvas->reference_list, link) {
-		nemolist_remove(&ref->link);
-		nemolist_remove(&ref->redraw_listener.link);
-		nemolist_remove(&ref->destroy_listener.link);
-
-		free(ref);
-	}
 
 	nemotale_node_destroy(canvas->node);
 
@@ -124,71 +108,6 @@ void nemoshow_canvas_destroy(struct showone *one)
 	delete static_cast<showcanvas_t *>(canvas->cc);
 
 	free(canvas);
-}
-
-static void nemoshow_canvas_handle_canvas_redraw_signal(struct nemolistener *listener, void *data)
-{
-	struct showcref *ref = (struct showcref *)container_of(listener, struct showcref, redraw_listener);
-
-	nemoshow_canvas_damage_all(ref->one);
-}
-
-static void nemoshow_canvas_handle_canvas_destroy_signal(struct nemolistener *listener, void *data)
-{
-	struct showcref *ref = (struct showcref *)container_of(listener, struct showcref, destroy_listener);
-
-	nemolist_remove(&ref->link);
-	nemolist_remove(&ref->redraw_listener.link);
-	nemolist_remove(&ref->destroy_listener.link);
-
-	free(ref);
-}
-
-void nemoshow_canvas_attach_one(struct showone *parent, struct showone *one)
-{
-	if (parent->type == NEMOSHOW_CANVAS_TYPE) {
-		struct showcanvas *canvas = NEMOSHOW_CANVAS(parent);
-		struct showcanvas *src = NEMOSHOW_CANVAS(one);
-		struct showcref *ref;
-
-		ref = (struct showcref *)malloc(sizeof(struct showcref));
-		if (ref == NULL)
-			return;
-
-		ref->src = one;
-		ref->one = parent;
-
-		ref->redraw_listener.notify = nemoshow_canvas_handle_canvas_redraw_signal;
-		nemosignal_add(&src->redraw_signal, &ref->redraw_listener);
-		ref->destroy_listener.notify = nemoshow_canvas_handle_canvas_destroy_signal;
-		nemosignal_add(&one->destroy_signal, &ref->destroy_listener);
-
-		nemolist_insert(&canvas->reference_list, &ref->link);
-	} else {
-		nemoshow_one_attach_one(parent, one);
-	}
-}
-
-void nemoshow_canvas_detach_one(struct showone *parent, struct showone *one)
-{
-	if (parent->type == NEMOSHOW_CANVAS_TYPE) {
-		struct showcanvas *canvas = NEMOSHOW_CANVAS(parent);
-		struct showcref *ref, *nref;
-
-		nemolist_for_each_safe(ref, nref, &canvas->reference_list, link) {
-			if (ref->src == one) {
-				nemolist_remove(&ref->link);
-				nemolist_remove(&ref->redraw_listener.link);
-				nemolist_remove(&ref->destroy_listener.link);
-
-				free(ref);
-
-				break;
-			}
-		}
-	} else {
-		nemoshow_one_detach_one(parent, one);
-	}
 }
 
 static int nemoshow_canvas_compare(const void *a, const void *b)
@@ -721,6 +640,13 @@ void nemoshow_canvas_render_back(struct nemoshow *show, struct showone *one)
 	nemotale_node_fill_pixman(canvas->node, canvas->fills[2], canvas->fills[1], canvas->fills[0], canvas->fills[3]);
 }
 
+void nemoshow_canvas_flush_vector(struct nemoshow *show, struct showone *one)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	nemotale_node_flush_gl(show->tale, canvas->node);
+}
+
 int nemoshow_canvas_set_viewport(struct nemoshow *show, struct showone *one, double sx, double sy)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
@@ -786,7 +712,7 @@ void nemoshow_canvas_damage_one(struct showone *one, struct showone *child)
 
 	canvas->needs_redraw = 1;
 
-	nemosignal_emit(&canvas->redraw_signal, canvas);
+	nemoshow_one_dirty(one, NEMOSHOW_CANVAS_DIRTY);
 }
 
 void nemoshow_canvas_damage_all(struct showone *one)
@@ -798,7 +724,7 @@ void nemoshow_canvas_damage_all(struct showone *one)
 	canvas->needs_redraw = 1;
 	canvas->needs_full_redraw = 1;
 
-	nemosignal_emit(&canvas->redraw_signal, canvas);
+	nemoshow_one_dirty(one, NEMOSHOW_CANVAS_DIRTY);
 }
 
 void nemoshow_canvas_dirty_all(struct showone *one, uint32_t dirty)

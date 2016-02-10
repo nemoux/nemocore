@@ -33,16 +33,6 @@ struct nemoshow;
 typedef void (*nemoshow_canvas_dispatch_render_t)(struct nemoshow *show, struct showone *one);
 typedef void (*nemoshow_canvas_dispatch_resize_t)(struct nemoshow *show, struct showone *one, int32_t width, int32_t height);
 
-struct showcref {
-	struct nemolistener redraw_listener;
-	struct nemolistener destroy_listener;
-
-	struct nemolist link;
-
-	struct showone *src;
-	struct showone *one;
-};
-
 struct showcanvas {
 	struct showone base;
 
@@ -78,9 +68,6 @@ struct showcanvas {
 	int needs_redraw;
 	int needs_full_redraw;
 
-	struct nemosignal redraw_signal;
-	struct nemolist reference_list;
-
 	nemoshow_canvas_dispatch_render_t dispatch_render;
 	nemoshow_canvas_dispatch_resize_t dispatch_resize;
 
@@ -111,6 +98,8 @@ extern void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone 
 extern void nemoshow_canvas_render_pipeline(struct nemoshow *show, struct showone *one);
 extern void nemoshow_canvas_render_back(struct nemoshow *show, struct showone *one);
 
+extern void nemoshow_canvas_flush_vector(struct nemoshow *show, struct showone *one);
+
 extern int nemoshow_canvas_set_viewport(struct nemoshow *show, struct showone *one, double sx, double sy);
 
 extern void nemoshow_canvas_damage_one(struct showone *one, struct showone *child);
@@ -118,13 +107,6 @@ extern void nemoshow_canvas_damage_all(struct showone *one);
 extern void nemoshow_canvas_dirty_all(struct showone *one, uint32_t dirty);
 
 extern struct showone *nemoshow_canvas_pick_one(struct showone *one, double x, double y);
-
-static inline void nemoshow_canvas_needs_redraw(struct showone *one)
-{
-	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
-
-	canvas->needs_redraw = 1;
-}
 
 static inline void nemoshow_canvas_set_dispatch_render(struct showone *one, nemoshow_canvas_dispatch_render_t dispatch_render)
 {
