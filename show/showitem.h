@@ -168,6 +168,7 @@ extern void nemoshow_item_path_cubicto(struct showone *one, double x0, double y0
 extern void nemoshow_item_path_close(struct showone *one, int has_stroke, int has_fill);
 extern void nemoshow_item_path_cmd(struct showone *one, const char *cmd, int has_stroke, int has_fill);
 extern void nemoshow_item_path_arc(struct showone *one, double x, double y, double width, double height, double from, double to, int has_stroke, int has_fill);
+extern void nemoshow_item_path_text(struct showone *one, const char *font, int fontsize, const char *text, int textlength, double x, double y, int has_stroke, int has_fill);
 extern void nemoshow_item_path_append(struct showone *one, struct showone *src);
 
 extern void nemoshow_item_path_translate(struct showone *one, double x, double y);

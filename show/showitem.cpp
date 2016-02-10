@@ -469,7 +469,8 @@ static inline void nemoshow_item_update_pathgroup(struct nemoshow *show, struct 
 
 				text = nemoobject_gets(&child->object, "d");
 
-				SkSafeUnref(paint.setTypeface(
+				SkSafeUnref(
+						paint.setTypeface(
 							SkTypeface::CreateFromFile(
 								fontconfig_get_path(
 									nemoobject_gets(&child->object, "font"),
@@ -1174,6 +1175,46 @@ void nemoshow_item_path_arc(struct showone *one, double x, double y, double widt
 			NEMOSHOW_ITEM_CC(item, fillpath) = new SkPath;
 
 		NEMOSHOW_ITEM_CC(item, fillpath)->addArc(rect, from, to);
+	}
+
+	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
+}
+
+void nemoshow_item_path_text(struct showone *one, const char *font, int fontsize, const char *text, int textlength, double x, double y, int has_stroke, int has_fill)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+	SkPaint paint;
+	SkPath path;
+	SkTypeface *face;
+
+	SkSafeUnref(
+			paint.setTypeface(
+				SkTypeface::CreateFromFile(
+					fontconfig_get_path(
+						font,
+						NULL,
+						FC_SLANT_ROMAN,
+						FC_WEIGHT_NORMAL,
+						FC_WIDTH_NORMAL,
+						FC_MONO), 0)));
+
+	paint.setAntiAlias(true);
+	paint.setTextSize(fontsize);
+	paint.getTextPath(text, textlength, x, y, &path);
+
+	NEMOSHOW_ITEM_CC(item, path)->addPath(path);
+
+	if (has_stroke != 0) {
+		if (NEMOSHOW_ITEM_CC(item, strokepath) == NULL)
+			NEMOSHOW_ITEM_CC(item, strokepath) = new SkPath;
+
+		NEMOSHOW_ITEM_CC(item, strokepath)->addPath(path);
+	}
+	if (has_fill != 0) {
+		if (NEMOSHOW_ITEM_CC(item, fillpath) == NULL)
+			NEMOSHOW_ITEM_CC(item, fillpath) = new SkPath;
+
+		NEMOSHOW_ITEM_CC(item, fillpath)->addPath(path);
 	}
 
 	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
