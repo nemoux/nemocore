@@ -83,3 +83,31 @@ void glshader_finish(struct glshader *shader)
 	shader->fragment_shader = 0;
 	shader->program = 0;
 }
+
+GLuint glshader_create_program(const char *fshader, const char *vshader)
+{
+	GLuint frag, vert;
+	GLuint program;
+	GLint status;
+
+	frag = glshader_compile(GL_FRAGMENT_SHADER, 1, &fshader);
+	vert = glshader_compile(GL_VERTEX_SHADER, 1, &vshader);
+
+	program = glCreateProgram();
+	glAttachShader(program, frag);
+	glAttachShader(program, vert);
+	glLinkProgram(program);
+
+	glGetProgramiv(program, GL_LINK_STATUS, &status);
+	if (!status) {
+		GLsizei len;
+		char log[1000];
+
+		glGetProgramInfoLog(program, 1000, &len, log);
+		fprintf(stderr, "Error: linking:\n%*s\n", len, log);
+
+		return 0;
+	}
+
+	return program;
+}

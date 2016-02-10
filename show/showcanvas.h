@@ -24,6 +24,7 @@ typedef enum {
 	NEMOSHOW_CANVAS_OPENGL_TYPE = 2,
 	NEMOSHOW_CANVAS_PIXMAN_TYPE = 3,
 	NEMOSHOW_CANVAS_BACK_TYPE = 4,
+	NEMOSHOW_CANVAS_PIPELINE_TYPE = 5,
 	NEMOSHOW_CANVAS_LAST_TYPE
 } NemoShowCanvasType;
 
@@ -107,6 +108,7 @@ extern void nemoshow_canvas_detach_pixman(struct showone *one);
 extern int nemoshow_canvas_resize_pixman(struct showone *one, int32_t width, int32_t height);
 
 extern void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one);
+extern void nemoshow_canvas_render_pipeline(struct nemoshow *show, struct showone *one);
 extern void nemoshow_canvas_render_back(struct nemoshow *show, struct showone *one);
 
 extern int nemoshow_canvas_set_viewport(struct nemoshow *show, struct showone *one, double sx, double sy);

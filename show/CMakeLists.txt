@@ -37,6 +37,8 @@ add_library(nemoshow SHARED
 	showhelper.cpp
 	showmisc.cpp
 	svghelper.cpp
+	showpoly.c
+	showpipe.c
 	)
 
 TARGET_LINK_LIBRARIES(nemoshow
@@ -70,6 +72,8 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/show/showeasy.h
 	${CMAKE_SOURCE_DIR}/show/showmisc.h
 	${CMAKE_SOURCE_DIR}/show/svghelper.h
+	${CMAKE_SOURCE_DIR}/show/showpoly.h
+	${CMAKE_SOURCE_DIR}/show/showpipe.h
 	)
 
 set(NEMOSHOW_PKGCONFIG_REQUIRES "nemoasst nemotale skia harfbuzz")

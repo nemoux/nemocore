@@ -31,6 +31,8 @@ NEMO_BEGIN_EXTERN_C
 #include <showfont.h>
 #include <showeasy.h>
 #include <svghelper.h>
+#include <showpoly.h>
+#include <showpipe.h>
 
 #include <nemotale.h>
 #include <nemolist.h>

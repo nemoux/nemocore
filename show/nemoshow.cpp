@@ -597,10 +597,10 @@ static inline void nemoshow_render_canvas(struct nemoshow *show, struct showone 
 			nemoshow_canvas_render_vector(show, one);
 
 			nemotale_node_flush_gl(show->tale, canvas->node);
+		} else if (one->sub == NEMOSHOW_CANVAS_PIPELINE_TYPE) {
+			nemoshow_canvas_render_pipeline(show, one);
 		} else if (one->sub == NEMOSHOW_CANVAS_BACK_TYPE) {
 			nemoshow_canvas_render_back(show, one);
-
-			nemotale_node_flush_gl(show->tale, canvas->node);
 		}
 
 		if (canvas->dispatch_render != NULL)

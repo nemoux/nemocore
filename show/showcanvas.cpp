@@ -11,6 +11,8 @@
 #include <showcanvas.hpp>
 #include <showitem.h>
 #include <showitem.hpp>
+#include <showpoly.h>
+#include <showpipe.h>
 #include <showmatrix.h>
 #include <showmatrix.hpp>
 #include <showpath.h>
@@ -672,7 +674,6 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 	struct showone *child;
-	int i;
 
 	if (canvas->needs_full_redraw == 0) {
 		NEMOSHOW_CANVAS_CC(canvas, canvas)->save();
@@ -701,6 +702,16 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 	}
 
 	NEMOSHOW_CANVAS_CC(canvas, damage)->setEmpty();
+}
+
+void nemoshow_canvas_render_pipeline(struct nemoshow *show, struct showone *one)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+	struct showone *child;
+
+	nemoshow_children_for_each(child, one) {
+		nemoshow_pipe_dispatch(one, child);
+	}
 }
 
 void nemoshow_canvas_render_back(struct nemoshow *show, struct showone *one)

@@ -122,6 +122,8 @@ extern GLuint glshader_compile(GLenum type, int count, const char **sources);
 extern int glshader_prepare(struct glshader *shader, const char *vertex_source, const char *fragment_source, int debug);
 extern void glshader_finish(struct glshader *shader);
 
+extern GLuint glshader_create_program(const char *fshader, const char *vshader);
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

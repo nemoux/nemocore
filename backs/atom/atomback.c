@@ -32,23 +32,9 @@ static void nemoback_atom_dispatch_show_render_canvas(struct nemoshow *show, str
 	glClearDepth(0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glUseProgram(atom->program);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_texture(atom->canvas1));
-
-	glUniformMatrix4fv(atom->umatrix, 1, GL_FALSE, (GLfloat *)atom->matrix.d);
-	glUniform4fv(atom->ucolor, 1, color);
-	glUniform1i(atom->utex0, 0);
-
-	glBindVertexArray(atom->varray);
-	glDrawArrays(atom->mode, 0, atom->elements);
-	glBindVertexArray(0);
+	nemoshow_pipe_dispatch(one, atom->pipe);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	nemoshow_canvas_damage_all(one);
-	nemoshow_dispatch_feedback(show);
 }
 
 static void nemoback_atom_dispatch_show_resize_canvas(struct nemoshow *show, struct showone *one, int32_t width, int32_t height)
@@ -101,7 +87,11 @@ int main(int argc, char *argv[])
 	struct showone *canvas;
 	struct showone *blur;
 	struct showone *ease;
+	struct showone *pipe;
 	struct showone *one;
+	struct showtransition *trans;
+	struct showone *sequence;
+	struct showone *set0;
 	int32_t width = 1920;
 	int32_t height = 1080;
 	int opt;
@@ -179,6 +169,19 @@ int main(int argc, char *argv[])
 	nemoshow_attach_one(show, canvas);
 	nemoshow_one_attach(scene, canvas);
 
+	atom->pipe = pipe = nemoshow_pipe_create(NEMOSHOW_SIMPLE_PIPE);
+	nemoshow_attach_one(show, pipe);
+	nemoshow_one_attach(canvas, pipe);
+
+	atom->one = one = nemoshow_poly_create(NEMOSHOW_QUAD_POLY);
+	nemoshow_attach_one(show, one);
+	nemoshow_one_attach(pipe, one);
+	nemoshow_poly_set_vertex(one, 0, -0.0f, -0.0f, 0.0f);
+	nemoshow_poly_set_vertex(one, 1, 0.5f, -0.5f, 0.0f);
+	nemoshow_poly_set_vertex(one, 2, 0.5f, 0.5f, 0.0f);
+	nemoshow_poly_set_vertex(one, 3, -0.5f, 0.5f, 0.0f);
+	nemoshow_poly_set_color(one, 0.0f, 0.0f, 0.0f, 1.0f);
+
 	atom->canvas1 = canvas = nemoshow_canvas_create();
 	nemoshow_canvas_set_width(canvas, width);
 	nemoshow_canvas_set_height(canvas, height);
@@ -221,20 +224,23 @@ int main(int argc, char *argv[])
 	nemoshow_attach_one(show, blur);
 	nemoshow_filter_set_blur(blur, "high", "solid", 5.0f);
 
-	nemoback_atom_prepare_shader(atom,
-			nemoback_atom_create_shader(texture_fragment_shader, simple_vertex_shader));
+	set0 = nemoshow_sequence_create_set();
+	nemoshow_sequence_set_source(set0, atom->one);
+	nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_RED_COLOR, 1.0f, NEMOSHOW_STYLE_DIRTY);
+	nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_GREEN_COLOR, 1.0f, NEMOSHOW_STYLE_DIRTY);
+	nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_BLUE_COLOR, 1.0f, NEMOSHOW_STYLE_DIRTY);
+	nemoshow_sequence_set_fattr_offset(set0, "vertex", NEMOSHOW_POLY_X_OFFSET(atom->one, 0), -0.5f, NEMOSHOW_SHAPE_DIRTY);
+	nemoshow_sequence_set_fattr_offset(set0, "vertex", NEMOSHOW_POLY_Y_OFFSET(atom->one, 0), -0.5f, NEMOSHOW_SHAPE_DIRTY);
 
-	float vertices[] = {
-		-0.5f, -0.5f, 0.0f, 0.0f, 1.0f,
-		0.5f, -0.5f, 0.0f, 1.0f, 1.0f,
-		0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
-		-0.5f, -0.5f, 0.0f, 0.0f, 1.0f,
-		0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
-		-0.5f, 0.5f, 0.0f, 0.0f, 0.0f,
-	};
+	sequence = nemoshow_sequence_create_easy(atom->show,
+			nemoshow_sequence_create_frame_easy(atom->show,
+				1.0f, set0, NULL),
+			NULL);
 
-	nemoback_atom_create_buffer(atom);
-	nemoback_atom_prepare_buffer(atom, GL_TRIANGLES, vertices, sizeof(vertices) / sizeof(vertices[0]));
+	trans = nemoshow_transition_create(atom->ease1, 1800, 0);
+	nemoshow_transition_check_one(trans, atom->one);
+	nemoshow_transition_attach_sequence(trans, sequence);
+	nemoshow_attach_transition(atom->show, trans);
 
 	nemoshow_dispatch_frame(show);
 
