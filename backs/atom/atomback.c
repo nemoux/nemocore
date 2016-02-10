@@ -182,10 +182,7 @@ int main(int argc, char *argv[])
 			0.5f * 1080.0f / 1920.0f,
 			0.5f,
 			0.5f);
-	nemoshow_poly_set_rotate(one,
-			M_PI / 16.0f,
-			M_PI / 16.0f,
-			0.0f);
+	nemoshow_poly_set_rotate(one, 30.0f, 30.0f, 0.0f);
 	nemoshow_poly_use_texcoords(one, 1);
 	nemoshow_poly_use_normals(one, 1);
 	nemoshow_poly_use_vbo(one, 1);
@@ -217,8 +214,8 @@ int main(int argc, char *argv[])
 
 	set0 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set0, atom->one);
-	nemoshow_sequence_set_dattr(set0, "rx", M_PI / 16.0f, NEMOSHOW_MATRIX_DIRTY);
-	nemoshow_sequence_set_dattr(set0, "ry", M_PI / 16.0f, NEMOSHOW_MATRIX_DIRTY);
+	nemoshow_sequence_set_dattr(set0, "rx", 15.0f, NEMOSHOW_MATRIX_DIRTY);
+	nemoshow_sequence_set_dattr(set0, "ry", 15.0f, NEMOSHOW_MATRIX_DIRTY);
 
 	set1 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set1, atom->onet);

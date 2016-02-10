@@ -308,9 +308,9 @@ int nemoshow_poly_update(struct showone *one)
 
 	if ((one->dirty & NEMOSHOW_MATRIX_DIRTY) != 0) {
 		nemomatrix_init_identity(&poly->modelview);
-		nemomatrix_rotate_x(&poly->modelview, cos(poly->rx), sin(poly->rx));
-		nemomatrix_rotate_y(&poly->modelview, cos(poly->ry), sin(poly->ry));
-		nemomatrix_rotate_z(&poly->modelview, cos(poly->rz), sin(poly->rz));
+		nemomatrix_rotate_x(&poly->modelview, cos(poly->rx * M_PI / 180.0f), sin(poly->rx * M_PI / 180.0f));
+		nemomatrix_rotate_y(&poly->modelview, cos(poly->ry * M_PI / 180.0f), sin(poly->ry * M_PI / 180.0f));
+		nemomatrix_rotate_z(&poly->modelview, cos(poly->rz * M_PI / 180.0f), sin(poly->rz * M_PI / 180.0f));
 		nemomatrix_scale_xyz(&poly->modelview, poly->sx, poly->sy, poly->sz);
 		nemomatrix_translate_xyz(&poly->modelview, poly->tx, poly->ty, poly->tz);
 	}

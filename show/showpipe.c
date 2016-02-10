@@ -171,9 +171,9 @@ int nemoshow_pipe_update(struct showone *one)
 
 	if ((one->dirty & NEMOSHOW_MATRIX_DIRTY) != 0) {
 		nemomatrix_init_identity(&pipe->projection);
-		nemomatrix_rotate_x(&pipe->projection, cos(pipe->rx), sin(pipe->rx));
-		nemomatrix_rotate_y(&pipe->projection, cos(pipe->ry), sin(pipe->ry));
-		nemomatrix_rotate_z(&pipe->projection, cos(pipe->rz), sin(pipe->rz));
+		nemomatrix_rotate_x(&pipe->projection, cos(pipe->rx * M_PI / 180.0f), sin(pipe->rx * M_PI / 180.0f));
+		nemomatrix_rotate_y(&pipe->projection, cos(pipe->ry * M_PI / 180.0f), sin(pipe->ry * M_PI / 180.0f));
+		nemomatrix_rotate_z(&pipe->projection, cos(pipe->rz * M_PI / 180.0f), sin(pipe->rz * M_PI / 180.0f));
 		nemomatrix_scale_xyz(&pipe->projection, pipe->sx, pipe->sy * -1.0f, pipe->sz);
 		nemomatrix_translate_xyz(&pipe->projection, pipe->tx, pipe->ty, pipe->tz);
 	}
