@@ -43,6 +43,7 @@ static void nemoback_atom_dispatch_canvas_fullscreen(struct nemocanvas *canvas, 
 int main(int argc, char *argv[])
 {
 	struct option options[] = {
+		{ "file",						required_argument,			NULL,		'f' },
 		{ "width",					required_argument,			NULL,		'w' },
 		{ "height",					required_argument,			NULL,		'h' },
 		{ "log",						required_argument,			NULL,		'l' },
@@ -62,17 +63,24 @@ int main(int argc, char *argv[])
 	struct showone *sequence;
 	struct showone *set0;
 	struct showone *set1;
+	struct showone *set2;
+	struct showone *set3;
+	char *filepath = NULL;
 	int32_t width = 1920;
 	int32_t height = 1080;
 	int opt;
 
 	nemolog_set_file(2);
 
-	while (opt = getopt_long(argc, argv, "w:h:l:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "f:w:h:l:", options, NULL)) {
 		if (opt == -1)
 			break;
 
 		switch (opt) {
+			case 'f':
+				filepath = strdup(optarg);
+				break;
+
 			case 'w':
 				width = strtoul(optarg, NULL, 10);
 				break;
@@ -89,6 +97,9 @@ int main(int argc, char *argv[])
 				break;
 		}
 	}
+
+	if (filepath == NULL)
+		return 0;
 
 	atom = (struct atomback *)malloc(sizeof(struct atomback));
 	if (atom == NULL)
@@ -128,21 +139,22 @@ int main(int argc, char *argv[])
 	nemoshow_one_attach(scene, canvas);
 
 	atom->canvast = canvas = nemoshow_canvas_create();
-	nemoshow_canvas_set_width(canvas, width);
-	nemoshow_canvas_set_height(canvas, height);
+	nemoshow_canvas_set_width(canvas, 512.0f);
+	nemoshow_canvas_set_height(canvas, 512.0f);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
 	nemoshow_attach_one(show, canvas);
 
-	atom->onet = one = nemoshow_item_create(NEMOSHOW_RRECT_ITEM);
+	atom->onet = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
 	nemoshow_attach_one(show, one);
 	nemoshow_one_attach(canvas, one);
 	nemoshow_item_set_x(one, 0.0f);
 	nemoshow_item_set_y(one, 0.0f);
-	nemoshow_item_set_width(one, width);
-	nemoshow_item_set_height(one, height);
-	nemoshow_item_set_rx(one, 10.0f);
-	nemoshow_item_set_ry(one, 10.0f);
+	nemoshow_item_set_width(one, 512.0f);
+	nemoshow_item_set_height(one, 512.0f);
 	nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
+	nemoshow_item_set_tsr(one);
+	nemoshow_item_pivot(one, 512.0f / 2.0f, 512.0f / 2.0f);
+	nemoshow_item_load_svg(one, filepath);
 
 	atom->canvas0 = canvas = nemoshow_canvas_create();
 	nemoshow_canvas_set_width(canvas, width);
@@ -182,7 +194,7 @@ int main(int argc, char *argv[])
 			0.5f * nemoshow_canvas_get_aspect_ratio(atom->canvas0),
 			0.5f,
 			0.5f);
-	nemoshow_poly_set_rotate(one, 30.0f, 30.0f, 0.0f);
+	nemoshow_poly_set_rotate(one, 0.0f, 0.0f, 0.0f);
 	nemoshow_poly_use_texcoords(one, 1);
 	nemoshow_poly_use_normals(one, 1);
 	nemoshow_poly_use_vbo(one, 1);
@@ -214,21 +226,33 @@ int main(int argc, char *argv[])
 
 	set0 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set0, atom->one);
-	nemoshow_sequence_set_dattr(set0, "rx", 15.0f, NEMOSHOW_MATRIX_DIRTY);
-	nemoshow_sequence_set_dattr(set0, "ry", 15.0f, NEMOSHOW_MATRIX_DIRTY);
+	nemoshow_sequence_set_dattr(set0, "rx", 360.0f, NEMOSHOW_MATRIX_DIRTY);
+	nemoshow_sequence_set_dattr(set0, "ry", 360.0f, NEMOSHOW_MATRIX_DIRTY);
 
 	set1 = nemoshow_sequence_create_set();
-	nemoshow_sequence_set_source(set1, atom->onet);
-	nemoshow_sequence_set_cattr(set1, "fill", 0xff, 0x8c, 0x32, 0xff, NEMOSHOW_STYLE_DIRTY);
+	nemoshow_sequence_set_source(set1, atom->one);
+	nemoshow_sequence_set_dattr(set1, "rx", 0.0f, NEMOSHOW_MATRIX_DIRTY);
+	nemoshow_sequence_set_dattr(set1, "ry", 0.0f, NEMOSHOW_MATRIX_DIRTY);
+
+	set2 = nemoshow_sequence_create_set();
+	nemoshow_sequence_set_source(set2, atom->onet);
+	nemoshow_sequence_set_cattr(set2, "fill", 0xff, 0x8c, 0x32, 0xff, NEMOSHOW_STYLE_DIRTY);
+
+	set3 = nemoshow_sequence_create_set();
+	nemoshow_sequence_set_source(set3, atom->onet);
+	nemoshow_sequence_set_cattr(set3, "fill", 0x1e, 0xdc, 0xdc, 0xff, NEMOSHOW_STYLE_DIRTY);
 
 	sequence = nemoshow_sequence_create_easy(atom->show,
 			nemoshow_sequence_create_frame_easy(atom->show,
-				1.0f, set0, set1, NULL),
+				0.5f, set0, set2, NULL),
+			nemoshow_sequence_create_frame_easy(atom->show,
+				1.0f, set1, set3, NULL),
 			NULL);
 
-	trans = nemoshow_transition_create(atom->ease1, 6000, 0);
+	trans = nemoshow_transition_create(atom->ease0, 18000, 0);
 	nemoshow_transition_check_one(trans, atom->one);
 	nemoshow_transition_check_one(trans, atom->onet);
+	nemoshow_transition_set_repeat(trans, 0);
 	nemoshow_transition_attach_sequence(trans, sequence);
 	nemoshow_attach_transition(atom->show, trans);
 
@@ -253,7 +277,7 @@ int main(int argc, char *argv[])
 				1.0f, set1, NULL),
 			NULL);
 
-	trans = nemoshow_transition_create(atom->ease1, 12000, 0);
+	trans = nemoshow_transition_create(atom->ease0, 12000, 0);
 	nemoshow_transition_check_one(trans, atom->pipe);
 	nemoshow_transition_set_repeat(trans, 0);
 	nemoshow_transition_attach_sequence(trans, sequence);
