@@ -531,6 +531,8 @@ static inline void nemoshow_item_update_path(struct nemoshow *show, struct showo
 
 		nemoshow_item_update_pathgroup(show, item, one);
 
+		item->pathlength = nemoshow_helper_get_path_length(NEMOSHOW_ITEM_CC(item, path));
+
 		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 	}
 }
