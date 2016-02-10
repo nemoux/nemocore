@@ -156,10 +156,11 @@ int main(int argc, char *argv[])
 	nemoshow_attach_one(show, pipe);
 	nemoshow_one_attach(canvas, pipe);
 
+#if	0
 	atom->one = one = nemoshow_poly_create(NEMOSHOW_QUAD_TEX_POLY);
 	nemoshow_attach_one(show, one);
 	nemoshow_one_attach(pipe, one);
-	nemoshow_poly_set_vertex(one, 0, -0.0f, -0.0f, 0.0f);
+	nemoshow_poly_set_vertex(one, 0, -0.5f, -0.5f, 0.0f);
 	nemoshow_poly_set_vertex(one, 1, 0.5f, -0.5f, 0.0f);
 	nemoshow_poly_set_vertex(one, 2, 0.5f, 0.5f, 0.0f);
 	nemoshow_poly_set_vertex(one, 3, -0.5f, 0.5f, 0.0f);
@@ -170,6 +171,13 @@ int main(int argc, char *argv[])
 	nemoshow_poly_set_color(one, 0.0f, 0.0f, 0.0f, 1.0f);
 	nemoshow_poly_set_canvas(one, atom->canvast);
 	nemoshow_poly_set_vbo(one, 1);
+#else
+	atom->one = one = nemoshow_poly_create(NEMOSHOW_CUBE_TEX_POLY);
+	nemoshow_attach_one(show, one);
+	nemoshow_one_attach(pipe, one);
+	nemoshow_poly_set_canvas(one, atom->canvast);
+	nemoshow_poly_set_color(one, 0.0f, 0.0f, 0.0f, 1.0f);
+#endif
 
 	nemoshow_set_scene(show, scene);
 	nemoshow_set_size(show, width, height);
@@ -196,15 +204,15 @@ int main(int argc, char *argv[])
 	nemoshow_filter_set_blur(blur, "high", "solid", 5.0f);
 
 	nemomatrix_init_identity(&matrix);
-	nemomatrix_rotate_y(&matrix, cos(M_PI), sin(M_PI));
+	nemomatrix_rotate_y(&matrix, cos(M_PI / 16.0f), sin(M_PI / 16.0f));
+	nemomatrix_rotate_x(&matrix, cos(M_PI / 16.0f), sin(M_PI / 16.0f));
+	nemomatrix_scale_xyz(&matrix, 0.3f, 0.3f, 0.3f);
 
 	set0 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set0, atom->one);
 	nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_RED_COLOR, 1.0f, NEMOSHOW_STYLE_DIRTY);
 	nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_GREEN_COLOR, 1.0f, NEMOSHOW_STYLE_DIRTY);
 	nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_BLUE_COLOR, 1.0f, NEMOSHOW_STYLE_DIRTY);
-	nemoshow_sequence_set_fattr_offset(set0, "vertex", NEMOSHOW_POLY_X_OFFSET(atom->one, 0), -0.5f, NEMOSHOW_SHAPE_DIRTY);
-	nemoshow_sequence_set_fattr_offset(set0, "vertex", NEMOSHOW_POLY_Y_OFFSET(atom->one, 0), -0.5f, NEMOSHOW_SHAPE_DIRTY);
 	nemoshow_sequence_set_mattr(set0, "matrix", matrix.d, NEMOSHOW_MATRIX_DIRTY);
 
 	set1 = nemoshow_sequence_create_set();

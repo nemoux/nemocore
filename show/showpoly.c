@@ -8,6 +8,84 @@
 #include <showpoly.h>
 #include <nemomisc.h>
 
+static const float quad_vertices[] = {
+	-1.0f, -1.0f, 0.0f,
+	1.0f, -1.0f, 0.0f,
+	1.0f, 1.0f, 0.0f,
+	-1.0f, 1.0f, 0.0f
+};
+
+static const float quad_tex_vertices[] = {
+	-1.0f, -1.0f, 0.0f, 0.0f, 1.0f,
+	1.0f, -1.0f, 0.0f, 1.0f, 1.0f,
+	1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+	-1.0f, 1.0f, 0.0f, 0.0f, 0.0f
+};
+
+static const float cube_vertices[] = {
+	-1.0f, -1.0f, -1.0f,
+	1.0f, -1.0f, -1.0f,
+	1.0f, -1.0f, 1.0f,
+	-1.0f, -1.0f, 1.0f,
+
+	-1.0f, 1.0f, -1.0f,
+	-1.0f, 1.0f, 1.0f,
+	1.0f, 1.0f, 1.0f,
+	1.0f, 1.0f, -1.0f,
+
+	-1.0f, -1.0f, -1.0f,
+	-1.0f, -1.0f, 1.0f,
+	-1.0f, 1.0f, 1.0f,
+	-1.0f, 1.0f, -1.0f,
+
+	1.0f, -1.0f, -1.0f,
+	1.0f, 1.0f, -1.0f,
+	1.0f, 1.0f, 1.0f,
+	1.0f, -1.0f, 1.0f,
+
+	-1.0f, -1.0f, -1.0f,
+	-1.0f, 1.0f, -1.0f,
+	1.0f, 1.0f, -1.0f,
+	1.0f, -1.0f, -1.0f,
+
+	-1.0f, 1.0f, 1.0f,
+	-1.0f, -1.0f, 1.0f,
+	1.0f, -1.0f, 1.0f,
+	1.0f, 1.0f, 1.0f,
+};
+
+static const float cube_tex_vertices[] = {
+	-1.0f, -1.0f, -1.0f, 0.0f, 1.0f,
+	1.0f, -1.0f, -1.0f, 1.0f, 1.0f,
+	1.0f, -1.0f, 1.0f, 1.0f, 0.0f,
+	-1.0f, -1.0f, 1.0f, 0.0f, 0.0f,
+
+	-1.0f, 1.0f, -1.0f, 0.0f, 1.0f,
+	-1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+	1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+	1.0f, 1.0f, -1.0f, 0.0f, 0.0f,
+
+	-1.0f, -1.0f, -1.0f, 0.0f, 1.0f,
+	-1.0f, -1.0f, 1.0f, 1.0f, 1.0f,
+	-1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+	-1.0f, 1.0f, -1.0f, 0.0f, 0.0f,
+
+	1.0f, -1.0f, -1.0f, 0.0f, 1.0f,
+	1.0f, 1.0f, -1.0f, 1.0f, 1.0f,
+	1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+	1.0f, -1.0f, 1.0f, 0.0f, 0.0f,
+
+	-1.0f, -1.0f, -1.0f, 0.0f, 1.0f,
+	-1.0f, 1.0f, -1.0f, 1.0f, 1.0f,
+	1.0f, 1.0f, -1.0f, 1.0f, 0.0f,
+	1.0f, -1.0f, -1.0f, 0.0f, 0.0f,
+
+	-1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+	-1.0f, -1.0f, 1.0f, 1.0f, 1.0f,
+	1.0f, -1.0f, 1.0f, 1.0f, 0.0f,
+	1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+};
+
 struct showone *nemoshow_poly_create(int type)
 {
 	struct showpoly *poly;
@@ -35,22 +113,48 @@ struct showone *nemoshow_poly_create(int type)
 
 	if (one->sub == NEMOSHOW_QUAD_POLY) {
 		poly->vertices = (float *)malloc(sizeof(float) * 12);
-		poly->nvertices = 4;
+		poly->nvertices = 12 / 3;
 		poly->stride = 3;
 
 		poly->mode = GL_TRIANGLE_FAN;
-		poly->elements = 4;
+		poly->elements = 12 / 3;
 
 		nemoobject_set_reserved(&one->object, "vertex", poly->vertices, sizeof(float[12]));
+
+		memcpy(poly->vertices, quad_vertices, sizeof(float[12]));
 	} else if (one->sub == NEMOSHOW_QUAD_TEX_POLY) {
 		poly->vertices = (float *)malloc(sizeof(float) * 20);
-		poly->nvertices = 4;
+		poly->nvertices = 20 / 5;
 		poly->stride = 5;
 
 		poly->mode = GL_TRIANGLE_FAN;
-		poly->elements = 4;
+		poly->elements = 20 / 5;
 
 		nemoobject_set_reserved(&one->object, "vertex", poly->vertices, sizeof(float[20]));
+
+		memcpy(poly->vertices, quad_tex_vertices, sizeof(float[20]));
+	} else if (one->sub == NEMOSHOW_CUBE_POLY) {
+		poly->vertices = (float *)malloc(sizeof(float) * 12 * 6);
+		poly->nvertices = 12 * 6 / 3;
+		poly->stride = 3;
+
+		poly->mode = GL_TRIANGLE_FAN;
+		poly->elements = 12 * 6 / 3;
+
+		nemoobject_set_reserved(&one->object, "vertex", poly->vertices, sizeof(float[12 * 6]));
+
+		memcpy(poly->vertices, cube_vertices, sizeof(float[12 * 6]));
+	} else if (one->sub == NEMOSHOW_CUBE_TEX_POLY) {
+		poly->vertices = (float *)malloc(sizeof(float) * 20 * 6);
+		poly->nvertices = 20 * 6 / 5;
+		poly->stride = 5;
+
+		poly->mode = GL_TRIANGLE_FAN;
+		poly->elements = 20 * 6 / 5;
+
+		nemoobject_set_reserved(&one->object, "vertex", poly->vertices, sizeof(float[20 * 6]));
+
+		memcpy(poly->vertices, cube_tex_vertices, sizeof(float[20 * 6]));
 	}
 
 	return one;
