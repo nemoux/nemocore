@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
 	nemoshow_poly_set_canvas(one, atom->canvast);
 	nemoshow_poly_set_color(one, 1.0f, 1.0f, 1.0f, 1.0f);
 	nemoshow_poly_set_scale(one,
-			0.5f * 1080.0f / 1920.0f,
+			0.5f * nemoshow_canvas_get_aspect_ratio(atom->canvas0),
 			0.5f,
 			0.5f);
 	nemoshow_poly_set_rotate(one, 30.0f, 30.0f, 0.0f);
