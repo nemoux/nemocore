@@ -92,6 +92,30 @@ int nemoshow_poly_update(struct showone *one)
 		}
 	}
 
+	if ((one->dirty & NEMOSHOW_SHAPE_DIRTY) != 0) {
+		if (poly->has_vbo != 0) {
+			glBindVertexArray(poly->varray);
+
+			if (one->sub == NEMOSHOW_QUAD_POLY) {
+				glBindBuffer(GL_ARRAY_BUFFER, poly->vbuffer);
+				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void *)0);
+				glEnableVertexAttribArray(0);
+				glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat[3]) * poly->nvertices, poly->vertices, GL_STATIC_DRAW);
+				glBindBuffer(GL_ARRAY_BUFFER, 0);
+			} else if (one->sub == NEMOSHOW_QUAD_TEX_POLY) {
+				glBindBuffer(GL_ARRAY_BUFFER, poly->vbuffer);
+				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void *)0);
+				glEnableVertexAttribArray(0);
+				glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void *)sizeof(GLfloat[3]));
+				glEnableVertexAttribArray(1);
+				glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat[5]) * poly->nvertices, poly->vertices, GL_STATIC_DRAW);
+				glBindBuffer(GL_ARRAY_BUFFER, 0);
+			}
+
+			glBindVertexArray(0);
+		}
+	}
+
 	return 0;
 }
 
@@ -99,4 +123,23 @@ void nemoshow_poly_set_canvas(struct showone *one, struct showone *canvas)
 {
 	nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_CANVAS_REF));
 	nemoshow_one_reference_one(one, canvas, NEMOSHOW_CANVAS_DIRTY, NEMOSHOW_CANVAS_REF);
+}
+
+void nemoshow_poly_set_vbo(struct showone *one, int has_vbo)
+{
+	struct showpoly *poly = NEMOSHOW_POLY(one);
+
+	if (poly->has_vbo == 0 && has_vbo != 0) {
+		glGenVertexArrays(1, &poly->varray);
+		glGenBuffers(1, &poly->vbuffer);
+		glGenBuffers(1, &poly->vindex);
+	} else if (poly->has_vbo != 0 && has_vbo == 0) {
+		glDeleteBuffers(1, &poly->vbuffer);
+		glDeleteBuffers(1, &poly->vindex);
+		glDeleteVertexArrays(1, &poly->varray);
+	}
+
+	poly->has_vbo = has_vbo;
+
+	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }

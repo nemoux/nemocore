@@ -168,6 +168,7 @@ int main(int argc, char *argv[])
 	nemoshow_poly_set_texcoord(one, 3, 0.0f, 0.0f);
 	nemoshow_poly_set_color(one, 0.0f, 0.0f, 0.0f, 1.0f);
 	nemoshow_poly_set_canvas(one, atom->canvast);
+	nemoshow_poly_set_vbo(one, 1);
 
 	nemoshow_set_scene(show, scene);
 	nemoshow_set_size(show, width, height);
