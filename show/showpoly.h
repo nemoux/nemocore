@@ -16,6 +16,7 @@ NEMO_BEGIN_EXTERN_C
 
 #include <nemolist.h>
 #include <nemolistener.h>
+#include <nemomatrix.h>
 
 typedef enum {
 	NEMOSHOW_POLY_X_VERTEX = 0,
@@ -55,6 +56,8 @@ struct showpoly {
 	int elements;
 
 	int has_vbo;
+
+	struct nemomatrix modelview;
 };
 
 #define NEMOSHOW_POLY(one)					((struct showpoly *)container_of(one, struct showpoly, base))

@@ -18,6 +18,8 @@ struct showone *nemoshow_poly_create(int type)
 		return NULL;
 	memset(poly, 0, sizeof(struct showpoly));
 
+	nemomatrix_init_identity(&poly->modelview);
+
 	one = &poly->base;
 	one->type = NEMOSHOW_POLY_TYPE;
 	one->sub = type;

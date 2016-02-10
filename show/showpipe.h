@@ -32,6 +32,7 @@ struct showpipe {
 	GLuint program;
 
 	GLuint uprojection;
+	GLuint umodelview;
 	GLuint ucolor;
 	GLuint utex0;
 

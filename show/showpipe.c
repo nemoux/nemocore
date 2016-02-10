@@ -13,9 +13,10 @@
 
 static const char *simple_vertex_shader =
 "uniform mat4 projection;\n"
+"uniform mat4 modelview;\n"
 "attribute vec3 vertex;\n"
 "void main() {\n"
-"  gl_Position = projection * vec4(vertex, 1.0);\n"
+"  gl_Position = projection * modelview * vec4(vertex, 1.0);\n"
 "}\n";
 
 static const char *simple_fragment_shader =
@@ -27,11 +28,12 @@ static const char *simple_fragment_shader =
 
 static const char *texture_vertex_shader =
 "uniform mat4 projection;\n"
+"uniform mat4 modelview;\n"
 "attribute vec3 vertex;\n"
 "attribute vec2 texcoord;\n"
 "varying vec2 v_texcoord;\n"
 "void main() {\n"
-"  gl_Position = projection * vec4(vertex, 1.0);\n"
+"  gl_Position = projection * modelview * vec4(vertex, 1.0);\n"
 "  v_texcoord = texcoord;\n"
 "}\n";
 
@@ -72,6 +74,7 @@ struct showone *nemoshow_pipe_create(int type)
 		glLinkProgram(pipe->program);
 
 		pipe->uprojection = glGetUniformLocation(pipe->program, "projection");
+		pipe->umodelview = glGetUniformLocation(pipe->program, "modelview");
 		pipe->ucolor = glGetUniformLocation(pipe->program, "color");
 	} else if (one->sub == NEMOSHOW_TEXTURE_PIPE) {
 		pipe->program = glshader_create_program(texture_fragment_shader, texture_vertex_shader);
@@ -82,6 +85,7 @@ struct showone *nemoshow_pipe_create(int type)
 		glLinkProgram(pipe->program);
 
 		pipe->uprojection = glGetUniformLocation(pipe->program, "projection");
+		pipe->umodelview = glGetUniformLocation(pipe->program, "modelview");
 		pipe->ucolor = glGetUniformLocation(pipe->program, "color");
 		pipe->utex0 = glGetUniformLocation(pipe->program, "tex0");
 	}
@@ -125,6 +129,7 @@ static inline int nemoshow_pipe_dispatch_simple(struct showone *canvas, struct s
 	nemoshow_children_for_each(child, one) {
 		poly = NEMOSHOW_POLY(child);
 
+		glUniformMatrix4fv(pipe->umodelview, 1, GL_FALSE, (GLfloat *)poly->modelview.d);
 		glUniform4fv(pipe->ucolor, 1, poly->colors);
 
 		if (poly->has_vbo == 0) {
@@ -157,6 +162,7 @@ static inline int nemoshow_pipe_dispatch_texture(struct showone *canvas, struct 
 	nemoshow_children_for_each(child, one) {
 		poly = NEMOSHOW_POLY(child);
 
+		glUniformMatrix4fv(pipe->umodelview, 1, GL_FALSE, (GLfloat *)poly->modelview.d);
 		glUniform4fv(pipe->ucolor, 1, poly->colors);
 
 		ref = NEMOSHOW_REF(child, NEMOSHOW_CANVAS_REF);
