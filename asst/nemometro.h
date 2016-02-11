@@ -22,6 +22,8 @@ typedef enum {
 	NEMO_METRO_LAST_PLANE
 } NemoMetroPlaneDirection;
 
+extern int nemometro_intersect_triangle(float *v0, float *v1, float *v2, float *o, float *d, float *t, float *u, float *v);
+extern int nemometro_pick_triangle(struct nemomatrix *projection, int32_t width, int32_t height, struct nemomatrix *modelview, float *v0, float *v1, float *v2, float x, float y, float *t, float *u, float *v);
 extern int nemometro_intersect_cube(float *cube, float *o, float *d, float *mint, float *maxt);
 extern int nemometro_pick_cube(struct nemomatrix *projection, int32_t width, int32_t height, struct nemomatrix *modelview, float *boundingbox, float x, float y, float *mint, float *maxt);
 extern void nemometro_unproject(struct nemomatrix *projection, int32_t width, int32_t height, struct nemomatrix *modelview, float x, float y, float z, float *out);

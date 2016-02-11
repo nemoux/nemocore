@@ -99,6 +99,8 @@ extern void nemoshow_poly_use_texcoords(struct showone *one, int on_texcoords);
 extern void nemoshow_poly_use_normals(struct showone *one, int on_normals);
 extern void nemoshow_poly_use_vbo(struct showone *one, int on_vbo);
 
+extern int nemoshow_poly_pick_one(struct showone *one, double x, double y, float *tx, float *ty);
+
 static inline void nemoshow_poly_set_x(struct showone *one, int index, float x)
 {
 	struct showpoly *poly = NEMOSHOW_POLY(one);

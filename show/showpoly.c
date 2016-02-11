@@ -8,6 +8,9 @@
 #include <float.h>
 
 #include <showpoly.h>
+#include <showpipe.h>
+#include <showcanvas.h>
+#include <nemometro.h>
 #include <nemomisc.h>
 
 static const float quad_vertices[] = {
@@ -417,4 +420,48 @@ void nemoshow_poly_use_vbo(struct showone *one, int on_vbo)
 	}
 
 	poly->on_vbo = on_vbo;
+}
+
+int nemoshow_poly_pick_one(struct showone *one, double x, double y, float *tx, float *ty)
+{
+	struct showpoly *poly = NEMOSHOW_POLY(one);
+	struct showcanvas *canvas;
+	struct showpipe *pipe;
+	float t, u, v;
+
+	pipe = NEMOSHOW_PIPE(one->parent);
+	canvas = NEMOSHOW_CANVAS(one->parent->parent);
+
+	if (one->sub == NEMOSHOW_QUAD_POLY) {
+		if (nemometro_pick_triangle(
+					&pipe->projection,
+					canvas->width, canvas->height,
+					&poly->modelview,
+					&poly->vertices[3 * 1],
+					&poly->vertices[3 * 0],
+					&poly->vertices[3 * 2],
+					x, y,
+					&t, &u, &v) > 0) {
+			*tx = 1.0f - u;
+			*ty = 1.0f - v;
+
+			return 1;
+		} else if (nemometro_pick_triangle(
+					&pipe->projection,
+					canvas->width, canvas->height,
+					&poly->modelview,
+					&poly->vertices[3 * 3],
+					&poly->vertices[3 * 2],
+					&poly->vertices[3 * 0],
+					x, y,
+					&t, &u, &v) > 0) {
+			*tx = u;
+			*ty = v;
+
+			return 1;
+		}
+	} else if (one->sub == NEMOSHOW_CUBE_POLY) {
+	}
+
+	return 0;
 }

@@ -86,6 +86,21 @@ static void nemoback_atom_dispatch_tale_event(struct nemotale *tale, struct tale
 					nemoshow_transition_attach_sequence(trans, sequence);
 					nemoshow_attach_transition(atom->show, trans);
 				}
+
+				if (tag == 1) {
+					struct showone *one;
+					float tx, ty;
+
+					if (nemoshow_poly_pick_one(atom->one0, event->x, event->y, &tx, &ty) > 0) {
+						one = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
+						nemoshow_attach_one(atom->show, one);
+						nemoshow_one_attach(atom->canvast, one);
+						nemoshow_item_set_x(one, tx * nemoshow_canvas_get_width(atom->canvast));
+						nemoshow_item_set_y(one, ty * nemoshow_canvas_get_height(atom->canvast));
+						nemoshow_item_set_r(one, 5.0f);
+						nemoshow_item_set_fill_color(one, 0xff, 0xff, 0xff, 0xff);
+					}
+				}
 			}
 		}
 	}
