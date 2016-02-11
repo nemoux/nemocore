@@ -48,9 +48,6 @@ extern void nemomesh_prepare_index(struct nemomesh *mesh, GLenum mode, uint32_t 
 
 extern void nemomesh_update_transform(struct nemomesh *mesh);
 
-extern void nemomesh_reset_quaternion(struct nemomesh *mesh, int32_t width, int32_t height, float x, float y);
-extern void nemomesh_update_quaternion(struct nemomesh *mesh, int32_t width, int32_t height, float x, float y);
-
 static inline void nemomesh_turn_on_guides(struct nemomesh *mesh)
 {
 	mesh->on_guides = 1;
