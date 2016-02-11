@@ -368,7 +368,7 @@ static int xdgshell_dispatch(const void *implementation, void *target, uint32_t 
 	struct wl_resource *resource = (struct wl_resource *)target;
 	struct shellclient *sc = (struct shellclient *)wl_resource_get_user_data(resource);
 
-	if (opcode != 0) {
+	if (opcode != 1) {
 		wl_resource_post_error(resource, WL_DISPLAY_ERROR_INVALID_OBJECT, "must call use_unstable_version first");
 		return 0;
 	}
