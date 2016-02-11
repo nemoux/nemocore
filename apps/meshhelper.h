@@ -6,6 +6,7 @@
 #include <GL/gl.h>
 
 #include <nemomatrix.h>
+#include <nemospin.h>
 
 struct nemomesh {
 	struct nemomatrix modelview;
@@ -36,8 +37,7 @@ struct nemomesh {
 	float sx, sy, sz;
 	float tx, ty, tz;
 
-	struct nemovector avec, cvec;
-	struct nemoquaternion squat, cquat;
+	struct nemospin spin;
 };
 
 extern struct nemomesh *nemomesh_create_object(const char *filepath, const char *basepath);

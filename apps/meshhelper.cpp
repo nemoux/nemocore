@@ -39,8 +39,6 @@ struct nemomesh *nemomesh_create_object(const char *filepath, const char *basepa
 		return NULL;
 	memset(mesh, 0, sizeof(struct nemomesh));
 
-	nemoquaternion_init_identity(&mesh->cquat);
-
 	mesh->lines = (float *)malloc(sizeof(float) * 16);
 	mesh->nlines = 0;
 	mesh->slines = 16;
@@ -428,70 +426,6 @@ void nemomesh_update_transform(struct nemomesh *mesh)
 {
 	nemomatrix_init_identity(&mesh->modelview);
 	nemomatrix_translate_xyz(&mesh->modelview, mesh->tx, mesh->ty, mesh->tz);
-	nemomatrix_multiply_quaternion(&mesh->modelview, &mesh->cquat);
+	nemomatrix_multiply_quaternion(&mesh->modelview, nemospin_get_quaternion(&mesh->spin));
 	nemomatrix_scale_xyz(&mesh->modelview, mesh->sx, mesh->sy, mesh->sz);
-}
-
-static void nemomesh_project_onto_surface(int32_t width, int32_t height, struct nemovector *v)
-{
-	double dist = width > height ? width : height;
-	double radius = dist / 2.0f;
-	double px = (v->f[0] - radius);
-	double py = (v->f[1] - radius) * -1.0f;
-	double pz = (v->f[2] - 0.0f);
-	double radius2 = radius * radius;
-	double length2 = px * px + py * py;
-	double length;
-
-	if (length2 <= radius2) {
-		pz = sqrtf(radius2 - length2);
-	} else {
-		length = sqrtf(length2);
-
-		px = px / length;
-		py = py / length;
-		pz = 0.0f;
-	}
-
-	length = sqrtf(px * px + py * py + pz * pz);
-
-	v->f[0] = px / length;
-	v->f[1] = py / length;
-	v->f[2] = pz / length;
-}
-
-static void nemomesh_compute_quaternion(struct nemomesh *mesh)
-{
-	struct nemovector v = mesh->avec;
-	float dot = nemovector_dot(&mesh->avec, &mesh->cvec);
-	float angle = acosf(dot);
-
-	if (isnan(angle) == 0) {
-		nemovector_cross(&v, &mesh->cvec);
-
-		nemoquaternion_make_with_angle_axis(&mesh->cquat, angle * 2.0f, v.f[0], v.f[1], v.f[2]);
-		nemoquaternion_normalize(&mesh->cquat);
-		nemoquaternion_multiply(&mesh->cquat, &mesh->squat);
-	}
-}
-
-void nemomesh_reset_quaternion(struct nemomesh *mesh, int32_t width, int32_t height, float x, float y)
-{
-	mesh->avec.f[0] = x;
-	mesh->avec.f[1] = y;
-	mesh->avec.f[2] = 0.0f;
-
-	nemomesh_project_onto_surface(width, height, &mesh->avec);
-
-	mesh->squat = mesh->cquat;
-}
-
-void nemomesh_update_quaternion(struct nemomesh *mesh, int32_t width, int32_t height, float x, float y)
-{
-	mesh->cvec.f[0] = x;
-	mesh->cvec.f[1] = y;
-	mesh->cvec.f[2] = 0.0f;
-
-	nemomesh_project_onto_surface(width, height, &mesh->cvec);
-	nemomesh_compute_quaternion(mesh);
 }

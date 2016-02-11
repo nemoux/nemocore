@@ -25,6 +25,7 @@
 #include <meshhelper.h>
 #include <nemomatrix.h>
 #include <nemometro.h>
+#include <nemospin.h>
 #include <nemobox.h>
 #include <nemomisc.h>
 
@@ -235,11 +236,7 @@ static void nemomesh_dispatch_tale_event(struct nemotale *tale, struct talenode 
 
 					nemocanvas_dispatch_frame(context->canvas);
 				} else if (nemotale_is_triple_taps(tale, event, type)) {
-					nemomesh_reset_quaternion(mesh,
-							context->width,
-							context->height,
-							event->taps[2]->x,
-							event->taps[2]->y);
+					nemospin_reset(&mesh->spin, event->taps[2]->x, event->taps[2]->y);
 				}
 			}
 		} else if (nemotale_is_touch_motion(tale, event, type)) {
@@ -248,11 +245,7 @@ static void nemomesh_dispatch_tale_event(struct nemotale *tale, struct talenode 
 			nemotale_event_update_node_taps(tale, node, event, type);
 
 			if (nemotale_is_triple_taps(tale, event, type)) {
-				nemomesh_update_quaternion(mesh,
-						context->width,
-						context->height,
-						event->taps[2]->x,
-						event->taps[2]->y);
+				nemospin_update(&mesh->spin, event->taps[2]->x, event->taps[2]->y);
 
 				nemocanvas_dispatch_frame(context->canvas);
 			}
@@ -450,6 +443,8 @@ int main(int argc, char *argv[])
 
 	context->mesh = mesh = nemomesh_create_object(filepath, basepath);
 	nemomesh_prepare_buffer(mesh, GL_LINES, mesh->lines, mesh->nlines);
+
+	nemospin_init(&mesh->spin, context->width, context->height);
 
 	nemocanvas_dispatch_frame(NTEGL_CANVAS(canvas));
 
