@@ -427,10 +427,18 @@ int nemoshow_poly_pick_one(struct showone *one, double x, double y, float *tx, f
 	struct showpoly *poly = NEMOSHOW_POLY(one);
 	struct showcanvas *canvas;
 	struct showpipe *pipe;
+	struct showone *parent;
 	float t, u, v;
 
-	pipe = NEMOSHOW_PIPE(one->parent);
-	canvas = NEMOSHOW_CANVAS(one->parent->parent);
+	parent = nemoshow_one_get_parent(one, NEMOSHOW_PIPE_TYPE, 0);
+	if (parent == NULL)
+		return 0;
+	pipe = NEMOSHOW_PIPE(parent);
+
+	parent = nemoshow_one_get_parent(one, NEMOSHOW_CANVAS_TYPE, NEMOSHOW_CANVAS_PIPELINE_TYPE);
+	if (parent == NULL)
+		return 0;
+	canvas = NEMOSHOW_CANVAS(parent);
 
 	if (one->sub == NEMOSHOW_QUAD_POLY) {
 		if (nemometro_pick_triangle(
