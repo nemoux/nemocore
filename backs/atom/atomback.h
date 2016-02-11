@@ -30,7 +30,8 @@ struct atomback {
 	struct showone *ease2;
 
 	struct showone *pipe;
-	struct showone *one;
+	struct showone *one0;
+	struct showone *one1;
 
 	struct showone *canvast;
 	struct showone *onet;

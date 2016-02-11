@@ -23,10 +23,10 @@ static const float quad_texcoords[] = {
 };
 
 static const float quad_normals[] = {
-	0.0f, 0.0f, 1.0f,
-	0.0f, 0.0f, 1.0f,
-	0.0f, 0.0f, 1.0f,
-	0.0f, 0.0f, 1.0f
+	0.0f, 0.0f, -1.0f,
+	0.0f, 0.0f, -1.0f,
+	0.0f, 0.0f, -1.0f,
+	0.0f, 0.0f, -1.0f
 };
 
 static const float cube_vertices[] = {
@@ -322,6 +322,19 @@ void nemoshow_poly_set_canvas(struct showone *one, struct showone *canvas)
 {
 	nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_CANVAS_REF));
 	nemoshow_one_reference_one(one, canvas, NEMOSHOW_CANVAS_DIRTY, NEMOSHOW_CANVAS_REF);
+}
+
+void nemoshow_poly_transform_vertices(struct showone *one, struct nemomatrix *matrix)
+{
+	struct showpoly *poly = NEMOSHOW_POLY(one);
+	int i;
+
+	for (i = 0; i < poly->elements; i++) {
+		nemomatrix_transform_xyz(matrix,
+				&poly->vertices[3 * i + NEMOSHOW_POLY_X_VERTEX],
+				&poly->vertices[3 * i + NEMOSHOW_POLY_Y_VERTEX],
+				&poly->vertices[3 * i + NEMOSHOW_POLY_Z_VERTEX]);
+	}
 }
 
 void nemoshow_poly_use_texcoords(struct showone *one, int on_texcoords)

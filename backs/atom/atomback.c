@@ -65,6 +65,7 @@ int main(int argc, char *argv[])
 	struct showone *set1;
 	struct showone *set2;
 	struct showone *set3;
+	struct nemomatrix matrix;
 	char *filepath = NULL;
 	int32_t width = 1920;
 	int32_t height = 1080;
@@ -168,37 +169,38 @@ int main(int argc, char *argv[])
 	nemoshow_one_attach(canvas, pipe);
 	nemoshow_pipe_set_light(pipe, 1.0f, 1.0f, -1.0f, 1.0f);
 
-#if	0
-	atom->one = one = nemoshow_poly_create(NEMOSHOW_QUAD_POLY);
+	atom->one0 = one = nemoshow_poly_create(NEMOSHOW_QUAD_POLY);
 	nemoshow_attach_one(show, one);
 	nemoshow_one_attach(pipe, one);
-	nemoshow_poly_set_vertex(one, 0, -0.5f, -0.5f, 0.0f);
-	nemoshow_poly_set_vertex(one, 1, 0.5f, -0.5f, 0.0f);
-	nemoshow_poly_set_vertex(one, 2, 0.5f, 0.5f, 0.0f);
-	nemoshow_poly_set_vertex(one, 3, -0.5f, 0.5f, 0.0f);
+	nemoshow_poly_set_color(one, 0.1f, 0.1f, 0.1f, 1.0f);
+	nemoshow_poly_set_canvas(one, atom->canvast);
+	nemoshow_poly_use_texcoords(one, 1);
+	nemoshow_poly_use_normals(one, 1);
+	nemoshow_poly_use_vbo(one, 1);
+	nemoshow_poly_set_vertex(one, 0, -1.0f, -1.0f, 1.0f);
+	nemoshow_poly_set_vertex(one, 1, 1.0f, -1.0f, 1.0f);
+	nemoshow_poly_set_vertex(one, 2, 1.0f, 1.0f, 1.0f);
+	nemoshow_poly_set_vertex(one, 3, -1.0f, 1.0f, 1.0f);
 	nemoshow_poly_set_texcoord(one, 0, 0.0f, 1.0f);
 	nemoshow_poly_set_texcoord(one, 1, 1.0f, 1.0f);
 	nemoshow_poly_set_texcoord(one, 2, 1.0f, 0.0f);
 	nemoshow_poly_set_texcoord(one, 3, 0.0f, 0.0f);
-	nemoshow_poly_set_color(one, 0.0f, 0.0f, 0.0f, 1.0f);
-	nemoshow_poly_set_canvas(one, atom->canvast);
-	nemoshow_poly_use_texcoords(one, 1);
-	nemoshow_poly_use_vbo(one, 1);
-#else
-	atom->one = one = nemoshow_poly_create(NEMOSHOW_CUBE_POLY);
+
+	atom->one1 = one = nemoshow_poly_create(NEMOSHOW_CUBE_POLY);
 	nemoshow_attach_one(show, one);
 	nemoshow_one_attach(pipe, one);
 	nemoshow_poly_set_canvas(one, atom->canvast);
 	nemoshow_poly_set_color(one, 1.0f, 1.0f, 1.0f, 1.0f);
-	nemoshow_poly_set_scale(one,
-			0.5f * nemoshow_canvas_get_aspect_ratio(atom->canvas0),
-			0.5f,
-			0.5f);
-	nemoshow_poly_set_rotate(one, 0.0f, 0.0f, 0.0f);
 	nemoshow_poly_use_texcoords(one, 1);
 	nemoshow_poly_use_normals(one, 1);
 	nemoshow_poly_use_vbo(one, 1);
-#endif
+
+	nemomatrix_init_identity(&matrix);
+	nemomatrix_scale_xyz(&matrix,
+			0.5f * nemoshow_canvas_get_aspect_ratio(atom->canvas0),
+			0.5f,
+			0.5f);
+	nemoshow_poly_transform_vertices(one, &matrix);
 
 	nemoshow_set_scene(show, scene);
 	nemoshow_set_size(show, width, height);
@@ -225,12 +227,12 @@ int main(int argc, char *argv[])
 	nemoshow_filter_set_blur(blur, "high", "solid", 5.0f);
 
 	set0 = nemoshow_sequence_create_set();
-	nemoshow_sequence_set_source(set0, atom->one);
+	nemoshow_sequence_set_source(set0, atom->one1);
 	nemoshow_sequence_set_dattr(set0, "rx", 360.0f, NEMOSHOW_MATRIX_DIRTY);
 	nemoshow_sequence_set_dattr(set0, "ry", 360.0f, NEMOSHOW_MATRIX_DIRTY);
 
 	set1 = nemoshow_sequence_create_set();
-	nemoshow_sequence_set_source(set1, atom->one);
+	nemoshow_sequence_set_source(set1, atom->one1);
 	nemoshow_sequence_set_dattr(set1, "rx", 0.0f, NEMOSHOW_MATRIX_DIRTY);
 	nemoshow_sequence_set_dattr(set1, "ry", 0.0f, NEMOSHOW_MATRIX_DIRTY);
 
@@ -250,7 +252,7 @@ int main(int argc, char *argv[])
 			NULL);
 
 	trans = nemoshow_transition_create(atom->ease0, 18000, 0);
-	nemoshow_transition_check_one(trans, atom->one);
+	nemoshow_transition_check_one(trans, atom->one1);
 	nemoshow_transition_check_one(trans, atom->onet);
 	nemoshow_transition_set_repeat(trans, 0);
 	nemoshow_transition_attach_sequence(trans, sequence);

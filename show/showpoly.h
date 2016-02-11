@@ -91,6 +91,8 @@ extern int nemoshow_poly_update(struct showone *one);
 
 extern void nemoshow_poly_set_canvas(struct showone *one, struct showone *canvas);
 
+extern void nemoshow_poly_transform_vertices(struct showone *one, struct nemomatrix *matrix);
+
 extern void nemoshow_poly_use_texcoords(struct showone *one, int on_texcoords);
 extern void nemoshow_poly_use_normals(struct showone *one, int on_normals);
 extern void nemoshow_poly_use_vbo(struct showone *one, int on_vbo);

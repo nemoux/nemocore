@@ -127,8 +127,8 @@ void nemomatrix_multiply(struct nemomatrix *m, const struct nemomatrix *n)
 
 void nemomatrix_transform(struct nemomatrix *matrix, struct nemovector *v)
 {
-	int i, j;
 	struct nemovector t;
+	int i, j;
 
 	for (i = 0; i < 4; i++) {
 		t.f[i] = 0;
@@ -137,6 +137,28 @@ void nemomatrix_transform(struct nemomatrix *matrix, struct nemovector *v)
 	}
 
 	*v = t;
+}
+
+int nemomatrix_transform_xyz(struct nemomatrix *matrix, float *x, float *y, float *z)
+{
+	struct nemovector v = { *x, *y, *z, 1.0f };
+	struct nemovector t;
+	int i, j;
+
+	for (i = 0; i < 4; i++) {
+		t.f[i] = 0;
+		for (j = 0; j < 4; j++)
+			t.f[i] += v.f[j] * matrix->d[i + j * 4];
+	}
+
+	if (fabsf(t.f[3]) < 1e-6)
+		return -1;
+
+	*x = t.f[0];
+	*y = t.f[1];
+	*z = t.f[2];
+
+	return 0;
 }
 
 int nemomatrix_invert(struct nemomatrix *inverse, const struct nemomatrix *matrix)
@@ -475,7 +497,7 @@ void nemomatrix_append_command(struct nemomatrix *matrix, const char *str)
 			nemomatrix_scale(matrix, x, y);
 		}
 	}
-	
+
 	nemotoken_destroy(token);
 }
 
