@@ -140,13 +140,12 @@ int nemometro_intersect_cube(float *cube, float *o, float *d, float *mint, float
 	return plane;
 }
 
-int nemometro_pick_cube(struct nemomatrix *projection, int32_t width, int32_t height, struct nemomatrix *modelview, float *boundingbox, float x, float y)
+int nemometro_pick_cube(struct nemomatrix *projection, int32_t width, int32_t height, struct nemomatrix *modelview, float *boundingbox, float x, float y, float *mint, float *maxt)
 {
 	float near[3], far[3];
 	float rayorg[3];
 	float rayvec[3];
 	float raylen;
-	float mint, maxt;
 
 	nemometro_unproject(projection, width, height, modelview, x, y, -1.0f, near);
 	nemometro_unproject(projection, width, height, modelview, x, y, 1.0f, far);
@@ -165,7 +164,7 @@ int nemometro_pick_cube(struct nemomatrix *projection, int32_t width, int32_t he
 	rayorg[1] = near[1];
 	rayorg[2] = near[2];
 
-	return nemometro_intersect_cube(boundingbox, rayorg, rayvec, &mint, &maxt);
+	return nemometro_intersect_cube(boundingbox, rayorg, rayvec, mint, maxt);
 }
 
 void nemometro_unproject(struct nemomatrix *projection, int32_t width, int32_t height, struct nemomatrix *modelview, float x, float y, float z, float *out)

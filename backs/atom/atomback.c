@@ -24,6 +24,69 @@ static void nemoback_atom_dispatch_tale_event(struct nemotale *tale, struct tale
 		if (nemotale_dispatch_grab(tale, event->device, type, event) == 0) {
 			struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
 			struct atomback *atom = (struct atomback *)nemoshow_get_userdata(show);
+
+			if (nemotale_is_touch_down(tale, event, type)) {
+				uint32_t tag;
+
+				tag = nemoshow_canvas_pick_tag(atom->canvas0, event->x, event->y);
+				if (tag == 1) {
+					struct showtransition *trans;
+					struct showone *sequence;
+					struct showone *set0, *set1;
+
+					set0 = nemoshow_sequence_create_set();
+					nemoshow_sequence_set_source(set0, atom->one0);
+					nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_RED_COLOR, 0.0f, NEMOSHOW_STYLE_DIRTY);
+					nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_GREEN_COLOR, 0.0f, NEMOSHOW_STYLE_DIRTY);
+					nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_BLUE_COLOR, 0.0f, NEMOSHOW_STYLE_DIRTY);
+
+					set1 = nemoshow_sequence_create_set();
+					nemoshow_sequence_set_source(set1, atom->one0);
+					nemoshow_sequence_set_fattr_offset(set1, "color", NEMOSHOW_POLY_RED_COLOR, 0.1f, NEMOSHOW_STYLE_DIRTY);
+					nemoshow_sequence_set_fattr_offset(set1, "color", NEMOSHOW_POLY_GREEN_COLOR, 0.1f, NEMOSHOW_STYLE_DIRTY);
+					nemoshow_sequence_set_fattr_offset(set1, "color", NEMOSHOW_POLY_BLUE_COLOR, 0.1f, NEMOSHOW_STYLE_DIRTY);
+
+					sequence = nemoshow_sequence_create_easy(atom->show,
+							nemoshow_sequence_create_frame_easy(atom->show,
+								0.5f, set0, NULL),
+							nemoshow_sequence_create_frame_easy(atom->show,
+								1.0f, set1, NULL),
+							NULL);
+
+					trans = nemoshow_transition_create(atom->ease0, 800, 0);
+					nemoshow_transition_check_one(trans, atom->one0);
+					nemoshow_transition_attach_sequence(trans, sequence);
+					nemoshow_attach_transition(atom->show, trans);
+				} else if (tag == 2) {
+					struct showtransition *trans;
+					struct showone *sequence;
+					struct showone *set0, *set1;
+
+					set0 = nemoshow_sequence_create_set();
+					nemoshow_sequence_set_source(set0, atom->one1);
+					nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_RED_COLOR, 0.0f, NEMOSHOW_STYLE_DIRTY);
+					nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_GREEN_COLOR, 0.0f, NEMOSHOW_STYLE_DIRTY);
+					nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_BLUE_COLOR, 0.0f, NEMOSHOW_STYLE_DIRTY);
+
+					set1 = nemoshow_sequence_create_set();
+					nemoshow_sequence_set_source(set1, atom->one1);
+					nemoshow_sequence_set_fattr_offset(set1, "color", NEMOSHOW_POLY_RED_COLOR, 1.0f, NEMOSHOW_STYLE_DIRTY);
+					nemoshow_sequence_set_fattr_offset(set1, "color", NEMOSHOW_POLY_GREEN_COLOR, 1.0f, NEMOSHOW_STYLE_DIRTY);
+					nemoshow_sequence_set_fattr_offset(set1, "color", NEMOSHOW_POLY_BLUE_COLOR, 1.0f, NEMOSHOW_STYLE_DIRTY);
+
+					sequence = nemoshow_sequence_create_easy(atom->show,
+							nemoshow_sequence_create_frame_easy(atom->show,
+								0.5f, set0, NULL),
+							nemoshow_sequence_create_frame_easy(atom->show,
+								1.0f, set1, NULL),
+							NULL);
+
+					trans = nemoshow_transition_create(atom->ease0, 800, 0);
+					nemoshow_transition_check_one(trans, atom->one1);
+					nemoshow_transition_attach_sequence(trans, sequence);
+					nemoshow_attach_transition(atom->show, trans);
+				}
+			}
 		}
 	}
 }
@@ -158,11 +221,12 @@ int main(int argc, char *argv[])
 	nemoshow_item_load_svg(one, filepath);
 
 	atom->canvas0 = canvas = nemoshow_canvas_create();
-	nemoshow_attach_one(show, canvas);
-	nemoshow_one_attach(scene, canvas);
 	nemoshow_canvas_set_width(canvas, width);
 	nemoshow_canvas_set_height(canvas, height);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_PIPELINE_TYPE);
+	nemoshow_canvas_set_event(canvas, 1);
+	nemoshow_attach_one(show, canvas);
+	nemoshow_one_attach(scene, canvas);
 
 	atom->pipe = pipe = nemoshow_pipe_create(NEMOSHOW_LIGHTING_PIPE);
 	nemoshow_attach_one(show, pipe);
@@ -174,6 +238,7 @@ int main(int argc, char *argv[])
 	atom->one0 = one = nemoshow_poly_create(NEMOSHOW_QUAD_POLY);
 	nemoshow_attach_one(show, one);
 	nemoshow_one_attach(pipe, one);
+	nemoshow_one_set_tag(one, 1);
 	nemoshow_poly_set_color(one, 0.1f, 0.1f, 0.1f, 1.0f);
 	nemoshow_poly_set_canvas(one, atom->canvast);
 	nemoshow_poly_use_texcoords(one, 1);
@@ -191,6 +256,7 @@ int main(int argc, char *argv[])
 	atom->one1 = one = nemoshow_poly_create(NEMOSHOW_CUBE_POLY);
 	nemoshow_attach_one(show, one);
 	nemoshow_one_attach(pipe, one);
+	nemoshow_one_set_tag(one, 2);
 	nemoshow_poly_set_canvas(one, atom->canvast);
 	nemoshow_poly_set_color(one, 1.0f, 1.0f, 1.0f, 1.0f);
 	nemoshow_poly_use_texcoords(one, 1);

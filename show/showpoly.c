@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <float.h>
+
 #include <showpoly.h>
 #include <nemomisc.h>
 
@@ -278,6 +280,25 @@ int nemoshow_poly_update(struct showone *one)
 	}
 
 	if ((one->dirty & NEMOSHOW_SHAPE_DIRTY) != 0) {
+		float minx = FLT_MAX, miny = FLT_MAX, minz = FLT_MAX, maxx = FLT_MIN, maxy = FLT_MIN, maxz = FLT_MIN;
+		int i;
+
+		for (i = 0; i < poly->elements; i++) {
+			minx = MIN(poly->vertices[3 * i + NEMOSHOW_POLY_X_VERTEX], minx);
+			miny = MIN(poly->vertices[3 * i + NEMOSHOW_POLY_Y_VERTEX], miny);
+			minz = MIN(poly->vertices[3 * i + NEMOSHOW_POLY_Z_VERTEX], minz);
+			maxx = MAX(poly->vertices[3 * i + NEMOSHOW_POLY_X_VERTEX], maxx);
+			maxy = MAX(poly->vertices[3 * i + NEMOSHOW_POLY_Y_VERTEX], maxy);
+			maxz = MAX(poly->vertices[3 * i + NEMOSHOW_POLY_Z_VERTEX], maxz);
+		}
+
+		poly->boundingbox[0] = minx;
+		poly->boundingbox[1] = maxx;
+		poly->boundingbox[2] = miny;
+		poly->boundingbox[3] = maxy;
+		poly->boundingbox[4] = minz;
+		poly->boundingbox[5] = maxz;
+
 		if (poly->on_vbo != 0) {
 			glBindVertexArray(poly->varray);
 

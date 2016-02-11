@@ -212,7 +212,8 @@ static void nemomesh_dispatch_tale_event(struct nemotale *tale, struct talenode 
 	if (id == 1) {
 		if (nemotale_is_touch_down(tale, event, type)) {
 			struct nemomesh *mesh = context->mesh;
-			int plane = nemometro_pick_cube(&context->projection, context->width, context->height, &mesh->modelview, mesh->boundingbox, event->x, event->y);
+			float mint, maxt;
+			int plane = nemometro_pick_cube(&context->projection, context->width, context->height, &mesh->modelview, mesh->boundingbox, event->x, event->y, &mint, &maxt);
 
 			if (plane == NEMO_METRO_NONE_PLANE) {
 				float sx, sy;
@@ -263,7 +264,8 @@ static void nemomesh_dispatch_tale_event(struct nemotale *tale, struct talenode 
 
 		if (nemotale_is_single_click(tale, event, type)) {
 			struct nemomesh *mesh = context->mesh;
-			int plane = nemometro_pick_cube(&context->projection, context->width, context->height, &mesh->modelview, mesh->boundingbox, event->x, event->y);
+			float mint, maxt;
+			int plane = nemometro_pick_cube(&context->projection, context->width, context->height, &mesh->modelview, mesh->boundingbox, event->x, event->y, &mint, &maxt);
 
 			if (plane != NEMO_METRO_NONE_PLANE) {
 				if (mesh->mode == GL_TRIANGLES)

@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <float.h>
+
 #include <skiaconfig.hpp>
 
 #include <showcanvas.h>
@@ -23,6 +25,7 @@
 #include <nemoshow.h>
 #include <nemoxml.h>
 #include <nemobox.h>
+#include <nemometro.h>
 #include <nemomisc.h>
 
 struct showone *nemoshow_canvas_create(void)
@@ -746,7 +749,7 @@ void nemoshow_canvas_dirty_all(struct showone *one, uint32_t dirty)
 		nemoshow_one_dirty(child, dirty);
 }
 
-static inline struct showone *nemoshow_canvas_pick_one_in(struct showone *one, double px, double py)
+static inline struct showone *nemoshow_canvas_pick_item(struct showone *one, double px, double py)
 {
 	struct showone *child;
 
@@ -754,7 +757,7 @@ static inline struct showone *nemoshow_canvas_pick_one_in(struct showone *one, d
 		if (child->sub == NEMOSHOW_GROUP_ITEM) {
 			struct showone *pick;
 
-			pick = nemoshow_canvas_pick_one_in(child, px, py);
+			pick = nemoshow_canvas_pick_item(child, px, py);
 			if (pick != NULL)
 				return pick;
 		} else if (child->tag != 0) {
@@ -784,7 +787,38 @@ static inline struct showone *nemoshow_canvas_pick_one_in(struct showone *one, d
 	return NULL;
 }
 
+static inline struct showone *nemoshow_canvas_pick_poly(struct showone *one, double x, double y)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+	struct showone *child, *pchild;
+	struct showone *pick = NULL;
+	float min = FLT_MAX;
+
+	nemoshow_children_for_each(child, one) {
+		struct showpipe *pipe = NEMOSHOW_PIPE(child);
+
+		nemoshow_children_for_each(pchild, child) {
+			if (pchild->tag != 0) {
+				struct showpoly *poly = NEMOSHOW_POLY(pchild);
+				float mint, maxt;
+
+				if (nemometro_pick_cube(&pipe->projection, canvas->width, canvas->height, &poly->modelview, poly->boundingbox, x, y, &mint, &maxt) > 0) {
+					if (min > mint) {
+						min = mint;
+						pick = pchild;
+					}
+				}
+			}
+		}
+	}
+
+	return pick;
+}
+
 struct showone *nemoshow_canvas_pick_one(struct showone *one, double x, double y)
 {
-	return nemoshow_canvas_pick_one_in(one, x, y);
+	if (one->sub == NEMOSHOW_CANVAS_PIPELINE_TYPE)
+		return nemoshow_canvas_pick_poly(one, x, y);
+
+	return nemoshow_canvas_pick_item(one, x, y);
 }
