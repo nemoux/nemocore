@@ -18,7 +18,6 @@ include_directories(
 	${CMAKE_BINARY_DIR}/tool
 	${CMAKE_SOURCE_DIR}/tale
 	${CMAKE_SOURCE_DIR}/show
-	${CMAKE_SOURCE_DIR}/thirds
 	)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
@@ -134,18 +133,6 @@ TARGET_LINK_LIBRARIES(nemoimage
 	)
 
 INSTALL(TARGETS nemoimage DESTINATION bin)
-
-add_executable(nemomesh
-	nemomesh.cpp
-	meshhelper.cpp
-	${CMAKE_SOURCE_DIR}/thirds/tiny_obj_loader.cc
-	)
-
-TARGET_LINK_LIBRARIES(nemomesh
-	nemoapps
-	)
-
-INSTALL(TARGETS nemomesh DESTINATION bin)
 
 if(WITH_MUPDF)
 	add_executable(nemopdf
