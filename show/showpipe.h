@@ -44,6 +44,8 @@ struct showpipe {
 	double tx, ty, tz;
 	double sx, sy, sz;
 	double rx, ry, rz;
+
+	double ratio;
 };
 
 #define NEMOSHOW_PIPE(one)					((struct showpipe *)container_of(one, struct showpipe, base))
@@ -96,6 +98,15 @@ static inline void nemoshow_pipe_set_rotate(struct showone *one, float rx, float
 	pipe->rx = rx;
 	pipe->ry = ry;
 	pipe->rz = rz;
+
+	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
+}
+
+static inline void nemoshow_pipe_set_aspect_ratio(struct showone *one, float ratio)
+{
+	struct showpipe *pipe = NEMOSHOW_PIPE(one);
+
+	pipe->ratio = ratio;
 
 	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
 }

@@ -89,6 +89,8 @@ struct showone *nemoshow_pipe_create(int type)
 	pipe->sy = 1.0f;
 	pipe->sz = 1.0f;
 
+	pipe->ratio = 1.0f;
+
 	one = &pipe->base;
 	one->type = NEMOSHOW_PIPE_TYPE;
 	one->sub = type;
@@ -174,8 +176,9 @@ int nemoshow_pipe_update(struct showone *one)
 		nemomatrix_rotate_x(&pipe->projection, cos(pipe->rx * M_PI / 180.0f), sin(pipe->rx * M_PI / 180.0f));
 		nemomatrix_rotate_y(&pipe->projection, cos(pipe->ry * M_PI / 180.0f), sin(pipe->ry * M_PI / 180.0f));
 		nemomatrix_rotate_z(&pipe->projection, cos(pipe->rz * M_PI / 180.0f), sin(pipe->rz * M_PI / 180.0f));
-		nemomatrix_scale_xyz(&pipe->projection, pipe->sx, pipe->sy * -1.0f, pipe->sz);
+		nemomatrix_scale_xyz(&pipe->projection, pipe->sx, pipe->sy, pipe->sz);
 		nemomatrix_translate_xyz(&pipe->projection, pipe->tx, pipe->ty, pipe->tz);
+		nemomatrix_scale_xyz(&pipe->projection, pipe->ratio, -1.0f, 1.0f);
 	}
 
 	nemoshow_canvas_damage_all(one->parent);

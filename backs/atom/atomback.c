@@ -158,16 +158,18 @@ int main(int argc, char *argv[])
 	nemoshow_item_load_svg(one, filepath);
 
 	atom->canvas0 = canvas = nemoshow_canvas_create();
+	nemoshow_attach_one(show, canvas);
+	nemoshow_one_attach(scene, canvas);
 	nemoshow_canvas_set_width(canvas, width);
 	nemoshow_canvas_set_height(canvas, height);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_PIPELINE_TYPE);
-	nemoshow_attach_one(show, canvas);
-	nemoshow_one_attach(scene, canvas);
 
 	atom->pipe = pipe = nemoshow_pipe_create(NEMOSHOW_LIGHTING_PIPE);
 	nemoshow_attach_one(show, pipe);
 	nemoshow_one_attach(canvas, pipe);
 	nemoshow_pipe_set_light(pipe, 1.0f, 1.0f, -1.0f, 1.0f);
+	nemoshow_pipe_set_aspect_ratio(pipe,
+			nemoshow_canvas_get_aspect_ratio(atom->canvas0));
 
 	atom->one0 = one = nemoshow_poly_create(NEMOSHOW_QUAD_POLY);
 	nemoshow_attach_one(show, one);
@@ -196,10 +198,7 @@ int main(int argc, char *argv[])
 	nemoshow_poly_use_vbo(one, 1);
 
 	nemomatrix_init_identity(&matrix);
-	nemomatrix_scale_xyz(&matrix,
-			0.5f * nemoshow_canvas_get_aspect_ratio(atom->canvas0),
-			0.5f,
-			0.5f);
+	nemomatrix_scale_xyz(&matrix, 0.5f, 0.5f, 0.5f);
 	nemoshow_poly_transform_vertices(one, &matrix);
 
 	nemoshow_set_scene(show, scene);

@@ -51,7 +51,7 @@ struct showcanvas {
 	GLuint fbo, dbo;
 
 	double width, height;
-	double aspect;
+	double ratio;
 
 	struct {
 		int dirty;
@@ -181,7 +181,7 @@ static inline double nemoshow_canvas_get_height(struct showone *one)
 
 static inline double nemoshow_canvas_get_aspect_ratio(struct showone *one)
 {
-	return NEMOSHOW_CANVAS_AT(one, aspect);
+	return NEMOSHOW_CANVAS_AT(one, ratio);
 }
 
 static inline void nemoshow_canvas_set_fill_color(struct showone *one, double r, double g, double b, double a)
