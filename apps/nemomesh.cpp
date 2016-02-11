@@ -203,63 +203,6 @@ static void nemomesh_render_scene(struct meshcontext *context)
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-static void nemomesh_unproject(struct meshcontext *context, struct nemomesh *mesh, float x, float y, float z, float *out)
-{
-	struct nemomatrix matrix;
-	struct nemomatrix inverse;
-	struct nemovector in;
-
-	matrix = mesh->modelview;
-	nemomatrix_multiply(&matrix, &context->projection);
-
-	nemomatrix_invert(&inverse, &matrix);
-
-	in.f[0] = x * 2.0f / context->width - 1.0f;
-	in.f[1] = y * 2.0f / context->height - 1.0f;
-	in.f[2] = z * 2.0f - 1.0f;
-	in.f[3] = 1.0f;
-
-	nemomatrix_transform(&inverse, &in);
-
-	if (fabsf(in.f[3]) < 1e-6) {
-		out[0] = 0.0f;
-		out[1] = 0.0f;
-		out[2] = 0.0f;
-	} else {
-		out[0] = in.f[0] / in.f[3];
-		out[1] = in.f[1] / in.f[3];
-		out[2] = in.f[2] / in.f[3];
-	}
-}
-
-static int nemomesh_pick_object(struct meshcontext *context, struct nemomesh *mesh, float x, float y)
-{
-	float near[3], far[3];
-	float rayorg[3];
-	float rayvec[3];
-	float raylen;
-	float mint, maxt;
-
-	nemomesh_unproject(context, mesh, x, y, -1.0f, near);
-	nemomesh_unproject(context, mesh, x, y, 1.0f, far);
-
-	rayvec[0] = far[0] - near[0];
-	rayvec[1] = far[1] - near[1];
-	rayvec[2] = far[2] - near[2];
-
-	raylen = sqrtf(rayvec[0] * rayvec[0] + rayvec[1] * rayvec[1] + rayvec[2] * rayvec[2]);
-
-	rayvec[0] /= raylen;
-	rayvec[1] /= raylen;
-	rayvec[2] /= raylen;
-
-	rayorg[0] = near[0];
-	rayorg[1] = near[1];
-	rayorg[2] = near[2];
-
-	return nemometro_cube_intersect(mesh->boundingbox, rayorg, rayvec, &mint, &maxt);
-}
-
 static void nemomesh_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
 {
 	struct meshcontext *context = (struct meshcontext *)nemotale_get_userdata(tale);
@@ -268,7 +211,7 @@ static void nemomesh_dispatch_tale_event(struct nemotale *tale, struct talenode 
 	if (id == 1) {
 		if (nemotale_is_touch_down(tale, event, type)) {
 			struct nemomesh *mesh = context->mesh;
-			int plane = nemomesh_pick_object(context, mesh, event->x, event->y);
+			int plane = nemometro_pick_cube(&context->projection, context->width, context->height, &mesh->modelview, mesh->boundingbox, event->x, event->y);
 
 			if (plane == NEMO_METRO_NONE_PLANE) {
 				float sx, sy;
@@ -327,7 +270,7 @@ static void nemomesh_dispatch_tale_event(struct nemotale *tale, struct talenode 
 
 		if (nemotale_is_single_click(tale, event, type)) {
 			struct nemomesh *mesh = context->mesh;
-			int plane = nemomesh_pick_object(context, mesh, event->x, event->y);
+			int plane = nemometro_pick_cube(&context->projection, context->width, context->height, &mesh->modelview, mesh->boundingbox, event->x, event->y);
 
 			if (plane != NEMO_METRO_NONE_PLANE) {
 				if (mesh->mode == GL_TRIANGLES)
