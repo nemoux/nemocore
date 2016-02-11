@@ -9,12 +9,12 @@
 #include <colorhelper.h>
 #include <stringhelper.h>
 
-static int nemocolor_compare(const void *a, const void *b)
+static int color_compare(const void *a, const void *b)
 {
 	return strcasecmp((const char *)a, (const char *)b);
 }
 
-static inline const uint8_t *nemocolor_get_reserved(const char *name)
+static inline const uint8_t *color_get_reserved(const char *name)
 {
 	static struct colormap {
 		char name[32];
@@ -170,14 +170,14 @@ static inline const uint8_t *nemocolor_get_reserved(const char *name)
 		{ "yellowgreen",          { 154,205, 50 } }
 	}, *map;
 
-	map = (struct colormap *)bsearch(name, maps, sizeof(maps) / sizeof(maps[0]), sizeof(maps[0]), nemocolor_compare);
+	map = (struct colormap *)bsearch(name, maps, sizeof(maps) / sizeof(maps[0]), sizeof(maps[0]), color_compare);
 	if (map != NULL)
 		return map->rgb;
 
 	return NULL;
 }
 
-uint32_t nemocolor_parse(const char *value)
+uint32_t color_parse(const char *value)
 {
 	uint8_t rgba[4];
 
@@ -224,7 +224,7 @@ uint32_t nemocolor_parse(const char *value)
 	} else {
 		const uint8_t *rgb;
 
-		rgb = nemocolor_get_reserved(value);
+		rgb = color_get_reserved(value);
 		if (rgb != NULL) {
 			rgba[0] = rgb[0];
 			rgba[1] = rgb[1];
@@ -233,5 +233,5 @@ uint32_t nemocolor_parse(const char *value)
 		}
 	}
 
-	return NEMOCOLOR_TO_UINT32(rgba);
+	return COLOR_TO_UINT32(rgba);
 }

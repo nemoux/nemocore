@@ -1,7 +1,11 @@
 FIND_PACKAGE(PkgConfig REQUIRED)
 
+include_directories(
+	${CMAKE_SOURCE_DIR}/thirds
+	)
+
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -std=c++11")
 set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 
 if(WITH_EGL)
@@ -33,6 +37,8 @@ add_library(nemoasst SHARED
 	${CMAKE_SOURCE_DIR}/misc/colorhelper.c
 	${CMAKE_SOURCE_DIR}/misc/prochelper.c
 	${CMAKE_SOURCE_DIR}/misc/oshelper.c
+	${CMAKE_SOURCE_DIR}/thirds/tiny_obj_loader.cc
+	${CMAKE_SOURCE_DIR}/misc/meshhelper.cpp
 	${NEMOASST_EGL_SOURCES}
 	)
 

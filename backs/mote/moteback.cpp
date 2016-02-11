@@ -453,30 +453,30 @@ int main(int argc, char *argv[])
 				break;
 
 			case 'n':
-				uc = nemocolor_parse(optarg);
+				uc = color_parse(optarg);
 
-				color0[0] = NEMOCOLOR_DOUBLE_R(uc);
-				color0[1] = NEMOCOLOR_DOUBLE_G(uc);
-				color0[2] = NEMOCOLOR_DOUBLE_B(uc);
-				color0[3] = NEMOCOLOR_DOUBLE_A(uc);
+				color0[0] = COLOR_DOUBLE_R(uc);
+				color0[1] = COLOR_DOUBLE_G(uc);
+				color0[2] = COLOR_DOUBLE_B(uc);
+				color0[3] = COLOR_DOUBLE_A(uc);
 				break;
 
 			case 'm':
-				uc = nemocolor_parse(optarg);
+				uc = color_parse(optarg);
 
-				color1[0] = NEMOCOLOR_DOUBLE_R(uc);
-				color1[1] = NEMOCOLOR_DOUBLE_G(uc);
-				color1[2] = NEMOCOLOR_DOUBLE_B(uc);
-				color1[3] = NEMOCOLOR_DOUBLE_A(uc);
+				color1[0] = COLOR_DOUBLE_R(uc);
+				color1[1] = COLOR_DOUBLE_G(uc);
+				color1[2] = COLOR_DOUBLE_B(uc);
+				color1[3] = COLOR_DOUBLE_A(uc);
 				break;
 
 			case 't':
-				uc = nemocolor_parse(optarg);
+				uc = color_parse(optarg);
 
-				textcolor[0] = NEMOCOLOR_DOUBLE_R(uc);
-				textcolor[1] = NEMOCOLOR_DOUBLE_G(uc);
-				textcolor[2] = NEMOCOLOR_DOUBLE_B(uc);
-				textcolor[3] = NEMOCOLOR_DOUBLE_A(uc);
+				textcolor[0] = COLOR_DOUBLE_R(uc);
+				textcolor[1] = COLOR_DOUBLE_G(uc);
+				textcolor[2] = COLOR_DOUBLE_B(uc);
+				textcolor[3] = COLOR_DOUBLE_A(uc);
 				break;
 
 			case 'f':
