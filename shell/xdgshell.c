@@ -249,6 +249,11 @@ static void xdgshell_unbind_xdg_surface(struct wl_resource *resource)
 	bin->resource = NULL;
 }
 
+static void xdg_shell_destroy(struct wl_client *client, struct wl_resource *resource)
+{
+	struct shellclient *sc = (struct shellclient *)wl_resource_get_user_data(resource);
+}
+
 static void xdg_use_unstable_version(struct wl_client *client, struct wl_resource *resource, int32_t version)
 {
 	if (version > 1) {
@@ -300,7 +305,7 @@ static void xdg_get_xdg_surface(struct wl_client *client, struct wl_resource *re
 	bin->flags |= NEMO_SHELL_SURFACE_BINDABLE_FLAG;
 }
 
-static void xdg_get_xdg_popup(struct wl_client *client, struct wl_resource *resource, uint32_t id, struct wl_resource *surface_resource, struct wl_resource *parent_resource, struct wl_resource *seat_resource, uint32_t serial, int32_t x, int32_t y, uint32_t flags)
+static void xdg_get_xdg_popup(struct wl_client *client, struct wl_resource *resource, uint32_t id, struct wl_resource *surface_resource, struct wl_resource *parent_resource, struct wl_resource *seat_resource, uint32_t serial, int32_t x, int32_t y)
 {
 	struct nemocanvas *canvas = (struct nemocanvas *)wl_resource_get_user_data(surface_resource);
 	struct nemocanvas *parent = (struct nemocanvas *)wl_resource_get_user_data(parent_resource);
@@ -351,6 +356,7 @@ static void xdg_pong(struct wl_client *client, struct wl_resource *resource, uin
 }
 
 static const struct xdg_shell_interface xdg_implementation = {
+	xdg_shell_destroy,
 	xdg_use_unstable_version,
 	xdg_get_xdg_surface,
 	xdg_get_xdg_popup,
@@ -367,7 +373,7 @@ static int xdgshell_dispatch(const void *implementation, void *target, uint32_t 
 		return 0;
 	}
 
-#define	XDG_SERVER_VERSION	(4)
+#define	XDG_SERVER_VERSION	(5)
 
 	if (args[0].i != XDG_SERVER_VERSION) {
 		wl_resource_post_error(resource, WL_DISPLAY_ERROR_INVALID_OBJECT, "incompatible version, server is %d client wants %d", XDG_SERVER_VERSION, args[0].i);

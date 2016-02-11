@@ -23,7 +23,7 @@ option(WITH_XWAYLAND "Build with XWAYLAND" ON)
 option(WITH_GLIB "Build with GLIB" ON)
 option(WITH_GSTREAMER "Build with GSTREAMER" ON)
 option(WITH_PULSEAUDIO "Build with PULSEAUDIO" ON)
-option(WITH_GRILO "Build with GRILO" ON)
+option(WITH_GRILO "Build with GRILO" OFF)
 option(WITH_MUPDF "Build with MUPDF" ON)
 
 option(WITH_WAYLANDSHELL "Build with WAYLANDSHELL" ON)
