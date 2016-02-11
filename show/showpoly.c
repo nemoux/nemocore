@@ -238,12 +238,16 @@ void nemoshow_poly_destroy(struct showone *one)
 	if (poly->on_texcoords != 0) {
 		free(poly->texcoords);
 	}
+	if (poly->on_diffuses != 0) {
+		free(poly->diffuses);
+	}
 	if (poly->on_normals != 0) {
 		free(poly->normals);
 	}
 	if (poly->on_vbo != 0) {
 		glDeleteBuffers(1, &poly->vvertex);
 		glDeleteBuffers(1, &poly->vtexcoord);
+		glDeleteBuffers(1, &poly->vdiffuse);
 		glDeleteBuffers(1, &poly->vnormal);
 		glDeleteBuffers(1, &poly->vindex);
 		glDeleteVertexArrays(1, &poly->varray);
@@ -317,6 +321,13 @@ int nemoshow_poly_update(struct showone *one)
 				glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat[2]) * poly->elements, poly->texcoords, GL_STATIC_DRAW);
 			}
 
+			if (poly->on_diffuses != 0) {
+				glBindBuffer(GL_ARRAY_BUFFER, poly->vdiffuse);
+				glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void *)0);
+				glEnableVertexAttribArray(1);
+				glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat[3]) * poly->elements, poly->diffuses, GL_STATIC_DRAW);
+			}
+
 			if (poly->on_normals != 0) {
 				glBindBuffer(GL_ARRAY_BUFFER, poly->vnormal);
 				glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void *)0);
@@ -381,6 +392,21 @@ void nemoshow_poly_use_texcoords(struct showone *one, int on_texcoords)
 	poly->on_texcoords = on_texcoords;
 }
 
+void nemoshow_poly_use_diffuses(struct showone *one, int on_diffuses)
+{
+	struct showpoly *poly = NEMOSHOW_POLY(one);
+
+	if (poly->on_diffuses == 0 && on_diffuses != 0) {
+		poly->diffuses = (float *)malloc(sizeof(float[3]) * poly->elements);
+
+		nemoobject_set_reserved(&one->object, "diffuse", poly->diffuses, sizeof(float[3]) * poly->elements);
+	} else if (poly->on_diffuses != 0 && on_diffuses == 0) {
+		free(poly->diffuses);
+	}
+
+	poly->on_diffuses = on_diffuses;
+}
+
 void nemoshow_poly_use_normals(struct showone *one, int on_normals)
 {
 	struct showpoly *poly = NEMOSHOW_POLY(one);
@@ -409,11 +435,13 @@ void nemoshow_poly_use_vbo(struct showone *one, int on_vbo)
 		glGenVertexArrays(1, &poly->varray);
 		glGenBuffers(1, &poly->vvertex);
 		glGenBuffers(1, &poly->vtexcoord);
+		glGenBuffers(1, &poly->vdiffuse);
 		glGenBuffers(1, &poly->vnormal);
 		glGenBuffers(1, &poly->vindex);
 	} else if (poly->on_vbo != 0 && on_vbo == 0) {
 		glDeleteBuffers(1, &poly->vvertex);
 		glDeleteBuffers(1, &poly->vtexcoord);
+		glDeleteBuffers(1, &poly->vdiffuse);
 		glDeleteBuffers(1, &poly->vnormal);
 		glDeleteBuffers(1, &poly->vindex);
 		glDeleteVertexArrays(1, &poly->varray);

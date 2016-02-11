@@ -24,6 +24,9 @@ typedef enum {
 	NEMOSHOW_POLY_Z_VERTEX = 2,
 	NEMOSHOW_POLY_TX_VERTEX = 0,
 	NEMOSHOW_POLY_TY_VERTEX = 1,
+	NEMOSHOW_POLY_R_DIFFUSE = 0,
+	NEMOSHOW_POLY_G_DIFFUSE = 1,
+	NEMOSHOW_POLY_B_DIFFUSE = 2,
 	NEMOSHOW_POLY_X_NORMAL = 0,
 	NEMOSHOW_POLY_Y_NORMAL = 1,
 	NEMOSHOW_POLY_Z_NORMAL = 2,
@@ -50,6 +53,7 @@ struct showpoly {
 
 	float *vertices;
 	float *texcoords;
+	float *diffuses;
 	float *normals;
 	int elements;
 
@@ -58,11 +62,13 @@ struct showpoly {
 	GLuint varray;
 	GLuint vvertex;
 	GLuint vtexcoord;
+	GLuint vdiffuse;
 	GLuint vnormal;
 	GLuint vindex;
 	GLenum mode;
 
 	int on_texcoords;
+	int on_diffuses;
 	int on_normals;
 	int on_vbo;
 
@@ -97,6 +103,7 @@ extern void nemoshow_poly_transform_vertices(struct showone *one, struct nemomat
 
 extern void nemoshow_poly_use_texcoords(struct showone *one, int on_texcoords);
 extern void nemoshow_poly_use_normals(struct showone *one, int on_normals);
+extern void nemoshow_poly_use_diffuses(struct showone *one, int on_diffuses);
 extern void nemoshow_poly_use_vbo(struct showone *one, int on_vbo);
 
 extern int nemoshow_poly_pick_one(struct showone *one, double x, double y, float *tx, float *ty);
@@ -163,6 +170,17 @@ static inline void nemoshow_poly_set_texcoord(struct showone *one, int index, fl
 
 	poly->texcoords[2 * index + NEMOSHOW_POLY_TX_VERTEX] = tx;
 	poly->texcoords[2 * index + NEMOSHOW_POLY_TY_VERTEX] = ty;
+
+	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
+}
+
+static inline void nemoshow_poly_set_diffuse(struct showone *one, int index, float r, float g, float b)
+{
+	struct showpoly *poly = NEMOSHOW_POLY(one);
+
+	poly->diffuses[3 * index + NEMOSHOW_POLY_R_DIFFUSE] = r;
+	poly->diffuses[3 * index + NEMOSHOW_POLY_G_DIFFUSE] = g;
+	poly->diffuses[3 * index + NEMOSHOW_POLY_B_DIFFUSE] = b;
 
 	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }

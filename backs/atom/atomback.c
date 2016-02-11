@@ -243,7 +243,7 @@ int main(int argc, char *argv[])
 	nemoshow_attach_one(show, canvas);
 	nemoshow_one_attach(scene, canvas);
 
-	atom->pipe = pipe = nemoshow_pipe_create(NEMOSHOW_LIGHTING_PIPE);
+	atom->pipe = pipe = nemoshow_pipe_create(NEMOSHOW_LIGHTING_TEXTURE_PIPE);
 	nemoshow_attach_one(show, pipe);
 	nemoshow_one_attach(canvas, pipe);
 	nemoshow_pipe_set_light(pipe, 1.0f, 1.0f, -1.0f, 1.0f);
