@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #define __USE_GNU
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,6 +32,7 @@
 #include <task.h>
 #include <sound.h>
 #include <clipboard.h>
+#include <virtuio.h>
 #include <screen.h>
 #include <animation.h>
 #include <effect.h>

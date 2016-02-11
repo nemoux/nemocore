@@ -16,6 +16,7 @@
 #include <content.h>
 #include <screen.h>
 #include <layer.h>
+#include <waylandhelper.h>
 #include <nemomisc.h>
 
 static int pixmanrenderer_read_pixels(struct nemorenderer *base, struct nemoscreen *screen, pixman_format_code_t format, void *pixels, uint32_t x, uint32_t y, uint32_t width, uint32_t height)

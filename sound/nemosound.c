@@ -13,6 +13,7 @@
 #include <nemotool.h>
 #include <nemosound.h>
 #include <nemoglib.h>
+#include <prochelper.h>
 #include <nemolog.h>
 #include <nemomisc.h>
 

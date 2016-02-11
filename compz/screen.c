@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #define __USE_GNU
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,6 +13,7 @@
 #include <compz.h>
 #include <canvas.h>
 #include <view.h>
+#include <presentation.h>
 #include <nemomatrix.h>
 #include <nemoitem.h>
 #include <nemolog.h>

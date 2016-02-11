@@ -20,6 +20,7 @@
 #include <actor.h>
 #include <content.h>
 #include <vieweffect.h>
+#include <nemolog.h>
 #include <nemomisc.h>
 
 static inline float pickgrab_calculate_touchpoint_distance(struct touchpoint *tp0, struct touchpoint *tp1)

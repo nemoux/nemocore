@@ -18,6 +18,7 @@
 #include <picker.h>
 #include <virtuio.h>
 #include <binding.h>
+#include <nemolog.h>
 #include <nemomisc.h>
 
 static void default_touchpoint_grab_down(struct touchpoint_grab *grab, uint32_t time, uint64_t touchid, float x, float y)

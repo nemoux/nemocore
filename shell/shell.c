@@ -25,9 +25,11 @@
 #include <screen.h>
 #include <viewanimation.h>
 #include <busycursor.h>
+#include <vieweffect.h>
 #include <waylandshell.h>
 #include <xdgshell.h>
 #include <nemoshell.h>
+#include <prochelper.h>
 #include <nemomisc.h>
 #include <nemolog.h>
 #include <nemoitem.h>

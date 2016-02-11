@@ -17,6 +17,8 @@
 #include <nemoegl.h>
 #include <talehelper.h>
 #include <pixmanhelper.h>
+#include <glhelper.h>
+#include <fbohelper.h>
 #include <nemomatrix.h>
 #include <nemomisc.h>
 

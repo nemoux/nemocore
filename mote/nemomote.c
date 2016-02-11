@@ -6,6 +6,7 @@
 #include <errno.h>
 
 #include <nemomote.h>
+#include <nemomisc.h>
 
 struct nemomote *nemomote_create(int max)
 {

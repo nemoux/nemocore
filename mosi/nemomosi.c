@@ -6,6 +6,7 @@
 #include <errno.h>
 
 #include <nemomosi.h>
+#include <nemomisc.h>
 
 struct nemomosi *nemomosi_create(int32_t width, int32_t height)
 {

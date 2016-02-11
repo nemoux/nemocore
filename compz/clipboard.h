@@ -36,6 +36,8 @@ struct clipboard {
 	struct clipsource *source;
 };
 
+extern struct clipboard *clipboard_create(struct nemoseat *seat);
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

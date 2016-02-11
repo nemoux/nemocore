@@ -20,6 +20,7 @@
 #include <canvas.h>
 #include <actor.h>
 #include <vieweffect.h>
+#include <nemolog.h>
 #include <nemomisc.h>
 
 static void move_shellgrab_handle_bin_change(struct wl_listener *listener, void *data)

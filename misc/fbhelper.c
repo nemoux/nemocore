@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+#define __USE_GNU
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -5,6 +7,7 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <sys/ioctl.h>
 #include <linux/fb.h>
 
 #include <fbhelper.h>

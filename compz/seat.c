@@ -18,6 +18,7 @@
 #include <canvas.h>
 #include <view.h>
 #include <picker.h>
+#include <binding.h>
 #include <nemomisc.h>
 
 static void wayland_seat_get_pointer(struct wl_client *client, struct wl_resource *seat_resource, uint32_t id)

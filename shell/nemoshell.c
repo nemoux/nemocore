@@ -18,6 +18,7 @@
 #include <move.h>
 #include <pick.h>
 #include <screen.h>
+#include <seat.h>
 #include <viewanimation.h>
 #include <nemomisc.h>
 

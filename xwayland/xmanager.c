@@ -14,6 +14,8 @@
 #include <view.h>
 #include <xserver.h>
 #include <xmanager.h>
+#include <selection.h>
+#include <dnd.h>
 #include <cursor.h>
 #include <nemohash.h>
 #include <nemomisc.h>

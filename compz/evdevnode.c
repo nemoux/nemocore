@@ -6,6 +6,7 @@
 #include <errno.h>
 
 #include <linux/input.h>
+#include <mtdev-plumbing.h>
 #include <wayland-server.h>
 #include <wayland-nemo-seat-server-protocol.h>
 
