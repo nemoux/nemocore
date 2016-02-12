@@ -206,8 +206,7 @@ static int glrenderer_attach_egl(struct glrenderer *renderer, struct glcontent *
 		nemolog_error("GLRENDERER", "failed to create image from prime fd\n");
 		return -1;
 	}
-
-	glActiveTexture(GL_TEXTURE0);
+	
 	glBindTexture(glcontent->target, glcontent->textures[0]);
 	renderer->image_target_texture_2d(glcontent->target, glcontent->images[0]);
 

@@ -90,6 +90,7 @@ extern int nemoshow_canvas_update(struct showone *one);
 extern int nemoshow_canvas_set_type(struct showone *one, int type);
 extern void nemoshow_canvas_set_event(struct showone *one, uint32_t event);
 extern void nemoshow_canvas_set_alpha(struct showone *one, double alpha);
+extern int nemoshow_canvas_set_filter(struct showone *one, const char *fshader, const char *vshader);
 
 extern int nemoshow_canvas_attach_pixman(struct showone *one, void *data, int32_t width, int32_t height);
 extern void nemoshow_canvas_detach_pixman(struct showone *one);

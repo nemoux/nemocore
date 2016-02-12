@@ -116,12 +116,12 @@ static void glrenderer_use_uniforms(struct glshader *shader, struct nemoview *vi
 	struct glcontent *glcontent = (struct glcontent *)nemocontent_get_opengl_context(view->content, screen->node);
 	int i;
 
-	glUniformMatrix4fv(shader->proj_uniform, 1, GL_FALSE, screen->render.matrix.d);
-	glUniform4fv(shader->color_uniform, 1, glcontent->colors);
-	glUniform1f(shader->alpha_uniform, view->alpha);
+	glUniformMatrix4fv(shader->uprojection, 1, GL_FALSE, screen->render.matrix.d);
+	glUniform4fv(shader->ucolor, 1, glcontent->colors);
+	glUniform1f(shader->ualpha, view->alpha);
 
 	for (i = 0; i < glcontent->ntextures; i++) {
-		glUniform1i(shader->tex_uniforms[i], i);
+		glUniform1i(shader->utextures[i], i);
 	}
 }
 
@@ -686,8 +686,6 @@ static int glrenderer_prepare_egl_context(struct glrenderer *renderer, struct ne
 
 	if (strstr(extensions, "GL_OES_EGL_image_external"))
 		renderer->has_egl_image_external = 1;
-
-	glActiveTexture(GL_TEXTURE0);
 
 	renderer->texture_shader_rgba.vertex_source = vertex_shader;
 	renderer->texture_shader_rgba.fragment_source = texture_fragment_shader_rgba;

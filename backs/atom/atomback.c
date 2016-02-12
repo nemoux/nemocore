@@ -13,6 +13,7 @@
 #include <nemoegl.h>
 #include <atomback.h>
 #include <showhelper.h>
+#include <glfilter.h>
 #include <nemolog.h>
 #include <nemomisc.h>
 
@@ -229,6 +230,7 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_width(canvas, 512.0f);
 	nemoshow_canvas_set_height(canvas, 512.0f);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
+	nemoshow_canvas_set_filter(canvas, simple_filter_fragment_shader, simple_filter_vertex_shader);
 	nemoshow_attach_one(show, canvas);
 
 	atom->onet = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);

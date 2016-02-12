@@ -11,11 +11,11 @@ static const char vertex_shader[] =
 "uniform mat4 proj;\n"
 "attribute vec2 position;\n"
 "attribute vec2 texcoord;\n"
-"varying vec2 v_texcoord;\n"
+"varying vec2 vtexcoord;\n"
 "void main()\n"
 "{\n"
 "   gl_Position = proj * vec4(position, 0.0, 1.0);\n"
-"   v_texcoord = texcoord;\n"
+"   vtexcoord = texcoord;\n"
 "}\n";
 
 #define FRAGMENT_CONVERT_YUV						\
@@ -35,43 +35,43 @@ static const char fragment_brace[] =
 
 static const char texture_fragment_shader_rgba[] =
 "precision mediump float;\n"
-"varying vec2 v_texcoord;\n"
+"varying vec2 vtexcoord;\n"
 "uniform sampler2D tex;\n"
 "uniform float alpha;\n"
 "void main()\n"
 "{\n"
-"   gl_FragColor = alpha * texture2D(tex, v_texcoord);\n";
+"   gl_FragColor = alpha * texture2D(tex, vtexcoord);\n";
 
 static const char texture_fragment_shader_rgbx[] =
 "precision mediump float;\n"
-"varying vec2 v_texcoord;\n"
+"varying vec2 vtexcoord;\n"
 "uniform sampler2D tex;\n"
 "uniform float alpha;\n"
 "void main()\n"
 "{\n"
-"   gl_FragColor.rgb = alpha * texture2D(tex, v_texcoord).rgb;\n"
+"   gl_FragColor.rgb = alpha * texture2D(tex, vtexcoord).rgb;\n"
 "   gl_FragColor.a = alpha;\n";
 
 static const char texture_fragment_shader_egl_external[] =
 "#extension GL_OES_EGL_image_external : require\n"
 "precision mediump float;\n"
-"varying vec2 v_texcoord;\n"
+"varying vec2 vtexcoord;\n"
 "uniform samplerExternalOES tex;\n"
 "uniform float alpha;\n"
 "void main()\n"
 "{\n"
-"   gl_FragColor = alpha * texture2D(tex, v_texcoord)\n;";
+"   gl_FragColor = alpha * texture2D(tex, vtexcoord)\n;";
 
 static const char texture_fragment_shader_y_uv[] =
 "precision mediump float;\n"
 "uniform sampler2D tex;\n"
 "uniform sampler2D tex1;\n"
-"varying vec2 v_texcoord;\n"
+"varying vec2 vtexcoord;\n"
 "uniform float alpha;\n"
 "void main() {\n"
-"  float y = 1.16438356 * (texture2D(tex, v_texcoord).x - 0.0625);\n"
-"  float u = texture2D(tex1, v_texcoord).r - 0.5;\n"
-"  float v = texture2D(tex1, v_texcoord).g - 0.5;\n"
+"  float y = 1.16438356 * (texture2D(tex, vtexcoord).x - 0.0625);\n"
+"  float u = texture2D(tex1, vtexcoord).r - 0.5;\n"
+"  float v = texture2D(tex1, vtexcoord).g - 0.5;\n"
 FRAGMENT_CONVERT_YUV;
 
 static const char texture_fragment_shader_y_u_v[] =
@@ -79,24 +79,24 @@ static const char texture_fragment_shader_y_u_v[] =
 "uniform sampler2D tex;\n"
 "uniform sampler2D tex1;\n"
 "uniform sampler2D tex2;\n"
-"varying vec2 v_texcoord;\n"
+"varying vec2 vtexcoord;\n"
 "uniform float alpha;\n"
 "void main() {\n"
-"  float y = 1.16438356 * (texture2D(tex, v_texcoord).x - 0.0625);\n"
-"  float u = texture2D(tex1, v_texcoord).x - 0.5;\n"
-"  float v = texture2D(tex2, v_texcoord).x - 0.5;\n"
+"  float y = 1.16438356 * (texture2D(tex, vtexcoord).x - 0.0625);\n"
+"  float u = texture2D(tex1, vtexcoord).x - 0.5;\n"
+"  float v = texture2D(tex2, vtexcoord).x - 0.5;\n"
 FRAGMENT_CONVERT_YUV;
 
 static const char texture_fragment_shader_y_xuxv[] =
 "precision mediump float;\n"
 "uniform sampler2D tex;\n"
 "uniform sampler2D tex1;\n"
-"varying vec2 v_texcoord;\n"
+"varying vec2 vtexcoord;\n"
 "uniform float alpha;\n"
 "void main() {\n"
-"  float y = 1.16438356 * (texture2D(tex, v_texcoord).x - 0.0625);\n"
-"  float u = texture2D(tex1, v_texcoord).g - 0.5;\n"
-"  float v = texture2D(tex1, v_texcoord).a - 0.5;\n"
+"  float y = 1.16438356 * (texture2D(tex, vtexcoord).x - 0.0625);\n"
+"  float u = texture2D(tex1, vtexcoord).g - 0.5;\n"
+"  float v = texture2D(tex1, vtexcoord).a - 0.5;\n"
 FRAGMENT_CONVERT_YUV;
 
 static const char solid_fragment_shader[] =
@@ -110,10 +110,10 @@ static const char solid_fragment_shader[] =
 struct glshader {
 	GLuint program;
 	GLuint vertex_shader, fragment_shader;
-	GLint proj_uniform;
-	GLint tex_uniforms[3];
-	GLint alpha_uniform;
-	GLint color_uniform;
+	GLint uprojection;
+	GLint utextures[3];
+	GLint ualpha;
+	GLint ucolor;
 	const char *vertex_source, *fragment_source;
 };
 

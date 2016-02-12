@@ -197,6 +197,13 @@ void nemoshow_canvas_set_alpha(struct showone *one, double alpha)
 	canvas->alpha = alpha;
 }
 
+int nemoshow_canvas_set_filter(struct showone *one, const char *fshader, const char *vshader)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	return nemotale_node_set_filter(canvas->node, fshader, vshader);
+}
+
 int nemoshow_canvas_attach_pixman(struct showone *one, void *data, int32_t width, int32_t height)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);

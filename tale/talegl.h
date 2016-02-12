@@ -11,6 +11,9 @@ NEMO_BEGIN_EXTERN_C
 #include <pixman.h>
 #include <cairo.h>
 
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
+#include <GL/glext.h>
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
@@ -29,6 +32,12 @@ NEMO_BEGIN_EXTERN_C
 
 struct taleglnode {
 	GLuint texture;
+
+	int has_filter;
+	GLuint ftexture;
+	GLuint fbo, dbo;
+	GLuint fprogram;
+	GLuint utexture;
 
 	struct nemolistener destroy_listener;
 };
@@ -52,6 +61,8 @@ extern int nemotale_composite_fbo_full(struct nemotale *tale);
 
 extern int nemotale_node_flush_gl(struct nemotale *tale, struct talenode *node);
 
+extern int nemotale_node_set_filter(struct talenode *node, const char *fshader, const char *vshader);
+
 extern struct talenode *nemotale_node_create_gl(int32_t width, int32_t height);
 extern int nemotale_node_resize_gl(struct talenode *node, int32_t width, int32_t height);
 extern int nemotale_node_set_viewport_gl(struct talenode *node, int32_t width, int32_t height);
@@ -59,6 +70,9 @@ extern int nemotale_node_set_viewport_gl(struct talenode *node, int32_t width, i
 static inline GLuint nemotale_node_get_texture(struct talenode *node)
 {
 	struct taleglnode *context = (struct taleglnode *)node->glcontext;
+
+	if (context->has_filter != 0)
+		return context->ftexture;
 
 	return context->texture;
 }

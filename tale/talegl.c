@@ -72,6 +72,15 @@ static void nemotale_node_handle_destroy_signal(struct nemolistener *listener, v
 
 	glDeleteTextures(1, &context->texture);
 
+	if (context->has_filter != 0) {
+		glDeleteTextures(1, &context->ftexture);
+
+		glDeleteFramebuffers(1, &context->fbo);
+		glDeleteRenderbuffers(1, &context->dbo);
+
+		glDeleteProgram(context->fprogram);
+	}
+
 	free(context);
 }
 
@@ -147,6 +156,17 @@ int nemotale_node_resize_gl(struct talenode *node, int32_t width, int32_t height
 			node->viewport.sx = (double)node->viewport.width / (double)node->geometry.width;
 			node->viewport.sy = (double)node->viewport.height / (double)node->geometry.height;
 		}
+
+		if (context->has_filter != 0) {
+			glBindTexture(GL_TEXTURE_2D, context->ftexture);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, node->viewport.width, node->viewport.height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
+			glBindTexture(GL_TEXTURE_2D, 0);
+
+			glDeleteFramebuffers(1, &context->fbo);
+			glDeleteRenderbuffers(1, &context->dbo);
+
+			fbo_prepare_context(context->ftexture, node->viewport.width, node->viewport.height, &context->fbo, &context->dbo);
+		}
 	}
 
 	return 0;
@@ -189,13 +209,13 @@ static void nemotale_use_shader(struct nemotale *tale, struct talenode *node, st
 	}
 
 	if (context->current_shader == shader) {
-		glUniform1f(shader->alpha_uniform, node->alpha);
+		glUniform1f(shader->ualpha, node->alpha);
 	} else {
 		glUseProgram(shader->program);
 
-		glUniformMatrix4fv(shader->proj_uniform, 1, GL_FALSE, context->projection.d);
-		glUniform1i(shader->tex_uniforms[0], 0);
-		glUniform1f(shader->alpha_uniform, node->alpha);
+		glUniformMatrix4fv(shader->uprojection, 1, GL_FALSE, context->projection.d);
+		glUniform1i(shader->utextures[0], 0);
+		glUniform1f(shader->ualpha, node->alpha);
 
 		context->current_shader = shader;
 	}
@@ -320,7 +340,6 @@ static void nemotale_repaint_node(struct nemotale *tale, struct talenode *node, 
 		if (node->pmcontext != NULL && node->needs_flush != 0)
 			nemotale_node_flush_gl(tale, node);
 
-		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, nemotale_node_get_texture(node));
 
 		if (node->transform.enable != 0) {
@@ -913,8 +932,89 @@ int nemotale_node_flush_gl(struct nemotale *tale, struct talenode *node)
 #endif
 		}
 
+		if (gcontext->has_filter != 0) {
+			GLfloat vertices[] = {
+				-1.0f, -1.0f, 0.0f, 0.0f,
+				1.0f, -1.0f, 1.0f, 0.0f,
+				1.0f, 1.0f, 1.0f, 1.0f,
+				-1.0f, 1.0f, 0.0f, 1.0f
+			};
+
+			glBindFramebuffer(GL_FRAMEBUFFER, gcontext->fbo);
+
+			glViewport(0, 0, node->viewport.width, node->viewport.height);
+
+			glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+			glClearDepth(0.0f);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			glUseProgram(gcontext->fprogram);
+			glUniform1i(gcontext->utexture, 0);
+
+			glBindTexture(GL_TEXTURE_2D, gcontext->texture);
+
+			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &vertices[0]);
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &vertices[2]);
+			glEnableVertexAttribArray(1);
+
+			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		}
+
 		node->needs_flush = 0;
 	}
+
+	return 0;
+}
+
+int nemotale_node_set_filter(struct talenode *node, const char *fshader, const char *vshader)
+{
+	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
+	GLuint program;
+
+	if (gcontext == NULL) {
+		gcontext = (struct taleglnode *)malloc(sizeof(struct taleglnode));
+		if (gcontext == NULL)
+			return -1;
+		memset(gcontext, 0, sizeof(struct taleglnode));
+
+		glGenTextures(1, &gcontext->texture);
+		glBindTexture(GL_TEXTURE_2D, gcontext->texture);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+		node->glcontext = gcontext;
+
+		gcontext->destroy_listener.notify = nemotale_node_handle_destroy_signal;
+		nemosignal_add(&node->destroy_signal, &gcontext->destroy_listener);
+	}
+
+	glGenTextures(1, &gcontext->ftexture);
+	glBindTexture(GL_TEXTURE_2D, gcontext->ftexture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, node->viewport.width, node->viewport.height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	gcontext->fprogram = program = glshader_create_program(fshader, vshader);
+	if (program == 0)
+		return 0;
+
+	glUseProgram(program);
+	glBindAttribLocation(program, 0, "position");
+	glBindAttribLocation(program, 1, "texcoord");
+
+	gcontext->utexture = glGetUniformLocation(program, "tex");
+
+	fbo_prepare_context(gcontext->ftexture, node->viewport.width, node->viewport.height, &gcontext->fbo, &gcontext->dbo);
+
+	gcontext->has_filter = 1;
 
 	return 0;
 }

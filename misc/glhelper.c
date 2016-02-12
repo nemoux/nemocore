@@ -63,12 +63,12 @@ int glshader_prepare(struct glshader *shader, const char *vertex_source, const c
 		return -1;
 	}
 
-	shader->proj_uniform = glGetUniformLocation(shader->program, "proj");
-	shader->tex_uniforms[0] = glGetUniformLocation(shader->program, "tex");
-	shader->tex_uniforms[1] = glGetUniformLocation(shader->program, "tex1");
-	shader->tex_uniforms[2] = glGetUniformLocation(shader->program, "tex2");
-	shader->alpha_uniform = glGetUniformLocation(shader->program, "alpha");
-	shader->color_uniform = glGetUniformLocation(shader->program, "color");
+	shader->uprojection = glGetUniformLocation(shader->program, "proj");
+	shader->utextures[0] = glGetUniformLocation(shader->program, "tex");
+	shader->utextures[1] = glGetUniformLocation(shader->program, "tex1");
+	shader->utextures[2] = glGetUniformLocation(shader->program, "tex2");
+	shader->ualpha = glGetUniformLocation(shader->program, "alpha");
+	shader->ucolor = glGetUniformLocation(shader->program, "color");
 
 	return 0;
 }

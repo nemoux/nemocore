@@ -141,9 +141,7 @@ static void nemoback_mini_prepare(struct miniback *mini, const char *filepath)
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
-
-	glActiveTexture(GL_TEXTURE0);
-
+	
 	glGenTextures(1, &mini->texture);
 	glBindTexture(GL_TEXTURE_2D, mini->texture);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
