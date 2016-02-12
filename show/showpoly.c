@@ -36,11 +36,11 @@ static const float quad_normals[] = {
 
 static const float cube_vertices[] = {
 	-1.0f, -1.0f, 1.0f,
-	1.0f, -1.0f, 1.0f,
+	-1.0f, -1.0f, -1.0f,
 	1.0f, -1.0f, -1.0f,
 	-1.0f, -1.0f, 1.0f,
 	1.0f, -1.0f, -1.0f,
-	-1.0f, -1.0f, -1.0f,
+	1.0f, -1.0f, 1.0f,
 
 	-1.0f, 1.0f, -1.0f,
 	-1.0f, 1.0f, 1.0f,
@@ -50,11 +50,11 @@ static const float cube_vertices[] = {
 	1.0f, 1.0f, -1.0f,
 
 	-1.0f, -1.0f, 1.0f,
-	-1.0f, -1.0f, -1.0f,
+	-1.0f, 1.0f, 1.0f,
 	-1.0f, 1.0f, -1.0f,
 	-1.0f, -1.0f, 1.0f,
 	-1.0f, 1.0f, -1.0f,
-	-1.0f, 1.0f, 1.0f,
+	-1.0f, -1.0f, -1.0f,
 
 	1.0f, -1.0f, -1.0f,
 	1.0f, 1.0f, -1.0f,
@@ -78,15 +78,17 @@ static const float cube_vertices[] = {
 	-1.0f, -1.0f, 1.0f
 };
 
+static const int cube_planes[] = {
+	NEMO_METRO_BOTTOM_PLANE,
+	NEMO_METRO_TOP_PLANE,
+	NEMO_METRO_LEFT_PLANE,
+	NEMO_METRO_RIGHT_PLANE,
+	NEMO_METRO_FRONT_PLANE,
+	NEMO_METRO_BACK_PLANE
+};
+
 static const float cube_texcoords[] = {
 	0.0f, 1.0f,
-	1.0f, 1.0f,
-	1.0f, 0.0f,
-	0.0f, 1.0f,
-	1.0f, 0.0f,
-	0.0f, 0.0f,
-
-	0.0f, 1.0f,
 	0.0f, 0.0f,
 	1.0f, 0.0f,
 	0.0f, 1.0f,
@@ -94,11 +96,18 @@ static const float cube_texcoords[] = {
 	1.0f, 1.0f,
 
 	0.0f, 1.0f,
-	1.0f, 1.0f,
+	0.0f, 0.0f,
 	1.0f, 0.0f,
 	0.0f, 1.0f,
 	1.0f, 0.0f,
+	1.0f, 1.0f,
+
+	0.0f, 1.0f,
 	0.0f, 0.0f,
+	1.0f, 0.0f,
+	0.0f, 1.0f,
+	1.0f, 0.0f,
+	1.0f, 1.0f,
 
 	0.0f, 1.0f,
 	0.0f, 0.0f,
@@ -497,6 +506,49 @@ int nemoshow_poly_pick_one(struct showone *one, double x, double y, float *tx, f
 			return 1;
 		}
 	} else if (one->sub == NEMOSHOW_CUBE_POLY) {
+		float min = FLT_MAX;
+		int plane = NEMO_METRO_NONE_PLANE;
+		int i;
+
+		for (i = 0; i < NEMO_METRO_LAST_PLANE; i++) {
+			if (nemometro_pick_triangle(
+						&pipe->projection,
+						canvas->width, canvas->height,
+						&poly->modelview,
+						&poly->vertices[18 * i + 3 * 1],
+						&poly->vertices[18 * i + 3 * 2],
+						&poly->vertices[18 * i + 3 * 0],
+						x, y,
+						&t, &u, &v) > 0) {
+				if (t < min) {
+					min = t;
+
+					*tx = u;
+					*ty = v;
+
+					plane = cube_planes[i];
+				}
+			} else if (nemometro_pick_triangle(
+						&pipe->projection,
+						canvas->width, canvas->height,
+						&poly->modelview,
+						&poly->vertices[18 * i + 3 * 5],
+						&poly->vertices[18 * i + 3 * 3],
+						&poly->vertices[18 * i + 3 * 4],
+						x, y,
+						&t, &u, &v) > 0) {
+				if (t < min) {
+					min = t;
+
+					*tx = 1.0f - u;
+					*ty = 1.0f - v;
+
+					plane = cube_planes[i];
+				}
+			}
+		}
+
+		return plane;
 	}
 
 	return 0;
