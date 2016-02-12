@@ -72,14 +72,14 @@ static void nemotale_node_handle_destroy_signal(struct nemolistener *listener, v
 
 	glDeleteTextures(1, &context->texture);
 
-	if (context->has_filter != 0) {
+	if (context->ftexture > 0)
 		glDeleteTextures(1, &context->ftexture);
-
+	if (context->fbo > 0)
 		glDeleteFramebuffers(1, &context->fbo);
+	if (context->dbo > 0)
 		glDeleteRenderbuffers(1, &context->dbo);
-
+	if (context->fprogram > 0)
 		glDeleteProgram(context->fprogram);
-	}
 
 	free(context);
 }
@@ -157,7 +157,7 @@ int nemotale_node_resize_gl(struct talenode *node, int32_t width, int32_t height
 			node->viewport.sy = (double)node->viewport.height / (double)node->geometry.height;
 		}
 
-		if (context->has_filter != 0) {
+		if (node->has_filter != 0) {
 			glBindTexture(GL_TEXTURE_2D, context->ftexture);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, node->viewport.width, node->viewport.height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 			glBindTexture(GL_TEXTURE_2D, 0);
@@ -932,7 +932,7 @@ int nemotale_node_flush_gl(struct nemotale *tale, struct talenode *node)
 #endif
 		}
 
-		if (gcontext->has_filter != 0) {
+		if (node->has_filter != 0) {
 			GLfloat vertices[] = {
 				-1.0f, -1.0f, 0.0f, 0.0f,
 				1.0f, -1.0f, 1.0f, 0.0f,
@@ -1014,7 +1014,7 @@ int nemotale_node_set_filter(struct talenode *node, const char *fshader, const c
 
 	fbo_prepare_context(gcontext->ftexture, node->viewport.width, node->viewport.height, &gcontext->fbo, &gcontext->dbo);
 
-	gcontext->has_filter = 1;
+	node->has_filter = 1;
 
 	return 0;
 }

@@ -33,7 +33,6 @@ NEMO_BEGIN_EXTERN_C
 struct taleglnode {
 	GLuint texture;
 
-	int has_filter;
 	GLuint ftexture;
 	GLuint fbo, dbo;
 	GLuint fprogram;
@@ -71,7 +70,7 @@ static inline GLuint nemotale_node_get_texture(struct talenode *node)
 {
 	struct taleglnode *context = (struct taleglnode *)node->glcontext;
 
-	if (context->has_filter != 0)
+	if (node->has_filter != 0)
 		return context->ftexture;
 
 	return context->texture;

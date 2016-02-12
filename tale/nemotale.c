@@ -253,7 +253,9 @@ void nemotale_accumulate_damage(struct nemotale *tale)
 	for (i = 0; i < tale->nnodes; i++) {
 		node = tale->nodes[i];
 
-		if (node->dirty != 0) {
+		if (node->has_filter != 0) {
+			nemotale_damage_below(tale, node);
+		} else if (node->dirty != 0) {
 			pixman_region32_t damage;
 
 			pixman_region32_init(&damage);

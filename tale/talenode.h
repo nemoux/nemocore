@@ -81,6 +81,8 @@ struct talenode {
 	} transform;
 
 	double alpha;
+
+	int has_filter;
 };
 
 #define	NTNODE_OBJECT(node)						(&node->object)
