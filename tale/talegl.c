@@ -950,6 +950,9 @@ int nemotale_node_flush_gl(struct nemotale *tale, struct talenode *node)
 
 			glUseProgram(gcontext->fprogram);
 			glUniform1i(gcontext->utexture, 0);
+			glUniform1f(gcontext->uwidth, node->viewport.width);
+			glUniform1f(gcontext->uheight, node->viewport.height);
+			glUniform1f(gcontext->utime, time_current_msecs());
 
 			glBindTexture(GL_TEXTURE_2D, gcontext->texture);
 
@@ -973,6 +976,19 @@ int nemotale_node_set_filter(struct talenode *node, const char *fshader, const c
 {
 	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
 	GLuint program;
+
+	if (node->has_filter != 0) {
+		glDeleteTextures(1, &gcontext->ftexture);
+		glDeleteFramebuffers(1, &gcontext->fbo);
+		glDeleteRenderbuffers(1, &gcontext->dbo);
+		glDeleteProgram(gcontext->fprogram);
+	}
+
+	if (fshader == NULL || vshader == NULL) {
+		node->has_filter = 0;
+
+		return 0;
+	}
 
 	if (gcontext == NULL) {
 		gcontext = (struct taleglnode *)malloc(sizeof(struct taleglnode));
@@ -1011,6 +1027,9 @@ int nemotale_node_set_filter(struct talenode *node, const char *fshader, const c
 	glBindAttribLocation(program, 1, "texcoord");
 
 	gcontext->utexture = glGetUniformLocation(program, "tex");
+	gcontext->uwidth = glGetUniformLocation(program, "width");
+	gcontext->uheight = glGetUniformLocation(program, "height");
+	gcontext->utime = glGetUniformLocation(program, "time");
 
 	fbo_prepare_context(gcontext->ftexture, node->viewport.width, node->viewport.height, &gcontext->fbo, &gcontext->dbo);
 

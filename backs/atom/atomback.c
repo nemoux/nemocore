@@ -108,6 +108,17 @@ static void nemoback_atom_dispatch_tale_event(struct nemotale *tale, struct tale
 					int plane;
 
 					if ((plane = nemoshow_poly_pick_one(atom->one1, event->x, event->y, &tx, &ty)) > 0) {
+						static const char *filters[] = {
+							gaussian_filter_fragment_shader,
+							laplacian_filter_fragment_shader,
+							emboss_filter_fragment_shader,
+							sharpness_filter_fragment_shader
+						};
+						static int filterindex = 0;
+
+						nemoshow_canvas_set_filter(atom->canvast, filters[filterindex], simple_filter_vertex_shader);
+
+						filterindex = (filterindex + 1) % (sizeof(filters) / sizeof(filters[0]));
 					}
 				}
 			}
@@ -230,7 +241,6 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_width(canvas, 512.0f);
 	nemoshow_canvas_set_height(canvas, 512.0f);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
-	nemoshow_canvas_set_filter(canvas, simple_filter_fragment_shader, simple_filter_vertex_shader);
 	nemoshow_attach_one(show, canvas);
 
 	atom->onet = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);

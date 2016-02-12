@@ -37,6 +37,9 @@ struct taleglnode {
 	GLuint fbo, dbo;
 	GLuint fprogram;
 	GLuint utexture;
+	GLuint uwidth;
+	GLuint uheight;
+	GLuint utime;
 
 	struct nemolistener destroy_listener;
 };
