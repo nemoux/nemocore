@@ -45,6 +45,7 @@
 #include <pixmanhelper.h>
 #include <colorhelper.h>
 #include <talehelper.h>
+#include <skiahelper.h>
 #include <nemomisc.h>
 
 struct moteback {
@@ -90,56 +91,32 @@ struct moteback {
 	int is_sleeping;
 };
 
-static void nemoback_mote_prepare_text(struct moteback *mote, const char *text, int ntext)
+static void nemoback_mote_prepare_text(struct moteback *mote, const char *text)
 {
+	const char *font = "/usr/share/fonts/ttf/LiberationMono-Regular.ttf";
 	double textsize = mote->textsize;
-	double x, y;
-	int size = 16;
 	int fontsize = 16;
+	uint32_t *pixels;
+	int width, height;
+	int textwidth;
+	double x, y;
 	int i, j, p;
 
-	SkBitmap bitmap;
-	bitmap.allocPixels(SkImageInfo::Make(size * ntext, size, kN32_SkColorType, kPremul_SkAlphaType));
+	width = fontsize * strlen(text);
+	height = fontsize;
+	pixels = (uint32_t *)malloc(sizeof(uint32_t) * width * height);
 
-	SkBitmapDevice device(bitmap);
-	SkCanvas canvas(&device);
+	textwidth = skia_draw_text((void *)pixels, width, height, font, fontsize, text);
 
-	canvas.clear(SK_ColorTRANSPARENT);
+	x = random_get_double(0.0f, mote->width - textwidth * textsize);
+	y = random_get_double(0.0f, mote->height - fontsize * textsize);
 
-	SkPaint paint;
-	paint.setAntiAlias(true);
-	paint.setStyle(SkPaint::kFill_Style);
-	paint.setColor(SK_ColorWHITE);
-	paint.setTypeface(SkTypeface::CreateFromFile("/usr/share/fonts/ttf/LiberationMono-Regular.ttf", 0));
-	paint.setTextSize(fontsize);
-
-	SkPaint::FontMetrics metrics;
-	paint.getFontMetrics(&metrics, 0);
-
-	canvas.drawText(
-			text, ntext,
-			SkIntToScalar(0), SkIntToScalar(-metrics.fAscent),
-			paint);
-
-	SkScalar widths[ntext];
-	double width = 0.0f;
-	int count;
-
-	count = paint.getTextWidths(text, ntext, widths, NULL);
-
-	for (i = 0; i < count; i++) {
-		width += ceil(widths[i]);
-	}
-
-	x = random_get_double(0.0f, mote->width - width * textsize);
-	y = random_get_double(0.0f, mote->height - size * textsize);
-
-	for (i = 0; i < size; i++) {
-		for (j = 0; j < size * ntext; j++) {
-			if (bitmap.getColor(j, i) != SK_ColorTRANSPARENT) {
+	for (i = 0; i < height; i++) {
+		for (j = 0; j < width; j++) {
+			if (pixels[i * width + j] != 0x0) {
 				p = nemomote_get_one_by_type(mote->mote, 1);
 				if (p < 0)
-					return;
+					goto out;
 
 				nemomote_tweener_set_one(mote->mote, p,
 						x + j * textsize,
@@ -151,6 +128,9 @@ static void nemoback_mote_prepare_text(struct moteback *mote, const char *text, 
 			}
 		}
 	}
+
+out:
+	free(pixels);
 }
 
 static void nemoback_mote_update_one(struct moteback *mote, double secs)
@@ -327,11 +307,11 @@ static void nemoback_mote_dispatch_timer_event(struct nemotimer *timer, void *da
 
 			strftime(msg, sizeof(msg), "%m:%d-%I:%M", tm);
 
-			nemoback_mote_prepare_text(mote, msg, strlen(msg));
+			nemoback_mote_prepare_text(mote, msg);
 		} else {
 			strcpy(msg, mote->logo);
 
-			nemoback_mote_prepare_text(mote, msg, strlen(msg));
+			nemoback_mote_prepare_text(mote, msg);
 		}
 
 		mote->type = (mote->type + 1) % 2;

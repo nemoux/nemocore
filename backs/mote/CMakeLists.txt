@@ -28,6 +28,7 @@ add_executable(nemoback-mote
 TARGET_LINK_LIBRARIES(nemoback-mote
 	nemoapps
 	nemomote
+	nemoshow
 	${NEMOUX_COMMON_LIBRARIES}
 	${SKIA_LIBRARIES}
 	)

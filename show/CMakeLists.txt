@@ -36,9 +36,10 @@ add_library(nemoshow SHARED
 	showeasy.cpp
 	showhelper.cpp
 	showmisc.cpp
-	svghelper.cpp
 	showpoly.c
 	showpipe.c
+	svghelper.cpp
+	skiahelper.cpp
 	)
 
 TARGET_LINK_LIBRARIES(nemoshow
