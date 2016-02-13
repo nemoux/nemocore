@@ -69,3 +69,22 @@ int skia_draw_text(void *pixels, int32_t width, int32_t height, const char *font
 
 	return textwidth;
 }
+
+int skia_draw_image(void *pixels, int32_t width, int32_t height, const char *uri)
+{
+	SkBitmap back;
+	SkImageDecoder::DecodeFile(uri, &back);
+
+	SkBitmap bitmap;
+	bitmap.setInfo(
+			SkImageInfo::Make(width, height, kN32_SkColorType, kPremul_SkAlphaType));
+	bitmap.setPixels(pixels);
+
+	SkBitmapDevice device(bitmap);
+	SkCanvas canvas(&device);
+
+	canvas.drawBitmapRect(back,
+			SkRect::MakeXYWH(0, 0, width, height), NULL);
+
+	return 0;
+}

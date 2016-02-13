@@ -159,23 +159,11 @@ static void nemoback_mote_update_one(struct moteback *mote, double secs)
 
 static void nemoback_mote_render_back(struct moteback *mote, pixman_image_t *image, const char *uri)
 {
-	int32_t width = pixman_image_get_width(image);
-	int32_t height = pixman_image_get_height(image);
-
-	SkBitmap back;
-	SkImageDecoder::DecodeFile(uri, &back);
-
-	SkBitmap bitmap;
-	bitmap.setInfo(
-			SkImageInfo::Make(width, height, kN32_SkColorType, kPremul_SkAlphaType));
-	bitmap.setPixels(
-			pixman_image_get_data(image));
-
-	SkBitmapDevice device(bitmap);
-	SkCanvas canvas(&device);
-
-	canvas.drawBitmapRect(back,
-			SkRect::MakeXYWH(0, 0, width, height), NULL);
+	skia_draw_image(
+			pixman_image_get_data(image),
+			pixman_image_get_width(image),
+			pixman_image_get_height(image),
+			uri);
 }
 
 static void nemoback_mote_render_one(struct moteback *mote, pixman_image_t *image)
