@@ -11,6 +11,7 @@ set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 if(WITH_EGL)
 	set(NEMOASST_EGL_SOURCES
 		${CMAKE_SOURCE_DIR}/misc/glhelper.c
+		${CMAKE_SOURCE_DIR}/misc/glfilter.c
 		${CMAKE_SOURCE_DIR}/misc/eglhelper.c
 		${CMAKE_SOURCE_DIR}/misc/fbohelper.c
 		)

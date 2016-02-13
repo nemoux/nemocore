@@ -7,6 +7,9 @@
 NEMO_BEGIN_EXTERN_C
 #endif
 
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+
 static const char simple_filter_vertex_shader[] =
 "attribute vec2 position;\n"
 "attribute vec2 texcoord;\n"
@@ -124,6 +127,8 @@ static const char sharpness_filter_fragment_shader[] =
 "  s += texture2D(tex, vtexcoord + vec2(sw, sh)) * -1.0;\n"
 "  gl_FragColor = clamp(s / 1.0 + 0.0, 0.0, 1.0);\n"
 "}\n";
+
+extern GLuint glfilter_create_program(const char *shader);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

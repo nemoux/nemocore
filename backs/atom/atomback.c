@@ -108,17 +108,6 @@ static void nemoback_atom_dispatch_tale_event(struct nemotale *tale, struct tale
 					int plane;
 
 					if ((plane = nemoshow_poly_pick_one(atom->one1, event->x, event->y, &tx, &ty)) > 0) {
-						static const char *filters[] = {
-							gaussian_filter_fragment_shader,
-							laplacian_filter_fragment_shader,
-							emboss_filter_fragment_shader,
-							sharpness_filter_fragment_shader
-						};
-						static int filterindex = 0;
-
-						nemoshow_canvas_set_filter(atom->canvast, filters[filterindex], simple_filter_vertex_shader);
-
-						filterindex = (filterindex + 1) % (sizeof(filters) / sizeof(filters[0]));
 					}
 				}
 			}
@@ -142,6 +131,7 @@ int main(int argc, char *argv[])
 {
 	struct option options[] = {
 		{ "file",						required_argument,			NULL,		'f' },
+		{ "shader",					required_argument,			NULL,		's' },
 		{ "width",					required_argument,			NULL,		'w' },
 		{ "height",					required_argument,			NULL,		'h' },
 		{ "log",						required_argument,			NULL,		'l' },
@@ -165,19 +155,24 @@ int main(int argc, char *argv[])
 	struct showone *set3;
 	struct nemomatrix matrix;
 	char *filepath = NULL;
+	char *shaderpath = NULL;
 	int32_t width = 1920;
 	int32_t height = 1080;
 	int opt;
 
 	nemolog_set_file(2);
 
-	while (opt = getopt_long(argc, argv, "f:w:h:l:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "f:s:w:h:l:", options, NULL)) {
 		if (opt == -1)
 			break;
 
 		switch (opt) {
 			case 'f':
 				filepath = strdup(optarg);
+				break;
+
+			case 's':
+				shaderpath = strdup(optarg);
 				break;
 
 			case 'w':
@@ -241,6 +236,8 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_width(canvas, 512.0f);
 	nemoshow_canvas_set_height(canvas, 512.0f);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
+	if (shaderpath != NULL)
+		nemoshow_canvas_load_filter(canvas, shaderpath);
 	nemoshow_attach_one(show, canvas);
 
 	atom->onet = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);

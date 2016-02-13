@@ -10,6 +10,7 @@
 #include <talegl.h>
 #include <talepixman.h>
 #include <glhelper.h>
+#include <glfilter.h>
 #include <fbohelper.h>
 #include <cliphelper.h>
 #include <nemolog.h>
@@ -972,7 +973,7 @@ int nemotale_node_flush_gl(struct nemotale *tale, struct talenode *node)
 	return 0;
 }
 
-int nemotale_node_set_filter(struct talenode *node, const char *fshader, const char *vshader)
+int nemotale_node_set_filter(struct talenode *node, const char *shader)
 {
 	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
 	GLuint program;
@@ -984,7 +985,7 @@ int nemotale_node_set_filter(struct talenode *node, const char *fshader, const c
 		glDeleteProgram(gcontext->fprogram);
 	}
 
-	if (fshader == NULL || vshader == NULL) {
+	if (shader == NULL) {
 		node->has_filter = 0;
 
 		return 0;
@@ -1018,13 +1019,9 @@ int nemotale_node_set_filter(struct talenode *node, const char *fshader, const c
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, node->viewport.width, node->viewport.height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	gcontext->fprogram = program = glshader_create_program(fshader, vshader);
+	gcontext->fprogram = program = glfilter_create_program(shader);
 	if (program == 0)
 		return 0;
-
-	glUseProgram(program);
-	glBindAttribLocation(program, 0, "position");
-	glBindAttribLocation(program, 1, "texcoord");
 
 	gcontext->utexture = glGetUniformLocation(program, "tex");
 	gcontext->uwidth = glGetUniformLocation(program, "width");

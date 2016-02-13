@@ -22,6 +22,7 @@
 #include <showfont.hpp>
 #include <showhelper.hpp>
 #include <fbohelper.h>
+#include <oshelper.h>
 #include <nemoshow.h>
 #include <nemoxml.h>
 #include <nemobox.h>
@@ -197,11 +198,27 @@ void nemoshow_canvas_set_alpha(struct showone *one, double alpha)
 	canvas->alpha = alpha;
 }
 
-int nemoshow_canvas_set_filter(struct showone *one, const char *fshader, const char *vshader)
+int nemoshow_canvas_set_filter(struct showone *one, const char *shader)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
-	return nemotale_node_set_filter(canvas->node, fshader, vshader);
+	return nemotale_node_set_filter(canvas->node, shader);
+}
+
+int nemoshow_canvas_load_filter(struct showone *one, const char *shaderpath)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+	char *shader = NULL;
+	int r;
+
+	if (os_load_path(shaderpath, &shader, NULL) < 0)
+		return -1;
+
+	r = nemotale_node_set_filter(canvas->node, shader);
+
+	free(shader);
+
+	return 0;
 }
 
 int nemoshow_canvas_attach_pixman(struct showone *one, void *data, int32_t width, int32_t height)

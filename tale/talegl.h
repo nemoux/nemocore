@@ -63,7 +63,7 @@ extern int nemotale_composite_fbo_full(struct nemotale *tale);
 
 extern int nemotale_node_flush_gl(struct nemotale *tale, struct talenode *node);
 
-extern int nemotale_node_set_filter(struct talenode *node, const char *fshader, const char *vshader);
+extern int nemotale_node_set_filter(struct talenode *node, const char *shader);
 
 extern struct talenode *nemotale_node_create_gl(int32_t width, int32_t height);
 extern int nemotale_node_resize_gl(struct talenode *node, int32_t width, int32_t height);
