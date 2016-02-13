@@ -96,27 +96,24 @@ static void nemoback_mote_prepare_text(struct moteback *mote, const char *text)
 	const char *font = "/usr/share/fonts/ttf/LiberationMono-Regular.ttf";
 	double textsize = mote->textsize;
 	int fontsize = 16;
-	uint32_t *pixels;
-	int width, height;
+	int width = fontsize * strlen(text);
+	int height = fontsize;
+	uint32_t pixels[width * height];
 	int textwidth;
 	double x, y;
 	int i, j, p;
 
-	width = fontsize * strlen(text);
-	height = fontsize;
-	pixels = (uint32_t *)malloc(sizeof(uint32_t) * width * height);
-
 	textwidth = skia_draw_text((void *)pixels, width, height, font, fontsize, text);
 
 	x = random_get_double(0.0f, mote->width - textwidth * textsize);
-	y = random_get_double(0.0f, mote->height - fontsize * textsize);
+	y = random_get_double(0.0f, mote->height - height * textsize);
 
 	for (i = 0; i < height; i++) {
 		for (j = 0; j < width; j++) {
 			if (pixels[i * width + j] != 0x0) {
 				p = nemomote_get_one_by_type(mote->mote, 1);
 				if (p < 0)
-					goto out;
+					return;
 
 				nemomote_tweener_set_one(mote->mote, p,
 						x + j * textsize,
@@ -128,9 +125,6 @@ static void nemoback_mote_prepare_text(struct moteback *mote, const char *text)
 			}
 		}
 	}
-
-out:
-	free(pixels);
 }
 
 static void nemoback_mote_update_one(struct moteback *mote, double secs)
