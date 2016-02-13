@@ -37,15 +37,15 @@ static void nemoback_atom_dispatch_tale_event(struct nemotale *tale, struct tale
 
 					set0 = nemoshow_sequence_create_set();
 					nemoshow_sequence_set_source(set0, atom->one0);
-					nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_RED_COLOR, 0.0f, NEMOSHOW_STYLE_DIRTY);
-					nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_GREEN_COLOR, 0.0f, NEMOSHOW_STYLE_DIRTY);
-					nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_BLUE_COLOR, 0.0f, NEMOSHOW_STYLE_DIRTY);
+					nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_RED_COLOR, 0.1f, NEMOSHOW_STYLE_DIRTY);
+					nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_GREEN_COLOR, 0.1f, NEMOSHOW_STYLE_DIRTY);
+					nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_BLUE_COLOR, 0.1f, NEMOSHOW_STYLE_DIRTY);
 
 					set1 = nemoshow_sequence_create_set();
 					nemoshow_sequence_set_source(set1, atom->one0);
-					nemoshow_sequence_set_fattr_offset(set1, "color", NEMOSHOW_POLY_RED_COLOR, 0.1f, NEMOSHOW_STYLE_DIRTY);
-					nemoshow_sequence_set_fattr_offset(set1, "color", NEMOSHOW_POLY_GREEN_COLOR, 0.1f, NEMOSHOW_STYLE_DIRTY);
-					nemoshow_sequence_set_fattr_offset(set1, "color", NEMOSHOW_POLY_BLUE_COLOR, 0.1f, NEMOSHOW_STYLE_DIRTY);
+					nemoshow_sequence_set_fattr_offset(set1, "color", NEMOSHOW_POLY_RED_COLOR, 1.0f, NEMOSHOW_STYLE_DIRTY);
+					nemoshow_sequence_set_fattr_offset(set1, "color", NEMOSHOW_POLY_GREEN_COLOR, 1.0f, NEMOSHOW_STYLE_DIRTY);
+					nemoshow_sequence_set_fattr_offset(set1, "color", NEMOSHOW_POLY_BLUE_COLOR, 1.0f, NEMOSHOW_STYLE_DIRTY);
 
 					sequence = nemoshow_sequence_create_easy(atom->show,
 							nemoshow_sequence_create_frame_easy(atom->show,
@@ -232,12 +232,18 @@ int main(int argc, char *argv[])
 	nemoshow_attach_one(show, canvas);
 	nemoshow_one_attach(scene, canvas);
 
-	atom->canvast = canvas = nemoshow_canvas_create();
+	atom->canvasb = canvas = nemoshow_canvas_create();
 	nemoshow_canvas_set_width(canvas, 512.0f);
 	nemoshow_canvas_set_height(canvas, 512.0f);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
 	if (shaderpath != NULL)
 		nemoshow_canvas_load_filter(canvas, shaderpath);
+	nemoshow_attach_one(show, canvas);
+
+	atom->canvast = canvas = nemoshow_canvas_create();
+	nemoshow_canvas_set_width(canvas, 512.0f);
+	nemoshow_canvas_set_height(canvas, 512.0f);
+	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
 	nemoshow_attach_one(show, canvas);
 
 	atom->onet = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
@@ -271,8 +277,8 @@ int main(int argc, char *argv[])
 	nemoshow_attach_one(show, one);
 	nemoshow_one_attach(pipe, one);
 	nemoshow_one_set_tag(one, 1);
-	nemoshow_poly_set_color(one, 0.1f, 0.1f, 0.1f, 1.0f);
-	nemoshow_poly_set_canvas(one, atom->canvast);
+	nemoshow_poly_set_color(one, 1.0f, 1.0f, 1.0f, 1.0f);
+	nemoshow_poly_set_canvas(one, atom->canvasb);
 	nemoshow_poly_use_texcoords(one, 1);
 	nemoshow_poly_use_normals(one, 1);
 	nemoshow_poly_use_vbo(one, 1);
@@ -284,6 +290,10 @@ int main(int argc, char *argv[])
 	nemoshow_poly_set_texcoord(one, 1, 1.0f, 1.0f);
 	nemoshow_poly_set_texcoord(one, 2, 1.0f, 0.0f);
 	nemoshow_poly_set_texcoord(one, 3, 0.0f, 0.0f);
+
+	nemomatrix_init_identity(&matrix);
+	nemomatrix_scale_xyz(&matrix, 1.0f / nemoshow_canvas_get_aspect_ratio(atom->canvas0), 1.0f, 1.0f);
+	nemoshow_poly_transform_vertices(one, &matrix);
 
 	atom->one1 = one = nemoshow_poly_create(NEMOSHOW_CUBE_POLY);
 	nemoshow_attach_one(show, one);
@@ -322,6 +332,11 @@ int main(int argc, char *argv[])
 	atom->solid = blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
 	nemoshow_attach_one(show, blur);
 	nemoshow_filter_set_blur(blur, "high", "solid", 5.0f);
+
+	trans = nemoshow_transition_create(atom->ease2, 18000, 0);
+	nemoshow_transition_dirty_one(trans, atom->canvasb, NEMOSHOW_FILTER_DIRTY);
+	nemoshow_transition_set_repeat(trans, 0);
+	nemoshow_attach_transition(atom->show, trans);
 
 	set0 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set0, atom->one1);

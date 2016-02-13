@@ -64,6 +64,7 @@ INSTALL(FILES ${CMAKE_BINARY_DIR}/envs/nemoenvs.pc DESTINATION lib${CMAKE_LIBRAR
 set(RESOURCE_DIRS
 	${CMAKE_CURRENT_SOURCE_DIR}/resources/keyboard
 	${CMAKE_CURRENT_SOURCE_DIR}/resources/misc-icons
+	${CMAKE_CURRENT_SOURCE_DIR}/resources/shaders
 	)
 
 INSTALL(DIRECTORY ${RESOURCE_DIRS} DESTINATION share/nemoenvs)

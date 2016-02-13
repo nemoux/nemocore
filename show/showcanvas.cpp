@@ -272,6 +272,8 @@ int nemoshow_canvas_update(struct showone *one)
 		nemoshow_canvas_update_style(show, one);
 	if ((one->dirty & NEMOSHOW_MATRIX_DIRTY) != 0)
 		nemoshow_canvas_update_matrix(show, one);
+	if ((one->dirty & NEMOSHOW_FILTER_DIRTY) != 0)
+		nemoshow_canvas_damage_filter(one);
 
 	return 0;
 }
@@ -662,11 +664,34 @@ void nemoshow_canvas_render_back(struct nemoshow *show, struct showone *one)
 	nemotale_node_fill_pixman(canvas->node, canvas->fills[2], canvas->fills[1], canvas->fills[0], canvas->fills[3]);
 }
 
-void nemoshow_canvas_flush_vector(struct nemoshow *show, struct showone *one)
+void nemoshow_canvas_flush_now(struct nemoshow *show, struct showone *one)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
-	nemotale_node_flush_gl(show->tale, canvas->node);
+	if (canvas->needs_redraw != 0) {
+		canvas->needs_redraw = 0;
+
+		if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
+			nemoshow_canvas_render_vector(show, one);
+		} else if (one->sub == NEMOSHOW_CANVAS_PIPELINE_TYPE) {
+			nemoshow_canvas_render_pipeline(show, one);
+		} else if (one->sub == NEMOSHOW_CANVAS_BACK_TYPE) {
+			nemoshow_canvas_render_back(show, one);
+		}
+
+		if (canvas->dispatch_render != NULL)
+			canvas->dispatch_render(show, one);
+	}
+
+	if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
+		nemotale_node_flush_gl(show->tale, canvas->node);
+		nemotale_node_filter_gl(show->tale, canvas->node);
+	} else if (one->sub == NEMOSHOW_CANVAS_PIXMAN_TYPE) {
+		nemotale_node_flush_gl(show->tale, canvas->node);
+		nemotale_node_filter_gl(show->tale, canvas->node);
+	} else if (one->sub == NEMOSHOW_CANVAS_OPENGL_TYPE || one->sub == NEMOSHOW_CANVAS_PIPELINE_TYPE) {
+		nemotale_node_filter_gl(show->tale, canvas->node);
+	}
 }
 
 int nemoshow_canvas_set_viewport(struct nemoshow *show, struct showone *one, double sx, double sy)
@@ -761,6 +786,15 @@ void nemoshow_canvas_damage_all(struct showone *one)
 
 	canvas->needs_redraw = 1;
 	canvas->needs_full_redraw = 1;
+
+	nemoshow_one_dirty(one, NEMOSHOW_CANVAS_DIRTY);
+}
+
+void nemoshow_canvas_damage_filter(struct showone *one)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	nemotale_node_damage_filter(canvas->node);
 
 	nemoshow_one_dirty(one, NEMOSHOW_CANVAS_DIRTY);
 }

@@ -289,10 +289,8 @@ int nemoshow_poly_update(struct showone *one)
 	if ((one->dirty & NEMOSHOW_CANVAS_DIRTY) != 0) {
 		struct showone *canvas = NEMOSHOW_REF(one, NEMOSHOW_CANVAS_REF);
 
-		if (canvas != NULL) {
-			nemoshow_canvas_render_vector(canvas->show, canvas);
-			nemoshow_canvas_flush_vector(canvas->show, canvas);
-		}
+		if (canvas != NULL)
+			nemoshow_canvas_flush_now(canvas->show, canvas);
 	}
 
 	if ((one->dirty & NEMOSHOW_SHAPE_DIRTY) != 0) {

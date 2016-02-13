@@ -32,6 +32,11 @@ struct showtransition {
 	struct showtransition **transitions;
 	int ntransitions, stransitions;
 
+	struct showone **ones;
+	int nones, sones;
+	uint32_t *dirties;
+	int ndirties, sdirties;
+
 	struct showone **dones;
 	int ndones, sdones;
 
@@ -62,6 +67,7 @@ extern struct showtransition *nemoshow_transition_create(struct showone *ease, u
 extern void nemoshow_transition_destroy(struct showtransition *trans, int done);
 
 extern void nemoshow_transition_check_one(struct showtransition *trans, struct showone *one);
+extern void nemoshow_transition_dirty_one(struct showtransition *trans, struct showone *one, uint32_t dirty);
 extern void nemoshow_transition_destroy_one(struct showtransition *trans, struct showone *one);
 
 extern void nemoshow_transition_attach_sequence(struct showtransition *trans, struct showone *sequence);

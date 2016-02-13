@@ -59,14 +59,13 @@ uint32_t time_current_msecs(void)
 	return tv.tv_sec * 1000 + tv.tv_usec / 1000;
 }
 
-void time_current_nsecs(uint64_t *secs, uint32_t *nsecs)
+uint64_t time_current_nsecs(void)
 {
 	struct timespec ts;
 
 	clock_gettime(CLOCK_MONOTONIC, &ts);
 
-	*secs = ts.tv_sec;
-	*nsecs = ts.tv_nsec;
+	return ts.tv_sec * 1000000000 + ts.tv_nsec;
 }
 
 int random_get_int(int min, int max)

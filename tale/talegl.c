@@ -341,6 +341,9 @@ static void nemotale_repaint_node(struct nemotale *tale, struct talenode *node, 
 		if (node->pmcontext != NULL && node->needs_flush != 0)
 			nemotale_node_flush_gl(tale, node);
 
+		if (node->has_filter != 0 && node->needs_filter != 0)
+			nemotale_node_filter_gl(tale, node);
+
 		glBindTexture(GL_TEXTURE_2D, nemotale_node_get_texture(node));
 
 		if (node->transform.enable != 0) {
@@ -933,41 +936,52 @@ int nemotale_node_flush_gl(struct nemotale *tale, struct talenode *node)
 #endif
 		}
 
-		if (node->has_filter != 0) {
-			GLfloat vertices[] = {
-				-1.0f, -1.0f, 0.0f, 0.0f,
-				1.0f, -1.0f, 1.0f, 0.0f,
-				1.0f, 1.0f, 1.0f, 1.0f,
-				-1.0f, 1.0f, 0.0f, 1.0f
-			};
-
-			glBindFramebuffer(GL_FRAMEBUFFER, gcontext->fbo);
-
-			glViewport(0, 0, node->viewport.width, node->viewport.height);
-
-			glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-			glClearDepth(0.0f);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-			glUseProgram(gcontext->fprogram);
-			glUniform1i(gcontext->utexture, 0);
-			glUniform1f(gcontext->uwidth, node->viewport.width);
-			glUniform1f(gcontext->uheight, node->viewport.height);
-			glUniform1f(gcontext->utime, time_current_msecs());
-
-			glBindTexture(GL_TEXTURE_2D, gcontext->texture);
-
-			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &vertices[0]);
-			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &vertices[2]);
-			glEnableVertexAttribArray(1);
-
-			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		}
-
 		node->needs_flush = 0;
+		node->needs_filter = 1;
+	}
+
+	return 0;
+}
+
+int nemotale_node_filter_gl(struct nemotale *tale, struct talenode *node)
+{
+	struct nemogltale *context = (struct nemogltale *)tale->glcontext;
+	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
+
+	if (node->has_filter != 0 && node->needs_filter != 0) {
+		GLfloat vertices[] = {
+			-1.0f, -1.0f, 0.0f, 0.0f,
+			1.0f, -1.0f, 1.0f, 0.0f,
+			1.0f, 1.0f, 1.0f, 1.0f,
+			-1.0f, 1.0f, 0.0f, 1.0f
+		};
+
+		glBindFramebuffer(GL_FRAMEBUFFER, gcontext->fbo);
+
+		glViewport(0, 0, node->viewport.width, node->viewport.height);
+
+		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		glClearDepth(0.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		glUseProgram(gcontext->fprogram);
+		glUniform1i(gcontext->utexture, 0);
+		glUniform1f(gcontext->uwidth, node->viewport.width);
+		glUniform1f(gcontext->uheight, node->viewport.height);
+		glUniform1f(gcontext->utime, (float)time_current_nsecs() / 1000000000.0f);
+
+		glBindTexture(GL_TEXTURE_2D, gcontext->texture);
+
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &vertices[0]);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &vertices[2]);
+		glEnableVertexAttribArray(1);
+
+		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		node->needs_filter = 0;
 	}
 
 	return 0;

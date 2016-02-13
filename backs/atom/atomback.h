@@ -33,6 +33,7 @@ struct atomback {
 	struct showone *one0;
 	struct showone *one1;
 
+	struct showone *canvasb;
 	struct showone *canvast;
 	struct showone *onet;
 

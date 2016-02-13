@@ -6,6 +6,8 @@
 #include <errno.h>
 
 #include <assert.h>
+#include <time.h>
+#include <sys/time.h>
 #include <sys/mman.h>
 #include <sys/epoll.h>
 #include <sys/eventfd.h>
@@ -269,14 +271,13 @@ static void nemocanvas_dispatch_frame_event(struct nemotask *task, uint32_t even
 static void nemocanvas_dispatch_frame_timer(struct nemotimer *timer, void *data)
 {
 	struct nemocanvas *canvas = (struct nemocanvas *)data;
-	uint64_t secs;
-	uint32_t nsecs;
+	struct timespec ts;
 
 	canvas->framefeed = 0;
 
-	time_current_nsecs(&secs, &nsecs);
+	clock_gettime(CLOCK_MONOTONIC, &ts);
 
-	canvas->dispatch_frame(canvas, secs, nsecs);
+	canvas->dispatch_frame(canvas, ts.tv_sec, ts.tv_nsec);
 }
 
 struct nemocanvas *nemocanvas_create(struct nemotool *tool)
@@ -655,13 +656,13 @@ void nemocanvas_terminate_feedback(struct nemocanvas *canvas)
 	if (canvas->framerate == 0) {
 		if (canvas->feedback != NULL) {
 			presentation_feedback_destroy(canvas->feedback);
-			
+
 			canvas->feedback = NULL;
 		}
 	} else {
 		if (canvas->framefeed != 0) {
 			nemotimer_set_timeout(canvas->frametimer, 0);
-			
+
 			canvas->framefeed = 0;
 		}
 	}

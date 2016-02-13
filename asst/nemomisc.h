@@ -44,7 +44,7 @@ NEMO_BEGIN_EXTERN_C
 extern void debug_show_backtrace(void);
 
 extern uint32_t time_current_msecs(void);
-extern void time_current_nsecs(uint64_t *secs, uint32_t *nsecs);
+extern uint64_t time_current_nsecs(void);
 
 extern int random_get_int(int min, int max);
 extern double random_get_double(double min, double max);
