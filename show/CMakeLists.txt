@@ -72,9 +72,10 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/show/showfont.h
 	${CMAKE_SOURCE_DIR}/show/showeasy.h
 	${CMAKE_SOURCE_DIR}/show/showmisc.h
-	${CMAKE_SOURCE_DIR}/show/svghelper.h
 	${CMAKE_SOURCE_DIR}/show/showpoly.h
 	${CMAKE_SOURCE_DIR}/show/showpipe.h
+	${CMAKE_SOURCE_DIR}/show/svghelper.h
+	${CMAKE_SOURCE_DIR}/show/skiahelper.h
 	)
 
 set(NEMOSHOW_PKGCONFIG_REQUIRES "nemoasst nemotale skia harfbuzz")

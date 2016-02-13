@@ -6,6 +6,7 @@
 #include <errno.h>
 
 #include <skiahelper.h>
+#include <colorhelper.h>
 #include <skiaconfig.hpp>
 
 int skia_get_text_width(const char *font, double fontsize, const char *text)
@@ -85,6 +86,40 @@ int skia_draw_image(void *pixels, int32_t width, int32_t height, const char *uri
 
 	canvas.drawBitmapRect(back,
 			SkRect::MakeXYWH(0, 0, width, height), NULL);
+
+	return 0;
+}
+
+int skia_draw_circle(void *pixels, int32_t width, int32_t height, double x, double y, double r, double b, int32_t c)
+{
+	SkBitmap bitmap;
+	bitmap.setInfo(
+			SkImageInfo::Make(width, height, kN32_SkColorType, kPremul_SkAlphaType));
+	bitmap.setPixels(pixels);
+
+	SkBitmapDevice device(bitmap);
+	SkCanvas canvas(&device);
+
+	SkMaskFilter *filter = SkBlurMaskFilter::Create(
+			kSolid_SkBlurStyle,
+			SkBlurMask::ConvertRadiusToSigma(b),
+			SkBlurMaskFilter::kHighQuality_BlurFlag);
+
+	SkPaint paint;
+	paint.setAntiAlias(true);
+	paint.setStyle(SkPaint::kFill_Style);
+	paint.setColor(
+			SkColorSetARGB(
+				COLOR_UINT32_A(c),
+				COLOR_UINT32_R(c),
+				COLOR_UINT32_G(c),
+				COLOR_UINT32_B(c)));
+	paint.setMaskFilter(filter);
+
+	canvas.clear(SK_ColorTRANSPARENT);
+	canvas.drawCircle(x, y, r, paint);
+
+	filter->unref();
 
 	return 0;
 }
