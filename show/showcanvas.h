@@ -15,6 +15,7 @@ NEMO_BEGIN_EXTERN_C
 #include <talegl.h>
 
 #include <showone.h>
+#include <showpipe.h>
 
 #define	NEMOSHOW_CANVAS_TYPE_MAX		(32)
 
@@ -30,7 +31,7 @@ typedef enum {
 
 struct nemoshow;
 
-typedef void (*nemoshow_canvas_dispatch_render_t)(struct nemoshow *show, struct showone *one);
+typedef void (*nemoshow_canvas_dispatch_redraw_t)(struct nemoshow *show, struct showone *one);
 typedef void (*nemoshow_canvas_dispatch_resize_t)(struct nemoshow *show, struct showone *one, int32_t width, int32_t height);
 
 struct showcanvas {
@@ -69,7 +70,7 @@ struct showcanvas {
 	int needs_redraw;
 	int needs_full_redraw;
 
-	nemoshow_canvas_dispatch_render_t dispatch_render;
+	nemoshow_canvas_dispatch_redraw_t dispatch_redraw;
 	nemoshow_canvas_dispatch_resize_t dispatch_resize;
 
 	void *cc;
@@ -111,9 +112,9 @@ extern void nemoshow_canvas_dirty_all(struct showone *one, uint32_t dirty);
 
 extern struct showone *nemoshow_canvas_pick_one(struct showone *one, double x, double y);
 
-static inline void nemoshow_canvas_set_dispatch_render(struct showone *one, nemoshow_canvas_dispatch_render_t dispatch_render)
+static inline void nemoshow_canvas_set_dispatch_redraw(struct showone *one, nemoshow_canvas_dispatch_redraw_t dispatch_redraw)
 {
-	NEMOSHOW_CANVAS_AT(one, dispatch_render) = dispatch_render;
+	NEMOSHOW_CANVAS_AT(one, dispatch_redraw) = dispatch_redraw;
 }
 
 static inline void nemoshow_canvas_set_dispatch_resize(struct showone *one, nemoshow_canvas_dispatch_resize_t dispatch_resize)
@@ -256,6 +257,17 @@ static inline void nemoshow_canvas_transform_from_global(struct showone *one, fl
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
 	nemotale_node_transform_from_global(canvas->node, x, y, sx, sy);
+}
+
+static inline void nemoshow_canvas_redraw_one(struct nemoshow *show, struct showone *one)
+{
+	if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
+		nemoshow_canvas_render_vector(show, one);
+	} else if (one->sub == NEMOSHOW_CANVAS_PIPELINE_TYPE) {
+		nemoshow_canvas_render_pipeline(show, one);
+	} else if (one->sub == NEMOSHOW_CANVAS_BACK_TYPE) {
+		nemoshow_canvas_render_back(show, one);
+	}
 }
 
 #ifdef __cplusplus

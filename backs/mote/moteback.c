@@ -18,6 +18,14 @@
 #include <nemolog.h>
 #include <nemomisc.h>
 
+static void nemoback_mote_dispatch_pipeline_canvas_redraw(struct nemoshow *show, struct showone *one)
+{
+	nemoshow_canvas_redraw_one(show, one);
+
+	nemoshow_canvas_damage_all(one);
+	nemoshow_dispatch_feedback(show);
+}
+
 static void nemoback_mote_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
 {
 	uint32_t id = nemotale_node_get_id(node);
@@ -245,6 +253,7 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_height(canvas, height);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_PIPELINE_TYPE);
 	nemoshow_canvas_set_event(canvas, 1);
+	nemoshow_canvas_set_dispatch_redraw(canvas, nemoback_mote_dispatch_pipeline_canvas_redraw);
 	nemoshow_attach_one(show, canvas);
 	nemoshow_one_attach(scene, canvas);
 

@@ -671,16 +671,10 @@ void nemoshow_canvas_flush_now(struct nemoshow *show, struct showone *one)
 	if (canvas->needs_redraw != 0) {
 		canvas->needs_redraw = 0;
 
-		if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
-			nemoshow_canvas_render_vector(show, one);
-		} else if (one->sub == NEMOSHOW_CANVAS_PIPELINE_TYPE) {
-			nemoshow_canvas_render_pipeline(show, one);
-		} else if (one->sub == NEMOSHOW_CANVAS_BACK_TYPE) {
-			nemoshow_canvas_render_back(show, one);
-		}
-
-		if (canvas->dispatch_render != NULL)
-			canvas->dispatch_render(show, one);
+		if (canvas->dispatch_redraw != NULL)
+			canvas->dispatch_redraw(show, one);
+		else
+			nemoshow_canvas_redraw_one(show, one);
 	}
 
 	if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {

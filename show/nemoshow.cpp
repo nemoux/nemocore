@@ -565,42 +565,6 @@ void nemoshow_update_one(struct nemoshow *show)
 	show->dirty_serial = 0;
 }
 
-static inline void nemoshow_update_canvas(struct nemoshow *show, struct showone *one)
-{
-	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
-
-	if (canvas->viewport.dirty != 0) {
-		nemoshow_canvas_set_viewport(show, one,
-				(double)show->width / (double)NEMOSHOW_SCENE_AT(show->scene, width) * show->sx,
-				(double)show->height / (double)NEMOSHOW_SCENE_AT(show->scene, height) * show->sy);
-
-		if (canvas->dispatch_resize != NULL)
-			canvas->dispatch_resize(show, one, canvas->viewport.width, canvas->viewport.height);
-
-		canvas->viewport.dirty = 0;
-	}
-}
-
-static inline void nemoshow_render_canvas(struct nemoshow *show, struct showone *one)
-{
-	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
-
-	if (canvas->needs_redraw != 0) {
-		canvas->needs_redraw = 0;
-
-		if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
-			nemoshow_canvas_render_vector(show, one);
-		} else if (one->sub == NEMOSHOW_CANVAS_PIPELINE_TYPE) {
-			nemoshow_canvas_render_pipeline(show, one);
-		} else if (one->sub == NEMOSHOW_CANVAS_BACK_TYPE) {
-			nemoshow_canvas_render_back(show, one);
-		}
-
-		if (canvas->dispatch_render != NULL)
-			canvas->dispatch_render(show, one);
-	}
-}
-
 void nemoshow_render_one(struct nemoshow *show)
 {
 	struct showone *scene = show->scene;
@@ -618,8 +582,27 @@ void nemoshow_render_one(struct nemoshow *show)
 
 	nemoshow_children_for_each(one, scene) {
 		if (one->type == NEMOSHOW_CANVAS_TYPE) {
-			nemoshow_update_canvas(show, one);
-			nemoshow_render_canvas(show, one);
+			canvas = NEMOSHOW_CANVAS(one);
+
+			if (canvas->viewport.dirty != 0) {
+				canvas->viewport.dirty = 0;
+
+				nemoshow_canvas_set_viewport(show, one,
+						(double)show->width / (double)NEMOSHOW_SCENE_AT(show->scene, width) * show->sx,
+						(double)show->height / (double)NEMOSHOW_SCENE_AT(show->scene, height) * show->sy);
+
+				if (canvas->dispatch_resize != NULL)
+					canvas->dispatch_resize(show, one, canvas->viewport.width, canvas->viewport.height);
+			}
+
+			if (canvas->needs_redraw != 0) {
+				canvas->needs_redraw = 0;
+
+				if (canvas->dispatch_redraw != NULL)
+					canvas->dispatch_redraw(show, one);
+				else
+					nemoshow_canvas_redraw_one(show, one);
+			}
 		}
 	}
 }
