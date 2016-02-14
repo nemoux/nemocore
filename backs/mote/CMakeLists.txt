@@ -5,7 +5,7 @@ INCLUDE_DIRECTORIES(${SKIA_INCLUDE_DIRS})
 LINK_DIRECTORIES(${SKIA_LIBRARY_DIRS})
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
 set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 
 include_directories(
@@ -22,7 +22,7 @@ include_directories(
 	)
 
 add_executable(nemoback-mote
-	moteback.cpp
+	moteback.c
 	)
 
 TARGET_LINK_LIBRARIES(nemoback-mote
