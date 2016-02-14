@@ -23,6 +23,7 @@ add_library(nemoenvs SHARED
 	nemoenvs.c
 	nemopad.c
 	nemopack.c
+	nemospeaker.c
 	nemograb.c
 	talehelper.c
 	showhelper.c
@@ -44,6 +45,7 @@ set(HEADER_FILES
 	nemoenvs.h
 	nemopad.h
 	nemopack.h
+	nemospeaker.h
 	nemograb.h
 	talehelper.h
 	showhelper.h
@@ -60,6 +62,7 @@ INSTALL(FILES ${CMAKE_BINARY_DIR}/envs/nemoenvs.pc DESTINATION lib${CMAKE_LIBRAR
 
 set(RESOURCE_DIRS
 	${CMAKE_CURRENT_SOURCE_DIR}/resources/keyboard
+	${CMAKE_CURRENT_SOURCE_DIR}/resources/speaker
 	${CMAKE_CURRENT_SOURCE_DIR}/resources/misc-icons
 	${CMAKE_CURRENT_SOURCE_DIR}/resources/shaders
 	)
