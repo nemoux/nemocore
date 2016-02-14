@@ -27,6 +27,7 @@ typedef enum {
 	NEMOSHOW_TEXTURE_PIPE = 2,
 	NEMOSHOW_LIGHTING_DIFFUSE_PIPE = 3,
 	NEMOSHOW_LIGHTING_TEXTURE_PIPE = 4,
+	NEMOSHOW_LIGHTING_DIFFUSE_TEXTURE_PIPE = 5,
 	NEMOSHOW_LAST_PIPE
 } NemoShowPipeType;
 
@@ -40,6 +41,11 @@ struct showpipe {
 	GLuint ucolor;
 	GLuint utex0;
 	GLuint ulight;
+
+	int vertex;
+	int texcoord;
+	int diffuse;
+	int normal;
 
 	float lights[4];
 
@@ -113,6 +119,26 @@ static inline void nemoshow_pipe_set_aspect_ratio(struct showone *one, float rat
 	pipe->ratio = ratio;
 
 	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
+}
+
+static inline int nemoshow_pipe_get_vertex(struct showone *one)
+{
+	return NEMOSHOW_PIPE_AT(one, vertex);
+}
+
+static inline int nemoshow_pipe_get_texcoord(struct showone *one)
+{
+	return NEMOSHOW_PIPE_AT(one, texcoord);
+}
+
+static inline int nemoshow_pipe_get_diffuse(struct showone *one)
+{
+	return NEMOSHOW_PIPE_AT(one, diffuse);
+}
+
+static inline int nemoshow_pipe_get_normal(struct showone *one)
+{
+	return NEMOSHOW_PIPE_AT(one, normal);
 }
 
 extern int nemoshow_pipe_dispatch_one(struct showone *canvas, struct showone *one);

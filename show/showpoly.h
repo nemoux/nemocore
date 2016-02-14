@@ -30,6 +30,7 @@ typedef enum {
 	NEMOSHOW_POLY_R_DIFFUSE = 0,
 	NEMOSHOW_POLY_G_DIFFUSE = 1,
 	NEMOSHOW_POLY_B_DIFFUSE = 2,
+	NEMOSHOW_POLY_A_DIFFUSE = 3,
 	NEMOSHOW_POLY_X_NORMAL = 0,
 	NEMOSHOW_POLY_Y_NORMAL = 1,
 	NEMOSHOW_POLY_Z_NORMAL = 2,
@@ -180,13 +181,14 @@ static inline void nemoshow_poly_set_texcoord(struct showone *one, int index, fl
 	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
 
-static inline void nemoshow_poly_set_diffuse(struct showone *one, int index, float r, float g, float b)
+static inline void nemoshow_poly_set_diffuse(struct showone *one, int index, float r, float g, float b, float a)
 {
 	struct showpoly *poly = NEMOSHOW_POLY(one);
 
-	poly->diffuses[3 * index + NEMOSHOW_POLY_R_DIFFUSE] = r;
-	poly->diffuses[3 * index + NEMOSHOW_POLY_G_DIFFUSE] = g;
-	poly->diffuses[3 * index + NEMOSHOW_POLY_B_DIFFUSE] = b;
+	poly->diffuses[4 * index + NEMOSHOW_POLY_R_DIFFUSE] = r;
+	poly->diffuses[4 * index + NEMOSHOW_POLY_G_DIFFUSE] = g;
+	poly->diffuses[4 * index + NEMOSHOW_POLY_B_DIFFUSE] = b;
+	poly->diffuses[4 * index + NEMOSHOW_POLY_A_DIFFUSE] = a;
 
 	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }

@@ -294,8 +294,15 @@ int nemoshow_poly_update(struct showone *one)
 	}
 
 	if ((one->dirty & NEMOSHOW_SHAPE_DIRTY) != 0) {
+		struct showpipe *pipe;
+		struct showone *parent;
 		float minx = FLT_MAX, miny = FLT_MAX, minz = FLT_MAX, maxx = FLT_MIN, maxy = FLT_MIN, maxz = FLT_MIN;
 		int i;
+
+		parent = nemoshow_one_get_parent(one, NEMOSHOW_PIPE_TYPE, 0);
+		if (parent == NULL)
+			return 0;
+		pipe = NEMOSHOW_PIPE(parent);
 
 		for (i = 0; i < poly->elements; i++) {
 			minx = MIN(poly->vertices[3 * i + NEMOSHOW_POLY_X_VERTEX], minx);
@@ -316,29 +323,31 @@ int nemoshow_poly_update(struct showone *one)
 		if (poly->on_vbo != 0) {
 			glBindVertexArray(poly->varray);
 
-			glBindBuffer(GL_ARRAY_BUFFER, poly->vvertex);
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void *)0);
-			glEnableVertexAttribArray(0);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat[3]) * poly->elements, poly->vertices, GL_STATIC_DRAW);
+			if (pipe->vertex >= 0) {
+				glBindBuffer(GL_ARRAY_BUFFER, poly->vvertex);
+				glVertexAttribPointer(pipe->vertex, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void *)0);
+				glEnableVertexAttribArray(pipe->vertex);
+				glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat[3]) * poly->elements, poly->vertices, GL_STATIC_DRAW);
+			}
 
-			if (poly->on_texcoords != 0) {
+			if (pipe->texcoord >= 0 && poly->on_texcoords != 0) {
 				glBindBuffer(GL_ARRAY_BUFFER, poly->vtexcoord);
-				glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (void *)0);
-				glEnableVertexAttribArray(1);
+				glVertexAttribPointer(pipe->texcoord, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (void *)0);
+				glEnableVertexAttribArray(pipe->texcoord);
 				glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat[2]) * poly->elements, poly->texcoords, GL_STATIC_DRAW);
 			}
 
-			if (poly->on_diffuses != 0) {
+			if (pipe->diffuse >= 0 && poly->on_diffuses != 0) {
 				glBindBuffer(GL_ARRAY_BUFFER, poly->vdiffuse);
-				glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void *)0);
-				glEnableVertexAttribArray(1);
-				glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat[3]) * poly->elements, poly->diffuses, GL_STATIC_DRAW);
+				glVertexAttribPointer(pipe->diffuse, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void *)0);
+				glEnableVertexAttribArray(pipe->diffuse);
+				glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat[4]) * poly->elements, poly->diffuses, GL_STATIC_DRAW);
 			}
 
-			if (poly->on_normals != 0) {
+			if (pipe->normal >= 0 && poly->on_normals != 0) {
 				glBindBuffer(GL_ARRAY_BUFFER, poly->vnormal);
-				glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void *)0);
-				glEnableVertexAttribArray(2);
+				glVertexAttribPointer(pipe->normal, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void *)0);
+				glEnableVertexAttribArray(pipe->normal);
 				glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat[3]) * poly->elements, poly->normals, GL_STATIC_DRAW);
 			}
 
@@ -416,9 +425,9 @@ void nemoshow_poly_use_diffuses(struct showone *one, int on_diffuses)
 	struct showpoly *poly = NEMOSHOW_POLY(one);
 
 	if (poly->on_diffuses == 0 && on_diffuses != 0) {
-		poly->diffuses = (float *)malloc(sizeof(float[3]) * poly->elements);
+		poly->diffuses = (float *)malloc(sizeof(float[4]) * poly->elements);
 
-		nemoobject_set_reserved(&one->object, "diffuse", poly->diffuses, sizeof(float[3]) * poly->elements);
+		nemoobject_set_reserved(&one->object, "diffuse", poly->diffuses, sizeof(float[4]) * poly->elements);
 	} else if (poly->on_diffuses != 0 && on_diffuses == 0) {
 		free(poly->diffuses);
 	}

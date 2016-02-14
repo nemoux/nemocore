@@ -71,6 +71,37 @@ static void nemoback_mote_dispatch_pipeline_canvas_redraw(struct nemoshow *show,
 		nemoshow_poly_set_vertex(mote->mesh, i * 6 + 3, x0, y0, 0.0f);
 		nemoshow_poly_set_vertex(mote->mesh, i * 6 + 4, x1, y1, 0.0f);
 		nemoshow_poly_set_vertex(mote->mesh, i * 6 + 5, x1, y0, 0.0f);
+
+		nemoshow_poly_set_diffuse(mote->mesh, i * 6 + 0,
+				NEMOMOTE_COLOR_R(mote->mote, i),
+				NEMOMOTE_COLOR_G(mote->mote, i),
+				NEMOMOTE_COLOR_B(mote->mote, i),
+				NEMOMOTE_COLOR_A(mote->mote, i));
+		nemoshow_poly_set_diffuse(mote->mesh, i * 6 + 1,
+				NEMOMOTE_COLOR_R(mote->mote, i),
+				NEMOMOTE_COLOR_G(mote->mote, i),
+				NEMOMOTE_COLOR_B(mote->mote, i),
+				NEMOMOTE_COLOR_A(mote->mote, i));
+		nemoshow_poly_set_diffuse(mote->mesh, i * 6 + 2,
+				NEMOMOTE_COLOR_R(mote->mote, i),
+				NEMOMOTE_COLOR_G(mote->mote, i),
+				NEMOMOTE_COLOR_B(mote->mote, i),
+				NEMOMOTE_COLOR_A(mote->mote, i));
+		nemoshow_poly_set_diffuse(mote->mesh, i * 6 + 3,
+				NEMOMOTE_COLOR_R(mote->mote, i),
+				NEMOMOTE_COLOR_G(mote->mote, i),
+				NEMOMOTE_COLOR_B(mote->mote, i),
+				NEMOMOTE_COLOR_A(mote->mote, i));
+		nemoshow_poly_set_diffuse(mote->mesh, i * 6 + 4,
+				NEMOMOTE_COLOR_R(mote->mote, i),
+				NEMOMOTE_COLOR_G(mote->mote, i),
+				NEMOMOTE_COLOR_B(mote->mote, i),
+				NEMOMOTE_COLOR_A(mote->mote, i));
+		nemoshow_poly_set_diffuse(mote->mesh, i * 6 + 5,
+				NEMOMOTE_COLOR_R(mote->mote, i),
+				NEMOMOTE_COLOR_G(mote->mote, i),
+				NEMOMOTE_COLOR_B(mote->mote, i),
+				NEMOMOTE_COLOR_A(mote->mote, i));
 	}
 
 	nemoshow_canvas_redraw_one(show, one);
@@ -140,7 +171,7 @@ static void nemoback_mote_dispatch_timer_event(struct nemotimer *timer, void *da
 							x + j * mote->textsize,
 							y + i * mote->textsize,
 							mote->tcolors1, mote->tcolors0,
-							mote->textsize * 0.5f, mote->textsize * 0.3f,
+							mote->textsize * 0.8f, mote->textsize * 0.5f,
 							5.0f, 1.0f);
 					nemomote_type_set_one(mote->mote, p, 5);
 				}
@@ -454,7 +485,7 @@ int main(int argc, char *argv[])
 	nemoshow_item_set_x(one, 64.0f);
 	nemoshow_item_set_y(one, 64.0f);
 	nemoshow_item_set_r(one, 48.0f);
-	nemoshow_item_set_stroke_color(one, 0x1e, 0xdc, 0xdc, 0x40);
+	nemoshow_item_set_stroke_color(one, 0x1e, 0xdc, 0xdc, 0xff);
 	nemoshow_item_set_stroke_width(one, 12.0f);
 	nemoshow_item_set_filter(one, mote->solid);
 
@@ -467,7 +498,7 @@ int main(int argc, char *argv[])
 	nemoshow_attach_one(show, canvas);
 	nemoshow_one_attach(scene, canvas);
 
-	mote->pipe = pipe = nemoshow_pipe_create(NEMOSHOW_LIGHTING_TEXTURE_PIPE);
+	mote->pipe = pipe = nemoshow_pipe_create(NEMOSHOW_LIGHTING_DIFFUSE_TEXTURE_PIPE);
 	nemoshow_attach_one(show, pipe);
 	nemoshow_one_attach(canvas, pipe);
 	nemoshow_pipe_set_light(pipe, 1.0f, 1.0f, -1.0f, 1.0f);
@@ -482,7 +513,12 @@ int main(int argc, char *argv[])
 	nemoshow_poly_set_canvas(one, mote->canvasb);
 	nemoshow_poly_use_texcoords(one, 1);
 	nemoshow_poly_use_normals(one, 1);
+	nemoshow_poly_use_diffuses(one, 1);
 	nemoshow_poly_use_vbo(one, 1);
+	nemoshow_poly_set_diffuse(one, 0, 1.0f, 1.0f, 1.0f, 1.0f);
+	nemoshow_poly_set_diffuse(one, 1, 1.0f, 1.0f, 1.0f, 1.0f);
+	nemoshow_poly_set_diffuse(one, 2, 1.0f, 1.0f, 1.0f, 1.0f);
+	nemoshow_poly_set_diffuse(one, 3, 1.0f, 1.0f, 1.0f, 1.0f);
 
 	nemomatrix_init_identity(&matrix);
 	nemomatrix_scale_xyz(&matrix, 1.0f / nemoshow_canvas_get_aspect_ratio(mote->canvasp), 1.0f, 1.0f);
@@ -495,7 +531,9 @@ int main(int argc, char *argv[])
 	nemoshow_poly_set_canvas(one, mote->canvast);
 	nemoshow_poly_set_vertices(one, (float *)malloc(sizeof(float[3]) * pixelcount * 6), pixelcount * 6);
 	nemoshow_poly_use_texcoords(one, 1);
+	nemoshow_poly_use_diffuses(one, 1);
 	nemoshow_poly_use_normals(one, 1);
+	nemoshow_poly_use_vbo(one, 1);
 
 	for (i = 0; i < pixelcount; i++) {
 		nemoshow_poly_set_texcoord(one, i * 6 + 0, 0.0f, 1.0f);

@@ -23,7 +23,9 @@ static const char *simple_fragment_shader =
 "precision mediump float;\n"
 "uniform vec4 color;\n"
 "void main() {\n"
-"  gl_FragColor = color;\n"
+"  float alpha = color.a;\n"
+"  gl_FragColor.rgb = color.rgb * alpha;\n"
+"  gl_FragColor.a = alpha;\n"
 "}\n";
 
 static const char *texture_vertex_shader =
@@ -43,7 +45,10 @@ static const char *texture_fragment_shader =
 "uniform sampler2D tex0;\n"
 "uniform vec4 color;\n"
 "void main() {\n"
-"  gl_FragColor = texture2D(tex0, vtexcoord) * color;\n"
+"  vec4 t = texture2D(tex0, vtexcoord);\n"
+"  float alpha = t.a * color.a;\n"
+"  gl_FragColor.rgb = texture2D(tex0, vtexcoord).rgb * color.rgb * alpha;\n"
+"  gl_FragColor.a = alpha;\n"
 "}\n";
 
 static const char *lighting_diffuse_vertex_shader =
@@ -51,10 +56,10 @@ static const char *lighting_diffuse_vertex_shader =
 "uniform mat4 modelview;\n"
 "uniform vec4 light;\n"
 "attribute vec3 vertex;\n"
-"attribute vec3 diffuse;\n"
+"attribute vec4 diffuse;\n"
 "attribute vec3 normal;\n"
 "varying vec3 vlight;\n"
-"varying vec3 vdiffuse;\n"
+"varying vec4 vdiffuse;\n"
 "varying vec3 vnormal;\n"
 "void main() {\n"
 "  gl_Position = projection * modelview * vec4(vertex, 1.0);\n"
@@ -66,11 +71,13 @@ static const char *lighting_diffuse_vertex_shader =
 static const char *lighting_diffuse_fragment_shader =
 "precision mediump float;\n"
 "varying vec3 vlight;\n"
-"varying vec3 vdiffuse;\n"
+"varying vec4 vdiffuse;\n"
 "varying vec3 vnormal;\n"
 "uniform vec4 color;\n"
 "void main() {\n"
-"  gl_FragColor = vec4(vdiffuse * max(dot(vlight, vnormal), 0.0), 1.0) * color;\n"
+"  float alpha = vdiffuse.a * color.a;\n"
+"  gl_FragColor.rgb = vdiffuse.rgb * max(dot(vlight, vnormal), 0.0) * color.rgb * alpha;\n"
+"  gl_FragColor.a = alpha;\n"
 "}\n";
 
 static const char *lighting_texture_vertex_shader =
@@ -99,7 +106,46 @@ static const char *lighting_texture_fragment_shader =
 "uniform vec4 color;\n"
 "void main() {\n"
 "  float v = max(dot(vlight, vnormal), 0.0);\n"
-"  gl_FragColor = texture2D(tex0, vtexcoord) * vec4(v, v, v, 1.0) * color;\n"
+"  vec4 t = texture2D(tex0, vtexcoord);\n"
+"  float alpha = t.a * color.a;\n"
+"  gl_FragColor.rgb = t.rgb * vec3(v, v, v) * color.rgb * alpha;\n"
+"  gl_FragColor.a = alpha;\n"
+"}\n";
+
+static const char *lighting_diffuse_texture_vertex_shader =
+"uniform mat4 projection;\n"
+"uniform mat4 modelview;\n"
+"uniform vec4 light;\n"
+"attribute vec3 vertex;\n"
+"attribute vec2 texcoord;\n"
+"attribute vec4 diffuse;\n"
+"attribute vec3 normal;\n"
+"varying vec3 vlight;\n"
+"varying vec2 vtexcoord;\n"
+"varying vec4 vdiffuse;\n"
+"varying vec3 vnormal;\n"
+"void main() {\n"
+"  gl_Position = projection * modelview * vec4(vertex, 1.0);\n"
+"  vlight = normalize(light.xyz - mat3(modelview) * vertex);\n"
+"  vtexcoord = texcoord;\n"
+"  vdiffuse = diffuse;\n"
+"  vnormal = normalize(mat3(modelview) * normal);\n"
+"}\n";
+
+static const char *lighting_diffuse_texture_fragment_shader =
+"precision mediump float;\n"
+"varying vec3 vlight;\n"
+"varying vec2 vtexcoord;\n"
+"varying vec4 vdiffuse;\n"
+"varying vec3 vnormal;\n"
+"uniform sampler2D tex0;\n"
+"uniform vec4 color;\n"
+"void main() {\n"
+"  float v = max(dot(vlight, vnormal), 0.0);\n"
+"  vec4 t = texture2D(tex0, vtexcoord);\n"
+"  float alpha = t.a * vdiffuse.a * color.a;\n"
+"  gl_FragColor.rgb = t.rgb * vec3(v, v, v) * vdiffuse.rgb * color.rgb * alpha;\n"
+"  gl_FragColor.a = alpha;\n"
 "}\n";
 
 struct showone *nemoshow_pipe_create(int type)
@@ -146,6 +192,11 @@ struct showone *nemoshow_pipe_create(int type)
 		glBindAttribLocation(pipe->program, 0, "vertex");
 		glLinkProgram(pipe->program);
 
+		pipe->vertex = 0;
+		pipe->texcoord = -1;
+		pipe->diffuse = -1;
+		pipe->normal = -1;
+
 		pipe->uprojection = glGetUniformLocation(pipe->program, "projection");
 		pipe->umodelview = glGetUniformLocation(pipe->program, "modelview");
 		pipe->ucolor = glGetUniformLocation(pipe->program, "color");
@@ -156,6 +207,11 @@ struct showone *nemoshow_pipe_create(int type)
 		glBindAttribLocation(pipe->program, 0, "vertex");
 		glBindAttribLocation(pipe->program, 1, "texcoord");
 		glLinkProgram(pipe->program);
+
+		pipe->vertex = 0;
+		pipe->texcoord = 1;
+		pipe->diffuse = -1;
+		pipe->normal = -1;
 
 		pipe->uprojection = glGetUniformLocation(pipe->program, "projection");
 		pipe->umodelview = glGetUniformLocation(pipe->program, "modelview");
@@ -170,6 +226,11 @@ struct showone *nemoshow_pipe_create(int type)
 		glBindAttribLocation(pipe->program, 2, "normal");
 		glLinkProgram(pipe->program);
 
+		pipe->vertex = 0;
+		pipe->texcoord = -1;
+		pipe->diffuse = 1;
+		pipe->normal = 2;
+
 		pipe->uprojection = glGetUniformLocation(pipe->program, "projection");
 		pipe->umodelview = glGetUniformLocation(pipe->program, "modelview");
 		pipe->ucolor = glGetUniformLocation(pipe->program, "color");
@@ -182,6 +243,31 @@ struct showone *nemoshow_pipe_create(int type)
 		glBindAttribLocation(pipe->program, 1, "texcoord");
 		glBindAttribLocation(pipe->program, 2, "normal");
 		glLinkProgram(pipe->program);
+
+		pipe->vertex = 0;
+		pipe->texcoord = 1;
+		pipe->diffuse = -1;
+		pipe->normal = 2;
+
+		pipe->uprojection = glGetUniformLocation(pipe->program, "projection");
+		pipe->umodelview = glGetUniformLocation(pipe->program, "modelview");
+		pipe->ucolor = glGetUniformLocation(pipe->program, "color");
+		pipe->utex0 = glGetUniformLocation(pipe->program, "tex0");
+		pipe->ulight = glGetUniformLocation(pipe->program, "light");
+	} else if (one->sub == NEMOSHOW_LIGHTING_DIFFUSE_TEXTURE_PIPE) {
+		pipe->program = glshader_create_program(lighting_diffuse_texture_fragment_shader, lighting_diffuse_texture_vertex_shader);
+
+		glUseProgram(pipe->program);
+		glBindAttribLocation(pipe->program, 0, "vertex");
+		glBindAttribLocation(pipe->program, 1, "texcoord");
+		glBindAttribLocation(pipe->program, 2, "diffuse");
+		glBindAttribLocation(pipe->program, 3, "normal");
+		glLinkProgram(pipe->program);
+
+		pipe->vertex = 0;
+		pipe->texcoord = 1;
+		pipe->diffuse = 2;
+		pipe->normal = 3;
 
 		pipe->uprojection = glGetUniformLocation(pipe->program, "projection");
 		pipe->umodelview = glGetUniformLocation(pipe->program, "modelview");
@@ -226,7 +312,7 @@ int nemoshow_pipe_update(struct showone *one)
 	return 0;
 }
 
-static inline int nemoshow_pipe_dispatch_simple(struct showone *canvas, struct showone *one)
+static int nemoshow_pipe_dispatch_simple(struct showone *canvas, struct showone *one)
 {
 	struct showpipe *pipe = NEMOSHOW_PIPE(one);
 	struct showpoly *poly;
@@ -257,7 +343,7 @@ static inline int nemoshow_pipe_dispatch_simple(struct showone *canvas, struct s
 	return 0;
 }
 
-static inline int nemoshow_pipe_dispatch_texture(struct showone *canvas, struct showone *one)
+static int nemoshow_pipe_dispatch_texture(struct showone *canvas, struct showone *one)
 {
 	struct showpipe *pipe = NEMOSHOW_PIPE(one);
 	struct showpoly *poly;
@@ -296,7 +382,7 @@ static inline int nemoshow_pipe_dispatch_texture(struct showone *canvas, struct 
 	return 0;
 }
 
-static inline int nemoshow_pipe_dispatch_lighting_diffuse(struct showone *canvas, struct showone *one)
+static int nemoshow_pipe_dispatch_lighting_diffuse(struct showone *canvas, struct showone *one)
 {
 	struct showpipe *pipe = NEMOSHOW_PIPE(one);
 	struct showpoly *poly;
@@ -316,7 +402,7 @@ static inline int nemoshow_pipe_dispatch_lighting_diffuse(struct showone *canvas
 		if (poly->on_vbo == 0) {
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void *)&poly->vertices[0]);
 			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void *)&poly->diffuses[0]);
+			glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void *)&poly->diffuses[0]);
 			glEnableVertexAttribArray(1);
 			glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void *)&poly->normals[0]);
 			glEnableVertexAttribArray(2);
@@ -332,7 +418,7 @@ static inline int nemoshow_pipe_dispatch_lighting_diffuse(struct showone *canvas
 	return 0;
 }
 
-static inline int nemoshow_pipe_dispatch_lighting_texture(struct showone *canvas, struct showone *one)
+static int nemoshow_pipe_dispatch_lighting_texture(struct showone *canvas, struct showone *one)
 {
 	struct showpipe *pipe = NEMOSHOW_PIPE(one);
 	struct showpoly *poly;
@@ -374,29 +460,71 @@ static inline int nemoshow_pipe_dispatch_lighting_texture(struct showone *canvas
 	return 0;
 }
 
-int nemoshow_pipe_dispatch_one(struct showone *canvas, struct showone *one)
+static int nemoshow_pipe_dispatch_lighting_diffuse_texture(struct showone *canvas, struct showone *one)
 {
-	if (one->sub == NEMOSHOW_SIMPLE_PIPE) {
-		return nemoshow_pipe_dispatch_simple(canvas, one);
-	} else if (one->sub == NEMOSHOW_TEXTURE_PIPE) {
-		return nemoshow_pipe_dispatch_texture(canvas, one);
-	} else if (one->sub == NEMOSHOW_LIGHTING_DIFFUSE_PIPE) {
-		return nemoshow_pipe_dispatch_lighting_diffuse(canvas, one);
-	} else if (one->sub == NEMOSHOW_LIGHTING_TEXTURE_PIPE) {
-		return nemoshow_pipe_dispatch_lighting_texture(canvas, one);
+	struct showpipe *pipe = NEMOSHOW_PIPE(one);
+	struct showpoly *poly;
+	struct showone *child;
+	struct showone *ref;
+
+	glUseProgram(pipe->program);
+
+	glUniformMatrix4fv(pipe->uprojection, 1, GL_FALSE, (GLfloat *)pipe->projection.d);
+	glUniform1i(pipe->utex0, 0);
+	glUniform4fv(pipe->ulight, 1, pipe->lights);
+
+	nemoshow_children_for_each(child, one) {
+		poly = NEMOSHOW_POLY(child);
+
+		glUniformMatrix4fv(pipe->umodelview, 1, GL_FALSE, (GLfloat *)poly->modelview.d);
+		glUniform4fv(pipe->ucolor, 1, poly->colors);
+
+		ref = NEMOSHOW_REF(child, NEMOSHOW_CANVAS_REF);
+		if (ref != NULL)
+			glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_texture(ref));
+
+		if (poly->on_vbo == 0) {
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void *)&poly->vertices[0]);
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (void *)&poly->texcoords[0]);
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void *)&poly->diffuses[0]);
+			glEnableVertexAttribArray(2);
+			glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void *)&poly->normals[0]);
+			glEnableVertexAttribArray(3);
+
+			glDrawArrays(poly->mode, 0, poly->elements);
+		} else {
+			glBindVertexArray(poly->varray);
+			glDrawArrays(poly->mode, 0, poly->elements);
+			glBindVertexArray(0);
+		}
 	}
 
 	return 0;
 }
+
+typedef int (*nemoshow_pipe_dispatch_pipeline)(struct showone *canvas, struct showone *one);
 
 void nemoshow_canvas_render_pipeline(struct nemoshow *show, struct showone *one)
 {
+	static const nemoshow_pipe_dispatch_pipeline dispatches[] = {
+		NULL,
+		nemoshow_pipe_dispatch_simple,
+		nemoshow_pipe_dispatch_texture,
+		nemoshow_pipe_dispatch_lighting_diffuse,
+		nemoshow_pipe_dispatch_lighting_texture,
+		nemoshow_pipe_dispatch_lighting_diffuse_texture
+	};
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 	struct showone *child;
 
 	glBindFramebuffer(GL_FRAMEBUFFER, canvas->fbo);
 
 	glViewport(0, 0, canvas->viewport.width, canvas->viewport.height);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
@@ -406,7 +534,7 @@ void nemoshow_canvas_render_pipeline(struct nemoshow *show, struct showone *one)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	nemoshow_children_for_each(child, one) {
-		nemoshow_pipe_dispatch_one(one, child);
+		dispatches[child->sub](one, child);
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
