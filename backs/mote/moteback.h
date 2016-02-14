@@ -26,6 +26,7 @@ struct moteback {
 	struct showone *back;
 	struct showone *canvasb;
 	struct showone *canvasp;
+	struct showone *canvast;
 	struct showone *inner, *outer, *solid;
 	struct showone *ease0;
 	struct showone *ease1;
@@ -34,9 +35,6 @@ struct moteback {
 	struct showone *pipe;
 	struct showone *quad;
 	struct showone *mesh;
-
-	struct showone *canvast;
-	struct showone *onet;
 
 	struct nemomote *mote;
 	struct moterandom random;
@@ -48,6 +46,9 @@ struct moteback {
 
 	int type;
 	char *logo;
+	char *font;
+	double fontsize;
+	double textsize;
 	double pixelsize;
 	double speedmax;
 	double mutualgravity;
