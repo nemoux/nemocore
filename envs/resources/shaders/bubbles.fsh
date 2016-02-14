@@ -12,9 +12,7 @@ const int bubbles = 64;
 
 void main()
 {
-  vec2 uv = -1.0 + 2.0 * vtexcoord;
-  uv.x *= width / height;
-
+  vec2 uv = vec2(-1.0 + 2.0 * vtexcoord.x * width / height, -1.0 + 2.0 * vtexcoord.y);
   vec3 c = vec3(0.2, 0.2, 0.4);
 
   for (int i = 0; i < bubbles; i++) {
