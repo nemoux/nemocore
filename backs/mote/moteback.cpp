@@ -103,7 +103,8 @@ static void nemoback_mote_prepare_text(struct moteback *mote, const char *text)
 	double x, y;
 	int i, j, p;
 
-	textwidth = skia_draw_text((void *)pixels, width, height, font, fontsize, text);
+	skia_clear_canvas((void *)pixels, width, height);
+	textwidth = skia_draw_text((void *)pixels, width, height, font, fontsize, text, 0.0f, 0.0f, 0xffffffff);
 
 	x = random_get_double(0.0f, mote->width - textwidth * textsize);
 	y = random_get_double(0.0f, mote->height - height * textsize);
