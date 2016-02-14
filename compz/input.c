@@ -110,7 +110,7 @@ int nemoinput_get_config_geometry(struct nemocompz *compz, const char *devnode, 
 void nemoinput_transform_to_global(struct inputnode *node, float dx, float dy, float *x, float *y)
 {
 	if (node->transform.enable != 0) {
-		struct nemovector v = { dx, dy, 0.0f, 1.0f };
+		struct nemovector v = { { dx, dy, 0.0f, 1.0f } };
 
 		nemomatrix_transform(&node->transform.inverse, &v);
 
@@ -131,7 +131,7 @@ void nemoinput_transform_to_global(struct inputnode *node, float dx, float dy, f
 void nemoinput_transform_from_global(struct inputnode *node, float x, float y, float *dx, float *dy)
 {
 	if (node->transform.enable != 0) {
-		struct nemovector v = { x, y, 0.0f, 1.0f };
+		struct nemovector v = { { x, y, 0.0f, 1.0f } };
 
 		nemomatrix_transform(&node->transform.matrix, &v);
 

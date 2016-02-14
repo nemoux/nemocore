@@ -630,8 +630,8 @@ static inline int nemotale_composite_egl_in(struct nemotale *tale)
 			return -1;
 
 		for (i = 0, edamage = edamages; i < nrects; i++) {
-			struct nemovector v1 = { rects[i].x1, rects[i].y1, 0.0f, 1.0f };
-			struct nemovector v2 = { rects[i].x2, rects[i].y2, 0.0f, 1.0f };
+			struct nemovector v1 = { { rects[i].x1, rects[i].y1, 0.0f, 1.0f } };
+			struct nemovector v2 = { { rects[i].x2, rects[i].y2, 0.0f, 1.0f } };
 
 			nemomatrix_transform(&context->transform, &v1);
 			nemomatrix_transform(&context->transform, &v2);

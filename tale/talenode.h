@@ -144,7 +144,7 @@ static inline void nemotale_node_damage_filter(struct talenode *node)
 static inline void nemotale_node_transform_to_global(struct talenode *node, float sx, float sy, float *x, float *y)
 {
 	if (node->transform.enable) {
-		struct nemovector v = { sx, sy, 0.0f, 1.0f };
+		struct nemovector v = { { sx, sy, 0.0f, 1.0f } };
 
 		nemomatrix_transform(&node->transform.matrix, &v);
 
@@ -164,7 +164,7 @@ static inline void nemotale_node_transform_to_global(struct talenode *node, floa
 static inline void nemotale_node_transform_from_global(struct talenode *node, float x, float y, float *sx, float *sy)
 {
 	if (node->transform.enable) {
-		struct nemovector v = { x, y, 0.0f, 1.0f };
+		struct nemovector v = { { x, y, 0.0f, 1.0f } };
 
 		nemomatrix_transform(&node->transform.inverse, &v);
 

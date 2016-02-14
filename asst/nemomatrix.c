@@ -141,7 +141,7 @@ void nemomatrix_transform(struct nemomatrix *matrix, struct nemovector *v)
 
 int nemomatrix_transform_xyz(struct nemomatrix *matrix, float *x, float *y, float *z)
 {
-	struct nemovector v = { *x, *y, *z, 1.0f };
+	struct nemovector v = { { *x, *y, *z, 1.0f } };
 	struct nemovector t;
 	int i, j;
 

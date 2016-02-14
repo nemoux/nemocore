@@ -291,7 +291,7 @@ static void nemoscreen_update_region(struct nemoscreen *screen)
 		int i;
 
 		for (i = 0; i < 4; i++) {
-			struct nemovector v = { s[i][0], s[i][1], 0.0f, 1.0f };
+			struct nemovector v = { { s[i][0], s[i][1], 0.0f, 1.0f } };
 
 			nemomatrix_transform(&screen->transform.inverse, &v);
 
@@ -341,7 +341,7 @@ void nemoscreen_update_geometry(struct nemoscreen *screen)
 void nemoscreen_transform_to_global(struct nemoscreen *screen, float dx, float dy, float *x, float *y)
 {
 	if (screen->transform.enable != 0) {
-		struct nemovector v = { dx, dy, 0.0f, 1.0f };
+		struct nemovector v = { { dx, dy, 0.0f, 1.0f } };
 
 		nemomatrix_transform(&screen->transform.inverse, &v);
 
@@ -362,7 +362,7 @@ void nemoscreen_transform_to_global(struct nemoscreen *screen, float dx, float d
 void nemoscreen_transform_from_global(struct nemoscreen *screen, float x, float y, float *dx, float *dy)
 {
 	if (screen->transform.enable != 0) {
-		struct nemovector v = { x, y, 0.0f, 1.0f };
+		struct nemovector v = { { x, y, 0.0f, 1.0f } };
 
 		nemomatrix_transform(&screen->transform.matrix, &v);
 

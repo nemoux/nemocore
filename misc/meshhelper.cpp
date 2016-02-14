@@ -77,9 +77,9 @@ int mesh_load_triangles(const char *filepath, const char *basepath, float **vert
 				n2[1] = shapes[i].mesh.normals[v2 * 3 + 1];
 				n2[2] = shapes[i].mesh.normals[v2 * 3 + 2];
 			} else {
-				struct nemovector t0 = { p0[0], p0[1], p0[2] };
-				struct nemovector t1 = { p1[0], p1[1], p1[2] };
-				struct nemovector t2 = { p2[0], p2[1], p2[2] };
+				struct nemovector t0 = { { p0[0], p0[1], p0[2] } };
+				struct nemovector t1 = { { p1[0], p1[1], p1[2] } };
+				struct nemovector t2 = { { p2[0], p2[1], p2[2] } };
 				struct nemovector s0, s1;
 
 				s0.f[0] = t1.f[0] - t0.f[0];
@@ -210,9 +210,9 @@ int mesh_load_lines(const char *filepath, const char *basepath, float **vertices
 				n2[1] = shapes[i].mesh.normals[v2 * 3 + 1];
 				n2[2] = shapes[i].mesh.normals[v2 * 3 + 2];
 			} else {
-				struct nemovector t0 = { p0[0], p0[1], p0[2] };
-				struct nemovector t1 = { p1[0], p1[1], p1[2] };
-				struct nemovector t2 = { p2[0], p2[1], p2[2] };
+				struct nemovector t0 = { { p0[0], p0[1], p0[2] } };
+				struct nemovector t1 = { { p1[0], p1[1], p1[2] } };
+				struct nemovector t2 = { { p2[0], p2[1], p2[2] } };
 				struct nemovector s0, s1;
 
 				s0.f[0] = t1.f[0] - t0.f[0];

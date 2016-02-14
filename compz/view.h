@@ -275,7 +275,7 @@ static inline void nemoview_transform_to_global(struct nemoview *view, float sx,
 	}
 
 	if (view->transform.enable) {
-		struct nemovector v = { sx, sy, 0.0f, 1.0f };
+		struct nemovector v = { { sx, sy, 0.0f, 1.0f } };
 
 		nemomatrix_transform(&view->transform.matrix, &v);
 
@@ -300,7 +300,7 @@ static inline void nemoview_transform_from_global(struct nemoview *view, float x
 	}
 
 	if (view->transform.enable) {
-		struct nemovector v = { x, y, 0.0f, 1.0f };
+		struct nemovector v = { { x, y, 0.0f, 1.0f } };
 
 		nemomatrix_transform(&view->transform.inverse, &v);
 
@@ -321,7 +321,7 @@ static inline void nemoview_transform_from_global(struct nemoview *view, float x
 static inline void nemoview_transform_to_global_nocheck(struct nemoview *view, float sx, float sy, float *x, float *y)
 {
 	if (view->transform.enable) {
-		struct nemovector v = { sx, sy, 0.0f, 1.0f };
+		struct nemovector v = { { sx, sy, 0.0f, 1.0f } };
 
 		nemomatrix_transform(&view->transform.matrix, &v);
 
@@ -342,7 +342,7 @@ static inline void nemoview_transform_to_global_nocheck(struct nemoview *view, f
 static inline void nemoview_transform_from_global_nocheck(struct nemoview *view, float x, float y, float *sx, float *sy)
 {
 	if (view->transform.enable) {
-		struct nemovector v = { x, y, 0.0f, 1.0f };
+		struct nemovector v = { { x, y, 0.0f, 1.0f } };
 
 		nemomatrix_transform(&view->transform.inverse, &v);
 
