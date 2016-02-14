@@ -11,6 +11,7 @@ NEMO_BEGIN_EXTERN_C
 #include <nemolistener.h>
 #include <nemomatrix.h>
 
+#include <nemomote.h>
 #include <showhelper.h>
 
 struct moteback {
@@ -31,10 +32,34 @@ struct moteback {
 	struct showone *ease2;
 
 	struct showone *pipe;
-	struct showone *one;
+	struct showone *quad;
+	struct showone *mesh;
 
 	struct showone *canvast;
 	struct showone *onet;
+
+	struct nemomote *mote;
+	struct moterandom random;
+	struct nemozone box;
+	struct nemozone disc;
+	struct nemozone speed;
+
+	struct nemoease ease;
+
+	int type;
+	char *logo;
+	double pixelsize;
+	double speedmax;
+	double mutualgravity;
+
+	double colors0[4];
+	double colors1[4];
+	double tcolors0[4];
+	double tcolors1[4];
+
+	double secs;
+
+	double ratio;
 
 	int is_sleeping;
 };

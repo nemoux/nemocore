@@ -366,6 +366,18 @@ void nemoshow_poly_set_canvas(struct showone *one, struct showone *canvas)
 	nemoshow_one_reference_one(one, canvas, NEMOSHOW_CANVAS_DIRTY, NEMOSHOW_CANVAS_REF);
 }
 
+void nemoshow_poly_set_vertices(struct showone *one, float *vertices, int elements)
+{
+	struct showpoly *poly = NEMOSHOW_POLY(one);
+
+	poly->vertices = vertices;
+	poly->elements = elements;
+
+	poly->mode = GL_TRIANGLES;
+
+	nemoobject_set_reserved(&one->object, "vertex", poly->vertices, sizeof(float[elements * 3]));
+}
+
 void nemoshow_poly_transform_vertices(struct showone *one, struct nemomatrix *matrix)
 {
 	struct showpoly *poly = NEMOSHOW_POLY(one);

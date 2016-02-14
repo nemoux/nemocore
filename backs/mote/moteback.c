@@ -12,14 +12,69 @@
 #include <nemotimer.h>
 #include <nemoegl.h>
 #include <moteback.h>
+#include <nemomote.h>
 #include <showhelper.h>
 #include <colorhelper.h>
 #include <glfilter.h>
 #include <nemolog.h>
 #include <nemomisc.h>
 
+static void nemoback_mote_update_motes(struct moteback *mote, double secs)
+{
+	nemomote_mutualgravity_update(mote->mote, 1, secs, 100.0f, mote->mutualgravity, 50.0f);
+	nemomote_speedlimit_update(mote->mote, 2, secs, 0.0f, mote->speedmax * 0.2f);
+	nemomote_collide_update(mote->mote, 2, 1, secs, 1.5f);
+	nemomote_collide_update(mote->mote, 2, 2, secs, 1.5f);
+	nemomote_speedlimit_update(mote->mote, 1, secs, 0.0f, mote->speedmax);
+
+	if (nemomote_tween_update(mote->mote, 5, secs, &mote->ease, 6, NEMOMOTE_POSITION_TWEEN | NEMOMOTE_COLOR_TWEEN | NEMOMOTE_MASS_TWEEN) != 0) {
+		nemomote_tweener_set(mote->mote, 6,
+				0.0f, 0.0f,
+				mote->colors1, mote->colors0,
+				mote->pixelsize, mote->pixelsize * 0.5f,
+				5.0f, 1.0f);
+	}
+
+	if (nemomote_tween_update(mote->mote, 6, secs, &mote->ease, 7, NEMOMOTE_COLOR_TWEEN | NEMOMOTE_MASS_TWEEN) != 0) {
+		nemomote_explosion_update(mote->mote, 7, secs, -30.0f, 30.0f, -30.0f, 30.0f);
+		nemomote_sleeptime_set(mote->mote, 7, 9.0f, 3.0f);
+		nemomote_type_set(mote->mote, 7, 1);
+	}
+
+	nemomote_boundingbox_update(mote->mote, 2, secs, &mote->box, 0.8f);
+	nemomote_move_update(mote->mote, 2, secs);
+	nemomote_boundingbox_update(mote->mote, 1, secs, &mote->box, 0.8f);
+	nemomote_move_update(mote->mote, 1, secs);
+
+	nemomote_cleanup(mote->mote);
+}
+
 static void nemoback_mote_dispatch_pipeline_canvas_redraw(struct nemoshow *show, struct showone *one)
 {
+	struct moteback *mote = (struct moteback *)nemoshow_get_userdata(show);
+	double secs = (double)time_current_nsecs() / 1000000000;
+	int i;
+
+	nemoback_mote_update_motes(mote, secs - mote->secs);
+	mote->secs = secs;
+
+	for (i = 0; i < nemomote_get_count(mote->mote); i++) {
+		double x = (NEMOMOTE_POSITION_X(mote->mote, i) / (double)mote->width * 2.0f - 1.0f) / mote->ratio;
+		double y = (NEMOMOTE_POSITION_Y(mote->mote, i) / (double)mote->height * 2.0f - 1.0f);
+		double m = (NEMOMOTE_MASS(mote->mote, i) / (double)mote->height * 2.0f);
+		double x0 = x - m;
+		double y0 = y - m;
+		double x1 = x + m;
+		double y1 = y + m;
+
+		nemoshow_poly_set_vertex(mote->mesh, i * 6 + 0, x0, y0, 0.0f);
+		nemoshow_poly_set_vertex(mote->mesh, i * 6 + 1, x0, y1, 0.0f);
+		nemoshow_poly_set_vertex(mote->mesh, i * 6 + 2, x1, y1, 0.0f);
+		nemoshow_poly_set_vertex(mote->mesh, i * 6 + 3, x0, y0, 0.0f);
+		nemoshow_poly_set_vertex(mote->mesh, i * 6 + 4, x1, y1, 0.0f);
+		nemoshow_poly_set_vertex(mote->mesh, i * 6 + 5, x1, y0, 0.0f);
+	}
+
 	nemoshow_canvas_redraw_one(show, one);
 
 	nemoshow_canvas_damage_all(one);
@@ -97,16 +152,18 @@ int main(int argc, char *argv[])
 	int32_t height = 1080;
 	double textsize = 18.0f;
 	double pixelsize = 8.0f;
-	double speedmax = 300.0f;
-	double mutualgravity = 5000.0f;
-	double color0[4] = { 0.0f, 0.5f, 0.5f, 0.1f };
-	double color1[4] = { 0.0f, 0.5f, 0.5f, 0.3f };
+	double speedmax = 500.0f;
+	double mutualgravity = 3000.0f;
+	double color0[4] = { 0.0f, 0.5f, 0.5f, 0.3f };
+	double color1[4] = { 0.0f, 0.5f, 0.5f, 0.7f };
 	double textcolor[4] = { 0.0f, 1.0f, 1.0f, 1.0f };
 	uint32_t color;
-	int pixelcount = 500;
+	int pixelcount = 1800;
 	int opt;
+	int i;
 
 	nemolog_set_file(2);
+	nemolog_open_socket("/tmp/nemo.log.0");
 
 	while (opt = getopt_long(argc, argv, "f:s:w:h:l:p:c:e:g:n:m:t:", options, NULL)) {
 		if (opt == -1)
@@ -192,6 +249,71 @@ int main(int argc, char *argv[])
 	mote->width = width;
 	mote->height = height;
 
+	if (logo != NULL)
+		mote->logo = logo;
+	else
+		mote->logo = strdup("NEMO-UX");
+
+	mote->pixelsize = pixelsize;
+	mote->speedmax = speedmax;
+	mote->mutualgravity = mutualgravity;
+
+	mote->colors0[0] = color0[0];
+	mote->colors1[0] = color1[0];
+	mote->colors0[1] = color0[1];
+	mote->colors1[1] = color1[1];
+	mote->colors0[2] = color0[2];
+	mote->colors1[2] = color1[2];
+	mote->colors0[3] = color0[3];
+	mote->colors1[3] = color1[3];
+
+	mote->tcolors0[0] = textcolor[0];
+	mote->tcolors1[0] = textcolor[0];
+	mote->tcolors0[1] = textcolor[1];
+	mote->tcolors1[1] = textcolor[1];
+	mote->tcolors0[2] = textcolor[2];
+	mote->tcolors1[2] = textcolor[2];
+	mote->tcolors0[3] = textcolor[3];
+	mote->tcolors1[3] = textcolor[3];
+
+	mote->mote = nemomote_create(pixelcount);
+	nemomote_random_set_property(&mote->random, 5.0f, 1.0f);
+	nemozone_set_cube(&mote->box, mote->width * 0.0f, mote->width * 1.0f, mote->height * 0.0f, mote->height * 1.0f);
+	nemozone_set_disc(&mote->disc, mote->width * 0.5f, mote->height * 0.5f, mote->width * 0.2f);
+	nemozone_set_disc(&mote->speed, 0.0f, 0.0f, 50.0f);
+
+	nemomote_blast_emit(mote->mote, pixelcount * 0.8f);
+	nemomote_position_update(mote->mote, &mote->box);
+	nemomote_velocity_update(mote->mote, &mote->speed);
+	nemomote_color_update(mote->mote,
+			mote->colors1[0], mote->colors0[0],
+			mote->colors1[1], mote->colors0[1],
+			mote->colors1[2], mote->colors0[2],
+			mote->colors1[3], mote->colors0[3]);
+	nemomote_mass_update(mote->mote,
+			mote->pixelsize,
+			mote->pixelsize * 0.5f);
+	nemomote_type_update(mote->mote, 1);
+	nemomote_commit(mote->mote);
+
+	nemomote_blast_emit(mote->mote, pixelcount * 0.1f);
+	nemomote_position_update(mote->mote, &mote->box);
+	nemomote_velocity_update(mote->mote, &mote->speed);
+	nemomote_color_update(mote->mote,
+			mote->colors1[0], mote->colors0[0],
+			mote->colors1[1], mote->colors0[1],
+			mote->colors1[2], mote->colors0[2],
+			mote->colors1[3], mote->colors1[3]);
+	nemomote_mass_update(mote->mote,
+			mote->pixelsize * 1.5f,
+			mote->pixelsize);
+	nemomote_type_update(mote->mote, 2);
+	nemomote_commit(mote->mote);
+
+	nemoease_set(&mote->ease, NEMOEASE_CUBIC_INOUT_TYPE);
+
+	mote->secs = (double)time_current_nsecs() / 1000000000;
+
 	mote->tool = tool = nemotool_create();
 	if (tool == NULL)
 		goto err1;
@@ -264,7 +386,7 @@ int main(int argc, char *argv[])
 	nemoshow_pipe_set_aspect_ratio(pipe,
 			nemoshow_canvas_get_aspect_ratio(mote->canvasp));
 
-	mote->one = one = nemoshow_poly_create(NEMOSHOW_QUAD_POLY);
+	mote->quad = one = nemoshow_poly_create(NEMOSHOW_QUAD_POLY);
 	nemoshow_attach_one(show, one);
 	nemoshow_one_attach(pipe, one);
 	nemoshow_one_set_tag(one, 1);
@@ -277,6 +399,33 @@ int main(int argc, char *argv[])
 	nemomatrix_init_identity(&matrix);
 	nemomatrix_scale_xyz(&matrix, 1.0f / nemoshow_canvas_get_aspect_ratio(mote->canvasp), 1.0f, 1.0f);
 	nemoshow_poly_transform_vertices(one, &matrix);
+
+	mote->mesh = one = nemoshow_poly_create(NEMOSHOW_MESH_POLY);
+	nemoshow_attach_one(show, one);
+	nemoshow_one_attach(pipe, one);
+	nemoshow_poly_set_color(one, 1.0f, 1.0f, 1.0f, 1.0f);
+	nemoshow_poly_set_canvas(one, mote->canvast);
+	nemoshow_poly_set_vertices(one, (float *)malloc(sizeof(float[3]) * pixelcount * 6), pixelcount * 6);
+	nemoshow_poly_use_texcoords(one, 1);
+	nemoshow_poly_use_normals(one, 1);
+
+	for (i = 0; i < pixelcount; i++) {
+		nemoshow_poly_set_texcoord(one, i * 6 + 0, 0.0f, 1.0f);
+		nemoshow_poly_set_texcoord(one, i * 6 + 1, 0.0f, 0.0f);
+		nemoshow_poly_set_texcoord(one, i * 6 + 2, 1.0f, 0.0f);
+		nemoshow_poly_set_texcoord(one, i * 6 + 3, 0.0f, 1.0f);
+		nemoshow_poly_set_texcoord(one, i * 6 + 4, 1.0f, 0.0f);
+		nemoshow_poly_set_texcoord(one, i * 6 + 5, 1.0f, 1.0f);
+
+		nemoshow_poly_set_normal(one, i * 6 + 0, 0.0f, 0.0f, -1.0f);
+		nemoshow_poly_set_normal(one, i * 6 + 1, 0.0f, 0.0f, -1.0f);
+		nemoshow_poly_set_normal(one, i * 6 + 2, 0.0f, 0.0f, -1.0f);
+		nemoshow_poly_set_normal(one, i * 6 + 3, 0.0f, 0.0f, -1.0f);
+		nemoshow_poly_set_normal(one, i * 6 + 4, 0.0f, 0.0f, -1.0f);
+		nemoshow_poly_set_normal(one, i * 6 + 5, 0.0f, 0.0f, -1.0f);
+	}
+
+	mote->ratio = nemoshow_canvas_get_aspect_ratio(mote->canvasp);
 
 	nemoshow_set_scene(show, scene);
 	nemoshow_set_size(show, width, height);

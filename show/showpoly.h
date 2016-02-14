@@ -46,6 +46,7 @@ typedef enum {
 	NEMOSHOW_NONE_POLY = 0,
 	NEMOSHOW_QUAD_POLY = 1,
 	NEMOSHOW_CUBE_POLY = 2,
+	NEMOSHOW_MESH_POLY = 3,
 	NEMOSHOW_LAST_POLY
 } NemoShowPolyType;
 
@@ -101,6 +102,8 @@ extern int nemoshow_poly_arrange(struct showone *one);
 extern int nemoshow_poly_update(struct showone *one);
 
 extern void nemoshow_poly_set_canvas(struct showone *one, struct showone *canvas);
+
+extern void nemoshow_poly_set_vertices(struct showone *one, float *vertices, int elements);
 
 extern void nemoshow_poly_transform_vertices(struct showone *one, struct nemomatrix *matrix);
 
