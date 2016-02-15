@@ -263,13 +263,16 @@ int main(int argc, char *argv[])
 		goto err2;
 	nemoshow_set_userdata(show, edge);
 
-	if (layer == NULL || strcmp(layer, "underlay") == 0)
+	if (layer == NULL || strcmp(layer, "underlay") == 0) {
 		nemocanvas_set_layer(NEMOSHOW_AT(show, canvas), NEMO_SURFACE_LAYER_TYPE_UNDERLAY);
-	else if (strcmp(layer, "overlay") == 0)
+	} else if (strcmp(layer, "overlay") == 0) {
 		nemocanvas_set_layer(NEMOSHOW_AT(show, canvas), NEMO_SURFACE_LAYER_TYPE_OVERLAY);
-	else
+	} else {
+		nemocanvas_opaque(NEMOSHOW_AT(show, canvas), 0, 0, width, height);
 		nemocanvas_set_layer(NEMOSHOW_AT(show, canvas), NEMO_SURFACE_LAYER_TYPE_BACKGROUND);
+	}
 
+	nemocanvas_set_input_type(NEMOSHOW_AT(show, canvas), NEMO_SURFACE_INPUT_TYPE_TOUCH);
 	nemocanvas_set_dispatch_fullscreen(NEMOSHOW_AT(show, canvas), nemoback_edge_dispatch_canvas_fullscreen);
 
 	edge->scene = scene = nemoshow_scene_create();
