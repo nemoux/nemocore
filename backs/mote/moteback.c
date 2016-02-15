@@ -423,6 +423,7 @@ int main(int argc, char *argv[])
 	nemocanvas_set_layer(NEMOSHOW_AT(show, canvas), NEMO_SURFACE_LAYER_TYPE_BACKGROUND);
 	nemocanvas_set_input_type(NEMOSHOW_AT(show, canvas), NEMO_SURFACE_INPUT_TYPE_TOUCH);
 	nemocanvas_set_dispatch_fullscreen(NEMOSHOW_AT(show, canvas), nemoback_mote_dispatch_canvas_fullscreen);
+	nemocanvas_unset_sound(NEMOSHOW_AT(show, canvas));
 
 	mote->ease0 = ease = nemoshow_ease_create();
 	nemoshow_ease_set_type(ease, NEMOEASE_CUBIC_INOUT_TYPE);

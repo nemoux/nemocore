@@ -656,7 +656,9 @@ int main(int argc, char *argv[])
 
 	nemocanvas_opaque(NEMOSHOW_AT(show, canvas), 0, 0, width, height);
 	nemocanvas_set_layer(NEMOSHOW_AT(show, canvas), NEMO_SURFACE_LAYER_TYPE_BACKGROUND);
+	nemocanvas_set_input_type(NEMOSHOW_AT(show, canvas), NEMO_SURFACE_INPUT_TYPE_TOUCH);
 	nemocanvas_set_dispatch_fullscreen(NEMOSHOW_AT(show, canvas), nemoback_miro_dispatch_canvas_fullscreen);
+	nemocanvas_unset_sound(NEMOSHOW_AT(show, canvas));
 
 	miro->scene = scene = nemoshow_scene_create();
 	nemoshow_scene_set_width(scene, width);

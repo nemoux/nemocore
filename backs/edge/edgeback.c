@@ -274,6 +274,7 @@ int main(int argc, char *argv[])
 
 	nemocanvas_set_input_type(NEMOSHOW_AT(show, canvas), NEMO_SURFACE_INPUT_TYPE_TOUCH);
 	nemocanvas_set_dispatch_fullscreen(NEMOSHOW_AT(show, canvas), nemoback_edge_dispatch_canvas_fullscreen);
+	nemocanvas_unset_sound(NEMOSHOW_AT(show, canvas));
 
 	edge->scene = scene = nemoshow_scene_create();
 	nemoshow_scene_set_width(scene, width);
