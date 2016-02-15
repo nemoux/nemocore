@@ -404,15 +404,19 @@ void nemocanvas_miss(struct nemocanvas *canvas)
 	nemo_surface_miss(canvas->nemo_surface);
 }
 
-void nemocanvas_execute_command(struct nemocanvas *canvas, const char *name, const char *cmds)
+void nemocanvas_execute_command(struct nemocanvas *canvas, const char *name, const char *cmds, uint32_t type, uint32_t coords, double x, double y, double r)
 {
-	nemo_surface_execute_command(canvas->nemo_surface, name, cmds);
+	nemo_surface_execute_command(canvas->nemo_surface,
+			name, cmds, type, coords,
+			wl_fixed_from_double(x),
+			wl_fixed_from_double(y),
+			wl_fixed_from_double(r));
 }
 
-void nemocanvas_execute_action(struct nemocanvas *canvas, uint32_t group, uint32_t action, double x, double y, double r)
+void nemocanvas_execute_action(struct nemocanvas *canvas, uint32_t group, uint32_t action, uint32_t type, uint32_t coords, double x, double y, double r)
 {
 	nemo_surface_execute_action(canvas->nemo_surface,
-			group, action,
+			group, action, type, coords,
 			wl_fixed_from_double(x),
 			wl_fixed_from_double(y),
 			wl_fixed_from_double(r));

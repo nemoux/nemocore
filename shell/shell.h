@@ -52,8 +52,8 @@ typedef enum {
 
 struct shellbin;
 
-typedef int (*nemoshell_execute_command_t)(void *data, struct shellbin *bin, const char *name, const char *cmds);
-typedef int (*nemoshell_execute_action_t)(void *data, struct shellbin *bin, uint32_t group, uint32_t action, double x, double y, double r);
+typedef int (*nemoshell_execute_command_t)(void *data, struct shellbin *bin, const char *name, const char *cmds, uint32_t type, double x, double y, double r);
+typedef int (*nemoshell_execute_action_t)(void *data, struct shellbin *bin, uint32_t group, uint32_t action, uint32_t type, double x, double y, double r);
 
 struct nemoshell {
 	struct nemocompz *compz;

@@ -82,32 +82,59 @@ static void nemo_surface_miss(struct wl_client *client, struct wl_resource *reso
 		wl_signal_emit(&bin->ungrab_signal, bin);
 }
 
-static void nemo_surface_execute_command(struct wl_client *client, struct wl_resource *resource, const char *name, const char *cmds)
+static void nemo_surface_execute_command(struct wl_client *client, struct wl_resource *resource, const char *name, const char *cmds, uint32_t type, uint32_t coords, wl_fixed_t x, wl_fixed_t y, wl_fixed_t r)
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 	struct nemoshell *shell = bin->shell;
 
-	if (shell->execute_command != NULL)
-		shell->execute_command(shell->userdata, bin, name, cmds);
+	if (shell->execute_command != NULL) {
+		float tx, ty;
+		float tr;
+
+		if (coords == NEMO_SURFACE_COORDINATE_TYPE_LOCAL) {
+			nemoview_transform_to_global(bin->view,
+					wl_fixed_to_double(x),
+					wl_fixed_to_double(y),
+					&tx, &ty);
+
+			tr = wl_fixed_to_double(r) * M_PI / 180.0f + bin->view->geometry.r;
+		} else {
+			tx = wl_fixed_to_double(x);
+			ty = wl_fixed_to_double(y);
+			tr = wl_fixed_to_double(r) * M_PI / 180.0f;
+		}
+
+		shell->execute_command(shell->userdata, bin,
+				name, cmds, type,
+				tx, ty, tr);
+	}
 }
 
-static void nemo_surface_execute_action(struct wl_client *client, struct wl_resource *resource, uint32_t group, uint32_t action, wl_fixed_t x, wl_fixed_t y, wl_fixed_t r)
+static void nemo_surface_execute_action(struct wl_client *client, struct wl_resource *resource, uint32_t group, uint32_t action, uint32_t type, uint32_t coords, wl_fixed_t x, wl_fixed_t y, wl_fixed_t r)
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 	struct nemoshell *shell = bin->shell;
 
 	if (shell->execute_action != NULL) {
-		float gx, gy;
+		float tx, ty;
+		float tr;
 
-		nemoview_transform_to_global(bin->view,
-				wl_fixed_to_double(x),
-				wl_fixed_to_double(y),
-				&gx, &gy);
+		if (coords == NEMO_SURFACE_COORDINATE_TYPE_LOCAL) {
+			nemoview_transform_to_global(bin->view,
+					wl_fixed_to_double(x),
+					wl_fixed_to_double(y),
+					&tx, &ty);
+
+			tr = wl_fixed_to_double(r) * M_PI / 180.0f + bin->view->geometry.r;
+		} else {
+			tx = wl_fixed_to_double(x);
+			ty = wl_fixed_to_double(y);
+			tr = wl_fixed_to_double(r) * M_PI / 180.0f;
+		}
 
 		shell->execute_action(shell->userdata, bin,
-				group, action,
-				gx, gy,
-				wl_fixed_to_double(r));
+				group, action, type,
+				tx, ty, tr);
 	}
 }
 

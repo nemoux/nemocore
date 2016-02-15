@@ -56,14 +56,31 @@
 		<request name="miss">
 		</request>
 
+		<enum name="execute_type">
+			<entry name="normal" value="0"/>
+			<entry name="focus_on" value="1"/>
+		</enum>
+
+		<enum name="coordinate_type">
+			<entry name="local" value="0"/>
+			<entry name="global" value="1"/>
+		</enum>
+
 		<request name="execute_command">
 			<arg name="name" type="string"/>
 			<arg name="cmds" type="string"/>
+			<arg name="type" type="uint"/>
+			<arg name="coords" type="uint"/>
+			<arg name="x" type="fixed"/>
+			<arg name="y" type="fixed"/>
+			<arg name="r" type="fixed"/>
 		</request>
 
 		<request name="execute_action">
 			<arg name="group" type="uint"/>
 			<arg name="action" type="uint"/>
+			<arg name="type" type="uint"/>
+			<arg name="coords" type="uint"/>
 			<arg name="x" type="fixed"/>
 			<arg name="y" type="fixed"/>
 			<arg name="r" type="fixed"/>

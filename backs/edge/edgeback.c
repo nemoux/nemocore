@@ -88,6 +88,8 @@ static int nemoback_edge_dispatch_roll_group_grab(struct talegrab *base, uint32_
 		if (roll->actionidx >= 0) {
 			nemocanvas_execute_action(NEMOSHOW_AT(show, canvas),
 					roll->groupidx, roll->actionidx,
+					NEMO_SURFACE_EXECUTE_TYPE_NORMAL,
+					NEMO_SURFACE_COORDINATE_TYPE_GLOBAL,
 					event->x, event->y, roll->r);
 
 			nemoback_edgeroll_shutdown(edge, roll);
