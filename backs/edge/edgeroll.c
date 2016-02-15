@@ -381,7 +381,6 @@ int nemoback_edgeroll_activate_group(struct edgeback *edge, struct edgeroll *rol
 	double x, y;
 	int dd = group % 2 == 0 ? -1 : 1;
 	int dx = 0, dy = 0;
-	int attr;
 	int i;
 
 	if (roll->state != EDGEBACK_ROLL_ACTIVE_STATE)
@@ -519,21 +518,7 @@ int nemoback_edgeroll_activate_group(struct edgeback *edge, struct edgeroll *rol
 		nemoshow_transition_attach_sequence(trans, sequence);
 		nemoshow_attach_transition(edge->show, trans);
 
-		set0 = nemoshow_sequence_create_set();
-		nemoshow_sequence_set_source(set0, roll->actionrings[i]);
-		attr = nemoshow_sequence_set_dattr(set0, "ro", 360.0f, NEMOSHOW_MATRIX_DIRTY);
-		nemoshow_sequence_fix_dattr(set0, attr, 0.0f);
-
-		sequence = nemoshow_sequence_create_easy(edge->show,
-				nemoshow_sequence_create_frame_easy(edge->show,
-					1.0f, set0, NULL),
-				NULL);
-
-		trans = nemoshow_transition_create(edge->ease2, 5000, 0);
-		nemoshow_transition_check_one(trans, roll->actionrings[i]);
-		nemoshow_transition_attach_sequence(trans, sequence);
-		nemoshow_transition_set_repeat(trans, 0);
-		nemoshow_attach_transition(edge->show, trans);
+		nemoshow_transition_dispatch_rotate_easy(edge->show, roll->actionrings[i], edge->ease2, 5000, 0, 0);
 	}
 
 	nemoshow_dispatch_frame(edge->show);
