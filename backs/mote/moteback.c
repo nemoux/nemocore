@@ -211,6 +211,7 @@ int main(int argc, char *argv[])
 		{ "mincolor",				required_argument,			NULL,		'n' },
 		{ "maxcolor",				required_argument,			NULL,		'm' },
 		{ "textcolor",			required_argument,			NULL,		't' },
+		{ "alpha",					required_argument,			NULL,		'a' },
 		{ 0 }
 	};
 
@@ -239,6 +240,7 @@ int main(int argc, char *argv[])
 	double color0[4] = { 0.0f, 0.5f, 0.5f, 0.3f };
 	double color1[4] = { 0.0f, 0.5f, 0.5f, 0.7f };
 	double textcolor[4] = { 0.0f, 1.0f, 1.0f, 1.0f };
+	double alpha = 1.0f;
 	uint32_t color;
 	int pixelcount = 1800;
 	int opt;
@@ -246,7 +248,7 @@ int main(int argc, char *argv[])
 
 	nemolog_set_file(2);
 
-	while (opt = getopt_long(argc, argv, "f:s:w:h:l:p:c:e:g:n:m:t:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "f:s:w:h:l:p:c:e:g:n:m:t:a:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -312,6 +314,10 @@ int main(int argc, char *argv[])
 				textcolor[1] = COLOR_DOUBLE_G(color);
 				textcolor[2] = COLOR_DOUBLE_B(color);
 				textcolor[3] = COLOR_DOUBLE_A(color);
+				break;
+
+			case 'a':
+				alpha = strtod(optarg, NULL);
 				break;
 
 			default:
@@ -495,6 +501,7 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_PIPELINE_TYPE);
 	nemoshow_canvas_set_event(canvas, 1);
 	nemoshow_canvas_set_dispatch_redraw(canvas, nemoback_mote_dispatch_pipeline_canvas_redraw);
+	nemoshow_canvas_set_alpha(canvas, alpha);
 	nemoshow_attach_one(show, canvas);
 	nemoshow_one_attach(scene, canvas);
 

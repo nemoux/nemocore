@@ -29,7 +29,7 @@ static void nemoback_atom_dispatch_tale_event(struct nemotale *tale, struct tale
 			if (nemotale_is_touch_down(tale, event, type)) {
 				uint32_t tag;
 
-				tag = nemoshow_canvas_pick_tag(atom->canvas0, event->x, event->y);
+				tag = nemoshow_canvas_pick_tag(atom->canvasp, event->x, event->y);
 				if (tag == 1) {
 					struct showtransition *trans;
 					struct showone *sequence;
@@ -134,6 +134,7 @@ int main(int argc, char *argv[])
 		{ "shader",					required_argument,			NULL,		's' },
 		{ "width",					required_argument,			NULL,		'w' },
 		{ "height",					required_argument,			NULL,		'h' },
+		{ "alpha",					required_argument,			NULL,		'a' },
 		{ "log",						required_argument,			NULL,		'l' },
 		{ 0 }
 	};
@@ -156,13 +157,14 @@ int main(int argc, char *argv[])
 	struct nemomatrix matrix;
 	char *filepath = NULL;
 	char *shaderpath = NULL;
+	double alpha = 1.0f;
 	int32_t width = 1920;
 	int32_t height = 1080;
 	int opt;
 
 	nemolog_set_file(2);
 
-	while (opt = getopt_long(argc, argv, "f:s:w:h:l:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "f:s:w:h:l:a:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -185,6 +187,10 @@ int main(int argc, char *argv[])
 
 			case 'l':
 				nemolog_open_socket(optarg);
+				break;
+
+			case 'a':
+				alpha = strtod(optarg, NULL);
 				break;
 
 			default:
@@ -258,11 +264,12 @@ int main(int argc, char *argv[])
 	nemoshow_item_pivot(one, 512.0f / 2.0f, 512.0f / 2.0f);
 	nemoshow_item_load_svg(one, filepath);
 
-	atom->canvas0 = canvas = nemoshow_canvas_create();
+	atom->canvasp = canvas = nemoshow_canvas_create();
 	nemoshow_canvas_set_width(canvas, width);
 	nemoshow_canvas_set_height(canvas, height);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_PIPELINE_TYPE);
 	nemoshow_canvas_set_event(canvas, 1);
+	nemoshow_canvas_set_alpha(canvas, alpha);
 	nemoshow_attach_one(show, canvas);
 	nemoshow_one_attach(scene, canvas);
 
@@ -271,7 +278,7 @@ int main(int argc, char *argv[])
 	nemoshow_one_attach(canvas, pipe);
 	nemoshow_pipe_set_light(pipe, 1.0f, 1.0f, -1.0f, 1.0f);
 	nemoshow_pipe_set_aspect_ratio(pipe,
-			nemoshow_canvas_get_aspect_ratio(atom->canvas0));
+			nemoshow_canvas_get_aspect_ratio(atom->canvasp));
 
 	atom->one0 = one = nemoshow_poly_create(NEMOSHOW_QUAD_POLY);
 	nemoshow_attach_one(show, one);
@@ -292,7 +299,7 @@ int main(int argc, char *argv[])
 	nemoshow_poly_set_texcoord(one, 3, 0.0f, 0.0f);
 
 	nemomatrix_init_identity(&matrix);
-	nemomatrix_scale_xyz(&matrix, 1.0f / nemoshow_canvas_get_aspect_ratio(atom->canvas0), 1.0f, 1.0f);
+	nemomatrix_scale_xyz(&matrix, 1.0f / nemoshow_canvas_get_aspect_ratio(atom->canvasp), 1.0f, 1.0f);
 	nemoshow_poly_transform_vertices(one, &matrix);
 
 	atom->one1 = one = nemoshow_poly_create(NEMOSHOW_CUBE_POLY);

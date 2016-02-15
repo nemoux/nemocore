@@ -23,7 +23,7 @@ struct atomback {
 	struct nemoshow *show;
 	struct showone *scene;
 	struct showone *back;
-	struct showone *canvas0;
+	struct showone *canvasp;
 	struct showone *inner, *outer, *solid;
 	struct showone *ease0;
 	struct showone *ease1;
