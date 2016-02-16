@@ -46,7 +46,7 @@ static uint32_t nemopdf_get_touch_location(int32_t sx, int32_t sy, int32_t sw, i
 	return type;
 }
 
-static void nemopdf_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
+static void nemopdf_dispatch_tale_event(struct nemotale *tale, struct talenode *node, struct taleevent *event)
 {
 	struct pdfcontext *context = (struct pdfcontext *)nemotale_get_userdata(tale);
 	struct nemocanvas *canvas = NTEGL_CANVAS(context->canvas);
@@ -54,26 +54,26 @@ static void nemopdf_dispatch_tale_event(struct nemotale *tale, struct talenode *
 	uint32_t id = nemotale_node_get_id(node);
 
 	if (id == 1) {
-		if (nemotale_is_touch_down(tale, event, type) ||
-				nemotale_is_touch_up(tale, event, type)) {
-			nemotale_event_update_node_taps(tale, node, event, type);
+		if (nemotale_event_is_touch_down(tale, event) || nemotale_event_is_touch_up(tale, event)) {
+			nemotale_event_update_node_taps(tale, node, event);
 
-			if (nemotale_is_single_tap(tale, event, type)) {
-				nemocanvas_move(canvas, event->taps[0]->serial);
-			} else if (nemotale_is_many_taps(tale, event, type)) {
-				nemotale_event_update_faraway_taps(tale, event);
+			if (nemotale_event_is_single_tap(tale, event)) {
+				nemocanvas_move(canvas, nemotale_event_get_serial_on(event, 0));
+			} else if (nemotale_event_is_many_taps(tale, event)) {
+				uint32_t serial0, serial1;
+
+				nemotale_event_get_distant_taps_serials(tale, event, &serial0, &serial1);
 
 				nemocanvas_pick(canvas,
-						event->tap0->serial,
-						event->tap1->serial,
+						serial0, serial1,
 						(1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_SCALE) | (1 << NEMO_SURFACE_PICK_TYPE_MOVE));
 			}
 		}
 
-		if (nemotale_is_single_click(tale, event, type)) {
-			nemotale_event_update_node_taps(tale, node, event, type);
+		if (nemotale_event_is_single_click(tale, event)) {
+			nemotale_event_update_node_taps(tale, node, event);
 
-			if (nemotale_is_no_tap(tale, event, type)) {
+			if (nemotale_event_is_no_tap(tale, event)) {
 				uint32_t location;
 
 				location = nemopdf_get_touch_location(0, 0,
