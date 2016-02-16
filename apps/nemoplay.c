@@ -22,11 +22,6 @@
 #include <nemolog.h>
 #include <nemomisc.h>
 
-#define	NEMOPLAY_SEEK_ENABLE						(0)
-
-#define	NEMOPLAY_SLIDE_DISTANCE_MIN			(5.0f)
-#define	NEMOPLAY_SLIDE_FRAME_TIME				(10000000000)
-
 struct playcontext {
 	struct nemotool *tool;
 	struct nemogst *gst;
@@ -51,16 +46,6 @@ struct playcontext {
 	int is_minisink;
 
 	int is_audio_only;
-
-	float gx, gy;
-
-	int64_t position;
-
-	uint32_t pid;
-	int32_t volume;
-
-	double alpha;
-	int is_alpha_mode;
 };
 
 static void nemoplay_dispatch_subtitle(GstElement *base, guint8 *data, gsize size, gpointer userdata)
@@ -68,7 +53,7 @@ static void nemoplay_dispatch_subtitle(GstElement *base, guint8 *data, gsize siz
 	nemolog_message("PLAY", "{%s}\n", data);
 }
 
-static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
+static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode *node, struct taleevent *event)
 {
 	struct playcontext *context = (struct playcontext *)nemotale_get_userdata(tale);
 	uint32_t id = nemotale_node_get_id(node);
@@ -77,96 +62,21 @@ static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode 
 		return;
 
 	if (id == 1) {
-		nemotale_event_update_node_taps(tale, node, event, type);
+		nemotale_event_update_node_taps(tale, node, event);
 
-		if (nemotale_is_touch_down(tale, event, type) ||
-				nemotale_is_touch_up(tale, event, type)) {
-			if (nemotale_is_single_tap(tale, event, type)) {
-				nemocanvas_move(context->canvas, event->taps[0]->serial);
-			} else if (nemotale_is_many_taps(tale, event, type)) {
-				nemotale_event_update_faraway_taps(tale, event);
+		if (nemotale_event_is_touch_down(tale, event) || nemotale_event_is_touch_up(tale, event)) {
+			if (nemotale_event_is_single_tap(tale, event)) {
+				nemocanvas_move(context->canvas, nemotale_event_get_serial_on(event, 0));
+			} else if (nemotale_event_is_many_taps(tale, event)) {
+				uint32_t serial0, serial1;
+
+				nemotale_event_get_distant_taps_serials(tale, event, &serial0, &serial1);
 
 				nemocanvas_pick(context->canvas,
-						event->tap0->serial,
-						event->tap1->serial,
+						serial0, serial1,
 						(1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_SCALE) | (1 << NEMO_SURFACE_PICK_TYPE_MOVE));
-#if	NEMOPLAY_SEEK_ENABLE
-			} else if (nemotale_is_triple_taps(tale, event, type)) {
-				context->position = nemogst_get_position(context->gst);
-
-				context->gx = event->x;
-				context->gy = event->y;
-#endif
-			}
-#if NEMOPLAY_SEEK_ENABLE
-		} else if (nemotale_is_motion_event(tale, event, type)) {
-			if (nemotale_is_triple_taps(tale, event, type)) {
-				if (context->gx - NEMOPLAY_SLIDE_DISTANCE_MIN > event->taps[2]->x) {
-					if (context->position != 0) {
-						context->position = MAX(context->position - NEMOPLAY_SLIDE_FRAME_TIME, 0);
-
-						nemogst_set_position(context->gst, context->position);
-
-						context->gx = event->x;
-						context->gy = event->y;
-					}
-				} else if (context->gx + NEMOPLAY_SLIDE_DISTANCE_MIN < event->taps[2]->x) {
-					if (context->position != 0) {
-						context->position = context->position + NEMOPLAY_SLIDE_FRAME_TIME;
-
-						nemogst_set_position(context->gst, context->position);
-
-						context->gx = event->x;
-						context->gy = event->y;
-					}
-				} else if (context->gy - NEMOPLAY_SLIDE_DISTANCE_MIN > event->taps[2]->y) {
-					if (context->is_alpha_mode == 0) {
-						context->volume = MIN(context->volume + 1, 100);
-
-						nemosound_set_volume(context->tool, context->pid, context->volume);
-
-						context->gx = event->x;
-						context->gy = event->y;
-					} else {
-						context->alpha = MIN(context->alpha + 0.001f, 1.0f);
-
-						nemotale_node_set_alpha(context->node, context->alpha);
-						nemotale_node_damage_all(context->node);
-					}
-				} else if (context->gy + NEMOPLAY_SLIDE_DISTANCE_MIN < event->taps[2]->y) {
-					if (context->is_alpha_mode == 0) {
-						context->volume = MAX(context->volume - 1, 0);
-
-						nemosound_set_volume(context->tool, context->pid, context->volume);
-
-						context->gx = event->x;
-						context->gy = event->y;
-					} else {
-						context->alpha = MAX(context->alpha - 0.001f, 0.0f);
-
-						nemotale_node_set_alpha(context->node, context->alpha);
-						nemotale_node_damage_all(context->node);
-					}
-				}
-			}
-#endif
-		}
-
-#if	0
-		if (nemotale_is_long_press(tale, event, type)) {
-			if (nemogst_is_playing_media(context->gst) != 0) {
-				nemogst_pause_media(context->gst);
 			}
 		}
-
-		if (nemotale_is_single_click(tale, event, type)) {
-			if (nemogst_is_playing_media(context->gst) == 0) {
-				nemogst_play_media(context->gst);
-			}
-
-			context->is_alpha_mode = !context->is_alpha_mode;
-		}
-#endif
 	}
 }
 
@@ -357,11 +267,6 @@ int main(int argc, char *argv[])
 
 	context->is_background = is_background;
 	context->is_minisink = is_minisink;
-
-	context->pid = getpid();
-	context->volume = 50;
-
-	context->alpha = 1.0f;
 
 	context->tool = tool = nemotool_create();
 	if (tool == NULL)
