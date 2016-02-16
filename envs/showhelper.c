@@ -261,7 +261,7 @@ static void nemoshow_dispatch_tale_event(struct nemotale *tale, struct talenode 
 {
 	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
 	uint32_t id = nemotale_node_get_id(node);
-	
+
 	if (nemotale_dispatch_grab(tale, event) == 0) {
 		if (id == 0) {
 			if (show->dispatch_event != NULL)

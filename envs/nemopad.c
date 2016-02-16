@@ -216,10 +216,9 @@ void __attribute__((destructor(101))) nemopad_finish_envs(void)
 	nemoshow_one_destroy(nemopadease);
 }
 
-static int nemopad_dispatch_key_grab(void *data, uint32_t tag, void *event)
+static int nemopad_dispatch_key_grab(struct nemoshow *show, void *data, uint32_t tag, void *event)
 {
 	struct nemopad *pad = (struct nemopad *)data;
-	struct nemoshow *show = pad->show;
 	uint32_t code = nemopadkeys[tag].code;
 
 	if (nemoshow_event_is_down_event(show, event)) {
@@ -315,7 +314,13 @@ static void nemopad_dispatch_canvas_event(struct nemoshow *show, struct showone 
 		tag = nemoshow_canvas_pick_tag(canvas, nemoshow_event_get_x(event), nemoshow_event_get_y(event));
 
 		if (nemoshow_event_is_down_event(show, event)) {
-			nemoshow_event_dispatch_grab(show, event, nemopad_dispatch_key_grab, pad, tag, &pad->destroy_signal);
+			struct showgrab *grab;
+
+			grab = nemoshow_grab_create(show, event, nemopad_dispatch_key_grab);
+			nemoshow_grab_set_userdata(grab, pad);
+			nemoshow_grab_set_tag(grab, tag);
+			nemoshow_grab_check_signal(grab, &pad->destroy_signal);
+			nemoshow_dispatch_grab(show, event);
 		}
 
 		caps_on = nemokeypad_is_caps_on(pad->keypad);

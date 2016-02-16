@@ -8,16 +8,49 @@
 #include <nemoshow.h>
 #include <showevent.h>
 
-int nemoshow_event_dispatch_grab(struct nemoshow *show, void *event, nemotale_grab_dispatch_event_t dispatch, void *data, uint32_t tag, struct nemosignal *signal)
+static int nemoshow_grab_dispatch_tale_event(struct talegrab *base, struct taleevent *event)
 {
-	struct talegrab *grab;
+	struct showgrab *grab = (struct showgrab *)container_of(base, struct showgrab, base);
 
-	grab = nemotale_grab_create(show->tale, event, dispatch);
-	nemotale_grab_set_userdata(grab, data);
-	nemotale_grab_set_tag(grab, tag);
-	nemotale_grab_check_signal(grab, signal);
+	return grab->dispatch_event(grab->show, grab->data, grab->tag, event);
+}
 
-	nemotale_dispatch_grab(show->tale, event);
+struct showgrab *nemoshow_grab_create(struct nemoshow *show, void *event, nemoshow_grab_dispatch_event_t dispatch)
+{
+	struct showgrab *grab;
 
-	return 0;
+	grab = (struct showgrab *)malloc(sizeof(struct showgrab));
+	if (grab == NULL)
+		return NULL;
+	memset(grab, 0, sizeof(struct showgrab));
+
+	nemotale_grab_prepare(&grab->base, show->tale, event, nemoshow_grab_dispatch_tale_event);
+
+	nemolist_init(&grab->destroy_listener.link);
+
+	grab->dispatch_event = dispatch;
+
+	return grab;
+}
+
+void nemoshow_grab_destroy(struct showgrab *grab)
+{
+	nemolist_remove(&grab->destroy_listener.link);
+
+	nemotale_grab_finish(&grab->base);
+
+	free(grab);
+}
+
+static void nemoshow_grab_handle_destroy_signal(struct nemolistener *listener, void *data)
+{
+	struct showgrab *grab = (struct showgrab *)container_of(listener, struct showgrab, destroy_listener);
+
+	nemoshow_grab_destroy(grab);
+}
+
+void nemoshow_grab_check_signal(struct showgrab *grab, struct nemosignal *signal)
+{
+	grab->destroy_listener.notify = nemoshow_grab_handle_destroy_signal;
+	nemosignal_add(signal, &grab->destroy_listener);
 }
