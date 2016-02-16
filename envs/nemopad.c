@@ -221,7 +221,7 @@ static int nemopad_dispatch_key_grab(struct nemoshow *show, void *data, uint32_t
 	struct nemopad *pad = (struct nemopad *)data;
 	uint32_t code = nemopadkeys[tag].code;
 
-	if (nemoshow_event_is_down_event(show, event)) {
+	if (nemoshow_event_is_down(show, event)) {
 		if (code != 0) {
 			nemokeypad_notify_key(pad->keypad,
 					time_current_msecs(),
@@ -260,7 +260,7 @@ static int nemopad_dispatch_key_grab(struct nemoshow *show, void *data, uint32_t
 		}
 
 		nemoshow_dispatch_frame(show);
-	} else if (nemoshow_event_is_up_event(show, event)) {
+	} else if (nemoshow_event_is_up(show, event)) {
 		if (code != 0) {
 			nemokeypad_notify_key(pad->keypad,
 					time_current_msecs(),
@@ -289,7 +289,7 @@ static void nemopad_dispatch_canvas_event(struct nemoshow *show, struct showone 
 	struct nemopad *pad = (struct nemopad *)nemoshow_get_userdata(show);
 
 	if (pad->is_pickable != 0) {
-		if (nemoshow_event_is_down_event(show, event) || nemoshow_event_is_up_event(show, event)) {
+		if (nemoshow_event_is_down(show, event) || nemoshow_event_is_up(show, event)) {
 			nemoshow_event_update_taps(show, NULL, event);
 
 			if (nemoshow_event_is_no_tap(show, event)) {
@@ -313,7 +313,7 @@ static void nemopad_dispatch_canvas_event(struct nemoshow *show, struct showone 
 
 		tag = nemoshow_canvas_pick_tag(canvas, nemoshow_event_get_x(event), nemoshow_event_get_y(event));
 
-		if (nemoshow_event_is_down_event(show, event)) {
+		if (nemoshow_event_is_down(show, event)) {
 			struct showgrab *grab;
 
 			grab = nemoshow_grab_create(show, event, nemopad_dispatch_key_grab);
