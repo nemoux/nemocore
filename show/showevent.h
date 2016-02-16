@@ -118,7 +118,7 @@ static inline void nemoshow_event_update_taps(struct nemoshow *show, struct show
 		nemotale_event_update_node_taps(show->tale, NEMOSHOW_CANVAS_AT(one, node), (struct taleevent *)event);
 }
 
-static inline void nemoshow_event_get_distant_taps(struct nemoshow *show, struct showone *one, void *event, uint64_t *device0, uint64_t *device1)
+static inline void nemoshow_event_get_distant_taps(struct nemoshow *show, void *event, uint64_t *device0, uint64_t *device1)
 {
 	nemotale_event_get_distant_taps(show->tale, (struct taleevent *)event, device0, device1);
 }

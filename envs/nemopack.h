@@ -28,7 +28,7 @@ struct nemopack {
 
 	struct wl_listener view_destroy_listener;
 	struct wl_listener bin_resize_listener;
-	
+
 	struct nemoshow *show;
 
 	struct showone *scene;
@@ -43,7 +43,6 @@ struct nemopack {
 	struct showone *blur1;
 
 	struct nemoactor *actor;
-
 	struct nemotimer *timer;
 
 	uint32_t timeout;
