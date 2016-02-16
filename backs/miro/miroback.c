@@ -17,7 +17,6 @@
 #include <nemotool.h>
 #include <miroback.h>
 #include <mirotap.h>
-#include <nemograb.h>
 #include <showhelper.h>
 #include <nemolog.h>
 #include <nemomisc.h>
@@ -41,24 +40,23 @@ struct miromice {
 static void nemoback_miro_dispatch_show(struct miroback *miro, uint32_t duration, uint32_t interval);
 static void nemoback_miro_dispatch_hide(struct miroback *miro, uint32_t duration, uint32_t interval);
 
-static int nemoback_miro_dispatch_tap_grab(struct talegrab *base, uint32_t type, struct taleevent *event)
+static int nemoback_miro_dispatch_tap_grab(struct nemoshow *show, void *data, uint32_t tag, void *event)
 {
-	struct nemograb *grab = (struct nemograb *)container_of(base, struct nemograb, base);
-	struct mirotap *tap = (struct mirotap *)nemograb_get_userdata(grab);
+	struct mirotap *tap = (struct mirotap *)data;
 	struct miroback *miro = tap->miro;
 
-	if (type & NEMOTALE_DOWN_EVENT) {
-		nemoback_mirotap_down(miro, tap, event->x, event->y);
+	if (nemoshow_event_is_down(show, event)) {
+		nemoback_mirotap_down(miro, tap, nemoshow_event_get_x(event), nemoshow_event_get_y(event));
 
-		nemoshow_dispatch_frame(miro->show);
-	} else if (type & NEMOTALE_MOTION_EVENT) {
-		nemoback_mirotap_motion(miro, tap, event->x, event->y);
+		nemoshow_dispatch_frame(show);
+	} else if (nemoshow_event_is_motion(show, event)) {
+		nemoback_mirotap_motion(miro, tap, nemoshow_event_get_x(event), nemoshow_event_get_y(event));
 
-		nemoshow_dispatch_frame(miro->show);
-	} else if (type & NEMOTALE_UP_EVENT) {
-		nemoback_mirotap_up(miro, tap, event->x, event->y);
+		nemoshow_dispatch_frame(show);
+	} else if (nemoshow_event_is_up(show, event)) {
+		nemoback_mirotap_up(miro, tap, nemoshow_event_get_x(event), nemoshow_event_get_y(event));
 
-		nemoshow_dispatch_frame(miro->show);
+		nemoshow_dispatch_frame(show);
 
 		return 0;
 	}
@@ -66,27 +64,20 @@ static int nemoback_miro_dispatch_tap_grab(struct talegrab *base, uint32_t type,
 	return 1;
 }
 
-static void nemoback_miro_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
+static void nemoback_miro_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, void *event)
 {
-	uint32_t id = nemotale_node_get_id(node);
+	struct miroback *miro = (struct miroback *)nemoshow_get_userdata(show);
 
-	if (id == 1) {
-		if (nemotale_dispatch_grab(tale, event->device, type, event) == 0) {
-			struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
-			struct miroback *miro = (struct miroback *)nemoshow_get_userdata(show);
+	if (nemoshow_event_is_down(show, event)) {
+		struct showgrab *grab;
+		struct mirotap *tap;
 
-			if (nemotale_is_touch_down(tale, event, type)) {
-				struct mirotap *tap;
-				struct nemograb *grab;
+		tap = nemoback_mirotap_create(miro);
 
-				tap = nemoback_mirotap_create(miro);
-
-				grab = nemograb_create(tale, event, nemoback_miro_dispatch_tap_grab);
-				nemograb_set_userdata(grab, tap);
-				nemograb_check_signal(grab, &tap->destroy_signal);
-				nemotale_dispatch_grab(tale, event->device, type, event);
-			}
-		}
+		grab = nemoshow_grab_create(show, event, nemoback_miro_dispatch_tap_grab);
+		nemoshow_grab_set_userdata(grab, tap);
+		nemoshow_grab_check_signal(grab, &tap->destroy_signal);
+		nemoshow_dispatch_grab(show, event);
 	}
 }
 
@@ -521,10 +512,8 @@ static void nemoback_miro_dispatch_hide(struct miroback *miro, uint32_t duration
 	nemoshow_dispatch_frame(miro->show);
 }
 
-static void nemoback_miro_dispatch_canvas_fullscreen(struct nemocanvas *canvas, int32_t active, int32_t opaque)
+static void nemoback_miro_dispatch_canvas_fullscreen(struct nemoshow *show, int32_t active, int32_t opaque)
 {
-	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
-	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
 	struct miroback *miro = (struct miroback *)nemoshow_get_userdata(show);
 
 	if (active == 0)
@@ -649,16 +638,16 @@ int main(int argc, char *argv[])
 	nemotimer_set_callback(timer, nemoback_miro_dispatch_timer_event);
 	nemotimer_set_userdata(timer, miro);
 
-	miro->show = show = nemoshow_create_canvas(tool, width, height, nemoback_miro_dispatch_tale_event);
+	miro->show = show = nemoshow_create_view(tool, width, height);
 	if (show == NULL)
 		goto err2;
+	nemoshow_set_dispatch_fullscreen(show, nemoback_miro_dispatch_canvas_fullscreen);
 	nemoshow_set_userdata(show, miro);
 
-	nemocanvas_opaque(NEMOSHOW_AT(show, canvas), 0, 0, width, height);
-	nemocanvas_set_layer(NEMOSHOW_AT(show, canvas), NEMO_SURFACE_LAYER_TYPE_BACKGROUND);
-	nemocanvas_set_input_type(NEMOSHOW_AT(show, canvas), NEMO_SURFACE_INPUT_TYPE_TOUCH);
-	nemocanvas_set_dispatch_fullscreen(NEMOSHOW_AT(show, canvas), nemoback_miro_dispatch_canvas_fullscreen);
-	nemocanvas_unset_sound(NEMOSHOW_AT(show, canvas));
+	nemoshow_view_attach_layer(show, "background");
+	nemoshow_view_set_opaque(show, 0, 0, width, height);
+	nemoshow_view_set_input_type(show, "touch");
+	nemoshow_view_put_sound(show);
 
 	miro->scene = scene = nemoshow_scene_create();
 	nemoshow_scene_set_width(scene, width);
@@ -678,7 +667,7 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_width(canvas, width);
 	nemoshow_canvas_set_height(canvas, height);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
-	nemoshow_canvas_set_event(canvas, 1);
+	nemoshow_canvas_set_dispatch_event(canvas, nemoback_miro_dispatch_canvas_event);
 	nemoshow_attach_one(show, canvas);
 	nemoshow_one_attach(scene, canvas);
 
@@ -755,7 +744,7 @@ int main(int argc, char *argv[])
 	nemotool_run(tool);
 
 err3:
-	nemoshow_destroy_canvas(show);
+	nemoshow_destroy_view(show);
 
 err2:
 	nemotool_disconnect_wayland(tool);

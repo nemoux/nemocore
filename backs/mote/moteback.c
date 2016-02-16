@@ -110,26 +110,6 @@ static void nemoback_mote_dispatch_pipeline_canvas_redraw(struct nemoshow *show,
 	nemoshow_dispatch_feedback(show);
 }
 
-static void nemoback_mote_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
-{
-	uint32_t id = nemotale_node_get_id(node);
-
-	if (id == 1) {
-		if (nemotale_dispatch_grab(tale, event->device, type, event) == 0) {
-			struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
-			struct moteback *mote = (struct moteback *)nemoshow_get_userdata(show);
-
-			if (nemotale_is_touch_down(tale, event, type)) {
-				uint32_t tag;
-
-				tag = nemoshow_canvas_pick_tag(mote->canvasp, event->x, event->y);
-				if (tag == 1) {
-				}
-			}
-		}
-	}
-}
-
 static void nemoback_mote_dispatch_timer_event(struct nemotimer *timer, void *data)
 {
 	struct moteback *mote = (struct moteback *)data;
@@ -184,10 +164,8 @@ static void nemoback_mote_dispatch_timer_event(struct nemotimer *timer, void *da
 	nemotimer_set_timeout(mote->timer, 30 * 1000);
 }
 
-static void nemoback_mote_dispatch_canvas_fullscreen(struct nemocanvas *canvas, int32_t active, int32_t opaque)
+static void nemoback_mote_dispatch_canvas_fullscreen(struct nemoshow *show, int32_t active, int32_t opaque)
 {
-	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
-	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
 	struct moteback *mote = (struct moteback *)nemoshow_get_userdata(show);
 
 	if (active == 0)
@@ -414,16 +392,16 @@ int main(int argc, char *argv[])
 	nemotimer_set_userdata(mote->timer, mote);
 	nemotimer_set_timeout(mote->timer, 5000);
 
-	mote->show = show = nemoshow_create_canvas(tool, width, height, nemoback_mote_dispatch_tale_event);
+	mote->show = show = nemoshow_create_view(tool, width, height);
 	if (show == NULL)
 		goto err2;
+	nemoshow_set_dispatch_fullscreen(show, nemoback_mote_dispatch_canvas_fullscreen);
 	nemoshow_set_userdata(show, mote);
 
-	nemocanvas_opaque(NEMOSHOW_AT(show, canvas), 0, 0, width, height);
-	nemocanvas_set_layer(NEMOSHOW_AT(show, canvas), NEMO_SURFACE_LAYER_TYPE_BACKGROUND);
-	nemocanvas_set_input_type(NEMOSHOW_AT(show, canvas), NEMO_SURFACE_INPUT_TYPE_TOUCH);
-	nemocanvas_set_dispatch_fullscreen(NEMOSHOW_AT(show, canvas), nemoback_mote_dispatch_canvas_fullscreen);
-	nemocanvas_unset_sound(NEMOSHOW_AT(show, canvas));
+	nemoshow_view_attach_layer(show, "background");
+	nemoshow_view_set_opaque(show, 0, 0, width, height);
+	nemoshow_view_set_input_type(show, "touch");
+	nemoshow_view_put_sound(show);
 
 	mote->ease0 = ease = nemoshow_ease_create();
 	nemoshow_ease_set_type(ease, NEMOEASE_CUBIC_INOUT_TYPE);
@@ -599,6 +577,8 @@ int main(int argc, char *argv[])
 	nemoshow_dispatch_frame(show);
 
 	nemotool_run(tool);
+
+	nemoshow_destroy_view(show);
 
 err2:
 	nemotool_disconnect_wayland(tool);

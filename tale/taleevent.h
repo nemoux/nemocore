@@ -299,6 +299,11 @@ static inline void nemotale_event_set_tag(struct taleevent *event, uint32_t tag)
 	nemotale_tap_set_tag(event->tap, tag);
 }
 
+static inline void nemotale_event_set_used(struct taleevent *event)
+{
+	nemotale_tap_set_state(event->tap, NEMOTALE_TAP_USED_STATE);
+}
+
 static inline int nemotale_event_update_taps(struct nemotale *tale, struct taleevent *event)
 {
 	struct taletap *tap;

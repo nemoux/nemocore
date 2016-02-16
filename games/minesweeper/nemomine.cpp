@@ -343,103 +343,89 @@ static void nemomine_confirm_mine(struct minecontext *context, uint32_t tag)
 	}
 }
 
-static void nemomine_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
+static void nemomine_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, void *event)
 {
-	uint32_t id = nemotale_node_get_id(node);
+	struct minecontext *context = (struct minecontext *)nemoshow_get_userdata(show);
 
-	if (id == 1) {
-		struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
-		struct minecontext *context = (struct minecontext *)nemoshow_get_userdata(show);
-		struct nemocanvas *canvas = NEMOSHOW_AT(show, canvas);
+	if (context->is_pinning != 0) {
+		if (nemoshow_event_is_down(show, event) || nemoshow_event_is_up(show, event)) {
+			nemoshow_event_update_taps(show, canvas, event);
 
-		if (context->is_pinning != 0) {
-			if (nemotale_is_touch_down(tale, event, type) ||
-					nemotale_is_touch_up(tale, event, type)) {
-				nemotale_event_update_node_taps(tale, node, event, type);
-
-				if (nemotale_is_single_tap(tale, event, type)) {
-					nemocanvas_move(canvas, event->taps[0]->serial);
-				} else if (nemotale_is_many_taps(tale, event, type)) {
-					nemotale_event_update_faraway_taps(tale, event);
-
-					nemocanvas_pick(canvas,
-							event->tap0->serial,
-							event->tap1->serial,
-							(1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_SCALE) | (1 << NEMO_SURFACE_PICK_TYPE_MOVE));
-				}
+			if (nemoshow_event_is_single_tap(show, event)) {
+				nemoshow_view_move(show, nemoshow_event_get_serial_on(event, 0));
+			} else if (nemoshow_event_is_many_taps(show, event)) {
+				nemoshow_view_pick_distant(show, event, NEMOSHOW_VIEW_PICK_ALL_TYPE);
 			}
+		}
 
-			if (nemotale_is_single_click(tale, event, type)) {
-				struct showone *one;
-				uint32_t tag;
-
-				tag = nemoshow_canvas_pick_tag(context->canvas, event->x, event->y);
-				if (tag-- > 0) {
-					if (tag == 10001) {
-						context->is_pinning = !context->is_pinning;
-
-						nemomine_rotate_pin(context, 0.0f);
-
-						nemoshow_dispatch_frame(context->show);
-					} else if (tag == 10002) {
-						nemomine_prepare_game(context);
-
-						nemoshow_dispatch_frame(context->show);
-					}
-				}
-			}
-		} else {
+		if (nemoshow_event_is_single_click(show, event)) {
+			struct showone *one;
 			uint32_t tag;
 
-			tag = nemoshow_canvas_pick_tag(context->canvas, event->x, event->y);
+			tag = nemoshow_canvas_pick_tag(context->canvas, nemoshow_event_get_x(event), nemoshow_event_get_y(event));
 			if (tag-- > 0) {
-				if (nemotale_is_single_click(tale, event, type)) {
-					if (tag < 10000 && context->is_playing != 0) {
-						struct mineone *mone = &context->ones[tag];
+				if (tag == 10001) {
+					context->is_pinning = !context->is_pinning;
 
-						if (mone->state != NEMOMINE_CONFIRM_STATE) {
-							if (mone->is_bomb != 0) {
-								nemomine_finish_game(context);
+					nemomine_rotate_pin(context, 0.0f);
 
-								nemoshow_dispatch_frame(context->show);
-							} else {
-								nemomine_confirm_mine(context, tag);
+					nemoshow_dispatch_frame(show);
+				} else if (tag == 10002) {
+					nemomine_prepare_game(context);
 
-								nemoshow_dispatch_frame(context->show);
-							}
+					nemoshow_dispatch_frame(show);
+				}
+			}
+		}
+	} else {
+		uint32_t tag;
+
+		tag = nemoshow_canvas_pick_tag(context->canvas, nemoshow_event_get_x(event), nemoshow_event_get_y(event));
+		if (tag-- > 0) {
+			if (nemoshow_event_is_single_click(show, event)) {
+				if (tag < 10000 && context->is_playing != 0) {
+					struct mineone *mone = &context->ones[tag];
+
+					if (mone->state != NEMOMINE_CONFIRM_STATE) {
+						if (mone->is_bomb != 0) {
+							nemomine_finish_game(context);
+
+							nemoshow_dispatch_frame(show);
+						} else {
+							nemomine_confirm_mine(context, tag);
+
+							nemoshow_dispatch_frame(show);
 						}
-					} else if (tag == 10001) {
-						context->is_pinning = !context->is_pinning;
+					}
+				} else if (tag == 10001) {
+					context->is_pinning = !context->is_pinning;
 
-						nemomine_rotate_pin(context, 45.0f);
+					nemomine_rotate_pin(context, 45.0f);
 
-						nemoshow_dispatch_frame(context->show);
-					} else if (tag == 10002) {
-						nemomine_prepare_game(context);
+					nemoshow_dispatch_frame(show);
+				} else if (tag == 10002) {
+					nemomine_prepare_game(context);
 
-						nemoshow_dispatch_frame(context->show);
+					nemoshow_dispatch_frame(show);
+				}
+			}
+
+			if (nemoshow_event_is_long_press(show, event)) {
+				if (tag < 10000 && context->is_playing != 0) {
+					struct mineone *mone = &context->ones[tag];
+
+					if (mone->state == NEMOMINE_NONE_STATE) {
+						nemomine_check_mine(context, tag);
+
+						nemoshow_dispatch_frame(show);
+					} else if (mone->state == NEMOMINE_CHECK_STATE) {
+						nemomine_uncheck_mine(context, tag);
+
+						nemoshow_dispatch_frame(show);
 					}
 				}
 
-				if (nemotale_is_long_press(tale, event, type)) {
-					struct taletap *tap = event->tap;
-
-					if (tag < 10000 && context->is_playing != 0) {
-						struct mineone *mone = &context->ones[tag];
-
-						if (mone->state == NEMOMINE_NONE_STATE) {
-							nemomine_check_mine(context, tag);
-
-							nemoshow_dispatch_frame(context->show);
-						} else if (mone->state == NEMOMINE_CHECK_STATE) {
-							nemomine_uncheck_mine(context, tag);
-
-							nemoshow_dispatch_frame(context->show);
-						}
-					}
-
-					nemotale_tap_set_state(tap, NEMOTALE_TAP_USED_STATE);
-				}
+				nemoshow_event_set_used(event);
 			}
 		}
 	}
@@ -588,7 +574,7 @@ int main(int argc, char *argv[])
 		goto err1;
 	nemotool_connect_wayland(tool, NULL);
 
-	context->show = show = nemoshow_create_canvas(tool, width, height, nemomine_dispatch_tale_event);
+	context->show = show = nemoshow_create_view(tool, width, height);
 	if (show == NULL)
 		goto err2;
 	nemoshow_set_userdata(show, context);
@@ -615,7 +601,7 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_width(canvas, width);
 	nemoshow_canvas_set_height(canvas, height);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
-	nemoshow_canvas_set_event(canvas, 1);
+	nemoshow_canvas_set_dispatch_event(canvas, nemomine_dispatch_canvas_event);
 	nemoshow_attach_one(show, canvas);
 	nemoshow_one_attach(scene, canvas);
 
@@ -726,7 +712,7 @@ int main(int argc, char *argv[])
 	nemomine_finish_ui(context);
 
 err3:
-	nemoshow_destroy_canvas(show);
+	nemoshow_destroy_view(show);
 
 err2:
 	nemotool_disconnect_wayland(tool);

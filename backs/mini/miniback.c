@@ -141,7 +141,7 @@ static void nemoback_mini_prepare(struct miniback *mini, const char *filepath)
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
-	
+
 	glGenTextures(1, &mini->texture);
 	glBindTexture(GL_TEXTURE_2D, mini->texture);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -199,7 +199,7 @@ static void nemoback_mini_render(struct miniback *mini)
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-static void nemoback_mini_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
+static void nemoback_mini_dispatch_tale_event(struct nemotale *tale, struct talenode *node, struct taleevent *event)
 {
 	uint32_t id = nemotale_node_get_id(node);
 }

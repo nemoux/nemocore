@@ -170,6 +170,11 @@ static inline void nemoshow_event_set_tag(void *event, uint32_t tag)
 	nemotale_event_set_tag((struct taleevent *)event, tag);
 }
 
+static inline void nemoshow_event_set_used(void *event)
+{
+	nemotale_event_set_used((struct taleevent *)event);
+}
+
 static inline void nemoshow_event_update_taps(struct nemoshow *show, struct showone *one, void *event)
 {
 	if (one == NULL)
