@@ -26,7 +26,6 @@ include_directories(
 	${CMAKE_SOURCE_DIR}/mosi
 	${CMAKE_SOURCE_DIR}/apps
 	${CMAKE_SOURCE_DIR}/thirds
-	${CMAKE_SOURCE_DIR}/thirds/poly2tri
 	)
 
 add_definitions(-DNEMOUX_MIROBACK_RESOURCES="${CMAKE_INSTALL_PREFIX}/share/nemobacks/miroback")

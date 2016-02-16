@@ -17,7 +17,6 @@ include_directories(
 	${CMAKE_SOURCE_DIR}/mote
 	${CMAKE_SOURCE_DIR}/apps
 	${CMAKE_SOURCE_DIR}/thirds
-	${CMAKE_SOURCE_DIR}/thirds/poly2tri
 	)
 
 add_executable(nemoback-atom
