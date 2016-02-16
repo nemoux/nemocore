@@ -214,6 +214,11 @@ static inline uint32_t nemotale_event_get_serial(struct taleevent *event)
 	return event->serial;
 }
 
+static inline uint32_t nemotale_event_get_serial_on(struct taleevent *event, int index)
+{
+	return event->taps[index]->serial;
+}
+
 static inline uint32_t nemotale_event_get_time(struct taleevent *event)
 {
 	return event->time;
@@ -354,7 +359,7 @@ static inline int nemotale_event_update_taps_by_tag(struct nemotale *tale, struc
 	return (event->tapcount = count);
 }
 
-static inline void nemotale_event_get_distant_taps(struct nemotale *tale, struct taleevent *event, uint64_t *device0, uint64_t *device1)
+static inline void nemotale_event_get_distant_taps_devices(struct nemotale *tale, struct taleevent *event, uint64_t *device0, uint64_t *device1)
 {
 	struct taletap *tap0, *tap1;
 	float dm = 0.0f;
@@ -377,6 +382,34 @@ static inline void nemotale_event_get_distant_taps(struct nemotale *tale, struct
 
 				*device0 = tap0->device;
 				*device1 = tap1->device;
+			}
+		}
+	}
+}
+
+static inline void nemotale_event_get_distant_taps_serials(struct nemotale *tale, struct taleevent *event, uint32_t *serial0, uint32_t *serial1)
+{
+	struct taletap *tap0, *tap1;
+	float dm = 0.0f;
+	float dd;
+	float dx, dy;
+	int i, j;
+
+	for (i = 0; i < event->tapcount - 1; i++) {
+		tap0 = event->taps[i];
+
+		for (j = i + 1; j < event->tapcount; j++) {
+			tap1 = event->taps[j];
+
+			dx = tap1->x - tap0->x;
+			dy = tap1->y - tap0->y;
+			dd = sqrtf(dx * dx + dy * dy);
+
+			if (dd > dm) {
+				dm = dd;
+
+				*serial0 = tap0->serial;
+				*serial1 = tap1->serial;
 			}
 		}
 	}

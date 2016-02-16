@@ -28,28 +28,15 @@ struct imagecontext {
 	struct showone *image;
 };
 
-static void nemoimage_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
+static void nemoimage_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, void *event)
 {
-	uint32_t id = nemotale_node_get_id(node);
+	if (nemoshow_event_is_down(show, event) || nemoshow_event_is_up(show, event)) {
+		nemoshow_event_update_taps(show, canvas, event);
 
-	if (id == 1) {
-		if (nemotale_is_touch_down(tale, event, type) ||
-				nemotale_is_touch_up(tale, event, type)) {
-			struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
-			struct nemocanvas *canvas = NEMOSHOW_AT(show, canvas);
-
-			nemotale_event_update_node_taps(tale, node, event, type);
-
-			if (nemotale_is_single_tap(tale, event, type)) {
-				nemocanvas_move(canvas, event->taps[0]->serial);
-			} else if (nemotale_is_many_taps(tale, event, type)) {
-				nemotale_event_update_faraway_taps(tale, event);
-
-				nemocanvas_pick(canvas,
-						event->tap0->serial,
-						event->tap1->serial,
-						(1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_SCALE) | (1 << NEMO_SURFACE_PICK_TYPE_MOVE));
-			}
+		if (nemoshow_event_is_single_tap(show, event)) {
+			nemoshow_view_move(show, nemoshow_event_get_serial_on(event, 0));
+		} else if (nemoshow_event_is_many_taps(show, event)) {
+			nemoshow_view_pick_distant(show, event, NEMOSHOW_VIEW_PICK_ALL_TYPE);
 		}
 	}
 }
@@ -119,12 +106,12 @@ int main(int argc, char *argv[])
 		height = NEMOIMAGE_SIZE_MAX;
 	}
 
-	context->show = show = nemoshow_create_canvas(tool, width, height, nemoimage_dispatch_tale_event);
+	context->show = show = nemoshow_create_view(tool, width, height);
 	if (show == NULL)
 		goto out2;
 	nemoshow_set_userdata(show, context);
 
-	nemocanvas_set_input_type(NEMOSHOW_AT(show, canvas), NEMO_SURFACE_INPUT_TYPE_TOUCH);
+	nemoshow_view_set_input_type(show, "touch");
 
 	context->scene = scene = nemoshow_scene_create();
 	nemoshow_scene_set_width(scene, width);
@@ -144,7 +131,7 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_width(canvas, width);
 	nemoshow_canvas_set_height(canvas, height);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
-	nemoshow_canvas_set_event(canvas, 1);
+	nemoshow_canvas_set_dispatch_event(canvas, nemoimage_dispatch_canvas_event);
 	nemoshow_attach_one(show, canvas);
 	nemoshow_one_attach(scene, canvas);
 
@@ -164,7 +151,7 @@ int main(int argc, char *argv[])
 
 	nemotool_run(tool);
 
-	nemoshow_destroy_canvas(show);
+	nemoshow_destroy_view(show);
 
 out2:
 	nemotool_disconnect_wayland(tool);

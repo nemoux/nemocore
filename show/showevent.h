@@ -85,6 +85,11 @@ static inline uint32_t nemoshow_event_get_serial(void *event)
 	return nemotale_event_get_serial((struct taleevent *)event);
 }
 
+static inline uint32_t nemoshow_event_get_serial_on(void *event, int index)
+{
+	return nemotale_event_get_serial_on((struct taleevent *)event, index);
+}
+
 static inline uint32_t nemoshow_event_get_time(void *event)
 {
 	return nemotale_event_get_time((struct taleevent *)event);
@@ -178,9 +183,14 @@ static inline void nemoshow_event_update_taps_by_tag(struct nemoshow *show, void
 	nemotale_event_update_taps_by_tag(show->tale, (struct taleevent *)event, tag);
 }
 
-static inline void nemoshow_event_get_distant_taps(struct nemoshow *show, void *event, uint64_t *device0, uint64_t *device1)
+static inline void nemoshow_event_get_distant_taps_devices(struct nemoshow *show, void *event, uint64_t *device0, uint64_t *device1)
 {
-	nemotale_event_get_distant_taps(show->tale, (struct taleevent *)event, device0, device1);
+	nemotale_event_get_distant_taps_devices(show->tale, (struct taleevent *)event, device0, device1);
+}
+
+static inline void nemoshow_event_get_distant_taps_serials(struct nemoshow *show, void *event, uint32_t *serial0, uint32_t *serial1)
+{
+	nemotale_event_get_distant_taps_serials(show->tale, (struct taleevent *)event, serial0, serial1);
 }
 
 static inline int nemoshow_event_is_single_click(struct nemoshow *show, void *event)

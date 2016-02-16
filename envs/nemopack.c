@@ -107,7 +107,7 @@ static void nemopack_dispatch_canvas_event(struct nemoshow *show, struct showone
 			struct touchpoint *tp0, *tp1;
 			uint64_t device0, device1;
 
-			nemoshow_event_get_distant_taps(show, event, &device0, &device1);
+			nemoshow_event_get_distant_taps_devices(show, event, &device0, &device1);
 
 			tp0 = nemoseat_get_touchpoint_by_id(seat, device0);
 			tp1 = nemoseat_get_touchpoint_by_id(seat, device1);

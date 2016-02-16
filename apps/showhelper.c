@@ -103,9 +103,33 @@ static int nemoshow_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t ty
 	return 0;
 }
 
+static void nemoshow_dispatch_canvas_transform(struct nemocanvas *canvas, int32_t visible)
+{
+	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
+	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
+
+	if (show->dispatch_transform != NULL)
+		show->dispatch_transform(show, visible);
+}
+
+static void nemoshow_dispatch_canvas_fullscreen(struct nemocanvas *canvas, int32_t active, int32_t opaque)
+{
+	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
+	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
+
+	if (show->dispatch_fullscreen != NULL)
+		show->dispatch_fullscreen(show, active, opaque);
+}
+
 static void nemoshow_dispatch_canvas_destroy(struct nemocanvas *canvas)
 {
-	nemotool_exit(canvas->tool);
+	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
+	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
+
+	if (show->dispatch_destroy != NULL)
+		show->dispatch_destroy(show);
+	else
+		nemotool_exit(canvas->tool);
 }
 
 static void nemoshow_dispatch_timer(struct nemotimer *timer, void *data)
@@ -117,7 +141,26 @@ static void nemoshow_dispatch_timer(struct nemotimer *timer, void *data)
 	nemotale_push_timer_event(scon->tale, time_current_msecs());
 }
 
-struct nemoshow *nemoshow_create_canvas(struct nemotool *tool, int32_t width, int32_t height, nemotale_dispatch_event_t dispatch)
+static void nemoshow_dispatch_tale_event(struct nemotale *tale, struct talenode *node, struct taleevent *event)
+{
+	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
+	uint32_t id = nemotale_node_get_id(node);
+
+	if (nemotale_dispatch_grab(tale, event) == 0) {
+		if (id == 0) {
+			if (show->dispatch_event != NULL)
+				show->dispatch_event(show, event);
+		} else {
+			struct showone *one = (struct showone *)nemotale_node_get_data(node);
+			struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+			if (canvas->dispatch_event != NULL)
+				canvas->dispatch_event(show, one, event);
+		}
+	}
+}
+
+struct nemoshow *nemoshow_create_view(struct nemotool *tool, int32_t width, int32_t height)
 {
 	struct showcontext *scon;
 	struct nemoshow *show;
@@ -148,6 +191,8 @@ struct nemoshow *nemoshow_create_canvas(struct nemotool *tool, int32_t width, in
 	nemocanvas_set_dispatch_resize(scon->canvas, nemoshow_dispatch_canvas_resize);
 	nemocanvas_set_dispatch_frame(scon->canvas, nemoshow_dispatch_canvas_frame);
 	nemocanvas_set_dispatch_event(scon->canvas, nemoshow_dispatch_canvas_event);
+	nemocanvas_set_dispatch_transform(scon->canvas, nemoshow_dispatch_canvas_transform);
+	nemocanvas_set_dispatch_fullscreen(scon->canvas, nemoshow_dispatch_canvas_fullscreen);
 	nemocanvas_set_dispatch_destroy(scon->canvas, nemoshow_dispatch_canvas_destroy);
 
 	scon->tale = nemotale_create_gl();
@@ -157,7 +202,7 @@ struct nemoshow *nemoshow_create_canvas(struct nemotool *tool, int32_t width, in
 				NTEGL_CONTEXT(scon->egl),
 				NTEGL_CONFIG(scon->egl),
 				(EGLNativeWindowType)NTEGL_WINDOW(scon->eglcanvas)));
-	nemotale_set_dispatch_event(scon->tale, dispatch);
+	nemotale_set_dispatch_event(scon->tale, nemoshow_dispatch_tale_event);
 
 	show = nemoshow_create();
 	nemoshow_set_tale(show, scon->tale);
@@ -174,7 +219,7 @@ err1:
 	return NULL;
 }
 
-void nemoshow_destroy_canvas(struct nemoshow *show)
+void nemoshow_destroy_view(struct nemoshow *show)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 
@@ -190,21 +235,21 @@ void nemoshow_destroy_canvas(struct nemoshow *show)
 	free(scon);
 }
 
-static void nemoshow_dispatch_destroy_canvas(void *data)
+static void nemoshow_dispatch_destroy_view(void *data)
 {
 	struct nemoshow *show = (struct nemoshow *)data;
 
-	nemoshow_destroy_canvas(show);
+	nemoshow_destroy_view(show);
 }
 
-void nemoshow_destroy_canvas_on_idle(struct nemoshow *show)
+void nemoshow_destroy_view_on_idle(struct nemoshow *show)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 
-	nemotool_dispatch_idle(scon->tool, nemoshow_dispatch_destroy_canvas, show);
+	nemotool_dispatch_idle(scon->tool, nemoshow_dispatch_destroy_view, show);
 }
 
-void nemoshow_revoke_canvas(struct nemoshow *show)
+void nemoshow_revoke_view(struct nemoshow *show)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 
@@ -230,4 +275,159 @@ void nemoshow_terminate_feedback(struct nemoshow *show)
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 
 	nemocanvas_terminate_feedback(scon->canvas);
+}
+
+void nemoshow_view_attach_layer(struct nemoshow *show, const char *layer)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemocanvas *canvas = scon->canvas;
+
+	if (strcmp(layer, "background") == 0)
+		nemocanvas_set_layer(canvas, NEMO_SURFACE_LAYER_TYPE_BACKGROUND);
+	else if (strcmp(layer, "underlay") == 0)
+		nemocanvas_set_layer(canvas, NEMO_SURFACE_LAYER_TYPE_UNDERLAY);
+	else if (strcmp(layer, "overlay") == 0)
+		nemocanvas_set_layer(canvas, NEMO_SURFACE_LAYER_TYPE_OVERLAY);
+	else if (strcmp(layer, "service") == 0)
+		nemocanvas_set_layer(canvas, NEMO_SURFACE_LAYER_TYPE_SERVICE);
+}
+
+void nemoshow_view_detach_layer(struct nemoshow *show)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemocanvas *canvas = scon->canvas;
+}
+
+void nemoshow_view_set_position(struct nemoshow *show, float x, float y)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemocanvas *canvas = scon->canvas;
+}
+
+void nemoshow_view_set_rotation(struct nemoshow *show, float r)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemocanvas *canvas = scon->canvas;
+}
+
+void nemoshow_view_set_pivot(struct nemoshow *show, float px, float py)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemocanvas *canvas = scon->canvas;
+
+	nemocanvas_set_pivot(canvas, px, py);
+}
+
+void nemoshow_view_put_pivot(struct nemoshow *show)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemocanvas *canvas = scon->canvas;
+}
+
+void nemoshow_view_set_flag(struct nemoshow *show, float fx, float fy)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemocanvas *canvas = scon->canvas;
+
+	nemocanvas_set_flag(canvas, fx, fy);
+}
+
+void nemoshow_view_set_opaque(struct nemoshow *show, int32_t x, int32_t y, int32_t width, int32_t height)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemocanvas *canvas = scon->canvas;
+
+	nemocanvas_opaque(canvas, x, y, width, height);
+}
+
+void nemoshow_view_set_min_size(struct nemoshow *show, float width, float height)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemocanvas *canvas = scon->canvas;
+
+	nemocanvas_set_min_size(canvas, width, height);
+}
+
+void nemoshow_view_set_max_size(struct nemoshow *show, float width, float height)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemocanvas *canvas = scon->canvas;
+
+	nemocanvas_set_max_size(canvas, width, height);
+}
+
+void nemoshow_view_set_input_type(struct nemoshow *show, const char *type)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemocanvas *canvas = scon->canvas;
+
+	if (strcmp(type, "touch") == 0)
+		nemocanvas_set_input_type(canvas, NEMO_SURFACE_INPUT_TYPE_TOUCH);
+	else
+		nemocanvas_set_input_type(canvas, NEMO_SURFACE_INPUT_TYPE_NORMAL);
+}
+
+void nemoshow_view_set_sound(struct nemoshow *show)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemocanvas *canvas = scon->canvas;
+
+	nemocanvas_set_sound(canvas);
+}
+
+void nemoshow_view_put_sound(struct nemoshow *show)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemocanvas *canvas = scon->canvas;
+
+	nemocanvas_unset_sound(canvas);
+}
+
+int nemoshow_view_move(struct nemoshow *show, uint32_t serial)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemocanvas *canvas = scon->canvas;
+
+	nemocanvas_move(canvas, serial);
+
+	return 1;
+}
+
+int nemoshow_view_pick(struct nemoshow *show, uint32_t serial0, uint32_t serial1, uint32_t type)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemocanvas *canvas = scon->canvas;
+	uint32_t ptype = 0x0;
+
+	if (type & NEMOSHOW_VIEW_PICK_ROTATE_TYPE)
+		ptype |= (1 << NEMO_SURFACE_PICK_TYPE_ROTATE);
+	if (type & NEMOSHOW_VIEW_PICK_SCALE_TYPE)
+		ptype |= (1 << NEMO_SURFACE_PICK_TYPE_SCALE);
+	if (type & NEMOSHOW_VIEW_PICK_TRANSLATE_TYPE)
+		ptype |= (1 << NEMO_SURFACE_PICK_TYPE_MOVE);
+
+	nemocanvas_pick(canvas, serial0, serial1, ptype);
+
+	return 1;
+}
+
+int nemoshow_view_pick_distant(struct nemoshow *show, void *event, uint32_t type)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemocanvas *canvas = scon->canvas;
+	uint32_t serial0, serial1;
+	uint32_t ptype = 0x0;
+
+	nemotale_event_get_distant_taps_serials(show->tale, event, &serial0, &serial1);
+
+	if (type & NEMOSHOW_VIEW_PICK_ROTATE_TYPE)
+		ptype |= (1 << NEMO_SURFACE_PICK_TYPE_ROTATE);
+	if (type & NEMOSHOW_VIEW_PICK_SCALE_TYPE)
+		ptype |= (1 << NEMO_SURFACE_PICK_TYPE_SCALE);
+	if (type & NEMOSHOW_VIEW_PICK_TRANSLATE_TYPE)
+		ptype |= (1 << NEMO_SURFACE_PICK_TYPE_MOVE);
+
+	nemocanvas_pick(canvas, serial0, serial1, ptype);
+
+	return 1;
 }
