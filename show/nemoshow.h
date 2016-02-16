@@ -37,7 +37,12 @@ NEMO_BEGIN_EXTERN_C
 #include <nemotale.h>
 #include <nemolist.h>
 
+struct nemoshow;
+
 typedef void (*nemoshow_dispatch_transition_done_t)(void *userdata);
+typedef void (*nemoshow_dispatch_event_t)(struct nemoshow *show, void *event);
+typedef void (*nemoshow_dispatch_transform_t)(struct nemoshow *show, int32_t visible);
+typedef void (*nemoshow_dispatch_fullscreen_t)(struct nemoshow *show, int32_t active, int32_t opaque);
 
 struct nemoshow {
 	struct nemotale *tale;
@@ -58,6 +63,10 @@ struct nemoshow {
 
 	nemoshow_dispatch_transition_done_t dispatch_done;
 	void *dispatch_data;
+
+	nemoshow_dispatch_event_t dispatch_event;
+	nemoshow_dispatch_transform_t dispatch_transform;
+	nemoshow_dispatch_fullscreen_t dispatch_fullscreen;
 
 	uint32_t dirty_serial;
 	uint32_t transition_serial;
@@ -153,6 +162,21 @@ static inline void nemoshow_set_dispatch_transition_done(struct nemoshow *show, 
 {
 	show->dispatch_done = dispatch;
 	show->dispatch_data = data;
+}
+
+static inline void nemoshow_set_dispatch_event(struct nemoshow *show, nemoshow_dispatch_event_t dispatch)
+{
+	show->dispatch_event = dispatch;
+}
+
+static inline void nemoshow_set_dispatch_transform(struct nemoshow *show, nemoshow_dispatch_transform_t dispatch)
+{
+	show->dispatch_transform = dispatch;
+}
+
+static inline void nemoshow_set_dispatch_fullscreen(struct nemoshow *show, nemoshow_dispatch_fullscreen_t dispatch)
+{
+	show->dispatch_fullscreen = dispatch;
 }
 
 #ifdef __cplusplus

@@ -85,6 +85,8 @@ struct taletap {
 };
 
 struct taleevent {
+	uint32_t type;
+
 	uint64_t device;
 
 	uint32_t serial;
@@ -104,8 +106,6 @@ struct taleevent {
 
 	struct taletap *taps[NEMOTALE_EVENT_TAPS_MAX];
 	int tapcount;
-
-	struct taletap *tap0, *tap1;
 };
 
 extern void nemotale_push_pointer_enter_event(struct nemotale *tale, uint32_t serial, uint64_t device, float x, float y);
@@ -179,16 +179,76 @@ static inline struct taletap *nemotale_touch_get_tap(struct nemotale *tale, uint
 	return NULL;
 }
 
-static inline int nemotale_event_update_taps(struct nemotale *tale, struct taleevent *event, uint32_t type)
+static inline float nemotale_event_get_x(struct taleevent *event)
+{
+	return event->x;
+}
+
+static inline float nemotale_event_get_y(struct taleevent *event)
+{
+	return event->y;
+}
+
+static inline float nemotale_event_get_gx(struct taleevent *event)
+{
+	return event->gx;
+}
+
+static inline float nemotale_event_get_gy(struct taleevent *event)
+{
+	return event->gy;
+}
+
+static inline float nemotale_event_get_r(struct taleevent *event)
+{
+	return event->r;
+}
+
+static inline uint32_t nemotale_event_get_axis(struct taleevent *event)
+{
+	return event->axis;
+}
+
+static inline uint32_t nemotale_event_get_serial(struct taleevent *event)
+{
+	return event->serial;
+}
+
+static inline uint32_t nemotale_event_get_time(struct taleevent *event)
+{
+	return event->time;
+}
+
+static inline uint32_t nemotale_event_get_value(struct taleevent *event)
+{
+	return event->value;
+}
+
+static inline uint32_t nemotale_event_get_duration(struct taleevent *event)
+{
+	return event->duration;
+}
+
+static inline uint64_t nemotale_event_get_device(struct taleevent *event)
+{
+	return event->device;
+}
+
+static inline uint64_t nemotale_event_get_device_on(struct taleevent *event, int index)
+{
+	return event->taps[index]->device;
+}
+
+static inline int nemotale_event_update_taps(struct nemotale *tale, struct taleevent *event)
 {
 	struct taletap *tap;
 	int count = 0;
 
-	if (type & NEMOTALE_POINTER_EVENT) {
+	if (event->type & NEMOTALE_POINTER_EVENT) {
 		nemolist_for_each(tap, &tale->ptap_list, link) {
 			event->taps[count++] = tap;
 		}
-	} else if (type & NEMOTALE_TOUCH_EVENT) {
+	} else if (event->type & NEMOTALE_TOUCH_EVENT) {
 		nemolist_for_each(tap, &tale->tap_list, link) {
 			event->taps[count++] = tap;
 		}
@@ -197,18 +257,18 @@ static inline int nemotale_event_update_taps(struct nemotale *tale, struct talee
 	return (event->tapcount = count);
 }
 
-static inline int nemotale_event_update_node_taps(struct nemotale *tale, struct talenode *node, struct taleevent *event, uint32_t type)
+static inline int nemotale_event_update_node_taps(struct nemotale *tale, struct talenode *node, struct taleevent *event)
 {
 	struct taletap *tap;
 	int count = 0;
 
-	if (type & NEMOTALE_POINTER_EVENT) {
+	if (event->type & NEMOTALE_POINTER_EVENT) {
 		nemolist_for_each(tap, &tale->ptap_list, link) {
 			if (tap->node == node) {
 				event->taps[count++] = tap;
 			}
 		}
-	} else if (type & NEMOTALE_TOUCH_EVENT) {
+	} else if (event->type & NEMOTALE_TOUCH_EVENT) {
 		nemolist_for_each(tap, &tale->tap_list, link) {
 			if (tap->node == node) {
 				event->taps[count++] = tap;
@@ -219,17 +279,17 @@ static inline int nemotale_event_update_node_taps(struct nemotale *tale, struct 
 	return (event->tapcount = count);
 }
 
-static inline int nemotale_event_update_taps_by_tag(struct nemotale *tale, struct taleevent *event, uint32_t type, uint32_t tag)
+static inline int nemotale_event_update_taps_by_tag(struct nemotale *tale, struct taleevent *event, uint32_t tag)
 {
 	struct taletap *tap;
 	int count = 0;
 
-	if (type & NEMOTALE_POINTER_EVENT) {
+	if (event->type & NEMOTALE_POINTER_EVENT) {
 		nemolist_for_each(tap, &tale->ptap_list, link) {
 			if (tap->tag == tag)
 				event->taps[count++] = tap;
 		}
-	} else if (type & NEMOTALE_TOUCH_EVENT) {
+	} else if (event->type & NEMOTALE_TOUCH_EVENT) {
 		nemolist_for_each(tap, &tale->tap_list, link) {
 			if (tap->tag == tag)
 				event->taps[count++] = tap;
@@ -239,7 +299,7 @@ static inline int nemotale_event_update_taps_by_tag(struct nemotale *tale, struc
 	return (event->tapcount = count);
 }
 
-static inline void nemotale_event_update_faraway_taps(struct nemotale *tale, struct taleevent *event)
+static inline void nemotale_event_update_taps_distant(struct nemotale *tale, struct taleevent *event, uint64_t *device0, uint64_t *device1)
 {
 	struct taletap *tap0, *tap1;
 	float dm = 0.0f;
@@ -260,8 +320,8 @@ static inline void nemotale_event_update_faraway_taps(struct nemotale *tale, str
 			if (dd > dm) {
 				dm = dd;
 
-				event->tap0 = tap0;
-				event->tap1 = tap1;
+				*device0 = tap0->device;
+				*device1 = tap1->device;
 			}
 		}
 	}

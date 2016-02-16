@@ -33,6 +33,7 @@ struct nemoshow;
 
 typedef void (*nemoshow_canvas_dispatch_redraw_t)(struct nemoshow *show, struct showone *one);
 typedef void (*nemoshow_canvas_dispatch_resize_t)(struct nemoshow *show, struct showone *one, int32_t width, int32_t height);
+typedef void (*nemoshow_canvas_dispatch_event_t)(struct nemoshow *show, struct showone *one, void *event);
 
 struct showcanvas {
 	struct showone base;
@@ -52,7 +53,6 @@ struct showcanvas {
 	GLuint fbo, dbo;
 
 	double width, height;
-	double ratio;
 
 	struct {
 		int dirty;
@@ -72,6 +72,7 @@ struct showcanvas {
 
 	nemoshow_canvas_dispatch_redraw_t dispatch_redraw;
 	nemoshow_canvas_dispatch_resize_t dispatch_resize;
+	nemoshow_canvas_dispatch_event_t dispatch_event;
 
 	void *cc;
 };
@@ -120,6 +121,11 @@ static inline void nemoshow_canvas_set_dispatch_redraw(struct showone *one, nemo
 static inline void nemoshow_canvas_set_dispatch_resize(struct showone *one, nemoshow_canvas_dispatch_resize_t dispatch_resize)
 {
 	NEMOSHOW_CANVAS_AT(one, dispatch_resize) = dispatch_resize;
+}
+
+static inline void nemoshow_canvas_set_dispatch_event(struct showone *one, nemoshow_canvas_dispatch_event_t dispatch_event)
+{
+	NEMOSHOW_CANVAS_AT(one, dispatch_event) = dispatch_event;
 }
 
 static inline struct talenode *nemoshow_canvas_get_node(struct showone *one)
@@ -185,7 +191,9 @@ static inline double nemoshow_canvas_get_height(struct showone *one)
 
 static inline double nemoshow_canvas_get_aspect_ratio(struct showone *one)
 {
-	return NEMOSHOW_CANVAS_AT(one, ratio);
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	return canvas->height / canvas->width;
 }
 
 static inline void nemoshow_canvas_set_fill_color(struct showone *one, double r, double g, double b, double a)

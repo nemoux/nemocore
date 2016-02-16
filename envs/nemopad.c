@@ -6,7 +6,6 @@
 #include <errno.h>
 
 #include <wayland-server.h>
-#include <wayland-nemo-shell-server-protocol.h>
 
 #include <shell.h>
 #include <compz.h>
@@ -450,28 +449,6 @@ static void nemopad_dispatch_tale_event(struct nemotale *tale, struct talenode *
 	}
 }
 
-static int nemopad_dispatch_actor_resize(struct nemoactor *actor, int32_t width, int32_t height, int32_t fixed)
-{
-	struct nemotale *tale = (struct nemotale *)actor->context;
-	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
-	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
-	struct talefbo *fbo = (struct talefbo *)nemotale_get_backend(tale);
-
-	nemoactor_resize_gl(actor, width, height);
-
-	nemoshow_set_size(show, width, height);
-
-	nemoshow_render_one(show);
-
-	nemotale_resize_fbo(fbo, width, height);
-
-	nemotale_composite_fbo_full(tale);
-
-	nemoactor_damage_dirty(actor);
-
-	return 0;
-}
-
 static void nemopad_dispatch_actor_transform(struct nemoactor *actor, int32_t visible)
 {
 	struct nemotale *tale = (struct nemotale *)actor->context;
@@ -721,8 +698,7 @@ int nemopad_activate(struct nemopad *pad, double x, double y, double r)
 			(double)(nemopadkeys[9].x1 + nemopadkeys[9].x0) / 2.0f / (double)NEMOPAD_WIDTH,
 			(double)(nemopadkeys[9].y1 + nemopadkeys[9].y0) / 2.0f / (double)NEMOPAD_HEIGHT);
 	nemoview_set_rotation(actor->view, r);
-
-	nemoactor_set_dispatch_resize(actor, nemopad_dispatch_actor_resize);
+	
 	nemoactor_set_dispatch_transform(actor, nemopad_dispatch_actor_transform);
 
 	nemoactor_set_min_size(actor, pad->minwidth, pad->minheight);

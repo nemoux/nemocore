@@ -96,13 +96,14 @@ void nemotale_push_pointer_enter_event(struct nemotale *tale, uint32_t serial, u
 	tap->x = x;
 	tap->y = y;
 
+	event.type = NEMOTALE_POINTER_ENTER_EVENT;
 	event.x = x;
 	event.y = y;
 	event.device = device;
 	event.serial = serial;
 	event.tap = tap;
 
-	tale->dispatch_event(tale, NULL, NEMOTALE_POINTER_ENTER_EVENT, &event);
+	tale->dispatch_event(tale, NULL, &event);
 }
 
 void nemotale_push_pointer_leave_event(struct nemotale *tale, uint32_t serial, uint64_t device)
@@ -114,11 +115,12 @@ void nemotale_push_pointer_leave_event(struct nemotale *tale, uint32_t serial, u
 	if (tap == NULL)
 		return;
 
+	event.type = NEMOTALE_POINTER_LEAVE_EVENT;
 	event.device = device;
 	event.serial = serial;
 	event.tap = tap;
 
-	tale->dispatch_event(tale, tap->node, NEMOTALE_POINTER_LEAVE_EVENT, &event);
+	tale->dispatch_event(tale, tap->node, &event);
 
 	nemotale_destroy_tap(tap);
 }
@@ -157,13 +159,14 @@ void nemotale_push_pointer_down_event(struct nemotale *tale, uint32_t serial, ui
 	tap->grab_y = tap->y;
 	tap->serial = serial;
 
+	event.type = type;
 	event.device = device;
 	event.serial = serial;
 	event.time = time;
 	event.value = button;
 	event.tap = tap;
 
-	tale->dispatch_event(tale, tap->node, type, &event);
+	tale->dispatch_event(tale, tap->node, &event);
 }
 
 void nemotale_push_pointer_up_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, uint32_t button)
@@ -184,6 +187,7 @@ void nemotale_push_pointer_up_event(struct nemotale *tale, uint32_t serial, uint
 	else
 		type = NEMOTALE_POINTER_BUTTON_UP_EVENT;
 
+	event.type = type;
 	event.x = tap->x;
 	event.y = tap->y;
 	event.time = time;
@@ -192,7 +196,7 @@ void nemotale_push_pointer_up_event(struct nemotale *tale, uint32_t serial, uint
 	event.serial = serial;
 	event.tap = tap;
 
-	tale->dispatch_event(tale, tap->node, type, &event);
+	tale->dispatch_event(tale, tap->node, &event);
 }
 
 void nemotale_push_pointer_motion_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, float x, float y)
@@ -209,13 +213,14 @@ void nemotale_push_pointer_motion_event(struct nemotale *tale, uint32_t serial, 
 	tap->x = x;
 	tap->y = y;
 
+	event.type = NEMOTALE_POINTER_MOTION_EVENT;
 	event.device = device;
 	event.time = time;
 	event.x = x;
 	event.y = y;
 	event.tap = tap;
 
-	tale->dispatch_event(tale, tap->node, NEMOTALE_POINTER_MOTION_EVENT, &event);
+	tale->dispatch_event(tale, tap->node, &event);
 }
 
 void nemotale_push_pointer_axis_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, uint32_t axis, float value)
@@ -227,51 +232,56 @@ void nemotale_push_pointer_axis_event(struct nemotale *tale, uint32_t serial, ui
 	if (tap == NULL)
 		return;
 
+	event.type = NEMOTALE_POINTER_AXIS_EVENT;
 	event.device = device;
 	event.time = time;
 	event.axis = axis;
 	event.r = value;
 	event.tap = tap;
 
-	tale->dispatch_event(tale, tap->node, NEMOTALE_POINTER_AXIS_EVENT, &event);
+	tale->dispatch_event(tale, tap->node, &event);
 }
 
 void nemotale_push_keyboard_enter_event(struct nemotale *tale, uint32_t serial, uint64_t device)
 {
 	struct taleevent event;
 
+	event.type = NEMOTALE_KEYBOARD_ENTER_EVENT;
 	event.device = device;
 
-	tale->dispatch_event(tale, NULL, NEMOTALE_KEYBOARD_ENTER_EVENT, &event);
+	tale->dispatch_event(tale, NULL, &event);
 }
 
 void nemotale_push_keyboard_leave_event(struct nemotale *tale, uint32_t serial, uint64_t device)
 {
 	struct taleevent event;
 
+	event.type = NEMOTALE_KEYBOARD_LEAVE_EVENT;
 	event.device = device;
 
-	tale->dispatch_event(tale, NULL, NEMOTALE_KEYBOARD_LEAVE_EVENT, &event);
+	tale->dispatch_event(tale, NULL, &event);
 }
 
 void nemotale_push_keyboard_down_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, uint32_t key)
 {
 	struct taleevent event;
 
+	event.type = NEMOTALE_KEYBOARD_DOWN_EVENT;
 	event.device = device;
 	event.value = key;
 
-	tale->dispatch_event(tale, NULL, NEMOTALE_KEYBOARD_DOWN_EVENT, &event);
+	tale->dispatch_event(tale, NULL, &event);
 }
 
 void nemotale_push_keyboard_up_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, uint32_t key)
 {
 	struct taleevent event;
 
+	event.type = NEMOTALE_KEYBOARD_UP_EVENT;
 	event.device = device;
 	event.value = key;
 
-	tale->dispatch_event(tale, NULL, NEMOTALE_KEYBOARD_UP_EVENT, &event);
+	tale->dispatch_event(tale, NULL, &event);
 }
 
 void nemotale_push_touch_down_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, float x, float y, float gx, float gy)
@@ -307,6 +317,7 @@ void nemotale_push_touch_down_event(struct nemotale *tale, uint32_t serial, uint
 	tap->grab_gx = gx;
 	tap->grab_gy = gy;
 
+	event.type = NEMOTALE_TOUCH_DOWN_EVENT;
 	event.device = device;
 	event.serial = serial;
 	event.time = time;
@@ -316,7 +327,7 @@ void nemotale_push_touch_down_event(struct nemotale *tale, uint32_t serial, uint
 	event.gy = gy;
 	event.tap = tap;
 
-	tale->dispatch_event(tale, tap->node, NEMOTALE_TOUCH_DOWN_EVENT, &event);
+	tale->dispatch_event(tale, tap->node, &event);
 }
 
 void nemotale_push_touch_up_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time)
@@ -328,6 +339,7 @@ void nemotale_push_touch_up_event(struct nemotale *tale, uint32_t serial, uint64
 	if (tap == NULL)
 		return;
 
+	event.type = NEMOTALE_TOUCH_UP_EVENT;
 	event.x = tap->x;
 	event.y = tap->y;
 	event.gx = tap->gx;
@@ -339,7 +351,7 @@ void nemotale_push_touch_up_event(struct nemotale *tale, uint32_t serial, uint64
 
 	nemotale_remove_tap(tap);
 
-	tale->dispatch_event(tale, tap->node, NEMOTALE_TOUCH_UP_EVENT, &event);
+	tale->dispatch_event(tale, tap->node, &event);
 
 	nemotale_destroy_tap(tap);
 }
@@ -362,6 +374,7 @@ void nemotale_push_touch_motion_event(struct nemotale *tale, uint32_t serial, ui
 	tap->gx = gx;
 	tap->gy = gy;
 
+	event.type = NEMOTALE_TOUCH_MOTION_EVENT;
 	event.device = device;
 	event.serial = tap->serial;
 	event.time = time;
@@ -371,7 +384,7 @@ void nemotale_push_touch_motion_event(struct nemotale *tale, uint32_t serial, ui
 	event.gy = gy;
 	event.tap = tap;
 
-	tale->dispatch_event(tale, tap->node, NEMOTALE_TOUCH_MOTION_EVENT, &event);
+	tale->dispatch_event(tale, tap->node, &event);
 }
 
 void nemotale_push_timer_event(struct nemotale *tale, uint32_t time)
@@ -386,6 +399,7 @@ void nemotale_push_timer_event(struct nemotale *tale, uint32_t time)
 			if (tap->dist <= tale->long_press_distance) {
 				struct taleevent event;
 
+				event.type = NEMOTALE_TOUCH_LONG_PRESS_EVENT;
 				event.device = tap->device;
 				event.serial = tap->serial;
 				event.time = time;
@@ -396,7 +410,7 @@ void nemotale_push_timer_event(struct nemotale *tale, uint32_t time)
 				event.gy = tap->gy;
 				event.tap = tap;
 
-				tale->dispatch_event(tale, tap->node, NEMOTALE_TOUCH_LONG_PRESS_EVENT, &event);
+				tale->dispatch_event(tale, tap->node, &event);
 			}
 		}
 	}
@@ -406,50 +420,55 @@ void nemotale_push_stick_enter_event(struct nemotale *tale, uint32_t serial, uin
 {
 	struct taleevent event;
 
+	event.type = NEMOTALE_STICK_ENTER_EVENT;
 	event.device = device;
 	event.serial = serial;
 
-	tale->dispatch_event(tale, NULL, NEMOTALE_STICK_ENTER_EVENT, &event);
+	tale->dispatch_event(tale, NULL, &event);
 }
 
 void nemotale_push_stick_leave_event(struct nemotale *tale, uint32_t serial, uint64_t device)
 {
 	struct taleevent event;
 
+	event.type = NEMOTALE_STICK_LEAVE_EVENT;
 	event.device = device;
 	event.serial = serial;
 
-	tale->dispatch_event(tale, NULL, NEMOTALE_STICK_LEAVE_EVENT, &event);
+	tale->dispatch_event(tale, NULL, &event);
 }
 
 void nemotale_push_stick_down_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, uint32_t button)
 {
 	struct taleevent event;
 
+	event.type = NEMOTALE_STICK_BUTTON_DOWN_EVENT;
 	event.device = device;
 	event.serial = serial;
 	event.time = time;
 	event.value = button;
 
-	tale->dispatch_event(tale, NULL, NEMOTALE_STICK_BUTTON_DOWN_EVENT, &event);
+	tale->dispatch_event(tale, NULL, &event);
 }
 
 void nemotale_push_stick_up_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, uint32_t button)
 {
 	struct taleevent event;
 
+	event.type = NEMOTALE_STICK_BUTTON_UP_EVENT;
 	event.time = time;
 	event.value = button;
 	event.device = device;
 	event.serial = serial;
 
-	tale->dispatch_event(tale, NULL, NEMOTALE_STICK_BUTTON_UP_EVENT, &event);
+	tale->dispatch_event(tale, NULL, &event);
 }
 
 void nemotale_push_stick_translate_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, float x, float y, float z)
 {
 	struct taleevent event;
 
+	event.type = NEMOTALE_STICK_TRANSLATE_EVENT;
 	event.serial = serial;
 	event.device = device;
 	event.time = time;
@@ -457,13 +476,14 @@ void nemotale_push_stick_translate_event(struct nemotale *tale, uint32_t serial,
 	event.y = y;
 	event.z = z;
 
-	tale->dispatch_event(tale, NULL, NEMOTALE_STICK_TRANSLATE_EVENT, &event);
+	tale->dispatch_event(tale, NULL, &event);
 }
 
 void nemotale_push_stick_rotate_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, float x, float y, float z)
 {
 	struct taleevent event;
 
+	event.type = NEMOTALE_STICK_ROTATE_EVENT;
 	event.serial = serial;
 	event.device = device;
 	event.time = time;
@@ -471,5 +491,5 @@ void nemotale_push_stick_rotate_event(struct nemotale *tale, uint32_t serial, ui
 	event.y = y;
 	event.z = z;
 
-	tale->dispatch_event(tale, NULL, NEMOTALE_STICK_ROTATE_EVENT, &event);
+	tale->dispatch_event(tale, NULL, &event);
 }

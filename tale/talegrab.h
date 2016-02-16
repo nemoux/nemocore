@@ -13,37 +13,50 @@ NEMO_BEGIN_EXTERN_C
 #include <nemolistener.h>
 
 #include <nemotale.h>
+#include <taleevent.h>
 
-struct talegrab;
-
-typedef int (*nemotale_dispatch_grab_t)(struct talegrab *grab, uint32_t type, struct taleevent *event);
+typedef int (*nemotale_grab_dispatch_event_t)(void *data, uint32_t tag, struct taleevent *event);
 
 struct talegrab {
 	struct nemotale *tale;
 
 	uint64_t device;
+	uint32_t tag;
+	void *data;
 
 	struct nemolist link;
 
+	struct nemolistener destroy_listener;
 	struct nemolistener tale_destroy_listener;
 
-	nemotale_dispatch_grab_t dispatch;
+	nemotale_grab_dispatch_event_t dispatch_event;
 };
 
-extern int nemotale_prepare_grab(struct talegrab *grab, struct nemotale *tale, uint64_t device, nemotale_dispatch_grab_t dispatch);
-extern void nemotale_finish_grab(struct talegrab *grab);
+extern int nemotale_grab_prepare(struct talegrab *grab, struct nemotale *tale, struct taleevent *event, nemotale_grab_dispatch_event_t dispatch);
+extern void nemotale_grab_finish(struct talegrab *grab);
 
-extern struct talegrab *nemotale_create_grab(struct nemotale *tale, uint64_t device, nemotale_dispatch_grab_t dispatch);
-extern void nemotale_destroy_grab(struct talegrab *grab);
-extern void nemotale_destroy_grab_with_device(struct nemotale *tale, uint64_t device);
+extern struct talegrab *nemotale_grab_create(struct nemotale *tale, struct taleevent *event, nemotale_grab_dispatch_event_t dispatch);
+extern void nemotale_grab_destroy(struct talegrab *grab);
 
-static inline int nemotale_dispatch_grab(struct nemotale *tale, uint64_t device, uint32_t type, struct taleevent *event)
+extern void nemotale_grab_check_signal(struct talegrab *grab, struct nemosignal *signal);
+
+static inline void nemotale_grab_set_userdata(struct talegrab *grab, void *data)
+{
+	grab->data = data;
+}
+
+static inline void nemotale_grab_set_tag(struct talegrab *grab, uint32_t tag)
+{
+	grab->tag = tag;
+}
+
+static inline int nemotale_dispatch_grab(struct nemotale *tale, struct taleevent *event)
 {
 	struct talegrab *grab;
 
 	nemolist_for_each(grab, &tale->grab_list, link) {
-		if (grab->device == device) {
-			return grab->dispatch(grab, type, event);
+		if (grab->device == event->device) {
+			return grab->dispatch_event(grab->data, grab->tag, event);
 		}
 	}
 

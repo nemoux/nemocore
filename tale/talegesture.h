@@ -42,27 +42,27 @@ static inline int nemotale_is_touch_single_click(struct nemotale *tale, struct t
 	return 0;
 }
 
-static inline int nemotale_is_single_click(struct nemotale *tale, struct taleevent *event, uint32_t type)
+static inline int nemotale_is_single_click(struct nemotale *tale, struct taleevent *event)
 {
-	if (type & NEMOTALE_POINTER_UP_EVENT)
+	if (event->type & NEMOTALE_POINTER_UP_EVENT)
 		return nemotale_is_pointer_single_click(tale, event);
-	else if (type & NEMOTALE_TOUCH_UP_EVENT)
+	else if (event->type & NEMOTALE_TOUCH_UP_EVENT)
 		return nemotale_is_touch_single_click(tale, event);
 
 	return 0;
 }
 
-static inline int nemotale_is_no_tap(struct nemotale *tale, struct taleevent *event, uint32_t type)
+static inline int nemotale_is_no_tap(struct nemotale *tale, struct taleevent *event)
 {
 	return event->tapcount == 0;
 }
 
-static inline int nemotale_is_single_tap(struct nemotale *tale, struct taleevent *event, uint32_t type)
+static inline int nemotale_is_single_tap(struct nemotale *tale, struct taleevent *event)
 {
 	return event->tapcount == 1;
 }
 
-static inline int nemotale_is_double_taps(struct nemotale *tale, struct taleevent *event, uint32_t type)
+static inline int nemotale_is_double_taps(struct nemotale *tale, struct taleevent *event)
 {
 #ifdef NEMOUX_WITH_TAP_MINIMUM_DISTANCE
 	if (event->tapcount == 2) {
@@ -79,192 +79,159 @@ static inline int nemotale_is_double_taps(struct nemotale *tale, struct taleeven
 #endif
 }
 
-static inline int nemotale_is_triple_taps(struct nemotale *tale, struct taleevent *event, uint32_t type)
+static inline int nemotale_is_triple_taps(struct nemotale *tale, struct taleevent *event)
 {
 	return event->tapcount == 3;
 }
 
-static inline int nemotale_is_many_taps(struct nemotale *tale, struct taleevent *event, uint32_t type)
+static inline int nemotale_is_many_taps(struct nemotale *tale, struct taleevent *event)
 {
 	return event->tapcount >= 2;
 }
 
-static inline int nemotale_is_close_event(struct nemotale *tale, struct taleevent *event, uint32_t type)
+static inline int nemotale_is_down_event(struct nemotale *tale, struct taleevent *event)
 {
-	if (event->tapcount >= 3 &&
-			event->time - event->taps[0]->grab_time < tale->close_duration) {
-		double cx = 0.0f;
-		double cy = 0.0f;
-		int count = 0;
-		int i;
-
-		for (i = 0; i < event->tapcount; i++) {
-			cx += event->taps[i]->grab_gx;
-			cy += event->taps[i]->grab_gy;
-		}
-
-		cx /= event->tapcount;
-		cy /= event->tapcount;
-
-		for (i = 0; i < event->tapcount; i++) {
-			double dx0 = event->taps[i]->grab_gx - cx;
-			double dy0 = event->taps[i]->grab_gy - cy;
-			double dx1 = event->taps[i]->gx - cx;
-			double dy1 = event->taps[i]->gy - cy;
-			double d0 = sqrtf(dx0 * dx0 + dy0 * dy0);
-			double d1 = sqrtf(dx1 * dx1 + dy1 * dy1);
-
-			if (d0 > d1 && d0 - d1 > tale->close_distance && ++count >= 2)
-				return 1;
-		}
-	}
-
-	return 0;
+	return event->type & NEMOTALE_DOWN_EVENT;
 }
 
-static inline int nemotale_is_down_event(struct nemotale *tale, struct taleevent *event, uint32_t type)
+static inline int nemotale_is_motion_event(struct nemotale *tale, struct taleevent *event)
 {
-	return type & NEMOTALE_DOWN_EVENT;
+	return event->type & NEMOTALE_MOTION_EVENT;
 }
 
-static inline int nemotale_is_motion_event(struct nemotale *tale, struct taleevent *event, uint32_t type)
+static inline int nemotale_is_up_event(struct nemotale *tale, struct taleevent *event)
 {
-	return type & NEMOTALE_MOTION_EVENT;
+	return event->type & NEMOTALE_UP_EVENT;
 }
 
-static inline int nemotale_is_up_event(struct nemotale *tale, struct taleevent *event, uint32_t type)
+static inline int nemotale_is_long_press(struct nemotale *tale, struct taleevent *event)
 {
-	return type & NEMOTALE_UP_EVENT;
+	return event->type & NEMOTALE_LONG_PRESS_EVENT;
 }
 
-static inline int nemotale_is_long_press(struct nemotale *tale, struct taleevent *event, uint32_t type)
+static inline int nemotale_is_touch_down(struct nemotale *tale, struct taleevent *event)
 {
-	return type & NEMOTALE_LONG_PRESS_EVENT;
+	return event->type & NEMOTALE_TOUCH_DOWN_EVENT;
 }
 
-static inline int nemotale_is_touch_down(struct nemotale *tale, struct taleevent *event, uint32_t type)
+static inline int nemotale_is_touch_up(struct nemotale *tale, struct taleevent *event)
 {
-	return type & NEMOTALE_TOUCH_DOWN_EVENT;
+	return event->type & NEMOTALE_TOUCH_UP_EVENT;
 }
 
-static inline int nemotale_is_touch_up(struct nemotale *tale, struct taleevent *event, uint32_t type)
+static inline int nemotale_is_touch_motion(struct nemotale *tale, struct taleevent *event)
 {
-	return type & NEMOTALE_TOUCH_UP_EVENT;
+	return event->type & NEMOTALE_TOUCH_MOTION_EVENT;
 }
 
-static inline int nemotale_is_touch_motion(struct nemotale *tale, struct taleevent *event, uint32_t type)
+static inline int nemotale_is_touch_long_press(struct nemotale *tale, struct taleevent *event)
 {
-	return type & NEMOTALE_TOUCH_MOTION_EVENT;
+	return event->type & NEMOTALE_TOUCH_LONG_PRESS_EVENT;
 }
 
-static inline int nemotale_is_touch_long_press(struct nemotale *tale, struct taleevent *event, uint32_t type)
+static inline int nemotale_is_pointer_enter(struct nemotale *tale, struct taleevent *event)
 {
-	return type & NEMOTALE_TOUCH_LONG_PRESS_EVENT;
+	return event->type & NEMOTALE_POINTER_ENTER_EVENT;
 }
 
-static inline int nemotale_is_pointer_enter(struct nemotale *tale, struct taleevent *event, uint32_t type)
+static inline int nemotale_is_pointer_leave(struct nemotale *tale, struct taleevent *event)
 {
-	return type & NEMOTALE_POINTER_ENTER_EVENT;
+	return event->type & NEMOTALE_POINTER_LEAVE_EVENT;
 }
 
-static inline int nemotale_is_pointer_leave(struct nemotale *tale, struct taleevent *event, uint32_t type)
+static inline int nemotale_is_pointer_left_down(struct nemotale *tale, struct taleevent *event)
 {
-	return type & NEMOTALE_POINTER_LEAVE_EVENT;
+	return event->type & NEMOTALE_POINTER_LEFT_DOWN_EVENT;
 }
 
-static inline int nemotale_is_pointer_left_down(struct nemotale *tale, struct taleevent *event, uint32_t type)
+static inline int nemotale_is_pointer_left_up(struct nemotale *tale, struct taleevent *event)
 {
-	return type & NEMOTALE_POINTER_LEFT_DOWN_EVENT;
+	return event->type & NEMOTALE_POINTER_LEFT_UP_EVENT;
 }
 
-static inline int nemotale_is_pointer_left_up(struct nemotale *tale, struct taleevent *event, uint32_t type)
+static inline int nemotale_is_pointer_right_down(struct nemotale *tale, struct taleevent *event)
 {
-	return type & NEMOTALE_POINTER_LEFT_UP_EVENT;
+	return event->type & NEMOTALE_POINTER_RIGHT_DOWN_EVENT;
 }
 
-static inline int nemotale_is_pointer_right_down(struct nemotale *tale, struct taleevent *event, uint32_t type)
+static inline int nemotale_is_pointer_right_up(struct nemotale *tale, struct taleevent *event)
 {
-	return type & NEMOTALE_POINTER_RIGHT_DOWN_EVENT;
+	return event->type & NEMOTALE_POINTER_RIGHT_UP_EVENT;
 }
 
-static inline int nemotale_is_pointer_right_up(struct nemotale *tale, struct taleevent *event, uint32_t type)
+static inline int nemotale_is_pointer_motion(struct nemotale *tale, struct taleevent *event)
 {
-	return type & NEMOTALE_POINTER_RIGHT_UP_EVENT;
+	return event->type & NEMOTALE_POINTER_MOTION_EVENT;
 }
 
-static inline int nemotale_is_pointer_motion(struct nemotale *tale, struct taleevent *event, uint32_t type)
+static inline int nemotale_is_pointer_axis(struct nemotale *tale, struct taleevent *event)
 {
-	return type & NEMOTALE_POINTER_MOTION_EVENT;
+	return event->type & NEMOTALE_POINTER_AXIS_EVENT;
 }
 
-static inline int nemotale_is_pointer_axis(struct nemotale *tale, struct taleevent *event, uint32_t type)
+static inline int nemotale_is_pointer_button_down(struct nemotale *tale, struct taleevent *event, uint32_t button)
 {
-	return type & NEMOTALE_POINTER_AXIS_EVENT;
+	return (event->type & NEMOTALE_POINTER_DOWN_EVENT) && (event->value == button);
 }
 
-static inline int nemotale_is_pointer_button_down(struct nemotale *tale, struct taleevent *event, uint32_t type, uint32_t button)
+static inline int nemotale_is_pointer_button_up(struct nemotale *tale, struct taleevent *event, uint32_t button)
 {
-	return (type & NEMOTALE_POINTER_DOWN_EVENT) && (event->value == button);
+	return (event->type & NEMOTALE_POINTER_UP_EVENT) && (event->value == button);
 }
 
-static inline int nemotale_is_pointer_button_up(struct nemotale *tale, struct taleevent *event, uint32_t type, uint32_t button)
+static inline int nemotale_is_pointer_long_press(struct nemotale *tale, struct taleevent *event)
 {
-	return (type & NEMOTALE_POINTER_UP_EVENT) && (event->value == button);
+	return event->type & NEMOTALE_POINTER_LONG_PRESS_EVENT;
 }
 
-static inline int nemotale_is_pointer_long_press(struct nemotale *tale, struct taleevent *event, uint32_t type)
+static inline int nemotale_is_keyboard_enter(struct nemotale *tale, struct taleevent *event)
 {
-	return type & NEMOTALE_POINTER_LONG_PRESS_EVENT;
+	return event->type & NEMOTALE_KEYBOARD_ENTER_EVENT;
 }
 
-static inline int nemotale_is_keyboard_enter(struct nemotale *tale, struct taleevent *event, uint32_t type)
+static inline int nemotale_is_keyboard_leave(struct nemotale *tale, struct taleevent *event)
 {
-	return type & NEMOTALE_KEYBOARD_ENTER_EVENT;
+	return event->type & NEMOTALE_KEYBOARD_LEAVE_EVENT;
 }
 
-static inline int nemotale_is_keyboard_leave(struct nemotale *tale, struct taleevent *event, uint32_t type)
+static inline int nemotale_is_keyboard_down(struct nemotale *tale, struct taleevent *event)
 {
-	return type & NEMOTALE_KEYBOARD_LEAVE_EVENT;
+	return event->type & NEMOTALE_KEYBOARD_DOWN_EVENT;
 }
 
-static inline int nemotale_is_keyboard_down(struct nemotale *tale, struct taleevent *event, uint32_t type)
+static inline int nemotale_is_keyboard_up(struct nemotale *tale, struct taleevent *event)
 {
-	return type & NEMOTALE_KEYBOARD_DOWN_EVENT;
+	return event->type & NEMOTALE_KEYBOARD_UP_EVENT;
 }
 
-static inline int nemotale_is_keyboard_up(struct nemotale *tale, struct taleevent *event, uint32_t type)
+static inline int nemotale_is_stick_enter(struct nemotale *tale, struct taleevent *event)
 {
-	return type & NEMOTALE_KEYBOARD_UP_EVENT;
+	return event->type & NEMOTALE_STICK_ENTER_EVENT;
 }
 
-static inline int nemotale_is_stick_enter(struct nemotale *tale, struct taleevent *event, uint32_t type)
+static inline int nemotale_is_stick_leave(struct nemotale *tale, struct taleevent *event)
 {
-	return type & NEMOTALE_STICK_ENTER_EVENT;
+	return event->type & NEMOTALE_STICK_LEAVE_EVENT;
 }
 
-static inline int nemotale_is_stick_leave(struct nemotale *tale, struct taleevent *event, uint32_t type)
+static inline int nemotale_is_stick_translate(struct nemotale *tale, struct taleevent *event)
 {
-	return type & NEMOTALE_STICK_LEAVE_EVENT;
+	return event->type & NEMOTALE_STICK_TRANSLATE_EVENT;
 }
 
-static inline int nemotale_is_stick_translate(struct nemotale *tale, struct taleevent *event, uint32_t type)
+static inline int nemotale_is_stick_rotate(struct nemotale *tale, struct taleevent *event)
 {
-	return type & NEMOTALE_STICK_TRANSLATE_EVENT;
+	return event->type & NEMOTALE_STICK_ROTATE_EVENT;
 }
 
-static inline int nemotale_is_stick_rotate(struct nemotale *tale, struct taleevent *event, uint32_t type)
+static inline int nemotale_is_stick_button_down(struct nemotale *tale, struct taleevent *event)
 {
-	return type & NEMOTALE_STICK_ROTATE_EVENT;
+	return event->type & NEMOTALE_STICK_BUTTON_DOWN_EVENT;
 }
 
-static inline int nemotale_is_stick_button_down(struct nemotale *tale, struct taleevent *event, uint32_t type)
+static inline int nemotale_is_stick_button_up(struct nemotale *tale, struct taleevent *event)
 {
-	return type & NEMOTALE_STICK_BUTTON_DOWN_EVENT;
-}
-
-static inline int nemotale_is_stick_button_up(struct nemotale *tale, struct taleevent *event, uint32_t type)
-{
-	return type & NEMOTALE_STICK_BUTTON_UP_EVENT;
+	return event->type & NEMOTALE_STICK_BUTTON_UP_EVENT;
 }
 
 #ifdef __cplusplus

@@ -20,7 +20,7 @@ struct nemotale;
 struct talenode;
 struct taleevent;
 
-typedef void (*nemotale_dispatch_event_t)(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event);
+typedef void (*nemotale_dispatch_event_t)(struct nemotale *tale, struct talenode *node, struct taleevent *event);
 
 struct nemotale {
 	void *pmcontext;

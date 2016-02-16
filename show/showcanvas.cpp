@@ -167,9 +167,9 @@ int nemoshow_canvas_set_type(struct showone *one, int type)
 		nemotale_node_opaque(canvas->node, 0, 0, canvas->width, canvas->height);
 	}
 
-	canvas->ratio = canvas->height / canvas->width;
-
 	one->sub = type;
+
+	nemotale_node_set_data(canvas->node, one);
 
 	return 0;
 }

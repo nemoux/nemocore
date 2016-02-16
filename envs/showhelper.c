@@ -6,6 +6,7 @@
 #include <errno.h>
 
 #include <wayland-server.h>
+#include <wayland-nemo-shell-server-protocol.h>
 
 #include <shell.h>
 #include <compz.h>
@@ -229,6 +230,24 @@ static void nemoshow_dispatch_actor_frame(struct nemoactor *actor, uint32_t msec
 	pixman_region32_fini(&region);
 }
 
+static void nemoshow_dispatch_actor_transform(struct nemoactor *actor, int32_t visible)
+{
+	struct nemotale *tale = (struct nemotale *)actor->context;
+	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
+
+	if (show->dispatch_transform != NULL)
+		show->dispatch_transform(show, visible);
+}
+
+static void nemoshow_dispatch_actor_fullscreen(struct nemoactor *actor, int32_t active, int32_t opaque)
+{
+	struct nemotale *tale = (struct nemotale *)actor->context;
+	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
+
+	if (show->dispatch_fullscreen != NULL)
+		show->dispatch_fullscreen(show, active, opaque);
+}
+
 static void nemoshow_dispatch_timer(struct nemotimer *timer, void *data)
 {
 	struct showcontext *scon = (struct showcontext *)data;
@@ -238,7 +257,24 @@ static void nemoshow_dispatch_timer(struct nemotimer *timer, void *data)
 	nemotale_push_timer_event(scon->tale, time_current_msecs());
 }
 
-struct nemoshow *nemoshow_create_actor(struct nemoshell *shell, int32_t width, int32_t height, nemotale_dispatch_event_t dispatch)
+static void nemoshow_dispatch_tale_event(struct nemotale *tale, struct talenode *node, struct taleevent *event)
+{
+	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
+	uint32_t id = nemotale_node_get_id(node);
+
+	if (id == 0) {
+		if (show->dispatch_event != NULL)
+			show->dispatch_event(show, event);
+	} else {
+		struct showone *one = (struct showone *)nemotale_node_get_data(node);
+		struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+		if (canvas->dispatch_event != NULL)
+			canvas->dispatch_event(show, one, event);
+	}
+}
+
+struct nemoshow *nemoshow_create_view(struct nemoshell *shell, int32_t width, int32_t height)
 {
 	struct nemocompz *compz = shell->compz;
 	struct showcontext *scon;
@@ -287,6 +323,8 @@ struct nemoshow *nemoshow_create_actor(struct nemoshell *shell, int32_t width, i
 
 	nemoactor_set_dispatch_resize(actor, nemoshow_dispatch_actor_resize);
 	nemoactor_set_dispatch_frame(actor, nemoshow_dispatch_actor_frame);
+	nemoactor_set_dispatch_transform(actor, nemoshow_dispatch_actor_transform);
+	nemoactor_set_dispatch_fullscreen(actor, nemoshow_dispatch_actor_fullscreen);
 
 	scon->tale = nemotale_create_gl();
 	nemotale_set_backend(scon->tale,
@@ -295,7 +333,7 @@ struct nemoshow *nemoshow_create_actor(struct nemoshell *shell, int32_t width, i
 				actor->base.width,
 				actor->base.height));
 	nemotale_resize(scon->tale, actor->base.width, actor->base.height);
-	nemotale_set_dispatch_event(scon->tale, dispatch);
+	nemotale_set_dispatch_event(scon->tale, nemoshow_dispatch_tale_event);
 
 	show = nemoshow_create();
 	nemoshow_set_tale(show, scon->tale);
@@ -324,7 +362,7 @@ err1:
 	return NULL;
 }
 
-void nemoshow_destroy_actor(struct nemoshow *show)
+void nemoshow_destroy_view(struct nemoshow *show)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 
@@ -339,21 +377,21 @@ void nemoshow_destroy_actor(struct nemoshow *show)
 	free(scon);
 }
 
-static void nemoshow_dispatch_destroy_actor(void *data)
+static void nemoshow_dispatch_destroy_view(void *data)
 {
 	struct nemoshow *show = (struct nemoshow *)data;
 
 	nemoshow_destroy_actor(show);
 }
 
-void nemoshow_destroy_actor_on_idle(struct nemoshow *show)
+void nemoshow_destroy_view_on_idle(struct nemoshow *show)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 
 	nemocompz_dispatch_idle(scon->compz, nemoshow_dispatch_destroy_actor, show);
 }
 
-void nemoshow_revoke_actor(struct nemoshow *show)
+void nemoshow_revoke_view(struct nemoshow *show)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemoactor *actor = scon->actor;
@@ -401,4 +439,160 @@ void nemoshow_terminate_feedback(struct nemoshow *show)
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 
 	nemoactor_terminate_feedback(scon->actor);
+}
+
+void nemoshow_view_attach_layer(struct nemoshow *show, const char *layer)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemoshell *shell = scon->shell;
+	struct nemoactor *actor = scon->actor;
+
+	if (strcmp(layer, "background") == 0)
+		nemoview_attach_layer(actor->view, &shell->background_layer);
+	else if (strcmp(layer, "underlay") == 0)
+		nemoview_attach_layer(actor->view, &shell->underlay_layer);
+	else if (strcmp(layer, "overlay") == 0)
+		nemoview_attach_layer(actor->view, &shell->overlay_layer);
+	else if (strcmp(layer, "service") == 0)
+		nemoview_attach_layer(actor->view, &shell->service_layer);
+
+	nemoview_set_state(actor->view, NEMO_VIEW_MAPPED_STATE);
+}
+
+void nemoshow_view_detach_layer(struct nemoshow *show)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemoactor *actor = scon->actor;
+
+	nemoview_detach_layer(actor->view);
+
+	nemoview_put_state(actor->view, NEMO_VIEW_MAPPED_STATE);
+}
+
+void nemoshow_view_set_position(struct nemoshow *show, float x, float y)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemoactor *actor = scon->actor;
+
+	nemoview_set_position(actor->view, x, y);
+}
+
+void nemoshow_view_set_rotation(struct nemoshow *show, float r)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemoactor *actor = scon->actor;
+
+	nemoview_set_rotation(actor->view, r);
+}
+
+void nemoshow_view_set_pivot(struct nemoshow *show, float px, float py)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemoactor *actor = scon->actor;
+
+	nemoview_set_pivot(actor->view, px, py);
+}
+
+void nemoshow_view_put_pivot(struct nemoshow *show)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemoactor *actor = scon->actor;
+
+	nemoview_put_pivot(actor->view);
+}
+
+void nemoshow_view_set_flag(struct nemoshow *show, float fx, float fy)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemoactor *actor = scon->actor;
+
+	nemoview_set_flag(actor->view, fx, fy);
+}
+
+void nemoshow_view_set_opaque(struct nemoshow *show, int32_t x, int32_t y, int32_t width, int32_t height)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemoactor *actor = scon->actor;
+}
+
+void nemoshow_view_set_min_size(struct nemoshow *show, float width, float height)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemoactor *actor = scon->actor;
+
+	nemoactor_set_min_size(actor, width, height);
+}
+
+void nemoshow_view_set_max_size(struct nemoshow *show, float width, float height)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemoactor *actor = scon->actor;
+
+	nemoactor_set_max_size(actor, width, height);
+}
+
+void nemoshow_view_set_input_type(struct nemoshow *show, const char *type)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemoactor *actor = scon->actor;
+}
+
+void nemoshow_view_set_sound(struct nemoshow *show)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemoactor *actor = scon->actor;
+
+	nemoview_set_state(actor->view, NEMO_VIEW_SOUND_STATE);
+}
+
+void nemoshow_view_put_sound(struct nemoshow *show)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemoactor *actor = scon->actor;
+
+	nemoview_put_state(actor->view, NEMO_VIEW_SOUND_STATE);
+}
+
+int nemoshow_view_move(struct nemoshow *show, uint64_t device)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemoseat *seat = scon->compz->seat;
+	struct nemoactor *actor = scon->actor;
+	struct touchpoint *tp;
+
+	tp = nemoseat_get_touchpoint_by_id(seat, device);
+	if (tp != NULL) {
+		nemoshell_move_actor_by_touchpoint(scon->shell, tp, actor);
+
+		return 1;
+	}
+
+	return 0;
+}
+
+int nemoshow_view_pick(struct nemoshow *show, uint64_t device0, uint64_t device1, uint32_t type)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemoseat *seat = scon->compz->seat;
+	struct nemoactor *actor = scon->actor;
+	struct touchpoint *tp0, *tp1;
+
+	tp0 = nemoseat_get_touchpoint_by_id(seat, device0);
+	tp1 = nemoseat_get_touchpoint_by_id(seat, device1);
+	if (tp0 != NULL && tp1 != NULL) {
+		uint32_t ptype = 0x0;
+
+		if (type & NEMOSHOW_VIEW_PICK_ROTATE_TYPE)
+			ptype |= (1 << NEMO_SURFACE_PICK_TYPE_ROTATE);
+		if (type & NEMOSHOW_VIEW_PICK_SCALE_TYPE)
+			ptype |= (1 << NEMO_SURFACE_PICK_TYPE_SCALE);
+		if (type & NEMOSHOW_VIEW_PICK_TRANSLATE_TYPE)
+			ptype |= (1 << NEMO_SURFACE_PICK_TYPE_MOVE);
+
+		nemoshell_pick_actor_by_touchpoint(scon->shell, tp0, tp1, ptype, actor);
+
+		return 1;
+	}
+
+	return 0;
 }
