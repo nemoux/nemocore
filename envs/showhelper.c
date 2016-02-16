@@ -17,6 +17,9 @@
 #include <keypad.h>
 #include <pointer.h>
 #include <touch.h>
+#include <seat.h>
+#include <move.h>
+#include <pick.h>
 #include <timer.h>
 
 #include <nemoshow.h>
@@ -248,6 +251,15 @@ static void nemoshow_dispatch_actor_fullscreen(struct nemoactor *actor, int32_t 
 		show->dispatch_fullscreen(show, active, opaque);
 }
 
+static void nemoshow_dispatch_actor_destroy(struct nemoactor *actor)
+{
+	struct nemotale *tale = (struct nemotale *)actor->context;
+	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
+
+	if (show->dispatch_destroy != NULL)
+		show->dispatch_destroy(show);
+}
+
 static void nemoshow_dispatch_timer(struct nemotimer *timer, void *data)
 {
 	struct showcontext *scon = (struct showcontext *)data;
@@ -327,6 +339,7 @@ struct nemoshow *nemoshow_create_view(struct nemoshell *shell, int32_t width, in
 	nemoactor_set_dispatch_frame(actor, nemoshow_dispatch_actor_frame);
 	nemoactor_set_dispatch_transform(actor, nemoshow_dispatch_actor_transform);
 	nemoactor_set_dispatch_fullscreen(actor, nemoshow_dispatch_actor_fullscreen);
+	nemoactor_set_dispatch_destroy(actor, nemoshow_dispatch_actor_destroy);
 
 	scon->tale = nemotale_create_gl();
 	nemotale_set_backend(scon->tale,
@@ -383,14 +396,14 @@ static void nemoshow_dispatch_destroy_view(void *data)
 {
 	struct nemoshow *show = (struct nemoshow *)data;
 
-	nemoshow_destroy_actor(show);
+	nemoshow_destroy_view(show);
 }
 
 void nemoshow_destroy_view_on_idle(struct nemoshow *show)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 
-	nemocompz_dispatch_idle(scon->compz, nemoshow_dispatch_destroy_actor, show);
+	nemocompz_dispatch_idle(scon->compz, nemoshow_dispatch_destroy_view, show);
 }
 
 void nemoshow_revoke_view(struct nemoshow *show)

@@ -6,17 +6,13 @@
 #include <errno.h>
 
 #include <wayland-server.h>
-#include <wayland-nemo-shell-server-protocol.h>
 
 #include <shell.h>
 #include <compz.h>
-#include <actor.h>
-#include <layer.h>
 #include <view.h>
 #include <canvas.h>
 #include <seat.h>
 #include <touch.h>
-#include <grab.h>
 #include <move.h>
 #include <pick.h>
 #include <picker.h>
@@ -24,8 +20,6 @@
 
 #include <nemospeaker.h>
 #include <nemoshell.h>
-#include <nemograb.h>
-#include <talehelper.h>
 #include <showhelper.h>
 #include <nemolog.h>
 #include <nemomisc.h>
@@ -50,16 +44,15 @@ void __attribute__((destructor(101))) nemospeaker_finish_envs(void)
 	nemoshow_one_destroy(nemospeakerease);
 }
 
-static int nemospeaker_dispatch_volume_handle_rotate_grab(struct talegrab *base, uint32_t type, struct taleevent *event)
+static int nemospeaker_dispatch_volume_handle_rotate_grab(struct nemoshow *show, void *data, uint32_t tag, void *event)
 {
-	struct nemograb *grab = (struct nemograb *)container_of(base, struct nemograb, base);
-	struct nemospeaker *speaker = (struct nemospeaker *)nemograb_get_userdata(grab);
+	struct nemospeaker *speaker = (struct nemospeaker *)data;
 
-	if (type & NEMOTALE_DOWN_EVENT) {
-		grab->dx = event->x;
-		grab->dy = event->y;
-	} else if (type & NEMOTALE_MOTION_EVENT) {
-		double dv = (event->x - grab->dx) / 396.0f;
+	if (nemoshow_event_is_down(show, event)) {
+	} else if (nemoshow_event_is_motion(show, event)) {
+		float gx = nemoshow_event_get_grab_x(event);
+		float x = nemoshow_event_get_x(event);
+		double dv = (x - gx) / 396.0f;
 		double nv = MAX(MIN(speaker->volumeratio + dv, 1.0f), 0.0f);
 
 		nemoshow_item_set_width(speaker->volume, nv * 396.0f);
@@ -71,104 +64,78 @@ static int nemospeaker_dispatch_volume_handle_rotate_grab(struct talegrab *base,
 		} else if (speaker->sink != NULL) {
 			nemosound_set_volume_sink(speaker->shell->compz->sound, speaker->sink->id, (uint32_t)(nv * 100.0f));
 		}
-	} else if (type & NEMOTALE_UP_EVENT) {
+	} else if (nemoshow_event_is_up(show, event)) {
 		if (speaker->pid != 0) {
 			nemosound_get_info(speaker->shell->compz->sound, speaker->pid);
 		} else if (speaker->sink != NULL) {
 			nemosound_get_info_sink(speaker->shell->compz->sound, speaker->sink->id);
 		}
 
-		nemograb_destroy(grab);
+		return 0;
 	}
 
 	return 1;
 }
 
-static void nemospeaker_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
+static void nemospeaker_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, void *event)
 {
-	uint32_t id = nemotale_node_get_id(node);
+	struct nemospeaker *speaker = (struct nemospeaker *)nemoshow_get_userdata(show);
+	struct nemocompz *compz = speaker->shell->compz;
 
-	if (id == 1) {
-		if (nemotale_dispatch_grab(tale, event->device, type, event) == 0) {
-			struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
-			struct nemospeaker *speaker = (struct nemospeaker *)nemoshow_get_userdata(show);
-			struct nemoshell *shell = NEMOSHOW_AT(show, shell);
-			struct nemoactor *actor = NEMOSHOW_AT(show, actor);
-			struct nemocompz *compz = shell->compz;
-			struct nemoseat *seat = compz->seat;
+	if (nemoshow_event_is_down(show, event)) {
+		if (NEMOSPEAKER_CHECK(nemoshow_event_get_x(event), nemoshow_event_get_y(event), 58, 226, 454, 286)) {
+			struct showgrab *grab;
 
-			if (nemotale_is_touch_down(tale, event, type)) {
-				if (NEMOSPEAKER_CHECK(event->x, event->y, 58, 226, 454, 286)) {
-					struct nemograb *grab;
+			grab = nemoshow_grab_create(show, event, nemospeaker_dispatch_volume_handle_rotate_grab);
+			nemoshow_grab_set_userdata(grab, speaker);
+			nemoshow_grab_check_signal(grab, &speaker->destroy_signal);
+			nemoshow_dispatch_grab(show, event);
+		} else {
+			nemoshow_event_set_tag(event, 1);
+		}
+	} else if (nemoshow_event_is_up(show, event)) {
+		struct nemoview *view;
+		struct wl_client *client;
+		float sx, sy;
 
-					grab = nemograb_create(tale, event, nemospeaker_dispatch_volume_handle_rotate_grab);
-					nemograb_set_userdata(grab, speaker);
-					nemograb_check_signal(grab, &speaker->destroy_signal);
-					nemotale_dispatch_grab(tale, event->device, type, event);
-				} else {
-					nemotale_tap_set_tag(event->tap, 1);
-				}
-			} else if (nemotale_is_touch_up(tale, event, type)) {
-				struct nemoview *view;
-				struct wl_client *client;
-				float sx, sy;
+		view = nemocompz_pick_canvas(compz, nemoshow_event_get_gx(event), nemoshow_event_get_gy(event), &sx, &sy);
+		if ((view != NULL) &&
+				(nemoview_has_state(view, NEMO_VIEW_SOUND_STATE)) &&
+				(view->canvas != NULL) &&
+				(view->canvas->resource != NULL) &&
+				(client = wl_resource_get_client(view->canvas->resource)) != NULL) {
+			pid_t pid;
 
-				view = nemocompz_pick_canvas(compz, event->gx, event->gy, &sx, &sy);
-				if ((view != NULL) &&
-						(nemoview_has_state(view, NEMO_VIEW_SOUND_STATE)) &&
-						(view->canvas != NULL) &&
-						(view->canvas->resource != NULL) &&
-						(client = wl_resource_get_client(view->canvas->resource)) != NULL) {
-					pid_t pid;
+			wl_client_get_credentials(client, &pid, NULL, NULL);
 
-					wl_client_get_credentials(client, &pid, NULL, NULL);
+			speaker->pid = pid;
 
-					speaker->pid = pid;
+			if (speaker->sink != NULL)
+				nemosound_set_sink(compz->sound, speaker->pid, speaker->sink->id);
 
-					if (speaker->sink != NULL)
-						nemosound_set_sink(compz->sound, speaker->pid, speaker->sink->id);
+			nemosound_get_info(compz->sound, speaker->pid);
+		} else if (speaker->sink != NULL) {
+			speaker->pid = 0;
 
-					nemosound_get_info(compz->sound, speaker->pid);
-				} else if (speaker->sink != NULL) {
-					speaker->pid = 0;
+			nemosound_get_info_sink(compz->sound, speaker->sink->id);
+		}
+	}
 
-					nemosound_get_info_sink(compz->sound, speaker->sink->id);
-				}
-			}
+	if (nemoshow_event_is_down(show, event) || nemoshow_event_is_up(show, event)) {
+		nemoshow_event_update_taps_by_tag(show, event, 1);
 
-			if (nemotale_is_touch_down(tale, event, type) ||
-					nemotale_is_touch_up(tale, event, type)) {
-				nemotale_event_update_taps_by_tag(tale, event, type, 1);
+		if (nemoshow_event_is_single_tap(show, event)) {
+			nemoshow_view_move(show, nemoshow_event_get_device_on(event, 0));
+		} else if (nemoshow_event_is_many_taps(show, event)) {
+			nemoshow_view_put_pivot(show);
 
-				if (nemotale_is_single_tap(tale, event, type)) {
-					struct touchpoint *tp;
-
-					tp = nemoseat_get_touchpoint_by_id(seat, event->taps[0]->device);
-					if (tp != NULL) {
-						nemoshell_move_actor_by_touchpoint(shell, tp, actor);
-					}
-				} else if (nemotale_is_many_taps(tale, event, type)) {
-					struct touchpoint *tp0, *tp1;
-
-					nemotale_event_update_faraway_taps(tale, event);
-
-					tp0 = nemoseat_get_touchpoint_by_id(seat, event->tap0->device);
-					tp1 = nemoseat_get_touchpoint_by_id(seat, event->tap1->device);
-					if (tp0 != NULL && tp1 != NULL) {
-						nemoview_put_pivot(actor->view);
-
-						nemoshell_pick_actor_by_touchpoint(shell, tp0, tp1, (1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_SCALE) | (1 << NEMO_SURFACE_PICK_TYPE_MOVE), actor);
-					}
-				}
-			}
+			nemoshow_view_pick_distant(show, event, NEMOSHOW_VIEW_PICK_ROTATE_TYPE | NEMOSHOW_VIEW_PICK_SCALE_TYPE | NEMOSHOW_VIEW_PICK_TRANSLATE_TYPE);
 		}
 	}
 }
 
-static void nemospeaker_dispatch_actor_destroy(struct nemoactor *actor)
+static void nemospeaker_dispatch_show_destroy(struct nemoshow *show)
 {
-	struct nemotale *tale = (struct nemotale *)actor->context;
-	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
 	struct nemospeaker *speaker = (struct nemospeaker *)nemoshow_get_userdata(show);
 
 	nemospeaker_destroy(speaker);
@@ -212,7 +179,6 @@ static void nemospeaker_handle_sound_info(struct wl_listener *listener, void *da
 struct nemospeaker *nemospeaker_create(struct nemoshell *shell, uint32_t size, double x, double y, double r)
 {
 	struct nemocompz *compz = shell->compz;
-	struct nemoactor *actor;
 	struct nemospeaker *speaker;
 	struct nemoshow *show;
 	struct showone *scene;
@@ -237,11 +203,10 @@ struct nemospeaker *nemospeaker_create(struct nemoshell *shell, uint32_t size, d
 
 	nemosignal_init(&speaker->destroy_signal);
 
-	speaker->show = show = nemoshow_create_actor(shell,
-			size, size,
-			nemospeaker_dispatch_tale_event);
+	speaker->show = show = nemoshow_create_view(shell, size, size);
 	if (show == NULL)
 		goto err1;
+	nemoshow_set_dispatch_destroy(show, nemospeaker_dispatch_show_destroy);
 	nemoshow_set_userdata(show, speaker);
 
 	speaker->scene = scene = nemoshow_scene_create();
@@ -261,7 +226,7 @@ struct nemospeaker *nemospeaker_create(struct nemoshell *shell, uint32_t size, d
 	nemoshow_canvas_set_width(canvas, width + NEMOSPEAKER_OUTSET * 2);
 	nemoshow_canvas_set_height(canvas, height + NEMOSPEAKER_OUTSET * 2);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
-	nemoshow_canvas_set_event(canvas, 1);
+	nemoshow_canvas_set_dispatch_event(canvas, nemospeaker_dispatch_canvas_event);
 	nemoshow_attach_one(show, canvas);
 	nemoshow_one_attach(scene, canvas);
 
@@ -319,16 +284,12 @@ struct nemospeaker *nemospeaker_create(struct nemoshell *shell, uint32_t size, d
 
 	nemoshow_render_one(show);
 
-	actor = NEMOSHOW_AT(show, actor);
-	nemoview_attach_layer(actor->view, &shell->overlay_layer);
-	nemoview_set_state(actor->view, NEMO_VIEW_MAPPED_STATE);
-	nemoview_set_position(actor->view,
+	nemoshow_view_attach_layer(show, "overlay");
+	nemoshow_view_set_position(show,
 			speaker->x - size / 2.0f,
 			speaker->y - size / 2.0f);
-	nemoview_set_pivot(actor->view, size / 2.0f, size / 2.0f);
-	nemoview_set_rotation(actor->view, speaker->r);
-
-	nemoactor_set_dispatch_destroy(actor, nemospeaker_dispatch_actor_destroy);
+	nemoshow_view_set_pivot(show, size / 2.0f, size / 2.0f);
+	nemoshow_view_set_rotation(show, speaker->r);
 
 	nemospeaker_dispatch_fadein_transition(show, speaker->layout0, nemospeakerease, 1500, 0);
 	nemospeaker_dispatch_fadein_transition(show, speaker->layout1, nemospeakerease, 1000, 250);
@@ -361,8 +322,8 @@ void nemospeaker_destroy(struct nemospeaker *speaker)
 
 	nemoshow_put_scene(speaker->show);
 
-	nemoshow_revoke_actor(speaker->show);
-	nemoshow_destroy_actor_on_idle(speaker->show);
+	nemoshow_revoke_view(speaker->show);
+	nemoshow_destroy_view_on_idle(speaker->show);
 
 	free(speaker);
 }

@@ -239,6 +239,61 @@ static inline uint64_t nemotale_event_get_device_on(struct taleevent *event, int
 	return event->taps[index]->device;
 }
 
+static inline float nemotale_event_get_grab_x(struct taleevent *event)
+{
+	return event->tap->grab_x;
+}
+
+static inline float nemotale_event_get_grab_y(struct taleevent *event)
+{
+	return event->tap->grab_y;
+}
+
+static inline float nemotale_event_get_grab_gx(struct taleevent *event)
+{
+	return event->tap->grab_gx;
+}
+
+static inline float nemotale_event_get_grab_gy(struct taleevent *event)
+{
+	return event->tap->grab_gy;
+}
+
+static inline float nemotale_event_get_grab_x_on(struct taleevent *event, int index)
+{
+	return event->taps[index]->grab_x;
+}
+
+static inline float nemotale_event_get_grab_y_on(struct taleevent *event, int index)
+{
+	return event->taps[index]->grab_y;
+}
+
+static inline float nemotale_event_get_grab_gx_on(struct taleevent *event, int index)
+{
+	return event->taps[index]->grab_gx;
+}
+
+static inline float nemotale_event_get_grab_gy_on(struct taleevent *event, int index)
+{
+	return event->taps[index]->grab_gy;
+}
+
+static inline uint32_t nemotale_event_get_grab_time(struct taleevent *event)
+{
+	return event->tap->grab_time;
+}
+
+static inline uint32_t nemotale_event_get_grab_time_on(struct taleevent *event, int index)
+{
+	return event->taps[index]->grab_time;
+}
+
+static inline void nemotale_event_set_tag(struct taleevent *event, uint32_t tag)
+{
+	nemotale_tap_set_tag(event->tap, tag);
+}
+
 static inline int nemotale_event_update_taps(struct nemotale *tale, struct taleevent *event)
 {
 	struct taletap *tap;

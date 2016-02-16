@@ -110,12 +110,72 @@ static inline uint64_t nemoshow_event_get_device_on(void *event, int index)
 	return nemotale_event_get_device_on((struct taleevent *)event, index);
 }
 
+static inline float nemoshow_event_get_grab_x(void *event)
+{
+	return nemotale_event_get_grab_x((struct taleevent *)event);
+}
+
+static inline float nemoshow_event_get_grab_y(void *event)
+{
+	return nemotale_event_get_grab_y((struct taleevent *)event);
+}
+
+static inline float nemoshow_event_get_grab_gx(void *event)
+{
+	return nemotale_event_get_grab_gx((struct taleevent *)event);
+}
+
+static inline float nemoshow_event_get_grab_gy(void *event)
+{
+	return nemotale_event_get_grab_gy((struct taleevent *)event);
+}
+
+static inline float nemoshow_event_get_grab_x_on(void *event, int index)
+{
+	return nemotale_event_get_grab_x_on((struct taleevent *)event, index);
+}
+
+static inline float nemoshow_event_get_grab_y_on(void *event, int index)
+{
+	return nemotale_event_get_grab_y_on((struct taleevent *)event, index);
+}
+
+static inline float nemoshow_event_get_grab_gx_on(void *event, int index)
+{
+	return nemotale_event_get_grab_gx_on((struct taleevent *)event, index);
+}
+
+static inline float nemoshow_event_get_grab_gy_on(void *event, int index)
+{
+	return nemotale_event_get_grab_gy_on((struct taleevent *)event, index);
+}
+
+static inline uint32_t nemoshow_event_get_grab_time(void *event)
+{
+	return nemotale_event_get_grab_time((struct taleevent *)event);
+}
+
+static inline uint32_t nemoshow_event_get_grab_time_on(void *event, int index)
+{
+	return nemotale_event_get_grab_time_on((struct taleevent *)event, index);
+}
+
+static inline void nemoshow_event_set_tag(void *event, uint32_t tag)
+{
+	nemotale_event_set_tag((struct taleevent *)event, tag);
+}
+
 static inline void nemoshow_event_update_taps(struct nemoshow *show, struct showone *one, void *event)
 {
 	if (one == NULL)
 		nemotale_event_update_taps(show->tale, (struct taleevent *)event);
 	else
 		nemotale_event_update_node_taps(show->tale, NEMOSHOW_CANVAS_AT(one, node), (struct taleevent *)event);
+}
+
+static inline void nemoshow_event_update_taps_by_tag(struct nemoshow *show, void *event, uint32_t tag)
+{
+	nemotale_event_update_taps_by_tag(show->tale, (struct taleevent *)event, tag);
 }
 
 static inline void nemoshow_event_get_distant_taps(struct nemoshow *show, void *event, uint64_t *device0, uint64_t *device1)

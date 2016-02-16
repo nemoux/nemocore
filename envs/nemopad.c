@@ -295,7 +295,7 @@ static void nemopad_dispatch_canvas_event(struct nemoshow *show, struct showone 
 			if (nemoshow_event_is_no_tap(show, event)) {
 				nemotimer_set_timeout(pad->timer, pad->timeout);
 			} else if (nemoshow_event_is_single_tap(show, event)) {
-				if (nemoshow_view_move(show, nemoshow_event_get_device(event)) > 0) {
+				if (nemoshow_view_move(show, nemoshow_event_get_device_on(event, 0)) > 0) {
 					nemotimer_set_timeout(pad->timer, 0);
 				}
 			} else if (nemoshow_event_is_many_taps(show, event)) {

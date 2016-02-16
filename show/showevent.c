@@ -11,8 +11,16 @@
 static int nemoshow_grab_dispatch_tale_event(struct talegrab *base, struct taleevent *event)
 {
 	struct showgrab *grab = (struct showgrab *)container_of(base, struct showgrab, base);
+	int r;
 
-	return grab->dispatch_event(grab->show, grab->data, grab->tag, event);
+	r = grab->dispatch_event(grab->show, grab->data, grab->tag, event);
+	if (r == 0) {
+		nemoshow_grab_destroy(grab);
+
+		return 0;
+	}
+
+	return r;
 }
 
 struct showgrab *nemoshow_grab_create(struct nemoshow *show, void *event, nemoshow_grab_dispatch_event_t dispatch)

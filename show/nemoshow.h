@@ -43,6 +43,7 @@ typedef void (*nemoshow_dispatch_transition_done_t)(void *userdata);
 typedef void (*nemoshow_dispatch_event_t)(struct nemoshow *show, void *event);
 typedef void (*nemoshow_dispatch_transform_t)(struct nemoshow *show, int32_t visible);
 typedef void (*nemoshow_dispatch_fullscreen_t)(struct nemoshow *show, int32_t active, int32_t opaque);
+typedef void (*nemoshow_dispatch_destroy_t)(struct nemoshow *show);
 
 struct nemoshow {
 	struct nemotale *tale;
@@ -67,6 +68,7 @@ struct nemoshow {
 	nemoshow_dispatch_event_t dispatch_event;
 	nemoshow_dispatch_transform_t dispatch_transform;
 	nemoshow_dispatch_fullscreen_t dispatch_fullscreen;
+	nemoshow_dispatch_destroy_t dispatch_destroy;
 
 	uint32_t dirty_serial;
 	uint32_t transition_serial;
@@ -177,6 +179,11 @@ static inline void nemoshow_set_dispatch_transform(struct nemoshow *show, nemosh
 static inline void nemoshow_set_dispatch_fullscreen(struct nemoshow *show, nemoshow_dispatch_fullscreen_t dispatch)
 {
 	show->dispatch_fullscreen = dispatch;
+}
+
+static inline void nemoshow_set_dispatch_destroy(struct nemoshow *show, nemoshow_dispatch_destroy_t dispatch)
+{
+	show->dispatch_destroy = dispatch;
 }
 
 #include <showevent.h>
