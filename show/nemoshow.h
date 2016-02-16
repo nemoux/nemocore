@@ -30,9 +30,9 @@ NEMO_BEGIN_EXTERN_C
 #include <showcons.h>
 #include <showfont.h>
 #include <showeasy.h>
-#include <svghelper.h>
 #include <showpoly.h>
 #include <showpipe.h>
+#include <svghelper.h>
 
 #include <nemotale.h>
 #include <nemolist.h>
@@ -178,6 +178,8 @@ static inline void nemoshow_set_dispatch_fullscreen(struct nemoshow *show, nemos
 {
 	show->dispatch_fullscreen = dispatch;
 }
+
+#include <showevent.h>
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

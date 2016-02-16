@@ -299,7 +299,7 @@ static inline int nemotale_event_update_taps_by_tag(struct nemotale *tale, struc
 	return (event->tapcount = count);
 }
 
-static inline void nemotale_event_update_taps_distant(struct nemotale *tale, struct taleevent *event, uint64_t *device0, uint64_t *device1)
+static inline void nemotale_event_get_distant_taps(struct nemotale *tale, struct taleevent *event, uint64_t *device0, uint64_t *device1)
 {
 	struct taletap *tap0, *tap1;
 	float dm = 0.0f;

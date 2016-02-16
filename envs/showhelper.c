@@ -261,16 +261,18 @@ static void nemoshow_dispatch_tale_event(struct nemotale *tale, struct talenode 
 {
 	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
 	uint32_t id = nemotale_node_get_id(node);
+	
+	if (nemotale_dispatch_grab(tale, event) == 0) {
+		if (id == 0) {
+			if (show->dispatch_event != NULL)
+				show->dispatch_event(show, event);
+		} else {
+			struct showone *one = (struct showone *)nemotale_node_get_data(node);
+			struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
-	if (id == 0) {
-		if (show->dispatch_event != NULL)
-			show->dispatch_event(show, event);
-	} else {
-		struct showone *one = (struct showone *)nemotale_node_get_data(node);
-		struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
-
-		if (canvas->dispatch_event != NULL)
-			canvas->dispatch_event(show, one, event);
+			if (canvas->dispatch_event != NULL)
+				canvas->dispatch_event(show, one, event);
+		}
 	}
 }
 
@@ -576,6 +578,36 @@ int nemoshow_view_pick(struct nemoshow *show, uint64_t device0, uint64_t device1
 	struct nemoseat *seat = scon->compz->seat;
 	struct nemoactor *actor = scon->actor;
 	struct touchpoint *tp0, *tp1;
+
+	tp0 = nemoseat_get_touchpoint_by_id(seat, device0);
+	tp1 = nemoseat_get_touchpoint_by_id(seat, device1);
+	if (tp0 != NULL && tp1 != NULL) {
+		uint32_t ptype = 0x0;
+
+		if (type & NEMOSHOW_VIEW_PICK_ROTATE_TYPE)
+			ptype |= (1 << NEMO_SURFACE_PICK_TYPE_ROTATE);
+		if (type & NEMOSHOW_VIEW_PICK_SCALE_TYPE)
+			ptype |= (1 << NEMO_SURFACE_PICK_TYPE_SCALE);
+		if (type & NEMOSHOW_VIEW_PICK_TRANSLATE_TYPE)
+			ptype |= (1 << NEMO_SURFACE_PICK_TYPE_MOVE);
+
+		nemoshell_pick_actor_by_touchpoint(scon->shell, tp0, tp1, ptype, actor);
+
+		return 1;
+	}
+
+	return 0;
+}
+
+int nemoshow_view_pick_distant(struct nemoshow *show, void *event, uint32_t type)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemoseat *seat = scon->compz->seat;
+	struct nemoactor *actor = scon->actor;
+	struct touchpoint *tp0, *tp1;
+	uint64_t device0, device1;
+
+	nemotale_event_get_distant_taps(show->tale, event, &device0, &device1);
 
 	tp0 = nemoseat_get_touchpoint_by_id(seat, device0);
 	tp1 = nemoseat_get_touchpoint_by_id(seat, device1);

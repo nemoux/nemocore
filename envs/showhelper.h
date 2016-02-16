@@ -43,7 +43,7 @@ struct showcontext {
 
 #define NEMOSHOW_AT(show, at)			(((struct showcontext *)nemoshow_get_context(show))->at)
 
-extern struct nemoshow *nemoshow_create_view(struct nemoshell *shell, int32_t width, int32_t height, nemotale_dispatch_event_t dispatch);
+extern struct nemoshow *nemoshow_create_view(struct nemoshell *shell, int32_t width, int32_t height);
 extern void nemoshow_destroy_view(struct nemoshow *show);
 extern void nemoshow_destroy_view_on_idle(struct nemoshow *show);
 extern void nemoshow_revoke_view(struct nemoshow *show);
@@ -67,6 +67,7 @@ extern void nemoshow_view_set_sound(struct nemoshow *show);
 extern void nemoshow_view_put_sound(struct nemoshow *show);
 extern int nemoshow_view_move(struct nemoshow *show, uint64_t device);
 extern int nemoshow_view_pick(struct nemoshow *show, uint64_t device0, uint64_t device1, uint32_t type);
+extern int nemoshow_view_pick_distant(struct nemoshow *show, void *event, uint32_t type);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

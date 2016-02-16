@@ -125,6 +125,13 @@ static inline void nemoshow_canvas_set_dispatch_resize(struct showone *one, nemo
 
 static inline void nemoshow_canvas_set_dispatch_event(struct showone *one, nemoshow_canvas_dispatch_event_t dispatch_event)
 {
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	if (dispatch_event == NULL)
+		nemotale_node_set_pick_type(canvas->node, NEMOTALE_PICK_NO_TYPE);
+	else
+		nemotale_node_set_pick_type(canvas->node, NEMOTALE_PICK_DEFAULT_TYPE);
+
 	NEMOSHOW_CANVAS_AT(one, dispatch_event) = dispatch_event;
 }
 

@@ -9,21 +9,12 @@
 
 #include <shell.h>
 #include <compz.h>
-#include <actor.h>
-#include <layer.h>
-#include <view.h>
-#include <seat.h>
-#include <touch.h>
 #include <keypad.h>
-#include <grab.h>
-#include <move.h>
-#include <pick.h>
 #include <picker.h>
+#include <view.h>
 #include <timer.h>
 
 #include <nemopad.h>
-#include <nemograb.h>
-#include <talehelper.h>
 #include <showhelper.h>
 #include <nemolog.h>
 #include <nemomisc.h>
@@ -225,20 +216,13 @@ void __attribute__((destructor(101))) nemopad_finish_envs(void)
 	nemoshow_one_destroy(nemopadease);
 }
 
-static int nemopad_dispatch_key_grab(struct talegrab *base, uint32_t type, struct taleevent *event)
+static int nemopad_dispatch_key_grab(void *data, uint32_t tag, void *event)
 {
-	struct nemograb *grab = (struct nemograb *)container_of(base, struct nemograb, base);
-	struct nemopad *pad = (struct nemopad *)nemograb_get_userdata(grab);
-	uint32_t tag = nemograb_get_tag(grab);
+	struct nemopad *pad = (struct nemopad *)data;
+	struct nemoshow *show = pad->show;
 	uint32_t code = nemopadkeys[tag].code;
 
-	if (type & NEMOTALE_DOWN_EVENT) {
-		struct nemoshow *show = pad->show;
-		struct nemoshell *shell = NEMOSHOW_AT(show, shell);
-		struct nemoactor *actor = NEMOSHOW_AT(show, actor);
-		struct nemocompz *compz = shell->compz;
-		struct nemoseat *seat = compz->seat;
-
+	if (nemoshow_event_is_down_event(show, event)) {
 		if (code != 0) {
 			nemokeypad_notify_key(pad->keypad,
 					time_current_msecs(),
@@ -247,7 +231,6 @@ static int nemopad_dispatch_key_grab(struct talegrab *base, uint32_t type, struc
 		}
 
 		if (tag == 9) {
-			struct touchpoint *tp;
 			int i;
 
 			for (i = 0; i < NEMOPAD_KEYS_MAX; i++) {
@@ -256,10 +239,7 @@ static int nemopad_dispatch_key_grab(struct talegrab *base, uint32_t type, struc
 				}
 			}
 
-			tp = nemoseat_get_touchpoint_by_id(seat, event->device);
-			if (tp != NULL) {
-				nemoshell_move_actor_by_touchpoint(shell, tp, actor);
-			}
+			nemoshow_view_move(show, nemoshow_event_get_device(event));
 
 			pad->is_pickable = 1;
 		}
@@ -281,11 +261,7 @@ static int nemopad_dispatch_key_grab(struct talegrab *base, uint32_t type, struc
 		}
 
 		nemoshow_dispatch_frame(show);
-	} else if (type & NEMOTALE_UP_EVENT) {
-		struct nemoshow *show = pad->show;
-		struct nemoshell *shell = NEMOSHOW_AT(show, shell);
-		struct nemoactor *actor = NEMOSHOW_AT(show, actor);
-
+	} else if (nemoshow_event_is_up_event(show, event)) {
 		if (code != 0) {
 			nemokeypad_notify_key(pad->keypad,
 					time_current_msecs(),
@@ -303,156 +279,124 @@ static int nemopad_dispatch_key_grab(struct talegrab *base, uint32_t type, struc
 
 		nemoshow_dispatch_frame(show);
 
-		nemograb_destroy(grab);
-
 		return 0;
 	}
 
 	return 1;
 }
 
-static void nemopad_dispatch_tale_event(struct nemotale *tale, struct talenode *node, uint32_t type, struct taleevent *event)
+static void nemopad_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, void *event)
 {
-	uint32_t id = nemotale_node_get_id(node);
+	struct nemopad *pad = (struct nemopad *)nemoshow_get_userdata(show);
 
-	if (id == 1) {
-		if (nemotale_dispatch_grab(tale, event->device, type, event) == 0) {
-			struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
-			struct nemoshell *shell = NEMOSHOW_AT(show, shell);
-			struct nemoactor *actor = NEMOSHOW_AT(show, actor);
-			struct nemocompz *compz = shell->compz;
-			struct nemopad *pad = (struct nemopad *)nemoshow_get_userdata(show);
+	if (pad->is_pickable != 0) {
+		if (nemoshow_event_is_down_event(show, event) || nemoshow_event_is_up_event(show, event)) {
+			nemoshow_event_update_taps(show, NULL, event);
 
-			if (pad->is_pickable != 0) {
-				if (nemotale_is_touch_down(tale, event, type) ||
-						nemotale_is_touch_up(tale, event, type)) {
-					struct nemoseat *seat = compz->seat;
-
-					nemotale_event_update_taps(tale, event, type);
-
-					if (nemotale_is_no_tap(tale, event, type)) {
-						nemotimer_set_timeout(pad->timer, pad->timeout);
-					} else if (nemotale_is_single_tap(tale, event, type)) {
-						struct touchpoint *tp;
-
-						tp = nemoseat_get_touchpoint_by_id(seat, event->taps[0]->device);
-						if (tp != NULL) {
-							nemoshell_move_actor_by_touchpoint(shell, tp, actor);
-
-							nemotimer_set_timeout(pad->timer, 0);
-						}
-					} else if (nemotale_is_many_taps(tale, event, type)) {
-						struct touchpoint *tp0, *tp1;
-
-						nemotale_event_update_faraway_taps(tale, event);
-
-						tp0 = nemoseat_get_touchpoint_by_id(seat, event->tap0->device);
-						tp1 = nemoseat_get_touchpoint_by_id(seat, event->tap1->device);
-						if (tp0 != NULL && tp1 != NULL) {
-							nemoview_put_pivot(actor->view);
-
-							nemoshell_pick_actor_by_touchpoint(shell, tp0, tp1, (1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_SCALE) | (1 << NEMO_SURFACE_PICK_TYPE_MOVE), actor);
-
-							nemotimer_set_timeout(pad->timer, 0);
-						}
-					}
+			if (nemoshow_event_is_no_tap(show, event)) {
+				nemotimer_set_timeout(pad->timer, pad->timeout);
+			} else if (nemoshow_event_is_single_tap(show, event)) {
+				if (nemoshow_view_move(show, nemoshow_event_get_device(event)) > 0) {
+					nemotimer_set_timeout(pad->timer, 0);
 				}
-			} else {
-				uint32_t tag;
-				int caps_on, shift_on;
-				int i;
+			} else if (nemoshow_event_is_many_taps(show, event)) {
+				nemoshow_view_put_pivot(show);
 
-				tag = nemoshow_canvas_pick_tag(pad->canvas, event->x, event->y);
-
-				if (nemotale_is_touch_down(tale, event, type)) {
-					struct nemograb *grab;
-
-					grab = nemograb_create(tale, event, nemopad_dispatch_key_grab);
-					nemograb_set_userdata(grab, pad);
-					nemograb_set_tag(grab, tag);
-					nemograb_check_signal(grab, &pad->destroy_signal);
-					nemotale_dispatch_grab(tale, event->device, type, event);
+				if (nemoshow_view_pick_distant(show, event, NEMOSHOW_VIEW_PICK_ROTATE_TYPE | NEMOSHOW_VIEW_PICK_SCALE_TYPE | NEMOSHOW_VIEW_PICK_TRANSLATE_TYPE) > 0) {
+					nemotimer_set_timeout(pad->timer, 0);
 				}
+			}
+		}
+	} else {
+		uint32_t tag;
+		int caps_on, shift_on;
+		int i;
 
-				caps_on = nemokeypad_is_caps_on(pad->keypad);
-				shift_on = nemokeypad_is_shift_on(pad->keypad);
+		tag = nemoshow_canvas_pick_tag(canvas, nemoshow_event_get_x(event), nemoshow_event_get_y(event));
 
-				if ((caps_on ^ shift_on) != pad->is_upper_case) {
-					for (i = 0; i < NEMOPAD_KEYS_MAX; i++) {
-						struct showone *path = pad->is_upper_case == 0 ? nemopaduppers[i] : nemopadnormals[i];
-						uint32_t color = pad->is_upper_case == 0 ? nemopadkeys[i].color1 : nemopadkeys[i].color0;
+		if (nemoshow_event_is_down_event(show, event)) {
+			nemoshow_event_dispatch_grab(show, event, nemopad_dispatch_key_grab, pad, tag, &pad->destroy_signal);
+		}
 
-						if (nemopaduppers[i] != NULL) {
-							nemoshow_item_set_stroke_color(pad->borders[i],
-									nemopadcolors[color][0],
-									nemopadcolors[color][1],
-									nemopadcolors[color][2],
-									0xa0);
-							nemoshow_item_set_fill_color(pad->keys[i],
-									nemopadcolors[color][0],
-									nemopadcolors[color][1],
-									nemopadcolors[color][2],
-									0xc0);
+		caps_on = nemokeypad_is_caps_on(pad->keypad);
+		shift_on = nemokeypad_is_shift_on(pad->keypad);
 
-							nemoshow_item_path_clear(pad->keys[i]);
-							nemoshow_item_path_append(pad->keys[i], path);
-						}
-					}
+		if ((caps_on ^ shift_on) != pad->is_upper_case) {
+			for (i = 0; i < NEMOPAD_KEYS_MAX; i++) {
+				struct showone *path = pad->is_upper_case == 0 ? nemopaduppers[i] : nemopadnormals[i];
+				uint32_t color = pad->is_upper_case == 0 ? nemopadkeys[i].color1 : nemopadkeys[i].color0;
 
-					nemoshow_dispatch_frame(show);
+				if (nemopaduppers[i] != NULL) {
+					nemoshow_item_set_stroke_color(pad->borders[i],
+							nemopadcolors[color][0],
+							nemopadcolors[color][1],
+							nemopadcolors[color][2],
+							0xa0);
+					nemoshow_item_set_fill_color(pad->keys[i],
+							nemopadcolors[color][0],
+							nemopadcolors[color][1],
+							nemopadcolors[color][2],
+							0xc0);
 
-					pad->is_upper_case = (caps_on ^ shift_on);
+					nemoshow_item_path_clear(pad->keys[i]);
+					nemoshow_item_path_append(pad->keys[i], path);
 				}
+			}
 
-				if (shift_on != pad->is_shift_case) {
-					for (i = 0; i < NEMOPAD_KEYS_MAX; i++) {
-						struct showone *path = pad->is_shift_case == 0 ? nemopadshifts[i] : nemopadnormals[i];
-						uint32_t color = pad->is_shift_case == 0 ? nemopadkeys[i].color1 : nemopadkeys[i].color0;
+			nemoshow_dispatch_frame(show);
 
-						if (nemopadshifts[i] != NULL) {
-							nemoshow_item_set_stroke_color(pad->borders[i],
-									nemopadcolors[color][0],
-									nemopadcolors[color][1],
-									nemopadcolors[color][2],
-									0xa0);
-							nemoshow_item_set_fill_color(pad->keys[i],
-									nemopadcolors[color][0],
-									nemopadcolors[color][1],
-									nemopadcolors[color][2],
-									0xc0);
+			pad->is_upper_case = (caps_on ^ shift_on);
+		}
 
-							nemoshow_item_path_clear(pad->keys[i]);
-							nemoshow_item_path_append(pad->keys[i], path);
-						}
-					}
+		if (shift_on != pad->is_shift_case) {
+			for (i = 0; i < NEMOPAD_KEYS_MAX; i++) {
+				struct showone *path = pad->is_shift_case == 0 ? nemopadshifts[i] : nemopadnormals[i];
+				uint32_t color = pad->is_shift_case == 0 ? nemopadkeys[i].color1 : nemopadkeys[i].color0;
 
-					nemoshow_dispatch_frame(show);
+				if (nemopadshifts[i] != NULL) {
+					nemoshow_item_set_stroke_color(pad->borders[i],
+							nemopadcolors[color][0],
+							nemopadcolors[color][1],
+							nemopadcolors[color][2],
+							0xa0);
+					nemoshow_item_set_fill_color(pad->keys[i],
+							nemopadcolors[color][0],
+							nemopadcolors[color][1],
+							nemopadcolors[color][2],
+							0xc0);
 
-					pad->is_shift_case = shift_on;
+					nemoshow_item_path_clear(pad->keys[i]);
+					nemoshow_item_path_append(pad->keys[i], path);
 				}
+			}
 
-				if (nemotale_is_single_click(tale, event, type)) {
-					if (tag == 17) {
-						nemopad_deactivate(pad);
-					} else if (tag == 2 || tag == 16) {
-						struct nemoview *view;
-						float sx, sy;
+			nemoshow_dispatch_frame(show);
 
-						view = nemocompz_pick_canvas(compz, event->gx, event->gy, &sx, &sy);
-						if (view != NULL && nemoview_support_touch_only(view) == 0) {
-							nemokeypad_set_focus(pad->keypad, view);
-						}
-					}
+			pad->is_shift_case = shift_on;
+		}
+
+		if (nemoshow_event_is_single_click(show, event)) {
+			if (tag == 17) {
+				nemopad_deactivate(pad);
+			} else if (tag == 2 || tag == 16) {
+				struct nemocompz *compz = pad->shell->compz;
+				struct nemoview *view;
+				float sx, sy;
+
+				view = nemocompz_pick_canvas(compz,
+						nemoshow_event_get_gx(event),
+						nemoshow_event_get_gy(event),
+						&sx, &sy);
+				if (view != NULL && nemoview_support_touch_only(view) == 0) {
+					nemokeypad_set_focus(pad->keypad, view);
 				}
 			}
 		}
 	}
 }
 
-static void nemopad_dispatch_actor_transform(struct nemoactor *actor, int32_t visible)
+static void nemopad_dispatch_show_transform(struct nemoshow *show, int32_t visible)
 {
-	struct nemotale *tale = (struct nemotale *)actor->context;
-	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
 	struct nemopad *pad = (struct nemopad *)nemoshow_get_userdata(show);
 
 	pad->is_visible = visible;
@@ -465,8 +409,6 @@ static void nemopad_dispatch_timer(struct nemotimer *timer, void *data)
 	if (pad->state & NEMOPAD_ACTIVE_STATE) {
 		if (pad->is_visible != 0) {
 			struct nemoshow *show = pad->show;
-			struct nemoshell *shell = NEMOSHOW_AT(show, shell);
-			struct nemoactor *actor = NEMOSHOW_AT(show, actor);
 			int i;
 
 			pad->is_pickable = 0;
@@ -546,8 +488,8 @@ void nemopad_destroy(struct nemopad *pad)
 
 		nemoshow_put_scene(pad->show);
 
-		nemoshow_revoke_actor(pad->show);
-		nemoshow_destroy_actor_on_idle(pad->show);
+		nemoshow_revoke_view(pad->show);
+		nemoshow_destroy_view_on_idle(pad->show);
 
 		nemokeypad_destroy(pad->keypad);
 	}
@@ -559,7 +501,6 @@ int nemopad_activate(struct nemopad *pad, double x, double y, double r)
 {
 	struct nemoshell *shell = pad->shell;
 	struct nemocompz *compz = shell->compz;
-	struct nemoactor *actor;
 	struct nemoshow *show;
 	struct showone *scene;
 	struct showone *canvas;
@@ -577,11 +518,10 @@ int nemopad_activate(struct nemopad *pad, double x, double y, double r)
 	if (pad->keypad == NULL)
 		goto err1;
 
-	pad->show = show = nemoshow_create_actor(shell,
-			pad->width, pad->height,
-			nemopad_dispatch_tale_event);
+	pad->show = show = nemoshow_create_view(shell, pad->width, pad->height);
 	if (show == NULL)
 		goto err2;
+	nemoshow_set_dispatch_transform(show, nemopad_dispatch_show_transform);
 	nemoshow_set_userdata(show, pad);
 
 	pad->scene = scene = nemoshow_scene_create();
@@ -601,7 +541,7 @@ int nemopad_activate(struct nemopad *pad, double x, double y, double r)
 	nemoshow_canvas_set_width(canvas, basewidth);
 	nemoshow_canvas_set_height(canvas, baseheight);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
-	nemoshow_canvas_set_event(canvas, 1);
+	nemoshow_canvas_set_dispatch_event(canvas, nemopad_dispatch_canvas_event);
 	nemoshow_attach_one(show, canvas);
 	nemoshow_one_attach(scene, canvas);
 
@@ -689,19 +629,14 @@ int nemopad_activate(struct nemopad *pad, double x, double y, double r)
 
 	nemoshow_render_one(show);
 
-	actor = NEMOSHOW_AT(show, actor);
-	nemoview_attach_layer(actor->view, &shell->overlay_layer);
-	nemoview_set_state(actor->view, NEMO_VIEW_MAPPED_STATE);
-	nemoview_set_position(actor->view, x - pad->width / 2.0f, y - 0.0f);
-	nemoview_set_pivot(actor->view, pad->width / 2.0f, 0.0f);
-	nemoview_set_flag(actor->view,
+	nemoshow_view_attach_layer(show, "overlay");
+	nemoshow_view_set_position(show, x - pad->width / 2.0f, y - 0.0f);
+	nemoshow_view_set_pivot(show, pad->width / 2.0f, 0.0f);
+	nemoshow_view_set_flag(show,
 			(double)(nemopadkeys[9].x1 + nemopadkeys[9].x0) / 2.0f / (double)NEMOPAD_WIDTH,
 			(double)(nemopadkeys[9].y1 + nemopadkeys[9].y0) / 2.0f / (double)NEMOPAD_HEIGHT);
-	nemoview_set_rotation(actor->view, r);
-	
-	nemoactor_set_dispatch_transform(actor, nemopad_dispatch_actor_transform);
-
-	nemoactor_set_min_size(actor, pad->minwidth, pad->minheight);
+	nemoshow_view_set_rotation(show, r);
+	nemoshow_view_set_min_size(show, pad->minwidth, pad->minheight);
 
 	nemoshow_dispatch_frame(show);
 
@@ -726,7 +661,6 @@ static void nemopad_dispatch_deactivate_done(void *data)
 void nemopad_deactivate(struct nemopad *pad)
 {
 	struct nemoshow *show = pad->show;
-	struct nemoactor *actor = NEMOSHOW_AT(show, actor);
 	struct showtransition *trans;
 	struct showone *sequence;
 	struct showone *frame;
@@ -783,7 +717,7 @@ void nemopad_deactivate(struct nemopad *pad)
 
 	nemoshow_dispatch_frame(show);
 
-	nemoshow_revoke_actor(show);
+	nemoshow_revoke_view(show);
 }
 
 void nemopad_set_focus(struct nemopad *pad, struct nemoview *view)

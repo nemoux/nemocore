@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <nemoshow.h>
 #include <showevent.h>
 
 int nemoshow_event_dispatch_grab(struct nemoshow *show, void *event, nemotale_grab_dispatch_event_t dispatch, void *data, uint32_t tag, struct nemosignal *signal)

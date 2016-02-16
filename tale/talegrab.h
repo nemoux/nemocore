@@ -15,7 +15,7 @@ NEMO_BEGIN_EXTERN_C
 #include <nemotale.h>
 #include <taleevent.h>
 
-typedef int (*nemotale_grab_dispatch_event_t)(void *data, uint32_t tag, struct taleevent *event);
+typedef int (*nemotale_grab_dispatch_event_t)(void *data, uint32_t tag, void *event);
 
 struct talegrab {
 	struct nemotale *tale;
@@ -56,7 +56,16 @@ static inline int nemotale_dispatch_grab(struct nemotale *tale, struct taleevent
 
 	nemolist_for_each(grab, &tale->grab_list, link) {
 		if (grab->device == event->device) {
-			return grab->dispatch_event(grab->data, grab->tag, event);
+			int r;
+
+			r = grab->dispatch_event(grab->data, grab->tag, event);
+			if (r == 0) {
+				nemotale_grab_destroy(grab);
+
+				return 0;
+			}
+
+			return r;
 		}
 	}
 
