@@ -485,7 +485,7 @@ static void nemosound_dispatch_timer(struct nemotimer *timer, void *data)
 int main(int argc, char *argv[])
 {
 	struct option options[] = {
-		{ "log",			required_argument,	NULL,		'l' },
+		{ "log",			required_argument,	NULL,		'o' },
 		{ 0 }
 	};
 
@@ -496,12 +496,12 @@ int main(int argc, char *argv[])
 
 	nemolog_set_file(2);
 
-	while (opt = getopt_long(argc, argv, "l:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "o:", options, NULL)) {
 		if (opt == -1)
 			break;
 
 		switch (opt) {
-			case 'l':
+			case 'o':
 				nemolog_open_socket(optarg);
 				break;
 

@@ -155,9 +155,9 @@ int main(int argc, char *argv[])
 		{ "rollsize",			required_argument,			NULL,		's' },
 		{ "rollrange",		required_argument,			NULL,		'r' },
 		{ "rolltimeout",	required_argument,			NULL,		't' },
-		{ "layer",				required_argument,			NULL,		'y' },
+		{ "layer",				required_argument,			NULL,		'l' },
 		{ "config",				required_argument,			NULL,		'c' },
-		{ "log",					required_argument,			NULL,		'l' },
+		{ "log",					required_argument,			NULL,		'o' },
 		{ 0 }
 	};
 
@@ -182,7 +182,7 @@ int main(int argc, char *argv[])
 
 	nemolog_set_file(2);
 
-	while (opt = getopt_long(argc, argv, "w:h:s:r:t:y:c:l:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:s:r:t:l:c:o:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -207,7 +207,7 @@ int main(int argc, char *argv[])
 				rolltimeout = strtoul(optarg, NULL, 10);
 				break;
 
-			case 'y':
+			case 'l':
 				layer = strdup(optarg);
 				break;
 
@@ -215,7 +215,7 @@ int main(int argc, char *argv[])
 				configpath = strdup(optarg);
 				break;
 
-			case 'l':
+			case 'o':
 				nemolog_open_socket(optarg);
 				break;
 
