@@ -28,6 +28,7 @@ typedef enum {
 struct nemoshell;
 struct nemocompz;
 struct nemoactor;
+struct nemoview;
 struct nemotimer;
 
 struct showcontext {
@@ -51,11 +52,13 @@ extern void nemoshow_destroy_view_on_idle(struct nemoshow *show);
 extern void nemoshow_revoke_view(struct nemoshow *show);
 
 extern void nemoshow_dispatch_frame(struct nemoshow *show);
+extern void nemoshow_dispatch_resize(struct nemoshow *show, int32_t width, int32_t height);
 extern void nemoshow_dispatch_feedback(struct nemoshow *show);
 extern void nemoshow_terminate_feedback(struct nemoshow *show);
 
 extern void nemoshow_view_set_layer(struct nemoshow *show, const char *layer);
 extern void nemoshow_view_put_layer(struct nemoshow *show);
+extern void nemoshow_view_set_parent(struct nemoshow *show, struct nemoview *view);
 extern void nemoshow_view_set_position(struct nemoshow *show, float x, float y);
 extern void nemoshow_view_set_rotation(struct nemoshow *show, float r);
 extern void nemoshow_view_set_pivot(struct nemoshow *show, float px, float py);

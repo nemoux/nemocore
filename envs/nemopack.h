@@ -41,8 +41,7 @@ struct nemopack {
 
 	struct showone *blur0;
 	struct showone *blur1;
-
-	struct nemoactor *actor;
+	
 	struct nemotimer *timer;
 
 	uint32_t timeout;

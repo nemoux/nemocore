@@ -263,6 +263,13 @@ void nemoshow_dispatch_frame(struct nemoshow *show)
 	nemocanvas_dispatch_frame(scon->canvas);
 }
 
+void nemoshow_dispatch_resize(struct nemoshow *show, int32_t width, int32_t height)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+
+	nemocanvas_dispatch_resize(scon->canvas, width, height, 0);
+}
+
 void nemoshow_dispatch_feedback(struct nemoshow *show)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);

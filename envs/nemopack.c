@@ -15,7 +15,6 @@
 #include <shell.h>
 #include <compz.h>
 #include <view.h>
-#include <actor.h>
 #include <canvas.h>
 #include <seat.h>
 #include <touch.h>
@@ -57,12 +56,10 @@ static void nemopack_handle_view_destroy(struct wl_listener *listener, void *dat
 static void nemopack_handle_bin_resize(struct wl_listener *listener, void *data)
 {
 	struct nemopack *pack = (struct nemopack *)container_of(listener, struct nemopack, bin_resize_listener);
-	struct nemoactor *actor = pack->actor;
 	uint32_t width = pack->view->content->width;
 	uint32_t height = pack->view->content->height;
 
-	nemoactor_dispatch_resize(actor, width, height, 0);
-
+	nemoshow_dispatch_resize(pack->show, width, height);
 	nemoshow_dispatch_frame(pack->show);
 }
 
@@ -133,7 +130,6 @@ static void nemopack_dispatch_timer(struct nemotimer *timer, void *data)
 
 struct nemopack *nemopack_create(struct nemoshell *shell, struct nemoview *view, uint32_t timeout)
 {
-	struct nemoactor *actor;
 	struct nemopack *pack;
 	struct nemoshow *show;
 	struct showone *scene;
@@ -260,10 +256,7 @@ struct nemopack *nemopack_create(struct nemoshell *shell, struct nemoview *view,
 	nemoshow_transition_set_repeat(trans, 0);
 	nemoshow_attach_transition(show, trans);
 
-	pack->actor = actor = NEMOSHOW_AT(show, actor);
-	nemoview_set_parent(actor->view, view);
-	nemoview_set_state(actor->view, NEMO_VIEW_MAPPED_STATE);
-	nemoview_update_transform(actor->view);
+	nemoshow_view_set_parent(show, view);
 
 	pack->view = view;
 	pack->bin = nemoshell_get_bin(view->canvas);

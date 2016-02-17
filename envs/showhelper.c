@@ -442,6 +442,13 @@ void nemoshow_dispatch_frame(struct nemoshow *show)
 	nemoactor_dispatch_frame(scon->actor);
 }
 
+void nemoshow_dispatch_resize(struct nemoshow *show, int32_t width, int32_t height)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+
+	nemoactor_dispatch_resize(scon->actor, width, height, 0);
+}
+
 void nemoshow_dispatch_feedback(struct nemoshow *show)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
@@ -482,6 +489,15 @@ void nemoshow_view_put_layer(struct nemoshow *show)
 	nemoview_detach_layer(actor->view);
 
 	nemoview_put_state(actor->view, NEMO_VIEW_MAPPED_STATE);
+}
+
+void nemoshow_view_set_parent(struct nemoshow *show, struct nemoview *view)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemoactor *actor = scon->actor;
+
+	nemoview_set_parent(actor->view, view);
+	nemoview_set_state(actor->view, NEMO_VIEW_MAPPED_STATE);
 }
 
 void nemoshow_view_set_position(struct nemoshow *show, float x, float y)

@@ -692,6 +692,12 @@ void nemocanvas_dispatch_frame_async(struct nemocanvas *canvas)
 	write(canvas->eventfd, &v, sizeof(uint64_t));
 }
 
+void nemocanvas_dispatch_resize(struct nemocanvas *canvas, int32_t width, int32_t height, int32_t fixed)
+{
+	if (canvas->dispatch_resize != NULL)
+		canvas->dispatch_resize(canvas, width, height, fixed);
+}
+
 void nemocanvas_dispatch_destroy(struct nemocanvas *canvas)
 {
 	if (canvas->dispatch_destroy != NULL)
