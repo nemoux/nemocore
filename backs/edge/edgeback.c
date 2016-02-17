@@ -250,16 +250,14 @@ int main(int argc, char *argv[])
 	nemoshow_set_dispatch_fullscreen(show, nemoback_edge_dispatch_canvas_fullscreen);
 	nemoshow_set_userdata(show, edge);
 
-	if (layer == NULL || strcmp(layer, "underlay") == 0) {
-		nemoshow_view_attach_layer(show, "underlay");
-	} else if (strcmp(layer, "overlay") == 0) {
-		nemoshow_view_attach_layer(show, "overlay");
-	} else {
-		nemoshow_view_attach_layer(show, "background");
-		nemoshow_view_set_opaque(show, 0, 0, width, height);
+	if (layer != NULL) {
+		nemoshow_view_set_layer(show, layer);
+
+		if (strcmp(layer, "background") == 0)
+			nemoshow_view_set_opaque(show, 0, 0, width, height);
 	}
 
-	nemoshow_view_set_input_type(show, "touch");
+	nemoshow_view_set_input(show, "touch");
 	nemoshow_view_put_sound(show);
 
 	edge->scene = scene = nemoshow_scene_create();

@@ -633,8 +633,8 @@ int nemopad_activate(struct nemopad *pad, double x, double y, double r)
 	}
 
 	nemoshow_render_one(show);
-
-	nemoshow_view_attach_layer(show, "overlay");
+	
+	nemoshow_view_set_layer(show, "overlay");
 	nemoshow_view_set_position(show, x - pad->width / 2.0f, y - 0.0f);
 	nemoshow_view_set_pivot(show, pad->width / 2.0f, 0.0f);
 	nemoshow_view_set_flag(show,

@@ -451,16 +451,6 @@ void nemocanvas_set_scale(struct nemocanvas *canvas, float sx, float sy)
 				wl_fixed_from_double(sy));
 }
 
-void nemocanvas_set_input_type(struct nemocanvas *canvas, uint32_t type)
-{
-	nemo_surface_set_input_type(canvas->nemo_surface, type);
-}
-
-void nemocanvas_set_input(struct nemocanvas *canvas, int32_t x, int32_t y, int32_t width, int32_t height)
-{
-	nemo_surface_set_input(canvas->nemo_surface, x, y, width, height);
-}
-
 void nemocanvas_set_pivot(struct nemocanvas *canvas, int px, int py)
 {
 	nemo_surface_set_pivot(canvas->nemo_surface, px, py);
@@ -478,6 +468,11 @@ void nemocanvas_set_flag(struct nemocanvas *canvas, float fx, float fy)
 	nemo_surface_set_flag(canvas->nemo_surface,
 			wl_fixed_from_double(fx),
 			wl_fixed_from_double(fy));
+}
+
+void nemocanvas_set_input(struct nemocanvas *canvas, uint32_t type)
+{
+	nemo_surface_set_input(canvas->nemo_surface, type);
 }
 
 void nemocanvas_set_layer(struct nemocanvas *canvas, uint32_t type)

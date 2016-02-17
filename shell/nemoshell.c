@@ -171,27 +171,6 @@ static void nemo_surface_set_scale(struct wl_client *client, struct wl_resource 
 			wl_fixed_to_double(sy));
 }
 
-static void nemo_surface_set_input_type(struct wl_client *client, struct wl_resource *resource, uint32_t type)
-{
-	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
-
-	if (type == NEMO_SURFACE_INPUT_TYPE_NORMAL) {
-		nemoview_set_input_type(bin->view, NEMO_VIEW_INPUT_NORMAL);
-	} else if (type == NEMO_SURFACE_INPUT_TYPE_TOUCH) {
-		nemoview_set_input_type(bin->view, NEMO_VIEW_INPUT_TOUCH);
-	}
-}
-
-static void nemo_surface_set_input(struct wl_client *client, struct wl_resource *resource, uint32_t x, uint32_t y, uint32_t width, uint32_t height)
-{
-	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
-	struct nemocontent *content = &bin->canvas->base;
-
-	pixman_region32_init_rect(&content->region.input, x, y, width, height);
-
-	content->region.has_input = 1;
-}
-
 static void nemo_surface_set_pivot(struct wl_client *client, struct wl_resource *resource, int32_t px, int32_t py)
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
@@ -215,6 +194,17 @@ static void nemo_surface_set_flag(struct wl_client *client, struct wl_resource *
 	nemoview_set_flag(bin->view,
 			wl_fixed_to_double(fx),
 			wl_fixed_to_double(fy));
+}
+
+static void nemo_surface_set_input(struct wl_client *client, struct wl_resource *resource, uint32_t type)
+{
+	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
+
+	if (type == NEMO_SURFACE_INPUT_TYPE_NORMAL) {
+		nemoview_set_input_type(bin->view, NEMO_VIEW_INPUT_NORMAL);
+	} else if (type == NEMO_SURFACE_INPUT_TYPE_TOUCH) {
+		nemoview_set_input_type(bin->view, NEMO_VIEW_INPUT_TOUCH);
+	}
 }
 
 static void nemo_surface_set_layer(struct wl_client *client, struct wl_resource *resource, uint32_t type)
@@ -333,11 +323,10 @@ static const struct nemo_surface_interface nemo_surface_implementation = {
 	nemo_surface_set_min_size,
 	nemo_surface_set_max_size,
 	nemo_surface_set_scale,
-	nemo_surface_set_input_type,
-	nemo_surface_set_input,
 	nemo_surface_set_pivot,
 	nemo_surface_set_anchor,
 	nemo_surface_set_flag,
+	nemo_surface_set_input,
 	nemo_surface_set_layer,
 	nemo_surface_set_parent,
 	nemo_surface_set_fullscreen_type,

@@ -397,10 +397,10 @@ int main(int argc, char *argv[])
 		goto err2;
 	nemoshow_set_dispatch_fullscreen(show, nemoback_mote_dispatch_canvas_fullscreen);
 	nemoshow_set_userdata(show, mote);
-
-	nemoshow_view_attach_layer(show, "background");
+	
+	nemoshow_view_set_layer(show, "background");
 	nemoshow_view_set_opaque(show, 0, 0, width, height);
-	nemoshow_view_set_input_type(show, "touch");
+	nemoshow_view_set_input(show, "touch");
 	nemoshow_view_put_sound(show);
 
 	mote->ease0 = ease = nemoshow_ease_create();

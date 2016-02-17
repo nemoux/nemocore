@@ -106,22 +106,6 @@
 			<arg name="sy" type="fixed"/>
 		</request>
 
-		<enum name="input_type">
-			<entry name="normal" value="0"/>
-			<entry name="touch" value="1"/>
-		</enum>
-
-		<request name="set_input_type">
-			<arg name="type" type="uint"/>
-		</request>
-
-		<request name="set_input">
-			<arg name="x" type="uint"/>
-			<arg name="y" type="uint"/>
-			<arg name="width" type="uint"/>
-			<arg name="height" type="uint"/>
-		</request>
-
 		<request name="set_pivot">
 			<arg name="px" type="int"/>
 			<arg name="py" type="int"/>
@@ -135,6 +119,15 @@
 		<request name="set_flag">
 			<arg name="fx" type="fixed"/>
 			<arg name="fy" type="fixed"/>
+		</request>
+
+		<enum name="input_type">
+			<entry name="normal" value="0"/>
+			<entry name="touch" value="1"/>
+		</enum>
+
+		<request name="set_input">
+			<arg name="type" type="uint"/>
 		</request>
 
 		<enum name="layer_type">

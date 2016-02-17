@@ -456,7 +456,7 @@ void nemoshow_terminate_feedback(struct nemoshow *show)
 	nemoactor_terminate_feedback(scon->actor);
 }
 
-void nemoshow_view_attach_layer(struct nemoshow *show, const char *layer)
+void nemoshow_view_set_layer(struct nemoshow *show, const char *layer)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemoshell *shell = scon->shell;
@@ -474,7 +474,7 @@ void nemoshow_view_attach_layer(struct nemoshow *show, const char *layer)
 	nemoview_set_state(actor->view, NEMO_VIEW_MAPPED_STATE);
 }
 
-void nemoshow_view_detach_layer(struct nemoshow *show)
+void nemoshow_view_put_layer(struct nemoshow *show)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemoactor *actor = scon->actor;
@@ -546,7 +546,7 @@ void nemoshow_view_set_max_size(struct nemoshow *show, float width, float height
 	nemoactor_set_max_size(actor, width, height);
 }
 
-void nemoshow_view_set_input_type(struct nemoshow *show, const char *type)
+void nemoshow_view_set_input(struct nemoshow *show, const char *type)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemoactor *actor = scon->actor;

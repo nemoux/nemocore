@@ -644,9 +644,9 @@ int main(int argc, char *argv[])
 	nemoshow_set_dispatch_fullscreen(show, nemoback_miro_dispatch_canvas_fullscreen);
 	nemoshow_set_userdata(show, miro);
 
-	nemoshow_view_attach_layer(show, "background");
+	nemoshow_view_set_layer(show, "background");
 	nemoshow_view_set_opaque(show, 0, 0, width, height);
-	nemoshow_view_set_input_type(show, "touch");
+	nemoshow_view_set_input(show, "touch");
 	nemoshow_view_put_sound(show);
 
 	miro->scene = scene = nemoshow_scene_create();

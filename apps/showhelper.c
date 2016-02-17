@@ -277,7 +277,7 @@ void nemoshow_terminate_feedback(struct nemoshow *show)
 	nemocanvas_terminate_feedback(scon->canvas);
 }
 
-void nemoshow_view_attach_layer(struct nemoshow *show, const char *layer)
+void nemoshow_view_set_layer(struct nemoshow *show, const char *layer)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemocanvas *canvas = scon->canvas;
@@ -292,7 +292,7 @@ void nemoshow_view_attach_layer(struct nemoshow *show, const char *layer)
 		nemocanvas_set_layer(canvas, NEMO_SURFACE_LAYER_TYPE_SERVICE);
 }
 
-void nemoshow_view_detach_layer(struct nemoshow *show)
+void nemoshow_view_put_layer(struct nemoshow *show)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemocanvas *canvas = scon->canvas;
@@ -356,15 +356,15 @@ void nemoshow_view_set_max_size(struct nemoshow *show, float width, float height
 	nemocanvas_set_max_size(canvas, width, height);
 }
 
-void nemoshow_view_set_input_type(struct nemoshow *show, const char *type)
+void nemoshow_view_set_input(struct nemoshow *show, const char *type)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemocanvas *canvas = scon->canvas;
 
 	if (strcmp(type, "touch") == 0)
-		nemocanvas_set_input_type(canvas, NEMO_SURFACE_INPUT_TYPE_TOUCH);
+		nemocanvas_set_input(canvas, NEMO_SURFACE_INPUT_TYPE_TOUCH);
 	else
-		nemocanvas_set_input_type(canvas, NEMO_SURFACE_INPUT_TYPE_NORMAL);
+		nemocanvas_set_input(canvas, NEMO_SURFACE_INPUT_TYPE_NORMAL);
 }
 
 void nemoshow_view_set_sound(struct nemoshow *show)

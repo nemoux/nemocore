@@ -284,7 +284,7 @@ struct nemospeaker *nemospeaker_create(struct nemoshell *shell, uint32_t size, d
 
 	nemoshow_render_one(show);
 
-	nemoshow_view_attach_layer(show, "overlay");
+	nemoshow_view_set_layer(show, "overlay");
 	nemoshow_view_set_position(show,
 			speaker->x - size / 2.0f,
 			speaker->y - size / 2.0f);

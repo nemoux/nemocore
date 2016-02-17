@@ -316,7 +316,7 @@ int main(int argc, char *argv[])
 	nemocanvas_set_dispatch_resize(canvas, nemoplay_dispatch_canvas_resize);
 	nemocanvas_set_dispatch_transform(canvas, nemoplay_dispatch_canvas_transform);
 	nemocanvas_set_max_size(canvas, UINT32_MAX, UINT32_MAX);
-	nemocanvas_set_input_type(canvas, NEMO_SURFACE_INPUT_TYPE_TOUCH);
+	nemocanvas_set_input(canvas, NEMO_SURFACE_INPUT_TYPE_TOUCH);
 
 	context->tale = tale = nemotale_create_gl();
 	nemotale_set_backend(tale,
