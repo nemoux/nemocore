@@ -67,7 +67,6 @@ struct showone *nemoshow_canvas_create(void)
 	nemoshow_one_prepare(one);
 
 	nemoobject_set_reserved(&one->object, "type", canvas->type, NEMOSHOW_CANVAS_TYPE_MAX);
-	nemoobject_set_reserved(&one->object, "event", &canvas->event, sizeof(uint32_t));
 	nemoobject_set_reserved(&one->object, "width", &canvas->width, sizeof(double));
 	nemoobject_set_reserved(&one->object, "height", &canvas->height, sizeof(double));
 
@@ -134,8 +133,6 @@ int nemoshow_canvas_arrange(struct showone *one)
 		nemoshow_canvas_set_type(one, NEMOSHOW_CANVAS_VECTOR_TYPE);
 	}
 
-	nemoshow_canvas_set_event(one, canvas->event);
-
 	return 0;
 }
 
@@ -178,15 +175,14 @@ void nemoshow_canvas_set_event(struct showone *one, uint32_t event)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
-	if (event == 0) {
-		nemotale_node_set_pick_type(canvas->node, NEMOTALE_PICK_NO_TYPE);
-	} else {
-		nemotale_node_set_pick_type(canvas->node, NEMOTALE_PICK_DEFAULT_TYPE);
+	nemotale_node_set_id(canvas->node, event);
+}
 
-		nemotale_node_set_id(canvas->node, event);
-	}
+uint32_t nemoshow_canvas_get_event(struct showone *one)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
-	canvas->event = event;
+	return nemotale_node_get_id(canvas->node);
 }
 
 void nemoshow_canvas_set_alpha(struct showone *one, double alpha)

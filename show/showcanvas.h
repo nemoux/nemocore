@@ -41,7 +41,6 @@ struct showcanvas {
 	struct nemoshow *show;
 
 	char type[NEMOSHOW_CANVAS_TYPE_MAX];
-	uint32_t event;
 
 	uint32_t fill;
 	double fills[4];
@@ -91,6 +90,7 @@ extern int nemoshow_canvas_update(struct showone *one);
 
 extern int nemoshow_canvas_set_type(struct showone *one, int type);
 extern void nemoshow_canvas_set_event(struct showone *one, uint32_t event);
+extern uint32_t nemoshow_canvas_get_event(struct showone *one);
 extern void nemoshow_canvas_set_alpha(struct showone *one, double alpha);
 extern int nemoshow_canvas_set_filter(struct showone *one, const char *shader);
 extern int nemoshow_canvas_load_filter(struct showone *one, const char *shaderpath);
@@ -131,7 +131,9 @@ static inline void nemoshow_canvas_set_dispatch_event(struct showone *one, nemos
 		nemotale_node_set_pick_type(canvas->node, NEMOTALE_PICK_NO_TYPE);
 	} else {
 		nemotale_node_set_pick_type(canvas->node, NEMOTALE_PICK_DEFAULT_TYPE);
-		nemotale_node_set_id(canvas->node, 1);
+
+		if (nemotale_node_get_id(canvas->node) == 0)
+			nemotale_node_set_id(canvas->node, 1);
 	}
 
 	NEMOSHOW_CANVAS_AT(one, dispatch_event) = dispatch_event;
