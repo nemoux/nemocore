@@ -491,12 +491,12 @@ void nemoshow_view_put_layer(struct nemoshow *show)
 	nemoview_put_state(actor->view, NEMO_VIEW_MAPPED_STATE);
 }
 
-void nemoshow_view_set_parent(struct nemoshow *show, struct nemoview *view)
+void nemoshow_view_set_parent(struct nemoshow *show, struct nemoview *parent)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemoactor *actor = scon->actor;
 
-	nemoview_set_parent(actor->view, view);
+	nemoview_set_parent(actor->view, parent);
 	nemoview_set_state(actor->view, NEMO_VIEW_MAPPED_STATE);
 }
 

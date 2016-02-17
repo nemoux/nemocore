@@ -305,6 +305,14 @@ void nemoshow_view_put_layer(struct nemoshow *show)
 	struct nemocanvas *canvas = scon->canvas;
 }
 
+void nemoshow_view_set_parent(struct nemoshow *show, struct nemocanvas *parent)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemocanvas *canvas = scon->canvas;
+
+	nemocanvas_set_parent(canvas, parent);
+}
+
 void nemoshow_view_set_position(struct nemoshow *show, float x, float y)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
