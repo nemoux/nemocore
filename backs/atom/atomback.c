@@ -210,11 +210,11 @@ int main(int argc, char *argv[])
 		goto err2;
 	nemoshow_set_dispatch_fullscreen(show, nemoback_atom_dispatch_canvas_fullscreen);
 	nemoshow_set_userdata(show, atom);
-	
+
 	nemoshow_view_set_layer(show, "background");
-	nemoshow_view_set_opaque(show, 0, 0, width, height);
 	nemoshow_view_set_input(show, "touch");
 	nemoshow_view_put_sound(show);
+	nemoshow_view_set_opaque(show, 0, 0, width, height);
 
 	atom->scene = scene = nemoshow_scene_create();
 	nemoshow_scene_set_width(scene, width);

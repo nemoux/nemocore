@@ -462,14 +462,14 @@ void nemoshow_view_set_layer(struct nemoshow *show, const char *layer)
 	struct nemoshell *shell = scon->shell;
 	struct nemoactor *actor = scon->actor;
 
-	if (strcmp(layer, "background") == 0)
+	if (layer == NULL || strcmp(layer, "service") == 0)
+		nemoview_attach_layer(actor->view, &shell->service_layer);
+	else if (strcmp(layer, "background") == 0)
 		nemoview_attach_layer(actor->view, &shell->background_layer);
 	else if (strcmp(layer, "underlay") == 0)
 		nemoview_attach_layer(actor->view, &shell->underlay_layer);
 	else if (strcmp(layer, "overlay") == 0)
 		nemoview_attach_layer(actor->view, &shell->overlay_layer);
-	else if (strcmp(layer, "service") == 0)
-		nemoview_attach_layer(actor->view, &shell->service_layer);
 
 	nemoview_set_state(actor->view, NEMO_VIEW_MAPPED_STATE);
 }
@@ -551,10 +551,10 @@ void nemoshow_view_set_input(struct nemoshow *show, const char *type)
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemoactor *actor = scon->actor;
 
-	if (strcmp(type, "touch") == 0)
-		nemoview_set_input_type(actor->view, NEMO_VIEW_INPUT_TOUCH);
-	else
+	if (type == NULL || strcmp(type, "normal") == 0)
 		nemoview_set_input_type(actor->view, NEMO_VIEW_INPUT_NORMAL);
+	else if (strcmp(type, "touch") == 0)
+		nemoview_set_input_type(actor->view, NEMO_VIEW_INPUT_TOUCH);
 }
 
 void nemoshow_view_set_sound(struct nemoshow *show)

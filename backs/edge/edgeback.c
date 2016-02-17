@@ -226,6 +226,8 @@ int main(int argc, char *argv[])
 
 	if (configpath == NULL)
 		asprintf(&configpath, "%s/.config/minishell.xml", getenv("HOME"));
+	if (layer == NULL)
+		layer = strdup("underlay");
 
 	edge = (struct edgeback *)malloc(sizeof(struct edgeback));
 	if (edge == NULL)
@@ -250,15 +252,12 @@ int main(int argc, char *argv[])
 	nemoshow_set_dispatch_fullscreen(show, nemoback_edge_dispatch_canvas_fullscreen);
 	nemoshow_set_userdata(show, edge);
 
-	if (layer != NULL) {
-		nemoshow_view_set_layer(show, layer);
-
-		if (strcmp(layer, "background") == 0)
-			nemoshow_view_set_opaque(show, 0, 0, width, height);
-	}
-
+	nemoshow_view_set_layer(show, layer);
 	nemoshow_view_set_input(show, "touch");
 	nemoshow_view_put_sound(show);
+
+	if (strcmp(layer, "background") == 0)
+		nemoshow_view_set_opaque(show, 0, 0, width, height);
 
 	edge->scene = scene = nemoshow_scene_create();
 	nemoshow_scene_set_width(scene, width);

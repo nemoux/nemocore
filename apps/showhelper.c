@@ -282,14 +282,14 @@ void nemoshow_view_set_layer(struct nemoshow *show, const char *layer)
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemocanvas *canvas = scon->canvas;
 
-	if (strcmp(layer, "background") == 0)
+	if (layer == NULL || strcmp(layer, "service") == 0)
+		nemocanvas_set_layer(canvas, NEMO_SURFACE_LAYER_TYPE_SERVICE);
+	else if (strcmp(layer, "background") == 0)
 		nemocanvas_set_layer(canvas, NEMO_SURFACE_LAYER_TYPE_BACKGROUND);
 	else if (strcmp(layer, "underlay") == 0)
 		nemocanvas_set_layer(canvas, NEMO_SURFACE_LAYER_TYPE_UNDERLAY);
 	else if (strcmp(layer, "overlay") == 0)
 		nemocanvas_set_layer(canvas, NEMO_SURFACE_LAYER_TYPE_OVERLAY);
-	else if (strcmp(layer, "service") == 0)
-		nemocanvas_set_layer(canvas, NEMO_SURFACE_LAYER_TYPE_SERVICE);
 }
 
 void nemoshow_view_put_layer(struct nemoshow *show)
@@ -361,10 +361,10 @@ void nemoshow_view_set_input(struct nemoshow *show, const char *type)
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemocanvas *canvas = scon->canvas;
 
-	if (strcmp(type, "touch") == 0)
-		nemocanvas_set_input(canvas, NEMO_SURFACE_INPUT_TYPE_TOUCH);
-	else
+	if (type == NULL || strcmp(type, "normal") == 0)
 		nemocanvas_set_input(canvas, NEMO_SURFACE_INPUT_TYPE_NORMAL);
+	else if (strcmp(type, "touch") == 0)
+		nemocanvas_set_input(canvas, NEMO_SURFACE_INPUT_TYPE_TOUCH);
 }
 
 void nemoshow_view_set_sound(struct nemoshow *show)
