@@ -199,6 +199,26 @@ static inline float nemotale_event_get_gy(struct taleevent *event)
 	return event->gy;
 }
 
+static inline float nemotale_event_get_x_on(struct taleevent *event, int index)
+{
+	return event->taps[index]->x;
+}
+
+static inline float nemotale_event_get_y_on(struct taleevent *event, int index)
+{
+	return event->taps[index]->y;
+}
+
+static inline float nemotale_event_get_gx_on(struct taleevent *event, int index)
+{
+	return event->taps[index]->gx;
+}
+
+static inline float nemotale_event_get_gy_on(struct taleevent *event, int index)
+{
+	return event->taps[index]->gy;
+}
+
 static inline float nemotale_event_get_r(struct taleevent *event)
 {
 	return event->r;
@@ -322,7 +342,7 @@ static inline int nemotale_event_update_taps(struct nemotale *tale, struct talee
 	return (event->tapcount = count);
 }
 
-static inline int nemotale_event_update_node_taps(struct nemotale *tale, struct talenode *node, struct taleevent *event)
+static inline int nemotale_event_update_taps_by_node(struct nemotale *tale, struct talenode *node, struct taleevent *event)
 {
 	struct taletap *tap;
 	int count = 0;
@@ -364,7 +384,7 @@ static inline int nemotale_event_update_taps_by_tag(struct nemotale *tale, struc
 	return (event->tapcount = count);
 }
 
-static inline void nemotale_event_get_distant_taps_devices(struct nemotale *tale, struct taleevent *event, uint64_t *device0, uint64_t *device1)
+static inline void nemotale_event_get_distant_tapdevices(struct nemotale *tale, struct taleevent *event, uint64_t *device0, uint64_t *device1)
 {
 	struct taletap *tap0, *tap1;
 	float dm = 0.0f;
@@ -392,7 +412,7 @@ static inline void nemotale_event_get_distant_taps_devices(struct nemotale *tale
 	}
 }
 
-static inline void nemotale_event_get_distant_taps_serials(struct nemotale *tale, struct taleevent *event, uint32_t *serial0, uint32_t *serial1)
+static inline void nemotale_event_get_distant_tapserials(struct nemotale *tale, struct taleevent *event, uint32_t *serial0, uint32_t *serial1)
 {
 	struct taletap *tap0, *tap1;
 	float dm = 0.0f;

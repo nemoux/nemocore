@@ -418,7 +418,7 @@ int nemoshow_view_pick_distant(struct nemoshow *show, void *event, uint32_t type
 	uint32_t serial0, serial1;
 	uint32_t ptype = 0x0;
 
-	nemotale_event_get_distant_taps_serials(show->tale, event, &serial0, &serial1);
+	nemotale_event_get_distant_tapserials(show->tale, event, &serial0, &serial1);
 
 	if (type & NEMOSHOW_VIEW_PICK_ROTATE_TYPE)
 		ptype |= (1 << NEMO_SURFACE_PICK_TYPE_ROTATE);

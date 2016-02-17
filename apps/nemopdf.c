@@ -55,14 +55,14 @@ static void nemopdf_dispatch_tale_event(struct nemotale *tale, struct talenode *
 
 	if (id == 1) {
 		if (nemotale_event_is_touch_down(tale, event) || nemotale_event_is_touch_up(tale, event)) {
-			nemotale_event_update_node_taps(tale, node, event);
+			nemotale_event_update_taps_by_node(tale, node, event);
 
 			if (nemotale_event_is_single_tap(tale, event)) {
 				nemocanvas_move(canvas, nemotale_event_get_serial_on(event, 0));
 			} else if (nemotale_event_is_many_taps(tale, event)) {
 				uint32_t serial0, serial1;
 
-				nemotale_event_get_distant_taps_serials(tale, event, &serial0, &serial1);
+				nemotale_event_get_distant_tapserials(tale, event, &serial0, &serial1);
 
 				nemocanvas_pick(canvas,
 						serial0, serial1,
@@ -71,7 +71,7 @@ static void nemopdf_dispatch_tale_event(struct nemotale *tale, struct talenode *
 		}
 
 		if (nemotale_event_is_single_click(tale, event)) {
-			nemotale_event_update_node_taps(tale, node, event);
+			nemotale_event_update_taps_by_node(tale, node, event);
 
 			if (nemotale_event_is_no_tap(tale, event)) {
 				uint32_t location;

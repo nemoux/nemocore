@@ -70,6 +70,26 @@ static inline float nemoshow_event_get_gy(void *event)
 	return nemotale_event_get_gy((struct taleevent *)event);
 }
 
+static inline float nemoshow_event_get_x_on(void *event, int index)
+{
+	return nemotale_event_get_x_on((struct taleevent *)event, index);
+}
+
+static inline float nemoshow_event_get_y_on(void *event, int index)
+{
+	return nemotale_event_get_y_on((struct taleevent *)event, index);
+}
+
+static inline float nemoshow_event_get_gx_on(void *event, int index)
+{
+	return nemotale_event_get_gx_on((struct taleevent *)event, index);
+}
+
+static inline float nemoshow_event_get_gy_on(void *event, int index)
+{
+	return nemotale_event_get_gy_on((struct taleevent *)event, index);
+}
+
 static inline float nemoshow_event_get_r(void *event)
 {
 	return nemotale_event_get_r((struct taleevent *)event);
@@ -180,7 +200,7 @@ static inline void nemoshow_event_update_taps(struct nemoshow *show, struct show
 	if (one == NULL)
 		nemotale_event_update_taps(show->tale, (struct taleevent *)event);
 	else
-		nemotale_event_update_node_taps(show->tale, NEMOSHOW_CANVAS_AT(one, node), (struct taleevent *)event);
+		nemotale_event_update_taps_by_node(show->tale, NEMOSHOW_CANVAS_AT(one, node), (struct taleevent *)event);
 }
 
 static inline void nemoshow_event_update_taps_by_tag(struct nemoshow *show, void *event, uint32_t tag)
@@ -188,14 +208,14 @@ static inline void nemoshow_event_update_taps_by_tag(struct nemoshow *show, void
 	nemotale_event_update_taps_by_tag(show->tale, (struct taleevent *)event, tag);
 }
 
-static inline void nemoshow_event_get_distant_taps_devices(struct nemoshow *show, void *event, uint64_t *device0, uint64_t *device1)
+static inline void nemoshow_event_get_distant_tapdevices(struct nemoshow *show, void *event, uint64_t *device0, uint64_t *device1)
 {
-	nemotale_event_get_distant_taps_devices(show->tale, (struct taleevent *)event, device0, device1);
+	nemotale_event_get_distant_tapdevices(show->tale, (struct taleevent *)event, device0, device1);
 }
 
-static inline void nemoshow_event_get_distant_taps_serials(struct nemoshow *show, void *event, uint32_t *serial0, uint32_t *serial1)
+static inline void nemoshow_event_get_distant_tapserials(struct nemoshow *show, void *event, uint32_t *serial0, uint32_t *serial1)
 {
-	nemotale_event_get_distant_taps_serials(show->tale, (struct taleevent *)event, serial0, serial1);
+	nemotale_event_get_distant_tapserials(show->tale, (struct taleevent *)event, serial0, serial1);
 }
 
 static inline int nemoshow_event_is_single_click(struct nemoshow *show, void *event)
