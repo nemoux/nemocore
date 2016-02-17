@@ -44,9 +44,9 @@ void __attribute__((destructor(101))) nemospeaker_finish_envs(void)
 	nemoshow_one_destroy(nemospeakerease);
 }
 
-static int nemospeaker_dispatch_volume_handle_rotate_grab(struct nemoshow *show, void *data, uint32_t tag, void *event)
+static int nemospeaker_dispatch_volume_handle_rotate_grab(struct nemoshow *show, struct showgrab *grab, void *event)
 {
-	struct nemospeaker *speaker = (struct nemospeaker *)data;
+	struct nemospeaker *speaker = (struct nemospeaker *)nemoshow_grab_get_userdata(grab);
 
 	if (nemoshow_event_is_down(show, event)) {
 	} else if (nemoshow_event_is_motion(show, event)) {
@@ -70,6 +70,8 @@ static int nemospeaker_dispatch_volume_handle_rotate_grab(struct nemoshow *show,
 		} else if (speaker->sink != NULL) {
 			nemosound_get_info_sink(speaker->shell->compz->sound, speaker->sink->id);
 		}
+
+		nemoshow_grab_destroy(grab);
 
 		return 0;
 	}

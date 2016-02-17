@@ -6,23 +6,13 @@
 #include <errno.h>
 
 #include <nemoshow.h>
-#include <showevent.h>
+#include <showgrab.h>
 
 static int nemoshow_grab_dispatch_tale_event(struct talegrab *base, struct taleevent *event)
 {
 	struct showgrab *grab = (struct showgrab *)container_of(base, struct showgrab, base);
-	int r;
 
-	r = grab->dispatch_event(grab->show, grab->data, grab->tag, event);
-	if (r < 0) {
-		return 0;
-	} else if (r == 0) {
-		nemoshow_grab_destroy(grab);
-
-		return 0;
-	}
-
-	return r;
+	return grab->dispatch_event(grab->show, grab, event);
 }
 
 struct showgrab *nemoshow_grab_create(struct nemoshow *show, void *event, nemoshow_grab_dispatch_event_t dispatch)

@@ -14,41 +14,6 @@ NEMO_BEGIN_EXTERN_C
 
 #include <taleevent.h>
 #include <talegesture.h>
-#include <talegrab.h>
-
-typedef int (*nemoshow_grab_dispatch_event_t)(struct nemoshow *show, void *data, uint32_t tag, void *event);
-
-struct showgrab {
-	struct talegrab base;
-
-	struct nemoshow *show;
-
-	nemoshow_grab_dispatch_event_t dispatch_event;
-	uint32_t tag;
-	void *data;
-
-	struct nemolistener destroy_listener;
-};
-
-extern struct showgrab *nemoshow_grab_create(struct nemoshow *show, void *event, nemoshow_grab_dispatch_event_t dispatch);
-extern void nemoshow_grab_destroy(struct showgrab *grab);
-
-extern void nemoshow_grab_check_signal(struct showgrab *grab, struct nemosignal *signal);
-
-static inline void nemoshow_grab_set_userdata(struct showgrab *grab, void *data)
-{
-	grab->data = data;
-}
-
-static inline void nemoshow_grab_set_tag(struct showgrab *grab, uint32_t tag)
-{
-	grab->tag = tag;
-}
-
-static inline void nemoshow_dispatch_grab(struct nemoshow *show, void *event)
-{
-	nemotale_dispatch_grab(show->tale, (struct taleevent *)event);
-}
 
 static inline float nemoshow_event_get_x(void *event)
 {

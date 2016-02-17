@@ -40,9 +40,9 @@ struct miromice {
 static void nemoback_miro_dispatch_show(struct miroback *miro, uint32_t duration, uint32_t interval);
 static void nemoback_miro_dispatch_hide(struct miroback *miro, uint32_t duration, uint32_t interval);
 
-static int nemoback_miro_dispatch_tap_grab(struct nemoshow *show, void *data, uint32_t tag, void *event)
+static int nemoback_miro_dispatch_tap_grab(struct nemoshow *show, struct showgrab *grab, void *event)
 {
-	struct mirotap *tap = (struct mirotap *)data;
+	struct mirotap *tap = (struct mirotap *)nemoshow_grab_get_userdata(grab);
 	struct miroback *miro = tap->miro;
 
 	if (nemoshow_event_is_down(show, event)) {
@@ -57,6 +57,8 @@ static int nemoback_miro_dispatch_tap_grab(struct nemoshow *show, void *data, ui
 		nemoback_mirotap_up(miro, tap, nemoshow_event_get_x(event), nemoshow_event_get_y(event));
 
 		nemoshow_dispatch_frame(show);
+
+		nemoshow_grab_destroy(grab);
 
 		return 0;
 	}

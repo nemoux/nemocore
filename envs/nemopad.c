@@ -216,9 +216,10 @@ void __attribute__((destructor(101))) nemopad_finish_envs(void)
 	nemoshow_one_destroy(nemopadease);
 }
 
-static int nemopad_dispatch_key_grab(struct nemoshow *show, void *data, uint32_t tag, void *event)
+static int nemopad_dispatch_key_grab(struct nemoshow *show, struct showgrab *grab, void *event)
 {
-	struct nemopad *pad = (struct nemopad *)data;
+	struct nemopad *pad = (struct nemopad *)nemoshow_grab_get_userdata(grab);
+	uint32_t tag = nemoshow_grab_get_tag(grab);
 	uint32_t code = nemopadkeys[tag].code;
 
 	if (nemoshow_event_is_down(show, event)) {
@@ -277,6 +278,8 @@ static int nemopad_dispatch_key_grab(struct nemoshow *show, void *data, uint32_t
 		}
 
 		nemoshow_dispatch_frame(show);
+		
+		nemoshow_grab_destroy(grab);
 
 		return 0;
 	}
@@ -633,7 +636,7 @@ int nemopad_activate(struct nemopad *pad, double x, double y, double r)
 	}
 
 	nemoshow_render_one(show);
-	
+
 	nemoshow_view_set_layer(show, "overlay");
 	nemoshow_view_set_position(show, x - pad->width / 2.0f, y - 0.0f);
 	nemoshow_view_set_pivot(show, pad->width / 2.0f, 0.0f);

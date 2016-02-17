@@ -17,9 +17,9 @@
 #include <nemolog.h>
 #include <nemomisc.h>
 
-static int nemoback_edge_dispatch_roll_grab(struct nemoshow *show, void *data, uint32_t tag, void *event)
+static int nemoback_edge_dispatch_roll_grab(struct nemoshow *show, struct showgrab *grab, void *event)
 {
-	struct edgeroll *roll = (struct edgeroll *)data;
+	struct edgeroll *roll = (struct edgeroll *)nemoshow_grab_get_userdata(grab);
 	struct edgeback *edge = roll->edge;
 
 	if (nemoshow_event_is_down(show, event)) {
@@ -35,16 +35,19 @@ static int nemoback_edge_dispatch_roll_grab(struct nemoshow *show, void *data, u
 
 		nemoshow_dispatch_frame(show);
 
+		nemoshow_grab_destroy(grab);
+
 		return 0;
 	}
 
 	return 1;
 }
 
-static int nemoback_edge_dispatch_roll_group_grab(struct nemoshow *show, void *data, uint32_t tag, void *event)
+static int nemoback_edge_dispatch_roll_group_grab(struct nemoshow *show, struct showgrab *grab, void *event)
 {
-	struct edgeroll *roll = (struct edgeroll *)data;
+	struct edgeroll *roll = (struct edgeroll *)nemoshow_grab_get_userdata(grab);
 	struct edgeback *edge = roll->edge;
+	uint32_t tag = nemoshow_grab_get_tag(grab);
 
 	if (nemoshow_event_is_down(show, event)) {
 		nemoback_edgeroll_activate_group(edge, roll, tag);
@@ -92,6 +95,8 @@ static int nemoback_edge_dispatch_roll_group_grab(struct nemoshow *show, void *d
 		} else {
 			nemoback_edgeroll_deactivate_group(edge, roll);
 		}
+
+		nemoshow_grab_destroy(grab);
 
 		return 0;
 	}

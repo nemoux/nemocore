@@ -186,6 +186,7 @@ static inline void nemoshow_set_dispatch_destroy(struct nemoshow *show, nemoshow
 	show->dispatch_destroy = dispatch;
 }
 
+#include <showgrab.h>
 #include <showevent.h>
 
 #ifdef __cplusplus
