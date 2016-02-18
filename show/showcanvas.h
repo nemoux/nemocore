@@ -66,6 +66,8 @@ struct showcanvas {
 	double px, py;
 	double sx, sy;
 
+	int is_mapped;
+	int needs_resize;
 	int needs_redraw;
 	int needs_full_redraw;
 
@@ -89,6 +91,7 @@ extern int nemoshow_canvas_arrange(struct showone *one);
 extern int nemoshow_canvas_update(struct showone *one);
 
 extern int nemoshow_canvas_set_type(struct showone *one, int type);
+extern int nemoshow_canvas_resize(struct showone *one);
 extern void nemoshow_canvas_set_event(struct showone *one, uint32_t event);
 extern uint32_t nemoshow_canvas_get_event(struct showone *one);
 extern void nemoshow_canvas_set_alpha(struct showone *one, double alpha);
@@ -182,12 +185,18 @@ static inline int32_t nemoshow_canvas_get_viewport_height(struct showone *one)
 
 static inline void nemoshow_canvas_set_width(struct showone *one, double width)
 {
-	NEMOSHOW_CANVAS_AT(one, width) = width;
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	canvas->width = width;
+	canvas->needs_resize = 1;
 }
 
 static inline void nemoshow_canvas_set_height(struct showone *one, double height)
 {
-	NEMOSHOW_CANVAS_AT(one, height) = height;
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	canvas->height = height;
+	canvas->needs_resize = 1;
 }
 
 static inline double nemoshow_canvas_get_width(struct showone *one)

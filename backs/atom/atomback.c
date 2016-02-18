@@ -309,9 +309,6 @@ int main(int argc, char *argv[])
 	nemomatrix_scale_xyz(&matrix, 0.5f, 0.5f, 0.5f);
 	nemoshow_poly_transform_vertices(one, &matrix);
 
-	nemoshow_set_scene(show, scene);
-	nemoshow_set_size(show, width, height);
-
 	atom->ease0 = ease = nemoshow_ease_create();
 	nemoshow_ease_set_type(ease, NEMOEASE_CUBIC_INOUT_TYPE);
 

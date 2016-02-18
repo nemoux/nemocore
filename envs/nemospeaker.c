@@ -232,9 +232,6 @@ struct nemospeaker *nemospeaker_create(struct nemoshell *shell, uint32_t size, d
 	nemoshow_attach_one(show, canvas);
 	nemoshow_one_attach(scene, canvas);
 
-	nemoshow_set_scene(show, scene);
-	nemoshow_set_size(show, size, size);
-
 	speaker->group = group = nemoshow_item_create(NEMOSHOW_GROUP_ITEM);
 	nemoshow_attach_one(show, group);
 	nemoshow_one_attach(canvas, group);

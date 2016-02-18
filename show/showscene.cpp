@@ -19,6 +19,8 @@ struct showone *nemoshow_scene_create(void)
 		return NULL;
 	memset(scene, 0, sizeof(struct showscene));
 
+	scene->needs_resize = 1;
+
 	one = &scene->base;
 	one->type = NEMOSHOW_SCENE_TYPE;
 	one->update = nemoshow_scene_update;

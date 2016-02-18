@@ -225,6 +225,8 @@ void nemotale_below_node(struct nemotale *tale, struct talenode *node, struct ta
 void nemotale_clear_node(struct nemotale *tale)
 {
 	tale->nnodes = 0;
+	
+	nemotale_damage_all(tale);
 }
 
 void nemotale_update_node(struct nemotale *tale)

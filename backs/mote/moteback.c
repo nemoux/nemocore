@@ -539,9 +539,6 @@ int main(int argc, char *argv[])
 
 	mote->ratio = nemoshow_canvas_get_aspect_ratio(mote->canvasp);
 
-	nemoshow_set_scene(show, scene);
-	nemoshow_set_size(show, width, height);
-
 	trans = nemoshow_transition_create(mote->ease2, 18000, 0);
 	nemoshow_transition_dirty_one(trans, mote->canvasb, NEMOSHOW_FILTER_DIRTY);
 	nemoshow_transition_set_repeat(trans, 0);

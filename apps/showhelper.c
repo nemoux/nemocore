@@ -206,6 +206,7 @@ struct nemoshow *nemoshow_create_view(struct nemotool *tool, int32_t width, int3
 
 	show = nemoshow_create();
 	nemoshow_set_tale(show, scon->tale);
+	nemoshow_set_size(show, width, height);
 	nemoshow_set_context(show, scon);
 
 	nemocanvas_set_userdata(NTEGL_CANVAS(scon->eglcanvas), scon->tale);

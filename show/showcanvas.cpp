@@ -56,6 +56,8 @@ struct showone *nemoshow_canvas_create(void)
 
 	canvas->alpha = 1.0f;
 
+	canvas->is_mapped = 0;
+	canvas->needs_resize = 0;
 	canvas->needs_redraw = 1;
 	canvas->needs_full_redraw = 1;
 
@@ -166,7 +168,45 @@ int nemoshow_canvas_set_type(struct showone *one, int type)
 
 	one->sub = type;
 
+	canvas->needs_resize = 0;
+
 	nemotale_node_set_data(canvas->node, one);
+
+	return 0;
+}
+
+int nemoshow_canvas_resize(struct showone *one)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
+		nemotale_node_resize_pixman(canvas->node, canvas->width, canvas->height);
+
+		delete NEMOSHOW_CANVAS_CC(canvas, damage);
+		delete NEMOSHOW_CANVAS_CC(canvas, canvas);
+		delete NEMOSHOW_CANVAS_CC(canvas, device);
+		delete NEMOSHOW_CANVAS_CC(canvas, bitmap);
+
+		NEMOSHOW_CANVAS_CC(canvas, bitmap) = new SkBitmap;
+		NEMOSHOW_CANVAS_CC(canvas, bitmap)->setInfo(
+				SkImageInfo::Make(canvas->width, canvas->height, kN32_SkColorType, kPremul_SkAlphaType));
+		NEMOSHOW_CANVAS_CC(canvas, bitmap)->setPixels(
+				nemotale_node_get_buffer(canvas->node));
+
+		NEMOSHOW_CANVAS_CC(canvas, device) = new SkBitmapDevice(*NEMOSHOW_CANVAS_CC(canvas, bitmap));
+		NEMOSHOW_CANVAS_CC(canvas, canvas) = new SkCanvas(NEMOSHOW_CANVAS_CC(canvas, device));
+
+		NEMOSHOW_CANVAS_CC(canvas, damage) = new SkRegion;
+	} else if (one->sub == NEMOSHOW_CANVAS_PIPELINE_TYPE) {
+		nemotale_node_resize_gl(canvas->node, canvas->width, canvas->height);
+	} else if (one->sub == NEMOSHOW_CANVAS_PIXMAN_TYPE) {
+		nemotale_node_resize_pixman(canvas->node, canvas->width, canvas->height);
+	} else if (one->sub == NEMOSHOW_CANVAS_OPENGL_TYPE) {
+		nemotale_node_resize_gl(canvas->node, canvas->width, canvas->height);
+	} else if (one->sub == NEMOSHOW_CANVAS_BACK_TYPE) {
+		nemotale_node_resize_pixman(canvas->node, canvas->width, canvas->height);
+		nemotale_node_opaque(canvas->node, 0, 0, canvas->width, canvas->height);
+	}
 
 	return 0;
 }

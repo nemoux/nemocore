@@ -352,6 +352,7 @@ struct nemoshow *nemoshow_create_view(struct nemoshell *shell, int32_t width, in
 
 	show = nemoshow_create();
 	nemoshow_set_tale(show, scon->tale);
+	nemoshow_set_size(show, width, height);
 	nemoshow_set_context(show, scon);
 
 	nemotale_set_userdata(scon->tale, show);

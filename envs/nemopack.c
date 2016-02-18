@@ -183,9 +183,6 @@ struct nemopack *nemopack_create(struct nemoshell *shell, struct nemoview *view,
 	nemoshow_attach_one(show, canvas);
 	nemoshow_one_attach(scene, canvas);
 
-	nemoshow_set_scene(show, scene);
-	nemoshow_set_size(show, view->content->width, view->content->height);
-
 	pack->blur0 = blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
 	nemoshow_attach_one(show, blur);
 	nemoshow_filter_set_blur(blur, "high", "inner", 5.0f);

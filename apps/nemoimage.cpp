@@ -135,9 +135,6 @@ int main(int argc, char *argv[])
 	nemoshow_attach_one(show, canvas);
 	nemoshow_one_attach(scene, canvas);
 
-	nemoshow_set_scene(show, scene);
-	nemoshow_set_size(show, width, height);
-
 	context->image = one = nemoshow_item_create(NEMOSHOW_IMAGE_ITEM);
 	nemoshow_attach_one(show, one);
 	nemoshow_one_attach(canvas, one);

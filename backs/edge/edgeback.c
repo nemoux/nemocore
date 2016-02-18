@@ -286,9 +286,6 @@ int main(int argc, char *argv[])
 	nemoshow_attach_one(show, canvas);
 	nemoshow_one_attach(scene, canvas);
 
-	nemoshow_set_scene(show, scene);
-	nemoshow_set_size(show, width, height);
-
 	edge->ease0 = ease = nemoshow_ease_create();
 	nemoshow_ease_set_type(ease, NEMOEASE_CUBIC_INOUT_TYPE);
 

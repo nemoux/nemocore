@@ -278,7 +278,7 @@ static int nemopad_dispatch_key_grab(struct nemoshow *show, struct showgrab *gra
 		}
 
 		nemoshow_dispatch_frame(show);
-		
+
 		nemoshow_grab_destroy(grab);
 
 		return 0;
@@ -533,9 +533,9 @@ int nemopad_activate(struct nemopad *pad, double x, double y, double r)
 	nemoshow_set_userdata(show, pad);
 
 	pad->scene = scene = nemoshow_scene_create();
+	nemoshow_attach_one(show, scene);
 	nemoshow_scene_set_width(scene, basewidth);
 	nemoshow_scene_set_height(scene, baseheight);
-	nemoshow_attach_one(show, scene);
 
 	pad->back = canvas = nemoshow_canvas_create();
 	nemoshow_canvas_set_width(canvas, basewidth);
@@ -552,9 +552,6 @@ int nemopad_activate(struct nemopad *pad, double x, double y, double r)
 	nemoshow_canvas_set_dispatch_event(canvas, nemopad_dispatch_canvas_event);
 	nemoshow_attach_one(show, canvas);
 	nemoshow_one_attach(scene, canvas);
-
-	nemoshow_set_scene(show, scene);
-	nemoshow_set_size(show, pad->width, pad->height);
 
 	pad->blur = blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
 	nemoshow_attach_one(show, blur);

@@ -15,6 +15,7 @@ struct showscene {
 	struct showone base;
 
 	double width, height;
+	int needs_resize;
 };
 
 #define NEMOSHOW_SCENE(one)					((struct showscene *)container_of(one, struct showscene, base))
@@ -27,12 +28,18 @@ extern int nemoshow_scene_update(struct showone *one);
 
 static inline void nemoshow_scene_set_width(struct showone *one, double width)
 {
-	NEMOSHOW_SCENE_AT(one, width) = width;
+	struct showscene *scene = NEMOSHOW_SCENE(one);
+
+	scene->width = width;
+	scene->needs_resize = 1;
 }
 
 static inline void nemoshow_scene_set_height(struct showone *one, double height)
 {
-	NEMOSHOW_SCENE_AT(one, height) = height;
+	struct showscene *scene = NEMOSHOW_SCENE(one);
+
+	scene->height = height;
+	scene->needs_resize = 1;
 }
 
 #ifdef __cplusplus
