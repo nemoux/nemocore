@@ -198,8 +198,6 @@ int main(int argc, char *argv[])
 	struct nemoshow *show;
 	struct showone *scene;
 	struct showone *canvas;
-	struct showone *blur;
-	struct showone *ease;
 	struct showone *pipe;
 	struct showone *one;
 	struct showtransition *trans;
@@ -403,18 +401,6 @@ int main(int argc, char *argv[])
 	nemoshow_view_put_sound(show);
 	nemoshow_view_set_opaque(show, 0, 0, width, height);
 
-	mote->inner = blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
-	nemoshow_attach_one(show, blur);
-	nemoshow_filter_set_blur(blur, "high", "inner", 3.0f);
-
-	mote->outer = blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
-	nemoshow_attach_one(show, blur);
-	nemoshow_filter_set_blur(blur, "high", "outer", 3.0f);
-
-	mote->solid = blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
-	nemoshow_attach_one(show, blur);
-	nemoshow_filter_set_blur(blur, "high", "solid", 16.0f);
-
 	mote->scene = scene = nemoshow_scene_create();
 	nemoshow_scene_set_width(scene, width);
 	nemoshow_scene_set_height(scene, height);
@@ -463,7 +449,7 @@ int main(int argc, char *argv[])
 	nemoshow_item_set_r(one, 48.0f);
 	nemoshow_item_set_stroke_color(one, 0x1e, 0xdc, 0xdc, 0xff);
 	nemoshow_item_set_stroke_width(one, 12.0f);
-	nemoshow_item_set_filter(one, mote->solid);
+	nemoshow_item_set_filter(one, NEMOSHOW_SOLID_LARGE_BLUR);
 
 	mote->canvasp = canvas = nemoshow_canvas_create();
 	nemoshow_canvas_set_width(canvas, width);

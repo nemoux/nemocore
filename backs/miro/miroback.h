@@ -27,8 +27,7 @@ struct miroback {
 	struct showone *scene;
 	struct showone *back;
 	struct showone *canvas;
-	struct showone *inner, *outer, *solid;
-	
+
 	struct showone **cones;
 	struct showone **rones;
 

@@ -187,7 +187,7 @@ static int nemoback_miro_shoot_mice(struct miroback *miro)
 	nemoshow_item_set_y(one, mice->r0 * (miro->height / miro->rows));
 	nemoshow_item_set_r(one, 0.0f);
 	nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
-	nemoshow_item_set_filter(one, miro->solid);
+	nemoshow_item_set_filter(one, NEMOSHOW_SOLID_SMALL_BLUR);
 
 	set0 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set0, one);
@@ -544,8 +544,6 @@ int main(int argc, char *argv[])
 	struct nemoshow *show;
 	struct showone *scene;
 	struct showone *canvas;
-	struct showone *blur;
-	struct showone *ease;
 	struct showone *one;
 	int32_t width = 1920;
 	int32_t height = 1080;
@@ -673,18 +671,6 @@ int main(int argc, char *argv[])
 	nemoshow_attach_one(show, canvas);
 	nemoshow_one_attach(scene, canvas);
 
-	miro->inner = blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
-	nemoshow_attach_one(show, blur);
-	nemoshow_filter_set_blur(blur, "high", "inner", 3.0f);
-
-	miro->outer = blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
-	nemoshow_attach_one(show, blur);
-	nemoshow_filter_set_blur(blur, "high", "outer", 3.0f);
-
-	miro->solid = blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
-	nemoshow_attach_one(show, blur);
-	nemoshow_filter_set_blur(blur, "high", "solid", 5.0f);
-
 	miro->cones = (struct showone **)malloc(sizeof(struct showone *) * (columns + 1));
 	miro->rones = (struct showone **)malloc(sizeof(struct showone *) * (rows + 1));
 	miro->bones = (struct showone **)malloc(sizeof(struct showone *) * (columns * rows));
@@ -711,7 +697,7 @@ int main(int argc, char *argv[])
 		nemoshow_item_set_height(one, 0.0f);
 		nemoshow_item_set_stroke_color(one, 0x1e, 0xdc, 0xdc, 0xff);
 		nemoshow_item_set_stroke_width(one, 2.0f);
-		nemoshow_item_set_filter(one, miro->solid);
+		nemoshow_item_set_filter(one, NEMOSHOW_SOLID_SMALL_BLUR);
 		nemoshow_item_set_alpha(one, 0.5f);
 	}
 
@@ -725,7 +711,7 @@ int main(int argc, char *argv[])
 		nemoshow_item_set_height(one, i * (height / rows));
 		nemoshow_item_set_stroke_color(one, 0x1e, 0xdc, 0xdc, 0xff);
 		nemoshow_item_set_stroke_width(one, 2.0f);
-		nemoshow_item_set_filter(one, miro->solid);
+		nemoshow_item_set_filter(one, NEMOSHOW_SOLID_SMALL_BLUR);
 		nemoshow_item_set_alpha(one, 0.5f);
 	}
 

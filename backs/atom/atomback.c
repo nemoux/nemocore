@@ -135,8 +135,6 @@ int main(int argc, char *argv[])
 	struct nemoshow *show;
 	struct showone *scene;
 	struct showone *canvas;
-	struct showone *blur;
-	struct showone *ease;
 	struct showone *pipe;
 	struct showone *one;
 	struct showtransition *trans;
@@ -308,18 +306,6 @@ int main(int argc, char *argv[])
 	nemomatrix_init_identity(&matrix);
 	nemomatrix_scale_xyz(&matrix, 0.5f, 0.5f, 0.5f);
 	nemoshow_poly_transform_vertices(one, &matrix);
-
-	atom->inner = blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
-	nemoshow_attach_one(show, blur);
-	nemoshow_filter_set_blur(blur, "high", "inner", 3.0f);
-
-	atom->outer = blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
-	nemoshow_attach_one(show, blur);
-	nemoshow_filter_set_blur(blur, "high", "outer", 3.0f);
-
-	atom->solid = blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
-	nemoshow_attach_one(show, blur);
-	nemoshow_filter_set_blur(blur, "high", "solid", 5.0f);
 
 	trans = nemoshow_transition_create(NEMOSHOW_LINEAR_EASE, 18000, 0);
 	nemoshow_transition_dirty_one(trans, atom->canvasb, NEMOSHOW_FILTER_DIRTY);

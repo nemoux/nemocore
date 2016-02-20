@@ -172,8 +172,6 @@ int main(int argc, char *argv[])
 	struct nemoshow *show;
 	struct showone *scene;
 	struct showone *canvas;
-	struct showone *blur;
-	struct showone *ease;
 	struct showone *one;
 	int32_t width = 1920;
 	int32_t height = 1080;
@@ -285,18 +283,6 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_dispatch_event(canvas, nemoback_edge_dispatch_canvas_event);
 	nemoshow_attach_one(show, canvas);
 	nemoshow_one_attach(scene, canvas);
-
-	edge->inner = blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
-	nemoshow_attach_one(show, blur);
-	nemoshow_filter_set_blur(blur, "high", "inner", 3.0f);
-
-	edge->outer = blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
-	nemoshow_attach_one(show, blur);
-	nemoshow_filter_set_blur(blur, "high", "outer", 3.0f);
-
-	edge->solid = blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
-	nemoshow_attach_one(show, blur);
-	nemoshow_filter_set_blur(blur, "high", "solid", 5.0f);
 
 	edge->envs = nemoenvs_create();
 	nemoenvs_load_configs(edge->envs, configpath);

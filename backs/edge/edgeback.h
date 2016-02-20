@@ -24,8 +24,7 @@ struct edgeback {
 	struct showone *scene;
 	struct showone *back;
 	struct showone *canvas;
-	struct showone *inner, *outer, *solid;
-
+	
 	uint32_t roll_serial;
 
 	float rollsize;

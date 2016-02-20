@@ -38,9 +38,7 @@ struct nemopad {
 
 	struct showone *back;
 	struct showone *canvas;
-
-	struct showone *blur;
-
+	
 	struct showone *borders[NEMOPAD_KEYS_MAX];
 	struct showone *keys[NEMOPAD_KEYS_MAX];
 

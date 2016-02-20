@@ -24,7 +24,6 @@ struct atomback {
 	struct showone *scene;
 	struct showone *back;
 	struct showone *canvasp;
-	struct showone *inner, *outer, *solid;
 	
 	struct showone *pipe;
 	struct showone *one0;

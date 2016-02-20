@@ -87,7 +87,7 @@ static void nemoback_edgeroll_show_rings(struct edgeback *edge, struct edgeroll 
 		nemoshow_item_set_width(one, edge->rollsize);
 		nemoshow_item_set_height(one, edge->rollsize);
 		nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
-		nemoshow_item_set_filter(one, edge->solid);
+		nemoshow_item_set_filter(one, NEMOSHOW_SOLID_SMALL_BLUR);
 		nemoshow_item_set_tsr(one);
 		nemoshow_item_pivot(one, edge->rollsize / 2.0f, edge->rollsize / 2.0f);
 		nemoshow_item_scale(one, 0.0f, 0.0f);
@@ -184,7 +184,7 @@ static void nemoback_edgeroll_show_groups(struct edgeback *edge, struct edgeroll
 		nemoshow_item_set_width(one, edge->rollsize);
 		nemoshow_item_set_height(one, edge->rollsize);
 		nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
-		nemoshow_item_set_filter(one, edge->solid);
+		nemoshow_item_set_filter(one, NEMOSHOW_SOLID_SMALL_BLUR);
 		nemoshow_item_set_tsr(one);
 		nemoshow_item_pivot(one, edge->rollsize / 2.0f, edge->rollsize / 2.0f);
 		nemoshow_item_scale(one, 0.7f, 0.7f);
@@ -453,7 +453,7 @@ int nemoback_edgeroll_activate_group(struct edgeback *edge, struct edgeroll *rol
 		nemoshow_item_set_width(one, edge->rollsize);
 		nemoshow_item_set_height(one, edge->rollsize);
 		nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
-		nemoshow_item_set_filter(one, edge->solid);
+		nemoshow_item_set_filter(one, NEMOSHOW_SOLID_SMALL_BLUR);
 		nemoshow_item_set_tsr(one);
 		nemoshow_item_pivot(one, edge->rollsize / 2.0f, edge->rollsize / 2.0f);
 		nemoshow_item_scale(one, 0.3f, 0.3f);
@@ -474,7 +474,7 @@ int nemoback_edgeroll_activate_group(struct edgeback *edge, struct edgeroll *rol
 		nemoshow_item_set_width(one, edge->rollsize);
 		nemoshow_item_set_height(one, edge->rollsize);
 		nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
-		nemoshow_item_set_filter(one, edge->solid);
+		nemoshow_item_set_filter(one, NEMOSHOW_SOLID_SMALL_BLUR);
 		nemoshow_item_set_tsr(one);
 		nemoshow_item_pivot(one, edge->rollsize / 2.0f, edge->rollsize / 2.0f);
 		nemoshow_item_scale(one, 0.6f, 0.1f);

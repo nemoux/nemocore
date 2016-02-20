@@ -27,7 +27,6 @@ struct moteback {
 	struct showone *canvasb;
 	struct showone *canvasp;
 	struct showone *canvast;
-	struct showone *inner, *outer, *solid;
 	
 	struct showone *pipe;
 	struct showone *quad;
