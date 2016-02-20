@@ -42,7 +42,6 @@ struct minecontext {
 	struct showone *canvas;
 	struct showone *filter0;
 	struct showone *filter1;
-	struct showone *ease;
 
 	struct showone *numbers[10];
 	struct showone *bomb;
@@ -186,7 +185,7 @@ static void nemomine_rotate_pin(struct minecontext *context, double ro)
 
 	sequence = nemoshow_sequence_create_easy(context->show, frame, NULL);
 
-	trans = nemoshow_transition_create(context->ease, 500, 0);
+	trans = nemoshow_transition_create(NEMOSHOW_CUBIC_INOUT_EASE, 500, 0);
 	nemoshow_transition_check_one(trans, context->pin);
 	nemoshow_transition_attach_sequence(trans, sequence);
 	nemoshow_attach_transition(context->show, trans);
@@ -220,7 +219,7 @@ static void nemomine_check_mine(struct minecontext *context, uint32_t tag)
 
 	sequence = nemoshow_sequence_create_easy(context->show, frame, NULL);
 
-	trans = nemoshow_transition_create(context->ease, 500, 0);
+	trans = nemoshow_transition_create(NEMOSHOW_CUBIC_INOUT_EASE, 500, 0);
 	nemoshow_transition_check_one(trans, mone->one);
 	nemoshow_transition_attach_sequence(trans, sequence);
 	nemoshow_attach_transition(context->show, trans);
@@ -253,7 +252,7 @@ static void nemomine_uncheck_mine(struct minecontext *context, uint32_t tag)
 
 	sequence = nemoshow_sequence_create_easy(context->show, frame, NULL);
 
-	trans = nemoshow_transition_create(context->ease, 500, 0);
+	trans = nemoshow_transition_create(NEMOSHOW_CUBIC_INOUT_EASE, 500, 0);
 	nemoshow_transition_check_one(trans, mone->one);
 	nemoshow_transition_attach_sequence(trans, sequence);
 	nemoshow_attach_transition(context->show, trans);
@@ -310,7 +309,7 @@ static void nemomine_confirm_mine(struct minecontext *context, uint32_t tag)
 
 		sequence = nemoshow_sequence_create_easy(context->show, frame, NULL);
 
-		trans = nemoshow_transition_create(context->ease, 500, 0);
+		trans = nemoshow_transition_create(NEMOSHOW_CUBIC_INOUT_EASE, 500, 0);
 		nemoshow_transition_check_one(trans, mone->box);
 		nemoshow_transition_check_one(trans, mone->one);
 		nemoshow_transition_attach_sequence(trans, sequence);
@@ -336,7 +335,7 @@ static void nemomine_confirm_mine(struct minecontext *context, uint32_t tag)
 
 		sequence = nemoshow_sequence_create_easy(context->show, frame, NULL);
 
-		trans = nemoshow_transition_create(context->ease, 500, 0);
+		trans = nemoshow_transition_create(NEMOSHOW_CUBIC_INOUT_EASE, 500, 0);
 		nemoshow_transition_check_one(trans, mone->one);
 		nemoshow_transition_attach_sequence(trans, sequence);
 		nemoshow_attach_transition(context->show, trans);
@@ -604,9 +603,6 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_dispatch_event(canvas, nemomine_dispatch_canvas_event);
 	nemoshow_attach_one(show, canvas);
 	nemoshow_one_attach(scene, canvas);
-
-	context->ease = ease = nemoshow_ease_create();
-	nemoshow_ease_set_type(ease, NEMOEASE_CUBIC_INOUT_TYPE);
 
 	context->filter0 = filter = nemoshow_filter_create(NEMOSHOW_EMBOSS_FILTER);
 	nemoshow_attach_one(show, filter);

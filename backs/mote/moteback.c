@@ -403,15 +403,6 @@ int main(int argc, char *argv[])
 	nemoshow_view_put_sound(show);
 	nemoshow_view_set_opaque(show, 0, 0, width, height);
 
-	mote->ease0 = ease = nemoshow_ease_create();
-	nemoshow_ease_set_type(ease, NEMOEASE_CUBIC_INOUT_TYPE);
-
-	mote->ease1 = ease = nemoshow_ease_create();
-	nemoshow_ease_set_type(ease, NEMOEASE_CUBIC_OUT_TYPE);
-
-	mote->ease2 = ease = nemoshow_ease_create();
-	nemoshow_ease_set_type(ease, NEMOEASE_LINEAR_TYPE);
-
 	mote->inner = blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
 	nemoshow_attach_one(show, blur);
 	nemoshow_filter_set_blur(blur, "high", "inner", 3.0f);
@@ -539,7 +530,7 @@ int main(int argc, char *argv[])
 
 	mote->ratio = nemoshow_canvas_get_aspect_ratio(mote->canvasp);
 
-	trans = nemoshow_transition_create(mote->ease2, 18000, 0);
+	trans = nemoshow_transition_create(NEMOSHOW_LINEAR_EASE, 18000, 0);
 	nemoshow_transition_dirty_one(trans, mote->canvasb, NEMOSHOW_FILTER_DIRTY);
 	nemoshow_transition_set_repeat(trans, 0);
 	nemoshow_attach_transition(mote->show, trans);
@@ -565,7 +556,7 @@ int main(int argc, char *argv[])
 				1.0f, set1, NULL),
 			NULL);
 
-	trans = nemoshow_transition_create(mote->ease0, 12000, 0);
+	trans = nemoshow_transition_create(NEMOSHOW_CUBIC_INOUT_EASE, 12000, 0);
 	nemoshow_transition_check_one(trans, mote->pipe);
 	nemoshow_transition_set_repeat(trans, 0);
 	nemoshow_transition_attach_sequence(trans, sequence);

@@ -136,8 +136,6 @@ static double nemopadcolors[][3] = {
 	{ 0xff, 0x8c, 0x32 }
 };
 
-static struct showone *nemopadease;
-
 void __attribute__((constructor(101))) nemopad_prepare_envs(void)
 {
 	struct showone *one;
@@ -193,9 +191,6 @@ void __attribute__((constructor(101))) nemopad_prepare_envs(void)
 			nemopadshifts[i] = NULL;
 		}
 	}
-
-	nemopadease = nemoshow_ease_create();
-	nemoshow_ease_set_type(nemopadease, NEMOEASE_CUBIC_INOUT_TYPE);
 }
 
 void __attribute__((destructor(101))) nemopad_finish_envs(void)
@@ -212,8 +207,6 @@ void __attribute__((destructor(101))) nemopad_finish_envs(void)
 		if (nemopadshifts[i] != NULL)
 			nemoshow_one_destroy(nemopadshifts[i]);
 	}
-
-	nemoshow_one_destroy(nemopadease);
 }
 
 static int nemopad_dispatch_key_grab(struct nemoshow *show, struct showgrab *grab, void *event)
@@ -627,7 +620,7 @@ int nemopad_activate(struct nemopad *pad, double x, double y, double r)
 
 		sequence = nemoshow_sequence_create_easy(show, frame, NULL);
 
-		trans = nemoshow_transition_create(nemopadease, random_get_int(500, 1000), random_get_int(0, 500));
+		trans = nemoshow_transition_create(NEMOSHOW_CUBIC_INOUT_EASE, random_get_int(500, 1000), random_get_int(0, 500));
 		nemoshow_transition_attach_sequence(trans, sequence);
 		nemoshow_attach_transition(show, trans);
 	}
@@ -695,7 +688,7 @@ void nemopad_deactivate(struct nemopad *pad)
 
 	sequence = nemoshow_sequence_create_easy(show, frame, NULL);
 
-	trans = nemoshow_transition_create(nemopadease, 400, 0);
+	trans = nemoshow_transition_create(NEMOSHOW_CUBIC_INOUT_EASE, 400, 0);
 	nemoshow_transition_attach_sequence(trans, sequence);
 	nemoshow_attach_transition(show, trans);
 
@@ -713,7 +706,7 @@ void nemopad_deactivate(struct nemopad *pad)
 
 	sequence = nemoshow_sequence_create_easy(show, frame, NULL);
 
-	trans = nemoshow_transition_create(nemopadease, 800, 0);
+	trans = nemoshow_transition_create(NEMOSHOW_CUBIC_INOUT_EASE, 800, 0);
 	nemoshow_transition_attach_sequence(trans, sequence);
 	nemoshow_attach_transition(show, trans);
 

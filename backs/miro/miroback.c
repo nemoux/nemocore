@@ -115,7 +115,7 @@ static void nemoback_miro_dispatch_mice_transition_done(void *data)
 					1.0f, set0, NULL),
 				NULL);
 
-		trans = nemoshow_transition_create(miro->ease1, 1000, 0);
+		trans = nemoshow_transition_create(NEMOSHOW_CUBIC_OUT_EASE, 1000, 0);
 		nemoshow_transition_set_dispatch_done(trans, nemoback_miro_dispatch_mice_destroy_done);
 		nemoshow_transition_set_userdata(trans, mice);
 		nemoshow_transition_check_one(trans, mice->one);
@@ -151,7 +151,7 @@ static void nemoback_miro_dispatch_mice_transition_done(void *data)
 					1.0f, set0, NULL),
 				NULL);
 
-		trans = nemoshow_transition_create(miro->ease2, 2400, 0);
+		trans = nemoshow_transition_create(NEMOSHOW_LINEAR_EASE, 2400, 0);
 		nemoshow_transition_set_dispatch_done(trans, nemoback_miro_dispatch_mice_transition_done);
 		nemoshow_transition_set_userdata(trans, mice);
 		nemoshow_transition_check_one(trans, mice->one);
@@ -198,7 +198,7 @@ static int nemoback_miro_shoot_mice(struct miroback *miro)
 				1.0f, set0, NULL),
 			NULL);
 
-	trans = nemoshow_transition_create(miro->ease1, 1000, 0);
+	trans = nemoshow_transition_create(NEMOSHOW_CUBIC_OUT_EASE, 1000, 0);
 	nemoshow_transition_set_dispatch_done(trans, nemoback_miro_dispatch_mice_transition_done);
 	nemoshow_transition_set_userdata(trans, mice);
 	nemoshow_transition_check_one(trans, one);
@@ -234,7 +234,7 @@ static int nemoback_miro_shoot_box(struct miroback *miro)
 					1.0f, set1, NULL),
 				NULL);
 
-		trans = nemoshow_transition_create(miro->ease1, 1500, i * 300);
+		trans = nemoshow_transition_create(NEMOSHOW_CUBIC_OUT_EASE, 1500, i * 300);
 		nemoshow_transition_check_one(trans, miro->bones[index]);
 		nemoshow_transition_attach_sequence(trans, sequence);
 		nemoshow_attach_transition(miro->show, trans);
@@ -389,7 +389,7 @@ static void nemoback_miro_dispatch_pulse_timer_event(struct nemotimer *timer, vo
 		sequence = nemoshow_sequence_create();
 		nemoshow_one_attach(sequence, frame);
 
-		trans = nemoshow_transition_create(miro->ease2, 150, 0);
+		trans = nemoshow_transition_create(NEMOSHOW_LINEAR_EASE, 150, 0);
 		nemoshow_transition_attach_sequence(trans, sequence);
 		nemoshow_attach_transition(miro->show, trans);
 
@@ -445,7 +445,7 @@ static void nemoback_miro_dispatch_show(struct miroback *miro, uint32_t duration
 					1.0f, set0, NULL),
 				NULL);
 
-		trans = nemoshow_transition_create(miro->ease1, duration, i * interval);
+		trans = nemoshow_transition_create(NEMOSHOW_CUBIC_OUT_EASE, duration, i * interval);
 		nemoshow_transition_check_one(trans, miro->cones[i]);
 		nemoshow_transition_attach_sequence(trans, sequence);
 		nemoshow_attach_transition(miro->show, trans);
@@ -461,7 +461,7 @@ static void nemoback_miro_dispatch_show(struct miroback *miro, uint32_t duration
 					1.0f, set0, NULL),
 				NULL);
 
-		trans = nemoshow_transition_create(miro->ease1, duration, i * interval);
+		trans = nemoshow_transition_create(NEMOSHOW_CUBIC_OUT_EASE, duration, i * interval);
 		nemoshow_transition_check_one(trans, miro->rones[i]);
 		nemoshow_transition_attach_sequence(trans, sequence);
 		nemoshow_attach_transition(miro->show, trans);
@@ -489,7 +489,7 @@ static void nemoback_miro_dispatch_hide(struct miroback *miro, uint32_t duration
 					1.0f, set0, NULL),
 				NULL);
 
-		trans = nemoshow_transition_create(miro->ease1, duration, i * interval);
+		trans = nemoshow_transition_create(NEMOSHOW_CUBIC_OUT_EASE, duration, i * interval);
 		nemoshow_transition_check_one(trans, miro->cones[i]);
 		nemoshow_transition_attach_sequence(trans, sequence);
 		nemoshow_attach_transition(miro->show, trans);
@@ -505,7 +505,7 @@ static void nemoback_miro_dispatch_hide(struct miroback *miro, uint32_t duration
 					1.0f, set0, NULL),
 				NULL);
 
-		trans = nemoshow_transition_create(miro->ease1, duration, i * interval);
+		trans = nemoshow_transition_create(NEMOSHOW_CUBIC_OUT_EASE, duration, i * interval);
 		nemoshow_transition_check_one(trans, miro->rones[i]);
 		nemoshow_transition_attach_sequence(trans, sequence);
 		nemoshow_attach_transition(miro->show, trans);
@@ -672,15 +672,6 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_dispatch_event(canvas, nemoback_miro_dispatch_canvas_event);
 	nemoshow_attach_one(show, canvas);
 	nemoshow_one_attach(scene, canvas);
-	
-	miro->ease0 = ease = nemoshow_ease_create();
-	nemoshow_ease_set_type(ease, NEMOEASE_CUBIC_INOUT_TYPE);
-
-	miro->ease1 = ease = nemoshow_ease_create();
-	nemoshow_ease_set_type(ease, NEMOEASE_CUBIC_OUT_TYPE);
-
-	miro->ease2 = ease = nemoshow_ease_create();
-	nemoshow_ease_set_type(ease, NEMOEASE_LINEAR_TYPE);
 
 	miro->inner = blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
 	nemoshow_attach_one(show, blur);

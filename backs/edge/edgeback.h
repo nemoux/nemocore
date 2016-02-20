@@ -25,9 +25,6 @@ struct edgeback {
 	struct showone *back;
 	struct showone *canvas;
 	struct showone *inner, *outer, *solid;
-	struct showone *ease0;
-	struct showone *ease1;
-	struct showone *ease2;
 
 	uint32_t roll_serial;
 

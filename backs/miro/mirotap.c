@@ -72,7 +72,7 @@ static void nemoback_mirotap_dispatch_timer(struct nemotimer *timer, void *data)
 			nemoshow_sequence_set_source(set1, ones[i]);
 			nemoshow_sequence_set_dattr(set1, "alpha", 0.0f, NEMOSHOW_STYLE_DIRTY);
 
-			trans = nemoshow_transition_create(miro->ease0, duration, delay * i);
+			trans = nemoshow_transition_create(NEMOSHOW_CUBIC_INOUT_EASE, duration, delay * i);
 			nemoshow_transition_check_one(trans, ones[i]);
 			nemoshow_transition_attach_sequence(trans,
 					nemoshow_sequence_create_easy(miro->show,
@@ -101,7 +101,7 @@ static void nemoback_mirotap_dispatch_timer(struct nemotimer *timer, void *data)
 			nemoshow_sequence_set_source(set1, ones[i]);
 			nemoshow_sequence_set_dattr(set1, "alpha", 0.0f, NEMOSHOW_STYLE_DIRTY);
 
-			trans = nemoshow_transition_create(miro->ease0, duration, delay * i);
+			trans = nemoshow_transition_create(NEMOSHOW_CUBIC_INOUT_EASE, duration, delay * i);
 			nemoshow_transition_check_one(trans, ones[i]);
 			nemoshow_transition_attach_sequence(trans,
 					nemoshow_sequence_create_easy(miro->show,
@@ -239,7 +239,7 @@ int nemoback_mirotap_down(struct miroback *miro, struct mirotap *tap, double x, 
 				1.0f, set0, set1, NULL),
 			NULL);
 
-	trans0 = nemoshow_transition_create(miro->ease1, 800, 0);
+	trans0 = nemoshow_transition_create(NEMOSHOW_CUBIC_OUT_EASE, 800, 0);
 	nemoshow_transition_check_one(trans0, tap->one0);
 	nemoshow_transition_check_one(trans0, tap->oner);
 	nemoshow_transition_attach_sequence(trans0, sequence);
@@ -255,7 +255,7 @@ int nemoback_mirotap_down(struct miroback *miro, struct mirotap *tap, double x, 
 				1.0f, set0, NULL),
 			NULL);
 
-	trans1 = nemoshow_transition_create(miro->ease2, 3000, 0);
+	trans1 = nemoshow_transition_create(NEMOSHOW_LINEAR_EASE, 3000, 0);
 	nemoshow_transition_check_one(trans1, tap->oner);
 	nemoshow_transition_attach_sequence(trans1, sequence);
 	nemoshow_transition_set_repeat(trans1, 0);
@@ -276,7 +276,7 @@ int nemoback_mirotap_down(struct miroback *miro, struct mirotap *tap, double x, 
 				1.0f, set1, NULL),
 			NULL);
 
-	trans1 = nemoshow_transition_create(miro->ease0, 1200, 0);
+	trans1 = nemoshow_transition_create(NEMOSHOW_CUBIC_INOUT_EASE, 1200, 0);
 	nemoshow_transition_check_one(trans1, tap->blur);
 	nemoshow_transition_attach_sequence(trans1, sequence);
 	nemoshow_transition_set_repeat(trans1, 0);
@@ -354,7 +354,7 @@ int nemoback_mirotap_motion(struct miroback *miro, struct mirotap *tap, double x
 					1.0f, set0, set1, set2, set3, set4, setr, NULL),
 				NULL);
 
-		trans = nemoshow_transition_create(miro->ease1, 500, 0);
+		trans = nemoshow_transition_create(NEMOSHOW_CUBIC_OUT_EASE, 500, 0);
 		nemoshow_transition_check_one(trans, tap->one0);
 		nemoshow_transition_check_one(trans, tap->one1);
 		nemoshow_transition_check_one(trans, tap->one2);
@@ -397,7 +397,7 @@ int nemoback_mirotap_motion(struct miroback *miro, struct mirotap *tap, double x
 					1.0f, set0, set1, set2, set3, set4, setr, NULL),
 				NULL);
 
-		trans = nemoshow_transition_create(miro->ease1, 500, 0);
+		trans = nemoshow_transition_create(NEMOSHOW_CUBIC_OUT_EASE, 500, 0);
 		nemoshow_transition_check_one(trans, tap->one0);
 		nemoshow_transition_check_one(trans, tap->one1);
 		nemoshow_transition_check_one(trans, tap->one2);
@@ -468,7 +468,7 @@ int nemoback_mirotap_up(struct miroback *miro, struct mirotap *tap, double x, do
 				1.0f, set0, set1, set2, set3, set4, setr, NULL),
 			NULL);
 
-	trans = nemoshow_transition_create(miro->ease0, 700, 0);
+	trans = nemoshow_transition_create(NEMOSHOW_CUBIC_INOUT_EASE, 700, 0);
 	nemoshow_transition_set_dispatch_done(trans, nemoback_mirotap_dispatch_destroy_done);
 	nemoshow_transition_set_userdata(trans, tap);
 	nemoshow_transition_check_one(trans, tap->one0);

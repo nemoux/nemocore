@@ -286,15 +286,6 @@ int main(int argc, char *argv[])
 	nemoshow_attach_one(show, canvas);
 	nemoshow_one_attach(scene, canvas);
 
-	edge->ease0 = ease = nemoshow_ease_create();
-	nemoshow_ease_set_type(ease, NEMOEASE_CUBIC_INOUT_TYPE);
-
-	edge->ease1 = ease = nemoshow_ease_create();
-	nemoshow_ease_set_type(ease, NEMOEASE_CUBIC_OUT_TYPE);
-
-	edge->ease2 = ease = nemoshow_ease_create();
-	nemoshow_ease_set_type(ease, NEMOEASE_LINEAR_TYPE);
-
 	edge->inner = blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
 	nemoshow_attach_one(show, blur);
 	nemoshow_filter_set_blur(blur, "high", "inner", 3.0f);

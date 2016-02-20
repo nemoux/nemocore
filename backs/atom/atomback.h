@@ -25,10 +25,7 @@ struct atomback {
 	struct showone *back;
 	struct showone *canvasp;
 	struct showone *inner, *outer, *solid;
-	struct showone *ease0;
-	struct showone *ease1;
-	struct showone *ease2;
-
+	
 	struct showone *pipe;
 	struct showone *one0;
 	struct showone *one1;

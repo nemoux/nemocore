@@ -31,17 +31,12 @@
 #define NEMOSPEAKER_CHECK(x, y, x0, y0, x1, y1)	\
 	(x0 + NEMOSPEAKER_OUTSET <= x && x < x1 + NEMOSPEAKER_OUTSET && y0 + NEMOSPEAKER_OUTSET <= y && y < y1 + NEMOSPEAKER_OUTSET)
 
-static struct showone *nemospeakerease;
-
 void __attribute__((constructor(101))) nemospeaker_prepare_envs(void)
 {
-	nemospeakerease = nemoshow_ease_create();
-	nemoshow_ease_set_type(nemospeakerease, NEMOEASE_CUBIC_INOUT_TYPE);
 }
 
 void __attribute__((destructor(101))) nemospeaker_finish_envs(void)
 {
-	nemoshow_one_destroy(nemospeakerease);
 }
 
 static int nemospeaker_dispatch_volume_handle_rotate_grab(struct nemoshow *show, struct showgrab *grab, void *event)
@@ -290,10 +285,10 @@ struct nemospeaker *nemospeaker_create(struct nemoshell *shell, uint32_t size, d
 	nemoshow_view_set_pivot(show, size / 2.0f, size / 2.0f);
 	nemoshow_view_set_rotation(show, speaker->r);
 
-	nemospeaker_dispatch_fadein_transition(show, speaker->layout0, nemospeakerease, 1500, 0);
-	nemospeaker_dispatch_fadein_transition(show, speaker->layout1, nemospeakerease, 1000, 250);
-	nemospeaker_dispatch_fadein_transition(show, speaker->layout2, nemospeakerease, 1000, 500);
-	nemospeaker_dispatch_fadein_transition(show, speaker->volume, nemospeakerease, 1000, 750);
+	nemospeaker_dispatch_fadein_transition(show, speaker->layout0, NEMOSHOW_CUBIC_INOUT_EASE, 1500, 0);
+	nemospeaker_dispatch_fadein_transition(show, speaker->layout1, NEMOSHOW_CUBIC_INOUT_EASE, 1000, 250);
+	nemospeaker_dispatch_fadein_transition(show, speaker->layout2, NEMOSHOW_CUBIC_INOUT_EASE, 1000, 500);
+	nemospeaker_dispatch_fadein_transition(show, speaker->volume, NEMOSHOW_CUBIC_INOUT_EASE, 1000, 750);
 
 	nemoshow_dispatch_frame(show);
 
@@ -341,7 +336,7 @@ void nemospeaker_set_volume(struct nemospeaker *speaker, uint32_t volume, uint32
 	nemoshow_sequence_set_source(set0, speaker->volume);
 	nemoshow_sequence_set_dattr(set0, "width", ((double)volume / 100.0f) * 396.0f, NEMOSHOW_SHAPE_DIRTY);
 
-	trans = nemoshow_transition_create(nemospeakerease, duration, delay);
+	trans = nemoshow_transition_create(NEMOSHOW_CUBIC_INOUT_EASE, duration, delay);
 	nemoshow_transition_check_one(trans, speaker->volume);
 	nemoshow_transition_attach_sequence(trans,
 			nemoshow_sequence_create_easy(speaker->show,

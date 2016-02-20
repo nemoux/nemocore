@@ -9,6 +9,27 @@
 #include <nemoxml.h>
 #include <nemomisc.h>
 
+struct showone *nemoeases[NEMOEASE_LAST_TYPE];
+
+void __attribute__((constructor(101))) nemoshow_ease_prepare(void)
+{
+	int i;
+
+	for (i = 0; i < NEMOEASE_LAST_TYPE; i++) {
+		nemoeases[i] = nemoshow_ease_create();
+		nemoshow_ease_set_type(nemoeases[i], i);
+	}
+}
+
+void __attribute__((destructor(101))) nemoshow_ease_finish(void)
+{
+	int i;
+
+	for (i = 0; i < NEMOEASE_LAST_TYPE; i++) {
+		nemoshow_ease_destroy(nemoeases[i]);
+	}
+}
+
 struct showone *nemoshow_ease_create(void)
 {
 	struct showease *ease;

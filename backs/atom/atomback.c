@@ -49,7 +49,7 @@ static void nemoback_atom_dispatch_canvas_event(struct nemoshow *show, struct sh
 						1.0f, set1, NULL),
 					NULL);
 
-			trans = nemoshow_transition_create(atom->ease0, 800, 0);
+			trans = nemoshow_transition_create(NEMOSHOW_CUBIC_INOUT_EASE, 800, 0);
 			nemoshow_transition_check_one(trans, atom->one0);
 			nemoshow_transition_attach_sequence(trans, sequence);
 			nemoshow_attach_transition(atom->show, trans);
@@ -77,7 +77,7 @@ static void nemoback_atom_dispatch_canvas_event(struct nemoshow *show, struct sh
 						1.0f, set1, NULL),
 					NULL);
 
-			trans = nemoshow_transition_create(atom->ease0, 800, 0);
+			trans = nemoshow_transition_create(NEMOSHOW_CUBIC_INOUT_EASE, 800, 0);
 			nemoshow_transition_check_one(trans, atom->one1);
 			nemoshow_transition_attach_sequence(trans, sequence);
 			nemoshow_attach_transition(atom->show, trans);
@@ -309,15 +309,6 @@ int main(int argc, char *argv[])
 	nemomatrix_scale_xyz(&matrix, 0.5f, 0.5f, 0.5f);
 	nemoshow_poly_transform_vertices(one, &matrix);
 
-	atom->ease0 = ease = nemoshow_ease_create();
-	nemoshow_ease_set_type(ease, NEMOEASE_CUBIC_INOUT_TYPE);
-
-	atom->ease1 = ease = nemoshow_ease_create();
-	nemoshow_ease_set_type(ease, NEMOEASE_CUBIC_OUT_TYPE);
-
-	atom->ease2 = ease = nemoshow_ease_create();
-	nemoshow_ease_set_type(ease, NEMOEASE_LINEAR_TYPE);
-
 	atom->inner = blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
 	nemoshow_attach_one(show, blur);
 	nemoshow_filter_set_blur(blur, "high", "inner", 3.0f);
@@ -330,7 +321,7 @@ int main(int argc, char *argv[])
 	nemoshow_attach_one(show, blur);
 	nemoshow_filter_set_blur(blur, "high", "solid", 5.0f);
 
-	trans = nemoshow_transition_create(atom->ease2, 18000, 0);
+	trans = nemoshow_transition_create(NEMOSHOW_LINEAR_EASE, 18000, 0);
 	nemoshow_transition_dirty_one(trans, atom->canvasb, NEMOSHOW_FILTER_DIRTY);
 	nemoshow_transition_set_repeat(trans, 0);
 	nemoshow_attach_transition(atom->show, trans);
@@ -360,7 +351,7 @@ int main(int argc, char *argv[])
 				1.0f, set1, set3, NULL),
 			NULL);
 
-	trans = nemoshow_transition_create(atom->ease0, 18000, 0);
+	trans = nemoshow_transition_create(NEMOSHOW_CUBIC_INOUT_EASE, 18000, 0);
 	nemoshow_transition_check_one(trans, atom->one1);
 	nemoshow_transition_check_one(trans, atom->onet);
 	nemoshow_transition_set_repeat(trans, 0);
@@ -388,7 +379,7 @@ int main(int argc, char *argv[])
 				1.0f, set1, NULL),
 			NULL);
 
-	trans = nemoshow_transition_create(atom->ease0, 12000, 0);
+	trans = nemoshow_transition_create(NEMOSHOW_CUBIC_INOUT_EASE, 12000, 0);
 	nemoshow_transition_check_one(trans, atom->pipe);
 	nemoshow_transition_set_repeat(trans, 0);
 	nemoshow_transition_attach_sequence(trans, sequence);

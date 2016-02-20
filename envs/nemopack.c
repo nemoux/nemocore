@@ -29,21 +29,12 @@
 #include <nemolog.h>
 #include <nemomisc.h>
 
-static struct showone *nemopackease0;
-static struct showone *nemopackease1;
-
 void __attribute__((constructor(101))) nemopack_prepare_envs(void)
 {
-	nemopackease0 = nemoshow_ease_create();
-	nemoshow_ease_set_type(nemopackease0, NEMOEASE_CUBIC_INOUT_TYPE);
-	nemopackease1 = nemoshow_ease_create();
-	nemoshow_ease_set_type(nemopackease1, NEMOEASE_CUBIC_OUT_TYPE);
 }
 
 void __attribute__((destructor(101))) nemopack_finish_envs(void)
 {
-	nemoshow_one_destroy(nemopackease0);
-	nemoshow_one_destroy(nemopackease1);
 }
 
 static void nemopack_handle_view_destroy(struct wl_listener *listener, void *data)
@@ -227,7 +218,7 @@ struct nemopack *nemopack_create(struct nemoshell *shell, struct nemoview *view,
 				1.0f, set0, set1, NULL),
 			NULL);
 
-	trans = nemoshow_transition_create(nemopackease1, 500, 0);
+	trans = nemoshow_transition_create(NEMOSHOW_CUBIC_OUT_EASE, 500, 0);
 	nemoshow_transition_check_one(trans, one);
 	nemoshow_transition_attach_sequence(trans, sequence);
 	nemoshow_attach_transition(show, trans);
@@ -247,7 +238,7 @@ struct nemopack *nemopack_create(struct nemoshell *shell, struct nemoview *view,
 				1.0f, set1, NULL),
 			NULL);
 
-	trans = nemoshow_transition_create(nemopackease0, 1200, 0);
+	trans = nemoshow_transition_create(NEMOSHOW_CUBIC_INOUT_EASE, 1200, 0);
 	nemoshow_transition_check_one(trans, pack->blur1);
 	nemoshow_transition_attach_sequence(trans, sequence);
 	nemoshow_transition_set_repeat(trans, 0);

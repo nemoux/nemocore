@@ -122,7 +122,7 @@ static void nemoback_edgeroll_show_rings(struct edgeback *edge, struct edgeroll 
 					1.0f, set0, NULL),
 				NULL);
 
-		trans = nemoshow_transition_create(edge->ease1, 700, 0);
+		trans = nemoshow_transition_create(NEMOSHOW_CUBIC_OUT_EASE, 700, 0);
 		nemoshow_transition_check_one(trans, one);
 		nemoshow_transition_attach_sequence(trans, sequence);
 		nemoshow_attach_transition(edge->show, trans);
@@ -150,7 +150,7 @@ static void nemoback_edgeroll_hide_rings(struct edgeback *edge, struct edgeroll 
 					1.0f, set0, NULL),
 				NULL);
 
-		trans = nemoshow_transition_create(edge->ease0, 700, 0);
+		trans = nemoshow_transition_create(NEMOSHOW_CUBIC_INOUT_EASE, 700, 0);
 		if (needs_destroy != 0) {
 			nemoback_edgeroll_reference(roll);
 
@@ -221,7 +221,7 @@ static void nemoback_edgeroll_show_groups(struct edgeback *edge, struct edgeroll
 					1.0f, set0, NULL),
 				NULL);
 
-		trans = nemoshow_transition_create(edge->ease1, 700, 300);
+		trans = nemoshow_transition_create(NEMOSHOW_CUBIC_OUT_EASE, 700, 300);
 		nemoshow_transition_check_one(trans, one);
 		nemoshow_transition_attach_sequence(trans, sequence);
 		nemoshow_attach_transition(edge->show, trans);
@@ -247,7 +247,7 @@ static void nemoback_edgeroll_hide_groups(struct edgeback *edge, struct edgeroll
 					1.0f, set0, NULL),
 				NULL);
 
-		trans = nemoshow_transition_create(edge->ease0, 700, 0);
+		trans = nemoshow_transition_create(NEMOSHOW_CUBIC_INOUT_EASE, 700, 0);
 		if (needs_destroy != 0) {
 			nemoback_edgeroll_reference(roll);
 
@@ -434,7 +434,7 @@ int nemoback_edgeroll_activate_group(struct edgeback *edge, struct edgeroll *rol
 				1.0f, set0, set1, NULL),
 			NULL);
 
-	trans = nemoshow_transition_create(edge->ease1, 500, 0);
+	trans = nemoshow_transition_create(NEMOSHOW_CUBIC_OUT_EASE, 500, 0);
 	nemoshow_transition_check_one(trans, roll->grouprings[group]);
 	nemoshow_transition_check_one(trans, roll->groups[group]);
 	nemoshow_transition_attach_sequence(trans, sequence);
@@ -497,7 +497,7 @@ int nemoback_edgeroll_activate_group(struct edgeback *edge, struct edgeroll *rol
 					1.0f, set0, NULL),
 				NULL);
 
-		trans = nemoshow_transition_create(edge->ease1, 500, i * 100);
+		trans = nemoshow_transition_create(NEMOSHOW_CUBIC_OUT_EASE, 500, i * 100);
 		nemoshow_transition_check_one(trans, roll->actionrings[i]);
 		nemoshow_transition_attach_sequence(trans, sequence);
 		nemoshow_attach_transition(edge->show, trans);
@@ -513,12 +513,12 @@ int nemoback_edgeroll_activate_group(struct edgeback *edge, struct edgeroll *rol
 					1.0f, set0, NULL),
 				NULL);
 
-		trans = nemoshow_transition_create(edge->ease1, 300, i * 100 + 200);
+		trans = nemoshow_transition_create(NEMOSHOW_CUBIC_OUT_EASE, 300, i * 100 + 200);
 		nemoshow_transition_check_one(trans, roll->actions[i]);
 		nemoshow_transition_attach_sequence(trans, sequence);
 		nemoshow_attach_transition(edge->show, trans);
 
-		nemoshow_transition_dispatch_rotate_easy(edge->show, roll->actionrings[i], edge->ease2, 5000, 0, 0);
+		nemoshow_transition_dispatch_rotate_easy(edge->show, roll->actionrings[i], NEMOSHOW_LINEAR_EASE, 5000, 0, 0);
 	}
 
 	nemoshow_dispatch_frame(edge->show);
@@ -557,7 +557,7 @@ int nemoback_edgeroll_deactivate_group(struct edgeback *edge, struct edgeroll *r
 				1.0f, set0, set1, NULL),
 			NULL);
 
-	trans = nemoshow_transition_create(edge->ease0, 500, 0);
+	trans = nemoshow_transition_create(NEMOSHOW_CUBIC_INOUT_EASE, 500, 0);
 	nemoshow_transition_check_one(trans, roll->grouprings[group]);
 	nemoshow_transition_check_one(trans, roll->groups[group]);
 	nemoshow_transition_attach_sequence(trans, sequence);
@@ -581,7 +581,7 @@ int nemoback_edgeroll_deactivate_group(struct edgeback *edge, struct edgeroll *r
 					1.0f, set0, set1, NULL),
 				NULL);
 
-		trans = nemoshow_transition_create(edge->ease0, 500, 0);
+		trans = nemoshow_transition_create(NEMOSHOW_CUBIC_INOUT_EASE, 500, 0);
 		nemoshow_transition_check_one(trans, roll->actionrings[i]);
 		nemoshow_transition_check_one(trans, roll->actions[i]);
 		nemoshow_transition_destroy_one(trans, roll->actionrings[i]);
@@ -627,7 +627,7 @@ int nemoback_edgeroll_activate_action(struct edgeback *edge, struct edgeroll *ro
 				1.0f, set0, set1, NULL),
 			NULL);
 
-	trans = nemoshow_transition_create(edge->ease1, 300, 0);
+	trans = nemoshow_transition_create(NEMOSHOW_CUBIC_OUT_EASE, 300, 0);
 	nemoshow_transition_check_one(trans, roll->actionrings[action]);
 	nemoshow_transition_check_one(trans, roll->actions[action]);
 	nemoshow_transition_attach_sequence(trans, sequence);
@@ -665,7 +665,7 @@ int nemoback_edgeroll_deactivate_action(struct edgeback *edge, struct edgeroll *
 				1.0f, set0, set1, NULL),
 			NULL);
 
-	trans = nemoshow_transition_create(edge->ease0, 300, 0);
+	trans = nemoshow_transition_create(NEMOSHOW_CUBIC_INOUT_EASE, 300, 0);
 	nemoshow_transition_check_one(trans, roll->actionrings[action]);
 	nemoshow_transition_check_one(trans, roll->actions[action]);
 	nemoshow_transition_attach_sequence(trans, sequence);
