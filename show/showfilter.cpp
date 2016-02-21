@@ -15,29 +15,38 @@
 
 struct showone *nemoblurs[NEMOBLUR_LAST_TYPE];
 
-void __attribute__((constructor(101))) nemoshow_filter_prepare(void)
+void __attribute__((constructor(102))) nemoshow_filter_prepare(void)
 {
 	nemoblurs[NEMOBLUR_INNER_SMALL_TYPE] = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
 	nemoshow_filter_set_blur(nemoblurs[NEMOBLUR_INNER_SMALL_TYPE], "high", "inner", 5.0f);
+	nemoshow_filter_update(nemoblurs[NEMOBLUR_INNER_SMALL_TYPE]);
 	nemoblurs[NEMOBLUR_INNER_MEDIUM_TYPE] = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
 	nemoshow_filter_set_blur(nemoblurs[NEMOBLUR_INNER_MEDIUM_TYPE], "high", "inner", 10.0f);
+	nemoshow_filter_update(nemoblurs[NEMOBLUR_INNER_MEDIUM_TYPE]);
 	nemoblurs[NEMOBLUR_INNER_LARGE_TYPE] = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
 	nemoshow_filter_set_blur(nemoblurs[NEMOBLUR_INNER_LARGE_TYPE], "high", "inner", 15.0f);
+	nemoshow_filter_update(nemoblurs[NEMOBLUR_INNER_LARGE_TYPE]);
 	nemoblurs[NEMOBLUR_OUTER_SMALL_TYPE] = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
 	nemoshow_filter_set_blur(nemoblurs[NEMOBLUR_OUTER_SMALL_TYPE], "high", "outer", 5.0f);
+	nemoshow_filter_update(nemoblurs[NEMOBLUR_OUTER_SMALL_TYPE]);
 	nemoblurs[NEMOBLUR_OUTER_MEDIUM_TYPE] = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
 	nemoshow_filter_set_blur(nemoblurs[NEMOBLUR_OUTER_MEDIUM_TYPE], "high", "outer", 10.0f);
+	nemoshow_filter_update(nemoblurs[NEMOBLUR_OUTER_MEDIUM_TYPE]);
 	nemoblurs[NEMOBLUR_OUTER_LARGE_TYPE] = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
 	nemoshow_filter_set_blur(nemoblurs[NEMOBLUR_OUTER_LARGE_TYPE], "high", "outer", 15.0f);
+	nemoshow_filter_update(nemoblurs[NEMOBLUR_OUTER_LARGE_TYPE]);
 	nemoblurs[NEMOBLUR_SOLID_SMALL_TYPE] = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
 	nemoshow_filter_set_blur(nemoblurs[NEMOBLUR_SOLID_SMALL_TYPE], "high", "solid", 5.0f);
+	nemoshow_filter_update(nemoblurs[NEMOBLUR_SOLID_SMALL_TYPE]);
 	nemoblurs[NEMOBLUR_SOLID_MEDIUM_TYPE] = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
 	nemoshow_filter_set_blur(nemoblurs[NEMOBLUR_SOLID_MEDIUM_TYPE], "high", "solid", 10.0f);
+	nemoshow_filter_update(nemoblurs[NEMOBLUR_SOLID_MEDIUM_TYPE]);
 	nemoblurs[NEMOBLUR_SOLID_LARGE_TYPE] = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
 	nemoshow_filter_set_blur(nemoblurs[NEMOBLUR_SOLID_LARGE_TYPE], "high", "solid", 15.0f);
+	nemoshow_filter_update(nemoblurs[NEMOBLUR_SOLID_LARGE_TYPE]);
 }
 
-void __attribute__((destructor(101))) nemoshow_filter_finish(void)
+void __attribute__((destructor(102))) nemoshow_filter_finish(void)
 {
 	int i;
 
