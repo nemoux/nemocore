@@ -116,6 +116,9 @@ extern void nemoshow_damage_canvas_all(struct nemoshow *show);
 extern void nemoshow_attach_one(struct nemoshow *show, struct showone *one);
 extern void nemoshow_detach_one(struct nemoshow *show, struct showone *one);
 
+extern void nemoshow_attach_ones(struct nemoshow *show, struct showone *one);
+extern void nemoshow_detach_ones(struct nemoshow *show, struct showone *one);
+
 extern void nemoshow_attach_transition(struct nemoshow *show, struct showtransition *trans);
 extern void nemoshow_detach_transition(struct nemoshow *show, struct showtransition *trans);
 extern void nemoshow_attach_transition_after(struct nemoshow *show, struct showtransition *trans, struct showtransition *ntrans);

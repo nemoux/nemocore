@@ -155,7 +155,7 @@ struct nemopack *nemopack_create(struct nemoshell *shell, struct nemoview *view,
 	pack->scene = scene = nemoshow_scene_create();
 	nemoshow_scene_set_width(scene, view->content->width);
 	nemoshow_scene_set_height(scene, view->content->height);
-	nemoshow_attach_one(show, scene);
+	nemoshow_set_scene(show, scene);
 
 	pack->back = canvas = nemoshow_canvas_create();
 	nemoshow_canvas_set_width(canvas, view->content->width);
@@ -163,7 +163,6 @@ struct nemopack *nemopack_create(struct nemoshell *shell, struct nemoview *view,
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_BACK_TYPE);
 	nemoshow_canvas_set_fill_color(canvas, 0.0f, 0.0f, 0.0f, 0.0f);
 	nemoshow_canvas_set_alpha(canvas, 0.0f);
-	nemoshow_attach_one(show, canvas);
 	nemoshow_one_attach(scene, canvas);
 
 	pack->canvas = canvas = nemoshow_canvas_create();
@@ -171,18 +170,14 @@ struct nemopack *nemopack_create(struct nemoshell *shell, struct nemoview *view,
 	nemoshow_canvas_set_height(canvas, view->content->height);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
 	nemoshow_canvas_set_dispatch_event(canvas, nemopack_dispatch_canvas_event);
-	nemoshow_attach_one(show, canvas);
 	nemoshow_one_attach(scene, canvas);
 
 	pack->blur0 = blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
-	nemoshow_attach_one(show, blur);
 	nemoshow_filter_set_blur(blur, "high", "inner", 5.0f);
 	pack->blur1 = blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
-	nemoshow_attach_one(show, blur);
 	nemoshow_filter_set_blur(blur, "high", "outer", 0.0f);
 
 	pack->one = one = nemoshow_item_create(NEMOSHOW_RECT_ITEM);
-	nemoshow_attach_one(show, one);
 	nemoshow_one_attach(canvas, one);
 	nemoshow_item_set_x(one, 0.0f);
 	nemoshow_item_set_y(one, 0.0f);
@@ -196,7 +191,6 @@ struct nemopack *nemopack_create(struct nemoshell *shell, struct nemoview *view,
 	nemoshow_sequence_set_cattr(set0, "fill", 0x1e, 0xdc, 0xdc, 0x40, NEMOSHOW_STYLE_DIRTY);
 
 	pack->icon = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
-	nemoshow_attach_one(show, one);
 	nemoshow_one_attach(canvas, one);
 	nemoshow_item_set_width(one, view->content->width / 2);
 	nemoshow_item_set_height(one, view->content->height / 2);

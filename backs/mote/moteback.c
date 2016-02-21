@@ -404,7 +404,7 @@ int main(int argc, char *argv[])
 	mote->scene = scene = nemoshow_scene_create();
 	nemoshow_scene_set_width(scene, width);
 	nemoshow_scene_set_height(scene, height);
-	nemoshow_attach_one(show, scene);
+	nemoshow_set_scene(show, scene);
 
 	mote->back = canvas = nemoshow_canvas_create();
 	nemoshow_canvas_set_width(canvas, width);
@@ -413,7 +413,6 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_fill_color(canvas, 0.0f, 0.0f, 0.0f, 255.0f);
 	nemoshow_canvas_set_alpha(canvas, 0.0f);
 	nemoshow_canvas_set_event(canvas, 1);
-	nemoshow_attach_one(show, canvas);
 	nemoshow_one_attach(scene, canvas);
 
 	mote->canvasb = canvas = nemoshow_canvas_create();
@@ -422,11 +421,9 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
 	if (shaderpath != NULL)
 		nemoshow_canvas_load_filter(canvas, shaderpath);
-	nemoshow_attach_one(show, canvas);
 
 	if (filepath != NULL) {
 		one = nemoshow_item_create(NEMOSHOW_IMAGE_ITEM);
-		nemoshow_attach_one(show, one);
 		nemoshow_one_attach(canvas, one);
 		nemoshow_item_set_x(one, 0.0f);
 		nemoshow_item_set_y(one, 0.0f);
@@ -439,10 +436,8 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_width(canvas, 128.0f);
 	nemoshow_canvas_set_height(canvas, 128.0f);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
-	nemoshow_attach_one(show, canvas);
 
 	one = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
-	nemoshow_attach_one(show, one);
 	nemoshow_one_attach(canvas, one);
 	nemoshow_item_set_x(one, 64.0f);
 	nemoshow_item_set_y(one, 64.0f);
@@ -458,18 +453,15 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_event(canvas, 1);
 	nemoshow_canvas_set_dispatch_redraw(canvas, nemoback_mote_dispatch_pipeline_canvas_redraw);
 	nemoshow_canvas_set_alpha(canvas, alpha);
-	nemoshow_attach_one(show, canvas);
 	nemoshow_one_attach(scene, canvas);
 
 	mote->pipe = pipe = nemoshow_pipe_create(NEMOSHOW_LIGHTING_DIFFUSE_TEXTURE_PIPE);
-	nemoshow_attach_one(show, pipe);
 	nemoshow_one_attach(canvas, pipe);
 	nemoshow_pipe_set_light(pipe, 1.0f, 1.0f, -1.0f, 1.0f);
 	nemoshow_pipe_set_aspect_ratio(pipe,
 			nemoshow_canvas_get_aspect_ratio(mote->canvasp));
 
 	mote->quad = one = nemoshow_poly_create(NEMOSHOW_QUAD_POLY);
-	nemoshow_attach_one(show, one);
 	nemoshow_one_attach(pipe, one);
 	nemoshow_one_set_tag(one, 1);
 	nemoshow_poly_set_color(one, 1.0f, 1.0f, 1.0f, 1.0f);
@@ -488,7 +480,6 @@ int main(int argc, char *argv[])
 	nemoshow_poly_transform_vertices(one, &matrix);
 
 	mote->mesh = one = nemoshow_poly_create(NEMOSHOW_MESH_POLY);
-	nemoshow_attach_one(show, one);
 	nemoshow_one_attach(pipe, one);
 	nemoshow_poly_set_color(one, 1.0f, 1.0f, 1.0f, 1.0f);
 	nemoshow_poly_set_canvas(one, mote->canvast);

@@ -131,11 +131,9 @@ int nemoback_mirotap_down(struct miroback *miro, struct mirotap *tap, double x, 
 	tap->y = y;
 
 	tap->blur = blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
-	nemoshow_attach_one(miro->show, blur);
 	nemoshow_filter_set_blur(blur, "high", "solid", 0.0f);
 
 	tap->one0 = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
-	nemoshow_attach_one(miro->show, one);
 	nemoshow_one_attach(miro->canvas, one);
 	nemoshow_item_set_x(one, 0.0f);
 	nemoshow_item_set_y(one, 0.0f);
@@ -150,7 +148,6 @@ int nemoback_mirotap_down(struct miroback *miro, struct mirotap *tap, double x, 
 	nemoshow_item_load_svg(one, NEMOUX_MIROBACK_RESOURCES "/touch-1.svg");
 
 	tap->one1 = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
-	nemoshow_attach_one(miro->show, one);
 	nemoshow_one_attach(miro->canvas, one);
 	nemoshow_item_set_x(one, 0.0f);
 	nemoshow_item_set_y(one, 0.0f);
@@ -165,7 +162,6 @@ int nemoback_mirotap_down(struct miroback *miro, struct mirotap *tap, double x, 
 	nemoshow_item_set_alpha(one, 0.0f);
 
 	tap->one2 = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
-	nemoshow_attach_one(miro->show, one);
 	nemoshow_one_attach(miro->canvas, one);
 	nemoshow_item_set_x(one, 0.0f);
 	nemoshow_item_set_y(one, 0.0f);
@@ -180,7 +176,6 @@ int nemoback_mirotap_down(struct miroback *miro, struct mirotap *tap, double x, 
 	nemoshow_item_set_alpha(one, 0.0f);
 
 	tap->one3 = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
-	nemoshow_attach_one(miro->show, one);
 	nemoshow_one_attach(miro->canvas, one);
 	nemoshow_item_set_x(one, 0.0f);
 	nemoshow_item_set_y(one, 0.0f);
@@ -195,7 +190,6 @@ int nemoback_mirotap_down(struct miroback *miro, struct mirotap *tap, double x, 
 	nemoshow_item_set_alpha(one, 0.0f);
 
 	tap->one4 = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
-	nemoshow_attach_one(miro->show, one);
 	nemoshow_one_attach(miro->canvas, one);
 	nemoshow_item_set_x(one, 0.0f);
 	nemoshow_item_set_y(one, 0.0f);
@@ -210,7 +204,6 @@ int nemoback_mirotap_down(struct miroback *miro, struct mirotap *tap, double x, 
 	nemoshow_item_set_alpha(one, 0.0f);
 
 	tap->oner = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
-	nemoshow_attach_one(miro->show, one);
 	nemoshow_one_attach(miro->canvas, one);
 	nemoshow_item_set_x(one, 0.0f);
 	nemoshow_item_set_y(one, 0.0f);

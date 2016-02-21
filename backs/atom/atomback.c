@@ -90,7 +90,6 @@ static void nemoback_atom_dispatch_canvas_event(struct nemoshow *show, struct sh
 
 			if ((plane = nemoshow_poly_pick_one(atom->one0, nemoshow_event_get_x(event), nemoshow_event_get_y(event), &tx, &ty)) > 0) {
 				one = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
-				nemoshow_attach_one(atom->show, one);
 				nemoshow_one_attach(atom->canvast, one);
 				nemoshow_item_set_x(one, tx * nemoshow_canvas_get_width(atom->canvast));
 				nemoshow_item_set_y(one, ty * nemoshow_canvas_get_height(atom->canvast));
@@ -217,7 +216,7 @@ int main(int argc, char *argv[])
 	atom->scene = scene = nemoshow_scene_create();
 	nemoshow_scene_set_width(scene, width);
 	nemoshow_scene_set_height(scene, height);
-	nemoshow_attach_one(show, scene);
+	nemoshow_set_scene(show, scene);
 
 	atom->back = canvas = nemoshow_canvas_create();
 	nemoshow_canvas_set_width(canvas, width);
@@ -226,7 +225,6 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_fill_color(canvas, 0.0f, 0.0f, 0.0f, 255.0f);
 	nemoshow_canvas_set_alpha(canvas, 0.0f);
 	nemoshow_canvas_set_event(canvas, 1);
-	nemoshow_attach_one(show, canvas);
 	nemoshow_one_attach(scene, canvas);
 
 	atom->canvasb = canvas = nemoshow_canvas_create();
@@ -235,16 +233,13 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
 	if (shaderpath != NULL)
 		nemoshow_canvas_load_filter(canvas, shaderpath);
-	nemoshow_attach_one(show, canvas);
 
 	atom->canvast = canvas = nemoshow_canvas_create();
 	nemoshow_canvas_set_width(canvas, 512.0f);
 	nemoshow_canvas_set_height(canvas, 512.0f);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
-	nemoshow_attach_one(show, canvas);
 
 	atom->onet = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
-	nemoshow_attach_one(show, one);
 	nemoshow_one_attach(canvas, one);
 	nemoshow_item_set_x(one, 0.0f);
 	nemoshow_item_set_y(one, 0.0f);
@@ -261,18 +256,15 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_PIPELINE_TYPE);
 	nemoshow_canvas_set_dispatch_event(canvas, nemoback_atom_dispatch_canvas_event);
 	nemoshow_canvas_set_alpha(canvas, alpha);
-	nemoshow_attach_one(show, canvas);
 	nemoshow_one_attach(scene, canvas);
 
 	atom->pipe = pipe = nemoshow_pipe_create(NEMOSHOW_LIGHTING_TEXTURE_PIPE);
-	nemoshow_attach_one(show, pipe);
 	nemoshow_one_attach(canvas, pipe);
 	nemoshow_pipe_set_light(pipe, 1.0f, 1.0f, -1.0f, 1.0f);
 	nemoshow_pipe_set_aspect_ratio(pipe,
 			nemoshow_canvas_get_aspect_ratio(atom->canvasp));
 
 	atom->one0 = one = nemoshow_poly_create(NEMOSHOW_QUAD_POLY);
-	nemoshow_attach_one(show, one);
 	nemoshow_one_attach(pipe, one);
 	nemoshow_one_set_tag(one, 1);
 	nemoshow_poly_set_color(one, 1.0f, 1.0f, 1.0f, 1.0f);
@@ -294,7 +286,6 @@ int main(int argc, char *argv[])
 	nemoshow_poly_transform_vertices(one, &matrix);
 
 	atom->one1 = one = nemoshow_poly_create(NEMOSHOW_CUBE_POLY);
-	nemoshow_attach_one(show, one);
 	nemoshow_one_attach(pipe, one);
 	nemoshow_one_set_tag(one, 2);
 	nemoshow_poly_set_canvas(one, atom->canvast);

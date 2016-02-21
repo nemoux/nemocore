@@ -541,7 +541,6 @@ static inline void nemoshow_item_update_path(struct nemoshow *show, struct showo
 static inline void nemoshow_item_update_matrix(struct nemoshow *show, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
-	struct showone *ref;
 
 	NEMOSHOW_ITEM_CC(item, matrix)->setIdentity();
 
@@ -611,9 +610,8 @@ static inline void nemoshow_item_update_matrix(struct nemoshow *show, struct sho
 				*NEMOSHOW_ITEM_CC(item, modelview));
 	}
 
-	ref = NEMOSHOW_REF(one, NEMOSHOW_GROUP_REF);
-	if (ref != NULL) {
-		struct showitem *group = NEMOSHOW_ITEM(ref);
+	if (one->parent->sub == NEMOSHOW_GROUP_ITEM) {
+		struct showitem *group = NEMOSHOW_ITEM(one->parent);
 
 		NEMOSHOW_ITEM_CC(item, matrix)->postConcat(
 				*NEMOSHOW_ITEM_CC(group, matrix));
@@ -954,17 +952,10 @@ void nemoshow_item_attach_one(struct showone *parent, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	if (one->parent != NULL) {
-		if (one->parent->sub == NEMOSHOW_GROUP_ITEM)
-			nemoshow_one_unreference_one(one, one->parent);
-
+	if (one->parent != NULL)
 		nemoshow_one_detach_one(one->parent, one);
-	}
 
 	nemoshow_one_attach_one(parent, one);
-
-	if (parent->sub == NEMOSHOW_GROUP_ITEM)
-		nemoshow_one_reference_one(one, parent, NEMOSHOW_MATRIX_DIRTY, NEMOSHOW_GROUP_REF);
 
 	if (item->canvas != NULL) {
 		nemolist_remove(&item->canvas_destroy_listener.link);
@@ -990,9 +981,6 @@ void nemoshow_item_attach_one(struct showone *parent, struct showone *one)
 void nemoshow_item_detach_one(struct showone *parent, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
-
-	if (parent->sub == NEMOSHOW_GROUP_ITEM)
-		nemoshow_one_unreference_one(one, parent);
 
 	nemoshow_one_detach_one(parent, one);
 

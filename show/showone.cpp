@@ -99,9 +99,6 @@ struct showone *nemoshow_one_create(int type)
 
 void nemoshow_one_destroy(struct showone *one)
 {
-	if (one->state & NEMOSHOW_RECYCLE_STATE)
-		return;
-
 	if (one->destroy != NULL) {
 		one->destroy(one);
 	} else {
@@ -114,9 +111,6 @@ void nemoshow_one_destroy(struct showone *one)
 void nemoshow_one_destroy_all(struct showone *one)
 {
 	struct showone *child, *nchild;
-
-	if (one->state & NEMOSHOW_RECYCLE_STATE)
-		return;
 
 	nemoshow_children_for_each_safe(child, nchild, one)
 		nemoshow_one_destroy_all(child);
@@ -149,6 +143,13 @@ static inline void nemoshow_one_dirty_backwards(struct showone *one, uint32_t di
 		if (ref->one->dirty_serial <= one->dirty_serial)
 			nemoshow_one_dirty_backwards(ref->one, ref->dirty);
 	}
+
+	if (one->type == NEMOSHOW_ITEM_TYPE && one->sub == NEMOSHOW_GROUP_ITEM) {
+		struct showone *child;
+
+		nemoshow_children_for_each(child, one)
+			nemoshow_one_dirty_backwards(child, NEMOSHOW_MATRIX_DIRTY);
+	}
 }
 
 void nemoshow_one_dirty(struct showone *one, uint32_t dirty)
@@ -170,6 +171,13 @@ void nemoshow_one_dirty(struct showone *one, uint32_t dirty)
 	nemolist_for_each(ref, &one->reference_list, link) {
 		if (ref->one->dirty_serial <= one->dirty_serial)
 			nemoshow_one_dirty_backwards(ref->one, ref->dirty);
+	}
+
+	if (one->type == NEMOSHOW_ITEM_TYPE && one->sub == NEMOSHOW_GROUP_ITEM) {
+		struct showone *child;
+
+		nemoshow_children_for_each(child, one)
+			nemoshow_one_dirty_backwards(child, NEMOSHOW_MATRIX_DIRTY);
 	}
 }
 
@@ -193,6 +201,9 @@ void nemoshow_one_attach_one(struct showone *parent, struct showone *one)
 
 	one->parent_destroy_listener.notify = nemoshow_one_handle_parent_destroy_signal;
 	nemosignal_add(&parent->destroy_signal, &one->parent_destroy_listener);
+
+	if (parent->show != NULL)
+		nemoshow_attach_ones(parent->show, one);
 }
 
 void nemoshow_one_detach_one(struct showone *parent, struct showone *one)
@@ -244,6 +255,9 @@ int nemoshow_one_reference_one(struct showone *one, struct showone *src, uint32_
 
 	if (one->dirty_serial <= src->dirty_serial)
 		nemoshow_one_dirty_backwards(one, dirty);
+
+	if (one->show != NULL)
+		nemoshow_attach_ones(one->show, src);
 
 	return 0;
 }

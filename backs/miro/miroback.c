@@ -181,7 +181,6 @@ static int nemoback_miro_shoot_mice(struct miroback *miro)
 	mice->r1 = mice->r0;
 
 	mice->one = one = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
-	nemoshow_attach_one(miro->show, one);
 	nemoshow_one_attach(miro->canvas, one);
 	nemoshow_item_set_x(one, mice->c0 * (miro->width / miro->columns));
 	nemoshow_item_set_y(one, mice->r0 * (miro->height / miro->rows));
@@ -652,7 +651,7 @@ int main(int argc, char *argv[])
 	miro->scene = scene = nemoshow_scene_create();
 	nemoshow_scene_set_width(scene, width);
 	nemoshow_scene_set_height(scene, height);
-	nemoshow_attach_one(show, scene);
+	nemoshow_set_scene(show, scene);
 
 	miro->back = canvas = nemoshow_canvas_create();
 	nemoshow_canvas_set_width(canvas, width);
@@ -660,7 +659,6 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_BACK_TYPE);
 	nemoshow_canvas_set_fill_color(canvas, 0.0f, 0.0f, 0.0f, 255.0f);
 	nemoshow_canvas_set_alpha(canvas, 0.0f);
-	nemoshow_attach_one(show, canvas);
 	nemoshow_one_attach(scene, canvas);
 
 	miro->canvas = canvas = nemoshow_canvas_create();
@@ -668,7 +666,6 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_height(canvas, height);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
 	nemoshow_canvas_set_dispatch_event(canvas, nemoback_miro_dispatch_canvas_event);
-	nemoshow_attach_one(show, canvas);
 	nemoshow_one_attach(scene, canvas);
 
 	miro->cones = (struct showone **)malloc(sizeof(struct showone *) * (columns + 1));
@@ -677,7 +674,6 @@ int main(int argc, char *argv[])
 
 	for (i = 0; i < columns * rows; i++) {
 		miro->bones[i] = one = nemoshow_item_create(NEMOSHOW_RECT_ITEM);
-		nemoshow_attach_one(show, one);
 		nemoshow_one_attach(canvas, one);
 		nemoshow_item_set_x(one, (i % columns) * (width / columns));
 		nemoshow_item_set_y(one, (i / columns) * (height / rows));
@@ -689,7 +685,6 @@ int main(int argc, char *argv[])
 
 	for (i = 0; i <= columns; i++) {
 		miro->cones[i] = one = nemoshow_item_create(NEMOSHOW_LINE_ITEM);
-		nemoshow_attach_one(show, one);
 		nemoshow_one_attach(canvas, one);
 		nemoshow_item_set_x(one, i * (width / columns));
 		nemoshow_item_set_y(one, 0.0f);
@@ -703,7 +698,6 @@ int main(int argc, char *argv[])
 
 	for (i = 0; i <= rows; i++) {
 		miro->rones[i] = one = nemoshow_item_create(NEMOSHOW_LINE_ITEM);
-		nemoshow_attach_one(show, one);
 		nemoshow_one_attach(canvas, one);
 		nemoshow_item_set_x(one, 0.0f);
 		nemoshow_item_set_y(one, i * (height / rows));

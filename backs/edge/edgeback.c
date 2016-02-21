@@ -265,7 +265,7 @@ int main(int argc, char *argv[])
 	edge->scene = scene = nemoshow_scene_create();
 	nemoshow_scene_set_width(scene, width);
 	nemoshow_scene_set_height(scene, height);
-	nemoshow_attach_one(show, scene);
+	nemoshow_set_scene(show, scene);
 
 	edge->back = canvas = nemoshow_canvas_create();
 	nemoshow_canvas_set_width(canvas, width);
@@ -273,7 +273,6 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_BACK_TYPE);
 	nemoshow_canvas_set_fill_color(canvas, 0.0f, 0.0f, 0.0f, 255.0f);
 	nemoshow_canvas_set_alpha(canvas, 0.0f);
-	nemoshow_attach_one(show, canvas);
 	nemoshow_one_attach(scene, canvas);
 
 	edge->canvas = canvas = nemoshow_canvas_create();
@@ -281,7 +280,6 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_height(canvas, height);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
 	nemoshow_canvas_set_dispatch_event(canvas, nemoback_edge_dispatch_canvas_event);
-	nemoshow_attach_one(show, canvas);
 	nemoshow_one_attach(scene, canvas);
 
 	edge->envs = nemoenvs_create();

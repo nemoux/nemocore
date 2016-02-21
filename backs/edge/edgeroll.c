@@ -80,7 +80,6 @@ static void nemoback_edgeroll_show_rings(struct edgeback *edge, struct edgeroll 
 		const char *ring = nemoenvs_get_group_ring(edge->envs, i);
 
 		roll->grouprings[i] = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
-		nemoshow_attach_one(edge->show, one);
 		nemoshow_one_attach(edge->canvas, one);
 		nemoshow_item_set_x(one, 0.0f);
 		nemoshow_item_set_y(one, 0.0f);
@@ -175,7 +174,6 @@ static void nemoback_edgeroll_show_groups(struct edgeback *edge, struct edgeroll
 		const char *icon = nemoenvs_get_group_icon(edge->envs, i);
 
 		roll->groups[i] = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
-		nemoshow_attach_one(edge->show, one);
 		nemoshow_one_attach(edge->canvas, one);
 		nemoshow_one_set_tag(one, NEMOSHOW_ONE_TAGGROUP(1000 + i, roll->serial));
 		nemoshow_one_set_userdata(one, roll);
@@ -445,7 +443,6 @@ int nemoback_edgeroll_activate_group(struct edgeback *edge, struct edgeroll *rol
 		const char *icon = nemoenvs_get_action_icon(edge->envs, group, i);
 
 		roll->actionrings[i] = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
-		nemoshow_attach_one(edge->show, one);
 		nemoshow_one_attach(edge->canvas, one);
 		nemoshow_one_set_tag(one, NEMOSHOW_ONE_TAGGROUP(2000 + i, roll->serial));
 		nemoshow_item_set_x(one, 0.0f);
@@ -466,7 +463,6 @@ int nemoback_edgeroll_activate_group(struct edgeback *edge, struct edgeroll *rol
 				y + (i + 1) * edge->rollsize * dy);
 
 		roll->actions[i] = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
-		nemoshow_attach_one(edge->show, one);
 		nemoshow_one_attach(edge->canvas, one);
 		nemoshow_one_set_tag(one, NEMOSHOW_ONE_TAGGROUP(2000 + i, roll->serial));
 		nemoshow_item_set_x(one, 0.0f);

@@ -402,10 +402,6 @@ static int nemoshow_load_show(struct nemoshow *show, struct xmlnode *node)
 
 			if (one->type == NEMOSHOW_SCENE_TYPE) {
 				nemoshow_load_scene(show, one, child);
-			} else if (one->type == NEMOSHOW_SEQUENCE_TYPE) {
-				nemoshow_load_sequence(show, one, child);
-
-				nemoshow_one_set_state(one, NEMOSHOW_RECYCLE_STATE);
 			}
 		}
 	}
@@ -643,6 +639,8 @@ int nemoshow_set_scene(struct nemoshow *show, struct showone *one)
 
 	scene->needs_resize = 1;
 
+	nemoshow_attach_ones(show, one);
+
 	return 0;
 }
 
@@ -650,6 +648,8 @@ void nemoshow_put_scene(struct nemoshow *show)
 {
 	if (show->scene == NULL)
 		return;
+
+	nemoshow_detach_ones(show, show->scene);
 
 	show->scene = NULL;
 
@@ -764,11 +764,6 @@ void nemoshow_attach_one(struct nemoshow *show, struct showone *one)
 	one->show = show;
 
 	nemoshow_one_dirty(one, NEMOSHOW_ALL_DIRTY);
-
-	if (one->type == NEMOSHOW_SCENE_TYPE) {
-		if (show->scene == NULL)
-			nemoshow_set_scene(show, one);
-	}
 }
 
 void nemoshow_detach_one(struct nemoshow *show, struct showone *one)
@@ -777,10 +772,40 @@ void nemoshow_detach_one(struct nemoshow *show, struct showone *one)
 	nemolist_init(&one->link);
 
 	one->show = NULL;
+}
 
-	if (one->type == NEMOSHOW_SCENE_TYPE) {
-		if (show->scene == one)
-			nemoshow_put_scene(show);
+void nemoshow_attach_ones(struct nemoshow *show, struct showone *one)
+{
+	struct showone *child;
+	int i;
+
+	if (one->show != show) {
+		if (one->show != NULL)
+			nemoshow_detach_one(one->show, one);
+
+		nemoshow_attach_one(show, one);
+	}
+
+	nemoshow_children_for_each(child, one) {
+		nemoshow_attach_ones(show, child);
+	}
+
+	for (i = 0; i < NEMOSHOW_LAST_REF; i++) {
+		if (one->refs[i] != NULL)
+			nemoshow_attach_ones(show, one->refs[i]->src);
+	}
+}
+
+void nemoshow_detach_ones(struct nemoshow *show, struct showone *one)
+{
+	struct showone *child;
+
+	if (one->show == show) {
+		nemoshow_detach_one(show, one);
+	}
+
+	nemoshow_children_for_each(child, one) {
+		nemoshow_detach_ones(show, child);
 	}
 }
 

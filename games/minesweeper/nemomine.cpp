@@ -459,7 +459,6 @@ static void nemomine_prepare_ui(struct minecontext *context)
 			mone = &context->ones[index];
 
 			mone->box = one = nemoshow_item_create(NEMOSHOW_RRECT_ITEM);
-			nemoshow_attach_one(context->show, one);
 			nemoshow_one_attach(context->canvas, one);
 			nemoshow_one_set_tag(one, index + 1);
 			nemoshow_item_set_x(one, 1.0f);
@@ -476,7 +475,6 @@ static void nemomine_prepare_ui(struct minecontext *context)
 			nemoshow_item_translate(one, j * context->size, i * context->size + context->size);
 
 			mone->one = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
-			nemoshow_attach_one(context->show, one);
 			nemoshow_one_attach(context->canvas, one);
 			nemoshow_one_set_tag(one, index + 1);
 			nemoshow_item_set_x(one, 2.0f);
@@ -585,7 +583,7 @@ int main(int argc, char *argv[])
 	context->scene = scene = nemoshow_scene_create();
 	nemoshow_scene_set_width(scene, width);
 	nemoshow_scene_set_height(scene, height);
-	nemoshow_attach_one(show, scene);
+	nemoshow_set_scene(show, scene);
 
 	context->back = canvas = nemoshow_canvas_create();
 	nemoshow_canvas_set_width(canvas, width);
@@ -593,7 +591,6 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_BACK_TYPE);
 	nemoshow_canvas_set_fill_color(canvas, 0.0f, 0.0f, 0.0f, 0.0f);
 	nemoshow_canvas_set_alpha(canvas, 0.0f);
-	nemoshow_attach_one(show, canvas);
 	nemoshow_one_attach(scene, canvas);
 
 	context->canvas = canvas = nemoshow_canvas_create();
@@ -601,16 +598,13 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_height(canvas, height);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
 	nemoshow_canvas_set_dispatch_event(canvas, nemomine_dispatch_canvas_event);
-	nemoshow_attach_one(show, canvas);
 	nemoshow_one_attach(scene, canvas);
 
 	context->filter0 = filter = nemoshow_filter_create(NEMOSHOW_EMBOSS_FILTER);
-	nemoshow_attach_one(show, filter);
 	nemoshow_filter_set_light(filter, 1.0f, 1.0f, 1.0f, 128.0f, 32.0f);
 	nemoshow_filter_set_radius(filter, 0.5f);
 
 	context->filter1 = filter = nemoshow_filter_create(NEMOSHOW_EMBOSS_FILTER);
-	nemoshow_attach_one(show, filter);
 	nemoshow_filter_set_light(filter, 1.0f, 1.0f, 1.0f, 128.0f, 32.0f);
 	nemoshow_filter_set_radius(filter, 1.0f);
 
@@ -640,7 +634,6 @@ int main(int argc, char *argv[])
 	nemoshow_item_load_svg(one, NEMOUX_MINESWEEPER_RESOURCES "/mine-finder.svg");
 
 	context->pin = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
-	nemoshow_attach_one(show, one);
 	nemoshow_one_attach(canvas, one);
 	nemoshow_one_set_tag(one, 10001 + 1);
 	nemoshow_item_set_x(one, 0.0f);
@@ -656,7 +649,6 @@ int main(int argc, char *argv[])
 	nemoshow_item_load_svg(one, NEMOUX_MINESWEEPER_RESOURCES "/mine-pin.svg");
 
 	context->reset = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
-	nemoshow_attach_one(show, one);
 	nemoshow_one_attach(canvas, one);
 	nemoshow_one_set_tag(one, 10002 + 1);
 	nemoshow_item_set_x(one, 0.0f);
@@ -670,12 +662,10 @@ int main(int argc, char *argv[])
 	nemoshow_item_load_svg(one, NEMOUX_MINESWEEPER_RESOURCES "/mine-bomb.svg");
 
 	context->font = font = nemoshow_font_create();
-	nemoshow_attach_one(show, font);
 	nemoshow_font_load(font, "/usr/share/fonts/ttf/LiberationMono-Regular.ttf");
 	nemoshow_font_use_harfbuzz(font);
 
 	context->time = one = nemoshow_item_create(NEMOSHOW_TEXT_ITEM);
-	nemoshow_attach_one(show, one);
 	nemoshow_one_attach(canvas, one);
 	nemoshow_item_set_font(one, font);
 	nemoshow_item_set_fontsize(one, size);
