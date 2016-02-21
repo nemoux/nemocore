@@ -169,8 +169,6 @@ static struct showone *nemoshow_create_one(struct nemoshow *show, struct xmlnode
 		one = nemoshow_path_create(NEMOSHOW_TEXT_PATH);
 	} else if (strcmp(node->name, "svgto") == 0) {
 		one = nemoshow_path_create(NEMOSHOW_SVG_PATH);
-	} else if (strcmp(node->name, "camera") == 0) {
-		one = nemoshow_camera_create();
 	} else if (strcmp(node->name, "blur") == 0) {
 		one = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
 	} else if (strcmp(node->name, "linear") == 0) {
@@ -347,8 +345,6 @@ static int nemoshow_load_scene(struct nemoshow *show, struct showone *scene, str
 				nemoshow_load_canvas(show, one, child);
 			} else if (one->type == NEMOSHOW_MATRIX_TYPE) {
 				nemoshow_load_matrix(show, one, child);
-			} else if (one->type == NEMOSHOW_CAMERA_TYPE) {
-				nemoshow_load_one(show, one, child);
 			}
 		}
 	}
@@ -526,10 +522,6 @@ void nemoshow_arrange_one(struct nemoshow *show)
 			nemoshow_matrix_arrange(one);
 
 			nemoshow_one_set_state(one, NEMOSHOW_ARRANGE_STATE);
-		} else if (one->type == NEMOSHOW_CAMERA_TYPE) {
-			nemoshow_camera_arrange(one);
-
-			nemoshow_one_set_state(one, NEMOSHOW_ARRANGE_STATE);
 		} else if (one->type == NEMOSHOW_FILTER_TYPE) {
 			nemoshow_filter_arrange(one);
 
@@ -662,26 +654,6 @@ void nemoshow_put_scene(struct nemoshow *show)
 	show->scene = NULL;
 
 	nemotale_clear_node(show->tale);
-}
-
-int nemoshow_set_camera(struct nemoshow *show, struct showone *one)
-{
-	if (show->camera == one)
-		return 0;
-
-	show->camera = one;
-
-	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
-
-	return 0;
-}
-
-void nemoshow_put_camera(struct nemoshow *show)
-{
-	if (show->camera == NULL)
-		return;
-
-	show->camera = NULL;
 }
 
 int nemoshow_set_size(struct nemoshow *show, uint32_t width, uint32_t height)

@@ -24,7 +24,6 @@ NEMO_BEGIN_EXTERN_C
 #include <showtransition.h>
 #include <showmatrix.h>
 #include <showpath.h>
-#include <showcamera.h>
 #include <showfilter.h>
 #include <showshader.h>
 #include <showcons.h>
@@ -52,7 +51,6 @@ struct nemoshow {
 	struct showsymtable *stable;
 
 	struct showone *scene;
-	struct showone *camera;
 
 	uint32_t width, height;
 	double sx, sy;
@@ -103,9 +101,6 @@ extern void nemoshow_render_one(struct nemoshow *show);
 
 extern int nemoshow_set_scene(struct nemoshow *show, struct showone *one);
 extern void nemoshow_put_scene(struct nemoshow *show);
-
-extern int nemoshow_set_camera(struct nemoshow *show, struct showone *one);
-extern void nemoshow_put_camera(struct nemoshow *show);
 
 extern int nemoshow_set_size(struct nemoshow *show, uint32_t width, uint32_t height);
 extern int nemoshow_set_scale(struct nemoshow *show, double sx, double sy);
