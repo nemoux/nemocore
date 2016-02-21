@@ -779,12 +779,13 @@ void nemoshow_attach_ones(struct nemoshow *show, struct showone *one)
 	struct showone *child;
 	int i;
 
-	if (one->show != show) {
-		if (one->show != NULL)
-			nemoshow_detach_one(one->show, one);
+	if (one->show == show)
+		return;
 
-		nemoshow_attach_one(show, one);
-	}
+	if (one->show != NULL)
+		nemoshow_detach_one(one->show, one);
+
+	nemoshow_attach_one(show, one);
 
 	nemoshow_children_for_each(child, one) {
 		nemoshow_attach_ones(show, child);
