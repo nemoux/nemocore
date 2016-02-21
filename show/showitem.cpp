@@ -610,7 +610,7 @@ static inline void nemoshow_item_update_matrix(struct nemoshow *show, struct sho
 				*NEMOSHOW_ITEM_CC(item, modelview));
 	}
 
-	if (one->parent->sub == NEMOSHOW_GROUP_ITEM) {
+	if (one->parent->type == NEMOSHOW_ITEM_TYPE && one->parent->sub == NEMOSHOW_GROUP_ITEM) {
 		struct showitem *group = NEMOSHOW_ITEM(one->parent);
 
 		NEMOSHOW_ITEM_CC(item, matrix)->postConcat(
