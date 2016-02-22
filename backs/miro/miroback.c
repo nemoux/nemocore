@@ -533,7 +533,6 @@ int main(int argc, char *argv[])
 		{ "mices",			required_argument,			NULL,		'm' },
 		{ "tapsize",		required_argument,			NULL,		't' },
 		{ "sounddev",		required_argument,			NULL,		's' },
-		{ "log",				required_argument,			NULL,		'o' },
 		{ 0 }
 	};
 
@@ -554,9 +553,7 @@ int main(int argc, char *argv[])
 	int opt;
 	int i;
 
-	nemolog_set_file(2);
-
-	while (opt = getopt_long(argc, argv, "w:h:c:r:m:t:s:o:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:c:r:m:t:s:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -587,10 +584,6 @@ int main(int argc, char *argv[])
 
 			case 's':
 				snddev = strdup(optarg);
-				break;
-
-			case 'o':
-				nemolog_open_socket(optarg);
 				break;
 
 			default:

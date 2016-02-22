@@ -15,7 +15,7 @@
 
 struct showone *nemoblurs[NEMOBLUR_LAST_TYPE];
 
-void __attribute__((constructor(102))) nemoshow_filter_prepare(void)
+void __attribute__((constructor(102))) nemoshow_filter_initialize(void)
 {
 	nemoblurs[NEMOBLUR_INNER_SMALL_TYPE] = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
 	nemoshow_filter_set_blur(nemoblurs[NEMOBLUR_INNER_SMALL_TYPE], "high", "inner", 5.0f);
@@ -46,7 +46,7 @@ void __attribute__((constructor(102))) nemoshow_filter_prepare(void)
 	nemoshow_filter_update(nemoblurs[NEMOBLUR_SOLID_LARGE_TYPE]);
 }
 
-void __attribute__((destructor(102))) nemoshow_filter_finish(void)
+void __attribute__((destructor(102))) nemoshow_filter_finalize(void)
 {
 	int i;
 

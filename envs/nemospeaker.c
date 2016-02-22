@@ -31,11 +31,11 @@
 #define NEMOSPEAKER_CHECK(x, y, x0, y0, x1, y1)	\
 	(x0 + NEMOSPEAKER_OUTSET <= x && x < x1 + NEMOSPEAKER_OUTSET && y0 + NEMOSPEAKER_OUTSET <= y && y < y1 + NEMOSPEAKER_OUTSET)
 
-void __attribute__((constructor(101))) nemospeaker_prepare_envs(void)
+void __attribute__((constructor(101))) nemospeaker_initialize_envs(void)
 {
 }
 
-void __attribute__((destructor(101))) nemospeaker_finish_envs(void)
+void __attribute__((destructor(101))) nemospeaker_finalize_envs(void)
 {
 }
 

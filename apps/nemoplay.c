@@ -193,7 +193,6 @@ int main(int argc, char *argv[])
 		{ "height",				required_argument,	NULL,		'h' },
 		{ "background",		no_argument,				NULL,		'b' },
 		{ "minisink",			no_argument,				NULL,		'm' },
-		{ "log",					required_argument,	NULL,		'o' },
 		{ 0 }
 	};
 
@@ -213,9 +212,7 @@ int main(int argc, char *argv[])
 	int is_minisink = 0;
 	int opt;
 
-	nemolog_set_file(2);
-
-	while (opt = getopt_long(argc, argv, "f:s:w:h:bmo:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "f:s:w:h:bm", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -242,10 +239,6 @@ int main(int argc, char *argv[])
 
 			case 'm':
 				is_minisink = 1;
-				break;
-
-			case 'o':
-				nemolog_open_socket(optarg);
 				break;
 
 			default:

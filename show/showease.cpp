@@ -11,7 +11,7 @@
 
 struct showone *nemoeases[NEMOEASE_LAST_TYPE];
 
-void __attribute__((constructor(101))) nemoshow_ease_prepare(void)
+void __attribute__((constructor(101))) nemoshow_ease_initialize(void)
 {
 	int i;
 
@@ -21,7 +21,7 @@ void __attribute__((constructor(101))) nemoshow_ease_prepare(void)
 	}
 }
 
-void __attribute__((destructor(101))) nemoshow_ease_finish(void)
+void __attribute__((destructor(101))) nemoshow_ease_finalize(void)
 {
 	int i;
 

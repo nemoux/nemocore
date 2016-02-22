@@ -222,8 +222,6 @@ int main(int argc, char *argv[])
 	int opt;
 	int i;
 
-	nemolog_set_file(2);
-
 	while (opt = getopt_long(argc, argv, "f:s:w:h:l:p:c:e:g:n:m:t:a:", options, NULL)) {
 		if (opt == -1)
 			break;

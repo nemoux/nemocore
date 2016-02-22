@@ -125,7 +125,6 @@ int main(int argc, char *argv[])
 		{ "width",					required_argument,			NULL,		'w' },
 		{ "height",					required_argument,			NULL,		'h' },
 		{ "alpha",					required_argument,			NULL,		'a' },
-		{ "log",						required_argument,			NULL,		'o' },
 		{ 0 }
 	};
 
@@ -150,9 +149,7 @@ int main(int argc, char *argv[])
 	int32_t height = 1080;
 	int opt;
 
-	nemolog_set_file(2);
-
-	while (opt = getopt_long(argc, argv, "f:s:w:h:o:a:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "f:s:w:h:a:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -171,10 +168,6 @@ int main(int argc, char *argv[])
 
 			case 'h':
 				height = strtoul(optarg, NULL, 10);
-				break;
-
-			case 'o':
-				nemolog_open_socket(optarg);
 				break;
 
 			case 'a':

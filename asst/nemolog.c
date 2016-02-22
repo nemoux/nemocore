@@ -18,6 +18,22 @@
 static int nemologfile = -1;
 static int nemologtype = 0;
 
+void __attribute__((constructor(101))) nemolog_initialize(void)
+{
+	char *env;
+
+	env = getenv("NEMOLOG_SOCKET_PATH");
+	if (env != NULL)
+		nemolog_open_socket(env);
+	else
+		nemolog_set_file(2);
+}
+
+void __attribute__((destructor(101))) nemolog_finalize(void)
+{
+	nemolog_close_file();
+}
+
 int nemolog_open_file(const char *filepath)
 {
 	nemologfile = open(filepath, O_RDWR | O_CREAT | O_TRUNC);

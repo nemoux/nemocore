@@ -136,7 +136,7 @@ static double nemopadcolors[][3] = {
 	{ 0xff, 0x8c, 0x32 }
 };
 
-void __attribute__((constructor(101))) nemopad_prepare_envs(void)
+void __attribute__((constructor(101))) nemopad_initialize_envs(void)
 {
 	struct showone *one;
 	int i;
@@ -193,7 +193,7 @@ void __attribute__((constructor(101))) nemopad_prepare_envs(void)
 	}
 }
 
-void __attribute__((destructor(101))) nemopad_finish_envs(void)
+void __attribute__((destructor(101))) nemopad_finalize_envs(void)
 {
 	int i;
 

@@ -29,11 +29,11 @@
 #include <nemolog.h>
 #include <nemomisc.h>
 
-void __attribute__((constructor(101))) nemopack_prepare_envs(void)
+void __attribute__((constructor(101))) nemopack_initialize_envs(void)
 {
 }
 
-void __attribute__((destructor(101))) nemopack_finish_envs(void)
+void __attribute__((destructor(101))) nemopack_finalize_envs(void)
 {
 }
 

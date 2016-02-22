@@ -520,8 +520,6 @@ int main(int argc, char *argv[])
 	int opt;
 	int i;
 
-	nemolog_set_file(2);
-
 	while (opt = getopt_long(argc, argv, "c:r:b:s:", options, NULL)) {
 		if (opt == -1)
 			break;
