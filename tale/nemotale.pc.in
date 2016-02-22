@@ -4,7 +4,7 @@ libdir=${prefix}/lib@CMAKE_LIBRARY_SUFFIX@
 incdir=${prefix}/include
 
 Name: Nemotale
-Description: NEMO-UX vector library
+Description: NEMO-UX compositing library
 Version: 0.1.0
 Requires: @NEMOTALE_PKGCONFIG_REQUIRES@
 Libs: -L${libdir} -lnemotale

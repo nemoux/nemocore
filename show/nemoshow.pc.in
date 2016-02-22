@@ -4,7 +4,7 @@ libdir=${prefix}/lib@CMAKE_LIBRARY_SUFFIX@
 incdir=${prefix}/include
 
 Name: Nemoshow
-Description: NEMO-UX show library
+Description: NEMO-UX vector library
 Version: 0.1.0
 Requires: @NEMOSHOW_PKGCONFIG_REQUIRES@
 Libs: -L${libdir} -lnemoshow
