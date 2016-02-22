@@ -34,8 +34,6 @@ struct minecontext {
 
 	struct nemotimer *timer;
 
-	struct nemotale *tale;
-
 	struct nemoshow *show;
 	struct showone *scene;
 	struct showone *back;
@@ -506,7 +504,6 @@ int main(int argc, char *argv[])
 	struct minecontext *context;
 	struct nemotool *tool;
 	struct nemotimer *timer;
-	struct nemotale *tale;
 	struct nemoshow *show;
 	struct showone *scene;
 	struct showone *canvas;
@@ -575,10 +572,6 @@ int main(int argc, char *argv[])
 	if (show == NULL)
 		goto err2;
 	nemoshow_set_userdata(show, context);
-
-	context->tale = tale = NEMOSHOW_AT(show, tale);
-	nemotale_set_single_click_gesture(tale, 150, 50);
-	nemotale_set_long_press_gesture(tale, 300, 50);
 
 	context->scene = scene = nemoshow_scene_create();
 	nemoshow_scene_set_width(scene, width);

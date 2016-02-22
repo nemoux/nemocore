@@ -9,7 +9,6 @@
 
 #include <miroback.h>
 #include <mirotap.h>
-#include <talehelper.h>
 #include <showhelper.h>
 #include <nemolog.h>
 #include <nemomisc.h>

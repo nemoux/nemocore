@@ -12,7 +12,6 @@
 #include <edgeback.h>
 #include <edgemisc.h>
 #include <nemoenvs.h>
-#include <talehelper.h>
 #include <showhelper.h>
 #include <nemotimer.h>
 #include <nemolog.h>
