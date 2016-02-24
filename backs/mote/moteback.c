@@ -299,7 +299,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	if (filepath == NULL)
+	if (filepath == NULL || pixelcount <= 0)
 		return 0;
 
 	mote = (struct moteback *)malloc(sizeof(struct moteback));
