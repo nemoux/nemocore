@@ -842,13 +842,13 @@ static inline struct showone *nemoshow_canvas_pick_item(struct showone *one, dou
 	struct showone *child;
 
 	nemoshow_children_for_each_reverse(child, one) {
-		if (child->sub == NEMOSHOW_GROUP_ITEM) {
+		if (child->tag == 0) {
 			struct showone *pick;
 
 			pick = nemoshow_canvas_pick_item(child, px, py);
 			if (pick != NULL)
 				return pick;
-		} else if (child->tag != 0) {
+		} else {
 			struct showitem *item = NEMOSHOW_ITEM(child);
 
 			if (NEMOSHOW_ITEM_CC(item, has_inverse)) {
