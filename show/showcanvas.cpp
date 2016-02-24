@@ -588,7 +588,7 @@ static inline void nemoshow_canvas_render_item_group(struct showcanvas *canvas, 
 
 static inline int nemoshow_canvas_check_one(struct showcanvas *canvas, struct showone *one)
 {
-	if (one->sub != NEMOSHOW_GROUP_ITEM) {
+	if (nemoshow_one_has_state(one, NEMOSHOW_NOBOUND_STATE) == 0) {
 		SkIRect boundingbox = SkIRect::MakeXYWH(one->sx, one->sy, one->sw, one->sh);
 
 		return NEMOSHOW_CANVAS_CC(canvas, damage)->intersects(boundingbox);

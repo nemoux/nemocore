@@ -144,7 +144,7 @@ static inline void nemoshow_one_dirty_backwards(struct showone *one, uint32_t di
 			nemoshow_one_dirty_backwards(ref->one, ref->dirty);
 	}
 
-	if (one->type == NEMOSHOW_ITEM_TYPE && one->sub == NEMOSHOW_GROUP_ITEM) {
+	if (nemoshow_one_has_state(one, NEMOSHOW_INHERIT_STATE)) {
 		struct showone *child;
 
 		nemoshow_children_for_each(child, one)
@@ -173,7 +173,7 @@ void nemoshow_one_dirty(struct showone *one, uint32_t dirty)
 			nemoshow_one_dirty_backwards(ref->one, ref->dirty);
 	}
 
-	if (one->type == NEMOSHOW_ITEM_TYPE && one->sub == NEMOSHOW_GROUP_ITEM) {
+	if (nemoshow_one_has_state(one, NEMOSHOW_INHERIT_STATE)) {
 		struct showone *child;
 
 		nemoshow_children_for_each(child, one)
