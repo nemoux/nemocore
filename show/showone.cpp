@@ -177,7 +177,7 @@ void nemoshow_one_dirty(struct showone *one, uint32_t dirty)
 		struct showone *child;
 
 		nemoshow_children_for_each(child, one)
-			nemoshow_one_dirty_backwards(child, NEMOSHOW_MATRIX_DIRTY);
+			nemoshow_one_dirty_backwards(child, dirty);
 	}
 }
 

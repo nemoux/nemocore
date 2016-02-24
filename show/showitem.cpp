@@ -73,6 +73,26 @@ struct showone *nemoshow_item_create(int type)
 	item->sx = 1.0f;
 	item->sy = 1.0f;
 
+	item->fills[NEMOSHOW_ITEM_ALPHA_COLOR] = 255.0f;
+	item->fills[NEMOSHOW_ITEM_RED_COLOR] = 255.0f;
+	item->fills[NEMOSHOW_ITEM_GREEN_COLOR] = 255.0f;
+	item->fills[NEMOSHOW_ITEM_BLUE_COLOR] = 255.0f;
+	item->strokes[NEMOSHOW_ITEM_ALPHA_COLOR] = 255.0f;
+	item->strokes[NEMOSHOW_ITEM_RED_COLOR] = 255.0f;
+	item->strokes[NEMOSHOW_ITEM_GREEN_COLOR] = 255.0f;
+	item->strokes[NEMOSHOW_ITEM_BLUE_COLOR] = 255.0f;
+
+	item->_alpha = 1.0f;
+
+	item->_fills[NEMOSHOW_ITEM_ALPHA_COLOR] = 255.0f;
+	item->_fills[NEMOSHOW_ITEM_RED_COLOR] = 255.0f;
+	item->_fills[NEMOSHOW_ITEM_GREEN_COLOR] = 255.0f;
+	item->_fills[NEMOSHOW_ITEM_BLUE_COLOR] = 255.0f;
+	item->_strokes[NEMOSHOW_ITEM_ALPHA_COLOR] = 255.0f;
+	item->_strokes[NEMOSHOW_ITEM_RED_COLOR] = 255.0f;
+	item->_strokes[NEMOSHOW_ITEM_GREEN_COLOR] = 255.0f;
+	item->_strokes[NEMOSHOW_ITEM_BLUE_COLOR] = 255.0f;
+
 	one = &item->base;
 	one->type = NEMOSHOW_ITEM_TYPE;
 	one->sub = type;
@@ -108,9 +128,9 @@ struct showone *nemoshow_item_create(int type)
 	nemoobject_set_reserved(&one->object, "from", &item->from, sizeof(double));
 	nemoobject_set_reserved(&one->object, "to", &item->to, sizeof(double));
 
-	nemoobject_set_reserved(&one->object, "stroke", item->strokes, sizeof(double[4]));
+	nemoobject_set_reserved(&one->object, "stroke", item->_strokes, sizeof(double[4]));
 	nemoobject_set_reserved(&one->object, "stroke-width", &item->stroke_width, sizeof(double));
-	nemoobject_set_reserved(&one->object, "fill", item->fills, sizeof(double[4]));
+	nemoobject_set_reserved(&one->object, "fill", item->_fills, sizeof(double[4]));
 
 	nemoobject_set_reserved(&one->object, "font-size", &item->fontsize, sizeof(double));
 
@@ -118,7 +138,7 @@ struct showone *nemoshow_item_create(int type)
 	nemoobject_set_reserved(&one->object, "pathdeviation", &item->pathdeviation, sizeof(double));
 	nemoobject_set_reserved(&one->object, "pathseed", &item->pathseed, sizeof(uint32_t));
 
-	nemoobject_set_reserved(&one->object, "alpha", &item->alpha, sizeof(double));
+	nemoobject_set_reserved(&one->object, "alpha", &item->_alpha, sizeof(double));
 
 	if (one->sub == NEMOSHOW_RING_ITEM) {
 		NEMOSHOW_ITEM_CC(item, stroke)->setStyle(SkPaint::kFill_Style);
@@ -289,6 +309,37 @@ static inline void nemoshow_item_update_uri(struct nemoshow *show, struct showon
 static inline void nemoshow_item_update_style(struct nemoshow *show, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
+	struct showitem *pitem;
+	struct showone *pone;
+
+	pone = nemoshow_one_get_parent(one, NEMOSHOW_ITEM_TYPE, NEMOSHOW_GROUP_ITEM);
+	if (pone != NULL) {
+		pitem = NEMOSHOW_ITEM(pone);
+
+		item->alpha = item->_alpha * pitem->alpha;
+
+		item->fills[NEMOSHOW_ITEM_ALPHA_COLOR] = item->_fills[NEMOSHOW_ITEM_ALPHA_COLOR] * (pitem->fills[NEMOSHOW_ITEM_ALPHA_COLOR] / 255.0f);
+		item->fills[NEMOSHOW_ITEM_RED_COLOR] = item->_fills[NEMOSHOW_ITEM_RED_COLOR] * (pitem->fills[NEMOSHOW_ITEM_RED_COLOR] / 255.0f);
+		item->fills[NEMOSHOW_ITEM_GREEN_COLOR] = item->_fills[NEMOSHOW_ITEM_GREEN_COLOR] * (pitem->fills[NEMOSHOW_ITEM_GREEN_COLOR] / 255.0f);
+		item->fills[NEMOSHOW_ITEM_BLUE_COLOR] = item->_fills[NEMOSHOW_ITEM_BLUE_COLOR] * (pitem->fills[NEMOSHOW_ITEM_BLUE_COLOR] / 255.0f);
+
+		item->strokes[NEMOSHOW_ITEM_ALPHA_COLOR] = item->_strokes[NEMOSHOW_ITEM_ALPHA_COLOR] * (pitem->strokes[NEMOSHOW_ITEM_ALPHA_COLOR] / 255.0f);
+		item->strokes[NEMOSHOW_ITEM_RED_COLOR] = item->_strokes[NEMOSHOW_ITEM_RED_COLOR] * (pitem->strokes[NEMOSHOW_ITEM_RED_COLOR] / 255.0f);
+		item->strokes[NEMOSHOW_ITEM_GREEN_COLOR] = item->_strokes[NEMOSHOW_ITEM_GREEN_COLOR] * (pitem->strokes[NEMOSHOW_ITEM_GREEN_COLOR] / 255.0f);
+		item->strokes[NEMOSHOW_ITEM_BLUE_COLOR] = item->_strokes[NEMOSHOW_ITEM_BLUE_COLOR] * (pitem->strokes[NEMOSHOW_ITEM_BLUE_COLOR] / 255.0f);
+	} else {
+		item->alpha = item->_alpha;
+
+		item->fills[NEMOSHOW_ITEM_ALPHA_COLOR] = item->_fills[NEMOSHOW_ITEM_ALPHA_COLOR];
+		item->fills[NEMOSHOW_ITEM_RED_COLOR] = item->_fills[NEMOSHOW_ITEM_RED_COLOR];
+		item->fills[NEMOSHOW_ITEM_GREEN_COLOR] = item->_fills[NEMOSHOW_ITEM_GREEN_COLOR];
+		item->fills[NEMOSHOW_ITEM_BLUE_COLOR] = item->_fills[NEMOSHOW_ITEM_BLUE_COLOR];
+
+		item->strokes[NEMOSHOW_ITEM_ALPHA_COLOR] = item->_strokes[NEMOSHOW_ITEM_ALPHA_COLOR];
+		item->strokes[NEMOSHOW_ITEM_RED_COLOR] = item->_strokes[NEMOSHOW_ITEM_RED_COLOR];
+		item->strokes[NEMOSHOW_ITEM_GREEN_COLOR] = item->_strokes[NEMOSHOW_ITEM_GREEN_COLOR];
+		item->strokes[NEMOSHOW_ITEM_BLUE_COLOR] = item->_strokes[NEMOSHOW_ITEM_BLUE_COLOR];
+	}
 
 	if (item->fill != 0) {
 		NEMOSHOW_ITEM_CC(item, fill)->setColor(

@@ -98,6 +98,10 @@ struct showitem {
 
 	double alpha;
 
+	double _strokes[4];
+	double _fills[4];
+	double _alpha;
+
 	double pathlength;
 	double pathsegment;
 	double pathdeviation;
@@ -302,7 +306,9 @@ static inline void nemoshow_item_set_spacing(struct showone *one, double spacing
 
 static inline void nemoshow_item_set_alpha(struct showone *one, double alpha)
 {
-	NEMOSHOW_ITEM_AT(one, alpha) = alpha;
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	item->_alpha = alpha;
 
 	nemoshow_one_dirty(one, NEMOSHOW_STYLE_DIRTY);
 }
@@ -311,10 +317,10 @@ static inline void nemoshow_item_set_fill_color(struct showone *one, double r, d
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	item->fills[NEMOSHOW_ITEM_RED_COLOR] = r;
-	item->fills[NEMOSHOW_ITEM_GREEN_COLOR] = g;
-	item->fills[NEMOSHOW_ITEM_BLUE_COLOR] = b;
-	item->fills[NEMOSHOW_ITEM_ALPHA_COLOR] = a;
+	item->_fills[NEMOSHOW_ITEM_RED_COLOR] = r;
+	item->_fills[NEMOSHOW_ITEM_GREEN_COLOR] = g;
+	item->_fills[NEMOSHOW_ITEM_BLUE_COLOR] = b;
+	item->_fills[NEMOSHOW_ITEM_ALPHA_COLOR] = a;
 
 	item->fill = 1;
 
@@ -325,10 +331,10 @@ static inline void nemoshow_item_set_stroke_color(struct showone *one, double r,
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	item->strokes[NEMOSHOW_ITEM_RED_COLOR] = r;
-	item->strokes[NEMOSHOW_ITEM_GREEN_COLOR] = g;
-	item->strokes[NEMOSHOW_ITEM_BLUE_COLOR] = b;
-	item->strokes[NEMOSHOW_ITEM_ALPHA_COLOR] = a;
+	item->_strokes[NEMOSHOW_ITEM_RED_COLOR] = r;
+	item->_strokes[NEMOSHOW_ITEM_GREEN_COLOR] = g;
+	item->_strokes[NEMOSHOW_ITEM_BLUE_COLOR] = b;
+	item->_strokes[NEMOSHOW_ITEM_ALPHA_COLOR] = a;
 
 	item->stroke = 1;
 
