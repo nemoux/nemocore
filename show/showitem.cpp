@@ -344,7 +344,7 @@ static inline void nemoshow_item_update_style(struct nemoshow *show, struct show
 		item->strokes[NEMOSHOW_ITEM_BLUE_COLOR] = item->_strokes[NEMOSHOW_ITEM_BLUE_COLOR];
 	}
 
-	if (item->fill != 0) {
+	if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE)) {
 		NEMOSHOW_ITEM_CC(item, fill)->setColor(
 				SkColorSetARGB(
 					item->fills[NEMOSHOW_ITEM_ALPHA_COLOR] * item->alpha,
@@ -352,7 +352,7 @@ static inline void nemoshow_item_update_style(struct nemoshow *show, struct show
 					item->fills[NEMOSHOW_ITEM_GREEN_COLOR],
 					item->fills[NEMOSHOW_ITEM_BLUE_COLOR]));
 	}
-	if (item->stroke != 0) {
+	if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE)) {
 		NEMOSHOW_ITEM_CC(item, stroke)->setStrokeWidth(item->stroke_width);
 		NEMOSHOW_ITEM_CC(item, stroke)->setColor(
 				SkColorSetARGB(
@@ -368,9 +368,9 @@ static inline void nemoshow_item_update_filter(struct nemoshow *show, struct sho
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	if (NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF) != NULL) {
-		if (item->fill != 0)
+		if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE))
 			NEMOSHOW_ITEM_CC(item, fill)->setMaskFilter(NEMOSHOW_FILTER_CC(NEMOSHOW_FILTER(NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF)), filter));
-		if (item->stroke != 0)
+		if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
 			NEMOSHOW_ITEM_CC(item, stroke)->setMaskFilter(NEMOSHOW_FILTER_CC(NEMOSHOW_FILTER(NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF)), filter));
 	}
 
@@ -382,7 +382,7 @@ static inline void nemoshow_item_update_shader(struct nemoshow *show, struct sho
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	if (NEMOSHOW_REF(one, NEMOSHOW_SHADER_REF) != NULL) {
-		if (item->fill != 0)
+		if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE))
 			NEMOSHOW_ITEM_CC(item, fill)->setShader(NEMOSHOW_SHADER_CC(NEMOSHOW_SHADER(NEMOSHOW_REF(one, NEMOSHOW_SHADER_REF)), shader));
 	}
 
@@ -803,7 +803,7 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 				box.width(),
 				box.height());
 
-	if (item->stroke != 0)
+	if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
 		box.outset(item->stroke_width, item->stroke_width);
 
 	one->x0 = box.x();
@@ -943,7 +943,7 @@ void nemoshow_item_set_shader(struct showone *one, struct showone *shader)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	item->fill = 1;
+	nemoshow_one_set_state(one, NEMOSHOW_FILL_STATE);
 
 	nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_SHADER_REF));
 	nemoshow_one_reference_one(one, shader, NEMOSHOW_SHADER_DIRTY, NEMOSHOW_SHADER_REF);

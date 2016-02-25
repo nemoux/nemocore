@@ -90,10 +90,8 @@ struct showitem {
 
 	double from, to;
 
-	uint32_t stroke;
 	double strokes[4];
 	double stroke_width;
-	uint32_t fill;
 	double fills[4];
 
 	double alpha;
@@ -322,7 +320,7 @@ static inline void nemoshow_item_set_fill_color(struct showone *one, double r, d
 	item->_fills[NEMOSHOW_ITEM_BLUE_COLOR] = b;
 	item->_fills[NEMOSHOW_ITEM_ALPHA_COLOR] = a;
 
-	item->fill = 1;
+	nemoshow_one_set_state(one, NEMOSHOW_FILL_STATE);
 
 	nemoshow_one_dirty(one, NEMOSHOW_STYLE_DIRTY);
 }
@@ -336,7 +334,7 @@ static inline void nemoshow_item_set_stroke_color(struct showone *one, double r,
 	item->_strokes[NEMOSHOW_ITEM_BLUE_COLOR] = b;
 	item->_strokes[NEMOSHOW_ITEM_ALPHA_COLOR] = a;
 
-	item->stroke = 1;
+	nemoshow_one_set_state(one, NEMOSHOW_STROKE_STATE);
 
 	nemoshow_one_dirty(one, NEMOSHOW_STYLE_DIRTY);
 }
@@ -360,13 +358,6 @@ static inline void nemoshow_item_set_anchor(struct showone *one, double ax, doub
 	item->has_anchor = 1;
 
 	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
-}
-
-static inline double nemoshow_item_get_outer(struct showone *one)
-{
-	struct showitem *item = NEMOSHOW_ITEM(one);
-
-	return one->outer + (item->stroke != 0 ? item->stroke_width : 0.0f);
 }
 
 static inline void nemoshow_item_translate(struct showone *one, double tx, double ty)

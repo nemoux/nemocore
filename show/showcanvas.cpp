@@ -326,9 +326,9 @@ static inline void nemoshow_canvas_render_item_line(struct showcanvas *canvas, S
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	if (item->fill != 0)
+	if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE))
 		_canvas->drawLine(item->x, item->y, item->width, item->height, *NEMOSHOW_ITEM_CC(item, fill));
-	if (item->stroke != 0)
+	if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
 		_canvas->drawLine(item->x, item->y, item->width, item->height, *NEMOSHOW_ITEM_CC(item, stroke));
 }
 
@@ -337,9 +337,9 @@ static inline void nemoshow_canvas_render_item_rect(struct showcanvas *canvas, S
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	SkRect rect = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
 
-	if (item->fill != 0)
+	if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE))
 		_canvas->drawRect(rect, *NEMOSHOW_ITEM_CC(item, fill));
-	if (item->stroke != 0)
+	if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
 		_canvas->drawRect(rect, *NEMOSHOW_ITEM_CC(item, stroke));
 }
 
@@ -348,9 +348,9 @@ static inline void nemoshow_canvas_render_item_rrect(struct showcanvas *canvas, 
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	SkRect rect = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
 
-	if (item->fill != 0)
+	if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE))
 		_canvas->drawRoundRect(rect, item->rx, item->ry, *NEMOSHOW_ITEM_CC(item, fill));
-	if (item->stroke != 0)
+	if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
 		_canvas->drawRoundRect(rect, item->rx, item->ry, *NEMOSHOW_ITEM_CC(item, stroke));
 }
 
@@ -358,9 +358,9 @@ static inline void nemoshow_canvas_render_item_circle(struct showcanvas *canvas,
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	if (item->fill != 0)
+	if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE))
 		_canvas->drawCircle(item->x, item->y, item->r, *NEMOSHOW_ITEM_CC(item, fill));
-	if (item->stroke != 0)
+	if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
 		_canvas->drawCircle(item->x, item->y, item->r, *NEMOSHOW_ITEM_CC(item, stroke));
 }
 
@@ -369,9 +369,9 @@ static inline void nemoshow_canvas_render_item_arc(struct showcanvas *canvas, Sk
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	SkRect rect = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
 
-	if (item->fill != 0)
+	if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE))
 		_canvas->drawArc(rect, item->from, item->to - item->from, false, *NEMOSHOW_ITEM_CC(item, fill));
-	if (item->stroke != 0)
+	if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
 		_canvas->drawArc(rect, item->from, item->to - item->from, false, *NEMOSHOW_ITEM_CC(item, stroke));
 }
 
@@ -380,9 +380,9 @@ static inline void nemoshow_canvas_render_item_pie(struct showcanvas *canvas, Sk
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	SkRect rect = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
 
-	if (item->fill != 0)
+	if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE))
 		_canvas->drawArc(rect, item->from, item->to - item->from, true, *NEMOSHOW_ITEM_CC(item, fill));
-	if (item->stroke != 0)
+	if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
 		_canvas->drawArc(rect, item->from, item->to - item->from, true, *NEMOSHOW_ITEM_CC(item, stroke));
 }
 
@@ -390,9 +390,9 @@ static inline void nemoshow_canvas_render_item_donut(struct showcanvas *canvas, 
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	if (item->fill != 0)
+	if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE))
 		_canvas->drawPath(*NEMOSHOW_ITEM_CC(item, path), *NEMOSHOW_ITEM_CC(item, fill));
-	if (item->stroke != 0)
+	if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
 		_canvas->drawPath(*NEMOSHOW_ITEM_CC(item, path), *NEMOSHOW_ITEM_CC(item, stroke));
 }
 
@@ -400,9 +400,9 @@ static inline void nemoshow_canvas_render_item_ring(struct showcanvas *canvas, S
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	if (item->fill != 0)
+	if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE))
 		_canvas->drawCircle(item->x, item->y, item->inner, *NEMOSHOW_ITEM_CC(item, fill));
-	if (item->stroke != 0)
+	if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
 		_canvas->drawPath(*NEMOSHOW_ITEM_CC(item, path), *NEMOSHOW_ITEM_CC(item, stroke));
 }
 
@@ -411,13 +411,13 @@ static inline void nemoshow_canvas_render_item_path(struct showcanvas *canvas, S
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	if (item->from == 0.0f && item->to == 1.0f) {
-		if (item->fill != 0) {
+		if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE)) {
 			if (NEMOSHOW_ITEM_CC(item, fillpath) != NULL)
 				_canvas->drawPath(*NEMOSHOW_ITEM_CC(item, fillpath), *NEMOSHOW_ITEM_CC(item, fill));
 			else
 				_canvas->drawPath(*NEMOSHOW_ITEM_CC(item, path), *NEMOSHOW_ITEM_CC(item, fill));
 		}
-		if (item->stroke != 0) {
+		if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE)) {
 			if (NEMOSHOW_ITEM_CC(item, strokepath) != NULL)
 				_canvas->drawPath(*NEMOSHOW_ITEM_CC(item, strokepath), *NEMOSHOW_ITEM_CC(item, stroke));
 			else
@@ -441,9 +441,9 @@ static inline void nemoshow_canvas_render_item_path_group(struct showcanvas *can
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	if (item->from == 0.0f && item->to == 1.0f) {
-		if (item->fill != 0)
+		if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE))
 			_canvas->drawPath(*NEMOSHOW_ITEM_CC(item, path), *NEMOSHOW_ITEM_CC(item, fill));
-		if (item->stroke != 0)
+		if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
 			_canvas->drawPath(*NEMOSHOW_ITEM_CC(item, path), *NEMOSHOW_ITEM_CC(item, stroke));
 	} else {
 		SkPath path;
@@ -467,14 +467,14 @@ static inline void nemoshow_canvas_render_item_text(struct showcanvas *canvas, S
 			_canvas->save();
 			_canvas->translate(0.0f, -item->fontascent);
 
-			if (item->fill != 0)
+			if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE))
 				_canvas->drawText(
 						item->text,
 						strlen(item->text),
 						item->x,
 						item->y,
 						*NEMOSHOW_ITEM_CC(item, fill));
-			if (item->stroke != 0)
+			if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
 				_canvas->drawText(
 						item->text,
 						strlen(item->text),
@@ -484,13 +484,13 @@ static inline void nemoshow_canvas_render_item_text(struct showcanvas *canvas, S
 
 			_canvas->restore();
 		} else if (NEMOSHOW_FONT_AT(NEMOSHOW_REF(one, NEMOSHOW_FONT_REF), layout) == NEMOSHOW_HARFBUZZ_LAYOUT) {
-			if (item->fill != 0)
+			if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE))
 				_canvas->drawPosText(
 						item->text,
 						strlen(item->text),
 						NEMOSHOW_ITEM_CC(item, points),
 						*NEMOSHOW_ITEM_CC(item, fill));
-			if (item->stroke != 0)
+			if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
 				_canvas->drawPosText(
 						item->text,
 						strlen(item->text),
@@ -498,14 +498,14 @@ static inline void nemoshow_canvas_render_item_text(struct showcanvas *canvas, S
 						*NEMOSHOW_ITEM_CC(item, stroke));
 		}
 	} else {
-		if (item->fill != 0)
+		if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE))
 			_canvas->drawTextOnPath(
 					item->text,
 					strlen(item->text),
 					*NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(NEMOSHOW_REF(one, NEMOSHOW_PATH_REF)), path),
 					NULL,
 					*NEMOSHOW_ITEM_CC(item, fill));
-		if (item->stroke != 0)
+		if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
 			_canvas->drawTextOnPath(
 					item->text,
 					strlen(item->text),
@@ -520,11 +520,11 @@ static inline void nemoshow_canvas_render_item_textbox(struct showcanvas *canvas
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	if (item->text != NULL) {
-		if (item->fill != 0) {
+		if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE)) {
 			NEMOSHOW_ITEM_CC(item, textbox)->setText(item->text, strlen(item->text), *NEMOSHOW_ITEM_CC(item, fill));
 			NEMOSHOW_ITEM_CC(item, textbox)->draw(_canvas);
 		}
-		if (item->stroke != 0) {
+		if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE)) {
 			NEMOSHOW_ITEM_CC(item, textbox)->setText(item->text, strlen(item->text), *NEMOSHOW_ITEM_CC(item, stroke));
 			NEMOSHOW_ITEM_CC(item, textbox)->draw(_canvas);
 		}
