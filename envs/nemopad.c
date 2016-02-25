@@ -560,7 +560,6 @@ int nemopad_activate(struct nemopad *pad, double x, double y, double r)
 					0xa0);
 			nemoshow_item_set_stroke_width(one, nemopadkeys[i].thickness);
 			nemoshow_item_set_alpha(one, 0.0f);
-			nemoshow_item_set_tsr(one);
 			nemoshow_item_translate(one, nemopadkeys[i].x0, nemopadkeys[i].y0);
 			nemoshow_item_path_append(one, nemopadborders[i]);
 		} else {
@@ -584,7 +583,6 @@ int nemopad_activate(struct nemopad *pad, double x, double y, double r)
 					nemopadcolors[nemopadkeys[i].color0][2],
 					0xc0);
 			nemoshow_item_set_alpha(one, 0.0f);
-			nemoshow_item_set_tsr(one);
 			nemoshow_item_translate(one, nemopadkeys[i].x0, nemopadkeys[i].y0);
 			nemoshow_item_path_append(one, nemopadnormals[i]);
 		} else {

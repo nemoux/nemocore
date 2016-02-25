@@ -621,12 +621,12 @@ static inline void nemoshow_canvas_render_one(struct showcanvas *canvas, SkCanva
 	};
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	struct showitem *clip = NEMOSHOW_REF(one, NEMOSHOW_CLIP_REF) == NULL ? NULL : NEMOSHOW_ITEM(NEMOSHOW_REF(one, NEMOSHOW_CLIP_REF));
-	int has_context = item->transform != 0 || item->has_anchor != 0 || clip != NULL;
+	int has_context = nemoshow_one_has_state(one, NEMOSHOW_TRANSFORM_STATE) || item->has_anchor != 0 || clip != NULL;
 
 	if (has_context != 0)
 		_canvas->save();
 
-	if (item->transform != 0)
+	if (nemoshow_one_has_state(one, NEMOSHOW_TRANSFORM_STATE))
 		_canvas->concat(*NEMOSHOW_ITEM_CC(item, modelview));
 
 	if (item->has_anchor != 0)

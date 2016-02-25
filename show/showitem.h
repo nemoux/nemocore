@@ -149,7 +149,6 @@ extern void nemoshow_item_set_stroke_cap(struct showone *one, int cap);
 extern void nemoshow_item_set_stroke_join(struct showone *one, int join);
 
 extern void nemoshow_item_set_matrix(struct showone *one, double m[9]);
-extern void nemoshow_item_set_tsr(struct showone *one);
 extern void nemoshow_item_set_shader(struct showone *one, struct showone *shader);
 extern void nemoshow_item_set_filter(struct showone *one, struct showone *filter);
 extern void nemoshow_item_set_clip(struct showone *one, struct showone *clip);
@@ -367,6 +366,8 @@ static inline void nemoshow_item_translate(struct showone *one, double tx, doubl
 	item->tx = tx;
 	item->ty = ty;
 
+	nemoshow_one_set_state(one, NEMOSHOW_TRANSFORM_STATE);
+
 	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
 }
 
@@ -386,6 +387,8 @@ static inline void nemoshow_item_rotate(struct showone *one, double ro)
 
 	item->ro = ro;
 
+	nemoshow_one_set_state(one, NEMOSHOW_TRANSFORM_STATE);
+
 	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
 }
 
@@ -401,6 +404,8 @@ static inline void nemoshow_item_scale(struct showone *one, double sx, double sy
 	item->sx = sx;
 	item->sy = sy;
 
+	nemoshow_one_set_state(one, NEMOSHOW_TRANSFORM_STATE);
+
 	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
 }
 
@@ -410,6 +415,8 @@ static inline void nemoshow_item_pivot(struct showone *one, double px, double py
 
 	item->px = px;
 	item->py = py;
+
+	nemoshow_one_set_state(one, NEMOSHOW_TRANSFORM_STATE);
 
 	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
 }

@@ -469,7 +469,6 @@ static void nemomine_prepare_ui(struct minecontext *context)
 			nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
 			nemoshow_item_set_stroke_color(one, 0x1e, 0xdc, 0xdc, 0xff);
 			nemoshow_item_set_stroke_width(one, 1.0f);
-			nemoshow_item_set_tsr(one);
 			nemoshow_item_translate(one, j * context->size, i * context->size + context->size);
 
 			mone->one = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
@@ -481,7 +480,6 @@ static void nemomine_prepare_ui(struct minecontext *context)
 			nemoshow_item_set_height(one, context->size - 4.0f);
 			nemoshow_item_set_filter(one, context->filter0);
 			nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
-			nemoshow_item_set_tsr(one);
 			nemoshow_item_translate(one, j * context->size, i * context->size + context->size);
 		}
 	}
@@ -633,7 +631,6 @@ int main(int argc, char *argv[])
 	nemoshow_item_set_height(one, size);
 	nemoshow_item_set_filter(one, context->filter0);
 	nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
-	nemoshow_item_set_tsr(one);
 	nemoshow_item_pivot(one, size / 2.0f, size / 2.0f);
 	nemoshow_item_translate(one, (context->columns - 1) * context->size, 0.0f);
 	nemoshow_item_rotate(one, 45.0f);
@@ -648,7 +645,6 @@ int main(int argc, char *argv[])
 	nemoshow_item_set_height(one, size);
 	nemoshow_item_set_filter(one, context->filter0);
 	nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
-	nemoshow_item_set_tsr(one);
 	nemoshow_item_translate(one, (context->columns / 2) * context->size, 0.0f);
 	nemoshow_item_load_svg(one, NEMOUX_MINESWEEPER_RESOURCES "/mine-bomb.svg");
 
@@ -663,7 +659,6 @@ int main(int argc, char *argv[])
 	nemoshow_item_set_anchor(one, 1.0f, 0.5f);
 	nemoshow_item_set_filter(one, context->filter0);
 	nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
-	nemoshow_item_set_tsr(one);
 	nemoshow_item_translate(one, (context->columns - 2) * context->size, context->size / 2.0f);
 	nemoshow_item_set_text(one, "0");
 

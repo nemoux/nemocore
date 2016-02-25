@@ -224,6 +224,8 @@ static inline void nemoshow_poly_set_translate(struct showone *one, float tx, fl
 	poly->ty = ty;
 	poly->tz = tz;
 
+	nemoshow_one_set_state(one, NEMOSHOW_TRANSFORM_STATE);
+
 	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
 }
 
@@ -235,6 +237,8 @@ static inline void nemoshow_poly_set_scale(struct showone *one, float sx, float 
 	poly->sy = sy;
 	poly->sz = sz;
 
+	nemoshow_one_set_state(one, NEMOSHOW_TRANSFORM_STATE);
+
 	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
 }
 
@@ -245,6 +249,8 @@ static inline void nemoshow_poly_set_rotate(struct showone *one, float rx, float
 	poly->rx = rx;
 	poly->ry = ry;
 	poly->rz = rz;
+
+	nemoshow_one_set_state(one, NEMOSHOW_TRANSFORM_STATE);
 
 	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
 }

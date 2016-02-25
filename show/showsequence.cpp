@@ -155,6 +155,7 @@ int nemoshow_sequence_set_attr(struct showone *one, const char *name, const char
 			set->eattrs[set->nattrs] = d;
 			set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
 			set->dirties[set->nattrs] = prop->dirty;
+			set->states[set->nattrs] = prop->state;
 			set->types[set->nattrs] = NEMOSHOW_DOUBLE_PROP;
 			set->nattrs++;
 		} else if (prop->type == NEMOSHOW_FLOAT_PROP) {
@@ -165,6 +166,7 @@ int nemoshow_sequence_set_attr(struct showone *one, const char *name, const char
 			set->eattrs[set->nattrs] = d;
 			set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
 			set->dirties[set->nattrs] = prop->dirty;
+			set->states[set->nattrs] = prop->state;
 			set->types[set->nattrs] = NEMOSHOW_FLOAT_PROP;
 			set->nattrs++;
 		} else if (prop->type == NEMOSHOW_COLOR_PROP) {
@@ -177,6 +179,7 @@ int nemoshow_sequence_set_attr(struct showone *one, const char *name, const char
 			set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
 			set->offsets[set->nattrs] = NEMOSHOW_ITEM_RED_COLOR;
 			set->dirties[set->nattrs] = prop->dirty;
+			set->states[set->nattrs] = prop->state;
 			set->types[set->nattrs] = NEMOSHOW_DOUBLE_PROP;
 			set->nattrs++;
 
@@ -185,6 +188,7 @@ int nemoshow_sequence_set_attr(struct showone *one, const char *name, const char
 			set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
 			set->offsets[set->nattrs] = NEMOSHOW_ITEM_GREEN_COLOR;
 			set->dirties[set->nattrs] = prop->dirty;
+			set->states[set->nattrs] = prop->state;
 			set->types[set->nattrs] = NEMOSHOW_DOUBLE_PROP;
 			set->nattrs++;
 
@@ -193,6 +197,7 @@ int nemoshow_sequence_set_attr(struct showone *one, const char *name, const char
 			set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
 			set->offsets[set->nattrs] = NEMOSHOW_ITEM_BLUE_COLOR;
 			set->dirties[set->nattrs] = prop->dirty;
+			set->states[set->nattrs] = prop->state;
 			set->types[set->nattrs] = NEMOSHOW_DOUBLE_PROP;
 			set->nattrs++;
 
@@ -201,6 +206,7 @@ int nemoshow_sequence_set_attr(struct showone *one, const char *name, const char
 			set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
 			set->offsets[set->nattrs] = NEMOSHOW_ITEM_ALPHA_COLOR;
 			set->dirties[set->nattrs] = prop->dirty;
+			set->states[set->nattrs] = prop->state;
 			set->types[set->nattrs] = NEMOSHOW_DOUBLE_PROP;
 			set->nattrs++;
 		}
@@ -384,10 +390,12 @@ static void nemoshow_sequence_prepare_frame(struct showone *one, uint32_t serial
 						set->sattrs[i] = nemoattr_getd_offset(set->attrs[i], set->offsets[i]);
 					else
 						set->sattrs[i] = nemoattr_getf_offset(set->attrs[i], set->offsets[i]);
+
+					nemoshow_one_set_state(set->src, set->states[i]);
 				}
 			}
 
-			nemoshow_one_set_state(set->src, NEMOSHOW_TRANSITION_STATE | set->states[i]);
+			nemoshow_one_set_state(set->src, NEMOSHOW_TRANSITION_STATE);
 		}
 	}
 }

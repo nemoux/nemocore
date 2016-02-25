@@ -140,7 +140,6 @@ int nemoback_mirotap_down(struct miroback *miro, struct mirotap *tap, double x, 
 	nemoshow_item_set_height(one, miro->tapsize);
 	nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
 	nemoshow_item_set_filter(one, tap->blur);
-	nemoshow_item_set_tsr(one);
 	nemoshow_item_pivot(one, miro->tapsize / 2.0f, miro->tapsize / 2.0f);
 	nemoshow_item_translate(one, x - miro->tapsize / 2.0f, y - miro->tapsize / 2.0f);
 	nemoshow_item_scale(one, 0.0f, 0.0f);
@@ -154,7 +153,6 @@ int nemoback_mirotap_down(struct miroback *miro, struct mirotap *tap, double x, 
 	nemoshow_item_set_height(one, miro->tapsize);
 	nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
 	nemoshow_item_set_filter(one, tap->blur);
-	nemoshow_item_set_tsr(one);
 	nemoshow_item_pivot(one, miro->tapsize / 2.0f, miro->tapsize / 2.0f);
 	nemoshow_item_translate(one, x - miro->tapsize / 2.0f, y - miro->tapsize / 2.0f);
 	nemoshow_item_load_svg(one, NEMOUX_MIROBACK_RESOURCES "/touch-3-1.svg");
@@ -168,7 +166,6 @@ int nemoback_mirotap_down(struct miroback *miro, struct mirotap *tap, double x, 
 	nemoshow_item_set_height(one, miro->tapsize);
 	nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
 	nemoshow_item_set_filter(one, tap->blur);
-	nemoshow_item_set_tsr(one);
 	nemoshow_item_pivot(one, miro->tapsize / 2.0f, miro->tapsize / 2.0f);
 	nemoshow_item_translate(one, x - miro->tapsize / 2.0f, y - miro->tapsize / 2.0f);
 	nemoshow_item_load_svg(one, NEMOUX_MIROBACK_RESOURCES "/touch-3-2.svg");
@@ -182,7 +179,6 @@ int nemoback_mirotap_down(struct miroback *miro, struct mirotap *tap, double x, 
 	nemoshow_item_set_height(one, miro->tapsize);
 	nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
 	nemoshow_item_set_filter(one, tap->blur);
-	nemoshow_item_set_tsr(one);
 	nemoshow_item_pivot(one, miro->tapsize / 2.0f, miro->tapsize / 2.0f);
 	nemoshow_item_translate(one, x - miro->tapsize / 2.0f, y - miro->tapsize / 2.0f);
 	nemoshow_item_load_svg(one, NEMOUX_MIROBACK_RESOURCES "/touch-3-3.svg");
@@ -196,7 +192,6 @@ int nemoback_mirotap_down(struct miroback *miro, struct mirotap *tap, double x, 
 	nemoshow_item_set_height(one, miro->tapsize);
 	nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
 	nemoshow_item_set_filter(one, tap->blur);
-	nemoshow_item_set_tsr(one);
 	nemoshow_item_pivot(one, miro->tapsize / 2.0f, miro->tapsize / 2.0f);
 	nemoshow_item_translate(one, x - miro->tapsize / 2.0f, y - miro->tapsize / 2.0f);
 	nemoshow_item_load_svg(one, NEMOUX_MIROBACK_RESOURCES "/touch-3-4.svg");
@@ -211,7 +206,6 @@ int nemoback_mirotap_down(struct miroback *miro, struct mirotap *tap, double x, 
 	nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
 	nemoshow_item_set_filter(one, tap->blur);
 	nemoshow_item_set_alpha(one, 0.0f);
-	nemoshow_item_set_tsr(one);
 	nemoshow_item_pivot(one, miro->tapsize / 2.0f, miro->tapsize / 2.0f);
 	nemoshow_item_translate(one, x - miro->tapsize / 2.0f, y - miro->tapsize / 2.0f);
 	nemoshow_item_scale(one, 0.9f, 0.9f);

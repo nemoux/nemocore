@@ -598,16 +598,11 @@ static inline void nemoshow_item_update_matrix(struct nemoshow *show, struct sho
 
 	NEMOSHOW_ITEM_CC(item, matrix)->setIdentity();
 
-	if (item->transform != 0) {
-		if (item->transform == NEMOSHOW_EXTERN_TRANSFORM) {
-			NEMOSHOW_ITEM_CC(item, modelview)->setIdentity();
+	if (nemoshow_one_has_state(one, NEMOSHOW_TRANSFORM_STATE)) {
+		if (item->transform == 0)
+			item->transform = NEMOSHOW_TSR_TRANSFORM;
 
-			NEMOSHOW_ITEM_CC(item, modelview)->postConcat(
-					*NEMOSHOW_MATRIX_CC(
-						NEMOSHOW_MATRIX(
-							NEMOSHOW_REF(one, NEMOSHOW_MATRIX_REF)),
-						matrix));
-		} else if (item->transform == NEMOSHOW_TSR_TRANSFORM) {
+		if (item->transform == NEMOSHOW_TSR_TRANSFORM) {
 			NEMOSHOW_ITEM_CC(item, modelview)->setIdentity();
 
 			if (item->px != 0.0f || item->py != 0.0f) {
@@ -631,6 +626,14 @@ static inline void nemoshow_item_update_matrix(struct nemoshow *show, struct sho
 			}
 
 			NEMOSHOW_ITEM_CC(item, modelview)->postTranslate(item->tx, item->ty);
+		} else if (item->transform == NEMOSHOW_EXTERN_TRANSFORM) {
+			NEMOSHOW_ITEM_CC(item, modelview)->setIdentity();
+
+			NEMOSHOW_ITEM_CC(item, modelview)->postConcat(
+					*NEMOSHOW_MATRIX_CC(
+						NEMOSHOW_MATRIX(
+							NEMOSHOW_REF(one, NEMOSHOW_MATRIX_REF)),
+						matrix));
 		} else if (item->transform == NEMOSHOW_CHILDREN_TRANSFORM) {
 			struct showone *child;
 
@@ -926,15 +929,6 @@ void nemoshow_item_set_matrix(struct showone *one, double m[9])
 		item->matrix[i] = m[i];
 
 	item->transform = NEMOSHOW_DIRECT_TRANSFORM;
-
-	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
-}
-
-void nemoshow_item_set_tsr(struct showone *one)
-{
-	struct showitem *item = NEMOSHOW_ITEM(one);
-
-	item->transform = NEMOSHOW_TSR_TRANSFORM;
 
 	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
 }
