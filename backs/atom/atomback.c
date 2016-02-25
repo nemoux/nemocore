@@ -32,15 +32,15 @@ static void nemoback_atom_dispatch_canvas_event(struct nemoshow *show, struct sh
 
 			set0 = nemoshow_sequence_create_set();
 			nemoshow_sequence_set_source(set0, atom->one0);
-			nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_RED_COLOR, 0.1f, NEMOSHOW_STYLE_DIRTY);
-			nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_GREEN_COLOR, 0.1f, NEMOSHOW_STYLE_DIRTY);
-			nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_BLUE_COLOR, 0.1f, NEMOSHOW_STYLE_DIRTY);
+			nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_RED_COLOR, 0.1f);
+			nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_GREEN_COLOR, 0.1f);
+			nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_BLUE_COLOR, 0.1f);
 
 			set1 = nemoshow_sequence_create_set();
 			nemoshow_sequence_set_source(set1, atom->one0);
-			nemoshow_sequence_set_fattr_offset(set1, "color", NEMOSHOW_POLY_RED_COLOR, 1.0f, NEMOSHOW_STYLE_DIRTY);
-			nemoshow_sequence_set_fattr_offset(set1, "color", NEMOSHOW_POLY_GREEN_COLOR, 1.0f, NEMOSHOW_STYLE_DIRTY);
-			nemoshow_sequence_set_fattr_offset(set1, "color", NEMOSHOW_POLY_BLUE_COLOR, 1.0f, NEMOSHOW_STYLE_DIRTY);
+			nemoshow_sequence_set_fattr_offset(set1, "color", NEMOSHOW_POLY_RED_COLOR, 1.0f);
+			nemoshow_sequence_set_fattr_offset(set1, "color", NEMOSHOW_POLY_GREEN_COLOR, 1.0f);
+			nemoshow_sequence_set_fattr_offset(set1, "color", NEMOSHOW_POLY_BLUE_COLOR, 1.0f);
 
 			sequence = nemoshow_sequence_create_easy(atom->show,
 					nemoshow_sequence_create_frame_easy(atom->show,
@@ -60,15 +60,15 @@ static void nemoback_atom_dispatch_canvas_event(struct nemoshow *show, struct sh
 
 			set0 = nemoshow_sequence_create_set();
 			nemoshow_sequence_set_source(set0, atom->one1);
-			nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_RED_COLOR, 0.0f, NEMOSHOW_STYLE_DIRTY);
-			nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_GREEN_COLOR, 0.0f, NEMOSHOW_STYLE_DIRTY);
-			nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_BLUE_COLOR, 0.0f, NEMOSHOW_STYLE_DIRTY);
+			nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_RED_COLOR, 0.0f);
+			nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_GREEN_COLOR, 0.0f);
+			nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_BLUE_COLOR, 0.0f);
 
 			set1 = nemoshow_sequence_create_set();
 			nemoshow_sequence_set_source(set1, atom->one1);
-			nemoshow_sequence_set_fattr_offset(set1, "color", NEMOSHOW_POLY_RED_COLOR, 1.0f, NEMOSHOW_STYLE_DIRTY);
-			nemoshow_sequence_set_fattr_offset(set1, "color", NEMOSHOW_POLY_GREEN_COLOR, 1.0f, NEMOSHOW_STYLE_DIRTY);
-			nemoshow_sequence_set_fattr_offset(set1, "color", NEMOSHOW_POLY_BLUE_COLOR, 1.0f, NEMOSHOW_STYLE_DIRTY);
+			nemoshow_sequence_set_fattr_offset(set1, "color", NEMOSHOW_POLY_RED_COLOR, 1.0f);
+			nemoshow_sequence_set_fattr_offset(set1, "color", NEMOSHOW_POLY_GREEN_COLOR, 1.0f);
+			nemoshow_sequence_set_fattr_offset(set1, "color", NEMOSHOW_POLY_BLUE_COLOR, 1.0f);
 
 			sequence = nemoshow_sequence_create_easy(atom->show,
 					nemoshow_sequence_create_frame_easy(atom->show,
@@ -298,21 +298,21 @@ int main(int argc, char *argv[])
 
 	set0 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set0, atom->one1);
-	nemoshow_sequence_set_dattr(set0, "rx", 360.0f, NEMOSHOW_MATRIX_DIRTY);
-	nemoshow_sequence_set_dattr(set0, "ry", 360.0f, NEMOSHOW_MATRIX_DIRTY);
+	nemoshow_sequence_set_dattr(set0, "rx", 360.0f);
+	nemoshow_sequence_set_dattr(set0, "ry", 360.0f);
 
 	set1 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set1, atom->one1);
-	nemoshow_sequence_set_dattr(set1, "rx", 0.0f, NEMOSHOW_MATRIX_DIRTY);
-	nemoshow_sequence_set_dattr(set1, "ry", 0.0f, NEMOSHOW_MATRIX_DIRTY);
+	nemoshow_sequence_set_dattr(set1, "rx", 0.0f);
+	nemoshow_sequence_set_dattr(set1, "ry", 0.0f);
 
 	set2 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set2, atom->onet);
-	nemoshow_sequence_set_cattr(set2, "fill", 0xff, 0x8c, 0x32, 0xff, NEMOSHOW_STYLE_DIRTY);
+	nemoshow_sequence_set_cattr(set2, "fill", 0xff, 0x8c, 0x32, 0xff);
 
 	set3 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set3, atom->onet);
-	nemoshow_sequence_set_cattr(set3, "fill", 0x1e, 0xdc, 0xdc, 0xff, NEMOSHOW_STYLE_DIRTY);
+	nemoshow_sequence_set_cattr(set3, "fill", 0x1e, 0xdc, 0xdc, 0xff);
 
 	sequence = nemoshow_sequence_create_easy(atom->show,
 			nemoshow_sequence_create_frame_easy(atom->show,
@@ -330,17 +330,17 @@ int main(int argc, char *argv[])
 
 	set0 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set0, atom->pipe);
-	nemoshow_sequence_set_fattr_offset(set0, "light", 0, -1.0f, NEMOSHOW_REDRAW_DIRTY);
-	nemoshow_sequence_set_fattr_offset(set0, "light", 1, 1.0f, NEMOSHOW_REDRAW_DIRTY);
-	nemoshow_sequence_set_fattr_offset(set0, "light", 2, -1.0f, NEMOSHOW_REDRAW_DIRTY);
-	nemoshow_sequence_set_fattr_offset(set0, "light", 3, 1.0f, NEMOSHOW_REDRAW_DIRTY);
+	nemoshow_sequence_set_fattr_offset(set0, "light", 0, -1.0f);
+	nemoshow_sequence_set_fattr_offset(set0, "light", 1, 1.0f);
+	nemoshow_sequence_set_fattr_offset(set0, "light", 2, -1.0f);
+	nemoshow_sequence_set_fattr_offset(set0, "light", 3, 1.0f);
 
 	set1 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set1, atom->pipe);
-	nemoshow_sequence_set_fattr_offset(set1, "light", 0, 1.0f, NEMOSHOW_REDRAW_DIRTY);
-	nemoshow_sequence_set_fattr_offset(set1, "light", 1, 1.0f, NEMOSHOW_REDRAW_DIRTY);
-	nemoshow_sequence_set_fattr_offset(set1, "light", 2, -1.0f, NEMOSHOW_REDRAW_DIRTY);
-	nemoshow_sequence_set_fattr_offset(set1, "light", 3, 1.0f, NEMOSHOW_REDRAW_DIRTY);
+	nemoshow_sequence_set_fattr_offset(set1, "light", 0, 1.0f);
+	nemoshow_sequence_set_fattr_offset(set1, "light", 1, 1.0f);
+	nemoshow_sequence_set_fattr_offset(set1, "light", 2, -1.0f);
+	nemoshow_sequence_set_fattr_offset(set1, "light", 3, 1.0f);
 
 	sequence = nemoshow_sequence_create_easy(atom->show,
 			nemoshow_sequence_create_frame_easy(atom->show,

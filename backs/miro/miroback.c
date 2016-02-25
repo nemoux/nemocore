@@ -108,7 +108,7 @@ static void nemoback_miro_dispatch_mice_transition_done(void *data)
 			mice->r1 <= 0 || mice->r1 >= miro->rows) {
 		set0 = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(set0, mice->one);
-		nemoshow_sequence_set_dattr(set0, "r", 0.0f, NEMOSHOW_SHAPE_DIRTY);
+		nemoshow_sequence_set_dattr(set0, "r", 0.0f);
 
 		sequence = nemoshow_sequence_create_easy(miro->show,
 				nemoshow_sequence_create_frame_easy(miro->show,
@@ -143,8 +143,8 @@ static void nemoback_miro_dispatch_mice_transition_done(void *data)
 
 		set0 = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(set0, mice->one);
-		nemoshow_sequence_set_dattr(set0, "x", mice->c1 * (miro->width / miro->columns), NEMOSHOW_SHAPE_DIRTY);
-		nemoshow_sequence_set_dattr(set0, "y", mice->r1 * (miro->height / miro->rows), NEMOSHOW_SHAPE_DIRTY);
+		nemoshow_sequence_set_dattr(set0, "x", mice->c1 * (miro->width / miro->columns));
+		nemoshow_sequence_set_dattr(set0, "y", mice->r1 * (miro->height / miro->rows));
 
 		sequence = nemoshow_sequence_create_easy(miro->show,
 				nemoshow_sequence_create_frame_easy(miro->show,
@@ -190,7 +190,7 @@ static int nemoback_miro_shoot_mice(struct miroback *miro)
 
 	set0 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set0, one);
-	nemoshow_sequence_set_dattr(set0, "r", 5.0f, NEMOSHOW_SHAPE_DIRTY);
+	nemoshow_sequence_set_dattr(set0, "r", 5.0f);
 
 	sequence = nemoshow_sequence_create_easy(miro->show,
 			nemoshow_sequence_create_frame_easy(miro->show,
@@ -220,11 +220,11 @@ static int nemoback_miro_shoot_box(struct miroback *miro)
 
 		set0 = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(set0, miro->bones[index]);
-		nemoshow_sequence_set_dattr(set0, "alpha", 1.0f, NEMOSHOW_STYLE_DIRTY);
+		nemoshow_sequence_set_dattr(set0, "alpha", 1.0f);
 
 		set1 = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(set1, miro->bones[index]);
-		nemoshow_sequence_set_dattr(set1, "alpha", 0.0f, NEMOSHOW_STYLE_DIRTY);
+		nemoshow_sequence_set_dattr(set1, "alpha", 0.0f);
 
 		sequence = nemoshow_sequence_create_easy(miro->show,
 				nemoshow_sequence_create_frame_easy(miro->show,
@@ -375,7 +375,7 @@ static void nemoback_miro_dispatch_pulse_timer_event(struct nemotimer *timer, vo
 			if (miro->nodes0[i] != miro->nodes1[i]) {
 				set0 = nemoshow_sequence_create_set();
 				nemoshow_sequence_set_source(set0, miro->bones[i]);
-				nemoshow_sequence_set_dattr(set0, "alpha", (double)miro->nodes1[i] / NEMOMIRO_PA_VOLUME_DECIBELS, NEMOSHOW_STYLE_DIRTY);
+				nemoshow_sequence_set_dattr(set0, "alpha", (double)miro->nodes1[i] / NEMOMIRO_PA_VOLUME_DECIBELS);
 
 				nemoshow_one_attach(frame, set0);
 
@@ -437,7 +437,7 @@ static void nemoback_miro_dispatch_show(struct miroback *miro, uint32_t duration
 	for (i = 0; i <= miro->columns; i++) {
 		set0 = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(set0, miro->cones[i]);
-		nemoshow_sequence_set_dattr(set0, "height", miro->height, NEMOSHOW_SHAPE_DIRTY);
+		nemoshow_sequence_set_dattr(set0, "height", miro->height);
 
 		sequence = nemoshow_sequence_create_easy(miro->show,
 				nemoshow_sequence_create_frame_easy(miro->show,
@@ -453,7 +453,7 @@ static void nemoback_miro_dispatch_show(struct miroback *miro, uint32_t duration
 	for (i = 0; i <= miro->rows; i++) {
 		set0 = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(set0, miro->rones[i]);
-		nemoshow_sequence_set_dattr(set0, "width", miro->width, NEMOSHOW_SHAPE_DIRTY);
+		nemoshow_sequence_set_dattr(set0, "width", miro->width);
 
 		sequence = nemoshow_sequence_create_easy(miro->show,
 				nemoshow_sequence_create_frame_easy(miro->show,
@@ -481,7 +481,7 @@ static void nemoback_miro_dispatch_hide(struct miroback *miro, uint32_t duration
 	for (i = 0; i <= miro->columns; i++) {
 		set0 = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(set0, miro->cones[i]);
-		nemoshow_sequence_set_dattr(set0, "height", 0.0f, NEMOSHOW_SHAPE_DIRTY);
+		nemoshow_sequence_set_dattr(set0, "height", 0.0f);
 
 		sequence = nemoshow_sequence_create_easy(miro->show,
 				nemoshow_sequence_create_frame_easy(miro->show,
@@ -497,7 +497,7 @@ static void nemoback_miro_dispatch_hide(struct miroback *miro, uint32_t duration
 	for (i = 0; i <= miro->rows; i++) {
 		set0 = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(set0, miro->rones[i]);
-		nemoshow_sequence_set_dattr(set0, "width", 0.0f, NEMOSHOW_SHAPE_DIRTY);
+		nemoshow_sequence_set_dattr(set0, "width", 0.0f);
 
 		sequence = nemoshow_sequence_create_easy(miro->show,
 				nemoshow_sequence_create_frame_easy(miro->show,

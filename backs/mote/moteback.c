@@ -512,17 +512,17 @@ int main(int argc, char *argv[])
 
 	set0 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set0, mote->pipe);
-	nemoshow_sequence_set_fattr_offset(set0, "light", 0, -1.0f, NEMOSHOW_REDRAW_DIRTY);
-	nemoshow_sequence_set_fattr_offset(set0, "light", 1, 1.0f, NEMOSHOW_REDRAW_DIRTY);
-	nemoshow_sequence_set_fattr_offset(set0, "light", 2, -1.0f, NEMOSHOW_REDRAW_DIRTY);
-	nemoshow_sequence_set_fattr_offset(set0, "light", 3, 1.0f, NEMOSHOW_REDRAW_DIRTY);
+	nemoshow_sequence_set_fattr_offset(set0, "light", 0, -1.0f);
+	nemoshow_sequence_set_fattr_offset(set0, "light", 1, 1.0f);
+	nemoshow_sequence_set_fattr_offset(set0, "light", 2, -1.0f);
+	nemoshow_sequence_set_fattr_offset(set0, "light", 3, 1.0f);
 
 	set1 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set1, mote->pipe);
-	nemoshow_sequence_set_fattr_offset(set1, "light", 0, 1.0f, NEMOSHOW_REDRAW_DIRTY);
-	nemoshow_sequence_set_fattr_offset(set1, "light", 1, 1.0f, NEMOSHOW_REDRAW_DIRTY);
-	nemoshow_sequence_set_fattr_offset(set1, "light", 2, -1.0f, NEMOSHOW_REDRAW_DIRTY);
-	nemoshow_sequence_set_fattr_offset(set1, "light", 3, 1.0f, NEMOSHOW_REDRAW_DIRTY);
+	nemoshow_sequence_set_fattr_offset(set1, "light", 0, 1.0f);
+	nemoshow_sequence_set_fattr_offset(set1, "light", 1, 1.0f);
+	nemoshow_sequence_set_fattr_offset(set1, "light", 2, -1.0f);
+	nemoshow_sequence_set_fattr_offset(set1, "light", 3, 1.0f);
 
 	sequence = nemoshow_sequence_create_easy(mote->show,
 			nemoshow_sequence_create_frame_easy(mote->show,

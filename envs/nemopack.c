@@ -188,7 +188,7 @@ struct nemopack *nemopack_create(struct nemoshell *shell, struct nemoview *view,
 
 	set0 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set0, one);
-	nemoshow_sequence_set_cattr(set0, "fill", 0x1e, 0xdc, 0xdc, 0x40, NEMOSHOW_STYLE_DIRTY);
+	nemoshow_sequence_set_cattr(set0, "fill", 0x1e, 0xdc, 0xdc, 0x40);
 
 	pack->icon = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
 	nemoshow_one_attach(canvas, one);
@@ -204,8 +204,8 @@ struct nemopack *nemopack_create(struct nemoshell *shell, struct nemoview *view,
 
 	set1 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set1, one);
-	nemoshow_sequence_set_cattr(set1, "fill", 0x1e, 0xdc, 0xdc, 0xff, NEMOSHOW_STYLE_DIRTY);
-	nemoshow_sequence_set_cattr(set1, "stroke", 0x1e, 0xdc, 0xdc, 0xff, NEMOSHOW_STYLE_DIRTY);
+	nemoshow_sequence_set_cattr(set1, "fill", 0x1e, 0xdc, 0xdc, 0xff);
+	nemoshow_sequence_set_cattr(set1, "stroke", 0x1e, 0xdc, 0xdc, 0xff);
 
 	sequence = nemoshow_sequence_create_easy(show,
 			nemoshow_sequence_create_frame_easy(show,
@@ -219,11 +219,11 @@ struct nemopack *nemopack_create(struct nemoshell *shell, struct nemoview *view,
 
 	set0 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set0, pack->blur1);
-	nemoshow_sequence_set_dattr(set0, "r", 8.0f, NEMOSHOW_SHAPE_DIRTY);
+	nemoshow_sequence_set_dattr(set0, "r", 8.0f);
 
 	set1 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set1, pack->blur1);
-	nemoshow_sequence_set_dattr(set1, "r", 3.0f, NEMOSHOW_SHAPE_DIRTY);
+	nemoshow_sequence_set_dattr(set1, "r", 3.0f);
 
 	sequence = nemoshow_sequence_create_easy(show,
 			nemoshow_sequence_create_frame_easy(show,

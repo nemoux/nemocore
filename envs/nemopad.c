@@ -597,13 +597,13 @@ int nemopad_activate(struct nemopad *pad, double x, double y, double r)
 		if (pad->borders[i] != NULL) {
 			set = nemoshow_sequence_create_set();
 			nemoshow_sequence_set_source(set, pad->borders[i]);
-			nemoshow_sequence_set_dattr(set, "alpha", 1.0f, NEMOSHOW_STYLE_DIRTY);
+			nemoshow_sequence_set_dattr(set, "alpha", 1.0f);
 			nemoshow_one_attach(frame, set);
 		}
 		if (pad->keys[i] != NULL) {
 			set = nemoshow_sequence_create_set();
 			nemoshow_sequence_set_source(set, pad->keys[i]);
-			nemoshow_sequence_set_dattr(set, "alpha", 1.0f, NEMOSHOW_STYLE_DIRTY);
+			nemoshow_sequence_set_dattr(set, "alpha", 1.0f);
 			nemoshow_one_attach(frame, set);
 		}
 
@@ -670,7 +670,7 @@ void nemopad_deactivate(struct nemopad *pad)
 		if (pad->keys[i] != NULL) {
 			set = nemoshow_sequence_create_set();
 			nemoshow_sequence_set_source(set, pad->keys[i]);
-			nemoshow_sequence_set_dattr(set, "alpha", 0.0f, NEMOSHOW_STYLE_DIRTY);
+			nemoshow_sequence_set_dattr(set, "alpha", 0.0f);
 			nemoshow_one_attach(frame, set);
 		}
 	}
@@ -688,7 +688,7 @@ void nemopad_deactivate(struct nemopad *pad)
 		if (pad->borders[i] != NULL) {
 			set = nemoshow_sequence_create_set();
 			nemoshow_sequence_set_source(set, pad->borders[i]);
-			nemoshow_sequence_set_dattr(set, "alpha", 0.0f, NEMOSHOW_STYLE_DIRTY);
+			nemoshow_sequence_set_dattr(set, "alpha", 0.0f);
 			nemoshow_one_attach(frame, set);
 		}
 	}

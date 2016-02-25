@@ -65,11 +65,11 @@ static void nemoback_mirotap_dispatch_timer(struct nemotimer *timer, void *data)
 		for (i = 0; i < nones; i++) {
 			set0 = nemoshow_sequence_create_set();
 			nemoshow_sequence_set_source(set0, ones[i]);
-			nemoshow_sequence_set_dattr(set0, "alpha", 1.0f, NEMOSHOW_STYLE_DIRTY);
+			nemoshow_sequence_set_dattr(set0, "alpha", 1.0f);
 
 			set1 = nemoshow_sequence_create_set();
 			nemoshow_sequence_set_source(set1, ones[i]);
-			nemoshow_sequence_set_dattr(set1, "alpha", 0.0f, NEMOSHOW_STYLE_DIRTY);
+			nemoshow_sequence_set_dattr(set1, "alpha", 0.0f);
 
 			trans = nemoshow_transition_create(NEMOSHOW_CUBIC_INOUT_EASE, duration, delay * i);
 			nemoshow_transition_check_one(trans, ones[i]);
@@ -94,11 +94,11 @@ static void nemoback_mirotap_dispatch_timer(struct nemotimer *timer, void *data)
 		for (i = 0; i < nones; i++) {
 			set0 = nemoshow_sequence_create_set();
 			nemoshow_sequence_set_source(set0, ones[i]);
-			nemoshow_sequence_set_dattr(set0, "alpha", 1.0f, NEMOSHOW_STYLE_DIRTY);
+			nemoshow_sequence_set_dattr(set0, "alpha", 1.0f);
 
 			set1 = nemoshow_sequence_create_set();
 			nemoshow_sequence_set_source(set1, ones[i]);
-			nemoshow_sequence_set_dattr(set1, "alpha", 0.0f, NEMOSHOW_STYLE_DIRTY);
+			nemoshow_sequence_set_dattr(set1, "alpha", 0.0f);
 
 			trans = nemoshow_transition_create(NEMOSHOW_CUBIC_INOUT_EASE, duration, delay * i);
 			nemoshow_transition_check_one(trans, ones[i]);
@@ -219,12 +219,12 @@ int nemoback_mirotap_down(struct miroback *miro, struct mirotap *tap, double x, 
 
 	set0 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set0, tap->one0);
-	nemoshow_sequence_set_dattr(set0, "sx", 1.0f, NEMOSHOW_MATRIX_DIRTY);
-	nemoshow_sequence_set_dattr(set0, "sy", 1.0f, NEMOSHOW_MATRIX_DIRTY);
+	nemoshow_sequence_set_dattr(set0, "sx", 1.0f);
+	nemoshow_sequence_set_dattr(set0, "sy", 1.0f);
 
 	set1 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set1, tap->oner);
-	nemoshow_sequence_set_dattr(set1, "alpha", 1.0f, NEMOSHOW_STYLE_DIRTY);
+	nemoshow_sequence_set_dattr(set1, "alpha", 1.0f);
 
 	sequence = nemoshow_sequence_create_easy(miro->show,
 			nemoshow_sequence_create_frame_easy(miro->show,
@@ -239,7 +239,7 @@ int nemoback_mirotap_down(struct miroback *miro, struct mirotap *tap, double x, 
 
 	set0 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set0, tap->oner);
-	attr = nemoshow_sequence_set_dattr(set0, "ro", 360.0f, NEMOSHOW_MATRIX_DIRTY);
+	attr = nemoshow_sequence_set_dattr(set0, "ro", 360.0f);
 	nemoshow_sequence_fix_dattr(set0, attr, 0.0f);
 
 	sequence = nemoshow_sequence_create_easy(miro->show,
@@ -255,11 +255,11 @@ int nemoback_mirotap_down(struct miroback *miro, struct mirotap *tap, double x, 
 
 	set0 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set0, tap->blur);
-	nemoshow_sequence_set_dattr(set0, "r", 15.0f, NEMOSHOW_SHAPE_DIRTY);
+	nemoshow_sequence_set_dattr(set0, "r", 15.0f);
 
 	set1 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set1, tap->blur);
-	nemoshow_sequence_set_dattr(set1, "r", 3.0f, NEMOSHOW_SHAPE_DIRTY);
+	nemoshow_sequence_set_dattr(set1, "r", 3.0f);
 
 	sequence = nemoshow_sequence_create_easy(miro->show,
 			nemoshow_sequence_create_frame_easy(miro->show,
@@ -317,29 +317,29 @@ int nemoback_mirotap_motion(struct miroback *miro, struct mirotap *tap, double x
 	if (has_collision == 0 && tap->state != MIROBACK_TAP_NORMAL_STATE) {
 		set0 = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(set0, tap->one0);
-		nemoshow_sequence_set_cattr(set0, "fill", 0x1e, 0xdc, 0xdc, 0xff, NEMOSHOW_STYLE_DIRTY);
+		nemoshow_sequence_set_cattr(set0, "fill", 0x1e, 0xdc, 0xdc, 0xff);
 
 		set1 = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(set1, tap->one1);
-		nemoshow_sequence_set_cattr(set1, "fill", 0x1e, 0xdc, 0xdc, 0xff, NEMOSHOW_STYLE_DIRTY);
+		nemoshow_sequence_set_cattr(set1, "fill", 0x1e, 0xdc, 0xdc, 0xff);
 
 		set2 = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(set2, tap->one2);
-		nemoshow_sequence_set_cattr(set2, "fill", 0x1e, 0xdc, 0xdc, 0xff, NEMOSHOW_STYLE_DIRTY);
+		nemoshow_sequence_set_cattr(set2, "fill", 0x1e, 0xdc, 0xdc, 0xff);
 
 		set3 = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(set3, tap->one3);
-		nemoshow_sequence_set_cattr(set3, "fill", 0x1e, 0xdc, 0xdc, 0xff, NEMOSHOW_STYLE_DIRTY);
+		nemoshow_sequence_set_cattr(set3, "fill", 0x1e, 0xdc, 0xdc, 0xff);
 
 		set4 = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(set4, tap->one4);
-		nemoshow_sequence_set_cattr(set4, "fill", 0x1e, 0xdc, 0xdc, 0xff, NEMOSHOW_STYLE_DIRTY);
+		nemoshow_sequence_set_cattr(set4, "fill", 0x1e, 0xdc, 0xdc, 0xff);
 
 		setr = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(setr, tap->oner);
-		nemoshow_sequence_set_cattr(setr, "fill", 0x1e, 0xdc, 0xdc, 0xff, NEMOSHOW_STYLE_DIRTY);
-		nemoshow_sequence_set_dattr(setr, "sx", 0.9f, NEMOSHOW_MATRIX_DIRTY);
-		nemoshow_sequence_set_dattr(setr, "sy", 0.9f, NEMOSHOW_MATRIX_DIRTY);
+		nemoshow_sequence_set_cattr(setr, "fill", 0x1e, 0xdc, 0xdc, 0xff);
+		nemoshow_sequence_set_dattr(setr, "sx", 0.9f);
+		nemoshow_sequence_set_dattr(setr, "sy", 0.9f);
 
 		sequence = nemoshow_sequence_create_easy(miro->show,
 				nemoshow_sequence_create_frame_easy(miro->show,
@@ -360,29 +360,29 @@ int nemoback_mirotap_motion(struct miroback *miro, struct mirotap *tap, double x
 	} else if (has_collision != 0 && tap->state != MIROBACK_TAP_COLLISION_STATE) {
 		set0 = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(set0, tap->one0);
-		nemoshow_sequence_set_cattr(set0, "fill", 0xff, 0x8c, 0x32, 0xff, NEMOSHOW_STYLE_DIRTY);
+		nemoshow_sequence_set_cattr(set0, "fill", 0xff, 0x8c, 0x32, 0xff);
 
 		set1 = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(set1, tap->one1);
-		nemoshow_sequence_set_cattr(set1, "fill", 0xff, 0x8c, 0x32, 0xff, NEMOSHOW_STYLE_DIRTY);
+		nemoshow_sequence_set_cattr(set1, "fill", 0xff, 0x8c, 0x32, 0xff);
 
 		set2 = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(set2, tap->one2);
-		nemoshow_sequence_set_cattr(set2, "fill", 0xff, 0x8c, 0x32, 0xff, NEMOSHOW_STYLE_DIRTY);
+		nemoshow_sequence_set_cattr(set2, "fill", 0xff, 0x8c, 0x32, 0xff);
 
 		set3 = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(set3, tap->one3);
-		nemoshow_sequence_set_cattr(set3, "fill", 0xff, 0x8c, 0x32, 0xff, NEMOSHOW_STYLE_DIRTY);
+		nemoshow_sequence_set_cattr(set3, "fill", 0xff, 0x8c, 0x32, 0xff);
 
 		set4 = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(set4, tap->one4);
-		nemoshow_sequence_set_cattr(set4, "fill", 0xff, 0x8c, 0x32, 0xff, NEMOSHOW_STYLE_DIRTY);
+		nemoshow_sequence_set_cattr(set4, "fill", 0xff, 0x8c, 0x32, 0xff);
 
 		setr = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(setr, tap->oner);
-		nemoshow_sequence_set_cattr(setr, "fill", 0xff, 0x8c, 0x32, 0xff, NEMOSHOW_STYLE_DIRTY);
-		nemoshow_sequence_set_dattr(setr, "sx", 0.15f, NEMOSHOW_MATRIX_DIRTY);
-		nemoshow_sequence_set_dattr(setr, "sy", 0.15f, NEMOSHOW_MATRIX_DIRTY);
+		nemoshow_sequence_set_cattr(setr, "fill", 0xff, 0x8c, 0x32, 0xff);
+		nemoshow_sequence_set_dattr(setr, "sx", 0.15f);
+		nemoshow_sequence_set_dattr(setr, "sy", 0.15f);
 
 		sequence = nemoshow_sequence_create_easy(miro->show,
 				nemoshow_sequence_create_frame_easy(miro->show,
@@ -428,32 +428,32 @@ int nemoback_mirotap_up(struct miroback *miro, struct mirotap *tap, double x, do
 
 	set0 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set0, tap->one0);
-	nemoshow_sequence_set_dattr(set0, "sx", 0.0f, NEMOSHOW_MATRIX_DIRTY);
-	nemoshow_sequence_set_dattr(set0, "sy", 0.0f, NEMOSHOW_MATRIX_DIRTY);
+	nemoshow_sequence_set_dattr(set0, "sx", 0.0f);
+	nemoshow_sequence_set_dattr(set0, "sy", 0.0f);
 
 	set1 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set1, tap->one1);
-	nemoshow_sequence_set_dattr(set1, "sx", 0.0f, NEMOSHOW_MATRIX_DIRTY);
-	nemoshow_sequence_set_dattr(set1, "sy", 0.0f, NEMOSHOW_MATRIX_DIRTY);
+	nemoshow_sequence_set_dattr(set1, "sx", 0.0f);
+	nemoshow_sequence_set_dattr(set1, "sy", 0.0f);
 
 	set2 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set2, tap->one2);
-	nemoshow_sequence_set_dattr(set2, "sx", 0.0f, NEMOSHOW_MATRIX_DIRTY);
-	nemoshow_sequence_set_dattr(set2, "sy", 0.0f, NEMOSHOW_MATRIX_DIRTY);
+	nemoshow_sequence_set_dattr(set2, "sx", 0.0f);
+	nemoshow_sequence_set_dattr(set2, "sy", 0.0f);
 
 	set3 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set3, tap->one3);
-	nemoshow_sequence_set_dattr(set3, "sx", 0.0f, NEMOSHOW_MATRIX_DIRTY);
-	nemoshow_sequence_set_dattr(set3, "sy", 0.0f, NEMOSHOW_MATRIX_DIRTY);
+	nemoshow_sequence_set_dattr(set3, "sx", 0.0f);
+	nemoshow_sequence_set_dattr(set3, "sy", 0.0f);
 
 	set4 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set4, tap->one4);
-	nemoshow_sequence_set_dattr(set4, "sx", 0.0f, NEMOSHOW_MATRIX_DIRTY);
-	nemoshow_sequence_set_dattr(set4, "sy", 0.0f, NEMOSHOW_MATRIX_DIRTY);
+	nemoshow_sequence_set_dattr(set4, "sx", 0.0f);
+	nemoshow_sequence_set_dattr(set4, "sy", 0.0f);
 
 	setr = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(setr, tap->oner);
-	nemoshow_sequence_set_dattr(setr, "alpha", 0.0f, NEMOSHOW_STYLE_DIRTY);
+	nemoshow_sequence_set_dattr(setr, "alpha", 0.0f);
 
 	sequence = nemoshow_sequence_create_easy(miro->show,
 			nemoshow_sequence_create_frame_easy(miro->show,

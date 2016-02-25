@@ -145,7 +145,7 @@ static void nemospeaker_dispatch_fadein_transition(struct nemoshow *show, struct
 
 	set0 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set0, one);
-	nemoshow_sequence_set_dattr(set0, "alpha", 1.0f, NEMOSHOW_STYLE_DIRTY);
+	nemoshow_sequence_set_dattr(set0, "alpha", 1.0f);
 
 	trans = nemoshow_transition_create(ease, duration, delay);
 	nemoshow_transition_check_one(trans, one);
@@ -327,7 +327,7 @@ void nemospeaker_set_volume(struct nemospeaker *speaker, uint32_t volume, uint32
 
 	set0 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set0, speaker->volume);
-	nemoshow_sequence_set_dattr(set0, "width", ((double)volume / 100.0f) * 396.0f, NEMOSHOW_SHAPE_DIRTY);
+	nemoshow_sequence_set_dattr(set0, "width", ((double)volume / 100.0f) * 396.0f);
 
 	trans = nemoshow_transition_create(NEMOSHOW_CUBIC_INOUT_EASE, duration, delay);
 	nemoshow_transition_check_one(trans, speaker->volume);

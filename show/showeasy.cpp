@@ -42,7 +42,7 @@ void nemoshow_transition_dispatch_rotate_easy(struct nemoshow *show, struct show
 
 	set0 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set0, one);
-	attr = nemoshow_sequence_set_dattr(set0, "ro", 360.0f, NEMOSHOW_MATRIX_DIRTY);
+	attr = nemoshow_sequence_set_dattr(set0, "ro", 360.0f);
 	nemoshow_sequence_fix_dattr(set0, attr, 0.0f);
 
 	sequence = nemoshow_sequence_create_easy(show,

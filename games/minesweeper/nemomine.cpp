@@ -178,7 +178,7 @@ static void nemomine_rotate_pin(struct minecontext *context, double ro)
 
 	set0 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set0, context->pin);
-	nemoshow_sequence_set_dattr(set0, "ro", ro, NEMOSHOW_MATRIX_DIRTY);
+	nemoshow_sequence_set_dattr(set0, "ro", ro);
 	nemoshow_one_attach(frame, set0);
 
 	sequence = nemoshow_sequence_create_easy(context->show, frame, NULL);
@@ -206,13 +206,13 @@ static void nemomine_check_mine(struct minecontext *context, uint32_t tag)
 
 	set0 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set0, mone->box);
-	nemoshow_sequence_set_cattr(set0, "fill", 0x1e, 0xdc, 0xdc, 0x40, NEMOSHOW_STYLE_DIRTY);
+	nemoshow_sequence_set_cattr(set0, "fill", 0x1e, 0xdc, 0xdc, 0x40);
 	nemoshow_one_attach(frame, set0);
 
 	set1 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set1, mone->one);
-	nemoshow_sequence_set_cattr(set1, "fill", 0xbb, 0xe5, 0xa9, 0xff, NEMOSHOW_STYLE_DIRTY);
-	nemoshow_sequence_set_dattr(set1, "alpha", 1.0f, NEMOSHOW_STYLE_DIRTY);
+	nemoshow_sequence_set_cattr(set1, "fill", 0xbb, 0xe5, 0xa9, 0xff);
+	nemoshow_sequence_set_dattr(set1, "alpha", 1.0f);
 	nemoshow_one_attach(frame, set1);
 
 	sequence = nemoshow_sequence_create_easy(context->show, frame, NULL);
@@ -240,12 +240,12 @@ static void nemomine_uncheck_mine(struct minecontext *context, uint32_t tag)
 
 	set0 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set0, mone->box);
-	nemoshow_sequence_set_cattr(set0, "fill", 0x1e, 0xdc, 0xdc, 0xff, NEMOSHOW_STYLE_DIRTY);
+	nemoshow_sequence_set_cattr(set0, "fill", 0x1e, 0xdc, 0xdc, 0xff);
 	nemoshow_one_attach(frame, set0);
 
 	set1 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set1, mone->one);
-	nemoshow_sequence_set_dattr(set1, "alpha", 0.0f, NEMOSHOW_STYLE_DIRTY);
+	nemoshow_sequence_set_dattr(set1, "alpha", 0.0f);
 	nemoshow_one_attach(frame, set1);
 
 	sequence = nemoshow_sequence_create_easy(context->show, frame, NULL);
@@ -296,13 +296,13 @@ static void nemomine_confirm_mine(struct minecontext *context, uint32_t tag)
 
 		set0 = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(set0, mone->box);
-		nemoshow_sequence_set_cattr(set0, "fill", 0x0, 0x0, 0x0, 0x0, NEMOSHOW_STYLE_DIRTY);
-		nemoshow_sequence_set_dattr(set0, "stroke-width", 1.0f, NEMOSHOW_SHAPE_DIRTY | NEMOSHOW_STYLE_DIRTY);
+		nemoshow_sequence_set_cattr(set0, "fill", 0x0, 0x0, 0x0, 0x0);
+		nemoshow_sequence_set_dattr(set0, "stroke-width", 1.0f);
 		nemoshow_one_attach(frame, set0);
 
 		set1 = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(set1, mone->one);
-		nemoshow_sequence_set_dattr(set1, "alpha", 0.0f, NEMOSHOW_STYLE_DIRTY);
+		nemoshow_sequence_set_dattr(set1, "alpha", 0.0f);
 		nemoshow_one_attach(frame, set1);
 
 		sequence = nemoshow_sequence_create_easy(context->show, frame, NULL);
@@ -321,14 +321,14 @@ static void nemomine_confirm_mine(struct minecontext *context, uint32_t tag)
 
 		set0 = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(set0, mone->one);
-		nemoshow_sequence_set_cattr(set0, "fill", 0xff, 0x8c, 0x32, 0xff, NEMOSHOW_STYLE_DIRTY);
-		nemoshow_sequence_set_dattr(set0, "alpha", 1.0f, NEMOSHOW_STYLE_DIRTY);
+		nemoshow_sequence_set_cattr(set0, "fill", 0xff, 0x8c, 0x32, 0xff);
+		nemoshow_sequence_set_dattr(set0, "alpha", 1.0f);
 		nemoshow_one_attach(frame, set0);
 
 		set1 = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(set1, mone->box);
-		nemoshow_sequence_set_cattr(set1, "fill", 0x0, 0x0, 0x0, 0x0, NEMOSHOW_STYLE_DIRTY);
-		nemoshow_sequence_set_dattr(set1, "stroke-width", 1.0f, NEMOSHOW_SHAPE_DIRTY | NEMOSHOW_STYLE_DIRTY);
+		nemoshow_sequence_set_cattr(set1, "fill", 0x0, 0x0, 0x0, 0x0);
+		nemoshow_sequence_set_dattr(set1, "stroke-width", 1.0f);
 		nemoshow_one_attach(frame, set1);
 
 		sequence = nemoshow_sequence_create_easy(context->show, frame, NULL);

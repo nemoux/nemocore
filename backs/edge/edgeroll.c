@@ -112,8 +112,8 @@ static void nemoback_edgeroll_show_rings(struct edgeback *edge, struct edgeroll 
 
 		set0 = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(set0, one);
-		nemoshow_sequence_set_dattr(set0, "sx", 1.0f, NEMOSHOW_MATRIX_DIRTY);
-		nemoshow_sequence_set_dattr(set0, "sy", 1.0f, NEMOSHOW_MATRIX_DIRTY);
+		nemoshow_sequence_set_dattr(set0, "sx", 1.0f);
+		nemoshow_sequence_set_dattr(set0, "sy", 1.0f);
 
 		sequence = nemoshow_sequence_create_easy(edge->show,
 				nemoshow_sequence_create_frame_easy(edge->show,
@@ -139,9 +139,9 @@ static void nemoback_edgeroll_hide_rings(struct edgeback *edge, struct edgeroll 
 	for (i = 0; i < roll->ngroups; i++) {
 		set0 = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(set0, roll->grouprings[i]);
-		nemoshow_sequence_set_dattr(set0, "alpha", 0.0f, NEMOSHOW_STYLE_DIRTY);
-		nemoshow_sequence_set_dattr(set0, "sx", 0.3f, NEMOSHOW_MATRIX_DIRTY);
-		nemoshow_sequence_set_dattr(set0, "sy", 0.3f, NEMOSHOW_MATRIX_DIRTY);
+		nemoshow_sequence_set_dattr(set0, "alpha", 0.0f);
+		nemoshow_sequence_set_dattr(set0, "sx", 0.3f);
+		nemoshow_sequence_set_dattr(set0, "sy", 0.3f);
 
 		sequence = nemoshow_sequence_create_easy(edge->show,
 				nemoshow_sequence_create_frame_easy(edge->show,
@@ -209,9 +209,9 @@ static void nemoback_edgeroll_show_groups(struct edgeback *edge, struct edgeroll
 
 		set0 = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(set0, one);
-		nemoshow_sequence_set_dattr(set0, "alpha", 1.0f, NEMOSHOW_STYLE_DIRTY);
-		nemoshow_sequence_set_dattr(set0, "sx", 1.0f, NEMOSHOW_MATRIX_DIRTY);
-		nemoshow_sequence_set_dattr(set0, "sy", 1.0f, NEMOSHOW_MATRIX_DIRTY);
+		nemoshow_sequence_set_dattr(set0, "alpha", 1.0f);
+		nemoshow_sequence_set_dattr(set0, "sx", 1.0f);
+		nemoshow_sequence_set_dattr(set0, "sy", 1.0f);
 
 		sequence = nemoshow_sequence_create_easy(edge->show,
 				nemoshow_sequence_create_frame_easy(edge->show,
@@ -235,9 +235,9 @@ static void nemoback_edgeroll_hide_groups(struct edgeback *edge, struct edgeroll
 	for (i = 0; i < roll->ngroups; i++) {
 		set0 = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(set0, roll->groups[i]);
-		nemoshow_sequence_set_dattr(set0, "alpha", 0.0f, NEMOSHOW_STYLE_DIRTY);
-		nemoshow_sequence_set_dattr(set0, "sx", 0.7f, NEMOSHOW_MATRIX_DIRTY);
-		nemoshow_sequence_set_dattr(set0, "sy", 0.7f, NEMOSHOW_MATRIX_DIRTY);
+		nemoshow_sequence_set_dattr(set0, "alpha", 0.0f);
+		nemoshow_sequence_set_dattr(set0, "sx", 0.7f);
+		nemoshow_sequence_set_dattr(set0, "sy", 0.7f);
 
 		sequence = nemoshow_sequence_create_easy(edge->show,
 				nemoshow_sequence_create_frame_easy(edge->show,
@@ -418,13 +418,13 @@ int nemoback_edgeroll_activate_group(struct edgeback *edge, struct edgeroll *rol
 
 	set0 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set0, roll->grouprings[group]);
-	nemoshow_sequence_set_dattr(set0, "sx", 0.8f, NEMOSHOW_MATRIX_DIRTY);
-	nemoshow_sequence_set_dattr(set0, "sy", 0.8f, NEMOSHOW_MATRIX_DIRTY);
+	nemoshow_sequence_set_dattr(set0, "sx", 0.8f);
+	nemoshow_sequence_set_dattr(set0, "sy", 0.8f);
 
 	set1 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set1, roll->groups[group]);
-	nemoshow_sequence_set_dattr(set1, "sx", 0.8f, NEMOSHOW_MATRIX_DIRTY);
-	nemoshow_sequence_set_dattr(set1, "sy", 0.8f, NEMOSHOW_MATRIX_DIRTY);
+	nemoshow_sequence_set_dattr(set1, "sx", 0.8f);
+	nemoshow_sequence_set_dattr(set1, "sy", 0.8f);
 
 	sequence = nemoshow_sequence_create_easy(edge->show,
 			nemoshow_sequence_create_frame_easy(edge->show,
@@ -483,9 +483,9 @@ int nemoback_edgeroll_activate_group(struct edgeback *edge, struct edgeroll *rol
 
 		set0 = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(set0, roll->actionrings[i]);
-		nemoshow_sequence_set_dattr(set0, "alpha", 1.0f, NEMOSHOW_STYLE_DIRTY);
-		nemoshow_sequence_set_dattr(set0, "sx", 1.0f, NEMOSHOW_MATRIX_DIRTY);
-		nemoshow_sequence_set_dattr(set0, "sy", 1.0f, NEMOSHOW_MATRIX_DIRTY);
+		nemoshow_sequence_set_dattr(set0, "alpha", 1.0f);
+		nemoshow_sequence_set_dattr(set0, "sx", 1.0f);
+		nemoshow_sequence_set_dattr(set0, "sy", 1.0f);
 
 		sequence = nemoshow_sequence_create_easy(edge->show,
 				nemoshow_sequence_create_frame_easy(edge->show,
@@ -499,9 +499,9 @@ int nemoback_edgeroll_activate_group(struct edgeback *edge, struct edgeroll *rol
 
 		set0 = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(set0, roll->actions[i]);
-		nemoshow_sequence_set_dattr(set0, "alpha", 1.0f, NEMOSHOW_STYLE_DIRTY);
-		nemoshow_sequence_set_dattr(set0, "sx", 0.8f, NEMOSHOW_MATRIX_DIRTY);
-		nemoshow_sequence_set_dattr(set0, "sy", 0.8f, NEMOSHOW_MATRIX_DIRTY);
+		nemoshow_sequence_set_dattr(set0, "alpha", 1.0f);
+		nemoshow_sequence_set_dattr(set0, "sx", 0.8f);
+		nemoshow_sequence_set_dattr(set0, "sy", 0.8f);
 
 		sequence = nemoshow_sequence_create_easy(edge->show,
 				nemoshow_sequence_create_frame_easy(edge->show,
@@ -539,13 +539,13 @@ int nemoback_edgeroll_deactivate_group(struct edgeback *edge, struct edgeroll *r
 
 	set0 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set0, roll->grouprings[group]);
-	nemoshow_sequence_set_dattr(set0, "sx", 1.0f, NEMOSHOW_MATRIX_DIRTY);
-	nemoshow_sequence_set_dattr(set0, "sy", 1.0f, NEMOSHOW_MATRIX_DIRTY);
+	nemoshow_sequence_set_dattr(set0, "sx", 1.0f);
+	nemoshow_sequence_set_dattr(set0, "sy", 1.0f);
 
 	set1 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set1, roll->groups[group]);
-	nemoshow_sequence_set_dattr(set1, "sx", 1.0f, NEMOSHOW_MATRIX_DIRTY);
-	nemoshow_sequence_set_dattr(set1, "sy", 1.0f, NEMOSHOW_MATRIX_DIRTY);
+	nemoshow_sequence_set_dattr(set1, "sx", 1.0f);
+	nemoshow_sequence_set_dattr(set1, "sy", 1.0f);
 
 	sequence = nemoshow_sequence_create_easy(edge->show,
 			nemoshow_sequence_create_frame_easy(edge->show,
@@ -561,15 +561,15 @@ int nemoback_edgeroll_deactivate_group(struct edgeback *edge, struct edgeroll *r
 	for (i = 0; i < roll->nactions; i++) {
 		set0 = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(set0, roll->actionrings[i]);
-		nemoshow_sequence_set_dattr(set0, "alpha", 0.0f, NEMOSHOW_STYLE_DIRTY);
-		nemoshow_sequence_set_dattr(set0, "sx", 0.4f, NEMOSHOW_MATRIX_DIRTY);
-		nemoshow_sequence_set_dattr(set0, "sy", 0.4f, NEMOSHOW_MATRIX_DIRTY);
+		nemoshow_sequence_set_dattr(set0, "alpha", 0.0f);
+		nemoshow_sequence_set_dattr(set0, "sx", 0.4f);
+		nemoshow_sequence_set_dattr(set0, "sy", 0.4f);
 
 		set1 = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(set1, roll->actions[i]);
-		nemoshow_sequence_set_dattr(set1, "alpha", 0.0f, NEMOSHOW_STYLE_DIRTY);
-		nemoshow_sequence_set_dattr(set1, "sx", 0.2f, NEMOSHOW_MATRIX_DIRTY);
-		nemoshow_sequence_set_dattr(set1, "sy", 0.2f, NEMOSHOW_MATRIX_DIRTY);
+		nemoshow_sequence_set_dattr(set1, "alpha", 0.0f);
+		nemoshow_sequence_set_dattr(set1, "sx", 0.2f);
+		nemoshow_sequence_set_dattr(set1, "sy", 0.2f);
 
 		sequence = nemoshow_sequence_create_easy(edge->show,
 				nemoshow_sequence_create_frame_easy(edge->show,
@@ -609,13 +609,13 @@ int nemoback_edgeroll_activate_action(struct edgeback *edge, struct edgeroll *ro
 
 	set0 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set0, roll->actionrings[action]);
-	nemoshow_sequence_set_dattr(set0, "sx", 0.8f, NEMOSHOW_MATRIX_DIRTY);
-	nemoshow_sequence_set_dattr(set0, "sy", 0.8f, NEMOSHOW_MATRIX_DIRTY);
+	nemoshow_sequence_set_dattr(set0, "sx", 0.8f);
+	nemoshow_sequence_set_dattr(set0, "sy", 0.8f);
 
 	set1 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set1, roll->actions[action]);
-	nemoshow_sequence_set_dattr(set1, "sx", 0.6f, NEMOSHOW_MATRIX_DIRTY);
-	nemoshow_sequence_set_dattr(set1, "sy", 0.6f, NEMOSHOW_MATRIX_DIRTY);
+	nemoshow_sequence_set_dattr(set1, "sx", 0.6f);
+	nemoshow_sequence_set_dattr(set1, "sy", 0.6f);
 
 	sequence = nemoshow_sequence_create_easy(edge->show,
 			nemoshow_sequence_create_frame_easy(edge->show,
@@ -647,13 +647,13 @@ int nemoback_edgeroll_deactivate_action(struct edgeback *edge, struct edgeroll *
 
 	set0 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set0, roll->actionrings[action]);
-	nemoshow_sequence_set_dattr(set0, "sx", 1.0f, NEMOSHOW_MATRIX_DIRTY);
-	nemoshow_sequence_set_dattr(set0, "sy", 1.0f, NEMOSHOW_MATRIX_DIRTY);
+	nemoshow_sequence_set_dattr(set0, "sx", 1.0f);
+	nemoshow_sequence_set_dattr(set0, "sy", 1.0f);
 
 	set1 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set1, roll->actions[action]);
-	nemoshow_sequence_set_dattr(set1, "sx", 0.8f, NEMOSHOW_MATRIX_DIRTY);
-	nemoshow_sequence_set_dattr(set1, "sy", 0.8f, NEMOSHOW_MATRIX_DIRTY);
+	nemoshow_sequence_set_dattr(set1, "sx", 0.8f);
+	nemoshow_sequence_set_dattr(set1, "sy", 0.8f);
 
 	sequence = nemoshow_sequence_create_easy(edge->show,
 			nemoshow_sequence_create_frame_easy(edge->show,
