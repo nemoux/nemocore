@@ -312,19 +312,12 @@ int nemoshow_pipe_update(struct showone *one)
 	return 0;
 }
 
-static int nemoshow_pipe_dispatch_simple(struct showone *canvas, struct showone *one)
+static inline void nemoshow_pipe_dispatch_simple_one(struct showpipe *pipe, struct showone *one)
 {
-	struct showpipe *pipe = NEMOSHOW_PIPE(one);
-	struct showpoly *poly;
+	struct showpoly *poly = NEMOSHOW_POLY(one);
 	struct showone *child;
 
-	glUseProgram(pipe->program);
-
-	glUniformMatrix4fv(pipe->uprojection, 1, GL_FALSE, (GLfloat *)pipe->projection.d);
-
-	nemoshow_children_for_each(child, one) {
-		poly = NEMOSHOW_POLY(child);
-
+	if (poly->elements > 0) {
 		glUniformMatrix4fv(pipe->umodelview, 1, GL_FALSE, (GLfloat *)poly->modelview.d);
 		glUniform4fv(pipe->ucolor, 1, poly->colors);
 
@@ -340,28 +333,38 @@ static int nemoshow_pipe_dispatch_simple(struct showone *canvas, struct showone 
 		}
 	}
 
-	return 0;
+	nemoshow_children_for_each(child, one) {
+		nemoshow_pipe_dispatch_simple_one(pipe, child);
+	}
 }
 
-static int nemoshow_pipe_dispatch_texture(struct showone *canvas, struct showone *one)
+static int nemoshow_pipe_dispatch_simple(struct showone *canvas, struct showone *one)
 {
 	struct showpipe *pipe = NEMOSHOW_PIPE(one);
-	struct showpoly *poly;
 	struct showone *child;
-	struct showone *ref;
 
 	glUseProgram(pipe->program);
 
 	glUniformMatrix4fv(pipe->uprojection, 1, GL_FALSE, (GLfloat *)pipe->projection.d);
-	glUniform1i(pipe->utex0, 0);
 
 	nemoshow_children_for_each(child, one) {
-		poly = NEMOSHOW_POLY(child);
+		nemoshow_pipe_dispatch_simple_one(pipe, child);
+	}
 
+	return 0;
+}
+
+static inline void nemoshow_pipe_dispatch_texture_one(struct showpipe *pipe, struct showone *one)
+{
+	struct showpoly *poly = NEMOSHOW_POLY(one);
+	struct showone *child;
+	struct showone *ref;
+
+	if (poly->elements > 0) {
 		glUniformMatrix4fv(pipe->umodelview, 1, GL_FALSE, (GLfloat *)poly->modelview.d);
 		glUniform4fv(pipe->ucolor, 1, poly->colors);
 
-		ref = NEMOSHOW_REF(child, NEMOSHOW_CANVAS_REF);
+		ref = NEMOSHOW_REF(one, NEMOSHOW_CANVAS_REF);
 		if (ref != NULL)
 			glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_texture(ref));
 
@@ -379,23 +382,34 @@ static int nemoshow_pipe_dispatch_texture(struct showone *canvas, struct showone
 		}
 	}
 
-	return 0;
+	nemoshow_children_for_each(child, one) {
+		nemoshow_pipe_dispatch_texture_one(pipe, child);
+	}
 }
 
-static int nemoshow_pipe_dispatch_lighting_diffuse(struct showone *canvas, struct showone *one)
+static int nemoshow_pipe_dispatch_texture(struct showone *canvas, struct showone *one)
 {
 	struct showpipe *pipe = NEMOSHOW_PIPE(one);
-	struct showpoly *poly;
 	struct showone *child;
 
 	glUseProgram(pipe->program);
 
 	glUniformMatrix4fv(pipe->uprojection, 1, GL_FALSE, (GLfloat *)pipe->projection.d);
-	glUniform4fv(pipe->ulight, 1, pipe->lights);
+	glUniform1i(pipe->utex0, 0);
 
 	nemoshow_children_for_each(child, one) {
-		poly = NEMOSHOW_POLY(child);
+		nemoshow_pipe_dispatch_texture_one(pipe, child);
+	}
 
+	return 0;
+}
+
+static inline void nemoshow_pipe_dispatch_lighting_diffuse_one(struct showpipe *pipe, struct showone *one)
+{
+	struct showpoly *poly = NEMOSHOW_POLY(one);
+	struct showone *child;
+
+	if (poly->elements > 0) {
 		glUniformMatrix4fv(pipe->umodelview, 1, GL_FALSE, (GLfloat *)poly->modelview.d);
 		glUniform4fv(pipe->ucolor, 1, poly->colors);
 
@@ -415,29 +429,39 @@ static int nemoshow_pipe_dispatch_lighting_diffuse(struct showone *canvas, struc
 		}
 	}
 
-	return 0;
+	nemoshow_children_for_each(child, one) {
+		nemoshow_pipe_dispatch_lighting_diffuse_one(pipe, child);
+	}
 }
 
-static int nemoshow_pipe_dispatch_lighting_texture(struct showone *canvas, struct showone *one)
+static int nemoshow_pipe_dispatch_lighting_diffuse(struct showone *canvas, struct showone *one)
 {
 	struct showpipe *pipe = NEMOSHOW_PIPE(one);
-	struct showpoly *poly;
 	struct showone *child;
-	struct showone *ref;
 
 	glUseProgram(pipe->program);
 
 	glUniformMatrix4fv(pipe->uprojection, 1, GL_FALSE, (GLfloat *)pipe->projection.d);
-	glUniform1i(pipe->utex0, 0);
 	glUniform4fv(pipe->ulight, 1, pipe->lights);
 
 	nemoshow_children_for_each(child, one) {
-		poly = NEMOSHOW_POLY(child);
+		nemoshow_pipe_dispatch_lighting_diffuse_one(pipe, child);
+	}
 
+	return 0;
+}
+
+static inline void nemoshow_pipe_dispatch_lighting_texture_one(struct showpipe *pipe, struct showone *one)
+{
+	struct showpoly *poly = NEMOSHOW_POLY(one);
+	struct showone *child;
+	struct showone *ref;
+
+	if (poly->elements > 0) {
 		glUniformMatrix4fv(pipe->umodelview, 1, GL_FALSE, (GLfloat *)poly->modelview.d);
 		glUniform4fv(pipe->ucolor, 1, poly->colors);
 
-		ref = NEMOSHOW_REF(child, NEMOSHOW_CANVAS_REF);
+		ref = NEMOSHOW_REF(one, NEMOSHOW_CANVAS_REF);
 		if (ref != NULL)
 			glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_texture(ref));
 
@@ -457,13 +481,14 @@ static int nemoshow_pipe_dispatch_lighting_texture(struct showone *canvas, struc
 		}
 	}
 
-	return 0;
+	nemoshow_children_for_each(child, one) {
+		nemoshow_pipe_dispatch_lighting_texture_one(pipe, child);
+	}
 }
 
-static int nemoshow_pipe_dispatch_lighting_diffuse_texture(struct showone *canvas, struct showone *one)
+static int nemoshow_pipe_dispatch_lighting_texture(struct showone *canvas, struct showone *one)
 {
 	struct showpipe *pipe = NEMOSHOW_PIPE(one);
-	struct showpoly *poly;
 	struct showone *child;
 	struct showone *ref;
 
@@ -474,12 +499,23 @@ static int nemoshow_pipe_dispatch_lighting_diffuse_texture(struct showone *canva
 	glUniform4fv(pipe->ulight, 1, pipe->lights);
 
 	nemoshow_children_for_each(child, one) {
-		poly = NEMOSHOW_POLY(child);
+		nemoshow_pipe_dispatch_lighting_texture_one(pipe, child);
+	}
 
+	return 0;
+}
+
+static inline void nemoshow_pipe_dispatch_lighting_diffuse_texture_one(struct showpipe *pipe, struct showone *one)
+{
+	struct showpoly *poly = NEMOSHOW_POLY(one);
+	struct showone *child;
+	struct showone *ref;
+
+	if (poly->elements > 0) {
 		glUniformMatrix4fv(pipe->umodelview, 1, GL_FALSE, (GLfloat *)poly->modelview.d);
 		glUniform4fv(pipe->ucolor, 1, poly->colors);
 
-		ref = NEMOSHOW_REF(child, NEMOSHOW_CANVAS_REF);
+		ref = NEMOSHOW_REF(one, NEMOSHOW_CANVAS_REF);
 		if (ref != NULL)
 			glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_texture(ref));
 
@@ -499,6 +535,27 @@ static int nemoshow_pipe_dispatch_lighting_diffuse_texture(struct showone *canva
 			glDrawArrays(poly->mode, 0, poly->elements);
 			glBindVertexArray(0);
 		}
+	}
+
+	nemoshow_children_for_each(child, one) {
+		nemoshow_pipe_dispatch_lighting_diffuse_texture_one(pipe, child);
+	}
+}
+
+static int nemoshow_pipe_dispatch_lighting_diffuse_texture(struct showone *canvas, struct showone *one)
+{
+	struct showpipe *pipe = NEMOSHOW_PIPE(one);
+	struct showone *child;
+	struct showone *ref;
+
+	glUseProgram(pipe->program);
+
+	glUniformMatrix4fv(pipe->uprojection, 1, GL_FALSE, (GLfloat *)pipe->projection.d);
+	glUniform1i(pipe->utex0, 0);
+	glUniform4fv(pipe->ulight, 1, pipe->lights);
+
+	nemoshow_children_for_each(child, one) {
+		nemoshow_pipe_dispatch_lighting_diffuse_texture_one(pipe, child);
 	}
 
 	return 0;

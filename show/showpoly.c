@@ -232,6 +232,8 @@ struct showone *nemoshow_poly_create(int type)
 		memcpy(poly->vertices, cube_vertices, sizeof(float[18 * 6]));
 	}
 
+	nemoshow_one_set_state(one, NEMOSHOW_INHERIT_STATE);
+
 	return one;
 }
 
@@ -269,7 +271,8 @@ void nemoshow_poly_attach_one(struct showone *parent, struct showone *one)
 {
 	nemoshow_one_attach_one(parent, one);
 
-	nemoshow_one_reference_one(parent, one, NEMOSHOW_REDRAW_DIRTY, -1);
+	if (parent->type == NEMOSHOW_PIPE_TYPE)
+		nemoshow_one_reference_one(parent, one, NEMOSHOW_REDRAW_DIRTY, -1);
 }
 
 void nemoshow_poly_detach_one(struct showone *parent, struct showone *one)
@@ -364,6 +367,12 @@ int nemoshow_poly_update(struct showone *one)
 		nemomatrix_rotate_z(&poly->modelview, cos(poly->rz * M_PI / 180.0f), sin(poly->rz * M_PI / 180.0f));
 		nemomatrix_scale_xyz(&poly->modelview, poly->sx, poly->sy, poly->sz);
 		nemomatrix_translate_xyz(&poly->modelview, poly->tx, poly->ty, poly->tz);
+
+		if (nemoshow_one_has_state(one->parent, NEMOSHOW_INHERIT_STATE)) {
+			struct showpoly *group = NEMOSHOW_POLY(one->parent);
+
+			nemomatrix_multiply(&poly->modelview, &group->modelview);
+		}
 	}
 
 	return 0;
