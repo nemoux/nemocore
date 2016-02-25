@@ -349,9 +349,9 @@ static inline void nemoshow_canvas_render_item_rrect(struct showcanvas *canvas, 
 	SkRect rect = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
 
 	if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE))
-		_canvas->drawRoundRect(rect, item->rx, item->ry, *NEMOSHOW_ITEM_CC(item, fill));
+		_canvas->drawRoundRect(rect, item->ox, item->oy, *NEMOSHOW_ITEM_CC(item, fill));
 	if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
-		_canvas->drawRoundRect(rect, item->rx, item->ry, *NEMOSHOW_ITEM_CC(item, stroke));
+		_canvas->drawRoundRect(rect, item->ox, item->oy, *NEMOSHOW_ITEM_CC(item, stroke));
 }
 
 static inline void nemoshow_canvas_render_item_circle(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one)

@@ -81,7 +81,7 @@ struct showitem {
 	struct nemolistener canvas_destroy_listener;
 
 	double x, y;
-	double rx, ry;
+	double ox, oy;
 	double width, height;
 	double r;
 	double inner;
@@ -225,16 +225,16 @@ static inline double nemoshow_item_get_y(struct showone *one)
 	return NEMOSHOW_ITEM_AT(one, y);
 }
 
-static inline void nemoshow_item_set_rx(struct showone *one, double rx)
+static inline void nemoshow_item_set_roundx(struct showone *one, double ox)
 {
-	NEMOSHOW_ITEM_AT(one, rx) = rx;
+	NEMOSHOW_ITEM_AT(one, ox) = ox;
 
 	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
 
-static inline void nemoshow_item_set_ry(struct showone *one, double ry)
+static inline void nemoshow_item_set_roundy(struct showone *one, double oy)
 {
-	NEMOSHOW_ITEM_AT(one, ry) = ry;
+	NEMOSHOW_ITEM_AT(one, oy) = oy;
 
 	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
