@@ -272,9 +272,6 @@ int nemoshow_item_arrange(struct showone *one)
 	if (v != NULL)
 		item->uri = strdup(v);
 
-	if (nemoobject_has(&one->object, "ax") || nemoobject_has(&one->object, "ay"))
-		item->has_anchor = 1;
-
 	return 0;
 }
 
@@ -751,19 +748,19 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 		item->width = item->r * 2;
 		item->height = item->r * 2;
 	} else if (one->sub == NEMOSHOW_PATH_ITEM) {
-		if (item->has_size == 0) {
+		if (nemoshow_one_has_state(one, NEMOSHOW_SIZE_STATE)) {
+			box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
+		} else {
 			box = NEMOSHOW_ITEM_CC(item, path)->getBounds();
 
 			if (item->pathsegment >= 1.0f)
 				box.outset(fabs(item->pathdeviation), fabs(item->pathdeviation));
-		} else {
-			box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
 		}
 	} else if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
-		if (item->has_size == 0)
-			box = NEMOSHOW_ITEM_CC(item, path)->getBounds();
-		else
+		if (nemoshow_one_has_state(one, NEMOSHOW_SIZE_STATE))
 			box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
+		else
+			box = NEMOSHOW_ITEM_CC(item, path)->getBounds();
 	} else if (one->sub == NEMOSHOW_TEXT_ITEM) {
 		if (NEMOSHOW_REF(one, NEMOSHOW_PATH_REF) == NULL) {
 			if (NEMOSHOW_FONT_AT(NEMOSHOW_REF(one, NEMOSHOW_FONT_REF), layout) == NEMOSHOW_NORMAL_LAYOUT) {
@@ -799,7 +796,7 @@ void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one
 		box = SkRect::MakeXYWH(0, 0, 0, 0);
 	}
 
-	if (item->has_anchor != 0)
+	if (nemoshow_one_has_state(one, NEMOSHOW_ANCHOR_STATE))
 		box.setXYWH(
 				box.x() - box.width() * item->ax,
 				box.y() - box.height() * item->ay,

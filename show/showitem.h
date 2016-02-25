@@ -86,8 +86,6 @@ struct showitem {
 	double r;
 	double inner;
 
-	int has_size;
-
 	double from, to;
 
 	double strokes[4];
@@ -128,13 +126,13 @@ struct showitem {
 	double px, py;
 
 	double ax, ay;
-	int has_anchor;
 
 	void *cc;
 };
 
 #define NEMOSHOW_ITEM(one)					((struct showitem *)container_of(one, struct showitem, base))
-#define	NEMOSHOW_ITEM_AT(one, at)		(NEMOSHOW_ITEM(one)->at)
+#define NEMOSHOW_ITEM_AT(one, at)		(NEMOSHOW_ITEM(one)->at)
+#define NEMOSHOW_ITEM_ONE(item)			(&(item)->base)
 
 extern struct showone *nemoshow_item_create(int type);
 extern void nemoshow_item_destroy(struct showone *one);
@@ -243,7 +241,8 @@ static inline void nemoshow_item_set_width(struct showone *one, double width)
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	item->width = width;
-	item->has_size = 1;
+
+	nemoshow_one_set_state(one, NEMOSHOW_SIZE_STATE);
 
 	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
@@ -253,7 +252,8 @@ static inline void nemoshow_item_set_height(struct showone *one, double height)
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	item->height = height;
-	item->has_size = 1;
+
+	nemoshow_one_set_state(one, NEMOSHOW_SIZE_STATE);
 
 	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
@@ -354,7 +354,7 @@ static inline void nemoshow_item_set_anchor(struct showone *one, double ax, doub
 	item->ax = ax;
 	item->ay = ay;
 
-	item->has_anchor = 1;
+	nemoshow_one_set_state(one, NEMOSHOW_ANCHOR_STATE);
 
 	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }

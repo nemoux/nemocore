@@ -621,7 +621,7 @@ static inline void nemoshow_canvas_render_one(struct showcanvas *canvas, SkCanva
 	};
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	struct showitem *clip = NEMOSHOW_REF(one, NEMOSHOW_CLIP_REF) == NULL ? NULL : NEMOSHOW_ITEM(NEMOSHOW_REF(one, NEMOSHOW_CLIP_REF));
-	int has_context = nemoshow_one_has_state(one, NEMOSHOW_TRANSFORM_STATE) || item->has_anchor != 0 || clip != NULL;
+	int has_context = nemoshow_one_has_state(one, NEMOSHOW_TRANSFORM_STATE) || nemoshow_one_has_state(one, NEMOSHOW_ANCHOR_STATE) || clip != NULL;
 
 	if (has_context != 0)
 		_canvas->save();
@@ -629,7 +629,7 @@ static inline void nemoshow_canvas_render_one(struct showcanvas *canvas, SkCanva
 	if (nemoshow_one_has_state(one, NEMOSHOW_TRANSFORM_STATE))
 		_canvas->concat(*NEMOSHOW_ITEM_CC(item, modelview));
 
-	if (item->has_anchor != 0)
+	if (nemoshow_one_has_state(one, NEMOSHOW_ANCHOR_STATE))
 		_canvas->translate(-item->width * item->ax, -item->height * item->ay);
 
 	if (clip != NULL) {
@@ -644,7 +644,7 @@ static inline void nemoshow_canvas_render_one(struct showcanvas *canvas, SkCanva
 					nemoshow_canvas_get_viewport_sy(item->canvas));
 			_canvas->concat(*NEMOSHOW_ITEM_CC(clip, modelview));
 
-			if (clip->has_anchor != 0)
+			if (nemoshow_one_has_state(NEMOSHOW_ITEM_ONE(clip), NEMOSHOW_ANCHOR_STATE))
 				_canvas->translate(-clip->width * clip->ax, -clip->height * clip->ay);
 
 			_canvas->clipPath(*NEMOSHOW_ITEM_CC(clip, path));
