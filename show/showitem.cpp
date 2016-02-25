@@ -368,9 +368,9 @@ static inline void nemoshow_item_update_filter(struct nemoshow *show, struct sho
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	if (NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF) != NULL) {
-		if (item->fill != 0 && item->stroke == 0)
+		if (item->fill != 0)
 			NEMOSHOW_ITEM_CC(item, fill)->setMaskFilter(NEMOSHOW_FILTER_CC(NEMOSHOW_FILTER(NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF)), filter));
-		else
+		if (item->stroke != 0)
 			NEMOSHOW_ITEM_CC(item, stroke)->setMaskFilter(NEMOSHOW_FILTER_CC(NEMOSHOW_FILTER(NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF)), filter));
 	}
 
