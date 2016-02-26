@@ -297,13 +297,13 @@ int main(int argc, char *argv[])
 	if (objpath != NULL) {
 		atom->one2 = one = nemoshow_poly_create(NEMOSHOW_MESH_POLY);
 		nemoshow_one_attach(atom->one1, one);
-		nemoshow_poly_set_canvas(one, atom->canvast);
+		nemoshow_poly_set_canvas(one, atom->canvasb);
 		nemoshow_poly_use_vbo(one, 1);
 		nemoshow_poly_load_obj(one, objpath);
 		nemoshow_poly_translate(one, 1.0f, 0.0f, 0.0f);
 
 		nemomatrix_init_identity(&matrix);
-		nemomatrix_scale_xyz(&matrix, 0.01f, 0.01f, 0.01f);
+		nemomatrix_scale_xyz(&matrix, 0.25f, 0.25f, 0.25f);
 		nemoshow_poly_transform_vertices(one, &matrix);
 	}
 
