@@ -179,7 +179,7 @@ int mesh_load_triangles(const char *filepath, const char *basepath, float **vert
 	*texcoords = _texcoords;
 	*colors = _colors;
 
-	return _nvertices / 9;
+	return _nvertices / 3;
 }
 
 int mesh_load_lines(const char *filepath, const char *basepath, float **vertices, float **normals, float **colors)
