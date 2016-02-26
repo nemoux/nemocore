@@ -37,6 +37,7 @@ void nemoshow_one_prepare(struct showone *one)
 void nemoshow_one_finish(struct showone *one)
 {
 	struct showref *ref, *nref;
+	struct showone *child, *nchild;
 	int i;
 
 	nemosignal_emit(&one->destroy_signal, one);
@@ -48,6 +49,10 @@ void nemoshow_one_finish(struct showone *one)
 		nemolist_remove(&ref->link);
 
 		free(ref);
+	}
+
+	nemoshow_children_for_each_safe(child, nchild, one) {
+		nemoshow_one_destroy(child);
 	}
 
 	if (one->show != NULL) {
@@ -99,22 +104,6 @@ struct showone *nemoshow_one_create(int type)
 
 void nemoshow_one_destroy(struct showone *one)
 {
-	if (one->destroy != NULL) {
-		one->destroy(one);
-	} else {
-		nemoshow_one_finish(one);
-
-		free(one);
-	}
-}
-
-void nemoshow_one_destroy_all(struct showone *one)
-{
-	struct showone *child, *nchild;
-
-	nemoshow_children_for_each_safe(child, nchild, one)
-		nemoshow_one_destroy_all(child);
-
 	if (one->destroy != NULL) {
 		one->destroy(one);
 	} else {

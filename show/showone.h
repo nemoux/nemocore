@@ -188,7 +188,6 @@ extern void nemoshow_one_finish(struct showone *one);
 
 extern struct showone *nemoshow_one_create(int type);
 extern void nemoshow_one_destroy(struct showone *one);
-extern void nemoshow_one_destroy_all(struct showone *one);
 
 extern void nemoshow_one_dirty(struct showone *one, uint32_t dirty);
 

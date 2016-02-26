@@ -158,18 +158,13 @@ struct showone *nemoshow_item_create(int type)
 void nemoshow_item_destroy(struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
-	struct showone *child, *nchild;
-
-	if (item->canvas != NULL) {
-		nemoshow_canvas_damage_one(item->canvas, one);
-	}
-
-	nemolist_remove(&item->canvas_destroy_listener.link);
-
-	nemoshow_children_for_each_safe(child, nchild, one)
-		nemoshow_one_destroy_all(child);
 
 	nemoshow_one_finish(one);
+
+	if (item->canvas != NULL)
+		nemoshow_canvas_damage_one(item->canvas, one);
+
+	nemolist_remove(&item->canvas_destroy_listener.link);
 
 	if (NEMOSHOW_ITEM_CC(item, matrix) != NULL)
 		delete NEMOSHOW_ITEM_CC(item, matrix);
@@ -296,11 +291,6 @@ static inline void nemoshow_item_update_uri(struct nemoshow *show, struct showon
 
 			one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 		} else if (one->sub == NEMOSHOW_SVG_ITEM) {
-			struct showone *child, *nchild;
-
-			nemoshow_children_for_each_safe(child, nchild, one)
-				nemoshow_one_destroy_all(child);
-
 			nemoshow_svg_load_uri(show, one, item->uri);
 
 			one->dirty |= NEMOSHOW_SHAPE_DIRTY;

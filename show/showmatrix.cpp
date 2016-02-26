@@ -45,10 +45,6 @@ struct showone *nemoshow_matrix_create(int type)
 void nemoshow_matrix_destroy(struct showone *one)
 {
 	struct showmatrix *matrix = NEMOSHOW_MATRIX(one);
-	struct showone *child, *nchild;
-
-	nemoshow_children_for_each_safe(child, nchild, one)
-		nemoshow_one_destroy_all(child);
 
 	nemoshow_one_finish(one);
 
