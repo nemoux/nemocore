@@ -499,41 +499,22 @@ void nemoshow_arrange_one(struct nemoshow *show)
 	struct showone *one;
 
 	nemoshow_for_each(one, show) {
-		if (nemoshow_one_has_state(one, NEMOSHOW_ARRANGE_STATE) != 0)
-			continue;
-
 		if (one->type == NEMOSHOW_EASE_TYPE) {
 			nemoshow_ease_arrange(one);
-
-			nemoshow_one_set_state(one, NEMOSHOW_ARRANGE_STATE);
 		} else if (one->type == NEMOSHOW_CANVAS_TYPE) {
 			nemoshow_canvas_arrange(one);
-
-			nemoshow_one_set_state(one, NEMOSHOW_ARRANGE_STATE);
 		} else if (one->type == NEMOSHOW_ITEM_TYPE) {
 			nemoshow_item_arrange(one);
-
-			nemoshow_one_set_state(one, NEMOSHOW_ARRANGE_STATE);
 		} else if (one->type == NEMOSHOW_MATRIX_TYPE) {
 			nemoshow_matrix_arrange(one);
-
-			nemoshow_one_set_state(one, NEMOSHOW_ARRANGE_STATE);
 		} else if (one->type == NEMOSHOW_FILTER_TYPE) {
 			nemoshow_filter_arrange(one);
-
-			nemoshow_one_set_state(one, NEMOSHOW_ARRANGE_STATE);
 		} else if (one->type == NEMOSHOW_SHADER_TYPE) {
 			nemoshow_shader_arrange(one);
-
-			nemoshow_one_set_state(one, NEMOSHOW_ARRANGE_STATE);
 		} else if (one->type == NEMOSHOW_FONT_TYPE) {
 			nemoshow_font_arrange(one);
-
-			nemoshow_one_set_state(one, NEMOSHOW_ARRANGE_STATE);
 		} else if (one->type == NEMOSHOW_PATH_TYPE) {
 			nemoshow_path_arrange(one);
-
-			nemoshow_one_set_state(one, NEMOSHOW_ARRANGE_STATE);
 		}
 	}
 }
