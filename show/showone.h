@@ -57,7 +57,6 @@ typedef enum {
 
 typedef enum {
 	NEMOSHOW_ARRANGE_STATE = (1 << 0),
-	NEMOSHOW_TRANSITION_STATE = (1 << 1),
 	NEMOSHOW_INHERIT_STATE = (1 << 8),
 	NEMOSHOW_NOBOUND_STATE = (1 << 9),
 	NEMOSHOW_FILL_STATE = (1 << 16),
