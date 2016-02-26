@@ -31,13 +31,14 @@ struct showone *nemoshow_matrix_create(int type)
 	one->sub = type;
 	one->update = nemoshow_matrix_update;
 	one->destroy = nemoshow_matrix_destroy;
-	one->attach = nemoshow_matrix_attach_one;
-	one->detach = nemoshow_matrix_detach_one;
 
 	nemoshow_one_prepare(one);
 
 	nemoobject_set_reserved(&one->object, "x", &matrix->x, sizeof(double));
 	nemoobject_set_reserved(&one->object, "y", &matrix->y, sizeof(double));
+
+	nemoshow_one_set_state(one, NEMOSHOW_EFFECT_STATE);
+	nemoshow_one_set_effect(one, NEMOSHOW_MATRIX_DIRTY);
 
 	return one;
 }
@@ -54,18 +55,6 @@ void nemoshow_matrix_destroy(struct showone *one)
 	delete static_cast<showmatrix_t *>(matrix->cc);
 
 	free(matrix);
-}
-
-void nemoshow_matrix_attach_one(struct showone *parent, struct showone *one)
-{
-	nemoshow_one_attach_one(parent, one);
-
-	nemoshow_one_reference_one(parent, one, NEMOSHOW_MATRIX_DIRTY, -1);
-}
-
-void nemoshow_matrix_detach_one(struct showone *parent, struct showone *one)
-{
-	nemoshow_one_detach_one(parent, one);
 }
 
 int nemoshow_matrix_arrange(struct showone *one)

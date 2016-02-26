@@ -63,6 +63,7 @@ typedef enum {
 	NEMOSHOW_ANCHOR_STATE = (1 << 4),
 	NEMOSHOW_INHERIT_STATE = (1 << 8),
 	NEMOSHOW_NOBOUND_STATE = (1 << 9),
+	NEMOSHOW_EFFECT_STATE = (1 << 10),
 	NEMOSHOW_LAST_STATE
 } NemoShowOneState;
 
@@ -153,6 +154,8 @@ struct showone {
 	int nattrs, sattrs;
 
 	uint32_t dirty;
+
+	uint32_t effect;
 
 	int32_t x, y, w, h;
 	int32_t sx, sy, sw, sh;
@@ -265,6 +268,11 @@ static inline void nemoshow_one_put_state(struct showone *one, uint32_t state)
 static inline int nemoshow_one_has_state(struct showone *one, uint32_t state)
 {
 	return one->state & state;
+}
+
+static inline void nemoshow_one_set_effect(struct showone *one, uint32_t effect)
+{
+	one->effect = effect;
 }
 
 static inline void nemoshow_one_set_tag(struct showone *one, uint32_t tag)

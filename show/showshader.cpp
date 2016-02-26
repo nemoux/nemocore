@@ -27,8 +27,6 @@ struct showone *nemoshow_stop_create(void)
 	one->type = NEMOSHOW_STOP_TYPE;
 	one->update = nemoshow_stop_update;
 	one->destroy = nemoshow_stop_destroy;
-	one->attach = nemoshow_stop_attach_one;
-	one->detach = nemoshow_stop_detach_one;
 
 	nemoshow_one_prepare(one);
 
@@ -38,6 +36,9 @@ struct showone *nemoshow_stop_create(void)
 	nemoobject_set_reserved(&one->object, "fill:g", &stop->fills[1], sizeof(double));
 	nemoobject_set_reserved(&one->object, "fill:b", &stop->fills[0], sizeof(double));
 	nemoobject_set_reserved(&one->object, "fill:a", &stop->fills[3], sizeof(double));
+
+	nemoshow_one_set_state(one, NEMOSHOW_EFFECT_STATE);
+	nemoshow_one_set_effect(one, NEMOSHOW_SHADER_DIRTY);
 
 	return one;
 }
@@ -49,18 +50,6 @@ void nemoshow_stop_destroy(struct showone *one)
 	nemoshow_one_finish(one);
 
 	free(stop);
-}
-
-void nemoshow_stop_attach_one(struct showone *parent, struct showone *one)
-{
-	nemoshow_one_attach_one(parent, one);
-
-	nemoshow_one_reference_one(parent, one, NEMOSHOW_SHADER_DIRTY, -1);
-}
-
-void nemoshow_stop_detach_one(struct showone *parent, struct showone *one)
-{
-	nemoshow_one_detach_one(parent, one);
 }
 
 int nemoshow_stop_arrange(struct showone *one)

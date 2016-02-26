@@ -43,8 +43,7 @@ void nemoshow_one_finish(struct showone *one)
 	nemosignal_emit(&one->destroy_signal, one);
 
 	nemolist_for_each_safe(ref, nref, &one->reference_list, link) {
-		if (ref->index >= 0)
-			ref->one->refs[ref->index] = NULL;
+		ref->one->refs[ref->index] = NULL;
 
 		nemolist_remove(&ref->link);
 
@@ -133,11 +132,17 @@ static inline void nemoshow_one_dirty_backwards(struct showone *one, uint32_t di
 			nemoshow_one_dirty_backwards(ref->one, ref->dirty);
 	}
 
+	if (nemoshow_one_has_state(one, NEMOSHOW_EFFECT_STATE)) {
+		nemoshow_one_dirty_backwards(one->parent, one->effect);
+	}
+
 	if (nemoshow_one_has_state(one, NEMOSHOW_INHERIT_STATE)) {
 		struct showone *child;
 
-		nemoshow_children_for_each(child, one)
-			nemoshow_one_dirty_backwards(child, dirty);
+		nemoshow_children_for_each(child, one) {
+			if (nemoshow_one_has_state(child, NEMOSHOW_EFFECT_STATE) == 0)
+				nemoshow_one_dirty_backwards(child, dirty);
+		}
 	}
 }
 
@@ -162,11 +167,17 @@ void nemoshow_one_dirty(struct showone *one, uint32_t dirty)
 			nemoshow_one_dirty_backwards(ref->one, ref->dirty);
 	}
 
+	if (nemoshow_one_has_state(one, NEMOSHOW_EFFECT_STATE)) {
+		nemoshow_one_dirty_backwards(one->parent, one->effect);
+	}
+
 	if (nemoshow_one_has_state(one, NEMOSHOW_INHERIT_STATE)) {
 		struct showone *child;
 
-		nemoshow_children_for_each(child, one)
-			nemoshow_one_dirty_backwards(child, dirty);
+		nemoshow_children_for_each(child, one) {
+			if (nemoshow_one_has_state(child, NEMOSHOW_EFFECT_STATE) == 0)
+				nemoshow_one_dirty_backwards(child, dirty);
+		}
 	}
 }
 
@@ -235,8 +246,7 @@ int nemoshow_one_reference_one(struct showone *one, struct showone *src, uint32_
 	ref->one = one;
 	ref->index = index;
 
-	if (index >= 0)
-		one->refs[index] = ref;
+	one->refs[index] = ref;
 
 	nemolist_insert(&src->reference_list, &ref->link);
 

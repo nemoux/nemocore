@@ -194,8 +194,6 @@ struct showone *nemoshow_poly_create(int type)
 	one->sub = type;
 	one->update = nemoshow_poly_update;
 	one->destroy = nemoshow_poly_destroy;
-	one->attach = nemoshow_poly_attach_one;
-	one->detach = nemoshow_poly_detach_one;
 
 	nemoshow_one_prepare(one);
 
@@ -233,6 +231,8 @@ struct showone *nemoshow_poly_create(int type)
 	}
 
 	nemoshow_one_set_state(one, NEMOSHOW_INHERIT_STATE);
+	nemoshow_one_set_state(one, NEMOSHOW_EFFECT_STATE);
+	nemoshow_one_set_effect(one, NEMOSHOW_REDRAW_DIRTY);
 
 	return one;
 }
@@ -265,19 +265,6 @@ void nemoshow_poly_destroy(struct showone *one)
 	}
 
 	free(poly);
-}
-
-void nemoshow_poly_attach_one(struct showone *parent, struct showone *one)
-{
-	nemoshow_one_attach_one(parent, one);
-
-	if (parent->type == NEMOSHOW_PIPE_TYPE)
-		nemoshow_one_reference_one(parent, one, NEMOSHOW_REDRAW_DIRTY, -1);
-}
-
-void nemoshow_poly_detach_one(struct showone *parent, struct showone *one)
-{
-	nemoshow_one_detach_one(parent, one);
 }
 
 int nemoshow_poly_arrange(struct showone *one)
