@@ -137,7 +137,7 @@ static inline void nemoshow_one_dirty_backwards(struct showone *one, uint32_t di
 		struct showone *child;
 
 		nemoshow_children_for_each(child, one)
-			nemoshow_one_dirty_backwards(child, NEMOSHOW_MATRIX_DIRTY);
+			nemoshow_one_dirty_backwards(child, dirty);
 	}
 }
 
