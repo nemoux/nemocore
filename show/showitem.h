@@ -156,7 +156,7 @@ extern void nemoshow_item_set_uri(struct showone *one, const char *uri);
 extern void nemoshow_item_set_text(struct showone *one, const char *text);
 
 extern void nemoshow_item_attach_one(struct showone *parent, struct showone *one);
-extern void nemoshow_item_detach_one(struct showone *parent, struct showone *one);
+extern void nemoshow_item_detach_one(struct showone *one);
 extern int nemoshow_item_above_one(struct showone *one, struct showone *above);
 extern int nemoshow_item_below_one(struct showone *one, struct showone *below);
 

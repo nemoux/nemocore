@@ -983,50 +983,67 @@ static void nemoshow_item_handle_canvas_destroy_signal(struct nemolistener *list
 	nemolist_init(&item->canvas_destroy_listener.link);
 }
 
-void nemoshow_item_attach_one(struct showone *parent, struct showone *one)
+static void nemoshow_item_attach_ones(struct showone *canvas, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
+	struct showone *child;
+
+	if (item->canvas == canvas)
+		return;
+
+	if (item->canvas != NULL) {
+		nemolist_remove(&item->canvas_destroy_listener.link);
+		nemolist_init(&item->canvas_destroy_listener.link);
+	}
+
+	item->canvas = canvas;
+
+	item->canvas_destroy_listener.notify = nemoshow_item_handle_canvas_destroy_signal;
+	nemosignal_add(&item->canvas->destroy_signal, &item->canvas_destroy_listener);
+
+	one->update = nemoshow_item_update_with_canvas;
+
+	nemoshow_children_for_each(child, one)
+		nemoshow_item_attach_ones(canvas, child);
+}
+
+static void nemoshow_item_detach_ones(struct showone *one)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+	struct showone *child;
+
+	if (item->canvas != NULL) {
+		item->canvas = NULL;
+
+		nemolist_remove(&item->canvas_destroy_listener.link);
+		nemolist_init(&item->canvas_destroy_listener.link);
+
+		one->update = nemoshow_item_update;
+	}
+
+	nemoshow_children_for_each(child, one)
+		nemoshow_item_detach_ones(child);
+}
+
+void nemoshow_item_attach_one(struct showone *parent, struct showone *one)
+{
+	struct showone *canvas;
 
 	if (one->parent != NULL)
-		nemoshow_one_detach_one(one->parent, one);
+		nemoshow_one_detach_one(one);
 
 	nemoshow_one_attach_one(parent, one);
 
-	if (item->canvas != NULL) {
-		nemolist_remove(&item->canvas_destroy_listener.link);
-		nemolist_init(&item->canvas_destroy_listener.link);
-	}
-
-	if (parent->type == NEMOSHOW_CANVAS_TYPE) {
-		item->canvas = parent;
-	} else {
-		item->canvas = NEMOSHOW_ITEM_AT(parent, canvas);
-	}
-
-	if (item->canvas != NULL) {
-		one->update = nemoshow_item_update_with_canvas;
-
-		item->canvas_destroy_listener.notify = nemoshow_item_handle_canvas_destroy_signal;
-		nemosignal_add(&item->canvas->destroy_signal, &item->canvas_destroy_listener);
-	} else {
-		one->update = nemoshow_item_update;
-	}
+	canvas = nemoshow_one_get_parent(one, NEMOSHOW_CANVAS_TYPE, 0);
+	if (canvas != NULL)
+		nemoshow_item_attach_ones(canvas, one);
 }
 
-void nemoshow_item_detach_one(struct showone *parent, struct showone *one)
+void nemoshow_item_detach_one(struct showone *one)
 {
-	struct showitem *item = NEMOSHOW_ITEM(one);
+	nemoshow_one_detach_one(one);
 
-	nemoshow_one_detach_one(parent, one);
-
-	if (item->canvas == parent) {
-		item->canvas = NULL;
-
-		one->update = nemoshow_item_update;
-
-		nemolist_remove(&item->canvas_destroy_listener.link);
-		nemolist_init(&item->canvas_destroy_listener.link);
-	}
+	nemoshow_item_detach_ones(one);
 }
 
 int nemoshow_item_above_one(struct showone *one, struct showone *above)

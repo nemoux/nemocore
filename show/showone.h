@@ -88,7 +88,7 @@ struct showone;
 typedef int (*nemoshow_one_update_t)(struct showone *one);
 typedef void (*nemoshow_one_destroy_t)(struct showone *one);
 typedef void (*nemoshow_one_attach_t)(struct showone *parent, struct showone *one);
-typedef void (*nemoshow_one_detach_t)(struct showone *parent, struct showone *one);
+typedef void (*nemoshow_one_detach_t)(struct showone *one);
 typedef int (*nemoshow_one_above_t)(struct showone *one, struct showone *above);
 typedef int (*nemoshow_one_below_t)(struct showone *one, struct showone *below);
 
@@ -195,7 +195,7 @@ extern void nemoshow_one_destroy(struct showone *one);
 extern void nemoshow_one_dirty(struct showone *one, uint32_t dirty);
 
 extern void nemoshow_one_attach_one(struct showone *parent, struct showone *one);
-extern void nemoshow_one_detach_one(struct showone *parent, struct showone *one);
+extern void nemoshow_one_detach_one(struct showone *one);
 
 extern int nemoshow_one_above_one(struct showone *one, struct showone *above);
 extern int nemoshow_one_below_one(struct showone *one, struct showone *below);
@@ -218,12 +218,12 @@ static inline void nemoshow_one_attach(struct showone *parent, struct showone *o
 	}
 }
 
-static inline void nemoshow_one_detach(struct showone *parent, struct showone *one)
+static inline void nemoshow_one_detach(struct showone *one)
 {
 	if (one->detach != NULL) {
-		one->detach(parent, one);
+		one->detach(one);
 	} else {
-		nemoshow_one_detach_one(parent, one);
+		nemoshow_one_detach_one(one);
 	}
 }
 

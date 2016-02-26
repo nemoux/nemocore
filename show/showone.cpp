@@ -55,11 +55,11 @@ void nemoshow_one_finish(struct showone *one)
 	}
 
 	if (one->show != NULL) {
-		nemoshow_detach_one(one->show, one);
+		nemoshow_detach_one(one);
 	}
 
 	if (one->parent != NULL) {
-		nemoshow_one_detach_one(one->parent, one);
+		nemoshow_one_detach_one(one);
 	}
 
 	for (i = 0; i < one->nattrs; i++) {
@@ -206,7 +206,7 @@ void nemoshow_one_attach_one(struct showone *parent, struct showone *one)
 		nemoshow_attach_ones(parent->show, one);
 }
 
-void nemoshow_one_detach_one(struct showone *parent, struct showone *one)
+void nemoshow_one_detach_one(struct showone *one)
 {
 	nemolist_remove(&one->children_link);
 	nemolist_init(&one->children_link);

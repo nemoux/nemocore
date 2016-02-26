@@ -84,9 +84,6 @@ struct showcanvas {
 extern struct showone *nemoshow_canvas_create(void);
 extern void nemoshow_canvas_destroy(struct showone *one);
 
-extern void nemoshow_canvas_attach_one(struct showone *parent, struct showone *one);
-extern void nemoshow_canvas_detach_one(struct showone *parent, struct showone *one);
-
 extern int nemoshow_canvas_arrange(struct showone *one);
 extern int nemoshow_canvas_update(struct showone *one);
 
