@@ -47,6 +47,8 @@ struct nemoshow *nemoshow_create(void)
 	nemolist_init(&show->transition_list);
 	nemolist_init(&show->transition_destroy_list);
 
+	nemolist_init(&show->scene_destroy_listener.link);
+
 	show->sx = 1.0f;
 	show->sy = 1.0f;
 
@@ -81,6 +83,8 @@ void nemoshow_destroy(struct nemoshow *show)
 	nemolist_remove(&show->dirty_list);
 	nemolist_remove(&show->transition_list);
 	nemolist_remove(&show->transition_destroy_list);
+
+	nemolist_remove(&show->scene_destroy_listener.link);
 
 	nemoshow_expr_destroy(show->expr);
 	nemoshow_expr_destroy_symbol_table(show->stable);
@@ -594,6 +598,16 @@ void nemoshow_render_one(struct nemoshow *show)
 	}
 }
 
+static void nemoshow_handle_scene_destroy_signal(struct nemolistener *listener, void *data)
+{
+	struct nemoshow *show = (struct nemoshow *)container_of(listener, struct nemoshow, scene_destroy_listener);
+
+	show->scene = NULL;
+
+	nemolist_remove(&show->scene_destroy_listener.link);
+	nemolist_init(&show->scene_destroy_listener.link);
+}
+
 int nemoshow_set_scene(struct nemoshow *show, struct showone *one)
 {
 	struct showscene *scene;
@@ -607,6 +621,9 @@ int nemoshow_set_scene(struct nemoshow *show, struct showone *one)
 		nemoshow_put_scene(show);
 
 	show->scene = one;
+
+	show->scene_destroy_listener.notify = nemoshow_handle_scene_destroy_signal;
+	nemosignal_add(&one->destroy_signal, &show->scene_destroy_listener);
 
 	scene = NEMOSHOW_SCENE(one);
 
@@ -633,6 +650,9 @@ void nemoshow_put_scene(struct nemoshow *show)
 	nemoshow_detach_ones(show, show->scene);
 
 	show->scene = NULL;
+
+	nemolist_remove(&show->scene_destroy_listener.link);
+	nemolist_init(&show->scene_destroy_listener.link);
 
 	nemotale_clear_node(show->tale);
 }

@@ -35,6 +35,7 @@ NEMO_BEGIN_EXTERN_C
 
 #include <nemotale.h>
 #include <nemolist.h>
+#include <nemolistener.h>
 
 struct nemoshow;
 
@@ -51,6 +52,7 @@ struct nemoshow {
 	struct showsymtable *stable;
 
 	struct showone *scene;
+	struct nemolistener scene_destroy_listener;
 
 	uint32_t width, height;
 	double sx, sy;
