@@ -76,10 +76,6 @@ typedef enum {
 struct showitem {
 	struct showone base;
 
-	struct showone *canvas;
-
-	struct nemolistener canvas_destroy_listener;
-
 	double x, y;
 	double ox, oy;
 	double width, height;
@@ -139,7 +135,6 @@ extern void nemoshow_item_destroy(struct showone *one);
 
 extern int nemoshow_item_arrange(struct showone *one);
 extern int nemoshow_item_update(struct showone *one);
-extern int nemoshow_item_update_with_canvas(struct showone *one);
 
 extern void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one);
 
@@ -185,18 +180,6 @@ extern int nemoshow_item_set_buffer(struct showone *one, char *buffer, uint32_t 
 extern void nemoshow_item_put_buffer(struct showone *one);
 extern int nemoshow_item_copy_buffer(struct showone *one, char *buffer, uint32_t width, uint32_t height);
 extern int nemoshow_item_fill_buffer(struct showone *one, double r, double g, double b, double a);
-
-static inline void nemoshow_item_set_canvas(struct showone *one, struct showone *canvas)
-{
-	struct showitem *item = NEMOSHOW_ITEM(one);
-
-	item->canvas = canvas;
-}
-
-static inline struct showone *nemoshow_item_get_canvas(struct showone *one)
-{
-	return NEMOSHOW_ITEM_AT(one, canvas);
-}
 
 static inline void nemoshow_item_set_x(struct showone *one, double x)
 {

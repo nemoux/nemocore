@@ -64,6 +64,9 @@ struct showpipe {
 extern struct showone *nemoshow_pipe_create(int type);
 extern void nemoshow_pipe_destroy(struct showone *one);
 
+extern void nemoshow_pipe_attach_one(struct showone *parent, struct showone *one);
+extern void nemoshow_pipe_detach_one(struct showone *one);
+
 extern int nemoshow_pipe_arrange(struct showone *one);
 extern int nemoshow_pipe_update(struct showone *one);
 

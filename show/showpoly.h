@@ -96,6 +96,9 @@ struct showpoly {
 extern struct showone *nemoshow_poly_create(int type);
 extern void nemoshow_poly_destroy(struct showone *one);
 
+extern void nemoshow_poly_attach_one(struct showone *parent, struct showone *one);
+extern void nemoshow_poly_detach_one(struct showone *one);
+
 extern int nemoshow_poly_arrange(struct showone *one);
 extern int nemoshow_poly_update(struct showone *one);
 

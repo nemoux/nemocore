@@ -169,6 +169,8 @@ struct showone *nemoshow_pipe_create(int type)
 	one->sub = type;
 	one->update = nemoshow_pipe_update;
 	one->destroy = nemoshow_pipe_destroy;
+	one->attach = nemoshow_pipe_attach_one;
+	one->detach = nemoshow_pipe_detach_one;
 
 	nemoshow_one_prepare(one);
 
@@ -288,6 +290,24 @@ void nemoshow_pipe_destroy(struct showone *one)
 	free(pipe);
 }
 
+void nemoshow_pipe_attach_one(struct showone *parent, struct showone *one)
+{
+	struct showone *canvas;
+
+	nemoshow_one_attach_one(parent, one);
+
+	canvas = nemoshow_one_get_parent(one, NEMOSHOW_CANVAS_TYPE, 0);
+	if (canvas != NULL)
+		nemoshow_canvas_attach_ones(canvas, one);
+}
+
+void nemoshow_pipe_detach_one(struct showone *one)
+{
+	nemoshow_one_detach_one(one);
+
+	nemoshow_canvas_detach_ones(one);
+}
+
 int nemoshow_pipe_arrange(struct showone *one)
 {
 	return 0;
@@ -307,7 +327,8 @@ int nemoshow_pipe_update(struct showone *one)
 		nemomatrix_scale_xyz(&pipe->projection, pipe->ratio, -1.0f, 1.0f);
 	}
 
-	nemoshow_canvas_damage_all(one->parent);
+	if (one->canvas != NULL)
+		nemoshow_canvas_damage_all(one->canvas);
 
 	return 0;
 }

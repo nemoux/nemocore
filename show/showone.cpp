@@ -26,6 +26,7 @@ void nemoshow_one_prepare(struct showone *one)
 	nemolist_init(&one->reference_list);
 
 	nemolist_init(&one->parent_destroy_listener.link);
+	nemolist_init(&one->canvas_destroy_listener.link);
 
 	nemoobject_set_reserved(&one->object, "id", one->id, NEMOSHOW_ID_MAX);
 
@@ -62,11 +63,17 @@ void nemoshow_one_finish(struct showone *one)
 		nemoshow_one_detach_one(one);
 	}
 
+	if (one->canvas != NULL) {
+		nemoshow_canvas_damage_one(one->canvas, one);
+		nemoshow_canvas_detach_one(one);
+	}
+
 	for (i = 0; i < one->nattrs; i++) {
 		nemoshow_one_destroy_attr(one->attrs[i]);
 	}
 
 	nemolist_remove(&one->parent_destroy_listener.link);
+	nemolist_remove(&one->canvas_destroy_listener.link);
 
 	nemolist_remove(&one->link);
 	nemolist_remove(&one->children_link);
@@ -196,6 +203,9 @@ static void nemoshow_one_handle_parent_destroy_signal(struct nemolistener *liste
 
 void nemoshow_one_attach_one(struct showone *parent, struct showone *one)
 {
+	if (one->parent != NULL)
+		nemoshow_one_detach_one(one);
+
 	nemolist_insert_tail(&parent->children_list, &one->children_link);
 	one->parent = parent;
 

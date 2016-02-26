@@ -113,6 +113,11 @@ extern void nemoshow_canvas_dirty_all(struct showone *one, uint32_t dirty);
 
 extern struct showone *nemoshow_canvas_pick_one(struct showone *one, double x, double y);
 
+extern void nemoshow_canvas_attach_one(struct showone *canvas, struct showone *one);
+extern void nemoshow_canvas_detach_one(struct showone *one);
+extern void nemoshow_canvas_attach_ones(struct showone *canvas, struct showone *one);
+extern void nemoshow_canvas_detach_ones(struct showone *one);
+
 static inline void nemoshow_canvas_set_dispatch_redraw(struct showone *one, nemoshow_canvas_dispatch_redraw_t dispatch_redraw)
 {
 	NEMOSHOW_CANVAS_AT(one, dispatch_redraw) = dispatch_redraw;

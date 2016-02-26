@@ -640,8 +640,8 @@ static inline void nemoshow_canvas_render_one(struct showcanvas *canvas, SkCanva
 
 			_canvas->resetMatrix();
 			_canvas->scale(
-					nemoshow_canvas_get_viewport_sx(item->canvas),
-					nemoshow_canvas_get_viewport_sy(item->canvas));
+					nemoshow_canvas_get_viewport_sx(one->canvas),
+					nemoshow_canvas_get_viewport_sy(one->canvas));
 			_canvas->concat(*NEMOSHOW_ITEM_CC(clip, modelview));
 
 			if (nemoshow_one_has_state(NEMOSHOW_ITEM_ONE(clip), NEMOSHOW_ANCHOR_STATE))
@@ -909,4 +909,56 @@ struct showone *nemoshow_canvas_pick_one(struct showone *one, double x, double y
 		return nemoshow_canvas_pick_poly(one, x, y);
 
 	return nemoshow_canvas_pick_item(one, x, y);
+}
+
+static void nemoshow_canvas_handle_canvas_destroy_signal(struct nemolistener *listener, void *data)
+{
+	struct showone *one = (struct showone *)container_of(listener, struct showone, canvas_destroy_listener);
+
+	one->canvas = NULL;
+
+	nemolist_remove(&one->canvas_destroy_listener.link);
+	nemolist_init(&one->canvas_destroy_listener.link);
+}
+
+void nemoshow_canvas_attach_one(struct showone *canvas, struct showone *one)
+{
+	one->canvas = canvas;
+
+	one->canvas_destroy_listener.notify = nemoshow_canvas_handle_canvas_destroy_signal;
+	nemosignal_add(&canvas->destroy_signal, &one->canvas_destroy_listener);
+}
+
+void nemoshow_canvas_detach_one(struct showone *one)
+{
+	nemolist_remove(&one->canvas_destroy_listener.link);
+	nemolist_init(&one->canvas_destroy_listener.link);
+
+	one->canvas = NULL;
+}
+
+void nemoshow_canvas_attach_ones(struct showone *canvas, struct showone *one)
+{
+	struct showone *child;
+
+	if (one->canvas == canvas)
+		return;
+
+	if (one->canvas != NULL)
+		nemoshow_canvas_detach_one(one);
+
+	nemoshow_canvas_attach_one(canvas, one);
+
+	nemoshow_children_for_each(child, one)
+		nemoshow_canvas_attach_ones(canvas, child);
+}
+
+void nemoshow_canvas_detach_ones(struct showone *one)
+{
+	struct showone *child;
+
+	nemoshow_canvas_detach_one(one);
+
+	nemoshow_children_for_each(child, one)
+		nemoshow_canvas_detach_ones(child);
 }
