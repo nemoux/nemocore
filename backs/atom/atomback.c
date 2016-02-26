@@ -121,6 +121,7 @@ int main(int argc, char *argv[])
 {
 	struct option options[] = {
 		{ "file",						required_argument,			NULL,		'f' },
+		{ "obj",						required_argument,			NULL,		'o' },
 		{ "shader",					required_argument,			NULL,		's' },
 		{ "width",					required_argument,			NULL,		'w' },
 		{ "height",					required_argument,			NULL,		'h' },
@@ -143,19 +144,24 @@ int main(int argc, char *argv[])
 	struct showone *set3;
 	struct nemomatrix matrix;
 	char *filepath = NULL;
+	char *objpath = NULL;
 	char *shaderpath = NULL;
 	double alpha = 1.0f;
 	int32_t width = 1920;
 	int32_t height = 1080;
 	int opt;
 
-	while (opt = getopt_long(argc, argv, "f:s:w:h:a:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "f:o:s:w:h:a:", options, NULL)) {
 		if (opt == -1)
 			break;
 
 		switch (opt) {
 			case 'f':
 				filepath = strdup(optarg);
+				break;
+
+			case 'o':
+				objpath = strdup(optarg);
 				break;
 
 			case 's':
@@ -259,7 +265,6 @@ int main(int argc, char *argv[])
 	atom->one0 = one = nemoshow_poly_create(NEMOSHOW_QUAD_POLY);
 	nemoshow_one_attach(pipe, one);
 	nemoshow_one_set_tag(one, 1);
-	nemoshow_poly_set_color(one, 1.0f, 1.0f, 1.0f, 1.0f);
 	nemoshow_poly_set_canvas(one, atom->canvasb);
 	nemoshow_poly_use_texcoords(one, 1);
 	nemoshow_poly_use_normals(one, 1);
@@ -281,7 +286,6 @@ int main(int argc, char *argv[])
 	nemoshow_one_attach(pipe, one);
 	nemoshow_one_set_tag(one, 2);
 	nemoshow_poly_set_canvas(one, atom->canvast);
-	nemoshow_poly_set_color(one, 1.0f, 1.0f, 1.0f, 1.0f);
 	nemoshow_poly_use_texcoords(one, 1);
 	nemoshow_poly_use_normals(one, 1);
 	nemoshow_poly_use_vbo(one, 1);
@@ -289,6 +293,19 @@ int main(int argc, char *argv[])
 	nemomatrix_init_identity(&matrix);
 	nemomatrix_scale_xyz(&matrix, 0.5f, 0.5f, 0.5f);
 	nemoshow_poly_transform_vertices(one, &matrix);
+
+	if (objpath != NULL) {
+		atom->one2 = one = nemoshow_poly_create(NEMOSHOW_MESH_POLY);
+		nemoshow_one_attach(atom->one1, one);
+		nemoshow_poly_set_canvas(one, atom->canvast);
+		nemoshow_poly_use_vbo(one, 1);
+		nemoshow_poly_load_obj(one, objpath);
+		nemoshow_poly_translate(one, 1.0f, 0.0f, 0.0f);
+
+		nemomatrix_init_identity(&matrix);
+		nemomatrix_scale_xyz(&matrix, 0.01f, 0.01f, 0.01f);
+		nemoshow_poly_transform_vertices(one, &matrix);
+	}
 
 	trans = nemoshow_transition_create(NEMOSHOW_LINEAR_EASE, 18000, 0);
 	nemoshow_transition_dirty_one(trans, atom->canvasb, NEMOSHOW_FILTER_DIRTY);

@@ -14,16 +14,18 @@
 #include <nemomatrix.h>
 #include <nemobox.h>
 
-int mesh_load_triangles(const char *filepath, const char *basepath, float **vertices, float **normals, float **colors)
+int mesh_load_triangles(const char *filepath, const char *basepath, float **vertices, float **normals, float **texcoords, float **colors)
 {
 	std::vector<tinyobj::shape_t> shapes;
 	std::vector<tinyobj::material_t> materials;
 	std::string r;
 	float *_vertices;
 	float *_normals;
+	float *_texcoords;
 	float *_colors;
 	int _nvertices, _svertices;
 	int _nnormals, _snormals;
+	int _ntexcoords, _stexcoords;
 	int _ncolors, _scolors;
 	int i, j;
 
@@ -39,6 +41,10 @@ int mesh_load_triangles(const char *filepath, const char *basepath, float **vert
 	_nnormals = 0;
 	_snormals = 16;
 
+	_texcoords = (float *)malloc(sizeof(float) * 16);
+	_ntexcoords = 0;
+	_stexcoords = 16;
+
 	_colors = (float *)malloc(sizeof(float) * 16);
 	_ncolors = 0;
 	_scolors = 16;
@@ -50,6 +56,7 @@ int mesh_load_triangles(const char *filepath, const char *basepath, float **vert
 			uint32_t v2 = shapes[i].mesh.indices[j * 3 + 2];
 			float p0[3], p1[3], p2[3];
 			float n0[3], n1[3], n2[3];
+			float t0[2], t1[2], t2[2];
 			float r = 1.0f, g = 1.0f, b = 1.0f;
 
 			p0[0] = shapes[i].mesh.positions[v0 * 3 + 0];
@@ -98,6 +105,26 @@ int mesh_load_triangles(const char *filepath, const char *basepath, float **vert
 				n0[2] = n1[2] = n2[2] = s0.f[2];
 			}
 
+			if (shapes[i].mesh.texcoords.size() > 0) {
+				t0[0] = shapes[i].mesh.texcoords[v0 * 3 + 0];
+				t0[1] = shapes[i].mesh.texcoords[v0 * 3 + 1];
+
+				t1[0] = shapes[i].mesh.texcoords[v1 * 3 + 0];
+				t1[1] = shapes[i].mesh.texcoords[v1 * 3 + 1];
+
+				t2[0] = shapes[i].mesh.texcoords[v2 * 3 + 0];
+				t2[1] = shapes[i].mesh.texcoords[v2 * 3 + 1];
+			} else {
+				t0[0] = 0.0f;
+				t0[1] = 0.0f;
+
+				t1[0] = 0.0f;
+				t1[1] = 0.0f;
+
+				t2[0] = 0.0f;
+				t2[1] = 0.0f;
+			}
+
 			if (shapes[i].mesh.material_ids.size() > 0) {
 				int32_t m = shapes[i].mesh.material_ids[j / 3];
 
@@ -128,6 +155,13 @@ int mesh_load_triangles(const char *filepath, const char *basepath, float **vert
 			NEMOBOX_APPEND(_normals, _snormals, _nnormals, n2[1]);
 			NEMOBOX_APPEND(_normals, _snormals, _nnormals, n2[2]);
 
+			NEMOBOX_APPEND(_texcoords, _stexcoords, _ntexcoords, t0[0]);
+			NEMOBOX_APPEND(_texcoords, _stexcoords, _ntexcoords, t0[1]);
+			NEMOBOX_APPEND(_texcoords, _stexcoords, _ntexcoords, t1[0]);
+			NEMOBOX_APPEND(_texcoords, _stexcoords, _ntexcoords, t1[1]);
+			NEMOBOX_APPEND(_texcoords, _stexcoords, _ntexcoords, t2[0]);
+			NEMOBOX_APPEND(_texcoords, _stexcoords, _ntexcoords, t2[1]);
+
 			NEMOBOX_APPEND(_colors, _scolors, _ncolors, r);
 			NEMOBOX_APPEND(_colors, _scolors, _ncolors, g);
 			NEMOBOX_APPEND(_colors, _scolors, _ncolors, b);
@@ -142,6 +176,7 @@ int mesh_load_triangles(const char *filepath, const char *basepath, float **vert
 
 	*vertices = _vertices;
 	*normals = _normals;
+	*texcoords = _texcoords;
 	*colors = _colors;
 
 	return _nvertices / 9;

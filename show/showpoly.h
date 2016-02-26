@@ -115,6 +115,8 @@ extern void nemoshow_poly_use_vbo(struct showone *one, int on_vbo);
 
 extern int nemoshow_poly_pick_one(struct showone *one, double x, double y, float *tx, float *ty);
 
+extern int nemoshow_poly_load_obj(struct showone *one, const char *uri);
+
 static inline void nemoshow_poly_set_x(struct showone *one, int index, float x)
 {
 	struct showpoly *poly = NEMOSHOW_POLY(one);
@@ -216,7 +218,7 @@ static inline void nemoshow_poly_set_color(struct showone *one, float r, float g
 	nemoshow_one_dirty(one, NEMOSHOW_STYLE_DIRTY);
 }
 
-static inline void nemoshow_poly_set_translate(struct showone *one, float tx, float ty, float tz)
+static inline void nemoshow_poly_translate(struct showone *one, float tx, float ty, float tz)
 {
 	struct showpoly *poly = NEMOSHOW_POLY(one);
 
@@ -229,7 +231,7 @@ static inline void nemoshow_poly_set_translate(struct showone *one, float tx, fl
 	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
 }
 
-static inline void nemoshow_poly_set_scale(struct showone *one, float sx, float sy, float sz)
+static inline void nemoshow_poly_scale(struct showone *one, float sx, float sy, float sz)
 {
 	struct showpoly *poly = NEMOSHOW_POLY(one);
 
@@ -242,7 +244,7 @@ static inline void nemoshow_poly_set_scale(struct showone *one, float sx, float 
 	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
 }
 
-static inline void nemoshow_poly_set_rotate(struct showone *one, float rx, float ry, float rz)
+static inline void nemoshow_poly_rotate(struct showone *one, float rx, float ry, float rz)
 {
 	struct showpoly *poly = NEMOSHOW_POLY(one);
 

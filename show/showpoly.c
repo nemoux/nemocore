@@ -10,6 +10,8 @@
 #include <showpoly.h>
 #include <showpipe.h>
 #include <showcanvas.h>
+#include <meshhelper.h>
+#include <oshelper.h>
 #include <nemometro.h>
 #include <nemomisc.h>
 
@@ -188,6 +190,11 @@ struct showone *nemoshow_poly_create(int type)
 	poly->sx = 1.0f;
 	poly->sy = 1.0f;
 	poly->sz = 1.0f;
+
+	poly->colors[NEMOSHOW_POLY_RED_COLOR] = 1.0f;
+	poly->colors[NEMOSHOW_POLY_GREEN_COLOR] = 1.0f;
+	poly->colors[NEMOSHOW_POLY_BLUE_COLOR] = 1.0f;
+	poly->colors[NEMOSHOW_POLY_ALPHA_COLOR] = 1.0f;
 
 	one = &poly->base;
 	one->type = NEMOSHOW_POLY_TYPE;
@@ -591,4 +598,30 @@ int nemoshow_poly_pick_one(struct showone *one, double x, double y, float *tx, f
 	}
 
 	return 0;
+}
+
+int nemoshow_poly_load_obj(struct showone *one, const char *uri)
+{
+	struct showpoly *poly = NEMOSHOW_POLY(one);
+	float *vertices;
+	float *normals;
+	float *texcoords;
+	float *colors;
+	int elements;
+
+	elements = mesh_load_triangles(uri, os_get_file_path(uri), &vertices, &normals, &texcoords, &colors);
+	if (elements <= 0)
+		return 0;
+
+	poly->vertices = vertices;
+	poly->normals = normals;
+	poly->texcoords = texcoords;
+	poly->elements = elements;
+
+	poly->on_normals = 1;
+	poly->on_texcoords = 1;
+
+	poly->mode = GL_TRIANGLES;
+
+	return elements;
 }
