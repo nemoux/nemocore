@@ -328,6 +328,27 @@ int main(int argc, char *argv[])
 		nemomatrix_init_identity(&matrix);
 		nemomatrix_scale_xyz(&matrix, 0.1f, 0.1f, 0.1f);
 		nemoshow_poly_transform_vertices(one, &matrix);
+
+		set0 = nemoshow_sequence_create_set();
+		nemoshow_sequence_set_source(set0, atom->icon0);
+		nemoshow_sequence_set_dattr(set0, "ry", 360.0f);
+
+		set1 = nemoshow_sequence_create_set();
+		nemoshow_sequence_set_source(set1, atom->icon0);
+		nemoshow_sequence_set_dattr(set1, "ry", 0.0f);
+
+		sequence = nemoshow_sequence_create_easy(atom->show,
+				nemoshow_sequence_create_frame_easy(atom->show,
+					0.5f, set0, NULL),
+				nemoshow_sequence_create_frame_easy(atom->show,
+					1.0f, set1, NULL),
+				NULL);
+
+		trans = nemoshow_transition_create(NEMOSHOW_CUBIC_INOUT_EASE, 8000, 0);
+		nemoshow_transition_check_one(trans, atom->icon0);
+		nemoshow_transition_set_repeat(trans, 0);
+		nemoshow_transition_attach_sequence(trans, sequence);
+		nemoshow_attach_transition(atom->show, trans);
 	}
 
 	trans = nemoshow_transition_create(NEMOSHOW_LINEAR_EASE, 18000, 0);
