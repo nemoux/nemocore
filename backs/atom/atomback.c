@@ -105,6 +105,21 @@ static void nemoback_atom_dispatch_canvas_event(struct nemoshow *show, struct sh
 			}
 		}
 	}
+
+	if (nemoshow_event_is_single_click(show, event)) {
+		uint32_t tag;
+
+		tag = nemoshow_canvas_pick_tag(atom->canvasp, nemoshow_event_get_x(event), nemoshow_event_get_y(event));
+		if (tag == 100) {
+			nemocanvas_execute_action(NEMOSHOW_AT(show, canvas),
+					0, 0,
+					NEMO_SURFACE_EXECUTE_TYPE_NORMAL,
+					NEMO_SURFACE_COORDINATE_TYPE_GLOBAL,
+					nemoshow_event_get_x(event),
+					nemoshow_event_get_y(event),
+					0.0f);
+		}
+	}
 }
 
 static void nemoback_atom_dispatch_canvas_fullscreen(struct nemoshow *show, int32_t active, int32_t opaque)
@@ -256,7 +271,7 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_alpha(canvas, alpha);
 	nemoshow_one_attach(scene, canvas);
 
-	atom->pipe = pipe = nemoshow_pipe_create(NEMOSHOW_LIGHTING_TEXTURE_PIPE);
+	atom->pipe0 = pipe = nemoshow_pipe_create(NEMOSHOW_LIGHTING_TEXTURE_PIPE);
 	nemoshow_one_attach(canvas, pipe);
 	nemoshow_pipe_set_light(pipe, 1.0f, 1.0f, -1.0f, 1.0f);
 	nemoshow_pipe_set_aspect_ratio(pipe,
@@ -295,15 +310,23 @@ int main(int argc, char *argv[])
 	nemoshow_poly_transform_vertices(one, &matrix);
 
 	if (objpath != NULL) {
-		atom->one2 = one = nemoshow_poly_create(NEMOSHOW_MESH_POLY);
-		nemoshow_one_attach(atom->one1, one);
+		atom->pipe1 = pipe = nemoshow_pipe_create(NEMOSHOW_LIGHTING_DIFFUSE_PIPE);
+		nemoshow_one_attach(canvas, pipe);
+		nemoshow_pipe_set_light(pipe, 1.0f, 1.0f, -1.0f, 1.0f);
+		nemoshow_pipe_set_aspect_ratio(pipe,
+				nemoshow_canvas_get_aspect_ratio(atom->canvasp));
+
+		atom->icon0 = one = nemoshow_poly_create(NEMOSHOW_MESH_POLY);
+		nemoshow_one_attach(pipe, one);
+		nemoshow_one_set_tag(one, 100);
 		nemoshow_poly_set_canvas(one, atom->canvasb);
 		nemoshow_poly_use_vbo(one, 1);
 		nemoshow_poly_load_obj(one, objpath);
 		nemoshow_poly_translate(one, 1.0f, 0.0f, 0.0f);
+		nemoshow_poly_rotate(one, 90.0f, 0.0f, 0.0f);
 
 		nemomatrix_init_identity(&matrix);
-		nemomatrix_scale_xyz(&matrix, 0.25f, 0.25f, 0.25f);
+		nemomatrix_scale_xyz(&matrix, 0.1f, 0.1f, 0.1f);
 		nemoshow_poly_transform_vertices(one, &matrix);
 	}
 
@@ -345,14 +368,14 @@ int main(int argc, char *argv[])
 	nemoshow_attach_transition(atom->show, trans);
 
 	set0 = nemoshow_sequence_create_set();
-	nemoshow_sequence_set_source(set0, atom->pipe);
+	nemoshow_sequence_set_source(set0, atom->pipe0);
 	nemoshow_sequence_set_fattr_offset(set0, "light", 0, -1.0f);
 	nemoshow_sequence_set_fattr_offset(set0, "light", 1, 1.0f);
 	nemoshow_sequence_set_fattr_offset(set0, "light", 2, -1.0f);
 	nemoshow_sequence_set_fattr_offset(set0, "light", 3, 1.0f);
 
 	set1 = nemoshow_sequence_create_set();
-	nemoshow_sequence_set_source(set1, atom->pipe);
+	nemoshow_sequence_set_source(set1, atom->pipe0);
 	nemoshow_sequence_set_fattr_offset(set1, "light", 0, 1.0f);
 	nemoshow_sequence_set_fattr_offset(set1, "light", 1, 1.0f);
 	nemoshow_sequence_set_fattr_offset(set1, "light", 2, -1.0f);
@@ -366,7 +389,7 @@ int main(int argc, char *argv[])
 			NULL);
 
 	trans = nemoshow_transition_create(NEMOSHOW_CUBIC_INOUT_EASE, 12000, 0);
-	nemoshow_transition_check_one(trans, atom->pipe);
+	nemoshow_transition_check_one(trans, atom->pipe0);
 	nemoshow_transition_set_repeat(trans, 0);
 	nemoshow_transition_attach_sequence(trans, sequence);
 	nemoshow_attach_transition(atom->show, trans);

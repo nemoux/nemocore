@@ -648,10 +648,12 @@ int nemoshow_poly_load_obj(struct showone *one, const char *uri)
 	poly->vertices = vertices;
 	poly->normals = normals;
 	poly->texcoords = texcoords;
+	poly->diffuses = colors;
 	poly->elements = elements;
 
 	poly->on_normals = 1;
 	poly->on_texcoords = 1;
+	poly->on_diffuses = 1;
 
 	poly->mode = GL_TRIANGLES;
 

@@ -57,7 +57,7 @@ int mesh_load_triangles(const char *filepath, const char *basepath, float **vert
 			float p0[3], p1[3], p2[3];
 			float n0[3], n1[3], n2[3];
 			float t0[2], t1[2], t2[2];
-			float r = 1.0f, g = 1.0f, b = 1.0f;
+			float r = 1.0f, g = 1.0f, b = 1.0f, a = 1.0f;
 
 			p0[0] = shapes[i].mesh.positions[v0 * 3 + 0];
 			p0[1] = shapes[i].mesh.positions[v0 * 3 + 1];
@@ -165,12 +165,15 @@ int mesh_load_triangles(const char *filepath, const char *basepath, float **vert
 			NEMOBOX_APPEND(_colors, _scolors, _ncolors, r);
 			NEMOBOX_APPEND(_colors, _scolors, _ncolors, g);
 			NEMOBOX_APPEND(_colors, _scolors, _ncolors, b);
+			NEMOBOX_APPEND(_colors, _scolors, _ncolors, a);
 			NEMOBOX_APPEND(_colors, _scolors, _ncolors, r);
 			NEMOBOX_APPEND(_colors, _scolors, _ncolors, g);
 			NEMOBOX_APPEND(_colors, _scolors, _ncolors, b);
+			NEMOBOX_APPEND(_colors, _scolors, _ncolors, a);
 			NEMOBOX_APPEND(_colors, _scolors, _ncolors, r);
 			NEMOBOX_APPEND(_colors, _scolors, _ncolors, g);
 			NEMOBOX_APPEND(_colors, _scolors, _ncolors, b);
+			NEMOBOX_APPEND(_colors, _scolors, _ncolors, a);
 		}
 	}
 
