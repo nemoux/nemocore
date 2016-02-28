@@ -387,6 +387,8 @@ int glrenderer_read_canvas(struct nemorenderer *base, struct nemocanvas *canvas,
 	struct glrenderer *renderer = (struct glrenderer *)container_of(base, struct glrenderer, base);
 	struct glcontent *glcontent = (struct glcontent *)nemocontent_get_opengl_context(&canvas->base, base->node);
 	GLenum glformat;
+	GLuint pbo;
+	void *ptr;
 
 	if (glcontent == NULL)
 		return -1;
@@ -409,9 +411,22 @@ int glrenderer_read_canvas(struct nemorenderer *base, struct nemocanvas *canvas,
 			return -1;
 	}
 
-	glBindTexture(GL_TEXTURE_2D, glcontent->textures[0]);
+	glGenBuffers(1, &pbo);
+	glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
+	glBufferData(GL_PIXEL_PACK_BUFFER, glcontent->pitch * glcontent->height * 4, NULL, GL_STREAM_DRAW);
+	glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 
-	glGetTexImage(GL_TEXTURE_2D, 0, glformat, GL_UNSIGNED_BYTE, pixels);
+	glBindTexture(GL_TEXTURE_2D, glcontent->textures[0]);
+	glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
+
+	ptr = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
+	memcpy(pixels, ptr, glcontent->pitch * glcontent->height * 4);
+	glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
+
+	glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glDeleteBuffers(1, &pbo);
 
 	return 0;
 }
