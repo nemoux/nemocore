@@ -98,6 +98,11 @@ extern void nemokeyboard_start_grab(struct nemokeyboard *keyboard, struct nemoke
 extern void nemokeyboard_end_grab(struct nemokeyboard *keyboard);
 extern void nemokeyboard_cancel_grab(struct nemokeyboard *keyboard);
 
+static inline int nemokeyboard_has_modifiers_state(struct nemokeyboard *keyboard, uint32_t state)
+{
+	return keyboard->modifiers_state == state;
+}
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif
