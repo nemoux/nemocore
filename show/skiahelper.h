@@ -1,5 +1,5 @@
 #ifndef __SKIA_HELPER_H__
-#define __SKI_HELPER_H__
+#define __SKIA_HELPER_H__
 
 #include <nemoconfig.h>
 

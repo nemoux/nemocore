@@ -68,6 +68,7 @@ set(HEADER_FILES
 	nemometro.h
 	nemospin.h
 	nemoconfig.h
+	nemohelper.h
 	)
 
 configure_file(
