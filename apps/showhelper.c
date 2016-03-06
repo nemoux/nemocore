@@ -340,6 +340,14 @@ void nemoshow_view_put_pivot(struct nemoshow *show)
 	struct nemocanvas *canvas = scon->canvas;
 }
 
+void nemoshow_view_set_anchor(struct nemoshow *show, float ax, float ay)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemocanvas *canvas = scon->canvas;
+	
+	nemocanvas_set_anchor(canvas, ax, ay);
+}
+
 void nemoshow_view_set_flag(struct nemoshow *show, float fx, float fy)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);

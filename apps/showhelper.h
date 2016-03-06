@@ -66,6 +66,7 @@ extern void nemoshow_view_set_position(struct nemoshow *show, float x, float y);
 extern void nemoshow_view_set_rotation(struct nemoshow *show, float r);
 extern void nemoshow_view_set_pivot(struct nemoshow *show, float px, float py);
 extern void nemoshow_view_put_pivot(struct nemoshow *show);
+extern void nemoshow_view_set_anchor(struct nemoshow *show, float ax, float ay);
 extern void nemoshow_view_set_flag(struct nemoshow *show, float fx, float fy);
 extern void nemoshow_view_set_opaque(struct nemoshow *show, int32_t x, int32_t y, int32_t width, int32_t height);
 extern void nemoshow_view_set_min_size(struct nemoshow *show, float width, float height);
