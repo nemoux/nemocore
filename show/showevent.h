@@ -183,6 +183,11 @@ static inline void nemoshow_event_get_distant_tapserials(struct nemoshow *show, 
 	nemotale_event_get_distant_tapserials(show->tale, (struct taleevent *)event, serial0, serial1);
 }
 
+static inline void nemoshow_event_transform_to_viewport(struct nemoshow *show, float x, float y, float *sx, float *sy)
+{
+	nemotale_event_transform_to_viewport(show->tale, x, y, sx, sy);
+}
+
 static inline int nemoshow_event_is_single_click(struct nemoshow *show, void *event)
 {
 	return nemotale_event_is_single_click(show->tale, (struct taleevent *)event);
