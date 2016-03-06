@@ -60,24 +60,6 @@ int nemotale_prepare(struct nemotale *tale)
 	else
 		tale->single_click_distance = 50;
 
-	env = getenv("NEMOTALE_TAP_MINIMUM_DISTANCE");
-	if (env != NULL)
-		tale->tap_minimum_distance = strtoul(env, NULL, 10);
-	else
-		tale->tap_minimum_distance = 0;
-
-	env = getenv("NEMOTALE_CLOSE_DURATION");
-	if (env != NULL)
-		tale->close_duration = strtoul(env, NULL, 10);
-	else
-		tale->close_duration = 1000;
-
-	env = getenv("NEMOTALE_CLOSE_DISTANCE");
-	if (env != NULL)
-		tale->close_distance = strtoul(env, NULL, 10);
-	else
-		tale->close_distance = 100;
-
 	env = getenv("NEMOTALE_MINIMUM_WIDTH");
 	if (env != NULL)
 		tale->minimum_width = strtoul(env, NULL, 10);
@@ -225,7 +207,7 @@ void nemotale_below_node(struct nemotale *tale, struct talenode *node, struct ta
 void nemotale_clear_node(struct nemotale *tale)
 {
 	tale->nnodes = 0;
-	
+
 	nemotale_damage_all(tale);
 }
 

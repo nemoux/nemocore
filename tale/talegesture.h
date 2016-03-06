@@ -63,19 +63,7 @@ static inline int nemotale_event_is_single_tap(struct nemotale *tale, struct tal
 
 static inline int nemotale_event_is_double_taps(struct nemotale *tale, struct taleevent *event)
 {
-#ifdef NEMOUX_WITH_TAP_MINIMUM_DISTANCE
-	if (event->tapcount == 2) {
-		double dx = event->taps[1]->gx - event->taps[0]->gx;
-		double dy = event->taps[1]->gy - event->taps[0]->gy;
-
-		if (sqrtf(dx * dx + dy * dy) >= tale->tap_minimum_distance)
-			return 1;
-	}
-
-	return 0;
-#else
 	return event->tapcount == 2;
-#endif
 }
 
 static inline int nemotale_event_is_triple_taps(struct nemotale *tale, struct taleevent *event)
