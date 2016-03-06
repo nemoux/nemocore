@@ -77,6 +77,7 @@ extern void nemoshow_view_put_sound(struct nemoshow *show);
 extern int nemoshow_view_move(struct nemoshow *show, uint32_t serial);
 extern int nemoshow_view_pick(struct nemoshow *show, uint32_t serial0, uint32_t serial1, uint32_t type);
 extern int nemoshow_view_pick_distant(struct nemoshow *show, void *event, uint32_t type);
+extern void nemoshow_view_miss(struct nemoshow *show);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

@@ -344,7 +344,7 @@ void nemoshow_view_set_anchor(struct nemoshow *show, float ax, float ay)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemocanvas *canvas = scon->canvas;
-	
+
 	nemocanvas_set_anchor(canvas, ax, ay);
 }
 
@@ -454,4 +454,12 @@ int nemoshow_view_pick_distant(struct nemoshow *show, void *event, uint32_t type
 	nemocanvas_pick(canvas, serial0, serial1, ptype);
 
 	return 1;
+}
+
+void nemoshow_view_miss(struct nemoshow *show)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemocanvas *canvas = scon->canvas;
+
+	nemocanvas_miss(canvas);
 }
