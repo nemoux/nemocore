@@ -44,6 +44,7 @@ struct nemoshow *nemoshow_create(void)
 
 	nemolist_init(&show->one_list);
 	nemolist_init(&show->dirty_list);
+	nemolist_init(&show->bounds_list);
 	nemolist_init(&show->transition_list);
 	nemolist_init(&show->transition_destroy_list);
 
@@ -81,6 +82,7 @@ void nemoshow_destroy(struct nemoshow *show)
 
 	nemolist_remove(&show->one_list);
 	nemolist_remove(&show->dirty_list);
+	nemolist_remove(&show->bounds_list);
 	nemolist_remove(&show->transition_list);
 	nemolist_remove(&show->transition_destroy_list);
 
@@ -523,21 +525,6 @@ void nemoshow_arrange_one(struct nemoshow *show)
 	}
 }
 
-void nemoshow_update_one(struct nemoshow *show)
-{
-	struct showone *scene = show->scene;
-	struct showone *one, *none;
-
-	if (scene == NULL)
-		return;
-
-	nemolist_for_each_safe(one, none, &show->dirty_list, dirty_link) {
-		nemoshow_one_update(one);
-	}
-
-	show->dirty_serial = 0;
-}
-
 void nemoshow_render_one(struct nemoshow *show)
 {
 	struct showone *scene = show->scene;
@@ -549,6 +536,10 @@ void nemoshow_render_one(struct nemoshow *show)
 
 	nemolist_for_each_safe(one, none, &show->dirty_list, dirty_link) {
 		nemoshow_one_update(one);
+	}
+
+	nemolist_for_each_safe(one, none, &show->bounds_list, bounds_link) {
+		nemoshow_one_update_bounds(one);
 	}
 
 	show->dirty_serial = 0;

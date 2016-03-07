@@ -328,12 +328,12 @@ int nemoshow_poly_update(struct showone *one)
 			maxz = MAX(poly->vertices[3 * i + NEMOSHOW_POLY_Z_VERTEX], maxz);
 		}
 
-		poly->boundingbox[0] = minx;
-		poly->boundingbox[1] = maxx;
-		poly->boundingbox[2] = miny;
-		poly->boundingbox[3] = maxy;
-		poly->boundingbox[4] = minz;
-		poly->boundingbox[5] = maxz;
+		poly->bounds[0] = minx;
+		poly->bounds[1] = maxx;
+		poly->bounds[2] = miny;
+		poly->bounds[3] = maxy;
+		poly->bounds[4] = minz;
+		poly->bounds[5] = maxz;
 
 		if (poly->on_vbo != 0) {
 			glBindVertexArray(poly->varray);

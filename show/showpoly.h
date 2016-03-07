@@ -62,7 +62,7 @@ struct showpoly {
 	float *normals;
 	int elements;
 
-	float boundingbox[6];
+	float bounds[6];
 
 	GLuint varray;
 	GLuint vvertex;

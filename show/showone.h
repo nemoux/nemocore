@@ -62,7 +62,7 @@ typedef enum {
 	NEMOSHOW_SIZE_STATE = (1 << 3),
 	NEMOSHOW_ANCHOR_STATE = (1 << 4),
 	NEMOSHOW_INHERIT_STATE = (1 << 8),
-	NEMOSHOW_NOBOUND_STATE = (1 << 9),
+	NEMOSHOW_BOUNDS_STATE = (1 << 9),
 	NEMOSHOW_EFFECT_STATE = (1 << 10),
 	NEMOSHOW_LAST_STATE
 } NemoShowOneState;
@@ -121,6 +121,7 @@ struct showone {
 	struct nemolist link;
 	struct nemolist children_link;
 	struct nemolist dirty_link;
+	struct nemolist bounds_link;
 
 	uint32_t state;
 
@@ -196,6 +197,9 @@ extern struct showone *nemoshow_one_create(int type);
 extern void nemoshow_one_destroy(struct showone *one);
 
 extern void nemoshow_one_dirty(struct showone *one, uint32_t dirty);
+extern void nemoshow_one_bounds(struct showone *one);
+
+extern void nemoshow_one_update_bounds(struct showone *one);
 
 extern void nemoshow_one_attach_one(struct showone *parent, struct showone *one);
 extern void nemoshow_one_detach_one(struct showone *one);

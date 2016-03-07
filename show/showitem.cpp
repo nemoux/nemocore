@@ -145,7 +145,7 @@ struct showone *nemoshow_item_create(int type)
 		NEMOSHOW_ITEM_CC(item, textbox)->setMode(SkTextBox::kLineBreak_Mode);
 	} else if (one->sub == NEMOSHOW_GROUP_ITEM) {
 		nemoshow_one_set_state(one, NEMOSHOW_INHERIT_STATE);
-		nemoshow_one_set_state(one, NEMOSHOW_NOBOUND_STATE);
+		nemoshow_one_set_state(one, NEMOSHOW_BOUNDS_STATE);
 	} else if (one->sub == NEMOSHOW_SVG_ITEM) {
 		nemoshow_one_set_state(one, NEMOSHOW_INHERIT_STATE);
 	}
@@ -701,7 +701,7 @@ static inline void nemoshow_item_update_shape(struct nemoshow *show, struct show
 	}
 }
 
-void nemoshow_item_update_boundingbox(struct nemoshow *show, struct showone *one)
+void nemoshow_item_update_bounds(struct nemoshow *show, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one->canvas);
@@ -840,7 +840,9 @@ int nemoshow_item_update(struct showone *one)
 
 			nemoshow_item_update_shape(show, one);
 
-			nemoshow_item_update_boundingbox(show, one);
+			nemoshow_item_update_bounds(show, one);
+
+			nemoshow_one_bounds(one);
 		}
 
 		nemoshow_canvas_damage_one(one->canvas, one);

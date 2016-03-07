@@ -588,13 +588,9 @@ static inline void nemoshow_canvas_render_item_group(struct showcanvas *canvas, 
 
 static inline int nemoshow_canvas_check_one(struct showcanvas *canvas, struct showone *one)
 {
-	if (nemoshow_one_has_state(one, NEMOSHOW_NOBOUND_STATE) == 0) {
-		SkIRect boundingbox = SkIRect::MakeXYWH(one->sx, one->sy, one->sw, one->sh);
+	SkIRect bounds = SkIRect::MakeXYWH(one->sx, one->sy, one->sw, one->sh);
 
-		return NEMOSHOW_CANVAS_CC(canvas, damage)->intersects(boundingbox);
-	}
-
-	return 1;
+	return NEMOSHOW_CANVAS_CC(canvas, damage)->intersects(bounds);
 }
 
 typedef void (*nemoshow_canvas_render_t)(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one);
@@ -890,7 +886,7 @@ static inline struct showone *nemoshow_canvas_pick_poly(struct showone *one, dou
 				struct showpoly *poly = NEMOSHOW_POLY(pchild);
 				float mint, maxt;
 
-				if (nemometro_pick_cube(&pipe->projection, canvas->width, canvas->height, &poly->modelview, poly->boundingbox, x, y, &mint, &maxt) > 0) {
+				if (nemometro_pick_cube(&pipe->projection, canvas->width, canvas->height, &poly->modelview, poly->bounds, x, y, &mint, &maxt) > 0) {
 					if (min > mint) {
 						min = mint;
 						pick = pchild;
