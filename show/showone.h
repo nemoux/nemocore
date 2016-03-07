@@ -264,6 +264,16 @@ static inline void nemoshow_one_update(struct showone *one)
 	nemolist_init(&one->dirty_link);
 }
 
+static inline int nemoshow_one_is_type(struct showone *one, int type)
+{
+	return one->type == type;
+}
+
+static inline int nemoshow_one_is_subtype(struct showone *one, int type, int sub)
+{
+	return one->type == type && one->sub == sub;
+}
+
 static inline void nemoshow_one_set_state(struct showone *one, uint32_t state)
 {
 	one->state |= state;
