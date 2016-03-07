@@ -841,7 +841,7 @@ static inline struct showone *nemoshow_canvas_pick_item(struct showone *one, dou
 	nemoshow_children_for_each_reverse(child, one) {
 		if (child->sub == NEMOSHOW_GROUP_ITEM) {
 			if (child->tag != 0) {
-				if (nemoshow_item_pick_one(child, x, y) != 0)
+				if (nemoshow_item_check_one(child, x, y) != 0)
 					return child;
 			} else {
 				pick = nemoshow_canvas_pick_item(child, x, y);
@@ -850,7 +850,7 @@ static inline struct showone *nemoshow_canvas_pick_item(struct showone *one, dou
 			}
 		} else {
 			if (child->tag != 0) {
-				if (nemoshow_item_pick_one(child, x, y) != 0)
+				if (nemoshow_item_check_one(child, x, y) != 0)
 					return child;
 			}
 		}
@@ -870,7 +870,7 @@ static inline struct showone *nemoshow_canvas_pick_poly(struct showone *one, dou
 	nemoshow_children_for_each(pone, one) {
 		nemoshow_children_for_each(cone, pone) {
 			if (cone->tag != 0) {
-				t = nemoshow_poly_pick_one(one, pone, cone, x, y);
+				t = nemoshow_poly_check_one(one, pone, cone, x, y);
 				if (min > t) {
 					min = t;
 					pick = cone;

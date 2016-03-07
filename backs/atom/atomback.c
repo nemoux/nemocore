@@ -88,7 +88,7 @@ static void nemoback_atom_dispatch_canvas_event(struct nemoshow *show, struct sh
 			float tx, ty;
 			int plane;
 
-			if ((plane = nemoshow_poly_pick_plane(atom->canvasp, atom->pipe0, atom->one0, nemoshow_event_get_x(event), nemoshow_event_get_y(event), &tx, &ty)) > 0) {
+			if ((plane = nemoshow_poly_check_plane(atom->canvasp, atom->pipe0, atom->one0, nemoshow_event_get_x(event), nemoshow_event_get_y(event), &tx, &ty)) > 0) {
 				one = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
 				nemoshow_one_attach(atom->canvast, one);
 				nemoshow_item_set_x(one, tx * nemoshow_canvas_get_width(atom->canvast));
@@ -101,7 +101,7 @@ static void nemoback_atom_dispatch_canvas_event(struct nemoshow *show, struct sh
 			float tx, ty;
 			int plane;
 
-			if ((plane = nemoshow_poly_pick_plane(atom->canvasp, atom->pipe0, atom->one1, nemoshow_event_get_x(event), nemoshow_event_get_y(event), &tx, &ty)) > 0) {
+			if ((plane = nemoshow_poly_check_plane(atom->canvasp, atom->pipe0, atom->one1, nemoshow_event_get_x(event), nemoshow_event_get_y(event), &tx, &ty)) > 0) {
 			}
 		}
 	}
