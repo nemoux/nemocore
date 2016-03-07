@@ -334,6 +334,23 @@ void nemoshow_one_destroy_attr(struct showattr *attr)
 	free(attr);
 }
 
+struct showone *nemoshow_one_search_one(struct showone *one, const char *id)
+{
+	struct showone *child;
+	struct showone *sone;
+
+	if (strcmp(one->id, id) == 0)
+		return one;
+
+	nemoshow_children_for_each(child, one) {
+		sone = nemoshow_one_search_one(child, id);
+		if (sone != NULL)
+			return sone;
+	}
+
+	return NULL;
+}
+
 void nemoshow_one_dump(struct showone *one, FILE *out)
 {
 	struct showprop *prop;

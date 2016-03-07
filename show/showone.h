@@ -210,6 +210,8 @@ extern void nemoshow_one_unreference_all(struct showone *one);
 extern struct showattr *nemoshow_one_create_attr(const char *name, const char *text, struct nemoattr *ref, uint32_t dirty);
 extern void nemoshow_one_destroy_attr(struct showattr *attr);
 
+extern struct showone *nemoshow_one_search_one(struct showone *one, const char *id);
+
 extern void nemoshow_one_dump(struct showone *one, FILE *out);
 
 static inline void nemoshow_one_attach(struct showone *parent, struct showone *one)
