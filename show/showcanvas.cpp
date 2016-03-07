@@ -836,34 +836,22 @@ void nemoshow_canvas_dirty_all(struct showone *one, uint32_t dirty)
 static inline struct showone *nemoshow_canvas_pick_item(struct showone *one, double x, double y)
 {
 	struct showone *child;
+	struct showone *pick;
 
 	nemoshow_children_for_each_reverse(child, one) {
-		if (child->tag == 0) {
-			struct showone *pick;
-
-			pick = nemoshow_canvas_pick_item(child, x, y);
-			if (pick != NULL)
-				return pick;
+		if (child->sub == NEMOSHOW_GROUP_ITEM) {
+			if (child->tag != 0) {
+				if (nemoshow_item_pick_one(child, x, y) != 0)
+					return child;
+			} else {
+				pick = nemoshow_canvas_pick_item(child, x, y);
+				if (pick != NULL)
+					return pick;
+			}
 		} else {
-			struct showitem *item = NEMOSHOW_ITEM(child);
-
-			if (NEMOSHOW_ITEM_CC(item, has_inverse)) {
-				SkPoint p = NEMOSHOW_ITEM_CC(item, inverse)->mapXY(x, y);
-
-				if (child->x0 < p.x() && p.x() < child->x1 &&
-						child->y0 < p.y() && p.y() < child->y1) {
-					if (item->pick == NEMOSHOW_NORMAL_PICK) {
-						return child;
-					} else if (item->pick == NEMOSHOW_PATH_PICK) {
-						SkRegion region;
-						SkRegion clip;
-
-						clip.setRect(p.x(), p.y(), p.x() + 1, p.y() + 1);
-
-						if (region.setPath(*NEMOSHOW_ITEM_CC(item, path), clip) == true)
-							return child;
-					}
-				}
+			if (child->tag != 0) {
+				if (nemoshow_item_pick_one(child, x, y) != 0)
+					return child;
 			}
 		}
 	}
@@ -874,23 +862,18 @@ static inline struct showone *nemoshow_canvas_pick_item(struct showone *one, dou
 static inline struct showone *nemoshow_canvas_pick_poly(struct showone *one, double x, double y)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
-	struct showone *child, *pchild;
+	struct showone *pone, *cone;
 	struct showone *pick = NULL;
 	float min = FLT_MAX;
+	float t;
 
-	nemoshow_children_for_each(child, one) {
-		struct showpipe *pipe = NEMOSHOW_PIPE(child);
-
-		nemoshow_children_for_each(pchild, child) {
-			if (pchild->tag != 0) {
-				struct showpoly *poly = NEMOSHOW_POLY(pchild);
-				float mint, maxt;
-
-				if (nemometro_pick_cube(&pipe->projection, canvas->width, canvas->height, &poly->modelview, poly->bounds, x, y, &mint, &maxt) > 0) {
-					if (min > mint) {
-						min = mint;
-						pick = pchild;
-					}
+	nemoshow_children_for_each(pone, one) {
+		nemoshow_children_for_each(cone, pone) {
+			if (cone->tag != 0) {
+				t = nemoshow_poly_pick_one(one, pone, cone, x, y);
+				if (min > t) {
+					min = t;
+					pick = cone;
 				}
 			}
 		}
