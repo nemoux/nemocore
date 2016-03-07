@@ -436,7 +436,7 @@ void nemoshow_one_destroy_attr(struct showattr *attr)
 	free(attr);
 }
 
-struct showone *nemoshow_one_search_one(struct showone *one, const char *id)
+struct showone *nemoshow_one_search_id(struct showone *one, const char *id)
 {
 	struct showone *child;
 	struct showone *sone;
@@ -445,7 +445,24 @@ struct showone *nemoshow_one_search_one(struct showone *one, const char *id)
 		return one;
 
 	nemoshow_children_for_each(child, one) {
-		sone = nemoshow_one_search_one(child, id);
+		sone = nemoshow_one_search_id(child, id);
+		if (sone != NULL)
+			return sone;
+	}
+
+	return NULL;
+}
+
+struct showone *nemoshow_one_search_tag(struct showone *one, uint32_t tag)
+{
+	struct showone *child;
+	struct showone *sone;
+
+	if (one->tag == tag)
+		return one;
+
+	nemoshow_children_for_each(child, one) {
+		sone = nemoshow_one_search_tag(child, tag);
 		if (sone != NULL)
 			return sone;
 	}
