@@ -505,23 +505,12 @@ void nemoshow_poly_use_vbo(struct showone *one, int on_vbo)
 	poly->on_vbo = on_vbo;
 }
 
-int nemoshow_poly_pick_one(struct showone *one, double x, double y, float *tx, float *ty)
+int nemoshow_poly_pick_plane(struct showone *cone, struct showone *pone, struct showone *one, double x, double y, float *tx, float *ty)
 {
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(cone);
+	struct showpipe *pipe = NEMOSHOW_PIPE(pone);
 	struct showpoly *poly = NEMOSHOW_POLY(one);
-	struct showcanvas *canvas;
-	struct showpipe *pipe;
-	struct showone *parent;
 	float t, u, v;
-
-	parent = nemoshow_one_get_parent(one, NEMOSHOW_PIPE_TYPE, 0);
-	if (parent == NULL)
-		return 0;
-	pipe = NEMOSHOW_PIPE(parent);
-
-	parent = nemoshow_one_get_parent(one, NEMOSHOW_CANVAS_TYPE, NEMOSHOW_CANVAS_PIPELINE_TYPE);
-	if (parent == NULL)
-		return 0;
-	canvas = NEMOSHOW_CANVAS(parent);
 
 	if (one->sub == NEMOSHOW_QUAD_POLY) {
 		if (nemometro_pick_triangle(
@@ -598,6 +587,19 @@ int nemoshow_poly_pick_one(struct showone *one, double x, double y, float *tx, f
 	}
 
 	return 0;
+}
+
+float nemoshow_poly_pick_one(struct showone *cone, struct showone *pone, struct showone *one, double x, double y)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(cone);
+	struct showpipe *pipe = NEMOSHOW_PIPE(pone);
+	struct showpoly *poly = NEMOSHOW_POLY(one);
+	float mint, maxt;
+
+	if (nemometro_pick_cube(&pipe->projection, canvas->width, canvas->height, &poly->modelview, poly->bounds, x, y, &mint, &maxt) > 0)
+		return mint;
+
+	return FLT_MAX;
 }
 
 int nemoshow_poly_load_obj(struct showone *one, const char *uri)

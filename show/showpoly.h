@@ -113,7 +113,8 @@ extern void nemoshow_poly_use_normals(struct showone *one, int on_normals);
 extern void nemoshow_poly_use_diffuses(struct showone *one, int on_diffuses);
 extern void nemoshow_poly_use_vbo(struct showone *one, int on_vbo);
 
-extern int nemoshow_poly_pick_one(struct showone *one, double x, double y, float *tx, float *ty);
+extern int nemoshow_poly_pick_plane(struct showone *cone, struct showone *pone, struct showone *one, double x, double y, float *tx, float *ty);
+extern float nemoshow_poly_pick_one(struct showone *cone, struct showone *pone, struct showone *one, double x, double y);
 
 extern int nemoshow_poly_load_obj(struct showone *one, const char *uri);
 

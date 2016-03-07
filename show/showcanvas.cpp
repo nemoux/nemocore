@@ -833,7 +833,7 @@ void nemoshow_canvas_dirty_all(struct showone *one, uint32_t dirty)
 		nemoshow_one_dirty(child, dirty);
 }
 
-static inline struct showone *nemoshow_canvas_pick_item(struct showone *one, double px, double py)
+static inline struct showone *nemoshow_canvas_pick_item(struct showone *one, double x, double y)
 {
 	struct showone *child;
 
@@ -841,14 +841,14 @@ static inline struct showone *nemoshow_canvas_pick_item(struct showone *one, dou
 		if (child->tag == 0) {
 			struct showone *pick;
 
-			pick = nemoshow_canvas_pick_item(child, px, py);
+			pick = nemoshow_canvas_pick_item(child, x, y);
 			if (pick != NULL)
 				return pick;
 		} else {
 			struct showitem *item = NEMOSHOW_ITEM(child);
 
 			if (NEMOSHOW_ITEM_CC(item, has_inverse)) {
-				SkPoint p = NEMOSHOW_ITEM_CC(item, inverse)->mapXY(px, py);
+				SkPoint p = NEMOSHOW_ITEM_CC(item, inverse)->mapXY(x, y);
 
 				if (child->x0 < p.x() && p.x() < child->x1 &&
 						child->y0 < p.y() && p.y() < child->y1) {

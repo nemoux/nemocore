@@ -1631,3 +1631,29 @@ int nemoshow_item_set_bitmap(struct showone *one, SkBitmap *bitmap)
 
 	return 0;
 }
+
+int nemoshow_item_pick_one(struct showone *one, double x, double y)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	if (NEMOSHOW_ITEM_CC(item, has_inverse)) {
+		SkPoint p = NEMOSHOW_ITEM_CC(item, inverse)->mapXY(x, y);
+
+		if (one->x0 < p.x() && p.x() < one->x1 &&
+				one->y0 < p.y() && p.y() < one->y1) {
+			if (item->pick == NEMOSHOW_NORMAL_PICK) {
+				return 1;
+			} else if (item->pick == NEMOSHOW_PATH_PICK) {
+				SkRegion region;
+				SkRegion clip;
+
+				clip.setRect(p.x(), p.y(), p.x() + 1, p.y() + 1);
+
+				if (region.setPath(*NEMOSHOW_ITEM_CC(item, path), clip) == true)
+					return 1;
+			}
+		}
+	}
+
+	return 0;
+}
