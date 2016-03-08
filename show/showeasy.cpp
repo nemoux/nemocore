@@ -33,6 +33,33 @@ struct showtransition *nemoshow_transition_create_easy(struct nemoshow *show, st
 	return trans;
 }
 
+void nemoshow_transition_dispatch_easy(struct nemoshow *show, struct showone *one, struct showone *ease, uint32_t duration, uint32_t delay, uint32_t repeat, const char *attr, double v0, double v1)
+{
+	struct showtransition *trans;
+	struct showone *sequence;
+	struct showone *set0;
+	int index;
+
+	set0 = nemoshow_sequence_create_set();
+	nemoshow_sequence_set_source(set0, one);
+
+	if (repeat != 1) {
+		index = nemoshow_sequence_set_dattr(set0, attr, v1);
+		nemoshow_sequence_fix_dattr(set0, index, v0);
+	}
+
+	sequence = nemoshow_sequence_create_easy(show,
+			nemoshow_sequence_create_frame_easy(show,
+				1.0f, set0, NULL),
+			NULL);
+
+	trans = nemoshow_transition_create(ease, duration, delay);
+	nemoshow_transition_check_one(trans, one);
+	nemoshow_transition_attach_sequence(trans, sequence);
+	nemoshow_transition_set_repeat(trans, repeat);
+	nemoshow_attach_transition(show, trans);
+}
+
 void nemoshow_attach_transition_easy(struct nemoshow *show, ...)
 {
 	struct showtransition *ptrans = NULL;

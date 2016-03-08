@@ -11,6 +11,8 @@ NEMO_BEGIN_EXTERN_C
 
 extern struct showtransition *nemoshow_transition_create_easy(struct nemoshow *show, struct showone *ease, uint32_t duration, uint32_t delay, ...);
 
+extern void nemoshow_transition_dispatch_easy(struct nemoshow *show, struct showone *one, struct showone *ease, uint32_t duration, uint32_t delay, uint32_t repeat, const char *attr, double v0, double v1);
+
 extern void nemoshow_attach_transition_easy(struct nemoshow *show, ...);
 
 extern struct showone *nemoshow_sequence_create_set_easy(struct nemoshow *show, struct showone *src, ...);
