@@ -696,14 +696,14 @@ void nemoshow_above_canvas(struct nemoshow *show, struct showone *one, struct sh
 {
 	nemotale_above_node(show->tale,
 			NEMOSHOW_CANVAS_AT(one, node),
-			NEMOSHOW_CANVAS_AT(above, node));
+			above != NULL ? NEMOSHOW_CANVAS_AT(above, node) : NULL);
 }
 
 void nemoshow_below_canvas(struct nemoshow *show, struct showone *one, struct showone *below)
 {
 	nemotale_below_node(show->tale,
 			NEMOSHOW_CANVAS_AT(one, node),
-			NEMOSHOW_CANVAS_AT(below, node));
+			below != NULL ? NEMOSHOW_CANVAS_AT(below, node) : NULL);
 }
 
 void nemoshow_damage_canvas_all(struct nemoshow *show)

@@ -174,19 +174,25 @@ void nemotale_above_node(struct nemotale *tale, struct talenode *node, struct ta
 {
 	int i;
 
-	for (i = 0; i < tale->nnodes; i++) {
-		if (tale->nodes[i] == node) {
-			NEMOBOX_REMOVE(tale->nodes, tale->nnodes, i);
-			break;
+	if (node->tale != NULL) {
+		for (i = 0; i < node->tale->nnodes; i++) {
+			if (node->tale->nodes[i] == node) {
+				NEMOBOX_REMOVE(node->tale->nodes, node->tale->nnodes, i);
+				break;
+			}
 		}
 	}
 
-	for (i = 0; i < tale->nnodes; i++) {
-		if (tale->nodes[i] == above) {
-			NEMOBOX_PUSH(tale->nodes, tale->snodes, tale->nnodes, i + 1, node);
+	if (above != NULL) {
+		for (i = 0; i < tale->nnodes; i++) {
+			if (tale->nodes[i] == above) {
+				NEMOBOX_PUSH(tale->nodes, tale->snodes, tale->nnodes, i + 1, node);
 
-			break;
+				break;
+			}
 		}
+	} else {
+		NEMOBOX_PUSH(tale->nodes, tale->snodes, tale->nnodes, tale->nnodes, node);
 	}
 
 	nemotale_damage_below(tale, node);
@@ -198,19 +204,25 @@ void nemotale_below_node(struct nemotale *tale, struct talenode *node, struct ta
 {
 	int i;
 
-	for (i = 0; i < tale->nnodes; i++) {
-		if (tale->nodes[i] == node) {
-			NEMOBOX_REMOVE(tale->nodes, tale->nnodes, i);
-			break;
+	if (node->tale != NULL) {
+		for (i = 0; i < node->tale->nnodes; i++) {
+			if (node->tale->nodes[i] == node) {
+				NEMOBOX_REMOVE(node->tale->nodes, node->tale->nnodes, i);
+				break;
+			}
 		}
 	}
 
-	for (i = 0; i < tale->nnodes; i++) {
-		if (tale->nodes[i] == below) {
-			NEMOBOX_PUSH(tale->nodes, tale->snodes, tale->nnodes, i, node);
+	if (below != NULL) {
+		for (i = 0; i < tale->nnodes; i++) {
+			if (tale->nodes[i] == below) {
+				NEMOBOX_PUSH(tale->nodes, tale->snodes, tale->nnodes, i, node);
 
-			break;
+				break;
+			}
 		}
+	} else {
+		NEMOBOX_PUSH(tale->nodes, tale->snodes, tale->nnodes, 0, node);
 	}
 
 	nemotale_damage_below(tale, node);
