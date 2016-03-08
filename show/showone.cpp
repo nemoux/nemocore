@@ -310,7 +310,11 @@ void nemoshow_one_detach_one(struct showone *one)
 int nemoshow_one_above_one(struct showone *one, struct showone *above)
 {
 	nemolist_remove(&one->children_link);
-	nemolist_insert_tail(&above->children_link, &one->children_link);
+
+	if (above != NULL)
+		nemolist_insert_tail(&above->children_link, &one->children_link);
+	else
+		nemolist_insert_tail(&one->parent->children_list, &one->children_link);
 
 	return 0;
 }
@@ -318,7 +322,11 @@ int nemoshow_one_above_one(struct showone *one, struct showone *above)
 int nemoshow_one_below_one(struct showone *one, struct showone *below)
 {
 	nemolist_remove(&one->children_link);
-	nemolist_insert(&below->children_link, &one->children_link);
+
+	if (below != NULL)
+		nemolist_insert(&below->children_link, &one->children_link);
+	else
+		nemolist_insert(&one->parent->children_list, &one->children_link);
 
 	return 0;
 }

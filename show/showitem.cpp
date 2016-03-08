@@ -966,7 +966,7 @@ void nemoshow_item_detach_one(struct showone *one)
 
 int nemoshow_item_above_one(struct showone *one, struct showone *above)
 {
-	if (one->parent != above->parent)
+	if (above != NULL && one->parent != above->parent)
 		return -1;
 
 	nemoshow_one_above_one(one, above);
@@ -978,7 +978,7 @@ int nemoshow_item_above_one(struct showone *one, struct showone *above)
 
 int nemoshow_item_below_one(struct showone *one, struct showone *below)
 {
-	if (one->parent != below->parent)
+	if (below != NULL && one->parent != below->parent)
 		return -1;
 
 	nemoshow_one_below_one(one, below);
