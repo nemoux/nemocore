@@ -25,6 +25,8 @@ struct showone *nemoshow_ring_create(int32_t width, int32_t height)
 
 	nemoshow_item_set_base_width(one, width);
 	nemoshow_item_set_base_height(one, height);
+	nemoshow_item_set_width(one, width);
+	nemoshow_item_set_height(one, height);
 
 	ring->icon0 = icon = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
 	nemoshow_one_attach(one, icon);

@@ -89,8 +89,6 @@ static void nemoback_edgeroll_show_rings(struct edgeback *edge, struct edgeroll 
 		nemoshow_one_setd(one, "inner_rotate", roll->r);
 		nemoshow_one_setd(one, "inner_alpha", 0.0f);
 		nemoshow_one_sets(one, "inner_icon", icon);
-		nemoshow_item_set_width(one, edge->rollsize);
-		nemoshow_item_set_height(one, edge->rollsize);
 
 		if (roll->site == EDGEBACK_TOP_SITE) {
 			nemoshow_item_translate(one,
@@ -378,7 +376,7 @@ int nemoback_edgeroll_activate_group(struct edgeback *edge, struct edgeroll *rol
 	set0 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set0, roll->groups[group]);
 	nemoshow_sequence_set_dattr(set0, "outer_scale", 0.8f);
-	nemoshow_sequence_set_dattr(set0, "inner_scale", 0.8f);
+	nemoshow_sequence_set_dattr(set0, "inner_scale", 0.7f);
 
 	sequence = nemoshow_sequence_create_easy(edge->show,
 			nemoshow_sequence_create_frame_easy(edge->show,
@@ -401,12 +399,10 @@ int nemoback_edgeroll_activate_group(struct edgeback *edge, struct edgeroll *rol
 		nemoshow_one_setd(one, "outer_rotate", roll->r);
 		nemoshow_one_setd(one, "outer_alpha", 0.0f);
 		nemoshow_one_sets(one, "outer_icon", ring);
-		nemoshow_one_setd(one, "inner_scale", 0.1f);
+		nemoshow_one_setd(one, "inner_scale", 0.3f);
 		nemoshow_one_setd(one, "inner_rotate", roll->r);
 		nemoshow_one_setd(one, "inner_alpha", 0.0f);
 		nemoshow_one_sets(one, "inner_icon", icon);
-		nemoshow_item_set_width(one, edge->rollsize);
-		nemoshow_item_set_height(one, edge->rollsize);
 
 		nemoshow_item_translate(one,
 				x + (i + 1) * edge->rollsize * dx,
