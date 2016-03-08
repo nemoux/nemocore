@@ -92,6 +92,8 @@ typedef void (*nemoshow_one_attach_t)(struct showone *parent, struct showone *on
 typedef void (*nemoshow_one_detach_t)(struct showone *one);
 typedef int (*nemoshow_one_above_t)(struct showone *one, struct showone *above);
 typedef int (*nemoshow_one_below_t)(struct showone *one, struct showone *below);
+typedef int (*nemoshow_one_dattr_t)(struct showone *one, const char *attr, double value);
+typedef int (*nemoshow_one_sattr_t)(struct showone *one, const char *attr, const char *value);
 
 struct showattr {
 	char name[NEMOSHOW_ATTR_NAME_MAX];
@@ -144,6 +146,8 @@ struct showone {
 	nemoshow_one_detach_t detach;
 	nemoshow_one_above_t above;
 	nemoshow_one_below_t below;
+	nemoshow_one_dattr_t dattr;
+	nemoshow_one_sattr_t sattr;
 
 	struct nemoshow *show;
 
@@ -303,9 +307,22 @@ static inline uint32_t nemoshow_one_get_tag(struct showone *one)
 	return one == NULL ? 0 : one->tag;
 }
 
+static inline void nemoshow_one_set_dispatch_dattr(struct showone *one, nemoshow_one_dattr_t dattr)
+{
+	one->dattr = dattr;
+}
+
+static inline void nemoshow_one_set_dispatch_sattr(struct showone *one, nemoshow_one_sattr_t sattr)
+{
+	one->sattr = sattr;
+}
+
 static inline void nemoshow_one_setd(struct showone *one, const char *attr, double value)
 {
 	nemoobject_setd(&one->object, attr, value);
+
+	if (one->dattr != NULL)
+		one->dattr(one, attr, value);
 }
 
 static inline double nemoshow_one_getd(struct showone *one, const char *attr)
@@ -316,6 +333,9 @@ static inline double nemoshow_one_getd(struct showone *one, const char *attr)
 static inline void nemoshow_one_sets(struct showone *one, const char *attr, const char *value)
 {
 	nemoobject_sets(&one->object, attr, value, strlen(value));
+
+	if (one->sattr != NULL)
+		one->sattr(one, attr, value);
 }
 
 static inline const char *nemoshow_one_gets(struct showone *one, const char *attr)

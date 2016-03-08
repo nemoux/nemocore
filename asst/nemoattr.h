@@ -35,6 +35,11 @@ struct nemoobject {
 	int mattrs;
 };
 
+static inline const char *nemoattr_get_name(struct nemoattr *attr)
+{
+	return attr->name;
+}
+
 static inline void nemoattr_set_serial(struct nemoattr *attr, uint32_t serial)
 {
 	attr->serial = serial;
@@ -127,7 +132,7 @@ static inline double nemoattr_getd(struct nemoattr *attr)
 	return *(double *)(attr->p);
 }
 
-static inline void nemoattr_setd_offset(struct nemoattr *attr, int offset, float d)
+static inline void nemoattr_setd_offset(struct nemoattr *attr, int offset, double d)
 {
 	((double *)(attr->p))[offset] = d;
 }

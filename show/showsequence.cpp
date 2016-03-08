@@ -240,7 +240,16 @@ int nemoshow_sequence_set_dattr(struct showone *one, const char *name, double va
 		return set->nattrs++;
 	}
 
-	return -1;
+	sattr = nemoobject_get(&src->object, name);
+	set->attrs[set->nattrs] = sattr;
+	set->eattrs[set->nattrs] = value;
+	set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
+	set->offsets[set->nattrs] = 0;
+	set->dirties[set->nattrs] = 0x0;
+	set->states[set->nattrs] = 0x0;
+	set->types[set->nattrs] = NEMOSHOW_DOUBLE_PROP;
+
+	return set->nattrs++;
 }
 
 int nemoshow_sequence_set_dattr_offset(struct showone *one, const char *name, int offset, double value)
@@ -288,7 +297,16 @@ int nemoshow_sequence_set_fattr(struct showone *one, const char *name, double va
 		return set->nattrs++;
 	}
 
-	return -1;
+	sattr = nemoobject_get(&src->object, name);
+	set->attrs[set->nattrs] = sattr;
+	set->eattrs[set->nattrs] = value;
+	set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
+	set->offsets[set->nattrs] = 0;
+	set->dirties[set->nattrs] = 0x0;
+	set->states[set->nattrs] = 0x0;
+	set->types[set->nattrs] = NEMOSHOW_FLOAT_PROP;
+
+	return set->nattrs++;
 }
 
 int nemoshow_sequence_set_fattr_offset(struct showone *one, const char *name, int offset, double value)
@@ -422,12 +440,15 @@ static void nemoshow_sequence_dispatch_frame(struct showone *one, double s, doub
 
 			for (i = 0; i < set->nattrs; i++) {
 				if (nemoattr_get_serial(set->attrs[i]) <= serial) {
+					double v = (set->eattrs[i] - set->sattrs[i]) * dt + set->sattrs[i];
+
 					if (set->types[i] == NEMOSHOW_DOUBLE_PROP)
-						nemoattr_setd_offset(set->attrs[i], set->offsets[i],
-								(set->eattrs[i] - set->sattrs[i]) * dt + set->sattrs[i]);
+						nemoattr_setd_offset(set->attrs[i], set->offsets[i], v);
 					else
-						nemoattr_setf_offset(set->attrs[i], set->offsets[i],
-								(set->eattrs[i] - set->sattrs[i]) * dt + set->sattrs[i]);
+						nemoattr_setf_offset(set->attrs[i], set->offsets[i], v);
+
+					if (set->src->dattr != NULL)
+						set->src->dattr(set->src, nemoattr_get_name(set->attrs[i]), v);
 
 					dirty |= set->dirties[i];
 				}
@@ -453,10 +474,15 @@ static void nemoshow_sequence_finish_frame(struct showone *one, uint32_t serial)
 
 			for (i = 0; i < set->nattrs; i++) {
 				if (nemoattr_get_serial(set->attrs[i]) <= serial) {
+					double v = set->fattrs[i];
+
 					if (set->types[i] == NEMOSHOW_DOUBLE_PROP)
-						nemoattr_setd_offset(set->attrs[i], set->offsets[i], set->fattrs[i]);
+						nemoattr_setd_offset(set->attrs[i], set->offsets[i], v);
 					else
-						nemoattr_setf_offset(set->attrs[i], set->offsets[i], set->fattrs[i]);
+						nemoattr_setf_offset(set->attrs[i], set->offsets[i], v);
+
+					if (set->src->dattr != NULL)
+						set->src->dattr(set->src, nemoattr_get_name(set->attrs[i]), v);
 
 					dirty |= set->dirties[i];
 				}
