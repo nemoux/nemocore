@@ -24,6 +24,7 @@ add_executable(nemoback-edge
 	edgeback.c
 	edgeroll.c
 	edgemisc.c
+	showring.c
 	)
 
 TARGET_LINK_LIBRARIES(nemoback-edge

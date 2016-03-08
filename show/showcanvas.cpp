@@ -582,6 +582,22 @@ static inline void nemoshow_canvas_render_item_group(struct showcanvas *canvas, 
 	}
 }
 
+static inline void nemoshow_canvas_render_item_container(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one)
+{
+	struct showone *child;
+
+	if (canvas->needs_full_redraw == 0) {
+		nemoshow_children_for_each(child, one) {
+			if (nemoshow_canvas_check_one(canvas, child) != 0)
+				nemoshow_canvas_render_one(canvas, _canvas, child);
+		}
+	} else {
+		nemoshow_children_for_each(child, one) {
+			nemoshow_canvas_render_one(canvas, _canvas, child);
+		}
+	}
+}
+
 static inline int nemoshow_canvas_check_one(struct showcanvas *canvas, struct showone *one)
 {
 	SkIRect bounds = SkIRect::MakeXYWH(one->sx, one->sy, one->sw, one->sh);
@@ -609,7 +625,8 @@ static inline void nemoshow_canvas_render_one(struct showcanvas *canvas, SkCanva
 		nemoshow_canvas_render_item_path_group,
 		nemoshow_canvas_render_item_image,
 		nemoshow_canvas_render_item_svg,
-		nemoshow_canvas_render_item_group
+		nemoshow_canvas_render_item_group,
+		nemoshow_canvas_render_item_container
 	};
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	struct showitem *clip = NEMOSHOW_REF(one, NEMOSHOW_CLIP_REF) == NULL ? NULL : NEMOSHOW_ITEM(NEMOSHOW_REF(one, NEMOSHOW_CLIP_REF));
@@ -623,9 +640,6 @@ static inline void nemoshow_canvas_render_one(struct showcanvas *canvas, SkCanva
 
 	if (nemoshow_one_has_state(one, NEMOSHOW_ANCHOR_STATE))
 		_canvas->translate(-item->width * item->ax, -item->height * item->ay);
-
-	if (nemoshow_one_has_state(one, NEMOSHOW_VIEWPORT_STATE))
-		_canvas->scale(item->width / item->width0, item->height / item->height0);
 
 	if (clip != NULL) {
 		if (clip->transform == 0) {

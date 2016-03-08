@@ -81,7 +81,8 @@ typedef enum {
 	NEMOSHOW_SHADER_DIRTY = (1 << 8),
 	NEMOSHOW_URI_DIRTY = (1 << 9),
 	NEMOSHOW_CANVAS_DIRTY = (1 << 10),
-	NEMOSHOW_ALL_DIRTY = NEMOSHOW_SHAPE_DIRTY | NEMOSHOW_STYLE_DIRTY | NEMOSHOW_TEXT_DIRTY | NEMOSHOW_FONT_DIRTY | NEMOSHOW_PATH_DIRTY | NEMOSHOW_MATRIX_DIRTY | NEMOSHOW_FILTER_DIRTY | NEMOSHOW_SHADER_DIRTY | NEMOSHOW_URI_DIRTY | NEMOSHOW_CANVAS_DIRTY
+	NEMOSHOW_SIZE_DIRTY = (1 << 11),
+	NEMOSHOW_ALL_DIRTY = NEMOSHOW_SHAPE_DIRTY | NEMOSHOW_STYLE_DIRTY | NEMOSHOW_TEXT_DIRTY | NEMOSHOW_FONT_DIRTY | NEMOSHOW_PATH_DIRTY | NEMOSHOW_MATRIX_DIRTY | NEMOSHOW_FILTER_DIRTY | NEMOSHOW_SHADER_DIRTY | NEMOSHOW_URI_DIRTY | NEMOSHOW_CANVAS_DIRTY | NEMOSHOW_SIZE_DIRTY
 } NemoShowDirtyType;
 
 struct showone;
@@ -169,6 +170,7 @@ struct showone {
 
 	int32_t x0, y0, x1, y1;
 
+	void *context;
 	void *userdata;
 };
 
@@ -307,6 +309,11 @@ static inline uint32_t nemoshow_one_get_tag(struct showone *one)
 	return one == NULL ? 0 : one->tag;
 }
 
+static inline void nemoshow_one_set_dispatch_destroy(struct showone *one, nemoshow_one_destroy_t destroy)
+{
+	one->destroy = destroy;
+}
+
 static inline void nemoshow_one_set_dispatch_dattr(struct showone *one, nemoshow_one_dattr_t dattr)
 {
 	one->dattr = dattr;
@@ -363,6 +370,16 @@ static inline struct showone *nemoshow_one_get_parent(struct showone *one, int t
 	}
 
 	return parent;
+}
+
+static inline void nemoshow_one_set_context(struct showone *one, void *context)
+{
+	one->context = context;
+}
+
+static inline void *nemoshow_one_get_context(struct showone *one)
+{
+	return one->context;
 }
 
 static inline void nemoshow_one_set_userdata(struct showone *one, void *userdata)

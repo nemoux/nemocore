@@ -148,6 +148,10 @@ struct showone *nemoshow_item_create(int type)
 		nemoshow_one_set_state(one, NEMOSHOW_BOUNDS_STATE);
 	} else if (one->sub == NEMOSHOW_SVG_ITEM) {
 		nemoshow_one_set_state(one, NEMOSHOW_INHERIT_STATE);
+	} else if (one->sub == NEMOSHOW_CONTAINER_ITEM) {
+		nemoshow_one_set_state(one, NEMOSHOW_INHERIT_STATE);
+		nemoshow_one_set_state(one, NEMOSHOW_VIEWPORT_STATE);
+		nemoshow_one_set_state(one, NEMOSHOW_TRANSFORM_STATE);
 	}
 
 	return one;
@@ -582,9 +586,12 @@ static inline void nemoshow_item_update_matrix(struct nemoshow *show, struct sho
 		if (item->transform == 0)
 			item->transform = NEMOSHOW_TSR_TRANSFORM;
 
-		if (item->transform == NEMOSHOW_TSR_TRANSFORM) {
-			NEMOSHOW_ITEM_CC(item, modelview)->setIdentity();
+		NEMOSHOW_ITEM_CC(item, modelview)->setIdentity();
 
+		if (nemoshow_one_has_state(one, NEMOSHOW_VIEWPORT_STATE))
+			NEMOSHOW_ITEM_CC(item, modelview)->postScale(item->width / item->width0, item->height / item->height0);
+
+		if (item->transform == NEMOSHOW_TSR_TRANSFORM) {
 			if (item->px != 0.0f || item->py != 0.0f) {
 				NEMOSHOW_ITEM_CC(item, modelview)->postTranslate(-item->px, -item->py);
 
@@ -607,8 +614,6 @@ static inline void nemoshow_item_update_matrix(struct nemoshow *show, struct sho
 
 			NEMOSHOW_ITEM_CC(item, modelview)->postTranslate(item->tx, item->ty);
 		} else if (item->transform == NEMOSHOW_EXTERN_TRANSFORM) {
-			NEMOSHOW_ITEM_CC(item, modelview)->setIdentity();
-
 			NEMOSHOW_ITEM_CC(item, modelview)->postConcat(
 					*NEMOSHOW_MATRIX_CC(
 						NEMOSHOW_MATRIX(
@@ -616,8 +621,6 @@ static inline void nemoshow_item_update_matrix(struct nemoshow *show, struct sho
 						matrix));
 		} else if (item->transform == NEMOSHOW_CHILDREN_TRANSFORM) {
 			struct showone *child;
-
-			NEMOSHOW_ITEM_CC(item, modelview)->setIdentity();
 
 			nemoshow_children_for_each(child, one) {
 				if (child->type == NEMOSHOW_MATRIX_TYPE) {
@@ -775,6 +778,8 @@ void nemoshow_item_update_bounds(struct nemoshow *show, struct showone *one)
 		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
 	} else if (one->sub == NEMOSHOW_SVG_ITEM) {
 		box = SkRect::MakeXYWH(0, 0, item->width, item->height);
+	} else if (one->sub == NEMOSHOW_CONTAINER_ITEM) {
+		box = SkRect::MakeXYWH(0, 0, item->width0, item->height0);
 	} else {
 		box = SkRect::MakeXYWH(0, 0, 0, 0);
 	}
@@ -832,6 +837,8 @@ int nemoshow_item_update(struct showone *one)
 	if ((one->dirty & NEMOSHOW_PATH_DIRTY) != 0)
 		nemoshow_item_update_path(show, one);
 	if ((one->dirty & NEMOSHOW_MATRIX_DIRTY) != 0)
+		nemoshow_item_update_matrix(show, one);
+	else if (nemoshow_one_has_state(one, NEMOSHOW_VIEWPORT_STATE) && (one->dirty & NEMOSHOW_SIZE_DIRTY) != 0)
 		nemoshow_item_update_matrix(show, one);
 
 	if (one->canvas != NULL) {

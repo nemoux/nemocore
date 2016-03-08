@@ -13,6 +13,7 @@
 #include <edgemisc.h>
 #include <nemoenvs.h>
 #include <showhelper.h>
+#include <showring.h>
 #include <nemotimer.h>
 #include <nemolog.h>
 #include <nemomisc.h>
@@ -50,10 +51,7 @@ void nemoback_edgeroll_destroy(struct edgeroll *roll)
 		nemotimer_destroy(roll->timer);
 
 	for (i = 0; i < roll->ngroups; i++) {
-		nemoshow_one_destroy(roll->grouprings[i]);
-
-		if (roll->groups[i] != NULL)
-			nemoshow_one_destroy(roll->groups[i]);
+		nemoshow_one_destroy(roll->groups[i]);
 	}
 
 	free(roll);
@@ -77,19 +75,22 @@ static void nemoback_edgeroll_show_rings(struct edgeback *edge, struct edgeroll 
 
 	for (i = roll->ngroups; i < ngroups; i++) {
 		const char *ring = nemoenvs_get_group_ring(edge->envs, i);
+		const char *icon = nemoenvs_get_group_icon(edge->envs, i);
 
-		roll->grouprings[i] = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
+		roll->groups[i] = one = nemoshow_ring_create(edge->rollsize, edge->rollsize);
 		nemoshow_one_attach(edge->canvas, one);
-		nemoshow_item_set_x(one, 0.0f);
-		nemoshow_item_set_y(one, 0.0f);
+		nemoshow_one_set_tag(one, NEMOSHOW_ONE_TAGGROUP(1000 + i, roll->serial));
+		nemoshow_one_set_userdata(one, roll);
+		nemoshow_one_setd(one, "outer_scale", 0.0f);
+		nemoshow_one_setd(one, "outer_rotate", roll->r);
+		nemoshow_one_setd(one, "outer_alpha", 0.0f);
+		nemoshow_one_sets(one, "outer_icon", ring);
+		nemoshow_one_setd(one, "inner_scale", 0.7f);
+		nemoshow_one_setd(one, "inner_rotate", roll->r);
+		nemoshow_one_setd(one, "inner_alpha", 0.0f);
+		nemoshow_one_sets(one, "inner_icon", icon);
 		nemoshow_item_set_width(one, edge->rollsize);
 		nemoshow_item_set_height(one, edge->rollsize);
-		nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
-		nemoshow_item_set_filter(one, NEMOSHOW_SOLID_SMALL_BLUR);
-		nemoshow_item_pivot(one, edge->rollsize / 2.0f, edge->rollsize / 2.0f);
-		nemoshow_item_scale(one, 0.0f, 0.0f);
-		nemoshow_item_rotate(one, roll->r);
-		nemoshow_item_load_svg(one, ring);
 
 		if (roll->site == EDGEBACK_TOP_SITE) {
 			nemoshow_item_translate(one,
@@ -111,8 +112,8 @@ static void nemoback_edgeroll_show_rings(struct edgeback *edge, struct edgeroll 
 
 		set0 = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(set0, one);
-		nemoshow_sequence_set_dattr(set0, "sx", 1.0f);
-		nemoshow_sequence_set_dattr(set0, "sy", 1.0f);
+		nemoshow_sequence_set_dattr(set0, "outer_alpha", 1.0f);
+		nemoshow_sequence_set_dattr(set0, "outer_scale", 1.0f);
 
 		sequence = nemoshow_sequence_create_easy(edge->show,
 				nemoshow_sequence_create_frame_easy(edge->show,
@@ -137,10 +138,9 @@ static void nemoback_edgeroll_hide_rings(struct edgeback *edge, struct edgeroll 
 
 	for (i = 0; i < roll->ngroups; i++) {
 		set0 = nemoshow_sequence_create_set();
-		nemoshow_sequence_set_source(set0, roll->grouprings[i]);
-		nemoshow_sequence_set_dattr(set0, "alpha", 0.0f);
-		nemoshow_sequence_set_dattr(set0, "sx", 0.3f);
-		nemoshow_sequence_set_dattr(set0, "sy", 0.3f);
+		nemoshow_sequence_set_source(set0, roll->groups[i]);
+		nemoshow_sequence_set_dattr(set0, "outer_alpha", 0.0f);
+		nemoshow_sequence_set_dattr(set0, "outer_scale", 0.3f);
 
 		sequence = nemoshow_sequence_create_easy(edge->show,
 				nemoshow_sequence_create_frame_easy(edge->show,
@@ -154,7 +154,7 @@ static void nemoback_edgeroll_hide_rings(struct edgeback *edge, struct edgeroll 
 			nemoshow_transition_set_dispatch_done(trans, nemoback_edgeroll_dispatch_destroy_done);
 			nemoshow_transition_set_userdata(trans, roll);
 		}
-		nemoshow_transition_check_one(trans, roll->grouprings[i]);
+		nemoshow_transition_check_one(trans, roll->groups[i]);
 		nemoshow_transition_attach_sequence(trans, sequence);
 		nemoshow_attach_transition(edge->show, trans);
 	}
@@ -162,54 +162,16 @@ static void nemoback_edgeroll_hide_rings(struct edgeback *edge, struct edgeroll 
 
 static void nemoback_edgeroll_show_groups(struct edgeback *edge, struct edgeroll *roll)
 {
-	struct showone *one;
 	struct showtransition *trans;
 	struct showone *sequence;
 	struct showone *set0;
 	int i;
 
 	for (i = 0; i < roll->ngroups; i++) {
-		const char *icon = nemoenvs_get_group_icon(edge->envs, i);
-
-		roll->groups[i] = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
-		nemoshow_one_attach(edge->canvas, one);
-		nemoshow_one_set_tag(one, NEMOSHOW_ONE_TAGGROUP(1000 + i, roll->serial));
-		nemoshow_one_set_userdata(one, roll);
-		nemoshow_item_set_x(one, 0.0f);
-		nemoshow_item_set_y(one, 0.0f);
-		nemoshow_item_set_width(one, edge->rollsize);
-		nemoshow_item_set_height(one, edge->rollsize);
-		nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
-		nemoshow_item_set_filter(one, NEMOSHOW_SOLID_SMALL_BLUR);
-		nemoshow_item_pivot(one, edge->rollsize / 2.0f, edge->rollsize / 2.0f);
-		nemoshow_item_scale(one, 0.7f, 0.7f);
-		nemoshow_item_rotate(one, roll->r);
-		nemoshow_item_load_svg(one, icon);
-		nemoshow_item_set_alpha(one, 0.0f);
-
-		if (roll->site == EDGEBACK_TOP_SITE) {
-			nemoshow_item_translate(one,
-					(roll->x1 + roll->x0) / 2.0f - edge->rollsize / 2.0f,
-					(i + 0) * edge->rollsize);
-		} else if (roll->site == EDGEBACK_BOTTOM_SITE) {
-			nemoshow_item_translate(one,
-					(roll->x1 + roll->x0) / 2.0f - edge->rollsize / 2.0f,
-					edge->height - (i + 1) * edge->rollsize);
-		} else if (roll->site == EDGEBACK_LEFT_SITE) {
-			nemoshow_item_translate(one,
-					(i + 0) * edge->rollsize,
-					(roll->y1 + roll->y0) / 2.0f - edge->rollsize / 2.0f);
-		} else if (roll->site == EDGEBACK_RIGHT_SITE) {
-			nemoshow_item_translate(one,
-					edge->width - (i + 1) * edge->rollsize,
-					(roll->y1 + roll->y0) / 2.0f - edge->rollsize / 2.0f);
-		}
-
 		set0 = nemoshow_sequence_create_set();
-		nemoshow_sequence_set_source(set0, one);
-		nemoshow_sequence_set_dattr(set0, "alpha", 1.0f);
-		nemoshow_sequence_set_dattr(set0, "sx", 1.0f);
-		nemoshow_sequence_set_dattr(set0, "sy", 1.0f);
+		nemoshow_sequence_set_source(set0, roll->groups[i]);
+		nemoshow_sequence_set_dattr(set0, "inner_alpha", 1.0f);
+		nemoshow_sequence_set_dattr(set0, "inner_scale", 1.0f);
 
 		sequence = nemoshow_sequence_create_easy(edge->show,
 				nemoshow_sequence_create_frame_easy(edge->show,
@@ -217,7 +179,7 @@ static void nemoback_edgeroll_show_groups(struct edgeback *edge, struct edgeroll
 				NULL);
 
 		trans = nemoshow_transition_create(NEMOSHOW_CUBIC_OUT_EASE, 700, 300);
-		nemoshow_transition_check_one(trans, one);
+		nemoshow_transition_check_one(trans, roll->groups[i]);
 		nemoshow_transition_attach_sequence(trans, sequence);
 		nemoshow_attach_transition(edge->show, trans);
 	}
@@ -233,9 +195,8 @@ static void nemoback_edgeroll_hide_groups(struct edgeback *edge, struct edgeroll
 	for (i = 0; i < roll->ngroups; i++) {
 		set0 = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(set0, roll->groups[i]);
-		nemoshow_sequence_set_dattr(set0, "alpha", 0.0f);
-		nemoshow_sequence_set_dattr(set0, "sx", 0.7f);
-		nemoshow_sequence_set_dattr(set0, "sy", 0.7f);
+		nemoshow_sequence_set_dattr(set0, "inner_alpha", 0.0f);
+		nemoshow_sequence_set_dattr(set0, "inner_scale", 0.7f);
 
 		sequence = nemoshow_sequence_create_easy(edge->show,
 				nemoshow_sequence_create_frame_easy(edge->show,
@@ -376,6 +337,7 @@ int nemoback_edgeroll_activate_group(struct edgeback *edge, struct edgeroll *rol
 	double x, y;
 	int dd = group % 2 == 0 ? -1 : 1;
 	int dx = 0, dy = 0;
+	int attr;
 	int i;
 
 	if (roll->state != EDGEBACK_ROLL_ACTIVE_STATE)
@@ -415,22 +377,16 @@ int nemoback_edgeroll_activate_group(struct edgeback *edge, struct edgeroll *rol
 		dy *= -1;
 
 	set0 = nemoshow_sequence_create_set();
-	nemoshow_sequence_set_source(set0, roll->grouprings[group]);
-	nemoshow_sequence_set_dattr(set0, "sx", 0.8f);
-	nemoshow_sequence_set_dattr(set0, "sy", 0.8f);
-
-	set1 = nemoshow_sequence_create_set();
-	nemoshow_sequence_set_source(set1, roll->groups[group]);
-	nemoshow_sequence_set_dattr(set1, "sx", 0.8f);
-	nemoshow_sequence_set_dattr(set1, "sy", 0.8f);
+	nemoshow_sequence_set_source(set0, roll->groups[group]);
+	nemoshow_sequence_set_dattr(set0, "outer_scale", 0.8f);
+	nemoshow_sequence_set_dattr(set0, "inner_scale", 0.8f);
 
 	sequence = nemoshow_sequence_create_easy(edge->show,
 			nemoshow_sequence_create_frame_easy(edge->show,
-				1.0f, set0, set1, NULL),
+				1.0f, set0, NULL),
 			NULL);
 
 	trans = nemoshow_transition_create(NEMOSHOW_CUBIC_OUT_EASE, 500, 0);
-	nemoshow_transition_check_one(trans, roll->grouprings[group]);
 	nemoshow_transition_check_one(trans, roll->groups[group]);
 	nemoshow_transition_attach_sequence(trans, sequence);
 	nemoshow_attach_transition(edge->show, trans);
@@ -439,49 +395,28 @@ int nemoback_edgeroll_activate_group(struct edgeback *edge, struct edgeroll *rol
 		const char *ring = nemoenvs_get_action_ring(edge->envs, group, i);
 		const char *icon = nemoenvs_get_action_icon(edge->envs, group, i);
 
-		roll->actionrings[i] = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
+		roll->actions[i] = one = nemoshow_ring_create(edge->rollsize, edge->rollsize);
 		nemoshow_one_attach(edge->canvas, one);
 		nemoshow_one_set_tag(one, NEMOSHOW_ONE_TAGGROUP(2000 + i, roll->serial));
-		nemoshow_item_set_x(one, 0.0f);
-		nemoshow_item_set_y(one, 0.0f);
+		nemoshow_one_setd(one, "outer_scale", 0.5f);
+		nemoshow_one_setd(one, "outer_rotate", roll->r);
+		nemoshow_one_setd(one, "outer_alpha", 0.0f);
+		nemoshow_one_sets(one, "outer_icon", ring);
+		nemoshow_one_setd(one, "inner_scale", 0.1f);
+		nemoshow_one_setd(one, "inner_rotate", roll->r);
+		nemoshow_one_setd(one, "inner_alpha", 0.0f);
+		nemoshow_one_sets(one, "inner_icon", icon);
 		nemoshow_item_set_width(one, edge->rollsize);
 		nemoshow_item_set_height(one, edge->rollsize);
-		nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
-		nemoshow_item_set_filter(one, NEMOSHOW_SOLID_SMALL_BLUR);
-		nemoshow_item_pivot(one, edge->rollsize / 2.0f, edge->rollsize / 2.0f);
-		nemoshow_item_scale(one, 0.3f, 0.3f);
-		nemoshow_item_rotate(one, roll->r);
-		nemoshow_item_load_svg(one, ring);
-		nemoshow_item_set_alpha(one, 0.0f);
-
-		nemoshow_item_translate(one,
-				x + (i + 1) * edge->rollsize * dx,
-				y + (i + 1) * edge->rollsize * dy);
-
-		roll->actions[i] = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
-		nemoshow_one_attach(edge->canvas, one);
-		nemoshow_one_set_tag(one, NEMOSHOW_ONE_TAGGROUP(2000 + i, roll->serial));
-		nemoshow_item_set_x(one, 0.0f);
-		nemoshow_item_set_y(one, 0.0f);
-		nemoshow_item_set_width(one, edge->rollsize);
-		nemoshow_item_set_height(one, edge->rollsize);
-		nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
-		nemoshow_item_set_filter(one, NEMOSHOW_SOLID_SMALL_BLUR);
-		nemoshow_item_pivot(one, edge->rollsize / 2.0f, edge->rollsize / 2.0f);
-		nemoshow_item_scale(one, 0.6f, 0.1f);
-		nemoshow_item_rotate(one, roll->r);
-		nemoshow_item_load_svg(one, icon);
-		nemoshow_item_set_alpha(one, 0.0f);
 
 		nemoshow_item_translate(one,
 				x + (i + 1) * edge->rollsize * dx,
 				y + (i + 1) * edge->rollsize * dy);
 
 		set0 = nemoshow_sequence_create_set();
-		nemoshow_sequence_set_source(set0, roll->actionrings[i]);
-		nemoshow_sequence_set_dattr(set0, "alpha", 1.0f);
-		nemoshow_sequence_set_dattr(set0, "sx", 1.0f);
-		nemoshow_sequence_set_dattr(set0, "sy", 1.0f);
+		nemoshow_sequence_set_source(set0, roll->actions[i]);
+		nemoshow_sequence_set_dattr(set0, "outer_alpha", 1.0f);
+		nemoshow_sequence_set_dattr(set0, "outer_scale", 1.0f);
 
 		sequence = nemoshow_sequence_create_easy(edge->show,
 				nemoshow_sequence_create_frame_easy(edge->show,
@@ -489,15 +424,14 @@ int nemoback_edgeroll_activate_group(struct edgeback *edge, struct edgeroll *rol
 				NULL);
 
 		trans = nemoshow_transition_create(NEMOSHOW_CUBIC_OUT_EASE, 500, i * 100);
-		nemoshow_transition_check_one(trans, roll->actionrings[i]);
+		nemoshow_transition_check_one(trans, roll->actions[i]);
 		nemoshow_transition_attach_sequence(trans, sequence);
 		nemoshow_attach_transition(edge->show, trans);
 
 		set0 = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(set0, roll->actions[i]);
-		nemoshow_sequence_set_dattr(set0, "alpha", 1.0f);
-		nemoshow_sequence_set_dattr(set0, "sx", 0.8f);
-		nemoshow_sequence_set_dattr(set0, "sy", 0.8f);
+		nemoshow_sequence_set_dattr(set0, "inner_alpha", 1.0f);
+		nemoshow_sequence_set_dattr(set0, "inner_scale", 0.8f);
 
 		sequence = nemoshow_sequence_create_easy(edge->show,
 				nemoshow_sequence_create_frame_easy(edge->show,
@@ -509,7 +443,21 @@ int nemoback_edgeroll_activate_group(struct edgeback *edge, struct edgeroll *rol
 		nemoshow_transition_attach_sequence(trans, sequence);
 		nemoshow_attach_transition(edge->show, trans);
 
-		nemoshow_transition_dispatch_rotate_easy(edge->show, roll->actionrings[i], NEMOSHOW_LINEAR_EASE, 5000, 0, 0);
+		set0 = nemoshow_sequence_create_set();
+		nemoshow_sequence_set_source(set0, roll->actions[i]);
+		attr = nemoshow_sequence_set_dattr(set0, "outer_rotate", 360.0f);
+		nemoshow_sequence_fix_dattr(set0, attr, 0.0f);
+
+		sequence = nemoshow_sequence_create_easy(edge->show,
+				nemoshow_sequence_create_frame_easy(edge->show,
+					1.0f, set0, NULL),
+				NULL);
+
+		trans = nemoshow_transition_create(NEMOSHOW_LINEAR_EASE, 5000, 0);
+		nemoshow_transition_check_one(trans, roll->actions[i]);
+		nemoshow_transition_attach_sequence(trans, sequence);
+		nemoshow_transition_set_repeat(trans, 0);
+		nemoshow_attach_transition(edge->show, trans);
 	}
 
 	nemoshow_dispatch_frame(edge->show);
@@ -526,7 +474,7 @@ int nemoback_edgeroll_deactivate_group(struct edgeback *edge, struct edgeroll *r
 {
 	struct showtransition *trans;
 	struct showone *sequence;
-	struct showone *set0, *set1;
+	struct showone *set0;
 	int group = roll->groupidx;
 	int i;
 
@@ -534,48 +482,35 @@ int nemoback_edgeroll_deactivate_group(struct edgeback *edge, struct edgeroll *r
 		return 0;
 
 	set0 = nemoshow_sequence_create_set();
-	nemoshow_sequence_set_source(set0, roll->grouprings[group]);
-	nemoshow_sequence_set_dattr(set0, "sx", 1.0f);
-	nemoshow_sequence_set_dattr(set0, "sy", 1.0f);
-
-	set1 = nemoshow_sequence_create_set();
-	nemoshow_sequence_set_source(set1, roll->groups[group]);
-	nemoshow_sequence_set_dattr(set1, "sx", 1.0f);
-	nemoshow_sequence_set_dattr(set1, "sy", 1.0f);
+	nemoshow_sequence_set_source(set0, roll->groups[group]);
+	nemoshow_sequence_set_dattr(set0, "outer_scale", 1.0f);
+	nemoshow_sequence_set_dattr(set0, "inner_scale", 1.0f);
 
 	sequence = nemoshow_sequence_create_easy(edge->show,
 			nemoshow_sequence_create_frame_easy(edge->show,
-				1.0f, set0, set1, NULL),
+				1.0f, set0, NULL),
 			NULL);
 
 	trans = nemoshow_transition_create(NEMOSHOW_CUBIC_INOUT_EASE, 500, 0);
-	nemoshow_transition_check_one(trans, roll->grouprings[group]);
 	nemoshow_transition_check_one(trans, roll->groups[group]);
 	nemoshow_transition_attach_sequence(trans, sequence);
 	nemoshow_attach_transition(edge->show, trans);
 
 	for (i = 0; i < roll->nactions; i++) {
 		set0 = nemoshow_sequence_create_set();
-		nemoshow_sequence_set_source(set0, roll->actionrings[i]);
-		nemoshow_sequence_set_dattr(set0, "alpha", 0.0f);
-		nemoshow_sequence_set_dattr(set0, "sx", 0.4f);
-		nemoshow_sequence_set_dattr(set0, "sy", 0.4f);
-
-		set1 = nemoshow_sequence_create_set();
-		nemoshow_sequence_set_source(set1, roll->actions[i]);
-		nemoshow_sequence_set_dattr(set1, "alpha", 0.0f);
-		nemoshow_sequence_set_dattr(set1, "sx", 0.2f);
-		nemoshow_sequence_set_dattr(set1, "sy", 0.2f);
+		nemoshow_sequence_set_source(set0, roll->actions[i]);
+		nemoshow_sequence_set_dattr(set0, "outer_alpha", 0.0f);
+		nemoshow_sequence_set_dattr(set0, "outer_scale", 0.4f);
+		nemoshow_sequence_set_dattr(set0, "inner_alpha", 0.0f);
+		nemoshow_sequence_set_dattr(set0, "inner_scale", 0.2f);
 
 		sequence = nemoshow_sequence_create_easy(edge->show,
 				nemoshow_sequence_create_frame_easy(edge->show,
-					1.0f, set0, set1, NULL),
+					1.0f, set0, NULL),
 				NULL);
 
 		trans = nemoshow_transition_create(NEMOSHOW_CUBIC_INOUT_EASE, 500, 0);
-		nemoshow_transition_check_one(trans, roll->actionrings[i]);
 		nemoshow_transition_check_one(trans, roll->actions[i]);
-		nemoshow_transition_destroy_one(trans, roll->actionrings[i]);
 		nemoshow_transition_destroy_one(trans, roll->actions[i]);
 		nemoshow_transition_attach_sequence(trans, sequence);
 		nemoshow_attach_transition(edge->show, trans);
@@ -595,7 +530,7 @@ int nemoback_edgeroll_activate_action(struct edgeback *edge, struct edgeroll *ro
 {
 	struct showtransition *trans;
 	struct showone *sequence;
-	struct showone *set0, *set1;
+	struct showone *set0;
 
 	if (roll->state != EDGEBACK_ROLL_ACTIVE_STATE)
 		return 0;
@@ -604,22 +539,16 @@ int nemoback_edgeroll_activate_action(struct edgeback *edge, struct edgeroll *ro
 		return 0;
 
 	set0 = nemoshow_sequence_create_set();
-	nemoshow_sequence_set_source(set0, roll->actionrings[action]);
-	nemoshow_sequence_set_dattr(set0, "sx", 0.8f);
-	nemoshow_sequence_set_dattr(set0, "sy", 0.8f);
-
-	set1 = nemoshow_sequence_create_set();
-	nemoshow_sequence_set_source(set1, roll->actions[action]);
-	nemoshow_sequence_set_dattr(set1, "sx", 0.6f);
-	nemoshow_sequence_set_dattr(set1, "sy", 0.6f);
+	nemoshow_sequence_set_source(set0, roll->actions[action]);
+	nemoshow_sequence_set_dattr(set0, "outer_scale", 0.8f);
+	nemoshow_sequence_set_dattr(set0, "inner_scale", 0.6f);
 
 	sequence = nemoshow_sequence_create_easy(edge->show,
 			nemoshow_sequence_create_frame_easy(edge->show,
-				1.0f, set0, set1, NULL),
+				1.0f, set0, NULL),
 			NULL);
 
 	trans = nemoshow_transition_create(NEMOSHOW_CUBIC_OUT_EASE, 300, 0);
-	nemoshow_transition_check_one(trans, roll->actionrings[action]);
 	nemoshow_transition_check_one(trans, roll->actions[action]);
 	nemoshow_transition_attach_sequence(trans, sequence);
 	nemoshow_attach_transition(edge->show, trans);
@@ -635,29 +564,23 @@ int nemoback_edgeroll_deactivate_action(struct edgeback *edge, struct edgeroll *
 {
 	struct showtransition *trans;
 	struct showone *sequence;
-	struct showone *set0, *set1;
+	struct showone *set0;
 	int action = roll->actionidx;
 
 	if (action < 0)
 		return 0;
 
 	set0 = nemoshow_sequence_create_set();
-	nemoshow_sequence_set_source(set0, roll->actionrings[action]);
-	nemoshow_sequence_set_dattr(set0, "sx", 1.0f);
-	nemoshow_sequence_set_dattr(set0, "sy", 1.0f);
-
-	set1 = nemoshow_sequence_create_set();
-	nemoshow_sequence_set_source(set1, roll->actions[action]);
-	nemoshow_sequence_set_dattr(set1, "sx", 0.8f);
-	nemoshow_sequence_set_dattr(set1, "sy", 0.8f);
+	nemoshow_sequence_set_source(set0, roll->actions[action]);
+	nemoshow_sequence_set_dattr(set0, "outer_scale", 1.0f);
+	nemoshow_sequence_set_dattr(set0, "inner_scale", 0.8f);
 
 	sequence = nemoshow_sequence_create_easy(edge->show,
 			nemoshow_sequence_create_frame_easy(edge->show,
-				1.0f, set0, set1, NULL),
+				1.0f, set0, NULL),
 			NULL);
 
 	trans = nemoshow_transition_create(NEMOSHOW_CUBIC_INOUT_EASE, 300, 0);
-	nemoshow_transition_check_one(trans, roll->actionrings[action]);
 	nemoshow_transition_check_one(trans, roll->actions[action]);
 	nemoshow_transition_attach_sequence(trans, sequence);
 	nemoshow_attach_transition(edge->show, trans);

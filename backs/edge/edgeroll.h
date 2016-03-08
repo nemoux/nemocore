@@ -32,11 +32,9 @@ struct edgeroll {
 
 	struct nemotimer *timer;
 
-	struct showone *grouprings[EDGEBACK_GROUP_MAX];
 	struct showone *groups[EDGEBACK_GROUP_MAX];
 	int ngroups;
 
-	struct showone *actionrings[EDGEBACK_ACTION_MAX];
 	struct showone *actions[EDGEBACK_ACTION_MAX];
 	int nactions;
 
