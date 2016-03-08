@@ -148,10 +148,7 @@ struct showone {
 	struct nemoshow *show;
 
 	struct showone *parent;
-	struct nemolistener parent_destroy_listener;
-
 	struct showone *canvas;
-	struct nemolistener canvas_destroy_listener;
 
 	struct showref *refs[NEMOSHOW_LAST_REF];
 

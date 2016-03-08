@@ -27,6 +27,7 @@ typedef enum {
 
 typedef int (*nemotale_node_pick_t)(struct talenode *node, double x, double y, void *data);
 
+struct nemotale;
 struct talenode;
 
 struct talenode {
@@ -40,6 +41,8 @@ struct talenode {
 
 	int picktype;
 	nemotale_node_pick_t pick;
+
+	struct nemotale *tale;
 
 	uint32_t id;
 
@@ -225,6 +228,11 @@ static inline void nemotale_node_scale(struct talenode *node, float sx, float sy
 
 	node->transform.enable = 1;
 	node->transform.dirty = 1;
+}
+
+static inline int nemotale_node_is_mapped(struct talenode *node)
+{
+	return node->tale != NULL;
 }
 
 static inline void nemotale_node_set_alpha(struct talenode *node, double alpha)

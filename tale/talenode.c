@@ -64,6 +64,9 @@ void nemotale_node_finish(struct talenode *node)
 {
 	nemosignal_emit(&node->destroy_signal, node);
 
+	if (node->tale != NULL)
+		nemotale_detach_node(node);
+
 	nemoobject_finish(&node->object);
 
 	pixman_region32_fini(&node->boundingbox);

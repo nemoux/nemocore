@@ -474,16 +474,16 @@ void nemopad_destroy(struct nemopad *pad)
 	if (pad->state & NEMOPAD_ACTIVE_STATE) {
 		int i;
 
-		nemoshow_one_destroy(pad->back);
-		nemoshow_one_destroy(pad->canvas);
-		nemoshow_one_destroy(pad->scene);
-
 		for (i = 0; i < NEMOPAD_KEYS_MAX; i++) {
 			if (pad->borders[i] != NULL)
 				nemoshow_one_destroy(pad->borders[i]);
 			if (pad->keys[i] != NULL)
 				nemoshow_one_destroy(pad->keys[i]);
 		}
+
+		nemoshow_one_destroy(pad->back);
+		nemoshow_one_destroy(pad->canvas);
+		nemoshow_one_destroy(pad->scene);
 
 		nemoshow_put_scene(pad->show);
 

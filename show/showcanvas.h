@@ -66,7 +66,6 @@ struct showcanvas {
 	double px, py;
 	double sx, sy;
 
-	int is_mapped;
 	int needs_resize;
 	int needs_redraw;
 	int needs_full_redraw;

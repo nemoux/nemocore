@@ -26,9 +26,6 @@ void nemoshow_one_prepare(struct showone *one)
 	nemolist_init(&one->children_list);
 	nemolist_init(&one->reference_list);
 
-	nemolist_init(&one->parent_destroy_listener.link);
-	nemolist_init(&one->canvas_destroy_listener.link);
-
 	nemoobject_set_reserved(&one->object, "id", one->id, NEMOSHOW_ID_MAX);
 
 	one->attrs = (struct showattr **)malloc(sizeof(struct showattr *) * 4);
@@ -61,7 +58,7 @@ void nemoshow_one_finish(struct showone *one)
 	}
 
 	if (one->parent != NULL) {
-		nemoshow_one_detach_one(one);
+		nemoshow_one_detach(one);
 	}
 
 	if (one->canvas != NULL) {
@@ -72,9 +69,6 @@ void nemoshow_one_finish(struct showone *one)
 	for (i = 0; i < one->nattrs; i++) {
 		nemoshow_one_destroy_attr(one->attrs[i]);
 	}
-
-	nemolist_remove(&one->parent_destroy_listener.link);
-	nemolist_remove(&one->canvas_destroy_listener.link);
 
 	nemolist_remove(&one->link);
 	nemolist_remove(&one->children_link);
@@ -290,29 +284,13 @@ void nemoshow_one_update_bounds(struct showone *one)
 	nemolist_init(&one->bounds_link);
 }
 
-static void nemoshow_one_handle_parent_destroy_signal(struct nemolistener *listener, void *data)
-{
-	struct showone *one = (struct showone *)container_of(listener, struct showone, parent_destroy_listener);
-
-	nemolist_remove(&one->children_link);
-	nemolist_init(&one->children_link);
-
-	one->parent = NULL;
-
-	nemolist_remove(&one->parent_destroy_listener.link);
-	nemolist_init(&one->parent_destroy_listener.link);
-}
-
 void nemoshow_one_attach_one(struct showone *parent, struct showone *one)
 {
 	if (one->parent != NULL)
-		nemoshow_one_detach_one(one);
+		nemoshow_one_detach(one);
 
 	nemolist_insert_tail(&parent->children_list, &one->children_link);
 	one->parent = parent;
-
-	one->parent_destroy_listener.notify = nemoshow_one_handle_parent_destroy_signal;
-	nemosignal_add(&parent->destroy_signal, &one->parent_destroy_listener);
 
 	if (parent->show != NULL)
 		nemoshow_attach_ones(parent->show, one);
@@ -323,10 +301,10 @@ void nemoshow_one_detach_one(struct showone *one)
 	nemolist_remove(&one->children_link);
 	nemolist_init(&one->children_link);
 
-	one->parent = NULL;
+	nemolist_remove(&one->dirty_link);
+	nemolist_init(&one->dirty_link);
 
-	nemolist_remove(&one->parent_destroy_listener.link);
-	nemolist_init(&one->parent_destroy_listener.link);
+	one->parent = NULL;
 }
 
 int nemoshow_one_above_one(struct showone *one, struct showone *above)
