@@ -628,6 +628,9 @@ static inline void nemoshow_canvas_render_one(struct showcanvas *canvas, SkCanva
 	if (nemoshow_one_has_state(one, NEMOSHOW_ANCHOR_STATE))
 		_canvas->translate(-item->width * item->ax, -item->height * item->ay);
 
+	if (nemoshow_one_has_state(one, NEMOSHOW_VIEWPORT_STATE))
+		_canvas->scale(item->width / item->width0, item->height / item->height0);
+
 	if (clip != NULL) {
 		if (clip->transform == 0) {
 			_canvas->clipPath(*NEMOSHOW_ITEM_CC(clip, path));

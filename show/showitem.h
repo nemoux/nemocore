@@ -82,6 +82,8 @@ struct showitem {
 	double r;
 	double inner;
 
+	double width0, height0;
+
 	double from, to;
 
 	double strokes[4];
@@ -242,6 +244,24 @@ static inline void nemoshow_item_set_height(struct showone *one, double height)
 	nemoshow_one_set_state(one, NEMOSHOW_SIZE_STATE);
 
 	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
+}
+
+static inline void nemoshow_item_set_base_width(struct showone *one, double width)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	item->width0 = width;
+
+	nemoshow_one_dirty(one, NEMOSHOW_REDRAW_DIRTY);
+}
+
+static inline void nemoshow_item_set_base_height(struct showone *one, double height)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	item->height0 = height;
+
+	nemoshow_one_dirty(one, NEMOSHOW_REDRAW_DIRTY);
 }
 
 static inline void nemoshow_item_set_r(struct showone *one, double r)
