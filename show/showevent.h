@@ -35,6 +35,11 @@ static inline float nemoshow_event_get_y(void *event)
 	return nemotale_event_get_y((struct taleevent *)event);
 }
 
+static inline float nemoshow_event_get_z(void *event)
+{
+	return nemotale_event_get_z((struct taleevent *)event);
+}
+
 static inline float nemoshow_event_get_gx(void *event)
 {
 	return nemotale_event_get_gx((struct taleevent *)event);

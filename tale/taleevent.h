@@ -189,6 +189,11 @@ static inline float nemotale_event_get_y(struct taleevent *event)
 	return event->y;
 }
 
+static inline float nemotale_event_get_z(struct taleevent *event)
+{
+	return event->z;
+}
+
 static inline float nemotale_event_get_gx(struct taleevent *event)
 {
 	return event->gx;
