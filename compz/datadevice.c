@@ -134,9 +134,15 @@ static void data_device_set_selection(struct wl_client *client, struct wl_resour
 			serial);
 }
 
+static void data_device_release(struct wl_client *client, struct wl_resource *resource)
+{
+	wl_resource_destroy(resource);
+}
+
 static const struct wl_data_device_interface data_device_implementation = {
 	data_device_start_drag,
-	data_device_set_selection
+	data_device_set_selection,
+	data_device_release
 };
 
 static void datadevice_unbind_data_device(struct wl_resource *resource)
@@ -196,7 +202,7 @@ static void datadevice_bind_manager(struct wl_client *client, void *data, uint32
 {
 	struct wl_resource *resource;
 
-	resource = wl_resource_create(client, &wl_data_device_manager_interface, 1, id);
+	resource = wl_resource_create(client, &wl_data_device_manager_interface, version, id);
 	if (resource == NULL) {
 		wl_client_post_no_memory(client);
 		return;
@@ -207,7 +213,7 @@ static void datadevice_bind_manager(struct wl_client *client, void *data, uint32
 
 int datadevice_manager_init(struct wl_display *display)
 {
-	if (!wl_global_create(display, &wl_data_device_manager_interface, 1, NULL, datadevice_bind_manager))
+	if (!wl_global_create(display, &wl_data_device_manager_interface, 2, NULL, datadevice_bind_manager))
 		return -1;
 
 	return 0;
