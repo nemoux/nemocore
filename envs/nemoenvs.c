@@ -294,6 +294,19 @@ void nemoenvs_load_actions(struct nemoenvs *envs)
 		if (ring != NULL)
 			group->ring = strdup(ring);
 
+		group->type = NEMOENVS_GROUP_NORMAL_TYPE;
+
+		attr = nemoitem_get_attr(shell->configs, index, "type");
+		if (attr != NULL) {
+			if (strcmp(attr, "contents") == 0) {
+				path = nemoitem_get_attr(shell->configs, index, "path");
+				if (path != NULL) {
+					group->type = NEMOENVS_GROUP_CONTENTS_TYPE;
+					group->path = strdup(path);
+				}
+			}
+		}
+
 		NEMOBOX_APPEND(envs->groups, envs->sgroups, envs->ngroups, group);
 	}
 

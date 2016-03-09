@@ -27,8 +27,11 @@ struct nemogroup {
 	struct nemoaction **actions;
 	int sactions, nactions;
 
+	char *path;
 	char *icon;
 	char *ring;
+
+	char *type;
 };
 
 struct nemoenvs {
@@ -64,6 +67,11 @@ static inline struct nemoaction *nemoenvs_get_action(struct nemoenvs *envs, int 
 	return envs->groups[group]->actions[action];
 }
 
+static inline const char *nemoenvs_get_group_path(struct nemoenvs *envs, int group)
+{
+	return envs->groups[group]->path;
+}
+
 static inline const char *nemoenvs_get_group_icon(struct nemoenvs *envs, int group)
 {
 	return envs->groups[group]->icon;
@@ -74,6 +82,11 @@ static inline const char *nemoenvs_get_group_ring(struct nemoenvs *envs, int gro
 	return envs->groups[group]->ring;
 }
 
+static inline int nemoenvs_is_group_type(struct nemoenvs *envs, int group, const char *type)
+{
+	return envs->groups[group]->type != NULL && strcmp(envs->groups[group]->type, type) == 0;
+}
+
 static inline const char *nemoenvs_get_action_icon(struct nemoenvs *envs, int group, int action)
 {
 	return envs->groups[group]->actions[action]->icon;
@@ -82,6 +95,11 @@ static inline const char *nemoenvs_get_action_icon(struct nemoenvs *envs, int gr
 static inline const char *nemoenvs_get_action_ring(struct nemoenvs *envs, int group, int action)
 {
 	return envs->groups[group]->actions[action]->ring;
+}
+
+static inline int nemoenvs_is_action_type(struct nemoenvs *envs, int group, int action, const char *type)
+{
+	return envs->groups[group]->actions[action]->type != NULL && strcmp(envs->groups[group]->actions[action]->type, type) == 0;
 }
 
 #ifdef __cplusplus

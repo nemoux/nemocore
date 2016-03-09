@@ -66,6 +66,15 @@ void nemoenvs_destroy_group(struct nemogroup *group)
 	for (i = 0; i < group->nactions; i++)
 		nemoenvs_destroy_action(group->actions[i]);
 
+	if (group->icon != NULL)
+		free(group->icon);
+	if (group->ring != NULL)
+		free(group->ring);
+	if (group->type != NULL)
+		free(group->type);
+	if (group->path != NULL)
+		free(group->path);
+
 	free(group->actions);
 	free(group);
 }
@@ -153,6 +162,14 @@ void nemoenvs_load_actions(struct nemoenvs *envs)
 
 		if (ring != NULL)
 			group->ring = strdup(ring);
+
+		attr = nemoitem_get_attr(envs->configs, index, "type");
+		if (attr != NULL)
+			group->type = strdup(attr);
+
+		attr = nemoitem_get_attr(envs->configs, index, "path");
+		if (attr != NULL)
+			group->path = strdup(attr);
 
 		NEMOBOX_APPEND(envs->groups, envs->sgroups, envs->ngroups, group);
 	}

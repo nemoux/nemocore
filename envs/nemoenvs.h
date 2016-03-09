@@ -25,6 +25,12 @@ typedef enum {
 } NemoEnvsAppType;
 
 typedef enum {
+	NEMOENVS_GROUP_NORMAL_TYPE = 0,
+	NEMOENVS_GROUP_CONTENTS_TYPE = 1,
+	NEMOENVS_GROUP_LAST_TYPE
+} NemoEnvsGroupType;
+
+typedef enum {
 	NEMOENVS_NETWORK_NORMAL_STATE = 0,
 	NEMOENVS_NETWORK_BLOCK_STATE = 1,
 	NEMOENVS_NETWORK_LAST_STATE
@@ -59,8 +65,11 @@ struct nemogroup {
 	struct nemoaction **actions;
 	int sactions, nactions;
 
+	char *path;
 	char *icon;
 	char *ring;
+
+	int type;
 };
 
 struct nemoapp {
@@ -124,6 +133,11 @@ static inline struct nemoaction *nemoenvs_get_action(struct nemoenvs *envs, int 
 	return envs->groups[group]->actions[action];
 }
 
+static inline const char *nemoenvs_get_group_path(struct nemoenvs *envs, int group)
+{
+	return envs->groups[group]->path;
+}
+
 static inline const char *nemoenvs_get_group_icon(struct nemoenvs *envs, int group)
 {
 	return envs->groups[group]->icon;
@@ -134,6 +148,11 @@ static inline const char *nemoenvs_get_group_ring(struct nemoenvs *envs, int gro
 	return envs->groups[group]->ring;
 }
 
+static inline int nemoenvs_get_group_type(struct nemoenvs *envs, int group)
+{
+	return envs->groups[group]->type;
+}
+
 static inline const char *nemoenvs_get_action_icon(struct nemoenvs *envs, int group, int action)
 {
 	return envs->groups[group]->actions[action]->icon;
@@ -142,6 +161,11 @@ static inline const char *nemoenvs_get_action_icon(struct nemoenvs *envs, int gr
 static inline const char *nemoenvs_get_action_ring(struct nemoenvs *envs, int group, int action)
 {
 	return envs->groups[group]->actions[action]->ring;
+}
+
+static inline int nemoenvs_get_action_type(struct nemoenvs *envs, int group, int action)
+{
+	return envs->groups[group]->actions[action]->type;
 }
 
 #ifdef __cplusplus
