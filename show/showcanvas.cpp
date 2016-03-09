@@ -166,6 +166,7 @@ int nemoshow_canvas_set_type(struct showone *one, int type)
 
 	canvas->needs_resize = 0;
 
+	nemotale_node_set_pick_type(canvas->node, NEMOTALE_PICK_NO_TYPE);
 	nemotale_node_set_data(canvas->node, one);
 
 	return 0;
