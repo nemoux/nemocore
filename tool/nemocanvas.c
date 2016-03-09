@@ -422,6 +422,15 @@ void nemocanvas_execute_action(struct nemocanvas *canvas, uint32_t group, uint32
 			wl_fixed_from_double(r));
 }
 
+void nemocanvas_execute_content(struct nemocanvas *canvas, uint32_t type, const char *path, uint32_t coords, double x, double y, double r)
+{
+	nemo_surface_execute_content(canvas->nemo_surface,
+			type, path, coords,
+			wl_fixed_from_double(x),
+			wl_fixed_from_double(y),
+			wl_fixed_from_double(r));
+}
+
 void nemocanvas_set_size(struct nemocanvas *canvas, int32_t width, int32_t height)
 {
 	canvas->width = width;

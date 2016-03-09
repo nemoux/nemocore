@@ -66,6 +66,10 @@
 			<entry name="global" value="1"/>
 		</enum>
 
+		<enum name="content_type">
+			<entry name="folder" value="0"/>
+		</enum>
+
 		<request name="execute_command">
 			<arg name="name" type="string"/>
 			<arg name="cmds" type="string"/>
@@ -80,6 +84,15 @@
 			<arg name="group" type="uint"/>
 			<arg name="action" type="uint"/>
 			<arg name="type" type="uint"/>
+			<arg name="coords" type="uint"/>
+			<arg name="x" type="fixed"/>
+			<arg name="y" type="fixed"/>
+			<arg name="r" type="fixed"/>
+		</request>
+
+		<request name="execute_content">
+			<arg name="type" type="uint"/>
+			<arg name="path" type="string"/>
 			<arg name="coords" type="uint"/>
 			<arg name="x" type="fixed"/>
 			<arg name="y" type="fixed"/>

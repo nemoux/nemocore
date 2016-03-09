@@ -138,6 +138,34 @@ static void nemo_surface_execute_action(struct wl_client *client, struct wl_reso
 	}
 }
 
+static void nemo_surface_execute_content(struct wl_client *client, struct wl_resource *resource, uint32_t type, const char *path, uint32_t coords, wl_fixed_t x, wl_fixed_t y, wl_fixed_t r)
+{
+	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
+	struct nemoshell *shell = bin->shell;
+
+	if (shell->execute_content != NULL) {
+		float tx, ty;
+		float tr;
+
+		if (coords == NEMO_SURFACE_COORDINATE_TYPE_LOCAL) {
+			nemoview_transform_to_global(bin->view,
+					wl_fixed_to_double(x),
+					wl_fixed_to_double(y),
+					&tx, &ty);
+
+			tr = wl_fixed_to_double(r) * M_PI / 180.0f + bin->view->geometry.r;
+		} else {
+			tx = wl_fixed_to_double(x);
+			ty = wl_fixed_to_double(y);
+			tr = wl_fixed_to_double(r) * M_PI / 180.0f;
+		}
+
+		shell->execute_content(shell->userdata, bin,
+				type, path,
+				tx, ty, tr);
+	}
+}
+
 static void nemo_surface_set_size(struct wl_client *client, struct wl_resource *resource, uint32_t width, uint32_t height)
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
@@ -319,6 +347,7 @@ static const struct nemo_surface_interface nemo_surface_implementation = {
 	nemo_surface_miss,
 	nemo_surface_execute_command,
 	nemo_surface_execute_action,
+	nemo_surface_execute_content,
 	nemo_surface_set_size,
 	nemo_surface_set_min_size,
 	nemo_surface_set_max_size,
