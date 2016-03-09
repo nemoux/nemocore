@@ -41,11 +41,6 @@ void nemoshow_one_finish(struct showone *one)
 
 	nemosignal_emit(&one->destroy_signal, one);
 
-	if (one->canvas != NULL) {
-		nemoshow_canvas_damage_one(one->canvas, one);
-		nemoshow_canvas_detach_one(one);
-	}
-
 	nemolist_for_each_safe(ref, nref, &one->reference_list, link) {
 		ref->one->refs[ref->index] = NULL;
 

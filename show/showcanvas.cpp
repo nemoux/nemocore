@@ -911,7 +911,11 @@ void nemoshow_canvas_attach_one(struct showone *canvas, struct showone *one)
 
 void nemoshow_canvas_detach_one(struct showone *one)
 {
-	one->canvas = NULL;
+	if (one->canvas != NULL) {
+		nemoshow_canvas_damage_one(one->canvas, one);
+
+		one->canvas = NULL;
+	}
 }
 
 void nemoshow_canvas_attach_ones(struct showone *canvas, struct showone *one)
@@ -931,7 +935,11 @@ void nemoshow_canvas_detach_ones(struct showone *one)
 {
 	struct showone *child;
 
-	one->canvas = NULL;
+	if (one->canvas != NULL) {
+		nemoshow_canvas_damage_one(one->canvas, one);
+
+		one->canvas = NULL;
+	}
 
 	nemoshow_children_for_each(child, one)
 		nemoshow_canvas_detach_ones(child);
