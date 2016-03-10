@@ -108,15 +108,10 @@ struct talenode *nemotale_pick_node(struct nemotale *tale, float x, float y, flo
 	for (i = tale->nnodes - 1; i >= 0; i--) {
 		node = tale->nodes[i];
 
-		if (node->picktype == NEMOTALE_PICK_DEFAULT_TYPE) {
+		if (node->id > 0) {
 			nemotale_node_transform_from_global(node, x, y, sx, sy);
 
 			if (pixman_region32_contains_point(&node->input, *sx, *sy, NULL))
-				return node;
-		} else if (node->picktype == NEMOTALE_PICK_CUSTOM_TYPE) {
-			nemotale_node_transform_from_global(node, x, y, sx, sy);
-
-			if (node->pick(node, *sx, *sy, node->pickdata) != 0)
 				return node;
 		}
 	}
@@ -126,15 +121,10 @@ struct talenode *nemotale_pick_node(struct nemotale *tale, float x, float y, flo
 
 int nemotale_check_node(struct nemotale *tale, struct talenode *node, float x, float y, float *sx, float *sy)
 {
-	if (node->picktype == NEMOTALE_PICK_DEFAULT_TYPE) {
+	if (node->id > 0) {
 		nemotale_node_transform_from_global(node, x, y, sx, sy);
 
 		if (pixman_region32_contains_point(&node->input, *sx, *sy, NULL))
-			return 1;
-	} else if (node->picktype == NEMOTALE_PICK_CUSTOM_TYPE) {
-		nemotale_node_transform_from_global(node, x, y, sx, sy);
-
-		if (node->pick(node, *sx, *sy, node->pickdata) != 0)
 			return 1;
 	}
 

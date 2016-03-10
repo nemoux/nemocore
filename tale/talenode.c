@@ -168,14 +168,6 @@ void nemotale_node_transform_update(struct talenode *node)
 	}
 }
 
-void nemotale_node_set_picker(struct talenode *node, nemotale_node_pick_t pick, void *data)
-{
-	node->pick = pick;
-	node->pickdata = data;
-
-	node->picktype = NEMOTALE_PICK_CUSTOM_TYPE;
-}
-
 void nemotale_node_correct_pivot(struct talenode *node, float px, float py)
 {
 	if (node->geometry.px != px || node->geometry.py != py) {

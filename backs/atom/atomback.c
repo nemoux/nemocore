@@ -238,7 +238,6 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_BACK_TYPE);
 	nemoshow_canvas_set_fill_color(canvas, 0.0f, 0.0f, 0.0f, 255.0f);
 	nemoshow_canvas_set_alpha(canvas, 0.0f);
-	nemoshow_canvas_set_event(canvas, 1);
 	nemoshow_one_attach(scene, canvas);
 
 	atom->canvasb = canvas = nemoshow_canvas_create();

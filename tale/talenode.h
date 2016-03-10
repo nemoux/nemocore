@@ -18,15 +18,6 @@ NEMO_BEGIN_EXTERN_C
 
 #define	NEMOTALE_NODE_ATTR_MAX			(16)
 
-typedef enum {
-	NEMOTALE_PICK_DEFAULT_TYPE = 0,
-	NEMOTALE_PICK_CUSTOM_TYPE = 1,
-	NEMOTALE_PICK_NO_TYPE = 2,
-	NEMOTALE_PICK_LAST_TYPE
-} NemoTalePickType;
-
-typedef int (*nemotale_node_pick_t)(struct talenode *node, float x, float y, void *data);
-
 struct nemotale;
 struct talenode;
 
@@ -37,10 +28,6 @@ struct talenode {
 	void *glcontext;
 
 	void *userdata;
-	void *pickdata;
-
-	int picktype;
-	nemotale_node_pick_t pick;
 
 	struct nemotale *tale;
 
@@ -100,8 +87,6 @@ extern void nemotale_node_finish(struct talenode *node);
 
 extern void nemotale_node_boundingbox_update(struct talenode *node, int32_t x, int32_t y, int32_t width, int32_t height, pixman_region32_t *bbox);
 extern void nemotale_node_transform_update(struct talenode *node);
-
-extern void nemotale_node_set_picker(struct talenode *node, nemotale_node_pick_t pick, void *data);
 
 extern void nemotale_node_correct_pivot(struct talenode *node, float px, float py);
 extern int nemotale_node_transform(struct talenode *node, float d[9]);
@@ -248,11 +233,6 @@ static inline void nemotale_node_set_id(struct talenode *node, uint32_t id)
 static inline uint32_t nemotale_node_get_id(struct talenode *node)
 {
 	return node == NULL ? 0 : node->id;
-}
-
-static inline void nemotale_node_set_pick_type(struct talenode *node, int type)
-{
-	node->picktype = type;
 }
 
 static inline int32_t nemotale_node_get_width(struct talenode *node)
