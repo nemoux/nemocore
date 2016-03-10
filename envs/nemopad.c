@@ -144,49 +144,53 @@ void __attribute__((constructor(101))) nemopad_initialize_envs(void)
 	for (i = 0; i < NEMOPAD_KEYS_MAX; i++) {
 		if (nemopadkeys[i].border != NULL) {
 			nemopadborders[i] = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
-			nemoshow_item_set_x(one, 0.0f);
-			nemoshow_item_set_y(one, 0.0f);
 			nemoshow_item_set_width(one,
 					nemopadkeys[i].x1 - nemopadkeys[i].x0);
 			nemoshow_item_set_height(one,
 					nemopadkeys[i].y1 - nemopadkeys[i].y0);
-			nemoshow_item_load_svg(one, nemopadkeys[i].border);
+			nemoshow_item_load_svg(one, nemopadkeys[i].border,
+					0.0f, 0.0f,
+					nemopadkeys[i].x1 - nemopadkeys[i].x0,
+					nemopadkeys[i].y1 - nemopadkeys[i].y0);
 		} else {
 			nemopadborders[i] = NULL;
 		}
 		if (nemopadkeys[i].normal != NULL) {
 			nemopadnormals[i] = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
-			nemoshow_item_set_x(one, 0.0f);
-			nemoshow_item_set_y(one, 0.0f);
 			nemoshow_item_set_width(one,
 					nemopadkeys[i].x1 - nemopadkeys[i].x0);
 			nemoshow_item_set_height(one,
 					nemopadkeys[i].y1 - nemopadkeys[i].y0);
-			nemoshow_item_load_svg(one, nemopadkeys[i].normal);
+			nemoshow_item_load_svg(one, nemopadkeys[i].normal,
+					0.0f, 0.0f,
+					nemopadkeys[i].x1 - nemopadkeys[i].x0,
+					nemopadkeys[i].y1 - nemopadkeys[i].y0);
 		} else {
 			nemopadnormals[i] = NULL;
 		}
 		if (nemopadkeys[i].upper != NULL) {
 			nemopaduppers[i] = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
-			nemoshow_item_set_x(one, 0.0f);
-			nemoshow_item_set_y(one, 0.0f);
 			nemoshow_item_set_width(one,
 					nemopadkeys[i].x1 - nemopadkeys[i].x0);
 			nemoshow_item_set_height(one,
 					nemopadkeys[i].y1 - nemopadkeys[i].y0);
-			nemoshow_item_load_svg(one, nemopadkeys[i].upper);
+			nemoshow_item_load_svg(one, nemopadkeys[i].upper,
+					0.0f, 0.0f,
+					nemopadkeys[i].x1 - nemopadkeys[i].x0,
+					nemopadkeys[i].y1 - nemopadkeys[i].y0);
 		} else {
 			nemopaduppers[i] = NULL;
 		}
 		if (nemopadkeys[i].shift != NULL) {
 			nemopadshifts[i] = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
-			nemoshow_item_set_x(one, 0.0f);
-			nemoshow_item_set_y(one, 0.0f);
 			nemoshow_item_set_width(one,
 					nemopadkeys[i].x1 - nemopadkeys[i].x0);
 			nemoshow_item_set_height(one,
 					nemopadkeys[i].y1 - nemopadkeys[i].y0);
-			nemoshow_item_load_svg(one, nemopadkeys[i].shift);
+			nemoshow_item_load_svg(one, nemopadkeys[i].shift,
+					0.0f, 0.0f,
+					nemopadkeys[i].x1 - nemopadkeys[i].x0,
+					nemopadkeys[i].y1 - nemopadkeys[i].y0);
 		} else {
 			nemopadshifts[i] = NULL;
 		}

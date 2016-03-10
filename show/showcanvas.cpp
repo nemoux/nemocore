@@ -402,7 +402,7 @@ static inline void nemoshow_canvas_render_item_path(struct showcanvas *canvas, S
 	}
 }
 
-static inline void nemoshow_canvas_render_item_path_group(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one)
+static inline void nemoshow_canvas_render_item_pathgroup(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
@@ -589,7 +589,7 @@ static inline void nemoshow_canvas_render_one(struct showcanvas *canvas, SkCanva
 		nemoshow_canvas_render_item_text,
 		nemoshow_canvas_render_item_textbox,
 		nemoshow_canvas_render_item_path,
-		nemoshow_canvas_render_item_path_group,
+		nemoshow_canvas_render_item_pathgroup,
 		nemoshow_canvas_render_item_image,
 		nemoshow_canvas_render_item_svg,
 		nemoshow_canvas_render_item_group,

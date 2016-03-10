@@ -474,10 +474,8 @@ static void nemomine_prepare_ui(struct minecontext *context)
 			mone->one = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
 			nemoshow_one_attach(context->canvas, one);
 			nemoshow_one_set_tag(one, index + 1);
-			nemoshow_item_set_x(one, 2.0f);
-			nemoshow_item_set_y(one, 2.0f);
-			nemoshow_item_set_width(one, context->size - 4.0f);
-			nemoshow_item_set_height(one, context->size - 4.0f);
+			nemoshow_item_set_width(one, context->size);
+			nemoshow_item_set_height(one, context->size);
 			nemoshow_item_set_filter(one, context->filter0);
 			nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
 			nemoshow_item_translate(one, j * context->size, i * context->size + context->size);
@@ -601,32 +599,24 @@ int main(int argc, char *argv[])
 		snprintf(name, sizeof(name), NEMOUX_MINESWEEPER_RESOURCES "/mine-%d.svg", i);
 
 		context->numbers[i] = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
-		nemoshow_item_set_x(one, 2.0f);
-		nemoshow_item_set_y(one, 2.0f);
-		nemoshow_item_set_width(one, size - 4.0f);
-		nemoshow_item_set_height(one, size - 4.0f);
-		nemoshow_item_load_svg(one, name);
+		nemoshow_item_set_width(one, size);
+		nemoshow_item_set_height(one, size);
+		nemoshow_item_load_svg(one, name, 2.0f, 2.0f, size - 4.0f, size - 4.0f);
 	}
 
 	context->bomb = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
-	nemoshow_item_set_x(one, 2.0f);
-	nemoshow_item_set_y(one, 2.0f);
-	nemoshow_item_set_width(one, size - 4.0f);
-	nemoshow_item_set_height(one, size - 4.0f);
-	nemoshow_item_load_svg(one, NEMOUX_MINESWEEPER_RESOURCES "/mine-bomb.svg");
+	nemoshow_item_set_width(one, size);
+	nemoshow_item_set_height(one, size);
+	nemoshow_item_load_svg(one, NEMOUX_MINESWEEPER_RESOURCES "/mine-bomb.svg", 2.0f, 2.0f, size - 4.0f, size - 4.0f);
 
 	context->flag = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
-	nemoshow_item_set_x(one, 2.0f);
-	nemoshow_item_set_y(one, 2.0f);
-	nemoshow_item_set_width(one, size - 4.0f);
-	nemoshow_item_set_height(one, size - 4.0f);
-	nemoshow_item_load_svg(one, NEMOUX_MINESWEEPER_RESOURCES "/mine-finder.svg");
+	nemoshow_item_set_width(one, size);
+	nemoshow_item_set_height(one, size);
+	nemoshow_item_load_svg(one, NEMOUX_MINESWEEPER_RESOURCES "/mine-finder.svg", 2.0f, 2.0f, size - 4.0f, size - 4.0f);
 
 	context->pin = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
 	nemoshow_one_attach(canvas, one);
 	nemoshow_one_set_tag(one, 10001 + 1);
-	nemoshow_item_set_x(one, 0.0f);
-	nemoshow_item_set_y(one, 0.0f);
 	nemoshow_item_set_width(one, size);
 	nemoshow_item_set_height(one, size);
 	nemoshow_item_set_filter(one, context->filter0);
@@ -634,19 +624,17 @@ int main(int argc, char *argv[])
 	nemoshow_item_pivot(one, size / 2.0f, size / 2.0f);
 	nemoshow_item_translate(one, (context->columns - 1) * context->size, 0.0f);
 	nemoshow_item_rotate(one, 45.0f);
-	nemoshow_item_load_svg(one, NEMOUX_MINESWEEPER_RESOURCES "/mine-pin.svg");
+	nemoshow_item_load_svg(one, NEMOUX_MINESWEEPER_RESOURCES "/mine-pin.svg", 0.0f, 0.0f, size, size);
 
 	context->reset = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
 	nemoshow_one_attach(canvas, one);
 	nemoshow_one_set_tag(one, 10002 + 1);
-	nemoshow_item_set_x(one, 0.0f);
-	nemoshow_item_set_y(one, 0.0f);
 	nemoshow_item_set_width(one, size);
 	nemoshow_item_set_height(one, size);
 	nemoshow_item_set_filter(one, context->filter0);
 	nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
 	nemoshow_item_translate(one, (context->columns / 2) * context->size, 0.0f);
-	nemoshow_item_load_svg(one, NEMOUX_MINESWEEPER_RESOURCES "/mine-bomb.svg");
+	nemoshow_item_load_svg(one, NEMOUX_MINESWEEPER_RESOURCES "/mine-bomb.svg", 0.0f, 0.0f, size, size);
 
 	context->font = font = nemoshow_font_create();
 	nemoshow_font_load(font, "/usr/share/fonts/ttf/LiberationMono-Regular.ttf");

@@ -195,7 +195,7 @@ struct nemopack *nemopack_create(struct nemoshell *shell, struct nemoview *view,
 	nemoshow_item_set_width(one, view->content->width / 2);
 	nemoshow_item_set_height(one, view->content->height / 2);
 	nemoshow_item_translate(one, view->content->width / 4, view->content->height / 4);
-	nemoshow_item_load_svg(one, NEMOENVS_RESOURCES "/misc-icons/catch.svg");
+	nemoshow_item_load_svg(one, NEMOENVS_RESOURCES "/misc-icons/catch.svg", 0.0f, 0.0f, view->content->width / 2, view->content->height / 2);
 	nemoshow_item_set_fill_color(one, 0.0f, 0.0f, 0.0f, 0.0f);
 	nemoshow_item_set_stroke_color(one, 0.0f, 0.0f, 0.0f, 0.0f);
 	nemoshow_item_set_stroke_width(one, MIN(view->content->width, view->content->height) / 64);

@@ -173,7 +173,7 @@ extern void nemoshow_item_path_set_dash_effect(struct showone *one, double *dash
 
 extern int nemoshow_item_path_contains_point(struct showone *one, double x, double y);
 
-extern int nemoshow_item_load_svg(struct showone *one, const char *uri);
+extern int nemoshow_item_load_svg(struct showone *one, const char *uri, double x, double y, double width, double height);
 
 extern int nemoshow_item_set_buffer(struct showone *one, char *buffer, uint32_t width, uint32_t height);
 extern void nemoshow_item_put_buffer(struct showone *one);
@@ -229,7 +229,12 @@ static inline void nemoshow_item_set_width(struct showone *one, double width)
 
 	nemoshow_one_set_state(one, NEMOSHOW_SIZE_STATE);
 
-	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
+	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY | NEMOSHOW_SIZE_DIRTY);
+}
+
+static inline double nemoshow_item_get_width(struct showone *one)
+{
+	return NEMOSHOW_ITEM_AT(one, width);
 }
 
 static inline void nemoshow_item_set_height(struct showone *one, double height)
@@ -240,7 +245,12 @@ static inline void nemoshow_item_set_height(struct showone *one, double height)
 
 	nemoshow_one_set_state(one, NEMOSHOW_SIZE_STATE);
 
-	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
+	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY | NEMOSHOW_SIZE_DIRTY);
+}
+
+static inline double nemoshow_item_get_height(struct showone *one)
+{
+	return NEMOSHOW_ITEM_AT(one, height);
 }
 
 static inline void nemoshow_item_set_base_width(struct showone *one, double width)
@@ -252,6 +262,11 @@ static inline void nemoshow_item_set_base_width(struct showone *one, double widt
 	nemoshow_one_dirty(one, NEMOSHOW_REDRAW_DIRTY);
 }
 
+static inline double nemoshow_item_get_base_width(struct showone *one)
+{
+	return NEMOSHOW_ITEM_AT(one, width0);
+}
+
 static inline void nemoshow_item_set_base_height(struct showone *one, double height)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
@@ -259,6 +274,11 @@ static inline void nemoshow_item_set_base_height(struct showone *one, double hei
 	item->height0 = height;
 
 	nemoshow_one_dirty(one, NEMOSHOW_REDRAW_DIRTY);
+}
+
+static inline double nemoshow_item_get_base_height(struct showone *one)
+{
+	return NEMOSHOW_ITEM_AT(one, height0);
 }
 
 static inline void nemoshow_item_set_r(struct showone *one, double r)

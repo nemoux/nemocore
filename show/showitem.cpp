@@ -1270,15 +1270,15 @@ int nemoshow_item_path_contains_point(struct showone *one, double x, double y)
 	return 0;
 }
 
-int nemoshow_item_load_svg(struct showone *one, const char *uri)
+int nemoshow_item_load_svg(struct showone *one, const char *uri, double x, double y, double width, double height)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	struct nemoxml *xml;
 	struct xmlnode *node;
 	double sw, sh;
 	double pw, ph;
-	const char *units;
 	const char *attr0, *attr1;
+	const char *units;
 	SkMatrix matrix;
 	int has_fill;
 	int has_stroke;
@@ -1303,8 +1303,8 @@ int nemoshow_item_load_svg(struct showone *one, const char *uri)
 			attr1 = nemoxml_node_get_attr(node, "height");
 
 			if (attr0 != NULL && attr1 != NULL) {
-				sw = item->width;
-				sh = item->height;
+				sw = width;
+				sh = height;
 
 				pw = string_parse_float_with_endptr(attr0, 0, strlen(attr0), &units);
 				ph = string_parse_float_with_endptr(attr1, 0, strlen(attr1), &units);
@@ -1318,7 +1318,7 @@ int nemoshow_item_load_svg(struct showone *one, const char *uri)
 		}
 	}
 
-	matrix.postTranslate(item->x, item->y);
+	matrix.postTranslate(x, y);
 
 	nemolist_for_each(node, &xml->nodes, nodelink) {
 		has_stroke = 0;
