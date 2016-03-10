@@ -113,8 +113,7 @@ extern void nemoshow_detach_canvas(struct nemoshow *show, struct showone *one);
 extern void nemoshow_above_canvas(struct nemoshow *show, struct showone *one, struct showone *above);
 extern void nemoshow_below_canvas(struct nemoshow *show, struct showone *one, struct showone *below);
 
-extern struct showone *nemoshow_pick_canvas(struct nemoshow *show, float x, float y, float *sx, float *sy);
-extern int nemoshow_check_canvas(struct nemoshow *show, struct showone *one, float x, float y, float *sx, float *sy);
+extern int nemoshow_contain_canvas(struct nemoshow *show, struct showone *one, float x, float y, float *sx, float *sy);
 
 extern void nemoshow_damage_canvas_all(struct nemoshow *show);
 

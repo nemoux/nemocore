@@ -87,7 +87,7 @@ extern int nemotale_prepare(struct nemotale *tale);
 extern void nemotale_finish(struct nemotale *tale);
 
 extern struct talenode *nemotale_pick_node(struct nemotale *tale, float x, float y, float *sx, float *sy);
-extern int nemotale_check_node(struct nemotale *tale, struct talenode *node, float x, float y, float *sx, float *sy);
+extern int nemotale_contain_node(struct nemotale *tale, struct talenode *node, float x, float y, float *sx, float *sy);
 
 extern void nemotale_damage_region(struct nemotale *tale, pixman_region32_t *region);
 extern void nemotale_damage_below(struct nemotale *tale, struct talenode *node);

@@ -34,6 +34,7 @@ struct nemoshow;
 typedef void (*nemoshow_canvas_dispatch_redraw_t)(struct nemoshow *show, struct showone *one);
 typedef void (*nemoshow_canvas_dispatch_resize_t)(struct nemoshow *show, struct showone *one, int32_t width, int32_t height);
 typedef void (*nemoshow_canvas_dispatch_event_t)(struct nemoshow *show, struct showone *one, void *event);
+typedef int (*nemoshow_canvas_contain_point_t)(struct nemoshow *show, struct showone *one, float x, float y);
 
 struct showcanvas {
 	struct showone base;
@@ -73,6 +74,7 @@ struct showcanvas {
 	nemoshow_canvas_dispatch_redraw_t dispatch_redraw;
 	nemoshow_canvas_dispatch_resize_t dispatch_resize;
 	nemoshow_canvas_dispatch_event_t dispatch_event;
+	nemoshow_canvas_contain_point_t contain_point;
 
 	void *cc;
 };
@@ -136,6 +138,11 @@ static inline void nemoshow_canvas_set_dispatch_event(struct showone *one, nemos
 	}
 
 	NEMOSHOW_CANVAS_AT(one, dispatch_event) = dispatch_event;
+}
+
+static inline void nemoshow_canvas_set_contain_point(struct showone *one, nemoshow_canvas_contain_point_t contain_point)
+{
+	NEMOSHOW_CANVAS_AT(one, contain_point) = contain_point;
 }
 
 static inline struct talenode *nemoshow_canvas_get_node(struct showone *one)

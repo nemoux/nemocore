@@ -119,14 +119,12 @@ struct talenode *nemotale_pick_node(struct nemotale *tale, float x, float y, flo
 	return NULL;
 }
 
-int nemotale_check_node(struct nemotale *tale, struct talenode *node, float x, float y, float *sx, float *sy)
+int nemotale_contain_node(struct nemotale *tale, struct talenode *node, float x, float y, float *sx, float *sy)
 {
-	if (node->id > 0) {
-		nemotale_node_transform_from_global(node, x, y, sx, sy);
+	nemotale_node_transform_from_global(node, x, y, sx, sy);
 
-		if (pixman_region32_contains_point(&node->input, *sx, *sy, NULL))
-			return 1;
-	}
+	if (pixman_region32_contains_point(&node->input, *sx, *sy, NULL))
+		return 1;
 
 	return 0;
 }

@@ -724,20 +724,17 @@ void nemoshow_below_canvas(struct nemoshow *show, struct showone *one, struct sh
 	}
 }
 
-struct showone *nemoshow_pick_canvas(struct nemoshow *show, float x, float y, float *sx, float *sy)
+int nemoshow_contain_canvas(struct nemoshow *show, struct showone *one, float x, float y, float *sx, float *sy)
 {
-	struct talenode *node;
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
-	node = nemotale_pick_node(show->tale, x, y, sx, sy);
-	if (node != NULL)
-		return (struct showone *)nemotale_node_get_data(node);
+	if (canvas->contain_point != NULL) {
+		nemotale_node_transform_from_global(canvas->node, x, y, sx, sy);
 
-	return NULL;
-}
+		return canvas->contain_point(show, one, *sx, *sy);
+	}
 
-int nemoshow_check_canvas(struct nemoshow *show, struct showone *one, float x, float y, float *sx, float *sy)
-{
-	return nemotale_check_node(show->tale, NEMOSHOW_CANVAS_AT(one, node), x, y, sx, sy);
+	return nemotale_contain_node(show->tale, canvas->node, x, y, sx, sy);
 }
 
 void nemoshow_damage_canvas_all(struct nemoshow *show)

@@ -1598,7 +1598,7 @@ int nemoshow_item_set_bitmap(struct showone *one, SkBitmap *bitmap)
 	return 0;
 }
 
-int nemoshow_item_check_one(struct showone *one, float x, float y)
+int nemoshow_item_contain_one(struct showone *one, float x, float y)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
@@ -1632,7 +1632,7 @@ struct showone *nemoshow_item_pick_one(struct showone *one, float x, float y)
 	nemoshow_children_for_each_reverse(child, one) {
 		if (child->sub == NEMOSHOW_GROUP_ITEM) {
 			if (child->tag != 0) {
-				if (nemoshow_item_check_one(child, x, y) != 0)
+				if (nemoshow_item_contain_one(child, x, y) != 0)
 					return child;
 			} else {
 				pick = nemoshow_item_pick_one(child, x, y);
@@ -1641,7 +1641,7 @@ struct showone *nemoshow_item_pick_one(struct showone *one, float x, float y)
 			}
 		} else {
 			if (child->tag != 0) {
-				if (nemoshow_item_check_one(child, x, y) != 0)
+				if (nemoshow_item_contain_one(child, x, y) != 0)
 					return child;
 			}
 		}
