@@ -23,17 +23,14 @@ typedef enum {
 	NEMOSHOW_RRECT_ITEM = 3,
 	NEMOSHOW_CIRCLE_ITEM = 4,
 	NEMOSHOW_ARC_ITEM = 5,
-	NEMOSHOW_PIE_ITEM = 6,
-	NEMOSHOW_DONUT_ITEM = 7,
-	NEMOSHOW_RING_ITEM = 8,
-	NEMOSHOW_TEXT_ITEM = 9,
-	NEMOSHOW_TEXTBOX_ITEM = 10,
-	NEMOSHOW_PATH_ITEM = 11,
-	NEMOSHOW_PATHGROUP_ITEM = 12,
-	NEMOSHOW_IMAGE_ITEM = 13,
-	NEMOSHOW_SVG_ITEM = 14,
-	NEMOSHOW_GROUP_ITEM = 15,
-	NEMOSHOW_CONTAINER_ITEM = 16,
+	NEMOSHOW_TEXT_ITEM = 6,
+	NEMOSHOW_TEXTBOX_ITEM = 7,
+	NEMOSHOW_PATH_ITEM = 8,
+	NEMOSHOW_PATHGROUP_ITEM = 9,
+	NEMOSHOW_IMAGE_ITEM = 10,
+	NEMOSHOW_SVG_ITEM = 11,
+	NEMOSHOW_GROUP_ITEM = 12,
+	NEMOSHOW_CONTAINER_ITEM = 13,
 	NEMOSHOW_LAST_ITEM
 } NemoShowItemType;
 
@@ -81,7 +78,6 @@ struct showitem {
 	double ox, oy;
 	double width, height;
 	double r;
-	double inner;
 
 	double width0, height0;
 
@@ -268,13 +264,6 @@ static inline void nemoshow_item_set_base_height(struct showone *one, double hei
 static inline void nemoshow_item_set_r(struct showone *one, double r)
 {
 	NEMOSHOW_ITEM_AT(one, r) = r;
-
-	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
-}
-
-static inline void nemoshow_item_set_inner(struct showone *one, double inner)
-{
-	NEMOSHOW_ITEM_AT(one, inner) = inner;
 
 	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }

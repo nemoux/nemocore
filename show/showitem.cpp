@@ -110,7 +110,6 @@ struct showone *nemoshow_item_create(int type)
 	nemoobject_set_reserved(&one->object, "width", &item->width, sizeof(double));
 	nemoobject_set_reserved(&one->object, "height", &item->height, sizeof(double));
 	nemoobject_set_reserved(&one->object, "r", &item->r, sizeof(double));
-	nemoobject_set_reserved(&one->object, "inner", &item->inner, sizeof(double));
 
 	nemoobject_set_reserved(&one->object, "tx", &item->tx, sizeof(double));
 	nemoobject_set_reserved(&one->object, "ty", &item->ty, sizeof(double));
@@ -138,9 +137,7 @@ struct showone *nemoshow_item_create(int type)
 
 	nemoobject_set_reserved(&one->object, "alpha", &item->_alpha, sizeof(double));
 
-	if (one->sub == NEMOSHOW_RING_ITEM) {
-		NEMOSHOW_ITEM_CC(item, stroke)->setStyle(SkPaint::kFill_Style);
-	} else if (one->sub == NEMOSHOW_TEXTBOX_ITEM) {
+	if (one->sub == NEMOSHOW_TEXTBOX_ITEM) {
 		NEMOSHOW_ITEM_CC(item, textbox) = new SkTextBox;
 		NEMOSHOW_ITEM_CC(item, textbox)->setMode(SkTextBox::kLineBreak_Mode);
 	} else if (one->sub == NEMOSHOW_GROUP_ITEM) {
@@ -670,35 +667,6 @@ static inline void nemoshow_item_update_shape(struct nemoshow *show, struct show
 
 	if (one->sub == NEMOSHOW_PATH_ITEM) {
 		item->pathlength = nemoshow_helper_get_path_length(NEMOSHOW_ITEM_CC(item, path));
-	} else if (one->sub == NEMOSHOW_DONUT_ITEM) {
-		SkRect outr = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
-		SkRect inr = SkRect::MakeXYWH(item->x + item->inner, item->y + item->inner, item->width - item->inner * 2, item->height - item->inner * 2);
-
-		NEMOSHOW_ITEM_CC(item, path)->reset();
-
-		if (item->from == 0.0f && item->to == 360.0f) {
-			NEMOSHOW_ITEM_CC(item, path)->addArc(inr, 0.0f, 360.0f);
-			NEMOSHOW_ITEM_CC(item, path)->addArc(outr, 0.0f, 360.0f);
-			NEMOSHOW_ITEM_CC(item, path)->setFillType(SkPath::kEvenOdd_FillType);
-		} else if (item->from != item->to) {
-			NEMOSHOW_ITEM_CC(item, path)->addArc(outr, item->to, item->from - item->to);
-			NEMOSHOW_ITEM_CC(item, path)->lineTo(
-					item->x + item->width / 2.0f + cos(item->from * M_PI / 180.0f) * (item->width / 2.0f - item->inner),
-					item->y + item->height / 2.0f + sin(item->from * M_PI / 180.0f) * (item->height / 2.0f - item->inner));
-			NEMOSHOW_ITEM_CC(item, path)->addArc(inr, item->from, item->to - item->from);
-			NEMOSHOW_ITEM_CC(item, path)->lineTo(
-					item->x + item->width / 2.0f + cos(item->to * M_PI / 180.0f) * (item->width / 2.0f),
-					item->y + item->height / 2.0f + sin(item->to * M_PI / 180.0f) * (item->height / 2.0f));
-		}
-	} else if (one->sub == NEMOSHOW_RING_ITEM) {
-		SkRect outr = SkRect::MakeXYWH(item->x - item->r, item->y - item->r, item->r * 2, item->r * 2);
-		SkRect inr = SkRect::MakeXYWH(item->x - item->inner, item->y - item->inner, item->inner * 2, item->inner * 2);
-
-		NEMOSHOW_ITEM_CC(item, path)->reset();
-
-		NEMOSHOW_ITEM_CC(item, path)->addArc(inr, 0.0f, 360.0f);
-		NEMOSHOW_ITEM_CC(item, path)->addArc(outr, 0.0f, 360.0f);
-		NEMOSHOW_ITEM_CC(item, path)->setFillType(SkPath::kEvenOdd_FillType);
 	} else if (one->sub == NEMOSHOW_TEXTBOX_ITEM) {
 		NEMOSHOW_ITEM_CC(item, textbox)->setBox(item->x, item->y, item->width, item->height);
 	}
@@ -724,15 +692,6 @@ void nemoshow_item_update_bounds(struct nemoshow *show, struct showone *one)
 		item->height = item->r * 2;
 	} else if (one->sub == NEMOSHOW_ARC_ITEM) {
 		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
-	} else if (one->sub == NEMOSHOW_PIE_ITEM) {
-		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
-	} else if (one->sub == NEMOSHOW_DONUT_ITEM) {
-		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
-	} else if (one->sub == NEMOSHOW_RING_ITEM) {
-		box = SkRect::MakeXYWH(item->x - item->r, item->y - item->r, item->r * 2, item->r * 2);
-
-		item->width = item->r * 2;
-		item->height = item->r * 2;
 	} else if (one->sub == NEMOSHOW_PATH_ITEM) {
 		if (nemoshow_one_has_state(one, NEMOSHOW_SIZE_STATE)) {
 			box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);

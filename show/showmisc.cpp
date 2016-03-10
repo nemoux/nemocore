@@ -47,7 +47,6 @@ struct showprop *nemoshow_get_property(const char *name)
 		{ "from",							NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_SHAPE_DIRTY,				0x0 },
 		{ "height",						NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_SHAPE_DIRTY | NEMOSHOW_SIZE_DIRTY,				NEMOSHOW_SIZE_STATE },
 		{ "id",								NEMOSHOW_STRING_PROP,				NEMOSHOW_NONE_DIRTY,				0x0 },
-		{ "inner",						NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_SHAPE_DIRTY,				0x0 },
 		{ "light",						NEMOSHOW_FLOAT_PROP,				NEMOSHOW_REDRAW_DIRTY,			0x0 },
 		{ "matrix",						NEMOSHOW_FLOAT_PROP,				NEMOSHOW_MATRIX_DIRTY,			NEMOSHOW_TRANSFORM_STATE },
 		{ "mode",							NEMOSHOW_STRING_PROP,				NEMOSHOW_STYLE_DIRTY,				0x0 },

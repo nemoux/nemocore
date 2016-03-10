@@ -372,37 +372,6 @@ static inline void nemoshow_canvas_render_item_arc(struct showcanvas *canvas, Sk
 		_canvas->drawArc(rect, item->from, item->to - item->from, false, *NEMOSHOW_ITEM_CC(item, stroke));
 }
 
-static inline void nemoshow_canvas_render_item_pie(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one)
-{
-	struct showitem *item = NEMOSHOW_ITEM(one);
-	SkRect rect = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
-
-	if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE))
-		_canvas->drawArc(rect, item->from, item->to - item->from, true, *NEMOSHOW_ITEM_CC(item, fill));
-	if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
-		_canvas->drawArc(rect, item->from, item->to - item->from, true, *NEMOSHOW_ITEM_CC(item, stroke));
-}
-
-static inline void nemoshow_canvas_render_item_donut(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one)
-{
-	struct showitem *item = NEMOSHOW_ITEM(one);
-
-	if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE))
-		_canvas->drawPath(*NEMOSHOW_ITEM_CC(item, path), *NEMOSHOW_ITEM_CC(item, fill));
-	if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
-		_canvas->drawPath(*NEMOSHOW_ITEM_CC(item, path), *NEMOSHOW_ITEM_CC(item, stroke));
-}
-
-static inline void nemoshow_canvas_render_item_ring(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one)
-{
-	struct showitem *item = NEMOSHOW_ITEM(one);
-
-	if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE))
-		_canvas->drawCircle(item->x, item->y, item->inner, *NEMOSHOW_ITEM_CC(item, fill));
-	if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
-		_canvas->drawPath(*NEMOSHOW_ITEM_CC(item, path), *NEMOSHOW_ITEM_CC(item, stroke));
-}
-
 static inline void nemoshow_canvas_render_item_path(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
@@ -617,9 +586,6 @@ static inline void nemoshow_canvas_render_one(struct showcanvas *canvas, SkCanva
 		nemoshow_canvas_render_item_rrect,
 		nemoshow_canvas_render_item_circle,
 		nemoshow_canvas_render_item_arc,
-		nemoshow_canvas_render_item_pie,
-		nemoshow_canvas_render_item_donut,
-		nemoshow_canvas_render_item_ring,
 		nemoshow_canvas_render_item_text,
 		nemoshow_canvas_render_item_textbox,
 		nemoshow_canvas_render_item_path,
