@@ -113,6 +113,9 @@ extern void nemoshow_detach_canvas(struct nemoshow *show, struct showone *one);
 extern void nemoshow_above_canvas(struct nemoshow *show, struct showone *one, struct showone *above);
 extern void nemoshow_below_canvas(struct nemoshow *show, struct showone *one, struct showone *below);
 
+extern struct showone *nemoshow_pick_canvas(struct nemoshow *show, float x, float y, float *sx, float *sy);
+extern int nemoshow_check_canvas(struct nemoshow *show, struct showone *one, float x, float y, float *sx, float *sy);
+
 extern void nemoshow_damage_canvas_all(struct nemoshow *show);
 
 extern void nemoshow_attach_one(struct nemoshow *show, struct showone *one);
@@ -168,6 +171,12 @@ static inline void nemoshow_set_dispatch_transition_done(struct nemoshow *show, 
 
 static inline void nemoshow_set_dispatch_event(struct nemoshow *show, nemoshow_dispatch_event_t dispatch)
 {
+	if (dispatch == NULL) {
+		nemotale_put_state(show->tale, NEMOTALE_NOFOCUS_STATE);
+	} else {
+		nemotale_set_state(show->tale, NEMOTALE_NOFOCUS_STATE);
+	}
+
 	show->dispatch_event = dispatch;
 }
 

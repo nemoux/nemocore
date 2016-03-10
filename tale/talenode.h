@@ -25,7 +25,7 @@ typedef enum {
 	NEMOTALE_PICK_LAST_TYPE
 } NemoTalePickType;
 
-typedef int (*nemotale_node_pick_t)(struct talenode *node, double x, double y, void *data);
+typedef int (*nemotale_node_pick_t)(struct talenode *node, float x, float y, void *data);
 
 struct nemotale;
 struct talenode;

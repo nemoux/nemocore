@@ -65,7 +65,6 @@ typedef enum {
 	NEMOSHOW_INHERIT_STATE = (1 << 8),
 	NEMOSHOW_BOUNDS_STATE = (1 << 9),
 	NEMOSHOW_EFFECT_STATE = (1 << 10),
-	NEMOSHOW_LAST_STATE
 } NemoShowOneState;
 
 typedef enum {

@@ -688,16 +688,56 @@ int nemoshow_set_scale(struct nemoshow *show, double sx, double sy)
 
 void nemoshow_above_canvas(struct nemoshow *show, struct showone *one, struct showone *above)
 {
-	nemotale_above_node(show->tale,
-			NEMOSHOW_CANVAS_AT(one, node),
-			above != NULL ? NEMOSHOW_CANVAS_AT(above, node) : NULL);
+	nemolist_remove(&one->children_link);
+
+	if (above != NULL) {
+		nemotale_above_node(show->tale,
+				NEMOSHOW_CANVAS_AT(one, node),
+				NEMOSHOW_CANVAS_AT(above, node));
+
+		nemolist_insert_tail(&above->children_link, &one->children_link);
+	} else {
+		nemotale_above_node(show->tale,
+				NEMOSHOW_CANVAS_AT(one, node),
+				NULL);
+
+		nemolist_insert_tail(&one->parent->children_list, &one->children_link);
+	}
 }
 
 void nemoshow_below_canvas(struct nemoshow *show, struct showone *one, struct showone *below)
 {
-	nemotale_below_node(show->tale,
-			NEMOSHOW_CANVAS_AT(one, node),
-			below != NULL ? NEMOSHOW_CANVAS_AT(below, node) : NULL);
+	nemolist_remove(&one->children_link);
+
+	if (below != NULL) {
+		nemotale_below_node(show->tale,
+				NEMOSHOW_CANVAS_AT(one, node),
+				NEMOSHOW_CANVAS_AT(below, node));
+
+		nemolist_insert(&below->children_link, &one->children_link);
+	} else {
+		nemotale_below_node(show->tale,
+				NEMOSHOW_CANVAS_AT(one, node),
+				NULL);
+
+		nemolist_insert(&one->parent->children_list, &one->children_link);
+	}
+}
+
+struct showone *nemoshow_pick_canvas(struct nemoshow *show, float x, float y, float *sx, float *sy)
+{
+	struct talenode *node;
+
+	node = nemotale_pick_node(show->tale, x, y, sx, sy);
+	if (node != NULL)
+		return (struct showone *)nemotale_node_get_data(node);
+
+	return NULL;
+}
+
+int nemoshow_check_canvas(struct nemoshow *show, struct showone *one, float x, float y, float *sx, float *sy)
+{
+	return nemotale_check_node(show->tale, NEMOSHOW_CANVAS_AT(one, node), x, y, sx, sy);
 }
 
 void nemoshow_damage_canvas_all(struct nemoshow *show)

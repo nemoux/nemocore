@@ -39,7 +39,7 @@ static int nemoshow_dispatch_pick_tale(struct nemocontent *content, float x, flo
 		return pixman_region32_contains_point(&tale->input, x, y, NULL);
 	}
 
-	return nemotale_pick(tale, x, y, &sx, &sy) != NULL;
+	return nemotale_pick_node(tale, x, y, &sx, &sy) != NULL;
 }
 
 static void nemoshow_dispatch_pointer_enter(struct nemopointer *pointer, struct nemocontent *content)
@@ -272,18 +272,20 @@ static void nemoshow_dispatch_timer(struct nemotimer *timer, void *data)
 static void nemoshow_dispatch_tale_event(struct nemotale *tale, struct talenode *node, struct taleevent *event)
 {
 	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
-	uint32_t id = nemotale_node_get_id(node);
 
-	if (nemotale_dispatch_grab(tale, event) == 0) {
-		if (id == 0) {
-			if (show->dispatch_event != NULL)
-				show->dispatch_event(show, event);
-		} else {
-			struct showone *one = (struct showone *)nemotale_node_get_data(node);
-			struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+	if (show->dispatch_event != NULL) {
+		show->dispatch_event(show, event);
+	} else {
+		if (nemotale_dispatch_grab(tale, event) == 0) {
+			uint32_t id = nemotale_node_get_id(node);
 
-			if (canvas->dispatch_event != NULL)
-				canvas->dispatch_event(show, one, event);
+			if (id != 0) {
+				struct showone *one = (struct showone *)nemotale_node_get_data(node);
+				struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+				if (canvas->dispatch_event != NULL)
+					canvas->dispatch_event(show, one, event);
+			}
 		}
 	}
 }

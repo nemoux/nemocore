@@ -16,6 +16,10 @@ NEMO_BEGIN_EXTERN_C
 #include <nemomatrix.h>
 #include <nemobox.h>
 
+typedef enum {
+	NEMOTALE_NOFOCUS_STATE = (1 << 0)
+} NemoTaleState;
+
 struct nemotale;
 struct talenode;
 struct taleevent;
@@ -28,6 +32,8 @@ struct nemotale {
 	void *backend;
 
 	void *userdata;
+
+	uint32_t state;
 
 	struct talenode **nodes;
 	int nnodes, snodes;
@@ -80,7 +86,8 @@ struct nemotale {
 extern int nemotale_prepare(struct nemotale *tale);
 extern void nemotale_finish(struct nemotale *tale);
 
-extern struct talenode *nemotale_pick(struct nemotale *tale, float x, float y, float *sx, float *sy);
+extern struct talenode *nemotale_pick_node(struct nemotale *tale, float x, float y, float *sx, float *sy);
+extern int nemotale_check_node(struct nemotale *tale, struct talenode *node, float x, float y, float *sx, float *sy);
 
 extern void nemotale_damage_region(struct nemotale *tale, pixman_region32_t *region);
 extern void nemotale_damage_below(struct nemotale *tale, struct talenode *node);
@@ -96,6 +103,21 @@ extern void nemotale_update_node(struct nemotale *tale);
 
 extern void nemotale_accumulate_damage(struct nemotale *tale);
 extern void nemotale_flush_damage(struct nemotale *tale);
+
+static inline void nemotale_set_state(struct nemotale *tale, uint32_t state)
+{
+	tale->state |= state;
+}
+
+static inline void nemotale_put_state(struct nemotale *tale, uint32_t state)
+{
+	tale->state &= ~state;
+}
+
+static inline int nemotale_has_state(struct nemotale *tale, uint32_t state)
+{
+	return tale->state & state;
+}
 
 static inline void nemotale_resize(struct nemotale *tale, int32_t width, int32_t height)
 {

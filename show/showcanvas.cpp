@@ -813,7 +813,7 @@ void nemoshow_canvas_dirty_all(struct showone *one, uint32_t dirty)
 		nemoshow_one_dirty(child, dirty);
 }
 
-static inline struct showone *nemoshow_canvas_pick_item(struct showone *one, double x, double y)
+static inline struct showone *nemoshow_canvas_pick_item(struct showone *one, float x, float y)
 {
 	struct showone *child;
 	struct showone *pick;
@@ -839,7 +839,7 @@ static inline struct showone *nemoshow_canvas_pick_item(struct showone *one, dou
 	return NULL;
 }
 
-static inline struct showone *nemoshow_canvas_pick_poly(struct showone *one, double x, double y)
+static inline struct showone *nemoshow_canvas_pick_poly(struct showone *one, float x, float y)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 	struct showone *pone, *cone;
@@ -862,7 +862,7 @@ static inline struct showone *nemoshow_canvas_pick_poly(struct showone *one, dou
 	return pick;
 }
 
-struct showone *nemoshow_canvas_pick_one(struct showone *one, double x, double y)
+struct showone *nemoshow_canvas_pick_one(struct showone *one, float x, float y)
 {
 	if (one->sub == NEMOSHOW_CANVAS_PIPELINE_TYPE)
 		return nemoshow_canvas_pick_poly(one, x, y);

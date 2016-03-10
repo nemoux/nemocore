@@ -100,7 +100,7 @@ void nemotale_finish(struct nemotale *tale)
 	free(tale->nodes);
 }
 
-struct talenode *nemotale_pick(struct nemotale *tale, float x, float y, float *sx, float *sy)
+struct talenode *nemotale_pick_node(struct nemotale *tale, float x, float y, float *sx, float *sy)
 {
 	struct talenode *node;
 	int i;
@@ -122,6 +122,23 @@ struct talenode *nemotale_pick(struct nemotale *tale, float x, float y, float *s
 	}
 
 	return NULL;
+}
+
+int nemotale_check_node(struct nemotale *tale, struct talenode *node, float x, float y, float *sx, float *sy)
+{
+	if (node->picktype == NEMOTALE_PICK_DEFAULT_TYPE) {
+		nemotale_node_transform_from_global(node, x, y, sx, sy);
+
+		if (pixman_region32_contains_point(&node->input, *sx, *sy, NULL))
+			return 1;
+	} else if (node->picktype == NEMOTALE_PICK_CUSTOM_TYPE) {
+		nemotale_node_transform_from_global(node, x, y, sx, sy);
+
+		if (node->pick(node, *sx, *sy, node->pickdata) != 0)
+			return 1;
+	}
+
+	return 0;
 }
 
 void nemotale_damage_region(struct nemotale *tale, pixman_region32_t *region)

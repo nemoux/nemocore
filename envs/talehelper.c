@@ -28,7 +28,7 @@ static int nemotale_dispatch_actor_pick_tale(struct nemocontent *content, float 
 		return pixman_region32_contains_point(&tale->input, x, y, NULL);
 	}
 
-	return nemotale_pick(tale, x, y, &sx, &sy) != NULL;
+	return nemotale_pick_node(tale, x, y, &sx, &sy) != NULL;
 }
 
 static void nemotale_dispatch_actor_pointer_enter(struct nemopointer *pointer, struct nemocontent *content)

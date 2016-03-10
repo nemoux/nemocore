@@ -1598,7 +1598,7 @@ int nemoshow_item_set_bitmap(struct showone *one, SkBitmap *bitmap)
 	return 0;
 }
 
-int nemoshow_item_check_one(struct showone *one, double x, double y)
+int nemoshow_item_check_one(struct showone *one, float x, float y)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
@@ -1624,7 +1624,7 @@ int nemoshow_item_check_one(struct showone *one, double x, double y)
 	return 0;
 }
 
-struct showone *nemoshow_item_pick_one(struct showone *one, double x, double y)
+struct showone *nemoshow_item_pick_one(struct showone *one, float x, float y)
 {
 	struct showone *child;
 	struct showone *pick;

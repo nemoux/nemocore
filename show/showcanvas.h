@@ -110,7 +110,7 @@ extern void nemoshow_canvas_damage_all(struct showone *one);
 extern void nemoshow_canvas_damage_filter(struct showone *one);
 extern void nemoshow_canvas_dirty_all(struct showone *one, uint32_t dirty);
 
-extern struct showone *nemoshow_canvas_pick_one(struct showone *one, double x, double y);
+extern struct showone *nemoshow_canvas_pick_one(struct showone *one, float x, float y);
 
 extern void nemoshow_canvas_attach_one(struct showone *canvas, struct showone *one);
 extern void nemoshow_canvas_detach_one(struct showone *one);
@@ -229,7 +229,7 @@ static inline void nemoshow_canvas_set_fill_color(struct showone *one, double r,
 	canvas->fill = 1;
 }
 
-static inline uint32_t nemoshow_canvas_pick_tag(struct showone *one, int x, int y)
+static inline uint32_t nemoshow_canvas_pick_tag(struct showone *one, float x, float y)
 {
 	return nemoshow_one_get_tag(
 			nemoshow_canvas_pick_one(one, x, y));
