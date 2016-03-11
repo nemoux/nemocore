@@ -108,6 +108,9 @@ struct showitem {
 	double textwidth, textheight;
 	double spacingmul, spacingadd;
 
+	double *points;
+	int pointcount;
+
 	char *uri;
 
 	int transform;
@@ -174,6 +177,8 @@ extern void nemoshow_item_path_set_dash_effect(struct showone *one, double *dash
 extern int nemoshow_item_path_contains_point(struct showone *one, double x, double y);
 
 extern int nemoshow_item_load_svg(struct showone *one, const char *uri, double x, double y, double width, double height);
+
+extern void nemoshow_item_set_points(struct showone *one, double *points, int pointcount);
 
 extern int nemoshow_item_set_buffer(struct showone *one, char *buffer, uint32_t width, uint32_t height);
 extern void nemoshow_item_put_buffer(struct showone *one);

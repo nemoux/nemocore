@@ -61,6 +61,7 @@ struct showprop *nemoshow_get_property(const char *name)
 		{ "pathdeviation",		NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_PATH_DIRTY,				0x0 },
 		{ "pathseed",					NEMOSHOW_INTEGER_PROP,			NEMOSHOW_PATH_DIRTY,				0x0 },
 		{ "pathsegment",			NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_PATH_DIRTY,				0x0 },
+		{ "points",						NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_POINTS_DIRTY,			0x0 },
 		{ "px",								NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_MATRIX_DIRTY,			NEMOSHOW_TRANSFORM_STATE },
 		{ "py",								NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_MATRIX_DIRTY,			NEMOSHOW_TRANSFORM_STATE },
 		{ "r",								NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_SHAPE_DIRTY,				0x0 },

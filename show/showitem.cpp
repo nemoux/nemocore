@@ -187,6 +187,10 @@ void nemoshow_item_destroy(struct showone *one)
 
 	delete static_cast<showitem_t *>(item->cc);
 
+	if (item->points != NULL)
+		free(item->points);
+	if (item->pathdashes != NULL)
+		free(item->pathdashes);
 	if (item->uri != NULL)
 		free(item->uri);
 
@@ -429,17 +433,21 @@ static inline void nemoshow_item_update_text(struct nemoshow *show, struct showo
 
 				fontscale = item->fontsize / NEMOSHOW_FONT_AT(NEMOSHOW_REF(one, NEMOSHOW_FONT_REF), max_advance_height);
 
+				if (item->points != NULL)
+					free(item->points);
 				if (NEMOSHOW_ITEM_CC(item, points) != NULL)
 					delete[] NEMOSHOW_ITEM_CC(item, points);
 
-				NEMOSHOW_ITEM_CC(item, points) = new SkPoint[strlen(item->text)];
+				item->points = (double *)malloc(sizeof(double[2]) * nhbglyphs);
+				item->pointcount = nhbglyphs;
+
+				NEMOSHOW_ITEM_CC(item, points) = new SkPoint[nhbglyphs];
 
 				item->textwidth = 0.0f;
 
 				for (i = 0; i < nhbglyphs; i++) {
-					NEMOSHOW_ITEM_CC(item, points)[i].set(
-							hbglyphspos[i].x_offset * fontscale + item->textwidth + item->x,
-							item->y - item->fontascent);
+					item->points[i * 2 + 0] = hbglyphspos[i].x_offset * fontscale + item->textwidth + item->x;
+					item->points[i * 2 + 1] = item->y - item->fontascent;
 
 					item->textwidth += hbglyphspos[i].x_advance * fontscale;
 				}
@@ -447,6 +455,8 @@ static inline void nemoshow_item_update_text(struct nemoshow *show, struct showo
 				item->textheight = item->fontdescent - item->fontascent;
 
 				hb_buffer_destroy(hbbuffer);
+
+				one->dirty |= NEMOSHOW_POINTS_DIRTY;
 			}
 		} else {
 			item->textwidth = 0.0f;
@@ -463,6 +473,20 @@ static inline void nemoshow_item_update_text(struct nemoshow *show, struct showo
 		}
 
 		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
+	}
+}
+
+static inline void nemoshow_item_update_points(struct nemoshow *show, struct showone *one)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+	int i;
+
+	if (item->points != NULL) {
+		for (i = 0; i < item->pointcount; i++) {
+			NEMOSHOW_ITEM_CC(item, points)[i].set(
+					item->points[i * 2 + 0],
+					item->points[i * 2 + 1]);
+		}
 	}
 }
 
@@ -793,6 +817,8 @@ int nemoshow_item_update(struct showone *one)
 		nemoshow_item_update_font(show, one);
 	if ((one->dirty & NEMOSHOW_TEXT_DIRTY) != 0)
 		nemoshow_item_update_text(show, one);
+	if ((one->dirty & NEMOSHOW_POINTS_DIRTY) != 0)
+		nemoshow_item_update_points(show, one);
 	if ((one->dirty & NEMOSHOW_PATH_DIRTY) != 0)
 		nemoshow_item_update_path(show, one);
 	if ((one->dirty & NEMOSHOW_MATRIX_DIRTY) != 0)
@@ -1497,6 +1523,27 @@ int nemoshow_item_load_svg(struct showone *one, const char *uri, double x, doubl
 	NEMOSHOW_ITEM_CC(item, fillpath)->transform(matrix);
 
 	return 0;
+}
+
+void nemoshow_item_set_points(struct showone *one, double *points, int pointcount)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+	int i;
+
+	if (item->points != NULL)
+		free(item->points);
+	if (NEMOSHOW_ITEM_CC(item, points) != NULL)
+		delete[] NEMOSHOW_ITEM_CC(item, points);
+
+	item->points = (double *)malloc(sizeof(double[2]) * pointcount);
+	item->pointcount = pointcount;
+
+	NEMOSHOW_ITEM_CC(item, points) = new SkPoint[pointcount];
+
+	for (i = 0; i < pointcount * 2; i++)
+		item->points[i] = points[i];
+
+	nemoobject_set_reserved(&one->object, "points", item->points, sizeof(double[2]) * pointcount);
 }
 
 int nemoshow_item_set_buffer(struct showone *one, char *buffer, uint32_t width, uint32_t height)
