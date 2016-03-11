@@ -487,6 +487,8 @@ static inline void nemoshow_item_update_points(struct nemoshow *show, struct sho
 					item->points[i * 2 + 0],
 					item->points[i * 2 + 1]);
 		}
+
+		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 	}
 }
 
@@ -759,6 +761,22 @@ void nemoshow_item_update_bounds(struct nemoshow *show, struct showone *one)
 		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
 	} else if (one->sub == NEMOSHOW_IMAGE_ITEM) {
 		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
+	} else if (one->sub == NEMOSHOW_POINTS_ITEM || one->sub == NEMOSHOW_POLYLINE_ITEM || one->sub == NEMOSHOW_POLYGON_ITEM) {
+		int32_t x0 = INT_MAX, y0 = INT_MAX, x1 = INT_MIN, y1 = INT_MIN;
+		int i;
+
+		for (i = 0; i < item->pointcount; i++) {
+			if (item->points[i * 2 + 0] < x0)
+				x0 = item->points[i * 2 + 0];
+			if (item->points[i * 2 + 0] > x1)
+				x1 = item->points[i * 2 + 0];
+			if (item->points[i * 2 + 1] < y0)
+				y0 = item->points[i * 2 + 1];
+			if (item->points[i * 2 + 1] > y1)
+				y1 = item->points[i * 2 + 1];
+		}
+
+		box = SkRect::MakeXYWH(x0, y0, x1 - x0, y1 - y0);
 	} else if (one->sub == NEMOSHOW_SVG_ITEM) {
 		box = SkRect::MakeXYWH(0, 0, item->width, item->height);
 	} else if (one->sub == NEMOSHOW_CONTAINER_ITEM) {
@@ -1544,6 +1562,8 @@ void nemoshow_item_set_points(struct showone *one, double *points, int pointcoun
 		item->points[i] = points[i];
 
 	nemoobject_set_reserved(&one->object, "points", item->points, sizeof(double[2]) * pointcount);
+
+	nemoshow_one_dirty(one, NEMOSHOW_POINTS_DIRTY);
 }
 
 int nemoshow_item_set_buffer(struct showone *one, char *buffer, uint32_t width, uint32_t height)

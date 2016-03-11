@@ -499,6 +499,36 @@ static inline void nemoshow_canvas_render_item_image(struct showcanvas *canvas, 
 	}
 }
 
+static inline void nemoshow_canvas_render_item_points(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE))
+		_canvas->drawPoints(SkCanvas::kPoints_PointMode, item->pointcount, NEMOSHOW_ITEM_CC(item, points), *NEMOSHOW_ITEM_CC(item, fill));
+	if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
+		_canvas->drawPoints(SkCanvas::kPoints_PointMode, item->pointcount, NEMOSHOW_ITEM_CC(item, points), *NEMOSHOW_ITEM_CC(item, stroke));
+}
+
+static inline void nemoshow_canvas_render_item_polyline(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE))
+		_canvas->drawPoints(SkCanvas::kLines_PointMode, item->pointcount, NEMOSHOW_ITEM_CC(item, points), *NEMOSHOW_ITEM_CC(item, fill));
+	if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
+		_canvas->drawPoints(SkCanvas::kLines_PointMode, item->pointcount, NEMOSHOW_ITEM_CC(item, points), *NEMOSHOW_ITEM_CC(item, stroke));
+}
+
+static inline void nemoshow_canvas_render_item_polygon(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE))
+		_canvas->drawPoints(SkCanvas::kPolygon_PointMode, item->pointcount, NEMOSHOW_ITEM_CC(item, points), *NEMOSHOW_ITEM_CC(item, fill));
+	if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
+		_canvas->drawPoints(SkCanvas::kPolygon_PointMode, item->pointcount, NEMOSHOW_ITEM_CC(item, points), *NEMOSHOW_ITEM_CC(item, stroke));
+}
+
 static inline void nemoshow_canvas_render_item_svg(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
@@ -576,6 +606,9 @@ static inline void nemoshow_canvas_render_one(struct showcanvas *canvas, SkCanva
 		nemoshow_canvas_render_item_path,
 		nemoshow_canvas_render_item_pathgroup,
 		nemoshow_canvas_render_item_image,
+		nemoshow_canvas_render_item_points,
+		nemoshow_canvas_render_item_polyline,
+		nemoshow_canvas_render_item_polygon,
 		nemoshow_canvas_render_item_svg,
 		nemoshow_canvas_render_item_group,
 		nemoshow_canvas_render_item_container
