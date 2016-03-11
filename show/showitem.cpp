@@ -1558,8 +1558,13 @@ void nemoshow_item_set_points(struct showone *one, double *points, int pointcoun
 
 	NEMOSHOW_ITEM_CC(item, points) = new SkPoint[pointcount];
 
-	for (i = 0; i < pointcount * 2; i++)
-		item->points[i] = points[i];
+	if (points != NULL) {
+		for (i = 0; i < pointcount * 2; i++)
+			item->points[i] = points[i];
+	} else {
+		for (i = 0; i < pointcount * 2; i++)
+			item->points[i] = 0.0f;
+	}
 
 	nemoobject_set_reserved(&one->object, "points", item->points, sizeof(double[2]) * pointcount);
 
