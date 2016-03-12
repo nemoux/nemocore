@@ -136,6 +136,13 @@ struct showitem {
 #define NEMOSHOW_ITEM_AT(one, at)		(NEMOSHOW_ITEM(one)->at)
 #define NEMOSHOW_ITEM_ONE(item)			(&(item)->base)
 
+#define NEMOSHOW_ITEM_POINTS_OFFSET_X(index)				(index * 2 + 0)
+#define NEMOSHOW_ITEM_POINTS_OFFSET_Y(index)				(index * 2 + 1)
+#define NEMOSHOW_ITEM_POLYLINE_OFFSET_X(index)			(index * 2 + 0)
+#define NEMOSHOW_ITEM_POLYLINE_OFFSET_Y(index)			(index * 2 + 1)
+#define NEMOSHOW_ITEM_POLYGON_OFFSET_X(index)				(index * 2 + 0)
+#define NEMOSHOW_ITEM_POLYGON_OFFSET_Y(index)				(index * 2 + 1)
+
 extern struct showone *nemoshow_item_create(int type);
 extern void nemoshow_item_destroy(struct showone *one);
 
