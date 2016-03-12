@@ -1771,12 +1771,25 @@ int nemoshow_item_path_load_svg(struct showone *one, const char *uri, double x, 
 void nemoshow_item_path_translate(struct showone *one, double x, double y)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
+	struct showone *child;
+	struct showpath *path;
 	SkMatrix matrix;
 
 	matrix.setIdentity();
 	matrix.postTranslate(x, y);
 
-	NEMOSHOW_ITEM_CC(item, path)->transform(matrix);
+	if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
+		nemoshow_children_for_each(child, one) {
+			path = NEMOSHOW_PATH(child);
+
+			NEMOSHOW_PATH_CC(path, path)->transform(matrix);
+		}
+	} else if (one->sub == NEMOSHOW_PATHTWICE_ITEM) {
+		NEMOSHOW_ITEM_CC(item, path)->transform(matrix);
+		NEMOSHOW_ITEM_CC(item, fillpath)->transform(matrix);
+	} else {
+		NEMOSHOW_ITEM_CC(item, path)->transform(matrix);
+	}
 
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 }
@@ -1784,12 +1797,25 @@ void nemoshow_item_path_translate(struct showone *one, double x, double y)
 void nemoshow_item_path_scale(struct showone *one, double sx, double sy)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
+	struct showone *child;
+	struct showpath *path;
 	SkMatrix matrix;
 
 	matrix.setIdentity();
 	matrix.postScale(sx, sy);
 
-	NEMOSHOW_ITEM_CC(item, path)->transform(matrix);
+	if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
+		nemoshow_children_for_each(child, one) {
+			path = NEMOSHOW_PATH(child);
+
+			NEMOSHOW_PATH_CC(path, path)->transform(matrix);
+		}
+	} else if (one->sub == NEMOSHOW_PATHTWICE_ITEM) {
+		NEMOSHOW_ITEM_CC(item, path)->transform(matrix);
+		NEMOSHOW_ITEM_CC(item, fillpath)->transform(matrix);
+	} else {
+		NEMOSHOW_ITEM_CC(item, path)->transform(matrix);
+	}
 
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 }
@@ -1797,12 +1823,25 @@ void nemoshow_item_path_scale(struct showone *one, double sx, double sy)
 void nemoshow_item_path_rotate(struct showone *one, double ro)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
+	struct showone *child;
+	struct showpath *path;
 	SkMatrix matrix;
 
 	matrix.setIdentity();
 	matrix.postRotate(ro);
 
-	NEMOSHOW_ITEM_CC(item, path)->transform(matrix);
+	if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
+		nemoshow_children_for_each(child, one) {
+			path = NEMOSHOW_PATH(child);
+
+			NEMOSHOW_PATH_CC(path, path)->transform(matrix);
+		}
+	} else if (one->sub == NEMOSHOW_PATHTWICE_ITEM) {
+		NEMOSHOW_ITEM_CC(item, path)->transform(matrix);
+		NEMOSHOW_ITEM_CC(item, fillpath)->transform(matrix);
+	} else {
+		NEMOSHOW_ITEM_CC(item, path)->transform(matrix);
+	}
 
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 }
