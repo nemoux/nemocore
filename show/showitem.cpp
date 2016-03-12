@@ -1191,7 +1191,39 @@ void nemoshow_item_path_append(struct showone *one, struct showone *src)
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	struct showitem *other = NEMOSHOW_ITEM(src);
 
-	NEMOSHOW_ITEM_CC(item, path)->addPath(*NEMOSHOW_ITEM_CC(other, path));
+	if (one->sub == NEMOSHOW_PATHTWICE_ITEM) {
+		if (src->sub == NEMOSHOW_PATHGROUP_ITEM) {
+			struct showone *child;
+			struct showpath *path;
+
+			nemoshow_children_for_each(child, src) {
+				path = NEMOSHOW_PATH(child);
+
+				NEMOSHOW_ITEM_CC(item, path)->addPath(*NEMOSHOW_PATH_CC(path, path));
+			}
+		} else if (src->sub == NEMOSHOW_PATHTWICE_ITEM) {
+			NEMOSHOW_ITEM_CC(item, path)->addPath(*NEMOSHOW_ITEM_CC(other, path));
+			NEMOSHOW_ITEM_CC(item, fillpath)->addPath(*NEMOSHOW_ITEM_CC(other, fillpath));
+		} else if (src->sub == NEMOSHOW_PATH_ITEM) {
+			NEMOSHOW_ITEM_CC(item, path)->addPath(*NEMOSHOW_ITEM_CC(other, path));
+		}
+	} else if (one->sub == NEMOSHOW_PATH_ITEM) {
+		if (src->sub == NEMOSHOW_PATHGROUP_ITEM) {
+			struct showone *child;
+			struct showpath *path;
+
+			nemoshow_children_for_each(child, src) {
+				path = NEMOSHOW_PATH(child);
+
+				NEMOSHOW_ITEM_CC(item, path)->addPath(*NEMOSHOW_PATH_CC(path, path));
+			}
+		} else if (src->sub == NEMOSHOW_PATHTWICE_ITEM) {
+			NEMOSHOW_ITEM_CC(item, path)->addPath(*NEMOSHOW_ITEM_CC(other, path));
+			NEMOSHOW_ITEM_CC(item, path)->addPath(*NEMOSHOW_ITEM_CC(other, fillpath));
+		} else if (src->sub == NEMOSHOW_PATH_ITEM) {
+			NEMOSHOW_ITEM_CC(item, path)->addPath(*NEMOSHOW_ITEM_CC(other, path));
+		}
+	}
 
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 }

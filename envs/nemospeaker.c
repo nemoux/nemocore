@@ -229,7 +229,7 @@ struct nemospeaker *nemospeaker_create(struct nemoshell *shell, uint32_t size, d
 	nemoshow_one_attach(canvas, group);
 	nemoshow_item_translate(group, NEMOSPEAKER_OUTSET, NEMOSPEAKER_OUTSET);
 
-	speaker->layout0 = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
+	speaker->layout0 = one = nemoshow_item_create(NEMOSHOW_PATHTWICE_ITEM);
 	nemoshow_one_attach(group, one);
 	nemoshow_item_set_width(one, width);
 	nemoshow_item_set_height(one, height);
@@ -237,7 +237,7 @@ struct nemospeaker *nemospeaker_create(struct nemoshell *shell, uint32_t size, d
 	nemoshow_item_set_alpha(one, 0.0f);
 	nemoshow_item_path_load_svg(one, NEMOENVS_RESOURCES "/speaker/speaker-1.svg", 0.0f, 0.0f, width, height);
 
-	speaker->layout1 = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
+	speaker->layout1 = one = nemoshow_item_create(NEMOSHOW_PATHTWICE_ITEM);
 	nemoshow_one_attach(group, one);
 	nemoshow_item_set_width(one, width);
 	nemoshow_item_set_height(one, height);
@@ -245,7 +245,7 @@ struct nemospeaker *nemospeaker_create(struct nemoshell *shell, uint32_t size, d
 	nemoshow_item_set_alpha(one, 0.0f);
 	nemoshow_item_path_load_svg(one, NEMOENVS_RESOURCES "/speaker/speaker-2.svg", 0.0f, 0.0f, width, height);
 
-	speaker->layout2 = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
+	speaker->layout2 = one = nemoshow_item_create(NEMOSHOW_PATHTWICE_ITEM);
 	nemoshow_one_attach(group, one);
 	nemoshow_item_set_width(one, width);
 	nemoshow_item_set_height(one, height);

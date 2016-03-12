@@ -132,7 +132,7 @@ int nemoback_mirotap_down(struct miroback *miro, struct mirotap *tap, double x, 
 	tap->blur = blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
 	nemoshow_filter_set_blur(blur, "high", "solid", 0.0f);
 
-	tap->one0 = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
+	tap->one0 = one = nemoshow_item_create(NEMOSHOW_PATHTWICE_ITEM);
 	nemoshow_one_attach(miro->canvas, one);
 	nemoshow_item_set_width(one, miro->tapsize);
 	nemoshow_item_set_height(one, miro->tapsize);
@@ -143,7 +143,7 @@ int nemoback_mirotap_down(struct miroback *miro, struct mirotap *tap, double x, 
 	nemoshow_item_scale(one, 0.0f, 0.0f);
 	nemoshow_item_path_load_svg(one, NEMOUX_MIROBACK_RESOURCES "/touch-1.svg", 0.0f, 0.0f, miro->tapsize, miro->tapsize);
 
-	tap->one1 = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
+	tap->one1 = one = nemoshow_item_create(NEMOSHOW_PATHTWICE_ITEM);
 	nemoshow_one_attach(miro->canvas, one);
 	nemoshow_item_set_width(one, miro->tapsize);
 	nemoshow_item_set_height(one, miro->tapsize);
@@ -154,7 +154,7 @@ int nemoback_mirotap_down(struct miroback *miro, struct mirotap *tap, double x, 
 	nemoshow_item_path_load_svg(one, NEMOUX_MIROBACK_RESOURCES "/touch-3-1.svg", 0.0f, 0.0f, miro->tapsize, miro->tapsize);
 	nemoshow_item_set_alpha(one, 0.0f);
 
-	tap->one2 = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
+	tap->one2 = one = nemoshow_item_create(NEMOSHOW_PATHTWICE_ITEM);
 	nemoshow_one_attach(miro->canvas, one);
 	nemoshow_item_set_width(one, miro->tapsize);
 	nemoshow_item_set_height(one, miro->tapsize);
@@ -165,7 +165,7 @@ int nemoback_mirotap_down(struct miroback *miro, struct mirotap *tap, double x, 
 	nemoshow_item_path_load_svg(one, NEMOUX_MIROBACK_RESOURCES "/touch-3-2.svg", 0.0f, 0.0f, miro->tapsize, miro->tapsize);
 	nemoshow_item_set_alpha(one, 0.0f);
 
-	tap->one3 = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
+	tap->one3 = one = nemoshow_item_create(NEMOSHOW_PATHTWICE_ITEM);
 	nemoshow_one_attach(miro->canvas, one);
 	nemoshow_item_set_width(one, miro->tapsize);
 	nemoshow_item_set_height(one, miro->tapsize);
@@ -176,7 +176,7 @@ int nemoback_mirotap_down(struct miroback *miro, struct mirotap *tap, double x, 
 	nemoshow_item_path_load_svg(one, NEMOUX_MIROBACK_RESOURCES "/touch-3-3.svg", 0.0f, 0.0f, miro->tapsize, miro->tapsize);
 	nemoshow_item_set_alpha(one, 0.0f);
 
-	tap->one4 = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
+	tap->one4 = one = nemoshow_item_create(NEMOSHOW_PATHTWICE_ITEM);
 	nemoshow_one_attach(miro->canvas, one);
 	nemoshow_item_set_width(one, miro->tapsize);
 	nemoshow_item_set_height(one, miro->tapsize);
@@ -187,7 +187,7 @@ int nemoback_mirotap_down(struct miroback *miro, struct mirotap *tap, double x, 
 	nemoshow_item_path_load_svg(one, NEMOUX_MIROBACK_RESOURCES "/touch-3-4.svg", 0.0f, 0.0f, miro->tapsize, miro->tapsize);
 	nemoshow_item_set_alpha(one, 0.0f);
 
-	tap->oner = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
+	tap->oner = one = nemoshow_item_create(NEMOSHOW_PATHTWICE_ITEM);
 	nemoshow_one_attach(miro->canvas, one);
 	nemoshow_item_set_width(one, miro->tapsize);
 	nemoshow_item_set_height(one, miro->tapsize);

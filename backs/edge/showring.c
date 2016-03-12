@@ -28,7 +28,7 @@ struct showone *nemoshow_ring_create(int32_t width, int32_t height)
 	nemoshow_item_set_width(one, width);
 	nemoshow_item_set_height(one, height);
 
-	ring->icon0 = icon = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
+	ring->icon0 = icon = nemoshow_item_create(NEMOSHOW_PATHTWICE_ITEM);
 	nemoshow_one_attach(one, icon);
 	nemoshow_item_set_x(icon, 0.0f);
 	nemoshow_item_set_y(icon, 0.0f);
@@ -38,7 +38,7 @@ struct showone *nemoshow_ring_create(int32_t width, int32_t height)
 	nemoshow_item_set_filter(icon, NEMOSHOW_SOLID_SMALL_BLUR);
 	nemoshow_item_pivot(icon, width / 2.0f, height / 2.0f);
 
-	ring->icon1 = icon = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
+	ring->icon1 = icon = nemoshow_item_create(NEMOSHOW_PATHTWICE_ITEM);
 	nemoshow_one_attach(one, icon);
 	nemoshow_item_set_x(icon, 0.0f);
 	nemoshow_item_set_y(icon, 0.0f);

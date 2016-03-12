@@ -190,7 +190,7 @@ struct nemopack *nemopack_create(struct nemoshell *shell, struct nemoview *view,
 	nemoshow_sequence_set_source(set0, one);
 	nemoshow_sequence_set_cattr(set0, "fill", 0x1e, 0xdc, 0xdc, 0x40);
 
-	pack->icon = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
+	pack->icon = one = nemoshow_item_create(NEMOSHOW_PATHTWICE_ITEM);
 	nemoshow_one_attach(canvas, one);
 	nemoshow_item_set_width(one, view->content->width / 2);
 	nemoshow_item_set_height(one, view->content->height / 2);

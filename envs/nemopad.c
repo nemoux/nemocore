@@ -143,7 +143,7 @@ void __attribute__((constructor(101))) nemopad_initialize_envs(void)
 
 	for (i = 0; i < NEMOPAD_KEYS_MAX; i++) {
 		if (nemopadkeys[i].border != NULL) {
-			nemopadborders[i] = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
+			nemopadborders[i] = one = nemoshow_item_create(NEMOSHOW_PATHTWICE_ITEM);
 			nemoshow_item_set_width(one,
 					nemopadkeys[i].x1 - nemopadkeys[i].x0);
 			nemoshow_item_set_height(one,
@@ -156,7 +156,7 @@ void __attribute__((constructor(101))) nemopad_initialize_envs(void)
 			nemopadborders[i] = NULL;
 		}
 		if (nemopadkeys[i].normal != NULL) {
-			nemopadnormals[i] = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
+			nemopadnormals[i] = one = nemoshow_item_create(NEMOSHOW_PATHTWICE_ITEM);
 			nemoshow_item_set_width(one,
 					nemopadkeys[i].x1 - nemopadkeys[i].x0);
 			nemoshow_item_set_height(one,
@@ -169,7 +169,7 @@ void __attribute__((constructor(101))) nemopad_initialize_envs(void)
 			nemopadnormals[i] = NULL;
 		}
 		if (nemopadkeys[i].upper != NULL) {
-			nemopaduppers[i] = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
+			nemopaduppers[i] = one = nemoshow_item_create(NEMOSHOW_PATHTWICE_ITEM);
 			nemoshow_item_set_width(one,
 					nemopadkeys[i].x1 - nemopadkeys[i].x0);
 			nemoshow_item_set_height(one,
@@ -182,7 +182,7 @@ void __attribute__((constructor(101))) nemopad_initialize_envs(void)
 			nemopaduppers[i] = NULL;
 		}
 		if (nemopadkeys[i].shift != NULL) {
-			nemopadshifts[i] = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
+			nemopadshifts[i] = one = nemoshow_item_create(NEMOSHOW_PATHTWICE_ITEM);
 			nemoshow_item_set_width(one,
 					nemopadkeys[i].x1 - nemopadkeys[i].x0);
 			nemoshow_item_set_height(one,
@@ -547,7 +547,7 @@ int nemopad_activate(struct nemopad *pad, double x, double y, double r)
 
 	for (i = 0; i < NEMOPAD_KEYS_MAX; i++) {
 		if (nemopadborders[i] != NULL) {
-			pad->borders[i] = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
+			pad->borders[i] = one = nemoshow_item_create(NEMOSHOW_PATHTWICE_ITEM);
 			nemoshow_one_attach(canvas, one);
 			nemoshow_one_set_tag(one, i);
 			nemoshow_item_set_x(one, 0.0f);
@@ -571,7 +571,7 @@ int nemopad_activate(struct nemopad *pad, double x, double y, double r)
 		}
 
 		if (nemopadnormals[i] != NULL) {
-			pad->keys[i] = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
+			pad->keys[i] = one = nemoshow_item_create(NEMOSHOW_PATHTWICE_ITEM);
 			nemoshow_one_attach(canvas, one);
 			nemoshow_one_set_tag(one, i);
 			nemoshow_item_set_x(one, 0.0f);

@@ -252,7 +252,7 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_height(canvas, 512.0f);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
 
-	atom->onet = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
+	atom->onet = one = nemoshow_item_create(NEMOSHOW_PATHTWICE_ITEM);
 	nemoshow_one_attach(canvas, one);
 	nemoshow_item_set_width(one, 512.0f);
 	nemoshow_item_set_height(one, 512.0f);
