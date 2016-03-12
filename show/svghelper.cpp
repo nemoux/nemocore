@@ -975,6 +975,11 @@ static inline int nemoshow_svg_load_defs(struct svgcontext *context, struct xmln
 
 static inline int nemoshow_svg_load_one(struct svgcontext *context, struct xmlnode *node)
 {
+	const char *attr;
+
+	if ((attr = nemoxml_node_get_attr(node, "display")) != NULL && strcmp(attr, "none") == 0)
+		return 0;
+
 	if (strcmp(node->name, "rect") == 0) {
 		nemoshow_svg_load_rect(context, node);
 	} else if (strcmp(node->name, "circle") == 0) {

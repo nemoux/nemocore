@@ -1249,6 +1249,9 @@ int nemoshow_item_load_svg(struct showone *one, const char *uri, double x, doubl
 		has_stroke = 0;
 		has_fill = 0;
 
+		if ((attr0 = nemoxml_node_get_attr(node, "display")) != NULL && strcmp(attr0, "none") == 0)
+			continue;
+
 		if ((attr0 = nemoxml_node_get_attr(node, "stroke")) != NULL && strcmp(attr0, "none") != 0)
 			has_stroke = 1;
 
