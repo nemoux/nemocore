@@ -258,7 +258,7 @@ int main(int argc, char *argv[])
 	nemoshow_item_set_height(one, 512.0f);
 	nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
 	nemoshow_item_pivot(one, 512.0f / 2.0f, 512.0f / 2.0f);
-	nemoshow_item_load_svg(one, filepath, 0.0f, 0.0f, 512.0f, 512.0f);
+	nemoshow_item_path_load_svg(one, filepath, 0.0f, 0.0f, 512.0f, 512.0f);
 
 	atom->canvasp = canvas = nemoshow_canvas_create();
 	nemoshow_canvas_set_width(canvas, width);

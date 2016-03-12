@@ -493,9 +493,9 @@ static inline void nemoshow_canvas_render_item_points(struct showcanvas *canvas,
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE))
-		_canvas->drawPoints(SkCanvas::kPoints_PointMode, item->pointcount / 2, NEMOSHOW_ITEM_CC(item, points), *NEMOSHOW_ITEM_CC(item, fill));
+		_canvas->drawPoints(SkCanvas::kPoints_PointMode, item->npoints / 2, NEMOSHOW_ITEM_CC(item, points), *NEMOSHOW_ITEM_CC(item, fill));
 	if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
-		_canvas->drawPoints(SkCanvas::kPoints_PointMode, item->pointcount / 2, NEMOSHOW_ITEM_CC(item, points), *NEMOSHOW_ITEM_CC(item, stroke));
+		_canvas->drawPoints(SkCanvas::kPoints_PointMode, item->npoints / 2, NEMOSHOW_ITEM_CC(item, points), *NEMOSHOW_ITEM_CC(item, stroke));
 }
 
 static inline void nemoshow_canvas_render_item_polyline(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one)
@@ -503,9 +503,9 @@ static inline void nemoshow_canvas_render_item_polyline(struct showcanvas *canva
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE))
-		_canvas->drawPoints(SkCanvas::kLines_PointMode, item->pointcount / 2, NEMOSHOW_ITEM_CC(item, points), *NEMOSHOW_ITEM_CC(item, fill));
+		_canvas->drawPoints(SkCanvas::kLines_PointMode, item->npoints / 2, NEMOSHOW_ITEM_CC(item, points), *NEMOSHOW_ITEM_CC(item, fill));
 	if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
-		_canvas->drawPoints(SkCanvas::kLines_PointMode, item->pointcount / 2, NEMOSHOW_ITEM_CC(item, points), *NEMOSHOW_ITEM_CC(item, stroke));
+		_canvas->drawPoints(SkCanvas::kLines_PointMode, item->npoints / 2, NEMOSHOW_ITEM_CC(item, points), *NEMOSHOW_ITEM_CC(item, stroke));
 }
 
 static inline void nemoshow_canvas_render_item_polygon(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one)
@@ -513,9 +513,9 @@ static inline void nemoshow_canvas_render_item_polygon(struct showcanvas *canvas
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE))
-		_canvas->drawPoints(SkCanvas::kPolygon_PointMode, item->pointcount / 2, NEMOSHOW_ITEM_CC(item, points), *NEMOSHOW_ITEM_CC(item, fill));
+		_canvas->drawPoints(SkCanvas::kPolygon_PointMode, item->npoints / 2, NEMOSHOW_ITEM_CC(item, points), *NEMOSHOW_ITEM_CC(item, fill));
 	if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
-		_canvas->drawPoints(SkCanvas::kPolygon_PointMode, item->pointcount / 2, NEMOSHOW_ITEM_CC(item, points), *NEMOSHOW_ITEM_CC(item, stroke));
+		_canvas->drawPoints(SkCanvas::kPolygon_PointMode, item->npoints / 2, NEMOSHOW_ITEM_CC(item, points), *NEMOSHOW_ITEM_CC(item, stroke));
 }
 
 static inline void nemoshow_canvas_render_item_image(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one)

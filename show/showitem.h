@@ -122,10 +122,10 @@ struct showitem {
 	char *text;
 
 	uint32_t *cmds;
-	int cmdcount;
+	int ncmds, scmds;
 
 	double *points;
-	int pointcount;
+	int npoints, spoints;
 
 	char *uri;
 
@@ -187,14 +187,15 @@ extern int nemoshow_item_above_one(struct showone *one, struct showone *above);
 extern int nemoshow_item_below_one(struct showone *one, struct showone *below);
 
 extern void nemoshow_item_path_clear(struct showone *one);
-extern void nemoshow_item_path_moveto(struct showone *one, double x, double y);
-extern void nemoshow_item_path_lineto(struct showone *one, double x, double y);
-extern void nemoshow_item_path_cubicto(struct showone *one, double x0, double y0, double x1, double y1, double x2, double y2);
-extern void nemoshow_item_path_close(struct showone *one);
+extern int nemoshow_item_path_moveto(struct showone *one, double x, double y);
+extern int nemoshow_item_path_lineto(struct showone *one, double x, double y);
+extern int nemoshow_item_path_cubicto(struct showone *one, double x0, double y0, double x1, double y1, double x2, double y2);
+extern int nemoshow_item_path_close(struct showone *one);
 extern void nemoshow_item_path_cmd(struct showone *one, const char *cmd);
 extern void nemoshow_item_path_arc(struct showone *one, double x, double y, double width, double height, double from, double to);
 extern void nemoshow_item_path_text(struct showone *one, const char *font, int fontsize, const char *text, int textlength, double x, double y);
 extern void nemoshow_item_path_append(struct showone *one, struct showone *src);
+extern int nemoshow_item_path_load_svg(struct showone *one, const char *uri, double x, double y, double width, double height);
 
 extern void nemoshow_item_path_translate(struct showone *one, double x, double y);
 extern void nemoshow_item_path_scale(struct showone *one, double sx, double sy);
@@ -205,10 +206,8 @@ extern void nemoshow_item_path_set_dash_effect(struct showone *one, double *dash
 
 extern int nemoshow_item_path_contains_point(struct showone *one, double x, double y);
 
-extern int nemoshow_item_load_svg(struct showone *one, const char *uri, double x, double y, double width, double height);
-
-extern void nemoshow_item_set_cmds(struct showone *one, uint32_t *cmds, int cmdcount);
-extern void nemoshow_item_set_points(struct showone *one, double *points, int pointcount);
+extern void nemoshow_item_clear_points(struct showone *one);
+extern int nemoshow_item_append_point(struct showone *one, double x, double y);
 
 extern int nemoshow_item_set_buffer(struct showone *one, char *buffer, uint32_t width, uint32_t height);
 extern void nemoshow_item_put_buffer(struct showone *one);
@@ -477,20 +476,6 @@ static inline void nemoshow_item_set_pick(struct showone *one, int pick)
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	item->pick = pick;
-}
-
-static inline void nemoshow_item_set_cmd(struct showone *one, int index, uint32_t cmd)
-{
-	struct showitem *item = NEMOSHOW_ITEM(one);
-
-	item->cmds[index] = cmd;
-}
-
-static inline void nemoshow_item_set_point(struct showone *one, int index, double p)
-{
-	struct showitem *item = NEMOSHOW_ITEM(one);
-
-	item->points[index] = p;
 }
 
 #ifdef __cplusplus

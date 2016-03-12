@@ -148,7 +148,7 @@ void __attribute__((constructor(101))) nemopad_initialize_envs(void)
 					nemopadkeys[i].x1 - nemopadkeys[i].x0);
 			nemoshow_item_set_height(one,
 					nemopadkeys[i].y1 - nemopadkeys[i].y0);
-			nemoshow_item_load_svg(one, nemopadkeys[i].border,
+			nemoshow_item_path_load_svg(one, nemopadkeys[i].border,
 					0.0f, 0.0f,
 					nemopadkeys[i].x1 - nemopadkeys[i].x0,
 					nemopadkeys[i].y1 - nemopadkeys[i].y0);
@@ -161,7 +161,7 @@ void __attribute__((constructor(101))) nemopad_initialize_envs(void)
 					nemopadkeys[i].x1 - nemopadkeys[i].x0);
 			nemoshow_item_set_height(one,
 					nemopadkeys[i].y1 - nemopadkeys[i].y0);
-			nemoshow_item_load_svg(one, nemopadkeys[i].normal,
+			nemoshow_item_path_load_svg(one, nemopadkeys[i].normal,
 					0.0f, 0.0f,
 					nemopadkeys[i].x1 - nemopadkeys[i].x0,
 					nemopadkeys[i].y1 - nemopadkeys[i].y0);
@@ -174,7 +174,7 @@ void __attribute__((constructor(101))) nemopad_initialize_envs(void)
 					nemopadkeys[i].x1 - nemopadkeys[i].x0);
 			nemoshow_item_set_height(one,
 					nemopadkeys[i].y1 - nemopadkeys[i].y0);
-			nemoshow_item_load_svg(one, nemopadkeys[i].upper,
+			nemoshow_item_path_load_svg(one, nemopadkeys[i].upper,
 					0.0f, 0.0f,
 					nemopadkeys[i].x1 - nemopadkeys[i].x0,
 					nemopadkeys[i].y1 - nemopadkeys[i].y0);
@@ -187,7 +187,7 @@ void __attribute__((constructor(101))) nemopad_initialize_envs(void)
 					nemopadkeys[i].x1 - nemopadkeys[i].x0);
 			nemoshow_item_set_height(one,
 					nemopadkeys[i].y1 - nemopadkeys[i].y0);
-			nemoshow_item_load_svg(one, nemopadkeys[i].shift,
+			nemoshow_item_path_load_svg(one, nemopadkeys[i].shift,
 					0.0f, 0.0f,
 					nemopadkeys[i].x1 - nemopadkeys[i].x0,
 					nemopadkeys[i].y1 - nemopadkeys[i].y0);

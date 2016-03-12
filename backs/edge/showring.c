@@ -103,12 +103,12 @@ int nemoshow_ring_set_sattr(struct showone *one, const char *attr, const char *v
 	struct showring *ring = (struct showring *)nemoshow_one_get_context(one);
 
 	if (strcmp(attr, "inner_icon") == 0) {
-		nemoshow_item_load_svg(ring->icon0, value,
+		nemoshow_item_path_load_svg(ring->icon0, value,
 				0.0f, 0.0f,
 				nemoshow_item_get_width(ring->icon0),
 				nemoshow_item_get_height(ring->icon0));
 	} else if (strcmp(attr, "outer_icon") == 0) {
-		nemoshow_item_load_svg(ring->icon1, value,
+		nemoshow_item_path_load_svg(ring->icon1, value,
 				0.0f, 0.0f,
 				nemoshow_item_get_width(ring->icon1),
 				nemoshow_item_get_height(ring->icon1));

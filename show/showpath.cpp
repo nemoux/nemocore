@@ -37,6 +37,28 @@ struct showone *nemoshow_path_create(int type)
 	NEMOSHOW_PATH_CC(path, paint)->setAntiAlias(true);
 	NEMOSHOW_PATH_CC(path, path) = new SkPath;
 
+	path->alpha = 1.0f;
+
+	path->fills[NEMOSHOW_PATH_ALPHA_COLOR] = 255.0f;
+	path->fills[NEMOSHOW_PATH_RED_COLOR] = 255.0f;
+	path->fills[NEMOSHOW_PATH_GREEN_COLOR] = 255.0f;
+	path->fills[NEMOSHOW_PATH_BLUE_COLOR] = 255.0f;
+	path->strokes[NEMOSHOW_PATH_ALPHA_COLOR] = 255.0f;
+	path->strokes[NEMOSHOW_PATH_RED_COLOR] = 255.0f;
+	path->strokes[NEMOSHOW_PATH_GREEN_COLOR] = 255.0f;
+	path->strokes[NEMOSHOW_PATH_BLUE_COLOR] = 255.0f;
+
+	path->_alpha = 1.0f;
+
+	path->_fills[NEMOSHOW_PATH_ALPHA_COLOR] = 255.0f;
+	path->_fills[NEMOSHOW_PATH_RED_COLOR] = 255.0f;
+	path->_fills[NEMOSHOW_PATH_GREEN_COLOR] = 255.0f;
+	path->_fills[NEMOSHOW_PATH_BLUE_COLOR] = 255.0f;
+	path->_strokes[NEMOSHOW_PATH_ALPHA_COLOR] = 255.0f;
+	path->_strokes[NEMOSHOW_PATH_RED_COLOR] = 255.0f;
+	path->_strokes[NEMOSHOW_PATH_GREEN_COLOR] = 255.0f;
+	path->_strokes[NEMOSHOW_PATH_BLUE_COLOR] = 255.0f;
+
 	one = &path->base;
 	one->type = NEMOSHOW_PATH_TYPE;
 	one->sub = type;

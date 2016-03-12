@@ -136,11 +136,27 @@ struct showone *nemoshow_item_create(int type)
 
 	nemoobject_set_reserved(&one->object, "alpha", &item->_alpha, sizeof(double));
 
-	if (one->sub == NEMOSHOW_TEXTBOX_ITEM) {
+	if (one->sub == NEMOSHOW_TEXT_ITEM) {
+		item->points = (double *)malloc(sizeof(double) * 8);
+		item->npoints = 0;
+		item->spoints = 8;
+	} else if (one->sub == NEMOSHOW_TEXTBOX_ITEM) {
 		NEMOSHOW_ITEM_CC(item, textbox) = new SkTextBox;
 		NEMOSHOW_ITEM_CC(item, textbox)->setMode(SkTextBox::kLineBreak_Mode);
+	} else if (one->sub == NEMOSHOW_PATHARRAY_ITEM) {
+		item->cmds = (uint32_t *)malloc(sizeof(uint32_t) * 8);
+		item->ncmds = 0;
+		item->scmds = 8;
+
+		item->points = (double *)malloc(sizeof(double) * 8);
+		item->npoints = 0;
+		item->spoints = 8;
 	} else if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
 		nemoshow_one_set_state(one, NEMOSHOW_INHERIT_STATE);
+	} else if (one->sub == NEMOSHOW_POINTS_ITEM || one->sub == NEMOSHOW_POLYLINE_ITEM || one->sub == NEMOSHOW_POLYGON_ITEM) {
+		item->points = (double *)malloc(sizeof(double) * 8);
+		item->npoints = 0;
+		item->spoints = 8;
 	} else if (one->sub == NEMOSHOW_GROUP_ITEM) {
 		nemoshow_one_set_state(one, NEMOSHOW_INHERIT_STATE);
 		nemoshow_one_set_state(one, NEMOSHOW_BOUNDS_STATE);
@@ -437,21 +453,18 @@ static inline void nemoshow_item_update_text(struct nemoshow *show, struct showo
 
 				fontscale = item->fontsize / NEMOSHOW_FONT_AT(NEMOSHOW_REF(one, NEMOSHOW_FONT_REF), max_advance_height);
 
-				if (item->points != NULL)
-					free(item->points);
 				if (NEMOSHOW_ITEM_CC(item, points) != NULL)
 					delete[] NEMOSHOW_ITEM_CC(item, points);
 
-				item->points = (double *)malloc(sizeof(double[2]) * nhbglyphs);
-				item->pointcount = nhbglyphs * 2;
-
 				NEMOSHOW_ITEM_CC(item, points) = new SkPoint[nhbglyphs];
+
+				item->npoints = 0;
 
 				item->textwidth = 0.0f;
 
 				for (i = 0; i < nhbglyphs; i++) {
-					item->points[i * 2 + 0] = hbglyphspos[i].x_offset * fontscale + item->textwidth + item->x;
-					item->points[i * 2 + 1] = item->y - item->fontascent;
+					NEMOBOX_APPEND(item->points, item->spoints, item->npoints, hbglyphspos[i].x_offset * fontscale + item->textwidth + item->x);
+					NEMOBOX_APPEND(item->points, item->spoints, item->npoints, item->y - item->fontascent);
 
 					item->textwidth += hbglyphspos[i].x_advance * fontscale;
 				}
@@ -484,32 +497,25 @@ static inline void nemoshow_item_update_points(struct nemoshow *show, struct sho
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	if (one->sub == NEMOSHOW_POINTS_ITEM || one->sub == NEMOSHOW_POLYLINE_ITEM || one->sub == NEMOSHOW_POLYGON_ITEM) {
-		if (item->points != NULL) {
-			int i;
+		int i;
 
-			if (NEMOSHOW_ITEM_CC(item, points) != NULL)
-				delete[] NEMOSHOW_ITEM_CC(item, points);
+		if (NEMOSHOW_ITEM_CC(item, points) != NULL)
+			delete[] NEMOSHOW_ITEM_CC(item, points);
 
-			NEMOSHOW_ITEM_CC(item, points) = new SkPoint[item->pointcount / 2];
+		NEMOSHOW_ITEM_CC(item, points) = new SkPoint[item->npoints / 2];
 
-			for (i = 0; i < item->pointcount / 2; i++) {
-				NEMOSHOW_ITEM_CC(item, points)[i].set(
-						item->points[i * 2 + 0],
-						item->points[i * 2 + 1]);
-			}
-
-			one->dirty |= NEMOSHOW_SHAPE_DIRTY;
+		for (i = 0; i < item->npoints / 2; i++) {
+			NEMOSHOW_ITEM_CC(item, points)[i].set(
+					item->points[i * 2 + 0],
+					item->points[i * 2 + 1]);
 		}
+
+		nemoobject_set_reserved(&one->object, "points", item->points, sizeof(double) * item->npoints);
+
+		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 	} else if (one->sub == NEMOSHOW_PATHARRAY_ITEM) {
-		one->dirty |= NEMOSHOW_PATH_DIRTY;
-	}
-}
+		nemoobject_set_reserved(&one->object, "points", item->points, sizeof(double) * item->npoints);
 
-static inline void nemoshow_item_update_cmds(struct nemoshow *show, struct showone *one)
-{
-	struct showitem *item = NEMOSHOW_ITEM(one);
-
-	if (one->sub == NEMOSHOW_PATHARRAY_ITEM) {
 		one->dirty |= NEMOSHOW_PATH_DIRTY;
 	}
 }
@@ -523,7 +529,7 @@ static inline void nemoshow_item_update_path(struct nemoshow *show, struct showo
 
 		NEMOSHOW_ITEM_CC(item, path)->reset();
 
-		for (i = 0; i < item->cmdcount; i++) {
+		for (i = 0; i < item->ncmds; i++) {
 			if (item->cmds[i] == NEMOSHOW_ITEM_PATH_MOVETO_CMD)
 				NEMOSHOW_ITEM_CC(item, path)->moveTo(
 						item->points[NEMOSHOW_ITEM_PATHARRAY_OFFSET_X0(i)],
@@ -764,7 +770,7 @@ void nemoshow_item_update_bounds(struct nemoshow *show, struct showone *one)
 		int32_t x0 = INT_MAX, y0 = INT_MAX, x1 = INT_MIN, y1 = INT_MIN;
 		int i;
 
-		for (i = 0; i < item->pointcount / 2; i++) {
+		for (i = 0; i < item->npoints / 2; i++) {
 			if (item->points[i * 2 + 0] < x0)
 				x0 = item->points[i * 2 + 0];
 			if (item->points[i * 2 + 0] > x1)
@@ -836,8 +842,6 @@ int nemoshow_item_update(struct showone *one)
 		nemoshow_item_update_text(show, one);
 	if ((one->dirty & NEMOSHOW_POINTS_DIRTY) != 0)
 		nemoshow_item_update_points(show, one);
-	if ((one->dirty & NEMOSHOW_CMDS_DIRTY) != 0)
-		nemoshow_item_update_cmds(show, one);
 	if ((one->dirty & NEMOSHOW_PATH_DIRTY) != 0)
 		nemoshow_item_update_path(show, one);
 	if ((one->dirty & NEMOSHOW_MATRIX_DIRTY) != 0)
@@ -1010,45 +1014,122 @@ void nemoshow_item_path_clear(struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
+	if (one->sub == NEMOSHOW_PATHARRAY_ITEM) {
+		item->ncmds = 0;
+		item->npoints = 0;
+
+		nemoshow_one_dirty(one, NEMOSHOW_POINTS_DIRTY | NEMOSHOW_PATH_DIRTY);
+
+		return;
+	}
+
 	NEMOSHOW_ITEM_CC(item, path)->reset();
 
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 }
 
-void nemoshow_item_path_moveto(struct showone *one, double x, double y)
+int nemoshow_item_path_moveto(struct showone *one, double x, double y)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	if (one->sub == NEMOSHOW_PATHARRAY_ITEM) {
+		NEMOBOX_APPEND(item->cmds, item->scmds, item->ncmds, NEMOSHOW_ITEM_PATH_MOVETO_CMD);
+
+		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, x);
+		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, y);
+		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, 0.0f);
+		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, 0.0f);
+		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, 0.0f);
+		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, 0.0f);
+
+		nemoshow_one_dirty(one, NEMOSHOW_POINTS_DIRTY | NEMOSHOW_PATH_DIRTY);
+
+		return item->ncmds - 1;
+	}
 
 	NEMOSHOW_ITEM_CC(item, path)->moveTo(x, y);
 
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
+
+	return 0;
 }
 
-void nemoshow_item_path_lineto(struct showone *one, double x, double y)
+int nemoshow_item_path_lineto(struct showone *one, double x, double y)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	if (one->sub == NEMOSHOW_PATHARRAY_ITEM) {
+		NEMOBOX_APPEND(item->cmds, item->scmds, item->ncmds, NEMOSHOW_ITEM_PATH_LINETO_CMD);
+
+		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, x);
+		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, y);
+		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, 0.0f);
+		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, 0.0f);
+		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, 0.0f);
+		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, 0.0f);
+
+		nemoshow_one_dirty(one, NEMOSHOW_POINTS_DIRTY | NEMOSHOW_PATH_DIRTY);
+
+		return item->ncmds - 1;
+	}
 
 	NEMOSHOW_ITEM_CC(item, path)->lineTo(x, y);
 
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
+
+	return 0;
 }
 
-void nemoshow_item_path_cubicto(struct showone *one, double x0, double y0, double x1, double y1, double x2, double y2)
+int nemoshow_item_path_cubicto(struct showone *one, double x0, double y0, double x1, double y1, double x2, double y2)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	if (one->sub == NEMOSHOW_PATHARRAY_ITEM) {
+		NEMOBOX_APPEND(item->cmds, item->scmds, item->ncmds, NEMOSHOW_ITEM_PATH_CURVETO_CMD);
+
+		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, x0);
+		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, y0);
+		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, x1);
+		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, y1);
+		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, x2);
+		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, y2);
+
+		nemoshow_one_dirty(one, NEMOSHOW_POINTS_DIRTY | NEMOSHOW_PATH_DIRTY);
+
+		return item->ncmds - 1;
+	}
 
 	NEMOSHOW_ITEM_CC(item, path)->cubicTo(x0, y0, x1, y1, x2, y2);
 
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
+
+	return 0;
 }
 
-void nemoshow_item_path_close(struct showone *one)
+int nemoshow_item_path_close(struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	if (one->sub == NEMOSHOW_PATHARRAY_ITEM) {
+		NEMOBOX_APPEND(item->cmds, item->scmds, item->ncmds, NEMOSHOW_ITEM_PATH_CLOSE_CMD);
+
+		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, 0.0f);
+		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, 0.0f);
+		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, 0.0f);
+		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, 0.0f);
+		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, 0.0f);
+		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, 0.0f);
+
+		nemoshow_one_dirty(one, NEMOSHOW_POINTS_DIRTY | NEMOSHOW_PATH_DIRTY);
+
+		return item->ncmds - 1;
+	}
 
 	NEMOSHOW_ITEM_CC(item, path)->close();
 
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
+
+	return 0;
 }
 
 void nemoshow_item_path_cmd(struct showone *one, const char *cmd)
@@ -1110,97 +1191,7 @@ void nemoshow_item_path_append(struct showone *one, struct showone *src)
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 }
 
-void nemoshow_item_path_translate(struct showone *one, double x, double y)
-{
-	struct showitem *item = NEMOSHOW_ITEM(one);
-	SkMatrix matrix;
-
-	matrix.setIdentity();
-	matrix.postTranslate(x, y);
-
-	NEMOSHOW_ITEM_CC(item, path)->transform(matrix);
-
-	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
-}
-
-void nemoshow_item_path_scale(struct showone *one, double sx, double sy)
-{
-	struct showitem *item = NEMOSHOW_ITEM(one);
-	SkMatrix matrix;
-
-	matrix.setIdentity();
-	matrix.postScale(sx, sy);
-
-	NEMOSHOW_ITEM_CC(item, path)->transform(matrix);
-
-	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
-}
-
-void nemoshow_item_path_rotate(struct showone *one, double ro)
-{
-	struct showitem *item = NEMOSHOW_ITEM(one);
-	SkMatrix matrix;
-
-	matrix.setIdentity();
-	matrix.postRotate(ro);
-
-	NEMOSHOW_ITEM_CC(item, path)->transform(matrix);
-
-	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
-}
-
-void nemoshow_item_path_set_discrete_effect(struct showone *one, double segment, double deviation, uint32_t seed)
-{
-	struct showitem *item = NEMOSHOW_ITEM(one);
-
-	item->pathsegment = segment;
-	item->pathdeviation = deviation;
-	item->pathseed = seed;
-
-	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
-}
-
-void nemoshow_item_path_set_dash_effect(struct showone *one, double *dashes, int dashcount)
-{
-	struct showitem *item = NEMOSHOW_ITEM(one);
-	int i;
-
-	if (item->pathdashes != NULL)
-		free(item->pathdashes);
-
-	item->pathdashes = (double *)malloc(sizeof(double) * dashcount);
-	item->pathdashcount = dashcount;
-
-	for (i = 0; i < dashcount; i++)
-		item->pathdashes[i] = dashes[i];
-
-	nemoobject_set_reserved(&one->object, "pathdash", item->pathdashes, sizeof(double) * dashcount);
-
-	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
-}
-
-int nemoshow_item_path_contains_point(struct showone *one, double x, double y)
-{
-	struct showitem *item = NEMOSHOW_ITEM(one);
-
-	if (NEMOSHOW_ITEM_CC(item, has_inverse)) {
-		SkPoint p = NEMOSHOW_ITEM_CC(item, inverse)->mapXY(x, y);
-
-		if (one->x0 < p.x() && p.x() < one->x1 &&
-				one->y0 < p.y() && p.y() < one->y1) {
-			SkRegion region;
-			SkRegion clip;
-
-			clip.setRect(p.x(), p.y(), p.x() + 1, p.y() + 1);
-
-			return region.setPath(*NEMOSHOW_ITEM_CC(item, path), clip) == true;
-		}
-	}
-
-	return 0;
-}
-
-int nemoshow_item_load_svg(struct showone *one, const char *uri, double x, double y, double width, double height)
+int nemoshow_item_path_load_svg(struct showone *one, const char *uri, double x, double y, double width, double height)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	struct nemoxml *xml;
@@ -1381,50 +1372,111 @@ int nemoshow_item_load_svg(struct showone *one, const char *uri, double x, doubl
 	return 0;
 }
 
-void nemoshow_item_set_cmds(struct showone *one, uint32_t *cmds, int cmdcount)
+void nemoshow_item_path_translate(struct showone *one, double x, double y)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
-	int i;
+	SkMatrix matrix;
 
-	if (item->cmds != NULL)
-		free(item->cmds);
+	matrix.setIdentity();
+	matrix.postTranslate(x, y);
 
-	item->cmds = (uint32_t *)malloc(sizeof(uint32_t) * cmdcount);
-	item->cmdcount = cmdcount;
+	NEMOSHOW_ITEM_CC(item, path)->transform(matrix);
 
-	if (cmds != NULL) {
-		for (i = 0; i < cmdcount; i++)
-			item->cmds[i] = cmds[i];
-	} else {
-		for (i = 0; i < cmdcount; i++)
-			item->cmds[i] = 0;
-	}
-
-	nemoshow_one_dirty(one, NEMOSHOW_CMDS_DIRTY);
+	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 }
 
-void nemoshow_item_set_points(struct showone *one, double *points, int pointcount)
+void nemoshow_item_path_scale(struct showone *one, double sx, double sy)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+	SkMatrix matrix;
+
+	matrix.setIdentity();
+	matrix.postScale(sx, sy);
+
+	NEMOSHOW_ITEM_CC(item, path)->transform(matrix);
+
+	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
+}
+
+void nemoshow_item_path_rotate(struct showone *one, double ro)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+	SkMatrix matrix;
+
+	matrix.setIdentity();
+	matrix.postRotate(ro);
+
+	NEMOSHOW_ITEM_CC(item, path)->transform(matrix);
+
+	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
+}
+
+void nemoshow_item_path_set_discrete_effect(struct showone *one, double segment, double deviation, uint32_t seed)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	item->pathsegment = segment;
+	item->pathdeviation = deviation;
+	item->pathseed = seed;
+
+	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
+}
+
+void nemoshow_item_path_set_dash_effect(struct showone *one, double *dashes, int dashcount)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	int i;
 
-	if (item->points != NULL)
-		free(item->points);
+	if (item->pathdashes != NULL)
+		free(item->pathdashes);
 
-	item->points = (double *)malloc(sizeof(double) * pointcount);
-	item->pointcount = pointcount;
+	item->pathdashes = (double *)malloc(sizeof(double) * dashcount);
+	item->pathdashcount = dashcount;
 
-	if (points != NULL) {
-		for (i = 0; i < pointcount; i++)
-			item->points[i] = points[i];
-	} else {
-		for (i = 0; i < pointcount; i++)
-			item->points[i] = 0.0f;
+	for (i = 0; i < dashcount; i++)
+		item->pathdashes[i] = dashes[i];
+
+	nemoobject_set_reserved(&one->object, "pathdash", item->pathdashes, sizeof(double) * dashcount);
+
+	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
+}
+
+int nemoshow_item_path_contains_point(struct showone *one, double x, double y)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	if (NEMOSHOW_ITEM_CC(item, has_inverse)) {
+		SkPoint p = NEMOSHOW_ITEM_CC(item, inverse)->mapXY(x, y);
+
+		if (one->x0 < p.x() && p.x() < one->x1 &&
+				one->y0 < p.y() && p.y() < one->y1) {
+			SkRegion region;
+			SkRegion clip;
+
+			clip.setRect(p.x(), p.y(), p.x() + 1, p.y() + 1);
+
+			return region.setPath(*NEMOSHOW_ITEM_CC(item, path), clip) == true;
+		}
 	}
 
-	nemoobject_set_reserved(&one->object, "points", item->points, sizeof(double) * pointcount);
+	return 0;
+}
 
-	nemoshow_one_dirty(one, NEMOSHOW_POINTS_DIRTY);
+void nemoshow_item_clear_points(struct showone *one)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	item->npoints = 0;
+}
+
+int nemoshow_item_append_point(struct showone *one, double x, double y)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	NEMOBOX_APPEND(item->points, item->spoints, item->npoints, x);
+	NEMOBOX_APPEND(item->points, item->spoints, item->npoints, y);
+
+	return item->npoints / 2 - 1;
 }
 
 int nemoshow_item_set_buffer(struct showone *one, char *buffer, uint32_t width, uint32_t height)

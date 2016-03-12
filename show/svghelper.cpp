@@ -729,10 +729,11 @@ static inline int nemoshow_svg_load_polygon(struct svgcontext *context, struct x
 
 	count = nemotoken_get_token_count(token);
 
-	nemoshow_item_set_points(one, NULL, count);
-
-	for (i = 0; i < count; i++)
-		nemoshow_item_set_point(one, i, strtod(nemotoken_get_token(token, i), NULL));
+	for (i = 0; i < count; i += 2) {
+		nemoshow_item_append_point(one,
+				strtod(nemotoken_get_token(token, i + 0), NULL),
+				strtod(nemotoken_get_token(token, i + 1), NULL));
+	}
 
 	nemotoken_destroy(token);
 
@@ -766,10 +767,11 @@ static inline int nemoshow_svg_load_polyline(struct svgcontext *context, struct 
 
 	count = nemotoken_get_token_count(token);
 
-	nemoshow_item_set_points(one, NULL, count);
-
-	for (i = 0; i < count; i++)
-		nemoshow_item_set_point(one, i, strtod(nemotoken_get_token(token, i), NULL));
+	for (i = 0; i < count; i++) {
+		nemoshow_item_append_point(one,
+				strtod(nemotoken_get_token(token, i + 0), NULL),
+				strtod(nemotoken_get_token(token, i + 1), NULL));
+	}
 
 	nemotoken_destroy(token);
 

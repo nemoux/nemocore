@@ -141,7 +141,7 @@ int nemoback_mirotap_down(struct miroback *miro, struct mirotap *tap, double x, 
 	nemoshow_item_pivot(one, miro->tapsize / 2.0f, miro->tapsize / 2.0f);
 	nemoshow_item_translate(one, x - miro->tapsize / 2.0f, y - miro->tapsize / 2.0f);
 	nemoshow_item_scale(one, 0.0f, 0.0f);
-	nemoshow_item_load_svg(one, NEMOUX_MIROBACK_RESOURCES "/touch-1.svg", 0.0f, 0.0f, miro->tapsize, miro->tapsize);
+	nemoshow_item_path_load_svg(one, NEMOUX_MIROBACK_RESOURCES "/touch-1.svg", 0.0f, 0.0f, miro->tapsize, miro->tapsize);
 
 	tap->one1 = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
 	nemoshow_one_attach(miro->canvas, one);
@@ -151,7 +151,7 @@ int nemoback_mirotap_down(struct miroback *miro, struct mirotap *tap, double x, 
 	nemoshow_item_set_filter(one, tap->blur);
 	nemoshow_item_pivot(one, miro->tapsize / 2.0f, miro->tapsize / 2.0f);
 	nemoshow_item_translate(one, x - miro->tapsize / 2.0f, y - miro->tapsize / 2.0f);
-	nemoshow_item_load_svg(one, NEMOUX_MIROBACK_RESOURCES "/touch-3-1.svg", 0.0f, 0.0f, miro->tapsize, miro->tapsize);
+	nemoshow_item_path_load_svg(one, NEMOUX_MIROBACK_RESOURCES "/touch-3-1.svg", 0.0f, 0.0f, miro->tapsize, miro->tapsize);
 	nemoshow_item_set_alpha(one, 0.0f);
 
 	tap->one2 = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
@@ -162,7 +162,7 @@ int nemoback_mirotap_down(struct miroback *miro, struct mirotap *tap, double x, 
 	nemoshow_item_set_filter(one, tap->blur);
 	nemoshow_item_pivot(one, miro->tapsize / 2.0f, miro->tapsize / 2.0f);
 	nemoshow_item_translate(one, x - miro->tapsize / 2.0f, y - miro->tapsize / 2.0f);
-	nemoshow_item_load_svg(one, NEMOUX_MIROBACK_RESOURCES "/touch-3-2.svg", 0.0f, 0.0f, miro->tapsize, miro->tapsize);
+	nemoshow_item_path_load_svg(one, NEMOUX_MIROBACK_RESOURCES "/touch-3-2.svg", 0.0f, 0.0f, miro->tapsize, miro->tapsize);
 	nemoshow_item_set_alpha(one, 0.0f);
 
 	tap->one3 = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
@@ -173,7 +173,7 @@ int nemoback_mirotap_down(struct miroback *miro, struct mirotap *tap, double x, 
 	nemoshow_item_set_filter(one, tap->blur);
 	nemoshow_item_pivot(one, miro->tapsize / 2.0f, miro->tapsize / 2.0f);
 	nemoshow_item_translate(one, x - miro->tapsize / 2.0f, y - miro->tapsize / 2.0f);
-	nemoshow_item_load_svg(one, NEMOUX_MIROBACK_RESOURCES "/touch-3-3.svg", 0.0f, 0.0f, miro->tapsize, miro->tapsize);
+	nemoshow_item_path_load_svg(one, NEMOUX_MIROBACK_RESOURCES "/touch-3-3.svg", 0.0f, 0.0f, miro->tapsize, miro->tapsize);
 	nemoshow_item_set_alpha(one, 0.0f);
 
 	tap->one4 = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
@@ -184,7 +184,7 @@ int nemoback_mirotap_down(struct miroback *miro, struct mirotap *tap, double x, 
 	nemoshow_item_set_filter(one, tap->blur);
 	nemoshow_item_pivot(one, miro->tapsize / 2.0f, miro->tapsize / 2.0f);
 	nemoshow_item_translate(one, x - miro->tapsize / 2.0f, y - miro->tapsize / 2.0f);
-	nemoshow_item_load_svg(one, NEMOUX_MIROBACK_RESOURCES "/touch-3-4.svg", 0.0f, 0.0f, miro->tapsize, miro->tapsize);
+	nemoshow_item_path_load_svg(one, NEMOUX_MIROBACK_RESOURCES "/touch-3-4.svg", 0.0f, 0.0f, miro->tapsize, miro->tapsize);
 	nemoshow_item_set_alpha(one, 0.0f);
 
 	tap->oner = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
@@ -197,7 +197,7 @@ int nemoback_mirotap_down(struct miroback *miro, struct mirotap *tap, double x, 
 	nemoshow_item_pivot(one, miro->tapsize / 2.0f, miro->tapsize / 2.0f);
 	nemoshow_item_translate(one, x - miro->tapsize / 2.0f, y - miro->tapsize / 2.0f);
 	nemoshow_item_scale(one, 0.9f, 0.9f);
-	nemoshow_item_load_svg(one, NEMOUX_MIROBACK_RESOURCES "/touch-2.svg", 0.0f, 0.0f, miro->tapsize, miro->tapsize);
+	nemoshow_item_path_load_svg(one, NEMOUX_MIROBACK_RESOURCES "/touch-2.svg", 0.0f, 0.0f, miro->tapsize, miro->tapsize);
 
 	set0 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set0, tap->one0);
