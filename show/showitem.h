@@ -75,6 +75,15 @@ typedef enum {
 	NEMOSHOW_ITEM_ALPHA_COLOR = 3
 } NemoShowItemColor;
 
+typedef enum {
+	NEMOSHOW_ITEM_PATH_NONE_CMD = 0,
+	NEMOSHOW_ITEM_PATH_MOVETO_CMD = 1,
+	NEMOSHOW_ITEM_PATH_LINETO_CMD = 2,
+	NEMOSHOW_ITEM_PATH_CURVETO_CMD = 3,
+	NEMOSHOW_ITEM_PATH_CLOSE_CMD = 4,
+	NEMOSHOW_ITEM_PATH_LAST_CMD
+} NemoShowItemPathCmd;
+
 struct showitem {
 	struct showone base;
 
@@ -112,6 +121,9 @@ struct showitem {
 	double spacingmul, spacingadd;
 	char *text;
 
+	uint32_t *cmds;
+	int cmdcount;
+
 	double *points;
 	int pointcount;
 
@@ -142,6 +154,12 @@ struct showitem {
 #define NEMOSHOW_ITEM_POLYLINE_OFFSET_Y(index)			(index * 2 + 1)
 #define NEMOSHOW_ITEM_POLYGON_OFFSET_X(index)				(index * 2 + 0)
 #define NEMOSHOW_ITEM_POLYGON_OFFSET_Y(index)				(index * 2 + 1)
+#define NEMOSHOW_ITEM_PATHARRAY_OFFSET_X0(index)		(index * 6 + 0)
+#define NEMOSHOW_ITEM_PATHARRAY_OFFSET_Y0(index)		(index * 6 + 1)
+#define NEMOSHOW_ITEM_PATHARRAY_OFFSET_X1(index)		(index * 6 + 2)
+#define NEMOSHOW_ITEM_PATHARRAY_OFFSET_Y1(index)		(index * 6 + 3)
+#define NEMOSHOW_ITEM_PATHARRAY_OFFSET_X2(index)		(index * 6 + 4)
+#define NEMOSHOW_ITEM_PATHARRAY_OFFSET_Y2(index)		(index * 6 + 5)
 
 extern struct showone *nemoshow_item_create(int type);
 extern void nemoshow_item_destroy(struct showone *one);
@@ -189,6 +207,7 @@ extern int nemoshow_item_path_contains_point(struct showone *one, double x, doub
 
 extern int nemoshow_item_load_svg(struct showone *one, const char *uri, double x, double y, double width, double height);
 
+extern void nemoshow_item_set_cmds(struct showone *one, uint32_t *cmds, int cmdcount);
 extern void nemoshow_item_set_points(struct showone *one, double *points, int pointcount);
 
 extern int nemoshow_item_set_buffer(struct showone *one, char *buffer, uint32_t width, uint32_t height);
