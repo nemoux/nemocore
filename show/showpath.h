@@ -11,32 +11,51 @@ NEMO_BEGIN_EXTERN_C
 
 #include <showone.h>
 
+#define NEMOSHOW_PATH_DASH_MAX			(32)
+
 typedef enum {
-	NEMOSHOW_NONE_PATH = 0,
-	NEMOSHOW_MOVETO_PATH = 1,
-	NEMOSHOW_LINETO_PATH = 2,
-	NEMOSHOW_CURVETO_PATH = 3,
-	NEMOSHOW_CLOSE_PATH = 4,
-	NEMOSHOW_CMD_PATH = 5,
-	NEMOSHOW_TEXT_PATH = 6,
-	NEMOSHOW_RECT_PATH = 7,
-	NEMOSHOW_CIRCLE_PATH = 8,
-	NEMOSHOW_LAST_PATH
-} NemoShowPathType;
+	NEMOSHOW_PATH_BUTT_CAP = 0,
+	NEMOSHOW_PATH_ROUND_CAP = 1,
+	NEMOSHOW_PATH_SQUARE_CAP = 2,
+	NEMOSHOW_PATH_LAST_CAP
+} NemoShowPathCap;
+
+typedef enum {
+	NEMOSHOW_PATH_MITER_JOIN = 0,
+	NEMOSHOW_PATH_ROUND_JOIN = 1,
+	NEMOSHOW_PATH_BEVEL_JOIN = 2,
+	NEMOSHOW_PATH_LAST_JOIN
+} NemoShowPathJoin;
+
+typedef enum {
+	NEMOSHOW_PATH_BLUE_COLOR = 0,
+	NEMOSHOW_PATH_GREEN_COLOR = 1,
+	NEMOSHOW_PATH_RED_COLOR = 2,
+	NEMOSHOW_PATH_ALPHA_COLOR = 3
+} NemoShowPathColor;
 
 struct showpath {
 	struct showone base;
 
-	double x0, y0;
-	double x1, y1;
-	double x2, y2;
-	double width, height;
-	double r;
+	double strokes[4];
+	double stroke_width;
+	double fills[4];
 
-	char *cmd;
-	char *text;
-	char *font;
-	int fontsize;
+	double alpha;
+
+	double _strokes[4];
+	double _fills[4];
+	double _alpha;
+
+	double pathlength;
+	double pathsegment;
+	double pathdeviation;
+	uint32_t pathseed;
+
+	double *pathdashes;
+	int pathdashcount;
+
+	void *cc;
 };
 
 #define NEMOSHOW_PATH(one)					((struct showpath *)container_of(one, struct showpath, base))
@@ -48,84 +67,72 @@ extern void nemoshow_path_destroy(struct showone *one);
 extern int nemoshow_path_arrange(struct showone *one);
 extern int nemoshow_path_update(struct showone *one);
 
-static inline void nemoshow_path_set_x0(struct showone *one, double x0)
-{
-	NEMOSHOW_PATH_AT(one, x0) = x0;
-}
+extern void nemoshow_path_set_stroke_cap(struct showone *one, int cap);
+extern void nemoshow_path_set_stroke_join(struct showone *one, int join);
 
-static inline void nemoshow_path_set_y0(struct showone *one, double y0)
-{
-	NEMOSHOW_PATH_AT(one, y0) = y0;
-}
+extern void nemoshow_path_clear(struct showone *one);
+extern void nemoshow_path_moveto(struct showone *one, double x, double y);
+extern void nemoshow_path_lineto(struct showone *one, double x, double y);
+extern void nemoshow_path_cubicto(struct showone *one, double x0, double y0, double x1, double y1, double x2, double y2);
+extern void nemoshow_path_close(struct showone *one);
+extern void nemoshow_path_cmd(struct showone *one, const char *cmd);
+extern void nemoshow_path_arc(struct showone *one, double x, double y, double width, double height, double from, double to);
+extern void nemoshow_path_text(struct showone *one, const char *font, int fontsize, const char *text, int textlength, double x, double y);
+extern void nemoshow_path_append(struct showone *one, struct showone *src);
 
-static inline void nemoshow_path_set_x1(struct showone *one, double x1)
-{
-	NEMOSHOW_PATH_AT(one, x1) = x1;
-}
+extern void nemoshow_path_translate(struct showone *one, double x, double y);
+extern void nemoshow_path_scale(struct showone *one, double sx, double sy);
+extern void nemoshow_path_rotate(struct showone *one, double ro);
 
-static inline void nemoshow_path_set_y1(struct showone *one, double y1)
-{
-	NEMOSHOW_PATH_AT(one, y1) = y1;
-}
+extern void nemoshow_path_path_set_discrete_effect(struct showone *one, double segment, double deviation, uint32_t seed);
+extern void nemoshow_path_path_set_dash_effect(struct showone *one, double *dashes, int dashcount);
 
-static inline void nemoshow_path_set_x2(struct showone *one, double x2)
-{
-	NEMOSHOW_PATH_AT(one, x2) = x2;
-}
+extern void nemoshow_path_set_filter(struct showone *one, struct showone *filter);
 
-static inline void nemoshow_path_set_y2(struct showone *one, double y2)
-{
-	NEMOSHOW_PATH_AT(one, y2) = y2;
-}
-
-static inline void nemoshow_path_set_width(struct showone *one, double width)
-{
-	NEMOSHOW_PATH_AT(one, width) = width;
-}
-
-static inline void nemoshow_path_set_height(struct showone *one, double height)
-{
-	NEMOSHOW_PATH_AT(one, height) = height;
-}
-
-static inline void nemoshow_path_set_r(struct showone *one, double r)
-{
-	NEMOSHOW_PATH_AT(one, r) = r;
-}
-
-static inline void nemoshow_path_set_cmd(struct showone *one, const char *cmd)
+static inline void nemoshow_path_set_alpha(struct showone *one, double alpha)
 {
 	struct showpath *path = NEMOSHOW_PATH(one);
 
-	if (path->cmd != NULL)
-		free(path->cmd);
+	path->_alpha = alpha;
 
-	path->cmd = strdup(cmd);
+	nemoshow_one_dirty(one, NEMOSHOW_STYLE_DIRTY);
 }
 
-static inline void nemoshow_path_set_text(struct showone *one, const char *text)
+static inline void nemoshow_path_set_fill_color(struct showone *one, double r, double g, double b, double a)
 {
 	struct showpath *path = NEMOSHOW_PATH(one);
 
-	if (path->text != NULL)
-		free(path->text);
+	path->_fills[NEMOSHOW_PATH_RED_COLOR] = r;
+	path->_fills[NEMOSHOW_PATH_GREEN_COLOR] = g;
+	path->_fills[NEMOSHOW_PATH_BLUE_COLOR] = b;
+	path->_fills[NEMOSHOW_PATH_ALPHA_COLOR] = a;
 
-	path->text = strdup(text);
+	nemoshow_one_set_state(one, NEMOSHOW_FILL_STATE);
+
+	nemoshow_one_dirty(one, NEMOSHOW_STYLE_DIRTY);
 }
 
-static inline void nemoshow_path_set_font(struct showone *one, const char *font)
+static inline void nemoshow_path_set_stroke_color(struct showone *one, double r, double g, double b, double a)
 {
 	struct showpath *path = NEMOSHOW_PATH(one);
 
-	if (path->font != NULL)
-		free(path->font);
+	path->_strokes[NEMOSHOW_PATH_RED_COLOR] = r;
+	path->_strokes[NEMOSHOW_PATH_GREEN_COLOR] = g;
+	path->_strokes[NEMOSHOW_PATH_BLUE_COLOR] = b;
+	path->_strokes[NEMOSHOW_PATH_ALPHA_COLOR] = a;
 
-	path->font = strdup(font);
+	nemoshow_one_set_state(one, NEMOSHOW_STROKE_STATE);
+
+	nemoshow_one_dirty(one, NEMOSHOW_STYLE_DIRTY);
 }
 
-static inline void nemoshow_path_set_fontsize(struct showone *one, int fontsize)
+static inline void nemoshow_path_set_stroke_width(struct showone *one, double width)
 {
-	NEMOSHOW_PATH_AT(one, fontsize) = fontsize;
+	struct showpath *path = NEMOSHOW_PATH(one);
+
+	path->stroke_width = width;
+
+	nemoshow_one_dirty(one, NEMOSHOW_STYLE_DIRTY);
 }
 
 #ifdef __cplusplus

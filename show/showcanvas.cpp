@@ -18,6 +18,7 @@
 #include <showmatrix.h>
 #include <showmatrix.hpp>
 #include <showpath.h>
+#include <showpath.hpp>
 #include <showfont.h>
 #include <showfont.hpp>
 #include <showhelper.hpp>
@@ -435,18 +436,10 @@ static inline void nemoshow_canvas_render_item_path(struct showcanvas *canvas, S
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	if (item->from == 0.0f && item->to == 1.0f) {
-		if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE)) {
-			if (NEMOSHOW_ITEM_CC(item, fillpath) != NULL)
-				_canvas->drawPath(*NEMOSHOW_ITEM_CC(item, fillpath), *NEMOSHOW_ITEM_CC(item, fill));
-			else
-				_canvas->drawPath(*NEMOSHOW_ITEM_CC(item, path), *NEMOSHOW_ITEM_CC(item, fill));
-		}
-		if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE)) {
-			if (NEMOSHOW_ITEM_CC(item, strokepath) != NULL)
-				_canvas->drawPath(*NEMOSHOW_ITEM_CC(item, strokepath), *NEMOSHOW_ITEM_CC(item, stroke));
-			else
-				_canvas->drawPath(*NEMOSHOW_ITEM_CC(item, path), *NEMOSHOW_ITEM_CC(item, stroke));
-		}
+		if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE))
+			_canvas->drawPath(*NEMOSHOW_ITEM_CC(item, path), *NEMOSHOW_ITEM_CC(item, fill));
+		if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
+			_canvas->drawPath(*NEMOSHOW_ITEM_CC(item, path), *NEMOSHOW_ITEM_CC(item, stroke));
 	} else {
 		SkPath path;
 
@@ -485,22 +478,13 @@ static inline void nemoshow_canvas_render_item_patharray(struct showcanvas *canv
 static inline void nemoshow_canvas_render_item_pathgroup(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
+	struct showone *child;
+	struct showpath *path;
 
-	if (item->from == 0.0f && item->to == 1.0f) {
-		if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE))
-			_canvas->drawPath(*NEMOSHOW_ITEM_CC(item, path), *NEMOSHOW_ITEM_CC(item, fill));
-		if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
-			_canvas->drawPath(*NEMOSHOW_ITEM_CC(item, path), *NEMOSHOW_ITEM_CC(item, stroke));
-	} else {
-		SkPath path;
+	nemoshow_children_for_each(child, one) {
+		path = NEMOSHOW_PATH(child);
 
-		nemoshow_helper_draw_path(
-				path,
-				NEMOSHOW_ITEM_CC(item, path),
-				item->pathlength,
-				item->from, item->to);
-
-		_canvas->drawPath(path, *NEMOSHOW_ITEM_CC(item, stroke));
+		_canvas->drawPath(*NEMOSHOW_PATH_CC(path, path), *NEMOSHOW_PATH_CC(path, paint));
 	}
 }
 

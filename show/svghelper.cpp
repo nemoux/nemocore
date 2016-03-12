@@ -691,16 +691,14 @@ static inline int nemoshow_svg_load_path(struct svgcontext *context, struct xmln
 	struct showone *cmd;
 	const char *value;
 
-	one = nemoshow_item_create(NEMOSHOW_PATHGROUP_ITEM);
+	one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
 	nemoshow_one_attach(context->one, one);
 
 	nemoshow_one_set_id(one,
 			(value = nemoxml_node_get_attr(node, "id")) ? value : "");
 
-	cmd = nemoshow_path_create(NEMOSHOW_CMD_PATH);
-	nemoshow_path_set_cmd(cmd,
+	nemoshow_item_path_cmd(one,
 			nemoxml_node_get_attr(node, "d"));
-	nemoshow_one_attach(one, cmd);
 
 	nemoshow_svg_load_style(context, node, one);
 
@@ -710,13 +708,12 @@ static inline int nemoshow_svg_load_path(struct svgcontext *context, struct xmln
 static inline int nemoshow_svg_load_polygon(struct svgcontext *context, struct xmlnode *node)
 {
 	struct showone *one;
-	struct showone *child;
 	const char *value;
 	const char *points;
 	struct nemotoken *token;
 	int i, count;
 
-	one = nemoshow_item_create(NEMOSHOW_PATHGROUP_ITEM);
+	one = nemoshow_item_create(NEMOSHOW_POLYGON_ITEM);
 	nemoshow_one_attach(context->one, one);
 
 	nemoshow_one_set_id(one,
@@ -732,20 +729,10 @@ static inline int nemoshow_svg_load_polygon(struct svgcontext *context, struct x
 
 	count = nemotoken_get_token_count(token);
 
-	child = nemoshow_path_create(NEMOSHOW_MOVETO_PATH);
-	nemoshow_path_set_x0(child, strtod(nemotoken_get_token(token, 0), NULL));
-	nemoshow_path_set_y0(child, strtod(nemotoken_get_token(token, 1), NULL));
-	nemoshow_one_attach(one, child);
+	nemoshow_item_set_points(one, NULL, count);
 
-	for (i = 2; i < count; i += 2) {
-		child = nemoshow_path_create(NEMOSHOW_LINETO_PATH);
-		nemoshow_path_set_x0(child, strtod(nemotoken_get_token(token, i + 0), NULL));
-		nemoshow_path_set_y0(child, strtod(nemotoken_get_token(token, i + 1), NULL));
-		nemoshow_one_attach(one, child);
-	}
-
-	child = nemoshow_path_create(NEMOSHOW_CLOSE_PATH);
-	nemoshow_one_attach(one, child);
+	for (i = 0; i < count; i++)
+		nemoshow_item_set_point(one, i, strtod(nemotoken_get_token(token, i), NULL));
 
 	nemotoken_destroy(token);
 
@@ -763,7 +750,7 @@ static inline int nemoshow_svg_load_polyline(struct svgcontext *context, struct 
 	struct nemotoken *token;
 	int i, count;
 
-	one = nemoshow_item_create(NEMOSHOW_PATHGROUP_ITEM);
+	one = nemoshow_item_create(NEMOSHOW_POLYLINE_ITEM);
 	nemoshow_one_attach(context->one, one);
 
 	nemoshow_one_set_id(one,
@@ -779,17 +766,10 @@ static inline int nemoshow_svg_load_polyline(struct svgcontext *context, struct 
 
 	count = nemotoken_get_token_count(token);
 
-	child = nemoshow_path_create(NEMOSHOW_MOVETO_PATH);
-	nemoshow_path_set_x0(child, strtod(nemotoken_get_token(token, 0), NULL));
-	nemoshow_path_set_y0(child, strtod(nemotoken_get_token(token, 1), NULL));
-	nemoshow_one_attach(one, child);
+	nemoshow_item_set_points(one, NULL, count);
 
-	for (i = 2; i < count; i += 2) {
-		child = nemoshow_path_create(NEMOSHOW_LINETO_PATH);
-		nemoshow_path_set_x0(child, strtod(nemotoken_get_token(token, i + 0), NULL));
-		nemoshow_path_set_y0(child, strtod(nemotoken_get_token(token, i + 1), NULL));
-		nemoshow_one_attach(one, child);
-	}
+	for (i = 0; i < count; i++)
+		nemoshow_item_set_point(one, i, strtod(nemotoken_get_token(token, i), NULL));
 
 	nemotoken_destroy(token);
 

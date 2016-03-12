@@ -17,6 +17,7 @@
 #include <showshader.h>
 #include <showshader.hpp>
 #include <showpath.h>
+#include <showpath.hpp>
 #include <showfont.h>
 #include <showfont.hpp>
 #include <showhelper.hpp>
@@ -46,8 +47,6 @@ struct showone *nemoshow_item_create(int type)
 	NEMOSHOW_ITEM_CC(item, modelview) = new SkMatrix;
 	NEMOSHOW_ITEM_CC(item, viewbox) = new SkMatrix;
 	NEMOSHOW_ITEM_CC(item, path) = new SkPath;
-	NEMOSHOW_ITEM_CC(item, strokepath) = NULL;
-	NEMOSHOW_ITEM_CC(item, fillpath) = NULL;
 	NEMOSHOW_ITEM_CC(item, fill) = new SkPaint;
 	NEMOSHOW_ITEM_CC(item, fill)->setStyle(SkPaint::kFill_Style);
 	NEMOSHOW_ITEM_CC(item, fill)->setStrokeCap(SkPaint::kRound_Cap);
@@ -140,6 +139,8 @@ struct showone *nemoshow_item_create(int type)
 	if (one->sub == NEMOSHOW_TEXTBOX_ITEM) {
 		NEMOSHOW_ITEM_CC(item, textbox) = new SkTextBox;
 		NEMOSHOW_ITEM_CC(item, textbox)->setMode(SkTextBox::kLineBreak_Mode);
+	} else if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
+		nemoshow_one_set_state(one, NEMOSHOW_INHERIT_STATE);
 	} else if (one->sub == NEMOSHOW_GROUP_ITEM) {
 		nemoshow_one_set_state(one, NEMOSHOW_INHERIT_STATE);
 		nemoshow_one_set_state(one, NEMOSHOW_BOUNDS_STATE);
@@ -170,10 +171,6 @@ void nemoshow_item_destroy(struct showone *one)
 		delete NEMOSHOW_ITEM_CC(item, viewbox);
 	if (NEMOSHOW_ITEM_CC(item, path) != NULL)
 		delete NEMOSHOW_ITEM_CC(item, path);
-	if (NEMOSHOW_ITEM_CC(item, strokepath) != NULL)
-		delete NEMOSHOW_ITEM_CC(item, strokepath);
-	if (NEMOSHOW_ITEM_CC(item, fillpath) != NULL)
-		delete NEMOSHOW_ITEM_CC(item, fillpath);
 	if (NEMOSHOW_ITEM_CC(item, fill) != NULL)
 		delete NEMOSHOW_ITEM_CC(item, fill);
 	if (NEMOSHOW_ITEM_CC(item, stroke) != NULL)
@@ -546,66 +543,9 @@ static inline void nemoshow_item_update_path(struct nemoshow *show, struct showo
 			else if (item->cmds[i] == NEMOSHOW_ITEM_PATH_CLOSE_CMD)
 				NEMOSHOW_ITEM_CC(item, path)->close();
 		}
-	} else if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
-		struct showone *child;
-		struct showpath *path;
-
-		NEMOSHOW_ITEM_CC(item, path)->reset();
-
-		nemoshow_children_for_each(child, one) {
-			if (child->type == NEMOSHOW_PATH_TYPE) {
-				path = NEMOSHOW_PATH(child);
-
-				if (child->sub == NEMOSHOW_MOVETO_PATH) {
-					NEMOSHOW_ITEM_CC(item, path)->moveTo(path->x0, path->y0);
-				} else if (child->sub == NEMOSHOW_LINETO_PATH) {
-					NEMOSHOW_ITEM_CC(item, path)->lineTo(path->x0, path->y0);
-				} else if (child->sub == NEMOSHOW_CURVETO_PATH) {
-					NEMOSHOW_ITEM_CC(item, path)->cubicTo(
-							path->x0, path->y0,
-							path->x1, path->y1,
-							path->x2, path->y2);
-				} else if (child->sub == NEMOSHOW_CLOSE_PATH) {
-					NEMOSHOW_ITEM_CC(item, path)->close();
-				} else if (child->sub == NEMOSHOW_CMD_PATH) {
-					SkPath rpath;
-
-					SkParsePath::FromSVGString(path->cmd, &rpath);
-
-					NEMOSHOW_ITEM_CC(item, path)->addPath(rpath);
-				} else if (child->sub == NEMOSHOW_RECT_PATH) {
-					NEMOSHOW_ITEM_CC(item, path)->addRect(path->x0, path->y0, path->x0 + path->width, path->y0 + path->height);
-				} else if (child->sub == NEMOSHOW_CIRCLE_PATH) {
-					NEMOSHOW_ITEM_CC(item, path)->addCircle(path->x0, path->y0, path->r);
-				} else if (child->sub == NEMOSHOW_TEXT_PATH) {
-					if (path->text != NULL) {
-						SkPaint paint;
-						SkPath rpath;
-						SkTypeface *face;
-
-						SkSafeUnref(
-								paint.setTypeface(
-									SkTypeface::CreateFromFile(
-										fontconfig_get_path(
-											path->font,
-											NULL,
-											FC_SLANT_ROMAN,
-											FC_WEIGHT_NORMAL,
-											FC_WIDTH_NORMAL,
-											FC_MONO), 0)));
-
-						paint.setAntiAlias(true);
-						paint.setTextSize(path->fontsize);
-						paint.getTextPath(path->text, strlen(path->text), path->x0, path->y0, &rpath);
-
-						NEMOSHOW_ITEM_CC(item, path)->addPath(rpath);
-					}
-				}
-			}
-		}
 	}
 
-	if (one->sub == NEMOSHOW_PATH_ITEM || one->sub == NEMOSHOW_PATHARRAY_ITEM || one->sub == NEMOSHOW_PATHGROUP_ITEM) {
+	if (one->sub == NEMOSHOW_PATH_ITEM || one->sub == NEMOSHOW_PATHARRAY_ITEM) {
 		if (item->pathsegment >= 1.0f) {
 			SkPathEffect *effect;
 
@@ -756,7 +696,7 @@ void nemoshow_item_update_bounds(struct nemoshow *show, struct showone *one)
 		item->height = item->r * 2;
 	} else if (one->sub == NEMOSHOW_ARC_ITEM) {
 		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
-	} else if (one->sub == NEMOSHOW_PATH_ITEM || one->sub == NEMOSHOW_PATHARRAY_ITEM || one->sub == NEMOSHOW_PATHGROUP_ITEM) {
+	} else if (one->sub == NEMOSHOW_PATH_ITEM || one->sub == NEMOSHOW_PATHARRAY_ITEM) {
 		if (nemoshow_one_has_state(one, NEMOSHOW_SIZE_STATE)) {
 			box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
 		} else {
@@ -764,6 +704,32 @@ void nemoshow_item_update_bounds(struct nemoshow *show, struct showone *one)
 
 			if (item->pathsegment >= 1.0f)
 				box.outset(fabs(item->pathdeviation), fabs(item->pathdeviation));
+		}
+	} else if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
+		if (nemoshow_one_has_state(one, NEMOSHOW_SIZE_STATE)) {
+			box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
+		} else {
+			struct showone *child;
+			struct showpath *path;
+			SkRegion region;
+			SkRect cbox;
+			SkIRect bbox;
+
+			nemoshow_children_for_each(child, one) {
+				path = NEMOSHOW_PATH(child);
+
+				cbox = NEMOSHOW_PATH_CC(path, path)->getBounds();
+
+				if (path->pathsegment >= 1.0f)
+					cbox.outset(fabs(path->pathdeviation), fabs(path->pathdeviation));
+
+				region.op(
+						SkIRect::MakeXYWH(cbox.x(), cbox.y(), cbox.width(), cbox.height()),
+						SkRegion::kUnion_Op);
+			}
+
+			bbox = region.getBounds();
+			box = SkRect::MakeXYWH(bbox.x(), bbox.y(), bbox.width(), bbox.height());
 		}
 	} else if (one->sub == NEMOSHOW_TEXT_ITEM) {
 		if (NEMOSHOW_REF(one, NEMOSHOW_PATH_REF) == NULL) {
@@ -1046,103 +1012,46 @@ void nemoshow_item_path_clear(struct showone *one)
 
 	NEMOSHOW_ITEM_CC(item, path)->reset();
 
-	if (NEMOSHOW_ITEM_CC(item, strokepath) != NULL)
-		NEMOSHOW_ITEM_CC(item, strokepath)->reset();
-	if (NEMOSHOW_ITEM_CC(item, fillpath) != NULL)
-		NEMOSHOW_ITEM_CC(item, fillpath)->reset();
-
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 }
 
-void nemoshow_item_path_moveto(struct showone *one, double x, double y, int has_stroke, int has_fill)
+void nemoshow_item_path_moveto(struct showone *one, double x, double y)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	NEMOSHOW_ITEM_CC(item, path)->moveTo(x, y);
 
-	if (has_stroke != 0) {
-		if (NEMOSHOW_ITEM_CC(item, strokepath) == NULL)
-			NEMOSHOW_ITEM_CC(item, strokepath) = new SkPath;
-
-		NEMOSHOW_ITEM_CC(item, strokepath)->moveTo(x, y);
-	}
-	if (has_fill != 0) {
-		if (NEMOSHOW_ITEM_CC(item, fillpath) == NULL)
-			NEMOSHOW_ITEM_CC(item, fillpath) = new SkPath;
-
-		NEMOSHOW_ITEM_CC(item, fillpath)->moveTo(x, y);
-	}
-
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 }
 
-void nemoshow_item_path_lineto(struct showone *one, double x, double y, int has_stroke, int has_fill)
+void nemoshow_item_path_lineto(struct showone *one, double x, double y)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	NEMOSHOW_ITEM_CC(item, path)->lineTo(x, y);
 
-	if (has_stroke != 0) {
-		if (NEMOSHOW_ITEM_CC(item, strokepath) == NULL)
-			NEMOSHOW_ITEM_CC(item, strokepath) = new SkPath;
-
-		NEMOSHOW_ITEM_CC(item, strokepath)->lineTo(x, y);
-	}
-	if (has_fill != 0) {
-		if (NEMOSHOW_ITEM_CC(item, fillpath) == NULL)
-			NEMOSHOW_ITEM_CC(item, fillpath) = new SkPath;
-
-		NEMOSHOW_ITEM_CC(item, fillpath)->lineTo(x, y);
-	}
-
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 }
 
-void nemoshow_item_path_cubicto(struct showone *one, double x0, double y0, double x1, double y1, double x2, double y2, int has_stroke, int has_fill)
+void nemoshow_item_path_cubicto(struct showone *one, double x0, double y0, double x1, double y1, double x2, double y2)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	NEMOSHOW_ITEM_CC(item, path)->cubicTo(x0, y0, x1, y1, x2, y2);
 
-	if (has_stroke != 0) {
-		if (NEMOSHOW_ITEM_CC(item, strokepath) == NULL)
-			NEMOSHOW_ITEM_CC(item, strokepath) = new SkPath;
-
-		NEMOSHOW_ITEM_CC(item, strokepath)->cubicTo(x0, y0, x1, y1, x2, y2);
-	}
-	if (has_fill != 0) {
-		if (NEMOSHOW_ITEM_CC(item, fillpath) == NULL)
-			NEMOSHOW_ITEM_CC(item, fillpath) = new SkPath;
-
-		NEMOSHOW_ITEM_CC(item, fillpath)->cubicTo(x0, y0, x1, y1, x2, y2);
-	}
-
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 }
 
-void nemoshow_item_path_close(struct showone *one, int has_stroke, int has_fill)
+void nemoshow_item_path_close(struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	NEMOSHOW_ITEM_CC(item, path)->close();
 
-	if (has_stroke != 0) {
-		if (NEMOSHOW_ITEM_CC(item, strokepath) == NULL)
-			NEMOSHOW_ITEM_CC(item, strokepath) = new SkPath;
-
-		NEMOSHOW_ITEM_CC(item, strokepath)->close();
-	}
-	if (has_fill != 0) {
-		if (NEMOSHOW_ITEM_CC(item, fillpath) == NULL)
-			NEMOSHOW_ITEM_CC(item, fillpath) = new SkPath;
-
-		NEMOSHOW_ITEM_CC(item, fillpath)->close();
-	}
-
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 }
 
-void nemoshow_item_path_cmd(struct showone *one, const char *cmd, int has_stroke, int has_fill)
+void nemoshow_item_path_cmd(struct showone *one, const char *cmd)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	SkPath path;
@@ -1151,46 +1060,20 @@ void nemoshow_item_path_cmd(struct showone *one, const char *cmd, int has_stroke
 
 	NEMOSHOW_ITEM_CC(item, path)->addPath(path);
 
-	if (has_stroke != 0) {
-		if (NEMOSHOW_ITEM_CC(item, strokepath) == NULL)
-			NEMOSHOW_ITEM_CC(item, strokepath) = new SkPath;
-
-		NEMOSHOW_ITEM_CC(item, strokepath)->addPath(path);
-	}
-	if (has_fill != 0) {
-		if (NEMOSHOW_ITEM_CC(item, fillpath) == NULL)
-			NEMOSHOW_ITEM_CC(item, fillpath) = new SkPath;
-
-		NEMOSHOW_ITEM_CC(item, fillpath)->addPath(path);
-	}
-
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 }
 
-void nemoshow_item_path_arc(struct showone *one, double x, double y, double width, double height, double from, double to, int has_stroke, int has_fill)
+void nemoshow_item_path_arc(struct showone *one, double x, double y, double width, double height, double from, double to)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	SkRect rect = SkRect::MakeXYWH(x, y, width, height);
 
 	NEMOSHOW_ITEM_CC(item, path)->addArc(rect, from, to);
 
-	if (has_stroke != 0) {
-		if (NEMOSHOW_ITEM_CC(item, strokepath) == NULL)
-			NEMOSHOW_ITEM_CC(item, strokepath) = new SkPath;
-
-		NEMOSHOW_ITEM_CC(item, strokepath)->addArc(rect, from, to);
-	}
-	if (has_fill != 0) {
-		if (NEMOSHOW_ITEM_CC(item, fillpath) == NULL)
-			NEMOSHOW_ITEM_CC(item, fillpath) = new SkPath;
-
-		NEMOSHOW_ITEM_CC(item, fillpath)->addArc(rect, from, to);
-	}
-
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 }
 
-void nemoshow_item_path_text(struct showone *one, const char *font, int fontsize, const char *text, int textlength, double x, double y, int has_stroke, int has_fill)
+void nemoshow_item_path_text(struct showone *one, const char *font, int fontsize, const char *text, int textlength, double x, double y)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	SkPaint paint;
@@ -1214,19 +1097,6 @@ void nemoshow_item_path_text(struct showone *one, const char *font, int fontsize
 
 	NEMOSHOW_ITEM_CC(item, path)->addPath(path);
 
-	if (has_stroke != 0) {
-		if (NEMOSHOW_ITEM_CC(item, strokepath) == NULL)
-			NEMOSHOW_ITEM_CC(item, strokepath) = new SkPath;
-
-		NEMOSHOW_ITEM_CC(item, strokepath)->addPath(path);
-	}
-	if (has_fill != 0) {
-		if (NEMOSHOW_ITEM_CC(item, fillpath) == NULL)
-			NEMOSHOW_ITEM_CC(item, fillpath) = new SkPath;
-
-		NEMOSHOW_ITEM_CC(item, fillpath)->addPath(path);
-	}
-
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 }
 
@@ -1236,19 +1106,6 @@ void nemoshow_item_path_append(struct showone *one, struct showone *src)
 	struct showitem *other = NEMOSHOW_ITEM(src);
 
 	NEMOSHOW_ITEM_CC(item, path)->addPath(*NEMOSHOW_ITEM_CC(other, path));
-
-	if (NEMOSHOW_ITEM_CC(other, strokepath) != NULL) {
-		if (NEMOSHOW_ITEM_CC(item, strokepath) == NULL)
-			NEMOSHOW_ITEM_CC(item, strokepath) = new SkPath;
-
-		NEMOSHOW_ITEM_CC(item, strokepath)->addPath(*NEMOSHOW_ITEM_CC(other, strokepath));
-	}
-	if (NEMOSHOW_ITEM_CC(other, fillpath) != NULL) {
-		if (NEMOSHOW_ITEM_CC(item, fillpath) == NULL)
-			NEMOSHOW_ITEM_CC(item, fillpath) = new SkPath;
-
-		NEMOSHOW_ITEM_CC(item, fillpath)->addPath(*NEMOSHOW_ITEM_CC(other, fillpath));
-	}
 
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 }
@@ -1263,11 +1120,6 @@ void nemoshow_item_path_translate(struct showone *one, double x, double y)
 
 	NEMOSHOW_ITEM_CC(item, path)->transform(matrix);
 
-	if (NEMOSHOW_ITEM_CC(item, strokepath) != NULL)
-		NEMOSHOW_ITEM_CC(item, strokepath)->transform(matrix);
-	if (NEMOSHOW_ITEM_CC(item, fillpath) != NULL)
-		NEMOSHOW_ITEM_CC(item, fillpath)->transform(matrix);
-
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 }
 
@@ -1281,11 +1133,6 @@ void nemoshow_item_path_scale(struct showone *one, double sx, double sy)
 
 	NEMOSHOW_ITEM_CC(item, path)->transform(matrix);
 
-	if (NEMOSHOW_ITEM_CC(item, strokepath) != NULL)
-		NEMOSHOW_ITEM_CC(item, strokepath)->transform(matrix);
-	if (NEMOSHOW_ITEM_CC(item, fillpath) != NULL)
-		NEMOSHOW_ITEM_CC(item, fillpath)->transform(matrix);
-
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 }
 
@@ -1298,11 +1145,6 @@ void nemoshow_item_path_rotate(struct showone *one, double ro)
 	matrix.postRotate(ro);
 
 	NEMOSHOW_ITEM_CC(item, path)->transform(matrix);
-
-	if (NEMOSHOW_ITEM_CC(item, strokepath) != NULL)
-		NEMOSHOW_ITEM_CC(item, strokepath)->transform(matrix);
-	if (NEMOSHOW_ITEM_CC(item, fillpath) != NULL)
-		NEMOSHOW_ITEM_CC(item, fillpath)->transform(matrix);
 
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 }
@@ -1374,11 +1216,6 @@ int nemoshow_item_load_svg(struct showone *one, const char *uri, double x, doubl
 	if (uri == NULL)
 		return -1;
 
-	if (NEMOSHOW_ITEM_CC(item, strokepath) == NULL)
-		NEMOSHOW_ITEM_CC(item, strokepath) = new SkPath;
-	if (NEMOSHOW_ITEM_CC(item, fillpath) == NULL)
-		NEMOSHOW_ITEM_CC(item, fillpath) = new SkPath;
-
 	xml = nemoxml_create();
 	nemoxml_load_file(xml, uri);
 	nemoxml_update(xml);
@@ -1437,12 +1274,10 @@ int nemoshow_item_load_svg(struct showone *one, const char *uri, double x, doubl
 
 				SkParsePath::FromSVGString(d, &rpath);
 
-				NEMOSHOW_ITEM_CC(item, path)->addPath(rpath);
-
-				if (has_stroke != 0)
-					NEMOSHOW_ITEM_CC(item, strokepath)->addPath(rpath);
-				if (has_fill != 0)
-					NEMOSHOW_ITEM_CC(item, fillpath)->addPath(rpath);
+				if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
+				} else {
+					NEMOSHOW_ITEM_CC(item, path)->addPath(rpath);
+				}
 			}
 		} else if (strcmp(node->name, "line") == 0) {
 			double x1 = strtod(nemoxml_node_get_attr(node, "x1"), NULL);
@@ -1450,16 +1285,10 @@ int nemoshow_item_load_svg(struct showone *one, const char *uri, double x, doubl
 			double x2 = strtod(nemoxml_node_get_attr(node, "x2"), NULL);
 			double y2 = strtod(nemoxml_node_get_attr(node, "y2"), NULL);
 
-			NEMOSHOW_ITEM_CC(item, path)->moveTo(x1, y1);
-			NEMOSHOW_ITEM_CC(item, path)->lineTo(x2, y2);
-
-			if (has_stroke != 0) {
-				NEMOSHOW_ITEM_CC(item, strokepath)->moveTo(x1, y1);
-				NEMOSHOW_ITEM_CC(item, strokepath)->lineTo(x2, y2);
-			}
-			if (has_fill != 0) {
-				NEMOSHOW_ITEM_CC(item, fillpath)->moveTo(x1, y1);
-				NEMOSHOW_ITEM_CC(item, fillpath)->lineTo(x2, y2);
+			if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
+			} else {
+				NEMOSHOW_ITEM_CC(item, path)->moveTo(x1, y1);
+				NEMOSHOW_ITEM_CC(item, path)->lineTo(x2, y2);
 			}
 		} else if (strcmp(node->name, "rect") == 0) {
 			double x = strtod(nemoxml_node_get_attr(node, "x"), NULL);
@@ -1467,23 +1296,19 @@ int nemoshow_item_load_svg(struct showone *one, const char *uri, double x, doubl
 			double width = strtod(nemoxml_node_get_attr(node, "width"), NULL);
 			double height = strtod(nemoxml_node_get_attr(node, "height"), NULL);
 
-			NEMOSHOW_ITEM_CC(item, path)->addRect(x, y, x + width, y + height);
-
-			if (has_stroke != 0)
-				NEMOSHOW_ITEM_CC(item, strokepath)->addRect(x, y, x + width, y + height);
-			if (has_fill != 0)
-				NEMOSHOW_ITEM_CC(item, fillpath)->addRect(x, y, x + width, y + height);
+			if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
+			} else {
+				NEMOSHOW_ITEM_CC(item, path)->addRect(x, y, x + width, y + height);
+			}
 		} else if (strcmp(node->name, "circle") == 0) {
 			double x = strtod(nemoxml_node_get_attr(node, "cx"), NULL);
 			double y = strtod(nemoxml_node_get_attr(node, "cy"), NULL);
 			double r = strtod(nemoxml_node_get_attr(node, "r"), NULL);
 
-			NEMOSHOW_ITEM_CC(item, path)->addCircle(x, y, r);
-
-			if (has_stroke != 0)
-				NEMOSHOW_ITEM_CC(item, strokepath)->addCircle(x, y, r);
-			if (has_fill != 0)
-				NEMOSHOW_ITEM_CC(item, fillpath)->addCircle(x, y, r);
+			if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
+			} else {
+				NEMOSHOW_ITEM_CC(item, path)->addCircle(x, y, r);
+			}
 		} else if (strcmp(node->name, "polygon") == 0) {
 			const char *points = nemoxml_node_get_attr(node, "points");
 			struct nemotoken *token;
@@ -1497,40 +1322,20 @@ int nemoshow_item_load_svg(struct showone *one, const char *uri, double x, doubl
 
 			count = nemotoken_get_token_count(token);
 
-			NEMOSHOW_ITEM_CC(item, path)->moveTo(
-					strtod(nemotoken_get_token(token, 0), NULL),
-					strtod(nemotoken_get_token(token, 1), NULL));
-
-			if (has_stroke != 0)
-				NEMOSHOW_ITEM_CC(item, strokepath)->moveTo(
-						strtod(nemotoken_get_token(token, 0), NULL),
-						strtod(nemotoken_get_token(token, 1), NULL));
-			if (has_fill != 0)
-				NEMOSHOW_ITEM_CC(item, fillpath)->moveTo(
+			if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
+			} else {
+				NEMOSHOW_ITEM_CC(item, path)->moveTo(
 						strtod(nemotoken_get_token(token, 0), NULL),
 						strtod(nemotoken_get_token(token, 1), NULL));
 
-			for (i = 2; i < count; i += 2) {
-				NEMOSHOW_ITEM_CC(item, path)->lineTo(
-						strtod(nemotoken_get_token(token, i + 0), NULL),
-						strtod(nemotoken_get_token(token, i + 1), NULL));
+				for (i = 2; i < count; i += 2) {
+					NEMOSHOW_ITEM_CC(item, path)->lineTo(
+							strtod(nemotoken_get_token(token, i + 0), NULL),
+							strtod(nemotoken_get_token(token, i + 1), NULL));
+				}
 
-				if (has_stroke != 0)
-					NEMOSHOW_ITEM_CC(item, strokepath)->lineTo(
-							strtod(nemotoken_get_token(token, i + 0), NULL),
-							strtod(nemotoken_get_token(token, i + 1), NULL));
-				if (has_fill != 0)
-					NEMOSHOW_ITEM_CC(item, fillpath)->lineTo(
-							strtod(nemotoken_get_token(token, i + 0), NULL),
-							strtod(nemotoken_get_token(token, i + 1), NULL));
+				NEMOSHOW_ITEM_CC(item, path)->close();
 			}
-
-			NEMOSHOW_ITEM_CC(item, path)->close();
-
-			if (has_stroke != 0)
-				NEMOSHOW_ITEM_CC(item, strokepath)->close();
-			if (has_fill != 0)
-				NEMOSHOW_ITEM_CC(item, fillpath)->close();
 
 			nemotoken_destroy(token);
 		} else if (strcmp(node->name, "polyline") == 0) {
@@ -1546,32 +1351,17 @@ int nemoshow_item_load_svg(struct showone *one, const char *uri, double x, doubl
 
 			count = nemotoken_get_token_count(token);
 
-			NEMOSHOW_ITEM_CC(item, path)->moveTo(
-					strtod(nemotoken_get_token(token, 0), NULL),
-					strtod(nemotoken_get_token(token, 1), NULL));
-
-			if (has_stroke != 0)
-				NEMOSHOW_ITEM_CC(item, strokepath)->moveTo(
-						strtod(nemotoken_get_token(token, 0), NULL),
-						strtod(nemotoken_get_token(token, 1), NULL));
-			if (has_fill != 0)
-				NEMOSHOW_ITEM_CC(item, fillpath)->moveTo(
+			if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
+			} else {
+				NEMOSHOW_ITEM_CC(item, path)->moveTo(
 						strtod(nemotoken_get_token(token, 0), NULL),
 						strtod(nemotoken_get_token(token, 1), NULL));
 
-			for (i = 2; i < count; i += 2) {
-				NEMOSHOW_ITEM_CC(item, path)->lineTo(
-						strtod(nemotoken_get_token(token, i + 0), NULL),
-						strtod(nemotoken_get_token(token, i + 1), NULL));
-
-				if (has_stroke != 0)
-					NEMOSHOW_ITEM_CC(item, strokepath)->lineTo(
+				for (i = 2; i < count; i += 2) {
+					NEMOSHOW_ITEM_CC(item, path)->lineTo(
 							strtod(nemotoken_get_token(token, i + 0), NULL),
 							strtod(nemotoken_get_token(token, i + 1), NULL));
-				if (has_fill != 0)
-					NEMOSHOW_ITEM_CC(item, fillpath)->lineTo(
-							strtod(nemotoken_get_token(token, i + 0), NULL),
-							strtod(nemotoken_get_token(token, i + 1), NULL));
+				}
 			}
 
 			nemotoken_destroy(token);
@@ -1581,8 +1371,9 @@ int nemoshow_item_load_svg(struct showone *one, const char *uri, double x, doubl
 	nemoxml_destroy(xml);
 
 	NEMOSHOW_ITEM_CC(item, path)->transform(matrix);
-	NEMOSHOW_ITEM_CC(item, strokepath)->transform(matrix);
-	NEMOSHOW_ITEM_CC(item, fillpath)->transform(matrix);
+
+	if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
+	}
 
 	return 0;
 }

@@ -151,22 +151,6 @@ static struct showone *nemoshow_create_one(struct nemoshow *show, struct xmlnode
 		one = nemoshow_matrix_create(NEMOSHOW_ROTATE_MATRIX);
 	} else if (strcmp(node->name, "translate") == 0) {
 		one = nemoshow_matrix_create(NEMOSHOW_TRANSLATE_MATRIX);
-	} else if (strcmp(node->name, "moveto") == 0) {
-		one = nemoshow_path_create(NEMOSHOW_MOVETO_PATH);
-	} else if (strcmp(node->name, "lineto") == 0) {
-		one = nemoshow_path_create(NEMOSHOW_LINETO_PATH);
-	} else if (strcmp(node->name, "curveto") == 0) {
-		one = nemoshow_path_create(NEMOSHOW_CURVETO_PATH);
-	} else if (strcmp(node->name, "close") == 0) {
-		one = nemoshow_path_create(NEMOSHOW_CLOSE_PATH);
-	} else if (strcmp(node->name, "cmd") == 0) {
-		one = nemoshow_path_create(NEMOSHOW_CMD_PATH);
-	} else if (strcmp(node->name, "rectto") == 0) {
-		one = nemoshow_path_create(NEMOSHOW_RECT_PATH);
-	} else if (strcmp(node->name, "circleto") == 0) {
-		one = nemoshow_path_create(NEMOSHOW_CIRCLE_PATH);
-	} else if (strcmp(node->name, "textto") == 0) {
-		one = nemoshow_path_create(NEMOSHOW_TEXT_PATH);
 	} else if (strcmp(node->name, "blur") == 0) {
 		one = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
 	} else if (strcmp(node->name, "linear") == 0) {
