@@ -444,7 +444,7 @@ static inline void nemoshow_item_update_text(struct nemoshow *show, struct showo
 					delete[] NEMOSHOW_ITEM_CC(item, points);
 
 				item->points = (double *)malloc(sizeof(double[2]) * nhbglyphs);
-				item->pointcount = nhbglyphs;
+				item->pointcount = nhbglyphs * 2;
 
 				NEMOSHOW_ITEM_CC(item, points) = new SkPoint[nhbglyphs];
 
@@ -483,16 +483,24 @@ static inline void nemoshow_item_update_text(struct nemoshow *show, struct showo
 static inline void nemoshow_item_update_points(struct nemoshow *show, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
-	int i;
 
-	if (item->points != NULL) {
-		for (i = 0; i < item->pointcount; i++) {
-			NEMOSHOW_ITEM_CC(item, points)[i].set(
-					item->points[i * 2 + 0],
-					item->points[i * 2 + 1]);
+	if (one->sub == NEMOSHOW_POINTS_ITEM || one->sub == NEMOSHOW_POLYLINE_ITEM || one->sub == NEMOSHOW_POLYGON_ITEM) {
+		if (item->points != NULL) {
+			int i;
+
+			if (NEMOSHOW_ITEM_CC(item, points) != NULL)
+				delete[] NEMOSHOW_ITEM_CC(item, points);
+
+			NEMOSHOW_ITEM_CC(item, points) = new SkPoint[item->pointcount / 2];
+
+			for (i = 0; i < item->pointcount / 2; i++) {
+				NEMOSHOW_ITEM_CC(item, points)[i].set(
+						item->points[i * 2 + 0],
+						item->points[i * 2 + 1]);
+			}
+
+			one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 		}
-
-		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 	}
 }
 
@@ -752,7 +760,7 @@ void nemoshow_item_update_bounds(struct nemoshow *show, struct showone *one)
 		int32_t x0 = INT_MAX, y0 = INT_MAX, x1 = INT_MIN, y1 = INT_MIN;
 		int i;
 
-		for (i = 0; i < item->pointcount; i++) {
+		for (i = 0; i < item->pointcount / 2; i++) {
 			if (item->points[i * 2 + 0] < x0)
 				x0 = item->points[i * 2 + 0];
 			if (item->points[i * 2 + 0] > x1)
@@ -1546,23 +1554,19 @@ void nemoshow_item_set_points(struct showone *one, double *points, int pointcoun
 
 	if (item->points != NULL)
 		free(item->points);
-	if (NEMOSHOW_ITEM_CC(item, points) != NULL)
-		delete[] NEMOSHOW_ITEM_CC(item, points);
 
-	item->points = (double *)malloc(sizeof(double[2]) * pointcount);
+	item->points = (double *)malloc(sizeof(double) * pointcount);
 	item->pointcount = pointcount;
 
-	NEMOSHOW_ITEM_CC(item, points) = new SkPoint[pointcount];
-
 	if (points != NULL) {
-		for (i = 0; i < pointcount * 2; i++)
+		for (i = 0; i < pointcount; i++)
 			item->points[i] = points[i];
 	} else {
-		for (i = 0; i < pointcount * 2; i++)
+		for (i = 0; i < pointcount; i++)
 			item->points[i] = 0.0f;
 	}
 
-	nemoobject_set_reserved(&one->object, "points", item->points, sizeof(double[2]) * pointcount);
+	nemoobject_set_reserved(&one->object, "points", item->points, sizeof(double) * pointcount);
 
 	nemoshow_one_dirty(one, NEMOSHOW_POINTS_DIRTY);
 }
