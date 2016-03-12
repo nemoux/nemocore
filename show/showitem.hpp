@@ -14,6 +14,7 @@ typedef struct _showitem {
 	bool has_inverse;
 
 	SkPath *path;
+	SkPath *fillpath;
 	SkBitmap *bitmap;
 	uint32_t width, height;
 

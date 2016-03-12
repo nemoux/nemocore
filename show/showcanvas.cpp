@@ -453,6 +453,28 @@ static inline void nemoshow_canvas_render_item_path(struct showcanvas *canvas, S
 	}
 }
 
+static inline void nemoshow_canvas_render_item_pathtwice(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	if (item->from == 0.0f && item->to == 1.0f) {
+		if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE))
+			_canvas->drawPath(*NEMOSHOW_ITEM_CC(item, fillpath), *NEMOSHOW_ITEM_CC(item, fill));
+		if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
+			_canvas->drawPath(*NEMOSHOW_ITEM_CC(item, path), *NEMOSHOW_ITEM_CC(item, stroke));
+	} else {
+		SkPath path;
+
+		nemoshow_helper_draw_path(
+				path,
+				NEMOSHOW_ITEM_CC(item, path),
+				item->pathlength,
+				item->from, item->to);
+
+		_canvas->drawPath(path, *NEMOSHOW_ITEM_CC(item, stroke));
+	}
+}
+
 static inline void nemoshow_canvas_render_item_patharray(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
@@ -610,6 +632,7 @@ static inline void nemoshow_canvas_render_one(struct showcanvas *canvas, SkCanva
 		nemoshow_canvas_render_item_text,
 		nemoshow_canvas_render_item_textbox,
 		nemoshow_canvas_render_item_path,
+		nemoshow_canvas_render_item_pathtwice,
 		nemoshow_canvas_render_item_patharray,
 		nemoshow_canvas_render_item_pathgroup,
 		nemoshow_canvas_render_item_points,
