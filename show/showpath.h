@@ -33,6 +33,11 @@ struct showpath {
 	double x2, y2;
 	double width, height;
 	double r;
+
+	char *cmd;
+	char *text;
+	char *font;
+	int fontsize;
 };
 
 #define NEMOSHOW_PATH(one)					((struct showpath *)container_of(one, struct showpath, base))
@@ -87,6 +92,41 @@ static inline void nemoshow_path_set_height(struct showone *one, double height)
 static inline void nemoshow_path_set_r(struct showone *one, double r)
 {
 	NEMOSHOW_PATH_AT(one, r) = r;
+}
+
+static inline void nemoshow_path_set_cmd(struct showone *one, const char *cmd)
+{
+	struct showpath *path = NEMOSHOW_PATH(one);
+
+	if (path->cmd != NULL)
+		free(path->cmd);
+
+	path->cmd = strdup(cmd);
+}
+
+static inline void nemoshow_path_set_text(struct showone *one, const char *text)
+{
+	struct showpath *path = NEMOSHOW_PATH(one);
+
+	if (path->text != NULL)
+		free(path->text);
+
+	path->text = strdup(text);
+}
+
+static inline void nemoshow_path_set_font(struct showone *one, const char *font)
+{
+	struct showpath *path = NEMOSHOW_PATH(one);
+
+	if (path->font != NULL)
+		free(path->font);
+
+	path->font = strdup(font);
+}
+
+static inline void nemoshow_path_set_fontsize(struct showone *one, int fontsize)
+{
+	NEMOSHOW_PATH_AT(one, fontsize) = fontsize;
 }
 
 #ifdef __cplusplus

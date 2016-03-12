@@ -690,7 +690,6 @@ static inline int nemoshow_svg_load_path(struct svgcontext *context, struct xmln
 	struct showone *one;
 	struct showone *cmd;
 	const char *value;
-	const char *d;
 
 	one = nemoshow_item_create(NEMOSHOW_PATHGROUP_ITEM);
 	nemoshow_one_attach(context->one, one);
@@ -698,10 +697,9 @@ static inline int nemoshow_svg_load_path(struct svgcontext *context, struct xmln
 	nemoshow_one_set_id(one,
 			(value = nemoxml_node_get_attr(node, "id")) ? value : "");
 
-	d = nemoxml_node_get_attr(node, "d");
-
 	cmd = nemoshow_path_create(NEMOSHOW_CMD_PATH);
-	nemoobject_sets(&cmd->object, "d", d, strlen(d));
+	nemoshow_path_set_cmd(cmd,
+			nemoxml_node_get_attr(node, "d"));
 	nemoshow_one_attach(one, cmd);
 
 	nemoshow_svg_load_style(context, node, one);
@@ -735,14 +733,14 @@ static inline int nemoshow_svg_load_polygon(struct svgcontext *context, struct x
 	count = nemotoken_get_token_count(token);
 
 	child = nemoshow_path_create(NEMOSHOW_MOVETO_PATH);
-	NEMOSHOW_PATH_AT(child, x0) = strtod(nemotoken_get_token(token, 0), NULL);
-	NEMOSHOW_PATH_AT(child, y0) = strtod(nemotoken_get_token(token, 1), NULL);
+	nemoshow_path_set_x0(child, strtod(nemotoken_get_token(token, 0), NULL));
+	nemoshow_path_set_y0(child, strtod(nemotoken_get_token(token, 1), NULL));
 	nemoshow_one_attach(one, child);
 
 	for (i = 2; i < count; i += 2) {
 		child = nemoshow_path_create(NEMOSHOW_LINETO_PATH);
-		NEMOSHOW_PATH_AT(child, x0) = strtod(nemotoken_get_token(token, i + 0), NULL);
-		NEMOSHOW_PATH_AT(child, y0) = strtod(nemotoken_get_token(token, i + 1), NULL);
+		nemoshow_path_set_x0(child, strtod(nemotoken_get_token(token, i + 0), NULL));
+		nemoshow_path_set_y0(child, strtod(nemotoken_get_token(token, i + 1), NULL));
 		nemoshow_one_attach(one, child);
 	}
 
@@ -782,14 +780,14 @@ static inline int nemoshow_svg_load_polyline(struct svgcontext *context, struct 
 	count = nemotoken_get_token_count(token);
 
 	child = nemoshow_path_create(NEMOSHOW_MOVETO_PATH);
-	NEMOSHOW_PATH_AT(child, x0) = strtod(nemotoken_get_token(token, 0), NULL);
-	NEMOSHOW_PATH_AT(child, y0) = strtod(nemotoken_get_token(token, 1), NULL);
+	nemoshow_path_set_x0(child, strtod(nemotoken_get_token(token, 0), NULL));
+	nemoshow_path_set_y0(child, strtod(nemotoken_get_token(token, 1), NULL));
 	nemoshow_one_attach(one, child);
 
 	for (i = 2; i < count; i += 2) {
 		child = nemoshow_path_create(NEMOSHOW_LINETO_PATH);
-		NEMOSHOW_PATH_AT(child, x0) = strtod(nemotoken_get_token(token, i + 0), NULL);
-		NEMOSHOW_PATH_AT(child, y0) = strtod(nemotoken_get_token(token, i + 1), NULL);
+		nemoshow_path_set_x0(child, strtod(nemotoken_get_token(token, i + 0), NULL));
+		nemoshow_path_set_y0(child, strtod(nemotoken_get_token(token, i + 1), NULL));
 		nemoshow_one_attach(one, child);
 	}
 

@@ -107,9 +107,9 @@ struct showitem {
 	double fontsize;
 	double fontascent;
 	double fontdescent;
-	const char *text;
 	double textwidth, textheight;
 	double spacingmul, spacingadd;
+	char *text;
 
 	double *points;
 	int pointcount;

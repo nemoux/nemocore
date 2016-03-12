@@ -52,6 +52,13 @@ void nemoshow_path_destroy(struct showone *one)
 
 	nemoshow_one_finish(one);
 
+	if (path->text != NULL)
+		free(path->text);
+	if (path->font != NULL)
+		free(path->font);
+	if (path->cmd != NULL)
+		free(path->cmd);
+
 	free(path);
 }
 

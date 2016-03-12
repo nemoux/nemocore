@@ -191,6 +191,8 @@ void nemoshow_item_destroy(struct showone *one)
 		free(item->points);
 	if (item->pathdashes != NULL)
 		free(item->pathdashes);
+	if (item->text != NULL)
+		free(item->text);
 	if (item->uri != NULL)
 		free(item->uri);
 
@@ -393,7 +395,6 @@ static inline void nemoshow_item_update_text(struct nemoshow *show, struct showo
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	if (one->sub == NEMOSHOW_TEXT_ITEM) {
-		item->text = nemoobject_gets(&one->object, "d");
 		if (item->text != NULL) {
 			if (NEMOSHOW_FONT_AT(NEMOSHOW_REF(one, NEMOSHOW_FONT_REF), layout) == NEMOSHOW_NORMAL_LAYOUT) {
 				SkPaint::FontMetrics metrics;
@@ -465,7 +466,6 @@ static inline void nemoshow_item_update_text(struct nemoshow *show, struct showo
 
 		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 	} else if (one->sub == NEMOSHOW_TEXTBOX_ITEM) {
-		item->text = nemoobject_gets(&one->object, "d");
 		if (item->text != NULL) {
 			NEMOSHOW_ITEM_CC(item, fill)->setTextSize(item->fontsize);
 			NEMOSHOW_ITEM_CC(item, stroke)->setTextSize(item->fontsize);
@@ -515,7 +515,7 @@ static inline void nemoshow_item_update_pathgroup(struct nemoshow *show, struct 
 			} else if (child->sub == NEMOSHOW_CMD_PATH) {
 				SkPath rpath;
 
-				SkParsePath::FromSVGString(nemoobject_gets(&child->object, "d"), &rpath);
+				SkParsePath::FromSVGString(path->cmd, &rpath);
 
 				NEMOSHOW_ITEM_CC(item, path)->addPath(rpath);
 			} else if (child->sub == NEMOSHOW_RECT_PATH) {
@@ -523,29 +523,28 @@ static inline void nemoshow_item_update_pathgroup(struct nemoshow *show, struct 
 			} else if (child->sub == NEMOSHOW_CIRCLE_PATH) {
 				NEMOSHOW_ITEM_CC(item, path)->addCircle(path->x0, path->y0, path->r);
 			} else if (child->sub == NEMOSHOW_TEXT_PATH) {
-				SkPaint paint;
-				SkPath rpath;
-				SkTypeface *face;
-				const char *text;
+				if (path->text != NULL) {
+					SkPaint paint;
+					SkPath rpath;
+					SkTypeface *face;
 
-				text = nemoobject_gets(&child->object, "d");
+					SkSafeUnref(
+							paint.setTypeface(
+								SkTypeface::CreateFromFile(
+									fontconfig_get_path(
+										path->font,
+										NULL,
+										FC_SLANT_ROMAN,
+										FC_WEIGHT_NORMAL,
+										FC_WIDTH_NORMAL,
+										FC_MONO), 0)));
 
-				SkSafeUnref(
-						paint.setTypeface(
-							SkTypeface::CreateFromFile(
-								fontconfig_get_path(
-									nemoobject_gets(&child->object, "font"),
-									NULL,
-									FC_SLANT_ROMAN,
-									FC_WEIGHT_NORMAL,
-									FC_WIDTH_NORMAL,
-									FC_MONO), 0)));
+					paint.setAntiAlias(true);
+					paint.setTextSize(path->fontsize);
+					paint.getTextPath(path->text, strlen(path->text), path->x0, path->y0, &rpath);
 
-				paint.setAntiAlias(true);
-				paint.setTextSize(nemoobject_getd(&child->object, "font-size"));
-				paint.getTextPath(text, strlen(text), path->x0, path->y0, &rpath);
-
-				NEMOSHOW_ITEM_CC(item, path)->addPath(rpath);
+					NEMOSHOW_ITEM_CC(item, path)->addPath(rpath);
+				}
 			} else if (child->sub == NEMOSHOW_SVG_PATH) {
 				nemoshow_item_update_pathgroup(show, item, child);
 			}
@@ -951,7 +950,12 @@ void nemoshow_item_set_uri(struct showone *one, const char *uri)
 
 void nemoshow_item_set_text(struct showone *one, const char *text)
 {
-	nemoobject_sets(&one->object, "d", text, strlen(text));
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	if (item->text != NULL)
+		free(item->text);
+
+	item->text = strdup(text);
 
 	nemoshow_one_dirty(one, NEMOSHOW_TEXT_DIRTY);
 }
@@ -1291,6 +1295,8 @@ void nemoshow_item_path_set_dash_effect(struct showone *one, double *dashes, int
 		item->pathdashes[i] = dashes[i];
 
 	nemoobject_set_reserved(&one->object, "pathdash", item->pathdashes, sizeof(double) * dashcount);
+
+	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 }
 
 int nemoshow_item_path_contains_point(struct showone *one, double x, double y)
