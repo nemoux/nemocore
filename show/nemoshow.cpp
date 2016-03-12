@@ -167,8 +167,6 @@ static struct showone *nemoshow_create_one(struct nemoshow *show, struct xmlnode
 		one = nemoshow_path_create(NEMOSHOW_CIRCLE_PATH);
 	} else if (strcmp(node->name, "textto") == 0) {
 		one = nemoshow_path_create(NEMOSHOW_TEXT_PATH);
-	} else if (strcmp(node->name, "svgto") == 0) {
-		one = nemoshow_path_create(NEMOSHOW_SVG_PATH);
 	} else if (strcmp(node->name, "blur") == 0) {
 		one = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
 	} else if (strcmp(node->name, "linear") == 0) {
