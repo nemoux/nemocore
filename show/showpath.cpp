@@ -19,7 +19,7 @@
 #include <fonthelper.h>
 #include <nemomisc.h>
 
-struct showone *nemoshow_path_create(int type)
+struct showone *nemoshow_path_create(void)
 {
 	struct showpath *path;
 	struct showone *one;
@@ -61,7 +61,6 @@ struct showone *nemoshow_path_create(int type)
 
 	one = &path->base;
 	one->type = NEMOSHOW_PATH_TYPE;
-	one->sub = type;
 	one->update = nemoshow_path_update;
 	one->destroy = nemoshow_path_destroy;
 
