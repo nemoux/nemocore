@@ -461,13 +461,7 @@ static inline void nemoshow_item_update_text(struct nemoshow *show, struct showo
 
 				fontscale = item->fontsize / NEMOSHOW_FONT_AT(NEMOSHOW_REF(one, NEMOSHOW_FONT_REF), max_advance_height);
 
-				if (NEMOSHOW_ITEM_CC(item, points) != NULL)
-					delete[] NEMOSHOW_ITEM_CC(item, points);
-
-				NEMOSHOW_ITEM_CC(item, points) = new SkPoint[nhbglyphs];
-
 				item->npoints = 0;
-
 				item->textwidth = 0.0f;
 
 				for (i = 0; i < nhbglyphs; i++) {
@@ -504,7 +498,24 @@ static inline void nemoshow_item_update_points(struct nemoshow *show, struct sho
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	if (one->sub == NEMOSHOW_POINTS_ITEM || one->sub == NEMOSHOW_POLYLINE_ITEM || one->sub == NEMOSHOW_POLYGON_ITEM) {
+	if (one->sub == NEMOSHOW_TEXT_ITEM) {
+		if (NEMOSHOW_FONT_AT(NEMOSHOW_REF(one, NEMOSHOW_FONT_REF), layout) == NEMOSHOW_HARFBUZZ_LAYOUT) {
+			int i;
+
+			if (NEMOSHOW_ITEM_CC(item, points) != NULL)
+				delete[] NEMOSHOW_ITEM_CC(item, points);
+
+			NEMOSHOW_ITEM_CC(item, points) = new SkPoint[item->npoints / 2];
+
+			for (i = 0; i < item->npoints / 2; i++) {
+				NEMOSHOW_ITEM_CC(item, points)[i].set(
+						item->points[i * 2 + 0],
+						item->points[i * 2 + 1]);
+			}
+
+			one->dirty |= NEMOSHOW_SHAPE_DIRTY;
+		}
+	} else if (one->sub == NEMOSHOW_POINTS_ITEM || one->sub == NEMOSHOW_POLYLINE_ITEM || one->sub == NEMOSHOW_POLYGON_ITEM) {
 		int i;
 
 		if (NEMOSHOW_ITEM_CC(item, points) != NULL)
@@ -586,7 +597,7 @@ static inline void nemoshow_item_update_path(struct nemoshow *show, struct showo
 				effect->unref();
 			}
 		}
-		
+
 		NEMOSHOW_ITEM_CC(item, measure)->setPath(NEMOSHOW_ITEM_CC(item, path), false);
 
 		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
