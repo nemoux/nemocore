@@ -674,6 +674,9 @@ static inline void nemoshow_item_update_matrix(struct nemoshow *show, struct sho
 			NEMOSHOW_ITEM_CC(item, modelview)->set9(args);
 		}
 
+		if (nemoshow_one_has_state(one, NEMOSHOW_ANCHOR_STATE))
+			NEMOSHOW_ITEM_CC(item, modelview)->postTranslate(-item->width * item->ax, -item->height * item->ay);
+
 		NEMOSHOW_ITEM_CC(item, matrix)->postConcat(
 				*NEMOSHOW_ITEM_CC(item, modelview));
 	}
@@ -689,16 +692,52 @@ static inline void nemoshow_item_update_matrix(struct nemoshow *show, struct sho
 		NEMOSHOW_ITEM_CC(item, matrix)->invert(
 				NEMOSHOW_ITEM_CC(item, inverse));
 
-	one->dirty |= NEMOSHOW_SHAPE_DIRTY;
+	one->dirty |= NEMOSHOW_BOUNDS_DIRTY;
 }
 
 static inline void nemoshow_item_update_shape(struct nemoshow *show, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	if (one->sub == NEMOSHOW_TEXTBOX_ITEM) {
+	if (one->sub == NEMOSHOW_CIRCLE_ITEM) {
+		item->width = item->r * 2;
+		item->height = item->r * 2;
+
+		one->dirty |= NEMOSHOW_SIZE_DIRTY;
+	} else if (one->sub == NEMOSHOW_TEXT_ITEM) {
+		SkRect box;
+
+		if (NEMOSHOW_REF(one, NEMOSHOW_PATH_REF) == NULL) {
+			if (NEMOSHOW_FONT_AT(NEMOSHOW_REF(one, NEMOSHOW_FONT_REF), layout) == NEMOSHOW_NORMAL_LAYOUT) {
+				SkScalar widths[strlen(item->text)];
+				double width = 0.0f;
+				int i, count;
+
+				count = NEMOSHOW_ITEM_CC(item, stroke)->getTextWidths(item->text, strlen(item->text), widths, NULL);
+
+				for (i = 0; i < count; i++) {
+					width += ceil(widths[i]);
+				}
+
+				box = SkRect::MakeXYWH(0, 0, width, item->fontdescent - item->fontascent);
+			} else if (NEMOSHOW_FONT_AT(NEMOSHOW_REF(one, NEMOSHOW_FONT_REF), layout) == NEMOSHOW_HARFBUZZ_LAYOUT) {
+				box = SkRect::MakeXYWH(item->x, item->y, item->textwidth, item->textheight);
+			}
+		} else {
+			box = NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(NEMOSHOW_REF(one, NEMOSHOW_PATH_REF)), path)->getBounds();
+
+			box.outset(item->fontsize, item->fontsize);
+		}
+
+		item->width = box.width();
+		item->height = box.height();
+
+		one->dirty |= NEMOSHOW_SIZE_DIRTY;
+	} else if (one->sub == NEMOSHOW_TEXTBOX_ITEM) {
 		NEMOSHOW_ITEM_CC(item, textbox)->setBox(item->x, item->y, item->width, item->height);
 	}
+
+	one->dirty |= NEMOSHOW_BOUNDS_DIRTY;
 }
 
 void nemoshow_item_update_bounds(struct nemoshow *show, struct showone *one)
@@ -708,19 +747,8 @@ void nemoshow_item_update_bounds(struct nemoshow *show, struct showone *one)
 	SkRect box;
 	double outer;
 
-	if (one->sub == NEMOSHOW_LINE_ITEM) {
-		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
-	} else if (one->sub == NEMOSHOW_RECT_ITEM) {
-		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
-	} else if (one->sub == NEMOSHOW_RRECT_ITEM) {
-		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
-	} else if (one->sub == NEMOSHOW_CIRCLE_ITEM) {
+	if (one->sub == NEMOSHOW_CIRCLE_ITEM) {
 		box = SkRect::MakeXYWH(item->x - item->r, item->y - item->r, item->r * 2, item->r * 2);
-
-		item->width = item->r * 2;
-		item->height = item->r * 2;
-	} else if (one->sub == NEMOSHOW_ARC_ITEM) {
-		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
 	} else if (one->sub == NEMOSHOW_PATH_ITEM || one->sub == NEMOSHOW_PATHTWICE_ITEM || one->sub == NEMOSHOW_PATHARRAY_ITEM) {
 		if (nemoshow_one_has_state(one, NEMOSHOW_SIZE_STATE)) {
 			box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
@@ -756,35 +784,6 @@ void nemoshow_item_update_bounds(struct nemoshow *show, struct showone *one)
 			bbox = region.getBounds();
 			box = SkRect::MakeXYWH(bbox.x(), bbox.y(), bbox.width(), bbox.height());
 		}
-	} else if (one->sub == NEMOSHOW_TEXT_ITEM) {
-		if (NEMOSHOW_REF(one, NEMOSHOW_PATH_REF) == NULL) {
-			if (NEMOSHOW_FONT_AT(NEMOSHOW_REF(one, NEMOSHOW_FONT_REF), layout) == NEMOSHOW_NORMAL_LAYOUT) {
-				SkScalar widths[strlen(item->text)];
-				double width = 0.0f;
-				int i, count;
-
-				count = NEMOSHOW_ITEM_CC(item, stroke)->getTextWidths(item->text, strlen(item->text), widths, NULL);
-
-				for (i = 0; i < count; i++) {
-					width += ceil(widths[i]);
-				}
-
-				box = SkRect::MakeXYWH(0, 0, width, item->fontdescent - item->fontascent);
-			} else if (NEMOSHOW_FONT_AT(NEMOSHOW_REF(one, NEMOSHOW_FONT_REF), layout) == NEMOSHOW_HARFBUZZ_LAYOUT) {
-				box = SkRect::MakeXYWH(item->x, item->y, item->textwidth, item->textheight);
-			}
-		} else {
-			box = NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(NEMOSHOW_REF(one, NEMOSHOW_PATH_REF)), path)->getBounds();
-
-			box.outset(item->fontsize, item->fontsize);
-		}
-
-		item->width = box.width();
-		item->height = box.height();
-	} else if (one->sub == NEMOSHOW_TEXTBOX_ITEM) {
-		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
-	} else if (one->sub == NEMOSHOW_IMAGE_ITEM) {
-		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
 	} else if (one->sub == NEMOSHOW_POINTS_ITEM || one->sub == NEMOSHOW_POLYLINE_ITEM || one->sub == NEMOSHOW_POLYGON_ITEM) {
 		int32_t x0 = INT_MAX, y0 = INT_MAX, x1 = INT_MIN, y1 = INT_MIN;
 		int i;
@@ -801,20 +800,9 @@ void nemoshow_item_update_bounds(struct nemoshow *show, struct showone *one)
 		}
 
 		box = SkRect::MakeXYWH(x0, y0, x1 - x0, y1 - y0);
-	} else if (one->sub == NEMOSHOW_SVG_ITEM) {
-		box = SkRect::MakeXYWH(0, 0, item->width, item->height);
-	} else if (one->sub == NEMOSHOW_CONTAINER_ITEM) {
-		box = SkRect::MakeXYWH(0, 0, item->width0, item->height0);
 	} else {
-		box = SkRect::MakeXYWH(0, 0, 0, 0);
+		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
 	}
-
-	if (nemoshow_one_has_state(one, NEMOSHOW_ANCHOR_STATE))
-		box.setXYWH(
-				box.x() - box.width() * item->ax,
-				box.y() - box.height() * item->ay,
-				box.width(),
-				box.height());
 
 	if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
 		box.outset(item->stroke_width, item->stroke_width);
@@ -863,16 +851,16 @@ int nemoshow_item_update(struct showone *one)
 		nemoshow_item_update_points(show, one);
 	if ((one->dirty & NEMOSHOW_PATH_DIRTY) != 0)
 		nemoshow_item_update_path(show, one);
+	if ((one->dirty & NEMOSHOW_SHAPE_DIRTY) != 0)
+		nemoshow_item_update_shape(show, one);
 	if ((one->dirty & NEMOSHOW_MATRIX_DIRTY) != 0)
 		nemoshow_item_update_matrix(show, one);
-	else if ((one->dirty & NEMOSHOW_SIZE_DIRTY) != 0 && nemoshow_one_has_state(one, NEMOSHOW_VIEWPORT_STATE))
+	else if ((one->dirty & NEMOSHOW_SIZE_DIRTY) != 0 && nemoshow_one_has_state(one, NEMOSHOW_VIEWPORT_STATE | NEMOSHOW_ANCHOR_STATE))
 		nemoshow_item_update_matrix(show, one);
 
 	if (one->canvas != NULL) {
-		if ((one->dirty & NEMOSHOW_SHAPE_DIRTY) != 0) {
+		if ((one->dirty & NEMOSHOW_BOUNDS_DIRTY) != 0) {
 			nemoshow_canvas_damage_one(one->canvas, one);
-
-			nemoshow_item_update_shape(show, one);
 
 			nemoshow_item_update_bounds(show, one);
 
@@ -880,9 +868,6 @@ int nemoshow_item_update(struct showone *one)
 		}
 
 		nemoshow_canvas_damage_one(one->canvas, one);
-	} else {
-		if ((one->dirty & NEMOSHOW_SHAPE_DIRTY) != 0)
-			nemoshow_item_update_shape(show, one);
 	}
 
 	return 0;

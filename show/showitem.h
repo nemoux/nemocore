@@ -106,7 +106,7 @@ struct showitem {
 	double _strokes[4];
 	double _fills[4];
 	double _alpha;
-	
+
 	double pathsegment;
 	double pathdeviation;
 	uint32_t pathseed;
@@ -404,9 +404,9 @@ static inline void nemoshow_item_set_anchor(struct showone *one, double ax, doub
 	item->ax = ax;
 	item->ay = ay;
 
-	nemoshow_one_set_state(one, NEMOSHOW_ANCHOR_STATE);
+	nemoshow_one_set_state(one, NEMOSHOW_ANCHOR_STATE | NEMOSHOW_TRANSFORM_STATE);
 
-	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
+	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
 }
 
 static inline void nemoshow_item_translate(struct showone *one, double tx, double ty)
