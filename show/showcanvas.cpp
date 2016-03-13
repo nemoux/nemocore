@@ -21,7 +21,6 @@
 #include <showpath.hpp>
 #include <showfont.h>
 #include <showfont.hpp>
-#include <showhelper.hpp>
 #include <fbohelper.h>
 #include <oshelper.h>
 #include <nemoshow.h>
@@ -443,13 +442,12 @@ static inline void nemoshow_canvas_render_item_path(struct showcanvas *canvas, S
 	} else {
 		SkPath path;
 
-		nemoshow_helper_draw_path(
-				path,
-				NEMOSHOW_ITEM_CC(item, path),
-				item->pathlength,
-				item->from, item->to);
-
-		_canvas->drawPath(path, *NEMOSHOW_ITEM_CC(item, stroke));
+		if (NEMOSHOW_ITEM_CC(item, measure)->getSegment(
+					NEMOSHOW_ITEM_CC(item, measure)->getLength() * item->from,
+					NEMOSHOW_ITEM_CC(item, measure)->getLength() * item->to,
+					&path, true) == true) {
+			_canvas->drawPath(path, *NEMOSHOW_ITEM_CC(item, stroke));
+		}
 	}
 }
 
@@ -465,13 +463,12 @@ static inline void nemoshow_canvas_render_item_pathtwice(struct showcanvas *canv
 	} else {
 		SkPath path;
 
-		nemoshow_helper_draw_path(
-				path,
-				NEMOSHOW_ITEM_CC(item, path),
-				item->pathlength,
-				item->from, item->to);
-
-		_canvas->drawPath(path, *NEMOSHOW_ITEM_CC(item, stroke));
+		if (NEMOSHOW_ITEM_CC(item, measure)->getSegment(
+					NEMOSHOW_ITEM_CC(item, measure)->getLength() * item->from,
+					NEMOSHOW_ITEM_CC(item, measure)->getLength() * item->to,
+					&path, true) == true) {
+			_canvas->drawPath(path, *NEMOSHOW_ITEM_CC(item, stroke));
+		}
 	}
 }
 
@@ -487,13 +484,12 @@ static inline void nemoshow_canvas_render_item_patharray(struct showcanvas *canv
 	} else {
 		SkPath path;
 
-		nemoshow_helper_draw_path(
-				path,
-				NEMOSHOW_ITEM_CC(item, path),
-				item->pathlength,
-				item->from, item->to);
-
-		_canvas->drawPath(path, *NEMOSHOW_ITEM_CC(item, stroke));
+		if (NEMOSHOW_ITEM_CC(item, measure)->getSegment(
+					NEMOSHOW_ITEM_CC(item, measure)->getLength() * item->from,
+					NEMOSHOW_ITEM_CC(item, measure)->getLength() * item->to,
+					&path, true) == true) {
+			_canvas->drawPath(path, *NEMOSHOW_ITEM_CC(item, stroke));
+		}
 	}
 }
 

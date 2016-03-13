@@ -12,7 +12,6 @@
 #include <showitem.hpp>
 #include <nemoshow.h>
 #include <showmisc.h>
-#include <showhelper.hpp>
 #include <nemoxml.h>
 #include <nemomisc.h>
 

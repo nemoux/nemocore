@@ -18,6 +18,8 @@ typedef struct _showitem {
 	SkBitmap *bitmap;
 	uint32_t width, height;
 
+	SkPathMeasure *measure;
+
 	SkPoint *points;
 
 	SkTextBox *textbox;

@@ -33,7 +33,6 @@ add_library(nemoshow SHARED
 	showcons.cpp
 	showfont.cpp
 	showeasy.cpp
-	showhelper.cpp
 	showmisc.cpp
 	showpoly.c
 	showpipe.c

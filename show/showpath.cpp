@@ -13,7 +13,6 @@
 #include <showitem.hpp>
 #include <showfilter.h>
 #include <showfilter.hpp>
-#include <showhelper.hpp>
 #include <nemoshow.h>
 #include <svghelper.h>
 #include <fonthelper.h>

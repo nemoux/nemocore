@@ -20,7 +20,6 @@
 #include <showpath.hpp>
 #include <showfont.h>
 #include <showfont.hpp>
-#include <showhelper.hpp>
 #include <nemoshow.h>
 #include <fonthelper.h>
 #include <svghelper.h>
@@ -59,6 +58,7 @@ struct showone *nemoshow_item_create(int type)
 	NEMOSHOW_ITEM_CC(item, stroke)->setStrokeCap(SkPaint::kRound_Cap);
 	NEMOSHOW_ITEM_CC(item, stroke)->setStrokeJoin(SkPaint::kRound_Join);
 	NEMOSHOW_ITEM_CC(item, stroke)->setAntiAlias(true);
+	NEMOSHOW_ITEM_CC(item, measure) = new SkPathMeasure;
 	NEMOSHOW_ITEM_CC(item, points) = NULL;
 	NEMOSHOW_ITEM_CC(item, textbox) = NULL;
 	NEMOSHOW_ITEM_CC(item, bitmap) = NULL;
@@ -197,6 +197,8 @@ void nemoshow_item_destroy(struct showone *one)
 		delete NEMOSHOW_ITEM_CC(item, fill);
 	if (NEMOSHOW_ITEM_CC(item, stroke) != NULL)
 		delete NEMOSHOW_ITEM_CC(item, stroke);
+	if (NEMOSHOW_ITEM_CC(item, measure) != NULL)
+		delete NEMOSHOW_ITEM_CC(item, measure);
 	if (NEMOSHOW_ITEM_CC(item, points) != NULL)
 		delete[] NEMOSHOW_ITEM_CC(item, points);
 	if (NEMOSHOW_ITEM_CC(item, textbox) != NULL)
@@ -584,8 +586,8 @@ static inline void nemoshow_item_update_path(struct nemoshow *show, struct showo
 				effect->unref();
 			}
 		}
-
-		item->pathlength = nemoshow_helper_get_path_length(NEMOSHOW_ITEM_CC(item, path));
+		
+		NEMOSHOW_ITEM_CC(item, measure)->setPath(NEMOSHOW_ITEM_CC(item, path), false);
 
 		one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 	}

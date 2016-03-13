@@ -106,8 +106,7 @@ struct showitem {
 	double _strokes[4];
 	double _fills[4];
 	double _alpha;
-
-	double pathlength;
+	
 	double pathsegment;
 	double pathdeviation;
 	uint32_t pathseed;

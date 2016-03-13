@@ -36,4 +36,6 @@
 
 #include <SkGeometry.h>
 
+#include <SkPathMeasure.h>
+
 #endif
