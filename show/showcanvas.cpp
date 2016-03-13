@@ -639,40 +639,42 @@ static inline void nemoshow_canvas_render_one(struct showcanvas *canvas, SkCanva
 		nemoshow_canvas_render_item_group,
 		nemoshow_canvas_render_item_container
 	};
-	struct showitem *item = NEMOSHOW_ITEM(one);
-	int has_context = nemoshow_one_has_state(one, NEMOSHOW_TRANSFORM_STATE | NEMOSHOW_CLIP_STATE);
 
-	if (has_context != 0)
+	if (nemoshow_one_has_state(one, NEMOSHOW_TRANSFORM_STATE | NEMOSHOW_CLIP_STATE)) {
+		struct showitem *item = NEMOSHOW_ITEM(one);
+
 		_canvas->save();
 
-	if (nemoshow_one_has_state(one, NEMOSHOW_TRANSFORM_STATE))
-		_canvas->concat(*NEMOSHOW_ITEM_CC(item, modelview));
+		if (nemoshow_one_has_state(one, NEMOSHOW_TRANSFORM_STATE))
+			_canvas->concat(*NEMOSHOW_ITEM_CC(item, modelview));
 
-	if (nemoshow_one_has_state(one, NEMOSHOW_CLIP_STATE)) {
-		struct showone *ref = NEMOSHOW_REF(one, NEMOSHOW_CLIP_REF);
-		struct showitem *clip = NEMOSHOW_ITEM(ref);
+		if (nemoshow_one_has_state(one, NEMOSHOW_CLIP_STATE)) {
+			struct showone *ref = NEMOSHOW_REF(one, NEMOSHOW_CLIP_REF);
+			struct showitem *clip = NEMOSHOW_ITEM(ref);
 
-		if (nemoshow_one_has_state(ref, NEMOSHOW_TRANSFORM_STATE)) {
-			SkMatrix matrix = _canvas->getTotalMatrix();
+			if (nemoshow_one_has_state(ref, NEMOSHOW_TRANSFORM_STATE)) {
+				SkMatrix matrix = _canvas->getTotalMatrix();
 
-			_canvas->resetMatrix();
-			_canvas->scale(
-					nemoshow_canvas_get_viewport_sx(one->canvas),
-					nemoshow_canvas_get_viewport_sy(one->canvas));
-			_canvas->concat(*NEMOSHOW_ITEM_CC(clip, modelview));
+				_canvas->resetMatrix();
+				_canvas->scale(
+						nemoshow_canvas_get_viewport_sx(one->canvas),
+						nemoshow_canvas_get_viewport_sy(one->canvas));
+				_canvas->concat(*NEMOSHOW_ITEM_CC(clip, modelview));
 
-			_canvas->clipPath(*NEMOSHOW_ITEM_CC(clip, path));
+				_canvas->clipPath(*NEMOSHOW_ITEM_CC(clip, path));
 
-			_canvas->setMatrix(matrix);
-		} else {
-			_canvas->clipPath(*NEMOSHOW_ITEM_CC(clip, path));
+				_canvas->setMatrix(matrix);
+			} else {
+				_canvas->clipPath(*NEMOSHOW_ITEM_CC(clip, path));
+			}
 		}
-	}
 
-	renderers[one->sub](canvas, _canvas, one);
+		renderers[one->sub](canvas, _canvas, one);
 
-	if (has_context != 0)
 		_canvas->restore();
+	} else {
+		renderers[one->sub](canvas, _canvas, one);
+	}
 }
 
 void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
