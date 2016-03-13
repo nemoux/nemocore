@@ -1018,18 +1018,21 @@ void nemoshow_item_path_clear(struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	if (one->sub == NEMOSHOW_PATHARRAY_ITEM) {
+	if (one->sub == NEMOSHOW_PATH_ITEM) {
+		NEMOSHOW_ITEM_CC(item, path)->reset();
+
+		nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
+	} else if (one->sub == NEMOSHOW_PATHTWICE_ITEM) {
+		NEMOSHOW_ITEM_CC(item, path)->reset();
+		NEMOSHOW_ITEM_CC(item, fillpath)->reset();
+
+		nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
+	} else if (one->sub == NEMOSHOW_PATHARRAY_ITEM) {
 		item->ncmds = 0;
 		item->npoints = 0;
 
 		nemoshow_one_dirty(one, NEMOSHOW_POINTS_DIRTY | NEMOSHOW_PATH_DIRTY);
-
-		return;
 	}
-
-	NEMOSHOW_ITEM_CC(item, path)->reset();
-
-	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 }
 
 int nemoshow_item_path_moveto(struct showone *one, double x, double y)

@@ -199,6 +199,7 @@ static void nemomine_check_mine(struct minecontext *context, uint32_t tag)
 
 	mone->state = NEMOMINE_CHECK_STATE;
 
+	nemoshow_item_path_clear(mone->one);
 	nemoshow_item_path_append(mone->one, context->flag);
 
 	frame = nemoshow_sequence_create_frame();
