@@ -383,5 +383,5 @@ void nemoshow_path_set_dash_effect(struct showone *one, double *dashes, int dash
 void nemoshow_path_set_filter(struct showone *one, struct showone *filter)
 {
 	nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF));
-	nemoshow_one_reference_one(one, filter, NEMOSHOW_FILTER_DIRTY, NEMOSHOW_FILTER_REF);
+	nemoshow_one_reference_one(one, filter, NEMOSHOW_FILTER_DIRTY, 0x0, NEMOSHOW_FILTER_REF);
 }

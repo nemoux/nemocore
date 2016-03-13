@@ -399,7 +399,7 @@ int nemoshow_poly_update(struct showone *one)
 void nemoshow_poly_set_canvas(struct showone *one, struct showone *canvas)
 {
 	nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_CANVAS_REF));
-	nemoshow_one_reference_one(one, canvas, NEMOSHOW_CANVAS_DIRTY, NEMOSHOW_CANVAS_REF);
+	nemoshow_one_reference_one(one, canvas, NEMOSHOW_CANVAS_DIRTY, 0x0, NEMOSHOW_CANVAS_REF);
 }
 
 void nemoshow_poly_set_vertices(struct showone *one, float *vertices, int elements)

@@ -239,13 +239,13 @@ int nemoshow_item_arrange(struct showone *one)
 	v = nemoobject_gets(&one->object, "filter");
 	if (v != NULL && (filter = nemoshow_search_one(show, v)) != NULL) {
 		nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF));
-		nemoshow_one_reference_one(one, filter, NEMOSHOW_FILTER_DIRTY, NEMOSHOW_FILTER_REF);
+		nemoshow_one_reference_one(one, filter, NEMOSHOW_FILTER_DIRTY, 0x0, NEMOSHOW_FILTER_REF);
 	}
 
 	v = nemoobject_gets(&one->object, "shader");
 	if (v != NULL && (shader = nemoshow_search_one(show, v)) != NULL) {
 		nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_SHADER_REF));
-		nemoshow_one_reference_one(one, shader, NEMOSHOW_SHADER_DIRTY, NEMOSHOW_SHADER_REF);
+		nemoshow_one_reference_one(one, shader, NEMOSHOW_SHADER_DIRTY, 0x0, NEMOSHOW_SHADER_REF);
 	}
 
 	v = nemoobject_gets(&one->object, "matrix");
@@ -256,7 +256,7 @@ int nemoshow_item_arrange(struct showone *one)
 			item->transform = NEMOSHOW_ITEM_EXTERN_TRANSFORM;
 
 			nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_MATRIX_REF));
-			nemoshow_one_reference_one(one, matrix, NEMOSHOW_MATRIX_DIRTY, NEMOSHOW_MATRIX_REF);
+			nemoshow_one_reference_one(one, matrix, NEMOSHOW_MATRIX_DIRTY, NEMOSHOW_TRANSFORM_STATE, NEMOSHOW_MATRIX_REF);
 		}
 	} else {
 		nemoshow_children_for_each(child, one) {
@@ -271,19 +271,19 @@ int nemoshow_item_arrange(struct showone *one)
 	v = nemoobject_gets(&one->object, "clip");
 	if (v != NULL && (clip = nemoshow_search_one(show, v)) != NULL) {
 		nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_CLIP_REF));
-		nemoshow_one_reference_one(one, clip, NEMOSHOW_REDRAW_DIRTY, NEMOSHOW_CLIP_REF);
+		nemoshow_one_reference_one(one, clip, NEMOSHOW_REDRAW_DIRTY, NEMOSHOW_CLIP_STATE, NEMOSHOW_CLIP_REF);
 	}
 
 	v = nemoobject_gets(&one->object, "path");
 	if (v != NULL && (path = nemoshow_search_one(show, v)) != NULL) {
 		nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_PATH_REF));
-		nemoshow_one_reference_one(one, path, NEMOSHOW_SHAPE_DIRTY, NEMOSHOW_PATH_REF);
+		nemoshow_one_reference_one(one, path, NEMOSHOW_SHAPE_DIRTY, 0x0, NEMOSHOW_PATH_REF);
 	}
 
 	v = nemoobject_gets(&one->object, "font");
 	if (v != NULL && (font = nemoshow_search_one(show, v)) != NULL) {
 		nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_FONT_REF));
-		nemoshow_one_reference_one(one, font, NEMOSHOW_FONT_DIRTY, NEMOSHOW_FONT_REF);
+		nemoshow_one_reference_one(one, font, NEMOSHOW_FONT_DIRTY, 0x0, NEMOSHOW_FONT_REF);
 	}
 
 	v = nemoobject_gets(&one->object, "uri");
@@ -921,31 +921,31 @@ void nemoshow_item_set_shader(struct showone *one, struct showone *shader)
 	nemoshow_one_set_state(one, NEMOSHOW_FILL_STATE);
 
 	nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_SHADER_REF));
-	nemoshow_one_reference_one(one, shader, NEMOSHOW_SHADER_DIRTY, NEMOSHOW_SHADER_REF);
+	nemoshow_one_reference_one(one, shader, NEMOSHOW_SHADER_DIRTY, 0x0, NEMOSHOW_SHADER_REF);
 }
 
 void nemoshow_item_set_filter(struct showone *one, struct showone *filter)
 {
 	nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF));
-	nemoshow_one_reference_one(one, filter, NEMOSHOW_FILTER_DIRTY, NEMOSHOW_FILTER_REF);
+	nemoshow_one_reference_one(one, filter, NEMOSHOW_FILTER_DIRTY, 0x0, NEMOSHOW_FILTER_REF);
 }
 
 void nemoshow_item_set_clip(struct showone *one, struct showone *clip)
 {
 	nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_CLIP_REF));
-	nemoshow_one_reference_one(one, clip, NEMOSHOW_REDRAW_DIRTY, NEMOSHOW_CLIP_REF);
+	nemoshow_one_reference_one(one, clip, NEMOSHOW_REDRAW_DIRTY, NEMOSHOW_CLIP_STATE, NEMOSHOW_CLIP_REF);
 }
 
 void nemoshow_item_set_font(struct showone *one, struct showone *font)
 {
 	nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_FONT_REF));
-	nemoshow_one_reference_one(one, font, NEMOSHOW_FONT_DIRTY, NEMOSHOW_FONT_REF);
+	nemoshow_one_reference_one(one, font, NEMOSHOW_FONT_DIRTY, 0x0, NEMOSHOW_FONT_REF);
 }
 
 void nemoshow_item_set_path(struct showone *one, struct showone *path)
 {
 	nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_PATH_REF));
-	nemoshow_one_reference_one(one, path, NEMOSHOW_SHAPE_DIRTY, NEMOSHOW_PATH_REF);
+	nemoshow_one_reference_one(one, path, NEMOSHOW_SHAPE_DIRTY, 0x0, NEMOSHOW_PATH_REF);
 }
 
 void nemoshow_item_set_uri(struct showone *one, const char *uri)

@@ -640,8 +640,7 @@ static inline void nemoshow_canvas_render_one(struct showcanvas *canvas, SkCanva
 		nemoshow_canvas_render_item_container
 	};
 	struct showitem *item = NEMOSHOW_ITEM(one);
-	struct showitem *clip = NEMOSHOW_REF(one, NEMOSHOW_CLIP_REF) == NULL ? NULL : NEMOSHOW_ITEM(NEMOSHOW_REF(one, NEMOSHOW_CLIP_REF));
-	int has_context = nemoshow_one_has_state(one, NEMOSHOW_TRANSFORM_STATE) || clip != NULL;
+	int has_context = nemoshow_one_has_state(one, NEMOSHOW_TRANSFORM_STATE | NEMOSHOW_CLIP_STATE);
 
 	if (has_context != 0)
 		_canvas->save();
@@ -649,10 +648,11 @@ static inline void nemoshow_canvas_render_one(struct showcanvas *canvas, SkCanva
 	if (nemoshow_one_has_state(one, NEMOSHOW_TRANSFORM_STATE))
 		_canvas->concat(*NEMOSHOW_ITEM_CC(item, modelview));
 
-	if (clip != NULL) {
-		if (clip->transform == 0) {
-			_canvas->clipPath(*NEMOSHOW_ITEM_CC(clip, path));
-		} else {
+	if (nemoshow_one_has_state(one, NEMOSHOW_CLIP_STATE)) {
+		struct showone *ref = NEMOSHOW_REF(one, NEMOSHOW_CLIP_REF);
+		struct showitem *clip = NEMOSHOW_ITEM(ref);
+
+		if (nemoshow_one_has_state(ref, NEMOSHOW_TRANSFORM_STATE)) {
 			SkMatrix matrix = _canvas->getTotalMatrix();
 
 			_canvas->resetMatrix();
@@ -664,6 +664,8 @@ static inline void nemoshow_canvas_render_one(struct showcanvas *canvas, SkCanva
 			_canvas->clipPath(*NEMOSHOW_ITEM_CC(clip, path));
 
 			_canvas->setMatrix(matrix);
+		} else {
+			_canvas->clipPath(*NEMOSHOW_ITEM_CC(clip, path));
 		}
 	}
 

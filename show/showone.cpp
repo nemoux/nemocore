@@ -44,6 +44,8 @@ void nemoshow_one_finish(struct showone *one)
 	nemolist_for_each_safe(ref, nref, &one->reference_list, link) {
 		ref->one->refs[ref->index] = NULL;
 
+		nemoshow_one_put_state(ref->one, ref->state);
+
 		nemolist_remove(&ref->link);
 
 		free(ref);
@@ -326,7 +328,7 @@ int nemoshow_one_below_one(struct showone *one, struct showone *below)
 	return 0;
 }
 
-int nemoshow_one_reference_one(struct showone *one, struct showone *src, uint32_t dirty, int index)
+int nemoshow_one_reference_one(struct showone *one, struct showone *src, uint32_t dirty, uint32_t state, int index)
 {
 	struct showref *ref;
 
@@ -336,6 +338,7 @@ int nemoshow_one_reference_one(struct showone *one, struct showone *src, uint32_
 
 	ref->src = src;
 	ref->dirty = dirty;
+	ref->state = state;
 	ref->one = one;
 	ref->index = index;
 
@@ -344,6 +347,8 @@ int nemoshow_one_reference_one(struct showone *one, struct showone *src, uint32_
 	nemolist_insert(&src->reference_list, &ref->link);
 
 	nemoshow_one_dirty(one, dirty);
+
+	nemoshow_one_set_state(one, state);
 
 	if (one->dirty_serial <= src->dirty_serial)
 		nemoshow_one_dirty_backwards(one, dirty);
@@ -367,6 +372,8 @@ void nemoshow_one_unreference_one(struct showone *one, struct showone *src)
 		if (ref != NULL && ref->src == src) {
 			one->refs[i] = NULL;
 
+			nemoshow_one_put_state(one, ref->state);
+
 			nemolist_remove(&ref->link);
 
 			free(ref);
@@ -385,6 +392,8 @@ void nemoshow_one_unreference_all(struct showone *one)
 		ref = one->refs[i];
 		if (ref != NULL) {
 			one->refs[i] = NULL;
+
+			nemoshow_one_put_state(one, ref->state);
 
 			nemolist_remove(&ref->link);
 

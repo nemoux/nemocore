@@ -65,6 +65,7 @@ typedef enum {
 	NEMOSHOW_INHERIT_STATE = (1 << 8),
 	NEMOSHOW_BOUNDS_STATE = (1 << 9),
 	NEMOSHOW_EFFECT_STATE = (1 << 10),
+	NEMOSHOW_CLIP_STATE = (1 << 11)
 } NemoShowOneState;
 
 typedef enum {
@@ -111,6 +112,7 @@ struct showref {
 
 	struct showone *src;
 	uint32_t dirty;
+	uint32_t state;
 	struct showone *one;
 	int index;
 };
@@ -212,7 +214,7 @@ extern void nemoshow_one_detach_one(struct showone *one);
 extern int nemoshow_one_above_one(struct showone *one, struct showone *above);
 extern int nemoshow_one_below_one(struct showone *one, struct showone *below);
 
-extern int nemoshow_one_reference_one(struct showone *one, struct showone *src, uint32_t dirty, int index);
+extern int nemoshow_one_reference_one(struct showone *one, struct showone *src, uint32_t dirty, uint32_t state, int index);
 extern void nemoshow_one_unreference_one(struct showone *one, struct showone *src);
 extern void nemoshow_one_unreference_all(struct showone *one);
 
