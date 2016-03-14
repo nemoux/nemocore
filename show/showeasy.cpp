@@ -24,7 +24,6 @@ struct showtransition *nemoshow_transition_create_easy(struct nemoshow *show, st
 
 	while ((name = va_arg(vargs, const char *)) != NULL) {
 		sequence = nemoshow_search_one(show, name);
-		nemoshow_update_one_expression(show, sequence);
 		nemoshow_transition_attach_sequence(trans, sequence);
 	}
 

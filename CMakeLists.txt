@@ -34,6 +34,8 @@ option(WITH_MESA_RENDERNODE "Build with MESA's RENDERNODE" OFF)
 
 option(WITH_TOUCH_TO_POINTER "Build with Touch to Pointer" OFF)
 
+option(WITH_SHOWEXPR "Build with NEMOSHOW's EXPR" OFF)
+
 option(WITH_OPTIMIZE "Build with OPTIMIZE" ON)
 option(WITH_DEBUG "Build with DEBUG" OFF)
 option(WITH_PROFILE "Build with PROFILE" OFF)
@@ -147,31 +149,6 @@ if(WITH_DRM)
 	add_definitions(-DNEMOUX_WITH_DRM=1)
 endif(WITH_DRM)
 
-if(WITH_UNWIND)
-	add_definitions(-DNEMOUX_WITH_UNWIND=1)
-
-	set(NEMOUX_COMMON_LIBRARIES
-		${NEMOUX_COMMON_LIBRARIES}
-		unwind
-		)
-endif(WITH_UNWIND)
-
-if(WITH_LOGIND)
-	add_definitions(-DNEMOUX_WITH_LOGIND=1)
-endif(WITH_LOGIND)
-
-if(WITH_WAYLANDSHELL)
-	add_definitions(-DNEMOUX_WITH_WAYLANDSHELL=1)
-endif(WITH_WAYLANDSHELL)
-
-if(WITH_XDGSHELL)
-	add_definitions(-DNEMOUX_WITH_XDGSHELL=1)
-endif(WITH_XDGSHELL)
-
-if(WITH_FULLSCREEN)
-	add_definitions(-DNEMOUX_WITH_FULLSCREEN=1)
-endif(WITH_FULLSCREEN)
-
 if(WITH_MESA_DMABUF)
 	add_definitions(-DNEMOUX_WITH_MESA_DMABUF=1)
 endif(WITH_MESA_DMABUF)
@@ -180,9 +157,14 @@ if(WITH_MESA_RENDERNODE)
 	add_definitions(-DNEMOUX_WITH_MESA_RENDERNODE=1)
 endif(WITH_MESA_RENDERNODE)
 
-if(WITH_TOUCH_TO_POINTER)
-	add_definitions(-DNEMOUX_WITH_TOUCH_TO_POINTER=1)
-endif(WITH_TOUCH_TO_POINTER)
+if(WITH_UNWIND)
+	add_definitions(-DNEMOUX_WITH_UNWIND=1)
+
+	set(NEMOUX_COMMON_LIBRARIES
+		${NEMOUX_COMMON_LIBRARIES}
+		unwind
+		)
+endif(WITH_UNWIND)
 
 if(WITH_GLIB)
 	add_definitions(-DNEMOUX_WITH_GLIB=1)

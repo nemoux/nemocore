@@ -15,6 +15,14 @@ include_directories(
 	${CMAKE_SOURCE_DIR}/thirds
 	)
 
+if(WITH_SHOWEXPR)
+	add_definitions(-DNEMOUX_WITH_SHOWEXPR=1)
+
+	set(EXTRA_SOURCES ${EXTRA_SOURCES}
+		showexpr.cpp
+		)
+endif(WITH_SHOWEXPR)
+
 add_library(nemoshow SHARED
 	nemoshow.cpp
 	showone.cpp
@@ -23,14 +31,12 @@ add_library(nemoshow SHARED
 	showitem.cpp
 	showcolor.cpp
 	showpath.cpp
-	showexpr.cpp
 	showsequence.cpp
 	showease.cpp
 	showtransition.cpp
 	showmatrix.cpp
 	showfilter.cpp
 	showshader.cpp
-	showcons.cpp
 	showfont.cpp
 	showeasy.cpp
 	showmisc.cpp
@@ -39,6 +45,7 @@ add_library(nemoshow SHARED
 	showgrab.c
 	svghelper.cpp
 	skiahelper.cpp
+	${EXTRA_SOURCES}
 	)
 
 TARGET_LINK_LIBRARIES(nemoshow
@@ -59,14 +66,13 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/show/showitem.hpp
 	${CMAKE_SOURCE_DIR}/show/showcolor.h
 	${CMAKE_SOURCE_DIR}/show/showpath.h
-	${CMAKE_SOURCE_DIR}/show/showexpr.h
 	${CMAKE_SOURCE_DIR}/show/showsequence.h
 	${CMAKE_SOURCE_DIR}/show/showease.h
 	${CMAKE_SOURCE_DIR}/show/showtransition.h
 	${CMAKE_SOURCE_DIR}/show/showmatrix.h
 	${CMAKE_SOURCE_DIR}/show/showfilter.h
 	${CMAKE_SOURCE_DIR}/show/showshader.h
-	${CMAKE_SOURCE_DIR}/show/showcons.h
+	${CMAKE_SOURCE_DIR}/show/showexpr.h
 	${CMAKE_SOURCE_DIR}/show/showfont.h
 	${CMAKE_SOURCE_DIR}/show/showeasy.h
 	${CMAKE_SOURCE_DIR}/show/showmisc.h
@@ -76,6 +82,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/show/showevent.h
 	${CMAKE_SOURCE_DIR}/show/svghelper.h
 	${CMAKE_SOURCE_DIR}/show/skiahelper.h
+	${EXTRA_HEADERS}
 	)
 
 set(NEMOSHOW_PKGCONFIG_REQUIRES "nemoasst nemotale skia harfbuzz")

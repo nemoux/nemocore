@@ -18,7 +18,6 @@ NEMO_BEGIN_EXTERN_C
 #include <showcanvas.h>
 #include <showitem.h>
 #include <showcolor.h>
-#include <showexpr.h>
 #include <showsequence.h>
 #include <showease.h>
 #include <showtransition.h>
@@ -26,7 +25,7 @@ NEMO_BEGIN_EXTERN_C
 #include <showpath.h>
 #include <showfilter.h>
 #include <showshader.h>
-#include <showcons.h>
+#include <showexpr.h>
 #include <showfont.h>
 #include <showeasy.h>
 #include <showpoly.h>
@@ -93,10 +92,12 @@ extern struct showone *nemoshow_search_one(struct nemoshow *show, const char *id
 
 extern int nemoshow_load_xml(struct nemoshow *show, const char *path);
 
+#ifdef NEMOUX_WITH_SHOWEXPR
 extern void nemoshow_update_symbol(struct nemoshow *show, const char *name, double value);
 extern void nemoshow_update_expression(struct nemoshow *show);
 extern void nemoshow_update_one_expression(struct nemoshow *show, struct showone *one);
 extern void nemoshow_update_one_expression_without_dirty(struct nemoshow *show, struct showone *one);
+#endif
 
 extern void nemoshow_arrange_one(struct nemoshow *show);
 extern void nemoshow_render_one(struct nemoshow *show);

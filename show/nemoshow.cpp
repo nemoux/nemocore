@@ -32,6 +32,7 @@ struct nemoshow *nemoshow_create(void)
 		return NULL;
 	memset(show, 0, sizeof(struct nemoshow));
 
+#ifdef NEMOUX_WITH_SHOWEXPR
 	show->expr = nemoshow_expr_create();
 	if (show->expr == NULL)
 		goto err1;
@@ -41,6 +42,7 @@ struct nemoshow *nemoshow_create(void)
 		goto err2;
 
 	nemoshow_expr_add_symbol_table(show->expr, show->stable);
+#endif
 
 	nemolist_init(&show->one_list);
 	nemolist_init(&show->dirty_list);
@@ -55,8 +57,10 @@ struct nemoshow *nemoshow_create(void)
 
 	return show;
 
+#ifdef NEMOUX_WITH_SHOWEXPR
 err2:
 	nemoshow_expr_destroy(show->expr);
+#endif
 
 err1:
 	free(show);
@@ -88,8 +92,10 @@ void nemoshow_destroy(struct nemoshow *show)
 
 	nemolist_remove(&show->scene_destroy_listener.link);
 
+#ifdef NEMOUX_WITH_SHOWEXPR
 	nemoshow_expr_destroy(show->expr);
 	nemoshow_expr_destroy_symbol_table(show->stable);
+#endif
 
 	free(show);
 }
@@ -159,8 +165,6 @@ static struct showone *nemoshow_create_one(struct nemoshow *show, struct xmlnode
 		one = nemoshow_shader_create(NEMOSHOW_RADIAL_GRADIENT_SHADER);
 	} else if (strcmp(node->name, "stop") == 0) {
 		one = nemoshow_stop_create();
-	} else if (strcmp(node->name, "cons") == 0) {
-		one = nemoshow_cons_create();
 	} else if (strcmp(node->name, "font") == 0) {
 		one = nemoshow_font_create();
 	} else if (strcmp(node->name, "defs") == 0) {
@@ -410,6 +414,7 @@ int nemoshow_load_xml(struct nemoshow *show, const char *path)
 	return 0;
 }
 
+#ifdef NEMOUX_WITH_SHOWEXPR
 void nemoshow_update_symbol(struct nemoshow *show, const char *name, double value)
 {
 	nemoshow_expr_add_symbol(show->stable, name, value);
@@ -475,6 +480,7 @@ void nemoshow_update_one_expression_without_dirty(struct nemoshow *show, struct 
 	nemoshow_children_for_each(child, one)
 		nemoshow_update_one_expression_without_dirty(show, child);
 }
+#endif
 
 void nemoshow_arrange_one(struct nemoshow *show)
 {
