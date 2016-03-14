@@ -18,7 +18,7 @@
 #include <fonthelper.h>
 #include <nemomisc.h>
 
-struct showone *nemoshow_path_create(void)
+struct showone *nemoshow_path_create(int type)
 {
 	struct showpath *path;
 	struct showone *one;
@@ -28,43 +28,9 @@ struct showone *nemoshow_path_create(void)
 		return NULL;
 	memset(path, 0, sizeof(struct showpath));
 
-	path->cc = new showpath_t;
-	NEMOSHOW_PATH_CC(path, fill) = new SkPaint;
-	NEMOSHOW_PATH_CC(path, fill)->setStyle(SkPaint::kFill_Style);
-	NEMOSHOW_PATH_CC(path, fill)->setStrokeCap(SkPaint::kRound_Cap);
-	NEMOSHOW_PATH_CC(path, fill)->setStrokeJoin(SkPaint::kRound_Join);
-	NEMOSHOW_PATH_CC(path, fill)->setAntiAlias(true);
-	NEMOSHOW_PATH_CC(path, stroke) = new SkPaint;
-	NEMOSHOW_PATH_CC(path, stroke)->setStyle(SkPaint::kStroke_Style);
-	NEMOSHOW_PATH_CC(path, stroke)->setStrokeCap(SkPaint::kRound_Cap);
-	NEMOSHOW_PATH_CC(path, stroke)->setStrokeJoin(SkPaint::kRound_Join);
-	NEMOSHOW_PATH_CC(path, stroke)->setAntiAlias(true);
-	NEMOSHOW_PATH_CC(path, path) = new SkPath;
-
-	path->alpha = 1.0f;
-
-	path->fills[NEMOSHOW_PATH_ALPHA_COLOR] = 255.0f;
-	path->fills[NEMOSHOW_PATH_RED_COLOR] = 255.0f;
-	path->fills[NEMOSHOW_PATH_GREEN_COLOR] = 255.0f;
-	path->fills[NEMOSHOW_PATH_BLUE_COLOR] = 255.0f;
-	path->strokes[NEMOSHOW_PATH_ALPHA_COLOR] = 255.0f;
-	path->strokes[NEMOSHOW_PATH_RED_COLOR] = 255.0f;
-	path->strokes[NEMOSHOW_PATH_GREEN_COLOR] = 255.0f;
-	path->strokes[NEMOSHOW_PATH_BLUE_COLOR] = 255.0f;
-
-	path->_alpha = 1.0f;
-
-	path->_fills[NEMOSHOW_PATH_ALPHA_COLOR] = 255.0f;
-	path->_fills[NEMOSHOW_PATH_RED_COLOR] = 255.0f;
-	path->_fills[NEMOSHOW_PATH_GREEN_COLOR] = 255.0f;
-	path->_fills[NEMOSHOW_PATH_BLUE_COLOR] = 255.0f;
-	path->_strokes[NEMOSHOW_PATH_ALPHA_COLOR] = 255.0f;
-	path->_strokes[NEMOSHOW_PATH_RED_COLOR] = 255.0f;
-	path->_strokes[NEMOSHOW_PATH_GREEN_COLOR] = 255.0f;
-	path->_strokes[NEMOSHOW_PATH_BLUE_COLOR] = 255.0f;
-
 	one = &path->base;
 	one->type = NEMOSHOW_PATH_TYPE;
+	one->sub = type;
 	one->update = nemoshow_path_update;
 	one->destroy = nemoshow_path_destroy;
 
@@ -80,6 +46,55 @@ struct showone *nemoshow_path_create(void)
 
 	nemoobject_set_reserved(&one->object, "alpha", &path->_alpha, sizeof(double));
 
+	nemoobject_set_reserved(&one->object, "x", &path->x0, sizeof(double));
+	nemoobject_set_reserved(&one->object, "y", &path->y0, sizeof(double));
+	nemoobject_set_reserved(&one->object, "x0", &path->x0, sizeof(double));
+	nemoobject_set_reserved(&one->object, "y0", &path->y0, sizeof(double));
+	nemoobject_set_reserved(&one->object, "x1", &path->x1, sizeof(double));
+	nemoobject_set_reserved(&one->object, "y1", &path->y1, sizeof(double));
+	nemoobject_set_reserved(&one->object, "x2", &path->x2, sizeof(double));
+	nemoobject_set_reserved(&one->object, "y2", &path->y2, sizeof(double));
+
+	if (one->sub == NEMOSHOW_NORMAL_PATH) {
+		path->cc = new showpath_t;
+		NEMOSHOW_PATH_CC(path, fill) = new SkPaint;
+		NEMOSHOW_PATH_CC(path, fill)->setStyle(SkPaint::kFill_Style);
+		NEMOSHOW_PATH_CC(path, fill)->setStrokeCap(SkPaint::kRound_Cap);
+		NEMOSHOW_PATH_CC(path, fill)->setStrokeJoin(SkPaint::kRound_Join);
+		NEMOSHOW_PATH_CC(path, fill)->setAntiAlias(true);
+		NEMOSHOW_PATH_CC(path, stroke) = new SkPaint;
+		NEMOSHOW_PATH_CC(path, stroke)->setStyle(SkPaint::kStroke_Style);
+		NEMOSHOW_PATH_CC(path, stroke)->setStrokeCap(SkPaint::kRound_Cap);
+		NEMOSHOW_PATH_CC(path, stroke)->setStrokeJoin(SkPaint::kRound_Join);
+		NEMOSHOW_PATH_CC(path, stroke)->setAntiAlias(true);
+		NEMOSHOW_PATH_CC(path, path) = new SkPath;
+
+		path->alpha = 1.0f;
+
+		path->fills[NEMOSHOW_PATH_ALPHA_COLOR] = 255.0f;
+		path->fills[NEMOSHOW_PATH_RED_COLOR] = 255.0f;
+		path->fills[NEMOSHOW_PATH_GREEN_COLOR] = 255.0f;
+		path->fills[NEMOSHOW_PATH_BLUE_COLOR] = 255.0f;
+		path->strokes[NEMOSHOW_PATH_ALPHA_COLOR] = 255.0f;
+		path->strokes[NEMOSHOW_PATH_RED_COLOR] = 255.0f;
+		path->strokes[NEMOSHOW_PATH_GREEN_COLOR] = 255.0f;
+		path->strokes[NEMOSHOW_PATH_BLUE_COLOR] = 255.0f;
+
+		path->_alpha = 1.0f;
+
+		path->_fills[NEMOSHOW_PATH_ALPHA_COLOR] = 255.0f;
+		path->_fills[NEMOSHOW_PATH_RED_COLOR] = 255.0f;
+		path->_fills[NEMOSHOW_PATH_GREEN_COLOR] = 255.0f;
+		path->_fills[NEMOSHOW_PATH_BLUE_COLOR] = 255.0f;
+		path->_strokes[NEMOSHOW_PATH_ALPHA_COLOR] = 255.0f;
+		path->_strokes[NEMOSHOW_PATH_RED_COLOR] = 255.0f;
+		path->_strokes[NEMOSHOW_PATH_GREEN_COLOR] = 255.0f;
+		path->_strokes[NEMOSHOW_PATH_BLUE_COLOR] = 255.0f;
+	} else {
+		nemoshow_one_set_state(one, NEMOSHOW_EFFECT_STATE);
+		nemoshow_one_set_effect(one, NEMOSHOW_PATH_DIRTY);
+	}
+
 	return one;
 }
 
@@ -89,12 +104,16 @@ void nemoshow_path_destroy(struct showone *one)
 
 	nemoshow_one_finish(one);
 
-	if (NEMOSHOW_PATH_CC(path, fill) != NULL)
-		delete NEMOSHOW_PATH_CC(path, fill);
-	if (NEMOSHOW_PATH_CC(path, stroke) != NULL)
-		delete NEMOSHOW_PATH_CC(path, stroke);
-	if (NEMOSHOW_PATH_CC(path, path) != NULL)
-		delete NEMOSHOW_PATH_CC(path, path);
+	if (one->sub == NEMOSHOW_NORMAL_PATH) {
+		if (NEMOSHOW_PATH_CC(path, fill) != NULL)
+			delete NEMOSHOW_PATH_CC(path, fill);
+		if (NEMOSHOW_PATH_CC(path, stroke) != NULL)
+			delete NEMOSHOW_PATH_CC(path, stroke);
+		if (NEMOSHOW_PATH_CC(path, path) != NULL)
+			delete NEMOSHOW_PATH_CC(path, path);
+
+		delete static_cast<showpath_t *>(path->cc);
+	}
 
 	free(path);
 }
@@ -107,6 +126,9 @@ int nemoshow_path_arrange(struct showone *one)
 int nemoshow_path_update(struct showone *one)
 {
 	struct showpath *path = NEMOSHOW_PATH(one);
+
+	if (one->sub == NEMOSHOW_SINGLE_PATH)
+		return 0;
 
 	if ((one->dirty & NEMOSHOW_STYLE_DIRTY) != 0) {
 		struct showitem *group;
@@ -235,7 +257,11 @@ void nemoshow_path_clear(struct showone *one)
 {
 	struct showpath *path = NEMOSHOW_PATH(one);
 
-	NEMOSHOW_PATH_CC(path, path)->reset();
+	if (one->sub == NEMOSHOW_SINGLE_PATH) {
+		path->cmd = NEMOSHOW_PATH_NONE_CMD;
+	} else {
+		NEMOSHOW_PATH_CC(path, path)->reset();
+	}
 
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 }
@@ -244,7 +270,14 @@ void nemoshow_path_moveto(struct showone *one, double x, double y)
 {
 	struct showpath *path = NEMOSHOW_PATH(one);
 
-	NEMOSHOW_PATH_CC(path, path)->moveTo(x, y);
+	if (one->sub == NEMOSHOW_SINGLE_PATH) {
+		path->cmd = NEMOSHOW_PATH_MOVETO_CMD;
+
+		path->x0 = x;
+		path->y0 = y;
+	} else {
+		NEMOSHOW_PATH_CC(path, path)->moveTo(x, y);
+	}
 
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 }
@@ -253,7 +286,14 @@ void nemoshow_path_lineto(struct showone *one, double x, double y)
 {
 	struct showpath *path = NEMOSHOW_PATH(one);
 
-	NEMOSHOW_PATH_CC(path, path)->lineTo(x, y);
+	if (one->sub == NEMOSHOW_SINGLE_PATH) {
+		path->cmd = NEMOSHOW_PATH_LINETO_CMD;
+
+		path->x0 = x;
+		path->y0 = y;
+	} else {
+		NEMOSHOW_PATH_CC(path, path)->lineTo(x, y);
+	}
 
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 }
@@ -262,7 +302,18 @@ void nemoshow_path_cubicto(struct showone *one, double x0, double y0, double x1,
 {
 	struct showpath *path = NEMOSHOW_PATH(one);
 
-	NEMOSHOW_PATH_CC(path, path)->cubicTo(x0, y0, x1, y1, x2, y2);
+	if (one->sub == NEMOSHOW_SINGLE_PATH) {
+		path->cmd = NEMOSHOW_PATH_CURVETO_CMD;
+
+		path->x0 = x0;
+		path->y0 = y0;
+		path->x1 = x1;
+		path->y1 = y1;
+		path->x2 = x2;
+		path->y2 = y2;
+	} else {
+		NEMOSHOW_PATH_CC(path, path)->cubicTo(x0, y0, x1, y1, x2, y2);
+	}
 
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 }
@@ -271,7 +322,11 @@ void nemoshow_path_close(struct showone *one)
 {
 	struct showpath *path = NEMOSHOW_PATH(one);
 
-	NEMOSHOW_PATH_CC(path, path)->close();
+	if (one->sub == NEMOSHOW_SINGLE_PATH) {
+		path->cmd = NEMOSHOW_PATH_CURVETO_CMD;
+	} else {
+		NEMOSHOW_PATH_CC(path, path)->close();
+	}
 
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 }

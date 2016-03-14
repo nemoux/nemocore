@@ -14,6 +14,13 @@ NEMO_BEGIN_EXTERN_C
 #define NEMOSHOW_PATH_DASH_MAX			(32)
 
 typedef enum {
+	NEMOSHOW_NONE_PATH = 0,
+	NEMOSHOW_NORMAL_PATH = 1,
+	NEMOSHOW_SINGLE_PATH = 2,
+	NEMOSHOW_LAST_PATH
+} NemoShowPathType;
+
+typedef enum {
 	NEMOSHOW_PATH_BUTT_CAP = 0,
 	NEMOSHOW_PATH_ROUND_CAP = 1,
 	NEMOSHOW_PATH_SQUARE_CAP = 2,
@@ -33,6 +40,15 @@ typedef enum {
 	NEMOSHOW_PATH_RED_COLOR = 2,
 	NEMOSHOW_PATH_ALPHA_COLOR = 3
 } NemoShowPathColor;
+
+typedef enum {
+	NEMOSHOW_PATH_NONE_CMD = 0,
+	NEMOSHOW_PATH_MOVETO_CMD = 1,
+	NEMOSHOW_PATH_LINETO_CMD = 2,
+	NEMOSHOW_PATH_CURVETO_CMD = 3,
+	NEMOSHOW_PATH_CLOSE_CMD = 4,
+	NEMOSHOW_PATH_LAST_CMD
+} NemoShowPathCmd;
 
 struct showpath {
 	struct showone base;
@@ -55,13 +71,18 @@ struct showpath {
 	double *pathdashes;
 	int pathdashcount;
 
+	int cmd;
+	double x0, y0;
+	double x1, y1;
+	double x2, y2;
+
 	void *cc;
 };
 
 #define NEMOSHOW_PATH(one)					((struct showpath *)container_of(one, struct showpath, base))
 #define	NEMOSHOW_PATH_AT(one, at)		(NEMOSHOW_PATH(one)->at)
 
-extern struct showone *nemoshow_path_create(void);
+extern struct showone *nemoshow_path_create(int type);
 extern void nemoshow_path_destroy(struct showone *one);
 
 extern int nemoshow_path_arrange(struct showone *one);

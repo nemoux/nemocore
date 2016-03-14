@@ -77,18 +77,9 @@ typedef enum {
 } NemoShowItemColor;
 
 typedef enum {
-	NEMOSHOW_ITEM_PATH_NONE_CMD = 0,
-	NEMOSHOW_ITEM_PATH_MOVETO_CMD = 1,
-	NEMOSHOW_ITEM_PATH_LINETO_CMD = 2,
-	NEMOSHOW_ITEM_PATH_CURVETO_CMD = 3,
-	NEMOSHOW_ITEM_PATH_CLOSE_CMD = 4,
-	NEMOSHOW_ITEM_PATH_LAST_CMD
-} NemoShowItemPathCmd;
-
-typedef enum {
-	NEMOSHOW_ITEM_PATH_STROKE_INDEX = 0,
-	NEMOSHOW_ITEM_PATH_FILL_INDEX = 1,
-	NEMOSHOW_ITEM_PATH_LAST_INDEX
+	NEMOSHOW_ITEM_STROKE_PATH = (1 << 0),
+	NEMOSHOW_ITEM_FILL_PATH = (1 << 1),
+	NEMOSHOW_ITEM_BOTH_PATH = NEMOSHOW_ITEM_STROKE_PATH | NEMOSHOW_ITEM_FILL_PATH
 } NemoShowItemPathIndex;
 
 struct showitem {
@@ -120,7 +111,7 @@ struct showitem {
 	double *pathdashes;
 	int pathdashcount;
 
-	int pathindex;
+	uint32_t pathselect;
 
 	double fontsize;
 	double fontascent;
@@ -204,7 +195,7 @@ extern void nemoshow_item_path_arc(struct showone *one, double x, double y, doub
 extern void nemoshow_item_path_text(struct showone *one, const char *font, int fontsize, const char *text, int textlength, double x, double y);
 extern void nemoshow_item_path_append(struct showone *one, struct showone *src);
 extern int nemoshow_item_path_load_svg(struct showone *one, const char *uri, double x, double y, double width, double height);
-extern void nemoshow_item_path_use(struct showone *one, int index);
+extern void nemoshow_item_path_use(struct showone *one, uint32_t paths);
 
 extern void nemoshow_item_path_translate(struct showone *one, double x, double y);
 extern void nemoshow_item_path_scale(struct showone *one, double sx, double sy);

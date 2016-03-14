@@ -499,6 +499,11 @@ static inline void nemoshow_canvas_render_item_pathgroup(struct showcanvas *canv
 	struct showone *child;
 	struct showpath *path;
 
+	if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE))
+		_canvas->drawPath(*NEMOSHOW_ITEM_CC(item, path), *NEMOSHOW_ITEM_CC(item, fill));
+	if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
+		_canvas->drawPath(*NEMOSHOW_ITEM_CC(item, path), *NEMOSHOW_ITEM_CC(item, stroke));
+
 	nemoshow_children_for_each(child, one) {
 		path = NEMOSHOW_PATH(child);
 
