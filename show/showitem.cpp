@@ -636,6 +636,9 @@ static inline void nemoshow_item_update_matrix(struct nemoshow *show, struct sho
 		if (nemoshow_one_has_state(one, NEMOSHOW_VIEWPORT_STATE))
 			NEMOSHOW_ITEM_CC(item, modelview)->postScale(item->width / item->width0, item->height / item->height0);
 
+		if (nemoshow_one_has_state(one, NEMOSHOW_ANCHOR_STATE))
+			NEMOSHOW_ITEM_CC(item, modelview)->postTranslate(-item->width * item->ax, -item->height * item->ay);
+
 		if (item->transform == NEMOSHOW_ITEM_TSR_TRANSFORM) {
 			if (item->px != 0.0f || item->py != 0.0f) {
 				NEMOSHOW_ITEM_CC(item, modelview)->postTranslate(-item->px, -item->py);
@@ -690,9 +693,6 @@ static inline void nemoshow_item_update_matrix(struct nemoshow *show, struct sho
 
 			NEMOSHOW_ITEM_CC(item, modelview)->set9(args);
 		}
-
-		if (nemoshow_one_has_state(one, NEMOSHOW_ANCHOR_STATE))
-			NEMOSHOW_ITEM_CC(item, modelview)->postTranslate(-item->width * item->ax, -item->height * item->ay);
 
 		NEMOSHOW_ITEM_CC(item, matrix)->postConcat(
 				*NEMOSHOW_ITEM_CC(item, modelview));
