@@ -26,6 +26,7 @@ typedef struct _showitem {
 } showitem_t;
 
 #define NEMOSHOW_ITEM_CC(base, name)				(((showitem_t *)((base)->cc))->name)
+#define NEMOSHOW_ITEM_ATCC(one, name)				(NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(one), name))
 
 static inline SkPath *nemoshow_item_get_skia_path(struct showone *one)
 {

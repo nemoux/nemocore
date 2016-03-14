@@ -9,5 +9,6 @@ typedef struct _showfilter {
 } showfilter_t;
 
 #define NEMOSHOW_FILTER_CC(base, name)				(((showfilter_t *)((base)->cc))->name)
+#define NEMOSHOW_FILTER_ATCC(one, name)				(NEMOSHOW_FILTER_CC(NEMOSHOW_FILTER(one), name))
 
 #endif

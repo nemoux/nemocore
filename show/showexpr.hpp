@@ -16,6 +16,7 @@ typedef struct _showsymtable {
 } showsymtable_t;
 
 #define	NEMOSHOW_EXPR_CC(base, name)					(((showexpr_t *)((base)->cc))->name)
+#define NEMOSHOW_EXPR_ATCC(one, name)					(NEMOSHOW_EXPR_CC(NEMOSHOW_EXPR(one), name))
 #define	NEMOSHOW_SYMTABLE_CC(base, name)			(((showsymtable_t *)((base)->cc))->name)
 
 #endif

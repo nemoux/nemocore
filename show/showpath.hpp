@@ -9,5 +9,6 @@ typedef struct _showpath {
 } showpath_t;
 
 #define NEMOSHOW_PATH_CC(base, name)				(((showpath_t *)((base)->cc))->name)
+#define NEMOSHOW_PATH_ATCC(one, name)				(NEMOSHOW_PATH_CC(NEMOSHOW_PATH(one), name))
 
 #endif
