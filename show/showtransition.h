@@ -23,6 +23,7 @@ struct transitionsensor {
 	struct nemolistener listener;
 
 	struct showtransition *transition;
+	struct showone *one;
 };
 
 struct showtransition {

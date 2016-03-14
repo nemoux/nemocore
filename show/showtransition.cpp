@@ -117,9 +117,15 @@ void nemoshow_transition_check_one(struct showtransition *trans, struct showone 
 {
 	struct transitionsensor *sensor;
 
+	nemolist_for_each(sensor, &trans->sensor_list, link) {
+		if (sensor->one == one)
+			return;
+	}
+
 	sensor = (struct transitionsensor *)malloc(sizeof(struct transitionsensor));
 	if (sensor != NULL) {
 		sensor->transition = trans;
+		sensor->one = one;
 
 		sensor->listener.notify = nemoshow_transition_handle_destroy_signal;
 		nemosignal_add(&one->destroy_signal, &sensor->listener);
