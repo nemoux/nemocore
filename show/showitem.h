@@ -418,6 +418,11 @@ static inline void nemoshow_item_set_anchor(struct showone *one, double ax, doub
 	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
 }
 
+static inline const char *nemoshow_item_get_text(struct showone *one)
+{
+	return NEMOSHOW_ITEM_AT(one, text);
+}
+
 static inline void nemoshow_item_translate(struct showone *one, double tx, double ty)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
