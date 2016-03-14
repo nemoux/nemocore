@@ -330,35 +330,25 @@ static inline void nemoshow_item_update_style(struct nemoshow *show, struct show
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	struct showitem *group;
 
-	if (nemoshow_one_has_state(one->parent, NEMOSHOW_INHERIT_STATE)) {
-		group = NEMOSHOW_ITEM(one->parent);
-
-		item->alpha = item->_alpha * group->alpha;
-
-		item->fills[NEMOSHOW_ITEM_ALPHA_COLOR] = item->_fills[NEMOSHOW_ITEM_ALPHA_COLOR] * (group->fills[NEMOSHOW_ITEM_ALPHA_COLOR] / 255.0f);
-		item->fills[NEMOSHOW_ITEM_RED_COLOR] = item->_fills[NEMOSHOW_ITEM_RED_COLOR] * (group->fills[NEMOSHOW_ITEM_RED_COLOR] / 255.0f);
-		item->fills[NEMOSHOW_ITEM_GREEN_COLOR] = item->_fills[NEMOSHOW_ITEM_GREEN_COLOR] * (group->fills[NEMOSHOW_ITEM_GREEN_COLOR] / 255.0f);
-		item->fills[NEMOSHOW_ITEM_BLUE_COLOR] = item->_fills[NEMOSHOW_ITEM_BLUE_COLOR] * (group->fills[NEMOSHOW_ITEM_BLUE_COLOR] / 255.0f);
-
-		item->strokes[NEMOSHOW_ITEM_ALPHA_COLOR] = item->_strokes[NEMOSHOW_ITEM_ALPHA_COLOR] * (group->strokes[NEMOSHOW_ITEM_ALPHA_COLOR] / 255.0f);
-		item->strokes[NEMOSHOW_ITEM_RED_COLOR] = item->_strokes[NEMOSHOW_ITEM_RED_COLOR] * (group->strokes[NEMOSHOW_ITEM_RED_COLOR] / 255.0f);
-		item->strokes[NEMOSHOW_ITEM_GREEN_COLOR] = item->_strokes[NEMOSHOW_ITEM_GREEN_COLOR] * (group->strokes[NEMOSHOW_ITEM_GREEN_COLOR] / 255.0f);
-		item->strokes[NEMOSHOW_ITEM_BLUE_COLOR] = item->_strokes[NEMOSHOW_ITEM_BLUE_COLOR] * (group->strokes[NEMOSHOW_ITEM_BLUE_COLOR] / 255.0f);
-	} else {
-		item->alpha = item->_alpha;
-
-		item->fills[NEMOSHOW_ITEM_ALPHA_COLOR] = item->_fills[NEMOSHOW_ITEM_ALPHA_COLOR];
-		item->fills[NEMOSHOW_ITEM_RED_COLOR] = item->_fills[NEMOSHOW_ITEM_RED_COLOR];
-		item->fills[NEMOSHOW_ITEM_GREEN_COLOR] = item->_fills[NEMOSHOW_ITEM_GREEN_COLOR];
-		item->fills[NEMOSHOW_ITEM_BLUE_COLOR] = item->_fills[NEMOSHOW_ITEM_BLUE_COLOR];
-
-		item->strokes[NEMOSHOW_ITEM_ALPHA_COLOR] = item->_strokes[NEMOSHOW_ITEM_ALPHA_COLOR];
-		item->strokes[NEMOSHOW_ITEM_RED_COLOR] = item->_strokes[NEMOSHOW_ITEM_RED_COLOR];
-		item->strokes[NEMOSHOW_ITEM_GREEN_COLOR] = item->_strokes[NEMOSHOW_ITEM_GREEN_COLOR];
-		item->strokes[NEMOSHOW_ITEM_BLUE_COLOR] = item->_strokes[NEMOSHOW_ITEM_BLUE_COLOR];
-	}
-
 	if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE)) {
+		if (nemoshow_one_has_state(one->parent, NEMOSHOW_INHERIT_STATE)) {
+			group = NEMOSHOW_ITEM(one->parent);
+
+			item->alpha = item->_alpha * group->alpha;
+
+			item->fills[NEMOSHOW_ITEM_ALPHA_COLOR] = item->_fills[NEMOSHOW_ITEM_ALPHA_COLOR] * (group->fills[NEMOSHOW_ITEM_ALPHA_COLOR] / 255.0f);
+			item->fills[NEMOSHOW_ITEM_RED_COLOR] = item->_fills[NEMOSHOW_ITEM_RED_COLOR] * (group->fills[NEMOSHOW_ITEM_RED_COLOR] / 255.0f);
+			item->fills[NEMOSHOW_ITEM_GREEN_COLOR] = item->_fills[NEMOSHOW_ITEM_GREEN_COLOR] * (group->fills[NEMOSHOW_ITEM_GREEN_COLOR] / 255.0f);
+			item->fills[NEMOSHOW_ITEM_BLUE_COLOR] = item->_fills[NEMOSHOW_ITEM_BLUE_COLOR] * (group->fills[NEMOSHOW_ITEM_BLUE_COLOR] / 255.0f);
+		} else {
+			item->alpha = item->_alpha;
+
+			item->fills[NEMOSHOW_ITEM_ALPHA_COLOR] = item->_fills[NEMOSHOW_ITEM_ALPHA_COLOR];
+			item->fills[NEMOSHOW_ITEM_RED_COLOR] = item->_fills[NEMOSHOW_ITEM_RED_COLOR];
+			item->fills[NEMOSHOW_ITEM_GREEN_COLOR] = item->_fills[NEMOSHOW_ITEM_GREEN_COLOR];
+			item->fills[NEMOSHOW_ITEM_BLUE_COLOR] = item->_fills[NEMOSHOW_ITEM_BLUE_COLOR];
+		}
+
 		NEMOSHOW_ITEM_CC(item, fill)->setColor(
 				SkColorSetARGB(
 					item->fills[NEMOSHOW_ITEM_ALPHA_COLOR] * item->alpha,
@@ -367,6 +357,24 @@ static inline void nemoshow_item_update_style(struct nemoshow *show, struct show
 					item->fills[NEMOSHOW_ITEM_BLUE_COLOR]));
 	}
 	if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE)) {
+		if (nemoshow_one_has_state(one->parent, NEMOSHOW_INHERIT_STATE)) {
+			group = NEMOSHOW_ITEM(one->parent);
+
+			item->alpha = item->_alpha * group->alpha;
+
+			item->strokes[NEMOSHOW_ITEM_ALPHA_COLOR] = item->_strokes[NEMOSHOW_ITEM_ALPHA_COLOR] * (group->strokes[NEMOSHOW_ITEM_ALPHA_COLOR] / 255.0f);
+			item->strokes[NEMOSHOW_ITEM_RED_COLOR] = item->_strokes[NEMOSHOW_ITEM_RED_COLOR] * (group->strokes[NEMOSHOW_ITEM_RED_COLOR] / 255.0f);
+			item->strokes[NEMOSHOW_ITEM_GREEN_COLOR] = item->_strokes[NEMOSHOW_ITEM_GREEN_COLOR] * (group->strokes[NEMOSHOW_ITEM_GREEN_COLOR] / 255.0f);
+			item->strokes[NEMOSHOW_ITEM_BLUE_COLOR] = item->_strokes[NEMOSHOW_ITEM_BLUE_COLOR] * (group->strokes[NEMOSHOW_ITEM_BLUE_COLOR] / 255.0f);
+		} else {
+			item->alpha = item->_alpha;
+
+			item->strokes[NEMOSHOW_ITEM_ALPHA_COLOR] = item->_strokes[NEMOSHOW_ITEM_ALPHA_COLOR];
+			item->strokes[NEMOSHOW_ITEM_RED_COLOR] = item->_strokes[NEMOSHOW_ITEM_RED_COLOR];
+			item->strokes[NEMOSHOW_ITEM_GREEN_COLOR] = item->_strokes[NEMOSHOW_ITEM_GREEN_COLOR];
+			item->strokes[NEMOSHOW_ITEM_BLUE_COLOR] = item->_strokes[NEMOSHOW_ITEM_BLUE_COLOR];
+		}
+
 		NEMOSHOW_ITEM_CC(item, stroke)->setStrokeWidth(item->stroke_width);
 		NEMOSHOW_ITEM_CC(item, stroke)->setColor(
 				SkColorSetARGB(
@@ -386,9 +394,9 @@ static inline void nemoshow_item_update_filter(struct nemoshow *show, struct sho
 			NEMOSHOW_ITEM_CC(item, fill)->setMaskFilter(NEMOSHOW_FILTER_CC(NEMOSHOW_FILTER(NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF)), filter));
 		if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
 			NEMOSHOW_ITEM_CC(item, stroke)->setMaskFilter(NEMOSHOW_FILTER_CC(NEMOSHOW_FILTER(NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF)), filter));
-	}
 
-	one->dirty |= NEMOSHOW_SHAPE_DIRTY;
+		one->dirty |= NEMOSHOW_BOUNDS_DIRTY;
+	}
 }
 
 static inline void nemoshow_item_update_shader(struct nemoshow *show, struct showone *one)
@@ -398,9 +406,9 @@ static inline void nemoshow_item_update_shader(struct nemoshow *show, struct sho
 	if (NEMOSHOW_REF(one, NEMOSHOW_SHADER_REF) != NULL) {
 		if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE))
 			NEMOSHOW_ITEM_CC(item, fill)->setShader(NEMOSHOW_SHADER_CC(NEMOSHOW_SHADER(NEMOSHOW_REF(one, NEMOSHOW_SHADER_REF)), shader));
-	}
 
-	one->dirty |= NEMOSHOW_SHAPE_DIRTY;
+		one->dirty |= NEMOSHOW_BOUNDS_DIRTY;
+	}
 }
 
 static inline void nemoshow_item_update_font(struct nemoshow *show, struct showone *one)
