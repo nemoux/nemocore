@@ -1069,9 +1069,14 @@ int nemoshow_item_path_moveto(struct showone *one, double x, double y)
 		nemoshow_one_dirty(one, NEMOSHOW_POINTS_DIRTY | NEMOSHOW_PATH_DIRTY);
 
 		return item->ncmds - 1;
+	} else if (one->sub == NEMOSHOW_PATHTWICE_ITEM) {
+		if (item->pathindex == NEMOSHOW_ITEM_PATH_STROKE_INDEX)
+			NEMOSHOW_ITEM_CC(item, path)->moveTo(x, y);
+		else if (item->pathindex == NEMOSHOW_ITEM_PATH_FILL_INDEX)
+			NEMOSHOW_ITEM_CC(item, fillpath)->moveTo(x, y);
+	} else {
+		NEMOSHOW_ITEM_CC(item, path)->moveTo(x, y);
 	}
-
-	NEMOSHOW_ITEM_CC(item, path)->moveTo(x, y);
 
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 
@@ -1095,9 +1100,14 @@ int nemoshow_item_path_lineto(struct showone *one, double x, double y)
 		nemoshow_one_dirty(one, NEMOSHOW_POINTS_DIRTY | NEMOSHOW_PATH_DIRTY);
 
 		return item->ncmds - 1;
+	} else if (one->sub == NEMOSHOW_PATHTWICE_ITEM) {
+		if (item->pathindex == NEMOSHOW_ITEM_PATH_STROKE_INDEX)
+			NEMOSHOW_ITEM_CC(item, path)->lineTo(x, y);
+		else if (item->pathindex == NEMOSHOW_ITEM_PATH_FILL_INDEX)
+			NEMOSHOW_ITEM_CC(item, fillpath)->lineTo(x, y);
+	} else {
+		NEMOSHOW_ITEM_CC(item, path)->lineTo(x, y);
 	}
-
-	NEMOSHOW_ITEM_CC(item, path)->lineTo(x, y);
 
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 
@@ -1121,9 +1131,14 @@ int nemoshow_item_path_cubicto(struct showone *one, double x0, double y0, double
 		nemoshow_one_dirty(one, NEMOSHOW_POINTS_DIRTY | NEMOSHOW_PATH_DIRTY);
 
 		return item->ncmds - 1;
+	} else if (one->sub == NEMOSHOW_PATHTWICE_ITEM) {
+		if (item->pathindex == NEMOSHOW_ITEM_PATH_STROKE_INDEX)
+			NEMOSHOW_ITEM_CC(item, path)->cubicTo(x0, y0, x1, y1, x2, y2);
+		else if (item->pathindex == NEMOSHOW_ITEM_PATH_FILL_INDEX)
+			NEMOSHOW_ITEM_CC(item, fillpath)->cubicTo(x0, y0, x1, y1, x2, y2);
+	} else {
+		NEMOSHOW_ITEM_CC(item, path)->cubicTo(x0, y0, x1, y1, x2, y2);
 	}
-
-	NEMOSHOW_ITEM_CC(item, path)->cubicTo(x0, y0, x1, y1, x2, y2);
 
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 
@@ -1147,9 +1162,14 @@ int nemoshow_item_path_close(struct showone *one)
 		nemoshow_one_dirty(one, NEMOSHOW_POINTS_DIRTY | NEMOSHOW_PATH_DIRTY);
 
 		return item->ncmds - 1;
+	} else if (one->sub == NEMOSHOW_PATHTWICE_ITEM) {
+		if (item->pathindex == NEMOSHOW_ITEM_PATH_STROKE_INDEX)
+			NEMOSHOW_ITEM_CC(item, path)->close();
+		else if (item->pathindex == NEMOSHOW_ITEM_PATH_FILL_INDEX)
+			NEMOSHOW_ITEM_CC(item, fillpath)->close();
+	} else {
+		NEMOSHOW_ITEM_CC(item, path)->close();
 	}
-
-	NEMOSHOW_ITEM_CC(item, path)->close();
 
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 
@@ -1163,7 +1183,14 @@ void nemoshow_item_path_cmd(struct showone *one, const char *cmd)
 
 	SkParsePath::FromSVGString(cmd, &path);
 
-	NEMOSHOW_ITEM_CC(item, path)->addPath(path);
+	if (one->sub == NEMOSHOW_PATHTWICE_ITEM) {
+		if (item->pathindex == NEMOSHOW_ITEM_PATH_STROKE_INDEX)
+			NEMOSHOW_ITEM_CC(item, path)->addPath(path);
+		else if (item->pathindex == NEMOSHOW_ITEM_PATH_FILL_INDEX)
+			NEMOSHOW_ITEM_CC(item, fillpath)->addPath(path);
+	} else {
+		NEMOSHOW_ITEM_CC(item, path)->addPath(path);
+	}
 
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 }
@@ -1173,7 +1200,14 @@ void nemoshow_item_path_arc(struct showone *one, double x, double y, double widt
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	SkRect rect = SkRect::MakeXYWH(x, y, width, height);
 
-	NEMOSHOW_ITEM_CC(item, path)->addArc(rect, from, to);
+	if (one->sub == NEMOSHOW_PATHTWICE_ITEM) {
+		if (item->pathindex == NEMOSHOW_ITEM_PATH_STROKE_INDEX)
+			NEMOSHOW_ITEM_CC(item, path)->addArc(rect, from, to);
+		else if (item->pathindex == NEMOSHOW_ITEM_PATH_FILL_INDEX)
+			NEMOSHOW_ITEM_CC(item, fillpath)->addArc(rect, from, to);
+	} else {
+		NEMOSHOW_ITEM_CC(item, path)->addArc(rect, from, to);
+	}
 
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 }
@@ -1200,7 +1234,14 @@ void nemoshow_item_path_text(struct showone *one, const char *font, int fontsize
 	paint.setTextSize(fontsize);
 	paint.getTextPath(text, textlength, x, y, &path);
 
-	NEMOSHOW_ITEM_CC(item, path)->addPath(path);
+	if (one->sub == NEMOSHOW_PATHTWICE_ITEM) {
+		if (item->pathindex == NEMOSHOW_ITEM_PATH_STROKE_INDEX)
+			NEMOSHOW_ITEM_CC(item, path)->addPath(path);
+		else if (item->pathindex == NEMOSHOW_ITEM_PATH_FILL_INDEX)
+			NEMOSHOW_ITEM_CC(item, fillpath)->addPath(path);
+	} else {
+		NEMOSHOW_ITEM_CC(item, path)->addPath(path);
+	}
 
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 }
@@ -1214,14 +1255,23 @@ void nemoshow_item_path_append(struct showone *one, struct showone *src)
 		if (src->sub == NEMOSHOW_PATHGROUP_ITEM) {
 			struct showone *child;
 
-			nemoshow_children_for_each(child, src) {
-				NEMOSHOW_ITEM_CC(item, path)->addPath(*NEMOSHOW_PATH_ATCC(child, path));
+			if (item->pathindex == NEMOSHOW_ITEM_PATH_STROKE_INDEX) {
+				nemoshow_children_for_each(child, src) {
+					NEMOSHOW_ITEM_CC(item, path)->addPath(*NEMOSHOW_PATH_ATCC(child, path));
+				}
+			} else if (item->pathindex == NEMOSHOW_ITEM_PATH_FILL_INDEX) {
+				nemoshow_children_for_each(child, src) {
+					NEMOSHOW_ITEM_CC(item, fillpath)->addPath(*NEMOSHOW_PATH_ATCC(child, path));
+				}
 			}
 		} else if (src->sub == NEMOSHOW_PATHTWICE_ITEM) {
 			NEMOSHOW_ITEM_CC(item, path)->addPath(*NEMOSHOW_ITEM_CC(other, path));
 			NEMOSHOW_ITEM_CC(item, fillpath)->addPath(*NEMOSHOW_ITEM_CC(other, fillpath));
 		} else if (src->sub == NEMOSHOW_PATH_ITEM) {
-			NEMOSHOW_ITEM_CC(item, path)->addPath(*NEMOSHOW_ITEM_CC(other, path));
+			if (item->pathindex == NEMOSHOW_ITEM_PATH_STROKE_INDEX)
+				NEMOSHOW_ITEM_CC(item, path)->addPath(*NEMOSHOW_ITEM_CC(other, path));
+			else if (item->pathindex == NEMOSHOW_ITEM_PATH_FILL_INDEX)
+				NEMOSHOW_ITEM_CC(item, fillpath)->addPath(*NEMOSHOW_ITEM_CC(other, path));
 		}
 	} else if (one->sub == NEMOSHOW_PATH_ITEM) {
 		if (src->sub == NEMOSHOW_PATHGROUP_ITEM) {
@@ -1592,6 +1642,13 @@ int nemoshow_item_path_load_svg(struct showone *one, const char *uri, double x, 
 	}
 
 	return 0;
+}
+
+void nemoshow_item_path_use(struct showone *one, int index)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	item->pathindex = index;
 }
 
 void nemoshow_item_path_translate(struct showone *one, double x, double y)
