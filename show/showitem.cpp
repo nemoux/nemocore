@@ -393,16 +393,15 @@ static inline void nemoshow_item_update_filter(struct nemoshow *show, struct sho
 		struct showone *ref = NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF);
 		struct showfilter *filter = NEMOSHOW_FILTER(ref);
 
-		if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE))
-			NEMOSHOW_ITEM_CC(item, fill)->setMaskFilter(NEMOSHOW_FILTER_CC(filter, filter));
-		if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
-			NEMOSHOW_ITEM_CC(item, stroke)->setMaskFilter(NEMOSHOW_FILTER_CC(filter, filter));
+		NEMOSHOW_ITEM_CC(item, fill)->setMaskFilter(NEMOSHOW_FILTER_CC(filter, filter));
+		NEMOSHOW_ITEM_CC(item, stroke)->setMaskFilter(NEMOSHOW_FILTER_CC(filter, filter));
 
 		if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
 			struct showone *child;
 
 			nemoshow_children_for_each(child, one) {
-				NEMOSHOW_PATH_ATCC(child, paint)->setMaskFilter(NEMOSHOW_FILTER_CC(filter, filter));
+				NEMOSHOW_PATH_ATCC(child, fill)->setMaskFilter(NEMOSHOW_FILTER_CC(filter, filter));
+				NEMOSHOW_PATH_ATCC(child, stroke)->setMaskFilter(NEMOSHOW_FILTER_CC(filter, filter));
 			}
 		}
 
@@ -415,8 +414,7 @@ static inline void nemoshow_item_update_shader(struct nemoshow *show, struct sho
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	if (NEMOSHOW_REF(one, NEMOSHOW_SHADER_REF) != NULL) {
-		if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE))
-			NEMOSHOW_ITEM_CC(item, fill)->setShader(NEMOSHOW_SHADER_CC(NEMOSHOW_SHADER(NEMOSHOW_REF(one, NEMOSHOW_SHADER_REF)), shader));
+		NEMOSHOW_ITEM_CC(item, fill)->setShader(NEMOSHOW_SHADER_CC(NEMOSHOW_SHADER(NEMOSHOW_REF(one, NEMOSHOW_SHADER_REF)), shader));
 
 		one->dirty |= NEMOSHOW_BOUNDS_DIRTY;
 	}

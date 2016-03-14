@@ -4,7 +4,9 @@
 #include <showpath.h>
 
 typedef struct _showpath {
-	SkPaint *paint;
+	SkPaint *fill;
+	SkPaint *stroke;
+
 	SkPath *path;
 } showpath_t;
 

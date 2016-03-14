@@ -29,11 +29,16 @@ struct showone *nemoshow_path_create(void)
 	memset(path, 0, sizeof(struct showpath));
 
 	path->cc = new showpath_t;
-	NEMOSHOW_PATH_CC(path, paint) = new SkPaint;
-	NEMOSHOW_PATH_CC(path, paint)->setStyle(SkPaint::kFill_Style);
-	NEMOSHOW_PATH_CC(path, paint)->setStrokeCap(SkPaint::kRound_Cap);
-	NEMOSHOW_PATH_CC(path, paint)->setStrokeJoin(SkPaint::kRound_Join);
-	NEMOSHOW_PATH_CC(path, paint)->setAntiAlias(true);
+	NEMOSHOW_PATH_CC(path, fill) = new SkPaint;
+	NEMOSHOW_PATH_CC(path, fill)->setStyle(SkPaint::kFill_Style);
+	NEMOSHOW_PATH_CC(path, fill)->setStrokeCap(SkPaint::kRound_Cap);
+	NEMOSHOW_PATH_CC(path, fill)->setStrokeJoin(SkPaint::kRound_Join);
+	NEMOSHOW_PATH_CC(path, fill)->setAntiAlias(true);
+	NEMOSHOW_PATH_CC(path, stroke) = new SkPaint;
+	NEMOSHOW_PATH_CC(path, stroke)->setStyle(SkPaint::kStroke_Style);
+	NEMOSHOW_PATH_CC(path, stroke)->setStrokeCap(SkPaint::kRound_Cap);
+	NEMOSHOW_PATH_CC(path, stroke)->setStrokeJoin(SkPaint::kRound_Join);
+	NEMOSHOW_PATH_CC(path, stroke)->setAntiAlias(true);
 	NEMOSHOW_PATH_CC(path, path) = new SkPath;
 
 	path->alpha = 1.0f;
@@ -84,8 +89,10 @@ void nemoshow_path_destroy(struct showone *one)
 
 	nemoshow_one_finish(one);
 
-	if (NEMOSHOW_PATH_CC(path, paint) != NULL)
-		delete NEMOSHOW_PATH_CC(path, paint);
+	if (NEMOSHOW_PATH_CC(path, fill) != NULL)
+		delete NEMOSHOW_PATH_CC(path, fill);
+	if (NEMOSHOW_PATH_CC(path, stroke) != NULL)
+		delete NEMOSHOW_PATH_CC(path, stroke);
 	if (NEMOSHOW_PATH_CC(path, path) != NULL)
 		delete NEMOSHOW_PATH_CC(path, path);
 
@@ -102,49 +109,61 @@ int nemoshow_path_update(struct showone *one)
 	struct showpath *path = NEMOSHOW_PATH(one);
 
 	if ((one->dirty & NEMOSHOW_STYLE_DIRTY) != 0) {
-		struct showpath *group;
+		struct showitem *group;
 
-		if (nemoshow_one_has_state(one->parent, NEMOSHOW_INHERIT_STATE)) {
-			group = NEMOSHOW_PATH(one->parent);
+		if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE)) {
+			if (nemoshow_one_has_state(one->parent, NEMOSHOW_INHERIT_STATE)) {
+				group = NEMOSHOW_ITEM(one->parent);
 
-			path->alpha = path->_alpha * group->alpha;
+				path->alpha = path->_alpha * group->alpha;
 
-			path->fills[NEMOSHOW_PATH_ALPHA_COLOR] = path->_fills[NEMOSHOW_PATH_ALPHA_COLOR] * (group->fills[NEMOSHOW_ITEM_ALPHA_COLOR] / 255.0f);
-			path->fills[NEMOSHOW_PATH_RED_COLOR] = path->_fills[NEMOSHOW_PATH_RED_COLOR] * (group->fills[NEMOSHOW_ITEM_RED_COLOR] / 255.0f);
-			path->fills[NEMOSHOW_PATH_GREEN_COLOR] = path->_fills[NEMOSHOW_PATH_GREEN_COLOR] * (group->fills[NEMOSHOW_ITEM_GREEN_COLOR] / 255.0f);
-			path->fills[NEMOSHOW_PATH_BLUE_COLOR] = path->_fills[NEMOSHOW_PATH_BLUE_COLOR] * (group->fills[NEMOSHOW_ITEM_BLUE_COLOR] / 255.0f);
+				path->fills[NEMOSHOW_PATH_ALPHA_COLOR] = path->_fills[NEMOSHOW_PATH_ALPHA_COLOR] * (group->fills[NEMOSHOW_ITEM_ALPHA_COLOR] / 255.0f);
+				path->fills[NEMOSHOW_PATH_RED_COLOR] = path->_fills[NEMOSHOW_PATH_RED_COLOR] * (group->fills[NEMOSHOW_ITEM_RED_COLOR] / 255.0f);
+				path->fills[NEMOSHOW_PATH_GREEN_COLOR] = path->_fills[NEMOSHOW_PATH_GREEN_COLOR] * (group->fills[NEMOSHOW_ITEM_GREEN_COLOR] / 255.0f);
+				path->fills[NEMOSHOW_PATH_BLUE_COLOR] = path->_fills[NEMOSHOW_PATH_BLUE_COLOR] * (group->fills[NEMOSHOW_ITEM_BLUE_COLOR] / 255.0f);
+			} else {
+				path->alpha = path->_alpha;
 
-			path->strokes[NEMOSHOW_PATH_ALPHA_COLOR] = path->_strokes[NEMOSHOW_PATH_ALPHA_COLOR] * (group->strokes[NEMOSHOW_ITEM_ALPHA_COLOR] / 255.0f);
-			path->strokes[NEMOSHOW_PATH_RED_COLOR] = path->_strokes[NEMOSHOW_PATH_RED_COLOR] * (group->strokes[NEMOSHOW_ITEM_RED_COLOR] / 255.0f);
-			path->strokes[NEMOSHOW_PATH_GREEN_COLOR] = path->_strokes[NEMOSHOW_PATH_GREEN_COLOR] * (group->strokes[NEMOSHOW_ITEM_GREEN_COLOR] / 255.0f);
-			path->strokes[NEMOSHOW_PATH_BLUE_COLOR] = path->_strokes[NEMOSHOW_PATH_BLUE_COLOR] * (group->strokes[NEMOSHOW_ITEM_BLUE_COLOR] / 255.0f);
-		} else {
-			path->alpha = path->_alpha;
+				path->fills[NEMOSHOW_PATH_ALPHA_COLOR] = path->_fills[NEMOSHOW_ITEM_ALPHA_COLOR];
+				path->fills[NEMOSHOW_PATH_RED_COLOR] = path->_fills[NEMOSHOW_ITEM_RED_COLOR];
+				path->fills[NEMOSHOW_PATH_GREEN_COLOR] = path->_fills[NEMOSHOW_ITEM_GREEN_COLOR];
+				path->fills[NEMOSHOW_PATH_BLUE_COLOR] = path->_fills[NEMOSHOW_ITEM_BLUE_COLOR];
+			}
 
-			path->fills[NEMOSHOW_PATH_ALPHA_COLOR] = path->_fills[NEMOSHOW_ITEM_ALPHA_COLOR];
-			path->fills[NEMOSHOW_PATH_RED_COLOR] = path->_fills[NEMOSHOW_ITEM_RED_COLOR];
-			path->fills[NEMOSHOW_PATH_GREEN_COLOR] = path->_fills[NEMOSHOW_ITEM_GREEN_COLOR];
-			path->fills[NEMOSHOW_PATH_BLUE_COLOR] = path->_fills[NEMOSHOW_ITEM_BLUE_COLOR];
-
-			path->strokes[NEMOSHOW_PATH_ALPHA_COLOR] = path->_strokes[NEMOSHOW_ITEM_ALPHA_COLOR];
-			path->strokes[NEMOSHOW_PATH_RED_COLOR] = path->_strokes[NEMOSHOW_ITEM_RED_COLOR];
-			path->strokes[NEMOSHOW_PATH_GREEN_COLOR] = path->_strokes[NEMOSHOW_ITEM_GREEN_COLOR];
-			path->strokes[NEMOSHOW_PATH_BLUE_COLOR] = path->_strokes[NEMOSHOW_ITEM_BLUE_COLOR];
+			NEMOSHOW_PATH_CC(path, fill)->setColor(
+					SkColorSetARGB(
+						path->fills[NEMOSHOW_PATH_ALPHA_COLOR] * path->alpha,
+						path->fills[NEMOSHOW_PATH_RED_COLOR],
+						path->fills[NEMOSHOW_PATH_GREEN_COLOR],
+						path->fills[NEMOSHOW_PATH_BLUE_COLOR]));
 		}
+		if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE)) {
+			if (nemoshow_one_has_state(one->parent, NEMOSHOW_INHERIT_STATE)) {
+				group = NEMOSHOW_ITEM(one->parent);
 
-		NEMOSHOW_PATH_CC(path, paint)->setStrokeWidth(path->stroke_width);
+				path->alpha = path->_alpha * group->alpha;
 
-		if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE))
-			NEMOSHOW_PATH_CC(path, paint)->setStyle(SkPaint::kFill_Style);
-		else
-			NEMOSHOW_PATH_CC(path, paint)->setStyle(SkPaint::kStroke_Style);
+				path->strokes[NEMOSHOW_PATH_ALPHA_COLOR] = path->_strokes[NEMOSHOW_PATH_ALPHA_COLOR] * (group->strokes[NEMOSHOW_ITEM_ALPHA_COLOR] / 255.0f);
+				path->strokes[NEMOSHOW_PATH_RED_COLOR] = path->_strokes[NEMOSHOW_PATH_RED_COLOR] * (group->strokes[NEMOSHOW_ITEM_RED_COLOR] / 255.0f);
+				path->strokes[NEMOSHOW_PATH_GREEN_COLOR] = path->_strokes[NEMOSHOW_PATH_GREEN_COLOR] * (group->strokes[NEMOSHOW_ITEM_GREEN_COLOR] / 255.0f);
+				path->strokes[NEMOSHOW_PATH_BLUE_COLOR] = path->_strokes[NEMOSHOW_PATH_BLUE_COLOR] * (group->strokes[NEMOSHOW_ITEM_BLUE_COLOR] / 255.0f);
+			} else {
+				path->alpha = path->_alpha;
 
-		NEMOSHOW_PATH_CC(path, paint)->setColor(
-				SkColorSetARGB(
-					path->fills[NEMOSHOW_PATH_ALPHA_COLOR] * path->alpha,
-					path->fills[NEMOSHOW_PATH_RED_COLOR],
-					path->fills[NEMOSHOW_PATH_GREEN_COLOR],
-					path->fills[NEMOSHOW_PATH_BLUE_COLOR]));
+				path->strokes[NEMOSHOW_PATH_ALPHA_COLOR] = path->_strokes[NEMOSHOW_ITEM_ALPHA_COLOR];
+				path->strokes[NEMOSHOW_PATH_RED_COLOR] = path->_strokes[NEMOSHOW_ITEM_RED_COLOR];
+				path->strokes[NEMOSHOW_PATH_GREEN_COLOR] = path->_strokes[NEMOSHOW_ITEM_GREEN_COLOR];
+				path->strokes[NEMOSHOW_PATH_BLUE_COLOR] = path->_strokes[NEMOSHOW_ITEM_BLUE_COLOR];
+			}
+
+			NEMOSHOW_PATH_CC(path, stroke)->setStrokeWidth(path->stroke_width);
+			NEMOSHOW_PATH_CC(path, stroke)->setColor(
+					SkColorSetARGB(
+						path->strokes[NEMOSHOW_PATH_ALPHA_COLOR] * path->alpha,
+						path->strokes[NEMOSHOW_PATH_RED_COLOR],
+						path->strokes[NEMOSHOW_PATH_GREEN_COLOR],
+						path->strokes[NEMOSHOW_PATH_BLUE_COLOR]));
+		}
 	}
 
 	if ((one->dirty & NEMOSHOW_PATH_DIRTY) != 0) {
@@ -153,7 +172,8 @@ int nemoshow_path_update(struct showone *one)
 
 			effect = SkDiscretePathEffect::Create(path->pathsegment, path->pathdeviation, path->pathseed);
 			if (effect != NULL) {
-				NEMOSHOW_PATH_CC(path, paint)->setPathEffect(effect);
+				NEMOSHOW_PATH_CC(path, fill)->setPathEffect(effect);
+				NEMOSHOW_PATH_CC(path, stroke)->setPathEffect(effect);
 				effect->unref();
 			}
 		}
@@ -168,7 +188,8 @@ int nemoshow_path_update(struct showone *one)
 
 			effect = SkDashPathEffect::Create(dashes, path->pathdashcount, 0);
 			if (effect != NULL) {
-				NEMOSHOW_PATH_CC(path, paint)->setPathEffect(effect);
+				NEMOSHOW_PATH_CC(path, fill)->setPathEffect(effect);
+				NEMOSHOW_PATH_CC(path, stroke)->setPathEffect(effect);
 				effect->unref();
 			}
 		}
@@ -176,7 +197,8 @@ int nemoshow_path_update(struct showone *one)
 
 	if ((one->dirty & NEMOSHOW_FILTER_DIRTY) != 0) {
 		if (NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF) != NULL) {
-			NEMOSHOW_PATH_CC(path, paint)->setMaskFilter(NEMOSHOW_FILTER_CC(NEMOSHOW_FILTER(NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF)), filter));
+			NEMOSHOW_PATH_CC(path, fill)->setMaskFilter(NEMOSHOW_FILTER_ATCC(NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF), filter));
+			NEMOSHOW_PATH_CC(path, stroke)->setMaskFilter(NEMOSHOW_FILTER_ATCC(NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF), filter));
 		}
 	}
 
@@ -192,7 +214,8 @@ void nemoshow_path_set_stroke_cap(struct showone *one, int cap)
 	};
 	struct showpath *path = NEMOSHOW_PATH(one);
 
-	NEMOSHOW_PATH_CC(path, paint)->setStrokeCap(caps[cap]);
+	NEMOSHOW_PATH_CC(path, stroke)->setStrokeCap(caps[cap]);
+	NEMOSHOW_PATH_CC(path, fill)->setStrokeCap(caps[cap]);
 }
 
 void nemoshow_path_set_stroke_join(struct showone *one, int join)
@@ -204,7 +227,8 @@ void nemoshow_path_set_stroke_join(struct showone *one, int join)
 	};
 	struct showpath *path = NEMOSHOW_PATH(one);
 
-	NEMOSHOW_PATH_CC(path, paint)->setStrokeJoin(joins[join]);
+	NEMOSHOW_PATH_CC(path, stroke)->setStrokeJoin(joins[join]);
+	NEMOSHOW_PATH_CC(path, fill)->setStrokeJoin(joins[join]);
 }
 
 void nemoshow_path_clear(struct showone *one)
