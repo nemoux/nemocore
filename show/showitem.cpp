@@ -18,6 +18,7 @@
 #include <showshader.hpp>
 #include <showpath.h>
 #include <showpath.hpp>
+#include <showpathcmd.h>
 #include <showfont.h>
 #include <showfont.hpp>
 #include <nemoshow.h>
@@ -585,33 +586,31 @@ static inline void nemoshow_item_update_path(struct nemoshow *show, struct showo
 			else if (item->cmds[i] == NEMOSHOW_PATH_CLOSE_CMD)
 				NEMOSHOW_ITEM_CC(item, path)->close();
 		}
-	} else if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
+	} else if (one->sub == NEMOSHOW_PATHLIST_ITEM) {
 		struct showone *child;
-		struct showpath *path;
+		struct showpathcmd *pcmd;
 
 		NEMOSHOW_ITEM_CC(item, path)->reset();
 
 		nemoshow_children_for_each(child, one) {
-			if (child->sub == NEMOSHOW_SINGLE_PATH) {
-				path = NEMOSHOW_PATH(child);
+			pcmd = NEMOSHOW_PATHCMD(child);
 
-				if (path->cmd == NEMOSHOW_PATH_MOVETO_CMD) {
-					NEMOSHOW_ITEM_CC(item, path)->moveTo(path->x0, path->y0);
-				} else if (path->cmd == NEMOSHOW_PATH_LINETO_CMD) {
-					NEMOSHOW_ITEM_CC(item, path)->lineTo(path->x0, path->y0);
-				} else if (path->cmd == NEMOSHOW_PATH_CURVETO_CMD) {
-					NEMOSHOW_ITEM_CC(item, path)->cubicTo(
-							path->x0, path->y0,
-							path->x1, path->y1,
-							path->x2, path->y2);
-				} else if (path->cmd == NEMOSHOW_PATH_CLOSE_CMD) {
-					NEMOSHOW_ITEM_CC(item, path)->close();
-				}
+			if (child->sub == NEMOSHOW_PATH_MOVETO_CMD) {
+				NEMOSHOW_ITEM_CC(item, path)->moveTo(pcmd->x0, pcmd->y0);
+			} else if (child->sub == NEMOSHOW_PATH_LINETO_CMD) {
+				NEMOSHOW_ITEM_CC(item, path)->lineTo(pcmd->x0, pcmd->y0);
+			} else if (child->sub == NEMOSHOW_PATH_CURVETO_CMD) {
+				NEMOSHOW_ITEM_CC(item, path)->cubicTo(
+						pcmd->x0, pcmd->y0,
+						pcmd->x1, pcmd->y1,
+						pcmd->x2, pcmd->y2);
+			} else if (child->sub == NEMOSHOW_PATH_CLOSE_CMD) {
+				NEMOSHOW_ITEM_CC(item, path)->close();
 			}
 		}
 	}
 
-	if (one->sub == NEMOSHOW_PATH_ITEM || one->sub == NEMOSHOW_PATHTWICE_ITEM || one->sub == NEMOSHOW_PATHARRAY_ITEM || one->sub == NEMOSHOW_PATHGROUP_ITEM) {
+	if (one->sub == NEMOSHOW_PATH_ITEM || one->sub == NEMOSHOW_PATHTWICE_ITEM || one->sub == NEMOSHOW_PATHARRAY_ITEM || one->sub == NEMOSHOW_PATHLIST_ITEM) {
 		if (item->pathsegment >= 1.0f) {
 			SkPathEffect *effect;
 
@@ -790,7 +789,7 @@ void nemoshow_item_update_bounds(struct nemoshow *show, struct showone *one)
 
 	if (one->sub == NEMOSHOW_CIRCLE_ITEM) {
 		box = SkRect::MakeXYWH(item->x - item->r, item->y - item->r, item->r * 2, item->r * 2);
-	} else if (one->sub == NEMOSHOW_PATH_ITEM || one->sub == NEMOSHOW_PATHTWICE_ITEM || one->sub == NEMOSHOW_PATHARRAY_ITEM) {
+	} else if (one->sub == NEMOSHOW_PATH_ITEM || one->sub == NEMOSHOW_PATHTWICE_ITEM || one->sub == NEMOSHOW_PATHARRAY_ITEM || one->sub == NEMOSHOW_PATHLIST_ITEM) {
 		if (nemoshow_one_has_state(one, NEMOSHOW_SIZE_STATE)) {
 			box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
 		} else {
@@ -808,15 +807,6 @@ void nemoshow_item_update_bounds(struct nemoshow *show, struct showone *one)
 			SkRegion region;
 			SkRect cbox;
 			SkIRect bbox;
-
-			cbox = NEMOSHOW_ITEM_CC(item, path)->getBounds();
-
-			if (item->pathsegment >= 1.0f)
-				cbox.outset(fabs(item->pathdeviation), fabs(item->pathdeviation));
-
-			region.op(
-					SkIRect::MakeXYWH(cbox.x(), cbox.y(), cbox.width(), cbox.height()),
-					SkRegion::kUnion_Op);
 
 			nemoshow_children_for_each(child, one) {
 				path = NEMOSHOW_PATH(child);
@@ -1102,6 +1092,14 @@ int nemoshow_item_path_moveto(struct showone *one, double x, double y)
 		nemoshow_one_dirty(one, NEMOSHOW_POINTS_DIRTY | NEMOSHOW_PATH_DIRTY);
 
 		return item->ncmds - 1;
+	} else if (one->sub == NEMOSHOW_PATHLIST_ITEM) {
+		struct showone *child;
+
+		child = nemoshow_pathcmd_create(NEMOSHOW_PATH_MOVETO_CMD);
+		nemoshow_one_attach(one, child);
+
+		nemoshow_pathcmd_set_x0(child, x);
+		nemoshow_pathcmd_set_y0(child, y);
 	} else if (one->sub == NEMOSHOW_PATHTWICE_ITEM) {
 		if (item->pathselect & NEMOSHOW_ITEM_STROKE_PATH)
 			NEMOSHOW_ITEM_CC(item, path)->moveTo(x, y);
@@ -1133,6 +1131,14 @@ int nemoshow_item_path_lineto(struct showone *one, double x, double y)
 		nemoshow_one_dirty(one, NEMOSHOW_POINTS_DIRTY | NEMOSHOW_PATH_DIRTY);
 
 		return item->ncmds - 1;
+	} else if (one->sub == NEMOSHOW_PATHLIST_ITEM) {
+		struct showone *child;
+
+		child = nemoshow_pathcmd_create(NEMOSHOW_PATH_LINETO_CMD);
+		nemoshow_one_attach(one, child);
+
+		nemoshow_pathcmd_set_x0(child, x);
+		nemoshow_pathcmd_set_y0(child, y);
 	} else if (one->sub == NEMOSHOW_PATHTWICE_ITEM) {
 		if (item->pathselect & NEMOSHOW_ITEM_STROKE_PATH)
 			NEMOSHOW_ITEM_CC(item, path)->lineTo(x, y);
@@ -1164,6 +1170,18 @@ int nemoshow_item_path_cubicto(struct showone *one, double x0, double y0, double
 		nemoshow_one_dirty(one, NEMOSHOW_POINTS_DIRTY | NEMOSHOW_PATH_DIRTY);
 
 		return item->ncmds - 1;
+	} else if (one->sub == NEMOSHOW_PATHLIST_ITEM) {
+		struct showone *child;
+
+		child = nemoshow_pathcmd_create(NEMOSHOW_PATH_CURVETO_CMD);
+		nemoshow_one_attach(one, child);
+
+		nemoshow_pathcmd_set_x0(child, x0);
+		nemoshow_pathcmd_set_y0(child, y0);
+		nemoshow_pathcmd_set_x1(child, x1);
+		nemoshow_pathcmd_set_y1(child, y1);
+		nemoshow_pathcmd_set_x2(child, x2);
+		nemoshow_pathcmd_set_y2(child, y2);
 	} else if (one->sub == NEMOSHOW_PATHTWICE_ITEM) {
 		if (item->pathselect & NEMOSHOW_ITEM_STROKE_PATH)
 			NEMOSHOW_ITEM_CC(item, path)->cubicTo(x0, y0, x1, y1, x2, y2);
@@ -1195,6 +1213,11 @@ int nemoshow_item_path_close(struct showone *one)
 		nemoshow_one_dirty(one, NEMOSHOW_POINTS_DIRTY | NEMOSHOW_PATH_DIRTY);
 
 		return item->ncmds - 1;
+	} else if (one->sub == NEMOSHOW_PATHLIST_ITEM) {
+		struct showone *child;
+
+		child = nemoshow_pathcmd_create(NEMOSHOW_PATH_CLOSE_CMD);
+		nemoshow_one_attach(one, child);
 	} else if (one->sub == NEMOSHOW_PATHTWICE_ITEM) {
 		if (item->pathselect & NEMOSHOW_ITEM_STROKE_PATH)
 			NEMOSHOW_ITEM_CC(item, path)->close();
@@ -1694,11 +1717,7 @@ void nemoshow_item_path_translate(struct showone *one, double x, double y)
 	matrix.setIdentity();
 	matrix.postTranslate(x, y);
 
-	if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
-		nemoshow_children_for_each(child, one) {
-			NEMOSHOW_PATH_ATCC(child, path)->transform(matrix);
-		}
-	} else if (one->sub == NEMOSHOW_PATHTWICE_ITEM) {
+	if (one->sub == NEMOSHOW_PATHTWICE_ITEM) {
 		NEMOSHOW_ITEM_CC(item, path)->transform(matrix);
 		NEMOSHOW_ITEM_CC(item, fillpath)->transform(matrix);
 	} else {
@@ -1717,11 +1736,7 @@ void nemoshow_item_path_scale(struct showone *one, double sx, double sy)
 	matrix.setIdentity();
 	matrix.postScale(sx, sy);
 
-	if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
-		nemoshow_children_for_each(child, one) {
-			NEMOSHOW_PATH_ATCC(child, path)->transform(matrix);
-		}
-	} else if (one->sub == NEMOSHOW_PATHTWICE_ITEM) {
+	if (one->sub == NEMOSHOW_PATHTWICE_ITEM) {
 		NEMOSHOW_ITEM_CC(item, path)->transform(matrix);
 		NEMOSHOW_ITEM_CC(item, fillpath)->transform(matrix);
 	} else {
@@ -1740,11 +1755,7 @@ void nemoshow_item_path_rotate(struct showone *one, double ro)
 	matrix.setIdentity();
 	matrix.postRotate(ro);
 
-	if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
-		nemoshow_children_for_each(child, one) {
-			NEMOSHOW_PATH_ATCC(child, path)->transform(matrix);
-		}
-	} else if (one->sub == NEMOSHOW_PATHTWICE_ITEM) {
+	if (one->sub == NEMOSHOW_PATHTWICE_ITEM) {
 		NEMOSHOW_ITEM_CC(item, path)->transform(matrix);
 		NEMOSHOW_ITEM_CC(item, fillpath)->transform(matrix);
 	} else {

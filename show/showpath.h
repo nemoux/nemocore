@@ -16,7 +16,7 @@ NEMO_BEGIN_EXTERN_C
 typedef enum {
 	NEMOSHOW_NONE_PATH = 0,
 	NEMOSHOW_NORMAL_PATH = 1,
-	NEMOSHOW_SINGLE_PATH = 2,
+	NEMOSHOW_ARRAY_PATH = 2,
 	NEMOSHOW_LAST_PATH
 } NemoShowPathType;
 
@@ -41,15 +41,6 @@ typedef enum {
 	NEMOSHOW_PATH_ALPHA_COLOR = 3
 } NemoShowPathColor;
 
-typedef enum {
-	NEMOSHOW_PATH_NONE_CMD = 0,
-	NEMOSHOW_PATH_MOVETO_CMD = 1,
-	NEMOSHOW_PATH_LINETO_CMD = 2,
-	NEMOSHOW_PATH_CURVETO_CMD = 3,
-	NEMOSHOW_PATH_CLOSE_CMD = 4,
-	NEMOSHOW_PATH_LAST_CMD
-} NemoShowPathCmd;
-
 struct showpath {
 	struct showone base;
 
@@ -71,16 +62,24 @@ struct showpath {
 	double *pathdashes;
 	int pathdashcount;
 
-	int cmd;
-	double x0, y0;
-	double x1, y1;
-	double x2, y2;
+	uint32_t *cmds;
+	int ncmds, scmds;
+
+	double *points;
+	int npoints, spoints;
 
 	void *cc;
 };
 
 #define NEMOSHOW_PATH(one)					((struct showpath *)container_of(one, struct showpath, base))
 #define	NEMOSHOW_PATH_AT(one, at)		(NEMOSHOW_PATH(one)->at)
+
+#define NEMOSHOW_PATH_ARRAY_OFFSET_X0(index)			(index * 6 + 0)
+#define NEMOSHOW_PATH_ARRAY_OFFSET_Y0(index)			(index * 6 + 1)
+#define NEMOSHOW_PATH_ARRAY_OFFSET_X1(index)			(index * 6 + 2)
+#define NEMOSHOW_PATH_ARRAY_OFFSET_Y1(index)			(index * 6 + 3)
+#define NEMOSHOW_PATH_ARRAY_OFFSET_X2(index)			(index * 6 + 4)
+#define NEMOSHOW_PATH_ARRAY_OFFSET_Y2(index)			(index * 6 + 5)
 
 extern struct showone *nemoshow_path_create(int type);
 extern void nemoshow_path_destroy(struct showone *one);

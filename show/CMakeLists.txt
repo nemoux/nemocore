@@ -31,6 +31,7 @@ add_library(nemoshow SHARED
 	showitem.cpp
 	showcolor.cpp
 	showpath.cpp
+	showpathcmd.cpp
 	showsequence.cpp
 	showease.cpp
 	showtransition.cpp
@@ -66,6 +67,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/show/showitem.hpp
 	${CMAKE_SOURCE_DIR}/show/showcolor.h
 	${CMAKE_SOURCE_DIR}/show/showpath.h
+	${CMAKE_SOURCE_DIR}/show/showpathcmd.h
 	${CMAKE_SOURCE_DIR}/show/showsequence.h
 	${CMAKE_SOURCE_DIR}/show/showease.h
 	${CMAKE_SOURCE_DIR}/show/showtransition.h
