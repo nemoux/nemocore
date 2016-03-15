@@ -997,6 +997,15 @@ void nemoshow_item_path_clear(struct showone *one)
 		item->npoints = 0;
 
 		nemoshow_one_dirty(one, NEMOSHOW_POINTS_DIRTY | NEMOSHOW_PATH_DIRTY);
+	} else if (one->sub == NEMOSHOW_PATHLIST_ITEM) {
+		struct showone *child, *nchild;
+
+		nemoshow_children_for_each_safe(child, nchild, one) {
+			if (child->type == NEMOSHOW_PATHCMD_TYPE)
+				nemoshow_one_destroy(child);
+		}
+
+		nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 	}
 }
 
@@ -1025,6 +1034,8 @@ int nemoshow_item_path_moveto(struct showone *one, double x, double y)
 
 		nemoshow_pathcmd_set_x0(child, x);
 		nemoshow_pathcmd_set_y0(child, y);
+
+		nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 
 		return nemoshow_children_count(one) - 1;
 	} else if (one->sub == NEMOSHOW_PATHTWICE_ITEM) {
@@ -1066,6 +1077,8 @@ int nemoshow_item_path_lineto(struct showone *one, double x, double y)
 
 		nemoshow_pathcmd_set_x0(child, x);
 		nemoshow_pathcmd_set_y0(child, y);
+
+		nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 
 		return nemoshow_children_count(one) - 1;
 	} else if (one->sub == NEMOSHOW_PATHTWICE_ITEM) {
@@ -1112,6 +1125,8 @@ int nemoshow_item_path_cubicto(struct showone *one, double x0, double y0, double
 		nemoshow_pathcmd_set_x2(child, x2);
 		nemoshow_pathcmd_set_y2(child, y2);
 
+		nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
+
 		return nemoshow_children_count(one) - 1;
 	} else if (one->sub == NEMOSHOW_PATHTWICE_ITEM) {
 		if (item->pathselect & NEMOSHOW_ITEM_STROKE_PATH)
@@ -1149,6 +1164,8 @@ int nemoshow_item_path_close(struct showone *one)
 
 		child = nemoshow_pathcmd_create(NEMOSHOW_PATH_CLOSE_CMD);
 		nemoshow_one_attach(one, child);
+
+		nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 
 		return nemoshow_children_count(one) - 1;
 	} else if (one->sub == NEMOSHOW_PATHTWICE_ITEM) {
