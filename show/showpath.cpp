@@ -216,6 +216,28 @@ int nemoshow_path_update(struct showone *one)
 				else if (path->cmds[i] == NEMOSHOW_PATH_CLOSE_CMD)
 					NEMOSHOW_PATH_CC(path, path)->close();
 			}
+		} else if (one->sub == NEMOSHOW_LIST_PATH) {
+			struct showone *child;
+			struct showpathcmd *pcmd;
+
+			NEMOSHOW_PATH_CC(path, path)->reset();
+
+			nemoshow_children_for_each(child, one) {
+				pcmd = NEMOSHOW_PATHCMD(child);
+
+				if (child->sub == NEMOSHOW_PATH_MOVETO_CMD) {
+					NEMOSHOW_PATH_CC(path, path)->moveTo(pcmd->x0, pcmd->y0);
+				} else if (child->sub == NEMOSHOW_PATH_LINETO_CMD) {
+					NEMOSHOW_PATH_CC(path, path)->lineTo(pcmd->x0, pcmd->y0);
+				} else if (child->sub == NEMOSHOW_PATH_CURVETO_CMD) {
+					NEMOSHOW_PATH_CC(path, path)->cubicTo(
+							pcmd->x0, pcmd->y0,
+							pcmd->x1, pcmd->y1,
+							pcmd->x2, pcmd->y2);
+				} else if (child->sub == NEMOSHOW_PATH_CLOSE_CMD) {
+					NEMOSHOW_PATH_CC(path, path)->close();
+				}
+			}
 		}
 
 		if (path->pathsegment >= 1.0f) {
@@ -314,6 +336,16 @@ int nemoshow_path_moveto(struct showone *one, double x, double y)
 		nemoshow_one_dirty(one, NEMOSHOW_POINTS_DIRTY | NEMOSHOW_PATH_DIRTY);
 
 		return path->ncmds - 1;
+	} else if (one->sub == NEMOSHOW_PATHLIST_ITEM) {
+		struct showone *child;
+
+		child = nemoshow_pathcmd_create(NEMOSHOW_PATH_MOVETO_CMD);
+		nemoshow_one_attach(one, child);
+
+		nemoshow_pathcmd_set_x0(child, x);
+		nemoshow_pathcmd_set_y0(child, y);
+
+		return nemoshow_children_count(one) - 1;
 	} else {
 		NEMOSHOW_PATH_CC(path, path)->moveTo(x, y);
 
@@ -340,6 +372,16 @@ int nemoshow_path_lineto(struct showone *one, double x, double y)
 		nemoshow_one_dirty(one, NEMOSHOW_POINTS_DIRTY | NEMOSHOW_PATH_DIRTY);
 
 		return path->ncmds - 1;
+	} else if (one->sub == NEMOSHOW_PATHLIST_ITEM) {
+		struct showone *child;
+
+		child = nemoshow_pathcmd_create(NEMOSHOW_PATH_LINETO_CMD);
+		nemoshow_one_attach(one, child);
+
+		nemoshow_pathcmd_set_x0(child, x);
+		nemoshow_pathcmd_set_y0(child, y);
+
+		return nemoshow_children_count(one) - 1;
 	} else {
 		NEMOSHOW_PATH_CC(path, path)->lineTo(x, y);
 
@@ -366,6 +408,20 @@ int nemoshow_path_cubicto(struct showone *one, double x0, double y0, double x1, 
 		nemoshow_one_dirty(one, NEMOSHOW_POINTS_DIRTY | NEMOSHOW_PATH_DIRTY);
 
 		return path->ncmds - 1;
+	} else if (one->sub == NEMOSHOW_PATHLIST_ITEM) {
+		struct showone *child;
+
+		child = nemoshow_pathcmd_create(NEMOSHOW_PATH_CURVETO_CMD);
+		nemoshow_one_attach(one, child);
+
+		nemoshow_pathcmd_set_x0(child, x0);
+		nemoshow_pathcmd_set_y0(child, y0);
+		nemoshow_pathcmd_set_x1(child, x1);
+		nemoshow_pathcmd_set_y1(child, y1);
+		nemoshow_pathcmd_set_x2(child, x2);
+		nemoshow_pathcmd_set_y2(child, y2);
+
+		return nemoshow_children_count(one) - 1;
 	} else {
 		NEMOSHOW_PATH_CC(path, path)->cubicTo(x0, y0, x1, y1, x2, y2);
 
@@ -392,6 +448,13 @@ int nemoshow_path_close(struct showone *one)
 		nemoshow_one_dirty(one, NEMOSHOW_POINTS_DIRTY | NEMOSHOW_PATH_DIRTY);
 
 		return path->ncmds - 1;
+	} else if (one->sub == NEMOSHOW_PATHLIST_ITEM) {
+		struct showone *child;
+
+		child = nemoshow_pathcmd_create(NEMOSHOW_PATH_CLOSE_CMD);
+		nemoshow_one_attach(one, child);
+
+		return nemoshow_children_count(one) - 1;
 	} else {
 		NEMOSHOW_PATH_CC(path, path)->close();
 
