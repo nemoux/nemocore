@@ -229,6 +229,8 @@ static inline void nemoshow_path_update_path(struct nemoshow *show, struct showo
 			else if (path->cmds[i] == NEMOSHOW_PATH_CLOSE_CMD)
 				NEMOSHOW_PATH_CC(path, path)->close();
 		}
+
+		one->dirty |= NEMOSHOW_BOUNDS_DIRTY;
 	} else if (one->sub == NEMOSHOW_LIST_PATH) {
 		struct showone *child;
 		struct showpathcmd *pcmd;
@@ -251,7 +253,15 @@ static inline void nemoshow_path_update_path(struct nemoshow *show, struct showo
 				NEMOSHOW_PATH_CC(path, path)->close();
 			}
 		}
+
+		one->dirty |= NEMOSHOW_BOUNDS_DIRTY;
 	}
+}
+
+static inline void nemoshow_path_update_patheffect(struct nemoshow *show, struct showone *one)
+{
+	struct showpath *path = NEMOSHOW_PATH(one);
+	int i;
 
 	if (path->pathsegment >= 1.0f) {
 		SkPathEffect *effect;
@@ -279,11 +289,6 @@ static inline void nemoshow_path_update_path(struct nemoshow *show, struct showo
 		}
 	}
 
-	one->dirty |= NEMOSHOW_SHAPE_DIRTY;
-}
-
-static inline void nemoshow_path_update_shape(struct nemoshow *show, struct showone *one)
-{
 	one->dirty |= NEMOSHOW_BOUNDS_DIRTY;
 }
 
@@ -340,8 +345,8 @@ int nemoshow_path_update(struct showone *one)
 		nemoshow_path_update_points(show, one);
 	if ((one->dirty & NEMOSHOW_PATH_DIRTY) != 0)
 		nemoshow_path_update_path(show, one);
-	if ((one->dirty & NEMOSHOW_SHAPE_DIRTY) != 0)
-		nemoshow_path_update_shape(show, one);
+	if ((one->dirty & NEMOSHOW_PATHEFFECT_DIRTY) != 0)
+		nemoshow_path_update_patheffect(show, one);
 
 	if (one->canvas != NULL) {
 		if ((one->dirty & NEMOSHOW_BOUNDS_DIRTY) != 0) {
@@ -675,7 +680,7 @@ void nemoshow_path_set_discrete_effect(struct showone *one, double segment, doub
 	path->pathdeviation = deviation;
 	path->pathseed = seed;
 
-	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
+	nemoshow_one_dirty(one, NEMOSHOW_PATHEFFECT_DIRTY);
 }
 
 void nemoshow_path_set_dash_effect(struct showone *one, double *dashes, int dashcount)
@@ -692,9 +697,9 @@ void nemoshow_path_set_dash_effect(struct showone *one, double *dashes, int dash
 	for (i = 0; i < dashcount; i++)
 		path->pathdashes[i] = dashes[i];
 
-	nemoobject_set_reserved(&one->object, "pathdash", path->pathdashes, sizeof(double) * dashcount);
+	nemoobject_set_reserved(&one->object, "pathdashes", path->pathdashes, sizeof(double) * dashcount);
 
-	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
+	nemoshow_one_dirty(one, NEMOSHOW_PATHEFFECT_DIRTY);
 }
 
 void nemoshow_path_set_filter(struct showone *one, struct showone *filter)
