@@ -184,8 +184,6 @@ int nemoshow_path_update(struct showone *one)
 	}
 
 	if ((one->dirty & NEMOSHOW_POINTS_DIRTY) != 0) {
-		nemoobject_set_reserved(&one->object, "points", path->points, sizeof(double) * path->npoints);
-
 		one->dirty |= NEMOSHOW_PATH_DIRTY;
 	}
 
@@ -338,6 +336,8 @@ int nemoshow_path_moveto(struct showone *one, double x, double y)
 		NEMOBOX_APPEND(path->points, path->spoints, path->npoints, 0.0f);
 		NEMOBOX_APPEND(path->points, path->spoints, path->npoints, 0.0f);
 
+		nemoobject_set_reserved(&one->object, "points", path->points, sizeof(double) * path->npoints);
+
 		nemoshow_one_dirty(one, NEMOSHOW_POINTS_DIRTY | NEMOSHOW_PATH_DIRTY);
 
 		return path->ncmds - 1;
@@ -376,6 +376,8 @@ int nemoshow_path_lineto(struct showone *one, double x, double y)
 		NEMOBOX_APPEND(path->points, path->spoints, path->npoints, 0.0f);
 		NEMOBOX_APPEND(path->points, path->spoints, path->npoints, 0.0f);
 
+		nemoobject_set_reserved(&one->object, "points", path->points, sizeof(double) * path->npoints);
+
 		nemoshow_one_dirty(one, NEMOSHOW_POINTS_DIRTY | NEMOSHOW_PATH_DIRTY);
 
 		return path->ncmds - 1;
@@ -413,6 +415,8 @@ int nemoshow_path_cubicto(struct showone *one, double x0, double y0, double x1, 
 		NEMOBOX_APPEND(path->points, path->spoints, path->npoints, y1);
 		NEMOBOX_APPEND(path->points, path->spoints, path->npoints, x2);
 		NEMOBOX_APPEND(path->points, path->spoints, path->npoints, y2);
+
+		nemoobject_set_reserved(&one->object, "points", path->points, sizeof(double) * path->npoints);
 
 		nemoshow_one_dirty(one, NEMOSHOW_POINTS_DIRTY | NEMOSHOW_PATH_DIRTY);
 
@@ -455,6 +459,8 @@ int nemoshow_path_close(struct showone *one)
 		NEMOBOX_APPEND(path->points, path->spoints, path->npoints, 0.0f);
 		NEMOBOX_APPEND(path->points, path->spoints, path->npoints, 0.0f);
 		NEMOBOX_APPEND(path->points, path->spoints, path->npoints, 0.0f);
+
+		nemoobject_set_reserved(&one->object, "points", path->points, sizeof(double) * path->npoints);
 
 		nemoshow_one_dirty(one, NEMOSHOW_POINTS_DIRTY | NEMOSHOW_PATH_DIRTY);
 
