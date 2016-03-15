@@ -90,6 +90,8 @@ struct showone *nemoshow_path_create(int type)
 		path->points = (double *)malloc(sizeof(double) * 8);
 		path->npoints = 0;
 		path->spoints = 8;
+
+		nemoobject_set_reserved(&one->object, "points", path->points, sizeof(double) * path->spoints);
 	}
 
 	return one;

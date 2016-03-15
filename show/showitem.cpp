@@ -156,12 +156,16 @@ struct showone *nemoshow_item_create(int type)
 		item->points = (double *)malloc(sizeof(double) * 8);
 		item->npoints = 0;
 		item->spoints = 8;
+
+		nemoobject_set_reserved(&one->object, "points", item->points, sizeof(double) * item->spoints);
 	} else if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
 		nemoshow_one_set_state(one, NEMOSHOW_INHERIT_STATE);
 	} else if (one->sub == NEMOSHOW_POINTS_ITEM || one->sub == NEMOSHOW_POLYLINE_ITEM || one->sub == NEMOSHOW_POLYGON_ITEM) {
 		item->points = (double *)malloc(sizeof(double) * 8);
 		item->npoints = 0;
 		item->spoints = 8;
+
+		nemoobject_set_reserved(&one->object, "points", item->points, sizeof(double) * item->spoints);
 	} else if (one->sub == NEMOSHOW_GROUP_ITEM) {
 		nemoshow_one_set_state(one, NEMOSHOW_INHERIT_STATE);
 		nemoshow_one_set_state(one, NEMOSHOW_BOUNDS_STATE);
