@@ -197,6 +197,8 @@ struct showone {
 	nemolist_next(&((one)->children_list), child, struct showone, children_link)
 #define nemoshow_children_empty(one)	\
 	nemolist_empty(&((one)->children_list))
+#define nemoshow_children_count(one)	\
+	nemolist_length(&((one)->children_list))
 
 extern void nemoshow_one_prepare(struct showone *one);
 extern void nemoshow_one_finish(struct showone *one);

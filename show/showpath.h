@@ -91,10 +91,10 @@ extern void nemoshow_path_set_stroke_cap(struct showone *one, int cap);
 extern void nemoshow_path_set_stroke_join(struct showone *one, int join);
 
 extern void nemoshow_path_clear(struct showone *one);
-extern void nemoshow_path_moveto(struct showone *one, double x, double y);
-extern void nemoshow_path_lineto(struct showone *one, double x, double y);
-extern void nemoshow_path_cubicto(struct showone *one, double x0, double y0, double x1, double y1, double x2, double y2);
-extern void nemoshow_path_close(struct showone *one);
+extern int nemoshow_path_moveto(struct showone *one, double x, double y);
+extern int nemoshow_path_lineto(struct showone *one, double x, double y);
+extern int nemoshow_path_cubicto(struct showone *one, double x0, double y0, double x1, double y1, double x2, double y2);
+extern int nemoshow_path_close(struct showone *one);
 extern void nemoshow_path_cmd(struct showone *one, const char *cmd);
 extern void nemoshow_path_arc(struct showone *one, double x, double y, double width, double height, double from, double to);
 extern void nemoshow_path_text(struct showone *one, const char *font, int fontsize, const char *text, int textlength, double x, double y);

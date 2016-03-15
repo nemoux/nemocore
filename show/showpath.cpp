@@ -297,7 +297,7 @@ void nemoshow_path_clear(struct showone *one)
 	}
 }
 
-void nemoshow_path_moveto(struct showone *one, double x, double y)
+int nemoshow_path_moveto(struct showone *one, double x, double y)
 {
 	struct showpath *path = NEMOSHOW_PATH(one);
 
@@ -312,14 +312,18 @@ void nemoshow_path_moveto(struct showone *one, double x, double y)
 		NEMOBOX_APPEND(path->points, path->spoints, path->npoints, 0.0f);
 
 		nemoshow_one_dirty(one, NEMOSHOW_POINTS_DIRTY | NEMOSHOW_PATH_DIRTY);
+
+		return path->ncmds - 1;
 	} else {
 		NEMOSHOW_PATH_CC(path, path)->moveTo(x, y);
 
 		nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 	}
+
+	return 0;
 }
 
-void nemoshow_path_lineto(struct showone *one, double x, double y)
+int nemoshow_path_lineto(struct showone *one, double x, double y)
 {
 	struct showpath *path = NEMOSHOW_PATH(one);
 
@@ -334,14 +338,18 @@ void nemoshow_path_lineto(struct showone *one, double x, double y)
 		NEMOBOX_APPEND(path->points, path->spoints, path->npoints, 0.0f);
 
 		nemoshow_one_dirty(one, NEMOSHOW_POINTS_DIRTY | NEMOSHOW_PATH_DIRTY);
+
+		return path->ncmds - 1;
 	} else {
 		NEMOSHOW_PATH_CC(path, path)->lineTo(x, y);
 
 		nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 	}
+
+	return 0;
 }
 
-void nemoshow_path_cubicto(struct showone *one, double x0, double y0, double x1, double y1, double x2, double y2)
+int nemoshow_path_cubicto(struct showone *one, double x0, double y0, double x1, double y1, double x2, double y2)
 {
 	struct showpath *path = NEMOSHOW_PATH(one);
 
@@ -356,14 +364,18 @@ void nemoshow_path_cubicto(struct showone *one, double x0, double y0, double x1,
 		NEMOBOX_APPEND(path->points, path->spoints, path->npoints, y2);
 
 		nemoshow_one_dirty(one, NEMOSHOW_POINTS_DIRTY | NEMOSHOW_PATH_DIRTY);
+
+		return path->ncmds - 1;
 	} else {
 		NEMOSHOW_PATH_CC(path, path)->cubicTo(x0, y0, x1, y1, x2, y2);
 
 		nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 	}
+
+	return 0;
 }
 
-void nemoshow_path_close(struct showone *one)
+int nemoshow_path_close(struct showone *one)
 {
 	struct showpath *path = NEMOSHOW_PATH(one);
 
@@ -378,11 +390,15 @@ void nemoshow_path_close(struct showone *one)
 		NEMOBOX_APPEND(path->points, path->spoints, path->npoints, 0.0f);
 
 		nemoshow_one_dirty(one, NEMOSHOW_POINTS_DIRTY | NEMOSHOW_PATH_DIRTY);
+
+		return path->ncmds - 1;
 	} else {
 		NEMOSHOW_PATH_CC(path, path)->close();
 
 		nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 	}
+
+	return 0;
 }
 
 void nemoshow_path_cmd(struct showone *one, const char *cmd)
