@@ -19,8 +19,6 @@
 #include <fonthelper.h>
 #include <nemomisc.h>
 
-#define	NEMOSHOW_ANTIALIAS_EPSILON			(5.0f)
-
 struct showone *nemoshow_path_create(int type)
 {
 	struct showpath *path;
@@ -190,8 +188,6 @@ static inline void nemoshow_path_update_filter(struct nemoshow *show, struct sho
 		NEMOSHOW_PATH_CC(path, fill)->setMaskFilter(NEMOSHOW_FILTER_ATCC(NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF), filter));
 		NEMOSHOW_PATH_CC(path, stroke)->setMaskFilter(NEMOSHOW_FILTER_ATCC(NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF), filter));
 	}
-
-	one->dirty |= NEMOSHOW_BOUNDS_DIRTY;
 }
 
 static inline void nemoshow_path_update_points(struct nemoshow *show, struct showone *one)
@@ -229,8 +225,6 @@ static inline void nemoshow_path_update_path(struct nemoshow *show, struct showo
 			else if (path->cmds[i] == NEMOSHOW_PATH_CLOSE_CMD)
 				NEMOSHOW_PATH_CC(path, path)->close();
 		}
-
-		one->dirty |= NEMOSHOW_BOUNDS_DIRTY;
 	} else if (one->sub == NEMOSHOW_LIST_PATH) {
 		struct showone *child;
 		struct showpathcmd *pcmd;
@@ -253,8 +247,6 @@ static inline void nemoshow_path_update_path(struct nemoshow *show, struct showo
 				NEMOSHOW_PATH_CC(path, path)->close();
 			}
 		}
-
-		one->dirty |= NEMOSHOW_BOUNDS_DIRTY;
 	}
 }
 
@@ -288,54 +280,12 @@ static inline void nemoshow_path_update_patheffect(struct nemoshow *show, struct
 			effect->unref();
 		}
 	}
-
-	one->dirty |= NEMOSHOW_BOUNDS_DIRTY;
-}
-
-static inline void nemoshow_path_update_bounds(struct nemoshow *show, struct showone *one)
-{
-	struct showpath *path = NEMOSHOW_PATH(one);
-	struct showitem *item = NEMOSHOW_ITEM(one->parent);
-	struct showcanvas *canvas = NEMOSHOW_CANVAS(one->canvas);
-	SkRect box;
-	double outer;
-
-	box = NEMOSHOW_PATH_CC(path, path)->getBounds();
-
-	if (path->pathsegment >= 1.0f)
-		box.outset(fabs(path->pathsegment), fabs(path->pathsegment));
-
-	if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
-		box.outset(path->stroke_width, path->stroke_width);
-
-	one->x0 = box.x();
-	one->y0 = box.y();
-	one->x1 = box.x() + box.width();
-	one->y1 = box.y() + box.height();
-
-	NEMOSHOW_ITEM_CC(item, matrix)->mapRect(&box);
-
-	outer = NEMOSHOW_ANTIALIAS_EPSILON;
-	if (NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF) != NULL)
-		outer += NEMOSHOW_FILTER_AT(NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF), r) * 2.0f;
-
-	box.outset(outer, outer);
-
-	one->x = MAX(floor(box.x()), 0);
-	one->y = MAX(floor(box.y()), 0);
-	one->w = ceil(box.width());
-	one->h = ceil(box.height());
-	one->sx = floor(one->x * canvas->viewport.sx);
-	one->sy = floor(one->y * canvas->viewport.sy);
-	one->sw = ceil(one->w * canvas->viewport.sx);
-	one->sh = ceil(one->h * canvas->viewport.sy);
-	one->outer = outer;
 }
 
 int nemoshow_path_update(struct showone *one)
 {
 	struct nemoshow *show = one->show;
-	struct showpath *path = NEMOSHOW_PATH(one);
+	struct showone *parent = one->parent;
 
 	if ((one->dirty & NEMOSHOW_STYLE_DIRTY) != 0)
 		nemoshow_path_update_style(show, one);
@@ -348,17 +298,8 @@ int nemoshow_path_update(struct showone *one)
 	if ((one->dirty & NEMOSHOW_PATHEFFECT_DIRTY) != 0)
 		nemoshow_path_update_patheffect(show, one);
 
-	if (one->canvas != NULL) {
-		if ((one->dirty & NEMOSHOW_BOUNDS_DIRTY) != 0) {
-			nemoshow_canvas_damage_one(one->canvas, one);
-
-			nemoshow_path_update_bounds(show, one);
-
-			nemoshow_one_bounds(one);
-		}
-
-		nemoshow_canvas_damage_one(one->canvas, one);
-	}
+	if (parent->canvas != NULL)
+		nemoshow_canvas_damage_one(parent->canvas, parent);
 
 	return 0;
 }
