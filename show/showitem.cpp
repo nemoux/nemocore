@@ -160,6 +160,7 @@ struct showone *nemoshow_item_create(int type)
 		nemoobject_set_reserved(&one->object, "points", item->points, sizeof(double) * item->spoints);
 	} else if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
 		nemoshow_one_set_state(one, NEMOSHOW_INHERIT_STATE);
+		nemoshow_one_set_state(one, NEMOSHOW_BOUNDS_STATE);
 	} else if (one->sub == NEMOSHOW_POINTS_ITEM || one->sub == NEMOSHOW_POLYLINE_ITEM || one->sub == NEMOSHOW_POLYGON_ITEM) {
 		item->points = (double *)malloc(sizeof(double) * 8);
 		item->npoints = 0;
@@ -707,7 +708,7 @@ static inline void nemoshow_item_update_shape(struct nemoshow *show, struct show
 	one->dirty |= NEMOSHOW_BOUNDS_DIRTY;
 }
 
-void nemoshow_item_update_bounds(struct nemoshow *show, struct showone *one)
+static inline void nemoshow_item_update_bounds(struct nemoshow *show, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one->canvas);
@@ -724,32 +725,6 @@ void nemoshow_item_update_bounds(struct nemoshow *show, struct showone *one)
 
 			if (item->pathsegment >= 1.0f)
 				box.outset(fabs(item->pathdeviation), fabs(item->pathdeviation));
-		}
-	} else if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
-		if (nemoshow_one_has_state(one, NEMOSHOW_SIZE_STATE)) {
-			box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
-		} else {
-			struct showone *child;
-			struct showpath *path;
-			SkRegion region;
-			SkRect cbox;
-			SkIRect bbox;
-
-			nemoshow_children_for_each(child, one) {
-				path = NEMOSHOW_PATH(child);
-
-				cbox = NEMOSHOW_PATH_CC(path, path)->getBounds();
-
-				if (path->pathsegment >= 1.0f)
-					cbox.outset(fabs(path->pathdeviation), fabs(path->pathdeviation));
-
-				region.op(
-						SkIRect::MakeXYWH(cbox.x(), cbox.y(), cbox.width(), cbox.height()),
-						SkRegion::kUnion_Op);
-			}
-
-			bbox = region.getBounds();
-			box = SkRect::MakeXYWH(bbox.x(), bbox.y(), bbox.width(), bbox.height());
 		}
 	} else if (one->sub == NEMOSHOW_POINTS_ITEM || one->sub == NEMOSHOW_POLYLINE_ITEM || one->sub == NEMOSHOW_POLYGON_ITEM) {
 		int32_t x0 = INT_MAX, y0 = INT_MAX, x1 = INT_MIN, y1 = INT_MIN;

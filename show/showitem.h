@@ -166,8 +166,6 @@ extern void nemoshow_item_destroy(struct showone *one);
 
 extern int nemoshow_item_update(struct showone *one);
 
-extern void nemoshow_item_update_bounds(struct nemoshow *show, struct showone *one);
-
 extern void nemoshow_item_set_stroke_cap(struct showone *one, int cap);
 extern void nemoshow_item_set_stroke_join(struct showone *one, int join);
 
