@@ -292,11 +292,6 @@ void nemoshow_poly_detach_one(struct showone *one)
 	nemoshow_canvas_detach_ones(one);
 }
 
-int nemoshow_poly_arrange(struct showone *one)
-{
-	return 0;
-}
-
 int nemoshow_poly_update(struct showone *one)
 {
 	struct showpoly *poly = NEMOSHOW_POLY(one);

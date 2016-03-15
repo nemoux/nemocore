@@ -34,7 +34,6 @@ struct showpathcmd {
 extern struct showone *nemoshow_pathcmd_create(int type);
 extern void nemoshow_pathcmd_destroy(struct showone *one);
 
-extern int nemoshow_pathcmd_arrange(struct showone *one);
 extern int nemoshow_pathcmd_update(struct showone *one);
 
 static inline void nemoshow_pathcmd_set_x0(struct showone *one, double x0)

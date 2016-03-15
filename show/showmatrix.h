@@ -34,7 +34,6 @@ struct showmatrix {
 extern struct showone *nemoshow_matrix_create(int type);
 extern void nemoshow_matrix_destroy(struct showone *one);
 
-extern int nemoshow_matrix_arrange(struct showone *one);
 extern int nemoshow_matrix_update(struct showone *one);
 
 static inline void nemoshow_matrix_set_x(struct showone *one, double x)

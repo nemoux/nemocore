@@ -24,7 +24,6 @@
 #include <fbohelper.h>
 #include <oshelper.h>
 #include <nemoshow.h>
-#include <nemoxml.h>
 #include <nemobox.h>
 #include <nemometro.h>
 #include <nemomisc.h>
@@ -115,23 +114,6 @@ void nemoshow_canvas_destroy(struct showone *one)
 static int nemoshow_canvas_compare(const void *a, const void *b)
 {
 	return strcasecmp((const char *)a, (const char *)b);
-}
-
-int nemoshow_canvas_arrange(struct showone *one)
-{
-	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
-
-	if (strcmp(canvas->type, "back") == 0) {
-		nemoshow_canvas_set_type(one, NEMOSHOW_CANVAS_BACK_TYPE);
-	} else if (strcmp(canvas->type, "opengl") == 0) {
-		nemoshow_canvas_set_type(one, NEMOSHOW_CANVAS_OPENGL_TYPE);
-	} else if (strcmp(canvas->type, "pixman") == 0) {
-		nemoshow_canvas_set_type(one, NEMOSHOW_CANVAS_PIXMAN_TYPE);
-	} else if (strcmp(canvas->type, "vector") == 0) {
-		nemoshow_canvas_set_type(one, NEMOSHOW_CANVAS_VECTOR_TYPE);
-	}
-
-	return 0;
 }
 
 int nemoshow_canvas_set_type(struct showone *one, int type)

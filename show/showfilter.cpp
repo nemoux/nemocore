@@ -10,7 +10,6 @@
 #include <showfilter.h>
 #include <showfilter.hpp>
 #include <nemoshow.h>
-#include <nemoxml.h>
 #include <nemomisc.h>
 
 struct showone *nemoblurs[NEMOBLUR_LAST_TYPE];
@@ -99,18 +98,6 @@ void nemoshow_filter_destroy(struct showone *one)
 	delete static_cast<showfilter_t *>(filter->cc);
 
 	free(filter);
-}
-
-int nemoshow_filter_arrange(struct showone *one)
-{
-	struct showfilter *filter = NEMOSHOW_FILTER(one);
-	const char *flags = nemoobject_gets(&one->object, "flags");
-	const char *style = nemoobject_gets(&one->object, "type");
-
-	if (one->sub == NEMOSHOW_BLUR_FILTER)
-		nemoshow_filter_set_blur(one, flags, style, filter->r);
-
-	return 0;
 }
 
 int nemoshow_filter_update(struct showone *one)

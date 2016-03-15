@@ -308,11 +308,6 @@ void nemoshow_pipe_detach_one(struct showone *one)
 	nemoshow_canvas_detach_ones(one);
 }
 
-int nemoshow_pipe_arrange(struct showone *one)
-{
-	return 0;
-}
-
 int nemoshow_pipe_update(struct showone *one)
 {
 	struct showpipe *pipe = NEMOSHOW_PIPE(one);

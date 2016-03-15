@@ -55,34 +55,6 @@ void nemoshow_font_destroy(struct showone *one)
 	free(font);
 }
 
-int nemoshow_font_arrange(struct showone *one)
-{
-	struct showfont *font = NEMOSHOW_FONT(one);
-	const char *fontfamily;
-	const char *fontstyle;
-	const char *fontlayout;
-	const char *fontpath;
-
-	fontfamily = nemoobject_gets(&one->object, "font-family");
-	fontstyle = nemoobject_gets(&one->object, "font-style");
-
-	fontpath = fontconfig_get_path(
-			fontfamily,
-			fontstyle,
-			FC_SLANT_ROMAN,
-			FC_WEIGHT_NORMAL,
-			FC_WIDTH_NORMAL,
-			FC_MONO);
-
-	nemoshow_font_load(one, fontpath);
-
-	fontlayout = nemoobject_gets(&one->object, "font-layout");
-	if (fontlayout == NULL || strcmp(fontlayout, "harfbuzz") == 0)
-		nemoshow_font_use_harfbuzz(one);
-
-	return 0;
-}
-
 int nemoshow_font_update(struct showone *one)
 {
 	struct showfont *font = NEMOSHOW_FONT(one);

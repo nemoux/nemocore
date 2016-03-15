@@ -54,13 +54,6 @@ void nemoshow_stop_destroy(struct showone *one)
 	free(stop);
 }
 
-int nemoshow_stop_arrange(struct showone *one)
-{
-	struct showstop *stop = NEMOSHOW_STOP(one);
-
-	return 0;
-}
-
 int nemoshow_stop_update(struct showone *one)
 {
 	struct showstop *stop = NEMOSHOW_STOP(one);
@@ -118,11 +111,6 @@ void nemoshow_shader_destroy(struct showone *one)
 	delete static_cast<showshader_t *>(shader->cc);
 
 	free(shader);
-}
-
-int nemoshow_shader_arrange(struct showone *one)
-{
-	return 0;
 }
 
 int nemoshow_shader_update(struct showone *one)

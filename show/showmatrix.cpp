@@ -57,13 +57,6 @@ void nemoshow_matrix_destroy(struct showone *one)
 	free(matrix);
 }
 
-int nemoshow_matrix_arrange(struct showone *one)
-{
-	struct showmatrix *matrix = NEMOSHOW_MATRIX(one);
-
-	return 0;
-}
-
 int nemoshow_matrix_update(struct showone *one)
 {
 	struct showmatrix *matrix = NEMOSHOW_MATRIX(one);

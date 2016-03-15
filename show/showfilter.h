@@ -36,7 +36,6 @@ struct showfilter {
 extern struct showone *nemoshow_filter_create(int type);
 extern void nemoshow_filter_destroy(struct showone *one);
 
-extern int nemoshow_filter_arrange(struct showone *one);
 extern int nemoshow_filter_update(struct showone *one);
 
 extern void nemoshow_filter_set_blur(struct showone *one, const char *flags, const char *style, double r);

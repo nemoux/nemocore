@@ -118,11 +118,6 @@ void nemoshow_path_destroy(struct showone *one)
 	free(path);
 }
 
-int nemoshow_path_arrange(struct showone *one)
-{
-	return 0;
-}
-
 int nemoshow_path_update(struct showone *one)
 {
 	struct showpath *path = NEMOSHOW_PATH(one);

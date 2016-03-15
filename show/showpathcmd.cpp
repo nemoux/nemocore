@@ -53,11 +53,6 @@ void nemoshow_pathcmd_destroy(struct showone *one)
 	free(pcmd);
 }
 
-int nemoshow_pathcmd_arrange(struct showone *one)
-{
-	return 0;
-}
-
 int nemoshow_pathcmd_update(struct showone *one)
 {
 	return 0;

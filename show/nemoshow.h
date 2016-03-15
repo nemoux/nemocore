@@ -90,8 +90,6 @@ extern void nemoshow_destroy(struct nemoshow *show);
 
 extern struct showone *nemoshow_search_one(struct nemoshow *show, const char *id);
 
-extern int nemoshow_load_xml(struct nemoshow *show, const char *path);
-
 #ifdef NEMOUX_WITH_SHOWEXPR
 extern void nemoshow_update_symbol(struct nemoshow *show, const char *name, double value);
 extern void nemoshow_update_expression(struct nemoshow *show);
@@ -99,7 +97,6 @@ extern void nemoshow_update_one_expression(struct nemoshow *show, struct showone
 extern void nemoshow_update_one_expression_without_dirty(struct nemoshow *show, struct showone *one);
 #endif
 
-extern void nemoshow_arrange_one(struct nemoshow *show);
 extern void nemoshow_render_one(struct nemoshow *show);
 
 extern int nemoshow_set_scene(struct nemoshow *show, struct showone *one);

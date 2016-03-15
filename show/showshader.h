@@ -55,7 +55,6 @@ struct showshader {
 extern struct showone *nemoshow_stop_create(void);
 extern void nemoshow_stop_destroy(struct showone *one);
 
-extern int nemoshow_stop_arrange(struct showone *one);
 extern int nemoshow_stop_update(struct showone *one);
 
 static inline void nemoshow_stop_set_fill_color(struct showone *one, double r, double g, double b, double a)
@@ -85,7 +84,6 @@ static inline void nemoshow_stop_set_offset(struct showone *one, double offset)
 extern struct showone *nemoshow_shader_create(int type);
 extern void nemoshow_shader_destroy(struct showone *one);
 
-extern int nemoshow_shader_arrange(struct showone *one);
 extern int nemoshow_shader_update(struct showone *one);
 
 extern void nemoshow_shader_set_canvas(struct showone *one, struct showone *canvas);
