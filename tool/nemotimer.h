@@ -9,7 +9,6 @@ NEMO_BEGIN_EXTERN_C
 
 struct nemotool;
 struct nemotimer;
-struct nemotask;
 
 typedef void (*nemotimer_dispatch_t)(struct nemotimer *timer, void *data);
 
@@ -17,7 +16,6 @@ struct nemotimer {
 	struct nemotool *tool;
 
 	int timer_fd;
-	struct nemotask timer_task;
 
 	nemotimer_dispatch_t callback;
 

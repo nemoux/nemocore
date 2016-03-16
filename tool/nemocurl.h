@@ -31,7 +31,6 @@ struct nemocurl {
 	int fds[NEMOCURL_MAX_FDS];
 	int nfds;
 
-	struct nemotask task;
 	struct nemotimer *timer;
 
 	nemocurl_dispatch_t callback;

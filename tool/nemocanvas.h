@@ -16,7 +16,6 @@ NEMO_BEGIN_EXTERN_C
 #include <nemolistener.h>
 
 struct nemocanvas;
-struct nemotask;
 
 typedef int (*nemocanvas_dispatch_event_t)(struct nemocanvas *canvas, uint32_t type, struct nemoevent *event);
 typedef void (*nemocanvas_dispatch_resize_t)(struct nemocanvas *canvas, int32_t width, int32_t height, int32_t fixed);
@@ -53,7 +52,6 @@ struct nemocanvas {
 	int width, height;
 	pixman_region32_t damage;
 
-	struct nemotask repaint_task;
 	struct nemobuffer buffers[2];
 	struct nemobuffer *extras;
 	struct nemobuffer *buffer;
@@ -68,7 +66,6 @@ struct nemocanvas {
 	nemocanvas_dispatch_destroy_t dispatch_destroy;
 
 	int eventfd;
-	struct nemotask frame_task;
 
 	struct nemosignal destroy_signal;
 

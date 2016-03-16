@@ -261,9 +261,9 @@ static const struct wl_surface_listener surface_listener = {
 	surface_leave
 };
 
-static void nemocanvas_dispatch_frame_event(struct nemotask *task, uint32_t events)
+static void nemocanvas_dispatch_frame_event(void *data, uint32_t events)
 {
-	struct nemocanvas *canvas = (struct nemocanvas *)container_of(task, struct nemocanvas, frame_task);
+	struct nemocanvas *canvas = (struct nemocanvas *)data;
 
 	nemocanvas_dispatch_frame(canvas);
 }
@@ -292,13 +292,10 @@ struct nemocanvas *nemocanvas_create(struct nemotool *tool)
 	canvas->eventfd = eventfd(0, EFD_CLOEXEC | EFD_NONBLOCK);
 	if (canvas->eventfd < 0)
 		goto err1;
-	canvas->frame_task.dispatch = nemocanvas_dispatch_frame_event;
 
-	nemotool_watch_fd(tool, canvas->eventfd, EPOLLIN, &canvas->frame_task);
+	nemotool_watch_source(tool, canvas->eventfd, EPOLLIN, nemocanvas_dispatch_frame_event, canvas);
 
 	nemosignal_init(&canvas->destroy_signal);
-
-	nemolist_init(&canvas->repaint_task.link);
 
 	pixman_region32_init(&canvas->damage);
 
@@ -369,9 +366,7 @@ void nemocanvas_destroy(struct nemocanvas *canvas)
 
 	pixman_region32_fini(&canvas->damage);
 
-	nemolist_remove(&canvas->repaint_task.link);
-
-	nemotool_unwatch_fd(canvas->tool, canvas->eventfd);
+	nemotool_unwatch_source(canvas->tool, canvas->eventfd);
 	close(canvas->eventfd);
 
 	free(canvas);

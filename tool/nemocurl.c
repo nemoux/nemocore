@@ -14,6 +14,22 @@
 #include <nemobox.h>
 #include <nemomisc.h>
 
+static int nemocurl_perform(struct nemocurl *curl);
+
+static void nemocurl_dispatch_event(void *data, uint32_t events)
+{
+	struct nemocurl *curl = (struct nemocurl *)data;
+
+	nemocurl_perform(curl);
+}
+
+static void nemocurl_dispatch_timer(struct nemotimer *timer, void *data)
+{
+	struct nemocurl *curl = (struct nemocurl *)data;
+
+	nemocurl_perform(curl);
+}
+
 static struct curlreq *nemocurl_create_request(void)
 {
 	struct curlreq *req;
@@ -71,7 +87,7 @@ static int nemocurl_update_fds(struct nemocurl *curl)
 		return -1;
 
 	for (i = 0; i < curl->nfds; i++) {
-		nemotool_unwatch_fd(curl->tool, curl->fds[i]);
+		nemotool_unwatch_source(curl->tool, curl->fds[i]);
 	}
 
 	curl->nfds = 0;
@@ -89,7 +105,7 @@ static int nemocurl_update_fds(struct nemocurl *curl)
 		if (events == 0)
 			continue;
 
-		nemotool_watch_fd(curl->tool, fd, events, &curl->task);
+		nemotool_watch_source(curl->tool, fd, events, nemocurl_dispatch_event, curl);
 
 		curl->fds[curl->nfds++] = fd;
 	}
@@ -140,7 +156,7 @@ static int nemocurl_perform(struct nemocurl *curl)
 
 	if (running == 0) {
 		for (i = 0; i < curl->nfds; i++) {
-			nemotool_unwatch_fd(curl->tool, curl->fds[i]);
+			nemotool_unwatch_source(curl->tool, curl->fds[i]);
 		}
 
 		curl->nfds = 0;
@@ -150,20 +166,6 @@ static int nemocurl_perform(struct nemocurl *curl)
 	}
 
 	return 0;
-}
-
-static void nemocurl_dispatch_task(struct nemotask *task, uint32_t events)
-{
-	struct nemocurl *curl = (struct nemocurl *)container_of(task, struct nemocurl, task);
-
-	nemocurl_perform(curl);
-}
-
-static void nemocurl_dispatch_timer(struct nemotimer *timer, void *data)
-{
-	struct nemocurl *curl = (struct nemocurl *)data;
-
-	nemocurl_perform(curl);
 }
 
 static int _global_init_done = 0;
@@ -192,8 +194,6 @@ struct nemocurl *nemocurl_create(struct nemotool *tool)
 		goto err2;
 
 	curl->tool = tool;
-
-	curl->task.dispatch = nemocurl_dispatch_task;
 
 	nemolist_init(&curl->list);
 

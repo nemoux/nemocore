@@ -46,20 +46,19 @@ typedef enum {
 	NEMO_MOD_CONTROL_MASK = 0x04
 } NemoModMask;
 
-struct nemotask;
 struct nemotool;
 
-typedef void (*nemotool_dispatch_task_t)(struct nemotask *task, uint32_t events);
-
+typedef void (*nemotool_dispatch_source_t)(void *data, uint32_t events);
 typedef void (*nemotool_dispatch_idle_t)(void *data);
-
 typedef void (*nemotool_dispatch_global_t)(struct nemotool *tool, uint32_t id, const char *interface, uint32_t version);
 
-struct nemotask {
-	nemotool_dispatch_task_t dispatch;
-	struct nemolist link;
-
+struct nemosource {
+	nemotool_dispatch_source_t dispatch;
 	void *data;
+
+	int fd;
+
+	struct nemolist link;
 };
 
 struct nemoidle {
@@ -118,7 +117,6 @@ struct nemotool {
 
 	int display_fd;
 	uint32_t display_events;
-	struct nemotask display_task;
 
 	nemotool_dispatch_global_t dispatch_global;
 
@@ -126,6 +124,8 @@ struct nemotool {
 	struct nemolist output_list;
 
 	struct nemolist idle_list;
+
+	struct nemolist source_list;
 
 	int running;
 
@@ -154,8 +154,9 @@ extern void nemotool_run(struct nemotool *tool);
 extern void nemotool_flush(struct nemotool *tool);
 extern void nemotool_exit(struct nemotool *tool);
 
-extern void nemotool_watch_fd(struct nemotool *tool, int fd, uint32_t events, struct nemotask *task);
-extern void nemotool_unwatch_fd(struct nemotool *tool, int fd);
+extern int nemotool_watch_source(struct nemotool *tool, int fd, uint32_t events, nemotool_dispatch_source_t dispatch, void *data);
+extern void nemotool_unwatch_source(struct nemotool *tool, int fd);
+extern void nemotool_change_source(struct nemotool *tool, int fd, uint32_t events);
 extern int nemotool_get_fd(struct nemotool *tool);
 
 extern struct nemotool *nemotool_create(void);

@@ -12,9 +12,9 @@
 #include <nemotimer.h>
 #include <nemomisc.h>
 
-static void nemotimer_dispatch_event(struct nemotask *task, uint32_t events)
+static void nemotimer_dispatch_event(void *data, uint32_t events)
 {
-	struct nemotimer *timer = (struct nemotimer *)container_of(task, struct nemotimer, timer_task);
+	struct nemotimer *timer = (struct nemotimer *)data;
 	uint64_t exp;
 
 	if (read(timer->timer_fd, &exp, sizeof(exp)) != sizeof(exp))
@@ -36,11 +36,10 @@ struct nemotimer *nemotimer_create(struct nemotool *tool)
 	timer->timer_fd = timerfd_create(CLOCK_MONOTONIC, TFD_CLOEXEC | TFD_NONBLOCK);
 	if (timer->timer_fd < 0)
 		goto err1;
-	timer->timer_task.dispatch = nemotimer_dispatch_event;
 
 	timer->tool = tool;
 
-	nemotool_watch_fd(tool, timer->timer_fd, EPOLLIN, &timer->timer_task);
+	nemotool_watch_source(tool, timer->timer_fd, EPOLLIN, nemotimer_dispatch_event, timer);
 
 	return timer;
 
@@ -52,7 +51,7 @@ err1:
 
 void nemotimer_destroy(struct nemotimer *timer)
 {
-	nemotool_unwatch_fd(timer->tool, timer->timer_fd);
+	nemotool_unwatch_source(timer->tool, timer->timer_fd);
 
 	close(timer->timer_fd);
 

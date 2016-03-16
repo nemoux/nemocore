@@ -584,9 +584,9 @@ static const struct wl_registry_listener registry_listener = {
 	registry_handle_global_remove
 };
 
-static void nemotool_dispatch_wayland_display(struct nemotask *task, uint32_t events)
+static void nemotool_dispatch_wayland_display(void *data, uint32_t events)
 {
-	struct nemotool *tool = (struct nemotool *)container_of(task, struct nemotool, display_task);
+	struct nemotool *tool = (struct nemotool *)data;
 	struct epoll_event ep;
 	int ret;
 
@@ -608,9 +608,7 @@ static void nemotool_dispatch_wayland_display(struct nemotask *task, uint32_t ev
 	if (events & EPOLLOUT) {
 		ret = wl_display_flush(tool->display);
 		if (ret == 0) {
-			ep.events = EPOLLIN | EPOLLERR | EPOLLHUP;
-			ep.data.ptr = &tool->display_task;
-			epoll_ctl(tool->epoll_fd, EPOLL_CTL_MOD, tool->display_fd, &ep);
+			nemotool_change_source(tool, tool->display_fd, EPOLLIN | EPOLLERR | EPOLLHUP);
 		} else if (ret == -1 && errno != EAGAIN) {
 			tool->running = 0;
 			return;
@@ -621,11 +619,9 @@ static void nemotool_dispatch_wayland_display(struct nemotask *task, uint32_t ev
 void nemotool_connect_wayland(struct nemotool *tool, const char *name)
 {
 	tool->display = wl_display_connect(name);
-
 	tool->display_fd = wl_display_get_fd(tool->display);
-	tool->display_task.dispatch = nemotool_dispatch_wayland_display;
 
-	nemotool_watch_fd(tool, tool->display_fd, EPOLLIN | EPOLLERR | EPOLLHUP, &tool->display_task);
+	nemotool_watch_source(tool, tool->display_fd, EPOLLIN | EPOLLERR | EPOLLHUP, nemotool_dispatch_wayland_display, tool);
 
 	tool->registry = wl_display_get_registry(tool->display);
 	wl_registry_add_listener(tool->registry, &registry_listener, tool);
@@ -640,9 +636,44 @@ void nemotool_disconnect_wayland(struct nemotool *tool)
 	tool->display = NULL;
 }
 
+static inline struct nemosource *nemotool_create_source(struct nemotool *tool, int fd)
+{
+	struct nemosource *source;
+
+	source = (struct nemosource *)malloc(sizeof(struct nemosource));
+	if (source == NULL)
+		return NULL;
+	memset(source, 0, sizeof(struct nemosource));
+
+	source->fd = fd;
+
+	nemolist_insert(&tool->source_list, &source->link);
+
+	return source;
+}
+
+static inline void nemotool_destroy_source(struct nemosource *source)
+{
+	nemolist_remove(&source->link);
+
+	free(source);
+}
+
+static inline struct nemosource *nemotool_search_source(struct nemotool *tool, int fd)
+{
+	struct nemosource *source;
+
+	nemolist_for_each(source, &tool->source_list, link) {
+		if (source->fd == fd)
+			return source;
+	}
+
+	return NULL;
+}
+
 void nemotool_dispatch(struct nemotool *tool)
 {
-	struct nemotask *task;
+	struct nemosource *source;
 	struct nemoidle *idle;
 	struct epoll_event ep[16];
 	int i, count, ret;
@@ -662,10 +693,7 @@ void nemotool_dispatch(struct nemotool *tool)
 
 		ret = wl_display_flush(tool->display);
 		if (ret < 0 && errno == EAGAIN) {
-			ep[0].events = EPOLLIN | EPOLLOUT | EPOLLERR | EPOLLHUP;
-			ep[0].data.ptr = &tool->display_task;
-
-			epoll_ctl(tool->epoll_fd, EPOLL_CTL_MOD, tool->display_fd, &ep[0]);
+			nemotool_change_source(tool, tool->display_fd, EPOLLIN | EPOLLOUT | EPOLLERR | EPOLLHUP);
 		} else if (ret < 0) {
 			return;
 		}
@@ -673,8 +701,12 @@ void nemotool_dispatch(struct nemotool *tool)
 
 	count = epoll_wait(tool->epoll_fd, ep, ARRAY_LENGTH(ep), -1);
 	for (i = 0; i < count; i++) {
-		task = ep[i].data.ptr;
-		task->dispatch(task, ep[i].events);
+		source = ep[i].data.ptr;
+		if (source->fd >= 0) {
+			source->dispatch(source->data, ep[i].events);
+		} else {
+			nemotool_destroy_source(source);
+		}
 	}
 }
 
@@ -698,18 +730,50 @@ void nemotool_exit(struct nemotool *tool)
 	tool->running = 0;
 }
 
-void nemotool_watch_fd(struct nemotool *tool, int fd, uint32_t events, struct nemotask *task)
+int nemotool_watch_source(struct nemotool *tool, int fd, uint32_t events, nemotool_dispatch_source_t dispatch, void *data)
 {
+	struct nemosource *source;
 	struct epoll_event ep;
 
+	source = nemotool_create_source(tool, fd);
+	if (source == NULL)
+		return -1;
+
+	source->dispatch = dispatch;
+	source->data = data;
+	source->fd = fd;
+
 	ep.events = events;
-	ep.data.ptr = task;
+	ep.data.ptr = source;
 	epoll_ctl(tool->epoll_fd, EPOLL_CTL_ADD, fd, &ep);
+
+	return 0;
 }
 
-void nemotool_unwatch_fd(struct nemotool *tool, int fd)
+void nemotool_unwatch_source(struct nemotool *tool, int fd)
 {
+	struct nemosource *source;
+
+	source = nemotool_search_source(tool, fd);
+	if (source != NULL) {
+		source->fd = -1;
+	}
+
 	epoll_ctl(tool->epoll_fd, EPOLL_CTL_DEL, fd, NULL);
+}
+
+void nemotool_change_source(struct nemotool *tool, int fd, uint32_t events)
+{
+	struct nemosource *source;
+
+	source = nemotool_search_source(tool, fd);
+	if (source != NULL) {
+		struct epoll_event ep;
+
+		ep.events = events;
+		ep.data.ptr = source;
+		epoll_ctl(tool->epoll_fd, EPOLL_CTL_MOD, fd, &ep);
+	}
 }
 
 int nemotool_get_fd(struct nemotool *tool)
@@ -739,6 +803,8 @@ struct nemotool *nemotool_create(void)
 	nemolist_init(&tool->output_list);
 
 	nemolist_init(&tool->idle_list);
+
+	nemolist_init(&tool->source_list);
 
 	tool->running = 1;
 
@@ -782,6 +848,13 @@ void nemotool_destroy(struct nemotool *tool)
 	}
 
 	xkb_context_unref(tool->xkb.context);
+
+	nemolist_remove(&tool->global_list);
+	nemolist_remove(&tool->output_list);
+
+	nemolist_remove(&tool->idle_list);
+
+	nemolist_remove(&tool->source_list);
 
 	close(tool->epoll_fd);
 

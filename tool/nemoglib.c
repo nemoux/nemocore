@@ -10,7 +10,7 @@
 #include <nemotool.h>
 #include <nemoglib.h>
 
-struct nemosource {
+struct nemogsource {
 	GSource source;
 	GPollFD pfd;
 
@@ -21,7 +21,7 @@ struct nemosource {
 
 static gboolean nemoglib_prepare_source(GSource *base, int *timeout)
 {
-	struct nemosource *source = (struct nemosource *)base;
+	struct nemogsource *source = (struct nemogsource *)base;
 
 	*timeout = -1;
 
@@ -32,14 +32,14 @@ static gboolean nemoglib_prepare_source(GSource *base, int *timeout)
 
 static gboolean nemoglib_check_source(GSource *base)
 {
-	struct nemosource *source = (struct nemosource *)base;
+	struct nemogsource *source = (struct nemogsource *)base;
 
 	return source->pfd.revents;
 }
 
 static gboolean nemoglib_dispatch_source(GSource *base, GSourceFunc callback, void *data)
 {
-	struct nemosource *source = (struct nemosource *)base;
+	struct nemogsource *source = (struct nemogsource *)base;
 
 	nemotool_dispatch(source->tool);
 
@@ -49,7 +49,7 @@ static gboolean nemoglib_dispatch_source(GSource *base, GSourceFunc callback, vo
 	return TRUE;
 }
 
-static GSourceFuncs nemosource_handlers = {
+static GSourceFuncs nemogsource_handlers = {
 	nemoglib_prepare_source,
 	nemoglib_check_source,
 	nemoglib_dispatch_source,
@@ -58,10 +58,10 @@ static GSourceFuncs nemosource_handlers = {
 
 int nemoglib_run_tool(GMainLoop *gmainloop, struct nemotool *tool)
 {
-	struct nemosource *source;
+	struct nemogsource *source;
 	GSource *gsource;
 
-	source = (struct nemosource *)g_source_new(&nemosource_handlers, sizeof(struct nemosource));
+	source = (struct nemogsource *)g_source_new(&nemogsource_handlers, sizeof(struct nemogsource));
 	if (source == NULL)
 		return -1;
 	source->mainloop = gmainloop;
