@@ -21,20 +21,6 @@ typedef enum {
 	NEMOSHOW_LAST_PATH
 } NemoShowPathType;
 
-typedef enum {
-	NEMOSHOW_PATH_BUTT_CAP = 0,
-	NEMOSHOW_PATH_ROUND_CAP = 1,
-	NEMOSHOW_PATH_SQUARE_CAP = 2,
-	NEMOSHOW_PATH_LAST_CAP
-} NemoShowPathCap;
-
-typedef enum {
-	NEMOSHOW_PATH_MITER_JOIN = 0,
-	NEMOSHOW_PATH_ROUND_JOIN = 1,
-	NEMOSHOW_PATH_BEVEL_JOIN = 2,
-	NEMOSHOW_PATH_LAST_JOIN
-} NemoShowPathJoin;
-
 struct showpath {
 	struct showone base;
 
@@ -67,13 +53,6 @@ struct showpath {
 
 #define NEMOSHOW_PATH(one)					((struct showpath *)container_of(one, struct showpath, base))
 #define	NEMOSHOW_PATH_AT(one, at)		(NEMOSHOW_PATH(one)->at)
-
-#define NEMOSHOW_PATH_ARRAY_OFFSET_X0(index)			(index * 6 + 0)
-#define NEMOSHOW_PATH_ARRAY_OFFSET_Y0(index)			(index * 6 + 1)
-#define NEMOSHOW_PATH_ARRAY_OFFSET_X1(index)			(index * 6 + 2)
-#define NEMOSHOW_PATH_ARRAY_OFFSET_Y1(index)			(index * 6 + 3)
-#define NEMOSHOW_PATH_ARRAY_OFFSET_X2(index)			(index * 6 + 4)
-#define NEMOSHOW_PATH_ARRAY_OFFSET_Y2(index)			(index * 6 + 5)
 
 extern struct showone *nemoshow_path_create(int type);
 extern void nemoshow_path_destroy(struct showone *one);

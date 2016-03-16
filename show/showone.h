@@ -96,6 +96,30 @@ typedef enum {
 	NEMOSHOW_ALPHA_COLOR = 3
 } NemoShowColor;
 
+typedef enum {
+	NEMOSHOW_NONE_TRANSFORM = (0 << 0),
+	NEMOSHOW_EXTERN_TRANSFORM = (1 << 0),
+	NEMOSHOW_INTERN_TRANSFORM = (1 << 1),
+	NEMOSHOW_CHILDREN_TRANSFORM = (1 << 7) | (1 << 1),
+	NEMOSHOW_DIRECT_TRANSFORM = (1 << 8) | (1 << 1),
+	NEMOSHOW_TSR_TRANSFORM = (1 << 9) | (1 << 1),
+	NEMOSHOW_LAST_TRANSFORM
+} NemoShowTransform;
+
+typedef enum {
+	NEMOSHOW_BUTT_CAP = 0,
+	NEMOSHOW_ROUND_CAP = 1,
+	NEMOSHOW_SQUARE_CAP = 2,
+	NEMOSHOW_LAST_CAP
+} NemoShowCap;
+
+typedef enum {
+	NEMOSHOW_MITER_JOIN = 0,
+	NEMOSHOW_ROUND_JOIN = 1,
+	NEMOSHOW_BEVEL_JOIN = 2,
+	NEMOSHOW_LAST_JOIN
+} NemoShowJoin;
+
 struct showone;
 
 typedef int (*nemoshow_one_update_t)(struct showone *one);
@@ -192,6 +216,15 @@ struct showone {
 #define NEMOSHOW_ONE_GROUP(tag)							((tag >> 16) & 0xffff)
 
 #define NEMOSHOW_ONE_TAGGROUP(tag, group)		(((tag & 0xffff) << 0) | ((group & 0xffff) << 16))
+
+#define NEMOSHOW_POINTS_OFFSET_X(index)				(index * 2 + 0)
+#define NEMOSHOW_POINTS_OFFSET_Y(index)				(index * 2 + 1)
+#define NEMOSHOW_PATHARRAY_OFFSET_X0(index)		(index * 6 + 0)
+#define NEMOSHOW_PATHARRAY_OFFSET_Y0(index)		(index * 6 + 1)
+#define NEMOSHOW_PATHARRAY_OFFSET_X1(index)		(index * 6 + 2)
+#define NEMOSHOW_PATHARRAY_OFFSET_Y1(index)		(index * 6 + 3)
+#define NEMOSHOW_PATHARRAY_OFFSET_X2(index)		(index * 6 + 4)
+#define NEMOSHOW_PATHARRAY_OFFSET_Y2(index)		(index * 6 + 5)
 
 #define nemoshow_children_for_each(child, one)	\
 	nemolist_for_each(child, &((one)->children_list), children_link)

@@ -496,20 +496,20 @@ static inline void nemoshow_item_update_path(struct nemoshow *show, struct showo
 		for (i = 0; i < item->ncmds; i++) {
 			if (item->cmds[i] == NEMOSHOW_PATH_MOVETO_CMD)
 				NEMOSHOW_ITEM_CC(item, path)->moveTo(
-						item->points[NEMOSHOW_ITEM_PATHARRAY_OFFSET_X0(i)],
-						item->points[NEMOSHOW_ITEM_PATHARRAY_OFFSET_Y0(i)]);
+						item->points[NEMOSHOW_PATHARRAY_OFFSET_X0(i)],
+						item->points[NEMOSHOW_PATHARRAY_OFFSET_Y0(i)]);
 			else if (item->cmds[i] == NEMOSHOW_PATH_LINETO_CMD)
 				NEMOSHOW_ITEM_CC(item, path)->lineTo(
-						item->points[NEMOSHOW_ITEM_PATHARRAY_OFFSET_X0(i)],
-						item->points[NEMOSHOW_ITEM_PATHARRAY_OFFSET_Y0(i)]);
+						item->points[NEMOSHOW_PATHARRAY_OFFSET_X0(i)],
+						item->points[NEMOSHOW_PATHARRAY_OFFSET_Y0(i)]);
 			else if (item->cmds[i] == NEMOSHOW_PATH_CURVETO_CMD)
 				NEMOSHOW_ITEM_CC(item, path)->cubicTo(
-						item->points[NEMOSHOW_ITEM_PATHARRAY_OFFSET_X0(i)],
-						item->points[NEMOSHOW_ITEM_PATHARRAY_OFFSET_Y0(i)],
-						item->points[NEMOSHOW_ITEM_PATHARRAY_OFFSET_X1(i)],
-						item->points[NEMOSHOW_ITEM_PATHARRAY_OFFSET_Y1(i)],
-						item->points[NEMOSHOW_ITEM_PATHARRAY_OFFSET_X2(i)],
-						item->points[NEMOSHOW_ITEM_PATHARRAY_OFFSET_Y2(i)]);
+						item->points[NEMOSHOW_PATHARRAY_OFFSET_X0(i)],
+						item->points[NEMOSHOW_PATHARRAY_OFFSET_Y0(i)],
+						item->points[NEMOSHOW_PATHARRAY_OFFSET_X1(i)],
+						item->points[NEMOSHOW_PATHARRAY_OFFSET_Y1(i)],
+						item->points[NEMOSHOW_PATHARRAY_OFFSET_X2(i)],
+						item->points[NEMOSHOW_PATHARRAY_OFFSET_Y2(i)]);
 			else if (item->cmds[i] == NEMOSHOW_PATH_CLOSE_CMD)
 				NEMOSHOW_ITEM_CC(item, path)->close();
 		}
@@ -588,7 +588,7 @@ static inline void nemoshow_item_update_matrix(struct nemoshow *show, struct sho
 
 	if (nemoshow_one_has_state(one, NEMOSHOW_TRANSFORM_STATE)) {
 		if (item->transform == 0)
-			item->transform = NEMOSHOW_ITEM_TSR_TRANSFORM;
+			item->transform = NEMOSHOW_TSR_TRANSFORM;
 
 		NEMOSHOW_ITEM_CC(item, modelview)->setIdentity();
 
@@ -598,7 +598,7 @@ static inline void nemoshow_item_update_matrix(struct nemoshow *show, struct sho
 		if (nemoshow_one_has_state(one, NEMOSHOW_ANCHOR_STATE))
 			NEMOSHOW_ITEM_CC(item, modelview)->postTranslate(-item->width * item->ax, -item->height * item->ay);
 
-		if (item->transform == NEMOSHOW_ITEM_TSR_TRANSFORM) {
+		if (item->transform == NEMOSHOW_TSR_TRANSFORM) {
 			if (item->px != 0.0f || item->py != 0.0f) {
 				NEMOSHOW_ITEM_CC(item, modelview)->postTranslate(-item->px, -item->py);
 
@@ -620,13 +620,13 @@ static inline void nemoshow_item_update_matrix(struct nemoshow *show, struct sho
 			}
 
 			NEMOSHOW_ITEM_CC(item, modelview)->postTranslate(item->tx, item->ty);
-		} else if (item->transform == NEMOSHOW_ITEM_EXTERN_TRANSFORM) {
+		} else if (item->transform == NEMOSHOW_EXTERN_TRANSFORM) {
 			NEMOSHOW_ITEM_CC(item, modelview)->postConcat(
 					*NEMOSHOW_MATRIX_CC(
 						NEMOSHOW_MATRIX(
 							NEMOSHOW_REF(one, NEMOSHOW_MATRIX_REF)),
 						matrix));
-		} else if (item->transform == NEMOSHOW_ITEM_CHILDREN_TRANSFORM) {
+		} else if (item->transform == NEMOSHOW_CHILDREN_TRANSFORM) {
 			struct showone *child;
 
 			nemoshow_children_for_each(child, one) {
@@ -637,7 +637,7 @@ static inline void nemoshow_item_update_matrix(struct nemoshow *show, struct sho
 								matrix));
 				}
 			}
-		} else if (item->transform == NEMOSHOW_ITEM_DIRECT_TRANSFORM) {
+		} else if (item->transform == NEMOSHOW_DIRECT_TRANSFORM) {
 			SkScalar args[9] = {
 				SkDoubleToScalar(item->matrix[0]),
 				SkDoubleToScalar(item->matrix[1]),
@@ -859,7 +859,7 @@ void nemoshow_item_set_matrix(struct showone *one, double m[9])
 	for (i = 0; i < 9; i++)
 		item->matrix[i] = m[i];
 
-	item->transform = NEMOSHOW_ITEM_DIRECT_TRANSFORM;
+	item->transform = NEMOSHOW_DIRECT_TRANSFORM;
 
 	nemoshow_one_set_state(one, NEMOSHOW_TRANSFORM_STATE);
 

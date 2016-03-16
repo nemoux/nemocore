@@ -208,20 +208,20 @@ static inline void nemoshow_path_update_path(struct nemoshow *show, struct showo
 		for (i = 0; i < path->ncmds; i++) {
 			if (path->cmds[i] == NEMOSHOW_PATH_MOVETO_CMD)
 				NEMOSHOW_PATH_CC(path, path)->moveTo(
-						path->points[NEMOSHOW_PATH_ARRAY_OFFSET_X0(i)],
-						path->points[NEMOSHOW_PATH_ARRAY_OFFSET_Y0(i)]);
+						path->points[NEMOSHOW_PATHARRAY_OFFSET_X0(i)],
+						path->points[NEMOSHOW_PATHARRAY_OFFSET_Y0(i)]);
 			else if (path->cmds[i] == NEMOSHOW_PATH_LINETO_CMD)
 				NEMOSHOW_PATH_CC(path, path)->lineTo(
-						path->points[NEMOSHOW_PATH_ARRAY_OFFSET_X0(i)],
-						path->points[NEMOSHOW_PATH_ARRAY_OFFSET_Y0(i)]);
+						path->points[NEMOSHOW_PATHARRAY_OFFSET_X0(i)],
+						path->points[NEMOSHOW_PATHARRAY_OFFSET_Y0(i)]);
 			else if (path->cmds[i] == NEMOSHOW_PATH_CURVETO_CMD)
 				NEMOSHOW_PATH_CC(path, path)->cubicTo(
-						path->points[NEMOSHOW_PATH_ARRAY_OFFSET_X0(i)],
-						path->points[NEMOSHOW_PATH_ARRAY_OFFSET_Y0(i)],
-						path->points[NEMOSHOW_PATH_ARRAY_OFFSET_X1(i)],
-						path->points[NEMOSHOW_PATH_ARRAY_OFFSET_Y1(i)],
-						path->points[NEMOSHOW_PATH_ARRAY_OFFSET_X2(i)],
-						path->points[NEMOSHOW_PATH_ARRAY_OFFSET_Y2(i)]);
+						path->points[NEMOSHOW_PATHARRAY_OFFSET_X0(i)],
+						path->points[NEMOSHOW_PATHARRAY_OFFSET_Y0(i)],
+						path->points[NEMOSHOW_PATHARRAY_OFFSET_X1(i)],
+						path->points[NEMOSHOW_PATHARRAY_OFFSET_Y1(i)],
+						path->points[NEMOSHOW_PATHARRAY_OFFSET_X2(i)],
+						path->points[NEMOSHOW_PATHARRAY_OFFSET_Y2(i)]);
 			else if (path->cmds[i] == NEMOSHOW_PATH_CLOSE_CMD)
 				NEMOSHOW_PATH_CC(path, path)->close();
 		}

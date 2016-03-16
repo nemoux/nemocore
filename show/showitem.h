@@ -41,30 +41,6 @@ typedef enum {
 } NemoShowItemType;
 
 typedef enum {
-	NEMOSHOW_ITEM_NONE_TRANSFORM = (0 << 0),
-	NEMOSHOW_ITEM_EXTERN_TRANSFORM = (1 << 0),
-	NEMOSHOW_ITEM_INTERN_TRANSFORM = (1 << 1),
-	NEMOSHOW_ITEM_CHILDREN_TRANSFORM = (1 << 7) | (1 << 1),
-	NEMOSHOW_ITEM_DIRECT_TRANSFORM = (1 << 8) | (1 << 1),
-	NEMOSHOW_ITEM_TSR_TRANSFORM = (1 << 9) | (1 << 1),
-	NEMOSHOW_ITEM_LAST_TRANSFORM
-} NemoShowItemTransform;
-
-typedef enum {
-	NEMOSHOW_ITEM_BUTT_CAP = 0,
-	NEMOSHOW_ITEM_ROUND_CAP = 1,
-	NEMOSHOW_ITEM_SQUARE_CAP = 2,
-	NEMOSHOW_ITEM_LAST_CAP
-} NemoShowItemCap;
-
-typedef enum {
-	NEMOSHOW_ITEM_MITER_JOIN = 0,
-	NEMOSHOW_ITEM_ROUND_JOIN = 1,
-	NEMOSHOW_ITEM_BEVEL_JOIN = 2,
-	NEMOSHOW_ITEM_LAST_JOIN
-} NemoShowItemJoin;
-
-typedef enum {
 	NEMOSHOW_ITEM_NORMAL_PICK = 0,
 	NEMOSHOW_ITEM_PATH_PICK = 1,
 	NEMOSHOW_ITEM_LAST_PICK
@@ -140,19 +116,6 @@ struct showitem {
 #define NEMOSHOW_ITEM(one)					((struct showitem *)container_of(one, struct showitem, base))
 #define NEMOSHOW_ITEM_AT(one, at)		(NEMOSHOW_ITEM(one)->at)
 #define NEMOSHOW_ITEM_ONE(item)			(&(item)->base)
-
-#define NEMOSHOW_ITEM_POINTS_OFFSET_X(index)				(index * 2 + 0)
-#define NEMOSHOW_ITEM_POINTS_OFFSET_Y(index)				(index * 2 + 1)
-#define NEMOSHOW_ITEM_POLYLINE_OFFSET_X(index)			(index * 2 + 0)
-#define NEMOSHOW_ITEM_POLYLINE_OFFSET_Y(index)			(index * 2 + 1)
-#define NEMOSHOW_ITEM_POLYGON_OFFSET_X(index)				(index * 2 + 0)
-#define NEMOSHOW_ITEM_POLYGON_OFFSET_Y(index)				(index * 2 + 1)
-#define NEMOSHOW_ITEM_PATHARRAY_OFFSET_X0(index)		(index * 6 + 0)
-#define NEMOSHOW_ITEM_PATHARRAY_OFFSET_Y0(index)		(index * 6 + 1)
-#define NEMOSHOW_ITEM_PATHARRAY_OFFSET_X1(index)		(index * 6 + 2)
-#define NEMOSHOW_ITEM_PATHARRAY_OFFSET_Y1(index)		(index * 6 + 3)
-#define NEMOSHOW_ITEM_PATHARRAY_OFFSET_X2(index)		(index * 6 + 4)
-#define NEMOSHOW_ITEM_PATHARRAY_OFFSET_Y2(index)		(index * 6 + 5)
 
 extern struct showone *nemoshow_item_create(int type);
 extern void nemoshow_item_destroy(struct showone *one);
