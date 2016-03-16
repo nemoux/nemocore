@@ -167,6 +167,7 @@ struct showone {
 
 	uint32_t tag;
 
+	struct nemosignal detach_signal;
 	struct nemosignal destroy_signal;
 
 	struct nemolist children_list;

@@ -486,14 +486,14 @@ void nemoshow_attach_transition(struct nemoshow *show, struct showtransition *tr
 void nemoshow_detach_transition(struct nemoshow *show, struct showtransition *trans)
 {
 	nemolist_remove(&trans->link);
+	nemolist_init(&trans->link);
 }
 
 void nemoshow_attach_transition_after(struct nemoshow *show, struct showtransition *trans, struct showtransition *ntrans)
 {
-	NEMOBOX_APPEND(trans->transitions, trans->stransitions, trans->ntransitions, ntrans);
+	nemolist_insert_tail(&trans->children_list, &ntrans->children_link);
 
 	ntrans->serial = ++show->transition_serial;
-	ntrans->parent = trans;
 }
 
 void nemoshow_dispatch_transition(struct nemoshow *show, uint32_t msecs)
@@ -507,11 +507,14 @@ void nemoshow_dispatch_transition(struct nemoshow *show, uint32_t msecs)
 		done = nemoshow_transition_dispatch(trans, msecs);
 		if (done != 0) {
 			if (trans->repeat == 1) {
-				for (i = 0; i < trans->ntransitions; i++) {
-					strans[scount++] = trans->transitions[i];
-				}
+				struct showtransition *child, *nchild;
 
-				trans->ntransitions = 0;
+				nemolist_for_each_safe(child, nchild, &trans->children_list, children_link) {
+					strans[scount++] = child;
+
+					nemolist_remove(&child->children_link);
+					nemolist_init(&child->children_link);
+				}
 
 				nemolist_remove(&trans->link);
 				nemolist_insert(&show->transition_destroy_list, &trans->link);
@@ -528,7 +531,6 @@ void nemoshow_dispatch_transition(struct nemoshow *show, uint32_t msecs)
 
 	for (i = 0; i < scount; i++) {
 		trans = strans[i];
-		trans->parent = NULL;
 
 		for (j = 0; j < trans->nsequences; j++) {
 			nemoshow_sequence_prepare(trans->sequences[j], trans->serial);

@@ -20,28 +20,27 @@ struct showtransition *nemoshow_transition_create(struct showone *ease, uint32_t
 	memset(trans, 0, sizeof(struct showtransition));
 
 	nemolist_init(&trans->link);
+	nemolist_init(&trans->children_link);
 
+	nemolist_init(&trans->children_list);
 	nemolist_init(&trans->sensor_list);
+	nemolist_init(&trans->ref_list);
 
 	trans->sequences = (struct showone **)malloc(sizeof(struct showone *) * 4);
 	trans->nsequences = 0;
 	trans->ssequences = 4;
 
-	trans->transitions = (struct showtransition **)malloc(sizeof(struct showtransition *) * 4);
-	trans->ntransitions = 0;
-	trans->stransitions = 4;
-
-	trans->ones = (struct showone **)malloc(sizeof(struct showone *) * 4);
-	trans->nones = 0;
-	trans->sones = 4;
+	trans->dones = (struct showone **)malloc(sizeof(struct showone *) * 4);
+	trans->ndones = 0;
+	trans->sdones = 4;
 
 	trans->dirties = (uint32_t *)malloc(sizeof(uint32_t) * 4);
 	trans->ndirties = 0;
 	trans->sdirties = 4;
 
-	trans->dones = (struct showone **)malloc(sizeof(struct showone *) * 4);
-	trans->ndones = 0;
-	trans->sdones = 4;
+	trans->tones = (struct showone **)malloc(sizeof(struct showone *) * 4);
+	trans->ntones = 0;
+	trans->stones = 4;
 
 	trans->ease = NEMOSHOW_EASE(ease);
 
@@ -56,22 +55,13 @@ void nemoshow_transition_destroy(struct showtransition *trans, int done)
 {
 	nemoshow_transition_dispatch_done_t dispatch_done = trans->dispatch_done;
 	void *userdata = trans->userdata;
+	struct showtransition *child, *nchild;
 	struct transitionsensor *sensor, *nsensor;
+	struct transitionref *ref, *nref;
 	int i;
 
 	nemolist_remove(&trans->link);
-
-	if (trans->parent != NULL) {
-		struct showtransition *ptrans = trans->parent;
-
-		for (i = 0; i < ptrans->ntransitions; i++) {
-			if (ptrans->transitions[i] == trans) {
-				NEMOBOX_REMOVE(ptrans->transitions, ptrans->ntransitions, i);
-
-				break;
-			}
-		}
-	}
+	nemolist_remove(&trans->children_link);
 
 	nemolist_for_each_safe(sensor, nsensor, &trans->sensor_list, link) {
 		nemolist_remove(&sensor->link);
@@ -80,25 +70,30 @@ void nemoshow_transition_destroy(struct showtransition *trans, int done)
 		free(sensor);
 	}
 
+	nemolist_for_each_safe(ref, nref, &trans->ref_list, link) {
+		nemolist_remove(&ref->link);
+		nemolist_remove(&ref->listener.link);
+
+		free(ref);
+	}
+
 	for (i = 0; i < trans->nsequences; i++) {
 		nemoshow_one_destroy(trans->sequences[i]);
 	}
 
-	for (i = 0; i < trans->ntransitions; i++) {
-		trans->transitions[i]->parent = NULL;
-
-		nemoshow_transition_destroy(trans->transitions[i], done);
+	nemolist_for_each_safe(child, nchild, &trans->children_list, children_link) {
+		nemoshow_transition_destroy(child, done);
 	}
 
-	for (i = 0; i < trans->ndones; i++) {
-		nemoshow_one_destroy(trans->dones[i]);
+	for (i = 0; i < trans->ntones; i++) {
+		if (trans->tones[i] != NULL)
+			nemoshow_one_destroy(trans->tones[i]);
 	}
 
 	free(trans->sequences);
-	free(trans->transitions);
-	free(trans->ones);
-	free(trans->dirties);
 	free(trans->dones);
+	free(trans->dirties);
+	free(trans->tones);
 	free(trans);
 
 	if (done != 0 && dispatch_done != NULL) {
@@ -134,15 +129,55 @@ void nemoshow_transition_check_one(struct showtransition *trans, struct showone 
 	}
 }
 
+static void nemoshow_transition_handle_dirty_detach_signal(struct nemolistener *listener, void *data)
+{
+	struct transitionref *ref = (struct transitionref *)container_of(listener, struct transitionref, listener);
+
+	ref->transition->dones[ref->index] = NULL;
+}
+
 void nemoshow_transition_dirty_one(struct showtransition *trans, struct showone *one, uint32_t dirty)
 {
-	NEMOBOX_APPEND(trans->ones, trans->sones, trans->nones, one);
-	NEMOBOX_APPEND(trans->dirties, trans->sdirties, trans->ndirties, dirty);
+	struct transitionref *ref;
+
+	ref = (struct transitionref *)malloc(sizeof(struct transitionref));
+	if (ref != NULL) {
+		NEMOBOX_APPEND(trans->dones, trans->sdones, trans->ndones, one);
+		NEMOBOX_APPEND(trans->dirties, trans->sdirties, trans->ndirties, dirty);
+
+		ref->transition = trans;
+		ref->index = trans->ndones - 1;
+
+		ref->listener.notify = nemoshow_transition_handle_dirty_detach_signal;
+		nemosignal_add(&one->detach_signal, &ref->listener);
+
+		nemolist_insert_tail(&trans->ref_list, &ref->link);
+	}
+}
+
+static void nemoshow_transition_handle_destroy_detach_signal(struct nemolistener *listener, void *data)
+{
+	struct transitionref *ref = (struct transitionref *)container_of(listener, struct transitionref, listener);
+
+	ref->transition->tones[ref->index] = NULL;
 }
 
 void nemoshow_transition_destroy_one(struct showtransition *trans, struct showone *one)
 {
-	NEMOBOX_APPEND(trans->dones, trans->sdones, trans->ndones, one);
+	struct transitionref *ref;
+
+	ref = (struct transitionref *)malloc(sizeof(struct transitionref));
+	if (ref != NULL) {
+		NEMOBOX_APPEND(trans->tones, trans->stones, trans->ntones, one);
+
+		ref->transition = trans;
+		ref->index = trans->ntones - 1;
+
+		ref->listener.notify = nemoshow_transition_handle_destroy_detach_signal;
+		nemosignal_add(&one->detach_signal, &ref->listener);
+
+		nemolist_insert_tail(&trans->ref_list, &ref->link);
+	}
 }
 
 void nemoshow_transition_attach_sequence(struct showtransition *trans, struct showone *sequence)
@@ -175,8 +210,9 @@ int nemoshow_transition_dispatch(struct showtransition *trans, uint32_t time)
 		nemoshow_sequence_dispatch(trans->sequences[i], t, trans->serial);
 	}
 
-	for (i = 0; i < trans->nones; i++) {
-		nemoshow_one_dirty(trans->ones[i], trans->dirties[i]);
+	for (i = 0; i < trans->ndones; i++) {
+		if (trans->dones[i] != NULL)
+			nemoshow_one_dirty(trans->dones[i], trans->dirties[i]);
 	}
 
 	if (trans->dispatch_frame != NULL) {

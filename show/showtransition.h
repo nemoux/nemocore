@@ -26,22 +26,25 @@ struct transitionsensor {
 	struct showone *one;
 };
 
+struct transitionref {
+	struct nemolist link;
+	struct nemolistener listener;
+
+	struct showtransition *transition;
+	int index;
+};
+
 struct showtransition {
 	struct showone **sequences;
 	int nsequences, ssequences;
 
-	struct showtransition **transitions;
-	int ntransitions, stransitions;
-
-	struct showone **ones;
-	int nones, sones;
+	struct showone **dones;
+	int ndones, sdones;
 	uint32_t *dirties;
 	int ndirties, sdirties;
 
-	struct showone **dones;
-	int ndones, sdones;
-
-	struct showtransition *parent;
+	struct showone **tones;
+	int ntones, stones;
 
 	struct showease *ease;
 
@@ -55,8 +58,11 @@ struct showtransition {
 	uint32_t serial;
 
 	struct nemolist link;
+	struct nemolist children_link;
 
+	struct nemolist children_list;
 	struct nemolist sensor_list;
+	struct nemolist ref_list;
 
 	nemoshow_transition_dispatch_frame_t dispatch_frame;
 	nemoshow_transition_dispatch_done_t dispatch_done;
