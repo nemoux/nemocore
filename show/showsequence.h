@@ -13,27 +13,32 @@ NEMO_BEGIN_EXTERN_C
 
 #include <showone.h>
 
-#define	NEMOSHOW_SEQUENCE_TYPE_MAX			(32)
-#define	NEMOSHOW_SEQUENCE_SET_ATTR_MAX	(32)
-
 struct nemoshow;
 struct showone;
+
+struct showact {
+	struct nemolist link;
+
+	struct nemoattr *attr;
+
+	double sattr;
+	double eattr;
+	double fattr;
+
+	uint32_t offset;
+	uint32_t dirty;
+	uint32_t state;
+
+	int type;
+};
 
 struct showset {
 	struct showone base;
 
 	struct showone *src;
 
-	struct nemoattr *attrs[NEMOSHOW_SEQUENCE_SET_ATTR_MAX];
-
-	double sattrs[NEMOSHOW_SEQUENCE_SET_ATTR_MAX];
-	double eattrs[NEMOSHOW_SEQUENCE_SET_ATTR_MAX];
-	double fattrs[NEMOSHOW_SEQUENCE_SET_ATTR_MAX];
-	uint32_t offsets[NEMOSHOW_SEQUENCE_SET_ATTR_MAX];
-	uint32_t dirties[NEMOSHOW_SEQUENCE_SET_ATTR_MAX];
-	uint32_t states[NEMOSHOW_SEQUENCE_SET_ATTR_MAX];
-	int types[NEMOSHOW_SEQUENCE_SET_ATTR_MAX];
-	int nattrs;
+	struct nemolist act_list;
+	int act_count;
 };
 
 struct showframe {

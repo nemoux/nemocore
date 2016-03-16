@@ -111,14 +111,23 @@ struct showone *nemoshow_sequence_create_set(void)
 
 	nemoshow_one_prepare(one);
 
+	nemolist_init(&set->act_list);
+
 	return one;
 }
 
 void nemoshow_sequence_destroy_set(struct showone *one)
 {
 	struct showset *set = NEMOSHOW_SET(one);
+	struct showact *act, *nact;
 
 	nemoshow_one_finish(one);
+
+	nemolist_for_each_safe(act, nact, &set->act_list, link) {
+		nemolist_remove(&act->link);
+
+		free(act);
+	}
 
 	free(set);
 }
@@ -126,6 +135,25 @@ void nemoshow_sequence_destroy_set(struct showone *one)
 int nemoshow_sequence_update_set(struct showone *one)
 {
 	return 0;
+}
+
+static inline int nemoshow_sequence_append_act(struct showone *one, struct nemoattr *attr, double e, double f, uint32_t offset, uint32_t dirty, uint32_t state, int type)
+{
+	struct showset *set = NEMOSHOW_SET(one);
+	struct showact *act;
+
+	act = (struct showact *)malloc(sizeof(struct showact));
+	act->attr = attr;
+	act->eattr = e;
+	act->fattr = f;
+	act->offset = offset;
+	act->dirty = dirty;
+	act->state = state;
+	act->type = type;
+
+	nemolist_insert(&set->act_list, &act->link);
+
+	return set->act_count++;
 }
 
 int nemoshow_sequence_set_source(struct showone *one, struct showone *src)
@@ -149,69 +177,59 @@ int nemoshow_sequence_set_attr(struct showone *one, const char *name, const char
 		if (prop->type == NEMOSHOW_DOUBLE_PROP) {
 			double d = strtod(value, NULL);
 
-			sattr = nemoobject_get(&src->object, name);
-			set->attrs[set->nattrs] = sattr;
-			set->eattrs[set->nattrs] = d;
-			set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
-			set->dirties[set->nattrs] = prop->dirty;
-			set->states[set->nattrs] = prop->state;
-			set->types[set->nattrs] = NEMOSHOW_DOUBLE_PROP;
-
-			return set->nattrs++;
+			return nemoshow_sequence_append_act(one,
+					nemoobject_get(&src->object, name),
+					d, d,
+					0,
+					prop->dirty, prop->state,
+					NEMOSHOW_DOUBLE_PROP);
 		} else if (prop->type == NEMOSHOW_FLOAT_PROP) {
 			double d = strtod(value, NULL);
 
-			sattr = nemoobject_get(&src->object, name);
-			set->attrs[set->nattrs] = sattr;
-			set->eattrs[set->nattrs] = d;
-			set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
-			set->dirties[set->nattrs] = prop->dirty;
-			set->states[set->nattrs] = prop->state;
-			set->types[set->nattrs] = NEMOSHOW_FLOAT_PROP;
-
-			return set->nattrs++;
+			return nemoshow_sequence_append_act(one,
+					nemoobject_get(&src->object, name),
+					d, d,
+					0,
+					prop->dirty, prop->state,
+					NEMOSHOW_FLOAT_PROP);
 		} else if (prop->type == NEMOSHOW_COLOR_PROP) {
 			uint32_t c = nemoshow_color_parse(value);
 
 			sattr = nemoobject_get(&src->object, name);
 
-			set->attrs[set->nattrs] = sattr;
-			set->eattrs[set->nattrs] = (double)NEMOSHOW_COLOR_UINT32_R(c);
-			set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
-			set->offsets[set->nattrs] = NEMOSHOW_RED_COLOR;
-			set->dirties[set->nattrs] = prop->dirty;
-			set->states[set->nattrs] = prop->state;
-			set->types[set->nattrs] = NEMOSHOW_DOUBLE_PROP;
-			set->nattrs++;
+			nemoshow_sequence_append_act(one,
+					sattr,
+					(double)NEMOSHOW_COLOR_UINT32_R(c),
+					(double)NEMOSHOW_COLOR_UINT32_R(c),
+					NEMOSHOW_RED_COLOR,
+					prop->dirty, prop->state,
+					NEMOSHOW_DOUBLE_PROP);
 
-			set->attrs[set->nattrs] = sattr;
-			set->eattrs[set->nattrs] = (double)NEMOSHOW_COLOR_UINT32_G(c);
-			set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
-			set->offsets[set->nattrs] = NEMOSHOW_GREEN_COLOR;
-			set->dirties[set->nattrs] = prop->dirty;
-			set->states[set->nattrs] = prop->state;
-			set->types[set->nattrs] = NEMOSHOW_DOUBLE_PROP;
-			set->nattrs++;
+			nemoshow_sequence_append_act(one,
+					sattr,
+					(double)NEMOSHOW_COLOR_UINT32_G(c),
+					(double)NEMOSHOW_COLOR_UINT32_G(c),
+					NEMOSHOW_GREEN_COLOR,
+					prop->dirty, prop->state,
+					NEMOSHOW_DOUBLE_PROP);
 
-			set->attrs[set->nattrs] = sattr;
-			set->eattrs[set->nattrs] = (double)NEMOSHOW_COLOR_UINT32_B(c);
-			set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
-			set->offsets[set->nattrs] = NEMOSHOW_BLUE_COLOR;
-			set->dirties[set->nattrs] = prop->dirty;
-			set->states[set->nattrs] = prop->state;
-			set->types[set->nattrs] = NEMOSHOW_DOUBLE_PROP;
-			set->nattrs++;
+			nemoshow_sequence_append_act(one,
+					sattr,
+					(double)NEMOSHOW_COLOR_UINT32_B(c),
+					(double)NEMOSHOW_COLOR_UINT32_B(c),
+					NEMOSHOW_BLUE_COLOR,
+					prop->dirty, prop->state,
+					NEMOSHOW_DOUBLE_PROP);
 
-			set->attrs[set->nattrs] = sattr;
-			set->eattrs[set->nattrs] = (double)NEMOSHOW_COLOR_UINT32_A(c);
-			set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
-			set->offsets[set->nattrs] = NEMOSHOW_ALPHA_COLOR;
-			set->dirties[set->nattrs] = prop->dirty;
-			set->states[set->nattrs] = prop->state;
-			set->types[set->nattrs] = NEMOSHOW_DOUBLE_PROP;
-			set->nattrs++;
+			nemoshow_sequence_append_act(one,
+					sattr,
+					(double)NEMOSHOW_COLOR_UINT32_A(c),
+					(double)NEMOSHOW_COLOR_UINT32_A(c),
+					NEMOSHOW_ALPHA_COLOR,
+					prop->dirty, prop->state,
+					NEMOSHOW_DOUBLE_PROP);
 
-			return set->nattrs;
+			return set->act_count;
 		}
 	}
 
@@ -222,54 +240,43 @@ int nemoshow_sequence_set_dattr(struct showone *one, const char *name, double va
 {
 	struct showset *set = NEMOSHOW_SET(one);
 	struct showone *src = set->src;
-	struct nemoattr *sattr;
 	struct showprop *prop;
 
 	prop = nemoshow_get_property(name);
 	if (prop != NULL) {
-		sattr = nemoobject_get(&src->object, name);
-		set->attrs[set->nattrs] = sattr;
-		set->eattrs[set->nattrs] = value;
-		set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
-		set->offsets[set->nattrs] = 0;
-		set->dirties[set->nattrs] = prop->dirty;
-		set->states[set->nattrs] = prop->state;
-		set->types[set->nattrs] = NEMOSHOW_DOUBLE_PROP;
-
-		return set->nattrs++;
+		return nemoshow_sequence_append_act(one,
+				nemoobject_get(&src->object, name),
+				value,
+				value,
+				0,
+				prop->dirty, prop->state,
+				NEMOSHOW_DOUBLE_PROP);
 	}
 
-	sattr = nemoobject_get(&src->object, name);
-	set->attrs[set->nattrs] = sattr;
-	set->eattrs[set->nattrs] = value;
-	set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
-	set->offsets[set->nattrs] = 0;
-	set->dirties[set->nattrs] = 0x0;
-	set->states[set->nattrs] = 0x0;
-	set->types[set->nattrs] = NEMOSHOW_DOUBLE_PROP;
-
-	return set->nattrs++;
+	return nemoshow_sequence_append_act(one,
+			nemoobject_get(&src->object, name),
+			value,
+			value,
+			0,
+			0x0, 0x0,
+			NEMOSHOW_DOUBLE_PROP);
 }
 
 int nemoshow_sequence_set_dattr_offset(struct showone *one, const char *name, int offset, double value)
 {
 	struct showset *set = NEMOSHOW_SET(one);
 	struct showone *src = set->src;
-	struct nemoattr *sattr;
 	struct showprop *prop;
 
 	prop = nemoshow_get_property(name);
 	if (prop != NULL) {
-		sattr = nemoobject_get(&src->object, name);
-		set->attrs[set->nattrs] = sattr;
-		set->eattrs[set->nattrs] = value;
-		set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
-		set->offsets[set->nattrs] = offset;
-		set->dirties[set->nattrs] = prop->dirty;
-		set->states[set->nattrs] = prop->state;
-		set->types[set->nattrs] = NEMOSHOW_DOUBLE_PROP;
-
-		return set->nattrs++;
+		return nemoshow_sequence_append_act(one,
+				nemoobject_get(&src->object, name),
+				value,
+				value,
+				offset,
+				prop->dirty, prop->state,
+				NEMOSHOW_DOUBLE_PROP);
 	}
 
 	return -1;
@@ -279,54 +286,43 @@ int nemoshow_sequence_set_fattr(struct showone *one, const char *name, double va
 {
 	struct showset *set = NEMOSHOW_SET(one);
 	struct showone *src = set->src;
-	struct nemoattr *sattr;
 	struct showprop *prop;
 
 	prop = nemoshow_get_property(name);
 	if (prop != NULL) {
-		sattr = nemoobject_get(&src->object, name);
-		set->attrs[set->nattrs] = sattr;
-		set->eattrs[set->nattrs] = value;
-		set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
-		set->offsets[set->nattrs] = 0;
-		set->dirties[set->nattrs] = prop->dirty;
-		set->states[set->nattrs] = prop->state;
-		set->types[set->nattrs] = NEMOSHOW_FLOAT_PROP;
-
-		return set->nattrs++;
+		return nemoshow_sequence_append_act(one,
+				nemoobject_get(&src->object, name),
+				value,
+				value,
+				0,
+				prop->dirty, prop->state,
+				NEMOSHOW_FLOAT_PROP);
 	}
 
-	sattr = nemoobject_get(&src->object, name);
-	set->attrs[set->nattrs] = sattr;
-	set->eattrs[set->nattrs] = value;
-	set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
-	set->offsets[set->nattrs] = 0;
-	set->dirties[set->nattrs] = 0x0;
-	set->states[set->nattrs] = 0x0;
-	set->types[set->nattrs] = NEMOSHOW_FLOAT_PROP;
-
-	return set->nattrs++;
+	return nemoshow_sequence_append_act(one,
+			nemoobject_get(&src->object, name),
+			value,
+			value,
+			0,
+			0x0, 0x0,
+			NEMOSHOW_FLOAT_PROP);
 }
 
 int nemoshow_sequence_set_fattr_offset(struct showone *one, const char *name, int offset, double value)
 {
 	struct showset *set = NEMOSHOW_SET(one);
 	struct showone *src = set->src;
-	struct nemoattr *sattr;
 	struct showprop *prop;
 
 	prop = nemoshow_get_property(name);
 	if (prop != NULL) {
-		sattr = nemoobject_get(&src->object, name);
-		set->attrs[set->nattrs] = sattr;
-		set->eattrs[set->nattrs] = value;
-		set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
-		set->offsets[set->nattrs] = offset;
-		set->dirties[set->nattrs] = prop->dirty;
-		set->states[set->nattrs] = prop->state;
-		set->types[set->nattrs] = NEMOSHOW_FLOAT_PROP;
-
-		return set->nattrs++;
+		return nemoshow_sequence_append_act(one,
+				nemoobject_get(&src->object, name),
+				value,
+				value,
+				offset,
+				prop->dirty, prop->state,
+				NEMOSHOW_FLOAT_PROP);
 	}
 
 	return -1;
@@ -336,50 +332,42 @@ int nemoshow_sequence_set_cattr(struct showone *one, const char *name, double r,
 {
 	struct showset *set = NEMOSHOW_SET(one);
 	struct showone *src = set->src;
-	struct nemoattr *sattr;
 	struct showprop *prop;
+	struct nemoattr *sattr;
 
 	prop = nemoshow_get_property(name);
 	if (prop != NULL) {
 		sattr = nemoobject_get(&src->object, name);
 
-		set->attrs[set->nattrs] = sattr;
-		set->eattrs[set->nattrs] = r;
-		set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
-		set->offsets[set->nattrs] = NEMOSHOW_RED_COLOR;
-		set->dirties[set->nattrs] = prop->dirty;
-		set->states[set->nattrs] = prop->state;
-		set->types[set->nattrs] = NEMOSHOW_DOUBLE_PROP;
-		set->nattrs++;
+		nemoshow_sequence_append_act(one,
+				sattr,
+				r, r,
+				NEMOSHOW_RED_COLOR,
+				prop->dirty, prop->state,
+				NEMOSHOW_DOUBLE_PROP);
 
-		set->attrs[set->nattrs] = sattr;
-		set->eattrs[set->nattrs] = g;
-		set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
-		set->offsets[set->nattrs] = NEMOSHOW_GREEN_COLOR;
-		set->dirties[set->nattrs] = prop->dirty;
-		set->states[set->nattrs] = prop->state;
-		set->types[set->nattrs] = NEMOSHOW_DOUBLE_PROP;
-		set->nattrs++;
+		nemoshow_sequence_append_act(one,
+				sattr,
+				g, g,
+				NEMOSHOW_GREEN_COLOR,
+				prop->dirty, prop->state,
+				NEMOSHOW_DOUBLE_PROP);
 
-		set->attrs[set->nattrs] = sattr;
-		set->eattrs[set->nattrs] = b;
-		set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
-		set->offsets[set->nattrs] = NEMOSHOW_BLUE_COLOR;
-		set->dirties[set->nattrs] = prop->dirty;
-		set->states[set->nattrs] = prop->state;
-		set->types[set->nattrs] = NEMOSHOW_DOUBLE_PROP;
-		set->nattrs++;
+		nemoshow_sequence_append_act(one,
+				sattr,
+				b, b,
+				NEMOSHOW_BLUE_COLOR,
+				prop->dirty, prop->state,
+				NEMOSHOW_DOUBLE_PROP);
 
-		set->attrs[set->nattrs] = sattr;
-		set->eattrs[set->nattrs] = a;
-		set->fattrs[set->nattrs] = set->eattrs[set->nattrs];
-		set->offsets[set->nattrs] = NEMOSHOW_ALPHA_COLOR;
-		set->dirties[set->nattrs] = prop->dirty;
-		set->states[set->nattrs] = prop->state;
-		set->types[set->nattrs] = NEMOSHOW_DOUBLE_PROP;
-		set->nattrs++;
+		nemoshow_sequence_append_act(one,
+				sattr,
+				a, a,
+				NEMOSHOW_ALPHA_COLOR,
+				prop->dirty, prop->state,
+				NEMOSHOW_DOUBLE_PROP);
 
-		return set->nattrs;
+		return set->act_count;
 	}
 
 	return -1;
@@ -388,8 +376,14 @@ int nemoshow_sequence_set_cattr(struct showone *one, const char *name, double r,
 int nemoshow_sequence_fix_dattr(struct showone *one, int index, double value)
 {
 	struct showset *set = NEMOSHOW_SET(one);
+	struct showact *act;
 
-	set->fattrs[index] = value;
+	nemolist_for_each(act, &set->act_list, link) {
+		if (index-- <= 0) {
+			act->fattr = value;
+			break;
+		}
+	}
 
 	return 0;
 }
@@ -399,7 +393,7 @@ static void nemoshow_sequence_prepare_frame(struct showone *one, uint32_t serial
 	struct showframe *frame = NEMOSHOW_FRAME(one);
 	struct showset *set;
 	struct showone *child;
-	int i;
+	struct showact *act;
 
 	nemoshow_children_for_each(child, one) {
 		if (child->type == NEMOSHOW_SET_TYPE) {
@@ -407,14 +401,14 @@ static void nemoshow_sequence_prepare_frame(struct showone *one, uint32_t serial
 
 			set = NEMOSHOW_SET(child);
 
-			for (i = 0; i < set->nattrs; i++) {
-				if (nemoattr_get_serial(set->attrs[i]) <= serial) {
-					if (set->types[i] == NEMOSHOW_DOUBLE_PROP)
-						set->sattrs[i] = nemoattr_getd_offset(set->attrs[i], set->offsets[i]);
+			nemolist_for_each(act, &set->act_list, link) {
+				if (nemoattr_get_serial(act->attr) <= serial) {
+					if (act->type == NEMOSHOW_DOUBLE_PROP)
+						act->sattr = nemoattr_getd_offset(act->attr, act->offset);
 					else
-						set->sattrs[i] = nemoattr_getf_offset(set->attrs[i], set->offsets[i]);
+						act->sattr = nemoattr_getf_offset(act->attr, act->offset);
 
-					state |= set->states[i];
+					state |= act->state;
 				}
 			}
 
@@ -428,8 +422,8 @@ static void nemoshow_sequence_dispatch_frame(struct showone *one, double s, doub
 	struct showframe *frame = NEMOSHOW_FRAME(one);
 	struct showset *set;
 	struct showone *child;
+	struct showact *act;
 	double dt = (t - s) / (frame->t - s);
-	int i;
 
 	nemoshow_children_for_each(child, one) {
 		if (child->type == NEMOSHOW_SET_TYPE) {
@@ -437,19 +431,19 @@ static void nemoshow_sequence_dispatch_frame(struct showone *one, double s, doub
 
 			set = NEMOSHOW_SET(child);
 
-			for (i = 0; i < set->nattrs; i++) {
-				if (nemoattr_get_serial(set->attrs[i]) <= serial) {
-					double v = (set->eattrs[i] - set->sattrs[i]) * dt + set->sattrs[i];
+			nemolist_for_each(act, &set->act_list, link) {
+				if (nemoattr_get_serial(act->attr) <= serial) {
+					double v = (act->eattr - act->sattr) * dt + act->sattr;
 
-					if (set->types[i] == NEMOSHOW_DOUBLE_PROP)
-						nemoattr_setd_offset(set->attrs[i], set->offsets[i], v);
+					if (act->type == NEMOSHOW_DOUBLE_PROP)
+						nemoattr_setd_offset(act->attr, act->offset, v);
 					else
-						nemoattr_setf_offset(set->attrs[i], set->offsets[i], v);
+						nemoattr_setf_offset(act->attr, act->offset, v);
 
 					if (set->src->dattr != NULL)
-						set->src->dattr(set->src, nemoattr_get_name(set->attrs[i]), v);
+						set->src->dattr(set->src, nemoattr_get_name(act->attr), v);
 
-					dirty |= set->dirties[i];
+					dirty |= act->dirty;
 				}
 			}
 
@@ -463,7 +457,7 @@ static void nemoshow_sequence_finish_frame(struct showone *one, uint32_t serial)
 	struct showframe *frame = NEMOSHOW_FRAME(one);
 	struct showset *set;
 	struct showone *child;
-	int i;
+	struct showact *act;
 
 	nemoshow_children_for_each(child, one) {
 		if (child->type == NEMOSHOW_SET_TYPE) {
@@ -471,19 +465,19 @@ static void nemoshow_sequence_finish_frame(struct showone *one, uint32_t serial)
 
 			set = NEMOSHOW_SET(child);
 
-			for (i = 0; i < set->nattrs; i++) {
-				if (nemoattr_get_serial(set->attrs[i]) <= serial) {
-					double v = set->fattrs[i];
+			nemolist_for_each(act, &set->act_list, link) {
+				if (nemoattr_get_serial(act->attr) <= serial) {
+					double v = act->fattr;
 
-					if (set->types[i] == NEMOSHOW_DOUBLE_PROP)
-						nemoattr_setd_offset(set->attrs[i], set->offsets[i], v);
+					if (act->type == NEMOSHOW_DOUBLE_PROP)
+						nemoattr_setd_offset(act->attr, act->offset, v);
 					else
-						nemoattr_setf_offset(set->attrs[i], set->offsets[i], v);
+						nemoattr_setf_offset(act->attr, act->offset, v);
 
 					if (set->src->dattr != NULL)
-						set->src->dattr(set->src, nemoattr_get_name(set->attrs[i]), v);
+						set->src->dattr(set->src, nemoattr_get_name(act->attr), v);
 
-					dirty |= set->dirties[i];
+					dirty |= act->dirty;
 				}
 			}
 
@@ -497,7 +491,7 @@ void nemoshow_sequence_prepare(struct showone *one, uint32_t serial)
 	struct showsequence *sequence = NEMOSHOW_SEQUENCE(one);
 	struct showone *frame;
 	struct showone *child;
-	int i;
+	struct showact *act;
 
 	if (one->serial > serial)
 		return;
@@ -513,9 +507,9 @@ void nemoshow_sequence_prepare(struct showone *one, uint32_t serial)
 			if (child->type == NEMOSHOW_SET_TYPE) {
 				struct showset *set = NEMOSHOW_SET(child);
 
-				for (i = 0; i < set->nattrs; i++) {
-					if (nemoattr_get_serial(set->attrs[i]) < serial)
-						nemoattr_set_serial(set->attrs[i], serial);
+				nemolist_for_each(act, &set->act_list, link) {
+					if (nemoattr_get_serial(act->attr) < serial)
+						nemoattr_set_serial(act->attr, serial);
 				}
 			}
 		}
