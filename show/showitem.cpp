@@ -515,6 +515,8 @@ static inline void nemoshow_item_update_path(struct nemoshow *show, struct showo
 				NEMOSHOW_ITEM_CC(item, path)->close();
 		}
 
+		NEMOSHOW_ITEM_CC(item, measure)->setPath(NEMOSHOW_ITEM_CC(item, path), false);
+
 		one->dirty |= NEMOSHOW_BOUNDS_DIRTY;
 	} else if (one->sub == NEMOSHOW_PATHLIST_ITEM) {
 		struct showone *child;
@@ -538,6 +540,8 @@ static inline void nemoshow_item_update_path(struct nemoshow *show, struct showo
 				NEMOSHOW_ITEM_CC(item, path)->close();
 			}
 		}
+
+		NEMOSHOW_ITEM_CC(item, measure)->setPath(NEMOSHOW_ITEM_CC(item, path), false);
 
 		one->dirty |= NEMOSHOW_BOUNDS_DIRTY;
 	}
@@ -574,8 +578,6 @@ static inline void nemoshow_item_update_patheffect(struct nemoshow *show, struct
 				effect->unref();
 			}
 		}
-
-		NEMOSHOW_ITEM_CC(item, measure)->setPath(NEMOSHOW_ITEM_CC(item, path), false);
 
 		one->dirty |= NEMOSHOW_BOUNDS_DIRTY;
 	}
