@@ -26,7 +26,7 @@ struct transitionsensor {
 	struct showone *one;
 };
 
-struct transitionref {
+struct transitionpin {
 	struct nemolist link;
 	struct nemolistener listener;
 
@@ -62,7 +62,7 @@ struct showtransition {
 
 	struct nemolist children_list;
 	struct nemolist sensor_list;
-	struct nemolist ref_list;
+	struct nemolist pin_list;
 
 	nemoshow_transition_dispatch_frame_t dispatch_frame;
 	nemoshow_transition_dispatch_done_t dispatch_done;

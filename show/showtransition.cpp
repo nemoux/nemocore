@@ -24,7 +24,7 @@ struct showtransition *nemoshow_transition_create(struct showone *ease, uint32_t
 
 	nemolist_init(&trans->children_list);
 	nemolist_init(&trans->sensor_list);
-	nemolist_init(&trans->ref_list);
+	nemolist_init(&trans->pin_list);
 
 	trans->sequences = (struct showone **)malloc(sizeof(struct showone *) * 4);
 	trans->nsequences = 0;
@@ -57,7 +57,7 @@ void nemoshow_transition_destroy(struct showtransition *trans, int done)
 	void *userdata = trans->userdata;
 	struct showtransition *child, *nchild;
 	struct transitionsensor *sensor, *nsensor;
-	struct transitionref *ref, *nref;
+	struct transitionpin *pin, *npin;
 	int i;
 
 	nemolist_remove(&trans->link);
@@ -70,11 +70,11 @@ void nemoshow_transition_destroy(struct showtransition *trans, int done)
 		free(sensor);
 	}
 
-	nemolist_for_each_safe(ref, nref, &trans->ref_list, link) {
-		nemolist_remove(&ref->link);
-		nemolist_remove(&ref->listener.link);
+	nemolist_for_each_safe(pin, npin, &trans->pin_list, link) {
+		nemolist_remove(&pin->link);
+		nemolist_remove(&pin->listener.link);
 
-		free(ref);
+		free(pin);
 	}
 
 	for (i = 0; i < trans->nsequences; i++) {
@@ -129,54 +129,54 @@ void nemoshow_transition_check_one(struct showtransition *trans, struct showone 
 	}
 }
 
-static void nemoshow_transition_handle_dirty_detach_signal(struct nemolistener *listener, void *data)
+static void nemoshow_transition_handle_dirty_unpin_signal(struct nemolistener *listener, void *data)
 {
-	struct transitionref *ref = (struct transitionref *)container_of(listener, struct transitionref, listener);
+	struct transitionpin *pin = (struct transitionpin *)container_of(listener, struct transitionpin, listener);
 
-	ref->transition->dones[ref->index] = NULL;
+	pin->transition->dones[pin->index] = NULL;
 }
 
 void nemoshow_transition_dirty_one(struct showtransition *trans, struct showone *one, uint32_t dirty)
 {
-	struct transitionref *ref;
+	struct transitionpin *pin;
 
-	ref = (struct transitionref *)malloc(sizeof(struct transitionref));
-	if (ref != NULL) {
+	pin = (struct transitionpin *)malloc(sizeof(struct transitionpin));
+	if (pin != NULL) {
 		NEMOBOX_APPEND(trans->dones, trans->sdones, trans->ndones, one);
 		NEMOBOX_APPEND(trans->dirties, trans->sdirties, trans->ndirties, dirty);
 
-		ref->transition = trans;
-		ref->index = trans->ndones - 1;
+		pin->transition = trans;
+		pin->index = trans->ndones - 1;
 
-		ref->listener.notify = nemoshow_transition_handle_dirty_detach_signal;
-		nemosignal_add(&one->detach_signal, &ref->listener);
+		pin->listener.notify = nemoshow_transition_handle_dirty_unpin_signal;
+		nemosignal_add(&one->unpin_signal, &pin->listener);
 
-		nemolist_insert_tail(&trans->ref_list, &ref->link);
+		nemolist_insert_tail(&trans->pin_list, &pin->link);
 	}
 }
 
-static void nemoshow_transition_handle_destroy_detach_signal(struct nemolistener *listener, void *data)
+static void nemoshow_transition_handle_destroy_unpin_signal(struct nemolistener *listener, void *data)
 {
-	struct transitionref *ref = (struct transitionref *)container_of(listener, struct transitionref, listener);
+	struct transitionpin *pin = (struct transitionpin *)container_of(listener, struct transitionpin, listener);
 
-	ref->transition->tones[ref->index] = NULL;
+	pin->transition->tones[pin->index] = NULL;
 }
 
 void nemoshow_transition_destroy_one(struct showtransition *trans, struct showone *one)
 {
-	struct transitionref *ref;
+	struct transitionpin *pin;
 
-	ref = (struct transitionref *)malloc(sizeof(struct transitionref));
-	if (ref != NULL) {
+	pin = (struct transitionpin *)malloc(sizeof(struct transitionpin));
+	if (pin != NULL) {
 		NEMOBOX_APPEND(trans->tones, trans->stones, trans->ntones, one);
 
-		ref->transition = trans;
-		ref->index = trans->ntones - 1;
+		pin->transition = trans;
+		pin->index = trans->ntones - 1;
 
-		ref->listener.notify = nemoshow_transition_handle_destroy_detach_signal;
-		nemosignal_add(&one->detach_signal, &ref->listener);
+		pin->listener.notify = nemoshow_transition_handle_destroy_unpin_signal;
+		nemosignal_add(&one->unpin_signal, &pin->listener);
 
-		nemolist_insert_tail(&trans->ref_list, &ref->link);
+		nemolist_insert_tail(&trans->pin_list, &pin->link);
 	}
 }
 

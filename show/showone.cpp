@@ -16,7 +16,7 @@ void nemoshow_one_prepare(struct showone *one)
 {
 	nemoobject_prepare(&one->object, NEMOSHOW_ATTR_MAX);
 
-	nemosignal_init(&one->detach_signal);
+	nemosignal_init(&one->unpin_signal);
 	nemosignal_init(&one->destroy_signal);
 
 	nemolist_init(&one->link);
@@ -40,7 +40,8 @@ void nemoshow_one_finish(struct showone *one)
 	struct showone *child, *nchild;
 	int i;
 
-	nemosignal_emit(&one->detach_signal, one);
+	nemosignal_emit(&one->unpin_signal, one);
+
 	nemosignal_emit(&one->destroy_signal, one);
 
 	nemolist_for_each_safe(ref, nref, &one->reference_list, link) {
