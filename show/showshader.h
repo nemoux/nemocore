@@ -31,7 +31,6 @@ struct showstop {
 
 	double offset;
 
-	uint32_t fill;
 	double fills[4];
 };
 
@@ -61,12 +60,12 @@ static inline void nemoshow_stop_set_fill_color(struct showone *one, double r, d
 {
 	struct showstop *stop = NEMOSHOW_STOP(one);
 
-	stop->fills[0] = r;
-	stop->fills[1] = g;
-	stop->fills[2] = b;
-	stop->fills[3] = a;
+	stop->fills[NEMOSHOW_RED_COLOR] = r;
+	stop->fills[NEMOSHOW_GREEN_COLOR] = g;
+	stop->fills[NEMOSHOW_BLUE_COLOR] = b;
+	stop->fills[NEMOSHOW_ALPHA_COLOR] = a;
 
-	stop->fill = 1;
+	nemoshow_one_set_state(one, NEMOSHOW_FILL_STATE);
 
 	nemoshow_one_dirty(one, NEMOSHOW_STYLE_DIRTY);
 }

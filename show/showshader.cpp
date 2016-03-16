@@ -33,11 +33,7 @@ struct showone *nemoshow_stop_create(void)
 	nemoshow_one_prepare(one);
 
 	nemoobject_set_reserved(&one->object, "offset", &stop->offset, sizeof(double));
-	nemoobject_set_reserved(&one->object, "fill", &stop->fill, sizeof(uint32_t));
-	nemoobject_set_reserved(&one->object, "fill:r", &stop->fills[2], sizeof(double));
-	nemoobject_set_reserved(&one->object, "fill:g", &stop->fills[1], sizeof(double));
-	nemoobject_set_reserved(&one->object, "fill:b", &stop->fills[0], sizeof(double));
-	nemoobject_set_reserved(&one->object, "fill:a", &stop->fills[3], sizeof(double));
+	nemoobject_set_reserved(&one->object, "fill", &stop->fills, sizeof(double[4]));
 
 	nemoshow_one_set_state(one, NEMOSHOW_EFFECT_STATE);
 	nemoshow_one_set_effect(one, NEMOSHOW_SHADER_DIRTY);
@@ -137,7 +133,11 @@ int nemoshow_shader_update(struct showone *one)
 				nemoshow_children_for_each(child, shader->ref) {
 					stop = NEMOSHOW_STOP(child);
 
-					colors[noffsets] = SkColorSetARGB(stop->fills[3], stop->fills[2], stop->fills[1], stop->fills[0]);
+					colors[noffsets] = SkColorSetARGB(
+							stop->fills[NEMOSHOW_ALPHA_COLOR],
+							stop->fills[NEMOSHOW_RED_COLOR],
+							stop->fills[NEMOSHOW_GREEN_COLOR],
+							stop->fills[NEMOSHOW_BLUE_COLOR]);
 					offsets[noffsets] = stop->offset;
 
 					noffsets++;
@@ -146,7 +146,11 @@ int nemoshow_shader_update(struct showone *one)
 				nemoshow_children_for_each(child, one) {
 					stop = NEMOSHOW_STOP(child);
 
-					colors[noffsets] = SkColorSetARGB(stop->fills[3], stop->fills[2], stop->fills[1], stop->fills[0]);
+					colors[noffsets] = SkColorSetARGB(
+							stop->fills[NEMOSHOW_ALPHA_COLOR],
+							stop->fills[NEMOSHOW_RED_COLOR],
+							stop->fills[NEMOSHOW_GREEN_COLOR],
+							stop->fills[NEMOSHOW_BLUE_COLOR]);
 					offsets[noffsets] = stop->offset;
 
 					noffsets++;

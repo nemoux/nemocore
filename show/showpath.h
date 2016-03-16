@@ -35,13 +35,6 @@ typedef enum {
 	NEMOSHOW_PATH_LAST_JOIN
 } NemoShowPathJoin;
 
-typedef enum {
-	NEMOSHOW_PATH_BLUE_COLOR = 0,
-	NEMOSHOW_PATH_GREEN_COLOR = 1,
-	NEMOSHOW_PATH_RED_COLOR = 2,
-	NEMOSHOW_PATH_ALPHA_COLOR = 3
-} NemoShowPathColor;
-
 struct showpath {
 	struct showone base;
 
@@ -122,10 +115,10 @@ static inline void nemoshow_path_set_fill_color(struct showone *one, double r, d
 {
 	struct showpath *path = NEMOSHOW_PATH(one);
 
-	path->_fills[NEMOSHOW_PATH_RED_COLOR] = r;
-	path->_fills[NEMOSHOW_PATH_GREEN_COLOR] = g;
-	path->_fills[NEMOSHOW_PATH_BLUE_COLOR] = b;
-	path->_fills[NEMOSHOW_PATH_ALPHA_COLOR] = a;
+	path->_fills[NEMOSHOW_RED_COLOR] = r;
+	path->_fills[NEMOSHOW_GREEN_COLOR] = g;
+	path->_fills[NEMOSHOW_BLUE_COLOR] = b;
+	path->_fills[NEMOSHOW_ALPHA_COLOR] = a;
 
 	nemoshow_one_set_state(one, NEMOSHOW_FILL_STATE);
 
@@ -136,10 +129,10 @@ static inline void nemoshow_path_set_stroke_color(struct showone *one, double r,
 {
 	struct showpath *path = NEMOSHOW_PATH(one);
 
-	path->_strokes[NEMOSHOW_PATH_RED_COLOR] = r;
-	path->_strokes[NEMOSHOW_PATH_GREEN_COLOR] = g;
-	path->_strokes[NEMOSHOW_PATH_BLUE_COLOR] = b;
-	path->_strokes[NEMOSHOW_PATH_ALPHA_COLOR] = a;
+	path->_strokes[NEMOSHOW_RED_COLOR] = r;
+	path->_strokes[NEMOSHOW_GREEN_COLOR] = g;
+	path->_strokes[NEMOSHOW_BLUE_COLOR] = b;
+	path->_strokes[NEMOSHOW_ALPHA_COLOR] = a;
 
 	nemoshow_one_set_state(one, NEMOSHOW_STROKE_STATE);
 

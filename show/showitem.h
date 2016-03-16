@@ -71,13 +71,6 @@ typedef enum {
 } NemoShowItemPick;
 
 typedef enum {
-	NEMOSHOW_ITEM_BLUE_COLOR = 0,
-	NEMOSHOW_ITEM_GREEN_COLOR = 1,
-	NEMOSHOW_ITEM_RED_COLOR = 2,
-	NEMOSHOW_ITEM_ALPHA_COLOR = 3
-} NemoShowItemColor;
-
-typedef enum {
 	NEMOSHOW_ITEM_STROKE_PATH = (1 << 0),
 	NEMOSHOW_ITEM_FILL_PATH = (1 << 1),
 	NEMOSHOW_ITEM_BOTH_PATH = NEMOSHOW_ITEM_STROKE_PATH | NEMOSHOW_ITEM_FILL_PATH
@@ -362,10 +355,10 @@ static inline void nemoshow_item_set_fill_color(struct showone *one, double r, d
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	item->_fills[NEMOSHOW_ITEM_RED_COLOR] = r;
-	item->_fills[NEMOSHOW_ITEM_GREEN_COLOR] = g;
-	item->_fills[NEMOSHOW_ITEM_BLUE_COLOR] = b;
-	item->_fills[NEMOSHOW_ITEM_ALPHA_COLOR] = a;
+	item->_fills[NEMOSHOW_RED_COLOR] = r;
+	item->_fills[NEMOSHOW_GREEN_COLOR] = g;
+	item->_fills[NEMOSHOW_BLUE_COLOR] = b;
+	item->_fills[NEMOSHOW_ALPHA_COLOR] = a;
 
 	nemoshow_one_set_state(one, NEMOSHOW_FILL_STATE);
 
@@ -376,10 +369,10 @@ static inline void nemoshow_item_set_stroke_color(struct showone *one, double r,
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	item->_strokes[NEMOSHOW_ITEM_RED_COLOR] = r;
-	item->_strokes[NEMOSHOW_ITEM_GREEN_COLOR] = g;
-	item->_strokes[NEMOSHOW_ITEM_BLUE_COLOR] = b;
-	item->_strokes[NEMOSHOW_ITEM_ALPHA_COLOR] = a;
+	item->_strokes[NEMOSHOW_RED_COLOR] = r;
+	item->_strokes[NEMOSHOW_GREEN_COLOR] = g;
+	item->_strokes[NEMOSHOW_BLUE_COLOR] = b;
+	item->_strokes[NEMOSHOW_ALPHA_COLOR] = a;
 
 	nemoshow_one_set_state(one, NEMOSHOW_STROKE_STATE);
 
