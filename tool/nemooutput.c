@@ -97,7 +97,8 @@ struct nemooutput *nemooutput_create(struct nemotool *tool, uint32_t id)
 
 void nemooutput_destroy(struct nemooutput *output)
 {
-	wl_output_destroy(output->output);
+	if (output->tool->display != NULL)
+		wl_output_destroy(output->output);
 
 	nemolist_remove(&output->link);
 
