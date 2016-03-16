@@ -615,7 +615,7 @@ static inline void nemoshow_svg_set_style(struct svgcontext *context, struct sho
 	} else if (strcmp(attr, "stop-color") == 0) {
 		nemoshow_svg_get_color(context, rgba, value);
 
-		nemoshow_stop_set_fill_color(one, rgba[0], rgba[1], rgba[2], rgba[3]);
+		nemoshow_stop_set_color(one, rgba[0], rgba[1], rgba[2], rgba[3]);
 	} else if (strcmp(attr, "stop-opacity") == 0) {
 		nemoshow_stop_set_offset(one, strtod(value, NULL));
 	}

@@ -56,7 +56,7 @@ extern void nemoshow_stop_destroy(struct showone *one);
 
 extern int nemoshow_stop_update(struct showone *one);
 
-static inline void nemoshow_stop_set_fill_color(struct showone *one, double r, double g, double b, double a)
+static inline void nemoshow_stop_set_color(struct showone *one, double r, double g, double b, double a)
 {
 	struct showstop *stop = NEMOSHOW_STOP(one);
 

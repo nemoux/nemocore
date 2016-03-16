@@ -345,6 +345,7 @@ static inline void nemoshow_item_update_shader(struct nemoshow *show, struct sho
 
 	if (NEMOSHOW_REF(one, NEMOSHOW_SHADER_REF) != NULL) {
 		NEMOSHOW_ITEM_CC(item, fill)->setShader(NEMOSHOW_SHADER_CC(NEMOSHOW_SHADER(NEMOSHOW_REF(one, NEMOSHOW_SHADER_REF)), shader));
+		NEMOSHOW_ITEM_CC(item, stroke)->setShader(NEMOSHOW_SHADER_CC(NEMOSHOW_SHADER(NEMOSHOW_REF(one, NEMOSHOW_SHADER_REF)), shader));
 
 		one->dirty |= NEMOSHOW_BOUNDS_DIRTY;
 	}
