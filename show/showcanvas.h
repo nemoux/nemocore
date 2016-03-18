@@ -40,6 +40,7 @@ struct showcanvas {
 	struct showone base;
 
 	struct nemoshow *show;
+	struct nemolist link;
 
 	char type[NEMOSHOW_CANVAS_TYPE_MAX];
 
@@ -81,6 +82,7 @@ struct showcanvas {
 
 #define NEMOSHOW_CANVAS(one)					((struct showcanvas *)container_of(one, struct showcanvas, base))
 #define NEMOSHOW_CANVAS_AT(one, at)		(NEMOSHOW_CANVAS(one)->at)
+#define NEMOSHOW_CANVAS_ONE(canvas)		(&(canvas)->base)
 
 extern struct showone *nemoshow_canvas_create(void);
 extern void nemoshow_canvas_destroy(struct showone *one);
@@ -99,8 +101,6 @@ extern int nemoshow_canvas_resize_pixman(struct showone *one, int32_t width, int
 
 extern void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one);
 extern void nemoshow_canvas_render_back(struct nemoshow *show, struct showone *one);
-
-extern void nemoshow_canvas_flush_now(struct nemoshow *show, struct showone *one);
 
 extern int nemoshow_canvas_set_viewport(struct nemoshow *show, struct showone *one, double sx, double sy);
 

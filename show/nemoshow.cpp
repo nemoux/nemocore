@@ -46,6 +46,7 @@ struct nemoshow *nemoshow_create(void)
 	nemolist_init(&show->one_list);
 	nemolist_init(&show->dirty_list);
 	nemolist_init(&show->bounds_list);
+	nemolist_init(&show->canvas_list);
 	nemolist_init(&show->transition_list);
 	nemolist_init(&show->transition_destroy_list);
 
@@ -86,6 +87,7 @@ void nemoshow_destroy(struct nemoshow *show)
 	nemolist_remove(&show->one_list);
 	nemolist_remove(&show->dirty_list);
 	nemolist_remove(&show->bounds_list);
+	nemolist_remove(&show->canvas_list);
 	nemolist_remove(&show->transition_list);
 	nemolist_remove(&show->transition_destroy_list);
 
@@ -185,7 +187,7 @@ void nemoshow_update_one_expression_without_dirty(struct nemoshow *show, struct 
 void nemoshow_render_one(struct nemoshow *show)
 {
 	struct showone *scene = show->scene;
-	struct showcanvas *canvas;
+	struct showcanvas *canvas, *ncanvas;
 	struct showone *one, *none;
 
 	if (scene == NULL)
@@ -205,6 +207,32 @@ void nemoshow_render_one(struct nemoshow *show)
 		NEMOSHOW_SCENE_AT(scene, needs_resize) = 0;
 
 		nemotale_resize(show->tale, NEMOSHOW_SCENE_AT(scene, width), NEMOSHOW_SCENE_AT(scene, height));
+	}
+
+	nemolist_for_each_safe(canvas, ncanvas, &show->canvas_list, link) {
+		one = NEMOSHOW_CANVAS_ONE(canvas);
+
+		if (canvas->needs_redraw != 0) {
+			canvas->needs_redraw = 0;
+
+			if (canvas->dispatch_redraw != NULL)
+				canvas->dispatch_redraw(show, one);
+			else
+				nemoshow_canvas_redraw_one(show, one);
+		}
+
+		if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
+			nemotale_node_flush_gl(show->tale, canvas->node);
+			nemotale_node_filter_gl(show->tale, canvas->node);
+		} else if (one->sub == NEMOSHOW_CANVAS_PIXMAN_TYPE) {
+			nemotale_node_flush_gl(show->tale, canvas->node);
+			nemotale_node_filter_gl(show->tale, canvas->node);
+		} else if (one->sub == NEMOSHOW_CANVAS_OPENGL_TYPE || one->sub == NEMOSHOW_CANVAS_PIPELINE_TYPE) {
+			nemotale_node_filter_gl(show->tale, canvas->node);
+		}
+
+		nemolist_remove(&canvas->link);
+		nemolist_init(&canvas->link);
 	}
 
 	nemoshow_children_for_each(one, scene) {

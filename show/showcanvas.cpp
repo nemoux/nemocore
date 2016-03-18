@@ -59,6 +59,8 @@ struct showone *nemoshow_canvas_create(void)
 	canvas->needs_redraw = 1;
 	canvas->needs_full_redraw = 1;
 
+	nemolist_init(&canvas->link);
+
 	one = &canvas->base;
 	one->type = NEMOSHOW_CANVAS_TYPE;
 	one->update = nemoshow_canvas_update;
@@ -94,6 +96,8 @@ void nemoshow_canvas_destroy(struct showone *one)
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
 	nemoshow_one_finish(one);
+
+	nemolist_remove(&canvas->link);
 
 	nemotale_node_destroy(canvas->node);
 
@@ -723,30 +727,6 @@ void nemoshow_canvas_render_back(struct nemoshow *show, struct showone *one)
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
 	nemotale_node_fill_pixman(canvas->node, canvas->fills[2], canvas->fills[1], canvas->fills[0], canvas->fills[3]);
-}
-
-void nemoshow_canvas_flush_now(struct nemoshow *show, struct showone *one)
-{
-	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
-
-	if (canvas->needs_redraw != 0) {
-		canvas->needs_redraw = 0;
-
-		if (canvas->dispatch_redraw != NULL)
-			canvas->dispatch_redraw(show, one);
-		else
-			nemoshow_canvas_redraw_one(show, one);
-	}
-
-	if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
-		nemotale_node_flush_gl(show->tale, canvas->node);
-		nemotale_node_filter_gl(show->tale, canvas->node);
-	} else if (one->sub == NEMOSHOW_CANVAS_PIXMAN_TYPE) {
-		nemotale_node_flush_gl(show->tale, canvas->node);
-		nemotale_node_filter_gl(show->tale, canvas->node);
-	} else if (one->sub == NEMOSHOW_CANVAS_OPENGL_TYPE || one->sub == NEMOSHOW_CANVAS_PIPELINE_TYPE) {
-		nemotale_node_filter_gl(show->tale, canvas->node);
-	}
 }
 
 int nemoshow_canvas_set_viewport(struct nemoshow *show, struct showone *one, double sx, double sy)

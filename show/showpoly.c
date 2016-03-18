@@ -10,6 +10,7 @@
 #include <showpoly.h>
 #include <showpipe.h>
 #include <showcanvas.h>
+#include <nemoshow.h>
 #include <meshhelper.h>
 #include <oshelper.h>
 #include <nemometro.h>
@@ -297,10 +298,15 @@ int nemoshow_poly_update(struct showone *one)
 	struct showpoly *poly = NEMOSHOW_POLY(one);
 
 	if ((one->dirty & NEMOSHOW_CANVAS_DIRTY) != 0) {
-		struct showone *canvas = NEMOSHOW_REF(one, NEMOSHOW_CANVAS_REF);
+		struct showone *ref = NEMOSHOW_REF(one, NEMOSHOW_CANVAS_REF);
 
-		if (canvas != NULL)
-			nemoshow_canvas_flush_now(canvas->show, canvas);
+		if (ref != NULL) {
+			struct nemoshow *show = one->show;
+			struct showcanvas *canvas = NEMOSHOW_CANVAS(ref);
+
+			nemolist_remove(&canvas->link);
+			nemolist_insert(&show->canvas_list, &canvas->link);
+		}
 	}
 
 	if ((one->dirty & NEMOSHOW_SHAPE_DIRTY) != 0) {
