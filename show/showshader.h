@@ -37,8 +37,6 @@ struct showstop {
 struct showshader {
 	struct showone base;
 
-	struct showone *ref;
-
 	double x0, y0;
 	double x1, y1;
 	double r;
@@ -85,7 +83,8 @@ extern void nemoshow_shader_destroy(struct showone *one);
 
 extern int nemoshow_shader_update(struct showone *one);
 
-extern void nemoshow_shader_set_canvas(struct showone *one, struct showone *canvas);
+extern void nemoshow_shader_set_shader(struct showone *one, struct showone *shader);
+extern void nemoshow_shader_set_bitmap(struct showone *one, struct showone *bitmap);
 
 static inline void nemoshow_shader_set_x0(struct showone *one, double x0)
 {

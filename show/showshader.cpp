@@ -9,8 +9,8 @@
 
 #include <showshader.h>
 #include <showshader.hpp>
-#include <showcanvas.h>
-#include <showcanvas.hpp>
+#include <showitem.h>
+#include <showitem.hpp>
 #include <nemoshow.h>
 #include <nemoxml.h>
 #include <nemomisc.h>
@@ -118,19 +118,20 @@ int nemoshow_shader_update(struct showone *one)
 	};
 	struct showshader *shader = NEMOSHOW_SHADER(one);
 
-	if ((one->dirty & NEMOSHOW_SHADER_DIRTY) != 0 || (one->dirty & NEMOSHOW_SHAPE_DIRTY) != 0) {
+	if ((one->dirty & (NEMOSHOW_SHADER_DIRTY | NEMOSHOW_SHAPE_DIRTY | NEMOSHOW_BITMAP_DIRTY)) != 0) {
+		if (NEMOSHOW_SHADER_CC(shader, shader) != NULL)
+			NEMOSHOW_SHADER_CC(shader, shader)->unref();
+
 		if (one->sub == NEMOSHOW_LINEAR_GRADIENT_SHADER || one->sub == NEMOSHOW_RADIAL_GRADIENT_SHADER) {
+			struct showone *ref = NEMOSHOW_REF(one, NEMOSHOW_SHADER_REF);
 			struct showstop *stop;
 			SkColor colors[32];
 			SkScalar offsets[32];
 			struct showone *child;
 			int noffsets = 0;
 
-			if (NEMOSHOW_SHADER_CC(shader, shader) != NULL)
-				NEMOSHOW_SHADER_CC(shader, shader)->unref();
-
-			if (shader->ref != NULL) {
-				nemoshow_children_for_each(child, shader->ref) {
+			if (ref != NULL) {
+				nemoshow_children_for_each(child, ref) {
 					stop = NEMOSHOW_STOP(child);
 
 					colors[noffsets] = SkColorSetARGB(
@@ -178,19 +179,14 @@ int nemoshow_shader_update(struct showone *one)
 						noffsets,
 						tilemodes[shader->tmx]);
 			}
-		}
-	}
+		} else if (one->sub == NEMOSHOW_BITMAP_SHADER) {
+			struct showone *ref = NEMOSHOW_REF(one, NEMOSHOW_BITMAP_REF);
 
-	if ((one->dirty & NEMOSHOW_CANVAS_DIRTY) != 0 || (one->dirty & NEMOSHOW_SHADER_DIRTY) != 0) {
-		if (one->sub == NEMOSHOW_BITMAP_SHADER) {
-			struct showone *canvas = NEMOSHOW_REF(one, NEMOSHOW_CANVAS_REF);
+			if (ref != NULL) {
+				struct showitem *item = NEMOSHOW_ITEM(ref);
 
-			if (NEMOSHOW_SHADER_CC(shader, shader) != NULL)
-				NEMOSHOW_SHADER_CC(shader, shader)->unref();
-
-			if (canvas != NULL) {
 				NEMOSHOW_SHADER_CC(shader, shader) = SkShader::CreateBitmapShader(
-						*NEMOSHOW_CANVAS_CC(NEMOSHOW_CANVAS(canvas), bitmap),
+						*NEMOSHOW_ITEM_CC(item, bitmap),
 						tilemodes[shader->tmx],
 						tilemodes[shader->tmy]);
 			}
@@ -206,8 +202,14 @@ int nemoshow_shader_update(struct showone *one)
 	return 0;
 }
 
-void nemoshow_shader_set_canvas(struct showone *one, struct showone *canvas)
+void nemoshow_shader_set_shader(struct showone *one, struct showone *shader)
 {
-	nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_CANVAS_REF));
-	nemoshow_one_reference_one(one, canvas, NEMOSHOW_CANVAS_DIRTY, 0x0, NEMOSHOW_CANVAS_REF);
+	nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_SHADER_REF));
+	nemoshow_one_reference_one(one, shader, NEMOSHOW_SHADER_DIRTY, 0x0, NEMOSHOW_SHADER_REF);
+}
+
+void nemoshow_shader_set_bitmap(struct showone *one, struct showone *bitmap)
+{
+	nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_BITMAP_REF));
+	nemoshow_one_reference_one(one, bitmap, NEMOSHOW_BITMAP_DIRTY, 0x0, NEMOSHOW_BITMAP_REF);
 }

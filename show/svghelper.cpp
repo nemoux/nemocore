@@ -797,7 +797,7 @@ static inline int nemoshow_svg_load_linear_gradient(struct svgcontext *context, 
 
 	href = nemoxml_node_get_attr(node, "xlink:href");
 	if (href != NULL)
-		NEMOSHOW_SHADER_AT(one, ref) = nemoshow_search_one(context->show, href + 1);
+		nemoshow_shader_set_shader(one, nemoshow_search_one(context->show, href + 1));
 
 	value = nemoxml_node_get_attr(node, "gradientUnits");
 	if (value != NULL && strcmp(value, "userSpaceOnUse") == 0)
@@ -861,7 +861,7 @@ static inline int nemoshow_svg_load_radial_gradient(struct svgcontext *context, 
 
 	href = nemoxml_node_get_attr(node, "xlink:href");
 	if (href != NULL)
-		NEMOSHOW_SHADER_AT(one, ref) = nemoshow_search_one(context->show, href + 1);
+		nemoshow_shader_set_shader(one, nemoshow_search_one(context->show, href + 1));
 
 	value = nemoxml_node_get_attr(node, "gradientUnits");
 	if (value != NULL && strcmp(value, "userSpaceOnUse") == 0)
