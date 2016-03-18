@@ -308,8 +308,8 @@ void nemoshow_revoke_view(struct nemoshow *show)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 
-	nemoactor_dispatch_pick(scon->actor, NULL);
-	nemoactor_dispatch_event(scon->actor, NULL);
+	nemoactor_set_dispatch_pick(scon->actor, NULL);
+	nemoactor_set_dispatch_event(scon->actor, NULL);
 }
 
 void nemoshow_dispatch_frame(struct nemoshow *show)
