@@ -1,5 +1,5 @@
-#ifndef	__NEMO_EVENT_H__
-#define	__NEMO_EVENT_H__
+#ifndef __NEMO_EVENT_H__
+#define __NEMO_EVENT_H__
 
 #include <nemoconfig.h>
 
@@ -7,43 +7,39 @@
 NEMO_BEGIN_EXTERN_C
 #endif
 
-#include <pthread.h>
-
-#include <nemolist.h>
-#include <nemolistener.h>
-
-struct nemocompz;
-
-typedef void (*nemoevent_dispatch_t)(struct nemocompz *compz, void *context, void *data);
-
-struct eventone {
-	nemoevent_dispatch_t dispatch;
-	void *context;
-	void *data;
-
-	struct nemolist link;
-};
+typedef enum {
+	NEMOEVENT_POINTER_ENTER_TYPE = (1 << 0),
+	NEMOEVENT_POINTER_LEAVE_TYPE = (1 << 1),
+	NEMOEVENT_POINTER_MOTION_TYPE = (1 << 2),
+	NEMOEVENT_POINTER_BUTTON_TYPE = (1 << 3),
+	NEMOEVENT_POINTER_AXIS_TYPE = (1 << 4),
+	NEMOEVENT_KEYBOARD_ENTER_TYPE = (1 << 5),
+	NEMOEVENT_KEYBOARD_LEAVE_TYPE = (1 << 6),
+	NEMOEVENT_KEYBOARD_KEY_TYPE = (1 << 7),
+	NEMOEVENT_KEYBOARD_MODIFIERS_TYPE = (1 << 8),
+	NEMOEVENT_TOUCH_DOWN_TYPE = (1 << 9),
+	NEMOEVENT_TOUCH_UP_TYPE = (1 << 10),
+	NEMOEVENT_TOUCH_MOTION_TYPE = (1 << 11),
+	NEMOEVENT_STICK_ENTER_TYPE = (1 << 12),
+	NEMOEVENT_STICK_LEAVE_TYPE = (1 << 13),
+	NEMOEVENT_STICK_TRANSLATE_TYPE = (1 << 14),
+	NEMOEVENT_STICK_ROTATE_TYPE = (1 << 15),
+	NEMOEVENT_STICK_BUTTON_TYPE = (1 << 16),
+} NemoEventType;
 
 struct nemoevent {
-	struct nemocompz *compz;
+	uint64_t device;
 
-	struct wl_event_source *source;
-	int eventfd;
+	uint32_t serial;
 
-	struct nemolist event_list;
-	pthread_mutex_t lock;
+	uint32_t time;
+	uint32_t value;
+	uint32_t state;
+
+	float x, y, z;
+	float gx, gy;
+	float r;
 };
-
-extern struct nemoevent *nemoevent_create(struct nemocompz *compz);
-extern void nemoevent_destroy(struct nemoevent *event);
-
-extern void nemoevent_trigger(struct nemoevent *event, uint64_t v);
-
-extern struct eventone *nemoevent_create_one(nemoevent_dispatch_t dispatch, void *context, void *data);
-extern void nemoevent_destroy_one(struct eventone *one);
-
-extern void nemoevent_enqueue_one(struct nemoevent *event, struct eventone *one);
-extern struct eventone *nemoevent_dequeue_one(struct nemoevent *event);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

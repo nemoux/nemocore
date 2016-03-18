@@ -9,6 +9,7 @@
 
 #include <actor.h>
 #include <content.h>
+#include <event.h>
 #include <compz.h>
 #include <view.h>
 #include <renderer.h>
@@ -16,8 +17,209 @@
 #include <seat.h>
 #include <pointer.h>
 #include <keyboard.h>
+#include <keypad.h>
+#include <touch.h>
 #include <timer.h>
 #include <nemomisc.h>
+
+static int nemoactor_dispatch_pick_me(struct nemocontent *content, float x, float y)
+{
+	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
+
+	return nemoactor_dispatch_pick(actor, x, y);
+}
+
+static void nemoactor_dispatch_pointer_enter(struct nemopointer *pointer, struct nemocontent *content)
+{
+	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
+	struct nemoevent event;
+
+	event.device = pointer->id;
+	event.serial = 0;
+
+	nemoactor_dispatch_event(actor, NEMOEVENT_POINTER_ENTER_TYPE, &event);
+}
+
+static void nemoactor_dispatch_pointer_leave(struct nemopointer *pointer, struct nemocontent *content)
+{
+	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
+	struct nemoevent event;
+
+	event.device = pointer->id;
+	event.serial = 0;
+
+	nemoactor_dispatch_event(actor, NEMOEVENT_POINTER_LEAVE_TYPE, &event);
+}
+
+static void nemoactor_dispatch_pointer_motion(struct nemopointer *pointer, struct nemocontent *content, uint32_t time, float x, float y)
+{
+	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
+	struct nemoevent event;
+
+	event.device = pointer->id;
+	event.serial = 0;
+	event.time = time;
+	event.x = x;
+	event.y = y;
+
+	nemoactor_dispatch_event(actor, NEMOEVENT_POINTER_MOTION_TYPE, &event);
+}
+
+static void nemoactor_dispatch_pointer_axis(struct nemopointer *pointer, struct nemocontent *content, uint32_t time, uint32_t axis, float value)
+{
+	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
+	struct nemoevent event;
+
+	event.device = pointer->id;
+	event.serial = 0;
+	event.time = time;
+	event.state = axis;
+	event.r = value;
+
+	nemoactor_dispatch_event(actor, NEMOEVENT_POINTER_AXIS_TYPE, &event);
+}
+
+static void nemoactor_dispatch_pointer_button(struct nemopointer *pointer, struct nemocontent *content, uint32_t time, uint32_t button, uint32_t state)
+{
+	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
+	struct nemoevent event;
+
+	event.device = pointer->id;
+	event.serial = 0;
+	event.time = time;
+	event.value = button;
+	event.state = state;
+
+	nemoactor_dispatch_event(actor, NEMOEVENT_POINTER_BUTTON_TYPE, &event);
+}
+
+static void nemoactor_dispatch_keyboard_enter(struct nemokeyboard *keyboard, struct nemocontent *content)
+{
+	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
+	struct nemoevent event;
+
+	event.device = keyboard->id;
+	event.serial = 0;
+
+	nemoactor_dispatch_event(actor, NEMOEVENT_KEYBOARD_ENTER_TYPE, &event);
+}
+
+static void nemoactor_dispatch_keyboard_leave(struct nemokeyboard *keyboard, struct nemocontent *content)
+{
+	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
+	struct nemoevent event;
+
+	event.device = keyboard->id;
+	event.serial = 0;
+
+	nemoactor_dispatch_event(actor, NEMOEVENT_KEYBOARD_LEAVE_TYPE, &event);
+}
+
+static void nemoactor_dispatch_keyboard_key(struct nemokeyboard *keyboard, struct nemocontent *content, uint32_t time, uint32_t key, uint32_t state)
+{
+	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
+	struct nemoevent event;
+
+	event.device = keyboard->id;
+	event.serial = 0;
+	event.time = time;
+	event.value = key;
+	event.state = state;
+
+	nemoactor_dispatch_event(actor, NEMOEVENT_KEYBOARD_KEY_TYPE, &event);
+}
+
+static void nemoactor_dispatch_keyboard_modifiers(struct nemokeyboard *keyboard, struct nemocontent *content, uint32_t mods_depressed, uint32_t mods_latched, uint32_t mods_locked, uint32_t group)
+{
+}
+
+static void nemoactor_dispatch_keypad_enter(struct nemokeypad *keypad, struct nemocontent *content)
+{
+	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
+	struct nemoevent event;
+
+	event.device = keypad->id;
+	event.serial = 0;
+
+	nemoactor_dispatch_event(actor, NEMOEVENT_KEYBOARD_ENTER_TYPE, &event);
+}
+
+static void nemoactor_dispatch_keypad_leave(struct nemokeypad *keypad, struct nemocontent *content)
+{
+	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
+	struct nemoevent event;
+
+	event.device = keypad->id;
+	event.serial = 0;
+
+	nemoactor_dispatch_event(actor, NEMOEVENT_KEYBOARD_LEAVE_TYPE, &event);
+}
+
+static void nemoactor_dispatch_keypad_key(struct nemokeypad *keypad, struct nemocontent *content, uint32_t time, uint32_t key, uint32_t state)
+{
+	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
+	struct nemoevent event;
+
+	event.device = keypad->id;
+	event.serial = 0;
+	event.time = time;
+	event.value = key;
+	event.state = state;
+
+	nemoactor_dispatch_event(actor, NEMOEVENT_KEYBOARD_KEY_TYPE, &event);
+}
+
+static void nemoactor_dispatch_keypad_modifiers(struct nemokeypad *keypad, struct nemocontent *content, uint32_t mods_depressed, uint32_t mods_latched, uint32_t mods_locked, uint32_t group)
+{
+}
+
+static void nemoactor_dispatch_touch_down(struct touchpoint *tp, struct nemocontent *content, uint32_t time, uint64_t touchid, float x, float y, float gx, float gy)
+{
+	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
+	struct nemoevent event;
+
+	event.device = touchid;
+	event.serial = 0;
+	event.time = time;
+	event.x = x;
+	event.y = y;
+	event.gx = gx;
+	event.gy = gy;
+
+	nemoactor_dispatch_event(actor, NEMOEVENT_TOUCH_DOWN_TYPE, &event);
+}
+
+static void nemoactor_dispatch_touch_up(struct touchpoint *tp, struct nemocontent *content, uint32_t time, uint64_t touchid)
+{
+	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
+	struct nemoevent event;
+
+	event.device = touchid;
+	event.serial = 0;
+	event.time = time;
+
+	nemoactor_dispatch_event(actor, NEMOEVENT_TOUCH_UP_TYPE, &event);
+}
+
+static void nemoactor_dispatch_touch_motion(struct touchpoint *tp, struct nemocontent *content, uint32_t time, uint64_t touchid, float x, float y, float gx, float gy)
+{
+	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
+	struct nemoevent event;
+
+	event.device = touchid;
+	event.serial = 0;
+	event.time = time;
+	event.x = x;
+	event.y = y;
+	event.gx = gx;
+	event.gy = gy;
+
+	nemoactor_dispatch_event(actor, NEMOEVENT_TOUCH_MOTION_TYPE, &event);
+}
+
+static void nemoactor_dispatch_touch_frame(struct touchpoint *tp, struct nemocontent *content)
+{
+}
 
 static void nemoactor_update_output(struct nemocontent *content, uint32_t node_mask, uint32_t screen_mask)
 {
@@ -106,9 +308,28 @@ struct nemoactor *nemoactor_create_pixman(struct nemocompz *compz, int width, in
 	actor->base.update_fullscreen = nemoactor_update_fullscreen;
 	actor->base.read_pixels = nemoactor_read_pixels;
 
-	actor->dispatch_resize = NULL;
-	actor->dispatch_output = NULL;
-	actor->dispatch_frame = NULL;
+	actor->base.pick = nemoactor_dispatch_pick_me;
+
+	actor->base.pointer_enter = nemoactor_dispatch_pointer_enter;
+	actor->base.pointer_leave = nemoactor_dispatch_pointer_leave;
+	actor->base.pointer_motion = nemoactor_dispatch_pointer_motion;
+	actor->base.pointer_axis = nemoactor_dispatch_pointer_axis;
+	actor->base.pointer_button = nemoactor_dispatch_pointer_button;
+
+	actor->base.keyboard_enter = nemoactor_dispatch_keyboard_enter;
+	actor->base.keyboard_leave = nemoactor_dispatch_keyboard_leave;
+	actor->base.keyboard_key = nemoactor_dispatch_keyboard_key;
+	actor->base.keyboard_modifiers = nemoactor_dispatch_keyboard_modifiers;
+
+	actor->base.keypad_enter = nemoactor_dispatch_keypad_enter;
+	actor->base.keypad_leave = nemoactor_dispatch_keypad_leave;
+	actor->base.keypad_key = nemoactor_dispatch_keypad_key;
+	actor->base.keypad_modifiers = nemoactor_dispatch_keypad_modifiers;
+
+	actor->base.touch_down = nemoactor_dispatch_touch_down;
+	actor->base.touch_up = nemoactor_dispatch_touch_up;
+	actor->base.touch_motion = nemoactor_dispatch_touch_motion;
+	actor->base.touch_frame = nemoactor_dispatch_touch_frame;
 
 	actor->min_width = 0;
 	actor->min_height = 0;
@@ -240,9 +461,28 @@ struct nemoactor *nemoactor_create_gl(struct nemocompz *compz, int width, int he
 	actor->base.update_fullscreen = nemoactor_update_fullscreen;
 	actor->base.read_pixels = nemoactor_read_pixels;
 
-	actor->dispatch_resize = NULL;
-	actor->dispatch_output = NULL;
-	actor->dispatch_frame = NULL;
+	actor->base.pick = nemoactor_dispatch_pick_me;
+
+	actor->base.pointer_enter = nemoactor_dispatch_pointer_enter;
+	actor->base.pointer_leave = nemoactor_dispatch_pointer_leave;
+	actor->base.pointer_motion = nemoactor_dispatch_pointer_motion;
+	actor->base.pointer_axis = nemoactor_dispatch_pointer_axis;
+	actor->base.pointer_button = nemoactor_dispatch_pointer_button;
+
+	actor->base.keyboard_enter = nemoactor_dispatch_keyboard_enter;
+	actor->base.keyboard_leave = nemoactor_dispatch_keyboard_leave;
+	actor->base.keyboard_key = nemoactor_dispatch_keyboard_key;
+	actor->base.keyboard_modifiers = nemoactor_dispatch_keyboard_modifiers;
+
+	actor->base.keypad_enter = nemoactor_dispatch_keypad_enter;
+	actor->base.keypad_leave = nemoactor_dispatch_keypad_leave;
+	actor->base.keypad_key = nemoactor_dispatch_keypad_key;
+	actor->base.keypad_modifiers = nemoactor_dispatch_keypad_modifiers;
+
+	actor->base.touch_down = nemoactor_dispatch_touch_down;
+	actor->base.touch_up = nemoactor_dispatch_touch_up;
+	actor->base.touch_motion = nemoactor_dispatch_touch_motion;
+	actor->base.touch_frame = nemoactor_dispatch_touch_frame;
 
 	actor->min_width = 0;
 	actor->min_height = 0;
@@ -370,6 +610,16 @@ void nemoactor_flush_damage(struct nemoactor *actor)
 	pixman_region32_clear(&actor->base.damage);
 }
 
+void nemoactor_set_dispatch_event(struct nemoactor *actor, nemoactor_dispatch_event_t dispatch)
+{
+	actor->dispatch_event = dispatch;
+}
+
+void nemoactor_set_dispatch_pick(struct nemoactor *actor, nemoactor_dispatch_pick_t dispatch)
+{
+	actor->dispatch_pick = dispatch;
+}
+
 void nemoactor_set_dispatch_resize(struct nemoactor *actor, nemoactor_dispatch_resize_t dispatch)
 {
 	actor->dispatch_resize = dispatch;
@@ -403,6 +653,22 @@ void nemoactor_set_dispatch_destroy(struct nemoactor *actor, nemoactor_dispatch_
 void nemoactor_set_framerate(struct nemoactor *actor, uint32_t framerate)
 {
 	actor->framerate = framerate;
+}
+
+int nemoactor_dispatch_event(struct nemoactor *actor, uint32_t type, struct nemoevent *event)
+{
+	if (actor->dispatch_event != NULL)
+		return actor->dispatch_event(actor, type, event);
+
+	return 0;
+}
+
+int nemoactor_dispatch_pick(struct nemoactor *actor, float x, float y)
+{
+	if (actor->dispatch_pick != NULL)
+		return actor->dispatch_pick(actor, x, y);
+
+	return 0;
 }
 
 int nemoactor_dispatch_resize(struct nemoactor *actor, int32_t width, int32_t height, int32_t fixed)

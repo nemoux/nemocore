@@ -16,10 +16,13 @@ NEMO_BEGIN_EXTERN_C
 #endif
 
 #include <content.h>
+#include <event.h>
 
 struct nemoview;
 struct nemoscreen;
 
+typedef int (*nemoactor_dispatch_event_t)(struct nemoactor *actor, uint32_t type, struct nemoevent *event);
+typedef int (*nemoactor_dispatch_pick_t)(struct nemoactor *actor, float x, float y);
 typedef int (*nemoactor_dispatch_resize_t)(struct nemoactor *actor, int32_t width, int32_t height, int32_t fixed);
 typedef void (*nemoactor_dispatch_output_t)(struct nemoactor *actor, uint32_t node_mask, uint32_t screen_mask);
 typedef void (*nemoactor_dispatch_transform_t)(struct nemoactor *actor, int32_t visible);
@@ -56,6 +59,8 @@ struct nemoactor {
 	GLuint texture;
 #endif
 
+	nemoactor_dispatch_event_t dispatch_event;
+	nemoactor_dispatch_pick_t dispatch_pick;
 	nemoactor_dispatch_resize_t dispatch_resize;
 	nemoactor_dispatch_output_t dispatch_output;
 	nemoactor_dispatch_transform_t dispatch_transform;
@@ -87,6 +92,8 @@ extern void nemoactor_damage(struct nemoactor *actor, int32_t x, int32_t y, int3
 extern void nemoactor_damage_region(struct nemoactor *actor, pixman_region32_t *region);
 extern void nemoactor_flush_damage(struct nemoactor *actor);
 
+extern void nemoactor_set_dispatch_event(struct nemoactor *actor, nemoactor_dispatch_event_t dispatch);
+extern void nemoactor_set_dispatch_pick(struct nemoactor *actor, nemoactor_dispatch_pick_t dispatch);
 extern void nemoactor_set_dispatch_resize(struct nemoactor *actor, nemoactor_dispatch_resize_t dispatch);
 extern void nemoactor_set_dispatch_output(struct nemoactor *actor, nemoactor_dispatch_output_t dispatch);
 extern void nemoactor_set_dispatch_transform(struct nemoactor *actor, nemoactor_dispatch_transform_t dispatch);
@@ -96,6 +103,8 @@ extern void nemoactor_set_dispatch_destroy(struct nemoactor *actor, nemoactor_di
 
 extern void nemoactor_set_framerate(struct nemoactor *actor, uint32_t framerate);
 
+extern int nemoactor_dispatch_event(struct nemoactor *actor, uint32_t type, struct nemoevent *event);
+extern int nemoactor_dispatch_pick(struct nemoactor *actor, float x, float y);
 extern int nemoactor_dispatch_resize(struct nemoactor *actor, int32_t width, int32_t height, int32_t fixed);
 extern void nemoactor_dispatch_output(struct nemoactor *actor, uint32_t node_mask, uint32_t screen_mask);
 extern void nemoactor_dispatch_transform(struct nemoactor *actor, int visible);
@@ -108,6 +117,16 @@ extern void nemoactor_terminate_feedback(struct nemoactor *actor);
 
 extern void nemoactor_set_min_size(struct nemoactor *actor, uint32_t width, uint32_t height);
 extern void nemoactor_set_max_size(struct nemoactor *actor, uint32_t width, uint32_t height);
+
+static inline void nemoactor_set_context(struct nemoactor *actor, void *context)
+{
+	actor->context = context;
+}
+
+static inline void *nemoactor_get_context(struct nemoactor *actor)
+{
+	return actor->context;
+}
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

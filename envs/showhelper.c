@@ -26,158 +26,74 @@
 #include <showhelper.h>
 #include <nemomisc.h>
 
-static int nemoshow_dispatch_pick_tale(struct nemocontent *content, float x, float y)
+static int nemoshow_dispatch_actor_pick(struct nemoactor *actor, float x, float y)
 {
-	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
-	struct nemotale *tale = (struct nemotale *)actor->context;
+	struct nemotale *tale = (struct nemotale *)nemoactor_get_context(actor);
 	float sx, sy;
 
 	x *= tale->viewport.rx;
 	y *= tale->viewport.ry;
 
-	if (nemotale_get_node_count(tale) == 0) {
+	if (nemotale_get_node_count(tale) == 0)
 		return pixman_region32_contains_point(&tale->input, x, y, NULL);
-	}
 
 	return nemotale_pick_node(tale, x, y, &sx, &sy) != NULL;
 }
 
-static void nemoshow_dispatch_pointer_enter(struct nemopointer *pointer, struct nemocontent *content)
+static int nemoshow_dispatch_actor_event(struct nemoactor *actor, uint32_t type, struct nemoevent *event)
 {
-	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
-	struct nemotale *tale = (struct nemotale *)actor->context;
+	struct nemotale *tale = (struct nemotale *)nemoactor_get_context(actor);
 
-	nemotale_push_pointer_enter_event(tale, 0, (uint64_t)pointer->id, pointer->x, pointer->y);
-}
+	if (type & NEMOEVENT_POINTER_ENTER_TYPE) {
+		nemotale_push_pointer_enter_event(tale, event->serial, event->device, event->x, event->y);
+	} else if (type & NEMOEVENT_POINTER_LEAVE_TYPE) {
+		nemotale_push_pointer_leave_event(tale, event->serial, event->device);
+	} else if (type & NEMOEVENT_POINTER_MOTION_TYPE) {
+		nemotale_push_pointer_motion_event(tale, event->serial, event->device, event->time, event->x, event->y);
+	} else if (type & NEMOEVENT_POINTER_BUTTON_TYPE) {
+		if (event->state == WL_POINTER_BUTTON_STATE_PRESSED)
+			nemotale_push_pointer_down_event(tale, event->serial, event->device, event->time, event->value);
+		else
+			nemotale_push_pointer_up_event(tale, event->serial, event->device, event->time, event->value);
+	} else if (type & NEMOEVENT_POINTER_AXIS_TYPE) {
+		nemotale_push_pointer_axis_event(tale, event->serial, event->device, event->time, event->state, event->r);
+	} else if (type & NEMOEVENT_KEYBOARD_ENTER_TYPE) {
+		nemotale_push_keyboard_enter_event(tale, event->serial, event->device);
+	} else if (type & NEMOEVENT_KEYBOARD_LEAVE_TYPE) {
+		nemotale_push_keyboard_leave_event(tale, event->serial, event->device);
+	} else if (type & NEMOEVENT_KEYBOARD_KEY_TYPE) {
+		if (event->state == WL_KEYBOARD_KEY_STATE_PRESSED)
+			nemotale_push_keyboard_down_event(tale, event->serial, event->device, event->time, event->value);
+		else
+			nemotale_push_keyboard_up_event(tale, event->serial, event->device, event->time, event->value);
+	} else if (type & NEMOEVENT_KEYBOARD_MODIFIERS_TYPE) {
+	} else if (type & NEMOEVENT_TOUCH_DOWN_TYPE) {
+		nemotale_push_touch_down_event(tale, event->serial, event->device, event->time, event->x, event->y, event->gx, event->gy);
+	} else if (type & NEMOEVENT_TOUCH_UP_TYPE) {
+		nemotale_push_touch_up_event(tale, event->serial, event->device, event->time);
+	} else if (type & NEMOEVENT_TOUCH_MOTION_TYPE) {
+		nemotale_push_touch_motion_event(tale, event->serial, event->device, event->time, event->x, event->y, event->gx, event->gy);
+	} else if (type & NEMOEVENT_STICK_ENTER_TYPE) {
+		nemotale_push_stick_enter_event(tale, event->serial, event->device);
+	} else if (type & NEMOEVENT_STICK_LEAVE_TYPE) {
+		nemotale_push_stick_leave_event(tale, event->serial, event->device);
+	} else if (type & NEMOEVENT_STICK_TRANSLATE_TYPE) {
+		nemotale_push_stick_translate_event(tale, event->serial, event->device, event->time, event->x, event->y, event->z);
+	} else if (type & NEMOEVENT_STICK_ROTATE_TYPE) {
+		nemotale_push_stick_rotate_event(tale, event->serial, event->device, event->time, event->x, event->y, event->z);
+	} else if (type & NEMOEVENT_STICK_BUTTON_TYPE) {
+		if (event->state == WL_POINTER_BUTTON_STATE_PRESSED)
+			nemotale_push_stick_down_event(tale, event->serial, event->device, event->time, event->value);
+		else
+			nemotale_push_stick_up_event(tale, event->serial, event->device, event->time, event->value);
+	}
 
-static void nemoshow_dispatch_pointer_leave(struct nemopointer *pointer, struct nemocontent *content)
-{
-	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
-	struct nemotale *tale = (struct nemotale *)actor->context;
-
-	nemotale_push_pointer_leave_event(tale, 0, (uint64_t)pointer->id);
-}
-
-static void nemoshow_dispatch_pointer_motion(struct nemopointer *pointer, struct nemocontent *content, uint32_t time, float x, float y)
-{
-	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
-	struct nemotale *tale = (struct nemotale *)actor->context;
-
-	nemotale_push_pointer_motion_event(tale, 0, (uint64_t)pointer->id, time, x, y);
-}
-
-static void nemoshow_dispatch_pointer_axis(struct nemopointer *pointer, struct nemocontent *content, uint32_t time, uint32_t axis, float value)
-{
-	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
-	struct nemotale *tale = (struct nemotale *)actor->context;
-
-	nemotale_push_pointer_axis_event(tale, 0, (uint64_t)pointer->id, time, axis, value);
-}
-
-static void nemoshow_dispatch_pointer_button(struct nemopointer *pointer, struct nemocontent *content, uint32_t time, uint32_t button, uint32_t state)
-{
-	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
-	struct nemotale *tale = (struct nemotale *)actor->context;
-
-	if (state == WL_POINTER_BUTTON_STATE_PRESSED)
-		nemotale_push_pointer_down_event(tale, 0, (uint64_t)pointer->id, time, button);
-	else
-		nemotale_push_pointer_up_event(tale, 0, (uint64_t)pointer->id, time, button);
-}
-
-static void nemoshow_dispatch_keyboard_enter(struct nemokeyboard *keyboard, struct nemocontent *content)
-{
-	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
-	struct nemotale *tale = (struct nemotale *)actor->context;
-
-	nemotale_push_keyboard_enter_event(tale, 0, (uint64_t)keyboard->id);
-}
-
-static void nemoshow_dispatch_keyboard_leave(struct nemokeyboard *keyboard, struct nemocontent *content)
-{
-	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
-	struct nemotale *tale = (struct nemotale *)actor->context;
-
-	nemotale_push_keyboard_leave_event(tale, 0, (uint64_t)keyboard->id);
-}
-
-static void nemoshow_dispatch_keyboard_key(struct nemokeyboard *keyboard, struct nemocontent *content, uint32_t time, uint32_t key, uint32_t state)
-{
-	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
-	struct nemotale *tale = (struct nemotale *)actor->context;
-
-	if (state == WL_KEYBOARD_KEY_STATE_PRESSED)
-		nemotale_push_keyboard_down_event(tale, 0, (uint64_t)keyboard->id, time, key);
-	else
-		nemotale_push_keyboard_up_event(tale, 0, (uint64_t)keyboard->id, time, key);
-}
-
-static void nemoshow_dispatch_keyboard_modifiers(struct nemokeyboard *keyboard, struct nemocontent *content, uint32_t mods_depressed, uint32_t mods_latched, uint32_t mods_locked, uint32_t group)
-{
-}
-
-static void nemoshow_dispatch_keypad_enter(struct nemokeypad *keypad, struct nemocontent *content)
-{
-	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
-	struct nemotale *tale = (struct nemotale *)actor->context;
-
-	nemotale_push_keyboard_enter_event(tale, 0, (uint64_t)keypad->id);
-}
-
-static void nemoshow_dispatch_keypad_leave(struct nemokeypad *keypad, struct nemocontent *content)
-{
-	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
-	struct nemotale *tale = (struct nemotale *)actor->context;
-
-	nemotale_push_keyboard_leave_event(tale, 0, (uint64_t)keypad->id);
-}
-
-static void nemoshow_dispatch_keypad_key(struct nemokeypad *keypad, struct nemocontent *content, uint32_t time, uint32_t key, uint32_t state)
-{
-	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
-	struct nemotale *tale = (struct nemotale *)actor->context;
-
-	if (state == WL_KEYBOARD_KEY_STATE_PRESSED)
-		nemotale_push_keyboard_down_event(tale, 0, (uint64_t)keypad->id, time, key);
-	else
-		nemotale_push_keyboard_up_event(tale, 0, (uint64_t)keypad->id, time, key);
-}
-
-static void nemoshow_dispatch_keypad_modifiers(struct nemokeypad *keypad, struct nemocontent *content, uint32_t mods_depressed, uint32_t mods_latched, uint32_t mods_locked, uint32_t group)
-{
-}
-
-static void nemoshow_dispatch_touch_down(struct touchpoint *tp, struct nemocontent *content, uint32_t time, uint64_t touchid, float x, float y, float gx, float gy)
-{
-	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
-	struct nemotale *tale = (struct nemotale *)actor->context;
-
-	nemotale_push_touch_down_event(tale, 0, touchid, time, x, y, gx, gy);
-}
-
-static void nemoshow_dispatch_touch_up(struct touchpoint *tp, struct nemocontent *content, uint32_t time, uint64_t touchid)
-{
-	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
-	struct nemotale *tale = (struct nemotale *)actor->context;
-
-	nemotale_push_touch_up_event(tale, 0, touchid, time);
-}
-
-static void nemoshow_dispatch_touch_motion(struct touchpoint *tp, struct nemocontent *content, uint32_t time, uint64_t touchid, float x, float y, float gx, float gy)
-{
-	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
-	struct nemotale *tale = (struct nemotale *)actor->context;
-
-	nemotale_push_touch_motion_event(tale, 0, touchid, time, x, y, gx, gy);
-}
-
-static void nemoshow_dispatch_touch_frame(struct touchpoint *tp, struct nemocontent *content)
-{
+	return 0;
 }
 
 static int nemoshow_dispatch_actor_resize(struct nemoactor *actor, int32_t width, int32_t height, int32_t fixed)
 {
-	struct nemotale *tale = (struct nemotale *)actor->context;
+	struct nemotale *tale = (struct nemotale *)nemoactor_get_context(actor);
 	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct talefbo *fbo = (struct talefbo *)nemotale_get_backend(tale);
@@ -204,7 +120,7 @@ static int nemoshow_dispatch_actor_resize(struct nemoactor *actor, int32_t width
 
 static void nemoshow_dispatch_actor_frame(struct nemoactor *actor, uint32_t msecs)
 {
-	struct nemotale *tale = (struct nemotale *)actor->context;
+	struct nemotale *tale = (struct nemotale *)nemoactor_get_context(actor);
 	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
 	struct nemocompz *compz = actor->compz;
 	pixman_region32_t region;
@@ -235,7 +151,7 @@ static void nemoshow_dispatch_actor_frame(struct nemoactor *actor, uint32_t msec
 
 static void nemoshow_dispatch_actor_transform(struct nemoactor *actor, int32_t visible)
 {
-	struct nemotale *tale = (struct nemotale *)actor->context;
+	struct nemotale *tale = (struct nemotale *)nemoactor_get_context(actor);
 	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
 
 	if (show->dispatch_transform != NULL)
@@ -244,7 +160,7 @@ static void nemoshow_dispatch_actor_transform(struct nemoactor *actor, int32_t v
 
 static void nemoshow_dispatch_actor_fullscreen(struct nemoactor *actor, int32_t active, int32_t opaque)
 {
-	struct nemotale *tale = (struct nemotale *)actor->context;
+	struct nemotale *tale = (struct nemotale *)nemoactor_get_context(actor);
 	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
 
 	if (show->dispatch_fullscreen != NULL)
@@ -253,7 +169,7 @@ static void nemoshow_dispatch_actor_fullscreen(struct nemoactor *actor, int32_t 
 
 static void nemoshow_dispatch_actor_destroy(struct nemoactor *actor)
 {
-	struct nemotale *tale = (struct nemotale *)actor->context;
+	struct nemotale *tale = (struct nemotale *)nemoactor_get_context(actor);
 	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
 
 	if (show->dispatch_destroy != NULL)
@@ -313,30 +229,9 @@ struct nemoshow *nemoshow_create_view(struct nemoshell *shell, int32_t width, in
 	nemotimer_set_callback(timer, nemoshow_dispatch_timer);
 	nemotimer_set_timeout(timer, 500);
 	nemotimer_set_userdata(timer, scon);
-
-	actor->base.pick = nemoshow_dispatch_pick_tale;
-
-	actor->base.pointer_enter = nemoshow_dispatch_pointer_enter;
-	actor->base.pointer_leave = nemoshow_dispatch_pointer_leave;
-	actor->base.pointer_motion = nemoshow_dispatch_pointer_motion;
-	actor->base.pointer_axis = nemoshow_dispatch_pointer_axis;
-	actor->base.pointer_button = nemoshow_dispatch_pointer_button;
-
-	actor->base.keyboard_enter = nemoshow_dispatch_keyboard_enter;
-	actor->base.keyboard_leave = nemoshow_dispatch_keyboard_leave;
-	actor->base.keyboard_key = nemoshow_dispatch_keyboard_key;
-	actor->base.keyboard_modifiers = nemoshow_dispatch_keyboard_modifiers;
-
-	actor->base.keypad_enter = nemoshow_dispatch_keypad_enter;
-	actor->base.keypad_leave = nemoshow_dispatch_keypad_leave;
-	actor->base.keypad_key = nemoshow_dispatch_keypad_key;
-	actor->base.keypad_modifiers = nemoshow_dispatch_keypad_modifiers;
-
-	actor->base.touch_down = nemoshow_dispatch_touch_down;
-	actor->base.touch_up = nemoshow_dispatch_touch_up;
-	actor->base.touch_motion = nemoshow_dispatch_touch_motion;
-	actor->base.touch_frame = nemoshow_dispatch_touch_frame;
-
+	
+	nemoactor_set_dispatch_event(actor, nemoshow_dispatch_actor_event);
+	nemoactor_set_dispatch_pick(actor, nemoshow_dispatch_actor_pick);
 	nemoactor_set_dispatch_resize(actor, nemoshow_dispatch_actor_resize);
 	nemoactor_set_dispatch_frame(actor, nemoshow_dispatch_actor_frame);
 	nemoactor_set_dispatch_transform(actor, nemoshow_dispatch_actor_transform);
@@ -359,7 +254,7 @@ struct nemoshow *nemoshow_create_view(struct nemoshell *shell, int32_t width, in
 
 	nemotale_set_userdata(scon->tale, show);
 
-	actor->context = scon->tale;
+	nemoactor_set_context(actor, scon->tale);
 
 	scon->shell = shell;
 	scon->compz = compz;

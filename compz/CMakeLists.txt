@@ -166,7 +166,7 @@ add_library(nemocompz SHARED
 	viewanimation.c
 	vieweffect.c
 	plugin.c
-	event.c
+	eventqueue.c
 	waylandhelper.c
 	${CMAKE_SOURCE_DIR}/misc/fbhelper.c
 	${CMAKE_SOURCE_DIR}/misc/ttyhelper.c
@@ -248,6 +248,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/compz/plugin.h
 	${CMAKE_SOURCE_DIR}/compz/task.h
 	${CMAKE_SOURCE_DIR}/compz/event.h
+	${CMAKE_SOURCE_DIR}/compz/eventqueue.h
 	${CMAKE_SOURCE_DIR}/compz/timer.h
 	${CMAKE_SOURCE_DIR}/compz/animation.h
 	${CMAKE_SOURCE_DIR}/compz/viewanimation.h

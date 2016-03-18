@@ -832,12 +832,12 @@ void nemocompz_set_touch_timeout(struct nemocompz *compz, uint32_t timeout)
 	compz->touch_timeout = timeout;
 }
 
-struct nemoevent *nemocompz_get_main_event(struct nemocompz *compz)
+struct nemoeventqueue *nemocompz_get_main_eventqueue(struct nemocompz *compz)
 {
-	if (compz->event == NULL)
-		compz->event = nemoevent_create(compz);
+	if (compz->queue == NULL)
+		compz->queue = nemoeventqueue_create(compz);
 
-	return compz->event;
+	return compz->queue;
 }
 
 int nemocompz_set_presentation_clock(struct nemocompz *compz, clockid_t id)

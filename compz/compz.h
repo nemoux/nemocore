@@ -13,7 +13,7 @@ NEMO_BEGIN_EXTERN_C
 #include <backend.h>
 #include <layer.h>
 #include <renderer.h>
-#include <event.h>
+#include <eventqueue.h>
 #include <nemoitem.h>
 
 #define	NEMOCOMPZ_NODE_MAX				(4)
@@ -130,7 +130,7 @@ struct nemocompz {
 
 	struct wl_event_source *framerate_timer;
 
-	struct nemoevent *event;
+	struct nemoeventqueue *queue;
 
 	struct nemoitem *configs;
 };
@@ -176,7 +176,7 @@ extern void nemocompz_set_touch_timeout(struct nemocompz *compz, uint32_t timeou
 
 extern void nemocompz_dispatch_idle(struct nemocompz *compz, nemocompz_dispatch_idle_t dispatch, void *data);
 
-extern struct nemoevent *nemocompz_get_main_event(struct nemocompz *compz);
+extern struct nemoeventqueue *nemocompz_get_main_eventqueue(struct nemocompz *compz);
 
 extern int nemocompz_set_presentation_clock(struct nemocompz *compz, clockid_t id);
 extern int nemocompz_set_presentation_clock_software(struct nemocompz *compz);
