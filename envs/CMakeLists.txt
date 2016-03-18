@@ -24,7 +24,6 @@ add_library(nemoenvs SHARED
 	nemopad.c
 	nemopack.c
 	nemospeaker.c
-	talehelper.c
 	showhelper.c
 	)
 
@@ -45,7 +44,6 @@ set(HEADER_FILES
 	nemopad.h
 	nemopack.h
 	nemospeaker.h
-	talehelper.h
 	showhelper.h
 	)
 
