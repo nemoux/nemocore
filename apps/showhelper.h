@@ -49,9 +49,7 @@ struct showcontext {
 
 extern struct nemoshow *nemoshow_create_view(struct nemotool *tool, int32_t width, int32_t height);
 extern void nemoshow_destroy_view(struct nemoshow *show);
-
 extern void nemoshow_destroy_view_on_idle(struct nemoshow *show);
-
 extern void nemoshow_revoke_view(struct nemoshow *show);
 
 extern void nemoshow_dispatch_frame(struct nemoshow *show);

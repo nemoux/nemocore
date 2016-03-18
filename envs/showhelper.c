@@ -229,7 +229,7 @@ struct nemoshow *nemoshow_create_view(struct nemoshell *shell, int32_t width, in
 	nemotimer_set_callback(timer, nemoshow_dispatch_timer);
 	nemotimer_set_timeout(timer, 500);
 	nemotimer_set_userdata(timer, scon);
-	
+
 	nemoactor_set_dispatch_event(actor, nemoshow_dispatch_actor_event);
 	nemoactor_set_dispatch_pick(actor, nemoshow_dispatch_actor_pick);
 	nemoactor_set_dispatch_resize(actor, nemoshow_dispatch_actor_resize);
@@ -307,30 +307,9 @@ void nemoshow_destroy_view_on_idle(struct nemoshow *show)
 void nemoshow_revoke_view(struct nemoshow *show)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
-	struct nemoactor *actor = scon->actor;
 
-	actor->base.pick = NULL;
-
-	actor->base.pointer_enter = NULL;
-	actor->base.pointer_leave = NULL;
-	actor->base.pointer_motion = NULL;
-	actor->base.pointer_axis = NULL;
-	actor->base.pointer_button = NULL;
-
-	actor->base.keyboard_enter = NULL;
-	actor->base.keyboard_leave = NULL;
-	actor->base.keyboard_key = NULL;
-	actor->base.keyboard_modifiers = NULL;
-
-	actor->base.keypad_enter = NULL;
-	actor->base.keypad_leave = NULL;
-	actor->base.keypad_key = NULL;
-	actor->base.keypad_modifiers = NULL;
-
-	actor->base.touch_down = NULL;
-	actor->base.touch_up = NULL;
-	actor->base.touch_motion = NULL;
-	actor->base.touch_frame = NULL;
+	nemoactor_dispatch_pick(scon->actor, NULL);
+	nemoactor_dispatch_event(scon->actor, NULL);
 }
 
 void nemoshow_dispatch_frame(struct nemoshow *show)
