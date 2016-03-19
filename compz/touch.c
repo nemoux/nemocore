@@ -266,7 +266,7 @@ void touchpoint_update_direction(struct touchpoint *tp, float x, float y)
 	}
 }
 
-int touchpoint_update_velocity(struct touchpoint *tp, uint32_t nsamples)
+int touchpoint_update_velocity(struct touchpoint *tp, uint32_t nsamples, uint32_t max_duration)
 {
 	float x0, y0;
 	float x1, y1;
@@ -287,10 +287,20 @@ int touchpoint_update_velocity(struct touchpoint *tp, uint32_t nsamples)
 	y1 = tp->samples[i1].y;
 	t1 = tp->samples[i1].time;
 
+	if (t1 - t0 > max_duration)
+		return 0;
+
 	tp->dx = (x1 - x0) / (float)(t1 - t0);
 	tp->dy = (y1 - y0) / (float)(t1 - t0);
 
 	return 1;
+}
+
+void touchpoint_clear_samples(struct touchpoint *tp)
+{
+	tp->nsamples = 0;
+	tp->ssample = 0;
+	tp->esample = 0;
 }
 
 static void touchpoint_handle_focus_resource_destroy(struct wl_listener *listener, void *data)

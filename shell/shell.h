@@ -95,6 +95,7 @@ struct nemoshell {
 
 	struct {
 		uint32_t samples;
+		uint32_t max_duration;
 
 		double friction;
 		double coefficient;

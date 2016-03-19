@@ -184,7 +184,7 @@ static void move_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 	if (bin != NULL &&
 			bin->state.fullscreen == 0 &&
 			bin->state.maximized == 0 &&
-			touchpoint_update_velocity(tp, bin->shell->pitch.samples) > 0) {
+			touchpoint_update_velocity(tp, bin->shell->pitch.samples, bin->shell->pitch.max_duration) > 0) {
 		struct nemoshell *shell = bin->shell;
 		struct vieweffect *effect;
 
@@ -296,6 +296,8 @@ int nemoshell_move_canvas_by_touchpoint(struct nemoshell *shell, struct touchpoi
 	move->dx = bin->view->geometry.x - tp->x;
 	move->dy = bin->view->geometry.y - tp->y;
 	move->has_reset = bin->reset_scale;
+
+	touchpoint_clear_samples(tp);
 
 	if (shell->is_logging_grab != 0)
 		nemolog_message("MOVE", "[DOWN] %llu: x(%f) y(%f)\n", tp->gid, bin->view->geometry.x, bin->view->geometry.y);
@@ -423,7 +425,7 @@ static void move_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 	struct touchpoint *tp = base->touchpoint;
 	struct nemoshell *shell = grab->shell;
 
-	if (grab->actor != NULL && touchpoint_update_velocity(tp, shell->pitch.samples) > 0) {
+	if (grab->actor != NULL && touchpoint_update_velocity(tp, shell->pitch.samples, shell->pitch.max_duration) > 0) {
 		struct vieweffect *effect;
 
 		effect = vieweffect_create(grab->actor->view);
@@ -512,6 +514,8 @@ int nemoshell_move_actor_by_touchpoint(struct nemoshell *shell, struct touchpoin
 
 	move->dx = actor->view->geometry.x - tp->x;
 	move->dy = actor->view->geometry.y - tp->y;
+
+	touchpoint_clear_samples(tp);
 
 	nemoshell_start_touchpoint_actorgrab(&move->base, &move_actorgrab_touchpoint_interface, actor, tp);
 
