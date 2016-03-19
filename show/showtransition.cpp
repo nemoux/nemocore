@@ -47,6 +47,7 @@ struct showtransition *nemoshow_transition_create(struct showone *ease, uint32_t
 	trans->duration = duration;
 	trans->delay = delay;
 	trans->repeat = 1;
+	trans->framerate = NEMOSHOW_TRANSITION_DEFAULT_FRAMERATE;
 
 	return trans;
 }
@@ -194,10 +195,19 @@ int nemoshow_transition_dispatch(struct showtransition *trans, uint32_t time)
 	if (trans->stime == 0) {
 		trans->stime = time + trans->delay;
 		trans->etime = time + trans->delay + trans->duration;
+
+		trans->ntime = time + trans->delay;
 	}
 
 	if (trans->stime > time)
 		return 0;
+
+	if (trans->framerate != NEMOSHOW_TRANSITION_DEFAULT_FRAMERATE) {
+		if (trans->ntime > time)
+			return 0;
+
+		trans->ntime = trans->ntime + 1000 / trans->framerate;
+	}
 
 	if (trans->etime <= time) {
 		t = 1.0f;

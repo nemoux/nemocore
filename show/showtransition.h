@@ -15,6 +15,8 @@ NEMO_BEGIN_EXTERN_C
 #include <nemolist.h>
 #include <nemolistener.h>
 
+#define NEMOSHOW_TRANSITION_DEFAULT_FRAMERATE			(60)
+
 typedef void (*nemoshow_transition_dispatch_frame_t)(void *userdata, uint32_t time, double t);
 typedef void (*nemoshow_transition_dispatch_done_t)(void *userdata);
 
@@ -51,9 +53,11 @@ struct showtransition {
 	uint32_t duration;
 	uint32_t delay;
 	uint32_t repeat;
+	uint32_t framerate;
 
 	uint32_t stime;
 	uint32_t etime;
+	uint32_t ntime;
 
 	uint32_t serial;
 
@@ -94,6 +98,11 @@ static inline void nemoshow_transition_set_dispatch_done(struct showtransition *
 static inline void nemoshow_transition_set_repeat(struct showtransition *trans, uint32_t repeat)
 {
 	trans->repeat = repeat;
+}
+
+static inline void nemoshow_transition_set_framerate(struct showtransition *trans, uint32_t framerate)
+{
+	trans->framerate = framerate;
 }
 
 static inline void nemoshow_transition_set_userdata(struct showtransition *trans, void *data)

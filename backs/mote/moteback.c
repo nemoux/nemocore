@@ -105,9 +105,6 @@ static void nemoback_mote_dispatch_pipeline_canvas_redraw(struct nemoshow *show,
 	}
 
 	nemoshow_canvas_redraw_one(show, one);
-
-	nemoshow_canvas_damage_all(one);
-	nemoshow_dispatch_feedback(show);
 }
 
 static void nemoback_mote_dispatch_timer_event(struct nemotimer *timer, void *data)
@@ -190,6 +187,7 @@ int main(int argc, char *argv[])
 		{ "maxcolor",				required_argument,			NULL,		'm' },
 		{ "textcolor",			required_argument,			NULL,		't' },
 		{ "alpha",					required_argument,			NULL,		'a' },
+		{ "framerate",			required_argument,			NULL,		'r' },
 		{ 0 }
 	};
 
@@ -201,9 +199,6 @@ int main(int argc, char *argv[])
 	struct showone *pipe;
 	struct showone *one;
 	struct showtransition *trans;
-	struct showone *sequence;
-	struct showone *set0;
-	struct showone *set1;
 	struct nemomatrix matrix;
 	char *filepath = NULL;
 	char *shaderpath = NULL;
@@ -219,10 +214,11 @@ int main(int argc, char *argv[])
 	double alpha = 1.0f;
 	uint32_t color;
 	int pixelcount = 1800;
+	int framerate = 30;
 	int opt;
 	int i;
 
-	while (opt = getopt_long(argc, argv, "f:s:w:h:l:p:c:e:g:n:m:t:a:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "f:s:w:h:l:p:c:e:g:n:m:t:a:r:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -292,6 +288,10 @@ int main(int argc, char *argv[])
 
 			case 'a':
 				alpha = strtod(optarg, NULL);
+				break;
+
+			case 'r':
+				framerate = strtoul(optarg, NULL, 10);
 				break;
 
 			default:
@@ -503,36 +503,18 @@ int main(int argc, char *argv[])
 
 	mote->ratio = nemoshow_canvas_get_aspect_ratio(mote->canvasp);
 
+	if (shaderpath != NULL) {
+		trans = nemoshow_transition_create(NEMOSHOW_LINEAR_EASE, 18000, 0);
+		nemoshow_transition_dirty_one(trans, mote->canvasb, NEMOSHOW_FILTER_DIRTY);
+		nemoshow_transition_set_repeat(trans, 0);
+		nemoshow_transition_set_framerate(trans, framerate);
+		nemoshow_attach_transition(mote->show, trans);
+	}
+
 	trans = nemoshow_transition_create(NEMOSHOW_LINEAR_EASE, 18000, 0);
-	nemoshow_transition_dirty_one(trans, mote->canvasb, NEMOSHOW_FILTER_DIRTY);
+	nemoshow_transition_dirty_one(trans, mote->canvasp, NEMOSHOW_REDRAW_DIRTY);
 	nemoshow_transition_set_repeat(trans, 0);
-	nemoshow_attach_transition(mote->show, trans);
-
-	set0 = nemoshow_sequence_create_set();
-	nemoshow_sequence_set_source(set0, mote->pipe);
-	nemoshow_sequence_set_fattr_offset(set0, "light", 0, -1.0f);
-	nemoshow_sequence_set_fattr_offset(set0, "light", 1, 1.0f);
-	nemoshow_sequence_set_fattr_offset(set0, "light", 2, -1.0f);
-	nemoshow_sequence_set_fattr_offset(set0, "light", 3, 1.0f);
-
-	set1 = nemoshow_sequence_create_set();
-	nemoshow_sequence_set_source(set1, mote->pipe);
-	nemoshow_sequence_set_fattr_offset(set1, "light", 0, 1.0f);
-	nemoshow_sequence_set_fattr_offset(set1, "light", 1, 1.0f);
-	nemoshow_sequence_set_fattr_offset(set1, "light", 2, -1.0f);
-	nemoshow_sequence_set_fattr_offset(set1, "light", 3, 1.0f);
-
-	sequence = nemoshow_sequence_create_easy(mote->show,
-			nemoshow_sequence_create_frame_easy(mote->show,
-				0.5f, set0, NULL),
-			nemoshow_sequence_create_frame_easy(mote->show,
-				1.0f, set1, NULL),
-			NULL);
-
-	trans = nemoshow_transition_create(NEMOSHOW_CUBIC_INOUT_EASE, 12000, 0);
-	nemoshow_transition_check_one(trans, mote->pipe);
-	nemoshow_transition_set_repeat(trans, 0);
-	nemoshow_transition_attach_sequence(trans, sequence);
+	nemoshow_transition_set_framerate(trans, framerate);
 	nemoshow_attach_transition(mote->show, trans);
 
 	nemoshow_dispatch_frame(show);

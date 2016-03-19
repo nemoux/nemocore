@@ -141,6 +141,7 @@ int main(int argc, char *argv[])
 		{ "width",					required_argument,			NULL,		'w' },
 		{ "height",					required_argument,			NULL,		'h' },
 		{ "alpha",					required_argument,			NULL,		'a' },
+		{ "framerate",			required_argument,			NULL,		'r' },
 		{ 0 }
 	};
 
@@ -164,9 +165,10 @@ int main(int argc, char *argv[])
 	double alpha = 1.0f;
 	int32_t width = 1920;
 	int32_t height = 1080;
+	int framerate = 30;
 	int opt;
 
-	while (opt = getopt_long(argc, argv, "f:o:s:w:h:a:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "f:o:s:w:h:a:r:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -193,6 +195,10 @@ int main(int argc, char *argv[])
 
 			case 'a':
 				alpha = strtod(optarg, NULL);
+				break;
+
+			case 'r':
+				framerate = strtoul(optarg, NULL, 10);
 				break;
 
 			default:
@@ -351,6 +357,7 @@ int main(int argc, char *argv[])
 	trans = nemoshow_transition_create(NEMOSHOW_LINEAR_EASE, 18000, 0);
 	nemoshow_transition_dirty_one(trans, atom->canvasb, NEMOSHOW_FILTER_DIRTY);
 	nemoshow_transition_set_repeat(trans, 0);
+	nemoshow_transition_set_framerate(trans, framerate);
 	nemoshow_attach_transition(atom->show, trans);
 
 	set0 = nemoshow_sequence_create_set();

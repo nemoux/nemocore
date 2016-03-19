@@ -278,6 +278,8 @@ int nemoshow_canvas_update(struct showone *one)
 		nemoshow_canvas_update_matrix(show, one);
 	if ((one->dirty & NEMOSHOW_FILTER_DIRTY) != 0)
 		nemoshow_canvas_damage_filter(one);
+	if ((one->dirty & NEMOSHOW_REDRAW_DIRTY) != 0)
+		nemoshow_canvas_damage_all(one);
 
 	return 0;
 }
