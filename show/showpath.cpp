@@ -478,6 +478,16 @@ int nemoshow_path_cubicto(struct showone *one, double x0, double y0, double x1, 
 	return 0;
 }
 
+void nemoshow_path_arcto(struct showone *one, double x, double y, double width, double height, double from, double to, int needs_moveto)
+{
+	struct showpath *path = NEMOSHOW_PATH(one);
+	SkRect rect = SkRect::MakeXYWH(x, y, width, height);
+
+	NEMOSHOW_PATH_CC(path, path)->arcTo(rect, from, to, needs_moveto == 0 ? false : true);
+
+	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
+}
+
 int nemoshow_path_close(struct showone *one)
 {
 	struct showpath *path = NEMOSHOW_PATH(one);
@@ -532,7 +542,7 @@ void nemoshow_path_arc(struct showone *one, double x, double y, double width, do
 	struct showpath *path = NEMOSHOW_PATH(one);
 	SkRect rect = SkRect::MakeXYWH(x, y, width, height);
 
-	NEMOSHOW_PATH_CC(path, path)->arcTo(rect, from, to, false);
+	NEMOSHOW_PATH_CC(path, path)->addArc(rect, from, to);
 
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 }

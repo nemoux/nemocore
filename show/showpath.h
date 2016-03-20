@@ -66,6 +66,7 @@ extern void nemoshow_path_clear(struct showone *one);
 extern int nemoshow_path_moveto(struct showone *one, double x, double y);
 extern int nemoshow_path_lineto(struct showone *one, double x, double y);
 extern int nemoshow_path_cubicto(struct showone *one, double x0, double y0, double x1, double y1, double x2, double y2);
+extern void nemoshow_path_arcto(struct showone *one, double x, double y, double width, double height, double from, double to, int needs_moveto);
 extern int nemoshow_path_close(struct showone *one);
 extern void nemoshow_path_cmd(struct showone *one, const char *cmd);
 extern void nemoshow_path_arc(struct showone *one, double x, double y, double width, double height, double from, double to);

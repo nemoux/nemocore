@@ -1142,6 +1142,23 @@ int nemoshow_item_path_cubicto(struct showone *one, double x0, double y0, double
 	return 0;
 }
 
+void nemoshow_item_path_arcto(struct showone *one, double x, double y, double width, double height, double from, double to, int needs_moveto)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+	SkRect rect = SkRect::MakeXYWH(x, y, width, height);
+
+	if (one->sub == NEMOSHOW_PATHTWICE_ITEM) {
+		if (item->pathselect & NEMOSHOW_ITEM_STROKE_PATH)
+			NEMOSHOW_ITEM_CC(item, path)->arcTo(rect, from, to, needs_moveto == 0 ? false : true);
+		if (item->pathselect & NEMOSHOW_ITEM_FILL_PATH)
+			NEMOSHOW_ITEM_CC(item, fillpath)->arcTo(rect, from, to, needs_moveto == 0 ? false : true);
+	} else {
+		NEMOSHOW_ITEM_CC(item, path)->arcTo(rect, from, to, needs_moveto == 0 ? false : true);
+	}
+
+	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
+}
+
 int nemoshow_item_path_close(struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
@@ -1210,11 +1227,11 @@ void nemoshow_item_path_arc(struct showone *one, double x, double y, double widt
 
 	if (one->sub == NEMOSHOW_PATHTWICE_ITEM) {
 		if (item->pathselect & NEMOSHOW_ITEM_STROKE_PATH)
-			NEMOSHOW_ITEM_CC(item, path)->arcTo(rect, from, to, false);
+			NEMOSHOW_ITEM_CC(item, path)->addArc(rect, from, to);
 		if (item->pathselect & NEMOSHOW_ITEM_FILL_PATH)
-			NEMOSHOW_ITEM_CC(item, fillpath)->arcTo(rect, from, to, false);
+			NEMOSHOW_ITEM_CC(item, fillpath)->addArc(rect, from, to);
 	} else {
-		NEMOSHOW_ITEM_CC(item, path)->arcTo(rect, from, to, false);
+		NEMOSHOW_ITEM_CC(item, path)->addArc(rect, from, to);
 	}
 
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
