@@ -37,7 +37,7 @@ static void nemoback_mote_dispatch_pipeline_canvas_redraw(struct nemoshow *show,
 		nemomote_tweener_set(mote->mote, 6,
 				0.0f, 0.0f,
 				mote->colors1, mote->colors0,
-				mote->pixelsize, mote->pixelsize * 0.5f,
+				mote->pixelsize, mote->pixelsize * 0.0f,
 				5.0f, 1.0f);
 	}
 
@@ -198,6 +198,7 @@ int main(int argc, char *argv[])
 	struct showone *canvas;
 	struct showone *pipe;
 	struct showone *one;
+	struct showone *filter;
 	struct showtransition *trans;
 	struct nemomatrix matrix;
 	char *filepath = NULL;
@@ -206,8 +207,8 @@ int main(int argc, char *argv[])
 	int32_t width = 1920;
 	int32_t height = 1080;
 	double pixelsize = 8.0f;
-	double speedmax = 500.0f;
-	double mutualgravity = 3000.0f;
+	double speedmax = 300.0f;
+	double mutualgravity = 2500.0f;
 	double color0[4] = { 0.0f, 0.5f, 0.5f, 0.3f };
 	double color1[4] = { 0.0f, 0.5f, 0.5f, 0.7f };
 	double textcolor[4] = { 0.0f, 1.0f, 1.0f, 1.0f };
@@ -356,7 +357,7 @@ int main(int argc, char *argv[])
 			mote->colors1[3], mote->colors0[3]);
 	nemomote_mass_update(mote->mote,
 			mote->pixelsize,
-			mote->pixelsize * 0.5f);
+			mote->pixelsize * 0.0f);
 	nemomote_type_update(mote->mote, 1);
 	nemomote_commit(mote->mote);
 
@@ -369,8 +370,8 @@ int main(int argc, char *argv[])
 			mote->colors1[2], mote->colors0[2],
 			mote->colors1[3], mote->colors1[3]);
 	nemomote_mass_update(mote->mote,
-			mote->pixelsize * 1.5f,
-			mote->pixelsize);
+			mote->pixelsize,
+			mote->pixelsize * 0.5f);
 	nemomote_type_update(mote->mote, 2);
 	nemomote_commit(mote->mote);
 
@@ -430,18 +431,21 @@ int main(int argc, char *argv[])
 	}
 
 	mote->canvast = canvas = nemoshow_canvas_create();
-	nemoshow_canvas_set_width(canvas, 128.0f);
-	nemoshow_canvas_set_height(canvas, 128.0f);
+	nemoshow_canvas_set_width(canvas, pixelsize * 2.0f);
+	nemoshow_canvas_set_height(canvas, pixelsize * 2.0f);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
+
+	filter = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
+	nemoshow_filter_set_blur(filter, "high", "solid", pixelsize * 0.2f);
+	nemoshow_filter_update(filter);
 
 	one = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
 	nemoshow_one_attach(canvas, one);
-	nemoshow_item_set_x(one, 64.0f);
-	nemoshow_item_set_y(one, 64.0f);
-	nemoshow_item_set_r(one, 48.0f);
-	nemoshow_item_set_stroke_color(one, 0x1e, 0xdc, 0xdc, 0xff);
-	nemoshow_item_set_stroke_width(one, 12.0f);
-	nemoshow_item_set_filter(one, NEMOSHOW_SOLID_LARGE_BLUR);
+	nemoshow_item_set_x(one, pixelsize);
+	nemoshow_item_set_y(one, pixelsize);
+	nemoshow_item_set_r(one, pixelsize * 0.8f);
+	nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
+	nemoshow_item_set_filter(one, filter);
 
 	mote->canvasp = canvas = nemoshow_canvas_create();
 	nemoshow_canvas_set_width(canvas, width);
