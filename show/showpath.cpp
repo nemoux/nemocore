@@ -532,7 +532,7 @@ void nemoshow_path_arc(struct showone *one, double x, double y, double width, do
 	struct showpath *path = NEMOSHOW_PATH(one);
 	SkRect rect = SkRect::MakeXYWH(x, y, width, height);
 
-	NEMOSHOW_PATH_CC(path, path)->addArc(rect, from, to);
+	NEMOSHOW_PATH_CC(path, path)->arcTo(rect, from, to, false);
 
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
 }

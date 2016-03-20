@@ -1210,11 +1210,11 @@ void nemoshow_item_path_arc(struct showone *one, double x, double y, double widt
 
 	if (one->sub == NEMOSHOW_PATHTWICE_ITEM) {
 		if (item->pathselect & NEMOSHOW_ITEM_STROKE_PATH)
-			NEMOSHOW_ITEM_CC(item, path)->addArc(rect, from, to);
+			NEMOSHOW_ITEM_CC(item, path)->arcTo(rect, from, to, false);
 		if (item->pathselect & NEMOSHOW_ITEM_FILL_PATH)
-			NEMOSHOW_ITEM_CC(item, fillpath)->addArc(rect, from, to);
+			NEMOSHOW_ITEM_CC(item, fillpath)->arcTo(rect, from, to, false);
 	} else {
-		NEMOSHOW_ITEM_CC(item, path)->addArc(rect, from, to);
+		NEMOSHOW_ITEM_CC(item, path)->arcTo(rect, from, to, false);
 	}
 
 	nemoshow_one_dirty(one, NEMOSHOW_PATH_DIRTY);
