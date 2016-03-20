@@ -105,6 +105,9 @@ struct nemoshell {
 		uint32_t samples;
 		double min_velocity;
 
+		double rotate_degree;
+		double scale_degree;
+
 		double fullscreen_scale;
 		double resize_interval;
 	} pick;

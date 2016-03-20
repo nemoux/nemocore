@@ -1233,6 +1233,8 @@ void nemoshell_load_gestures(struct nemoshell *shell)
 
 	shell->pick.samples = nemoitem_get_iattr_named(shell->configs, "//nemoshell/pick", "samples", 5);
 	shell->pick.min_velocity = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "min_velocity", 0.1f);
+	shell->pick.rotate_degree = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "rotate_degree", 15.0f);
+	shell->pick.scale_degree = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "scale_degree", 45.0f);
 	shell->pick.fullscreen_scale = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "fullscreen_scale", 1.5f);
 	shell->pick.resize_interval = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "resize_interval", 50.0f);
 
