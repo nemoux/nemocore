@@ -181,10 +181,12 @@ static void move_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 	if (bin != NULL && bin->shell->is_logging_grab != 0)
 		nemolog_message("MOVE", "[UP] %llu: (%u)\n", touchid, time);
 
+	touchpoint_update_velocity(tp, bin->shell->pitch.samples);
+
 	if (bin != NULL &&
 			bin->state.fullscreen == 0 &&
 			bin->state.maximized == 0 &&
-			touchpoint_update_velocity(tp, bin->shell->pitch.samples, bin->shell->pitch.max_duration) > 0) {
+			touchpoint_check_samples(tp, bin->shell->pitch.samples, bin->shell->pitch.max_duration) > 0) {
 		struct nemoshell *shell = bin->shell;
 		struct vieweffect *effect;
 
@@ -425,7 +427,9 @@ static void move_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 	struct touchpoint *tp = base->touchpoint;
 	struct nemoshell *shell = grab->shell;
 
-	if (grab->actor != NULL && touchpoint_update_velocity(tp, shell->pitch.samples, shell->pitch.max_duration) > 0) {
+	touchpoint_update_velocity(tp, shell->pitch.samples);
+
+	if (grab->actor != NULL && touchpoint_check_samples(tp, shell->pitch.samples, shell->pitch.max_duration) > 0) {
 		struct vieweffect *effect;
 
 		effect = vieweffect_create(grab->actor->view);
