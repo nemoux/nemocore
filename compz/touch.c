@@ -293,7 +293,7 @@ void touchpoint_update_velocity(struct touchpoint *tp, uint32_t nsamples)
 	}
 }
 
-int touchpoint_check_samples(struct touchpoint *tp, uint32_t nsamples, uint32_t max_duration)
+int touchpoint_check_duration(struct touchpoint *tp, uint32_t nsamples, uint32_t max_duration)
 {
 	uint32_t t0, t1;
 	uint32_t i0, i1;
@@ -308,6 +308,37 @@ int touchpoint_check_samples(struct touchpoint *tp, uint32_t nsamples, uint32_t 
 	t1 = tp->samples[i1].time;
 
 	if (t1 - t0 > max_duration)
+		return 0;
+
+	return 1;
+}
+
+int touchpoint_check_velocity(struct touchpoint *tp, uint32_t nsamples, double min_velocity)
+{
+	float x0, y0;
+	float x1, y1;
+	float dx, dy;
+	uint32_t t0, t1;
+	uint32_t i0, i1;
+
+	if (tp->nsamples < nsamples)
+		return 0;
+
+	i0 = (tp->esample - nsamples) % NEMOCOMPZ_TOUCH_SAMPLE_MAX;
+	i1 = (tp->esample - 1) % NEMOCOMPZ_TOUCH_SAMPLE_MAX;
+
+	x0 = tp->samples[i0].x;
+	y0 = tp->samples[i0].y;
+	t0 = tp->samples[i0].time;
+
+	x1 = tp->samples[i1].x;
+	y1 = tp->samples[i1].y;
+	t1 = tp->samples[i1].time;
+
+	dx = (x1 - x0) / (float)(t1 - t0);
+	dy = (y1 - y0) / (float)(t1 - t0);
+
+	if (sqrtf(dx * dx + dy * dy) < min_velocity)
 		return 0;
 
 	return 1;

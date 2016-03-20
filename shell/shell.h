@@ -102,16 +102,11 @@ struct nemoshell {
 	} pitch;
 
 	struct {
-		double max_rotate;
-		double max_scale;
+		uint32_t samples;
+		double min_velocity;
+
 		double fullscreen_scale;
-
 		double resize_interval;
-
-		double rotate_degree;
-		double scale_degree;
-
-		double min_distance;
 	} pick;
 
 	struct {
