@@ -489,7 +489,11 @@ static inline void nemoshow_item_update_path(struct nemoshow *show, struct showo
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	if (one->sub == NEMOSHOW_PATHARRAY_ITEM) {
+	if (one->sub == NEMOSHOW_PATH_ITEM || one->sub == NEMOSHOW_PATHTWICE_ITEM) {
+		NEMOSHOW_ITEM_CC(item, measure)->setPath(NEMOSHOW_ITEM_CC(item, path), false);
+
+		one->dirty |= NEMOSHOW_BOUNDS_DIRTY;
+	} else if (one->sub == NEMOSHOW_PATHARRAY_ITEM) {
 		int i;
 
 		NEMOSHOW_ITEM_CC(item, path)->reset();
