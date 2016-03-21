@@ -229,9 +229,14 @@ static void nemo_surface_set_input(struct wl_client *client, struct wl_resource 
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 
 	if (type == NEMO_SURFACE_INPUT_TYPE_NORMAL) {
+		nemoview_set_state(bin->view, NEMO_VIEW_PICKABLE_STATE);
 		nemoview_set_input_type(bin->view, NEMO_VIEW_INPUT_NORMAL);
 	} else if (type == NEMO_SURFACE_INPUT_TYPE_TOUCH) {
+		nemoview_set_state(bin->view, NEMO_VIEW_PICKABLE_STATE);
 		nemoview_set_input_type(bin->view, NEMO_VIEW_INPUT_TOUCH);
+	} else if (type == NEMO_SURFACE_INPUT_TYPE_NONE) {
+		nemoview_put_state(bin->view, NEMO_VIEW_PICKABLE_STATE);
+		nemoview_set_input_type(bin->view, NEMO_VIEW_INPUT_NONE);
 	}
 }
 

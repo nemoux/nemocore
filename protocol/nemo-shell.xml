@@ -137,6 +137,7 @@
 		<enum name="input_type">
 			<entry name="normal" value="0"/>
 			<entry name="touch" value="1"/>
+			<entry name="none" value="2"/>
 		</enum>
 
 		<request name="set_input">

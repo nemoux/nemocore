@@ -452,10 +452,16 @@ void nemoshow_view_set_input(struct nemoshow *show, const char *type)
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemoactor *actor = scon->actor;
 
-	if (type == NULL || strcmp(type, "normal") == 0)
+	if (type == NULL || strcmp(type, "normal") == 0) {
+		nemoview_set_state(actor->view, NEMO_VIEW_PICKABLE_STATE);
 		nemoview_set_input_type(actor->view, NEMO_VIEW_INPUT_NORMAL);
-	else if (strcmp(type, "touch") == 0)
+	} else if (strcmp(type, "touch") == 0) {
+		nemoview_set_state(actor->view, NEMO_VIEW_PICKABLE_STATE);
 		nemoview_set_input_type(actor->view, NEMO_VIEW_INPUT_TOUCH);
+	} else if (strcmp(type, "none") == 0) {
+		nemoview_put_state(actor->view, NEMO_VIEW_PICKABLE_STATE);
+		nemoview_set_input_type(actor->view, NEMO_VIEW_INPUT_NONE);
+	}
 }
 
 void nemoshow_view_set_sound(struct nemoshow *show)

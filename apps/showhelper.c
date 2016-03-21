@@ -391,6 +391,8 @@ void nemoshow_view_set_input(struct nemoshow *show, const char *type)
 		nemocanvas_set_input(canvas, NEMO_SURFACE_INPUT_TYPE_NORMAL);
 	else if (strcmp(type, "touch") == 0)
 		nemocanvas_set_input(canvas, NEMO_SURFACE_INPUT_TYPE_TOUCH);
+	else if (strcmp(type, "none") == 0)
+		nemocanvas_set_input(canvas, NEMO_SURFACE_INPUT_TYPE_NONE);
 }
 
 void nemoshow_view_set_sound(struct nemoshow *show)
