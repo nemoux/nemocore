@@ -48,6 +48,7 @@ void nemoshow_one_finish(struct showone *one)
 		ref->one->refs[ref->index] = NULL;
 
 		nemoshow_one_put_state(ref->one, ref->state);
+		nemoshow_one_dirty(ref->one, ref->dirty);
 
 		nemolist_remove(&ref->link);
 
@@ -376,6 +377,7 @@ void nemoshow_one_unreference_one(struct showone *one, struct showone *src)
 			one->refs[i] = NULL;
 
 			nemoshow_one_put_state(one, ref->state);
+			nemoshow_one_dirty(one, ref->dirty);
 
 			nemolist_remove(&ref->link);
 
@@ -397,6 +399,7 @@ void nemoshow_one_unreference_all(struct showone *one)
 			one->refs[i] = NULL;
 
 			nemoshow_one_put_state(one, ref->state);
+			nemoshow_one_dirty(one, ref->dirty);
 
 			nemolist_remove(&ref->link);
 

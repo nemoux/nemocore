@@ -892,14 +892,10 @@ void nemoshow_item_set_matrix(struct showone *one, double m[9])
 
 void nemoshow_item_set_shader(struct showone *one, struct showone *shader)
 {
-	struct showitem *item = NEMOSHOW_ITEM(one);
-
 	nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_SHADER_REF));
 
 	if (shader != NULL)
 		nemoshow_one_reference_one(one, shader, NEMOSHOW_SHADER_DIRTY, 0x0, NEMOSHOW_SHADER_REF);
-	else
-		nemoshow_one_dirty(one, NEMOSHOW_SHADER_DIRTY);
 }
 
 void nemoshow_item_set_filter(struct showone *one, struct showone *filter)
@@ -908,8 +904,6 @@ void nemoshow_item_set_filter(struct showone *one, struct showone *filter)
 
 	if (filter != NULL)
 		nemoshow_one_reference_one(one, filter, NEMOSHOW_FILTER_DIRTY, 0x0, NEMOSHOW_FILTER_REF);
-	else
-		nemoshow_one_dirty(one, NEMOSHOW_FILTER_DIRTY);
 }
 
 void nemoshow_item_set_clip(struct showone *one, struct showone *clip)
