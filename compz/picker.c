@@ -51,14 +51,6 @@ struct nemoview *nemocompz_pick_view_below(struct nemocompz *compz, float x, flo
 	struct nemoview *view, *child;
 	int belowed = 0;
 
-#define	NEMOCOMPZ_PICK_VIEW(v, x, y, sx, sy)	\
-	nemoview_transform_from_global(v, x, y, sx, sy);	\
-	if (v->content->pick == NULL) {	\
-		if (pixman_region32_contains_point(&v->content->input, *sx, *sy, NULL)) return v;	\
-	} else {	\
-		if (v->content->pick(v->content, *sx, *sy)) return v;	\
-	}
-
 	wl_list_for_each(layer, &compz->layer_list, link) {
 		wl_list_for_each(view, &layer->view_list, layer_link) {
 			if (belowed == 0) {
