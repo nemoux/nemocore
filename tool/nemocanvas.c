@@ -521,6 +521,11 @@ void nemocanvas_unset_sound(struct nemocanvas *canvas)
 	nemo_surface_unset_sound(canvas->nemo_surface);
 }
 
+void nemocanvas_set_tag(struct nemocanvas *canvas, uint32_t tag)
+{
+	nemo_surface_set_tag(canvas->nemo_surface, tag);
+}
+
 void nemocanvas_set_nemosurface(struct nemocanvas *canvas, uint32_t type)
 {
 	struct nemo_shell *shell = canvas->tool->shell;

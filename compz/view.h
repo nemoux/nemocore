@@ -52,6 +52,8 @@ struct nemoview {
 	struct nemocanvas *canvas;
 	struct nemoactor *actor;
 
+	uint32_t tag;
+
 	struct wl_signal destroy_signal;
 
 	struct wl_list link;
@@ -395,6 +397,16 @@ static inline int nemoview_support_keyboard(struct nemoview *view)
 static inline int nemoview_support_touch_only(struct nemoview *view)
 {
 	return view->input.type == NEMO_VIEW_INPUT_TOUCH;
+}
+
+static inline void nemoview_set_tag(struct nemoview *view, uint32_t tag)
+{
+	view->tag = tag;
+}
+
+static inline uint32_t nemoview_get_tag(struct nemoview *view)
+{
+	return view->tag;
 }
 
 #ifdef __cplusplus

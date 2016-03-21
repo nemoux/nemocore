@@ -186,6 +186,10 @@
 		<request name="unset_sound">
 		</request>
 
+		<request name="set_tag">
+			<arg name="tag" type="uint"/>
+		</request>
+
 		<event name="configure">
 			<arg name="width" type="int"/>
 			<arg name="height" type="int"/>

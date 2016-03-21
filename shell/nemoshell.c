@@ -345,6 +345,13 @@ static void nemo_surface_unset_sound(struct wl_client *client, struct wl_resourc
 	nemoview_put_state(bin->view, NEMO_VIEW_SOUND_STATE);
 }
 
+static void nemo_surface_set_tag(struct wl_client *client, struct wl_resource *resource, uint32_t tag)
+{
+	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
+
+	nemoview_set_tag(bin->view, tag);
+}
+
 static const struct nemo_surface_interface nemo_surface_implementation = {
 	nemo_surface_destroy,
 	nemo_surface_move,
@@ -368,7 +375,8 @@ static const struct nemo_surface_interface nemo_surface_implementation = {
 	nemo_surface_set_fullscreen,
 	nemo_surface_unset_fullscreen,
 	nemo_surface_set_sound,
-	nemo_surface_unset_sound
+	nemo_surface_unset_sound,
+	nemo_surface_set_tag
 };
 
 static void nemoshell_unbind_nemo_surface(struct wl_resource *resource)

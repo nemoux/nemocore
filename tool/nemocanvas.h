@@ -107,6 +107,7 @@ extern void nemocanvas_set_fullscreen(struct nemocanvas *canvas, uint32_t id);
 extern void nemocanvas_unset_fullscreen(struct nemocanvas *canvas);
 extern void nemocanvas_set_sound(struct nemocanvas *canvas);
 extern void nemocanvas_unset_sound(struct nemocanvas *canvas);
+extern void nemocanvas_set_tag(struct nemocanvas *canvas, uint32_t tag);
 
 extern void nemocanvas_set_nemosurface(struct nemocanvas *canvas, uint32_t type);
 

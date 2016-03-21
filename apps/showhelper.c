@@ -411,6 +411,14 @@ void nemoshow_view_put_sound(struct nemoshow *show)
 	nemocanvas_unset_sound(canvas);
 }
 
+void nemoshow_view_set_tag(struct nemoshow *show, uint32_t tag)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemocanvas *canvas = scon->canvas;
+	
+	nemocanvas_set_tag(canvas, tag);
+}
+
 int nemoshow_view_move(struct nemoshow *show, uint32_t serial)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);

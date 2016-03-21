@@ -480,6 +480,14 @@ void nemoshow_view_put_sound(struct nemoshow *show)
 	nemoview_put_state(actor->view, NEMO_VIEW_SOUND_STATE);
 }
 
+void nemoshow_view_set_tag(struct nemoshow *show, uint32_t tag)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemoactor *actor = scon->actor;
+
+	nemoview_set_tag(actor->view, tag);
+}
+
 int nemoshow_view_move(struct nemoshow *show, uint64_t device)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
