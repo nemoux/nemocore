@@ -30,13 +30,15 @@ struct nemoview *nemocompz_pick_view(struct nemocompz *compz, float x, float y, 
 		wl_list_for_each(view, &layer->view_list, layer_link) {
 			if (!wl_list_empty(&view->children_list)) {
 				wl_list_for_each(child, &view->children_list, children_link) {
-					if (nemoview_has_state(child, NEMO_VIEW_PICKABLE_STATE) != 0)
+					if (nemoview_has_state(child, NEMO_VIEW_PICKABLE_STATE) != 0) {
 						NEMOCOMPZ_PICK_VIEW(child, x, y, sx, sy);
+					}
 				}
 			}
 
-			if (nemoview_has_state(view, NEMO_VIEW_PICKABLE_STATE) != 0)
+			if (nemoview_has_state(view, NEMO_VIEW_PICKABLE_STATE) != 0) {
 				NEMOCOMPZ_PICK_VIEW(view, x, y, sx, sy);
+			}
 		}
 	}
 
@@ -75,13 +77,15 @@ struct nemoview *nemocompz_pick_view_below(struct nemocompz *compz, float x, flo
 			} else {
 				if (!wl_list_empty(&view->children_list)) {
 					wl_list_for_each(child, &view->children_list, children_link) {
-						if (nemoview_has_state(child, NEMO_VIEW_PICKABLE_STATE) != 0)
+						if (nemoview_has_state(child, NEMO_VIEW_PICKABLE_STATE) != 0) {
 							NEMOCOMPZ_PICK_VIEW(child, x, y, sx, sy);
+						}
 					}
 				}
 
-				if (nemoview_has_state(view, NEMO_VIEW_PICKABLE_STATE) != 0)
+				if (nemoview_has_state(view, NEMO_VIEW_PICKABLE_STATE) != 0) {
 					NEMOCOMPZ_PICK_VIEW(view, x, y, sx, sy);
+				}
 			}
 		}
 	}
@@ -104,13 +108,15 @@ struct nemoview *nemocompz_pick_canvas(struct nemocompz *compz, float x, float y
 					if (child->canvas == NULL)
 						continue;
 
-					if (nemoview_has_state(child, NEMO_VIEW_PICKABLE_STATE) != 0)
+					if (nemoview_has_state(child, NEMO_VIEW_PICKABLE_STATE) != 0) {
 						NEMOCOMPZ_PICK_VIEW(child, x, y, sx, sy);
+					}
 				}
 			}
 
-			if (nemoview_has_state(view, NEMO_VIEW_PICKABLE_STATE) != 0)
+			if (nemoview_has_state(view, NEMO_VIEW_PICKABLE_STATE) != 0) {
 				NEMOCOMPZ_PICK_VIEW(view, x, y, sx, sy);
+			}
 		}
 	}
 
