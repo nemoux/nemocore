@@ -102,7 +102,7 @@ void nemoshow_shader_destroy(struct showone *one)
 	if (NEMOSHOW_SHADER_CC(shader, matrix) != NULL)
 		delete NEMOSHOW_SHADER_CC(shader, matrix);
 	if (NEMOSHOW_SHADER_CC(shader, shader) != NULL)
-		delete NEMOSHOW_SHADER_CC(shader, shader);
+		NEMOSHOW_SHADER_CC(shader, shader)->unref();
 
 	delete static_cast<showshader_t *>(shader->cc);
 
