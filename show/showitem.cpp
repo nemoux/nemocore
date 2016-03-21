@@ -336,9 +336,21 @@ static inline void nemoshow_item_update_filter(struct nemoshow *show, struct sho
 				NEMOSHOW_PATH_ATCC(child, stroke)->setMaskFilter(NEMOSHOW_FILTER_CC(filter, filter));
 			}
 		}
+	} else {
+		NEMOSHOW_ITEM_CC(item, fill)->setMaskFilter(NULL);
+		NEMOSHOW_ITEM_CC(item, stroke)->setMaskFilter(NULL);
 
-		one->dirty |= NEMOSHOW_BOUNDS_DIRTY;
+		if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
+			struct showone *child;
+
+			nemoshow_children_for_each(child, one) {
+				NEMOSHOW_PATH_ATCC(child, fill)->setMaskFilter(NULL);
+				NEMOSHOW_PATH_ATCC(child, stroke)->setMaskFilter(NULL);
+			}
+		}
 	}
+
+	one->dirty |= NEMOSHOW_BOUNDS_DIRTY;
 }
 
 static inline void nemoshow_item_update_shader(struct nemoshow *show, struct showone *one)
@@ -348,9 +360,12 @@ static inline void nemoshow_item_update_shader(struct nemoshow *show, struct sho
 	if (NEMOSHOW_REF(one, NEMOSHOW_SHADER_REF) != NULL) {
 		NEMOSHOW_ITEM_CC(item, fill)->setShader(NEMOSHOW_SHADER_CC(NEMOSHOW_SHADER(NEMOSHOW_REF(one, NEMOSHOW_SHADER_REF)), shader));
 		NEMOSHOW_ITEM_CC(item, stroke)->setShader(NEMOSHOW_SHADER_CC(NEMOSHOW_SHADER(NEMOSHOW_REF(one, NEMOSHOW_SHADER_REF)), shader));
-
-		one->dirty |= NEMOSHOW_BOUNDS_DIRTY;
+	} else {
+		NEMOSHOW_ITEM_CC(item, fill)->setShader(NULL);
+		NEMOSHOW_ITEM_CC(item, stroke)->setShader(NULL);
 	}
+
+	one->dirty |= NEMOSHOW_BOUNDS_DIRTY;
 }
 
 static inline void nemoshow_item_update_font(struct nemoshow *show, struct showone *one)
@@ -879,16 +894,22 @@ void nemoshow_item_set_shader(struct showone *one, struct showone *shader)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	nemoshow_one_set_state(one, NEMOSHOW_FILL_STATE);
-
 	nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_SHADER_REF));
-	nemoshow_one_reference_one(one, shader, NEMOSHOW_SHADER_DIRTY, 0x0, NEMOSHOW_SHADER_REF);
+
+	if (shader != NULL)
+		nemoshow_one_reference_one(one, shader, NEMOSHOW_SHADER_DIRTY, 0x0, NEMOSHOW_SHADER_REF);
+	else
+		nemoshow_one_dirty(one, NEMOSHOW_SHADER_DIRTY);
 }
 
 void nemoshow_item_set_filter(struct showone *one, struct showone *filter)
 {
 	nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF));
-	nemoshow_one_reference_one(one, filter, NEMOSHOW_FILTER_DIRTY, 0x0, NEMOSHOW_FILTER_REF);
+
+	if (filter != NULL)
+		nemoshow_one_reference_one(one, filter, NEMOSHOW_FILTER_DIRTY, 0x0, NEMOSHOW_FILTER_REF);
+	else
+		nemoshow_one_dirty(one, NEMOSHOW_FILTER_DIRTY);
 }
 
 void nemoshow_item_set_clip(struct showone *one, struct showone *clip)
