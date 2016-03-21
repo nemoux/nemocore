@@ -33,19 +33,22 @@ static void nemoback_mote_dispatch_pipeline_canvas_redraw(struct nemoshow *show,
 	nemomote_collide_update(mote->mote, 2, 2, secs, 1.5f);
 	nemomote_speedlimit_update(mote->mote, 1, secs, 0.0f, mote->speedmax);
 
-	if (nemomote_tween_update(mote->mote, 5, secs, &mote->ease, 6, NEMOMOTE_POSITION_TWEEN | NEMOMOTE_COLOR_TWEEN | NEMOMOTE_MASS_TWEEN) != 0) {
-		nemomote_tweener_set(mote->mote, 6,
-				0.0f, 0.0f,
-				mote->colors1, mote->colors0,
-				mote->pixelsize, mote->pixelsize * 0.0f,
-				5.0f, 1.0f);
-	}
+	nemomote_tween_update(mote->mote, 5, secs, &mote->ease, 6, NEMOMOTE_POSITION_TWEEN | NEMOMOTE_COLOR_TWEEN | NEMOMOTE_MASS_TWEEN);
+	nemomote_sleeptime_set(mote->mote, 6, 7.0f, 5.0f);
+	nemomote_type_set(mote->mote, 6, 7);
 
-	if (nemomote_tween_update(mote->mote, 6, secs, &mote->ease, 7, NEMOMOTE_COLOR_TWEEN | NEMOMOTE_MASS_TWEEN) != 0) {
-		nemomote_explosion_update(mote->mote, 7, secs, -30.0f, 30.0f, -30.0f, 30.0f);
-		nemomote_sleeptime_set(mote->mote, 7, 9.0f, 3.0f);
-		nemomote_type_set(mote->mote, 7, 1);
-	}
+	nemomote_sleep_update(mote->mote, 7, secs, 8);
+	nemomote_tweener_set(mote->mote, 8,
+			0.0f, 0.0f,
+			mote->colors1, mote->colors0,
+			mote->pixelsize, mote->pixelsize * 0.0f,
+			5.0f, 1.0f);
+	nemomote_explosion_update(mote->mote, 8, secs, mote->speedmax, -mote->speedmax, mote->speedmax, -mote->speedmax);
+	nemomote_type_set(mote->mote, 8, 9);
+
+	nemomote_tween_update(mote->mote, 9, secs, &mote->ease, 1, NEMOMOTE_COLOR_TWEEN | NEMOMOTE_MASS_TWEEN);
+	nemomote_boundingbox_update(mote->mote, 9, secs, &mote->box, 0.8f);
+	nemomote_move_update(mote->mote, 9, secs);
 
 	nemomote_boundingbox_update(mote->mote, 2, secs, &mote->box, 0.8f);
 	nemomote_move_update(mote->mote, 2, secs);

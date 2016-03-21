@@ -25,6 +25,7 @@ extern "C" {
 #include <actors/deadline.h>
 #include <actors/collide.h>
 #include <actors/tween.h>
+#include <actors/sleep.h>
 #include <builders/position.h>
 #include <builders/velocity.h>
 #include <builders/mass.h>
@@ -37,32 +38,32 @@ extern "C" {
 
 #define	NEMOMOTE_DEAD_BIT			(1 << 0)
 
-struct nemomote {
-	double *buffers;
-	uint32_t *types;
-	uint32_t *attrs;
-	double *tweens;
+	struct nemomote {
+		double *buffers;
+		uint32_t *types;
+		uint32_t *attrs;
+		double *tweens;
 
-	int mcount;
-	int lcount;
-	int rcount;
-};
+		int mcount;
+		int lcount;
+		int rcount;
+	};
 
-extern struct nemomote *nemomote_create(int max);
-extern void nemomote_destroy(struct nemomote *mote);
+	extern struct nemomote *nemomote_create(int max);
+	extern void nemomote_destroy(struct nemomote *mote);
 
-extern int nemomote_reset(struct nemomote *mote);
+	extern int nemomote_reset(struct nemomote *mote);
 
-extern int nemomote_ready(struct nemomote *mote, unsigned int count);
-extern int nemomote_commit(struct nemomote *mote);
-extern int nemomote_cleanup(struct nemomote *mote);
+	extern int nemomote_ready(struct nemomote *mote, unsigned int count);
+	extern int nemomote_commit(struct nemomote *mote);
+	extern int nemomote_cleanup(struct nemomote *mote);
 
-extern int nemomote_get_one_by_type(struct nemomote *mote, uint32_t type);
+	extern int nemomote_get_one_by_type(struct nemomote *mote, uint32_t type);
 
-static inline int nemomote_get_count(struct nemomote *mote)
-{
-	return mote->lcount;
-}
+	static inline int nemomote_get_count(struct nemomote *mote)
+	{
+		return mote->lcount;
+	}
 
 #define NEMOMOTE_POSITION_X(m, i)			((m)->buffers[i * 12 + 0])
 #define NEMOMOTE_POSITION_Y(m, i)			((m)->buffers[i * 12 + 1])

@@ -9,7 +9,7 @@
 #include <actors/explosion.h>
 #include <nemomisc.h>
 
-int nemomote_explosion_update(struct nemomote *mote, uint32_t type, double secs, double minx, double maxx, double miny, double maxy)
+int nemomote_explosion_update(struct nemomote *mote, uint32_t type, double secs, double maxx, double minx, double maxy, double miny)
 {
 	int i;
 

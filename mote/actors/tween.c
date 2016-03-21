@@ -12,7 +12,6 @@
 int nemomote_tween_update(struct nemomote *mote, uint32_t type, double secs, struct nemoease *ease, uint32_t dtype, uint32_t tween)
 {
 	double t;
-	int done = 0;
 	int i;
 
 	for (i = 0; i < mote->lcount; i++) {
@@ -29,8 +28,6 @@ int nemomote_tween_update(struct nemomote *mote, uint32_t type, double secs, str
 			t = 1.0f;
 
 			mote->types[i] = dtype;
-
-			done = 1;
 		}
 
 		if (tween & NEMOMOTE_POSITION_TWEEN) {
@@ -50,5 +47,5 @@ int nemomote_tween_update(struct nemomote *mote, uint32_t type, double secs, str
 		}
 	}
 
-	return done;
+	return 0;
 }

@@ -34,6 +34,7 @@ add_library(nemomote SHARED
 	actors/deadline.c
 	actors/collide.c
 	actors/tween.c
+	actors/sleep.c
 	)
 
 set(NEMOMOTE_PKGCONFIG_REQUIRES "")
@@ -67,6 +68,7 @@ set(HEADER_ACTOR_FILES
 	${CMAKE_SOURCE_DIR}/mote/actors/deadline.h
 	${CMAKE_SOURCE_DIR}/mote/actors/collide.h
 	${CMAKE_SOURCE_DIR}/mote/actors/tween.h
+	${CMAKE_SOURCE_DIR}/mote/actors/sleep.h
 	)
 
 set(HEADER_BUILDER_FILES
