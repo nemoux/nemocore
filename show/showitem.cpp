@@ -169,6 +169,8 @@ struct showone *nemoshow_item_create(int type)
 	} else if (one->sub == NEMOSHOW_GROUP_ITEM) {
 		nemoshow_one_set_state(one, NEMOSHOW_INHERIT_STATE);
 		nemoshow_one_set_state(one, NEMOSHOW_BOUNDS_STATE);
+	} else if (one->sub == NEMOSHOW_IMAGE_ITEM) {
+		nemoshow_one_set_state(one, NEMOSHOW_FILL_STATE);
 	} else if (one->sub == NEMOSHOW_SVG_ITEM) {
 		nemoshow_one_set_state(one, NEMOSHOW_INHERIT_STATE);
 	} else if (one->sub == NEMOSHOW_CONTAINER_ITEM) {
