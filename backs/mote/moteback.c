@@ -33,20 +33,24 @@ static void nemoback_mote_dispatch_pipeline_canvas_redraw(struct nemoshow *show,
 	nemomote_collide_update(mote->mote, 2, 2, secs, 1.5f);
 	nemomote_speedlimit_update(mote->mote, 1, secs, 0.0f, mote->speedmax);
 
-	nemomote_tween_update(mote->mote, 5, secs, &mote->ease, 6, NEMOMOTE_POSITION_TWEEN | NEMOMOTE_COLOR_TWEEN | NEMOMOTE_MASS_TWEEN);
-	nemomote_sleeptime_set(mote->mote, 6, 7.0f, 5.0f);
+	nemomote_tween_update(mote->mote, 5, secs, &mote->ease0, 6, NEMOMOTE_POSITION_TWEEN | NEMOMOTE_COLOR_TWEEN | NEMOMOTE_MASS_TWEEN);
+	nemomote_sleeptime_set(mote->mote, 6, 5.0f, 4.5f);
 	nemomote_type_set(mote->mote, 6, 7);
 
 	nemomote_sleep_update(mote->mote, 7, secs, 8);
-	nemomote_tweener_set(mote->mote, 8,
-			0.0f, 0.0f,
-			mote->colors1, mote->colors0,
-			mote->pixelsize, mote->pixelsize * 0.0f,
-			5.0f, 1.0f);
+	nemomote_tweener_set_color(mote->mote, 8,
+			mote->colors1[0], mote->colors0[0],
+			mote->colors1[1], mote->colors0[1],
+			mote->colors1[2], mote->colors0[2],
+			mote->colors1[3], mote->colors0[3]);
+	nemomote_tweener_set_mass(mote->mote, 8,
+			mote->pixelsize, mote->pixelsize * 0.0f);
+	nemomote_tweener_set_duration(mote->mote, 8,
+			3.0f, 1.0f);
 	nemomote_explosion_update(mote->mote, 8, secs, mote->speedmax, -mote->speedmax, mote->speedmax, -mote->speedmax);
 	nemomote_type_set(mote->mote, 8, 9);
 
-	nemomote_tween_update(mote->mote, 9, secs, &mote->ease, 1, NEMOMOTE_COLOR_TWEEN | NEMOMOTE_MASS_TWEEN);
+	nemomote_tween_update(mote->mote, 9, secs, &mote->ease1, 1, NEMOMOTE_COLOR_TWEEN | NEMOMOTE_MASS_TWEEN);
 	nemomote_boundingbox_update(mote->mote, 9, secs, &mote->box, 0.8f);
 	nemomote_move_update(mote->mote, 9, secs);
 
@@ -147,12 +151,18 @@ static void nemoback_mote_dispatch_timer_event(struct nemotimer *timer, void *da
 					if (p < 0)
 						return;
 
-					nemomote_tweener_set_one(mote->mote, p,
+					nemomote_tweener_set_one_position(mote->mote, p,
 							x + j * mote->textsize,
-							y + i * mote->textsize,
-							mote->tcolors1, mote->tcolors0,
-							mote->textsize * 0.8f, mote->textsize * 0.5f,
-							5.0f, 1.0f);
+							y + i * mote->textsize);
+					nemomote_tweener_set_one_color(mote->mote, p,
+							mote->tcolors1[0], mote->tcolors0[0],
+							mote->tcolors1[1], mote->tcolors0[1],
+							mote->tcolors1[2], mote->tcolors0[2],
+							mote->tcolors1[3], mote->tcolors0[3]);
+					nemomote_tweener_set_one_mass(mote->mote, p,
+							mote->textsize * 0.8f, mote->textsize * 0.5f);
+					nemomote_tweener_set_one_duration(mote->mote, p,
+							3.0f, 1.0f);
 					nemomote_type_set_one(mote->mote, p, 5);
 				}
 			}
@@ -378,7 +388,8 @@ int main(int argc, char *argv[])
 	nemomote_type_update(mote->mote, 2);
 	nemomote_commit(mote->mote);
 
-	nemoease_set(&mote->ease, NEMOEASE_CUBIC_INOUT_TYPE);
+	nemoease_set(&mote->ease0, NEMOEASE_CUBIC_INOUT_TYPE);
+	nemoease_set(&mote->ease1, NEMOEASE_CUBIC_INOUT_TYPE);
 
 	mote->secs = (double)time_current_nsecs() / 1000000000;
 

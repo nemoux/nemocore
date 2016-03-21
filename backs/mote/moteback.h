@@ -38,7 +38,8 @@ struct moteback {
 	struct nemozone disc;
 	struct nemozone speed;
 
-	struct nemoease ease;
+	struct nemoease ease0;
+	struct nemoease ease1;
 
 	int type;
 	char *logo;
