@@ -58,10 +58,10 @@ struct nemogst {
 extern struct nemogst *nemogst_create(void);
 extern void nemogst_destroy(struct nemogst *gst);
 
-extern int nemogst_prepare_nemo_sink(struct nemogst *gst, struct wl_display *display, struct wl_shm *shm, uint32_t formats, struct wl_surface *surface);
+extern int nemogst_prepare_sink(struct nemogst *gst, struct wl_display *display, struct wl_shm *shm, uint32_t formats, struct wl_surface *surface);
 
-extern int nemogst_load_media_info(struct nemogst *gst, const char *uri);
-extern int nemogst_set_media_path(struct nemogst *gst, const char *uri);
+extern int nemogst_prepare_media(struct nemogst *gst, const char *uri);
+extern int nemogst_resize_media(struct nemogst *gst, uint32_t width, uint32_t height);
 
 extern int nemogst_ready_media(struct nemogst *gst);
 extern int nemogst_play_media(struct nemogst *gst);
@@ -69,10 +69,6 @@ extern int nemogst_pause_media(struct nemogst *gst);
 extern int nemogst_replay_media(struct nemogst *gst);
 extern int nemogst_is_done_media(struct nemogst *gst);
 extern int nemogst_is_playing_media(struct nemogst *gst);
-
-extern int nemogst_resize_video(struct nemogst *gst, uint32_t width, uint32_t height);
-
-extern void nemogst_sink_set_property(struct nemogst *gst, const char *name, uint32_t value);
 
 extern int64_t nemogst_get_position(struct nemogst *gst);
 extern int64_t nemogst_get_duration(struct nemogst *gst);

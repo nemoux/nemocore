@@ -126,7 +126,7 @@ static gboolean nemogst_watch_bus(GstBus *bus, GstMessage *msg, gpointer data)
 	return GST_BUS_PASS;
 }
 
-int nemogst_prepare_nemo_sink(struct nemogst *gst, struct wl_display *display, struct wl_shm *shm, uint32_t formats, struct wl_surface *surface)
+int nemogst_prepare_sink(struct nemogst *gst, struct wl_display *display, struct wl_shm *shm, uint32_t formats, struct wl_surface *surface)
 {
 	GstPad *pad;
 
@@ -153,6 +153,7 @@ int nemogst_prepare_nemo_sink(struct nemogst *gst, struct wl_display *display, s
 	gst_object_unref(pad);
 
 	g_object_set(G_OBJECT(gst->player), "video-sink", gst->pipeline, NULL);
+	g_object_set(G_OBJECT(gst->player), "uri", gst->uri, NULL);
 
 	gst->bus = gst_pipeline_get_bus(GST_PIPELINE(gst->player));
 	gst->busid = gst_bus_add_watch(gst->bus, nemogst_watch_bus, gst);
@@ -162,7 +163,7 @@ int nemogst_prepare_nemo_sink(struct nemogst *gst, struct wl_display *display, s
 	return 0;
 }
 
-int nemogst_load_media_info(struct nemogst *gst, const char *uri)
+int nemogst_prepare_media(struct nemogst *gst, const char *uri)
 {
 	GstDiscoverer *dc;
 	GstDiscovererInfo *info;
@@ -213,9 +214,23 @@ int nemogst_load_media_info(struct nemogst *gst, const char *uri)
 	return has_video;
 }
 
-int nemogst_set_media_path(struct nemogst *gst, const char *uri)
+int nemogst_resize_media(struct nemogst *gst, uint32_t width, uint32_t height)
 {
-	g_object_set(G_OBJECT(gst->player), "uri", uri, NULL);
+	GstCaps *caps;
+	GstStructure *gs;
+
+	caps = gst_caps_new_empty();
+	gs = gst_structure_new("video/x-raw",
+			"width", G_TYPE_INT, width,
+			"height", G_TYPE_INT, height,
+			"pixel-aspect-ratio", GST_TYPE_FRACTION, 1, 1,
+			NULL);
+	gst_caps_append_structure(caps, gs);
+	g_object_set(G_OBJECT(gst->filter), "caps", caps, NULL);
+	gst_caps_unref(caps);
+
+	gst->width = width;
+	gst->height = height;
 
 	return 0;
 }
@@ -286,32 +301,6 @@ int nemogst_is_playing_media(struct nemogst *gst)
 		return 1;
 
 	return 0;
-}
-
-int nemogst_resize_video(struct nemogst *gst, uint32_t width, uint32_t height)
-{
-	GstCaps *caps;
-	GstStructure *gs;
-
-	caps = gst_caps_new_empty();
-	gs = gst_structure_new("video/x-raw",
-			"width", G_TYPE_INT, width,
-			"height", G_TYPE_INT, height,
-			"pixel-aspect-ratio", GST_TYPE_FRACTION, 1, 1,
-			NULL);
-	gst_caps_append_structure(caps, gs);
-	g_object_set(G_OBJECT(gst->filter), "caps", caps, NULL);
-	gst_caps_unref(caps);
-
-	gst->width = width;
-	gst->height = height;
-
-	return 0;
-}
-
-void nemogst_sink_set_property(struct nemogst *gst, const char *name, uint32_t value)
-{
-	g_object_set(G_OBJECT(gst->sink), name, value, NULL);
 }
 
 int64_t nemogst_get_position(struct nemogst *gst)

@@ -102,7 +102,7 @@ static void nemoplay_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t w
 	if (fixed == 0)
 		height = width / nemogst_get_video_aspect_ratio(context->gst);
 
-	nemogst_resize_video(context->gst, width, height);
+	nemogst_resize_media(context->gst, width, height);
 
 	if (nemogst_is_playing_media(context->gst) == 0)
 		nemogst_set_next_step(context->gst, 1, 1.0f);
@@ -142,6 +142,7 @@ int main(int argc, char *argv[])
 	char *uri;
 	int32_t width = 0, height = 0;
 	int is_background = 0;
+	int has_video;
 	int opt;
 
 	while (opt = getopt_long(argc, argv, "f:w:h:b", options, NULL)) {
@@ -194,8 +195,10 @@ int main(int argc, char *argv[])
 		goto out2;
 
 	asprintf(&uri, "file://%s", filepath);
+	has_video = nemogst_prepare_media(context->gst, uri);
+	free(uri);
 
-	if (nemogst_load_media_info(context->gst, uri) == 0)
+	if (has_video == 0)
 		goto out3;
 
 	context->width = width = width != 0 ? width : 480;
@@ -237,27 +240,27 @@ int main(int argc, char *argv[])
 	nemotale_node_set_id(node, 1);
 	nemotale_node_opaque(node, 0, 0, width, height);
 
-	nemogst_prepare_nemo_sink(context->gst,
-			nemotool_get_display(tool),
-			nemotool_get_shm(tool),
-			nemotool_get_formats(tool),
-			nemocanvas_get_surface(canvas));
-	nemogst_set_media_path(context->gst, uri);
-
-	nemogst_resize_video(context->gst, width, height);
+	nemocanvas_dispatch_frame(context->canvas);
 
 	timer = nemotimer_create(context->tool);
 	nemotimer_set_callback(timer, nemoplay_dispatch_tale_timer);
 	nemotimer_set_timeout(timer, 500);
 	nemotimer_set_userdata(timer, context);
 
-	nemogst_play_media(context->gst);
+	nemogst_prepare_sink(context->gst,
+			nemotool_get_display(tool),
+			nemotool_get_shm(tool),
+			nemotool_get_formats(tool),
+			nemocanvas_get_surface(canvas));
+	nemogst_resize_media(context->gst, width, height);
 
-	nemocanvas_dispatch_frame(context->canvas);
+	nemogst_play_media(context->gst);
 
 	gmainloop = g_main_loop_new(NULL, FALSE);
 	nemoglib_run_tool(gmainloop, context->tool);
 	g_main_loop_unref(gmainloop);
+
+	nemogst_pause_media(context->gst);
 
 	nemotimer_destroy(timer);
 
@@ -265,8 +268,6 @@ int main(int argc, char *argv[])
 	nemotool_destroy_egl(context->egl);
 
 	nemolog_message("PLAY", "done '%s' media file...\n", filepath);
-
-	free(uri);
 
 out3:
 	nemogst_destroy(context->gst);
