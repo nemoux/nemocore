@@ -24,6 +24,7 @@
 #include <nemoshow.h>
 #include <fonthelper.h>
 #include <svghelper.h>
+#include <svghelper.hpp>
 #include <stringhelper.h>
 #include <colorhelper.h>
 #include <nemoxml.h>
@@ -1380,10 +1381,10 @@ int nemoshow_item_path_load_svg(struct showone *one, const char *uri, double x, 
 	double pw, ph;
 	const char *attr0, *attr1;
 	const char *units;
-	SkPath path;
-	SkMatrix matrix;
 	int has_fill;
 	int has_stroke;
+	SkPath path;
+	SkMatrix matrix;
 
 	if (uri == NULL)
 		return -1;
@@ -1391,31 +1392,6 @@ int nemoshow_item_path_load_svg(struct showone *one, const char *uri, double x, 
 	xml = nemoxml_create();
 	nemoxml_load_file(xml, uri);
 	nemoxml_update(xml);
-
-	matrix.setIdentity();
-
-	nemolist_for_each(node, &xml->nodes, nodelink) {
-		if (strcmp(node->name, "svg") == 0) {
-			attr0 = nemoxml_node_get_attr(node, "width");
-			attr1 = nemoxml_node_get_attr(node, "height");
-
-			if (attr0 != NULL && attr1 != NULL) {
-				sw = width;
-				sh = height;
-
-				pw = string_parse_float_with_endptr(attr0, 0, strlen(attr0), &units);
-				ph = string_parse_float_with_endptr(attr1, 0, strlen(attr1), &units);
-
-				if (sw != pw || sh != ph) {
-					matrix.postScale(sw / pw, sh / ph);
-				}
-			}
-
-			break;
-		}
-	}
-
-	matrix.postTranslate(x, y);
 
 	nemolist_for_each(node, &xml->nodes, nodelink) {
 		has_stroke = 0;
@@ -1522,6 +1498,12 @@ int nemoshow_item_path_load_svg(struct showone *one, const char *uri, double x, 
 			nemotoken_destroy(token);
 		}
 
+		if ((attr0 = nemoxml_node_get_attr(node, "transform")) != NULL) {
+			nemoshow_svg_get_transform(&matrix, attr0);
+
+			path.transform(matrix);
+		}
+
 		if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
 			child = nemoshow_path_create(NEMOSHOW_NORMAL_PATH);
 			nemoshow_one_attach(one, child);
@@ -1539,7 +1521,30 @@ int nemoshow_item_path_load_svg(struct showone *one, const char *uri, double x, 
 		}
 	}
 
-	nemoxml_destroy(xml);
+	matrix.setIdentity();
+
+	nemolist_for_each(node, &xml->nodes, nodelink) {
+		if (strcmp(node->name, "svg") == 0) {
+			attr0 = nemoxml_node_get_attr(node, "width");
+			attr1 = nemoxml_node_get_attr(node, "height");
+
+			if (attr0 != NULL && attr1 != NULL) {
+				sw = width;
+				sh = height;
+
+				pw = string_parse_float_with_endptr(attr0, 0, strlen(attr0), &units);
+				ph = string_parse_float_with_endptr(attr1, 0, strlen(attr1), &units);
+
+				if (sw != pw || sh != ph) {
+					matrix.postScale(sw / pw, sh / ph);
+				}
+			}
+
+			break;
+		}
+	}
+
+	matrix.postTranslate(x, y);
 
 	if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
 		nemoshow_children_for_each(child, one) {
@@ -1551,6 +1556,8 @@ int nemoshow_item_path_load_svg(struct showone *one, const char *uri, double x, 
 	} else {
 		NEMOSHOW_ITEM_CC(item, path)->transform(matrix);
 	}
+
+	nemoxml_destroy(xml);
 
 	return 0;
 }
