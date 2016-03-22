@@ -14,6 +14,8 @@
 #include <showitem.hpp>
 #include <showfilter.h>
 #include <showfilter.hpp>
+#include <showshader.h>
+#include <showshader.hpp>
 #include <nemoshow.h>
 #include <svghelper.h>
 #include <fonthelper.h>
@@ -187,6 +189,22 @@ static inline void nemoshow_path_update_filter(struct nemoshow *show, struct sho
 	if (NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF) != NULL) {
 		NEMOSHOW_PATH_CC(path, fill)->setMaskFilter(NEMOSHOW_FILTER_ATCC(NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF), filter));
 		NEMOSHOW_PATH_CC(path, stroke)->setMaskFilter(NEMOSHOW_FILTER_ATCC(NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF), filter));
+	} else {
+		NEMOSHOW_PATH_CC(path, fill)->setMaskFilter(NULL);
+		NEMOSHOW_PATH_CC(path, stroke)->setMaskFilter(NULL);
+	}
+}
+
+static inline void nemoshow_path_update_shader(struct nemoshow *show, struct showone *one)
+{
+	struct showpath *path = NEMOSHOW_PATH(one);
+
+	if (NEMOSHOW_REF(one, NEMOSHOW_SHADER_REF) != NULL) {
+		NEMOSHOW_PATH_CC(path, fill)->setShader(NEMOSHOW_SHADER_ATCC(NEMOSHOW_REF(one, NEMOSHOW_SHADER_REF), shader));
+		NEMOSHOW_PATH_CC(path, stroke)->setShader(NEMOSHOW_SHADER_ATCC(NEMOSHOW_REF(one, NEMOSHOW_SHADER_REF), shader));
+	} else {
+		NEMOSHOW_PATH_CC(path, fill)->setShader(NULL);
+		NEMOSHOW_PATH_CC(path, stroke)->setShader(NULL);
 	}
 }
 
@@ -291,6 +309,8 @@ int nemoshow_path_update(struct showone *one)
 		nemoshow_path_update_style(show, one);
 	if ((one->dirty & NEMOSHOW_FILTER_DIRTY) != 0)
 		nemoshow_path_update_filter(show, one);
+	if ((one->dirty & NEMOSHOW_SHADER_DIRTY) != 0)
+		nemoshow_path_update_shader(show, one);
 	if ((one->dirty & NEMOSHOW_POINTS_DIRTY) != 0)
 		nemoshow_path_update_points(show, one);
 	if ((one->dirty & NEMOSHOW_PATH_DIRTY) != 0)
@@ -653,8 +673,18 @@ void nemoshow_path_set_dash_effect(struct showone *one, double *dashes, int dash
 	nemoshow_one_dirty(one, NEMOSHOW_PATHEFFECT_DIRTY);
 }
 
+void nemoshow_path_set_shader(struct showone *one, struct showone *shader)
+{
+	nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_SHADER_REF));
+
+	if (shader != NULL)
+		nemoshow_one_reference_one(one, shader, NEMOSHOW_SHADER_DIRTY, 0x0, NEMOSHOW_SHADER_REF);
+}
+
 void nemoshow_path_set_filter(struct showone *one, struct showone *filter)
 {
 	nemoshow_one_unreference_one(one, NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF));
-	nemoshow_one_reference_one(one, filter, NEMOSHOW_FILTER_DIRTY, 0x0, NEMOSHOW_FILTER_REF);
+
+	if (filter != NULL)
+		nemoshow_one_reference_one(one, filter, NEMOSHOW_FILTER_DIRTY, 0x0, NEMOSHOW_FILTER_REF);
 }

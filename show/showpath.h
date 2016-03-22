@@ -80,6 +80,7 @@ extern void nemoshow_path_rotate(struct showone *one, double ro);
 extern void nemoshow_path_path_set_discrete_effect(struct showone *one, double segment, double deviation, uint32_t seed);
 extern void nemoshow_path_path_set_dash_effect(struct showone *one, double *dashes, int dashcount);
 
+extern void nemoshow_path_set_shader(struct showone *one, struct showone *shader);
 extern void nemoshow_path_set_filter(struct showone *one, struct showone *filter);
 
 static inline void nemoshow_path_set_alpha(struct showone *one, double alpha)
