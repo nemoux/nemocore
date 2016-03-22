@@ -12,7 +12,6 @@
 #include <unistd.h>
 
 #include <gstnemosink.h>
-#include <gstnemosubsink.h>
 
 enum {
 	SIGNAL_0,
@@ -516,9 +515,7 @@ static gboolean plugin_init(GstPlugin *plugin)
 
 	if (gst_nemo_sink_plugin_init(plugin) != TRUE)
 		return FALSE;
-	if (gst_nemo_subsink_plugin_init(plugin) != TRUE)
-		return FALSE;
-	
+
 	return TRUE;
 }
 

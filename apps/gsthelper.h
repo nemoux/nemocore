@@ -26,19 +26,12 @@ typedef enum {
 	GST_PLAY_FLAG_SOFT_COLORBALANCE = 0x000000400
 } GstPlayFlags;
 
-typedef void (*nemogst_subtitle_render_t)(GstElement *base, guint8 *data, gsize size, gpointer userdata);
-
 struct nemogst {
 	GstElement *player;
 	GstElement *pipeline;
 	GstElement *sink;
 	GstElement *scale;
 	GstElement *filter;
-
-	GstElement *subpipeline;
-	GstElement *subfile;
-	GstElement *subparse;
-	GstElement *subsink;
 
 	GstBus *bus;
 	guint busid;
@@ -66,13 +59,9 @@ extern struct nemogst *nemogst_create(void);
 extern void nemogst_destroy(struct nemogst *gst);
 
 extern int nemogst_prepare_nemo_sink(struct nemogst *gst, struct wl_display *display, struct wl_shm *shm, uint32_t formats, struct wl_surface *surface);
-extern int nemogst_prepare_nemo_subsink(struct nemogst *gst, nemogst_subtitle_render_t render, void *userdata);
-extern int nemogst_prepare_audio_sink(struct nemogst *gst);
 
 extern int nemogst_load_media_info(struct nemogst *gst, const char *uri);
-
 extern int nemogst_set_media_path(struct nemogst *gst, const char *uri);
-extern int nemogst_set_subtitle_path(struct nemogst *gst, const char *path);
 
 extern int nemogst_ready_media(struct nemogst *gst);
 extern int nemogst_play_media(struct nemogst *gst);

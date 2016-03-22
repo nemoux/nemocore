@@ -37,13 +37,7 @@ struct playcontext {
 	int32_t width, height;
 
 	int is_background;
-	int is_audio_only;
 };
-
-static void nemoplay_dispatch_subtitle(GstElement *base, guint8 *data, gsize size, gpointer userdata)
-{
-	nemolog_message("PLAY", "{%s}\n", data);
-}
 
 static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode *node, struct taleevent *event)
 {
@@ -105,25 +99,21 @@ static void nemoplay_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t w
 		return;
 	}
 
-	if (context->is_audio_only == 0) {
-		if (fixed == 0) {
-			height = width / nemogst_get_video_aspect_ratio(context->gst);
-		}
+	if (fixed == 0)
+		height = width / nemogst_get_video_aspect_ratio(context->gst);
 
-		nemogst_resize_video(context->gst, width, height);
+	nemogst_resize_video(context->gst, width, height);
 
-		if (nemogst_is_playing_media(context->gst) == 0) {
-			nemogst_set_next_step(context->gst, 1, 1.0f);
-		}
+	if (nemogst_is_playing_media(context->gst) == 0)
+		nemogst_set_next_step(context->gst, 1, 1.0f);
 
-		nemotool_resize_egl_canvas(context->ecanvas, width, height);
-		nemotale_resize(context->tale, width, height);
-		nemotale_node_resize_pixman(context->node, width, height);
-		nemotale_node_opaque(context->node, 0, 0, width, height);
+	nemotool_resize_egl_canvas(context->ecanvas, width, height);
+	nemotale_resize(context->tale, width, height);
+	nemotale_node_resize_pixman(context->node, width, height);
+	nemotale_node_opaque(context->node, 0, 0, width, height);
 
-		context->width = width;
-		context->height = height;
-	}
+	context->width = width;
+	context->height = height;
 }
 
 static void nemoplay_dispatch_canvas_transform(struct nemocanvas *canvas, int32_t visible)
@@ -134,7 +124,6 @@ int main(int argc, char *argv[])
 {
 	struct option options[] = {
 		{ "file",					required_argument,	NULL,		'f' },
-		{ "subtitle",			required_argument,	NULL,		's' },
 		{ "width",				required_argument,	NULL,		'w' },
 		{ "height",				required_argument,	NULL,		'h' },
 		{ "background",		no_argument,				NULL,		'b' },
@@ -150,23 +139,18 @@ int main(int argc, char *argv[])
 	struct nemotale *tale;
 	struct talenode *node;
 	char *filepath = NULL;
-	char *subtitlepath = NULL;
 	char *uri;
 	int32_t width = 0, height = 0;
 	int is_background = 0;
 	int opt;
 
-	while (opt = getopt_long(argc, argv, "f:s:w:h:b", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "f:w:h:b", options, NULL)) {
 		if (opt == -1)
 			break;
 
 		switch (opt) {
 			case 'f':
 				filepath = strdup(optarg);
-				break;
-
-			case 's':
-				subtitlepath = strdup(optarg);
 				break;
 
 			case 'w':
@@ -211,22 +195,11 @@ int main(int argc, char *argv[])
 
 	asprintf(&uri, "file://%s", filepath);
 
-	nemogst_load_media_info(context->gst, uri);
+	if (nemogst_load_media_info(context->gst, uri) == 0)
+		goto out3;
 
-	context->is_audio_only = nemogst_get_video_width(context->gst) == 0 || nemogst_get_video_height(context->gst) == 0;
-
-	if (width == 0 || height == 0) {
-		if (context->is_audio_only == 0) {
-			width = 480;
-			height = 480 / nemogst_get_video_aspect_ratio(context->gst);
-		} else {
-			width = 480;
-			height = 480;
-		}
-	}
-
-	context->width = width;
-	context->height = height;
+	context->width = width = width != 0 ? width : 480;
+	context->height = height = height != 0 ? height : 480 / nemogst_get_video_aspect_ratio(context->gst);
 
 	context->egl = nemotool_create_egl(tool);
 
@@ -264,30 +237,14 @@ int main(int argc, char *argv[])
 	nemotale_node_set_id(node, 1);
 	nemotale_node_opaque(node, 0, 0, width, height);
 
-	if (context->is_audio_only == 0) {
-		nemogst_prepare_nemo_sink(context->gst,
-				nemotool_get_display(tool),
-				nemotool_get_shm(tool),
-				nemotool_get_formats(tool),
-				nemocanvas_get_surface(canvas));
-		nemogst_set_media_path(context->gst, uri);
+	nemogst_prepare_nemo_sink(context->gst,
+			nemotool_get_display(tool),
+			nemotool_get_shm(tool),
+			nemotool_get_formats(tool),
+			nemocanvas_get_surface(canvas));
+	nemogst_set_media_path(context->gst, uri);
 
-		if (subtitlepath != NULL) {
-			nemogst_prepare_nemo_subsink(context->gst, nemoplay_dispatch_subtitle, context);
-			nemogst_set_subtitle_path(context->gst, subtitlepath);
-		}
-
-		nemogst_resize_video(context->gst, width, height);
-	} else {
-		nemogst_prepare_audio_sink(context->gst);
-		nemogst_set_media_path(context->gst, uri);
-
-		nemotale_node_fill_pixman(context->node,
-				random_get_double(0.0f, 1.0f),
-				random_get_double(0.0f, 1.0f),
-				random_get_double(0.0f, 1.0f),
-				random_get_double(0.0f, 1.0f));
-	}
+	nemogst_resize_video(context->gst, width, height);
 
 	timer = nemotimer_create(context->tool);
 	nemotimer_set_callback(timer, nemoplay_dispatch_tale_timer);
@@ -302,7 +259,7 @@ int main(int argc, char *argv[])
 	nemoglib_run_tool(gmainloop, context->tool);
 	g_main_loop_unref(gmainloop);
 
-	nemogst_destroy(context->gst);
+	nemotimer_destroy(timer);
 
 	nemotool_destroy_egl_canvas(context->ecanvas);
 	nemotool_destroy_egl(context->egl);
@@ -311,7 +268,8 @@ int main(int argc, char *argv[])
 
 	free(uri);
 
-	nemotimer_destroy(timer);
+out3:
+	nemogst_destroy(context->gst);
 
 out2:
 	nemotool_disconnect_wayland(tool);

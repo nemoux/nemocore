@@ -162,44 +162,6 @@ int nemogst_prepare_nemo_sink(struct nemogst *gst, struct wl_display *display, s
 	return 0;
 }
 
-int nemogst_prepare_nemo_subsink(struct nemogst *gst, nemogst_subtitle_render_t render, void *userdata)
-{
-	gst->subpipeline = gst_pipeline_new("nemosubpipe");
-
-	gst->subfile = gst_element_factory_make("filesrc", "subfile");
-	if (gst->subfile == NULL)
-		return -1;
-	gst->subparse = gst_element_factory_make("subparse", "subparse");
-	if (gst->subparse == NULL)
-		return -1;
-	gst->subsink = gst_element_factory_make("nemosubsink", "subsink");
-	if (gst->subsink == NULL)
-		return -1;
-	g_object_set(G_OBJECT(gst->subsink), "render-callback", render, NULL);
-	g_object_set(G_OBJECT(gst->subsink), "render-userdata", userdata, NULL);
-
-	gst_bin_add_many(GST_BIN(gst->subpipeline), gst->subfile, gst->subparse, gst->subsink, NULL);
-	gst_element_link_many(gst->subfile, gst->subparse, gst->subsink, NULL);
-
-	gst_element_set_state(gst->subpipeline, GST_STATE_READY);
-
-	return 0;
-}
-
-int nemogst_prepare_audio_sink(struct nemogst *gst)
-{
-	GstPad *pad;
-
-	gst->player = gst_element_factory_make("playbin", "playbin");
-
-	gst->bus = gst_pipeline_get_bus(GST_PIPELINE(gst->player));
-	gst->busid = gst_bus_add_watch(gst->bus, nemogst_watch_bus, gst);
-
-	gst_element_set_state(gst->player, GST_STATE_READY);
-
-	return 0;
-}
-
 int nemogst_load_media_info(struct nemogst *gst, const char *uri)
 {
 	GstDiscoverer *dc;
@@ -248,7 +210,7 @@ int nemogst_load_media_info(struct nemogst *gst, const char *uri)
 	gst->video.aspect_ratio = (double)gst->video.width / (double)gst->video.height;
 	gst->uri = strdup(uri);
 
-	return 0;
+	return has_video;
 }
 
 int nemogst_set_media_path(struct nemogst *gst, const char *uri)
@@ -258,19 +220,9 @@ int nemogst_set_media_path(struct nemogst *gst, const char *uri)
 	return 0;
 }
 
-int nemogst_set_subtitle_path(struct nemogst *gst, const char *path)
-{
-	g_object_set(G_OBJECT(gst->subfile), "location", path, NULL);
-
-	return 0;
-}
-
 int nemogst_ready_media(struct nemogst *gst)
 {
 	gst_element_set_state(gst->player, GST_STATE_READY);
-
-	if (gst->subpipeline != NULL)
-		gst_element_set_state(gst->subpipeline, GST_STATE_READY);
 
 	return 0;
 }
@@ -279,9 +231,6 @@ int nemogst_play_media(struct nemogst *gst)
 {
 	if (gst->is_changed == 0) {
 		gst_element_set_state(gst->player, GST_STATE_PLAYING);
-
-		if (gst->subpipeline != NULL)
-			gst_element_set_state(gst->subpipeline, GST_STATE_PLAYING);
 
 		gst->is_changed = 1;
 	}
@@ -293,9 +242,6 @@ int nemogst_pause_media(struct nemogst *gst)
 {
 	if (gst->is_blocked == 0 && gst->is_changed == 0) {
 		gst_element_set_state(gst->player, GST_STATE_PAUSED);
-
-		if (gst->subpipeline != NULL)
-			gst_element_set_state(gst->subpipeline, GST_STATE_PAUSED);
 
 		gst->is_blocked = 1;
 		gst->is_changed = 1;
@@ -311,13 +257,6 @@ int nemogst_replay_media(struct nemogst *gst)
 				GST_FORMAT_TIME,
 				GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_SEGMENT | GST_SEEK_FLAG_ACCURATE,
 				0);
-
-		if (gst->subpipeline != NULL) {
-			gst_element_seek_simple(gst->subpipeline,
-					GST_FORMAT_TIME,
-					GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_SEGMENT | GST_SEEK_FLAG_ACCURATE,
-					0);
-		}
 
 		gst->is_blocked = 1;
 	}
@@ -404,13 +343,6 @@ int nemogst_set_position(struct nemogst *gst, int64_t position)
 				GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_SEGMENT | GST_SEEK_FLAG_ACCURATE,
 				position);
 
-		if (gst->subpipeline != NULL) {
-			gst_element_seek_simple(gst->subpipeline,
-					GST_FORMAT_TIME,
-					GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_SEGMENT | GST_SEEK_FLAG_ACCURATE,
-					position);
-		}
-
 		gst->is_blocked = 1;
 	}
 
@@ -422,10 +354,6 @@ int nemogst_set_next_step(struct nemogst *gst, int steps, double rate)
 	gboolean r;
 
 	r = gst_element_send_event(gst->player, gst_event_new_step(GST_FORMAT_BUFFERS, steps, rate, TRUE, FALSE));
-
-	if (gst->subpipeline != NULL) {
-		gst_element_send_event(gst->subpipeline, gst_event_new_step(GST_FORMAT_BUFFERS, steps, rate, TRUE, FALSE));
-	}
 
 	return r;
 }

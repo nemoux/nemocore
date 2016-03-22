@@ -39,7 +39,6 @@ add_definitions(-DVERSION="1.1.1.1")
 add_library(gstnemosink
 	gstnemobufferpool.c
 	gstnemosink.c
-	gstnemosubsink.c
 	${PROTOCOLS}
 	)
 
