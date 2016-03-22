@@ -27,7 +27,6 @@ typedef enum {
 } GstPlayFlags;
 
 typedef void (*nemogst_subtitle_render_t)(GstElement *base, guint8 *data, gsize size, gpointer userdata);
-typedef void (*nemogst_minisink_render_t)(GstElement *base, guint8 *data, gint width, gint height, GstVideoFormat format, gpointer userdata);
 
 struct nemogst {
 	GstElement *player;
@@ -68,7 +67,6 @@ extern void nemogst_destroy(struct nemogst *gst);
 
 extern int nemogst_prepare_nemo_sink(struct nemogst *gst, struct wl_display *display, struct wl_shm *shm, uint32_t formats, struct wl_surface *surface);
 extern int nemogst_prepare_nemo_subsink(struct nemogst *gst, nemogst_subtitle_render_t render, void *userdata);
-extern int nemogst_prepare_mini_sink(struct nemogst *gst, nemogst_minisink_render_t render, void *userdata);
 extern int nemogst_prepare_audio_sink(struct nemogst *gst);
 
 extern int nemogst_load_media_info(struct nemogst *gst, const char *uri);

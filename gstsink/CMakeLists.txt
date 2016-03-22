@@ -40,8 +40,6 @@ add_library(gstnemosink
 	gstnemobufferpool.c
 	gstnemosink.c
 	gstnemosubsink.c
-	gstminibufferpool.c
-	gstminisink.c
 	${PROTOCOLS}
 	)
 
