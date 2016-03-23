@@ -89,6 +89,8 @@ struct showone *nemoshow_shader_create(int type)
 	nemoobject_set_reserved(&one->object, "tilemode", &shader->tmx, sizeof(uint32_t));
 	nemoobject_set_reserved(&one->object, "tilemode-x", &shader->tmx, sizeof(uint32_t));
 	nemoobject_set_reserved(&one->object, "tilemode-y", &shader->tmy, sizeof(uint32_t));
+	nemoobject_set_reserved(&one->object, "octaves", &shader->octaves, sizeof(uint32_t));
+	nemoobject_set_reserved(&one->object, "seed", &shader->seed, sizeof(double));
 
 	return one;
 }
@@ -190,6 +192,16 @@ int nemoshow_shader_update(struct showone *one)
 						tilemodes[shader->tmx],
 						tilemodes[shader->tmy]);
 			}
+		} else if (one->sub == NEMOSHOW_PERLIN_FRACTAL_NOISE_SHADER) {
+			NEMOSHOW_SHADER_CC(shader, shader) = SkPerlinNoiseShader::CreateFractalNoise(
+					SkDoubleToScalar(shader->x0), SkDoubleToScalar(shader->y0),
+					shader->octaves,
+					SkDoubleToScalar(shader->seed));
+		} else if (one->sub == NEMOSHOW_PERLIN_TURBULENCE_NOISE_SHADER) {
+			NEMOSHOW_SHADER_CC(shader, shader) = SkPerlinNoiseShader::CreateTurbulence(
+					SkDoubleToScalar(shader->x0), SkDoubleToScalar(shader->y0),
+					shader->octaves,
+					SkDoubleToScalar(shader->seed));
 		}
 	}
 

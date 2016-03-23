@@ -29,6 +29,7 @@
 #include <SkEmbossMaskFilter.h>
 
 #include <SkGradientShader.h>
+#include <SkPerlinNoiseShader.h>
 
 #include <SkPathEffect.h>
 #include <SkDiscretePathEffect.h>

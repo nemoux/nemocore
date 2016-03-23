@@ -16,6 +16,8 @@ typedef enum {
 	NEMOSHOW_LINEAR_GRADIENT_SHADER = 1,
 	NEMOSHOW_RADIAL_GRADIENT_SHADER = 2,
 	NEMOSHOW_BITMAP_SHADER = 3,
+	NEMOSHOW_PERLIN_FRACTAL_NOISE_SHADER = 4,
+	NEMOSHOW_PERLIN_TURBULENCE_NOISE_SHADER = 5,
 	NEMOSHOW_LAST_SHADER
 } NemoShowGradientType;
 
@@ -42,6 +44,9 @@ struct showshader {
 	double r;
 
 	uint32_t tmx, tmy;
+
+	uint32_t octaves;
+	double seed;
 
 	void *cc;
 };
@@ -138,6 +143,20 @@ static inline void nemoshow_shader_set_tilemode_x(struct showone *one, uint32_t 
 static inline void nemoshow_shader_set_tilemode_y(struct showone *one, uint32_t tm)
 {
 	NEMOSHOW_SHADER_AT(one, tmy) = tm;
+
+	nemoshow_one_dirty(one, NEMOSHOW_SHADER_DIRTY);
+}
+
+static inline void nemoshow_shader_set_octaves(struct showone *one, uint32_t octaves)
+{
+	NEMOSHOW_SHADER_AT(one, octaves) = octaves;
+
+	nemoshow_one_dirty(one, NEMOSHOW_SHADER_DIRTY);
+}
+
+static inline void nemoshow_shader_set_seed(struct showone *one, double seed)
+{
+	NEMOSHOW_SHADER_AT(one, seed) = seed;
 
 	nemoshow_one_dirty(one, NEMOSHOW_SHADER_DIRTY);
 }
