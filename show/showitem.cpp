@@ -1846,3 +1846,21 @@ struct showone *nemoshow_item_pick_one(struct showone *one, float x, float y)
 
 	return NULL;
 }
+
+void nemoshow_item_transform_to_global(struct showone *one, float sx, float sy, float *x, float *y)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+	SkPoint p = NEMOSHOW_ITEM_CC(item, matrix)->mapXY(sx, sy);
+
+	*x = p.x();
+	*y = p.y();
+}
+
+void nemoshow_item_transform_from_global(struct showone *one, float x, float y, float *sx, float *sy)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+	SkPoint p = NEMOSHOW_ITEM_CC(item, inverse)->mapXY(x, y);
+
+	*sx = p.x();
+	*sy = p.y();
+}

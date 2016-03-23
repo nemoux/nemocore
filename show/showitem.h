@@ -172,6 +172,9 @@ extern int nemoshow_item_fill_buffer(struct showone *one, double r, double g, do
 extern int nemoshow_item_contain_one(struct showone *one, float x, float y);
 extern struct showone *nemoshow_item_pick_one(struct showone *one, float x, float y);
 
+extern void nemoshow_item_transform_to_global(struct showone *one, float sx, float sy, float *x, float *y);
+extern void nemoshow_item_transform_from_global(struct showone *one, float x, float y, float *sx, float *sy);
+
 static inline void nemoshow_item_set_x(struct showone *one, double x)
 {
 	NEMOSHOW_ITEM_AT(one, x) = x;

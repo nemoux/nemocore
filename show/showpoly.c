@@ -506,7 +506,7 @@ void nemoshow_poly_use_vbo(struct showone *one, int on_vbo)
 	poly->on_vbo = on_vbo;
 }
 
-int nemoshow_poly_check_plane(struct showone *cone, struct showone *pone, struct showone *one, double x, double y, float *tx, float *ty)
+int nemoshow_poly_pick_plane(struct showone *cone, struct showone *pone, struct showone *one, double x, double y, float *tx, float *ty)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(cone);
 	struct showpipe *pipe = NEMOSHOW_PIPE(pone);
@@ -590,7 +590,7 @@ int nemoshow_poly_check_plane(struct showone *cone, struct showone *pone, struct
 	return 0;
 }
 
-float nemoshow_poly_check_one(struct showone *cone, struct showone *pone, struct showone *one, double x, double y)
+float nemoshow_poly_contains_point(struct showone *cone, struct showone *pone, struct showone *one, double x, double y)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(cone);
 	struct showpipe *pipe = NEMOSHOW_PIPE(pone);
