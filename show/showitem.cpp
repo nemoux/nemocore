@@ -1426,24 +1426,24 @@ int nemoshow_item_path_load_svg(struct showone *one, const char *uri, double x, 
 				SkParsePath::FromSVGString(d, &path);
 			}
 		} else if (strcmp(node->name, "line") == 0) {
-			double x1 = strtod(nemoxml_node_get_attr(node, "x1"), NULL);
-			double y1 = strtod(nemoxml_node_get_attr(node, "y1"), NULL);
-			double x2 = strtod(nemoxml_node_get_attr(node, "x2"), NULL);
-			double y2 = strtod(nemoxml_node_get_attr(node, "y2"), NULL);
+			double x1 = nemoxml_node_get_dattr(node, "x1", 0.0f);
+			double y1 = nemoxml_node_get_dattr(node, "y1", 0.0f);
+			double x2 = nemoxml_node_get_dattr(node, "x2", 0.0f);
+			double y2 = nemoxml_node_get_dattr(node, "y2", 0.0f);
 
 			path.moveTo(x1, y1);
 			path.lineTo(x2, y2);
 		} else if (strcmp(node->name, "rect") == 0) {
-			double x = strtod(nemoxml_node_get_attr(node, "x"), NULL);
-			double y = strtod(nemoxml_node_get_attr(node, "y"), NULL);
-			double width = strtod(nemoxml_node_get_attr(node, "width"), NULL);
-			double height = strtod(nemoxml_node_get_attr(node, "height"), NULL);
+			double x = nemoxml_node_get_dattr(node, "x", 0.0f);
+			double y = nemoxml_node_get_dattr(node, "y", 0.0f);
+			double width = nemoxml_node_get_dattr(node, "width", 0.0f);
+			double height = nemoxml_node_get_dattr(node, "height", 0.0f);
 
 			path.addRect(x, y, x + width, y + height);
 		} else if (strcmp(node->name, "circle") == 0) {
-			double x = strtod(nemoxml_node_get_attr(node, "cx"), NULL);
-			double y = strtod(nemoxml_node_get_attr(node, "cy"), NULL);
-			double r = strtod(nemoxml_node_get_attr(node, "r"), NULL);
+			double x = nemoxml_node_get_dattr(node, "cx", 0.0f);
+			double y = nemoxml_node_get_dattr(node, "cy", 0.0f);
+			double r = nemoxml_node_get_dattr(node, "r", 0.0f);
 
 			path.addCircle(x, y, r);
 		} else if (strcmp(node->name, "polygon") == 0) {
@@ -1460,13 +1460,13 @@ int nemoshow_item_path_load_svg(struct showone *one, const char *uri, double x, 
 			count = nemotoken_get_token_count(token);
 
 			path.moveTo(
-					strtod(nemotoken_get_token(token, 0), NULL),
-					strtod(nemotoken_get_token(token, 1), NULL));
+					nemotoken_get_double(token, 0, 0.0f),
+					nemotoken_get_double(token, 1, 0.0f));
 
 			for (i = 2; i < count; i += 2) {
 				path.lineTo(
-						strtod(nemotoken_get_token(token, i + 0), NULL),
-						strtod(nemotoken_get_token(token, i + 1), NULL));
+						nemotoken_get_double(token, i + 0, 0.0f),
+						nemotoken_get_double(token, i + 1, 0.0f));
 			}
 
 			path.close();
@@ -1486,13 +1486,13 @@ int nemoshow_item_path_load_svg(struct showone *one, const char *uri, double x, 
 			count = nemotoken_get_token_count(token);
 
 			path.moveTo(
-					strtod(nemotoken_get_token(token, 0), NULL),
-					strtod(nemotoken_get_token(token, 1), NULL));
+					nemotoken_get_double(token, 0, 0.0f),
+					nemotoken_get_double(token, 1, 0.0f));
 
 			for (i = 2; i < count; i += 2) {
 				path.lineTo(
-						strtod(nemotoken_get_token(token, i + 0), NULL),
-						strtod(nemotoken_get_token(token, i + 1), NULL));
+						nemotoken_get_double(token, i + 0, 0.0f),
+						nemotoken_get_double(token, i + 1, 0.0f));
 			}
 
 			nemotoken_destroy(token);

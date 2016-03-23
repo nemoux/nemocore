@@ -59,6 +59,28 @@ extern int nemoxml_select_node(struct nemoxml *xml, struct xmlnode **nodes, int 
 extern int nemoxml_select_node_by_path(struct nemoxml *xml, struct xmlnode **nodes, int length, const char *path);
 extern int nemoxml_select_node_by_attr(struct nemoxml *xml, struct xmlnode **nodes, int length, const char *name, const char *attr, const char *value);
 
+static inline double nemoxml_node_get_dattr(struct xmlnode *node, const char *attr, double value)
+{
+	char *s;
+
+	s = nemoxml_node_get_attr(node, attr);
+	if (s == NULL)
+		return value;
+
+	return strtod(s, NULL);
+}
+
+static inline int nemoxml_node_get_iattr(struct xmlnode *node, const char *attr, int value)
+{
+	char *s;
+
+	s = nemoxml_node_get_attr(node, attr);
+	if (s == NULL)
+		return value;
+
+	return strtoul(s, NULL, 10);
+}
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif
