@@ -22,7 +22,7 @@
 #include <nemolog.h>
 #include <nemomisc.h>
 
-struct playcontext {
+struct videocontext {
 	struct nemotool *tool;
 	struct nemogst *gst;
 
@@ -39,9 +39,9 @@ struct playcontext {
 	int is_background;
 };
 
-static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode *node, struct taleevent *event)
+static void nemovideo_dispatch_tale_event(struct nemotale *tale, struct talenode *node, struct taleevent *event)
 {
-	struct playcontext *context = (struct playcontext *)nemotale_get_userdata(tale);
+	struct videocontext *context = (struct videocontext *)nemotale_get_userdata(tale);
 	uint32_t id = nemotale_node_get_id(node);
 
 	if (context->is_background != 0)
@@ -66,9 +66,9 @@ static void nemoplay_dispatch_tale_event(struct nemotale *tale, struct talenode 
 	}
 }
 
-static void nemoplay_dispatch_tale_timer(struct nemotimer *timer, void *data)
+static void nemovideo_dispatch_tale_timer(struct nemotimer *timer, void *data)
 {
-	struct playcontext *context = (struct playcontext *)data;
+	struct videocontext *context = (struct videocontext *)data;
 
 	nemotimer_set_timeout(timer, 500);
 
@@ -78,18 +78,18 @@ static void nemoplay_dispatch_tale_timer(struct nemotimer *timer, void *data)
 	nemotale_push_timer_event(context->tale, time_current_msecs());
 }
 
-static void nemoplay_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t secs, uint32_t nsecs)
+static void nemovideo_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t secs, uint32_t nsecs)
 {
 	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
-	struct playcontext *context = (struct playcontext *)nemotale_get_userdata(tale);
+	struct videocontext *context = (struct videocontext *)nemotale_get_userdata(tale);
 
 	nemotale_composite_egl(tale, NULL);
 }
 
-static void nemoplay_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t width, int32_t height, int32_t fixed)
+static void nemovideo_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t width, int32_t height, int32_t fixed)
 {
 	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
-	struct playcontext *context = (struct playcontext *)nemotale_get_userdata(tale);
+	struct videocontext *context = (struct videocontext *)nemotale_get_userdata(tale);
 
 	if (width == 0 || height == 0)
 		return;
@@ -116,7 +116,7 @@ static void nemoplay_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t w
 	context->height = height;
 }
 
-static void nemoplay_dispatch_canvas_transform(struct nemocanvas *canvas, int32_t visible)
+static void nemovideo_dispatch_canvas_transform(struct nemocanvas *canvas, int32_t visible)
 {
 }
 
@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
 	};
 
 	GMainLoop *gmainloop;
-	struct playcontext *context;
+	struct videocontext *context;
 	struct nemotool *tool;
 	struct nemocanvas *canvas;
 	struct eglcanvas *ecanvas;
@@ -178,10 +178,10 @@ int main(int argc, char *argv[])
 
 	gst_init(&argc, &argv);
 
-	context = (struct playcontext *)malloc(sizeof(struct playcontext));
+	context = (struct videocontext *)malloc(sizeof(struct videocontext));
 	if (context == NULL)
 		return -1;
-	memset(context, 0, sizeof(struct playcontext));
+	memset(context, 0, sizeof(struct videocontext));
 
 	context->is_background = is_background;
 
@@ -217,9 +217,9 @@ int main(int argc, char *argv[])
 	} else {
 		nemocanvas_set_anchor(canvas, -0.5f, -0.5f);
 	}
-	nemocanvas_set_dispatch_frame(canvas, nemoplay_dispatch_canvas_frame);
-	nemocanvas_set_dispatch_resize(canvas, nemoplay_dispatch_canvas_resize);
-	nemocanvas_set_dispatch_transform(canvas, nemoplay_dispatch_canvas_transform);
+	nemocanvas_set_dispatch_frame(canvas, nemovideo_dispatch_canvas_frame);
+	nemocanvas_set_dispatch_resize(canvas, nemovideo_dispatch_canvas_resize);
+	nemocanvas_set_dispatch_transform(canvas, nemovideo_dispatch_canvas_transform);
 	nemocanvas_set_max_size(canvas, UINT32_MAX, UINT32_MAX);
 	nemocanvas_set_input(canvas, NEMO_SURFACE_INPUT_TYPE_TOUCH);
 
@@ -232,7 +232,7 @@ int main(int argc, char *argv[])
 				(EGLNativeWindowType)NTEGL_WINDOW(ecanvas)));
 	nemotale_resize(tale, width, height);
 
-	nemotale_attach_canvas(tale, canvas, nemoplay_dispatch_tale_event);
+	nemotale_attach_canvas(tale, canvas, nemovideo_dispatch_tale_event);
 	nemotale_set_userdata(tale, context);
 
 	context->node = node = nemotale_node_create_pixman(width, height);
@@ -243,7 +243,7 @@ int main(int argc, char *argv[])
 	nemocanvas_dispatch_frame(context->canvas);
 
 	timer = nemotimer_create(context->tool);
-	nemotimer_set_callback(timer, nemoplay_dispatch_tale_timer);
+	nemotimer_set_callback(timer, nemovideo_dispatch_tale_timer);
 	nemotimer_set_timeout(timer, 500);
 	nemotimer_set_userdata(timer, context);
 
