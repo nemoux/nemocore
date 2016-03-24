@@ -23,7 +23,7 @@ static void nemosubcanvas_configure(struct nemocanvas *canvas, int32_t dx, int32
 
 	assert(sub);
 
-	if (!nemoview_is_mapped(sub->view)) {
+	if (!nemoview_has_state(sub->view, NEMO_VIEW_MAP_STATE)) {
 		nemoview_set_position(sub->view, sub->view->geometry.x + dx, sub->view->geometry.y + dy);
 		nemoview_update_transform(sub->view);
 		nemoview_damage_below(sub->view);

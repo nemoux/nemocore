@@ -474,11 +474,6 @@ void nemocanvas_set_flag(struct nemocanvas *canvas, float fx, float fy)
 			wl_fixed_from_double(fy));
 }
 
-void nemocanvas_set_input(struct nemocanvas *canvas, uint32_t type)
-{
-	nemo_surface_set_input(canvas->nemo_surface, type);
-}
-
 void nemocanvas_set_layer(struct nemocanvas *canvas, uint32_t type)
 {
 	nemo_surface_set_layer(canvas->nemo_surface, type);
@@ -506,9 +501,9 @@ void nemocanvas_set_fullscreen(struct nemocanvas *canvas, uint32_t id)
 	nemo_surface_set_fullscreen(canvas->nemo_surface, id);
 }
 
-void nemocanvas_unset_fullscreen(struct nemocanvas *canvas)
+void nemocanvas_put_fullscreen(struct nemocanvas *canvas)
 {
-	nemo_surface_unset_fullscreen(canvas->nemo_surface);
+	nemo_surface_put_fullscreen(canvas->nemo_surface);
 }
 
 void nemocanvas_set_state(struct nemocanvas *canvas, const char *state)
@@ -516,9 +511,9 @@ void nemocanvas_set_state(struct nemocanvas *canvas, const char *state)
 	nemo_surface_set_state(canvas->nemo_surface, state);
 }
 
-void nemocanvas_unset_state(struct nemocanvas *canvas, const char *state)
+void nemocanvas_put_state(struct nemocanvas *canvas, const char *state)
 {
-	nemo_surface_unset_state(canvas->nemo_surface, state);
+	nemo_surface_put_state(canvas->nemo_surface, state);
 }
 
 void nemocanvas_set_tag(struct nemocanvas *canvas, uint32_t tag)

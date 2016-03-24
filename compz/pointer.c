@@ -98,7 +98,7 @@ static const struct nemopointer_grab_interface default_pointer_grab_interface = 
 
 static void nemopointer_destroy_sprite(struct nemopointer *pointer)
 {
-	if (nemoview_is_mapped(pointer->sprite))
+	if (nemoview_has_state(pointer->sprite, NEMO_VIEW_MAP_STATE))
 		nemoview_unmap(pointer->sprite);
 
 	wl_list_remove(&pointer->sprite_destroy_listener.link);
@@ -174,7 +174,7 @@ static void nemopointer_configure_canvas(struct nemocanvas *canvas, int32_t dx, 
 	pixman_region32_clear(&canvas->pending.input);
 	pixman_region32_clear(&canvas->base.input);
 
-	if (!nemoview_is_mapped(pointer->sprite)) {
+	if (!nemoview_has_state(pointer->sprite, NEMO_VIEW_MAP_STATE)) {
 		nemoview_attach_layer(pointer->sprite, &canvas->compz->cursor_layer);
 		nemoview_damage_below(pointer->sprite);
 		nemoview_update_transform(pointer->sprite);
@@ -557,7 +557,7 @@ void nemopointer_set_cursor_actor(struct nemopointer *pointer, struct nemoactor 
 
 	pixman_region32_clear(&actor->base.input);
 
-	if (!nemoview_is_mapped(pointer->sprite)) {
+	if (!nemoview_has_state(pointer->sprite, NEMO_VIEW_MAP_STATE)) {
 		nemoview_attach_layer(pointer->sprite, &actor->compz->cursor_layer);
 		nemoview_damage_below(pointer->sprite);
 		nemoview_update_transform(pointer->sprite);

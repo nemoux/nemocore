@@ -134,16 +134,6 @@
 			<arg name="fy" type="fixed"/>
 		</request>
 
-		<enum name="input_type">
-			<entry name="normal" value="0"/>
-			<entry name="touch" value="1"/>
-			<entry name="none" value="2"/>
-		</enum>
-
-		<request name="set_input">
-			<arg name="type" type="uint"/>
-		</request>
-
 		<enum name="layer_type">
 			<entry name="background" value="0"/>
 			<entry name="service" value="1"/>
@@ -177,14 +167,14 @@
 			<arg name="id" type="uint"/>
 		</request>
 
-		<request name="unset_fullscreen">
+		<request name="put_fullscreen">
 		</request>
 
 		<request name="set_state">
 			<arg name="state" type="string"/>
 		</request>
 
-		<request name="unset_state">
+		<request name="put_state">
 			<arg name="state" type="string"/>
 		</request>
 

@@ -249,7 +249,7 @@ int main(int argc, char *argv[])
 	nemoshow_set_userdata(show, edge);
 
 	nemoshow_view_set_layer(show, layer);
-	nemoshow_view_set_input(show, "touch");
+	nemoshow_view_put_state(show, "keypad");
 	nemoshow_view_put_state(show, "sound");
 
 	if (strcmp(layer, "background") == 0)

@@ -187,7 +187,7 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 		state_changed = 1;
 	}
 
-	if (!nemoview_is_mapped(view)) {
+	if (!nemoview_has_state(view, NEMO_VIEW_MAP_STATE)) {
 		if (bin->type == NEMO_SHELL_SURFACE_NORMAL_TYPE) {
 			if (bin->has_screen != 0) {
 				nemoview_correct_pivot(view, bin->screen.width / 2.0f, bin->screen.height / 2.0f);
@@ -251,7 +251,7 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 		bin->last_width = canvas->base.width;
 		bin->last_height = canvas->base.height;
 
-		nemoview_set_state(view, NEMO_VIEW_MAPPED_STATE);
+		nemoview_set_state(view, NEMO_VIEW_MAP_STATE);
 	} else if (bin->type == NEMO_SHELL_SURFACE_OVERLAY_TYPE) {
 		nemoview_update_transform_parent(view);
 
@@ -751,7 +751,7 @@ struct nemoview *nemoshell_get_default_view(struct nemocanvas *canvas)
 		return bin->view;
 
 	wl_list_for_each(view, &canvas->view_list, link) {
-		if (nemoview_is_mapped(view))
+		if (nemoview_has_state(view, NEMO_VIEW_MAP_STATE))
 			return view;
 	}
 
@@ -851,8 +851,6 @@ static inline void nemoshell_set_client_state(struct shellbin *bin, struct clien
 	}
 
 	bin->flags = state->flags;
-
-	nemoview_set_input_type(bin->view, state->input_type);
 }
 
 int nemoshell_use_client_state(struct nemoshell *shell, struct shellbin *bin, struct wl_client *client)

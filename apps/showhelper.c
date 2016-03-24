@@ -382,19 +382,6 @@ void nemoshow_view_set_max_size(struct nemoshow *show, float width, float height
 	nemocanvas_set_max_size(canvas, width, height);
 }
 
-void nemoshow_view_set_input(struct nemoshow *show, const char *type)
-{
-	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
-	struct nemocanvas *canvas = scon->canvas;
-
-	if (type == NULL || strcmp(type, "normal") == 0)
-		nemocanvas_set_input(canvas, NEMO_SURFACE_INPUT_TYPE_NORMAL);
-	else if (strcmp(type, "touch") == 0)
-		nemocanvas_set_input(canvas, NEMO_SURFACE_INPUT_TYPE_TOUCH);
-	else if (strcmp(type, "none") == 0)
-		nemocanvas_set_input(canvas, NEMO_SURFACE_INPUT_TYPE_NONE);
-}
-
 void nemoshow_view_set_state(struct nemoshow *show, const char *state)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
@@ -408,7 +395,7 @@ void nemoshow_view_put_state(struct nemoshow *show, const char *state)
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemocanvas *canvas = scon->canvas;
 
-	nemocanvas_unset_state(canvas, state);
+	nemocanvas_put_state(canvas, state);
 }
 
 void nemoshow_view_set_tag(struct nemoshow *show, uint32_t tag)

@@ -157,8 +157,6 @@ struct clientstate {
 
 	uint32_t flags;
 
-	uint32_t input_type;
-
 	uint32_t fadein_type;
 	uint32_t fadein_ease;
 	uint32_t fadein_delay;
@@ -382,11 +380,6 @@ static inline void clientstate_set_min_size(struct clientstate *state, uint32_t 
 static inline void clientstate_set_bin_flags(struct clientstate *state, uint32_t flags)
 {
 	state->flags = flags;
-}
-
-static inline void clientstate_set_input_type(struct clientstate *state, uint32_t type)
-{
-	state->input_type = type;
 }
 
 static inline void clientstate_set_fadein_style(struct clientstate *state, uint32_t type, uint32_t ease, uint32_t delay, uint32_t duration)

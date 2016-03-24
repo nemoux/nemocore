@@ -340,14 +340,6 @@ void nemoenvs_load_actions(struct nemoenvs *envs)
 				action->type = NEMOENVS_ACTION_NONE_TYPE;
 		}
 
-		action->input = NEMO_VIEW_INPUT_NORMAL;
-
-		attr = nemoitem_get_attr(shell->configs, index, "input");
-		if (attr != NULL) {
-			if (strcmp(attr, "touch") == 0)
-				action->input = NEMO_VIEW_INPUT_TOUCH;
-		}
-
 		action->network = NEMOENVS_NETWORK_NORMAL_STATE;
 
 		attr = nemoitem_get_attr(shell->configs, index, "network");

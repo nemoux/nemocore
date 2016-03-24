@@ -44,7 +44,7 @@ struct nemoview *nemoview_create(struct nemocompz *compz, struct nemocontent *co
 
 	pixman_region32_init(&view->clip);
 
-	view->state = NEMO_VIEW_CATCHABLE_STATE | NEMO_VIEW_PICKABLE_STATE | NEMO_VIEW_SOUND_STATE;
+	view->state = NEMO_VIEW_CATCH_STATE | NEMO_VIEW_PICK_STATE | NEMO_VIEW_SOUND_STATE;
 
 	view->psf_flags = 0x0;
 
@@ -79,7 +79,7 @@ void nemoview_destroy(struct nemoview *view)
 
 	assert(wl_list_empty(&view->children_list));
 
-	if (nemoview_is_mapped(view))
+	if (nemoview_has_state(view, NEMO_VIEW_MAP_STATE))
 		nemoview_unmap(view);
 
 	wl_list_remove(&view->link);
@@ -169,7 +169,7 @@ void nemoview_correct_pivot(struct nemoview *view, float px, float py)
 
 void nemoview_unmap(struct nemoview *view)
 {
-	if (!nemoview_is_mapped(view))
+	if (!nemoview_has_state(view, NEMO_VIEW_MAP_STATE))
 		return;
 
 	nemoview_damage_below(view);
@@ -177,7 +177,7 @@ void nemoview_unmap(struct nemoview *view)
 	view->node_mask = 0;
 	view->screen_mask = 0;
 
-	nemoview_put_state(view, NEMO_VIEW_MAPPED_STATE);
+	nemoview_put_state(view, NEMO_VIEW_MAP_STATE);
 
 	nemocontent_update_output(view->content, 0, 0);
 

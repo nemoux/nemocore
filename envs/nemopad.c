@@ -392,7 +392,7 @@ static void nemopad_dispatch_canvas_event(struct nemoshow *show, struct showone 
 						nemoshow_event_get_gx(event),
 						nemoshow_event_get_gy(event),
 						&sx, &sy);
-				if (view != NULL && nemoview_support_touch_only(view) == 0) {
+				if (view != NULL && nemoview_has_state(view, NEMO_VIEW_KEYPAD_STATE)) {
 					nemokeypad_set_focus(pad->keypad, view);
 				}
 			}

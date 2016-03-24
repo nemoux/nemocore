@@ -224,22 +224,6 @@ static void nemo_surface_set_flag(struct wl_client *client, struct wl_resource *
 			wl_fixed_to_double(fy));
 }
 
-static void nemo_surface_set_input(struct wl_client *client, struct wl_resource *resource, uint32_t type)
-{
-	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
-
-	if (type == NEMO_SURFACE_INPUT_TYPE_NORMAL) {
-		nemoview_set_state(bin->view, NEMO_VIEW_PICKABLE_STATE);
-		nemoview_set_input_type(bin->view, NEMO_VIEW_INPUT_NORMAL);
-	} else if (type == NEMO_SURFACE_INPUT_TYPE_TOUCH) {
-		nemoview_set_state(bin->view, NEMO_VIEW_PICKABLE_STATE);
-		nemoview_set_input_type(bin->view, NEMO_VIEW_INPUT_TOUCH);
-	} else if (type == NEMO_SURFACE_INPUT_TYPE_NONE) {
-		nemoview_put_state(bin->view, NEMO_VIEW_PICKABLE_STATE);
-		nemoview_set_input_type(bin->view, NEMO_VIEW_INPUT_NONE);
-	}
-}
-
 static void nemo_surface_set_layer(struct wl_client *client, struct wl_resource *resource, uint32_t type)
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
@@ -247,7 +231,7 @@ static void nemo_surface_set_layer(struct wl_client *client, struct wl_resource 
 	if (type == NEMO_SURFACE_LAYER_TYPE_BACKGROUND) {
 		bin->layer = &bin->shell->background_layer;
 
-		nemoview_put_state(bin->view, NEMO_VIEW_CATCHABLE_STATE);
+		nemoview_put_state(bin->view, NEMO_VIEW_CATCH_STATE);
 	} else if (type == NEMO_SURFACE_LAYER_TYPE_SERVICE) {
 		bin->layer = &bin->shell->service_layer;
 	} else if (type == NEMO_SURFACE_LAYER_TYPE_OVERLAY) {
@@ -320,7 +304,7 @@ static void nemo_surface_set_fullscreen(struct wl_client *client, struct wl_reso
 #endif
 }
 
-static void nemo_surface_unset_fullscreen(struct wl_client *client, struct wl_resource *resource)
+static void nemo_surface_put_fullscreen(struct wl_client *client, struct wl_resource *resource)
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 	struct nemoshell *shell = bin->shell;
@@ -335,15 +319,27 @@ static void nemo_surface_set_state(struct wl_client *client, struct wl_resource 
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 
-	if (strcmp(state, "sound") == 0)
+	if (strcmp(state, "catch") == 0)
+		nemoview_set_state(bin->view, NEMO_VIEW_CATCH_STATE);
+	else if (strcmp(state, "pick") == 0)
+		nemoview_set_state(bin->view, NEMO_VIEW_PICK_STATE);
+	else if (strcmp(state, "keypad") == 0)
+		nemoview_set_state(bin->view, NEMO_VIEW_KEYPAD_STATE);
+	else if (strcmp(state, "sound") == 0)
 		nemoview_set_state(bin->view, NEMO_VIEW_SOUND_STATE);
 }
 
-static void nemo_surface_unset_state(struct wl_client *client, struct wl_resource *resource, const char *state)
+static void nemo_surface_put_state(struct wl_client *client, struct wl_resource *resource, const char *state)
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 
-	if (strcmp(state, "sound") == 0)
+	if (strcmp(state, "catch") == 0)
+		nemoview_put_state(bin->view, NEMO_VIEW_CATCH_STATE);
+	else if (strcmp(state, "pick") == 0)
+		nemoview_put_state(bin->view, NEMO_VIEW_PICK_STATE);
+	else if (strcmp(state, "keypad") == 0)
+		nemoview_put_state(bin->view, NEMO_VIEW_KEYPAD_STATE);
+	else if (strcmp(state, "sound") == 0)
 		nemoview_put_state(bin->view, NEMO_VIEW_SOUND_STATE);
 }
 
@@ -369,15 +365,14 @@ static const struct nemo_surface_interface nemo_surface_implementation = {
 	nemo_surface_set_pivot,
 	nemo_surface_set_anchor,
 	nemo_surface_set_flag,
-	nemo_surface_set_input,
 	nemo_surface_set_layer,
 	nemo_surface_set_parent,
 	nemo_surface_set_fullscreen_type,
 	nemo_surface_set_fullscreen_opaque,
 	nemo_surface_set_fullscreen,
-	nemo_surface_unset_fullscreen,
+	nemo_surface_put_fullscreen,
 	nemo_surface_set_state,
-	nemo_surface_unset_state,
+	nemo_surface_put_state,
 	nemo_surface_set_tag
 };
 
@@ -418,7 +413,7 @@ static void nemo_get_nemo_surface(struct wl_client *client, struct wl_resource *
 		return;
 	}
 
-	nemoview_put_state(bin->view, NEMO_VIEW_CATCHABLE_STATE);
+	nemoview_put_state(bin->view, NEMO_VIEW_CATCH_STATE);
 
 	if (shell->default_layer != NULL)
 		bin->layer = shell->default_layer;

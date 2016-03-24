@@ -917,7 +917,7 @@ static void nemoxmanager_handle_transform(struct wl_listener *listener, void *da
 	if (xwindow == NULL)
 		return;
 
-	if (view == NULL || !nemoview_is_mapped(view))
+	if (view == NULL || !nemoview_has_state(view, NEMO_VIEW_MAP_STATE))
 		return;
 
 	if (xwindow->x != view->geometry.x ||

@@ -355,7 +355,7 @@ void nemoshow_view_set_layer(struct nemoshow *show, const char *layer)
 	else if (strcmp(layer, "overlay") == 0)
 		nemoview_attach_layer(actor->view, &shell->overlay_layer);
 
-	nemoview_set_state(actor->view, NEMO_VIEW_MAPPED_STATE);
+	nemoview_set_state(actor->view, NEMO_VIEW_MAP_STATE);
 }
 
 void nemoshow_view_put_layer(struct nemoshow *show)
@@ -365,7 +365,7 @@ void nemoshow_view_put_layer(struct nemoshow *show)
 
 	nemoview_detach_layer(actor->view);
 
-	nemoview_put_state(actor->view, NEMO_VIEW_MAPPED_STATE);
+	nemoview_put_state(actor->view, NEMO_VIEW_MAP_STATE);
 }
 
 void nemoshow_view_set_parent(struct nemoshow *show, struct nemoview *parent)
@@ -374,7 +374,7 @@ void nemoshow_view_set_parent(struct nemoshow *show, struct nemoview *parent)
 	struct nemoactor *actor = scon->actor;
 
 	nemoview_set_parent(actor->view, parent);
-	nemoview_set_state(actor->view, NEMO_VIEW_MAPPED_STATE);
+	nemoview_set_state(actor->view, NEMO_VIEW_MAP_STATE);
 }
 
 void nemoshow_view_set_position(struct nemoshow *show, float x, float y)
@@ -447,29 +447,18 @@ void nemoshow_view_set_max_size(struct nemoshow *show, float width, float height
 	nemoactor_set_max_size(actor, width, height);
 }
 
-void nemoshow_view_set_input(struct nemoshow *show, const char *type)
-{
-	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
-	struct nemoactor *actor = scon->actor;
-
-	if (type == NULL || strcmp(type, "normal") == 0) {
-		nemoview_set_state(actor->view, NEMO_VIEW_PICKABLE_STATE);
-		nemoview_set_input_type(actor->view, NEMO_VIEW_INPUT_NORMAL);
-	} else if (strcmp(type, "touch") == 0) {
-		nemoview_set_state(actor->view, NEMO_VIEW_PICKABLE_STATE);
-		nemoview_set_input_type(actor->view, NEMO_VIEW_INPUT_TOUCH);
-	} else if (strcmp(type, "none") == 0) {
-		nemoview_put_state(actor->view, NEMO_VIEW_PICKABLE_STATE);
-		nemoview_set_input_type(actor->view, NEMO_VIEW_INPUT_NONE);
-	}
-}
-
 void nemoshow_view_set_state(struct nemoshow *show, const char *state)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemoactor *actor = scon->actor;
 
-	if (strcmp(state, "sound") == 0)
+	if (strcmp(state, "catch") == 0)
+		nemoview_set_state(actor->view, NEMO_VIEW_CATCH_STATE);
+	else if (strcmp(state, "pick") == 0)
+		nemoview_set_state(actor->view, NEMO_VIEW_PICK_STATE);
+	else if (strcmp(state, "keypad") == 0)
+		nemoview_set_state(actor->view, NEMO_VIEW_KEYPAD_STATE);
+	else if (strcmp(state, "sound") == 0)
 		nemoview_set_state(actor->view, NEMO_VIEW_SOUND_STATE);
 }
 
@@ -478,7 +467,13 @@ void nemoshow_view_put_state(struct nemoshow *show, const char *state)
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemoactor *actor = scon->actor;
 
-	if (strcmp(state, "sound") == 0)
+	if (strcmp(state, "catch") == 0)
+		nemoview_put_state(actor->view, NEMO_VIEW_CATCH_STATE);
+	else if (strcmp(state, "pick") == 0)
+		nemoview_put_state(actor->view, NEMO_VIEW_PICK_STATE);
+	else if (strcmp(state, "keypad") == 0)
+		nemoview_put_state(actor->view, NEMO_VIEW_KEYPAD_STATE);
+	else if (strcmp(state, "sound") == 0)
 		nemoview_put_state(actor->view, NEMO_VIEW_SOUND_STATE);
 }
 

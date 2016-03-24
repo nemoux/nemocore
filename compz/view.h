@@ -20,16 +20,10 @@ typedef enum {
 } NemoViewTransformType;
 
 typedef enum {
-	NEMO_VIEW_INPUT_NORMAL = 0,
-	NEMO_VIEW_INPUT_TOUCH = 1,
-	NEMO_VIEW_INPUT_NONE = 2,
-	NEMO_VIEW_INPUT_LAST
-} NemoViewInputType;
-
-typedef enum {
-	NEMO_VIEW_MAPPED_STATE = (1 << 0),
-	NEMO_VIEW_CATCHABLE_STATE = (1 << 1),
-	NEMO_VIEW_PICKABLE_STATE = (1 << 2),
+	NEMO_VIEW_MAP_STATE = (1 << 0),
+	NEMO_VIEW_CATCH_STATE = (1 << 1),
+	NEMO_VIEW_PICK_STATE = (1 << 2),
+	NEMO_VIEW_KEYPAD_STATE = (1 << 3),
 	NEMO_VIEW_SOUND_STATE = (1 << 3),
 	NEMO_VIEW_LAST_STATE
 } NemoViewState;
@@ -377,26 +371,6 @@ static inline void nemoview_put_state(struct nemoview *view, uint32_t state)
 static inline int nemoview_has_state(struct nemoview *view, uint32_t state)
 {
 	return view->state & state;
-}
-
-static inline void nemoview_set_input_type(struct nemoview *view, int type)
-{
-	view->input.type = type;
-}
-
-static inline int nemoview_is_mapped(struct nemoview *view)
-{
-	return view->state & NEMO_VIEW_MAPPED_STATE;
-}
-
-static inline int nemoview_support_keyboard(struct nemoview *view)
-{
-	return view->input.type == NEMO_VIEW_INPUT_NORMAL;
-}
-
-static inline int nemoview_support_touch_only(struct nemoview *view)
-{
-	return view->input.type == NEMO_VIEW_INPUT_TOUCH;
 }
 
 static inline void nemoview_set_tag(struct nemoview *view, uint32_t tag)
