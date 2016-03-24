@@ -48,7 +48,7 @@ struct nemoaction {
 	uint32_t flags;
 
 	int type;
-	int input;
+	int keypad;
 	int network;
 
 	uint32_t max_width, max_height;

@@ -18,7 +18,7 @@ struct nemoaction {
 	char *user;
 
 	char *type;
-	char *input;
+	char *keypad;
 	char *network;
 	char *resize;
 };

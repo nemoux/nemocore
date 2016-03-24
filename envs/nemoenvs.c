@@ -340,6 +340,14 @@ void nemoenvs_load_actions(struct nemoenvs *envs)
 				action->type = NEMOENVS_ACTION_NONE_TYPE;
 		}
 
+		action->keypad = 1;
+
+		attr = nemoitem_get_attr(shell->configs, index, "keypad");
+		if (attr != NULL) {
+			if (strcmp(attr, "off") == 0)
+				action->keypad = 0;
+		}
+
 		action->network = NEMOENVS_NETWORK_NORMAL_STATE;
 
 		attr = nemoitem_get_attr(shell->configs, index, "network");
