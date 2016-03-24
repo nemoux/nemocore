@@ -15,17 +15,37 @@ typedef enum {
 	NEMOSHOW_NONE_FILTER = 0,
 	NEMOSHOW_BLUR_FILTER = 1,
 	NEMOSHOW_EMBOSS_FILTER = 2,
+	NEMOSHOW_SHADOW_FILTER = 3,
 	NEMOSHOW_LAST_FILTER
 } NemoShowFilterType;
+
+typedef enum {
+	NEMOSHOW_FILTER_MASK_TYPE = 0,
+	NEMOSHOW_FILTER_IMAGE_TYPE = 1,
+	NEMOSHOW_FILTER_COLOR_TYPE = 2,
+	NEMOSHOW_FILTER_LAST_TYPE
+} NemoShowFilterBaseType;
+
+typedef enum {
+	NEMOSHOW_FILTER_SHADOW_AND_FOREGROUND_MODE = 0,
+	NEMOSHOW_FILTER_SHADOW_ONLY_MODE = 1,
+	NEMOSHOW_FILTER_SHADOW_LAST_MODE
+} NemoShowFilterShadowMode;
 
 struct showfilter {
 	struct showone base;
 
+	int type;
+
 	double r;
 
 	double dx, dy, dz;
+	double sx, sy;
 	double ambient;
 	double specular;
+
+	double fills[4];
+	int mode;
 
 	void *cc;
 };
@@ -45,6 +65,55 @@ extern void nemoshow_filter_set_radius(struct showone *one, double r);
 extern void nemoshow_filter_set_direction(struct showone *one, double dx, double dy, double dz);
 extern void nemoshow_filter_set_ambient(struct showone *one, double ambient);
 extern void nemoshow_filter_set_specular(struct showone *one, double specular);
+
+static inline void nemoshow_filter_set_color(struct showone *one, double r, double g, double b, double a)
+{
+	struct showfilter *filter = NEMOSHOW_FILTER(one);
+
+	filter->fills[NEMOSHOW_RED_COLOR] = r;
+	filter->fills[NEMOSHOW_GREEN_COLOR] = g;
+	filter->fills[NEMOSHOW_BLUE_COLOR] = b;
+	filter->fills[NEMOSHOW_ALPHA_COLOR] = a;
+
+	nemoshow_one_set_state(one, NEMOSHOW_FILL_STATE);
+
+	nemoshow_one_dirty(one, NEMOSHOW_STYLE_DIRTY);
+}
+
+static inline void nemoshow_filter_set_dx(struct showone *one, double dx)
+{
+	NEMOSHOW_FILTER_AT(one, dx) = dx;
+
+	nemoshow_one_dirty(one, NEMOSHOW_FILTER_DIRTY);
+}
+
+static inline void nemoshow_filter_set_dy(struct showone *one, double dy)
+{
+	NEMOSHOW_FILTER_AT(one, dy) = dy;
+
+	nemoshow_one_dirty(one, NEMOSHOW_FILTER_DIRTY);
+}
+
+static inline void nemoshow_filter_set_sx(struct showone *one, double sx)
+{
+	NEMOSHOW_FILTER_AT(one, sx) = sx;
+
+	nemoshow_one_dirty(one, NEMOSHOW_FILTER_DIRTY);
+}
+
+static inline void nemoshow_filter_set_sy(struct showone *one, double sy)
+{
+	NEMOSHOW_FILTER_AT(one, sy) = sy;
+
+	nemoshow_one_dirty(one, NEMOSHOW_FILTER_DIRTY);
+}
+
+static inline void nemoshow_filter_set_mode(struct showone *one, int mode)
+{
+	NEMOSHOW_FILTER_AT(one, mode) = mode;
+
+	nemoshow_one_dirty(one, NEMOSHOW_FILTER_DIRTY);
+}
 
 typedef enum {
 	NEMOBLUR_INNER_SMALL_TYPE = 0,

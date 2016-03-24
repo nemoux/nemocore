@@ -27,6 +27,8 @@
 #include <SkBlurMask.h>
 #include <SkBlurMaskFilter.h>
 #include <SkEmbossMaskFilter.h>
+#include <SkDropShadowImageFilter.h>
+#include <SkLumaColorFilter.h>
 
 #include <SkGradientShader.h>
 #include <SkPerlinNoiseShader.h>

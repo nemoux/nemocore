@@ -326,20 +326,50 @@ static inline void nemoshow_item_update_filter(struct nemoshow *show, struct sho
 		struct showone *ref = NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF);
 		struct showfilter *filter = NEMOSHOW_FILTER(ref);
 
-		NEMOSHOW_ITEM_CC(item, fill)->setMaskFilter(NEMOSHOW_FILTER_CC(filter, filter));
-		NEMOSHOW_ITEM_CC(item, stroke)->setMaskFilter(NEMOSHOW_FILTER_CC(filter, filter));
+		if (filter->type == NEMOSHOW_FILTER_MASK_TYPE) {
+			NEMOSHOW_ITEM_CC(item, fill)->setMaskFilter(NEMOSHOW_FILTER_CC(filter, maskfilter));
+			NEMOSHOW_ITEM_CC(item, stroke)->setMaskFilter(NEMOSHOW_FILTER_CC(filter, maskfilter));
 
-		if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
-			struct showone *child;
+			if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
+				struct showone *child;
 
-			nemoshow_children_for_each(child, one) {
-				NEMOSHOW_PATH_ATCC(child, fill)->setMaskFilter(NEMOSHOW_FILTER_CC(filter, filter));
-				NEMOSHOW_PATH_ATCC(child, stroke)->setMaskFilter(NEMOSHOW_FILTER_CC(filter, filter));
+				nemoshow_children_for_each(child, one) {
+					NEMOSHOW_PATH_ATCC(child, fill)->setMaskFilter(NEMOSHOW_FILTER_CC(filter, maskfilter));
+					NEMOSHOW_PATH_ATCC(child, stroke)->setMaskFilter(NEMOSHOW_FILTER_CC(filter, maskfilter));
+				}
+			}
+		} else if (filter->type == NEMOSHOW_FILTER_IMAGE_TYPE) {
+			NEMOSHOW_ITEM_CC(item, fill)->setImageFilter(NEMOSHOW_FILTER_CC(filter, imagefilter));
+			NEMOSHOW_ITEM_CC(item, stroke)->setImageFilter(NEMOSHOW_FILTER_CC(filter, imagefilter));
+
+			if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
+				struct showone *child;
+
+				nemoshow_children_for_each(child, one) {
+					NEMOSHOW_PATH_ATCC(child, fill)->setImageFilter(NEMOSHOW_FILTER_CC(filter, imagefilter));
+					NEMOSHOW_PATH_ATCC(child, stroke)->setImageFilter(NEMOSHOW_FILTER_CC(filter, imagefilter));
+				}
+			}
+		} else if (filter->type == NEMOSHOW_FILTER_COLOR_TYPE) {
+			NEMOSHOW_ITEM_CC(item, fill)->setColorFilter(NEMOSHOW_FILTER_CC(filter, colorfilter));
+			NEMOSHOW_ITEM_CC(item, stroke)->setColorFilter(NEMOSHOW_FILTER_CC(filter, colorfilter));
+
+			if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
+				struct showone *child;
+
+				nemoshow_children_for_each(child, one) {
+					NEMOSHOW_PATH_ATCC(child, fill)->setColorFilter(NEMOSHOW_FILTER_CC(filter, colorfilter));
+					NEMOSHOW_PATH_ATCC(child, stroke)->setColorFilter(NEMOSHOW_FILTER_CC(filter, colorfilter));
+				}
 			}
 		}
 	} else {
 		NEMOSHOW_ITEM_CC(item, fill)->setMaskFilter(NULL);
 		NEMOSHOW_ITEM_CC(item, stroke)->setMaskFilter(NULL);
+		NEMOSHOW_ITEM_CC(item, fill)->setImageFilter(NULL);
+		NEMOSHOW_ITEM_CC(item, stroke)->setImageFilter(NULL);
+		NEMOSHOW_ITEM_CC(item, fill)->setColorFilter(NULL);
+		NEMOSHOW_ITEM_CC(item, stroke)->setColorFilter(NULL);
 
 		if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
 			struct showone *child;
@@ -347,6 +377,10 @@ static inline void nemoshow_item_update_filter(struct nemoshow *show, struct sho
 			nemoshow_children_for_each(child, one) {
 				NEMOSHOW_PATH_ATCC(child, fill)->setMaskFilter(NULL);
 				NEMOSHOW_PATH_ATCC(child, stroke)->setMaskFilter(NULL);
+				NEMOSHOW_PATH_ATCC(child, fill)->setImageFilter(NULL);
+				NEMOSHOW_PATH_ATCC(child, stroke)->setImageFilter(NULL);
+				NEMOSHOW_PATH_ATCC(child, fill)->setColorFilter(NULL);
+				NEMOSHOW_PATH_ATCC(child, stroke)->setColorFilter(NULL);
 			}
 		}
 	}

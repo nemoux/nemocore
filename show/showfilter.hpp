@@ -2,7 +2,9 @@
 #define __NEMOSHOW_FILTER_HPP__
 
 typedef struct _showfilter {
-	SkMaskFilter *filter;
+	SkMaskFilter *maskfilter;
+	SkImageFilter *imagefilter;
+	SkColorFilter *colorfilter;
 
 	SkBlurMaskFilter::BlurFlags flags;
 	SkBlurStyle style;

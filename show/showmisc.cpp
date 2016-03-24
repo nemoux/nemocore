@@ -71,6 +71,8 @@ struct showprop *nemoshow_get_property(const char *name)
 		{ "rz",								NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_MATRIX_DIRTY,			NEMOSHOW_TRANSFORM_STATE },
 		{ "seed",							NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_SHADER_DIRTY,			0x0 },
 		{ "shader",						NEMOSHOW_STRING_PROP,				NEMOSHOW_STYLE_DIRTY,				0x0 },
+		{ "sigma-x",					NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_FILTER_DIRTY,			0x0 },
+		{ "sigma-y",					NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_FILTER_DIRTY,			0x0 },
 		{ "specular",					NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_FILTER_DIRTY,			0x0 },
 		{ "src",							NEMOSHOW_STRING_PROP,				NEMOSHOW_NONE_DIRTY,				0x0 },
 		{ "stroke",						NEMOSHOW_COLOR_PROP,				NEMOSHOW_STYLE_DIRTY,				NEMOSHOW_STROKE_STATE },

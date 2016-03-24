@@ -65,7 +65,9 @@ struct showone *nemoshow_filter_create(int type)
 	memset(filter, 0, sizeof(struct showfilter));
 
 	filter->cc = new showfilter_t;
-	NEMOSHOW_FILTER_CC(filter, filter) = NULL;
+	NEMOSHOW_FILTER_CC(filter, maskfilter) = NULL;
+	NEMOSHOW_FILTER_CC(filter, imagefilter) = NULL;
+	NEMOSHOW_FILTER_CC(filter, colorfilter) = NULL;
 
 	one = &filter->base;
 	one->type = NEMOSHOW_FILTER_TYPE;
@@ -82,6 +84,15 @@ struct showone *nemoshow_filter_create(int type)
 	nemoobject_set_reserved(&one->object, "dz", &filter->dz, sizeof(double));
 	nemoobject_set_reserved(&one->object, "ambient", &filter->ambient, sizeof(double));
 	nemoobject_set_reserved(&one->object, "specular", &filter->specular, sizeof(double));
+	nemoobject_set_reserved(&one->object, "fill", &filter->fills, sizeof(double[4]));
+	nemoobject_set_reserved(&one->object, "sigma-x", &filter->sx, sizeof(double));
+	nemoobject_set_reserved(&one->object, "sigma-y", &filter->sy, sizeof(double));
+
+	if (type == NEMOSHOW_BLUR_FILTER || type == NEMOSHOW_EMBOSS_FILTER) {
+		filter->type = NEMOSHOW_FILTER_MASK_TYPE;
+	} else if (type == NEMOSHOW_SHADOW_FILTER) {
+		filter->type = NEMOSHOW_FILTER_IMAGE_TYPE;
+	}
 
 	return one;
 }
@@ -92,8 +103,12 @@ void nemoshow_filter_destroy(struct showone *one)
 
 	nemoshow_one_finish(one);
 
-	if (NEMOSHOW_FILTER_CC(filter, filter) != NULL)
-		NEMOSHOW_FILTER_CC(filter, filter)->unref();
+	if (NEMOSHOW_FILTER_CC(filter, maskfilter) != NULL)
+		NEMOSHOW_FILTER_CC(filter, maskfilter)->unref();
+	if (NEMOSHOW_FILTER_CC(filter, imagefilter) != NULL)
+		NEMOSHOW_FILTER_CC(filter, imagefilter)->unref();
+	if (NEMOSHOW_FILTER_CC(filter, colorfilter) != NULL)
+		NEMOSHOW_FILTER_CC(filter, colorfilter)->unref();
 
 	delete static_cast<showfilter_t *>(filter->cc);
 
@@ -104,25 +119,52 @@ int nemoshow_filter_update(struct showone *one)
 {
 	struct showfilter *filter = NEMOSHOW_FILTER(one);
 
-	if (NEMOSHOW_FILTER_CC(filter, filter) != NULL)
-		NEMOSHOW_FILTER_CC(filter, filter)->unref();
+	if (filter->type == NEMOSHOW_FILTER_MASK_TYPE) {
+		if (NEMOSHOW_FILTER_CC(filter, maskfilter) != NULL)
+			NEMOSHOW_FILTER_CC(filter, maskfilter)->unref();
 
-	if (one->sub == NEMOSHOW_BLUR_FILTER) {
-		NEMOSHOW_FILTER_CC(filter, filter) = SkBlurMaskFilter::Create(
-				NEMOSHOW_FILTER_CC(filter, style),
-				SkBlurMask::ConvertRadiusToSigma(filter->r),
-				NEMOSHOW_FILTER_CC(filter, flags));
-	} else if (one->sub == NEMOSHOW_EMBOSS_FILTER) {
-		SkEmbossMaskFilter::Light light;
+		if (one->sub == NEMOSHOW_BLUR_FILTER) {
+			NEMOSHOW_FILTER_CC(filter, maskfilter) = SkBlurMaskFilter::Create(
+					NEMOSHOW_FILTER_CC(filter, style),
+					SkBlurMask::ConvertRadiusToSigma(filter->r),
+					NEMOSHOW_FILTER_CC(filter, flags));
+		} else if (one->sub == NEMOSHOW_EMBOSS_FILTER) {
+			SkEmbossMaskFilter::Light light;
 
-		light.fDirection[0] = filter->dx;
-		light.fDirection[1] = filter->dy;
-		light.fDirection[2] = filter->dz;
-		light.fAmbient = filter->ambient;
-		light.fSpecular = filter->specular;
+			light.fDirection[0] = filter->dx;
+			light.fDirection[1] = filter->dy;
+			light.fDirection[2] = filter->dz;
+			light.fAmbient = filter->ambient;
+			light.fSpecular = filter->specular;
 
-		NEMOSHOW_FILTER_CC(filter, filter) = SkEmbossMaskFilter::Create(
-				SkBlurMask::ConvertRadiusToSigma(filter->r), light);
+			NEMOSHOW_FILTER_CC(filter, maskfilter) = SkEmbossMaskFilter::Create(
+					SkBlurMask::ConvertRadiusToSigma(filter->r), light);
+		}
+	} else if (filter->type == NEMOSHOW_FILTER_IMAGE_TYPE) {
+		if (NEMOSHOW_FILTER_CC(filter, imagefilter) != NULL)
+			NEMOSHOW_FILTER_CC(filter, imagefilter)->unref();
+
+		if (one->sub == NEMOSHOW_SHADOW_FILTER) {
+			static const SkDropShadowImageFilter::ShadowMode shadowmodes[] = {
+				SkDropShadowImageFilter::kDrawShadowAndForeground_ShadowMode,
+				SkDropShadowImageFilter::kDrawShadowOnly_ShadowMode
+			};
+
+			NEMOSHOW_FILTER_CC(filter, imagefilter) = SkDropShadowImageFilter::Create(
+					SkDoubleToScalar(filter->dx),
+					SkDoubleToScalar(filter->dy),
+					SkDoubleToScalar(filter->sx),
+					SkDoubleToScalar(filter->sy),
+					SkColorSetARGB(
+						filter->fills[NEMOSHOW_ALPHA_COLOR],
+						filter->fills[NEMOSHOW_RED_COLOR],
+						filter->fills[NEMOSHOW_GREEN_COLOR],
+						filter->fills[NEMOSHOW_BLUE_COLOR]),
+					shadowmodes[filter->mode]);
+		}
+	} else if (filter->type == NEMOSHOW_FILTER_COLOR_TYPE) {
+		if (NEMOSHOW_FILTER_CC(filter, colorfilter) != NULL)
+			NEMOSHOW_FILTER_CC(filter, colorfilter)->unref();
 	}
 
 	return 0;
