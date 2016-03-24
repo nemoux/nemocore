@@ -108,10 +108,6 @@ struct nemoview {
 		struct nemomatrix matrix, inverse;
 	} transform;
 
-	struct {
-		int type;
-	} input;
-
 	void *data;
 };
 

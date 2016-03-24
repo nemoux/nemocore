@@ -384,6 +384,21 @@ pixman_image_t *nemocanvas_get_pixman_image(struct nemocanvas *canvas)
 	return image;
 }
 
+void nemocanvas_set_tag(struct nemocanvas *canvas, uint32_t tag)
+{
+	nemo_surface_set_tag(canvas->nemo_surface, tag);
+}
+
+void nemocanvas_set_state(struct nemocanvas *canvas, const char *state)
+{
+	nemo_surface_set_state(canvas->nemo_surface, state);
+}
+
+void nemocanvas_put_state(struct nemocanvas *canvas, const char *state)
+{
+	nemo_surface_put_state(canvas->nemo_surface, state);
+}
+
 void nemocanvas_move(struct nemocanvas *canvas, uint32_t serial)
 {
 	nemo_surface_move(canvas->nemo_surface, canvas->tool->seat, serial);
@@ -504,21 +519,6 @@ void nemocanvas_set_fullscreen(struct nemocanvas *canvas, uint32_t id)
 void nemocanvas_put_fullscreen(struct nemocanvas *canvas)
 {
 	nemo_surface_put_fullscreen(canvas->nemo_surface);
-}
-
-void nemocanvas_set_state(struct nemocanvas *canvas, const char *state)
-{
-	nemo_surface_set_state(canvas->nemo_surface, state);
-}
-
-void nemocanvas_put_state(struct nemocanvas *canvas, const char *state)
-{
-	nemo_surface_put_state(canvas->nemo_surface, state);
-}
-
-void nemocanvas_set_tag(struct nemocanvas *canvas, uint32_t tag)
-{
-	nemo_surface_set_tag(canvas->nemo_surface, tag);
 }
 
 void nemocanvas_set_nemosurface(struct nemocanvas *canvas, uint32_t type)

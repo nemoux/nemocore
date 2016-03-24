@@ -55,6 +55,41 @@ static void nemo_surface_destroy(struct wl_client *client, struct wl_resource *r
 	wl_resource_destroy(resource);
 }
 
+static void nemo_surface_set_tag(struct wl_client *client, struct wl_resource *resource, uint32_t tag)
+{
+	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
+
+	nemoview_set_tag(bin->view, tag);
+}
+
+static void nemo_surface_set_state(struct wl_client *client, struct wl_resource *resource, const char *state)
+{
+	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
+
+	if (strcmp(state, "catch") == 0)
+		nemoview_set_state(bin->view, NEMO_VIEW_CATCH_STATE);
+	else if (strcmp(state, "pick") == 0)
+		nemoview_set_state(bin->view, NEMO_VIEW_PICK_STATE);
+	else if (strcmp(state, "keypad") == 0)
+		nemoview_set_state(bin->view, NEMO_VIEW_KEYPAD_STATE);
+	else if (strcmp(state, "sound") == 0)
+		nemoview_set_state(bin->view, NEMO_VIEW_SOUND_STATE);
+}
+
+static void nemo_surface_put_state(struct wl_client *client, struct wl_resource *resource, const char *state)
+{
+	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
+
+	if (strcmp(state, "catch") == 0)
+		nemoview_put_state(bin->view, NEMO_VIEW_CATCH_STATE);
+	else if (strcmp(state, "pick") == 0)
+		nemoview_put_state(bin->view, NEMO_VIEW_PICK_STATE);
+	else if (strcmp(state, "keypad") == 0)
+		nemoview_put_state(bin->view, NEMO_VIEW_KEYPAD_STATE);
+	else if (strcmp(state, "sound") == 0)
+		nemoview_put_state(bin->view, NEMO_VIEW_SOUND_STATE);
+}
+
 static void nemo_surface_move(struct wl_client *client, struct wl_resource *resource, struct wl_resource *seat_resource, uint32_t serial)
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
@@ -315,43 +350,11 @@ static void nemo_surface_put_fullscreen(struct wl_client *client, struct wl_reso
 	}
 }
 
-static void nemo_surface_set_state(struct wl_client *client, struct wl_resource *resource, const char *state)
-{
-	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
-
-	if (strcmp(state, "catch") == 0)
-		nemoview_set_state(bin->view, NEMO_VIEW_CATCH_STATE);
-	else if (strcmp(state, "pick") == 0)
-		nemoview_set_state(bin->view, NEMO_VIEW_PICK_STATE);
-	else if (strcmp(state, "keypad") == 0)
-		nemoview_set_state(bin->view, NEMO_VIEW_KEYPAD_STATE);
-	else if (strcmp(state, "sound") == 0)
-		nemoview_set_state(bin->view, NEMO_VIEW_SOUND_STATE);
-}
-
-static void nemo_surface_put_state(struct wl_client *client, struct wl_resource *resource, const char *state)
-{
-	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
-
-	if (strcmp(state, "catch") == 0)
-		nemoview_put_state(bin->view, NEMO_VIEW_CATCH_STATE);
-	else if (strcmp(state, "pick") == 0)
-		nemoview_put_state(bin->view, NEMO_VIEW_PICK_STATE);
-	else if (strcmp(state, "keypad") == 0)
-		nemoview_put_state(bin->view, NEMO_VIEW_KEYPAD_STATE);
-	else if (strcmp(state, "sound") == 0)
-		nemoview_put_state(bin->view, NEMO_VIEW_SOUND_STATE);
-}
-
-static void nemo_surface_set_tag(struct wl_client *client, struct wl_resource *resource, uint32_t tag)
-{
-	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
-
-	nemoview_set_tag(bin->view, tag);
-}
-
 static const struct nemo_surface_interface nemo_surface_implementation = {
 	nemo_surface_destroy,
+	nemo_surface_set_tag,
+	nemo_surface_set_state,
+	nemo_surface_put_state,
 	nemo_surface_move,
 	nemo_surface_pick,
 	nemo_surface_miss,
@@ -370,10 +373,7 @@ static const struct nemo_surface_interface nemo_surface_implementation = {
 	nemo_surface_set_fullscreen_type,
 	nemo_surface_set_fullscreen_opaque,
 	nemo_surface_set_fullscreen,
-	nemo_surface_put_fullscreen,
-	nemo_surface_set_state,
-	nemo_surface_put_state,
-	nemo_surface_set_tag
+	nemo_surface_put_fullscreen
 };
 
 static void nemoshell_unbind_nemo_surface(struct wl_resource *resource)

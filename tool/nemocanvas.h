@@ -85,6 +85,9 @@ extern void nemocanvas_opaque(struct nemocanvas *canvas, int32_t x, int32_t y, i
 
 extern pixman_image_t *nemocanvas_get_pixman_image(struct nemocanvas *canvas);
 
+extern void nemocanvas_set_tag(struct nemocanvas *canvas, uint32_t tag);
+extern void nemocanvas_set_state(struct nemocanvas *canvas, const char *state);
+extern void nemocanvas_put_state(struct nemocanvas *canvas, const char *state);
 extern void nemocanvas_move(struct nemocanvas *canvas, uint32_t serial);
 extern void nemocanvas_pick(struct nemocanvas *canvas, uint32_t serial0, uint32_t serial1, uint32_t type);
 extern void nemocanvas_miss(struct nemocanvas *canvas);
@@ -104,9 +107,6 @@ extern void nemocanvas_set_fullscreen_type(struct nemocanvas *canvas, uint32_t t
 extern void nemocanvas_set_fullscreen_opaque(struct nemocanvas *canvas, uint32_t opaque);
 extern void nemocanvas_set_fullscreen(struct nemocanvas *canvas, uint32_t id);
 extern void nemocanvas_put_fullscreen(struct nemocanvas *canvas);
-extern void nemocanvas_set_state(struct nemocanvas *canvas, const char *state);
-extern void nemocanvas_put_state(struct nemocanvas *canvas, const char *state);
-extern void nemocanvas_set_tag(struct nemocanvas *canvas, uint32_t tag);
 
 extern void nemocanvas_set_nemosurface(struct nemocanvas *canvas, uint32_t type);
 
