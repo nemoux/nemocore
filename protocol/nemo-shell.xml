@@ -180,10 +180,12 @@
 		<request name="unset_fullscreen">
 		</request>
 
-		<request name="set_sound">
+		<request name="set_state">
+			<arg name="state" type="string"/>
 		</request>
 
-		<request name="unset_sound">
+		<request name="unset_state">
+			<arg name="state" type="string"/>
 		</request>
 
 		<request name="set_tag">

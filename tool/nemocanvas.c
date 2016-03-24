@@ -511,14 +511,14 @@ void nemocanvas_unset_fullscreen(struct nemocanvas *canvas)
 	nemo_surface_unset_fullscreen(canvas->nemo_surface);
 }
 
-void nemocanvas_set_sound(struct nemocanvas *canvas)
+void nemocanvas_set_state(struct nemocanvas *canvas, const char *state)
 {
-	nemo_surface_set_sound(canvas->nemo_surface);
+	nemo_surface_set_state(canvas->nemo_surface, state);
 }
 
-void nemocanvas_unset_sound(struct nemocanvas *canvas)
+void nemocanvas_unset_state(struct nemocanvas *canvas, const char *state)
 {
-	nemo_surface_unset_sound(canvas->nemo_surface);
+	nemo_surface_unset_state(canvas->nemo_surface, state);
 }
 
 void nemocanvas_set_tag(struct nemocanvas *canvas, uint32_t tag)

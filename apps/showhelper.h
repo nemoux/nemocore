@@ -70,8 +70,8 @@ extern void nemoshow_view_set_opaque(struct nemoshow *show, int32_t x, int32_t y
 extern void nemoshow_view_set_min_size(struct nemoshow *show, float width, float height);
 extern void nemoshow_view_set_max_size(struct nemoshow *show, float width, float height);
 extern void nemoshow_view_set_input(struct nemoshow *show, const char *type);
-extern void nemoshow_view_set_sound(struct nemoshow *show);
-extern void nemoshow_view_put_sound(struct nemoshow *show);
+extern void nemoshow_view_set_state(struct nemoshow *show, const char *state);
+extern void nemoshow_view_put_state(struct nemoshow *show, const char *state);
 extern void nemoshow_view_set_tag(struct nemoshow *show, uint32_t tag);
 extern int nemoshow_view_move(struct nemoshow *show, uint32_t serial);
 extern int nemoshow_view_pick(struct nemoshow *show, uint32_t serial0, uint32_t serial1, uint32_t type);

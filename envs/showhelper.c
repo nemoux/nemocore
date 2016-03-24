@@ -464,20 +464,22 @@ void nemoshow_view_set_input(struct nemoshow *show, const char *type)
 	}
 }
 
-void nemoshow_view_set_sound(struct nemoshow *show)
+void nemoshow_view_set_state(struct nemoshow *show, const char *state)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemoactor *actor = scon->actor;
 
-	nemoview_set_state(actor->view, NEMO_VIEW_SOUND_STATE);
+	if (strcmp(state, "sound") == 0)
+		nemoview_set_state(actor->view, NEMO_VIEW_SOUND_STATE);
 }
 
-void nemoshow_view_put_sound(struct nemoshow *show)
+void nemoshow_view_put_state(struct nemoshow *show, const char *state)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemoactor *actor = scon->actor;
 
-	nemoview_put_state(actor->view, NEMO_VIEW_SOUND_STATE);
+	if (strcmp(state, "sound") == 0)
+		nemoview_put_state(actor->view, NEMO_VIEW_SOUND_STATE);
 }
 
 void nemoshow_view_set_tag(struct nemoshow *show, uint32_t tag)

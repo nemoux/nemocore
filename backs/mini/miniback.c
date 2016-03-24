@@ -279,7 +279,7 @@ int main(int argc, char *argv[])
 	nemocanvas_set_input(NTEGL_CANVAS(canvas), NEMO_SURFACE_INPUT_TYPE_TOUCH);
 	nemocanvas_set_layer(NTEGL_CANVAS(canvas), NEMO_SURFACE_LAYER_TYPE_BACKGROUND);
 	nemocanvas_set_dispatch_resize(NTEGL_CANVAS(canvas), nemoback_mini_dispatch_canvas_resize);
-	nemocanvas_unset_sound(NTEGL_CANVAS(canvas));
+	nemocanvas_unset_state(NTEGL_CANVAS(canvas), "sound");
 
 	mini->canvas = NTEGL_CANVAS(canvas);
 

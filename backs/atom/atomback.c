@@ -230,7 +230,7 @@ int main(int argc, char *argv[])
 
 	nemoshow_view_set_layer(show, "background");
 	nemoshow_view_set_input(show, "touch");
-	nemoshow_view_put_sound(show);
+	nemoshow_view_put_state(show, "sound");
 	nemoshow_view_set_opaque(show, 0, 0, width, height);
 
 	atom->scene = scene = nemoshow_scene_create();

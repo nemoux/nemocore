@@ -331,18 +331,20 @@ static void nemo_surface_unset_fullscreen(struct wl_client *client, struct wl_re
 	}
 }
 
-static void nemo_surface_set_sound(struct wl_client *client, struct wl_resource *resource)
+static void nemo_surface_set_state(struct wl_client *client, struct wl_resource *resource, const char *state)
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 
-	nemoview_set_state(bin->view, NEMO_VIEW_SOUND_STATE);
+	if (strcmp(state, "sound") == 0)
+		nemoview_set_state(bin->view, NEMO_VIEW_SOUND_STATE);
 }
 
-static void nemo_surface_unset_sound(struct wl_client *client, struct wl_resource *resource)
+static void nemo_surface_unset_state(struct wl_client *client, struct wl_resource *resource, const char *state)
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 
-	nemoview_put_state(bin->view, NEMO_VIEW_SOUND_STATE);
+	if (strcmp(state, "sound") == 0)
+		nemoview_put_state(bin->view, NEMO_VIEW_SOUND_STATE);
 }
 
 static void nemo_surface_set_tag(struct wl_client *client, struct wl_resource *resource, uint32_t tag)
@@ -374,8 +376,8 @@ static const struct nemo_surface_interface nemo_surface_implementation = {
 	nemo_surface_set_fullscreen_opaque,
 	nemo_surface_set_fullscreen,
 	nemo_surface_unset_fullscreen,
-	nemo_surface_set_sound,
-	nemo_surface_unset_sound,
+	nemo_surface_set_state,
+	nemo_surface_unset_state,
 	nemo_surface_set_tag
 };
 

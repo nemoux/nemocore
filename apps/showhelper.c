@@ -395,27 +395,27 @@ void nemoshow_view_set_input(struct nemoshow *show, const char *type)
 		nemocanvas_set_input(canvas, NEMO_SURFACE_INPUT_TYPE_NONE);
 }
 
-void nemoshow_view_set_sound(struct nemoshow *show)
+void nemoshow_view_set_state(struct nemoshow *show, const char *state)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemocanvas *canvas = scon->canvas;
 
-	nemocanvas_set_sound(canvas);
+	nemocanvas_set_state(canvas, state);
 }
 
-void nemoshow_view_put_sound(struct nemoshow *show)
+void nemoshow_view_put_state(struct nemoshow *show, const char *state)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemocanvas *canvas = scon->canvas;
 
-	nemocanvas_unset_sound(canvas);
+	nemocanvas_unset_state(canvas, state);
 }
 
 void nemoshow_view_set_tag(struct nemoshow *show, uint32_t tag)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemocanvas *canvas = scon->canvas;
-	
+
 	nemocanvas_set_tag(canvas, tag);
 }
 

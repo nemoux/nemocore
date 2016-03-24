@@ -250,7 +250,7 @@ int main(int argc, char *argv[])
 
 	nemoshow_view_set_layer(show, layer);
 	nemoshow_view_set_input(show, "touch");
-	nemoshow_view_put_sound(show);
+	nemoshow_view_put_state(show, "sound");
 
 	if (strcmp(layer, "background") == 0)
 		nemoshow_view_set_opaque(show, 0, 0, width, height);
