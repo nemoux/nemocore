@@ -45,6 +45,86 @@
 			<arg name="state" type="string"/>
 		</request>
 
+		<request name="set_size">
+			<arg name="width" type="uint"/>
+			<arg name="height" type="uint"/>
+		</request>
+
+		<request name="set_min_size">
+			<arg name="width" type="uint"/>
+			<arg name="height" type="uint"/>
+		</request>
+
+		<request name="set_max_size">
+			<arg name="width" type="uint"/>
+			<arg name="height" type="uint"/>
+		</request>
+
+		<request name="set_position">
+			<arg name="x" type="fixed"/>
+			<arg name="y" type="fixed"/>
+		</request>
+
+		<request name="set_rotation">
+			<arg name="r" type="fixed"/>
+		</request>
+
+		<request name="set_scale">
+			<arg name="sx" type="fixed"/>
+			<arg name="sy" type="fixed"/>
+		</request>
+
+		<request name="set_pivot">
+			<arg name="px" type="int"/>
+			<arg name="py" type="int"/>
+		</request>
+
+		<request name="set_anchor">
+			<arg name="ax" type="fixed"/>
+			<arg name="ay" type="fixed"/>
+		</request>
+
+		<request name="set_flag">
+			<arg name="fx" type="fixed"/>
+			<arg name="fy" type="fixed"/>
+		</request>
+
+		<enum name="layer_type">
+			<entry name="background" value="0"/>
+			<entry name="service" value="1"/>
+			<entry name="overlay" value="2"/>
+			<entry name="underlay" value="3"/>
+		</enum>
+
+		<request name="set_layer">
+			<arg name="type" type="uint"/>
+		</request>
+
+		<request name="set_parent">
+			<arg name="parent" type="object" interface="nemo_surface"/>
+		</request>
+
+		<enum name="fullscreen_type">
+			<entry name="normal" value="0"/>
+			<entry name="pick" value="1"/>
+			<entry name="pitch" value="2"/>
+		</enum>
+
+		<request name="set_fullscreen_type">
+			<arg name="type" type="uint"/>
+		</request>
+
+		<request name="set_fullscreen_opaque">
+			<arg name="opaque" type="uint"/>
+		</request>
+
+		<request name="set_fullscreen">
+			<arg name="id" type="uint"/>
+		</request>
+
+		<request name="put_fullscreen">
+		</request>
+
 		<request name="move">
 			<arg name="seat" type="object" interface="nemo_seat"/>
 			<arg name="serial" type="uint"/>
@@ -109,77 +189,6 @@
 			<arg name="x" type="fixed"/>
 			<arg name="y" type="fixed"/>
 			<arg name="r" type="fixed"/>
-		</request>
-
-		<request name="set_size">
-			<arg name="width" type="uint"/>
-			<arg name="height" type="uint"/>
-		</request>
-
-		<request name="set_min_size">
-			<arg name="width" type="uint"/>
-			<arg name="height" type="uint"/>
-		</request>
-
-		<request name="set_max_size">
-			<arg name="width" type="uint"/>
-			<arg name="height" type="uint"/>
-		</request>
-
-		<request name="set_scale">
-			<arg name="sx" type="fixed"/>
-			<arg name="sy" type="fixed"/>
-		</request>
-
-		<request name="set_pivot">
-			<arg name="px" type="int"/>
-			<arg name="py" type="int"/>
-		</request>
-
-		<request name="set_anchor">
-			<arg name="ax" type="fixed"/>
-			<arg name="ay" type="fixed"/>
-		</request>
-
-		<request name="set_flag">
-			<arg name="fx" type="fixed"/>
-			<arg name="fy" type="fixed"/>
-		</request>
-
-		<enum name="layer_type">
-			<entry name="background" value="0"/>
-			<entry name="service" value="1"/>
-			<entry name="overlay" value="2"/>
-			<entry name="underlay" value="3"/>
-		</enum>
-
-		<request name="set_layer">
-			<arg name="type" type="uint"/>
-		</request>
-
-		<request name="set_parent">
-			<arg name="parent" type="object" interface="nemo_surface"/>
-		</request>
-
-		<enum name="fullscreen_type">
-			<entry name="normal" value="0"/>
-			<entry name="pick" value="1"/>
-			<entry name="pitch" value="2"/>
-		</enum>
-
-		<request name="set_fullscreen_type">
-			<arg name="type" type="uint"/>
-		</request>
-
-		<request name="set_fullscreen_opaque">
-			<arg name="opaque" type="uint"/>
-		</request>
-
-		<request name="set_fullscreen">
-			<arg name="id" type="uint"/>
-		</request>
-
-		<request name="put_fullscreen">
 		</request>
 
 		<event name="configure">

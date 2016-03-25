@@ -320,12 +320,24 @@ void nemoshow_view_set_position(struct nemoshow *show, float x, float y)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemocanvas *canvas = scon->canvas;
+
+	nemocanvas_set_position(canvas, x, y);
 }
 
 void nemoshow_view_set_rotation(struct nemoshow *show, float r)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemocanvas *canvas = scon->canvas;
+
+	nemocanvas_set_rotation(canvas, r);
+}
+
+void nemoshow_view_set_scale(struct nemoshow *show, float sx, float sy)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemocanvas *canvas = scon->canvas;
+
+	nemocanvas_set_scale(canvas, sx, sy);
 }
 
 void nemoshow_view_set_pivot(struct nemoshow *show, float px, float py)

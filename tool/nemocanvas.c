@@ -399,48 +399,6 @@ void nemocanvas_put_state(struct nemocanvas *canvas, const char *state)
 	nemo_surface_put_state(canvas->nemo_surface, state);
 }
 
-void nemocanvas_move(struct nemocanvas *canvas, uint32_t serial)
-{
-	nemo_surface_move(canvas->nemo_surface, canvas->tool->seat, serial);
-}
-
-void nemocanvas_pick(struct nemocanvas *canvas, uint32_t serial0, uint32_t serial1, uint32_t type)
-{
-	nemo_surface_pick(canvas->nemo_surface, canvas->tool->seat, serial0, serial1, type);
-}
-
-void nemocanvas_miss(struct nemocanvas *canvas)
-{
-	nemo_surface_miss(canvas->nemo_surface);
-}
-
-void nemocanvas_execute_command(struct nemocanvas *canvas, const char *name, const char *cmds, uint32_t type, uint32_t coords, double x, double y, double r)
-{
-	nemo_surface_execute_command(canvas->nemo_surface,
-			name, cmds, type, coords,
-			wl_fixed_from_double(x),
-			wl_fixed_from_double(y),
-			wl_fixed_from_double(r));
-}
-
-void nemocanvas_execute_action(struct nemocanvas *canvas, uint32_t group, uint32_t action, uint32_t type, uint32_t coords, double x, double y, double r)
-{
-	nemo_surface_execute_action(canvas->nemo_surface,
-			group, action, type, coords,
-			wl_fixed_from_double(x),
-			wl_fixed_from_double(y),
-			wl_fixed_from_double(r));
-}
-
-void nemocanvas_execute_content(struct nemocanvas *canvas, uint32_t type, const char *path, uint32_t coords, double x, double y, double r)
-{
-	nemo_surface_execute_content(canvas->nemo_surface,
-			type, path, coords,
-			wl_fixed_from_double(x),
-			wl_fixed_from_double(y),
-			wl_fixed_from_double(r));
-}
-
 void nemocanvas_set_size(struct nemocanvas *canvas, int32_t width, int32_t height)
 {
 	canvas->width = width;
@@ -460,6 +418,21 @@ void nemocanvas_set_max_size(struct nemocanvas *canvas, int32_t width, int32_t h
 {
 	if (canvas->nemo_surface != NULL)
 		nemo_surface_set_max_size(canvas->nemo_surface, width, height);
+}
+
+void nemocanvas_set_position(struct nemocanvas *canvas, float x, float y)
+{
+	if (canvas->nemo_surface != NULL)
+		nemo_surface_set_position(canvas->nemo_surface,
+				wl_fixed_from_double(x),
+				wl_fixed_from_double(y));
+}
+
+void nemocanvas_set_rotation(struct nemocanvas *canvas, float r)
+{
+	if (canvas->nemo_surface != NULL)
+		nemo_surface_set_rotation(canvas->nemo_surface,
+				wl_fixed_from_double(r));
 }
 
 void nemocanvas_set_scale(struct nemocanvas *canvas, float sx, float sy)
@@ -519,6 +492,48 @@ void nemocanvas_set_fullscreen(struct nemocanvas *canvas, uint32_t id)
 void nemocanvas_put_fullscreen(struct nemocanvas *canvas)
 {
 	nemo_surface_put_fullscreen(canvas->nemo_surface);
+}
+
+void nemocanvas_move(struct nemocanvas *canvas, uint32_t serial)
+{
+	nemo_surface_move(canvas->nemo_surface, canvas->tool->seat, serial);
+}
+
+void nemocanvas_pick(struct nemocanvas *canvas, uint32_t serial0, uint32_t serial1, uint32_t type)
+{
+	nemo_surface_pick(canvas->nemo_surface, canvas->tool->seat, serial0, serial1, type);
+}
+
+void nemocanvas_miss(struct nemocanvas *canvas)
+{
+	nemo_surface_miss(canvas->nemo_surface);
+}
+
+void nemocanvas_execute_command(struct nemocanvas *canvas, const char *name, const char *cmds, uint32_t type, uint32_t coords, double x, double y, double r)
+{
+	nemo_surface_execute_command(canvas->nemo_surface,
+			name, cmds, type, coords,
+			wl_fixed_from_double(x),
+			wl_fixed_from_double(y),
+			wl_fixed_from_double(r));
+}
+
+void nemocanvas_execute_action(struct nemocanvas *canvas, uint32_t group, uint32_t action, uint32_t type, uint32_t coords, double x, double y, double r)
+{
+	nemo_surface_execute_action(canvas->nemo_surface,
+			group, action, type, coords,
+			wl_fixed_from_double(x),
+			wl_fixed_from_double(y),
+			wl_fixed_from_double(r));
+}
+
+void nemocanvas_execute_content(struct nemocanvas *canvas, uint32_t type, const char *path, uint32_t coords, double x, double y, double r)
+{
+	nemo_surface_execute_content(canvas->nemo_surface,
+			type, path, coords,
+			wl_fixed_from_double(x),
+			wl_fixed_from_double(y),
+			wl_fixed_from_double(r));
 }
 
 void nemocanvas_set_nemosurface(struct nemocanvas *canvas, uint32_t type)

@@ -90,117 +90,6 @@ static void nemo_surface_put_state(struct wl_client *client, struct wl_resource 
 		nemoview_put_state(bin->view, NEMO_VIEW_SOUND_STATE);
 }
 
-static void nemo_surface_move(struct wl_client *client, struct wl_resource *resource, struct wl_resource *seat_resource, uint32_t serial)
-{
-	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
-
-	if (bin->flags & NEMO_SHELL_SURFACE_MOVABLE_FLAG) {
-		nemoshell_move_canvas(bin->shell, bin, serial);
-	}
-}
-
-static void nemo_surface_pick(struct wl_client *client, struct wl_resource *resource, struct wl_resource *seat_resource, uint32_t serial0, uint32_t serial1, uint32_t type)
-{
-	struct nemoseat *seat = (struct nemoseat *)wl_resource_get_user_data(seat_resource);
-	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
-
-	if (bin->flags & NEMO_SHELL_SURFACE_PICKABLE_FLAG) {
-		nemoshell_pick_canvas(bin->shell, bin, serial0, serial1, type);
-	}
-}
-
-static void nemo_surface_miss(struct wl_client *client, struct wl_resource *resource)
-{
-	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
-
-	if (bin->grabbed > 0)
-		wl_signal_emit(&bin->ungrab_signal, bin);
-}
-
-static void nemo_surface_execute_command(struct wl_client *client, struct wl_resource *resource, const char *name, const char *cmds, uint32_t type, uint32_t coords, wl_fixed_t x, wl_fixed_t y, wl_fixed_t r)
-{
-	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
-	struct nemoshell *shell = bin->shell;
-
-	if (shell->execute_command != NULL) {
-		float tx, ty;
-		float tr;
-
-		if (coords == NEMO_SURFACE_COORDINATE_TYPE_LOCAL) {
-			nemoview_transform_to_global(bin->view,
-					wl_fixed_to_double(x),
-					wl_fixed_to_double(y),
-					&tx, &ty);
-
-			tr = wl_fixed_to_double(r) * M_PI / 180.0f + bin->view->geometry.r;
-		} else {
-			tx = wl_fixed_to_double(x);
-			ty = wl_fixed_to_double(y);
-			tr = wl_fixed_to_double(r) * M_PI / 180.0f;
-		}
-
-		shell->execute_command(shell->userdata, bin,
-				name, cmds, type,
-				tx, ty, tr);
-	}
-}
-
-static void nemo_surface_execute_action(struct wl_client *client, struct wl_resource *resource, uint32_t group, uint32_t action, uint32_t type, uint32_t coords, wl_fixed_t x, wl_fixed_t y, wl_fixed_t r)
-{
-	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
-	struct nemoshell *shell = bin->shell;
-
-	if (shell->execute_action != NULL) {
-		float tx, ty;
-		float tr;
-
-		if (coords == NEMO_SURFACE_COORDINATE_TYPE_LOCAL) {
-			nemoview_transform_to_global(bin->view,
-					wl_fixed_to_double(x),
-					wl_fixed_to_double(y),
-					&tx, &ty);
-
-			tr = wl_fixed_to_double(r) * M_PI / 180.0f + bin->view->geometry.r;
-		} else {
-			tx = wl_fixed_to_double(x);
-			ty = wl_fixed_to_double(y);
-			tr = wl_fixed_to_double(r) * M_PI / 180.0f;
-		}
-
-		shell->execute_action(shell->userdata, bin,
-				group, action, type,
-				tx, ty, tr);
-	}
-}
-
-static void nemo_surface_execute_content(struct wl_client *client, struct wl_resource *resource, uint32_t type, const char *path, uint32_t coords, wl_fixed_t x, wl_fixed_t y, wl_fixed_t r)
-{
-	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
-	struct nemoshell *shell = bin->shell;
-
-	if (shell->execute_content != NULL) {
-		float tx, ty;
-		float tr;
-
-		if (coords == NEMO_SURFACE_COORDINATE_TYPE_LOCAL) {
-			nemoview_transform_to_global(bin->view,
-					wl_fixed_to_double(x),
-					wl_fixed_to_double(y),
-					&tx, &ty);
-
-			tr = wl_fixed_to_double(r) * M_PI / 180.0f + bin->view->geometry.r;
-		} else {
-			tx = wl_fixed_to_double(x);
-			ty = wl_fixed_to_double(y);
-			tr = wl_fixed_to_double(r) * M_PI / 180.0f;
-		}
-
-		shell->execute_content(shell->userdata, bin,
-				type, path,
-				tx, ty, tr);
-	}
-}
-
 static void nemo_surface_set_size(struct wl_client *client, struct wl_resource *resource, uint32_t width, uint32_t height)
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
@@ -223,6 +112,23 @@ static void nemo_surface_set_max_size(struct wl_client *client, struct wl_resour
 
 	bin->max_width = width;
 	bin->max_height = height;
+}
+
+static void nemo_surface_set_position(struct wl_client *client, struct wl_resource *resource, wl_fixed_t x, wl_fixed_t y)
+{
+	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
+
+	nemoview_set_position(bin->view,
+			wl_fixed_to_double(x),
+			wl_fixed_to_double(y));
+}
+
+static void nemo_surface_set_rotation(struct wl_client *client, struct wl_resource *resource, wl_fixed_t r)
+{
+	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
+
+	nemoview_set_rotation(bin->view,
+			wl_fixed_to_double(r));
 }
 
 static void nemo_surface_set_scale(struct wl_client *client, struct wl_resource *resource, wl_fixed_t sx, wl_fixed_t sy)
@@ -350,20 +256,127 @@ static void nemo_surface_put_fullscreen(struct wl_client *client, struct wl_reso
 	}
 }
 
+static void nemo_surface_move(struct wl_client *client, struct wl_resource *resource, struct wl_resource *seat_resource, uint32_t serial)
+{
+	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
+
+	if (bin->flags & NEMO_SHELL_SURFACE_MOVABLE_FLAG) {
+		nemoshell_move_canvas(bin->shell, bin, serial);
+	}
+}
+
+static void nemo_surface_pick(struct wl_client *client, struct wl_resource *resource, struct wl_resource *seat_resource, uint32_t serial0, uint32_t serial1, uint32_t type)
+{
+	struct nemoseat *seat = (struct nemoseat *)wl_resource_get_user_data(seat_resource);
+	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
+
+	if (bin->flags & NEMO_SHELL_SURFACE_PICKABLE_FLAG) {
+		nemoshell_pick_canvas(bin->shell, bin, serial0, serial1, type);
+	}
+}
+
+static void nemo_surface_miss(struct wl_client *client, struct wl_resource *resource)
+{
+	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
+
+	if (bin->grabbed > 0)
+		wl_signal_emit(&bin->ungrab_signal, bin);
+}
+
+static void nemo_surface_execute_command(struct wl_client *client, struct wl_resource *resource, const char *name, const char *cmds, uint32_t type, uint32_t coords, wl_fixed_t x, wl_fixed_t y, wl_fixed_t r)
+{
+	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
+	struct nemoshell *shell = bin->shell;
+
+	if (shell->execute_command != NULL) {
+		float tx, ty;
+		float tr;
+
+		if (coords == NEMO_SURFACE_COORDINATE_TYPE_LOCAL) {
+			nemoview_transform_to_global(bin->view,
+					wl_fixed_to_double(x),
+					wl_fixed_to_double(y),
+					&tx, &ty);
+
+			tr = wl_fixed_to_double(r) * M_PI / 180.0f + bin->view->geometry.r;
+		} else {
+			tx = wl_fixed_to_double(x);
+			ty = wl_fixed_to_double(y);
+			tr = wl_fixed_to_double(r) * M_PI / 180.0f;
+		}
+
+		shell->execute_command(shell->userdata, bin,
+				name, cmds, type,
+				tx, ty, tr);
+	}
+}
+
+static void nemo_surface_execute_action(struct wl_client *client, struct wl_resource *resource, uint32_t group, uint32_t action, uint32_t type, uint32_t coords, wl_fixed_t x, wl_fixed_t y, wl_fixed_t r)
+{
+	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
+	struct nemoshell *shell = bin->shell;
+
+	if (shell->execute_action != NULL) {
+		float tx, ty;
+		float tr;
+
+		if (coords == NEMO_SURFACE_COORDINATE_TYPE_LOCAL) {
+			nemoview_transform_to_global(bin->view,
+					wl_fixed_to_double(x),
+					wl_fixed_to_double(y),
+					&tx, &ty);
+
+			tr = wl_fixed_to_double(r) * M_PI / 180.0f + bin->view->geometry.r;
+		} else {
+			tx = wl_fixed_to_double(x);
+			ty = wl_fixed_to_double(y);
+			tr = wl_fixed_to_double(r) * M_PI / 180.0f;
+		}
+
+		shell->execute_action(shell->userdata, bin,
+				group, action, type,
+				tx, ty, tr);
+	}
+}
+
+static void nemo_surface_execute_content(struct wl_client *client, struct wl_resource *resource, uint32_t type, const char *path, uint32_t coords, wl_fixed_t x, wl_fixed_t y, wl_fixed_t r)
+{
+	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
+	struct nemoshell *shell = bin->shell;
+
+	if (shell->execute_content != NULL) {
+		float tx, ty;
+		float tr;
+
+		if (coords == NEMO_SURFACE_COORDINATE_TYPE_LOCAL) {
+			nemoview_transform_to_global(bin->view,
+					wl_fixed_to_double(x),
+					wl_fixed_to_double(y),
+					&tx, &ty);
+
+			tr = wl_fixed_to_double(r) * M_PI / 180.0f + bin->view->geometry.r;
+		} else {
+			tx = wl_fixed_to_double(x);
+			ty = wl_fixed_to_double(y);
+			tr = wl_fixed_to_double(r) * M_PI / 180.0f;
+		}
+
+		shell->execute_content(shell->userdata, bin,
+				type, path,
+				tx, ty, tr);
+	}
+}
+
 static const struct nemo_surface_interface nemo_surface_implementation = {
 	nemo_surface_destroy,
 	nemo_surface_set_tag,
 	nemo_surface_set_state,
 	nemo_surface_put_state,
-	nemo_surface_move,
-	nemo_surface_pick,
-	nemo_surface_miss,
-	nemo_surface_execute_command,
-	nemo_surface_execute_action,
-	nemo_surface_execute_content,
 	nemo_surface_set_size,
 	nemo_surface_set_min_size,
 	nemo_surface_set_max_size,
+	nemo_surface_set_position,
+	nemo_surface_set_rotation,
 	nemo_surface_set_scale,
 	nemo_surface_set_pivot,
 	nemo_surface_set_anchor,
@@ -373,7 +386,13 @@ static const struct nemo_surface_interface nemo_surface_implementation = {
 	nemo_surface_set_fullscreen_type,
 	nemo_surface_set_fullscreen_opaque,
 	nemo_surface_set_fullscreen,
-	nemo_surface_put_fullscreen
+	nemo_surface_put_fullscreen,
+	nemo_surface_move,
+	nemo_surface_pick,
+	nemo_surface_miss,
+	nemo_surface_execute_command,
+	nemo_surface_execute_action,
+	nemo_surface_execute_content
 };
 
 static void nemoshell_unbind_nemo_surface(struct wl_resource *resource)

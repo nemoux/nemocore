@@ -393,6 +393,14 @@ void nemoshow_view_set_rotation(struct nemoshow *show, float r)
 	nemoview_set_rotation(actor->view, r);
 }
 
+void nemoshow_view_set_scale(struct nemoshow *show, float sx, float sy)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemoactor *actor = scon->actor;
+	
+	nemoview_set_scale(actor->view, sx, sy);
+}
+
 void nemoshow_view_set_pivot(struct nemoshow *show, float px, float py)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
