@@ -53,6 +53,7 @@ struct nemocompz {
 
 	int state;
 	int dirty;
+	int layer_dirty;
 	pixman_region32_t damage;
 
 	pixman_region32_t scene;
@@ -165,6 +166,7 @@ extern void nemocompz_set_scope(struct nemocompz *compz, int32_t x, int32_t y, i
 
 extern void nemocompz_update_transform(struct nemocompz *compz);
 extern void nemocompz_update_output(struct nemocompz *compz);
+extern void nemocompz_update_layer(struct nemocompz *compz);
 
 extern void nemocompz_dispatch_animation(struct nemocompz *compz, struct nemoanimation *animation);
 extern void nemocompz_dispatch_effect(struct nemocompz *compz, struct nemoeffect *effect);

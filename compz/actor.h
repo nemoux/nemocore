@@ -27,6 +27,7 @@ typedef int (*nemoactor_dispatch_resize_t)(struct nemoactor *actor, int32_t widt
 typedef void (*nemoactor_dispatch_output_t)(struct nemoactor *actor, uint32_t node_mask, uint32_t screen_mask);
 typedef void (*nemoactor_dispatch_transform_t)(struct nemoactor *actor, int32_t visible);
 typedef void (*nemoactor_dispatch_fullscreen_t)(struct nemoactor *actor, int32_t active, int32_t opaque);
+typedef void (*nemoactor_dispatch_layer_t)(struct nemoactor *actor, int32_t on_top);
 typedef void (*nemoactor_dispatch_frame_t)(struct nemoactor *actor, uint32_t msecs);
 typedef void (*nemoactor_dispatch_destroy_t)(struct nemoactor *actor);
 
@@ -65,6 +66,7 @@ struct nemoactor {
 	nemoactor_dispatch_output_t dispatch_output;
 	nemoactor_dispatch_transform_t dispatch_transform;
 	nemoactor_dispatch_fullscreen_t dispatch_fullscreen;
+	nemoactor_dispatch_layer_t dispatch_layer;
 	nemoactor_dispatch_frame_t dispatch_frame;
 	nemoactor_dispatch_destroy_t dispatch_destroy;
 
@@ -98,6 +100,7 @@ extern void nemoactor_set_dispatch_resize(struct nemoactor *actor, nemoactor_dis
 extern void nemoactor_set_dispatch_output(struct nemoactor *actor, nemoactor_dispatch_output_t dispatch);
 extern void nemoactor_set_dispatch_transform(struct nemoactor *actor, nemoactor_dispatch_transform_t dispatch);
 extern void nemoactor_set_dispatch_fullscreen(struct nemoactor *actor, nemoactor_dispatch_fullscreen_t dispatch);
+extern void nemoactor_set_dispatch_layer(struct nemoactor *actor, nemoactor_dispatch_layer_t dispatch);
 extern void nemoactor_set_dispatch_frame(struct nemoactor *actor, nemoactor_dispatch_frame_t dispatch);
 extern void nemoactor_set_dispatch_destroy(struct nemoactor *actor, nemoactor_dispatch_destroy_t dispatch);
 
@@ -109,6 +112,7 @@ extern int nemoactor_dispatch_resize(struct nemoactor *actor, int32_t width, int
 extern void nemoactor_dispatch_output(struct nemoactor *actor, uint32_t node_mask, uint32_t screen_mask);
 extern void nemoactor_dispatch_transform(struct nemoactor *actor, int visible);
 extern void nemoactor_dispatch_fullscreen(struct nemoactor *actor, int active, int opaque);
+extern void nemoactor_dispatch_layer(struct nemoactor *actor, int on_top);
 extern void nemoactor_dispatch_frame(struct nemoactor *actor);
 extern void nemoactor_dispatch_destroy(struct nemoactor *actor);
 

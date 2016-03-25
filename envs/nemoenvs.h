@@ -49,6 +49,7 @@ struct nemoaction {
 
 	int type;
 	int keypad;
+	int layer;
 	int network;
 
 	uint32_t max_width, max_height;

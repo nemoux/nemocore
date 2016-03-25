@@ -38,10 +38,15 @@ static void shell_send_fullscreen(struct nemocanvas *canvas, int active, int opa
 {
 }
 
+static void shell_send_layer(struct nemocanvas *canvas, int on_top)
+{
+}
+
 static struct nemoclient shell_client = {
 	shell_send_configure,
 	shell_send_transform,
-	shell_send_fullscreen
+	shell_send_fullscreen,
+	shell_send_layer
 };
 
 static void shell_surface_pong(struct wl_client *client, struct wl_resource *resource, uint32_t serial)

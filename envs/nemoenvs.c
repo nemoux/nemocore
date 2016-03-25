@@ -327,6 +327,12 @@ void nemoenvs_load_actions(struct nemoenvs *envs)
 			action->ring = strdup(ring);
 
 		action->type = NEMOENVS_ACTION_APP_TYPE;
+		action->keypad = 1;
+		action->layer = 0;
+		action->network = NEMOENVS_NETWORK_NORMAL_STATE;
+		action->flags = NEMO_SHELL_SURFACE_MOVABLE_FLAG | NEMO_SHELL_SURFACE_PICKABLE_FLAG | NEMO_SHELL_SURFACE_MAXIMIZABLE_FLAG | NEMO_SHELL_SURFACE_MINIMIZABLE_FLAG;
+		action->has_max_size = 0;
+		action->has_min_size = 0;
 
 		attr = nemoitem_get_attr(shell->configs, index, "type");
 		if (attr != NULL) {
@@ -340,23 +346,23 @@ void nemoenvs_load_actions(struct nemoenvs *envs)
 				action->type = NEMOENVS_ACTION_NONE_TYPE;
 		}
 
-		action->keypad = 1;
-
 		attr = nemoitem_get_attr(shell->configs, index, "keypad");
 		if (attr != NULL) {
 			if (strcmp(attr, "off") == 0)
 				action->keypad = 0;
 		}
 
-		action->network = NEMOENVS_NETWORK_NORMAL_STATE;
+		attr = nemoitem_get_attr(shell->configs, index, "layer");
+		if (attr != NULL) {
+			if (strcmp(attr, "on") == 0)
+				action->layer = 1;
+		}
 
 		attr = nemoitem_get_attr(shell->configs, index, "network");
 		if (attr != NULL) {
 			if (strcmp(attr, "block") == 0)
 				action->network = NEMOENVS_NETWORK_BLOCK_STATE;
 		}
-
-		action->flags = NEMO_SHELL_SURFACE_MOVABLE_FLAG | NEMO_SHELL_SURFACE_PICKABLE_FLAG | NEMO_SHELL_SURFACE_MAXIMIZABLE_FLAG | NEMO_SHELL_SURFACE_MINIMIZABLE_FLAG;
 
 		attr = nemoitem_get_attr(shell->configs, index, "resize");
 		if (attr != NULL) {
@@ -372,8 +378,6 @@ void nemoenvs_load_actions(struct nemoenvs *envs)
 			action->max_width = strtoul(attr0, NULL, 10);
 			action->max_height = strtoul(attr1, NULL, 10);
 			action->has_max_size = 1;
-		} else {
-			action->has_max_size = 0;
 		}
 
 		attr0 = nemoitem_get_attr(shell->configs, index, "min_width");
@@ -382,8 +386,6 @@ void nemoenvs_load_actions(struct nemoenvs *envs)
 			action->min_width = strtoul(attr0, NULL, 10);
 			action->min_height = strtoul(attr1, NULL, 10);
 			action->has_min_size = 1;
-		} else {
-			action->has_min_size = 0;
 		}
 
 		attr = nemoitem_get_attr(shell->configs, index, "fadein_type");

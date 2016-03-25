@@ -1108,10 +1108,15 @@ static void xserver_send_fullscreen(struct nemocanvas *canvas, int active, int o
 {
 }
 
+static void xserver_send_layer(struct nemocanvas *canvas, int on_top)
+{
+}
+
 static struct nemoclient xserver_client = {
 	xserver_send_configure,
 	xserver_send_transform,
-	xserver_send_fullscreen
+	xserver_send_fullscreen,
+	xserver_send_layer
 };
 
 void nemoxmanager_map_window(struct nemoxmanager *xmanager, struct nemoxwindow *xwindow)

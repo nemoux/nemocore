@@ -205,5 +205,9 @@
 			<arg name="active" type="int"/>
 			<arg name="opaque" type="int"/>
 		</event>
+
+		<event name="layer">
+			<arg name="on_top" type="int"/>
+		</event>
 	</interface>
 </protocol>

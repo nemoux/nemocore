@@ -341,18 +341,25 @@ out:
 	}
 }
 
-static void shellbin_transform_canvas(struct nemocanvas *canvas, int visible)
+static void shellbin_update_canvas_transform(struct nemocanvas *canvas, int visible)
 {
 	struct shellbin *bin = nemoshell_get_bin(canvas);
 
 	bin->client->send_transform(canvas, visible);
 }
 
-static void shellbin_fullscreen_canvas(struct nemocanvas *canvas, int active, int opaque)
+static void shellbin_update_canvas_fullscreen(struct nemocanvas *canvas, int active, int opaque)
 {
 	struct shellbin *bin = nemoshell_get_bin(canvas);
 
 	bin->client->send_fullscreen(canvas, active, opaque);
+}
+
+static void shellbin_update_canvas_layer(struct nemocanvas *canvas, int on_top)
+{
+	struct shellbin *bin = nemoshell_get_bin(canvas);
+
+	bin->client->send_layer(canvas, on_top);
 }
 
 static void shellbin_handle_canvas_destroy(struct wl_listener *listener, void *data)
@@ -418,8 +425,9 @@ struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas
 	canvas->configure = shellbin_configure_canvas;
 	canvas->configure_private = (void *)bin;
 
-	canvas->transform = shellbin_transform_canvas;
-	canvas->fullscreen = shellbin_fullscreen_canvas;
+	canvas->update_transform = shellbin_update_canvas_transform;
+	canvas->update_fullscreen = shellbin_update_canvas_fullscreen;
+	canvas->update_layer = shellbin_update_canvas_layer;
 
 	bin->canvas_destroy_listener.notify = shellbin_handle_canvas_destroy;
 	wl_signal_add(&canvas->destroy_signal, &bin->canvas_destroy_listener);

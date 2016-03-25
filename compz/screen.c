@@ -46,6 +46,12 @@ static int nemoscreen_repaint_frame(struct nemoscreen *screen)
 		compz->dirty = 0;
 	}
 
+	if (compz->layer_dirty != 0) {
+		nemocompz_update_layer(compz);
+
+		compz->layer_dirty = 0;
+	}
+
 	if (pixman_region32_not_empty(&screen->damage)) {
 		r = screen->repaint_frame(screen, &screen->damage);
 	}

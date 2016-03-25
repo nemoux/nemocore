@@ -44,10 +44,18 @@ static void nemo_send_fullscreen(struct nemocanvas *canvas, int active, int opaq
 	nemo_surface_send_fullscreen(bin->resource, active, opaque);
 }
 
+static void nemo_send_layer(struct nemocanvas *canvas, int on_top)
+{
+	struct shellbin *bin = nemoshell_get_bin(canvas);
+
+	nemo_surface_send_layer(bin->resource, on_top);
+}
+
 static struct nemoclient nemo_client = {
 	nemo_send_configure,
 	nemo_send_transform,
-	nemo_send_fullscreen
+	nemo_send_fullscreen,
+	nemo_send_layer
 };
 
 static void nemo_surface_destroy(struct wl_client *client, struct wl_resource *resource)
@@ -74,6 +82,8 @@ static void nemo_surface_set_state(struct wl_client *client, struct wl_resource 
 		nemoview_set_state(bin->view, NEMO_VIEW_KEYPAD_STATE);
 	else if (strcmp(state, "sound") == 0)
 		nemoview_set_state(bin->view, NEMO_VIEW_SOUND_STATE);
+	else if (strcmp(state, "layer") == 0)
+		nemoview_set_state(bin->view, NEMO_VIEW_LAYER_STATE);
 }
 
 static void nemo_surface_put_state(struct wl_client *client, struct wl_resource *resource, const char *state)
@@ -88,6 +98,8 @@ static void nemo_surface_put_state(struct wl_client *client, struct wl_resource 
 		nemoview_put_state(bin->view, NEMO_VIEW_KEYPAD_STATE);
 	else if (strcmp(state, "sound") == 0)
 		nemoview_put_state(bin->view, NEMO_VIEW_SOUND_STATE);
+	else if (strcmp(state, "layer") == 0)
+		nemoview_put_state(bin->view, NEMO_VIEW_LAYER_STATE);
 }
 
 static void nemo_surface_set_size(struct wl_client *client, struct wl_resource *resource, uint32_t width, uint32_t height)

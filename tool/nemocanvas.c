@@ -51,10 +51,19 @@ static void nemo_surface_handle_fullscreen(void *data, struct nemo_surface *surf
 		canvas->dispatch_fullscreen(canvas, active, opaque);
 }
 
+static void nemo_surface_handle_layer(void *data, struct nemo_surface *surface, int32_t on_top)
+{
+	struct nemocanvas *canvas = (struct nemocanvas *)data;
+
+	if (canvas->dispatch_layer != NULL)
+		canvas->dispatch_layer(canvas, on_top);
+}
+
 static const struct nemo_surface_listener nemo_surface_listener = {
 	nemo_surface_handle_configure,
 	nemo_surface_handle_transform,
-	nemo_surface_handle_fullscreen
+	nemo_surface_handle_fullscreen,
+	nemo_surface_handle_layer
 };
 
 static void buffer_release(void *data, struct wl_buffer *buffer)
@@ -596,6 +605,11 @@ void nemocanvas_set_dispatch_transform(struct nemocanvas *canvas, nemocanvas_dis
 void nemocanvas_set_dispatch_fullscreen(struct nemocanvas *canvas, nemocanvas_dispatch_fullscreen_t dispatch)
 {
 	canvas->dispatch_fullscreen = dispatch;
+}
+
+void nemocanvas_set_dispatch_layer(struct nemocanvas *canvas, nemocanvas_dispatch_layer_t dispatch)
+{
+	canvas->dispatch_layer = dispatch;
 }
 
 void nemocanvas_set_framerate(struct nemocanvas *canvas, uint32_t framerate)

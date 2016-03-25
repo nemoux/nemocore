@@ -35,6 +35,8 @@ void nemoenvs_destroy_action(struct nemoaction *action)
 		free(action->type);
 	if (action->keypad != NULL)
 		free(action->keypad);
+	if (action->layer != NULL)
+		free(action->layer);
 	if (action->network != NULL)
 		free(action->network);
 	if (action->resize != NULL)
@@ -197,6 +199,10 @@ void nemoenvs_load_actions(struct nemoenvs *envs)
 		attr = nemoitem_get_attr(envs->configs, index, "keypad");
 		if (attr != NULL)
 			action->keypad = strdup(attr);
+
+		attr = nemoitem_get_attr(envs->configs, index, "layer");
+		if (attr != NULL)
+			action->layer = strdup(attr);
 
 		attr = nemoitem_get_attr(envs->configs, index, "network");
 		if (attr != NULL)

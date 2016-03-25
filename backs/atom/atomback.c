@@ -132,6 +132,10 @@ static void nemoback_atom_dispatch_canvas_fullscreen(struct nemoshow *show, int3
 		atom->is_sleeping = 1;
 }
 
+static void nemoback_atom_dispatch_canvas_layer(struct nemoshow *show, int32_t on_top)
+{
+}
+
 int main(int argc, char *argv[])
 {
 	struct option options[] = {
@@ -226,9 +230,11 @@ int main(int argc, char *argv[])
 	if (show == NULL)
 		goto err2;
 	nemoshow_set_dispatch_fullscreen(show, nemoback_atom_dispatch_canvas_fullscreen);
+	nemoshow_set_dispatch_layer(show, nemoback_atom_dispatch_canvas_layer);
 	nemoshow_set_userdata(show, atom);
 
 	nemoshow_view_set_layer(show, "background");
+	nemoshow_view_set_state(show, "layer");
 	nemoshow_view_put_state(show, "keypad");
 	nemoshow_view_put_state(show, "sound");
 	nemoshow_view_set_opaque(show, 0, 0, width, height);

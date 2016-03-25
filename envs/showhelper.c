@@ -167,6 +167,15 @@ static void nemoshow_dispatch_actor_fullscreen(struct nemoactor *actor, int32_t 
 		show->dispatch_fullscreen(show, active, opaque);
 }
 
+static void nemoshow_dispatch_actor_layer(struct nemoactor *actor, int32_t on_top)
+{
+	struct nemotale *tale = (struct nemotale *)nemoactor_get_context(actor);
+	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
+
+	if (show->dispatch_layer != NULL)
+		show->dispatch_layer(show, on_top);
+}
+
 static void nemoshow_dispatch_actor_destroy(struct nemoactor *actor)
 {
 	struct nemotale *tale = (struct nemotale *)nemoactor_get_context(actor);
@@ -236,6 +245,7 @@ struct nemoshow *nemoshow_create_view(struct nemoshell *shell, int32_t width, in
 	nemoactor_set_dispatch_frame(actor, nemoshow_dispatch_actor_frame);
 	nemoactor_set_dispatch_transform(actor, nemoshow_dispatch_actor_transform);
 	nemoactor_set_dispatch_fullscreen(actor, nemoshow_dispatch_actor_fullscreen);
+	nemoactor_set_dispatch_layer(actor, nemoshow_dispatch_actor_layer);
 	nemoactor_set_dispatch_destroy(actor, nemoshow_dispatch_actor_destroy);
 
 	scon->tale = nemotale_create_gl();
@@ -397,7 +407,7 @@ void nemoshow_view_set_scale(struct nemoshow *show, float sx, float sy)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemoactor *actor = scon->actor;
-	
+
 	nemoview_set_scale(actor->view, sx, sy);
 }
 
@@ -468,6 +478,8 @@ void nemoshow_view_set_state(struct nemoshow *show, const char *state)
 		nemoview_set_state(actor->view, NEMO_VIEW_KEYPAD_STATE);
 	else if (strcmp(state, "sound") == 0)
 		nemoview_set_state(actor->view, NEMO_VIEW_SOUND_STATE);
+	else if (strcmp(state, "layer") == 0)
+		nemoview_set_state(actor->view, NEMO_VIEW_LAYER_STATE);
 }
 
 void nemoshow_view_put_state(struct nemoshow *show, const char *state)
@@ -483,6 +495,8 @@ void nemoshow_view_put_state(struct nemoshow *show, const char *state)
 		nemoview_put_state(actor->view, NEMO_VIEW_KEYPAD_STATE);
 	else if (strcmp(state, "sound") == 0)
 		nemoview_put_state(actor->view, NEMO_VIEW_SOUND_STATE);
+	else if (strcmp(state, "layer") == 0)
+		nemoview_put_state(actor->view, NEMO_VIEW_LAYER_STATE);
 }
 
 void nemoshow_view_set_tag(struct nemoshow *show, uint32_t tag)
