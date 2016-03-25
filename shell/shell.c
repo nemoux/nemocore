@@ -226,7 +226,7 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 			nemoview_damage_below(view);
 
 			wl_list_for_each_reverse(child, &bin->children_list, children_link) {
-				nemoview_update_layer(child->view);
+				nemoview_above_layer(child->view, NULL);
 			}
 
 			nemoview_set_parent(view, bin->parent->view);

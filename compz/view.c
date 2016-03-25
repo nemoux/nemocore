@@ -485,17 +485,19 @@ void nemoview_detach_layer(struct nemoview *view)
 	view->layer = NULL;
 }
 
-void nemoview_update_layer(struct nemoview *view)
+void nemoview_above_layer(struct nemoview *view, struct nemoview *above)
 {
 	struct wl_list *layer_link;
 
 	if (view->parent != NULL)
 		view = view->parent;
 
-	if (view->layer == NULL)
-		return;
-
-	layer_link = &view->layer->view_list;
+	if (above != NULL) {
+		layer_link = above->layer_link.prev;
+		view->layer = above->layer;
+	} else {
+		layer_link = &view->layer->view_list;
+	}
 
 	nemoview_transform_dirty(view);
 	wl_list_remove(&view->layer_link);
@@ -504,27 +506,25 @@ void nemoview_update_layer(struct nemoview *view)
 	nemoview_damage_below(view);
 }
 
-void nemoview_above_layer(struct nemoview *view, struct nemoview *above)
+void nemoview_below_layer(struct nemoview *view, struct nemoview *below)
 {
 	struct wl_list *layer_link;
 
-	assert(view != NULL && above != NULL);
+	if (view->parent != NULL)
+		view = view->parent;
 
-	if (view->layer != NULL) {
-		nemoview_transform_dirty(view);
-		wl_list_remove(&view->layer_link);
-		wl_list_init(&view->layer_link);
-
-		view->layer = NULL;
+	if (below != NULL) {
+		layer_link = below->layer_link.next;
+		view->layer = below->layer;
+	} else {
+		layer_link = &view->layer->view_list.prev;
 	}
 
-	layer_link = above->layer_link.prev;
-
+	nemoview_transform_dirty(view);
+	wl_list_remove(&view->layer_link);
 	wl_list_insert(layer_link, &view->layer_link);
 	nemoview_clip_dirty(view);
 	nemoview_damage_below(view);
-
-	view->layer = above->layer;
 }
 
 int nemoview_get_trapezoids(struct nemoview *view, int32_t x, int32_t y, int32_t width, int32_t height, pixman_trapezoid_t *traps)
