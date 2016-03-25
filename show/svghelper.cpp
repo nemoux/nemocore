@@ -288,18 +288,18 @@ int nemoshow_svg_get_transform(SkMatrix *matrix, const char *value)
 			if (strcmp(type, "translate") == 0) {
 				nargs = nemoshow_svg_get_transform_args(token, i, args);
 				if (nargs == 1) {
-					matrix->setTranslate(args[0], 0.0f);
+					matrix->postTranslate(args[0], 0.0f);
 				} else if (nargs == 2) {
-					matrix->setTranslate(args[0], args[1]);
+					matrix->postTranslate(args[0], args[1]);
 				}
 
 				i += nargs;
 			} else if (strcmp(type, "rotate") == 0) {
 				nargs = nemoshow_svg_get_transform_args(token, i, args);
 				if (nargs == 1) {
-					matrix->setRotate(args[0]);
+					matrix->postRotate(args[0]);
 				} else if (nargs == 3) {
-					matrix->setTranslate(args[1], args[2]);
+					matrix->postTranslate(args[1], args[2]);
 					matrix->postRotate(args[0]);
 					matrix->postTranslate(-args[1], -args[2]);
 				}
@@ -308,23 +308,23 @@ int nemoshow_svg_get_transform(SkMatrix *matrix, const char *value)
 			} else if (strcmp(type, "scale") == 0) {
 				nargs = nemoshow_svg_get_transform_args(token, i, args);
 				if (nargs == 1) {
-					matrix->setScale(args[0], 0.0f);
+					matrix->postScale(args[0], 0.0f);
 				} else if (nargs == 2) {
-					matrix->setScale(args[0], args[1]);
+					matrix->postScale(args[0], args[1]);
 				}
 
 				i += nargs;
 			} else if (strcmp(type, "skewX") == 0) {
 				nargs = nemoshow_svg_get_transform_args(token, i, args);
 				if (nargs == 1) {
-					matrix->setSkewX(args[0]);
+					matrix->postSkew(args[0], 0.0f);
 				}
 
 				i += nargs;
 			} else if (strcmp(type, "skewY") == 0) {
 				nargs = nemoshow_svg_get_transform_args(token, i, args);
 				if (nargs == 1) {
-					matrix->setSkewY(args[0]);
+					matrix->postSkew(0.0f, args[0]);
 				}
 
 				i += nargs;
