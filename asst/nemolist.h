@@ -126,6 +126,46 @@ static inline void nemolist_insert_list(struct nemolist *list, struct nemolist *
 	list->next = other->next;
 }
 
+static inline void nemolist_enqueue(struct nemolist *list, struct nemolist *elm)
+{
+	nemolist_insert(list, elm);
+}
+
+static struct nemolist *nemolist_dequeue(struct nemolist *list)
+{
+	struct nemolist *elm;
+
+	if (nemolist_empty(list))
+		return NULL;
+
+	elm = list->prev;
+
+	nemolist_remove(elm);
+	nemolist_init(elm);
+
+	return elm;
+}
+
+static inline void nemolist_push(struct nemolist *list, struct nemolist *elm)
+{
+	nemolist_insert_tail(list, elm);
+}
+
+static struct nemolist *nemolist_pop(struct nemolist *list)
+{
+	struct nemolist *elm;
+
+	if (nemolist_empty(list))
+		return NULL;
+
+	elm = list->prev;
+
+	nemolist_remove(elm);
+	nemolist_init(elm);
+
+	return elm;
+}
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif
