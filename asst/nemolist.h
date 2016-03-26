@@ -166,6 +166,22 @@ static struct nemolist *nemolist_pop(struct nemolist *list)
 	return elm;
 }
 
+static struct nemolist *nemolist_peek_head(struct nemolist *list)
+{
+	if (nemolist_empty(list))
+		return NULL;
+
+	return list->next;
+}
+
+static struct nemolist *nemolist_peek_tail(struct nemolist *list)
+{
+	if (nemolist_empty(list))
+		return NULL;
+
+	return list->prev;
+}
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif
