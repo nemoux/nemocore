@@ -13,6 +13,41 @@
 #include <nemoplay.h>
 #include <nemomisc.h>
 
+static void *nemoplay_handle_videoplay(void *arg)
+{
+	struct nemoplay *play = (struct nemoplay *)arg;
+	struct playqueue *queue;
+	struct playone *one;
+	int iframe = 0;
+
+	queue = nemoplay_get_video_queue(play);
+
+	while ((one = nemoplay_queue_dequeue(queue)) != NULL) {
+		FILE *file;
+		char filename[32];
+		int y;
+
+		sprintf(filename, "frame%d.ppm", ++iframe);
+
+		file = fopen(filename, "wb");
+		if (file == NULL)
+			break;
+
+		fprintf(file, "P6\n%d %d\n255\n", one->width, one->height);
+
+		for (y = 0; y < one->height; y++)
+			fwrite(one->data + y * one->stride, 1, one->stride, file);
+
+		fclose(file);
+
+		free(one->data);
+
+		nemoplay_queue_destroy_one(one);
+	}
+
+	return NULL;
+}
+
 static void *nemoplay_handle_audioplay(void *arg)
 {
 	struct nemoplay *play = (struct nemoplay *)arg;
@@ -79,6 +114,7 @@ int main(int argc, char *argv[])
 	if (play == NULL)
 		goto out1;
 
+	pthread_create(&thread, NULL, nemoplay_handle_videoplay, (void *)play);
 	pthread_create(&thread, NULL, nemoplay_handle_audioplay, (void *)play);
 
 	if (nemoplay_decode_media(play, mediapath) < 0)

@@ -16,6 +16,9 @@ struct nemoplay {
 	struct playqueue *audio_queue;
 	struct playqueue *subtitle_queue;
 
+	int video_width;
+	int video_height;
+
 	int audio_channels;
 	int audio_samplerate;
 	int audio_samplebits;
@@ -41,6 +44,16 @@ static inline struct playqueue *nemoplay_get_audio_queue(struct nemoplay *play)
 static inline struct playqueue *nemoplay_get_subtitle_queue(struct nemoplay *play)
 {
 	return play->subtitle_queue;
+}
+
+static inline int nemoplay_get_video_width(struct nemoplay *play)
+{
+	return play->video_width;
+}
+
+static inline int nemoplay_get_video_height(struct nemoplay *play)
+{
+	return play->video_height;
 }
 
 static inline int nemoplay_get_audio_channels(struct nemoplay *play)

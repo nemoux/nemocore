@@ -56,6 +56,7 @@ int nemoplay_decode_media(struct nemoplay *play, const char *mediapath)
 	AVCodec *codec;
 	AVFrame *frame;
 	AVPacket packet;
+	struct SwsContext *swsctx = NULL;
 	AVCodecContext *video_context = NULL;
 	AVCodecContext *audio_context = NULL;
 	AVCodecContext *subtitle_context = NULL;
@@ -102,6 +103,9 @@ int nemoplay_decode_media(struct nemoplay *play, const char *mediapath)
 	audio_stream = av_find_best_stream(container, AVMEDIA_TYPE_AUDIO, audio_stream, video_stream, NULL, 0);
 	subtitle_stream = av_find_best_stream(container, AVMEDIA_TYPE_SUBTITLE, subtitle_stream, audio_stream >= 0 ? audio_stream : video_stream, NULL, 0);
 
+	play->video_width = video_context->width;
+	play->video_height = video_context->height;
+
 	play->audio_channels = audio_context->channels;
 	play->audio_samplerate = audio_context->sample_rate;
 
@@ -120,8 +124,54 @@ int nemoplay_decode_media(struct nemoplay *play, const char *mediapath)
 
 	frame = av_frame_alloc();
 
+	swsctx = sws_getContext(
+			video_context->width,
+			video_context->height,
+			video_context->pix_fmt,
+			video_context->width,
+			video_context->height,
+			PIX_FMT_RGB24,
+			SWS_BILINEAR,
+			NULL,
+			NULL,
+			NULL);
+
 	while (av_read_frame(container, &packet) >= 0) {
 		if (packet.stream_index == video_stream) {
+			struct playone *one;
+			uint8_t *buffer;
+			int nbytes;
+
+			nbytes = avpicture_get_size(PIX_FMT_RGB24, play->video_width, play->video_height);
+			buffer = (uint8_t *)malloc(nbytes);
+
+			avcodec_decode_video2(video_context, frame, &finished, &packet);
+
+			if (finished != 0) {
+				AVFrame *frame0;
+
+				frame0 = av_frame_alloc();
+
+				avpicture_fill((AVPicture *)frame0, buffer, PIX_FMT_RGB24, play->video_width, play->video_height);
+
+				sws_scale(swsctx,
+						(void *)frame->data, frame->linesize,
+						0, play->video_height,
+						(void *)frame0->data, frame0->linesize);
+
+				one = nemoplay_queue_create_one();
+				one->cmd = NEMOPLAY_QUEUE_NORMAL_COMMAND;
+				one->data = buffer;
+				one->size = nbytes;
+
+				one->width = play->video_width;
+				one->height = play->video_height;
+				one->stride = frame0->linesize[0];
+
+				nemoplay_queue_enqueue(play->video_queue, one);
+
+				av_frame_free(&frame0);
+			}
 		} else if (packet.stream_index == audio_stream) {
 			int planesize;
 			int len = avcodec_decode_audio4(audio_context, frame, &finished, &packet);
@@ -129,18 +179,18 @@ int nemoplay_decode_media(struct nemoplay *play, const char *mediapath)
 
 			if (finished != 0) {
 				struct playone *one;
-				uint16_t *samples;
+				uint16_t *buffer;
 				uint32_t size = 0;
 				int index = 0;
 				int nb, ch;
 
-				samples = (uint16_t *)malloc(planesize * audio_context->channels);
+				buffer = (uint16_t *)malloc(planesize * audio_context->channels);
 
 				switch (audio_context->sample_fmt) {
 					case AV_SAMPLE_FMT_S16P:
 						for (nb = 0; nb < planesize / sizeof(uint16_t); nb++) {
 							for (ch = 0; ch < audio_context->channels; ch++) {
-								samples[index++] = ((uint16_t *)frame->extended_data[ch])[nb];
+								buffer[index++] = ((uint16_t *)frame->extended_data[ch])[nb];
 							}
 						}
 
@@ -150,7 +200,7 @@ int nemoplay_decode_media(struct nemoplay *play, const char *mediapath)
 					case AV_SAMPLE_FMT_FLTP:
 						for (nb = 0; nb < planesize / sizeof(float); nb++) {
 							for (ch = 0; ch < audio_context->channels; ch++) {
-								samples[index++] = ((float *)frame->extended_data[ch])[nb] * UINT_MAX;
+								buffer[index++] = ((float *)frame->extended_data[ch])[nb] * UINT_MAX;
 							}
 						}
 
@@ -159,7 +209,7 @@ int nemoplay_decode_media(struct nemoplay *play, const char *mediapath)
 
 					case AV_SAMPLE_FMT_S16:
 						for (nb = 0; nb < planesize / sizeof(uint16_t); nb++) {
-							samples[nb] = (uint16_t)(((uint16_t *)frame->extended_data[0])[nb]);
+							buffer[nb] = (uint16_t)(((uint16_t *)frame->extended_data[0])[nb]);
 						}
 
 						size = frame->linesize[0];
@@ -167,7 +217,7 @@ int nemoplay_decode_media(struct nemoplay *play, const char *mediapath)
 
 					case AV_SAMPLE_FMT_FLT:
 						for (nb = 0; nb < planesize / sizeof(float); nb++) {
-							samples[nb] = (uint16_t)(((float *)frame->extended_data[0])[nb] * UINT_MAX);
+							buffer[nb] = (uint16_t)(((float *)frame->extended_data[0])[nb] * UINT_MAX);
 						}
 
 						size = planesize / sizeof(float) * sizeof(uint16_t);
@@ -176,7 +226,7 @@ int nemoplay_decode_media(struct nemoplay *play, const char *mediapath)
 					case AV_SAMPLE_FMT_U8P:
 						for (nb = 0; nb < planesize / sizeof(uint8_t); nb++) {
 							for (ch = 0; ch < audio_context->channels; ch++) {
-								samples[index++] = (((uint8_t *)frame->extended_data[ch])[nb] - 127) * UINT_MAX / 127;
+								buffer[index++] = (((uint8_t *)frame->extended_data[ch])[nb] - 127) * UINT_MAX / 127;
 							}
 						}
 
@@ -186,7 +236,7 @@ int nemoplay_decode_media(struct nemoplay *play, const char *mediapath)
 					case AV_SAMPLE_FMT_U8:
 						for (nb = 0; nb < planesize / sizeof(uint8_t); nb++) {
 							for (ch = 0; ch < audio_context->channels; ch++) {
-								samples[index++] = (((uint8_t *)frame->extended_data[0])[nb] - 127) * UINT_MAX / 127;
+								buffer[index++] = (((uint8_t *)frame->extended_data[0])[nb] - 127) * UINT_MAX / 127;
 							}
 						}
 
@@ -200,7 +250,7 @@ int nemoplay_decode_media(struct nemoplay *play, const char *mediapath)
 
 				one = nemoplay_queue_create_one();
 				one->cmd = NEMOPLAY_QUEUE_NORMAL_COMMAND;
-				one->data = samples;
+				one->data = buffer;
 				one->size = size;
 
 				nemoplay_queue_enqueue(play->audio_queue, one);
