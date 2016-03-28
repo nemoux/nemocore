@@ -17,108 +17,132 @@
 #include <nemolog.h>
 #include <nemomisc.h>
 
+static int nemoback_atom_dispatch_quad_touch_down(struct showone *one, const char *name, struct nemoobject *attrs)
+{
+	struct atomback *atom = (struct atomback *)nemoshow_one_get_userdata(one);
+	struct showtransition *trans;
+	struct showone *sequence;
+	struct showone *set0, *set1;
+
+	set0 = nemoshow_sequence_create_set();
+	nemoshow_sequence_set_source(set0, atom->one0);
+	nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_RED_COLOR, 0.1f);
+	nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_GREEN_COLOR, 0.1f);
+	nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_BLUE_COLOR, 0.1f);
+
+	set1 = nemoshow_sequence_create_set();
+	nemoshow_sequence_set_source(set1, atom->one0);
+	nemoshow_sequence_set_fattr_offset(set1, "color", NEMOSHOW_POLY_RED_COLOR, 1.0f);
+	nemoshow_sequence_set_fattr_offset(set1, "color", NEMOSHOW_POLY_GREEN_COLOR, 1.0f);
+	nemoshow_sequence_set_fattr_offset(set1, "color", NEMOSHOW_POLY_BLUE_COLOR, 1.0f);
+
+	sequence = nemoshow_sequence_create_easy(atom->show,
+			nemoshow_sequence_create_frame_easy(atom->show,
+				0.5f, set0, NULL),
+			nemoshow_sequence_create_frame_easy(atom->show,
+				1.0f, set1, NULL),
+			NULL);
+
+	trans = nemoshow_transition_create(NEMOSHOW_CUBIC_INOUT_EASE, 800, 0);
+	nemoshow_transition_check_one(trans, atom->one0);
+	nemoshow_transition_attach_sequence(trans, sequence);
+	nemoshow_attach_transition(atom->show, trans);
+
+	return 0;
+}
+
+static int nemoback_atom_dispatch_quad_touch_up(struct showone *one, const char *name, struct nemoobject *attrs)
+{
+	struct atomback *atom = (struct atomback *)nemoshow_one_get_userdata(one);
+	struct showone *none;
+	float tx, ty;
+	int plane;
+
+	if ((plane = nemoshow_poly_pick_plane(atom->canvasp, atom->pipe0, atom->one0, nemoobject_getd(attrs, "x"), nemoobject_getd(attrs, "y"), &tx, &ty)) > 0) {
+		none = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
+		nemoshow_one_attach(atom->canvast, none);
+		nemoshow_item_set_x(none, tx * nemoshow_canvas_get_width(atom->canvast));
+		nemoshow_item_set_y(none, ty * nemoshow_canvas_get_height(atom->canvast));
+		nemoshow_item_set_r(none, 5.0f);
+		nemoshow_item_set_fill_color(none, 0xff, 0xff, 0xff, 0xff);
+	}
+
+	return 0;
+}
+
+static int nemoback_atom_dispatch_cube_touch_down(struct showone *one, const char *name, struct nemoobject *attrs)
+{
+	struct atomback *atom = (struct atomback *)nemoshow_one_get_userdata(one);
+	struct showtransition *trans;
+	struct showone *sequence;
+	struct showone *set0, *set1;
+
+	set0 = nemoshow_sequence_create_set();
+	nemoshow_sequence_set_source(set0, atom->one1);
+	nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_RED_COLOR, 0.0f);
+	nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_GREEN_COLOR, 0.0f);
+	nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_BLUE_COLOR, 0.0f);
+
+	set1 = nemoshow_sequence_create_set();
+	nemoshow_sequence_set_source(set1, atom->one1);
+	nemoshow_sequence_set_fattr_offset(set1, "color", NEMOSHOW_POLY_RED_COLOR, 1.0f);
+	nemoshow_sequence_set_fattr_offset(set1, "color", NEMOSHOW_POLY_GREEN_COLOR, 1.0f);
+	nemoshow_sequence_set_fattr_offset(set1, "color", NEMOSHOW_POLY_BLUE_COLOR, 1.0f);
+
+	sequence = nemoshow_sequence_create_easy(atom->show,
+			nemoshow_sequence_create_frame_easy(atom->show,
+				0.5f, set0, NULL),
+			nemoshow_sequence_create_frame_easy(atom->show,
+				1.0f, set1, NULL),
+			NULL);
+
+	trans = nemoshow_transition_create(NEMOSHOW_CUBIC_INOUT_EASE, 800, 0);
+	nemoshow_transition_check_one(trans, atom->one1);
+	nemoshow_transition_attach_sequence(trans, sequence);
+	nemoshow_attach_transition(atom->show, trans);
+
+	return 0;
+}
+
+static int nemoback_atom_dispatch_mesh_signal_click(struct showone *one, const char *name, struct nemoobject *attrs)
+{
+	struct atomback *atom = (struct atomback *)nemoshow_one_get_userdata(one);
+
+	nemocanvas_execute_action(NEMOSHOW_AT(atom->show, canvas),
+			0, 0,
+			NEMO_SURFACE_EXECUTE_TYPE_NORMAL,
+			NEMO_SURFACE_COORDINATE_TYPE_GLOBAL,
+			nemoobject_getd(attrs, "x"),
+			nemoobject_getd(attrs, "y"),
+			0.0f);
+
+	return 0;
+}
+
 static void nemoback_atom_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, void *event)
 {
 	struct atomback *atom = (struct atomback *)nemoshow_get_userdata(show);
+	struct showone *one;
 
-	if (nemoshow_event_is_down(show, event)) {
-		uint32_t tag;
+	one = nemoshow_canvas_pick_one(atom->canvasp, nemoshow_event_get_x(event), nemoshow_event_get_y(event));
+	if (one != NULL) {
+		struct nemoobject attrs;
 
-		tag = nemoshow_canvas_pick_tag(atom->canvasp, nemoshow_event_get_x(event), nemoshow_event_get_y(event));
-		if (tag == 1) {
-			struct showtransition *trans;
-			struct showone *sequence;
-			struct showone *set0, *set1;
+		nemoobject_prepare(&attrs, 8);
+		nemoobject_setd(&attrs, "x", nemoshow_event_get_x(event));
+		nemoobject_setd(&attrs, "y", nemoshow_event_get_y(event));
 
-			set0 = nemoshow_sequence_create_set();
-			nemoshow_sequence_set_source(set0, atom->one0);
-			nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_RED_COLOR, 0.1f);
-			nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_GREEN_COLOR, 0.1f);
-			nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_BLUE_COLOR, 0.1f);
-
-			set1 = nemoshow_sequence_create_set();
-			nemoshow_sequence_set_source(set1, atom->one0);
-			nemoshow_sequence_set_fattr_offset(set1, "color", NEMOSHOW_POLY_RED_COLOR, 1.0f);
-			nemoshow_sequence_set_fattr_offset(set1, "color", NEMOSHOW_POLY_GREEN_COLOR, 1.0f);
-			nemoshow_sequence_set_fattr_offset(set1, "color", NEMOSHOW_POLY_BLUE_COLOR, 1.0f);
-
-			sequence = nemoshow_sequence_create_easy(atom->show,
-					nemoshow_sequence_create_frame_easy(atom->show,
-						0.5f, set0, NULL),
-					nemoshow_sequence_create_frame_easy(atom->show,
-						1.0f, set1, NULL),
-					NULL);
-
-			trans = nemoshow_transition_create(NEMOSHOW_CUBIC_INOUT_EASE, 800, 0);
-			nemoshow_transition_check_one(trans, atom->one0);
-			nemoshow_transition_attach_sequence(trans, sequence);
-			nemoshow_attach_transition(atom->show, trans);
-		} else if (tag == 2) {
-			struct showtransition *trans;
-			struct showone *sequence;
-			struct showone *set0, *set1;
-
-			set0 = nemoshow_sequence_create_set();
-			nemoshow_sequence_set_source(set0, atom->one1);
-			nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_RED_COLOR, 0.0f);
-			nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_GREEN_COLOR, 0.0f);
-			nemoshow_sequence_set_fattr_offset(set0, "color", NEMOSHOW_POLY_BLUE_COLOR, 0.0f);
-
-			set1 = nemoshow_sequence_create_set();
-			nemoshow_sequence_set_source(set1, atom->one1);
-			nemoshow_sequence_set_fattr_offset(set1, "color", NEMOSHOW_POLY_RED_COLOR, 1.0f);
-			nemoshow_sequence_set_fattr_offset(set1, "color", NEMOSHOW_POLY_GREEN_COLOR, 1.0f);
-			nemoshow_sequence_set_fattr_offset(set1, "color", NEMOSHOW_POLY_BLUE_COLOR, 1.0f);
-
-			sequence = nemoshow_sequence_create_easy(atom->show,
-					nemoshow_sequence_create_frame_easy(atom->show,
-						0.5f, set0, NULL),
-					nemoshow_sequence_create_frame_easy(atom->show,
-						1.0f, set1, NULL),
-					NULL);
-
-			trans = nemoshow_transition_create(NEMOSHOW_CUBIC_INOUT_EASE, 800, 0);
-			nemoshow_transition_check_one(trans, atom->one1);
-			nemoshow_transition_attach_sequence(trans, sequence);
-			nemoshow_attach_transition(atom->show, trans);
+		if (nemoshow_event_is_down(show, event)) {
+			nemoshow_one_emit_signal(one, "touch::down", &attrs);
+		} else if (nemoshow_event_is_up(show, event)) {
+			nemoshow_one_emit_signal(one, "touch::up", &attrs);
 		}
 
-		if (tag == 1) {
-			struct showone *one;
-			float tx, ty;
-			int plane;
-
-			if ((plane = nemoshow_poly_pick_plane(atom->canvasp, atom->pipe0, atom->one0, nemoshow_event_get_x(event), nemoshow_event_get_y(event), &tx, &ty)) > 0) {
-				one = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
-				nemoshow_one_attach(atom->canvast, one);
-				nemoshow_item_set_x(one, tx * nemoshow_canvas_get_width(atom->canvast));
-				nemoshow_item_set_y(one, ty * nemoshow_canvas_get_height(atom->canvast));
-				nemoshow_item_set_r(one, 5.0f);
-				nemoshow_item_set_fill_color(one, 0xff, 0xff, 0xff, 0xff);
-			}
-		} else if (tag == 2) {
-			struct showone *one;
-			float tx, ty;
-			int plane;
-
-			if ((plane = nemoshow_poly_pick_plane(atom->canvasp, atom->pipe0, atom->one1, nemoshow_event_get_x(event), nemoshow_event_get_y(event), &tx, &ty)) > 0) {
-			}
+		if (nemoshow_event_is_single_click(show, event)) {
+			nemoshow_one_emit_signal(one, "gesture::single_click", &attrs);
 		}
-	}
 
-	if (nemoshow_event_is_single_click(show, event)) {
-		uint32_t tag;
-
-		tag = nemoshow_canvas_pick_tag(atom->canvasp, nemoshow_event_get_x(event), nemoshow_event_get_y(event));
-		if (tag == 100) {
-			nemocanvas_execute_action(NEMOSHOW_AT(show, canvas),
-					0, 0,
-					NEMO_SURFACE_EXECUTE_TYPE_NORMAL,
-					NEMO_SURFACE_COORDINATE_TYPE_GLOBAL,
-					nemoshow_event_get_x(event),
-					nemoshow_event_get_y(event),
-					0.0f);
-		}
+		nemoobject_finish(&attrs);
 	}
 }
 
@@ -288,7 +312,10 @@ int main(int argc, char *argv[])
 
 	atom->one0 = one = nemoshow_poly_create(NEMOSHOW_QUAD_POLY);
 	nemoshow_one_attach(pipe, one);
-	nemoshow_one_set_tag(one, 1);
+	nemoshow_one_set_state(one, NEMOSHOW_PICK_STATE);
+	nemoshow_one_connect_signal(one, "touch::down", nemoback_atom_dispatch_quad_touch_down);
+	nemoshow_one_connect_signal(one, "touch::up", nemoback_atom_dispatch_quad_touch_up);
+	nemoshow_one_set_userdata(one, atom);
 	nemoshow_poly_set_canvas(one, atom->canvasb);
 	nemoshow_poly_use_texcoords(one, 1);
 	nemoshow_poly_use_normals(one, 1);
@@ -308,7 +335,9 @@ int main(int argc, char *argv[])
 
 	atom->one1 = one = nemoshow_poly_create(NEMOSHOW_CUBE_POLY);
 	nemoshow_one_attach(pipe, one);
-	nemoshow_one_set_tag(one, 2);
+	nemoshow_one_set_state(one, NEMOSHOW_PICK_STATE);
+	nemoshow_one_connect_signal(one, "touch::down", nemoback_atom_dispatch_cube_touch_down);
+	nemoshow_one_set_userdata(one, atom);
 	nemoshow_poly_set_canvas(one, atom->canvast);
 	nemoshow_poly_use_texcoords(one, 1);
 	nemoshow_poly_use_normals(one, 1);
@@ -327,7 +356,9 @@ int main(int argc, char *argv[])
 
 		atom->icon0 = one = nemoshow_poly_create(NEMOSHOW_MESH_POLY);
 		nemoshow_one_attach(pipe, one);
-		nemoshow_one_set_tag(one, 100);
+		nemoshow_one_set_state(one, NEMOSHOW_PICK_STATE);
+		nemoshow_one_connect_signal(one, "gesture::signal_click", nemoback_atom_dispatch_mesh_signal_click);
+		nemoshow_one_set_userdata(one, atom);
 		nemoshow_poly_set_canvas(one, atom->canvasb);
 		nemoshow_poly_use_vbo(one, 1);
 		nemoshow_poly_load_obj(one, objpath);

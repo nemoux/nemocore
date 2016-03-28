@@ -460,6 +460,7 @@ static void nemomine_prepare_ui(struct minecontext *context)
 			mone->box = one = nemoshow_item_create(NEMOSHOW_RRECT_ITEM);
 			nemoshow_one_attach(context->canvas, one);
 			nemoshow_one_set_tag(one, index + 1);
+			nemoshow_one_set_state(one, NEMOSHOW_PICK_STATE);
 			nemoshow_item_set_x(one, 1.0f);
 			nemoshow_item_set_y(one, 1.0f);
 			nemoshow_item_set_roundx(one, 2.0f);
@@ -475,6 +476,7 @@ static void nemomine_prepare_ui(struct minecontext *context)
 			mone->one = one = nemoshow_item_create(NEMOSHOW_PATHTWICE_ITEM);
 			nemoshow_one_attach(context->canvas, one);
 			nemoshow_one_set_tag(one, index + 1);
+			nemoshow_one_set_state(one, NEMOSHOW_PICK_STATE);
 			nemoshow_item_set_width(one, context->size);
 			nemoshow_item_set_height(one, context->size);
 			nemoshow_item_set_filter(one, context->filter0);
@@ -618,6 +620,7 @@ int main(int argc, char *argv[])
 	context->pin = one = nemoshow_item_create(NEMOSHOW_PATHTWICE_ITEM);
 	nemoshow_one_attach(canvas, one);
 	nemoshow_one_set_tag(one, 10001 + 1);
+	nemoshow_one_set_state(one, NEMOSHOW_PICK_STATE);
 	nemoshow_item_set_width(one, size);
 	nemoshow_item_set_height(one, size);
 	nemoshow_item_set_filter(one, context->filter0);
@@ -630,6 +633,7 @@ int main(int argc, char *argv[])
 	context->reset = one = nemoshow_item_create(NEMOSHOW_PATHTWICE_ITEM);
 	nemoshow_one_attach(canvas, one);
 	nemoshow_one_set_tag(one, 10002 + 1);
+	nemoshow_one_set_state(one, NEMOSHOW_PICK_STATE);
 	nemoshow_item_set_width(one, size);
 	nemoshow_item_set_height(one, size);
 	nemoshow_item_set_filter(one, context->filter0);

@@ -478,6 +478,7 @@ int main(int argc, char *argv[])
 	mote->quad = one = nemoshow_poly_create(NEMOSHOW_QUAD_POLY);
 	nemoshow_one_attach(pipe, one);
 	nemoshow_one_set_tag(one, 1);
+	nemoshow_one_set_state(one, NEMOSHOW_PICK_STATE);
 	nemoshow_poly_set_color(one, 1.0f, 1.0f, 1.0f, 1.0f);
 	nemoshow_poly_set_canvas(one, mote->canvasb);
 	nemoshow_poly_use_texcoords(one, 1);

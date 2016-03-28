@@ -14,10 +14,11 @@ NEMO_BEGIN_EXTERN_C
 #include <nemolist.h>
 #include <nemolistener.h>
 
-#define NEMOSHOW_ID_MAX					(32)
-#define NEMOSHOW_ATTR_MAX				(48)
-#define NEMOSHOW_ATTR_NAME_MAX	(32)
-#define NEMOSHOW_SYMBOL_MAX			(32)
+#define NEMOSHOW_ID_MAX						(32)
+#define NEMOSHOW_ATTR_MAX					(48)
+#define NEMOSHOW_ATTR_NAME_MAX		(32)
+#define NEMOSHOW_SYMBOL_MAX				(32)
+#define NEMOSHOW_SIGNAL_NAME_MAX	(32)
 
 typedef enum {
 	NEMOSHOW_NONE_TYPE = 0,
@@ -67,7 +68,8 @@ typedef enum {
 	NEMOSHOW_INHERIT_STATE = (1 << 8),
 	NEMOSHOW_BOUNDS_STATE = (1 << 9),
 	NEMOSHOW_EFFECT_STATE = (1 << 10),
-	NEMOSHOW_CLIP_STATE = (1 << 11)
+	NEMOSHOW_CLIP_STATE = (1 << 11),
+	NEMOSHOW_PICK_STATE = (1 << 12)
 } NemoShowOneState;
 
 typedef enum {
@@ -132,6 +134,7 @@ typedef int (*nemoshow_one_above_t)(struct showone *one, struct showone *above);
 typedef int (*nemoshow_one_below_t)(struct showone *one, struct showone *below);
 typedef int (*nemoshow_one_dattr_t)(struct showone *one, const char *attr, double value);
 typedef int (*nemoshow_one_sattr_t)(struct showone *one, const char *attr, const char *value);
+typedef int (*nemoshow_one_signal_t)(struct showone *one, const char *name, struct nemoobject *attrs);
 
 struct showattr {
 	char name[NEMOSHOW_ATTR_NAME_MAX];
@@ -156,6 +159,13 @@ struct showevent {
 	uint32_t dirty;
 };
 
+struct showsignal {
+	struct nemolist link;
+
+	char name[NEMOSHOW_SIGNAL_NAME_MAX];
+	nemoshow_one_signal_t callback;
+};
+
 struct showone {
 	int type, sub;
 	char id[NEMOSHOW_ID_MAX];
@@ -174,6 +184,7 @@ struct showone {
 
 	struct nemolist children_list;
 	struct nemolist reference_list;
+	struct nemolist signal_list;
 
 	struct nemoobject object;
 	uint32_t serial;
@@ -270,6 +281,10 @@ extern void nemoshow_one_destroy_attr(struct showattr *attr);
 
 extern struct showone *nemoshow_one_search_id(struct showone *one, const char *id);
 extern struct showone *nemoshow_one_search_tag(struct showone *one, uint32_t tag);
+
+extern int nemoshow_one_connect_signal(struct showone *one, const char *name, nemoshow_one_signal_t callback);
+extern void nemoshow_one_disconnect_signal(struct showone *one, const char *name);
+extern int nemoshow_one_emit_signal(struct showone *one, const char *name, struct nemoobject *attrs);
 
 extern void nemoshow_one_dump(struct showone *one, FILE *out);
 
@@ -420,6 +435,11 @@ static inline struct showone *nemoshow_one_get_parent(struct showone *one, int t
 	}
 
 	return parent;
+}
+
+static inline struct nemoshow *nemoshow_one_get_show(struct showone *one)
+{
+	return one->show;
 }
 
 static inline void nemoshow_one_set_context(struct showone *one, void *context)

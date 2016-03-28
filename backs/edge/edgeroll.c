@@ -80,6 +80,7 @@ static void nemoback_edgeroll_show_rings(struct edgeback *edge, struct edgeroll 
 		roll->groups[i] = one = nemoshow_ring_create(edge->rollsize, edge->rollsize);
 		nemoshow_one_attach(edge->canvas, one);
 		nemoshow_one_set_tag(one, NEMOSHOW_ONE_TAGGROUP(1000 + i, roll->serial));
+		nemoshow_one_set_state(one, NEMOSHOW_PICK_STATE);
 		nemoshow_one_set_userdata(one, roll);
 		nemoshow_one_setd(one, "outer_scale", 0.0f);
 		nemoshow_one_setd(one, "outer_rotate", roll->r);
@@ -395,6 +396,7 @@ int nemoback_edgeroll_activate_group(struct edgeback *edge, struct edgeroll *rol
 		roll->actions[i] = one = nemoshow_ring_create(edge->rollsize, edge->rollsize);
 		nemoshow_one_attach(edge->canvas, one);
 		nemoshow_one_set_tag(one, NEMOSHOW_ONE_TAGGROUP(2000 + i, roll->serial));
+		nemoshow_one_set_state(one, NEMOSHOW_PICK_STATE);
 		nemoshow_one_setd(one, "outer_scale", 0.5f);
 		nemoshow_one_setd(one, "outer_rotate", roll->r);
 		nemoshow_one_setd(one, "outer_alpha", 0.0f);

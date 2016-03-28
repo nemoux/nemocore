@@ -550,6 +550,7 @@ int nemopad_activate(struct nemopad *pad, double x, double y, double r)
 			pad->borders[i] = one = nemoshow_item_create(NEMOSHOW_PATHTWICE_ITEM);
 			nemoshow_one_attach(canvas, one);
 			nemoshow_one_set_tag(one, i);
+			nemoshow_one_set_state(one, NEMOSHOW_PICK_STATE);
 			nemoshow_item_set_x(one, 0.0f);
 			nemoshow_item_set_y(one, 0.0f);
 			nemoshow_item_set_width(one,
@@ -574,6 +575,7 @@ int nemopad_activate(struct nemopad *pad, double x, double y, double r)
 			pad->keys[i] = one = nemoshow_item_create(NEMOSHOW_PATHTWICE_ITEM);
 			nemoshow_one_attach(canvas, one);
 			nemoshow_one_set_tag(one, i);
+			nemoshow_one_set_state(one, NEMOSHOW_PICK_STATE);
 			nemoshow_item_set_x(one, 0.0f);
 			nemoshow_item_set_y(one, 0.0f);
 			nemoshow_item_set_width(one,

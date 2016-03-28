@@ -26,6 +26,7 @@ void nemoshow_one_prepare(struct showone *one)
 
 	nemolist_init(&one->children_list);
 	nemolist_init(&one->reference_list);
+	nemolist_init(&one->signal_list);
 
 	nemoobject_set_reserved(&one->object, "id", one->id, NEMOSHOW_ID_MAX);
 
@@ -37,6 +38,7 @@ void nemoshow_one_prepare(struct showone *one)
 void nemoshow_one_finish(struct showone *one)
 {
 	struct showref *ref, *nref;
+	struct showsignal *signal, *nsignal;
 	struct showone *child, *nchild;
 	int i;
 
@@ -53,6 +55,12 @@ void nemoshow_one_finish(struct showone *one)
 		nemolist_remove(&ref->link);
 
 		free(ref);
+	}
+
+	nemolist_for_each_safe(signal, nsignal, &one->signal_list, link) {
+		nemolist_remove(&signal->link);
+
+		free(signal);
 	}
 
 	nemoshow_children_for_each_safe(child, nchild, one) {
@@ -464,6 +472,51 @@ struct showone *nemoshow_one_search_tag(struct showone *one, uint32_t tag)
 	}
 
 	return NULL;
+}
+
+int nemoshow_one_connect_signal(struct showone *one, const char *name, nemoshow_one_signal_t callback)
+{
+	struct showsignal *signal;
+
+	signal = (struct showsignal *)malloc(sizeof(struct showsignal));
+	if (signal == NULL)
+		return -1;
+	memset(signal, 0, sizeof(struct showsignal));
+
+	strncpy(signal->name, name, NEMOSHOW_SIGNAL_NAME_MAX);
+	signal->callback = callback;
+
+	nemolist_insert(&one->signal_list, &signal->link);
+
+	return 0;
+}
+
+void nemoshow_one_disconnect_signal(struct showone *one, const char *name)
+{
+	struct showsignal *signal;
+
+	nemolist_for_each(signal, &one->signal_list, link) {
+		if (strcmp(signal->name, name) == 0) {
+			nemolist_remove(&signal->link);
+
+			free(signal);
+
+			return;
+		}
+	}
+}
+
+int nemoshow_one_emit_signal(struct showone *one, const char *name, struct nemoobject *attrs)
+{
+	struct showsignal *signal;
+
+	nemolist_for_each(signal, &one->signal_list, link) {
+		if (strcmp(signal->name, name) == 0) {
+			return signal->callback(one, name, attrs);
+		}
+	}
+
+	return 0;
 }
 
 void nemoshow_one_dump(struct showone *one, FILE *out)
