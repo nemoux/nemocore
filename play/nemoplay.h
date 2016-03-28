@@ -9,16 +9,16 @@ NEMO_BEGIN_EXTERN_C
 
 #include <stdint.h>
 
-#include <ffmpegconfig.h>
-
 #include <playqueue.h>
 
 struct nemoplay {
-	AVFormatContext *container;
+	struct playqueue *video_queue;
+	struct playqueue *audio_queue;
+	struct playqueue *subtitle_queue;
 
-	int video_stream;
-	int audio_stream;
-	int subtitle_stream;
+	int audio_channels;
+	int audio_samplerate;
+	int audio_samplebits;
 
 	void *userdata;
 };
@@ -26,7 +26,37 @@ struct nemoplay {
 extern struct nemoplay *nemoplay_create(void);
 extern void nemoplay_destroy(struct nemoplay *play);
 
-extern int nemoplay_open(struct nemoplay *play, const char *filepath);
+extern int nemoplay_decode_media(struct nemoplay *play, const char *mediapath);
+
+static inline struct playqueue *nemoplay_get_video_queue(struct nemoplay *play)
+{
+	return play->video_queue;
+}
+
+static inline struct playqueue *nemoplay_get_audio_queue(struct nemoplay *play)
+{
+	return play->audio_queue;
+}
+
+static inline struct playqueue *nemoplay_get_subtitle_queue(struct nemoplay *play)
+{
+	return play->subtitle_queue;
+}
+
+static inline int nemoplay_get_audio_channels(struct nemoplay *play)
+{
+	return play->audio_channels;
+}
+
+static inline int nemoplay_get_audio_samplerate(struct nemoplay *play)
+{
+	return play->audio_samplerate;
+}
+
+static inline int nemoplay_get_audio_samplebits(struct nemoplay *play)
+{
+	return play->audio_samplebits;
+}
 
 static inline void nemoplay_set_userdata(struct nemoplay *play, void *userdata)
 {
@@ -36,21 +66,6 @@ static inline void nemoplay_set_userdata(struct nemoplay *play, void *userdata)
 static inline void *nemoplay_get_userdata(struct nemoplay *play)
 {
 	return play->userdata;
-}
-
-static inline int nemoplay_get_video_stream(struct nemoplay *play)
-{
-	return play->video_stream;
-}
-
-static inline int nemoplay_get_audio_stream(struct nemoplay *play)
-{
-	return play->audio_stream;
-}
-
-static inline int nemoplay_get_subtitle_stream(struct nemoplay *play)
-{
-	return play->subtitle_stream;
 }
 
 #ifdef __cplusplus

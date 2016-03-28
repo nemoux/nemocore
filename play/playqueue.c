@@ -24,6 +24,8 @@ struct playqueue *nemoplay_queue_create(void)
 	if (pthread_cond_init(&queue->signal, NULL) != 0)
 		goto err2;
 
+	nemolist_init(&queue->list);
+
 	return queue;
 
 err2:
@@ -37,6 +39,8 @@ err1:
 
 void nemoplay_queue_destroy(struct playqueue *queue)
 {
+	nemolist_remove(&queue->list);
+
 	pthread_cond_destroy(&queue->signal);
 	pthread_mutex_destroy(&queue->lock);
 

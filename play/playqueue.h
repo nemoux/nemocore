@@ -13,10 +13,20 @@ NEMO_BEGIN_EXTERN_C
 
 #include <nemolist.h>
 
+typedef enum {
+	NEMOPLAY_QUEUE_NORMAL_COMMAND = 0,
+	NEMOPLAY_QUEUE_FLUSH_COMMAND = 1,
+	NEMOPLAY_QUEUE_ERROR_COMMAND = 2,
+	NEMOPLAY_QUEUE_LAST_COMMAND
+} NemoPlayQueueCmd;
+
 struct playone {
 	struct nemolist link;
 
 	int cmd;
+
+	void *data;
+	uint32_t size;
 };
 
 struct playqueue {

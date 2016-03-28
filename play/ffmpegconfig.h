@@ -7,4 +7,6 @@
 #include <libavcodec/avcodec.h>
 #include <libswscale/swscale.h>
 
+typedef enum AVSampleFormat AVSampleFormat;
+
 #endif
