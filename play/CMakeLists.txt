@@ -27,10 +27,12 @@ include_directories(
 
 add_library(nemoplay SHARED
 	nemoplay.c
+	playqueue.c
 	)
 
 TARGET_LINK_LIBRARIES(nemoplay
 	nemoasst
+	pthread
 	${LIBAVCODEC_LIBRARIES}
 	${LIBAVFORMAT_LIBRARIES}
 	${LIBAVUTIL_LIBRARIES}
