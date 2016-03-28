@@ -131,7 +131,7 @@ static inline void nemolist_enqueue(struct nemolist *list, struct nemolist *elm)
 	nemolist_insert(list, elm);
 }
 
-static struct nemolist *nemolist_dequeue(struct nemolist *list)
+static inline struct nemolist *nemolist_dequeue(struct nemolist *list)
 {
 	struct nemolist *elm;
 
@@ -151,7 +151,7 @@ static inline void nemolist_push(struct nemolist *list, struct nemolist *elm)
 	nemolist_insert_tail(list, elm);
 }
 
-static struct nemolist *nemolist_pop(struct nemolist *list)
+static inline struct nemolist *nemolist_pop(struct nemolist *list)
 {
 	struct nemolist *elm;
 
@@ -166,7 +166,7 @@ static struct nemolist *nemolist_pop(struct nemolist *list)
 	return elm;
 }
 
-static struct nemolist *nemolist_peek_head(struct nemolist *list)
+static inline struct nemolist *nemolist_peek_head(struct nemolist *list)
 {
 	if (nemolist_empty(list))
 		return NULL;
@@ -174,7 +174,7 @@ static struct nemolist *nemolist_peek_head(struct nemolist *list)
 	return list->next;
 }
 
-static struct nemolist *nemolist_peek_tail(struct nemolist *list)
+static inline struct nemolist *nemolist_peek_tail(struct nemolist *list)
 {
 	if (nemolist_empty(list))
 		return NULL;
