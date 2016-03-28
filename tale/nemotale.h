@@ -226,6 +226,26 @@ static inline void nemotale_set_single_click_gesture(struct nemotale *tale, uint
 	tale->single_click_distance = distance;
 }
 
+static inline void nemotale_set_minimum_width(struct nemotale *tale, uint32_t width)
+{
+	tale->minimum_width = width;
+}
+
+static inline void nemotale_set_minimum_height(struct nemotale *tale, uint32_t height)
+{
+	tale->minimum_height = height;
+}
+
+static inline void nemotale_set_maximum_width(struct nemotale *tale, uint32_t width)
+{
+	tale->maximum_width = width;
+}
+
+static inline void nemotale_set_maximum_height(struct nemotale *tale, uint32_t height)
+{
+	tale->maximum_height = height;
+}
+
 static inline uint32_t nemotale_get_minimum_width(struct nemotale *tale)
 {
 	return tale->minimum_width;
