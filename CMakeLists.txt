@@ -192,6 +192,7 @@ add_subdirectory(tool)
 add_subdirectory(tale)
 add_subdirectory(show)
 add_subdirectory(mote)
+add_subdirectory(play)
 
 add_subdirectory(compz)
 add_subdirectory(shell)
