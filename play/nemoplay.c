@@ -102,24 +102,28 @@ int nemoplay_decode_media(struct nemoplay *play, const char *mediapath)
 	audio_stream = av_find_best_stream(container, AVMEDIA_TYPE_AUDIO, audio_stream, video_stream, NULL, 0);
 	subtitle_stream = av_find_best_stream(container, AVMEDIA_TYPE_SUBTITLE, subtitle_stream, audio_stream >= 0 ? audio_stream : video_stream, NULL, 0);
 
-	play->video_width = video_context->width;
-	play->video_height = video_context->height;
+	if (video_context != NULL) {
+		play->video_width = video_context->width;
+		play->video_height = video_context->height;
+	}
 
-	play->audio_channels = audio_context->channels;
-	play->audio_samplerate = audio_context->sample_rate;
+	if (audio_context != NULL) {
+		play->audio_channels = audio_context->channels;
+		play->audio_samplerate = audio_context->sample_rate;
 
-	if (audio_context->sample_fmt == AV_SAMPLE_FMT_U8 || audio_context->sample_fmt == AV_SAMPLE_FMT_U8P)
-		play->audio_samplebits = 8;
-	else if (audio_context->sample_fmt == AV_SAMPLE_FMT_S16 || audio_context->sample_fmt == AV_SAMPLE_FMT_S16P)
-		play->audio_samplebits = 16;
-	else if (audio_context->sample_fmt == AV_SAMPLE_FMT_S32 || audio_context->sample_fmt == AV_SAMPLE_FMT_S32P)
-		play->audio_samplebits = 16;
-	else if (audio_context->sample_fmt == AV_SAMPLE_FMT_FLT || audio_context->sample_fmt == AV_SAMPLE_FMT_FLTP)
-		play->audio_samplebits = 16;
-	else if (audio_context->sample_fmt == AV_SAMPLE_FMT_DBL || audio_context->sample_fmt == AV_SAMPLE_FMT_DBLP)
-		play->audio_samplebits = 16;
-	else
-		play->audio_samplebits = 0;
+		if (audio_context->sample_fmt == AV_SAMPLE_FMT_U8 || audio_context->sample_fmt == AV_SAMPLE_FMT_U8P)
+			play->audio_samplebits = 8;
+		else if (audio_context->sample_fmt == AV_SAMPLE_FMT_S16 || audio_context->sample_fmt == AV_SAMPLE_FMT_S16P)
+			play->audio_samplebits = 16;
+		else if (audio_context->sample_fmt == AV_SAMPLE_FMT_S32 || audio_context->sample_fmt == AV_SAMPLE_FMT_S32P)
+			play->audio_samplebits = 16;
+		else if (audio_context->sample_fmt == AV_SAMPLE_FMT_FLT || audio_context->sample_fmt == AV_SAMPLE_FMT_FLTP)
+			play->audio_samplebits = 16;
+		else if (audio_context->sample_fmt == AV_SAMPLE_FMT_DBL || audio_context->sample_fmt == AV_SAMPLE_FMT_DBLP)
+			play->audio_samplebits = 16;
+		else
+			play->audio_samplebits = 0;
+	}
 
 	frame = av_frame_alloc();
 
@@ -150,8 +154,10 @@ int nemoplay_decode_media(struct nemoplay *play, const char *mediapath)
 			}
 		} else if (packet.stream_index == audio_stream) {
 			int planesize;
-			int len = avcodec_decode_audio4(audio_context, frame, &finished, &packet);
-			int size = av_samples_get_buffer_size(&planesize, audio_context->channels, frame->nb_samples, audio_context->sample_fmt, 1);
+
+			avcodec_decode_audio4(audio_context, frame, &finished, &packet);
+
+			av_samples_get_buffer_size(&planesize, audio_context->channels, frame->nb_samples, audio_context->sample_fmt, 1);
 
 			if (finished != 0) {
 				struct playone *one;
