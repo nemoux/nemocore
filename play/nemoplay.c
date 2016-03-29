@@ -133,22 +133,25 @@ int nemoplay_decode_media(struct nemoplay *play, const char *mediapath)
 
 			if (finished != 0) {
 				struct playone *one;
-				uint8_t *buffer;
+				uint8_t *y, *u, *v;
 				int nbytes;
 
-				nbytes = (play->video_width * play->video_height) + ((play->video_width * play->video_height) / 4 * 2);
-				buffer = (uint8_t *)malloc(nbytes);
+				y = (uint8_t *)malloc(play->video_width * play->video_height);
+				u = (uint8_t *)malloc(play->video_width * play->video_height / 4);
+				v = (uint8_t *)malloc(play->video_width * play->video_height / 4);
 
-				memcpy(buffer, frame->data, nbytes);
+				memcpy(y, frame->data[0], play->video_width * play->video_height);
+				memcpy(u, frame->data[1], play->video_width * play->video_height / 4);
+				memcpy(v, frame->data[2], play->video_width * play->video_height / 4);
 
 				one = nemoplay_queue_create_one();
 				one->cmd = NEMOPLAY_QUEUE_NORMAL_COMMAND;
-				one->data = buffer;
-				one->size = nbytes;
 
+				one->y = y;
+				one->u = u;
+				one->v = v;
 				one->width = play->video_width;
 				one->height = play->video_height;
-				one->stride = frame->linesize[0];
 
 				nemoplay_queue_enqueue(play->video_queue, one);
 			}

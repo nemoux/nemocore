@@ -13,6 +13,7 @@
 #include <nemoplay.h>
 #include <nemoshow.h>
 #include <showhelper.h>
+#include <nemolog.h>
 #include <nemomisc.h>
 
 struct playcontext {
@@ -24,6 +25,7 @@ struct playcontext {
 	struct showone *canvas;
 
 	struct nemoplay *play;
+	struct playshader *shader;
 
 	struct nemotimer *timer;
 
@@ -55,11 +57,16 @@ static void nemoplay_dispatch_video_timer(struct nemotimer *timer, void *data)
 
 	one = nemoplay_queue_dequeue(queue);
 	if (one != NULL) {
+		nemoplay_shader_dispatch(context->shader, one->y, one->u, one->v);
+
+		nemoshow_canvas_damage_all(context->canvas);
+		nemoshow_dispatch_frame(context->show);
+
 		nemoplay_queue_destroy_one(one);
 
-		nemotimer_set_timeout(timer, 300);
+		nemotimer_set_timeout(timer, 30);
 	} else {
-		nemotimer_set_timeout(timer, 300);
+		nemotimer_set_timeout(timer, 30);
 	}
 }
 
@@ -85,6 +92,7 @@ int main(int argc, char *argv[])
 	struct showone *canvas;
 	struct showone *one;
 	struct nemoplay *play;
+	struct playshader *shader;
 	struct nemotimer *timer;
 	pthread_t thread;
 	char *mediapath = NULL;
@@ -149,9 +157,14 @@ int main(int argc, char *argv[])
 	context->canvas = canvas = nemoshow_canvas_create();
 	nemoshow_canvas_set_width(canvas, width);
 	nemoshow_canvas_set_height(canvas, height);
-	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
+	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_OPENGL_TYPE);
 	nemoshow_canvas_set_dispatch_event(canvas, nemoplay_dispatch_canvas_event);
 	nemoshow_one_attach(scene, canvas);
+
+	context->shader = shader = nemoplay_shader_create();
+	nemoplay_shader_set_texture(shader,
+			nemoshow_canvas_get_texture(canvas),
+			width, height);
 
 	context->timer = timer = nemotimer_create(tool);
 	nemotimer_set_callback(timer, nemoplay_dispatch_video_timer);
