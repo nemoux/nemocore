@@ -56,7 +56,6 @@ int nemoplay_decode_media(struct nemoplay *play, const char *mediapath)
 	AVCodec *codec;
 	AVFrame *frame;
 	AVPacket packet;
-	struct SwsContext *swsctx = NULL;
 	AVCodecContext *video_context = NULL;
 	AVCodecContext *audio_context = NULL;
 	AVCodecContext *subtitle_context = NULL;
@@ -124,40 +123,19 @@ int nemoplay_decode_media(struct nemoplay *play, const char *mediapath)
 
 	frame = av_frame_alloc();
 
-	swsctx = sws_getContext(
-			video_context->width,
-			video_context->height,
-			video_context->pix_fmt,
-			video_context->width,
-			video_context->height,
-			PIX_FMT_RGB24,
-			SWS_BILINEAR,
-			NULL,
-			NULL,
-			NULL);
-
 	while (av_read_frame(container, &packet) >= 0) {
 		if (packet.stream_index == video_stream) {
-			struct playone *one;
-			uint8_t *buffer;
-			int nbytes;
-
-			nbytes = avpicture_get_size(PIX_FMT_RGB24, play->video_width, play->video_height);
-			buffer = (uint8_t *)malloc(nbytes);
-
 			avcodec_decode_video2(video_context, frame, &finished, &packet);
 
 			if (finished != 0) {
-				AVFrame *frame0;
+				struct playone *one;
+				uint8_t *buffer;
+				int nbytes;
 
-				frame0 = av_frame_alloc();
+				nbytes = (play->video_width * play->video_height) + ((play->video_width * play->video_height) / 4 * 2);
+				buffer = (uint8_t *)malloc(nbytes);
 
-				avpicture_fill((AVPicture *)frame0, buffer, PIX_FMT_RGB24, play->video_width, play->video_height);
-
-				sws_scale(swsctx,
-						(void *)frame->data, frame->linesize,
-						0, play->video_height,
-						(void *)frame0->data, frame0->linesize);
+				memcpy(buffer, frame->data, nbytes);
 
 				one = nemoplay_queue_create_one();
 				one->cmd = NEMOPLAY_QUEUE_NORMAL_COMMAND;
@@ -166,11 +144,9 @@ int nemoplay_decode_media(struct nemoplay *play, const char *mediapath)
 
 				one->width = play->video_width;
 				one->height = play->video_height;
-				one->stride = frame0->linesize[0];
+				one->stride = frame->linesize[0];
 
 				nemoplay_queue_enqueue(play->video_queue, one);
-
-				av_frame_free(&frame0);
 			}
 		} else if (packet.stream_index == audio_stream) {
 			int planesize;

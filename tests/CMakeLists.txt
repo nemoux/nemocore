@@ -1,5 +1,9 @@
 FIND_PACKAGE(PkgConfig REQUIRED)
 
+PKG_CHECK_MODULES(SKIA REQUIRED skia)
+INCLUDE_DIRECTORIES(${SKIA_INCLUDE_DIRS})
+LINK_DIRECTORIES(${SKIA_LIBRARY_DIRS})
+
 PKG_CHECK_MODULES(AO REQUIRED ao)
 INCLUDE_DIRECTORIES(${AO_INCLUDE_DIRS})
 LINK_DIRECTORIES(${AO_LIBRARY_DIRS})
@@ -10,6 +14,7 @@ include_directories(
 	${CMAKE_BINARY_DIR}/tool
 	${CMAKE_SOURCE_DIR}/tale
 	${CMAKE_SOURCE_DIR}/show
+	${CMAKE_SOURCE_DIR}/apps
 	${CMAKE_SOURCE_DIR}/play
 	)
 
@@ -23,5 +28,15 @@ add_executable(nemoplay-decode
 
 TARGET_LINK_LIBRARIES(nemoplay-decode
 	nemoplay
+	${AO_LIBRARIES}
+	)
+
+add_executable(nemoplay-show
+	nemoplay-show.c
+	)
+
+TARGET_LINK_LIBRARIES(nemoplay-show
+	nemoplay
+	nemoapps
 	${AO_LIBRARIES}
 	)

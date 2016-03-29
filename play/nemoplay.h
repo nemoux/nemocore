@@ -10,6 +10,7 @@ NEMO_BEGIN_EXTERN_C
 #include <stdint.h>
 
 #include <playqueue.h>
+#include <playmisc.h>
 
 struct nemoplay {
 	struct playqueue *video_queue;

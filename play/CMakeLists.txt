@@ -28,6 +28,7 @@ include_directories(
 add_library(nemoplay SHARED
 	nemoplay.c
 	playqueue.c
+	playmisc.c
 	)
 
 TARGET_LINK_LIBRARIES(nemoplay

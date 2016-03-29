@@ -89,6 +89,7 @@ int main(int argc, char *argv[])
 	struct option options[] = {
 		{ 0 }
 	};
+
 	struct nemoplay *play;
 	pthread_t thread;
 	char *mediapath = NULL;
