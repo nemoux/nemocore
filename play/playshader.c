@@ -108,6 +108,8 @@ int nemoplay_shader_set_texture(struct playshader *shader, GLuint texture, int32
 
 	glGenTextures(1, &shader->texy);
 	glBindTexture(GL_TEXTURE_2D, shader->texy);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, shader->width);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -125,6 +127,8 @@ int nemoplay_shader_set_texture(struct playshader *shader, GLuint texture, int32
 
 	glGenTextures(1, &shader->texu);
 	glBindTexture(GL_TEXTURE_2D, shader->texu);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, shader->width / 2);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -142,6 +146,8 @@ int nemoplay_shader_set_texture(struct playshader *shader, GLuint texture, int32
 
 	glGenTextures(1, &shader->texv);
 	glBindTexture(GL_TEXTURE_2D, shader->texv);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, shader->width / 2);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -182,6 +188,8 @@ int nemoplay_shader_dispatch(struct playshader *shader, uint8_t *y, uint8_t *u, 
 
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, shader->texv);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, shader->width / 2);
 	glTexSubImage2D(GL_TEXTURE_2D, 0,
 			0, 0,
 			shader->width / 2, shader->height / 2,
@@ -192,6 +200,8 @@ int nemoplay_shader_dispatch(struct playshader *shader, uint8_t *y, uint8_t *u, 
 
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, shader->texu);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, shader->width / 2);
 	glTexSubImage2D(GL_TEXTURE_2D, 0,
 			0, 0,
 			shader->width / 2, shader->height / 2,
@@ -202,6 +212,8 @@ int nemoplay_shader_dispatch(struct playshader *shader, uint8_t *y, uint8_t *u, 
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, shader->texy);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, shader->width);
 	glTexSubImage2D(GL_TEXTURE_2D, 0,
 			0, 0,
 			shader->width, shader->height,

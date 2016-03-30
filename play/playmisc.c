@@ -96,3 +96,30 @@ out2:
 out1:
 	return r;
 }
+
+int nemoplay_convert_yuv_to_rgba(uint8_t *y, uint8_t *u, uint8_t *v, uint8_t *c, int width, int height)
+{
+	int i, j;
+
+	for (i = 0; i < height; i++) {
+		for (j = 0; j < width; j++) {
+			float _y = y[i * width + j] / 255.0f;
+			float _u = u[(i / 2) * (width / 2) + (j / 2)] / 255.0f - 0.5f;
+			float _v = v[(i / 2) * (width / 2) + (j / 2)] / 255.0f - 0.5f;
+			float r = _y + 1.402f * _v;
+			float g = _y - 0.344f * _u - 0.714f * _v;
+			float b = _y + 1.772f * _u;
+
+			r = MIN(MAX(r, 0.0f), 1.0f);
+			g = MIN(MAX(g, 0.0f), 1.0f);
+			b = MIN(MAX(b, 0.0f), 1.0f);
+
+			c[(i * width + j) * 4 + 0] = b * 255;
+			c[(i * width + j) * 4 + 1] = g * 255;
+			c[(i * width + j) * 4 + 2] = r * 255;
+			c[(i * width + j) * 4 + 3] = 255;
+		}
+	}
+
+	return 0;
+}

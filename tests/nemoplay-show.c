@@ -57,10 +57,28 @@ static void nemoplay_dispatch_video_timer(struct nemotimer *timer, void *data)
 
 	one = nemoplay_queue_dequeue(queue);
 	if (one != NULL) {
+		uint8_t c[one->width * one->height * 4];
+
+#if	0
 		nemoplay_shader_dispatch(context->shader, one->y, one->u, one->v);
+#else
+		nemoplay_convert_yuv_to_rgba(one->y, one->u, one->v, c, one->width, one->height);
+
+		glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_texture(context->canvas));
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, one->width);
+		glTexSubImage2D(GL_TEXTURE_2D, 0,
+				0, 0,
+				one->width, one->height,
+				GL_BGRA_EXT, GL_UNSIGNED_BYTE, c);
+#endif
 
 		nemoshow_canvas_damage_all(context->canvas);
 		nemoshow_dispatch_frame(context->show);
+
+		free(one->y);
+		free(one->u);
+		free(one->v);
 
 		nemoplay_queue_destroy_one(one);
 
