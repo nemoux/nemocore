@@ -10,7 +10,7 @@ NEMO_BEGIN_EXTERN_C
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
-static const char simple_filter_vertex_shader[] =
+static const char GLFILTER_SIMPLE_VERTEX_SHADER[] =
 "attribute vec2 position;\n"
 "attribute vec2 texcoord;\n"
 "varying vec2 vtexcoord;\n"
@@ -20,7 +20,7 @@ static const char simple_filter_vertex_shader[] =
 "  vtexcoord = texcoord;\n"
 "}\n";
 
-static const char simple_filter_fragment_shader[] =
+static const char GLFILTER_SIMPLE_FRAGMENT_SHADER[] =
 "precision mediump float;\n"
 "varying vec2 vtexcoord;\n"
 "uniform sampler2D tex;\n"
@@ -32,7 +32,7 @@ static const char simple_filter_fragment_shader[] =
 "  gl_FragColor = texture2D(tex, vtexcoord);\n"
 "}\n";
 
-static const char gaussian_filter_fragment_shader[] =
+static const char GLFILTER_GAUSSIAN_FRAGMENT_SHADER[] =
 "precision mediump float;\n"
 "varying vec2 vtexcoord;\n"
 "uniform sampler2D tex;\n"
@@ -56,7 +56,7 @@ static const char gaussian_filter_fragment_shader[] =
 "  gl_FragColor = clamp(s / 16.0 + 0.0, 0.0, 1.0);\n"
 "}\n";
 
-static const char laplacian_filter_fragment_shader[] =
+static const char GLFILTER_LAPLACIAN_FRAGMENT_SHADER[] =
 "precision mediump float;\n"
 "varying vec2 vtexcoord;\n"
 "uniform sampler2D tex;\n"
@@ -80,7 +80,7 @@ static const char laplacian_filter_fragment_shader[] =
 "  gl_FragColor = clamp(s / 0.1 + 0.0, 0.0, 1.0);\n"
 "}\n";
 
-static const char emboss_filter_fragment_shader[] =
+static const char GLFILTER_EMBOSS_FRAGMENT_SHADER[] =
 "precision mediump float;\n"
 "varying vec2 vtexcoord;\n"
 "uniform sampler2D tex;\n"
@@ -104,7 +104,7 @@ static const char emboss_filter_fragment_shader[] =
 "  gl_FragColor = clamp(s / 1.0 + 0.5, 0.0, 1.0);\n"
 "}\n";
 
-static const char sharpness_filter_fragment_shader[] =
+static const char GLFILTER_SHARPNESS_FRAGMENT_SHADER[] =
 "precision mediump float;\n"
 "varying vec2 vtexcoord;\n"
 "uniform sampler2D tex;\n"

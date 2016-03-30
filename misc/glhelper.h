@@ -7,7 +7,7 @@
 NEMO_BEGIN_EXTERN_C
 #endif
 
-static const char vertex_shader[] =
+static const char GLHELPER_VERTEX_SHADER[] =
 "uniform mat4 proj;\n"
 "attribute vec2 position;\n"
 "attribute vec2 texcoord;\n"
@@ -27,13 +27,13 @@ static const char vertex_shader[] =
 "  gl_FragColor.b = y + 2.01723214 * u;\n"			\
 "  gl_FragColor.a = alpha;\n"
 
-static const char fragment_debug[] =
+static const char GLHELPER_FRAGMENT_DEBUG[] =
 "  gl_FragColor = vec4(0.0, 0.3, 0.0, 0.2) + gl_FragColor * 0.8;\n";
 
-static const char fragment_brace[] =
+static const char GLHELPER_FRAGMENT_BRACE[] =
 "}\n";
 
-static const char texture_fragment_shader_rgba[] =
+static const char GLHELPER_TEXTURE_FRAGMENT_SHADER_RGBA[] =
 "precision mediump float;\n"
 "varying vec2 vtexcoord;\n"
 "uniform sampler2D tex;\n"
@@ -42,7 +42,7 @@ static const char texture_fragment_shader_rgba[] =
 "{\n"
 "   gl_FragColor = alpha * texture2D(tex, vtexcoord);\n";
 
-static const char texture_fragment_shader_rgbx[] =
+static const char GLHELPER_TEXTURE_FRAGMENT_SHADER_RGBX[] =
 "precision mediump float;\n"
 "varying vec2 vtexcoord;\n"
 "uniform sampler2D tex;\n"
@@ -52,7 +52,7 @@ static const char texture_fragment_shader_rgbx[] =
 "   gl_FragColor.rgb = alpha * texture2D(tex, vtexcoord).rgb;\n"
 "   gl_FragColor.a = alpha;\n";
 
-static const char texture_fragment_shader_egl_external[] =
+static const char GLHELPER_TEXTURE_FRAGMENT_SHADER_EGL_EXTERNAL[] =
 "#extension GL_OES_EGL_image_external : require\n"
 "precision mediump float;\n"
 "varying vec2 vtexcoord;\n"
@@ -62,7 +62,7 @@ static const char texture_fragment_shader_egl_external[] =
 "{\n"
 "   gl_FragColor = alpha * texture2D(tex, vtexcoord)\n;";
 
-static const char texture_fragment_shader_y_uv[] =
+static const char GLHELPER_TEXTURE_FRAGMENT_SHADER_Y_UV[] =
 "precision mediump float;\n"
 "uniform sampler2D tex;\n"
 "uniform sampler2D tex1;\n"
@@ -74,7 +74,7 @@ static const char texture_fragment_shader_y_uv[] =
 "  float v = texture2D(tex1, vtexcoord).g - 0.5;\n"
 FRAGMENT_CONVERT_YUV;
 
-static const char texture_fragment_shader_y_u_v[] =
+static const char GLHELPER_TEXTURE_FRAGMENT_SHADER_Y_U_V[] =
 "precision mediump float;\n"
 "uniform sampler2D tex;\n"
 "uniform sampler2D tex1;\n"
@@ -87,7 +87,7 @@ static const char texture_fragment_shader_y_u_v[] =
 "  float v = texture2D(tex2, vtexcoord).x - 0.5;\n"
 FRAGMENT_CONVERT_YUV;
 
-static const char texture_fragment_shader_y_xuxv[] =
+static const char GLHELPER_TEXTURE_FRAGMENT_SHADER_Y_XUXV[] =
 "precision mediump float;\n"
 "uniform sampler2D tex;\n"
 "uniform sampler2D tex1;\n"
@@ -99,7 +99,7 @@ static const char texture_fragment_shader_y_xuxv[] =
 "  float v = texture2D(tex1, vtexcoord).a - 0.5;\n"
 FRAGMENT_CONVERT_YUV;
 
-static const char solid_fragment_shader[] =
+static const char GLHELPER_SOLID_FRAGMENT_SHADER[] =
 "precision mediump float;\n"
 "uniform vec4 color;\n"
 "uniform float alpha;\n"

@@ -687,20 +687,20 @@ static int glrenderer_prepare_egl_context(struct glrenderer *renderer, struct ne
 	if (strstr(extensions, "GL_OES_EGL_image_external"))
 		renderer->has_egl_image_external = 1;
 
-	renderer->texture_shader_rgba.vertex_source = vertex_shader;
-	renderer->texture_shader_rgba.fragment_source = texture_fragment_shader_rgba;
-	renderer->texture_shader_rgbx.vertex_source = vertex_shader;
-	renderer->texture_shader_rgbx.fragment_source = texture_fragment_shader_rgbx;
-	renderer->texture_shader_egl_external.vertex_source = vertex_shader;
-	renderer->texture_shader_egl_external.fragment_source = texture_fragment_shader_egl_external;
-	renderer->texture_shader_y_uv.vertex_source = vertex_shader;
-	renderer->texture_shader_y_uv.fragment_source = texture_fragment_shader_y_uv;
-	renderer->texture_shader_y_u_v.vertex_source = vertex_shader;
-	renderer->texture_shader_y_u_v.fragment_source = texture_fragment_shader_y_u_v;
-	renderer->texture_shader_y_xuxv.vertex_source = vertex_shader;
-	renderer->texture_shader_y_xuxv.fragment_source = texture_fragment_shader_y_xuxv;
-	renderer->solid_shader.vertex_source = vertex_shader;
-	renderer->solid_shader.fragment_source = solid_fragment_shader;
+	renderer->texture_shader_rgba.vertex_source = GLHELPER_VERTEX_SHADER;
+	renderer->texture_shader_rgba.fragment_source = GLHELPER_TEXTURE_FRAGMENT_SHADER_RGBA;
+	renderer->texture_shader_rgbx.vertex_source = GLHELPER_VERTEX_SHADER;
+	renderer->texture_shader_rgbx.fragment_source = GLHELPER_TEXTURE_FRAGMENT_SHADER_RGBX;
+	renderer->texture_shader_egl_external.vertex_source = GLHELPER_VERTEX_SHADER;
+	renderer->texture_shader_egl_external.fragment_source = GLHELPER_TEXTURE_FRAGMENT_SHADER_EGL_EXTERNAL;
+	renderer->texture_shader_y_uv.vertex_source = GLHELPER_VERTEX_SHADER;
+	renderer->texture_shader_y_uv.fragment_source = GLHELPER_TEXTURE_FRAGMENT_SHADER_Y_UV;
+	renderer->texture_shader_y_u_v.vertex_source = GLHELPER_VERTEX_SHADER;
+	renderer->texture_shader_y_u_v.fragment_source = GLHELPER_TEXTURE_FRAGMENT_SHADER_Y_U_V;
+	renderer->texture_shader_y_xuxv.vertex_source = GLHELPER_VERTEX_SHADER;
+	renderer->texture_shader_y_xuxv.fragment_source = GLHELPER_TEXTURE_FRAGMENT_SHADER_Y_XUXV;
+	renderer->solid_shader.vertex_source = GLHELPER_VERTEX_SHADER;
+	renderer->solid_shader.fragment_source = GLHELPER_SOLID_FRAGMENT_SHADER;
 
 	return 0;
 }

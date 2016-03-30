@@ -42,7 +42,7 @@ extern int nemoplay_shader_prepare(struct playshader *shader, const char *vertex
 extern void nemoplay_shader_finish(struct playshader *shader);
 extern int nemoplay_shader_dispatch(struct playshader *shader, uint8_t *y, uint8_t *u, uint8_t *v);
 
-static const char *NEMOPLAY_TO_RGBA_VERTEX_SHADER =
+static const char NEMOPLAY_TO_RGBA_VERTEX_SHADER[] =
 "attribute vec2 position;\n"
 "attribute vec2 texcoord;\n"
 "varying vec2 vtexcoord;\n"
@@ -52,7 +52,7 @@ static const char *NEMOPLAY_TO_RGBA_VERTEX_SHADER =
 "  vtexcoord = texcoord;\n"
 "}\n";
 
-static const char *NEMOPLAY_TO_RGBA_FRAGMENT_SHADER =
+static const char NEMOPLAY_TO_RGBA_FRAGMENT_SHADER[] =
 "precision mediump float;\n"
 "varying vec2 vtexcoord;\n"
 "uniform sampler2D texy;\n"

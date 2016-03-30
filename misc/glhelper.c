@@ -12,7 +12,6 @@
 
 GLuint glshader_compile(GLenum type, int count, const char **sources)
 {
-	char msg[512];
 	GLint status;
 	GLuint s;
 
@@ -20,10 +19,8 @@ GLuint glshader_compile(GLenum type, int count, const char **sources)
 	glShaderSource(s, count, sources, NULL);
 	glCompileShader(s);
 	glGetShaderiv(s, GL_COMPILE_STATUS, &status);
-	if (!status) {
-		glGetShaderInfoLog(s, sizeof(msg), NULL, msg);
+	if (!status)
 		return GL_NONE;
-	}
 
 	return s;
 }
@@ -39,12 +36,12 @@ int glshader_prepare(struct glshader *shader, const char *vertex_source, const c
 
 	if (debug != 0) {
 		sources[0] = fragment_source;
-		sources[1] = fragment_debug;
-		sources[2] = fragment_brace;
+		sources[1] = GLHELPER_FRAGMENT_DEBUG;
+		sources[2] = GLHELPER_FRAGMENT_BRACE;
 		count = 3;
 	} else {
 		sources[0] = fragment_source;
-		sources[1] = fragment_brace;
+		sources[1] = GLHELPER_FRAGMENT_BRACE;
 		count = 2;
 	}
 

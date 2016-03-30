@@ -10,7 +10,7 @@
 
 GLuint glfilter_create_program(const char *shader)
 {
-	const char *vertexshader = simple_filter_vertex_shader;
+	const char *vertexshader = GLFILTER_SIMPLE_VERTEX_SHADER;
 	GLuint frag, vert;
 	GLuint program;
 	GLint status;

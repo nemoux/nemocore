@@ -417,20 +417,20 @@ struct nemotale *nemotale_create_gl(void)
 		context->has_unpack_subimage = 1;
 #endif
 
-	context->texture_shader_rgba.vertex_source = vertex_shader;
-	context->texture_shader_rgba.fragment_source = texture_fragment_shader_rgba;
-	context->texture_shader_rgbx.vertex_source = vertex_shader;
-	context->texture_shader_rgbx.fragment_source = texture_fragment_shader_rgbx;
-	context->texture_shader_egl_external.vertex_source = vertex_shader;
-	context->texture_shader_egl_external.fragment_source = texture_fragment_shader_egl_external;
-	context->texture_shader_y_uv.vertex_source = vertex_shader;
-	context->texture_shader_y_uv.fragment_source = texture_fragment_shader_y_uv;
-	context->texture_shader_y_u_v.vertex_source = vertex_shader;
-	context->texture_shader_y_u_v.fragment_source = texture_fragment_shader_y_u_v;
-	context->texture_shader_y_xuxv.vertex_source = vertex_shader;
-	context->texture_shader_y_xuxv.fragment_source = texture_fragment_shader_y_xuxv;
-	context->solid_shader.vertex_source = vertex_shader;
-	context->solid_shader.fragment_source = solid_fragment_shader;
+	context->texture_shader_rgba.vertex_source = GLHELPER_VERTEX_SHADER;
+	context->texture_shader_rgba.fragment_source = GLHELPER_TEXTURE_FRAGMENT_SHADER_RGBA;
+	context->texture_shader_rgbx.vertex_source = GLHELPER_VERTEX_SHADER;
+	context->texture_shader_rgbx.fragment_source = GLHELPER_TEXTURE_FRAGMENT_SHADER_RGBX;
+	context->texture_shader_egl_external.vertex_source = GLHELPER_VERTEX_SHADER;
+	context->texture_shader_egl_external.fragment_source = GLHELPER_TEXTURE_FRAGMENT_SHADER_EGL_EXTERNAL;
+	context->texture_shader_y_uv.vertex_source = GLHELPER_VERTEX_SHADER;
+	context->texture_shader_y_uv.fragment_source = GLHELPER_TEXTURE_FRAGMENT_SHADER_Y_UV;
+	context->texture_shader_y_u_v.vertex_source = GLHELPER_VERTEX_SHADER;
+	context->texture_shader_y_u_v.fragment_source = GLHELPER_TEXTURE_FRAGMENT_SHADER_Y_U_V;
+	context->texture_shader_y_xuxv.vertex_source = GLHELPER_VERTEX_SHADER;
+	context->texture_shader_y_xuxv.fragment_source = GLHELPER_TEXTURE_FRAGMENT_SHADER_Y_XUXV;
+	context->solid_shader.vertex_source = GLHELPER_VERTEX_SHADER;
+	context->solid_shader.fragment_source = GLHELPER_SOLID_FRAGMENT_SHADER;
 
 	return tale;
 
