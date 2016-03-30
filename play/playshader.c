@@ -180,14 +180,14 @@ int nemoplay_shader_dispatch(struct playshader *shader, uint8_t *y, uint8_t *u, 
 	glUniform1i(shader->utexu, 1);
 	glUniform1i(shader->utexv, 2);
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, shader->texy);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, shader->texv);
 	glTexSubImage2D(GL_TEXTURE_2D, 0,
 			0, 0,
-			shader->width, shader->height,
+			shader->width / 2, shader->height / 2,
 			GL_LUMINANCE,
 			GL_UNSIGNED_BYTE,
-			y);
+			v);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glActiveTexture(GL_TEXTURE1);
@@ -200,14 +200,14 @@ int nemoplay_shader_dispatch(struct playshader *shader, uint8_t *y, uint8_t *u, 
 			u);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, shader->texv);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, shader->texy);
 	glTexSubImage2D(GL_TEXTURE_2D, 0,
 			0, 0,
-			shader->width / 2, shader->height / 2,
+			shader->width, shader->height,
 			GL_LUMINANCE,
 			GL_UNSIGNED_BYTE,
-			v);
+			y);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &vertices[0]);
