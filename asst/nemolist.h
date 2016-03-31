@@ -131,6 +131,11 @@ static inline void nemolist_enqueue(struct nemolist *list, struct nemolist *elm)
 	nemolist_insert(list, elm);
 }
 
+static inline void nemolist_enqueue_tail(struct nemolist *list, struct nemolist *elm)
+{
+	nemolist_insert_tail(list, elm);
+}
+
 static inline struct nemolist *nemolist_dequeue(struct nemolist *list)
 {
 	struct nemolist *elm;

@@ -79,6 +79,17 @@ void nemoplay_queue_enqueue(struct playqueue *queue, struct playone *one)
 	pthread_cond_signal(&queue->signal);
 }
 
+void nemoplay_queue_enqueue_tail(struct playqueue *queue, struct playone *one)
+{
+	pthread_mutex_lock(&queue->lock);
+
+	nemolist_enqueue_tail(&queue->list, &one->link);
+
+	pthread_mutex_unlock(&queue->lock);
+
+	pthread_cond_signal(&queue->signal);
+}
+
 struct playone *nemoplay_queue_dequeue(struct playqueue *queue)
 {
 	struct nemolist *elm;

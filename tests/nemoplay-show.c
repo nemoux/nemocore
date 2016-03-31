@@ -76,13 +76,15 @@ static void nemoplay_dispatch_video_timer(struct nemotimer *timer, void *data)
 	timeout = threshold * 1000;
 	time = nemoplay_clock_get(clock);
 
-drop:
 	one = nemoplay_queue_dequeue(queue);
 	if (one != NULL) {
-		if (time > one->pts + threshold)
-			goto drop;
-		else if (time < one->pts - threshold)
+		if (time > one->pts + threshold) {
+			timeout = 1;
 			goto pass;
+		} else if (time < one->pts - threshold) {
+			nemoplay_queue_enqueue_tail(queue, one);
+			goto pass;
+		}
 
 		nemoplay_shader_update(context->shader, one->y, one->u, one->v);
 		nemoplay_shader_dispatch(context->shader);

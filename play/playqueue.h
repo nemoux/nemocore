@@ -52,6 +52,7 @@ extern struct playone *nemoplay_queue_create_one(void);
 extern void nemoplay_queue_destroy_one(struct playone *one);
 
 extern void nemoplay_queue_enqueue(struct playqueue *queue, struct playone *one);
+extern void nemoplay_queue_enqueue_tail(struct playqueue *queue, struct playone *one);
 extern struct playone *nemoplay_queue_dequeue(struct playqueue *queue);
 extern struct playone *nemoplay_queue_peek(struct playqueue *queue);
 
