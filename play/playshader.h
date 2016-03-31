@@ -18,6 +18,7 @@ NEMO_BEGIN_EXTERN_C
 struct playshader {
 	GLuint texture;
 	GLuint fbo, dbo;
+	int32_t viewport_width, viewport_height;
 
 	GLuint shaders[2];
 	GLuint program;
@@ -29,14 +30,14 @@ struct playshader {
 	GLuint texy;
 	GLuint texu;
 	GLuint texv;
-
-	int32_t width, height;
+	int32_t texture_width, texture_height;
 };
 
 extern struct playshader *nemoplay_shader_create(void);
 extern void nemoplay_shader_destroy(struct playshader *shader);
 
-extern int nemoplay_shader_set_texture(struct playshader *shader, GLuint texture, int32_t width, int32_t height);
+extern int nemoplay_shader_set_texture(struct playshader *shader, int32_t width, int32_t height);
+extern int nemoplay_shader_set_viewport(struct playshader *shader, GLuint texture, int32_t width, int32_t height);
 
 extern int nemoplay_shader_prepare(struct playshader *shader, const char *vertex_source, const char *fragment_source);
 extern void nemoplay_shader_finish(struct playshader *shader);

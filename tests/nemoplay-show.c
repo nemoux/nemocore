@@ -47,6 +47,15 @@ static void nemoplay_dispatch_canvas_event(struct nemoshow *show, struct showone
 	}
 }
 
+static void nemoplay_dispatch_canvas_resize(struct nemoshow *show, struct showone *one, int32_t width, int32_t height)
+{
+	struct playcontext *context = (struct playcontext *)nemoshow_get_userdata(show);
+
+	nemoplay_shader_set_viewport(context->shader,
+			nemoshow_canvas_get_texture(context->canvas),
+			width, height);
+}
+
 static void nemoplay_dispatch_video_timer(struct nemotimer *timer, void *data)
 {
 	struct playcontext *context = (struct playcontext *)data;
@@ -163,15 +172,14 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_height(canvas, height);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_OPENGL_TYPE);
 	nemoshow_canvas_set_dispatch_event(canvas, nemoplay_dispatch_canvas_event);
+	nemoshow_canvas_set_dispatch_resize(canvas, nemoplay_dispatch_canvas_resize);
 	nemoshow_one_attach(scene, canvas);
 
 	context->shader = shader = nemoplay_shader_create();
 	nemoplay_shader_prepare(shader,
 			NEMOPLAY_TO_RGBA_VERTEX_SHADER,
 			NEMOPLAY_TO_RGBA_FRAGMENT_SHADER);
-	nemoplay_shader_set_texture(shader,
-			nemoshow_canvas_get_texture(canvas),
-			width, height);
+	nemoplay_shader_set_texture(shader, width, height);
 
 	context->timer = timer = nemotimer_create(tool);
 	nemotimer_set_callback(timer, nemoplay_dispatch_video_timer);
