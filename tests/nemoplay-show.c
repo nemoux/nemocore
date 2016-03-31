@@ -78,12 +78,17 @@ static void nemoplay_dispatch_video_timer(struct nemotimer *timer, void *data)
 
 	one = nemoplay_queue_dequeue(queue);
 	if (one != NULL) {
+		if (one->cmd == NEMOPLAY_QUEUE_DONE_COMMAND) {
+			timeout = 0;
+			goto pass1;
+		}
+
 		if (time > one->pts + threshold) {
 			timeout = 1;
-			goto pass;
+			goto pass2;
 		} else if (time < one->pts - threshold) {
 			nemoplay_queue_enqueue_tail(queue, one);
-			goto pass;
+			goto done;
 		}
 
 		nemoplay_shader_update(context->shader, one->y, one->u, one->v);
@@ -92,20 +97,22 @@ static void nemoplay_dispatch_video_timer(struct nemotimer *timer, void *data)
 		nemoshow_canvas_damage_all(context->canvas);
 		nemoshow_dispatch_frame(context->show);
 
+		context->has_frame = 1;
+
 		pone = nemoplay_queue_peek(queue);
 		if (pone != NULL)
 			timeout = pone->pts > time ? (pone->pts - time) * 1000 : 1;
 
+pass2:
 		free(one->y);
 		free(one->u);
 		free(one->v);
 
+pass1:
 		nemoplay_queue_destroy_one(one);
-
-		context->has_frame = 1;
 	}
 
-pass:
+done:
 	nemotimer_set_timeout(timer, timeout);
 }
 
@@ -143,13 +150,19 @@ static void *nemoplay_handle_audioplay(void *arg)
 	clock = nemoplay_get_audio_clock(context->play);
 
 	while ((one = nemoplay_queue_dequeue(queue)) != NULL) {
-		ao_play(device, (char *)one->data, one->size);
+		if (one->cmd == NEMOPLAY_QUEUE_NORMAL_COMMAND) {
+			ao_play(device, (char *)one->data, one->size);
 
-		nemoplay_clock_set(clock, one->pts);
+			nemoplay_clock_set(clock, one->pts);
 
-		free(one->data);
+			free(one->data);
 
-		nemoplay_queue_destroy_one(one);
+			nemoplay_queue_destroy_one(one);
+		} else if (one->cmd == NEMOPLAY_QUEUE_DONE_COMMAND) {
+			nemoplay_queue_destroy_one(one);
+
+			break;
+		}
 	}
 
 	ao_close(device);
@@ -173,7 +186,8 @@ int main(int argc, char *argv[])
 	struct nemoplay *play;
 	struct playshader *shader;
 	struct nemotimer *timer;
-	pthread_t thread;
+	pthread_t thread0;
+	pthread_t thread1;
 	char *mediapath = NULL;
 	int width, height;
 	int opt;
@@ -208,8 +222,8 @@ int main(int argc, char *argv[])
 
 	nemoplay_prepare_media(play, mediapath);
 
-	pthread_create(&thread, NULL, nemoplay_handle_decodeframe, (void *)context);
-	pthread_create(&thread, NULL, nemoplay_handle_audioplay, (void *)context);
+	pthread_create(&thread0, NULL, nemoplay_handle_decodeframe, (void *)context);
+	pthread_create(&thread1, NULL, nemoplay_handle_audioplay, (void *)context);
 
 	context->tool = tool = nemotool_create();
 	if (tool == NULL)
@@ -266,6 +280,9 @@ err4:
 	nemotool_destroy(tool);
 
 err3:
+	nemoplay_set_state(play, NEMOPLAY_DONE_STATE);
+	pthread_join(thread0, NULL);
+	pthread_join(thread1, NULL);
 	nemoplay_destroy(play);
 
 err2:

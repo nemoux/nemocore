@@ -16,7 +16,16 @@ NEMO_BEGIN_EXTERN_C
 #include <playshader.h>
 #include <playmisc.h>
 
+typedef enum {
+	NEMOPLAY_NONE_STATE = 0,
+	NEMOPLAY_PLAYING_STATE = 1,
+	NEMOPLAY_DONE_STATE = 2,
+	NEMOPLAY_LAST_STATE
+} NemoPlayState;
+
 struct nemoplay {
+	int state;
+
 	struct playqueue *video_queue;
 	struct playqueue *audio_queue;
 	struct playqueue *subtitle_queue;
@@ -50,6 +59,16 @@ extern void nemoplay_destroy(struct nemoplay *play);
 extern int nemoplay_prepare_media(struct nemoplay *play, const char *mediapath);
 extern void nemoplay_finish_media(struct nemoplay *play);
 extern int nemoplay_decode_media(struct nemoplay *play);
+
+static inline void nemoplay_set_state(struct nemoplay *play, int state)
+{
+	play->state = state;
+}
+
+static inline int nemoplay_get_state(struct nemoplay *play)
+{
+	return play->state;
+}
 
 static inline struct playqueue *nemoplay_get_video_queue(struct nemoplay *play)
 {
