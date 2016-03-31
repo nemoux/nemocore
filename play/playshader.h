@@ -41,7 +41,9 @@ extern int nemoplay_shader_set_viewport(struct playshader *shader, GLuint textur
 
 extern int nemoplay_shader_prepare(struct playshader *shader, const char *vertex_source, const char *fragment_source);
 extern void nemoplay_shader_finish(struct playshader *shader);
-extern int nemoplay_shader_dispatch(struct playshader *shader, uint8_t *y, uint8_t *u, uint8_t *v);
+extern int nemoplay_shader_update(struct playshader *shader, uint8_t *y, uint8_t *u, uint8_t *v);
+extern int nemoplay_shader_clear(struct playshader *shader);
+extern int nemoplay_shader_dispatch(struct playshader *shader);
 
 static const char NEMOPLAY_TO_RGBA_VERTEX_SHADER[] =
 "attribute vec2 position;\n"
