@@ -3,6 +3,7 @@
 
 #include <libavutil/mathematics.h>
 #include <libavutil/samplefmt.h>
+#include <libavutil/time.h>
 #include <libavutil/opt.h>
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>

@@ -62,17 +62,37 @@ static void nemoplay_dispatch_video_timer(struct nemotimer *timer, void *data)
 {
 	struct playcontext *context = (struct playcontext *)data;
 	struct playqueue *queue;
+	struct playclock *clock;
 	struct playone *one;
+	struct playone *pone;
+	double threshold;
+	double time;
+	uint32_t timeout;
 
 	queue = nemoplay_get_video_queue(context->play);
+	clock = nemoplay_get_audio_clock(context->play);
 
+	threshold = 1.0f / nemoplay_get_video_framerate(context->play);
+	timeout = threshold * 1000;
+	time = nemoplay_clock_get(clock);
+
+drop:
 	one = nemoplay_queue_dequeue(queue);
 	if (one != NULL) {
+		if (time > one->pts + threshold)
+			goto drop;
+		else if (time < one->pts - threshold)
+			goto pass;
+
 		nemoplay_shader_update(context->shader, one->y, one->u, one->v);
 		nemoplay_shader_dispatch(context->shader);
 
 		nemoshow_canvas_damage_all(context->canvas);
 		nemoshow_dispatch_frame(context->show);
+
+		pone = nemoplay_queue_peek(queue);
+		if (pone != NULL)
+			timeout = pone->pts > time ? (pone->pts - time) * 1000 : 1;
 
 		free(one->y);
 		free(one->u);
@@ -80,12 +100,11 @@ static void nemoplay_dispatch_video_timer(struct nemotimer *timer, void *data)
 
 		nemoplay_queue_destroy_one(one);
 
-		nemotimer_set_timeout(timer, 30);
-
 		context->has_frame = 1;
-	} else {
-		nemotimer_set_timeout(timer, 30);
 	}
+
+pass:
+	nemotimer_set_timeout(timer, timeout);
 }
 
 static void *nemoplay_handle_decodeframe(void *arg)
@@ -101,6 +120,7 @@ static void *nemoplay_handle_audioplay(void *arg)
 {
 	struct playcontext *context = (struct playcontext *)arg;
 	struct playqueue *queue;
+	struct playclock *clock;
 	struct playone *one;
 	ao_device *device;
 	ao_sample_format format;
@@ -118,9 +138,12 @@ static void *nemoplay_handle_audioplay(void *arg)
 	device = ao_open_live(driver, &format, NULL);
 
 	queue = nemoplay_get_audio_queue(context->play);
+	clock = nemoplay_get_audio_clock(context->play);
 
 	while ((one = nemoplay_queue_dequeue(queue)) != NULL) {
 		ao_play(device, (char *)one->data, one->size);
+
+		nemoplay_clock_set(clock, one->pts);
 
 		free(one->data);
 
@@ -226,7 +249,7 @@ int main(int argc, char *argv[])
 	context->timer = timer = nemotimer_create(tool);
 	nemotimer_set_callback(timer, nemoplay_dispatch_video_timer);
 	nemotimer_set_userdata(timer, context);
-	nemotimer_set_timeout(timer, 300);
+	nemotimer_set_timeout(timer, 10);
 
 	nemoshow_dispatch_frame(show);
 

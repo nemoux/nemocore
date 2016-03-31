@@ -12,6 +12,7 @@ NEMO_BEGIN_EXTERN_C
 #include <ffmpegconfig.h>
 
 #include <playqueue.h>
+#include <playclock.h>
 #include <playshader.h>
 #include <playmisc.h>
 
@@ -29,8 +30,12 @@ struct nemoplay {
 	int audio_stream;
 	int subtitle_stream;
 
+	struct playclock *video_clock;
+	struct playclock *audio_clock;
+
 	int video_width;
 	int video_height;
+	double video_framerate;
 
 	int audio_channels;
 	int audio_samplerate;
@@ -61,6 +66,16 @@ static inline struct playqueue *nemoplay_get_subtitle_queue(struct nemoplay *pla
 	return play->subtitle_queue;
 }
 
+static inline struct playclock *nemoplay_get_video_clock(struct nemoplay *play)
+{
+	return play->video_clock;
+}
+
+static inline struct playclock *nemoplay_get_audio_clock(struct nemoplay *play)
+{
+	return play->audio_clock;
+}
+
 static inline int nemoplay_get_video_width(struct nemoplay *play)
 {
 	return play->video_width;
@@ -69,6 +84,11 @@ static inline int nemoplay_get_video_width(struct nemoplay *play)
 static inline int nemoplay_get_video_height(struct nemoplay *play)
 {
 	return play->video_height;
+}
+
+static inline double nemoplay_get_video_framerate(struct nemoplay *play)
+{
+	return play->video_framerate;
 }
 
 static inline int nemoplay_get_audio_channels(struct nemoplay *play)

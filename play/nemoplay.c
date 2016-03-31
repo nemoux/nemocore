@@ -30,6 +30,9 @@ struct nemoplay *nemoplay_create(void)
 	play->audio_queue = nemoplay_queue_create();
 	play->subtitle_queue = nemoplay_queue_create();
 
+	play->video_clock = nemoplay_clock_create();
+	play->audio_clock = nemoplay_clock_create();
+
 	return play;
 
 err1:
@@ -40,6 +43,9 @@ err1:
 
 void nemoplay_destroy(struct nemoplay *play)
 {
+	nemoplay_clock_destroy(play->video_clock);
+	nemoplay_clock_destroy(play->audio_clock);
+
 	nemoplay_queue_destroy(play->video_queue);
 	nemoplay_queue_destroy(play->audio_queue);
 	nemoplay_queue_destroy(play->subtitle_queue);
@@ -120,6 +126,8 @@ int nemoplay_prepare_media(struct nemoplay *play, const char *mediapath)
 	play->audio_stream = audio_stream;
 	play->subtitle_stream = subtitle_stream;
 
+	play->video_framerate = av_q2d(av_guess_frame_rate(container, container->streams[video_stream], NULL));
+
 	return 0;
 
 err1:
@@ -141,6 +149,8 @@ int nemoplay_decode_media(struct nemoplay *play)
 	SwrContext *swr;
 	AVFrame *frame;
 	AVPacket packet;
+	double video_timebase;
+	double audio_timebase;
 	int video_stream = play->video_stream;
 	int audio_stream = play->audio_stream;
 	int subtitle_stream = play->subtitle_stream;
@@ -154,6 +164,9 @@ int nemoplay_decode_media(struct nemoplay *play)
 	av_opt_set_sample_fmt(swr, "in_sample_fmt", audio_context->sample_fmt, 0);
 	av_opt_set_sample_fmt(swr, "out_sample_fmt", AV_SAMPLE_FMT_S16, 0);
 	swr_init(swr);
+
+	audio_timebase = av_q2d(container->streams[audio_stream]->time_base);
+	video_timebase = av_q2d(container->streams[video_stream]->time_base);
 
 	frame = av_frame_alloc();
 
@@ -175,6 +188,7 @@ int nemoplay_decode_media(struct nemoplay *play)
 
 				one = nemoplay_queue_create_one();
 				one->cmd = NEMOPLAY_QUEUE_NORMAL_COMMAND;
+				one->pts = video_timebase * av_frame_get_best_effort_timestamp(frame);
 
 				one->y = y;
 				one->u = u;
@@ -204,6 +218,8 @@ int nemoplay_decode_media(struct nemoplay *play)
 
 				one = nemoplay_queue_create_one();
 				one->cmd = NEMOPLAY_QUEUE_NORMAL_COMMAND;
+				one->pts = audio_timebase * av_frame_get_best_effort_timestamp(frame);
+
 				one->data = buffer;
 				one->size = samplesize * audio_context->channels * av_get_bytes_per_sample(AV_SAMPLE_FMT_S16);
 

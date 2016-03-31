@@ -28,6 +28,7 @@ include_directories(
 add_library(nemoplay SHARED
 	nemoplay.c
 	playqueue.c
+	playclock.c
 	playshader.c
 	playmisc.c
 	)
@@ -45,6 +46,10 @@ INSTALL(TARGETS nemoplay DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
 
 set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/play/nemoplay.h
+	${CMAKE_SOURCE_DIR}/play/playqueue.h
+	${CMAKE_SOURCE_DIR}/play/playclock.h
+	${CMAKE_SOURCE_DIR}/play/playshader.h
+	${CMAKE_SOURCE_DIR}/play/playmisc.h
 	)
 
 set(NEMOSHOW_PKGCONFIG_REQUIRES "nemoasst libavcodec libavformat libavutil libswscale")

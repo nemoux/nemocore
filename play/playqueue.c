@@ -97,3 +97,16 @@ retry:
 
 	return container_of(elm, struct playone, link);
 }
+
+struct playone *nemoplay_queue_peek(struct playqueue *queue)
+{
+	struct nemolist *elm;
+
+	pthread_mutex_lock(&queue->lock);
+
+	elm = nemolist_peek_tail(&queue->list);
+
+	pthread_mutex_unlock(&queue->lock);
+
+	return container_of(elm, struct playone, link);
+}
