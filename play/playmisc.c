@@ -97,6 +97,29 @@ out1:
 	return r;
 }
 
+void nemoplay_dump_media(const char *mediapath)
+{
+	AVFormatContext *container;
+	int i;
+
+	container = avformat_alloc_context();
+	if (container == NULL)
+		return;
+
+	if (avformat_open_input(&container, mediapath, NULL, NULL) < 0)
+		goto out1;
+
+	if (avformat_find_stream_info(container, NULL) < 0)
+		goto out1;
+
+	for (i = 0; i < container->nb_streams; i++) {
+		av_dump_format(container, i, mediapath, 0);
+	}
+
+out1:
+	avformat_close_input(&container);
+}
+
 int nemoplay_convert_yuv_to_rgba(uint8_t *y, uint8_t *u, uint8_t *v, uint8_t *c, int width, int height)
 {
 	int i, j;

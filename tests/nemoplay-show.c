@@ -29,8 +29,6 @@ struct playcontext {
 	int has_frame;
 
 	struct nemotimer *timer;
-
-	char *mediapath;
 };
 
 static void nemoplay_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, void *event)
@@ -94,7 +92,43 @@ static void *nemoplay_handle_decodeframe(void *arg)
 {
 	struct playcontext *context = (struct playcontext *)arg;
 
-	nemoplay_decode_media(context->play, context->mediapath);
+	nemoplay_decode_media(context->play);
+
+	return NULL;
+}
+
+static void *nemoplay_handle_audioplay(void *arg)
+{
+	struct playcontext *context = (struct playcontext *)arg;
+	struct playqueue *queue;
+	struct playone *one;
+	ao_device *device;
+	ao_sample_format format;
+	int driver;
+
+	ao_initialize();
+
+	format.channels = nemoplay_get_audio_channels(context->play);
+	format.bits = nemoplay_get_audio_samplebits(context->play);
+	format.rate = nemoplay_get_audio_samplerate(context->play);
+	format.byte_format = AO_FMT_NATIVE;
+	format.matrix = 0;
+
+	driver = ao_default_driver_id();
+	device = ao_open_live(driver, &format, NULL);
+
+	queue = nemoplay_get_audio_queue(context->play);
+
+	while ((one = nemoplay_queue_dequeue(queue)) != NULL) {
+		ao_play(device, (char *)one->data, one->size);
+
+		free(one->data);
+
+		nemoplay_queue_destroy_one(one);
+	}
+
+	ao_close(device);
+	ao_shutdown();
 
 	return NULL;
 }
@@ -143,13 +177,14 @@ int main(int argc, char *argv[])
 		return -1;
 	memset(context, 0, sizeof(struct playcontext));
 
-	context->mediapath = mediapath;
-
 	context->play = play = nemoplay_create();
 	if (context->play == NULL)
 		goto err2;
 
+	nemoplay_prepare_media(play, mediapath);
+
 	pthread_create(&thread, NULL, nemoplay_handle_decodeframe, (void *)context);
+	pthread_create(&thread, NULL, nemoplay_handle_audioplay, (void *)context);
 
 	context->tool = tool = nemotool_create();
 	if (tool == NULL)

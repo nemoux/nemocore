@@ -5,8 +5,6 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include <ffmpegconfig.h>
-
 #include <nemoplay.h>
 #include <nemomisc.h>
 
@@ -46,23 +44,23 @@ void nemoplay_destroy(struct nemoplay *play)
 	nemoplay_queue_destroy(play->audio_queue);
 	nemoplay_queue_destroy(play->subtitle_queue);
 
+	if (play->container != NULL)
+		avformat_close_input(&play->container);
+
 	free(play);
 }
 
-int nemoplay_decode_media(struct nemoplay *play, const char *mediapath)
+int nemoplay_prepare_media(struct nemoplay *play, const char *mediapath)
 {
 	AVFormatContext *container;
 	AVCodecContext *context;
 	AVCodec *codec;
-	AVFrame *frame;
-	AVPacket packet;
 	AVCodecContext *video_context = NULL;
 	AVCodecContext *audio_context = NULL;
 	AVCodecContext *subtitle_context = NULL;
 	int video_stream = -1;
 	int audio_stream = -1;
 	int subtitle_stream = -1;
-	int finished = 0;
 	int i;
 
 	container = avformat_alloc_context();
@@ -70,10 +68,10 @@ int nemoplay_decode_media(struct nemoplay *play, const char *mediapath)
 		return -1;
 
 	if (avformat_open_input(&container, mediapath, NULL, NULL) < 0)
-		goto out1;
+		goto err1;
 
 	if (avformat_find_stream_info(container, NULL) < 0)
-		goto out1;
+		goto err1;
 
 	for (i = 0; i < container->nb_streams; i++) {
 		context = container->streams[i]->codec;
@@ -124,6 +122,40 @@ int nemoplay_decode_media(struct nemoplay *play, const char *mediapath)
 		else
 			play->audio_samplebits = 0;
 	}
+
+	play->container = container;
+
+	play->video_context = video_context;
+	play->audio_context = audio_context;
+	play->subtitle_context = subtitle_context;
+	play->video_stream = video_stream;
+	play->audio_stream = audio_stream;
+	play->subtitle_stream = subtitle_stream;
+
+	return 0;
+
+err1:
+	avformat_close_input(&container);
+
+	return -1;
+}
+
+void nemoplay_finish_media(struct nemoplay *play)
+{
+}
+
+int nemoplay_decode_media(struct nemoplay *play)
+{
+	AVFormatContext *container = play->container;
+	AVCodecContext *video_context = play->video_context;
+	AVCodecContext *audio_context = play->audio_context;
+	AVCodecContext *subtitle_context = play->subtitle_context;
+	AVFrame *frame;
+	AVPacket packet;
+	int video_stream = play->video_stream;
+	int audio_stream = play->audio_stream;
+	int subtitle_stream = play->subtitle_stream;
+	int finished = 0;
 
 	frame = av_frame_alloc();
 
@@ -246,9 +278,6 @@ int nemoplay_decode_media(struct nemoplay *play, const char *mediapath)
 	}
 
 	av_frame_free(&frame);
-
-out1:
-	avformat_close_input(&container);
 
 	return 0;
 }

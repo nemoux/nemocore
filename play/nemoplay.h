@@ -9,6 +9,8 @@ NEMO_BEGIN_EXTERN_C
 
 #include <stdint.h>
 
+#include <ffmpegconfig.h>
+
 #include <playqueue.h>
 #include <playshader.h>
 #include <playmisc.h>
@@ -17,6 +19,15 @@ struct nemoplay {
 	struct playqueue *video_queue;
 	struct playqueue *audio_queue;
 	struct playqueue *subtitle_queue;
+
+	AVFormatContext *container;
+
+	AVCodecContext *video_context;
+	AVCodecContext *audio_context;
+	AVCodecContext *subtitle_context;
+	int video_stream;
+	int audio_stream;
+	int subtitle_stream;
 
 	int video_width;
 	int video_height;
@@ -31,7 +42,9 @@ struct nemoplay {
 extern struct nemoplay *nemoplay_create(void);
 extern void nemoplay_destroy(struct nemoplay *play);
 
-extern int nemoplay_decode_media(struct nemoplay *play, const char *mediapath);
+extern int nemoplay_prepare_media(struct nemoplay *play, const char *mediapath);
+extern void nemoplay_finish_media(struct nemoplay *play);
+extern int nemoplay_decode_media(struct nemoplay *play);
 
 static inline struct playqueue *nemoplay_get_video_queue(struct nemoplay *play)
 {
@@ -71,6 +84,21 @@ static inline int nemoplay_get_audio_samplerate(struct nemoplay *play)
 static inline int nemoplay_get_audio_samplebits(struct nemoplay *play)
 {
 	return play->audio_samplebits;
+}
+
+static inline int nemoplay_has_video(struct nemoplay *play)
+{
+	return play->video_context != NULL;
+}
+
+static inline int nemoplay_has_audio(struct nemoplay *play)
+{
+	return play->audio_context != NULL;
+}
+
+static inline int nemoplay_has_subtitle(struct nemoplay *play)
+{
+	return play->subtitle_context != NULL;
 }
 
 static inline void nemoplay_set_userdata(struct nemoplay *play, void *userdata)

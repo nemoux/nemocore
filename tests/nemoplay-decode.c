@@ -115,15 +115,17 @@ int main(int argc, char *argv[])
 	if (play == NULL)
 		goto out1;
 
+	nemoplay_dump_media(mediapath);
+
+	nemoplay_prepare_media(play, mediapath);
+
 	pthread_create(&thread, NULL, nemoplay_handle_videoplay, (void *)play);
 	pthread_create(&thread, NULL, nemoplay_handle_audioplay, (void *)play);
 
-	if (nemoplay_decode_media(play, mediapath) < 0)
-		goto out2;
+	nemoplay_decode_media(play);
 
 	pthread_join(thread, NULL);
 
-out2:
 	nemoplay_destroy(play);
 
 out1:
