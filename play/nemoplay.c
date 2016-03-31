@@ -184,6 +184,8 @@ int nemoplay_decode_media(struct nemoplay *play)
 
 				nemoplay_queue_enqueue(play->video_queue, one);
 			}
+
+			av_frame_unref(frame);
 		} else if (packet.stream_index == audio_stream) {
 			uint8_t *buffer;
 			int buffersize;
@@ -207,6 +209,8 @@ int nemoplay_decode_media(struct nemoplay *play)
 
 				nemoplay_queue_enqueue(play->audio_queue, one);
 			}
+
+			av_frame_unref(frame);
 		} else if (packet.stream_index == subtitle_stream) {
 		}
 
