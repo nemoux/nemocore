@@ -3,9 +3,11 @@
 
 #include <libavutil/mathematics.h>
 #include <libavutil/samplefmt.h>
+#include <libavutil/opt.h>
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
 #include <libswscale/swscale.h>
+#include <libswresample/swresample.h>
 
 typedef enum AVSampleFormat AVSampleFormat;
 
