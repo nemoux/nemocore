@@ -275,6 +275,9 @@ int nemoplay_decode_media(struct nemoplay *play)
 
 void nemoplay_set_state(struct nemoplay *play, int state)
 {
+	if (play->state == NEMOPLAY_DONE_STATE)
+		return;
+
 	pthread_mutex_lock(&play->lock);
 
 	play->state = state;
