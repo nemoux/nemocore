@@ -83,23 +83,26 @@ static void nemoplay_dispatch_video_timer(struct nemotimer *timer, void *data)
 		return;
 	}
 
-	if (one->cmd == NEMOPLAY_QUEUE_DONE_COMMAND) {
+	if (nemoplay_queue_get_one_cmd(one) == NEMOPLAY_QUEUE_DONE_COMMAND) {
 		nemoplay_queue_destroy_one(one);
 		nemotimer_set_timeout(timer, 0);
 		return;
 	}
 
-	if (time > one->pts + threshold) {
+	if (time > nemoplay_queue_get_one_pts(one) + threshold) {
 		nemoplay_queue_destroy_one(one);
 		nemotimer_set_timeout(timer, 1);
 		return;
-	} else if (time < one->pts - threshold) {
+	} else if (time < nemoplay_queue_get_one_pts(one) - threshold) {
 		nemoplay_queue_enqueue_tail(queue, one);
-		nemotimer_set_timeout(timer, (one->pts - time) * 1000);
+		nemotimer_set_timeout(timer, (nemoplay_queue_get_one_pts(one) - time) * 1000);
 		return;
 	}
 
-	nemoplay_shader_update(context->shader, one->y, one->u, one->v);
+	nemoplay_shader_update(context->shader,
+			nemoplay_queue_get_one_y(one),
+			nemoplay_queue_get_one_u(one),
+			nemoplay_queue_get_one_v(one));
 	nemoplay_shader_dispatch(context->shader);
 
 	nemoshow_canvas_damage_all(context->canvas);
@@ -109,7 +112,7 @@ static void nemoplay_dispatch_video_timer(struct nemotimer *timer, void *data)
 
 	pone = nemoplay_queue_peek(queue);
 	if (pone != NULL)
-		timeout = pone->pts > time ? MAX((pone->pts - time) * 1000, 1) : 1;
+		timeout = nemoplay_queue_get_one_pts(pone) > time ? MAX((nemoplay_queue_get_one_pts(pone) - time) * 1000, 1) : 1;
 
 	nemotimer_set_timeout(timer, timeout);
 
@@ -155,13 +158,15 @@ static void *nemoplay_handle_audioplay(void *arg)
 			nemoplay_wakeup_media(context->play);
 			nemoplay_queue_wait(queue);
 		} else {
-			if (one->cmd == NEMOPLAY_QUEUE_NORMAL_COMMAND) {
-				ao_play(device, (char *)one->data, one->size);
+			if (nemoplay_queue_get_one_cmd(one) == NEMOPLAY_QUEUE_NORMAL_COMMAND) {
+				ao_play(device,
+						nemoplay_queue_get_one_data(one),
+						nemoplay_queue_get_one_size(one));
 
-				nemoplay_clock_set(clock, one->pts);
+				nemoplay_clock_set(clock, nemoplay_queue_get_one_pts(one));
 
 				nemoplay_queue_destroy_one(one);
-			} else if (one->cmd == NEMOPLAY_QUEUE_DONE_COMMAND) {
+			} else if (nemoplay_queue_get_one_cmd(one) == NEMOPLAY_QUEUE_DONE_COMMAND) {
 				nemoplay_queue_destroy_one(one);
 
 				break;

@@ -210,8 +210,6 @@ int nemoplay_decode_media(struct nemoplay *play)
 					one->y = y;
 					one->u = u;
 					one->v = v;
-					one->width = play->video_width;
-					one->height = play->video_height;
 
 					nemoplay_queue_enqueue(play->video_queue, one);
 				}

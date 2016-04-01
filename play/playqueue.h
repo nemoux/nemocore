@@ -34,9 +34,6 @@ struct playone {
 	uint8_t *y;
 	uint8_t *u;
 	uint8_t *v;
-	uint32_t width;
-	uint32_t height;
-	uint32_t stride;
 };
 
 struct playqueue {
@@ -62,6 +59,41 @@ extern void nemoplay_queue_wait(struct playqueue *queue);
 static inline int nemoplay_queue_get_count(struct playqueue *queue)
 {
 	return queue->count;
+}
+
+static inline int nemoplay_queue_get_one_cmd(struct playone *one)
+{
+	return one->cmd;
+}
+
+static inline double nemoplay_queue_get_one_pts(struct playone *one)
+{
+	return one->pts;
+}
+
+static inline void *nemoplay_queue_get_one_data(struct playone *one)
+{
+	return one->data;
+}
+
+static inline uint8_t *nemoplay_queue_get_one_y(struct playone *one)
+{
+	return one->y;
+}
+
+static inline uint8_t *nemoplay_queue_get_one_u(struct playone *one)
+{
+	return one->u;
+}
+
+static inline uint8_t *nemoplay_queue_get_one_v(struct playone *one)
+{
+	return one->v;
+}
+
+static inline uint32_t nemoplay_queue_get_one_size(struct playone *one)
+{
+	return one->size;
 }
 
 #ifdef __cplusplus

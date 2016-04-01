@@ -40,7 +40,9 @@ static void *nemoplay_handle_audioplay(void *arg)
 		if (one == NULL) {
 			nemoplay_queue_wait(queue);
 		} else {
-			ao_play(device, (char *)one->data, one->size);
+			ao_play(device,
+					nemoplay_queue_get_one_data(one),
+					nemoplay_queue_get_one_size(one));
 
 			nemoplay_queue_destroy_one(one);
 		}
