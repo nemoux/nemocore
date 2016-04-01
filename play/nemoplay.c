@@ -191,7 +191,7 @@ int nemoplay_decode_media(struct nemoplay *play)
 		if (play->state == NEMOPLAY_PLAY_STATE) {
 			r = av_read_frame(container, &packet);
 			if (r < 0) {
-				play->state = NEMOPLAY_STOP_STATE;
+				play->state = NEMOPLAY_IDLE_STATE;
 			} else {
 				if (packet.stream_index == video_stream) {
 					avcodec_decode_video2(video_context, frame, &finished, &packet);
@@ -259,11 +259,7 @@ int nemoplay_decode_media(struct nemoplay *play)
 					play->state = NEMOPLAY_FULL_STATE;
 				}
 			}
-		} else if (play->state == NEMOPLAY_FULL_STATE) {
-			pthread_mutex_lock(&play->lock);
-			pthread_cond_wait(&play->signal, &play->lock);
-			pthread_mutex_unlock(&play->lock);
-		} else if (play->state == NEMOPLAY_STOP_STATE) {
+		} else if (play->state == NEMOPLAY_FULL_STATE || play->state == NEMOPLAY_STOP_STATE || play->state == NEMOPLAY_IDLE_STATE) {
 			pthread_mutex_lock(&play->lock);
 			pthread_cond_wait(&play->signal, &play->lock);
 			pthread_mutex_unlock(&play->lock);
@@ -273,10 +269,6 @@ int nemoplay_decode_media(struct nemoplay *play)
 	av_frame_free(&frame);
 
 	swr_free(&swr);
-
-	nemoplay_queue_set_state(play->video_queue, NEMOPLAY_QUEUE_DONE_STATE);
-	nemoplay_queue_set_state(play->audio_queue, NEMOPLAY_QUEUE_DONE_STATE);
-	nemoplay_queue_set_state(play->subtitle_queue, NEMOPLAY_QUEUE_DONE_STATE);
 
 	return 0;
 }
@@ -290,4 +282,18 @@ void nemoplay_set_state(struct nemoplay *play, int state)
 	pthread_cond_signal(&play->signal);
 
 	pthread_mutex_unlock(&play->lock);
+
+	if (state == NEMOPLAY_PLAY_STATE) {
+		nemoplay_queue_set_state(play->video_queue, NEMOPLAY_QUEUE_NORMAL_STATE);
+		nemoplay_queue_set_state(play->audio_queue, NEMOPLAY_QUEUE_NORMAL_STATE);
+		nemoplay_queue_set_state(play->subtitle_queue, NEMOPLAY_QUEUE_NORMAL_STATE);
+	} else if (state == NEMOPLAY_STOP_STATE) {
+		nemoplay_queue_set_state(play->video_queue, NEMOPLAY_QUEUE_STOP_STATE);
+		nemoplay_queue_set_state(play->audio_queue, NEMOPLAY_QUEUE_STOP_STATE);
+		nemoplay_queue_set_state(play->subtitle_queue, NEMOPLAY_QUEUE_STOP_STATE);
+	} else if (state == NEMOPLAY_DONE_STATE) {
+		nemoplay_queue_set_state(play->video_queue, NEMOPLAY_QUEUE_DONE_STATE);
+		nemoplay_queue_set_state(play->audio_queue, NEMOPLAY_QUEUE_DONE_STATE);
+		nemoplay_queue_set_state(play->subtitle_queue, NEMOPLAY_QUEUE_DONE_STATE);
+	}
 }
