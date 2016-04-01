@@ -74,7 +74,7 @@ static void nemoplay_dispatch_video_timer(struct nemotimer *timer, void *data)
 
 	one = nemoplay_queue_dequeue(queue);
 	if (one == NULL) {
-		nemoplay_wakeup_media(context->play);
+		nemoplay_set_state(context->play, NEMOPLAY_PLAY_STATE);
 		nemotimer_set_timeout(timer, 1000 / nemoplay_get_video_framerate(context->play));
 	} else if (nemoplay_queue_get_one_serial(one) != nemoplay_queue_get_serial(queue)) {
 		nemoplay_queue_destroy_one(one);
@@ -112,7 +112,7 @@ static void nemoplay_dispatch_video_timer(struct nemotimer *timer, void *data)
 	}
 
 	if (nemoplay_queue_get_count(queue) < 32)
-		nemoplay_wakeup_media(context->play);
+		nemoplay_set_state(context->play, NEMOPLAY_PLAY_STATE);
 }
 
 static void *nemoplay_handle_decodeframe(void *arg)
@@ -151,7 +151,7 @@ static void *nemoplay_handle_audioplay(void *arg)
 	while (nemoplay_queue_get_state(queue) != NEMOPLAY_QUEUE_DONE_STATE) {
 		one = nemoplay_queue_dequeue(queue);
 		if (one == NULL) {
-			nemoplay_wakeup_media(context->play);
+			nemoplay_set_state(context->play, NEMOPLAY_PLAY_STATE);
 			nemoplay_queue_wait(queue);
 		} else if (nemoplay_queue_get_one_serial(one) != nemoplay_queue_get_serial(queue)) {
 			nemoplay_queue_destroy_one(one);
@@ -166,7 +166,7 @@ static void *nemoplay_handle_audioplay(void *arg)
 		}
 
 		if (nemoplay_queue_get_count(queue) < 32)
-			nemoplay_wakeup_media(context->play);
+			nemoplay_set_state(context->play, NEMOPLAY_PLAY_STATE);
 	}
 
 	ao_close(device);

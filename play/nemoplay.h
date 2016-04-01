@@ -22,8 +22,10 @@ NEMO_BEGIN_EXTERN_C
 
 typedef enum {
 	NEMOPLAY_NONE_STATE = 0,
-	NEMOPLAY_PLAYING_STATE = 1,
-	NEMOPLAY_DONE_STATE = 2,
+	NEMOPLAY_PLAY_STATE = 1,
+	NEMOPLAY_FULL_STATE = 2,
+	NEMOPLAY_STOP_STATE = 3,
+	NEMOPLAY_DONE_STATE = 4,
 	NEMOPLAY_LAST_STATE
 } NemoPlayState;
 
@@ -68,8 +70,6 @@ extern void nemoplay_destroy(struct nemoplay *play);
 extern int nemoplay_prepare_media(struct nemoplay *play, const char *mediapath);
 extern void nemoplay_finish_media(struct nemoplay *play);
 extern int nemoplay_decode_media(struct nemoplay *play);
-
-extern void nemoplay_wakeup_media(struct nemoplay *play);
 
 extern void nemoplay_set_state(struct nemoplay *play, int state);
 

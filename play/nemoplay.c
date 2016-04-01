@@ -169,8 +169,7 @@ int nemoplay_decode_media(struct nemoplay *play)
 	int audio_stream = play->audio_stream;
 	int subtitle_stream = play->subtitle_stream;
 	int finished = 0;
-
-	play->state = NEMOPLAY_PLAYING_STATE;
+	int r;
 
 	swr = swr_alloc();
 	av_opt_set_int(swr, "in_channel_layout", audio_context->channel_layout, 0);
@@ -186,76 +185,85 @@ int nemoplay_decode_media(struct nemoplay *play)
 
 	frame = av_frame_alloc();
 
-	while (av_read_frame(container, &packet) >= 0) {
-		if (play->state == NEMOPLAY_PLAYING_STATE) {
-			if (packet.stream_index == video_stream) {
-				avcodec_decode_video2(video_context, frame, &finished, &packet);
+	play->state = NEMOPLAY_PLAY_STATE;
 
-				if (finished != 0) {
-					struct playone *one;
-					uint8_t *y, *u, *v;
+	while (play->state != NEMOPLAY_DONE_STATE) {
+		if (play->state == NEMOPLAY_PLAY_STATE) {
+			r = av_read_frame(container, &packet);
+			if (r < 0) {
+				play->state = NEMOPLAY_STOP_STATE;
+			} else {
+				if (packet.stream_index == video_stream) {
+					avcodec_decode_video2(video_context, frame, &finished, &packet);
 
-					y = (uint8_t *)malloc(frame->linesize[0] * frame->height);
-					u = (uint8_t *)malloc(frame->linesize[1] * frame->height / 2);
-					v = (uint8_t *)malloc(frame->linesize[2] * frame->height / 2);
+					if (finished != 0) {
+						struct playone *one;
+						uint8_t *y, *u, *v;
 
-					memcpy(y, frame->data[0], frame->linesize[0] * frame->height);
-					memcpy(u, frame->data[1], frame->linesize[1] * frame->height / 2);
-					memcpy(v, frame->data[2], frame->linesize[2] * frame->height / 2);
+						y = (uint8_t *)malloc(frame->linesize[0] * frame->height);
+						u = (uint8_t *)malloc(frame->linesize[1] * frame->height / 2);
+						v = (uint8_t *)malloc(frame->linesize[2] * frame->height / 2);
 
-					one = nemoplay_queue_create_one();
-					one->cmd = NEMOPLAY_QUEUE_NORMAL_COMMAND;
-					one->pts = video_timebase * av_frame_get_best_effort_timestamp(frame);
-					one->serial = play->video_queue->serial;
+						memcpy(y, frame->data[0], frame->linesize[0] * frame->height);
+						memcpy(u, frame->data[1], frame->linesize[1] * frame->height / 2);
+						memcpy(v, frame->data[2], frame->linesize[2] * frame->height / 2);
 
-					one->y = y;
-					one->u = u;
-					one->v = v;
+						one = nemoplay_queue_create_one();
+						one->cmd = NEMOPLAY_QUEUE_NORMAL_COMMAND;
+						one->pts = video_timebase * av_frame_get_best_effort_timestamp(frame);
+						one->serial = play->video_queue->serial;
 
-					nemoplay_queue_enqueue(play->video_queue, one);
+						one->y = y;
+						one->u = u;
+						one->v = v;
+
+						nemoplay_queue_enqueue(play->video_queue, one);
+					}
+
+					av_frame_unref(frame);
+				} else if (packet.stream_index == audio_stream) {
+					uint8_t *buffer;
+					int buffersize;
+					int samplesize;
+
+					avcodec_decode_audio4(audio_context, frame, &finished, &packet);
+
+					buffersize = av_samples_get_buffer_size(NULL, audio_context->channels, frame->nb_samples, audio_context->sample_fmt, 1);
+
+					if (finished != 0) {
+						struct playone *one;
+
+						buffer = (uint8_t *)malloc(buffersize);
+
+						samplesize = swr_convert(swr, &buffer, buffersize, (const uint8_t **)frame->extended_data, frame->nb_samples);
+
+						one = nemoplay_queue_create_one();
+						one->cmd = NEMOPLAY_QUEUE_NORMAL_COMMAND;
+						one->pts = audio_timebase * av_frame_get_best_effort_timestamp(frame);
+						one->serial = play->audio_queue->serial;
+
+						one->data = buffer;
+						one->size = samplesize * audio_context->channels * av_get_bytes_per_sample(AV_SAMPLE_FMT_S16);
+
+						nemoplay_queue_enqueue(play->audio_queue, one);
+					}
+
+					av_frame_unref(frame);
+				} else if (packet.stream_index == subtitle_stream) {
 				}
 
-				av_frame_unref(frame);
-			} else if (packet.stream_index == audio_stream) {
-				uint8_t *buffer;
-				int buffersize;
-				int samplesize;
+				av_free_packet(&packet);
 
-				avcodec_decode_audio4(audio_context, frame, &finished, &packet);
-
-				buffersize = av_samples_get_buffer_size(NULL, audio_context->channels, frame->nb_samples, audio_context->sample_fmt, 1);
-
-				if (finished != 0) {
-					struct playone *one;
-
-					buffer = (uint8_t *)malloc(buffersize);
-
-					samplesize = swr_convert(swr, &buffer, buffersize, (const uint8_t **)frame->extended_data, frame->nb_samples);
-
-					one = nemoplay_queue_create_one();
-					one->cmd = NEMOPLAY_QUEUE_NORMAL_COMMAND;
-					one->pts = audio_timebase * av_frame_get_best_effort_timestamp(frame);
-					one->serial = play->audio_queue->serial;
-
-					one->data = buffer;
-					one->size = samplesize * audio_context->channels * av_get_bytes_per_sample(AV_SAMPLE_FMT_S16);
-
-					nemoplay_queue_enqueue(play->audio_queue, one);
+				if (nemoplay_queue_get_count(play->video_queue) > play->max_queuesize &&
+						nemoplay_queue_get_count(play->audio_queue) > play->max_queuesize) {
+					play->state = NEMOPLAY_FULL_STATE;
 				}
-
-				av_frame_unref(frame);
-			} else if (packet.stream_index == subtitle_stream) {
 			}
-
-			av_free_packet(&packet);
-		} else if (play->state == NEMOPLAY_DONE_STATE) {
-			av_free_packet(&packet);
-
-			break;
-		}
-
-		if (nemoplay_queue_get_count(play->video_queue) > play->max_queuesize &&
-				nemoplay_queue_get_count(play->audio_queue) > play->max_queuesize) {
+		} else if (play->state == NEMOPLAY_FULL_STATE) {
+			pthread_mutex_lock(&play->lock);
+			pthread_cond_wait(&play->signal, &play->lock);
+			pthread_mutex_unlock(&play->lock);
+		} else if (play->state == NEMOPLAY_STOP_STATE) {
 			pthread_mutex_lock(&play->lock);
 			pthread_cond_wait(&play->signal, &play->lock);
 			pthread_mutex_unlock(&play->lock);
@@ -266,23 +274,20 @@ int nemoplay_decode_media(struct nemoplay *play)
 
 	swr_free(&swr);
 
-	return 0;
-}
+	nemoplay_queue_set_state(play->video_queue, NEMOPLAY_QUEUE_DONE_STATE);
+	nemoplay_queue_set_state(play->audio_queue, NEMOPLAY_QUEUE_DONE_STATE);
+	nemoplay_queue_set_state(play->subtitle_queue, NEMOPLAY_QUEUE_DONE_STATE);
 
-void nemoplay_wakeup_media(struct nemoplay *play)
-{
-	pthread_cond_signal(&play->signal);
+	return 0;
 }
 
 void nemoplay_set_state(struct nemoplay *play, int state)
 {
+	pthread_mutex_lock(&play->lock);
+
 	play->state = state;
 
-	if (state == NEMOPLAY_DONE_STATE) {
-		nemoplay_queue_set_state(play->video_queue, NEMOPLAY_QUEUE_DONE_STATE);
-		nemoplay_queue_set_state(play->audio_queue, NEMOPLAY_QUEUE_DONE_STATE);
-		nemoplay_queue_set_state(play->subtitle_queue, NEMOPLAY_QUEUE_DONE_STATE);
-	}
-
 	pthread_cond_signal(&play->signal);
+
+	pthread_mutex_unlock(&play->lock);
 }
