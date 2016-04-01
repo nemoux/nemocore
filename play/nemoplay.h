@@ -18,7 +18,7 @@ NEMO_BEGIN_EXTERN_C
 #include <playshader.h>
 #include <playmisc.h>
 
-#define NEMOPLAY_MAX_QUEUESIZE		(64)
+#define NEMOPLAY_MAX_QUEUESIZE		(128)
 
 typedef enum {
 	NEMOPLAY_NONE_STATE = 0,

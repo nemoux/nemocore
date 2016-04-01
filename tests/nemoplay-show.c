@@ -110,6 +110,9 @@ static void nemoplay_dispatch_video_timer(struct nemotimer *timer, void *data)
 		nemoplay_queue_destroy_one(one);
 		nemotimer_set_timeout(timer, 0);
 	}
+
+	if (nemoplay_queue_get_count(queue) < 32)
+		nemoplay_wakeup_media(context->play);
 }
 
 static void *nemoplay_handle_decodeframe(void *arg)
@@ -165,6 +168,9 @@ static void *nemoplay_handle_audioplay(void *arg)
 			nemoplay_queue_destroy_one(one);
 			done = 1;
 		}
+
+		if (nemoplay_queue_get_count(queue) < 32)
+			nemoplay_wakeup_media(context->play);
 	} while (done == 0);
 
 	ao_close(device);
