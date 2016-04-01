@@ -65,31 +65,27 @@ static void nemoplay_dispatch_video_timer(struct nemotimer *timer, void *data)
 	struct playclock *clock;
 	struct playone *one;
 	struct playone *pone;
-	double threshold;
-	double time;
-	uint32_t timeout;
 
 	queue = nemoplay_get_video_queue(context->play);
 	clock = nemoplay_get_audio_clock(context->play);
 
-	threshold = 1.0f / nemoplay_get_video_framerate(context->play);
-	timeout = threshold * 1000;
-	time = nemoplay_clock_get(clock);
-
 	one = nemoplay_queue_dequeue(queue);
 	if (one == NULL) {
 		nemoplay_wakeup_media(context->play);
-		nemotimer_set_timeout(timer, timeout);
+		nemotimer_set_timeout(timer, 1000 / nemoplay_get_video_framerate(context->play));
 	} else if (nemoplay_queue_get_one_serial(one) != nemoplay_queue_get_serial(queue)) {
 		nemoplay_queue_destroy_one(one);
 		nemotimer_set_timeout(timer, 1);
 	} else if (nemoplay_queue_get_one_cmd(one) == NEMOPLAY_QUEUE_NORMAL_COMMAND) {
-		if (time > nemoplay_queue_get_one_pts(one) + threshold) {
+		double threshold = 1.0f / nemoplay_get_video_framerate(context->play);
+		double time0 = nemoplay_clock_get(clock);
+
+		if (time0 > nemoplay_queue_get_one_pts(one) + threshold) {
 			nemoplay_queue_destroy_one(one);
 			nemotimer_set_timeout(timer, 1);
-		} else if (time < nemoplay_queue_get_one_pts(one) - threshold) {
+		} else if (time0 < nemoplay_queue_get_one_pts(one) - threshold) {
 			nemoplay_queue_enqueue_tail(queue, one);
-			nemotimer_set_timeout(timer, (nemoplay_queue_get_one_pts(one) - time) * 1000);
+			nemotimer_set_timeout(timer, MAX((nemoplay_queue_get_one_pts(one) - time0) * 1000, 1));
 		} else {
 			nemoplay_shader_update(context->shader,
 					nemoplay_queue_get_one_y(one),
@@ -104,9 +100,9 @@ static void nemoplay_dispatch_video_timer(struct nemotimer *timer, void *data)
 
 			pone = nemoplay_queue_peek(queue);
 			if (pone != NULL)
-				timeout = nemoplay_queue_get_one_pts(pone) > time ? MAX((nemoplay_queue_get_one_pts(pone) - time) * 1000, 1) : 1;
-
-			nemotimer_set_timeout(timer, timeout);
+				nemotimer_set_timeout(timer, nemoplay_queue_get_one_pts(pone) > time0 ? MAX((nemoplay_queue_get_one_pts(pone) - time0) * 1000, 1) : 1);
+			else
+				nemotimer_set_timeout(timer, threshold * 1000);
 
 			nemoplay_queue_destroy_one(one);
 		}
