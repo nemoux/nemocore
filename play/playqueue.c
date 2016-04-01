@@ -84,9 +84,9 @@ void nemoplay_queue_enqueue(struct playqueue *queue, struct playone *one)
 	nemolist_enqueue(&queue->list, &one->link);
 	queue->count++;
 
-	pthread_mutex_unlock(&queue->lock);
-
 	pthread_cond_signal(&queue->signal);
+
+	pthread_mutex_unlock(&queue->lock);
 }
 
 void nemoplay_queue_enqueue_tail(struct playqueue *queue, struct playone *one)
@@ -96,9 +96,9 @@ void nemoplay_queue_enqueue_tail(struct playqueue *queue, struct playone *one)
 	nemolist_enqueue_tail(&queue->list, &one->link);
 	queue->count++;
 
-	pthread_mutex_unlock(&queue->lock);
-
 	pthread_cond_signal(&queue->signal);
+
+	pthread_mutex_unlock(&queue->lock);
 }
 
 struct playone *nemoplay_queue_dequeue(struct playqueue *queue)
@@ -133,7 +133,19 @@ void nemoplay_queue_wait(struct playqueue *queue)
 {
 	pthread_mutex_lock(&queue->lock);
 
-	pthread_cond_wait(&queue->signal, &queue->lock);
+	if (queue->state != NEMOPLAY_QUEUE_DONE_STATE)
+		pthread_cond_wait(&queue->signal, &queue->lock);
+
+	pthread_mutex_unlock(&queue->lock);
+}
+
+void nemoplay_queue_set_state(struct playqueue *queue, int state)
+{
+	pthread_mutex_lock(&queue->lock);
+
+	queue->state = state;
+
+	pthread_cond_signal(&queue->signal);
 
 	pthread_mutex_unlock(&queue->lock);
 }

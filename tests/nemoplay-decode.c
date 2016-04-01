@@ -35,7 +35,7 @@ static void *nemoplay_handle_audioplay(void *arg)
 
 	queue = nemoplay_get_audio_queue(play);
 
-	do {
+	while (nemoplay_queue_get_state(queue) != NEMOPLAY_QUEUE_DONE_STATE) {
 		one = nemoplay_queue_dequeue(queue);
 		if (one == NULL) {
 			nemoplay_queue_wait(queue);
@@ -48,7 +48,7 @@ static void *nemoplay_handle_audioplay(void *arg)
 
 			nemoplay_queue_destroy_one(one);
 		}
-	} while (1);
+	}
 
 	ao_close(device);
 	ao_shutdown();

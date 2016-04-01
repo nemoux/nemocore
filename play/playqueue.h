@@ -14,10 +14,15 @@ NEMO_BEGIN_EXTERN_C
 #include <nemolist.h>
 
 typedef enum {
+	NEMOPLAY_QUEUE_NORMAL_STATE = 0,
+	NEMOPLAY_QUEUE_DONE_STATE = 1,
+	NEMOPLAY_QUEUE_LAST_STATE
+} NemoPlayQueueState;
+
+typedef enum {
 	NEMOPLAY_QUEUE_NORMAL_COMMAND = 0,
 	NEMOPLAY_QUEUE_FLUSH_COMMAND = 1,
 	NEMOPLAY_QUEUE_ERROR_COMMAND = 2,
-	NEMOPLAY_QUEUE_DONE_COMMAND = 3,
 	NEMOPLAY_QUEUE_LAST_COMMAND
 } NemoPlayQueueCmd;
 
@@ -39,6 +44,8 @@ struct playone {
 };
 
 struct playqueue {
+	int state;
+
 	pthread_mutex_t lock;
 	pthread_cond_t signal;
 
@@ -59,6 +66,13 @@ extern void nemoplay_queue_enqueue_tail(struct playqueue *queue, struct playone 
 extern struct playone *nemoplay_queue_dequeue(struct playqueue *queue);
 extern struct playone *nemoplay_queue_peek(struct playqueue *queue);
 extern void nemoplay_queue_wait(struct playqueue *queue);
+
+extern void nemoplay_queue_set_state(struct playqueue *queue, int state);
+
+static inline int nemoplay_queue_get_state(struct playqueue *queue)
+{
+	return queue->state;
+}
 
 static inline int nemoplay_queue_get_count(struct playqueue *queue)
 {

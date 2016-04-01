@@ -249,18 +249,6 @@ int nemoplay_decode_media(struct nemoplay *play)
 
 			av_free_packet(&packet);
 		} else if (play->state == NEMOPLAY_DONE_STATE) {
-			struct playone *one;
-
-			one = nemoplay_queue_create_one();
-			one->cmd = NEMOPLAY_QUEUE_DONE_COMMAND;
-			one->serial = ++play->video_queue->serial;
-			nemoplay_queue_enqueue(play->video_queue, one);
-
-			one = nemoplay_queue_create_one();
-			one->cmd = NEMOPLAY_QUEUE_DONE_COMMAND;
-			one->serial = ++play->audio_queue->serial;
-			nemoplay_queue_enqueue(play->audio_queue, one);
-
 			av_free_packet(&packet);
 
 			break;
@@ -289,6 +277,12 @@ void nemoplay_wakeup_media(struct nemoplay *play)
 void nemoplay_set_state(struct nemoplay *play, int state)
 {
 	play->state = state;
+
+	if (state == NEMOPLAY_DONE_STATE) {
+		nemoplay_queue_set_state(play->video_queue, NEMOPLAY_QUEUE_DONE_STATE);
+		nemoplay_queue_set_state(play->audio_queue, NEMOPLAY_QUEUE_DONE_STATE);
+		nemoplay_queue_set_state(play->subtitle_queue, NEMOPLAY_QUEUE_DONE_STATE);
+	}
 
 	pthread_cond_signal(&play->signal);
 }
