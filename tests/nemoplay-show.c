@@ -77,43 +77,43 @@ static void nemoplay_dispatch_video_timer(struct nemotimer *timer, void *data)
 	time = nemoplay_clock_get(clock);
 
 	one = nemoplay_queue_dequeue(queue);
-	if (one != NULL) {
-		if (one->cmd == NEMOPLAY_QUEUE_DONE_COMMAND) {
-			timeout = 0;
-			goto pass1;
-		}
-
-		if (time > one->pts + threshold) {
-			timeout = 1;
-			goto pass2;
-		} else if (time < one->pts - threshold) {
-			nemoplay_queue_enqueue_tail(queue, one);
-			goto done;
-		}
-
-		nemoplay_shader_update(context->shader, one->y, one->u, one->v);
-		nemoplay_shader_dispatch(context->shader);
-
-		nemoshow_canvas_damage_all(context->canvas);
-		nemoshow_dispatch_frame(context->show);
-
-		context->has_frame = 1;
-
-		pone = nemoplay_queue_peek(queue);
-		if (pone != NULL)
-			timeout = pone->pts > time ? (pone->pts - time) * 1000 : 1;
-
-pass2:
-		free(one->y);
-		free(one->u);
-		free(one->v);
-
-pass1:
-		nemoplay_queue_destroy_one(one);
+	if (one == NULL) {
+		nemoplay_wakeup_media(context->play);
+		nemotimer_set_timeout(timer, timeout);
+		return;
 	}
 
-done:
+	if (one->cmd == NEMOPLAY_QUEUE_DONE_COMMAND) {
+		nemoplay_queue_destroy_one(one);
+		nemotimer_set_timeout(timer, 0);
+		return;
+	}
+
+	if (time > one->pts + threshold) {
+		nemoplay_queue_destroy_one(one);
+		nemotimer_set_timeout(timer, 1);
+		return;
+	} else if (time < one->pts - threshold) {
+		nemoplay_queue_enqueue_tail(queue, one);
+		nemotimer_set_timeout(timer, (one->pts - time) * 1000);
+		return;
+	}
+
+	nemoplay_shader_update(context->shader, one->y, one->u, one->v);
+	nemoplay_shader_dispatch(context->shader);
+
+	nemoshow_canvas_damage_all(context->canvas);
+	nemoshow_dispatch_frame(context->show);
+
+	context->has_frame = 1;
+
+	pone = nemoplay_queue_peek(queue);
+	if (pone != NULL)
+		timeout = pone->pts > time ? MAX((pone->pts - time) * 1000, 1) : 1;
+
 	nemotimer_set_timeout(timer, timeout);
+
+	nemoplay_queue_destroy_one(one);
 }
 
 static void *nemoplay_handle_decodeframe(void *arg)
@@ -149,21 +149,25 @@ static void *nemoplay_handle_audioplay(void *arg)
 	queue = nemoplay_get_audio_queue(context->play);
 	clock = nemoplay_get_audio_clock(context->play);
 
-	while ((one = nemoplay_queue_dequeue(queue)) != NULL) {
-		if (one->cmd == NEMOPLAY_QUEUE_NORMAL_COMMAND) {
-			ao_play(device, (char *)one->data, one->size);
+	do {
+		one = nemoplay_queue_dequeue(queue);
+		if (one == NULL) {
+			nemoplay_wakeup_media(context->play);
+			nemoplay_queue_wait(queue);
+		} else {
+			if (one->cmd == NEMOPLAY_QUEUE_NORMAL_COMMAND) {
+				ao_play(device, (char *)one->data, one->size);
 
-			nemoplay_clock_set(clock, one->pts);
+				nemoplay_clock_set(clock, one->pts);
 
-			free(one->data);
+				nemoplay_queue_destroy_one(one);
+			} else if (one->cmd == NEMOPLAY_QUEUE_DONE_COMMAND) {
+				nemoplay_queue_destroy_one(one);
 
-			nemoplay_queue_destroy_one(one);
-		} else if (one->cmd == NEMOPLAY_QUEUE_DONE_COMMAND) {
-			nemoplay_queue_destroy_one(one);
-
-			break;
+				break;
+			}
 		}
-	}
+	} while (1);
 
 	ao_close(device);
 	ao_shutdown();

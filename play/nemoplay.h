@@ -9,12 +9,16 @@ NEMO_BEGIN_EXTERN_C
 
 #include <stdint.h>
 
+#include <pthread.h>
+
 #include <ffmpegconfig.h>
 
 #include <playqueue.h>
 #include <playclock.h>
 #include <playshader.h>
 #include <playmisc.h>
+
+#define NEMOPLAY_MAX_QUEUESIZE		(32)
 
 typedef enum {
 	NEMOPLAY_NONE_STATE = 0,
@@ -25,6 +29,11 @@ typedef enum {
 
 struct nemoplay {
 	int state;
+
+	pthread_mutex_t lock;
+	pthread_cond_t signal;
+
+	int max_queuesize;
 
 	struct playqueue *video_queue;
 	struct playqueue *audio_queue;
@@ -60,6 +69,8 @@ extern int nemoplay_prepare_media(struct nemoplay *play, const char *mediapath);
 extern void nemoplay_finish_media(struct nemoplay *play);
 extern int nemoplay_decode_media(struct nemoplay *play);
 
+extern void nemoplay_wakeup_media(struct nemoplay *play);
+
 static inline void nemoplay_set_state(struct nemoplay *play, int state)
 {
 	play->state = state;
@@ -68,6 +79,11 @@ static inline void nemoplay_set_state(struct nemoplay *play, int state)
 static inline int nemoplay_get_state(struct nemoplay *play)
 {
 	return play->state;
+}
+
+static inline void nemoplay_set_max_queuesize(struct nemoplay *play, int queuesize)
+{
+	play->max_queuesize = queuesize;
 }
 
 static inline struct playqueue *nemoplay_get_video_queue(struct nemoplay *play)

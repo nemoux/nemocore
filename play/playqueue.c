@@ -65,6 +65,15 @@ void nemoplay_queue_destroy_one(struct playone *one)
 {
 	nemolist_remove(&one->link);
 
+	if (one->data != NULL)
+		free(one->data);
+	if (one->y != NULL)
+		free(one->y);
+	if (one->u != NULL)
+		free(one->u);
+	if (one->v != NULL)
+		free(one->v);
+
 	free(one);
 }
 
@@ -73,6 +82,7 @@ void nemoplay_queue_enqueue(struct playqueue *queue, struct playone *one)
 	pthread_mutex_lock(&queue->lock);
 
 	nemolist_enqueue(&queue->list, &one->link);
+	queue->count++;
 
 	pthread_mutex_unlock(&queue->lock);
 
@@ -84,6 +94,7 @@ void nemoplay_queue_enqueue_tail(struct playqueue *queue, struct playone *one)
 	pthread_mutex_lock(&queue->lock);
 
 	nemolist_enqueue_tail(&queue->list, &one->link);
+	queue->count++;
 
 	pthread_mutex_unlock(&queue->lock);
 
@@ -96,17 +107,13 @@ struct playone *nemoplay_queue_dequeue(struct playqueue *queue)
 
 	pthread_mutex_lock(&queue->lock);
 
-retry:
 	elm = nemolist_dequeue(&queue->list);
-	if (elm == NULL) {
-		pthread_cond_wait(&queue->signal, &queue->lock);
-
-		goto retry;
-	}
+	if (elm != NULL)
+		queue->count--;
 
 	pthread_mutex_unlock(&queue->lock);
 
-	return container_of(elm, struct playone, link);
+	return elm != NULL ? container_of(elm, struct playone, link) : NULL;
 }
 
 struct playone *nemoplay_queue_peek(struct playqueue *queue)
@@ -119,5 +126,14 @@ struct playone *nemoplay_queue_peek(struct playqueue *queue)
 
 	pthread_mutex_unlock(&queue->lock);
 
-	return container_of(elm, struct playone, link);
+	return elm != NULL ? container_of(elm, struct playone, link) : NULL;
+}
+
+void nemoplay_queue_wait(struct playqueue *queue)
+{
+	pthread_mutex_lock(&queue->lock);
+
+	pthread_cond_wait(&queue->signal, &queue->lock);
+
+	pthread_mutex_unlock(&queue->lock);
 }

@@ -26,6 +26,12 @@ struct nemoplay *nemoplay_create(void)
 		return NULL;
 	memset(play, 0, sizeof(struct nemoplay));
 
+	if (pthread_mutex_init(&play->lock, NULL) != 0)
+		goto err1;
+
+	if (pthread_cond_init(&play->signal, NULL) != 0)
+		goto err2;
+
 	play->video_queue = nemoplay_queue_create();
 	play->audio_queue = nemoplay_queue_create();
 	play->subtitle_queue = nemoplay_queue_create();
@@ -33,7 +39,12 @@ struct nemoplay *nemoplay_create(void)
 	play->video_clock = nemoplay_clock_create();
 	play->audio_clock = nemoplay_clock_create();
 
+	play->max_queuesize = NEMOPLAY_MAX_QUEUESIZE;
+
 	return play;
+
+err2:
+	pthread_mutex_destroy(&play->lock);
 
 err1:
 	free(play);
@@ -52,6 +63,9 @@ void nemoplay_destroy(struct nemoplay *play)
 
 	if (play->container != NULL)
 		avformat_close_input(&play->container);
+
+	pthread_cond_destroy(&play->signal);
+	pthread_mutex_destroy(&play->lock);
 
 	free(play);
 }
@@ -249,6 +263,13 @@ int nemoplay_decode_media(struct nemoplay *play)
 
 			break;
 		}
+
+		if (nemoplay_queue_get_count(play->video_queue) > play->max_queuesize &&
+				nemoplay_queue_get_count(play->audio_queue) > play->max_queuesize) {
+			pthread_mutex_lock(&play->lock);
+			pthread_cond_wait(&play->signal, &play->lock);
+			pthread_mutex_unlock(&play->lock);
+		}
 	}
 
 	av_frame_free(&frame);
@@ -256,4 +277,9 @@ int nemoplay_decode_media(struct nemoplay *play)
 	swr_free(&swr);
 
 	return 0;
+}
+
+void nemoplay_wakeup_media(struct nemoplay *play)
+{
+	pthread_cond_signal(&play->signal);
 }

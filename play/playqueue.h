@@ -44,6 +44,7 @@ struct playqueue {
 	pthread_cond_t signal;
 
 	struct nemolist list;
+	int count;
 };
 
 extern struct playqueue *nemoplay_queue_create(void);
@@ -56,6 +57,12 @@ extern void nemoplay_queue_enqueue(struct playqueue *queue, struct playone *one)
 extern void nemoplay_queue_enqueue_tail(struct playqueue *queue, struct playone *one);
 extern struct playone *nemoplay_queue_dequeue(struct playqueue *queue);
 extern struct playone *nemoplay_queue_peek(struct playqueue *queue);
+extern void nemoplay_queue_wait(struct playqueue *queue);
+
+static inline int nemoplay_queue_get_count(struct playqueue *queue)
+{
+	return queue->count;
+}
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
