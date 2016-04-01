@@ -39,6 +39,8 @@ static void *nemoplay_handle_audioplay(void *arg)
 		one = nemoplay_queue_dequeue(queue);
 		if (one == NULL) {
 			nemoplay_queue_wait(queue);
+		} else if (nemoplay_queue_get_one_serial(one) != nemoplay_queue_get_serial(queue)) {
+			nemoplay_queue_destroy_one(one);
 		} else {
 			ao_play(device,
 					nemoplay_queue_get_one_data(one),

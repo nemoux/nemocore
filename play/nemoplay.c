@@ -206,6 +206,7 @@ int nemoplay_decode_media(struct nemoplay *play)
 					one = nemoplay_queue_create_one();
 					one->cmd = NEMOPLAY_QUEUE_NORMAL_COMMAND;
 					one->pts = video_timebase * av_frame_get_best_effort_timestamp(frame);
+					one->serial = play->video_queue->serial;
 
 					one->y = y;
 					one->u = u;
@@ -234,6 +235,7 @@ int nemoplay_decode_media(struct nemoplay *play)
 					one = nemoplay_queue_create_one();
 					one->cmd = NEMOPLAY_QUEUE_NORMAL_COMMAND;
 					one->pts = audio_timebase * av_frame_get_best_effort_timestamp(frame);
+					one->serial = play->audio_queue->serial;
 
 					one->data = buffer;
 					one->size = samplesize * audio_context->channels * av_get_bytes_per_sample(AV_SAMPLE_FMT_S16);
@@ -251,10 +253,12 @@ int nemoplay_decode_media(struct nemoplay *play)
 
 			one = nemoplay_queue_create_one();
 			one->cmd = NEMOPLAY_QUEUE_DONE_COMMAND;
+			one->serial = ++play->video_queue->serial;
 			nemoplay_queue_enqueue(play->video_queue, one);
 
 			one = nemoplay_queue_create_one();
 			one->cmd = NEMOPLAY_QUEUE_DONE_COMMAND;
+			one->serial = ++play->audio_queue->serial;
 			nemoplay_queue_enqueue(play->audio_queue, one);
 
 			av_free_packet(&packet);

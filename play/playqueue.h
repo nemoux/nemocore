@@ -34,6 +34,8 @@ struct playone {
 	uint8_t *y;
 	uint8_t *u;
 	uint8_t *v;
+
+	uint32_t serial;
 };
 
 struct playqueue {
@@ -42,6 +44,8 @@ struct playqueue {
 
 	struct nemolist list;
 	int count;
+
+	uint32_t serial;
 };
 
 extern struct playqueue *nemoplay_queue_create(void);
@@ -59,6 +63,11 @@ extern void nemoplay_queue_wait(struct playqueue *queue);
 static inline int nemoplay_queue_get_count(struct playqueue *queue)
 {
 	return queue->count;
+}
+
+static inline uint32_t nemoplay_queue_get_serial(struct playqueue *queue)
+{
+	return queue->serial;
 }
 
 static inline int nemoplay_queue_get_one_cmd(struct playone *one)
@@ -94,6 +103,11 @@ static inline uint8_t *nemoplay_queue_get_one_v(struct playone *one)
 static inline uint32_t nemoplay_queue_get_one_size(struct playone *one)
 {
 	return one->size;
+}
+
+static inline uint32_t nemoplay_queue_get_one_serial(struct playone *one)
+{
+	return one->serial;
 }
 
 #ifdef __cplusplus
