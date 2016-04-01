@@ -71,10 +71,7 @@ extern int nemoplay_decode_media(struct nemoplay *play);
 
 extern void nemoplay_wakeup_media(struct nemoplay *play);
 
-static inline void nemoplay_set_state(struct nemoplay *play, int state)
-{
-	play->state = state;
-}
+extern void nemoplay_set_state(struct nemoplay *play, int state);
 
 static inline int nemoplay_get_state(struct nemoplay *play)
 {

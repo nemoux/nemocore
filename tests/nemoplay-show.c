@@ -80,47 +80,40 @@ static void nemoplay_dispatch_video_timer(struct nemotimer *timer, void *data)
 	if (one == NULL) {
 		nemoplay_wakeup_media(context->play);
 		nemotimer_set_timeout(timer, timeout);
-		return;
 	} else if (nemoplay_queue_get_one_serial(one) != nemoplay_queue_get_serial(queue)) {
 		nemoplay_queue_destroy_one(one);
 		nemotimer_set_timeout(timer, 1);
-		return;
-	}
+	} else if (nemoplay_queue_get_one_cmd(one) == NEMOPLAY_QUEUE_NORMAL_COMMAND) {
+		if (time > nemoplay_queue_get_one_pts(one) + threshold) {
+			nemoplay_queue_destroy_one(one);
+			nemotimer_set_timeout(timer, 1);
+		} else if (time < nemoplay_queue_get_one_pts(one) - threshold) {
+			nemoplay_queue_enqueue_tail(queue, one);
+			nemotimer_set_timeout(timer, (nemoplay_queue_get_one_pts(one) - time) * 1000);
+		} else {
+			nemoplay_shader_update(context->shader,
+					nemoplay_queue_get_one_y(one),
+					nemoplay_queue_get_one_u(one),
+					nemoplay_queue_get_one_v(one));
+			nemoplay_shader_dispatch(context->shader);
 
-	if (nemoplay_queue_get_one_cmd(one) == NEMOPLAY_QUEUE_DONE_COMMAND) {
+			nemoshow_canvas_damage_all(context->canvas);
+			nemoshow_dispatch_frame(context->show);
+
+			context->has_frame = 1;
+
+			pone = nemoplay_queue_peek(queue);
+			if (pone != NULL)
+				timeout = nemoplay_queue_get_one_pts(pone) > time ? MAX((nemoplay_queue_get_one_pts(pone) - time) * 1000, 1) : 1;
+
+			nemotimer_set_timeout(timer, timeout);
+
+			nemoplay_queue_destroy_one(one);
+		}
+	} else if (nemoplay_queue_get_one_cmd(one) == NEMOPLAY_QUEUE_DONE_COMMAND) {
 		nemoplay_queue_destroy_one(one);
 		nemotimer_set_timeout(timer, 0);
-		return;
 	}
-
-	if (time > nemoplay_queue_get_one_pts(one) + threshold) {
-		nemoplay_queue_destroy_one(one);
-		nemotimer_set_timeout(timer, 1);
-		return;
-	} else if (time < nemoplay_queue_get_one_pts(one) - threshold) {
-		nemoplay_queue_enqueue_tail(queue, one);
-		nemotimer_set_timeout(timer, (nemoplay_queue_get_one_pts(one) - time) * 1000);
-		return;
-	}
-
-	nemoplay_shader_update(context->shader,
-			nemoplay_queue_get_one_y(one),
-			nemoplay_queue_get_one_u(one),
-			nemoplay_queue_get_one_v(one));
-	nemoplay_shader_dispatch(context->shader);
-
-	nemoshow_canvas_damage_all(context->canvas);
-	nemoshow_dispatch_frame(context->show);
-
-	context->has_frame = 1;
-
-	pone = nemoplay_queue_peek(queue);
-	if (pone != NULL)
-		timeout = nemoplay_queue_get_one_pts(pone) > time ? MAX((nemoplay_queue_get_one_pts(pone) - time) * 1000, 1) : 1;
-
-	nemotimer_set_timeout(timer, timeout);
-
-	nemoplay_queue_destroy_one(one);
 }
 
 static void *nemoplay_handle_decodeframe(void *arg)
@@ -141,6 +134,7 @@ static void *nemoplay_handle_audioplay(void *arg)
 	ao_device *device;
 	ao_sample_format format;
 	int driver;
+	int done = 0;
 
 	ao_initialize();
 
@@ -163,22 +157,19 @@ static void *nemoplay_handle_audioplay(void *arg)
 			nemoplay_queue_wait(queue);
 		} else if (nemoplay_queue_get_one_serial(one) != nemoplay_queue_get_serial(queue)) {
 			nemoplay_queue_destroy_one(one);
-		} else {
-			if (nemoplay_queue_get_one_cmd(one) == NEMOPLAY_QUEUE_NORMAL_COMMAND) {
-				ao_play(device,
-						nemoplay_queue_get_one_data(one),
-						nemoplay_queue_get_one_size(one));
+		} else if (nemoplay_queue_get_one_cmd(one) == NEMOPLAY_QUEUE_NORMAL_COMMAND) {
+			ao_play(device,
+					nemoplay_queue_get_one_data(one),
+					nemoplay_queue_get_one_size(one));
 
-				nemoplay_clock_set(clock, nemoplay_queue_get_one_pts(one));
+			nemoplay_clock_set(clock, nemoplay_queue_get_one_pts(one));
 
-				nemoplay_queue_destroy_one(one);
-			} else if (nemoplay_queue_get_one_cmd(one) == NEMOPLAY_QUEUE_DONE_COMMAND) {
-				nemoplay_queue_destroy_one(one);
-
-				break;
-			}
+			nemoplay_queue_destroy_one(one);
+		} else if (nemoplay_queue_get_one_cmd(one) == NEMOPLAY_QUEUE_DONE_COMMAND) {
+			nemoplay_queue_destroy_one(one);
+			done = 1;
 		}
-	} while (1);
+	} while (done == 0);
 
 	ao_close(device);
 	ao_shutdown();

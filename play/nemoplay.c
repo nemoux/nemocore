@@ -285,3 +285,10 @@ void nemoplay_wakeup_media(struct nemoplay *play)
 {
 	pthread_cond_signal(&play->signal);
 }
+
+void nemoplay_set_state(struct nemoplay *play, int state)
+{
+	play->state = state;
+
+	pthread_cond_signal(&play->signal);
+}
