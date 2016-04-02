@@ -18,6 +18,10 @@ NEMO_BEGIN_EXTERN_C
 #	define MAX(x,y) (((x) > (y)) ? (x) : (y))
 #endif
 
+#ifndef MINMAX
+# define MINMAX(x,y,z)	(MIN(MAX(x,y), z))
+#endif
+
 #ifndef offsetof
 #	define offsetof(type, member) \
 	((char *)&((type *)0)->member - (char *)0)

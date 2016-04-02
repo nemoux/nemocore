@@ -106,7 +106,7 @@ static void nemoplay_dispatch_video_timer(struct nemotimer *timer, void *data)
 				nemotimer_set_timeout(timer, 1);
 			} else if (time0 < nemoplay_queue_get_one_pts(one) - threshold) {
 				nemoplay_queue_enqueue_tail(queue, one);
-				nemotimer_set_timeout(timer, MAX((nemoplay_queue_get_one_pts(one) - time0) * 1000, 1));
+				nemotimer_set_timeout(timer, threshold * 1000);
 			} else {
 				nemoplay_shader_update(context->shader,
 						nemoplay_queue_get_one_y(one),
@@ -120,7 +120,7 @@ static void nemoplay_dispatch_video_timer(struct nemotimer *timer, void *data)
 				context->has_frame = 1;
 
 				if (nemoplay_queue_peek_pts(queue, &pts) != 0)
-					nemotimer_set_timeout(timer, pts > time0 ? MAX((pts - time0) * 1000, 1) : 1);
+					nemotimer_set_timeout(timer, MINMAX(pts > time0 ? pts - time0 : 1.0f, 1.0f, threshold) * 1000);
 				else
 					nemotimer_set_timeout(timer, threshold * 1000);
 
