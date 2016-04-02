@@ -22,6 +22,8 @@ static void *nemoplay_handle_audioplay(void *arg)
 	ao_sample_format format;
 	int driver;
 
+	nemoplay_enter_thread(play);
+
 	ao_initialize();
 
 	format.channels = nemoplay_get_audio_channels(play);
@@ -52,6 +54,8 @@ static void *nemoplay_handle_audioplay(void *arg)
 
 	ao_close(device);
 	ao_shutdown();
+
+	nemoplay_leave_thread(play);
 
 	return NULL;
 }
@@ -97,8 +101,7 @@ int main(int argc, char *argv[])
 		nemoplay_decode_media(play, INT_MAX, INT_MAX);
 	}
 
-	pthread_join(thread, NULL);
-
+	nemoplay_wait_thread(play);
 	nemoplay_destroy(play);
 
 out1:

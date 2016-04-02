@@ -300,3 +300,35 @@ void nemoplay_set_state(struct nemoplay *play, int state)
 		nemoplay_queue_set_state(play->subtitle_queue, NEMOPLAY_QUEUE_DONE_STATE);
 	}
 }
+
+void nemoplay_enter_thread(struct nemoplay *play)
+{
+	pthread_mutex_lock(&play->lock);
+
+	play->threadcount++;
+
+	pthread_cond_signal(&play->signal);
+
+	pthread_mutex_unlock(&play->lock);
+}
+
+void nemoplay_leave_thread(struct nemoplay *play)
+{
+	pthread_mutex_lock(&play->lock);
+
+	play->threadcount--;
+
+	pthread_cond_signal(&play->signal);
+
+	pthread_mutex_unlock(&play->lock);
+}
+
+void nemoplay_wait_thread(struct nemoplay *play)
+{
+	pthread_mutex_lock(&play->lock);
+
+	while (play->threadcount > 0)
+		pthread_cond_wait(&play->signal, &play->lock);
+
+	pthread_mutex_unlock(&play->lock);
+}

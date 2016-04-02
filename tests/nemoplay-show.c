@@ -137,6 +137,8 @@ static void *nemoplay_handle_decodeframe(void *arg)
 	struct nemoplay *play = context->play;
 	int state;
 
+	nemoplay_enter_thread(play);
+
 	while ((state = nemoplay_get_state(play)) != NEMOPLAY_DONE_STATE) {
 		if (state == NEMOPLAY_PLAY_STATE) {
 			nemoplay_decode_media(play, 256, 128);
@@ -145,12 +147,15 @@ static void *nemoplay_handle_decodeframe(void *arg)
 		}
 	}
 
+	nemoplay_leave_thread(play);
+
 	return NULL;
 }
 
 static void *nemoplay_handle_audioplay(void *arg)
 {
 	struct playcontext *context = (struct playcontext *)arg;
+	struct nemoplay *play = context->play;
 	struct playqueue *queue;
 	struct playclock *clock;
 	struct playone *one;
@@ -159,25 +164,27 @@ static void *nemoplay_handle_audioplay(void *arg)
 	int driver;
 	int state;
 
+	nemoplay_enter_thread(play);
+
 	ao_initialize();
 
-	format.channels = nemoplay_get_audio_channels(context->play);
-	format.bits = nemoplay_get_audio_samplebits(context->play);
-	format.rate = nemoplay_get_audio_samplerate(context->play);
+	format.channels = nemoplay_get_audio_channels(play);
+	format.bits = nemoplay_get_audio_samplebits(play);
+	format.rate = nemoplay_get_audio_samplerate(play);
 	format.byte_format = AO_FMT_NATIVE;
 	format.matrix = 0;
 
 	driver = ao_default_driver_id();
 	device = ao_open_live(driver, &format, NULL);
 
-	queue = nemoplay_get_audio_queue(context->play);
-	clock = nemoplay_get_audio_clock(context->play);
+	queue = nemoplay_get_audio_queue(play);
+	clock = nemoplay_get_audio_clock(play);
 
 	while ((state = nemoplay_queue_get_state(queue)) != NEMOPLAY_QUEUE_DONE_STATE) {
 		if (state == NEMOPLAY_QUEUE_NORMAL_STATE) {
 			one = nemoplay_queue_dequeue(queue);
 			if (one == NULL) {
-				nemoplay_set_state(context->play, NEMOPLAY_PLAY_STATE);
+				nemoplay_set_state(play, NEMOPLAY_PLAY_STATE);
 				nemoplay_queue_wait(queue);
 			} else if (nemoplay_queue_get_one_serial(one) != nemoplay_queue_get_serial(queue)) {
 				nemoplay_queue_destroy_one(one);
@@ -192,7 +199,7 @@ static void *nemoplay_handle_audioplay(void *arg)
 			}
 
 			if (nemoplay_queue_get_count(queue) < 64)
-				nemoplay_set_state(context->play, NEMOPLAY_PLAY_STATE);
+				nemoplay_set_state(play, NEMOPLAY_PLAY_STATE);
 		} else if (state == NEMOPLAY_QUEUE_STOP_STATE) {
 			nemoplay_queue_wait(queue);
 		}
@@ -200,6 +207,8 @@ static void *nemoplay_handle_audioplay(void *arg)
 
 	ao_close(device);
 	ao_shutdown();
+
+	nemoplay_leave_thread(play);
 
 	return NULL;
 }
@@ -219,8 +228,7 @@ int main(int argc, char *argv[])
 	struct nemoplay *play;
 	struct playshader *shader;
 	struct nemotimer *timer;
-	pthread_t thread0;
-	pthread_t thread1;
+	pthread_t thread;
 	char *mediapath = NULL;
 	int width, height;
 	int opt;
@@ -255,8 +263,8 @@ int main(int argc, char *argv[])
 
 	nemoplay_prepare_media(play, mediapath);
 
-	pthread_create(&thread0, NULL, nemoplay_handle_decodeframe, (void *)context);
-	pthread_create(&thread1, NULL, nemoplay_handle_audioplay, (void *)context);
+	pthread_create(&thread, NULL, nemoplay_handle_decodeframe, (void *)context);
+	pthread_create(&thread, NULL, nemoplay_handle_audioplay, (void *)context);
 
 	context->tool = tool = nemotool_create();
 	if (tool == NULL)
@@ -316,8 +324,7 @@ err4:
 
 err3:
 	nemoplay_set_state(play, NEMOPLAY_DONE_STATE);
-	pthread_join(thread0, NULL);
-	pthread_join(thread1, NULL);
+	nemoplay_wait_thread(play);
 	nemoplay_destroy(play);
 
 err2:

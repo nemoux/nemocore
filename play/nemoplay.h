@@ -34,6 +34,8 @@ struct nemoplay {
 	pthread_mutex_t lock;
 	pthread_cond_t signal;
 
+	int threadcount;
+
 	struct playqueue *video_queue;
 	struct playqueue *audio_queue;
 	struct playqueue *subtitle_queue;
@@ -75,6 +77,10 @@ extern int nemoplay_decode_media(struct nemoplay *play, int reqcount, int maxcou
 extern void nemoplay_wait_media(struct nemoplay *play);
 
 extern void nemoplay_set_state(struct nemoplay *play, int state);
+
+extern void nemoplay_enter_thread(struct nemoplay *play);
+extern void nemoplay_leave_thread(struct nemoplay *play);
+extern void nemoplay_wait_thread(struct nemoplay *play);
 
 static inline int nemoplay_get_state(struct nemoplay *play)
 {
