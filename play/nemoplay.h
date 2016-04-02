@@ -18,8 +18,6 @@ NEMO_BEGIN_EXTERN_C
 #include <playshader.h>
 #include <playmisc.h>
 
-#define NEMOPLAY_MAX_QUEUESIZE		(128)
-
 typedef enum {
 	NEMOPLAY_NONE_STATE = 0,
 	NEMOPLAY_PLAY_STATE = 1,
@@ -36,8 +34,6 @@ struct nemoplay {
 	pthread_mutex_t lock;
 	pthread_cond_t signal;
 
-	int max_queuesize;
-
 	struct playqueue *video_queue;
 	struct playqueue *audio_queue;
 	struct playqueue *subtitle_queue;
@@ -50,6 +46,11 @@ struct nemoplay {
 	int video_stream;
 	int audio_stream;
 	int subtitle_stream;
+
+	double video_timebase;
+	double audio_timebase;
+
+	SwrContext *swr;
 
 	struct playclock *video_clock;
 	struct playclock *audio_clock;
@@ -70,18 +71,14 @@ extern void nemoplay_destroy(struct nemoplay *play);
 
 extern int nemoplay_prepare_media(struct nemoplay *play, const char *mediapath);
 extern void nemoplay_finish_media(struct nemoplay *play);
-extern int nemoplay_decode_media(struct nemoplay *play);
+extern int nemoplay_decode_media(struct nemoplay *play, int reqcount, int maxcount);
+extern void nemoplay_wait_media(struct nemoplay *play);
 
 extern void nemoplay_set_state(struct nemoplay *play, int state);
 
 static inline int nemoplay_get_state(struct nemoplay *play)
 {
 	return play->state;
-}
-
-static inline void nemoplay_set_max_queuesize(struct nemoplay *play, int queuesize)
-{
-	play->max_queuesize = queuesize;
 }
 
 static inline struct playqueue *nemoplay_get_video_queue(struct nemoplay *play)

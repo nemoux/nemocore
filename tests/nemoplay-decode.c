@@ -93,7 +93,9 @@ int main(int argc, char *argv[])
 
 	pthread_create(&thread, NULL, nemoplay_handle_audioplay, (void *)play);
 
-	nemoplay_decode_media(play);
+	while (nemoplay_get_state(play) != NEMOPLAY_DONE_STATE) {
+		nemoplay_decode_media(play, INT_MAX, INT_MAX);
+	}
 
 	pthread_join(thread, NULL);
 

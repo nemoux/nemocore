@@ -39,8 +39,6 @@ struct nemoplay *nemoplay_create(void)
 	play->video_clock = nemoplay_clock_create();
 	play->audio_clock = nemoplay_clock_create();
 
-	play->max_queuesize = NEMOPLAY_MAX_QUEUESIZE;
-
 	return play;
 
 err2:
@@ -60,6 +58,9 @@ void nemoplay_destroy(struct nemoplay *play)
 	nemoplay_queue_destroy(play->video_queue);
 	nemoplay_queue_destroy(play->audio_queue);
 	nemoplay_queue_destroy(play->subtitle_queue);
+
+	if (play->swr != NULL)
+		swr_free(&play->swr);
 
 	if (play->container != NULL)
 		avformat_close_input(&play->container);
@@ -123,12 +124,27 @@ int nemoplay_prepare_media(struct nemoplay *play, const char *mediapath)
 	if (video_context != NULL) {
 		play->video_width = video_context->width;
 		play->video_height = video_context->height;
+		play->video_timebase = av_q2d(container->streams[video_stream]->time_base);
 	}
 
 	if (audio_context != NULL) {
+		SwrContext *swr;
+
 		play->audio_channels = audio_context->channels;
 		play->audio_samplerate = audio_context->sample_rate;
 		play->audio_samplebits = 16;
+		play->audio_timebase = av_q2d(container->streams[audio_stream]->time_base);
+
+		swr = swr_alloc();
+		av_opt_set_int(swr, "in_channel_layout", audio_context->channel_layout, 0);
+		av_opt_set_int(swr, "out_channel_layout", audio_context->channel_layout, 0);
+		av_opt_set_int(swr, "in_sample_rate", audio_context->sample_rate, 0);
+		av_opt_set_int(swr, "out_sample_rate", audio_context->sample_rate, 0);
+		av_opt_set_sample_fmt(swr, "in_sample_fmt", audio_context->sample_fmt, 0);
+		av_opt_set_sample_fmt(swr, "out_sample_fmt", AV_SAMPLE_FMT_S16, 0);
+		swr_init(swr);
+
+		play->swr = swr;
 	}
 
 	play->container = container;
@@ -142,6 +158,8 @@ int nemoplay_prepare_media(struct nemoplay *play, const char *mediapath)
 
 	play->video_framerate = av_q2d(av_guess_frame_rate(container, container->streams[video_stream], NULL));
 
+	play->state = NEMOPLAY_PLAY_STATE;
+
 	return 0;
 
 err1:
@@ -154,123 +172,105 @@ void nemoplay_finish_media(struct nemoplay *play)
 {
 }
 
-int nemoplay_decode_media(struct nemoplay *play)
+int nemoplay_decode_media(struct nemoplay *play, int reqcount, int maxcount)
 {
 	AVFormatContext *container = play->container;
 	AVCodecContext *video_context = play->video_context;
 	AVCodecContext *audio_context = play->audio_context;
 	AVCodecContext *subtitle_context = play->subtitle_context;
-	SwrContext *swr;
 	AVFrame *frame;
 	AVPacket packet;
-	double video_timebase;
-	double audio_timebase;
 	int video_stream = play->video_stream;
 	int audio_stream = play->audio_stream;
 	int subtitle_stream = play->subtitle_stream;
 	int finished = 0;
-	int r;
-
-	swr = swr_alloc();
-	av_opt_set_int(swr, "in_channel_layout", audio_context->channel_layout, 0);
-	av_opt_set_int(swr, "out_channel_layout", audio_context->channel_layout, 0);
-	av_opt_set_int(swr, "in_sample_rate", audio_context->sample_rate, 0);
-	av_opt_set_int(swr, "out_sample_rate", audio_context->sample_rate, 0);
-	av_opt_set_sample_fmt(swr, "in_sample_fmt", audio_context->sample_fmt, 0);
-	av_opt_set_sample_fmt(swr, "out_sample_fmt", AV_SAMPLE_FMT_S16, 0);
-	swr_init(swr);
-
-	audio_timebase = av_q2d(container->streams[audio_stream]->time_base);
-	video_timebase = av_q2d(container->streams[video_stream]->time_base);
+	int i;
 
 	frame = av_frame_alloc();
 
-	play->state = NEMOPLAY_PLAY_STATE;
+	for (i = 0; i < reqcount && play->state == NEMOPLAY_PLAY_STATE; i++) {
+		if (av_read_frame(container, &packet) < 0) {
+			play->state = NEMOPLAY_IDLE_STATE;
+		} else if (packet.stream_index == video_stream) {
+			avcodec_decode_video2(video_context, frame, &finished, &packet);
 
-	while (play->state != NEMOPLAY_DONE_STATE) {
-		if (play->state == NEMOPLAY_PLAY_STATE) {
-			r = av_read_frame(container, &packet);
-			if (r < 0) {
-				play->state = NEMOPLAY_IDLE_STATE;
-			} else {
-				if (packet.stream_index == video_stream) {
-					avcodec_decode_video2(video_context, frame, &finished, &packet);
+			if (finished != 0) {
+				struct playone *one;
+				uint8_t *y, *u, *v;
 
-					if (finished != 0) {
-						struct playone *one;
-						uint8_t *y, *u, *v;
+				y = (uint8_t *)malloc(frame->linesize[0] * frame->height);
+				u = (uint8_t *)malloc(frame->linesize[1] * frame->height / 2);
+				v = (uint8_t *)malloc(frame->linesize[2] * frame->height / 2);
 
-						y = (uint8_t *)malloc(frame->linesize[0] * frame->height);
-						u = (uint8_t *)malloc(frame->linesize[1] * frame->height / 2);
-						v = (uint8_t *)malloc(frame->linesize[2] * frame->height / 2);
+				memcpy(y, frame->data[0], frame->linesize[0] * frame->height);
+				memcpy(u, frame->data[1], frame->linesize[1] * frame->height / 2);
+				memcpy(v, frame->data[2], frame->linesize[2] * frame->height / 2);
 
-						memcpy(y, frame->data[0], frame->linesize[0] * frame->height);
-						memcpy(u, frame->data[1], frame->linesize[1] * frame->height / 2);
-						memcpy(v, frame->data[2], frame->linesize[2] * frame->height / 2);
+				one = nemoplay_queue_create_one();
+				one->cmd = NEMOPLAY_QUEUE_NORMAL_COMMAND;
+				one->pts = play->video_timebase * av_frame_get_best_effort_timestamp(frame);
+				one->serial = play->video_queue->serial;
 
-						one = nemoplay_queue_create_one();
-						one->cmd = NEMOPLAY_QUEUE_NORMAL_COMMAND;
-						one->pts = video_timebase * av_frame_get_best_effort_timestamp(frame);
-						one->serial = play->video_queue->serial;
+				one->y = y;
+				one->u = u;
+				one->v = v;
 
-						one->y = y;
-						one->u = u;
-						one->v = v;
-
-						nemoplay_queue_enqueue(play->video_queue, one);
-					}
-
-					av_frame_unref(frame);
-				} else if (packet.stream_index == audio_stream) {
-					uint8_t *buffer;
-					int buffersize;
-					int samplesize;
-
-					avcodec_decode_audio4(audio_context, frame, &finished, &packet);
-
-					buffersize = av_samples_get_buffer_size(NULL, audio_context->channels, frame->nb_samples, audio_context->sample_fmt, 1);
-
-					if (finished != 0) {
-						struct playone *one;
-
-						buffer = (uint8_t *)malloc(buffersize);
-
-						samplesize = swr_convert(swr, &buffer, buffersize, (const uint8_t **)frame->extended_data, frame->nb_samples);
-
-						one = nemoplay_queue_create_one();
-						one->cmd = NEMOPLAY_QUEUE_NORMAL_COMMAND;
-						one->pts = audio_timebase * av_frame_get_best_effort_timestamp(frame);
-						one->serial = play->audio_queue->serial;
-
-						one->data = buffer;
-						one->size = samplesize * audio_context->channels * av_get_bytes_per_sample(AV_SAMPLE_FMT_S16);
-
-						nemoplay_queue_enqueue(play->audio_queue, one);
-					}
-
-					av_frame_unref(frame);
-				} else if (packet.stream_index == subtitle_stream) {
-				}
-
-				av_free_packet(&packet);
-
-				if (nemoplay_queue_get_count(play->video_queue) > play->max_queuesize &&
-						nemoplay_queue_get_count(play->audio_queue) > play->max_queuesize) {
-					play->state = NEMOPLAY_FULL_STATE;
-				}
+				nemoplay_queue_enqueue(play->video_queue, one);
 			}
-		} else if (play->state == NEMOPLAY_FULL_STATE || play->state == NEMOPLAY_STOP_STATE || play->state == NEMOPLAY_IDLE_STATE) {
-			pthread_mutex_lock(&play->lock);
-			pthread_cond_wait(&play->signal, &play->lock);
-			pthread_mutex_unlock(&play->lock);
+
+			av_frame_unref(frame);
+		} else if (packet.stream_index == audio_stream) {
+			uint8_t *buffer;
+			int buffersize;
+			int samplesize;
+
+			avcodec_decode_audio4(audio_context, frame, &finished, &packet);
+
+			buffersize = av_samples_get_buffer_size(NULL, audio_context->channels, frame->nb_samples, audio_context->sample_fmt, 1);
+
+			if (finished != 0) {
+				struct playone *one;
+
+				buffer = (uint8_t *)malloc(buffersize);
+
+				samplesize = swr_convert(play->swr, &buffer, buffersize, (const uint8_t **)frame->extended_data, frame->nb_samples);
+
+				one = nemoplay_queue_create_one();
+				one->cmd = NEMOPLAY_QUEUE_NORMAL_COMMAND;
+				one->pts = play->audio_timebase * av_frame_get_best_effort_timestamp(frame);
+				one->serial = play->audio_queue->serial;
+
+				one->data = buffer;
+				one->size = samplesize * audio_context->channels * av_get_bytes_per_sample(AV_SAMPLE_FMT_S16);
+
+				nemoplay_queue_enqueue(play->audio_queue, one);
+			}
+
+			av_frame_unref(frame);
+		} else if (packet.stream_index == subtitle_stream) {
 		}
+
+		if (nemoplay_queue_get_count(play->video_queue) > maxcount &&
+				nemoplay_queue_get_count(play->audio_queue) > maxcount) {
+			play->state = NEMOPLAY_FULL_STATE;
+		}
+
+		av_free_packet(&packet);
 	}
 
 	av_frame_free(&frame);
 
-	swr_free(&swr);
-
 	return 0;
+}
+
+void nemoplay_wait_media(struct nemoplay *play)
+{
+	pthread_mutex_lock(&play->lock);
+
+	if (play->state == NEMOPLAY_FULL_STATE || play->state == NEMOPLAY_STOP_STATE || play->state == NEMOPLAY_IDLE_STATE)
+		pthread_cond_wait(&play->signal, &play->lock);
+
+	pthread_mutex_unlock(&play->lock);
 }
 
 void nemoplay_set_state(struct nemoplay *play, int state)
