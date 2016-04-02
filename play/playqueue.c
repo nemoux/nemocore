@@ -168,6 +168,8 @@ void nemoplay_queue_flush(struct playqueue *queue)
 		nemoplay_queue_destroy_one(one);
 	}
 
+	queue->count = 0;
+
 	queue->serial++;
 
 	pthread_mutex_unlock(&queue->lock);
