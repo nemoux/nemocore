@@ -263,6 +263,18 @@ int nemoplay_decode_media(struct nemoplay *play, int reqcount, int maxcount)
 	return 0;
 }
 
+int nemoplay_seek_media(struct nemoplay *play, double pos, double min, double max)
+{
+	nemoplay_queue_flush(play->video_queue);
+	nemoplay_queue_flush(play->audio_queue);
+	nemoplay_queue_flush(play->subtitle_queue);
+
+	if (avformat_seek_file(play->container, -1, (int64_t)(min * AV_TIME_BASE), (int64_t)(pos * AV_TIME_BASE), (int64_t)(max * AV_TIME_BASE), 0) < 0)
+		return -1;
+
+	return 0;
+}
+
 void nemoplay_wait_media(struct nemoplay *play)
 {
 	pthread_mutex_lock(&play->lock);

@@ -129,12 +129,46 @@ struct playone *nemoplay_queue_peek(struct playqueue *queue)
 	return elm != NULL ? container_of(elm, struct playone, link) : NULL;
 }
 
+int nemoplay_queue_peek_pts(struct playqueue *queue, double *pts)
+{
+	struct playone *one = NULL;
+	struct nemolist *elm;
+
+	pthread_mutex_lock(&queue->lock);
+
+	elm = nemolist_peek_tail(&queue->list);
+	if (elm != NULL) {
+		one = container_of(elm, struct playone, link);
+
+		*pts = one->pts;
+	}
+
+	pthread_mutex_unlock(&queue->lock);
+
+	return one != NULL;
+}
+
 void nemoplay_queue_wait(struct playqueue *queue)
 {
 	pthread_mutex_lock(&queue->lock);
 
 	if (queue->state != NEMOPLAY_QUEUE_DONE_STATE)
 		pthread_cond_wait(&queue->signal, &queue->lock);
+
+	pthread_mutex_unlock(&queue->lock);
+}
+
+void nemoplay_queue_flush(struct playqueue *queue)
+{
+	struct playone *one, *none;
+
+	pthread_mutex_lock(&queue->lock);
+
+	nemolist_for_each_safe(one, none, &queue->list, link) {
+		nemoplay_queue_destroy_one(one);
+	}
+
+	queue->serial++;
 
 	pthread_mutex_unlock(&queue->lock);
 }
