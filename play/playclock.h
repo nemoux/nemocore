@@ -9,12 +9,16 @@ NEMO_BEGIN_EXTERN_C
 
 #include <stdint.h>
 
+#include <pthread.h>
+
 struct playclock {
 	double ptime;
 	double dtime;
 	double ltime;
 
 	double speed;
+
+	pthread_mutex_t lock;
 };
 
 extern struct playclock *nemoplay_clock_create(void);

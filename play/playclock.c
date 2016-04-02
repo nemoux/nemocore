@@ -18,33 +18,58 @@ struct playclock *nemoplay_clock_create(void)
 		return NULL;
 	memset(clock, 0, sizeof(struct playclock));
 
+	if (pthread_mutex_init(&clock->lock, NULL) != 0)
+		goto err1;
+
 	clock->speed = 1.0f;
 
 	return clock;
+
+err1:
+	free(clock);
+
+	return NULL;
 }
 
 void nemoplay_clock_destroy(struct playclock *clock)
 {
+	pthread_mutex_destroy(&clock->lock);
+
 	free(clock);
 }
 
 void nemoplay_clock_set_speed(struct playclock *clock, double speed)
 {
+	pthread_mutex_lock(&clock->lock);
+
 	clock->speed = speed;
+
+	pthread_mutex_unlock(&clock->lock);
 }
 
 void nemoplay_clock_set(struct playclock *clock, double ptime)
 {
 	double ctime = av_gettime_relative() / 1000000.0f;
 
+	pthread_mutex_lock(&clock->lock);
+
 	clock->ptime = ptime;
 	clock->ltime = ctime;
 	clock->dtime = ptime - ctime;
+
+	pthread_mutex_unlock(&clock->lock);
 }
 
 double nemoplay_clock_get(struct playclock *clock)
 {
 	double ctime = av_gettime_relative() / 1000000.0f;
+	double rtime;
 
-	return clock->dtime + ctime - (ctime - clock->ltime) * (1.0f - clock->speed);
+	pthread_mutex_lock(&clock->lock);
+
+	rtime = clock->dtime + ctime - (ctime - clock->ltime) * (1.0f - clock->speed);
+
+	pthread_mutex_unlock(&clock->lock);
+
+	return rtime;
 }
