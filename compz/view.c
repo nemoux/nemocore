@@ -537,6 +537,29 @@ void nemoview_below_layer(struct nemoview *view, struct nemoview *below)
 	view->compz->layer_dirty = 1;
 }
 
+int nemoview_overlap_view(struct nemoview *view, int32_t x, int32_t y, int32_t width, int32_t height, struct nemoview *oview)
+{
+	int32_t s[4][2] = {
+		{ x, y },
+		{ x, y + height },
+		{ x + width, y },
+		{ x + width, y + height }
+	};
+	float tx, ty;
+	float sx, sy;
+	int i;
+
+	for (i = 0; i < 4; i++) {
+		nemoview_transform_to_global(view, s[i][0], s[i][1], &tx, &ty);
+		nemoview_transform_from_global(oview, tx, ty, &sx, &sy);
+
+		if (pixman_region32_contains_point(&oview->content->opaque, sx, sy, NULL))
+			return 1;
+	}
+
+	return 0;
+}
+
 int nemoview_get_trapezoids(struct nemoview *view, int32_t x, int32_t y, int32_t width, int32_t height, pixman_trapezoid_t *traps)
 {
 	float s[4][2] = {

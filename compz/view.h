@@ -135,6 +135,8 @@ extern void nemoview_detach_layer(struct nemoview *view);
 extern void nemoview_above_layer(struct nemoview *view, struct nemoview *above);
 extern void nemoview_below_layer(struct nemoview *view, struct nemoview *below);
 
+extern int nemoview_overlap_view(struct nemoview *view, int32_t x, int32_t y, int32_t width, int32_t height, struct nemoview *oview);
+
 extern int nemoview_get_trapezoids(struct nemoview *view, int32_t x, int32_t y, int32_t width, int32_t height, pixman_trapezoid_t *traps);
 
 static inline void nemoview_transform_dirty(struct nemoview *view)
