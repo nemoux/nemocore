@@ -764,6 +764,8 @@ static inline void nemoshow_item_update_shape(struct nemoshow *show, struct show
 			box.outset(item->fontsize, item->fontsize);
 		}
 
+		item->x = box.x();
+		item->y = box.y();
 		item->width = box.width();
 		item->height = box.height();
 
