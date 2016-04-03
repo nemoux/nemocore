@@ -112,7 +112,7 @@ struct nemocanvas {
 
 	void (*update_transform)(struct nemocanvas *canvas, int visible);
 	void (*update_fullscreen)(struct nemocanvas *canvas, int active, int opaque);
-	void (*update_layer)(struct nemocanvas *canvas, int on_top);
+	void (*update_layer)(struct nemocanvas *canvas, int visible);
 
 	struct wl_list subcanvas_list;
 
@@ -123,7 +123,7 @@ struct nemoclient {
 	void (*send_configure)(struct nemocanvas *canvas, int32_t width, int32_t height);
 	void (*send_transform)(struct nemocanvas *canvas, int visible);
 	void (*send_fullscreen)(struct nemocanvas *canvas, int active, int opaque);
-	void (*send_layer)(struct nemocanvas *canvas, int on_top);
+	void (*send_layer)(struct nemocanvas *canvas, int visible);
 };
 
 extern struct nemocanvas *nemocanvas_create(struct wl_client *client, struct wl_resource *compositor_resource, uint32_t id);

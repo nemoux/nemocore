@@ -156,7 +156,7 @@ static void nemoback_atom_dispatch_canvas_fullscreen(struct nemoshow *show, int3
 		atom->is_sleeping = 1;
 }
 
-static void nemoback_atom_dispatch_canvas_layer(struct nemoshow *show, int32_t on_top)
+static void nemoback_atom_dispatch_canvas_layer(struct nemoshow *show, int32_t visible)
 {
 }
 

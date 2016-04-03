@@ -51,12 +51,12 @@ static void nemo_surface_handle_fullscreen(void *data, struct nemo_surface *surf
 		canvas->dispatch_fullscreen(canvas, active, opaque);
 }
 
-static void nemo_surface_handle_layer(void *data, struct nemo_surface *surface, int32_t on_top)
+static void nemo_surface_handle_layer(void *data, struct nemo_surface *surface, int32_t visible)
 {
 	struct nemocanvas *canvas = (struct nemocanvas *)data;
 
 	if (canvas->dispatch_layer != NULL)
-		canvas->dispatch_layer(canvas, on_top);
+		canvas->dispatch_layer(canvas, visible);
 }
 
 static const struct nemo_surface_listener nemo_surface_listener = {

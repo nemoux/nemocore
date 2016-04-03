@@ -44,11 +44,11 @@ static void nemo_send_fullscreen(struct nemocanvas *canvas, int active, int opaq
 	nemo_surface_send_fullscreen(bin->resource, active, opaque);
 }
 
-static void nemo_send_layer(struct nemocanvas *canvas, int on_top)
+static void nemo_send_layer(struct nemocanvas *canvas, int visible)
 {
 	struct shellbin *bin = nemoshell_get_bin(canvas);
 
-	nemo_surface_send_layer(bin->resource, on_top);
+	nemo_surface_send_layer(bin->resource, visible);
 }
 
 static struct nemoclient nemo_client = {

@@ -38,7 +38,7 @@ static void shell_send_fullscreen(struct nemocanvas *canvas, int active, int opa
 {
 }
 
-static void shell_send_layer(struct nemocanvas *canvas, int on_top)
+static void shell_send_layer(struct nemocanvas *canvas, int visible)
 {
 }
 

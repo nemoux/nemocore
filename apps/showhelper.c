@@ -121,13 +121,13 @@ static void nemoshow_dispatch_canvas_fullscreen(struct nemocanvas *canvas, int32
 		show->dispatch_fullscreen(show, active, opaque);
 }
 
-static void nemoshow_dispatch_canvas_layer(struct nemocanvas *canvas, int32_t on_top)
+static void nemoshow_dispatch_canvas_layer(struct nemocanvas *canvas, int32_t visible)
 {
 	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
 	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
 
 	if (show->dispatch_layer != NULL)
-		show->dispatch_layer(show, on_top);
+		show->dispatch_layer(show, visible);
 }
 
 static void nemoshow_dispatch_canvas_destroy(struct nemocanvas *canvas)

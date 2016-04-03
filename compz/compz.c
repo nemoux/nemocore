@@ -798,22 +798,22 @@ void nemocompz_update_layer(struct nemocompz *compz)
 {
 	struct nemolayer *layer;
 	struct nemoview *view, *child;
-	int on_top = 1;
+	int visible = 1;
 
 	wl_list_for_each(layer, &compz->layer_list, link) {
 		wl_list_for_each(view, &layer->view_list, layer_link) {
 			if (!wl_list_empty(&view->children_list)) {
 				wl_list_for_each(child, &view->children_list, children_link) {
 					if (nemoview_has_state(child, NEMO_VIEW_LAYER_STATE)) {
-						nemocontent_update_layer(child->content, on_top);
-						on_top = 0;
+						nemocontent_update_layer(child->content, visible);
+						visible = 0;
 					}
 				}
 			}
 
 			if (nemoview_has_state(view, NEMO_VIEW_LAYER_STATE)) {
-				nemocontent_update_layer(view->content, on_top);
-				on_top = 0;
+				nemocontent_update_layer(view->content, visible);
+				visible = 0;
 			}
 		}
 	}

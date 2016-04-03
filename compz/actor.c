@@ -255,12 +255,12 @@ static void nemoactor_update_fullscreen(struct nemocontent *content, int active,
 		actor->dispatch_fullscreen(actor, active, opaque);
 }
 
-static void nemoactor_update_layer(struct nemocontent *content, int on_top)
+static void nemoactor_update_layer(struct nemocontent *content, int visible)
 {
 	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
 
 	if (actor->dispatch_layer != NULL)
-		actor->dispatch_layer(actor, on_top);
+		actor->dispatch_layer(actor, visible);
 }
 
 static void nemoactor_dispatch_frame_timer(struct nemotimer *timer, void *data)
@@ -712,10 +712,10 @@ void nemoactor_dispatch_fullscreen(struct nemoactor *actor, int active, int opaq
 		actor->dispatch_fullscreen(actor, active, opaque);
 }
 
-void nemoactor_dispatch_layer(struct nemoactor *actor, int on_top)
+void nemoactor_dispatch_layer(struct nemoactor *actor, int visible)
 {
 	if (actor->dispatch_layer != NULL)
-		actor->dispatch_layer(actor, on_top);
+		actor->dispatch_layer(actor, visible);
 }
 
 void nemoactor_dispatch_frame(struct nemoactor *actor)

@@ -1108,7 +1108,7 @@ static void xserver_send_fullscreen(struct nemocanvas *canvas, int active, int o
 {
 }
 
-static void xserver_send_layer(struct nemocanvas *canvas, int on_top)
+static void xserver_send_layer(struct nemocanvas *canvas, int visible)
 {
 }
 

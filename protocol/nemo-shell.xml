@@ -207,7 +207,7 @@
 		</event>
 
 		<event name="layer">
-			<arg name="on_top" type="int"/>
+			<arg name="visible" type="int"/>
 		</event>
 	</interface>
 </protocol>

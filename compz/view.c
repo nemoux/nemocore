@@ -363,6 +363,8 @@ void nemoview_update_transform_done(struct nemoview *view)
 {
 	view->transform.done = 0;
 
+	view->compz->layer_dirty = 1;
+
 	nemocontent_update_transform(view->content,
 			nemocompz_contains_view(view->compz, view));
 }

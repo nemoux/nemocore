@@ -42,7 +42,7 @@ typedef void (*nemoshow_dispatch_transition_done_t)(void *userdata);
 typedef void (*nemoshow_dispatch_event_t)(struct nemoshow *show, void *event);
 typedef void (*nemoshow_dispatch_transform_t)(struct nemoshow *show, int32_t visible);
 typedef void (*nemoshow_dispatch_fullscreen_t)(struct nemoshow *show, int32_t active, int32_t opaque);
-typedef void (*nemoshow_dispatch_layer_t)(struct nemoshow *show, int32_t on_top);
+typedef void (*nemoshow_dispatch_layer_t)(struct nemoshow *show, int32_t visible);
 typedef void (*nemoshow_dispatch_destroy_t)(struct nemoshow *show);
 
 struct nemoshow {

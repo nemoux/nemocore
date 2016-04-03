@@ -167,13 +167,13 @@ static void nemoshow_dispatch_actor_fullscreen(struct nemoactor *actor, int32_t 
 		show->dispatch_fullscreen(show, active, opaque);
 }
 
-static void nemoshow_dispatch_actor_layer(struct nemoactor *actor, int32_t on_top)
+static void nemoshow_dispatch_actor_layer(struct nemoactor *actor, int32_t visible)
 {
 	struct nemotale *tale = (struct nemotale *)nemoactor_get_context(actor);
 	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
 
 	if (show->dispatch_layer != NULL)
-		show->dispatch_layer(show, on_top);
+		show->dispatch_layer(show, visible);
 }
 
 static void nemoshow_dispatch_actor_destroy(struct nemoactor *actor)

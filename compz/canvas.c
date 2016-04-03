@@ -500,12 +500,12 @@ static void nemocanvas_update_fullscreen(struct nemocontent *content, int active
 		canvas->update_fullscreen(canvas, active, opaque);
 }
 
-static void nemocanvas_update_layer(struct nemocontent *content, int on_top)
+static void nemocanvas_update_layer(struct nemocontent *content, int visible)
 {
 	struct nemocanvas *canvas = (struct nemocanvas *)container_of(content, struct nemocanvas, base);
 
 	if (canvas->update_layer != NULL)
-		canvas->update_layer(canvas, on_top);
+		canvas->update_layer(canvas, visible);
 }
 
 static int nemocanvas_read_pixels(struct nemocontent *content, pixman_format_code_t format, void *pixels)

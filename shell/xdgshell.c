@@ -63,7 +63,7 @@ static void xdg_send_fullscreen(struct nemocanvas *canvas, int active, int opaqu
 {
 }
 
-static void xdg_send_layer(struct nemocanvas *canvas, int on_top)
+static void xdg_send_layer(struct nemocanvas *canvas, int visible)
 {
 }
 
@@ -232,7 +232,7 @@ static void xdg_popup_send_fullscreen(struct nemocanvas *canvas, int active, int
 {
 }
 
-static void xdg_popup_send_layer(struct nemocanvas *canvas, int on_top)
+static void xdg_popup_send_layer(struct nemocanvas *canvas, int visible)
 {
 }
 

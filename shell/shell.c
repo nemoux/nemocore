@@ -355,11 +355,11 @@ static void shellbin_update_canvas_fullscreen(struct nemocanvas *canvas, int act
 	bin->client->send_fullscreen(canvas, active, opaque);
 }
 
-static void shellbin_update_canvas_layer(struct nemocanvas *canvas, int on_top)
+static void shellbin_update_canvas_layer(struct nemocanvas *canvas, int visible)
 {
 	struct shellbin *bin = nemoshell_get_bin(canvas);
 
-	bin->client->send_layer(canvas, on_top);
+	bin->client->send_layer(canvas, visible);
 }
 
 static void shellbin_handle_canvas_destroy(struct wl_listener *listener, void *data)
