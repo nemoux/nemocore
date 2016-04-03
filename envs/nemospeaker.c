@@ -138,6 +138,10 @@ static void nemospeaker_dispatch_show_destroy(struct nemoshow *show)
 	nemospeaker_destroy(speaker);
 }
 
+static void nemospeaker_dispatch_show_layer(struct nemoshow *show, int32_t visible)
+{
+}
+
 static void nemospeaker_dispatch_fadein_transition(struct nemoshow *show, struct showone *one, struct showone *ease, uint32_t duration, uint32_t delay)
 {
 	struct showtransition *trans;
@@ -204,7 +208,10 @@ struct nemospeaker *nemospeaker_create(struct nemoshell *shell, uint32_t size, d
 	if (show == NULL)
 		goto err1;
 	nemoshow_set_dispatch_destroy(show, nemospeaker_dispatch_show_destroy);
+	nemoshow_set_dispatch_layer(show, nemospeaker_dispatch_show_layer);
 	nemoshow_set_userdata(show, speaker);
+
+	nemoshow_view_set_state(show, "layer");
 
 	speaker->scene = scene = nemoshow_scene_create();
 	nemoshow_scene_set_width(scene, width + NEMOSPEAKER_OUTSET * 2);

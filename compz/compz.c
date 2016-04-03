@@ -794,29 +794,72 @@ void nemocompz_update_output(struct nemocompz *compz)
 	}
 }
 
+static inline int nemocompz_check_visible(struct nemocompz *compz, struct nemoview *cview, pixman_region32_t *region)
+{
+	struct nemolayer *layer;
+	struct nemoview *view, *child;
+
+	if (pixman_region32_contains_rectangle(region, pixman_region32_extents(&cview->transform.boundingbox)) == PIXMAN_REGION_OUT)
+		return 1;
+
+	wl_list_for_each(layer, &compz->layer_list, link) {
+		wl_list_for_each(view, &layer->view_list, layer_link) {
+			if (cview == view)
+				return 1;
+
+			if (!wl_list_empty(&view->children_list)) {
+				wl_list_for_each(child, &view->children_list, children_link) {
+					if (cview == child)
+						return 1;
+
+					if (nemoview_has_state(child, NEMO_VIEW_LAYER_STATE)) {
+						if (nemoview_overlap_view(cview, child) != 0 ||
+								nemoview_overlap_view(child, cview) != 0)
+							return 0;
+					}
+				}
+			}
+
+			if (nemoview_has_state(view, NEMO_VIEW_LAYER_STATE)) {
+				if (nemoview_overlap_view(cview, view) != 0 ||
+						nemoview_overlap_view(view, cview) != 0)
+					return 0;
+			}
+		}
+	}
+
+	return 1;
+}
+
 void nemocompz_update_layer(struct nemocompz *compz)
 {
 	struct nemolayer *layer;
 	struct nemoview *view, *child;
-	int visible = 1;
+	pixman_region32_t region;
+
+	pixman_region32_init(&region);
 
 	wl_list_for_each(layer, &compz->layer_list, link) {
 		wl_list_for_each(view, &layer->view_list, layer_link) {
 			if (!wl_list_empty(&view->children_list)) {
 				wl_list_for_each(child, &view->children_list, children_link) {
 					if (nemoview_has_state(child, NEMO_VIEW_LAYER_STATE)) {
-						nemocontent_update_layer(child->content, visible);
-						visible = 0;
+						nemocontent_update_layer(child->content, nemocompz_check_visible(compz, child, &region));
+
+						pixman_region32_union(&region, &region, &child->transform.boundingbox);
 					}
 				}
 			}
 
 			if (nemoview_has_state(view, NEMO_VIEW_LAYER_STATE)) {
-				nemocontent_update_layer(view->content, visible);
-				visible = 0;
+				nemocontent_update_layer(view->content, nemocompz_check_visible(compz, view, &region));
+
+				pixman_region32_union(&region, &region, &view->transform.boundingbox);
 			}
 		}
 	}
+
+	pixman_region32_fini(&region);
 }
 
 void nemocompz_dispatch_animation(struct nemocompz *compz, struct nemoanimation *animation)

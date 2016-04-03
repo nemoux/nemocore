@@ -135,8 +135,6 @@ extern void nemoview_detach_layer(struct nemoview *view);
 extern void nemoview_above_layer(struct nemoview *view, struct nemoview *above);
 extern void nemoview_below_layer(struct nemoview *view, struct nemoview *below);
 
-extern int nemoview_overlap_view(struct nemoview *view, int32_t x, int32_t y, int32_t width, int32_t height, struct nemoview *oview);
-
 extern int nemoview_get_trapezoids(struct nemoview *view, int32_t x, int32_t y, int32_t width, int32_t height, pixman_trapezoid_t *traps);
 
 static inline void nemoview_transform_dirty(struct nemoview *view)
@@ -267,9 +265,8 @@ static inline void nemoview_set_alpha(struct nemoview *view, float alpha)
 
 static inline void nemoview_transform_to_global(struct nemoview *view, float sx, float sy, float *x, float *y)
 {
-	if (view->transform.dirty) {
+	if (view->transform.dirty)
 		nemoview_update_transform(view);
-	}
 
 	if (view->transform.enable) {
 		struct nemovector v = { { sx, sy, 0.0f, 1.0f } };
@@ -292,9 +289,8 @@ static inline void nemoview_transform_to_global(struct nemoview *view, float sx,
 
 static inline void nemoview_transform_from_global(struct nemoview *view, float x, float y, float *sx, float *sy)
 {
-	if (view->transform.dirty) {
+	if (view->transform.dirty)
 		nemoview_update_transform(view);
-	}
 
 	if (view->transform.enable) {
 		struct nemovector v = { { x, y, 0.0f, 1.0f } };
@@ -355,6 +351,41 @@ static inline void nemoview_transform_from_global_nocheck(struct nemoview *view,
 		*sx = x - view->geometry.x;
 		*sy = y - view->geometry.y;
 	}
+}
+
+static inline int nemoview_contains_point(struct nemoview *view, float x, float y)
+{
+	float sx, sy;
+
+	nemoview_transform_from_global(view, x, y, &sx, &sy);
+
+	return 0 <= sx && sx <= view->content->width && 0 <= sy && sy <= view->content->height;
+}
+
+static inline int nemoview_overlap_view(struct nemoview *view, struct nemoview *oview)
+{
+	float s[4][2] = {
+		{ 0, 0 },
+		{ 0, view->content->height },
+		{ view->content->width, 0 },
+		{ view->content->width, view->content->height }
+	};
+	float tx, ty;
+	int i;
+
+	if (view->transform.dirty)
+		nemoview_update_transform(view);
+	if (oview->transform.dirty)
+		nemoview_update_transform(oview);
+
+	for (i = 0; i < 4; i++) {
+		nemoview_transform_to_global(view, s[i][0], s[i][1], &tx, &ty);
+
+		if (nemoview_contains_point(oview, tx, ty) != 0)
+			return 1;
+	}
+
+	return 0;
 }
 
 static inline void nemoview_set_state(struct nemoview *view, uint32_t state)
