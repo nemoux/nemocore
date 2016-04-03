@@ -247,7 +247,9 @@ int main(int argc, char *argv[])
 		goto err2;
 	nemoshow_set_dispatch_fullscreen(show, nemoback_edge_dispatch_canvas_fullscreen);
 	nemoshow_set_userdata(show, edge);
-	
+
+	nemoshow_view_set_layer(show, layer);
+
 	nemoshow_view_put_state(show, "keypad");
 	nemoshow_view_put_state(show, "sound");
 
