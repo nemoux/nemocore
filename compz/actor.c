@@ -736,10 +736,12 @@ void nemoactor_dispatch_frame(struct nemoactor *actor)
 	}
 }
 
-void nemoactor_dispatch_destroy(struct nemoactor *actor)
+int nemoactor_dispatch_destroy(struct nemoactor *actor)
 {
 	if (actor->dispatch_destroy != NULL)
-		actor->dispatch_destroy(actor);
+		return actor->dispatch_destroy(actor);
+
+	return 0;
 }
 
 void nemoactor_dispatch_feedback(struct nemoactor *actor)

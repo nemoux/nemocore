@@ -99,8 +99,8 @@ static int nemoshow_dispatch_actor_resize(struct nemoactor *actor, int32_t width
 	struct talefbo *fbo = (struct talefbo *)nemotale_get_backend(tale);
 
 	if (width < nemotale_get_close_width(tale) || height < nemotale_get_close_height(tale)) {
-		nemoactor_dispatch_destroy(actor);
-		return 0;
+		if (nemoactor_dispatch_destroy(actor) > 0)
+			return 0;
 	}
 
 	nemoactor_resize_gl(actor, width, height);
@@ -176,13 +176,15 @@ static void nemoshow_dispatch_actor_layer(struct nemoactor *actor, int32_t visib
 		show->dispatch_layer(show, visible);
 }
 
-static void nemoshow_dispatch_actor_destroy(struct nemoactor *actor)
+static int nemoshow_dispatch_actor_destroy(struct nemoactor *actor)
 {
 	struct nemotale *tale = (struct nemotale *)nemoactor_get_context(actor);
 	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
 
 	if (show->dispatch_destroy != NULL)
-		show->dispatch_destroy(show);
+		return show->dispatch_destroy(show);
+
+	return 0;
 }
 
 static void nemoshow_dispatch_timer(struct nemotimer *timer, void *data)

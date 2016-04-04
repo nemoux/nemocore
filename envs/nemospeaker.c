@@ -131,11 +131,13 @@ static void nemospeaker_dispatch_canvas_event(struct nemoshow *show, struct show
 	}
 }
 
-static void nemospeaker_dispatch_show_destroy(struct nemoshow *show)
+static int nemospeaker_dispatch_show_destroy(struct nemoshow *show)
 {
 	struct nemospeaker *speaker = (struct nemospeaker *)nemoshow_get_userdata(show);
 
 	nemospeaker_destroy(speaker);
+
+	return 1;
 }
 
 static void nemospeaker_dispatch_show_layer(struct nemoshow *show, int32_t visible)

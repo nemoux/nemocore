@@ -20,8 +20,8 @@ static void nemoshow_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t w
 		return;
 
 	if (width < nemotale_get_close_width(tale) || height < nemotale_get_close_height(tale)) {
-		nemocanvas_dispatch_destroy(canvas);
-		return;
+		if (nemocanvas_dispatch_destroy(canvas) > 0)
+			return;
 	}
 
 	nemotool_resize_egl_canvas(scon->eglcanvas, width, height);
@@ -130,15 +130,17 @@ static void nemoshow_dispatch_canvas_layer(struct nemocanvas *canvas, int32_t vi
 		show->dispatch_layer(show, visible);
 }
 
-static void nemoshow_dispatch_canvas_destroy(struct nemocanvas *canvas)
+static int nemoshow_dispatch_canvas_destroy(struct nemocanvas *canvas)
 {
 	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
 	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
 
 	if (show->dispatch_destroy != NULL)
-		show->dispatch_destroy(show);
-	else
-		nemotool_exit(canvas->tool);
+		return show->dispatch_destroy(show);
+
+	nemotool_exit(canvas->tool);
+
+	return 1;
 }
 
 static void nemoshow_dispatch_timer(struct nemotimer *timer, void *data)

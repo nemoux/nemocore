@@ -731,10 +731,12 @@ void nemocanvas_dispatch_resize(struct nemocanvas *canvas, int32_t width, int32_
 		canvas->dispatch_resize(canvas, width, height, fixed);
 }
 
-void nemocanvas_dispatch_destroy(struct nemocanvas *canvas)
+int nemocanvas_dispatch_destroy(struct nemocanvas *canvas)
 {
 	if (canvas->dispatch_destroy != NULL)
-		canvas->dispatch_destroy(canvas);
+		return canvas->dispatch_destroy(canvas);
+
+	return 0;
 }
 
 void nemocanvas_attach_queue(struct nemocanvas *canvas, struct nemoqueue *queue)

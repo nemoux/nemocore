@@ -29,7 +29,7 @@ typedef void (*nemoactor_dispatch_transform_t)(struct nemoactor *actor, int32_t 
 typedef void (*nemoactor_dispatch_fullscreen_t)(struct nemoactor *actor, int32_t active, int32_t opaque);
 typedef void (*nemoactor_dispatch_layer_t)(struct nemoactor *actor, int32_t visible);
 typedef void (*nemoactor_dispatch_frame_t)(struct nemoactor *actor, uint32_t msecs);
-typedef void (*nemoactor_dispatch_destroy_t)(struct nemoactor *actor);
+typedef int (*nemoactor_dispatch_destroy_t)(struct nemoactor *actor);
 
 struct nemoactor {
 	struct nemocontent base;
@@ -114,7 +114,7 @@ extern void nemoactor_dispatch_transform(struct nemoactor *actor, int visible);
 extern void nemoactor_dispatch_fullscreen(struct nemoactor *actor, int active, int opaque);
 extern void nemoactor_dispatch_layer(struct nemoactor *actor, int visible);
 extern void nemoactor_dispatch_frame(struct nemoactor *actor);
-extern void nemoactor_dispatch_destroy(struct nemoactor *actor);
+extern int nemoactor_dispatch_destroy(struct nemoactor *actor);
 
 extern void nemoactor_dispatch_feedback(struct nemoactor *actor);
 extern void nemoactor_terminate_feedback(struct nemoactor *actor);
