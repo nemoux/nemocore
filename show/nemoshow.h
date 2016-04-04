@@ -200,6 +200,16 @@ static inline void nemoshow_set_dispatch_destroy(struct nemoshow *show, nemoshow
 	show->dispatch_destroy = dispatch;
 }
 
+static inline void nemoshow_set_close_width(struct nemoshow *show, uint32_t width)
+{
+	nemotale_set_close_width(show->tale, width);
+}
+
+static inline void nemoshow_set_close_height(struct nemoshow *show, uint32_t height)
+{
+	nemotale_set_close_height(show->tale, height);
+}
+
 static inline void nemoshow_set_minimum_width(struct nemoshow *show, uint32_t width)
 {
 	nemotale_set_minimum_width(show->tale, width);
@@ -218,6 +228,16 @@ static inline void nemoshow_set_maximum_width(struct nemoshow *show, uint32_t wi
 static inline void nemoshow_set_maximum_height(struct nemoshow *show, uint32_t height)
 {
 	nemotale_set_maximum_height(show->tale, height);
+}
+
+static inline uint32_t nemoshow_get_close_width(struct nemoshow *show)
+{
+	return nemotale_get_close_width(show->tale);
+}
+
+static inline uint32_t nemoshow_get_close_height(struct nemoshow *show)
+{
+	return nemotale_get_close_height(show->tale);
 }
 
 static inline uint32_t nemoshow_get_minimum_width(struct nemoshow *show)

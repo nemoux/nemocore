@@ -98,7 +98,7 @@ static int nemoshow_dispatch_actor_resize(struct nemoactor *actor, int32_t width
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct talefbo *fbo = (struct talefbo *)nemotale_get_backend(tale);
 
-	if (width < nemotale_get_minimum_width(tale) || height < nemotale_get_minimum_height(tale)) {
+	if (width < nemotale_get_close_width(tale) || height < nemotale_get_close_height(tale)) {
 		nemoactor_dispatch_destroy(actor);
 		return 0;
 	}
@@ -228,7 +228,7 @@ struct nemoshow *nemoshow_create_view(struct nemoshell *shell, int32_t width, in
 		return NULL;
 	memset(scon, 0, sizeof(struct showcontext));
 
-	actor = nemoactor_create_gl(compz, width, height);
+	scon->actor = actor = nemoactor_create_gl(compz, width, height);
 	if (actor == NULL)
 		goto err1;
 
@@ -262,13 +262,19 @@ struct nemoshow *nemoshow_create_view(struct nemoshell *shell, int32_t width, in
 	nemoshow_set_size(show, width, height);
 	nemoshow_set_context(show, scon);
 
+	nemoactor_set_min_size(scon->actor,
+			nemotale_get_minimum_width(scon->tale),
+			nemotale_get_minimum_height(scon->tale));
+	nemoactor_set_max_size(scon->actor,
+			nemotale_get_maximum_width(scon->tale),
+			nemotale_get_maximum_height(scon->tale));
+
 	nemotale_set_userdata(scon->tale, show);
 
 	nemoactor_set_context(actor, scon->tale);
 
 	scon->shell = shell;
 	scon->compz = compz;
-	scon->actor = actor;
 	scon->timer = timer;
 	scon->width = width;
 	scon->height = height;

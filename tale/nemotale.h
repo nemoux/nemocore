@@ -74,9 +74,12 @@ struct nemotale {
 	uint32_t single_click_duration;
 	uint32_t single_click_distance;
 
+	uint32_t close_width;
+	uint32_t close_height;
+
 	uint32_t minimum_width;
-	uint32_t maximum_width;
 	uint32_t minimum_height;
+	uint32_t maximum_width;
 	uint32_t maximum_height;
 };
 
@@ -226,6 +229,16 @@ static inline void nemotale_set_single_click_gesture(struct nemotale *tale, uint
 	tale->single_click_distance = distance;
 }
 
+static inline void nemotale_set_close_width(struct nemotale *tale, uint32_t width)
+{
+	tale->close_width = width;
+}
+
+static inline void nemotale_set_close_height(struct nemotale *tale, uint32_t height)
+{
+	tale->close_height = height;
+}
+
 static inline void nemotale_set_minimum_width(struct nemotale *tale, uint32_t width)
 {
 	tale->minimum_width = width;
@@ -246,19 +259,29 @@ static inline void nemotale_set_maximum_height(struct nemotale *tale, uint32_t h
 	tale->maximum_height = height;
 }
 
+static inline uint32_t nemotale_get_close_width(struct nemotale *tale)
+{
+	return tale->close_width;
+}
+
+static inline uint32_t nemotale_get_close_height(struct nemotale *tale)
+{
+	return tale->close_height;
+}
+
 static inline uint32_t nemotale_get_minimum_width(struct nemotale *tale)
 {
 	return tale->minimum_width;
 }
 
-static inline uint32_t nemotale_get_maximum_width(struct nemotale *tale)
-{
-	return tale->maximum_width;
-}
-
 static inline uint32_t nemotale_get_minimum_height(struct nemotale *tale)
 {
 	return tale->minimum_height;
+}
+
+static inline uint32_t nemotale_get_maximum_width(struct nemotale *tale)
+{
+	return tale->maximum_width;
 }
 
 static inline uint32_t nemotale_get_maximum_height(struct nemotale *tale)

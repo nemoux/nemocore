@@ -19,7 +19,7 @@ static void nemoshow_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t w
 	if (width == 0 || height == 0)
 		return;
 
-	if (width < nemotale_get_minimum_width(tale) || height < nemotale_get_minimum_height(tale)) {
+	if (width < nemotale_get_close_width(tale) || height < nemotale_get_close_height(tale)) {
 		nemocanvas_dispatch_destroy(canvas);
 		return;
 	}
@@ -220,6 +220,13 @@ struct nemoshow *nemoshow_create_view(struct nemotool *tool, int32_t width, int3
 	nemoshow_set_tale(show, scon->tale);
 	nemoshow_set_size(show, width, height);
 	nemoshow_set_context(show, scon);
+
+	nemocanvas_set_min_size(scon->canvas,
+			nemotale_get_minimum_width(scon->tale),
+			nemotale_get_minimum_height(scon->tale));
+	nemocanvas_set_max_size(scon->canvas,
+			nemotale_get_maximum_width(scon->tale),
+			nemotale_get_maximum_height(scon->tale));
 
 	nemocanvas_set_userdata(NTEGL_CANVAS(scon->eglcanvas), scon->tale);
 	nemotale_set_userdata(scon->tale, show);
