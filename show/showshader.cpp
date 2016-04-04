@@ -206,9 +206,11 @@ int nemoshow_shader_update(struct showone *one)
 	}
 
 	if ((one->dirty & NEMOSHOW_MATRIX_DIRTY) != 0) {
-		NEMOSHOW_SHADER_CC(shader, shader) = SkShader::CreateLocalMatrixShader(
-				NEMOSHOW_SHADER_CC(shader, shader),
-				*NEMOSHOW_SHADER_CC(shader, matrix));
+		if (nemoshow_one_has_state(one, NEMOSHOW_TRANSFORM_STATE)) {
+			NEMOSHOW_SHADER_CC(shader, shader) = SkShader::CreateLocalMatrixShader(
+					NEMOSHOW_SHADER_CC(shader, shader),
+					*NEMOSHOW_SHADER_CC(shader, matrix));
+		}
 	}
 
 	return 0;
