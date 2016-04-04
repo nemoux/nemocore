@@ -211,7 +211,7 @@ void nemoshow_item_destroy(struct showone *one)
 		delete[] NEMOSHOW_ITEM_CC(item, points);
 	if (NEMOSHOW_ITEM_CC(item, textbox) != NULL)
 		delete NEMOSHOW_ITEM_CC(item, textbox);
-	if (NEMOSHOW_ITEM_CC(item, bitmap) != NULL)
+	if (NEMOSHOW_ITEM_CC(item, needs_free) == true && NEMOSHOW_ITEM_CC(item, bitmap) != NULL)
 		delete NEMOSHOW_ITEM_CC(item, bitmap);
 
 	delete static_cast<showitem_t *>(item->cc);
@@ -236,11 +236,12 @@ static inline void nemoshow_item_update_uri(struct nemoshow *show, struct showon
 	bool r;
 
 	if (item->uri != NULL) {
-		if (NEMOSHOW_ITEM_CC(item, bitmap) != NULL)
+		if (NEMOSHOW_ITEM_CC(item, needs_free) == true && NEMOSHOW_ITEM_CC(item, bitmap) != NULL)
 			delete NEMOSHOW_ITEM_CC(item, bitmap);
 
 		if (one->sub == NEMOSHOW_IMAGE_ITEM) {
 			NEMOSHOW_ITEM_CC(item, bitmap) = new SkBitmap;
+			NEMOSHOW_ITEM_CC(item, needs_free) = true;
 
 			r = SkImageDecoder::DecodeFile(item->uri, NEMOSHOW_ITEM_CC(item, bitmap));
 			if (r == false) {
@@ -1736,10 +1737,11 @@ int nemoshow_item_set_buffer(struct showone *one, char *buffer, uint32_t width, 
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	if (NEMOSHOW_ITEM_CC(item, bitmap) != NULL)
+	if (NEMOSHOW_ITEM_CC(item, needs_free) == true && NEMOSHOW_ITEM_CC(item, bitmap) != NULL)
 		delete NEMOSHOW_ITEM_CC(item, bitmap);
 
 	NEMOSHOW_ITEM_CC(item, bitmap) = new SkBitmap;
+	NEMOSHOW_ITEM_CC(item, needs_free) = true;
 
 	if (buffer != NULL) {
 		NEMOSHOW_ITEM_CC(item, bitmap)->setInfo(
@@ -1763,7 +1765,8 @@ void nemoshow_item_put_buffer(struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	delete NEMOSHOW_ITEM_CC(item, bitmap);
+	if (NEMOSHOW_ITEM_CC(item, needs_free) == true && NEMOSHOW_ITEM_CC(item, bitmap) != NULL)
+		delete NEMOSHOW_ITEM_CC(item, bitmap);
 
 	NEMOSHOW_ITEM_CC(item, bitmap) = NULL;
 
@@ -1780,10 +1783,11 @@ int nemoshow_item_copy_buffer(struct showone *one, char *buffer, uint32_t width,
 
 	if (NEMOSHOW_ITEM_CC(item, width) != width ||
 			NEMOSHOW_ITEM_CC(item, height) != height) {
-		if (NEMOSHOW_ITEM_CC(item, bitmap) != NULL)
+		if (NEMOSHOW_ITEM_CC(item, needs_free) == true && NEMOSHOW_ITEM_CC(item, bitmap) != NULL)
 			delete NEMOSHOW_ITEM_CC(item, bitmap);
 
 		NEMOSHOW_ITEM_CC(item, bitmap) = new SkBitmap;
+		NEMOSHOW_ITEM_CC(item, needs_free) = true;
 		NEMOSHOW_ITEM_CC(item, bitmap)->allocPixels(
 				SkImageInfo::Make(width, height, kN32_SkColorType, kPremul_SkAlphaType));
 
@@ -1821,10 +1825,11 @@ int nemoshow_item_set_bitmap(struct showone *one, SkBitmap *bitmap)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	if (NEMOSHOW_ITEM_CC(item, bitmap) != NULL)
+	if (NEMOSHOW_ITEM_CC(item, needs_free) == true && NEMOSHOW_ITEM_CC(item, bitmap) != NULL)
 		delete NEMOSHOW_ITEM_CC(item, bitmap);
 
 	NEMOSHOW_ITEM_CC(item, bitmap) = bitmap;
+	NEMOSHOW_ITEM_CC(item, needs_free) = false;
 
 	nemoshow_one_dirty(one, NEMOSHOW_REDRAW_DIRTY);
 
