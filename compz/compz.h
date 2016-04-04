@@ -186,8 +186,8 @@ extern void nemocompz_get_presentation_clock(struct nemocompz *compz, struct tim
 
 extern int nemocompz_is_running(struct nemocompz *compz);
 
-extern int nemocompz_contains_view(struct nemocompz *compz, struct nemoview *view);
-extern int nemocompz_contains_view_near(struct nemocompz *compz, struct nemoview *view, float dx, float dy);
+extern int nemocompz_contain_view(struct nemocompz *compz, struct nemoview *view);
+extern int nemocompz_contain_view_near(struct nemocompz *compz, struct nemoview *view, float dx, float dy);
 
 extern void nemocompz_load_configs(struct nemocompz *compz, const char *configpath);
 extern void nemocompz_load_backends(struct nemocompz *compz);

@@ -590,7 +590,7 @@ int nemoshow_poly_pick_plane(struct showone *cone, struct showone *pone, struct 
 	return 0;
 }
 
-float nemoshow_poly_contains_point(struct showone *cone, struct showone *pone, struct showone *one, double x, double y)
+float nemoshow_poly_contain_point(struct showone *cone, struct showone *pone, struct showone *one, double x, double y)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(cone);
 	struct showpipe *pipe = NEMOSHOW_PIPE(pone);

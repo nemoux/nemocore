@@ -14,7 +14,7 @@ int nemomote_position_update(struct nemomote *mote, struct nemozone *zone)
 	int i;
 
 	for (i = mote->lcount; i < mote->lcount + mote->rcount; i++) {
-		nemozone_locates(zone, &x, &y);
+		nemozone_locate(zone, &x, &y);
 
 		NEMOMOTE_POSITION_X(mote, i) = x;
 		NEMOMOTE_POSITION_Y(mote, i) = y;
@@ -30,7 +30,7 @@ int nemomote_position_set(struct nemomote *mote, uint32_t type, struct nemozone 
 
 	for (i = 0; i < mote->lcount; i++) {
 		if (mote->types[i] == type) {
-			nemozone_locates(zone, &x, &y);
+			nemozone_locate(zone, &x, &y);
 
 			NEMOMOTE_POSITION_X(mote, i) = x;
 			NEMOMOTE_POSITION_Y(mote, i) = y;

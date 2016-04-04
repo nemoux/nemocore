@@ -353,7 +353,7 @@ static inline void nemoview_transform_from_global_nocheck(struct nemoview *view,
 	}
 }
 
-static inline int nemoview_contains_point(struct nemoview *view, float x, float y)
+static inline int nemoview_contain_point(struct nemoview *view, float x, float y)
 {
 	float sx, sy;
 
@@ -381,7 +381,7 @@ static inline int nemoview_overlap_view(struct nemoview *view, struct nemoview *
 	for (i = 0; i < 4; i++) {
 		nemoview_transform_to_global(view, s[i][0], s[i][1], &tx, &ty);
 
-		if (nemoview_contains_point(oview, tx, ty) != 0)
+		if (nemoview_contain_point(oview, tx, ty) != 0)
 			return 1;
 	}
 

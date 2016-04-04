@@ -881,7 +881,7 @@ static inline struct showone *nemoshow_canvas_pick_poly(struct showone *one, flo
 	nemoshow_children_for_each(pone, one) {
 		nemoshow_children_for_each(cone, pone) {
 			if (nemoshow_one_has_state(cone, NEMOSHOW_PICK_STATE)) {
-				t = nemoshow_poly_contains_point(one, pone, cone, x, y);
+				t = nemoshow_poly_contain_point(one, pone, cone, x, y);
 				if (min > t) {
 					min = t;
 					pick = cone;

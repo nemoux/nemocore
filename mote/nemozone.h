@@ -7,8 +7,8 @@
 
 struct nemozone;
 
-typedef void (*nemomote_zone_locates_t)(struct nemozone *zone, double *x, double *y);
-typedef int (*nemomote_zone_contains_t)(struct nemozone *zone, double x, double y);
+typedef void (*nemomote_zone_locate_t)(struct nemozone *zone, double *x, double *y);
+typedef int (*nemomote_zone_contain_t)(struct nemozone *zone, double x, double y);
 
 struct nemozone {
 	int type;
@@ -20,8 +20,8 @@ struct nemozone {
 
 	double radius;
 
-	nemomote_zone_locates_t locates;
-	nemomote_zone_contains_t contains;
+	nemomote_zone_locate_t locate;
+	nemomote_zone_contain_t contain;
 };
 
 extern void nemozone_set_cube(struct nemozone *zone, double left, double right, double top, double bottom);
@@ -33,14 +33,14 @@ static inline int nemozone_get_type(struct nemozone *zone)
 	return zone->type;
 }
 
-static inline void nemozone_locates(struct nemozone *zone, double *x, double *y)
+static inline void nemozone_locate(struct nemozone *zone, double *x, double *y)
 {
-	zone->locates(zone, x, y);
+	zone->locate(zone, x, y);
 }
 
-static inline int nemozone_contains(struct nemozone *zone, double x, double y)
+static inline int nemozone_contain(struct nemozone *zone, double x, double y)
 {
-	return zone->contains(zone, x, y);
+	return zone->contain(zone, x, y);
 }
 
 #endif

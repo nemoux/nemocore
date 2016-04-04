@@ -17,7 +17,7 @@ int nemomote_deathzone_update(struct nemomote *mote, uint32_t type, double secs,
 		if (mote->types[i] != type)
 			continue;
 
-		if (nemozone_contains(zone, NEMOMOTE_POSITION_X(mote, i), NEMOMOTE_POSITION_Y(mote, i))) {
+		if (nemozone_contain(zone, NEMOMOTE_POSITION_X(mote, i), NEMOMOTE_POSITION_Y(mote, i))) {
 			mote->attrs[i] |= NEMOMOTE_DEAD_BIT;
 		}
 	}

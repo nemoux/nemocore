@@ -1693,7 +1693,7 @@ void nemoshow_item_path_set_dash_effect(struct showone *one, double *dashes, int
 	nemoshow_one_dirty(one, NEMOSHOW_PATHEFFECT_DIRTY);
 }
 
-int nemoshow_item_path_contains_point(struct showone *one, double x, double y)
+int nemoshow_item_path_contain_point(struct showone *one, double x, double y)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 

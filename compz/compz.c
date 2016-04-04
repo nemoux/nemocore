@@ -952,7 +952,7 @@ int nemocompz_is_running(struct nemocompz *compz)
 	return compz->state == NEMOCOMPZ_RUNNING_STATE;
 }
 
-int nemocompz_contains_view(struct nemocompz *compz, struct nemoview *view)
+int nemocompz_contain_view(struct nemocompz *compz, struct nemoview *view)
 {
 	float tx, ty;
 
@@ -967,7 +967,7 @@ int nemocompz_contains_view(struct nemocompz *compz, struct nemoview *view)
 	return 1;
 }
 
-int nemocompz_contains_view_near(struct nemocompz *compz, struct nemoview *view, float dx, float dy)
+int nemocompz_contain_view_near(struct nemocompz *compz, struct nemoview *view, float dx, float dy)
 {
 	float tx, ty;
 

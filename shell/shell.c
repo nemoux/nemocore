@@ -1084,7 +1084,7 @@ void nemoshell_put_fullscreen_bin(struct nemoshell *shell, struct shellbin *bin)
 	nemoshell_send_bin_state(bin);
 }
 
-static inline int nemoshell_bin_contains_view(struct shellbin *bin, struct nemoview *view)
+static inline int nemoshell_bin_contain_view(struct shellbin *bin, struct nemoview *view)
 {
 	float s[4][2] = {
 		{ 0.0f, 0.0f },
@@ -1123,12 +1123,12 @@ void nemoshell_set_fullscreen_opaque(struct nemoshell *shell, struct shellbin *b
 		wl_list_for_each(view, &layer->view_list, layer_link) {
 			if (!wl_list_empty(&view->children_list)) {
 				wl_list_for_each(child, &view->children_list, children_link) {
-					if (nemoshell_bin_contains_view(bin, child) != 0)
+					if (nemoshell_bin_contain_view(bin, child) != 0)
 						nemocontent_update_fullscreen(child->content, 1, bin->on_opaquescreen);
 				}
 			}
 
-			if (nemoshell_bin_contains_view(bin, view) != 0)
+			if (nemoshell_bin_contain_view(bin, view) != 0)
 				nemocontent_update_fullscreen(view->content, 1, bin->on_opaquescreen);
 		}
 	}
@@ -1152,12 +1152,12 @@ void nemoshell_put_fullscreen_opaque(struct nemoshell *shell, struct shellbin *b
 
 			if (!wl_list_empty(&view->children_list)) {
 				wl_list_for_each(child, &view->children_list, children_link) {
-					if (nemoshell_bin_contains_view(bin, child) != 0)
+					if (nemoshell_bin_contain_view(bin, child) != 0)
 						nemocontent_update_fullscreen(child->content, 0, bin->on_opaquescreen);
 				}
 			}
 
-			if (nemoshell_bin_contains_view(bin, view) != 0)
+			if (nemoshell_bin_contain_view(bin, view) != 0)
 				nemocontent_update_fullscreen(view->content, 0, bin->on_opaquescreen);
 		}
 	}
