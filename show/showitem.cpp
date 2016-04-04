@@ -265,7 +265,7 @@ static inline void nemoshow_item_update_style(struct nemoshow *show, struct show
 	struct showitem *group;
 
 	if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE)) {
-		if (nemoshow_one_has_state(one->parent, NEMOSHOW_INHERIT_STATE)) {
+		if (one->parent != NULL && nemoshow_one_has_state(one->parent, NEMOSHOW_INHERIT_STATE)) {
 			group = NEMOSHOW_ITEM(one->parent);
 
 			item->alpha = item->_alpha * group->alpha;
@@ -291,7 +291,7 @@ static inline void nemoshow_item_update_style(struct nemoshow *show, struct show
 					item->fills[NEMOSHOW_BLUE_COLOR]));
 	}
 	if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE)) {
-		if (nemoshow_one_has_state(one->parent, NEMOSHOW_INHERIT_STATE)) {
+		if (one->parent != NULL && nemoshow_one_has_state(one->parent, NEMOSHOW_INHERIT_STATE)) {
 			group = NEMOSHOW_ITEM(one->parent);
 
 			item->alpha = item->_alpha * group->alpha;
@@ -717,7 +717,7 @@ static inline void nemoshow_item_update_matrix(struct nemoshow *show, struct sho
 				*NEMOSHOW_ITEM_CC(item, modelview));
 	}
 
-	if (nemoshow_one_has_state(one->parent, NEMOSHOW_INHERIT_STATE)) {
+	if (one->parent != NULL && nemoshow_one_has_state(one->parent, NEMOSHOW_INHERIT_STATE)) {
 		struct showitem *group = NEMOSHOW_ITEM(one->parent);
 
 		NEMOSHOW_ITEM_CC(item, matrix)->postConcat(
