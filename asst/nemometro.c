@@ -7,6 +7,35 @@
 
 #include <nemometro.h>
 
+static inline void nemometro_unproject(struct nemomatrix *projection, int32_t width, int32_t height, struct nemomatrix *modelview, float x, float y, float z, float *out)
+{
+	struct nemomatrix matrix;
+	struct nemomatrix inverse;
+	struct nemovector in;
+
+	matrix = *modelview;
+	nemomatrix_multiply(&matrix, projection);
+
+	nemomatrix_invert(&inverse, &matrix);
+
+	in.f[0] = x * 2.0f / width - 1.0f;
+	in.f[1] = y * 2.0f / height - 1.0f;
+	in.f[2] = z * 2.0f - 1.0f;
+	in.f[3] = 1.0f;
+
+	nemomatrix_transform(&inverse, &in);
+
+	if (fabsf(in.f[3]) < 1e-6) {
+		out[0] = 0.0f;
+		out[1] = 0.0f;
+		out[2] = 0.0f;
+	} else {
+		out[0] = in.f[0] / in.f[3];
+		out[1] = in.f[1] / in.f[3];
+		out[2] = in.f[2] / in.f[3];
+	}
+}
+
 int nemometro_intersect_triangle(float *v0, float *v1, float *v2, float *o, float *d, float *t, float *u, float *v)
 {
 	float edge1[3], edge2[3];
@@ -225,33 +254,4 @@ int nemometro_pick_cube(struct nemomatrix *projection, int32_t width, int32_t he
 	rayorg[2] = near[2];
 
 	return nemometro_intersect_cube(boundingbox, rayorg, rayvec, mint, maxt);
-}
-
-void nemometro_unproject(struct nemomatrix *projection, int32_t width, int32_t height, struct nemomatrix *modelview, float x, float y, float z, float *out)
-{
-	struct nemomatrix matrix;
-	struct nemomatrix inverse;
-	struct nemovector in;
-
-	matrix = *modelview;
-	nemomatrix_multiply(&matrix, projection);
-
-	nemomatrix_invert(&inverse, &matrix);
-
-	in.f[0] = x * 2.0f / width - 1.0f;
-	in.f[1] = y * 2.0f / height - 1.0f;
-	in.f[2] = z * 2.0f - 1.0f;
-	in.f[3] = 1.0f;
-
-	nemomatrix_transform(&inverse, &in);
-
-	if (fabsf(in.f[3]) < 1e-6) {
-		out[0] = 0.0f;
-		out[1] = 0.0f;
-		out[2] = 0.0f;
-	} else {
-		out[0] = in.f[0] / in.f[3];
-		out[1] = in.f[1] / in.f[3];
-		out[2] = in.f[2] / in.f[3];
-	}
 }

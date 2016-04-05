@@ -798,7 +798,7 @@ static inline int nemocompz_check_visible(struct nemocompz *compz, struct nemovi
 {
 	struct nemolayer *layer;
 	struct nemoview *view, *child;
-
+	
 	if (pixman_region32_contains_rectangle(region, pixman_region32_extents(&cview->transform.boundingbox)) == PIXMAN_REGION_OUT)
 		return 1;
 
@@ -813,16 +813,14 @@ static inline int nemocompz_check_visible(struct nemocompz *compz, struct nemovi
 						return 1;
 
 					if (nemoview_has_state(child, NEMO_VIEW_LAYER_STATE)) {
-						if (nemoview_overlap_view(cview, child) != 0 ||
-								nemoview_overlap_view(child, cview) != 0)
+						if (nemoview_overlap_view(cview, child) != 0)
 							return 0;
 					}
 				}
 			}
-
+			
 			if (nemoview_has_state(view, NEMO_VIEW_LAYER_STATE)) {
-				if (nemoview_overlap_view(cview, view) != 0 ||
-						nemoview_overlap_view(view, cview) != 0)
+				if (nemoview_overlap_view(cview, view) != 0)
 					return 0;
 			}
 		}

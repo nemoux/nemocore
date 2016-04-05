@@ -12,6 +12,7 @@ NEMO_BEGIN_EXTERN_C
 #include <compz.h>
 #include <content.h>
 #include <nemomatrix.h>
+#include <nemometro.h>
 
 typedef enum {
 	NEMO_VIEW_TRANSFORM_NORMAL = 0,
@@ -354,39 +355,27 @@ static inline void nemoview_transform_from_global_nocheck(struct nemoview *view,
 	}
 }
 
-static inline int nemoview_contain_point(struct nemoview *view, float x, float y)
-{
-	float sx, sy;
-
-	nemoview_transform_from_global(view, x, y, &sx, &sy);
-
-	return 0 <= sx && sx <= view->content->width && 0 <= sy && sy <= view->content->height;
-}
-
 static inline int nemoview_overlap_view(struct nemoview *view, struct nemoview *oview)
 {
-	float s[4][2] = {
-		{ 0, 0 },
-		{ 0, view->content->height },
-		{ view->content->width, 0 },
-		{ view->content->width, view->content->height }
-	};
-	float tx, ty;
-	int i;
+	float b0[8];
+	float b1[8];
 
 	if (view->transform.dirty)
 		nemoview_update_transform(view);
 	if (oview->transform.dirty)
 		nemoview_update_transform(oview);
 
-	for (i = 0; i < 4; i++) {
-		nemoview_transform_to_global(view, s[i][0], s[i][1], &tx, &ty);
+	nemoview_transform_to_global_nocheck(view, 0, 0, &b0[2*0+0], &b0[2*0+1]);
+	nemoview_transform_to_global_nocheck(view, 0, view->content->height, &b0[2*1+0], &b0[2*1+1]);
+	nemoview_transform_to_global_nocheck(view, view->content->width, view->content->height, &b0[2*2+0], &b0[2*2+1]);
+	nemoview_transform_to_global_nocheck(view, view->content->width, 0, &b0[2*3+0], &b0[2*3+1]);
 
-		if (nemoview_contain_point(oview, tx, ty) != 0)
-			return 1;
-	}
+	nemoview_transform_to_global_nocheck(oview, 0, 0, &b1[2*0+0], &b1[2*0+1]);
+	nemoview_transform_to_global_nocheck(oview, 0, oview->content->height, &b1[2*1+0], &b1[2*1+1]);
+	nemoview_transform_to_global_nocheck(oview, oview->content->width, oview->content->height, &b1[2*2+0], &b1[2*2+1]);
+	nemoview_transform_to_global_nocheck(oview, oview->content->width, 0, &b1[2*3+0], &b1[2*3+1]);
 
-	return 0;
+	return nemometro_intersect_boxes(b0, b1);
 }
 
 static inline void nemoview_set_state(struct nemoview *view, uint32_t state)
