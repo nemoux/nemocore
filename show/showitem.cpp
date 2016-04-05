@@ -1303,6 +1303,7 @@ void nemoshow_item_path_text(struct showone *one, const char *font, int fontsize
 	SkPaint paint;
 	SkPath path;
 	SkTypeface *face;
+	SkPaint::FontMetrics metrics;
 
 	SkSafeUnref(
 			paint.setTypeface(
@@ -1317,7 +1318,8 @@ void nemoshow_item_path_text(struct showone *one, const char *font, int fontsize
 
 	paint.setAntiAlias(true);
 	paint.setTextSize(fontsize);
-	paint.getTextPath(text, textlength, x, y, &path);
+	paint.getFontMetrics(&metrics, 0);
+	paint.getTextPath(text, textlength, x, y - metrics.fAscent, &path);
 
 	if (one->sub == NEMOSHOW_PATHTWICE_ITEM) {
 		if (item->pathselect & NEMOSHOW_ITEM_STROKE_PATH)
