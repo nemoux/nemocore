@@ -26,6 +26,7 @@ typedef enum {
 	NEMO_VIEW_KEYPAD_STATE = (1 << 3),
 	NEMO_VIEW_SOUND_STATE = (1 << 4),
 	NEMO_VIEW_LAYER_STATE = (1 << 5),
+	NEMO_VIEW_PUSH_STATE = (1 << 6),
 	NEMO_VIEW_LAST_STATE
 } NemoViewState;
 

@@ -16,6 +16,7 @@
 #include <screen.h>
 #include <pointer.h>
 #include <touch.h>
+#include <datadevice.h>
 #include <view.h>
 #include <canvas.h>
 #include <actor.h>
@@ -212,6 +213,15 @@ static void move_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 	free(move);
 
 	if (tp->focus != NULL) {
+		if (bin != NULL) {
+			if (nemoview_has_state(tp->focus, NEMO_VIEW_PUSH_STATE) != 0 && touchpoint_get_distance(tp) > bin->shell->active.push_distance) {
+				nemoview_above_layer(tp->focus, NULL);
+
+				nemoseat_set_stick_focus(tp->touch->seat, tp->focus);
+				datadevice_set_focus(tp->touch->seat, tp->focus);
+			}
+		}
+
 		nemocontent_touch_up(tp, tp->focus->content, time, touchid);
 	}
 }
@@ -425,14 +435,15 @@ static void move_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 	struct actorgrab *grab = (struct actorgrab *)container_of(base, struct actorgrab, base.touchpoint);
 	struct actorgrab_move *move = (struct actorgrab_move *)container_of(grab, struct actorgrab_move, base);
 	struct touchpoint *tp = base->touchpoint;
+	struct nemoactor *actor = grab->actor;
 	struct nemoshell *shell = grab->shell;
 
-	if (grab->actor != NULL && touchpoint_check_duration(tp, shell->pitch.samples, shell->pitch.max_duration) > 0) {
+	if (actor != NULL && touchpoint_check_duration(tp, shell->pitch.samples, shell->pitch.max_duration) > 0) {
 		struct vieweffect *effect;
 
 		touchpoint_update_velocity(tp, shell->pitch.samples);
 
-		effect = vieweffect_create(grab->actor->view);
+		effect = vieweffect_create(actor->view);
 		effect->type = NEMO_VIEW_PITCH_EFFECT;
 		effect->pitch.velocity = sqrtf(tp->dx * tp->dx + tp->dy * tp->dy) * shell->pitch.coefficient;
 		effect->pitch.dx = tp->dx / effect->pitch.velocity;
@@ -446,6 +457,12 @@ static void move_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 	free(move);
 
 	if (tp->focus != NULL) {
+		if (actor != NULL) {
+			if (nemoview_has_state(tp->focus, NEMO_VIEW_PUSH_STATE) != 0 && touchpoint_get_distance(tp) > shell->active.push_distance) {
+				nemoview_above_layer(tp->focus, NULL);
+			}
+		}
+
 		nemocontent_touch_up(tp, tp->focus->content, time, touchid);
 	}
 }

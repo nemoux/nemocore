@@ -116,6 +116,10 @@ struct nemoshell {
 	} pick;
 
 	struct {
+		double push_distance;
+	} active;
+
+	struct {
 		uint32_t min_width, min_height;
 		uint32_t max_width, max_height;
 	} bin;

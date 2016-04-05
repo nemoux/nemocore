@@ -15,6 +15,7 @@
 #include <seat.h>
 #include <screen.h>
 #include <touch.h>
+#include <datadevice.h>
 #include <view.h>
 #include <canvas.h>
 #include <actor.h>
@@ -113,6 +114,24 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 			}
 		} else {
 			bin->client->send_configure(bin->canvas, width, height);
+		}
+	}
+
+	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_MOVE)) {
+		if (tp0->focus != NULL && nemoview_has_state(tp0->focus, NEMO_VIEW_PUSH_STATE) != 0) {
+			float x0 = (tp0->grab_x + tp1->grab_x) / 2.0f;
+			float y0 = (tp0->grab_y + tp1->grab_y) / 2.0f;
+			float x1 = (tp0->x + tp1->x) / 2.0f;
+			float y1 = (tp0->y + tp1->y) / 2.0f;
+			float dx = x1 - x0;
+			float dy = y1 - y0;
+
+			if (sqrtf(dx * dx + dy * dy) > shell->active.push_distance) {
+				nemoview_above_layer(tp0->focus, NULL);
+
+				nemoseat_set_stick_focus(tp0->touch->seat, tp0->focus);
+				datadevice_set_focus(tp0->touch->seat, tp0->focus);
+			}
 		}
 	}
 
@@ -581,33 +600,51 @@ static void pick_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 {
 	struct actorgrab *grab = (struct actorgrab *)container_of(base, struct actorgrab, base.touchpoint);
 	struct actorgrab_pick *pick = (struct actorgrab_pick *)container_of(grab, struct actorgrab_pick, base);
-	struct touchpoint *tp = base->touchpoint;
+	struct touchpoint *tp0 = base->touchpoint;
+	struct touchpoint *tp1 = pick->other->base.base.touchpoint.touchpoint;
 	struct nemoactor *actor = grab->actor;
 	struct nemoshell *shell = grab->shell;
 
-	if (actor != NULL && (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALE))) {
-		struct nemocompz *compz = actor->compz;
-		struct nemoview *view = actor->view;
-		int32_t width = pick->width * pick->sx;
-		int32_t height = pick->height * pick->sy;
-		int32_t sx, sy;
-		float fromx, fromy, tox, toy;
+	if (actor != NULL) {
+		if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALE)) {
+			struct nemocompz *compz = actor->compz;
+			struct nemoview *view = actor->view;
+			int32_t width = pick->width * pick->sx;
+			int32_t height = pick->height * pick->sy;
+			int32_t sx, sy;
+			float fromx, fromy, tox, toy;
 
-		nemoview_set_scale(view, 1.0f, 1.0f);
-		nemoview_update_transform(view);
+			nemoview_set_scale(view, 1.0f, 1.0f);
+			nemoview_update_transform(view);
 
-		sx = (width - actor->base.width) * -actor->ax;
-		sy = (height - actor->base.height) * -actor->ay;
+			sx = (width - actor->base.width) * -actor->ax;
+			sy = (height - actor->base.height) * -actor->ay;
 
-		nemoview_transform_to_global(view, 0.0f, 0.0f, &fromx, &fromy);
-		nemoview_transform_to_global(view, sx, sy, &tox, &toy);
+			nemoview_transform_to_global(view, 0.0f, 0.0f, &fromx, &fromy);
+			nemoview_transform_to_global(view, sx, sy, &tox, &toy);
 
-		nemoview_set_position(view,
-				view->geometry.x + tox - fromx,
-				view->geometry.y + toy - fromy);
+			nemoview_set_position(view,
+					view->geometry.x + tox - fromx,
+					view->geometry.y + toy - fromy);
 
-		if (nemoactor_dispatch_resize(actor, width, height, 0) == 0)
-			nemoactor_dispatch_frame(actor);
+			if (nemoactor_dispatch_resize(actor, width, height, 0) == 0)
+				nemoactor_dispatch_frame(actor);
+		}
+
+		if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_MOVE)) {
+			if (tp0->focus != NULL && nemoview_has_state(tp0->focus, NEMO_VIEW_PUSH_STATE) != 0) {
+				float x0 = (tp0->grab_x + tp1->grab_x) / 2.0f;
+				float y0 = (tp0->grab_y + tp1->grab_y) / 2.0f;
+				float x1 = (tp0->x + tp1->x) / 2.0f;
+				float y1 = (tp0->y + tp1->y) / 2.0f;
+				float dx = x1 - x0;
+				float dy = y1 - y0;
+
+				if (sqrtf(dx * dx + dy * dy) > shell->active.push_distance) {
+					nemoview_above_layer(tp0->focus, NULL);
+				}
+			}
+		}
 	}
 
 	nemoview_transform_done(actor->view);
@@ -617,8 +654,8 @@ static void pick_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 	free(pick->other);
 	free(pick);
 
-	if (tp->focus != NULL) {
-		nemocontent_touch_up(tp, tp->focus->content, time, touchid);
+	if (tp0->focus != NULL) {
+		nemocontent_touch_up(tp0, tp0->focus->content, time, touchid);
 	}
 }
 
