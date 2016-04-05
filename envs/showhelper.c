@@ -103,6 +103,9 @@ static int nemoshow_dispatch_actor_resize(struct nemoactor *actor, int32_t width
 			return 0;
 	}
 
+	if (show->dispatch_resize != NULL)
+		show->dispatch_resize(show, width, height);
+
 	nemoactor_resize_gl(actor, width, height);
 
 	nemoshow_set_size(show, width, height);
