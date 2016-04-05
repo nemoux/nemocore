@@ -545,7 +545,7 @@ static inline void nemoshow_item_update_path(struct nemoshow *show, struct showo
 	if (one->sub == NEMOSHOW_PATH_ITEM || one->sub == NEMOSHOW_PATHTWICE_ITEM) {
 		NEMOSHOW_ITEM_CC(item, measure)->setPath(NEMOSHOW_ITEM_CC(item, path), false);
 
-		one->dirty |= NEMOSHOW_BOUNDS_DIRTY;
+		one->dirty |= NEMOSHOW_SHAPE_DIRTY | NEMOSHOW_BOUNDS_DIRTY;
 	} else if (one->sub == NEMOSHOW_PATHARRAY_ITEM) {
 		int i;
 
@@ -574,7 +574,7 @@ static inline void nemoshow_item_update_path(struct nemoshow *show, struct showo
 
 		NEMOSHOW_ITEM_CC(item, measure)->setPath(NEMOSHOW_ITEM_CC(item, path), false);
 
-		one->dirty |= NEMOSHOW_BOUNDS_DIRTY;
+		one->dirty |= NEMOSHOW_SHAPE_DIRTY | NEMOSHOW_BOUNDS_DIRTY;
 	} else if (one->sub == NEMOSHOW_PATHLIST_ITEM) {
 		struct showone *child;
 		struct showpathcmd *pcmd;
@@ -600,7 +600,7 @@ static inline void nemoshow_item_update_path(struct nemoshow *show, struct showo
 
 		NEMOSHOW_ITEM_CC(item, measure)->setPath(NEMOSHOW_ITEM_CC(item, path), false);
 
-		one->dirty |= NEMOSHOW_BOUNDS_DIRTY;
+		one->dirty |= NEMOSHOW_SHAPE_DIRTY | NEMOSHOW_BOUNDS_DIRTY;
 	}
 }
 
@@ -636,7 +636,7 @@ static inline void nemoshow_item_update_patheffect(struct nemoshow *show, struct
 			}
 		}
 
-		one->dirty |= NEMOSHOW_BOUNDS_DIRTY;
+		one->dirty |= NEMOSHOW_SHAPE_DIRTY | NEMOSHOW_BOUNDS_DIRTY;
 	}
 }
 
@@ -740,6 +740,20 @@ static inline void nemoshow_item_update_shape(struct nemoshow *show, struct show
 		item->height = item->r * 2;
 
 		one->dirty |= NEMOSHOW_SIZE_DIRTY;
+	} else if (one->sub == NEMOSHOW_PATH_ITEM || one->sub == NEMOSHOW_PATHTWICE_ITEM || one->sub == NEMOSHOW_PATHARRAY_ITEM || one->sub == NEMOSHOW_PATHLIST_ITEM) {
+		if (nemoshow_one_has_state(one, NEMOSHOW_SIZE_STATE) == 0) {
+			SkRect box;
+
+			box = NEMOSHOW_ITEM_CC(item, path)->getBounds();
+
+			if (item->pathsegment >= 1.0f)
+				box.outset(fabs(item->pathdeviation), fabs(item->pathdeviation));
+
+			item->x = box.x();
+			item->y = box.y();
+			item->width = box.width();
+			item->height = box.height();
+		}
 	} else if (one->sub == NEMOSHOW_TEXT_ITEM) {
 		SkRect box;
 
@@ -787,15 +801,6 @@ static inline void nemoshow_item_update_bounds(struct nemoshow *show, struct sho
 
 	if (one->sub == NEMOSHOW_CIRCLE_ITEM) {
 		box = SkRect::MakeXYWH(item->x - item->r, item->y - item->r, item->r * 2, item->r * 2);
-	} else if (one->sub == NEMOSHOW_PATH_ITEM || one->sub == NEMOSHOW_PATHTWICE_ITEM || one->sub == NEMOSHOW_PATHARRAY_ITEM || one->sub == NEMOSHOW_PATHLIST_ITEM) {
-		if (nemoshow_one_has_state(one, NEMOSHOW_SIZE_STATE)) {
-			box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
-		} else {
-			box = NEMOSHOW_ITEM_CC(item, path)->getBounds();
-
-			if (item->pathsegment >= 1.0f)
-				box.outset(fabs(item->pathdeviation), fabs(item->pathdeviation));
-		}
 	} else if (one->sub == NEMOSHOW_POINTS_ITEM || one->sub == NEMOSHOW_POLYLINE_ITEM || one->sub == NEMOSHOW_POLYGON_ITEM) {
 		int32_t x0 = INT_MAX, y0 = INT_MAX, x1 = INT_MIN, y1 = INT_MIN;
 		int i;
