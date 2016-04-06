@@ -372,23 +372,6 @@ static inline void nemoshow_item_set_stroke_width(struct showone *one, double wi
 	nemoshow_one_dirty(one, NEMOSHOW_STYLE_DIRTY | NEMOSHOW_SHAPE_DIRTY);
 }
 
-static inline void nemoshow_item_set_anchor(struct showone *one, double ax, double ay)
-{
-	struct showitem *item = NEMOSHOW_ITEM(one);
-
-	item->ax = ax;
-	item->ay = ay;
-
-	nemoshow_one_set_state(one, NEMOSHOW_ANCHOR_STATE | NEMOSHOW_TRANSFORM_STATE);
-
-	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
-}
-
-static inline const char *nemoshow_item_get_text(struct showone *one)
-{
-	return NEMOSHOW_ITEM_AT(one, text);
-}
-
 static inline void nemoshow_item_translate(struct showone *one, double tx, double ty)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
@@ -401,12 +384,12 @@ static inline void nemoshow_item_translate(struct showone *one, double tx, doubl
 	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
 }
 
-static inline double nemoshow_item_get_tx(struct showone *one)
+static inline double nemoshow_item_get_translate_x(struct showone *one)
 {
 	return NEMOSHOW_ITEM_AT(one, tx);
 }
 
-static inline double nemoshow_item_get_ty(struct showone *one)
+static inline double nemoshow_item_get_translate_y(struct showone *one)
 {
 	return NEMOSHOW_ITEM_AT(one, ty);
 }
@@ -439,6 +422,16 @@ static inline void nemoshow_item_scale(struct showone *one, double sx, double sy
 	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
 }
 
+static inline double nemoshow_item_get_scale_x(struct showone *one)
+{
+	return NEMOSHOW_ITEM_AT(one, sx);
+}
+
+static inline double nemoshow_item_get_scale_y(struct showone *one)
+{
+	return NEMOSHOW_ITEM_AT(one, sy);
+}
+
 static inline void nemoshow_item_pivot(struct showone *one, double px, double py)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
@@ -451,11 +444,48 @@ static inline void nemoshow_item_pivot(struct showone *one, double px, double py
 	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
 }
 
+static inline double nemoshow_item_get_pivot_x(struct showone *one)
+{
+	return NEMOSHOW_ITEM_AT(one, px);
+}
+
+static inline double nemoshow_item_get_pivot_y(struct showone *one)
+{
+	return NEMOSHOW_ITEM_AT(one, py);
+}
+
+static inline void nemoshow_item_set_anchor(struct showone *one, double ax, double ay)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+
+	item->ax = ax;
+	item->ay = ay;
+
+	nemoshow_one_set_state(one, NEMOSHOW_ANCHOR_STATE | NEMOSHOW_TRANSFORM_STATE);
+
+	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
+}
+
+static inline double nemoshow_item_get_anchor_x(struct showone *one)
+{
+	return NEMOSHOW_ITEM_AT(one, ax);
+}
+
+static inline double nemoshow_item_get_anchor_y(struct showone *one)
+{
+	return NEMOSHOW_ITEM_AT(one, ay);
+}
+
 static inline void nemoshow_item_set_pick(struct showone *one, int pick)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	item->pick = pick;
+}
+
+static inline const char *nemoshow_item_get_text(struct showone *one)
+{
+	return NEMOSHOW_ITEM_AT(one, text);
 }
 
 #ifdef __cplusplus
