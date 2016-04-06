@@ -56,8 +56,11 @@ struct showitem {
 	struct showone base;
 
 	double x, y;
-	double ox, oy;
 	double width, height;
+
+	double ox, oy;
+
+	double cx, cy;
 	double r;
 
 	double width0, height0;
@@ -271,6 +274,20 @@ static inline void nemoshow_item_set_base_height(struct showone *one, double hei
 static inline double nemoshow_item_get_base_height(struct showone *one)
 {
 	return NEMOSHOW_ITEM_AT(one, height0);
+}
+
+static inline void nemoshow_item_set_cx(struct showone *one, double cx)
+{
+	NEMOSHOW_ITEM_AT(one, cx) = cx;
+
+	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
+}
+
+static inline void nemoshow_item_set_cy(struct showone *one, double cy)
+{
+	NEMOSHOW_ITEM_AT(one, cy) = cy;
+
+	nemoshow_one_dirty(one, NEMOSHOW_SHAPE_DIRTY);
 }
 
 static inline void nemoshow_item_set_r(struct showone *one, double r)

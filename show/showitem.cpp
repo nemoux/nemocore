@@ -112,6 +112,8 @@ struct showone *nemoshow_item_create(int type)
 	nemoobject_set_reserved(&one->object, "oy", &item->oy, sizeof(double));
 	nemoobject_set_reserved(&one->object, "width", &item->width, sizeof(double));
 	nemoobject_set_reserved(&one->object, "height", &item->height, sizeof(double));
+	nemoobject_set_reserved(&one->object, "cx", &item->cx, sizeof(double));
+	nemoobject_set_reserved(&one->object, "cy", &item->cy, sizeof(double));
 	nemoobject_set_reserved(&one->object, "r", &item->r, sizeof(double));
 
 	nemoobject_set_reserved(&one->object, "tx", &item->tx, sizeof(double));
@@ -653,6 +655,8 @@ static inline void nemoshow_item_update_shape(struct nemoshow *show, struct show
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	if (one->sub == NEMOSHOW_CIRCLE_ITEM) {
+		item->x = item->cx - item->r;
+		item->y = item->cy - item->r;
 		item->width = item->r * 2;
 		item->height = item->r * 2;
 
@@ -827,14 +831,8 @@ static inline void nemoshow_item_update_bounds(struct nemoshow *show, struct sho
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one->canvas);
-	SkRect box;
+	SkRect box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
 	double outer;
-
-	if (one->sub == NEMOSHOW_CIRCLE_ITEM) {
-		box = SkRect::MakeXYWH(item->x - item->r, item->y - item->r, item->r * 2, item->r * 2);
-	} else {
-		box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
-	}
 
 	if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
 		box.outset(item->stroke_width, item->stroke_width);

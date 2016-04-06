@@ -455,8 +455,8 @@ int main(int argc, char *argv[])
 
 	one = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
 	nemoshow_one_attach(canvas, one);
-	nemoshow_item_set_x(one, pixelsize);
-	nemoshow_item_set_y(one, pixelsize);
+	nemoshow_item_set_cx(one, pixelsize);
+	nemoshow_item_set_cy(one, pixelsize);
 	nemoshow_item_set_r(one, pixelsize * 0.8f);
 	nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
 	nemoshow_item_set_filter(one, filter);

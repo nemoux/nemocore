@@ -61,8 +61,8 @@ static int nemoback_atom_dispatch_quad_touch_up(struct showone *one, const char 
 	if ((plane = nemoshow_poly_pick_plane(atom->canvasp, atom->pipe0, atom->one0, nemoobject_getd(attrs, "x"), nemoobject_getd(attrs, "y"), &tx, &ty)) > 0) {
 		none = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
 		nemoshow_one_attach(atom->canvast, none);
-		nemoshow_item_set_x(none, tx * nemoshow_canvas_get_width(atom->canvast));
-		nemoshow_item_set_y(none, ty * nemoshow_canvas_get_height(atom->canvast));
+		nemoshow_item_set_cx(none, tx * nemoshow_canvas_get_width(atom->canvast));
+		nemoshow_item_set_cy(none, ty * nemoshow_canvas_get_height(atom->canvast));
 		nemoshow_item_set_r(none, 5.0f);
 		nemoshow_item_set_fill_color(none, 0xff, 0xff, 0xff, 0xff);
 	}

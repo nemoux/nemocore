@@ -27,6 +27,8 @@ struct showprop *nemoshow_get_property(const char *name)
 		{ "child",						NEMOSHOW_INTEGER_PROP,			NEMOSHOW_NONE_DIRTY,				0x0 },
 		{ "clip",							NEMOSHOW_STRING_PROP,				NEMOSHOW_SHAPE_DIRTY,				0x0 },
 		{ "color",						NEMOSHOW_FLOAT_PROP,				NEMOSHOW_STYLE_DIRTY,				0x0 },
+		{ "cx",								NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_SHAPE_DIRTY,				0x0 },
+		{ "cy",								NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_SHAPE_DIRTY,				0x0 },
 		{ "d",								NEMOSHOW_STRING_PROP,				NEMOSHOW_TEXT_DIRTY,				0x0 },
 		{ "diffuse",					NEMOSHOW_FLOAT_PROP,				NEMOSHOW_SHAPE_DIRTY,				0x0 },
 		{ "dx",								NEMOSHOW_DOUBLE_PROP,				NEMOSHOW_FILTER_DIRTY,			0x0 },

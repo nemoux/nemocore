@@ -143,8 +143,8 @@ static void nemoback_miro_dispatch_mice_transition_done(void *data)
 
 		set0 = nemoshow_sequence_create_set();
 		nemoshow_sequence_set_source(set0, mice->one);
-		nemoshow_sequence_set_dattr(set0, "x", mice->c1 * (miro->width / miro->columns));
-		nemoshow_sequence_set_dattr(set0, "y", mice->r1 * (miro->height / miro->rows));
+		nemoshow_sequence_set_dattr(set0, "cx", mice->c1 * (miro->width / miro->columns));
+		nemoshow_sequence_set_dattr(set0, "cy", mice->r1 * (miro->height / miro->rows));
 
 		sequence = nemoshow_sequence_create_easy(miro->show,
 				nemoshow_sequence_create_frame_easy(miro->show,
@@ -182,8 +182,8 @@ static int nemoback_miro_shoot_mice(struct miroback *miro)
 
 	mice->one = one = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
 	nemoshow_one_attach(miro->canvas, one);
-	nemoshow_item_set_x(one, mice->c0 * (miro->width / miro->columns));
-	nemoshow_item_set_y(one, mice->r0 * (miro->height / miro->rows));
+	nemoshow_item_set_cx(one, mice->c0 * (miro->width / miro->columns));
+	nemoshow_item_set_cy(one, mice->r0 * (miro->height / miro->rows));
 	nemoshow_item_set_r(one, 0.0f);
 	nemoshow_item_set_fill_color(one, 0x1e, 0xdc, 0xdc, 0xff);
 	nemoshow_item_set_filter(one, NEMOSHOW_SOLID_SMALL_BLUR);
