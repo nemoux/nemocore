@@ -72,7 +72,6 @@ struct nemoview *nemoview_create(struct nemocompz *compz, struct nemocontent *co
 	pixman_region32_init(&view->transform.boundingbox);
 
 	view->input = &view->content->input;
-	view->scope = &view->transform.boundingbox;
 
 	return view;
 }
@@ -353,6 +352,10 @@ void nemoview_update_transform(struct nemoview *view)
 	pixman_region32_fini(&view->transform.opaque);
 	pixman_region32_init(&view->transform.opaque);
 
+	if (nemoview_has_state(view, NEMO_VIEW_SCOPE_STATE) == 0)
+		pixman_region32_init_rect(&view->geometry.scope,
+				0, 0, view->content->width, view->content->height);
+
 	if (view->transform.enable == 0) {
 		nemoview_update_transform_disable(view);
 	} else if (nemoview_update_transform_enable(view) < 0) {
@@ -444,7 +447,6 @@ void nemoview_set_scope(struct nemoview *view, uint32_t x, uint32_t y, uint32_t 
 	pixman_region32_init_rect(&view->geometry.scope, x, y, width, height);
 
 	view->input = &view->geometry.scope;
-	view->scope = &view->geometry.scope;
 
 	nemoview_set_state(view, NEMO_VIEW_SCOPE_STATE);
 }

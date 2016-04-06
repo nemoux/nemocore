@@ -77,7 +77,6 @@ struct nemoview {
 	float alpha;
 
 	pixman_region32_t *input;
-	pixman_region32_t *scope;
 
 	struct {
 		uint32_t keyboard_count;
@@ -374,8 +373,8 @@ static inline int nemoview_overlap_view(struct nemoview *view, struct nemoview *
 	if (oview->transform.dirty)
 		nemoview_update_transform(oview);
 
-	box0 = pixman_region32_extents(view->scope);
-	box1 = pixman_region32_extents(oview->scope);
+	box0 = pixman_region32_extents(&view->geometry.scope);
+	box1 = pixman_region32_extents(&oview->geometry.scope);
 
 	nemoview_transform_to_global_nocheck(view, box0->x1, box0->y1, &b0[2*0+0], &b0[2*0+1]);
 	nemoview_transform_to_global_nocheck(view, box0->x1, box0->y2, &b0[2*1+0], &b0[2*1+1]);
