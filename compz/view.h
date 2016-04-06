@@ -76,8 +76,6 @@ struct nemoview {
 	pixman_region32_t clip;
 	float alpha;
 
-	pixman_region32_t *input;
-
 	struct {
 		uint32_t keyboard_count;
 	} focus;
