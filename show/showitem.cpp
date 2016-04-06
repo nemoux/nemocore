@@ -161,6 +161,8 @@ struct showone *nemoshow_item_create(int type)
 		nemoobject_set_reserved(&one->object, "points", item->points, sizeof(double) * item->spoints);
 	} else if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
 		nemoshow_one_set_state(one, NEMOSHOW_INHERIT_STATE);
+		nemoshow_one_set_state(one, NEMOSHOW_FILL_STATE);
+		nemoshow_one_set_state(one, NEMOSHOW_STROKE_STATE);
 	} else if (one->sub == NEMOSHOW_POINTS_ITEM || one->sub == NEMOSHOW_POLYLINE_ITEM || one->sub == NEMOSHOW_POLYGON_ITEM) {
 		item->points = (double *)malloc(sizeof(double) * 8);
 		item->npoints = 0;
@@ -169,13 +171,19 @@ struct showone *nemoshow_item_create(int type)
 		nemoobject_set_reserved(&one->object, "points", item->points, sizeof(double) * item->spoints);
 	} else if (one->sub == NEMOSHOW_GROUP_ITEM) {
 		nemoshow_one_set_state(one, NEMOSHOW_INHERIT_STATE);
+		nemoshow_one_set_state(one, NEMOSHOW_FILL_STATE);
+		nemoshow_one_set_state(one, NEMOSHOW_STROKE_STATE);
 		nemoshow_one_set_state(one, NEMOSHOW_BOUNDS_STATE);
 	} else if (one->sub == NEMOSHOW_IMAGE_ITEM) {
 		nemoshow_one_set_state(one, NEMOSHOW_FILL_STATE);
 	} else if (one->sub == NEMOSHOW_SVG_ITEM) {
 		nemoshow_one_set_state(one, NEMOSHOW_INHERIT_STATE);
+		nemoshow_one_set_state(one, NEMOSHOW_FILL_STATE);
+		nemoshow_one_set_state(one, NEMOSHOW_STROKE_STATE);
 	} else if (one->sub == NEMOSHOW_CONTAINER_ITEM) {
 		nemoshow_one_set_state(one, NEMOSHOW_INHERIT_STATE);
+		nemoshow_one_set_state(one, NEMOSHOW_FILL_STATE);
+		nemoshow_one_set_state(one, NEMOSHOW_STROKE_STATE);
 		nemoshow_one_set_state(one, NEMOSHOW_VIEWPORT_STATE);
 		nemoshow_one_set_state(one, NEMOSHOW_TRANSFORM_STATE);
 	}
