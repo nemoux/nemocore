@@ -588,6 +588,7 @@ void nemoshow_path_text(struct showone *one, const char *font, int fontsize, con
 	SkPaint paint;
 	SkPath rpath;
 	SkTypeface *face;
+	SkPaint::FontMetrics metrics;
 
 	SkSafeUnref(
 			paint.setTypeface(
@@ -602,7 +603,8 @@ void nemoshow_path_text(struct showone *one, const char *font, int fontsize, con
 
 	paint.setAntiAlias(true);
 	paint.setTextSize(fontsize);
-	paint.getTextPath(text, textlength, x, y, &rpath);
+	paint.getFontMetrics(&metrics, 0);
+	paint.getTextPath(text, textlength, x, y - metrics.fAscent, &rpath);
 
 	NEMOSHOW_PATH_CC(path, path)->addPath(rpath);
 
