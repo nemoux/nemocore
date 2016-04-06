@@ -1390,10 +1390,10 @@ static inline void nemoshow_item_path_load_style(struct showone *one, struct xml
 		c = color_parse(attr);
 
 		nemoshow_path_set_fill_color(one,
-				COLOR_DOUBLE_R(c),
-				COLOR_DOUBLE_G(c),
-				COLOR_DOUBLE_B(c),
-				COLOR_DOUBLE_A(c));
+				COLOR_UINT32_R(c),
+				COLOR_UINT32_G(c),
+				COLOR_UINT32_B(c),
+				COLOR_UINT32_A(c));
 	}
 
 	attr = nemoxml_node_get_attr(node, "stroke");
@@ -1407,10 +1407,10 @@ static inline void nemoshow_item_path_load_style(struct showone *one, struct xml
 			w = 1.0f;
 
 		nemoshow_path_set_stroke_color(one,
-				COLOR_DOUBLE_R(c),
-				COLOR_DOUBLE_G(c),
-				COLOR_DOUBLE_B(c),
-				COLOR_DOUBLE_A(c));
+				COLOR_UINT32_R(c),
+				COLOR_UINT32_G(c),
+				COLOR_UINT32_B(c),
+				COLOR_UINT32_A(c));
 		nemoshow_path_set_stroke_width(one, w);
 	}
 }
