@@ -676,8 +676,8 @@ static inline int nemoshow_svg_load_circle(struct svgcontext *context, struct xm
 	nemoshow_one_set_id(one,
 			(value = nemoxml_node_get_attr(node, "id")) ? value : "");
 
-	NEMOSHOW_ITEM_AT(one, x) = nemoshow_svg_get_length(context, nemoxml_node_get_attr(node, "cx"), NEMOSHOW_SVG_ORIENTATION_HORIZONTAL, "0");
-	NEMOSHOW_ITEM_AT(one, y) = nemoshow_svg_get_length(context, nemoxml_node_get_attr(node, "cy"), NEMOSHOW_SVG_ORIENTATION_VERTICAL, "0");
+	NEMOSHOW_ITEM_AT(one, cx) = nemoshow_svg_get_length(context, nemoxml_node_get_attr(node, "cx"), NEMOSHOW_SVG_ORIENTATION_HORIZONTAL, "0");
+	NEMOSHOW_ITEM_AT(one, cy) = nemoshow_svg_get_length(context, nemoxml_node_get_attr(node, "cy"), NEMOSHOW_SVG_ORIENTATION_VERTICAL, "0");
 	NEMOSHOW_ITEM_AT(one, r) = nemoshow_svg_get_length(context, nemoxml_node_get_attr(node, "r"), NEMOSHOW_SVG_ORIENTATION_HORIZONTAL, "0");
 
 	nemoshow_svg_load_style(context, node, one);

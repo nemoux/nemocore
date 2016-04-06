@@ -329,9 +329,9 @@ static inline void nemoshow_canvas_render_item_circle(struct showcanvas *canvas,
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE))
-		_canvas->drawCircle(item->x, item->y, item->r, *NEMOSHOW_ITEM_CC(item, fill));
+		_canvas->drawCircle(item->cx, item->cy, item->r, *NEMOSHOW_ITEM_CC(item, fill));
 	if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
-		_canvas->drawCircle(item->x, item->y, item->r, *NEMOSHOW_ITEM_CC(item, stroke));
+		_canvas->drawCircle(item->cx, item->cy, item->r, *NEMOSHOW_ITEM_CC(item, stroke));
 }
 
 static inline void nemoshow_canvas_render_item_arc(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one)
