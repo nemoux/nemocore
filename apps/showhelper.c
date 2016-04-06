@@ -432,6 +432,14 @@ void nemoshow_view_put_state(struct nemoshow *show, const char *state)
 	nemocanvas_put_state(canvas, state);
 }
 
+void nemoshow_view_set_orbit(struct nemoshow *show, uint32_t x, uint32_t y, uint32_t width, uint32_t height)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemocanvas *canvas = scon->canvas;
+
+	nemocanvas_set_orbit(canvas, x, y, width, height);
+}
+
 void nemoshow_view_set_tag(struct nemoshow *show, uint32_t tag)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);

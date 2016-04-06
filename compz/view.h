@@ -28,6 +28,7 @@ typedef enum {
 	NEMO_VIEW_SOUND_STATE = (1 << 4),
 	NEMO_VIEW_LAYER_STATE = (1 << 5),
 	NEMO_VIEW_PUSH_STATE = (1 << 6),
+	NEMO_VIEW_ORBIT_STATE = (1 << 7),
 	NEMO_VIEW_LAST_STATE
 } NemoViewState;
 
@@ -75,6 +76,9 @@ struct nemoview {
 	pixman_region32_t clip;
 	float alpha;
 
+	pixman_region32_t *input;
+	pixman_region32_t *orbit;
+
 	struct {
 		uint32_t keyboard_count;
 	} focus;
@@ -93,6 +97,8 @@ struct nemoview {
 		float sx, sy;
 
 		int32_t width, height;
+
+		pixman_region32_t orbit;
 
 		struct wl_list transform_list;
 	} geometry;
@@ -129,6 +135,7 @@ extern void nemoview_update_transform_children(struct nemoview *view);
 extern void nemoview_update_transform_parent(struct nemoview *view);
 
 extern void nemoview_set_parent(struct nemoview *view, struct nemoview *parent);
+extern void nemoview_set_orbit(struct nemoview *view, uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 
 extern void nemoview_accumulate_damage(struct nemoview *view, pixman_region32_t *opaque);
 
@@ -357,6 +364,8 @@ static inline void nemoview_transform_from_global_nocheck(struct nemoview *view,
 
 static inline int nemoview_overlap_view(struct nemoview *view, struct nemoview *oview)
 {
+	pixman_box32_t *box0;
+	pixman_box32_t *box1;
 	float b0[8];
 	float b1[8];
 
@@ -365,15 +374,18 @@ static inline int nemoview_overlap_view(struct nemoview *view, struct nemoview *
 	if (oview->transform.dirty)
 		nemoview_update_transform(oview);
 
-	nemoview_transform_to_global_nocheck(view, 0, 0, &b0[2*0+0], &b0[2*0+1]);
-	nemoview_transform_to_global_nocheck(view, 0, view->content->height, &b0[2*1+0], &b0[2*1+1]);
-	nemoview_transform_to_global_nocheck(view, view->content->width, view->content->height, &b0[2*2+0], &b0[2*2+1]);
-	nemoview_transform_to_global_nocheck(view, view->content->width, 0, &b0[2*3+0], &b0[2*3+1]);
+	box0 = pixman_region32_extents(view->orbit);
+	box1 = pixman_region32_extents(oview->orbit);
 
-	nemoview_transform_to_global_nocheck(oview, 0, 0, &b1[2*0+0], &b1[2*0+1]);
-	nemoview_transform_to_global_nocheck(oview, 0, oview->content->height, &b1[2*1+0], &b1[2*1+1]);
-	nemoview_transform_to_global_nocheck(oview, oview->content->width, oview->content->height, &b1[2*2+0], &b1[2*2+1]);
-	nemoview_transform_to_global_nocheck(oview, oview->content->width, 0, &b1[2*3+0], &b1[2*3+1]);
+	nemoview_transform_to_global_nocheck(view, box0->x1, box0->y1, &b0[2*0+0], &b0[2*0+1]);
+	nemoview_transform_to_global_nocheck(view, box0->x1, box0->y2, &b0[2*1+0], &b0[2*1+1]);
+	nemoview_transform_to_global_nocheck(view, box0->x2, box0->y2, &b0[2*2+0], &b0[2*2+1]);
+	nemoview_transform_to_global_nocheck(view, box0->x2, box0->y1, &b0[2*3+0], &b0[2*3+1]);
+
+	nemoview_transform_to_global_nocheck(oview, box1->x1, box1->y1, &b1[2*0+0], &b1[2*0+1]);
+	nemoview_transform_to_global_nocheck(oview, box1->x1, box1->y2, &b1[2*1+0], &b1[2*1+1]);
+	nemoview_transform_to_global_nocheck(oview, box1->x2, box1->y2, &b1[2*2+0], &b1[2*2+1]);
+	nemoview_transform_to_global_nocheck(oview, box1->x2, box1->y1, &b1[2*3+0], &b1[2*3+1]);
 
 	return nemometro_intersect_boxes(b0, b1);
 }

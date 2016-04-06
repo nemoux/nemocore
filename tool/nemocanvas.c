@@ -483,6 +483,11 @@ void nemocanvas_set_parent(struct nemocanvas *canvas, struct nemocanvas *parent)
 	}
 }
 
+void nemocanvas_set_orbit(struct nemocanvas *canvas, uint32_t x, uint32_t y, uint32_t width, uint32_t height)
+{
+	nemo_surface_set_orbit(canvas->nemo_surface, x, y, width, height);
+}
+
 void nemocanvas_set_fullscreen_type(struct nemocanvas *canvas, uint32_t type)
 {
 	nemo_surface_set_fullscreen_type(canvas->nemo_surface, type);

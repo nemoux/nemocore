@@ -72,6 +72,7 @@ extern void nemoshow_view_set_min_size(struct nemoshow *show, float width, float
 extern void nemoshow_view_set_max_size(struct nemoshow *show, float width, float height);
 extern void nemoshow_view_set_state(struct nemoshow *show, const char *state);
 extern void nemoshow_view_put_state(struct nemoshow *show, const char *state);
+extern void nemoshow_view_set_orbit(struct nemoshow *show, uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 extern void nemoshow_view_set_tag(struct nemoshow *show, uint32_t tag);
 extern int nemoshow_view_move(struct nemoshow *show, uint32_t serial);
 extern int nemoshow_view_pick(struct nemoshow *show, uint32_t serial0, uint32_t serial1, uint32_t type);

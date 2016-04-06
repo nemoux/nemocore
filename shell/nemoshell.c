@@ -206,6 +206,13 @@ static void nemo_surface_set_parent(struct wl_client *client, struct wl_resource
 	nemoshell_set_parent_bin(bin, pbin);
 }
 
+static void nemo_surface_set_orbit(struct wl_client *client, struct wl_resource *resource, uint32_t x, uint32_t y, uint32_t width, uint32_t height)
+{
+	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
+
+	nemoview_set_orbit(bin->view, x, y, width, height);
+}
+
 static void nemo_surface_set_fullscreen_type(struct wl_client *client, struct wl_resource *resource, uint32_t type)
 {
 #ifdef NEMOUX_WITH_FULLSCREEN
@@ -399,6 +406,7 @@ static const struct nemo_surface_interface nemo_surface_implementation = {
 	nemo_surface_set_flag,
 	nemo_surface_set_layer,
 	nemo_surface_set_parent,
+	nemo_surface_set_orbit,
 	nemo_surface_set_fullscreen_type,
 	nemo_surface_set_fullscreen_opaque,
 	nemo_surface_set_fullscreen,

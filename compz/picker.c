@@ -21,7 +21,7 @@ struct nemoview *nemocompz_pick_view(struct nemocompz *compz, float x, float y, 
 #define	NEMOCOMPZ_PICK_VIEW(v, x, y, sx, sy)	\
 	nemoview_transform_from_global(v, x, y, sx, sy);	\
 	if (v->content->pick == NULL) {	\
-		if (pixman_region32_contains_point(&v->content->input, *sx, *sy, NULL)) return v;	\
+		if (pixman_region32_contains_point(v->input, *sx, *sy, NULL)) return v;	\
 	} else {	\
 		if (v->content->pick(v->content, *sx, *sy)) return v;	\
 	}
