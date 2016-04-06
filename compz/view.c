@@ -442,9 +442,16 @@ void nemoview_set_parent(struct nemoview *view, struct nemoview *parent)
 
 void nemoview_set_scope(struct nemoview *view, uint32_t x, uint32_t y, uint32_t width, uint32_t height)
 {
-	pixman_region32_init_rect(&view->geometry.scope, x, y, width, height);
+	pixman_region32_union_rect(&view->geometry.scope, &view->geometry.scope, x, y, width, height);
 
 	nemoview_set_state(view, NEMO_VIEW_SCOPE_STATE);
+}
+
+void nemoview_put_scope(struct nemoview *view)
+{
+	pixman_region32_clear(&view->geometry.scope);
+
+	nemoview_put_state(view, NEMO_VIEW_SCOPE_STATE);
 }
 
 void nemoview_accumulate_damage(struct nemoview *view, pixman_region32_t *opaque)

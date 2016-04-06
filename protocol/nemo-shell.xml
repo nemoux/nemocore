@@ -111,6 +111,9 @@
 			<arg name="height" type="uint"/>
 		</request>
 
+		<request name="put_scope">
+		</request>
+
 		<enum name="fullscreen_type">
 			<entry name="normal" value="0"/>
 			<entry name="pick" value="1"/>

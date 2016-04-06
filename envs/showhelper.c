@@ -522,6 +522,14 @@ void nemoshow_view_set_scope(struct nemoshow *show, uint32_t x, uint32_t y, uint
 	nemoview_set_scope(actor->view, x, y, width, height);
 }
 
+void nemoshow_view_put_scope(struct nemoshow *show)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemoactor *actor = scon->actor;
+
+	nemoview_put_scope(actor->view);
+}
+
 void nemoshow_view_set_tag(struct nemoshow *show, uint32_t tag)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);

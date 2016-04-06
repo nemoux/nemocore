@@ -488,6 +488,11 @@ void nemocanvas_set_scope(struct nemocanvas *canvas, uint32_t x, uint32_t y, uin
 	nemo_surface_set_scope(canvas->nemo_surface, x, y, width, height);
 }
 
+void nemocanvas_put_scope(struct nemocanvas *canvas)
+{
+	nemo_surface_put_scope(canvas->nemo_surface);
+}
+
 void nemocanvas_set_fullscreen_type(struct nemocanvas *canvas, uint32_t type)
 {
 	nemo_surface_set_fullscreen_type(canvas->nemo_surface, type);
