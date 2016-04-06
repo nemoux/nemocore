@@ -514,12 +514,12 @@ void nemoshow_view_put_state(struct nemoshow *show, const char *state)
 		nemoview_put_state(actor->view, NEMO_VIEW_PUSH_STATE);
 }
 
-void nemoshow_view_set_orbit(struct nemoshow *show, uint32_t x, uint32_t y, uint32_t width, uint32_t height)
+void nemoshow_view_set_scope(struct nemoshow *show, uint32_t x, uint32_t y, uint32_t width, uint32_t height)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemoactor *actor = scon->actor;
 
-	nemoview_set_orbit(actor->view, x, y, width, height);
+	nemoview_set_scope(actor->view, x, y, width, height);
 }
 
 void nemoshow_view_set_tag(struct nemoshow *show, uint32_t tag)

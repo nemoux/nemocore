@@ -799,7 +799,7 @@ static inline int nemocompz_check_visible(struct nemocompz *compz, struct nemovi
 	struct nemolayer *layer;
 	struct nemoview *view, *child;
 
-	if (pixman_region32_contains_rectangle(region, pixman_region32_extents(cview->orbit)) == PIXMAN_REGION_OUT)
+	if (pixman_region32_contains_rectangle(region, pixman_region32_extents(cview->scope)) == PIXMAN_REGION_OUT)
 		return 1;
 
 	wl_list_for_each(layer, &compz->layer_list, link) {
@@ -844,7 +844,7 @@ void nemocompz_update_layer(struct nemocompz *compz)
 					if (nemoview_has_state(child, NEMO_VIEW_LAYER_STATE)) {
 						nemocontent_update_layer(child->content, nemocompz_check_visible(compz, child, &region));
 
-						pixman_region32_union(&region, &region, child->orbit);
+						pixman_region32_union(&region, &region, child->scope);
 					}
 				}
 			}
@@ -852,7 +852,7 @@ void nemocompz_update_layer(struct nemocompz *compz)
 			if (nemoview_has_state(view, NEMO_VIEW_LAYER_STATE)) {
 				nemocontent_update_layer(view->content, nemocompz_check_visible(compz, view, &region));
 
-				pixman_region32_union(&region, &region, view->orbit);
+				pixman_region32_union(&region, &region, view->scope);
 			}
 		}
 	}

@@ -68,11 +68,11 @@ struct nemoview *nemoview_create(struct nemocompz *compz, struct nemocontent *co
 	view->geometry.width = 0;
 	view->geometry.height = 0;
 
-	pixman_region32_init(&view->geometry.orbit);
+	pixman_region32_init(&view->geometry.scope);
 	pixman_region32_init(&view->transform.boundingbox);
 
 	view->input = &view->content->input;
-	view->orbit = &view->transform.boundingbox;
+	view->scope = &view->transform.boundingbox;
 
 	return view;
 }
@@ -91,7 +91,7 @@ void nemoview_destroy(struct nemoview *view)
 	nemoview_detach_layer(view);
 
 	pixman_region32_fini(&view->clip);
-	pixman_region32_fini(&view->geometry.orbit);
+	pixman_region32_fini(&view->geometry.scope);
 	pixman_region32_fini(&view->transform.boundingbox);
 
 	nemoview_set_parent(view, NULL);
@@ -439,14 +439,14 @@ void nemoview_set_parent(struct nemoview *view, struct nemoview *parent)
 	nemoview_transform_dirty(view);
 }
 
-void nemoview_set_orbit(struct nemoview *view, uint32_t x, uint32_t y, uint32_t width, uint32_t height)
+void nemoview_set_scope(struct nemoview *view, uint32_t x, uint32_t y, uint32_t width, uint32_t height)
 {
-	pixman_region32_init_rect(&view->geometry.orbit, x, y, width, height);
+	pixman_region32_init_rect(&view->geometry.scope, x, y, width, height);
 
-	view->input = &view->geometry.orbit;
-	view->orbit = &view->geometry.orbit;
+	view->input = &view->geometry.scope;
+	view->scope = &view->geometry.scope;
 
-	nemoview_set_state(view, NEMO_VIEW_ORBIT_STATE);
+	nemoview_set_state(view, NEMO_VIEW_SCOPE_STATE);
 }
 
 void nemoview_accumulate_damage(struct nemoview *view, pixman_region32_t *opaque)

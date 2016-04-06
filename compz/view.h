@@ -28,7 +28,7 @@ typedef enum {
 	NEMO_VIEW_SOUND_STATE = (1 << 4),
 	NEMO_VIEW_LAYER_STATE = (1 << 5),
 	NEMO_VIEW_PUSH_STATE = (1 << 6),
-	NEMO_VIEW_ORBIT_STATE = (1 << 7),
+	NEMO_VIEW_SCOPE_STATE = (1 << 7),
 	NEMO_VIEW_LAST_STATE
 } NemoViewState;
 
@@ -77,7 +77,7 @@ struct nemoview {
 	float alpha;
 
 	pixman_region32_t *input;
-	pixman_region32_t *orbit;
+	pixman_region32_t *scope;
 
 	struct {
 		uint32_t keyboard_count;
@@ -98,7 +98,7 @@ struct nemoview {
 
 		int32_t width, height;
 
-		pixman_region32_t orbit;
+		pixman_region32_t scope;
 
 		struct wl_list transform_list;
 	} geometry;
@@ -135,7 +135,7 @@ extern void nemoview_update_transform_children(struct nemoview *view);
 extern void nemoview_update_transform_parent(struct nemoview *view);
 
 extern void nemoview_set_parent(struct nemoview *view, struct nemoview *parent);
-extern void nemoview_set_orbit(struct nemoview *view, uint32_t x, uint32_t y, uint32_t width, uint32_t height);
+extern void nemoview_set_scope(struct nemoview *view, uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 
 extern void nemoview_accumulate_damage(struct nemoview *view, pixman_region32_t *opaque);
 
@@ -374,8 +374,8 @@ static inline int nemoview_overlap_view(struct nemoview *view, struct nemoview *
 	if (oview->transform.dirty)
 		nemoview_update_transform(oview);
 
-	box0 = pixman_region32_extents(view->orbit);
-	box1 = pixman_region32_extents(oview->orbit);
+	box0 = pixman_region32_extents(view->scope);
+	box1 = pixman_region32_extents(oview->scope);
 
 	nemoview_transform_to_global_nocheck(view, box0->x1, box0->y1, &b0[2*0+0], &b0[2*0+1]);
 	nemoview_transform_to_global_nocheck(view, box0->x1, box0->y2, &b0[2*1+0], &b0[2*1+1]);
