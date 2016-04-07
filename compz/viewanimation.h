@@ -69,7 +69,7 @@ extern void viewanimation_destroy(struct viewanimation *animation);
 
 extern void viewanimation_dispatch(struct nemocompz *compz, struct viewanimation *animation);
 
-extern int viewanimation_revoke(struct nemocompz *compz, struct nemoview *view);
+extern int viewanimation_revoke(struct nemocompz *compz, struct nemoview *view, uint32_t type);
 
 static inline void viewanimation_set_translate(struct viewanimation *animation, float x, float y)
 {

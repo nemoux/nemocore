@@ -297,7 +297,7 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 		}
 
 		if (bin->state.fullscreen || bin->state.maximized) {
-			viewanimation_revoke(view->compz, view);
+			viewanimation_revoke(view->compz, view, NEMO_VIEW_TRANSLATE_ANIMATION | NEMO_VIEW_ROTATE_ANIMATION);
 			vieweffect_revoke(view->compz, view);
 
 			nemoview_attach_layer(view, &bin->shell->fullscreen_layer);

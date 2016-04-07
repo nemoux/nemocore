@@ -163,7 +163,7 @@ void viewanimation_dispatch(struct nemocompz *compz, struct viewanimation *anima
 	nemocompz_dispatch_animation(compz, &animation->base);
 }
 
-int viewanimation_revoke(struct nemocompz *compz, struct nemoview *view)
+int viewanimation_revoke(struct nemocompz *compz, struct nemoview *view, uint32_t type)
 {
 	struct nemoanimation *anim, *next;
 
@@ -171,7 +171,10 @@ int viewanimation_revoke(struct nemocompz *compz, struct nemoview *view)
 		struct viewanimation *animation = (struct viewanimation *)container_of(anim, struct viewanimation, base);
 
 		if (animation->view == view) {
-			viewanimation_destroy(animation);
+			animation->type &= ~type;
+
+			if (animation->type == 0x0)
+				viewanimation_destroy(animation);
 		}
 	}
 
