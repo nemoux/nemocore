@@ -61,9 +61,9 @@ struct nemoxkb *nemoxkb_create(void)
 	if (xkb->context == NULL)
 		return NULL;
 
-	xkb->names.rules = strdup("evdev");
-	xkb->names.model = strdup("pc105");
-	xkb->names.layout = strdup("us");
+	xkb->names.rules = "evdev";
+	xkb->names.model = "pc105";
+	xkb->names.layout = "us";
 
 	xkb->xkbinfo = (struct nemoxkbinfo *)malloc(sizeof(struct nemoxkbinfo));
 	if (xkb->xkbinfo == NULL)
@@ -79,8 +79,6 @@ struct nemoxkb *nemoxkb_create(void)
 			return NULL;
 	}
 
-	xkb->xkbinfo->keymap = xkb_map_ref(xkb->xkbinfo->keymap);
-
 	xkb->state = xkb_state_new(xkb->xkbinfo->keymap);
 	if (xkb->state == NULL)
 		return NULL;
@@ -91,6 +89,8 @@ struct nemoxkb *nemoxkb_create(void)
 void nemoxkb_destroy(struct nemoxkb *xkb)
 {
 	xkb_state_unref(xkb->state);
+	xkb_keymap_unref(xkb->xkbinfo->keymap);
+	xkb_context_unref(xkb->context);
 
 	free(xkb->xkbinfo);
 	free(xkb);

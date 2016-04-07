@@ -29,6 +29,12 @@ struct nemoxml *nemoxml_create(void)
 
 void nemoxml_destroy(struct nemoxml *xml)
 {
+	struct xmlnode *child, *nchild;
+
+	nemolist_for_each_safe(child, nchild, &xml->children, link) {
+		nemoxml_destroy_node(child);
+	}
+
 	nemolist_remove(&xml->children);
 	nemolist_remove(&xml->nodes);
 
@@ -82,6 +88,7 @@ struct xmlnode *nemoxml_create_node(void)
 
 void nemoxml_destroy_node(struct xmlnode *node)
 {
+	struct xmlnode *child, *nchild;
 	int i;
 
 	for (i = 0; i < node->nattrs; i++) {
@@ -91,6 +98,10 @@ void nemoxml_destroy_node(struct xmlnode *node)
 
 	if (node->contents != NULL) {
 		free(node->contents);
+	}
+
+	nemolist_for_each_safe(child, nchild, &node->children, link) {
+		nemoxml_destroy_node(child);
 	}
 
 	nemolist_remove(&node->link);
@@ -196,6 +207,8 @@ int nemoxml_load_file(struct nemoxml *xml, const char *filepath)
 
 	if (buffer != NULL) {
 		XML_Parse(context.parser, buffer, length, 0);
+
+		free(buffer);
 	}
 
 	XML_ParserFree(context.parser);

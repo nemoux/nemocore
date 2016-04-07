@@ -69,6 +69,13 @@ void nemoenvs_destroy_group(struct nemogroup *group)
 	for (i = 0; i < group->nactions; i++)
 		nemoenvs_destroy_action(group->actions[i]);
 
+	if (group->path != NULL)
+		free(group->path);
+	if (group->icon != NULL)
+		free(group->icon);
+	if (group->ring != NULL)
+		free(group->ring);
+
 	free(group->actions);
 	free(group);
 }

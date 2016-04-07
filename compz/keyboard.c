@@ -187,6 +187,8 @@ void nemokeyboard_destroy(struct nemokeyboard *keyboard)
 
 	nemoxkb_destroy(keyboard->xkb);
 
+	wl_array_release(&keyboard->keys);
+
 	wl_list_remove(&keyboard->focus_resource_listener.link);
 	wl_list_remove(&keyboard->focus_view_listener.link);
 

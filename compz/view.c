@@ -188,6 +188,8 @@ void nemoview_unmap(struct nemoview *view)
 	wl_list_remove(&view->link);
 	wl_list_init(&view->link);
 
+	view->layer = NULL;
+
 	view->compz->layer_dirty = 1;
 
 	nemoseat_put_focus(view->compz->seat, view);
@@ -507,6 +509,7 @@ void nemoview_detach_layer(struct nemoview *view)
 	nemoview_transform_dirty(view);
 	wl_list_remove(&view->layer_link);
 	wl_list_init(&view->layer_link);
+	nemoview_damage_below(view);
 
 	view->layer = NULL;
 

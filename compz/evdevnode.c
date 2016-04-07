@@ -677,6 +677,13 @@ void evdev_destroy_node(struct evdevnode *node)
 	if (node->base.screen != NULL)
 		nemoinput_put_screen(&node->base);
 
+	if (node->pointer != NULL)
+		nemopointer_destroy(node->pointer);
+	if (node->keyboard != NULL)
+		nemokeyboard_destroy(node->keyboard);
+	if (node->touch != NULL)
+		nemotouch_destroy(node->touch);
+
 	close(node->fd);
 
 	if (node->base.devnode != NULL)
