@@ -142,6 +142,38 @@ static inline void nemotale_resize(struct nemotale *tale, int32_t width, int32_t
 	}
 }
 
+static inline void nemotale_set_width(struct nemotale *tale, int32_t width)
+{
+	tale->width = width;
+	tale->transform.dirty = 1;
+
+	pixman_region32_init_rect(&tale->region, 0, 0, tale->width, tale->height);
+	pixman_region32_init_rect(&tale->input, 0, 0, tale->width, tale->height);
+
+	if (tale->viewport.enable == 0) {
+		tale->viewport.width = width;
+	} else {
+		tale->viewport.sx = (double)tale->viewport.width / (double)tale->width;
+		tale->viewport.rx = (double)tale->width / (double)tale->viewport.width;
+	}
+}
+
+static inline void nemotale_set_height(struct nemotale *tale, int32_t height)
+{
+	tale->height = height;
+	tale->transform.dirty = 1;
+
+	pixman_region32_init_rect(&tale->region, 0, 0, tale->width, tale->height);
+	pixman_region32_init_rect(&tale->input, 0, 0, tale->width, tale->height);
+
+	if (tale->viewport.enable == 0) {
+		tale->viewport.height = height;
+	} else {
+		tale->viewport.sy = (double)tale->viewport.height / (double)tale->height;
+		tale->viewport.ry = (double)tale->height / (double)tale->viewport.height;
+	}
+}
+
 static inline void nemotale_set_viewport(struct nemotale *tale, int32_t width, int32_t height)
 {
 	tale->viewport.width = width;

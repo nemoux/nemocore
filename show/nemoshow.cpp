@@ -203,12 +203,6 @@ void nemoshow_render_one(struct nemoshow *show)
 
 	show->dirty_serial = 0;
 
-	if (NEMOSHOW_SCENE_AT(scene, needs_resize) != 0) {
-		NEMOSHOW_SCENE_AT(scene, needs_resize) = 0;
-
-		nemotale_resize(show->tale, NEMOSHOW_SCENE_AT(scene, width), NEMOSHOW_SCENE_AT(scene, height));
-	}
-
 	nemolist_for_each_safe(canvas, ncanvas, &show->canvas_list, link) {
 		one = NEMOSHOW_CANVAS_ONE(canvas);
 
@@ -283,7 +277,6 @@ static void nemoshow_handle_scene_destroy_signal(struct nemolistener *listener, 
 
 int nemoshow_set_scene(struct nemoshow *show, struct showone *one)
 {
-	struct showscene *scene;
 	struct showone *child;
 
 	if (show->scene == one)
@@ -297,16 +290,14 @@ int nemoshow_set_scene(struct nemoshow *show, struct showone *one)
 	show->scene_destroy_listener.notify = nemoshow_handle_scene_destroy_signal;
 	nemosignal_add(&one->destroy_signal, &show->scene_destroy_listener);
 
-	scene = NEMOSHOW_SCENE(one);
-
 	nemoshow_children_for_each(child, one) {
 		if (child->type == NEMOSHOW_CANVAS_TYPE)
 			nemotale_detach_node(NEMOSHOW_CANVAS_AT(child, node));
 	}
 
-	scene->needs_resize = 1;
-
 	nemoshow_attach_ones(show, one);
+
+	nemotale_resize(show->tale, NEMOSHOW_SCENE_AT(one, width), NEMOSHOW_SCENE_AT(one, height));
 
 	return 0;
 }

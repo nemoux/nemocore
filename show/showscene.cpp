@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <nemoshow.h>
 #include <showscene.h>
 #include <nemoxml.h>
 #include <nemomisc.h>
@@ -18,8 +19,6 @@ struct showone *nemoshow_scene_create(void)
 	if (scene == NULL)
 		return NULL;
 	memset(scene, 0, sizeof(struct showscene));
-
-	scene->needs_resize = 1;
 
 	one = &scene->base;
 	one->type = NEMOSHOW_SCENE_TYPE;
@@ -46,4 +45,24 @@ void nemoshow_scene_destroy(struct showone *one)
 int nemoshow_scene_update(struct showone *one)
 {
 	return 0;
+}
+
+void nemoshow_scene_set_width(struct showone *one, double width)
+{
+	struct showscene *scene = NEMOSHOW_SCENE(one);
+
+	scene->width = width;
+
+	if (one->show != NULL)
+		nemotale_set_width(one->show->tale, width);
+}
+
+void nemoshow_scene_set_height(struct showone *one, double height)
+{
+	struct showscene *scene = NEMOSHOW_SCENE(one);
+
+	scene->height = height;
+
+	if (one->show != NULL)
+		nemotale_set_height(one->show->tale, height);
 }
