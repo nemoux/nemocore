@@ -64,6 +64,7 @@ struct showone *nemoshow_item_create(int type)
 	NEMOSHOW_ITEM_CC(item, points) = NULL;
 	NEMOSHOW_ITEM_CC(item, textbox) = NULL;
 	NEMOSHOW_ITEM_CC(item, bitmap) = NULL;
+	NEMOSHOW_ITEM_CC(item, needs_free) = false;
 	NEMOSHOW_ITEM_CC(item, width) = 0;
 	NEMOSHOW_ITEM_CC(item, height) = 0;
 
