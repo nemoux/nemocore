@@ -146,6 +146,16 @@ static void nemoback_atom_dispatch_canvas_event(struct nemoshow *show, struct sh
 	}
 }
 
+static void nemoback_atom_dispatch_show_layer(struct nemoshow *show, int32_t visible)
+{
+	struct atomback *atom = (struct atomback *)nemoshow_get_userdata(show);
+
+	if (visible < 0)
+		atom->is_sleeping = 1;
+	else
+		atom->is_sleeping = 0;
+}
+
 int main(int argc, char *argv[])
 {
 	struct option options[] = {
@@ -239,9 +249,11 @@ int main(int argc, char *argv[])
 	atom->show = show = nemoshow_create_view(tool, width, height);
 	if (show == NULL)
 		goto err2;
+	nemoshow_set_dispatch_layer(show, nemoback_atom_dispatch_show_layer);
 	nemoshow_set_userdata(show, atom);
 
 	nemoshow_view_set_layer(show, "background");
+	nemoshow_view_set_state(show, "layer");
 	nemoshow_view_put_state(show, "keypad");
 	nemoshow_view_put_state(show, "sound");
 	nemoshow_view_set_opaque(show, 0, 0, width, height);

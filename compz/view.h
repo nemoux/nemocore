@@ -29,6 +29,7 @@ typedef enum {
 	NEMO_VIEW_LAYER_STATE = (1 << 5),
 	NEMO_VIEW_PUSH_STATE = (1 << 6),
 	NEMO_VIEW_SCOPE_STATE = (1 << 7),
+	NEMO_VIEW_OPAQUE_STATE = (1 << 8),
 	NEMO_VIEW_LAST_STATE
 } NemoViewState;
 
@@ -389,6 +390,49 @@ static inline int nemoview_overlap_view(struct nemoview *view, struct nemoview *
 	return nemometro_intersect_boxes(b0, b1);
 }
 
+static inline int nemoview_contain_point(struct nemoview *view, float x, float y)
+{
+	float sx, sy;
+
+	nemoview_transform_from_global(view, x, y, &sx, &sy);
+
+	if (pixman_region32_contains_point(&view->geometry.scope, sx, sy, NULL))
+		return 1;
+
+	return 0;
+}
+
+static inline int nemoview_contain_view(struct nemoview *view, struct nemoview *oview)
+{
+	pixman_box32_t *box;
+	float s[4][2];
+	float tx, ty;
+	int i;
+
+	if (view->transform.dirty)
+		nemoview_update_transform(view);
+	if (oview->transform.dirty)
+		nemoview_update_transform(oview);
+
+	box = pixman_region32_extents(&oview->geometry.scope);
+	if (box->x1 >= box->x2 || box->y1 >= box->y2)
+		return 0;
+
+	s[0][0] = s[2][0] = box->x1 + 1.0f;
+	s[0][1] = s[1][1] = box->y1 + 1.0f;
+	s[1][0] = s[3][0] = box->x2 - 1.0f;
+	s[2][1] = s[3][1] = box->y2 - 1.0f;
+
+	for (i = 0; i < 4; i++) {
+		nemoview_transform_to_global_nocheck(oview, s[i][0], s[i][1], &tx, &ty);
+
+		if (nemoview_contain_point(view, tx, ty) == 0)
+			return 0;
+	}
+
+	return 1;
+}
+
 static inline void nemoview_set_state(struct nemoview *view, uint32_t state)
 {
 	view->state |= state;
@@ -402,6 +446,11 @@ static inline void nemoview_put_state(struct nemoview *view, uint32_t state)
 static inline int nemoview_has_state(struct nemoview *view, uint32_t state)
 {
 	return view->state & state;
+}
+
+static inline int nemoview_has_state_all(struct nemoview *view, uint32_t state)
+{
+	return (view->state & state) == state;
 }
 
 static inline void nemoview_set_tag(struct nemoview *view, uint32_t tag)

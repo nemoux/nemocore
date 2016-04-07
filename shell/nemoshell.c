@@ -78,6 +78,8 @@ static void nemo_surface_set_state(struct wl_client *client, struct wl_resource 
 		nemoview_set_state(bin->view, NEMO_VIEW_LAYER_STATE);
 	else if (strcmp(state, "push") == 0)
 		nemoview_set_state(bin->view, NEMO_VIEW_PUSH_STATE);
+	else if (strcmp(state, "opaque") == 0)
+		nemoview_set_state(bin->view, NEMO_VIEW_OPAQUE_STATE);
 }
 
 static void nemo_surface_put_state(struct wl_client *client, struct wl_resource *resource, const char *state)
@@ -96,6 +98,8 @@ static void nemo_surface_put_state(struct wl_client *client, struct wl_resource 
 		nemoview_put_state(bin->view, NEMO_VIEW_LAYER_STATE);
 	else if (strcmp(state, "push") == 0)
 		nemoview_put_state(bin->view, NEMO_VIEW_PUSH_STATE);
+	else if (strcmp(state, "opaque") == 0)
+		nemoview_put_state(bin->view, NEMO_VIEW_OPAQUE_STATE);
 }
 
 static void nemo_surface_set_size(struct wl_client *client, struct wl_resource *resource, uint32_t width, uint32_t height)

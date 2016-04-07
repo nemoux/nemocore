@@ -214,6 +214,7 @@ struct nemospeaker *nemospeaker_create(struct nemoshell *shell, uint32_t size, d
 	nemoshow_set_userdata(show, speaker);
 
 	nemoshow_view_set_state(show, "layer");
+	nemoshow_view_set_state(show, "opaque");
 
 	speaker->scene = scene = nemoshow_scene_create();
 	nemoshow_scene_set_width(scene, width + NEMOSPEAKER_OUTSET * 2);

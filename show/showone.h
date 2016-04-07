@@ -359,6 +359,11 @@ static inline int nemoshow_one_has_state(struct showone *one, uint32_t state)
 	return one->state & state;
 }
 
+static inline int nemoshow_one_has_state_all(struct showone *one, uint32_t state)
+{
+	return (one->state & state) == state;
+}
+
 static inline void nemoshow_one_set_effect(struct showone *one, uint32_t effect)
 {
 	one->effect = effect;

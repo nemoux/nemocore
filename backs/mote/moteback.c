@@ -114,6 +114,16 @@ static void nemoback_mote_dispatch_pipeline_canvas_redraw(struct nemoshow *show,
 	nemoshow_canvas_redraw_one(show, one);
 }
 
+static void nemoback_mote_dispatch_show_layer(struct nemoshow *show, int32_t visible)
+{
+	struct moteback *mote = (struct moteback *)nemoshow_get_userdata(show);
+
+	if (visible < 0)
+		mote->is_sleeping = 1;
+	else
+		mote->is_sleeping = 0;
+}
+
 static void nemoback_mote_dispatch_timer_event(struct nemotimer *timer, void *data)
 {
 	struct moteback *mote = (struct moteback *)data;
@@ -396,9 +406,11 @@ int main(int argc, char *argv[])
 	mote->show = show = nemoshow_create_view(tool, width, height);
 	if (show == NULL)
 		goto err2;
+	nemoshow_set_dispatch_layer(show, nemoback_mote_dispatch_show_layer);
 	nemoshow_set_userdata(show, mote);
 
 	nemoshow_view_set_layer(show, "background");
+	nemoshow_view_set_state(show, "layer");
 	nemoshow_view_put_state(show, "keypad");
 	nemoshow_view_put_state(show, "sound");
 	nemoshow_view_set_opaque(show, 0, 0, width, height);

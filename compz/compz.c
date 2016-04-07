@@ -798,35 +798,43 @@ static inline int nemocompz_check_visible(struct nemocompz *compz, struct nemovi
 {
 	struct nemolayer *layer;
 	struct nemoview *view, *child;
+	int visible = 1;
 
 	if (pixman_region32_contains_rectangle(region, pixman_region32_extents(&cview->geometry.scope)) == PIXMAN_REGION_OUT)
-		return 1;
+		goto out;
 
 	wl_list_for_each(layer, &compz->layer_list, link) {
 		wl_list_for_each(view, &layer->view_list, layer_link) {
 			if (cview == view)
-				return 1;
+				goto out;
 
 			if (!wl_list_empty(&view->children_list)) {
 				wl_list_for_each(child, &view->children_list, children_link) {
 					if (cview == child)
-						return 1;
+						goto out;
 
-					if (nemoview_has_state(child, NEMO_VIEW_LAYER_STATE)) {
-						if (nemoview_overlap_view(cview, child) != 0)
-							return 0;
-					}
+					if (nemoview_has_state_all(child, NEMO_VIEW_LAYER_STATE | NEMO_VIEW_OPAQUE_STATE) &&
+							nemoview_contain_view(child, cview) != 0)
+						return -1;
+
+					if (nemoview_has_state_all(child, NEMO_VIEW_LAYER_STATE) &&
+							nemoview_overlap_view(cview, child) != 0)
+						visible = 0;
 				}
 			}
 
-			if (nemoview_has_state(view, NEMO_VIEW_LAYER_STATE)) {
-				if (nemoview_overlap_view(cview, view) != 0)
-					return 0;
-			}
+			if (nemoview_has_state(view, NEMO_VIEW_LAYER_STATE | NEMO_VIEW_OPAQUE_STATE) &&
+					nemoview_contain_view(view, cview) != 0)
+				return -1;
+
+			if (nemoview_has_state(view, NEMO_VIEW_LAYER_STATE) &&
+					nemoview_overlap_view(cview, view) != 0)
+				visible = 0;
 		}
 	}
 
-	return 1;
+out:
+	return visible;
 }
 
 void nemocompz_update_layer(struct nemocompz *compz)
