@@ -42,7 +42,6 @@ typedef void (*nemoshow_dispatch_transition_done_t)(void *userdata);
 typedef void (*nemoshow_dispatch_event_t)(struct nemoshow *show, void *event);
 typedef void (*nemoshow_dispatch_resize_t)(struct nemoshow *show, int32_t width, int32_t height);
 typedef void (*nemoshow_dispatch_transform_t)(struct nemoshow *show, int32_t visible);
-typedef void (*nemoshow_dispatch_fullscreen_t)(struct nemoshow *show, int32_t active, int32_t opaque);
 typedef void (*nemoshow_dispatch_layer_t)(struct nemoshow *show, int32_t visible);
 typedef int (*nemoshow_dispatch_destroy_t)(struct nemoshow *show);
 
@@ -71,7 +70,6 @@ struct nemoshow {
 	nemoshow_dispatch_event_t dispatch_event;
 	nemoshow_dispatch_resize_t dispatch_resize;
 	nemoshow_dispatch_transform_t dispatch_transform;
-	nemoshow_dispatch_fullscreen_t dispatch_fullscreen;
 	nemoshow_dispatch_layer_t dispatch_layer;
 	nemoshow_dispatch_destroy_t dispatch_destroy;
 
@@ -190,11 +188,6 @@ static inline void nemoshow_set_dispatch_resize(struct nemoshow *show, nemoshow_
 static inline void nemoshow_set_dispatch_transform(struct nemoshow *show, nemoshow_dispatch_transform_t dispatch)
 {
 	show->dispatch_transform = dispatch;
-}
-
-static inline void nemoshow_set_dispatch_fullscreen(struct nemoshow *show, nemoshow_dispatch_fullscreen_t dispatch)
-{
-	show->dispatch_fullscreen = dispatch;
 }
 
 static inline void nemoshow_set_dispatch_layer(struct nemoshow *show, nemoshow_dispatch_layer_t dispatch)

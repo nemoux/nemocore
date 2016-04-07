@@ -1104,10 +1104,6 @@ static void xserver_send_transform(struct nemocanvas *canvas, int visible)
 {
 }
 
-static void xserver_send_fullscreen(struct nemocanvas *canvas, int active, int opaque)
-{
-}
-
 static void xserver_send_layer(struct nemocanvas *canvas, int visible)
 {
 }
@@ -1115,7 +1111,6 @@ static void xserver_send_layer(struct nemocanvas *canvas, int visible)
 static struct nemoclient xserver_client = {
 	xserver_send_configure,
 	xserver_send_transform,
-	xserver_send_fullscreen,
 	xserver_send_layer
 };
 

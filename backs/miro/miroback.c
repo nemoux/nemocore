@@ -513,16 +513,6 @@ static void nemoback_miro_dispatch_hide(struct miroback *miro, uint32_t duration
 	nemoshow_dispatch_frame(miro->show);
 }
 
-static void nemoback_miro_dispatch_canvas_fullscreen(struct nemoshow *show, int32_t active, int32_t opaque)
-{
-	struct miroback *miro = (struct miroback *)nemoshow_get_userdata(show);
-
-	if (active == 0)
-		miro->is_sleeping = 0;
-	else
-		miro->is_sleeping = 1;
-}
-
 int main(int argc, char *argv[])
 {
 	struct option options[] = {
@@ -633,7 +623,6 @@ int main(int argc, char *argv[])
 	miro->show = show = nemoshow_create_view(tool, width, height);
 	if (show == NULL)
 		goto err2;
-	nemoshow_set_dispatch_fullscreen(show, nemoback_miro_dispatch_canvas_fullscreen);
 	nemoshow_set_userdata(show, miro);
 
 	nemoshow_view_set_layer(show, "background");

@@ -146,16 +146,6 @@ static void nemoback_atom_dispatch_canvas_event(struct nemoshow *show, struct sh
 	}
 }
 
-static void nemoback_atom_dispatch_canvas_fullscreen(struct nemoshow *show, int32_t active, int32_t opaque)
-{
-	struct atomback *atom = (struct atomback *)nemoshow_get_userdata(show);
-
-	if (active == 0)
-		atom->is_sleeping = 0;
-	else
-		atom->is_sleeping = 1;
-}
-
 int main(int argc, char *argv[])
 {
 	struct option options[] = {
@@ -249,7 +239,6 @@ int main(int argc, char *argv[])
 	atom->show = show = nemoshow_create_view(tool, width, height);
 	if (show == NULL)
 		goto err2;
-	nemoshow_set_dispatch_fullscreen(show, nemoback_atom_dispatch_canvas_fullscreen);
 	nemoshow_set_userdata(show, atom);
 
 	nemoshow_view_set_layer(show, "background");

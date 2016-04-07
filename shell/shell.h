@@ -202,7 +202,6 @@ struct shellbin {
 	int32_t last_sx, last_sy;
 
 	struct wl_listener canvas_destroy_listener;
-	struct wl_listener fullscreen_opaque_listener;
 
 	uint32_t resize_edges;
 	uint32_t reset_scale;
@@ -241,7 +240,6 @@ struct shellbin {
 
 	int on_pickscreen;
 	int on_pitchscreen;
-	int on_opaquescreen;
 
 	struct {
 		float x, y;
@@ -322,8 +320,6 @@ extern void nemoshell_set_popup_bin(struct nemoshell *shell, struct shellbin *bi
 extern void nemoshell_set_fullscreen_bin_on_screen(struct nemoshell *shell, struct shellbin *bin, struct nemoscreen *screen);
 extern void nemoshell_set_fullscreen_bin(struct nemoshell *shell, struct shellbin *bin, struct shellscreen *screen);
 extern void nemoshell_put_fullscreen_bin(struct nemoshell *shell, struct shellbin *bin);
-extern void nemoshell_set_fullscreen_opaque(struct nemoshell *shell, struct shellbin *bin);
-extern void nemoshell_put_fullscreen_opaque(struct nemoshell *shell, struct shellbin *bin);
 extern void nemoshell_set_maximized_bin_on_screen(struct nemoshell *shell, struct shellbin *bin, struct nemoscreen *screen);
 extern void nemoshell_set_maximized_bin(struct nemoshell *shell, struct shellbin *bin, struct shellscreen *screen);
 extern void nemoshell_put_maximized_bin(struct nemoshell *shell, struct shellbin *bin);

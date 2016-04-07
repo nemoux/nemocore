@@ -348,13 +348,6 @@ static void shellbin_update_canvas_transform(struct nemocanvas *canvas, int visi
 	bin->client->send_transform(canvas, visible);
 }
 
-static void shellbin_update_canvas_fullscreen(struct nemocanvas *canvas, int active, int opaque)
-{
-	struct shellbin *bin = nemoshell_get_bin(canvas);
-
-	bin->client->send_fullscreen(canvas, active, opaque);
-}
-
 static void shellbin_update_canvas_layer(struct nemocanvas *canvas, int visible)
 {
 	struct shellbin *bin = nemoshell_get_bin(canvas);
@@ -426,13 +419,10 @@ struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas
 	canvas->configure_private = (void *)bin;
 
 	canvas->update_transform = shellbin_update_canvas_transform;
-	canvas->update_fullscreen = shellbin_update_canvas_fullscreen;
 	canvas->update_layer = shellbin_update_canvas_layer;
 
 	bin->canvas_destroy_listener.notify = shellbin_handle_canvas_destroy;
 	wl_signal_add(&canvas->destroy_signal, &bin->canvas_destroy_listener);
-
-	wl_list_init(&bin->fullscreen_opaque_listener.link);
 
 	return bin;
 
@@ -449,7 +439,6 @@ void nemoshell_destroy_bin(struct shellbin *bin)
 	wl_signal_emit(&bin->destroy_signal, bin);
 
 	wl_list_remove(&bin->canvas_destroy_listener.link);
-	wl_list_remove(&bin->fullscreen_opaque_listener.link);
 
 	bin->canvas->configure = NULL;
 	bin->canvas->configure_private = NULL;
@@ -1104,66 +1093,6 @@ static inline int nemoshell_bin_contain_view(struct shellbin *bin, struct nemovi
 	}
 
 	return 1;
-}
-
-static void shellbin_handle_fullscreen_opaque(struct wl_listener *listener, void *data)
-{
-	struct shellbin *bin = (struct shellbin *)container_of(listener, struct shellbin, fullscreen_opaque_listener);
-
-	nemoshell_put_fullscreen_opaque(bin->shell, bin);
-}
-
-void nemoshell_set_fullscreen_opaque(struct nemoshell *shell, struct shellbin *bin)
-{
-	struct nemocompz *compz = shell->compz;
-	struct nemolayer *layer;
-	struct nemoview *view, *child;
-
-	wl_list_for_each(layer, &compz->layer_list, link) {
-		wl_list_for_each(view, &layer->view_list, layer_link) {
-			if (!wl_list_empty(&view->children_list)) {
-				wl_list_for_each(child, &view->children_list, children_link) {
-					if (nemoshell_bin_contain_view(bin, child) != 0)
-						nemocontent_update_fullscreen(child->content, 1, bin->on_opaquescreen);
-				}
-			}
-
-			if (nemoshell_bin_contain_view(bin, view) != 0)
-				nemocontent_update_fullscreen(view->content, 1, bin->on_opaquescreen);
-		}
-	}
-
-	wl_list_remove(&bin->fullscreen_opaque_listener.link);
-
-	bin->fullscreen_opaque_listener.notify = shellbin_handle_fullscreen_opaque;
-	wl_signal_add(&bin->destroy_signal, &bin->fullscreen_opaque_listener);
-}
-
-void nemoshell_put_fullscreen_opaque(struct nemoshell *shell, struct shellbin *bin)
-{
-	struct nemocompz *compz = shell->compz;
-	struct nemolayer *layer;
-	struct nemoview *view, *child;
-
-	wl_list_for_each(layer, &compz->layer_list, link) {
-		wl_list_for_each(view, &layer->view_list, layer_link) {
-			if (bin->view == view)
-				continue;
-
-			if (!wl_list_empty(&view->children_list)) {
-				wl_list_for_each(child, &view->children_list, children_link) {
-					if (nemoshell_bin_contain_view(bin, child) != 0)
-						nemocontent_update_fullscreen(child->content, 0, bin->on_opaquescreen);
-				}
-			}
-
-			if (nemoshell_bin_contain_view(bin, view) != 0)
-				nemocontent_update_fullscreen(view->content, 0, bin->on_opaquescreen);
-		}
-	}
-
-	wl_list_remove(&bin->fullscreen_opaque_listener.link);
-	wl_list_init(&bin->fullscreen_opaque_listener.link);
 }
 
 void nemoshell_set_maximized_bin_on_screen(struct nemoshell *shell, struct shellbin *bin, struct nemoscreen *screen)

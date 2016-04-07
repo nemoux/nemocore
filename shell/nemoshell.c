@@ -37,13 +37,6 @@ static void nemo_send_transform(struct nemocanvas *canvas, int visible)
 	nemo_surface_send_transform(bin->resource, visible);
 }
 
-static void nemo_send_fullscreen(struct nemocanvas *canvas, int active, int opaque)
-{
-	struct shellbin *bin = nemoshell_get_bin(canvas);
-
-	nemo_surface_send_fullscreen(bin->resource, active, opaque);
-}
-
 static void nemo_send_layer(struct nemocanvas *canvas, int visible)
 {
 	struct shellbin *bin = nemoshell_get_bin(canvas);
@@ -54,7 +47,6 @@ static void nemo_send_layer(struct nemocanvas *canvas, int visible)
 static struct nemoclient nemo_client = {
 	nemo_send_configure,
 	nemo_send_transform,
-	nemo_send_fullscreen,
 	nemo_send_layer
 };
 
@@ -239,15 +231,6 @@ static void nemo_surface_set_fullscreen_type(struct wl_client *client, struct wl
 #endif
 }
 
-static void nemo_surface_set_fullscreen_opaque(struct wl_client *client, struct wl_resource *resource, uint32_t opaque)
-{
-#ifdef NEMOUX_WITH_FULLSCREEN
-	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
-
-	bin->on_opaquescreen = opaque;
-#endif
-}
-
 static void nemo_surface_set_fullscreen(struct wl_client *client, struct wl_resource *resource, uint32_t id)
 {
 #ifdef NEMOUX_WITH_FULLSCREEN
@@ -263,7 +246,6 @@ static void nemo_surface_set_fullscreen(struct wl_client *client, struct wl_reso
 				wl_signal_emit(&bin->ungrab_signal, bin);
 
 			nemoshell_set_fullscreen_bin(shell, bin, screen);
-			nemoshell_set_fullscreen_opaque(shell, bin);
 
 			if (screen->focus == NEMO_SHELL_FULLSCREEN_ALL_FOCUS) {
 				nemoseat_set_keyboard_focus(shell->compz->seat, bin->view);
@@ -280,10 +262,8 @@ static void nemo_surface_put_fullscreen(struct wl_client *client, struct wl_reso
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 	struct nemoshell *shell = bin->shell;
 
-	if (bin->flags & NEMO_SHELL_SURFACE_MAXIMIZABLE_FLAG) {
-		nemoshell_put_fullscreen_opaque(shell, bin);
+	if (bin->flags & NEMO_SHELL_SURFACE_MAXIMIZABLE_FLAG)
 		nemoshell_put_fullscreen_bin(shell, bin);
-	}
 }
 
 static void nemo_surface_move(struct wl_client *client, struct wl_resource *resource, struct wl_resource *seat_resource, uint32_t serial)
@@ -416,7 +396,6 @@ static const struct nemo_surface_interface nemo_surface_implementation = {
 	nemo_surface_set_scope,
 	nemo_surface_put_scope,
 	nemo_surface_set_fullscreen_type,
-	nemo_surface_set_fullscreen_opaque,
 	nemo_surface_set_fullscreen,
 	nemo_surface_put_fullscreen,
 	nemo_surface_move,

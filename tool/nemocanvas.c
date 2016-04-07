@@ -43,14 +43,6 @@ static void nemo_surface_handle_transform(void *data, struct nemo_surface *surfa
 		canvas->dispatch_transform(canvas, visible);
 }
 
-static void nemo_surface_handle_fullscreen(void *data, struct nemo_surface *surface, int32_t active, int32_t opaque)
-{
-	struct nemocanvas *canvas = (struct nemocanvas *)data;
-
-	if (canvas->dispatch_fullscreen != NULL)
-		canvas->dispatch_fullscreen(canvas, active, opaque);
-}
-
 static void nemo_surface_handle_layer(void *data, struct nemo_surface *surface, int32_t visible)
 {
 	struct nemocanvas *canvas = (struct nemocanvas *)data;
@@ -62,7 +54,6 @@ static void nemo_surface_handle_layer(void *data, struct nemo_surface *surface, 
 static const struct nemo_surface_listener nemo_surface_listener = {
 	nemo_surface_handle_configure,
 	nemo_surface_handle_transform,
-	nemo_surface_handle_fullscreen,
 	nemo_surface_handle_layer
 };
 
@@ -498,11 +489,6 @@ void nemocanvas_set_fullscreen_type(struct nemocanvas *canvas, uint32_t type)
 	nemo_surface_set_fullscreen_type(canvas->nemo_surface, type);
 }
 
-void nemocanvas_set_fullscreen_opaque(struct nemocanvas *canvas, uint32_t opaque)
-{
-	nemo_surface_set_fullscreen_opaque(canvas->nemo_surface, opaque);
-}
-
 void nemocanvas_set_fullscreen(struct nemocanvas *canvas, uint32_t id)
 {
 	nemo_surface_set_fullscreen(canvas->nemo_surface, id);
@@ -610,11 +596,6 @@ void nemocanvas_set_dispatch_resize(struct nemocanvas *canvas, nemocanvas_dispat
 void nemocanvas_set_dispatch_transform(struct nemocanvas *canvas, nemocanvas_dispatch_transform_t dispatch)
 {
 	canvas->dispatch_transform = dispatch;
-}
-
-void nemocanvas_set_dispatch_fullscreen(struct nemocanvas *canvas, nemocanvas_dispatch_fullscreen_t dispatch)
-{
-	canvas->dispatch_fullscreen = dispatch;
 }
 
 void nemocanvas_set_dispatch_layer(struct nemocanvas *canvas, nemocanvas_dispatch_layer_t dispatch)

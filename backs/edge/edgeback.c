@@ -148,10 +148,6 @@ static void nemoback_edge_dispatch_canvas_event(struct nemoshow *show, struct sh
 	}
 }
 
-static void nemoback_edge_dispatch_canvas_fullscreen(struct nemoshow *show, int32_t active, int32_t opaque)
-{
-}
-
 int main(int argc, char *argv[])
 {
 	struct option options[] = {
@@ -245,7 +241,6 @@ int main(int argc, char *argv[])
 	edge->show = show = nemoshow_create_view(tool, width, height);
 	if (show == NULL)
 		goto err2;
-	nemoshow_set_dispatch_fullscreen(show, nemoback_edge_dispatch_canvas_fullscreen);
 	nemoshow_set_userdata(show, edge);
 
 	nemoshow_view_set_layer(show, layer);

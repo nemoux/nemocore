@@ -174,16 +174,6 @@ static void nemoback_mote_dispatch_timer_event(struct nemotimer *timer, void *da
 	nemotimer_set_timeout(mote->timer, 30 * 1000);
 }
 
-static void nemoback_mote_dispatch_canvas_fullscreen(struct nemoshow *show, int32_t active, int32_t opaque)
-{
-	struct moteback *mote = (struct moteback *)nemoshow_get_userdata(show);
-
-	if (active == 0)
-		mote->is_sleeping = 0;
-	else
-		mote->is_sleeping = 1;
-}
-
 int main(int argc, char *argv[])
 {
 	struct option options[] = {
@@ -406,7 +396,6 @@ int main(int argc, char *argv[])
 	mote->show = show = nemoshow_create_view(tool, width, height);
 	if (show == NULL)
 		goto err2;
-	nemoshow_set_dispatch_fullscreen(show, nemoback_mote_dispatch_canvas_fullscreen);
 	nemoshow_set_userdata(show, mote);
 
 	nemoshow_view_set_layer(show, "background");

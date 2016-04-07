@@ -210,7 +210,6 @@ int main(int argc, char *argv[])
 	context->canvas = canvas = NTEGL_CANVAS(ecanvas);
 	nemocanvas_set_nemosurface(canvas, NEMO_SHELL_SURFACE_TYPE_NORMAL);
 	nemocanvas_set_fullscreen_type(canvas, (1 << NEMO_SURFACE_FULLSCREEN_TYPE_PICK) | (1 << NEMO_SURFACE_FULLSCREEN_TYPE_PITCH));
-	nemocanvas_set_fullscreen_opaque(canvas, 1);
 	if (context->is_background != 0) {
 		nemocanvas_set_layer(canvas, NEMO_SURFACE_LAYER_TYPE_BACKGROUND);
 		nemocanvas_set_fullscreen(canvas, 0);

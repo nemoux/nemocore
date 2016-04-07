@@ -117,13 +117,6 @@ void nemocontent_update_transform(struct nemocontent *content, int visible)
 	}
 }
 
-void nemocontent_update_fullscreen(struct nemocontent *content, int active, int opaque)
-{
-	if (content->update_fullscreen != NULL) {
-		content->update_fullscreen(content, active, opaque);
-	}
-}
-
 void nemocontent_update_layer(struct nemocontent *content, int visible)
 {
 	if (content->update_layer != NULL) {

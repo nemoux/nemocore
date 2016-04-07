@@ -492,14 +492,6 @@ static void nemocanvas_update_transform(struct nemocontent *content, int visible
 		canvas->update_transform(canvas, visible);
 }
 
-static void nemocanvas_update_fullscreen(struct nemocontent *content, int active, int opaque)
-{
-	struct nemocanvas *canvas = (struct nemocanvas *)container_of(content, struct nemocanvas, base);
-
-	if (canvas->update_fullscreen != NULL)
-		canvas->update_fullscreen(canvas, active, opaque);
-}
-
 static void nemocanvas_update_layer(struct nemocontent *content, int visible)
 {
 	struct nemocanvas *canvas = (struct nemocanvas *)container_of(content, struct nemocanvas, base);
@@ -1288,7 +1280,6 @@ struct nemocanvas *nemocanvas_create(struct wl_client *client, struct wl_resourc
 
 	canvas->base.update_output = nemocanvas_update_output;
 	canvas->base.update_transform = nemocanvas_update_transform;
-	canvas->base.update_fullscreen = nemocanvas_update_fullscreen;
 	canvas->base.update_layer = nemocanvas_update_layer;
 	canvas->base.read_pixels = nemocanvas_read_pixels;
 

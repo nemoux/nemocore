@@ -34,10 +34,6 @@ static void shell_send_transform(struct nemocanvas *canvas, int visible)
 {
 }
 
-static void shell_send_fullscreen(struct nemocanvas *canvas, int active, int opaque)
-{
-}
-
 static void shell_send_layer(struct nemocanvas *canvas, int visible)
 {
 }
@@ -45,7 +41,6 @@ static void shell_send_layer(struct nemocanvas *canvas, int visible)
 static struct nemoclient shell_client = {
 	shell_send_configure,
 	shell_send_transform,
-	shell_send_fullscreen,
 	shell_send_layer
 };
 

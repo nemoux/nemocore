@@ -115,15 +115,6 @@ static void nemoshow_dispatch_canvas_transform(struct nemocanvas *canvas, int32_
 		show->dispatch_transform(show, visible);
 }
 
-static void nemoshow_dispatch_canvas_fullscreen(struct nemocanvas *canvas, int32_t active, int32_t opaque)
-{
-	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
-	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
-
-	if (show->dispatch_fullscreen != NULL)
-		show->dispatch_fullscreen(show, active, opaque);
-}
-
 static void nemoshow_dispatch_canvas_layer(struct nemocanvas *canvas, int32_t visible)
 {
 	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
@@ -208,7 +199,6 @@ struct nemoshow *nemoshow_create_view(struct nemotool *tool, int32_t width, int3
 	nemocanvas_set_dispatch_frame(scon->canvas, nemoshow_dispatch_canvas_frame);
 	nemocanvas_set_dispatch_event(scon->canvas, nemoshow_dispatch_canvas_event);
 	nemocanvas_set_dispatch_transform(scon->canvas, nemoshow_dispatch_canvas_transform);
-	nemocanvas_set_dispatch_fullscreen(scon->canvas, nemoshow_dispatch_canvas_fullscreen);
 	nemocanvas_set_dispatch_layer(scon->canvas, nemoshow_dispatch_canvas_layer);
 	nemocanvas_set_dispatch_destroy(scon->canvas, nemoshow_dispatch_canvas_destroy);
 
