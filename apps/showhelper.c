@@ -24,12 +24,12 @@ static void nemoshow_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t w
 			return;
 	}
 
-	if (show->dispatch_resize != NULL)
-		show->dispatch_resize(show, width, height);
-
 	nemotool_resize_egl_canvas(scon->eglcanvas, width, height);
 
 	nemoshow_set_size(show, width, height);
+
+	if (show->dispatch_resize != NULL)
+		show->dispatch_resize(show, width, height);
 
 	nemoshow_render_one(show);
 
