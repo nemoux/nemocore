@@ -188,6 +188,8 @@ int main(int argc, char *argv[])
 	nemocanvas_set_anchor(NTEGL_CANVAS(canvas), -0.5f, -0.5f);
 	nemocanvas_set_dispatch_resize(NTEGL_CANVAS(canvas), nemopdf_dispatch_canvas_resize);
 	nemocanvas_set_max_size(NTEGL_CANVAS(canvas), UINT32_MAX, UINT32_MAX);
+	nemocanvas_set_state(canvas, "layer");
+	nemocanvas_set_state(canvas, "opaque");
 	nemocanvas_put_state(NTEGL_CANVAS(canvas), "keypad");
 
 	context->tale = tale = nemotale_create_gl();

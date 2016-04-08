@@ -1173,12 +1173,12 @@ void nemoshell_load_gestures(struct nemoshell *shell)
 	shell->pick.min_velocity = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "min_velocity", 0.1f);
 	shell->pick.rotate_degree = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "rotate_degree", 5.0f);
 	shell->pick.scale_degree = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "scale_degree", 45.0f);
-	shell->pick.rotate_distance = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "rotate_distance", 150.0f);
-	shell->pick.scale_distance = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "scale_distance", 150.0f);
-	shell->pick.fullscreen_scale = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "fullscreen_scale", 1.5f);
+	shell->pick.rotate_distance = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "rotate_distance", 75.0f);
+	shell->pick.scale_distance = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "scale_distance", 75.0f);
+	shell->pick.fullscreen_scale = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "fullscreen_scale", 1.25f);
 	shell->pick.resize_interval = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "resize_interval", 50.0f);
 
-	shell->active.push_distance = nemoitem_get_fattr_named(shell->configs, "//nemoshell/active", "push_distance", 200.0f);
+	shell->active.push_distance = nemoitem_get_fattr_named(shell->configs, "//nemoshell/active", "push_distance", 100.0f);
 
 	shell->bin.min_width = nemoitem_get_iattr_named(shell->configs, "//nemoshell/bin", "min_width", 0);
 	shell->bin.min_height = nemoitem_get_iattr_named(shell->configs, "//nemoshell/bin", "min_height", 0);
