@@ -1,6 +1,8 @@
 #ifndef __NEMOSHOW_FILTER_HPP__
 #define __NEMOSHOW_FILTER_HPP__
 
+#include <skiaconfig.hpp>
+
 typedef struct _showfilter {
 	SkMaskFilter *maskfilter;
 	SkImageFilter *imagefilter;

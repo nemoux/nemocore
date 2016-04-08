@@ -1,6 +1,8 @@
 #ifndef __NEMOSHOW_PATH_HPP__
 #define __NEMOSHOW_PATH_HPP__
 
+#include <skiaconfig.hpp>
+
 #include <showpath.h>
 
 typedef struct _showpath {
