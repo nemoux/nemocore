@@ -499,8 +499,7 @@ void nemoshow_sequence_prepare(struct showone *one, uint32_t serial)
 	one->serial = serial;
 
 	sequence->t = 0.0f;
-
-	sequence->frame = nemoshow_children0(one);
+	sequence->frame = NULL;
 
 	nemoshow_children_for_each(frame, one) {
 		nemoshow_children_for_each(child, frame) {
@@ -514,8 +513,6 @@ void nemoshow_sequence_prepare(struct showone *one, uint32_t serial)
 			}
 		}
 	}
-
-	nemoshow_sequence_prepare_frame(sequence->frame, serial);
 }
 
 void nemoshow_sequence_dispatch(struct showone *one, double t, uint32_t serial)
@@ -524,6 +521,19 @@ void nemoshow_sequence_dispatch(struct showone *one, double t, uint32_t serial)
 
 	if (one->serial > serial)
 		return;
+
+	if (sequence->frame == NULL) {
+		struct showone *frame;
+
+		nemoshow_children_for_each(frame, one) {
+			sequence->frame = frame;
+
+			if (NEMOSHOW_FRAME_AT(frame, t) > t)
+				break;
+		}
+
+		nemoshow_sequence_prepare_frame(sequence->frame, serial);
+	}
 
 	if (sequence->frame != NULL) {
 		struct showframe *frame = NEMOSHOW_FRAME(sequence->frame);
@@ -534,10 +544,7 @@ void nemoshow_sequence_dispatch(struct showone *one, double t, uint32_t serial)
 			nemoshow_sequence_finish_frame(sequence->frame, serial);
 
 			sequence->t = frame->t;
-
-			sequence->frame = nemoshow_children_next(one, sequence->frame);
-			if (sequence->frame != NULL)
-				nemoshow_sequence_prepare_frame(sequence->frame, serial);
+			sequence->frame = NULL;
 		} else {
 			nemoshow_sequence_dispatch_frame(sequence->frame, sequence->t, t, serial);
 		}
