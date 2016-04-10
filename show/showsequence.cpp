@@ -538,9 +538,7 @@ void nemoshow_sequence_dispatch(struct showone *one, double t, uint32_t serial)
 	if (sequence->frame != NULL) {
 		struct showframe *frame = NEMOSHOW_FRAME(sequence->frame);
 
-		if (t >= 1.0f) {
-			nemoshow_sequence_finish_frame(sequence->frame, serial);
-		} else if (frame->t < t) {
+		if (frame->t <= t) {
 			nemoshow_sequence_finish_frame(sequence->frame, serial);
 
 			sequence->t = frame->t;
