@@ -1100,7 +1100,7 @@ static void xserver_send_configure(struct nemocanvas *canvas, int32_t width, int
 	xwindow->configure_source = wl_event_loop_add_idle(xmanager->xserver->loop, xserver_handle_configure, xwindow);
 }
 
-static void xserver_send_transform(struct nemocanvas *canvas, int visible)
+static void xserver_send_transform(struct nemocanvas *canvas, int visible, int32_t x, int32_t y, int32_t width, int32_t height)
 {
 }
 

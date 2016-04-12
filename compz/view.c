@@ -369,12 +369,40 @@ void nemoview_update_transform(struct nemoview *view)
 
 void nemoview_update_transform_done(struct nemoview *view)
 {
+	pixman_region32_t region;
+	pixman_box32_t *extents;
+	float p[4][2];
+	float x0, y0, x1, y1;
+
 	view->transform.done = 0;
 
 	view->compz->layer_dirty = 1;
 
+	pixman_region32_init(&region);
+	pixman_region32_intersect(&region, &view->compz->scope, &view->transform.boundingbox);
+
+	extents = pixman_region32_extents(&region);
+
+	nemoview_transform_from_global_nocheck(view, extents->x1, extents->y1, &p[0][0], &p[0][1]);
+	nemoview_transform_from_global_nocheck(view, extents->x2, extents->y1, &p[1][0], &p[1][1]);
+	nemoview_transform_from_global_nocheck(view, extents->x1, extents->y2, &p[2][0], &p[2][1]);
+	nemoview_transform_from_global_nocheck(view, extents->x2, extents->y2, &p[3][0], &p[3][1]);
+
+	pixman_region32_fini(&region);
+
+	x0 = MIN(MIN(p[0][0], p[1][0]), MIN(p[2][0], p[3][0]));
+	x1 = MAX(MAX(p[0][0], p[1][0]), MAX(p[2][0], p[3][0]));
+	y0 = MIN(MIN(p[0][1], p[1][1]), MIN(p[2][1], p[3][1]));
+	y1 = MAX(MAX(p[0][1], p[1][1]), MAX(p[2][1], p[3][1]));
+
+	x0 = MAX(x0, 0.0f);
+	x1 = MIN(x1, view->content->width);
+	y0 = MAX(y0, 0.0f);
+	y1 = MIN(y1, view->content->height);
+
 	nemocontent_update_transform(view->content,
-			nemocompz_contain_view(view->compz, view));
+			nemocompz_contain_view(view->compz, view),
+			x0, y0, x1 - x0, y1 - y0);
 }
 
 void nemoview_update_transform_children(struct nemoview *view)

@@ -19,7 +19,7 @@ struct nemocanvas;
 
 typedef int (*nemocanvas_dispatch_event_t)(struct nemocanvas *canvas, uint32_t type, struct nemoevent *event);
 typedef void (*nemocanvas_dispatch_resize_t)(struct nemocanvas *canvas, int32_t width, int32_t height, int32_t fixed);
-typedef void (*nemocanvas_dispatch_transform_t)(struct nemocanvas *canvas, int32_t visible);
+typedef void (*nemocanvas_dispatch_transform_t)(struct nemocanvas *canvas, int32_t visible, int32_t x, int32_t y, int32_t width, int32_t height);
 typedef void (*nemocanvas_dispatch_layer_t)(struct nemocanvas *canvas, int32_t visible);
 typedef void (*nemocanvas_dispatch_frame_t)(struct nemocanvas *canvas, uint64_t secs, uint32_t nsecs);
 typedef void (*nemocanvas_dispatch_discard_t)(struct nemocanvas *canvas);

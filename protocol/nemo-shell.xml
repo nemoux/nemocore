@@ -205,6 +205,10 @@
 
 		<event name="transform">
 			<arg name="visible" type="int"/>
+			<arg name="x" type="int"/>
+			<arg name="y" type="int"/>
+			<arg name="width" type="int"/>
+			<arg name="height" type="int"/>
 		</event>
 
 		<event name="layer">

@@ -35,12 +35,12 @@ static void nemo_surface_handle_configure(void *data, struct nemo_surface *surfa
 		canvas->dispatch_resize(canvas, width, height, fixed);
 }
 
-static void nemo_surface_handle_transform(void *data, struct nemo_surface *surface, int32_t visible)
+static void nemo_surface_handle_transform(void *data, struct nemo_surface *surface, int32_t visible, int32_t x, int32_t y, int32_t width, int32_t height)
 {
 	struct nemocanvas *canvas = (struct nemocanvas *)data;
 
 	if (canvas->dispatch_transform != NULL)
-		canvas->dispatch_transform(canvas, visible);
+		canvas->dispatch_transform(canvas, visible, x, y, width, height);
 }
 
 static void nemo_surface_handle_layer(void *data, struct nemo_surface *surface, int32_t visible)

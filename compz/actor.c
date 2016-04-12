@@ -239,12 +239,12 @@ static void nemoactor_update_output(struct nemocontent *content, uint32_t node_m
 	content->screen_mask = screen_mask;
 }
 
-static void nemoactor_update_transform(struct nemocontent *content, int visible)
+static void nemoactor_update_transform(struct nemocontent *content, int visible, int32_t x, int32_t y, int32_t width, int32_t height)
 {
 	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
 
 	if (actor->dispatch_transform != NULL)
-		actor->dispatch_transform(actor, visible);
+		actor->dispatch_transform(actor, visible, x, y, width, height);
 }
 
 static void nemoactor_update_layer(struct nemocontent *content, int visible)
@@ -685,10 +685,10 @@ void nemoactor_dispatch_output(struct nemoactor *actor, uint32_t node_mask, uint
 		actor->dispatch_output(actor, node_mask, screen_mask);
 }
 
-void nemoactor_dispatch_transform(struct nemoactor *actor, int visible)
+void nemoactor_dispatch_transform(struct nemoactor *actor, int visible, int32_t x, int32_t y, int32_t width, int32_t height)
 {
 	if (actor->dispatch_transform != NULL)
-		actor->dispatch_transform(actor, visible);
+		actor->dispatch_transform(actor, visible, x, y, width, height);
 }
 
 void nemoactor_dispatch_layer(struct nemoactor *actor, int visible)

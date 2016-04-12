@@ -152,13 +152,13 @@ static void nemoshow_dispatch_actor_frame(struct nemoactor *actor, uint32_t msec
 	pixman_region32_fini(&region);
 }
 
-static void nemoshow_dispatch_actor_transform(struct nemoactor *actor, int32_t visible)
+static void nemoshow_dispatch_actor_transform(struct nemoactor *actor, int32_t visible, int32_t x, int32_t y, int32_t width, int32_t height)
 {
 	struct nemotale *tale = (struct nemotale *)nemoactor_get_context(actor);
 	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
 
 	if (show->dispatch_transform != NULL)
-		show->dispatch_transform(show, visible);
+		show->dispatch_transform(show, visible, x, y, width, height);
 }
 
 static void nemoshow_dispatch_actor_layer(struct nemoactor *actor, int32_t visible)

@@ -30,7 +30,7 @@ static void shell_send_configure(struct nemocanvas *canvas, int32_t width, int32
 	}
 }
 
-static void shell_send_transform(struct nemocanvas *canvas, int visible)
+static void shell_send_transform(struct nemocanvas *canvas, int visible, int32_t x, int32_t y, int32_t width, int32_t height)
 {
 }
 

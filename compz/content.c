@@ -110,10 +110,10 @@ void nemocontent_update_output(struct nemocontent *content, uint32_t node_mask, 
 	}
 }
 
-void nemocontent_update_transform(struct nemocontent *content, int visible)
+void nemocontent_update_transform(struct nemocontent *content, int visible, int32_t x, int32_t y, int32_t width, int32_t height)
 {
 	if (content->update_transform != NULL) {
-		content->update_transform(content, visible);
+		content->update_transform(content, visible, x, y, width, height);
 	}
 }
 

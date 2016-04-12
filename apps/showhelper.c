@@ -115,13 +115,13 @@ static int nemoshow_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t ty
 	return 0;
 }
 
-static void nemoshow_dispatch_canvas_transform(struct nemocanvas *canvas, int32_t visible)
+static void nemoshow_dispatch_canvas_transform(struct nemocanvas *canvas, int32_t visible, int32_t x, int32_t y, int32_t width, int32_t height)
 {
 	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
 	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
 
 	if (show->dispatch_transform != NULL)
-		show->dispatch_transform(show, visible);
+		show->dispatch_transform(show, visible, x, y, width, height);
 }
 
 static void nemoshow_dispatch_canvas_layer(struct nemocanvas *canvas, int32_t visible)

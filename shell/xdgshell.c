@@ -55,7 +55,7 @@ static void xdg_send_configure(struct nemocanvas *canvas, int32_t width, int32_t
 	wl_array_release(&states);
 }
 
-static void xdg_send_transform(struct nemocanvas *canvas, int visible)
+static void xdg_send_transform(struct nemocanvas *canvas, int visible, int32_t x, int32_t y, int32_t width, int32_t height)
 {
 }
 
@@ -219,7 +219,7 @@ static void xdg_popup_send_configure(struct nemocanvas *canvas, int32_t width, i
 {
 }
 
-static void xdg_popup_send_transform(struct nemocanvas *canvas, int visible)
+static void xdg_popup_send_transform(struct nemocanvas *canvas, int visible, int32_t x, int32_t y, int32_t width, int32_t height)
 {
 }
 

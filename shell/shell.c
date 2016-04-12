@@ -341,11 +341,11 @@ out:
 	}
 }
 
-static void shellbin_update_canvas_transform(struct nemocanvas *canvas, int visible)
+static void shellbin_update_canvas_transform(struct nemocanvas *canvas, int visible, int32_t x, int32_t y, int32_t width, int32_t height)
 {
 	struct shellbin *bin = nemoshell_get_bin(canvas);
 
-	bin->client->send_transform(canvas, visible);
+	bin->client->send_transform(canvas, visible, x, y, width, height);
 }
 
 static void shellbin_update_canvas_layer(struct nemocanvas *canvas, int visible)

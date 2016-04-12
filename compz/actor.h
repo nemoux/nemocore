@@ -25,7 +25,7 @@ typedef int (*nemoactor_dispatch_event_t)(struct nemoactor *actor, uint32_t type
 typedef int (*nemoactor_dispatch_pick_t)(struct nemoactor *actor, float x, float y);
 typedef int (*nemoactor_dispatch_resize_t)(struct nemoactor *actor, int32_t width, int32_t height, int32_t fixed);
 typedef void (*nemoactor_dispatch_output_t)(struct nemoactor *actor, uint32_t node_mask, uint32_t screen_mask);
-typedef void (*nemoactor_dispatch_transform_t)(struct nemoactor *actor, int32_t visible);
+typedef void (*nemoactor_dispatch_transform_t)(struct nemoactor *actor, int32_t visible, int32_t x, int32_t y, int32_t width, int32_t height);
 typedef void (*nemoactor_dispatch_layer_t)(struct nemoactor *actor, int32_t visible);
 typedef void (*nemoactor_dispatch_frame_t)(struct nemoactor *actor, uint32_t msecs);
 typedef int (*nemoactor_dispatch_destroy_t)(struct nemoactor *actor);
@@ -107,7 +107,7 @@ extern int nemoactor_dispatch_event(struct nemoactor *actor, uint32_t type, stru
 extern int nemoactor_dispatch_pick(struct nemoactor *actor, float x, float y);
 extern int nemoactor_dispatch_resize(struct nemoactor *actor, int32_t width, int32_t height, int32_t fixed);
 extern void nemoactor_dispatch_output(struct nemoactor *actor, uint32_t node_mask, uint32_t screen_mask);
-extern void nemoactor_dispatch_transform(struct nemoactor *actor, int visible);
+extern void nemoactor_dispatch_transform(struct nemoactor *actor, int visible, int32_t x, int32_t y, int32_t width, int32_t height);
 extern void nemoactor_dispatch_layer(struct nemoactor *actor, int visible);
 extern void nemoactor_dispatch_frame(struct nemoactor *actor);
 extern int nemoactor_dispatch_destroy(struct nemoactor *actor);

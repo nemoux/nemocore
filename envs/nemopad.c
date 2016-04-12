@@ -400,7 +400,7 @@ static void nemopad_dispatch_canvas_event(struct nemoshow *show, struct showone 
 	}
 }
 
-static void nemopad_dispatch_show_transform(struct nemoshow *show, int32_t visible)
+static void nemopad_dispatch_show_transform(struct nemoshow *show, int32_t visible, int32_t x, int32_t y, int32_t width, int32_t height)
 {
 	struct nemopad *pad = (struct nemopad *)nemoshow_get_userdata(show);
 

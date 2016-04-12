@@ -484,12 +484,12 @@ static void nemocanvas_update_output(struct nemocontent *content, uint32_t node_
 	content->screen_mask = screen_next;
 }
 
-static void nemocanvas_update_transform(struct nemocontent *content, int visible)
+static void nemocanvas_update_transform(struct nemocontent *content, int visible, int32_t x, int32_t y, int32_t width, int32_t height)
 {
 	struct nemocanvas *canvas = (struct nemocanvas *)container_of(content, struct nemocanvas, base);
 
 	if (canvas->update_transform != NULL)
-		canvas->update_transform(canvas, visible);
+		canvas->update_transform(canvas, visible, x, y, width, height);
 }
 
 static void nemocanvas_update_layer(struct nemocontent *content, int visible)

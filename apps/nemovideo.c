@@ -116,7 +116,7 @@ static void nemovideo_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t 
 	context->height = height;
 }
 
-static void nemovideo_dispatch_canvas_transform(struct nemocanvas *canvas, int32_t visible)
+static void nemovideo_dispatch_canvas_transform(struct nemocanvas *canvas, int32_t visible, int32_t x, int32_t y, int32_t width, int32_t height)
 {
 }
 
