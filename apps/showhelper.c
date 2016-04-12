@@ -55,6 +55,15 @@ static void nemoshow_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 	nemotale_composite_egl(tale, NULL);
 }
 
+static void nemoshow_dispatch_canvas_discard(struct nemocanvas *canvas)
+{
+	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
+	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+
+	nemocanvas_dispatch_frame(scon->canvas);
+}
+
 static int nemoshow_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t type, struct nemoevent *event)
 {
 	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
@@ -197,6 +206,7 @@ struct nemoshow *nemoshow_create_view(struct nemotool *tool, int32_t width, int3
 	nemocanvas_set_nemosurface(scon->canvas, NEMO_SHELL_SURFACE_TYPE_NORMAL);
 	nemocanvas_set_dispatch_resize(scon->canvas, nemoshow_dispatch_canvas_resize);
 	nemocanvas_set_dispatch_frame(scon->canvas, nemoshow_dispatch_canvas_frame);
+	nemocanvas_set_dispatch_discard(scon->canvas, nemoshow_dispatch_canvas_discard);
 	nemocanvas_set_dispatch_event(scon->canvas, nemoshow_dispatch_canvas_event);
 	nemocanvas_set_dispatch_transform(scon->canvas, nemoshow_dispatch_canvas_transform);
 	nemocanvas_set_dispatch_layer(scon->canvas, nemoshow_dispatch_canvas_layer);

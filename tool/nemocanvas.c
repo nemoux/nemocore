@@ -613,6 +613,11 @@ void nemocanvas_set_dispatch_frame(struct nemocanvas *canvas, nemocanvas_dispatc
 	canvas->dispatch_frame = dispatch;
 }
 
+void nemocanvas_set_dispatch_discard(struct nemocanvas *canvas, nemocanvas_dispatch_discard_t dispatch)
+{
+	canvas->dispatch_discard = dispatch;
+}
+
 void nemocanvas_set_dispatch_screen(struct nemocanvas *canvas, nemocanvas_dispatch_screen_t dispatch)
 {
 	canvas->dispatch_screen = dispatch;
@@ -651,6 +656,9 @@ static void presentation_feedback_discarded(void *data, struct presentation_feed
 
 		canvas->feedback = NULL;
 	}
+
+	if (canvas->dispatch_discard != NULL)
+		canvas->dispatch_discard(canvas);
 }
 
 static const struct presentation_feedback_listener presentation_feedback_listener = {
