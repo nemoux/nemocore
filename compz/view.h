@@ -30,6 +30,7 @@ typedef enum {
 	NEMO_VIEW_PUSH_STATE = (1 << 6),
 	NEMO_VIEW_SCOPE_STATE = (1 << 7),
 	NEMO_VIEW_OPAQUE_STATE = (1 << 8),
+	NEMO_VIEW_GRAB_STATE = (1 << 9),
 	NEMO_VIEW_LAST_STATE
 } NemoViewState;
 
