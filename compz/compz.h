@@ -53,8 +53,9 @@ struct nemocompz {
 
 	int state;
 	int dirty;
-	int layer_dirty;
 	pixman_region32_t damage;
+
+	int layer_notify;
 
 	pixman_region32_t scene;
 	int has_scene;

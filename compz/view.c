@@ -190,7 +190,7 @@ void nemoview_unmap(struct nemoview *view)
 
 	view->layer = NULL;
 
-	view->compz->layer_dirty = 1;
+	view->compz->layer_notify = 1;
 
 	nemoseat_put_focus(view->compz->seat, view);
 }
@@ -376,7 +376,7 @@ void nemoview_update_transform_notify(struct nemoview *view)
 
 	view->transform.notify = 0;
 
-	view->compz->layer_dirty = 1;
+	view->compz->layer_notify = 1;
 
 	pixman_region32_init(&region);
 	pixman_region32_intersect(&region, &view->compz->scope, &view->transform.boundingbox);
@@ -526,7 +526,7 @@ void nemoview_attach_layer(struct nemoview *view, struct nemolayer *layer)
 
 	view->layer = layer;
 
-	view->compz->layer_dirty = 1;
+	view->compz->layer_notify = 1;
 }
 
 void nemoview_detach_layer(struct nemoview *view)
@@ -541,7 +541,7 @@ void nemoview_detach_layer(struct nemoview *view)
 
 	view->layer = NULL;
 
-	view->compz->layer_dirty = 1;
+	view->compz->layer_notify = 1;
 }
 
 void nemoview_above_layer(struct nemoview *view, struct nemoview *above)
@@ -564,7 +564,7 @@ void nemoview_above_layer(struct nemoview *view, struct nemoview *above)
 	nemoview_clip_dirty(view);
 	nemoview_damage_below(view);
 
-	view->compz->layer_dirty = 1;
+	view->compz->layer_notify = 1;
 }
 
 void nemoview_below_layer(struct nemoview *view, struct nemoview *below)
@@ -587,7 +587,7 @@ void nemoview_below_layer(struct nemoview *view, struct nemoview *below)
 	nemoview_clip_dirty(view);
 	nemoview_damage_below(view);
 
-	view->compz->layer_dirty = 1;
+	view->compz->layer_notify = 1;
 }
 
 int nemoview_get_trapezoids(struct nemoview *view, int32_t x, int32_t y, int32_t width, int32_t height, pixman_trapezoid_t *traps)

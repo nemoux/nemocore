@@ -118,6 +118,8 @@ int nemoshell_move_canvas_by_pointer(struct nemoshell *shell, struct nemopointer
 
 	nemoshell_start_pointer_shellgrab(&move->base, &move_shellgrab_pointer_interface, bin, pointer);
 
+	nemoview_transform_notify(bin->view);
+
 	move->base.bin_change_listener.notify = move_shellgrab_handle_bin_change;
 	wl_signal_add(&bin->change_signal, &move->base.bin_change_listener);
 
@@ -317,6 +319,8 @@ int nemoshell_move_canvas_by_touchpoint(struct nemoshell *shell, struct touchpoi
 
 	nemoshell_start_touchpoint_shellgrab(&move->base, &move_shellgrab_touchpoint_interface, bin, tp);
 
+	nemoview_transform_notify(bin->view);
+
 	move->base.bin_change_listener.notify = move_shellgrab_handle_bin_change;
 	wl_signal_add(&bin->change_signal, &move->base.bin_change_listener);
 
@@ -423,6 +427,8 @@ int nemoshell_move_actor_by_pointer(struct nemoshell *shell, struct nemopointer 
 	move->dy = actor->view->geometry.y - pointer->grab_y;
 
 	nemoshell_start_pointer_actorgrab(&move->base, &move_actorgrab_pointer_interface, actor, pointer);
+
+	nemoview_transform_notify(actor->view);
 
 	return 0;
 }
@@ -542,6 +548,8 @@ int nemoshell_move_actor_by_touchpoint(struct nemoshell *shell, struct touchpoin
 	touchpoint_clear_samples(tp);
 
 	nemoshell_start_touchpoint_actorgrab(&move->base, &move_actorgrab_touchpoint_interface, actor, tp);
+
+	nemoview_transform_notify(actor->view);
 
 	return 0;
 }
