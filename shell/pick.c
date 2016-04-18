@@ -134,8 +134,6 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		}
 	}
 
-	nemoview_transform_notify(bin->view);
-
 	bin->resize_edges = 0;
 	nemoshell_send_bin_configure(bin);
 
@@ -144,6 +142,9 @@ out:
 	nemoshell_end_touchpoint_shellgrab(&pick->other->base);
 	free(pick->other);
 	free(pick);
+
+	if (bin != NULL)
+		nemoview_transform_notify(bin->view);
 
 	if (tp0->focus != NULL) {
 		nemocontent_touch_up(tp0, tp0->focus->content, time, tp0->gid);
@@ -648,16 +649,16 @@ static void pick_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		}
 	}
 
-	nemoview_transform_notify(actor->view);
-
 	nemoshell_end_touchpoint_actorgrab(grab);
 	nemoshell_end_touchpoint_actorgrab(&pick->other->base);
 	free(pick->other);
 	free(pick);
 
-	if (tp0->focus != NULL) {
+	if (actor != NULL)
+		nemoview_transform_notify(actor->view);
+
+	if (tp0->focus != NULL)
 		nemocontent_touch_up(tp0, tp0->focus->content, time, touchid);
-	}
 }
 
 static void pick_actorgrab_touchpoint_motion(struct touchpoint_grab *base, uint32_t time, uint64_t touchid, float x, float y)

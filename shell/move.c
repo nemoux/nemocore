@@ -179,6 +179,7 @@ static void move_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 	struct shellgrab_move *move = (struct shellgrab_move *)container_of(grab, struct shellgrab_move, base);
 	struct touchpoint *tp = base->touchpoint;
 	struct shellbin *bin = grab->bin;
+	int needs_notify = 1;
 
 	if (bin != NULL && bin->shell->is_logging_grab != 0)
 		nemolog_message("MOVE", "[UP] %llu: (%u)\n", touchid, time);
@@ -208,12 +209,15 @@ static void move_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		}
 
 		vieweffect_dispatch(bin->shell->compz, effect);
-	} else if (bin != NULL) {
-		nemoview_transform_notify(bin->view);
+
+		needs_notify = 0;
 	}
 
 	nemoshell_end_touchpoint_shellgrab(grab);
 	free(move);
+
+	if (bin != NULL && needs_notify != 0)
+		nemoview_transform_notify(bin->view);
 
 	if (tp->focus != NULL) {
 		if (bin != NULL) {
@@ -444,6 +448,7 @@ static void move_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 	struct touchpoint *tp = base->touchpoint;
 	struct nemoactor *actor = grab->actor;
 	struct nemoshell *shell = grab->shell;
+	int needs_notify = 1;
 
 	if (actor != NULL && touchpoint_check_duration(tp, shell->pitch.samples, shell->pitch.max_duration) > 0) {
 		struct vieweffect *effect;
@@ -458,12 +463,15 @@ static void move_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		effect->pitch.friction = shell->pitch.friction;
 
 		vieweffect_dispatch(tp->touch->seat->compz, effect);
-	} else if (actor != NULL) {
-		nemoview_transform_notify(actor->view);
+
+		needs_notify = 0;
 	}
 
 	nemoshell_end_touchpoint_actorgrab(grab);
 	free(move);
+
+	if (actor != NULL && needs_notify != 0)
+		nemoview_transform_notify(actor->view);
 
 	if (tp->focus != NULL) {
 		if (actor != NULL) {
