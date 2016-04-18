@@ -759,8 +759,8 @@ void nemocompz_update_transform(struct nemocompz *compz)
 						nemoview_update_transform(child);
 					}
 
-					if (child->transform.done != 0) {
-						nemoview_update_transform_done(child);
+					if (child->transform.notify != 0) {
+						nemoview_update_transform_notify(child);
 					}
 				}
 			}
@@ -769,8 +769,8 @@ void nemocompz_update_transform(struct nemocompz *compz)
 				nemoview_update_transform(view);
 			}
 
-			if (view->transform.done != 0) {
-				nemoview_update_transform_done(view);
+			if (view->transform.notify != 0) {
+				nemoview_update_transform_notify(view);
 			}
 		}
 	}

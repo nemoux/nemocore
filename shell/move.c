@@ -207,7 +207,7 @@ static void move_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 
 		vieweffect_dispatch(bin->shell->compz, effect);
 	} else if (bin != NULL) {
-		nemoview_transform_done(bin->view);
+		nemoview_transform_notify(bin->view);
 	}
 
 	nemoshell_end_touchpoint_shellgrab(grab);
@@ -453,7 +453,7 @@ static void move_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 
 		vieweffect_dispatch(tp->touch->seat->compz, effect);
 	} else if (actor != NULL) {
-		nemoview_transform_done(actor->view);
+		nemoview_transform_notify(actor->view);
 	}
 
 	nemoshell_end_touchpoint_actorgrab(grab);

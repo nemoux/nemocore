@@ -246,7 +246,7 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 			nemoview_damage_below(view);
 		}
 
-		nemoview_transform_done(bin->view);
+		nemoview_transform_notify(bin->view);
 
 		bin->last_width = canvas->base.width;
 		bin->last_height = canvas->base.height;
@@ -331,7 +331,7 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 			nemoview_update_transform_children(view);
 		}
 
-		nemoview_transform_done(bin->view);
+		nemoview_transform_notify(bin->view);
 
 out:
 		bin->last_width = canvas->base.width;

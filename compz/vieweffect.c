@@ -29,7 +29,7 @@ retry:
 		dy = (effect->pitch.dy * effect->pitch.velocity) * msecs;
 
 		if (effect->pitch.velocity <= 1.0f) {
-			nemoview_transform_done(view);
+			nemoview_transform_notify(view);
 
 			effect->type &= ~NEMO_VIEW_PITCH_EFFECT;
 		} else if (nemocompz_contain_view_near(compz, view, dx, dy) == 0) {

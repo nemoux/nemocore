@@ -53,7 +53,7 @@ struct nemoview *nemoview_create(struct nemocompz *compz, struct nemocontent *co
 
 	view->transform.enable = 0;
 	view->transform.dirty = 1;
-	view->transform.done = 1;
+	view->transform.notify = 1;
 
 	view->geometry.r = 0.0f;
 	view->geometry.sx = 1.0f;
@@ -367,14 +367,14 @@ void nemoview_update_transform(struct nemoview *view)
 	nemoview_update_output(view);
 }
 
-void nemoview_update_transform_done(struct nemoview *view)
+void nemoview_update_transform_notify(struct nemoview *view)
 {
 	pixman_region32_t region;
 	pixman_box32_t *extents;
 	float p[4][2];
 	float x0, y0, x1, y1;
 
-	view->transform.done = 0;
+	view->transform.notify = 0;
 
 	view->compz->layer_dirty = 1;
 

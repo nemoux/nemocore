@@ -105,7 +105,7 @@ struct nemoview {
 	struct {
 		int enable;
 		int dirty;
-		int done;
+		int notify;
 		int type;
 
 		float cosr, sinr;
@@ -129,7 +129,7 @@ extern void nemoview_schedule_repaint(struct nemoview *view);
 
 extern void nemoview_update_output(struct nemoview *view);
 extern void nemoview_update_transform(struct nemoview *view);
-extern void nemoview_update_transform_done(struct nemoview *view);
+extern void nemoview_update_transform_notify(struct nemoview *view);
 extern void nemoview_update_transform_children(struct nemoview *view);
 extern void nemoview_update_transform_parent(struct nemoview *view);
 
@@ -161,9 +161,9 @@ static inline void nemoview_transform_dirty(struct nemoview *view)
 	}
 }
 
-static inline void nemoview_transform_done(struct nemoview *view)
+static inline void nemoview_transform_notify(struct nemoview *view)
 {
-	view->transform.done = 1;
+	view->transform.notify = 1;
 }
 
 static inline void nemoview_damage_dirty(struct nemoview *view)
