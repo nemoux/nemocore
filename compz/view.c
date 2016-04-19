@@ -68,7 +68,7 @@ struct nemoview *nemoview_create(struct nemocompz *compz, struct nemocontent *co
 	view->geometry.width = 0;
 	view->geometry.height = 0;
 
-	pixman_region32_init(&view->geometry.scope);
+	pixman_region32_init(&view->geometry.region);
 	pixman_region32_init(&view->transform.boundingbox);
 
 	return view;
@@ -88,7 +88,7 @@ void nemoview_destroy(struct nemoview *view)
 	nemoview_detach_layer(view);
 
 	pixman_region32_fini(&view->clip);
-	pixman_region32_fini(&view->geometry.scope);
+	pixman_region32_fini(&view->geometry.region);
 	pixman_region32_fini(&view->transform.boundingbox);
 
 	nemoview_set_parent(view, NULL);
@@ -352,8 +352,8 @@ void nemoview_update_transform(struct nemoview *view)
 	pixman_region32_fini(&view->transform.opaque);
 	pixman_region32_init(&view->transform.opaque);
 
-	if (nemoview_has_state(view, NEMO_VIEW_SCOPE_STATE) == 0)
-		pixman_region32_init_rect(&view->geometry.scope,
+	if (nemoview_has_state(view, NEMO_VIEW_REGION_STATE) == 0)
+		pixman_region32_init_rect(&view->geometry.region,
 				0, 0, view->content->width, view->content->height);
 
 	if (view->transform.enable == 0) {
@@ -476,18 +476,18 @@ void nemoview_set_parent(struct nemoview *view, struct nemoview *parent)
 	nemoview_transform_dirty(view);
 }
 
-void nemoview_set_scope(struct nemoview *view, uint32_t x, uint32_t y, uint32_t width, uint32_t height)
+void nemoview_set_region(struct nemoview *view, uint32_t x, uint32_t y, uint32_t width, uint32_t height)
 {
-	pixman_region32_union_rect(&view->geometry.scope, &view->geometry.scope, x, y, width, height);
+	pixman_region32_union_rect(&view->geometry.region, &view->geometry.region, x, y, width, height);
 
-	nemoview_set_state(view, NEMO_VIEW_SCOPE_STATE);
+	nemoview_set_state(view, NEMO_VIEW_REGION_STATE);
 }
 
-void nemoview_put_scope(struct nemoview *view)
+void nemoview_put_region(struct nemoview *view)
 {
-	pixman_region32_clear(&view->geometry.scope);
+	pixman_region32_clear(&view->geometry.region);
 
-	nemoview_put_state(view, NEMO_VIEW_SCOPE_STATE);
+	nemoview_put_state(view, NEMO_VIEW_REGION_STATE);
 }
 
 void nemoview_accumulate_damage(struct nemoview *view, pixman_region32_t *opaque)

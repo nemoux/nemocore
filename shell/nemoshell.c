@@ -202,18 +202,18 @@ static void nemo_surface_set_parent(struct wl_client *client, struct wl_resource
 	nemoshell_set_parent_bin(bin, pbin);
 }
 
-static void nemo_surface_set_scope(struct wl_client *client, struct wl_resource *resource, uint32_t x, uint32_t y, uint32_t width, uint32_t height)
+static void nemo_surface_set_region(struct wl_client *client, struct wl_resource *resource, uint32_t x, uint32_t y, uint32_t width, uint32_t height)
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 
-	nemoview_set_scope(bin->view, x, y, width, height);
+	nemoview_set_region(bin->view, x, y, width, height);
 }
 
-static void nemo_surface_put_scope(struct wl_client *client, struct wl_resource *resource)
+static void nemo_surface_put_region(struct wl_client *client, struct wl_resource *resource)
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 
-	nemoview_put_scope(bin->view);
+	nemoview_put_region(bin->view);
 }
 
 static void nemo_surface_set_fullscreen_type(struct wl_client *client, struct wl_resource *resource, uint32_t type)
@@ -397,8 +397,8 @@ static const struct nemo_surface_interface nemo_surface_implementation = {
 	nemo_surface_set_flag,
 	nemo_surface_set_layer,
 	nemo_surface_set_parent,
-	nemo_surface_set_scope,
-	nemo_surface_put_scope,
+	nemo_surface_set_region,
+	nemo_surface_put_region,
 	nemo_surface_set_fullscreen_type,
 	nemo_surface_set_fullscreen,
 	nemo_surface_put_fullscreen,

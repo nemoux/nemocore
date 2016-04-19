@@ -432,20 +432,20 @@ void nemoshow_view_put_state(struct nemoshow *show, const char *state)
 	nemocanvas_put_state(canvas, state);
 }
 
-void nemoshow_view_set_scope(struct nemoshow *show, uint32_t x, uint32_t y, uint32_t width, uint32_t height)
+void nemoshow_view_set_region(struct nemoshow *show, uint32_t x, uint32_t y, uint32_t width, uint32_t height)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemocanvas *canvas = scon->canvas;
 
-	nemocanvas_set_scope(canvas, x, y, width, height);
+	nemocanvas_set_region(canvas, x, y, width, height);
 }
 
-void nemoshow_view_put_scope(struct nemoshow *show)
+void nemoshow_view_put_region(struct nemoshow *show)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemocanvas *canvas = scon->canvas;
 
-	nemocanvas_put_scope(canvas);
+	nemocanvas_put_region(canvas);
 }
 
 void nemoshow_view_set_tag(struct nemoshow *show, uint32_t tag)

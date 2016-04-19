@@ -28,7 +28,7 @@ typedef enum {
 	NEMO_VIEW_SOUND_STATE = (1 << 4),
 	NEMO_VIEW_LAYER_STATE = (1 << 5),
 	NEMO_VIEW_PUSH_STATE = (1 << 6),
-	NEMO_VIEW_SCOPE_STATE = (1 << 7),
+	NEMO_VIEW_REGION_STATE = (1 << 7),
 	NEMO_VIEW_OPAQUE_STATE = (1 << 8),
 	NEMO_VIEW_GRAB_STATE = (1 << 9),
 	NEMO_VIEW_LAST_STATE
@@ -97,7 +97,7 @@ struct nemoview {
 
 		int32_t width, height;
 
-		pixman_region32_t scope;
+		pixman_region32_t region;
 
 		struct wl_list transform_list;
 	} geometry;
@@ -135,8 +135,8 @@ extern void nemoview_update_transform_parent(struct nemoview *view);
 
 extern void nemoview_set_parent(struct nemoview *view, struct nemoview *parent);
 
-extern void nemoview_set_scope(struct nemoview *view, uint32_t x, uint32_t y, uint32_t width, uint32_t height);
-extern void nemoview_put_scope(struct nemoview *view);
+extern void nemoview_set_region(struct nemoview *view, uint32_t x, uint32_t y, uint32_t width, uint32_t height);
+extern void nemoview_put_region(struct nemoview *view);
 
 extern void nemoview_accumulate_damage(struct nemoview *view, pixman_region32_t *opaque);
 
@@ -375,8 +375,8 @@ static inline int nemoview_overlap_view(struct nemoview *view, struct nemoview *
 	if (oview->transform.dirty)
 		nemoview_update_transform(oview);
 
-	box0 = pixman_region32_extents(&view->geometry.scope);
-	box1 = pixman_region32_extents(&oview->geometry.scope);
+	box0 = pixman_region32_extents(&view->geometry.region);
+	box1 = pixman_region32_extents(&oview->geometry.region);
 
 	nemoview_transform_to_global_nocheck(view, box0->x1, box0->y1, &b0[2*0+0], &b0[2*0+1]);
 	nemoview_transform_to_global_nocheck(view, box0->x1, box0->y2, &b0[2*1+0], &b0[2*1+1]);
@@ -397,7 +397,7 @@ static inline int nemoview_contain_point(struct nemoview *view, float x, float y
 
 	nemoview_transform_from_global(view, x, y, &sx, &sy);
 
-	if (pixman_region32_contains_point(&view->geometry.scope, sx, sy, NULL))
+	if (pixman_region32_contains_point(&view->geometry.region, sx, sy, NULL))
 		return 1;
 
 	return 0;
@@ -415,7 +415,7 @@ static inline int nemoview_contain_view(struct nemoview *view, struct nemoview *
 	if (oview->transform.dirty)
 		nemoview_update_transform(oview);
 
-	box = pixman_region32_extents(&oview->geometry.scope);
+	box = pixman_region32_extents(&oview->geometry.region);
 	if (box->x1 >= box->x2 || box->y1 >= box->y2)
 		return 0;
 

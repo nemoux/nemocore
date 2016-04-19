@@ -104,14 +104,14 @@
 			<arg name="parent" type="object" interface="nemo_surface"/>
 		</request>
 
-		<request name="set_scope">
+		<request name="set_region">
 			<arg name="x" type="uint"/>
 			<arg name="y" type="uint"/>
 			<arg name="width" type="uint"/>
 			<arg name="height" type="uint"/>
 		</request>
 
-		<request name="put_scope">
+		<request name="put_region">
 		</request>
 
 		<enum name="fullscreen_type">
