@@ -216,6 +216,23 @@ static void nemo_surface_put_region(struct wl_client *client, struct wl_resource
 	nemoview_put_region(bin->view);
 }
 
+static void nemo_surface_set_scope(struct wl_client *client, struct wl_resource *resource, uint32_t x, uint32_t y, uint32_t width, uint32_t height, const char *cmd)
+{
+	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
+
+	if (cmd[0] == 'r')
+		nemoview_set_scope(bin->view, x, y, width, height, NEMOSCOPE_RECT_TYPE);
+	else if (cmd[0] == 'c')
+		nemoview_set_scope(bin->view, x, y, width, height, NEMOSCOPE_CIRCLE_TYPE);
+}
+
+static void nemo_surface_put_scope(struct wl_client *client, struct wl_resource *resource)
+{
+	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
+
+	nemoview_put_scope(bin->view);
+}
+
 static void nemo_surface_set_fullscreen_type(struct wl_client *client, struct wl_resource *resource, uint32_t type)
 {
 #ifdef NEMOUX_WITH_FULLSCREEN
@@ -399,6 +416,8 @@ static const struct nemo_surface_interface nemo_surface_implementation = {
 	nemo_surface_set_parent,
 	nemo_surface_set_region,
 	nemo_surface_put_region,
+	nemo_surface_set_scope,
+	nemo_surface_put_scope,
 	nemo_surface_set_fullscreen_type,
 	nemo_surface_set_fullscreen,
 	nemo_surface_put_fullscreen,

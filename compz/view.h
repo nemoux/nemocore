@@ -13,6 +13,7 @@ NEMO_BEGIN_EXTERN_C
 #include <content.h>
 #include <nemomatrix.h>
 #include <nemometro.h>
+#include <nemoscope.h>
 
 typedef enum {
 	NEMOVIEW_TRANSFORM_NORMAL = 0,
@@ -29,8 +30,9 @@ typedef enum {
 	NEMOVIEW_LAYER_STATE = (1 << 5),
 	NEMOVIEW_PUSH_STATE = (1 << 6),
 	NEMOVIEW_REGION_STATE = (1 << 7),
-	NEMOVIEW_OPAQUE_STATE = (1 << 8),
-	NEMOVIEW_GRAB_STATE = (1 << 9),
+	NEMOVIEW_SCOPE_STATE = (1 << 8),
+	NEMOVIEW_OPAQUE_STATE = (1 << 9),
+	NEMOVIEW_GRAB_STATE = (1 << 10),
 	NEMOVIEW_LAST_STATE
 } NemoViewState;
 
@@ -77,6 +79,8 @@ struct nemoview {
 
 	pixman_region32_t clip;
 	float alpha;
+
+	struct nemoscope *scope;
 
 	struct {
 		uint32_t keyboard_count;
@@ -137,6 +141,9 @@ extern void nemoview_set_parent(struct nemoview *view, struct nemoview *parent);
 
 extern void nemoview_set_region(struct nemoview *view, uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 extern void nemoview_put_region(struct nemoview *view);
+
+extern void nemoview_set_scope(struct nemoview *view, uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t type);
+extern void nemoview_put_scope(struct nemoview *view);
 
 extern void nemoview_accumulate_damage(struct nemoview *view, pixman_region32_t *opaque);
 

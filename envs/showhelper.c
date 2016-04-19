@@ -24,6 +24,7 @@
 
 #include <nemoshow.h>
 #include <showhelper.h>
+#include <nemoscope.h>
 #include <nemomisc.h>
 
 static int nemoshow_dispatch_actor_pick(struct nemoactor *actor, float x, float y)
@@ -522,6 +523,25 @@ void nemoshow_view_put_region(struct nemoshow *show)
 	struct nemoactor *actor = scon->actor;
 
 	nemoview_put_region(actor->view);
+}
+
+void nemoshow_view_set_scope(struct nemoshow *show, uint32_t x, uint32_t y, uint32_t width, uint32_t height, const char *cmd)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemoactor *actor = scon->actor;
+
+	if (cmd[0] == 'r')
+		nemoview_set_scope(actor->view, x, y, width, height, NEMOSCOPE_RECT_TYPE);
+	else if (cmd[0] == 'c')
+		nemoview_set_scope(actor->view, x, y, width, height, NEMOSCOPE_CIRCLE_TYPE);
+}
+
+void nemoshow_view_put_scope(struct nemoshow *show)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemoactor *actor = scon->actor;
+
+	nemoview_put_scope(actor->view);
 }
 
 void nemoshow_view_set_tag(struct nemoshow *show, uint32_t tag)

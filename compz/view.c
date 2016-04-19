@@ -27,6 +27,10 @@ struct nemoview *nemoview_create(struct nemocompz *compz, struct nemocontent *co
 		return NULL;
 	memset(view, 0, sizeof(struct nemoview));
 
+	view->scope = nemoscope_create();
+	if (view->scope == NULL)
+		goto err1;
+
 	view->compz = compz;
 	view->content = content;
 	view->canvas = NULL;
@@ -72,6 +76,11 @@ struct nemoview *nemoview_create(struct nemocompz *compz, struct nemocontent *co
 	pixman_region32_init(&view->transform.boundingbox);
 
 	return view;
+
+err1:
+	free(view);
+
+	return NULL;
 }
 
 void nemoview_destroy(struct nemoview *view)
@@ -92,6 +101,8 @@ void nemoview_destroy(struct nemoview *view)
 	pixman_region32_fini(&view->transform.boundingbox);
 
 	nemoview_set_parent(view, NULL);
+
+	nemoscope_destroy(view->scope);
 
 	free(view);
 }
@@ -488,6 +499,20 @@ void nemoview_put_region(struct nemoview *view)
 	pixman_region32_clear(&view->geometry.region);
 
 	nemoview_put_state(view, NEMOVIEW_REGION_STATE);
+}
+
+void nemoview_set_scope(struct nemoview *view, uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t type)
+{
+	nemoscope_add(view->scope, 1, type, x, y, width, height);
+
+	nemoview_set_state(view, NEMOVIEW_SCOPE_STATE);
+}
+
+void nemoview_put_scope(struct nemoview *view)
+{
+	nemoscope_clear(view->scope);
+
+	nemoview_put_state(view, NEMOVIEW_SCOPE_STATE);
 }
 
 void nemoview_accumulate_damage(struct nemoview *view, pixman_region32_t *opaque)

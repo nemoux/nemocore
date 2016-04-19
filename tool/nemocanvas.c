@@ -484,6 +484,16 @@ void nemocanvas_put_region(struct nemocanvas *canvas)
 	nemo_surface_put_region(canvas->nemo_surface);
 }
 
+void nemocanvas_set_scope(struct nemocanvas *canvas, uint32_t x, uint32_t y, uint32_t width, uint32_t height, const char *cmd)
+{
+	nemo_surface_set_scope(canvas->nemo_surface, x, y, width, height, cmd);
+}
+
+void nemocanvas_put_scope(struct nemocanvas *canvas)
+{
+	nemo_surface_put_scope(canvas->nemo_surface);
+}
+
 void nemocanvas_set_fullscreen_type(struct nemocanvas *canvas, uint32_t type)
 {
 	nemo_surface_set_fullscreen_type(canvas->nemo_surface, type);
