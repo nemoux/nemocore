@@ -29,26 +29,26 @@ NEMO_BEGIN_EXTERN_C
 
 #define NEMOVECTOR_CROSS(v0, v1, v2)	\
 	v0[0] = v1[1] * v2[2] - v1[2] * v2[1];	\
-	v0[1] = v1[2] * v2[0] - v1[0] * v2[2];	\
-	v0[2] = v1[0] * v2[1] - v1[1] * v2[0]
+v0[1] = v1[2] * v2[0] - v1[0] * v2[2];	\
+v0[2] = v1[0] * v2[1] - v1[1] * v2[0]
 
 #define NEMOVECTOR_DOT(v1, v2)	(v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2])
 
 #define NEMOVECTOR_ADD(v0, v1, v2)	\
 	v0[0] = v1[0] + v2[0];	\
-	v0[1] = v1[1] + v2[1];	\
-	v0[2] = v1[2] + v2[2]
+v0[1] = v1[1] + v2[1];	\
+v0[2] = v1[2] + v2[2]
 
 #define NEMOVECTOR_SUB(v0, v1, v2)	\
 	v0[0] = v1[0] - v2[0];	\
-	v0[1] = v1[1] - v2[1];	\
-	v0[2] = v1[2] - v2[2]
+v0[1] = v1[1] - v2[1];	\
+v0[2] = v1[2] - v2[2]
 
 typedef enum {
-	NEMO_MATRIX_TRANSFORM_TRANSLATE = (1 << 0),
-	NEMO_MATRIX_TRANSFORM_SCALE = (1 << 1),
-	NEMO_MATRIX_TRANSFORM_ROTATE = (1 << 2),
-	NEMO_MATRIX_TRANSFORM_OTHER = (1 << 3),
+	NEMOMATRIX_TRANSFORM_TRANSLATE = (1 << 0),
+	NEMOMATRIX_TRANSFORM_SCALE = (1 << 1),
+	NEMOMATRIX_TRANSFORM_ROTATE = (1 << 2),
+	NEMOMATRIX_TRANSFORM_OTHER = (1 << 3),
 } NeomMatrixTransformType;
 
 struct nemomatrix {

@@ -41,9 +41,9 @@ typedef enum {
 } NemoToolEventType;
 
 typedef enum {
-	NEMO_MOD_SHIFT_MASK = 0x01,
-	NEMO_MOD_ALT_MASK = 0x02,
-	NEMO_MOD_CONTROL_MASK = 0x04
+	NEMOMOD_SHIFT_MASK = 0x01,
+	NEMOMOD_ALT_MASK = 0x02,
+	NEMOMOD_CONTROL_MASK = 0x04
 } NemoModMask;
 
 struct nemotool;

@@ -22,7 +22,7 @@ struct nemoview *nemocompz_pick_view(struct nemocompz *compz, float x, float y, 
 	nemoview_transform_from_global(v, x, y, sx, sy);	\
 	if (v->content->pick != NULL) {	\
 		if (v->content->pick(v->content, *sx, *sy)) return v;	\
-	} else if (nemoview_has_state(v, NEMO_VIEW_REGION_STATE) == 0) {	\
+	} else if (nemoview_has_state(v, NEMOVIEW_REGION_STATE) == 0) {	\
 		if (pixman_region32_contains_point(&v->content->input, *sx, *sy, NULL)) return v;	\
 	} else {	\
 		if (pixman_region32_contains_point(&v->geometry.region, *sx, *sy, NULL)) return v;	\
@@ -32,13 +32,13 @@ struct nemoview *nemocompz_pick_view(struct nemocompz *compz, float x, float y, 
 		wl_list_for_each(view, &layer->view_list, layer_link) {
 			if (!wl_list_empty(&view->children_list)) {
 				wl_list_for_each(child, &view->children_list, children_link) {
-					if (nemoview_has_state(child, NEMO_VIEW_PICK_STATE) != 0) {
+					if (nemoview_has_state(child, NEMOVIEW_PICK_STATE) != 0) {
 						NEMOCOMPZ_PICK_VIEW(child, x, y, sx, sy);
 					}
 				}
 			}
 
-			if (nemoview_has_state(view, NEMO_VIEW_PICK_STATE) != 0) {
+			if (nemoview_has_state(view, NEMOVIEW_PICK_STATE) != 0) {
 				NEMOCOMPZ_PICK_VIEW(view, x, y, sx, sy);
 			}
 		}
@@ -71,13 +71,13 @@ struct nemoview *nemocompz_pick_view_below(struct nemocompz *compz, float x, flo
 			} else {
 				if (!wl_list_empty(&view->children_list)) {
 					wl_list_for_each(child, &view->children_list, children_link) {
-						if (nemoview_has_state(child, NEMO_VIEW_PICK_STATE) != 0) {
+						if (nemoview_has_state(child, NEMOVIEW_PICK_STATE) != 0) {
 							NEMOCOMPZ_PICK_VIEW(child, x, y, sx, sy);
 						}
 					}
 				}
 
-				if (nemoview_has_state(view, NEMO_VIEW_PICK_STATE) != 0) {
+				if (nemoview_has_state(view, NEMOVIEW_PICK_STATE) != 0) {
 					NEMOCOMPZ_PICK_VIEW(view, x, y, sx, sy);
 				}
 			}
@@ -102,13 +102,13 @@ struct nemoview *nemocompz_pick_canvas(struct nemocompz *compz, float x, float y
 					if (child->canvas == NULL)
 						continue;
 
-					if (nemoview_has_state(child, NEMO_VIEW_PICK_STATE) != 0) {
+					if (nemoview_has_state(child, NEMOVIEW_PICK_STATE) != 0) {
 						NEMOCOMPZ_PICK_VIEW(child, x, y, sx, sy);
 					}
 				}
 			}
 
-			if (nemoview_has_state(view, NEMO_VIEW_PICK_STATE) != 0) {
+			if (nemoview_has_state(view, NEMOVIEW_PICK_STATE) != 0) {
 				NEMOCOMPZ_PICK_VIEW(view, x, y, sx, sy);
 			}
 		}

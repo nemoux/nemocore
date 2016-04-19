@@ -81,9 +81,9 @@ static void nemopack_dispatch_canvas_event(struct nemoshow *show, struct showone
 			tp0 = nemoseat_get_touchpoint_by_id(seat, nemoshow_event_get_device_on(event, 0));
 			tp1 = nemoseat_get_touchpoint_by_id(seat, nemoshow_event_get_device_on(event, 1));
 			if (tp0 != NULL && tp1 != NULL) {
-				if (pack->bin->flags & NEMO_SHELL_SURFACE_RESIZABLE_FLAG) {
+				if (pack->bin->flags & NEMOSHELL_SURFACE_RESIZABLE_FLAG) {
 					nemoshell_pick_canvas_by_touchpoint_on_area(shell, tp0, tp1, pack->bin);
-				} else if (pack->bin->flags & NEMO_SHELL_SURFACE_SCALABLE_FLAG) {
+				} else if (pack->bin->flags & NEMOSHELL_SURFACE_SCALABLE_FLAG) {
 					nemoshell_pick_canvas_by_touchpoint(shell, tp0, tp1, (1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_MOVE) | (1 << NEMO_SURFACE_PICK_TYPE_SCALEONLY), pack->bin);
 				} else {
 					nemoshell_pick_canvas_by_touchpoint(shell, tp0, tp1, (1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_MOVE), pack->bin);
@@ -100,7 +100,7 @@ static void nemopack_dispatch_canvas_event(struct nemoshow *show, struct showone
 			tp0 = nemoseat_get_touchpoint_by_id(seat, device0);
 			tp1 = nemoseat_get_touchpoint_by_id(seat, device1);
 			if (tp0 != NULL && tp1 != NULL) {
-				if (pack->bin->flags & NEMO_SHELL_SURFACE_SCALABLE_FLAG) {
+				if (pack->bin->flags & NEMOSHELL_SURFACE_SCALABLE_FLAG) {
 					nemoshell_pick_canvas_by_touchpoint(shell, tp0, tp1, (1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_MOVE) | (1 << NEMO_SURFACE_PICK_TYPE_SCALEONLY), pack->bin);
 				} else {
 					nemoshell_pick_canvas_by_touchpoint(shell, tp0, tp1, (1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_MOVE), pack->bin);

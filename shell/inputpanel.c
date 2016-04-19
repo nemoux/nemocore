@@ -97,7 +97,7 @@ static void inputbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 	nemoview_set_position(bin->view, x, y);
 
 	if (shell->showing_input_panels &&
-			!nemoview_has_state(bin->view, NEMO_VIEW_MAP_STATE)) {
+			!nemoview_has_state(bin->view, NEMOVIEW_MAP_STATE)) {
 		nemoview_attach_layer(bin->view, bin->layer);
 		nemoview_damage_below(bin->view);
 

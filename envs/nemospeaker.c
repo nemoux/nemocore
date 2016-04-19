@@ -97,7 +97,7 @@ static void nemospeaker_dispatch_canvas_event(struct nemoshow *show, struct show
 
 		view = nemocompz_pick_canvas(compz, nemoshow_event_get_gx(event), nemoshow_event_get_gy(event), &sx, &sy);
 		if ((view != NULL) &&
-				(nemoview_has_state(view, NEMO_VIEW_SOUND_STATE)) &&
+				(nemoview_has_state(view, NEMOVIEW_SOUND_STATE)) &&
 				(view->canvas != NULL) &&
 				(view->canvas->resource != NULL) &&
 				(client = wl_resource_get_client(view->canvas->resource)) != NULL) {

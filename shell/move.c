@@ -143,7 +143,7 @@ static void move_shellgrab_dispatch_effect_done(struct nemoeffect *base)
 			bin->view->content->height * 0.5f,
 			&tx, &ty);
 
-	screen = nemoshell_get_fullscreen_on(shell, tx, ty, NEMO_SHELL_FULLSCREEN_PITCH_TYPE);
+	screen = nemoshell_get_fullscreen_on(shell, tx, ty, NEMOSHELL_FULLSCREEN_PITCH_TYPE);
 	if (screen != NULL) {
 		struct shellbin *sbin, *nbin;
 
@@ -163,7 +163,7 @@ static void move_shellgrab_dispatch_effect_done(struct nemoeffect *base)
 
 		nemoshell_set_fullscreen_bin(shell, bin, screen);
 
-		if (screen->focus == NEMO_SHELL_FULLSCREEN_ALL_FOCUS) {
+		if (screen->focus == NEMOSHELL_FULLSCREEN_ALL_FOCUS) {
 			nemoseat_set_keyboard_focus(shell->compz->seat, bin->view);
 			nemoseat_set_pointer_focus(shell->compz->seat, bin->view);
 			nemoseat_set_stick_focus(shell->compz->seat, bin->view);
@@ -194,7 +194,7 @@ static void move_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		touchpoint_update_velocity(tp, shell->pitch.samples);
 
 		effect = vieweffect_create(grab->bin->view);
-		effect->type = NEMO_VIEW_PITCH_EFFECT;
+		effect->type = NEMOVIEW_PITCH_EFFECT;
 		effect->pitch.velocity = sqrtf(tp->dx * tp->dx + tp->dy * tp->dy) * shell->pitch.coefficient;
 		effect->pitch.dx = tp->dx / effect->pitch.velocity;
 		effect->pitch.dy = tp->dy / effect->pitch.velocity;
@@ -221,7 +221,7 @@ static void move_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 
 	if (tp->focus != NULL) {
 		if (bin != NULL) {
-			if (nemoview_has_state(tp->focus, NEMO_VIEW_PUSH_STATE) != 0 && touchpoint_get_distance(tp) > bin->shell->active.push_distance) {
+			if (nemoview_has_state(tp->focus, NEMOVIEW_PUSH_STATE) != 0 && touchpoint_get_distance(tp) > bin->shell->active.push_distance) {
 				nemoview_above_layer(tp->focus, NULL);
 
 				nemoseat_set_stick_focus(tp->touch->seat, tp->focus);
@@ -456,7 +456,7 @@ static void move_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		touchpoint_update_velocity(tp, shell->pitch.samples);
 
 		effect = vieweffect_create(actor->view);
-		effect->type = NEMO_VIEW_PITCH_EFFECT;
+		effect->type = NEMOVIEW_PITCH_EFFECT;
 		effect->pitch.velocity = sqrtf(tp->dx * tp->dx + tp->dy * tp->dy) * shell->pitch.coefficient;
 		effect->pitch.dx = tp->dx / effect->pitch.velocity;
 		effect->pitch.dy = tp->dy / effect->pitch.velocity;
@@ -475,7 +475,7 @@ static void move_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 
 	if (tp->focus != NULL) {
 		if (actor != NULL) {
-			if (nemoview_has_state(tp->focus, NEMO_VIEW_PUSH_STATE) != 0 && touchpoint_get_distance(tp) > shell->active.push_distance) {
+			if (nemoview_has_state(tp->focus, NEMOVIEW_PUSH_STATE) != 0 && touchpoint_get_distance(tp) > shell->active.push_distance) {
 				nemoview_above_layer(tp->focus, NULL);
 			}
 		}

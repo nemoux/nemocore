@@ -56,7 +56,7 @@ static void shell_surface_move(struct wl_client *client, struct wl_resource *res
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 
-	if (bin->flags & NEMO_SHELL_SURFACE_MOVABLE_FLAG) {
+	if (bin->flags & NEMOSHELL_SURFACE_MOVABLE_FLAG) {
 		nemoshell_move_canvas(bin->shell, bin, serial);
 	}
 }
@@ -65,7 +65,7 @@ static void shell_surface_resize(struct wl_client *client, struct wl_resource *r
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 
-	if (bin->flags & NEMO_SHELL_SURFACE_RESIZABLE_FLAG) {
+	if (bin->flags & NEMOSHELL_SURFACE_RESIZABLE_FLAG) {
 		nemoshell_resize_canvas(bin->shell, bin, serial, edges);
 	}
 }
@@ -88,7 +88,7 @@ static void shell_surface_set_fullscreen(struct wl_client *client, struct wl_res
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 	struct nemoshell *shell = bin->shell;
 
-	if (bin->flags & NEMO_SHELL_SURFACE_MAXIMIZABLE_FLAG) {
+	if (bin->flags & NEMOSHELL_SURFACE_MAXIMIZABLE_FLAG) {
 		struct nemoscreen *screen = output_resource != NULL ? (struct nemoscreen *)wl_resource_get_user_data(output_resource) : NULL;
 
 		if (screen == NULL)
@@ -115,7 +115,7 @@ static void shell_surface_set_maximized(struct wl_client *client, struct wl_reso
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 	struct nemoshell *shell = bin->shell;
 
-	if (bin->flags & NEMO_SHELL_SURFACE_MAXIMIZABLE_FLAG) {
+	if (bin->flags & NEMOSHELL_SURFACE_MAXIMIZABLE_FLAG) {
 		struct nemoscreen *screen = output_resource != NULL ? (struct nemoscreen *)wl_resource_get_user_data(output_resource) : NULL;
 
 		if (screen == NULL)
@@ -178,7 +178,7 @@ static void shell_get_shell_surface(struct wl_client *client, struct wl_resource
 	if (shell->default_layer != NULL)
 		bin->layer = shell->default_layer;
 
-	bin->type = NEMO_SHELL_SURFACE_NORMAL_TYPE;
+	bin->type = NEMOSHELL_SURFACE_NORMAL_TYPE;
 	bin->owner = sc;
 
 	bin->resource = wl_resource_create(client, &wl_shell_surface_interface, 1, id);
@@ -192,7 +192,7 @@ static void shell_get_shell_surface(struct wl_client *client, struct wl_resource
 
 	nemoshell_use_client_state(shell, bin, client);
 
-	bin->flags |= NEMO_SHELL_SURFACE_BINDABLE_FLAG;
+	bin->flags |= NEMOSHELL_SURFACE_BINDABLE_FLAG;
 }
 
 static const struct wl_shell_interface shell_implementation = {

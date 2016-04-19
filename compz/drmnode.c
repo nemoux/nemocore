@@ -631,7 +631,7 @@ static int drm_screen_repaint_frame(struct nemoscreen *base, pixman_region32_t *
 			goto err1;
 		}
 
-		base->set_dpms(base, NEMO_DPMS_ON_STATE);
+		base->set_dpms(base, NEMODPMS_ON_STATE);
 	}
 
 	if (drmModePageFlip(node->fd, screen->crtc_id,

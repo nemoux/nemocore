@@ -17,7 +17,7 @@ static void viewanimation_handle_frame(struct nemoanimation *base, double progre
 {
 	struct viewanimation *animation = (struct viewanimation *)container_of(base, struct viewanimation, base);
 
-	if (animation->type & NEMO_VIEW_TRANSLATE_ANIMATION) {
+	if (animation->type & NEMOVIEW_TRANSLATE_ANIMATION) {
 		float sx = animation->translate.base.x;
 		float sy = animation->translate.base.y;
 		float ex = animation->translate.x;
@@ -28,7 +28,7 @@ static void viewanimation_handle_frame(struct nemoanimation *base, double progre
 				(ey - sy) * progress + sy);
 	}
 
-	if (animation->type & NEMO_VIEW_ROTATE_ANIMATION) {
+	if (animation->type & NEMOVIEW_ROTATE_ANIMATION) {
 		float start = animation->rotate.base.r;
 		float end = animation->rotate.r;
 		float dr = fabsf(end - start);
@@ -40,7 +40,7 @@ static void viewanimation_handle_frame(struct nemoanimation *base, double progre
 		}
 	}
 
-	if (animation->type & NEMO_VIEW_SCALE_ANIMATION) {
+	if (animation->type & NEMOVIEW_SCALE_ANIMATION) {
 		float sx = animation->scale.base.sx;
 		float sy = animation->scale.base.sy;
 		float ex = animation->scale.sx;
@@ -51,7 +51,7 @@ static void viewanimation_handle_frame(struct nemoanimation *base, double progre
 				(ey - sy) * progress + sy);
 	}
 
-	if (animation->type & NEMO_VIEW_ALPHA_ANIMATION) {
+	if (animation->type & NEMOVIEW_ALPHA_ANIMATION) {
 		float sv = animation->alpha.base.v;
 		float ev = animation->alpha.v;
 
@@ -142,21 +142,21 @@ void viewanimation_dispatch(struct nemocompz *compz, struct viewanimation *anima
 {
 	struct nemoview *view = animation->view;
 
-	if (animation->type & NEMO_VIEW_TRANSLATE_ANIMATION) {
+	if (animation->type & NEMOVIEW_TRANSLATE_ANIMATION) {
 		animation->translate.base.x = view->geometry.x;
 		animation->translate.base.y = view->geometry.y;
 	}
 
-	if (animation->type & NEMO_VIEW_ROTATE_ANIMATION) {
+	if (animation->type & NEMOVIEW_ROTATE_ANIMATION) {
 		animation->rotate.base.r = view->geometry.r;
 	}
 
-	if (animation->type & NEMO_VIEW_SCALE_ANIMATION) {
+	if (animation->type & NEMOVIEW_SCALE_ANIMATION) {
 		animation->scale.base.sx = view->geometry.sx;
 		animation->scale.base.sy = view->geometry.sy;
 	}
 
-	if (animation->type & NEMO_VIEW_ALPHA_ANIMATION) {
+	if (animation->type & NEMOVIEW_ALPHA_ANIMATION) {
 		animation->alpha.base.v = view->alpha;
 	}
 

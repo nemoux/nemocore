@@ -73,7 +73,7 @@ void nemoshell_start_pointer_shellgrab(struct shellgrab *grab, const struct nemo
 	grab->bin_ungrab_listener.notify = shellgrab_handle_bin_ungrab_pointer;
 	wl_signal_add(&bin->ungrab_signal, &grab->bin_ungrab_listener);
 	if (grab->bin->grabbed++ == 0)
-		nemoview_set_state(bin->view, NEMO_VIEW_GRAB_STATE);
+		nemoview_set_state(bin->view, NEMOVIEW_GRAB_STATE);
 
 	wl_list_init(&grab->bin_change_listener.link);
 
@@ -87,7 +87,7 @@ void nemoshell_end_pointer_shellgrab(struct shellgrab *grab)
 		wl_list_remove(&grab->bin_ungrab_listener.link);
 		wl_list_remove(&grab->bin_change_listener.link);
 		if (--grab->bin->grabbed == 0)
-			nemoview_put_state(grab->bin->view, NEMO_VIEW_GRAB_STATE);
+			nemoview_put_state(grab->bin->view, NEMOVIEW_GRAB_STATE);
 	}
 
 	nemopointer_end_grab(grab->base.pointer.pointer);
@@ -102,7 +102,7 @@ void nemoshell_start_pointer_actorgrab(struct actorgrab *grab, const struct nemo
 	grab->actor_ungrab_listener.notify = actorgrab_handle_actor_ungrab_pointer;
 	wl_signal_add(&actor->ungrab_signal, &grab->actor_ungrab_listener);
 	if (grab->actor->grabbed++ == 0)
-		nemoview_set_state(actor->view, NEMO_VIEW_GRAB_STATE);
+		nemoview_set_state(actor->view, NEMOVIEW_GRAB_STATE);
 
 	nemopointer_start_grab(pointer, &grab->base.pointer);
 }
@@ -113,7 +113,7 @@ void nemoshell_end_pointer_actorgrab(struct actorgrab *grab)
 		wl_list_remove(&grab->actor_destroy_listener.link);
 		wl_list_remove(&grab->actor_ungrab_listener.link);
 		if (--grab->actor->grabbed == 0)
-			nemoview_put_state(grab->actor->view, NEMO_VIEW_GRAB_STATE);
+			nemoview_put_state(grab->actor->view, NEMOVIEW_GRAB_STATE);
 	}
 
 	nemopointer_end_grab(grab->base.pointer.pointer);
@@ -128,7 +128,7 @@ void nemoshell_start_touchpoint_shellgrab(struct shellgrab *grab, const struct t
 	grab->bin_ungrab_listener.notify = shellgrab_handle_bin_ungrab_touchpoint;
 	wl_signal_add(&bin->ungrab_signal, &grab->bin_ungrab_listener);
 	if (grab->bin->grabbed++ == 0)
-		nemoview_set_state(bin->view, NEMO_VIEW_GRAB_STATE);
+		nemoview_set_state(bin->view, NEMOVIEW_GRAB_STATE);
 
 	wl_list_init(&grab->bin_change_listener.link);
 
@@ -144,7 +144,7 @@ void nemoshell_end_touchpoint_shellgrab(struct shellgrab *grab)
 		wl_list_remove(&grab->bin_ungrab_listener.link);
 		wl_list_remove(&grab->bin_change_listener.link);
 		if (--grab->bin->grabbed == 0)
-			nemoview_put_state(grab->bin->view, NEMO_VIEW_GRAB_STATE);
+			nemoview_put_state(grab->bin->view, NEMOVIEW_GRAB_STATE);
 	}
 
 	touchpoint_end_grab(grab->base.touchpoint.touchpoint);
@@ -157,7 +157,7 @@ void nemoshell_miss_touchpoint_shellgrab(struct shellgrab *grab)
 		wl_list_remove(&grab->bin_ungrab_listener.link);
 		wl_list_remove(&grab->bin_change_listener.link);
 		if (--grab->bin->grabbed == 0)
-			nemoview_put_state(grab->bin->view, NEMO_VIEW_GRAB_STATE);
+			nemoview_put_state(grab->bin->view, NEMOVIEW_GRAB_STATE);
 	}
 
 	touchpoint_end_grab(grab->base.touchpoint.touchpoint);
@@ -172,7 +172,7 @@ void nemoshell_start_touchpoint_actorgrab(struct actorgrab *grab, const struct t
 	grab->actor_ungrab_listener.notify = actorgrab_handle_actor_ungrab_touchpoint;
 	wl_signal_add(&actor->ungrab_signal, &grab->actor_ungrab_listener);
 	if (grab->actor->grabbed++ == 0)
-		nemoview_set_state(actor->view, NEMO_VIEW_GRAB_STATE);
+		nemoview_set_state(actor->view, NEMOVIEW_GRAB_STATE);
 
 	touchpoint_start_grab(tp, &grab->base.touchpoint);
 }
@@ -183,7 +183,7 @@ void nemoshell_end_touchpoint_actorgrab(struct actorgrab *grab)
 		wl_list_remove(&grab->actor_destroy_listener.link);
 		wl_list_remove(&grab->actor_ungrab_listener.link);
 		if (--grab->actor->grabbed == 0)
-			nemoview_put_state(grab->actor->view, NEMO_VIEW_GRAB_STATE);
+			nemoview_put_state(grab->actor->view, NEMOVIEW_GRAB_STATE);
 	}
 
 	touchpoint_end_grab(grab->base.touchpoint.touchpoint);
@@ -195,7 +195,7 @@ void nemoshell_miss_touchpoint_actorgrab(struct actorgrab *grab)
 		wl_list_remove(&grab->actor_destroy_listener.link);
 		wl_list_remove(&grab->actor_ungrab_listener.link);
 		if (--grab->actor->grabbed == 0)
-			nemoview_put_state(grab->actor->view, NEMO_VIEW_GRAB_STATE);
+			nemoview_put_state(grab->actor->view, NEMOVIEW_GRAB_STATE);
 	}
 
 	touchpoint_end_grab(grab->base.touchpoint.touchpoint);

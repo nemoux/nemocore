@@ -187,8 +187,8 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 		state_changed = 1;
 	}
 
-	if (!nemoview_has_state(view, NEMO_VIEW_MAP_STATE)) {
-		if (bin->type == NEMO_SHELL_SURFACE_NORMAL_TYPE) {
+	if (!nemoview_has_state(view, NEMOVIEW_MAP_STATE)) {
+		if (bin->type == NEMOSHELL_SURFACE_NORMAL_TYPE) {
 			if (bin->has_screen != 0) {
 				nemoview_correct_pivot(view, bin->screen.width / 2.0f, bin->screen.height / 2.0f);
 				nemoview_set_position(view, bin->screen.x, bin->screen.y);
@@ -219,7 +219,7 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 				nemoview_update_transform(view);
 				nemoview_damage_below(view);
 			}
-		} else if (bin->type == NEMO_SHELL_SURFACE_POPUP_TYPE) {
+		} else if (bin->type == NEMOSHELL_SURFACE_POPUP_TYPE) {
 			struct shellbin *child;
 
 			nemoview_update_transform(view);
@@ -231,11 +231,11 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 
 			nemoview_set_parent(view, bin->parent->view);
 			nemoview_set_position(view, bin->popup.x, bin->popup.y);
-		} else if (bin->type == NEMO_SHELL_SURFACE_OVERLAY_TYPE) {
+		} else if (bin->type == NEMOSHELL_SURFACE_OVERLAY_TYPE) {
 			nemoview_set_parent(view, bin->parent->view);
 			nemoview_update_transform(view);
 			nemoview_damage_below(view);
-		} else if (bin->type == NEMO_SHELL_SURFACE_XWAYLAND_TYPE) {
+		} else if (bin->type == NEMOSHELL_SURFACE_XWAYLAND_TYPE) {
 			nemoview_attach_layer(view, bin->layer);
 			nemoview_set_position(view,
 					bin->geometry.x - canvas->base.width * bin->geometry.dx,
@@ -251,8 +251,8 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 		bin->last_width = canvas->base.width;
 		bin->last_height = canvas->base.height;
 
-		nemoview_set_state(view, NEMO_VIEW_MAP_STATE);
-	} else if (bin->type == NEMO_SHELL_SURFACE_OVERLAY_TYPE) {
+		nemoview_set_state(view, NEMOVIEW_MAP_STATE);
+	} else if (bin->type == NEMOSHELL_SURFACE_OVERLAY_TYPE) {
 		nemoview_update_transform_parent(view);
 
 		bin->last_width = canvas->base.width;
@@ -297,7 +297,7 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 		}
 
 		if (bin->state.fullscreen || bin->state.maximized) {
-			viewanimation_revoke(view->compz, view, NEMO_VIEW_TRANSLATE_ANIMATION | NEMO_VIEW_ROTATE_ANIMATION);
+			viewanimation_revoke(view->compz, view, NEMOVIEW_TRANSLATE_ANIMATION | NEMOVIEW_ROTATE_ANIMATION);
 			vieweffect_revoke(view->compz, view);
 
 			nemoview_attach_layer(view, &bin->shell->fullscreen_layer);
@@ -404,7 +404,7 @@ struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas
 	bin->shell = shell;
 	bin->canvas = canvas;
 	bin->client = client;
-	bin->flags = NEMO_SHELL_SURFACE_ALL_FLAGS;
+	bin->flags = NEMOSHELL_SURFACE_ALL_FLAGS;
 	bin->layer = &shell->service_layer;
 
 	bin->min_width = shell->bin.min_width;
@@ -699,7 +699,7 @@ void nemoshell_change_bin_next_state(struct shellbin *bin)
 	bin->state_changed = 0;
 
 	switch (bin->type) {
-		case NEMO_SHELL_SURFACE_NORMAL_TYPE:
+		case NEMOSHELL_SURFACE_NORMAL_TYPE:
 			if (bin->state.fullscreen || bin->state.maximized) {
 				bin->fullscreen.x = view->geometry.x;
 				bin->fullscreen.y = view->geometry.y;
@@ -713,10 +713,10 @@ void nemoshell_change_bin_next_state(struct shellbin *bin)
 			}
 			break;
 
-		case NEMO_SHELL_SURFACE_POPUP_TYPE:
+		case NEMOSHELL_SURFACE_POPUP_TYPE:
 			break;
 
-		case NEMO_SHELL_SURFACE_XWAYLAND_TYPE:
+		case NEMOSHELL_SURFACE_XWAYLAND_TYPE:
 			nemoview_set_position(view, bin->transient.x, bin->transient.y);
 			break;
 
@@ -748,7 +748,7 @@ struct nemoview *nemoshell_get_default_view(struct nemocanvas *canvas)
 		return bin->view;
 
 	wl_list_for_each(view, &canvas->view_list, link) {
-		if (nemoview_has_state(view, NEMO_VIEW_MAP_STATE))
+		if (nemoview_has_state(view, NEMOVIEW_MAP_STATE))
 			return view;
 	}
 
@@ -832,13 +832,13 @@ static inline void nemoshell_set_client_state(struct shellbin *bin, struct clien
 		struct viewanimation *animation;
 
 		animation = viewanimation_create(bin->view, state->fadein_ease, state->fadein_delay, state->fadein_duration);
-		if (state->fadein_type & NEMO_SHELL_FADEIN_ALPHA_FLAG) {
+		if (state->fadein_type & NEMOSHELL_FADEIN_ALPHA_FLAG) {
 			nemoview_set_alpha(bin->view, 0.0f);
 
 			viewanimation_set_alpha(animation, 1.0f);
 		}
 
-		if (state->fadein_type & NEMO_SHELL_FADEIN_SCALE_FLAG) {
+		if (state->fadein_type & NEMOSHELL_FADEIN_SCALE_FLAG) {
 			nemoview_set_scale(bin->view, 0.0f, 0.0f);
 
 			viewanimation_set_scale(animation, 1.0f, 1.0f);
@@ -934,17 +934,17 @@ void nemoshell_load_fullscreens(struct nemoshell *shell)
 
 		type = nemoitem_get_attr(shell->configs, index, "type");
 		if (type == NULL)
-			screen->type = NEMO_SHELL_FULLSCREEN_NORMAL_TYPE;
+			screen->type = NEMOSHELL_FULLSCREEN_NORMAL_TYPE;
 		else if (strcmp(type, "pick") == 0)
-			screen->type = NEMO_SHELL_FULLSCREEN_PICK_TYPE;
+			screen->type = NEMOSHELL_FULLSCREEN_PICK_TYPE;
 		else if (strcmp(type, "pitch") == 0)
-			screen->type = NEMO_SHELL_FULLSCREEN_PITCH_TYPE;
+			screen->type = NEMOSHELL_FULLSCREEN_PITCH_TYPE;
 
 		focus = nemoitem_get_attr(shell->configs, index, "focus");
 		if (focus == NULL)
-			screen->focus = NEMO_SHELL_FULLSCREEN_NONE_FOCUS;
+			screen->focus = NEMOSHELL_FULLSCREEN_NONE_FOCUS;
 		else if (strcmp(focus, "all") == 0)
-			screen->focus = NEMO_SHELL_FULLSCREEN_ALL_FOCUS;
+			screen->focus = NEMOSHELL_FULLSCREEN_ALL_FOCUS;
 
 		fixed = nemoitem_get_attr(shell->configs, index, "fixed");
 		if (fixed == NULL)
@@ -990,7 +990,7 @@ void nemoshell_set_toplevel_bin(struct nemoshell *shell, struct shellbin *bin)
 {
 	nemoshell_clear_bin_next_state(bin);
 
-	bin->type = NEMO_SHELL_SURFACE_NORMAL_TYPE;
+	bin->type = NEMOSHELL_SURFACE_NORMAL_TYPE;
 	nemoshell_set_parent_bin(bin, NULL);
 }
 
@@ -998,7 +998,7 @@ void nemoshell_set_popup_bin(struct nemoshell *shell, struct shellbin *bin, stru
 {
 	nemoshell_clear_bin_next_state(bin);
 
-	bin->type = NEMO_SHELL_SURFACE_POPUP_TYPE;
+	bin->type = NEMOSHELL_SURFACE_POPUP_TYPE;
 	bin->popup.x = x;
 	bin->popup.y = y;
 	bin->popup.serial = serial;
@@ -1018,7 +1018,7 @@ void nemoshell_set_fullscreen_bin_on_screen(struct nemoshell *shell, struct shel
 		bin->state_changed = 1;
 	}
 
-	bin->type = NEMO_SHELL_SURFACE_NORMAL_TYPE;
+	bin->type = NEMOSHELL_SURFACE_NORMAL_TYPE;
 	nemoshell_set_parent_bin(bin, NULL);
 
 	bin->screen.x = screen->rx;
@@ -1040,7 +1040,7 @@ void nemoshell_set_fullscreen_bin(struct nemoshell *shell, struct shellbin *bin,
 	bin->next_state.fullscreen = 1;
 	bin->state_changed = 1;
 
-	bin->type = NEMO_SHELL_SURFACE_NORMAL_TYPE;
+	bin->type = NEMOSHELL_SURFACE_NORMAL_TYPE;
 	nemoshell_set_parent_bin(bin, NULL);
 
 	bin->screen.x = screen->dx;
@@ -1107,7 +1107,7 @@ void nemoshell_set_maximized_bin_on_screen(struct nemoshell *shell, struct shell
 		bin->state_changed = 1;
 	}
 
-	bin->type = NEMO_SHELL_SURFACE_NORMAL_TYPE;
+	bin->type = NEMOSHELL_SURFACE_NORMAL_TYPE;
 	nemoshell_set_parent_bin(bin, NULL);
 
 	bin->screen.x = screen->rx;
@@ -1129,7 +1129,7 @@ void nemoshell_set_maximized_bin(struct nemoshell *shell, struct shellbin *bin, 
 	bin->next_state.maximized = 1;
 	bin->state_changed = 1;
 
-	bin->type = NEMO_SHELL_SURFACE_NORMAL_TYPE;
+	bin->type = NEMOSHELL_SURFACE_NORMAL_TYPE;
 	nemoshell_set_parent_bin(bin, NULL);
 
 	bin->screen.x = screen->dx;

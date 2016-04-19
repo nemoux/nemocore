@@ -231,11 +231,11 @@ static void keyboard_handle_modifiers(void *data, struct nemo_keyboard *keyboard
 		mask = xkb_state_serialize_mods(tool->xkb.state, XKB_STATE_DEPRESSED | XKB_STATE_LATCHED);
 		tool->modifiers = 0;
 		if (mask & tool->xkb.control_mask)
-			tool->modifiers |= NEMO_MOD_CONTROL_MASK;
+			tool->modifiers |= NEMOMOD_CONTROL_MASK;
 		if (mask & tool->xkb.alt_mask)
-			tool->modifiers |= NEMO_MOD_ALT_MASK;
+			tool->modifiers |= NEMOMOD_ALT_MASK;
 		if (mask & tool->xkb.shift_mask)
-			tool->modifiers |= NEMO_MOD_SHIFT_MASK;
+			tool->modifiers |= NEMOMOD_SHIFT_MASK;
 
 		if (canvas != NULL && canvas->dispatch_event != NULL) {
 			struct nemoevent event;

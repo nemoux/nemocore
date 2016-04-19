@@ -33,9 +33,9 @@ struct nemobackend *tuiobackend_create(struct nemocompz *compz, int index)
 	nemoitem_for_each(compz->configs, i, "//nemoshell/tuio", 0) {
 		value = nemoitem_get_attr(compz->configs, i, "protocol");
 		if (value == NULL || strcmp(value, "osc") != 0)
-			protocol = NEMO_TUIO_XML_PROTOCOL;
+			protocol = NEMOTUIO_XML_PROTOCOL;
 		else
-			protocol = NEMO_TUIO_OSC_PROTOCOL;
+			protocol = NEMOTUIO_OSC_PROTOCOL;
 
 		port = nemoitem_get_iattr(compz->configs, i, "port", 3333);
 		max = nemoitem_get_iattr(compz->configs, i, "max", 16);

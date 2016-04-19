@@ -44,7 +44,7 @@ struct nemoview *nemoview_create(struct nemocompz *compz, struct nemocontent *co
 
 	pixman_region32_init(&view->clip);
 
-	view->state = NEMO_VIEW_CATCH_STATE | NEMO_VIEW_PICK_STATE | NEMO_VIEW_KEYPAD_STATE | NEMO_VIEW_SOUND_STATE;
+	view->state = NEMOVIEW_CATCH_STATE | NEMOVIEW_PICK_STATE | NEMOVIEW_KEYPAD_STATE | NEMOVIEW_SOUND_STATE;
 
 	view->psf_flags = 0x0;
 
@@ -80,7 +80,7 @@ void nemoview_destroy(struct nemoview *view)
 
 	assert(wl_list_empty(&view->children_list));
 
-	if (nemoview_has_state(view, NEMO_VIEW_MAP_STATE))
+	if (nemoview_has_state(view, NEMOVIEW_MAP_STATE))
 		nemoview_unmap(view);
 
 	wl_list_remove(&view->link);
@@ -171,7 +171,7 @@ void nemoview_correct_pivot(struct nemoview *view, float px, float py)
 
 void nemoview_unmap(struct nemoview *view)
 {
-	if (!nemoview_has_state(view, NEMO_VIEW_MAP_STATE))
+	if (!nemoview_has_state(view, NEMOVIEW_MAP_STATE))
 		return;
 
 	nemoview_damage_below(view);
@@ -179,7 +179,7 @@ void nemoview_unmap(struct nemoview *view)
 	view->node_mask = 0;
 	view->screen_mask = 0;
 
-	nemoview_put_state(view, NEMO_VIEW_MAP_STATE);
+	nemoview_put_state(view, NEMOVIEW_MAP_STATE);
 
 	nemocontent_update_output(view->content, 0, 0);
 
@@ -352,7 +352,7 @@ void nemoview_update_transform(struct nemoview *view)
 	pixman_region32_fini(&view->transform.opaque);
 	pixman_region32_init(&view->transform.opaque);
 
-	if (nemoview_has_state(view, NEMO_VIEW_REGION_STATE) == 0)
+	if (nemoview_has_state(view, NEMOVIEW_REGION_STATE) == 0)
 		pixman_region32_init_rect(&view->geometry.region,
 				0, 0, view->content->width, view->content->height);
 
@@ -373,7 +373,7 @@ void nemoview_update_transform_notify(struct nemoview *view)
 
 	view->compz->layer_notify = 1;
 
-	if (nemoview_has_state(view, NEMO_VIEW_GRAB_STATE) == 0) {
+	if (nemoview_has_state(view, NEMOVIEW_GRAB_STATE) == 0) {
 		pixman_region32_t region;
 		pixman_box32_t *extents;
 		float p[4][2];
@@ -416,7 +416,7 @@ void nemoview_update_transform_children(struct nemoview *view)
 	struct nemoview *child;
 
 	wl_list_for_each(child, &view->children_list, children_link) {
-		if (child->transform.type == NEMO_VIEW_TRANSFORM_OVERLAY) {
+		if (child->transform.type == NEMOVIEW_TRANSFORM_OVERLAY) {
 			if (child->content->width != view->content->width || child->content->height != view->content->height) {
 				child->geometry.sx = (double)view->content->width / (double)child->content->width;
 				child->geometry.sy = (double)view->content->height / (double)child->content->height;
@@ -480,14 +480,14 @@ void nemoview_set_region(struct nemoview *view, uint32_t x, uint32_t y, uint32_t
 {
 	pixman_region32_union_rect(&view->geometry.region, &view->geometry.region, x, y, width, height);
 
-	nemoview_set_state(view, NEMO_VIEW_REGION_STATE);
+	nemoview_set_state(view, NEMOVIEW_REGION_STATE);
 }
 
 void nemoview_put_region(struct nemoview *view)
 {
 	pixman_region32_clear(&view->geometry.region);
 
-	nemoview_put_state(view, NEMO_VIEW_REGION_STATE);
+	nemoview_put_state(view, NEMOVIEW_REGION_STATE);
 }
 
 void nemoview_accumulate_damage(struct nemoview *view, pixman_region32_t *opaque)

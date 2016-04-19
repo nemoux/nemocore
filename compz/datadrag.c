@@ -25,7 +25,7 @@ static void datadrag_configure_pointer_canvas(struct nemocanvas *canvas, int32_t
 	struct nemodatadrag *drag = (struct nemodatadrag *)canvas->configure_private;
 	struct nemopointer *pointer = drag->base.pointer.pointer;
 
-	if (!nemoview_has_state(drag->icon, NEMO_VIEW_MAP_STATE) && canvas->buffer_reference.buffer) {
+	if (!nemoview_has_state(drag->icon, NEMOVIEW_MAP_STATE) && canvas->buffer_reference.buffer) {
 		nemoview_attach_layer(drag->icon, &canvas->compz->cursor_layer);
 		nemoview_damage_below(drag->icon);
 		nemoview_update_transform(drag->icon);
@@ -95,7 +95,7 @@ static void datadrag_set_focus(struct nemodatadrag *drag, struct nemoseat *seat,
 static void datadrag_end_drag(struct nemodatadrag *drag, struct nemoseat *seat)
 {
 	if (drag->icon) {
-		if (nemoview_has_state(drag->icon, NEMO_VIEW_MAP_STATE))
+		if (nemoview_has_state(drag->icon, NEMOVIEW_MAP_STATE))
 			nemoview_unmap(drag->icon);
 
 		drag->icon->canvas->configure = NULL;

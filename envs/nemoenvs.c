@@ -220,7 +220,7 @@ void nemoenvs_execute_background(struct nemoenvs *envs, int index)
 		if (state != NULL) {
 			clientstate_set_position(state, x, y);
 			clientstate_set_anchor(state, 0.0f, 0.0f);
-			clientstate_set_bin_flags(state, NEMO_SHELL_SURFACE_ALL_FLAGS);
+			clientstate_set_bin_flags(state, NEMOSHELL_SURFACE_ALL_FLAGS);
 		}
 
 		nemoenvs_attach_app(envs, NEMOENVS_APP_BACKGROUND_TYPE, index, pid);
@@ -337,7 +337,7 @@ void nemoenvs_load_actions(struct nemoenvs *envs)
 		action->keypad = 1;
 		action->layer = 0;
 		action->network = NEMOENVS_NETWORK_NORMAL_STATE;
-		action->flags = NEMO_SHELL_SURFACE_MOVABLE_FLAG | NEMO_SHELL_SURFACE_PICKABLE_FLAG | NEMO_SHELL_SURFACE_MAXIMIZABLE_FLAG | NEMO_SHELL_SURFACE_MINIMIZABLE_FLAG;
+		action->flags = NEMOSHELL_SURFACE_MOVABLE_FLAG | NEMOSHELL_SURFACE_PICKABLE_FLAG | NEMOSHELL_SURFACE_MAXIMIZABLE_FLAG | NEMOSHELL_SURFACE_MINIMIZABLE_FLAG;
 		action->has_max_size = 0;
 		action->has_min_size = 0;
 
@@ -374,9 +374,9 @@ void nemoenvs_load_actions(struct nemoenvs *envs)
 		attr = nemoitem_get_attr(shell->configs, index, "resize");
 		if (attr != NULL) {
 			if (strcmp(attr, "on") == 0)
-				action->flags = NEMO_SHELL_SURFACE_MOVABLE_FLAG | NEMO_SHELL_SURFACE_RESIZABLE_FLAG | NEMO_SHELL_SURFACE_PICKABLE_FLAG | NEMO_SHELL_SURFACE_MAXIMIZABLE_FLAG | NEMO_SHELL_SURFACE_MINIMIZABLE_FLAG;
+				action->flags = NEMOSHELL_SURFACE_MOVABLE_FLAG | NEMOSHELL_SURFACE_RESIZABLE_FLAG | NEMOSHELL_SURFACE_PICKABLE_FLAG | NEMOSHELL_SURFACE_MAXIMIZABLE_FLAG | NEMOSHELL_SURFACE_MINIMIZABLE_FLAG;
 			else if (strcmp(attr, "scale") == 0)
-				action->flags = NEMO_SHELL_SURFACE_MOVABLE_FLAG | NEMO_SHELL_SURFACE_SCALABLE_FLAG | NEMO_SHELL_SURFACE_PICKABLE_FLAG | NEMO_SHELL_SURFACE_MAXIMIZABLE_FLAG | NEMO_SHELL_SURFACE_MINIMIZABLE_FLAG;
+				action->flags = NEMOSHELL_SURFACE_MOVABLE_FLAG | NEMOSHELL_SURFACE_SCALABLE_FLAG | NEMOSHELL_SURFACE_PICKABLE_FLAG | NEMOSHELL_SURFACE_MAXIMIZABLE_FLAG | NEMOSHELL_SURFACE_MINIMIZABLE_FLAG;
 		}
 
 		attr0 = nemoitem_get_attr(shell->configs, index, "max_width");
@@ -398,11 +398,11 @@ void nemoenvs_load_actions(struct nemoenvs *envs)
 		attr = nemoitem_get_attr(shell->configs, index, "fadein_type");
 		if (attr != NULL) {
 			if (strcmp(attr, "alpha") == 0)
-				action->fadein_type = NEMO_SHELL_FADEIN_ALPHA_FLAG;
+				action->fadein_type = NEMOSHELL_FADEIN_ALPHA_FLAG;
 			else if (strcmp(attr, "scale") == 0)
-				action->fadein_type = NEMO_SHELL_FADEIN_SCALE_FLAG;
+				action->fadein_type = NEMOSHELL_FADEIN_SCALE_FLAG;
 			else if (strcmp(attr, "alpha+scale") == 0)
-				action->fadein_type = NEMO_SHELL_FADEIN_ALPHA_FLAG | NEMO_SHELL_FADEIN_SCALE_FLAG;
+				action->fadein_type = NEMOSHELL_FADEIN_ALPHA_FLAG | NEMOSHELL_FADEIN_SCALE_FLAG;
 
 			action->fadein_ease = NEMOEASE_CUBIC_OUT_TYPE;
 			action->fadein_delay = 0;

@@ -18,7 +18,7 @@ static int vieweffect_handle_frame(struct nemoeffect *base, uint32_t msecs)
 	struct vieweffect *effect = (struct vieweffect *)container_of(base, struct vieweffect, base);
 	struct nemoview *view = effect->view;
 
-	if (effect->type & NEMO_VIEW_PITCH_EFFECT) {
+	if (effect->type & NEMOVIEW_PITCH_EFFECT) {
 		struct nemocompz *compz = view->compz;
 		double x, y, dx, dy;
 
@@ -31,7 +31,7 @@ retry:
 		if (effect->pitch.velocity <= 1.0f) {
 			nemoview_transform_notify(view);
 
-			effect->type &= ~NEMO_VIEW_PITCH_EFFECT;
+			effect->type &= ~NEMOVIEW_PITCH_EFFECT;
 		} else if (nemocompz_contain_view_near(compz, view, dx, dy) == 0) {
 			effect->pitch.velocity *= 0.7f;
 

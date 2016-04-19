@@ -917,7 +917,7 @@ static void nemoxmanager_handle_transform(struct wl_listener *listener, void *da
 	if (xwindow == NULL)
 		return;
 
-	if (view == NULL || !nemoview_has_state(view, NEMO_VIEW_MAP_STATE))
+	if (view == NULL || !nemoview_has_state(view, NEMOVIEW_MAP_STATE))
 		return;
 
 	if (xwindow->x != view->geometry.x ||
@@ -1127,11 +1127,11 @@ void nemoxmanager_map_window(struct nemoxmanager *xmanager, struct nemoxwindow *
 		return;
 	}
 
-	bin->type = NEMO_SHELL_SURFACE_XWAYLAND_TYPE;
+	bin->type = NEMOSHELL_SURFACE_XWAYLAND_TYPE;
 
 	nemoshell_use_client_state_by_pid(shell, bin, xwindow->pid);
 
-	bin->flags |= NEMO_SHELL_SURFACE_BINDABLE_FLAG;
+	bin->flags |= NEMOSHELL_SURFACE_BINDABLE_FLAG;
 
 	xwindow->bin = bin;
 

@@ -12,14 +12,14 @@ NEMO_BEGIN_EXTERN_C
 #include <nemomatrix.h>
 
 typedef enum {
-	NEMO_METRO_NONE_PLANE = 0,
-	NEMO_METRO_FRONT_PLANE = 1,
-	NEMO_METRO_BACK_PLANE = 2,
-	NEMO_METRO_LEFT_PLANE = 3,
-	NEMO_METRO_RIGHT_PLANE = 4,
-	NEMO_METRO_TOP_PLANE = 5,
-	NEMO_METRO_BOTTOM_PLANE = 6,
-	NEMO_METRO_LAST_PLANE
+	NEMOMETRO_NONE_PLANE = 0,
+	NEMOMETRO_FRONT_PLANE = 1,
+	NEMOMETRO_BACK_PLANE = 2,
+	NEMOMETRO_LEFT_PLANE = 3,
+	NEMOMETRO_RIGHT_PLANE = 4,
+	NEMOMETRO_TOP_PLANE = 5,
+	NEMOMETRO_BOTTOM_PLANE = 6,
+	NEMOMETRO_LAST_PLANE
 } NemoMetroPlaneDirection;
 
 extern int nemometro_intersect_triangle(float *v0, float *v1, float *v2, float *o, float *d, float *t, float *u, float *v);

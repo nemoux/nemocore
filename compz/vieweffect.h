@@ -12,7 +12,7 @@ NEMO_BEGIN_EXTERN_C
 #include <effect.h>
 
 typedef enum {
-	NEMO_VIEW_PITCH_EFFECT = (1 << 0),
+	NEMOVIEW_PITCH_EFFECT = (1 << 0),
 } NemoViewEffectType;
 
 struct nemocompz;

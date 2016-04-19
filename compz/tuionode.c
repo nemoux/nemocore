@@ -38,24 +38,24 @@ static void tuio_handle_xml_argument(struct tuionode *node, const char *type, co
 {
 	if (type[0] == 's') {
 		if (value[0] == 'a') {
-			node->state = NEMO_TUIO_ALIVE_STATE;
+			node->state = NEMOTUIO_ALIVE_STATE;
 			node->alive.index = 0;
 		} else if (value[0] == 's') {
-			node->state = NEMO_TUIO_SET_STATE;
+			node->state = NEMOTUIO_SET_STATE;
 		} else if (value[0] == 'f') {
-			node->state = NEMO_TUIO_FSEQ_STATE;
+			node->state = NEMOTUIO_FSEQ_STATE;
 		}
 	}
 
 	if (type[0] == 'i') {
-		if (node->state == NEMO_TUIO_ALIVE_STATE) {
+		if (node->state == NEMOTUIO_ALIVE_STATE) {
 			node->taps[node->alive.index].id = strtoul(value, NULL, 10);
 			node->alive.index++;
-		} else if (node->state == NEMO_TUIO_SET_STATE) {
+		} else if (node->state == NEMOTUIO_SET_STATE) {
 			node->set.id = strtoul(value, NULL, 10);
 			node->set.tap = tuio_find_tap(node, node->set.id);
 			node->set.index = 0;
-		} else if (node->state == NEMO_TUIO_FSEQ_STATE) {
+		} else if (node->state == NEMOTUIO_FSEQ_STATE) {
 			node->fseq.id = strtoul(value, NULL, 10);
 
 			nemotouch_flush_tuio(node);
@@ -63,7 +63,7 @@ static void tuio_handle_xml_argument(struct tuionode *node, const char *type, co
 	}
 
 	if (type[0] == 'f') {
-		if (node->state == NEMO_TUIO_SET_STATE) {
+		if (node->state == NEMOTUIO_SET_STATE) {
 			if (node->set.index < 5) {
 				node->set.tap->f[node->set.index] = strtof(value, NULL);
 				node->set.index++;
@@ -153,14 +153,14 @@ static int tuio_handle_osc_message(struct tuionode *node, const char *msg, int l
 				break;
 
 			case OSC_INT32_TAG:
-				if (node->state == NEMO_TUIO_ALIVE_STATE) {
+				if (node->state == NEMOTUIO_ALIVE_STATE) {
 					node->taps[node->alive.index].id = osc_int32(arg);
 					node->alive.index++;
-				} else if (node->state == NEMO_TUIO_SET_STATE) {
+				} else if (node->state == NEMOTUIO_SET_STATE) {
 					node->set.id = osc_int32(arg);
 					node->set.tap = tuio_find_tap(node, node->set.id);
 					node->set.index = 0;
-				} else if (node->state == NEMO_TUIO_FSEQ_STATE) {
+				} else if (node->state == NEMOTUIO_FSEQ_STATE) {
 					node->fseq.id = osc_int32(arg);
 
 					nemotouch_flush_tuio(node);
@@ -170,7 +170,7 @@ static int tuio_handle_osc_message(struct tuionode *node, const char *msg, int l
 				break;
 
 			case OSC_FLOAT_TAG:
-				if (node->state == NEMO_TUIO_SET_STATE) {
+				if (node->state == NEMOTUIO_SET_STATE) {
 					if (node->set.index < 5) {
 						node->set.tap->f[node->set.index] = osc_float(arg);
 						node->set.index++;
@@ -182,12 +182,12 @@ static int tuio_handle_osc_message(struct tuionode *node, const char *msg, int l
 
 			case OSC_STRING_TAG:
 				if (arg[0] == 'a') {
-					node->state = NEMO_TUIO_ALIVE_STATE;
+					node->state = NEMOTUIO_ALIVE_STATE;
 					node->alive.index = 0;
 				} else if (arg[0] == 's') {
-					node->state = NEMO_TUIO_SET_STATE;
+					node->state = NEMOTUIO_SET_STATE;
 				} else if (arg[0] == 'f') {
-					node->state = NEMO_TUIO_FSEQ_STATE;
+					node->state = NEMOTUIO_FSEQ_STATE;
 				}
 
 				arg = osc_find_str4_end(arg, end);
@@ -388,9 +388,9 @@ struct tuionode *tuio_create_node(struct nemocompz *compz, int protocol, int por
 	if (node->touch == NULL)
 		goto err2;
 
-	if (protocol == NEMO_TUIO_XML_PROTOCOL) {
+	if (protocol == NEMOTUIO_XML_PROTOCOL) {
 		asprintf(&node->base.devnode, "xml:%d", port);
-	} else if (protocol == NEMO_TUIO_OSC_PROTOCOL) {
+	} else if (protocol == NEMOTUIO_OSC_PROTOCOL) {
 		asprintf(&node->base.devnode, "osc:%d", port);
 	}
 
@@ -402,10 +402,10 @@ struct tuionode *tuio_create_node(struct nemocompz *compz, int protocol, int por
 				nemocompz_get_scene_width(compz),
 				nemocompz_get_scene_height(compz));
 
-	if (protocol == NEMO_TUIO_XML_PROTOCOL) {
+	if (protocol == NEMOTUIO_XML_PROTOCOL) {
 		if (tuio_prepare_xml(node, port) < 0)
 			goto err4;
-	} else if (protocol == NEMO_TUIO_OSC_PROTOCOL) {
+	} else if (protocol == NEMOTUIO_OSC_PROTOCOL) {
 		if (tuio_prepare_osc(node, port) < 0)
 			goto err4;
 	}
@@ -434,9 +434,9 @@ void tuio_destroy_node(struct tuionode *node)
 {
 	wl_list_remove(&node->link);
 
-	if (node->protocol == NEMO_TUIO_XML_PROTOCOL) {
+	if (node->protocol == NEMOTUIO_XML_PROTOCOL) {
 		tuio_finish_xml(node);
-	} else if (node->protocol == NEMO_TUIO_OSC_PROTOCOL) {
+	} else if (node->protocol == NEMOTUIO_OSC_PROTOCOL) {
 		tuio_finish_osc(node);
 	}
 

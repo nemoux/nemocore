@@ -204,7 +204,7 @@ static void pixmanrenderer_draw_view(struct pixmanrenderer *renderer, struct nem
 		goto out;
 
 	if ((view->alpha != 1.0f) ||
-			(view->transform.enable && view->transform.matrix.type != NEMO_MATRIX_TRANSFORM_TRANSLATE)) {
+			(view->transform.enable && view->transform.matrix.type != NEMOMATRIX_TRANSFORM_TRANSLATE)) {
 		pixmanrenderer_draw_region(renderer, view, screen, &repaint, NULL, PIXMAN_OP_OVER);
 	} else {
 		pixman_region32_init_rect(&blend, 0, 0, view->content->width, view->content->height);

@@ -82,12 +82,12 @@ static const float cube_vertices[] = {
 };
 
 static const int cube_planes[] = {
-	NEMO_METRO_BOTTOM_PLANE,
-	NEMO_METRO_TOP_PLANE,
-	NEMO_METRO_LEFT_PLANE,
-	NEMO_METRO_RIGHT_PLANE,
-	NEMO_METRO_FRONT_PLANE,
-	NEMO_METRO_BACK_PLANE
+	NEMOMETRO_BOTTOM_PLANE,
+	NEMOMETRO_TOP_PLANE,
+	NEMOMETRO_LEFT_PLANE,
+	NEMOMETRO_RIGHT_PLANE,
+	NEMOMETRO_FRONT_PLANE,
+	NEMOMETRO_BACK_PLANE
 };
 
 static const float cube_texcoords[] = {
@@ -543,10 +543,10 @@ int nemoshow_poly_pick_plane(struct showone *cone, struct showone *pone, struct 
 		}
 	} else if (one->sub == NEMOSHOW_CUBE_POLY) {
 		float min = FLT_MAX;
-		int plane = NEMO_METRO_NONE_PLANE;
+		int plane = NEMOMETRO_NONE_PLANE;
 		int i;
 
-		for (i = 0; i < NEMO_METRO_LAST_PLANE; i++) {
+		for (i = 0; i < NEMOMETRO_LAST_PLANE; i++) {
 			if (nemometro_pick_triangle(
 						&pipe->projection,
 						canvas->width, canvas->height,

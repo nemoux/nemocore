@@ -96,14 +96,14 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		if (bin->on_pickscreen != 0) {
 			if (nemocompz_get_scene_width(compz) * shell->pick.fullscreen_scale <= width &&
 					nemocompz_get_scene_height(compz) * shell->pick.fullscreen_scale <= height)
-				screen = nemoshell_get_fullscreen_on(shell, tp0->x, tp0->y, NEMO_SHELL_FULLSCREEN_PICK_TYPE);
+				screen = nemoshell_get_fullscreen_on(shell, tp0->x, tp0->y, NEMOSHELL_FULLSCREEN_PICK_TYPE);
 
 			if (screen != NULL) {
 				nemoshell_set_fullscreen_bin(shell, bin, screen);
 
 				nemoseat_put_touchpoint_by_view(compz->seat, bin->view);
 
-				if (screen->focus == NEMO_SHELL_FULLSCREEN_ALL_FOCUS) {
+				if (screen->focus == NEMOSHELL_FULLSCREEN_ALL_FOCUS) {
 					nemoseat_set_keyboard_focus(compz->seat, bin->view);
 					nemoseat_set_pointer_focus(compz->seat, bin->view);
 					nemoseat_set_stick_focus(compz->seat, bin->view);
@@ -117,7 +117,7 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 	}
 
 	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_MOVE)) {
-		if (tp0->focus != NULL && nemoview_has_state(tp0->focus, NEMO_VIEW_PUSH_STATE) != 0) {
+		if (tp0->focus != NULL && nemoview_has_state(tp0->focus, NEMOVIEW_PUSH_STATE) != 0) {
 			float x0 = (tp0->grab_x + tp1->grab_x) / 2.0f;
 			float y0 = (tp0->grab_y + tp1->grab_y) / 2.0f;
 			float x1 = (tp0->x + tp1->x) / 2.0f;
@@ -634,7 +634,7 @@ static void pick_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		}
 
 		if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_MOVE)) {
-			if (tp0->focus != NULL && nemoview_has_state(tp0->focus, NEMO_VIEW_PUSH_STATE) != 0) {
+			if (tp0->focus != NULL && nemoview_has_state(tp0->focus, NEMOVIEW_PUSH_STATE) != 0) {
 				float x0 = (tp0->grab_x + tp1->grab_x) / 2.0f;
 				float y0 = (tp0->grab_y + tp1->grab_y) / 2.0f;
 				float x1 = (tp0->x + tp1->x) / 2.0f;
