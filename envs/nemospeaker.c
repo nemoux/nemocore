@@ -145,7 +145,7 @@ static void nemospeaker_dispatch_show_resize(struct nemoshow *show, int32_t widt
 	struct nemospeaker *speaker = (struct nemospeaker *)nemoshow_get_userdata(show);
 
 	nemoshow_view_put_scope(show);
-	nemoshow_view_set_scope(show, width / 2.0f, height / 2.0f, width * 0.45f, 0, "c");
+	nemoshow_view_set_scope(show, width * 0.05f, height * 0.05f, width * 0.9f, height * 0.9f, "c");
 }
 
 static void nemospeaker_dispatch_show_layer(struct nemoshow *show, int32_t visible)
@@ -289,7 +289,7 @@ struct nemospeaker *nemospeaker_create(struct nemoshell *shell, uint32_t size, d
 			speaker->y - size / 2.0f);
 	nemoshow_view_set_pivot(show, size / 2.0f, size / 2.0f);
 	nemoshow_view_set_rotation(show, speaker->r);
-	nemoshow_view_set_scope(show, size / 2.0f, size / 2.0f, size * 0.45f, 0, "c");
+	nemoshow_view_set_scope(show, size * 0.05f, size * 0.05f, size * 0.9f, size * 0.9f, "c");
 
 	nemospeaker_dispatch_fadein_transition(show, speaker->layout0, NEMOSHOW_CUBIC_INOUT_EASE, 1500, 0);
 	nemospeaker_dispatch_fadein_transition(show, speaker->layout1, NEMOSHOW_CUBIC_INOUT_EASE, 1000, 250);

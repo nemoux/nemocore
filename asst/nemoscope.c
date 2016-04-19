@@ -56,6 +56,9 @@ int nemoscope_add(struct nemoscope *scope, uint32_t tag, uint32_t type, float x,
 {
 	struct scopeone *one;
 
+	if (w <= 0.0f || h <= 0.0f)
+		return -1;
+
 	one = (struct scopeone *)malloc(sizeof(struct scopeone));
 	if (one == NULL)
 		return -1;
@@ -84,13 +87,26 @@ uint32_t nemoscope_pick(struct nemoscope *scope, float x, float y)
 					one->y <= y && one->y + one->h < y)
 				return one->tag;
 		} else if (one->type == NEMOSCOPE_CIRCLE_TYPE) {
-			float dx, dy;
+			if (one->w == one->h) {
+				float r = one->w / 2.0f;
+				float cx = one->x + r;
+				float cy = one->y + r;
+				float dx = cx - x;
+				float dy = cy - y;
 
-			dx = one->x - x;
-			dy = one->y - y;
+				if (sqrtf(dx * dx + dy * dy) <= r)
+					return one->tag;
+			} else {
+				float rx = one->w / 2.0f;
+				float ry = one->h / 2.0f;
+				float cx = one->x + rx;
+				float cy = one->y + ry;
+				float dx = x - cx;
+				float dy = y - cy;
 
-			if (sqrtf(dx * dx + dy * dy) <= one->w)
-				return one->tag;
+				if (((dx * dx) / (rx * rx) + (dy * dy) / (ry * ry)) <= 1.0f)
+					return one->tag;
+			}
 		}
 	}
 
