@@ -194,7 +194,7 @@ static void evdev_process_relative(struct evdevnode *node, struct input_event *e
 			switch (e->value) {
 				case -1:
 				case 1:
-					nemopointer_notify_axis(node->pointer, time, NEMO_POINTER_AXIS_ROTATE_Y, -1 * e->value * 10);
+					nemopointer_notify_axis(node->pointer, time, NEMO_POINTER_AXIS_ROTATE_X, -1 * e->value * 10);
 					break;
 
 				default:
@@ -208,7 +208,7 @@ static void evdev_process_relative(struct evdevnode *node, struct input_event *e
 			switch (e->value) {
 				case -1:
 				case 1:
-					nemopointer_notify_axis(node->pointer, time, NEMO_POINTER_AXIS_ROTATE_X, e->value * 10);
+					nemopointer_notify_axis(node->pointer, time, NEMO_POINTER_AXIS_ROTATE_Y, e->value * 10);
 					break;
 
 				default:
