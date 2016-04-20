@@ -132,8 +132,6 @@ void nemoshell_start_touchpoint_shellgrab(struct shellgrab *grab, const struct t
 
 	wl_list_init(&grab->bin_change_listener.link);
 
-	bin->canvas->touchid0 = 0;
-
 	touchpoint_start_grab(tp, &grab->base.touchpoint);
 }
 
