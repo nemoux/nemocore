@@ -127,6 +127,11 @@ int os_create_anonymous_file(off_t size)
 	return fd;
 }
 
+int os_exist_path(const char *path)
+{
+	return access(path, F_OK) == 0;
+}
+
 pid_t os_execute_path(const char *path, char *const argv[])
 {
 	pid_t pid;

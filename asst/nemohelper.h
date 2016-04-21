@@ -25,6 +25,7 @@ extern int os_socketpair_cloexec(int domain, int type, int protocol, int *sv);
 extern int os_epoll_create_cloexec(void);
 extern int os_create_anonymous_file(off_t size);
 
+extern int os_exist_path(const char *path);
 extern pid_t os_execute_path(const char *path, char *const argv[]);
 extern int os_load_path(const char *path, char **buffer, int *size);
 extern int os_save_path(const char *path, char *buffer, int size);
