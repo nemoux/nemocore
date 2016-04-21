@@ -263,14 +263,22 @@ int nemoplay_decode_media(struct nemoplay *play, int reqcount, int maxcount)
 	return 0;
 }
 
-int nemoplay_seek_media(struct nemoplay *play, double pos, double min, double max)
+int nemoplay_seek_media(struct nemoplay *play, double pos)
 {
 	nemoplay_queue_flush(play->video_queue);
 	nemoplay_queue_flush(play->audio_queue);
 	nemoplay_queue_flush(play->subtitle_queue);
 
-	if (avformat_seek_file(play->container, -1, (int64_t)(min * AV_TIME_BASE), (int64_t)(pos * AV_TIME_BASE), (int64_t)(max * AV_TIME_BASE), 0) < 0)
-		return -1;
+	if (avformat_seek_file(play->container, -1, INT64_MIN, (int64_t)(pos * AV_TIME_BASE), INT64_MAX, 0) >= 0) {
+		if (play->video_context != NULL)
+			avcodec_flush_buffers(play->video_context);
+		if (play->audio_context != NULL)
+			avcodec_flush_buffers(play->audio_context);
+		if (play->subtitle_context != NULL)
+			avcodec_flush_buffers(play->subtitle_context);
+
+		return 1;
+	}
 
 	return 0;
 }

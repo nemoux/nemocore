@@ -205,7 +205,7 @@ static void *nemoplay_handle_decodeframe(void *arg)
 			struct playclock *clock = nemoplay_get_audio_clock(context->play);
 			double pos = nemoplay_clock_get(clock) + 10.0f;
 
-			nemoplay_seek_media(play, pos, pos - 10.0f, pos + 10.0f);
+			nemoplay_seek_media(play, pos);
 		} else if (state == NEMOPLAY_FULL_STATE || state == NEMOPLAY_STOP_STATE || state == NEMOPLAY_IDLE_STATE) {
 			nemoplay_wait_media(play);
 		}

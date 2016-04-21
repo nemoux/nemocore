@@ -75,7 +75,7 @@ extern void nemoplay_destroy(struct nemoplay *play);
 extern int nemoplay_prepare_media(struct nemoplay *play, const char *mediapath);
 extern void nemoplay_finish_media(struct nemoplay *play);
 extern int nemoplay_decode_media(struct nemoplay *play, int reqcount, int maxcount);
-extern int nemoplay_seek_media(struct nemoplay *play, double pos, double min, double max);
+extern int nemoplay_seek_media(struct nemoplay *play, double pos);
 extern void nemoplay_wait_media(struct nemoplay *play);
 
 extern void nemoplay_set_state(struct nemoplay *play, int state);
