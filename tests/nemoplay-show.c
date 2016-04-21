@@ -29,8 +29,6 @@ struct playcontext {
 	int has_frame;
 
 	struct nemotimer *timer;
-
-	int is_playing;
 };
 
 static void nemoplay_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, void *event)
@@ -49,14 +47,10 @@ static void nemoplay_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 	if (nemoshow_event_is_single_click(show, event)) {
 		if (nemoshow_event_is_no_tap(show, event)) {
-			if (context->is_playing == 0) {
+			if (nemoplay_get_state(context->play) == NEMOPLAY_STOP_STATE) {
 				nemoplay_set_state(context->play, NEMOPLAY_PLAY_STATE);
-
-				context->is_playing = 1;
 			} else {
 				nemoplay_set_state(context->play, NEMOPLAY_STOP_STATE);
-
-				context->is_playing = 0;
 			}
 		} else if (nemoshow_event_is_single_tap(show, event)) {
 			nemoplay_set_state(context->play, NEMOPLAY_SEEK_STATE);
@@ -318,8 +312,6 @@ int main(int argc, char *argv[])
 	nemotimer_set_timeout(timer, 10);
 
 	nemoshow_dispatch_frame(show);
-
-	context->is_playing = 1;
 
 	nemotool_run(tool);
 
