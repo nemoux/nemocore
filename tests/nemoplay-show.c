@@ -26,7 +26,6 @@ struct playcontext {
 
 	struct nemoplay *play;
 	struct playshader *shader;
-	int has_frame;
 
 	struct nemotimer *timer;
 };
@@ -66,7 +65,7 @@ static void nemoplay_dispatch_canvas_resize(struct nemoshow *show, struct showon
 			nemoshow_canvas_get_texture(context->canvas),
 			width, height);
 
-	if (context->has_frame != 0)
+	if (nemoplay_get_frame(context->play) != 0)
 		nemoplay_shader_dispatch(context->shader);
 }
 
@@ -116,14 +115,14 @@ static void nemoplay_dispatch_video_timer(struct nemotimer *timer, void *data)
 				nemoshow_canvas_damage_all(context->canvas);
 				nemoshow_dispatch_frame(context->show);
 
-				context->has_frame = 1;
-
 				if (nemoplay_queue_peek_pts(queue, &pts) != 0)
 					nemotimer_set_timeout(timer, MINMAX(pts > cts ? pts - cts : 1.0f, 1.0f, threshold) * 1000);
 				else
 					nemotimer_set_timeout(timer, threshold * 1000);
 
 				nemoplay_queue_destroy_one(one);
+
+				nemoplay_next_frame(play);
 			}
 		}
 	} else if (state == NEMOPLAY_QUEUE_STOP_STATE) {

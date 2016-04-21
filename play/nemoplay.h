@@ -34,6 +34,8 @@ struct nemoplay {
 	int has_seek;
 	double seek_pts;
 
+	uint64_t frame;
+
 	pthread_mutex_t lock;
 	pthread_cond_t signal;
 
@@ -96,6 +98,21 @@ extern int nemoplay_has_seek(struct nemoplay *play);
 static inline int nemoplay_get_state(struct nemoplay *play)
 {
 	return play->state;
+}
+
+static inline uint64_t nemoplay_get_frame(struct nemoplay *play)
+{
+	return play->frame;
+}
+
+static inline uint64_t nemoplay_next_frame(struct nemoplay *play)
+{
+	return ++play->frame;
+}
+
+static inline void nemoplay_clear_frame(struct nemoplay *play)
+{
+	play->frame = 0;
 }
 
 static inline struct playqueue *nemoplay_get_video_queue(struct nemoplay *play)

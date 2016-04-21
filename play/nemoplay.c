@@ -157,6 +157,7 @@ int nemoplay_prepare_media(struct nemoplay *play, const char *mediapath)
 	play->video_framerate = av_q2d(av_guess_frame_rate(container, container->streams[video_stream], NULL));
 
 	play->state = NEMOPLAY_PLAY_STATE;
+	play->frame = 0;
 
 	return 0;
 
