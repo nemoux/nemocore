@@ -186,7 +186,7 @@ int nemoplay_decode_media(struct nemoplay *play, int reqcount, int maxcount)
 
 	frame = av_frame_alloc();
 
-	for (i = 0; i < reqcount && play->state == NEMOPLAY_PLAY_STATE; i++) {
+	for (i = 0; i < reqcount && play->state == NEMOPLAY_PLAY_STATE && play->has_seek == 0; i++) {
 		if (av_read_frame(container, &packet) < 0) {
 			play->state = NEMOPLAY_IDLE_STATE;
 		} else if (packet.stream_index == video_stream) {
@@ -359,4 +359,35 @@ void nemoplay_set_cts(struct nemoplay *play, double pts)
 double nemoplay_get_cts(struct nemoplay *play)
 {
 	return nemoplay_clock_get(play->clock);
+}
+
+void nemoplay_set_seek(struct nemoplay *play, double pts)
+{
+	pthread_mutex_lock(&play->lock);
+
+	play->has_seek = 1;
+	play->seek_pts = pts;
+
+	pthread_cond_signal(&play->signal);
+
+	pthread_mutex_unlock(&play->lock);
+}
+
+double nemoplay_get_seek(struct nemoplay *play)
+{
+	return play->seek_pts;
+}
+
+void nemoplay_put_seek(struct nemoplay *play)
+{
+	pthread_mutex_lock(&play->lock);
+
+	play->has_seek = 0;
+
+	pthread_mutex_unlock(&play->lock);
+}
+
+int nemoplay_has_seek(struct nemoplay *play)
+{
+	return play->has_seek;
 }

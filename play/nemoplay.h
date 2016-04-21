@@ -32,6 +32,9 @@ typedef enum {
 struct nemoplay {
 	int state;
 
+	int has_seek;
+	double seek_pts;
+
 	pthread_mutex_t lock;
 	pthread_cond_t signal;
 
@@ -85,6 +88,11 @@ extern void nemoplay_wait_thread(struct nemoplay *play);
 
 extern void nemoplay_set_cts(struct nemoplay *play, double pts);
 extern double nemoplay_get_cts(struct nemoplay *play);
+
+extern void nemoplay_set_seek(struct nemoplay *play, double pts);
+extern double nemoplay_get_seek(struct nemoplay *play);
+extern void nemoplay_put_seek(struct nemoplay *play);
+extern int nemoplay_has_seek(struct nemoplay *play);
 
 static inline int nemoplay_get_state(struct nemoplay *play)
 {
