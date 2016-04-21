@@ -188,7 +188,7 @@ int nemoplay_decode_media(struct nemoplay *play, int reqcount, int maxcount)
 
 	for (i = 0; i < reqcount && play->state == NEMOPLAY_PLAY_STATE && play->has_seek == 0; i++) {
 		if (av_read_frame(container, &packet) < 0) {
-			play->state = NEMOPLAY_IDLE_STATE;
+			nemoplay_set_state(play, NEMOPLAY_WAIT_STATE);
 		} else if (packet.stream_index == video_stream) {
 			avcodec_decode_video2(video_context, frame, &finished, &packet);
 
@@ -250,7 +250,7 @@ int nemoplay_decode_media(struct nemoplay *play, int reqcount, int maxcount)
 
 		if (nemoplay_queue_get_count(play->video_queue) > maxcount &&
 				nemoplay_queue_get_count(play->audio_queue) > maxcount) {
-			play->state = NEMOPLAY_FULL_STATE;
+			nemoplay_set_state(play, NEMOPLAY_WAIT_STATE);
 		}
 
 		av_free_packet(&packet);
@@ -285,7 +285,7 @@ void nemoplay_wait_media(struct nemoplay *play)
 {
 	pthread_mutex_lock(&play->lock);
 
-	if (play->state == NEMOPLAY_FULL_STATE || play->state == NEMOPLAY_STOP_STATE || play->state == NEMOPLAY_IDLE_STATE)
+	if (play->state == NEMOPLAY_WAIT_STATE)
 		pthread_cond_wait(&play->signal, &play->lock);
 
 	pthread_mutex_unlock(&play->lock);
@@ -298,7 +298,19 @@ void nemoplay_set_state(struct nemoplay *play, int state)
 
 	pthread_mutex_lock(&play->lock);
 
-	play->state = state;
+	if (state == NEMOPLAY_DONE_STATE) {
+		play->state = state;
+	} else if (play->state == NEMOPLAY_STOP_STATE) {
+		if (state == NEMOPLAY_PLAY_STATE)
+			play->state = state;
+		else
+			state = NEMOPLAY_NONE_STATE;
+	} else {
+		if (state == NEMOPLAY_WAKE_STATE)
+			play->state = NEMOPLAY_PLAY_STATE;
+		else
+			play->state = state;
+	}
 
 	pthread_cond_signal(&play->signal);
 

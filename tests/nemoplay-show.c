@@ -83,9 +83,11 @@ static void nemoplay_dispatch_video_timer(struct nemotimer *timer, void *data)
 
 	state = nemoplay_queue_get_state(queue);
 	if (state == NEMOPLAY_QUEUE_NORMAL_STATE) {
+		if (nemoplay_queue_get_count(queue) < 64)
+			nemoplay_set_state(play, NEMOPLAY_WAKE_STATE);
+
 		one = nemoplay_queue_dequeue(queue);
 		if (one == NULL) {
-			nemoplay_set_state(play, NEMOPLAY_PLAY_STATE);
 			nemotimer_set_timeout(timer, 1000 / nemoplay_get_video_framerate(play));
 		} else if (nemoplay_queue_get_one_serial(one) != nemoplay_queue_get_serial(queue)) {
 			nemoplay_queue_destroy_one(one);
@@ -124,9 +126,6 @@ static void nemoplay_dispatch_video_timer(struct nemotimer *timer, void *data)
 				nemoplay_queue_destroy_one(one);
 			}
 		}
-
-		if (nemoplay_queue_get_count(queue) < 64)
-			nemoplay_set_state(play, NEMOPLAY_PLAY_STATE);
 	} else if (state == NEMOPLAY_QUEUE_STOP_STATE) {
 		nemotimer_set_timeout(timer, 1000 / nemoplay_get_video_framerate(play));
 	}
@@ -160,9 +159,11 @@ static void *nemoplay_handle_audioplay(void *arg)
 
 	while ((state = nemoplay_queue_get_state(queue)) != NEMOPLAY_QUEUE_DONE_STATE) {
 		if (state == NEMOPLAY_QUEUE_NORMAL_STATE) {
+			if (nemoplay_queue_get_count(queue) < 64)
+				nemoplay_set_state(play, NEMOPLAY_WAKE_STATE);
+
 			one = nemoplay_queue_dequeue(queue);
 			if (one == NULL) {
-				nemoplay_set_state(play, NEMOPLAY_PLAY_STATE);
 				nemoplay_queue_wait(queue);
 			} else if (nemoplay_queue_get_one_serial(one) != nemoplay_queue_get_serial(queue)) {
 				nemoplay_queue_destroy_one(one);
@@ -175,9 +176,6 @@ static void *nemoplay_handle_audioplay(void *arg)
 
 				nemoplay_queue_destroy_one(one);
 			}
-
-			if (nemoplay_queue_get_count(queue) < 64)
-				nemoplay_set_state(play, NEMOPLAY_PLAY_STATE);
 		} else if (state == NEMOPLAY_QUEUE_STOP_STATE) {
 			nemoplay_queue_wait(queue);
 		}
@@ -208,7 +206,7 @@ static void *nemoplay_handle_decodeframe(void *arg)
 
 		if (state == NEMOPLAY_PLAY_STATE) {
 			nemoplay_decode_media(play, 256, 128);
-		} else if (state == NEMOPLAY_FULL_STATE || state == NEMOPLAY_STOP_STATE || state == NEMOPLAY_IDLE_STATE) {
+		} else if (state == NEMOPLAY_WAIT_STATE) {
 			nemoplay_wait_media(play);
 		}
 	}
