@@ -36,8 +36,7 @@ struct nemoplay *nemoplay_create(void)
 	play->audio_queue = nemoplay_queue_create();
 	play->subtitle_queue = nemoplay_queue_create();
 
-	play->video_clock = nemoplay_clock_create();
-	play->audio_clock = nemoplay_clock_create();
+	play->clock = nemoplay_clock_create();
 
 	return play;
 
@@ -52,8 +51,7 @@ err1:
 
 void nemoplay_destroy(struct nemoplay *play)
 {
-	nemoplay_clock_destroy(play->video_clock);
-	nemoplay_clock_destroy(play->audio_clock);
+	nemoplay_clock_destroy(play->clock);
 
 	nemoplay_queue_destroy(play->video_queue);
 	nemoplay_queue_destroy(play->audio_queue);
@@ -263,13 +261,13 @@ int nemoplay_decode_media(struct nemoplay *play, int reqcount, int maxcount)
 	return 0;
 }
 
-int nemoplay_seek_media(struct nemoplay *play, double pos)
+int nemoplay_seek_media(struct nemoplay *play, double pts)
 {
 	nemoplay_queue_flush(play->video_queue);
 	nemoplay_queue_flush(play->audio_queue);
 	nemoplay_queue_flush(play->subtitle_queue);
 
-	if (avformat_seek_file(play->container, -1, INT64_MIN, (int64_t)(pos * AV_TIME_BASE), INT64_MAX, 0) >= 0) {
+	if (avformat_seek_file(play->container, -1, INT64_MIN, (int64_t)(pts * AV_TIME_BASE), INT64_MAX, 0) >= 0) {
 		if (play->video_context != NULL)
 			avcodec_flush_buffers(play->video_context);
 		if (play->audio_context != NULL)
@@ -351,4 +349,14 @@ void nemoplay_wait_thread(struct nemoplay *play)
 		pthread_cond_wait(&play->signal, &play->lock);
 
 	pthread_mutex_unlock(&play->lock);
+}
+
+void nemoplay_set_cts(struct nemoplay *play, double pts)
+{
+	nemoplay_clock_set(play->clock, pts);
+}
+
+double nemoplay_get_cts(struct nemoplay *play)
+{
+	return nemoplay_clock_get(play->clock);
 }

@@ -55,8 +55,7 @@ struct nemoplay {
 
 	SwrContext *swr;
 
-	struct playclock *video_clock;
-	struct playclock *audio_clock;
+	struct playclock *clock;
 
 	int video_width;
 	int video_height;
@@ -75,7 +74,7 @@ extern void nemoplay_destroy(struct nemoplay *play);
 extern int nemoplay_prepare_media(struct nemoplay *play, const char *mediapath);
 extern void nemoplay_finish_media(struct nemoplay *play);
 extern int nemoplay_decode_media(struct nemoplay *play, int reqcount, int maxcount);
-extern int nemoplay_seek_media(struct nemoplay *play, double pos);
+extern int nemoplay_seek_media(struct nemoplay *play, double pts);
 extern void nemoplay_wait_media(struct nemoplay *play);
 
 extern void nemoplay_set_state(struct nemoplay *play, int state);
@@ -83,6 +82,9 @@ extern void nemoplay_set_state(struct nemoplay *play, int state);
 extern void nemoplay_enter_thread(struct nemoplay *play);
 extern void nemoplay_leave_thread(struct nemoplay *play);
 extern void nemoplay_wait_thread(struct nemoplay *play);
+
+extern void nemoplay_set_cts(struct nemoplay *play, double pts);
+extern double nemoplay_get_cts(struct nemoplay *play);
 
 static inline int nemoplay_get_state(struct nemoplay *play)
 {
@@ -102,16 +104,6 @@ static inline struct playqueue *nemoplay_get_audio_queue(struct nemoplay *play)
 static inline struct playqueue *nemoplay_get_subtitle_queue(struct nemoplay *play)
 {
 	return play->subtitle_queue;
-}
-
-static inline struct playclock *nemoplay_get_video_clock(struct nemoplay *play)
-{
-	return play->video_clock;
-}
-
-static inline struct playclock *nemoplay_get_audio_clock(struct nemoplay *play)
-{
-	return play->audio_clock;
 }
 
 static inline int nemoplay_get_video_width(struct nemoplay *play)

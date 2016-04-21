@@ -73,32 +73,35 @@ static void nemoplay_dispatch_canvas_resize(struct nemoshow *show, struct showon
 static void nemoplay_dispatch_video_timer(struct nemotimer *timer, void *data)
 {
 	struct playcontext *context = (struct playcontext *)data;
+	struct nemoplay *play = context->play;
 	struct playqueue *queue;
 	struct playone *one;
 	struct playone *pone;
 	int state;
 
-	queue = nemoplay_get_video_queue(context->play);
+	queue = nemoplay_get_video_queue(play);
 
 	state = nemoplay_queue_get_state(queue);
 	if (state == NEMOPLAY_QUEUE_NORMAL_STATE) {
 		one = nemoplay_queue_dequeue(queue);
 		if (one == NULL) {
-			nemoplay_set_state(context->play, NEMOPLAY_PLAY_STATE);
-			nemotimer_set_timeout(timer, 1000 / nemoplay_get_video_framerate(context->play));
+			nemoplay_set_state(play, NEMOPLAY_PLAY_STATE);
+			nemotimer_set_timeout(timer, 1000 / nemoplay_get_video_framerate(play));
 		} else if (nemoplay_queue_get_one_serial(one) != nemoplay_queue_get_serial(queue)) {
 			nemoplay_queue_destroy_one(one);
 			nemotimer_set_timeout(timer, 1);
 		} else if (nemoplay_queue_get_one_cmd(one) == NEMOPLAY_QUEUE_NORMAL_COMMAND) {
-			struct playclock *clock = nemoplay_get_audio_clock(context->play);
-			double threshold = 1.0f / nemoplay_get_video_framerate(context->play);
-			double time0 = nemoplay_clock_get(clock);
+			double threshold = 1.0f / nemoplay_get_video_framerate(play);
+			double cts = nemoplay_get_cts(play);
 			double pts;
 
-			if (time0 > nemoplay_queue_get_one_pts(one) + threshold) {
+			if (nemoplay_has_audio(play) == 0)
+				nemoplay_set_cts(play, nemoplay_queue_get_one_pts(one));
+
+			if (cts > nemoplay_queue_get_one_pts(one) + threshold) {
 				nemoplay_queue_destroy_one(one);
 				nemotimer_set_timeout(timer, 1);
-			} else if (time0 < nemoplay_queue_get_one_pts(one) - threshold) {
+			} else if (cts < nemoplay_queue_get_one_pts(one) - threshold) {
 				nemoplay_queue_enqueue_tail(queue, one);
 				nemotimer_set_timeout(timer, threshold * 1000);
 			} else {
@@ -114,7 +117,7 @@ static void nemoplay_dispatch_video_timer(struct nemotimer *timer, void *data)
 				context->has_frame = 1;
 
 				if (nemoplay_queue_peek_pts(queue, &pts) != 0)
-					nemotimer_set_timeout(timer, MINMAX(pts > time0 ? pts - time0 : 1.0f, 1.0f, threshold) * 1000);
+					nemotimer_set_timeout(timer, MINMAX(pts > cts ? pts - cts : 1.0f, 1.0f, threshold) * 1000);
 				else
 					nemotimer_set_timeout(timer, threshold * 1000);
 
@@ -123,9 +126,9 @@ static void nemoplay_dispatch_video_timer(struct nemotimer *timer, void *data)
 		}
 
 		if (nemoplay_queue_get_count(queue) < 64)
-			nemoplay_set_state(context->play, NEMOPLAY_PLAY_STATE);
+			nemoplay_set_state(play, NEMOPLAY_PLAY_STATE);
 	} else if (state == NEMOPLAY_QUEUE_STOP_STATE) {
-		nemotimer_set_timeout(timer, 1000 / nemoplay_get_video_framerate(context->play));
+		nemotimer_set_timeout(timer, 1000 / nemoplay_get_video_framerate(play));
 	}
 }
 
@@ -134,7 +137,6 @@ static void *nemoplay_handle_audioplay(void *arg)
 	struct playcontext *context = (struct playcontext *)arg;
 	struct nemoplay *play = context->play;
 	struct playqueue *queue;
-	struct playclock *clock;
 	struct playone *one;
 	ao_device *device;
 	ao_sample_format format;
@@ -155,7 +157,6 @@ static void *nemoplay_handle_audioplay(void *arg)
 	device = ao_open_live(driver, &format, NULL);
 
 	queue = nemoplay_get_audio_queue(play);
-	clock = nemoplay_get_audio_clock(play);
 
 	while ((state = nemoplay_queue_get_state(queue)) != NEMOPLAY_QUEUE_DONE_STATE) {
 		if (state == NEMOPLAY_QUEUE_NORMAL_STATE) {
@@ -166,11 +167,11 @@ static void *nemoplay_handle_audioplay(void *arg)
 			} else if (nemoplay_queue_get_one_serial(one) != nemoplay_queue_get_serial(queue)) {
 				nemoplay_queue_destroy_one(one);
 			} else if (nemoplay_queue_get_one_cmd(one) == NEMOPLAY_QUEUE_NORMAL_COMMAND) {
+				nemoplay_set_cts(play, nemoplay_queue_get_one_pts(one));
+
 				ao_play(device,
 						nemoplay_queue_get_one_data(one),
 						nemoplay_queue_get_one_size(one));
-
-				nemoplay_clock_set(clock, nemoplay_queue_get_one_pts(one));
 
 				nemoplay_queue_destroy_one(one);
 			}
@@ -202,10 +203,7 @@ static void *nemoplay_handle_decodeframe(void *arg)
 		if (state == NEMOPLAY_PLAY_STATE) {
 			nemoplay_decode_media(play, 256, 128);
 		} else if (state == NEMOPLAY_SEEK_STATE) {
-			struct playclock *clock = nemoplay_get_audio_clock(context->play);
-			double pos = nemoplay_clock_get(clock) + 10.0f;
-
-			nemoplay_seek_media(play, pos);
+			nemoplay_seek_media(play, nemoplay_get_cts(play) + 10.0f);
 		} else if (state == NEMOPLAY_FULL_STATE || state == NEMOPLAY_STOP_STATE || state == NEMOPLAY_IDLE_STATE) {
 			nemoplay_wait_media(play);
 		}
