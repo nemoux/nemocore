@@ -5,9 +5,12 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <cef/cef_app.h>
+#include <cef/cef_client.h>
+#include <cef/cef_render_handler.h>
+
 #include <nemonavi.h>
-#include <naviapp.hpp>
-#include <navihandler.hpp>
+#include <naviclient.hpp>
 #include <nemoshow.h>
 #include <showhelper.h>
 #include <nemolog.h>
@@ -23,10 +26,22 @@ int main(int argc, char *argv[])
 		return r;
 
 	CefSettings settings;
+	CefInitialize(args, settings, NULL, NULL);
 
-	CefRefPtr<NaviApp> app(new NaviApp);
-	CefInitialize(args, settings, app.get(), NULL);
-	CefRunMessageLoop();
+	CefRefPtr<CefBrowser> browser;
+	CefRefPtr<NaviClient> client;
+	CefWindowInfo window_info;
+	CefBrowserSettings browser_settings;
+
+	window_info.SetAsWindowless(0x1, true);
+
+	client = new NaviClient();
+
+	browser = CefBrowserHost::CreateBrowserSync(window_info, client.get(), "http://www.google.com", browser_settings, NULL);
+
+	while (1)
+		CefDoMessageLoopWork();
+
 	CefShutdown();
 
 	return 0;

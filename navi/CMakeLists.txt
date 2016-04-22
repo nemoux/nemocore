@@ -11,8 +11,7 @@ include_directories(
 
 add_library(nemonavi SHARED
 	nemonavi.c
-	naviapp.cpp
-	navihandler.cpp
+	naviclient.cpp
 	)
 
 TARGET_LINK_LIBRARIES(nemonavi

@@ -1,17 +1,15 @@
-#ifndef __NEMONAVI_HANDLER_HPP__
-#define __NEMONAVI_HANDLER_HPP__
+#ifndef __NEMONAVI_CLIENT_HPP__
+#define __NEMONAVI_CLIENT_HPP__
 
 #include <list>
 
 #include <cef/cef_client.h>
 #include <cef/cef_browser.h>
 
-class NaviHandler : public CefClient, public CefContextMenuHandler, public CefDisplayHandler, public CefDownloadHandler, public CefLifeSpanHandler, public CefLoadHandler, public CefRenderHandler, public CefKeyboardHandler, public CefRequestHandler {
+class NaviClient : public CefClient, public CefContextMenuHandler, public CefDisplayHandler, public CefDownloadHandler, public CefLifeSpanHandler, public CefLoadHandler, public CefRenderHandler, public CefKeyboardHandler, public CefRequestHandler {
 	public:
-		NaviHandler();
-		~NaviHandler();
-
-		static NaviHandler *GetInstance();
+		NaviClient();
+		~NaviClient();
 
 		CefRefPtr<CefDisplayHandler> GetDisplayHandler() OVERRIDE
 		{
@@ -24,6 +22,11 @@ class NaviHandler : public CefClient, public CefContextMenuHandler, public CefDi
 		}
 
 		CefRefPtr<CefLoadHandler> GetLoadHandler() OVERRIDE
+		{
+			return this;
+		}
+
+		CefRefPtr<CefRenderHandler> GetRenderHandler() OVERRIDE
 		{
 			return this;
 		}
@@ -53,21 +56,9 @@ class NaviHandler : public CefClient, public CefContextMenuHandler, public CefDi
 		bool StartDragging(CefRefPtr<CefBrowser> browser, CefRefPtr<CefDragData> drag_data, CefRenderHandler::DragOperationsMask allowed_ops, int x, int y) OVERRIDE;
 		void UpdateDragCursor(CefRefPtr<CefBrowser> browser, CefRenderHandler::DragOperation operation) OVERRIDE;
 
-		void CloseAllBrowsers(bool force_close);
-
-		bool IsClosing() const
-		{
-			return is_closing;
-		}
-
 	private:
-		typedef std::list< CefRefPtr<CefBrowser> > BrowserList;
-		BrowserList browsers;
-
-		bool is_closing;
-
-		IMPLEMENT_REFCOUNTING(NaviHandler);
-		DISALLOW_COPY_AND_ASSIGN(NaviHandler);
+		IMPLEMENT_REFCOUNTING(NaviClient);
+		DISALLOW_COPY_AND_ASSIGN(NaviClient);
 };
 
 #endif
