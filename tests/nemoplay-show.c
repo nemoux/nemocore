@@ -52,7 +52,7 @@ static void nemoplay_dispatch_canvas_event(struct nemoshow *show, struct showone
 				nemoplay_set_state(context->play, NEMOPLAY_STOP_STATE);
 			}
 		} else if (nemoshow_event_is_single_tap(show, event)) {
-			nemoplay_set_seek(context->play, nemoplay_get_cts(context->play) + 10.0f);
+			nemoplay_set_cmd(context->play, NEMOPLAY_SEEK_CMD);
 		}
 	}
 }
@@ -197,10 +197,9 @@ static void *nemoplay_handle_decodeframe(void *arg)
 	nemoplay_enter_thread(play);
 
 	while ((state = nemoplay_get_state(play)) != NEMOPLAY_DONE_STATE) {
-		if (nemoplay_has_seek(play) != 0) {
-			nemoplay_seek_media(play, nemoplay_get_seek(play));
-
-			nemoplay_put_seek(play);
+		if (nemoplay_has_cmd(play, NEMOPLAY_SEEK_CMD) != 0) {
+			nemoplay_seek_media(play, nemoplay_get_cts(play) + 10.0f);
+			nemoplay_put_cmd(play, NEMOPLAY_SEEK_CMD);
 		}
 
 		if (state == NEMOPLAY_PLAY_STATE) {

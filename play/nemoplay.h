@@ -28,11 +28,13 @@ typedef enum {
 	NEMOPLAY_LAST_STATE
 } NemoPlayState;
 
+typedef enum {
+	NEMOPLAY_SEEK_CMD = (1 << 0)
+} NemoPlayCmd;
+
 struct nemoplay {
 	int state;
-
-	int has_seek;
-	double seek_pts;
+	uint32_t cmd;
 
 	uint64_t frame;
 
@@ -90,10 +92,9 @@ extern void nemoplay_wait_thread(struct nemoplay *play);
 extern void nemoplay_set_cts(struct nemoplay *play, double pts);
 extern double nemoplay_get_cts(struct nemoplay *play);
 
-extern void nemoplay_set_seek(struct nemoplay *play, double pts);
-extern double nemoplay_get_seek(struct nemoplay *play);
-extern void nemoplay_put_seek(struct nemoplay *play);
-extern int nemoplay_has_seek(struct nemoplay *play);
+extern void nemoplay_set_cmd(struct nemoplay *play, uint32_t cmd);
+extern void nemoplay_put_cmd(struct nemoplay *play, uint32_t cmd);
+extern int nemoplay_has_cmd(struct nemoplay *play, uint32_t cmd);
 
 static inline int nemoplay_get_state(struct nemoplay *play)
 {

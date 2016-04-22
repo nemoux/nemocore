@@ -157,6 +157,7 @@ int nemoplay_prepare_media(struct nemoplay *play, const char *mediapath)
 	play->video_framerate = av_q2d(av_guess_frame_rate(container, container->streams[video_stream], NULL));
 
 	play->state = NEMOPLAY_PLAY_STATE;
+	play->cmd = 0x0;
 	play->frame = 0;
 
 	return 0;
@@ -187,7 +188,7 @@ int nemoplay_decode_media(struct nemoplay *play, int reqcount, int maxcount)
 
 	frame = av_frame_alloc();
 
-	for (i = 0; i < reqcount && play->state == NEMOPLAY_PLAY_STATE && play->has_seek == 0; i++) {
+	for (i = 0; i < reqcount && play->state == NEMOPLAY_PLAY_STATE && play->cmd == 0x0; i++) {
 		if (av_read_frame(container, &packet) < 0) {
 			nemoplay_set_state(play, NEMOPLAY_WAIT_STATE);
 		} else if (packet.stream_index == video_stream) {
@@ -374,33 +375,27 @@ double nemoplay_get_cts(struct nemoplay *play)
 	return nemoplay_clock_get(play->clock);
 }
 
-void nemoplay_set_seek(struct nemoplay *play, double pts)
+void nemoplay_set_cmd(struct nemoplay *play, uint32_t cmd)
 {
 	pthread_mutex_lock(&play->lock);
 
-	play->has_seek = 1;
-	play->seek_pts = pts;
+	play->cmd |= cmd;
 
 	pthread_cond_signal(&play->signal);
 
 	pthread_mutex_unlock(&play->lock);
 }
 
-double nemoplay_get_seek(struct nemoplay *play)
-{
-	return play->seek_pts;
-}
-
-void nemoplay_put_seek(struct nemoplay *play)
+void nemoplay_put_cmd(struct nemoplay *play, uint32_t cmd)
 {
 	pthread_mutex_lock(&play->lock);
 
-	play->has_seek = 0;
+	play->cmd &= ~cmd;
 
 	pthread_mutex_unlock(&play->lock);
 }
 
-int nemoplay_has_seek(struct nemoplay *play)
+int nemoplay_has_cmd(struct nemoplay *play, uint32_t cmd)
 {
-	return play->has_seek;
+	return (play->cmd & cmd) == cmd;
 }
