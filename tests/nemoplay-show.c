@@ -75,7 +75,6 @@ static void nemoplay_dispatch_video_timer(struct nemotimer *timer, void *data)
 	struct nemoplay *play = context->play;
 	struct playqueue *queue;
 	struct playone *one;
-	struct playone *pone;
 	int state;
 
 	queue = nemoplay_get_video_queue(play);
