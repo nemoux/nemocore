@@ -16,6 +16,7 @@ include_directories(
 	${CMAKE_SOURCE_DIR}/show
 	${CMAKE_SOURCE_DIR}/apps
 	${CMAKE_SOURCE_DIR}/play
+	${CMAKE_SOURCE_DIR}/navi
 	)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
@@ -40,3 +41,14 @@ TARGET_LINK_LIBRARIES(nemoplay-show
 	nemoapps
 	${AO_LIBRARIES}
 	)
+
+if(WITH_CEF)
+	add_executable(nemonavi-show
+		nemonavi-show.cpp
+		)
+
+	TARGET_LINK_LIBRARIES(nemonavi-show
+		nemonavi
+		nemoapps
+		)
+endif(WITH_CEF)

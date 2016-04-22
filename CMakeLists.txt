@@ -24,6 +24,7 @@ option(WITH_GLIB "Build with GLIB" ON)
 option(WITH_GSTREAMER "Build with GSTREAMER" ON)
 option(WITH_PULSEAUDIO "Build with PULSEAUDIO" ON)
 option(WITH_MUPDF "Build with MUPDF" ON)
+option(WITH_CEF "Build with CEF" ON)
 
 option(WITH_WAYLANDSHELL "Build with WAYLANDSHELL" ON)
 option(WITH_XDGSHELL "Build with XDGSHELL" ON)
@@ -193,6 +194,10 @@ add_subdirectory(tale)
 add_subdirectory(show)
 add_subdirectory(mote)
 add_subdirectory(play)
+
+if(WITH_CEF)
+	add_subdirectory(navi)
+endif(WITH_CEF)
 
 add_subdirectory(compz)
 add_subdirectory(shell)
