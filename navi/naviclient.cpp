@@ -21,7 +21,7 @@
 #include <nemohelper.h>
 #include <nemomisc.h>
 
-NaviClient::NaviClient()
+NaviClient::NaviClient(void *data) : m_userdata(data)
 {
 }
 
@@ -101,6 +101,18 @@ void NaviClient::OnPopupSize(CefRefPtr<CefBrowser> browser, const CefRect &rect)
 
 void NaviClient::OnPaint(CefRefPtr<CefBrowser> browser, CefRenderHandler::PaintElementType type, const CefRenderHandler::RectList &dirtyRects, const void *buffer, int width, int height)
 {
+	struct nemonavi *navi = (struct nemonavi *)m_userdata;
+
+	if (navi->dispatch_paint == NULL)
+		return;
+
+	CefRenderHandler::RectList::const_iterator iter = dirtyRects.begin();
+
+	for (; iter != dirtyRects.end(); iter++) {
+		const CefRect &rect = *iter;
+
+		navi->dispatch_paint(navi, buffer, width, height, rect.x, rect.y, rect.width, rect.height);
+	}
 }
 
 void NaviClient::OnCursorChange(CefRefPtr<CefBrowser> browser, CefCursorHandle cursor, CursorType type, const CefCursorInfo &custom_cursor_info)

@@ -44,7 +44,7 @@ TARGET_LINK_LIBRARIES(nemoplay-show
 
 if(WITH_CEF)
 	add_executable(nemonavi-show
-		nemonavi-show.cpp
+		nemonavi-show.c
 		)
 
 	TARGET_LINK_LIBRARIES(nemonavi-show

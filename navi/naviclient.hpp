@@ -8,7 +8,7 @@
 
 class NaviClient : public CefClient, public CefContextMenuHandler, public CefDisplayHandler, public CefDownloadHandler, public CefLifeSpanHandler, public CefLoadHandler, public CefRenderHandler, public CefKeyboardHandler, public CefRequestHandler {
 	public:
-		NaviClient();
+		NaviClient(void *data);
 		~NaviClient();
 
 		CefRefPtr<CefDisplayHandler> GetDisplayHandler() OVERRIDE
@@ -59,6 +59,8 @@ class NaviClient : public CefClient, public CefContextMenuHandler, public CefDis
 	private:
 		IMPLEMENT_REFCOUNTING(NaviClient);
 		DISALLOW_COPY_AND_ASSIGN(NaviClient);
+
+		void *m_userdata;
 };
 
 #endif

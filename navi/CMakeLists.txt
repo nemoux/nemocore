@@ -10,7 +10,7 @@ include_directories(
 	)
 
 add_library(nemonavi SHARED
-	nemonavi.c
+	nemonavi.cpp
 	naviclient.cpp
 	)
 
