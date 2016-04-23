@@ -13,6 +13,7 @@
 
 #include <nemonavi.h>
 #include <nemonavi.hpp>
+#include <naviapp.hpp>
 #include <naviclient.hpp>
 #include <nemolog.h>
 #include <nemomisc.h>
@@ -20,12 +21,13 @@
 int nemonavi_init_once(int argc, char *argv[])
 {
 	CefMainArgs args(argc, argv);
+	CefRefPtr<NaviApp> app = new NaviApp();
 
-	if (CefExecuteProcess(args, NULL, NULL) >= 0)
+	if (CefExecuteProcess(args, app, NULL) >= 0)
 		return -1;
 
 	CefSettings settings;
-	CefInitialize(args, settings, NULL, NULL);
+	CefInitialize(args, settings, app, NULL);
 
 	return 0;
 }
