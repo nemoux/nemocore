@@ -53,6 +53,7 @@ static void nemonavi_dispatch_paint(struct nemonavi *navi, const void *buffer, i
 static void nemonavi_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, void *event)
 {
 	struct navicontext *context = (struct navicontext *)nemoshow_get_userdata(show);
+	float x, y;
 
 	if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event)) {
 		nemoshow_event_update_taps(show, canvas, event);
@@ -65,27 +66,42 @@ static void nemonavi_dispatch_canvas_event(struct nemoshow *show, struct showone
 	}
 
 	if (nemoshow_event_is_pointer_enter(show, event)) {
-		nemonavi_send_pointer_enter_event(context->navi,
-				nemoshow_event_get_x(event),
-				nemoshow_event_get_y(event));
-	} else if (nemoshow_event_is_pointer_leave(show, event)) {
-		nemonavi_send_pointer_leave_event(context->navi,
-				nemoshow_event_get_x(event),
-				nemoshow_event_get_y(event));
-	} else if (nemoshow_event_is_pointer_button_down(show, event, 0)) {
-		nemonavi_send_pointer_down_event(context->navi,
+		nemoshow_event_transform_to_viewport(show,
 				nemoshow_event_get_x(event),
 				nemoshow_event_get_y(event),
+				&x, &y);
+
+		nemonavi_send_pointer_enter_event(context->navi, x, y);
+	} else if (nemoshow_event_is_pointer_leave(show, event)) {
+		nemoshow_event_transform_to_viewport(show,
+				nemoshow_event_get_x(event),
+				nemoshow_event_get_y(event),
+				&x, &y);
+
+		nemonavi_send_pointer_leave_event(context->navi, x, y);
+	} else if (nemoshow_event_is_pointer_button_down(show, event, 0)) {
+		nemoshow_event_transform_to_viewport(show,
+				nemoshow_event_get_x(event),
+				nemoshow_event_get_y(event),
+				&x, &y);
+
+		nemonavi_send_pointer_down_event(context->navi, x, y,
 				nemoshow_event_get_value(event));
 	} else if (nemoshow_event_is_pointer_button_up(show, event, 0)) {
-		nemonavi_send_pointer_up_event(context->navi,
+		nemoshow_event_transform_to_viewport(show,
 				nemoshow_event_get_x(event),
 				nemoshow_event_get_y(event),
+				&x, &y);
+
+		nemonavi_send_pointer_up_event(context->navi, x, y,
 				nemoshow_event_get_value(event));
 	} else if (nemoshow_event_is_pointer_motion(show, event)) {
-		nemonavi_send_pointer_motion_event(context->navi,
+		nemoshow_event_transform_to_viewport(show,
 				nemoshow_event_get_x(event),
-				nemoshow_event_get_y(event));
+				nemoshow_event_get_y(event),
+				&x, &y);
+
+		nemonavi_send_pointer_motion_event(context->navi, x, y);
 	} else if (nemoshow_event_is_pointer_axis(show, event)) {
 	}
 
