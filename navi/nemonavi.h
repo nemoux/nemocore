@@ -32,6 +32,19 @@ extern void nemonavi_destroy(struct nemonavi *navi);
 
 extern void nemonavi_set_size(struct nemonavi *navi, int32_t width, int32_t height);
 
+extern void nemonavi_send_pointer_enter_event(struct nemonavi *navi, float x, float y);
+extern void nemonavi_send_pointer_leave_event(struct nemonavi *navi, float x, float y);
+extern void nemonavi_send_pointer_down_event(struct nemonavi *navi, float x, float y, int button);
+extern void nemonavi_send_pointer_up_event(struct nemonavi *navi, float x, float y, int button);
+extern void nemonavi_send_pointer_motion_event(struct nemonavi *navi, float x, float y);
+
+extern void nemonavi_send_keyboard_down_event(struct nemonavi *navi, uint32_t code);
+extern void nemonavi_send_keyboard_up_event(struct nemonavi *navi, uint32_t code);
+
+extern void nemonavi_send_touch_down_event(struct nemonavi *navi, float x, float y, uint32_t id);
+extern void nemonavi_send_touch_up_event(struct nemonavi *navi, float x, float y, uint32_t id);
+extern void nemonavi_send_touch_motion_event(struct nemonavi *navi, float x, float y, uint32_t id);
+
 static inline void nemonavi_set_dispatch_paint(struct nemonavi *navi, nemonavi_dispatch_paint_t dispatch)
 {
 	navi->dispatch_paint = dispatch;

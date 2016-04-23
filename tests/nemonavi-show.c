@@ -63,6 +63,44 @@ static void nemonavi_dispatch_canvas_event(struct nemoshow *show, struct showone
 			nemoshow_view_pick_distant(show, event, NEMOSHOW_VIEW_PICK_ALL_TYPE);
 		}
 	}
+
+	if (nemoshow_event_is_pointer_enter(show, event)) {
+		nemonavi_send_pointer_enter_event(context->navi,
+				nemoshow_event_get_x(event),
+				nemoshow_event_get_y(event));
+	} else if (nemoshow_event_is_pointer_leave(show, event)) {
+		nemonavi_send_pointer_leave_event(context->navi,
+				nemoshow_event_get_x(event),
+				nemoshow_event_get_y(event));
+	} else if (nemoshow_event_is_pointer_button_down(show, event, 0)) {
+		nemonavi_send_pointer_down_event(context->navi,
+				nemoshow_event_get_x(event),
+				nemoshow_event_get_y(event),
+				nemoshow_event_get_value(event));
+	} else if (nemoshow_event_is_pointer_button_up(show, event, 0)) {
+		nemonavi_send_pointer_up_event(context->navi,
+				nemoshow_event_get_x(event),
+				nemoshow_event_get_y(event),
+				nemoshow_event_get_value(event));
+	} else if (nemoshow_event_is_pointer_motion(show, event)) {
+		nemonavi_send_pointer_motion_event(context->navi,
+				nemoshow_event_get_x(event),
+				nemoshow_event_get_y(event));
+	} else if (nemoshow_event_is_pointer_axis(show, event)) {
+	}
+
+	if (nemoshow_event_is_keyboard_down(show, event)) {
+		nemonavi_send_keyboard_down_event(context->navi,
+				nemoshow_event_get_value(event));
+	} else if (nemoshow_event_is_keyboard_up(show, event)) {
+		nemonavi_send_keyboard_up_event(context->navi,
+				nemoshow_event_get_value(event));
+	}
+
+	if (nemoshow_event_is_touch_down(show, event)) {
+	} else if (nemoshow_event_is_touch_up(show, event)) {
+	} else if (nemoshow_event_is_touch_motion(show, event)) {
+	}
 }
 
 static void nemonavi_dispatch_canvas_resize(struct nemoshow *show, struct showone *one, int32_t width, int32_t height)
@@ -120,7 +158,7 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_width(canvas, width);
 	nemoshow_canvas_set_height(canvas, height);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_BACK_TYPE);
-	nemoshow_canvas_set_fill_color(canvas, 0.0f, 0.0f, 0.0f, 0.0f);
+	nemoshow_canvas_set_fill_color(canvas, 0.5f, 0.5f, 0.5f, 0.5f);
 	nemoshow_one_attach(scene, canvas);
 
 	context->canvas = canvas = nemoshow_canvas_create();

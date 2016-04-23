@@ -253,6 +253,26 @@ static inline int nemoshow_event_is_long_press(struct nemoshow *show, void *even
 	return nemotale_event_is_long_press(show->tale, (struct taleevent *)event);
 }
 
+static inline int nemoshow_event_is_touch_down(struct nemoshow *show, void *event)
+{
+	return nemotale_event_is_touch_down(show->tale, (struct taleevent *)event);
+}
+
+static inline int nemoshow_event_is_touch_up(struct nemoshow *show, void *event)
+{
+	return nemotale_event_is_touch_up(show->tale, (struct taleevent *)event);
+}
+
+static inline int nemoshow_event_is_touch_motion(struct nemoshow *show, void *event)
+{
+	return nemotale_event_is_touch_motion(show->tale, (struct taleevent *)event);
+}
+
+static inline int nemoshow_event_is_touch_single_click(struct nemoshow *show, void *event)
+{
+	return nemotale_event_is_touch_single_click(show->tale, (struct taleevent *)event);
+}
+
 static inline int nemoshow_event_is_pointer_enter(struct nemoshow *show, void *event)
 {
 	return nemotale_event_is_pointer_enter(show->tale, (struct taleevent *)event);
@@ -273,9 +293,19 @@ static inline int nemoshow_event_is_pointer_button_up(struct nemoshow *show, voi
 	return nemotale_event_is_pointer_button_up(show->tale, (struct taleevent *)event, button);
 }
 
+static inline int nemoshow_event_is_pointer_motion(struct nemoshow *show, void *event)
+{
+	return nemotale_event_is_pointer_motion(show->tale, (struct taleevent *)event);
+}
+
 static inline int nemoshow_event_is_pointer_axis(struct nemoshow *show, void *event)
 {
 	return nemotale_event_is_pointer_axis(show->tale, (struct taleevent *)event);
+}
+
+static inline int nemoshow_event_is_pointer_single_click(struct nemoshow *show, void *event)
+{
+	return nemotale_event_is_pointer_single_click(show->tale, (struct taleevent *)event);
 }
 
 static inline int nemoshow_event_is_keyboard_enter(struct nemoshow *show, void *event)

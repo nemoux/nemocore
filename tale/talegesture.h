@@ -158,12 +158,12 @@ static inline int nemotale_event_is_pointer_axis(struct nemotale *tale, struct t
 
 static inline int nemotale_event_is_pointer_button_down(struct nemotale *tale, struct taleevent *event, uint32_t button)
 {
-	return (event->type & NEMOTALE_POINTER_DOWN_EVENT) && (event->value == button);
+	return (event->type & NEMOTALE_POINTER_DOWN_EVENT) && (button == 0 || event->value == button);
 }
 
 static inline int nemotale_event_is_pointer_button_up(struct nemotale *tale, struct taleevent *event, uint32_t button)
 {
-	return (event->type & NEMOTALE_POINTER_UP_EVENT) && (event->value == button);
+	return (event->type & NEMOTALE_POINTER_UP_EVENT) && (button == 0 || event->value == button);
 }
 
 static inline int nemotale_event_is_pointer_long_press(struct nemotale *tale, struct taleevent *event)
