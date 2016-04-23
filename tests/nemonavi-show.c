@@ -47,7 +47,7 @@ static void nemonavi_dispatch_paint(struct nemonavi *navi, const void *buffer, i
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	nemoshow_canvas_damage_all(context->canvas);
-	nemoshow_make_current(context->show);
+	nemoshow_dispatch_frame(context->show);
 }
 
 static void nemonavi_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, void *event)
@@ -72,7 +72,7 @@ static void nemonavi_dispatch_canvas_resize(struct nemoshow *show, struct showon
 	nemonavi_set_size(context->navi, width, height);
 }
 
-static void nemonavi_dispatch_video_timer(struct nemotimer *timer, void *data)
+static void nemonavi_dispatch_timer(struct nemotimer *timer, void *data)
 {
 	struct navicontext *context = (struct navicontext *)data;
 
@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
 	nemonavi_set_userdata(navi, context);
 
 	context->timer = timer = nemotimer_create(tool);
-	nemotimer_set_callback(timer, nemonavi_dispatch_video_timer);
+	nemotimer_set_callback(timer, nemonavi_dispatch_timer);
 	nemotimer_set_userdata(timer, context);
 	nemotimer_set_timeout(timer, 30);
 
