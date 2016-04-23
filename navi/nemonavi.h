@@ -45,6 +45,8 @@ extern void nemonavi_send_touch_down_event(struct nemonavi *navi, float x, float
 extern void nemonavi_send_touch_up_event(struct nemonavi *navi, float x, float y, uint32_t id);
 extern void nemonavi_send_touch_motion_event(struct nemonavi *navi, float x, float y, uint32_t id);
 
+extern void nemonavi_load_url(struct nemonavi *navi, const char *url);
+
 static inline void nemonavi_set_dispatch_paint(struct nemonavi *navi, nemonavi_dispatch_paint_t dispatch)
 {
 	navi->dispatch_paint = dispatch;

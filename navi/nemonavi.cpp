@@ -9,6 +9,7 @@
 
 #include <cef/cef_app.h>
 #include <cef/cef_client.h>
+#include <cef/cef_request.h>
 #include <cef/cef_render_handler.h>
 
 #include <nemonavi.h>
@@ -188,4 +189,13 @@ void nemonavi_send_touch_up_event(struct nemonavi *navi, float x, float y, uint3
 
 void nemonavi_send_touch_motion_event(struct nemonavi *navi, float x, float y, uint32_t id)
 {
+}
+
+void nemonavi_load_url(struct nemonavi *navi, const char *url)
+{
+	CefRefPtr<CefRequest> request(CefRequest::Create());
+
+	request->SetURL(url);
+
+	NEMONAVI_CC(navi, browser)->GetMainFrame()->LoadRequest(request);
 }
