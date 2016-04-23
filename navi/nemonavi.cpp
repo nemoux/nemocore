@@ -103,40 +103,24 @@ void nemonavi_send_pointer_leave_event(struct nemonavi *navi, float x, float y)
 
 void nemonavi_send_pointer_down_event(struct nemonavi *navi, float x, float y, int button)
 {
-	CefBrowserHost::MouseButtonType button_type;
 	CefMouseEvent mouse_event;
-
-	if (button == BTN_LEFT)
-		button_type = MBT_LEFT;
-	else if (button == BTN_RIGHT)
-		button_type = MBT_RIGHT;
-	else if (button == BTN_MIDDLE)
-		button_type = MBT_MIDDLE;
 
 	mouse_event.x = x;
 	mouse_event.y = y;
 	mouse_event.modifiers = 0x0;
 
-	NEMONAVI_CC(navi, browser)->GetHost()->SendMouseClickEvent(mouse_event, button_type, false, 1);
+	NEMONAVI_CC(navi, browser)->GetHost()->SendMouseClickEvent(mouse_event, MBT_LEFT, false, 1);
 }
 
 void nemonavi_send_pointer_up_event(struct nemonavi *navi, float x, float y, int button)
 {
-	CefBrowserHost::MouseButtonType button_type;
 	CefMouseEvent mouse_event;
-
-	if (button == BTN_LEFT)
-		button_type = MBT_LEFT;
-	else if (button == BTN_RIGHT)
-		button_type = MBT_RIGHT;
-	else if (button == BTN_MIDDLE)
-		button_type = MBT_MIDDLE;
 
 	mouse_event.x = x;
 	mouse_event.y = y;
 	mouse_event.modifiers = 0x0;
 
-	NEMONAVI_CC(navi, browser)->GetHost()->SendMouseClickEvent(mouse_event, button_type, true, 1);
+	NEMONAVI_CC(navi, browser)->GetHost()->SendMouseClickEvent(mouse_event, MBT_LEFT, true, 1);
 }
 
 void nemonavi_send_pointer_motion_event(struct nemonavi *navi, float x, float y)

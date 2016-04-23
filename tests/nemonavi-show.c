@@ -54,7 +54,7 @@ static void nemonavi_dispatch_canvas_event(struct nemoshow *show, struct showone
 {
 	struct navicontext *context = (struct navicontext *)nemoshow_get_userdata(show);
 
-	if (nemoshow_event_is_down(show, event) || nemoshow_event_is_up(show, event)) {
+	if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event)) {
 		nemoshow_event_update_taps(show, canvas, event);
 
 		if (nemoshow_event_is_single_tap(show, event)) {
