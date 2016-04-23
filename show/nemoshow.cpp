@@ -576,6 +576,11 @@ int nemoshow_has_transition(struct nemoshow *show)
 	return !nemolist_empty(&show->transition_list);
 }
 
+void nemoshow_set_keyboard_focus(struct nemoshow *show, struct showone *one)
+{
+	nemotale_set_keyboard_focus(show->tale, NEMOSHOW_CANVAS_AT(one, node));
+}
+
 void nemoshow_dump_all(struct nemoshow *show, FILE *out)
 {
 	struct showone *one;

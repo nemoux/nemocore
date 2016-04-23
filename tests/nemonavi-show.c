@@ -80,6 +80,8 @@ static void nemonavi_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 		nemonavi_send_pointer_leave_event(context->navi, x, y);
 	} else if (nemoshow_event_is_pointer_button_down(show, event, 0)) {
+		nemoshow_set_keyboard_focus(show, canvas);
+
 		nemoshow_event_transform_to_viewport(show,
 				nemoshow_event_get_x(event),
 				nemoshow_event_get_y(event),

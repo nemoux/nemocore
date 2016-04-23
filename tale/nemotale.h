@@ -62,6 +62,12 @@ struct nemotale {
 		int enable;
 	} viewport;
 
+	struct {
+		struct talenode *focus;
+
+		struct nemolistener node_destroy_listener;
+	} keyboard;
+
 	struct nemolist ptap_list;
 	struct nemolist tap_list;
 	struct nemolist grab_list;
@@ -106,6 +112,8 @@ extern void nemotale_update_node(struct nemotale *tale);
 
 extern void nemotale_accumulate_damage(struct nemotale *tale);
 extern void nemotale_flush_damage(struct nemotale *tale);
+
+extern void nemotale_set_keyboard_focus(struct nemotale *tale, struct talenode *node);
 
 static inline void nemotale_set_state(struct nemotale *tale, uint32_t state)
 {

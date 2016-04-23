@@ -36,6 +36,9 @@ int nemotale_prepare(struct nemotale *tale)
 	tale->nnodes = 0;
 	tale->snodes = 8;
 
+	tale->keyboard.focus = NULL;
+	nemolist_init(&tale->keyboard.node_destroy_listener.link);
+
 	env = getenv("NEMOTALE_LONG_PRESS_DURATION");
 	if (env != NULL)
 		tale->long_press_duration = strtoul(env, NULL, 10);
@@ -104,6 +107,8 @@ void nemotale_finish(struct nemotale *tale)
 	nemosignal_emit(&tale->destroy_signal, tale);
 
 	pixman_region32_fini(&tale->damage);
+
+	nemolist_remove(&tale->keyboard.node_destroy_listener.link);
 
 	nemolist_remove(&tale->ptap_list);
 	nemolist_remove(&tale->tap_list);
@@ -327,4 +332,29 @@ void nemotale_flush_damage(struct nemotale *tale)
 	}
 
 	pixman_region32_clear(&tale->damage);
+}
+
+static void nemotale_handle_keyboard_focus_destroy(struct nemolistener *listener, void *data)
+{
+	struct nemotale *tale = (struct nemotale *)container_of(listener, struct nemotale, keyboard.node_destroy_listener);
+
+	nemolist_remove(&tale->keyboard.node_destroy_listener.link);
+	nemolist_init(&tale->keyboard.node_destroy_listener.link);
+
+	tale->keyboard.focus = NULL;
+}
+
+void nemotale_set_keyboard_focus(struct nemotale *tale, struct talenode *node)
+{
+	if (tale->keyboard.focus != NULL) {
+		nemolist_remove(&tale->keyboard.node_destroy_listener.link);
+		nemolist_init(&tale->keyboard.node_destroy_listener.link);
+	}
+
+	tale->keyboard.focus = node;
+
+	if (node != NULL) {
+		tale->keyboard.node_destroy_listener.notify = nemotale_handle_keyboard_focus_destroy;
+		nemosignal_add(&node->destroy_signal, &tale->keyboard.node_destroy_listener);
+	}
 }

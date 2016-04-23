@@ -251,7 +251,7 @@ void nemotale_push_keyboard_enter_event(struct nemotale *tale, uint32_t serial, 
 	event.type = NEMOTALE_KEYBOARD_ENTER_EVENT;
 	event.device = device;
 
-	tale->dispatch_event(tale, NULL, &event);
+	tale->dispatch_event(tale, tale->keyboard.focus, &event);
 }
 
 void nemotale_push_keyboard_leave_event(struct nemotale *tale, uint32_t serial, uint64_t device)
@@ -261,7 +261,7 @@ void nemotale_push_keyboard_leave_event(struct nemotale *tale, uint32_t serial, 
 	event.type = NEMOTALE_KEYBOARD_LEAVE_EVENT;
 	event.device = device;
 
-	tale->dispatch_event(tale, NULL, &event);
+	tale->dispatch_event(tale, tale->keyboard.focus, &event);
 }
 
 void nemotale_push_keyboard_down_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, uint32_t key)
@@ -272,7 +272,7 @@ void nemotale_push_keyboard_down_event(struct nemotale *tale, uint32_t serial, u
 	event.device = device;
 	event.value = key;
 
-	tale->dispatch_event(tale, NULL, &event);
+	tale->dispatch_event(tale, tale->keyboard.focus, &event);
 }
 
 void nemotale_push_keyboard_up_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, uint32_t key)
@@ -283,7 +283,7 @@ void nemotale_push_keyboard_up_event(struct nemotale *tale, uint32_t serial, uin
 	event.device = device;
 	event.value = key;
 
-	tale->dispatch_event(tale, NULL, &event);
+	tale->dispatch_event(tale, tale->keyboard.focus, &event);
 }
 
 void nemotale_push_touch_down_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, float x, float y, float gx, float gy)
