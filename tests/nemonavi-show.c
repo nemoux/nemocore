@@ -11,25 +11,154 @@
 #include <nemolog.h>
 #include <nemomisc.h>
 
+struct navicontext {
+	struct nemotool *tool;
+
+	struct nemoshow *show;
+	struct showone *scene;
+	struct showone *back;
+	struct showone *canvas;
+
+	struct nemonavi *navi;
+
+	struct nemotimer *timer;
+};
+
 static void nemonavi_dispatch_paint(struct nemonavi *navi, const void *buffer, int width, int height, int dx, int dy, int dw, int dh)
 {
+	struct navicontext *context = (struct navicontext *)nemonavi_get_userdata(navi);
+	GLuint texture = nemoshow_canvas_get_texture(context->canvas);
+
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH, width);
+
+	if (dx == 0 && dy == 0 && dw == width && dh == height) {
+		glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
+		glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
+
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, buffer);
+	} else {
+		glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, dx);
+		glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, dy);
+
+		glTexSubImage2D(GL_TEXTURE_2D, 0, dx, dy, dw, dh, GL_BGRA_EXT, GL_UNSIGNED_BYTE, buffer);
+	}
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	nemoshow_canvas_damage_all(context->canvas);
+	nemoshow_make_current(context->show);
+}
+
+static void nemonavi_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, void *event)
+{
+	struct navicontext *context = (struct navicontext *)nemoshow_get_userdata(show);
+
+	if (nemoshow_event_is_down(show, event) || nemoshow_event_is_up(show, event)) {
+		nemoshow_event_update_taps(show, canvas, event);
+
+		if (nemoshow_event_is_single_tap(show, event)) {
+			nemoshow_view_move(show, nemoshow_event_get_serial_on(event, 0));
+		} else if (nemoshow_event_is_many_taps(show, event)) {
+			nemoshow_view_pick_distant(show, event, NEMOSHOW_VIEW_PICK_ALL_TYPE);
+		}
+	}
+}
+
+static void nemonavi_dispatch_canvas_resize(struct nemoshow *show, struct showone *one, int32_t width, int32_t height)
+{
+	struct navicontext *context = (struct navicontext *)nemoshow_get_userdata(show);
+
+	nemonavi_set_size(context->navi, width, height);
+}
+
+static void nemonavi_dispatch_video_timer(struct nemotimer *timer, void *data)
+{
+	struct navicontext *context = (struct navicontext *)data;
+
+	nemonavi_loop_once();
+
+	nemotimer_set_timeout(timer, 30);
 }
 
 int main(int argc, char *argv[])
 {
+	struct navicontext *context;
+	struct nemotool *tool;
+	struct nemotimer *timer;
+	struct nemoshow *show;
+	struct showone *scene;
+	struct showone *canvas;
+	struct showone *one;
 	struct nemonavi *navi;
+	int width = 640;
+	int height = 480;
 
 	nemonavi_init_once(argc, argv);
 
-	navi = nemonavi_create("http://www.google.com");
-	nemonavi_set_size(navi, 640, 480);
-	nemonavi_set_dispatch_paint(navi, nemonavi_dispatch_paint);
+	context = (struct navicontext *)malloc(sizeof(struct navicontext));
+	if (context == NULL)
+		goto err1;
+	memset(context, 0, sizeof(struct navicontext));
 
-	while (1)
-		nemonavi_loop_once();
+	context->tool = tool = nemotool_create();
+	if (tool == NULL)
+		goto err2;
+	nemotool_connect_wayland(tool, NULL);
+
+	context->show = show = nemoshow_create_view(tool, width, height);
+	if (show == NULL)
+		goto err3;
+	nemoshow_set_userdata(show, context);
+
+	context->scene = scene = nemoshow_scene_create();
+	nemoshow_scene_set_width(scene, width);
+	nemoshow_scene_set_height(scene, height);
+	nemoshow_set_scene(show, scene);
+
+	context->back = canvas = nemoshow_canvas_create();
+	nemoshow_canvas_set_width(canvas, width);
+	nemoshow_canvas_set_height(canvas, height);
+	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_BACK_TYPE);
+	nemoshow_canvas_set_fill_color(canvas, 0.0f, 0.0f, 0.0f, 0.0f);
+	nemoshow_one_attach(scene, canvas);
+
+	context->canvas = canvas = nemoshow_canvas_create();
+	nemoshow_canvas_set_width(canvas, width);
+	nemoshow_canvas_set_height(canvas, height);
+	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_OPENGL_TYPE);
+	nemoshow_canvas_set_dispatch_event(canvas, nemonavi_dispatch_canvas_event);
+	nemoshow_canvas_set_dispatch_resize(canvas, nemonavi_dispatch_canvas_resize);
+	nemoshow_one_attach(scene, canvas);
+
+	context->navi = navi = nemonavi_create("http://www.google.com");
+	nemonavi_set_size(navi, width, height);
+	nemonavi_set_dispatch_paint(navi, nemonavi_dispatch_paint);
+	nemonavi_set_userdata(navi, context);
+
+	context->timer = timer = nemotimer_create(tool);
+	nemotimer_set_callback(timer, nemonavi_dispatch_video_timer);
+	nemotimer_set_userdata(timer, context);
+	nemotimer_set_timeout(timer, 30);
+
+	nemoshow_dispatch_frame(show);
+
+	nemotool_run(tool);
+
+	nemotimer_destroy(timer);
 
 	nemonavi_destroy(navi);
 
+	nemoshow_destroy_view(show);
+
+err3:
+	nemotool_disconnect_wayland(tool);
+	nemotool_destroy(tool);
+
+err2:
+	free(context);
+
+err1:
 	nemonavi_exit_once();
 
 	return 0;

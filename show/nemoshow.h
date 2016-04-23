@@ -260,6 +260,11 @@ static inline uint32_t nemoshow_get_maximum_height(struct nemoshow *show)
 	return nemotale_get_maximum_height(show->tale);
 }
 
+static inline int nemoshow_make_current(struct nemoshow *show)
+{
+	return nemotale_make_current(show->tale);
+}
+
 #include <showgrab.h>
 #include <showevent.h>
 

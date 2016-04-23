@@ -50,6 +50,8 @@ struct talefbo;
 extern struct nemotale *nemotale_create_gl(void);
 extern void nemotale_destroy_gl(struct nemotale *tale);
 
+extern int nemotale_make_current(struct nemotale *tale);
+
 extern struct taleegl *nemotale_create_egl(EGLDisplay egl_display, EGLContext egl_context, EGLConfig egl_config, EGLNativeWindowType egl_window);
 extern void nemotale_destroy_egl(struct taleegl *egl);
 extern int nemotale_composite_egl(struct nemotale *tale, pixman_region32_t *region);

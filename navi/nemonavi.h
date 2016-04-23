@@ -18,6 +18,8 @@ struct nemonavi {
 
 	int32_t width, height;
 
+	void *data;
+
 	void *cc;
 };
 
@@ -33,6 +35,16 @@ extern void nemonavi_set_size(struct nemonavi *navi, int32_t width, int32_t heig
 static inline void nemonavi_set_dispatch_paint(struct nemonavi *navi, nemonavi_dispatch_paint_t dispatch)
 {
 	navi->dispatch_paint = dispatch;
+}
+
+static inline void nemonavi_set_userdata(struct nemonavi *navi, void *data)
+{
+	navi->data = data;
+}
+
+static inline void *nemonavi_get_userdata(struct nemonavi *navi)
+{
+	return navi->data;
 }
 
 #ifdef __cplusplus

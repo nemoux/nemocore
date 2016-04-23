@@ -451,6 +451,17 @@ void nemotale_destroy_gl(struct nemotale *tale)
 	free(tale);
 }
 
+int nemotale_make_current(struct nemotale *tale)
+{
+	struct nemogltale *context = (struct nemogltale *)tale->glcontext;
+	struct taleegl *egl = (struct taleegl *)tale->backend;
+
+	if (!eglMakeCurrent(egl->display, egl->surface, egl->surface, egl->context))
+		return -1;
+
+	return 0;
+}
+
 struct taleegl *nemotale_create_egl(EGLDisplay egl_display, EGLContext egl_context, EGLConfig egl_config, EGLNativeWindowType egl_window)
 {
 	struct taleegl *egl;
