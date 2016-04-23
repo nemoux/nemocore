@@ -22,6 +22,7 @@ int main(int argc, char *argv[])
 	nemonavi_init_once(argc, argv);
 
 	navi = nemonavi_create("http://www.google.com");
+	nemonavi_set_size(navi, 640, 480);
 	nemonavi_set_dispatch_paint(navi, nemonavi_dispatch_paint);
 
 	while (1)

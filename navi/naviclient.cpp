@@ -69,14 +69,14 @@ void NaviClient::OnLoadError(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> 
 
 bool NaviClient::GetRootScreenRect(CefRefPtr<CefBrowser> browser, CefRect &rect)
 {
-	rect = CefRect(0, 0, 640, 480);
-
 	return true;
 }
 
 bool NaviClient::GetViewRect(CefRefPtr<CefBrowser> browser, CefRect &rect)
 {
-	rect = CefRect(0, 0, 640, 480);
+	struct nemonavi *navi = (struct nemonavi *)m_userdata;
+
+	rect = CefRect(0, 0, navi->width, navi->height);
 
 	return true;
 }

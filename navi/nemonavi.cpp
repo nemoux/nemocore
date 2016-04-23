@@ -68,3 +68,11 @@ void nemonavi_destroy(struct nemonavi *navi)
 
 	free(navi);
 }
+
+void nemonavi_set_size(struct nemonavi *navi, int32_t width, int32_t height)
+{
+	navi->width = width;
+	navi->height = height;
+
+	NEMONAVI_CC(navi, browser)->GetHost()->WasResized();
+}

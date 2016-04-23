@@ -16,6 +16,8 @@ typedef void (*nemonavi_dispatch_paint_t)(struct nemonavi *navi, const void *buf
 struct nemonavi {
 	nemonavi_dispatch_paint_t dispatch_paint;
 
+	int32_t width, height;
+
 	void *cc;
 };
 
@@ -25,6 +27,8 @@ extern void nemonavi_loop_once(void);
 
 extern struct nemonavi *nemonavi_create(const char *url);
 extern void nemonavi_destroy(struct nemonavi *navi);
+
+extern void nemonavi_set_size(struct nemonavi *navi, int32_t width, int32_t height);
 
 static inline void nemonavi_set_dispatch_paint(struct nemonavi *navi, nemonavi_dispatch_paint_t dispatch)
 {
