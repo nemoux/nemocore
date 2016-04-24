@@ -134,6 +134,17 @@ void nemonavi_send_pointer_motion_event(struct nemonavi *navi, float x, float y)
 	NEMONAVI_CC(navi, browser)->GetHost()->SendMouseMoveEvent(mouse_event, false);
 }
 
+void nemonavi_send_pointer_wheel_event(struct nemonavi *navi, float x, float y)
+{
+	CefMouseEvent mouse_event;
+
+	mouse_event.x = 0.0f;
+	mouse_event.y = 0.0f;
+	mouse_event.modifiers = 0.0f;
+
+	NEMONAVI_CC(navi, browser)->GetHost()->SendMouseWheelEvent(mouse_event, x, y);
+}
+
 void nemonavi_send_keyboard_down_event(struct nemonavi *navi, uint32_t code)
 {
 	CefKeyEvent key_event;
