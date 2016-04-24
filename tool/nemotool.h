@@ -212,6 +212,21 @@ static inline uint32_t nemotool_get_fullscreen_height(struct nemotool *tool)
 	return tool->fullscreen_height;
 }
 
+static inline uint32_t nemotool_get_modifiers(struct nemotool *tool)
+{
+	return tool->modifiers;
+}
+
+static inline int nemotool_has_control_key(struct nemotool *tool)
+{
+	return tool->modifiers & NEMOMOD_CONTROL_MASK;
+}
+
+static inline int nemotool_has_alt_key(struct nemotool *tool)
+{
+	return tool->modifiers & NEMOMOD_ALT_MASK;
+}
+
 static inline void nemotool_set_userdata(struct nemotool *tool, void *data)
 {
 	tool->userdata = data;
@@ -228,6 +243,7 @@ extern void nemotool_destroy_queue(struct nemoqueue *queue);
 extern int nemotool_dispatch_queue(struct nemoqueue *queue);
 
 extern uint32_t nemotool_get_keysym(struct nemotool *tool, uint32_t code);
+extern int nemotool_is_special_key(uint32_t code);
 
 extern void nemotool_bypass_touch(struct nemotool *tool, int32_t id, float x, float y);
 extern void nemotool_calibrate_touch(struct nemotool *tool, const char *name, float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3);

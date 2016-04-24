@@ -927,3 +927,13 @@ uint32_t nemotool_get_keysym(struct nemotool *tool, uint32_t code)
 
 	return 0;
 }
+
+int nemotool_is_special_key(uint32_t code)
+{
+	if (code == KEY_LEFTSHIFT || code == KEY_RIGHTSHIFT ||
+			code == KEY_LEFTCTRL || code == KEY_RIGHTCTRL ||
+			code == KEY_LEFTALT || code == KEY_RIGHTALT)
+		return 1;
+
+	return 0;
+}
