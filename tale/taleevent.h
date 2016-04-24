@@ -467,6 +467,17 @@ static inline void nemotale_event_transform_to_viewport(struct nemotale *tale, f
 	}
 }
 
+static inline void nemotale_event_transform_from_viewport(struct nemotale *tale, float sx, float sy, float *x, float *y)
+{
+	if (tale->viewport.enable != 0) {
+		*x = sx * tale->viewport.rx;
+		*y = sy * tale->viewport.ry;
+	} else {
+		*x = sx;
+		*y = sy;
+	}
+}
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

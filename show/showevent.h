@@ -208,6 +208,11 @@ static inline void nemoshow_event_transform_to_viewport(struct nemoshow *show, f
 	nemotale_event_transform_to_viewport(show->tale, x, y, sx, sy);
 }
 
+static inline void nemoshow_event_transform_from_viewport(struct nemoshow *show, float sx, float sy, float *x, float *y)
+{
+	nemotale_event_transform_from_viewport(show->tale, sx, sy, x, y);
+}
+
 static inline int nemoshow_event_is_single_click(struct nemoshow *show, void *event)
 {
 	return nemotale_event_is_single_click(show->tale, (struct taleevent *)event);

@@ -65,6 +65,8 @@ struct showone *nemoshow_canvas_create(void)
 	one->type = NEMOSHOW_CANVAS_TYPE;
 	one->update = nemoshow_canvas_update;
 	one->destroy = nemoshow_canvas_destroy;
+	one->attach = nemoshow_canvas_attach_one;
+	one->detach = nemoshow_canvas_detach_one;
 
 	nemoshow_one_prepare(one);
 
@@ -113,6 +115,20 @@ void nemoshow_canvas_destroy(struct showone *one)
 	delete static_cast<showcanvas_t *>(canvas->cc);
 
 	free(canvas);
+}
+
+void nemoshow_canvas_attach_one(struct showone *parent, struct showone *one)
+{
+	nemoshow_one_attach_one(parent, one);
+}
+
+void nemoshow_canvas_detach_one(struct showone *one)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	nemoshow_one_detach_one(one);
+	
+	nemotale_detach_node(canvas->node);
 }
 
 static int nemoshow_canvas_compare(const void *a, const void *b)
@@ -901,12 +917,12 @@ struct showone *nemoshow_canvas_pick_one(struct showone *one, float x, float y)
 	return nemoshow_canvas_pick_item(one, x, y);
 }
 
-void nemoshow_canvas_attach_one(struct showone *canvas, struct showone *one)
+void nemoshow_canvas_set_one(struct showone *canvas, struct showone *one)
 {
 	one->canvas = canvas;
 }
 
-void nemoshow_canvas_detach_one(struct showone *one)
+void nemoshow_canvas_put_one(struct showone *one)
 {
 	if (one->canvas != NULL) {
 		nemoshow_canvas_damage_one(one->canvas, one);
@@ -915,7 +931,7 @@ void nemoshow_canvas_detach_one(struct showone *one)
 	}
 }
 
-void nemoshow_canvas_attach_ones(struct showone *canvas, struct showone *one)
+void nemoshow_canvas_set_ones(struct showone *canvas, struct showone *one)
 {
 	struct showone *child;
 
@@ -925,10 +941,10 @@ void nemoshow_canvas_attach_ones(struct showone *canvas, struct showone *one)
 	one->canvas = canvas;
 
 	nemoshow_children_for_each(child, one)
-		nemoshow_canvas_attach_ones(canvas, child);
+		nemoshow_canvas_set_ones(canvas, child);
 }
 
-void nemoshow_canvas_detach_ones(struct showone *one)
+void nemoshow_canvas_put_ones(struct showone *one)
 {
 	struct showone *child;
 
@@ -939,5 +955,5 @@ void nemoshow_canvas_detach_ones(struct showone *one)
 	}
 
 	nemoshow_children_for_each(child, one)
-		nemoshow_canvas_detach_ones(child);
+		nemoshow_canvas_put_ones(child);
 }

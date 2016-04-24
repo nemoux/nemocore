@@ -89,6 +89,9 @@ extern void nemoshow_canvas_destroy(struct showone *one);
 
 extern int nemoshow_canvas_update(struct showone *one);
 
+extern void nemoshow_canvas_attach_one(struct showone *parent, struct showone *one);
+extern void nemoshow_canvas_detach_one(struct showone *one);
+
 extern int nemoshow_canvas_set_type(struct showone *one, int type);
 extern int nemoshow_canvas_resize(struct showone *one);
 extern void nemoshow_canvas_set_alpha(struct showone *one, double alpha);
@@ -111,10 +114,10 @@ extern void nemoshow_canvas_dirty_all(struct showone *one, uint32_t dirty);
 
 extern struct showone *nemoshow_canvas_pick_one(struct showone *one, float x, float y);
 
-extern void nemoshow_canvas_attach_one(struct showone *canvas, struct showone *one);
-extern void nemoshow_canvas_detach_one(struct showone *one);
-extern void nemoshow_canvas_attach_ones(struct showone *canvas, struct showone *one);
-extern void nemoshow_canvas_detach_ones(struct showone *one);
+extern void nemoshow_canvas_set_one(struct showone *canvas, struct showone *one);
+extern void nemoshow_canvas_put_one(struct showone *one);
+extern void nemoshow_canvas_set_ones(struct showone *canvas, struct showone *one);
+extern void nemoshow_canvas_put_ones(struct showone *one);
 
 static inline void nemoshow_canvas_set_dispatch_redraw(struct showone *one, nemoshow_canvas_dispatch_redraw_t dispatch_redraw)
 {

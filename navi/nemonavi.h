@@ -9,12 +9,22 @@ NEMO_BEGIN_EXTERN_C
 
 #include <stdint.h>
 
+typedef enum {
+	NEMONAVI_PAINT_VIEW_TYPE = 0,
+	NEMONAVI_PAINT_POPUP_TYPE = 1,
+	NEMONAVI_PAINT_LAST_TYPE
+} NemoNaviPaintType;
+
 struct nemonavi;
 
-typedef void (*nemonavi_dispatch_paint_t)(struct nemonavi *navi, const void *buffer, int width, int height, int dx, int dy, int dw, int dh);
+typedef void (*nemonavi_dispatch_paint_t)(struct nemonavi *navi, int type, const void *buffer, int width, int height, int dx, int dy, int dw, int dh);
+typedef void (*nemonavi_dispatch_popup_show_t)(struct nemonavi *navi, int show);
+typedef void (*nemonavi_dispatch_popup_rect_t)(struct nemonavi *navi, int x, int y, int width, int height);
 
 struct nemonavi {
 	nemonavi_dispatch_paint_t dispatch_paint;
+	nemonavi_dispatch_popup_show_t dispatch_popup_show;
+	nemonavi_dispatch_popup_rect_t dispatch_popup_rect;
 
 	int32_t width, height;
 
@@ -51,6 +61,26 @@ extern void nemonavi_load_url(struct nemonavi *navi, const char *url);
 static inline void nemonavi_set_dispatch_paint(struct nemonavi *navi, nemonavi_dispatch_paint_t dispatch)
 {
 	navi->dispatch_paint = dispatch;
+}
+
+static inline void nemonavi_set_dispatch_popup_show(struct nemonavi *navi, nemonavi_dispatch_popup_show_t dispatch)
+{
+	navi->dispatch_popup_show = dispatch;
+}
+
+static inline void nemonavi_set_dispatch_popup_rect(struct nemonavi *navi, nemonavi_dispatch_popup_rect_t dispatch)
+{
+	navi->dispatch_popup_rect = dispatch;
+}
+
+static inline int nemonavi_get_width(struct nemonavi *navi)
+{
+	return navi->width;
+}
+
+static inline int nemonavi_get_height(struct nemonavi *navi)
+{
+	return navi->height;
 }
 
 static inline void nemonavi_set_userdata(struct nemonavi *navi, void *data)

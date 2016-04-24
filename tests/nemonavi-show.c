@@ -17,37 +17,90 @@ struct navicontext {
 	struct nemoshow *show;
 	struct showone *scene;
 	struct showone *back;
-	struct showone *canvas;
+
+	struct showone *view;
+	struct showone *popup;
 
 	struct nemonavi *navi;
 
 	struct nemotimer *timer;
 };
 
-static void nemonavi_dispatch_paint(struct nemonavi *navi, const void *buffer, int width, int height, int dx, int dy, int dw, int dh)
+static void nemonavi_dispatch_paint(struct nemonavi *navi, int type, const void *buffer, int width, int height, int dx, int dy, int dw, int dh)
 {
 	struct navicontext *context = (struct navicontext *)nemonavi_get_userdata(navi);
-	GLuint texture = nemoshow_canvas_get_texture(context->canvas);
 
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glPixelStorei(GL_UNPACK_ROW_LENGTH, width);
+	if (type == NEMONAVI_PAINT_VIEW_TYPE) {
+		GLuint texture = nemoshow_canvas_get_texture(context->view);
 
-	if (dx == 0 && dy == 0 && dw == width && dh == height) {
-		glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
-		glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glPixelStorei(GL_UNPACK_ROW_LENGTH, width);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, buffer);
-	} else {
-		glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, dx);
-		glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, dy);
+		if (dx == 0 && dy == 0 && dw == width && dh == height) {
+			glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
+			glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
 
-		glTexSubImage2D(GL_TEXTURE_2D, 0, dx, dy, dw, dh, GL_BGRA_EXT, GL_UNSIGNED_BYTE, buffer);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, buffer);
+		} else {
+			glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, dx);
+			glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, dy);
+
+			glTexSubImage2D(GL_TEXTURE_2D, 0, dx, dy, dw, dh, GL_BGRA_EXT, GL_UNSIGNED_BYTE, buffer);
+		}
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		nemoshow_canvas_damage_all(context->view);
+		nemoshow_dispatch_frame(context->show);
+	} else if (type == NEMONAVI_PAINT_POPUP_TYPE) {
+		GLuint texture = nemoshow_canvas_get_texture(context->popup);
+
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glPixelStorei(GL_UNPACK_ROW_LENGTH, width);
+
+		if (dx == 0 && dy == 0 && dw == width && dh == height) {
+			glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
+			glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
+
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, buffer);
+		} else {
+			glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, dx);
+			glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, dy);
+
+			glTexSubImage2D(GL_TEXTURE_2D, 0, dx, dy, dw, dh, GL_BGRA_EXT, GL_UNSIGNED_BYTE, buffer);
+		}
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		nemoshow_canvas_damage_all(context->popup);
+		nemoshow_dispatch_frame(context->show);
 	}
+}
 
-	glBindTexture(GL_TEXTURE_2D, 0);
+static void nemonavi_dispatch_popup_show(struct nemonavi *navi, int show)
+{
+	struct navicontext *context = (struct navicontext *)nemonavi_get_userdata(navi);
 
-	nemoshow_canvas_damage_all(context->canvas);
-	nemoshow_dispatch_frame(context->show);
+	if (show != 0)
+		nemoshow_one_attach(context->scene, context->popup);
+	else
+		nemoshow_one_detach(context->popup);
+}
+
+static void nemonavi_dispatch_popup_rect(struct nemonavi *navi, int x, int y, int width, int height)
+{
+	struct navicontext *context = (struct navicontext *)nemonavi_get_userdata(navi);
+	float x0, y0;
+	float x1, y1;
+
+	nemoshow_event_transform_from_viewport(context->show, x, y, &x0, &y0);
+	nemoshow_event_transform_from_viewport(context->show, x + width, y + height, &x1, &y1);
+
+	nemoshow_canvas_translate(context->popup, x0, y0);
+
+	nemoshow_canvas_set_width(context->popup, x1 - x0);
+	nemoshow_canvas_set_height(context->popup, y1 - y0);
+	nemoshow_canvas_resize(context->popup);
 }
 
 static void nemonavi_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, void *event)
@@ -161,7 +214,7 @@ static void nemonavi_dispatch_timer(struct nemotimer *timer, void *data)
 
 	nemonavi_loop_once();
 
-	nemotimer_set_timeout(timer, 30);
+	nemotimer_set_timeout(timer, 20);
 }
 
 int main(int argc, char *argv[])
@@ -206,7 +259,7 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_fill_color(canvas, 1.0f, 1.0f, 1.0f, 1.0f);
 	nemoshow_one_attach(scene, canvas);
 
-	context->canvas = canvas = nemoshow_canvas_create();
+	context->view = canvas = nemoshow_canvas_create();
 	nemoshow_canvas_set_width(canvas, width);
 	nemoshow_canvas_set_height(canvas, height);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_OPENGL_TYPE);
@@ -214,15 +267,23 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_dispatch_resize(canvas, nemonavi_dispatch_canvas_resize);
 	nemoshow_one_attach(scene, canvas);
 
+	context->popup = canvas = nemoshow_canvas_create();
+	nemoshow_canvas_set_width(canvas, width);
+	nemoshow_canvas_set_height(canvas, height);
+	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_OPENGL_TYPE);
+	nemoshow_canvas_set_dispatch_event(canvas, nemonavi_dispatch_canvas_event);
+
 	context->navi = navi = nemonavi_create("http://www.google.com");
 	nemonavi_set_size(navi, width, height);
 	nemonavi_set_dispatch_paint(navi, nemonavi_dispatch_paint);
+	nemonavi_set_dispatch_popup_show(navi, nemonavi_dispatch_popup_show);
+	nemonavi_set_dispatch_popup_rect(navi, nemonavi_dispatch_popup_rect);
 	nemonavi_set_userdata(navi, context);
 
 	context->timer = timer = nemotimer_create(tool);
 	nemotimer_set_callback(timer, nemonavi_dispatch_timer);
 	nemotimer_set_userdata(timer, context);
-	nemotimer_set_timeout(timer, 30);
+	nemotimer_set_timeout(timer, 20);
 
 	nemoshow_dispatch_frame(show);
 

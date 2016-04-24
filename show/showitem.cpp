@@ -1013,14 +1013,14 @@ void nemoshow_item_attach_one(struct showone *parent, struct showone *one)
 
 	canvas = nemoshow_one_get_parent(one, NEMOSHOW_CANVAS_TYPE, 0);
 	if (canvas != NULL)
-		nemoshow_canvas_attach_ones(canvas, one);
+		nemoshow_canvas_set_ones(canvas, one);
 }
 
 void nemoshow_item_detach_one(struct showone *one)
 {
 	nemoshow_one_detach_one(one);
 
-	nemoshow_canvas_detach_ones(one);
+	nemoshow_canvas_put_ones(one);
 }
 
 int nemoshow_item_above_one(struct showone *one, struct showone *above)

@@ -93,25 +93,33 @@ bool NaviClient::GetScreenInfo(CefRefPtr<CefBrowser> browser, CefScreenInfo &scr
 
 void NaviClient::OnPopupShow(CefRefPtr<CefBrowser> browser, bool show)
 {
+	struct nemonavi *navi = (struct nemonavi *)m_userdata;
+
+	if (navi->dispatch_popup_show != NULL)
+		navi->dispatch_popup_show(navi, show == true);
 }
 
 void NaviClient::OnPopupSize(CefRefPtr<CefBrowser> browser, const CefRect &rect)
 {
+	struct nemonavi *navi = (struct nemonavi *)m_userdata;
+
+	if (navi->dispatch_popup_rect != NULL)
+		navi->dispatch_popup_rect(navi,
+				rect.x, rect.y, rect.width, rect.height);
 }
 
 void NaviClient::OnPaint(CefRefPtr<CefBrowser> browser, CefRenderHandler::PaintElementType type, const CefRenderHandler::RectList &dirtyRects, const void *buffer, int width, int height)
 {
 	struct nemonavi *navi = (struct nemonavi *)m_userdata;
 
-	if (navi->dispatch_paint == NULL)
-		return;
+	if (navi->dispatch_paint != NULL) {
+		CefRenderHandler::RectList::const_iterator iter = dirtyRects.begin();
 
-	CefRenderHandler::RectList::const_iterator iter = dirtyRects.begin();
+		for (; iter != dirtyRects.end(); iter++) {
+			const CefRect &rect = *iter;
 
-	for (; iter != dirtyRects.end(); iter++) {
-		const CefRect &rect = *iter;
-
-		navi->dispatch_paint(navi, buffer, width, height, rect.x, rect.y, rect.width, rect.height);
+			navi->dispatch_paint(navi, type == PET_VIEW ? NEMONAVI_PAINT_VIEW_TYPE : NEMONAVI_PAINT_POPUP_TYPE, buffer, width, height, rect.x, rect.y, rect.width, rect.height);
+		}
 	}
 }
 
