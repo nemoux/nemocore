@@ -58,9 +58,7 @@ static void nemonavi_dispatch_canvas_event(struct nemoshow *show, struct showone
 	if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event)) {
 		nemoshow_event_update_taps(show, canvas, event);
 
-		if (nemoshow_event_is_single_tap(show, event)) {
-			nemoshow_view_move(show, nemoshow_event_get_serial_on(event, 0));
-		} else if (nemoshow_event_is_many_taps(show, event)) {
+		if (nemoshow_event_is_more_taps(show, event, 3)) {
 			nemoshow_view_pick_distant(show, event, NEMOSHOW_VIEW_PICK_ALL_TYPE);
 		}
 	}
@@ -123,8 +121,30 @@ static void nemonavi_dispatch_canvas_event(struct nemoshow *show, struct showone
 	}
 
 	if (nemoshow_event_is_touch_down(show, event)) {
+		nemoshow_set_keyboard_focus(show, canvas);
+
+		nemoshow_event_transform_to_viewport(show,
+				nemoshow_event_get_x(event),
+				nemoshow_event_get_y(event),
+				&x, &y);
+
+		nemonavi_send_pointer_down_event(context->navi, x, y,
+				nemoshow_event_get_value(event));
 	} else if (nemoshow_event_is_touch_up(show, event)) {
+		nemoshow_event_transform_to_viewport(show,
+				nemoshow_event_get_x(event),
+				nemoshow_event_get_y(event),
+				&x, &y);
+
+		nemonavi_send_pointer_up_event(context->navi, x, y,
+				nemoshow_event_get_value(event));
 	} else if (nemoshow_event_is_touch_motion(show, event)) {
+		nemoshow_event_transform_to_viewport(show,
+				nemoshow_event_get_x(event),
+				nemoshow_event_get_y(event),
+				&x, &y);
+
+		nemonavi_send_pointer_motion_event(context->navi, x, y);
 	}
 }
 

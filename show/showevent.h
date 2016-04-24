@@ -238,6 +238,11 @@ static inline int nemoshow_event_is_many_taps(struct nemoshow *show, void *event
 	return nemotale_event_is_many_taps(show->tale, (struct taleevent *)event);
 }
 
+static inline int nemoshow_event_is_more_taps(struct nemoshow *show, void *event, int tapcount)
+{
+	return nemotale_event_is_more_taps(show->tale, (struct taleevent *)event, tapcount);
+}
+
 static inline int nemoshow_event_is_down(struct nemoshow *show, void *event)
 {
 	return nemotale_event_is_down(show->tale, (struct taleevent *)event);

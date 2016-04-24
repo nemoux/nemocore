@@ -76,6 +76,11 @@ static inline int nemotale_event_is_many_taps(struct nemotale *tale, struct tale
 	return event->tapcount >= 2;
 }
 
+static inline int nemotale_event_is_more_taps(struct nemotale *tale, struct taleevent *event, int tapcount)
+{
+	return event->tapcount >= tapcount;
+}
+
 static inline int nemotale_event_is_down(struct nemotale *tale, struct taleevent *event)
 {
 	return event->type & NEMOTALE_DOWN_EVENT;
