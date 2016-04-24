@@ -175,6 +175,11 @@ static inline void nemoshow_event_set_used(void *event)
 	nemotale_event_set_used((struct taleevent *)event);
 }
 
+static inline int nemoshow_event_has_special_key(void *event)
+{
+	return nemotale_event_has_special_key((struct taleevent *)event);
+}
+
 static inline void nemoshow_event_update_taps(struct nemoshow *show, struct showone *one, void *event)
 {
 	if (one == NULL)

@@ -243,7 +243,6 @@ extern void nemotool_destroy_queue(struct nemoqueue *queue);
 extern int nemotool_dispatch_queue(struct nemoqueue *queue);
 
 extern uint32_t nemotool_get_keysym(struct nemotool *tool, uint32_t code);
-extern int nemotool_is_special_key(uint32_t code);
 
 extern void nemotool_bypass_touch(struct nemotool *tool, int32_t id, float x, float y);
 extern void nemotool_calibrate_touch(struct nemotool *tool, const char *name, float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3);
