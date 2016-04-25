@@ -5,6 +5,7 @@
 
 #include <cef/cef_client.h>
 #include <cef/cef_browser.h>
+#include <cef/cef_request_handler.h>
 
 class NaviClient : public CefClient, public CefContextMenuHandler, public CefDisplayHandler, public CefDownloadHandler, public CefLifeSpanHandler, public CefLoadHandler, public CefRenderHandler, public CefKeyboardHandler, public CefRequestHandler {
 	public:
@@ -35,8 +36,10 @@ class NaviClient : public CefClient, public CefContextMenuHandler, public CefDis
 		void OnAfterCreated(CefRefPtr<CefBrowser> browser) OVERRIDE;
 		bool DoClose(CefRefPtr<CefBrowser> browser) OVERRIDE;
 		void OnBeforeClose(CefRefPtr<CefBrowser> browser) OVERRIDE;
-
 		void OnLoadError(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, ErrorCode errorCode, const CefString &errorText, const CefString &failedUrl) OVERRIDE;
+
+		bool OnBeforeBrowse(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, CefRefPtr<CefRequest> request, bool is_redirect);
+		bool OnOpenURLFromTab(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString &target_url, CefRequestHandler::WindowOpenDisposition target_disposition, bool user_gesture);
 
 		bool GetRootScreenRect(CefRefPtr<CefBrowser> browser, CefRect &rect) OVERRIDE;
 		bool GetViewRect(CefRefPtr<CefBrowser> browser, CefRect &rect) OVERRIDE;

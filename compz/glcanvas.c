@@ -420,7 +420,8 @@ int glrenderer_read_canvas(struct nemorenderer *base, struct nemocanvas *canvas,
 	glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
 
 	ptr = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
-	memcpy(pixels, ptr, glcontent->pitch * glcontent->height * 4);
+	if (ptr != NULL)
+		memcpy(pixels, ptr, glcontent->pitch * glcontent->height * 4);
 	glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
 
 	glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
