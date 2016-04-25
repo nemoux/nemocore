@@ -29,8 +29,57 @@ NaviClient::~NaviClient()
 {
 }
 
+void NaviClient::OnBeforeContextMenu(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, CefRefPtr<CefContextMenuParams> params, CefRefPtr<CefMenuModel> model)
+{
+}
+
+bool NaviClient::OnContextMenuCommand(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, CefRefPtr<CefContextMenuParams> params, int command_id, EventFlags event_flags)
+{
+	return true;
+}
+
+void NaviClient::OnAddressChange(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString &url)
+{
+	CEF_REQUIRE_UI_THREAD();
+}
+
 void NaviClient::OnTitleChange(CefRefPtr<CefBrowser> browser, const CefString &title)
 {
+	CEF_REQUIRE_UI_THREAD();
+}
+
+void NaviClient::OnFullscreenModeChange(CefRefPtr<CefBrowser> browser, bool fullscreen)
+{
+	CEF_REQUIRE_UI_THREAD();
+}
+
+bool NaviClient::OnConsoleMessage(CefRefPtr<CefBrowser> browser, const CefString &message, const CefString &source, int line)
+{
+	CEF_REQUIRE_UI_THREAD();
+
+	return false;
+}
+
+bool NaviClient::OnBeforePopup(
+		CefRefPtr<CefBrowser> browser,
+		CefRefPtr<CefFrame> frame,
+		const CefString &target_url,
+		const CefString &target_frame_name,
+		CefLifeSpanHandler::WindowOpenDisposition target_disposition,
+		bool user_gesture,
+		const CefPopupFeatures &popup_features,
+		CefWindowInfo &window_info,
+		CefRefPtr<CefClient> &client,
+		CefBrowserSettings &settings,
+		bool *no_javascript_access)
+{
+	CefRefPtr<CefRequest> request(CefRequest::Create());
+
+	request->SetURL(target_url);
+
+	frame->LoadRequest(request);
+
+	return true;
 }
 
 void NaviClient::OnAfterCreated(CefRefPtr<CefBrowser> browser)

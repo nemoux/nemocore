@@ -6,13 +6,24 @@
 #include <cef/cef_client.h>
 #include <cef/cef_browser.h>
 #include <cef/cef_request_handler.h>
+#include <cef/cef_life_span_handler.h>
 
 class NaviClient : public CefClient, public CefContextMenuHandler, public CefDisplayHandler, public CefDownloadHandler, public CefLifeSpanHandler, public CefLoadHandler, public CefRenderHandler, public CefKeyboardHandler, public CefRequestHandler {
 	public:
 		NaviClient(void *data);
 		~NaviClient();
 
+		CefRefPtr<CefContextMenuHandler> GetContextMenuHandler() OVERRIDE
+		{
+			return this;
+		}
+
 		CefRefPtr<CefDisplayHandler> GetDisplayHandler() OVERRIDE
+		{
+			return this;
+		}
+
+		CefRefPtr<CefDownloadHandler> GetDownloadHandler() OVERRIDE
 		{
 			return this;
 		}
@@ -32,7 +43,31 @@ class NaviClient : public CefClient, public CefContextMenuHandler, public CefDis
 			return this;
 		}
 
+		CefRefPtr<CefRequestHandler> GetRequestHandler() OVERRIDE
+		{
+			return this;
+		}
+
+		void OnBeforeContextMenu(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, CefRefPtr<CefContextMenuParams> params, CefRefPtr<CefMenuModel> model) OVERRIDE;
+		bool OnContextMenuCommand(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, CefRefPtr<CefContextMenuParams> params, int command_id, EventFlags event_flags) OVERRIDE;
+
+		void OnAddressChange(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString &url) OVERRIDE;
 		void OnTitleChange(CefRefPtr<CefBrowser> browser, const CefString &title) OVERRIDE;
+		void OnFullscreenModeChange(CefRefPtr<CefBrowser> browser, bool fullscreen) OVERRIDE;
+		bool OnConsoleMessage(CefRefPtr<CefBrowser> browser, const CefString &message, const CefString &source, int line) OVERRIDE;
+
+		bool OnBeforePopup(
+				CefRefPtr<CefBrowser> browser,
+				CefRefPtr<CefFrame> frame,
+				const CefString &target_url,
+				const CefString &target_frame_name,
+				CefLifeSpanHandler::WindowOpenDisposition target_disposition,
+				bool user_gesture,
+				const CefPopupFeatures &popup_features,
+				CefWindowInfo &window_info,
+				CefRefPtr<CefClient> &client,
+				CefBrowserSettings &settings,
+				bool *no_javascript_access) OVERRIDE;
 		void OnAfterCreated(CefRefPtr<CefBrowser> browser) OVERRIDE;
 		bool DoClose(CefRefPtr<CefBrowser> browser) OVERRIDE;
 		void OnBeforeClose(CefRefPtr<CefBrowser> browser) OVERRIDE;
