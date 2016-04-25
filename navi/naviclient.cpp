@@ -120,7 +120,12 @@ void NaviClient::OnBeforeClose(CefRefPtr<CefBrowser> browser)
 
 void NaviClient::OnLoadingStateChange(CefRefPtr<CefBrowser> browser, bool isLoading, bool canGoBack, bool canGoForward)
 {
+	struct nemonavi *navi = (struct nemonavi *)m_userdata;
+
 	nemolog_message("NAVI", "[%s:%d]\n", __FUNCTION__, __LINE__);
+
+	if (navi->dispatch_loading_state != NULL)
+		navi->dispatch_loading_state(navi, isLoading == true, canGoBack == true, canGoForward == true);
 }
 
 void NaviClient::OnLoadError(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, ErrorCode errorCode, const CefString &errorText, const CefString &failedUrl)
@@ -329,7 +334,12 @@ bool NaviClient::OnRequestGeolocationPermission(
 
 bool NaviClient::OnPreKeyEvent(CefRefPtr<CefBrowser> browser, const CefKeyEvent &event, CefEventHandle os_event, bool *is_keyboard_shortcut)
 {
+	struct nemonavi *navi = (struct nemonavi *)m_userdata;
+
 	nemolog_message("NAVI", "[%s:%d]\n", __FUNCTION__, __LINE__);
+
+	if (navi->dispatch_key_event != NULL)
+		navi->dispatch_key_event(navi, event.windows_key_code, event.focus_on_editable_field);
 
 	return false;
 }

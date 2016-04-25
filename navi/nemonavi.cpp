@@ -194,3 +194,13 @@ void nemonavi_load_url(struct nemonavi *navi, const char *url)
 
 	NEMONAVI_CC(navi, browser)->GetMainFrame()->LoadRequest(request);
 }
+
+void nemonavi_go_back(struct nemonavi *navi)
+{
+	NEMONAVI_CC(navi, browser)->GoBack();
+}
+
+void nemonavi_go_forward(struct nemonavi *navi)
+{
+	NEMONAVI_CC(navi, browser)->GoForward();
+}

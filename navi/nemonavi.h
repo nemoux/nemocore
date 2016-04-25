@@ -20,11 +20,15 @@ struct nemonavi;
 typedef void (*nemonavi_dispatch_paint_t)(struct nemonavi *navi, int type, const void *buffer, int width, int height, int dx, int dy, int dw, int dh);
 typedef void (*nemonavi_dispatch_popup_show_t)(struct nemonavi *navi, int show);
 typedef void (*nemonavi_dispatch_popup_rect_t)(struct nemonavi *navi, int x, int y, int width, int height);
+typedef void (*nemonavi_dispatch_key_event_t)(struct nemonavi *navi, uint32_t code, int focus_on_editable_field);
+typedef void (*nemonavi_dispatch_loading_state_t)(struct nemonavi *navi, int is_loading, int can_go_back, int can_go_forward);
 
 struct nemonavi {
 	nemonavi_dispatch_paint_t dispatch_paint;
 	nemonavi_dispatch_popup_show_t dispatch_popup_show;
 	nemonavi_dispatch_popup_rect_t dispatch_popup_rect;
+	nemonavi_dispatch_key_event_t dispatch_key_event;
+	nemonavi_dispatch_loading_state_t dispatch_loading_state;
 
 	int32_t width, height;
 
@@ -57,6 +61,8 @@ extern void nemonavi_send_touch_up_event(struct nemonavi *navi, float x, float y
 extern void nemonavi_send_touch_motion_event(struct nemonavi *navi, float x, float y, uint32_t id);
 
 extern void nemonavi_load_url(struct nemonavi *navi, const char *url);
+extern void nemonavi_go_back(struct nemonavi *navi);
+extern void nemonavi_go_forward(struct nemonavi *navi);
 
 static inline void nemonavi_set_dispatch_paint(struct nemonavi *navi, nemonavi_dispatch_paint_t dispatch)
 {
@@ -71,6 +77,16 @@ static inline void nemonavi_set_dispatch_popup_show(struct nemonavi *navi, nemon
 static inline void nemonavi_set_dispatch_popup_rect(struct nemonavi *navi, nemonavi_dispatch_popup_rect_t dispatch)
 {
 	navi->dispatch_popup_rect = dispatch;
+}
+
+static inline void nemonavi_set_dispatch_key_event(struct nemonavi *navi, nemonavi_dispatch_key_event_t dispatch)
+{
+	navi->dispatch_key_event = dispatch;
+}
+
+static inline void nemonavi_set_dispatch_loading_state(struct nemonavi *navi, nemonavi_dispatch_loading_state_t dispatch)
+{
+	navi->dispatch_loading_state = dispatch;
 }
 
 static inline int nemonavi_get_width(struct nemonavi *navi)
