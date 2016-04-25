@@ -99,6 +99,10 @@ void NaviClient::OnBeforeClose(CefRefPtr<CefBrowser> browser)
 	CEF_REQUIRE_UI_THREAD();
 }
 
+void NaviClient::OnLoadingStateChange(CefRefPtr<CefBrowser> browser, bool isLoading, bool canGoBack, bool canGoForward)
+{
+}
+
 void NaviClient::OnLoadError(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, ErrorCode errorCode, const CefString &errorText, const CefString &failedUrl)
 {
 	CEF_REQUIRE_UI_THREAD();
@@ -124,6 +128,55 @@ bool NaviClient::OnBeforeBrowse(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFram
 bool NaviClient::OnOpenURLFromTab(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString &target_url, CefRequestHandler::WindowOpenDisposition target_disposition, bool user_gesture)
 {
 	return false;
+}
+
+cef_return_value_t NaviClient::OnBeforeResourceLoad(
+		CefRefPtr<CefBrowser> browser,
+		CefRefPtr<CefFrame> frame,
+		CefRefPtr<CefRequest> request,
+		CefRefPtr<CefRequestCallback> callback)
+{
+	return RV_CONTINUE;
+}
+
+CefRefPtr<CefResourceHandler> NaviClient::GetResourceHandler(
+		CefRefPtr<CefBrowser> browser,
+		CefRefPtr<CefFrame> frame,
+		CefRefPtr<CefRequest> request)
+{
+	return NULL;
+}
+
+CefRefPtr<CefResponseFilter> NaviClient::GetResourceResponseFilter(
+		CefRefPtr<CefBrowser> browser,
+		CefRefPtr<CefFrame> frame,
+		CefRefPtr<CefRequest> request,
+		CefRefPtr<CefResponse> response)
+{
+	return NULL;
+}
+
+bool NaviClient::OnQuotaRequest(CefRefPtr<CefBrowser> browser, const CefString &origin_url, int64 new_size, CefRefPtr<CefRequestCallback> callback)
+{
+	return true;
+}
+
+void NaviClient::OnProtocolExecution(CefRefPtr<CefBrowser> browser, const CefString &url, bool &allow_os_execution)
+{
+}
+
+bool NaviClient::OnCertificateError(
+		CefRefPtr<CefBrowser> browser,
+		ErrorCode cert_error,
+		const CefString &request_url,
+		CefRefPtr<CefSSLInfo> ssl_info,
+		CefRefPtr<CefRequestCallback> callback)
+{
+	return false;
+}
+
+void NaviClient::OnRenderProcessTerminated(CefRefPtr<CefBrowser> browser, TerminationStatus status)
+{
 }
 
 bool NaviClient::GetRootScreenRect(CefRefPtr<CefBrowser> browser, CefRect &rect)
@@ -194,10 +247,27 @@ void NaviClient::OnDownloadUpdated(CefRefPtr<CefBrowser> browser, CefRefPtr<CefD
 {
 }
 
-bool NaviClient::StartDragging(CefRefPtr<CefBrowser> browser, CefRefPtr<CefDragData> drag_data, CefRenderHandler::DragOperationsMask allowed_ops, int x, int y)
+bool NaviClient::OnDragEnter(CefRefPtr<CefBrowser> browser, CefRefPtr<CefDragData> dragData, CefDragHandler::DragOperationsMask mask)
+{
+	return false;
+}
+
+void NaviClient::OnDraggableRegionsChanged(CefRefPtr<CefBrowser> browser, const std::vector<CefDraggableRegion> &regions)
 {
 }
 
-void NaviClient::UpdateDragCursor(CefRefPtr<CefBrowser> browser, CefRenderHandler::DragOperation operation)
+bool NaviClient::OnRequestGeolocationPermission(
+		CefRefPtr<CefBrowser> browser,
+		const CefString &requesting_url,
+		int request_id,
+		CefRefPtr<CefGeolocationCallback> callback)
 {
+	callback->Continue(true);
+
+	return true;
+}
+
+bool NaviClient::OnPreKeyEvent(CefRefPtr<CefBrowser> browser, const CefKeyEvent &event, CefEventHandle os_event, bool *is_keyboard_shortcut)
+{
+	return false;
 }

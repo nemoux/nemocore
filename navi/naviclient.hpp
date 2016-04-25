@@ -1,14 +1,15 @@
 #ifndef __NEMONAVI_CLIENT_HPP__
 #define __NEMONAVI_CLIENT_HPP__
 
-#include <list>
-
 #include <cef/cef_client.h>
 #include <cef/cef_browser.h>
 #include <cef/cef_request_handler.h>
 #include <cef/cef_life_span_handler.h>
+#include <cef/cef_drag_handler.h>
+#include <cef/cef_geolocation_handler.h>
+#include <cef/cef_keyboard_handler.h>
 
-class NaviClient : public CefClient, public CefContextMenuHandler, public CefDisplayHandler, public CefDownloadHandler, public CefLifeSpanHandler, public CefLoadHandler, public CefRenderHandler, public CefKeyboardHandler, public CefRequestHandler {
+class NaviClient : public CefClient, public CefContextMenuHandler, public CefDisplayHandler, public CefDownloadHandler, public CefDragHandler, public CefGeolocationHandler, public CefLifeSpanHandler, public CefLoadHandler, public CefRenderHandler, public CefKeyboardHandler, public CefRequestHandler {
 	public:
 		NaviClient(void *data);
 		~NaviClient();
@@ -28,6 +29,16 @@ class NaviClient : public CefClient, public CefContextMenuHandler, public CefDis
 			return this;
 		}
 
+		CefRefPtr<CefDragHandler> GetDragHandler() OVERRIDE
+		{
+			return this;
+		}
+
+		CefRefPtr<CefGeolocationHandler> GetGeolocationHandler() OVERRIDE
+		{
+			return this;
+		}
+
 		CefRefPtr<CefLifeSpanHandler> GetLifeSpanHandler() OVERRIDE
 		{
 			return this;
@@ -39,6 +50,11 @@ class NaviClient : public CefClient, public CefContextMenuHandler, public CefDis
 		}
 
 		CefRefPtr<CefRenderHandler> GetRenderHandler() OVERRIDE
+		{
+			return this;
+		}
+
+		CefRefPtr<CefKeyboardHandler> GetKeyboardHandler() OVERRIDE
 		{
 			return this;
 		}
@@ -71,10 +87,35 @@ class NaviClient : public CefClient, public CefContextMenuHandler, public CefDis
 		void OnAfterCreated(CefRefPtr<CefBrowser> browser) OVERRIDE;
 		bool DoClose(CefRefPtr<CefBrowser> browser) OVERRIDE;
 		void OnBeforeClose(CefRefPtr<CefBrowser> browser) OVERRIDE;
+
+		void OnLoadingStateChange(CefRefPtr<CefBrowser> browser, bool isLoading, bool canGoBack, bool canGoForward) OVERRIDE;
 		void OnLoadError(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, ErrorCode errorCode, const CefString &errorText, const CefString &failedUrl) OVERRIDE;
 
 		bool OnBeforeBrowse(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, CefRefPtr<CefRequest> request, bool is_redirect) OVERRIDE;
 		bool OnOpenURLFromTab(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString &target_url, CefRequestHandler::WindowOpenDisposition target_disposition, bool user_gesture) OVERRIDE;
+		cef_return_value_t OnBeforeResourceLoad(
+				CefRefPtr<CefBrowser> browser,
+				CefRefPtr<CefFrame> frame,
+				CefRefPtr<CefRequest> request,
+				CefRefPtr<CefRequestCallback> callback) OVERRIDE;
+		CefRefPtr<CefResourceHandler> GetResourceHandler(
+				CefRefPtr<CefBrowser> browser,
+				CefRefPtr<CefFrame> frame,
+				CefRefPtr<CefRequest> request) OVERRIDE;
+		CefRefPtr<CefResponseFilter> GetResourceResponseFilter(
+				CefRefPtr<CefBrowser> browser,
+				CefRefPtr<CefFrame> frame,
+				CefRefPtr<CefRequest> request,
+				CefRefPtr<CefResponse> response) OVERRIDE;
+		bool OnQuotaRequest(CefRefPtr<CefBrowser> browser, const CefString &origin_url, int64 new_size, CefRefPtr<CefRequestCallback> callback) OVERRIDE;
+		void OnProtocolExecution(CefRefPtr<CefBrowser> browser, const CefString &url, bool &allow_os_execution) OVERRIDE;
+		bool OnCertificateError(
+				CefRefPtr<CefBrowser> browser,
+				ErrorCode cert_error,
+				const CefString &request_url,
+				CefRefPtr<CefSSLInfo> ssl_info,
+				CefRefPtr<CefRequestCallback> callback) OVERRIDE;
+		void OnRenderProcessTerminated(CefRefPtr<CefBrowser> browser, TerminationStatus status) OVERRIDE;
 
 		bool GetRootScreenRect(CefRefPtr<CefBrowser> browser, CefRect &rect) OVERRIDE;
 		bool GetViewRect(CefRefPtr<CefBrowser> browser, CefRect &rect) OVERRIDE;
@@ -91,8 +132,16 @@ class NaviClient : public CefClient, public CefContextMenuHandler, public CefDis
 		void OnBeforeDownload(CefRefPtr<CefBrowser> browser, CefRefPtr<CefDownloadItem> download_item, const CefString &suggested_name, CefRefPtr<CefBeforeDownloadCallback> callback) OVERRIDE;
 		void OnDownloadUpdated(CefRefPtr<CefBrowser> browser, CefRefPtr<CefDownloadItem> download_item, CefRefPtr<CefDownloadItemCallback> callback) OVERRIDE;
 
-		bool StartDragging(CefRefPtr<CefBrowser> browser, CefRefPtr<CefDragData> drag_data, CefRenderHandler::DragOperationsMask allowed_ops, int x, int y) OVERRIDE;
-		void UpdateDragCursor(CefRefPtr<CefBrowser> browser, CefRenderHandler::DragOperation operation) OVERRIDE;
+		bool OnDragEnter(CefRefPtr<CefBrowser> browser, CefRefPtr<CefDragData> dragData, CefDragHandler::DragOperationsMask mask) OVERRIDE;
+		void OnDraggableRegionsChanged(CefRefPtr<CefBrowser> browser, const std::vector<CefDraggableRegion> &regions) OVERRIDE;
+
+		bool OnRequestGeolocationPermission(
+				CefRefPtr<CefBrowser> browser,
+				const CefString &requesting_url,
+				int request_id,
+				CefRefPtr<CefGeolocationCallback> callback) OVERRIDE;
+
+		bool OnPreKeyEvent(CefRefPtr<CefBrowser> browser, const CefKeyEvent &event, CefEventHandle os_event, bool *is_keyboard_shortcut) OVERRIDE;
 
 	private:
 		IMPLEMENT_REFCOUNTING(NaviClient);
