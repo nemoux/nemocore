@@ -521,6 +521,9 @@ void nemoshow_dispatch_transition(struct nemoshow *show, uint32_t msecs)
 	struct nemolist transition_list;
 	int done, i;
 
+	if (nemoshow_has_state(show, NEMOSHOW_ONTIME_STATE))
+		msecs = time_current_msecs();
+
 	nemolist_init(&transition_list);
 
 	nemolist_for_each_safe(trans, ntrans, &show->transition_list, link) {

@@ -36,6 +36,10 @@ NEMO_BEGIN_EXTERN_C
 #include <nemolist.h>
 #include <nemolistener.h>
 
+typedef enum {
+	NEMOSHOW_ONTIME_STATE = (1 << 0)
+} NemoShowState;
+
 struct nemoshow;
 
 typedef void (*nemoshow_dispatch_transition_done_t)(void *userdata);
@@ -47,6 +51,8 @@ typedef int (*nemoshow_dispatch_destroy_t)(struct nemoshow *show);
 
 struct nemoshow {
 	struct nemotale *tale;
+
+	uint32_t state;
 
 	struct showexpr *expr;
 	struct showsymtable *stable;
@@ -163,6 +169,21 @@ static inline void nemoshow_set_userdata(struct nemoshow *show, void *data)
 static inline void *nemoshow_get_userdata(struct nemoshow *show)
 {
 	return show->userdata;
+}
+
+static inline void nemoshow_set_state(struct nemoshow *show, uint32_t state)
+{
+	show->state |= state;
+}
+
+static inline void nemoshow_put_state(struct nemoshow *show, uint32_t state)
+{
+	show->state &= ~state;
+}
+
+static inline int nemoshow_has_state(struct nemoshow *show, uint32_t state)
+{
+	return (show->state & state) == state;
 }
 
 static inline void nemoshow_set_dispatch_transition_done(struct nemoshow *show, nemoshow_dispatch_transition_done_t dispatch, void *data)
