@@ -17,6 +17,7 @@
 #include <naviapp.hpp>
 #include <naviclient.hpp>
 #include <nemolog.h>
+#include <nemohelper.h>
 #include <nemomisc.h>
 
 int nemonavi_init_once(int argc, char *argv[])
@@ -193,6 +194,23 @@ void nemonavi_load_url(struct nemonavi *navi, const char *url)
 	request->SetURL(url);
 
 	NEMONAVI_CC(navi, browser)->GetMainFrame()->LoadRequest(request);
+}
+
+void nemonavi_load_page(struct nemonavi *navi, const char *path)
+{
+	char *url;
+	char *buffer;
+	int size;
+
+	if (os_load_path(path, &buffer, &size) < 0)
+		return;
+
+	asprintf(&url, "file://%s", path);
+
+	NEMONAVI_CC(navi, browser)->GetMainFrame()->LoadString(buffer, url);
+
+	free(url);
+	free(buffer);
 }
 
 void nemonavi_go_back(struct nemonavi *navi)

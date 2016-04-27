@@ -61,6 +61,8 @@ extern void nemonavi_send_touch_up_event(struct nemonavi *navi, float x, float y
 extern void nemonavi_send_touch_motion_event(struct nemonavi *navi, float x, float y, uint32_t id);
 
 extern void nemonavi_load_url(struct nemonavi *navi, const char *url);
+extern void nemonavi_load_page(struct nemonavi *navi, const char *path);
+
 extern void nemonavi_go_back(struct nemonavi *navi);
 extern void nemonavi_go_forward(struct nemonavi *navi);
 
