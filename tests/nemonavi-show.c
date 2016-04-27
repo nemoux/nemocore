@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <getopt.h>
+
 #include <nemonavi.h>
 #include <nemoshow.h>
 #include <showhelper.h>
@@ -232,6 +234,12 @@ static void nemonavi_dispatch_timer(struct nemotimer *timer, void *data)
 
 int main(int argc, char *argv[])
 {
+	struct option options[] = {
+		{ "url",				required_argument,			NULL,			'u' },
+		{ "file",				required_argument,			NULL,			'f' },
+		{ 0 }
+	};
+
 	struct navicontext *context;
 	struct nemotool *tool;
 	struct nemotimer *timer;
@@ -240,8 +248,29 @@ int main(int argc, char *argv[])
 	struct showone *canvas;
 	struct showone *one;
 	struct nemonavi *navi;
+	char *url = NULL;
+	char *file = NULL;
 	int width = 640;
 	int height = 480;
+	int opt;
+
+	while (opt = getopt_long(argc, argv, "u:f:", options, NULL)) {
+		if (opt == -1)
+			break;
+
+		switch (opt) {
+			case 'u':
+				url = strdup(optarg);
+				break;
+
+			case 'f':
+				file = strdup(optarg);
+				break;
+
+			default:
+				break;
+		}
+	}
 
 	nemonavi_init_once(argc, argv);
 
@@ -294,6 +323,11 @@ int main(int argc, char *argv[])
 	nemonavi_set_dispatch_key_event(navi, nemonavi_dispatch_key_event);
 	nemonavi_set_dispatch_loading_state(navi, nemonavi_dispatch_loading_state);
 	nemonavi_set_userdata(navi, context);
+
+	if (file != NULL)
+		nemonavi_load_page(navi, file);
+	else if (url != NULL)
+		nemonavi_load_url(navi, url);
 
 	context->timer = timer = nemotimer_create(tool);
 	nemotimer_set_callback(timer, nemonavi_dispatch_timer);
