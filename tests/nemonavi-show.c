@@ -99,10 +99,7 @@ static void nemonavi_dispatch_popup_rect(struct nemonavi *navi, int x, int y, in
 	nemoshow_event_transform_from_viewport(context->show, x + width, y + height, &x1, &y1);
 
 	nemoshow_canvas_translate(context->popup, x0, y0);
-
-	nemoshow_canvas_set_width(context->popup, x1 - x0);
-	nemoshow_canvas_set_height(context->popup, y1 - y0);
-	nemoshow_canvas_resize(context->popup);
+	nemoshow_canvas_set_size(context->show, context->popup, x1 - x0, y1 - y0);
 }
 
 static void nemonavi_dispatch_key_event(struct nemonavi *navi, uint32_t code, int focus_on_editable_field)
@@ -253,6 +250,8 @@ int main(int argc, char *argv[])
 	int width = 640;
 	int height = 480;
 	int opt;
+
+	opterr = 0;
 
 	while (opt = getopt_long(argc, argv, "u:f:", options, NULL)) {
 		if (opt == -1)

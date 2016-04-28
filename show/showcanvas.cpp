@@ -127,7 +127,7 @@ void nemoshow_canvas_detach_one(struct showone *one)
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
 	nemoshow_one_detach_one(one);
-	
+
 	nemotale_detach_node(canvas->node);
 }
 
@@ -814,6 +814,17 @@ int nemoshow_canvas_set_viewport(struct nemoshow *show, struct showone *one, dou
 	}
 
 	return 0;
+}
+
+int nemoshow_canvas_set_size(struct nemoshow *show, struct showone *one, int32_t width, int32_t height)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	canvas->width = width;
+	canvas->height = height;
+	canvas->needs_resize = 0;
+
+	return nemoshow_canvas_resize(one);
 }
 
 void nemoshow_canvas_damage_one(struct showone *one, struct showone *child)
