@@ -19,7 +19,6 @@ TARGET_LINK_LIBRARIES(nemonavi
 	nemoasst
 	cef
 	cef_dll_wrapper
-	ssp
 	)
 
 INSTALL(TARGETS nemonavi DESTINATION lib${CMAKE_LIBRARY_SUFFIX})

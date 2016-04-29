@@ -46,7 +46,7 @@ static void nemolog_dispatch_message_task(int efd, struct logtask *task)
 	} else {
 		msg[len] = '\0';
 
-		printf(msg);
+		printf("%s", msg);
 	}
 }
 
@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
 	os_set_nonblocking_mode(lsoc);
 
 	addr.sun_family = AF_LOCAL;
-	namesize = snprintf(addr.sun_path, sizeof(addr.sun_path), socketpath);
+	namesize = snprintf(addr.sun_path, sizeof(addr.sun_path), "%s", socketpath);
 	size = offsetof(struct sockaddr_un, sun_path) + namesize;
 
 	if (bind(lsoc, (struct sockaddr *)&addr, size) < 0)

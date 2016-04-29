@@ -8,7 +8,7 @@
 #include <sys/mman.h>
 
 #include <ft2build.h>
-#include <freetype.h>
+#include <freetype/freetype.h>
 #include <hb-ft.h>
 #include <hb-ot.h>
 #include <fontconfig/fontconfig.h>

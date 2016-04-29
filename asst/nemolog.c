@@ -36,7 +36,7 @@ void __attribute__((destructor(101))) nemolog_finalize(void)
 
 int nemolog_open_file(const char *filepath)
 {
-	nemologfile = open(filepath, O_RDWR | O_CREAT | O_TRUNC);
+	nemologfile = open(filepath, O_RDWR | O_CREAT | O_TRUNC, 0644);
 
 	return nemologfile;
 }
@@ -64,7 +64,7 @@ int nemolog_open_socket(const char *socketpath)
 		return -1;
 
 	addr.sun_family = AF_LOCAL;
-	namesize = snprintf(addr.sun_path, sizeof(addr.sun_path), socketpath);
+	namesize = snprintf(addr.sun_path, sizeof(addr.sun_path), "%s", socketpath);
 	size = offsetof(struct sockaddr_un, sun_path) + namesize;
 
 	if (connect(soc, (struct sockaddr *)&addr, size) < 0)
