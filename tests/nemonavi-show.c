@@ -185,39 +185,47 @@ static void nemonavi_dispatch_canvas_event(struct nemoshow *show, struct showone
 					nemotool_get_keysym(context->tool, nemoshow_event_get_value(event)));
 	}
 
-	if (nemoshow_event_is_touch_down(show, event)) {
-		int id = nemonavi_get_touchid_empty(context->navi);
+	nemoshow_event_update_taps(show, canvas, event);
 
-		nemoshow_set_keyboard_focus(show, canvas);
+	if (nemoshow_event_is_more_taps(show, event, 2) == 0) {
+		if (nemoshow_event_is_touch_down(show, event)) {
+			int id = nemonavi_get_touchid_empty(context->navi);
 
-		nemoshow_event_transform_to_viewport(show,
-				nemoshow_event_get_x(event),
-				nemoshow_event_get_y(event),
-				&x, &y);
+			nemoshow_set_keyboard_focus(show, canvas);
 
-		nemoshow_event_set_tag(event, id);
+			nemoshow_event_transform_to_viewport(show,
+					nemoshow_event_get_x(event),
+					nemoshow_event_get_y(event),
+					&x, &y);
 
-		nemonavi_send_touch_down_event(context->navi, x, y, id, nemoshow_event_get_time(event) / 1000.0f);
-	} else if (nemoshow_event_is_touch_up(show, event)) {
-		int id = nemoshow_event_get_tag(event);
+			nemoshow_event_set_tag(event, id + 1);
 
-		nemoshow_event_transform_to_viewport(show,
-				nemoshow_event_get_x(event),
-				nemoshow_event_get_y(event),
-				&x, &y);
+			nemonavi_send_touch_down_event(context->navi, x, y, id, nemoshow_event_get_time(event) / 1000.0f);
+		} else if (nemoshow_event_is_touch_up(show, event)) {
+			int id = nemoshow_event_get_tag(event);
 
-		nemonavi_send_touch_up_event(context->navi, x, y, id, nemoshow_event_get_time(event) / 1000.0f);
-	} else if (nemoshow_event_is_touch_motion(show, event)) {
-		int id = nemoshow_event_get_tag(event);
+			if (id > 0) {
+				nemoshow_event_transform_to_viewport(show,
+						nemoshow_event_get_x(event),
+						nemoshow_event_get_y(event),
+						&x, &y);
 
-		nemoshow_event_transform_to_viewport(show,
-				nemoshow_event_get_x(event),
-				nemoshow_event_get_y(event),
-				&x, &y);
+				nemonavi_send_touch_up_event(context->navi, x, y, id - 1, nemoshow_event_get_time(event) / 1000.0f);
+			}
+		} else if (nemoshow_event_is_touch_motion(show, event)) {
+			int id = nemoshow_event_get_tag(event);
 
-		nemonavi_put_touchid(context->navi, id);
+			if (id > 0) {
+				nemoshow_event_transform_to_viewport(show,
+						nemoshow_event_get_x(event),
+						nemoshow_event_get_y(event),
+						&x, &y);
 
-		nemonavi_send_touch_motion_event(context->navi, x, y, id, nemoshow_event_get_time(event) / 1000.0f);
+				nemonavi_put_touchid(context->navi, id);
+
+				nemonavi_send_touch_motion_event(context->navi, x, y, id - 1, nemoshow_event_get_time(event) / 1000.0f);
+			}
+		}
 	}
 
 	nemonavi_loop_once();
