@@ -175,16 +175,52 @@ void nemonavi_send_keyboard_up_event(struct nemonavi *navi, uint32_t code)
 	NEMONAVI_CC(navi, browser)->GetHost()->SendKeyEvent(key_event);
 }
 
-void nemonavi_send_touch_down_event(struct nemonavi *navi, float x, float y, uint32_t id)
+void nemonavi_send_touch_down_event(struct nemonavi *navi, float x, float y, uint32_t id, double secs)
 {
+	CefTouchEvent touch_event;
+
+	touch_event.points[0].id = id;
+	touch_event.points[0].x = x;
+	touch_event.points[0].y = y;
+	touch_event.points[0].type = TPT_PRESSED;
+
+	touch_event.count = 1;
+	touch_event.modifiers = 0x0;
+	touch_event.timestamp_seconds = secs;
+
+	NEMONAVI_CC(navi, browser)->GetHost()->SendTouchEvent(touch_event);
 }
 
-void nemonavi_send_touch_up_event(struct nemonavi *navi, float x, float y, uint32_t id)
+void nemonavi_send_touch_up_event(struct nemonavi *navi, float x, float y, uint32_t id, double secs)
 {
+	CefTouchEvent touch_event;
+
+	touch_event.points[0].id = id;
+	touch_event.points[0].x = x;
+	touch_event.points[0].y = y;
+	touch_event.points[0].type = TPT_RELEASED;
+
+	touch_event.count = 1;
+	touch_event.modifiers = 0x0;
+	touch_event.timestamp_seconds = secs;
+
+	NEMONAVI_CC(navi, browser)->GetHost()->SendTouchEvent(touch_event);
 }
 
-void nemonavi_send_touch_motion_event(struct nemonavi *navi, float x, float y, uint32_t id)
+void nemonavi_send_touch_motion_event(struct nemonavi *navi, float x, float y, uint32_t id, double secs)
 {
+	CefTouchEvent touch_event;
+
+	touch_event.points[0].id = id;
+	touch_event.points[0].x = x;
+	touch_event.points[0].y = y;
+	touch_event.points[0].type = TPT_MOVED;
+
+	touch_event.count = 1;
+	touch_event.modifiers = 0x0;
+	touch_event.timestamp_seconds = secs;
+
+	NEMONAVI_CC(navi, browser)->GetHost()->SendTouchEvent(touch_event);
 }
 
 void nemonavi_load_url(struct nemonavi *navi, const char *url)

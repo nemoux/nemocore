@@ -170,6 +170,11 @@ static inline void nemoshow_event_set_tag(void *event, uint32_t tag)
 	nemotale_event_set_tag((struct taleevent *)event, tag);
 }
 
+static inline uint32_t nemoshow_event_get_tag(void *event)
+{
+	return nemotale_event_get_tag((struct taleevent *)event);
+}
+
 static inline void nemoshow_event_set_used(void *event)
 {
 	nemotale_event_set_used((struct taleevent *)event);
@@ -178,6 +183,11 @@ static inline void nemoshow_event_set_used(void *event)
 static inline int nemoshow_event_has_special_key(void *event)
 {
 	return nemotale_event_has_special_key((struct taleevent *)event);
+}
+
+static inline int nemoshow_event_get_tapcount(void *event)
+{
+	return nemotale_event_get_tapcount((struct taleevent *)event);
 }
 
 static inline void nemoshow_event_update_taps(struct nemoshow *show, struct showone *one, void *event)

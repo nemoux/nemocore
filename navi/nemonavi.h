@@ -32,6 +32,8 @@ struct nemonavi {
 
 	int32_t width, height;
 
+	uint32_t touchids;
+
 	void *data;
 
 	void *cc;
@@ -56,9 +58,9 @@ extern void nemonavi_send_pointer_wheel_event(struct nemonavi *navi, float x, fl
 extern void nemonavi_send_keyboard_down_event(struct nemonavi *navi, uint32_t code);
 extern void nemonavi_send_keyboard_up_event(struct nemonavi *navi, uint32_t code);
 
-extern void nemonavi_send_touch_down_event(struct nemonavi *navi, float x, float y, uint32_t id);
-extern void nemonavi_send_touch_up_event(struct nemonavi *navi, float x, float y, uint32_t id);
-extern void nemonavi_send_touch_motion_event(struct nemonavi *navi, float x, float y, uint32_t id);
+extern void nemonavi_send_touch_down_event(struct nemonavi *navi, float x, float y, uint32_t id, double secs);
+extern void nemonavi_send_touch_up_event(struct nemonavi *navi, float x, float y, uint32_t id, double secs);
+extern void nemonavi_send_touch_motion_event(struct nemonavi *navi, float x, float y, uint32_t id, double secs);
 
 extern void nemonavi_load_url(struct nemonavi *navi, const char *url);
 extern void nemonavi_load_page(struct nemonavi *navi, const char *path);
@@ -109,6 +111,21 @@ static inline void nemonavi_set_userdata(struct nemonavi *navi, void *data)
 static inline void *nemonavi_get_userdata(struct nemonavi *navi)
 {
 	return navi->data;
+}
+
+static inline uint32_t nemonavi_get_touchid_empty(struct nemonavi *navi)
+{
+	return ffs(navi->touchids);
+}
+
+static inline void nemonavi_set_touchid(struct nemonavi *navi, uint32_t id)
+{
+	navi->touchids |= (1 << id);
+}
+
+static inline void nemonavi_put_touchid(struct nemonavi *navi, uint32_t id)
+{
+	navi->touchids &= ~(1 << id);
 }
 
 #ifdef __cplusplus

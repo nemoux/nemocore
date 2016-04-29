@@ -325,6 +325,11 @@ static inline void nemotale_event_set_tag(struct taleevent *event, uint32_t tag)
 	nemotale_tap_set_tag(event->tap, tag);
 }
 
+static inline uint32_t nemotale_event_get_tag(struct taleevent *event)
+{
+	return nemotale_tap_get_tag(event->tap);
+}
+
 static inline void nemotale_event_set_used(struct taleevent *event)
 {
 	nemotale_tap_set_state(event->tap, NEMOTALE_TAP_USED_STATE);
@@ -338,6 +343,11 @@ static inline int nemotale_event_has_special_key(struct taleevent *event)
 		return 1;
 
 	return 0;
+}
+
+static inline int nemotale_event_get_tapcount(struct taleevent *event)
+{
+	return event->tapcount;
 }
 
 static inline int nemotale_event_update_taps(struct nemotale *tale, struct taleevent *event)

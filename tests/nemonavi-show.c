@@ -186,6 +186,8 @@ static void nemonavi_dispatch_canvas_event(struct nemoshow *show, struct showone
 	}
 
 	if (nemoshow_event_is_touch_down(show, event)) {
+		int id = nemonavi_get_touchid_empty(context->navi);
+
 		nemoshow_set_keyboard_focus(show, canvas);
 
 		nemoshow_event_transform_to_viewport(show,
@@ -193,24 +195,32 @@ static void nemonavi_dispatch_canvas_event(struct nemoshow *show, struct showone
 				nemoshow_event_get_y(event),
 				&x, &y);
 
-		nemonavi_send_pointer_down_event(context->navi, x, y,
-				nemoshow_event_get_value(event));
+		nemoshow_event_set_tag(event, id);
+
+		nemonavi_send_touch_down_event(context->navi, x, y, id, nemoshow_event_get_time(event) / 1000.0f);
 	} else if (nemoshow_event_is_touch_up(show, event)) {
+		int id = nemoshow_event_get_tag(event);
+
 		nemoshow_event_transform_to_viewport(show,
 				nemoshow_event_get_x(event),
 				nemoshow_event_get_y(event),
 				&x, &y);
 
-		nemonavi_send_pointer_up_event(context->navi, x, y,
-				nemoshow_event_get_value(event));
+		nemonavi_send_touch_up_event(context->navi, x, y, id, nemoshow_event_get_time(event) / 1000.0f);
 	} else if (nemoshow_event_is_touch_motion(show, event)) {
+		int id = nemoshow_event_get_tag(event);
+
 		nemoshow_event_transform_to_viewport(show,
 				nemoshow_event_get_x(event),
 				nemoshow_event_get_y(event),
 				&x, &y);
 
-		nemonavi_send_pointer_motion_event(context->navi, x, y);
+		nemonavi_put_touchid(context->navi, id);
+
+		nemonavi_send_touch_motion_event(context->navi, x, y, id, nemoshow_event_get_time(event) / 1000.0f);
 	}
+
+	nemonavi_loop_once();
 }
 
 static void nemonavi_dispatch_canvas_resize(struct nemoshow *show, struct showone *one, int32_t width, int32_t height)
