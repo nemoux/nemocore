@@ -177,6 +177,7 @@
 
 		<enum name="content_type">
 			<entry name="folder" value="0"/>
+			<entry name="url" value="1"/>
 		</enum>
 
 		<request name="execute_command">
@@ -207,7 +208,7 @@
 			<arg name="y" type="fixed"/>
 			<arg name="r" type="fixed"/>
 		</request>
-
+		
 		<event name="configure">
 			<arg name="width" type="int"/>
 			<arg name="height" type="int"/>
