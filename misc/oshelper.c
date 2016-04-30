@@ -179,6 +179,7 @@ int os_load_path(const char *path, char **buffer, int *size)
 		fclose(file);
 		return -1;
 	}
+	memset(tbuffer, 0, tsize + 1);
 
 	fread(tbuffer, sizeof(char), tsize, file);
 
