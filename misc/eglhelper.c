@@ -57,6 +57,8 @@ int egl_prepare_context(EGLNativeDisplayType nativedisplay, EGLDisplay *egl_disp
 		EGL_BLUE_SIZE, 1,
 		EGL_ALPHA_SIZE, 0,
 		EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+		EGL_SAMPLE_BUFFERS, 1,
+		EGL_SAMPLES, 4,
 		EGL_NONE
 	};
 	static const EGLint alpha_attribs[] = {
@@ -66,6 +68,8 @@ int egl_prepare_context(EGLNativeDisplayType nativedisplay, EGLDisplay *egl_disp
 		EGL_BLUE_SIZE, 1,
 		EGL_ALPHA_SIZE, 1,
 		EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+		EGL_SAMPLE_BUFFERS, 1,
+		EGL_SAMPLES, 4,
 		EGL_NONE
 	};
 	static const EGLint client_attribs[] = {
