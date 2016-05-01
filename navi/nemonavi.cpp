@@ -39,7 +39,7 @@ void nemonavi_exit_once(void)
 	CefShutdown();
 }
 
-void nemonavi_loop_once(void)
+void nemonavi_do_message(void)
 {
 	CefDoMessageLoopWork();
 }

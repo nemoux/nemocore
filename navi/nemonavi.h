@@ -41,7 +41,8 @@ struct nemonavi {
 
 extern int nemonavi_init_once(int argc, char *argv[]);
 extern void nemonavi_exit_once(void);
-extern void nemonavi_loop_once(void);
+
+extern void nemonavi_do_message(void);
 
 extern struct nemonavi *nemonavi_create(const char *url);
 extern void nemonavi_destroy(struct nemonavi *navi);

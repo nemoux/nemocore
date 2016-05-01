@@ -13,6 +13,8 @@
 #include <nemolog.h>
 #include <nemomisc.h>
 
+#define NEMONAVI_MESSAGE_TIMEOUT		(8)
+
 struct navicontext {
 	struct nemotool *tool;
 
@@ -228,7 +230,7 @@ static void nemonavi_dispatch_canvas_event(struct nemoshow *show, struct showone
 		}
 	}
 
-	nemonavi_loop_once();
+	nemonavi_do_message();
 }
 
 static void nemonavi_dispatch_canvas_resize(struct nemoshow *show, struct showone *one, int32_t width, int32_t height)
@@ -242,9 +244,9 @@ static void nemonavi_dispatch_timer(struct nemotimer *timer, void *data)
 {
 	struct navicontext *context = (struct navicontext *)data;
 
-	nemonavi_loop_once();
+	nemonavi_do_message();
 
-	nemotimer_set_timeout(timer, 20);
+	nemotimer_set_timeout(timer, NEMONAVI_MESSAGE_TIMEOUT);
 }
 
 int main(int argc, char *argv[])
@@ -349,7 +351,7 @@ int main(int argc, char *argv[])
 	context->timer = timer = nemotimer_create(tool);
 	nemotimer_set_callback(timer, nemonavi_dispatch_timer);
 	nemotimer_set_userdata(timer, context);
-	nemotimer_set_timeout(timer, 20);
+	nemotimer_set_timeout(timer, NEMONAVI_MESSAGE_TIMEOUT);
 
 	nemoshow_dispatch_frame(show);
 
