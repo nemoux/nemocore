@@ -72,6 +72,9 @@ struct nemonavi *nemonavi_create(const char *url)
 
 void nemonavi_destroy(struct nemonavi *navi)
 {
+	delete NEMONAVI_CC(navi, browser);
+	delete NEMONAVI_CC(navi, client);
+
 	delete static_cast<nemonavi_t *>(navi->cc);
 
 	free(navi);
