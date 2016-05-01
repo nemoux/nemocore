@@ -238,6 +238,8 @@ static void nemonavi_dispatch_canvas_resize(struct nemoshow *show, struct showon
 	struct navicontext *context = (struct navicontext *)nemoshow_get_userdata(show);
 
 	nemonavi_set_size(context->navi, width, height);
+	
+	nemonavi_do_message();
 }
 
 static void nemonavi_dispatch_timer(struct nemotimer *timer, void *data)
