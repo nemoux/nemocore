@@ -108,8 +108,15 @@ static void nemonavi_dispatch_key_event(struct nemonavi *navi, uint32_t code, in
 {
 	struct navicontext *context = (struct navicontext *)nemonavi_get_userdata(navi);
 
-	if (focus_on_editable_field == 0 && code == 8) {
-		nemonavi_go_back(context->navi);
+	if (focus_on_editable_field == 0) {
+		if (code == 8)
+			nemonavi_go_back(context->navi);
+		else if (code == 171)
+			nemonavi_set_zoomlevel(context->navi,
+					nemonavi_get_zoomlevel(context->navi) + 0.5f);
+		else if (code == 173)
+			nemonavi_set_zoomlevel(context->navi,
+					nemonavi_get_zoomlevel(context->navi) - 0.5f);
 	}
 }
 
@@ -238,7 +245,7 @@ static void nemonavi_dispatch_canvas_resize(struct nemoshow *show, struct showon
 	struct navicontext *context = (struct navicontext *)nemoshow_get_userdata(show);
 
 	nemonavi_set_size(context->navi, width, height);
-	
+
 	nemonavi_do_message();
 }
 
