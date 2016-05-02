@@ -247,11 +247,11 @@ static void move_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 			bin->state.maximized == 0) {
 		int32_t cx, cy;
 
-		if (move->has_reset != 0 && bin->reset_scale == 0) {
+		if (bin->reset_move != 0) {
 			move->dx = bin->view->geometry.x - tp->x;
 			move->dy = bin->view->geometry.y - tp->y;
 
-			move->has_reset = 0;
+			bin->reset_move = 0;
 		}
 
 		cx = x + move->dx;
@@ -314,7 +314,8 @@ int nemoshell_move_canvas_by_touchpoint(struct nemoshell *shell, struct touchpoi
 
 	move->dx = bin->view->geometry.x - tp->x;
 	move->dy = bin->view->geometry.y - tp->y;
-	move->has_reset = bin->reset_scale;
+	
+	bin->reset_move = 0;
 
 	touchpoint_clear_samples(tp);
 

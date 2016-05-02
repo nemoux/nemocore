@@ -655,3 +655,7 @@ int nemoshow_view_pick_distant(struct nemoshow *show, void *event, uint32_t type
 void nemoshow_view_miss(struct nemoshow *show)
 {
 }
+
+void nemoshow_view_resize(struct nemoshow *show, int32_t width, int32_t height)
+{
+}

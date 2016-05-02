@@ -28,6 +28,11 @@ struct playcontext {
 	struct playshader *shader;
 
 	struct nemotimer *timer;
+
+	int32_t screenid;
+
+	int32_t width;
+	int32_t height;
 };
 
 static void nemoplay_dispatch_show_transform(struct nemoshow *show, int32_t visible, int32_t x, int32_t y, int32_t width, int32_t height)
@@ -36,6 +41,21 @@ static void nemoplay_dispatch_show_transform(struct nemoshow *show, int32_t visi
 
 static void nemoplay_dispatch_show_fullscreen(struct nemoshow *show, int32_t id, int32_t x, int32_t y, int32_t width, int32_t height)
 {
+	struct playcontext *context = (struct playcontext *)nemoshow_get_userdata(show);
+
+	context->screenid = id;
+
+	if (id >= 0) {
+		double ratio = ((double)width / nemoplay_get_video_aspectratio(context->play)) / (double)height;
+
+		nemoshow_canvas_translate(context->canvas, 0.0f, context->height * (1.0f - ratio) / 2.0f);
+		nemoshow_canvas_set_size(context->show, context->canvas, context->width, context->height * ratio);
+	} else {
+		nemoshow_canvas_translate(context->canvas, 0.0f, 0.0f);
+		nemoshow_canvas_set_size(context->show, context->canvas, context->width, context->height);
+		
+		nemoshow_view_resize(context->show, width, width / nemoplay_get_video_aspectratio(context->play));
+	}
 }
 
 static void nemoplay_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, void *event)
@@ -271,6 +291,11 @@ int main(int argc, char *argv[])
 		return -1;
 	memset(context, 0, sizeof(struct playcontext));
 
+	context->screenid = -1;
+
+	context->width = width;
+	context->height = height;
+
 	context->play = play = nemoplay_create();
 	if (context->play == NULL)
 		goto err2;
@@ -298,6 +323,8 @@ int main(int argc, char *argv[])
 	nemoshow_view_set_fullscreen_type(show, "pick");
 	nemoshow_view_set_fullscreen_type(show, "pitch");
 
+	nemoshow_view_set_anchor(show, -0.5f, -0.5f);
+
 	context->scene = scene = nemoshow_scene_create();
 	nemoshow_scene_set_width(scene, width);
 	nemoshow_scene_set_height(scene, height);
@@ -307,8 +334,7 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_width(canvas, width);
 	nemoshow_canvas_set_height(canvas, height);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_BACK_TYPE);
-	nemoshow_canvas_set_fill_color(canvas, 0.0f, 0.0f, 0.0f, 0.0f);
-	nemoshow_canvas_set_alpha(canvas, 0.0f);
+	nemoshow_canvas_set_fill_color(canvas, 1.0f, 1.0f, 1.0f, 1.0f);
 	nemoshow_one_attach(scene, canvas);
 
 	context->canvas = canvas = nemoshow_canvas_create();

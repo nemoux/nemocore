@@ -582,3 +582,17 @@ void nemoshow_view_miss(struct nemoshow *show)
 
 	nemocanvas_miss(canvas);
 }
+
+void nemoshow_view_resize(struct nemoshow *show, int32_t width, int32_t height)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemocanvas *canvas = scon->canvas;
+
+	nemotool_resize_egl_canvas(scon->eglcanvas, width, height);
+
+	nemoshow_set_size(show, width, height);
+
+	nemoshow_render_one(show);
+
+	nemotale_composite_egl_full(scon->tale);
+}

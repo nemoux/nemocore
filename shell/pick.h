@@ -34,8 +34,7 @@ struct shellgrab_pick {
 	float sx, sy;
 	float dx, dy;
 	float r;
-	int has_reset;
-
+	
 	struct touchpoint *tp0, *tp1;
 
 	uint32_t frameid;

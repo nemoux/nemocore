@@ -204,8 +204,11 @@ struct shellbin {
 	struct wl_listener canvas_destroy_listener;
 
 	uint32_t resize_edges;
-	uint32_t reset_scale;
-	float px, py;
+	
+	int32_t reset_scale;
+	int32_t reset_size;
+	int32_t reset_move;
+	
 	float ax, ay;
 
 	uint32_t min_width, min_height;

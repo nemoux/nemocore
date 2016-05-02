@@ -17,14 +17,12 @@ struct shellgrab_move {
 	struct shellgrab base;
 
 	float dx, dy;
-	int has_reset;
 };
 
 struct actorgrab_move {
 	struct actorgrab base;
 
 	float dx, dy;
-	int has_reset;
 };
 
 extern int nemoshell_move_canvas_by_pointer(struct nemoshell *shell, struct nemopointer *pointer, struct shellbin *bin);

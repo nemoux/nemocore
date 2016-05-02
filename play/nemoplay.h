@@ -144,6 +144,11 @@ static inline int nemoplay_get_video_height(struct nemoplay *play)
 	return play->video_height;
 }
 
+static inline double nemoplay_get_video_aspectratio(struct nemoplay *play)
+{
+	return (double)play->video_width / (double)play->video_height;
+}
+
 static inline double nemoplay_get_video_framerate(struct nemoplay *play)
 {
 	return play->video_framerate;

@@ -317,6 +317,8 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 						view->geometry.x + tox - fromx,
 						view->geometry.y + toy - fromy);
 
+				bin->reset_move = 1;
+
 				if (bin->grabbed > 0) {
 					bin->last_sx = sx;
 					bin->last_sy = sy;
@@ -332,6 +334,8 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 		}
 
 		nemoview_transform_notify(bin->view);
+
+		bin->reset_size = 1;
 
 out:
 		bin->last_width = canvas->base.width;
@@ -1082,7 +1086,7 @@ void nemoshell_put_fullscreen_bin(struct nemoshell *shell, struct shellbin *bin)
 
 	nemoshell_send_bin_state(bin);
 
-	nemocontent_update_fullscreen(bin->view->content, -1, 0, 0, 0, 0);
+	nemocontent_update_fullscreen(bin->view->content, -1, bin->screen.x, bin->screen.y, bin->screen.width, bin->screen.height);
 }
 
 static inline int nemoshell_bin_contain_view(struct shellbin *bin, struct nemoview *view)
