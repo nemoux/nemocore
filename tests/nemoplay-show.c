@@ -53,8 +53,14 @@ static void nemoplay_dispatch_show_fullscreen(struct nemoshow *show, int32_t id,
 	} else {
 		nemoshow_canvas_translate(context->canvas, 0.0f, 0.0f);
 		nemoshow_canvas_set_size(context->show, context->canvas, context->width, context->height);
-		
+
 		nemoshow_view_resize(context->show, width, width / nemoplay_get_video_aspectratio(context->play));
+	}
+
+	if (nemoplay_get_frame(context->play) != 0) {
+		nemoplay_shader_dispatch(context->shader);
+
+		nemoshow_dispatch_frame(context->show);
 	}
 }
 
