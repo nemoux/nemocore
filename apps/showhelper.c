@@ -330,6 +330,50 @@ void nemoshow_view_put_layer(struct nemoshow *show)
 	struct nemocanvas *canvas = scon->canvas;
 }
 
+void nemoshow_view_set_fullscreen_type(struct nemoshow *show, const char *type)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemocanvas *canvas = scon->canvas;
+
+	if (type == NULL)
+		return;
+
+	if (strcmp(type, "pick") == 0)
+		nemocanvas_set_fullscreen_type(canvas, (1 << NEMO_SURFACE_FULLSCREEN_TYPE_PICK));
+	else if (strcmp(type, "pitch") == 0)
+		nemocanvas_set_fullscreen_type(canvas, (1 << NEMO_SURFACE_FULLSCREEN_TYPE_PITCH));
+}
+
+void nemoshow_view_put_fullscreen_type(struct nemoshow *show, const char *type)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemocanvas *canvas = scon->canvas;
+
+	if (type == NULL)
+		return;
+
+	if (strcmp(type, "pick") == 0)
+		nemocanvas_put_fullscreen_type(canvas, (1 << NEMO_SURFACE_FULLSCREEN_TYPE_PICK));
+	else if (strcmp(type, "pitch") == 0)
+		nemocanvas_put_fullscreen_type(canvas, (1 << NEMO_SURFACE_FULLSCREEN_TYPE_PITCH));
+}
+
+void nemoshow_view_set_fullscreen(struct nemoshow *show, uint32_t id)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemocanvas *canvas = scon->canvas;
+
+	nemocanvas_set_fullscreen(canvas, id);
+}
+
+void nemoshow_view_put_fullscreen(struct nemoshow *show)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemocanvas *canvas = scon->canvas;
+
+	nemocanvas_put_fullscreen(canvas);
+}
+
 void nemoshow_view_set_parent(struct nemoshow *show, struct nemocanvas *parent)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);

@@ -134,6 +134,10 @@
 		<request name="set_fullscreen_type">
 			<arg name="type" type="uint"/>
 		</request>
+		
+		<request name="put_fullscreen_type">
+			<arg name="type" type="uint"/>
+		</request>
 
 		<request name="set_fullscreen">
 			<arg name="id" type="uint"/>

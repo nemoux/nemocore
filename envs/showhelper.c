@@ -380,6 +380,22 @@ void nemoshow_view_put_layer(struct nemoshow *show)
 	nemoview_put_state(actor->view, NEMOVIEW_MAP_STATE);
 }
 
+void nemoshow_view_set_fullscreen_type(struct nemoshow *show, const char *type)
+{
+}
+
+void nemoshow_view_put_fullscreen_type(struct nemoshow *show, const char *type)
+{
+}
+
+void nemoshow_view_set_fullscreen(struct nemoshow *show, uint32_t id)
+{
+}
+
+void nemoshow_view_put_fullscreen(struct nemoshow *show)
+{
+}
+
 void nemoshow_view_set_parent(struct nemoshow *show, struct nemoview *parent)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);

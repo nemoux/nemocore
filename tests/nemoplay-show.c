@@ -216,6 +216,7 @@ static void *nemoplay_handle_decodeframe(void *arg)
 int main(int argc, char *argv[])
 {
 	struct option options[] = {
+		{ "audio",			required_argument,		NULL,		'a' },
 		{ 0 }
 	};
 
@@ -230,14 +231,19 @@ int main(int argc, char *argv[])
 	struct nemotimer *timer;
 	pthread_t thread;
 	char *mediapath = NULL;
+	int on_audio = 1;
 	int width, height;
 	int opt;
 
-	while (opt = getopt_long(argc, argv, "", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "a:", options, NULL)) {
 		if (opt == -1)
 			break;
 
 		switch (opt) {
+			case 'a':
+				on_audio = strcmp(optarg, "off") != 0;
+				break;
+
 			default:
 				break;
 		}
@@ -263,6 +269,9 @@ int main(int argc, char *argv[])
 
 	nemoplay_prepare_media(play, mediapath);
 
+	if (on_audio == 0)
+		nemoplay_revoke_audio(play);
+
 	pthread_create(&thread, NULL, nemoplay_handle_decodeframe, (void *)context);
 	pthread_create(&thread, NULL, nemoplay_handle_audioplay, (void *)context);
 
@@ -275,6 +284,9 @@ int main(int argc, char *argv[])
 	if (show == NULL)
 		goto err4;
 	nemoshow_set_userdata(show, context);
+
+	nemoshow_view_set_fullscreen_type(show, "pick");
+	nemoshow_view_set_fullscreen_type(show, "pitch");
 
 	context->scene = scene = nemoshow_scene_create();
 	nemoshow_scene_set_width(scene, width);

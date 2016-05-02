@@ -293,6 +293,22 @@ void nemoplay_wait_media(struct nemoplay *play)
 	pthread_mutex_unlock(&play->lock);
 }
 
+void nemoplay_revoke_video(struct nemoplay *play)
+{
+	if (play->video_context != NULL) {
+		play->video_context = NULL;
+		play->video_stream = -1;
+	}
+}
+
+void nemoplay_revoke_audio(struct nemoplay *play)
+{
+	if (play->audio_context != NULL) {
+		play->audio_context = NULL;
+		play->audio_stream = -1;
+	}
+}
+
 void nemoplay_set_state(struct nemoplay *play, int state)
 {
 	if (play->state == NEMOPLAY_DONE_STATE)

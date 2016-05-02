@@ -240,13 +240,24 @@ static void nemo_surface_set_fullscreen_type(struct wl_client *client, struct wl
 
 	if (type & (1 << NEMO_SURFACE_FULLSCREEN_TYPE_PICK)) {
 		bin->on_pickscreen = 1;
-	} else {
-		bin->on_pickscreen = 0;
 	}
 
 	if (type & (1 << NEMO_SURFACE_FULLSCREEN_TYPE_PITCH)) {
 		bin->on_pitchscreen = 1;
-	} else {
+	}
+#endif
+}
+
+static void nemo_surface_put_fullscreen_type(struct wl_client *client, struct wl_resource *resource, uint32_t type)
+{
+#ifdef NEMOUX_WITH_FULLSCREEN
+	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
+
+	if (type & (1 << NEMO_SURFACE_FULLSCREEN_TYPE_PICK)) {
+		bin->on_pickscreen = 0;
+	}
+
+	if (type & (1 << NEMO_SURFACE_FULLSCREEN_TYPE_PITCH)) {
 		bin->on_pitchscreen = 0;
 	}
 #endif
@@ -419,6 +430,7 @@ static const struct nemo_surface_interface nemo_surface_implementation = {
 	nemo_surface_set_scope,
 	nemo_surface_put_scope,
 	nemo_surface_set_fullscreen_type,
+	nemo_surface_put_fullscreen_type,
 	nemo_surface_set_fullscreen,
 	nemo_surface_put_fullscreen,
 	nemo_surface_move,
