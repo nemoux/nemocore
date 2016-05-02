@@ -30,6 +30,14 @@ struct playcontext {
 	struct nemotimer *timer;
 };
 
+static void nemoplay_dispatch_show_transform(struct nemoshow *show, int32_t visible, int32_t x, int32_t y, int32_t width, int32_t height)
+{
+}
+
+static void nemoplay_dispatch_show_fullscreen(struct nemoshow *show, int32_t id, int32_t x, int32_t y, int32_t width, int32_t height)
+{
+}
+
 static void nemoplay_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, void *event)
 {
 	struct playcontext *context = (struct playcontext *)nemoshow_get_userdata(show);
@@ -283,6 +291,8 @@ int main(int argc, char *argv[])
 	context->show = show = nemoshow_create_view(tool, width, height);
 	if (show == NULL)
 		goto err4;
+	nemoshow_set_dispatch_transform(show, nemoplay_dispatch_show_transform);
+	nemoshow_set_dispatch_fullscreen(show, nemoplay_dispatch_show_fullscreen);
 	nemoshow_set_userdata(show, context);
 
 	nemoshow_view_set_fullscreen_type(show, "pick");

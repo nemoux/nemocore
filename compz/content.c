@@ -123,3 +123,10 @@ void nemocontent_update_layer(struct nemocontent *content, int visible)
 		content->update_layer(content, visible);
 	}
 }
+
+void nemocontent_update_fullscreen(struct nemocontent *content, int id, int32_t x, int32_t y, int32_t width, int32_t height)
+{
+	if (content->update_fullscreen != NULL) {
+		content->update_fullscreen(content, id, x, y, width, height);
+	}
+}

@@ -21,6 +21,7 @@ typedef int (*nemocanvas_dispatch_event_t)(struct nemocanvas *canvas, uint32_t t
 typedef void (*nemocanvas_dispatch_resize_t)(struct nemocanvas *canvas, int32_t width, int32_t height, int32_t fixed);
 typedef void (*nemocanvas_dispatch_transform_t)(struct nemocanvas *canvas, int32_t visible, int32_t x, int32_t y, int32_t width, int32_t height);
 typedef void (*nemocanvas_dispatch_layer_t)(struct nemocanvas *canvas, int32_t visible);
+typedef void (*nemocanvas_dispatch_fullscreen_t)(struct nemocanvas *canvas, int32_t id, int32_t x, int32_t y, int32_t width, int32_t height);
 typedef void (*nemocanvas_dispatch_frame_t)(struct nemocanvas *canvas, uint64_t secs, uint32_t nsecs);
 typedef void (*nemocanvas_dispatch_discard_t)(struct nemocanvas *canvas);
 typedef void (*nemocanvas_dispatch_screen_t)(struct nemocanvas *canvas, int32_t x, int32_t y, int32_t width, int32_t height, int32_t mmwidth, int32_t mmheight, int left);
@@ -62,6 +63,7 @@ struct nemocanvas {
 	nemocanvas_dispatch_resize_t dispatch_resize;
 	nemocanvas_dispatch_transform_t dispatch_transform;
 	nemocanvas_dispatch_layer_t dispatch_layer;
+	nemocanvas_dispatch_fullscreen_t dispatch_fullscreen;
 	nemocanvas_dispatch_frame_t dispatch_frame;
 	nemocanvas_dispatch_discard_t dispatch_discard;
 	nemocanvas_dispatch_screen_t dispatch_screen;
@@ -127,6 +129,7 @@ extern void nemocanvas_set_dispatch_event(struct nemocanvas *canvas, nemocanvas_
 extern void nemocanvas_set_dispatch_resize(struct nemocanvas *canvas, nemocanvas_dispatch_resize_t dispatch);
 extern void nemocanvas_set_dispatch_transform(struct nemocanvas *canvas, nemocanvas_dispatch_transform_t dispatch);
 extern void nemocanvas_set_dispatch_layer(struct nemocanvas *canvas, nemocanvas_dispatch_layer_t dispatch);
+extern void nemocanvas_set_dispatch_fullscreen(struct nemocanvas *canvas, nemocanvas_dispatch_fullscreen_t dispatch);
 extern void nemocanvas_set_dispatch_frame(struct nemocanvas *canvas, nemocanvas_dispatch_frame_t dispatch);
 extern void nemocanvas_set_dispatch_discard(struct nemocanvas *canvas, nemocanvas_dispatch_discard_t dispatch);
 extern void nemocanvas_set_dispatch_screen(struct nemocanvas *canvas, nemocanvas_dispatch_screen_t dispatch);

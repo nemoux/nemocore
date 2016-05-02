@@ -44,10 +44,18 @@ static void nemo_send_layer(struct nemocanvas *canvas, int visible)
 	nemo_surface_send_layer(bin->resource, visible);
 }
 
+static void nemo_send_fullscreen(struct nemocanvas *canvas, int id, int32_t x, int32_t y, int32_t width, int32_t height)
+{
+	struct shellbin *bin = nemoshell_get_bin(canvas);
+
+	nemo_surface_send_fullscreen(bin->resource, id, x, y, width, height);
+}
+
 static struct nemoclient nemo_client = {
 	nemo_send_configure,
 	nemo_send_transform,
-	nemo_send_layer
+	nemo_send_layer,
+	nemo_send_fullscreen
 };
 
 static void nemo_surface_destroy(struct wl_client *client, struct wl_resource *resource)

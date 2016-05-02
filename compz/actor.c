@@ -255,6 +255,14 @@ static void nemoactor_update_layer(struct nemocontent *content, int visible)
 		actor->dispatch_layer(actor, visible);
 }
 
+static void nemoactor_update_fullscreen(struct nemocontent *content, int id, int32_t x, int32_t y, int32_t width, int32_t height)
+{
+	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
+
+	if (actor->dispatch_fullscreen != NULL)
+		actor->dispatch_fullscreen(actor, id, x, y, width, height);
+}
+
 static void nemoactor_dispatch_frame_timer(struct nemotimer *timer, void *data)
 {
 	struct nemoactor *actor = (struct nemoactor *)data;
@@ -306,6 +314,7 @@ struct nemoactor *nemoactor_create_pixman(struct nemocompz *compz, int width, in
 	actor->base.update_output = nemoactor_update_output;
 	actor->base.update_transform = nemoactor_update_transform;
 	actor->base.update_layer = nemoactor_update_layer;
+	actor->base.update_fullscreen = nemoactor_update_fullscreen;
 	actor->base.read_pixels = nemoactor_read_pixels;
 
 	actor->base.pick = nemoactor_dispatch_pick_me;
@@ -459,6 +468,7 @@ struct nemoactor *nemoactor_create_gl(struct nemocompz *compz, int width, int he
 	actor->base.update_output = nemoactor_update_output;
 	actor->base.update_transform = nemoactor_update_transform;
 	actor->base.update_layer = nemoactor_update_layer;
+	actor->base.update_fullscreen = nemoactor_update_fullscreen;
 	actor->base.read_pixels = nemoactor_read_pixels;
 
 	actor->base.pick = nemoactor_dispatch_pick_me;
@@ -640,6 +650,11 @@ void nemoactor_set_dispatch_layer(struct nemoactor *actor, nemoactor_dispatch_la
 	actor->dispatch_layer = dispatch;
 }
 
+void nemoactor_set_dispatch_fullscreen(struct nemoactor *actor, nemoactor_dispatch_fullscreen_t dispatch)
+{
+	actor->dispatch_fullscreen = dispatch;
+}
+
 void nemoactor_set_dispatch_frame(struct nemoactor *actor, nemoactor_dispatch_frame_t dispatch)
 {
 	actor->dispatch_frame = dispatch;
@@ -695,6 +710,12 @@ void nemoactor_dispatch_layer(struct nemoactor *actor, int visible)
 {
 	if (actor->dispatch_layer != NULL)
 		actor->dispatch_layer(actor, visible);
+}
+
+void nemoactor_dispatch_fullscreen(struct nemoactor *actor, int id, int32_t x, int32_t y, int32_t width, int32_t height)
+{
+	if (actor->dispatch_fullscreen != NULL)
+		actor->dispatch_fullscreen(actor, id, x, y, width, height);
 }
 
 void nemoactor_dispatch_frame(struct nemoactor *actor)

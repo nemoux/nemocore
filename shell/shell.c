@@ -355,6 +355,13 @@ static void shellbin_update_canvas_layer(struct nemocanvas *canvas, int visible)
 	bin->client->send_layer(canvas, visible);
 }
 
+static void shellbin_update_canvas_fullscreen(struct nemocanvas *canvas, int id, int32_t x, int32_t y, int32_t width, int32_t height)
+{
+	struct shellbin *bin = nemoshell_get_bin(canvas);
+
+	bin->client->send_fullscreen(canvas, id, x, y, width, height);
+}
+
 static void shellbin_handle_canvas_destroy(struct wl_listener *listener, void *data)
 {
 	struct shellbin *bin = (struct shellbin *)container_of(listener, struct shellbin, canvas_destroy_listener);
@@ -420,6 +427,7 @@ struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas
 
 	canvas->update_transform = shellbin_update_canvas_transform;
 	canvas->update_layer = shellbin_update_canvas_layer;
+	canvas->update_fullscreen = shellbin_update_canvas_fullscreen;
 
 	bin->canvas_destroy_listener.notify = shellbin_handle_canvas_destroy;
 	wl_signal_add(&canvas->destroy_signal, &bin->canvas_destroy_listener);
@@ -1053,6 +1061,8 @@ void nemoshell_set_fullscreen_bin(struct nemoshell *shell, struct shellbin *bin,
 	bin->fixed = screen->fixed;
 
 	nemoshell_send_bin_state(bin);
+
+	nemocontent_update_fullscreen(bin->view->content, screen->id, screen->dx, screen->dy, screen->dw, screen->dh);
 }
 
 void nemoshell_put_fullscreen_bin(struct nemoshell *shell, struct shellbin *bin)
@@ -1071,6 +1081,8 @@ void nemoshell_put_fullscreen_bin(struct nemoshell *shell, struct shellbin *bin)
 	bin->fixed = 0;
 
 	nemoshell_send_bin_state(bin);
+
+	nemocontent_update_fullscreen(bin->view->content, -1, 0, 0, 0, 0);
 }
 
 static inline int nemoshell_bin_contain_view(struct shellbin *bin, struct nemoview *view)

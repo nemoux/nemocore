@@ -171,6 +171,15 @@ static void nemoshow_dispatch_actor_layer(struct nemoactor *actor, int32_t visib
 		show->dispatch_layer(show, visible);
 }
 
+static void nemoshow_dispatch_actor_fullscreen(struct nemoactor *actor, int32_t id, int32_t x, int32_t y, int32_t width, int32_t height)
+{
+	struct nemotale *tale = (struct nemotale *)nemoactor_get_context(actor);
+	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
+
+	if (show->dispatch_fullscreen != NULL)
+		show->dispatch_fullscreen(show, id, x, y, width, height);
+}
+
 static int nemoshow_dispatch_actor_destroy(struct nemoactor *actor)
 {
 	struct nemotale *tale = (struct nemotale *)nemoactor_get_context(actor);
@@ -242,6 +251,7 @@ struct nemoshow *nemoshow_create_view(struct nemoshell *shell, int32_t width, in
 	nemoactor_set_dispatch_frame(actor, nemoshow_dispatch_actor_frame);
 	nemoactor_set_dispatch_transform(actor, nemoshow_dispatch_actor_transform);
 	nemoactor_set_dispatch_layer(actor, nemoshow_dispatch_actor_layer);
+	nemoactor_set_dispatch_fullscreen(actor, nemoshow_dispatch_actor_fullscreen);
 	nemoactor_set_dispatch_destroy(actor, nemoshow_dispatch_actor_destroy);
 
 	scon->tale = nemotale_create_gl();

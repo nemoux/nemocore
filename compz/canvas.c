@@ -500,6 +500,14 @@ static void nemocanvas_update_layer(struct nemocontent *content, int visible)
 		canvas->update_layer(canvas, visible);
 }
 
+static void nemocanvas_update_fullscreen(struct nemocontent *content, int id, int32_t x, int32_t y, int32_t width, int32_t height)
+{
+	struct nemocanvas *canvas = (struct nemocanvas *)container_of(content, struct nemocanvas, base);
+
+	if (canvas->update_fullscreen != NULL)
+		canvas->update_fullscreen(canvas, id, x, y, width, height);
+}
+
 static int nemocanvas_read_pixels(struct nemocontent *content, pixman_format_code_t format, void *pixels)
 {
 	struct nemocanvas *canvas = (struct nemocanvas *)container_of(content, struct nemocanvas, base);
@@ -1281,6 +1289,7 @@ struct nemocanvas *nemocanvas_create(struct wl_client *client, struct wl_resourc
 	canvas->base.update_output = nemocanvas_update_output;
 	canvas->base.update_transform = nemocanvas_update_transform;
 	canvas->base.update_layer = nemocanvas_update_layer;
+	canvas->base.update_fullscreen = nemocanvas_update_fullscreen;
 	canvas->base.read_pixels = nemocanvas_read_pixels;
 
 	canvas->base.pointer_enter = nemocanvas_pointer_enter;

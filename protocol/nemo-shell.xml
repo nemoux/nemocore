@@ -134,7 +134,7 @@
 		<request name="set_fullscreen_type">
 			<arg name="type" type="uint"/>
 		</request>
-		
+
 		<request name="put_fullscreen_type">
 			<arg name="type" type="uint"/>
 		</request>
@@ -212,7 +212,7 @@
 			<arg name="y" type="fixed"/>
 			<arg name="r" type="fixed"/>
 		</request>
-		
+
 		<event name="configure">
 			<arg name="width" type="int"/>
 			<arg name="height" type="int"/>
@@ -229,6 +229,14 @@
 
 		<event name="layer">
 			<arg name="visible" type="int"/>
+		</event>
+
+		<event name="fullscreen">
+			<arg name="id" type="int"/>
+			<arg name="x" type="int"/>
+			<arg name="y" type="int"/>
+			<arg name="width" type="int"/>
+			<arg name="height" type="int"/>
 		</event>
 	</interface>
 </protocol>
