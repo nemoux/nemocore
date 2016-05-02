@@ -345,8 +345,8 @@ struct nemoactor *nemoactor_create_pixman(struct nemocompz *compz, int width, in
 	actor->max_width = nemocompz_get_scene_width(compz);
 	actor->max_height = nemocompz_get_scene_height(compz);
 
-	actor->ax = 0.5f;
-	actor->ay = 0.5f;
+	actor->scale.ax = 0.5f;
+	actor->scale.ay = 0.5f;
 
 	wl_signal_init(&actor->destroy_signal);
 	wl_signal_init(&actor->ungrab_signal);
@@ -499,8 +499,8 @@ struct nemoactor *nemoactor_create_gl(struct nemocompz *compz, int width, int he
 	actor->max_width = nemocompz_get_scene_width(compz);
 	actor->max_height = nemocompz_get_scene_height(compz);
 
-	actor->ax = 0.5f;
-	actor->ay = 0.5f;
+	actor->scale.ax = 0.5f;
+	actor->scale.ay = 0.5f;
 
 	wl_signal_init(&actor->destroy_signal);
 	wl_signal_init(&actor->ungrab_signal);

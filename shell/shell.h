@@ -203,14 +203,6 @@ struct shellbin {
 
 	struct wl_listener canvas_destroy_listener;
 
-	uint32_t resize_edges;
-	
-	int32_t reset_scale;
-	int32_t reset_size;
-	int32_t reset_move;
-	
-	float ax, ay;
-
 	uint32_t min_width, min_height;
 	uint32_t max_width, max_height;
 
@@ -258,6 +250,15 @@ struct shellbin {
 		int32_t width, height;
 	} geometry, next_geometry;
 	int has_set_geometry, has_next_geometry;
+
+	struct {
+		float ax, ay;
+	} scale;
+	int32_t reset_scale;
+	int32_t reset_size;
+	int32_t reset_move;
+
+	uint32_t resize_edges;
 
 	struct binstate state, next_state, requested_state;
 	int state_changed;

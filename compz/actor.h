@@ -38,9 +38,6 @@ struct nemoactor {
 
 	struct nemoview *view;
 
-	float px, py;
-	float ax, ay;
-
 	struct wl_signal destroy_signal;
 	struct wl_signal ungrab_signal;
 
@@ -69,6 +66,10 @@ struct nemoactor {
 	nemoactor_dispatch_fullscreen_t dispatch_fullscreen;
 	nemoactor_dispatch_frame_t dispatch_frame;
 	nemoactor_dispatch_destroy_t dispatch_destroy;
+	
+	struct {
+		float ax, ay;
+	} scale;
 
 	struct wl_list frame_link;
 

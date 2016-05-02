@@ -70,8 +70,8 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		if (bin->view->geometry.has_pivot == 0) {
 			nemoview_correct_pivot(bin->view, bin->view->content->width / 2.0f, bin->view->content->height / 2.0f);
 
-			bin->ax = 0.5f;
-			bin->ay = 0.5f;
+			bin->scale.ax = 0.5f;
+			bin->scale.ay = 0.5f;
 		}
 
 		bin->reset_size = 0;
@@ -454,8 +454,8 @@ int nemoshell_pick_canvas_by_touchpoint_on_area(struct nemoshell *shell, struct 
 
 		nemoview_correct_pivot(bin->view, sx, sy);
 
-		bin->ax = sx / bin->view->content->width;
-		bin->ay = sy / bin->view->content->height;
+		bin->scale.ax = sx / bin->view->content->width;
+		bin->scale.ay = sy / bin->view->content->height;
 	}
 
 	pick0->dx = pick1->dx = bin->view->geometry.x - (tp0->x + tp1->x) / 2.0f;
@@ -526,8 +526,8 @@ int nemoshell_pick_canvas_by_touchpoint(struct nemoshell *shell, struct touchpoi
 
 		nemoview_correct_pivot(bin->view, sx, sy);
 
-		bin->ax = sx / bin->view->content->width;
-		bin->ay = sy / bin->view->content->height;
+		bin->scale.ax = sx / bin->view->content->width;
+		bin->scale.ay = sy / bin->view->content->height;
 	}
 
 	pick0->dx = pick1->dx = bin->view->geometry.x - (tp0->x + tp1->x) / 2.0f;
@@ -597,8 +597,8 @@ static void pick_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 			nemoview_set_scale(view, 1.0f, 1.0f);
 			nemoview_update_transform(view);
 
-			sx = (width - actor->base.width) * -actor->ax;
-			sy = (height - actor->base.height) * -actor->ay;
+			sx = (width - actor->base.width) * -actor->scale.ax;
+			sy = (height - actor->base.height) * -actor->scale.ay;
 
 			nemoview_transform_to_global(view, 0.0f, 0.0f, &fromx, &fromy);
 			nemoview_transform_to_global(view, sx, sy, &tox, &toy);
@@ -800,10 +800,8 @@ int nemoshell_pick_actor_by_touchpoint(struct nemoshell *shell, struct touchpoin
 
 		nemoview_correct_pivot(actor->view, sx, sy);
 
-		actor->px = cx;
-		actor->py = cy;
-		actor->ax = sx / actor->view->content->width;
-		actor->ay = sy / actor->view->content->height;
+		actor->scale.ax = sx / actor->view->content->width;
+		actor->scale.ay = sy / actor->view->content->height;
 	}
 
 	pick0->dx = pick1->dx = actor->view->geometry.x - (tp0->x + tp1->x) / 2.0f;
