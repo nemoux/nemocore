@@ -335,6 +335,11 @@ static inline void nemotale_event_set_used(struct taleevent *event)
 	nemotale_tap_set_state(event->tap, NEMOTALE_TAP_USED_STATE);
 }
 
+static inline void nemotale_event_set_used_on(struct taleevent *event, int index)
+{
+	nemotale_tap_set_state(event->taps[index], NEMOTALE_TAP_USED_STATE);
+}
+
 static inline int nemotale_event_has_special_key(struct taleevent *event)
 {
 	if (event->value == KEY_LEFTSHIFT || event->value == KEY_RIGHTSHIFT ||
@@ -410,7 +415,7 @@ static inline int nemotale_event_update_taps_by_tag(struct nemotale *tale, struc
 	return (event->tapcount = count);
 }
 
-static inline void nemotale_event_get_distant_tapdevices(struct nemotale *tale, struct taleevent *event, uint64_t *device0, uint64_t *device1)
+static inline void nemotale_event_get_distant_tapindices(struct nemotale *tale, struct taleevent *event, int *index0, int *index1)
 {
 	struct taletap *tap0, *tap1;
 	float dm = 0.0f;
@@ -431,8 +436,8 @@ static inline void nemotale_event_get_distant_tapdevices(struct nemotale *tale, 
 			if (dd > dm) {
 				dm = dd;
 
-				*device0 = tap0->device;
-				*device1 = tap1->device;
+				*index0 = i;
+				*index1 = j;
 			}
 		}
 	}
@@ -440,30 +445,22 @@ static inline void nemotale_event_get_distant_tapdevices(struct nemotale *tale, 
 
 static inline void nemotale_event_get_distant_tapserials(struct nemotale *tale, struct taleevent *event, uint32_t *serial0, uint32_t *serial1)
 {
-	struct taletap *tap0, *tap1;
-	float dm = 0.0f;
-	float dd;
-	float dx, dy;
-	int i, j;
+	int index0, index1;
 
-	for (i = 0; i < event->tapcount - 1; i++) {
-		tap0 = event->taps[i];
+	nemotale_event_get_distant_tapindices(tale, event, &index0, &index1);
 
-		for (j = i + 1; j < event->tapcount; j++) {
-			tap1 = event->taps[j];
+	*serial0 = nemotale_event_get_serial_on(event, index0);
+	*serial1 = nemotale_event_get_serial_on(event, index1);
+}
 
-			dx = tap1->x - tap0->x;
-			dy = tap1->y - tap0->y;
-			dd = sqrtf(dx * dx + dy * dy);
+static inline void nemotale_event_get_distant_tapdevices(struct nemotale *tale, struct taleevent *event, uint64_t *device0, uint64_t *device1)
+{
+	int index0, index1;
 
-			if (dd > dm) {
-				dm = dd;
+	nemotale_event_get_distant_tapindices(tale, event, &index0, &index1);
 
-				*serial0 = tap0->serial;
-				*serial1 = tap1->serial;
-			}
-		}
-	}
+	*device0 = nemotale_event_get_device_on(event, index0);
+	*device1 = nemotale_event_get_device_on(event, index1);
 }
 
 static inline void nemotale_event_transform_to_viewport(struct nemotale *tale, float x, float y, float *sx, float *sy)

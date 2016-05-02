@@ -628,12 +628,15 @@ int nemoshow_view_pick_distant(struct nemoshow *show, void *event, uint32_t type
 	struct nemoseat *seat = scon->compz->seat;
 	struct nemoactor *actor = scon->actor;
 	struct touchpoint *tp0, *tp1;
-	uint64_t device0, device1;
+	int tap0, tap1;
 
-	nemotale_event_get_distant_tapdevices(show->tale, event, &device0, &device1);
+	nemotale_event_get_distant_tapindices(show->tale, event, &tap0, &tap1);
 
-	tp0 = nemoseat_get_touchpoint_by_id(seat, device0);
-	tp1 = nemoseat_get_touchpoint_by_id(seat, device1);
+	nemotale_event_set_used_on(event, tap0);
+	nemotale_event_set_used_on(event, tap1);
+
+	tp0 = nemoseat_get_touchpoint_by_id(seat, nemotale_event_get_device_on(event, tap0));
+	tp1 = nemoseat_get_touchpoint_by_id(seat, nemotale_event_get_device_on(event, tap1));
 	if (tp0 != NULL && tp1 != NULL) {
 		uint32_t ptype = 0x0;
 
