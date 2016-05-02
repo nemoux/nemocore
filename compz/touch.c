@@ -150,8 +150,6 @@ static void nemo_touch_bypass(struct wl_client *client, struct wl_resource *reso
 
 		tp->grab_serial = wl_display_get_serial(seat->compz->display);
 		tp->grab_time = time;
-
-		nemocompz_run_touch_binding(seat->compz, tp, time);
 	}
 }
 
@@ -846,8 +844,6 @@ void nemotouch_bypass_event(struct nemocompz *compz, int32_t touchid, float sx, 
 
 		tp->grab_serial = wl_display_get_serial(compz->display);
 		tp->grab_time = time;
-
-		nemocompz_run_touch_binding(compz, tp, time);
 	}
 }
 
