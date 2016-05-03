@@ -394,6 +394,11 @@ double nemoplay_get_cts(struct nemoplay *play)
 	return nemoplay_clock_get(play->clock);
 }
 
+void nemoplay_set_speed(struct nemoplay *play, double speed)
+{
+	nemoplay_clock_set_speed(play->clock, speed);
+}
+
 void nemoplay_set_cmd(struct nemoplay *play, uint32_t cmd)
 {
 	pthread_mutex_lock(&play->lock);
