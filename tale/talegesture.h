@@ -81,6 +81,36 @@ static inline int nemotale_event_is_more_taps(struct nemotale *tale, struct tale
 	return event->tapcount >= tapcount;
 }
 
+static inline int nemotale_event_is_no_tap_with_up(struct nemotale *tale, struct taleevent *event)
+{
+	return (event->tapcount + !!(event->type & NEMOTALE_TOUCH_UP_EVENT)) == 0;
+}
+
+static inline int nemotale_event_is_single_tap_with_up(struct nemotale *tale, struct taleevent *event)
+{
+	return (event->tapcount + !!(event->type & NEMOTALE_TOUCH_UP_EVENT)) == 1;
+}
+
+static inline int nemotale_event_is_double_taps_with_up(struct nemotale *tale, struct taleevent *event)
+{
+	return (event->tapcount + !!(event->type & NEMOTALE_TOUCH_UP_EVENT)) == 2;
+}
+
+static inline int nemotale_event_is_triple_taps_with_up(struct nemotale *tale, struct taleevent *event)
+{
+	return (event->tapcount + !!(event->type & NEMOTALE_TOUCH_UP_EVENT)) == 3;
+}
+
+static inline int nemotale_event_is_many_taps_with_up(struct nemotale *tale, struct taleevent *event)
+{
+	return (event->tapcount + !!(event->type & NEMOTALE_TOUCH_UP_EVENT)) == 2;
+}
+
+static inline int nemotale_event_is_more_taps_with_up(struct nemotale *tale, struct taleevent *event, int tapcount)
+{
+	return (event->tapcount + !!(event->type & NEMOTALE_TOUCH_UP_EVENT)) >= tapcount;
+}
+
 static inline int nemotale_event_is_down(struct nemotale *tale, struct taleevent *event)
 {
 	return event->type & NEMOTALE_DOWN_EVENT;

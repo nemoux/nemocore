@@ -196,7 +196,7 @@ static void nemonavi_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 	nemoshow_event_update_taps(show, canvas, event);
 
-	if (nemoshow_event_is_more_taps(show, event, 2) == 0) {
+	if (nemoshow_event_is_more_taps_with_up(show, event, 2) == 0) {
 		if (nemoshow_event_is_touch_down(show, event)) {
 			int id = nemonavi_get_touchid_empty(context->navi);
 

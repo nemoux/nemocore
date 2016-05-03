@@ -263,6 +263,36 @@ static inline int nemoshow_event_is_more_taps(struct nemoshow *show, void *event
 	return nemotale_event_is_more_taps(show->tale, (struct taleevent *)event, tapcount);
 }
 
+static inline int nemoshow_event_is_no_tap_with_up(struct nemoshow *show, void *event)
+{
+	return nemotale_event_is_no_tap_with_up(show->tale, (struct taleevent *)event);
+}
+
+static inline int nemoshow_event_is_single_tap_with_up(struct nemoshow *show, void *event)
+{
+	return nemotale_event_is_single_tap_with_up(show->tale, (struct taleevent *)event);
+}
+
+static inline int nemoshow_event_is_double_taps_with_up(struct nemoshow *show, void *event)
+{
+	return nemotale_event_is_double_taps_with_up(show->tale, (struct taleevent *)event);
+}
+
+static inline int nemoshow_event_is_triple_taps_with_up(struct nemoshow *show, void *event)
+{
+	return nemotale_event_is_triple_taps_with_up(show->tale, (struct taleevent *)event);
+}
+
+static inline int nemoshow_event_is_many_taps_with_up(struct nemoshow *show, void *event)
+{
+	return nemotale_event_is_many_taps_with_up(show->tale, (struct taleevent *)event);
+}
+
+static inline int nemoshow_event_is_more_taps_with_up(struct nemoshow *show, void *event, int tapcount)
+{
+	return nemotale_event_is_more_taps_with_up(show->tale, (struct taleevent *)event, tapcount);
+}
+
 static inline int nemoshow_event_is_down(struct nemoshow *show, void *event)
 {
 	return nemotale_event_is_down(show->tale, (struct taleevent *)event);
