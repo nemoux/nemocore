@@ -129,8 +129,7 @@ static void nemoplay_dispatch_video_timer(struct nemotimer *timer, void *data)
 			double cts = nemoplay_get_cts(play);
 			double pts;
 
-			if (nemoplay_has_audio(play) == 0)
-				nemoplay_set_cts(play, nemoplay_queue_get_one_pts(one));
+			nemoplay_set_video_pts(play, nemoplay_queue_get_one_pts(one));
 
 			if (cts > nemoplay_queue_get_one_pts(one) + threshold) {
 				nemoplay_queue_destroy_one(one);
@@ -200,7 +199,7 @@ static void *nemoplay_handle_audioplay(void *arg)
 			} else if (nemoplay_queue_get_one_serial(one) != nemoplay_queue_get_serial(queue)) {
 				nemoplay_queue_destroy_one(one);
 			} else if (nemoplay_queue_get_one_cmd(one) == NEMOPLAY_QUEUE_NORMAL_COMMAND) {
-				nemoplay_set_cts(play, nemoplay_queue_get_one_pts(one));
+				nemoplay_set_audio_pts(play, nemoplay_queue_get_one_pts(one));
 
 				ao_play(device,
 						nemoplay_queue_get_one_data(one),

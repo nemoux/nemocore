@@ -378,7 +378,13 @@ void nemoplay_wait_thread(struct nemoplay *play)
 	pthread_mutex_unlock(&play->lock);
 }
 
-void nemoplay_set_cts(struct nemoplay *play, double pts)
+void nemoplay_set_video_pts(struct nemoplay *play, double pts)
+{
+	if (play->audio_context == NULL)
+		nemoplay_clock_set(play->clock, pts);
+}
+
+void nemoplay_set_audio_pts(struct nemoplay *play, double pts)
 {
 	nemoplay_clock_set(play->clock, pts);
 }

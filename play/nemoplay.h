@@ -92,7 +92,8 @@ extern void nemoplay_enter_thread(struct nemoplay *play);
 extern void nemoplay_leave_thread(struct nemoplay *play);
 extern void nemoplay_wait_thread(struct nemoplay *play);
 
-extern void nemoplay_set_cts(struct nemoplay *play, double pts);
+extern void nemoplay_set_video_pts(struct nemoplay *play, double pts);
+extern void nemoplay_set_audio_pts(struct nemoplay *play, double pts);
 extern double nemoplay_get_cts(struct nemoplay *play);
 
 extern void nemoplay_set_cmd(struct nemoplay *play, uint32_t cmd);
