@@ -217,8 +217,6 @@ int nemoplay_decode_media(struct nemoplay *play, int reqcount, int maxcount)
 
 				nemoplay_queue_enqueue(play->video_queue, one);
 			}
-
-			av_frame_unref(frame);
 		} else if (packet.stream_index == audio_stream) {
 			uint8_t *buffer;
 			int buffersize;
@@ -245,16 +243,15 @@ int nemoplay_decode_media(struct nemoplay *play, int reqcount, int maxcount)
 
 				nemoplay_queue_enqueue(play->audio_queue, one);
 			}
-
-			av_frame_unref(frame);
 		} else if (packet.stream_index == subtitle_stream) {
 		}
 
-		if (nemoplay_queue_get_count(play->video_queue) > maxcount &&
-				nemoplay_queue_get_count(play->audio_queue) > maxcount) {
+		if ((video_context == NULL || nemoplay_queue_get_count(play->video_queue) > maxcount) &&
+				(audio_context == NULL || nemoplay_queue_get_count(play->audio_queue) > maxcount)) {
 			nemoplay_set_state(play, NEMOPLAY_WAIT_STATE);
 		}
 
+		av_frame_unref(frame);
 		av_free_packet(&packet);
 	}
 
