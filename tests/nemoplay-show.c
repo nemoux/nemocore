@@ -236,7 +236,7 @@ static void *nemoplay_handle_decodeframe(void *arg)
 
 		if (state == NEMOPLAY_PLAY_STATE) {
 			nemoplay_decode_media(play, 256, 128);
-		} else if (state == NEMOPLAY_WAIT_STATE) {
+		} else if (state == NEMOPLAY_WAIT_STATE || state == NEMOPLAY_STOP_STATE) {
 			nemoplay_wait_media(play);
 		}
 	}

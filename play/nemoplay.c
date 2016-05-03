@@ -284,8 +284,7 @@ void nemoplay_wait_media(struct nemoplay *play)
 {
 	pthread_mutex_lock(&play->lock);
 
-	if (play->state == NEMOPLAY_WAIT_STATE)
-		pthread_cond_wait(&play->signal, &play->lock);
+	pthread_cond_wait(&play->signal, &play->lock);
 
 	pthread_mutex_unlock(&play->lock);
 }
