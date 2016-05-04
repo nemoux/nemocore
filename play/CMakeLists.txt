@@ -50,6 +50,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/play/playclock.h
 	${CMAKE_SOURCE_DIR}/play/playshader.h
 	${CMAKE_SOURCE_DIR}/play/playmisc.h
+	${CMAKE_SOURCE_DIR}/play/ffmpegconfig.h
 	)
 
 set(NEMOSHOW_PKGCONFIG_REQUIRES "nemoasst libavcodec libavformat libavutil libswscale")

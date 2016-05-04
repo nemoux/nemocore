@@ -10,6 +10,4 @@
 #include <libswscale/swscale.h>
 #include <libswresample/swresample.h>
 
-typedef enum AVSampleFormat AVSampleFormat;
-
 #endif
