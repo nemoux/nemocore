@@ -37,6 +37,9 @@ extern void nemoshow_grab_destroy(struct showgrab *grab);
 
 extern void nemoshow_grab_check_signal(struct showgrab *grab, struct nemosignal *signal);
 
+extern void nemoshow_dispatch_grab(struct nemoshow *show, void *event);
+extern void nemoshow_dispatch_grab_all(struct nemoshow *show, void *event);
+
 static inline void nemoshow_grab_set_userdata(struct showgrab *grab, void *data)
 {
 	grab->data = data;
@@ -55,11 +58,6 @@ static inline void nemoshow_grab_set_tag(struct showgrab *grab, uint32_t tag)
 static inline uint32_t nemoshow_grab_get_tag(struct showgrab *grab)
 {
 	return grab->tag;
-}
-
-static inline void nemoshow_dispatch_grab(struct nemoshow *show, void *event)
-{
-	nemotale_dispatch_grab(show->tale, (struct taleevent *)event);
 }
 
 #ifdef __cplusplus

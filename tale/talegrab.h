@@ -49,6 +49,19 @@ static inline int nemotale_dispatch_grab(struct nemotale *tale, struct taleevent
 	return 0;
 }
 
+static inline void nemotale_dispatch_grab_all(struct nemotale *tale, struct taleevent *event)
+{
+	struct talegrab *grab, *next;
+	int i;
+
+	for (i = 0; i < event->tapcount; i++) {
+		nemolist_for_each_safe(grab, next, &tale->grab_list, link) {
+			if (grab->device == event->taps[i]->device)
+				grab->dispatch_event(grab, event);
+		}
+	}
+}
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

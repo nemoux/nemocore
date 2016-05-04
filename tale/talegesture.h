@@ -126,6 +126,11 @@ static inline int nemotale_event_is_up(struct nemotale *tale, struct taleevent *
 	return event->type & NEMOTALE_UP_EVENT;
 }
 
+static inline int nemotale_event_is_cancel(struct nemotale *tale, struct taleevent *event)
+{
+	return event->type & NEMOTALE_CANCEL_EVENT;
+}
+
 static inline int nemotale_event_is_long_press(struct nemotale *tale, struct taleevent *event)
 {
 	return event->type & NEMOTALE_LONG_PRESS_EVENT;

@@ -46,6 +46,7 @@ typedef enum {
 	NEMOTALE_STICK_BUTTON_UP_EVENT = (1 << 22),
 	NEMOTALE_POINTER_LONG_PRESS_EVENT = (1 << 23),
 	NEMOTALE_TOUCH_LONG_PRESS_EVENT = (1 << 24),
+	NEMOTALE_CANCEL_EVENT = (1 << 25),
 	NEMOTALE_DOWN_EVENT = NEMOTALE_POINTER_DOWN_EVENT | NEMOTALE_TOUCH_DOWN_EVENT,
 	NEMOTALE_UP_EVENT = NEMOTALE_POINTER_UP_EVENT | NEMOTALE_TOUCH_UP_EVENT,
 	NEMOTALE_MOTION_EVENT = NEMOTALE_POINTER_MOTION_EVENT | NEMOTALE_TOUCH_MOTION_EVENT,
@@ -338,6 +339,20 @@ static inline void nemotale_event_set_used(struct taleevent *event)
 static inline void nemotale_event_set_used_on(struct taleevent *event, int index)
 {
 	nemotale_tap_set_state(event->taps[index], NEMOTALE_TAP_USED_STATE);
+}
+
+static inline void nemotale_event_set_used_all(struct taleevent *event)
+{
+	int i;
+
+	for (i = 0; i < event->tapcount; i++) {
+		nemotale_tap_set_state(event->taps[i], NEMOTALE_TAP_USED_STATE);
+	}
+}
+
+static inline void nemotale_event_set_cancel(struct taleevent *event)
+{
+	event->type = NEMOTALE_CANCEL_EVENT;
 }
 
 static inline int nemotale_event_has_special_key(struct taleevent *event)

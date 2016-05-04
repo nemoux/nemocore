@@ -226,6 +226,22 @@ void nemonavi_send_touch_motion_event(struct nemonavi *navi, float x, float y, u
 	NEMONAVI_CC(navi, browser)->GetHost()->SendTouchEvent(touch_event);
 }
 
+void nemonavi_send_touch_cancel_event(struct nemonavi *navi, float x, float y, uint32_t id, double secs)
+{
+	CefTouchEvent touch_event;
+
+	touch_event.points[0].id = id;
+	touch_event.points[0].x = x;
+	touch_event.points[0].y = y;
+	touch_event.points[0].type = TPT_CANCELLED;
+
+	touch_event.count = 1;
+	touch_event.modifiers = 0x0;
+	touch_event.timestamp_seconds = secs;
+	
+	NEMONAVI_CC(navi, browser)->GetHost()->SendTouchEvent(touch_event);
+}
+
 void nemonavi_load_url(struct nemonavi *navi, const char *url)
 {
 	CefRefPtr<CefRequest> request(CefRequest::Create());

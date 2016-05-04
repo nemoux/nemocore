@@ -185,6 +185,16 @@ static inline void nemoshow_event_set_used_on(void *event, int index)
 	nemotale_event_set_used_on((struct taleevent *)event, index);
 }
 
+static inline void nemoshow_event_set_used_all(void *event)
+{
+	nemotale_event_set_used_all((struct taleevent *)event);
+}
+
+static inline void nemoshow_event_set_cancel(void *event)
+{
+	nemotale_event_set_cancel((struct taleevent *)event);
+}
+
 static inline int nemoshow_event_has_special_key(void *event)
 {
 	return nemotale_event_has_special_key((struct taleevent *)event);
@@ -306,6 +316,11 @@ static inline int nemoshow_event_is_motion(struct nemoshow *show, void *event)
 static inline int nemoshow_event_is_up(struct nemoshow *show, void *event)
 {
 	return nemotale_event_is_up(show->tale, (struct taleevent *)event);
+}
+
+static inline int nemoshow_event_is_cancel(struct nemoshow *show, void *event)
+{
+	return nemotale_event_is_cancel(show->tale, (struct taleevent *)event);
 }
 
 static inline int nemoshow_event_is_long_press(struct nemoshow *show, void *event)

@@ -124,6 +124,78 @@ static void nemonavi_dispatch_loading_state(struct nemonavi *navi, int is_loadin
 {
 }
 
+static int nemonavi_dispatch_touch_grab(struct nemoshow *show, struct showgrab *grab, void *event)
+{
+	struct navicontext *context = (struct navicontext *)nemoshow_grab_get_userdata(grab);
+	float x, y;
+
+	if (nemoshow_event_is_down(show, event)) {
+		int id = nemonavi_get_touchid_empty(context->navi);
+
+		nemoshow_set_keyboard_focus(show, context->view);
+
+		nemoshow_event_transform_to_viewport(show,
+				nemoshow_event_get_x(event),
+				nemoshow_event_get_y(event),
+				&x, &y);
+
+		nemoshow_event_set_tag(event, id + 1);
+
+		nemonavi_send_touch_down_event(context->navi, x, y, id, nemoshow_event_get_time(event) / 1000.0f);
+	} else if (nemoshow_event_is_motion(show, event)) {
+		int id = nemoshow_event_get_tag(event);
+
+		if (id > 0) {
+			nemoshow_event_transform_to_viewport(show,
+					nemoshow_event_get_x(event),
+					nemoshow_event_get_y(event),
+					&x, &y);
+
+			nemonavi_put_touchid(context->navi, id);
+
+			nemonavi_send_touch_motion_event(context->navi, x, y, id - 1, nemoshow_event_get_time(event) / 1000.0f);
+
+			nemonavi_do_message();
+		}
+	} else if (nemoshow_event_is_up(show, event)) {
+		int id = nemoshow_event_get_tag(event);
+
+		if (id > 0) {
+			nemoshow_event_transform_to_viewport(show,
+					nemoshow_event_get_x(event),
+					nemoshow_event_get_y(event),
+					&x, &y);
+
+			nemonavi_send_touch_up_event(context->navi, x, y, id - 1, nemoshow_event_get_time(event) / 1000.0f);
+
+			nemonavi_do_message();
+		}
+
+		nemoshow_grab_destroy(grab);
+
+		return 0;
+	} else if (nemoshow_event_is_cancel(show, event)) {
+		int id = nemoshow_event_get_tag(event);
+
+		if (id > 0) {
+			nemoshow_event_transform_to_viewport(show,
+					nemoshow_event_get_x(event),
+					nemoshow_event_get_y(event),
+					&x, &y);
+
+			nemonavi_send_touch_cancel_event(context->navi, x, y, id - 1, nemoshow_event_get_time(event) / 1000.0f);
+
+			nemonavi_do_message();
+		}
+
+		nemoshow_grab_destroy(grab);
+
+		return 0;
+	}
+
+	return 1;
+}
+
 static void nemonavi_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, void *event)
 {
 	struct navicontext *context = (struct navicontext *)nemoshow_get_userdata(show);
@@ -134,6 +206,12 @@ static void nemonavi_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 		if (nemoshow_event_is_more_taps(show, event, 3)) {
 			nemoshow_view_pick_distant(show, event, NEMOSHOW_VIEW_PICK_ALL_TYPE);
+		}
+
+		if (nemoshow_event_is_more_taps(show, event, 2)) {
+			nemoshow_event_set_cancel(event);
+
+			nemoshow_dispatch_grab_all(show, event);
 		}
 	}
 
@@ -194,47 +272,12 @@ static void nemonavi_dispatch_canvas_event(struct nemoshow *show, struct showone
 					nemotool_get_keysym(context->tool, nemoshow_event_get_value(event)));
 	}
 
-	nemoshow_event_update_taps(show, canvas, event);
+	if (nemoshow_event_is_touch_down(show, event)) {
+		struct showgrab *grab;
 
-	if (nemoshow_event_is_more_taps_with_up(show, event, 2) == 0) {
-		if (nemoshow_event_is_touch_down(show, event)) {
-			int id = nemonavi_get_touchid_empty(context->navi);
-
-			nemoshow_set_keyboard_focus(show, canvas);
-
-			nemoshow_event_transform_to_viewport(show,
-					nemoshow_event_get_x(event),
-					nemoshow_event_get_y(event),
-					&x, &y);
-
-			nemoshow_event_set_tag(event, id + 1);
-
-			nemonavi_send_touch_down_event(context->navi, x, y, id, nemoshow_event_get_time(event) / 1000.0f);
-		} else if (nemoshow_event_is_touch_up(show, event)) {
-			int id = nemoshow_event_get_tag(event);
-
-			if (id > 0) {
-				nemoshow_event_transform_to_viewport(show,
-						nemoshow_event_get_x(event),
-						nemoshow_event_get_y(event),
-						&x, &y);
-
-				nemonavi_send_touch_up_event(context->navi, x, y, id - 1, nemoshow_event_get_time(event) / 1000.0f);
-			}
-		} else if (nemoshow_event_is_touch_motion(show, event)) {
-			int id = nemoshow_event_get_tag(event);
-
-			if (id > 0) {
-				nemoshow_event_transform_to_viewport(show,
-						nemoshow_event_get_x(event),
-						nemoshow_event_get_y(event),
-						&x, &y);
-
-				nemonavi_put_touchid(context->navi, id);
-
-				nemonavi_send_touch_motion_event(context->navi, x, y, id - 1, nemoshow_event_get_time(event) / 1000.0f);
-			}
-		}
+		grab = nemoshow_grab_create(show, event, nemonavi_dispatch_touch_grab);
+		nemoshow_grab_set_userdata(grab, context);
+		nemoshow_dispatch_grab(show, event);
 	}
 
 	nemonavi_do_message();

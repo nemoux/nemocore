@@ -55,3 +55,13 @@ void nemoshow_grab_check_signal(struct showgrab *grab, struct nemosignal *signal
 	grab->destroy_listener.notify = nemoshow_grab_handle_destroy_signal;
 	nemosignal_add(signal, &grab->destroy_listener);
 }
+
+void nemoshow_dispatch_grab(struct nemoshow *show, void *event)
+{
+	nemotale_dispatch_grab(show->tale, (struct taleevent *)event);
+}
+
+void nemoshow_dispatch_grab_all(struct nemoshow *show, void *event)
+{
+	nemotale_dispatch_grab_all(show->tale, (struct taleevent *)event);
+}
