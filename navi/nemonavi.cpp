@@ -238,7 +238,7 @@ void nemonavi_send_touch_cancel_event(struct nemonavi *navi, float x, float y, u
 	touch_event.count = 1;
 	touch_event.modifiers = 0x0;
 	touch_event.timestamp_seconds = secs;
-	
+
 	NEMONAVI_CC(navi, browser)->GetHost()->SendTouchEvent(touch_event);
 }
 

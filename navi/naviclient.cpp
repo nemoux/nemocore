@@ -281,8 +281,6 @@ void NaviClient::OnPaint(CefRefPtr<CefBrowser> browser, CefRenderHandler::PaintE
 {
 	struct nemonavi *navi = (struct nemonavi *)m_userdata;
 
-	nemolog_message("NAVI", "[%s:%d]\n", __FUNCTION__, __LINE__);
-
 	if (navi->dispatch_paint != NULL) {
 		CefRenderHandler::RectList::const_iterator iter = dirtyRects.begin();
 

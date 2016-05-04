@@ -132,6 +132,8 @@ static int nemonavi_dispatch_touch_grab(struct nemoshow *show, struct showgrab *
 	if (nemoshow_event_is_down(show, event)) {
 		int id = nemonavi_get_touchid_empty(context->navi);
 
+		nemonavi_set_touchid(context->navi, id);
+
 		nemoshow_set_keyboard_focus(show, context->view);
 
 		nemoshow_event_transform_to_viewport(show,
@@ -139,11 +141,11 @@ static int nemonavi_dispatch_touch_grab(struct nemoshow *show, struct showgrab *
 				nemoshow_event_get_y(event),
 				&x, &y);
 
-		nemoshow_event_set_tag(event, id + 1);
+		nemoshow_grab_set_tag(grab, id + 1);
 
 		nemonavi_send_touch_down_event(context->navi, x, y, id, nemoshow_event_get_time(event) / 1000.0f);
 	} else if (nemoshow_event_is_motion(show, event)) {
-		int id = nemoshow_event_get_tag(event);
+		int id = nemoshow_grab_get_tag(grab);
 
 		if (id > 0) {
 			nemoshow_event_transform_to_viewport(show,
@@ -151,14 +153,12 @@ static int nemonavi_dispatch_touch_grab(struct nemoshow *show, struct showgrab *
 					nemoshow_event_get_y(event),
 					&x, &y);
 
-			nemonavi_put_touchid(context->navi, id);
-
 			nemonavi_send_touch_motion_event(context->navi, x, y, id - 1, nemoshow_event_get_time(event) / 1000.0f);
 
 			nemonavi_do_message();
 		}
 	} else if (nemoshow_event_is_up(show, event)) {
-		int id = nemoshow_event_get_tag(event);
+		int id = nemoshow_grab_get_tag(grab);
 
 		if (id > 0) {
 			nemoshow_event_transform_to_viewport(show,
@@ -168,6 +168,8 @@ static int nemonavi_dispatch_touch_grab(struct nemoshow *show, struct showgrab *
 
 			nemonavi_send_touch_up_event(context->navi, x, y, id - 1, nemoshow_event_get_time(event) / 1000.0f);
 
+			nemonavi_put_touchid(context->navi, id - 1);
+
 			nemonavi_do_message();
 		}
 
@@ -175,7 +177,7 @@ static int nemonavi_dispatch_touch_grab(struct nemoshow *show, struct showgrab *
 
 		return 0;
 	} else if (nemoshow_event_is_cancel(show, event)) {
-		int id = nemoshow_event_get_tag(event);
+		int id = nemoshow_grab_get_tag(grab);
 
 		if (id > 0) {
 			nemoshow_event_transform_to_viewport(show,
@@ -184,6 +186,8 @@ static int nemonavi_dispatch_touch_grab(struct nemoshow *show, struct showgrab *
 					&x, &y);
 
 			nemonavi_send_touch_cancel_event(context->navi, x, y, id - 1, nemoshow_event_get_time(event) / 1000.0f);
+
+			nemonavi_put_touchid(context->navi, id - 1);
 
 			nemonavi_do_message();
 		}
