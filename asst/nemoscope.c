@@ -253,8 +253,8 @@ uint32_t nemoscope_pick(struct nemoscope *scope, float x, float y)
 
 	nemolist_for_each(one, &scope->list, link) {
 		if (one->type == NEMOSCOPE_RECT_TYPE) {
-			if (one->array[0] <= x && one->array[0] + one->array[2] < x &&
-					one->array[1] <= y && one->array[1] + one->array[3] < y)
+			if (one->array[0] <= x && x < one->array[0] + one->array[2] &&
+					one->array[1] <= y && y < one->array[1] + one->array[3])
 				return one->tag;
 		} else if (one->type == NEMOSCOPE_CIRCLE_TYPE) {
 			float r = one->array[2];
