@@ -142,7 +142,7 @@ extern void nemoview_set_parent(struct nemoview *view, struct nemoview *parent);
 extern void nemoview_set_region(struct nemoview *view, uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 extern void nemoview_put_region(struct nemoview *view);
 
-extern void nemoview_set_scope(struct nemoview *view, uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t type);
+extern void nemoview_set_scope(struct nemoview *view, const char *cmd);
 extern void nemoview_put_scope(struct nemoview *view);
 
 extern void nemoview_accumulate_damage(struct nemoview *view, pixman_region32_t *opaque);

@@ -224,14 +224,11 @@ static void nemo_surface_put_region(struct wl_client *client, struct wl_resource
 	nemoview_put_region(bin->view);
 }
 
-static void nemo_surface_set_scope(struct wl_client *client, struct wl_resource *resource, uint32_t x, uint32_t y, uint32_t width, uint32_t height, const char *cmd)
+static void nemo_surface_set_scope(struct wl_client *client, struct wl_resource *resource, const char *cmd)
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 
-	if (cmd[0] == 'r')
-		nemoview_set_scope(bin->view, x, y, width, height, NEMOSCOPE_RECT_TYPE);
-	else if (cmd[0] == 'c')
-		nemoview_set_scope(bin->view, x, y, width, height, NEMOSCOPE_CIRCLE_TYPE);
+	nemoview_set_scope(bin->view, cmd);
 }
 
 static void nemo_surface_put_scope(struct wl_client *client, struct wl_resource *resource)

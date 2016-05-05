@@ -15,16 +15,16 @@ typedef enum {
 	NEMOSCOPE_NONE_TYPE = 0,
 	NEMOSCOPE_RECT_TYPE = 1,
 	NEMOSCOPE_CIRCLE_TYPE = 2,
+	NEMOSCOPE_ELLIPSE_TYPE = 3,
+	NEMOSCOPE_POLYGON_TYPE = 4,
 	NEMOSCOPE_LAST_TYPE
 } NemoScopeType;
 
 struct scopeone {
-	float x, y;
-	float w, h;
+	int type;
+	float *array;
 
 	uint32_t tag;
-
-	int type;
 
 	struct nemolist link;
 };
@@ -38,7 +38,11 @@ extern void nemoscope_destroy(struct nemoscope *scope);
 
 extern void nemoscope_clear(struct nemoscope *scope);
 
-extern int nemoscope_add(struct nemoscope *scope, uint32_t tag, uint32_t type, float x, float y, float w, float h);
+extern int nemoscope_add_cmd(struct nemoscope *scope, uint32_t tag, const char *cmd);
+extern int nemoscope_add_rect(struct nemoscope *scope, uint32_t tag, float x, float y, float w, float h);
+extern int nemoscope_add_circle(struct nemoscope *scope, uint32_t tag, float x, float y, float r);
+extern int nemoscope_add_ellipse(struct nemoscope *scope, uint32_t tag, float x, float y, float rx, float ry);
+
 extern uint32_t nemoscope_pick(struct nemoscope *scope, float x, float y);
 
 #ifdef __cplusplus

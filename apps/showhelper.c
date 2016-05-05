@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
@@ -502,12 +503,18 @@ void nemoshow_view_put_region(struct nemoshow *show)
 	nemocanvas_put_region(canvas);
 }
 
-void nemoshow_view_set_scope(struct nemoshow *show, uint32_t x, uint32_t y, uint32_t width, uint32_t height, const char *cmd)
+void nemoshow_view_set_scope(struct nemoshow *show, const char *fmt, ...)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemocanvas *canvas = scon->canvas;
+	va_list vargs;
+	char cmd[512];
 
-	nemocanvas_set_scope(canvas, x, y, width, height, cmd);
+	va_start(vargs, fmt);
+	vsnprintf(cmd, sizeof(cmd), fmt, vargs);
+	va_end(vargs);
+
+	nemocanvas_set_scope(canvas, cmd);
 }
 
 void nemoshow_view_put_scope(struct nemoshow *show)

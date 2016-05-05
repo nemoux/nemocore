@@ -501,9 +501,9 @@ void nemoview_put_region(struct nemoview *view)
 	nemoview_put_state(view, NEMOVIEW_REGION_STATE);
 }
 
-void nemoview_set_scope(struct nemoview *view, uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint32_t type)
+void nemoview_set_scope(struct nemoview *view, const char *cmd)
 {
-	nemoscope_add(view->scope, 1, type, x, y, width, height);
+	nemoscope_add_cmd(view->scope, 1, cmd);
 
 	nemoview_set_state(view, NEMOVIEW_SCOPE_STATE);
 }

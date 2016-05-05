@@ -551,15 +551,18 @@ void nemoshow_view_put_region(struct nemoshow *show)
 	nemoview_put_region(actor->view);
 }
 
-void nemoshow_view_set_scope(struct nemoshow *show, uint32_t x, uint32_t y, uint32_t width, uint32_t height, const char *cmd)
+void nemoshow_view_set_scope(struct nemoshow *show, const char *fmt, ...)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemoactor *actor = scon->actor;
+	va_list vargs;
+	char cmd[512];
 
-	if (cmd[0] == 'r')
-		nemoview_set_scope(actor->view, x, y, width, height, NEMOSCOPE_RECT_TYPE);
-	else if (cmd[0] == 'c')
-		nemoview_set_scope(actor->view, x, y, width, height, NEMOSCOPE_CIRCLE_TYPE);
+	va_start(vargs, fmt);
+	vsnprintf(cmd, sizeof(cmd), fmt, vargs);
+	va_end(vargs);
+
+	nemoview_set_scope(actor->view, cmd);
 }
 
 void nemoshow_view_put_scope(struct nemoshow *show)

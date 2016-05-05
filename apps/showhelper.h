@@ -78,7 +78,7 @@ extern void nemoshow_view_set_state(struct nemoshow *show, const char *state);
 extern void nemoshow_view_put_state(struct nemoshow *show, const char *state);
 extern void nemoshow_view_set_region(struct nemoshow *show, uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 extern void nemoshow_view_put_region(struct nemoshow *show);
-extern void nemoshow_view_set_scope(struct nemoshow *show, uint32_t x, uint32_t y, uint32_t width, uint32_t height, const char *cmd);
+extern void nemoshow_view_set_scope(struct nemoshow *show, const char *fmt, ...);
 extern void nemoshow_view_put_scope(struct nemoshow *show);
 extern void nemoshow_view_set_tag(struct nemoshow *show, uint32_t tag);
 extern int nemoshow_view_move(struct nemoshow *show, uint32_t serial);

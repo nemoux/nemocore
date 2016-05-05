@@ -8,6 +8,7 @@
 #include <math.h>
 
 #include <nemoscope.h>
+#include <nemotoken.h>
 #include <nemolog.h>
 
 struct nemoscope *nemoscope_create(void)
@@ -52,29 +53,158 @@ void nemoscope_clear(struct nemoscope *scope)
 	nemolist_init(&scope->list);
 }
 
-int nemoscope_add(struct nemoscope *scope, uint32_t tag, uint32_t type, float x, float y, float w, float h)
+int nemoscope_add_cmd(struct nemoscope *scope, uint32_t tag, const char *cmd)
 {
 	struct scopeone *one;
+	struct nemotoken *token;
+	const char *type;
+	int i, count;
 
-	if (w <= 0.0f || h <= 0.0f)
+	token = nemotoken_create(cmd, strlen(cmd));
+	if (token == NULL)
 		return -1;
+	nemotoken_divide(token, ' ');
+	nemotoken_divide(token, ':');
+	nemotoken_divide(token, ',');
+	nemotoken_update(token);
+
+	count = nemotoken_get_token_count(token);
+
+	one = (struct scopeone *)malloc(sizeof(struct scopeone));
+	if (one == NULL)
+		goto err1;
+	memset(one, 0, sizeof(struct scopeone));
+
+	one->array = (float *)malloc(sizeof(float) * count);
+	if (one->array == NULL)
+		goto err2;
+
+	one->tag = tag;
+
+	type = nemotoken_get_token(token, 0);
+	if (type[0] == 'r')
+		one->type = NEMOSCOPE_RECT_TYPE;
+	else if (type[0] == 'c')
+		one->type = NEMOSCOPE_CIRCLE_TYPE;
+	else if (type[0] == 'e')
+		one->type = NEMOSCOPE_ELLIPSE_TYPE;
+	else if (type[0] == 'p')
+		one->type = NEMOSCOPE_POLYGON_TYPE;
+	else
+		goto err3;
+
+	for (i = 0; i < count - 1; i++) {
+		one->array[i] = nemotoken_get_double(token, i + 1, 0.0f);
+	}
+
+	nemolist_insert(&scope->list, &one->link);
+
+	nemotoken_destroy(token);
+
+	return 0;
+
+err3:
+	free(one->array);
+
+err2:
+	free(one);
+
+err1:
+	nemotoken_destroy(token);
+
+	return -1;
+}
+
+int nemoscope_add_rect(struct nemoscope *scope, uint32_t tag, float x, float y, float w, float h)
+{
+	struct scopeone *one;
 
 	one = (struct scopeone *)malloc(sizeof(struct scopeone));
 	if (one == NULL)
 		return -1;
 	memset(one, 0, sizeof(struct scopeone));
 
-	one->tag = tag;
+	one->array = (float *)malloc(sizeof(float) * 5);
+	if (one->array == NULL)
+		goto err1;
 
-	one->x = x;
-	one->y = y;
-	one->w = w;
-	one->h = h;
-	one->type = type;
+	one->tag = tag;
+	one->type = NEMOSCOPE_RECT_TYPE;
+
+	one->array[0] = x;
+	one->array[1] = y;
+	one->array[2] = w;
+	one->array[3] = h;
 
 	nemolist_insert(&scope->list, &one->link);
 
 	return 0;
+
+err1:
+	free(one);
+
+	return -1;
+}
+
+int nemoscope_add_circle(struct nemoscope *scope, uint32_t tag, float x, float y, float r)
+{
+	struct scopeone *one;
+
+	one = (struct scopeone *)malloc(sizeof(struct scopeone));
+	if (one == NULL)
+		return -1;
+	memset(one, 0, sizeof(struct scopeone));
+
+	one->array = (float *)malloc(sizeof(float) * 4);
+	if (one->array == NULL)
+		goto err1;
+
+	one->tag = tag;
+	one->type = NEMOSCOPE_CIRCLE_TYPE;
+
+	one->array[0] = x;
+	one->array[1] = y;
+	one->array[2] = r;
+
+	nemolist_insert(&scope->list, &one->link);
+
+	return 0;
+
+err1:
+	free(one);
+
+	return -1;
+}
+
+int nemoscope_add_ellipse(struct nemoscope *scope, uint32_t tag, float x, float y, float rx, float ry)
+{
+	struct scopeone *one;
+
+	one = (struct scopeone *)malloc(sizeof(struct scopeone));
+	if (one == NULL)
+		return -1;
+	memset(one, 0, sizeof(struct scopeone));
+
+	one->array = (float *)malloc(sizeof(float) * 5);
+	if (one->array == NULL)
+		goto err1;
+
+	one->tag = tag;
+	one->type = NEMOSCOPE_ELLIPSE_TYPE;
+
+	one->array[0] = x;
+	one->array[1] = y;
+	one->array[2] = rx;
+	one->array[3] = ry;
+
+	nemolist_insert(&scope->list, &one->link);
+
+	return 0;
+
+err1:
+	free(one);
+
+	return -1;
 }
 
 uint32_t nemoscope_pick(struct nemoscope *scope, float x, float y)
@@ -83,30 +213,29 @@ uint32_t nemoscope_pick(struct nemoscope *scope, float x, float y)
 
 	nemolist_for_each(one, &scope->list, link) {
 		if (one->type == NEMOSCOPE_RECT_TYPE) {
-			if (one->x <= x && one->x + one->w < x &&
-					one->y <= y && one->y + one->h < y)
+			if (one->array[0] <= x && one->array[0] + one->array[2] < x &&
+					one->array[1] <= y && one->array[1] + one->array[3] < y)
 				return one->tag;
 		} else if (one->type == NEMOSCOPE_CIRCLE_TYPE) {
-			if (one->w == one->h) {
-				float r = one->w / 2.0f;
-				float cx = one->x + r;
-				float cy = one->y + r;
-				float dx = cx - x;
-				float dy = cy - y;
+			float r = one->array[2];
+			float cx = one->array[0] + r;
+			float cy = one->array[1] + r;
+			float dx = cx - x;
+			float dy = cy - y;
 
-				if (sqrtf(dx * dx + dy * dy) <= r)
-					return one->tag;
-			} else {
-				float rx = one->w / 2.0f;
-				float ry = one->h / 2.0f;
-				float cx = one->x + rx;
-				float cy = one->y + ry;
-				float dx = x - cx;
-				float dy = y - cy;
+			if (sqrtf(dx * dx + dy * dy) <= r)
+				return one->tag;
+		} else if (one->type == NEMOSCOPE_ELLIPSE_TYPE) {
+			float rx = one->array[2];
+			float ry = one->array[3];
+			float cx = one->array[0] + rx;
+			float cy = one->array[1] + ry;
+			float dx = x - cx;
+			float dy = y - cy;
 
-				if (((dx * dx) / (rx * rx) + (dy * dy) / (ry * ry)) <= 1.0f)
-					return one->tag;
-			}
+			if (((dx * dx) / (rx * rx) + (dy * dy) / (ry * ry)) <= 1.0f)
+				return one->tag;
+		} else if (one->type == NEMOSCOPE_POLYGON_TYPE) {
 		}
 	}
 
