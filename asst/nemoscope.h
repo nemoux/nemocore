@@ -22,7 +22,9 @@ typedef enum {
 
 struct scopeone {
 	int type;
+
 	float *array;
+	int arraycount;
 
 	uint32_t tag;
 

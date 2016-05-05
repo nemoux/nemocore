@@ -78,6 +78,7 @@ int nemoscope_add_cmd(struct nemoscope *scope, uint32_t tag, const char *cmd)
 	one->array = (float *)malloc(sizeof(float) * count);
 	if (one->array == NULL)
 		goto err2;
+	one->arraycount = count - 1;
 
 	one->tag = tag;
 
@@ -97,7 +98,7 @@ int nemoscope_add_cmd(struct nemoscope *scope, uint32_t tag, const char *cmd)
 		one->array[i] = nemotoken_get_double(token, i + 1, 0.0f);
 	}
 
-	nemolist_insert(&scope->list, &one->link);
+	nemolist_insert_tail(&scope->list, &one->link);
 
 	nemotoken_destroy(token);
 
@@ -127,6 +128,7 @@ int nemoscope_add_rect(struct nemoscope *scope, uint32_t tag, float x, float y, 
 	one->array = (float *)malloc(sizeof(float) * 5);
 	if (one->array == NULL)
 		goto err1;
+	one->arraycount = 4;
 
 	one->tag = tag;
 	one->type = NEMOSCOPE_RECT_TYPE;
@@ -136,7 +138,7 @@ int nemoscope_add_rect(struct nemoscope *scope, uint32_t tag, float x, float y, 
 	one->array[2] = w;
 	one->array[3] = h;
 
-	nemolist_insert(&scope->list, &one->link);
+	nemolist_insert_tail(&scope->list, &one->link);
 
 	return 0;
 
@@ -158,6 +160,7 @@ int nemoscope_add_circle(struct nemoscope *scope, uint32_t tag, float x, float y
 	one->array = (float *)malloc(sizeof(float) * 4);
 	if (one->array == NULL)
 		goto err1;
+	one->arraycount = 3;
 
 	one->tag = tag;
 	one->type = NEMOSCOPE_CIRCLE_TYPE;
@@ -166,7 +169,7 @@ int nemoscope_add_circle(struct nemoscope *scope, uint32_t tag, float x, float y
 	one->array[1] = y;
 	one->array[2] = r;
 
-	nemolist_insert(&scope->list, &one->link);
+	nemolist_insert_tail(&scope->list, &one->link);
 
 	return 0;
 
@@ -188,6 +191,7 @@ int nemoscope_add_ellipse(struct nemoscope *scope, uint32_t tag, float x, float 
 	one->array = (float *)malloc(sizeof(float) * 5);
 	if (one->array == NULL)
 		goto err1;
+	one->arraycount = 4;
 
 	one->tag = tag;
 	one->type = NEMOSCOPE_ELLIPSE_TYPE;
@@ -197,7 +201,7 @@ int nemoscope_add_ellipse(struct nemoscope *scope, uint32_t tag, float x, float 
 	one->array[2] = rx;
 	one->array[3] = ry;
 
-	nemolist_insert(&scope->list, &one->link);
+	nemolist_insert_tail(&scope->list, &one->link);
 
 	return 0;
 
@@ -236,6 +240,22 @@ uint32_t nemoscope_pick(struct nemoscope *scope, float x, float y)
 			if (((dx * dx) / (rx * rx) + (dy * dy) / (ry * ry)) <= 1.0f)
 				return one->tag;
 		} else if (one->type == NEMOSCOPE_POLYGON_TYPE) {
+			int i, j = one->arraycount / 2 - 1;
+			int odd = 0;
+
+			for (i = 0; i < one->arraycount / 2; i++) {
+				if (((one->array[i*2+1] < y && one->array[j*2+1] >= y) || (one->array[j*2+1] < y && one->array[i*2+1] >= y)) &&
+						(one->array[i*2+0] <= x || one->array[j*2+0] <= x)) {
+					if (one->array[i*2+0] + (y - one->array[i*2+1]) / (one->array[j*2+1] - one->array[i*2+1]) * (one->array[j*2+0] - one->array[i*2+0]) < x) {
+						odd = !odd;
+					}
+				}
+
+				j = i;
+			}
+
+			if (odd != 0)
+				return one->tag;
 		}
 	}
 
