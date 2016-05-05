@@ -606,6 +606,8 @@ void nemoshow_view_resize(struct nemoshow *show, int32_t width, int32_t height)
 	nemotool_resize_egl_canvas(scon->eglcanvas, width, height);
 
 	nemoshow_set_size(show, width, height);
+
+	nemoshow_update_one(show);
 }
 
 void nemoshow_view_redraw(struct nemoshow *show)

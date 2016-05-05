@@ -186,6 +186,8 @@ void nemoshow_update_one_expression_without_dirty(struct nemoshow *show, struct 
 
 void nemoshow_update_one(struct nemoshow *show)
 {
+	struct showone *scene = show->scene;
+	struct showcanvas *canvas;
 	struct showone *one, *none;
 
 	nemolist_for_each_safe(one, none, &show->dirty_list, dirty_link) {
@@ -197,6 +199,29 @@ void nemoshow_update_one(struct nemoshow *show)
 	}
 
 	show->dirty_serial = 0;
+
+	nemoshow_children_for_each(one, scene) {
+		if (one->type == NEMOSHOW_CANVAS_TYPE) {
+			canvas = NEMOSHOW_CANVAS(one);
+
+			if (canvas->needs_resize != 0) {
+				canvas->needs_resize = 0;
+
+				nemoshow_canvas_resize(one);
+			}
+
+			if (canvas->viewport.dirty != 0) {
+				canvas->viewport.dirty = 0;
+
+				nemoshow_canvas_set_viewport(show, one,
+						(double)show->width / (double)NEMOSHOW_SCENE_AT(scene, width) * show->sx,
+						(double)show->height / (double)NEMOSHOW_SCENE_AT(scene, height) * show->sy);
+
+				if (canvas->dispatch_resize != NULL)
+					canvas->dispatch_resize(show, one, canvas->viewport.width, canvas->viewport.height);
+			}
+		}
+	}
 }
 
 void nemoshow_render_one(struct nemoshow *show)

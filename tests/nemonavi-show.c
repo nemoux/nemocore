@@ -28,11 +28,30 @@ struct navicontext {
 	struct nemonavi *navi;
 
 	struct nemotimer *timer;
+
+	int needs_resize;
 };
+
+static void nemonavi_dispatch_show_resize(struct nemoshow *show, int32_t width, int32_t height)
+{
+	struct navicontext *context = (struct navicontext *)nemoshow_get_userdata(show);
+
+	nemonavi_set_size(context->navi, width, height);
+
+	nemonavi_do_message();
+
+	context->needs_resize = 1;
+}
 
 static void nemonavi_dispatch_paint(struct nemonavi *navi, int type, const void *buffer, int width, int height, int dx, int dy, int dw, int dh)
 {
 	struct navicontext *context = (struct navicontext *)nemonavi_get_userdata(navi);
+
+	if (context->needs_resize != 0) {
+		nemoshow_view_resize(context->show, width, height);
+
+		context->needs_resize = 0;
+	}
 
 	if (type == NEMONAVI_PAINT_VIEW_TYPE) {
 		GLuint texture = nemoshow_canvas_get_texture(context->view);
@@ -287,15 +306,6 @@ static void nemonavi_dispatch_canvas_event(struct nemoshow *show, struct showone
 	nemonavi_do_message();
 }
 
-static void nemonavi_dispatch_canvas_resize(struct nemoshow *show, struct showone *one, int32_t width, int32_t height)
-{
-	struct navicontext *context = (struct navicontext *)nemoshow_get_userdata(show);
-
-	nemonavi_set_size(context->navi, width, height);
-
-	nemonavi_do_message();
-}
-
 static void nemonavi_dispatch_timer(struct nemotimer *timer, void *data)
 {
 	struct navicontext *context = (struct navicontext *)data;
@@ -362,6 +372,7 @@ int main(int argc, char *argv[])
 	context->show = show = nemoshow_create_view(tool, width, height);
 	if (show == NULL)
 		goto err3;
+	nemoshow_set_dispatch_resize(show, nemonavi_dispatch_show_resize);
 	nemoshow_set_userdata(show, context);
 
 	context->scene = scene = nemoshow_scene_create();
@@ -381,7 +392,6 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_height(canvas, height);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_OPENGL_TYPE);
 	nemoshow_canvas_set_dispatch_event(canvas, nemonavi_dispatch_canvas_event);
-	nemoshow_canvas_set_dispatch_resize(canvas, nemonavi_dispatch_canvas_resize);
 	nemoshow_one_attach(scene, canvas);
 
 	context->popup = canvas = nemoshow_canvas_create();
