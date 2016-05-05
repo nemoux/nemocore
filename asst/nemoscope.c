@@ -258,8 +258,8 @@ uint32_t nemoscope_pick(struct nemoscope *scope, float x, float y)
 				return one->tag;
 		} else if (one->type == NEMOSCOPE_CIRCLE_TYPE) {
 			float r = one->array[2];
-			float cx = one->array[0] + r;
-			float cy = one->array[1] + r;
+			float cx = one->array[0];
+			float cy = one->array[1];
 			float dx = cx - x;
 			float dy = cy - y;
 
@@ -268,8 +268,8 @@ uint32_t nemoscope_pick(struct nemoscope *scope, float x, float y)
 		} else if (one->type == NEMOSCOPE_ELLIPSE_TYPE) {
 			float rx = one->array[2];
 			float ry = one->array[3];
-			float cx = one->array[0] + rx;
-			float cy = one->array[1] + ry;
+			float cx = one->array[0];
+			float cy = one->array[1];
 			float dx = x - cx;
 			float dy = y - cy;
 
