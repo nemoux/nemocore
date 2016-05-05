@@ -104,16 +104,18 @@ static int nemoshow_dispatch_actor_resize(struct nemoactor *actor, int32_t width
 			return 0;
 	}
 
+	if (show->dispatch_resize != NULL) {
+		show->dispatch_resize(show, width, height);
+		return 0;
+	}
+
 	nemoactor_resize_gl(actor, width, height);
+
+	nemotale_resize_fbo(fbo, width, height);
 
 	nemoshow_set_size(show, width, height);
 
-	if (show->dispatch_resize != NULL)
-		show->dispatch_resize(show, width, height);
-
 	nemoshow_render_one(show);
-
-	nemotale_resize_fbo(fbo, width, height);
 
 	nemotale_composite_fbo_full(tale);
 
@@ -664,4 +666,27 @@ void nemoshow_view_miss(struct nemoshow *show)
 
 void nemoshow_view_resize(struct nemoshow *show, int32_t width, int32_t height)
 {
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemoactor *actor = scon->actor;
+	struct nemotale *tale = (struct nemotale *)nemoactor_get_context(actor);
+	struct talefbo *fbo = (struct talefbo *)nemotale_get_backend(tale);
+
+	nemoactor_resize_gl(actor, width, height);
+
+	nemotale_resize_fbo(fbo, width, height);
+
+	nemoshow_set_size(show, width, height);
+}
+
+void nemoshow_view_redraw(struct nemoshow *show)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemoactor *actor = scon->actor;
+	struct nemotale *tale = (struct nemotale *)nemoactor_get_context(actor);
+
+	nemoshow_render_one(show);
+
+	nemotale_composite_fbo_full(tale);
+
+	nemoactor_damage_dirty(actor);
 }

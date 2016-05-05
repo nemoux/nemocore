@@ -144,8 +144,12 @@ static void nemospeaker_dispatch_show_resize(struct nemoshow *show, int32_t widt
 {
 	struct nemospeaker *speaker = (struct nemospeaker *)nemoshow_get_userdata(show);
 
+	nemoshow_view_resize(show, width, height);
+
 	nemoshow_view_put_scope(show);
 	nemoshow_view_set_scope(show, "e:%f,%f:%f,%f", width * 0.5f, height * 0.5f, width * 0.45f, height * 0.45f);
+
+	nemoshow_view_redraw(show);
 }
 
 static void nemospeaker_dispatch_show_layer(struct nemoshow *show, int32_t visible)
