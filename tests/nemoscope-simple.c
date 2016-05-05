@@ -14,9 +14,11 @@ int main(void)
 
 	scope = nemoscope_create();
 
-	nemoscope_add_cmd(scope, 1, "p:50,0:0,50:50,100:100,50");
-	nemoscope_add_circle(scope, 2, 50, 50, 50);
+	nemoscope_add_triangle(scope, 1, 50, 25, 25, 75, 75, 75);
+	nemoscope_add_cmd(scope, 2, "p:50,0:0,50:50,100:100,50");
+	nemoscope_add_circle(scope, 3, 50, 50, 50);
 
+	NEMO_DEBUG("(50, 50) %d\n", nemoscope_pick(scope, 50, 50));
 	NEMO_DEBUG("(100, 50) %d\n", nemoscope_pick(scope, 100, 50));
 	NEMO_DEBUG("(100, 55) %d\n", nemoscope_pick(scope, 100, 55));
 

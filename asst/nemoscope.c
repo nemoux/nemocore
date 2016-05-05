@@ -89,6 +89,8 @@ int nemoscope_add_cmd(struct nemoscope *scope, uint32_t tag, const char *cmd)
 		one->type = NEMOSCOPE_CIRCLE_TYPE;
 	else if (type[0] == 'e')
 		one->type = NEMOSCOPE_ELLIPSE_TYPE;
+	else if (type[0] == 't')
+		one->type = NEMOSCOPE_TRIANGLE_TYPE;
 	else if (type[0] == 'p')
 		one->type = NEMOSCOPE_POLYGON_TYPE;
 	else
@@ -211,6 +213,40 @@ err1:
 	return -1;
 }
 
+int nemoscope_add_triangle(struct nemoscope *scope, uint32_t tag, float x0, float y0, float x1, float y1, float x2, float y2)
+{
+	struct scopeone *one;
+
+	one = (struct scopeone *)malloc(sizeof(struct scopeone));
+	if (one == NULL)
+		return -1;
+	memset(one, 0, sizeof(struct scopeone));
+
+	one->array = (float *)malloc(sizeof(float) * 7);
+	if (one->array == NULL)
+		goto err1;
+	one->arraycount = 6;
+
+	one->tag = tag;
+	one->type = NEMOSCOPE_TRIANGLE_TYPE;
+
+	one->array[0] = x0;
+	one->array[1] = y0;
+	one->array[2] = x1;
+	one->array[3] = y1;
+	one->array[4] = x2;
+	one->array[5] = y2;
+
+	nemolist_insert_tail(&scope->list, &one->link);
+
+	return 0;
+
+err1:
+	free(one);
+
+	return -1;
+}
+
 uint32_t nemoscope_pick(struct nemoscope *scope, float x, float y)
 {
 	struct scopeone *one;
@@ -238,6 +274,18 @@ uint32_t nemoscope_pick(struct nemoscope *scope, float x, float y)
 			float dy = y - cy;
 
 			if (((dx * dx) / (rx * rx) + (dy * dy) / (ry * ry)) <= 1.0f)
+				return one->tag;
+		} else if (one->type == NEMOSCOPE_TRIANGLE_TYPE) {
+			float dx = x - one->array[4];
+			float dy = y - one->array[5];
+			float dx21 = one->array[4] - one->array[2];
+			float dy12 = one->array[3] - one->array[5];
+			float d = dy12 * (one->array[0] - one->array[4]) + dx21 * (one->array[1] - one->array[5]);
+			float s = dy12 * dx + dx21 * dy;
+			float t = (one->array[5] - one->array[1]) * dx + (one->array[0] - one->array[4]) * dy;
+
+			if ((d < 0 && s <= 0 && t <= 0 && s + t >= d) ||
+					(d >= 0 && s >= 0 && t >= 0 && s + t <= d))
 				return one->tag;
 		} else if (one->type == NEMOSCOPE_POLYGON_TYPE) {
 			int i, j = one->arraycount / 2 - 1;
