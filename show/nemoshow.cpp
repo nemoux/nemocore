@@ -184,6 +184,21 @@ void nemoshow_update_one_expression_without_dirty(struct nemoshow *show, struct 
 }
 #endif
 
+void nemoshow_update_one(struct nemoshow *show)
+{
+	struct showone *one, *none;
+
+	nemolist_for_each_safe(one, none, &show->dirty_list, dirty_link) {
+		nemoshow_one_update(one);
+	}
+
+	nemolist_for_each_safe(one, none, &show->bounds_list, bounds_link) {
+		nemoshow_one_update_bounds(one);
+	}
+
+	show->dirty_serial = 0;
+}
+
 void nemoshow_render_one(struct nemoshow *show)
 {
 	struct showone *scene = show->scene;
