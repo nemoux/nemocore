@@ -28,30 +28,24 @@ struct navicontext {
 	struct nemonavi *navi;
 
 	struct nemotimer *timer;
-
-	int needs_resize;
 };
 
 static void nemonavi_dispatch_show_resize(struct nemoshow *show, int32_t width, int32_t height)
 {
 	struct navicontext *context = (struct navicontext *)nemoshow_get_userdata(show);
 
-	nemonavi_set_size(context->navi, width, height);
+	nemoshow_view_resize(context->show, width, height);
+
+	nemonavi_set_size(context->navi,
+			nemoshow_canvas_get_viewport_width(context->view),
+			nemoshow_canvas_get_viewport_height(context->view));
 
 	nemonavi_do_message();
-
-	context->needs_resize = 1;
 }
 
 static void nemonavi_dispatch_paint(struct nemonavi *navi, int type, const void *buffer, int width, int height, int dx, int dy, int dw, int dh)
 {
 	struct navicontext *context = (struct navicontext *)nemonavi_get_userdata(navi);
-
-	if (context->needs_resize != 0) {
-		nemoshow_view_resize(context->show, width, height);
-
-		context->needs_resize = 0;
-	}
 
 	if (type == NEMONAVI_PAINT_VIEW_TYPE) {
 		GLuint texture = nemoshow_canvas_get_texture(context->view);
