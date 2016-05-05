@@ -190,6 +190,9 @@ void nemoshow_update_one(struct nemoshow *show)
 	struct showcanvas *canvas;
 	struct showone *one, *none;
 
+	if (scene == NULL)
+		return;
+
 	nemolist_for_each_safe(one, none, &show->dirty_list, dirty_link) {
 		nemoshow_one_update(one);
 	}
