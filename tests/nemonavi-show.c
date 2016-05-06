@@ -58,16 +58,25 @@ static void nemonavi_dispatch_paint(struct nemonavi *navi, int type, const void 
 			glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
 
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, buffer);
+
+			nemoshow_canvas_damage_all(context->view);
 		} else {
+			float x0, y0;
+			float x1, y1;
+
 			glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, dx);
 			glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, dy);
 
 			glTexSubImage2D(GL_TEXTURE_2D, 0, dx, dy, dw, dh, GL_BGRA_EXT, GL_UNSIGNED_BYTE, buffer);
+
+			nemoshow_canvas_transform_from_viewport(context->view, dx, dy, &x0, &y0);
+			nemoshow_canvas_transform_from_viewport(context->view, dx + dw, dy + dh, &x1, &y1);
+
+			nemoshow_canvas_damage(context->view, x0, y0, x1 - x0, y1 - y0);
 		}
 
 		glBindTexture(GL_TEXTURE_2D, 0);
 
-		nemoshow_canvas_damage_all(context->view);
 		nemoshow_dispatch_frame(context->show);
 	} else if (type == NEMONAVI_PAINT_POPUP_TYPE) {
 		GLuint texture = nemoshow_canvas_get_texture(context->popup);
@@ -80,16 +89,25 @@ static void nemonavi_dispatch_paint(struct nemonavi *navi, int type, const void 
 			glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
 
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, buffer);
+
+			nemoshow_canvas_damage_all(context->popup);
 		} else {
+			float x0, y0;
+			float x1, y1;
+
 			glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, dx);
 			glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, dy);
 
 			glTexSubImage2D(GL_TEXTURE_2D, 0, dx, dy, dw, dh, GL_BGRA_EXT, GL_UNSIGNED_BYTE, buffer);
+
+			nemoshow_canvas_transform_from_viewport(context->popup, dx, dy, &x0, &y0);
+			nemoshow_canvas_transform_from_viewport(context->popup, dx + dw, dy + dh, &x1, &y1);
+
+			nemoshow_canvas_damage(context->popup, x0, y0, x1 - x0, y1 - y0);
 		}
 
 		glBindTexture(GL_TEXTURE_2D, 0);
 
-		nemoshow_canvas_damage_all(context->popup);
 		nemoshow_dispatch_frame(context->show);
 	}
 }

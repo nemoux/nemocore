@@ -156,6 +156,8 @@ int nemotale_node_resize_gl(struct talenode *node, int32_t width, int32_t height
 		} else {
 			node->viewport.sx = (double)node->viewport.width / (double)node->geometry.width;
 			node->viewport.sy = (double)node->viewport.height / (double)node->geometry.height;
+			node->viewport.rx = (double)node->geometry.width / (double)node->viewport.width;
+			node->viewport.ry = (double)node->geometry.height / (double)node->viewport.height;
 		}
 
 		if (node->has_filter != 0) {
@@ -182,6 +184,8 @@ int nemotale_node_set_viewport_gl(struct talenode *node, int32_t width, int32_t 
 
 	node->viewport.sx = (double)node->viewport.width / (double)node->geometry.width;
 	node->viewport.sy = (double)node->viewport.height / (double)node->geometry.height;
+	node->viewport.rx = (double)node->geometry.width / (double)node->viewport.width;
+	node->viewport.ry = (double)node->geometry.height / (double)node->viewport.height;
 
 	node->viewport.enable = 1;
 

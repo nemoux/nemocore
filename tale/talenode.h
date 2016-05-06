@@ -47,6 +47,7 @@ struct talenode {
 		int32_t width, height;
 
 		double sx, sy;
+		double rx, ry;
 
 		int enable;
 	} viewport;
@@ -263,6 +264,28 @@ static inline void nemotale_node_set_data(struct talenode *node, void *data)
 static inline void *nemotale_node_get_data(struct talenode *node)
 {
 	return node->userdata;
+}
+
+static inline void nemotale_node_transform_to_viewport(struct talenode *node, float x, float y, float *sx, float *sy)
+{
+	if (node->viewport.enable != 0) {
+		*sx = x * node->viewport.sx;
+		*sy = y * node->viewport.sy;
+	} else {
+		*sx = x;
+		*sy = y;
+	}
+}
+
+static inline void nemotale_node_transform_from_viewport(struct talenode *node, float sx, float sy, float *x, float *y)
+{
+	if (node->viewport.enable != 0) {
+		*x = sx * node->viewport.rx;
+		*y = sy * node->viewport.ry;
+	} else {
+		*x = sx;
+		*y = sy;
+	}
 }
 
 #ifdef __cplusplus

@@ -318,6 +318,8 @@ int nemotale_node_attach_pixman(struct talenode *node, void *data, int32_t width
 	} else {
 		node->viewport.sx = (double)node->viewport.width / (double)node->geometry.width;
 		node->viewport.sy = (double)node->viewport.height / (double)node->geometry.height;
+		node->viewport.rx = (double)node->geometry.width / (double)node->viewport.width;
+		node->viewport.ry = (double)node->geometry.height / (double)node->viewport.height;
 	}
 
 	return 0;
@@ -373,6 +375,8 @@ int nemotale_node_resize_pixman(struct talenode *node, int32_t width, int32_t he
 		} else {
 			node->viewport.sx = (double)node->viewport.width / (double)node->geometry.width;
 			node->viewport.sy = (double)node->viewport.height / (double)node->geometry.height;
+			node->viewport.rx = (double)node->geometry.width / (double)node->viewport.width;
+			node->viewport.ry = (double)node->geometry.height / (double)node->viewport.height;
 		}
 	}
 
@@ -413,6 +417,8 @@ int nemotale_node_set_viewport_pixman(struct talenode *node, int32_t width, int3
 
 	node->viewport.sx = (double)node->viewport.width / (double)node->geometry.width;
 	node->viewport.sy = (double)node->viewport.height / (double)node->geometry.height;
+	node->viewport.rx = (double)node->geometry.width / (double)node->viewport.width;
+	node->viewport.ry = (double)node->geometry.height / (double)node->viewport.height;
 
 	node->viewport.enable = 1;
 

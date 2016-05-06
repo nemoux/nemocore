@@ -108,6 +108,7 @@ extern void nemoshow_canvas_render_back(struct nemoshow *show, struct showone *o
 extern int nemoshow_canvas_set_viewport(struct nemoshow *show, struct showone *one, double sx, double sy);
 extern int nemoshow_canvas_set_size(struct nemoshow *show, struct showone *one, int32_t width, int32_t height);
 
+extern void nemoshow_canvas_damage(struct showone *one, int32_t x, int32_t y, int32_t width, int32_t height);
 extern void nemoshow_canvas_damage_one(struct showone *one, struct showone *child);
 extern void nemoshow_canvas_damage_all(struct showone *one);
 extern void nemoshow_canvas_damage_filter(struct showone *one);
@@ -291,6 +292,20 @@ static inline void nemoshow_canvas_transform_from_global(struct showone *one, fl
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
 	nemotale_node_transform_from_global(canvas->node, x, y, sx, sy);
+}
+
+static inline void nemoshow_canvas_transform_to_viewport(struct showone *one, float x, float y, float *sx, float *sy)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	nemotale_node_transform_to_viewport(canvas->node, x, y, sx, sy);
+}
+
+static inline void nemoshow_canvas_transform_from_viewport(struct showone *one, float sx, float sy, float *x, float *y)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	nemotale_node_transform_from_viewport(canvas->node, sx, sy, x, y);
 }
 
 static inline void nemoshow_canvas_redraw_one(struct nemoshow *show, struct showone *one)
