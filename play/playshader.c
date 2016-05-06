@@ -187,6 +187,9 @@ void nemoplay_shader_finish(struct playshader *shader)
 
 int nemoplay_shader_update(struct playshader *shader, uint8_t *y, uint8_t *u, uint8_t *v)
 {
+	glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
+	glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
+
 	glBindTexture(GL_TEXTURE_2D, shader->texv);
 	glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, shader->texture_width / 2);
 	glTexSubImage2D(GL_TEXTURE_2D, 0,
