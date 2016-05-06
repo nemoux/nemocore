@@ -330,6 +330,9 @@ void glrenderer_flush_canvas(struct nemorenderer *base, struct nemocanvas *canva
 	glBindTexture(GL_TEXTURE_2D, glcontent->textures[0]);
 
 	if (!renderer->has_unpack_subimage) {
+		glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
+		glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
+
 		wl_shm_buffer_begin_access(buffer->shmbuffer);
 		glTexImage2D(GL_TEXTURE_2D, 0, glcontent->format,
 				glcontent->pitch, buffer->height, 0,

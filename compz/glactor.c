@@ -206,7 +206,7 @@ static int glrenderer_attach_egl(struct glrenderer *renderer, struct glcontent *
 		nemolog_error("GLRENDERER", "failed to create image from prime fd\n");
 		return -1;
 	}
-	
+
 	glBindTexture(glcontent->target, glcontent->textures[0]);
 	renderer->image_target_texture_2d(glcontent->target, glcontent->images[0]);
 
@@ -284,6 +284,9 @@ void glrenderer_flush_actor(struct nemorenderer *base, struct nemoactor *actor)
 	glBindTexture(GL_TEXTURE_2D, glcontent->textures[0]);
 
 	if (!renderer->has_unpack_subimage) {
+		glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
+		glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
+
 		glTexImage2D(GL_TEXTURE_2D, 0, glcontent->format,
 				glcontent->pitch, height, 0,
 				glcontent->format, glcontent->pixeltype, (void *)data);

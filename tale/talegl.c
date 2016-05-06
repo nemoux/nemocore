@@ -894,6 +894,9 @@ int nemotale_node_flush_gl(struct nemotale *tale, struct talenode *node)
 		glBindTexture(GL_TEXTURE_2D, gcontext->texture);
 
 		if (!context->has_unpack_subimage) {
+			glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
+			glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
+
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT,
 					node->viewport.width, node->viewport.height, 0,
 					GL_BGRA_EXT, GL_UNSIGNED_BYTE, pcontext->data);
