@@ -233,6 +233,9 @@ int nemoplay_shader_clear(struct playshader *shader)
 	memset(u, 0, (shader->texture_width / 2) * (shader->texture_height / 2));
 	memset(v, 0, (shader->texture_width / 2) * (shader->texture_height / 2));
 
+	glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
+	glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
+
 	glBindTexture(GL_TEXTURE_2D, shader->texv);
 	glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, shader->texture_width / 2);
 	glTexSubImage2D(GL_TEXTURE_2D, 0,
