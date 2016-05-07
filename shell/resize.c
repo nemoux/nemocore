@@ -121,8 +121,8 @@ int nemoshell_resize_canvas_by_pointer(struct nemopointer *pointer, struct shell
 
 	resize->edges = edges;
 
-	resize->width = bin->view->content->width;
-	resize->height = bin->view->content->height;
+	resize->width = nemoshell_bin_get_geometry_width(bin);
+	resize->height = nemoshell_bin_get_geometry_height(bin);
 
 	bin->resize_edges = edges;
 	nemoshell_send_bin_configure(bin);

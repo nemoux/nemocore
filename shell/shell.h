@@ -10,6 +10,8 @@ NEMO_BEGIN_EXTERN_C
 #include <compz.h>
 #include <pixman.h>
 #include <layer.h>
+#include <view.h>
+#include <content.h>
 #include <nemoitem.h>
 
 typedef enum {
@@ -244,12 +246,16 @@ struct shellbin {
 	int has_screen;
 
 	struct {
-		float x, y;
-		float r;
-		float dx, dy;
+		int32_t x, y;
 		int32_t width, height;
 	} geometry, next_geometry;
 	int has_set_geometry, has_next_geometry;
+
+	struct {
+		float x, y;
+		float r;
+		float dx, dy;
+	} initial;
 
 	struct {
 		float ax, ay;
@@ -348,6 +354,16 @@ static inline void nemoshell_set_execute_content(struct nemoshell *shell, nemosh
 static inline void nemoshell_set_userdata(struct nemoshell *shell, void *data)
 {
 	shell->userdata = data;
+}
+
+static inline int32_t nemoshell_bin_get_geometry_width(struct shellbin *bin)
+{
+	return bin->has_set_geometry == 0 ? bin->view->content->width : bin->geometry.width;
+}
+
+static inline int32_t nemoshell_bin_get_geometry_height(struct shellbin *bin)
+{
+	return bin->has_set_geometry == 0 ? bin->view->content->height : bin->geometry.height;
 }
 
 static inline void clientstate_set_position(struct clientstate *state, float x, float y)
