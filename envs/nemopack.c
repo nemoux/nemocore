@@ -75,22 +75,6 @@ static void nemopack_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 				nemotimer_set_timeout(pack->timer, 0);
 			}
-		} else if (nemoshow_event_is_double_taps(show, event)) {
-			struct touchpoint *tp0, *tp1;
-
-			tp0 = nemoseat_get_touchpoint_by_id(seat, nemoshow_event_get_device_on(event, 0));
-			tp1 = nemoseat_get_touchpoint_by_id(seat, nemoshow_event_get_device_on(event, 1));
-			if (tp0 != NULL && tp1 != NULL) {
-				if (pack->bin->flags & NEMOSHELL_SURFACE_RESIZABLE_FLAG) {
-					nemoshell_pick_canvas_by_touchpoint_on_area(shell, tp0, tp1, pack->bin);
-				} else if (pack->bin->flags & NEMOSHELL_SURFACE_SCALABLE_FLAG) {
-					nemoshell_pick_canvas_by_touchpoint(shell, tp0, tp1, (1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_MOVE) | (1 << NEMO_SURFACE_PICK_TYPE_SCALEONLY), pack->bin);
-				} else {
-					nemoshell_pick_canvas_by_touchpoint(shell, tp0, tp1, (1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_MOVE), pack->bin);
-				}
-
-				nemotimer_set_timeout(pack->timer, 0);
-			}
 		} else if (nemoshow_event_is_many_taps(show, event)) {
 			struct touchpoint *tp0, *tp1;
 			uint64_t device0, device1;
@@ -100,7 +84,9 @@ static void nemopack_dispatch_canvas_event(struct nemoshow *show, struct showone
 			tp0 = nemoseat_get_touchpoint_by_id(seat, device0);
 			tp1 = nemoseat_get_touchpoint_by_id(seat, device1);
 			if (tp0 != NULL && tp1 != NULL) {
-				if (pack->bin->flags & NEMOSHELL_SURFACE_SCALABLE_FLAG) {
+				if (pack->bin->flags & NEMOSHELL_SURFACE_RESIZABLE_FLAG) {
+					nemoshell_pick_canvas_by_touchpoint(shell, tp0, tp1, (1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_MOVE) | (1 << NEMO_SURFACE_PICK_TYPE_SCALE), pack->bin);
+				} else if (pack->bin->flags & NEMOSHELL_SURFACE_SCALABLE_FLAG) {
 					nemoshell_pick_canvas_by_touchpoint(shell, tp0, tp1, (1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_MOVE) | (1 << NEMO_SURFACE_PICK_TYPE_SCALEONLY), pack->bin);
 				} else {
 					nemoshell_pick_canvas_by_touchpoint(shell, tp0, tp1, (1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_MOVE), pack->bin);

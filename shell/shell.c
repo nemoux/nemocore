@@ -283,16 +283,30 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 				sy = (canvas->base.height - bin->last_height) * view->geometry.ay;
 			}
 		} else {
-			if (bin->resize_edges != 0) {
-				sx = 0;
-				sy = 0;
-			}
+			if (bin->reset_scale != 0) {
+				nemoview_set_scale(view, 1.0f, 1.0f);
+				nemoview_update_transform(view);
 
-			if (bin->resize_edges & WL_SHELL_SURFACE_RESIZE_LEFT) {
-				sx = bin->last_width - canvas->base.width;
-			}
-			if (bin->resize_edges & WL_SHELL_SURFACE_RESIZE_TOP) {
-				sy = bin->last_height - canvas->base.height;
+				if (!wl_list_empty(&view->children_list)) {
+					nemoview_update_transform_children(view);
+				}
+
+				sx = (canvas->base.width - bin->last_width) * -bin->scale.ax;
+				sy = (canvas->base.height - bin->last_height) * -bin->scale.ay;
+
+				bin->reset_scale = 0;
+			} else {
+				if (bin->resize_edges != 0) {
+					sx = 0;
+					sy = 0;
+				}
+
+				if (bin->resize_edges & WL_SHELL_SURFACE_RESIZE_LEFT) {
+					sx = bin->last_width - canvas->base.width;
+				}
+				if (bin->resize_edges & WL_SHELL_SURFACE_RESIZE_TOP) {
+					sy = bin->last_height - canvas->base.height;
+				}
 			}
 		}
 

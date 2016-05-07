@@ -84,6 +84,7 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		int32_t height = pick->height * pick->sy;
 
 		bin->reset_scale = 1;
+		bin->resize_edges = WL_SHELL_SURFACE_RESIZE_LEFT | WL_SHELL_SURFACE_RESIZE_TOP;
 
 		if (shell->is_logging_grab != 0)
 			nemolog_message("PICK", "[UP:SCALE] %llu: sx(%f) sy(%f) width(%d) height(%d) (%u)\n", touchid, pick->sx, pick->sy, width, height, time);
@@ -128,9 +129,6 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 			}
 		}
 	}
-
-	bin->resize_edges = 0;
-	nemoshell_send_bin_configure(bin);
 
 out:
 	nemoshell_end_touchpoint_shellgrab(grab);
