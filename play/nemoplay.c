@@ -146,6 +146,8 @@ int nemoplay_prepare_media(struct nemoplay *play, const char *mediapath)
 	}
 
 	play->container = container;
+	
+	play->duration = container->duration / AV_TIME_BASE;
 
 	play->video_context = video_context;
 	play->audio_context = audio_context;

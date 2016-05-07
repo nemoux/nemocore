@@ -49,6 +49,8 @@ struct nemoplay {
 
 	AVFormatContext *container;
 
+	int32_t duration;
+
 	AVCodecContext *video_context;
 	AVCodecContext *audio_context;
 	AVCodecContext *subtitle_context;
@@ -185,6 +187,11 @@ static inline int nemoplay_has_audio(struct nemoplay *play)
 static inline int nemoplay_has_subtitle(struct nemoplay *play)
 {
 	return play->subtitle_context != NULL;
+}
+
+static inline int64_t nemoplay_get_duration(struct nemoplay *play)
+{
+	return play->duration;
 }
 
 static inline void nemoplay_set_userdata(struct nemoplay *play, void *userdata)
