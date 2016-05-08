@@ -301,6 +301,8 @@ static void xdg_get_xdg_surface(struct wl_client *client, struct wl_resource *re
 	bin->type = NEMOSHELL_SURFACE_NORMAL_TYPE;
 	bin->owner = sc;
 
+	wl_client_get_credentials(client, &bin->pid, NULL, NULL);
+
 	bin->resource = wl_resource_create(client, &xdg_surface_interface, 1, id);
 	if (bin->resource == NULL) {
 		wl_resource_post_no_memory(surface_resource);
@@ -310,7 +312,7 @@ static void xdg_get_xdg_surface(struct wl_client *client, struct wl_resource *re
 
 	wl_resource_set_implementation(bin->resource, &xdg_surface_implementation, bin, xdgshell_unbind_xdg_surface);
 
-	nemoshell_use_client_state(shell, bin, client);
+	nemoshell_use_client_state(shell, bin);
 
 	bin->flags |= NEMOSHELL_SURFACE_BINDABLE_FLAG;
 }
@@ -347,6 +349,8 @@ static void xdg_get_xdg_popup(struct wl_client *client, struct wl_resource *reso
 	bin->popup.y = y;
 	bin->popup.serial = serial;
 	nemoshell_set_parent_bin(bin, nemoshell_get_bin(parent));
+
+	wl_client_get_credentials(client, &bin->pid, NULL, NULL);
 
 	bin->resource = wl_resource_create(client, &xdg_popup_interface, 1, id);
 	if (bin->resource == NULL) {

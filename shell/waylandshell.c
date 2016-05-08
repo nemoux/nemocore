@@ -163,7 +163,6 @@ static void shell_get_shell_surface(struct wl_client *client, struct wl_resource
 	struct shellclient *sc = (struct shellclient *)wl_resource_get_user_data(resource);
 	struct nemoshell *shell = sc->shell;
 	struct shellbin *bin;
-	pid_t pid;
 
 	if (nemoshell_get_bin(canvas)) {
 		wl_resource_post_error(surface_resource,
@@ -185,6 +184,8 @@ static void shell_get_shell_surface(struct wl_client *client, struct wl_resource
 
 	bin->type = NEMOSHELL_SURFACE_NORMAL_TYPE;
 	bin->owner = sc;
+	
+	wl_client_get_credentials(client, &bin->pid, NULL, NULL);
 
 	bin->resource = wl_resource_create(client, &wl_shell_surface_interface, 1, id);
 	if (bin->resource == NULL) {
@@ -195,7 +196,7 @@ static void shell_get_shell_surface(struct wl_client *client, struct wl_resource
 
 	wl_resource_set_implementation(bin->resource, &shell_surface_implementation, bin, shell_unbind_shell_surface);
 
-	nemoshell_use_client_state(shell, bin, client);
+	nemoshell_use_client_state(shell, bin);
 
 	bin->flags |= NEMOSHELL_SURFACE_BINDABLE_FLAG;
 }

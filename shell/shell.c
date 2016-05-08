@@ -886,37 +886,10 @@ static inline void nemoshell_set_client_state(struct shellbin *bin, struct clien
 	nemoview_put_state(bin->view, state->state_off);
 }
 
-int nemoshell_use_client_state(struct nemoshell *shell, struct shellbin *bin, struct wl_client *client)
+int nemoshell_use_client_state(struct nemoshell *shell, struct shellbin *bin)
 {
 	struct clientstate *state;
-	pid_t pid;
-
-	wl_client_get_credentials(client, &pid, NULL, NULL);
-
-	state = nemoshell_get_client_state(shell, pid);
-	if (state != NULL) {
-		nemoshell_set_client_state(bin, state);
-
-		return 1;
-	} else {
-		pid_t ppid;
-
-		if (proc_get_process_parent_id(pid, &ppid) > 0) {
-			state = nemoshell_get_client_state(shell, ppid);
-			if (state != NULL) {
-				nemoshell_set_client_state(bin, state);
-
-				return 1;
-			}
-		}
-	}
-
-	return 0;
-}
-
-int nemoshell_use_client_state_by_pid(struct nemoshell *shell, struct shellbin *bin, pid_t pid)
-{
-	struct clientstate *state;
+	pid_t pid = bin->pid;
 
 	state = nemoshell_get_client_state(shell, pid);
 	if (state != NULL) {

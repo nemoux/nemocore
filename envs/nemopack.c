@@ -58,19 +58,11 @@ static int nemopack_dispatch_show_destroy(struct nemoshow *show)
 {
 	struct nemopack *pack = (struct nemopack *)nemoshow_get_userdata(show);
 	struct nemocanvas *canvas = pack->view->canvas;
-	struct wl_client *client;
 
 	wl_list_remove(&canvas->link);
 	wl_list_init(&canvas->link);
 
-	client = wl_resource_get_client(canvas->resource);
-	if (client != NULL) {
-		pid_t pid;
-
-		wl_client_get_credentials(client, &pid, NULL, NULL);
-
-		kill(pid, SIGKILL);
-	}
+	kill(pack->bin->pid, SIGKILL);
 
 	return 0;
 }

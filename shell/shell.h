@@ -190,6 +190,8 @@ struct shellbin {
 	struct wl_signal destroy_signal;
 	struct shellclient *owner;
 
+	pid_t pid;
+
 	struct wl_signal ungrab_signal;
 	struct wl_signal change_signal;
 	struct wl_signal resize_signal;
@@ -324,8 +326,7 @@ extern struct clientstate *nemoshell_create_client_state(struct nemoshell *shell
 extern void nemoshell_destroy_client_state(struct nemoshell *shell, struct clientstate *state);
 extern struct clientstate *nemoshell_get_client_state(struct nemoshell *shell, uint32_t pid);
 
-extern int nemoshell_use_client_state(struct nemoshell *shell, struct shellbin *bin, struct wl_client *client);
-extern int nemoshell_use_client_state_by_pid(struct nemoshell *shell, struct shellbin *bin, pid_t pid);
+extern int nemoshell_use_client_state(struct nemoshell *shell, struct shellbin *bin);
 
 extern void nemoshell_load_fullscreens(struct nemoshell *shell);
 extern struct shellscreen *nemoshell_get_fullscreen(struct nemoshell *shell, uint32_t id);

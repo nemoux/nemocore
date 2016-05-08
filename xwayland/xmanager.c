@@ -1133,8 +1133,9 @@ void nemoxmanager_map_window(struct nemoxmanager *xmanager, struct nemoxwindow *
 	}
 
 	bin->type = NEMOSHELL_SURFACE_XWAYLAND_TYPE;
+	bin->pid = xwindow->pid;
 
-	nemoshell_use_client_state_by_pid(shell, bin, xwindow->pid);
+	nemoshell_use_client_state(shell, bin);
 
 	bin->flags |= NEMOSHELL_SURFACE_BINDABLE_FLAG;
 

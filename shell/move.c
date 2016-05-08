@@ -152,12 +152,7 @@ static void move_shellgrab_dispatch_effect_done(struct nemoeffect *base)
 			wl_list_init(&sbin->screen_link);
 
 			if (sbin->resource != NULL) {
-				struct wl_client *client = wl_resource_get_client(sbin->resource);
-				pid_t pid;
-
-				wl_client_get_credentials(client, &pid, NULL, NULL);
-
-				kill(pid, SIGKILL);
+				kill(sbin->pid, SIGKILL);
 			}
 		}
 
@@ -314,7 +309,7 @@ int nemoshell_move_canvas_by_touchpoint(struct nemoshell *shell, struct touchpoi
 
 	move->dx = bin->view->geometry.x - tp->x;
 	move->dy = bin->view->geometry.y - tp->y;
-	
+
 	bin->reset_move = 0;
 
 	touchpoint_clear_samples(tp);

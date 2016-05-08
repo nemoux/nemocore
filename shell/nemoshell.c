@@ -490,6 +490,8 @@ static void nemo_get_nemo_surface(struct wl_client *client, struct wl_resource *
 
 	bin->owner = sc;
 
+	wl_client_get_credentials(client, &bin->pid, NULL, NULL);
+
 	bin->resource = wl_resource_create(client, &nemo_surface_interface, 1, id);
 	if (bin->resource == NULL) {
 		wl_resource_post_no_memory(surface_resource);
@@ -502,7 +504,7 @@ static void nemo_get_nemo_surface(struct wl_client *client, struct wl_resource *
 	if (type == NEMO_SHELL_SURFACE_TYPE_NORMAL) {
 		bin->type = NEMOSHELL_SURFACE_NORMAL_TYPE;
 
-		nemoshell_use_client_state(shell, bin, client);
+		nemoshell_use_client_state(shell, bin);
 	} else if (type == NEMO_SHELL_SURFACE_TYPE_OVERLAY) {
 		bin->type = NEMOSHELL_SURFACE_OVERLAY_TYPE;
 		bin->view->transform.type = NEMOVIEW_TRANSFORM_OVERLAY;

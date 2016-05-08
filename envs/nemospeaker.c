@@ -92,7 +92,7 @@ static void nemospeaker_dispatch_canvas_event(struct nemoshow *show, struct show
 		}
 	} else if (nemoshow_event_is_up(show, event)) {
 		struct nemoview *view;
-		struct wl_client *client;
+		struct shellbin *bin;
 		float sx, sy;
 
 		view = nemocompz_pick_canvas(compz, nemoshow_event_get_gx(event), nemoshow_event_get_gy(event), &sx, &sy);
@@ -100,12 +100,8 @@ static void nemospeaker_dispatch_canvas_event(struct nemoshow *show, struct show
 				(nemoview_has_state(view, NEMOVIEW_SOUND_STATE)) &&
 				(view->canvas != NULL) &&
 				(view->canvas->resource != NULL) &&
-				(client = wl_resource_get_client(view->canvas->resource)) != NULL) {
-			pid_t pid;
-
-			wl_client_get_credentials(client, &pid, NULL, NULL);
-
-			speaker->pid = pid;
+				((bin = nemoshell_get_bin(view->canvas)) != NULL)) {
+			speaker->pid = bin->pid;
 
 			if (speaker->sink != NULL)
 				nemosound_set_sink(compz->sound, speaker->pid, speaker->sink->id);
