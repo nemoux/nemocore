@@ -85,8 +85,6 @@ static void nemoplay_dispatch_canvas_event(struct nemoshow *show, struct showone
 			} else {
 				nemoplay_set_state(context->play, NEMOPLAY_STOP_STATE);
 			}
-		} else if (nemoshow_event_is_single_tap(show, event)) {
-			nemoplay_set_cmd(context->play, NEMOPLAY_SEEK_CMD);
 		}
 	}
 }
@@ -115,20 +113,23 @@ static void nemoplay_dispatch_video_timer(struct nemotimer *timer, void *data)
 
 	state = nemoplay_queue_get_state(queue);
 	if (state == NEMOPLAY_QUEUE_NORMAL_STATE) {
+		double threshold = 1.0f / nemoplay_get_video_framerate(play);
+		double cts = nemoplay_get_cts(play);
+		double pts;
+
+		if (cts >= nemoplay_get_duration(play))
+			nemoplay_set_cmd(play, NEMOPLAY_SEEK_CMD);
+
 		if (nemoplay_queue_get_count(queue) < 64)
 			nemoplay_set_state(play, NEMOPLAY_WAKE_STATE);
 
 		one = nemoplay_queue_dequeue(queue);
 		if (one == NULL) {
-			nemotimer_set_timeout(timer, 1000 / nemoplay_get_video_framerate(play));
+			nemotimer_set_timeout(timer, threshold * 1000);
 		} else if (nemoplay_queue_get_one_serial(one) != nemoplay_queue_get_serial(queue)) {
 			nemoplay_queue_destroy_one(one);
 			nemotimer_set_timeout(timer, 1);
 		} else if (nemoplay_queue_get_one_cmd(one) == NEMOPLAY_QUEUE_NORMAL_COMMAND) {
-			double threshold = 1.0f / nemoplay_get_video_framerate(play);
-			double cts = nemoplay_get_cts(play);
-			double pts;
-
 			nemoplay_set_video_pts(play, nemoplay_queue_get_one_pts(one));
 
 			if (cts > nemoplay_queue_get_one_pts(one) + threshold) {
@@ -230,7 +231,7 @@ static void *nemoplay_handle_decodeframe(void *arg)
 
 	while ((state = nemoplay_get_state(play)) != NEMOPLAY_DONE_STATE) {
 		if (nemoplay_has_cmd(play, NEMOPLAY_SEEK_CMD) != 0) {
-			nemoplay_seek_media(play, nemoplay_get_cts(play) + 10.0f);
+			nemoplay_seek_media(play, 0.0f);
 			nemoplay_put_cmd(play, NEMOPLAY_SEEK_CMD);
 		}
 
