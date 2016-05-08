@@ -78,8 +78,8 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 	}
 
 	if (bin->reset_size != 0) {
-		pick->width = nemoshell_bin_get_geometry_width(bin);
-		pick->height = nemoshell_bin_get_geometry_height(bin);
+		pick->width = pick->other->width = nemoshell_bin_get_geometry_width(bin);
+		pick->height = pick->other->height = nemoshell_bin_get_geometry_height(bin);
 
 		if (bin->view->geometry.has_pivot == 0) {
 			nemoview_correct_pivot(bin->view, nemoshell_bin_get_geometry_width(bin) / 2.0f, nemoshell_bin_get_geometry_height(bin) / 2.0f);
@@ -215,8 +215,8 @@ static void pick_shellgrab_touchpoint_frame(struct touchpoint_grab *base, uint32
 	}
 
 	if (bin->reset_size != 0) {
-		pick->width = nemoshell_bin_get_geometry_width(bin);
-		pick->height = nemoshell_bin_get_geometry_height(bin);
+		pick->width = pick->other->width = nemoshell_bin_get_geometry_width(bin);
+		pick->height = pick->other->height = nemoshell_bin_get_geometry_height(bin);
 
 		if (bin->view->geometry.has_pivot == 0) {
 			nemoview_correct_pivot(bin->view, nemoshell_bin_get_geometry_width(bin) / 2.0f, nemoshell_bin_get_geometry_height(bin) / 2.0f);
