@@ -236,6 +236,7 @@ struct shellbin {
 		float x, y;
 		int32_t width, height;
 		float r;
+		float px, py;
 	} fullscreen;
 
 	int on_pickscreen;

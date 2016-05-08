@@ -297,18 +297,15 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 
 				bin->has_scale = 0;
 				bin->reset_scale = 1;
-			} else {
-				if (bin->resize_edges != 0) {
-					sx = 0;
-					sy = 0;
-				}
+				bin->resize_edges = 0;
+			} else if (bin->resize_edges != 0) {
+				sx = 0;
+				sy = 0;
 
-				if (bin->resize_edges & WL_SHELL_SURFACE_RESIZE_LEFT) {
+				if (bin->resize_edges & WL_SHELL_SURFACE_RESIZE_LEFT)
 					sx = bin->last_width - canvas->base.width;
-				}
-				if (bin->resize_edges & WL_SHELL_SURFACE_RESIZE_TOP) {
+				if (bin->resize_edges & WL_SHELL_SURFACE_RESIZE_TOP)
 					sy = bin->last_height - canvas->base.height;
-				}
 			}
 		}
 
@@ -718,6 +715,8 @@ void nemoshell_change_bin_next_state(struct shellbin *bin)
 		view->geometry.y = bin->fullscreen.y;
 		view->geometry.width = bin->fullscreen.width;
 		view->geometry.height = bin->fullscreen.height;
+		view->geometry.px = bin->fullscreen.px;
+		view->geometry.py = bin->fullscreen.py;
 
 		if (view->geometry.r != bin->fullscreen.r)
 			nemoview_set_rotation(view, bin->fullscreen.r);
@@ -734,6 +733,8 @@ void nemoshell_change_bin_next_state(struct shellbin *bin)
 				bin->fullscreen.width = view->geometry.width;
 				bin->fullscreen.height = view->geometry.height;
 				bin->fullscreen.r = view->geometry.r;
+				bin->fullscreen.px = view->geometry.px;
+				bin->fullscreen.py = view->geometry.py;
 			} else if (bin->state.relative && parent) {
 				nemoview_set_position(view,
 						parent->geometry.x + bin->transient.x,
