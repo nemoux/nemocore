@@ -54,6 +54,27 @@ static void nemopack_handle_bin_resize(struct wl_listener *listener, void *data)
 	nemoshow_dispatch_frame(pack->show);
 }
 
+static int nemopack_dispatch_show_destroy(struct nemoshow *show)
+{
+	struct nemopack *pack = (struct nemopack *)nemoshow_get_userdata(show);
+	struct nemocanvas *canvas = pack->view->canvas;
+	struct wl_client *client;
+
+	wl_list_remove(&canvas->link);
+	wl_list_init(&canvas->link);
+
+	client = wl_resource_get_client(canvas->resource);
+	if (client != NULL) {
+		pid_t pid;
+
+		wl_client_get_credentials(client, &pid, NULL, NULL);
+
+		kill(pid, SIGKILL);
+	}
+
+	return 0;
+}
+
 static void nemopack_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, void *event)
 {
 	struct nemopack *pack = (struct nemopack *)nemoshow_get_userdata(show);
@@ -136,6 +157,7 @@ struct nemopack *nemopack_create(struct nemoshell *shell, struct nemoview *view,
 	pack->show = show = nemoshow_create_view(shell, view->content->width, view->content->height);
 	if (show == NULL)
 		goto err2;
+	nemoshow_set_dispatch_destroy(show, nemopack_dispatch_show_destroy);
 	nemoshow_set_userdata(show, pack);
 
 	pack->scene = scene = nemoshow_scene_create();
