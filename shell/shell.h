@@ -260,6 +260,8 @@ struct shellbin {
 	struct {
 		float ax, ay;
 	} scale;
+	int32_t has_scale;
+
 	int32_t reset_scale;
 	int32_t reset_size;
 	int32_t reset_move;
