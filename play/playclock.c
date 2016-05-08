@@ -23,6 +23,10 @@ struct playclock *nemoplay_clock_create(void)
 
 	clock->speed = 1.0f;
 
+	clock->ptime = 0.0f;
+	clock->ltime = av_gettime_relative() / 1000000.0f;
+	clock->dtime = -clock->ltime;
+
 	return clock;
 
 err1:
