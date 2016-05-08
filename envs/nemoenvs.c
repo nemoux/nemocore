@@ -346,6 +346,8 @@ void nemoenvs_load_actions(struct nemoenvs *envs)
 		action->flags = NEMOSHELL_SURFACE_MOVABLE_FLAG | NEMOSHELL_SURFACE_PICKABLE_FLAG | NEMOSHELL_SURFACE_MAXIMIZABLE_FLAG | NEMOSHELL_SURFACE_MINIMIZABLE_FLAG;
 		action->has_max_size = 0;
 		action->has_min_size = 0;
+		action->has_pickscreen = 0;
+		action->has_pitchscreen = 0;
 
 		attr = nemoitem_get_attr(shell->configs, index, "type");
 		if (attr != NULL) {
@@ -400,6 +402,14 @@ void nemoenvs_load_actions(struct nemoenvs *envs)
 			action->min_height = strtoul(attr1, NULL, 10);
 			action->has_min_size = 1;
 		}
+
+		attr = nemoitem_get_attr(shell->configs, index, "pickscreen");
+		if (attr != NULL && strcmp(attr, "on") == 0)
+			action->has_pickscreen = 1;
+
+		attr = nemoitem_get_attr(shell->configs, index, "pitchscreen");
+		if (attr != NULL && strcmp(attr, "on") == 0)
+			action->has_pitchscreen = 1;
 
 		attr = nemoitem_get_attr(shell->configs, index, "fadein_type");
 		if (attr != NULL) {

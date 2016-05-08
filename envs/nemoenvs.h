@@ -56,6 +56,9 @@ struct nemoaction {
 	uint32_t max_width, max_height;
 	uint32_t min_width, min_height;
 	int has_min_size, has_max_size;
+	
+	int has_pickscreen;
+	int has_pitchscreen;
 
 	uint32_t fadein_type;
 	uint32_t fadein_ease;

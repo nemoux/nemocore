@@ -855,6 +855,11 @@ static inline void nemoshell_set_client_state(struct shellbin *bin, struct clien
 		bin->min_height = state->min_height;
 	}
 
+	if (state->has_pickscreen != 0)
+		bin->on_pickscreen = 1;
+	if (state->has_pitchscreen != 0)
+		bin->on_pitchscreen = 1;
+
 	if (state->fadein_type != 0) {
 		struct viewanimation *animation;
 

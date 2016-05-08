@@ -164,6 +164,9 @@ struct clientstate {
 	uint32_t max_width, max_height;
 	int has_min_size, has_max_size;
 
+	int has_pickscreen;
+	int has_pitchscreen;
+
 	uint32_t flags;
 
 	uint32_t state_on;
@@ -403,6 +406,16 @@ static inline void clientstate_set_min_size(struct clientstate *state, uint32_t 
 	state->min_width = width;
 	state->min_height = height;
 	state->has_min_size = 1;
+}
+
+static inline void clientstate_set_pickscreen(struct clientstate *state, int pickscreen)
+{
+	state->has_pickscreen = pickscreen;
+}
+
+static inline void clientstate_set_pitchscreen(struct clientstate *state, int pitchscreen)
+{
+	state->has_pitchscreen = pitchscreen;
 }
 
 static inline void clientstate_set_bin_flags(struct clientstate *state, uint32_t flags)
