@@ -336,10 +336,12 @@ void nemoplay_set_state(struct nemoplay *play, int state)
 		nemoplay_queue_set_state(play->video_queue, NEMOPLAY_QUEUE_NORMAL_STATE);
 		nemoplay_queue_set_state(play->audio_queue, NEMOPLAY_QUEUE_NORMAL_STATE);
 		nemoplay_queue_set_state(play->subtitle_queue, NEMOPLAY_QUEUE_NORMAL_STATE);
+		nemoplay_clock_set_state(play->clock, NEMOPLAY_CLOCK_NORMAL_STATE);
 	} else if (state == NEMOPLAY_STOP_STATE) {
 		nemoplay_queue_set_state(play->video_queue, NEMOPLAY_QUEUE_STOP_STATE);
 		nemoplay_queue_set_state(play->audio_queue, NEMOPLAY_QUEUE_STOP_STATE);
 		nemoplay_queue_set_state(play->subtitle_queue, NEMOPLAY_QUEUE_STOP_STATE);
+		nemoplay_clock_set_state(play->clock, NEMOPLAY_CLOCK_STOP_STATE);
 	} else if (state == NEMOPLAY_DONE_STATE) {
 		nemoplay_queue_set_state(play->video_queue, NEMOPLAY_QUEUE_DONE_STATE);
 		nemoplay_queue_set_state(play->audio_queue, NEMOPLAY_QUEUE_DONE_STATE);

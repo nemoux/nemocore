@@ -71,9 +71,28 @@ double nemoplay_clock_get(struct playclock *clock)
 
 	pthread_mutex_lock(&clock->lock);
 
-	rtime = clock->dtime + ctime - (ctime - clock->ltime) * (1.0f - clock->speed);
+	if (clock->state == NEMOPLAY_CLOCK_NORMAL_STATE)
+		rtime = clock->dtime + ctime - (ctime - clock->ltime) * (1.0f - clock->speed);
+	else
+		rtime = clock->dtime + clock->ltime;
 
 	pthread_mutex_unlock(&clock->lock);
 
 	return rtime;
+}
+
+void nemoplay_clock_set_state(struct playclock *clock, int state)
+{
+	pthread_mutex_lock(&clock->lock);
+
+	clock->state = state;
+
+	if (state == NEMOPLAY_CLOCK_NORMAL_STATE) {
+		double ctime = av_gettime_relative() / 1000000.0f;
+
+		clock->dtime += (clock->ltime - ctime);
+		clock->ltime = ctime;
+	}
+
+	pthread_mutex_unlock(&clock->lock);
 }
