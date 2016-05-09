@@ -284,6 +284,8 @@ int nemoplay_seek_media(struct nemoplay *play, double pts)
 		if (play->subtitle_context != NULL)
 			avcodec_flush_buffers(play->subtitle_context);
 
+		nemoplay_clock_set(play->clock, pts);
+
 		return 1;
 	}
 
