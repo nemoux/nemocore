@@ -112,6 +112,10 @@ int nemoplay_prepare_media(struct nemoplay *play, const char *mediapath)
 		} else if (context->codec_type == AVMEDIA_TYPE_SUBTITLE) {
 			subtitle_stream = i;
 			subtitle_context = context;
+
+			codec = avcodec_find_decoder(context->codec_id);
+			if (codec != NULL)
+				avcodec_open2(context, codec, NULL);
 		}
 	}
 
@@ -146,7 +150,7 @@ int nemoplay_prepare_media(struct nemoplay *play, const char *mediapath)
 	}
 
 	play->container = container;
-	
+
 	play->duration = container->duration / AV_TIME_BASE;
 
 	play->video_context = video_context;
@@ -246,6 +250,10 @@ int nemoplay_decode_media(struct nemoplay *play, int reqcount, int maxcount)
 				nemoplay_queue_enqueue(play->audio_queue, one);
 			}
 		} else if (packet.stream_index == subtitle_stream) {
+			AVSubtitle subtitle;
+			int has_subtitle = 0;
+
+			avcodec_decode_subtitle2(subtitle_context, &subtitle, &has_subtitle, &packet);
 		}
 
 		if ((video_context == NULL || nemoplay_queue_get_count(play->video_queue) > maxcount) &&
