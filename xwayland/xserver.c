@@ -219,13 +219,7 @@ static void nemoxserver_handle_compz_destroy(struct wl_listener *listener, void 
 {
 	struct nemoxserver *xserver = container_of(listener, struct nemoxserver, destroy_listener);
 
-	if (xserver == NULL)
-		return;
-
-	if (xserver->loop != NULL)
-		nemoxserver_destroy(xserver);
-
-	free(xserver);
+	nemoxserver_destroy(xserver);
 }
 
 static void nemoxserver_cleanup(struct nemotask *task, int status)
@@ -321,8 +315,6 @@ void nemoxserver_destroy(struct nemoxserver *xserver)
 
 	if (xserver->xmanager != NULL)
 		nemoxmanager_destroy(xserver->xmanager);
-
-	xserver->loop = NULL;
 
 	free(xserver);
 }
