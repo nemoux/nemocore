@@ -12,7 +12,7 @@ NEMO_BEGIN_EXTERN_C
 
 #include <showhelper.h>
 
-#define NEMOPACK_TIMEOUT			(1000)
+#define NEMOPACK_TIMEOUT			(300)
 
 struct nemoshell;
 struct nemoview;
@@ -35,7 +35,7 @@ struct nemopack {
 
 	struct showone *back;
 	struct showone *canvas;
-	
+
 	struct nemotimer *timer;
 
 	uint32_t timeout;

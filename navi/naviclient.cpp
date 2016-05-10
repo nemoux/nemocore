@@ -47,14 +47,14 @@ void NaviClient::OnAddressChange(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFra
 {
 	CEF_REQUIRE_UI_THREAD();
 
-	nemolog_message("NAVI", "[%s:%d]\n", __FUNCTION__, __LINE__);
+	nemolog_message("NAVI", "[%s:%d] url(%s)\n", __FUNCTION__, __LINE__, std::string(url).c_str());
 }
 
 void NaviClient::OnTitleChange(CefRefPtr<CefBrowser> browser, const CefString &title)
 {
 	CEF_REQUIRE_UI_THREAD();
 
-	nemolog_message("NAVI", "[%s:%d]\n", __FUNCTION__, __LINE__);
+	nemolog_message("NAVI", "[%s:%d] title(%s)\n", __FUNCTION__, __LINE__, std::string(title).c_str());
 }
 
 void NaviClient::OnFullscreenModeChange(CefRefPtr<CefBrowser> browser, bool fullscreen)
@@ -68,7 +68,7 @@ bool NaviClient::OnConsoleMessage(CefRefPtr<CefBrowser> browser, const CefString
 {
 	CEF_REQUIRE_UI_THREAD();
 
-	nemolog_message("NAVI", "[%s:%d]\n", __FUNCTION__, __LINE__);
+	nemolog_message("NAVI", "[%s:%d] source(%s:%d) message(%s)\n", __FUNCTION__, __LINE__, std::string(source).c_str(), line, std::string(message).c_str());
 
 	return false;
 }
@@ -134,7 +134,7 @@ void NaviClient::OnLoadError(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> 
 {
 	CEF_REQUIRE_UI_THREAD();
 
-	nemolog_message("NAVI", "[%s:%d]\n", __FUNCTION__, __LINE__);
+	nemolog_message("NAVI", "[%s:%d] URL(%s) error(%s)\n", __FUNCTION__, __LINE__, std::string(failedUrl).c_str(), std::string(errorText).c_str());
 
 	if (errorCode == ERR_ABORTED)
 		return;
@@ -158,7 +158,7 @@ bool NaviClient::OnBeforeBrowse(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFram
 
 bool NaviClient::OnOpenURLFromTab(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString &target_url, CefRequestHandler::WindowOpenDisposition target_disposition, bool user_gesture)
 {
-	nemolog_message("NAVI", "[%s:%d]\n", __FUNCTION__, __LINE__);
+	nemolog_message("NAVI", "[%s:%d] target_url(%s)\n", __FUNCTION__, __LINE__, std::string(target_url).c_str());
 
 	return false;
 }
@@ -197,14 +197,14 @@ CefRefPtr<CefResponseFilter> NaviClient::GetResourceResponseFilter(
 
 bool NaviClient::OnQuotaRequest(CefRefPtr<CefBrowser> browser, const CefString &origin_url, int64 new_size, CefRefPtr<CefRequestCallback> callback)
 {
-	nemolog_message("NAVI", "[%s:%d]\n", __FUNCTION__, __LINE__);
+	nemolog_message("NAVI", "[%s:%d] origin_url(%s)\n", __FUNCTION__, __LINE__, std::string(origin_url).c_str());
 
 	return true;
 }
 
 void NaviClient::OnProtocolExecution(CefRefPtr<CefBrowser> browser, const CefString &url, bool &allow_os_execution)
 {
-	nemolog_message("NAVI", "[%s:%d]\n", __FUNCTION__, __LINE__);
+	nemolog_message("NAVI", "[%s:%d] url(%s) allow(%d)\n", __FUNCTION__, __LINE__, std::string(url).c_str(), allow_os_execution);
 }
 
 bool NaviClient::OnCertificateError(
@@ -214,7 +214,7 @@ bool NaviClient::OnCertificateError(
 		CefRefPtr<CefSSLInfo> ssl_info,
 		CefRefPtr<CefRequestCallback> callback)
 {
-	nemolog_message("NAVI", "[%s:%d]\n", __FUNCTION__, __LINE__);
+	nemolog_message("NAVI", "[%s:%d] request_url(%s)\n", __FUNCTION__, __LINE__, std::string(request_url).c_str());
 
 	return false;
 }
@@ -299,7 +299,7 @@ void NaviClient::OnCursorChange(CefRefPtr<CefBrowser> browser, CefCursorHandle c
 
 void NaviClient::OnBeforeDownload(CefRefPtr<CefBrowser> browser, CefRefPtr<CefDownloadItem> download_item, const CefString &suggested_name, CefRefPtr<CefBeforeDownloadCallback> callback)
 {
-	nemolog_message("NAVI", "[%s:%d]\n", __FUNCTION__, __LINE__);
+	nemolog_message("NAVI", "[%s:%d] suggested_name(%s)\n", __FUNCTION__, __LINE__, std::string(suggested_name).c_str());
 }
 
 void NaviClient::OnDownloadUpdated(CefRefPtr<CefBrowser> browser, CefRefPtr<CefDownloadItem> download_item, CefRefPtr<CefDownloadItemCallback> callback)
