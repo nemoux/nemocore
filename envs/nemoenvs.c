@@ -351,7 +351,9 @@ void nemoenvs_load_actions(struct nemoenvs *envs)
 
 		attr = nemoitem_get_attr(shell->configs, index, "type");
 		if (attr != NULL) {
-			if (strcmp(attr, "chrome") == 0)
+			if (strcmp(attr, "xapp") == 0)
+				action->type = NEMOENVS_ACTION_XAPP_TYPE;
+			else if (strcmp(attr, "chrome") == 0)
 				action->type = NEMOENVS_ACTION_CHROME_TYPE;
 			else if (strcmp(attr, "keypad") == 0)
 				action->type = NEMOENVS_ACTION_KEYPAD_TYPE;
@@ -440,6 +442,9 @@ void nemoenvs_load_actions(struct nemoenvs *envs)
 		argc = 0;
 
 		if (action->type == NEMOENVS_ACTION_APP_TYPE) {
+			action->path = strdup(path);
+			action->args[argc++] = action->path;
+		} else if (action->type == NEMOENVS_ACTION_XAPP_TYPE) {
 			action->path = strdup(path);
 			action->args[argc++] = action->path;
 		} else if (action->type == NEMOENVS_ACTION_CHROME_TYPE) {

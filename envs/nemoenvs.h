@@ -11,10 +11,11 @@ NEMO_BEGIN_EXTERN_C
 
 typedef enum {
 	NEMOENVS_ACTION_APP_TYPE = 0,
-	NEMOENVS_ACTION_CHROME_TYPE = 1,
-	NEMOENVS_ACTION_KEYPAD_TYPE = 2,
-	NEMOENVS_ACTION_SPEAKER_TYPE = 3,
-	NEMOENVS_ACTION_NONE_TYPE = 4,
+	NEMOENVS_ACTION_XAPP_TYPE = 1,
+	NEMOENVS_ACTION_CHROME_TYPE = 2,
+	NEMOENVS_ACTION_KEYPAD_TYPE = 3,
+	NEMOENVS_ACTION_SPEAKER_TYPE = 4,
+	NEMOENVS_ACTION_NONE_TYPE = 5,
 	NEMOENVS_ACTION_LAST_TYPE
 } NemoEnvsActionType;
 
@@ -56,7 +57,7 @@ struct nemoaction {
 	uint32_t max_width, max_height;
 	uint32_t min_width, min_height;
 	int has_min_size, has_max_size;
-	
+
 	int has_pickscreen;
 	int has_pitchscreen;
 

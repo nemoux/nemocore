@@ -244,12 +244,12 @@ static void nemoxserver_cleanup(struct nemotask *task, int status)
 	}
 }
 
-struct nemoxserver *nemoxserver_create(struct nemoshell *shell, const char *xserverpath)
+struct nemoxserver *nemoxserver_create(struct nemoshell *shell, const char *xserverpath, int xdisplay)
 {
 	struct nemocompz *compz = shell->compz;
 	struct wl_display *display = compz->display;
 	struct nemoxserver *xserver;
-	char lockfile[256], dispname[8];
+	char lockfile[256];
 
 	if (xserverpath == NULL)
 		return NULL;
@@ -264,25 +264,15 @@ struct nemoxserver *nemoxserver_create(struct nemoshell *shell, const char *xser
 	xserver->compz = compz;
 	xserver->shell = shell;
 
-	xserver->xdisplay = 0;
+	xserver->xdisplay = xdisplay;
 
-retry:
-	if (nemoxserver_create_lockfile(xserver->xdisplay, lockfile, sizeof(lockfile)) < 0) {
-		if (errno == EAGAIN) {
-			goto retry;
-		} else if (errno == EEXIST) {
-			xserver->xdisplay++;
-			goto retry;
-		} else {
-			goto err1;
-		}
-	}
+	if (nemoxserver_create_lockfile(xserver->xdisplay, lockfile, sizeof(lockfile)) < 0)
+		goto err1;
 
 	xserver->abstract_fd = nemoxserver_bind_to_abstract_socket(xserver->xdisplay);
 	if (xserver->abstract_fd < 0 && errno == EADDRINUSE) {
-		xserver->xdisplay++;
 		unlink(lockfile);
-		goto retry;
+		goto err1;
 	}
 
 	xserver->unix_fd = nemoxserver_bind_to_unix_socket(xserver->xdisplay);
@@ -290,9 +280,6 @@ retry:
 		unlink(lockfile);
 		goto err2;
 	}
-
-	snprintf(dispname, sizeof(dispname), ":%d", xserver->xdisplay);
-	setenv("DISPLAY", dispname, 1);
 
 	xserver->xserverpath = strdup(xserverpath);
 	xserver->loop = wl_display_get_event_loop(display);

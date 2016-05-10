@@ -49,7 +49,7 @@ struct nemoxserver {
 	struct wl_listener destroy_listener;
 };
 
-extern struct nemoxserver *nemoxserver_create(struct nemoshell *shell, const char *xserverpath);
+extern struct nemoxserver *nemoxserver_create(struct nemoshell *shell, const char *xserverpath, int xdisplay);
 
 extern void nemoxserver_shutdown(struct nemoxserver *xserver);
 
