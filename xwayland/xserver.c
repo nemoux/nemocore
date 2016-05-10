@@ -93,7 +93,10 @@ static int nemoxserver_handle_event(int listenfd, uint32_t mask, void *data)
 		nemotask_watch(xserver->compz, &xserver->task);
 
 		wl_event_source_remove(xserver->abstract_source);
+		xserver->abstract_source = NULL;
+
 		wl_event_source_remove(xserver->unix_source);
+		xserver->unix_source = NULL;
 	}
 
 	return 1;
@@ -220,7 +223,7 @@ static void nemoxserver_handle_compz_destroy(struct wl_listener *listener, void 
 		return;
 
 	if (xserver->loop != NULL)
-		nemoxserver_shutdown(xserver);
+		nemoxserver_destroy(xserver);
 
 	free(xserver);
 }
@@ -233,15 +236,7 @@ static void nemoxserver_cleanup(struct nemotask *task, int status)
 	xserver->client = NULL;
 	xserver->resource = NULL;
 
-	xserver->abstract_source = wl_event_loop_add_fd(xserver->loop, xserver->abstract_fd, WL_EVENT_READABLE, nemoxserver_handle_event, xserver);
-	xserver->unix_source = wl_event_loop_add_fd(xserver->loop, xserver->unix_fd, WL_EVENT_READABLE, nemoxserver_handle_event, xserver);
-
-	if (xserver->xmanager != NULL) {
-		nemoxmanager_destroy(xserver->xmanager);
-		xserver->xmanager = NULL;
-	} else {
-		nemoxserver_shutdown(xserver);
-	}
+	nemoxserver_destroy(xserver);
 }
 
 struct nemoxserver *nemoxserver_create(struct nemoshell *shell, const char *xserverpath, int xdisplay)
@@ -302,7 +297,7 @@ err1:
 	return NULL;
 }
 
-void nemoxserver_shutdown(struct nemoxserver *xserver)
+void nemoxserver_destroy(struct nemoxserver *xserver)
 {
 	char path[256];
 
@@ -314,10 +309,10 @@ void nemoxserver_shutdown(struct nemoxserver *xserver)
 	if (xserver->xserverpath != NULL)
 		free(xserver->xserverpath);
 
-	if (xserver->task.pid == 0) {
+	if (xserver->abstract_source != NULL)
 		wl_event_source_remove(xserver->abstract_source);
+	if (xserver->unix_source != NULL)
 		wl_event_source_remove(xserver->unix_source);
-	}
 
 	wl_list_remove(&xserver->destroy_listener.link);
 
@@ -328,4 +323,6 @@ void nemoxserver_shutdown(struct nemoxserver *xserver)
 		nemoxmanager_destroy(xserver->xmanager);
 
 	xserver->loop = NULL;
+
+	free(xserver);
 }
