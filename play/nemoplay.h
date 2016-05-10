@@ -189,9 +189,9 @@ static inline int nemoplay_has_subtitle(struct nemoplay *play)
 	return play->subtitle_context != NULL;
 }
 
-static inline int64_t nemoplay_get_duration(struct nemoplay *play)
+static inline int32_t nemoplay_get_duration(struct nemoplay *play)
 {
-	return play->duration;
+	return play->duration > 0 ? play->duration : INT32_MAX;
 }
 
 static inline void nemoplay_set_userdata(struct nemoplay *play, void *userdata)
