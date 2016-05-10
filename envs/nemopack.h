@@ -35,12 +35,6 @@ struct nemopack {
 
 	struct showone *back;
 	struct showone *canvas;
-
-	struct showone *one;
-	struct showone *icon;
-
-	struct showone *blur0;
-	struct showone *blur1;
 	
 	struct nemotimer *timer;
 
