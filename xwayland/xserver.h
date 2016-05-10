@@ -52,6 +52,8 @@ struct nemoxserver {
 extern struct nemoxserver *nemoxserver_create(struct nemoshell *shell, const char *xserverpath, int xdisplay);
 extern void nemoxserver_destroy(struct nemoxserver *xserver);
 
+extern int nemoxserver_execute(struct nemoxserver *xserver);
+
 static inline pid_t nemoxserver_get_pid(struct nemoxserver *xserver)
 {
 	return xserver->task.pid;

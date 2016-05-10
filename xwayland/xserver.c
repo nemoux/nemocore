@@ -318,3 +318,73 @@ void nemoxserver_destroy(struct nemoxserver *xserver)
 
 	free(xserver);
 }
+
+int nemoxserver_execute(struct nemoxserver *xserver)
+{
+	char display[8], s[8], abstract_fd[8], unix_fd[8], wm_fd[8];
+	int sv[2], wm[2], fd;
+
+	if (socketpair(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0, sv) < 0) {
+		nemolog_error("XWAYLAND", "failed to create socketpair for wayland");
+		return -1;
+	}
+
+	if (socketpair(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0, wm) < 0) {
+		nemolog_error("XWAYLAND", "failed to create socketpair for X");
+		return -1;
+	}
+
+	xserver->task.pid = fork();
+	if (xserver->task.pid == 0) {
+		const char *path = xserver->xserverpath;
+
+		fd = dup(sv[1]);
+		if (fd < 0)
+			return -1;
+
+		snprintf(s, sizeof(s), "%d", fd);
+		setenv("WAYLAND_SOCKET", s, 1);
+
+		snprintf(display, sizeof(display), ":%d", xserver->xdisplay);
+
+		fd = dup(xserver->abstract_fd);
+		if (fd < 0)
+			return -1;
+		snprintf(abstract_fd, sizeof(abstract_fd), "%d", fd);
+
+		fd = dup(xserver->unix_fd);
+		if (fd < 0)
+			return -1;
+		snprintf(unix_fd, sizeof(unix_fd), "%d", fd);
+
+		fd = dup(wm[1]);
+		if (fd < 0)
+			return -1;
+		snprintf(wm_fd, sizeof(wm_fd), "%d", fd);
+
+		signal(SIGUSR1, SIG_IGN);
+
+		if (execl(path, path, display, "-rootless", "-listen", abstract_fd, "-listen", unix_fd, "-wm", wm_fd, "-terminate", NULL) < 0)
+			nemolog_error("XWAYLAND", "failed to execute xserver");
+
+		exit(EXIT_FAILURE);
+	} else if (xserver->task.pid == -1) {
+		nemolog_error("XWAYLAND", "failed to fork");
+	} else {
+		close(sv[1]);
+		xserver->client = wl_client_create(xserver->display, sv[0]);
+
+		close(wm[1]);
+		xserver->wm_fd = wm[0];
+
+		nemotask_watch(xserver->compz, &xserver->task);
+
+		wl_event_source_remove(xserver->abstract_source);
+		xserver->abstract_source = NULL;
+
+		wl_event_source_remove(xserver->unix_source);
+		xserver->unix_source = NULL;
+	}
+
+	return 0;
+}
