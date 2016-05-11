@@ -295,6 +295,11 @@ void nemonavi_go_forward(struct nemonavi *navi)
 	NEMONAVI_CC(navi, browser)->GoForward();
 }
 
+void nemonavi_reload(struct nemonavi *navi)
+{
+	NEMONAVI_CC(navi, browser)->Reload();
+}
+
 double nemonavi_get_zoomlevel(struct nemonavi *navi)
 {
 	return NEMONAVI_CC(navi, browser)->GetHost()->GetZoomLevel();
