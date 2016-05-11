@@ -298,13 +298,15 @@ static void nemonavi_dispatch_canvas_event(struct nemoshow *show, struct showone
 	}
 
 	if (nemoshow_event_is_keyboard_down(show, event)) {
-		if (nemoshow_event_has_special_key(event) == 0)
-			nemonavi_send_keyboard_down_event(context->navi,
-					nemotool_get_keysym(context->tool, nemoshow_event_get_value(event)));
+		nemonavi_send_keyboard_down_event(context->navi,
+				nemoshow_event_get_value(event),
+				nemotool_get_keysym(context->tool, nemoshow_event_get_value(event)),
+				nemotool_get_modifiers(context->tool));
 	} else if (nemoshow_event_is_keyboard_up(show, event)) {
-		if (nemoshow_event_has_special_key(event) == 0)
-			nemonavi_send_keyboard_up_event(context->navi,
-					nemotool_get_keysym(context->tool, nemoshow_event_get_value(event)));
+		nemonavi_send_keyboard_up_event(context->navi,
+				nemoshow_event_get_value(event),
+				nemotool_get_keysym(context->tool, nemoshow_event_get_value(event)),
+				nemotool_get_modifiers(context->tool));
 	}
 
 	if (nemoshow_event_is_touch_down(show, event)) {

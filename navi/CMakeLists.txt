@@ -13,6 +13,7 @@ add_library(nemonavi SHARED
 	nemonavi.cpp
 	naviapp.cpp
 	naviclient.cpp
+	navikey.c
 	)
 
 TARGET_LINK_LIBRARIES(nemonavi

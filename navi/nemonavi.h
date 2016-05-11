@@ -56,8 +56,8 @@ extern void nemonavi_send_pointer_up_event(struct nemonavi *navi, float x, float
 extern void nemonavi_send_pointer_motion_event(struct nemonavi *navi, float x, float y);
 extern void nemonavi_send_pointer_wheel_event(struct nemonavi *navi, float x, float y);
 
-extern void nemonavi_send_keyboard_down_event(struct nemonavi *navi, uint32_t code);
-extern void nemonavi_send_keyboard_up_event(struct nemonavi *navi, uint32_t code);
+extern void nemonavi_send_keyboard_down_event(struct nemonavi *navi, uint32_t code, uint32_t sym, uint32_t modifiers);
+extern void nemonavi_send_keyboard_up_event(struct nemonavi *navi, uint32_t code, uint32_t sym, uint32_t modifiers);
 
 extern void nemonavi_send_touch_down_event(struct nemonavi *navi, float x, float y, uint32_t id, double secs);
 extern void nemonavi_send_touch_up_event(struct nemonavi *navi, float x, float y, uint32_t id, double secs);

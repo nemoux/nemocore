@@ -16,6 +16,7 @@
 #include <nemonavi.hpp>
 #include <naviapp.hpp>
 #include <naviclient.hpp>
+#include <navikey.h>
 #include <nemolog.h>
 #include <nemohelper.h>
 #include <nemomisc.h>
@@ -149,32 +150,46 @@ void nemonavi_send_pointer_wheel_event(struct nemonavi *navi, float x, float y)
 	NEMONAVI_CC(navi, browser)->GetHost()->SendMouseWheelEvent(mouse_event, x, y);
 }
 
-void nemonavi_send_keyboard_down_event(struct nemonavi *navi, uint32_t code)
+void nemonavi_send_keyboard_down_event(struct nemonavi *navi, uint32_t code, uint32_t sym, uint32_t modifiers)
 {
 	CefKeyEvent key_event;
 
-	key_event.windows_key_code = code;
+	key_event.windows_key_code = nemonavi_convert_to_vkey(code);
 	key_event.native_key_code = code;
-	key_event.character = code;
+	key_event.character = key_event.unmodified_character = sym;
+
 	key_event.modifiers = 0x0;
+	if (modifiers & MOD_SHIFT_MASK)
+		key_event.modifiers |= EVENTFLAG_SHIFT_DOWN;
+	if (modifiers & MOD_CONTROL_MASK)
+		key_event.modifiers |= EVENTFLAG_CONTROL_DOWN;
+	if (modifiers & MOD_ALT_MASK)
+		key_event.modifiers |= EVENTFLAG_ALT_DOWN;
 
 	key_event.type = KEYEVENT_RAWKEYDOWN;
 	NEMONAVI_CC(navi, browser)->GetHost()->SendKeyEvent(key_event);
 }
 
-void nemonavi_send_keyboard_up_event(struct nemonavi *navi, uint32_t code)
+void nemonavi_send_keyboard_up_event(struct nemonavi *navi, uint32_t code, uint32_t sym, uint32_t modifiers)
 {
 	CefKeyEvent key_event;
 
-	key_event.windows_key_code = code;
+	key_event.windows_key_code = nemonavi_convert_to_vkey(code);
 	key_event.native_key_code = code;
-	key_event.character = code;
-	key_event.modifiers = 0x0;
+	key_event.character = key_event.unmodified_character = sym;
 
-	key_event.type = KEYEVENT_KEYUP;
-	NEMONAVI_CC(navi, browser)->GetHost()->SendKeyEvent(key_event);
+	key_event.modifiers = 0x0;
+	if (modifiers & MOD_SHIFT_MASK)
+		key_event.modifiers |= EVENTFLAG_SHIFT_DOWN;
+	if (modifiers & MOD_CONTROL_MASK)
+		key_event.modifiers |= EVENTFLAG_CONTROL_DOWN;
+	if (modifiers & MOD_ALT_MASK)
+		key_event.modifiers |= EVENTFLAG_ALT_DOWN;
 
 	key_event.type = KEYEVENT_CHAR;
+	NEMONAVI_CC(navi, browser)->GetHost()->SendKeyEvent(key_event);
+
+	key_event.type = KEYEVENT_KEYUP;
 	NEMONAVI_CC(navi, browser)->GetHost()->SendKeyEvent(key_event);
 }
 
