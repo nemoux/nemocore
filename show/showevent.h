@@ -195,11 +195,6 @@ static inline void nemoshow_event_set_cancel(void *event)
 	nemotale_event_set_cancel((struct taleevent *)event);
 }
 
-static inline int nemoshow_event_has_special_key(void *event)
-{
-	return nemotale_event_has_special_key((struct taleevent *)event);
-}
-
 static inline int nemoshow_event_get_tapcount(void *event)
 {
 	return nemotale_event_get_tapcount((struct taleevent *)event);

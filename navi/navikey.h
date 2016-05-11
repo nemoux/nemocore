@@ -200,7 +200,8 @@ typedef enum {
 	MOD_CONTROL_MASK = 0x04
 } NemoNaviModMask;
 
-extern uint32_t nemonavi_convert_to_vkey(uint32_t code);
+extern uint32_t nemonavi_translate_vkey(uint32_t code);
+extern int nemonavi_is_character_vkey(uint32_t code);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

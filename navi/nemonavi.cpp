@@ -154,7 +154,7 @@ void nemonavi_send_keyboard_down_event(struct nemonavi *navi, uint32_t code, uin
 {
 	CefKeyEvent key_event;
 
-	key_event.windows_key_code = nemonavi_convert_to_vkey(code);
+	key_event.windows_key_code = nemonavi_translate_vkey(code);
 	key_event.native_key_code = code;
 	key_event.character = key_event.unmodified_character = sym;
 
@@ -174,7 +174,7 @@ void nemonavi_send_keyboard_up_event(struct nemonavi *navi, uint32_t code, uint3
 {
 	CefKeyEvent key_event;
 
-	key_event.windows_key_code = nemonavi_convert_to_vkey(code);
+	key_event.windows_key_code = nemonavi_translate_vkey(code);
 	key_event.native_key_code = code;
 	key_event.character = key_event.unmodified_character = sym;
 
@@ -186,8 +186,10 @@ void nemonavi_send_keyboard_up_event(struct nemonavi *navi, uint32_t code, uint3
 	if (modifiers & MOD_ALT_MASK)
 		key_event.modifiers |= EVENTFLAG_ALT_DOWN;
 
-	key_event.type = KEYEVENT_CHAR;
-	NEMONAVI_CC(navi, browser)->GetHost()->SendKeyEvent(key_event);
+	if (nemonavi_is_character_vkey(code)) {
+		key_event.type = KEYEVENT_CHAR;
+		NEMONAVI_CC(navi, browser)->GetHost()->SendKeyEvent(key_event);
+	}
 
 	key_event.type = KEYEVENT_KEYUP;
 	NEMONAVI_CC(navi, browser)->GetHost()->SendKeyEvent(key_event);

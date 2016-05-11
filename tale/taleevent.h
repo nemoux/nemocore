@@ -355,16 +355,6 @@ static inline void nemotale_event_set_cancel(struct taleevent *event)
 	event->type = NEMOTALE_CANCEL_EVENT;
 }
 
-static inline int nemotale_event_has_special_key(struct taleevent *event)
-{
-	if (event->value == KEY_LEFTSHIFT || event->value == KEY_RIGHTSHIFT ||
-			event->value == KEY_LEFTCTRL || event->value == KEY_RIGHTCTRL ||
-			event->value == KEY_LEFTALT || event->value == KEY_RIGHTALT)
-		return 1;
-
-	return 0;
-}
-
 static inline int nemotale_event_get_tapcount(struct taleevent *event)
 {
 	return event->tapcount;
