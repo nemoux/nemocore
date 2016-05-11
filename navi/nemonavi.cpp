@@ -290,9 +290,19 @@ void nemonavi_go_back(struct nemonavi *navi)
 	NEMONAVI_CC(navi, browser)->GoBack();
 }
 
+int nemonavi_can_go_back(struct nemonavi *navi)
+{
+	return NEMONAVI_CC(navi, browser)->CanGoBack() == true;
+}
+
 void nemonavi_go_forward(struct nemonavi *navi)
 {
 	NEMONAVI_CC(navi, browser)->GoForward();
+}
+
+int nemonavi_can_go_forward(struct nemonavi *navi)
+{
+	return NEMONAVI_CC(navi, browser)->CanGoForward() == true;
 }
 
 void nemonavi_reload(struct nemonavi *navi)

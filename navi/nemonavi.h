@@ -68,7 +68,9 @@ extern void nemonavi_load_url(struct nemonavi *navi, const char *url);
 extern void nemonavi_load_page(struct nemonavi *navi, const char *path);
 
 extern void nemonavi_go_back(struct nemonavi *navi);
+extern int nemonavi_can_go_back(struct nemonavi *navi);
 extern void nemonavi_go_forward(struct nemonavi *navi);
+extern int nemonavi_can_go_forward(struct nemonavi *navi);
 extern void nemonavi_reload(struct nemonavi *navi);
 
 extern double nemonavi_get_zoomlevel(struct nemonavi *navi);
