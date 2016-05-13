@@ -17,6 +17,7 @@
 
 #include <nemonavi.h>
 #include <naviclient.hpp>
+#include <naviapp.hpp>
 #include <nemolog.h>
 #include <nemohelper.h>
 #include <nemomisc.h>
@@ -340,6 +341,21 @@ bool NaviClient::OnPreKeyEvent(CefRefPtr<CefBrowser> browser, const CefKeyEvent 
 
 	if (navi->dispatch_key_event != NULL)
 		navi->dispatch_key_event(navi, event.windows_key_code, event.focus_on_editable_field);
+
+	return false;
+}
+
+bool NaviClient::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser, CefProcessId source_process, CefRefPtr<CefProcessMessage> message)
+{
+	struct nemonavi *navi = (struct nemonavi *)m_userdata;
+	std::string name = message->GetName();
+
+	if (name == NEMONAVI_FOCUSED_NODE_CHANGED_MESSAGE) {
+		if (navi->dispatch_focus_change != NULL)
+			navi->dispatch_focus_change(navi, message->GetArgumentList()->GetBool(0));
+
+		return true;
+	}
 
 	return false;
 }

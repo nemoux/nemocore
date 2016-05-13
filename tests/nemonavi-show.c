@@ -151,7 +151,7 @@ static void nemonavi_dispatch_key_event(struct nemonavi *navi, uint32_t code, in
 	}
 }
 
-static void nemonavi_dispatch_focus_change(struct nemonavi *navi, void *node, int is_editable)
+static void nemonavi_dispatch_focus_change(struct nemonavi *navi, int is_editable)
 {
 }
 

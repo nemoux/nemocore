@@ -21,7 +21,7 @@ typedef void (*nemonavi_dispatch_paint_t)(struct nemonavi *navi, int type, const
 typedef void (*nemonavi_dispatch_popup_show_t)(struct nemonavi *navi, int show);
 typedef void (*nemonavi_dispatch_popup_rect_t)(struct nemonavi *navi, int x, int y, int width, int height);
 typedef void (*nemonavi_dispatch_key_event_t)(struct nemonavi *navi, uint32_t code, int focus_on_editable_field);
-typedef void (*nemonavi_dispatch_focus_change_t)(struct nemonavi *navi, void *node, int is_editable);
+typedef void (*nemonavi_dispatch_focus_change_t)(struct nemonavi *navi, int is_editable);
 typedef void (*nemonavi_dispatch_loading_state_t)(struct nemonavi *navi, int is_loading, int can_go_back, int can_go_forward);
 
 struct nemonavi {

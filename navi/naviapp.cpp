@@ -11,6 +11,7 @@
 #include <cef/cef_cookie.h>
 
 #include <naviapp.hpp>
+#include <naviclient.hpp>
 #include <nemomisc.h>
 
 NaviApp::NaviApp()
@@ -78,6 +79,10 @@ void NaviApp::OnUncaughtException(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFr
 
 void NaviApp::OnFocusedNodeChanged(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, CefRefPtr<CefDOMNode> node)
 {
+	CefRefPtr<CefProcessMessage> message = CefProcessMessage::Create(NEMONAVI_FOCUSED_NODE_CHANGED_MESSAGE);
+
+	message->GetArgumentList()->SetBool(0, (node.get() && node->IsEditable()));
+	browser->SendProcessMessage(PID_BROWSER, message);
 }
 
 bool NaviApp::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser, CefProcessId source_process, CefRefPtr<CefProcessMessage> message)

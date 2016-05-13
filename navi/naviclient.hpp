@@ -9,6 +9,8 @@
 #include <cef/cef_geolocation_handler.h>
 #include <cef/cef_keyboard_handler.h>
 
+#define NEMONAVI_FOCUSED_NODE_CHANGED_MESSAGE			("NaviClient.FocusedNodeChanged")
+
 class NaviClient : public CefClient, public CefContextMenuHandler, public CefDisplayHandler, public CefDownloadHandler, public CefDragHandler, public CefGeolocationHandler, public CefLifeSpanHandler, public CefLoadHandler, public CefRenderHandler, public CefKeyboardHandler, public CefRequestHandler {
 	public:
 		NaviClient(void *data);
@@ -142,6 +144,8 @@ class NaviClient : public CefClient, public CefContextMenuHandler, public CefDis
 				CefRefPtr<CefGeolocationCallback> callback) OVERRIDE;
 
 		bool OnPreKeyEvent(CefRefPtr<CefBrowser> browser, const CefKeyEvent &event, CefEventHandle os_event, bool *is_keyboard_shortcut) OVERRIDE;
+
+		bool OnProcessMessageReceived(CefRefPtr<CefBrowser> browser, CefProcessId source_process, CefRefPtr<CefProcessMessage> message) OVERRIDE;
 
 	private:
 		IMPLEMENT_REFCOUNTING(NaviClient);
