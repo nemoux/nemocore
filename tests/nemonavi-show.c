@@ -375,7 +375,8 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	nemonavi_init_once(argc, argv);
+	if (nemonavi_init_once(argc, argv) > 0)
+		return 0;
 
 	context = (struct navicontext *)malloc(sizeof(struct navicontext));
 	if (context == NULL)
