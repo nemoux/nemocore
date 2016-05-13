@@ -37,3 +37,50 @@ void NaviApp::OnBeforeChildProcessLaunch(CefRefPtr<CefCommandLine> command_line)
 void NaviApp::OnRenderProcessThreadCreated(CefRefPtr<CefListValue> extra_info)
 {
 }
+
+void NaviApp::OnRenderThreadCreated(CefRefPtr<CefListValue> extra_info)
+{
+}
+
+void NaviApp::OnWebKitInitialized()
+{
+}
+
+void NaviApp::OnBrowserCreated(CefRefPtr<CefBrowser> browser)
+{
+}
+
+void NaviApp::OnBrowserDestroyed(CefRefPtr<CefBrowser> browser)
+{
+}
+
+CefRefPtr<CefLoadHandler> NaviApp::GetLoadHandler()
+{
+	return NULL;
+}
+
+bool NaviApp::OnBeforeNavigation(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, CefRefPtr<CefRequest> request, NavigationType navigation_type, bool is_redirect)
+{
+	return false;
+}
+
+void NaviApp::OnContextCreated(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, CefRefPtr<CefV8Context> context)
+{
+}
+
+void NaviApp::OnContextReleased(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, CefRefPtr<CefV8Context> context)
+{
+}
+
+void NaviApp::OnUncaughtException(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, CefRefPtr<CefV8Context> context, CefRefPtr<CefV8Exception> exception, CefRefPtr<CefV8StackTrace> stackTrace)
+{
+}
+
+void NaviApp::OnFocusedNodeChanged(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, CefRefPtr<CefDOMNode> node)
+{
+}
+
+bool NaviApp::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser, CefProcessId source_process, CefRefPtr<CefProcessMessage> message)
+{
+	return false;
+}

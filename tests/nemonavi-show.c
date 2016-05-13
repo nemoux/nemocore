@@ -151,6 +151,10 @@ static void nemonavi_dispatch_key_event(struct nemonavi *navi, uint32_t code, in
 	}
 }
 
+static void nemonavi_dispatch_focus_change(struct nemonavi *navi, void *node, int is_editable)
+{
+}
+
 static void nemonavi_dispatch_loading_state(struct nemonavi *navi, int is_loading, int can_go_back, int can_go_forward)
 {
 }
@@ -420,6 +424,7 @@ int main(int argc, char *argv[])
 	nemonavi_set_dispatch_popup_show(navi, nemonavi_dispatch_popup_show);
 	nemonavi_set_dispatch_popup_rect(navi, nemonavi_dispatch_popup_rect);
 	nemonavi_set_dispatch_key_event(navi, nemonavi_dispatch_key_event);
+	nemonavi_set_dispatch_focus_change(navi, nemonavi_dispatch_focus_change);
 	nemonavi_set_dispatch_loading_state(navi, nemonavi_dispatch_loading_state);
 	nemonavi_set_userdata(navi, context);
 
