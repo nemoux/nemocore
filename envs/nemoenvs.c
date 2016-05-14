@@ -355,10 +355,8 @@ void nemoenvs_load_actions(struct nemoenvs *envs)
 				action->type = NEMOENVS_ACTION_XAPP_TYPE;
 			else if (strcmp(attr, "chrome") == 0)
 				action->type = NEMOENVS_ACTION_CHROME_TYPE;
-			else if (strcmp(attr, "keypad") == 0)
-				action->type = NEMOENVS_ACTION_KEYPAD_TYPE;
-			else if (strcmp(attr, "speaker") == 0)
-				action->type = NEMOENVS_ACTION_SPEAKER_TYPE;
+			else if (strcmp(attr, "cmd") == 0)
+				action->type = NEMOENVS_ACTION_CMD_TYPE;
 			else if (strcmp(attr, "none") == 0)
 				action->type = NEMOENVS_ACTION_NONE_TYPE;
 		}
@@ -456,6 +454,8 @@ void nemoenvs_load_actions(struct nemoenvs *envs)
 				asprintf(&action->user, "--user-data-dir=%s", attr);
 				action->args[argc++] = action->user;
 			}
+		} else if (action->type == NEMOENVS_ACTION_CMD_TYPE) {
+			action->path = strdup(path);
 		}
 
 		nemoitem_for_vattr(shell->configs, index, "arg%d", i, 0, attr)
