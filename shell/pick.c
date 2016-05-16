@@ -68,10 +68,9 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		pick->sy = pick->other->sy = 1.0f;
 
 		if (bin->view->geometry.has_pivot == 0) {
-			nemoview_correct_pivot(bin->view, nemoshell_bin_get_geometry_width(bin) / 2.0f, nemoshell_bin_get_geometry_height(bin) / 2.0f);
-
-			bin->scale.ax = 0.5f;
-			bin->scale.ay = 0.5f;
+			nemoview_correct_pivot(bin->view,
+					nemoshell_bin_get_geometry_width(bin) * bin->scale.ax,
+					nemoshell_bin_get_geometry_height(bin) * bin->scale.ay);
 		}
 
 		bin->reset_scale = 0;
@@ -89,10 +88,9 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		pick->height = pick->other->height = nemoshell_bin_get_geometry_height(bin);
 
 		if (bin->view->geometry.has_pivot == 0) {
-			nemoview_correct_pivot(bin->view, nemoshell_bin_get_geometry_width(bin) / 2.0f, nemoshell_bin_get_geometry_height(bin) / 2.0f);
-
-			bin->scale.ax = 0.5f;
-			bin->scale.ay = 0.5f;
+			nemoview_correct_pivot(bin->view,
+					nemoshell_bin_get_geometry_width(bin) * bin->scale.ax,
+					nemoshell_bin_get_geometry_height(bin) * bin->scale.ay);
 		}
 
 		bin->reset_size = 0;
@@ -212,10 +210,9 @@ static void pick_shellgrab_touchpoint_frame(struct touchpoint_grab *base, uint32
 		pick->sy = pick->other->sy = 1.0f;
 
 		if (bin->view->geometry.has_pivot == 0) {
-			nemoview_correct_pivot(bin->view, nemoshell_bin_get_geometry_width(bin) / 2.0f, nemoshell_bin_get_geometry_height(bin) / 2.0f);
-
-			bin->scale.ax = 0.5f;
-			bin->scale.ay = 0.5f;
+			nemoview_correct_pivot(bin->view,
+					nemoshell_bin_get_geometry_width(bin) * bin->scale.ax,
+					nemoshell_bin_get_geometry_height(bin) * bin->scale.ay);
 		}
 
 		bin->reset_scale = 0;
@@ -233,10 +230,9 @@ static void pick_shellgrab_touchpoint_frame(struct touchpoint_grab *base, uint32
 		pick->height = pick->other->height = nemoshell_bin_get_geometry_height(bin);
 
 		if (bin->view->geometry.has_pivot == 0) {
-			nemoview_correct_pivot(bin->view, nemoshell_bin_get_geometry_width(bin) / 2.0f, nemoshell_bin_get_geometry_height(bin) / 2.0f);
-
-			bin->scale.ax = 0.5f;
-			bin->scale.ay = 0.5f;
+			nemoview_correct_pivot(bin->view,
+					nemoshell_bin_get_geometry_width(bin) * bin->scale.ax,
+					nemoshell_bin_get_geometry_height(bin) * bin->scale.ay);
 		}
 
 		bin->reset_size = 0;
