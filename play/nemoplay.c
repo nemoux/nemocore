@@ -221,6 +221,9 @@ int nemoplay_decode_media(struct nemoplay *play, int reqcount, int maxcount)
 				one->u = u;
 				one->v = v;
 
+				one->width = frame->linesize[0];
+				one->height = frame->height;
+
 				nemoplay_queue_enqueue(play->video_queue, one);
 			}
 		} else if (packet.stream_index == audio_stream) {

@@ -114,6 +114,14 @@ int nemoplay_shader_set_texture(struct playshader *shader, int32_t width, int32_
 
 	shader->texture_width = width;
 	shader->texture_height = height;
+	shader->texture_linesize = width;
+
+	return 0;
+}
+
+int nemoplay_shader_set_texture_linesize(struct playshader *shader, int32_t linesize)
+{
+	shader->texture_linesize = linesize;
 
 	return 0;
 }
@@ -191,7 +199,7 @@ int nemoplay_shader_update(struct playshader *shader, uint8_t *y, uint8_t *u, ui
 	glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
 
 	glBindTexture(GL_TEXTURE_2D, shader->texv);
-	glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, shader->texture_width / 2);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, shader->texture_linesize / 2);
 	glTexSubImage2D(GL_TEXTURE_2D, 0,
 			0, 0,
 			shader->texture_width / 2,
@@ -201,7 +209,7 @@ int nemoplay_shader_update(struct playshader *shader, uint8_t *y, uint8_t *u, ui
 			v);
 
 	glBindTexture(GL_TEXTURE_2D, shader->texu);
-	glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, shader->texture_width / 2);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, shader->texture_linesize / 2);
 	glTexSubImage2D(GL_TEXTURE_2D, 0,
 			0, 0,
 			shader->texture_width / 2,
@@ -211,7 +219,7 @@ int nemoplay_shader_update(struct playshader *shader, uint8_t *y, uint8_t *u, ui
 			u);
 
 	glBindTexture(GL_TEXTURE_2D, shader->texy);
-	glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, shader->texture_width);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, shader->texture_linesize);
 	glTexSubImage2D(GL_TEXTURE_2D, 0,
 			0, 0,
 			shader->texture_width,

@@ -31,12 +31,14 @@ struct playshader {
 	GLuint texu;
 	GLuint texv;
 	int32_t texture_width, texture_height;
+	int32_t texture_linesize;
 };
 
 extern struct playshader *nemoplay_shader_create(void);
 extern void nemoplay_shader_destroy(struct playshader *shader);
 
 extern int nemoplay_shader_set_texture(struct playshader *shader, int32_t width, int32_t height);
+extern int nemoplay_shader_set_texture_linesize(struct playshader *shader, int32_t linesize);
 extern int nemoplay_shader_set_viewport(struct playshader *shader, GLuint texture, int32_t width, int32_t height);
 
 extern int nemoplay_shader_prepare(struct playshader *shader, const char *vertex_source, const char *fragment_source);
@@ -71,6 +73,21 @@ static const char NEMOPLAY_TO_RGBA_FRAGMENT_SHADER[] =
 "  float b = y + 1.772 * u;\n"
 "  gl_FragColor = vec4(r, g, b, 1.0);\n"
 "}\n";
+
+static inline int nemoplay_shader_get_texture_width(struct playshader *shader)
+{
+	return shader->texture_width;
+}
+
+static inline int nemoplay_shader_get_texture_height(struct playshader *shader)
+{
+	return shader->texture_height;
+}
+
+static inline int nemoplay_shader_get_texture_linesize(struct playshader *shader)
+{
+	return shader->texture_linesize;
+}
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

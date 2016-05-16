@@ -139,6 +139,9 @@ static void nemoplay_dispatch_video_timer(struct nemotimer *timer, void *data)
 				nemoplay_queue_enqueue_tail(queue, one);
 				nemotimer_set_timeout(timer, threshold * 1000);
 			} else {
+				if (nemoplay_shader_get_texture_linesize(context->shader) != nemoplay_queue_get_one_width(one))
+					nemoplay_shader_set_texture_linesize(context->shader, nemoplay_queue_get_one_width(one));
+
 				nemoplay_shader_update(context->shader,
 						nemoplay_queue_get_one_y(one),
 						nemoplay_queue_get_one_u(one),

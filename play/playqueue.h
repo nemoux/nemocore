@@ -39,6 +39,7 @@ struct playone {
 	uint8_t *y;
 	uint8_t *u;
 	uint8_t *v;
+	int32_t width, height;
 
 	uint32_t serial;
 };
@@ -115,6 +116,16 @@ static inline uint8_t *nemoplay_queue_get_one_u(struct playone *one)
 static inline uint8_t *nemoplay_queue_get_one_v(struct playone *one)
 {
 	return one->v;
+}
+
+static inline int nemoplay_queue_get_one_width(struct playone *one)
+{
+	return one->width;
+}
+
+static inline int nemoplay_queue_get_one_height(struct playone *one)
+{
+	return one->height;
 }
 
 static inline uint32_t nemoplay_queue_get_one_size(struct playone *one)
