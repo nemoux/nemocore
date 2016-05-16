@@ -16,6 +16,7 @@ struct nemoaction {
 	char *icon;
 	char *ring;
 	char *user;
+	char *text;
 
 	char *type;
 	char *keypad;
@@ -96,6 +97,11 @@ static inline const char *nemoenvs_get_action_icon(struct nemoenvs *envs, int gr
 static inline const char *nemoenvs_get_action_ring(struct nemoenvs *envs, int group, int action)
 {
 	return envs->groups[group]->actions[action]->ring;
+}
+
+static inline const char *nemoenvs_get_action_text(struct nemoenvs *envs, int group, int action)
+{
+	return envs->groups[group]->actions[action]->text;
 }
 
 static inline int nemoenvs_is_action_type(struct nemoenvs *envs, int group, int action, const char *type)

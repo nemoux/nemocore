@@ -31,6 +31,8 @@ void nemoenvs_destroy_action(struct nemoaction *action)
 		free(action->ring);
 	if (action->user != NULL)
 		free(action->user);
+	if (action->text != NULL)
+		free(action->text);
 	if (action->type != NULL)
 		free(action->type);
 	if (action->keypad != NULL)
@@ -149,6 +151,7 @@ void nemoenvs_load_actions(struct nemoenvs *envs)
 	char *path;
 	char *icon;
 	char *ring;
+	char *text;
 	char *attr;
 	int igroup;
 	int index;
@@ -181,6 +184,7 @@ void nemoenvs_load_actions(struct nemoenvs *envs)
 		path = nemoitem_get_attr(envs->configs, index, "path");
 		icon = nemoitem_get_attr(envs->configs, index, "icon");
 		ring = nemoitem_get_attr(envs->configs, index, "ring");
+		text = nemoitem_get_attr(envs->configs, index, "text");
 		if (igroup < 0 || igroup >= envs->ngroups || icon == NULL)
 			continue;
 
@@ -191,6 +195,9 @@ void nemoenvs_load_actions(struct nemoenvs *envs)
 
 		if (ring != NULL)
 			action->ring = strdup(ring);
+
+		if (text != NULL)
+			action->text = strdup(text);
 
 		attr = nemoitem_get_attr(envs->configs, index, "type");
 		if (attr != NULL)
