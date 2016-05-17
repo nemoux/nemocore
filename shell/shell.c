@@ -1063,9 +1063,9 @@ void nemoshell_set_fullscreen_bin(struct nemoshell *shell, struct shellbin *bin,
 
 	bin->fixed = screen->fixed;
 
-	nemoshell_send_bin_state(bin);
-
 	nemocontent_update_fullscreen(bin->view->content, screen->id, screen->dx, screen->dy, screen->dw, screen->dh);
+
+	nemoshell_send_bin_state(bin);
 }
 
 void nemoshell_put_fullscreen_bin(struct nemoshell *shell, struct shellbin *bin)
