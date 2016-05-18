@@ -268,7 +268,7 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 		}
 
 		if (nemoshell_is_nemo_surface_for_canvas(bin->canvas) != 0) {
-			if (bin->has_scale != 0 && bin->done_serial >= bin->scale.serial) {
+			if (bin->has_scale != 0 && (bin->done_serial >= bin->scale.serial || bin->state.fullscreen || bin->state.maximized)) {
 				nemoview_set_scale(view, 1.0f, 1.0f);
 				nemoview_update_transform(view);
 
