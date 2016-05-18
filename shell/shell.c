@@ -258,7 +258,9 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 		bin->last_width = canvas->base.width;
 		bin->last_height = canvas->base.height;
 	} else if (state_changed != 0 || sx != 0 || sy != 0 ||
-			bin->last_width != canvas->base.width || bin->last_height != canvas->base.height) {
+			bin->last_width != canvas->base.width ||
+			bin->last_height != canvas->base.height ||
+			bin->has_scale != 0) {
 		if (nemoshell_is_nemo_surface_for_canvas(bin->canvas) != 0) {
 			if ((bin->state.fullscreen || bin->state.maximized) &&
 					(bin->screen.width != canvas->base.width || bin->screen.height != canvas->base.height))
@@ -266,7 +268,7 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 		}
 
 		if (nemoshell_is_nemo_surface_for_canvas(bin->canvas) != 0) {
-			if (bin->has_scale != 0) {
+			if (bin->has_scale != 0 && bin->done_serial >= bin->scale.serial) {
 				nemoview_set_scale(view, 1.0f, 1.0f);
 				nemoview_update_transform(view);
 

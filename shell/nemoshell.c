@@ -25,8 +25,9 @@
 static void nemo_send_configure(struct nemocanvas *canvas, int32_t width, int32_t height)
 {
 	struct shellbin *bin = nemoshell_get_bin(canvas);
+	uint32_t serial = ++bin->next_serial;
 
-	nemo_surface_send_configure(bin->resource, width, height);
+	nemo_surface_send_configure(bin->resource, width, height, serial);
 }
 
 static void nemo_send_transform(struct nemocanvas *canvas, int visible, int32_t x, int32_t y, int32_t width, int32_t height)
@@ -413,6 +414,13 @@ static void nemo_surface_execute_content(struct wl_client *client, struct wl_res
 	}
 }
 
+static void nemo_surface_commit_serial(struct wl_client *client, struct wl_resource *resource, uint32_t serial)
+{
+	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
+
+	bin->done_serial = serial;
+}
+
 static const struct nemo_surface_interface nemo_surface_implementation = {
 	nemo_surface_destroy,
 	nemo_surface_set_tag,
@@ -442,7 +450,8 @@ static const struct nemo_surface_interface nemo_surface_implementation = {
 	nemo_surface_miss,
 	nemo_surface_execute_command,
 	nemo_surface_execute_action,
-	nemo_surface_execute_content
+	nemo_surface_execute_content,
+	nemo_surface_commit_serial
 };
 
 static void nemoshell_unbind_nemo_surface(struct wl_resource *resource)

@@ -86,7 +86,6 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		int32_t width = nemoshell_bin_get_geometry_width(bin) * bin->view->geometry.sx;
 		int32_t height = nemoshell_bin_get_geometry_height(bin) * bin->view->geometry.sy;
 
-		bin->has_scale = 1;
 		bin->resize_edges = WL_SHELL_SURFACE_RESIZE_LEFT | WL_SHELL_SURFACE_RESIZE_TOP;
 
 		if (shell->is_logging_grab != 0)
@@ -113,6 +112,9 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		} else {
 			bin->client->send_configure(bin->canvas, width, height);
 		}
+
+		bin->has_scale = 1;
+		bin->scale.serial = bin->next_serial;
 	}
 
 	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_MOVE)) {

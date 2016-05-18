@@ -117,6 +117,7 @@ extern void nemocanvas_miss(struct nemocanvas *canvas);
 extern void nemocanvas_execute_command(struct nemocanvas *canvas, const char *name, const char *cmds, uint32_t type, uint32_t coords, double x, double y, double r);
 extern void nemocanvas_execute_action(struct nemocanvas *canvas, uint32_t group, uint32_t action, uint32_t type, uint32_t coords, double x, double y, double r);
 extern void nemocanvas_execute_content(struct nemocanvas *canvas, uint32_t type, const char *path, uint32_t coords, double x, double y, double r);
+extern void nemocanvas_commit_serial(struct nemocanvas *canvas, uint32_t serial);
 
 extern void nemocanvas_set_nemosurface(struct nemocanvas *canvas, uint32_t type);
 

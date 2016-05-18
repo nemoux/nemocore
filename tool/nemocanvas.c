@@ -27,9 +27,11 @@
 #include <pixmanhelper.h>
 #include <nemomisc.h>
 
-static void nemo_surface_handle_configure(void *data, struct nemo_surface *surface, int32_t width, int32_t height)
+static void nemo_surface_handle_configure(void *data, struct nemo_surface *surface, int32_t width, int32_t height, uint32_t serial)
 {
 	struct nemocanvas *canvas = (struct nemocanvas *)data;
+
+	nemocanvas_commit_serial(canvas, serial);
 
 	if (canvas->dispatch_resize != NULL)
 		canvas->dispatch_resize(canvas, width, height);
@@ -563,6 +565,11 @@ void nemocanvas_execute_content(struct nemocanvas *canvas, uint32_t type, const 
 			wl_fixed_from_double(x),
 			wl_fixed_from_double(y),
 			wl_fixed_from_double(r));
+}
+
+void nemocanvas_commit_serial(struct nemocanvas *canvas, uint32_t serial)
+{
+	nemo_surface_commit_serial(canvas->nemo_surface, serial);
 }
 
 void nemocanvas_set_nemosurface(struct nemocanvas *canvas, uint32_t type)

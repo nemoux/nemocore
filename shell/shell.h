@@ -265,6 +265,8 @@ struct shellbin {
 
 	struct {
 		float ax, ay;
+
+		uint32_t serial;
 	} scale;
 	int32_t has_scale;
 
@@ -272,6 +274,9 @@ struct shellbin {
 	int32_t reset_move;
 
 	uint32_t resize_edges;
+
+	uint32_t next_serial;
+	uint32_t done_serial;
 
 	struct binstate state, next_state, requested_state;
 	int state_changed;

@@ -209,9 +209,14 @@
 			<arg name="r" type="fixed"/>
 		</request>
 
+		<request name="commit_serial">
+			<arg name="serial" type="uint"/>
+		</request>
+
 		<event name="configure">
 			<arg name="width" type="int"/>
 			<arg name="height" type="int"/>
+			<arg name="serial" type="uint"/>
 		</event>
 
 		<event name="transform">
