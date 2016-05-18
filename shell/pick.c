@@ -588,12 +588,11 @@ int nemoshell_pick_canvas_by_touchpoint(struct nemoshell *shell, struct touchpoi
 	pick1->other = pick0;
 
 	if (shell->is_logging_grab != 0)
-		nemolog_message("PICK", "[DOWN] %llu+%llu: x(%f) y(%f) sx(%f) sy(%f) r(%f) reset(%d)\n",
+		nemolog_message("PICK", "[DOWN] %llu+%llu: x(%f) y(%f) sx(%f) sy(%f) r(%f)\n",
 				tp0->gid, tp1->gid,
 				bin->view->geometry.x, bin->view->geometry.y,
 				bin->view->geometry.sx, bin->view->geometry.sy,
-				bin->view->geometry.r,
-				bin->has_scale);
+				bin->view->geometry.r);
 
 	nemoshell_start_touchpoint_shellgrab(&pick0->base, &pick_shellgrab_touchpoint_interface, bin, tp0);
 	nemoshell_start_touchpoint_shellgrab(&pick1->base, &pick_shellgrab_touchpoint_interface, bin, tp1);
