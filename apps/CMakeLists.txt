@@ -92,22 +92,3 @@ TARGET_LINK_LIBRARIES(nemoimage
 	)
 
 INSTALL(TARGETS nemoimage DESTINATION bin)
-
-if(WITH_MUPDF)
-	add_executable(nemopdf
-		nemopdf.c
-		pdfhelper.c
-		)
-
-	TARGET_LINK_LIBRARIES(nemopdf
-		mupdf
-		mujs
-		muopenjpeg
-		mujpeg
-		mujbig2dec
-		freetype
-		crypto
-		z
-		nemoapps
-		)
-endif(WITH_MUPDF)

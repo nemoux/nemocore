@@ -50,8 +50,6 @@ TARGET_LINK_LIBRARIES(nemoplay-show
 	${AO_LIBRARIES}
 	)
 
-INSTALL(TARGETS nemoplay-show DESTINATION bin)
-
 if(WITH_CEF)
 	add_executable(nemonavi-show
 		nemonavi-show.c
@@ -61,6 +59,23 @@ if(WITH_CEF)
 		nemonavi
 		nemoapps
 		)
-
-	INSTALL(TARGETS nemonavi-show DESTINATION bin)
 endif(WITH_CEF)
+
+if(WITH_MUPDF)
+	add_executable(nemopdf-tale
+		nemopdf-tale.c
+		pdfhelper.c
+		)
+
+	TARGET_LINK_LIBRARIES(nemopdf-tale
+		mupdf
+		mujs
+		muopenjpeg
+		mujpeg
+		mujbig2dec
+		freetype
+		crypto
+		z
+		nemoapps
+		)
+endif(WITH_MUPDF)
