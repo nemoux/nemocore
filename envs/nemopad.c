@@ -271,7 +271,19 @@ static int nemopad_dispatch_key_grab(struct nemoshow *show, struct showgrab *gra
 		}
 
 		if (pad->borders[tag] != NULL) {
-			nemoshow_item_set_fill_color(pad->borders[tag], 0x0, 0x0, 0x0, 0x0);
+			if (pad->is_upper_case != 0 || pad->is_shift_case != 0) {
+				nemoshow_item_set_fill_color(pad->borders[tag],
+						nemopadcolors[nemopadkeys[tag].color1][0],
+						nemopadcolors[nemopadkeys[tag].color1][1],
+						nemopadcolors[nemopadkeys[tag].color1][2],
+						0x40);
+			} else {
+				nemoshow_item_set_fill_color(pad->borders[tag],
+						nemopadcolors[nemopadkeys[tag].color0][0],
+						nemopadcolors[nemopadkeys[tag].color0][1],
+						nemopadcolors[nemopadkeys[tag].color0][2],
+						0x40);
+			}
 		}
 
 		nemoshow_dispatch_frame(show);
@@ -332,6 +344,11 @@ static void nemopad_dispatch_canvas_event(struct nemoshow *show, struct showone 
 				uint32_t color = pad->is_upper_case == 0 ? nemopadkeys[i].color1 : nemopadkeys[i].color0;
 
 				if (nemopaduppers[i] != NULL) {
+					nemoshow_item_set_fill_color(pad->borders[i],
+							nemopadcolors[color][0],
+							nemopadcolors[color][1],
+							nemopadcolors[color][2],
+							0x40);
 					nemoshow_item_set_stroke_color(pad->borders[i],
 							nemopadcolors[color][0],
 							nemopadcolors[color][1],
@@ -341,7 +358,7 @@ static void nemopad_dispatch_canvas_event(struct nemoshow *show, struct showone 
 							nemopadcolors[color][0],
 							nemopadcolors[color][1],
 							nemopadcolors[color][2],
-							0xc0);
+							0xe0);
 
 					nemoshow_item_path_clear(pad->keys[i]);
 					nemoshow_item_path_append(pad->keys[i], path);
@@ -359,6 +376,11 @@ static void nemopad_dispatch_canvas_event(struct nemoshow *show, struct showone 
 				uint32_t color = pad->is_shift_case == 0 ? nemopadkeys[i].color1 : nemopadkeys[i].color0;
 
 				if (nemopadshifts[i] != NULL) {
+					nemoshow_item_set_fill_color(pad->borders[i],
+							nemopadcolors[color][0],
+							nemopadcolors[color][1],
+							nemopadcolors[color][2],
+							0x40);
 					nemoshow_item_set_stroke_color(pad->borders[i],
 							nemopadcolors[color][0],
 							nemopadcolors[color][1],
@@ -368,7 +390,7 @@ static void nemopad_dispatch_canvas_event(struct nemoshow *show, struct showone 
 							nemopadcolors[color][0],
 							nemopadcolors[color][1],
 							nemopadcolors[color][2],
-							0xc0);
+							0xe0);
 
 					nemoshow_item_path_clear(pad->keys[i]);
 					nemoshow_item_path_append(pad->keys[i], path);
@@ -425,13 +447,13 @@ static void nemopad_dispatch_timer(struct nemotimer *timer, void *data)
 								nemopadcolors[nemopadkeys[i].color1][0],
 								nemopadcolors[nemopadkeys[i].color1][1],
 								nemopadcolors[nemopadkeys[i].color1][2],
-								0xc0);
+								0xe0);
 					} else {
 						nemoshow_item_set_fill_color(pad->keys[i],
 								nemopadcolors[nemopadkeys[i].color0][0],
 								nemopadcolors[nemopadkeys[i].color0][1],
 								nemopadcolors[nemopadkeys[i].color0][2],
-								0xc0);
+								0xe0);
 					}
 				}
 			}
@@ -558,6 +580,11 @@ int nemopad_activate(struct nemopad *pad, double x, double y, double r)
 			nemoshow_item_set_height(one,
 					nemopadkeys[i].y1 - nemopadkeys[i].y0);
 			nemoshow_item_set_filter(one, NEMOSHOW_SOLID_SMALL_BLUR);
+			nemoshow_item_set_fill_color(one,
+					nemopadcolors[nemopadkeys[i].color0][0],
+					nemopadcolors[nemopadkeys[i].color0][1],
+					nemopadcolors[nemopadkeys[i].color0][2],
+					0x40);
 			nemoshow_item_set_stroke_color(one,
 					nemopadcolors[nemopadkeys[i].color0][0],
 					nemopadcolors[nemopadkeys[i].color0][1],
@@ -587,7 +614,7 @@ int nemopad_activate(struct nemopad *pad, double x, double y, double r)
 					nemopadcolors[nemopadkeys[i].color0][0],
 					nemopadcolors[nemopadkeys[i].color0][1],
 					nemopadcolors[nemopadkeys[i].color0][2],
-					0xc0);
+					0xe0);
 			nemoshow_item_set_alpha(one, 0.0f);
 			nemoshow_item_translate(one, nemopadkeys[i].x0, nemopadkeys[i].y0);
 			nemoshow_item_path_append(one, nemopadnormals[i]);
