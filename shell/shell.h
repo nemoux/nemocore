@@ -268,8 +268,7 @@ struct shellbin {
 	} scale;
 	int32_t has_scale;
 
-	int32_t reset_scale;
-	int32_t reset_size;
+	int32_t reset_pivot;
 	int32_t reset_move;
 
 	uint32_t resize_edges;

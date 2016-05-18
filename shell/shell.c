@@ -278,7 +278,6 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 				sy = (canvas->base.height - bin->last_height) * -bin->scale.ay;
 
 				bin->has_scale = 0;
-				bin->reset_scale = 1;
 			} else {
 				sx = (canvas->base.width - bin->last_width) * view->geometry.ax;
 				sy = (canvas->base.height - bin->last_height) * view->geometry.ay;
@@ -296,7 +295,6 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 				sy = (canvas->base.height - bin->last_height) * -bin->scale.ay;
 
 				bin->has_scale = 0;
-				bin->reset_scale = 1;
 				bin->resize_edges = 0;
 			} else if (bin->resize_edges != 0) {
 				sx = 0;
@@ -348,7 +346,7 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 
 		nemoview_transform_notify(bin->view);
 
-		bin->reset_size = 1;
+		bin->reset_pivot = 1;
 
 out:
 		bin->last_width = canvas->base.width;

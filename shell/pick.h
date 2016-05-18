@@ -30,11 +30,10 @@ struct shellgrab_pick {
 		double distance;
 	} resize;
 
-	int32_t width, height;
-	float sx, sy;
-	float dx, dy;
-	float r;
-	
+	struct {
+		float dx, dy;
+	} move;
+
 	struct touchpoint *tp0, *tp1;
 
 	uint32_t frameid;
@@ -55,10 +54,9 @@ struct actorgrab_pick {
 		double distance;
 	} scale;
 
-	int32_t width, height;
-	float sx, sy;
-	float dx, dy;
-	float r;
+	struct {
+		float dx, dy;
+	} move;
 
 	struct touchpoint *tp0, *tp1;
 
