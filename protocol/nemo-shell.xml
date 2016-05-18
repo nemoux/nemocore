@@ -212,7 +212,6 @@
 		<event name="configure">
 			<arg name="width" type="int"/>
 			<arg name="height" type="int"/>
-			<arg name="fixed" type="int"/>
 		</event>
 
 		<event name="transform">

@@ -595,7 +595,7 @@ static void pick_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 					view->geometry.x + tox - fromx,
 					view->geometry.y + toy - fromy);
 
-			if (nemoactor_dispatch_resize(actor, width, height, 0) == 0)
+			if (nemoactor_dispatch_resize(actor, width, height) == 0)
 				nemoactor_dispatch_frame(actor);
 		}
 

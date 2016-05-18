@@ -92,7 +92,7 @@ static int nemoshow_dispatch_actor_event(struct nemoactor *actor, uint32_t type,
 	return 0;
 }
 
-static int nemoshow_dispatch_actor_resize(struct nemoactor *actor, int32_t width, int32_t height, int32_t fixed)
+static int nemoshow_dispatch_actor_resize(struct nemoactor *actor, int32_t width, int32_t height)
 {
 	struct nemotale *tale = (struct nemotale *)nemoactor_get_context(actor);
 	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
@@ -347,7 +347,7 @@ void nemoshow_dispatch_resize(struct nemoshow *show, int32_t width, int32_t heig
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 
-	nemoactor_dispatch_resize(scon->actor, width, height, 0);
+	nemoactor_dispatch_resize(scon->actor, width, height);
 }
 
 void nemoshow_dispatch_feedback(struct nemoshow *show)

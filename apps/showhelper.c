@@ -11,7 +11,7 @@
 #include <showhelper.h>
 #include <nemomisc.h>
 
-static void nemoshow_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t width, int32_t height, int32_t fixed)
+static void nemoshow_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t width, int32_t height)
 {
 	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
 	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
@@ -305,7 +305,7 @@ void nemoshow_dispatch_resize(struct nemoshow *show, int32_t width, int32_t heig
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 
-	nemocanvas_dispatch_resize(scon->canvas, width, height, 0);
+	nemocanvas_dispatch_resize(scon->canvas, width, height);
 }
 
 void nemoshow_dispatch_feedback(struct nemoshow *show)

@@ -18,7 +18,7 @@ NEMO_BEGIN_EXTERN_C
 struct nemocanvas;
 
 typedef int (*nemocanvas_dispatch_event_t)(struct nemocanvas *canvas, uint32_t type, struct nemoevent *event);
-typedef void (*nemocanvas_dispatch_resize_t)(struct nemocanvas *canvas, int32_t width, int32_t height, int32_t fixed);
+typedef void (*nemocanvas_dispatch_resize_t)(struct nemocanvas *canvas, int32_t width, int32_t height);
 typedef void (*nemocanvas_dispatch_transform_t)(struct nemocanvas *canvas, int32_t visible, int32_t x, int32_t y, int32_t width, int32_t height);
 typedef void (*nemocanvas_dispatch_layer_t)(struct nemocanvas *canvas, int32_t visible);
 typedef void (*nemocanvas_dispatch_fullscreen_t)(struct nemocanvas *canvas, int32_t id, int32_t x, int32_t y, int32_t width, int32_t height);
@@ -144,7 +144,7 @@ extern void nemocanvas_dispatch_frame(struct nemocanvas *canvas);
 extern void nemocanvas_dispatch_frame_force(struct nemocanvas *canvas);
 extern void nemocanvas_dispatch_frame_async(struct nemocanvas *canvas);
 
-extern void nemocanvas_dispatch_resize(struct nemocanvas *canvas, int32_t width, int32_t height, int32_t fixed);
+extern void nemocanvas_dispatch_resize(struct nemocanvas *canvas, int32_t width, int32_t height);
 extern int nemocanvas_dispatch_destroy(struct nemocanvas *canvas);
 
 extern void nemocanvas_attach_queue(struct nemocanvas *canvas, struct nemoqueue *queue);

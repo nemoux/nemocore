@@ -686,10 +686,10 @@ int nemoactor_dispatch_pick(struct nemoactor *actor, float x, float y)
 	return 0;
 }
 
-int nemoactor_dispatch_resize(struct nemoactor *actor, int32_t width, int32_t height, int32_t fixed)
+int nemoactor_dispatch_resize(struct nemoactor *actor, int32_t width, int32_t height)
 {
 	if (actor->dispatch_resize != NULL)
-		return actor->dispatch_resize(actor, width, height, fixed);
+		return actor->dispatch_resize(actor, width, height);
 
 	return 0;
 }

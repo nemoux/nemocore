@@ -27,12 +27,12 @@
 #include <pixmanhelper.h>
 #include <nemomisc.h>
 
-static void nemo_surface_handle_configure(void *data, struct nemo_surface *surface, int32_t width, int32_t height, int32_t fixed)
+static void nemo_surface_handle_configure(void *data, struct nemo_surface *surface, int32_t width, int32_t height)
 {
 	struct nemocanvas *canvas = (struct nemocanvas *)data;
 
 	if (canvas->dispatch_resize != NULL)
-		canvas->dispatch_resize(canvas, width, height, fixed);
+		canvas->dispatch_resize(canvas, width, height);
 }
 
 static void nemo_surface_handle_transform(void *data, struct nemo_surface *surface, int32_t visible, int32_t x, int32_t y, int32_t width, int32_t height)
@@ -753,10 +753,10 @@ void nemocanvas_dispatch_frame_async(struct nemocanvas *canvas)
 	write(canvas->eventfd, &v, sizeof(uint64_t));
 }
 
-void nemocanvas_dispatch_resize(struct nemocanvas *canvas, int32_t width, int32_t height, int32_t fixed)
+void nemocanvas_dispatch_resize(struct nemocanvas *canvas, int32_t width, int32_t height)
 {
 	if (canvas->dispatch_resize != NULL)
-		canvas->dispatch_resize(canvas, width, height, fixed);
+		canvas->dispatch_resize(canvas, width, height);
 }
 
 int nemocanvas_dispatch_destroy(struct nemocanvas *canvas)
