@@ -7,13 +7,10 @@
 
 #include <getopt.h>
 
-#include <skiaconfig.hpp>
-
 #include <nemotool.h>
 #include <nemocanvas.h>
 #include <nemoegl.h>
 #include <showhelper.h>
-#include <showitem.hpp>
 #include <nemomisc.h>
 
 #define NEMOIMAGE_SIZE_MAX			(1024)
@@ -44,7 +41,6 @@ static void nemoimage_dispatch_canvas_event(struct nemoshow *show, struct showon
 int main(int argc, char *argv[])
 {
 	struct option options[] = {
-		{ "file",		required_argument,	NULL,		'f' },
 		{ 0 }
 	};
 
@@ -59,22 +55,18 @@ int main(int argc, char *argv[])
 	int32_t width, height;
 	int opt;
 
-	SkBitmap *bitmap;
-	bool r;
-
-	while (opt = getopt_long(argc, argv, "f:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "", options, NULL)) {
 		if (opt == -1)
 			break;
 
 		switch (opt) {
-			case 'f':
-				filepath = strdup(optarg);
-				break;
-
 			default:
 				break;
 		}
 	}
+
+	if (optind < argc)
+		filepath = strdup(argv[optind]);
 
 	if (filepath == NULL)
 		return 0;
@@ -88,14 +80,8 @@ int main(int argc, char *argv[])
 		goto out1;
 	nemotool_connect_wayland(tool, NULL);
 
-	bitmap = new SkBitmap;
-
-	r = SkImageDecoder::DecodeFile(filepath, bitmap);
-	if (r == false)
+	if (skia_get_image_size(filepath, &width, &height) < 0)
 		goto out2;
-
-	width = bitmap->width();
-	height = bitmap->height();
 
 	if (width > NEMOIMAGE_SIZE_MAX) {
 		height = height * ((double)NEMOIMAGE_SIZE_MAX / (double)width);
@@ -139,7 +125,7 @@ int main(int argc, char *argv[])
 	nemoshow_item_set_y(one, 0.0f);
 	nemoshow_item_set_width(one, width);
 	nemoshow_item_set_height(one, height);
-	nemoshow_item_set_bitmap(one, bitmap);
+	nemoshow_item_set_uri(one, filepath);
 
 	nemoshow_dispatch_frame(show);
 

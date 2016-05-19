@@ -132,7 +132,6 @@ static void nemopdf_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t wi
 int main(int argc, char *argv[])
 {
 	struct option options[] = {
-		{ "file",		required_argument,	NULL,		'f' },
 		{ 0 }
 	};
 
@@ -147,19 +146,18 @@ int main(int argc, char *argv[])
 	int32_t width, height;
 	int opt;
 
-	while (opt = getopt_long(argc, argv, "f:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "", options, NULL)) {
 		if (opt == -1)
 			break;
 
 		switch (opt) {
-			case 'f':
-				filepath = strdup(optarg);
-				break;
-
 			default:
 				break;
 		}
 	}
+
+	if (optind < argc)
+		filepath = strdup(argv[optind]);
 
 	if (filepath == NULL)
 		return 0;

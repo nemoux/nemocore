@@ -82,13 +82,3 @@ if(WITH_PULSEAUDIO)
 
 	INSTALL(TARGETS nemopulse DESTINATION bin)
 endif(WITH_PULSEAUDIO)
-
-add_executable(nemoimage
-	nemoimage.cpp
-	)
-
-TARGET_LINK_LIBRARIES(nemoimage
-	nemoapps
-	)
-
-INSTALL(TARGETS nemoimage DESTINATION bin)

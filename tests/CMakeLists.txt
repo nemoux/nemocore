@@ -31,6 +31,14 @@ TARGET_LINK_LIBRARIES(nemoscope-simple
 	nemoasst
 	)
 
+add_executable(nemoimage-show
+	nemoimage-show.c
+	)
+
+TARGET_LINK_LIBRARIES(nemoimage-show
+	nemoapps
+	)
+
 add_executable(nemoplay-decode
 	nemoplay-decode.c
 	)

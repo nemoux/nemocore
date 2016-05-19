@@ -16,7 +16,6 @@
 #include <showhelper.h>
 #include <colorhelper.h>
 #include <glfilter.h>
-#include <skiahelper.h>
 #include <nemolog.h>
 #include <nemomisc.h>
 

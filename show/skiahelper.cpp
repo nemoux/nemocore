@@ -135,6 +135,25 @@ int skia_draw_circle(void *pixels, int32_t width, int32_t height, double x, doub
 	return 0;
 }
 
+int skia_get_image_size(const char *path, int32_t *width, int32_t *height)
+{
+	SkBitmap *bitmap;
+	bool r;
+
+	bitmap = new SkBitmap;
+
+	r = SkImageDecoder::DecodeFile(path, bitmap);
+	if (r == false)
+		return -1;
+
+	*width = bitmap->width();
+	*height = bitmap->height();
+
+	delete bitmap;
+
+	return 0;
+}
+
 int skia_draw_image(void *pixels, int32_t width, int32_t height, const char *uri)
 {
 	SkBitmap back;
