@@ -46,7 +46,6 @@ int main(int argc, char *argv[])
 
 	struct imagecontext *context;
 	struct nemotool *tool;
-	struct nemotale *tale;
 	struct nemoshow *show;
 	struct showone *scene;
 	struct showone *canvas;
