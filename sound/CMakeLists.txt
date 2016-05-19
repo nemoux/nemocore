@@ -35,3 +35,14 @@ TARGET_LINK_LIBRARIES(nemosound
 	)
 
 INSTALL(TARGETS nemosound DESTINATION bin)
+
+add_executable(nemopulse
+	nemopulse.c
+	)
+
+TARGET_LINK_LIBRARIES(nemopulse
+	nemoasst
+	${LIBPULSE_LIBRARIES}
+	)
+
+INSTALL(TARGETS nemopulse DESTINATION bin)
