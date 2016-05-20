@@ -178,23 +178,6 @@ int nemoshow_canvas_resize(struct showone *one)
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
 	if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
-		nemotale_node_resize_pixman(canvas->node, canvas->width, canvas->height);
-
-		delete NEMOSHOW_CANVAS_CC(canvas, damage);
-		delete NEMOSHOW_CANVAS_CC(canvas, canvas);
-		delete NEMOSHOW_CANVAS_CC(canvas, device);
-		delete NEMOSHOW_CANVAS_CC(canvas, bitmap);
-
-		NEMOSHOW_CANVAS_CC(canvas, bitmap) = new SkBitmap;
-		NEMOSHOW_CANVAS_CC(canvas, bitmap)->setInfo(
-				SkImageInfo::Make(canvas->width, canvas->height, kN32_SkColorType, kPremul_SkAlphaType));
-		NEMOSHOW_CANVAS_CC(canvas, bitmap)->setPixels(
-				nemotale_node_get_buffer(canvas->node));
-
-		NEMOSHOW_CANVAS_CC(canvas, device) = new SkBitmapDevice(*NEMOSHOW_CANVAS_CC(canvas, bitmap));
-		NEMOSHOW_CANVAS_CC(canvas, canvas) = new SkCanvas(NEMOSHOW_CANVAS_CC(canvas, device));
-
-		NEMOSHOW_CANVAS_CC(canvas, damage) = new SkRegion;
 	} else if (one->sub == NEMOSHOW_CANVAS_PIPELINE_TYPE) {
 		nemotale_node_resize_gl(canvas->node, canvas->width, canvas->height);
 	} else if (one->sub == NEMOSHOW_CANVAS_PIXMAN_TYPE) {
@@ -830,11 +813,11 @@ int nemoshow_canvas_set_size(struct nemoshow *show, struct showone *one, int32_t
 void nemoshow_canvas_damage(struct showone *one, int32_t x, int32_t y, int32_t width, int32_t height)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
-	
+
 	nemotale_node_damage(canvas->node, x, y, width, height);
-	
+
 	canvas->needs_redraw = 1;
-	
+
 	nemoshow_one_dirty(one, NEMOSHOW_CANVAS_DIRTY);
 }
 
