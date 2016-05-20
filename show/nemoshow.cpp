@@ -420,13 +420,13 @@ void nemoshow_above_canvas(struct nemoshow *show, struct showone *one, struct sh
 				NEMOSHOW_CANVAS_AT(one, node),
 				NEMOSHOW_CANVAS_AT(above, node));
 
-		nemolist_insert_tail(&above->children_link, &one->children_link);
+		nemolist_insert(&above->children_link, &one->children_link);
 	} else {
 		nemotale_above_node(show->tale,
 				NEMOSHOW_CANVAS_AT(one, node),
 				NULL);
 
-		nemolist_insert_tail(&one->parent->children_list, &one->children_link);
+		nemolist_insert(&one->parent->children_list, &one->children_link);
 	}
 }
 
@@ -439,13 +439,13 @@ void nemoshow_below_canvas(struct nemoshow *show, struct showone *one, struct sh
 				NEMOSHOW_CANVAS_AT(one, node),
 				NEMOSHOW_CANVAS_AT(below, node));
 
-		nemolist_insert(&below->children_link, &one->children_link);
+		nemolist_insert_tail(&below->children_link, &one->children_link);
 	} else {
 		nemotale_below_node(show->tale,
 				NEMOSHOW_CANVAS_AT(one, node),
 				NULL);
 
-		nemolist_insert(&one->parent->children_list, &one->children_link);
+		nemolist_insert_tail(&one->parent->children_list, &one->children_link);
 	}
 }
 
