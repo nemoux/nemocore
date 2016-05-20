@@ -178,6 +178,7 @@ int nemoshow_canvas_resize(struct showone *one)
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
 	if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
+		nemotale_node_resize_pixman(canvas->node, canvas->width, canvas->height);
 	} else if (one->sub == NEMOSHOW_CANVAS_PIPELINE_TYPE) {
 		nemotale_node_resize_gl(canvas->node, canvas->width, canvas->height);
 	} else if (one->sub == NEMOSHOW_CANVAS_PIXMAN_TYPE) {
