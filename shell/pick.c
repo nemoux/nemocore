@@ -92,7 +92,7 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 			nemolog_message("PICK", "[UP:SCALE] %llu: sx(%f) sy(%f) width(%d) height(%d) (%u)\n", touchid, bin->view->geometry.sx, bin->view->geometry.sy, width, height, time);
 
 		if (bin->on_pickscreen != 0) {
-			if (nemocompz_get_scene_width(compz) * shell->pick.fullscreen_scale <= width &&
+			if (nemocompz_get_scene_width(compz) * shell->pick.fullscreen_scale <= width ||
 					nemocompz_get_scene_height(compz) * shell->pick.fullscreen_scale <= height)
 				screen = nemoshell_get_fullscreen_on(shell, tp0->x, tp0->y, NEMOSHELL_FULLSCREEN_PICK_TYPE);
 
