@@ -267,6 +267,8 @@ struct shellbin {
 		float ax, ay;
 
 		uint32_t serial;
+
+		int32_t width, height;
 	} scale;
 	int32_t has_scale;
 

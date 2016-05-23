@@ -115,6 +115,8 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 
 		bin->has_scale = 1;
 		bin->scale.serial = bin->next_serial;
+		bin->scale.width = width;
+		bin->scale.height = height;
 	}
 
 	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_MOVE)) {

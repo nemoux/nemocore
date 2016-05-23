@@ -285,7 +285,9 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 				sy = (canvas->base.height - bin->last_height) * view->geometry.ay;
 			}
 		} else {
-			if (bin->has_scale != 0) {
+#define NEMOSHELL_BIN_SCALE_EPSILON			(100)
+
+			if (bin->has_scale != 0 && (abs(bin->scale.width - canvas->base.width) < NEMOSHELL_BIN_SCALE_EPSILON || abs(bin->scale.height - canvas->base.height) < NEMOSHELL_BIN_SCALE_EPSILON)) {
 				nemoview_set_scale(view, 1.0f, 1.0f);
 				nemoview_update_transform(view);
 
