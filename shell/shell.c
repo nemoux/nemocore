@@ -891,6 +891,7 @@ static inline void nemoshell_set_client_state(struct shellbin *bin, struct clien
 int nemoshell_use_client_state(struct nemoshell *shell, struct shellbin *bin)
 {
 	struct clientstate *state;
+	pixman_box32_t *extents;
 	pid_t pid = bin->pid;
 
 	state = nemoshell_get_client_state(shell, pid);
@@ -910,6 +911,13 @@ int nemoshell_use_client_state(struct nemoshell *shell, struct shellbin *bin)
 			}
 		}
 	}
+
+	extents = pixman_region32_extents(&shell->compz->scope);
+
+	bin->initial.x = random_get_int(extents->x1, extents->x2);
+	bin->initial.y = random_get_int(extents->y1, extents->y2);
+	bin->initial.dx = 0.5f;
+	bin->initial.dy = 0.5f;
 
 	return 0;
 }
