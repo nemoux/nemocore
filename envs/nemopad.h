@@ -14,7 +14,7 @@ NEMO_BEGIN_EXTERN_C
 #define NEMOPAD_MINIMUM_WIDTH		(NEMOPAD_WIDTH / 2)
 #define NEMOPAD_MINIMUM_HEIGHT	(NEMOPAD_HEIGHT / 2)
 
-#define	NEMOPAD_TIMEOUT					(700)
+#define	NEMOPAD_TIMEOUT					(3000)
 
 #define NEMOPAD_KEYS_MAX				(80)
 
@@ -38,7 +38,7 @@ struct nemopad {
 
 	struct showone *back;
 	struct showone *canvas;
-	
+
 	struct showone *borders[NEMOPAD_KEYS_MAX];
 	struct showone *keys[NEMOPAD_KEYS_MAX];
 
@@ -46,9 +46,6 @@ struct nemopad {
 
 	int is_upper_case;
 	int is_shift_case;
-
-	int is_pickable;
-	int is_visible;
 
 	uint32_t width;
 	uint32_t height;

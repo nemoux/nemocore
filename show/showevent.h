@@ -190,6 +190,11 @@ static inline void nemoshow_event_set_used_all(void *event)
 	nemotale_event_set_used_all((struct taleevent *)event);
 }
 
+static inline int nemoshow_event_is_used(void *event)
+{
+	return nemotale_event_is_used((struct taleevent *)event);
+}
+
 static inline void nemoshow_event_set_cancel(void *event)
 {
 	nemotale_event_set_cancel((struct taleevent *)event);

@@ -350,6 +350,11 @@ static inline void nemotale_event_set_used_all(struct taleevent *event)
 	}
 }
 
+static inline int nemotale_event_is_used(struct taleevent *event)
+{
+	return nemotale_tap_has_state(event->tap, NEMOTALE_TAP_USED_STATE);
+}
+
 static inline void nemotale_event_set_cancel(struct taleevent *event)
 {
 	event->type = NEMOTALE_CANCEL_EVENT;

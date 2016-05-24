@@ -36,93 +36,95 @@ static struct {
 	uint32_t color1;
 
 	double thickness;
+
+	int needs_holding;
 } nemopadkeys[NEMOPAD_KEYS_MAX] = {
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-base.svg", NULL, NULL, NULL, 0, 0, 964, 322, "BASE", 0, 2, 2, 1.0f },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-base.svg", NULL, NULL, NULL, 0, 0, 964, 322, "BASE", 0, 2, 2, 1.0f, 0 },
 
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-h.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-01.svg", NULL, NULL, 26, 4, 86, 30, "ESC", 1, 2, 2, 3.0f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-h-i.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-02.svg", NULL, NULL, 76, 4, 136, 30, "FOCUS", 0, 2, 2, 3.0f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-h.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-03.svg", NULL, NULL, 138, 4, 198, 30, "F1", 59, 2, 2, 3.0f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-h-i.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-04.svg", NULL, NULL, 188, 4, 248, 30, "F2", 60, 2, 2, 3.0f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-h.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-05.svg", NULL, NULL, 238, 4, 298, 30, "F3", 61, 2, 2, 3.0f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-h-i.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-06.svg", NULL, NULL, 288, 4, 348, 30, "F4", 62, 2, 2, 3.0f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-h.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-07.svg", NULL, NULL, 338, 4, 398, 30, "F5", 63, 2, 2, 3.0f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-h-i.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-08.svg", NULL, NULL, 388, 4, 448, 30, "F6", 64, 2, 2, 3.0f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-h.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-09.svg", NULL, NULL, 452, 4, 512, 30, "PICK", 0, 2, 2, 3.0f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-h-i.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-10.svg", NULL, NULL, 516, 4, 576, 30, "F7", 65, 2, 2, 3.0f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-h.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-11.svg", NULL, NULL, 566, 4, 626, 30, "F8", 66, 2, 2, 3.0f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-h-i.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-12.svg", NULL, NULL, 616, 4, 676, 30, "F9", 67, 2, 2, 3.0f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-h.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-13.svg", NULL, NULL, 666, 4, 726, 30, "F10", 68, 2, 2, 3.0f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-h-i.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-14.svg", NULL, NULL, 716, 4, 776, 30, "F11", 87, 2, 2, 3.0f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-h.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-15.svg", NULL, NULL, 766, 4, 826, 30, "F12", 88, 2, 2, 3.0f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-h-i.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-16.svg", NULL, NULL, 828, 4, 888, 30, "FOCUS", 0, 2, 2, 3.0f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-h.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-17.svg", NULL, NULL, 878, 4, 938, 30, "POWER", 0, 2, 2, 3.0f },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-h.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-01.svg", NULL, NULL, 26, 4, 86, 30, "ESC", 1, 2, 2, 3.0f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-h-i.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-02.svg", NULL, NULL, 76, 4, 136, 30, "FOCUS", 0, 2, 2, 3.0f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-h.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-03.svg", NULL, NULL, 138, 4, 198, 30, "F1", 59, 2, 2, 3.0f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-h-i.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-04.svg", NULL, NULL, 188, 4, 248, 30, "F2", 60, 2, 2, 3.0f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-h.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-05.svg", NULL, NULL, 238, 4, 298, 30, "F3", 61, 2, 2, 3.0f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-h-i.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-06.svg", NULL, NULL, 288, 4, 348, 30, "F4", 62, 2, 2, 3.0f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-h.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-07.svg", NULL, NULL, 338, 4, 398, 30, "F5", 63, 2, 2, 3.0f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-h-i.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-08.svg", NULL, NULL, 388, 4, 448, 30, "F6", 64, 2, 2, 3.0f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-h.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-09.svg", NULL, NULL, 452, 4, 512, 30, "PICK", 0, 2, 2, 3.0f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-h-i.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-10.svg", NULL, NULL, 516, 4, 576, 30, "F7", 65, 2, 2, 3.0f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-h.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-11.svg", NULL, NULL, 566, 4, 626, 30, "F8", 66, 2, 2, 3.0f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-h-i.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-12.svg", NULL, NULL, 616, 4, 676, 30, "F9", 67, 2, 2, 3.0f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-h.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-13.svg", NULL, NULL, 666, 4, 726, 30, "F10", 68, 2, 2, 3.0f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-h-i.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-14.svg", NULL, NULL, 716, 4, 776, 30, "F11", 87, 2, 2, 3.0f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-h.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-15.svg", NULL, NULL, 766, 4, 826, 30, "F12", 88, 2, 2, 3.0f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-h-i.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-16.svg", NULL, NULL, 828, 4, 888, 30, "FOCUS", 0, 2, 2, 3.0f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-h.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-17.svg", NULL, NULL, 878, 4, 938, 30, "POWER", 0, 2, 2, 3.0f, 0 },
 
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-18.svg", NULL, NEMOENVS_RESOURCES "/keyboard/keyboard-18-s.svg", 4, 42, 64, 94, "'", 41, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-19.svg", NULL, NEMOENVS_RESOURCES "/keyboard/keyboard-19-s.svg", 68, 42, 128, 94, "1", 2, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-20.svg", NULL, NEMOENVS_RESOURCES "/keyboard/keyboard-20-s.svg", 132, 42, 192, 94, "2", 3, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-21.svg", NULL, NEMOENVS_RESOURCES "/keyboard/keyboard-21-s.svg", 196, 42, 256, 94, "3", 4, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-22.svg", NULL, NEMOENVS_RESOURCES "/keyboard/keyboard-22-s.svg", 260, 42, 320, 94, "4", 5, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-23.svg", NULL, NEMOENVS_RESOURCES "/keyboard/keyboard-23-s.svg", 324, 42, 384, 94, "5", 6, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-24.svg", NULL, NEMOENVS_RESOURCES "/keyboard/keyboard-24-s.svg", 388, 42, 448, 94, "6", 7, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-25.svg", NULL, NEMOENVS_RESOURCES "/keyboard/keyboard-25-s.svg", 452, 42, 512, 94, "7", 8, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-26.svg", NULL, NEMOENVS_RESOURCES "/keyboard/keyboard-26-s.svg", 516, 42, 576, 94, "8", 9, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-27.svg", NULL, NEMOENVS_RESOURCES "/keyboard/keyboard-27-s.svg", 580, 42, 640, 94, "9", 10, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-28.svg", NULL, NEMOENVS_RESOURCES "/keyboard/keyboard-28-s.svg", 644, 42, 704, 94, "0", 11, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-29.svg", NULL, NEMOENVS_RESOURCES "/keyboard/keyboard-29-s.svg", 708, 42, 768, 94, "-", 12, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-30.svg", NULL, NEMOENVS_RESOURCES "/keyboard/keyboard-30-s.svg", 772, 42, 832, 94, "=", 13, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-d-i.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-31.svg", NULL, NULL, 821, 42, 960, 94, "BACK", 14, 1, 1, 3.0f },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-18.svg", NULL, NEMOENVS_RESOURCES "/keyboard/keyboard-18-s.svg", 4, 42, 64, 94, "'", 41, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-19.svg", NULL, NEMOENVS_RESOURCES "/keyboard/keyboard-19-s.svg", 68, 42, 128, 94, "1", 2, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-20.svg", NULL, NEMOENVS_RESOURCES "/keyboard/keyboard-20-s.svg", 132, 42, 192, 94, "2", 3, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-21.svg", NULL, NEMOENVS_RESOURCES "/keyboard/keyboard-21-s.svg", 196, 42, 256, 94, "3", 4, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-22.svg", NULL, NEMOENVS_RESOURCES "/keyboard/keyboard-22-s.svg", 260, 42, 320, 94, "4", 5, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-23.svg", NULL, NEMOENVS_RESOURCES "/keyboard/keyboard-23-s.svg", 324, 42, 384, 94, "5", 6, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-24.svg", NULL, NEMOENVS_RESOURCES "/keyboard/keyboard-24-s.svg", 388, 42, 448, 94, "6", 7, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-25.svg", NULL, NEMOENVS_RESOURCES "/keyboard/keyboard-25-s.svg", 452, 42, 512, 94, "7", 8, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-26.svg", NULL, NEMOENVS_RESOURCES "/keyboard/keyboard-26-s.svg", 516, 42, 576, 94, "8", 9, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-27.svg", NULL, NEMOENVS_RESOURCES "/keyboard/keyboard-27-s.svg", 580, 42, 640, 94, "9", 10, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-28.svg", NULL, NEMOENVS_RESOURCES "/keyboard/keyboard-28-s.svg", 644, 42, 704, 94, "0", 11, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-29.svg", NULL, NEMOENVS_RESOURCES "/keyboard/keyboard-29-s.svg", 708, 42, 768, 94, "-", 12, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-30.svg", NULL, NEMOENVS_RESOURCES "/keyboard/keyboard-30-s.svg", 772, 42, 832, 94, "=", 13, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-d-i.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-31.svg", NULL, NULL, 821, 42, 960, 94, "BACK", 14, 1, 1, 3.0f, 1 },
 
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-b.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-32.svg", NULL, NULL, 36, 98, 111, 150, "TAB", 15, 1, 1, 3.0f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-33.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-33-s.svg", NULL, 100, 98, 160, 150, "q", 16, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-34.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-34-s.svg", NULL, 164, 98, 224, 150, "w", 17, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-35.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-35-s.svg", NULL, 228, 98, 288, 150, "e", 18, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-36.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-36-s.svg", NULL, 292, 98, 352, 150, "r", 19, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-37.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-37-s.svg", NULL, 356, 98, 416, 150, "t", 20, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-38.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-38-s.svg", NULL, 420, 98, 480, 150, "y", 21, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-39.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-39-s.svg", NULL, 484, 98, 544, 150, "u", 22, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-40.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-40-s.svg", NULL, 548, 98, 608, 150, "i", 23, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-41.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-41-s.svg", NULL, 612, 98, 672, 150, "o", 24, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-42.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-42-s.svg", NULL, 676, 98, 736, 150, "p", 25, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-43.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-43-s.svg", NULL, 740, 98, 800, 150, "[", 26, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-44.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-44-s.svg", NULL, 804, 98, 864, 150, "]", 27, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-45.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-45-s.svg", NULL, 868, 98, 928, 150, "\\", 43, 1, 2, 1.5f },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-b.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-32.svg", NULL, NULL, 36, 98, 111, 150, "TAB", 15, 1, 1, 3.0f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-33.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-33-s.svg", NULL, 100, 98, 160, 150, "q", 16, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-34.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-34-s.svg", NULL, 164, 98, 224, 150, "w", 17, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-35.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-35-s.svg", NULL, 228, 98, 288, 150, "e", 18, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-36.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-36-s.svg", NULL, 292, 98, 352, 150, "r", 19, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-37.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-37-s.svg", NULL, 356, 98, 416, 150, "t", 20, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-38.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-38-s.svg", NULL, 420, 98, 480, 150, "y", 21, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-39.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-39-s.svg", NULL, 484, 98, 544, 150, "u", 22, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-40.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-40-s.svg", NULL, 548, 98, 608, 150, "i", 23, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-41.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-41-s.svg", NULL, 612, 98, 672, 150, "o", 24, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-42.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-42-s.svg", NULL, 676, 98, 736, 150, "p", 25, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-43.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-43-s.svg", NULL, 740, 98, 800, 150, "[", 26, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-44.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-44-s.svg", NULL, 804, 98, 864, 150, "]", 27, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-45.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-45-s.svg", NULL, 868, 98, 928, 150, "\\", 43, 1, 2, 1.5f, 0 },
 
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-c.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-46.svg", NULL, NULL, 36, 154, 143, 206, "CAPS", 58, 1, 1, 3.0f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-47.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-47-s.svg", NULL, 132, 154, 192, 206, "a", 30, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-48.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-48-s.svg", NULL, 196, 154, 256, 206, "s", 31, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-49.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-49-s.svg", NULL, 260, 154, 320, 206, "d", 32, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-50.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-50-s.svg", NULL, 324, 154, 384, 206, "f", 33, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-51.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-51-s.svg", NULL, 388, 154, 448, 206, "g", 34, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-52.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-52-s.svg", NULL, 452, 154, 512, 206, "h", 35, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-53.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-53-s.svg", NULL, 516, 154, 576, 206, "j", 36, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-54.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-54-s.svg", NULL, 580, 154, 640, 206, "k", 37, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-55.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-55-s.svg", NULL, 644, 154, 704, 206, "l", 38, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-56.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-56-s.svg", NULL, 708, 154, 768, 206, ";", 39, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-57.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-57-s.svg", NULL, 772, 154, 832, 206, "'", 40, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-c-i.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-58.svg", NULL, NULL, 821, 154, 928, 206, "ENTER", 28, 1, 1, 3.0f },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-c.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-46.svg", NULL, NULL, 36, 154, 143, 206, "CAPS", 58, 1, 1, 3.0f, 1 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-47.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-47-s.svg", NULL, 132, 154, 192, 206, "a", 30, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-48.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-48-s.svg", NULL, 196, 154, 256, 206, "s", 31, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-49.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-49-s.svg", NULL, 260, 154, 320, 206, "d", 32, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-50.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-50-s.svg", NULL, 324, 154, 384, 206, "f", 33, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-51.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-51-s.svg", NULL, 388, 154, 448, 206, "g", 34, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-52.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-52-s.svg", NULL, 452, 154, 512, 206, "h", 35, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-53.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-53-s.svg", NULL, 516, 154, 576, 206, "j", 36, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-54.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-54-s.svg", NULL, 580, 154, 640, 206, "k", 37, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-55.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-55-s.svg", NULL, 644, 154, 704, 206, "l", 38, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-56.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-56-s.svg", NULL, 708, 154, 768, 206, ";", 39, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-57.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-57-s.svg", NULL, 772, 154, 832, 206, "'", 40, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-c-i.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-58.svg", NULL, NULL, 821, 154, 928, 206, "ENTER", 28, 1, 1, 3.0f, 0 },
 
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-d.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-59.svg", NULL, NULL, 36, 210, 175, 262, "SHIFT", 42, 1, 1, 3.0f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-60.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-60-s.svg", NULL, 164, 210, 224, 262, "z", 44, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-61.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-61-s.svg", NULL, 228, 210, 288, 262, "x", 45, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-62.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-62-s.svg", NULL, 292, 210, 352, 262, "c", 46, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-63.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-63-s.svg", NULL, 356, 210, 416, 262, "v", 47, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-64.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-64-s.svg", NULL, 420, 210, 480, 262, "b", 48, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-65.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-65-s.svg", NULL, 484, 210, 544, 262, "n", 49, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-66.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-66-s.svg", NULL, 548, 210, 608, 262, "m", 50, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-67.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-67-s.svg", NULL, 612, 210, 672, 262, ",", 51, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-68.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-68-s.svg", NULL, 676, 210, 736, 262, ".", 52, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-69.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-69-s.svg", NULL, 740, 210, 800, 262, "/", 53, 1, 2, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-d-i.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-70.svg", NULL, NULL, 789, 210, 928, 262, "SHIFT", 54, 1, 1, 3.0f },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-d.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-59.svg", NULL, NULL, 36, 210, 175, 262, "SHIFT", 42, 1, 1, 3.0f, 1 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-60.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-60-s.svg", NULL, 164, 210, 224, 262, "z", 44, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-61.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-61-s.svg", NULL, 228, 210, 288, 262, "x", 45, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-62.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-62-s.svg", NULL, 292, 210, 352, 262, "c", 46, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-63.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-63-s.svg", NULL, 356, 210, 416, 262, "v", 47, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-64.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-64-s.svg", NULL, 420, 210, 480, 262, "b", 48, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-65.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-65-s.svg", NULL, 484, 210, 544, 262, "n", 49, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-66.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-66-s.svg", NULL, 548, 210, 608, 262, "m", 50, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-67.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-67-s.svg", NULL, 612, 210, 672, 262, ",", 51, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-68.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-68-s.svg", NULL, 676, 210, 736, 262, ".", 52, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-a.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-69.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-69-s.svg", NULL, 740, 210, 800, 262, "/", 53, 1, 2, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-d-i.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-70.svg", NULL, NULL, 789, 210, 928, 262, "SHIFT", 54, 1, 1, 3.0f, 1 },
 
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-b.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-71.svg", NULL, NULL, 68, 266, 143, 318, "CTRL", 29, 1, 1, 3.0f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-b.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-72.svg", NULL, NULL, 132, 266, 207, 318, "ALT", 56, 1, 1, 3.0f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-e.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-73.svg", NULL, NULL, 181, 266, 655, 318, "SPACE", 57, 1, 1, 3.0f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-b-i.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-74.svg", NULL, NULL, 629, 266, 704, 318, "CTRL", 29, 1, 1, 3.0f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-b-i.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-75.svg", NULL, NULL, 693, 266, 768, 318, "ALT", 56, 1, 1, 3.0f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-f.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-76.svg", NULL, NULL, 772, 266, 802, 318, "LEFT", 75, 1, 1, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-g.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-77.svg", NULL, NULL, 805, 266, 863, 290, "UP", 72, 1, 1, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-g-i.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-78.svg", NULL, NULL, 805, 294, 863, 318, "DOWN", 80, 1, 1, 1.5f },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-f.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-79.svg", NULL, NULL, 866, 266, 896, 318, "RIGHT", 77, 1, 1, 1.5f },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-b.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-71.svg", NULL, NULL, 68, 266, 143, 318, "CTRL", 29, 1, 1, 3.0f, 1 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-b.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-72.svg", NULL, NULL, 132, 266, 207, 318, "ALT", 56, 1, 1, 3.0f, 1 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-e.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-73.svg", NULL, NULL, 181, 266, 655, 318, "SPACE", 57, 1, 1, 3.0f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-b-i.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-74.svg", NULL, NULL, 629, 266, 704, 318, "CTRL", 29, 1, 1, 3.0f, 1 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-b-i.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-75.svg", NULL, NULL, 693, 266, 768, 318, "DEL", 111, 1, 1, 3.0f, 1 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-f.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-76.svg", NULL, NULL, 772, 266, 802, 318, "LEFT", 75, 1, 1, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-g.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-77.svg", NULL, NULL, 805, 266, 863, 290, "UP", 72, 1, 1, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-g-i.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-78.svg", NULL, NULL, 805, 294, 863, 318, "DOWN", 80, 1, 1, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-f.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-79.svg", NULL, NULL, 866, 266, 896, 318, "RIGHT", 77, 1, 1, 1.5f, 0 },
 };
 
 static struct showone *nemopadborders[NEMOPAD_KEYS_MAX];
@@ -213,6 +215,75 @@ void __attribute__((destructor(101))) nemopad_finalize_envs(void)
 	}
 }
 
+static void nemopad_update_key_layout(struct nemopad *pad)
+{
+	int caps_on, shift_on;
+	int i;
+
+	caps_on = nemokeypad_is_caps_on(pad->keypad);
+	shift_on = nemokeypad_is_shift_on(pad->keypad);
+
+	if ((caps_on ^ shift_on) != pad->is_upper_case) {
+		for (i = 0; i < NEMOPAD_KEYS_MAX; i++) {
+			struct showone *path = pad->is_upper_case == 0 ? nemopaduppers[i] : nemopadnormals[i];
+			uint32_t color = pad->is_upper_case == 0 ? nemopadkeys[i].color1 : nemopadkeys[i].color0;
+
+			if (nemopaduppers[i] != NULL) {
+				nemoshow_item_set_fill_color(pad->borders[i],
+						nemopadcolors[color][0],
+						nemopadcolors[color][1],
+						nemopadcolors[color][2],
+						0x40);
+				nemoshow_item_set_stroke_color(pad->borders[i],
+						nemopadcolors[color][0],
+						nemopadcolors[color][1],
+						nemopadcolors[color][2],
+						0xa0);
+				nemoshow_item_set_fill_color(pad->keys[i],
+						nemopadcolors[color][0],
+						nemopadcolors[color][1],
+						nemopadcolors[color][2],
+						0xe0);
+
+				nemoshow_item_path_clear(pad->keys[i]);
+				nemoshow_item_path_append(pad->keys[i], path);
+			}
+		}
+
+		pad->is_upper_case = (caps_on ^ shift_on);
+	}
+
+	if (shift_on != pad->is_shift_case) {
+		for (i = 0; i < NEMOPAD_KEYS_MAX; i++) {
+			struct showone *path = pad->is_shift_case == 0 ? nemopadshifts[i] : nemopadnormals[i];
+			uint32_t color = pad->is_shift_case == 0 ? nemopadkeys[i].color1 : nemopadkeys[i].color0;
+
+			if (nemopadshifts[i] != NULL) {
+				nemoshow_item_set_fill_color(pad->borders[i],
+						nemopadcolors[color][0],
+						nemopadcolors[color][1],
+						nemopadcolors[color][2],
+						0x40);
+				nemoshow_item_set_stroke_color(pad->borders[i],
+						nemopadcolors[color][0],
+						nemopadcolors[color][1],
+						nemopadcolors[color][2],
+						0xa0);
+				nemoshow_item_set_fill_color(pad->keys[i],
+						nemopadcolors[color][0],
+						nemopadcolors[color][1],
+						nemopadcolors[color][2],
+						0xe0);
+
+				nemoshow_item_path_clear(pad->keys[i]);
+				nemoshow_item_path_append(pad->keys[i], path);
+			}
+		}
+
+		pad->is_shift_case = shift_on;
+	}
+}
+
 static int nemopad_dispatch_key_grab(struct nemoshow *show, struct showgrab *grab, void *event)
 {
 	struct nemopad *pad = (struct nemopad *)nemoshow_grab_get_userdata(grab);
@@ -220,25 +291,29 @@ static int nemopad_dispatch_key_grab(struct nemoshow *show, struct showgrab *gra
 	uint32_t code = nemopadkeys[tag].code;
 
 	if (nemoshow_event_is_down(show, event)) {
-		if (code != 0) {
-			nemokeypad_notify_key(pad->keypad,
-					time_current_msecs(),
-					code,
-					WL_KEYBOARD_KEY_STATE_PRESSED);
-		}
+		if (tag == 17) {
+			nemopad_deactivate(pad);
+		} else if (tag == 2 || tag == 16) {
+			struct nemocompz *compz = pad->shell->compz;
+			struct nemoview *view;
+			float sx, sy;
 
-		if (tag == 9) {
-			int i;
-
-			for (i = 0; i < NEMOPAD_KEYS_MAX; i++) {
-				if (pad->keys[i] != NULL) {
-					nemoshow_item_set_fill_color(pad->keys[i], 0x0, 0x0, 0x0, 0x0);
-				}
+			view = nemocompz_pick_canvas(compz,
+					nemoshow_event_get_gx(event),
+					nemoshow_event_get_gy(event),
+					&sx, &sy);
+			if (view != NULL && nemoview_has_state(view, NEMOVIEW_KEYPAD_STATE)) {
+				nemokeypad_set_focus(pad->keypad, view);
 			}
+		} else {
+			if (code != 0 && nemopadkeys[tag].needs_holding != 0) {
+				nemokeypad_notify_key(pad->keypad,
+						time_current_msecs(),
+						code,
+						WL_KEYBOARD_KEY_STATE_PRESSED);
 
-			nemoshow_view_move(show, nemoshow_event_get_device(event));
-
-			pad->is_pickable = 1;
+				nemopad_update_key_layout(pad);
+			}
 		}
 
 		if (pad->borders[tag] != NULL) {
@@ -260,14 +335,23 @@ static int nemopad_dispatch_key_grab(struct nemoshow *show, struct showgrab *gra
 		nemoshow_dispatch_frame(show);
 	} else if (nemoshow_event_is_up(show, event)) {
 		if (code != 0) {
-			nemokeypad_notify_key(pad->keypad,
-					time_current_msecs(),
-					code,
-					WL_KEYBOARD_KEY_STATE_RELEASED);
-		}
+			if (nemopadkeys[tag].needs_holding != 0) {
+				nemokeypad_notify_key(pad->keypad,
+						time_current_msecs(),
+						code,
+						WL_KEYBOARD_KEY_STATE_RELEASED);
+			} else if (nemoshow_event_is_used(event) == 0) {
+				nemokeypad_notify_key(pad->keypad,
+						time_current_msecs(),
+						code,
+						WL_KEYBOARD_KEY_STATE_PRESSED);
+				nemokeypad_notify_key(pad->keypad,
+						time_current_msecs(),
+						code,
+						WL_KEYBOARD_KEY_STATE_RELEASED);
+			}
 
-		if (tag == 9) {
-			nemotimer_set_timeout(pad->timer, pad->timeout);
+			nemopad_update_key_layout(pad);
 		}
 
 		if (pad->borders[tag] != NULL) {
@@ -299,168 +383,43 @@ static int nemopad_dispatch_key_grab(struct nemoshow *show, struct showgrab *gra
 static void nemopad_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, void *event)
 {
 	struct nemopad *pad = (struct nemopad *)nemoshow_get_userdata(show);
+	uint32_t tag;
 
-	if (pad->is_pickable != 0) {
-		if (nemoshow_event_is_down(show, event) || nemoshow_event_is_up(show, event)) {
-			nemoshow_event_update_taps(show, NULL, event);
+	tag = nemoshow_canvas_pick_tag(canvas, nemoshow_event_get_x(event), nemoshow_event_get_y(event));
 
-			if (nemoshow_event_is_no_tap(show, event)) {
-				nemotimer_set_timeout(pad->timer, pad->timeout);
-			} else if (nemoshow_event_is_single_tap(show, event)) {
-				if (nemoshow_view_move(show, nemoshow_event_get_device_on(event, 0)) > 0) {
-					nemotimer_set_timeout(pad->timer, 0);
-				}
-			} else if (nemoshow_event_is_many_taps(show, event)) {
-				nemoshow_view_put_pivot(show);
+	if (nemoshow_event_is_down(show, event)) {
+		struct showgrab *grab;
 
-				if (nemoshow_view_pick_distant(show, event, NEMOSHOW_VIEW_PICK_ROTATE_TYPE | NEMOSHOW_VIEW_PICK_SCALE_TYPE | NEMOSHOW_VIEW_PICK_TRANSLATE_TYPE) > 0) {
-					nemotimer_set_timeout(pad->timer, 0);
-				}
-			}
-		}
-	} else {
-		uint32_t tag;
-		int caps_on, shift_on;
-		int i;
+		grab = nemoshow_grab_create(show, event, nemopad_dispatch_key_grab);
+		nemoshow_grab_set_userdata(grab, pad);
+		nemoshow_grab_set_tag(grab, tag);
+		nemoshow_grab_check_signal(grab, &pad->destroy_signal);
+		nemoshow_dispatch_grab(show, event);
+	}
 
-		tag = nemoshow_canvas_pick_tag(canvas, nemoshow_event_get_x(event), nemoshow_event_get_y(event));
+	if (nemoshow_event_is_down(show, event) || nemoshow_event_is_up(show, event)) {
+		nemoshow_event_update_taps(show, NULL, event);
 
-		if (nemoshow_event_is_down(show, event)) {
-			struct showgrab *grab;
+		if (nemoshow_event_is_single_tap(show, event) && tag == 9) {
+			nemoshow_view_move(show, nemoshow_event_get_device_on(event, 0));
+		} else if (nemoshow_event_is_more_taps(show, event, 3)) {
+			nemoshow_view_put_pivot(show);
 
-			grab = nemoshow_grab_create(show, event, nemopad_dispatch_key_grab);
-			nemoshow_grab_set_userdata(grab, pad);
-			nemoshow_grab_set_tag(grab, tag);
-			nemoshow_grab_check_signal(grab, &pad->destroy_signal);
-			nemoshow_dispatch_grab(show, event);
-		}
+			nemoshow_view_pick_distant(show, event, NEMOSHOW_VIEW_PICK_ROTATE_TYPE | NEMOSHOW_VIEW_PICK_SCALE_TYPE | NEMOSHOW_VIEW_PICK_TRANSLATE_TYPE);
 
-		caps_on = nemokeypad_is_caps_on(pad->keypad);
-		shift_on = nemokeypad_is_shift_on(pad->keypad);
-
-		if ((caps_on ^ shift_on) != pad->is_upper_case) {
-			for (i = 0; i < NEMOPAD_KEYS_MAX; i++) {
-				struct showone *path = pad->is_upper_case == 0 ? nemopaduppers[i] : nemopadnormals[i];
-				uint32_t color = pad->is_upper_case == 0 ? nemopadkeys[i].color1 : nemopadkeys[i].color0;
-
-				if (nemopaduppers[i] != NULL) {
-					nemoshow_item_set_fill_color(pad->borders[i],
-							nemopadcolors[color][0],
-							nemopadcolors[color][1],
-							nemopadcolors[color][2],
-							0x40);
-					nemoshow_item_set_stroke_color(pad->borders[i],
-							nemopadcolors[color][0],
-							nemopadcolors[color][1],
-							nemopadcolors[color][2],
-							0xa0);
-					nemoshow_item_set_fill_color(pad->keys[i],
-							nemopadcolors[color][0],
-							nemopadcolors[color][1],
-							nemopadcolors[color][2],
-							0xe0);
-
-					nemoshow_item_path_clear(pad->keys[i]);
-					nemoshow_item_path_append(pad->keys[i], path);
-				}
-			}
-
-			nemoshow_dispatch_frame(show);
-
-			pad->is_upper_case = (caps_on ^ shift_on);
-		}
-
-		if (shift_on != pad->is_shift_case) {
-			for (i = 0; i < NEMOPAD_KEYS_MAX; i++) {
-				struct showone *path = pad->is_shift_case == 0 ? nemopadshifts[i] : nemopadnormals[i];
-				uint32_t color = pad->is_shift_case == 0 ? nemopadkeys[i].color1 : nemopadkeys[i].color0;
-
-				if (nemopadshifts[i] != NULL) {
-					nemoshow_item_set_fill_color(pad->borders[i],
-							nemopadcolors[color][0],
-							nemopadcolors[color][1],
-							nemopadcolors[color][2],
-							0x40);
-					nemoshow_item_set_stroke_color(pad->borders[i],
-							nemopadcolors[color][0],
-							nemopadcolors[color][1],
-							nemopadcolors[color][2],
-							0xa0);
-					nemoshow_item_set_fill_color(pad->keys[i],
-							nemopadcolors[color][0],
-							nemopadcolors[color][1],
-							nemopadcolors[color][2],
-							0xe0);
-
-					nemoshow_item_path_clear(pad->keys[i]);
-					nemoshow_item_path_append(pad->keys[i], path);
-				}
-			}
-
-			nemoshow_dispatch_frame(show);
-
-			pad->is_shift_case = shift_on;
-		}
-
-		if (nemoshow_event_is_single_click(show, event)) {
-			if (tag == 17) {
-				nemopad_deactivate(pad);
-			} else if (tag == 2 || tag == 16) {
-				struct nemocompz *compz = pad->shell->compz;
-				struct nemoview *view;
-				float sx, sy;
-
-				view = nemocompz_pick_canvas(compz,
-						nemoshow_event_get_gx(event),
-						nemoshow_event_get_gy(event),
-						&sx, &sy);
-				if (view != NULL && nemoview_has_state(view, NEMOVIEW_KEYPAD_STATE)) {
-					nemokeypad_set_focus(pad->keypad, view);
-				}
-			}
+			nemoshow_event_set_used_all(event);
 		}
 	}
-}
 
-static void nemopad_dispatch_show_transform(struct nemoshow *show, int32_t visible, int32_t x, int32_t y, int32_t width, int32_t height)
-{
-	struct nemopad *pad = (struct nemopad *)nemoshow_get_userdata(show);
-
-	pad->is_visible = visible;
+	nemotimer_set_timeout(pad->timer, pad->timeout);
 }
 
 static void nemopad_dispatch_timer(struct nemotimer *timer, void *data)
 {
 	struct nemopad *pad = (struct nemopad *)data;
 
-	if (pad->state & NEMOPAD_ACTIVE_STATE) {
-		if (pad->is_visible != 0) {
-			struct nemoshow *show = pad->show;
-			int i;
-
-			pad->is_pickable = 0;
-
-			for (i = 0; i < NEMOPAD_KEYS_MAX; i++) {
-				if (pad->keys[i] != NULL) {
-					if (pad->is_upper_case != 0 || pad->is_shift_case != 0) {
-						nemoshow_item_set_fill_color(pad->keys[i],
-								nemopadcolors[nemopadkeys[i].color1][0],
-								nemopadcolors[nemopadkeys[i].color1][1],
-								nemopadcolors[nemopadkeys[i].color1][2],
-								0xe0);
-					} else {
-						nemoshow_item_set_fill_color(pad->keys[i],
-								nemopadcolors[nemopadkeys[i].color0][0],
-								nemopadcolors[nemopadkeys[i].color0][1],
-								nemopadcolors[nemopadkeys[i].color0][2],
-								0xe0);
-					}
-				}
-			}
-
-			nemoshow_dispatch_frame(show);
-		}
-	}
+	if (pad->state & NEMOPAD_ACTIVE_STATE)
+		nemopad_deactivate(pad);
 }
 
 struct nemopad *nemopad_create(struct nemoshell *shell, uint32_t width, uint32_t height, uint32_t minwidth, uint32_t minheight, uint32_t timeout)
@@ -545,7 +504,6 @@ int nemopad_activate(struct nemopad *pad, double x, double y, double r)
 	pad->show = show = nemoshow_create_view(shell, pad->width, pad->height);
 	if (show == NULL)
 		goto err2;
-	nemoshow_set_dispatch_transform(show, nemopad_dispatch_show_transform);
 	nemoshow_set_userdata(show, pad);
 
 	pad->scene = scene = nemoshow_scene_create();
