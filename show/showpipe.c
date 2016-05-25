@@ -396,6 +396,8 @@ static inline void nemoshow_pipe_dispatch_texture_one(struct showpipe *pipe, str
 			glDrawArrays(poly->mode, 0, poly->elements);
 			glBindVertexArray(0);
 		}
+
+		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
 	nemoshow_children_for_each(child, one) {
@@ -495,6 +497,8 @@ static inline void nemoshow_pipe_dispatch_lighting_texture_one(struct showpipe *
 			glDrawArrays(poly->mode, 0, poly->elements);
 			glBindVertexArray(0);
 		}
+
+		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
 	nemoshow_children_for_each(child, one) {
@@ -551,6 +555,8 @@ static inline void nemoshow_pipe_dispatch_lighting_diffuse_texture_one(struct sh
 			glDrawArrays(poly->mode, 0, poly->elements);
 			glBindVertexArray(0);
 		}
+
+		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
 	nemoshow_children_for_each(child, one) {

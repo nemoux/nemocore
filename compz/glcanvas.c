@@ -153,6 +153,7 @@ static int glrenderer_attach_egl(struct glrenderer *renderer, struct glcontent *
 		glActiveTexture(GL_TEXTURE0 + i);
 		glBindTexture(glcontent->target, glcontent->textures[i]);
 		renderer->image_target_texture_2d(glcontent->target, glcontent->images[i]);
+		glBindTexture(glcontent->target, 0);
 	}
 
 	glcontent->pitch = buffer->width;
@@ -376,6 +377,8 @@ void glrenderer_flush_canvas(struct nemorenderer *base, struct nemocanvas *canva
 		}
 #endif
 	}
+
+	glBindTexture(GL_TEXTURE_2D, 0);
 
 out:
 	pixman_region32_fini(&glcontent->damage);

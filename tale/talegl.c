@@ -883,6 +883,7 @@ int nemotale_node_flush_gl(struct nemotale *tale, struct talenode *node)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glBindTexture(GL_TEXTURE_2D, 0);
 
 		node->glcontext = gcontext;
 
@@ -954,6 +955,8 @@ int nemotale_node_flush_gl(struct nemotale *tale, struct talenode *node)
 #endif
 		}
 
+		glBindTexture(GL_TEXTURE_2D, 0);
+
 		node->needs_flush = 0;
 		node->needs_filter = 1;
 	}
@@ -997,6 +1000,8 @@ int nemotale_node_filter_gl(struct nemotale *tale, struct talenode *node)
 
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
+		glBindTexture(GL_TEXTURE_2D, 0);
+
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		node->needs_filter = 0;
@@ -1035,6 +1040,7 @@ int nemotale_node_set_filter(struct talenode *node, const char *shader)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glBindTexture(GL_TEXTURE_2D, 0);
 
 		node->glcontext = gcontext;
 

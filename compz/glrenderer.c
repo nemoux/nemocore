@@ -314,6 +314,11 @@ static void glrenderer_draw_view(struct glrenderer *renderer, struct nemoview *v
 
 	pixman_region32_fini(&blend);
 
+	for (i = 0; i < glcontent->ntextures; i++) {
+		glActiveTexture(GL_TEXTURE0 + i);
+		glBindTexture(glcontent->target, 0);
+	}
+
 out:
 	pixman_region32_fini(&repaint);
 }

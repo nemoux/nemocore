@@ -209,6 +209,7 @@ static int glrenderer_attach_egl(struct glrenderer *renderer, struct glcontent *
 
 	glBindTexture(glcontent->target, glcontent->textures[0]);
 	renderer->image_target_texture_2d(glcontent->target, glcontent->images[0]);
+	glBindTexture(glcontent->target, 0);
 
 	glcontent->shader = &renderer->texture_shader_rgba;
 	glcontent->pitch = actor->base.width;
@@ -320,6 +321,8 @@ void glrenderer_flush_actor(struct nemorenderer *base, struct nemoactor *actor)
 #endif
 	}
 
+	glBindTexture(GL_TEXTURE_2D, 0);
+
 out:
 	pixman_region32_fini(&glcontent->damage);
 	pixman_region32_init(&glcontent->damage);
@@ -356,6 +359,8 @@ int glrenderer_read_actor(struct nemorenderer *base, struct nemoactor *actor, pi
 	glBindTexture(GL_TEXTURE_2D, glcontent->textures[0]);
 
 	glGetTexImage(GL_TEXTURE_2D, 0, glformat, GL_UNSIGNED_BYTE, pixels);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
 
 	return 0;
 }
