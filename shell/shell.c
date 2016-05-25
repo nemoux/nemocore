@@ -414,6 +414,7 @@ struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas
 	}
 
 	bin->view->canvas = canvas;
+	bin->view->client = wl_resource_get_client(canvas->resource);
 
 	wl_list_insert(&canvas->view_list, &bin->view->link);
 

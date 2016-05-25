@@ -1022,6 +1022,28 @@ struct nemoview *nemocompz_get_view_by_id(struct nemocompz *compz, uint32_t id)
 	return NULL;
 }
 
+struct nemoview *nemocompz_get_view_by_client(struct nemocompz *compz, struct wl_client *client)
+{
+	struct nemolayer *layer;
+	struct nemoview *view, *child;
+
+	wl_list_for_each(layer, &compz->layer_list, link) {
+		wl_list_for_each(view, &layer->view_list, layer_link) {
+			if (view->client == client)
+				return view;
+
+			if (!wl_list_empty(&view->children_list)) {
+				wl_list_for_each(child, &view->children_list, children_link) {
+					if (child->client == client)
+						return child;
+				}
+			}
+		}
+	}
+
+	return NULL;
+}
+
 void nemocompz_load_configs(struct nemocompz *compz, const char *configpath)
 {
 	struct nemoxml *xml;

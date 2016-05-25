@@ -60,6 +60,8 @@ struct nemoview {
 
 	struct wl_signal destroy_signal;
 
+	struct wl_client *client;
+
 	struct wl_list link;
 	struct wl_list layer_link;
 
