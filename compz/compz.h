@@ -99,6 +99,9 @@ struct nemocompz {
 	uint32_t screen_idpool;
 	uint32_t render_idpool;
 
+	uint32_t canvas_ids;
+	uint32_t view_ids;
+
 	uint32_t keyboard_ids;
 	uint32_t pointer_ids;
 	uint32_t stick_ids;

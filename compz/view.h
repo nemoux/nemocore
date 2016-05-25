@@ -51,6 +51,8 @@ struct nemoview {
 	struct nemocompz *compz;
 	struct nemocontent *content;
 
+	uint32_t id;
+
 	struct nemocanvas *canvas;
 	struct nemoactor *actor;
 

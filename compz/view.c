@@ -36,6 +36,8 @@ struct nemoview *nemoview_create(struct nemocompz *compz, struct nemocontent *co
 	view->canvas = NULL;
 	view->actor = NULL;
 
+	view->id = ++compz->view_ids;
+
 	wl_signal_init(&view->destroy_signal);
 
 	wl_list_init(&view->link);

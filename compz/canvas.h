@@ -86,6 +86,8 @@ struct nemocanvas {
 
 	struct nemocompz *compz;
 
+	uint32_t id;
+
 	struct wl_resource *resource;
 	struct wl_signal destroy_signal;
 
