@@ -252,29 +252,14 @@ static void keyboard_handle_repeat_info(void *data, struct nemo_keyboard *keyboa
 {
 }
 
-static void keyboard_handle_layout(void *data, struct nemo_keyboard *keyboard, const char *name)
-{
-}
-
 static const struct nemo_keyboard_listener keyboard_listener = {
 	keyboard_handle_keymap,
 	keyboard_handle_enter,
 	keyboard_handle_leave,
 	keyboard_handle_key,
 	keyboard_handle_modifiers,
-	keyboard_handle_repeat_info,
-	keyboard_handle_layout
+	keyboard_handle_repeat_info
 };
-
-void nemotool_keyboard_key(struct nemotool *tool, uint32_t time, uint32_t key, uint32_t state)
-{
-	nemo_keyboard_key(tool->keyboard, time, key, state);
-}
-
-void nemotool_keyboard_layout(struct nemotool *tool, const char *name)
-{
-	nemo_keyboard_layout(tool->keyboard, name);
-}
 
 static void touch_handle_down(void *data, struct nemo_touch *touch, uint32_t serial, uint32_t time, struct wl_surface *surface, int32_t id, wl_fixed_t sx, wl_fixed_t sy, wl_fixed_t x, wl_fixed_t y)
 {

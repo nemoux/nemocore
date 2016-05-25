@@ -157,20 +157,6 @@
 			<arg name="delay" type="int"/>
 		</event>
 
-		<event name="layout">
-			<arg name="name" type="string"/>
-		</event>
-
-		<request name="key">
-			<arg name="time" type="uint"/>
-			<arg name="key" type="uint"/>
-			<arg name="state" type="uint"/>
-		</request>
-
-		<request name="layout">
-			<arg name="name" type="string"/>
-		</request>
-
 		<request name="release" type="destructor">
 		</request>
 	</interface>

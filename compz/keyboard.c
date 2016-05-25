@@ -85,22 +85,12 @@ int nemokeyboard_bind_wayland(struct wl_client *client, struct wl_resource *seat
 	return 0;
 }
 
-static void nemo_keyboard_key(struct wl_client *client, struct wl_resource *resource, uint32_t time, uint32_t key, uint32_t state)
-{
-}
-
-static void nemo_keyboard_layout(struct wl_client *client, struct wl_resource *resource, const char *name)
-{
-}
-
 static void nemo_keyboard_release(struct wl_client *client, struct wl_resource *resource)
 {
 	wl_resource_destroy(resource);
 }
 
 static const struct nemo_keyboard_interface nemo_keyboard_implementation = {
-	nemo_keyboard_key,
-	nemo_keyboard_layout,
 	nemo_keyboard_release
 };
 
