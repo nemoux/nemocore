@@ -46,6 +46,9 @@ struct nemoview *nemoview_create(struct nemocompz *compz, struct nemocontent *co
 	wl_list_init(&view->children_link);
 	wl_list_init(&view->children_list);
 
+	wl_list_init(&view->parent_destroy_listener.link);
+	wl_list_init(&view->focus_destroy_listener.link);
+
 	wl_list_init(&view->geometry.transform_list);
 
 	pixman_region32_init(&view->clip);
@@ -95,14 +98,15 @@ void nemoview_destroy(struct nemoview *view)
 		nemoview_unmap(view);
 
 	wl_list_remove(&view->link);
+	wl_list_remove(&view->layer_link);
+	wl_list_remove(&view->children_link);
 
-	nemoview_detach_layer(view);
+	wl_list_remove(&view->parent_destroy_listener.link);
+	wl_list_remove(&view->focus_destroy_listener.link);
 
 	pixman_region32_fini(&view->clip);
 	pixman_region32_fini(&view->geometry.region);
 	pixman_region32_fini(&view->transform.boundingbox);
-
-	nemoview_set_parent(view, NULL);
 
 	nemoscope_destroy(view->scope);
 
@@ -475,7 +479,10 @@ void nemoview_set_parent(struct nemoview *view, struct nemoview *parent)
 
 	if (view->parent != NULL) {
 		wl_list_remove(&view->parent_destroy_listener.link);
+		wl_list_init(&view->parent_destroy_listener.link);
+
 		wl_list_remove(&view->children_link);
+		wl_list_init(&view->children_link);
 	}
 
 	view->parent = parent;
@@ -483,10 +490,36 @@ void nemoview_set_parent(struct nemoview *view, struct nemoview *parent)
 	if (parent != NULL) {
 		view->parent_destroy_listener.notify = nemoview_handle_transform_parent_destroy;
 		wl_signal_add(&parent->destroy_signal, &view->parent_destroy_listener);
+
 		wl_list_insert(&parent->children_list, &view->children_link);
 	}
 
 	nemoview_transform_dirty(view);
+}
+
+static void nemoview_handle_focus_destroy(struct wl_listener *listener, void *data)
+{
+	struct nemoview *view = (struct nemoview *)container_of(listener, struct nemoview, focus_destroy_listener);
+
+	view->focus = NULL;
+
+	wl_list_remove(&view->focus_destroy_listener.link);
+	wl_list_init(&view->focus_destroy_listener.link);
+}
+
+void nemoview_set_focus(struct nemoview *view, struct nemoview *focus)
+{
+	if (view->focus != NULL) {
+		wl_list_remove(&view->focus_destroy_listener.link);
+		wl_list_init(&view->focus_destroy_listener.link);
+	}
+
+	if (focus != NULL) {
+		view->focus_destroy_listener.notify = nemoview_handle_focus_destroy;
+		wl_signal_add(&focus->destroy_signal, &view->focus_destroy_listener);
+	}
+
+	view->focus = focus;
 }
 
 void nemoview_set_region(struct nemoview *view, uint32_t x, uint32_t y, uint32_t width, uint32_t height)

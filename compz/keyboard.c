@@ -201,12 +201,12 @@ void nemokeyboard_set_focus(struct nemokeyboard *keyboard, struct nemoview *view
 {
 	if (keyboard->focus != view) {
 		if (keyboard->focus != NULL) {
-			if (--keyboard->focus->focus.keyboard_count == 0) {
+			if (--keyboard->focus->keyboard_count == 0) {
 				nemocontent_keyboard_leave(keyboard, keyboard->focus->content);
 			}
 		}
 		if (view != NULL) {
-			if (++view->focus.keyboard_count == 1) {
+			if (++view->keyboard_count == 1) {
 				nemocontent_keyboard_enter(keyboard, view->content);
 			}
 		}

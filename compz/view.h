@@ -68,6 +68,9 @@ struct nemoview {
 	struct wl_list children_list;
 	struct wl_list children_link;
 
+	struct nemoview *focus;
+	struct wl_listener focus_destroy_listener;
+
 	struct nemolayer *layer;
 
 	struct nemoscreen *screen;
@@ -84,9 +87,7 @@ struct nemoview {
 
 	struct nemoscope *scope;
 
-	struct {
-		uint32_t keyboard_count;
-	} focus;
+	uint32_t keyboard_count;
 
 	struct {
 		float px, py;
@@ -140,6 +141,7 @@ extern void nemoview_update_transform_children(struct nemoview *view);
 extern void nemoview_update_transform_parent(struct nemoview *view);
 
 extern void nemoview_set_parent(struct nemoview *view, struct nemoview *parent);
+extern void nemoview_set_focus(struct nemoview *view, struct nemoview *focus);
 
 extern void nemoview_set_region(struct nemoview *view, uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 extern void nemoview_put_region(struct nemoview *view);

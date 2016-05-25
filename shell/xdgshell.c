@@ -44,7 +44,7 @@ static void xdg_send_configure(struct nemocanvas *canvas, int32_t width, int32_t
 		s = wl_array_add(&states, sizeof(uint32_t));
 		*s = XDG_SURFACE_STATE_RESIZING;
 	}
-	if (bin->view->focus.keyboard_count > 0) {
+	if (bin->view->keyboard_count > 0) {
 		s = wl_array_add(&states, sizeof(uint32_t));
 		*s = XDG_SURFACE_STATE_ACTIVATED;
 	}
