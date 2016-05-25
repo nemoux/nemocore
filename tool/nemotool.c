@@ -248,12 +248,22 @@ static void keyboard_handle_modifiers(void *data, struct nemo_keyboard *keyboard
 	}
 }
 
-static void keyboard_handle_repeat_info(void *data, struct nemo_keyboard *keyboard, int32_t rate, int32_t delay)
+static void keyboard_handle_layout(void *data, struct nemo_keyboard *keyboard, uint32_t serial, struct wl_surface *surface, int32_t id, const char *name)
 {
-}
+	if (surface != NULL) {
+		struct nemotool *tool = (struct nemotool *)data;
+		struct nemocanvas *canvas = (struct nemocanvas *)wl_surface_get_user_data(surface);
 
-static void keyboard_handle_layout(void *data, struct nemo_keyboard *keyboard, const char *name)
-{
+		if (canvas != NULL && canvas->dispatch_event != NULL) {
+			struct nemoevent event;
+
+			event.device = id;
+			event.serial = serial;
+			event.name = name;
+
+			canvas->dispatch_event(canvas, NEMOTOOL_KEYBOARD_LAYOUT_EVENT, &event);
+		}
+	}
 }
 
 static const struct nemo_keyboard_listener keyboard_listener = {
@@ -262,7 +272,6 @@ static const struct nemo_keyboard_listener keyboard_listener = {
 	keyboard_handle_leave,
 	keyboard_handle_key,
 	keyboard_handle_modifiers,
-	keyboard_handle_repeat_info,
 	keyboard_handle_layout
 };
 

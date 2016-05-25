@@ -286,6 +286,17 @@ void nemotale_push_keyboard_up_event(struct nemotale *tale, uint32_t serial, uin
 	tale->dispatch_event(tale, tale->keyboard.focus, &event);
 }
 
+void nemotale_push_keyboard_layout_event(struct nemotale *tale, uint32_t serial, uint64_t device, const char *name)
+{
+	struct taleevent event;
+
+	event.type = NEMOTALE_KEYBOARD_LAYOUT_EVENT;
+	event.device = device;
+	event.name = name;
+
+	tale->dispatch_event(tale, tale->keyboard.focus, &event);
+}
+
 void nemotale_push_touch_down_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, float x, float y, float gx, float gy)
 {
 	struct taleevent event;

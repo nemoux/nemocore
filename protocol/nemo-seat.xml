@@ -152,12 +152,10 @@
 			<arg name="group" type="uint"/>
 		</event>
 
-		<event name="repeat_info">
-			<arg name="rate" type="int"/>
-			<arg name="delay" type="int"/>
-		</event>
-
 		<event name="layout">
+			<arg name="serial" type="uint"/>
+			<arg name="surface" type="object" interface="wl_surface"/>
+			<arg name="id" type="int"/>
 			<arg name="name" type="string"/>
 		</event>
 

@@ -175,6 +175,11 @@ static inline uint32_t nemoshow_event_get_tag(void *event)
 	return nemotale_event_get_tag((struct taleevent *)event);
 }
 
+static inline const char *nemoshow_event_get_name(void *event)
+{
+	return nemotale_event_get_name((struct taleevent *)event);
+}
+
 static inline void nemoshow_event_set_used(void *event)
 {
 	nemotale_event_set_used((struct taleevent *)event);
@@ -401,6 +406,11 @@ static inline int nemoshow_event_is_keyboard_down(struct nemoshow *show, void *e
 static inline int nemoshow_event_is_keyboard_up(struct nemoshow *show, void *event)
 {
 	return nemotale_event_is_keyboard_up(show->tale, (struct taleevent *)event);
+}
+
+static inline int nemoshow_event_is_keyboard_layout(struct nemoshow *show, void *event)
+{
+	return nemotale_event_is_keyboard_layout(show->tale, (struct taleevent *)event);
 }
 
 static inline int nemoshow_event_is_stick_enter(struct nemoshow *show, void *event)

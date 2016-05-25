@@ -231,6 +231,11 @@ static inline int nemotale_event_is_keyboard_up(struct nemotale *tale, struct ta
 	return event->type & NEMOTALE_KEYBOARD_UP_EVENT;
 }
 
+static inline int nemotale_event_is_keyboard_layout(struct nemotale *tale, struct taleevent *event)
+{
+	return event->type & NEMOTALE_KEYBOARD_LAYOUT_EVENT;
+}
+
 static inline int nemotale_event_is_stick_enter(struct nemotale *tale, struct taleevent *event)
 {
 	return event->type & NEMOTALE_STICK_ENTER_EVENT;

@@ -94,6 +94,8 @@ static int nemoshow_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t ty
 		else
 			nemotale_push_keyboard_up_event(tale, event->serial, event->device, event->time, event->value);
 	} else if (type & NEMOTOOL_KEYBOARD_MODIFIERS_EVENT) {
+	} else if (type & NEMOTOOL_KEYBOARD_LAYOUT_EVENT) {
+		nemotale_push_keyboard_layout_event(tale, event->serial, event->device, event->name);
 	} else if (type & NEMOTOOL_TOUCH_DOWN_EVENT) {
 		nemotale_push_touch_down_event(tale, event->serial, event->device, event->time, event->x, event->y, event->gx, event->gy);
 	} else if (type & NEMOTOOL_TOUCH_UP_EVENT) {
@@ -602,7 +604,7 @@ void nemoshow_view_focus(struct nemoshow *show, uint32_t id)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemocanvas *canvas = scon->canvas;
-	
+
 	nemocanvas_focus(canvas, id);
 }
 
