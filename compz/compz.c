@@ -988,6 +988,40 @@ int nemocompz_contain_view_near(struct nemocompz *compz, struct nemoview *view, 
 	return 1;
 }
 
+struct nemocanvas *nemocompz_get_canvas_by_id(struct nemocompz *compz, uint32_t id)
+{
+	struct nemocanvas *canvas;
+
+	wl_list_for_each(canvas, &compz->canvas_list, link) {
+		if (canvas->id == id)
+			return canvas;
+	}
+
+	return NULL;
+}
+
+struct nemoview *nemocompz_get_view_by_id(struct nemocompz *compz, uint32_t id)
+{
+	struct nemolayer *layer;
+	struct nemoview *view, *child;
+
+	wl_list_for_each(layer, &compz->layer_list, link) {
+		wl_list_for_each(view, &layer->view_list, layer_link) {
+			if (view->id == id)
+				return view;
+
+			if (!wl_list_empty(&view->children_list)) {
+				wl_list_for_each(child, &view->children_list, children_link) {
+					if (child->id == id)
+						return child;
+				}
+			}
+		}
+	}
+
+	return NULL;
+}
+
 void nemocompz_load_configs(struct nemocompz *compz, const char *configpath)
 {
 	struct nemoxml *xml;

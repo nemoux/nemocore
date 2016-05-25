@@ -193,6 +193,9 @@ extern int nemocompz_is_running(struct nemocompz *compz);
 extern int nemocompz_contain_view(struct nemocompz *compz, struct nemoview *view);
 extern int nemocompz_contain_view_near(struct nemocompz *compz, struct nemoview *view, float dx, float dy);
 
+extern struct nemocanvas *nemocompz_get_canvas_by_id(struct nemocompz *compz, uint32_t id);
+extern struct nemoview *nemocompz_get_view_by_id(struct nemocompz *compz, uint32_t id);
+
 extern void nemocompz_load_configs(struct nemocompz *compz, const char *configpath);
 extern void nemocompz_load_backends(struct nemocompz *compz);
 extern void nemocompz_load_scenes(struct nemocompz *compz);
