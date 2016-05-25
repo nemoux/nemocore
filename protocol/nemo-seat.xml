@@ -152,13 +152,13 @@
 			<arg name="group" type="uint"/>
 		</event>
 
-		<request name="release" type="destructor">
-		</request>
-
 		<event name="repeat_info">
 			<arg name="rate" type="int"/>
 			<arg name="delay" type="int"/>
 		</event>
+
+		<request name="release" type="destructor">
+		</request>
 	</interface>
 
 	<interface name="nemo_touch" version="1">

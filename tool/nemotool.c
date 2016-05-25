@@ -248,12 +248,17 @@ static void keyboard_handle_modifiers(void *data, struct nemo_keyboard *keyboard
 	}
 }
 
+static void keyboard_handle_repeat_info(void *data, struct nemo_keyboard *keyboard, int32_t rate, int32_t delay)
+{
+}
+
 static const struct nemo_keyboard_listener keyboard_listener = {
 	keyboard_handle_keymap,
 	keyboard_handle_enter,
 	keyboard_handle_leave,
 	keyboard_handle_key,
-	keyboard_handle_modifiers
+	keyboard_handle_modifiers,
+	keyboard_handle_repeat_info
 };
 
 static void touch_handle_down(void *data, struct nemo_touch *touch, uint32_t serial, uint32_t time, struct wl_surface *surface, int32_t id, wl_fixed_t sx, wl_fixed_t sy, wl_fixed_t x, wl_fixed_t y)
