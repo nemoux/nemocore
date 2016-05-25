@@ -244,8 +244,11 @@ extern int nemotool_dispatch_queue(struct nemoqueue *queue);
 
 extern uint32_t nemotool_get_keysym(struct nemotool *tool, uint32_t code);
 
-extern void nemotool_bypass_touch(struct nemotool *tool, int32_t id, float x, float y);
-extern void nemotool_calibrate_touch(struct nemotool *tool, const char *name, float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3);
+extern void nemotool_keyboard_key(struct nemotool *tool, uint32_t time, uint32_t key, uint32_t state);
+extern void nemotool_keyboard_layout(struct nemotool *tool, const char *name);
+
+extern void nemotool_touch_bypass(struct nemotool *tool, int32_t id, float x, float y);
+extern void nemotool_touch_calibrate(struct nemotool *tool, const char *name, float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
