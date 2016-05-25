@@ -69,6 +69,9 @@ struct nemoshell {
 
 	struct nemolayer *default_layer;
 
+	struct wl_list bin_list;
+	uint32_t bin_ids;
+
 	struct wl_listener pointer_focus_listener;
 	struct wl_listener keyboard_focus_listener;
 	struct wl_listener keypad_focus_listener;
@@ -190,7 +193,11 @@ struct shellbin {
 	struct wl_signal destroy_signal;
 	struct shellclient *owner;
 
+	struct wl_list link;
+
 	pid_t pid;
+
+	uint32_t id;
 
 	struct wl_signal ungrab_signal;
 	struct wl_signal change_signal;
@@ -209,6 +216,9 @@ struct shellbin {
 	int32_t last_sx, last_sy;
 
 	struct wl_listener canvas_destroy_listener;
+
+	struct shellbin *focus;
+	struct wl_listener focus_destroy_listener;
 
 	uint32_t min_width, min_height;
 	uint32_t max_width, max_height;
@@ -313,6 +323,7 @@ extern void nemoshell_destroy_bin(struct shellbin *bin);
 
 extern struct shellbin *nemoshell_get_bin(struct nemocanvas *canvas);
 extern void nemoshell_set_parent_bin(struct shellbin *bin, struct shellbin *parent);
+extern struct shellbin *nemoshell_get_bin_by_id(struct nemoshell *shell, uint32_t id);
 
 extern void nemoshell_ping(struct shellbin *bin, uint32_t serial);
 extern void nemoshell_pong(struct shellclient *sc, uint32_t serial);
@@ -346,6 +357,8 @@ extern void nemoshell_put_fullscreen_bin(struct nemoshell *shell, struct shellbi
 extern void nemoshell_set_maximized_bin_on_screen(struct nemoshell *shell, struct shellbin *bin, struct nemoscreen *screen);
 extern void nemoshell_set_maximized_bin(struct nemoshell *shell, struct shellbin *bin, struct shellscreen *screen);
 extern void nemoshell_put_maximized_bin(struct nemoshell *shell, struct shellbin *bin);
+
+extern void nemoshell_set_focus_bin(struct shellbin *bin, struct shellbin *focus);
 
 extern void nemoshell_load_gestures(struct nemoshell *shell);
 

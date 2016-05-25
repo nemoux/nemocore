@@ -330,6 +330,14 @@ static void nemo_surface_miss(struct wl_client *client, struct wl_resource *reso
 		wl_signal_emit(&bin->ungrab_signal, bin);
 }
 
+static void nemo_surface_focus(struct wl_client *client, struct wl_resource *resource, uint32_t id)
+{
+	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
+	struct nemoshell *shell = bin->shell;
+	
+	nemoshell_set_focus_bin(bin, nemoshell_get_bin_by_id(shell, id));
+}
+
 static void nemo_surface_execute_command(struct wl_client *client, struct wl_resource *resource, const char *name, const char *cmds, uint32_t type, uint32_t coords, wl_fixed_t x, wl_fixed_t y, wl_fixed_t r)
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
@@ -448,6 +456,7 @@ static const struct nemo_surface_interface nemo_surface_implementation = {
 	nemo_surface_move,
 	nemo_surface_pick,
 	nemo_surface_miss,
+	nemo_surface_focus,
 	nemo_surface_execute_command,
 	nemo_surface_execute_action,
 	nemo_surface_execute_content,

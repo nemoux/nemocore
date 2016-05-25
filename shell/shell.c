@@ -433,6 +433,8 @@ struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas
 	bin->flags = NEMOSHELL_SURFACE_ALL_FLAGS;
 	bin->layer = &shell->service_layer;
 
+	bin->id = ++shell->bin_ids;
+
 	bin->min_width = shell->bin.min_width;
 	bin->min_height = shell->bin.min_height;
 	bin->max_width = shell->bin.max_width;
@@ -451,6 +453,10 @@ struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas
 	bin->canvas_destroy_listener.notify = shellbin_handle_canvas_destroy;
 	wl_signal_add(&canvas->destroy_signal, &bin->canvas_destroy_listener);
 
+	wl_list_init(&bin->focus_destroy_listener.link);
+
+	wl_list_insert(&shell->bin_list, &bin->link);
+
 	return bin;
 
 err1:
@@ -465,7 +471,10 @@ void nemoshell_destroy_bin(struct shellbin *bin)
 
 	wl_signal_emit(&bin->destroy_signal, bin);
 
+	wl_list_remove(&bin->link);
+
 	wl_list_remove(&bin->canvas_destroy_listener.link);
+	wl_list_remove(&bin->focus_destroy_listener.link);
 
 	bin->canvas->configure = NULL;
 	bin->canvas->configure_private = NULL;
@@ -500,6 +509,18 @@ void nemoshell_set_parent_bin(struct shellbin *bin, struct shellbin *parent)
 	if (parent != NULL) {
 		wl_list_insert(&parent->children_list, &bin->children_link);
 	}
+}
+
+struct shellbin *nemoshell_get_bin_by_id(struct nemoshell *shell, uint32_t id)
+{
+	struct shellbin *bin;
+
+	wl_list_for_each(bin, &shell->bin_list, link) {
+		if (bin->id == id)
+			return bin;
+	}
+
+	return NULL;
 }
 
 static void nemoshell_bind_wayland_shell(struct wl_client *client, void *data, uint32_t version, uint32_t id)
@@ -640,6 +661,8 @@ struct nemoshell *nemoshell_create(struct nemocompz *compz)
 	wl_list_init(&shell->child_signal_listener.link);
 	shell->child_signal_listener.notify = nemoshell_handle_child_signal;
 	wl_signal_add(&compz->child_signal, &shell->child_signal_listener);
+
+	wl_list_init(&shell->bin_list);
 
 	wl_list_init(&shell->fullscreen_list);
 	wl_list_init(&shell->clientstate_list);
@@ -1190,6 +1213,31 @@ void nemoshell_put_maximized_bin(struct nemoshell *shell, struct shellbin *bin)
 	bin->fixed = 0;
 
 	nemoshell_send_bin_state(bin);
+}
+
+static void shellbin_handle_focus_destroy(struct wl_listener *listener, void *data)
+{
+	struct shellbin *bin = (struct shellbin *)container_of(listener, struct shellbin, focus_destroy_listener);
+
+	bin->focus = NULL;
+
+	wl_list_remove(&bin->focus_destroy_listener.link);
+	wl_list_init(&bin->focus_destroy_listener.link);
+}
+
+void nemoshell_set_focus_bin(struct shellbin *bin, struct shellbin *focus)
+{
+	if (bin->focus != NULL) {
+		wl_list_remove(&bin->focus_destroy_listener.link);
+		wl_list_init(&bin->focus_destroy_listener.link);
+	}
+
+	if (focus != NULL) {
+		bin->focus_destroy_listener.notify = shellbin_handle_focus_destroy;
+		wl_signal_add(&focus->destroy_signal, &bin->focus_destroy_listener);
+	}
+
+	bin->focus = focus;
 }
 
 void nemoshell_load_gestures(struct nemoshell *shell)

@@ -664,6 +664,10 @@ void nemoshow_view_miss(struct nemoshow *show)
 {
 }
 
+void nemoshow_view_focus(struct nemoshow *show, uint32_t id)
+{
+}
+
 void nemoshow_view_resize(struct nemoshow *show, int32_t width, int32_t height)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);

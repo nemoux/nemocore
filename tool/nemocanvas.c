@@ -540,6 +540,11 @@ void nemocanvas_miss(struct nemocanvas *canvas)
 	nemo_surface_miss(canvas->nemo_surface);
 }
 
+void nemocanvas_focus(struct nemocanvas *canvas, uint32_t id)
+{
+	nemo_surface_focus(canvas->nemo_surface, id);
+}
+
 void nemocanvas_execute_command(struct nemocanvas *canvas, const char *name, const char *cmds, uint32_t type, uint32_t coords, double x, double y, double r)
 {
 	nemo_surface_execute_command(canvas->nemo_surface,
