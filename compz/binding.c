@@ -58,7 +58,7 @@ void nemocompz_run_key_binding(struct nemocompz *compz, struct nemokeyboard *key
 	struct nemobinding *binding;
 
 	wl_list_for_each(binding, &compz->key_binding_list, link) {
-		if (binding->key == key && binding->modifier == keyboard->modifiers_state) {
+		if (binding->key == key && nemoxkb_has_modifiers_state(keyboard->xkb, binding->modifier)) {
 			nemobinding_key_handler_t handler = binding->handler;
 
 			handler(compz, keyboard, time, key, state, binding->data);

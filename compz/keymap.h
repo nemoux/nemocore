@@ -9,6 +9,19 @@ NEMO_BEGIN_EXTERN_C
 
 #include <xkbcommon/xkbcommon.h>
 
+typedef enum {
+	MODIFIER_CTRL = (1 << 0),
+	MODIFIER_ALT = (1 << 1),
+	MODIFIER_SUPER = (1 << 2),
+	MODIFIER_SHIFT = (1 << 3)
+} NemoXKBModifier;
+
+typedef enum {
+	LED_NUM_LOCK = (1 << 0),
+	LED_CAPS_LOCK = (1 << 1),
+	LED_SCROLL_LOCK = (1 << 2)
+} NemoXKBLedLock;
+
 struct nemoxkbinfo {
 	struct xkb_keymap *keymap;
 	int keymap_fd;
@@ -34,11 +47,28 @@ struct nemoxkb {
 	struct nemoxkbinfo *xkbinfo;
 
 	struct xkb_state *state;
+
+	uint32_t modifiers_state;
+	uint32_t leds_state;
+
+	uint32_t mods_depressed;
+	uint32_t mods_latched;
+	uint32_t mods_locked;
+	uint32_t group;
+
+	struct wl_array keys;
 };
 
 extern struct nemoxkb *nemoxkb_create(void);
 extern void nemoxkb_destroy(struct nemoxkb *xkb);
 extern int nemoxkb_reset(struct nemoxkb *xkb);
+
+extern int nemoxkb_update_key(struct nemoxkb *xkb, uint32_t key, enum xkb_key_direction direction);
+
+static inline int nemoxkb_has_modifiers_state(struct nemoxkb *xkb, uint32_t state)
+{
+	return xkb->modifiers_state == state;
+}
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

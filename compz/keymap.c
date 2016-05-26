@@ -59,7 +59,7 @@ struct nemoxkb *nemoxkb_create(void)
 
 	xkb->context = xkb_context_new((enum xkb_context_flags)0);
 	if (xkb->context == NULL)
-		return NULL;
+		goto err1;
 
 	xkb->names.rules = "evdev";
 	xkb->names.model = "pc105";
@@ -67,27 +67,45 @@ struct nemoxkb *nemoxkb_create(void)
 
 	xkb->xkbinfo = (struct nemoxkbinfo *)malloc(sizeof(struct nemoxkbinfo));
 	if (xkb->xkbinfo == NULL)
-		return NULL;
+		goto err2;
 	memset(xkb->xkbinfo, 0, sizeof(struct nemoxkbinfo));
 
 	if (xkb->xkbinfo->keymap == NULL) {
 		xkb->xkbinfo->keymap = xkb_map_new_from_names(xkb->context, &xkb->names, (enum xkb_keymap_compile_flags)0);
 		if (xkb->xkbinfo->keymap == NULL)
-			return NULL;
+			goto err3;
 
 		if (nemoxkb_make_keymap(xkb->xkbinfo) < 0)
-			return NULL;
+			goto err4;
 	}
 
 	xkb->state = xkb_state_new(xkb->xkbinfo->keymap);
 	if (xkb->state == NULL)
-		return NULL;
+		goto err4;
+
+	wl_array_init(&xkb->keys);
 
 	return xkb;
+
+err4:
+	xkb_keymap_unref(xkb->xkbinfo->keymap);
+
+err3:
+	free(xkb->xkbinfo);
+
+err2:
+	xkb_context_unref(xkb->context);
+
+err1:
+	free(xkb);
+
+	return NULL;
 }
 
 void nemoxkb_destroy(struct nemoxkb *xkb)
 {
+	wl_array_release(&xkb->keys);
+
 	xkb_state_unref(xkb->state);
 	xkb_keymap_unref(xkb->xkbinfo->keymap);
 	xkb_context_unref(xkb->context);
@@ -109,4 +127,51 @@ int nemoxkb_reset(struct nemoxkb *xkb)
 	xkb->state = state;
 
 	return 0;
+}
+
+int nemoxkb_update_key(struct nemoxkb *xkb, uint32_t key, enum xkb_key_direction direction)
+{
+	uint32_t mods_depressed, mods_latched, mods_locked, mods_lookup, group;
+	uint32_t leds = 0;
+	int changed = 0;
+
+	xkb_state_update_key(xkb->state, key + 8, direction);
+
+	mods_depressed = xkb_state_serialize_mods(xkb->state, XKB_STATE_DEPRESSED);
+	mods_latched = xkb_state_serialize_mods(xkb->state, XKB_STATE_LATCHED);
+	mods_locked = xkb_state_serialize_mods(xkb->state, XKB_STATE_LOCKED);
+	group = xkb_state_serialize_group(xkb->state, XKB_STATE_EFFECTIVE);
+
+	if (mods_depressed != xkb->mods_depressed ||
+			mods_latched != xkb->mods_latched ||
+			mods_locked != xkb->mods_locked ||
+			group != xkb->group)
+		changed = 1;
+
+	xkb->mods_depressed = mods_depressed;
+	xkb->mods_latched = mods_latched;
+	xkb->mods_locked = mods_locked;
+	xkb->group = group;
+
+	xkb->modifiers_state = 0;
+
+	mods_lookup = mods_depressed | mods_latched;
+	if (mods_lookup & (1 << xkb->xkbinfo->ctrl_mod))
+		xkb->modifiers_state |= MODIFIER_CTRL;
+	if (mods_lookup & (1 << xkb->xkbinfo->alt_mod))
+		xkb->modifiers_state |= MODIFIER_ALT;
+	if (mods_lookup & (1 << xkb->xkbinfo->super_mod))
+		xkb->modifiers_state |= MODIFIER_SUPER;
+	if (mods_lookup & (1 << xkb->xkbinfo->shift_mod))
+		xkb->modifiers_state |= MODIFIER_SHIFT;
+
+	if (xkb_state_led_index_is_active(xkb->state, xkb->xkbinfo->num_led))
+		leds |= LED_NUM_LOCK;
+	if (xkb_state_led_index_is_active(xkb->state, xkb->xkbinfo->caps_led))
+		leds |= LED_CAPS_LOCK;
+	if (xkb_state_led_index_is_active(xkb->state, xkb->xkbinfo->scroll_led))
+		leds |= LED_SCROLL_LOCK;
+	xkb->leds_state = leds;
+
+	return changed;
 }

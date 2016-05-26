@@ -42,24 +42,13 @@ struct nemokeypad {
 
 	struct wl_list link;
 
-	struct {
-		uint32_t mods_depressed;
-		uint32_t mods_latched;
-		uint32_t mods_locked;
-		uint32_t group;
-	} modifiers;
-
 	struct nemoxkb *xkb;
-	uint32_t modifiers_state;
-	uint32_t leds_state;
 
 	struct nemokeypad_grab *grab;
 	struct nemokeypad_grab default_grab;
 	uint32_t grab_key;
 	uint32_t grab_serial;
 	uint32_t grab_time;
-
-	struct wl_array keys;
 
 	struct {
 		struct nemokeypad_grab grab;

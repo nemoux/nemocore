@@ -127,17 +127,7 @@ struct nemoview {
 		struct nemomatrix matrix, inverse;
 	} transform;
 
-	struct {
-		uint32_t mods_depressed;
-		uint32_t mods_latched;
-		uint32_t mods_locked;
-		uint32_t group;
-	} modifiers;
-
 	struct nemoxkb *xkb;
-	struct wl_array keys;
-	uint32_t modifiers_state;
-	uint32_t leds_state;
 
 	void *data;
 };

@@ -12,19 +12,6 @@ NEMO_BEGIN_EXTERN_C
 
 #include <input.h>
 
-typedef enum {
-	MODIFIER_CTRL = (1 << 0),
-	MODIFIER_ALT = (1 << 1),
-	MODIFIER_SUPER = (1 << 2),
-	MODIFIER_SHIFT = (1 << 3)
-} KeyboardModifier;
-
-typedef enum {
-	LED_NUM_LOCK = (1 << 0),
-	LED_CAPS_LOCK = (1 << 1),
-	LED_SCROLL_LOCK = (1 << 2)
-} KeyboardLedLock;
-
 struct nemoseat;
 struct nemofocus;
 
@@ -57,24 +44,13 @@ struct nemokeyboard {
 
 	struct wl_list link;
 
-	struct {
-		uint32_t mods_depressed;
-		uint32_t mods_latched;
-		uint32_t mods_locked;
-		uint32_t group;
-	} modifiers;
-
 	struct nemoxkb *xkb;
-	uint32_t modifiers_state;
-	uint32_t leds_state;
 
 	struct nemokeyboard_grab *grab;
 	struct nemokeyboard_grab default_grab;
 	uint32_t grab_key;
 	uint32_t grab_serial;
 	uint32_t grab_time;
-
-	struct wl_array keys;
 
 	struct {
 		struct nemokeyboard_grab grab;
@@ -97,11 +73,6 @@ extern void nemokeyboard_notify_key(struct nemokeyboard *keyboard, uint32_t time
 extern void nemokeyboard_start_grab(struct nemokeyboard *keyboard, struct nemokeyboard_grab *grab);
 extern void nemokeyboard_end_grab(struct nemokeyboard *keyboard);
 extern void nemokeyboard_cancel_grab(struct nemokeyboard *keyboard);
-
-static inline int nemokeyboard_has_modifiers_state(struct nemokeyboard *keyboard, uint32_t state)
-{
-	return keyboard->modifiers_state == state;
-}
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

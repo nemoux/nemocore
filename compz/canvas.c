@@ -679,11 +679,11 @@ static void nemocanvas_keyboard_enter(struct nemokeyboard *keyboard, struct nemo
 	wl_resource_for_each(resource, resource_list) {
 		if (wl_resource_get_client(resource) == client) {
 			wl_keyboard_send_modifiers(resource, serial,
-					keyboard->modifiers.mods_depressed,
-					keyboard->modifiers.mods_latched,
-					keyboard->modifiers.mods_locked,
-					keyboard->modifiers.group);
-			wl_keyboard_send_enter(resource, serial, canvas->resource, &keyboard->keys);
+					keyboard->xkb->mods_depressed,
+					keyboard->xkb->mods_latched,
+					keyboard->xkb->mods_locked,
+					keyboard->xkb->group);
+			wl_keyboard_send_enter(resource, serial, canvas->resource, &keyboard->xkb->keys);
 		}
 	}
 
@@ -693,11 +693,11 @@ static void nemocanvas_keyboard_enter(struct nemokeyboard *keyboard, struct nemo
 		if (wl_resource_get_client(resource) == client) {
 			nemo_keyboard_send_modifiers(resource, serial, canvas->resource,
 					keyboard->id,
-					keyboard->modifiers.mods_depressed,
-					keyboard->modifiers.mods_latched,
-					keyboard->modifiers.mods_locked,
-					keyboard->modifiers.group);
-			nemo_keyboard_send_enter(resource, serial, canvas->resource, keyboard->id, &keyboard->keys);
+					keyboard->xkb->mods_depressed,
+					keyboard->xkb->mods_latched,
+					keyboard->xkb->mods_locked,
+					keyboard->xkb->group);
+			nemo_keyboard_send_enter(resource, serial, canvas->resource, keyboard->id, &keyboard->xkb->keys);
 		}
 	}
 
@@ -809,11 +809,11 @@ static void nemocanvas_keypad_enter(struct nemokeypad *keypad, struct nemoconten
 	wl_resource_for_each(resource, resource_list) {
 		if (wl_resource_get_client(resource) == client) {
 			wl_keyboard_send_modifiers(resource, serial,
-					keypad->modifiers.mods_depressed,
-					keypad->modifiers.mods_latched,
-					keypad->modifiers.mods_locked,
-					keypad->modifiers.group);
-			wl_keyboard_send_enter(resource, serial, canvas->resource, &keypad->keys);
+					keypad->xkb->mods_depressed,
+					keypad->xkb->mods_latched,
+					keypad->xkb->mods_locked,
+					keypad->xkb->group);
+			wl_keyboard_send_enter(resource, serial, canvas->resource, &keypad->xkb->keys);
 		}
 	}
 
@@ -823,11 +823,11 @@ static void nemocanvas_keypad_enter(struct nemokeypad *keypad, struct nemoconten
 		if (wl_resource_get_client(resource) == client) {
 			nemo_keyboard_send_modifiers(resource, serial, canvas->resource,
 					keypad->id,
-					keypad->modifiers.mods_depressed,
-					keypad->modifiers.mods_latched,
-					keypad->modifiers.mods_locked,
-					keypad->modifiers.group);
-			nemo_keyboard_send_enter(resource, serial, canvas->resource, keypad->id, &keypad->keys);
+					keypad->xkb->mods_depressed,
+					keypad->xkb->mods_latched,
+					keypad->xkb->mods_locked,
+					keypad->xkb->group);
+			nemo_keyboard_send_enter(resource, serial, canvas->resource, keypad->id, &keypad->xkb->keys);
 		}
 	}
 

@@ -77,8 +77,6 @@ struct nemokeypad *nemokeypad_create(struct nemoseat *seat)
 	if (keypad->xkb == NULL)
 		goto err1;
 
-	wl_array_init(&keypad->keys);
-
 	keypad->default_grab.interface = &default_keypad_grab_interface;
 	keypad->default_grab.keypad = keypad;
 	keypad->grab = &keypad->default_grab;
@@ -148,63 +146,6 @@ void nemokeypad_set_focus(struct nemokeypad *keypad, struct nemoview *view)
 	wl_signal_emit(&keypad->seat->keypad.focus_signal, keypad);
 }
 
-static void nemokeypad_notify_modifiers(struct nemokeypad *keypad)
-{
-	uint32_t mods_depressed, mods_latched, mods_locked, mods_lookup, group;
-	uint32_t leds = 0;
-	int changed = 0;
-
-	mods_depressed = xkb_state_serialize_mods(keypad->xkb->state, XKB_STATE_DEPRESSED);
-	mods_latched = xkb_state_serialize_mods(keypad->xkb->state, XKB_STATE_LATCHED);
-	mods_locked = xkb_state_serialize_mods(keypad->xkb->state, XKB_STATE_LOCKED);
-	group = xkb_state_serialize_group(keypad->xkb->state, XKB_STATE_EFFECTIVE);
-
-	if (mods_depressed != keypad->modifiers.mods_depressed ||
-			mods_latched != keypad->modifiers.mods_latched ||
-			mods_locked != keypad->modifiers.mods_locked ||
-			group != keypad->modifiers.group)
-		changed = 1;
-
-	keypad->modifiers.mods_depressed = mods_depressed;
-	keypad->modifiers.mods_latched = mods_latched;
-	keypad->modifiers.mods_locked = mods_locked;
-	keypad->modifiers.group = group;
-
-	mods_lookup = mods_depressed | mods_latched;
-	keypad->modifiers_state = 0;
-	if (mods_lookup & (1 << keypad->xkb->xkbinfo->ctrl_mod))
-		keypad->modifiers_state |= MODIFIER_CTRL;
-	if (mods_lookup & (1 << keypad->xkb->xkbinfo->alt_mod))
-		keypad->modifiers_state |= MODIFIER_ALT;
-	if (mods_lookup & (1 << keypad->xkb->xkbinfo->super_mod))
-		keypad->modifiers_state |= MODIFIER_SUPER;
-	if (mods_lookup & (1 << keypad->xkb->xkbinfo->shift_mod))
-		keypad->modifiers_state |= MODIFIER_SHIFT;
-
-	if (xkb_state_led_index_is_active(keypad->xkb->state, keypad->xkb->xkbinfo->num_led))
-		leds |= LED_NUM_LOCK;
-	if (xkb_state_led_index_is_active(keypad->xkb->state, keypad->xkb->xkbinfo->caps_led))
-		leds |= LED_CAPS_LOCK;
-	if (xkb_state_led_index_is_active(keypad->xkb->state, keypad->xkb->xkbinfo->scroll_led))
-		leds |= LED_SCROLL_LOCK;
-	keypad->leds_state = leds;
-
-	if (changed) {
-		keypad->grab->interface->modifiers(keypad->grab,
-				keypad->modifiers.mods_depressed,
-				keypad->modifiers.mods_latched,
-				keypad->modifiers.mods_locked,
-				keypad->modifiers.group);
-	}
-}
-
-static void nemokeypad_update_modifiers(struct nemokeypad *keypad, uint32_t serial, uint32_t key, enum xkb_key_direction direction)
-{
-	xkb_state_update_key(keypad->xkb->state, key + 8, direction);
-
-	nemokeypad_notify_modifiers(keypad);
-}
-
 void nemokeypad_notify_key(struct nemokeypad *keypad, uint32_t time, uint32_t key, enum wl_keyboard_key_state state)
 {
 	if (keypad == NULL)
@@ -212,7 +153,12 @@ void nemokeypad_notify_key(struct nemokeypad *keypad, uint32_t time, uint32_t ke
 
 	keypad->grab->interface->key(keypad->grab, time, key, state);
 
-	nemokeypad_update_modifiers(keypad, wl_display_get_serial(keypad->seat->compz->display), key, state == WL_KEYBOARD_KEY_STATE_PRESSED ? XKB_KEY_DOWN : XKB_KEY_UP);
+	if (nemoxkb_update_key(keypad->xkb, key, state == WL_KEYBOARD_KEY_STATE_PRESSED ? XKB_KEY_DOWN : XKB_KEY_UP) != 0)
+		keypad->grab->interface->modifiers(keypad->grab,
+				keypad->xkb->mods_depressed,
+				keypad->xkb->mods_latched,
+				keypad->xkb->mods_locked,
+				keypad->xkb->group);
 }
 
 void nemokeypad_start_grab(struct nemokeypad *keypad, struct nemokeypad_grab *grab)
