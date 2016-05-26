@@ -102,17 +102,23 @@ static void nemo_keyboard_enter(struct wl_client *client, struct wl_resource *ke
 		return;
 	}
 
-	if (view->focus == NULL)
-		return;
-
 	if (view->xkb == NULL)
 		view->xkb = nemoxkb_create();
+
+	if (view->focus == NULL)
+		return;
 
 	resource_list = &seat->keyboard.resource_list;
 
 	wl_resource_for_each(resource, resource_list) {
 		if (wl_resource_get_client(resource) == view->focus->client) {
 			wl_keyboard_send_keymap(resource, WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1, view->xkb->xkbinfo->keymap_fd, view->xkb->xkbinfo->keymap_size);
+
+			wl_keyboard_send_modifiers(resource, serial,
+					view->xkb->mods_depressed,
+					view->xkb->mods_latched,
+					view->xkb->mods_locked,
+					view->xkb->group);
 
 			wl_keyboard_send_enter(resource, serial, view->focus->canvas->resource, &view->xkb->keys);
 		}
@@ -123,6 +129,14 @@ static void nemo_keyboard_enter(struct wl_client *client, struct wl_resource *ke
 	wl_resource_for_each(resource, resource_list) {
 		if (wl_resource_get_client(resource) == view->focus->client) {
 			nemo_keyboard_send_keymap(resource, WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1, view->xkb->xkbinfo->keymap_fd, view->xkb->xkbinfo->keymap_size);
+
+			nemo_keyboard_send_modifiers(resource, serial,
+					view->focus->canvas->resource,
+					wl_resource_get_id(keyboard_resource),
+					view->xkb->mods_depressed,
+					view->xkb->mods_latched,
+					view->xkb->mods_locked,
+					view->xkb->group);
 
 			nemo_keyboard_send_enter(resource,
 					serial,
@@ -181,6 +195,7 @@ static void nemo_keyboard_key(struct wl_client *client, struct wl_resource *keyb
 	struct wl_list *resource_list;
 	struct wl_resource *resource;
 	uint32_t serial;
+	int changed;
 
 	view = nemocompz_get_view_by_client(compz, client);
 	if (view == NULL) {
@@ -188,10 +203,12 @@ static void nemo_keyboard_key(struct wl_client *client, struct wl_resource *keyb
 		return;
 	}
 
+	changed = nemoxkb_update_key(view->xkb, key, state == NEMO_KEYBOARD_KEY_STATE_PRESSED ? XKB_KEY_DOWN : XKB_KEY_UP);
+
 	if (view->focus == NULL)
 		return;
 
-	if (nemoxkb_update_key(view->xkb, key, state == NEMO_KEYBOARD_KEY_STATE_PRESSED ? XKB_KEY_DOWN : XKB_KEY_UP) != 0) {
+	if (changed != 0) {
 		serial = wl_display_next_serial(compz->display);
 
 		resource_list = &seat->keyboard.resource_list;
