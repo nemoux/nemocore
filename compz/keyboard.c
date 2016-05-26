@@ -128,6 +128,35 @@ static void nemo_keyboard_key(struct wl_client *client, struct wl_resource *keyb
 
 static void nemo_keyboard_layout(struct wl_client *client, struct wl_resource *keyboard_resource, const char *name)
 {
+	struct nemoseat *seat = (struct nemoseat *)wl_resource_get_user_data(keyboard_resource);
+	struct nemocompz *compz = seat->compz;
+	struct nemoview *view;
+	struct wl_list *resource_list;
+	struct wl_resource *resource;
+	uint32_t serial;
+
+	serial = wl_display_next_serial(compz->display);
+
+	view = nemocompz_get_view_by_client(compz, client);
+	if (view == NULL) {
+		wl_client_post_no_memory(client);
+		return;
+	}
+
+	if (view->focus == NULL)
+		return;
+
+	resource_list = &seat->keyboard.nemo_resource_list;
+
+	wl_resource_for_each(resource, resource_list) {
+		if (wl_resource_get_client(resource) == view->focus->client) {
+			nemo_keyboard_send_layout(resource,
+					serial,
+					view->focus->canvas->resource,
+					wl_resource_get_id(keyboard_resource),
+					name);
+		}
+	}
 }
 
 static void nemo_keyboard_release(struct wl_client *client, struct wl_resource *keyboard_resource)
