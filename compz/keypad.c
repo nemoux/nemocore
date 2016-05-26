@@ -198,15 +198,8 @@ static void nemokeypad_notify_modifiers(struct nemokeypad *keypad)
 	}
 }
 
-static void nemokeypad_update_modifiers(struct nemokeypad *keypad, uint32_t serial, uint32_t key, enum wl_keyboard_key_state state)
+static void nemokeypad_update_modifiers(struct nemokeypad *keypad, uint32_t serial, uint32_t key, enum xkb_key_direction direction)
 {
-	enum xkb_key_direction direction;
-
-	if (state == WL_KEYBOARD_KEY_STATE_PRESSED)
-		direction = XKB_KEY_DOWN;
-	else
-		direction = XKB_KEY_UP;
-
 	xkb_state_update_key(keypad->xkb->state, key + 8, direction);
 
 	nemokeypad_notify_modifiers(keypad);
@@ -219,7 +212,7 @@ void nemokeypad_notify_key(struct nemokeypad *keypad, uint32_t time, uint32_t ke
 
 	keypad->grab->interface->key(keypad->grab, time, key, state);
 
-	nemokeypad_update_modifiers(keypad, wl_display_get_serial(keypad->seat->compz->display), key, state);
+	nemokeypad_update_modifiers(keypad, wl_display_get_serial(keypad->seat->compz->display), key, state == WL_KEYBOARD_KEY_STATE_PRESSED ? XKB_KEY_DOWN : XKB_KEY_UP);
 }
 
 void nemokeypad_start_grab(struct nemokeypad *keypad, struct nemokeypad_grab *grab)

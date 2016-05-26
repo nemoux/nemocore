@@ -15,6 +15,8 @@
 #include <renderer.h>
 #include <layer.h>
 #include <seat.h>
+#include <keyboard.h>
+#include <keymap.h>
 #include <nemomisc.h>
 #include <nemolog.h>
 
@@ -96,6 +98,11 @@ void nemoview_destroy(struct nemoview *view)
 
 	if (nemoview_has_state(view, NEMOVIEW_MAP_STATE))
 		nemoview_unmap(view);
+
+	if (view->xkb != NULL) {
+		nemoxkb_destroy(view->xkb);
+		wl_array_release(&view->keys);
+	}
 
 	wl_list_remove(&view->link);
 	wl_list_remove(&view->layer_link);
@@ -812,4 +819,48 @@ int nemoview_get_trapezoids(struct nemoview *view, int32_t x, int32_t y, int32_t
 	}
 
 	return ntraps - 1;
+}
+
+int nemoview_update_modifiers(struct nemoview *view)
+{
+	uint32_t mods_depressed, mods_latched, mods_locked, mods_lookup, group;
+	uint32_t leds = 0;
+	int changed = 0;
+
+	mods_depressed = xkb_state_serialize_mods(view->xkb->state, XKB_STATE_DEPRESSED);
+	mods_latched = xkb_state_serialize_mods(view->xkb->state, XKB_STATE_LATCHED);
+	mods_locked = xkb_state_serialize_mods(view->xkb->state, XKB_STATE_LOCKED);
+	group = xkb_state_serialize_group(view->xkb->state, XKB_STATE_EFFECTIVE);
+
+	if (mods_depressed != view->modifiers.mods_depressed ||
+			mods_latched != view->modifiers.mods_latched ||
+			mods_locked != view->modifiers.mods_locked ||
+			group != view->modifiers.group)
+		changed = 1;
+
+	view->modifiers.mods_depressed = mods_depressed;
+	view->modifiers.mods_latched = mods_latched;
+	view->modifiers.mods_locked = mods_locked;
+	view->modifiers.group = group;
+
+	mods_lookup = mods_depressed | mods_latched;
+	view->modifiers_state = 0;
+	if (mods_lookup & (1 << view->xkb->xkbinfo->ctrl_mod))
+		view->modifiers_state |= MODIFIER_CTRL;
+	if (mods_lookup & (1 << view->xkb->xkbinfo->alt_mod))
+		view->modifiers_state |= MODIFIER_ALT;
+	if (mods_lookup & (1 << view->xkb->xkbinfo->super_mod))
+		view->modifiers_state |= MODIFIER_SUPER;
+	if (mods_lookup & (1 << view->xkb->xkbinfo->shift_mod))
+		view->modifiers_state |= MODIFIER_SHIFT;
+
+	if (xkb_state_led_index_is_active(view->xkb->state, view->xkb->xkbinfo->num_led))
+		leds |= LED_NUM_LOCK;
+	if (xkb_state_led_index_is_active(view->xkb->state, view->xkb->xkbinfo->caps_led))
+		leds |= LED_CAPS_LOCK;
+	if (xkb_state_led_index_is_active(view->xkb->state, view->xkb->xkbinfo->scroll_led))
+		leds |= LED_SCROLL_LOCK;
+	view->leds_state = leds;
+
+	return changed;
 }

@@ -277,6 +277,16 @@ static const struct nemo_keyboard_listener keyboard_listener = {
 	keyboard_handle_layout
 };
 
+void nemotool_keyboard_enter(struct nemotool *tool)
+{
+	nemo_keyboard_enter(tool->keyboard);
+}
+
+void nemotool_keyboard_leave(struct nemotool *tool)
+{
+	nemo_keyboard_leave(tool->keyboard);
+}
+
 void nemotool_keyboard_key(struct nemotool *tool, uint32_t time, uint32_t key, uint32_t state)
 {
 	nemo_keyboard_key(tool->keyboard, time, key, state);

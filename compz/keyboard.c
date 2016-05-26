@@ -85,7 +85,7 @@ int nemokeyboard_bind_wayland(struct wl_client *client, struct wl_resource *seat
 	return 0;
 }
 
-static void nemo_keyboard_key(struct wl_client *client, struct wl_resource *keyboard_resource, uint32_t time, uint32_t key, uint32_t state)
+static void nemo_keyboard_enter(struct wl_client *client, struct wl_resource *keyboard_resource)
 {
 	struct nemoseat *seat = (struct nemoseat *)wl_resource_get_user_data(keyboard_resource);
 	struct nemocompz *compz = seat->compz;
@@ -104,6 +104,133 @@ static void nemo_keyboard_key(struct wl_client *client, struct wl_resource *keyb
 
 	if (view->focus == NULL)
 		return;
+
+	if (view->xkb == NULL) {
+		view->xkb = nemoxkb_create();
+		wl_array_init(&view->keys);
+	}
+
+	resource_list = &seat->keyboard.resource_list;
+
+	wl_resource_for_each(resource, resource_list) {
+		if (wl_resource_get_client(resource) == view->focus->client) {
+			wl_keyboard_send_keymap(resource, WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1, view->xkb->xkbinfo->keymap_fd, view->xkb->xkbinfo->keymap_size);
+
+			wl_keyboard_send_enter(resource, serial, view->focus->canvas->resource, &view->keys);
+		}
+	}
+
+	resource_list = &seat->keyboard.nemo_resource_list;
+
+	wl_resource_for_each(resource, resource_list) {
+		if (wl_resource_get_client(resource) == view->focus->client) {
+			nemo_keyboard_send_keymap(resource, WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1, view->xkb->xkbinfo->keymap_fd, view->xkb->xkbinfo->keymap_size);
+
+			nemo_keyboard_send_enter(resource,
+					serial,
+					view->focus->canvas->resource,
+					wl_resource_get_id(keyboard_resource),
+					&view->keys);
+		}
+	}
+}
+
+static void nemo_keyboard_leave(struct wl_client *client, struct wl_resource *keyboard_resource)
+{
+	struct nemoseat *seat = (struct nemoseat *)wl_resource_get_user_data(keyboard_resource);
+	struct nemocompz *compz = seat->compz;
+	struct nemoview *view;
+	struct wl_list *resource_list;
+	struct wl_resource *resource;
+	uint32_t serial;
+
+	serial = wl_display_next_serial(compz->display);
+
+	view = nemocompz_get_view_by_client(compz, client);
+	if (view == NULL) {
+		wl_client_post_no_memory(client);
+		return;
+	}
+
+	if (view->focus == NULL)
+		return;
+
+	if (view->xkb == NULL) {
+		view->xkb = nemoxkb_create();
+		wl_array_init(&view->keys);
+	}
+
+	resource_list = &seat->keyboard.resource_list;
+
+	wl_resource_for_each(resource, resource_list) {
+		if (wl_resource_get_client(resource) == view->focus->client) {
+			wl_keyboard_send_leave(resource, serial, view->focus->canvas->resource);
+		}
+	}
+
+	resource_list = &seat->keyboard.nemo_resource_list;
+
+	wl_resource_for_each(resource, resource_list) {
+		if (wl_resource_get_client(resource) == view->focus->client) {
+			nemo_keyboard_send_leave(resource,
+					serial,
+					view->focus->canvas->resource,
+					wl_resource_get_id(keyboard_resource));
+		}
+	}
+}
+
+static void nemo_keyboard_key(struct wl_client *client, struct wl_resource *keyboard_resource, uint32_t time, uint32_t key, uint32_t state)
+{
+	struct nemoseat *seat = (struct nemoseat *)wl_resource_get_user_data(keyboard_resource);
+	struct nemocompz *compz = seat->compz;
+	struct nemoview *view;
+	struct wl_list *resource_list;
+	struct wl_resource *resource;
+	uint32_t serial;
+
+	view = nemocompz_get_view_by_client(compz, client);
+	if (view == NULL) {
+		wl_client_post_no_memory(client);
+		return;
+	}
+
+	if (view->focus == NULL)
+		return;
+
+	xkb_state_update_key(view->xkb->state, key + 8, state == NEMO_KEYBOARD_KEY_STATE_PRESSED ? XKB_KEY_DOWN : XKB_KEY_UP);
+
+	if (nemoview_update_modifiers(view) != 0) {
+		serial = wl_display_next_serial(compz->display);
+
+		resource_list = &seat->keyboard.resource_list;
+
+		wl_resource_for_each(resource, resource_list) {
+			if (wl_resource_get_client(resource) == view->focus->client) {
+				wl_keyboard_send_modifiers(resource, serial,
+						view->modifiers.mods_depressed,
+						view->modifiers.mods_latched,
+						view->modifiers.mods_locked,
+						view->modifiers.group);
+			}
+		}
+
+		resource_list = &seat->keyboard.nemo_resource_list;
+
+		wl_resource_for_each(resource, resource_list) {
+			if (wl_resource_get_client(resource) == view->focus->client) {
+				nemo_keyboard_send_modifiers(resource, serial,
+						view->focus->canvas->resource,
+						wl_resource_get_id(keyboard_resource),
+						view->modifiers.mods_depressed,
+						view->modifiers.mods_latched,
+						view->modifiers.mods_locked,
+						view->modifiers.group);
+			}
+		}
+	}
+
+	serial = wl_display_next_serial(compz->display);
 
 	resource_list = &seat->keyboard.resource_list;
 
@@ -165,6 +292,8 @@ static void nemo_keyboard_release(struct wl_client *client, struct wl_resource *
 }
 
 static const struct nemo_keyboard_interface nemo_keyboard_implementation = {
+	nemo_keyboard_enter,
+	nemo_keyboard_leave,
 	nemo_keyboard_key,
 	nemo_keyboard_layout,
 	nemo_keyboard_release
@@ -354,15 +483,8 @@ static void nemokeyboard_notify_modifiers(struct nemokeyboard *keyboard)
 	}
 }
 
-static void nemokeyboard_update_modifiers(struct nemokeyboard *keyboard, uint32_t serial, uint32_t key, enum wl_keyboard_key_state state)
+static void nemokeyboard_update_modifiers(struct nemokeyboard *keyboard, uint32_t serial, uint32_t key, enum xkb_key_direction direction)
 {
-	enum xkb_key_direction direction;
-
-	if (state == WL_KEYBOARD_KEY_STATE_PRESSED)
-		direction = XKB_KEY_DOWN;
-	else
-		direction = XKB_KEY_UP;
-
 	xkb_state_update_key(keyboard->xkb->state, key + 8, direction);
 
 	nemokeyboard_notify_modifiers(keyboard);
@@ -377,7 +499,7 @@ void nemokeyboard_notify_key(struct nemokeyboard *keyboard, uint32_t time, uint3
 
 	keyboard->grab->interface->key(keyboard->grab, time, key, state);
 
-	nemokeyboard_update_modifiers(keyboard, wl_display_get_serial(keyboard->seat->compz->display), key, state);
+	nemokeyboard_update_modifiers(keyboard, wl_display_get_serial(keyboard->seat->compz->display), key, state == WL_KEYBOARD_KEY_STATE_PRESSED ? XKB_KEY_DOWN : XKB_KEY_UP);
 }
 
 void nemokeyboard_start_grab(struct nemokeyboard *keyboard, struct nemokeyboard_grab *grab)

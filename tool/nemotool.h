@@ -247,6 +247,8 @@ extern int nemotool_dispatch_queue(struct nemoqueue *queue);
 
 extern uint32_t nemotool_get_keysym(struct nemotool *tool, uint32_t code);
 
+extern void nemotool_keyboard_enter(struct nemotool *tool);
+extern void nemotool_keyboard_leave(struct nemotool *tool);
 extern void nemotool_keyboard_key(struct nemotool *tool, uint32_t time, uint32_t key, uint32_t state);
 extern void nemotool_keyboard_layout(struct nemotool *tool, const char *name);
 

@@ -159,6 +159,12 @@
 			<arg name="name" type="string"/>
 		</event>
 
+		<request name="enter">
+		</request>
+
+		<request name="leave">
+		</request>
+
 		<request name="key">
 			<arg name="time" type="uint"/>
 			<arg name="key" type="uint"/>

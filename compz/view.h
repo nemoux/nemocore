@@ -42,6 +42,7 @@ struct nemolayer;
 struct nemocontent;
 struct nemocanvas;
 struct nemoactor;
+struct nemoxkb;
 
 struct nemotransform {
 	struct nemomatrix matrix;
@@ -126,6 +127,18 @@ struct nemoview {
 		struct nemomatrix matrix, inverse;
 	} transform;
 
+	struct {
+		uint32_t mods_depressed;
+		uint32_t mods_latched;
+		uint32_t mods_locked;
+		uint32_t group;
+	} modifiers;
+
+	struct nemoxkb *xkb;
+	struct wl_array keys;
+	uint32_t modifiers_state;
+	uint32_t leds_state;
+
 	void *data;
 };
 
@@ -160,6 +173,8 @@ extern void nemoview_above_layer(struct nemoview *view, struct nemoview *above);
 extern void nemoview_below_layer(struct nemoview *view, struct nemoview *below);
 
 extern int nemoview_get_trapezoids(struct nemoview *view, int32_t x, int32_t y, int32_t width, int32_t height, pixman_trapezoid_t *traps);
+
+extern int nemoview_update_modifiers(struct nemoview *view);
 
 static inline void nemoview_transform_dirty(struct nemoview *view)
 {
