@@ -169,6 +169,11 @@
 			<arg name="id" type="uint"/>
 		</request>
 
+		<request name="focus_on">
+			<arg name="x" type="fixed"/>
+			<arg name="y" type="fixed"/>
+		</request>
+
 		<enum name="execute_type">
 			<entry name="normal" value="0"/>
 			<entry name="focus_on" value="1"/>
