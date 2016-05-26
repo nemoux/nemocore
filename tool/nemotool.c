@@ -151,8 +151,10 @@ static void keyboard_handle_keymap(void *data, struct nemo_keyboard *keyboard, u
 		return;
 	}
 
-	xkb_keymap_unref(tool->xkb.keymap);
-	xkb_state_unref(tool->xkb.state);
+	if (tool->xkb.keymap != NULL)
+		xkb_keymap_unref(tool->xkb.keymap);
+	if (tool->xkb.state != NULL)
+		xkb_state_unref(tool->xkb.state);
 
 	tool->xkb.keymap = keymap;
 	tool->xkb.state = state;
