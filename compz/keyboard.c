@@ -203,6 +203,9 @@ static void nemo_keyboard_key(struct wl_client *client, struct wl_resource *keyb
 		return;
 	}
 
+	if (view->xkb == NULL)
+		view->xkb = nemoxkb_create();
+
 	changed = nemoxkb_update_key(view->xkb, key, state == NEMO_KEYBOARD_KEY_STATE_PRESSED ? XKB_KEY_DOWN : XKB_KEY_UP);
 
 	if (view->focus == NULL)
