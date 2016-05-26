@@ -27,7 +27,7 @@ static void default_touchpoint_grab_down(struct touchpoint_grab *grab, uint32_t 
 	struct nemoview *view;
 	float sx, sy;
 
-	view = nemocompz_pick_view(tp->touch->seat->compz, x, y, &sx, &sy);
+	view = nemocompz_pick_view(tp->touch->seat->compz, x, y, &sx, &sy, NEMOVIEW_PICK_STATE);
 	if (view != NULL) {
 		touchpoint_set_focus(tp, view);
 	}
@@ -138,7 +138,7 @@ static void nemo_touch_bypass(struct wl_client *client, struct wl_resource *reso
 
 	nemoview_transform_to_global(tp->focus, wl_fixed_to_double(sx), wl_fixed_to_double(sy), &x, &y);
 
-	view = nemocompz_pick_view_below(seat->compz, x, y, &tx, &ty, tp->focus);
+	view = nemocompz_pick_view_below(seat->compz, x, y, &tx, &ty, tp->focus, NEMOVIEW_PICK_STATE);
 	if (view != NULL) {
 		time = time_current_msecs();
 
@@ -832,7 +832,7 @@ void nemotouch_bypass_event(struct nemocompz *compz, int32_t touchid, float sx, 
 
 	nemoview_transform_to_global(tp->focus, sx, sy, &x, &y);
 
-	view = nemocompz_pick_view_below(compz, x, y, &tx, &ty, tp->focus);
+	view = nemocompz_pick_view_below(compz, x, y, &tx, &ty, tp->focus, NEMOVIEW_PICK_STATE);
 	if (view != NULL) {
 		time = time_current_msecs();
 

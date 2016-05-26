@@ -352,7 +352,7 @@ static void nemo_surface_focus_on(struct wl_client *client, struct wl_resource *
 			&tx, &ty);
 
 	nemoview_set_focus(bin->view,
-			nemocompz_pick_canvas(shell->compz, tx, ty, &sx, &sy));
+			nemocompz_pick_view(shell->compz, tx, ty, &sx, &sy, NEMOVIEW_PICK_STATE | NEMOVIEW_CANVAS_STATE | NEMOVIEW_KEYPAD_STATE));
 }
 
 static void nemo_surface_execute_command(struct wl_client *client, struct wl_resource *resource, const char *name, const char *cmds, uint32_t type, uint32_t coords, wl_fixed_t x, wl_fixed_t y, wl_fixed_t r)

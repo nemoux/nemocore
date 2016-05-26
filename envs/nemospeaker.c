@@ -95,7 +95,7 @@ static void nemospeaker_dispatch_canvas_event(struct nemoshow *show, struct show
 		struct shellbin *bin;
 		float sx, sy;
 
-		view = nemocompz_pick_canvas(compz, nemoshow_event_get_gx(event), nemoshow_event_get_gy(event), &sx, &sy);
+		view = nemocompz_pick_view(compz, nemoshow_event_get_gx(event), nemoshow_event_get_gy(event), &sx, &sy, NEMOVIEW_PICK_STATE | NEMOVIEW_CANVAS_STATE);
 		if ((view != NULL) &&
 				(nemoview_has_state(view, NEMOVIEW_SOUND_STATE)) &&
 				(view->canvas != NULL) &&

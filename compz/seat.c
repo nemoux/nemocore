@@ -385,7 +385,7 @@ void nemoseat_bypass_touchpoint_by_view(struct nemoseat *seat, struct nemoview *
 	wl_list_for_each(touch, &seat->touch.device_list, link) {
 		wl_list_for_each(tp, &touch->touchpoint_list, link) {
 			if (tp->focus == view) {
-				pick = nemocompz_pick_view(compz, tp->x, tp->y, &tx, &ty);
+				pick = nemocompz_pick_view(compz, tp->x, tp->y, &tx, &ty, NEMOVIEW_PICK_STATE);
 				if (pick != NULL) {
 					nemocontent_touch_up(tp, tp->focus->content, msecs, tp->gid);
 

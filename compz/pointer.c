@@ -31,7 +31,7 @@ static void default_pointer_grab_focus(struct nemopointer_grab *grab)
 	if (pointer->button_count > 0)
 		return;
 
-	view = nemocompz_pick_view(pointer->seat->compz, pointer->x, pointer->y, &sx, &sy);
+	view = nemocompz_pick_view(pointer->seat->compz, pointer->x, pointer->y, &sx, &sy, NEMOVIEW_PICK_STATE);
 
 	if (pointer->focus != view || pointer->sx != sx || pointer->sy != sy) {
 		pointer->sx = sx;
@@ -73,7 +73,7 @@ static void default_pointer_grab_button(struct nemopointer_grab *grab, uint32_t 
 		struct nemoview *view;
 		float sx, sy;
 
-		view = nemocompz_pick_view(pointer->seat->compz, pointer->x, pointer->y, &sx, &sy);
+		view = nemocompz_pick_view(pointer->seat->compz, pointer->x, pointer->y, &sx, &sy, NEMOVIEW_PICK_STATE);
 		if (pointer->focus != view) {
 			nemopointer_set_focus(pointer, view, sx, sy);
 		}

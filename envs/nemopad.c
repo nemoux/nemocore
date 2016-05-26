@@ -298,10 +298,11 @@ static int nemopad_dispatch_key_grab(struct nemoshow *show, struct showgrab *gra
 			struct nemoview *view;
 			float sx, sy;
 
-			view = nemocompz_pick_canvas(compz,
+			view = nemocompz_pick_view(compz,
 					nemoshow_event_get_gx(event),
 					nemoshow_event_get_gy(event),
-					&sx, &sy);
+					&sx, &sy,
+					NEMOVIEW_PICK_STATE | NEMOVIEW_CANVAS_STATE);
 			if (view != NULL && nemoview_has_state(view, NEMOVIEW_KEYPAD_STATE)) {
 				nemokeypad_set_focus(pad->keypad, view);
 			}

@@ -123,7 +123,7 @@ static void datadrag_pointer_grab_focus(struct nemopointer_grab *base)
 	struct nemoview *view;
 	float sx, sy;
 
-	view = nemocompz_pick_view(pointer->seat->compz, pointer->x, pointer->y, &sx, &sy);
+	view = nemocompz_pick_view(pointer->seat->compz, pointer->x, pointer->y, &sx, &sy, NEMOVIEW_PICK_STATE);
 
 	if (drag->focus != view) {
 		datadrag_set_focus(drag, pointer->seat, view, sx, sy);

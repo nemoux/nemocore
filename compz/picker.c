@@ -13,7 +13,7 @@
 #include <content.h>
 #include <nemomisc.h>
 
-struct nemoview *nemocompz_pick_view(struct nemocompz *compz, float x, float y, float *sx, float *sy)
+struct nemoview *nemocompz_pick_view(struct nemocompz *compz, float x, float y, float *sx, float *sy, uint32_t state)
 {
 	struct nemolayer *layer;
 	struct nemoview *view, *child;
@@ -32,13 +32,13 @@ struct nemoview *nemocompz_pick_view(struct nemocompz *compz, float x, float y, 
 		wl_list_for_each(view, &layer->view_list, layer_link) {
 			if (!wl_list_empty(&view->children_list)) {
 				wl_list_for_each(child, &view->children_list, children_link) {
-					if (nemoview_has_state(child, NEMOVIEW_PICK_STATE) != 0) {
+					if (nemoview_has_state_all(child, state) != 0) {
 						NEMOCOMPZ_PICK_VIEW(child, x, y, sx, sy);
 					}
 				}
 			}
 
-			if (nemoview_has_state(view, NEMOVIEW_PICK_STATE) != 0) {
+			if (nemoview_has_state_all(view, state) != 0) {
 				NEMOCOMPZ_PICK_VIEW(view, x, y, sx, sy);
 			}
 		}
@@ -47,7 +47,7 @@ struct nemoview *nemocompz_pick_view(struct nemocompz *compz, float x, float y, 
 	return NULL;
 }
 
-struct nemoview *nemocompz_pick_view_below(struct nemocompz *compz, float x, float y, float *sx, float *sy, struct nemoview *below)
+struct nemoview *nemocompz_pick_view_below(struct nemocompz *compz, float x, float y, float *sx, float *sy, struct nemoview *below, uint32_t state)
 {
 	struct nemolayer *layer;
 	struct nemoview *view, *child;
@@ -71,45 +71,15 @@ struct nemoview *nemocompz_pick_view_below(struct nemocompz *compz, float x, flo
 			} else {
 				if (!wl_list_empty(&view->children_list)) {
 					wl_list_for_each(child, &view->children_list, children_link) {
-						if (nemoview_has_state(child, NEMOVIEW_PICK_STATE) != 0) {
+						if (nemoview_has_state_all(child, state) != 0) {
 							NEMOCOMPZ_PICK_VIEW(child, x, y, sx, sy);
 						}
 					}
 				}
 
-				if (nemoview_has_state(view, NEMOVIEW_PICK_STATE) != 0) {
+				if (nemoview_has_state_all(view, state) != 0) {
 					NEMOCOMPZ_PICK_VIEW(view, x, y, sx, sy);
 				}
-			}
-		}
-	}
-
-	return NULL;
-}
-
-struct nemoview *nemocompz_pick_canvas(struct nemocompz *compz, float x, float y, float *sx, float *sy)
-{
-	struct nemolayer *layer;
-	struct nemoview *view, *child;
-
-	wl_list_for_each(layer, &compz->layer_list, link) {
-		wl_list_for_each(view, &layer->view_list, layer_link) {
-			if (view->canvas == NULL)
-				continue;
-
-			if (!wl_list_empty(&view->children_list)) {
-				wl_list_for_each(child, &view->children_list, children_link) {
-					if (child->canvas == NULL)
-						continue;
-
-					if (nemoview_has_state(child, NEMOVIEW_PICK_STATE) != 0) {
-						NEMOCOMPZ_PICK_VIEW(child, x, y, sx, sy);
-					}
-				}
-			}
-
-			if (nemoview_has_state(view, NEMOVIEW_PICK_STATE) != 0) {
-				NEMOCOMPZ_PICK_VIEW(view, x, y, sx, sy);
 			}
 		}
 	}
