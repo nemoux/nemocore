@@ -121,10 +121,10 @@ static struct {
 	{ NEMOENVS_RESOURCES "/keyboard/keyboard-e.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-73.svg", NULL, NULL, 181, 266, 655, 318, "SPACE", 57, 1, 1, 3.0f, 0 },
 	{ NEMOENVS_RESOURCES "/keyboard/keyboard-b-i.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-74.svg", NULL, NULL, 629, 266, 704, 318, "CTRL", 29, 1, 1, 3.0f, 1 },
 	{ NEMOENVS_RESOURCES "/keyboard/keyboard-b-i.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-75.svg", NULL, NULL, 693, 266, 768, 318, "DEL", 111, 1, 1, 3.0f, 1 },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-f.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-76.svg", NULL, NULL, 772, 266, 802, 318, "LEFT", 75, 1, 1, 1.5f, 0 },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-g.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-77.svg", NULL, NULL, 805, 266, 863, 290, "UP", 72, 1, 1, 1.5f, 0 },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-g-i.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-78.svg", NULL, NULL, 805, 294, 863, 318, "DOWN", 80, 1, 1, 1.5f, 0 },
-	{ NEMOENVS_RESOURCES "/keyboard/keyboard-f.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-79.svg", NULL, NULL, 866, 266, 896, 318, "RIGHT", 77, 1, 1, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-f.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-76.svg", NULL, NULL, 772, 266, 802, 318, "LEFT", 105, 1, 1, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-g.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-77.svg", NULL, NULL, 805, 266, 863, 290, "UP", 103, 1, 1, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-g-i.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-78.svg", NULL, NULL, 805, 294, 863, 318, "DOWN", 108, 1, 1, 1.5f, 0 },
+	{ NEMOENVS_RESOURCES "/keyboard/keyboard-f.svg", NEMOENVS_RESOURCES "/keyboard/keyboard-79.svg", NULL, NULL, 866, 266, 896, 318, "RIGHT", 106, 1, 1, 1.5f, 0 },
 };
 
 static struct showone *nemopadborders[NEMOPAD_KEYS_MAX];
