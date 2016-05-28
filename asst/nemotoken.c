@@ -1,6 +1,9 @@
+#define _GNU_SOURCE
+#define __USE_GNU
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
@@ -25,7 +28,7 @@ struct nemotoken *nemotoken_create(const char *str, int length)
 
 	token->length = length;
 	token->tokens = NULL;
-	token->token_count = 0;
+	token->ntokens = 0;
 
 	return token;
 
@@ -35,6 +38,27 @@ err1:
 	return NULL;
 }
 
+struct nemotoken *nemotoken_create_format(const char *fmt, ...)
+{
+	struct nemotoken *token;
+	va_list vargs;
+
+	token = (struct nemotoken *)malloc(sizeof(struct nemotoken));
+	if (token == NULL)
+		return NULL;
+	memset(token, 0, sizeof(struct nemotoken));
+
+	va_start(vargs, fmt);
+	vasprintf(&token->contents, fmt, vargs);
+	va_end(vargs);
+
+	token->length = strlen(token->contents);
+	token->tokens = NULL;
+	token->ntokens = 0;
+
+	return token;
+}
+
 void nemotoken_destroy(struct nemotoken *token)
 {
 	if (token->tokens != NULL)
@@ -42,6 +66,26 @@ void nemotoken_destroy(struct nemotoken *token)
 
 	free(token->contents);
 	free(token);
+}
+
+int nemotoken_append(struct nemotoken *token, const char *str, int length)
+{
+	char *contents;
+
+	contents = (char *)malloc(token->length + length + 1);
+	if (contents == NULL)
+		return -1;
+
+	strcpy(contents, token->contents);
+	strcat(contents, str);
+	contents[token->length + length] = '\0';
+
+	free(token->contents);
+
+	token->contents = contents;
+	token->length = token->length + length;
+
+	return 0;
 }
 
 void nemotoken_divide(struct nemotoken *token, char div)
@@ -62,14 +106,14 @@ int nemotoken_update(struct nemotoken *token)
 	if (token->tokens != NULL)
 		free(token->tokens);
 
-	token->token_count = 0;
+	token->ntokens = 0;
 
 	state = 0;
 
 	for (i = 0; i < token->length + 1; i++) {
 		if (token->contents[i] == '\0') {
 			if (state == 1) {
-				token->token_count++;
+				token->ntokens++;
 			}
 
 			state = 0;
@@ -78,10 +122,10 @@ int nemotoken_update(struct nemotoken *token)
 		}
 	}
 
-	token->tokens = (char **)malloc(sizeof(char *) * (token->token_count + 1));
+	token->tokens = (char **)malloc(sizeof(char *) * (token->ntokens + 1));
 	if (token->tokens == NULL)
 		return -1;
-	memset(token->tokens, 0, sizeof(char *) * (token->token_count + 1));
+	memset(token->tokens, 0, sizeof(char *) * (token->ntokens + 1));
 
 	state = 0;
 	index = 0;
@@ -98,12 +142,14 @@ int nemotoken_update(struct nemotoken *token)
 		}
 	}
 
+	token->tokens[index] = NULL;
+
 	return 0;
 }
 
 int nemotoken_get_token_count(struct nemotoken *token)
 {
-	return token->token_count;
+	return token->ntokens;
 }
 
 char **nemotoken_get_tokens(struct nemotoken *token)
@@ -120,10 +166,10 @@ char *nemotoken_get_token_pair(struct nemotoken *token, const char *name)
 {
 	int i;
 
-	if (token->token_count < 2)
+	if (token->ntokens < 2)
 		return NULL;
 
-	for (i = 0; i < token->token_count - 1; i++) {
+	for (i = 0; i < token->ntokens - 1; i++) {
 		if (strcmp(token->tokens[i], name) == 0) {
 			return token->tokens[i + 1];
 		}
