@@ -18,6 +18,7 @@
 #include <nemolist.h>
 #include <nemoitem.h>
 #include <nemoease.h>
+#include <nemotoken.h>
 #include <nemomisc.h>
 
 struct nemoaction *nemoenvs_create_action(void)
@@ -190,31 +191,27 @@ void nemoenvs_execute_background(struct nemoenvs *envs, int index)
 {
 	struct nemoshell *shell = envs->shell;
 	struct nemocompz *compz = shell->compz;
+	struct nemotoken *token;
 	pid_t pid;
 	int32_t x, y;
 	int32_t width, height;
-	char *argv[32];
-	char *attr;
-	int argc = 0;
-	int iattr;
+	char *path;
+	char *args;
 
 	x = nemoitem_get_iattr(shell->configs, index, "x", 0);
 	y = nemoitem_get_iattr(shell->configs, index, "y", 0);
 	width = nemoitem_get_iattr(shell->configs, index, "width", nemocompz_get_scene_width(compz));
 	height = nemoitem_get_iattr(shell->configs, index, "height", nemocompz_get_scene_height(compz));
+	path = nemoitem_get_attr(shell->configs, index, "path");
+	args = nemoitem_get_attr(shell->configs, index, "args");
 
-	argv[argc++] = nemoitem_get_attr(shell->configs, index, "path");
-	argv[argc++] = strdup("-w");
-	asprintf(&argv[argc++], "%d", width);
-	argv[argc++] = strdup("-h");
-	asprintf(&argv[argc++], "%d", height);
+	token = nemotoken_create_format("%s;-w;%d;-h;%d", path, width, height);
+	if (args != NULL)
+		nemotoken_append(token, args, strlen(args));
+	nemotoken_divide(token, ';');
+	nemotoken_update(token);
 
-	nemoitem_for_vattr(shell->configs, index, "arg%d", iattr, 0, attr)
-		argv[argc++] = attr;
-
-	argv[argc++] = NULL;
-
-	pid = wayland_execute_path(argv[0], argv, NULL);
+	pid = wayland_execute_path(path, nemotoken_get_tokens(token), NULL);
 	if (pid > 0) {
 		struct clientstate *state;
 
@@ -228,10 +225,7 @@ void nemoenvs_execute_background(struct nemoenvs *envs, int index)
 		nemoenvs_attach_app(envs, NEMOENVS_APP_BACKGROUND_TYPE, index, pid);
 	}
 
-	free(argv[1]);
-	free(argv[2]);
-	free(argv[3]);
-	free(argv[4]);
+	nemotoken_destroy(token);
 }
 
 void nemoenvs_execute_backgrounds(struct nemoenvs *envs)
@@ -252,24 +246,26 @@ void nemoenvs_execute_soundmanager(struct nemoenvs *envs)
 
 	index = nemoitem_get(shell->configs, "//nemoshell/sound", 0);
 	if (index >= 0) {
+		struct nemotoken *token;
 		pid_t pid;
 		char *path;
-		char *attr;
-		char *argv[32];
-		int argc = 0;
-		int i;
+		char *args;
 
-		argv[argc++] = nemoitem_get_attr(shell->configs, index, "path");
+		path = nemoitem_get_attr(shell->configs, index, "path");
+		args = nemoitem_get_attr(shell->configs, index, "args");
 
-		nemoitem_for_vattr(shell->configs, index, "arg%d", i, 0, attr)
-			argv[argc++] = attr;
+		token = nemotoken_create(path, strlen(path));
+		if (args != NULL)
+			nemotoken_append(token, args, strlen(args));
+		nemotoken_divide(token, ';');
+		nemotoken_update(token);
 
-		argv[argc++] = NULL;
-
-		pid = wayland_execute_path(argv[0], argv, NULL);
+		pid = wayland_execute_path(path, nemotoken_get_tokens(token), NULL);
 		if (pid > 0) {
 			nemoenvs_attach_app(envs, NEMOENVS_APP_SOUNDMANAGER_TYPE, index, pid);
 		}
+
+		nemotoken_destroy(token);
 	}
 }
 

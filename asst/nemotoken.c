@@ -88,6 +88,36 @@ int nemotoken_append(struct nemotoken *token, const char *str, int length)
 	return 0;
 }
 
+int nemotoken_append_format(struct nemotoken *token, const char *fmt, ...)
+{
+	va_list vargs;
+	char *contents;
+	char *str;
+	int length;
+
+	va_start(vargs, fmt);
+	vasprintf(&str, fmt, vargs);
+	va_end(vargs);
+
+	length = strlen(str);
+
+	contents = (char *)malloc(token->length + length + 1);
+	if (contents == NULL)
+		return -1;
+
+	strcpy(contents, token->contents);
+	strcat(contents, str);
+	contents[token->length + length] = '\0';
+
+	free(token->contents);
+	free(str);
+
+	token->contents = contents;
+	token->length = token->length + length;
+
+	return 0;
+}
+
 void nemotoken_divide(struct nemotoken *token, char div)
 {
 	int i;
