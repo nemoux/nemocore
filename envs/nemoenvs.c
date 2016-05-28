@@ -37,12 +37,12 @@ void nemoenvs_destroy_action(struct nemoaction *action)
 {
 	if (action->path != NULL)
 		free(action->path);
+	if (action->args != NULL)
+		free(action->args);
 	if (action->icon != NULL)
 		free(action->icon);
 	if (action->ring != NULL)
 		free(action->ring);
-	if (action->user != NULL)
-		free(action->user);
 	if (action->text != NULL)
 		free(action->text);
 
@@ -276,15 +276,14 @@ void nemoenvs_load_actions(struct nemoenvs *envs)
 	struct nemoaction *action;
 	char *chromepath;
 	char *path;
+	char *args;
 	char *icon;
 	char *ring;
 	char *text;
 	char *attr;
 	char *attr0, *attr1;
-	int argc;
 	int igroup;
 	int index;
-	int i;
 
 	chromepath = nemoitem_get_attr_named(shell->configs, "//nemoshell/chrome", "path");
 
@@ -325,6 +324,7 @@ void nemoenvs_load_actions(struct nemoenvs *envs)
 	nemoitem_for_each(shell->configs, index, "//nemoshell/action", 0) {
 		igroup = nemoitem_get_iattr(shell->configs, index, "group", 0);
 		path = nemoitem_get_attr(shell->configs, index, "path");
+		args = nemoitem_get_attr(shell->configs, index, "args");
 		icon = nemoitem_get_attr(shell->configs, index, "icon");
 		ring = nemoitem_get_attr(shell->configs, index, "ring");
 		text = nemoitem_get_attr(shell->configs, index, "text");
@@ -342,6 +342,12 @@ void nemoenvs_load_actions(struct nemoenvs *envs)
 		if (text != NULL)
 			action->text = strdup(text);
 
+		if (path != NULL)
+			action->path = strdup(path);
+
+		if (args != NULL)
+			action->args = strdup(args);
+
 		action->type = NEMOENVS_ACTION_APP_TYPE;
 		action->keypad = 1;
 		action->layer = 0;
@@ -356,8 +362,6 @@ void nemoenvs_load_actions(struct nemoenvs *envs)
 		if (attr != NULL) {
 			if (strcmp(attr, "xapp") == 0)
 				action->type = NEMOENVS_ACTION_XAPP_TYPE;
-			else if (strcmp(attr, "chrome") == 0)
-				action->type = NEMOENVS_ACTION_CHROME_TYPE;
 			else if (strcmp(attr, "cmd") == 0)
 				action->type = NEMOENVS_ACTION_CMD_TYPE;
 			else if (strcmp(attr, "none") == 0)
@@ -439,32 +443,6 @@ void nemoenvs_load_actions(struct nemoenvs *envs)
 			if (attr != NULL)
 				action->fadein_duration = strtoul(attr, NULL, 10);
 		}
-
-		argc = 0;
-
-		if (action->type == NEMOENVS_ACTION_APP_TYPE) {
-			action->path = strdup(path);
-			action->args[argc++] = action->path;
-		} else if (action->type == NEMOENVS_ACTION_XAPP_TYPE) {
-			action->path = strdup(path);
-			action->args[argc++] = action->path;
-		} else if (action->type == NEMOENVS_ACTION_CHROME_TYPE) {
-			action->path = strdup(chromepath);
-			action->args[argc++] = action->path;
-
-			attr = nemoitem_get_attr(shell->configs, index, "user");
-			if (attr != NULL) {
-				asprintf(&action->user, "--user-data-dir=%s", attr);
-				action->args[argc++] = action->user;
-			}
-		} else if (action->type == NEMOENVS_ACTION_CMD_TYPE) {
-			action->path = strdup(path);
-		}
-
-		nemoitem_for_vattr(shell->configs, index, "arg%d", i, 0, attr)
-			action->args[argc++] = attr;
-
-		action->args[argc++] = NULL;
 
 		NEMOBOX_APPEND(group->actions, group->sactions, group->nactions, action);
 	}

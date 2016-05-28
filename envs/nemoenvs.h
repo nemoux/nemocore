@@ -12,9 +12,8 @@ NEMO_BEGIN_EXTERN_C
 typedef enum {
 	NEMOENVS_ACTION_APP_TYPE = 0,
 	NEMOENVS_ACTION_XAPP_TYPE = 1,
-	NEMOENVS_ACTION_CHROME_TYPE = 2,
-	NEMOENVS_ACTION_CMD_TYPE = 3,
-	NEMOENVS_ACTION_NONE_TYPE = 4,
+	NEMOENVS_ACTION_CMD_TYPE = 2,
+	NEMOENVS_ACTION_NONE_TYPE = 3,
 	NEMOENVS_ACTION_LAST_TYPE
 } NemoEnvsActionType;
 
@@ -43,9 +42,8 @@ struct nemoaction {
 	char *path;
 	char *icon;
 	char *ring;
-	char *user;
 	char *text;
-	char *args[16];
+	char *args;
 
 	uint32_t flags;
 
