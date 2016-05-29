@@ -11,6 +11,13 @@ NEMO_BEGIN_EXTERN_C
 
 #define NEMOCOMPZ_TOUCH_SAMPLE_MAX			(60)
 
+typedef enum {
+	TOUCHPOINT_DOWN_STATE = 0,
+	TOUCHPOINT_MOTION_STATE = 1,
+	TOUCHPOINT_UP_STATE = 2,
+	TOUCHPOINT_LAST_STATE
+} TouchPointState;
+
 struct nemoseat;
 struct nemotouch;
 struct tuionode;
@@ -37,6 +44,8 @@ struct touchsample {
 
 struct touchpoint {
 	struct nemotouch *touch;
+
+	int state;
 
 	uint64_t id;
 	uint64_t gid;
@@ -136,8 +145,8 @@ extern void touchpoint_set_focus(struct touchpoint *tp, struct nemoview *view);
 extern void touchpoint_start_grab(struct touchpoint *tp, struct touchpoint_grab *grab);
 extern void touchpoint_end_grab(struct touchpoint *tp);
 extern void touchpoint_cancel_grab(struct touchpoint *tp);
-
 extern void touchpoint_update_grab(struct touchpoint *tp);
+extern void touchpoint_done_grab(struct touchpoint *tp);
 
 extern struct touchnode *nemotouch_create_node(struct nemocompz *compz, const char *devnode);
 extern void nemotouch_destroy_node(struct touchnode *node);

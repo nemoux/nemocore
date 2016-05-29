@@ -21,7 +21,6 @@ add_definitions(-DNEMOENVS_RESOURCES="${CMAKE_INSTALL_PREFIX}/share/nemoenvs")
 
 add_library(nemoenvs SHARED
 	nemoenvs.c
-	nemopack.c
 	showhelper.c
 	)
 
@@ -39,7 +38,6 @@ INSTALL(TARGETS nemoenvs DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
 
 set(HEADER_FILES
 	nemoenvs.h
-	nemopack.h
 	showhelper.h
 	)
 

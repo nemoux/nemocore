@@ -1175,7 +1175,7 @@ void nemoxmanager_map_window(struct nemoxmanager *xmanager, struct nemoxwindow *
 
 	nemoshell_use_client_state(shell, bin);
 
-	bin->flags |= NEMOSHELL_SURFACE_BINDABLE_FLAG;
+	bin->flags |= NEMOSHELL_SURFACE_BINDABLE_FLAG | NEMOSHELL_SURFACE_CLOSEABLE_FLAG;
 
 	xwindow->bin = bin;
 

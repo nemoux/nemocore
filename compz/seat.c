@@ -310,6 +310,9 @@ struct touchpoint *nemoseat_get_touchpoint_by_grab_serial(struct nemoseat *seat,
 
 	wl_list_for_each(touch, &seat->touch.device_list, link) {
 		wl_list_for_each(tp, &touch->touchpoint_list, link) {
+			if (tp->state == TOUCHPOINT_UP_STATE)
+				continue;
+
 			if (tp->grab_serial == serial)
 				return tp;
 		}
@@ -325,6 +328,9 @@ struct touchpoint *nemoseat_get_touchpoint_by_id(struct nemoseat *seat, uint64_t
 
 	wl_list_for_each(touch, &seat->touch.device_list, link) {
 		wl_list_for_each(tp, &touch->touchpoint_list, link) {
+			if (tp->state == TOUCHPOINT_UP_STATE)
+				continue;
+
 			if (tp->gid == id)
 				return tp;
 		}
@@ -341,6 +347,9 @@ int nemoseat_get_touchpoint_by_view(struct nemoseat *seat, struct nemoview *view
 
 	wl_list_for_each(touch, &seat->touch.device_list, link) {
 		wl_list_for_each(tp, &touch->touchpoint_list, link) {
+			if (tp->state == TOUCHPOINT_UP_STATE)
+				continue;
+
 			if (tp->focus == view) {
 				tps[tpcount++] = tp;
 
@@ -362,6 +371,9 @@ int nemoseat_put_touchpoint_by_view(struct nemoseat *seat, struct nemoview *view
 
 	wl_list_for_each(touch, &seat->touch.device_list, link) {
 		wl_list_for_each_safe(tp, tnext, &touch->touchpoint_list, link) {
+			if (tp->state == TOUCHPOINT_UP_STATE)
+				continue;
+
 			if (tp->focus == view) {
 				nemocontent_touch_up(tp, tp->focus->content, msecs, tp->gid);
 
@@ -384,6 +396,9 @@ void nemoseat_bypass_touchpoint_by_view(struct nemoseat *seat, struct nemoview *
 
 	wl_list_for_each(touch, &seat->touch.device_list, link) {
 		wl_list_for_each(tp, &touch->touchpoint_list, link) {
+			if (tp->state == TOUCHPOINT_UP_STATE)
+				continue;
+
 			if (tp->focus == view) {
 				pick = nemocompz_pick_view(compz, tp->x, tp->y, &tx, &ty, NEMOVIEW_PICK_STATE);
 				if (pick != NULL) {
@@ -398,6 +413,35 @@ void nemoseat_bypass_touchpoint_by_view(struct nemoseat *seat, struct nemoview *
 
 					nemocompz_run_touch_binding(compz, tp, msecs);
 				}
+			}
+		}
+	}
+}
+
+void nemoseat_get_distant_touchpoint(struct nemoseat *seat, struct touchpoint *tps[], int ntps, struct touchpoint **tp0, struct touchpoint **tp1)
+{
+	struct nemotouch *touch;
+	struct touchpoint *_tp0, *_tp1;
+	float dm = 0.0f;
+	float dd;
+	float dx, dy;
+	int i, j;
+
+	for (i = 0; i < ntps - 1; i++) {
+		_tp0 = tps[i];
+
+		for (j = i + 1; j < ntps; j++) {
+			_tp1 = tps[j];
+
+			dx = _tp1->x - _tp0->x;
+			dy = _tp1->y - _tp0->y;
+			dd = sqrtf(dx * dx + dy * dy);
+
+			if (dd > dm) {
+				dm = dd;
+
+				*tp0 = _tp0;
+				*tp1 = _tp1;
 			}
 		}
 	}

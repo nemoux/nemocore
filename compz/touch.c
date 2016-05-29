@@ -483,6 +483,8 @@ void nemotouch_notify_down(struct nemotouch *touch, uint32_t time, int id, float
 	tp->grab_x = x;
 	tp->grab_y = y;
 
+	tp->state = TOUCHPOINT_DOWN_STATE;
+
 	tp->grab->interface->down(tp->grab, time, tp->gid, x, y);
 
 	tp->grab_serial = wl_display_get_serial(touch->seat->compz->display);
@@ -505,6 +507,10 @@ void nemotouch_notify_up(struct nemotouch *touch, uint32_t time, int id)
 	if (tp == NULL)
 		return;
 
+	tp->state = TOUCHPOINT_UP_STATE;
+
+	nemocompz_run_touch_binding(touch->seat->compz, tp, time);
+
 	tp->grab->interface->up(tp->grab, time, tp->gid);
 
 	nemotouch_destroy_touchpoint(touch, tp);
@@ -523,6 +529,8 @@ void nemotouch_notify_motion(struct nemotouch *touch, uint32_t time, int id, flo
 	tp = nemotouch_get_touchpoint_by_id(touch, id);
 	if (tp == NULL)
 		return;
+
+	tp->state = TOUCHPOINT_MOTION_STATE;
 
 	tp->grab->interface->motion(tp->grab, time, tp->gid, x, y);
 }
@@ -593,6 +601,8 @@ void nemotouch_flush_tuio(struct tuionode *node)
 			tp->grab_x = x;
 			tp->grab_y = y;
 
+			tp->state = TOUCHPOINT_DOWN_STATE;
+
 			tp->grab->interface->down(tp->grab, msecs, tp->gid, x, y);
 
 			tp->grab_serial = wl_display_get_serial(node->compz->display);
@@ -600,6 +610,8 @@ void nemotouch_flush_tuio(struct tuionode *node)
 
 			nemocompz_run_touch_binding(touch->seat->compz, tp, msecs);
 		} else {
+			tp->state = TOUCHPOINT_MOTION_STATE;
+
 			tp->grab->interface->motion(tp->grab, msecs, tp->gid, x, y);
 
 			wl_list_remove(&tp->link);
@@ -608,6 +620,10 @@ void nemotouch_flush_tuio(struct tuionode *node)
 	}
 
 	wl_list_for_each_safe(tp, tnext, &touchpoint_list, link) {
+		tp->state = TOUCHPOINT_UP_STATE;
+
+		nemocompz_run_touch_binding(touch->seat->compz, tp, msecs);
+
 		tp->grab->interface->up(tp->grab, msecs, tp->gid);
 
 		nemotouch_destroy_touchpoint(touch, tp);
@@ -643,6 +659,11 @@ void touchpoint_update_grab(struct touchpoint *tp)
 {
 	tp->grab_x = tp->x;
 	tp->grab_y = tp->y;
+}
+
+void touchpoint_done_grab(struct touchpoint *tp)
+{
+	tp->grab->interface->up(tp->grab, time_current_msecs(), tp->gid);
 }
 
 struct touchnode *nemotouch_create_node(struct nemocompz *compz, const char *devnode)
@@ -790,6 +811,8 @@ void nemotouch_flush_taps(struct touchnode *node, struct touchtaps *taps)
 			tp->grab_x = x;
 			tp->grab_y = y;
 
+			tp->state = TOUCHPOINT_DOWN_STATE;
+
 			tp->grab->interface->down(tp->grab, msecs, tp->gid, x, y);
 
 			tp->grab_serial = wl_display_get_serial(node->compz->display);
@@ -797,6 +820,8 @@ void nemotouch_flush_taps(struct touchnode *node, struct touchtaps *taps)
 
 			nemocompz_run_touch_binding(touch->seat->compz, tp, msecs);
 		} else {
+			tp->state = TOUCHPOINT_MOTION_STATE;
+
 			tp->grab->interface->motion(tp->grab, msecs, tp->gid, x, y);
 
 			wl_list_remove(&tp->link);
@@ -805,6 +830,10 @@ void nemotouch_flush_taps(struct touchnode *node, struct touchtaps *taps)
 	}
 
 	wl_list_for_each_safe(tp, tnext, &touchpoint_list, link) {
+		tp->state = TOUCHPOINT_UP_STATE;
+
+		nemocompz_run_touch_binding(touch->seat->compz, tp, msecs);
+
 		tp->grab->interface->up(tp->grab, msecs, tp->gid);
 
 		nemotouch_destroy_touchpoint(touch, tp);

@@ -300,7 +300,7 @@ int nemoshell_move_canvas_by_touchpoint(struct nemoshell *shell, struct touchpoi
 		return 0;
 
 	if (bin->grabbed > 0)
-		wl_signal_emit(&bin->ungrab_signal, bin);
+		touchpoint_done_grab(tp);
 
 	move = (struct shellgrab_move *)malloc(sizeof(struct shellgrab_move));
 	if (move == NULL)
@@ -537,7 +537,7 @@ int nemoshell_move_actor_by_touchpoint(struct nemoshell *shell, struct touchpoin
 		return -1;
 
 	if (actor->grabbed > 0)
-		wl_signal_emit(&actor->ungrab_signal, actor);
+		touchpoint_done_grab(tp);
 
 	move = (struct actorgrab_move *)malloc(sizeof(struct actorgrab_move));
 	if (move == NULL)

@@ -96,6 +96,8 @@ extern int nemoseat_get_touchpoint_by_view(struct nemoseat *seat, struct nemovie
 extern int nemoseat_put_touchpoint_by_view(struct nemoseat *seat, struct nemoview *view);
 extern void nemoseat_bypass_touchpoint_by_view(struct nemoseat *seat, struct nemoview *view);
 
+extern void nemoseat_get_distant_touchpoint(struct nemoseat *seat, struct touchpoint *tps[], int ntps, struct touchpoint **tp0, struct touchpoint **tp1);
+
 extern struct wl_resource *nemoseat_find_resource_for_view(struct wl_list *list, struct nemoview *view);
 
 extern void nemoseat_set_keyboard_focus(struct nemoseat *seat, struct nemoview *view);

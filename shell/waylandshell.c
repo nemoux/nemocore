@@ -184,7 +184,7 @@ static void shell_get_shell_surface(struct wl_client *client, struct wl_resource
 
 	bin->type = NEMOSHELL_SURFACE_NORMAL_TYPE;
 	bin->owner = sc;
-	
+
 	wl_client_get_credentials(client, &bin->pid, NULL, NULL);
 
 	bin->resource = wl_resource_create(client, &wl_shell_surface_interface, 1, id);
@@ -198,7 +198,7 @@ static void shell_get_shell_surface(struct wl_client *client, struct wl_resource
 
 	nemoshell_use_client_state(shell, bin);
 
-	bin->flags |= NEMOSHELL_SURFACE_BINDABLE_FLAG;
+	bin->flags |= NEMOSHELL_SURFACE_BINDABLE_FLAG | NEMOSHELL_SURFACE_CLOSEABLE_FLAG;
 }
 
 static const struct wl_shell_interface shell_implementation = {

@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <signal.h>
 #include <wayland-server.h>
 #include <wayland-nemo-shell-server-protocol.h>
 
@@ -90,6 +91,12 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 
 		if (shell->is_logging_grab != 0)
 			nemolog_message("PICK", "[UP:SCALE] %llu: sx(%f) sy(%f) width(%d) height(%d) (%u)\n", touchid, bin->view->geometry.sx, bin->view->geometry.sy, width, height, time);
+
+		if (bin->flags & NEMOSHELL_SURFACE_CLOSEABLE_FLAG) {
+			if (bin->min_width >= width || bin->min_height >= height) {
+				kill(bin->pid, SIGKILL);
+			}
+		}
 
 		if (bin->on_pickscreen != 0) {
 			if (nemocompz_get_scene_width(compz) * shell->pick.fullscreen_scale <= width ||
