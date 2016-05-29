@@ -62,19 +62,7 @@ int nemotale_prepare(struct nemotale *tale)
 		tale->single_click_distance = strtoul(env, NULL, 10);
 	else
 		tale->single_click_distance = 30;
-
-	env = getenv("NEMOTALE_CLOSE_WIDTH");
-	if (env != NULL)
-		tale->close_width = strtoul(env, NULL, 10);
-	else
-		tale->close_width = 250;
-
-	env = getenv("NEMOTALE_CLOSE_HEIGHT");
-	if (env != NULL)
-		tale->close_height = strtoul(env, NULL, 10);
-	else
-		tale->close_height = 250;
-
+	
 	env = getenv("NEMOTALE_MINIMUM_WIDTH");
 	if (env != NULL)
 		tale->minimum_width = strtoul(env, NULL, 10);

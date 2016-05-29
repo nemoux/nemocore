@@ -113,7 +113,7 @@ static void nemopdf_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t wi
 	if (width == 0 || height == 0)
 		return;
 
-	if (width < nemotale_get_close_width(tale) || height < nemotale_get_close_height(tale)) {
+	if (width <= nemotale_get_minimum_width(tale) || height <= nemotale_get_minimum_height(tale)) {
 		nemotool_exit(context->tool);
 		return;
 	}

@@ -20,7 +20,7 @@ static void nemoshow_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t w
 	if (width == 0 || height == 0)
 		return;
 
-	if (width < nemotale_get_close_width(tale) || height < nemotale_get_close_height(tale)) {
+	if (width <= nemotale_get_minimum_width(tale) || height <= nemotale_get_minimum_height(tale)) {
 		if (nemocanvas_dispatch_destroy(canvas) > 0)
 			return;
 	}
