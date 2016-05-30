@@ -99,11 +99,6 @@ static int nemoshow_dispatch_actor_resize(struct nemoactor *actor, int32_t width
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct talefbo *fbo = (struct talefbo *)nemotale_get_backend(tale);
 
-	if (width <= nemotale_get_minimum_width(tale) || height <= nemotale_get_minimum_height(tale)) {
-		if (nemoactor_dispatch_destroy(actor) > 0)
-			return 0;
-	}
-
 	if (show->dispatch_resize != NULL) {
 		show->dispatch_resize(show, width, height);
 		return 0;
@@ -276,6 +271,8 @@ struct nemoshow *nemoshow_create_view(struct nemoshell *shell, int32_t width, in
 	nemoactor_set_max_size(scon->actor,
 			nemotale_get_maximum_width(scon->tale),
 			nemotale_get_maximum_height(scon->tale));
+
+	nemoview_set_state(scon->actor->view, NEMOVIEW_CLOSE_STATE);
 
 	nemotale_set_userdata(scon->tale, show);
 

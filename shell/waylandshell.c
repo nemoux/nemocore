@@ -42,11 +42,16 @@ static void shell_send_fullscreen(struct nemocanvas *canvas, int id, int32_t x, 
 {
 }
 
+static void shell_send_close(struct nemocanvas *canvas)
+{
+}
+
 static struct nemoclient shell_client = {
 	shell_send_configure,
 	shell_send_transform,
 	shell_send_layer,
-	shell_send_fullscreen
+	shell_send_fullscreen,
+	shell_send_close
 };
 
 static void shell_surface_pong(struct wl_client *client, struct wl_resource *resource, uint32_t serial)
@@ -198,7 +203,7 @@ static void shell_get_shell_surface(struct wl_client *client, struct wl_resource
 
 	nemoshell_use_client_state(shell, bin);
 
-	bin->flags |= NEMOSHELL_SURFACE_BINDABLE_FLAG | NEMOSHELL_SURFACE_CLOSEABLE_FLAG;
+	bin->flags |= NEMOSHELL_SURFACE_BINDABLE_FLAG;
 }
 
 static const struct wl_shell_interface shell_implementation = {

@@ -1150,11 +1150,16 @@ static void xserver_send_fullscreen(struct nemocanvas *canvas, int id, int32_t x
 {
 }
 
+static void xserver_send_close(struct nemocanvas *canvas)
+{
+}
+
 static struct nemoclient xserver_client = {
 	xserver_send_configure,
 	xserver_send_transform,
 	xserver_send_layer,
-	xserver_send_fullscreen
+	xserver_send_fullscreen,
+	xserver_send_close
 };
 
 void nemoxmanager_map_window(struct nemoxmanager *xmanager, struct nemoxwindow *xwindow)
@@ -1175,7 +1180,7 @@ void nemoxmanager_map_window(struct nemoxmanager *xmanager, struct nemoxwindow *
 
 	nemoshell_use_client_state(shell, bin);
 
-	bin->flags |= NEMOSHELL_SURFACE_BINDABLE_FLAG | NEMOSHELL_SURFACE_CLOSEABLE_FLAG;
+	bin->flags |= NEMOSHELL_SURFACE_BINDABLE_FLAG;
 
 	xwindow->bin = bin;
 

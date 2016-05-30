@@ -87,43 +87,45 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		int32_t width = nemoshell_bin_get_geometry_width(bin) * bin->view->geometry.sx;
 		int32_t height = nemoshell_bin_get_geometry_height(bin) * bin->view->geometry.sy;
 
-		bin->resize_edges = WL_SHELL_SURFACE_RESIZE_LEFT | WL_SHELL_SURFACE_RESIZE_TOP;
-
 		if (shell->is_logging_grab != 0)
 			nemolog_message("PICK", "[UP:SCALE] %llu: sx(%f) sy(%f) width(%d) height(%d) (%u)\n", touchid, bin->view->geometry.sx, bin->view->geometry.sy, width, height, time);
 
-		if (bin->flags & NEMOSHELL_SURFACE_CLOSEABLE_FLAG) {
-			if (bin->min_width >= width || bin->min_height >= height) {
+		if (bin->min_width >= width || bin->min_height >= height) {
+			if (nemoview_has_state(bin->view, NEMOVIEW_CLOSE_STATE) == 0) {
 				kill(bin->pid, SIGKILL);
+			} else {
+				bin->client->send_close(bin->canvas);
 			}
-		}
+		} else {
+			bin->resize_edges = WL_SHELL_SURFACE_RESIZE_LEFT | WL_SHELL_SURFACE_RESIZE_TOP;
 
-		if (bin->on_pickscreen != 0) {
-			if (nemocompz_get_scene_width(compz) * shell->pick.fullscreen_scale <= width ||
-					nemocompz_get_scene_height(compz) * shell->pick.fullscreen_scale <= height)
-				screen = nemoshell_get_fullscreen_on(shell, tp0->x, tp0->y, NEMOSHELL_FULLSCREEN_PICK_TYPE);
+			if (bin->on_pickscreen != 0) {
+				if (nemocompz_get_scene_width(compz) * shell->pick.fullscreen_scale <= width ||
+						nemocompz_get_scene_height(compz) * shell->pick.fullscreen_scale <= height)
+					screen = nemoshell_get_fullscreen_on(shell, tp0->x, tp0->y, NEMOSHELL_FULLSCREEN_PICK_TYPE);
 
-			if (screen != NULL) {
-				nemoshell_set_fullscreen_bin(shell, bin, screen);
+				if (screen != NULL) {
+					nemoshell_set_fullscreen_bin(shell, bin, screen);
 
-				nemoseat_put_touchpoint_by_view(compz->seat, bin->view);
+					nemoseat_put_touchpoint_by_view(compz->seat, bin->view);
 
-				if (screen->focus == NEMOSHELL_FULLSCREEN_ALL_FOCUS) {
-					nemoseat_set_keyboard_focus(compz->seat, bin->view);
-					nemoseat_set_pointer_focus(compz->seat, bin->view);
-					nemoseat_set_stick_focus(compz->seat, bin->view);
+					if (screen->focus == NEMOSHELL_FULLSCREEN_ALL_FOCUS) {
+						nemoseat_set_keyboard_focus(compz->seat, bin->view);
+						nemoseat_set_pointer_focus(compz->seat, bin->view);
+						nemoseat_set_stick_focus(compz->seat, bin->view);
+					}
+				} else {
+					bin->client->send_configure(bin->canvas, width, height);
 				}
 			} else {
 				bin->client->send_configure(bin->canvas, width, height);
 			}
-		} else {
-			bin->client->send_configure(bin->canvas, width, height);
-		}
 
-		bin->has_scale = 1;
-		bin->scale.serial = bin->next_serial;
-		bin->scale.width = width;
-		bin->scale.height = height;
+			bin->has_scale = 1;
+			bin->scale.serial = bin->next_serial;
+			bin->scale.width = width;
+			bin->scale.height = height;
+		}
 	}
 
 	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_MOVE)) {
@@ -590,24 +592,29 @@ static void pick_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 			struct nemoview *view = actor->view;
 			int32_t width = actor->view->content->width * actor->view->geometry.sx;
 			int32_t height = actor->view->content->height * actor->view->geometry.sy;
-			int32_t sx, sy;
-			float fromx, fromy, tox, toy;
 
-			nemoview_set_scale(view, 1.0f, 1.0f);
-			nemoview_update_transform(view);
+			if (actor->min_width >= width || actor->min_height >= height) {
+				nemoactor_dispatch_destroy(actor);
+			} else {
+				int32_t sx, sy;
+				float fromx, fromy, tox, toy;
 
-			sx = (width - actor->base.width) * -actor->scale.ax;
-			sy = (height - actor->base.height) * -actor->scale.ay;
+				nemoview_set_scale(view, 1.0f, 1.0f);
+				nemoview_update_transform(view);
 
-			nemoview_transform_to_global(view, 0.0f, 0.0f, &fromx, &fromy);
-			nemoview_transform_to_global(view, sx, sy, &tox, &toy);
+				sx = (width - actor->base.width) * -actor->scale.ax;
+				sy = (height - actor->base.height) * -actor->scale.ay;
 
-			nemoview_set_position(view,
-					view->geometry.x + tox - fromx,
-					view->geometry.y + toy - fromy);
+				nemoview_transform_to_global(view, 0.0f, 0.0f, &fromx, &fromy);
+				nemoview_transform_to_global(view, sx, sy, &tox, &toy);
 
-			if (nemoactor_dispatch_resize(actor, width, height) == 0)
+				nemoview_set_position(view,
+						view->geometry.x + tox - fromx,
+						view->geometry.y + toy - fromy);
+
+				nemoactor_dispatch_resize(actor, width, height);
 				nemoactor_dispatch_frame(actor);
+			}
 		}
 
 		if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_MOVE)) {

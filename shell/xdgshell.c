@@ -67,11 +67,16 @@ static void xdg_send_fullscreen(struct nemocanvas *canvas, int id, int32_t x, in
 {
 }
 
+static void xdg_send_close(struct nemocanvas *canvas)
+{
+}
+
 static struct nemoclient xdg_client = {
 	xdg_send_configure,
 	xdg_send_transform,
 	xdg_send_layer,
-	xdg_send_fullscreen
+	xdg_send_fullscreen,
+	xdg_send_close
 };
 
 static void xdg_surface_destroy(struct wl_client *client, struct wl_resource *resource)
@@ -236,11 +241,16 @@ static void xdg_popup_send_fullscreen(struct nemocanvas *canvas, int id, int32_t
 {
 }
 
+static void xdg_popup_send_close(struct nemocanvas *canvas)
+{
+}
+
 static struct nemoclient xdg_popup_client = {
 	xdg_popup_send_configure,
 	xdg_popup_send_transform,
 	xdg_popup_send_layer,
-	xdg_popup_send_fullscreen
+	xdg_popup_send_fullscreen,
+	xdg_popup_send_close
 };
 
 static void xdg_popup_destroy(struct wl_client *client, struct wl_resource *resource)
@@ -314,7 +324,7 @@ static void xdg_get_xdg_surface(struct wl_client *client, struct wl_resource *re
 
 	nemoshell_use_client_state(shell, bin);
 
-	bin->flags |= NEMOSHELL_SURFACE_BINDABLE_FLAG | NEMOSHELL_SURFACE_CLOSEABLE_FLAG;
+	bin->flags |= NEMOSHELL_SURFACE_BINDABLE_FLAG;
 }
 
 static void xdg_get_xdg_popup(struct wl_client *client, struct wl_resource *resource, uint32_t id, struct wl_resource *surface_resource, struct wl_resource *parent_resource, struct wl_resource *seat_resource, uint32_t serial, int32_t x, int32_t y)

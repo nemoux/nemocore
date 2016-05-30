@@ -126,6 +126,7 @@ struct nemoclient {
 	void (*send_transform)(struct nemocanvas *canvas, int visible, int32_t x, int32_t y, int32_t width, int32_t height);
 	void (*send_layer)(struct nemocanvas *canvas, int visible);
 	void (*send_fullscreen)(struct nemocanvas *canvas, int id, int32_t x, int32_t y, int32_t width, int32_t height);
+	void (*send_close)(struct nemocanvas *canvas);
 };
 
 extern struct nemocanvas *nemocanvas_create(struct wl_client *client, struct wl_resource *compositor_resource, uint32_t id);

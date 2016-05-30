@@ -52,11 +52,19 @@ static void nemo_send_fullscreen(struct nemocanvas *canvas, int id, int32_t x, i
 	nemo_surface_send_fullscreen(bin->resource, id, x, y, width, height);
 }
 
+static void nemo_send_close(struct nemocanvas *canvas)
+{
+	struct shellbin *bin = nemoshell_get_bin(canvas);
+
+	nemo_surface_send_close(bin->resource);
+}
+
 static struct nemoclient nemo_client = {
 	nemo_send_configure,
 	nemo_send_transform,
 	nemo_send_layer,
-	nemo_send_fullscreen
+	nemo_send_fullscreen,
+	nemo_send_close
 };
 
 static void nemo_surface_destroy(struct wl_client *client, struct wl_resource *resource)
@@ -89,6 +97,8 @@ static void nemo_surface_set_state(struct wl_client *client, struct wl_resource 
 		nemoview_set_state(bin->view, NEMOVIEW_PUSH_STATE);
 	else if (strcmp(state, "opaque") == 0)
 		nemoview_set_state(bin->view, NEMOVIEW_OPAQUE_STATE);
+	else if (strcmp(state, "close") == 0)
+		nemoview_set_state(bin->view, NEMOVIEW_CLOSE_STATE);
 }
 
 static void nemo_surface_put_state(struct wl_client *client, struct wl_resource *resource, const char *state)
@@ -109,6 +119,8 @@ static void nemo_surface_put_state(struct wl_client *client, struct wl_resource 
 		nemoview_put_state(bin->view, NEMOVIEW_PUSH_STATE);
 	else if (strcmp(state, "opaque") == 0)
 		nemoview_put_state(bin->view, NEMOVIEW_OPAQUE_STATE);
+	else if (strcmp(state, "close") == 0)
+		nemoview_put_state(bin->view, NEMOVIEW_CLOSE_STATE);
 }
 
 static void nemo_surface_set_size(struct wl_client *client, struct wl_resource *resource, uint32_t width, uint32_t height)

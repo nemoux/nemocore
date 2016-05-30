@@ -247,5 +247,8 @@
 			<arg name="width" type="int"/>
 			<arg name="height" type="int"/>
 		</event>
+
+		<event name="close">
+		</event>
 	</interface>
 </protocol>
