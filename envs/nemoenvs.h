@@ -7,6 +7,8 @@
 NEMO_BEGIN_EXTERN_C
 #endif
 
+#include <nemomsg.h>
+
 #include <nemobox.h>
 
 typedef enum {
@@ -92,10 +94,15 @@ struct nemoenvs {
 	int sgroups, ngroups;
 
 	struct nemolist app_list;
+
+	struct nemomsg *msg;
+	struct nemomonitor *monitor;
 };
 
 extern struct nemoenvs *nemoenvs_create(struct nemoshell *shell);
 extern void nemoenvs_destroy(struct nemoenvs *envs);
+
+extern int nemoenvs_listen(struct nemoenvs *envs, const char *ip, int port);
 
 extern struct nemoaction *nemoenvs_create_action(void);
 extern void nemoenvs_destroy_action(struct nemoaction *action);

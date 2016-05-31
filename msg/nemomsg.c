@@ -55,18 +55,3 @@ void nemomsg_destroy(struct nemomsg *msg)
 
 	free(msg);
 }
-
-int nemomsg_dispatch_event(void *data)
-{
-	struct nemomsg *msg = (struct nemomsg *)data;
-	char buffer[1024];
-	char ip[64];
-	int port;
-	int size;
-
-	size = udp_recv_from(msg->soc, ip, &port, buffer, sizeof(buffer) - 1);
-	if (size <= 0)
-		return -1;
-
-	return 0;
-}

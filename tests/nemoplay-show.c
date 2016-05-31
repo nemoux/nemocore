@@ -13,16 +13,14 @@
 #include <nemoplay.h>
 #include <nemoshow.h>
 #include <showhelper.h>
-#include <nemomonitor.h>
-#include <nemomsg.h>
+#include <nemoenvs.h>
 #include <nemolog.h>
 #include <nemomisc.h>
 
 struct playcontext {
 	struct nemotool *tool;
 
-	struct nemomsg *msg;
-	struct nemomonitor *monitor;
+	struct nemoenvs *envs;
 
 	struct nemoshow *show;
 	struct showone *scene;
@@ -269,8 +267,7 @@ int main(int argc, char *argv[])
 
 	struct playcontext *context;
 	struct nemotool *tool;
-	struct nemomsg *msg;
-	struct nemomonitor *monitor;
+	struct nemoenvs *envs;
 	struct nemoshow *show;
 	struct showone *scene;
 	struct showone *canvas;
@@ -334,16 +331,10 @@ int main(int argc, char *argv[])
 		goto err3;
 	nemotool_connect_wayland(tool, NULL);
 
-	context->msg = msg = nemomsg_create(NULL, 0);
-	if (msg == NULL)
+	context->envs = envs = nemoenvs_create(tool);
+	if (envs == NULL)
 		goto err4;
-	nemomsg_conn_set_client(msg->conn, "/shell", "127.0.0.1", 10000);
-	nemomsg_conn_send_msg(msg->conn, "/shell", "merong", 6);
-
-	context->monitor = monitor = nemomonitor_create(tool,
-			nemomsg_get_socket(msg),
-			nemomsg_dispatch_event,
-			msg);
+	nemoenvs_connect(envs, "127.0.0.1", 10000);
 
 	context->show = show = nemoshow_create_view(tool, width, height);
 	if (show == NULL)
@@ -397,12 +388,11 @@ int main(int argc, char *argv[])
 	nemoshow_destroy_view(show);
 
 err5:
-	nemomonitor_destroy(monitor);
-	nemomsg_destroy(msg);
-
-err4:
 	nemotool_disconnect_wayland(tool);
 	nemotool_destroy(tool);
+
+err4:
+	nemoenvs_destroy(envs);
 
 err3:
 	nemoplay_set_state(play, NEMOPLAY_DONE_STATE);

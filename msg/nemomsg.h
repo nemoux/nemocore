@@ -20,8 +20,6 @@ struct nemomsg {
 extern struct nemomsg *nemomsg_create(const char *ip, int port);
 extern void nemomsg_destroy(struct nemomsg *msg);
 
-extern int nemomsg_dispatch_event(void *data);
-
 static inline void nemomsg_set_socket(struct nemomsg *msg, int soc)
 {
 	msg->soc = soc;

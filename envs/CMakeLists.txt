@@ -33,7 +33,7 @@ TARGET_LINK_LIBRARIES(nemoenvs
 	nemoshow
 	)
 
-set(NEMOENVS_PKGCONFIG_REQUIRES "nemoasst nemocompz nemoshell nemoshow")
+set(NEMOENVS_PKGCONFIG_REQUIRES "nemoasst nemocompz nemoshell nemoshow nemomsg")
 
 INSTALL(TARGETS nemoenvs DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
 

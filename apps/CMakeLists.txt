@@ -41,9 +41,10 @@ TARGET_LINK_LIBRARIES(nemoapps
 	nemotool
 	nemotale
 	nemoshow
+	nemomsg
 	)
 
-set(NEMOAPPS_PKGCONFIG_REQUIRES "nemoasst nemotool nemotale nemoshow")
+set(NEMOAPPS_PKGCONFIG_REQUIRES "nemoasst nemotool nemotale nemoshow nemomsg")
 
 INSTALL(TARGETS nemoapps DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
 

@@ -7,6 +7,7 @@
 
 #include <nemoenvs.h>
 #include <nemoxml.h>
+#include <udphelper.h>
 #include <nemomisc.h>
 
 struct nemoaction *nemoenvs_create_action(void)
@@ -83,7 +84,7 @@ void nemoenvs_destroy_group(struct nemogroup *group)
 	free(group);
 }
 
-struct nemoenvs *nemoenvs_create(void)
+struct nemoenvs *nemoenvs_create(struct nemotool *tool)
 {
 	struct nemoenvs *envs;
 
@@ -95,6 +96,8 @@ struct nemoenvs *nemoenvs_create(void)
 	envs->configs = nemoitem_create(64);
 	if (envs->configs == NULL)
 		goto err1;
+
+	envs->tool = tool;
 
 	envs->groups = (struct nemogroup **)malloc(sizeof(struct nemogroup *) * 8);
 	envs->ngroups = 0;
@@ -119,6 +122,37 @@ void nemoenvs_destroy(struct nemoenvs *envs)
 
 	free(envs->groups);
 	free(envs);
+}
+
+static int nemoenvs_dispatch_message(void *data)
+{
+	struct nemomsg *msg = (struct nemomsg *)data;
+	char buffer[1024];
+	char ip[64];
+	int port;
+	int size;
+
+	size = udp_recv_from(msg->soc, ip, &port, buffer, sizeof(buffer) - 1);
+	if (size <= 0)
+		return -1;
+
+	return 0;
+}
+
+int nemoenvs_connect(struct nemoenvs *envs, const char *ip, int port)
+{
+	envs->msg = nemomsg_create(NULL, 0);
+	if (envs->msg == NULL)
+		return -1;
+	nemomsg_conn_set_client(envs->msg->conn, "/shell", ip, port);
+	nemomsg_conn_send_msg(envs->msg->conn, "/shell", "merong", 6);
+
+	envs->monitor = nemomonitor_create(envs->tool,
+			nemomsg_get_socket(envs->msg),
+			nemoenvs_dispatch_message,
+			envs->msg);
+
+	return 0;
 }
 
 void nemoenvs_load_configs(struct nemoenvs *envs, const char *configpath)

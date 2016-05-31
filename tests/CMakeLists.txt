@@ -48,7 +48,6 @@ add_executable(nemoplay-show
 TARGET_LINK_LIBRARIES(nemoplay-show
 	nemoplay
 	nemoapps
-	nemomsg
 	${AO_LIBRARIES}
 	)
 

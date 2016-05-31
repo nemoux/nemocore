@@ -12,6 +12,7 @@
 #include <shell.h>
 #include <compz.h>
 #include <view.h>
+#include <monitor.h>
 #include <waylandhelper.h>
 
 #include <nemoenvs.h>
@@ -19,6 +20,7 @@
 #include <nemoitem.h>
 #include <nemoease.h>
 #include <nemotoken.h>
+#include <udphelper.h>
 #include <nemomisc.h>
 
 struct nemoaction *nemoenvs_create_action(void)
@@ -135,6 +137,35 @@ void nemoenvs_destroy(struct nemoenvs *envs)
 
 	free(envs->groups);
 	free(envs);
+}
+
+static int nemoenvs_dispatch_message(void *data)
+{
+	struct nemomsg *msg = (struct nemomsg *)data;
+	char buffer[1024];
+	char ip[64];
+	int port;
+	int size;
+
+	size = udp_recv_from(msg->soc, ip, &port, buffer, sizeof(buffer) - 1);
+	if (size <= 0)
+		return -1;
+
+	return 0;
+}
+
+int nemoenvs_listen(struct nemoenvs *envs, const char *ip, int port)
+{
+	envs->msg = nemomsg_create(ip, port);
+	if (envs->msg == NULL)
+		return -1;
+
+	envs->monitor = nemomonitor_create(envs->shell->compz,
+			nemomsg_get_socket(envs->msg),
+			nemoenvs_dispatch_message,
+			envs->msg);
+
+	return 0;
 }
 
 int nemoenvs_attach_app(struct nemoenvs *envs, int type, int index, pid_t pid)
