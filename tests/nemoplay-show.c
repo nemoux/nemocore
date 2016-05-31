@@ -73,8 +73,13 @@ static void nemoplay_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 		if (nemoshow_event_is_single_tap(show, event)) {
 			nemoshow_view_move(show, nemoshow_event_get_serial_on(event, 0));
+		} else if (nemoshow_event_is_double_taps(show, event)) {
+			nemoshow_view_pick(show,
+					nemoshow_event_get_serial_on(event, 0),
+					nemoshow_event_get_serial_on(event, 1),
+					NEMOSHOW_VIEW_PICK_ALL_TYPE);
 		} else if (nemoshow_event_is_many_taps(show, event)) {
-			nemoshow_view_pick_distant(show, event, NEMOSHOW_VIEW_PICK_ALL_TYPE);
+			nemoshow_view_pick_distant(show, event, NEMOSHOW_VIEW_PICK_ROTATE_TYPE | NEMOSHOW_VIEW_PICK_TRANSLATE_TYPE);
 		}
 	}
 

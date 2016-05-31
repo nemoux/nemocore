@@ -23,14 +23,6 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -std=c++11")
 set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 
-add_executable(nemoscope-simple
-	nemoscope-simple.c
-	)
-
-TARGET_LINK_LIBRARIES(nemoscope-simple
-	nemoasst
-	)
-
 add_executable(nemoimage-show
 	nemoimage-show.c
 	)
@@ -68,22 +60,3 @@ if(WITH_CEF)
 		nemoapps
 		)
 endif(WITH_CEF)
-
-if(WITH_MUPDF)
-	add_executable(nemopdf-tale
-		nemopdf-tale.c
-		pdfhelper.c
-		)
-
-	TARGET_LINK_LIBRARIES(nemopdf-tale
-		mupdf
-		mujs
-		muopenjpeg
-		mujpeg
-		mujbig2dec
-		freetype
-		crypto
-		z
-		nemoapps
-		)
-endif(WITH_MUPDF)
