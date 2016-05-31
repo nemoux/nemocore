@@ -39,6 +39,7 @@ add_library(nemoasst SHARED
 	${CMAKE_SOURCE_DIR}/misc/colorhelper.c
 	${CMAKE_SOURCE_DIR}/misc/prochelper.c
 	${CMAKE_SOURCE_DIR}/misc/oshelper.c
+	${CMAKE_SOURCE_DIR}/misc/udphelper.c
 	${CMAKE_SOURCE_DIR}/misc/meshhelper.cpp
 	${CMAKE_SOURCE_DIR}/thirds/tiny_obj_loader.cc
 	${NEMOASST_EGL_SOURCES}

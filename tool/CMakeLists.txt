@@ -27,7 +27,6 @@ wayland_add_protocol_client(PROTOCOLS
 include_directories(
 	${CMAKE_SOURCE_DIR}/asst
 	${CMAKE_SOURCE_DIR}/misc
-	${CMAKE_SOURCE_DIR}/thirds
 	)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
@@ -50,12 +49,8 @@ add_library(nemotool SHARED
 	nemooutput.c
 	nemosound.c
 	nemotimer.c
-	nemoglib.c
-	nemocurl.c
-	nemohttp.c
 	${EXTRA}
 	${PROTOCOLS}
-	${CMAKE_SOURCE_DIR}/thirds/http_parser.c
 	)
 
 TARGET_LINK_LIBRARIES(nemotool
@@ -83,8 +78,6 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/tool/nemooutput.h
 	${CMAKE_SOURCE_DIR}/tool/nemosound.h
 	${CMAKE_SOURCE_DIR}/tool/nemotimer.h
-	${CMAKE_SOURCE_DIR}/tool/nemoglib.h
-	${CMAKE_SOURCE_DIR}/tool/nemocurl.h
 	${EXTRA_HEADERS}
 	${CMAKE_BINARY_DIR}/tool/wayland-presentation-timing-client-protocol.h
 	${CMAKE_BINARY_DIR}/tool/wayland-nemo-shell-client-protocol.h

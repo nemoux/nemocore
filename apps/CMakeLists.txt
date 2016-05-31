@@ -18,6 +18,7 @@ include_directories(
 	${CMAKE_BINARY_DIR}/tool
 	${CMAKE_SOURCE_DIR}/tale
 	${CMAKE_SOURCE_DIR}/show
+	${CMAKE_SOURCE_DIR}/thirds
 	)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
@@ -26,8 +27,12 @@ set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 
 add_library(nemoapps SHARED
 	nemoenvs.c
+	nemoglib.c
+	nemocurl.c
+	nemohttp.c
 	talehelper.c
 	showhelper.c
+	${CMAKE_SOURCE_DIR}/thirds/http_parser.c
 	)
 
 TARGET_LINK_LIBRARIES(nemoapps
@@ -43,6 +48,9 @@ INSTALL(TARGETS nemoapps DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
 
 set(HEADER_FILES
 	nemoenvs.h
+	nemoglib.h
+	nemocurl.h
+	nemohttp.h
 	talehelper.h
 	showhelper.h
 	)
