@@ -1,5 +1,5 @@
-#ifndef	__NEMOUX_ENVS_H__
-#define	__NEMOUX_ENVS_H__
+#ifndef	__NEMOTOOL_ENVS_H__
+#define	__NEMOTOOL_ENVS_H__
 
 #include <nemoconfig.h>
 

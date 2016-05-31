@@ -1,5 +1,5 @@
-#ifndef	__NEMOUX_SHOW_HELPER_H__
-#define	__NEMOUX_SHOW_HELPER_H__
+#ifndef	__NEMOTOOL_SHOW_HELPER_H__
+#define	__NEMOTOOL_SHOW_HELPER_H__
 
 #include <nemoconfig.h>
 
