@@ -25,6 +25,8 @@
 #include <nemolog.h>
 #include <nemomisc.h>
 
+#define NEMOSHELL_PICK_CLOSE_EPSILON			(0.95f)
+
 static inline float pickgrab_calculate_touchpoint_distance(struct touchpoint *tp0, struct touchpoint *tp1)
 {
 	float dx, dy;
@@ -90,7 +92,7 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		if (shell->is_logging_grab != 0)
 			nemolog_message("PICK", "[UP:SCALE] %llu: sx(%f) sy(%f) width(%d) height(%d) (%u)\n", touchid, bin->view->geometry.sx, bin->view->geometry.sy, width, height, time);
 
-		if (bin->min_width >= width || bin->min_height >= height) {
+		if (bin->min_width >= width * NEMOSHELL_PICK_CLOSE_EPSILON || bin->min_height >= height * NEMOSHELL_PICK_CLOSE_EPSILON) {
 			if (nemoview_has_state(bin->view, NEMOVIEW_CLOSE_STATE) == 0) {
 				kill(bin->pid, SIGKILL);
 			} else {
@@ -593,7 +595,7 @@ static void pick_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 			int32_t width = actor->view->content->width * actor->view->geometry.sx;
 			int32_t height = actor->view->content->height * actor->view->geometry.sy;
 
-			if (actor->min_width >= width || actor->min_height >= height) {
+			if (actor->min_width >= width * NEMOSHELL_PICK_CLOSE_EPSILON || actor->min_height >= height * NEMOSHELL_PICK_CLOSE_EPSILON) {
 				nemoactor_dispatch_destroy(actor);
 			} else {
 				int32_t sx, sy;
