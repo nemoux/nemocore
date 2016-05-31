@@ -11,6 +11,7 @@ include_directories(
 	${CMAKE_BINARY_DIR}/shell
 	${CMAKE_SOURCE_DIR}/tale
 	${CMAKE_SOURCE_DIR}/show
+	${CMAKE_SOURCE_DIR}/msg
 	)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
