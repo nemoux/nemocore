@@ -142,12 +142,13 @@ void nemoenvs_destroy(struct nemoenvs *envs)
 static int nemoenvs_dispatch_message(void *data)
 {
 	struct nemomsg *msg = (struct nemomsg *)data;
+	int soc = nemomsg_get_socket(msg);
 	char buffer[1024];
 	char ip[64];
 	int port;
 	int size;
 
-	size = udp_recv_from(msg->soc, ip, &port, buffer, sizeof(buffer) - 1);
+	size = udp_recv_from(soc, ip, &port, buffer, sizeof(buffer) - 1);
 	if (size <= 0)
 		return -1;
 

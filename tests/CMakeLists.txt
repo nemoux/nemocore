@@ -15,7 +15,6 @@ include_directories(
 	${CMAKE_SOURCE_DIR}/tale
 	${CMAKE_SOURCE_DIR}/show
 	${CMAKE_SOURCE_DIR}/apps
-	${CMAKE_SOURCE_DIR}/msg
 	${CMAKE_SOURCE_DIR}/play
 	${CMAKE_SOURCE_DIR}/navi
 	)

@@ -18,7 +18,6 @@ include_directories(
 	${CMAKE_BINARY_DIR}/tool
 	${CMAKE_SOURCE_DIR}/tale
 	${CMAKE_SOURCE_DIR}/show
-	${CMAKE_SOURCE_DIR}/msg
 	${CMAKE_SOURCE_DIR}/thirds
 	)
 
@@ -41,10 +40,9 @@ TARGET_LINK_LIBRARIES(nemoapps
 	nemotool
 	nemotale
 	nemoshow
-	nemomsg
 	)
 
-set(NEMOAPPS_PKGCONFIG_REQUIRES "nemoasst nemotool nemotale nemoshow nemomsg")
+set(NEMOAPPS_PKGCONFIG_REQUIRES "nemoasst nemotool nemotale nemoshow")
 
 INSTALL(TARGETS nemoapps DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
 

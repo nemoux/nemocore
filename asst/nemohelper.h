@@ -36,6 +36,10 @@ extern char *os_get_file_path(const char *name);
 
 extern int os_set_nonblocking_mode(int fd);
 
+extern int udp_create_socket(const char *ip, int port);
+extern int udp_send_to(int soc, const char *ip, int port, const char *msg, int size);
+extern int udp_recv_from(int soc, char *ip, int *port, char *msg, int size);
+
 extern double cubicbezier_point(double t, double p0, double p1, double p2, double p3);
 extern double cubicbezier_length(double x0, double y0, double x1, double y1, double x2, double y2, double x3, double y3, int steps);
 

@@ -11,7 +11,6 @@ include_directories(
 	${CMAKE_BINARY_DIR}/shell
 	${CMAKE_SOURCE_DIR}/tale
 	${CMAKE_SOURCE_DIR}/show
-	${CMAKE_SOURCE_DIR}/msg
 	)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
@@ -33,7 +32,7 @@ TARGET_LINK_LIBRARIES(nemoenvs
 	nemoshow
 	)
 
-set(NEMOENVS_PKGCONFIG_REQUIRES "nemoasst nemocompz nemoshell nemoshow nemomsg")
+set(NEMOENVS_PKGCONFIG_REQUIRES "nemoasst nemocompz nemoshell nemoshow")
 
 INSTALL(TARGETS nemoenvs DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
 

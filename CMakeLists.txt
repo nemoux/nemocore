@@ -186,7 +186,6 @@ add_subdirectory(tale)
 add_subdirectory(show)
 add_subdirectory(mote)
 add_subdirectory(play)
-add_subdirectory(msg)
 
 if(WITH_CEF)
 	add_subdirectory(navi)
