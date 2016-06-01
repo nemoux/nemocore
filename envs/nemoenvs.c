@@ -23,6 +23,7 @@
 #include <nemoxml.h>
 #include <nemotoken.h>
 #include <udphelper.h>
+#include <nemolog.h>
 #include <nemomisc.h>
 
 struct nemoenvs *nemoenvs_create(struct nemoshell *shell)
