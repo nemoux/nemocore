@@ -63,13 +63,3 @@ configure_file(
 
 INSTALL(FILES ${HEADER_FILES} DESTINATION include/nemoapps)
 INSTALL(FILES ${CMAKE_BINARY_DIR}/apps/nemoapps.pc DESTINATION lib${CMAKE_LIBRARY_SUFFIX}/pkgconfig)
-
-add_executable(nemolog
-	nemolog.c
-	)
-
-TARGET_LINK_LIBRARIES(nemolog
-	nemoasst
-	)
-
-INSTALL(TARGETS nemolog DESTINATION bin)

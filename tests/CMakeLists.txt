@@ -60,3 +60,13 @@ if(WITH_CEF)
 		nemoapps
 		)
 endif(WITH_CEF)
+
+add_executable(nemolog
+	nemolog.c
+	)
+
+TARGET_LINK_LIBRARIES(nemolog
+	nemoasst
+	)
+
+INSTALL(TARGETS nemolog DESTINATION bin)
