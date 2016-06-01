@@ -35,10 +35,13 @@ struct nemoitem {
 
 #define nemoitem_for_each(one, item)	\
 	nemolist_for_each(one, &((item)->list), link)
-#define nemoitem_for_each_reverse(one, item)	\
-	nemolist_for_each_reverse(one, &((item)->list), link)
 #define nemoitem_for_each_safe(one, tmp, item)	\
 	nemolist_for_each_safe(one, tmp, &((item)->list), link)
+
+#define nemoitem_attr_for_each(attr, one)	\
+	nemolist_for_each(attr, &((one)->list), link)
+#define nemoitem_attr_for_each_safe(attr, tmp, one)	\
+	nemolist_for_each_safe(attr, tmp, &((one)->list), link)
 
 extern struct nemoitem *nemoitem_create(void);
 extern void nemoitem_destroy(struct nemoitem *item);
@@ -148,6 +151,30 @@ static inline float nemoitem_box_get_fattr(struct itembox *box, int index, const
 static inline const char *nemoitem_box_get_sattr(struct itembox *box, int index, const char *name, const char *value)
 {
 	return nemoitem_one_get_sattr(box->ones[index], name, value);
+}
+
+static inline void nemoitem_attr_set_name(struct itemattr *attr, const char *name)
+{
+	free(attr->name);
+
+	attr->name = strdup(name);
+}
+
+static inline const char *nemoitem_attr_get_name(struct itemattr *attr)
+{
+	return attr->name;
+}
+
+static inline void nemoitem_attr_set_value(struct itemattr *attr, const char *value)
+{
+	free(attr->value);
+
+	attr->value = strdup(value);
+}
+
+static inline const char *nemoitem_attr_get_value(struct itemattr *attr)
+{
+	return attr->value;
 }
 
 #ifdef __cplusplus
