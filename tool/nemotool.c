@@ -825,7 +825,6 @@ int nemotool_get_fd(struct nemotool *tool)
 struct nemotool *nemotool_create(void)
 {
 	struct nemotool *tool;
-	char *env;
 
 	tool = (struct nemotool *)malloc(sizeof(struct nemotool));
 	if (tool == NULL)
@@ -852,18 +851,6 @@ struct nemotool *nemotool_create(void)
 	nemolist_init(&tool->source_list);
 
 	tool->running = 1;
-
-	env = getenv("NEMOTOOL_FULLSCREEN_WIDTH");
-	if (env != NULL)
-		tool->fullscreen_width = strtoul(env, NULL, 10);
-	else
-		tool->fullscreen_width = 1920;
-
-	env = getenv("NEMOTOOL_FULLSCREEN_HEIGHT");
-	if (env != NULL)
-		tool->fullscreen_height = strtoul(env, NULL, 10);
-	else
-		tool->fullscreen_height = 1080;
 
 	return tool;
 
