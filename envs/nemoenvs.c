@@ -306,7 +306,6 @@ void nemoenvs_load_actions(struct nemoenvs *envs)
 	struct nemoshell *shell = envs->shell;
 	struct nemogroup *group;
 	struct nemoaction *action;
-	char *chromepath;
 	char *path;
 	char *args;
 	char *icon;
@@ -316,8 +315,6 @@ void nemoenvs_load_actions(struct nemoenvs *envs)
 	char *attr0, *attr1;
 	int igroup;
 	int index;
-
-	chromepath = nemoitem_get_attr_named(shell->configs, "//nemoshell/chrome", "path");
 
 	nemoitem_for_each(shell->configs, index, "//nemoshell/group", 0) {
 		icon = nemoitem_get_attr(shell->configs, index, "icon");
