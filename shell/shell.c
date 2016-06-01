@@ -866,25 +866,6 @@ static inline void nemoshell_set_client_state(struct shellbin *bin, struct clien
 	if (state->has_pitchscreen != 0)
 		bin->on_pitchscreen = 1;
 
-	if (state->fadein_type != 0) {
-		struct viewanimation *animation;
-
-		animation = viewanimation_create(bin->view, state->fadein_ease, state->fadein_delay, state->fadein_duration);
-		if (state->fadein_type & NEMOSHELL_FADEIN_ALPHA_FLAG) {
-			nemoview_set_alpha(bin->view, 0.0f);
-
-			viewanimation_set_alpha(animation, 1.0f);
-		}
-
-		if (state->fadein_type & NEMOSHELL_FADEIN_SCALE_FLAG) {
-			nemoview_set_scale(bin->view, 0.0f, 0.0f);
-
-			viewanimation_set_scale(animation, 1.0f, 1.0f);
-		}
-
-		viewanimation_dispatch(bin->shell->compz, animation);
-	}
-
 	bin->flags = state->flags;
 
 	nemoview_set_state(bin->view, state->state_on);
@@ -929,51 +910,53 @@ void nemoshell_load_fullscreens(struct nemoshell *shell)
 {
 	struct nemocompz *compz = shell->compz;
 	struct shellscreen *screen;
-	char *type;
-	char *focus;
-	char *fixed;
-	int index;
+	struct itemone *one;
+	const char *type;
+	const char *focus;
+	const char *fixed;
 
-	nemoitem_for_each(shell->configs, index, "//nemoshell/fullscreen", 0) {
-		screen = (struct shellscreen *)malloc(sizeof(struct shellscreen));
-		if (screen == NULL)
-			break;
-		memset(screen, 0, sizeof(struct shellscreen));
+	nemoitem_for_each(one, shell->configs) {
+		if (nemoitem_one_has_path(one, "/nemoshell/fullscreen") != 0) {
+			screen = (struct shellscreen *)malloc(sizeof(struct shellscreen));
+			if (screen == NULL)
+				break;
+			memset(screen, 0, sizeof(struct shellscreen));
 
-		screen->sx = nemoitem_get_iattr(shell->configs, index, "sx", 0);
-		screen->sy = nemoitem_get_iattr(shell->configs, index, "sy", 0);
-		screen->sw = nemoitem_get_iattr(shell->configs, index, "sw", nemocompz_get_scene_width(compz));
-		screen->sh = nemoitem_get_iattr(shell->configs, index, "sh", nemocompz_get_scene_height(compz));
-		screen->dx = nemoitem_get_iattr(shell->configs, index, "dx", 0);
-		screen->dy = nemoitem_get_iattr(shell->configs, index, "dy", 0);
-		screen->dw = nemoitem_get_iattr(shell->configs, index, "dw", nemocompz_get_scene_width(compz));
-		screen->dh = nemoitem_get_iattr(shell->configs, index, "dh", nemocompz_get_scene_height(compz));
-		screen->dr = nemoitem_get_iattr(shell->configs, index, "dr", 0);
-		screen->id = nemoitem_get_iattr(shell->configs, index, "id", 0);
+			screen->sx = nemoitem_one_get_iattr(one, "sx", 0);
+			screen->sy = nemoitem_one_get_iattr(one, "sy", 0);
+			screen->sw = nemoitem_one_get_iattr(one, "sw", nemocompz_get_scene_width(compz));
+			screen->sh = nemoitem_one_get_iattr(one, "sh", nemocompz_get_scene_height(compz));
+			screen->dx = nemoitem_one_get_iattr(one, "dx", 0);
+			screen->dy = nemoitem_one_get_iattr(one, "dy", 0);
+			screen->dw = nemoitem_one_get_iattr(one, "dw", nemocompz_get_scene_width(compz));
+			screen->dh = nemoitem_one_get_iattr(one, "dh", nemocompz_get_scene_height(compz));
+			screen->dr = nemoitem_one_get_iattr(one, "dr", 0);
+			screen->id = nemoitem_one_get_iattr(one, "id", 0);
 
-		type = nemoitem_get_attr(shell->configs, index, "type");
-		if (type == NULL)
-			screen->type = NEMOSHELL_FULLSCREEN_NORMAL_TYPE;
-		else if (strcmp(type, "pick") == 0)
-			screen->type = NEMOSHELL_FULLSCREEN_PICK_TYPE;
-		else if (strcmp(type, "pitch") == 0)
-			screen->type = NEMOSHELL_FULLSCREEN_PITCH_TYPE;
+			type = nemoitem_one_get_attr(one, "type");
+			if (type == NULL)
+				screen->type = NEMOSHELL_FULLSCREEN_NORMAL_TYPE;
+			else if (strcmp(type, "pick") == 0)
+				screen->type = NEMOSHELL_FULLSCREEN_PICK_TYPE;
+			else if (strcmp(type, "pitch") == 0)
+				screen->type = NEMOSHELL_FULLSCREEN_PITCH_TYPE;
 
-		focus = nemoitem_get_attr(shell->configs, index, "focus");
-		if (focus == NULL)
-			screen->focus = NEMOSHELL_FULLSCREEN_NONE_FOCUS;
-		else if (strcmp(focus, "all") == 0)
-			screen->focus = NEMOSHELL_FULLSCREEN_ALL_FOCUS;
+			focus = nemoitem_one_get_attr(one, "focus");
+			if (focus == NULL)
+				screen->focus = NEMOSHELL_FULLSCREEN_NONE_FOCUS;
+			else if (strcmp(focus, "all") == 0)
+				screen->focus = NEMOSHELL_FULLSCREEN_ALL_FOCUS;
 
-		fixed = nemoitem_get_attr(shell->configs, index, "fixed");
-		if (fixed == NULL)
-			screen->fixed = 0;
-		else if (strcmp(fixed, "on") == 0)
-			screen->fixed = 1;
+			fixed = nemoitem_one_get_attr(one, "fixed");
+			if (fixed == NULL)
+				screen->fixed = 0;
+			else if (strcmp(fixed, "on") == 0)
+				screen->fixed = 1;
 
-		wl_list_init(&screen->bin_list);
+			wl_list_init(&screen->bin_list);
 
-		wl_list_insert(&shell->fullscreen_list, &screen->link);
+			wl_list_insert(&shell->fullscreen_list, &screen->link);
+		}
 	}
 }
 
@@ -1197,24 +1180,24 @@ void nemoshell_put_maximized_bin(struct nemoshell *shell, struct shellbin *bin)
 
 void nemoshell_load_gestures(struct nemoshell *shell)
 {
-	shell->pitch.samples = nemoitem_get_iattr_named(shell->configs, "//nemoshell/pitch", "samples", 7);
-	shell->pitch.max_duration = nemoitem_get_iattr_named(shell->configs, "//nemoshell/pitch", "max_duration", 150);
-	shell->pitch.friction = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pitch", "friction", 0.015f);
-	shell->pitch.coefficient = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pitch", "coefficient", 1.8f);
+	shell->pitch.samples = nemoitem_get_iattr(shell->configs, "/nemoshell/pitch", "samples", 7);
+	shell->pitch.max_duration = nemoitem_get_iattr(shell->configs, "/nemoshell/pitch", "max_duration", 150);
+	shell->pitch.friction = nemoitem_get_fattr(shell->configs, "/nemoshell/pitch", "friction", 0.015f);
+	shell->pitch.coefficient = nemoitem_get_fattr(shell->configs, "/nemoshell/pitch", "coefficient", 1.8f);
 
-	shell->pick.samples = nemoitem_get_iattr_named(shell->configs, "//nemoshell/pick", "samples", 5);
-	shell->pick.min_velocity = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "min_velocity", 0.0f);
-	shell->pick.rotate_degree = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "rotate_degree", 0.0f);
-	shell->pick.scale_degree = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "scale_degree", 0.0f);
-	shell->pick.rotate_distance = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "rotate_distance", 25.0f);
-	shell->pick.scale_distance = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "scale_distance", 25.0f);
-	shell->pick.fullscreen_scale = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "fullscreen_scale", 1.25f);
-	shell->pick.resize_interval = nemoitem_get_fattr_named(shell->configs, "//nemoshell/pick", "resize_interval", 50.0f);
+	shell->pick.samples = nemoitem_get_iattr(shell->configs, "/nemoshell/pick", "samples", 5);
+	shell->pick.min_velocity = nemoitem_get_fattr(shell->configs, "/nemoshell/pick", "min_velocity", 0.0f);
+	shell->pick.rotate_degree = nemoitem_get_fattr(shell->configs, "/nemoshell/pick", "rotate_degree", 0.0f);
+	shell->pick.scale_degree = nemoitem_get_fattr(shell->configs, "/nemoshell/pick", "scale_degree", 0.0f);
+	shell->pick.rotate_distance = nemoitem_get_fattr(shell->configs, "/nemoshell/pick", "rotate_distance", 25.0f);
+	shell->pick.scale_distance = nemoitem_get_fattr(shell->configs, "/nemoshell/pick", "scale_distance", 25.0f);
+	shell->pick.fullscreen_scale = nemoitem_get_fattr(shell->configs, "/nemoshell/pick", "fullscreen_scale", 1.25f);
+	shell->pick.resize_interval = nemoitem_get_fattr(shell->configs, "/nemoshell/pick", "resize_interval", 50.0f);
 
-	shell->active.push_distance = nemoitem_get_fattr_named(shell->configs, "//nemoshell/active", "push_distance", 100.0f);
+	shell->active.push_distance = nemoitem_get_fattr(shell->configs, "/nemoshell/active", "push_distance", 100.0f);
 
-	shell->bin.min_width = nemoitem_get_iattr_named(shell->configs, "//nemoshell/bin", "min_width", 0);
-	shell->bin.min_height = nemoitem_get_iattr_named(shell->configs, "//nemoshell/bin", "min_height", 0);
-	shell->bin.max_width = nemoitem_get_iattr_named(shell->configs, "//nemoshell/bin", "max_width", nemocompz_get_scene_width(shell->compz) * 1.5f);
-	shell->bin.max_height = nemoitem_get_iattr_named(shell->configs, "//nemoshell/bin", "max_height", nemocompz_get_scene_height(shell->compz) * 1.5f);
+	shell->bin.min_width = nemoitem_get_iattr(shell->configs, "/nemoshell/bin", "min_width", 0);
+	shell->bin.min_height = nemoitem_get_iattr(shell->configs, "/nemoshell/bin", "min_height", 0);
+	shell->bin.max_width = nemoitem_get_iattr(shell->configs, "/nemoshell/bin", "max_width", nemocompz_get_scene_width(shell->compz) * 1.5f);
+	shell->bin.max_height = nemoitem_get_iattr(shell->configs, "/nemoshell/bin", "max_height", nemocompz_get_scene_height(shell->compz) * 1.5f);
 }

@@ -348,7 +348,7 @@ struct nemocompz *nemocompz_create(void)
 		return NULL;
 	memset(compz, 0, sizeof(struct nemocompz));
 
-	compz->configs = nemoitem_create(64);
+	compz->configs = nemoitem_create();
 	if (compz->configs == NULL)
 		goto err1;
 
@@ -1044,96 +1044,76 @@ struct nemoview *nemocompz_get_view_by_client(struct nemocompz *compz, struct wl
 	return NULL;
 }
 
-void nemocompz_load_configs(struct nemocompz *compz, const char *configpath)
-{
-	struct nemoxml *xml;
-	struct xmlnode *node;
-	int i, j;
-
-	xml = nemoxml_create();
-	nemoxml_load_file(xml, configpath);
-	nemoxml_update(xml);
-
-	nemolist_for_each(node, &xml->nodes, nodelink) {
-		i = nemoitem_set(compz->configs, node->path);
-
-		for (j = 0; j < node->nattrs; j++) {
-			nemoitem_set_attr(compz->configs, i,
-					node->attrs[j*2+0],
-					node->attrs[j*2+1]);
-		}
-	}
-
-	nemoxml_destroy(xml);
-}
-
 void nemocompz_load_backends(struct nemocompz *compz)
 {
+	struct itemone *one;
 	const char *name;
-	int index;
 
-	nemoitem_for_each(compz->configs, index, "//nemoshell/backend", 0) {
-		name = nemoitem_get_attr(compz->configs, index, "name");
+	nemoitem_for_each(one, compz->configs) {
+		if (nemoitem_one_has_path(one, "/nemoshell/backend") == 0)
+			continue;
+
+		name = nemoitem_one_get_attr(one, "name");
 		if (name == NULL)
 			continue;
 
 		if (strcmp(name, "drm") == 0) {
-			drmbackend_create(compz, index);
+			drmbackend_create(compz, nemoitem_one_get_attr(one, "rendernode"));
 		} else if (strcmp(name, "fb") == 0) {
-			fbbackend_create(compz, index);
+			fbbackend_create(compz, nemoitem_one_get_attr(one, "rendernode"));
 		} else if (strcmp(name, "evdev") == 0) {
-			evdevbackend_create(compz, index);
+			evdevbackend_create(compz);
 		} else if (strcmp(name, "tuio") == 0) {
-			tuiobackend_create(compz, index);
+			tuiobackend_create(compz);
 		}
 	}
 }
 
 void nemocompz_load_scenes(struct nemocompz *compz)
 {
-	int index;
+	struct itemone *one;
 
-	index = nemoitem_get(compz->configs, "//nemoshell/scene", 0);
-	if (index >= 0) {
-		int32_t x, y;
-		int32_t width, height;
+	nemoitem_for_each(one, compz->configs) {
+		if (nemoitem_one_has_path(one, "/nemoshell/scene") != 0) {
+			int32_t x, y;
+			int32_t width, height;
 
-		x = nemoitem_get_iattr(compz->configs, index, "x", 0);
-		y = nemoitem_get_iattr(compz->configs, index, "y", 0);
-		width = nemoitem_get_iattr(compz->configs, index, "width", 0);
-		height = nemoitem_get_iattr(compz->configs, index, "height", 0);
+			x = nemoitem_one_get_iattr(one, "x", 0);
+			y = nemoitem_one_get_iattr(one, "y", 0);
+			width = nemoitem_one_get_iattr(one, "width", 0);
+			height = nemoitem_one_get_iattr(one, "height", 0);
 
-		nemocompz_set_scene(compz, x, y, width, height);
-	}
+			nemocompz_set_scene(compz, x, y, width, height);
+		} else if (nemoitem_one_has_path(one, "/nemoshell/scope") != 0) {
+			int32_t x, y;
+			int32_t width, height;
 
-	index = nemoitem_get(compz->configs, "//nemoshell/scope", 0);
-	if (index >= 0) {
-		int32_t x, y;
-		int32_t width, height;
+			x = nemoitem_one_get_iattr(one, "x", 0);
+			y = nemoitem_one_get_iattr(one, "y", 0);
+			width = nemoitem_one_get_iattr(one, "width", 0);
+			height = nemoitem_one_get_iattr(one, "height", 0);
 
-		x = nemoitem_get_iattr(compz->configs, index, "x", 0);
-		y = nemoitem_get_iattr(compz->configs, index, "y", 0);
-		width = nemoitem_get_iattr(compz->configs, index, "width", 0);
-		height = nemoitem_get_iattr(compz->configs, index, "height", 0);
-
-		nemocompz_set_scope(compz, x, y, width, height);
+			nemocompz_set_scope(compz, x, y, width, height);
+		}
 	}
 }
 
 void nemocompz_load_virtuios(struct nemocompz *compz)
 {
-	int index, i;
+	struct itemone *one;
 	int port, fps;
 	int x, y, width, height;
 
-	nemoitem_for_each(compz->configs, index, "//nemoshell/virtuio", 0) {
-		port = nemoitem_get_iattr(compz->configs, index, "port", 3333);
-		fps = nemoitem_get_iattr(compz->configs, index, "fps", 60);
-		x = nemoitem_get_iattr(compz->configs, index, "x", 0);
-		y = nemoitem_get_iattr(compz->configs, index, "y", 0);
-		width = nemoitem_get_iattr(compz->configs, index, "width", nemocompz_get_scene_width(compz));
-		height = nemoitem_get_iattr(compz->configs, index, "height", nemocompz_get_scene_height(compz));
+	nemoitem_for_each(one, compz->configs) {
+		if (nemoitem_one_has_path(one, "/nemoshell/virtuio") != 0) {
+			port = nemoitem_one_get_iattr(one, "port", 3333);
+			fps = nemoitem_one_get_iattr(one, "fps", 60);
+			x = nemoitem_one_get_iattr(one, "x", 0);
+			y = nemoitem_one_get_iattr(one, "y", 0);
+			width = nemoitem_one_get_iattr(one, "width", nemocompz_get_scene_width(compz));
+			height = nemoitem_one_get_iattr(one, "height", nemocompz_get_scene_height(compz));
 
-		virtuio_create(compz, port, fps, x, y, width, height);
+			virtuio_create(compz, port, fps, x, y, width, height);
+		}
 	}
 }

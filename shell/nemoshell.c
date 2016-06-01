@@ -367,7 +367,7 @@ static void nemo_surface_focus_on(struct wl_client *client, struct wl_resource *
 			nemocompz_pick_view(shell->compz, tx, ty, &sx, &sy, NEMOVIEW_PICK_STATE | NEMOVIEW_CANVAS_STATE | NEMOVIEW_KEYPAD_STATE));
 }
 
-static void nemo_surface_execute_command(struct wl_client *client, struct wl_resource *resource, const char *name, const char *cmds, uint32_t type, uint32_t coords, wl_fixed_t x, wl_fixed_t y, wl_fixed_t r)
+static void nemo_surface_execute_command(struct wl_client *client, struct wl_resource *resource, const char *name, const char *cmds, uint32_t coords, wl_fixed_t x, wl_fixed_t y, wl_fixed_t r)
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 	struct nemoshell *shell = bin->shell;
@@ -389,13 +389,11 @@ static void nemo_surface_execute_command(struct wl_client *client, struct wl_res
 			tr = wl_fixed_to_double(r) * M_PI / 180.0f;
 		}
 
-		shell->execute_command(shell->userdata, bin,
-				name, cmds, type,
-				tx, ty, tr);
+		shell->execute_command(shell->userdata, bin, name, cmds, tx, ty, tr);
 	}
 }
 
-static void nemo_surface_execute_action(struct wl_client *client, struct wl_resource *resource, uint32_t group, uint32_t action, uint32_t type, uint32_t coords, wl_fixed_t x, wl_fixed_t y, wl_fixed_t r)
+static void nemo_surface_execute_action(struct wl_client *client, struct wl_resource *resource, const char *id, uint32_t coords, wl_fixed_t x, wl_fixed_t y, wl_fixed_t r)
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 	struct nemoshell *shell = bin->shell;
@@ -417,9 +415,7 @@ static void nemo_surface_execute_action(struct wl_client *client, struct wl_reso
 			tr = wl_fixed_to_double(r) * M_PI / 180.0f;
 		}
 
-		shell->execute_action(shell->userdata, bin,
-				group, action, type,
-				tx, ty, tr);
+		shell->execute_action(shell->userdata, bin, id, tx, ty, tr);
 	}
 }
 

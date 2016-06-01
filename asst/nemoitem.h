@@ -7,89 +7,147 @@
 NEMO_BEGIN_EXTERN_C
 #endif
 
-#define	NEMOITEM_ATTR_MAX			(32)
+#include <nemolist.h>
 
-struct itemnode {
+struct itemattr {
 	char *name;
-	char *attrs[NEMOITEM_ATTR_MAX * 2];
-	int nattrs;
+	char *value;
+
+	struct nemolist link;
+};
+
+struct itemone {
+	char *path;
+
+	struct nemolist list;
+
+	struct nemolist link;
+};
+
+struct itembox {
+	struct itemone **ones;
+	int nones;
 };
 
 struct nemoitem {
-	struct itemnode *nodes;
-	int nnodes;
-	int mnodes;
+	struct nemolist list;
 };
 
-#define nemoitem_for_each(item, ivar, iname, ibase)	\
-	for (ivar = ibase; (ivar = nemoitem_get(item, iname, ivar)) >= 0; ivar++)
+#define nemoitem_for_each(one, item)	\
+	nemolist_for_each(one, &((item)->list), link)
+#define nemoitem_for_each_reverse(one, item)	\
+	nemolist_for_each_reverse(one, &((item)->list), link)
+#define nemoitem_for_each_safe(one, tmp, item)	\
+	nemolist_for_each_safe(one, tmp, &((item)->list), link)
 
-#define nemoitem_for_vattr(item, ivar, fmt, iattr, ibase, attr)	\
-	for (iattr = ibase; (attr = nemoitem_get_vattr(item, ivar, fmt, iattr)) != NULL; iattr++)
-
-extern struct nemoitem *nemoitem_create(int mnodes);
+extern struct nemoitem *nemoitem_create(void);
 extern void nemoitem_destroy(struct nemoitem *item);
 
-extern int nemoitem_set(struct nemoitem *item, const char *name);
-extern int nemoitem_get(struct nemoitem *item, const char *name, int index);
+extern void nemoitem_attach_one(struct nemoitem *item, struct itemone *one);
+extern void nemoitem_detach_one(struct nemoitem *item, struct itemone *one);
 
-extern int nemoitem_get_ifone(struct nemoitem *item, const char *name, int index, const char *attr0, const char *value0);
-extern int nemoitem_get_iftwo(struct nemoitem *item, const char *name, int index, const char *attr0, const char *value0, const char *attr1, const char *value1);
+extern struct itemone *nemoitem_search_one(struct nemoitem *item, const char *path);
+extern struct itemone *nemoitem_search_attr(struct nemoitem *item, const char *path, const char *name, const char *value);
+extern int nemoitem_count_one(struct nemoitem *item, const char *path);
 
-extern int nemoitem_set_attr(struct nemoitem *item, int index, const char *attr, const char *value);
-extern char *nemoitem_get_attr(struct nemoitem *item, int index, const char *attr);
-extern int nemoitem_get_iattr(struct nemoitem *item, int index, const char *attr, int value);
-extern float nemoitem_get_fattr(struct nemoitem *item, int index, const char *attr, float value);
-extern char *nemoitem_get_vattr(struct nemoitem *item, int index, const char *fmt, ...);
+extern struct itembox *nemoitem_box_search_one(struct nemoitem *item, const char *path);
+extern struct itembox *nemoitem_box_search_attr(struct nemoitem *item, const char *path, const char *name, const char *value);
+extern void nemoitem_box_destroy(struct itembox *box);
 
-extern void nemoitem_dump(struct nemoitem *item, FILE *out);
+extern struct itemone *nemoitem_one_create(void);
+extern void nemoitem_one_destroy(struct itemone *one);
 
-static inline int nemoitem_set_attr_named(struct nemoitem *item, const char *name, const char *attr, const char *value)
+extern void nemoitem_one_set_path(struct itemone *one, const char *path);
+extern const char *nemoitem_one_get_path(struct itemone *one);
+extern int nemoitem_one_has_path(struct itemone *one, const char *path);
+
+extern int nemoitem_one_set_attr(struct itemone *one, const char *name, const char *value);
+extern const char *nemoitem_one_get_attr(struct itemone *one, const char *name);
+extern void nemoitem_one_put_attr(struct itemone *one, const char *name);
+extern int nemoitem_one_has_attr(struct itemone *one, const char *name, const char *value);
+
+static inline int nemoitem_one_get_iattr(struct itemone *one, const char *name, int value)
 {
-	int index;
+	const char *str = nemoitem_one_get_attr(one, name);
 
-	index = nemoitem_get(item, name, 0);
-	if (index >= 0) {
-		return nemoitem_set_attr(item, index, attr, value);
-	}
-
-	return -1;
+	return str != NULL ? strtoul(str, NULL, 10) : value;
 }
 
-static inline char *nemoitem_get_attr_named(struct nemoitem *item, const char *name, const char *attr)
+static inline float nemoitem_one_get_fattr(struct itemone *one, const char *name, float value)
 {
-	int index;
+	const char *str = nemoitem_one_get_attr(one, name);
 
-	index = nemoitem_get(item, name, 0);
-	if (index >= 0) {
-		return nemoitem_get_attr(item, index, attr);
-	}
-
-	return NULL;
+	return str != NULL ? strtod(str, NULL) : value;
 }
 
-static inline int nemoitem_get_iattr_named(struct nemoitem *item, const char *name, const char *attr, int value)
+static inline const char *nemoitem_one_get_sattr(struct itemone *one, const char *name, const char *value)
 {
-	int index;
+	const char *str = nemoitem_one_get_attr(one, name);
 
-	index = nemoitem_get(item, name, 0);
-	if (index >= 0) {
-		return nemoitem_get_iattr(item, index, attr, value);
-	}
-
-	return value;
+	return str != NULL ? str : value;
 }
 
-static inline float nemoitem_get_fattr_named(struct nemoitem *item, const char *name, const char *attr, float value)
+static inline int nemoitem_one_has_iattr(struct itemone *one, const char *name, int value)
 {
-	int index;
+	const char *str = nemoitem_one_get_attr(one, name);
 
-	index = nemoitem_get(item, name, 0);
-	if (index >= 0) {
-		return nemoitem_get_fattr(item, index, attr, value);
-	}
+	return str != NULL ? strtoul(str, NULL, 10) == value : 0;
+}
 
-	return value;
+static inline int nemoitem_one_has_fattr(struct itemone *one, const char *name, float value)
+{
+	const char *str = nemoitem_one_get_attr(one, name);
+
+	return str != NULL ? strtod(str, NULL) == value : 0;
+}
+
+static inline int nemoitem_one_has_sattr(struct itemone *one, const char *name, const char *value)
+{
+	return nemoitem_one_has_attr(one, name, value);
+}
+
+static inline int nemoitem_get_iattr(struct nemoitem *item, const char *path, const char *name, int value)
+{
+	struct itemone *one = nemoitem_search_one(item, path);
+	const char *str = one != NULL ? nemoitem_one_get_attr(one, name) : NULL;
+
+	return str != NULL ? strtoul(str, NULL, 10) : value;
+}
+
+static inline float nemoitem_get_fattr(struct nemoitem *item, const char *path, const char *name, float value)
+{
+	struct itemone *one = nemoitem_search_one(item, path);
+	const char *str = one != NULL ? nemoitem_one_get_attr(one, name) : NULL;
+
+	return str != NULL ? strtod(str, NULL) : value;
+}
+
+static inline const char *nemoitem_get_sattr(struct nemoitem *item, const char *path, const char *name, const char *value)
+{
+	struct itemone *one = nemoitem_search_one(item, path);
+	const char *str = one != NULL ? nemoitem_one_get_attr(one, name) : NULL;
+
+	return str != NULL ? str : value;
+}
+
+static inline int nemoitem_box_get_count(struct itembox *box)
+{
+	return box->nones;
+}
+
+static inline int nemoitem_box_get_iattr(struct itembox *box, int index, const char *name, int value)
+{
+	return nemoitem_one_get_iattr(box->ones[index], name, value);
+}
+
+static inline float nemoitem_box_get_fattr(struct itembox *box, int index, const char *name, float value)
+{
+	return nemoitem_one_get_fattr(box->ones[index], name, value);
+}
+
+static inline const char *nemoitem_box_get_sattr(struct itembox *box, int index, const char *name, const char *value)
+{
+	return nemoitem_one_get_sattr(box->ones[index], name, value);
 }
 
 #ifdef __cplusplus

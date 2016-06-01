@@ -62,7 +62,7 @@ void nemoxml_update(struct nemoxml *xml)
 	nemolist_remove(&xml->nodes);
 	nemolist_init(&xml->nodes);
 
-	nemoxml_update_children(xml, &xml->children, "/");
+	nemoxml_update_children(xml, &xml->children, "");
 }
 
 struct xmlnode *nemoxml_create_node(void)

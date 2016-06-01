@@ -23,7 +23,7 @@ struct drmbackend {
 	struct wl_event_source *udev_monitor_source;
 };
 
-extern struct nemobackend *drmbackend_create(struct nemocompz *compz, int index);
+extern struct nemobackend *drmbackend_create(struct nemocompz *compz, const char *rendernode);
 extern void drmbackend_destroy(struct nemobackend *base);
 
 #ifdef __cplusplus

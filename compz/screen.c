@@ -441,97 +441,70 @@ void nemoscreen_damage_dirty(struct nemoscreen *screen)
 
 int nemoscreen_get_config_mode(struct nemocompz *compz, uint32_t nodeid, uint32_t screenid, struct nemomode *mode)
 {
-	int32_t width, height;
-	uint32_t refresh;
-	char *attr0, *attr1;
-	int index;
+	struct itemone *one;
 
-	asprintf(&attr0, "%d", nodeid);
-	asprintf(&attr1, "%d", screenid);
+	nemoitem_for_each(one, compz->configs) {
+		if (nemoitem_one_has_path(one, "/nemoshell/screen") != 0 &&
+				nemoitem_one_has_iattr(one, "nodeid", nodeid) != 0 &&
+				nemoitem_one_has_iattr(one, "screenid", screenid) != 0) {
+			mode->width = nemoitem_one_get_iattr(one, "width", 0);
+			mode->height = nemoitem_one_get_iattr(one, "height", 0);
+			mode->refresh = nemoitem_one_get_iattr(one, "refresh", 0);
 
-	index = nemoitem_get_iftwo(compz->configs, "//nemoshell/screen", 0, "nodeid", attr0, "screenid", attr1);
-	if (index < 0) {
-		free(attr0);
-		free(attr1);
-
-		return 0;
+			return 1;
+		}
 	}
 
-	width = nemoitem_get_iattr(compz->configs, index, "width", 0);
-	height = nemoitem_get_iattr(compz->configs, index, "height", 0);
-	refresh = nemoitem_get_iattr(compz->configs, index, "refresh", 0);
-
-	mode->width = width;
-	mode->height = height;
-	mode->refresh = refresh;
-
-	free(attr0);
-	free(attr1);
-
-	return 1;
+	return 0;
 }
 
 int nemoscreen_get_config_geometry(struct nemocompz *compz, uint32_t nodeid, uint32_t screenid, struct nemoscreen *screen)
 {
-	char *attr0, *attr1;
-	const char *value;
-	int index;
+	struct itemone *one;
+	const char *transform;
 
-	asprintf(&attr0, "%d", nodeid);
-	asprintf(&attr1, "%d", screenid);
+	nemoitem_for_each(one, compz->configs) {
+		if (nemoitem_one_has_path(one, "/nemoshell/screen") != 0 &&
+				nemoitem_one_has_iattr(one, "nodeid", nodeid) != 0 &&
+				nemoitem_one_has_iattr(one, "screenid", screenid) != 0) {
+			screen->x = nemoitem_one_get_iattr(one, "x", 0);
+			screen->y = nemoitem_one_get_iattr(one, "y", 0);
+			screen->width = nemoitem_one_get_iattr(one, "width", 1920);
+			screen->height = nemoitem_one_get_iattr(one, "height", 1080);
 
-	index = nemoitem_get_iftwo(compz->configs, "//nemoshell/screen", 0, "nodeid", attr0, "screenid", attr1);
-	if (index < 0) {
-		free(attr0);
-		free(attr1);
+			transform = nemoitem_one_get_attr(one, "transform");
+			if (transform != NULL) {
+				struct nemomatrix *matrix = &screen->transform.matrix;
+				struct nemomatrix *inverse = &screen->transform.inverse;
 
-		return 0;
-	}
+				nemomatrix_init_identity(matrix);
+				nemomatrix_append_command(matrix, transform);
 
-	screen->x = nemoitem_get_iattr(compz->configs, index, "x", 0);
-	screen->y = nemoitem_get_iattr(compz->configs, index, "y", 0);
-	screen->width = nemoitem_get_iattr(compz->configs, index, "width", 1920);
-	screen->height = nemoitem_get_iattr(compz->configs, index, "height", 1080);
+				if (nemomatrix_invert(inverse, matrix) >= 0) {
+					screen->transform.enable = 1;
+					screen->transform.dirty = 1;
+					screen->transform.custom = 1;
+				}
+			}
 
-	value = nemoitem_get_attr(compz->configs, index, "transform");
-	if (value != NULL) {
-		struct nemomatrix *matrix = &screen->transform.matrix;
-		struct nemomatrix *inverse = &screen->transform.inverse;
-
-		nemomatrix_init_identity(matrix);
-		nemomatrix_append_command(matrix, value);
-
-		if (nemomatrix_invert(inverse, matrix) >= 0) {
-			screen->transform.enable = 1;
-			screen->transform.dirty = 1;
-			screen->transform.custom = 1;
+			return 1;
 		}
 	}
 
-	free(attr0);
-	free(attr1);
-
-	return 1;
+	return 0;
 }
 
 const char *nemoscreen_get_config(struct nemocompz *compz, uint32_t nodeid, uint32_t screenid, const char *attr)
 {
-	char *attr0, *attr1;
-	int index;
+	struct itemone *one;
 
-	asprintf(&attr0, "%d", nodeid);
-	asprintf(&attr1, "%d", screenid);
-
-	index = nemoitem_get_iftwo(compz->configs, "//nemoshell/screen", 0, "nodeid", attr0, "screenid", attr1);
-	if (index < 0) {
-		free(attr0);
-		free(attr1);
-
-		return NULL;
+	nemoitem_for_each(one, compz->configs) {
+		if (nemoitem_one_has_path(one, "/nemoshell/screen") != 0 &&
+				nemoitem_one_has_iattr(one, "nodeid", nodeid) != 0 &&
+				nemoitem_one_has_iattr(one, "screenid", screenid) != 0) {
+			return nemoitem_one_get_attr(one, attr);
+		}
 	}
 
-	free(attr0);
-	free(attr1);
-
-	return nemoitem_get_attr(compz->configs, index, attr);
+	return NULL;
 }

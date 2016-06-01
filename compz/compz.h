@@ -197,7 +197,6 @@ extern struct nemocanvas *nemocompz_get_canvas_by_id(struct nemocompz *compz, ui
 extern struct nemoview *nemocompz_get_view_by_id(struct nemocompz *compz, uint32_t id);
 extern struct nemoview *nemocompz_get_view_by_client(struct nemocompz *compz, struct wl_client *client);
 
-extern void nemocompz_load_configs(struct nemocompz *compz, const char *configpath);
 extern void nemocompz_load_backends(struct nemocompz *compz);
 extern void nemocompz_load_scenes(struct nemocompz *compz);
 extern void nemocompz_load_virtuios(struct nemocompz *compz);

@@ -840,6 +840,10 @@ struct nemotool *nemotool_create(void)
 	if (tool->xkb.context == NULL)
 		goto err2;
 
+	tool->configs = nemoitem_create();
+	if (tool->configs == NULL)
+		goto err3;
+
 	nemolist_init(&tool->global_list);
 	nemolist_init(&tool->output_list);
 
@@ -862,6 +866,9 @@ struct nemotool *nemotool_create(void)
 		tool->fullscreen_height = 1080;
 
 	return tool;
+
+err3:
+	xkb_context_unref(tool->xkb.context);
 
 err2:
 	close(tool->epoll_fd);
@@ -898,6 +905,8 @@ void nemotool_destroy(struct nemotool *tool)
 	nemolist_remove(&tool->source_list);
 
 	close(tool->epoll_fd);
+
+	nemoitem_destroy(tool->configs);
 
 	free(tool);
 }

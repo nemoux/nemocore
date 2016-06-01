@@ -17,6 +17,7 @@ NEMO_BEGIN_EXTERN_C
 #include <wayland-nemo-sound-client-protocol.h>
 #include <wayland-nemo-shell-client-protocol.h>
 
+#include <nemoitem.h>
 #include <nemolist.h>
 #include <nemolistener.h>
 
@@ -145,6 +146,8 @@ struct nemotool {
 
 	uint32_t fullscreen_width;
 	uint32_t fullscreen_height;
+
+	struct nemoitem *configs;
 
 	void *userdata;
 };

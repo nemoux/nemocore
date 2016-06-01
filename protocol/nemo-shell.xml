@@ -192,7 +192,6 @@
 		<request name="execute_command">
 			<arg name="name" type="string"/>
 			<arg name="cmds" type="string"/>
-			<arg name="type" type="uint"/>
 			<arg name="coords" type="uint"/>
 			<arg name="x" type="fixed"/>
 			<arg name="y" type="fixed"/>
@@ -200,9 +199,7 @@
 		</request>
 
 		<request name="execute_action">
-			<arg name="group" type="uint"/>
-			<arg name="action" type="uint"/>
-			<arg name="type" type="uint"/>
+			<arg name="id" type="string"/>
 			<arg name="coords" type="uint"/>
 			<arg name="x" type="fixed"/>
 			<arg name="y" type="fixed"/>

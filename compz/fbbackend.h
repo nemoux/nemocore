@@ -19,7 +19,7 @@ struct fbbackend {
 	struct udev *udev;
 };
 
-extern struct nemobackend *fbbackend_create(struct nemocompz *compz, int index);
+extern struct nemobackend *fbbackend_create(struct nemocompz *compz, const char *rendernode);
 extern void fbbackend_destroy(struct nemobackend *base);
 
 #ifdef __cplusplus

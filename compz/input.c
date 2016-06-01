@@ -55,56 +55,51 @@ void nemoinput_set_geometry(struct inputnode *node, int32_t x, int32_t y, int32_
 
 int nemoinput_get_config_screen(struct nemocompz *compz, const char *devnode, uint32_t *nodeid, uint32_t *screenid)
 {
-	const char *value;
-	int index;
+	struct itemone *one;
 
-	index = nemoitem_get_ifone(compz->configs, "//nemoshell/input", 0, "devnode", devnode);
-	if (index < 0)
-		return 0;
+	nemoitem_for_each(one, compz->configs) {
+		if (nemoitem_one_has_path(one, "/nemoshell/input") != 0 && nemoitem_one_has_attr(one, "devnode", devnode) != 0) {
+			*nodeid = nemoitem_one_get_iattr(one, "nodeid", 0);
+			*screenid = nemoitem_one_get_iattr(one, "screenid", 0);
 
-	value = nemoitem_get_attr(compz->configs, index, "nodeid");
-	if (value != NULL)
-		*nodeid = strtoul(value, 0, 10);
-	else
-		return 0;
+			return 1;
+		}
+	}
 
-	value = nemoitem_get_attr(compz->configs, index, "screenid");
-	if (value != NULL)
-		*screenid = strtoul(value, 0, 10);
-	else
-		return 0;
-
-	return 1;
+	return 0;
 }
 
 int nemoinput_get_config_geometry(struct nemocompz *compz, const char *devnode, struct inputnode *node)
 {
-	const char *value;
-	int index;
+	struct itemone *one;
 
-	index = nemoitem_get_ifone(compz->configs, "//nemoshell/input", 0, "devnode", devnode);
-	if (index < 0)
-		return 0;
+	nemoitem_for_each(one, compz->configs) {
+		if (nemoitem_one_has_path(one, "/nemoshell/input") != 0 && nemoitem_one_has_attr(one, "devnode", devnode) != 0) {
+			const char *transform;
 
-	node->x = nemoitem_get_iattr(compz->configs, index, "x", 0);
-	node->y = nemoitem_get_iattr(compz->configs, index, "y", 0);
-	node->width = nemoitem_get_iattr(compz->configs, index, "width", nemocompz_get_scene_width(compz));
-	node->height = nemoitem_get_iattr(compz->configs, index, "height", nemocompz_get_scene_height(compz));
+			node->x = nemoitem_one_get_iattr(one, "x", 0);
+			node->y = nemoitem_one_get_iattr(one, "y", 0);
+			node->width = nemoitem_one_get_iattr(one, "width", nemocompz_get_scene_width(compz));
+			node->height = nemoitem_one_get_iattr(one, "height", nemocompz_get_scene_height(compz));
 
-	value = nemoitem_get_attr(compz->configs, index, "transform");
-	if (value != NULL) {
-		struct nemomatrix *matrix = &node->transform.matrix;
-		struct nemomatrix *inverse = &node->transform.inverse;
+			transform = nemoitem_one_get_attr(one, "transform");
+			if (transform != NULL) {
+				struct nemomatrix *matrix = &node->transform.matrix;
+				struct nemomatrix *inverse = &node->transform.inverse;
 
-		nemomatrix_init_identity(matrix);
-		nemomatrix_append_command(matrix, value);
+				nemomatrix_init_identity(matrix);
+				nemomatrix_append_command(matrix, transform);
 
-		if (nemomatrix_invert(inverse, matrix) >= 0) {
-			node->transform.enable = 1;
+				if (nemomatrix_invert(inverse, matrix) >= 0) {
+					node->transform.enable = 1;
+				}
+			}
+
+			return 1;
 		}
 	}
 
-	return 1;
+	return 0;
 }
 
 void nemoinput_transform_to_global(struct inputnode *node, float dx, float dy, float *x, float *y)

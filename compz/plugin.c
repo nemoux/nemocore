@@ -42,14 +42,13 @@ int nemocompz_load_plugin(struct nemocompz *compz, const char *path, const char 
 
 void nemocompz_load_plugins(struct nemocompz *compz)
 {
-	const char *path;
-	const char *args;
-	int index;
+	struct itemone *one;
 
-	nemoitem_for_each(compz->configs, index, "//nemoshell/plugin", 0) {
-		path = nemoitem_get_attr(compz->configs, index, "path");
-		args = nemoitem_get_attr(compz->configs, index, "args");
-
-		nemocompz_load_plugin(compz, path, args);
+	nemoitem_for_each(one, compz->configs) {
+		if (nemoitem_one_has_path(one, "/nemoshell/plugin") != 0) {
+			nemocompz_load_plugin(compz,
+					nemoitem_one_get_attr(one, "path"),
+					nemoitem_one_get_attr(one, "args"));
+		}
 	}
 }

@@ -47,15 +47,10 @@ typedef enum {
 	NEMOSHELL_FULLSCREEN_LAST_FOCUS
 } NemoShellFullscreenFocus;
 
-typedef enum {
-	NEMOSHELL_FADEIN_ALPHA_FLAG = (1 << 0),
-	NEMOSHELL_FADEIN_SCALE_FLAG = (1 << 1)
-} NemoShellFadeinFlag;
-
 struct shellbin;
 
-typedef int (*nemoshell_execute_command_t)(void *data, struct shellbin *bin, const char *name, const char *cmds, uint32_t type, double x, double y, double r);
-typedef int (*nemoshell_execute_action_t)(void *data, struct shellbin *bin, uint32_t group, uint32_t action, uint32_t type, double x, double y, double r);
+typedef int (*nemoshell_execute_command_t)(void *data, struct shellbin *bin, const char *name, const char *cmds, double x, double y, double r);
+typedef int (*nemoshell_execute_action_t)(void *data, struct shellbin *bin, const char *id, double x, double y, double r);
 typedef int (*nemoshell_execute_content_t)(void *data, struct shellbin *bin, uint32_t type, const char *path, double x, double y, double r);
 
 struct nemoshell {
@@ -174,11 +169,6 @@ struct clientstate {
 
 	uint32_t state_on;
 	uint32_t state_off;
-
-	uint32_t fadein_type;
-	uint32_t fadein_ease;
-	uint32_t fadein_delay;
-	uint32_t fadein_duration;
 };
 
 struct binstate {
@@ -443,14 +433,6 @@ static inline void clientstate_set_view_state(struct clientstate *state, uint32_
 static inline void clientstate_put_view_state(struct clientstate *state, uint32_t _state)
 {
 	state->state_off |= _state;
-}
-
-static inline void clientstate_set_fadein_style(struct clientstate *state, uint32_t type, uint32_t ease, uint32_t delay, uint32_t duration)
-{
-	state->fadein_type = type;
-	state->fadein_ease = ease;
-	state->fadein_delay = delay;
-	state->fadein_duration = duration;
 }
 
 static inline void clientstate_set_maximized(struct clientstate *state, int is_maximized)

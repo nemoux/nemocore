@@ -140,7 +140,7 @@ err1:
 	return -1;
 }
 
-struct nemobackend *evdevbackend_create(struct nemocompz *compz, int index)
+struct nemobackend *evdevbackend_create(struct nemocompz *compz)
 {
 	struct evdevbackend *evdev;
 

@@ -10,7 +10,7 @@
 
 #include <nemoitem.h>
 
-struct nemoitem *nemoitem_create(int mnodes)
+struct nemoitem *nemoitem_create(void)
 {
 	struct nemoitem *item;
 
@@ -19,239 +19,268 @@ struct nemoitem *nemoitem_create(int mnodes)
 		return NULL;
 	memset(item, 0, sizeof(struct nemoitem));
 
-	item->nodes = (struct itemnode *)malloc(sizeof(struct itemnode) * mnodes);
-	if (item->nodes == NULL)
-		goto err1;
-	item->nnodes = 0;
-	item->mnodes = mnodes;
+	nemolist_init(&item->list);
 
 	return item;
-
-err1:
-	free(item);
-
-	return NULL;
 }
 
 void nemoitem_destroy(struct nemoitem *item)
 {
-	int i, j;
+	struct itemone *one, *next;
 
-	for (i = 0; i < item->nnodes; i++) {
-		struct itemnode *node = &item->nodes[i];
+	nemolist_for_each_safe(one, next, &item->list, link)
+		nemoitem_one_destroy(one);
 
-		for (j = 0; j < node->nattrs; j++) {
-			free(node->attrs[j*2+0]);
-			free(node->attrs[j*2+1]);
-		}
-
-		free(node->name);
-	}
-
-	free(item->nodes);
 	free(item);
 }
 
-int nemoitem_set(struct nemoitem *item, const char *name)
+void nemoitem_attach_one(struct nemoitem *item, struct itemone *one)
 {
-	struct itemnode *node;
-
-	if (item->nnodes >= item->mnodes)
-		return -1;
-
-	node = &item->nodes[item->nnodes];
-	node->name = strdup(name);
-	node->nattrs = 0;
-
-	return item->nnodes++;
+	nemolist_insert_tail(&item->list, &one->link);
 }
 
-int nemoitem_get(struct nemoitem *item, const char *name, int index)
+void nemoitem_detach_one(struct nemoitem *item, struct itemone *one)
 {
-	struct itemnode *node;
-	int i;
-
-	if (index >= item->mnodes)
-		return -1;
-
-	for (i = index; i < item->nnodes; i++) {
-		node = &item->nodes[i];
-
-		if (strcmp(node->name, name) == 0)
-			return i;
-	}
-
-	return -1;
+	nemolist_remove(&one->link);
+	nemolist_init(&one->link);
 }
 
-int nemoitem_get_ifone(struct nemoitem *item, const char *name, int index, const char *attr0, const char *value0)
+struct itemone *nemoitem_search_one(struct nemoitem *item, const char *path)
 {
-	struct itemnode *node;
-	int i, j;
+	struct itemone *one;
 
-	if (index >= item->mnodes)
-		return -1;
-
-	for (i = index; i < item->nnodes; i++) {
-		node = &item->nodes[i];
-
-		if (strcmp(node->name, name) == 0) {
-			for (j = 0; j < node->nattrs; j++) {
-				if (strcmp(node->attrs[j*2+0], attr0) == 0 &&
-						strcmp(node->attrs[j*2+1], value0) == 0) {
-					return i;
-				}
-			}
-		}
-	}
-
-	return -1;
-}
-
-int nemoitem_get_iftwo(struct nemoitem *item, const char *name, int index, const char *attr0, const char *value0, const char *attr1, const char *value1)
-{
-	struct itemnode *node;
-	int i, j, count;
-
-	if (index >= item->mnodes)
-		return -1;
-
-	for (i = index; i < item->nnodes; i++) {
-		node = &item->nodes[i];
-
-		if (strcmp(node->name, name) == 0) {
-			count = 0;
-
-			for (j = 0; j < node->nattrs; j++) {
-				if (strcmp(node->attrs[j*2+0], attr0) == 0 &&
-						strcmp(node->attrs[j*2+1], value0) == 0) {
-					count++;
-				} else if (strcmp(node->attrs[j*2+0], attr1) == 0 &&
-						strcmp(node->attrs[j*2+1], value1) == 0) {
-					count++;
-				}
-			}
-
-			if (count >= 2)
-				return i;
-		}
-	}
-
-	return -1;
-}
-
-int nemoitem_set_attr(struct nemoitem *item, int index, const char *attr, const char *value)
-{
-	struct itemnode *node;
-
-	if (index >= item->mnodes || value == NULL)
-		return -1;
-
-	node = &item->nodes[index];
-	node->attrs[node->nattrs * 2 + 0] = strdup(attr);
-	node->attrs[node->nattrs * 2 + 1] = strdup(value);
-
-	return node->nattrs++;
-}
-
-char *nemoitem_get_attr(struct nemoitem *item, int index, const char *attr)
-{
-	struct itemnode *node;
-	int i;
-
-	if (index >= item->mnodes)
-		return NULL;
-
-	node = &item->nodes[index];
-
-	for (i = 0; i < node->nattrs; i++) {
-		if (strcmp(node->attrs[i*2+0], attr) == 0) {
-			return node->attrs[i*2+1];
-		}
+	nemolist_for_each(one, &item->list, link) {
+		if (strcmp(one->path, path) == 0)
+			return one;
 	}
 
 	return NULL;
 }
 
-int nemoitem_get_iattr(struct nemoitem *item, int index, const char *attr, int value)
+struct itemone *nemoitem_search_attr(struct nemoitem *item, const char *path, const char *name, const char *value)
 {
-	struct itemnode *node;
-	int i;
+	struct itemone *one;
 
-	if (index >= item->mnodes)
-		return value;
-
-	node = &item->nodes[index];
-
-	for (i = 0; i < node->nattrs; i++) {
-		if (strcmp(node->attrs[i*2+0], attr) == 0) {
-			return strtoul(node->attrs[i*2+1], NULL, 10);
-		}
+	nemolist_for_each(one, &item->list, link) {
+		if ((path == NULL || strcmp(one->path, path) == 0) && nemoitem_one_has_attr(one, name, value) != 0)
+			return one;
 	}
 
-	return value;
+	return NULL;
 }
 
-float nemoitem_get_fattr(struct nemoitem *item, int index, const char *attr, float value)
+int nemoitem_count_one(struct nemoitem *item, const char *path)
 {
-	struct itemnode *node;
-	int i;
+	struct itemone *one;
+	int count = 0;
 
-	if (index >= item->mnodes)
-		return value;
-
-	node = &item->nodes[index];
-
-	for (i = 0; i < node->nattrs; i++) {
-		if (strcmp(node->attrs[i*2+0], attr) == 0) {
-			return strtod(node->attrs[i*2+1], NULL);
-		}
+	nemolist_for_each(one, &item->list, link) {
+		if (strcmp(one->path, path) == 0)
+			count++;
 	}
 
-	return value;
+	return count;
 }
 
-char *nemoitem_get_vattr(struct nemoitem *item, int index, const char *fmt, ...)
+struct itembox *nemoitem_box_search_one(struct nemoitem *item, const char *path)
 {
-	struct itemnode *node;
-	va_list vargs;
-	char *attr;
-	int i;
+	struct itembox *box;
+	struct itemone *one;
+	int count = 0;
 
-	if (index >= item->mnodes)
+	nemolist_for_each(one, &item->list, link) {
+		if (strcmp(one->path, path) == 0)
+			count++;
+	}
+
+	if (count == 0)
 		return NULL;
 
-	node = &item->nodes[index];
+	box = (struct itembox *)malloc(sizeof(struct itembox));
+	if (box == NULL)
+		return NULL;
+	memset(box, 0, sizeof(struct itembox));
 
-	va_start(vargs, fmt);
-	vasprintf(&attr, fmt, vargs);
-	va_end(vargs);
+	box->ones = (struct itemone **)malloc(sizeof(struct itemone *) * count);
+	if (box->ones == NULL)
+		goto err1;
 
-	for (i = 0; i < node->nattrs; i++) {
-		if (strcmp(node->attrs[i*2+0], attr) == 0) {
+	nemolist_for_each(one, &item->list, link) {
+		if (strcmp(one->path, path) == 0)
+			box->ones[box->nones++] = one;
+	}
+
+	return box;
+
+err1:
+	free(box);
+
+	return NULL;
+}
+
+struct itembox *nemoitem_box_search_attr(struct nemoitem *item, const char *path, const char *name, const char *value)
+{
+	struct itembox *box;
+	struct itemone *one;
+	int count = 0;
+
+	nemolist_for_each(one, &item->list, link) {
+		if ((path == NULL || strcmp(one->path, path) == 0) && nemoitem_one_has_attr(one, name, value) != 0)
+			count++;
+	}
+
+	if (count == 0)
+		return NULL;
+
+	box = (struct itembox *)malloc(sizeof(struct itembox));
+	if (box == NULL)
+		return NULL;
+	memset(box, 0, sizeof(struct itembox));
+
+	box->ones = (struct itemone **)malloc(sizeof(struct itemone *) * count);
+	if (box->ones == NULL)
+		goto err1;
+
+	nemolist_for_each(one, &item->list, link) {
+		if ((path == NULL || strcmp(one->path, path) == 0) && nemoitem_one_has_attr(one, name, value) != 0)
+			box->ones[box->nones++] = one;
+	}
+
+	return box;
+
+err1:
+	free(box);
+
+	return NULL;
+}
+
+void nemoitem_box_destroy(struct itembox *box)
+{
+	free(box->ones);
+	free(box);
+}
+
+struct itemone *nemoitem_one_create(void)
+{
+	struct itemone *one;
+
+	one = (struct itemone *)malloc(sizeof(struct itemone));
+	if (one == NULL)
+		return NULL;
+	memset(one, 0, sizeof(struct itemone));
+
+	nemolist_init(&one->list);
+
+	nemolist_init(&one->link);
+
+	return one;
+}
+
+void nemoitem_one_destroy(struct itemone *one)
+{
+	struct itemattr *attr, *next;
+
+	nemolist_remove(&one->link);
+
+	if (one->path != NULL)
+		free(one->path);
+
+	nemolist_for_each_safe(attr, next, &one->list, link) {
+		nemolist_remove(&attr->link);
+
+		free(attr->name);
+		free(attr->value);
+		free(attr);
+	}
+
+	free(one);
+}
+
+void nemoitem_one_set_path(struct itemone *one, const char *path)
+{
+	if (one->path != NULL)
+		free(one->path);
+
+	one->path = strdup(path);
+}
+
+const char *nemoitem_one_get_path(struct itemone *one)
+{
+	return one->path;
+}
+
+int nemoitem_one_has_path(struct itemone *one, const char *path)
+{
+	return strcmp(one->path, path) == 0;
+}
+
+int nemoitem_one_set_attr(struct itemone *one, const char *name, const char *value)
+{
+	struct itemattr *attr;
+
+	nemolist_for_each(attr, &one->list, link) {
+		if (strcmp(attr->name, name) == 0) {
+			free(attr->value);
+
+			attr->value = strdup(value);
+
+			return 1;
+		}
+	}
+
+	attr = (struct itemattr *)malloc(sizeof(struct itemattr));
+	if (attr == NULL)
+		return -1;
+
+	attr->name = strdup(name);
+	attr->value = strdup(value);
+
+	nemolist_insert_tail(&one->list, &attr->link);
+
+	return 0;
+}
+
+const char *nemoitem_one_get_attr(struct itemone *one, const char *name)
+{
+	struct itemattr *attr;
+
+	nemolist_for_each(attr, &one->list, link) {
+		if (strcmp(attr->name, name) == 0)
+			return attr->value;
+	}
+
+	return NULL;
+}
+
+void nemoitem_one_put_attr(struct itemone *one, const char *name)
+{
+	struct itemattr *attr;
+
+	nemolist_for_each(attr, &one->list, link) {
+		if (strcmp(attr->name, name) == 0) {
+			nemolist_remove(&attr->link);
+
+			free(attr->name);
+			free(attr->value);
 			free(attr);
 
-			return node->attrs[i*2+1];
+			break;
 		}
 	}
-
-	free(attr);
-
-	return NULL;
 }
 
-void nemoitem_dump(struct nemoitem *item, FILE *out)
+int nemoitem_one_has_attr(struct itemone *one, const char *name, const char *value)
 {
-	struct itemnode *node;
-	int i, j;
+	struct itemattr *attr;
 
-	for (i = 0; i < item->nnodes; i++) {
-		node = &item->nodes[i];
+	nemolist_for_each(attr, &one->list, link) {
+		if (strcmp(attr->name, name) == 0) {
+			if (value == NULL || strcmp(attr->value, value) == 0)
+				return 1;
 
-		fprintf(out, "[NEMOITEM] node '%s'\n", node->name);
-
-		for (j = 0; j < node->nattrs; j++) {
-			fprintf(out, "[NEMOITEM]   %s = '%s'\n", node->attrs[j*2+0], node->attrs[j*2+1]);
+			break;
 		}
 	}
+
+	return 0;
 }
