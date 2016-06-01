@@ -133,7 +133,7 @@ static void nemoshow_dispatch_canvas_layer(struct nemocanvas *canvas, int32_t vi
 		show->dispatch_layer(show, visible);
 }
 
-static void nemoshow_dispatch_canvas_fullscreen(struct nemocanvas *canvas, int32_t id, int32_t x, int32_t y, int32_t width, int32_t height)
+static void nemoshow_dispatch_canvas_fullscreen(struct nemocanvas *canvas, const char *id, int32_t x, int32_t y, int32_t width, int32_t height)
 {
 	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
 	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
@@ -370,7 +370,7 @@ void nemoshow_view_put_fullscreen_type(struct nemoshow *show, const char *type)
 		nemocanvas_put_fullscreen_type(canvas, (1 << NEMO_SURFACE_FULLSCREEN_TYPE_PITCH));
 }
 
-void nemoshow_view_set_fullscreen(struct nemoshow *show, uint32_t id)
+void nemoshow_view_set_fullscreen(struct nemoshow *show, const char *id)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemocanvas *canvas = scon->canvas;

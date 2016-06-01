@@ -282,7 +282,8 @@ struct shellbin {
 };
 
 struct shellscreen {
-	uint32_t id;
+	char *id;
+
 	uint32_t type;
 	uint32_t focus;
 
@@ -329,7 +330,7 @@ extern struct clientstate *nemoshell_get_client_state(struct nemoshell *shell, u
 extern int nemoshell_use_client_state(struct nemoshell *shell, struct shellbin *bin);
 
 extern void nemoshell_load_fullscreens(struct nemoshell *shell);
-extern struct shellscreen *nemoshell_get_fullscreen(struct nemoshell *shell, uint32_t id);
+extern struct shellscreen *nemoshell_get_fullscreen(struct nemoshell *shell, const char *id);
 extern struct shellscreen *nemoshell_get_fullscreen_on(struct nemoshell *shell, int32_t x, int32_t y, uint32_t type);
 
 extern void nemoshell_set_toplevel_bin(struct nemoshell *shell, struct shellbin *bin);

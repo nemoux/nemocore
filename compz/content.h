@@ -57,7 +57,7 @@ struct nemocontent {
 	void (*update_output)(struct nemocontent *content, uint32_t node_mask, uint32_t screen_mask);
 	void (*update_transform)(struct nemocontent *content, int visible, int32_t x, int32_t y, int32_t width, int32_t height);
 	void (*update_layer)(struct nemocontent *content, int visible);
-	void (*update_fullscreen)(struct nemocontent *content, int id, int32_t x, int32_t y, int32_t width, int32_t height);
+	void (*update_fullscreen)(struct nemocontent *content, const char *id, int32_t x, int32_t y, int32_t width, int32_t height);
 	int (*read_pixels)(struct nemocontent *content, pixman_format_code_t format, void *pixels);
 
 	void (*pointer_enter)(struct nemopointer *pointer, struct nemocontent *content);
@@ -99,7 +99,7 @@ extern pixman_box32_t nemocontent_transform_to_buffer_rect(struct nemocontent *c
 extern void nemocontent_update_output(struct nemocontent *content, uint32_t node_mask, uint32_t screen_mask);
 extern void nemocontent_update_transform(struct nemocontent *content, int visible, int32_t x, int32_t y, int32_t width, int32_t height);
 extern void nemocontent_update_layer(struct nemocontent *content, int visible);
-extern void nemocontent_update_fullscreen(struct nemocontent *content, int id, int32_t x, int32_t y, int32_t width, int32_t height);
+extern void nemocontent_update_fullscreen(struct nemocontent *content, const char *id, int32_t x, int32_t y, int32_t width, int32_t height);
 
 static inline void nemocontent_set_key_handler(struct nemocontent *content, nemocontent_key_handler_t handler, void *data)
 {

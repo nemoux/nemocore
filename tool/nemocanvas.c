@@ -53,7 +53,7 @@ static void nemo_surface_handle_layer(void *data, struct nemo_surface *surface, 
 		canvas->dispatch_layer(canvas, visible);
 }
 
-static void nemo_surface_handle_fullscreen(void *data, struct nemo_surface *surface, int32_t id, int32_t x, int32_t y, int32_t width, int32_t height)
+static void nemo_surface_handle_fullscreen(void *data, struct nemo_surface *surface, const char *id, int32_t x, int32_t y, int32_t width, int32_t height)
 {
 	struct nemocanvas *canvas = (struct nemocanvas *)data;
 
@@ -524,7 +524,7 @@ void nemocanvas_put_fullscreen_type(struct nemocanvas *canvas, uint32_t type)
 	nemo_surface_put_fullscreen_type(canvas->nemo_surface, type);
 }
 
-void nemocanvas_set_fullscreen(struct nemocanvas *canvas, uint32_t id)
+void nemocanvas_set_fullscreen(struct nemocanvas *canvas, const char *id)
 {
 	nemo_surface_set_fullscreen(canvas->nemo_surface, id);
 }

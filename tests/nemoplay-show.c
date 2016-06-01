@@ -32,7 +32,7 @@ struct playcontext {
 
 	struct nemotimer *timer;
 
-	int32_t screenid;
+	char *screenid;
 
 	int32_t width;
 	int32_t height;
@@ -42,13 +42,19 @@ static void nemoplay_dispatch_show_transform(struct nemoshow *show, int32_t visi
 {
 }
 
-static void nemoplay_dispatch_show_fullscreen(struct nemoshow *show, int32_t id, int32_t x, int32_t y, int32_t width, int32_t height)
+static void nemoplay_dispatch_show_fullscreen(struct nemoshow *show, const char *id, int32_t x, int32_t y, int32_t width, int32_t height)
 {
 	struct playcontext *context = (struct playcontext *)nemoshow_get_userdata(show);
 
-	context->screenid = id;
+	if (context->screenid != NULL)
+		free(context->screenid);
 
-	if (id >= 0) {
+	if (id != NULL)
+		context->screenid = strdup(id);
+	else
+		context->screenid = NULL;
+
+	if (id != NULL) {
 		double ratio = ((double)width / nemoplay_get_video_aspectratio(context->play)) / (double)height;
 
 		nemoshow_canvas_translate(context->canvas, 0.0f, context->height * (1.0f - ratio) / 2.0f);
@@ -309,7 +315,7 @@ int main(int argc, char *argv[])
 		return -1;
 	memset(context, 0, sizeof(struct playcontext));
 
-	context->screenid = -1;
+	context->screenid = NULL;
 
 	context->width = width;
 	context->height = height;

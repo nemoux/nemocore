@@ -168,7 +168,7 @@ static void nemoshow_dispatch_actor_layer(struct nemoactor *actor, int32_t visib
 		show->dispatch_layer(show, visible);
 }
 
-static void nemoshow_dispatch_actor_fullscreen(struct nemoactor *actor, int32_t id, int32_t x, int32_t y, int32_t width, int32_t height)
+static void nemoshow_dispatch_actor_fullscreen(struct nemoactor *actor, const char *id, int32_t x, int32_t y, int32_t width, int32_t height)
 {
 	struct nemotale *tale = (struct nemotale *)nemoactor_get_context(actor);
 	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
@@ -397,7 +397,7 @@ void nemoshow_view_put_fullscreen_type(struct nemoshow *show, const char *type)
 {
 }
 
-void nemoshow_view_set_fullscreen(struct nemoshow *show, uint32_t id)
+void nemoshow_view_set_fullscreen(struct nemoshow *show, const char *id)
 {
 }
 

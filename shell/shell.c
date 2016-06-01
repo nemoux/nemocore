@@ -374,7 +374,7 @@ static void shellbin_update_canvas_layer(struct nemocanvas *canvas, int visible)
 	bin->client->send_layer(canvas, visible);
 }
 
-static void shellbin_update_canvas_fullscreen(struct nemocanvas *canvas, int id, int32_t x, int32_t y, int32_t width, int32_t height)
+static void shellbin_update_canvas_fullscreen(struct nemocanvas *canvas, const char *id, int32_t x, int32_t y, int32_t width, int32_t height)
 {
 	struct shellbin *bin = nemoshell_get_bin(canvas);
 
@@ -911,6 +911,7 @@ void nemoshell_load_fullscreens(struct nemoshell *shell)
 	struct nemocompz *compz = shell->compz;
 	struct shellscreen *screen;
 	struct itemone *one;
+	const char *id;
 	const char *type;
 	const char *focus;
 	const char *fixed;
@@ -931,7 +932,8 @@ void nemoshell_load_fullscreens(struct nemoshell *shell)
 			screen->dw = nemoitem_one_get_iattr(one, "dw", nemocompz_get_scene_width(compz));
 			screen->dh = nemoitem_one_get_iattr(one, "dh", nemocompz_get_scene_height(compz));
 			screen->dr = nemoitem_one_get_iattr(one, "dr", 0);
-			screen->id = nemoitem_one_get_iattr(one, "id", 0);
+
+			screen->id = strdup(nemoitem_one_get_sattr(one, "id", ""));
 
 			type = nemoitem_one_get_attr(one, "type");
 			if (type == NULL)
@@ -960,12 +962,12 @@ void nemoshell_load_fullscreens(struct nemoshell *shell)
 	}
 }
 
-struct shellscreen *nemoshell_get_fullscreen(struct nemoshell *shell, uint32_t id)
+struct shellscreen *nemoshell_get_fullscreen(struct nemoshell *shell, const char *id)
 {
 	struct shellscreen *screen;
 
 	wl_list_for_each(screen, &shell->fullscreen_list, link) {
-		if (screen->id == id)
+		if (strcmp(screen->id, id) == 0)
 			return screen;
 	}
 
@@ -1081,7 +1083,7 @@ void nemoshell_put_fullscreen_bin(struct nemoshell *shell, struct shellbin *bin)
 
 	nemoshell_send_bin_state(bin);
 
-	nemocontent_update_fullscreen(bin->view->content, -1, bin->screen.x, bin->screen.y, bin->screen.width, bin->screen.height);
+	nemocontent_update_fullscreen(bin->view->content, NULL, bin->screen.x, bin->screen.y, bin->screen.width, bin->screen.height);
 }
 
 static inline int nemoshell_bin_contain_view(struct shellbin *bin, struct nemoview *view)

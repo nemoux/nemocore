@@ -21,7 +21,7 @@ typedef int (*nemocanvas_dispatch_event_t)(struct nemocanvas *canvas, uint32_t t
 typedef void (*nemocanvas_dispatch_resize_t)(struct nemocanvas *canvas, int32_t width, int32_t height);
 typedef void (*nemocanvas_dispatch_transform_t)(struct nemocanvas *canvas, int32_t visible, int32_t x, int32_t y, int32_t width, int32_t height);
 typedef void (*nemocanvas_dispatch_layer_t)(struct nemocanvas *canvas, int32_t visible);
-typedef void (*nemocanvas_dispatch_fullscreen_t)(struct nemocanvas *canvas, int32_t id, int32_t x, int32_t y, int32_t width, int32_t height);
+typedef void (*nemocanvas_dispatch_fullscreen_t)(struct nemocanvas *canvas, const char *id, int32_t x, int32_t y, int32_t width, int32_t height);
 typedef void (*nemocanvas_dispatch_frame_t)(struct nemocanvas *canvas, uint64_t secs, uint32_t nsecs);
 typedef void (*nemocanvas_dispatch_discard_t)(struct nemocanvas *canvas);
 typedef void (*nemocanvas_dispatch_screen_t)(struct nemocanvas *canvas, int32_t x, int32_t y, int32_t width, int32_t height, int32_t mmwidth, int32_t mmheight, int left);
@@ -109,7 +109,7 @@ extern void nemocanvas_set_scope(struct nemocanvas *canvas, const char *cmd);
 extern void nemocanvas_put_scope(struct nemocanvas *canvas);
 extern void nemocanvas_set_fullscreen_type(struct nemocanvas *canvas, uint32_t type);
 extern void nemocanvas_put_fullscreen_type(struct nemocanvas *canvas, uint32_t type);
-extern void nemocanvas_set_fullscreen(struct nemocanvas *canvas, uint32_t id);
+extern void nemocanvas_set_fullscreen(struct nemocanvas *canvas, const char *id);
 extern void nemocanvas_put_fullscreen(struct nemocanvas *canvas);
 extern void nemocanvas_move(struct nemocanvas *canvas, uint32_t serial);
 extern void nemocanvas_pick(struct nemocanvas *canvas, uint32_t serial0, uint32_t serial1, uint32_t type);

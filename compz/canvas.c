@@ -500,7 +500,7 @@ static void nemocanvas_update_layer(struct nemocontent *content, int visible)
 		canvas->update_layer(canvas, visible);
 }
 
-static void nemocanvas_update_fullscreen(struct nemocontent *content, int id, int32_t x, int32_t y, int32_t width, int32_t height)
+static void nemocanvas_update_fullscreen(struct nemocontent *content, const char *id, int32_t x, int32_t y, int32_t width, int32_t height)
 {
 	struct nemocanvas *canvas = (struct nemocanvas *)container_of(content, struct nemocanvas, base);
 

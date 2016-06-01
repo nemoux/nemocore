@@ -45,7 +45,7 @@ static void nemo_send_layer(struct nemocanvas *canvas, int visible)
 	nemo_surface_send_layer(bin->resource, visible);
 }
 
-static void nemo_send_fullscreen(struct nemocanvas *canvas, int id, int32_t x, int32_t y, int32_t width, int32_t height)
+static void nemo_send_fullscreen(struct nemocanvas *canvas, const char *id, int32_t x, int32_t y, int32_t width, int32_t height)
 {
 	struct shellbin *bin = nemoshell_get_bin(canvas);
 
@@ -281,7 +281,7 @@ static void nemo_surface_put_fullscreen_type(struct wl_client *client, struct wl
 #endif
 }
 
-static void nemo_surface_set_fullscreen(struct wl_client *client, struct wl_resource *resource, uint32_t id)
+static void nemo_surface_set_fullscreen(struct wl_client *client, struct wl_resource *resource, const char *id)
 {
 #ifdef NEMOUX_WITH_FULLSCREEN
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);

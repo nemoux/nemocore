@@ -48,7 +48,7 @@ typedef void (*nemoshow_dispatch_event_t)(struct nemoshow *show, void *event);
 typedef void (*nemoshow_dispatch_resize_t)(struct nemoshow *show, int32_t width, int32_t height);
 typedef void (*nemoshow_dispatch_transform_t)(struct nemoshow *show, int32_t visible, int32_t x, int32_t y, int32_t width, int32_t height);
 typedef void (*nemoshow_dispatch_layer_t)(struct nemoshow *show, int32_t visible);
-typedef void (*nemoshow_dispatch_fullscreen_t)(struct nemoshow *show, int32_t id, int32_t x, int32_t y, int32_t width, int32_t height);
+typedef void (*nemoshow_dispatch_fullscreen_t)(struct nemoshow *show, const char *id, int32_t x, int32_t y, int32_t width, int32_t height);
 typedef int (*nemoshow_dispatch_destroy_t)(struct nemoshow *show);
 
 struct nemoshow {

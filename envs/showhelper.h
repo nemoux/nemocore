@@ -60,7 +60,7 @@ extern void nemoshow_view_set_layer(struct nemoshow *show, const char *layer);
 extern void nemoshow_view_put_layer(struct nemoshow *show);
 extern void nemoshow_view_set_fullscreen_type(struct nemoshow *show, const char *type);
 extern void nemoshow_view_put_fullscreen_type(struct nemoshow *show, const char *type);
-extern void nemoshow_view_set_fullscreen(struct nemoshow *show, uint32_t id);
+extern void nemoshow_view_set_fullscreen(struct nemoshow *show, const char *id);
 extern void nemoshow_view_put_fullscreen(struct nemoshow *show);
 extern void nemoshow_view_set_parent(struct nemoshow *show, struct nemoview *parent);
 extern void nemoshow_view_set_position(struct nemoshow *show, float x, float y);
