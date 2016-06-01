@@ -31,9 +31,9 @@
 #include <nemoshell.h>
 #include <prochelper.h>
 #include <nemotoken.h>
+#include <nemoitem.h>
 #include <nemomisc.h>
 #include <nemolog.h>
-#include <nemoitem.h>
 
 static int nemoshell_dispatch_ping_timeout(void *data)
 {
@@ -1203,18 +1203,22 @@ void nemoshell_load_gestures(struct nemoshell *shell)
 	shell->bin.max_height = nemoitem_get_iattr(shell->configs, "/nemoshell/bin", "max_height", nemocompz_get_scene_height(shell->compz) * 1.5f);
 }
 
-int nemoshell_dispatch_message(void *data, const char *name, struct nemotoken *content)
+int nemoshell_dispatch_message(void *data, const char *cmd, const char *path, struct itemone *one)
 {
 	struct nemoshell *shell = (struct nemoshell *)data;
 
-	const char *cmd = nemotoken_get_token(content, 2);
-
 	if (strcmp(cmd, "set") == 0) {
-		const char *name = nemotoken_get_token(content, 3);
-		const char *value = nemotoken_get_token(content, 4);
+		struct itemattr *attr;
+		const char *name;
+		const char *value;
 
-		if (strcmp(name, "fullscreen_scale") == 0) {
-			shell->pick.fullscreen_scale = strtod(value, NULL);
+		nemoitem_attr_for_each(attr, one) {
+			name = nemoitem_attr_get_name(attr);
+			value = nemoitem_attr_get_value(attr);
+
+			if (strcmp(name, "fullscreen_scale") == 0) {
+				shell->pick.fullscreen_scale = strtod(value, NULL);
+			}
 		}
 	}
 

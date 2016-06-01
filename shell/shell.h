@@ -341,7 +341,7 @@ extern void nemoshell_put_maximized_bin(struct nemoshell *shell, struct shellbin
 
 extern void nemoshell_load_gestures(struct nemoshell *shell);
 
-extern int nemoshell_dispatch_message(void *data, const char *name, struct nemotoken *content);
+extern int nemoshell_dispatch_message(void *data, const char *cmd, const char *path, struct itemone *one);
 
 static inline void nemoshell_set_execute_command(struct nemoshell *shell, nemoshell_execute_command_t execute)
 {

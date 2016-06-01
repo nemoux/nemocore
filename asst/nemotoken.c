@@ -189,7 +189,7 @@ char **nemotoken_get_tokens(struct nemotoken *token)
 
 char *nemotoken_get_token(struct nemotoken *token, int index)
 {
-	return token->tokens[index];
+	return index < token->ntokens ? token->tokens[index] : NULL;
 }
 
 char *nemotoken_get_token_pair(struct nemotoken *token, const char *name)
