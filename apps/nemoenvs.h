@@ -46,11 +46,6 @@ static inline int nemoenvs_set_destination_callback(struct nemoenvs *envs, const
 	return nemomsg_set_destination_callback(envs->msg, name, callback, data);
 }
 
-static inline int nemoenvs_set_command_callback(struct nemoenvs *envs, const char *name, nemomsg_callback_t callback, void *data)
-{
-	return nemomsg_set_command_callback(envs->msg, name, callback, data);
-}
-
 static inline int nemoenvs_put_callback(struct nemoenvs *envs, nemomsg_callback_t callback)
 {
 	return nemomsg_put_callback(envs->msg, callback);
@@ -64,11 +59,6 @@ static inline int nemoenvs_put_source_callback(struct nemoenvs *envs, const char
 static inline int nemoenvs_put_destination_callback(struct nemoenvs *envs, const char *name, nemomsg_callback_t callback)
 {
 	return nemomsg_put_destination_callback(envs->msg, name, callback);
-}
-
-static inline int nemoenvs_put_command_callback(struct nemoenvs *envs, const char *name, nemomsg_callback_t callback)
-{
-	return nemomsg_put_command_callback(envs->msg, name, callback);
 }
 
 static inline void nemoenvs_set_data(struct nemoenvs *envs, void *data)

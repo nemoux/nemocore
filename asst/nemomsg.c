@@ -30,7 +30,6 @@ struct nemomsg *nemomsg_create(const char *ip, int port)
 	nemolist_init(&msg->callback_list);
 	nemolist_init(&msg->source_list);
 	nemolist_init(&msg->destination_list);
-	nemolist_init(&msg->command_list);
 
 	nemolist_init(&msg->delete_list);
 
@@ -64,14 +63,6 @@ void nemomsg_destroy(struct nemomsg *msg)
 	}
 
 	nemolist_for_each_safe(cb, next, &msg->destination_list, link) {
-		nemolist_remove(&cb->link);
-		nemolist_remove(&cb->dlink);
-
-		free(cb->name);
-		free(cb);
-	}
-
-	nemolist_for_each_safe(cb, next, &msg->command_list, link) {
 		nemolist_remove(&cb->link);
 		nemolist_remove(&cb->dlink);
 
@@ -157,25 +148,6 @@ int nemomsg_set_destination_callback(struct nemomsg *msg, const char *name, nemo
 	return 0;
 }
 
-int nemomsg_set_command_callback(struct nemomsg *msg, const char *name, nemomsg_callback_t callback, void *data)
-{
-	struct msgcallback *cb;
-
-	cb = (struct msgcallback *)malloc(sizeof(struct msgcallback));
-	if (cb == NULL)
-		return -1;
-
-	cb->name = strdup(name);
-	cb->callback = callback;
-	cb->data = data;
-
-	nemolist_init(&cb->dlink);
-
-	nemolist_insert_tail(&msg->command_list, &cb->link);
-
-	return 0;
-}
-
 int nemomsg_put_callback(struct nemomsg *msg, nemomsg_callback_t callback)
 {
 	struct msgcallback *cb;
@@ -215,35 +187,20 @@ int nemomsg_put_destination_callback(struct nemomsg *msg, const char *name, nemo
 	return 0;
 }
 
-int nemomsg_put_command_callback(struct nemomsg *msg, const char *name, nemomsg_callback_t callback)
-{
-	struct msgcallback *cb;
-
-	nemolist_for_each(cb, &msg->command_list, link) {
-		if (strcmp(cb->name, name) == 0 && cb->callback == callback) {
-			nemolist_insert(&msg->delete_list, &cb->dlink);
-		}
-	}
-
-	return 0;
-}
-
 int nemomsg_dispatch(struct nemomsg *msg, struct nemotoken *content)
 {
 	struct msgcallback *cb;
 	const char *src;
 	const char *dst;
-	const char *cmd;
 
-	if (nemotoken_get_token_count(content) < 3)
+	if (nemotoken_get_token_count(content) < 2)
 		return -1;
 
 	src = nemotoken_get_token(content, 0);
 	dst = nemotoken_get_token(content, 1);
-	cmd = nemotoken_get_token(content, 2);
 
 	nemolist_for_each(cb, &msg->callback_list, link) {
-		cb->callback(cb->data, cmd, content);
+		cb->callback(cb->data, src, content);
 	}
 
 	nemolist_for_each(cb, &msg->source_list, link) {
@@ -254,11 +211,6 @@ int nemomsg_dispatch(struct nemomsg *msg, struct nemotoken *content)
 	nemolist_for_each(cb, &msg->destination_list, link) {
 		if (strcmp(cb->name, dst) == 0)
 			cb->callback(cb->data, dst, content);
-	}
-
-	nemolist_for_each(cb, &msg->command_list, link) {
-		if (strcmp(cb->name, cmd) == 0)
-			cb->callback(cb->data, cmd, content);
 	}
 
 	return 0;

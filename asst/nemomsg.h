@@ -40,7 +40,6 @@ struct nemomsg {
 
 	struct nemolist source_list;
 	struct nemolist destination_list;
-	struct nemolist command_list;
 
 	struct nemolist delete_list;
 
@@ -53,12 +52,10 @@ extern void nemomsg_destroy(struct nemomsg *msg);
 extern int nemomsg_set_callback(struct nemomsg *msg, nemomsg_callback_t callback, void *data);
 extern int nemomsg_set_source_callback(struct nemomsg *msg, const char *name, nemomsg_callback_t callback, void *data);
 extern int nemomsg_set_destination_callback(struct nemomsg *msg, const char *name, nemomsg_callback_t callback, void *data);
-extern int nemomsg_set_command_callback(struct nemomsg *msg, const char *name, nemomsg_callback_t callback, void *data);
 
 extern int nemomsg_put_callback(struct nemomsg *msg, nemomsg_callback_t callback);
 extern int nemomsg_put_source_callback(struct nemomsg *msg, const char *name, nemomsg_callback_t callback);
 extern int nemomsg_put_destination_callback(struct nemomsg *msg, const char *name, nemomsg_callback_t callback);
-extern int nemomsg_put_command_callback(struct nemomsg *msg, const char *name, nemomsg_callback_t callback);
 
 extern int nemomsg_dispatch(struct nemomsg *msg, struct nemotoken *content);
 extern int nemomsg_clean(struct nemomsg *msg);
