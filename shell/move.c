@@ -215,15 +215,6 @@ static void move_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		nemoview_transform_notify(bin->view);
 
 	if (tp->focus != NULL) {
-		if (bin != NULL) {
-			if (nemoview_has_state(tp->focus, NEMOVIEW_PUSH_STATE) != 0 && touchpoint_get_distance(tp) > bin->shell->active.push_distance) {
-				nemoview_above_layer(tp->focus, NULL);
-
-				nemoseat_set_stick_focus(tp->touch->seat, tp->focus);
-				datadevice_set_focus(tp->touch->seat, tp->focus);
-			}
-		}
-
 		nemocontent_touch_up(tp, tp->focus->content, time, touchid);
 	}
 }
@@ -470,12 +461,6 @@ static void move_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		nemoview_transform_notify(actor->view);
 
 	if (tp->focus != NULL) {
-		if (actor != NULL) {
-			if (nemoview_has_state(tp->focus, NEMOVIEW_PUSH_STATE) != 0 && touchpoint_get_distance(tp) > shell->active.push_distance) {
-				nemoview_above_layer(tp->focus, NULL);
-			}
-		}
-
 		nemocontent_touch_up(tp, tp->focus->content, time, touchid);
 	}
 }

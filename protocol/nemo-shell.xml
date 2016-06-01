@@ -238,7 +238,7 @@
 		</event>
 
 		<event name="fullscreen">
-			<arg name="id" type="string"/>
+			<arg name="id" type="string" allow-null="true"/>
 			<arg name="x" type="int"/>
 			<arg name="y" type="int"/>
 			<arg name="width" type="int"/>

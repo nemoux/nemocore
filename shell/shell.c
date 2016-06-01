@@ -30,6 +30,7 @@
 #include <xdgshell.h>
 #include <nemoshell.h>
 #include <prochelper.h>
+#include <nemotoken.h>
 #include <nemomisc.h>
 #include <nemolog.h>
 #include <nemoitem.h>
@@ -1196,10 +1197,26 @@ void nemoshell_load_gestures(struct nemoshell *shell)
 	shell->pick.fullscreen_scale = nemoitem_get_fattr(shell->configs, "/nemoshell/pick", "fullscreen_scale", 1.25f);
 	shell->pick.resize_interval = nemoitem_get_fattr(shell->configs, "/nemoshell/pick", "resize_interval", 50.0f);
 
-	shell->active.push_distance = nemoitem_get_fattr(shell->configs, "/nemoshell/active", "push_distance", 100.0f);
-
 	shell->bin.min_width = nemoitem_get_iattr(shell->configs, "/nemoshell/bin", "min_width", 0);
 	shell->bin.min_height = nemoitem_get_iattr(shell->configs, "/nemoshell/bin", "min_height", 0);
 	shell->bin.max_width = nemoitem_get_iattr(shell->configs, "/nemoshell/bin", "max_width", nemocompz_get_scene_width(shell->compz) * 1.5f);
 	shell->bin.max_height = nemoitem_get_iattr(shell->configs, "/nemoshell/bin", "max_height", nemocompz_get_scene_height(shell->compz) * 1.5f);
+}
+
+int nemoshell_dispatch_message(void *data, const char *name, struct nemotoken *content)
+{
+	struct nemoshell *shell = (struct nemoshell *)data;
+
+	const char *cmd = nemotoken_get_token(content, 2);
+
+	if (strcmp(cmd, "set") == 0) {
+		const char *name = nemotoken_get_token(content, 3);
+		const char *value = nemotoken_get_token(content, 4);
+
+		if (strcmp(name, "fullscreen_scale") == 0) {
+			shell->pick.fullscreen_scale = strtod(value, NULL);
+		}
+	}
+
+	return 0;
 }

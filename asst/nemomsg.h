@@ -14,6 +14,8 @@ typedef int (*nemomsg_callback_t)(void *data, const char *name, struct nemotoken
 
 struct msgcallback {
 	nemomsg_callback_t callback;
+	void *data;
+
 	char *name;
 
 	struct nemolist link;
@@ -48,10 +50,10 @@ struct nemomsg {
 extern struct nemomsg *nemomsg_create(const char *ip, int port);
 extern void nemomsg_destroy(struct nemomsg *msg);
 
-extern int nemomsg_set_callback(struct nemomsg *msg, nemomsg_callback_t callback);
-extern int nemomsg_set_source_callback(struct nemomsg *msg, const char *name, nemomsg_callback_t callback);
-extern int nemomsg_set_destination_callback(struct nemomsg *msg, const char *name, nemomsg_callback_t callback);
-extern int nemomsg_set_command_callback(struct nemomsg *msg, const char *name, nemomsg_callback_t callback);
+extern int nemomsg_set_callback(struct nemomsg *msg, nemomsg_callback_t callback, void *data);
+extern int nemomsg_set_source_callback(struct nemomsg *msg, const char *name, nemomsg_callback_t callback, void *data);
+extern int nemomsg_set_destination_callback(struct nemomsg *msg, const char *name, nemomsg_callback_t callback, void *data);
+extern int nemomsg_set_command_callback(struct nemomsg *msg, const char *name, nemomsg_callback_t callback, void *data);
 
 extern int nemomsg_put_callback(struct nemomsg *msg, nemomsg_callback_t callback);
 extern int nemomsg_put_source_callback(struct nemomsg *msg, const char *name, nemomsg_callback_t callback);

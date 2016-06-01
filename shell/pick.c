@@ -130,24 +130,6 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		}
 	}
 
-	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_MOVE)) {
-		if (tp0->focus != NULL && nemoview_has_state(tp0->focus, NEMOVIEW_PUSH_STATE) != 0) {
-			float x0 = (tp0->grab_x + tp1->grab_x) / 2.0f;
-			float y0 = (tp0->grab_y + tp1->grab_y) / 2.0f;
-			float x1 = (tp0->x + tp1->x) / 2.0f;
-			float y1 = (tp0->y + tp1->y) / 2.0f;
-			float dx = x1 - x0;
-			float dy = y1 - y0;
-
-			if (sqrtf(dx * dx + dy * dy) > shell->active.push_distance) {
-				nemoview_above_layer(tp0->focus, NULL);
-
-				nemoseat_set_stick_focus(tp0->touch->seat, tp0->focus);
-				datadevice_set_focus(tp0->touch->seat, tp0->focus);
-			}
-		}
-	}
-
 out:
 	nemoshell_end_touchpoint_shellgrab(grab);
 	nemoshell_end_touchpoint_shellgrab(&pick->other->base);
@@ -616,21 +598,6 @@ static void pick_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 
 				nemoactor_dispatch_resize(actor, width, height);
 				nemoactor_dispatch_frame(actor);
-			}
-		}
-
-		if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_MOVE)) {
-			if (tp0->focus != NULL && nemoview_has_state(tp0->focus, NEMOVIEW_PUSH_STATE) != 0) {
-				float x0 = (tp0->grab_x + tp1->grab_x) / 2.0f;
-				float y0 = (tp0->grab_y + tp1->grab_y) / 2.0f;
-				float x1 = (tp0->x + tp1->x) / 2.0f;
-				float y1 = (tp0->y + tp1->y) / 2.0f;
-				float dx = x1 - x0;
-				float dy = y1 - y0;
-
-				if (sqrtf(dx * dx + dy * dy) > shell->active.push_distance) {
-					nemoview_above_layer(tp0->focus, NULL);
-				}
 			}
 		}
 	}

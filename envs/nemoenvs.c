@@ -53,6 +53,7 @@ void nemoenvs_destroy(struct nemoenvs *envs)
 static int nemoenvs_dispatch_message(void *data)
 {
 	struct nemomsg *msg = (struct nemomsg *)data;
+	struct nemotoken *content;
 	int soc = nemomsg_get_socket(msg);
 	char buffer[1024];
 	char ip[64];
@@ -62,6 +63,13 @@ static int nemoenvs_dispatch_message(void *data)
 	size = udp_recv_from(soc, ip, &port, buffer, sizeof(buffer) - 1);
 	if (size <= 0)
 		return -1;
+
+	content = nemotoken_create(buffer, size);
+	nemotoken_divide(content, ':');
+	nemotoken_update(content);
+
+	nemomsg_dispatch(msg, content);
+	nemomsg_clean(msg);
 
 	return 0;
 }

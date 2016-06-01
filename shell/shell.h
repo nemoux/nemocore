@@ -12,6 +12,7 @@ NEMO_BEGIN_EXTERN_C
 #include <layer.h>
 #include <view.h>
 #include <content.h>
+#include <nemotoken.h>
 #include <nemoitem.h>
 
 typedef enum {
@@ -114,10 +115,6 @@ struct nemoshell {
 		double fullscreen_scale;
 		double resize_interval;
 	} pick;
-
-	struct {
-		double push_distance;
-	} active;
 
 	struct {
 		uint32_t min_width, min_height;
@@ -343,6 +340,8 @@ extern void nemoshell_set_maximized_bin(struct nemoshell *shell, struct shellbin
 extern void nemoshell_put_maximized_bin(struct nemoshell *shell, struct shellbin *bin);
 
 extern void nemoshell_load_gestures(struct nemoshell *shell);
+
+extern int nemoshell_dispatch_message(void *data, const char *name, struct nemotoken *content);
 
 static inline void nemoshell_set_execute_command(struct nemoshell *shell, nemoshell_execute_command_t execute)
 {

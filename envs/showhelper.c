@@ -507,8 +507,6 @@ void nemoshow_view_set_state(struct nemoshow *show, const char *state)
 		nemoview_set_state(actor->view, NEMOVIEW_SOUND_STATE);
 	else if (strcmp(state, "layer") == 0)
 		nemoview_set_state(actor->view, NEMOVIEW_LAYER_STATE);
-	else if (strcmp(state, "push") == 0)
-		nemoview_set_state(actor->view, NEMOVIEW_PUSH_STATE);
 	else if (strcmp(state, "opaque") == 0)
 		nemoview_set_state(actor->view, NEMOVIEW_OPAQUE_STATE);
 }
@@ -528,8 +526,6 @@ void nemoshow_view_put_state(struct nemoshow *show, const char *state)
 		nemoview_put_state(actor->view, NEMOVIEW_SOUND_STATE);
 	else if (strcmp(state, "layer") == 0)
 		nemoview_put_state(actor->view, NEMOVIEW_LAYER_STATE);
-	else if (strcmp(state, "push") == 0)
-		nemoview_put_state(actor->view, NEMOVIEW_PUSH_STATE);
 	else if (strcmp(state, "opaque") == 0)
 		nemoview_put_state(actor->view, NEMOVIEW_OPAQUE_STATE);
 }

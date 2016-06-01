@@ -51,8 +51,6 @@ int nemoenvs_connect(struct nemoenvs *envs, const char *ip, int port)
 	envs->msg = nemomsg_create(NULL, 0);
 	if (envs->msg == NULL)
 		return -1;
-	nemomsg_set_client(envs->msg, "/shell", ip, port);
-	nemomsg_send_message(envs->msg, "/shell", "merong", 6);
 
 	envs->monitor = nemomonitor_create(envs->tool,
 			nemomsg_get_socket(envs->msg),
