@@ -10,7 +10,6 @@ NEMO_BEGIN_EXTERN_C
 struct nemocompz;
 
 extern int nemocompz_load_plugin(struct nemocompz *compz, const char *path, const char *args);
-extern void nemocompz_load_plugins(struct nemocompz *compz);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

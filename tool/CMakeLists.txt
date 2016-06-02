@@ -4,6 +4,10 @@ PKG_CHECK_MODULES(WAYLANDCLIENT REQUIRED wayland-client)
 INCLUDE_DIRECTORIES(${WAYLANDCLIENT_INCLUDE_DIRS})
 LINK_DIRECTORIES(${WAYLANDCLIENT_LIBRARY_DIRS})
 
+PKG_CHECK_MODULES(WAYLANDEGL REQUIRED wayland-egl)
+INCLUDE_DIRECTORIES(${WAYLANDEGL_INCLUDE_DIRS})
+LINK_DIRECTORIES(${WAYLANDEGL_LIBRARY_DIRS})
+
 wayland_add_protocol_client(PROTOCOLS
 	${CMAKE_SOURCE_DIR}/protocol/presentation-timing.xml
 	presentation-timing
@@ -33,16 +37,6 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
 set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 
-if(WITH_EGL)
-	PKG_CHECK_MODULES(WAYLANDEGL REQUIRED wayland-egl)
-	INCLUDE_DIRECTORIES(${WAYLANDEGL_INCLUDE_DIRS})
-	LINK_DIRECTORIES(${WAYLANDEGL_LIBRARY_DIRS})
-
-	set(EXTRA ${EXTRA}
-		nemoegl.c
-		)
-endif(WITH_EGL)
-
 add_library(nemotool SHARED
 	nemotool.c
 	nemocanvas.c
@@ -50,26 +44,18 @@ add_library(nemotool SHARED
 	nemosound.c
 	nemotimer.c
 	nemomonitor.c
-	${EXTRA}
+	nemoegl.c
 	${PROTOCOLS}
 	)
 
 TARGET_LINK_LIBRARIES(nemotool
 	nemoasst
 	${WAYLANDCLIENT_LIBRARIES}
+	${WAYLANDEGL_LIBRARIES}
 	${NEMOUX_COMMON_LIBRARIES}
 	)
 
 set(NEMOTOOL_PKGCONFIG_REQUIRES "pixman-1 cairo expat wayland-client wayland-egl")
-
-if(WITH_EGL)
-	TARGET_LINK_LIBRARIES(nemotool
-		${WAYLANDEGL_LIBRARIES}
-		)
-
-	set(EXTRA_HEADERS ${EXTRA_HEADERS} ${CMAKE_SOURCE_DIR}/tool/nemoegl.h)
-	set(NEMOTOOL_PKGCONFIG_REQUIRES "${NEMOTOOL_PKGCONFIG_REQUIRES} wayland-egl")
-endif(WITH_EGL)
 
 INSTALL(TARGETS nemotool DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
 
@@ -80,7 +66,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/tool/nemosound.h
 	${CMAKE_SOURCE_DIR}/tool/nemotimer.h
 	${CMAKE_SOURCE_DIR}/tool/nemomonitor.h
-	${EXTRA_HEADERS}
+	${CMAKE_SOURCE_DIR}/tool/nemoegl.h
 	${CMAKE_BINARY_DIR}/tool/wayland-presentation-timing-client-protocol.h
 	${CMAKE_BINARY_DIR}/tool/wayland-nemo-shell-client-protocol.h
 	${CMAKE_BINARY_DIR}/tool/wayland-nemo-seat-client-protocol.h

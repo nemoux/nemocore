@@ -121,8 +121,6 @@ struct nemoshell {
 		uint32_t max_width, max_height;
 	} bin;
 
-	struct nemoitem *configs;
-
 	nemoshell_execute_command_t execute_command;
 	nemoshell_execute_action_t execute_action;
 	nemoshell_execute_content_t execute_content;
@@ -326,8 +324,9 @@ extern struct clientstate *nemoshell_get_client_state(struct nemoshell *shell, u
 
 extern int nemoshell_use_client_state(struct nemoshell *shell, struct shellbin *bin);
 
-extern void nemoshell_load_fullscreens(struct nemoshell *shell);
 extern struct shellscreen *nemoshell_get_fullscreen(struct nemoshell *shell, const char *id);
+extern void nemoshell_put_fullscreen(struct nemoshell *shell, const char *id);
+
 extern struct shellscreen *nemoshell_get_fullscreen_on(struct nemoshell *shell, int32_t x, int32_t y, uint32_t type);
 
 extern void nemoshell_set_toplevel_bin(struct nemoshell *shell, struct shellbin *bin);
@@ -338,10 +337,6 @@ extern void nemoshell_put_fullscreen_bin(struct nemoshell *shell, struct shellbi
 extern void nemoshell_set_maximized_bin_on_screen(struct nemoshell *shell, struct shellbin *bin, struct nemoscreen *screen);
 extern void nemoshell_set_maximized_bin(struct nemoshell *shell, struct shellbin *bin, struct shellscreen *screen);
 extern void nemoshell_put_maximized_bin(struct nemoshell *shell, struct shellbin *bin);
-
-extern void nemoshell_load_gestures(struct nemoshell *shell);
-
-extern int nemoshell_dispatch_message(void *data, const char *cmd, const char *path, struct itemone *one);
 
 static inline void nemoshell_set_execute_command(struct nemoshell *shell, nemoshell_execute_command_t execute)
 {

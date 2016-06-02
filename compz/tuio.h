@@ -1,5 +1,5 @@
-#ifndef __TUIO_NODE_H__
-#define	__TUIO_NODE_H__
+#ifndef __NEMO_TUIO_H__
+#define __NEMO_TUIO_H__
 
 #include <nemoconfig.h>
 
@@ -44,7 +44,7 @@ struct tuiotap {
 	float f[6];
 };
 
-struct tuionode {
+struct tuio {
 	struct inputnode base;
 
 	struct nemocompz *compz;
@@ -79,8 +79,8 @@ struct tuionode {
 	struct xmlparser *xmlparser;
 };
 
-extern struct tuionode *tuio_create_node(struct nemocompz *compz, int protocol, int port, int max);
-extern void tuio_destroy_node(struct tuionode *node);
+extern struct tuio *tuio_create(struct nemocompz *compz, int protocol, int port, int max);
+extern void tuio_destroy(struct tuio *tuio);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

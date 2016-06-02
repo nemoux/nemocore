@@ -20,7 +20,7 @@ typedef enum {
 
 struct nemoseat;
 struct nemotouch;
-struct tuionode;
+struct tuio;
 
 struct touchpoint_grab;
 
@@ -130,7 +130,7 @@ extern void nemotouch_notify_motion(struct nemotouch *touch, uint32_t time, int 
 extern void nemotouch_notify_frame(struct nemotouch *touch, int id);
 extern void nemotouch_notify_frames(struct nemotouch *touch);
 
-extern void nemotouch_flush_tuio(struct tuionode *node);
+extern void nemotouch_flush_tuio(struct tuio *tuio);
 
 extern float touchpoint_get_distance(struct touchpoint *tp);
 extern void touchpoint_update(struct touchpoint *tp, float x, float y);

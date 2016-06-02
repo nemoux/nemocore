@@ -36,18 +36,13 @@
 #include <screen.h>
 #include <animation.h>
 #include <effect.h>
+#include <drmbackend.h>
 #include <fbbackend.h>
-#include <waylandbackend.h>
 #include <evdevbackend.h>
-#include <tuiobackend.h>
 #include <nemomisc.h>
 #include <nemoease.h>
 #include <nemoxml.h>
 #include <nemolog.h>
-
-#ifdef NEMOUX_WITH_DRM
-#include <drmbackend.h>
-#endif
 
 static void compositor_create_surface(struct wl_client *client, struct wl_resource *compositor_resource, uint32_t id)
 {
@@ -348,10 +343,6 @@ struct nemocompz *nemocompz_create(void)
 		return NULL;
 	memset(compz, 0, sizeof(struct nemocompz));
 
-	compz->configs = nemoitem_create();
-	if (compz->configs == NULL)
-		goto err1;
-
 	display = wl_display_create();
 	if (display == NULL)
 		goto err1;
@@ -399,6 +390,9 @@ struct nemocompz *nemocompz_create(void)
 	wl_list_init(&compz->canvas_list);
 	wl_list_init(&compz->actor_list);
 	wl_list_init(&compz->feedback_list);
+
+	wl_list_init(&compz->screenconfig_list);
+	wl_list_init(&compz->inputconfig_list);
 
 	wl_signal_init(&compz->session_signal);
 	compz->session_active = 1;
@@ -554,9 +548,6 @@ void nemocompz_destroy(struct nemocompz *compz)
 
 	if (compz->display != NULL)
 		wl_display_destroy(compz->display);
-
-	if (compz->configs != NULL)
-		nemoitem_destroy(compz->configs);
 
 	free(compz);
 }
@@ -1044,76 +1035,81 @@ struct nemoview *nemocompz_get_view_by_client(struct nemocompz *compz, struct wl
 	return NULL;
 }
 
-void nemocompz_load_backends(struct nemocompz *compz)
+struct screenconfig *nemocompz_get_screen_config(struct nemocompz *compz, uint32_t nodeid, uint32_t screenid)
 {
-	struct itemone *one;
-	const char *name;
+	struct screenconfig *config;
 
-	nemoitem_for_each(one, compz->configs) {
-		if (nemoitem_one_has_path(one, "/nemoshell/backend") == 0)
-			continue;
+	wl_list_for_each(config, &compz->screenconfig_list, link) {
+		if (config->nodeid == nodeid && config->screenid == screenid)
+			return config;
+	}
 
-		name = nemoitem_one_get_attr(one, "name");
-		if (name == NULL)
-			continue;
+	config = (struct screenconfig *)malloc(sizeof(struct screenconfig));
+	if (config == NULL)
+		return NULL;
+	memset(config, 0, sizeof(struct screenconfig));
 
-		if (strcmp(name, "drm") == 0) {
-			drmbackend_create(compz, nemoitem_one_get_attr(one, "rendernode"));
-		} else if (strcmp(name, "fb") == 0) {
-			fbbackend_create(compz, nemoitem_one_get_attr(one, "rendernode"));
-		} else if (strcmp(name, "evdev") == 0) {
-			evdevbackend_create(compz);
-		} else if (strcmp(name, "tuio") == 0) {
-			tuiobackend_create(compz);
+	config->nodeid = nodeid;
+	config->screenid = screenid;
+
+	wl_list_insert(&compz->screenconfig_list, &config->link);
+
+	return config;
+}
+
+void nemocompz_put_screen_config(struct nemocompz *compz, uint32_t nodeid, uint32_t screenid)
+{
+	struct screenconfig *config;
+
+	wl_list_for_each(config, &compz->screenconfig_list, link) {
+		if (config->nodeid == nodeid && config->screenid == screenid) {
+			wl_list_remove(&config->link);
+
+			if (config->renderer != NULL)
+				free(config->renderer);
+			if (config->transform != NULL)
+				free(config->transform);
+
+			free(config);
+
+			break;
 		}
 	}
 }
 
-void nemocompz_load_scenes(struct nemocompz *compz)
+struct inputconfig *nemocompz_get_input_config(struct nemocompz *compz, const char *devnode)
 {
-	struct itemone *one;
+	struct inputconfig *config;
 
-	nemoitem_for_each(one, compz->configs) {
-		if (nemoitem_one_has_path(one, "/nemoshell/scene") != 0) {
-			int32_t x, y;
-			int32_t width, height;
-
-			x = nemoitem_one_get_iattr(one, "x", 0);
-			y = nemoitem_one_get_iattr(one, "y", 0);
-			width = nemoitem_one_get_iattr(one, "width", 0);
-			height = nemoitem_one_get_iattr(one, "height", 0);
-
-			nemocompz_set_scene(compz, x, y, width, height);
-		} else if (nemoitem_one_has_path(one, "/nemoshell/scope") != 0) {
-			int32_t x, y;
-			int32_t width, height;
-
-			x = nemoitem_one_get_iattr(one, "x", 0);
-			y = nemoitem_one_get_iattr(one, "y", 0);
-			width = nemoitem_one_get_iattr(one, "width", 0);
-			height = nemoitem_one_get_iattr(one, "height", 0);
-
-			nemocompz_set_scope(compz, x, y, width, height);
-		}
+	wl_list_for_each(config, &compz->inputconfig_list, link) {
+		if (strcmp(config->devnode, devnode) == 0)
+			return config;
 	}
+
+	config = (struct inputconfig *)malloc(sizeof(struct inputconfig));
+	if (config == NULL)
+		return NULL;
+	memset(config, 0, sizeof(struct inputconfig));
+
+	config->devnode = strdup(devnode);
+
+	wl_list_insert(&compz->inputconfig_list, &config->link);
+
+	return config;
 }
 
-void nemocompz_load_virtuios(struct nemocompz *compz)
+void nemocompz_put_input_config(struct nemocompz *compz, const char *devnode)
 {
-	struct itemone *one;
-	int port, fps;
-	int x, y, width, height;
+	struct inputconfig *config;
 
-	nemoitem_for_each(one, compz->configs) {
-		if (nemoitem_one_has_path(one, "/nemoshell/virtuio") != 0) {
-			port = nemoitem_one_get_iattr(one, "port", 3333);
-			fps = nemoitem_one_get_iattr(one, "fps", 60);
-			x = nemoitem_one_get_iattr(one, "x", 0);
-			y = nemoitem_one_get_iattr(one, "y", 0);
-			width = nemoitem_one_get_iattr(one, "width", nemocompz_get_scene_width(compz));
-			height = nemoitem_one_get_iattr(one, "height", nemocompz_get_scene_height(compz));
+	wl_list_for_each(config, &compz->inputconfig_list, link) {
+		if (strcmp(config->devnode, devnode) == 0) {
+			wl_list_remove(&config->link);
 
-			virtuio_create(compz, port, fps, x, y, width, height);
+			free(config->devnode);
+			free(config);
+
+			break;
 		}
 	}
 }

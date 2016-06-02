@@ -8,14 +8,12 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -std=c++11")
 set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 
-if(WITH_EGL)
-	set(NEMOASST_EGL_SOURCES
-		${CMAKE_SOURCE_DIR}/misc/glhelper.c
-		${CMAKE_SOURCE_DIR}/misc/glfilter.c
-		${CMAKE_SOURCE_DIR}/misc/eglhelper.c
-		${CMAKE_SOURCE_DIR}/misc/fbohelper.c
-		)
-endif(WITH_EGL)
+set(NEMOASST_EGL_SOURCES
+	${CMAKE_SOURCE_DIR}/misc/glhelper.c
+	${CMAKE_SOURCE_DIR}/misc/glfilter.c
+	${CMAKE_SOURCE_DIR}/misc/eglhelper.c
+	${CMAKE_SOURCE_DIR}/misc/fbohelper.c
+	)
 
 add_library(nemoasst SHARED
 	nemoxml.c

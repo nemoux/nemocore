@@ -417,16 +417,13 @@ void nemoactor_destroy(struct nemoactor *actor)
 		free(actor->data);
 	}
 
-#ifdef NEMOUX_WITH_EGL
 	if (actor->texture > 0) {
 		glDeleteTextures(1, &actor->texture);
 	}
-#endif
 
 	free(actor);
 }
 
-#ifdef NEMOUX_WITH_EGL
 struct nemoactor *nemoactor_create_gl(struct nemocompz *compz, int width, int height)
 {
 	struct nemoactor *actor;
@@ -541,7 +538,6 @@ int nemoactor_resize_gl(struct nemoactor *actor, int width, int height)
 
 	return 0;
 }
-#endif
 
 void nemoactor_schedule_repaint(struct nemoactor *actor)
 {

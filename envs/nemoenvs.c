@@ -13,6 +13,7 @@
 #include <compz.h>
 #include <view.h>
 #include <monitor.h>
+#include <message.h>
 #include <waylandhelper.h>
 
 #include <nemoenvs.h>
@@ -36,16 +37,26 @@ struct nemoenvs *nemoenvs_create(struct nemoshell *shell)
 	memset(envs, 0, sizeof(struct nemoenvs));
 
 	envs->shell = shell;
-	envs->configs = shell->configs;
+
+	envs->configs = nemoitem_create();
+	if (envs->configs == NULL)
+		goto err1;
 
 	nemolist_init(&envs->app_list);
 
 	return envs;
+
+err1:
+	free(envs);
+
+	return NULL;
 }
 
 void nemoenvs_destroy(struct nemoenvs *envs)
 {
 	nemolist_remove(&envs->app_list);
+
+	nemoitem_destroy(envs->configs);
 
 	free(envs);
 }
@@ -110,6 +121,8 @@ void nemoenvs_load_configs(struct nemoenvs *envs, const char *configpath)
 		}
 
 		nemoitem_attach_one(envs->configs, one);
+
+		nemoshell_dispatch_message(envs->shell, "set", node->path, one);
 	}
 
 	nemoxml_destroy(xml);

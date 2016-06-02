@@ -9,7 +9,7 @@
 #include <wayland-nemo-seat-server-protocol.h>
 
 #include <touch.h>
-#include <tuionode.h>
+#include <tuio.h>
 #include <compz.h>
 #include <seat.h>
 #include <canvas.h>
@@ -566,9 +566,9 @@ void nemotouch_notify_frames(struct nemotouch *touch)
 	}
 }
 
-void nemotouch_flush_tuio(struct tuionode *node)
+void nemotouch_flush_tuio(struct tuio *tuio)
 {
-	struct nemotouch *touch = node->touch;
+	struct nemotouch *touch = tuio->touch;
 	struct touchpoint *tp, *tnext;
 	struct wl_list touchpoint_list;
 	uint32_t msecs = time_current_msecs();
@@ -579,22 +579,22 @@ void nemotouch_flush_tuio(struct tuionode *node)
 	wl_list_insert_list(&touchpoint_list, &touch->touchpoint_list);
 	wl_list_init(&touch->touchpoint_list);
 
-	for (i = 0; i < node->alive.index; i++) {
-		if (node->base.screen != NULL) {
-			nemoscreen_transform_to_global(node->base.screen,
-					node->taps[i].f[0] * node->base.screen->width,
-					node->taps[i].f[1] * node->base.screen->height,
+	for (i = 0; i < tuio->alive.index; i++) {
+		if (tuio->base.screen != NULL) {
+			nemoscreen_transform_to_global(tuio->base.screen,
+					tuio->taps[i].f[0] * tuio->base.screen->width,
+					tuio->taps[i].f[1] * tuio->base.screen->height,
 					&x, &y);
 		} else {
-			nemoinput_transform_to_global(&node->base,
-					node->taps[i].f[0] * node->base.width,
-					node->taps[i].f[1] * node->base.height,
+			nemoinput_transform_to_global(&tuio->base,
+					tuio->taps[i].f[0] * tuio->base.width,
+					tuio->taps[i].f[1] * tuio->base.height,
 					&x, &y);
 		}
 
-		tp = nemotouch_get_touchpoint_list_by_id(touch, &touchpoint_list, node->taps[i].id);
+		tp = nemotouch_get_touchpoint_list_by_id(touch, &touchpoint_list, tuio->taps[i].id);
 		if (tp == NULL) {
-			tp = nemotouch_create_touchpoint(touch, node->taps[i].id);
+			tp = nemotouch_create_touchpoint(touch, tuio->taps[i].id);
 			if (tp == NULL)
 				return;
 
@@ -605,7 +605,7 @@ void nemotouch_flush_tuio(struct tuionode *node)
 
 			tp->grab->interface->down(tp->grab, msecs, tp->gid, x, y);
 
-			tp->grab_serial = wl_display_get_serial(node->compz->display);
+			tp->grab_serial = wl_display_get_serial(tuio->compz->display);
 			tp->grab_time = msecs;
 
 			nemocompz_run_touch_binding(touch->seat->compz, tp, msecs);

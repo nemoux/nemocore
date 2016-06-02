@@ -441,18 +441,15 @@ void nemoscreen_damage_dirty(struct nemoscreen *screen)
 
 int nemoscreen_get_config_mode(struct nemocompz *compz, uint32_t nodeid, uint32_t screenid, struct nemomode *mode)
 {
-	struct itemone *one;
+	struct screenconfig *config;
 
-	nemoitem_for_each(one, compz->configs) {
-		if (nemoitem_one_has_path(one, "/nemoshell/screen") != 0 &&
-				nemoitem_one_has_iattr(one, "nodeid", nodeid) != 0 &&
-				nemoitem_one_has_iattr(one, "screenid", screenid) != 0) {
-			mode->width = nemoitem_one_get_iattr(one, "width", 0);
-			mode->height = nemoitem_one_get_iattr(one, "height", 0);
-			mode->refresh = nemoitem_one_get_iattr(one, "refresh", 0);
+	config = nemocompz_get_screen_config(compz, nodeid, screenid);
+	if (config != NULL) {
+		mode->width = config->width;
+		mode->height = config->height;
+		mode->refresh = config->refresh;
 
-			return 1;
-		}
+		return 1;
 	}
 
 	return 0;
@@ -460,51 +457,42 @@ int nemoscreen_get_config_mode(struct nemocompz *compz, uint32_t nodeid, uint32_
 
 int nemoscreen_get_config_geometry(struct nemocompz *compz, uint32_t nodeid, uint32_t screenid, struct nemoscreen *screen)
 {
-	struct itemone *one;
-	const char *transform;
+	struct screenconfig *config;
 
-	nemoitem_for_each(one, compz->configs) {
-		if (nemoitem_one_has_path(one, "/nemoshell/screen") != 0 &&
-				nemoitem_one_has_iattr(one, "nodeid", nodeid) != 0 &&
-				nemoitem_one_has_iattr(one, "screenid", screenid) != 0) {
-			screen->x = nemoitem_one_get_iattr(one, "x", 0);
-			screen->y = nemoitem_one_get_iattr(one, "y", 0);
-			screen->width = nemoitem_one_get_iattr(one, "width", 1920);
-			screen->height = nemoitem_one_get_iattr(one, "height", 1080);
+	config = nemocompz_get_screen_config(compz, nodeid, screenid);
+	if (config != NULL) {
+		screen->x = config->x;
+		screen->y = config->y;
+		screen->width = config->width;
+		screen->height = config->height;
 
-			transform = nemoitem_one_get_attr(one, "transform");
-			if (transform != NULL) {
-				struct nemomatrix *matrix = &screen->transform.matrix;
-				struct nemomatrix *inverse = &screen->transform.inverse;
+		if (config->transform != NULL) {
+			struct nemomatrix *matrix = &screen->transform.matrix;
+			struct nemomatrix *inverse = &screen->transform.inverse;
 
-				nemomatrix_init_identity(matrix);
-				nemomatrix_append_command(matrix, transform);
-
-				if (nemomatrix_invert(inverse, matrix) >= 0) {
-					screen->transform.enable = 1;
-					screen->transform.dirty = 1;
-					screen->transform.custom = 1;
-				}
+			nemomatrix_init_identity(matrix);
+			nemomatrix_append_command(matrix, config->transform);
+			
+			if (nemomatrix_invert(inverse, matrix) >= 0) {
+				screen->transform.enable = 1;
+				screen->transform.dirty = 1;
+				screen->transform.custom = 1;
 			}
-
-			return 1;
 		}
+
+		return 1;
 	}
 
 	return 0;
 }
 
-const char *nemoscreen_get_config(struct nemocompz *compz, uint32_t nodeid, uint32_t screenid, const char *attr)
+const char *nemoscreen_get_config_renderer(struct nemocompz *compz, uint32_t nodeid, uint32_t screenid)
 {
-	struct itemone *one;
+	struct screenconfig *config;
 
-	nemoitem_for_each(one, compz->configs) {
-		if (nemoitem_one_has_path(one, "/nemoshell/screen") != 0 &&
-				nemoitem_one_has_iattr(one, "nodeid", nodeid) != 0 &&
-				nemoitem_one_has_iattr(one, "screenid", screenid) != 0) {
-			return nemoitem_one_get_attr(one, attr);
-		}
-	}
+	config = nemocompz_get_screen_config(compz, nodeid, screenid);
+	if (config != NULL)
+		return config->renderer;
 
 	return NULL;
 }

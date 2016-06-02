@@ -13,9 +13,6 @@ NEMO_BEGIN_EXTERN_C
 
 #include <lo/lo.h>
 
-#include <nemolist.h>
-#include <nemolistener.h>
-
 struct nemocompz;
 
 struct virtuio {

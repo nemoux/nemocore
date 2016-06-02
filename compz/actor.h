@@ -10,10 +10,8 @@ NEMO_BEGIN_EXTERN_C
 #include <stdint.h>
 #include <pixman.h>
 
-#ifdef NEMOUX_WITH_EGL
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
-#endif
 
 #include <content.h>
 #include <event.h>
@@ -53,9 +51,7 @@ struct nemoactor {
 	uint32_t min_width, min_height;
 	uint32_t max_width, max_height;
 
-#ifdef NEMOUX_WITH_EGL
 	GLuint texture;
-#endif
 
 	nemoactor_dispatch_event_t dispatch_event;
 	nemoactor_dispatch_pick_t dispatch_pick;
@@ -84,10 +80,8 @@ extern struct nemoactor *nemoactor_create_pixman(struct nemocompz *compz, int wi
 extern void nemoactor_destroy(struct nemoactor *actor);
 extern int nemoactor_resize_pixman(struct nemoactor *actor, int width, int height);
 
-#ifdef NEMOUX_WITH_EGL
 extern struct nemoactor *nemoactor_create_gl(struct nemocompz *compz, int width, int height);
 extern int nemoactor_resize_gl(struct nemoactor *actor, int width, int height);
-#endif
 
 extern void nemoactor_schedule_repaint(struct nemoactor *actor);
 extern void nemoactor_damage_dirty(struct nemoactor *actor);

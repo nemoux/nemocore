@@ -20,13 +20,23 @@ struct nemoenvs *nemoenvs_create(struct nemotool *tool)
 	memset(envs, 0, sizeof(struct nemoenvs));
 
 	envs->tool = tool;
-	envs->configs = tool->configs;
+
+	envs->configs = nemoitem_create();
+	if (envs->configs == NULL)
+		goto err1;
 
 	return envs;
+
+err1:
+	free(envs);
+
+	return NULL;
 }
 
 void nemoenvs_destroy(struct nemoenvs *envs)
 {
+	nemoitem_destroy(envs->configs);
+
 	free(envs);
 }
 

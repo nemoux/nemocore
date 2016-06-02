@@ -16,11 +16,8 @@
 #include <wayland-server.h>
 #include <wayland-presentation-timing-server-protocol.h>
 
-#ifdef NEMOUX_WITH_EGL
-#include <glrenderer.h>
-#endif
-
 #include <drmnode.h>
+#include <glrenderer.h>
 #include <pixmanrenderer.h>
 #include <renderer.h>
 #include <compz.h>
@@ -332,7 +329,6 @@ static void drm_finish_pixman_screen(struct drmscreen *screen)
 	}
 }
 
-#ifdef NEMOUX_WITH_EGL
 static int drm_prepare_egl(struct drmnode *node)
 {
 	node->gbm = gbm_create_device(node->fd);
@@ -396,7 +392,6 @@ static void drm_finish_egl_screen(struct drmscreen *screen)
 
 	gbm_surface_destroy(screen->surface);
 }
-#endif
 
 static int drm_find_crtc_for_connector(struct drmnode *node, drmModeRes *resources, drmModeConnector *connector)
 {
@@ -687,7 +682,6 @@ static void drm_screen_destroy(struct nemoscreen *base)
 	drmModeSetCrtc(node->fd, crtc->crtc_id, crtc->buffer_id, crtc->x, crtc->y, &screen->connector_id, 1, &crtc->mode);
 	drmModeFreeCrtc(crtc);
 
-#ifdef NEMOUX_WITH_EGL
 	if (base->compz->use_pixman != 0) {
 		drm_finish_pixman_screen(screen);
 	} else if (screen->base.use_pixman != 0) {
@@ -696,9 +690,6 @@ static void drm_screen_destroy(struct nemoscreen *base)
 	} else {
 		drm_finish_egl_screen(screen);
 	}
-#else
-	drm_finish_pixman_screen(screen);
-#endif
 
 	wl_list_remove(&base->link);
 
@@ -750,7 +741,6 @@ static int drm_screen_switch_mode(struct nemoscreen *base, struct nemomode *mode
 	screen->current = NULL;
 	screen->next = NULL;
 
-#ifdef NEMOUX_WITH_EGL
 	if (compz->use_pixman != 0) {
 		drm_finish_pixman_screen(screen);
 
@@ -778,14 +768,6 @@ static int drm_screen_switch_mode(struct nemoscreen *base, struct nemomode *mode
 			goto err1;
 		}
 	}
-#else
-	drm_finish_pixman_screen(screen);
-
-	if (drm_prepare_pixman_screen(screen) < 0) {
-		nemolog_error("DRM", "failed to prepare pixman screen\n");
-		goto err1;
-	}
-#endif
 
 	return 0;
 
@@ -921,20 +903,18 @@ static int drm_create_screen_for_connector(struct drmnode *node, drmModeRes *res
 
 	nemoscreen_get_config_geometry(compz, node->base.nodeid, screen->base.screenid, &screen->base);
 
-	renderer = nemoscreen_get_config(compz, node->base.nodeid, screen->base.screenid, "renderer");
+	renderer = nemoscreen_get_config_renderer(compz, node->base.nodeid, screen->base.screenid);
 	if (renderer != NULL && strcmp(renderer, "pixman") == 0)
 		screen->base.use_pixman = 1;
 	else
 		screen->base.use_pixman = 0;
 
-#ifdef NEMOUX_WITH_EGL
 	if (compz->use_pixman == 0 && screen->base.use_pixman != 0) {
 		if (drm_prepare_pixman(node) < 0) {
 			nemolog_error("DRM", "failed to prepare pixman renderer\n");
 			goto err1;
 		}
 	}
-#endif
 
 	nemolog_message("DRM", "screen(%d, %d) x = %d, y = %d, width = %d, height = %d\n",
 			node->base.nodeid,
@@ -949,7 +929,6 @@ static int drm_create_screen_for_connector(struct drmnode *node, drmModeRes *res
 
 	nemoscreen_prepare(&screen->base);
 
-#ifdef NEMOUX_WITH_EGL
 	if (compz->use_pixman != 0) {
 		if (drm_prepare_pixman_screen(screen) < 0) {
 			nemolog_error("DRM", "failed to prepare pixman screen\n");
@@ -970,12 +949,6 @@ static int drm_create_screen_for_connector(struct drmnode *node, drmModeRes *res
 			goto err1;
 		}
 	}
-#else
-	if (drm_prepare_pixman_screen(screen) < 0) {
-		nemolog_error("DRM", "failed to prepare pixman screen\n");
-		goto err1;
-	}
-#endif
 
 	screen->base.repaint = drm_screen_repaint;
 	screen->base.repaint_frame = drm_screen_repaint_frame;
@@ -1116,7 +1089,6 @@ struct drmnode *drm_create_node(struct nemocompz *compz, uint32_t nodeid, const 
 	if (node->source == NULL)
 		goto err1;
 
-#ifdef NEMOUX_WITH_EGL
 	if (compz->use_pixman != 0) {
 		if (drm_prepare_pixman(node) < 0) {
 			nemolog_error("DRM", "failed to prepare pixman renderer\n");
@@ -1128,12 +1100,6 @@ struct drmnode *drm_create_node(struct nemocompz *compz, uint32_t nodeid, const 
 			goto err1;
 		}
 	}
-#else
-	if (drm_prepare_pixman(node) < 0) {
-		nemolog_error("DRM", "failed to prepare pixman renderer\n");
-		goto err1;
-	}
-#endif
 
 	drm_prepare_screens(node);
 
@@ -1161,12 +1127,8 @@ void drm_destroy_node(struct drmnode *node)
 	if (node->source != NULL)
 		wl_event_source_remove(node->source);
 
-#ifdef NEMOUX_WITH_EGL
 	drm_finish_pixman(node);
 	drm_finish_egl(node);
-#else
-	drm_finish_pixman(node);
-#endif
 
 	close(node->fd);
 

@@ -125,7 +125,7 @@ extern void nemoscreen_damage_dirty(struct nemoscreen *screen);
 
 extern int nemoscreen_get_config_mode(struct nemocompz *compz, uint32_t nodeid, uint32_t screenid, struct nemomode *mode);
 extern int nemoscreen_get_config_geometry(struct nemocompz *compz, uint32_t nodeid, uint32_t screenid, struct nemoscreen *screen);
-extern const char *nemoscreen_get_config(struct nemocompz *compz, uint32_t nodeid, uint32_t screenid, const char *attr);
+extern const char *nemoscreen_get_config_renderer(struct nemocompz *compz, uint32_t nodeid, uint32_t screenid);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

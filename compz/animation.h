@@ -10,7 +10,6 @@ NEMO_BEGIN_EXTERN_C
 #include <stdint.h>
 
 #include <nemoease.h>
-#include <nemolist.h>
 
 struct nemoanimation;
 struct nemocompz;

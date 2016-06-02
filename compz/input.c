@@ -55,15 +55,14 @@ void nemoinput_set_geometry(struct inputnode *node, int32_t x, int32_t y, int32_
 
 int nemoinput_get_config_screen(struct nemocompz *compz, const char *devnode, uint32_t *nodeid, uint32_t *screenid)
 {
-	struct itemone *one;
+	struct inputconfig *config;
 
-	nemoitem_for_each(one, compz->configs) {
-		if (nemoitem_one_has_path(one, "/nemoshell/input") != 0 && nemoitem_one_has_attr(one, "devnode", devnode) != 0) {
-			*nodeid = nemoitem_one_get_iattr(one, "nodeid", 0);
-			*screenid = nemoitem_one_get_iattr(one, "screenid", 0);
+	config = nemocompz_get_input_config(compz, devnode);
+	if (config != NULL) {
+		*nodeid = config->nodeid;
+		*screenid = config->screenid;
 
-			return 1;
-		}
+		return 1;
 	}
 
 	return 0;
@@ -71,32 +70,28 @@ int nemoinput_get_config_screen(struct nemocompz *compz, const char *devnode, ui
 
 int nemoinput_get_config_geometry(struct nemocompz *compz, const char *devnode, struct inputnode *node)
 {
-	struct itemone *one;
+	struct inputconfig *config;
 
-	nemoitem_for_each(one, compz->configs) {
-		if (nemoitem_one_has_path(one, "/nemoshell/input") != 0 && nemoitem_one_has_attr(one, "devnode", devnode) != 0) {
-			const char *transform;
+	config = nemocompz_get_input_config(compz, devnode);
+	if (config != NULL) {
+		node->x = config->x;
+		node->y = config->y;
+		node->width = config->width;
+		node->height = config->height;
 
-			node->x = nemoitem_one_get_iattr(one, "x", 0);
-			node->y = nemoitem_one_get_iattr(one, "y", 0);
-			node->width = nemoitem_one_get_iattr(one, "width", nemocompz_get_scene_width(compz));
-			node->height = nemoitem_one_get_iattr(one, "height", nemocompz_get_scene_height(compz));
+		if (config->transform != NULL) {
+			struct nemomatrix *matrix = &node->transform.matrix;
+			struct nemomatrix *inverse = &node->transform.inverse;
 
-			transform = nemoitem_one_get_attr(one, "transform");
-			if (transform != NULL) {
-				struct nemomatrix *matrix = &node->transform.matrix;
-				struct nemomatrix *inverse = &node->transform.inverse;
+			nemomatrix_init_identity(matrix);
+			nemomatrix_append_command(matrix, config->transform);
 
-				nemomatrix_init_identity(matrix);
-				nemomatrix_append_command(matrix, transform);
-
-				if (nemomatrix_invert(inverse, matrix) >= 0) {
-					node->transform.enable = 1;
-				}
+			if (nemomatrix_invert(inverse, matrix) >= 0) {
+				node->transform.enable = 1;
 			}
-
-			return 1;
 		}
+
+		return 1;
 	}
 
 	return 0;

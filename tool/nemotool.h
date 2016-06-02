@@ -17,7 +17,6 @@ NEMO_BEGIN_EXTERN_C
 #include <wayland-nemo-sound-client-protocol.h>
 #include <wayland-nemo-shell-client-protocol.h>
 
-#include <nemoitem.h>
 #include <nemolist.h>
 #include <nemolistener.h>
 
@@ -143,9 +142,7 @@ struct nemotool {
 	} xkb;
 
 	uint32_t modifiers;
-
-	struct nemoitem *configs;
-
+	
 	void *userdata;
 };
 

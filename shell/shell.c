@@ -439,8 +439,8 @@ struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas
 
 	bin->min_width = shell->bin.min_width;
 	bin->min_height = shell->bin.min_height;
-	bin->max_width = shell->bin.max_width;
-	bin->max_height = shell->bin.max_height;
+	bin->max_width = shell->bin.max_width != 0 ? shell->bin.max_width : nemocompz_get_scene_width(shell->compz) * 1.5f;
+	bin->max_height = shell->bin.max_height != 0 ? shell->bin.max_height : nemocompz_get_scene_height(shell->compz) * 1.5f;
 
 	bin->scale.ax = 0.5f;
 	bin->scale.ay = 0.5f;
@@ -598,7 +598,6 @@ static void nemoshell_handle_child_signal(struct wl_listener *listener, void *da
 struct nemoshell *nemoshell_create(struct nemocompz *compz)
 {
 	struct nemoshell *shell;
-	char *env;
 
 	shell = (struct nemoshell *)malloc(sizeof(struct nemoshell));
 	if (shell == NULL)
@@ -606,7 +605,6 @@ struct nemoshell *nemoshell_create(struct nemocompz *compz)
 	memset(shell, 0, sizeof(struct nemoshell));
 
 	shell->compz = compz;
-	shell->configs = compz->configs;
 
 	nemolayer_prepare(&shell->overlay_layer, &compz->cursor_layer.link);
 	nemolayer_prepare(&shell->fullscreen_layer, &shell->overlay_layer.link);
@@ -648,9 +646,24 @@ struct nemoshell *nemoshell_create(struct nemocompz *compz)
 	wl_list_init(&shell->fullscreen_list);
 	wl_list_init(&shell->clientstate_list);
 
-	env = getenv("NEMOUX_SHELL_GRAB_LOG");
-	if (env != NULL && strcmp(env, "ON") == 0)
-		shell->is_logging_grab = 1;
+	shell->pitch.samples = 7;
+	shell->pitch.max_duration = 150;
+	shell->pitch.friction = 0.015f;
+	shell->pitch.coefficient = 1.8f;
+
+	shell->pick.samples = 5;
+	shell->pick.min_velocity = 0.0f;
+	shell->pick.rotate_degree = 0.0f;
+	shell->pick.scale_degree = 0.0f;
+	shell->pick.rotate_distance = 25.0f;
+	shell->pick.scale_distance = 25.0f;
+	shell->pick.fullscreen_scale = 1.25f;
+	shell->pick.resize_interval = 50.0f;
+
+	shell->bin.min_width = 0;
+	shell->bin.min_height = 0;
+	shell->bin.max_width = 0;
+	shell->bin.max_height = 0;
 
 	return shell;
 
@@ -907,62 +920,6 @@ int nemoshell_use_client_state(struct nemoshell *shell, struct shellbin *bin)
 	return 0;
 }
 
-void nemoshell_load_fullscreens(struct nemoshell *shell)
-{
-	struct nemocompz *compz = shell->compz;
-	struct shellscreen *screen;
-	struct itemone *one;
-	const char *id;
-	const char *type;
-	const char *focus;
-	const char *fixed;
-
-	nemoitem_for_each(one, shell->configs) {
-		if (nemoitem_one_has_path(one, "/nemoshell/fullscreen") != 0) {
-			screen = (struct shellscreen *)malloc(sizeof(struct shellscreen));
-			if (screen == NULL)
-				break;
-			memset(screen, 0, sizeof(struct shellscreen));
-
-			screen->sx = nemoitem_one_get_iattr(one, "sx", 0);
-			screen->sy = nemoitem_one_get_iattr(one, "sy", 0);
-			screen->sw = nemoitem_one_get_iattr(one, "sw", nemocompz_get_scene_width(compz));
-			screen->sh = nemoitem_one_get_iattr(one, "sh", nemocompz_get_scene_height(compz));
-			screen->dx = nemoitem_one_get_iattr(one, "dx", 0);
-			screen->dy = nemoitem_one_get_iattr(one, "dy", 0);
-			screen->dw = nemoitem_one_get_iattr(one, "dw", nemocompz_get_scene_width(compz));
-			screen->dh = nemoitem_one_get_iattr(one, "dh", nemocompz_get_scene_height(compz));
-			screen->dr = nemoitem_one_get_iattr(one, "dr", 0);
-
-			screen->id = strdup(nemoitem_one_get_sattr(one, "id", ""));
-
-			type = nemoitem_one_get_attr(one, "type");
-			if (type == NULL)
-				screen->type = NEMOSHELL_FULLSCREEN_NORMAL_TYPE;
-			else if (strcmp(type, "pick") == 0)
-				screen->type = NEMOSHELL_FULLSCREEN_PICK_TYPE;
-			else if (strcmp(type, "pitch") == 0)
-				screen->type = NEMOSHELL_FULLSCREEN_PITCH_TYPE;
-
-			focus = nemoitem_one_get_attr(one, "focus");
-			if (focus == NULL)
-				screen->focus = NEMOSHELL_FULLSCREEN_NONE_FOCUS;
-			else if (strcmp(focus, "all") == 0)
-				screen->focus = NEMOSHELL_FULLSCREEN_ALL_FOCUS;
-
-			fixed = nemoitem_one_get_attr(one, "fixed");
-			if (fixed == NULL)
-				screen->fixed = 0;
-			else if (strcmp(fixed, "on") == 0)
-				screen->fixed = 1;
-
-			wl_list_init(&screen->bin_list);
-
-			wl_list_insert(&shell->fullscreen_list, &screen->link);
-		}
-	}
-}
-
 struct shellscreen *nemoshell_get_fullscreen(struct nemoshell *shell, const char *id)
 {
 	struct shellscreen *screen;
@@ -972,7 +929,35 @@ struct shellscreen *nemoshell_get_fullscreen(struct nemoshell *shell, const char
 			return screen;
 	}
 
-	return NULL;
+	screen = (struct shellscreen *)malloc(sizeof(struct shellscreen));
+	if (screen == NULL)
+		return NULL;
+	memset(screen, 0, sizeof(struct shellscreen));
+
+	screen->id = strdup(id);
+
+	wl_list_init(&screen->bin_list);
+
+	wl_list_insert(&shell->fullscreen_list, &screen->link);
+
+	return screen;
+}
+
+void nemoshell_put_fullscreen(struct nemoshell *shell, const char *id)
+{
+	struct shellscreen *screen;
+
+	wl_list_for_each(screen, &shell->fullscreen_list, link) {
+		if (strcmp(screen->id, id) == 0) {
+			wl_list_remove(&screen->link);
+			wl_list_remove(&screen->bin_list);
+
+			free(screen->id);
+			free(screen);
+
+			break;
+		}
+	}
 }
 
 struct shellscreen *nemoshell_get_fullscreen_on(struct nemoshell *shell, int32_t x, int32_t y, uint32_t type)
@@ -1179,48 +1164,4 @@ void nemoshell_put_maximized_bin(struct nemoshell *shell, struct shellbin *bin)
 	bin->fixed = 0;
 
 	nemoshell_send_bin_state(bin);
-}
-
-void nemoshell_load_gestures(struct nemoshell *shell)
-{
-	shell->pitch.samples = nemoitem_get_iattr(shell->configs, "/nemoshell/pitch", "samples", 7);
-	shell->pitch.max_duration = nemoitem_get_iattr(shell->configs, "/nemoshell/pitch", "max_duration", 150);
-	shell->pitch.friction = nemoitem_get_fattr(shell->configs, "/nemoshell/pitch", "friction", 0.015f);
-	shell->pitch.coefficient = nemoitem_get_fattr(shell->configs, "/nemoshell/pitch", "coefficient", 1.8f);
-
-	shell->pick.samples = nemoitem_get_iattr(shell->configs, "/nemoshell/pick", "samples", 5);
-	shell->pick.min_velocity = nemoitem_get_fattr(shell->configs, "/nemoshell/pick", "min_velocity", 0.0f);
-	shell->pick.rotate_degree = nemoitem_get_fattr(shell->configs, "/nemoshell/pick", "rotate_degree", 0.0f);
-	shell->pick.scale_degree = nemoitem_get_fattr(shell->configs, "/nemoshell/pick", "scale_degree", 0.0f);
-	shell->pick.rotate_distance = nemoitem_get_fattr(shell->configs, "/nemoshell/pick", "rotate_distance", 25.0f);
-	shell->pick.scale_distance = nemoitem_get_fattr(shell->configs, "/nemoshell/pick", "scale_distance", 25.0f);
-	shell->pick.fullscreen_scale = nemoitem_get_fattr(shell->configs, "/nemoshell/pick", "fullscreen_scale", 1.25f);
-	shell->pick.resize_interval = nemoitem_get_fattr(shell->configs, "/nemoshell/pick", "resize_interval", 50.0f);
-
-	shell->bin.min_width = nemoitem_get_iattr(shell->configs, "/nemoshell/bin", "min_width", 0);
-	shell->bin.min_height = nemoitem_get_iattr(shell->configs, "/nemoshell/bin", "min_height", 0);
-	shell->bin.max_width = nemoitem_get_iattr(shell->configs, "/nemoshell/bin", "max_width", nemocompz_get_scene_width(shell->compz) * 1.5f);
-	shell->bin.max_height = nemoitem_get_iattr(shell->configs, "/nemoshell/bin", "max_height", nemocompz_get_scene_height(shell->compz) * 1.5f);
-}
-
-int nemoshell_dispatch_message(void *data, const char *cmd, const char *path, struct itemone *one)
-{
-	struct nemoshell *shell = (struct nemoshell *)data;
-
-	if (strcmp(cmd, "set") == 0) {
-		struct itemattr *attr;
-		const char *name;
-		const char *value;
-
-		nemoitem_attr_for_each(attr, one) {
-			name = nemoitem_attr_get_name(attr);
-			value = nemoitem_attr_get_value(attr);
-
-			if (strcmp(name, "fullscreen_scale") == 0) {
-				shell->pick.fullscreen_scale = strtod(value, NULL);
-			}
-		}
-	}
-
-	return 0;
 }
