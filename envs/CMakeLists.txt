@@ -22,6 +22,7 @@ add_definitions(-DNEMOENVS_RESOURCES="${CMAKE_INSTALL_PREFIX}/share/nemoenvs")
 add_library(nemoenvs SHARED
 	nemoenvs.c
 	nemoapps.c
+	messages.c
 	showhelper.c
 	)
 

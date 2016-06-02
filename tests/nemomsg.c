@@ -18,8 +18,8 @@ int main(int argc, char *argv[])
 		{ "msg",		required_argument,		NULL,		'm' },
 		{ 0 }
 	};
-	char *ip = NULL;
-	char *msg = NULL;
+	char ip[64];
+	char msg[1024];
 	int port;
 	int soc;
 	int opt;
@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
 
 		switch (opt) {
 			case 'i':
-				ip = strdup(optarg);
+				strcpy(ip, optarg);
 				break;
 
 			case 'p':
@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 				break;
 
 			case 'm':
-				msg = strdup(optarg);
+				strcpy(msg, optarg);
 				break;
 
 			default:
@@ -51,6 +51,13 @@ int main(int argc, char *argv[])
 		return -1;
 
 	udp_send_to(soc, ip, port, msg, strlen(msg) + 1);
+
+	while (1) {
+		if (udp_recv_from(soc, ip, &port, msg, sizeof(msg)) <= 0)
+			break;
+
+		NEMO_DEBUG("[%s]\n", msg);
+	}
 
 	close(soc);
 

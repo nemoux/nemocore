@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+#define __USE_GNU
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -41,7 +43,9 @@
 #include <nemomisc.h>
 #include <nemolog.h>
 
-int nemoshell_dispatch_message(void *data, const char *cmd, const char *path, struct itemone *one)
+#include <nemoenvs.h>
+
+int nemoenvs_dispatch_nemoshell_message(struct nemoenvs *envs, const char *src, const char *cmd, const char *path, struct itemone *one, void *data)
 {
 	struct nemoshell *shell = (struct nemoshell *)data;
 	struct nemocompz *compz = shell->compz;
@@ -255,6 +259,37 @@ int nemoshell_dispatch_message(void *data, const char *cmd, const char *path, st
 						}
 					}
 				}
+			}
+		}
+	} else if (strcmp(cmd, "get") == 0) {
+		if (strcmp(path, "/nemoshell/screen") == 0) {
+			struct screenconfig *config;
+			char *content;
+
+			wl_list_for_each(config, &compz->screenconfig_list, link) {
+				asprintf(&content, "nodeid:%d:screenid:%d:x:%d:y:%d:width:%d:height:%d",
+						config->nodeid, config->screenid,
+						config->x, config->y,
+						config->width, config->height);
+
+				nemoenvs_send(envs, "/nemoshell", src, "reply", "/nemoshell/screen", content);
+
+				free(content);
+			}
+		} else if (strcmp(path, "/nemoshell/input") == 0) {
+			struct inputconfig *config;
+			char *content;
+
+			wl_list_for_each(config, &compz->inputconfig_list, link) {
+				asprintf(&content, "devnode:%s:nodeid:%d:screenid:%d:x:%d:y:%d:width:%d:height:%d",
+						config->devnode,
+						config->nodeid, config->screenid,
+						config->x, config->y,
+						config->width, config->height);
+
+				nemoenvs_send(envs, "/nemoshell", src, "reply", "/nemoshell/input", content);
+
+				free(content);
 			}
 		}
 	}

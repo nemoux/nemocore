@@ -46,7 +46,6 @@ add_library(nemoshell SHARED
 	waylandshell.c
 	xdgshell.c
 	nemoshell.c
-	message.c
 	${PROTOCOLS}
 	)
 
@@ -66,7 +65,6 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/shell/move.h
 	${CMAKE_SOURCE_DIR}/shell/pick.h
 	${CMAKE_SOURCE_DIR}/shell/nemoshell.h
-	${CMAKE_SOURCE_DIR}/shell/message.h
 	${CMAKE_BINARY_DIR}/shell/wayland-nemo-shell-server-protocol.h
 	)
 

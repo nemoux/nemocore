@@ -13,7 +13,6 @@
 #include <compz.h>
 #include <view.h>
 #include <monitor.h>
-#include <message.h>
 #include <waylandhelper.h>
 
 #include <nemoenvs.h>
@@ -79,7 +78,7 @@ static int nemoenvs_dispatch_message(void *data)
 	nemotoken_divide(content, ':');
 	nemotoken_update(content);
 
-	nemomsg_dispatch(msg, content);
+	nemomsg_dispatch(msg, ip, port, content);
 	nemomsg_clean(msg);
 
 	return 0;
@@ -97,6 +96,11 @@ int nemoenvs_listen(struct nemoenvs *envs, const char *ip, int port)
 			envs->msg);
 
 	return 0;
+}
+
+int nemoenvs_send(struct nemoenvs *envs, const char *src, const char *dst, const char *cmd, const char *path, const char *content)
+{
+	return nemomsg_send_format(envs->msg, dst, "%s:%s:%s:%s:%s", src, dst, cmd, path, content);
 }
 
 void nemoenvs_load_configs(struct nemoenvs *envs, const char *configpath)
@@ -122,7 +126,7 @@ void nemoenvs_load_configs(struct nemoenvs *envs, const char *configpath)
 
 		nemoitem_attach_one(envs->configs, one);
 
-		nemoshell_dispatch_message(envs->shell, "set", node->path, one);
+		nemoenvs_dispatch_nemoshell_message(envs, "file", "set", node->path, one, envs->shell);
 	}
 
 	nemoxml_destroy(xml);

@@ -187,7 +187,7 @@ int nemomsg_put_destination_callback(struct nemomsg *msg, const char *name, nemo
 	return 0;
 }
 
-int nemomsg_dispatch(struct nemomsg *msg, struct nemotoken *content)
+int nemomsg_dispatch(struct nemomsg *msg, const char *ip, int port, struct nemotoken *content)
 {
 	struct msgcallback *cb;
 	const char *src;
@@ -199,18 +199,20 @@ int nemomsg_dispatch(struct nemomsg *msg, struct nemotoken *content)
 	src = nemotoken_get_token(content, 0);
 	dst = nemotoken_get_token(content, 1);
 
+	nemomsg_set_client(msg, src, ip, port);
+
 	nemolist_for_each(cb, &msg->callback_list, link) {
-		cb->callback(cb->data, src, content);
+		cb->callback(cb->data, src, dst, content);
 	}
 
 	nemolist_for_each(cb, &msg->source_list, link) {
 		if (strcmp(cb->name, src) == 0)
-			cb->callback(cb->data, src, content);
+			cb->callback(cb->data, src, dst, content);
 	}
 
 	nemolist_for_each(cb, &msg->destination_list, link) {
 		if (strcmp(cb->name, dst) == 0)
-			cb->callback(cb->data, dst, content);
+			cb->callback(cb->data, src, dst, content);
 	}
 
 	return 0;
@@ -234,6 +236,17 @@ int nemomsg_clean(struct nemomsg *msg)
 int nemomsg_set_client(struct nemomsg *msg, const char *name, const char *ip, int port)
 {
 	struct msgclient *client;
+
+	nemolist_for_each(client, &msg->client_list, link) {
+		if (strcmp(client->name, name) == 0) {
+			free(client->ip);
+
+			client->ip = strdup(ip);
+			client->port = port;
+
+			return 1;
+		}
+	}
 
 	client = (struct msgclient *)malloc(sizeof(struct msgclient));
 	if (client == NULL)

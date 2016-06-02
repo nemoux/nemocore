@@ -30,6 +30,7 @@ extern struct nemoenvs *nemoenvs_create(struct nemoshell *shell);
 extern void nemoenvs_destroy(struct nemoenvs *envs);
 
 extern int nemoenvs_listen(struct nemoenvs *envs, const char *ip, int port);
+extern int nemoenvs_send(struct nemoenvs *envs, const char *src, const char *dst, const char *cmd, const char *path, const char *content);
 
 extern void nemoenvs_load_configs(struct nemoenvs *envs, const char *configpath);
 
@@ -67,6 +68,8 @@ static inline void nemoenvs_set_data(struct nemoenvs *envs, void *data)
 {
 	nemomsg_set_data(envs->msg, data);
 }
+
+extern int nemoenvs_dispatch_nemoshell_message(struct nemoenvs *envs, const char *src, const char *cmd, const char *path, struct itemone *one, void *data);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
