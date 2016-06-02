@@ -190,9 +190,18 @@ int nemoenvs_listen(struct nemoenvs *envs, const char *ip, int port)
 	return 0;
 }
 
-int nemoenvs_send(struct nemoenvs *envs, const char *src, const char *dst, const char *cmd, const char *path, const char *content)
+int nemoenvs_send(struct nemoenvs *envs, const char *name, const char *fmt, ...)
 {
-	return nemomsg_send_format(envs->msg, dst, "%s:%s:%s:%s:%s", src, dst, cmd, path, content);
+	va_list vargs;
+	int r;
+
+	va_start(vargs, fmt);
+
+	r = nemomsg_send_vargs(envs->msg, name, fmt, vargs);
+
+	va_end(vargs);
+
+	return r;
 }
 
 void nemoenvs_load_configs(struct nemoenvs *envs, const char *configpath)

@@ -272,7 +272,7 @@ int nemoenvs_dispatch_nemoshell_message(struct nemoenvs *envs, const char *src, 
 						config->x, config->y,
 						config->width, config->height);
 
-				nemoenvs_send(envs, dst, src, "reply", "/nemoshell/screen", content);
+				nemoenvs_send(envs, src, "%s:%s:reply:/nemoshell/screen:%s", dst, src, content);
 
 				free(content);
 			}
@@ -287,7 +287,7 @@ int nemoenvs_dispatch_nemoshell_message(struct nemoenvs *envs, const char *src, 
 						config->x, config->y,
 						config->width, config->height);
 
-				nemoenvs_send(envs, dst, src, "reply", "/nemoshell/input", content);
+				nemoenvs_send(envs, src, "%s:%s:replay:/nemoshell/input:%s", dst, src, content);
 
 				free(content);
 			}
@@ -312,7 +312,7 @@ int nemoenvs_dispatch_nemoshell_message(struct nemoenvs *envs, const char *src, 
 						strcat(content, ":");
 					}
 
-					nemoenvs_send(envs, dst, src, "reply", "/nemoshell/group", content);
+					nemoenvs_send(envs, src, "%s:%s:reply:/nemoshell/group:%s", dst, src, content);
 				}
 			}
 		} else if (strcmp(path, "/nemoshell/action") == 0) {
@@ -336,7 +336,7 @@ int nemoenvs_dispatch_nemoshell_message(struct nemoenvs *envs, const char *src, 
 						strcat(content, ":");
 					}
 
-					nemoenvs_send(envs, dst, src, "reply", "/nemoshell/action", content);
+					nemoenvs_send(envs, src, "%s:%s:reply:/nemoshell/action:%s", dst, src, content);
 				}
 			}
 		}
