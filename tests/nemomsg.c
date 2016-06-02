@@ -18,6 +18,8 @@ int main(int argc, char *argv[])
 		{ "msg",		required_argument,		NULL,		'm' },
 		{ 0 }
 	};
+	const char *inmsg = "/nemomsg:/nemoshell:in";
+	const char *outmsg = "/nemomsg:/nemoshell:out";
 	char ip[64];
 	char msg[1024];
 	int port;
@@ -50,6 +52,8 @@ int main(int argc, char *argv[])
 	if (soc < 0)
 		return -1;
 
+	udp_send_to(soc, ip, port, inmsg, strlen(inmsg) + 1);
+
 	udp_send_to(soc, ip, port, msg, strlen(msg) + 1);
 
 	while (1) {
@@ -58,6 +62,8 @@ int main(int argc, char *argv[])
 
 		NEMO_DEBUG("[%s]\n", msg);
 	}
+
+	udp_send_to(soc, ip, port, outmsg, strlen(outmsg) + 1);
 
 	close(soc);
 
