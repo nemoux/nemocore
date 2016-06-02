@@ -171,6 +171,8 @@ static int nemoenvs_dispatch_message(void *data)
 
 	nemoitem_one_destroy(one);
 
+	nemotoken_destroy(content);
+
 	return 0;
 }
 

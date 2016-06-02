@@ -65,6 +65,7 @@ extern int nemomsg_put_client(struct nemomsg *msg, const char *name, const char 
 
 extern int nemomsg_send_message(struct nemomsg *msg, const char *name, const char *contents, int size);
 extern int nemomsg_send_format(struct nemomsg *msg, const char *name, const char *fmt, ...);
+extern int nemomsg_send_vargs(struct nemomsg *msg, const char *name, const char *fmt, va_list vargs);
 
 static inline void nemomsg_set_data(struct nemomsg *msg, void *data)
 {

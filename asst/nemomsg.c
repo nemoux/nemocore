@@ -312,3 +312,24 @@ int nemomsg_send_format(struct nemomsg *msg, const char *name, const char *fmt, 
 
 	return 0;
 }
+
+int nemomsg_send_vargs(struct nemomsg *msg, const char *name, const char *fmt, va_list vargs)
+{
+	struct msgclient *client;
+	char *content;
+	int size;
+
+	vasprintf(&content, fmt, vargs);
+
+	size = strlen(content) + 1;
+
+	nemolist_for_each(client, &msg->client_list, link) {
+		if (strcmp(client->name, name) == 0) {
+			udp_send_to(msg->soc, client->ip, client->port, content, size);
+		}
+	}
+
+	free(content);
+
+	return 0;
+}
