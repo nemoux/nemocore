@@ -306,13 +306,13 @@ int nemoenvs_dispatch_nemoshell_message(struct nemoenvs *envs, const char *src, 
 						name = nemoitem_attr_get_name(attr);
 						value = nemoitem_attr_get_value(attr);
 
+						strcat(content, ":");
 						strcat(content, name);
 						strcat(content, ":");
 						strcat(content, value);
-						strcat(content, ":");
 					}
 
-					nemoenvs_send(envs, src, "%s:%s:reply:/nemoshell/group:%s", dst, src, content);
+					nemoenvs_send(envs, src, "%s:%s:reply:/nemoshell/group%s", dst, src, content);
 				}
 			}
 		} else if (strcmp(path, "/nemoshell/action") == 0) {
@@ -330,13 +330,13 @@ int nemoenvs_dispatch_nemoshell_message(struct nemoenvs *envs, const char *src, 
 						name = nemoitem_attr_get_name(attr);
 						value = nemoitem_attr_get_value(attr);
 
+						strcat(content, ":");
 						strcat(content, name);
 						strcat(content, ":");
 						strcat(content, value);
-						strcat(content, ":");
 					}
 
-					nemoenvs_send(envs, src, "%s:%s:reply:/nemoshell/action:%s", dst, src, content);
+					nemoenvs_send(envs, src, "%s:%s:reply:/nemoshell/action%s", dst, src, content);
 				}
 			}
 		}
