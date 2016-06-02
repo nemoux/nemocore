@@ -162,6 +162,8 @@ int nemoenvs_connect(struct nemoenvs *envs, const char *ip, int port)
 			nemoenvs_dispatch_message,
 			envs);
 
+	nemomsg_set_client(envs->msg, "/nemoshell", ip, port);
+
 	return 0;
 }
 
