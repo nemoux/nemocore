@@ -196,6 +196,24 @@ void nemoitem_one_destroy(struct itemone *one)
 	free(one);
 }
 
+struct itemone *nemoitem_one_clone(struct itemone *one)
+{
+	struct itemone *done;
+	struct itemattr *attr;
+
+	done = nemoitem_one_create();
+	if (done == NULL)
+		return NULL;
+
+	nemoitem_one_set_path(done, one->path);
+
+	nemolist_for_each(attr, &one->list, link) {
+		nemoitem_one_set_attr(done, attr->name, attr->value);
+	}
+
+	return done;
+}
+
 void nemoitem_one_set_path(struct itemone *one, const char *path)
 {
 	if (one->path != NULL)

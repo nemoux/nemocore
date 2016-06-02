@@ -60,6 +60,8 @@ extern void nemoitem_box_destroy(struct itembox *box);
 extern struct itemone *nemoitem_one_create(void);
 extern void nemoitem_one_destroy(struct itemone *one);
 
+extern struct itemone *nemoitem_one_clone(struct itemone *one);
+
 extern void nemoitem_one_set_path(struct itemone *one, const char *path);
 extern const char *nemoitem_one_get_path(struct itemone *one);
 extern int nemoitem_one_has_path(struct itemone *one, const char *path);

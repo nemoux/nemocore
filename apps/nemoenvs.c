@@ -169,29 +169,7 @@ int nemoenvs_connect(struct nemoenvs *envs, const char *ip, int port)
 	return 0;
 }
 
-void nemoenvs_load_configs(struct nemoenvs *envs, const char *configpath)
+int nemoenvs_send(struct nemoenvs *envs, const char *src, const char *dst, const char *cmd, const char *path, const char *content)
 {
-	struct nemoxml *xml;
-	struct xmlnode *node;
-	struct itemone *one;
-	int i;
-
-	xml = nemoxml_create();
-	nemoxml_load_file(xml, configpath);
-	nemoxml_update(xml);
-
-	nemolist_for_each(node, &xml->nodes, nodelink) {
-		one = nemoitem_one_create();
-		nemoitem_one_set_path(one, node->path);
-
-		for (i = 0; i < node->nattrs; i++) {
-			nemoitem_one_set_attr(one,
-					node->attrs[i*2+0],
-					node->attrs[i*2+1]);
-		}
-
-		nemoitem_attach_one(envs->configs, one);
-	}
-
-	nemoxml_destroy(xml);
+	return nemomsg_send_format(envs->msg, dst, "%s:%s:%s:%s:%s", src, dst, cmd, path, content);
 }

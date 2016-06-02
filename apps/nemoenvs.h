@@ -41,13 +41,12 @@ extern struct nemoenvs *nemoenvs_create(struct nemotool *tool);
 extern void nemoenvs_destroy(struct nemoenvs *envs);
 
 extern int nemoenvs_connect(struct nemoenvs *envs, const char *ip, int port);
+extern int nemoenvs_send(struct nemoenvs *envs, const char *src, const char *dst, const char *cmd, const char *path, const char *content);
 
 extern int nemoenvs_set_callback(struct nemoenvs *envs, nemoenvs_callback_t callback, void *data);
 extern int nemoenvs_put_callback(struct nemoenvs *envs, nemoenvs_callback_t callback, void *data);
 
 extern int nemoenvs_dispatch(struct nemoenvs *envs, const char *src, const char *dst, const char *cmd, const char *path, struct itemone *one);
-
-extern void nemoenvs_load_configs(struct nemoenvs *envs, const char *configpath);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
