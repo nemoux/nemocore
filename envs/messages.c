@@ -45,7 +45,7 @@
 
 #include <nemoenvs.h>
 
-int nemoenvs_dispatch_nemoshell_message(struct nemoenvs *envs, const char *src, const char *cmd, const char *path, struct itemone *one, void *data)
+int nemoenvs_dispatch_nemoshell_message(struct nemoenvs *envs, const char *src, const char *dst, const char *cmd, const char *path, struct itemone *one, void *data)
 {
 	struct nemoshell *shell = (struct nemoshell *)data;
 	struct nemocompz *compz = shell->compz;
@@ -272,7 +272,7 @@ int nemoenvs_dispatch_nemoshell_message(struct nemoenvs *envs, const char *src, 
 						config->x, config->y,
 						config->width, config->height);
 
-				nemoenvs_send(envs, "/nemoshell", src, "reply", "/nemoshell/screen", content);
+				nemoenvs_send(envs, dst, src, "reply", "/nemoshell/screen", content);
 
 				free(content);
 			}
@@ -287,7 +287,7 @@ int nemoenvs_dispatch_nemoshell_message(struct nemoenvs *envs, const char *src, 
 						config->x, config->y,
 						config->width, config->height);
 
-				nemoenvs_send(envs, "/nemoshell", src, "reply", "/nemoshell/input", content);
+				nemoenvs_send(envs, dst, src, "reply", "/nemoshell/input", content);
 
 				free(content);
 			}

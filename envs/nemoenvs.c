@@ -26,6 +26,8 @@
 #include <nemolog.h>
 #include <nemomisc.h>
 
+extern int nemoenvs_dispatch_nemoshell_message(struct nemoenvs *envs, const char *src, const char *dst, const char *cmd, const char *path, struct itemone *one, void *data);
+
 struct nemoenvs *nemoenvs_create(struct nemoshell *shell)
 {
 	struct nemoenvs *envs;
@@ -42,6 +44,9 @@ struct nemoenvs *nemoenvs_create(struct nemoshell *shell)
 		goto err1;
 
 	nemolist_init(&envs->app_list);
+	nemolist_init(&envs->callback_list);
+
+	nemoenvs_set_callback(envs, nemoenvs_dispatch_nemoshell_message, shell);
 
 	return envs;
 
@@ -53,6 +58,14 @@ err1:
 
 void nemoenvs_destroy(struct nemoenvs *envs)
 {
+	struct envscallback *cb, *next;
+
+	nemolist_for_each_safe(cb, next, &envs->callback_list, link) {
+		nemolist_remove(&cb->link);
+
+		free(cb);
+	}
+
 	nemolist_remove(&envs->app_list);
 
 	nemoitem_destroy(envs->configs);
@@ -60,15 +73,67 @@ void nemoenvs_destroy(struct nemoenvs *envs)
 	free(envs);
 }
 
+int nemoenvs_set_callback(struct nemoenvs *envs, nemoenvs_callback_t callback, void *data)
+{
+	struct envscallback *cb;
+
+	cb = (struct envscallback *)malloc(sizeof(struct envscallback));
+	if (cb == NULL)
+		return -1;
+
+	cb->callback = callback;
+	cb->data = data;
+
+	nemolist_insert_tail(&envs->callback_list, &cb->link);
+
+	return 0;
+}
+
+int nemoenvs_put_callback(struct nemoenvs *envs, nemoenvs_callback_t callback, void *data)
+{
+	struct envscallback *cb;
+
+	nemolist_for_each(cb, &envs->callback_list, link) {
+		if (cb->callback == callback) {
+			nemolist_remove(&cb->link);
+
+			free(cb);
+
+			break;
+		}
+	}
+
+	return 0;
+}
+
+int nemoenvs_dispatch(struct nemoenvs *envs, const char *src, const char *dst, const char *cmd, const char *path, struct itemone *one)
+{
+	struct envscallback *cb;
+
+	nemolist_for_each(cb, &envs->callback_list, link) {
+		cb->callback(envs, src, dst, cmd, path, one, cb->data);
+	}
+
+	return 0;
+}
+
 static int nemoenvs_dispatch_message(void *data)
 {
-	struct nemomsg *msg = (struct nemomsg *)data;
+	struct nemoenvs *envs = (struct nemoenvs *)data;
+	struct nemomsg *msg = envs->msg;
 	struct nemotoken *content;
+	struct itemone *one;
 	int soc = nemomsg_get_socket(msg);
+	const char *src;
+	const char *dst;
+	const char *cmd;
+	const char *path;
 	char buffer[1024];
 	char ip[64];
 	int port;
 	int size;
+	int count;
+	int i;
 
 	size = udp_recv_from(soc, ip, &port, buffer, sizeof(buffer) - 1);
 	if (size <= 0)
@@ -78,8 +143,33 @@ static int nemoenvs_dispatch_message(void *data)
 	nemotoken_divide(content, ':');
 	nemotoken_update(content);
 
-	nemomsg_dispatch(msg, ip, port, content);
-	nemomsg_clean(msg);
+	if (nemotoken_get_token_count(content) < 4)
+		return -1;
+
+	src = nemotoken_get_token(content, 0);
+	dst = nemotoken_get_token(content, 1);
+	cmd = nemotoken_get_token(content, 2);
+	path = nemotoken_get_token(content, 3);
+
+	count = (nemotoken_get_token_count(content) - 4) / 2;
+
+	if (strcmp(cmd, "in") == 0)
+		nemomsg_set_client(msg, src, ip, port);
+	else if (strcmp(cmd, "out") == 0)
+		nemomsg_put_client(msg, src, ip, port);
+
+	one = nemoitem_one_create();
+	nemoitem_one_set_path(one, path);
+
+	for (i = 0; i < count; i++) {
+		nemoitem_one_set_attr(one,
+				nemotoken_get_token(content, 4 + i * 2 + 0),
+				nemotoken_get_token(content, 4 + i * 2 + 1));
+	}
+
+	nemoenvs_dispatch(envs, src, dst, cmd, path, one);
+
+	nemoitem_one_destroy(one);
 
 	return 0;
 }
@@ -93,7 +183,7 @@ int nemoenvs_listen(struct nemoenvs *envs, const char *ip, int port)
 	envs->monitor = nemomonitor_create(envs->shell->compz,
 			nemomsg_get_socket(envs->msg),
 			nemoenvs_dispatch_message,
-			envs->msg);
+			envs);
 
 	return 0;
 }
@@ -126,7 +216,7 @@ void nemoenvs_load_configs(struct nemoenvs *envs, const char *configpath)
 
 		nemoitem_attach_one(envs->configs, one);
 
-		nemoenvs_dispatch_nemoshell_message(envs, "file", "set", node->path, one, envs->shell);
+		nemoenvs_dispatch(envs, "/file", "/nemoshell", "set", node->path, one);
 	}
 
 	nemoxml_destroy(xml);

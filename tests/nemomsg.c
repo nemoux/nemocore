@@ -18,8 +18,8 @@ int main(int argc, char *argv[])
 		{ "msg",		required_argument,		NULL,		'm' },
 		{ 0 }
 	};
-	const char *inmsg = "/nemomsg:/nemoshell:in";
-	const char *outmsg = "/nemomsg:/nemoshell:out";
+	const char *inmsg = "/nemomsg:/nemoshell:in:/";
+	const char *outmsg = "/nemomsg:/nemoshell:out:/";
 	char ip[64];
 	char msg[1024];
 	int port;
