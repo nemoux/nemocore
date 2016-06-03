@@ -26,8 +26,6 @@
 #include <nemolog.h>
 #include <nemomisc.h>
 
-extern int nemoenvs_dispatch_nemoshell_message(struct nemoenvs *envs, const char *src, const char *dst, const char *cmd, const char *path, struct itemone *one, void *data);
-
 struct nemoenvs *nemoenvs_create(struct nemoshell *shell)
 {
 	struct nemoenvs *envs;
