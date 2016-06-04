@@ -340,7 +340,7 @@ int main(int argc, char *argv[])
 	context->envs = envs = nemoenvs_create(tool);
 	if (envs == NULL)
 		goto err4;
-	nemoenvs_connect(envs, "127.0.0.1", 10000);
+	nemoenvs_connect(envs, "/nemoshell", "127.0.0.1", 10000);
 
 	context->show = show = nemoshow_create_view(tool, width, height);
 	if (show == NULL)

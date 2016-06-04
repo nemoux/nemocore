@@ -45,7 +45,7 @@
 
 #include <nemoenvs.h>
 
-int nemoenvs_dispatch_nemoshell_message(struct nemoenvs *envs, const char *src, const char *dst, const char *cmd, const char *path, struct itemone *one, void *data)
+int nemoenvs_dispatch_message(struct nemoenvs *envs, const char *src, const char *dst, const char *cmd, const char *path, struct itemone *one, void *data)
 {
 	struct nemoshell *shell = (struct nemoshell *)data;
 	struct nemocompz *compz = shell->compz;
