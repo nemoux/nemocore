@@ -8,6 +8,8 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <regex.h>
+
 #include <nemomsg.h>
 #include <udphelper.h>
 #include <nemomisc.h>
@@ -279,12 +281,18 @@ int nemomsg_put_client(struct nemomsg *msg, const char *name, const char *ip, in
 int nemomsg_send_message(struct nemomsg *msg, const char *name, const char *content, int size)
 {
 	struct msgclient *client;
+	regex_t regex;
+
+	if (regcomp(&regex, name, REG_EXTENDED))
+		return -1;
 
 	nemolist_for_each(client, &msg->client_list, link) {
-		if (strcmp(client->name, name) == 0) {
+		if (regexec(&regex, client->name, 0, NULL, 0) == 0) {
 			udp_send_to(msg->soc, client->ip, client->port, content, size);
 		}
 	}
+
+	regfree(&regex);
 
 	return 0;
 }
@@ -292,9 +300,13 @@ int nemomsg_send_message(struct nemomsg *msg, const char *name, const char *cont
 int nemomsg_send_format(struct nemomsg *msg, const char *name, const char *fmt, ...)
 {
 	struct msgclient *client;
+	regex_t regex;
 	va_list vargs;
 	char *content;
 	int size;
+
+	if (regcomp(&regex, name, REG_EXTENDED))
+		return -1;
 
 	va_start(vargs, fmt);
 	vasprintf(&content, fmt, vargs);
@@ -303,12 +315,14 @@ int nemomsg_send_format(struct nemomsg *msg, const char *name, const char *fmt, 
 	size = strlen(content) + 1;
 
 	nemolist_for_each(client, &msg->client_list, link) {
-		if (strcmp(client->name, name) == 0) {
+		if (regexec(&regex, client->name, 0, NULL, 0) == 0) {
 			udp_send_to(msg->soc, client->ip, client->port, content, size);
 		}
 	}
 
 	free(content);
+
+	regfree(&regex);
 
 	return 0;
 }
@@ -316,20 +330,26 @@ int nemomsg_send_format(struct nemomsg *msg, const char *name, const char *fmt, 
 int nemomsg_send_vargs(struct nemomsg *msg, const char *name, const char *fmt, va_list vargs)
 {
 	struct msgclient *client;
+	regex_t regex;
 	char *content;
 	int size;
+
+	if (regcomp(&regex, name, REG_EXTENDED))
+		return -1;
 
 	vasprintf(&content, fmt, vargs);
 
 	size = strlen(content) + 1;
 
 	nemolist_for_each(client, &msg->client_list, link) {
-		if (strcmp(client->name, name) == 0) {
+		if (regexec(&regex, client->name, 0, NULL, 0) == 0) {
 			udp_send_to(msg->soc, client->ip, client->port, content, size);
 		}
 	}
 
 	free(content);
+
+	regfree(&regex);
 
 	return 0;
 }
