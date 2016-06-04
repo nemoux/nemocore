@@ -272,7 +272,7 @@ int nemoenvs_dispatch_nemoshell_message(struct nemoenvs *envs, const char *src, 
 						config->x, config->y,
 						config->width, config->height);
 
-				nemoenvs_send(envs, src, "%s:%s:reply:/nemoshell/screen:%s", dst, src, content);
+				nemoenvs_send(envs, src, "%s:%s:set:/nemoshell/screen:%s", dst, src, content);
 
 				free(content);
 			}
@@ -287,20 +287,19 @@ int nemoenvs_dispatch_nemoshell_message(struct nemoenvs *envs, const char *src, 
 						config->x, config->y,
 						config->width, config->height);
 
-				nemoenvs_send(envs, src, "%s:%s:replay:/nemoshell/input:%s", dst, src, content);
+				nemoenvs_send(envs, src, "%s:%s:set:/nemoshell/input:%s", dst, src, content);
 
 				free(content);
 			}
-		} else if (strcmp(path, "/nemoshell/group") == 0) {
+		} else {
 			struct itemone *one;
 			struct itemattr *attr;
-			const char *name;
-			const char *value;
-			char content[512];
 
 			nemoitem_for_each(one, envs->configs) {
-				if (nemoitem_one_has_path(one, "/nemoshell/group") != 0) {
-					memset(content, 0, sizeof(content));
+				if (nemoitem_one_has_path(one, path) != 0) {
+					char content[1024] = { 0 };
+					const char *name;
+					const char *value;
 
 					nemoitem_attr_for_each(attr, one) {
 						name = nemoitem_attr_get_name(attr);
@@ -312,31 +311,7 @@ int nemoenvs_dispatch_nemoshell_message(struct nemoenvs *envs, const char *src, 
 						strcat(content, value);
 					}
 
-					nemoenvs_send(envs, src, "%s:%s:reply:/nemoshell/group%s", dst, src, content);
-				}
-			}
-		} else if (strcmp(path, "/nemoshell/action") == 0) {
-			struct itemone *one;
-			struct itemattr *attr;
-			const char *name;
-			const char *value;
-			char content[512];
-
-			nemoitem_for_each(one, envs->configs) {
-				if (nemoitem_one_has_path(one, "/nemoshell/action") != 0) {
-					memset(content, 0, sizeof(content));
-
-					nemoitem_attr_for_each(attr, one) {
-						name = nemoitem_attr_get_name(attr);
-						value = nemoitem_attr_get_value(attr);
-
-						strcat(content, ":");
-						strcat(content, name);
-						strcat(content, ":");
-						strcat(content, value);
-					}
-
-					nemoenvs_send(envs, src, "%s:%s:reply:/nemoshell/action%s", dst, src, content);
+					nemoenvs_send(envs, src, "%s:%s:set:%s%s", dst, src, path, content);
 				}
 			}
 		}
