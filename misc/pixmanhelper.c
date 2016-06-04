@@ -47,12 +47,12 @@ int pixman_save_png_file(pixman_image_t *image, const char *path)
 	png_struct *write_struct;
 	png_info *info_struct;
 	pixman_bool_t result = 0;
-	FILE *f;
+	FILE *fp;
 	png_bytep *row_pointers;
 	int i;
 
-	f = fopen(path, "wb");
-	if (f == NULL)
+	fp = fopen(path, "wb");
+	if (fp == NULL)
 		return 0;
 
 	data = (uint8_t *)malloc(sizeof(uint8_t[4]) * width * height);
@@ -78,7 +78,7 @@ int pixman_save_png_file(pixman_image_t *image, const char *path)
 	if (!(info_struct = png_create_info_struct(write_struct)))
 		goto out4;
 
-	png_init_io(write_struct, f);
+	png_init_io(write_struct, fp);
 
 	png_set_IHDR(write_struct, info_struct, width, height,
 			8, PNG_COLOR_TYPE_RGB_ALPHA,
@@ -104,7 +104,7 @@ out2:
 	free(data);
 
 out1:
-	fclose(f);
+	fclose(fp);
 
 	return result;
 }

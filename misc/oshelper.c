@@ -159,31 +159,31 @@ pid_t os_execute_path(const char *path, char *const argv[])
 
 int os_load_path(const char *path, char **buffer, int *size)
 {
-	FILE *file;
+	FILE *fp;
 	char *tbuffer;
 	int tsize;
 
 	if (path == NULL)
 		return -1;
 
-	file = fopen(path, "rt");
-	if (file == NULL)
+	fp = fopen(path, "rt");
+	if (fp == NULL)
 		return -1;
 
-	fseek(file, 0, SEEK_END);
-	tsize = ftell(file);
-	rewind(file);
+	fseek(fp, 0, SEEK_END);
+	tsize = ftell(fp);
+	rewind(fp);
 
 	tbuffer = malloc(sizeof(char) * (tsize + 1));
 	if (tbuffer == NULL) {
-		fclose(file);
+		fclose(fp);
 		return -1;
 	}
 	memset(tbuffer, 0, tsize + 1);
 
-	fread(tbuffer, sizeof(char), tsize, file);
+	fread(tbuffer, sizeof(char), tsize, fp);
 
-	fclose(file);
+	fclose(fp);
 
 	if (buffer != NULL)
 		*buffer = tbuffer;
@@ -195,18 +195,18 @@ int os_load_path(const char *path, char **buffer, int *size)
 
 int os_save_path(const char *path, char *buffer, int size)
 {
-	FILE *file;
+	FILE *fp;
 
 	if (path == NULL)
 		return -1;
 
-	file = fopen(path, "w");
-	if (file == NULL)
+	fp = fopen(path, "w");
+	if (fp == NULL)
 		return -1;
 
-	fwrite(buffer, sizeof(char), size, file);
+	fwrite(buffer, sizeof(char), size, fp);
 
-	fclose(file);
+	fclose(fp);
 
 	return 0;
 }

@@ -62,6 +62,9 @@ extern void nemoitem_one_destroy(struct itemone *one);
 
 extern struct itemone *nemoitem_one_clone(struct itemone *one);
 
+extern int nemoitem_one_load(struct itemone *one, const char *buffer);
+extern int nemoitem_one_save(struct itemone *one, char *buffer);
+
 extern void nemoitem_one_set_path(struct itemone *one, const char *path);
 extern const char *nemoitem_one_get_path(struct itemone *one);
 extern int nemoitem_one_has_path(struct itemone *one, const char *path);
@@ -70,6 +73,9 @@ extern int nemoitem_one_set_attr(struct itemone *one, const char *name, const ch
 extern const char *nemoitem_one_get_attr(struct itemone *one, const char *name);
 extern void nemoitem_one_put_attr(struct itemone *one, const char *name);
 extern int nemoitem_one_has_attr(struct itemone *one, const char *name, const char *value);
+
+extern int nemoitem_load(struct nemoitem *item, const char *filepath);
+extern int nemoitem_save(struct nemoitem *item, const char *filepath);
 
 static inline int nemoitem_one_get_iattr(struct itemone *one, const char *name, int value)
 {

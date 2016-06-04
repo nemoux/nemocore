@@ -50,7 +50,8 @@ extern int nemoenvs_put_callback(struct nemoenvs *envs, nemoenvs_callback_t call
 
 extern int nemoenvs_dispatch(struct nemoenvs *envs, const char *src, const char *dst, const char *cmd, const char *path, struct itemone *one);
 
-extern void nemoenvs_load_configs(struct nemoenvs *envs, const char *configpath);
+extern int nemoenvs_load_configs(struct nemoenvs *envs, const char *configpath);
+extern int nemoenvs_save_configs(struct nemoenvs *envs, const char *configpath);
 
 extern int nemoenvs_dispatch_nemoshell_message(struct nemoenvs *envs, const char *src, const char *dst, const char *cmd, const char *path, struct itemone *one, void *data);
 

@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <ctype.h>
 #include <wayland-server.h>
 
 #include <shell.h>
@@ -20,7 +21,6 @@
 #include <nemolist.h>
 #include <nemoitem.h>
 #include <nemoease.h>
-#include <nemoxml.h>
 #include <nemotoken.h>
 #include <udphelper.h>
 #include <nemolog.h>
@@ -202,31 +202,52 @@ int nemoenvs_send(struct nemoenvs *envs, const char *name, const char *fmt, ...)
 	return r;
 }
 
-void nemoenvs_load_configs(struct nemoenvs *envs, const char *configpath)
+int nemoenvs_load_configs(struct nemoenvs *envs, const char *configpath)
 {
-	struct nemoxml *xml;
-	struct xmlnode *node;
 	struct itemone *one;
-	int i;
+	FILE *fp;
+	char buffer[1024];
 
-	xml = nemoxml_create();
-	nemoxml_load_file(xml, configpath);
-	nemoxml_update(xml);
+	fp = fopen(configpath, "r");
+	if (fp == NULL)
+		return -1;
 
-	nemolist_for_each(node, &xml->nodes, nodelink) {
+	while (fgets(buffer, sizeof(buffer), fp) != NULL) {
+		if (buffer[0] == '/' && buffer[1] == '/')
+			continue;
+		if (isascii(buffer[0]) == 0)
+			continue;
+
 		one = nemoitem_one_create();
-		nemoitem_one_set_path(one, node->path);
-
-		for (i = 0; i < node->nattrs; i++) {
-			nemoitem_one_set_attr(one,
-					node->attrs[i*2+0],
-					node->attrs[i*2+1]);
-		}
-
+		nemoitem_one_load(one, buffer);
 		nemoitem_attach_one(envs->configs, one);
 
-		nemoenvs_dispatch(envs, "/file", "/nemoshell", "set", node->path, one);
+		nemoenvs_dispatch(envs, "/file", "/nemoshell", "set", nemoitem_one_get_path(one), one);
 	}
 
-	nemoxml_destroy(xml);
+	fclose(fp);
+
+	return 0;
+}
+
+int nemoenvs_save_configs(struct nemoenvs *envs, const char *configpath)
+{
+	struct itemone *one;
+	FILE *fp;
+	char buffer[1024];
+
+	fp = fopen(configpath, "w");
+	if (fp == NULL)
+		return -1;
+
+	nemoitem_for_each(one, envs->configs) {
+		nemoitem_one_save(one, buffer);
+
+		fputs(buffer, fp);
+		fputc('\n', fp);
+	}
+
+	fclose(fp);
+
+	return 0;
 }
