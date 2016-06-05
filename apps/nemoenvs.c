@@ -103,7 +103,6 @@ static int nemoenvs_handle_message(void *data)
 	struct nemomsg *msg = envs->msg;
 	struct nemotoken *content;
 	struct itemone *one;
-	int soc = nemomsg_get_socket(msg);
 	const char *src;
 	const char *dst;
 	const char *cmd;
@@ -115,7 +114,7 @@ static int nemoenvs_handle_message(void *data)
 	int count;
 	int i;
 
-	size = udp_recv_from(soc, ip, &port, buffer, sizeof(buffer) - 1);
+	size = nemomsg_recv_message(msg, ip, &port, buffer, sizeof(buffer) - 1);
 	if (size <= 0)
 		return -1;
 

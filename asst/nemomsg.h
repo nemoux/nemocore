@@ -63,6 +63,7 @@ extern int nemomsg_clean(struct nemomsg *msg);
 extern int nemomsg_set_client(struct nemomsg *msg, const char *name, const char *ip, int port);
 extern int nemomsg_put_client(struct nemomsg *msg, const char *name, const char *ip, int port);
 
+extern int nemomsg_recv_message(struct nemomsg *msg, char *ip, int *port, char *content, int size);
 extern int nemomsg_send_message(struct nemomsg *msg, const char *name, const char *contents, int size);
 extern int nemomsg_send_format(struct nemomsg *msg, const char *name, const char *fmt, ...);
 extern int nemomsg_send_vargs(struct nemomsg *msg, const char *name, const char *fmt, va_list vargs);

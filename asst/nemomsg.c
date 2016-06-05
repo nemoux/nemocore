@@ -278,6 +278,11 @@ int nemomsg_put_client(struct nemomsg *msg, const char *name, const char *ip, in
 	return 0;
 }
 
+int nemomsg_recv_message(struct nemomsg *msg, char *ip, int *port, char *content, int size)
+{
+	return udp_recv_from(msg->soc, ip, port, content, size);
+}
+
 int nemomsg_send_message(struct nemomsg *msg, const char *name, const char *content, int size)
 {
 	struct msgclient *client;

@@ -11,7 +11,7 @@
 #include <sys/socket.h>
 #include <sys/epoll.h>
 
-static int set_cloexec_or_close(int fd)
+static int os_set_cloexec_or_close(int fd)
 {
 	long flags;
 
@@ -47,8 +47,8 @@ int os_socketpair_cloexec(int domain, int type, int protocol, int *sv)
 	if (ret < 0)
 		return ret;
 
-	sv[0] = set_cloexec_or_close(sv[0]);
-	sv[1] = set_cloexec_or_close(sv[1]);
+	sv[0] = os_set_cloexec_or_close(sv[0]);
+	sv[1] = os_set_cloexec_or_close(sv[1]);
 
 	if (sv[0] != -1 && sv[1] != -1)
 		return 0;
@@ -72,7 +72,7 @@ int os_epoll_create_cloexec(void)
 #endif
 
 	fd = epoll_create(1);
-	return set_cloexec_or_close(fd);
+	return os_set_cloexec_or_close(fd);
 }
 
 static int create_tmpfile_cloexec(char *tmpname)
@@ -86,7 +86,7 @@ static int create_tmpfile_cloexec(char *tmpname)
 #else
 	fd = mkstemp(tmpname);
 	if (fd >= 0) {
-		fd = set_cloexec_or_close(fd);
+		fd = os_set_cloexec_or_close(fd);
 		unlink(tmpname);
 	}
 #endif
