@@ -14,6 +14,7 @@
 #include <compz.h>
 #include <view.h>
 #include <monitor.h>
+#include <timer.h>
 #include <waylandhelper.h>
 
 #include <nemoenvs.h>
@@ -25,6 +26,8 @@
 #include <udphelper.h>
 #include <nemolog.h>
 #include <nemomisc.h>
+
+#define NEMOENVS_LIVENESS_TIMEOUT		(7000)
 
 struct nemoenvs *nemoenvs_create(struct nemoshell *shell)
 {
@@ -137,13 +140,11 @@ static int nemoenvs_handle_message(void *data)
 	const char *cmd;
 	const char *path;
 	char buffer[1024];
-	char ip[64];
-	int port;
 	int size;
 	int count;
 	int i;
 
-	size = nemomsg_recv_message(msg, ip, &port, buffer, sizeof(buffer) - 1);
+	size = nemomsg_recv_message(msg, buffer, sizeof(buffer) - 1);
 	if (size <= 0)
 		return -1;
 
@@ -164,11 +165,6 @@ static int nemoenvs_handle_message(void *data)
 
 		count = (nemotoken_get_token_count(content) - 4) / 2;
 
-		if (strcmp(cmd, "in") == 0)
-			nemomsg_set_client(msg, src, ip, port);
-		else if (strcmp(cmd, "out") == 0)
-			nemomsg_put_client(msg, src, ip, port);
-
 		one = nemoitem_one_create();
 		nemoitem_one_set_path(one, path);
 
@@ -184,10 +180,21 @@ static int nemoenvs_handle_message(void *data)
 	} else {
 		nemomsg_send_message(msg, dst, buffer, size);
 	}
-
+	
 	nemotoken_destroy(content);
-
+	
 	return 0;
+}
+
+static void nemoenvs_dispatch_timer(struct nemotimer *timer, void *data)
+{
+	struct nemoenvs *envs = (struct nemoenvs *)data;
+
+	nemomsg_clean_clients(envs->msg);
+	nemomsg_check_clients(envs->msg);
+	nemomsg_send_format(envs->msg, "/*", "/nemoshell:/*:get:/check/live");
+
+	nemotimer_set_timeout(envs->timer, NEMOENVS_LIVENESS_TIMEOUT);
 }
 
 int nemoenvs_listen(struct nemoenvs *envs, const char *ip, int port)
@@ -200,6 +207,11 @@ int nemoenvs_listen(struct nemoenvs *envs, const char *ip, int port)
 			nemomsg_get_socket(envs->msg),
 			nemoenvs_handle_message,
 			envs);
+
+	envs->timer = nemotimer_create(envs->shell->compz);
+	nemotimer_set_callback(envs->timer, nemoenvs_dispatch_timer);
+	nemotimer_set_timeout(envs->timer, NEMOENVS_LIVENESS_TIMEOUT);
+	nemotimer_set_userdata(envs->timer, envs);
 
 	return 0;
 }

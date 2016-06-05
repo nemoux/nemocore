@@ -30,6 +30,7 @@ add_library(nemoapps SHARED
 	nemoglib.c
 	nemocurl.c
 	nemohttp.c
+	messages.c
 	talehelper.c
 	showhelper.c
 	${CMAKE_SOURCE_DIR}/thirds/http_parser.c

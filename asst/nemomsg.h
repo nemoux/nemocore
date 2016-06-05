@@ -28,6 +28,8 @@ struct msgclient {
 	char *ip;
 	int port;
 
+	int liveness;
+
 	struct nemolist link;
 };
 
@@ -42,6 +44,11 @@ struct nemomsg {
 	struct nemolist destination_list;
 
 	struct nemolist delete_list;
+
+	struct {
+		char ip[128];
+		int port;
+	} source;
 
 	void *data;
 };
@@ -63,7 +70,10 @@ extern int nemomsg_clean(struct nemomsg *msg);
 extern int nemomsg_set_client(struct nemomsg *msg, const char *name, const char *ip, int port);
 extern int nemomsg_put_client(struct nemomsg *msg, const char *name, const char *ip, int port);
 
-extern int nemomsg_recv_message(struct nemomsg *msg, char *ip, int *port, char *content, int size);
+extern int nemomsg_check_clients(struct nemomsg *msg);
+extern int nemomsg_clean_clients(struct nemomsg *msg);
+
+extern int nemomsg_recv_message(struct nemomsg *msg, char *content, int size);
 extern int nemomsg_send_message(struct nemomsg *msg, const char *name, const char *contents, int size);
 extern int nemomsg_send_format(struct nemomsg *msg, const char *name, const char *fmt, ...);
 extern int nemomsg_send_vargs(struct nemomsg *msg, const char *name, const char *fmt, va_list vargs);
@@ -86,6 +96,16 @@ static inline void nemomsg_set_socket(struct nemomsg *msg, int soc)
 static inline int nemomsg_get_socket(struct nemomsg *msg)
 {
 	return msg->soc;
+}
+
+static inline const char *nemomsg_get_source_ip(struct nemomsg *msg)
+{
+	return msg->source.ip;
+}
+
+static inline int nemomsg_get_source_port(struct nemomsg *msg)
+{
+	return msg->source.port;
 }
 
 #ifdef __cplusplus

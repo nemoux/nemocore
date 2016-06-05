@@ -27,6 +27,8 @@ struct nemoenvs *nemoenvs_create(struct nemotool *tool)
 
 	nemolist_init(&envs->callback_list);
 
+	nemoenvs_set_callback(envs, nemoenvs_dispatch_message, tool);
+
 	return envs;
 
 err1:
@@ -47,6 +49,8 @@ void nemoenvs_destroy(struct nemoenvs *envs)
 
 	nemoitem_destroy(envs->configs);
 
+	if (envs->clientname != NULL)
+		free(envs->clientname);
 	if (envs->servername != NULL)
 		free(envs->servername);
 
@@ -108,13 +112,11 @@ static int nemoenvs_handle_message(void *data)
 	const char *cmd;
 	const char *path;
 	char buffer[1024];
-	char ip[64];
-	int port;
 	int size;
 	int count;
 	int i;
 
-	size = nemomsg_recv_message(msg, ip, &port, buffer, sizeof(buffer) - 1);
+	size = nemomsg_recv_message(msg, buffer, sizeof(buffer) - 1);
 	if (size <= 0)
 		return -1;
 
@@ -132,11 +134,6 @@ static int nemoenvs_handle_message(void *data)
 	path = nemotoken_get_token(content, 3);
 
 	count = (nemotoken_get_token_count(content) - 4) / 2;
-
-	if (strcmp(cmd, "in") == 0)
-		nemomsg_set_client(msg, src, ip, port);
-	else if (strcmp(cmd, "out") == 0)
-		nemomsg_put_client(msg, src, ip, port);
 
 	one = nemoitem_one_create();
 	nemoitem_one_set_path(one, path);
@@ -156,7 +153,7 @@ static int nemoenvs_handle_message(void *data)
 	return 0;
 }
 
-int nemoenvs_connect(struct nemoenvs *envs, const char *name, const char *ip, int port)
+int nemoenvs_connect(struct nemoenvs *envs, const char *client, const char *server, const char *ip, int port)
 {
 	envs->msg = nemomsg_create(NULL, 0);
 	if (envs->msg == NULL)
@@ -167,9 +164,11 @@ int nemoenvs_connect(struct nemoenvs *envs, const char *name, const char *ip, in
 			nemoenvs_handle_message,
 			envs);
 
-	nemomsg_set_client(envs->msg, name, ip, port);
+	nemomsg_set_client(envs->msg, server, ip, port);
+	nemomsg_send_format(envs->msg, server, "%s:%s:set:/check/live", client, server);
 
-	envs->servername = strdup(name);
+	envs->clientname = strdup(client);
+	envs->servername = strdup(server);
 
 	return 0;
 }

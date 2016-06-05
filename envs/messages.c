@@ -260,6 +260,10 @@ int nemoenvs_dispatch_message(struct nemoenvs *envs, const char *src, const char
 					}
 				}
 			}
+		} else if (strcmp(path, "/check/live") == 0) {
+			nemomsg_set_client(envs->msg, src,
+					nemomsg_get_source_ip(envs->msg),
+					nemomsg_get_source_port(envs->msg));
 		}
 	} else if (strcmp(cmd, "get") == 0) {
 		if (strcmp(path, "/nemoshell/screen") == 0) {

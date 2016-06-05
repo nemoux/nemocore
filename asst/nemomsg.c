@@ -194,19 +194,12 @@ int nemomsg_dispatch(struct nemomsg *msg, const char *ip, int port, struct nemot
 	struct msgcallback *cb;
 	const char *src;
 	const char *dst;
-	const char *cmd;
 
 	if (nemotoken_get_token_count(content) < 3)
 		return -1;
 
 	src = nemotoken_get_token(content, 0);
 	dst = nemotoken_get_token(content, 1);
-	cmd = nemotoken_get_token(content, 2);
-
-	if (strcmp(cmd, "in") == 0)
-		nemomsg_set_client(msg, src, ip, port);
-	else if (strcmp(cmd, "out") == 0)
-		nemomsg_put_client(msg, src, ip, port);
 
 	nemolist_for_each(cb, &msg->callback_list, link) {
 		cb->callback(cb->data, src, dst, content);
@@ -244,6 +237,16 @@ int nemomsg_set_client(struct nemomsg *msg, const char *name, const char *ip, in
 {
 	struct msgclient *client;
 
+	nemolist_for_each(client, &msg->client_list, link) {
+		if (strcmp(client->name, name) == 0 &&
+				strcmp(client->ip, ip) == 0 &&
+				client->port == port) {
+			client->liveness = 1;
+
+			return 1;
+		}
+	}
+
 	client = (struct msgclient *)malloc(sizeof(struct msgclient));
 	if (client == NULL)
 		return -1;
@@ -251,6 +254,7 @@ int nemomsg_set_client(struct nemomsg *msg, const char *name, const char *ip, in
 	client->name = strdup(name);
 	client->ip = strdup(ip);
 	client->port = port;
+	client->liveness = 1;
 
 	nemolist_insert_tail(&msg->client_list, &client->link);
 
@@ -278,9 +282,37 @@ int nemomsg_put_client(struct nemomsg *msg, const char *name, const char *ip, in
 	return 0;
 }
 
-int nemomsg_recv_message(struct nemomsg *msg, char *ip, int *port, char *content, int size)
+int nemomsg_check_clients(struct nemomsg *msg)
 {
-	return udp_recv_from(msg->soc, ip, port, content, size);
+	struct msgclient *client;
+
+	nemolist_for_each(client, &msg->client_list, link) {
+		client->liveness = 0;
+	}
+
+	return 0;
+}
+
+int nemomsg_clean_clients(struct nemomsg *msg)
+{
+	struct msgclient *client;
+
+	nemolist_for_each(client, &msg->client_list, link) {
+		if (client->liveness == 0) {
+			nemolist_remove(&client->link);
+
+			free(client->name);
+			free(client->ip);
+			free(client);
+		}
+	}
+
+	return 0;
+}
+
+int nemomsg_recv_message(struct nemomsg *msg, char *content, int size)
+{
+	return udp_recv_from(msg->soc, msg->source.ip, &msg->source.port, content, size);
 }
 
 int nemomsg_send_message(struct nemomsg *msg, const char *name, const char *content, int size)
