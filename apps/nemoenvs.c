@@ -49,6 +49,11 @@ void nemoenvs_destroy(struct nemoenvs *envs)
 
 	nemoitem_destroy(envs->configs);
 
+	if (envs->monitor != NULL)
+		nemomonitor_destroy(envs->monitor);
+	if (envs->msg != NULL)
+		nemomsg_destroy(envs->msg);
+
 	if (envs->clientname != NULL)
 		free(envs->clientname);
 	if (envs->servername != NULL)

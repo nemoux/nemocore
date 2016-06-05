@@ -71,6 +71,13 @@ void nemoenvs_destroy(struct nemoenvs *envs)
 
 	nemoitem_destroy(envs->configs);
 
+	if (envs->monitor != NULL)
+		nemomonitor_destroy(envs->monitor);
+	if (envs->msg != NULL)
+		nemomsg_destroy(envs->msg);
+	if (envs->timer != NULL)
+		nemotimer_destroy(envs->timer);
+
 	if (envs->name != NULL)
 		free(envs->name);
 
@@ -180,9 +187,9 @@ static int nemoenvs_handle_message(void *data)
 	} else {
 		nemomsg_send_message(msg, dst, buffer, size);
 	}
-	
+
 	nemotoken_destroy(content);
-	
+
 	return 0;
 }
 

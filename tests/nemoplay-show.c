@@ -394,11 +394,11 @@ int main(int argc, char *argv[])
 	nemoshow_destroy_view(show);
 
 err5:
-	nemotool_disconnect_wayland(tool);
-	nemotool_destroy(tool);
+	nemoenvs_destroy(envs);
 
 err4:
-	nemoenvs_destroy(envs);
+	nemotool_disconnect_wayland(tool);
+	nemotool_destroy(tool);
 
 err3:
 	nemoplay_set_state(play, NEMOPLAY_DONE_STATE);
