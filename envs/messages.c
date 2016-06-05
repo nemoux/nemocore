@@ -56,7 +56,11 @@ int nemoenvs_dispatch_message(struct nemoenvs *envs, const char *src, const char
 		const char *name;
 		const char *value;
 
-		if (strcmp(path, "/nemoshell/backend") == 0) {
+		if (strcmp(path, "/check/live") == 0) {
+			nemomsg_set_client(envs->msg, src,
+					nemomsg_get_source_ip(envs->msg),
+					nemomsg_get_source_port(envs->msg));
+		} else if (strcmp(path, "/nemoshell/backend") == 0) {
 			name = nemoitem_one_get_attr(one, "name");
 			if (name != NULL) {
 				if (strcmp(name, "drm") == 0) {
@@ -260,10 +264,6 @@ int nemoenvs_dispatch_message(struct nemoenvs *envs, const char *src, const char
 					}
 				}
 			}
-		} else if (strcmp(path, "/check/live") == 0) {
-			nemomsg_set_client(envs->msg, src,
-					nemomsg_get_source_ip(envs->msg),
-					nemomsg_get_source_port(envs->msg));
 		}
 	} else if (strcmp(cmd, "get") == 0) {
 		if (strcmp(path, "/nemoshell/screen") == 0) {
