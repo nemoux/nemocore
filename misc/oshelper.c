@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <stdarg.h>
+
 #include <signal.h>
 #include <sys/socket.h>
 #include <sys/epoll.h>
@@ -254,6 +256,28 @@ const char *os_get_file_extension(const char *name)
 	}
 
 	return NULL;
+}
+
+int os_has_file_extension(const char *name, ...)
+{
+	const char *ext;
+	const char *cmp;
+	va_list vargs;
+
+	ext = os_get_file_extension(name);
+	if (ext == NULL)
+		return 0;
+
+	va_start(vargs, name);
+
+	while ((cmp = va_arg(vargs, const char *)) != NULL) {
+		if (strcmp(ext, cmp) == 0)
+			return 1;
+	}
+
+	va_end(vargs);
+
+	return 0;
 }
 
 char *os_get_file_path(const char *name)
