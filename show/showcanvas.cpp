@@ -67,6 +67,8 @@ struct showone *nemoshow_canvas_create(void)
 	one->destroy = nemoshow_canvas_destroy;
 	one->attach = nemoshow_canvas_attach_one;
 	one->detach = nemoshow_canvas_detach_one;
+	one->above = nemoshow_canvas_above_one;
+	one->below = nemoshow_canvas_below_one;
 
 	nemoshow_one_prepare(one);
 
@@ -119,6 +121,8 @@ void nemoshow_canvas_destroy(struct showone *one)
 
 void nemoshow_canvas_attach_one(struct showone *parent, struct showone *one)
 {
+	nemoshow_one_dirty(parent, NEMOSHOW_CHILDREN_DIRTY);
+
 	nemoshow_one_attach_one(parent, one);
 }
 
@@ -126,9 +130,34 @@ void nemoshow_canvas_detach_one(struct showone *one)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
-	nemoshow_one_detach_one(one);
+	if (one->parent != NULL)
+		nemoshow_one_dirty(one->parent, NEMOSHOW_CHILDREN_DIRTY);
 
-	nemotale_detach_node(canvas->node);
+	nemoshow_one_detach_one(one);
+}
+
+int nemoshow_canvas_above_one(struct showone *one, struct showone *above)
+{
+	if (above != NULL && one->parent != above->parent)
+		return -1;
+
+	nemoshow_one_dirty(one->parent, NEMOSHOW_CHILDREN_DIRTY);
+
+	nemoshow_one_above_one(one, above);
+
+	return 0;
+}
+
+int nemoshow_canvas_below_one(struct showone *one, struct showone *below)
+{
+	if (below != NULL && one->parent != below->parent)
+		return -1;
+
+	nemoshow_one_dirty(one->parent, NEMOSHOW_CHILDREN_DIRTY);
+
+	nemoshow_one_below_one(one, below);
+
+	return 0;
 }
 
 static int nemoshow_canvas_compare(const void *a, const void *b)

@@ -282,9 +282,6 @@ void nemoshow_render_one(struct nemoshow *show)
 				nemoshow_canvas_resize(one);
 			}
 
-			if (nemotale_node_is_mapped(canvas->node) == 0)
-				nemotale_attach_node(show->tale, canvas->node);
-
 			if (canvas->viewport.dirty != 0) {
 				canvas->viewport.dirty = 0;
 
@@ -333,12 +330,9 @@ int nemoshow_set_scene(struct nemoshow *show, struct showone *one)
 	show->scene_destroy_listener.notify = nemoshow_handle_scene_destroy_signal;
 	nemosignal_add(&one->destroy_signal, &show->scene_destroy_listener);
 
-	nemoshow_children_for_each(child, one) {
-		if (child->type == NEMOSHOW_CANVAS_TYPE)
-			nemotale_detach_node(NEMOSHOW_CANVAS_AT(child, node));
-	}
-
 	nemoshow_attach_ones(show, one);
+
+	nemoshow_one_dirty(one, NEMOSHOW_CHILDREN_DIRTY);
 
 	nemotale_resize(show->tale, NEMOSHOW_SCENE_AT(one, width), NEMOSHOW_SCENE_AT(one, height));
 
@@ -411,44 +405,6 @@ int nemoshow_set_scale(struct nemoshow *show, double sx, double sy)
 	return 1;
 }
 
-void nemoshow_above_canvas(struct nemoshow *show, struct showone *one, struct showone *above)
-{
-	nemolist_remove(&one->children_link);
-
-	if (above != NULL) {
-		nemotale_above_node(show->tale,
-				NEMOSHOW_CANVAS_AT(one, node),
-				NEMOSHOW_CANVAS_AT(above, node));
-
-		nemolist_insert(&above->children_link, &one->children_link);
-	} else {
-		nemotale_above_node(show->tale,
-				NEMOSHOW_CANVAS_AT(one, node),
-				NULL);
-
-		nemolist_insert(&one->parent->children_list, &one->children_link);
-	}
-}
-
-void nemoshow_below_canvas(struct nemoshow *show, struct showone *one, struct showone *below)
-{
-	nemolist_remove(&one->children_link);
-
-	if (below != NULL) {
-		nemotale_below_node(show->tale,
-				NEMOSHOW_CANVAS_AT(one, node),
-				NEMOSHOW_CANVAS_AT(below, node));
-
-		nemolist_insert_tail(&below->children_link, &one->children_link);
-	} else {
-		nemotale_below_node(show->tale,
-				NEMOSHOW_CANVAS_AT(one, node),
-				NULL);
-
-		nemolist_insert_tail(&one->parent->children_list, &one->children_link);
-	}
-}
-
 int nemoshow_contain_canvas(struct nemoshow *show, struct showone *one, float x, float y, float *sx, float *sy)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
@@ -491,11 +447,8 @@ void nemoshow_detach_one(struct showone *one)
 {
 	nemolist_remove(&one->link);
 	nemolist_init(&one->link);
-
+	
 	one->show = NULL;
-
-	if (one->type == NEMOSHOW_CANVAS_TYPE)
-		nemotale_detach_node(NEMOSHOW_CANVAS_AT(one, node));
 }
 
 void nemoshow_attach_ones(struct nemoshow *show, struct showone *one)

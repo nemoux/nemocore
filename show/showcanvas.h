@@ -91,6 +91,8 @@ extern int nemoshow_canvas_update(struct showone *one);
 
 extern void nemoshow_canvas_attach_one(struct showone *parent, struct showone *one);
 extern void nemoshow_canvas_detach_one(struct showone *one);
+extern int nemoshow_canvas_above_one(struct showone *one, struct showone *above);
+extern int nemoshow_canvas_below_one(struct showone *one, struct showone *below);
 
 extern int nemoshow_canvas_set_type(struct showone *one, int type);
 extern int nemoshow_canvas_resize(struct showone *one);

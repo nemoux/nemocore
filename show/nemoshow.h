@@ -118,12 +118,6 @@ extern void nemoshow_put_scene(struct nemoshow *show);
 extern int nemoshow_set_size(struct nemoshow *show, uint32_t width, uint32_t height);
 extern int nemoshow_set_scale(struct nemoshow *show, double sx, double sy);
 
-extern void nemoshow_attach_canvas(struct nemoshow *show, struct showone *one);
-extern void nemoshow_detach_canvas(struct nemoshow *show, struct showone *one);
-
-extern void nemoshow_above_canvas(struct nemoshow *show, struct showone *one, struct showone *above);
-extern void nemoshow_below_canvas(struct nemoshow *show, struct showone *one, struct showone *below);
-
 extern int nemoshow_contain_canvas(struct nemoshow *show, struct showone *one, float x, float y, float *sx, float *sy);
 
 extern void nemoshow_damage_canvas_all(struct nemoshow *show);

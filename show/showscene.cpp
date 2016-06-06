@@ -44,6 +44,23 @@ void nemoshow_scene_destroy(struct showone *one)
 
 int nemoshow_scene_update(struct showone *one)
 {
+	struct nemoshow *show = one->show;
+	struct showscene *scene = NEMOSHOW_SCENE(one);
+	struct showcanvas *canvas;
+	struct showone *child;
+
+	if (one->dirty & NEMOSHOW_CHILDREN_DIRTY) {
+		nemotale_clear_node(show->tale);
+
+		nemoshow_children_for_each(child, one) {
+			if (child->type == NEMOSHOW_CANVAS_TYPE) {
+				canvas = NEMOSHOW_CANVAS(child);
+
+				nemotale_attach_node(show->tale, canvas->node);
+			}
+		}
+	}
+
 	return 0;
 }
 
