@@ -72,6 +72,60 @@ struct itemone *nemoitem_search_attr(struct nemoitem *item, const char *path, co
 	return NULL;
 }
 
+struct itemone *nemoitem_search_attrs(struct nemoitem *item, const char *path, const char *attrs)
+{
+	struct itemone *one;
+	struct nemotoken *token;
+	int ntokens;
+	int i;
+
+	token = nemotoken_create(attrs, strlen(attrs));
+	nemotoken_divide(token, '#');
+	nemotoken_divide(token, '=');
+	nemotoken_update(token);
+
+	ntokens = nemotoken_get_token_count(token) / 2;
+
+	nemolist_for_each(one, &item->list, link) {
+		if (path != NULL && strcmp(one->path, path) != 0)
+			continue;
+
+		for (i = 0; i < ntokens; i++) {
+			if (nemoitem_one_has_attr(one,
+						nemotoken_get_token(token, i * 2 + 0),
+						nemotoken_get_token(token, i * 2 + 1)) == 0)
+				break;
+		}
+
+		if (i >= ntokens) {
+			nemotoken_destroy(token);
+
+			return one;
+		}
+	}
+
+	nemotoken_destroy(token);
+
+	return NULL;
+}
+
+struct itemone *nemoitem_search_format(struct nemoitem *item, const char *path, const char *fmt, ...)
+{
+	struct itemone *one;
+	va_list vargs;
+	char *content;
+
+	va_start(vargs, fmt);
+	vasprintf(&content, fmt, vargs);
+	va_end(vargs);
+
+	one = nemoitem_search_attrs(item, path, content);
+
+	free(content);
+
+	return one;
+}
+
 int nemoitem_count_one(struct nemoitem *item, const char *path)
 {
 	struct itemone *one;
@@ -155,6 +209,96 @@ err1:
 	free(box);
 
 	return NULL;
+}
+
+struct itembox *nemoitem_box_search_attrs(struct nemoitem *item, const char *path, const char *attrs)
+{
+	struct itembox *box;
+	struct itemone *one;
+	struct nemotoken *token;
+	int count = 0;
+	int ntokens;
+	int i;
+
+	token = nemotoken_create(attrs, strlen(attrs));
+	nemotoken_divide(token, '#');
+	nemotoken_divide(token, '=');
+	nemotoken_update(token);
+
+	ntokens = nemotoken_get_token_count(token) / 2;
+
+	nemolist_for_each(one, &item->list, link) {
+		if (path != NULL && strcmp(one->path, path) != 0)
+			continue;
+
+		for (i = 0; i < ntokens; i++) {
+			if (nemoitem_one_has_attr(one,
+						nemotoken_get_token(token, i * 2 + 0),
+						nemotoken_get_token(token, i * 2 + 1)) == 0)
+				break;
+		}
+
+		if (i >= ntokens) {
+			count++;
+		}
+	}
+
+	if (count == 0)
+		goto err1;
+
+	box = (struct itembox *)malloc(sizeof(struct itembox));
+	if (box == NULL)
+		goto err1;
+	memset(box, 0, sizeof(struct itembox));
+
+	box->ones = (struct itemone **)malloc(sizeof(struct itemone *) * count);
+	if (box->ones == NULL)
+		goto err2;
+
+	nemolist_for_each(one, &item->list, link) {
+		if (path != NULL && strcmp(one->path, path) != 0)
+			continue;
+
+		for (i = 0; i < ntokens; i++) {
+			if (nemoitem_one_has_attr(one,
+						nemotoken_get_token(token, i * 2 + 0),
+						nemotoken_get_token(token, i * 2 + 1)) == 0)
+				break;
+		}
+
+		if (i >= ntokens) {
+			box->ones[box->nones++] = one;
+		}
+	}
+
+	nemotoken_destroy(token);
+
+	return box;
+
+err2:
+	free(box);
+
+err1:
+	nemotoken_destroy(token);
+
+	return NULL;
+}
+
+struct itembox *nemoitem_box_search_format(struct nemoitem *item, const char *path, const char *fmt, ...)
+{
+	struct itembox *box;
+	va_list vargs;
+	char *content;
+
+	va_start(vargs, fmt);
+	vasprintf(&content, fmt, vargs);
+	va_end(vargs);
+
+	box = nemoitem_box_search_attrs(item, path, content);
+
+	free(content);
+
+	return box;
 }
 
 void nemoitem_box_destroy(struct itembox *box)

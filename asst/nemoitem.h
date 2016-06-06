@@ -51,10 +51,14 @@ extern void nemoitem_detach_one(struct nemoitem *item, struct itemone *one);
 
 extern struct itemone *nemoitem_search_one(struct nemoitem *item, const char *path);
 extern struct itemone *nemoitem_search_attr(struct nemoitem *item, const char *path, const char *name, const char *value);
+extern struct itemone *nemoitem_search_attrs(struct nemoitem *item, const char *path, const char *attrs);
+extern struct itemone *nemoitem_search_format(struct nemoitem *item, const char *path, const char *fmt, ...);
 extern int nemoitem_count_one(struct nemoitem *item, const char *path);
 
 extern struct itembox *nemoitem_box_search_one(struct nemoitem *item, const char *path);
 extern struct itembox *nemoitem_box_search_attr(struct nemoitem *item, const char *path, const char *name, const char *value);
+extern struct itembox *nemoitem_box_search_attrs(struct nemoitem *item, const char *path, const char *attrs);
+extern struct itembox *nemoitem_box_search_format(struct nemoitem *item, const char *path, const char *fmt, ...);
 extern void nemoitem_box_destroy(struct itembox *box);
 
 extern struct itemone *nemoitem_one_create(void);
