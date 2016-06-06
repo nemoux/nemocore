@@ -192,21 +192,23 @@ int nemoenvs_send(struct nemoenvs *envs, const char *fmt, ...)
 	return r;
 }
 
-int nemoenvs_load_variables(struct nemoenvs *envs)
+int nemoenvs_load_variable(struct nemoenvs *envs, const char *name, const char *path)
 {
 	struct itemone *one;
 	char *env;
 
-	env = getenv("NEMOSHELL_FONT");
+	env = getenv(name);
 	if (env != NULL) {
-		one = nemoitem_search_one(envs->configs, "/nemoshell/font");
+		one = nemoitem_search_one(envs->configs, path);
 		if (one == NULL) {
 			one = nemoitem_one_create();
-			nemoitem_one_set_path(one, "/nemoshell/font");
+			nemoitem_one_set_path(one, path);
 			nemoitem_attach_one(envs->configs, one);
 		}
 
 		nemoitem_one_load(one, env);
+
+		nemoenvs_dispatch(envs, "/envs", envs->clientname, "set", path, one);
 	}
 
 	return 0;

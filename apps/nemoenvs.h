@@ -46,7 +46,7 @@ extern void nemoenvs_destroy(struct nemoenvs *envs);
 extern int nemoenvs_connect(struct nemoenvs *envs, const char *client, const char *server, const char *ip, int port);
 extern int nemoenvs_send(struct nemoenvs *envs, const char *fmt, ...);
 
-extern int nemoenvs_load_variables(struct nemoenvs *envs);
+extern int nemoenvs_load_variable(struct nemoenvs *envs, const char *name, const char *path);
 
 extern int nemoenvs_set_callback(struct nemoenvs *envs, nemoenvs_callback_t callback, void *data);
 extern int nemoenvs_put_callback(struct nemoenvs *envs, nemoenvs_callback_t callback, void *data);
