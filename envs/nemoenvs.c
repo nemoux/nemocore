@@ -156,7 +156,7 @@ static int nemoenvs_handle_message(void *data)
 		return -1;
 
 	content = nemotoken_create(buffer, size);
-	nemotoken_divide(content, ':');
+	nemotoken_divide(content, '#');
 	nemotoken_divide(content, '=');
 	nemotoken_update(content);
 
@@ -194,7 +194,7 @@ static void nemoenvs_dispatch_timer(struct nemotimer *timer, void *data)
 
 	nemomsg_clean_clients(envs->msg);
 	nemomsg_check_clients(envs->msg);
-	nemomsg_send_format(envs->msg, "/*", "/nemoshell:/*:get:/check/live");
+	nemomsg_send_format(envs->msg, "/*", "/nemoshell#/*#get#/check/live");
 
 	nemotimer_set_timeout(envs->timer, NEMOENVS_LIVENESS_TIMEOUT);
 }

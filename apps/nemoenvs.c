@@ -126,7 +126,7 @@ static int nemoenvs_handle_message(void *data)
 		return -1;
 
 	content = nemotoken_create(buffer, size);
-	nemotoken_divide(content, ':');
+	nemotoken_divide(content, '#');
 	nemotoken_divide(content, '=');
 	nemotoken_update(content);
 
@@ -170,7 +170,7 @@ int nemoenvs_connect(struct nemoenvs *envs, const char *client, const char *serv
 			envs);
 
 	nemomsg_set_client(envs->msg, server, ip, port);
-	nemomsg_send_format(envs->msg, server, "%s:%s:set:/check/live", client, server);
+	nemomsg_send_format(envs->msg, server, "%s#%s#set#/check/live", client, server);
 
 	envs->clientname = strdup(client);
 	envs->servername = strdup(server);

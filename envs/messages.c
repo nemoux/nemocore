@@ -293,12 +293,12 @@ int nemoenvs_dispatch_message(struct nemoenvs *envs, const char *src, const char
 				char *content;
 
 				wl_list_for_each(config, &compz->screenconfig_list, link) {
-					asprintf(&content, "nodeid:%d:screenid:%d:x:%d:y:%d:width:%d:height:%d",
+					asprintf(&content, "nodeid=%d#screenid=%d#x=%d#y=%d#width=%d#height=%d",
 							config->nodeid, config->screenid,
 							config->x, config->y,
 							config->width, config->height);
 
-					nemoenvs_send(envs, src, "%s:%s:set:/nemoshell/screen:%s", dst, src, content);
+					nemoenvs_send(envs, src, "%s#%s#set#/nemoshell/screen#%s", dst, src, content);
 
 					free(content);
 				}
@@ -307,13 +307,13 @@ int nemoenvs_dispatch_message(struct nemoenvs *envs, const char *src, const char
 				char *content;
 
 				wl_list_for_each(config, &compz->inputconfig_list, link) {
-					asprintf(&content, "devnode:%s:nodeid:%d:screenid:%d:x:%d:y:%d:width:%d:height:%d",
+					asprintf(&content, "devnode=%s#nodeid=%d#screenid=%d#x=%d#y=%d#width=%d#height=%d",
 							config->devnode,
 							config->nodeid, config->screenid,
 							config->x, config->y,
 							config->width, config->height);
 
-					nemoenvs_send(envs, src, "%s:%s:set:/nemoshell/input:%s", dst, src, content);
+					nemoenvs_send(envs, src, "%s#%s#set#/nemoshell/input#%s", dst, src, content);
 
 					free(content);
 				}
@@ -331,13 +331,13 @@ int nemoenvs_dispatch_message(struct nemoenvs *envs, const char *src, const char
 							name = nemoitem_attr_get_name(attr);
 							value = nemoitem_attr_get_value(attr);
 
-							strcat(content, ":");
+							strcat(content, "#");
 							strcat(content, name);
-							strcat(content, ":");
+							strcat(content, "=");
 							strcat(content, value);
 						}
 
-						nemoenvs_send(envs, src, "%s:%s:set:%s%s", dst, src, path, content);
+						nemoenvs_send(envs, src, "%s#%s#set#%s%s", dst, src, path, content);
 					}
 				}
 			}
