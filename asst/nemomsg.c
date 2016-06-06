@@ -312,7 +312,10 @@ int nemomsg_clean_clients(struct nemomsg *msg)
 
 int nemomsg_recv_message(struct nemomsg *msg, char *content, int size)
 {
-	return udp_recv_from(msg->soc, msg->source.ip, &msg->source.port, content, size);
+	msg->source.buffer = content;
+	msg->source.size = udp_recv_from(msg->soc, msg->source.ip, &msg->source.port, content, size);
+
+	return msg->source.size;
 }
 
 int nemomsg_send_message(struct nemomsg *msg, const char *name, const char *content, int size)

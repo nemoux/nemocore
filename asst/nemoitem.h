@@ -77,6 +77,7 @@ extern int nemoitem_one_set_attr(struct itemone *one, const char *name, const ch
 extern const char *nemoitem_one_get_attr(struct itemone *one, const char *name);
 extern void nemoitem_one_put_attr(struct itemone *one, const char *name);
 extern int nemoitem_one_has_attr(struct itemone *one, const char *name, const char *value);
+extern int nemoitem_one_copy_attr(struct itemone *done, struct itemone *sone);
 
 extern int nemoitem_load(struct nemoitem *item, const char *filepath);
 extern int nemoitem_save(struct nemoitem *item, const char *filepath);

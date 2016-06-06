@@ -48,6 +48,9 @@ struct nemomsg {
 	struct {
 		char ip[128];
 		int port;
+
+		char *buffer;
+		int size;
 	} source;
 
 	void *data;
@@ -106,6 +109,16 @@ static inline const char *nemomsg_get_source_ip(struct nemomsg *msg)
 static inline int nemomsg_get_source_port(struct nemomsg *msg)
 {
 	return msg->source.port;
+}
+
+static inline const char *nemomsg_get_source_buffer(struct nemomsg *msg)
+{
+	return msg->source.buffer;
+}
+
+static inline int nemomsg_get_source_size(struct nemomsg *msg)
+{
+	return msg->source.size;
 }
 
 #ifdef __cplusplus

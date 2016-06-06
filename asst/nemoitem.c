@@ -495,6 +495,22 @@ int nemoitem_one_has_attr(struct itemone *one, const char *name, const char *val
 	return 0;
 }
 
+int nemoitem_one_copy_attr(struct itemone *done, struct itemone *sone)
+{
+	struct itemattr *attr;
+
+	if (sone == NULL)
+		return -1;
+	if (done == NULL)
+		return 0;
+
+	nemolist_for_each(attr, &sone->list, link) {
+		nemoitem_one_set_attr(done, attr->name, attr->value);
+	}
+
+	return 1;
+}
+
 int nemoitem_load(struct nemoitem *item, const char *filepath)
 {
 	struct itemone *one;

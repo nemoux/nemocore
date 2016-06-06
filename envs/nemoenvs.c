@@ -165,28 +165,23 @@ static int nemoenvs_handle_message(void *data)
 
 	src = nemotoken_get_token(content, 0);
 	dst = nemotoken_get_token(content, 1);
+	cmd = nemotoken_get_token(content, 2);
+	path = nemotoken_get_token(content, 3);
 
-	if (strcmp(dst, envs->name) == 0) {
-		cmd = nemotoken_get_token(content, 2);
-		path = nemotoken_get_token(content, 3);
+	count = (nemotoken_get_token_count(content) - 4) / 2;
 
-		count = (nemotoken_get_token_count(content) - 4) / 2;
+	one = nemoitem_one_create();
+	nemoitem_one_set_path(one, path);
 
-		one = nemoitem_one_create();
-		nemoitem_one_set_path(one, path);
-
-		for (i = 0; i < count; i++) {
-			nemoitem_one_set_attr(one,
-					nemotoken_get_token(content, 4 + i * 2 + 0),
-					nemotoken_get_token(content, 4 + i * 2 + 1));
-		}
-
-		nemoenvs_dispatch(envs, src, dst, cmd, path, one);
-
-		nemoitem_one_destroy(one);
-	} else {
-		nemomsg_send_message(msg, dst, buffer, size);
+	for (i = 0; i < count; i++) {
+		nemoitem_one_set_attr(one,
+				nemotoken_get_token(content, 4 + i * 2 + 0),
+				nemotoken_get_token(content, 4 + i * 2 + 1));
 	}
+
+	nemoenvs_dispatch(envs, src, dst, cmd, path, one);
+
+	nemoitem_one_destroy(one);
 
 	nemotoken_destroy(content);
 
