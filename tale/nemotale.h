@@ -35,8 +35,7 @@ struct nemotale {
 
 	uint32_t state;
 
-	struct talenode **nodes;
-	int nnodes, snodes;
+	struct nemolist node_list;
 
 	struct nemosignal destroy_signal;
 
@@ -231,7 +230,7 @@ static inline void nemotale_rotate(struct nemotale *tale, float cos, float sin)
 
 static inline int nemotale_get_node_count(struct nemotale *tale)
 {
-	return tale->nnodes;
+	return nemolist_length(&tale->node_list);
 }
 
 static inline int32_t nemotale_get_width(struct nemotale *tale)

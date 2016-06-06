@@ -23,6 +23,8 @@ int nemotale_node_prepare(struct talenode *node)
 {
 	nemosignal_init(&node->destroy_signal);
 
+	nemolist_init(&node->link);
+
 	node->geometry.x = 0.0f;
 	node->geometry.y = 0.0f;
 	node->geometry.r = 0.0f;
@@ -75,6 +77,8 @@ void nemotale_node_finish(struct talenode *node)
 	pixman_region32_fini(&node->input);
 	pixman_region32_fini(&node->damage);
 	pixman_region32_fini(&node->region);
+
+	nemolist_remove(&node->link);
 }
 
 void nemotale_node_boundingbox_update(struct talenode *node, int32_t x, int32_t y, int32_t width, int32_t height, pixman_region32_t *bbox)

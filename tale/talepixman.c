@@ -186,14 +186,11 @@ static void nemotale_repaint_node(struct nemotale *tale, struct talenode *node)
 int nemotale_composite_pixman(struct nemotale *tale, pixman_region32_t *region)
 {
 	struct talenode *node;
-	int i;
 
 	nemotale_update_node(tale);
 	nemotale_accumulate_damage(tale);
 
-	for (i = 0; i < tale->nnodes; i++) {
-		node = tale->nodes[i];
-
+	nemolist_for_each(node, &tale->node_list, link) {
 		nemotale_repaint_node(tale, node);
 	}
 
@@ -208,14 +205,11 @@ int nemotale_composite_pixman(struct nemotale *tale, pixman_region32_t *region)
 int nemotale_composite_pixman_full(struct nemotale *tale)
 {
 	struct talenode *node;
-	int i;
 
 	nemotale_update_node(tale);
 	nemotale_damage_all(tale);
 
-	for (i = 0; i < tale->nnodes; i++) {
-		node = tale->nodes[i];
-
+	nemolist_for_each(node, &tale->node_list, link) {
 		nemotale_repaint_node(tale, node);
 	}
 

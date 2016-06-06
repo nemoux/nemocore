@@ -32,9 +32,7 @@ int nemotale_prepare(struct nemotale *tale)
 	tale->viewport.rx = 1.0f;
 	tale->viewport.ry = 1.0f;
 
-	tale->nodes = (struct talenode **)malloc(sizeof(struct talenode *) * 8);
-	tale->nnodes = 0;
-	tale->snodes = 8;
+	nemolist_init(&tale->node_list);
 
 	tale->keyboard.focus = NULL;
 	nemolist_init(&tale->keyboard.node_destroy_listener.link);
@@ -62,7 +60,7 @@ int nemotale_prepare(struct nemotale *tale)
 		tale->single_click_distance = strtoul(env, NULL, 10);
 	else
 		tale->single_click_distance = 30;
-	
+
 	env = getenv("NEMOTALE_MINIMUM_WIDTH");
 	if (env != NULL)
 		tale->minimum_width = strtoul(env, NULL, 10);
@@ -102,17 +100,14 @@ void nemotale_finish(struct nemotale *tale)
 	nemolist_remove(&tale->tap_list);
 	nemolist_remove(&tale->grab_list);
 
-	free(tale->nodes);
+	nemolist_remove(&tale->node_list);
 }
 
 struct talenode *nemotale_pick_node(struct nemotale *tale, float x, float y, float *sx, float *sy)
 {
 	struct talenode *node;
-	int i;
 
-	for (i = tale->nnodes - 1; i >= 0; i--) {
-		node = tale->nodes[i];
-
+	nemolist_for_each_reverse(node, &tale->node_list, link) {
 		if (node->id > 0) {
 			nemotale_node_transform_from_global(node, x, y, sx, sy);
 
@@ -151,10 +146,8 @@ void nemotale_damage_all(struct nemotale *tale)
 
 void nemotale_attach_node(struct nemotale *tale, struct talenode *node)
 {
-	if (node->tale != NULL && node->tale != tale)
-		nemotale_detach_node(node);
-
-	NEMOBOX_APPEND(tale->nodes, tale->snodes, tale->nnodes, node);
+	nemolist_remove(&node->link);
+	nemolist_insert_tail(&tale->node_list, &node->link);
 
 	nemotale_damage_below(tale, node);
 
@@ -163,18 +156,11 @@ void nemotale_attach_node(struct nemotale *tale, struct talenode *node)
 
 void nemotale_detach_node(struct talenode *node)
 {
+	nemolist_remove(&node->link);
+	nemolist_init(&node->link);
+
 	if (node->tale != NULL) {
-		struct nemotale *tale = node->tale;
-		int i;
-
-		for (i = 0; i < tale->nnodes; i++) {
-			if (tale->nodes[i] == node) {
-				NEMOBOX_REMOVE(tale->nodes, tale->nnodes, i);
-				break;
-			}
-		}
-
-		nemotale_damage_below(tale, node);
+		nemotale_damage_below(node->tale, node);
 
 		node->tale = NULL;
 	}
@@ -182,28 +168,12 @@ void nemotale_detach_node(struct talenode *node)
 
 void nemotale_above_node(struct nemotale *tale, struct talenode *node, struct talenode *above)
 {
-	int i;
+	nemolist_remove(&node->link);
 
-	if (node->tale != NULL) {
-		for (i = 0; i < node->tale->nnodes; i++) {
-			if (node->tale->nodes[i] == node) {
-				NEMOBOX_REMOVE(node->tale->nodes, node->tale->nnodes, i);
-				break;
-			}
-		}
-	}
-
-	if (above != NULL) {
-		for (i = 0; i < tale->nnodes; i++) {
-			if (tale->nodes[i] == above) {
-				NEMOBOX_PUSH(tale->nodes, tale->snodes, tale->nnodes, i + 1, node);
-
-				break;
-			}
-		}
-	} else {
-		NEMOBOX_PUSH(tale->nodes, tale->snodes, tale->nnodes, tale->nnodes, node);
-	}
+	if (above != NULL)
+		nemolist_insert_tail(&above->link, &node->link);
+	else
+		nemolist_insert_tail(&tale->node_list, &node->link);
 
 	nemotale_damage_below(tale, node);
 
@@ -212,28 +182,12 @@ void nemotale_above_node(struct nemotale *tale, struct talenode *node, struct ta
 
 void nemotale_below_node(struct nemotale *tale, struct talenode *node, struct talenode *below)
 {
-	int i;
+	nemolist_remove(&node->link);
 
-	if (node->tale != NULL) {
-		for (i = 0; i < node->tale->nnodes; i++) {
-			if (node->tale->nodes[i] == node) {
-				NEMOBOX_REMOVE(node->tale->nodes, node->tale->nnodes, i);
-				break;
-			}
-		}
-	}
-
-	if (below != NULL) {
-		for (i = 0; i < tale->nnodes; i++) {
-			if (tale->nodes[i] == below) {
-				NEMOBOX_PUSH(tale->nodes, tale->snodes, tale->nnodes, i, node);
-
-				break;
-			}
-		}
-	} else {
-		NEMOBOX_PUSH(tale->nodes, tale->snodes, tale->nnodes, 0, node);
-	}
+	if (below != NULL)
+		nemolist_insert(&below->link, &node->link);
+	else
+		nemolist_insert(&tale->node_list, &node->link);
 
 	nemotale_damage_below(tale, node);
 
@@ -242,7 +196,12 @@ void nemotale_below_node(struct nemotale *tale, struct talenode *node, struct ta
 
 void nemotale_clear_node(struct nemotale *tale)
 {
-	tale->nnodes = 0;
+	struct talenode *node, *next;
+
+	nemolist_for_each_safe(node, next, &tale->node_list, link) {
+		nemolist_remove(&node->link);
+		nemolist_init(&node->link);
+	}
 
 	nemotale_damage_all(tale);
 }
@@ -250,11 +209,8 @@ void nemotale_clear_node(struct nemotale *tale)
 void nemotale_update_node(struct nemotale *tale)
 {
 	struct talenode *node;
-	int i;
 
-	for (i = 0; i < tale->nnodes; i++) {
-		node = tale->nodes[i];
-
+	nemolist_for_each(node, &tale->node_list, link) {
 		if (node->transform.dirty != 0) {
 			nemotale_damage_below(tale, node);
 			nemotale_node_transform_update(node);
@@ -268,11 +224,8 @@ void nemotale_update_node(struct nemotale *tale)
 void nemotale_accumulate_damage(struct nemotale *tale)
 {
 	struct talenode *node;
-	int i;
 
-	for (i = 0; i < tale->nnodes; i++) {
-		node = tale->nodes[i];
-
+	nemolist_for_each(node, &tale->node_list, link) {
 		if (node->has_filter != 0) {
 			nemotale_damage_below(tale, node);
 		} else if (node->dirty != 0) {
@@ -307,11 +260,8 @@ void nemotale_accumulate_damage(struct nemotale *tale)
 void nemotale_flush_damage(struct nemotale *tale)
 {
 	struct talenode *node;
-	int i;
 
-	for (i = 0; i < tale->nnodes; i++) {
-		node = tale->nodes[i];
-
+	nemolist_for_each(node, &tale->node_list, link) {
 		if (node->dirty != 0) {
 			pixman_region32_clear(&node->damage);
 
