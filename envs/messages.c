@@ -74,7 +74,7 @@ int nemoenvs_dispatch_message(struct nemoenvs *envs, const char *src, const char
 				}
 
 				if (nemoitem_one_copy_attr(
-							nemoitem_search_one(envs->configs, path),
+							nemoitem_search_attr(envs->configs, path, "name", name),
 							one) == 0) {
 					nemoitem_attach_one(envs->configs,
 							nemoitem_one_clone(one));
@@ -285,6 +285,18 @@ int nemoenvs_dispatch_message(struct nemoenvs *envs, const char *src, const char
 							}
 						}
 					}
+				}
+			} else if (strcmp(path, "/nemoshell/font") == 0) {
+				char content[1024];
+
+				nemoitem_one_save(one, content);
+				setenv("NEMOSHELL_FONT", content, 1);
+
+				if (nemoitem_one_copy_attr(
+							nemoitem_search_one(envs->configs, path),
+							one) == 0) {
+					nemoitem_attach_one(envs->configs,
+							nemoitem_one_clone(one));
 				}
 			}
 		} else if (strcmp(cmd, "get") == 0) {
