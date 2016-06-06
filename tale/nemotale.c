@@ -171,7 +171,7 @@ void nemotale_above_node(struct nemotale *tale, struct talenode *node, struct ta
 	nemolist_remove(&node->link);
 
 	if (above != NULL)
-		nemolist_insert_tail(&above->link, &node->link);
+		nemolist_insert(&above->link, &node->link);
 	else
 		nemolist_insert_tail(&tale->node_list, &node->link);
 
@@ -185,7 +185,7 @@ void nemotale_below_node(struct nemotale *tale, struct talenode *node, struct ta
 	nemolist_remove(&node->link);
 
 	if (below != NULL)
-		nemolist_insert(&below->link, &node->link);
+		nemolist_insert_tail(&below->link, &node->link);
 	else
 		nemolist_insert(&tale->node_list, &node->link);
 
