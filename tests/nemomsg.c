@@ -16,13 +16,13 @@ int main(int argc, char *argv[])
 		{ "ip",			required_argument,		NULL,		'i' },
 		{ "port",		required_argument,		NULL,		'p' },
 		{ "msg",		required_argument,		NULL,		'm' },
-		{ "recv",		required_argument,		NULL,		'r' },
+		{ "reply",	required_argument,		NULL,		'r' },
 		{ 0 }
 	};
 	char *livemsg = "/nemomsg#/nemoshell#set#/check/live";
 	char ip[64];
 	char msg[1024];
-	int needs_recv = 0;
+	int needs_reply = 0;
 	int port;
 	int soc;
 	int opt;
@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 				break;
 
 			case 'r':
-				needs_recv = 1;
+				needs_reply = 1;
 				break;
 
 			default:
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 	udp_send_to(soc, ip, port, livemsg, strlen(livemsg) + 1);
 	udp_send_to(soc, ip, port, msg, strlen(msg) + 1);
 
-	while (needs_recv != 0) {
+	while (needs_reply != 0) {
 		char contents[1024];
 		char ip[128];
 		int port;
