@@ -256,8 +256,6 @@ static void nemonavi_dispatch_canvas_event(struct nemoshow *show, struct showone
 		nemoshow_event_update_taps(show, canvas, event);
 
 		if (nemoshow_event_is_more_taps(show, event, 3)) {
-			nemoshow_view_pick_distant(show, event, NEMOSHOW_VIEW_PICK_ROTATE_TYPE | NEMOSHOW_VIEW_PICK_TRANSLATE_TYPE);
-		} else if (nemoshow_event_is_double_taps(show, event)) {
 			nemoshow_view_pick_distant(show, event, NEMOSHOW_VIEW_PICK_ALL_TYPE);
 		}
 	}
