@@ -127,7 +127,6 @@ static int nemoenvs_handle_message(void *data)
 
 	content = nemotoken_create(buffer, size);
 	nemotoken_divide(content, '#');
-	nemotoken_divide(content, '=');
 	nemotoken_update(content);
 
 	if (nemotoken_get_token_count(content) < 4)

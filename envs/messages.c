@@ -109,7 +109,7 @@ int nemoenvs_dispatch_message(struct nemoenvs *envs, const char *src, const char
 				}
 
 				if (nemoitem_one_copy_attr(
-							nemoitem_search_format(envs->configs, path, "nodeid=%d#screenid=%d", nodeid, screenid),
+							nemoitem_search_format(envs->configs, path, "nodeid#%d#screenid#%d", nodeid, screenid),
 							one) == 0) {
 					nemoitem_attach_one(envs->configs,
 							nemoitem_one_clone(one));
@@ -143,7 +143,7 @@ int nemoenvs_dispatch_message(struct nemoenvs *envs, const char *src, const char
 				}
 
 				if (nemoitem_one_copy_attr(
-							nemoitem_search_format(envs->configs, path, "devnode=%s", devnode),
+							nemoitem_search_format(envs->configs, path, "devnode#%s", devnode),
 							one) == 0) {
 					nemoitem_attach_one(envs->configs,
 							nemoitem_one_clone(one));
@@ -305,7 +305,7 @@ int nemoenvs_dispatch_message(struct nemoenvs *envs, const char *src, const char
 				char *contents;
 
 				wl_list_for_each(config, &compz->screenconfig_list, link) {
-					asprintf(&contents, "nodeid=%d#screenid=%d#x=%d#y=%d#width=%d#height=%d",
+					asprintf(&contents, "nodeid#%d#screenid#%d#x#%d#y#%d#width#%d#height#%d",
 							config->nodeid, config->screenid,
 							config->x, config->y,
 							config->width, config->height);
@@ -319,7 +319,7 @@ int nemoenvs_dispatch_message(struct nemoenvs *envs, const char *src, const char
 				char *contents;
 
 				wl_list_for_each(config, &compz->inputconfig_list, link) {
-					asprintf(&contents, "devnode=%s#nodeid=%d#screenid=%d#x=%d#y=%d#width=%d#height=%d",
+					asprintf(&contents, "devnode#%s#nodeid#%d#screenid#%d#x#%d#y#%d#width#%d#height#%d",
 							config->devnode,
 							config->nodeid, config->screenid,
 							config->x, config->y,
