@@ -345,7 +345,7 @@ int nemoenvs_dispatch_message(struct nemoenvs *envs, const char *src, const char
 
 							strcat(contents, "#");
 							strcat(contents, name);
-							strcat(contents, "=");
+							strcat(contents, "#");
 							strcat(contents, value);
 						}
 

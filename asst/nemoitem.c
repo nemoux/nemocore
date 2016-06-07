@@ -81,7 +81,6 @@ struct itemone *nemoitem_search_attrs(struct nemoitem *item, const char *path, c
 
 	token = nemotoken_create(attrs, strlen(attrs));
 	nemotoken_divide(token, '#');
-	nemotoken_divide(token, '=');
 	nemotoken_update(token);
 
 	ntokens = nemotoken_get_token_count(token) / 2;
@@ -222,7 +221,6 @@ struct itembox *nemoitem_box_search_attrs(struct nemoitem *item, const char *pat
 
 	token = nemotoken_create(attrs, strlen(attrs));
 	nemotoken_divide(token, '#');
-	nemotoken_divide(token, '=');
 	nemotoken_update(token);
 
 	ntokens = nemotoken_get_token_count(token) / 2;
@@ -371,7 +369,6 @@ int nemoitem_one_load(struct itemone *one, const char *buffer)
 	if (token == NULL)
 		return -1;
 	nemotoken_divide(token, '#');
-	nemotoken_divide(token, '=');
 	nemotoken_divide(token, '\n');
 	nemotoken_divide(token, ' ');
 	nemotoken_divide(token, '\t');
@@ -399,7 +396,7 @@ int nemoitem_one_save(struct itemone *one, char *buffer)
 	nemoitem_attr_for_each(attr, one) {
 		strcat(buffer, "#");
 		strcat(buffer, attr->name);
-		strcat(buffer, "=");
+		strcat(buffer, "#");
 		strcat(buffer, attr->value);
 	}
 
