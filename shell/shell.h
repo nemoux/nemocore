@@ -103,9 +103,6 @@ struct nemoshell {
 	} pitch;
 
 	struct {
-		uint32_t samples;
-		double min_velocity;
-
 		double rotate_degree;
 		double scale_degree;
 

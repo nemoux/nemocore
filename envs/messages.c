@@ -188,11 +188,7 @@ int nemoenvs_dispatch_message(struct nemoenvs *envs, const char *src, const char
 					name = nemoitem_attr_get_name(attr);
 					value = nemoitem_attr_get_value(attr);
 
-					if (strcmp(name, "samples") == 0) {
-						shell->pick.samples = strtoul(value, NULL, 10);
-					} else if (strcmp(name, "min_velocity") == 0) {
-						shell->pick.min_velocity = strtod(value, NULL);
-					} else if (strcmp(name, "rotate_degree") == 0) {
+					if (strcmp(name, "rotate_degree") == 0) {
 						shell->pick.rotate_degree = strtod(value, NULL);
 					} else if (strcmp(name, "scale_degree") == 0) {
 						shell->pick.scale_degree = strtod(value, NULL);

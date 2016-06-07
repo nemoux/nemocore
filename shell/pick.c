@@ -174,7 +174,6 @@ static void pick_shellgrab_touchpoint_frame(struct touchpoint_grab *base, uint32
 	float r = pickgrab_calculate_touchpoint_angle(pick->tp0, pick->tp1);
 	float d = pickgrab_calculate_touchpoint_direction_degree(pick->tp0, pick->tp1);
 	uint64_t touchid = tp->id;
-	int checked;
 
 	if (bin == NULL)
 		return;
@@ -183,8 +182,6 @@ static void pick_shellgrab_touchpoint_frame(struct touchpoint_grab *base, uint32
 	if (pick->frameid == frameid)
 		return;
 	pick->frameid = pick->other->frameid = frameid;
-
-	checked = touchpoint_check_velocity(pick->tp0, shell->pick.samples, shell->pick.min_velocity) != 0 || touchpoint_check_velocity(pick->tp1, shell->pick.samples, shell->pick.min_velocity) != 0;
 
 	if (bin->reset_pivot != 0) {
 		if (bin->view->geometry.has_pivot == 0) {
@@ -204,7 +201,7 @@ static void pick_shellgrab_touchpoint_frame(struct touchpoint_grab *base, uint32
 	}
 
 	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_ROTATE)) {
-		if (checked != 0 && d > shell->pick.rotate_degree && distance > shell->pick.rotate_distance) {
+		if (d > shell->pick.rotate_degree && distance > shell->pick.rotate_distance) {
 			nemoview_set_rotation(bin->view, bin->view->geometry.r + pick->rotate.r - r);
 
 			if (shell->is_logging_grab != 0)
@@ -215,7 +212,7 @@ static void pick_shellgrab_touchpoint_frame(struct touchpoint_grab *base, uint32
 	}
 
 	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALE) || pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALEONLY)) {
-		if (checked != 0 && d > shell->pick.scale_degree && distance > shell->pick.scale_distance) {
+		if (d > shell->pick.scale_degree && distance > shell->pick.scale_distance) {
 			float s = distance / pick->scale.distance;
 
 			if (bin->view->geometry.sx * s * nemoshell_bin_get_geometry_width(bin) > bin->max_width ||
@@ -640,7 +637,6 @@ static void pick_actorgrab_touchpoint_frame(struct touchpoint_grab *base, uint32
 	float r = pickgrab_calculate_touchpoint_angle(pick->tp0, pick->tp1);
 	float d = pickgrab_calculate_touchpoint_direction_degree(pick->tp0, pick->tp1);
 	uint64_t touchid = tp->id;
-	int checked;
 
 	if (actor == NULL)
 		return;
@@ -649,10 +645,8 @@ static void pick_actorgrab_touchpoint_frame(struct touchpoint_grab *base, uint32
 		return;
 	pick->frameid = pick->other->frameid = frameid;
 
-	checked = touchpoint_check_velocity(pick->tp0, shell->pick.samples, shell->pick.min_velocity) != 0 || touchpoint_check_velocity(pick->tp1, shell->pick.samples, shell->pick.min_velocity) != 0;
-
 	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_ROTATE)) {
-		if (checked != 0 && d > shell->pick.rotate_degree && distance > shell->pick.rotate_distance) {
+		if (d > shell->pick.rotate_degree && distance > shell->pick.rotate_distance) {
 			nemoview_set_rotation(actor->view, actor->view->geometry.r + pick->rotate.r - r);
 		}
 
@@ -660,7 +654,7 @@ static void pick_actorgrab_touchpoint_frame(struct touchpoint_grab *base, uint32
 	}
 
 	if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALE) || pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALEONLY)) {
-		if (checked != 0 && d > shell->pick.scale_degree && distance > shell->pick.scale_distance) {
+		if (d > shell->pick.scale_degree && distance > shell->pick.scale_distance) {
 			float s = distance / pick->scale.distance;
 
 			if (actor->view->geometry.sx * s * actor->view->content->width > actor->max_width ||
