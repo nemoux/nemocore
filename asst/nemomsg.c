@@ -393,3 +393,39 @@ int nemomsg_send_vargs(struct nemomsg *msg, const char *name, const char *fmt, v
 
 	return 0;
 }
+
+int nemomsg_sendto_message(struct nemomsg *msg, const char *ip, int port, const char *contents, int size)
+{
+	udp_send_to(msg->soc, ip, port, contents, size);
+
+	return 0;
+}
+
+int nemomsg_sendto_format(struct nemomsg *msg, const char *ip, int port, const char *fmt, ...)
+{
+	va_list vargs;
+	char *contents;
+
+	va_start(vargs, fmt);
+	vasprintf(&contents, fmt, vargs);
+	va_end(vargs);
+
+	udp_send_to(msg->soc, ip, port, contents, strlen(contents) + 1);
+
+	free(contents);
+
+	return 0;
+}
+
+int nemomsg_sendto_vargs(struct nemomsg *msg, const char *ip, int port, const char *fmt, va_list vargs)
+{
+	char *contents;
+
+	vasprintf(&contents, fmt, vargs);
+
+	udp_send_to(msg->soc, ip, port, contents, strlen(contents) + 1);
+
+	free(contents);
+
+	return 0;
+}

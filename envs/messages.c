@@ -310,7 +310,7 @@ int nemoenvs_dispatch_message(struct nemoenvs *envs, const char *src, const char
 							config->x, config->y,
 							config->width, config->height);
 
-					nemoenvs_send(envs, src, "%s#%s#set#/nemoshell/screen#%s", dst, src, contents);
+					nemoenvs_reply(envs, "%s#%s#set#/nemoshell/screen#%s", dst, src, contents);
 
 					free(contents);
 				}
@@ -325,7 +325,7 @@ int nemoenvs_dispatch_message(struct nemoenvs *envs, const char *src, const char
 							config->x, config->y,
 							config->width, config->height);
 
-					nemoenvs_send(envs, src, "%s#%s#set#/nemoshell/input#%s", dst, src, contents);
+					nemoenvs_reply(envs, "%s#%s#set#/nemoshell/input#%s", dst, src, contents);
 
 					free(contents);
 				}
@@ -349,7 +349,7 @@ int nemoenvs_dispatch_message(struct nemoenvs *envs, const char *src, const char
 							strcat(contents, value);
 						}
 
-						nemoenvs_send(envs, src, "%s#%s#set#%s%s", dst, src, path, contents);
+						nemoenvs_reply(envs, "%s#%s#set#%s%s", dst, src, path, contents);
 					}
 				}
 			}

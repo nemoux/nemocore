@@ -48,6 +48,7 @@ extern void nemoenvs_destroy(struct nemoenvs *envs);
 
 extern int nemoenvs_listen(struct nemoenvs *envs, const char *ip, int port);
 extern int nemoenvs_send(struct nemoenvs *envs, const char *name, const char *fmt, ...);
+extern int nemoenvs_reply(struct nemoenvs *envs, const char *fmt, ...);
 
 extern void nemoenvs_set_name(struct nemoenvs *envs, const char *name);
 
