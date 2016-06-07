@@ -287,10 +287,10 @@ int nemoenvs_dispatch_message(struct nemoenvs *envs, const char *src, const char
 					}
 				}
 			} else if (strcmp(path, "/nemoshell/font") == 0) {
-				char content[1024];
+				char contents[1024];
 
-				nemoitem_one_save(one, content);
-				setenv("NEMOSHELL_FONT", content, 1);
+				nemoitem_one_save(one, contents);
+				setenv("NEMOSHELL_FONT", contents, 1);
 
 				if (nemoitem_one_copy_attr(
 							nemoitem_search_one(envs->configs, path),
@@ -302,32 +302,32 @@ int nemoenvs_dispatch_message(struct nemoenvs *envs, const char *src, const char
 		} else if (strcmp(cmd, "get") == 0) {
 			if (strcmp(path, "/nemoshell/screen") == 0) {
 				struct screenconfig *config;
-				char *content;
+				char *contents;
 
 				wl_list_for_each(config, &compz->screenconfig_list, link) {
-					asprintf(&content, "nodeid=%d#screenid=%d#x=%d#y=%d#width=%d#height=%d",
+					asprintf(&contents, "nodeid=%d#screenid=%d#x=%d#y=%d#width=%d#height=%d",
 							config->nodeid, config->screenid,
 							config->x, config->y,
 							config->width, config->height);
 
-					nemoenvs_send(envs, src, "%s#%s#set#/nemoshell/screen#%s", dst, src, content);
+					nemoenvs_send(envs, src, "%s#%s#set#/nemoshell/screen#%s", dst, src, contents);
 
-					free(content);
+					free(contents);
 				}
 			} else if (strcmp(path, "/nemoshell/input") == 0) {
 				struct inputconfig *config;
-				char *content;
+				char *contents;
 
 				wl_list_for_each(config, &compz->inputconfig_list, link) {
-					asprintf(&content, "devnode=%s#nodeid=%d#screenid=%d#x=%d#y=%d#width=%d#height=%d",
+					asprintf(&contents, "devnode=%s#nodeid=%d#screenid=%d#x=%d#y=%d#width=%d#height=%d",
 							config->devnode,
 							config->nodeid, config->screenid,
 							config->x, config->y,
 							config->width, config->height);
 
-					nemoenvs_send(envs, src, "%s#%s#set#/nemoshell/input#%s", dst, src, content);
+					nemoenvs_send(envs, src, "%s#%s#set#/nemoshell/input#%s", dst, src, contents);
 
-					free(content);
+					free(contents);
 				}
 			} else {
 				struct itemone *one;
@@ -335,7 +335,7 @@ int nemoenvs_dispatch_message(struct nemoenvs *envs, const char *src, const char
 
 				nemoitem_for_each(one, envs->configs) {
 					if (nemoitem_one_has_path(one, path) != 0) {
-						char content[1024] = { 0 };
+						char contents[1024] = { 0 };
 						const char *name;
 						const char *value;
 
@@ -343,13 +343,13 @@ int nemoenvs_dispatch_message(struct nemoenvs *envs, const char *src, const char
 							name = nemoitem_attr_get_name(attr);
 							value = nemoitem_attr_get_value(attr);
 
-							strcat(content, "#");
-							strcat(content, name);
-							strcat(content, "=");
-							strcat(content, value);
+							strcat(contents, "#");
+							strcat(contents, name);
+							strcat(contents, "=");
+							strcat(contents, value);
 						}
 
-						nemoenvs_send(envs, src, "%s#%s#set#%s%s", dst, src, path, content);
+						nemoenvs_send(envs, src, "%s#%s#set#%s%s", dst, src, path, contents);
 					}
 				}
 			}

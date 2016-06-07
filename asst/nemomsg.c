@@ -189,30 +189,30 @@ int nemomsg_put_destination_callback(struct nemomsg *msg, const char *name, nemo
 	return 0;
 }
 
-int nemomsg_dispatch(struct nemomsg *msg, const char *ip, int port, struct nemotoken *content)
+int nemomsg_dispatch(struct nemomsg *msg, const char *ip, int port, struct nemotoken *contents)
 {
 	struct msgcallback *cb;
 	const char *src;
 	const char *dst;
 
-	if (nemotoken_get_token_count(content) < 3)
+	if (nemotoken_get_token_count(contents) < 3)
 		return -1;
 
-	src = nemotoken_get_token(content, 0);
-	dst = nemotoken_get_token(content, 1);
+	src = nemotoken_get_token(contents, 0);
+	dst = nemotoken_get_token(contents, 1);
 
 	nemolist_for_each(cb, &msg->callback_list, link) {
-		cb->callback(cb->data, src, dst, content);
+		cb->callback(cb->data, src, dst, contents);
 	}
 
 	nemolist_for_each(cb, &msg->source_list, link) {
 		if (strcmp(cb->name, src) == 0)
-			cb->callback(cb->data, src, dst, content);
+			cb->callback(cb->data, src, dst, contents);
 	}
 
 	nemolist_for_each(cb, &msg->destination_list, link) {
 		if (strcmp(cb->name, dst) == 0)
-			cb->callback(cb->data, src, dst, content);
+			cb->callback(cb->data, src, dst, contents);
 	}
 
 	return 0;
@@ -310,15 +310,15 @@ int nemomsg_clean_clients(struct nemomsg *msg)
 	return 0;
 }
 
-int nemomsg_recv_message(struct nemomsg *msg, char *content, int size)
+int nemomsg_recv_message(struct nemomsg *msg, char *contents, int size)
 {
-	msg->source.buffer = content;
-	msg->source.size = udp_recv_from(msg->soc, msg->source.ip, &msg->source.port, content, size);
+	msg->source.buffer = contents;
+	msg->source.size = udp_recv_from(msg->soc, msg->source.ip, &msg->source.port, contents, size);
 
 	return msg->source.size;
 }
 
-int nemomsg_send_message(struct nemomsg *msg, const char *name, const char *content, int size)
+int nemomsg_send_message(struct nemomsg *msg, const char *name, const char *contents, int size)
 {
 	struct msgclient *client;
 	regex_t regex;
@@ -328,7 +328,7 @@ int nemomsg_send_message(struct nemomsg *msg, const char *name, const char *cont
 
 	nemolist_for_each(client, &msg->client_list, link) {
 		if (regexec(&regex, client->name, 0, NULL, 0) == 0) {
-			udp_send_to(msg->soc, client->ip, client->port, content, size);
+			udp_send_to(msg->soc, client->ip, client->port, contents, size);
 		}
 	}
 
@@ -342,25 +342,25 @@ int nemomsg_send_format(struct nemomsg *msg, const char *name, const char *fmt, 
 	struct msgclient *client;
 	regex_t regex;
 	va_list vargs;
-	char *content;
+	char *contents;
 	int size;
 
 	if (regcomp(&regex, name, REG_EXTENDED))
 		return -1;
 
 	va_start(vargs, fmt);
-	vasprintf(&content, fmt, vargs);
+	vasprintf(&contents, fmt, vargs);
 	va_end(vargs);
 
-	size = strlen(content) + 1;
+	size = strlen(contents) + 1;
 
 	nemolist_for_each(client, &msg->client_list, link) {
 		if (regexec(&regex, client->name, 0, NULL, 0) == 0) {
-			udp_send_to(msg->soc, client->ip, client->port, content, size);
+			udp_send_to(msg->soc, client->ip, client->port, contents, size);
 		}
 	}
 
-	free(content);
+	free(contents);
 
 	regfree(&regex);
 
@@ -371,23 +371,23 @@ int nemomsg_send_vargs(struct nemomsg *msg, const char *name, const char *fmt, v
 {
 	struct msgclient *client;
 	regex_t regex;
-	char *content;
+	char *contents;
 	int size;
 
 	if (regcomp(&regex, name, REG_EXTENDED))
 		return -1;
 
-	vasprintf(&content, fmt, vargs);
+	vasprintf(&contents, fmt, vargs);
 
-	size = strlen(content) + 1;
+	size = strlen(contents) + 1;
 
 	nemolist_for_each(client, &msg->client_list, link) {
 		if (regexec(&regex, client->name, 0, NULL, 0) == 0) {
-			udp_send_to(msg->soc, client->ip, client->port, content, size);
+			udp_send_to(msg->soc, client->ip, client->port, contents, size);
 		}
 	}
 
-	free(content);
+	free(contents);
 
 	regfree(&regex);
 

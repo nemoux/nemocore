@@ -10,7 +10,7 @@ NEMO_BEGIN_EXTERN_C
 #include <nemolist.h>
 #include <nemotoken.h>
 
-typedef int (*nemomsg_callback_t)(void *data, const char *src, const char *dst, struct nemotoken *content);
+typedef int (*nemomsg_callback_t)(void *data, const char *src, const char *dst, struct nemotoken *contents);
 
 struct msgcallback {
 	nemomsg_callback_t callback;
@@ -67,7 +67,7 @@ extern int nemomsg_put_callback(struct nemomsg *msg, nemomsg_callback_t callback
 extern int nemomsg_put_source_callback(struct nemomsg *msg, const char *name, nemomsg_callback_t callback);
 extern int nemomsg_put_destination_callback(struct nemomsg *msg, const char *name, nemomsg_callback_t callback);
 
-extern int nemomsg_dispatch(struct nemomsg *msg, const char *ip, int port, struct nemotoken *content);
+extern int nemomsg_dispatch(struct nemomsg *msg, const char *ip, int port, struct nemotoken *contents);
 extern int nemomsg_clean(struct nemomsg *msg);
 
 extern int nemomsg_set_client(struct nemomsg *msg, const char *name, const char *ip, int port);
@@ -76,7 +76,7 @@ extern int nemomsg_put_client(struct nemomsg *msg, const char *name, const char 
 extern int nemomsg_check_clients(struct nemomsg *msg);
 extern int nemomsg_clean_clients(struct nemomsg *msg);
 
-extern int nemomsg_recv_message(struct nemomsg *msg, char *content, int size);
+extern int nemomsg_recv_message(struct nemomsg *msg, char *contents, int size);
 extern int nemomsg_send_message(struct nemomsg *msg, const char *name, const char *contents, int size);
 extern int nemomsg_send_format(struct nemomsg *msg, const char *name, const char *fmt, ...);
 extern int nemomsg_send_vargs(struct nemomsg *msg, const char *name, const char *fmt, va_list vargs);
