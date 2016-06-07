@@ -524,7 +524,7 @@ int nemoitem_load(struct nemoitem *item, const char *filepath)
 	while (fgets(buffer, sizeof(buffer), fp) != NULL) {
 		if (buffer[0] == '/' && buffer[1] == '/')
 			continue;
-		if (isascii(buffer[0]) == 0)
+		if (buffer[0] != '/')
 			continue;
 
 		one = nemoitem_one_create();
