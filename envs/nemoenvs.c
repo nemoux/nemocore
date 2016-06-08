@@ -267,9 +267,10 @@ int nemoenvs_load_configs(struct nemoenvs *envs, const char *configpath)
 
 		one = nemoitem_one_create();
 		nemoitem_one_load(one, buffer, '#');
-		nemoitem_attach_one(envs->configs, one);
 
 		nemoenvs_dispatch(envs, "/file", envs->name, "set", nemoitem_one_get_path(one), one);
+
+		nemoitem_one_destroy(one);
 	}
 
 	fclose(fp);

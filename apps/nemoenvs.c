@@ -216,16 +216,12 @@ int nemoenvs_load_variable(struct nemoenvs *envs, const char *name, const char *
 
 	env = getenv(name);
 	if (env != NULL) {
-		one = nemoitem_search_one(envs->configs, path);
-		if (one == NULL) {
-			one = nemoitem_one_create();
-			nemoitem_one_set_path(one, path);
-			nemoitem_attach_one(envs->configs, one);
-		}
-
+		one = nemoitem_one_create();
 		nemoitem_one_load(one, env, '#');
 
 		nemoenvs_dispatch(envs, "/envs", envs->clientname, "set", path, one);
+
+		nemoitem_one_destroy(one);
 	}
 
 	return 0;

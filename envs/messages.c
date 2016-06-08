@@ -290,6 +290,9 @@ int nemoenvs_dispatch_message(struct nemoenvs *envs, const char *src, const char
 					nemoitem_attach_one(envs->configs,
 							nemoitem_one_clone(one));
 				}
+			} else {
+				nemoitem_attach_one(envs->configs,
+						nemoitem_one_clone(one));
 			}
 		} else if (strcmp(cmd, "get") == 0) {
 			if (strcmp(path, "/nemoshell/screen") == 0) {
@@ -337,6 +340,11 @@ int nemoenvs_dispatch_message(struct nemoenvs *envs, const char *src, const char
 			}
 		}
 	} else {
+		if (strcmp(cmd, "set") == 0) {
+			nemoitem_attach_one(envs->configs,
+					nemoitem_one_clone(one));
+		}
+
 		nemomsg_send_message(envs->msg, dst,
 				nemomsg_get_source_buffer(envs->msg),
 				nemomsg_get_source_size(envs->msg));
