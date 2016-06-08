@@ -28,6 +28,10 @@ static int nemoxserver_handle_sigusr1(int signum, void *data)
 	nemoxmanager_create(xserver, xserver->wm_fd);
 	wl_event_source_remove(xserver->sigusr1_source);
 
+	xserver->state = NEMOXSERVER_READY_STATE;
+
+	wl_signal_emit(&xserver->sigusr1_signal, xserver);
+
 	return 1;
 }
 
@@ -97,6 +101,8 @@ static int nemoxserver_handle_event(int listenfd, uint32_t mask, void *data)
 
 		wl_event_source_remove(xserver->unix_source);
 		xserver->unix_source = NULL;
+
+		xserver->state = NEMOXSERVER_INIT_STATE;
 	}
 
 	return 1;
@@ -253,6 +259,8 @@ struct nemoxserver *nemoxserver_create(struct nemoshell *shell, const char *xser
 	xserver->compz = compz;
 	xserver->shell = shell;
 
+	xserver->state = NEMOXSERVER_NONE_STATE;
+
 	xserver->xdisplay = xdisplay;
 
 	if (nemoxserver_create_lockfile(xserver->xdisplay, lockfile, sizeof(lockfile)) < 0)
@@ -279,6 +287,10 @@ struct nemoxserver *nemoxserver_create(struct nemoshell *shell, const char *xser
 
 	xserver->destroy_listener.notify = nemoxserver_handle_compz_destroy;
 	wl_signal_add(&compz->destroy_signal, &xserver->destroy_listener);
+
+	wl_signal_init(&xserver->sigusr1_signal);
+
+	wl_list_init(&xserver->link);
 
 	return xserver;
 
@@ -307,6 +319,8 @@ void nemoxserver_destroy(struct nemoxserver *xserver)
 		wl_event_source_remove(xserver->abstract_source);
 	if (xserver->unix_source != NULL)
 		wl_event_source_remove(xserver->unix_source);
+
+	wl_list_remove(&xserver->link);
 
 	wl_list_remove(&xserver->destroy_listener.link);
 
@@ -384,6 +398,8 @@ int nemoxserver_execute(struct nemoxserver *xserver)
 
 		wl_event_source_remove(xserver->unix_source);
 		xserver->unix_source = NULL;
+
+		xserver->state = NEMOXSERVER_INIT_STATE;
 	}
 
 	return 0;

@@ -8,6 +8,7 @@ NEMO_BEGIN_EXTERN_C
 #endif
 
 #include <nemoapps.h>
+#include <nemoxapp.h>
 #include <nemomsg.h>
 
 #include <nemobox.h>
@@ -41,6 +42,14 @@ struct nemoenvs {
 	struct nemotimer *timer;
 
 	char *name;
+
+	struct wl_list xserver_list;
+	uint32_t xdisplay;
+
+	struct wl_list xapp_list;
+	struct wl_list xclient_list;
+	
+	struct wl_listener xserver_listener;
 };
 
 extern struct nemoenvs *nemoenvs_create(struct nemoshell *shell);

@@ -11,6 +11,7 @@ include_directories(
 	${CMAKE_BINARY_DIR}/shell
 	${CMAKE_SOURCE_DIR}/tale
 	${CMAKE_SOURCE_DIR}/show
+	${CMAKE_SOURCE_DIR}/xwayland
 	)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
@@ -22,6 +23,7 @@ add_definitions(-DNEMOENVS_RESOURCES="${CMAKE_INSTALL_PREFIX}/share/nemoenvs")
 add_library(nemoenvs SHARED
 	nemoenvs.c
 	nemoapps.c
+	nemoxapp.c
 	messages.c
 	bindings.c
 	showhelper.c
@@ -33,15 +35,17 @@ TARGET_LINK_LIBRARIES(nemoenvs
 	nemoshell
 	nemotale
 	nemoshow
+	nemoxwayland
 	)
 
-set(NEMOENVS_PKGCONFIG_REQUIRES "nemoasst nemocompz nemoshell nemoshow")
+set(NEMOENVS_PKGCONFIG_REQUIRES "nemoasst nemocompz nemoshell nemoshow nemoxwayland")
 
 INSTALL(TARGETS nemoenvs DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
 
 set(HEADER_FILES
 	nemoenvs.h
 	nemoapps.h
+	nemoxapp.h
 	showhelper.h
 	)
 

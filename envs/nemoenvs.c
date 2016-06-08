@@ -8,6 +8,7 @@
 #include <errno.h>
 
 #include <ctype.h>
+#include <signal.h>
 #include <wayland-server.h>
 
 #include <shell.h>
@@ -15,6 +16,7 @@
 #include <view.h>
 #include <monitor.h>
 #include <timer.h>
+#include <xserver.h>
 #include <waylandhelper.h>
 
 #include <nemoenvs.h>
@@ -48,6 +50,12 @@ struct nemoenvs *nemoenvs_create(struct nemoshell *shell)
 	nemolist_init(&envs->app_list);
 	nemolist_init(&envs->callback_list);
 
+	wl_list_init(&envs->xserver_list);
+	wl_list_init(&envs->xapp_list);
+	wl_list_init(&envs->xclient_list);
+
+	wl_list_init(&envs->xserver_listener.link);
+
 	nemoenvs_set_callback(envs, nemoenvs_dispatch_message, shell);
 
 	return envs;
@@ -61,6 +69,12 @@ err1:
 void nemoenvs_destroy(struct nemoenvs *envs)
 {
 	struct envscallback *cb, *next;
+
+	wl_list_remove(&envs->xserver_listener.link);
+
+	nemoenvs_terminate_xservers(envs);
+	nemoenvs_terminate_xclients(envs);
+	nemoenvs_terminate_xapps(envs);
 
 	nemolist_for_each_safe(cb, next, &envs->callback_list, link) {
 		nemolist_remove(&cb->link);

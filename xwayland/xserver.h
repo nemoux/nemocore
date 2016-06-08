@@ -13,6 +13,14 @@ NEMO_BEGIN_EXTERN_C
 
 #include <task.h>
 
+typedef enum {
+	NEMOXSERVER_NONE_STATE = 0,
+	NEMOXSERVER_INIT_STATE = 1,
+	NEMOXSERVER_READY_STATE = 2,
+	NEMOXSERVER_USED_STATE = 3,
+	NEMOXSERVER_LAST_STATE
+} NemoXServerState;
+
 struct nemocompz;
 struct nemoxmanager;
 struct nemoxwindow;
@@ -20,6 +28,12 @@ struct nemoxwindow;
 struct nemoxserver {
 	struct wl_display *display;
 	struct wl_event_loop *loop;
+
+	int state;
+
+	struct wl_list link;
+
+	struct wl_signal sigusr1_signal;
 
 	char *xserverpath;
 
