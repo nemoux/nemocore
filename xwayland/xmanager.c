@@ -246,6 +246,7 @@ static void nemoxmanager_handle_create_notify(struct nemoxmanager *xmanager, xcb
 {
 	xcb_create_notify_event_t *create_notify = (xcb_create_notify_event_t *)event;
 
+#ifdef XWAYLAND_DEBUG_ON
 	nemolog_message("XWAYLAND", "[CREATE_NOTIFY] window(%d) width(%d) height(%d) x(%d) y(%d) override_redirect(%d)\n",
 			create_notify->window,
 			create_notify->width,
@@ -253,6 +254,7 @@ static void nemoxmanager_handle_create_notify(struct nemoxmanager *xmanager, xcb
 			create_notify->x,
 			create_notify->y,
 			create_notify->override_redirect);
+#endif
 
 	if (nemoxmanager_our_resource(xmanager, create_notify->window))
 		return;
@@ -271,7 +273,9 @@ static void nemoxmanager_handle_map_request(struct nemoxmanager *xmanager, xcb_g
 	xcb_map_request_event_t *map_request = (xcb_map_request_event_t *)event;
 	struct nemoxwindow *xwindow;
 
+#ifdef XWAYLAND_DEBUG_ON
 	nemolog_message("XWAYLAND", "[MAP_REQUEST]\n");
+#endif
 
 	if (nemoxmanager_our_resource(xmanager, map_request->window)) {
 		nemolog_error("XWAYLAND", "xcb_map_request (window %d, ours)", map_request->window);
@@ -295,7 +299,9 @@ static void nemoxmanager_handle_map_notify(struct nemoxmanager *xmanager, xcb_ge
 {
 	xcb_map_notify_event_t *map_notify = (xcb_map_notify_event_t *)event;
 
+#ifdef XWAYLAND_DEBUG_ON
 	nemolog_message("XWAYLAND", "[MAP_NOTIFY]\n");
+#endif
 
 	if (nemoxmanager_our_resource(xmanager, map_notify->window))
 		return;
@@ -306,7 +312,9 @@ static void nemoxmanager_handle_unmap_notify(struct nemoxmanager *xmanager, xcb_
 	xcb_unmap_notify_event_t *unmap_notify = (xcb_unmap_notify_event_t *)event;
 	struct nemoxwindow *xwindow;
 
+#ifdef XWAYLAND_DEBUG_ON
 	nemolog_message("XWAYLAND", "[UNMAP_NOTIFY]\n");
+#endif
 
 	if (nemoxmanager_our_resource(xmanager, unmap_notify->window))
 		return;
@@ -345,7 +353,9 @@ static void nemoxmanager_handle_reparent_notify(struct nemoxmanager *xmanager, x
 	xcb_reparent_notify_event_t *reparent_notify = (xcb_reparent_notify_event_t *)event;
 	struct nemoxwindow *xwindow;
 
+#ifdef XWAYLAND_DEBUG_ON
 	nemolog_message("XWAYLAND", "[REPARENT_NOTIFY]\n");
+#endif
 
 	if (reparent_notify->parent == xmanager->screen->root) {
 		nemoxmanager_create_window(xmanager,
@@ -370,7 +380,9 @@ static void nemoxmanager_handle_configure_request(struct nemoxmanager *xmanager,
 	uint32_t mask, values[16];
 	int i = 0;
 
+#ifdef XWAYLAND_DEBUG_ON
 	nemolog_message("XWAYLAND", "[CONFIGURE_REQUEST]\n");
+#endif
 
 	xwindow = nemoxmanager_get_window(xmanager, configure_request->window);
 	if (xwindow == NULL)
@@ -430,11 +442,13 @@ static void nemoxmanager_handle_configure_notify(struct nemoxmanager *xmanager, 
 	xcb_configure_notify_event_t *configure_notify = (xcb_configure_notify_event_t *)event;
 	struct nemoxwindow *xwindow;
 
+#ifdef XWAYLAND_DEBUG_ON
 	nemolog_message("XWAYLAND", "[CONFIGURE_NOTIFY] x(%d) y(%d) width(%d) height(%d)\n",
 			configure_notify->x,
 			configure_notify->y,
 			configure_notify->width,
 			configure_notify->height);
+#endif
 
 	xwindow = nemoxmanager_get_window(xmanager, configure_notify->window);
 	if (xwindow == NULL)
@@ -453,7 +467,9 @@ static void nemoxmanager_handle_destroy_notify(struct nemoxmanager *xmanager, xc
 	xcb_destroy_notify_event_t *destroy_notify = (xcb_destroy_notify_event_t *)event;
 	struct nemoxwindow *xwindow;
 
+#ifdef XWAYLAND_DEBUG_ON
 	nemolog_message("XWAYLAND", "[DESTROY_NOTIFY]\n");
+#endif
 
 	if (nemoxmanager_our_resource(xmanager, destroy_notify->window))
 		return;
@@ -467,7 +483,9 @@ static void nemoxmanager_handle_destroy_notify(struct nemoxmanager *xmanager, xc
 
 static void nemoxmanager_handle_mapping_notify(struct nemoxmanager *xmanager, xcb_generic_event_t *event)
 {
+#ifdef XWAYLAND_DEBUG_ON
 	nemolog_message("XWAYLAND", "[MAPPING_NOTIFY]\n");
+#endif
 }
 
 static void nemoxmanager_handle_property_notify(struct nemoxmanager *xmanager, xcb_generic_event_t *event)
@@ -475,7 +493,9 @@ static void nemoxmanager_handle_property_notify(struct nemoxmanager *xmanager, x
 	xcb_property_notify_event_t *property_notify = (xcb_property_notify_event_t *)event;
 	struct nemoxwindow *xwindow;
 
+#ifdef XWAYLAND_DEBUG_ON
 	nemolog_message("XWAYLAND", "[PROPERTY_NOTIFY]\n");
+#endif
 
 	xwindow = nemoxmanager_get_window(xmanager, property_notify->window);
 	if (xwindow == NULL)
@@ -490,7 +510,9 @@ static void nemoxmanager_handle_property_notify(struct nemoxmanager *xmanager, x
 
 static void nemoxmanager_handle_moveresize(struct nemoxwindow *xwindow, xcb_client_message_event_t *client_message)
 {
+#ifdef XWAYLAND_DEBUG_ON
 	nemolog_message("XWAYLAND", "[MOVERESIZE]\n");
+#endif
 }
 
 static void nemoxmanager_handle_state(struct nemoxwindow *xwindow, xcb_client_message_event_t *client_message)
@@ -500,7 +522,9 @@ static void nemoxmanager_handle_state(struct nemoxwindow *xwindow, xcb_client_me
 	uint32_t action, property;
 	int maximized = (xwindow->maximized_horz && xwindow->maximized_vert);
 
+#ifdef XWAYLAND_DEBUG_ON
 	nemolog_message("XWAYLAND", "[STATE]\n");
+#endif
 
 	action = client_message->data.data32[0];
 	property = client_message->data.data32[1];
@@ -551,7 +575,9 @@ static void nemoxmanager_handle_surface_id(struct nemoxwindow *xwindow, xcb_clie
 	struct nemoxmanager *xmanager = xwindow->xmanager;
 	struct wl_resource *resource;
 
+#ifdef XWAYLAND_DEBUG_ON
 	nemolog_message("XWAYLAND", "[SURFACE_ID]\n");
+#endif
 
 	if (xwindow->canvas_id != 0) {
 		nemolog_warning("XWAYLAND", "surface id for window %d is existed\n", xwindow->canvas_id);
@@ -574,7 +600,9 @@ static void nemoxmanager_handle_client_message(struct nemoxmanager *xmanager, xc
 	xcb_client_message_event_t *client_message = (xcb_client_message_event_t *)event;
 	struct nemoxwindow *xwindow;
 
+#ifdef XWAYLAND_DEBUG_ON
 	nemolog_message("XWAYLAND", "[CLIENT_MESSAGE]\n");
+#endif
 
 	xwindow = nemoxmanager_get_window(xmanager, client_message->window);
 	if (xwindow == NULL)
@@ -593,7 +621,9 @@ static void nemoxmanager_handle_focus_in(struct nemoxmanager *xmanager, xcb_gene
 {
 	xcb_focus_in_event_t *focus = (xcb_focus_in_event_t *)event;
 
+#ifdef XWAYLAND_DEBUG_ON
 	nemolog_message("XWAYLAND", "[FOCUS_IN]\n");
+#endif
 
 	if (xmanager->focus == NULL || focus->event != xmanager->focus->id)
 		nemoxmanager_send_focus_window(xmanager, xmanager->focus);
