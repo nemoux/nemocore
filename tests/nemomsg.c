@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
 		{ "reply",	required_argument,		NULL,		'r' },
 		{ 0 }
 	};
-	char *livemsg = "/nemomsg#/nemoshell#set#/check/live";
+	char *livemsg = "/nemomsg /nemoshell set /check/live";
 	char ip[64];
 	char msg[1024];
 	int needs_reply = 0;

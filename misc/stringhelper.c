@@ -30,6 +30,16 @@ int string_divide(char *str, int length, char div)
 	return count;
 }
 
+void string_replace(char *str, int length, char src, char dst)
+{
+	int i;
+
+	for (i = 0; i < length; i++) {
+		if (str[i] == src)
+			str[i] = dst;
+	}
+}
+
 const char *string_get_token(const char *str, int length, int index)
 {
 	int i, state;

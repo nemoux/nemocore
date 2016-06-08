@@ -24,6 +24,7 @@
 #include <nemoease.h>
 #include <nemotoken.h>
 #include <udphelper.h>
+#include <stringhelper.h>
 #include <nemolog.h>
 #include <nemomisc.h>
 
@@ -156,7 +157,7 @@ static int nemoenvs_handle_message(void *data)
 		return -1;
 
 	contents = nemotoken_create(buffer, size);
-	nemotoken_divide(contents, '#');
+	nemotoken_divide(contents, ' ');
 	nemotoken_update(contents);
 
 	if (nemotoken_get_token_count(contents) < 4)
@@ -193,7 +194,7 @@ static void nemoenvs_dispatch_timer(struct nemotimer *timer, void *data)
 
 	nemomsg_clean_clients(envs->msg);
 	nemomsg_check_clients(envs->msg);
-	nemomsg_send_format(envs->msg, "/*", "/nemoshell#/*#get#/check/live");
+	nemomsg_send_format(envs->msg, "/*", "/nemoshell /* get /check/live");
 
 	nemotimer_set_timeout(envs->timer, NEMOENVS_LIVENESS_TIMEOUT);
 }
@@ -265,8 +266,11 @@ int nemoenvs_load_configs(struct nemoenvs *envs, const char *configpath)
 		if (buffer[0] != '/')
 			continue;
 
+		string_replace(buffer, strlen(buffer), '\n', '\0');
+		string_replace(buffer, strlen(buffer), '\t', ' ');
+
 		one = nemoitem_one_create();
-		nemoitem_one_load(one, buffer, '#');
+		nemoitem_one_load(one, buffer, ' ');
 
 		nemoenvs_dispatch(envs, "/file", envs->name, "set", nemoitem_one_get_path(one), one);
 
@@ -289,7 +293,7 @@ int nemoenvs_save_configs(struct nemoenvs *envs, const char *configpath)
 		return -1;
 
 	nemoitem_for_each(one, envs->configs) {
-		nemoitem_one_save(one, buffer, '#');
+		nemoitem_one_save(one, buffer, ' ');
 
 		fputs(buffer, fp);
 		fputc('\n', fp);

@@ -17,7 +17,7 @@ int nemoenvs_dispatch_message(struct nemoenvs *envs, const char *src, const char
 
 	if (strcmp(cmd, "get") == 0) {
 		if (strcmp(path, "/check/live") == 0) {
-			nemoenvs_reply(envs, "%s#%s#set#/check/live", envs->clientname, src);
+			nemoenvs_reply(envs, "%s %s set /check/live", envs->clientname, src);
 		}
 	}
 

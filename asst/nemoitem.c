@@ -369,9 +369,6 @@ int nemoitem_one_load(struct itemone *one, const char *buffer, char delimiter)
 	if (token == NULL)
 		return -1;
 	nemotoken_divide(token, delimiter);
-	nemotoken_divide(token, '\n');
-	nemotoken_divide(token, '\t');
-	nemotoken_divide(token, ' ');
 	nemotoken_update(token);
 
 	nemoitem_one_set_path(one, nemotoken_get_token(token, 0));
