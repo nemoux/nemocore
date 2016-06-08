@@ -103,9 +103,6 @@ struct nemoshell {
 	} pitch;
 
 	struct {
-		double rotate_degree;
-		double scale_degree;
-
 		double rotate_distance;
 		double scale_distance;
 
