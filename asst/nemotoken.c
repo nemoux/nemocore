@@ -129,6 +129,17 @@ void nemotoken_divide(struct nemotoken *token, char div)
 	}
 }
 
+void nemotoken_replace(struct nemotoken *token, char src, char dst)
+{
+	int i;
+
+	for (i = 0; i < token->length; i++) {
+		if (token->contents[i] == src) {
+			token->contents[i] = dst;
+		}
+	}
+}
+
 int nemotoken_update(struct nemotoken *token)
 {
 	int i, state, index;

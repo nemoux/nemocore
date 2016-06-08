@@ -23,6 +23,7 @@ extern int nemotoken_append(struct nemotoken *token, const char *str, int length
 extern int nemotoken_append_format(struct nemotoken *token, const char *fmt, ...);
 
 extern void nemotoken_divide(struct nemotoken *token, char div);
+extern void nemotoken_replace(struct nemotoken *token, char src, char dst);
 extern int nemotoken_update(struct nemotoken *token);
 
 extern int nemotoken_get_token_count(struct nemotoken *token);
