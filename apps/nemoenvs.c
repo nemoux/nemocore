@@ -223,7 +223,7 @@ int nemoenvs_load_variable(struct nemoenvs *envs, const char *name, const char *
 			nemoitem_attach_one(envs->configs, one);
 		}
 
-		nemoitem_one_load(one, env);
+		nemoitem_one_load(one, env, '#');
 
 		nemoenvs_dispatch(envs, "/envs", envs->clientname, "set", path, one);
 	}

@@ -51,14 +51,14 @@ extern void nemoitem_detach_one(struct nemoitem *item, struct itemone *one);
 
 extern struct itemone *nemoitem_search_one(struct nemoitem *item, const char *path);
 extern struct itemone *nemoitem_search_attr(struct nemoitem *item, const char *path, const char *name, const char *value);
-extern struct itemone *nemoitem_search_attrs(struct nemoitem *item, const char *path, const char *attrs);
-extern struct itemone *nemoitem_search_format(struct nemoitem *item, const char *path, const char *fmt, ...);
+extern struct itemone *nemoitem_search_attrs(struct nemoitem *item, const char *path, char delimiter, const char *attrs);
+extern struct itemone *nemoitem_search_format(struct nemoitem *item, const char *path, char delimiter, const char *fmt, ...);
 extern int nemoitem_count_one(struct nemoitem *item, const char *path);
 
 extern struct itembox *nemoitem_box_search_one(struct nemoitem *item, const char *path);
 extern struct itembox *nemoitem_box_search_attr(struct nemoitem *item, const char *path, const char *name, const char *value);
-extern struct itembox *nemoitem_box_search_attrs(struct nemoitem *item, const char *path, const char *attrs);
-extern struct itembox *nemoitem_box_search_format(struct nemoitem *item, const char *path, const char *fmt, ...);
+extern struct itembox *nemoitem_box_search_attrs(struct nemoitem *item, const char *path, char delimiter, const char *attrs);
+extern struct itembox *nemoitem_box_search_format(struct nemoitem *item, const char *path, char delimiter, const char *fmt, ...);
 extern void nemoitem_box_destroy(struct itembox *box);
 
 extern struct itemone *nemoitem_one_create(void);
@@ -66,8 +66,8 @@ extern void nemoitem_one_destroy(struct itemone *one);
 
 extern struct itemone *nemoitem_one_clone(struct itemone *one);
 
-extern int nemoitem_one_load(struct itemone *one, const char *buffer);
-extern int nemoitem_one_save(struct itemone *one, char *buffer);
+extern int nemoitem_one_load(struct itemone *one, const char *buffer, char delimiter);
+extern int nemoitem_one_save(struct itemone *one, char *buffer, char delimiter);
 
 extern void nemoitem_one_set_path(struct itemone *one, const char *path);
 extern const char *nemoitem_one_get_path(struct itemone *one);
@@ -79,8 +79,8 @@ extern void nemoitem_one_put_attr(struct itemone *one, const char *name);
 extern int nemoitem_one_has_attr(struct itemone *one, const char *name, const char *value);
 extern int nemoitem_one_copy_attr(struct itemone *done, struct itemone *sone);
 
-extern int nemoitem_load(struct nemoitem *item, const char *filepath);
-extern int nemoitem_save(struct nemoitem *item, const char *filepath);
+extern int nemoitem_load(struct nemoitem *item, const char *filepath, char delimiter);
+extern int nemoitem_save(struct nemoitem *item, const char *filepath, char delimiter);
 
 static inline int nemoitem_one_get_iattr(struct itemone *one, const char *name, int value)
 {

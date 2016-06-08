@@ -72,7 +72,7 @@ struct itemone *nemoitem_search_attr(struct nemoitem *item, const char *path, co
 	return NULL;
 }
 
-struct itemone *nemoitem_search_attrs(struct nemoitem *item, const char *path, const char *attrs)
+struct itemone *nemoitem_search_attrs(struct nemoitem *item, const char *path, char delimiter, const char *attrs)
 {
 	struct itemone *one;
 	struct nemotoken *token;
@@ -80,7 +80,7 @@ struct itemone *nemoitem_search_attrs(struct nemoitem *item, const char *path, c
 	int i;
 
 	token = nemotoken_create(attrs, strlen(attrs));
-	nemotoken_divide(token, '#');
+	nemotoken_divide(token, delimiter);
 	nemotoken_update(token);
 
 	ntokens = nemotoken_get_token_count(token) / 2;
@@ -108,19 +108,19 @@ struct itemone *nemoitem_search_attrs(struct nemoitem *item, const char *path, c
 	return NULL;
 }
 
-struct itemone *nemoitem_search_format(struct nemoitem *item, const char *path, const char *fmt, ...)
+struct itemone *nemoitem_search_format(struct nemoitem *item, const char *path, char delimiter, const char *fmt, ...)
 {
 	struct itemone *one;
 	va_list vargs;
-	char *content;
+	char *contents;
 
 	va_start(vargs, fmt);
-	vasprintf(&content, fmt, vargs);
+	vasprintf(&contents, fmt, vargs);
 	va_end(vargs);
 
-	one = nemoitem_search_attrs(item, path, content);
+	one = nemoitem_search_attrs(item, path, delimiter, contents);
 
-	free(content);
+	free(contents);
 
 	return one;
 }
@@ -210,7 +210,7 @@ err1:
 	return NULL;
 }
 
-struct itembox *nemoitem_box_search_attrs(struct nemoitem *item, const char *path, const char *attrs)
+struct itembox *nemoitem_box_search_attrs(struct nemoitem *item, const char *path, char delimiter, const char *attrs)
 {
 	struct itembox *box;
 	struct itemone *one;
@@ -220,7 +220,7 @@ struct itembox *nemoitem_box_search_attrs(struct nemoitem *item, const char *pat
 	int i;
 
 	token = nemotoken_create(attrs, strlen(attrs));
-	nemotoken_divide(token, '#');
+	nemotoken_divide(token, delimiter);
 	nemotoken_update(token);
 
 	ntokens = nemotoken_get_token_count(token) / 2;
@@ -282,19 +282,19 @@ err1:
 	return NULL;
 }
 
-struct itembox *nemoitem_box_search_format(struct nemoitem *item, const char *path, const char *fmt, ...)
+struct itembox *nemoitem_box_search_format(struct nemoitem *item, const char *path, char delimiter, const char *fmt, ...)
 {
 	struct itembox *box;
 	va_list vargs;
-	char *content;
+	char *contents;
 
 	va_start(vargs, fmt);
-	vasprintf(&content, fmt, vargs);
+	vasprintf(&contents, fmt, vargs);
 	va_end(vargs);
 
-	box = nemoitem_box_search_attrs(item, path, content);
+	box = nemoitem_box_search_attrs(item, path, delimiter, contents);
 
-	free(content);
+	free(contents);
 
 	return box;
 }
@@ -359,7 +359,7 @@ struct itemone *nemoitem_one_clone(struct itemone *one)
 	return done;
 }
 
-int nemoitem_one_load(struct itemone *one, const char *buffer)
+int nemoitem_one_load(struct itemone *one, const char *buffer, char delimiter)
 {
 	struct nemotoken *token;
 	int count;
@@ -368,10 +368,10 @@ int nemoitem_one_load(struct itemone *one, const char *buffer)
 	token = nemotoken_create(buffer, strlen(buffer));
 	if (token == NULL)
 		return -1;
-	nemotoken_divide(token, '#');
+	nemotoken_divide(token, delimiter);
 	nemotoken_divide(token, '\n');
-	nemotoken_divide(token, ' ');
 	nemotoken_divide(token, '\t');
+	nemotoken_divide(token, ' ');
 	nemotoken_update(token);
 
 	nemoitem_one_set_path(one, nemotoken_get_token(token, 0));
@@ -387,16 +387,16 @@ int nemoitem_one_load(struct itemone *one, const char *buffer)
 	return 0;
 }
 
-int nemoitem_one_save(struct itemone *one, char *buffer)
+int nemoitem_one_save(struct itemone *one, char *buffer, char delimiter)
 {
 	struct itemattr *attr;
 
 	strcpy(buffer, one->path);
 
 	nemoitem_attr_for_each(attr, one) {
-		strcat(buffer, "#");
+		strncat(buffer, &delimiter, 1);
 		strcat(buffer, attr->name);
-		strcat(buffer, "#");
+		strncat(buffer, &delimiter, 1);
 		strcat(buffer, attr->value);
 	}
 
@@ -508,7 +508,7 @@ int nemoitem_one_copy_attr(struct itemone *done, struct itemone *sone)
 	return 1;
 }
 
-int nemoitem_load(struct nemoitem *item, const char *filepath)
+int nemoitem_load(struct nemoitem *item, const char *filepath, char delimiter)
 {
 	struct itemone *one;
 	FILE *fp;
@@ -525,7 +525,7 @@ int nemoitem_load(struct nemoitem *item, const char *filepath)
 			continue;
 
 		one = nemoitem_one_create();
-		nemoitem_one_load(one, buffer);
+		nemoitem_one_load(one, buffer, delimiter);
 		nemoitem_attach_one(item, one);
 	}
 
@@ -534,7 +534,7 @@ int nemoitem_load(struct nemoitem *item, const char *filepath)
 	return 0;
 }
 
-int nemoitem_save(struct nemoitem *item, const char *filepath)
+int nemoitem_save(struct nemoitem *item, const char *filepath, char delimiter)
 {
 	struct itemone *one;
 	FILE *fp;
@@ -545,7 +545,7 @@ int nemoitem_save(struct nemoitem *item, const char *filepath)
 		return -1;
 
 	nemoitem_for_each(one, item) {
-		nemoitem_one_save(one, buffer);
+		nemoitem_one_save(one, buffer, delimiter);
 
 		fputs(buffer, fp);
 		fputc('\n', fp);

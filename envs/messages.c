@@ -109,7 +109,7 @@ int nemoenvs_dispatch_message(struct nemoenvs *envs, const char *src, const char
 				}
 
 				if (nemoitem_one_copy_attr(
-							nemoitem_search_format(envs->configs, path, "nodeid#%d#screenid#%d", nodeid, screenid),
+							nemoitem_search_format(envs->configs, path, '#', "nodeid#%d#screenid#%d", nodeid, screenid),
 							one) == 0) {
 					nemoitem_attach_one(envs->configs,
 							nemoitem_one_clone(one));
@@ -143,7 +143,7 @@ int nemoenvs_dispatch_message(struct nemoenvs *envs, const char *src, const char
 				}
 
 				if (nemoitem_one_copy_attr(
-							nemoitem_search_format(envs->configs, path, "devnode#%s", devnode),
+							nemoitem_search_format(envs->configs, path, '#', "devnode#%s", devnode),
 							one) == 0) {
 					nemoitem_attach_one(envs->configs,
 							nemoitem_one_clone(one));
@@ -281,7 +281,7 @@ int nemoenvs_dispatch_message(struct nemoenvs *envs, const char *src, const char
 			} else if (strcmp(path, "/nemoshell/font") == 0) {
 				char contents[1024];
 
-				nemoitem_one_save(one, contents);
+				nemoitem_one_save(one, contents, '#');
 				setenv("NEMOSHELL_FONT", contents, 1);
 
 				if (nemoitem_one_copy_attr(
