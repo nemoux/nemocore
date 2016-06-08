@@ -294,32 +294,22 @@ int nemoenvs_dispatch_message(struct nemoenvs *envs, const char *src, const char
 		} else if (strcmp(cmd, "get") == 0) {
 			if (strcmp(path, "/nemoshell/screen") == 0) {
 				struct screenconfig *config;
-				char *contents;
 
 				wl_list_for_each(config, &compz->screenconfig_list, link) {
-					asprintf(&contents, "nodeid#%d#screenid#%d#x#%d#y#%d#width#%d#height#%d",
+					nemoenvs_reply(envs, "%s#%s#set#/nemoshell/screen#nodeid#%d#screenid#%d#x#%d#y#%d#width#%d#height#%d", dst, src,
 							config->nodeid, config->screenid,
 							config->x, config->y,
 							config->width, config->height);
-
-					nemoenvs_reply(envs, "%s#%s#set#/nemoshell/screen#%s", dst, src, contents);
-
-					free(contents);
 				}
 			} else if (strcmp(path, "/nemoshell/input") == 0) {
 				struct inputconfig *config;
-				char *contents;
 
 				wl_list_for_each(config, &compz->inputconfig_list, link) {
-					asprintf(&contents, "devnode#%s#nodeid#%d#screenid#%d#x#%d#y#%d#width#%d#height#%d",
+					nemoenvs_reply(envs, "%s#%s#set#/nemoshell/input#devnode#%s#nodeid#%d#screenid#%d#x#%d#y#%d#width#%d#height#%d", dst, src,
 							config->devnode,
 							config->nodeid, config->screenid,
 							config->x, config->y,
 							config->width, config->height);
-
-					nemoenvs_reply(envs, "%s#%s#set#/nemoshell/input#%s", dst, src, contents);
-
-					free(contents);
 				}
 			} else {
 				struct itemone *one;
