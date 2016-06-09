@@ -1372,6 +1372,7 @@ static void nemoxmanager_handle_canvas_destroy(struct wl_listener *listener, voi
 	xwindow->canvas = NULL;
 
 	wl_list_remove(&xwindow->canvas_destroy_listener.link);
+	wl_list_init(&xwindow->canvas_destroy_listener.link);
 }
 
 struct nemoxwindow *nemoxmanager_get_canvas_window(struct nemocanvas *canvas)
