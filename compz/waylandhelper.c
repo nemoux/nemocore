@@ -31,6 +31,9 @@ uint32_t wayland_execute_path(const char *path, char *const argv[], char *const 
 	if (seteuid(getuid()) == -1)
 		return 0;
 
+	if (setpgid(getpid(), getpid()) == -1)
+		return 0;
+
 	if (argv == NULL || argv[0] == NULL) {
 		if (execl(path, path, NULL) < 0)
 			nemolog_warning("WAYLAND", "failed to execute '%s' with errno %d\n", path, errno);

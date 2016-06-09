@@ -197,7 +197,7 @@ int nemoenvs_terminate_xclients(struct nemoenvs *envs)
 	struct nemoxclient *xclient;
 
 	wl_list_for_each(xclient, &envs->xclient_list, link) {
-		kill(xclient->pid, SIGKILL);
+		kill(-xclient->pid, SIGKILL);
 	}
 
 	return 0;
