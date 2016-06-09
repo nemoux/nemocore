@@ -24,6 +24,7 @@ add_library(nemoenvs SHARED
 	nemoenvs.c
 	nemoapps.c
 	nemoxapp.c
+	nemobeat.c
 	messages.c
 	bindings.c
 	showhelper.c
@@ -46,6 +47,7 @@ set(HEADER_FILES
 	nemoenvs.h
 	nemoapps.h
 	nemoxapp.h
+	nemobeat.h
 	showhelper.h
 	)
 

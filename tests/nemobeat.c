@@ -116,8 +116,12 @@ int main(int argc, char *argv[])
 						pid = nemotoken_get_integer(token, 1, 0);
 
 						strcpy(args, nemotoken_get_string(token, 2, ""));
+
+						NEMO_DEBUG("set...pid(%d) args(%s)\n", pid, args);
 					} else if (strcmp(cmd, "live") == 0) {
 						os_timerfd_set_timeout(tfd, timeout, 0);
+
+						NEMO_DEBUG("live...\n");
 					}
 
 					nemotoken_destroy(token);
