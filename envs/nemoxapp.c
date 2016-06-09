@@ -63,6 +63,8 @@ static void nemoenvs_handle_xserver_sigusr1(struct wl_listener *listener, void *
 	wl_list_remove(&envs->xserver_listener.link);
 	wl_list_init(&envs->xserver_listener.link);
 
+	envs->is_waiting_sigusr1 = 0;
+
 	wl_list_for_each_safe(xapp, next, &envs->xapp_list, link) {
 		xserver = nemoenvs_search_xserver(envs);
 		if (xserver == NULL)
@@ -81,20 +83,24 @@ static void nemoenvs_handle_xserver_sigusr1(struct wl_listener *listener, void *
 
 static int nemoenvs_launch_xserver(struct nemoenvs *envs, uint32_t xdisplay)
 {
-	struct nemoxserver *xserver;
-	char display[256];
+	if (envs->is_waiting_sigusr1 == 0) {
+		struct nemoxserver *xserver;
+		char display[256];
 
-	xserver = nemoxserver_create(envs->shell,
-			nemoitem_get_sattr(envs->configs, "/nemoshell/xserver", "path", NULL), xdisplay);
-	if (xserver == NULL)
-		return -1;
+		xserver = nemoxserver_create(envs->shell,
+				nemoitem_get_sattr(envs->configs, "/nemoshell/xserver", "path", NULL), xdisplay);
+		if (xserver == NULL)
+			return -1;
 
-	nemoxserver_execute(xserver);
+		nemoxserver_execute(xserver);
 
-	wl_list_insert(&envs->xserver_list, &xserver->link);
+		wl_list_insert(&envs->xserver_list, &xserver->link);
 
-	envs->xserver_listener.notify = nemoenvs_handle_xserver_sigusr1;
-	wl_signal_add(&xserver->sigusr1_signal, &envs->xserver_listener);
+		envs->xserver_listener.notify = nemoenvs_handle_xserver_sigusr1;
+		wl_signal_add(&xserver->sigusr1_signal, &envs->xserver_listener);
+
+		envs->is_waiting_sigusr1 = 1;
+	}
 
 	return 0;
 }

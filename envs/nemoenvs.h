@@ -48,8 +48,9 @@ struct nemoenvs {
 
 	struct wl_list xapp_list;
 	struct wl_list xclient_list;
-	
+
 	struct wl_listener xserver_listener;
+	int is_waiting_sigusr1;
 };
 
 extern struct nemoenvs *nemoenvs_create(struct nemoshell *shell);
