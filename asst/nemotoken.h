@@ -28,23 +28,31 @@ extern int nemotoken_update(struct nemotoken *token);
 
 extern int nemotoken_get_token_count(struct nemotoken *token);
 extern char **nemotoken_get_tokens(struct nemotoken *token);
-extern char *nemotoken_get_token(struct nemotoken *token, int index);
-extern char *nemotoken_get_token_pair(struct nemotoken *token, const char *name);
+extern const char *nemotoken_get_token(struct nemotoken *token, int index);
+extern const char *nemotoken_get_token_pair(struct nemotoken *token, const char *name);
 
-static inline double nemotoken_get_double(struct nemotoken *token, int index, double value)
+static inline const char *nemotoken_get_string(struct nemotoken *token, int index, const char *value)
 {
-	if (token->tokens[index] == NULL)
+	if (index >= token->ntokens || token->tokens[index] == NULL)
 		return value;
 
-	return strtod(token->tokens[index], NULL);
+	return token->tokens[index];
 }
 
 static inline int nemotoken_get_int(struct nemotoken *token, int index, int value)
 {
-	if (token->tokens[index] == NULL)
+	if (index >= token->ntokens || token->tokens[index] == NULL)
 		return value;
 
 	return strtoul(token->tokens[index], NULL, 10);
+}
+
+static inline double nemotoken_get_double(struct nemotoken *token, int index, double value)
+{
+	if (index >= token->ntokens || token->tokens[index] == NULL)
+		return value;
+
+	return strtod(token->tokens[index], NULL);
 }
 
 #ifdef __cplusplus
