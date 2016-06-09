@@ -223,9 +223,9 @@ int nemoshow_svg_get_color(struct svgcontext *context, double *rgba, const char 
 		nemotoken_update(token);
 
 		if (nemotoken_get_token_count(token) >= 4) {
-			rgba[0] = (double)strtoul(nemotoken_get_token(token, 1), NULL, 10);
-			rgba[1] = (double)strtoul(nemotoken_get_token(token, 2), NULL, 10);
-			rgba[2] = (double)strtoul(nemotoken_get_token(token, 3), NULL, 10);
+			rgba[0] = (double)nemotoken_get_double(token, 1, 0.0f);
+			rgba[1] = (double)nemotoken_get_double(token, 2, 0.0f);
+			rgba[2] = (double)nemotoken_get_double(token, 3, 0.0f);
 			rgba[3] = 255.0f;
 		}
 
@@ -421,10 +421,10 @@ static inline void nemoshow_svg_get_viewbox_transform(struct svgcontext *context
 		nemotoken_update(token);
 
 		if (nemotoken_get_token_count(token) == 4) {
-			lx = strtod(nemotoken_get_token(token, 0), NULL);
-			ly = strtod(nemotoken_get_token(token, 1), NULL);
-			lw = strtod(nemotoken_get_token(token, 2), NULL);
-			lh = strtod(nemotoken_get_token(token, 3), NULL);
+			lx = nemotoken_get_double(token, 0, 0.0f);
+			ly = nemotoken_get_double(token, 1, 0.0f);
+			lw = nemotoken_get_double(token, 2, 0.0f);
+			lh = nemotoken_get_double(token, 3, 0.0f);
 		}
 
 		nemotoken_destroy(token);
@@ -731,8 +731,8 @@ static inline int nemoshow_svg_load_polygon(struct svgcontext *context, struct x
 
 	for (i = 0; i < count; i += 2) {
 		nemoshow_item_append_point(one,
-				strtod(nemotoken_get_token(token, i + 0), NULL),
-				strtod(nemotoken_get_token(token, i + 1), NULL));
+				nemotoken_get_double(token, i + 0, 0.0f),
+				nemotoken_get_double(token, i + 1, 0.0f));
 	}
 
 	nemotoken_destroy(token);
@@ -769,8 +769,8 @@ static inline int nemoshow_svg_load_polyline(struct svgcontext *context, struct 
 
 	for (i = 0; i < count; i++) {
 		nemoshow_item_append_point(one,
-				strtod(nemotoken_get_token(token, i + 0), NULL),
-				strtod(nemotoken_get_token(token, i + 1), NULL));
+				nemotoken_get_double(token, i + 0, 0.0f),
+				nemotoken_get_double(token, i + 1, 0.0f));
 	}
 
 	nemotoken_destroy(token);

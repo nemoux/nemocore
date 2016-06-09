@@ -480,19 +480,19 @@ void nemomatrix_append_command(struct nemomatrix *matrix, const char *str)
 	for (i = 0; i < nemotoken_get_token_count(token); i++) {
 		cmd = nemotoken_get_token(token, i);
 		if (strcmp(cmd, "translate") == 0) {
-			x = strtod(nemotoken_get_token(token, ++i), NULL);
-			y = strtod(nemotoken_get_token(token, ++i), NULL);
+			x = nemotoken_get_double(token, ++i, 0.0f);
+			y = nemotoken_get_double(token, ++i, 0.0f);
 
 			nemomatrix_translate(matrix, x, y);
 		} else if (strcmp(cmd, "rotate") == 0) {
-			x = strtod(nemotoken_get_token(token, ++i), NULL);
+			x = nemotoken_get_double(token, ++i, 0.0f);
 
 			nemomatrix_rotate(matrix,
 					cos(x / 180.0f * M_PI),
 					sin(x / 180.0f * M_PI));
 		} else if (strcmp(cmd, "scale") == 0) {
-			x = strtod(nemotoken_get_token(token, ++i), NULL);
-			y = strtod(nemotoken_get_token(token, ++i), NULL);
+			x = nemotoken_get_double(token, ++i, 0.0f);
+			y = nemotoken_get_double(token, ++i, 0.0f);
 
 			nemomatrix_scale(matrix, x, y);
 		}

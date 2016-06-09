@@ -213,9 +213,9 @@ uint32_t nemoshow_color_parse(const char *value)
 		nemotoken_update(token);
 
 		if (nemotoken_get_token_count(token) >= 4) {
-			rgba[2] = (uint8_t)strtoul(nemotoken_get_token(token, 1), NULL, 10);
-			rgba[1] = (uint8_t)strtoul(nemotoken_get_token(token, 2), NULL, 10);
-			rgba[0] = (uint8_t)strtoul(nemotoken_get_token(token, 3), NULL, 10);
+			rgba[2] = (uint8_t)nemotoken_get_integer(token, 1, 0);
+			rgba[1] = (uint8_t)nemotoken_get_integer(token, 2, 0);
+			rgba[0] = (uint8_t)nemotoken_get_integer(token, 3, 0);
 			rgba[3] = 255;
 		}
 
