@@ -7,8 +7,13 @@
 NEMO_BEGIN_EXTERN_C
 #endif
 
+#include <stdint.h>
+
 extern int os_socketpair_cloexec(int domain, int type, int protocol, int *sv);
 extern int os_epoll_create_cloexec(void);
+extern int os_epoll_add_fd(int efd, int fd, uint32_t events, void *data);
+extern int os_epoll_del_fd(int efd, int fd);
+extern int os_epoll_set_fd(int efd, int fd, uint32_t events, void *data);
 extern int os_create_anonymous_file(off_t size);
 
 extern int os_exist_path(const char *path);

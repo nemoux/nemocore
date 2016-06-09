@@ -7,6 +7,7 @@
 NEMO_BEGIN_EXTERN_C
 #endif
 
+#include <stdint.h>
 #include <pixman.h>
 
 extern int pixman_save_png_file(pixman_image_t *image, const char *path);
@@ -23,6 +24,9 @@ extern int pixman_copy_image(pixman_image_t *dst, pixman_image_t *src);
 
 extern int os_socketpair_cloexec(int domain, int type, int protocol, int *sv);
 extern int os_epoll_create_cloexec(void);
+extern int os_epoll_add_fd(int efd, int fd, uint32_t events, void *data);
+extern int os_epoll_del_fd(int efd, int fd);
+extern int os_epoll_set_fd(int efd, int fd, uint32_t events, void *data);
 extern int os_create_anonymous_file(off_t size);
 
 extern int os_exist_path(const char *path);

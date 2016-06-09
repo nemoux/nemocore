@@ -80,3 +80,13 @@ TARGET_LINK_LIBRARIES(nemomsg
 	)
 
 INSTALL(TARGETS nemomsg DESTINATION bin)
+
+add_executable(nemobeat
+	nemobeat.c
+	)
+
+TARGET_LINK_LIBRARIES(nemobeat
+	nemoasst
+	)
+
+INSTALL(TARGETS nemobeat DESTINATION bin)

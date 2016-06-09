@@ -75,6 +75,35 @@ int os_epoll_create_cloexec(void)
 	return os_set_cloexec_or_close(fd);
 }
 
+int os_epoll_add_fd(int efd, int fd, uint32_t events, void *data)
+{
+	struct epoll_event ep;
+
+	ep.events = events;
+	ep.data.ptr = data;
+	epoll_ctl(efd, EPOLL_CTL_ADD, fd, &ep);
+
+	return 0;
+}
+
+int os_epoll_del_fd(int efd, int fd)
+{
+	epoll_ctl(efd, EPOLL_CTL_DEL, fd, NULL);
+
+	return 0;
+}
+
+int os_epoll_set_fd(int efd, int fd, uint32_t events, void *data)
+{
+	struct epoll_event ep;
+
+	ep.events = events;
+	ep.data.ptr = data;
+	epoll_ctl(efd, EPOLL_CTL_MOD, fd, &ep);
+
+	return 0;
+}
+
 static int create_tmpfile_cloexec(char *tmpname)
 {
 	int fd;

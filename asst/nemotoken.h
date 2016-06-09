@@ -39,7 +39,7 @@ static inline const char *nemotoken_get_string(struct nemotoken *token, int inde
 	return token->tokens[index];
 }
 
-static inline int nemotoken_get_int(struct nemotoken *token, int index, int value)
+static inline int nemotoken_get_integer(struct nemotoken *token, int index, int value)
 {
 	if (index >= token->ntokens || token->tokens[index] == NULL)
 		return value;
