@@ -8,24 +8,11 @@
 #include <getopt.h>
 #include <signal.h>
 #include <sys/epoll.h>
-#include <sys/timerfd.h>
 
 #include <udphelper.h>
 #include <oshelper.h>
 #include <nemotoken.h>
 #include <nemomisc.h>
-
-static int nemobeat_set_timeout(int tfd, int secs)
-{
-	struct itimerspec its;
-
-	its.it_interval.tv_sec = 0;
-	its.it_interval.tv_nsec = 0;
-	its.it_value.tv_sec = secs;
-	its.it_value.tv_nsec = 0;
-
-	return timerfd_settime(tfd, 0, &its, NULL);
-}
 
 int main(int argc, char *argv[])
 {
@@ -72,7 +59,7 @@ int main(int argc, char *argv[])
 	if (efd < 0)
 		return -1;
 
-	tfd = timerfd_create(CLOCK_MONOTONIC, TFD_CLOEXEC | TFD_NONBLOCK);
+	tfd = os_timerfd_create_cloexec();
 	if (tfd < 0)
 		goto out1;
 
@@ -112,7 +99,7 @@ int main(int argc, char *argv[])
 					}
 				}
 
-				nemobeat_set_timeout(tfd, 0);
+				os_timerfd_set_timeout(tfd, 0, 0);
 			} else if (ep[i].data.ptr == (void *)0x2) {
 				udp_recv_from(soc, ip, &port, msg, sizeof(msg));
 
@@ -130,7 +117,7 @@ int main(int argc, char *argv[])
 
 						strcpy(args, nemotoken_get_string(token, 2, ""));
 					} else if (strcmp(cmd, "live") == 0) {
-						nemobeat_set_timeout(tfd, timeout);
+						os_timerfd_set_timeout(tfd, timeout, 0);
 					}
 
 					nemotoken_destroy(token);

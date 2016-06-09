@@ -10,6 +10,7 @@
 #include <signal.h>
 #include <sys/socket.h>
 #include <sys/epoll.h>
+#include <sys/timerfd.h>
 
 static int os_set_cloexec_or_close(int fd)
 {
@@ -104,7 +105,24 @@ int os_epoll_set_fd(int efd, int fd, uint32_t events, void *data)
 	return 0;
 }
 
-static int create_tmpfile_cloexec(char *tmpname)
+int os_timerfd_create_cloexec(void)
+{
+	return timerfd_create(CLOCK_MONOTONIC, TFD_CLOEXEC | TFD_NONBLOCK);
+}
+
+int os_timerfd_set_timeout(int tfd, uint32_t secs, uint32_t nsecs)
+{
+	struct itimerspec its;
+
+	its.it_interval.tv_sec = 0;
+	its.it_interval.tv_nsec = 0;
+	its.it_value.tv_sec = secs;
+	its.it_value.tv_nsec = 0;
+
+	return timerfd_settime(tfd, 0, &its, NULL);
+}
+
+static int os_create_tmpfile_cloexec(char *tmpname)
 {
 	int fd;
 
@@ -143,7 +161,7 @@ int os_create_anonymous_file(off_t size)
 	strcpy(name, path);
 	strcat(name, template);
 
-	fd = create_tmpfile_cloexec(name);
+	fd = os_create_tmpfile_cloexec(name);
 
 	free(name);
 
