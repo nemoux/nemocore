@@ -11,7 +11,8 @@ NEMO_BEGIN_EXTERN_C
 
 extern int string_divide(char *str, int length, char div);
 extern void string_replace(char *str, int length, char src, char dst);
-extern const char *string_get_token(const char *str, int length, int index);
+
+extern int string_has_prefix(const char *str, const char *prefix, int length);
 
 extern int string_parse_decimal(const char *str, int offset, int length);
 extern int string_parse_decimal_with_endptr(const char *str, int offset, int length, const char **endptr);

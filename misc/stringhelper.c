@@ -40,27 +40,16 @@ void string_replace(char *str, int length, char src, char dst)
 	}
 }
 
-const char *string_get_token(const char *str, int length, int index)
+int string_has_prefix(const char *str, const char *prefix, int length)
 {
-	int i, state;
-
-	state = 1;
+	int i;
 
 	for (i = 0; i < length; i++) {
-		if (index <= 0 && state != 0)
-			return &str[i];
-
-		if (str[i] == '\0') {
-			if (state != 0)
-				index--;
-
-			state = 0;
-		} else {
-			state = 1;
-		}
+		if (str[i] == '\0' || str[i] != prefix[i])
+			return 0;
 	}
 
-	return NULL;
+	return 1;
 }
 
 int string_parse_decimal(const char *str, int offset, int length)
