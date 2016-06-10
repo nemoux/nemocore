@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <regex.h>
+
 #include <stringhelper.h>
 
 int string_divide(char *str, int length, char div)
@@ -38,6 +40,21 @@ void string_replace(char *str, int length, char src, char dst)
 		if (str[i] == src)
 			str[i] = dst;
 	}
+}
+
+int string_has_regex(const char *str, const char *expr)
+{
+	regex_t regex;
+	int r;
+
+	if (regcomp(&regex, expr, REG_EXTENDED))
+		return 0;
+
+	r = regexec(&regex, str, 0, NULL, 0) == 0;
+
+	regfree(&regex);
+
+	return r;
 }
 
 int string_has_prefix(const char *str, const char *prefix, int length)
