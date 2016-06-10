@@ -12,9 +12,6 @@ NEMO_BEGIN_EXTERN_C
 extern int string_divide(char *str, int length, char div);
 extern void string_replace(char *str, int length, char src, char dst);
 
-extern int string_has_regex(const char *str, const char *expr);
-extern int string_has_prefix(const char *str, const char *prefix, int length);
-
 extern int string_parse_decimal(const char *str, int offset, int length);
 extern int string_parse_decimal_with_endptr(const char *str, int offset, int length, const char **endptr);
 extern int string_parse_hexadecimal(const char *str, int offset, int length);
@@ -24,40 +21,8 @@ extern double string_parse_float_with_endptr(const char *str, int offset, int le
 extern const char *string_find_alphabet(const char *str, int offset, int length);
 extern const char *string_find_number(const char *str, int offset, int length);
 
-static inline int string_is_alphabet(const char *str, int offset, int length)
-{
-	int i;
-
-	for (i = offset; i < offset + length; i++) {
-		if (('a' <= str[i] && str[i] <= 'z') ||
-				('A' <= str[i] && str[i] <= 'Z'))
-			continue;
-
-		return 0;
-	}
-
-	return 1;
-}
-
-static inline int string_is_number(const char *str, int offset, int length)
-{
-	int i;
-
-	for (i = offset; i < offset + length; i++) {
-		if ('0' <= str[i] && str[i] <= '9')
-			continue;
-
-		if (str[i] == '-' || str[i] == '+' || str[i] == '.')
-			continue;
-
-		if (str[i] == 'e' || str[i] == 'E')
-			continue;
-
-		return 0;
-	}
-
-	return 1;
-}
+extern int string_is_alphabet(const char *str, int offset, int length);
+extern int string_is_number(const char *str, int offset, int length);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

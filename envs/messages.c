@@ -38,7 +38,7 @@
 #include <xdgshell.h>
 #include <nemoshell.h>
 #include <prochelper.h>
-#include <stringhelper.h>
+#include <namespacehelper.h>
 #include <nemotoken.h>
 #include <nemoitem.h>
 #include <nemomisc.h>
@@ -276,9 +276,7 @@ int nemoenvs_dispatch_device_message(struct nemoenvs *envs, const char *src, con
 
 int nemoenvs_dispatch_config_message(struct nemoenvs *envs, const char *src, const char *dst, const char *cmd, const char *path, struct itemone *one, void *data)
 {
-	static const char *prefix = "/nemoshell";
-
-	if (string_has_prefix(path, prefix, strlen(prefix)) != 0) {
+	if (namespace_has_prefix(path, "/nemoshell") != 0) {
 		if (strcmp(cmd, "set") == 0) {
 			struct itemone *tone;
 			const char *id;
