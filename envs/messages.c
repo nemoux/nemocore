@@ -45,7 +45,7 @@
 
 #include <nemoenvs.h>
 
-int nemoenvs_dispatch_message(struct nemoenvs *envs, const char *src, const char *dst, const char *cmd, const char *path, struct itemone *one, void *data)
+int nemoenvs_dispatch_system_message(struct nemoenvs *envs, const char *src, const char *dst, const char *cmd, const char *path, struct itemone *one, void *data)
 {
 	struct nemoshell *shell = (struct nemoshell *)data;
 	struct nemocompz *compz = shell->compz;
@@ -57,11 +57,7 @@ int nemoenvs_dispatch_message(struct nemoenvs *envs, const char *src, const char
 			const char *name;
 			const char *value;
 
-			if (strcmp(path, "/check/live") == 0) {
-				nemomsg_set_client(envs->msg, src,
-						nemomsg_get_source_ip(envs->msg),
-						nemomsg_get_source_port(envs->msg));
-			} else if (strcmp(path, "/nemoshell/backend") == 0) {
+			if (strcmp(path, "/nemoshell/backend") == 0) {
 				name = nemoitem_one_get_attr(one, "name");
 				if (name != NULL) {
 					if (strcmp(name, "drm") == 0) {
@@ -71,13 +67,6 @@ int nemoenvs_dispatch_message(struct nemoenvs *envs, const char *src, const char
 					} else if (strcmp(name, "evdev") == 0) {
 						evdevbackend_create(compz);
 					}
-				}
-
-				if (nemoitem_one_copy_attr(
-							nemoitem_search_attr(envs->configs, path, "name", name),
-							one) == 0) {
-					nemoitem_attach_one(envs->configs,
-							nemoitem_one_clone(one));
 				}
 			} else if (strcmp(path, "/nemoshell/screen") == 0) {
 				struct screenconfig *config;
@@ -107,13 +96,6 @@ int nemoenvs_dispatch_message(struct nemoenvs *envs, const char *src, const char
 						}
 					}
 				}
-
-				if (nemoitem_one_copy_attr(
-							nemoitem_search_format(envs->configs, path, ' ', "nodeid %d screenid %d", nodeid, screenid),
-							one) == 0) {
-					nemoitem_attach_one(envs->configs,
-							nemoitem_one_clone(one));
-				}
 			} else if (strcmp(path, "/nemoshell/input") == 0) {
 				struct inputconfig *config;
 				const char *devnode = nemoitem_one_get_attr(one, "devnode");
@@ -140,13 +122,6 @@ int nemoenvs_dispatch_message(struct nemoenvs *envs, const char *src, const char
 							config->transform = strdup(value);
 						}
 					}
-				}
-
-				if (nemoitem_one_copy_attr(
-							nemoitem_search_format(envs->configs, path, ' ', "devnode %s", devnode),
-							one) == 0) {
-					nemoitem_attach_one(envs->configs,
-							nemoitem_one_clone(one));
 				}
 			} else if (strcmp(path, "/nemoshell/scene") == 0) {
 				int32_t x = nemoitem_one_get_iattr(one, "x", 0);
@@ -283,68 +258,87 @@ int nemoenvs_dispatch_message(struct nemoenvs *envs, const char *src, const char
 
 				nemoitem_one_save(one, contents, ' ');
 				setenv("NEMOSHELL_FONT", contents, 1);
-
-				if (nemoitem_one_copy_attr(
-							nemoitem_search_one(envs->configs, path),
-							one) == 0) {
-					nemoitem_attach_one(envs->configs,
-							nemoitem_one_clone(one));
-				}
-			} else {
-				nemoitem_attach_one(envs->configs,
-						nemoitem_one_clone(one));
-			}
-		} else if (strcmp(cmd, "get") == 0) {
-			if (strcmp(path, "/nemoshell/screen") == 0) {
-				struct screenconfig *config;
-
-				wl_list_for_each(config, &compz->screenconfig_list, link) {
-					nemoenvs_reply(envs, "%s %s set /nemoshell/screen nodeid %d screenid %d x %d y %d width %d height %d", dst, src,
-							config->nodeid, config->screenid,
-							config->x, config->y,
-							config->width, config->height);
-				}
-			} else if (strcmp(path, "/nemoshell/input") == 0) {
-				struct inputconfig *config;
-
-				wl_list_for_each(config, &compz->inputconfig_list, link) {
-					nemoenvs_reply(envs, "%s %s set /nemoshell/input devnode %s nodeid %d screenid %d x %d y %d width %d height %d", dst, src,
-							config->devnode,
-							config->nodeid, config->screenid,
-							config->x, config->y,
-							config->width, config->height);
-				}
-			} else {
-				struct itemone *one;
-				struct itemattr *attr;
-
-				nemoitem_for_each(one, envs->configs) {
-					if (nemoitem_one_has_path(one, path) != 0) {
-						char contents[1024] = { 0 };
-						const char *name;
-						const char *value;
-
-						nemoitem_attr_for_each(attr, one) {
-							name = nemoitem_attr_get_name(attr);
-							value = nemoitem_attr_get_value(attr);
-
-							strcat(contents, " ");
-							strcat(contents, name);
-							strcat(contents, " ");
-							strcat(contents, value);
-						}
-
-						nemoenvs_reply(envs, "%s %s set %s%s", dst, src, path, contents);
-					}
-				}
 			}
 		}
-	} else {
-		if (strcmp(cmd, "set") == 0) {
+	}
+
+	return 0;
+}
+
+int nemoenvs_dispatch_device_message(struct nemoenvs *envs, const char *src, const char *dst, const char *cmd, const char *path, struct itemone *one, void *data)
+{
+	return 0;
+}
+
+int nemoenvs_dispatch_config_message(struct nemoenvs *envs, const char *src, const char *dst, const char *cmd, const char *path, struct itemone *one, void *data)
+{
+	if (strcmp(cmd, "set") == 0) {
+		struct itemone *tone;
+		const char *id;
+
+		id = nemoitem_one_get_attr(one, "id");
+		if (id != NULL) {
+			tone = nemoitem_search_attr(envs->configs, path, "id", id);
+			if (tone != NULL)
+				nemoitem_one_copy_attr(tone, one);
+			else
+				nemoitem_attach_one(envs->configs,
+						nemoitem_one_clone(one));
+		} else {
 			nemoitem_attach_one(envs->configs,
 					nemoitem_one_clone(one));
 		}
+	} else if (strcmp(cmd, "get") == 0) {
+		struct itemone *tone;
+		const char *id;
 
+		id = nemoitem_one_get_attr(one, "id");
+		if (id != NULL) {
+			tone = nemoitem_search_attr(envs->configs, path, "id", id);
+			if (tone != NULL) {
+				char contents[1024] = { 0 };
+
+				nemoitem_one_save(tone, contents, ' ');
+
+				nemoenvs_reply(envs, "%s %s set %s", dst, src, contents);
+			}
+		} else {
+			nemoitem_for_each(tone, envs->configs) {
+				if (nemoitem_one_has_path(tone, path) != 0) {
+					char contents[1024] = { 0 };
+
+					nemoitem_one_save(tone, contents, ' ');
+
+					nemoenvs_reply(envs, "%s %s set %s", dst, src, contents);
+				}
+			}
+		}
+	} else if (strcmp(cmd, "put") == 0) {
+		struct itemone *tone;
+		const char *id;
+
+		id = nemoitem_one_get_attr(one, "id");
+		if (id != NULL) {
+			tone = nemoitem_search_attr(envs->configs, path, "id", id);
+			if (tone != NULL)
+				nemoitem_one_destroy(tone);
+		}
+	}
+
+	return 0;
+}
+
+int nemoenvs_dispatch_client_message(struct nemoenvs *envs, const char *src, const char *dst, const char *cmd, const char *path, struct itemone *one, void *data)
+{
+	if (strcmp(dst, "/nemoshell") == 0) {
+		if (strcmp(cmd, "rep") == 0) {
+			if (strcmp(path, "/check/live") == 0) {
+				nemomsg_set_client(envs->msg, src,
+						nemomsg_get_source_ip(envs->msg),
+						nemomsg_get_source_port(envs->msg));
+			}
+		}
+	} else {
 		nemomsg_send_message(envs->msg, dst,
 				nemomsg_get_source_buffer(envs->msg),
 				nemomsg_get_source_size(envs->msg));

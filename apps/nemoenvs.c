@@ -27,7 +27,8 @@ struct nemoenvs *nemoenvs_create(struct nemotool *tool)
 
 	nemolist_init(&envs->callback_list);
 
-	nemoenvs_set_callback(envs, nemoenvs_dispatch_message, tool);
+	nemoenvs_set_callback(envs, nemoenvs_dispatch_client_message, tool);
+	nemoenvs_set_callback(envs, nemoenvs_dispatch_config_message, tool);
 
 	return envs;
 
@@ -171,7 +172,7 @@ int nemoenvs_connect(struct nemoenvs *envs, const char *client, const char *serv
 			envs);
 
 	nemomsg_set_client(envs->msg, server, ip, port);
-	nemomsg_send_format(envs->msg, server, "%s %s set /check/live", client, server);
+	nemomsg_send_format(envs->msg, server, "%s %s rep /check/live", client, server);
 
 	envs->clientname = strdup(client);
 	envs->servername = strdup(server);

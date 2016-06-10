@@ -58,7 +58,10 @@ struct nemoenvs *nemoenvs_create(struct nemoshell *shell)
 
 	envs->beat_soc = -1;
 
-	nemoenvs_set_callback(envs, nemoenvs_dispatch_message, shell);
+	nemoenvs_set_callback(envs, nemoenvs_dispatch_client_message, shell);
+	nemoenvs_set_callback(envs, nemoenvs_dispatch_system_message, shell);
+	nemoenvs_set_callback(envs, nemoenvs_dispatch_device_message, shell);
+	nemoenvs_set_callback(envs, nemoenvs_dispatch_config_message, shell);
 
 	return envs;
 
@@ -229,7 +232,7 @@ static void nemoenvs_dispatch_timer(struct nemotimer *timer, void *data)
 
 	nemomsg_clean_clients(envs->msg);
 	nemomsg_check_clients(envs->msg);
-	nemomsg_send_format(envs->msg, "/*", "/nemoshell /* get /check/live");
+	nemomsg_send_format(envs->msg, "/*", "/nemoshell /* req /check/live");
 
 	nemotimer_set_timeout(envs->timer, NEMOENVS_LIVENESS_TIMEOUT);
 }
