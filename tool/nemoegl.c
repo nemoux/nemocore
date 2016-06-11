@@ -13,7 +13,7 @@
 #include <eglhelper.h>
 #include <nemomisc.h>
 
-struct eglcontext *nemotool_create_egl(struct nemotool *tool)
+struct eglcontext *nemoegl_create(struct nemotool *tool)
 {
 	struct eglcontext *egl;
 
@@ -37,14 +37,14 @@ struct eglcontext *nemotool_create_egl(struct nemotool *tool)
 	return egl;
 }
 
-void nemotool_destroy_egl(struct eglcontext *egl)
+void nemoegl_destroy(struct eglcontext *egl)
 {
 	eglDestroyContext(egl->egl_display, egl->egl_context);
 
 	free(egl);
 }
 
-struct eglcanvas *nemotool_create_egl_canvas(struct eglcontext *egl, int32_t width, int32_t height)
+struct eglcanvas *nemoegl_create_canvas(struct eglcontext *egl, int32_t width, int32_t height)
 {
 	struct eglcanvas *canvas;
 
@@ -74,7 +74,7 @@ err1:
 	return NULL;
 }
 
-void nemotool_destroy_egl_canvas(struct eglcanvas *canvas)
+void nemoegl_destroy_canvas(struct eglcanvas *canvas)
 {
 	wl_egl_window_destroy(canvas->egl_window);
 
@@ -83,7 +83,7 @@ void nemotool_destroy_egl_canvas(struct eglcanvas *canvas)
 	free(canvas);
 }
 
-void nemotool_resize_egl_canvas(struct eglcanvas *canvas, int32_t width, int32_t height)
+void nemoegl_resize_canvas(struct eglcanvas *canvas, int32_t width, int32_t height)
 {
 	nemocanvas_set_size(canvas->canvas, width, height);
 

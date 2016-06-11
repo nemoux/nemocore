@@ -38,13 +38,13 @@ struct eglcanvas {
 #define	NTEGL_CANVAS(ec)		(ec->canvas)
 #define	NTEGL_WINDOW(ec)		(ec->egl_window)
 
-extern struct eglcontext *nemotool_create_egl(struct nemotool *tool);
-extern void nemotool_destroy_egl(struct eglcontext *egl);
+extern struct eglcontext *nemoegl_create(struct nemotool *tool);
+extern void nemoegl_destroy(struct eglcontext *egl);
 
-extern struct eglcanvas *nemotool_create_egl_canvas(struct eglcontext *egl, int32_t width, int32_t height);
-extern void nemotool_destroy_egl_canvas(struct eglcanvas *canvas);
+extern struct eglcanvas *nemoegl_create_canvas(struct eglcontext *egl, int32_t width, int32_t height);
+extern void nemoegl_destroy_canvas(struct eglcanvas *canvas);
 
-extern void nemotool_resize_egl_canvas(struct eglcanvas *canvas, int32_t width, int32_t height);
+extern void nemoegl_resize_canvas(struct eglcanvas *canvas, int32_t width, int32_t height);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

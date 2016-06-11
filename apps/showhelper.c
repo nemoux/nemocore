@@ -25,7 +25,7 @@ static void nemoshow_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t w
 		return;
 	}
 
-	nemotool_resize_egl_canvas(scon->eglcanvas, width, height);
+	nemoegl_resize_canvas(scon->eglcanvas, width, height);
 
 	nemoshow_set_size(show, width, height);
 
@@ -207,9 +207,9 @@ struct nemoshow *nemoshow_create_view(struct nemotool *tool, int32_t width, int3
 	scon->width = width;
 	scon->height = height;
 
-	scon->egl = nemotool_create_egl(scon->tool);
+	scon->egl = nemoegl_create(scon->tool);
 
-	scon->eglcanvas = nemotool_create_egl_canvas(scon->egl, width, height);
+	scon->eglcanvas = nemoegl_create_canvas(scon->egl, width, height);
 	scon->canvas = NTEGL_CANVAS(scon->eglcanvas);
 
 	nemocanvas_set_nemosurface(scon->canvas, NEMO_SHELL_SURFACE_TYPE_NORMAL);
@@ -266,8 +266,8 @@ void nemoshow_destroy_view(struct nemoshow *show)
 
 	nemotale_destroy_gl(scon->tale);
 
-	nemotool_destroy_egl_canvas(scon->eglcanvas);
-	nemotool_destroy_egl(scon->egl);
+	nemoegl_destroy_canvas(scon->eglcanvas);
+	nemoegl_destroy(scon->egl);
 
 	free(scon);
 }
@@ -618,7 +618,7 @@ void nemoshow_view_resize(struct nemoshow *show, int32_t width, int32_t height)
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemocanvas *canvas = scon->canvas;
 
-	nemotool_resize_egl_canvas(scon->eglcanvas, width, height);
+	nemoegl_resize_canvas(scon->eglcanvas, width, height);
 
 	nemoshow_set_size(show, width, height);
 
