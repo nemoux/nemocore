@@ -6,6 +6,7 @@
 #include <errno.h>
 
 #include <getopt.h>
+#include <ctype.h>
 
 #include <nemonavi.h>
 #include <nemoshow.h>
@@ -17,6 +18,8 @@
 
 struct navicontext {
 	struct nemotool *tool;
+
+	struct nemohangul *hangul;
 
 	struct nemoshow *show;
 	struct showone *scene;
@@ -301,16 +304,83 @@ static void nemonavi_dispatch_canvas_event(struct nemoshow *show, struct showone
 		}
 	}
 
-	if (nemoshow_event_is_keyboard_down(show, event)) {
-		nemonavi_send_keyboard_down_event(context->navi,
-				nemoshow_event_get_value(event),
-				nemotool_get_keysym(context->tool, nemoshow_event_get_value(event)),
-				nemotool_get_modifiers(context->tool));
-	} else if (nemoshow_event_is_keyboard_up(show, event)) {
-		nemonavi_send_keyboard_up_event(context->navi,
-				nemoshow_event_get_value(event),
-				nemotool_get_keysym(context->tool, nemoshow_event_get_value(event)),
-				nemotool_get_modifiers(context->tool));
+	if (context->hangul == NULL) {
+		if (nemoshow_event_is_keyboard_down(show, event)) {
+			nemonavi_send_keyboard_down_event(context->navi,
+					nemoshow_event_get_value(event),
+					nemotool_get_keysym(context->tool, nemoshow_event_get_value(event)),
+					nemotool_get_modifiers(context->tool));
+		} else if (nemoshow_event_is_keyboard_up(show, event)) {
+			nemonavi_send_keyboard_up_event(context->navi,
+					nemoshow_event_get_value(event),
+					nemotool_get_keysym(context->tool, nemoshow_event_get_value(event)),
+					nemotool_get_modifiers(context->tool));
+		}
+	} else {
+		if (nemoshow_event_is_keyboard_down(show, event)) {
+		} else if (nemoshow_event_is_keyboard_up(show, event)) {
+			uint32_t code = nemoshow_event_get_value(event);
+			uint32_t sym = nemotool_get_keysym(context->tool, nemoshow_event_get_value(event));
+			const uint32_t *ucs;
+
+			if (code == 0xe) {
+				if (nemohangul_is_empty(context->hangul) == 0)
+					nemohangul_backspace(context->hangul);
+
+				nemonavi_send_keyboard_down_event(context->navi,
+						0xe, 0x8,
+						nemotool_get_modifiers(context->tool));
+				nemonavi_send_keyboard_up_event(context->navi,
+						0xe, 0x8,
+						nemotool_get_modifiers(context->tool));
+			} else if (code == 28 || code == 103 || code == 105 || code == 106 || code == 108) {
+				nemonavi_send_keyboard_down_event(context->navi, code, sym, nemotool_get_modifiers(context->tool));
+				nemonavi_send_keyboard_up_event(context->navi, code, sym, nemotool_get_modifiers(context->tool));
+
+				nemohangul_reset(context->hangul);
+			} else if (isascii(sym)) {
+				if (nemohangul_is_empty(context->hangul) == 0) {
+					nemonavi_send_keyboard_down_event(context->navi,
+							0xe, 0x8,
+							nemotool_get_modifiers(context->tool));
+					nemonavi_send_keyboard_up_event(context->navi,
+							0xe, 0x8,
+							nemotool_get_modifiers(context->tool));
+				}
+
+				nemohangul_process(context->hangul, sym);
+			}
+
+			ucs = nemohangul_get_commit_string(context->hangul);
+			if (ucs[0] != '\0') {
+				nemonavi_send_keyboard_up_event(context->navi,
+						code, ucs[0],
+						nemotool_get_modifiers(context->tool));
+			}
+
+			ucs = nemohangul_get_preedit_string(context->hangul);
+			if (ucs[0] != '\0') {
+				nemonavi_send_keyboard_up_event(context->navi,
+						code != 0xe ? code : 0x25, ucs[0],
+						nemotool_get_modifiers(context->tool));
+			}
+
+			if (code == 0x39)
+				nemonavi_send_keyboard_up_event(context->navi, code, sym, nemotool_get_modifiers(context->tool));
+		}
+	}
+
+	if (nemoshow_event_is_keyboard_layout(show, event)) {
+		const char *layout = nemoshow_event_get_name(event);
+
+		if (strcmp(layout, "kor") == 0) {
+			context->hangul = nemohangul_create();
+		} else {
+			if (context->hangul != NULL) {
+				nemohangul_destroy(context->hangul);
+				context->hangul = NULL;
+			}
+		}
 	}
 
 	if (nemoshow_event_is_touch_down(show, event)) {

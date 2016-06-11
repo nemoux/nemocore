@@ -11,6 +11,7 @@ NEMO_BEGIN_EXTERN_C
 #include <nemotimer.h>
 #include <nemocanvas.h>
 #include <nemoegl.h>
+#include <nemohangul.h>
 
 #include <nemotale.h>
 #include <talenode.h>
