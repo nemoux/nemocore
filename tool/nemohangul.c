@@ -49,7 +49,8 @@ void nemohangul_process(struct nemohangul *hangul, int code)
 
 void nemohangul_backspace(struct nemohangul *hangul)
 {
-	hangul_ic_backspace(hangul->context);
+	if (hangul_ic_is_empty(hangul->context) == 0)
+		hangul_ic_backspace(hangul->context);
 }
 
 void nemohangul_reset(struct nemohangul *hangul)

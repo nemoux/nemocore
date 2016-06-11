@@ -323,50 +323,46 @@ static void nemonavi_dispatch_canvas_event(struct nemoshow *show, struct showone
 			uint32_t sym = nemotool_get_keysym(context->tool, nemoshow_event_get_value(event));
 			const uint32_t *ucs;
 
-			if (code == 0xe) {
-				if (nemohangul_is_empty(context->hangul) == 0)
-					nemohangul_backspace(context->hangul);
+			if (code == KEY_BACKSPACE) {
+				nemonavi_send_keyboard_down_event(context->navi, code, sym, nemotool_get_modifiers(context->tool));
+				nemonavi_send_keyboard_up_event(context->navi, code, sym, nemotool_get_modifiers(context->tool));
 
-				nemonavi_send_keyboard_down_event(context->navi,
-						0xe, 0x8,
-						nemotool_get_modifiers(context->tool));
-				nemonavi_send_keyboard_up_event(context->navi,
-						0xe, 0x8,
-						nemotool_get_modifiers(context->tool));
-			} else if (code == 28 || code == 103 || code == 105 || code == 106 || code == 108) {
+				nemohangul_backspace(context->hangul);
+			} else if (code == KEY_UP || code == KEY_DOWN || code == KEY_LEFT || code == KEY_RIGHT) {
 				nemonavi_send_keyboard_down_event(context->navi, code, sym, nemotool_get_modifiers(context->tool));
 				nemonavi_send_keyboard_up_event(context->navi, code, sym, nemotool_get_modifiers(context->tool));
 
 				nemohangul_reset(context->hangul);
-			} else if (isascii(sym)) {
-				if (nemohangul_is_empty(context->hangul) == 0) {
-					nemonavi_send_keyboard_down_event(context->navi,
-							0xe, 0x8,
-							nemotool_get_modifiers(context->tool));
-					nemonavi_send_keyboard_up_event(context->navi,
-							0xe, 0x8,
-							nemotool_get_modifiers(context->tool));
-				}
+			} else {
+				if (isalpha(sym) != 0) {
+					if (nemohangul_is_empty(context->hangul) == 0) {
+						nemonavi_send_keyboard_down_event(context->navi, KEY_BACKSPACE, 0, nemotool_get_modifiers(context->tool));
+						nemonavi_send_keyboard_up_event(context->navi, KEY_BACKSPACE, 0, nemotool_get_modifiers(context->tool));
+					}
 
-				nemohangul_process(context->hangul, sym);
+					nemohangul_process(context->hangul, sym);
+				} else if (isspace(sym) != 0) {
+					nemohangul_reset(context->hangul);
+				} else {
+					nemonavi_send_keyboard_down_event(context->navi, code, sym, nemotool_get_modifiers(context->tool));
+					nemonavi_send_keyboard_up_event(context->navi, code, sym, nemotool_get_modifiers(context->tool));
+
+					nemohangul_reset(context->hangul);
+				}
 			}
 
 			ucs = nemohangul_get_commit_string(context->hangul);
-			if (ucs[0] != '\0') {
-				nemonavi_send_keyboard_up_event(context->navi,
-						code, ucs[0],
-						nemotool_get_modifiers(context->tool));
-			}
+			if (ucs[0] != '\0')
+				nemonavi_send_keyboard_up_event(context->navi, KEY_A, ucs[0], nemotool_get_modifiers(context->tool));
 
 			ucs = nemohangul_get_preedit_string(context->hangul);
-			if (ucs[0] != '\0') {
-				nemonavi_send_keyboard_up_event(context->navi,
-						code != 0xe ? code : 0x25, ucs[0],
-						nemotool_get_modifiers(context->tool));
-			}
+			if (ucs[0] != '\0')
+				nemonavi_send_keyboard_up_event(context->navi, KEY_A, ucs[0], nemotool_get_modifiers(context->tool));
 
-			if (code == 0x39)
+			if (isspace(sym) != 0) {
+				nemonavi_send_keyboard_down_event(context->navi, code, sym, nemotool_get_modifiers(context->tool));
 				nemonavi_send_keyboard_up_event(context->navi, code, sym, nemotool_get_modifiers(context->tool));
+			}
 		}
 	}
 
