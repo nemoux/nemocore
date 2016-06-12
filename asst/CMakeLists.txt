@@ -36,6 +36,7 @@ add_library(nemoasst SHARED
 	${CMAKE_SOURCE_DIR}/misc/fonthelper.c
 	${CMAKE_SOURCE_DIR}/misc/stringhelper.c
 	${CMAKE_SOURCE_DIR}/misc/namespacehelper.c
+	${CMAKE_SOURCE_DIR}/misc/keycodehelper.c
 	${CMAKE_SOURCE_DIR}/misc/colorhelper.c
 	${CMAKE_SOURCE_DIR}/misc/prochelper.c
 	${CMAKE_SOURCE_DIR}/misc/oshelper.c

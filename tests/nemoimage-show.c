@@ -11,6 +11,7 @@
 #include <nemocanvas.h>
 #include <nemoegl.h>
 #include <showhelper.h>
+#include <nemohelper.h>
 #include <nemomisc.h>
 
 #define NEMOIMAGE_SIZE_MAX			(1024)
