@@ -305,6 +305,32 @@ static void nemonavi_dispatch_canvas_event(struct nemoshow *show, struct showone
 		}
 	}
 
+	if (nemoshow_event_is_keyboard_down(show, event)) {
+	} else if (nemoshow_event_is_keyboard_up(show, event)) {
+		if (nemoshow_event_get_value(event) == KEY_HANGEUL) {
+			if (context->hangul == NULL) {
+				context->hangul = nemohangul_create();
+			} else {
+				nemohangul_destroy(context->hangul);
+				context->hangul = NULL;
+			}
+		}
+	}
+
+	if (nemoshow_event_is_keyboard_layout(show, event)) {
+		const char *layout = nemoshow_event_get_name(event);
+
+		if (strcmp(layout, "kor") == 0) {
+			if (context->hangul == NULL)
+				context->hangul = nemohangul_create();
+		} else {
+			if (context->hangul != NULL) {
+				nemohangul_destroy(context->hangul);
+				context->hangul = NULL;
+			}
+		}
+	}
+
 	if (context->hangul == NULL) {
 		if (nemoshow_event_is_keyboard_down(show, event)) {
 			nemonavi_send_keyboard_down_event(context->navi,
@@ -359,19 +385,6 @@ static void nemonavi_dispatch_canvas_event(struct nemoshow *show, struct showone
 					nemonavi_send_keyboard_down_event(context->navi, code, sym, nemotool_get_modifiers(context->tool));
 					nemonavi_send_keyboard_up_event(context->navi, code, sym, nemotool_get_modifiers(context->tool));
 				}
-			}
-		}
-	}
-
-	if (nemoshow_event_is_keyboard_layout(show, event)) {
-		const char *layout = nemoshow_event_get_name(event);
-
-		if (strcmp(layout, "kor") == 0) {
-			context->hangul = nemohangul_create();
-		} else {
-			if (context->hangul != NULL) {
-				nemohangul_destroy(context->hangul);
-				context->hangul = NULL;
 			}
 		}
 	}
