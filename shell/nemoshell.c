@@ -79,6 +79,13 @@ static void nemo_surface_set_tag(struct wl_client *client, struct wl_resource *r
 	nemoview_set_tag(bin->view, tag);
 }
 
+static void nemo_surface_set_type(struct wl_client *client, struct wl_resource *resource, const char *type)
+{
+	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
+
+	nemoview_set_type(bin->view, type);
+}
+
 static void nemo_surface_set_state(struct wl_client *client, struct wl_resource *resource, const char *state)
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
@@ -453,6 +460,7 @@ static void nemo_surface_commit_serial(struct wl_client *client, struct wl_resou
 static const struct nemo_surface_interface nemo_surface_implementation = {
 	nemo_surface_destroy,
 	nemo_surface_set_tag,
+	nemo_surface_set_type,
 	nemo_surface_set_state,
 	nemo_surface_put_state,
 	nemo_surface_set_size,

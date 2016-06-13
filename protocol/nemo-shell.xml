@@ -37,6 +37,10 @@
 			<arg name="tag" type="uint"/>
 		</request>
 
+		<request name="set_type">
+			<arg name="type" type="string"/>
+		</request>
+
 		<request name="set_state">
 			<arg name="state" type="string"/>
 		</request>

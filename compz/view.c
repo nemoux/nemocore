@@ -115,6 +115,9 @@ void nemoview_destroy(struct nemoview *view)
 
 	nemoscope_destroy(view->scope);
 
+	if (view->type != NULL)
+		free(view->type);
+
 	free(view);
 }
 
@@ -469,6 +472,14 @@ void nemoview_update_transform_parent(struct nemoview *view)
 		nemoview_transform_dirty(view);
 		nemoview_update_transform(view);
 	}
+}
+
+void nemoview_set_type(struct nemoview *view, const char *type)
+{
+	if (view->type != NULL)
+		free(view->type);
+
+	view->type = strdup(type);
 }
 
 static void nemoview_handle_transform_parent_destroy(struct wl_listener *listener, void *data)

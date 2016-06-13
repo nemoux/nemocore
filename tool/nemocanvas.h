@@ -90,6 +90,7 @@ extern void nemocanvas_opaque(struct nemocanvas *canvas, int32_t x, int32_t y, i
 extern pixman_image_t *nemocanvas_get_pixman_image(struct nemocanvas *canvas);
 
 extern void nemocanvas_set_tag(struct nemocanvas *canvas, uint32_t tag);
+extern void nemocanvas_set_type(struct nemocanvas *canvas, const char *type);
 extern void nemocanvas_set_state(struct nemocanvas *canvas, const char *state);
 extern void nemocanvas_put_state(struct nemocanvas *canvas, const char *state);
 extern void nemocanvas_set_size(struct nemocanvas *canvas, int32_t width, int32_t height);

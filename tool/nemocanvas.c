@@ -409,6 +409,11 @@ void nemocanvas_set_tag(struct nemocanvas *canvas, uint32_t tag)
 	nemo_surface_set_tag(canvas->nemo_surface, tag);
 }
 
+void nemocanvas_set_type(struct nemocanvas *canvas, const char *type)
+{
+	nemo_surface_set_type(canvas->nemo_surface, type);
+}
+
 void nemocanvas_set_state(struct nemocanvas *canvas, const char *state)
 {
 	nemo_surface_set_state(canvas->nemo_surface, state);

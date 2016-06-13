@@ -54,7 +54,8 @@ struct nemoview {
 	struct nemocontent *content;
 
 	uint32_t id;
-
+	char *type;
+	
 	struct nemocanvas *canvas;
 	struct nemoactor *actor;
 
@@ -145,6 +146,8 @@ extern void nemoview_update_transform(struct nemoview *view);
 extern void nemoview_update_transform_notify(struct nemoview *view);
 extern void nemoview_update_transform_children(struct nemoview *view);
 extern void nemoview_update_transform_parent(struct nemoview *view);
+
+extern void nemoview_set_type(struct nemoview *view, const char *type);
 
 extern void nemoview_set_parent(struct nemoview *view, struct nemoview *parent);
 extern void nemoview_set_focus(struct nemoview *view, struct nemoview *focus);

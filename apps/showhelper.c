@@ -534,6 +534,14 @@ void nemoshow_view_set_tag(struct nemoshow *show, uint32_t tag)
 	nemocanvas_set_tag(canvas, tag);
 }
 
+void nemoshow_view_set_type(struct nemoshow *show, const char *type)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemocanvas *canvas = scon->canvas;
+	
+	nemocanvas_set_type(canvas, type);
+}
+
 int nemoshow_view_move(struct nemoshow *show, uint32_t serial)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
