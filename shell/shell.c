@@ -179,7 +179,7 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 
 	if (bin->state_changed != 0) {
 		if (xdgshell_is_xdg_surface(bin) || waylandshell_is_shell_surface(bin)) {
-			nemoshell_change_bin_next_state(bin);
+			nemoshell_change_bin_state(bin);
 		} else {
 			bin->state = bin->next_state;
 			bin->state_changed = 0;
@@ -543,17 +543,15 @@ static void nemoshell_handle_keyboard_focus(struct wl_listener *listener, void *
 	if (keyboard->focused != NULL && keyboard->focused->canvas != NULL) {
 		struct shellbin *bin = nemoshell_get_bin(keyboard->focused->canvas);
 
-		if (bin) {
-			nemoshell_send_bin_configure(bin);
-		}
+		if (bin)
+			nemoshell_send_xdg_state(bin);
 	}
 
 	if (keyboard->focus != NULL && keyboard->focus->canvas != NULL) {
 		struct shellbin *bin = nemoshell_get_bin(keyboard->focus->canvas);
 
-		if (bin) {
-			nemoshell_send_bin_configure(bin);
-		}
+		if (bin)
+			nemoshell_send_xdg_state(bin);
 	}
 }
 
@@ -565,17 +563,15 @@ static void nemoshell_handle_keypad_focus(struct wl_listener *listener, void *da
 	if (keypad->focused != NULL && keypad->focused->canvas != NULL) {
 		struct shellbin *bin = nemoshell_get_bin(keypad->focused->canvas);
 
-		if (bin) {
-			nemoshell_send_bin_configure(bin);
-		}
+		if (bin)
+			nemoshell_send_xdg_state(bin);
 	}
 
 	if (keypad->focus != NULL && keypad->focus->canvas != NULL) {
 		struct shellbin *bin = nemoshell_get_bin(keypad->focus->canvas);
 
-		if (bin) {
-			nemoshell_send_bin_configure(bin);
-		}
+		if (bin)
+			nemoshell_send_xdg_state(bin);
 	}
 }
 
@@ -716,13 +712,7 @@ void nemoshell_send_bin_state(struct shellbin *bin)
 	bin->client->send_configure(bin->canvas, width, height);
 }
 
-void nemoshell_send_bin_configure(struct shellbin *bin)
-{
-	if (xdgshell_is_xdg_surface(bin))
-		nemoshell_send_bin_state(bin);
-}
-
-void nemoshell_change_bin_next_state(struct shellbin *bin)
+void nemoshell_change_bin_state(struct shellbin *bin)
 {
 	struct nemoview *parent = NULL;
 	struct nemoview *view = bin->view;
@@ -774,7 +764,7 @@ void nemoshell_change_bin_next_state(struct shellbin *bin)
 	}
 }
 
-void nemoshell_clear_bin_next_state(struct shellbin *bin)
+void nemoshell_clear_bin_state(struct shellbin *bin)
 {
 	bin->next_state.maximized = 0;
 	bin->next_state.fullscreen = 0;
@@ -782,6 +772,12 @@ void nemoshell_clear_bin_next_state(struct shellbin *bin)
 	if ((bin->next_state.maximized != bin->state.maximized) ||
 			(bin->next_state.fullscreen != bin->state.fullscreen))
 		bin->state_changed = 1;
+}
+
+void nemoshell_send_xdg_state(struct shellbin *bin)
+{
+	if (xdgshell_is_xdg_surface(bin))
+		nemoshell_send_bin_state(bin);
 }
 
 struct nemoview *nemoshell_get_default_view(struct nemocanvas *canvas)
@@ -847,7 +843,7 @@ struct clientstate *nemoshell_get_client_state(struct nemoshell *shell, uint32_t
 static inline void nemoshell_set_client_state(struct shellbin *bin, struct clientstate *state)
 {
 	if (state->is_fullscreen || state->is_maximized) {
-		nemoshell_clear_bin_next_state(bin);
+		nemoshell_clear_bin_state(bin);
 		bin->requested_state.maximized = state->is_maximized;
 		bin->requested_state.fullscreen = state->is_fullscreen;
 		bin->state_requested = 1;
@@ -979,7 +975,7 @@ struct shellscreen *nemoshell_get_fullscreen_on(struct nemoshell *shell, int32_t
 
 void nemoshell_set_toplevel_bin(struct nemoshell *shell, struct shellbin *bin)
 {
-	nemoshell_clear_bin_next_state(bin);
+	nemoshell_clear_bin_state(bin);
 
 	bin->type = NEMOSHELL_SURFACE_NORMAL_TYPE;
 	nemoshell_set_parent_bin(bin, NULL);
@@ -987,7 +983,7 @@ void nemoshell_set_toplevel_bin(struct nemoshell *shell, struct shellbin *bin)
 
 void nemoshell_set_popup_bin(struct nemoshell *shell, struct shellbin *bin, struct shellbin *parent, int32_t x, int32_t y, uint32_t serial)
 {
-	nemoshell_clear_bin_next_state(bin);
+	nemoshell_clear_bin_state(bin);
 
 	bin->type = NEMOSHELL_SURFACE_POPUP_TYPE;
 	bin->popup.x = x;
@@ -999,7 +995,7 @@ void nemoshell_set_popup_bin(struct nemoshell *shell, struct shellbin *bin, stru
 
 void nemoshell_set_fullscreen_bin_on_screen(struct nemoshell *shell, struct shellbin *bin, struct nemoscreen *screen)
 {
-	nemoshell_clear_bin_next_state(bin);
+	nemoshell_clear_bin_state(bin);
 
 	if (xdgshell_is_xdg_surface(bin) || xdgshell_is_xdg_popup(bin)) {
 		bin->requested_state.fullscreen = 1;
@@ -1031,7 +1027,7 @@ void nemoshell_set_fullscreen_bin(struct nemoshell *shell, struct shellbin *bin,
 		bin->requested_state.fullscreen = 1;
 		bin->state_requested = 1;
 	} else {
-		nemoshell_clear_bin_next_state(bin);
+		nemoshell_clear_bin_state(bin);
 		bin->next_state.fullscreen = 1;
 		bin->state_changed = 1;
 	}
@@ -1097,7 +1093,7 @@ static inline int nemoshell_bin_contain_view(struct shellbin *bin, struct nemovi
 
 void nemoshell_set_maximized_bin_on_screen(struct nemoshell *shell, struct shellbin *bin, struct nemoscreen *screen)
 {
-	nemoshell_clear_bin_next_state(bin);
+	nemoshell_clear_bin_state(bin);
 
 	if (xdgshell_is_xdg_surface(bin) || xdgshell_is_xdg_popup(bin)) {
 		bin->requested_state.maximized = 1;
@@ -1129,7 +1125,7 @@ void nemoshell_set_maximized_bin(struct nemoshell *shell, struct shellbin *bin, 
 		bin->requested_state.maximized = 1;
 		bin->state_requested = 1;
 	} else {
-		nemoshell_clear_bin_next_state(bin);
+		nemoshell_clear_bin_state(bin);
 		bin->next_state.maximized = 1;
 		bin->state_changed = 1;
 	}

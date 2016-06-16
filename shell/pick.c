@@ -289,7 +289,8 @@ static void pick_shellgrab_touchpoint_cancel(struct touchpoint_grab *base)
 
 	if (bin != NULL) {
 		bin->resize_edges = 0;
-		nemoshell_send_bin_configure(bin);
+
+		nemoshell_send_xdg_state(bin);
 	}
 
 	nemoshell_end_touchpoint_shellgrab(grab);
@@ -416,7 +417,7 @@ int nemoshell_pick_canvas_by_touchpoint_on_area(struct nemoshell *shell, struct 
 	} else {
 		type = (1 << NEMO_SURFACE_PICK_TYPE_RESIZE);
 
-		nemoshell_send_bin_configure(bin);
+		nemoshell_send_xdg_state(bin);
 	}
 
 	pick0->type = pick1->type = type;

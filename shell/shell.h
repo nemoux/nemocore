@@ -307,9 +307,10 @@ extern struct shellclient *nemoshell_get_client(struct wl_client *client);
 
 extern void nemoshell_send_bin_close(struct shellbin *bin);
 extern void nemoshell_send_bin_state(struct shellbin *bin);
-extern void nemoshell_send_bin_configure(struct shellbin *bin);
-extern void nemoshell_change_bin_next_state(struct shellbin *bin);
-extern void nemoshell_clear_bin_next_state(struct shellbin *bin);
+extern void nemoshell_change_bin_state(struct shellbin *bin);
+extern void nemoshell_clear_bin_state(struct shellbin *bin);
+
+extern void nemoshell_send_xdg_state(struct shellbin *bin);
 
 extern struct nemoview *nemoshell_get_default_view(struct nemocanvas *canvas);
 
