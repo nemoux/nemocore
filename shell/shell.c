@@ -685,6 +685,11 @@ void nemoshell_set_default_layer(struct nemoshell *shell, struct nemolayer *laye
 	shell->default_layer = layer;
 }
 
+void nemoshell_send_bin_close(struct shellbin *bin)
+{
+	bin->client->send_close(bin->canvas);
+}
+
 void nemoshell_send_bin_state(struct shellbin *bin)
 {
 	struct binstate *state;

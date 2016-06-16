@@ -89,7 +89,7 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 			if (nemoview_has_state(bin->view, NEMOVIEW_CLOSE_STATE) == 0) {
 				kill(bin->pid, SIGKILL);
 			} else {
-				bin->client->send_close(bin->canvas);
+				nemoshell_send_bin_close(bin);
 			}
 		} else {
 			bin->resize_edges = WL_SHELL_SURFACE_RESIZE_LEFT | WL_SHELL_SURFACE_RESIZE_TOP;

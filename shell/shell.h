@@ -305,6 +305,7 @@ extern struct shellclient *nemoshell_create_client(struct wl_client *client, str
 extern void nemoshell_destroy_client(struct shellclient *sc);
 extern struct shellclient *nemoshell_get_client(struct wl_client *client);
 
+extern void nemoshell_send_bin_close(struct shellbin *bin);
 extern void nemoshell_send_bin_state(struct shellbin *bin);
 extern void nemoshell_send_bin_configure(struct shellbin *bin);
 extern void nemoshell_change_bin_next_state(struct shellbin *bin);
