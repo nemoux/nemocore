@@ -8,6 +8,8 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <ctype.h>
+
 #include <nemotoken.h>
 
 struct nemotoken *nemotoken_create(const char *str, int length)
@@ -188,6 +190,22 @@ int nemotoken_update(struct nemotoken *token)
 	return 0;
 }
 
+void nemotoken_tolower(struct nemotoken *token)
+{
+	int i;
+
+	for (i = 0; i < token->length; i++)
+		token->contents[i] = tolower(token->contents[i]);
+}
+
+void nemotoken_toupper(struct nemotoken *token)
+{
+	int i;
+
+	for (i = 0; i < token->length; i++)
+		token->contents[i] = toupper(token->contents[i]);
+}
+
 int nemotoken_get_token_count(struct nemotoken *token)
 {
 	return token->ntokens;
@@ -213,4 +231,16 @@ int nemotoken_get_index(struct nemotoken *token, const char *name)
 	}
 
 	return token->ntokens;
+}
+
+int nemotoken_has_token(struct nemotoken *token, const char *name)
+{
+	int i;
+
+	for (i = 0; i < token->ntokens; i++) {
+		if (strcmp(token->tokens[i], name) == 0)
+			return 1;
+	}
+
+	return 0;
 }
