@@ -29,7 +29,7 @@ extern int nemotoken_update(struct nemotoken *token);
 extern int nemotoken_get_token_count(struct nemotoken *token);
 extern char **nemotoken_get_tokens(struct nemotoken *token);
 extern const char *nemotoken_get_token(struct nemotoken *token, int index);
-extern const char *nemotoken_get_token_pair(struct nemotoken *token, const char *name);
+extern int nemotoken_get_index(struct nemotoken *token, const char *name);
 
 static inline const char *nemotoken_get_string(struct nemotoken *token, int index, const char *value)
 {

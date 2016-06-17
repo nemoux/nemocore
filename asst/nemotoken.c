@@ -203,18 +203,14 @@ const char *nemotoken_get_token(struct nemotoken *token, int index)
 	return index < token->ntokens ? token->tokens[index] : NULL;
 }
 
-const char *nemotoken_get_token_pair(struct nemotoken *token, const char *name)
+int nemotoken_get_index(struct nemotoken *token, const char *name)
 {
 	int i;
 
-	if (token->ntokens < 2)
-		return NULL;
-
-	for (i = 0; i < token->ntokens - 1; i++) {
-		if (strcmp(token->tokens[i], name) == 0) {
-			return token->tokens[i + 1];
-		}
+	for (i = 0; i < token->ntokens; i++) {
+		if (strcmp(token->tokens[i], name) == 0)
+			return i;
 	}
 
-	return NULL;
+	return token->ntokens;
 }
