@@ -237,14 +237,21 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 			nemoview_update_transform(view);
 			nemoview_damage_below(view);
 		} else if (bin->type == NEMOSHELL_SURFACE_XWAYLAND_TYPE) {
-			nemoview_attach_layer(view, bin->layer);
-			nemoview_set_position(view,
-					bin->initial.x - canvas->base.width * bin->initial.dx,
-					bin->initial.y - canvas->base.height * bin->initial.dy);
-			nemoview_correct_pivot(view, view->content->width * bin->initial.dx, view->content->height * bin->initial.dy);
-			nemoview_set_rotation(view, bin->initial.r);
-			nemoview_update_transform(view);
-			nemoview_damage_below(view);
+			if (bin->parent == NULL) {
+				nemoview_attach_layer(view, bin->layer);
+				nemoview_set_position(view,
+						bin->initial.x - canvas->base.width * bin->initial.dx,
+						bin->initial.y - canvas->base.height * bin->initial.dy);
+				nemoview_correct_pivot(view, view->content->width * bin->initial.dx, view->content->height * bin->initial.dy);
+				nemoview_set_rotation(view, bin->initial.r);
+				nemoview_update_transform(view);
+				nemoview_damage_below(view);
+			} else {
+				nemoview_set_parent(view, bin->parent->view);
+				nemoview_set_position(view, bin->transient.x, bin->transient.y);
+				nemoview_update_transform(view);
+				nemoview_damage_below(view);
+			}
 		}
 
 		nemoview_transform_notify(bin->view);

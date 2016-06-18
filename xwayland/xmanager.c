@@ -1409,8 +1409,13 @@ void nemoxmanager_map_canvas(struct nemoxwindow *xwindow, struct nemocanvas *can
 	xwindow->canvas_destroy_listener.notify = nemoxmanager_handle_canvas_destroy;
 	wl_signal_add(&canvas->destroy_signal, &xwindow->canvas_destroy_listener);
 
-	if (xwindow->override_redirect == 0) {
-		nemoxmanager_repaint_window(xwindow);
-		nemoxmanager_map_window(xmanager, xwindow);
+	nemoxmanager_repaint_window(xwindow);
+	nemoxmanager_map_window(xmanager, xwindow);
+
+	if (xwindow->override_redirect != 0 && xmanager->focus != NULL) {
+		xwindow->bin->transient.x = xwindow->x;
+		xwindow->bin->transient.y = xwindow->y;
+
+		nemoshell_set_parent_bin(xwindow->bin, xmanager->focus->bin);
 	}
 }
