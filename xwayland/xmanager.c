@@ -503,6 +503,16 @@ static void nemoxmanager_handle_property_notify(struct nemoxmanager *xmanager, x
 
 	xwindow->properties_dirty = 1;
 
+	if (property_notify->state != XCB_PROPERTY_DELETE) {
+		xcb_get_property_reply_t *reply;
+		xcb_get_property_cookie_t cookie;
+
+		cookie = xcb_get_property(xmanager->conn, 0, property_notify->window, property_notify->atom, XCB_ATOM_ANY, 0, 2048);
+		reply = xcb_get_property_reply(xmanager->conn, cookie, NULL);
+		if (reply != NULL) {
+		}
+	}
+
 	if (property_notify->atom == xmanager->atom.net_wm_name ||
 			property_notify->atom == XCB_ATOM_WM_NAME)
 		nemoxmanager_repaint_window(xwindow);
