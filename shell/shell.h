@@ -54,6 +54,8 @@ typedef int (*nemoshell_execute_command_t)(void *data, struct shellbin *bin, con
 typedef int (*nemoshell_execute_action_t)(void *data, struct shellbin *bin, const char *id, double x, double y, double r);
 typedef int (*nemoshell_execute_content_t)(void *data, struct shellbin *bin, uint32_t type, const char *path, double x, double y, double r);
 
+typedef void (*nemoshell_transform_bin_t)(void *data, struct shellbin *bin);
+
 struct nemoshell {
 	struct nemocompz *compz;
 
@@ -118,6 +120,7 @@ struct nemoshell {
 	nemoshell_execute_command_t execute_command;
 	nemoshell_execute_action_t execute_action;
 	nemoshell_execute_content_t execute_content;
+	nemoshell_transform_bin_t transform_bin;
 	void *userdata;
 
 	int is_logging_grab;
@@ -347,6 +350,11 @@ static inline void nemoshell_set_execute_action(struct nemoshell *shell, nemoshe
 static inline void nemoshell_set_execute_content(struct nemoshell *shell, nemoshell_execute_content_t execute)
 {
 	shell->execute_content = execute;
+}
+
+static inline void nemoshell_set_transform_bin(struct nemoshell *shell, nemoshell_transform_bin_t dispatch)
+{
+	shell->transform_bin = dispatch;
 }
 
 static inline void nemoshell_set_userdata(struct nemoshell *shell, void *data)

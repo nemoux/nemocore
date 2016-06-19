@@ -123,6 +123,9 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		}
 	}
 
+	if (shell->transform_bin != NULL)
+		shell->transform_bin(shell->userdata, bin);
+
 out:
 	nemoshell_end_touchpoint_shellgrab(grab);
 	nemoshell_end_touchpoint_shellgrab(&pick->other->base);
