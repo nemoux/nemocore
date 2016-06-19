@@ -138,30 +138,32 @@ static void move_shellgrab_dispatch_effect_done(struct nemoeffect *base)
 	struct shellscreen *screen;
 	float tx, ty;
 
-	nemoview_transform_to_global(bin->view,
-			bin->view->content->width * 0.5f,
-			bin->view->content->height * 0.5f,
-			&tx, &ty);
+	if (bin->on_pitchscreen != 0) {
+		nemoview_transform_to_global(bin->view,
+				bin->view->content->width * 0.5f,
+				bin->view->content->height * 0.5f,
+				&tx, &ty);
 
-	screen = nemoshell_get_fullscreen_on(shell, tx, ty, NEMOSHELL_FULLSCREEN_PITCH_TYPE);
-	if (screen != NULL) {
-		struct shellbin *sbin, *nbin;
+		screen = nemoshell_get_fullscreen_on(shell, tx, ty, NEMOSHELL_FULLSCREEN_PITCH_TYPE);
+		if (screen != NULL) {
+			struct shellbin *sbin, *nbin;
 
-		wl_list_for_each_safe(sbin, nbin, &screen->bin_list, screen_link) {
-			wl_list_remove(&sbin->screen_link);
-			wl_list_init(&sbin->screen_link);
+			wl_list_for_each_safe(sbin, nbin, &screen->bin_list, screen_link) {
+				wl_list_remove(&sbin->screen_link);
+				wl_list_init(&sbin->screen_link);
 
-			if (sbin->resource != NULL) {
-				kill(sbin->pid, SIGKILL);
+				if (sbin->resource != NULL) {
+					kill(sbin->pid, SIGKILL);
+				}
 			}
-		}
 
-		nemoshell_set_fullscreen_bin(shell, bin, screen);
+			nemoshell_set_fullscreen_bin(shell, bin, screen);
 
-		if (screen->focus == NEMOSHELL_FULLSCREEN_ALL_FOCUS) {
-			nemoseat_set_keyboard_focus(shell->compz->seat, bin->view);
-			nemoseat_set_pointer_focus(shell->compz->seat, bin->view);
-			nemoseat_set_stick_focus(shell->compz->seat, bin->view);
+			if (screen->focus == NEMOSHELL_FULLSCREEN_ALL_FOCUS) {
+				nemoseat_set_keyboard_focus(shell->compz->seat, bin->view);
+				nemoseat_set_pointer_focus(shell->compz->seat, bin->view);
+				nemoseat_set_stick_focus(shell->compz->seat, bin->view);
+			}
 		}
 	}
 
@@ -198,11 +200,8 @@ static void move_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		if (shell->is_logging_grab != 0)
 			nemolog_message("MOVE", "[PITCH] %llu: dx(%f) dy(%f) (%u)\n", touchid, effect->pitch.dx, effect->pitch.dy, time);
 
-		if (grab->bin->on_pitchscreen != 0) {
-			vieweffect_set_dispatch_done(effect, move_shellgrab_dispatch_effect_done);
-			vieweffect_set_userdata(effect, grab->bin);
-		}
-
+		vieweffect_set_dispatch_done(effect, move_shellgrab_dispatch_effect_done);
+		vieweffect_set_userdata(effect, grab->bin);
 		vieweffect_dispatch(bin->shell->compz, effect);
 
 		needs_notify = 0;
