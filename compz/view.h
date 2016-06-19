@@ -502,6 +502,11 @@ static inline int nemoview_has_state_all(struct nemoview *view, uint32_t state)
 	return (view->state & state) == state;
 }
 
+static inline int nemoview_has_type(struct nemoview *view, const char *type)
+{
+	return view->type != NULL && strcmp(view->type, type) == 0;
+}
+
 static inline void nemoview_set_tag(struct nemoview *view, uint32_t tag)
 {
 	view->tag = tag;
