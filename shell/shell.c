@@ -256,6 +256,9 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 
 		nemoview_transform_notify(bin->view);
 
+		if (bin->shell->transform_bin != NULL)
+			bin->shell->transform_bin(bin->shell->userdata, bin);
+
 		bin->last_width = canvas->base.width;
 		bin->last_height = canvas->base.height;
 
@@ -357,6 +360,9 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 		}
 
 		nemoview_transform_notify(bin->view);
+
+		if (bin->shell->transform_bin != NULL)
+			bin->shell->transform_bin(bin->shell->userdata, bin);
 
 		bin->reset_pivot = 1;
 
