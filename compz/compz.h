@@ -63,6 +63,7 @@ struct inputconfig {
 
 	uint32_t nodeid;
 	uint32_t screenid;
+	int has_screen;
 
 	int32_t x, y;
 	int32_t width, height;

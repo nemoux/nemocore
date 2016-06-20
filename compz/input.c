@@ -58,7 +58,7 @@ int nemoinput_get_config_screen(struct nemocompz *compz, const char *devnode, ui
 	struct inputconfig *config;
 
 	config = nemocompz_get_input_config(compz, devnode);
-	if (config != NULL) {
+	if (config != NULL && config->has_screen != 0) {
 		*nodeid = config->nodeid;
 		*screenid = config->screenid;
 

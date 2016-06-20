@@ -123,6 +123,7 @@ int nemoenvs_dispatch_system_message(struct nemoenvs *envs, const char *src, con
 							config->nodeid = strtoul(value, NULL, 10);
 						} else if (strcmp(name, "screenid") == 0) {
 							config->screenid = strtoul(value, NULL, 10);
+							config->has_screen = 1;
 						} else if (strcmp(name, "transform") == 0) {
 							config->transform = strdup(value);
 						}
