@@ -1047,14 +1047,9 @@ struct screenconfig *nemocompz_get_screen_config(struct nemocompz *compz, uint32
 	return NULL;
 }
 
-struct screenconfig *nemocompz_get_screen_config_force(struct nemocompz *compz, uint32_t nodeid, uint32_t screenid)
+struct screenconfig *nemocompz_set_screen_config(struct nemocompz *compz, uint32_t nodeid, uint32_t screenid)
 {
 	struct screenconfig *config;
-
-	wl_list_for_each(config, &compz->screenconfig_list, link) {
-		if (config->nodeid == nodeid && config->screenid == screenid)
-			return config;
-	}
 
 	config = (struct screenconfig *)malloc(sizeof(struct screenconfig));
 	if (config == NULL)
@@ -1101,14 +1096,9 @@ struct inputconfig *nemocompz_get_input_config(struct nemocompz *compz, const ch
 	return NULL;
 }
 
-struct inputconfig *nemocompz_get_input_config_force(struct nemocompz *compz, const char *devnode)
+struct inputconfig *nemocompz_set_input_config(struct nemocompz *compz, const char *devnode)
 {
 	struct inputconfig *config;
-
-	wl_list_for_each(config, &compz->inputconfig_list, link) {
-		if (strcmp(config->devnode, devnode) == 0)
-			return config;
-	}
 
 	config = (struct inputconfig *)malloc(sizeof(struct inputconfig));
 	if (config == NULL)

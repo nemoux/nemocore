@@ -227,10 +227,10 @@ extern struct nemoview *nemocompz_get_view_by_id(struct nemocompz *compz, uint32
 extern struct nemoview *nemocompz_get_view_by_client(struct nemocompz *compz, struct wl_client *client);
 
 extern struct screenconfig *nemocompz_get_screen_config(struct nemocompz *compz, uint32_t nodeid, uint32_t screenid);
-extern struct screenconfig *nemocompz_get_screen_config_force(struct nemocompz *compz, uint32_t nodeid, uint32_t screenid);
+extern struct screenconfig *nemocompz_set_screen_config(struct nemocompz *compz, uint32_t nodeid, uint32_t screenid);
 extern void nemocompz_put_screen_config(struct nemocompz *compz, uint32_t nodeid, uint32_t screenid);
 extern struct inputconfig *nemocompz_get_input_config(struct nemocompz *compz, const char *devnode);
-extern struct inputconfig *nemocompz_get_input_config_force(struct nemocompz *compz, const char *devnode);
+extern struct inputconfig *nemocompz_set_input_config(struct nemocompz *compz, const char *devnode);
 extern void nemocompz_put_input_config(struct nemocompz *compz, const char *devnode);
 
 #ifdef __cplusplus
