@@ -74,7 +74,7 @@ int nemoenvs_dispatch_system_message(struct nemoenvs *envs, const char *src, con
 				uint32_t nodeid = nemoitem_one_get_iattr(one, "nodeid", 0);
 				uint32_t screenid = nemoitem_one_get_iattr(one, "screenid", 0);
 
-				config = nemocompz_get_screen_config(compz, nodeid, screenid);
+				config = nemocompz_get_screen_config_force(compz, nodeid, screenid);
 				if (config != NULL) {
 					nemoitem_attr_for_each(attr, one) {
 						name = nemoitem_attr_get_name(attr);
@@ -101,7 +101,7 @@ int nemoenvs_dispatch_system_message(struct nemoenvs *envs, const char *src, con
 				struct inputconfig *config;
 				const char *devnode = nemoitem_one_get_attr(one, "devnode");
 
-				config = nemocompz_get_input_config(compz, devnode);
+				config = nemocompz_get_input_config_force(compz, devnode);
 				if (config != NULL) {
 					nemoitem_attr_for_each(attr, one) {
 						name = nemoitem_attr_get_name(attr);
