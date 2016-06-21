@@ -199,6 +199,10 @@ static void *nemoplay_handle_audioplay(void *arg)
 
 	driver = ao_default_driver_id();
 	device = ao_open_live(driver, &format, NULL);
+	if (device == NULL) {
+		nemoplay_revoke_audio(play);
+		goto out;
+	}
 
 	queue = nemoplay_get_audio_queue(play);
 
@@ -227,6 +231,8 @@ static void *nemoplay_handle_audioplay(void *arg)
 	}
 
 	ao_close(device);
+
+out:
 	ao_shutdown();
 
 	nemoplay_leave_thread(play);
