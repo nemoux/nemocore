@@ -389,11 +389,6 @@ static inline void nemoview_transform_to_local(struct nemoview *view, struct nem
 {
 	float tx, ty;
 
-	if (view->transform.dirty)
-		nemoview_update_transform(view);
-	if (other->transform.dirty)
-		nemoview_update_transform(other);
-
 	nemoview_transform_to_global(view, x, y, &tx, &ty);
 	nemoview_transform_from_global(other, tx, ty, sx, sy);
 }
@@ -401,11 +396,6 @@ static inline void nemoview_transform_to_local(struct nemoview *view, struct nem
 static inline void nemoview_transform_from_local(struct nemoview *view, struct nemoview *other, float x, float y, float *sx, float *sy)
 {
 	float tx, ty;
-
-	if (view->transform.dirty)
-		nemoview_update_transform(view);
-	if (other->transform.dirty)
-		nemoview_update_transform(other);
 
 	nemoview_transform_to_global(other, x, y, &tx, &ty);
 	nemoview_transform_from_global(view, tx, ty, sx, sy);

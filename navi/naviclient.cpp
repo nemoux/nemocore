@@ -34,12 +34,16 @@ void NaviClient::OnBeforeContextMenu(CefRefPtr<CefBrowser> browser, CefRefPtr<Ce
 {
 	model->Clear();
 
+#ifdef NEMONAVI_DEBUG_ON
 	nemolog_message("NAVI", "[%s:%d]\n", __FUNCTION__, __LINE__);
+#endif
 }
 
 bool NaviClient::OnContextMenuCommand(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, CefRefPtr<CefContextMenuParams> params, int command_id, EventFlags event_flags)
 {
+#ifdef NEMONAVI_DEBUG_ON
 	nemolog_message("NAVI", "[%s:%d]\n", __FUNCTION__, __LINE__);
+#endif
 
 	return true;
 }
@@ -48,28 +52,36 @@ void NaviClient::OnAddressChange(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFra
 {
 	CEF_REQUIRE_UI_THREAD();
 
+#ifdef NEMONAVI_DEBUG_ON
 	nemolog_message("NAVI", "[%s:%d] url(%s)\n", __FUNCTION__, __LINE__, std::string(url).c_str());
+#endif
 }
 
 void NaviClient::OnTitleChange(CefRefPtr<CefBrowser> browser, const CefString &title)
 {
 	CEF_REQUIRE_UI_THREAD();
 
+#ifdef NEMONAVI_DEBUG_ON
 	nemolog_message("NAVI", "[%s:%d] title(%s)\n", __FUNCTION__, __LINE__, std::string(title).c_str());
+#endif
 }
 
 void NaviClient::OnFullscreenModeChange(CefRefPtr<CefBrowser> browser, bool fullscreen)
 {
 	CEF_REQUIRE_UI_THREAD();
 
+#ifdef NEMONAVI_DEBUG_ON
 	nemolog_message("NAVI", "[%s:%d]\n", __FUNCTION__, __LINE__);
+#endif
 }
 
 bool NaviClient::OnConsoleMessage(CefRefPtr<CefBrowser> browser, const CefString &message, const CefString &source, int line)
 {
 	CEF_REQUIRE_UI_THREAD();
 
+#ifdef NEMONAVI_DEBUG_ON
 	nemolog_message("NAVI", "[%s:%d] source(%s:%d) message(%s)\n", __FUNCTION__, __LINE__, std::string(source).c_str(), line, std::string(message).c_str());
+#endif
 
 	return false;
 }
@@ -89,7 +101,9 @@ bool NaviClient::OnBeforePopup(
 {
 	CefRefPtr<CefRequest> request(CefRequest::Create());
 
+#ifdef NEMONAVI_DEBUG_ON
 	nemolog_message("NAVI", "[%s:%d]\n", __FUNCTION__, __LINE__);
+#endif
 
 	request->SetURL(target_url);
 
@@ -102,14 +116,18 @@ void NaviClient::OnAfterCreated(CefRefPtr<CefBrowser> browser)
 {
 	CEF_REQUIRE_UI_THREAD();
 
+#ifdef NEMONAVI_DEBUG_ON
 	nemolog_message("NAVI", "[%s:%d]\n", __FUNCTION__, __LINE__);
+#endif
 }
 
 bool NaviClient::DoClose(CefRefPtr<CefBrowser> browser)
 {
 	CEF_REQUIRE_UI_THREAD();
 
+#ifdef NEMONAVI_DEBUG_ON
 	nemolog_message("NAVI", "[%s:%d]\n", __FUNCTION__, __LINE__);
+#endif
 
 	return false;
 }
@@ -118,14 +136,18 @@ void NaviClient::OnBeforeClose(CefRefPtr<CefBrowser> browser)
 {
 	CEF_REQUIRE_UI_THREAD();
 
+#ifdef NEMONAVI_DEBUG_ON
 	nemolog_message("NAVI", "[%s:%d]\n", __FUNCTION__, __LINE__);
+#endif
 }
 
 void NaviClient::OnLoadingStateChange(CefRefPtr<CefBrowser> browser, bool isLoading, bool canGoBack, bool canGoForward)
 {
 	struct nemonavi *navi = (struct nemonavi *)m_userdata;
 
+#ifdef NEMONAVI_DEBUG_ON
 	nemolog_message("NAVI", "[%s:%d]\n", __FUNCTION__, __LINE__);
+#endif
 
 	if (navi->dispatch_loading_state != NULL)
 		navi->dispatch_loading_state(navi, isLoading == true, canGoBack == true, canGoForward == true);
@@ -135,7 +157,9 @@ void NaviClient::OnLoadError(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> 
 {
 	CEF_REQUIRE_UI_THREAD();
 
+#ifdef NEMONAVI_DEBUG_ON
 	nemolog_message("NAVI", "[%s:%d] URL(%s) error(%s)\n", __FUNCTION__, __LINE__, std::string(failedUrl).c_str(), std::string(errorText).c_str());
+#endif
 
 	if (errorCode == ERR_ABORTED)
 		return;
@@ -152,14 +176,18 @@ void NaviClient::OnLoadError(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> 
 
 bool NaviClient::OnBeforeBrowse(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, CefRefPtr<CefRequest> request, bool is_redirect)
 {
+#ifdef NEMONAVI_DEBUG_ON
 	nemolog_message("NAVI", "[%s:%d]\n", __FUNCTION__, __LINE__);
+#endif
 
 	return false;
 }
 
 bool NaviClient::OnOpenURLFromTab(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString &target_url, CefRequestHandler::WindowOpenDisposition target_disposition, bool user_gesture)
 {
+#ifdef NEMONAVI_DEBUG_ON
 	nemolog_message("NAVI", "[%s:%d] target_url(%s)\n", __FUNCTION__, __LINE__, std::string(target_url).c_str());
+#endif
 
 	return false;
 }
@@ -170,7 +198,9 @@ cef_return_value_t NaviClient::OnBeforeResourceLoad(
 		CefRefPtr<CefRequest> request,
 		CefRefPtr<CefRequestCallback> callback)
 {
+#ifdef NEMONAVI_DEBUG_ON
 	nemolog_message("NAVI", "[%s:%d]\n", __FUNCTION__, __LINE__);
+#endif
 
 	return RV_CONTINUE;
 }
@@ -180,7 +210,9 @@ CefRefPtr<CefResourceHandler> NaviClient::GetResourceHandler(
 		CefRefPtr<CefFrame> frame,
 		CefRefPtr<CefRequest> request)
 {
+#ifdef NEMONAVI_DEBUG_ON
 	nemolog_message("NAVI", "[%s:%d]\n", __FUNCTION__, __LINE__);
+#endif
 
 	return NULL;
 }
@@ -191,21 +223,27 @@ CefRefPtr<CefResponseFilter> NaviClient::GetResourceResponseFilter(
 		CefRefPtr<CefRequest> request,
 		CefRefPtr<CefResponse> response)
 {
+#ifdef NEMONAVI_DEBUG_ON
 	nemolog_message("NAVI", "[%s:%d]\n", __FUNCTION__, __LINE__);
+#endif
 
 	return NULL;
 }
 
 bool NaviClient::OnQuotaRequest(CefRefPtr<CefBrowser> browser, const CefString &origin_url, int64 new_size, CefRefPtr<CefRequestCallback> callback)
 {
+#ifdef NEMONAVI_DEBUG_ON
 	nemolog_message("NAVI", "[%s:%d] origin_url(%s)\n", __FUNCTION__, __LINE__, std::string(origin_url).c_str());
+#endif
 
 	return true;
 }
 
 void NaviClient::OnProtocolExecution(CefRefPtr<CefBrowser> browser, const CefString &url, bool &allow_os_execution)
 {
+#ifdef NEMONAVI_DEBUG_ON
 	nemolog_message("NAVI", "[%s:%d] url(%s) allow(%d)\n", __FUNCTION__, __LINE__, std::string(url).c_str(), allow_os_execution);
+#endif
 }
 
 bool NaviClient::OnCertificateError(
@@ -215,19 +253,25 @@ bool NaviClient::OnCertificateError(
 		CefRefPtr<CefSSLInfo> ssl_info,
 		CefRefPtr<CefRequestCallback> callback)
 {
+#ifdef NEMONAVI_DEBUG_ON
 	nemolog_message("NAVI", "[%s:%d] request_url(%s)\n", __FUNCTION__, __LINE__, std::string(request_url).c_str());
+#endif
 
 	return false;
 }
 
 void NaviClient::OnRenderProcessTerminated(CefRefPtr<CefBrowser> browser, TerminationStatus status)
 {
+#ifdef NEMONAVI_DEBUG_ON
 	nemolog_message("NAVI", "[%s:%d]\n", __FUNCTION__, __LINE__);
+#endif
 }
 
 bool NaviClient::GetRootScreenRect(CefRefPtr<CefBrowser> browser, CefRect &rect)
 {
+#ifdef NEMONAVI_DEBUG_ON
 	nemolog_message("NAVI", "[%s:%d]\n", __FUNCTION__, __LINE__);
+#endif
 
 	return true;
 }
@@ -236,7 +280,9 @@ bool NaviClient::GetViewRect(CefRefPtr<CefBrowser> browser, CefRect &rect)
 {
 	struct nemonavi *navi = (struct nemonavi *)m_userdata;
 
+#ifdef NEMONAVI_DEBUG_ON
 	nemolog_message("NAVI", "[%s:%d]\n", __FUNCTION__, __LINE__);
+#endif
 
 	rect = CefRect(0, 0, navi->width, navi->height);
 
@@ -245,14 +291,18 @@ bool NaviClient::GetViewRect(CefRefPtr<CefBrowser> browser, CefRect &rect)
 
 bool NaviClient::GetScreenPoint(CefRefPtr<CefBrowser> browser, int viewX, int viewY, int &screenX, int &screenY)
 {
+#ifdef NEMONAVI_DEBUG_ON
 	nemolog_message("NAVI", "[%s:%d]\n", __FUNCTION__, __LINE__);
+#endif
 
 	return true;
 }
 
 bool NaviClient::GetScreenInfo(CefRefPtr<CefBrowser> browser, CefScreenInfo &screen_info)
 {
+#ifdef NEMONAVI_DEBUG_ON
 	nemolog_message("NAVI", "[%s:%d]\n", __FUNCTION__, __LINE__);
+#endif
 
 	return true;
 }
@@ -261,7 +311,9 @@ void NaviClient::OnPopupShow(CefRefPtr<CefBrowser> browser, bool show)
 {
 	struct nemonavi *navi = (struct nemonavi *)m_userdata;
 
+#ifdef NEMONAVI_DEBUG_ON
 	nemolog_message("NAVI", "[%s:%d]\n", __FUNCTION__, __LINE__);
+#endif
 
 	if (navi->dispatch_popup_show != NULL)
 		navi->dispatch_popup_show(navi, show == true);
@@ -271,7 +323,9 @@ void NaviClient::OnPopupSize(CefRefPtr<CefBrowser> browser, const CefRect &rect)
 {
 	struct nemonavi *navi = (struct nemonavi *)m_userdata;
 
+#ifdef NEMONAVI_DEBUG_ON
 	nemolog_message("NAVI", "[%s:%d]\n", __FUNCTION__, __LINE__);
+#endif
 
 	if (navi->dispatch_popup_rect != NULL)
 		navi->dispatch_popup_rect(navi,
@@ -295,29 +349,39 @@ void NaviClient::OnPaint(CefRefPtr<CefBrowser> browser, CefRenderHandler::PaintE
 
 void NaviClient::OnCursorChange(CefRefPtr<CefBrowser> browser, CefCursorHandle cursor, CursorType type, const CefCursorInfo &custom_cursor_info)
 {
+#ifdef NEMONAVI_DEBUG_ON
 	nemolog_message("NAVI", "[%s:%d]\n", __FUNCTION__, __LINE__);
+#endif
 }
 
 void NaviClient::OnBeforeDownload(CefRefPtr<CefBrowser> browser, CefRefPtr<CefDownloadItem> download_item, const CefString &suggested_name, CefRefPtr<CefBeforeDownloadCallback> callback)
 {
+#ifdef NEMONAVI_DEBUG_ON
 	nemolog_message("NAVI", "[%s:%d] suggested_name(%s)\n", __FUNCTION__, __LINE__, std::string(suggested_name).c_str());
+#endif
 }
 
 void NaviClient::OnDownloadUpdated(CefRefPtr<CefBrowser> browser, CefRefPtr<CefDownloadItem> download_item, CefRefPtr<CefDownloadItemCallback> callback)
 {
+#ifdef NEMONAVI_DEBUG_ON
 	nemolog_message("NAVI", "[%s:%d]\n", __FUNCTION__, __LINE__);
+#endif
 }
 
 bool NaviClient::OnDragEnter(CefRefPtr<CefBrowser> browser, CefRefPtr<CefDragData> dragData, CefDragHandler::DragOperationsMask mask)
 {
+#ifdef NEMONAVI_DEBUG_ON
 	nemolog_message("NAVI", "[%s:%d]\n", __FUNCTION__, __LINE__);
+#endif
 
 	return false;
 }
 
 void NaviClient::OnDraggableRegionsChanged(CefRefPtr<CefBrowser> browser, const std::vector<CefDraggableRegion> &regions)
 {
+#ifdef NEMONAVI_DEBUG_ON
 	nemolog_message("NAVI", "[%s:%d]\n", __FUNCTION__, __LINE__);
+#endif
 }
 
 bool NaviClient::OnRequestGeolocationPermission(
@@ -326,7 +390,9 @@ bool NaviClient::OnRequestGeolocationPermission(
 		int request_id,
 		CefRefPtr<CefGeolocationCallback> callback)
 {
+#ifdef NEMONAVI_DEBUG_ON
 	nemolog_message("NAVI", "[%s:%d]\n", __FUNCTION__, __LINE__);
+#endif
 
 	callback->Continue(true);
 
@@ -337,7 +403,9 @@ bool NaviClient::OnPreKeyEvent(CefRefPtr<CefBrowser> browser, const CefKeyEvent 
 {
 	struct nemonavi *navi = (struct nemonavi *)m_userdata;
 
+#ifdef NEMONAVI_DEBUG_ON
 	nemolog_message("NAVI", "[%s:%d]\n", __FUNCTION__, __LINE__);
+#endif
 
 	if (navi->dispatch_key_event != NULL)
 		navi->dispatch_key_event(navi, event.windows_key_code, event.focus_on_editable_field);
