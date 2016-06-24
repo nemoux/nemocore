@@ -247,11 +247,13 @@ static void nemonavi_dispatch_canvas_event(struct nemoshow *show, struct showone
 	if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event)) {
 		nemoshow_event_update_taps(show, canvas, event);
 
-		if (nemoshow_event_is_more_taps(show, event, 3)) {
-			nemoshow_view_pick_distant(show, event, NEMOSHOW_VIEW_PICK_ALL_TYPE);
+		if (nemoshow_event_is_more_taps(show, event, 5)) {
+			nemoshow_view_pick_distant(show, event, NEMOSHOW_VIEW_PICK_ROTATE_TYPE | NEMOSHOW_VIEW_PICK_SCALE_TYPE | NEMOSHOW_VIEW_PICK_TRANSLATE_TYPE | NEMOSHOW_VIEW_PICK_RESIZE_TYPE);
+		} else if (nemoshow_event_is_more_taps(show, event, 3)) {
+			nemoshow_view_pick_distant(show, event, NEMOSHOW_VIEW_PICK_ROTATE_TYPE | NEMOSHOW_VIEW_PICK_TRANSLATE_TYPE);
 		}
 
-		if (nemoshow_event_is_more_taps(show, event, 2)) {
+		if (nemoshow_event_is_more_taps(show, event, 3)) {
 			nemoshow_event_set_cancel(event);
 
 			nemoshow_dispatch_grab_all(show, event);

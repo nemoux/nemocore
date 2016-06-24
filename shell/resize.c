@@ -112,9 +112,8 @@ int nemoshell_resize_canvas_by_pointer(struct nemopointer *pointer, struct shell
 	if (bin == NULL)
 		return -1;
 
-	if (bin->grabbed > 0) {
+	if (bin->grabbed > 0)
 		wl_signal_emit(&bin->ungrab_signal, bin);
-	}
 
 	resize = (struct shellgrab_resize *)malloc(sizeof(struct shellgrab_resize));
 	if (resize == NULL)

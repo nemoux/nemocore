@@ -29,6 +29,7 @@ struct touchpoint_grab_interface {
 	void (*up)(struct touchpoint_grab *grab, uint32_t time, uint64_t touchid);
 	void (*motion)(struct touchpoint_grab *grab, uint32_t time, uint64_t touchid, float x, float y);
 	void (*frame)(struct touchpoint_grab *grab, uint32_t frameid);
+	void (*miss)(struct touchpoint_grab *grab, uint32_t time, uint64_t touchid);
 	void (*cancel)(struct touchpoint_grab *grab);
 };
 
@@ -144,6 +145,7 @@ extern void touchpoint_set_focus(struct touchpoint *tp, struct nemoview *view);
 
 extern void touchpoint_start_grab(struct touchpoint *tp, struct touchpoint_grab *grab);
 extern void touchpoint_end_grab(struct touchpoint *tp);
+extern void touchpoint_miss_grab(struct touchpoint *tp);
 extern void touchpoint_cancel_grab(struct touchpoint *tp);
 extern void touchpoint_update_grab(struct touchpoint *tp);
 extern void touchpoint_done_grab(struct touchpoint *tp);

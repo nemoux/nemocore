@@ -270,6 +270,10 @@ static void move_shellgrab_touchpoint_frame(struct touchpoint_grab *base, uint32
 {
 }
 
+static void move_shellgrab_touchpoint_miss(struct touchpoint_grab *base, uint32_t time, uint64_t touchid)
+{
+}
+
 static void move_shellgrab_touchpoint_cancel(struct touchpoint_grab *base)
 {
 	struct shellgrab *grab = (struct shellgrab *)container_of(base, struct shellgrab, base.touchpoint);
@@ -284,6 +288,7 @@ static const struct touchpoint_grab_interface move_shellgrab_touchpoint_interfac
 	move_shellgrab_touchpoint_up,
 	move_shellgrab_touchpoint_motion,
 	move_shellgrab_touchpoint_frame,
+	move_shellgrab_touchpoint_miss,
 	move_shellgrab_touchpoint_cancel
 };
 
@@ -504,6 +509,10 @@ static void move_actorgrab_touchpoint_frame(struct touchpoint_grab *base, uint32
 {
 }
 
+static void move_actorgrab_touchpoint_miss(struct touchpoint_grab *base, uint32_t time, uint64_t touchid)
+{
+}
+
 static void move_actorgrab_touchpoint_cancel(struct touchpoint_grab *base)
 {
 	struct actorgrab *grab = (struct actorgrab *)container_of(base, struct actorgrab, base.touchpoint);
@@ -518,6 +527,7 @@ static const struct touchpoint_grab_interface move_actorgrab_touchpoint_interfac
 	move_actorgrab_touchpoint_up,
 	move_actorgrab_touchpoint_motion,
 	move_actorgrab_touchpoint_frame,
+	move_actorgrab_touchpoint_miss,
 	move_actorgrab_touchpoint_cancel
 };
 

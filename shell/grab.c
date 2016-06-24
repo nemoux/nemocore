@@ -14,54 +14,77 @@
 #include <view.h>
 #include <nemomisc.h>
 
+void nemoshell_miss_shellgrab(struct shellgrab *grab)
+{
+	wl_list_remove(&grab->bin_destroy_listener.link);
+	wl_list_remove(&grab->bin_ungrab_listener.link);
+	wl_list_remove(&grab->bin_change_listener.link);
+
+	if (--grab->bin->grabbed == 0)
+		nemoview_put_state(grab->bin->view, NEMOVIEW_GRAB_STATE);
+
+	grab->bin = NULL;
+}
+
+void nemoshell_miss_actorgrab(struct actorgrab *grab)
+{
+	wl_list_remove(&grab->actor_destroy_listener.link);
+	wl_list_remove(&grab->actor_ungrab_listener.link);
+
+	if (--grab->actor->grabbed == 0)
+		nemoview_put_state(grab->actor->view, NEMOVIEW_GRAB_STATE);
+
+	grab->actor = NULL;
+}
+
 static void shellgrab_handle_bin_destroy(struct wl_listener *listener, void *data)
 {
 	struct shellgrab *grab = (struct shellgrab *)container_of(listener, struct shellgrab, bin_destroy_listener);
 
-	grab->bin = NULL;
-
-	wl_list_remove(&grab->bin_destroy_listener.link);
-	wl_list_remove(&grab->bin_ungrab_listener.link);
-	wl_list_remove(&grab->bin_change_listener.link);
+	nemoshell_miss_shellgrab(grab);
 }
 
 static void shellgrab_handle_bin_ungrab_pointer(struct wl_listener *listener, void *data)
 {
 	struct shellgrab *grab = (struct shellgrab *)container_of(listener, struct shellgrab, bin_ungrab_listener);
 
-	nemoshell_end_pointer_shellgrab(grab);
-	free(grab);
+	nemoshell_miss_shellgrab(grab);
 }
 
 static void shellgrab_handle_bin_ungrab_touchpoint(struct wl_listener *listener, void *data)
 {
 	struct shellgrab *grab = (struct shellgrab *)container_of(listener, struct shellgrab, bin_ungrab_listener);
 
-	nemoshell_miss_touchpoint_shellgrab(grab);
-	free(grab);
+	if (grab->missed == 0)
+		touchpoint_miss_grab(grab->base.touchpoint.touchpoint);
+
+	if (grab->bin != NULL)
+		nemoshell_miss_shellgrab(grab);
 }
 
 static void actorgrab_handle_actor_destroy(struct wl_listener *listener, void *data)
 {
 	struct actorgrab *grab = (struct actorgrab *)container_of(listener, struct actorgrab, actor_destroy_listener);
 
-	grab->actor = NULL;
+	nemoshell_miss_actorgrab(grab);
 }
 
 static void actorgrab_handle_actor_ungrab_pointer(struct wl_listener *listener, void *data)
 {
 	struct actorgrab *grab = (struct actorgrab *)container_of(listener, struct actorgrab, actor_ungrab_listener);
 
-	nemoshell_end_pointer_actorgrab(grab);
-	free(grab);
+	nemoshell_miss_actorgrab(grab);
 }
 
 static void actorgrab_handle_actor_ungrab_touchpoint(struct wl_listener *listener, void *data)
 {
 	struct actorgrab *grab = (struct actorgrab *)container_of(listener, struct actorgrab, actor_ungrab_listener);
 
-	nemoshell_miss_touchpoint_actorgrab(grab);
-	free(grab);
+	if (grab->missed == 0)
+		touchpoint_miss_grab(grab->base.touchpoint.touchpoint);
+
+	if (grab->actor != NULL)
+		nemoshell_miss_actorgrab(grab);
 }
 
 void nemoshell_start_pointer_shellgrab(struct shellgrab *grab, const struct nemopointer_grab_interface *interface, struct shellbin *bin, struct nemopointer *pointer)
@@ -82,13 +105,8 @@ void nemoshell_start_pointer_shellgrab(struct shellgrab *grab, const struct nemo
 
 void nemoshell_end_pointer_shellgrab(struct shellgrab *grab)
 {
-	if (grab->bin != NULL) {
-		wl_list_remove(&grab->bin_destroy_listener.link);
-		wl_list_remove(&grab->bin_ungrab_listener.link);
-		wl_list_remove(&grab->bin_change_listener.link);
-		if (--grab->bin->grabbed == 0)
-			nemoview_put_state(grab->bin->view, NEMOVIEW_GRAB_STATE);
-	}
+	if (grab->bin != NULL)
+		nemoshell_miss_shellgrab(grab);
 
 	nemopointer_end_grab(grab->base.pointer.pointer);
 }
@@ -109,12 +127,8 @@ void nemoshell_start_pointer_actorgrab(struct actorgrab *grab, const struct nemo
 
 void nemoshell_end_pointer_actorgrab(struct actorgrab *grab)
 {
-	if (grab->actor != NULL) {
-		wl_list_remove(&grab->actor_destroy_listener.link);
-		wl_list_remove(&grab->actor_ungrab_listener.link);
-		if (--grab->actor->grabbed == 0)
-			nemoview_put_state(grab->actor->view, NEMOVIEW_GRAB_STATE);
-	}
+	if (grab->actor != NULL)
+		nemoshell_miss_actorgrab(grab);
 
 	nemopointer_end_grab(grab->base.pointer.pointer);
 }
@@ -137,26 +151,8 @@ void nemoshell_start_touchpoint_shellgrab(struct shellgrab *grab, const struct t
 
 void nemoshell_end_touchpoint_shellgrab(struct shellgrab *grab)
 {
-	if (grab->bin != NULL) {
-		wl_list_remove(&grab->bin_destroy_listener.link);
-		wl_list_remove(&grab->bin_ungrab_listener.link);
-		wl_list_remove(&grab->bin_change_listener.link);
-		if (--grab->bin->grabbed == 0)
-			nemoview_put_state(grab->bin->view, NEMOVIEW_GRAB_STATE);
-	}
-
-	touchpoint_end_grab(grab->base.touchpoint.touchpoint);
-}
-
-void nemoshell_miss_touchpoint_shellgrab(struct shellgrab *grab)
-{
-	if (grab->bin != NULL) {
-		wl_list_remove(&grab->bin_destroy_listener.link);
-		wl_list_remove(&grab->bin_ungrab_listener.link);
-		wl_list_remove(&grab->bin_change_listener.link);
-		if (--grab->bin->grabbed == 0)
-			nemoview_put_state(grab->bin->view, NEMOVIEW_GRAB_STATE);
-	}
+	if (grab->bin != NULL)
+		nemoshell_miss_shellgrab(grab);
 
 	touchpoint_end_grab(grab->base.touchpoint.touchpoint);
 }
@@ -177,24 +173,8 @@ void nemoshell_start_touchpoint_actorgrab(struct actorgrab *grab, const struct t
 
 void nemoshell_end_touchpoint_actorgrab(struct actorgrab *grab)
 {
-	if (grab->actor != NULL) {
-		wl_list_remove(&grab->actor_destroy_listener.link);
-		wl_list_remove(&grab->actor_ungrab_listener.link);
-		if (--grab->actor->grabbed == 0)
-			nemoview_put_state(grab->actor->view, NEMOVIEW_GRAB_STATE);
-	}
-
-	touchpoint_end_grab(grab->base.touchpoint.touchpoint);
-}
-
-void nemoshell_miss_touchpoint_actorgrab(struct actorgrab *grab)
-{
-	if (grab->actor != NULL) {
-		wl_list_remove(&grab->actor_destroy_listener.link);
-		wl_list_remove(&grab->actor_ungrab_listener.link);
-		if (--grab->actor->grabbed == 0)
-			nemoview_put_state(grab->actor->view, NEMOVIEW_GRAB_STATE);
-	}
+	if (grab->actor != NULL)
+		nemoshell_miss_actorgrab(grab);
 
 	touchpoint_end_grab(grab->base.touchpoint.touchpoint);
 }
