@@ -304,19 +304,6 @@ static const struct touchpoint_grab_interface pick_shellgrab_touchpoint_interfac
 	pick_shellgrab_touchpoint_cancel
 };
 
-typedef enum {
-	NEMOSHELL_VIEW_TOP_AREA = 0,
-	NEMOSHELL_VIEW_BOTTOM_AREA = 1,
-	NEMOSHELL_VIEW_LEFT_AREA = 2,
-	NEMOSHELL_VIEW_RIGHT_AREA = 3,
-	NEMOSHELL_VIEW_LEFTTOP_AREA = 4,
-	NEMOSHELL_VIEW_RIGHTTOP_AREA = 5,
-	NEMOSHELL_VIEW_LEFTBOTTOM_AREA = 6,
-	NEMOSHELL_VIEW_RIGHTBOTTOM_AREA = 7,
-	NEMOSHELL_VIEW_CENTER_AREA,
-	NEMOSHELL_VIEW_LAST_AREA = NEMOSHELL_VIEW_CENTER_AREA
-} NemoShellViewArea;
-
 int nemoshell_pick_canvas_by_touchpoint(struct nemoshell *shell, struct touchpoint *tp0, struct touchpoint *tp1, uint32_t type, struct shellbin *bin)
 {
 	struct shellgrab_pick *pick0, *pick1;
@@ -419,7 +406,7 @@ static void pick_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		struct nemoshell *shell = grab->shell;
 		struct touchpoint *tp1 = pick->other->base.base.touchpoint.touchpoint;
 
-		if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALE)) {
+		if (nemoview_has_state(actor->view, NEMOVIEW_RESIZE_STATE) != 0 && (actor->view->geometry.sx != 1.0f || actor->view->geometry.sy != 1.0f)) {
 			struct nemocompz *compz = actor->compz;
 			struct nemoview *view = actor->view;
 			int32_t width = actor->view->content->width * actor->view->geometry.sx;
