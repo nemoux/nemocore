@@ -37,6 +37,7 @@ struct shellgrab_pick {
 	struct touchpoint *tp0, *tp1;
 
 	uint32_t frameid;
+	int done;
 
 	struct shellgrab_pick *other;
 };
@@ -61,6 +62,7 @@ struct actorgrab_pick {
 	struct touchpoint *tp0, *tp1;
 
 	uint32_t frameid;
+	int done;
 
 	struct actorgrab_pick *other;
 };

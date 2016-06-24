@@ -55,8 +55,7 @@ static void shellgrab_handle_bin_ungrab_touchpoint(struct wl_listener *listener,
 {
 	struct shellgrab *grab = (struct shellgrab *)container_of(listener, struct shellgrab, bin_ungrab_listener);
 
-	if (grab->missed == 0)
-		touchpoint_miss_grab(grab->base.touchpoint.touchpoint);
+	touchpoint_miss_grab(grab->base.touchpoint.touchpoint);
 
 	if (grab->bin != NULL)
 		nemoshell_miss_shellgrab(grab);
@@ -80,8 +79,7 @@ static void actorgrab_handle_actor_ungrab_touchpoint(struct wl_listener *listene
 {
 	struct actorgrab *grab = (struct actorgrab *)container_of(listener, struct actorgrab, actor_ungrab_listener);
 
-	if (grab->missed == 0)
-		touchpoint_miss_grab(grab->base.touchpoint.touchpoint);
+	touchpoint_miss_grab(grab->base.touchpoint.touchpoint);
 
 	if (grab->actor != NULL)
 		nemoshell_miss_actorgrab(grab);

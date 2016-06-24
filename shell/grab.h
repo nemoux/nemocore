@@ -24,8 +24,6 @@ struct shellgrab {
 	struct wl_listener bin_destroy_listener;
 	struct wl_listener bin_ungrab_listener;
 	struct wl_listener bin_change_listener;
-
-	int missed;
 };
 
 struct actorgrab {
@@ -39,8 +37,6 @@ struct actorgrab {
 	struct nemoshell *shell;
 	struct wl_listener actor_destroy_listener;
 	struct wl_listener actor_ungrab_listener;
-
-	int missed;
 };
 
 extern void nemoshell_start_pointer_shellgrab(struct shellgrab *grab, const struct nemopointer_grab_interface *interface, struct shellbin *bin, struct nemopointer *pointer);
