@@ -74,10 +74,6 @@ static void default_touchpoint_grab_frame(struct touchpoint_grab *grab, uint32_t
 	}
 }
 
-static void default_touchpoint_grab_miss(struct touchpoint_grab *grab, uint32_t time, uint64_t touchid)
-{
-}
-
 static void default_touchpoint_grab_cancel(struct touchpoint_grab *grab)
 {
 }
@@ -87,7 +83,6 @@ static const struct touchpoint_grab_interface default_touchpoint_grab_interface 
 	default_touchpoint_grab_up,
 	default_touchpoint_grab_motion,
 	default_touchpoint_grab_frame,
-	default_touchpoint_grab_miss,
 	default_touchpoint_grab_cancel
 };
 
@@ -653,11 +648,6 @@ void touchpoint_start_grab(struct touchpoint *tp, struct touchpoint_grab *grab)
 void touchpoint_end_grab(struct touchpoint *tp)
 {
 	tp->grab = &tp->default_grab;
-}
-
-void touchpoint_miss_grab(struct touchpoint *tp)
-{
-	tp->grab->interface->miss(tp->grab, time_current_msecs(), tp->gid);
 }
 
 void touchpoint_cancel_grab(struct touchpoint *tp)

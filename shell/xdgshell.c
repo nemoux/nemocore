@@ -122,7 +122,7 @@ static void xdg_surface_resize(struct wl_client *client, struct wl_resource *res
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 
-	if (bin->flags & NEMOSHELL_SURFACE_RESIZABLE_FLAG) {
+	if (nemoview_has_state(bin->view, NEMOVIEW_RESIZE_STATE) != 0) {
 		nemoshell_resize_canvas(bin->shell, bin, serial, edges);
 	}
 }
