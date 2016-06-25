@@ -253,14 +253,6 @@ static void move_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 		nemoview_set_position(bin->view, cx, cy);
 		nemoview_schedule_repaint(bin->view);
 
-		if (tp->focus != NULL) {
-			float sx, sy;
-
-			nemoview_transform_from_global(tp->focus, x, y, &sx, &sy);
-
-			nemocontent_touch_motion(tp, tp->focus->content, time, touchid, sx, sy, x, y);
-		}
-
 		if (bin->shell->is_logging_grab != 0)
 			nemolog_message("MOVE", "[MOTION] %llu: x(%f) y(%f) (%u)\n", touchid, bin->view->geometry.x, bin->view->geometry.y, time);
 	}

@@ -56,7 +56,7 @@ static void default_touchpoint_grab_motion(struct touchpoint_grab *grab, uint32_
 
 	touchpoint_update(tp, x, y);
 
-	if (tp->focus != NULL) {
+	if (tp->focus != NULL && nemoview_has_state(tp->focus, NEMOVIEW_GRAB_STATE) == 0) {
 		float sx, sy;
 
 		nemoview_transform_from_global(tp->focus, x, y, &sx, &sy);
