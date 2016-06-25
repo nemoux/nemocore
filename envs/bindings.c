@@ -181,7 +181,7 @@ void nemoenvs_handle_touch_event(struct nemocompz *compz, struct touchpoint *tp,
 					int tapcount;
 
 					tapcount = nemoseat_get_touchpoint_by_view(compz->seat, tp->focus, tps, 10);
-					if (tapcount >= 5) {
+					if (tapcount >= 3) {
 						struct touchpoint *tp0, *tp1;
 
 						nemoseat_get_distant_touchpoint(compz->seat, tps, tapcount, &tp0, &tp1);
@@ -191,12 +191,6 @@ void nemoenvs_handle_touch_event(struct nemocompz *compz, struct touchpoint *tp,
 						} else {
 							nemoshell_pick_canvas_by_touchpoint(bin->shell, tp0, tp1, (1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_MOVE), bin);
 						}
-					} else if (tapcount >= 3) {
-						struct touchpoint *tp0, *tp1;
-
-						nemoseat_get_distant_touchpoint(compz->seat, tps, tapcount, &tp0, &tp1);
-
-						nemoshell_pick_canvas_by_touchpoint(bin->shell, tp0, tp1, (1 << NEMO_SURFACE_PICK_TYPE_ROTATE) | (1 << NEMO_SURFACE_PICK_TYPE_MOVE), bin);
 					}
 				}
 			}
