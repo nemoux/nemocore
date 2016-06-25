@@ -279,7 +279,7 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 		}
 
 		if (nemoshell_is_nemo_surface_for_canvas(bin->canvas) != 0) {
-			if (bin->has_scale != 0 && (bin->done_serial >= bin->scale.serial || bin->state.fullscreen || bin->state.maximized)) {
+			if (bin->has_scale != 0 && (bin->done_serial >= bin->scale.serial || bin->state.fullscreen || bin->state.maximized || (bin->scale.width == canvas->base.width && bin->scale.height == canvas->base.height))) {
 				nemoview_set_scale(view, 1.0f, 1.0f);
 				nemoview_update_transform(view);
 
@@ -291,6 +291,9 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 				sy = (canvas->base.height - bin->last_height) * -bin->scale.ay;
 
 				bin->has_scale = 0;
+			} else if (bin->has_scale != 0) {
+				sx = (canvas->base.width - bin->last_width) * -bin->scale.ax;
+				sy = (canvas->base.height - bin->last_height) * -bin->scale.ay;
 			} else {
 				sx = (canvas->base.width - bin->last_width) * view->geometry.ax;
 				sy = (canvas->base.height - bin->last_height) * view->geometry.ay;
