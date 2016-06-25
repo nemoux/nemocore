@@ -15,12 +15,14 @@ struct nemoactor;
 
 struct shellgrab_move {
 	struct shellgrab base;
+	struct touchgrab touch;
 
 	float dx, dy;
 };
 
 struct actorgrab_move {
 	struct actorgrab base;
+	struct touchgrab touch;
 
 	float dx, dy;
 };

@@ -597,6 +597,9 @@ static int evdev_configure_node(struct evdevnode *node)
 		// add touch device
 		node->touch = nemotouch_create(node->compz->seat, &node->base);
 		if (node->touch != NULL) {
+			nemotouch_set_sampling(node->touch,
+					nemoinput_get_config_sampling(node->compz, node->devphys));
+
 			node->seat_caps |= EVDEV_SEAT_TOUCH;
 			nemolog_message("EVDEV", "%s [%s] is a touch\n", node->devname, node->base.devnode);
 		}

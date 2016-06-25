@@ -290,17 +290,6 @@ void nemocompz_dispatch_frame(struct nemocompz *compz)
 	}
 }
 
-static int nemocompz_dispatch_touch_timeout(void *data)
-{
-	struct nemocompz *compz = (struct nemocompz *)data;
-	struct nemoseat *seat = compz->seat;
-	uint32_t msecs = time_current_msecs();
-
-	nemoseat_update_touchpoints(seat, msecs);
-
-	wl_event_source_timer_update(compz->touch_timer, compz->touch_timeout);
-}
-
 static int nemocompz_dispatch_framerate_timeout(void *data)
 {
 	struct nemocompz *compz = (struct nemocompz *)data;
@@ -458,14 +447,6 @@ struct nemocompz *nemocompz_create(void)
 
 	wl_list_init(&compz->frame_list);
 
-	compz->touch_timer = wl_event_loop_add_timer(compz->loop, nemocompz_dispatch_touch_timeout, compz);
-	if (compz->touch_timer == NULL)
-		goto err1;
-
-	compz->touch_timeout = NEMOCOMPZ_DEFAULT_TOUCH_TIMEOUT;
-
-	wl_event_source_timer_update(compz->touch_timer, compz->touch_timeout);
-
 	env = getenv("NEMOUX_FRAMERATE_LOG");
 	if (env != NULL && strcmp(env, "ON") == 0) {
 		compz->framerate_timer = wl_event_loop_add_timer(compz->loop, nemocompz_dispatch_framerate_timeout, compz);
@@ -532,9 +513,6 @@ void nemocompz_destroy(struct nemocompz *compz)
 
 	if (compz->frame_timer != NULL)
 		wl_event_source_remove(compz->frame_timer);
-
-	if (compz->touch_timer != NULL)
-		wl_event_source_remove(compz->touch_timer);
 
 	if (compz->framerate_timer != NULL)
 		wl_event_source_remove(compz->framerate_timer);
@@ -890,11 +868,6 @@ void nemocompz_dispatch_effect(struct nemocompz *compz, struct nemoeffect *effec
 void nemocompz_set_frame_timeout(struct nemocompz *compz, uint32_t timeout)
 {
 	compz->frame_timeout = timeout;
-}
-
-void nemocompz_set_touch_timeout(struct nemocompz *compz, uint32_t timeout)
-{
-	compz->touch_timeout = timeout;
 }
 
 struct nemoeventqueue *nemocompz_get_main_eventqueue(struct nemocompz *compz)

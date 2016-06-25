@@ -239,6 +239,11 @@ void nemotouch_destroy(struct nemotouch *touch)
 	free(touch);
 }
 
+void nemotouch_set_sampling(struct nemotouch *touch, uint32_t sampling)
+{
+	touch->sampling = sampling;
+}
+
 float touchpoint_get_distance(struct touchpoint *tp)
 {
 	float dx = tp->grab_x - tp->x;
@@ -262,91 +267,6 @@ void touchpoint_update_direction(struct touchpoint *tp, float x, float y)
 		tp->x = x;
 		tp->y = y;
 	}
-}
-
-void touchpoint_update_velocity(struct touchpoint *tp, uint32_t nsamples)
-{
-	float x0, y0;
-	float x1, y1;
-	uint32_t t0, t1;
-	uint32_t i0, i1;
-
-	if (tp->nsamples < nsamples) {
-		tp->dx = 0.0f;
-		tp->dy = 0.0f;
-	} else {
-		i0 = (tp->esample - nsamples) % NEMOCOMPZ_TOUCH_SAMPLE_MAX;
-		i1 = (tp->esample - 1) % NEMOCOMPZ_TOUCH_SAMPLE_MAX;
-
-		x0 = tp->samples[i0].x;
-		y0 = tp->samples[i0].y;
-		t0 = tp->samples[i0].time;
-
-		x1 = tp->samples[i1].x;
-		y1 = tp->samples[i1].y;
-		t1 = tp->samples[i1].time;
-
-		tp->dx = (x1 - x0) / (float)(t1 - t0);
-		tp->dy = (y1 - y0) / (float)(t1 - t0);
-	}
-}
-
-int touchpoint_check_duration(struct touchpoint *tp, uint32_t nsamples, uint32_t max_duration)
-{
-	uint32_t t0, t1;
-	uint32_t i0, i1;
-
-	if (tp->nsamples < nsamples)
-		return 0;
-
-	i0 = (tp->esample - nsamples) % NEMOCOMPZ_TOUCH_SAMPLE_MAX;
-	i1 = (tp->esample - 1) % NEMOCOMPZ_TOUCH_SAMPLE_MAX;
-
-	t0 = tp->samples[i0].time;
-	t1 = tp->samples[i1].time;
-
-	if (t1 - t0 > max_duration)
-		return 0;
-
-	return 1;
-}
-
-int touchpoint_check_velocity(struct touchpoint *tp, uint32_t nsamples, double min_velocity)
-{
-	float x0, y0;
-	float x1, y1;
-	float dx, dy;
-	uint32_t t0, t1;
-	uint32_t i0, i1;
-
-	if (tp->nsamples < nsamples)
-		return 0;
-
-	i0 = (tp->esample - nsamples) % NEMOCOMPZ_TOUCH_SAMPLE_MAX;
-	i1 = (tp->esample - 1) % NEMOCOMPZ_TOUCH_SAMPLE_MAX;
-
-	x0 = tp->samples[i0].x;
-	y0 = tp->samples[i0].y;
-	t0 = tp->samples[i0].time;
-
-	x1 = tp->samples[i1].x;
-	y1 = tp->samples[i1].y;
-	t1 = tp->samples[i1].time;
-
-	dx = (x1 - x0) / (float)(t1 - t0);
-	dy = (y1 - y0) / (float)(t1 - t0);
-
-	if (sqrtf(dx * dx + dy * dy) < min_velocity)
-		return 0;
-
-	return 1;
-}
-
-void touchpoint_clear_samples(struct touchpoint *tp)
-{
-	tp->nsamples = 0;
-	tp->ssample = 0;
-	tp->esample = 0;
 }
 
 static void touchpoint_handle_focus_resource_destroy(struct wl_listener *listener, void *data)

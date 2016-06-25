@@ -82,7 +82,7 @@ void nemoshell_start_busycursor_grab(struct shellbin *bin, struct nemopointer *p
 	if (grab == NULL)
 		return;
 
-	nemoshell_start_pointer_shellgrab(grab, &busy_cursor_grab_interface, bin, pointer);
+	nemoshell_start_pointer_shellgrab(bin->shell, grab, &busy_cursor_grab_interface, bin, pointer);
 }
 
 void nemoshell_end_busycursor_grab(struct nemocompz *compz, struct wl_client *client)

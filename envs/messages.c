@@ -126,6 +126,8 @@ int nemoenvs_dispatch_system_message(struct nemoenvs *envs, const char *src, con
 							config->has_screen = 1;
 						} else if (strcmp(name, "transform") == 0) {
 							config->transform = strdup(value);
+						} else if (strcmp(name, "sampling") == 0) {
+							config->sampling = strtoul(value, NULL, 10);
 						}
 					}
 				}

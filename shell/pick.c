@@ -278,12 +278,6 @@ static void pick_shellgrab_touchpoint_cancel(struct touchpoint_grab *base)
 	struct shellgrab_pick *pick = (struct shellgrab_pick *)container_of(grab, struct shellgrab_pick, base);
 	struct shellbin *bin = grab->bin;
 
-	if (bin != NULL) {
-		bin->resize_edges = 0;
-
-		nemoshell_send_xdg_state(bin);
-	}
-
 	nemoshell_end_touchpoint_shellgrab(grab);
 	free(pick);
 }
@@ -361,8 +355,8 @@ int nemoshell_pick_canvas_by_touchpoint(struct nemoshell *shell, struct touchpoi
 				bin->view->geometry.sx, bin->view->geometry.sy,
 				bin->view->geometry.r);
 
-	nemoshell_start_touchpoint_shellgrab(&pick0->base, &pick_shellgrab_touchpoint_interface, bin, tp0);
-	nemoshell_start_touchpoint_shellgrab(&pick1->base, &pick_shellgrab_touchpoint_interface, bin, tp1);
+	nemoshell_start_touchpoint_shellgrab(shell, &pick0->base, &pick_shellgrab_touchpoint_interface, bin, tp0);
+	nemoshell_start_touchpoint_shellgrab(shell, &pick1->base, &pick_shellgrab_touchpoint_interface, bin, tp1);
 
 	nemoview_transform_notify(bin->view);
 
@@ -565,9 +559,6 @@ int nemoshell_pick_actor_by_touchpoint(struct nemoshell *shell, struct touchpoin
 		return -1;
 	memset(pick1, 0, sizeof(struct actorgrab_pick));
 
-	pick0->base.shell = shell;
-	pick1->base.shell = shell;
-
 	pick0->type = pick1->type = type;
 
 	pick0->scale.distance = pick1->scale.distance = pickgrab_calculate_touchpoint_distance(tp0, tp1);
@@ -596,8 +587,8 @@ int nemoshell_pick_actor_by_touchpoint(struct nemoshell *shell, struct touchpoin
 	pick0->other = pick1;
 	pick1->other = pick0;
 
-	nemoshell_start_touchpoint_actorgrab(&pick0->base, &pick_actorgrab_touchpoint_interface, actor, tp0);
-	nemoshell_start_touchpoint_actorgrab(&pick1->base, &pick_actorgrab_touchpoint_interface, actor, tp1);
+	nemoshell_start_touchpoint_actorgrab(shell, &pick0->base, &pick_actorgrab_touchpoint_interface, actor, tp0);
+	nemoshell_start_touchpoint_actorgrab(shell, &pick1->base, &pick_actorgrab_touchpoint_interface, actor, tp1);
 
 	nemoview_transform_notify(actor->view);
 

@@ -9,7 +9,7 @@ NEMO_BEGIN_EXTERN_C
 
 #include <input.h>
 
-#define NEMOCOMPZ_TOUCH_SAMPLE_MAX			(60)
+#define NEMOCOMPZ_TOUCH_SAMPLE_MAX			(32)
 
 typedef enum {
 	TOUCHPOINT_DOWN_STATE = 0,
@@ -35,11 +35,6 @@ struct touchpoint_grab_interface {
 struct touchpoint_grab {
 	const struct touchpoint_grab_interface *interface;
 	struct touchpoint *touchpoint;
-};
-
-struct touchsample {
-	float x, y;
-	uint32_t time;
 };
 
 struct touchpoint {
@@ -68,10 +63,6 @@ struct touchpoint {
 
 	float x, y;
 	float dx, dy;
-
-	struct touchsample samples[NEMOCOMPZ_TOUCH_SAMPLE_MAX];
-	uint32_t nsamples;
-	uint32_t ssample, esample;
 
 	void *binding;
 };
@@ -106,6 +97,7 @@ struct nemotouch {
 	struct inputnode *node;
 
 	uint32_t frame_count;
+	uint32_t sampling;
 
 	struct wl_list link;
 
@@ -119,6 +111,8 @@ extern int nemotouch_bind_nemo(struct wl_client *client, struct wl_resource *sea
 
 extern struct nemotouch *nemotouch_create(struct nemoseat *seat, struct inputnode *node);
 extern void nemotouch_destroy(struct nemotouch *touch);
+
+extern void nemotouch_set_sampling(struct nemotouch *touch, uint32_t sampling);
 
 extern struct touchpoint *nemotouch_get_touchpoint_by_id(struct nemotouch *touch, uint64_t id);
 extern struct touchpoint *nemotouch_get_touchpoint_list_by_id(struct nemotouch *touch, struct wl_list *list, uint64_t id);
@@ -135,10 +129,6 @@ extern void nemotouch_flush_tuio(struct tuio *tuio);
 extern float touchpoint_get_distance(struct touchpoint *tp);
 extern void touchpoint_update(struct touchpoint *tp, float x, float y);
 extern void touchpoint_update_direction(struct touchpoint *tp, float x, float y);
-extern void touchpoint_update_velocity(struct touchpoint *tp, uint32_t nsamples);
-extern int touchpoint_check_duration(struct touchpoint *tp, uint32_t nsamples, uint32_t max_duration);
-extern int touchpoint_check_velocity(struct touchpoint *tp, uint32_t nsamples, double min_velocity);
-extern void touchpoint_clear_samples(struct touchpoint *tp);
 
 extern void touchpoint_set_focus(struct touchpoint *tp, struct nemoview *view);
 

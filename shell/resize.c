@@ -129,7 +129,7 @@ int nemoshell_resize_canvas_by_pointer(struct nemopointer *pointer, struct shell
 
 	nemoshell_send_xdg_state(bin);
 
-	nemoshell_start_pointer_shellgrab(&resize->base, &resize_grab_interface, bin, pointer);
+	nemoshell_start_pointer_shellgrab(bin->shell, &resize->base, &resize_grab_interface, bin, pointer);
 
 	return 0;
 }

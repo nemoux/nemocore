@@ -97,6 +97,17 @@ int nemoinput_get_config_geometry(struct nemocompz *compz, const char *devnode, 
 	return 0;
 }
 
+uint32_t nemoinput_get_config_sampling(struct nemocompz *compz, const char *devnode)
+{
+	struct inputconfig *config;
+	
+	config = nemocompz_get_input_config(compz, devnode);
+	if (config != NULL)
+		return config->sampling;
+	
+	return 0;
+}
+
 void nemoinput_transform_to_global(struct inputnode *node, float dx, float dy, float *x, float *y)
 {
 	if (node->transform.enable != 0) {

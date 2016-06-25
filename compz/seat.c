@@ -523,24 +523,3 @@ void nemoseat_put_focus(struct nemoseat *seat, struct nemoview *view)
 		}
 	}
 }
-
-void nemoseat_update_touchpoints(struct nemoseat *seat, uint32_t msecs)
-{
-	struct nemotouch *touch;
-	struct touchpoint *tp;
-
-	wl_list_for_each(touch, &seat->touch.device_list, link) {
-		wl_list_for_each(tp, &touch->touchpoint_list, link) {
-			tp->samples[tp->esample].x = tp->x;
-			tp->samples[tp->esample].y = tp->y;
-			tp->samples[tp->esample].time = msecs;
-
-			tp->nsamples++;
-
-			tp->esample = (tp->esample + 1) % NEMOCOMPZ_TOUCH_SAMPLE_MAX;
-
-			if (tp->ssample == tp->esample)
-				tp->ssample = (tp->ssample + 1) % NEMOCOMPZ_TOUCH_SAMPLE_MAX;
-		}
-	}
-}
