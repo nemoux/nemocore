@@ -32,7 +32,7 @@ static void default_touchpoint_grab_down(struct touchpoint_grab *grab, uint32_t 
 		touchpoint_set_focus(tp, view);
 	}
 
-	touchpoint_reset(tp, x, y);
+	touchpoint_down(tp, x, y);
 
 	if (tp->focus != NULL) {
 		nemocontent_touch_down(tp, tp->focus->content, time, touchid, sx, sy, x, y);
@@ -45,6 +45,8 @@ static void default_touchpoint_grab_up(struct touchpoint_grab *grab, uint32_t ti
 {
 	struct touchpoint *tp = grab->touchpoint;
 
+	touchpoint_up(tp);
+
 	if (tp->focus != NULL) {
 		nemocontent_touch_up(tp, tp->focus->content, time, touchid);
 	}
@@ -54,7 +56,7 @@ static void default_touchpoint_grab_motion(struct touchpoint_grab *grab, uint32_
 {
 	struct touchpoint *tp = grab->touchpoint;
 
-	touchpoint_update(tp, x, y);
+	touchpoint_motion(tp, x, y);
 
 	if (tp->focus != NULL && nemoview_has_state(tp->focus, NEMOVIEW_GRAB_STATE) == 0) {
 		float sx, sy;
@@ -244,15 +246,7 @@ void nemotouch_set_sampling(struct nemotouch *touch, uint32_t sampling)
 	touch->sampling = sampling;
 }
 
-float touchpoint_get_distance(struct touchpoint *tp)
-{
-	float dx = tp->grab_x - tp->x;
-	float dy = tp->grab_y - tp->y;
-
-	return sqrtf(dx * dx + dy * dy);
-}
-
-void touchpoint_reset(struct touchpoint *tp, float x, float y)
+void touchpoint_down(struct touchpoint *tp, float x, float y)
 {
 	if (tp->nsamples == 0) {
 		tp->x = x;
@@ -270,7 +264,7 @@ void touchpoint_reset(struct touchpoint *tp, float x, float y)
 	}
 }
 
-void touchpoint_update(struct touchpoint *tp, float x, float y)
+void touchpoint_motion(struct touchpoint *tp, float x, float y)
 {
 	if (tp->nsamples == 0) {
 		tp->x = x;
@@ -293,6 +287,10 @@ void touchpoint_update(struct touchpoint *tp, float x, float y)
 		tp->x = sx / (float)tp->nsamples;
 		tp->y = sy / (float)tp->nsamples;
 	}
+}
+
+void touchpoint_up(struct touchpoint *tp)
+{
 }
 
 static void touchpoint_handle_focus_resource_destroy(struct wl_listener *listener, void *data)

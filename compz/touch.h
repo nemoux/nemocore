@@ -60,7 +60,7 @@ struct touchpoint {
 	float grab_x, grab_y;
 	uint32_t grab_serial;
 	uint32_t grab_time;
-	
+
 	float x, y;
 
 	float samples[NEMOCOMPZ_TOUCH_SAMPLE_MAX * 2];
@@ -129,9 +129,9 @@ extern void nemotouch_notify_frames(struct nemotouch *touch);
 
 extern void nemotouch_flush_tuio(struct tuio *tuio);
 
-extern float touchpoint_get_distance(struct touchpoint *tp);
-extern void touchpoint_reset(struct touchpoint *tp, float x, float y);
-extern void touchpoint_update(struct touchpoint *tp, float x, float y);
+extern void touchpoint_down(struct touchpoint *tp, float x, float y);
+extern void touchpoint_motion(struct touchpoint *tp, float x, float y);
+extern void touchpoint_up(struct touchpoint *tp);
 
 extern void touchpoint_set_focus(struct touchpoint *tp, struct nemoview *view);
 

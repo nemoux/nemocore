@@ -53,6 +53,8 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 	struct touchpoint *tp0 = base->touchpoint;
 	struct shellbin *bin = grab->bin;
 
+	touchpoint_up(tp0);
+
 	if (bin != NULL && pick->done == 0) {
 		struct nemoshell *shell = bin->shell;
 		struct touchpoint *tp1 = pick->other->base.base.touchpoint.touchpoint;
@@ -145,7 +147,7 @@ static void pick_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 {
 	struct touchpoint *tp = base->touchpoint;
 
-	touchpoint_update(tp, x, y);
+	touchpoint_motion(tp, x, y);
 }
 
 static void pick_shellgrab_touchpoint_frame(struct touchpoint_grab *base, uint32_t frameid)
@@ -388,6 +390,8 @@ static void pick_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 	struct touchpoint *tp0 = base->touchpoint;
 	struct nemoactor *actor = grab->actor;
 
+	touchpoint_up(tp0);
+
 	if (actor != NULL && pick->done == 0) {
 		struct nemoshell *shell = grab->shell;
 		struct touchpoint *tp1 = pick->other->base.base.touchpoint.touchpoint;
@@ -439,7 +443,7 @@ static void pick_actorgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 {
 	struct touchpoint *tp = base->touchpoint;
 
-	touchpoint_update(tp, x, y);
+	touchpoint_motion(tp, x, y);
 
 	if (tp->focus != NULL) {
 		float sx, sy;
