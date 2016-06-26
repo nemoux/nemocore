@@ -11,9 +11,14 @@ NEMO_BEGIN_EXTERN_C
 
 extern void nemosound_set_sink(struct nemotool *tool, uint32_t pid, uint32_t sink);
 extern void nemosound_set_mute(struct nemotool *tool, uint32_t pid, uint32_t mute);
-extern void nemosound_set_mute_sink(struct nemotool *tool, uint32_t sink, uint32_t mute);
 extern void nemosound_set_volume(struct nemotool *tool, uint32_t pid, uint32_t volume);
+
+extern void nemosound_set_mute_sink(struct nemotool *tool, uint32_t sink, uint32_t mute);
 extern void nemosound_set_volume_sink(struct nemotool *tool, uint32_t sink, uint32_t volume);
+
+extern void nemosound_set_current_sink(struct nemotool *tool, uint32_t sink);
+extern void nemosound_set_current_mute(struct nemotool *tool, uint32_t mute);
+extern void nemosound_set_current_volume(struct nemotool *tool, uint32_t volume);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
