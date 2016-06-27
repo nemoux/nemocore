@@ -371,6 +371,7 @@ static void tuio_finish_osc(struct tuio *tuio)
 struct tuio *tuio_create(struct nemocompz *compz, int protocol, int port, int max)
 {
 	struct tuio *tuio;
+	struct inputconfig *config;
 	uint32_t tuioid, screenid;
 
 	tuio = (struct tuio *)malloc(sizeof(struct tuio));
@@ -394,13 +395,26 @@ struct tuio *tuio_create(struct nemocompz *compz, int protocol, int port, int ma
 		asprintf(&tuio->base.devnode, "osc:%d", port);
 	}
 
-	if (nemoinput_get_config_screen(compz, tuio->base.devnode, &tuioid, &screenid) > 0)
-		nemoinput_set_screen(&tuio->base, nemocompz_get_screen(compz, tuioid, screenid));
-	else if (nemoinput_get_config_geometry(compz, tuio->base.devnode, &tuio->base) <= 0)
-		nemoinput_set_geometry(&tuio->base,
-				0, 0,
-				nemocompz_get_scene_width(compz),
-				nemocompz_get_scene_height(compz));
+	nemoinput_set_geometry(&tuio->base,
+			0, 0,
+			nemocompz_get_scene_width(compz),
+			nemocompz_get_scene_height(compz));
+
+	config = nemocompz_get_input_config(compz, tuio->base.devnode);
+	if (config != NULL) {
+		if (config->has_screen != 0) {
+			nemoinput_set_screen(&tuio->base, nemocompz_get_screen(compz, config->nodeid, config->screenid));
+		} else {
+			nemoinput_set_geometry(&tuio->base,
+					config->x,
+					config->y,
+					config->width,
+					config->height);
+
+			if (config->transform != NULL)
+				nemoinput_set_transform(&tuio->base, config->transform);
+		}
+	}
 
 	if (protocol == NEMOTUIO_XML_PROTOCOL) {
 		if (tuio_prepare_xml(tuio, port) < 0)

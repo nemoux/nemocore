@@ -53,58 +53,19 @@ void nemoinput_set_geometry(struct inputnode *node, int32_t x, int32_t y, int32_
 	node->height = height;
 }
 
-int nemoinput_get_config_screen(struct nemocompz *compz, const char *devnode, uint32_t *nodeid, uint32_t *screenid)
+int nemoinput_set_transform(struct inputnode *node, const char *cmd)
 {
-	struct inputconfig *config;
+	struct nemomatrix *matrix = &node->transform.matrix;
+	struct nemomatrix *inverse = &node->transform.inverse;
 
-	config = nemocompz_get_input_config(compz, devnode);
-	if (config != NULL && config->has_screen != 0) {
-		*nodeid = config->nodeid;
-		*screenid = config->screenid;
+	nemomatrix_init_identity(matrix);
+	nemomatrix_append_command(matrix, cmd);
 
-		return 1;
-	}
+	if (nemomatrix_invert(inverse, matrix) < 0)
+		return -1;
 
-	return 0;
-}
+	node->transform.enable = 1;
 
-int nemoinput_get_config_geometry(struct nemocompz *compz, const char *devnode, struct inputnode *node)
-{
-	struct inputconfig *config;
-
-	config = nemocompz_get_input_config(compz, devnode);
-	if (config != NULL) {
-		node->x = config->x;
-		node->y = config->y;
-		node->width = config->width;
-		node->height = config->height;
-
-		if (config->transform != NULL) {
-			struct nemomatrix *matrix = &node->transform.matrix;
-			struct nemomatrix *inverse = &node->transform.inverse;
-
-			nemomatrix_init_identity(matrix);
-			nemomatrix_append_command(matrix, config->transform);
-
-			if (nemomatrix_invert(inverse, matrix) >= 0) {
-				node->transform.enable = 1;
-			}
-		}
-
-		return 1;
-	}
-
-	return 0;
-}
-
-uint32_t nemoinput_get_config_sampling(struct nemocompz *compz, const char *devnode)
-{
-	struct inputconfig *config;
-	
-	config = nemocompz_get_input_config(compz, devnode);
-	if (config != NULL)
-		return config->sampling;
-	
 	return 0;
 }
 
