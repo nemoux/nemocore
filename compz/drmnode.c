@@ -804,7 +804,8 @@ static int drm_create_screen_for_connector(struct drmnode *node, drmModeRes *res
 	struct nemocompz *compz = node->base.compz;
 	struct drmscreen *screen;
 	struct drmmode *mode;
-	struct nemomode *basemode, configmode;
+	struct nemomode *basemode;
+	struct screenconfig *config;
 	drmModeEncoder *encoder;
 	drmModeModeInfo crtcmode;
 	drmModeCrtc *crtc;
@@ -883,7 +884,14 @@ static int drm_create_screen_for_connector(struct drmnode *node, drmModeRes *res
 		wl_list_insert(screen->base.mode_list.prev, &mode->base.link);
 	}
 
-	if (nemoscreen_get_config_mode(compz, node->base.nodeid, screen->base.screenid, &configmode)) {
+	config = nemocompz_get_screen_config(compz, node->base.nodeid, screen->base.screenid);
+	if (config != NULL) {
+		struct nemomode configmode = {
+			.width = config->width,
+			.height = config->height,
+			.refresh = config->refresh
+		};
+
 		wl_list_for_each(basemode, &screen->base.mode_list, link) {
 			if ((configmode.width == basemode->width) &&
 					(configmode.height == basemode->height) &&
@@ -892,6 +900,21 @@ static int drm_create_screen_for_connector(struct drmnode *node, drmModeRes *res
 				break;
 			}
 		}
+
+		screen->base.width = config->width;
+		screen->base.height = config->height;
+
+		if (config->transform != NULL) {
+			nemoscreen_set_transform(&screen->base, config->transform);
+		} else if (config->r != 0.0f || config->sx != 1.0f || config->sy != 1.0f) {
+			nemoscreen_set_position(&screen->base, config->x, config->y);
+			nemoscreen_set_scale(&screen->base, config->sx, config->sy);
+			nemoscreen_set_rotation(&screen->base, config->r);
+			nemoscreen_set_pivot(&screen->base, config->px, config->py);
+		}
+
+		if (config->renderer != NULL && strcmp(config->renderer, "pixman") == 0)
+			screen->base.use_pixman = 1;
 	}
 
 	if (screen->base.current_mode == NULL) {
@@ -900,14 +923,6 @@ static int drm_create_screen_for_connector(struct drmnode *node, drmModeRes *res
 	}
 
 	screen->base.current_mode->flags |= WL_OUTPUT_MODE_CURRENT;
-
-	nemoscreen_get_config_geometry(compz, node->base.nodeid, screen->base.screenid, &screen->base);
-
-	renderer = nemoscreen_get_config_renderer(compz, node->base.nodeid, screen->base.screenid);
-	if (renderer != NULL && strcmp(renderer, "pixman") == 0)
-		screen->base.use_pixman = 1;
-	else
-		screen->base.use_pixman = 0;
 
 	if (compz->use_pixman == 0 && screen->base.use_pixman != 0) {
 		if (drm_prepare_pixman(node) < 0) {

@@ -148,7 +148,15 @@ int nemoscreen_switch_mode(struct nemoscreen *screen, int32_t width, int32_t hei
 		.refresh = refresh
 	};
 
-	return screen->switch_mode(screen, &mode);
+	if (screen->switch_mode(screen, &mode) < 0)
+		return -1;
+
+	screen->width = width;
+	screen->height = height;
+
+	screen->transform.dirty = 1;
+
+	return 0;
 }
 
 static void nemoscreen_unbind_output(struct wl_resource *resource)
@@ -464,58 +472,12 @@ int nemoscreen_set_transform(struct nemoscreen *screen, const char *cmd)
 	return 0;
 }
 
+void nemoscreen_transform_dirty(struct nemoscreen *screen)
+{
+	screen->transform.dirty = 1;
+}
+
 void nemoscreen_damage_dirty(struct nemoscreen *screen)
 {
 	pixman_region32_union(&screen->damage, &screen->damage, &screen->region);
-}
-
-int nemoscreen_get_config_mode(struct nemocompz *compz, uint32_t nodeid, uint32_t screenid, struct nemomode *mode)
-{
-	struct screenconfig *config;
-
-	config = nemocompz_get_screen_config(compz, nodeid, screenid);
-	if (config != NULL) {
-		mode->width = config->width;
-		mode->height = config->height;
-		mode->refresh = config->refresh;
-
-		return 1;
-	}
-
-	return 0;
-}
-
-int nemoscreen_get_config_geometry(struct nemocompz *compz, uint32_t nodeid, uint32_t screenid, struct nemoscreen *screen)
-{
-	struct screenconfig *config;
-
-	config = nemocompz_get_screen_config(compz, nodeid, screenid);
-	if (config != NULL) {
-		screen->width = config->width;
-		screen->height = config->height;
-
-		if (config->transform != NULL) {
-			nemoscreen_set_transform(screen, config->transform);
-		} else if (config->r != 0.0f || config->sx != 1.0f || config->sy != 1.0f) {
-			nemoscreen_set_position(screen, config->x, config->y);
-			nemoscreen_set_scale(screen, config->sx, config->sy);
-			nemoscreen_set_rotation(screen, config->r);
-			nemoscreen_set_pivot(screen, config->px, config->py);
-		}
-
-		return 1;
-	}
-
-	return 0;
-}
-
-const char *nemoscreen_get_config_renderer(struct nemocompz *compz, uint32_t nodeid, uint32_t screenid)
-{
-	struct screenconfig *config;
-
-	config = nemocompz_get_screen_config(compz, nodeid, screenid);
-	if (config != NULL)
-		return config->renderer;
-
-	return NULL;
 }
