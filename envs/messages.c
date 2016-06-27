@@ -90,6 +90,16 @@ int nemoenvs_dispatch_system_message(struct nemoenvs *envs, const char *src, con
 							config->width = strtoul(value, NULL, 10);
 						} else if (strcmp(name, "height") == 0) {
 							config->height = strtoul(value, NULL, 10);
+						} else if (strcmp(name, "sx") == 0) {
+							config->sx = strtod(value, NULL);
+						} else if (strcmp(name, "sy") == 0) {
+							config->sy = strtod(value, NULL);
+						} else if (strcmp(name, "r") == 0) {
+							config->r = strtod(value, NULL) * M_PI / 180.0f;
+						} else if (strcmp(name, "px") == 0) {
+							config->px = strtod(value, NULL);
+						} else if (strcmp(name, "py") == 0) {
+							config->py = strtod(value, NULL);
 						} else if (strcmp(name, "refresh") == 0) {
 							config->refresh = strtoul(value, NULL, 10);
 						} else if (strcmp(name, "renderer") == 0) {

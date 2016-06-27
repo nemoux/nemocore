@@ -1032,6 +1032,9 @@ struct screenconfig *nemocompz_set_screen_config(struct nemocompz *compz, uint32
 	config->nodeid = nodeid;
 	config->screenid = screenid;
 
+	config->sx = 1.0f;
+	config->sy = 1.0f;
+
 	wl_list_insert(&compz->screenconfig_list, &config->link);
 
 	return config;

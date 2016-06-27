@@ -49,7 +49,8 @@ struct nemoscreen {
 	uint64_t msc;
 
 	int use_pixman;
-	int32_t x, y, width, height;
+	int32_t x, y;
+	int32_t width, height;
 	int32_t mmwidth, mmheight;
 	uint32_t subpixel;
 
@@ -59,9 +60,6 @@ struct nemoscreen {
 
 	struct {
 		float px, py;
-		int has_pivot;
-
-		float x, y;
 		float r;
 		float sx, sy;
 	} geometry;
@@ -116,10 +114,11 @@ extern void nemoscreen_update_geometry(struct nemoscreen *screen);
 extern void nemoscreen_transform_to_global(struct nemoscreen *screen, float dx, float dy, float *x, float *y);
 extern void nemoscreen_transform_from_global(struct nemoscreen *screen, float x, float y, float *dx, float *dy);
 
-extern void nemoscreen_set_position(struct nemoscreen *screen, float x, float y);
+extern void nemoscreen_set_position(struct nemoscreen *screen, int32_t x, int32_t y);
 extern void nemoscreen_set_rotation(struct nemoscreen *screen, float r);
 extern void nemoscreen_set_scale(struct nemoscreen *screen, float sx, float sy);
 extern void nemoscreen_set_pivot(struct nemoscreen *screen, float px, float py);
+extern int nemoscreen_set_transform(struct nemoscreen *screen, const char *cmd);
 
 extern void nemoscreen_damage_dirty(struct nemoscreen *screen);
 

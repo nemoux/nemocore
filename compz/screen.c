@@ -239,7 +239,7 @@ static int nemoscreen_update_transform_matrix(struct nemoscreen *screen)
 		nemomatrix_translate(matrix, screen->geometry.px, screen->geometry.py);
 	}
 
-	nemomatrix_translate(matrix, screen->geometry.x, screen->geometry.y);
+	nemomatrix_translate(matrix, screen->x, screen->y);
 
 	if (nemomatrix_invert(inverse, matrix) < 0) {
 		screen->transform.enable = 0;
@@ -386,15 +386,14 @@ void nemoscreen_transform_from_global(struct nemoscreen *screen, float x, float 
 	}
 }
 
-void nemoscreen_set_position(struct nemoscreen *screen, float x, float y)
+void nemoscreen_set_position(struct nemoscreen *screen, int32_t x, int32_t y)
 {
-	if (screen->geometry.x == x && screen->geometry.y == y)
+	if (screen->x == x && screen->y == y)
 		return;
 
-	screen->geometry.x = x;
-	screen->geometry.y = y;
+	screen->x = x;
+	screen->y = y;
 
-	screen->transform.enable = 1;
 	screen->transform.dirty = 1;
 }
 
@@ -434,6 +433,24 @@ void nemoscreen_set_pivot(struct nemoscreen *screen, float px, float py)
 	screen->transform.dirty = 1;
 }
 
+int nemoscreen_set_transform(struct nemoscreen *screen, const char *cmd)
+{
+	struct nemomatrix *matrix = &screen->transform.matrix;
+	struct nemomatrix *inverse = &screen->transform.inverse;
+
+	nemomatrix_init_identity(matrix);
+	nemomatrix_append_command(matrix, cmd);
+
+	if (nemomatrix_invert(inverse, matrix) < 0)
+		return -1;
+
+	screen->transform.enable = 1;
+	screen->transform.dirty = 1;
+	screen->transform.custom = 1;
+
+	return 0;
+}
+
 void nemoscreen_damage_dirty(struct nemoscreen *screen)
 {
 	pixman_region32_union(&screen->damage, &screen->damage, &screen->region);
@@ -467,17 +484,11 @@ int nemoscreen_get_config_geometry(struct nemocompz *compz, uint32_t nodeid, uin
 		screen->height = config->height;
 
 		if (config->transform != NULL) {
-			struct nemomatrix *matrix = &screen->transform.matrix;
-			struct nemomatrix *inverse = &screen->transform.inverse;
-
-			nemomatrix_init_identity(matrix);
-			nemomatrix_append_command(matrix, config->transform);
-			
-			if (nemomatrix_invert(inverse, matrix) >= 0) {
-				screen->transform.enable = 1;
-				screen->transform.dirty = 1;
-				screen->transform.custom = 1;
-			}
+			nemoscreen_set_transform(screen, config->transform);
+		} else if (config->r != 0.0f || config->sx != 1.0f || config->sy != 1.0f) {
+			nemoscreen_set_scale(screen, config->sx, config->sy);
+			nemoscreen_set_rotation(screen, config->r);
+			nemoscreen_set_pivot(screen, config->px, config->py);
 		}
 
 		return 1;

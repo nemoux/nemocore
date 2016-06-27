@@ -51,6 +51,10 @@ struct screenconfig {
 	int32_t width, height;
 	int32_t refresh;
 
+	float sx, sy;
+	float r;
+	float px, py;
+
 	char *renderer;
 	char *transform;
 
@@ -66,7 +70,7 @@ struct inputconfig {
 
 	int32_t x, y;
 	int32_t width, height;
-	
+
 	uint32_t sampling;
 
 	char *transform;
