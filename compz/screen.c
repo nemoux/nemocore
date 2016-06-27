@@ -478,14 +478,13 @@ int nemoscreen_get_config_geometry(struct nemocompz *compz, uint32_t nodeid, uin
 
 	config = nemocompz_get_screen_config(compz, nodeid, screenid);
 	if (config != NULL) {
-		screen->x = config->x;
-		screen->y = config->y;
 		screen->width = config->width;
 		screen->height = config->height;
 
 		if (config->transform != NULL) {
 			nemoscreen_set_transform(screen, config->transform);
 		} else if (config->r != 0.0f || config->sx != 1.0f || config->sy != 1.0f) {
+			nemoscreen_set_position(screen, config->x, config->y);
 			nemoscreen_set_scale(screen, config->sx, config->sy);
 			nemoscreen_set_rotation(screen, config->r);
 			nemoscreen_set_pivot(screen, config->px, config->py);
