@@ -161,6 +161,7 @@ static void nemoenvs_handle_set_nemoshell_input(struct nemoshell *shell, struct 
 				config->width = strtoul(value, NULL, 10);
 			} else if (strcmp(name, "height") == 0) {
 				config->height = strtoul(value, NULL, 10);
+				config->has_screen = 0;
 			} else if (strcmp(name, "nodeid") == 0) {
 				config->nodeid = strtoul(value, NULL, 10);
 			} else if (strcmp(name, "screenid") == 0) {
