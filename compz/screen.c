@@ -140,6 +140,17 @@ int nemoscreen_read_pixels(struct nemoscreen *screen, pixman_format_code_t forma
 	return screen->read_pixels(screen, format, pixels, x, y, width, height);
 }
 
+int nemoscreen_switch_mode(struct nemoscreen *screen, int32_t width, int32_t height, uint32_t refresh)
+{
+	struct nemomode mode = {
+		.width = width,
+		.height = height,
+		.refresh = refresh
+	};
+
+	return screen->switch_mode(screen, &mode);
+}
+
 static void nemoscreen_unbind_output(struct wl_resource *resource)
 {
 	wl_list_remove(wl_resource_get_link(resource));
@@ -342,6 +353,8 @@ void nemoscreen_update_geometry(struct nemoscreen *screen)
 	nemoscreen_update_region(screen);
 
 	nemocompz_update_scene(screen->compz);
+
+	nemoscreen_damage_dirty(screen);
 }
 
 void nemoscreen_transform_to_global(struct nemoscreen *screen, float dx, float dy, float *x, float *y)

@@ -66,6 +66,7 @@ static void nemoenvs_handle_set_nemoshell_backend(struct nemoshell *shell, struc
 static void nemoenvs_handle_set_nemoshell_screen(struct nemoshell *shell, struct itemone *one)
 {
 	struct nemocompz *compz = shell->compz;
+	struct nemoscreen *screen;
 	struct screenconfig *config;
 	uint32_t nodeid = nemoitem_one_get_iattr(one, "nodeid", 0);
 	uint32_t screenid = nemoitem_one_get_iattr(one, "screenid", 0);
@@ -107,6 +108,27 @@ static void nemoenvs_handle_set_nemoshell_screen(struct nemoshell *shell, struct
 			} else if (strcmp(name, "transform") == 0) {
 				config->transform = strdup(value);
 			}
+		}
+
+		screen = nemocompz_get_screen(compz, nodeid, screenid);
+		if (screen != NULL) {
+			if (screen->width != config->width || screen->height != config->height)
+				nemoscreen_switch_mode(screen, config->width, config->height, config->refresh);
+
+			if (config->transform != NULL) {
+				nemoscreen_set_transform(screen, config->transform);
+			} else {
+				if (screen->x != config->x || screen->y != config->y)
+					nemoscreen_set_position(screen, config->x, config->y);
+				if (screen->geometry.sx != config->sx || screen->geometry.sy != config->sy)
+					nemoscreen_set_scale(screen, config->sx, config->sy);
+				if (screen->geometry.r != config->r)
+					nemoscreen_set_rotation(screen, config->r);
+				if (screen->geometry.px != config->py)
+					nemoscreen_set_pivot(screen, config->px, config->py);
+			}
+
+			nemoscreen_schedule_repaint(screen);
 		}
 	}
 }

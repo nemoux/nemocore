@@ -106,6 +106,7 @@ struct nemoscreen {
 extern void nemoscreen_schedule_repaint(struct nemoscreen *screen);
 extern void nemoscreen_finish_frame(struct nemoscreen *screen, uint32_t secs, uint32_t usecs, uint32_t psf_flags);
 extern int nemoscreen_read_pixels(struct nemoscreen *screen, pixman_format_code_t format, void *pixels, uint32_t x, uint32_t y, uint32_t width, uint32_t height);
+extern int nemoscreen_switch_mode(struct nemoscreen *screen, int32_t width, int32_t height, uint32_t refresh);
 
 extern void nemoscreen_prepare(struct nemoscreen *screen);
 extern void nemoscreen_finish(struct nemoscreen *screen);
