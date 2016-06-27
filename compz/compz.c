@@ -34,11 +34,14 @@
 #include <clipboard.h>
 #include <virtuio.h>
 #include <screen.h>
+#include <input.h>
 #include <animation.h>
 #include <effect.h>
 #include <drmbackend.h>
 #include <fbbackend.h>
 #include <evdevbackend.h>
+#include <evdevnode.h>
+#include <tuio.h>
 #include <nemomisc.h>
 #include <nemoease.h>
 #include <nemoxml.h>
@@ -658,6 +661,30 @@ struct nemoscreen *nemocompz_get_screen(struct nemocompz *compz, uint32_t nodeid
 		if (screen->screenid == screenid && screen->node->nodeid == nodeid) {
 			return screen;
 		}
+	}
+
+	return NULL;
+}
+
+struct inputnode *nemocompz_get_input(struct nemocompz *compz, const char *devnode)
+{
+	struct evdevnode *enode;
+	struct touchnode *tnode;
+	struct tuio *tuio;
+
+	wl_list_for_each(enode, &compz->evdev_list, link) {
+		if (strcmp(enode->base.devnode, devnode) == 0)
+			return &enode->base;
+	}
+
+	wl_list_for_each(tnode, &compz->touch_list, link) {
+		if (strcmp(tnode->base.devnode, devnode) == 0)
+			return &tnode->base;
+	}
+
+	wl_list_for_each(tuio, &compz->tuio_list, link) {
+		if (strcmp(tuio->base.devnode, devnode) == 0)
+			return &tuio->base;
 	}
 
 	return NULL;

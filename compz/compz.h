@@ -194,6 +194,8 @@ extern struct nemoscreen *nemocompz_get_screen(struct nemocompz *compz, uint32_t
 extern void nemocompz_set_screen_frame_listener(struct nemocompz *compz, struct nemoscreen *screen);
 extern void nemocompz_put_screen_frame_listener(struct nemocompz *compz);
 
+extern struct inputnode *nemocompz_get_input(struct nemocompz *compz, const char *devnode);
+
 extern int32_t nemocompz_get_scene_width(struct nemocompz *compz);
 extern int32_t nemocompz_get_scene_height(struct nemocompz *compz);
 extern void nemocompz_update_scene(struct nemocompz *compz);

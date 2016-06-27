@@ -136,6 +136,8 @@ static void nemoenvs_handle_set_nemoshell_screen(struct nemoshell *shell, struct
 static void nemoenvs_handle_set_nemoshell_input(struct nemoshell *shell, struct itemone *one)
 {
 	struct nemocompz *compz = shell->compz;
+	struct nemoscreen *screen;
+	struct inputnode *node;
 	struct inputconfig *config;
 	const char *devnode = nemoitem_one_get_attr(one, "devnode");
 	struct itemattr *attr;
@@ -168,6 +170,24 @@ static void nemoenvs_handle_set_nemoshell_input(struct nemoshell *shell, struct 
 				config->transform = strdup(value);
 			} else if (strcmp(name, "sampling") == 0) {
 				config->sampling = strtoul(value, NULL, 10);
+			}
+		}
+
+		node = nemocompz_get_input(compz, devnode);
+		if (node != NULL) {
+			if (config->has_screen != 0) {
+				screen = nemocompz_get_screen(compz, config->nodeid, config->screenid);
+				if (node->screen != screen)
+					nemoinput_set_screen(node, screen);
+			} else {
+				nemoinput_set_geometry(node,
+						config->x,
+						config->y,
+						config->width,
+						config->height);
+
+				if (config->transform != NULL)
+					nemoinput_set_transform(node, config->transform);
 			}
 		}
 	}
