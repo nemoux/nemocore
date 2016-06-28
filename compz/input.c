@@ -25,9 +25,9 @@ static void nemoinput_handle_screen_destroy(struct wl_listener *listener, void *
 
 void nemoinput_set_screen(struct inputnode *node, struct nemoscreen *screen)
 {
-	if (node->screen_destroy_listener.notify) {
+	if (node->screen != NULL) {
 		wl_list_remove(&node->screen_destroy_listener.link);
-		node->screen_destroy_listener.notify = NULL;
+		wl_list_init(&node->screen_destroy_listener.link);
 	}
 
 	if (screen != NULL) {
@@ -43,6 +43,7 @@ void nemoinput_put_screen(struct inputnode *node)
 	node->screen = NULL;
 
 	wl_list_remove(&node->screen_destroy_listener.link);
+	wl_list_init(&node->screen_destroy_listener.link);
 }
 
 void nemoinput_set_geometry(struct inputnode *node, int32_t x, int32_t y, int32_t width, int32_t height)
@@ -67,6 +68,11 @@ int nemoinput_set_transform(struct inputnode *node, const char *cmd)
 	node->transform.enable = 1;
 
 	return 0;
+}
+
+void nemoinput_put_transform(struct inputnode *node)
+{
+	node->transform.enable = 0;
 }
 
 void nemoinput_set_sampling(struct inputnode *node, uint32_t sampling)

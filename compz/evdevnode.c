@@ -608,7 +608,6 @@ static int evdev_configure_node(struct evdevnode *node)
 struct evdevnode *evdev_create_node(struct nemocompz *compz, const char *path, int fd)
 {
 	struct evdevnode *node;
-	struct inputconfig *config;
 	char devname[256] = "unknown";
 	char devphys[256];
 	uint32_t nodeid, screenid;
@@ -636,34 +635,16 @@ struct evdevnode *evdev_create_node(struct nemocompz *compz, const char *path, i
 	node->pointer = NULL;
 	node->keyboard = NULL;
 
-	nemoinput_set_geometry(&node->base,
-			0, 0,
-			nemocompz_get_scene_width(compz),
-			nemocompz_get_scene_height(compz));
-
 	if (evdev_configure_node(node) < 0)
 		goto err1;
 
 	if (node->seat_caps == 0)
 		goto err1;
 
-	config = nemocompz_get_input_config(compz, node->devphys);
-	if (config != NULL) {
-		if (config->has_screen != 0) {
-			nemoinput_set_screen(&node->base, nemocompz_get_screen(compz, config->nodeid, config->screenid));
-		} else {
-			nemoinput_set_geometry(&node->base,
-					config->x,
-					config->y,
-					config->width,
-					config->height);
-
-			if (config->transform != NULL)
-				nemoinput_set_transform(&node->base, config->transform);
-		}
-
-		nemoinput_set_sampling(&node->base, config->sampling);
-	}
+	nemoinput_set_geometry(&node->base,
+			0, 0,
+			nemocompz_get_scene_width(compz),
+			nemocompz_get_scene_height(compz));
 
 	node->source = wl_event_loop_add_fd(compz->loop,
 			node->fd,

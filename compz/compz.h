@@ -43,41 +43,6 @@ struct nemoproc {
 	pid_t pid;
 };
 
-struct screenconfig {
-	uint32_t nodeid;
-	uint32_t screenid;
-
-	int32_t x, y;
-	int32_t width, height;
-	int32_t refresh;
-
-	float sx, sy;
-	float r;
-	float px, py;
-
-	char *renderer;
-	char *transform;
-
-	struct wl_list link;
-};
-
-struct inputconfig {
-	char *devnode;
-
-	uint32_t nodeid;
-	uint32_t screenid;
-	int has_screen;
-
-	int32_t x, y;
-	int32_t width, height;
-
-	uint32_t sampling;
-
-	char *transform;
-
-	struct wl_list link;
-};
-
 struct nemocompz {
 	struct wl_display *display;
 	struct wl_event_loop *loop;
@@ -127,9 +92,6 @@ struct nemocompz {
 	struct wl_list canvas_list;
 	struct wl_list actor_list;
 	struct wl_list feedback_list;
-
-	struct wl_list screenconfig_list;
-	struct wl_list inputconfig_list;
 
 	struct nemolayer cursor_layer;
 
@@ -228,13 +190,6 @@ extern int nemocompz_contain_view_near(struct nemocompz *compz, struct nemoview 
 extern struct nemocanvas *nemocompz_get_canvas_by_id(struct nemocompz *compz, uint32_t id);
 extern struct nemoview *nemocompz_get_view_by_id(struct nemocompz *compz, uint32_t id);
 extern struct nemoview *nemocompz_get_view_by_client(struct nemocompz *compz, struct wl_client *client);
-
-extern struct screenconfig *nemocompz_get_screen_config(struct nemocompz *compz, uint32_t nodeid, uint32_t screenid);
-extern struct screenconfig *nemocompz_set_screen_config(struct nemocompz *compz, uint32_t nodeid, uint32_t screenid);
-extern void nemocompz_put_screen_config(struct nemocompz *compz, uint32_t nodeid, uint32_t screenid);
-extern struct inputconfig *nemocompz_get_input_config(struct nemocompz *compz, const char *devnode);
-extern struct inputconfig *nemocompz_set_input_config(struct nemocompz *compz, const char *devnode);
-extern void nemocompz_put_input_config(struct nemocompz *compz, const char *devnode);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

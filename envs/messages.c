@@ -67,7 +67,6 @@ static void nemoenvs_handle_set_nemoshell_screen(struct nemoshell *shell, struct
 {
 	struct nemocompz *compz = shell->compz;
 	struct nemoscreen *screen;
-	struct screenconfig *config;
 	uint32_t nodeid = nemoitem_one_get_iattr(one, "nodeid", 0);
 	uint32_t screenid = nemoitem_one_get_iattr(one, "screenid", 0);
 	struct itemattr *attr;
@@ -75,61 +74,61 @@ static void nemoenvs_handle_set_nemoshell_screen(struct nemoshell *shell, struct
 	const char *name;
 	const char *value;
 
-	config = nemocompz_get_screen_config(compz, nodeid, screenid);
-	if (config == NULL)
-		config = nemocompz_set_screen_config(compz, nodeid, screenid);
-	if (config != NULL) {
+	screen = nemocompz_get_screen(compz, nodeid, screenid);
+	if (screen != NULL) {
+		int32_t width = screen->width;
+		int32_t height = screen->height;
+		int32_t x = 0, y = 0;
+		float sx = 1.0f, sy = 1.0f;
+		float r = 0.0f;
+		float px = 0.0f, py = 0.0f;
+		uint32_t refresh = 0;
+		const char *transform = NULL;
+
 		nemoitem_attr_for_each(attr, one) {
 			name = nemoitem_attr_get_name(attr);
 			value = nemoitem_attr_get_value(attr);
 
 			if (strcmp(name, "x") == 0) {
-				config->x = strtoul(value, NULL, 10);
+				x = strtoul(value, NULL, 10);
 			} else if (strcmp(name, "y") == 0) {
-				config->y = strtoul(value, NULL, 10);
+				y = strtoul(value, NULL, 10);
 			} else if (strcmp(name, "width") == 0) {
-				config->width = strtoul(value, NULL, 10);
+				width = strtoul(value, NULL, 10);
 			} else if (strcmp(name, "height") == 0) {
-				config->height = strtoul(value, NULL, 10);
+				height = strtoul(value, NULL, 10);
 			} else if (strcmp(name, "sx") == 0) {
-				config->sx = strtod(value, NULL);
+				sx = strtod(value, NULL);
 			} else if (strcmp(name, "sy") == 0) {
-				config->sy = strtod(value, NULL);
+				sy = strtod(value, NULL);
 			} else if (strcmp(name, "r") == 0) {
-				config->r = strtod(value, NULL) * M_PI / 180.0f;
+				r = strtod(value, NULL) * M_PI / 180.0f;
 			} else if (strcmp(name, "px") == 0) {
-				config->px = strtod(value, NULL);
+				px = strtod(value, NULL);
 			} else if (strcmp(name, "py") == 0) {
-				config->py = strtod(value, NULL);
+				py = strtod(value, NULL);
 			} else if (strcmp(name, "refresh") == 0) {
-				config->refresh = strtoul(value, NULL, 10);
-			} else if (strcmp(name, "renderer") == 0) {
-				config->renderer = strdup(value);
+				refresh = strtoul(value, NULL, 10);
 			} else if (strcmp(name, "transform") == 0) {
-				config->transform = strdup(value);
+				transform = strdup(value);
 			}
 		}
 
-		screen = nemocompz_get_screen(compz, nodeid, screenid);
-		if (screen != NULL) {
-			if (screen->width != config->width || screen->height != config->height)
-				nemoscreen_switch_mode(screen, config->width, config->height, config->refresh);
+		if (screen->width != width || screen->height != height)
+			nemoscreen_switch_mode(screen, width, height, refresh);
 
-			if (config->transform != NULL) {
-				nemoscreen_set_transform(screen, config->transform);
-			} else {
-				if (screen->x != config->x || screen->y != config->y)
-					nemoscreen_set_position(screen, config->x, config->y);
-				if (screen->geometry.sx != config->sx || screen->geometry.sy != config->sy)
-					nemoscreen_set_scale(screen, config->sx, config->sy);
-				if (screen->geometry.r != config->r)
-					nemoscreen_set_rotation(screen, config->r);
-				if (screen->geometry.px != config->py)
-					nemoscreen_set_pivot(screen, config->px, config->py);
-			}
+		if (transform != NULL) {
+			nemoscreen_set_transform(screen, transform);
+		} else {
+			nemoscreen_put_transform(screen);
 
-			nemoscreen_schedule_repaint(screen);
+			nemoscreen_set_position(screen, x, y);
+			nemoscreen_set_scale(screen, sx, sy);
+			nemoscreen_set_rotation(screen, r);
+			nemoscreen_set_pivot(screen, px, py);
 		}
+
+		nemoscreen_schedule_repaint(screen);
 	}
 }
 
@@ -138,60 +137,59 @@ static void nemoenvs_handle_set_nemoshell_input(struct nemoshell *shell, struct 
 	struct nemocompz *compz = shell->compz;
 	struct nemoscreen *screen;
 	struct inputnode *node;
-	struct inputconfig *config;
 	const char *devnode = nemoitem_one_get_attr(one, "devnode");
 	struct itemattr *attr;
 	const char *id;
 	const char *name;
 	const char *value;
 
-	config = nemocompz_get_input_config(compz, devnode);
-	if (config == NULL)
-		config = nemocompz_set_input_config(compz, devnode);
-	if (config != NULL) {
+	node = nemocompz_get_input(compz, devnode);
+	if (node != NULL) {
+		int32_t x, y;
+		int32_t width, height;
+		uint32_t nodeid, screenid;
+		uint32_t sampling = 0;
+		const char *transform = NULL;
+		int has_screen = 0;
+
 		nemoitem_attr_for_each(attr, one) {
 			name = nemoitem_attr_get_name(attr);
 			value = nemoitem_attr_get_value(attr);
 
 			if (strcmp(name, "x") == 0) {
-				config->x = strtoul(value, NULL, 10);
+				x = strtoul(value, NULL, 10);
 			} else if (strcmp(name, "y") == 0) {
-				config->y = strtoul(value, NULL, 10);
+				y = strtoul(value, NULL, 10);
 			} else if (strcmp(name, "width") == 0) {
-				config->width = strtoul(value, NULL, 10);
+				width = strtoul(value, NULL, 10);
 			} else if (strcmp(name, "height") == 0) {
-				config->height = strtoul(value, NULL, 10);
-				config->has_screen = 0;
+				height = strtoul(value, NULL, 10);
 			} else if (strcmp(name, "nodeid") == 0) {
-				config->nodeid = strtoul(value, NULL, 10);
+				nodeid = strtoul(value, NULL, 10);
 			} else if (strcmp(name, "screenid") == 0) {
-				config->screenid = strtoul(value, NULL, 10);
-				config->has_screen = 1;
+				screenid = strtoul(value, NULL, 10);
+				has_screen = 1;
 			} else if (strcmp(name, "transform") == 0) {
-				config->transform = strdup(value);
+				transform = value;
 			} else if (strcmp(name, "sampling") == 0) {
-				config->sampling = strtoul(value, NULL, 10);
+				sampling = strtoul(value, NULL, 10);
 			}
 		}
 
-		node = nemocompz_get_input(compz, devnode);
-		if (node != NULL) {
-			if (config->has_screen != 0) {
-				screen = nemocompz_get_screen(compz, config->nodeid, config->screenid);
-				if (node->screen != screen)
-					nemoinput_set_screen(node, screen);
-			} else {
-				nemoinput_set_geometry(node,
-						config->x,
-						config->y,
-						config->width,
-						config->height);
+		if (has_screen != 0) {
+			screen = nemocompz_get_screen(compz, nodeid, screenid);
+			if (node->screen != screen)
+				nemoinput_set_screen(node, screen);
+		} else {
+			nemoinput_put_screen(node);
 
-				if (config->transform != NULL)
-					nemoinput_set_transform(node, config->transform);
+			if (transform != NULL)
+				nemoinput_set_transform(node, transform);
+			else
+				nemoinput_put_transform(node);
 
-				nemoinput_set_sampling(node, config->sampling);
-			}
+			nemoinput_set_geometry(node, x, y, width, height);
+			nemoinput_set_sampling(node, sampling);
 		}
 	}
 }

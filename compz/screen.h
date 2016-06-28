@@ -48,7 +48,6 @@ struct nemoscreen {
 
 	uint64_t msc;
 
-	int use_pixman;
 	int32_t x, y;
 	int32_t width, height;
 	int32_t mmwidth, mmheight;
@@ -120,6 +119,7 @@ extern void nemoscreen_set_rotation(struct nemoscreen *screen, float r);
 extern void nemoscreen_set_scale(struct nemoscreen *screen, float sx, float sy);
 extern void nemoscreen_set_pivot(struct nemoscreen *screen, float px, float py);
 extern int nemoscreen_set_transform(struct nemoscreen *screen, const char *cmd);
+extern void nemoscreen_put_transform(struct nemoscreen *screen);
 
 extern void nemoscreen_transform_dirty(struct nemoscreen *screen);
 extern void nemoscreen_damage_dirty(struct nemoscreen *screen);

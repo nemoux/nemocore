@@ -595,7 +595,7 @@ static void drm_screen_render_frame(struct drmscreen *screen, pixman_region32_t 
 {
 	struct nemocompz *compz = screen->base.compz;
 
-	if (compz->use_pixman != 0 || screen->base.use_pixman != 0) {
+	if (compz->use_pixman != 0) {
 		drm_screen_render_pixman(screen, damage);
 	} else {
 		drm_screen_render_gl(screen, damage);
@@ -653,7 +653,7 @@ static int drm_screen_read_pixels(struct nemoscreen *base, pixman_format_code_t 
 {
 	struct nemocompz *compz = base->compz;
 
-	if (compz->use_pixman != 0 || base->use_pixman != 0) {
+	if (compz->use_pixman != 0) {
 		base->node->pixman->read_pixels(base->node->pixman, base, format, pixels, x, y, width, height);
 	} else {
 		base->node->opengl->read_pixels(base->node->opengl, base, format, pixels, x, y, width, height);
@@ -684,9 +684,6 @@ static void drm_screen_destroy(struct nemoscreen *base)
 
 	if (base->compz->use_pixman != 0) {
 		drm_finish_pixman_screen(screen);
-	} else if (screen->base.use_pixman != 0) {
-		drm_finish_pixman_screen(screen);
-		drm_finish_egl_screen(screen);
 	} else {
 		drm_finish_egl_screen(screen);
 	}
@@ -748,18 +745,6 @@ static int drm_screen_switch_mode(struct nemoscreen *base, struct nemomode *mode
 			nemolog_error("DRM", "failed to prepare pixman screen\n");
 			goto err1;
 		}
-	} else if (screen->base.use_pixman != 0) {
-		drm_finish_pixman_screen(screen);
-		drm_finish_egl_screen(screen);
-
-		if (drm_prepare_pixman_screen(screen) < 0) {
-			nemolog_error("DRM", "failed to prepare pixman screen\n");
-			goto err1;
-		}
-		if (drm_prepare_egl_screen(screen) < 0) {
-			nemolog_error("DRM", "failed to prepare egl screen\n");
-			goto err1;
-		}
 	} else {
 		drm_finish_egl_screen(screen);
 
@@ -804,13 +789,10 @@ static int drm_create_screen_for_connector(struct drmnode *node, drmModeRes *res
 	struct nemocompz *compz = node->base.compz;
 	struct drmscreen *screen;
 	struct drmmode *mode;
-	struct nemomode *basemode;
-	struct screenconfig *config;
 	drmModeEncoder *encoder;
 	drmModeModeInfo crtcmode;
 	drmModeCrtc *crtc;
 	const char *typename;
-	const char *renderer;
 	int index = -1;
 	int i;
 
@@ -877,44 +859,11 @@ static int drm_create_screen_for_connector(struct drmnode *node, drmModeRes *res
 			screen->base.current_mode = &mode->base;
 		}
 
-		if (screen->base.current_mode == NULL) {
+		if (screen->base.current_mode == NULL || mode->base.flags & WL_OUTPUT_MODE_PREFERRED) {
 			screen->base.current_mode = &mode->base;
 		}
 
 		wl_list_insert(screen->base.mode_list.prev, &mode->base.link);
-	}
-
-	config = nemocompz_get_screen_config(compz, node->base.nodeid, screen->base.screenid);
-	if (config != NULL) {
-		struct nemomode configmode = {
-			.width = config->width,
-			.height = config->height,
-			.refresh = config->refresh
-		};
-
-		wl_list_for_each(basemode, &screen->base.mode_list, link) {
-			if ((configmode.width == basemode->width) &&
-					(configmode.height == basemode->height) &&
-					(configmode.refresh == 0 || configmode.refresh == basemode->refresh)) {
-				screen->base.current_mode = basemode;
-				break;
-			}
-		}
-
-		screen->base.width = config->width;
-		screen->base.height = config->height;
-
-		if (config->transform != NULL) {
-			nemoscreen_set_transform(&screen->base, config->transform);
-		} else if (config->r != 0.0f || config->sx != 1.0f || config->sy != 1.0f) {
-			nemoscreen_set_position(&screen->base, config->x, config->y);
-			nemoscreen_set_scale(&screen->base, config->sx, config->sy);
-			nemoscreen_set_rotation(&screen->base, config->r);
-			nemoscreen_set_pivot(&screen->base, config->px, config->py);
-		}
-
-		if (config->renderer != NULL && strcmp(config->renderer, "pixman") == 0)
-			screen->base.use_pixman = 1;
 	}
 
 	if (screen->base.current_mode == NULL) {
@@ -922,14 +871,9 @@ static int drm_create_screen_for_connector(struct drmnode *node, drmModeRes *res
 		goto err1;
 	}
 
+	screen->base.width = screen->base.current_mode->width;
+	screen->base.height = screen->base.current_mode->height;
 	screen->base.current_mode->flags |= WL_OUTPUT_MODE_CURRENT;
-
-	if (compz->use_pixman == 0 && screen->base.use_pixman != 0) {
-		if (drm_prepare_pixman(node) < 0) {
-			nemolog_error("DRM", "failed to prepare pixman renderer\n");
-			goto err1;
-		}
-	}
 
 	nemolog_message("DRM", "screen(%d, %d) x = %d, y = %d, width = %d, height = %d\n",
 			node->base.nodeid,
@@ -947,15 +891,6 @@ static int drm_create_screen_for_connector(struct drmnode *node, drmModeRes *res
 	if (compz->use_pixman != 0) {
 		if (drm_prepare_pixman_screen(screen) < 0) {
 			nemolog_error("DRM", "failed to prepare pixman screen\n");
-			goto err1;
-		}
-	} else if (screen->base.use_pixman != 0) {
-		if (drm_prepare_pixman_screen(screen) < 0) {
-			nemolog_error("DRM", "failed to prepare pixman screen\n");
-			goto err1;
-		}
-		if (drm_prepare_egl_screen(screen) < 0) {
-			nemolog_error("DRM", "failed to prepare egl screen\n");
 			goto err1;
 		}
 	} else {

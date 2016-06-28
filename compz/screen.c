@@ -472,6 +472,13 @@ int nemoscreen_set_transform(struct nemoscreen *screen, const char *cmd)
 	return 0;
 }
 
+void nemoscreen_put_transform(struct nemoscreen *screen)
+{
+	screen->transform.enable = 0;
+	screen->transform.dirty = 1;
+	screen->transform.custom = 0;
+}
+
 void nemoscreen_transform_dirty(struct nemoscreen *screen)
 {
 	screen->transform.dirty = 1;

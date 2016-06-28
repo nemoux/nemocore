@@ -383,9 +383,6 @@ struct nemocompz *nemocompz_create(void)
 	wl_list_init(&compz->actor_list);
 	wl_list_init(&compz->feedback_list);
 
-	wl_list_init(&compz->screenconfig_list);
-	wl_list_init(&compz->inputconfig_list);
-
 	wl_signal_init(&compz->session_signal);
 	compz->session_active = 1;
 
@@ -1033,100 +1030,4 @@ struct nemoview *nemocompz_get_view_by_client(struct nemocompz *compz, struct wl
 	}
 
 	return NULL;
-}
-
-struct screenconfig *nemocompz_get_screen_config(struct nemocompz *compz, uint32_t nodeid, uint32_t screenid)
-{
-	struct screenconfig *config;
-
-	wl_list_for_each(config, &compz->screenconfig_list, link) {
-		if (config->nodeid == nodeid && config->screenid == screenid)
-			return config;
-	}
-
-	return NULL;
-}
-
-struct screenconfig *nemocompz_set_screen_config(struct nemocompz *compz, uint32_t nodeid, uint32_t screenid)
-{
-	struct screenconfig *config;
-
-	config = (struct screenconfig *)malloc(sizeof(struct screenconfig));
-	if (config == NULL)
-		return NULL;
-	memset(config, 0, sizeof(struct screenconfig));
-
-	config->nodeid = nodeid;
-	config->screenid = screenid;
-
-	config->sx = 1.0f;
-	config->sy = 1.0f;
-
-	wl_list_insert(&compz->screenconfig_list, &config->link);
-
-	return config;
-}
-
-void nemocompz_put_screen_config(struct nemocompz *compz, uint32_t nodeid, uint32_t screenid)
-{
-	struct screenconfig *config;
-
-	wl_list_for_each(config, &compz->screenconfig_list, link) {
-		if (config->nodeid == nodeid && config->screenid == screenid) {
-			wl_list_remove(&config->link);
-
-			if (config->renderer != NULL)
-				free(config->renderer);
-			if (config->transform != NULL)
-				free(config->transform);
-
-			free(config);
-
-			break;
-		}
-	}
-}
-
-struct inputconfig *nemocompz_get_input_config(struct nemocompz *compz, const char *devnode)
-{
-	struct inputconfig *config;
-
-	wl_list_for_each(config, &compz->inputconfig_list, link) {
-		if (strcmp(config->devnode, devnode) == 0)
-			return config;
-	}
-
-	return NULL;
-}
-
-struct inputconfig *nemocompz_set_input_config(struct nemocompz *compz, const char *devnode)
-{
-	struct inputconfig *config;
-
-	config = (struct inputconfig *)malloc(sizeof(struct inputconfig));
-	if (config == NULL)
-		return NULL;
-	memset(config, 0, sizeof(struct inputconfig));
-
-	config->devnode = strdup(devnode);
-
-	wl_list_insert(&compz->inputconfig_list, &config->link);
-
-	return config;
-}
-
-void nemocompz_put_input_config(struct nemocompz *compz, const char *devnode)
-{
-	struct inputconfig *config;
-
-	wl_list_for_each(config, &compz->inputconfig_list, link) {
-		if (strcmp(config->devnode, devnode) == 0) {
-			wl_list_remove(&config->link);
-
-			free(config->devnode);
-			free(config);
-
-			break;
-		}
-	}
 }

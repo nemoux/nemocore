@@ -611,7 +611,6 @@ void touchpoint_done_grab(struct touchpoint *tp)
 struct touchnode *nemotouch_create_node(struct nemocompz *compz, const char *devnode)
 {
 	struct touchnode *node;
-	struct inputconfig *config;
 	uint32_t nodeid, screenid;
 
 	node = (struct touchnode *)malloc(sizeof(struct touchnode));
@@ -631,22 +630,6 @@ struct touchnode *nemotouch_create_node(struct nemocompz *compz, const char *dev
 			0, 0,
 			nemocompz_get_scene_width(compz),
 			nemocompz_get_scene_height(compz));
-
-	config = nemocompz_get_input_config(compz, node->base.devnode);
-	if (config != NULL) {
-		if (config->has_screen != 0) {
-			nemoinput_set_screen(&node->base, nemocompz_get_screen(compz, config->nodeid, config->screenid));
-		} else {
-			nemoinput_set_geometry(&node->base,
-					config->x,
-					config->y,
-					config->width,
-					config->height);
-
-			if (config->transform != NULL)
-				nemoinput_set_transform(&node->base, config->transform);
-		}
-	}
 
 	wl_list_insert(compz->touch_list.prev, &node->link);
 

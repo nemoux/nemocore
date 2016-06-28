@@ -371,7 +371,6 @@ static void tuio_finish_osc(struct tuio *tuio)
 struct tuio *tuio_create(struct nemocompz *compz, int protocol, int port, int max)
 {
 	struct tuio *tuio;
-	struct inputconfig *config;
 	uint32_t tuioid, screenid;
 
 	tuio = (struct tuio *)malloc(sizeof(struct tuio));
@@ -400,37 +399,17 @@ struct tuio *tuio_create(struct nemocompz *compz, int protocol, int port, int ma
 			nemocompz_get_scene_width(compz),
 			nemocompz_get_scene_height(compz));
 
-	config = nemocompz_get_input_config(compz, tuio->base.devnode);
-	if (config != NULL) {
-		if (config->has_screen != 0) {
-			nemoinput_set_screen(&tuio->base, nemocompz_get_screen(compz, config->nodeid, config->screenid));
-		} else {
-			nemoinput_set_geometry(&tuio->base,
-					config->x,
-					config->y,
-					config->width,
-					config->height);
-
-			if (config->transform != NULL)
-				nemoinput_set_transform(&tuio->base, config->transform);
-		}
-	}
-
 	if (protocol == NEMOTUIO_XML_PROTOCOL) {
 		if (tuio_prepare_xml(tuio, port) < 0)
-			goto err4;
+			goto err3;
 	} else if (protocol == NEMOTUIO_OSC_PROTOCOL) {
 		if (tuio_prepare_osc(tuio, port) < 0)
-			goto err4;
+			goto err3;
 	}
 
 	wl_list_insert(compz->tuio_list.prev, &tuio->link);
 
 	return tuio;
-
-err4:
-	if (tuio->base.screen != NULL)
-		nemoinput_put_screen(&tuio->base);
 
 err3:
 	nemotouch_destroy(tuio->touch);
