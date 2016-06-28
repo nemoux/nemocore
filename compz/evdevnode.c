@@ -642,6 +642,13 @@ struct evdevnode *evdev_create_node(struct nemocompz *compz, const char *path, i
 	if (node->seat_caps == 0)
 		goto err1;
 
+	if (node->pointer != NULL)
+		node->base.type |= NEMOINPUT_POINTER_TYPE;
+	if (node->keyboard != NULL)
+		node->base.type |= NEMOINPUT_KEYBOARD_TYPE;
+	if (node->touch != NULL)
+		node->base.type |= NEMOINPUT_TOUCH_TYPE;
+
 	nemoinput_set_geometry(&node->base,
 			0, 0,
 			nemocompz_get_scene_width(compz),

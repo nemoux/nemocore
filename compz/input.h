@@ -9,11 +9,19 @@ NEMO_BEGIN_EXTERN_C
 
 #include <nemomatrix.h>
 
+typedef enum {
+	NEMOINPUT_POINTER_TYPE = (1 << 0),
+	NEMOINPUT_KEYBOARD_TYPE = (1 << 1),
+	NEMOINPUT_TOUCH_TYPE = (1 << 2)
+} NemoInputType;
+
 struct nemocompz;
 struct nemoscreen;
 
 struct inputnode {
 	char *devnode;
+
+	uint32_t type;
 
 	struct wl_list link;
 

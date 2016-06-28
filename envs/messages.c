@@ -437,6 +437,22 @@ int nemoenvs_dispatch_device_message(struct nemoenvs *envs, const char *src, con
 					else
 						nemoenvs_reply(envs, "%s %s dev %s devnode %s", dst, src, path, node->devnode);
 				}
+			} else if (strcmp(path, "/nemoshell/input/touch") == 0) {
+				struct inputnode *node;
+				struct itemone *tone;
+				const char *id;
+
+				wl_list_for_each(node, &compz->input_list, link) {
+					if (node->type & NEMOINPUT_TOUCH_TYPE) {
+						tone = nemoitem_search_attr(envs->configs, path, "devnode", node->devnode);
+						id = tone != NULL ? nemoitem_one_get_attr(tone, "id") : NULL;
+
+						if (id != NULL)
+							nemoenvs_reply(envs, "%s %s dev %s devnode %s id %s", dst, src, path, node->devnode, id);
+						else
+							nemoenvs_reply(envs, "%s %s dev %s devnode %s", dst, src, path, node->devnode);
+					}
+				}
 			}
 		}
 	}
