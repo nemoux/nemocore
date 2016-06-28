@@ -80,6 +80,7 @@ struct nemocompz {
 
 	struct wl_list backend_list;
 	struct wl_list screen_list;
+	struct wl_list input_list;
 	struct wl_list render_list;
 	struct wl_list evdev_list;
 	struct wl_list touch_list;

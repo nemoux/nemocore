@@ -380,6 +380,9 @@ struct tuio *tuio_create(struct nemocompz *compz, int protocol, int port, int ma
 
 	tuio->compz = compz;
 
+	wl_list_init(&tuio->link);
+	wl_list_init(&tuio->base.link);
+
 	tuio->taps = (struct tuiotap *)malloc(sizeof(struct tuiotap) * max);
 	if (tuio->taps == NULL)
 		goto err1;
@@ -408,6 +411,7 @@ struct tuio *tuio_create(struct nemocompz *compz, int protocol, int port, int ma
 	}
 
 	wl_list_insert(compz->tuio_list.prev, &tuio->link);
+	wl_list_insert(compz->input_list.prev, &tuio->base.link);
 
 	return tuio;
 
@@ -426,6 +430,7 @@ err1:
 void tuio_destroy(struct tuio *tuio)
 {
 	wl_list_remove(&tuio->link);
+	wl_list_remove(&tuio->base.link);
 
 	if (tuio->protocol == NEMOTUIO_XML_PROTOCOL) {
 		tuio_finish_xml(tuio);

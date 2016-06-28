@@ -600,6 +600,9 @@ struct touchnode *nemotouch_create_node(struct nemocompz *compz, const char *dev
 
 	node->compz = compz;
 
+	wl_list_init(&node->link);
+	wl_list_init(&node->base.link);
+
 	node->touch = nemotouch_create(compz->seat, &node->base);
 	if (node->touch == NULL)
 		goto err1;
@@ -612,6 +615,7 @@ struct touchnode *nemotouch_create_node(struct nemocompz *compz, const char *dev
 			nemocompz_get_scene_height(compz));
 
 	wl_list_insert(compz->touch_list.prev, &node->link);
+	wl_list_insert(compz->input_list.prev, &node->base.link);
 
 	return node;
 
@@ -624,6 +628,7 @@ err1:
 void nemotouch_destroy_node(struct touchnode *node)
 {
 	wl_list_remove(&node->link);
+	wl_list_remove(&node->base.link);
 
 	if (node->base.screen != NULL)
 		nemoinput_put_screen(&node->base);

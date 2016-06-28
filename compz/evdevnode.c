@@ -621,6 +621,7 @@ struct evdevnode *evdev_create_node(struct nemocompz *compz, const char *path, i
 	node->fd = fd;
 
 	wl_list_init(&node->link);
+	wl_list_init(&node->base.link);
 
 	ioctl(node->fd, EVIOCGNAME(sizeof(devname)), devname);
 	devname[sizeof(devname) - 1] = '\0';
@@ -655,6 +656,7 @@ struct evdevnode *evdev_create_node(struct nemocompz *compz, const char *path, i
 		goto err1;
 
 	wl_list_insert(compz->evdev_list.prev, &node->link);
+	wl_list_insert(compz->input_list.prev, &node->base.link);
 
 	return node;
 
@@ -667,6 +669,7 @@ err1:
 void evdev_destroy_node(struct evdevnode *node)
 {
 	wl_list_remove(&node->link);
+	wl_list_remove(&node->base.link);
 
 	if (node->source != NULL)
 		wl_event_source_remove(node->source);

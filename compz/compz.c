@@ -344,6 +344,7 @@ struct nemocompz *nemocompz_create(void)
 
 	wl_list_init(&compz->backend_list);
 	wl_list_init(&compz->screen_list);
+	wl_list_init(&compz->input_list);
 	wl_list_init(&compz->render_list);
 	wl_list_init(&compz->evdev_list);
 	wl_list_init(&compz->touch_list);
@@ -627,23 +628,11 @@ struct nemoscreen *nemocompz_get_screen(struct nemocompz *compz, uint32_t nodeid
 
 struct inputnode *nemocompz_get_input(struct nemocompz *compz, const char *devnode)
 {
-	struct evdevnode *enode;
-	struct touchnode *tnode;
-	struct tuio *tuio;
+	struct inputnode *node;
 
-	wl_list_for_each(enode, &compz->evdev_list, link) {
-		if (strcmp(enode->base.devnode, devnode) == 0)
-			return &enode->base;
-	}
-
-	wl_list_for_each(tnode, &compz->touch_list, link) {
-		if (strcmp(tnode->base.devnode, devnode) == 0)
-			return &tnode->base;
-	}
-
-	wl_list_for_each(tuio, &compz->tuio_list, link) {
-		if (strcmp(tuio->base.devnode, devnode) == 0)
-			return &tuio->base;
+	wl_list_for_each(node, &compz->input_list, link) {
+		if (strcmp(node->devnode, devnode) == 0)
+			return node;
 	}
 
 	return NULL;

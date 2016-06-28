@@ -404,7 +404,41 @@ int nemoenvs_dispatch_system_message(struct nemoenvs *envs, const char *src, con
 
 int nemoenvs_dispatch_device_message(struct nemoenvs *envs, const char *src, const char *dst, const char *cmd, const char *path, struct itemone *one, void *data)
 {
+	struct nemoshell *shell = (struct nemoshell *)data;
+	struct nemocompz *compz = shell->compz;
+
 	if (strcmp(dst, "/nemoshell") == 0) {
+		if (strcmp(cmd, "dev") == 0) {
+			if (strcmp(path, "/nemoshell/screen") == 0) {
+				struct nemoscreen *screen;
+				struct itemone *tone;
+				const char *id;
+
+				wl_list_for_each(screen, &compz->screen_list, link) {
+					tone = nemoitem_search_format(envs->configs, path, ' ', "nodeid %d screenid %d", screen->node->nodeid, screen->screenid);
+					id = tone != NULL ? nemoitem_one_get_attr(tone, "id") : NULL;
+
+					if (id != NULL)
+						nemoenvs_reply(envs, "%s %s dev %s nodeid %d screenid %d id %s", dst, src, path, screen->node->nodeid, screen->screenid, id);
+					else
+						nemoenvs_reply(envs, "%s %s dev %s nodeid %d screenid %d", dst, src, path, screen->node->nodeid, screen->screenid);
+				}
+			} else if (strcmp(path, "/nemoshell/input") == 0) {
+				struct inputnode *node;
+				struct itemone *tone;
+				const char *id;
+
+				wl_list_for_each(node, &compz->input_list, link) {
+					tone = nemoitem_search_attr(envs->configs, path, "devnode", node->devnode);
+					id = tone != NULL ? nemoitem_one_get_attr(tone, "id") : NULL;
+
+					if (id != NULL)
+						nemoenvs_reply(envs, "%s %s dev %s devnode %s id %s", dst, src, path, node->devnode, id);
+					else
+						nemoenvs_reply(envs, "%s %s dev %s devnode %s", dst, src, path, node->devnode);
+				}
+			}
+		}
 	}
 
 	return 0;

@@ -15,6 +15,8 @@ struct nemoscreen;
 struct inputnode {
 	char *devnode;
 
+	struct wl_list link;
+
 	struct nemoscreen *screen;
 
 	int32_t x, y, width, height;
