@@ -208,7 +208,6 @@ struct nemotouch *nemotouch_create(struct nemoseat *seat, struct inputnode *node
 {
 	struct nemocompz *compz = seat->compz;
 	struct nemotouch *touch;
-	char *env;
 
 	touch = (struct nemotouch *)malloc(sizeof(struct nemotouch));
 	if (touch == NULL)
@@ -221,10 +220,6 @@ struct nemotouch *nemotouch_create(struct nemoseat *seat, struct inputnode *node
 	wl_list_init(&touch->touchpoint_list);
 
 	wl_list_insert(&seat->touch.device_list, &touch->link);
-
-	env = getenv("NEMOUX_TOUCH_LOG");
-	if (env != NULL && strcmp(env, "ON") == 0)
-		touch->is_logging = 1;
 
 	return touch;
 
@@ -414,9 +409,6 @@ void nemotouch_notify_down(struct nemotouch *touch, uint32_t time, int id, float
 	if (touch == NULL)
 		return;
 
-	if (touch->is_logging != 0)
-		nemolog_message("TOUCH", "[DOWN] %d: %f %f (%u)\n", id, x, y, time);
-
 	tp = nemotouch_create_touchpoint(touch, id);
 	if (tp == NULL)
 		return;
@@ -441,9 +433,6 @@ void nemotouch_notify_up(struct nemotouch *touch, uint32_t time, int id)
 	if (touch == NULL)
 		return;
 
-	if (touch->is_logging != 0)
-		nemolog_message("TOUCH", "[UP] %d: (%u)\n", id, time);
-
 	tp = nemotouch_get_touchpoint_by_id(touch, id);
 	if (tp == NULL)
 		return;
@@ -464,9 +453,6 @@ void nemotouch_notify_motion(struct nemotouch *touch, uint32_t time, int id, flo
 	if (touch == NULL)
 		return;
 
-	if (touch->is_logging != 0)
-		nemolog_message("TOUCH", "[MOTION] %d: %f %f (%u)\n", id, x, y, time);
-
 	tp = nemotouch_get_touchpoint_by_id(touch, id);
 	if (tp == NULL)
 		return;
@@ -483,9 +469,6 @@ void nemotouch_notify_frame(struct nemotouch *touch, int id)
 	if (touch == NULL)
 		return;
 
-	if (touch->is_logging != 0)
-		nemolog_message("TOUCH", "[FRAME] %d:\n", id);
-
 	tp = nemotouch_get_touchpoint_by_id(touch, id);
 	if (tp == NULL)
 		return;
@@ -496,9 +479,6 @@ void nemotouch_notify_frame(struct nemotouch *touch, int id)
 void nemotouch_notify_frames(struct nemotouch *touch)
 {
 	struct touchpoint *tp;
-
-	if (touch->is_logging != 0)
-		nemolog_message("TOUCH", "[FRAME]\n");
 
 	touch->frame_count++;
 
