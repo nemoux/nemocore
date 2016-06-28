@@ -423,6 +423,18 @@ int nemoenvs_dispatch_device_message(struct nemoenvs *envs, const char *src, con
 					else
 						nemoenvs_reply(envs, "%s %s dev %s nodeid %d screenid %d", dst, src, path, screen->node->nodeid, screen->screenid);
 				}
+			} else if (strcmp(path, "/nemoshell/screen/mode") == 0) {
+				struct nemoscreen *screen;
+				struct nemomode *mode;
+				uint32_t nodeid = nemoitem_one_get_iattr(one, "nodeid", 0);
+				uint32_t screenid = nemoitem_one_get_iattr(one, "screenid", 0);
+
+				screen = nemocompz_get_screen(compz, nodeid, screenid);
+				if (screen != NULL) {
+					wl_list_for_each(mode, &screen->mode_list, link) {
+						nemoenvs_reply(envs, "%s %s dev %s nodeid %d screenid %d width %d height %d", dst, src, path, screen->node->nodeid, screen->screenid, mode->width, mode->height);
+					}
+				}
 			} else if (strcmp(path, "/nemoshell/input") == 0) {
 				struct inputnode *node;
 				struct itemone *tone;
