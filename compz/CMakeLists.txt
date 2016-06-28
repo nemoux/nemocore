@@ -154,6 +154,7 @@ add_library(nemocompz SHARED
 	animation.c
 	viewanimation.c
 	vieweffect.c
+	backend.c
 	plugin.c
 	monitor.c
 	eventqueue.c

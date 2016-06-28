@@ -162,7 +162,7 @@ err1:
 	return -1;
 }
 
-struct nemobackend *drmbackend_create(struct nemocompz *compz, const char *rendernode)
+struct nemobackend *drmbackend_create(struct nemocompz *compz, const char *args)
 {
 	struct drmbackend *drm;
 
@@ -178,8 +178,8 @@ struct nemobackend *drmbackend_create(struct nemocompz *compz, const char *rende
 	drm->compz = compz;
 	drm->udev = udev_ref(compz->udev);
 
-	if (rendernode != NULL) {
-		drmbackend_add_dev(drm, rendernode);
+	if (args != NULL) {
+		drmbackend_add_dev(drm, args);
 	} else {
 		drmbackend_monitor_devs(drm);
 		drmbackend_scan_devs(drm);

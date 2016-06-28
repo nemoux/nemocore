@@ -29,9 +29,6 @@
 #include <viewanimation.h>
 #include <busycursor.h>
 #include <vieweffect.h>
-#include <drmbackend.h>
-#include <fbbackend.h>
-#include <evdevbackend.h>
 #include <tuio.h>
 #include <virtuio.h>
 #include <waylandshell.h>
@@ -45,23 +42,6 @@
 #include <nemolog.h>
 
 #include <nemoenvs.h>
-
-static void nemoenvs_handle_set_nemoshell_backend(struct nemoshell *shell, struct itemone *one)
-{
-	struct nemocompz *compz = shell->compz;
-	const char *name;
-
-	name = nemoitem_one_get_attr(one, "name");
-	if (name != NULL) {
-		if (strcmp(name, "drm") == 0) {
-			drmbackend_create(compz, nemoitem_one_get_attr(one, "rendernode"));
-		} else if (strcmp(name, "fb") == 0) {
-			fbbackend_create(compz, nemoitem_one_get_attr(one, "rendernode"));
-		} else if (strcmp(name, "evdev") == 0) {
-			evdevbackend_create(compz);
-		}
-	}
-}
 
 static void nemoenvs_handle_set_nemoshell_screen(struct nemoshell *shell, struct itemone *one)
 {
@@ -391,9 +371,7 @@ int nemoenvs_dispatch_system_message(struct nemoenvs *envs, const char *src, con
 
 	if (strcmp(dst, "/nemoshell") == 0) {
 		if (strcmp(cmd, "set") == 0) {
-			if (strcmp(path, "/nemoshell/backend") == 0) {
-				nemoenvs_handle_set_nemoshell_backend(shell, one);
-			} else if (strcmp(path, "/nemoshell/screen") == 0) {
+			if (strcmp(path, "/nemoshell/screen") == 0) {
 				nemoenvs_handle_set_nemoshell_screen(shell, one);
 			} else if (strcmp(path, "/nemoshell/input") == 0) {
 				nemoenvs_handle_set_nemoshell_input(shell, one);

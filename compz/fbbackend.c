@@ -13,7 +13,7 @@
 #include <nemomisc.h>
 #include <nemolog.h>
 
-struct nemobackend *fbbackend_create(struct nemocompz *compz, const char *rendernode)
+struct nemobackend *fbbackend_create(struct nemocompz *compz, const char *args)
 {
 	struct fbbackend *fb;
 	struct fbnode *node;
@@ -28,12 +28,12 @@ struct nemobackend *fbbackend_create(struct nemocompz *compz, const char *render
 	fb->compz = compz;
 	fb->udev = udev_ref(compz->udev);
 
-	if (rendernode == NULL)
-		rendernode = "/dev/fb0";
+	if (args == NULL)
+		args = "/dev/fb0";
 
-	node = fb_create_node(compz, rendernode);
+	node = fb_create_node(compz, args);
 	if (node == NULL) {
-		nemolog_error("FRAMEBUFFER", "failed to create framebuffer node %s\n", rendernode);
+		nemolog_error("FRAMEBUFFER", "failed to create framebuffer node %s\n", args);
 		goto err1;
 	}
 
