@@ -293,31 +293,6 @@ void nemocompz_dispatch_frame(struct nemocompz *compz)
 	}
 }
 
-static int nemocompz_dispatch_framerate_timeout(void *data)
-{
-	struct nemocompz *compz = (struct nemocompz *)data;
-	struct nemoseat *seat = compz->seat;
-	struct nemoscreen *screen;
-	struct nemotouch *touch;
-	uint32_t msecs = time_current_msecs();
-
-	nemolog_message("COMPZ", "%fs frametime\n", (double)msecs / 1000.0f);
-
-	wl_list_for_each(screen, &compz->screen_list, link) {
-		nemolog_message("COMPZ", "  [%d:%d] screen %u frames...\n", screen->node->nodeid, screen->screenid, screen->frame_count);
-
-		screen->frame_count = 0;
-	}
-
-	wl_list_for_each(touch, &seat->touch.device_list, link) {
-		nemolog_message("COMPZ", "  [%s] touch %u frames...(%d)\n", touch->node->devnode, touch->frame_count, !wl_list_empty(&touch->touchpoint_list));
-
-		touch->frame_count = 0;
-	}
-
-	wl_event_source_timer_update(compz->framerate_timer, 1000);
-}
-
 void nemocompz_dispatch_idle(struct nemocompz *compz, nemocompz_dispatch_idle_t dispatch, void *data)
 {
 	wl_event_loop_add_idle(compz->loop, dispatch, data);
@@ -328,7 +303,6 @@ struct nemocompz *nemocompz_create(void)
 	struct nemocompz *compz;
 	struct wl_display *display;
 	struct wl_event_loop *loop;
-	char *env;
 
 	compz = (struct nemocompz *)malloc(sizeof(struct nemocompz));
 	if (compz == NULL)
@@ -447,15 +421,6 @@ struct nemocompz *nemocompz_create(void)
 
 	wl_list_init(&compz->frame_list);
 
-	env = getenv("NEMOUX_FRAMERATE_LOG");
-	if (env != NULL && strcmp(env, "ON") == 0) {
-		compz->framerate_timer = wl_event_loop_add_timer(compz->loop, nemocompz_dispatch_framerate_timeout, compz);
-		if (compz->framerate_timer == NULL)
-			goto err1;
-
-		wl_event_source_timer_update(compz->framerate_timer, 1000);
-	}
-
 	return compz;
 
 err1:
@@ -513,9 +478,6 @@ void nemocompz_destroy(struct nemocompz *compz)
 
 	if (compz->frame_timer != NULL)
 		wl_event_source_remove(compz->frame_timer);
-
-	if (compz->framerate_timer != NULL)
-		wl_event_source_remove(compz->framerate_timer);
 
 	nemolog_message("COMPZ", "destroy current session\n");
 
