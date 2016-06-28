@@ -443,10 +443,10 @@ int nemoenvs_dispatch_config_message(struct nemoenvs *envs, const char *src, con
 			if (id != NULL) {
 				tone = nemoitem_search_attr(envs->configs, path, "id", id);
 				if (tone != NULL)
-					nemoitem_one_copy_attr(tone, one);
-				else
-					nemoitem_attach_one(envs->configs,
-							nemoitem_one_clone(one));
+					nemoitem_one_destroy(tone);
+
+				nemoitem_attach_one(envs->configs,
+						nemoitem_one_clone(one));
 			} else {
 				nemoitem_attach_one(envs->configs,
 						nemoitem_one_clone(one));
