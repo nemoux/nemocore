@@ -69,6 +69,11 @@ int nemoinput_set_transform(struct inputnode *node, const char *cmd)
 	return 0;
 }
 
+void nemoinput_set_sampling(struct inputnode *node, uint32_t sampling)
+{
+	node->sampling = sampling;
+}
+
 void nemoinput_transform_to_global(struct inputnode *node, float dx, float dy, float *x, float *y)
 {
 	if (node->transform.enable != 0) {

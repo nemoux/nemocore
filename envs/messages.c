@@ -189,6 +189,8 @@ static void nemoenvs_handle_set_nemoshell_input(struct nemoshell *shell, struct 
 
 				if (config->transform != NULL)
 					nemoinput_set_transform(node, config->transform);
+
+				nemoinput_set_sampling(node, config->sampling);
 			}
 		}
 	}

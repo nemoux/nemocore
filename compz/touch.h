@@ -100,7 +100,6 @@ struct nemotouch {
 	struct inputnode *node;
 
 	uint32_t frame_count;
-	uint32_t sampling;
 
 	struct wl_list link;
 
@@ -114,8 +113,6 @@ extern int nemotouch_bind_nemo(struct wl_client *client, struct wl_resource *sea
 
 extern struct nemotouch *nemotouch_create(struct nemoseat *seat, struct inputnode *node);
 extern void nemotouch_destroy(struct nemotouch *touch);
-
-extern void nemotouch_set_sampling(struct nemotouch *touch, uint32_t sampling);
 
 extern struct touchpoint *nemotouch_get_touchpoint_by_id(struct nemotouch *touch, uint64_t id);
 extern struct touchpoint *nemotouch_get_touchpoint_list_by_id(struct nemotouch *touch, struct wl_list *list, uint64_t id);

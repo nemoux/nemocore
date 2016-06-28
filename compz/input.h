@@ -18,6 +18,8 @@ struct inputnode {
 	struct nemoscreen *screen;
 
 	int32_t x, y, width, height;
+	
+	uint32_t sampling;
 
 	struct {
 		int enable;
@@ -34,6 +36,7 @@ extern void nemoinput_put_screen(struct inputnode *node);
 
 extern void nemoinput_set_geometry(struct inputnode *node, int32_t x, int32_t y, int32_t width, int32_t height);
 extern int nemoinput_set_transform(struct inputnode *node, const char *cmd);
+extern void nemoinput_set_sampling(struct inputnode *node, uint32_t sampling);
 
 extern void nemoinput_transform_to_global(struct inputnode *node, float dx, float dy, float *x, float *y);
 extern void nemoinput_transform_from_global(struct inputnode *node, float x, float y, float *dx, float *dy);

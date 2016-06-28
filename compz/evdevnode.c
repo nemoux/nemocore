@@ -662,8 +662,7 @@ struct evdevnode *evdev_create_node(struct nemocompz *compz, const char *path, i
 				nemoinput_set_transform(&node->base, config->transform);
 		}
 
-		if (node->touch != NULL)
-			nemotouch_set_sampling(node->touch, config->sampling);
+		nemoinput_set_sampling(&node->base, config->sampling);
 	}
 
 	node->source = wl_event_loop_add_fd(compz->loop,

@@ -241,11 +241,6 @@ void nemotouch_destroy(struct nemotouch *touch)
 	free(touch);
 }
 
-void nemotouch_set_sampling(struct nemotouch *touch, uint32_t sampling)
-{
-	touch->sampling = sampling;
-}
-
 void touchpoint_down(struct touchpoint *tp, float x, float y)
 {
 	if (tp->nsamples == 0) {
@@ -341,7 +336,7 @@ static struct touchpoint *nemotouch_create_touchpoint(struct nemotouch *touch, u
 	tp->gid = ++touch->seat->compz->touch_ids;
 	tp->touch = touch;
 
-	tp->nsamples = touch->sampling;
+	tp->nsamples = touch->node->sampling;
 
 	wl_signal_init(&tp->destroy_signal);
 
