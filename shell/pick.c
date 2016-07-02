@@ -76,7 +76,7 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 			bin->reset_move = 0;
 		}
 
-		if (nemoview_has_state(bin->view, NEMOVIEW_RESIZE_STATE) != 0 && (bin->view->geometry.sx != 1.0f || bin->view->geometry.sy != 1.0f)) {
+		if (bin->view->geometry.sx != 1.0f || bin->view->geometry.sy != 1.0f) {
 			struct nemocompz *compz = shell->compz;
 			struct shellscreen *screen = NULL;
 			int32_t width = nemoshell_bin_get_geometry_width(bin) * bin->view->geometry.sx;
@@ -91,7 +91,7 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 				} else {
 					nemoshell_send_bin_close(bin);
 				}
-			} else {
+			} else if (nemoview_has_state(bin->view, NEMOVIEW_RESIZE_STATE) != 0) {
 				bin->resize_edges = WL_SHELL_SURFACE_RESIZE_LEFT | WL_SHELL_SURFACE_RESIZE_TOP;
 
 				if (bin->on_pickscreen != 0) {
@@ -401,7 +401,7 @@ static void pick_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		struct nemoshell *shell = grab->shell;
 		struct touchpoint *tp1 = pick->other->base.base.touchpoint.touchpoint;
 
-		if (nemoview_has_state(actor->view, NEMOVIEW_RESIZE_STATE) != 0 && (actor->view->geometry.sx != 1.0f || actor->view->geometry.sy != 1.0f)) {
+		if (actor->view->geometry.sx != 1.0f || actor->view->geometry.sy != 1.0f) {
 			struct nemocompz *compz = actor->compz;
 			struct nemoview *view = actor->view;
 			int32_t width = actor->view->content->width * actor->view->geometry.sx;
@@ -409,7 +409,7 @@ static void pick_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 
 			if (actor->min_width >= width * NEMOSHELL_PICK_CLOSE_EPSILON || actor->min_height >= height * NEMOSHELL_PICK_CLOSE_EPSILON) {
 				nemoactor_dispatch_destroy(actor);
-			} else {
+			} else if (nemoview_has_state(actor->view, NEMOVIEW_RESIZE_STATE) != 0) {
 				int32_t sx, sy;
 				float fromx, fromy, tox, toy;
 
