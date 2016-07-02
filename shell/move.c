@@ -226,7 +226,14 @@ static void move_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		nemoview_transform_notify(bin->view);
 
 	if (tp->focus != NULL) {
+		float sx, sy;
+
+		nemoview_transform_from_global(tp->focus, tp->x, tp->y, &sx, &sy);
+
+		nemocontent_touch_motion(tp, tp->focus->content, time, touchid, sx, sy, tp->x, tp->y);
 		nemocontent_touch_up(tp, tp->focus->content, time, touchid);
+
+		touchpoint_set_focus(tp, NULL);
 	}
 }
 
@@ -468,7 +475,14 @@ static void move_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		nemoview_transform_notify(actor->view);
 
 	if (tp->focus != NULL) {
+		float sx, sy;
+
+		nemoview_transform_from_global(tp->focus, tp->x, tp->y, &sx, &sy);
+
+		nemocontent_touch_motion(tp, tp->focus->content, time, touchid, sx, sy, tp->x, tp->y);
 		nemocontent_touch_up(tp, tp->focus->content, time, touchid);
+
+		touchpoint_set_focus(tp, NULL);
 	}
 }
 
@@ -482,22 +496,13 @@ static void move_actorgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 
 	touchpoint_motion(tp, x, y);
 
-	if (grab->actor == NULL)
-		return;
+	if (actor != NULL) {
+		cx = x + move->dx;
+		cy = y + move->dy;
 
-	if (tp->focus != NULL) {
-		float sx, sy;
-
-		nemoview_transform_from_global(tp->focus, x, y, &sx, &sy);
-
-		nemocontent_touch_motion(tp, tp->focus->content, time, touchid, sx, sy, x, y);
+		nemoview_set_position(actor->view, cx, cy);
+		nemoview_schedule_repaint(actor->view);
 	}
-
-	cx = x + move->dx;
-	cy = y + move->dy;
-
-	nemoview_set_position(actor->view, cx, cy);
-	nemoview_schedule_repaint(actor->view);
 }
 
 static void move_actorgrab_touchpoint_frame(struct touchpoint_grab *base, uint32_t frameid)

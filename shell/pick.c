@@ -137,6 +137,11 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 	free(pick);
 
 	if (tp0->focus != NULL) {
+		float sx, sy;
+
+		nemoview_transform_from_global(tp0->focus, tp0->x, tp0->y, &sx, &sy);
+
+		nemocontent_touch_motion(tp0, tp0->focus->content, time, tp0->gid, sx, sy, tp0->x, tp0->y);
 		nemocontent_touch_up(tp0, tp0->focus->content, time, tp0->gid);
 
 		touchpoint_set_focus(tp0, NULL);
@@ -435,8 +440,16 @@ static void pick_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 	if (actor != NULL)
 		nemoview_transform_notify(actor->view);
 
-	if (tp0->focus != NULL)
-		nemocontent_touch_up(tp0, tp0->focus->content, time, touchid);
+	if (tp0->focus != NULL) {
+		float sx, sy;
+
+		nemoview_transform_from_global(tp0->focus, tp0->x, tp0->y, &sx, &sy);
+
+		nemocontent_touch_motion(tp0, tp0->focus->content, time, tp0->gid, sx, sy, tp0->x, tp0->y);
+		nemocontent_touch_up(tp0, tp0->focus->content, time, tp0->gid);
+
+		touchpoint_set_focus(tp0, NULL);
+	}
 }
 
 static void pick_actorgrab_touchpoint_motion(struct touchpoint_grab *base, uint32_t time, uint64_t touchid, float x, float y)
@@ -444,14 +457,6 @@ static void pick_actorgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 	struct touchpoint *tp = base->touchpoint;
 
 	touchpoint_motion(tp, x, y);
-
-	if (tp->focus != NULL) {
-		float sx, sy;
-
-		nemoview_transform_from_global(tp->focus, x, y, &sx, &sy);
-
-		nemocontent_touch_motion(tp, tp->focus->content, time, touchid, sx, sy, x, y);
-	}
 }
 
 static void pick_actorgrab_touchpoint_frame(struct touchpoint_grab *base, uint32_t frameid)
