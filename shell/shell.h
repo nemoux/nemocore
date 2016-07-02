@@ -77,27 +77,12 @@ struct nemoshell {
 	struct wl_listener keypad_focus_listener;
 	struct wl_listener touch_focus_listener;
 
-	struct wl_listener show_input_panel_listener;
-	struct wl_listener hide_input_panel_listener;
-	struct wl_listener update_input_panel_listener;
-	int showing_input_panels;
-
 	struct wl_listener child_signal_listener;
 	struct wl_listener pointer_sprite_listener;
 
 	struct wl_list fullscreen_list;
 
 	struct wl_list clientstate_list;
-
-	struct {
-		struct nemocanvas *canvas;
-		pixman_box32_t cursor;
-	} textinput;
-
-	struct {
-		struct wl_resource *binding;
-		struct wl_list bin_list;
-	} inputpanel;
 
 	struct {
 		uint32_t samples;

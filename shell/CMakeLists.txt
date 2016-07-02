@@ -42,7 +42,6 @@ add_library(nemoshell SHARED
 	move.c
 	resize.c
 	pick.c
-	inputpanel.c
 	waylandshell.c
 	xdgshell.c
 	nemoshell.c

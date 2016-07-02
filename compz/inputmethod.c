@@ -10,7 +10,6 @@
 #include <wayland-input-method-server-protocol.h>
 
 #include <inputmethod.h>
-#include <textbackend.h>
 #include <textinput.h>
 #include <compz.h>
 #include <canvas.h>
@@ -98,143 +97,24 @@ static void input_method_context_keysym(struct wl_client *client, struct wl_reso
 	}
 }
 
-static void input_method_context_unbind_keyboard(struct wl_resource *resource)
-{
-	struct inputcontext *context = (struct inputcontext *)wl_resource_get_user_data(resource);
-
-	inputmethod_end_keyboard_grab(context);
-
-	context->keyboard = NULL;
-}
-
-static void input_method_context_grab_key(struct nemokeyboard_grab *grab, uint32_t time, uint32_t key, uint32_t state)
-{
-	struct nemokeyboard *keyboard = grab->keyboard;
-	struct wl_display *display;
-	uint32_t serial;
-
-	if (keyboard->inputmethod.resource == NULL)
-		return;
-
-	display = wl_client_get_display(wl_resource_get_client(keyboard->inputmethod.resource));
-	serial = wl_display_next_serial(display);
-	wl_keyboard_send_key(keyboard->inputmethod.resource, serial, time, key, state);
-}
-
-static void input_method_context_grab_modifiers(struct nemokeyboard_grab *grab, uint32_t mods_depressed, uint32_t mods_latched, uint32_t mods_locked, uint32_t group)
-{
-	struct nemokeyboard *keyboard = grab->keyboard;
-	struct wl_display *display;
-	uint32_t serial;
-
-	if (keyboard->inputmethod.resource == NULL)
-		return;
-
-	display = wl_client_get_display(wl_resource_get_client(keyboard->inputmethod.resource));
-	serial = wl_display_next_serial(display);
-	wl_keyboard_send_modifiers(keyboard->inputmethod.resource, serial, mods_depressed, mods_latched, mods_locked, group);
-}
-
-static void input_method_context_grab_cancel(struct nemokeyboard_grab *grab)
-{
-	nemokeyboard_end_grab(grab->keyboard);
-}
-
-static const struct nemokeyboard_grab_interface input_method_context_grab_interface = {
-	input_method_context_grab_key,
-	input_method_context_grab_modifiers,
-	input_method_context_grab_cancel,
-};
-
-static void input_method_context_grab_keyboard(struct wl_client *client, struct wl_resource *context_resource, uint32_t id)
-{
-	struct inputcontext *context = (struct inputcontext *)wl_resource_get_user_data(context_resource);
-	struct wl_resource *resource;
-	struct nemoseat *seat = context->inputmethod->seat;
-	struct nemokeyboard *keyboard;
-
-	keyboard = nemoseat_get_first_keyboard(seat);
-	if (keyboard == NULL) {
-		wl_resource_post_error(context_resource,
-				WL_DISPLAY_ERROR_INVALID_OBJECT,
-				"failed to find keyboard");
-		return;
-	}
-
-	resource = wl_resource_create(client, &wl_keyboard_interface, 1, id);
-	if (resource == NULL) {
-		wl_client_post_no_memory(client);
-		return;
-	}
-
-	wl_resource_set_implementation(resource, NULL, context, input_method_context_unbind_keyboard);
-
-	context->keyboard = resource;
-
-	wl_keyboard_send_keymap(resource, WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1, keyboard->xkb->xkbinfo->keymap_fd, keyboard->xkb->xkbinfo->keymap_size);
-
-	if (keyboard->grab != &keyboard->default_grab) {
-		nemokeyboard_end_grab(keyboard);
-	}
-
-	keyboard->inputmethod.grab.interface = &input_method_context_grab_interface;
-	nemokeyboard_start_grab(keyboard, &keyboard->inputmethod.grab);
-
-	keyboard->inputmethod.resource = resource;
-}
-
 static void input_method_context_key(struct wl_client *client, struct wl_resource *resource, uint32_t serial, uint32_t time, uint32_t key, uint32_t state)
 {
 	struct inputcontext *context = (struct inputcontext *)wl_resource_get_user_data(resource);
-	struct nemoseat *seat = context->inputmethod->seat;
-	struct nemokeyboard *keyboard;
-	struct nemokeyboard_grab *grab = &keyboard->default_grab;
-
-	keyboard = nemoseat_get_first_keyboard(seat);
-	if (keyboard == NULL) {
-		wl_resource_post_error(resource,
-				WL_DISPLAY_ERROR_INVALID_OBJECT,
-				"failed to find keyboard");
-		return;
-	}
-
-	grab->interface->key(grab, time, key, state);
 }
 
 static void input_method_context_modifiers(struct wl_client *client, struct wl_resource *resource, uint32_t serial, uint32_t mods_depressed, uint32_t mods_latched, uint32_t mods_locked, uint32_t group)
 {
 	struct inputcontext *context = (struct inputcontext *)wl_resource_get_user_data(resource);
-	struct nemoseat *seat = context->inputmethod->seat;
-	struct nemokeyboard *keyboard;
-	struct nemokeyboard_grab *grab = &keyboard->default_grab;
-
-	keyboard = nemoseat_get_first_keyboard(seat);
-	if (keyboard == NULL) {
-		wl_resource_post_error(resource,
-				WL_DISPLAY_ERROR_INVALID_OBJECT,
-				"failed to find keyboard");
-		return;
-	}
-
-	grab->interface->modifiers(grab, mods_depressed, mods_latched, mods_locked, group);
 }
 
 static void input_method_context_language(struct wl_client *client, struct wl_resource *resource, uint32_t serial, const char *language)
 {
 	struct inputcontext *context = (struct inputcontext *)wl_resource_get_user_data(resource);
-
-	if (context->model) {
-		wl_text_input_send_language(context->model->resource, serial, language);
-	}
 }
 
 static void input_method_context_text_direction(struct wl_client *client, struct wl_resource *resource, uint32_t serial, uint32_t direction)
 {
 	struct inputcontext *context = (struct inputcontext *)wl_resource_get_user_data(resource);
-
-	if (context->model) {
-		wl_text_input_send_text_direction(context->model->resource, serial, direction);
-	}
 }
 
 static const struct wl_input_method_context_interface input_method_context_implementation = {
@@ -293,136 +173,4 @@ void inputmethod_create_context(struct inputmethod *inputmethod, struct textinpu
 	inputmethod->context = context;
 
 	wl_input_method_send_activate(inputmethod->binding, context->resource);
-}
-
-static void inputmethod_handle_keyboard_focus(struct wl_listener *listener, void *data)
-{
-	struct inputmethod *inputmethod = (struct inputmethod *)container_of(listener, struct inputmethod, keyboard_focus_listener);
-	struct nemokeyboard *keyboard = (struct nemokeyboard *)data;
-	struct nemoview *focus = keyboard->focus;
-
-	if (inputmethod->model == NULL)
-		return;
-
-	if (focus == NULL || focus->canvas == NULL)
-		return;
-
-	if (inputmethod->model->canvas != focus->canvas) {
-		textinput_deactivate_input_method(inputmethod->model, inputmethod);
-	}
-}
-
-static void inputmethod_unbind_input_method(struct wl_resource *resource)
-{
-	struct inputmethod *inputmethod = (struct inputmethod *)wl_resource_get_user_data(resource);
-	struct textbackend *textbackend = inputmethod->textbackend;
-
-	inputmethod->binding = NULL;
-	inputmethod->context = NULL;
-
-	textbackend->inputmethod.binding = NULL;
-}
-
-static void inputmethod_bind_input_method(struct wl_client *client, void *data, uint32_t version, uint32_t id)
-{
-	struct inputmethod *inputmethod = (struct inputmethod *)data;
-	struct textbackend *textbackend = inputmethod->textbackend;
-	struct wl_resource *resource;
-
-	resource = wl_resource_create(client, &wl_input_method_interface, 1, id);
-	if (resource == NULL) {
-		wl_client_post_no_memory(client);
-		return;
-	}
-
-	if (inputmethod->binding != NULL) {
-		wl_resource_post_error(resource,
-				WL_DISPLAY_ERROR_INVALID_OBJECT,
-				"input method is already bounded");
-		wl_resource_destroy(resource);
-		return;
-	}
-
-	if (textbackend->inputmethod.client != client) {
-		wl_resource_post_error(resource,
-				WL_DISPLAY_ERROR_INVALID_OBJECT,
-				"input method binding is denied");
-		wl_resource_destroy(resource);
-		return;
-	}
-
-	wl_resource_set_implementation(resource, NULL, inputmethod, inputmethod_unbind_input_method);
-
-	inputmethod->binding = resource;
-
-	textbackend->inputmethod.binding = resource;
-}
-
-static void inputmethod_handle_seat_destroy(struct wl_listener *listener, void *data)
-{
-	struct inputmethod *inputmethod = (struct inputmethod *)container_of(listener, struct inputmethod, destroy_listener);
-
-	wl_global_destroy(inputmethod->global);
-	wl_list_remove(&inputmethod->destroy_listener.link);
-
-	free(inputmethod);
-}
-
-struct inputmethod *inputmethod_create(struct nemoseat *seat, struct textbackend *textbackend)
-{
-	struct inputmethod *inputmethod;
-
-	inputmethod = (struct inputmethod *)malloc(sizeof(struct inputmethod));
-	if (inputmethod == NULL)
-		return NULL;
-	memset(inputmethod, 0, sizeof(struct inputmethod));
-
-	inputmethod->seat = seat;
-	inputmethod->model = NULL;
-	inputmethod->context = NULL;
-	inputmethod->textbackend = textbackend;
-
-	inputmethod->global = wl_global_create(seat->compz->display, &wl_input_method_interface, 1, inputmethod, inputmethod_bind_input_method);
-	if (inputmethod->global == NULL)
-		goto err1;
-
-	inputmethod->destroy_listener.notify = inputmethod_handle_seat_destroy;
-	wl_signal_add(&seat->destroy_signal, &inputmethod->destroy_listener);
-
-	inputmethod->keyboard_focus_listener.notify = inputmethod_handle_keyboard_focus;
-	wl_signal_add(&seat->keyboard.focus_signal, &inputmethod->keyboard_focus_listener);
-
-	seat->inputmethod = inputmethod;
-
-	return inputmethod;
-
-err1:
-	free(inputmethod);
-
-	return NULL;
-}
-
-void inputmethod_prepare_keyboard_grab(struct nemokeyboard *keyboard)
-{
-	keyboard->inputmethod.grab.interface = &input_method_context_grab_interface;
-}
-
-void inputmethod_end_keyboard_grab(struct inputcontext *context)
-{
-	struct nemokeyboard_grab *grab;
-	struct nemokeyboard *keyboard;
-
-	keyboard = nemoseat_get_first_keyboard(context->inputmethod->seat);
-	if (keyboard == NULL)
-		return;
-
-	grab = &keyboard->inputmethod.grab;
-
-	if (grab->keyboard == NULL)
-		return;
-
-	if (grab->keyboard->grab == grab)
-		nemokeyboard_end_grab(keyboard);
-
-	keyboard->inputmethod.resource = NULL;
 }

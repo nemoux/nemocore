@@ -51,12 +51,7 @@ struct nemokeyboard {
 	uint32_t grab_key;
 	uint32_t grab_serial;
 	uint32_t grab_time;
-
-	struct {
-		struct nemokeyboard_grab grab;
-		struct wl_resource *resource;
-	} inputmethod;
-
+	
 	void *binding;
 };
 

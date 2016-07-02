@@ -361,10 +361,6 @@ struct nemocompz *nemocompz_create(void)
 	wl_signal_init(&compz->session_signal);
 	compz->session_active = 1;
 
-	wl_signal_init(&compz->show_input_panel_signal);
-	wl_signal_init(&compz->hide_input_panel_signal);
-	wl_signal_init(&compz->update_input_panel_signal);
-
 	wl_signal_init(&compz->create_surface_signal);
 	wl_signal_init(&compz->activate_signal);
 	wl_signal_init(&compz->transform_signal);

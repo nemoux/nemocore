@@ -8,7 +8,6 @@ NEMO_BEGIN_EXTERN_C
 #endif
 
 struct nemoview;
-struct inputmethod;
 
 struct nemoseat {
 	struct nemocompz *compz;
@@ -69,8 +68,6 @@ struct nemoseat {
 
 		struct nemoview *focus;
 	} selection;
-
-	struct inputmethod *inputmethod;
 };
 
 extern struct nemoseat *nemoseat_create(struct nemocompz *compz);

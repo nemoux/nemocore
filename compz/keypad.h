@@ -49,11 +49,6 @@ struct nemokeypad {
 	uint32_t grab_key;
 	uint32_t grab_serial;
 	uint32_t grab_time;
-
-	struct {
-		struct nemokeypad_grab grab;
-		struct wl_resource *resource;
-	} inputmethod;
 };
 
 extern struct nemokeypad *nemokeypad_create(struct nemoseat *seat);

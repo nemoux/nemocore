@@ -113,10 +113,6 @@ struct nemocompz {
 	struct wl_signal session_signal;
 	int session_active;
 
-	struct wl_signal show_input_panel_signal;
-	struct wl_signal hide_input_panel_signal;
-	struct wl_signal update_input_panel_signal;
-
 	struct wl_signal create_surface_signal;
 	struct wl_signal activate_signal;
 	struct wl_signal transform_signal;
