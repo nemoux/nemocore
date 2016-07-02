@@ -8,14 +8,12 @@ NEMO_BEGIN_EXTERN_C
 #endif
 
 struct nemoenvs;
+struct clientstate;
 
 struct nemoxapp {
 	char *cmds;
 
-	double x, y;
-	double r;
-
-	int has_state;
+	struct clientstate *state;
 
 	struct wl_list link;
 };
@@ -30,7 +28,7 @@ struct nemoxclient {
 
 extern int nemoenvs_launch_xserver0(struct nemoenvs *envs);
 
-extern int nemoenvs_launch_xapp(struct nemoenvs *envs, const char *cmds, double x, double y, double r, int has_state);
+extern int nemoenvs_launch_xapp(struct nemoenvs *envs, const char *cmds, struct clientstate *state);
 
 extern int nemoenvs_terminate_xclient(struct nemoenvs *envs, pid_t pid);
 extern int nemoenvs_terminate_xclients(struct nemoenvs *envs);

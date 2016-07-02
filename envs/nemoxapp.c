@@ -51,7 +51,7 @@ static struct nemoxserver *nemoenvs_search_xserver(struct nemoenvs *envs)
 	return NULL;
 }
 
-static int nemoenvs_execute_xapp(struct nemoenvs *envs, struct nemoxserver *xserver, const char *cmds, double x, double y, double r, int has_state);
+static int nemoenvs_execute_xapp(struct nemoenvs *envs, struct nemoxserver *xserver, const char *cmds, struct clientstate *state);
 static int nemoenvs_launch_xserver(struct nemoenvs *envs, uint32_t xdisplay);
 
 static void nemoenvs_handle_xserver_sigusr1(struct wl_listener *listener, void *data)
@@ -70,7 +70,7 @@ static void nemoenvs_handle_xserver_sigusr1(struct wl_listener *listener, void *
 		if (xserver == NULL)
 			break;
 
-		nemoenvs_execute_xapp(envs, xserver, xapp->cmds, xapp->x, xapp->y, xapp->r, xapp->has_state);
+		nemoenvs_execute_xapp(envs, xserver, xapp->cmds, xapp->state);
 
 		wl_list_remove(&xapp->link);
 
@@ -105,7 +105,7 @@ static int nemoenvs_launch_xserver(struct nemoenvs *envs, uint32_t xdisplay)
 	return 0;
 }
 
-static int nemoenvs_execute_xapp(struct nemoenvs *envs, struct nemoxserver *xserver, const char *cmds, double x, double y, double r, int has_state)
+static int nemoenvs_execute_xapp(struct nemoenvs *envs, struct nemoxserver *xserver, const char *cmds, struct clientstate *state)
 {
 	struct nemotoken *args;
 	struct nemotoken *envp;
@@ -129,17 +129,8 @@ static int nemoenvs_execute_xapp(struct nemoenvs *envs, struct nemoxserver *xser
 
 		wl_list_insert(&envs->xclient_list, &xclient->link);
 
-		if (has_state != 0) {
-			struct clientstate *state;
-
-			state = nemoshell_create_client_state(envs->shell, pid);
-			if (state != NULL) {
-				clientstate_set_position(state, x, y);
-				clientstate_set_anchor(state, 0.5f, 0.5f);
-				clientstate_set_rotate(state, r);
-				clientstate_set_bin_flags(state, NEMOSHELL_SURFACE_ALL_FLAGS);
-			}
-		}
+		if (state != NULL)
+			clientstate_set_pid(state, pid);
 
 		xserver->state = NEMOXSERVER_USED_STATE;
 	}
@@ -150,21 +141,18 @@ static int nemoenvs_execute_xapp(struct nemoenvs *envs, struct nemoxserver *xser
 	return 0;
 }
 
-int nemoenvs_launch_xapp(struct nemoenvs *envs, const char *cmds, double x, double y, double r, int has_state)
+int nemoenvs_launch_xapp(struct nemoenvs *envs, const char *cmds, struct clientstate *state)
 {
 	struct nemoxserver *xserver;
 	struct nemoxapp *xapp;
 
 	xserver = nemoenvs_search_xserver(envs);
 	if (xserver != NULL)
-		return nemoenvs_execute_xapp(envs, xserver, cmds, x, y, r, has_state);
+		return nemoenvs_execute_xapp(envs, xserver, cmds, state);
 
 	xapp = (struct nemoxapp *)malloc(sizeof(struct nemoxapp));
 	xapp->cmds = strdup(cmds);
-	xapp->x = x;
-	xapp->y = y;
-	xapp->r = r;
-	xapp->has_state = has_state;
+	xapp->state = state;
 
 	wl_list_insert(&envs->xapp_list, &xapp->link);
 
