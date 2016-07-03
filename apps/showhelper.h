@@ -89,6 +89,7 @@ extern int nemoshow_view_pick_distant(struct nemoshow *show, void *event, uint32
 extern void nemoshow_view_miss(struct nemoshow *show);
 extern void nemoshow_view_focus(struct nemoshow *show, uint32_t id);
 extern void nemoshow_view_focus_on(struct nemoshow *show, double x, double y);
+extern void nemoshow_view_execute(struct nemoshow *show, const char *type, const char *name, const char *fmt, ...);
 extern void nemoshow_view_resize(struct nemoshow *show, int32_t width, int32_t height);
 extern void nemoshow_view_redraw(struct nemoshow *show);
 

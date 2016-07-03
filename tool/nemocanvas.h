@@ -106,7 +106,7 @@ extern void nemocanvas_set_layer(struct nemocanvas *canvas, uint32_t type);
 extern void nemocanvas_set_parent(struct nemocanvas *canvas, struct nemocanvas *parent);
 extern void nemocanvas_set_region(struct nemocanvas *canvas, uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 extern void nemocanvas_put_region(struct nemocanvas *canvas);
-extern void nemocanvas_set_scope(struct nemocanvas *canvas, const char *cmd);
+extern void nemocanvas_set_scope(struct nemocanvas *canvas, const char *cmds);
 extern void nemocanvas_put_scope(struct nemocanvas *canvas);
 extern void nemocanvas_set_fullscreen_type(struct nemocanvas *canvas, uint32_t type);
 extern void nemocanvas_put_fullscreen_type(struct nemocanvas *canvas, uint32_t type);
@@ -117,10 +117,8 @@ extern void nemocanvas_pick(struct nemocanvas *canvas, uint32_t serial0, uint32_
 extern void nemocanvas_miss(struct nemocanvas *canvas);
 extern void nemocanvas_focus(struct nemocanvas *canvas, uint32_t id);
 extern void nemocanvas_focus_on(struct nemocanvas *canvas, double x, double y);
-extern void nemocanvas_execute_command(struct nemocanvas *canvas, const char *name, const char *cmds, uint32_t coords, double x, double y, double r);
-extern void nemocanvas_execute_action(struct nemocanvas *canvas, const char *id, uint32_t coords, double x, double y, double r);
-extern void nemocanvas_execute_content(struct nemocanvas *canvas, uint32_t type, const char *path, uint32_t coords, double x, double y, double r);
-extern void nemocanvas_commit_serial(struct nemocanvas *canvas, uint32_t serial);
+extern void nemocanvas_execute(struct nemocanvas *canvas, const char *type, const char *name, const char *cmds);
+extern void nemocanvas_update(struct nemocanvas *canvas, uint32_t serial);
 
 extern void nemocanvas_set_nemosurface(struct nemocanvas *canvas, uint32_t type);
 

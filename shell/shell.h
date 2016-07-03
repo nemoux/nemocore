@@ -49,9 +49,7 @@ typedef enum {
 
 struct shellbin;
 
-typedef int (*nemoshell_execute_command_t)(void *data, struct shellbin *bin, const char *name, const char *cmds, double x, double y, double r);
-typedef int (*nemoshell_execute_action_t)(void *data, struct shellbin *bin, const char *id, double x, double y, double r);
-typedef int (*nemoshell_execute_content_t)(void *data, struct shellbin *bin, uint32_t type, const char *path, double x, double y, double r);
+typedef int (*nemoshell_execute_command_t)(void *data, struct shellbin *bin, const char *type, const char *name, const char *cmds);
 
 typedef void (*nemoshell_transform_bin_t)(void *data, struct shellbin *bin);
 
@@ -103,8 +101,6 @@ struct nemoshell {
 	} bin;
 
 	nemoshell_execute_command_t execute_command;
-	nemoshell_execute_action_t execute_action;
-	nemoshell_execute_content_t execute_content;
 	nemoshell_transform_bin_t transform_bin;
 	nemoshell_destroy_client_t destroy_client;
 	nemoshell_update_pointer_t update_pointer;
@@ -333,16 +329,6 @@ extern void nemoshell_put_maximized_bin(struct nemoshell *shell, struct shellbin
 static inline void nemoshell_set_execute_command(struct nemoshell *shell, nemoshell_execute_command_t execute)
 {
 	shell->execute_command = execute;
-}
-
-static inline void nemoshell_set_execute_action(struct nemoshell *shell, nemoshell_execute_action_t execute)
-{
-	shell->execute_action = execute;
-}
-
-static inline void nemoshell_set_execute_content(struct nemoshell *shell, nemoshell_execute_content_t execute)
-{
-	shell->execute_content = execute;
 }
 
 static inline void nemoshell_set_transform_bin(struct nemoshell *shell, nemoshell_transform_bin_t dispatch)

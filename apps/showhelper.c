@@ -509,13 +509,13 @@ void nemoshow_view_set_scope(struct nemoshow *show, const char *fmt, ...)
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemocanvas *canvas = scon->canvas;
 	va_list vargs;
-	char cmd[512];
+	char cmds[512];
 
 	va_start(vargs, fmt);
-	vsnprintf(cmd, sizeof(cmd), fmt, vargs);
+	vsnprintf(cmds, sizeof(cmds), fmt, vargs);
 	va_end(vargs);
 
-	nemocanvas_set_scope(canvas, cmd);
+	nemocanvas_set_scope(canvas, cmds);
 }
 
 void nemoshow_view_put_scope(struct nemoshow *show)
@@ -538,7 +538,7 @@ void nemoshow_view_set_type(struct nemoshow *show, const char *type)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemocanvas *canvas = scon->canvas;
-	
+
 	nemocanvas_set_type(canvas, type);
 }
 
@@ -619,6 +619,20 @@ void nemoshow_view_focus_on(struct nemoshow *show, double x, double y)
 	struct nemocanvas *canvas = scon->canvas;
 
 	nemocanvas_focus_on(canvas, x, y);
+}
+
+void nemoshow_view_execute(struct nemoshow *show, const char *type, const char *name, const char *fmt, ...)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemocanvas *canvas = scon->canvas;
+	va_list vargs;
+	char cmds[512];
+
+	va_start(vargs, fmt);
+	vsnprintf(cmds, sizeof(cmds), fmt, vargs);
+	va_end(vargs);
+
+	nemocanvas_execute(canvas, type, name, cmds);
 }
 
 void nemoshow_view_resize(struct nemoshow *show, int32_t width, int32_t height)

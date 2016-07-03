@@ -240,11 +240,11 @@ static void nemo_surface_put_region(struct wl_client *client, struct wl_resource
 	nemoview_put_region(bin->view);
 }
 
-static void nemo_surface_set_scope(struct wl_client *client, struct wl_resource *resource, const char *cmd)
+static void nemo_surface_set_scope(struct wl_client *client, struct wl_resource *resource, const char *cmds)
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 
-	nemoview_set_scope(bin->view, cmd);
+	nemoview_set_scope(bin->view, cmds);
 }
 
 static void nemo_surface_put_scope(struct wl_client *client, struct wl_resource *resource)
@@ -376,87 +376,16 @@ static void nemo_surface_focus_on(struct wl_client *client, struct wl_resource *
 		shell->transform_bin(shell->userdata, bin);
 }
 
-static void nemo_surface_execute_command(struct wl_client *client, struct wl_resource *resource, const char *name, const char *cmds, uint32_t coords, wl_fixed_t x, wl_fixed_t y, wl_fixed_t r)
+static void nemo_surface_execute(struct wl_client *client, struct wl_resource *resource, const char *type, const char *name, const char *cmds)
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 	struct nemoshell *shell = bin->shell;
 
-	if (shell->execute_command != NULL) {
-		float tx, ty;
-		float tr;
-
-		if (coords == NEMO_SURFACE_COORDINATE_TYPE_LOCAL) {
-			nemoview_transform_to_global(bin->view,
-					wl_fixed_to_double(x),
-					wl_fixed_to_double(y),
-					&tx, &ty);
-
-			tr = wl_fixed_to_double(r) * M_PI / 180.0f + bin->view->geometry.r;
-		} else {
-			tx = wl_fixed_to_double(x);
-			ty = wl_fixed_to_double(y);
-			tr = wl_fixed_to_double(r) * M_PI / 180.0f;
-		}
-
-		shell->execute_command(shell->userdata, bin, name, cmds, tx, ty, tr);
-	}
+	if (shell->execute_command != NULL)
+		shell->execute_command(shell->userdata, bin, type, name, cmds);
 }
 
-static void nemo_surface_execute_action(struct wl_client *client, struct wl_resource *resource, const char *id, uint32_t coords, wl_fixed_t x, wl_fixed_t y, wl_fixed_t r)
-{
-	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
-	struct nemoshell *shell = bin->shell;
-
-	if (shell->execute_action != NULL) {
-		float tx, ty;
-		float tr;
-
-		if (coords == NEMO_SURFACE_COORDINATE_TYPE_LOCAL) {
-			nemoview_transform_to_global(bin->view,
-					wl_fixed_to_double(x),
-					wl_fixed_to_double(y),
-					&tx, &ty);
-
-			tr = wl_fixed_to_double(r) * M_PI / 180.0f + bin->view->geometry.r;
-		} else {
-			tx = wl_fixed_to_double(x);
-			ty = wl_fixed_to_double(y);
-			tr = wl_fixed_to_double(r) * M_PI / 180.0f;
-		}
-
-		shell->execute_action(shell->userdata, bin, id, tx, ty, tr);
-	}
-}
-
-static void nemo_surface_execute_content(struct wl_client *client, struct wl_resource *resource, uint32_t type, const char *path, uint32_t coords, wl_fixed_t x, wl_fixed_t y, wl_fixed_t r)
-{
-	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
-	struct nemoshell *shell = bin->shell;
-
-	if (shell->execute_content != NULL) {
-		float tx, ty;
-		float tr;
-
-		if (coords == NEMO_SURFACE_COORDINATE_TYPE_LOCAL) {
-			nemoview_transform_to_global(bin->view,
-					wl_fixed_to_double(x),
-					wl_fixed_to_double(y),
-					&tx, &ty);
-
-			tr = wl_fixed_to_double(r) * M_PI / 180.0f + bin->view->geometry.r;
-		} else {
-			tx = wl_fixed_to_double(x);
-			ty = wl_fixed_to_double(y);
-			tr = wl_fixed_to_double(r) * M_PI / 180.0f;
-		}
-
-		shell->execute_content(shell->userdata, bin,
-				type, path,
-				tx, ty, tr);
-	}
-}
-
-static void nemo_surface_commit_serial(struct wl_client *client, struct wl_resource *resource, uint32_t serial)
+static void nemo_surface_update(struct wl_client *client, struct wl_resource *resource, uint32_t serial)
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 
@@ -493,10 +422,8 @@ static const struct nemo_surface_interface nemo_surface_implementation = {
 	nemo_surface_miss,
 	nemo_surface_focus,
 	nemo_surface_focus_on,
-	nemo_surface_execute_command,
-	nemo_surface_execute_action,
-	nemo_surface_execute_content,
-	nemo_surface_commit_serial
+	nemo_surface_execute,
+	nemo_surface_update
 };
 
 static void nemoshell_unbind_nemo_surface(struct wl_resource *resource)

@@ -31,7 +31,7 @@ static void nemo_surface_handle_configure(void *data, struct nemo_surface *surfa
 {
 	struct nemocanvas *canvas = (struct nemocanvas *)data;
 
-	nemocanvas_commit_serial(canvas, serial);
+	nemocanvas_update(canvas, serial);
 
 	if (canvas->dispatch_resize != NULL)
 		canvas->dispatch_resize(canvas, width, height);
@@ -509,9 +509,9 @@ void nemocanvas_put_region(struct nemocanvas *canvas)
 	nemo_surface_put_region(canvas->nemo_surface);
 }
 
-void nemocanvas_set_scope(struct nemocanvas *canvas, const char *cmd)
+void nemocanvas_set_scope(struct nemocanvas *canvas, const char *cmds)
 {
-	nemo_surface_set_scope(canvas->nemo_surface, cmd);
+	nemo_surface_set_scope(canvas->nemo_surface, cmds);
 }
 
 void nemocanvas_put_scope(struct nemocanvas *canvas)
@@ -566,36 +566,14 @@ void nemocanvas_focus_on(struct nemocanvas *canvas, double x, double y)
 			wl_fixed_from_double(y));
 }
 
-void nemocanvas_execute_command(struct nemocanvas *canvas, const char *name, const char *cmds, uint32_t coords, double x, double y, double r)
+void nemocanvas_execute(struct nemocanvas *canvas, const char *type, const char *name, const char *cmds)
 {
-	nemo_surface_execute_command(canvas->nemo_surface,
-			name, cmds, coords,
-			wl_fixed_from_double(x),
-			wl_fixed_from_double(y),
-			wl_fixed_from_double(r));
+	nemo_surface_execute(canvas->nemo_surface, type, name, cmds);
 }
 
-void nemocanvas_execute_action(struct nemocanvas *canvas, const char *id, uint32_t coords, double x, double y, double r)
+void nemocanvas_update(struct nemocanvas *canvas, uint32_t serial)
 {
-	nemo_surface_execute_action(canvas->nemo_surface,
-			id, coords,
-			wl_fixed_from_double(x),
-			wl_fixed_from_double(y),
-			wl_fixed_from_double(r));
-}
-
-void nemocanvas_execute_content(struct nemocanvas *canvas, uint32_t type, const char *path, uint32_t coords, double x, double y, double r)
-{
-	nemo_surface_execute_content(canvas->nemo_surface,
-			type, path, coords,
-			wl_fixed_from_double(x),
-			wl_fixed_from_double(y),
-			wl_fixed_from_double(r));
-}
-
-void nemocanvas_commit_serial(struct nemocanvas *canvas, uint32_t serial)
-{
-	nemo_surface_commit_serial(canvas->nemo_surface, serial);
+	nemo_surface_update(canvas->nemo_surface, serial);
 }
 
 void nemocanvas_set_nemosurface(struct nemocanvas *canvas, uint32_t type)
