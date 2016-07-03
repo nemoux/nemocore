@@ -296,6 +296,16 @@ static inline void nemoview_set_alpha(struct nemoview *view, float alpha)
 	nemoview_damage_dirty(view);
 }
 
+static inline void nemoview_rotate_to_global(struct nemoview *view, float s, float *r)
+{
+	*r = s + view->geometry.r;
+}
+
+static inline void nemoview_rotate_from_global(struct nemoview *view, float r, float *s)
+{
+	*s = r - view->geometry.r;
+}
+
 static inline void nemoview_transform_to_global(struct nemoview *view, float sx, float sy, float *x, float *y)
 {
 	if (view->transform.dirty)
