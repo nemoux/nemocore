@@ -471,6 +471,8 @@ struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas
 	bin->canvas_destroy_listener.notify = shellbin_handle_canvas_destroy;
 	wl_signal_add(&canvas->destroy_signal, &bin->canvas_destroy_listener);
 
+	wl_list_insert(&shell->bin_list, &bin->link);
+
 	return bin;
 
 err1:
@@ -485,6 +487,8 @@ void nemoshell_destroy_bin(struct shellbin *bin)
 
 	wl_signal_emit(&bin->destroy_signal, bin);
 
+	wl_list_remove(&bin->link);
+
 	wl_list_remove(&bin->canvas_destroy_listener.link);
 
 	bin->canvas->configure = NULL;
@@ -498,6 +502,9 @@ void nemoshell_destroy_bin(struct shellbin *bin)
 	wl_list_for_each_safe(child, cnext, &bin->children_list, children_link) {
 		nemoshell_set_parent_bin(child, NULL);
 	}
+
+	if (bin->name != NULL)
+		free(bin->name);
 
 	free(bin);
 }
@@ -520,6 +527,30 @@ void nemoshell_set_parent_bin(struct shellbin *bin, struct shellbin *parent)
 	if (parent != NULL) {
 		wl_list_insert(&parent->children_list, &bin->children_link);
 	}
+}
+
+struct shellbin *nemoshell_get_bin_by_pid(struct nemoshell *shell, uint32_t pid)
+{
+	struct shellbin *bin;
+
+	wl_list_for_each(bin, &shell->bin_list, link) {
+		if (bin->pid == pid)
+			return bin;
+	}
+
+	return NULL;
+}
+
+struct shellbin *nemoshell_get_bin_by_name(struct nemoshell *shell, const char *name)
+{
+	struct shellbin *bin;
+
+	wl_list_for_each(bin, &shell->bin_list, link) {
+		if (bin->name != NULL && strcmp(bin->name, name) == 0)
+			return bin;
+	}
+
+	return NULL;
 }
 
 static void nemoshell_bind_wayland_shell(struct wl_client *client, void *data, uint32_t version, uint32_t id)
@@ -670,6 +701,7 @@ struct nemoshell *nemoshell_create(struct nemocompz *compz)
 	shell->pointer_sprite_listener.notify = nemoshell_handle_pointer_sprite;
 	wl_signal_add(&compz->seat->pointer.sprite_signal, &shell->pointer_sprite_listener);
 
+	wl_list_init(&shell->bin_list);
 	wl_list_init(&shell->fullscreen_list);
 	wl_list_init(&shell->clientstate_list);
 
@@ -856,6 +888,9 @@ void nemoshell_destroy_client_state(struct nemoshell *shell, struct clientstate 
 {
 	wl_list_remove(&state->link);
 
+	if (state->name != NULL)
+		free(state->name);
+
 	free(state);
 }
 
@@ -909,6 +944,9 @@ static inline void nemoshell_set_client_state(struct shellbin *bin, struct clien
 		bin->on_pitchscreen = 1;
 
 	bin->flags = state->flags;
+
+	if (state->name != NULL)
+		bin->name = strdup(state->name);
 
 	nemoview_set_state(bin->view, state->state_on);
 	nemoview_put_state(bin->view, state->state_off);

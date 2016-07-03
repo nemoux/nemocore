@@ -69,9 +69,6 @@ struct nemoshell {
 
 	struct nemolayer *default_layer;
 
-	struct wl_list bin_list;
-	uint32_t bin_ids;
-
 	struct wl_listener pointer_focus_listener;
 	struct wl_listener keyboard_focus_listener;
 	struct wl_listener keypad_focus_listener;
@@ -80,8 +77,8 @@ struct nemoshell {
 	struct wl_listener child_signal_listener;
 	struct wl_listener pointer_sprite_listener;
 
+	struct wl_list bin_list;
 	struct wl_list fullscreen_list;
-
 	struct wl_list clientstate_list;
 
 	struct {
@@ -128,6 +125,7 @@ struct shellclient {
 
 struct clientstate {
 	uint32_t pid;
+	char *name;
 
 	struct wl_list link;
 
@@ -166,6 +164,7 @@ struct shellbin {
 	struct shellclient *owner;
 
 	pid_t pid;
+	char *name;
 
 	struct wl_signal ungrab_signal;
 	struct wl_signal change_signal;
@@ -189,6 +188,8 @@ struct shellbin {
 	uint32_t max_width, max_height;
 
 	struct nemoclient *client;
+
+	struct wl_list link;
 
 	struct shellbin *parent;
 	struct wl_list children_list;
@@ -289,7 +290,9 @@ extern void nemoshell_destroy_bin(struct shellbin *bin);
 
 extern struct shellbin *nemoshell_get_bin(struct nemocanvas *canvas);
 extern void nemoshell_set_parent_bin(struct shellbin *bin, struct shellbin *parent);
-extern struct shellbin *nemoshell_get_bin_by_id(struct nemoshell *shell, uint32_t id);
+
+extern struct shellbin *nemoshell_get_bin_by_pid(struct nemoshell *shell, uint32_t pid);
+extern struct shellbin *nemoshell_get_bin_by_name(struct nemoshell *shell, const char *name);
 
 extern void nemoshell_ping(struct shellbin *bin, uint32_t serial);
 extern void nemoshell_pong(struct shellclient *sc, uint32_t serial);
@@ -375,6 +378,11 @@ static inline int32_t nemoshell_bin_get_geometry_height(struct shellbin *bin)
 static inline void clientstate_set_pid(struct clientstate *state, uint32_t pid)
 {
 	state->pid = pid;
+}
+
+static inline void clientstate_set_name(struct clientstate *state, const char *name)
+{
+	state->name = strdup(name);
 }
 
 static inline void clientstate_set_position(struct clientstate *state, float x, float y)
