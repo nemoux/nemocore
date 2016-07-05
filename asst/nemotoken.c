@@ -138,33 +138,38 @@ int nemotoken_append_format(struct nemotoken *token, const char *fmt, ...)
 	return 0;
 }
 
+void nemotoken_fence(struct nemotoken *token, char fence)
+{
+	token->fence = fence;
+}
+
 void nemotoken_divide(struct nemotoken *token, char div)
 {
 	int i;
 
-	for (i = 0; i < token->length; i++) {
-		if (token->contents[i] == div) {
-			token->contents[i] = '\0';
+	if (token->fence != '\0') {
+		char c = '\0';
+		int in_fence = 0;
+
+		for (i = 0; i < token->length; i++) {
+			if (in_fence == 0) {
+				if (token->contents[i] == div) {
+					token->contents[i] = '\0';
+				} else if (c == '\0' && token->contents[i] == token->fence) {
+					in_fence = 1;
+				}
+			} else {
+				if (token->contents[i] == token->fence) {
+					in_fence = 0;
+				}
+			}
+
+			c = token->contents[i];
 		}
-	}
-}
-
-void nemotoken_divide_with_fence(struct nemotoken *token, char div, char fnc)
-{
-	int in_fence = 0;
-	int i;
-
-	for (i = 0; i < token->length; i++) {
-		if (in_fence == 0) {
-			if (token->contents[i] == div) {
+	} else {
+		for (i = 0; i < token->length; i++) {
+			if (token->contents[i] == div)
 				token->contents[i] = '\0';
-			} else if (token->contents[i] == fnc) {
-				in_fence = 1;
-			}
-		} else {
-			if (token->contents[i] == fnc) {
-				in_fence = 0;
-			}
 		}
 	}
 }
@@ -186,6 +191,26 @@ int nemotoken_update(struct nemotoken *token)
 
 	if (token->tokens != NULL)
 		free(token->tokens);
+
+	if (token->fence != '\0') {
+		int in_fence = 0;
+
+		for (i = 0; i < token->length; i++) {
+			if (in_fence == 0) {
+				if ((token->contents[i] == token->fence) && (i == 0 || token->contents[i - 1] == '\0')) {
+					token->contents[i] = '\0';
+
+					in_fence = 1;
+				}
+			} else {
+				if (token->contents[i] == token->fence) {
+					token->contents[i] = '\0';
+
+					in_fence = 0;
+				}
+			}
+		}
+	}
 
 	token->ntokens = 0;
 
@@ -242,21 +267,6 @@ void nemotoken_toupper(struct nemotoken *token)
 
 	for (i = 0; i < token->length; i++)
 		token->contents[i] = toupper(token->contents[i]);
-}
-
-int nemotoken_get_token_count(struct nemotoken *token)
-{
-	return token->ntokens;
-}
-
-char **nemotoken_get_tokens(struct nemotoken *token)
-{
-	return token->tokens;
-}
-
-const char *nemotoken_get_token(struct nemotoken *token, int index)
-{
-	return index < token->ntokens ? token->tokens[index] : NULL;
 }
 
 int nemotoken_get_index(struct nemotoken *token, const char *name)
