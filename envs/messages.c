@@ -419,9 +419,9 @@ int nemoenvs_dispatch_device_message(struct nemoenvs *envs, const char *src, con
 					id = tone != NULL ? nemoitem_one_get_attr(tone, "id") : NULL;
 
 					if (id != NULL)
-						nemoenvs_reply(envs, "%s %s dev %s nodeid %d screenid %d id %s", dst, src, path, screen->node->nodeid, screen->screenid, id);
+						nemoenvs_reply(envs, "%s %s dev %s nodeid \"%d\" screenid \"%d\" id \"%s\"", dst, src, path, screen->node->nodeid, screen->screenid, id);
 					else
-						nemoenvs_reply(envs, "%s %s dev %s nodeid %d screenid %d", dst, src, path, screen->node->nodeid, screen->screenid);
+						nemoenvs_reply(envs, "%s %s dev %s nodeid \"%d\" screenid \"%d\"", dst, src, path, screen->node->nodeid, screen->screenid);
 				}
 			} else if (strcmp(path, "/nemoshell/screen/mode") == 0) {
 				struct nemoscreen *screen;
@@ -432,7 +432,7 @@ int nemoenvs_dispatch_device_message(struct nemoenvs *envs, const char *src, con
 				screen = nemocompz_get_screen(compz, nodeid, screenid);
 				if (screen != NULL) {
 					wl_list_for_each(mode, &screen->mode_list, link) {
-						nemoenvs_reply(envs, "%s %s dev %s nodeid %d screenid %d width %d height %d", dst, src, path, screen->node->nodeid, screen->screenid, mode->width, mode->height);
+						nemoenvs_reply(envs, "%s %s dev %s nodeid \"%d\" screenid \"%d\" width \"%d\" height \"%d\"", dst, src, path, screen->node->nodeid, screen->screenid, mode->width, mode->height);
 					}
 				}
 			} else if (strcmp(path, "/nemoshell/input") == 0) {
@@ -445,9 +445,9 @@ int nemoenvs_dispatch_device_message(struct nemoenvs *envs, const char *src, con
 					id = tone != NULL ? nemoitem_one_get_attr(tone, "id") : NULL;
 
 					if (id != NULL)
-						nemoenvs_reply(envs, "%s %s dev %s devnode %s id %s", dst, src, path, node->devnode, id);
+						nemoenvs_reply(envs, "%s %s dev %s devnode \"%s\" id \"%s\"", dst, src, path, node->devnode, id);
 					else
-						nemoenvs_reply(envs, "%s %s dev %s devnode %s", dst, src, path, node->devnode);
+						nemoenvs_reply(envs, "%s %s dev %s devnode \"%s\"", dst, src, path, node->devnode);
 				}
 			} else if (strcmp(path, "/nemoshell/input/touch") == 0) {
 				struct inputnode *node;
@@ -460,9 +460,9 @@ int nemoenvs_dispatch_device_message(struct nemoenvs *envs, const char *src, con
 						id = tone != NULL ? nemoitem_one_get_attr(tone, "id") : NULL;
 
 						if (id != NULL)
-							nemoenvs_reply(envs, "%s %s dev %s devnode %s id %s", dst, src, path, node->devnode, id);
+							nemoenvs_reply(envs, "%s %s dev %s devnode \"%s\" id \"%s\"", dst, src, path, node->devnode, id);
 						else
-							nemoenvs_reply(envs, "%s %s dev %s devnode %s", dst, src, path, node->devnode);
+							nemoenvs_reply(envs, "%s %s dev %s devnode \"%s\"", dst, src, path, node->devnode);
 					}
 				}
 			}

@@ -148,23 +148,20 @@ void nemotoken_divide(struct nemotoken *token, char div)
 	int i;
 
 	if (token->fence != '\0') {
-		char c = '\0';
 		int in_fence = 0;
 
 		for (i = 0; i < token->length; i++) {
 			if (in_fence == 0) {
 				if (token->contents[i] == div) {
 					token->contents[i] = '\0';
-				} else if (c == '\0' && token->contents[i] == token->fence) {
+				} else if (token->contents[i] == token->fence && (i == 0 || token->contents[i - 1] == '\0')) {
 					in_fence = 1;
 				}
 			} else {
-				if (token->contents[i] == token->fence) {
+				if (token->contents[i] == token->fence && (i + 1 == token->length || token->contents[i + 1] == div)) {
 					in_fence = 0;
 				}
 			}
-
-			c = token->contents[i];
 		}
 	} else {
 		for (i = 0; i < token->length; i++) {
@@ -203,7 +200,7 @@ int nemotoken_update(struct nemotoken *token)
 					in_fence = 1;
 				}
 			} else {
-				if (token->contents[i] == token->fence) {
+				if ((token->contents[i] == token->fence) && (i + 1 == token->length || token->contents[i + 1] == '\0')) {
 					token->contents[i] = '\0';
 
 					in_fence = 0;
