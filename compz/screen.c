@@ -407,7 +407,7 @@ void nemoscreen_transform_from_global(struct nemoscreen *screen, float x, float 
 	}
 }
 
-void nemoscreen_reset_transform(struct nemoscreen *screen)
+void nemoscreen_clear_transform(struct nemoscreen *screen)
 {
 	screen->geometry.sx = 1.0f;
 	screen->geometry.sy = 1.0f;
@@ -470,7 +470,7 @@ void nemoscreen_set_pivot(struct nemoscreen *screen, float px, float py)
 	screen->transform.dirty = 1;
 }
 
-int nemoscreen_set_transform_command(struct nemoscreen *screen, const char *cmd)
+int nemoscreen_set_custom(struct nemoscreen *screen, const char *cmd)
 {
 	struct nemomatrix *matrix = &screen->transform.matrix;
 	struct nemomatrix *inverse = &screen->transform.inverse;
