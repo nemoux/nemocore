@@ -9,29 +9,6 @@
 
 #include <stringhelper.h>
 
-int string_divide(char *str, int length, char div)
-{
-	int i, count, state;
-
-	count = 1;
-	state = 1;
-
-	for (i = 0; i < length; i++) {
-		if (str[i] == div) {
-			if (state != 0)
-				count++;
-
-			str[i] = '\0';
-
-			state = 0;
-		} else {
-			state = 1;
-		}
-	}
-
-	return count;
-}
-
 int string_merge(char *str, int length, char div, int count, ...)
 {
 	va_list vargs;
@@ -60,16 +37,6 @@ int string_merge(char *str, int length, char div, int count, ...)
 	va_end(vargs);
 
 	return index;
-}
-
-void string_replace(char *str, int length, char src, char dst)
-{
-	int i;
-
-	for (i = 0; i < length; i++) {
-		if (str[i] == src)
-			str[i] = dst;
-	}
 }
 
 int string_parse_decimal(const char *str, int offset, int length)

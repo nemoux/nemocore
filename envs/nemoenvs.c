@@ -299,13 +299,14 @@ int nemoenvs_load_configs(struct nemoenvs *envs, const char *configpath)
 		return -1;
 
 	while (fgets(buffer, sizeof(buffer), fp) != NULL) {
+		int length = strlen(buffer);
+
 		if (buffer[0] == '/' && buffer[1] == '/')
 			continue;
 		if (buffer[0] != '/')
 			continue;
-
-		string_replace(buffer, strlen(buffer), '\n', '\0');
-		string_replace(buffer, strlen(buffer), '\t', ' ');
+		if (buffer[length - 1] == '\n')
+			buffer[length - 1] = '\0';
 
 		one = nemoitem_one_create();
 		nemoitem_one_load(one, buffer, ' ', '\"');

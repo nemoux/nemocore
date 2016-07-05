@@ -89,9 +89,7 @@ extern int keycode_is_alphabet(uint32_t code);
 extern int keycode_is_direction(uint32_t code);
 extern int keycode_is_normal(uint32_t code);
 
-extern int string_divide(char *str, int length, char div);
 extern int string_merge(char *str, int length, char div, int count, ...);
-extern void string_replace(char *str, int length, char src, char dst);
 
 extern int string_parse_decimal(const char *str, int offset, int length);
 extern int string_parse_decimal_with_endptr(const char *str, int offset, int length, const char **endptr);
