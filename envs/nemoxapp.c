@@ -51,7 +51,7 @@ static struct nemoxserver *nemoenvs_search_xserver(struct nemoenvs *envs)
 	return NULL;
 }
 
-static int nemoenvs_execute_xapp(struct nemoenvs *envs, struct nemoxserver *xserver, const char *cmds, struct clientstate *state);
+static int nemoenvs_execute_xapp(struct nemoenvs *envs, struct nemoxserver *xserver, const char *_path, const char *_args, struct clientstate *state);
 static int nemoenvs_launch_xserver(struct nemoenvs *envs, uint32_t xdisplay);
 
 static void nemoenvs_handle_xserver_sigusr1(struct wl_listener *listener, void *data)
@@ -70,9 +70,14 @@ static void nemoenvs_handle_xserver_sigusr1(struct wl_listener *listener, void *
 		if (xserver == NULL)
 			break;
 
-		nemoenvs_execute_xapp(envs, xserver, xapp->cmds, xapp->state);
+		nemoenvs_execute_xapp(envs, xserver, xapp->path, xapp->args, xapp->state);
 
 		wl_list_remove(&xapp->link);
+
+		if (xapp->path != NULL)
+			free(xapp->path);
+		if (xapp->args != NULL)
+			free(xapp->args);
 
 		free(xapp);
 	}
@@ -105,13 +110,15 @@ static int nemoenvs_launch_xserver(struct nemoenvs *envs, uint32_t xdisplay)
 	return 0;
 }
 
-static int nemoenvs_execute_xapp(struct nemoenvs *envs, struct nemoxserver *xserver, const char *cmds, struct clientstate *state)
+static int nemoenvs_execute_xapp(struct nemoenvs *envs, struct nemoxserver *xserver, const char *_path, const char *_args, struct clientstate *state)
 {
 	struct nemotoken *args;
 	struct nemotoken *envp;
 	pid_t pid;
 
-	args = nemotoken_create(cmds, strlen(cmds));
+	args = nemotoken_create(_path, strlen(_path));
+	if (_args != NULL)
+		nemotoken_append_format(args, ";%s", _args);
 	nemotoken_divide(args, ';');
 	nemotoken_update(args);
 
@@ -141,17 +148,18 @@ static int nemoenvs_execute_xapp(struct nemoenvs *envs, struct nemoxserver *xser
 	return 0;
 }
 
-int nemoenvs_launch_xapp(struct nemoenvs *envs, const char *cmds, struct clientstate *state)
+int nemoenvs_launch_xapp(struct nemoenvs *envs, const char *path, const char *args, struct clientstate *state)
 {
 	struct nemoxserver *xserver;
 	struct nemoxapp *xapp;
 
 	xserver = nemoenvs_search_xserver(envs);
 	if (xserver != NULL)
-		return nemoenvs_execute_xapp(envs, xserver, cmds, state);
+		return nemoenvs_execute_xapp(envs, xserver, path, args, state);
 
 	xapp = (struct nemoxapp *)malloc(sizeof(struct nemoxapp));
-	xapp->cmds = strdup(cmds);
+	xapp->path = strdup(path);
+	xapp->args = args != NULL ? strdup(args) : NULL;
 	xapp->state = state;
 
 	wl_list_insert(&envs->xapp_list, &xapp->link);
@@ -208,6 +216,11 @@ int nemoenvs_terminate_xapps(struct nemoenvs *envs)
 
 	wl_list_for_each_safe(xapp, next, &envs->xapp_list, link) {
 		wl_list_remove(&xapp->link);
+
+		if (xapp->path != NULL)
+			free(xapp->path);
+		if (xapp->args != NULL)
+			free(xapp->args);
 
 		free(xapp);
 	}

@@ -9,36 +9,6 @@
 
 #include <stringhelper.h>
 
-int string_merge(char *str, int length, char div, int count, ...)
-{
-	va_list vargs;
-	const char *t;
-	int index = 0;
-	int i, j, l;
-
-	va_start(vargs, count);
-
-	for (i = 0; i < count && index < length - 1; i++) {
-		t = va_arg(vargs, const char *);
-		if (t != NULL) {
-			if (index != 0)
-				str[index++] = div;
-
-			l = strlen(t);
-
-			for (j = 0; j < l && index < length - 1; j++) {
-				str[index++] = t[j];
-			}
-		}
-	}
-
-	str[index] = '\0';
-
-	va_end(vargs);
-
-	return index;
-}
-
 int string_parse_decimal(const char *str, int offset, int length)
 {
 	uint32_t number = 0;

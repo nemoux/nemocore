@@ -11,7 +11,8 @@ struct nemoenvs;
 struct clientstate;
 
 struct nemoxapp {
-	char *cmds;
+	char *path;
+	char *args;
 
 	struct clientstate *state;
 
@@ -28,7 +29,7 @@ struct nemoxclient {
 
 extern int nemoenvs_launch_xserver0(struct nemoenvs *envs);
 
-extern int nemoenvs_launch_xapp(struct nemoenvs *envs, const char *cmds, struct clientstate *state);
+extern int nemoenvs_launch_xapp(struct nemoenvs *envs, const char *path, const char *args, struct clientstate *state);
 
 extern int nemoenvs_terminate_xclient(struct nemoenvs *envs, pid_t pid);
 extern int nemoenvs_terminate_xclients(struct nemoenvs *envs);
