@@ -149,6 +149,26 @@ void nemotoken_divide(struct nemotoken *token, char div)
 	}
 }
 
+void nemotoken_divide_with_fence(struct nemotoken *token, char div, char fnc)
+{
+	int in_fence = 0;
+	int i;
+
+	for (i = 0; i < token->length; i++) {
+		if (in_fence == 0) {
+			if (token->contents[i] == div) {
+				token->contents[i] = '\0';
+			} else if (token->contents[i] == fnc) {
+				in_fence = 1;
+			}
+		} else {
+			if (token->contents[i] == fnc) {
+				in_fence = 0;
+			}
+		}
+	}
+}
+
 void nemotoken_replace(struct nemotoken *token, char src, char dst)
 {
 	int i;
