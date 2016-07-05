@@ -91,7 +91,7 @@ static void nemoenvs_execute_background(struct nemoenvs *envs, struct itemone *o
 
 	token = nemotoken_create_format("%s;-w;%d;-h;%d", path, width, height);
 	if (args != NULL)
-		nemotoken_append(token, args, strlen(args));
+		nemotoken_append_format(token, ";%s", args);
 	nemotoken_divide(token, ';');
 	nemotoken_update(token);
 
@@ -126,7 +126,7 @@ static void nemoenvs_execute_soundmanager(struct nemoenvs *envs, struct itemone 
 
 	token = nemotoken_create(path, strlen(path));
 	if (args != NULL)
-		nemotoken_append(token, args, strlen(args));
+		nemotoken_append_format(token, ";%s", args);
 	nemotoken_divide(token, ';');
 	nemotoken_update(token);
 

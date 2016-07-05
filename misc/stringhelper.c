@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <stdarg.h>
+
 #include <stringhelper.h>
 
 int string_divide(char *str, int length, char div)
@@ -28,6 +30,36 @@ int string_divide(char *str, int length, char div)
 	}
 
 	return count;
+}
+
+int string_merge(char *str, int length, char div, int count, ...)
+{
+	va_list vargs;
+	const char *t;
+	int index = 0;
+	int i, j, l;
+
+	va_start(vargs, count);
+
+	for (i = 0; i < count && index < length - 1; i++) {
+		t = va_arg(vargs, const char *);
+		if (t != NULL) {
+			if (index != 0)
+				str[index++] = div;
+
+			l = strlen(t);
+
+			for (j = 0; j < l && index < length - 1; j++) {
+				str[index++] = t[j];
+			}
+		}
+	}
+
+	str[index] = '\0';
+
+	va_end(vargs);
+
+	return index;
 }
 
 void string_replace(char *str, int length, char src, char dst)

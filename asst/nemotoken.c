@@ -90,6 +90,24 @@ int nemotoken_append(struct nemotoken *token, const char *str, int length)
 	return 0;
 }
 
+int nemotoken_append_one(struct nemotoken *token, char c)
+{
+	char *contents;
+
+	contents = (char *)malloc(token->length + 1 + 1);
+	if (contents == NULL)
+		return -1;
+
+	snprintf(contents, token->length + 1 + 1, "%s%c", token->contents, c);
+
+	free(token->contents);
+
+	token->contents = contents;
+	token->length = token->length + 1;
+
+	return 0;
+}
+
 int nemotoken_append_format(struct nemotoken *token, const char *fmt, ...)
 {
 	va_list vargs;

@@ -89,6 +89,22 @@ extern int keycode_is_alphabet(uint32_t code);
 extern int keycode_is_direction(uint32_t code);
 extern int keycode_is_normal(uint32_t code);
 
+extern int string_divide(char *str, int length, char div);
+extern int string_merge(char *str, int length, char div, int count, ...);
+extern void string_replace(char *str, int length, char src, char dst);
+
+extern int string_parse_decimal(const char *str, int offset, int length);
+extern int string_parse_decimal_with_endptr(const char *str, int offset, int length, const char **endptr);
+extern int string_parse_hexadecimal(const char *str, int offset, int length);
+extern double string_parse_float(const char *str, int offset, int length);
+extern double string_parse_float_with_endptr(const char *str, int offset, int length, const char **endptr);
+
+extern const char *string_find_alphabet(const char *str, int offset, int length);
+extern const char *string_find_number(const char *str, int offset, int length);
+
+extern int string_is_alphabet(const char *str, int offset, int length);
+extern int string_is_number(const char *str, int offset, int length);
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif
