@@ -361,7 +361,7 @@ static void nemoenvs_handle_set_nemoshell_font(struct nemoshell *shell, struct i
 {
 	char contents[1024];
 
-	nemoitem_one_save(one, contents, ' ');
+	nemoitem_one_save(one, contents, ' ', '\"');
 	setenv("NEMOSHELL_FONT", contents, 1);
 }
 
@@ -501,7 +501,7 @@ int nemoenvs_dispatch_config_message(struct nemoenvs *envs, const char *src, con
 				if (tone != NULL) {
 					char contents[1024] = { 0 };
 
-					nemoitem_one_save(tone, contents, ' ');
+					nemoitem_one_save(tone, contents, ' ', '\"');
 
 					nemoenvs_reply(envs, "%s %s set %s", dst, src, contents);
 				}
@@ -510,7 +510,7 @@ int nemoenvs_dispatch_config_message(struct nemoenvs *envs, const char *src, con
 					if (nemoitem_one_has_path(tone, path) != 0) {
 						char contents[1024] = { 0 };
 
-						nemoitem_one_save(tone, contents, ' ');
+						nemoitem_one_save(tone, contents, ' ', '\"');
 
 						nemoenvs_reply(envs, "%s %s set %s", dst, src, contents);
 					}

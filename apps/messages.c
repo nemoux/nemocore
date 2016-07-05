@@ -39,7 +39,7 @@ int nemoenvs_dispatch_config_message(struct nemoenvs *envs, const char *src, con
 			if (tone != NULL) {
 				char contents[1024] = { 0 };
 
-				nemoitem_one_save(tone, contents, ' ');
+				nemoitem_one_save(tone, contents, ' ', '\"');
 
 				nemoenvs_reply(envs, "%s %s set %s", dst, src, contents);
 			}

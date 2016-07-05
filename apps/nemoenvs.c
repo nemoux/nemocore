@@ -127,8 +127,8 @@ static int nemoenvs_handle_message(void *data)
 		return -1;
 
 	contents = nemotoken_create(buffer, size);
+	nemotoken_fence(contents, '\"');
 	nemotoken_divide(contents, ' ');
-	nemotoken_divide(contents, '\t');
 	nemotoken_divide(contents, '\n');
 	nemotoken_update(contents);
 
@@ -220,7 +220,7 @@ int nemoenvs_load_variable(struct nemoenvs *envs, const char *name, const char *
 	env = getenv(name);
 	if (env != NULL) {
 		one = nemoitem_one_create();
-		nemoitem_one_load(one, env, ' ');
+		nemoitem_one_load(one, env, ' ', '\"');
 
 		nemoenvs_dispatch(envs, "/envs", envs->clientname, "set", path, one);
 

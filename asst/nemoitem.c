@@ -359,7 +359,7 @@ struct itemone *nemoitem_one_clone(struct itemone *one)
 	return done;
 }
 
-int nemoitem_one_load(struct itemone *one, const char *buffer, char delimiter)
+int nemoitem_one_load(struct itemone *one, const char *buffer, char delimiter, char fence)
 {
 	struct nemotoken *token;
 	int count;
@@ -368,6 +368,7 @@ int nemoitem_one_load(struct itemone *one, const char *buffer, char delimiter)
 	token = nemotoken_create(buffer, strlen(buffer));
 	if (token == NULL)
 		return -1;
+	nemotoken_fence(token, fence);
 	nemotoken_divide(token, delimiter);
 	nemotoken_update(token);
 
@@ -384,7 +385,7 @@ int nemoitem_one_load(struct itemone *one, const char *buffer, char delimiter)
 	return 0;
 }
 
-int nemoitem_one_save(struct itemone *one, char *buffer, char delimiter)
+int nemoitem_one_save(struct itemone *one, char *buffer, char delimiter, char fence)
 {
 	struct itemattr *attr;
 
@@ -394,7 +395,14 @@ int nemoitem_one_save(struct itemone *one, char *buffer, char delimiter)
 		strncat(buffer, &delimiter, 1);
 		strcat(buffer, attr->name);
 		strncat(buffer, &delimiter, 1);
-		strcat(buffer, attr->value);
+
+		if (fence == '\0') {
+			strcat(buffer, attr->value);
+		} else {
+			strncat(buffer, &fence, 1);
+			strcat(buffer, attr->value);
+			strncat(buffer, &fence, 1);
+		}
 	}
 
 	return 0;
@@ -505,7 +513,7 @@ int nemoitem_one_copy_attr(struct itemone *done, struct itemone *sone)
 	return 1;
 }
 
-int nemoitem_load(struct nemoitem *item, const char *filepath, char delimiter)
+int nemoitem_load(struct nemoitem *item, const char *filepath, char delimiter, char fence)
 {
 	struct itemone *one;
 	FILE *fp;
@@ -522,7 +530,7 @@ int nemoitem_load(struct nemoitem *item, const char *filepath, char delimiter)
 			continue;
 
 		one = nemoitem_one_create();
-		nemoitem_one_load(one, buffer, delimiter);
+		nemoitem_one_load(one, buffer, delimiter, fence);
 		nemoitem_attach_one(item, one);
 	}
 
@@ -531,7 +539,7 @@ int nemoitem_load(struct nemoitem *item, const char *filepath, char delimiter)
 	return 0;
 }
 
-int nemoitem_save(struct nemoitem *item, const char *filepath, char delimiter)
+int nemoitem_save(struct nemoitem *item, const char *filepath, char delimiter, char fence)
 {
 	struct itemone *one;
 	FILE *fp;
@@ -542,7 +550,7 @@ int nemoitem_save(struct nemoitem *item, const char *filepath, char delimiter)
 		return -1;
 
 	nemoitem_for_each(one, item) {
-		nemoitem_one_save(one, buffer, delimiter);
+		nemoitem_one_save(one, buffer, delimiter, fence);
 
 		fputs(buffer, fp);
 		fputc('\n', fp);
