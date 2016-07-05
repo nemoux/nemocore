@@ -97,11 +97,11 @@ static void nemoenvs_handle_set_nemoshell_screen(struct nemoshell *shell, struct
 		if (screen->width != width || screen->height != height)
 			nemoscreen_switch_mode(screen, width, height, refresh);
 
-		if (transform != NULL) {
-			nemoscreen_set_transform(screen, transform);
-		} else {
-			nemoscreen_put_transform(screen);
+		nemoscreen_reset_transform(screen);
 
+		if (transform != NULL) {
+			nemoscreen_set_transform_command(screen, transform);
+		} else {
 			nemoscreen_set_position(screen, x, y);
 			nemoscreen_set_scale(screen, sx, sy);
 			nemoscreen_set_rotation(screen, r);
