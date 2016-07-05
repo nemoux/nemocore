@@ -254,7 +254,7 @@ static int nemoscreen_update_transform_matrix(struct nemoscreen *screen)
 
 	if (screen->geometry.sx != 1.0f || screen->geometry.sy != 1.0f) {
 		nemomatrix_translate(matrix, -screen->geometry.px, -screen->geometry.py);
-		nemomatrix_scale(matrix, screen->geometry.sx, screen->geometry.sy);
+		nemomatrix_scale(matrix, 1.0f / screen->geometry.sx, 1.0f / screen->geometry.sy);
 		nemomatrix_translate(matrix, screen->geometry.px, screen->geometry.py);
 	}
 
@@ -440,8 +440,8 @@ void nemoscreen_set_rotation(struct nemoscreen *screen, float r)
 		return;
 
 	screen->geometry.r = r;
-	screen->transform.cosr = cos(r);
-	screen->transform.sinr = sin(r);
+	screen->transform.cosr = cos(-r);
+	screen->transform.sinr = sin(-r);
 
 	screen->transform.enable = 1;
 	screen->transform.dirty = 1;
