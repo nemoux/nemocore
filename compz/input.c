@@ -48,27 +48,6 @@ void nemoinput_put_screen(struct inputnode *node)
 	}
 }
 
-int nemoinput_set_transform(struct inputnode *node, const char *cmd)
-{
-	struct nemomatrix *matrix = &node->transform.matrix;
-	struct nemomatrix *inverse = &node->transform.inverse;
-
-	nemomatrix_init_identity(matrix);
-	nemomatrix_append_command(matrix, cmd);
-
-	if (nemomatrix_invert(inverse, matrix) < 0)
-		return -1;
-
-	node->transform.enable = 1;
-
-	return 0;
-}
-
-void nemoinput_put_transform(struct inputnode *node)
-{
-	node->transform.enable = 0;
-}
-
 void nemoinput_set_sampling(struct inputnode *node, uint32_t sampling)
 {
 	node->sampling = sampling;
