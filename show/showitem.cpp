@@ -23,7 +23,6 @@
 #include <showfont.hpp>
 #include <nemoshow.h>
 #include <fonthelper.h>
-#include <svghelper.h>
 #include <svghelper.hpp>
 #include <stringhelper.h>
 #include <colorhelper.h>
@@ -179,10 +178,6 @@ struct showone *nemoshow_item_create(int type)
 		nemoshow_one_set_state(one, NEMOSHOW_BOUNDS_STATE);
 	} else if (one->sub == NEMOSHOW_IMAGE_ITEM) {
 		nemoshow_one_set_state(one, NEMOSHOW_FILL_STATE);
-	} else if (one->sub == NEMOSHOW_SVG_ITEM) {
-		nemoshow_one_set_state(one, NEMOSHOW_INHERIT_STATE);
-		nemoshow_one_set_state(one, NEMOSHOW_FILL_STATE);
-		nemoshow_one_set_state(one, NEMOSHOW_STROKE_STATE);
 	} else if (one->sub == NEMOSHOW_CONTAINER_ITEM) {
 		nemoshow_one_set_state(one, NEMOSHOW_INHERIT_STATE);
 		nemoshow_one_set_state(one, NEMOSHOW_FILL_STATE);
@@ -260,10 +255,6 @@ static inline void nemoshow_item_update_uri(struct nemoshow *show, struct showon
 
 				NEMOSHOW_ITEM_CC(item, bitmap) = NULL;
 			}
-
-			one->dirty |= NEMOSHOW_SHAPE_DIRTY;
-		} else if (one->sub == NEMOSHOW_SVG_ITEM) {
-			nemoshow_svg_load_uri(show, one, item->uri);
 
 			one->dirty |= NEMOSHOW_SHAPE_DIRTY;
 		}

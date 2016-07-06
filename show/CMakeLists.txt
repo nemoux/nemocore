@@ -82,7 +82,6 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/show/showpipe.h
 	${CMAKE_SOURCE_DIR}/show/showgrab.h
 	${CMAKE_SOURCE_DIR}/show/showevent.h
-	${CMAKE_SOURCE_DIR}/show/svghelper.h
 	${CMAKE_SOURCE_DIR}/show/skiahelper.h
 	${CMAKE_SOURCE_DIR}/show/skiaconfig.hpp
 	${EXTRA_HEADERS}

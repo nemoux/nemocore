@@ -597,28 +597,6 @@ static inline void nemoshow_canvas_render_item_image(struct showcanvas *canvas, 
 	}
 }
 
-static inline void nemoshow_canvas_render_item_svg(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one)
-{
-	struct showitem *item = NEMOSHOW_ITEM(one);
-	struct showone *child;
-
-	_canvas->save();
-	_canvas->concat(*NEMOSHOW_ITEM_CC(item, viewbox));
-
-	if (canvas->needs_full_redraw == 0) {
-		nemoshow_children_for_each(child, one) {
-			if (nemoshow_canvas_check_one(canvas, child) != 0)
-				nemoshow_canvas_render_one(canvas, _canvas, child);
-		}
-	} else {
-		nemoshow_children_for_each(child, one) {
-			nemoshow_canvas_render_one(canvas, _canvas, child);
-		}
-	}
-
-	_canvas->restore();
-}
-
 static inline void nemoshow_canvas_render_item_group(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one)
 {
 	struct showone *child;
@@ -680,7 +658,6 @@ static inline void nemoshow_canvas_render_one(struct showcanvas *canvas, SkCanva
 		nemoshow_canvas_render_item_polyline,
 		nemoshow_canvas_render_item_polygon,
 		nemoshow_canvas_render_item_image,
-		nemoshow_canvas_render_item_svg,
 		nemoshow_canvas_render_item_group,
 		nemoshow_canvas_render_item_container
 	};

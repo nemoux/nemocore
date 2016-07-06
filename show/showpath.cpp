@@ -17,7 +17,6 @@
 #include <showshader.h>
 #include <showshader.hpp>
 #include <nemoshow.h>
-#include <svghelper.h>
 #include <fonthelper.h>
 #include <nemomisc.h>
 
