@@ -40,7 +40,7 @@ int nemoenvs_check_beats(struct nemoenvs *envs, int port, int timeout)
 	if (envs->beat_soc < 0)
 		return -1;
 
-	asprintf(&msg, "set %d %s", getpid(), envs->args);
+	asprintf(&msg, "set %d \"%s\"", getpid(), envs->args);
 	udp_send_to(envs->beat_soc, "127.0.0.1", envs->beat_port, msg, strlen(msg) + 1);
 	free(msg);
 

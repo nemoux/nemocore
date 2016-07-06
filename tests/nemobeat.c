@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 	char msg[1024];
 	char args[1024] = { 0 };
 	int port = 50000;
-	int timeout = 7;
+	int timeout = 5;
 	int pid = 0;
 	int efd;
 	int tfd;
@@ -105,9 +105,8 @@ int main(int argc, char *argv[])
 
 				token = nemotoken_create(msg, strlen(msg));
 				if (token != NULL) {
+					nemotoken_fence(token, '\"');
 					nemotoken_divide(token, ' ');
-					nemotoken_divide(token, '\t');
-					nemotoken_divide(token, '\n');
 					nemotoken_update(token);
 
 					cmd = nemotoken_get_token(token, 0);
