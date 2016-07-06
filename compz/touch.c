@@ -611,8 +611,7 @@ struct touchnode *nemotouch_create_node(struct nemocompz *compz, const char *dev
 
 	node->base.type |= NEMOINPUT_TOUCH_TYPE;
 
-	nemoinput_set_geometry(&node->base,
-			0, 0,
+	nemoinput_set_size(&node->base,
 			nemocompz_get_scene_width(compz),
 			nemocompz_get_scene_height(compz));
 

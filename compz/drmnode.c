@@ -912,7 +912,7 @@ static int drm_create_screen_for_connector(struct drmnode *node, drmModeRes *res
 
 	wl_list_insert(compz->screen_list.prev, &screen->base.link);
 
-	nemoscreen_update_geometry(&screen->base);
+	nemoscreen_update_transform(&screen->base);
 
 	nemolog_message("DRM", "screen %s, (connector %d, crtc %d)\n",
 			screen->base.name, screen->connector_id, screen->crtc_id);

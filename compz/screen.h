@@ -110,11 +110,12 @@ extern int nemoscreen_switch_mode(struct nemoscreen *screen, int32_t width, int3
 extern void nemoscreen_prepare(struct nemoscreen *screen);
 extern void nemoscreen_finish(struct nemoscreen *screen);
 
-extern void nemoscreen_update_geometry(struct nemoscreen *screen);
 extern void nemoscreen_transform_to_global(struct nemoscreen *screen, float dx, float dy, float *x, float *y);
 extern void nemoscreen_transform_from_global(struct nemoscreen *screen, float x, float y, float *dx, float *dy);
 
 extern void nemoscreen_clear_transform(struct nemoscreen *screen);
+extern void nemoscreen_update_transform(struct nemoscreen *screen);
+
 extern void nemoscreen_set_position(struct nemoscreen *screen, int32_t x, int32_t y);
 extern void nemoscreen_set_rotation(struct nemoscreen *screen, float r);
 extern void nemoscreen_set_scale(struct nemoscreen *screen, float sx, float sy);

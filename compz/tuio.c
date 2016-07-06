@@ -399,8 +399,7 @@ struct tuio *tuio_create(struct nemocompz *compz, int protocol, int port, int ma
 
 	tuio->base.type |= NEMOINPUT_TOUCH_TYPE;
 
-	nemoinput_set_geometry(&tuio->base,
-			0, 0,
+	nemoinput_set_size(&tuio->base,
 			nemocompz_get_scene_width(compz),
 			nemocompz_get_scene_height(compz));
 

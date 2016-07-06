@@ -125,8 +125,11 @@ static void nemoenvs_handle_set_nemoshell_input(struct nemoshell *shell, struct 
 
 	node = nemocompz_get_input(compz, devnode);
 	if (node != NULL) {
-		int32_t x, y;
-		int32_t width, height;
+		int32_t x = 0, y = 0;
+		int32_t width = 0, height = 0;
+		float sx = 1.0f, sy = 1.0f;
+		float r = 0.0f;
+		float px = 0.0f, py = 0.0f;
 		uint32_t nodeid, screenid;
 		uint32_t sampling = 0;
 		const char *transform = NULL;
@@ -144,6 +147,16 @@ static void nemoenvs_handle_set_nemoshell_input(struct nemoshell *shell, struct 
 				width = strtoul(value, NULL, 10);
 			} else if (strcmp(name, "height") == 0) {
 				height = strtoul(value, NULL, 10);
+			} else if (strcmp(name, "sx") == 0) {
+				sx = strtod(value, NULL);
+			} else if (strcmp(name, "sy") == 0) {
+				sy = strtod(value, NULL);
+			} else if (strcmp(name, "r") == 0) {
+				r = strtod(value, NULL) * M_PI / 180.0f;
+			} else if (strcmp(name, "px") == 0) {
+				px = strtod(value, NULL);
+			} else if (strcmp(name, "py") == 0) {
+				py = strtod(value, NULL);
 			} else if (strcmp(name, "nodeid") == 0) {
 				nodeid = strtoul(value, NULL, 10);
 			} else if (strcmp(name, "screenid") == 0) {
@@ -163,14 +176,21 @@ static void nemoenvs_handle_set_nemoshell_input(struct nemoshell *shell, struct 
 		} else {
 			nemoinput_put_screen(node);
 
-			if (transform != NULL)
-				nemoinput_set_transform(node, transform);
-			else
-				nemoinput_put_transform(node);
+			nemoinput_clear_transform(node);
 
-			nemoinput_set_geometry(node, x, y, width, height);
-			nemoinput_set_sampling(node, sampling);
+			if (transform != NULL) {
+				nemoinput_set_custom(node, transform);
+			} else {
+				nemoinput_set_position(node, x, y);
+				nemoinput_set_scale(node, sx, sy);
+				nemoinput_set_rotation(node, r);
+				nemoinput_set_pivot(node, px, py);
+			}
+
+			nemoinput_update_transform(node);
 		}
+
+		nemoinput_set_sampling(node, sampling);
 	}
 }
 

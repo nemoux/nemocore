@@ -227,7 +227,7 @@ static int fb_create_screen(struct fbnode *node, const char *devpath)
 
 	wl_list_insert(compz->screen_list.prev, &screen->base.link);
 
-	nemoscreen_update_geometry(&screen->base);
+	nemoscreen_update_transform(&screen->base);
 
 	nemolog_message("FRAMEBUFFER", "screen resolution %d x %d\n", screen->mode.width, screen->mode.height);
 
