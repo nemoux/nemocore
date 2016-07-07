@@ -682,6 +682,8 @@ void nemocompz_update_scene(struct nemocompz *compz)
 void nemocompz_scene_dirty(struct nemocompz *compz)
 {
 	compz->scene_dirty = 1;
+	
+	nemocompz_dispatch_frame(compz);
 }
 
 void nemocompz_set_scene(struct nemocompz *compz, int32_t x, int32_t y, int32_t width, int32_t height)
