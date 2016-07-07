@@ -64,6 +64,7 @@ static void nemoenvs_handle_set_nemoshell_screen(struct nemoshell *shell, struct
 		float px = 0.0f, py = 0.0f;
 		uint32_t refresh = 0;
 		const char *transform = NULL;
+		const char *scope = NULL;
 
 		nemoitem_attr_for_each(attr, one) {
 			name = nemoitem_attr_get_name(attr);
@@ -90,7 +91,9 @@ static void nemoenvs_handle_set_nemoshell_screen(struct nemoshell *shell, struct
 			} else if (strcmp(name, "refresh") == 0) {
 				refresh = strtoul(value, NULL, 10);
 			} else if (strcmp(name, "transform") == 0) {
-				transform = strdup(value);
+				transform = value;
+			} else if (strcmp(name, "scope") == 0) {
+				scope = value;
 			}
 		}
 
@@ -108,7 +111,15 @@ static void nemoenvs_handle_set_nemoshell_screen(struct nemoshell *shell, struct
 			nemoscreen_set_pivot(screen, px, py);
 		}
 
+		if (scope != NULL && strcmp(scope, "off") == 0) {
+			nemoscreen_put_state(screen, NEMOSCREEN_SCOPE_STATE);
+		} else {
+			nemoscreen_set_state(screen, NEMOSCREEN_SCOPE_STATE);
+		}
+
 		nemoscreen_schedule_repaint(screen);
+
+		nemocompz_scene_dirty(compz);
 	}
 }
 

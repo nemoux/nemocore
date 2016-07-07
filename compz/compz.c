@@ -269,6 +269,9 @@ static int nemocompz_dispatch_frame_timeout(void *data)
 	struct nemocompz *compz = (struct nemocompz *)data;
 	uint32_t msecs = time_current_msecs();
 
+	if (compz->scene_dirty != 0)
+		nemocompz_update_scene(compz);
+
 	nemocompz_dispatch_actor_frame(compz, msecs);
 	nemocompz_dispatch_animation_frame(compz, msecs);
 	nemocompz_dispatch_effect_frame(compz, msecs);
@@ -656,17 +659,29 @@ void nemocompz_update_scene(struct nemocompz *compz)
 {
 	struct nemoscreen *screen;
 
-	if (compz->has_scene != 0)
-		return;
+	compz->scene_dirty = 0;
 
-	pixman_region32_clear(&compz->scene);
+	if (compz->has_scene == 0) {
+		pixman_region32_clear(&compz->scene);
 
-	wl_list_for_each(screen, &compz->screen_list, link) {
-		pixman_region32_union(&compz->scene, &compz->scene, &screen->region);
+		wl_list_for_each(screen, &compz->screen_list, link) {
+			pixman_region32_union(&compz->scene, &compz->scene, &screen->region);
+		}
 	}
 
-	if (compz->has_scope == 0)
-		pixman_region32_copy(&compz->scope, &compz->scene);
+	if (compz->has_scope == 0) {
+		pixman_region32_clear(&compz->scope);
+
+		wl_list_for_each(screen, &compz->screen_list, link) {
+			if (nemoscreen_has_state(screen, NEMOSCREEN_SCOPE_STATE) != 0)
+				pixman_region32_union(&compz->scope, &compz->scope, &screen->region);
+		}
+	}
+}
+
+void nemocompz_scene_dirty(struct nemocompz *compz)
+{
+	compz->scene_dirty = 1;
 }
 
 void nemocompz_set_scene(struct nemocompz *compz, int32_t x, int32_t y, int32_t width, int32_t height)
@@ -674,9 +689,6 @@ void nemocompz_set_scene(struct nemocompz *compz, int32_t x, int32_t y, int32_t 
 	pixman_region32_init_rect(&compz->scene, x, y, width, height);
 
 	compz->has_scene = 1;
-
-	if (compz->has_scope == 0)
-		pixman_region32_init_rect(&compz->scope, x, y, width, height);
 }
 
 void nemocompz_set_scope(struct nemocompz *compz, int32_t x, int32_t y, int32_t width, int32_t height)

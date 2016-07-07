@@ -207,6 +207,8 @@ void nemoscreen_prepare(struct nemoscreen *screen)
 {
 	struct nemocompz *compz = screen->compz;
 
+	screen->state = NEMOSCREEN_SCOPE_STATE;
+
 	screen->geometry.sx = 1.0f;
 	screen->geometry.sy = 1.0f;
 
@@ -342,9 +344,9 @@ void nemoscreen_update_transform(struct nemoscreen *screen)
 
 	nemoscreen_update_region(screen);
 
-	nemocompz_update_scene(screen->compz);
-
 	nemoscreen_damage_dirty(screen);
+
+	nemocompz_scene_dirty(screen->compz);
 }
 
 void nemoscreen_transform_to_global(struct nemoscreen *screen, float dx, float dy, float *x, float *y)

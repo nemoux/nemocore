@@ -62,6 +62,8 @@ struct nemocompz {
 	pixman_region32_t scope;
 	int has_scope;
 
+	int scene_dirty;
+
 	struct wl_event_source *sigsrc[8];
 
 	struct udev *udev;
@@ -156,6 +158,7 @@ extern struct inputnode *nemocompz_get_input(struct nemocompz *compz, const char
 extern int32_t nemocompz_get_scene_width(struct nemocompz *compz);
 extern int32_t nemocompz_get_scene_height(struct nemocompz *compz);
 extern void nemocompz_update_scene(struct nemocompz *compz);
+extern void nemocompz_scene_dirty(struct nemocompz *compz);
 extern void nemocompz_set_scene(struct nemocompz *compz, int32_t x, int32_t y, int32_t width, int32_t height);
 extern void nemocompz_set_scope(struct nemocompz *compz, int32_t x, int32_t y, int32_t width, int32_t height);
 

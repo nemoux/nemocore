@@ -96,7 +96,7 @@ void nemoview_destroy(struct nemoview *view)
 
 	assert(wl_list_empty(&view->children_list));
 
-	if (nemoview_has_state(view, NEMOVIEW_MAP_STATE))
+	if (nemoview_has_state(view, NEMOVIEW_MAP_STATE) != 0)
 		nemoview_unmap(view);
 
 	if (view->xkb != NULL)
@@ -196,7 +196,7 @@ void nemoview_correct_pivot(struct nemoview *view, float px, float py)
 
 void nemoview_unmap(struct nemoview *view)
 {
-	if (!nemoview_has_state(view, NEMOVIEW_MAP_STATE))
+	if (nemoview_has_state(view, NEMOVIEW_MAP_STATE) == 0)
 		return;
 
 	nemoview_damage_below(view);

@@ -13,6 +13,11 @@ NEMO_BEGIN_EXTERN_C
 #include <nemomatrix.h>
 
 typedef enum {
+	NEMOSCREEN_SCOPE_STATE = (1 << 0),
+	NEMOSCREEN_LAST_STATE
+} NemoScreenState;
+
+typedef enum {
 	NEMODPMS_ON_STATE = 0,
 	NEMODPMS_STANDBY_STATE = 1,
 	NEMODPMS_SUSPEND_STATE = 2,
@@ -34,6 +39,8 @@ struct nemomode {
 struct nemoscreen {
 	struct nemocompz *compz;
 	struct rendernode *node;
+
+	uint32_t state;
 
 	uint32_t screenid;
 	uint32_t id;
@@ -124,6 +131,26 @@ extern int nemoscreen_set_custom(struct nemoscreen *screen, const char *cmd);
 
 extern void nemoscreen_transform_dirty(struct nemoscreen *screen);
 extern void nemoscreen_damage_dirty(struct nemoscreen *screen);
+
+static inline void nemoscreen_set_state(struct nemoscreen *screen, uint32_t state)
+{
+	screen->state |= state;
+}
+
+static inline void nemoscreen_put_state(struct nemoscreen *screen, uint32_t state)
+{
+	screen->state &= ~state;
+}
+
+static inline int nemoscreen_has_state(struct nemoscreen *screen, uint32_t state)
+{
+	return screen->state & state;
+}
+
+static inline int nemoscreen_has_state_all(struct nemoscreen *screen, uint32_t state)
+{
+	return (screen->state & state) == state;
+}
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
