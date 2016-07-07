@@ -59,8 +59,21 @@ void nemoenvs_destroy(struct nemoenvs *envs)
 		free(envs->clientname);
 	if (envs->servername != NULL)
 		free(envs->servername);
+	if (envs->id != NULL)
+		free(envs->id);
 
 	free(envs);
+}
+
+void nemoenvs_set_id(struct nemoenvs *envs, const char *id)
+{
+	if (envs->id != NULL)
+		free(envs->id);
+
+	if (id != NULL)
+		envs->id = strdup(id);
+	else
+		envs->id = NULL;
 }
 
 int nemoenvs_set_callback(struct nemoenvs *envs, nemoenvs_callback_t callback, void *data)

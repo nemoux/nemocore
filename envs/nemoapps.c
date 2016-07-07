@@ -79,6 +79,8 @@ static void nemoenvs_execute_background(struct nemoenvs *envs, struct itemone *o
 	pid_t pid;
 	int32_t x, y;
 	int32_t width, height;
+	const char *id;
+	const char *image;
 	const char *path;
 	const char *args;
 
@@ -86,10 +88,12 @@ static void nemoenvs_execute_background(struct nemoenvs *envs, struct itemone *o
 	y = nemoitem_one_get_iattr(one, "y", 0);
 	width = nemoitem_one_get_iattr(one, "width", nemocompz_get_scene_width(compz));
 	height = nemoitem_one_get_iattr(one, "height", nemocompz_get_scene_height(compz));
+	id = nemoitem_one_get_sattr(one, "id", "none");
+	image = nemoitem_one_get_sattr(one, "image", "none");
 	path = nemoitem_one_get_attr(one, "path");
 	args = nemoitem_one_get_attr(one, "args");
 
-	token = nemotoken_create_format("%s;-w;%d;-h;%d", path, width, height);
+	token = nemotoken_create_format("%s;-w;%d;-h;%d;-i;%s;-f;%s", path, width, height, id, image);
 	if (args != NULL)
 		nemotoken_append_format(token, ";%s", args);
 	nemotoken_divide(token, ';');
@@ -106,9 +110,7 @@ static void nemoenvs_execute_background(struct nemoenvs *envs, struct itemone *o
 			clientstate_set_bin_flags(state, NEMOSHELL_SURFACE_ALL_FLAGS);
 		}
 
-		nemoenvs_attach_app(envs,
-				nemoitem_one_get_sattr(one, "id", ""),
-				pid);
+		nemoenvs_attach_app(envs, id, pid);
 	}
 
 	nemotoken_destroy(token);

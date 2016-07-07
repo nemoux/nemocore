@@ -38,10 +38,13 @@ struct nemoenvs {
 
 	char *clientname;
 	char *servername;
+	char *id;
 };
 
 extern struct nemoenvs *nemoenvs_create(struct nemotool *tool);
 extern void nemoenvs_destroy(struct nemoenvs *envs);
+
+extern void nemoenvs_set_id(struct nemoenvs *envs, const char *id);
 
 extern int nemoenvs_connect(struct nemoenvs *envs, const char *client, const char *server, const char *ip, int port);
 extern int nemoenvs_send(struct nemoenvs *envs, const char *fmt, ...);
@@ -56,6 +59,11 @@ extern int nemoenvs_dispatch(struct nemoenvs *envs, const char *src, const char 
 
 extern int nemoenvs_dispatch_config_message(struct nemoenvs *envs, const char *src, const char *dst, const char *cmd, const char *path, struct itemone *one, void *data);
 extern int nemoenvs_dispatch_client_message(struct nemoenvs *envs, const char *src, const char *dst, const char *cmd, const char *path, struct itemone *one, void *data);
+
+static int nemoenvs_has_id(struct nemoenvs *envs, const char *id)
+{
+	return envs->id != NULL && strcmp(envs->id, id) == 0;
+}
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

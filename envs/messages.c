@@ -389,7 +389,7 @@ int nemoenvs_dispatch_system_message(struct nemoenvs *envs, const char *src, con
 {
 	struct nemoshell *shell = (struct nemoshell *)data;
 
-	if (strcmp(dst, "/nemoshell") == 0) {
+	if (strcmp(dst, envs->name) == 0) {
 		if (strcmp(cmd, "set") == 0) {
 			if (strcmp(path, "/nemoshell/screen") == 0) {
 				nemoenvs_handle_set_nemoshell_screen(shell, one);
@@ -427,7 +427,7 @@ int nemoenvs_dispatch_device_message(struct nemoenvs *envs, const char *src, con
 	struct nemoshell *shell = (struct nemoshell *)data;
 	struct nemocompz *compz = shell->compz;
 
-	if (strcmp(dst, "/nemoshell") == 0) {
+	if (strcmp(dst, envs->name) == 0) {
 		if (strcmp(cmd, "dev") == 0) {
 			if (strcmp(path, "/nemoshell/screen") == 0) {
 				struct nemoscreen *screen;
@@ -554,7 +554,7 @@ int nemoenvs_dispatch_config_message(struct nemoenvs *envs, const char *src, con
 
 int nemoenvs_dispatch_client_message(struct nemoenvs *envs, const char *src, const char *dst, const char *cmd, const char *path, struct itemone *one, void *data)
 {
-	if (strcmp(dst, "/nemoshell") == 0) {
+	if (strcmp(dst, envs->name) == 0) {
 		if (strcmp(cmd, "rep") == 0) {
 			if (strcmp(path, "/check/live") == 0) {
 				nemomsg_set_client(envs->msg, src,
