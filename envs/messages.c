@@ -377,6 +377,16 @@ static void nemoenvs_handle_set_nemoshell_fullscreen(struct nemoshell *shell, st
 	}
 }
 
+static void nemoenvs_handle_put_nemoshell_fullscreen(struct nemoshell *shell, struct itemone *one)
+{
+	const char *id;
+
+	id = nemoitem_one_get_attr(one, "id");
+	if (id != NULL) {
+		nemoshell_put_fullscreen(shell, id);
+	}
+}
+
 static void nemoenvs_handle_set_nemoshell_font(struct nemoshell *shell, struct itemone *one)
 {
 	char contents[1024];
@@ -415,6 +425,21 @@ int nemoenvs_dispatch_system_message(struct nemoenvs *envs, const char *src, con
 				nemoenvs_handle_set_nemoshell_fullscreen(shell, one);
 			} else if (strcmp(path, "/nemoshell/font") == 0) {
 				nemoenvs_handle_set_nemoshell_font(shell, one);
+			}
+		} else if (strcmp(cmd, "put") == 0) {
+			if (strcmp(path, "/nemoshell/screen") == 0) {
+			} else if (strcmp(path, "/nemoshell/input") == 0) {
+			} else if (strcmp(path, "/nemoshell/scene") == 0) {
+			} else if (strcmp(path, "/nemoshell/scope") == 0) {
+			} else if (strcmp(path, "/nemoshell/virtuio") == 0) {
+			} else if (strcmp(path, "/nemoshell/tuio") == 0) {
+			} else if (strcmp(path, "/nemoshell/plugin") == 0) {
+			} else if (strcmp(path, "/nemoshell/pick") == 0) {
+			} else if (strcmp(path, "/nemoshell/pitch") == 0) {
+			} else if (strcmp(path, "/nemoshell/bin") == 0) {
+			} else if (strcmp(path, "/nemoshell/fullscreen") == 0) {
+				nemoenvs_handle_put_nemoshell_fullscreen(shell, one);
+			} else if (strcmp(path, "/nemoshell/font") == 0) {
 			}
 		}
 	}
