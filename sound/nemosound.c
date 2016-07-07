@@ -493,6 +493,8 @@ int main(int argc, char *argv[])
 	struct nemotool *tool;
 	int opt;
 
+	opterr = 0;
+
 	while (opt = getopt_long(argc, argv, "", options, NULL)) {
 		if (opt == -1)
 			break;

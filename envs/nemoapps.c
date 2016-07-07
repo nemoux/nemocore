@@ -76,26 +76,33 @@ static void nemoenvs_execute_background(struct nemoenvs *envs, struct itemone *o
 	struct nemoshell *shell = envs->shell;
 	struct nemocompz *compz = shell->compz;
 	struct nemotoken *token;
-	pid_t pid;
+	struct itemattr *attr;
+	char cmds[512];
 	int32_t x, y;
-	int32_t width, height;
-	const char *id;
-	const char *image;
 	const char *path;
-	const char *args;
+	const char *id;
+	const char *name;
+	const char *value;
+	pid_t pid;
 
 	x = nemoitem_one_get_iattr(one, "x", 0);
 	y = nemoitem_one_get_iattr(one, "y", 0);
-	width = nemoitem_one_get_iattr(one, "width", nemocompz_get_scene_width(compz));
-	height = nemoitem_one_get_iattr(one, "height", nemocompz_get_scene_height(compz));
-	id = nemoitem_one_get_sattr(one, "id", "none");
-	image = nemoitem_one_get_sattr(one, "image", "none");
 	path = nemoitem_one_get_attr(one, "path");
-	args = nemoitem_one_get_attr(one, "args");
+	id = nemoitem_one_get_attr(one, "id");
 
-	token = nemotoken_create_format("%s;-w;%d;-h;%d;-i;%s;-f;%s", path, width, height, id, image);
-	if (args != NULL)
-		nemotoken_append_format(token, ";%s", args);
+	strcpy(cmds, path);
+
+	nemoitem_attr_for_each(attr, one) {
+		name = nemoitem_attr_get_name(attr);
+		value = nemoitem_attr_get_value(attr);
+
+		strcat(cmds, ";--");
+		strcat(cmds, name);
+		strcat(cmds, ";");
+		strcat(cmds, value);
+	}
+
+	token = nemotoken_create(cmds, strlen(cmds));
 	nemotoken_divide(token, ';');
 	nemotoken_update(token);
 
@@ -119,24 +126,36 @@ static void nemoenvs_execute_background(struct nemoenvs *envs, struct itemone *o
 static void nemoenvs_execute_soundmanager(struct nemoenvs *envs, struct itemone *one)
 {
 	struct nemotoken *token;
-	pid_t pid;
+	struct itemattr *attr;
+	char cmds[512];
 	const char *path;
-	const char *args;
+	const char *id;
+	const char *name;
+	const char *value;
+	pid_t pid;
 
 	path = nemoitem_one_get_attr(one, "path");
-	args = nemoitem_one_get_attr(one, "args");
+	id = nemoitem_one_get_attr(one, "id");
 
-	token = nemotoken_create(path, strlen(path));
-	if (args != NULL)
-		nemotoken_append_format(token, ";%s", args);
+	strcpy(cmds, path);
+
+	nemoitem_attr_for_each(attr, one) {
+		name = nemoitem_attr_get_name(attr);
+		value = nemoitem_attr_get_value(attr);
+
+		strcat(cmds, ";--");
+		strcat(cmds, name);
+		strcat(cmds, ";");
+		strcat(cmds, value);
+	}
+
+	token = nemotoken_create(cmds, strlen(cmds));
 	nemotoken_divide(token, ';');
 	nemotoken_update(token);
 
 	pid = wayland_execute_path(path, nemotoken_get_tokens(token), NULL);
 	if (pid > 0) {
-		nemoenvs_attach_app(envs,
-				nemoitem_one_get_sattr(one, "id", ""),
-				pid);
+		nemoenvs_attach_app(envs, id, pid);
 	}
 
 	nemotoken_destroy(token);
