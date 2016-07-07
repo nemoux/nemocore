@@ -646,6 +646,8 @@ static int glrenderer_prepare_egl_context(struct glrenderer *renderer, struct ne
 	};
 	EGLConfig egl_config;
 	EGLBoolean r;
+	const char *vendor;
+	const char *version;
 	const char *extensions;
 
 	if (!eglBindAPI(EGL_OPENGL_ES_API)) {
@@ -671,6 +673,14 @@ static int glrenderer_prepare_egl_context(struct glrenderer *renderer, struct ne
 		nemolog_error("GLRENDERER", "failed to make egl context current\n");
 		return -1;
 	}
+
+	vendor = (const char *)glGetString(GL_VENDOR);
+	if (vendor != NULL)
+		nemolog_message("GLRENDERER", "OpenGL ES vendor: %s\n", vendor);
+
+	version = (const char *)glGetString(GL_VERSION);
+	if (version != NULL)
+		nemolog_message("GLRENDERER", "OpenGL ES version: %s\n", version);
 
 	extensions = (const char *)glGetString(GL_EXTENSIONS);
 	if (extensions == NULL) {
