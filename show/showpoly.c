@@ -297,18 +297,6 @@ int nemoshow_poly_update(struct showone *one)
 {
 	struct showpoly *poly = NEMOSHOW_POLY(one);
 
-	if ((one->dirty & NEMOSHOW_CANVAS_DIRTY) != 0) {
-		struct showone *ref = NEMOSHOW_REF(one, NEMOSHOW_CANVAS_REF);
-
-		if (ref != NULL) {
-			struct nemoshow *show = one->show;
-			struct showcanvas *canvas = NEMOSHOW_CANVAS(ref);
-
-			nemolist_remove(&canvas->link);
-			nemolist_insert(&show->canvas_list, &canvas->link);
-		}
-	}
-
 	if ((one->dirty & NEMOSHOW_SHAPE_DIRTY) != 0) {
 		struct showpipe *pipe;
 		struct showone *parent;

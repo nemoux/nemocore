@@ -229,6 +229,20 @@ int nemoshow_canvas_resize(struct showone *one)
 	return 0;
 }
 
+int nemoshow_canvas_redraw(struct showone *one)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE)
+		nemoshow_canvas_render_vector(one->show, one);
+	else if (one->sub == NEMOSHOW_CANVAS_PIPELINE_TYPE)
+		nemoshow_canvas_render_pipeline(one->show, one);
+	else if (one->sub == NEMOSHOW_CANVAS_BACK_TYPE)
+		nemoshow_canvas_render_back(one->show, one);
+
+	return 0;
+}
+
 void nemoshow_canvas_set_alpha(struct showone *one, double alpha)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
@@ -316,6 +330,13 @@ int nemoshow_canvas_update(struct showone *one)
 		nemoshow_canvas_damage_filter(one);
 	if ((one->dirty & NEMOSHOW_REDRAW_DIRTY) != 0)
 		nemoshow_canvas_damage_all(one);
+
+	nemolist_remove(&canvas->link);
+
+	if (one->sub != NEMOSHOW_CANVAS_PIPELINE_TYPE)
+		nemolist_insert(&show->canvas_list, &canvas->link);
+	else
+		nemolist_insert(&show->pipe_list, &canvas->link);
 
 	return 0;
 }

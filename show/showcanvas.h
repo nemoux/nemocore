@@ -96,6 +96,7 @@ extern int nemoshow_canvas_below_one(struct showone *one, struct showone *below)
 
 extern int nemoshow_canvas_set_type(struct showone *one, int type);
 extern int nemoshow_canvas_resize(struct showone *one);
+extern int nemoshow_canvas_redraw(struct showone *one);
 extern void nemoshow_canvas_set_alpha(struct showone *one, double alpha);
 extern int nemoshow_canvas_set_filter(struct showone *one, const char *shader);
 extern int nemoshow_canvas_load_filter(struct showone *one, const char *shaderpath);

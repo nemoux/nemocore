@@ -110,6 +110,7 @@ static int nemoshow_dispatch_actor_resize(struct nemoactor *actor, int32_t width
 
 	nemoshow_set_size(show, width, height);
 
+	nemoshow_update_one(show);
 	nemoshow_render_one(show);
 
 	nemotale_composite_fbo_full(tale);
@@ -141,6 +142,7 @@ static void nemoshow_dispatch_actor_frame(struct nemoactor *actor, uint32_t msec
 		nemoactor_terminate_feedback(actor);
 	}
 
+	nemoshow_update_one(show);
 	nemoshow_render_one(show);
 
 	nemotale_composite_fbo(tale, &region);
@@ -695,6 +697,7 @@ void nemoshow_view_redraw(struct nemoshow *show)
 	struct nemoactor *actor = scon->actor;
 	struct nemotale *tale = (struct nemotale *)nemoactor_get_context(actor);
 
+	nemoshow_update_one(show);
 	nemoshow_render_one(show);
 
 	nemotale_composite_fbo_full(tale);

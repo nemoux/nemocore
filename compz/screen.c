@@ -424,8 +424,8 @@ void nemoscreen_set_rotation(struct nemoscreen *screen, float r)
 		return;
 
 	screen->geometry.r = r;
-	screen->transform.cosr = cos(r);
-	screen->transform.sinr = sin(r);
+	screen->transform.cosr = cos(-r);
+	screen->transform.sinr = sin(-r);
 
 	screen->transform.enable = 1;
 	screen->transform.dirty = 1;

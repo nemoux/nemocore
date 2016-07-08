@@ -47,6 +47,7 @@ struct nemoshow *nemoshow_create(void)
 	nemolist_init(&show->dirty_list);
 	nemolist_init(&show->bounds_list);
 	nemolist_init(&show->canvas_list);
+	nemolist_init(&show->pipe_list);
 	nemolist_init(&show->transition_list);
 	nemolist_init(&show->transition_destroy_list);
 
@@ -88,6 +89,7 @@ void nemoshow_destroy(struct nemoshow *show)
 	nemolist_remove(&show->dirty_list);
 	nemolist_remove(&show->bounds_list);
 	nemolist_remove(&show->canvas_list);
+	nemolist_remove(&show->pipe_list);
 	nemolist_remove(&show->transition_list);
 	nemolist_remove(&show->transition_destroy_list);
 
@@ -231,71 +233,29 @@ void nemoshow_render_one(struct nemoshow *show)
 {
 	struct showone *scene = show->scene;
 	struct showcanvas *canvas, *ncanvas;
-	struct showone *one, *none;
 
 	if (scene == NULL)
 		return;
 
-	nemolist_for_each_safe(one, none, &show->dirty_list, dirty_link) {
-		nemoshow_one_update(one);
-	}
-
-	nemolist_for_each_safe(one, none, &show->bounds_list, bounds_link) {
-		nemoshow_one_update_bounds(one);
-	}
-
-	show->dirty_serial = 0;
-
 	nemolist_for_each_safe(canvas, ncanvas, &show->canvas_list, link) {
-		one = NEMOSHOW_CANVAS_ONE(canvas);
+		canvas->dispatch_redraw(show, NEMOSHOW_CANVAS_ONE(canvas));
 
-		if (canvas->needs_redraw != 0) {
-			canvas->needs_redraw = 0;
+		canvas->needs_redraw = 0;
 
-			canvas->dispatch_redraw(show, one);
-		}
-
-		if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
-			nemotale_node_flush_gl(show->tale, canvas->node);
-			nemotale_node_filter_gl(show->tale, canvas->node);
-		} else if (one->sub == NEMOSHOW_CANVAS_PIXMAN_TYPE) {
-			nemotale_node_flush_gl(show->tale, canvas->node);
-			nemotale_node_filter_gl(show->tale, canvas->node);
-		} else if (one->sub == NEMOSHOW_CANVAS_OPENGL_TYPE || one->sub == NEMOSHOW_CANVAS_PIPELINE_TYPE) {
-			nemotale_node_filter_gl(show->tale, canvas->node);
-		}
+		nemotale_node_flush_gl(show->tale, canvas->node);
+		nemotale_node_filter_gl(show->tale, canvas->node);
 
 		nemolist_remove(&canvas->link);
 		nemolist_init(&canvas->link);
 	}
 
-	nemoshow_children_for_each(one, scene) {
-		if (one->type == NEMOSHOW_CANVAS_TYPE) {
-			canvas = NEMOSHOW_CANVAS(one);
+	nemolist_for_each_safe(canvas, ncanvas, &show->pipe_list, link) {
+		canvas->dispatch_redraw(show, NEMOSHOW_CANVAS_ONE(canvas));
 
-			if (canvas->needs_resize != 0) {
-				canvas->needs_resize = 0;
+		canvas->needs_redraw = 0;
 
-				nemoshow_canvas_resize(one);
-			}
-
-			if (canvas->viewport.dirty != 0) {
-				canvas->viewport.dirty = 0;
-
-				nemoshow_canvas_set_viewport(show, one,
-						(double)show->width / (double)NEMOSHOW_SCENE_AT(scene, width) * show->sx,
-						(double)show->height / (double)NEMOSHOW_SCENE_AT(scene, height) * show->sy);
-
-				if (canvas->dispatch_resize != NULL)
-					canvas->dispatch_resize(show, one, canvas->viewport.width, canvas->viewport.height);
-			}
-
-			if (canvas->needs_redraw != 0) {
-				canvas->needs_redraw = 0;
-
-				canvas->dispatch_redraw(show, one);
-			}
-		}
+		nemolist_remove(&canvas->link);
+		nemolist_init(&canvas->link);
 	}
 }
 
