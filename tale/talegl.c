@@ -884,7 +884,7 @@ int nemotale_node_flush_gl(struct nemotale *tale, struct talenode *node)
 		nemosignal_add(&node->destroy_signal, &gcontext->destroy_listener);
 	}
 
-	if (node->needs_flush != 0) {
+	if (pcontext != NULL && node->needs_flush != 0) {
 		glBindTexture(GL_TEXTURE_2D, gcontext->texture);
 
 		if (!context->has_unpack_subimage) {
