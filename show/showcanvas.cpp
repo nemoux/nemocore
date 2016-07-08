@@ -336,7 +336,7 @@ int nemoshow_canvas_update(struct showone *one)
 	if (one->sub != NEMOSHOW_CANVAS_PIPELINE_TYPE)
 		nemolist_insert(&show->canvas_list, &canvas->link);
 	else
-		nemolist_insert(&show->pipe_list, &canvas->link);
+		nemolist_insert(&show->pipeline_list, &canvas->link);
 
 	return 0;
 }

@@ -47,7 +47,7 @@ struct nemoshow *nemoshow_create(void)
 	nemolist_init(&show->dirty_list);
 	nemolist_init(&show->bounds_list);
 	nemolist_init(&show->canvas_list);
-	nemolist_init(&show->pipe_list);
+	nemolist_init(&show->pipeline_list);
 	nemolist_init(&show->transition_list);
 	nemolist_init(&show->transition_destroy_list);
 
@@ -89,7 +89,7 @@ void nemoshow_destroy(struct nemoshow *show)
 	nemolist_remove(&show->dirty_list);
 	nemolist_remove(&show->bounds_list);
 	nemolist_remove(&show->canvas_list);
-	nemolist_remove(&show->pipe_list);
+	nemolist_remove(&show->pipeline_list);
 	nemolist_remove(&show->transition_list);
 	nemolist_remove(&show->transition_destroy_list);
 
@@ -249,10 +249,12 @@ void nemoshow_render_one(struct nemoshow *show)
 		nemolist_init(&canvas->link);
 	}
 
-	nemolist_for_each_safe(canvas, ncanvas, &show->pipe_list, link) {
+	nemolist_for_each_safe(canvas, ncanvas, &show->pipeline_list, link) {
 		canvas->dispatch_redraw(show, NEMOSHOW_CANVAS_ONE(canvas));
 
 		canvas->needs_redraw = 0;
+
+		nemotale_node_filter_gl(show->tale, canvas->node);
 
 		nemolist_remove(&canvas->link);
 		nemolist_init(&canvas->link);
