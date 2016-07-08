@@ -58,6 +58,8 @@ struct showone *nemoshow_canvas_create(void)
 	canvas->needs_redraw = 1;
 	canvas->needs_full_redraw = 1;
 
+	canvas->dispatch_redraw = nemoshow_canvas_render_none;
+
 	nemolist_init(&canvas->link);
 
 	one = &canvas->base;
@@ -178,8 +180,12 @@ int nemoshow_canvas_set_type(struct showone *one, int type)
 		NEMOSHOW_CANVAS_CC(canvas, device) = new SkBitmapDevice(*NEMOSHOW_CANVAS_CC(canvas, bitmap));
 
 		NEMOSHOW_CANVAS_CC(canvas, damage) = new SkRegion;
+
+		canvas->dispatch_redraw = nemoshow_canvas_render_vector;
 	} else if (type == NEMOSHOW_CANVAS_PIPELINE_TYPE) {
 		canvas->node = nemotale_node_create_gl(canvas->width, canvas->height);
+
+		canvas->dispatch_redraw = nemoshow_canvas_render_pipeline;
 	} else if (type == NEMOSHOW_CANVAS_PIXMAN_TYPE) {
 		canvas->node = nemotale_node_create_pixman(canvas->width, canvas->height);
 	} else if (type == NEMOSHOW_CANVAS_OPENGL_TYPE) {
@@ -187,6 +193,8 @@ int nemoshow_canvas_set_type(struct showone *one, int type)
 	} else if (type == NEMOSHOW_CANVAS_BACK_TYPE) {
 		canvas->node = nemotale_node_create_pixman(canvas->width, canvas->height);
 		nemotale_node_opaque(canvas->node, 0, 0, canvas->width, canvas->height);
+
+		canvas->dispatch_redraw = nemoshow_canvas_render_back;
 	}
 
 	one->sub = type;
@@ -733,6 +741,10 @@ void nemoshow_canvas_render_back(struct nemoshow *show, struct showone *one)
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
 	nemotale_node_fill_pixman(canvas->node, canvas->fills[2], canvas->fills[1], canvas->fills[0], canvas->fills[3]);
+}
+
+void nemoshow_canvas_render_none(struct nemoshow *show, struct showone *one)
+{
 }
 
 int nemoshow_canvas_set_viewport(struct nemoshow *show, struct showone *one, double sx, double sy)

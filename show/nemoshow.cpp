@@ -252,10 +252,7 @@ void nemoshow_render_one(struct nemoshow *show)
 		if (canvas->needs_redraw != 0) {
 			canvas->needs_redraw = 0;
 
-			if (canvas->dispatch_redraw != NULL)
-				canvas->dispatch_redraw(show, one);
-			else
-				nemoshow_canvas_redraw_one(show, one);
+			canvas->dispatch_redraw(show, one);
 		}
 
 		if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
@@ -296,10 +293,7 @@ void nemoshow_render_one(struct nemoshow *show)
 			if (canvas->needs_redraw != 0) {
 				canvas->needs_redraw = 0;
 
-				if (canvas->dispatch_redraw != NULL)
-					canvas->dispatch_redraw(show, one);
-				else
-					nemoshow_canvas_redraw_one(show, one);
+				canvas->dispatch_redraw(show, one);
 			}
 		}
 	}
@@ -447,7 +441,7 @@ void nemoshow_detach_one(struct showone *one)
 {
 	nemolist_remove(&one->link);
 	nemolist_init(&one->link);
-	
+
 	one->show = NULL;
 }
 

@@ -106,6 +106,7 @@ extern int nemoshow_canvas_resize_pixman(struct showone *one, int32_t width, int
 
 extern void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one);
 extern void nemoshow_canvas_render_back(struct nemoshow *show, struct showone *one);
+extern void nemoshow_canvas_render_none(struct nemoshow *show, struct showone *one);
 
 extern int nemoshow_canvas_set_viewport(struct nemoshow *show, struct showone *one, double sx, double sy);
 extern int nemoshow_canvas_set_size(struct nemoshow *show, struct showone *one, int32_t width, int32_t height);
@@ -308,17 +309,6 @@ static inline void nemoshow_canvas_transform_from_viewport(struct showone *one, 
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
 	nemotale_node_transform_from_viewport(canvas->node, sx, sy, x, y);
-}
-
-static inline void nemoshow_canvas_redraw_one(struct nemoshow *show, struct showone *one)
-{
-	if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
-		nemoshow_canvas_render_vector(show, one);
-	} else if (one->sub == NEMOSHOW_CANVAS_PIPELINE_TYPE) {
-		nemoshow_canvas_render_pipeline(show, one);
-	} else if (one->sub == NEMOSHOW_CANVAS_BACK_TYPE) {
-		nemoshow_canvas_render_back(show, one);
-	}
 }
 
 #ifdef __cplusplus
