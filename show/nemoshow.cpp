@@ -48,6 +48,7 @@ struct nemoshow *nemoshow_create(void)
 	nemolist_init(&show->bounds_list);
 	nemolist_init(&show->canvas_list);
 	nemolist_init(&show->pipeline_list);
+	nemolist_init(&show->tiling_list);
 	nemolist_init(&show->transition_list);
 	nemolist_init(&show->transition_destroy_list);
 
@@ -55,6 +56,8 @@ struct nemoshow *nemoshow_create(void)
 
 	show->sx = 1.0f;
 	show->sy = 1.0f;
+
+	show->tilesize = NEMOSHOW_DEFAULT_TILESIZE;
 
 	return show;
 
@@ -90,6 +93,7 @@ void nemoshow_destroy(struct nemoshow *show)
 	nemolist_remove(&show->bounds_list);
 	nemolist_remove(&show->canvas_list);
 	nemolist_remove(&show->pipeline_list);
+	nemolist_remove(&show->tiling_list);
 	nemolist_remove(&show->transition_list);
 	nemolist_remove(&show->transition_destroy_list);
 
@@ -100,7 +104,29 @@ void nemoshow_destroy(struct nemoshow *show)
 	nemoshow_expr_destroy_symbol_table(show->stable);
 #endif
 
+	if (show->pool != NULL)
+		nemopool_destroy(show->pool);
+
 	free(show);
+}
+
+int nemoshow_prepare_threads(struct nemoshow *show, int threads)
+{
+	show->pool = nemopool_create(threads);
+
+	return show->pool != NULL;
+}
+
+void nemoshow_finish_threads(struct nemoshow *show)
+{
+	nemopool_destroy(show->pool);
+
+	show->pool = NULL;
+}
+
+void nemoshow_set_tilesize(struct nemoshow *show, int tilesize)
+{
+	show->tilesize = tilesize;
 }
 
 struct showone *nemoshow_search_one(struct nemoshow *show, const char *id)
@@ -254,6 +280,92 @@ void nemoshow_render_one(struct nemoshow *show)
 
 		canvas->needs_redraw = 0;
 
+		nemotale_node_filter_gl(show->tale, canvas->node);
+
+		nemolist_remove(&canvas->link);
+		nemolist_init(&canvas->link);
+	}
+}
+
+static void nemoshow_handle_vector_canvas_render(void *arg)
+{
+	struct showtask *task = (struct showtask *)arg;
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(task->one);
+
+	canvas->dispatch_redraw(task->show, task->one);
+
+	free(task);
+}
+
+static void nemoshow_handle_vector_canvas_render_tiled(void *arg)
+{
+	struct showtask *task = (struct showtask *)arg;
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(task->one);
+
+	canvas->dispatch_redraw_tiled(task->show, task->one, task->x, task->y, task->w, task->h);
+
+	free(task);
+}
+
+void nemoshow_divide_one(struct nemoshow *show)
+{
+	struct showone *scene = show->scene;
+	struct nemopool *pool = show->pool;
+	struct showcanvas *canvas, *ncanvas;
+	struct showtask *task;
+	int cw, ch;
+	int tr, tc;
+	int tw, th;
+	int i, j;
+
+	if (scene == NULL || pool == NULL)
+		return;
+
+	nemolist_for_each_safe(canvas, ncanvas, &show->canvas_list, link) {
+		if (canvas->dispatch_redraw_tiled == NULL)
+			continue;
+
+		cw = canvas->viewport.width;
+		ch = canvas->viewport.height;
+		tc = cw / show->tilesize + 1;
+		tr = ch / show->tilesize + 1;
+		tw = cw / tc;
+		th = ch / tr;
+
+		if (tc > 1 || tr > 1) {
+			canvas->needs_full_redraw = 1;
+
+			for (i = 0; i < tr; i++) {
+				for (j = 0; j < tc; j++) {
+					task = (struct showtask *)malloc(sizeof(struct showtask));
+					task->show = show;
+					task->one = NEMOSHOW_CANVAS_ONE(canvas);
+					task->x = j * tw;
+					task->y = i * th;
+					task->w = tw + 1;
+					task->h = th + 1;
+
+					nemopool_dispatch_task(pool, nemoshow_handle_vector_canvas_render_tiled, task);
+				}
+			}
+		} else {
+			task = (struct showtask *)malloc(sizeof(struct showtask));
+			task->show = show;
+			task->one = NEMOSHOW_CANVAS_ONE(canvas);
+
+			nemopool_dispatch_task(pool, nemoshow_handle_vector_canvas_render, task);
+		}
+
+		nemolist_remove(&canvas->link);
+		nemolist_insert_tail(&show->tiling_list, &canvas->link);
+	}
+
+	nemopool_finish_task(pool);
+
+	nemolist_for_each_safe(canvas, ncanvas, &show->tiling_list, link) {
+		canvas->needs_redraw = 0;
+
+		nemotale_node_flush_gl(show->tale, canvas->node);
 		nemotale_node_filter_gl(show->tale, canvas->node);
 
 		nemolist_remove(&canvas->link);

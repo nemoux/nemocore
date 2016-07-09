@@ -9,6 +9,7 @@
 #include <errno.h>
 
 #include <nemopool.h>
+#include <nemomisc.h>
 
 static struct poolnode *nemopool_create_node(struct nemopool *pool);
 static void nemopool_destroy_node(struct nemopool *pool, struct poolnode *node);

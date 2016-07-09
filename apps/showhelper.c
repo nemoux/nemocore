@@ -30,6 +30,7 @@ static void nemoshow_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t w
 	nemoshow_set_size(show, width, height);
 
 	nemoshow_update_one(show);
+	nemoshow_divide_one(show);
 	nemoshow_render_one(show);
 
 	nemotale_composite_egl_full(scon->tale);
@@ -50,6 +51,7 @@ static void nemoshow_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 	}
 
 	nemoshow_update_one(show);
+	nemoshow_divide_one(show);
 	nemoshow_render_one(show);
 
 	nemotale_composite_egl(tale, NULL);
@@ -655,6 +657,7 @@ void nemoshow_view_redraw(struct nemoshow *show)
 	struct nemocanvas *canvas = scon->canvas;
 
 	nemoshow_update_one(show);
+	nemoshow_divide_one(show);
 	nemoshow_render_one(show);
 
 	nemotale_composite_egl_full(scon->tale);

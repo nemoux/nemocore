@@ -33,14 +33,16 @@ NEMO_BEGIN_EXTERN_C
 #include <skiahelper.h>
 
 #include <nemotale.h>
-#include <nemolist.h>
-#include <nemolistener.h>
+#include <nemopool.h>
+
+#define NEMOSHOW_DEFAULT_TILESIZE		(1024)
 
 typedef enum {
 	NEMOSHOW_ONTIME_STATE = (1 << 0)
 } NemoShowState;
 
 struct nemoshow;
+struct showone;
 
 typedef void (*nemoshow_dispatch_transition_done_t)(void *userdata);
 typedef void (*nemoshow_dispatch_event_t)(struct nemoshow *show, void *event);
@@ -49,6 +51,14 @@ typedef void (*nemoshow_dispatch_transform_t)(struct nemoshow *show, int32_t vis
 typedef void (*nemoshow_dispatch_layer_t)(struct nemoshow *show, int32_t visible);
 typedef void (*nemoshow_dispatch_fullscreen_t)(struct nemoshow *show, const char *id, int32_t x, int32_t y, int32_t width, int32_t height);
 typedef int (*nemoshow_dispatch_destroy_t)(struct nemoshow *show);
+
+struct showtask {
+	struct nemoshow *show;
+	struct showone *one;
+
+	int32_t x, y;
+	int32_t w, h;
+};
 
 struct nemoshow {
 	struct nemotale *tale;
@@ -69,6 +79,7 @@ struct nemoshow {
 	struct nemolist bounds_list;
 	struct nemolist canvas_list;
 	struct nemolist pipeline_list;
+	struct nemolist tiling_list;
 	struct nemolist transition_list;
 	struct nemolist transition_destroy_list;
 
@@ -85,6 +96,9 @@ struct nemoshow {
 	uint32_t dirty_serial;
 	uint32_t transition_serial;
 
+	struct nemopool *pool;
+	int tilesize;
+
 	void *context;
 	void *userdata;
 };
@@ -100,6 +114,11 @@ extern void nemoshow_finalize(void);
 extern struct nemoshow *nemoshow_create(void);
 extern void nemoshow_destroy(struct nemoshow *show);
 
+extern int nemoshow_prepare_threads(struct nemoshow *show, int threads);
+extern void nemoshow_finish_threads(struct nemoshow *show);
+
+extern void nemoshow_set_tilesize(struct nemoshow *show, int tilesize);
+
 extern struct showone *nemoshow_search_one(struct nemoshow *show, const char *id);
 
 #ifdef NEMOUX_WITH_SHOWEXPR
@@ -111,6 +130,7 @@ extern void nemoshow_update_one_expression_without_dirty(struct nemoshow *show, 
 
 extern void nemoshow_update_one(struct nemoshow *show);
 extern void nemoshow_render_one(struct nemoshow *show);
+extern void nemoshow_divide_one(struct nemoshow *show);
 
 extern int nemoshow_set_scene(struct nemoshow *show, struct showone *one);
 extern void nemoshow_put_scene(struct nemoshow *show);

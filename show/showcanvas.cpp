@@ -59,6 +59,7 @@ struct showone *nemoshow_canvas_create(void)
 	canvas->needs_full_redraw = 1;
 
 	canvas->dispatch_redraw = nemoshow_canvas_render_none;
+	canvas->dispatch_redraw_tiled = NULL;
 
 	nemolist_init(&canvas->link);
 
@@ -182,6 +183,7 @@ int nemoshow_canvas_set_type(struct showone *one, int type)
 		NEMOSHOW_CANVAS_CC(canvas, damage) = new SkRegion;
 
 		canvas->dispatch_redraw = nemoshow_canvas_render_vector;
+		canvas->dispatch_redraw_tiled = nemoshow_canvas_render_vector_tiled;
 	} else if (type == NEMOSHOW_CANVAS_PIPELINE_TYPE) {
 		canvas->node = nemotale_node_create_gl(canvas->width, canvas->height);
 
@@ -755,6 +757,24 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 	delete _canvas;
 
 	NEMOSHOW_CANVAS_CC(canvas, damage)->setEmpty();
+}
+
+void nemoshow_canvas_render_vector_tiled(struct nemoshow *show, struct showone *one, int32_t x, int32_t y, int32_t width, int32_t height)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+	struct showone *child;
+	SkCanvas *_canvas;
+
+	_canvas = new SkCanvas(NEMOSHOW_CANVAS_CC(canvas, device));
+	_canvas->clipRect(SkRect::MakeXYWH(x, y, width, height));
+	_canvas->clear(SK_ColorTRANSPARENT);
+	_canvas->scale(canvas->viewport.sx, canvas->viewport.sy);
+
+	nemoshow_children_for_each(child, one) {
+		nemoshow_canvas_render_one(canvas, _canvas, child);
+	}
+
+	delete _canvas;
 }
 
 void nemoshow_canvas_render_back(struct nemoshow *show, struct showone *one)

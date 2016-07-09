@@ -32,6 +32,7 @@ typedef enum {
 struct nemoshow;
 
 typedef void (*nemoshow_canvas_dispatch_redraw_t)(struct nemoshow *show, struct showone *one);
+typedef void (*nemoshow_canvas_dispatch_redraw_tiled_t)(struct nemoshow *show, struct showone *one, int32_t x, int32_t y, int32_t width, int32_t height);
 typedef void (*nemoshow_canvas_dispatch_resize_t)(struct nemoshow *show, struct showone *one, int32_t width, int32_t height);
 typedef void (*nemoshow_canvas_dispatch_event_t)(struct nemoshow *show, struct showone *one, void *event);
 typedef int (*nemoshow_canvas_contain_point_t)(struct nemoshow *show, struct showone *one, float x, float y);
@@ -73,6 +74,7 @@ struct showcanvas {
 	int needs_full_redraw;
 
 	nemoshow_canvas_dispatch_redraw_t dispatch_redraw;
+	nemoshow_canvas_dispatch_redraw_tiled_t dispatch_redraw_tiled;
 	nemoshow_canvas_dispatch_resize_t dispatch_resize;
 	nemoshow_canvas_dispatch_event_t dispatch_event;
 	nemoshow_canvas_contain_point_t contain_point;
@@ -106,6 +108,7 @@ extern void nemoshow_canvas_detach_pixman(struct showone *one);
 extern int nemoshow_canvas_resize_pixman(struct showone *one, int32_t width, int32_t height);
 
 extern void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one);
+extern void nemoshow_canvas_render_vector_tiled(struct nemoshow *show, struct showone *one, int32_t x, int32_t y, int32_t width, int32_t height);
 extern void nemoshow_canvas_render_back(struct nemoshow *show, struct showone *one);
 extern void nemoshow_canvas_render_none(struct nemoshow *show, struct showone *one);
 
