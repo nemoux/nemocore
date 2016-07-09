@@ -6,9 +6,7 @@
 #include <showcanvas.h>
 
 typedef struct _showcanvas {
-	SkBitmapDevice *device;
 	SkBitmap *bitmap;
-
 	SkRegion *damage;
 } showcanvas_t;
 

@@ -40,7 +40,6 @@ struct showone *nemoshow_canvas_create(void)
 
 	canvas->cc = new showcanvas_t;
 	NEMOSHOW_CANVAS_CC(canvas, bitmap) = NULL;
-	NEMOSHOW_CANVAS_CC(canvas, device) = NULL;
 	NEMOSHOW_CANVAS_CC(canvas, damage) = NULL;
 
 	canvas->viewport.dirty = 1;
@@ -111,8 +110,6 @@ void nemoshow_canvas_destroy(struct showone *one)
 		delete NEMOSHOW_CANVAS_CC(canvas, damage);
 	if (NEMOSHOW_CANVAS_CC(canvas, bitmap) != NULL)
 		delete NEMOSHOW_CANVAS_CC(canvas, bitmap);
-	if (NEMOSHOW_CANVAS_CC(canvas, device) != NULL)
-		delete NEMOSHOW_CANVAS_CC(canvas, device);
 
 	delete static_cast<showcanvas_t *>(canvas->cc);
 
@@ -177,8 +174,6 @@ int nemoshow_canvas_set_type(struct showone *one, int type)
 				SkImageInfo::Make(canvas->width, canvas->height, kN32_SkColorType, kPremul_SkAlphaType));
 		NEMOSHOW_CANVAS_CC(canvas, bitmap)->setPixels(
 				nemotale_node_get_buffer(canvas->node));
-
-		NEMOSHOW_CANVAS_CC(canvas, device) = new SkBitmapDevice(*NEMOSHOW_CANVAS_CC(canvas, bitmap));
 
 		NEMOSHOW_CANVAS_CC(canvas, damage) = new SkRegion;
 
@@ -730,9 +725,11 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 	struct showone *child;
+	SkBitmapDevice *_device;
 	SkCanvas *_canvas;
 
-	_canvas = new SkCanvas(NEMOSHOW_CANVAS_CC(canvas, device));
+	_device = new SkBitmapDevice(*NEMOSHOW_CANVAS_CC(canvas, bitmap));
+	_canvas = new SkCanvas(_device);
 
 	if (canvas->needs_full_redraw == 0) {
 		_canvas->clipRegion(*NEMOSHOW_CANVAS_CC(canvas, damage));
@@ -755,6 +752,7 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 	}
 
 	delete _canvas;
+	delete _device;
 
 	NEMOSHOW_CANVAS_CC(canvas, damage)->setEmpty();
 }
@@ -763,9 +761,11 @@ void nemoshow_canvas_render_vector_tiled(struct nemoshow *show, struct showone *
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 	struct showone *child;
+	SkBitmapDevice *_device;
 	SkCanvas *_canvas;
 
-	_canvas = new SkCanvas(NEMOSHOW_CANVAS_CC(canvas, device));
+	_device = new SkBitmapDevice(*NEMOSHOW_CANVAS_CC(canvas, bitmap));
+	_canvas = new SkCanvas(_device);
 	_canvas->clipRect(SkRect::MakeXYWH(x, y, width, height));
 	_canvas->clear(SK_ColorTRANSPARENT);
 	_canvas->scale(canvas->viewport.sx, canvas->viewport.sy);
@@ -775,6 +775,7 @@ void nemoshow_canvas_render_vector_tiled(struct nemoshow *show, struct showone *
 	}
 
 	delete _canvas;
+	delete _device;
 }
 
 void nemoshow_canvas_render_back(struct nemoshow *show, struct showone *one)
@@ -799,7 +800,6 @@ int nemoshow_canvas_set_viewport(struct nemoshow *show, struct showone *one, dou
 		canvas->viewport.width = canvas->width * sx;
 		canvas->viewport.height = canvas->height * sy;
 
-		delete NEMOSHOW_CANVAS_CC(canvas, device);
 		delete NEMOSHOW_CANVAS_CC(canvas, bitmap);
 
 		nemotale_node_set_viewport_pixman(canvas->node, canvas->viewport.width, canvas->viewport.height);
@@ -809,8 +809,6 @@ int nemoshow_canvas_set_viewport(struct nemoshow *show, struct showone *one, dou
 				SkImageInfo::Make(canvas->viewport.width, canvas->viewport.height, kN32_SkColorType, kPremul_SkAlphaType));
 		NEMOSHOW_CANVAS_CC(canvas, bitmap)->setPixels(
 				nemotale_node_get_buffer(canvas->node));
-
-		NEMOSHOW_CANVAS_CC(canvas, device) = new SkBitmapDevice(*NEMOSHOW_CANVAS_CC(canvas, bitmap));
 
 		nemoshow_canvas_damage_all(one);
 		nemoshow_canvas_dirty_all(one, NEMOSHOW_SHAPE_DIRTY);
