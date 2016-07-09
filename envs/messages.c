@@ -406,6 +406,31 @@ static void nemoenvs_handle_set_nemoshell_font(struct nemoshell *shell, struct i
 	setenv("NEMOSHELL_FONT", contents, 1);
 }
 
+static void nemoenvs_handle_set_nemoshell_show(struct nemoshell *shell, struct itemone *one)
+{
+	char contents[128];
+	int threads;
+	int tilesize;
+
+	threads = nemoitem_one_get_iattr(one, "threads", 0);
+	if (threads > 0) {
+		snprintf(contents, sizeof(contents), "%d", threads);
+
+		setenv("NEMOSHOW_THREADS", contents, 1);
+	} else {
+		putenv("NEMOSHOW_THREADS");
+	}
+
+	tilesize = nemoitem_one_get_iattr(one, "tilesize", 0);
+	if (tilesize > 0) {
+		snprintf(contents, sizeof(contents), "%d", tilesize);
+
+		setenv("NEMOSHOW_TILESIZE", contents, 1);
+	} else {
+		putenv("NEMOSHOW_TILESIZE");
+	}
+}
+
 int nemoenvs_dispatch_system_message(struct nemoenvs *envs, const char *src, const char *dst, const char *cmd, const char *path, struct itemone *one, void *data)
 {
 	struct nemoshell *shell = (struct nemoshell *)data;
@@ -436,6 +461,8 @@ int nemoenvs_dispatch_system_message(struct nemoenvs *envs, const char *src, con
 				nemoenvs_handle_set_nemoshell_fullscreen(shell, one);
 			} else if (strcmp(path, "/nemoshell/font") == 0) {
 				nemoenvs_handle_set_nemoshell_font(shell, one);
+			} else if (strcmp(path, "/nemoshell/show") == 0) {
+				nemoenvs_handle_set_nemoshell_show(shell, one);
 			}
 		} else if (strcmp(cmd, "put") == 0) {
 			if (strcmp(path, "/nemoshell/screen") == 0) {
@@ -451,6 +478,7 @@ int nemoenvs_dispatch_system_message(struct nemoenvs *envs, const char *src, con
 			} else if (strcmp(path, "/nemoshell/fullscreen") == 0) {
 				nemoenvs_handle_put_nemoshell_fullscreen(shell, one);
 			} else if (strcmp(path, "/nemoshell/font") == 0) {
+			} else if (strcmp(path, "/nemoshell/show") == 0) {
 			}
 		}
 	}

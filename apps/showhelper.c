@@ -194,6 +194,7 @@ struct nemoshow *nemoshow_create_view(struct nemotool *tool, int32_t width, int3
 	struct showcontext *scon;
 	struct nemoshow *show;
 	struct nemotimer *timer;
+	const char *env;
 
 	scon = (struct showcontext *)malloc(sizeof(struct showcontext));
 	if (scon == NULL)
@@ -251,6 +252,13 @@ struct nemoshow *nemoshow_create_view(struct nemotool *tool, int32_t width, int3
 
 	nemocanvas_set_userdata(NTEGL_CANVAS(scon->eglcanvas), scon->tale);
 	nemotale_set_userdata(scon->tale, show);
+
+	env = getenv("NEMOSHOW_THREADS");
+	if (env != NULL)
+		nemoshow_prepare_threads(show, strtoul(env, NULL, 10));
+	env = getenv("NEMOSHOW_TILESIZE");
+	if (env != NULL)
+		nemoshow_set_tilesize(show, strtoul(env, NULL, 10));
 
 	return show;
 
