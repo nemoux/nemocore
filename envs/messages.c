@@ -187,6 +187,8 @@ static void nemoenvs_handle_set_nemoshell_input(struct nemoshell *shell, struct 
 		} else {
 			nemoinput_put_screen(node);
 
+			nemoinput_set_size(node, width, height);
+
 			nemoinput_clear_transform(node);
 
 			if (transform != NULL) {
