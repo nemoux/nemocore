@@ -129,6 +129,8 @@ struct clientstate {
 	float r;
 	int32_t width, height;
 
+	int has_position;
+
 	float dx, dy;
 
 	int is_maximized;
@@ -375,6 +377,8 @@ static inline void clientstate_set_position(struct clientstate *state, float x, 
 {
 	state->x = x;
 	state->y = y;
+
+	state->has_position = 1;
 }
 
 static inline void clientstate_set_rotate(struct clientstate *state, float r)

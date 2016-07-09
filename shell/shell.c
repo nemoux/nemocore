@@ -922,8 +922,15 @@ static inline void nemoshell_set_client_state(struct shellbin *bin, struct clien
 
 		nemoshell_send_bin_state(bin);
 	} else {
-		bin->initial.x = state->x;
-		bin->initial.y = state->y;
+		if (state->has_position != 0) {
+			bin->initial.x = state->x;
+			bin->initial.y = state->y;
+		} else {
+			pixman_box32_t *extents = pixman_region32_extents(&bin->shell->compz->scope);
+
+			bin->initial.x = random_get_int(extents->x1, extents->x2);
+			bin->initial.y = random_get_int(extents->y1, extents->y2);
+		}
 		bin->initial.r = state->r;
 		bin->initial.dx = state->dx;
 		bin->initial.dy = state->dy;
