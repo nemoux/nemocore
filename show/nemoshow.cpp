@@ -329,8 +329,8 @@ void nemoshow_divide_one(struct nemoshow *show)
 		ch = canvas->viewport.height;
 		tc = cw / show->tilesize + 1;
 		tr = ch / show->tilesize + 1;
-		tw = cw / tc;
-		th = ch / tr;
+		tw = ceil(cw / tc);
+		th = ceil(ch / tr);
 
 		if (tc > 1 || tr > 1) {
 			canvas->needs_full_redraw = 1;
@@ -342,8 +342,8 @@ void nemoshow_divide_one(struct nemoshow *show)
 					task->one = NEMOSHOW_CANVAS_ONE(canvas);
 					task->x = j * tw;
 					task->y = i * th;
-					task->w = tw + 1;
-					task->h = th + 1;
+					task->w = tw;
+					task->h = th;
 
 					nemopool_dispatch_task(pool, nemoshow_handle_vector_canvas_render_tiled, task);
 				}
