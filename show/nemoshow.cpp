@@ -5,12 +5,16 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <skiaconfig.hpp>
+
 #include <nemoshow.h>
+#include <showcanvas.h>
+#include <showcanvas.hpp>
 #include <nemobox.h>
 #include <nemoattr.h>
 #include <showmisc.h>
 #include <nemomisc.h>
-#include <skiaconfig.hpp>
+#include <nemolog.h>
 
 void __attribute__((constructor(101))) nemoshow_initialize(void)
 {
@@ -313,6 +317,7 @@ void nemoshow_divide_one(struct nemoshow *show)
 	struct nemopool *pool = show->pool;
 	struct showcanvas *canvas, *ncanvas;
 	struct showtask *task;
+	int needs_tiling = 0;
 	int cw, ch;
 	int tr, tc;
 	int tw, th;
@@ -333,8 +338,19 @@ void nemoshow_divide_one(struct nemoshow *show)
 		th = ceil(ch / tr);
 
 		if (tc > 1 || tr > 1) {
-			canvas->needs_full_redraw = 1;
+			if (canvas->needs_full_redraw != 0) {
+				canvas->needs_full_redraw = 0;
 
+				needs_tiling = 1;
+			} else {
+				SkIRect box = NEMOSHOW_CANVAS_CC(canvas, damage)->getBounds();
+
+				if (box.width() * box.height() >= show->tilesize * show->tilesize)
+					needs_tiling = 1;
+			}
+		}
+
+		if (needs_tiling != 0) {
 			for (i = 0; i < tr; i++) {
 				for (j = 0; j < tc; j++) {
 					task = (struct showtask *)malloc(sizeof(struct showtask));
