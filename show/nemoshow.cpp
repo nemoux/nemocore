@@ -248,7 +248,7 @@ void nemoshow_update_one(struct nemoshow *show)
 			if (canvas->viewport.dirty != 0) {
 				canvas->viewport.dirty = 0;
 
-				nemoshow_canvas_set_viewport(show, one,
+				nemoshow_canvas_set_viewport(one,
 						(double)show->width / (double)NEMOSHOW_SCENE_AT(scene, width) * show->sx,
 						(double)show->height / (double)NEMOSHOW_SCENE_AT(scene, height) * show->sy);
 

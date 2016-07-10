@@ -761,7 +761,7 @@ void nemoshow_canvas_render_none(struct nemoshow *show, struct showone *one)
 {
 }
 
-int nemoshow_canvas_set_viewport(struct nemoshow *show, struct showone *one, double sx, double sy)
+int nemoshow_canvas_set_viewport(struct showone *one, double sx, double sy)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
@@ -825,7 +825,7 @@ int nemoshow_canvas_set_viewport(struct nemoshow *show, struct showone *one, dou
 	return 0;
 }
 
-int nemoshow_canvas_set_size(struct nemoshow *show, struct showone *one, int32_t width, int32_t height)
+int nemoshow_canvas_set_size(struct showone *one, int32_t width, int32_t height)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 

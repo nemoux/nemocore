@@ -136,7 +136,7 @@ static void nemonavi_dispatch_popup_rect(struct nemonavi *navi, int x, int y, in
 	nemoshow_event_transform_from_viewport(context->show, x + width, y + height, &x1, &y1);
 
 	nemoshow_canvas_translate(context->popup, x0, y0);
-	nemoshow_canvas_set_size(context->show, context->popup, x1 - x0, y1 - y0);
+	nemoshow_canvas_set_size(context->popup, x1 - x0, y1 - y0);
 }
 
 static void nemonavi_dispatch_key_event(struct nemonavi *navi, uint32_t code, int focus_on_editable_field)

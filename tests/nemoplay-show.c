@@ -59,10 +59,10 @@ static void nemoplay_dispatch_show_fullscreen(struct nemoshow *show, const char 
 		double ratio = ((double)width / nemoplay_get_video_aspectratio(context->play)) / (double)height;
 
 		nemoshow_canvas_translate(context->canvas, 0.0f, context->height * (1.0f - ratio) / 2.0f);
-		nemoshow_canvas_set_size(context->show, context->canvas, context->width, context->height * ratio);
+		nemoshow_canvas_set_size(context->canvas, context->width, context->height * ratio);
 	} else {
 		nemoshow_canvas_translate(context->canvas, 0.0f, 0.0f);
-		nemoshow_canvas_set_size(context->show, context->canvas, context->width, context->height);
+		nemoshow_canvas_set_size(context->canvas, context->width, context->height);
 
 		nemoshow_view_resize(context->show, width, width / nemoplay_get_video_aspectratio(context->play));
 	}

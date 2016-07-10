@@ -112,8 +112,8 @@ extern void nemoshow_canvas_render_vector_tiled(struct nemoshow *show, struct sh
 extern void nemoshow_canvas_render_back(struct nemoshow *show, struct showone *one);
 extern void nemoshow_canvas_render_none(struct nemoshow *show, struct showone *one);
 
-extern int nemoshow_canvas_set_viewport(struct nemoshow *show, struct showone *one, double sx, double sy);
-extern int nemoshow_canvas_set_size(struct nemoshow *show, struct showone *one, int32_t width, int32_t height);
+extern int nemoshow_canvas_set_viewport(struct showone *one, double sx, double sy);
+extern int nemoshow_canvas_set_size(struct showone *one, int32_t width, int32_t height);
 
 extern void nemoshow_canvas_damage(struct showone *one, int32_t x, int32_t y, int32_t width, int32_t height);
 extern void nemoshow_canvas_damage_one(struct showone *one, struct showone *child);
