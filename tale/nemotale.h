@@ -248,15 +248,23 @@ static inline int nemotale_has_dispatch_event(struct nemotale *tale)
 	return tale->dispatch_event != NULL;
 }
 
-static inline void nemotale_set_long_press_gesture(struct nemotale *tale, uint32_t duration, uint32_t distance)
+static inline void nemotale_set_long_press_duration(struct nemotale *tale, uint32_t duration)
 {
 	tale->long_press_duration = duration;
+}
+
+static inline void nemotale_set_long_press_distance(struct nemotale *tale, uint32_t distance)
+{
 	tale->long_press_distance = distance;
 }
 
-static inline void nemotale_set_single_click_gesture(struct nemotale *tale, uint32_t duration, uint32_t distance)
+static inline void nemotale_set_single_click_duration(struct nemotale *tale, uint32_t duration)
 {
 	tale->single_click_duration = duration;
+}
+
+static inline void nemotale_set_single_click_distance(struct nemotale *tale, uint32_t distance)
+{
 	tale->single_click_distance = distance;
 }
 

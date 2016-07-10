@@ -253,6 +253,19 @@ struct nemoshow *nemoshow_create_view(struct nemotool *tool, int32_t width, int3
 	if (env != NULL)
 		nemoshow_set_tilesize(show, strtoul(env, NULL, 10));
 
+	env = getenv("NEMOTALE_LONG_PRESS_DURATION");
+	if (env != NULL)
+		nemotale_set_long_press_duration(scon->tale, strtoul(env, NULL, 10));
+	env = getenv("NEMOTALE_LONG_PRESS_DISTANCE");
+	if (env != NULL)
+		nemotale_set_long_press_distance(scon->tale, strtoul(env, NULL, 10));
+	env = getenv("NEMOTALE_SINGLE_CLICK_DURATION");
+	if (env != NULL)
+		nemotale_set_single_click_duration(scon->tale, strtoul(env, NULL, 10));
+	env = getenv("NEMOTALE_SINGLE_CLICK_DISTANCE");
+	if (env != NULL)
+		nemotale_set_single_click_distance(scon->tale, strtoul(env, NULL, 10));
+
 	return show;
 
 err1:

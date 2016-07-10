@@ -15,8 +15,6 @@
 
 int nemotale_prepare(struct nemotale *tale)
 {
-	char *env;
-
 	nemosignal_init(&tale->destroy_signal);
 
 	nemolist_init(&tale->ptap_list);
@@ -37,29 +35,10 @@ int nemotale_prepare(struct nemotale *tale)
 	tale->keyboard.focus = NULL;
 	nemolist_init(&tale->keyboard.node_destroy_listener.link);
 
-	env = getenv("NEMOTALE_LONG_PRESS_DURATION");
-	if (env != NULL)
-		tale->long_press_duration = strtoul(env, NULL, 10);
-	else
-		tale->long_press_duration = 1500;
-
-	env = getenv("NEMOTALE_LONG_PRESS_DISTANCE");
-	if (env != NULL)
-		tale->long_press_distance = strtoul(env, NULL, 10);
-	else
-		tale->long_press_distance = 50;
-
-	env = getenv("NEMOTALE_SINGLE_CLICK_DURATION");
-	if (env != NULL)
-		tale->single_click_duration = strtoul(env, NULL, 10);
-	else
-		tale->single_click_duration = 700;
-
-	env = getenv("NEMOTALE_SINGLE_CLICK_DISTANCE");
-	if (env != NULL)
-		tale->single_click_distance = strtoul(env, NULL, 10);
-	else
-		tale->single_click_distance = 30;
+	tale->long_press_duration = 1500;
+	tale->long_press_distance = 50;
+	tale->single_click_duration = 700;
+	tale->single_click_distance = 30;
 
 	return 0;
 }

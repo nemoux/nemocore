@@ -15,16 +15,6 @@ NEMO_BEGIN_EXTERN_C
 #include <taleevent.h>
 #include <talegesture.h>
 
-static inline void nemoshow_set_long_press_gesture(struct nemoshow *show, uint32_t duration, uint32_t distance)
-{
-	nemotale_set_long_press_gesture(show->tale, duration, distance);
-}
-
-static inline void nemoshow_set_single_click_gesture(struct nemoshow *show, uint32_t duration, uint32_t distance)
-{
-	nemotale_set_single_click_gesture(show->tale, duration, distance);
-}
-
 static inline float nemoshow_event_get_x(void *event)
 {
 	return nemotale_event_get_x((struct taleevent *)event);
