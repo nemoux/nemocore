@@ -353,15 +353,17 @@ void nemoshow_divide_one(struct nemoshow *show)
 		if (needs_tiling != 0) {
 			for (i = 0; i < tr; i++) {
 				for (j = 0; j < tc; j++) {
-					task = (struct showtask *)malloc(sizeof(struct showtask));
-					task->show = show;
-					task->one = NEMOSHOW_CANVAS_ONE(canvas);
-					task->x = j * tw;
-					task->y = i * th;
-					task->w = tw;
-					task->h = th;
+					if (NEMOSHOW_CANVAS_CC(canvas, damage)->intersects(SkIRect::MakeXYWH(j * tw, i * th, tw, th))) {
+						task = (struct showtask *)malloc(sizeof(struct showtask));
+						task->show = show;
+						task->one = NEMOSHOW_CANVAS_ONE(canvas);
+						task->x = j * tw;
+						task->y = i * th;
+						task->w = tw;
+						task->h = th;
 
-					nemopool_dispatch_task(pool, nemoshow_handle_vector_canvas_render_tiled, task);
+						nemopool_dispatch_task(pool, nemoshow_handle_vector_canvas_render_tiled, task);
+					}
 				}
 			}
 		} else {
