@@ -482,14 +482,7 @@ static inline void nemoshow_canvas_render_item_path(struct showcanvas *canvas, S
 		if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
 			_canvas->drawPath(*NEMOSHOW_ITEM_CC(item, path), *NEMOSHOW_ITEM_CC(item, stroke));
 	} else {
-		SkPath path;
-
-		if (NEMOSHOW_ITEM_CC(item, measure)->getSegment(
-					NEMOSHOW_ITEM_CC(item, measure)->getLength() * item->from,
-					NEMOSHOW_ITEM_CC(item, measure)->getLength() * item->to,
-					&path, true) == true) {
-			_canvas->drawPath(path, *NEMOSHOW_ITEM_CC(item, stroke));
-		}
+		_canvas->drawPath(*NEMOSHOW_ITEM_CC(item, subpath), *NEMOSHOW_ITEM_CC(item, stroke));
 	}
 }
 
@@ -503,14 +496,7 @@ static inline void nemoshow_canvas_render_item_pathtwice(struct showcanvas *canv
 		if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
 			_canvas->drawPath(*NEMOSHOW_ITEM_CC(item, path), *NEMOSHOW_ITEM_CC(item, stroke));
 	} else {
-		SkPath path;
-
-		if (NEMOSHOW_ITEM_CC(item, measure)->getSegment(
-					NEMOSHOW_ITEM_CC(item, measure)->getLength() * item->from,
-					NEMOSHOW_ITEM_CC(item, measure)->getLength() * item->to,
-					&path, true) == true) {
-			_canvas->drawPath(path, *NEMOSHOW_ITEM_CC(item, stroke));
-		}
+		_canvas->drawPath(*NEMOSHOW_ITEM_CC(item, subpath), *NEMOSHOW_ITEM_CC(item, stroke));
 	}
 }
 
@@ -524,14 +510,7 @@ static inline void nemoshow_canvas_render_item_patharray(struct showcanvas *canv
 		if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
 			_canvas->drawPath(*NEMOSHOW_ITEM_CC(item, path), *NEMOSHOW_ITEM_CC(item, stroke));
 	} else {
-		SkPath path;
-
-		if (NEMOSHOW_ITEM_CC(item, measure)->getSegment(
-					NEMOSHOW_ITEM_CC(item, measure)->getLength() * item->from,
-					NEMOSHOW_ITEM_CC(item, measure)->getLength() * item->to,
-					&path, true) == true) {
-			_canvas->drawPath(path, *NEMOSHOW_ITEM_CC(item, stroke));
-		}
+		_canvas->drawPath(*NEMOSHOW_ITEM_CC(item, subpath), *NEMOSHOW_ITEM_CC(item, stroke));
 	}
 }
 
@@ -545,14 +524,7 @@ static inline void nemoshow_canvas_render_item_pathlist(struct showcanvas *canva
 		if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
 			_canvas->drawPath(*NEMOSHOW_ITEM_CC(item, path), *NEMOSHOW_ITEM_CC(item, stroke));
 	} else {
-		SkPath path;
-
-		if (NEMOSHOW_ITEM_CC(item, measure)->getSegment(
-					NEMOSHOW_ITEM_CC(item, measure)->getLength() * item->from,
-					NEMOSHOW_ITEM_CC(item, measure)->getLength() * item->to,
-					&path, true) == true) {
-			_canvas->drawPath(path, *NEMOSHOW_ITEM_CC(item, stroke));
-		}
+		_canvas->drawPath(*NEMOSHOW_ITEM_CC(item, subpath), *NEMOSHOW_ITEM_CC(item, stroke));
 	}
 }
 

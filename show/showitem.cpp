@@ -49,6 +49,7 @@ struct showone *nemoshow_item_create(int type)
 	NEMOSHOW_ITEM_CC(item, viewbox) = new SkMatrix;
 	NEMOSHOW_ITEM_CC(item, path) = new SkPath;
 	NEMOSHOW_ITEM_CC(item, fillpath) = NULL;
+	NEMOSHOW_ITEM_CC(item, subpath) = NULL;
 	NEMOSHOW_ITEM_CC(item, fill) = new SkPaint;
 	NEMOSHOW_ITEM_CC(item, fill)->setStyle(SkPaint::kFill_Style);
 	NEMOSHOW_ITEM_CC(item, fill)->setStrokeCap(SkPaint::kRound_Cap);
@@ -149,9 +150,14 @@ struct showone *nemoshow_item_create(int type)
 	} else if (one->sub == NEMOSHOW_TEXTBOX_ITEM) {
 		NEMOSHOW_ITEM_CC(item, textbox) = new SkTextBox;
 		NEMOSHOW_ITEM_CC(item, textbox)->setMode(SkTextBox::kLineBreak_Mode);
+	} else if (one->sub == NEMOSHOW_PATH_ITEM) {
+		NEMOSHOW_ITEM_CC(item, subpath) = new SkPath;
 	} else if (one->sub == NEMOSHOW_PATHTWICE_ITEM) {
 		NEMOSHOW_ITEM_CC(item, fillpath) = new SkPath;
+		NEMOSHOW_ITEM_CC(item, subpath) = new SkPath;
 	} else if (one->sub == NEMOSHOW_PATHARRAY_ITEM) {
+		NEMOSHOW_ITEM_CC(item, subpath) = new SkPath;
+
 		item->cmds = (uint32_t *)malloc(sizeof(uint32_t) * 8);
 		item->ncmds = 0;
 		item->scmds = 8;
@@ -161,6 +167,8 @@ struct showone *nemoshow_item_create(int type)
 		item->spoints = 8;
 
 		nemoobject_set_reserved(&one->object, "points", item->points, sizeof(double) * item->spoints);
+	} else if (one->sub == NEMOSHOW_PATHLIST_ITEM) {
+		NEMOSHOW_ITEM_CC(item, subpath) = new SkPath;
 	} else if (one->sub == NEMOSHOW_PATHGROUP_ITEM) {
 		nemoshow_one_set_state(one, NEMOSHOW_INHERIT_STATE);
 		nemoshow_one_set_state(one, NEMOSHOW_FILL_STATE);
@@ -207,6 +215,8 @@ void nemoshow_item_destroy(struct showone *one)
 		delete NEMOSHOW_ITEM_CC(item, path);
 	if (NEMOSHOW_ITEM_CC(item, fillpath) != NULL)
 		delete NEMOSHOW_ITEM_CC(item, fillpath);
+	if (NEMOSHOW_ITEM_CC(item, subpath) != NULL)
+		delete NEMOSHOW_ITEM_CC(item, subpath);
 	if (NEMOSHOW_ITEM_CC(item, fill) != NULL)
 		delete NEMOSHOW_ITEM_CC(item, fill);
 	if (NEMOSHOW_ITEM_CC(item, stroke) != NULL)
@@ -654,10 +664,22 @@ static inline void nemoshow_item_update_shape(struct nemoshow *show, struct show
 
 		one->dirty |= NEMOSHOW_SIZE_DIRTY;
 	} else if (one->sub == NEMOSHOW_PATH_ITEM || one->sub == NEMOSHOW_PATHTWICE_ITEM || one->sub == NEMOSHOW_PATHARRAY_ITEM || one->sub == NEMOSHOW_PATHLIST_ITEM) {
+		if (item->from != 0.0f || item->to != 1.0f) {
+			NEMOSHOW_ITEM_CC(item, subpath)->reset();
+
+			NEMOSHOW_ITEM_CC(item, measure)->getSegment(
+					NEMOSHOW_ITEM_CC(item, measure)->getLength() * item->from,
+					NEMOSHOW_ITEM_CC(item, measure)->getLength() * item->to,
+					NEMOSHOW_ITEM_CC(item, subpath), true);
+		}
+
 		if (nemoshow_one_has_state(one, NEMOSHOW_SIZE_STATE) == 0) {
 			SkRect box;
 
-			box = NEMOSHOW_ITEM_CC(item, path)->getBounds();
+			if (item->from == 0.0f && item->to == 1.0f)
+				box = NEMOSHOW_ITEM_CC(item, path)->getBounds();
+			else
+				box = NEMOSHOW_ITEM_CC(item, subpath)->getBounds();
 
 			if (item->pathsegment >= 1.0f)
 				box.outset(fabs(item->pathdeviation), fabs(item->pathdeviation));
