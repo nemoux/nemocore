@@ -625,12 +625,12 @@ struct nemoscreen *nemocompz_get_screen(struct nemocompz *compz, uint32_t nodeid
 	return NULL;
 }
 
-struct inputnode *nemocompz_get_input(struct nemocompz *compz, const char *devnode)
+struct inputnode *nemocompz_get_input(struct nemocompz *compz, const char *devnode, uint32_t type)
 {
 	struct inputnode *node;
 
 	wl_list_for_each(node, &compz->input_list, link) {
-		if (strcmp(node->devnode, devnode) == 0)
+		if (strcmp(node->devnode, devnode) == 0 && nemoinput_has_type(node, type) != 0)
 			return node;
 	}
 
@@ -682,7 +682,7 @@ void nemocompz_update_scene(struct nemocompz *compz)
 void nemocompz_scene_dirty(struct nemocompz *compz)
 {
 	compz->scene_dirty = 1;
-	
+
 	nemocompz_dispatch_frame(compz);
 }
 

@@ -134,7 +134,7 @@ static void nemoenvs_handle_set_nemoshell_input(struct nemoshell *shell, struct 
 	const char *name;
 	const char *value;
 
-	node = nemocompz_get_input(compz, devnode);
+	node = nemocompz_get_input(compz, devnode, NEMOINPUT_TOUCH_TYPE);
 	if (node != NULL) {
 		int32_t x = 0, y = 0;
 		int32_t width = 0, height = 0;

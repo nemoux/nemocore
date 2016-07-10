@@ -69,6 +69,11 @@ extern void nemoinput_set_sampling(struct inputnode *node, uint32_t sampling);
 extern void nemoinput_transform_to_global(struct inputnode *node, float dx, float dy, float *x, float *y);
 extern void nemoinput_transform_from_global(struct inputnode *node, float x, float y, float *dx, float *dy);
 
+static inline int nemoinput_has_type(struct inputnode *node, uint32_t type)
+{
+	return (node->type & type) == type;
+}
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif
