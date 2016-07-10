@@ -7,6 +7,8 @@
 NEMO_BEGIN_EXTERN_C
 #endif
 
+#include <stdint.h>
+
 #ifdef NEMO_LOG_ON
 
 extern int nemolog_open_file(const char *filepath);
@@ -17,6 +19,7 @@ extern int nemolog_open_socket(const char *socketpath);
 extern int nemolog_message(const char *tag, const char *fmt, ...);
 extern int nemolog_warning(const char *tag, const char *fmt, ...);
 extern int nemolog_error(const char *tag, const char *fmt, ...);
+extern void nemolog_checkpoint(void);
 
 #else
 
@@ -28,6 +31,7 @@ static inline int nemolog_open_socket(const char *socketpath) {}
 static inline int nemolog_message(const char *tag, const char *fmt, ...) { return 0; }
 static inline int nemolog_warning(const char *tag, const char *fmt, ...) { return 0; }
 static inline int nemolog_error(const char *tag, const char *fmt, ...) { return 0; }
+static inline void nemolog_checkpoint(void) {}
 
 #endif
 

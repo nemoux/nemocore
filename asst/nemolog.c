@@ -15,6 +15,8 @@
 #include <nemomisc.h>
 
 #ifdef NEMO_LOG_ON
+static __thread uint64_t __nsecs;
+
 static int nemologfile = -1;
 static int nemologtype = 0;
 
@@ -26,6 +28,8 @@ void __attribute__((constructor(101))) nemolog_initialize(void)
 		nemolog_open_file(getenv("NEMOLOG_FILE_PATH"));
 	else
 		nemolog_set_file(2);
+
+	__nsecs = time_current_nsecs();
 }
 
 void __attribute__((destructor(101))) nemolog_finalize(void)
@@ -80,21 +84,11 @@ err1:
 	return -1;
 }
 
-static int nemolog_write(const char *syntax, const char *tag, const char *fmt, va_list vargs)
+static int nemolog_write(const char *syntax, const char *tag, double secs, const char *fmt, va_list vargs)
 {
-	struct timeval tv;
-	struct tm *tm;
 	char msg[1024];
-	char buffer[128] = "";
 
-	gettimeofday(&tv, NULL);
-
-	tm = localtime(&tv.tv_sec);
-	if (tm != NULL) {
-		strftime(buffer, sizeof(buffer), "%H:%M:%S", tm);
-	}
-
-	snprintf(msg, sizeof(msg), syntax, tag, buffer, tv.tv_usec / 1000);
+	snprintf(msg, sizeof(msg), syntax, tag, secs);
 	vsnprintf(msg + strlen(msg), sizeof(msg) - strlen(msg), fmt, vargs);
 
 	if (nemologtype == 1)
@@ -105,6 +99,7 @@ static int nemolog_write(const char *syntax, const char *tag, const char *fmt, v
 
 int nemolog_message(const char *tag, const char *fmt, ...)
 {
+	uint64_t nsecs = time_current_nsecs();
 	va_list vargs;
 	int r;
 
@@ -112,7 +107,7 @@ int nemolog_message(const char *tag, const char *fmt, ...)
 		return 0;
 
 	va_start(vargs, fmt);
-	r = nemolog_write("\e[32;1mNEMO:\e[m \e[1;33m[%s] (%s+%03li)\e[0m ", tag, fmt, vargs);
+	r = nemolog_write("\e[32;1mNEMO:\e[m \e[1;33m[%s] (%.3f)\e[0m ", tag, (double)(nsecs - __nsecs) / 1000000000.0f, fmt, vargs);
 	va_end(vargs);
 
 	return r;
@@ -120,6 +115,7 @@ int nemolog_message(const char *tag, const char *fmt, ...)
 
 int nemolog_warning(const char *tag, const char *fmt, ...)
 {
+	uint64_t nsecs = time_current_nsecs();
 	va_list vargs;
 	int r;
 
@@ -127,7 +123,7 @@ int nemolog_warning(const char *tag, const char *fmt, ...)
 		return 0;
 
 	va_start(vargs, fmt);
-	r = nemolog_write("\e[32;1mNEMO:\e[m \e[1;30m[%s] (%s+%03li)\e[0m ", tag, fmt, vargs);
+	r = nemolog_write("\e[32;1mNEMO:\e[m \e[1;30m[%s] (%.3f)\e[0m ", tag, (double)(nsecs - __nsecs) / 1000000000.0f, fmt, vargs);
 	va_end(vargs);
 
 	return r;
@@ -135,6 +131,7 @@ int nemolog_warning(const char *tag, const char *fmt, ...)
 
 int nemolog_error(const char *tag, const char *fmt, ...)
 {
+	uint64_t nsecs = time_current_nsecs();
 	va_list vargs;
 	int r;
 
@@ -142,9 +139,15 @@ int nemolog_error(const char *tag, const char *fmt, ...)
 		return 0;
 
 	va_start(vargs, fmt);
-	r = nemolog_write("\e[32;1mNEMO:\e[m \e[1;31m[%s] (%s+%03li)\e[0m ", tag, fmt, vargs);
+	r = nemolog_write("\e[32;1mNEMO:\e[m \e[1;31m[%s] (%.3f)\e[0m ", tag, (double)(nsecs - __nsecs) / 1000000000.0f, fmt, vargs);
 	va_end(vargs);
 
 	return r;
 }
+
+void nemolog_checkpoint(void)
+{
+	__nsecs = time_current_nsecs();
+}
+
 #endif
