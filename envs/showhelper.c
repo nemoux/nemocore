@@ -267,13 +267,6 @@ struct nemoshow *nemoshow_create_view(struct nemoshell *shell, int32_t width, in
 	nemoshow_set_size(show, width, height);
 	nemoshow_set_context(show, scon);
 
-	nemoactor_set_min_size(scon->actor,
-			nemotale_get_minimum_width(scon->tale),
-			nemotale_get_minimum_height(scon->tale));
-	nemoactor_set_max_size(scon->actor,
-			nemotale_get_maximum_width(scon->tale),
-			nemotale_get_maximum_height(scon->tale));
-
 	nemoview_set_state(scon->actor->view, NEMOVIEW_CLOSE_STATE);
 
 	nemotale_set_userdata(scon->tale, show);

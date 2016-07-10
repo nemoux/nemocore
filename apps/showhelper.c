@@ -241,13 +241,6 @@ struct nemoshow *nemoshow_create_view(struct nemotool *tool, int32_t width, int3
 	nemoshow_set_size(show, width, height);
 	nemoshow_set_context(show, scon);
 
-	nemocanvas_set_min_size(scon->canvas,
-			nemotale_get_minimum_width(scon->tale),
-			nemotale_get_minimum_height(scon->tale));
-	nemocanvas_set_max_size(scon->canvas,
-			nemotale_get_maximum_width(scon->tale),
-			nemotale_get_maximum_height(scon->tale));
-
 	nemocanvas_set_state(scon->canvas, "close");
 
 	nemocanvas_set_userdata(NTEGL_CANVAS(scon->eglcanvas), scon->tale);

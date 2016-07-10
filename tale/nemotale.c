@@ -61,30 +61,6 @@ int nemotale_prepare(struct nemotale *tale)
 	else
 		tale->single_click_distance = 30;
 
-	env = getenv("NEMOTALE_MINIMUM_WIDTH");
-	if (env != NULL)
-		tale->minimum_width = strtoul(env, NULL, 10);
-	else
-		tale->minimum_width = 200;
-
-	env = getenv("NEMOTALE_MINIMUM_HEIGHT");
-	if (env != NULL)
-		tale->minimum_height = strtoul(env, NULL, 10);
-	else
-		tale->minimum_height = 200;
-
-	env = getenv("NEMOTALE_MAXIMUM_WIDTH");
-	if (env != NULL)
-		tale->maximum_width = strtoul(env, NULL, 10);
-	else
-		tale->maximum_width = UINT32_MAX;
-
-	env = getenv("NEMOTALE_MAXIMUM_HEIGHT");
-	if (env != NULL)
-		tale->maximum_height = strtoul(env, NULL, 10);
-	else
-		tale->maximum_height = UINT32_MAX;
-
 	return 0;
 }
 
