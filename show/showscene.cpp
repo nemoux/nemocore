@@ -30,6 +30,8 @@ struct showone *nemoshow_scene_create(void)
 	nemoobject_set_reserved(&one->object, "width", &scene->width, sizeof(double));
 	nemoobject_set_reserved(&one->object, "height", &scene->height, sizeof(double));
 
+	nemoshow_one_set_state(one, NEMOSHOW_INHERIT_STATE);
+
 	return one;
 }
 
@@ -61,6 +63,17 @@ int nemoshow_scene_update(struct showone *one)
 		}
 	}
 
+	if (one->dirty & NEMOSHOW_SIZE_DIRTY) {
+		nemotale_set_width(show->tale, scene->width);
+		nemotale_set_height(show->tale, scene->height);
+
+		nemoshow_children_for_each(child, one) {
+			if (child->type == NEMOSHOW_CANVAS_TYPE) {
+				NEMOSHOW_CANVAS_AT(child, viewport.dirty) = 1;
+			}
+		}
+	}
+
 	return 0;
 }
 
@@ -70,8 +83,7 @@ void nemoshow_scene_set_width(struct showone *one, double width)
 
 	scene->width = width;
 
-	if (one->show != NULL)
-		nemotale_set_width(one->show->tale, width);
+	nemoshow_one_dirty(one, NEMOSHOW_SIZE_DIRTY);
 }
 
 void nemoshow_scene_set_height(struct showone *one, double height)
@@ -80,6 +92,5 @@ void nemoshow_scene_set_height(struct showone *one, double height)
 
 	scene->height = height;
 
-	if (one->show != NULL)
-		nemotale_set_height(one->show->tale, height);
+	nemoshow_one_dirty(one, NEMOSHOW_SIZE_DIRTY);
 }
