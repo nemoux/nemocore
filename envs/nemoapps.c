@@ -123,7 +123,7 @@ static void nemoenvs_execute_background(struct nemoenvs *envs, struct itemone *o
 	nemotoken_destroy(token);
 }
 
-static void nemoenvs_execute_soundmanager(struct nemoenvs *envs, struct itemone *one)
+static void nemoenvs_execute_daemon(struct nemoenvs *envs, struct itemone *one)
 {
 	struct nemotoken *token;
 	struct itemattr *attr;
@@ -172,8 +172,8 @@ int nemoenvs_respawn_app(struct nemoenvs *envs, pid_t pid)
 			if (one != NULL) {
 				if (nemoitem_one_has_path(one, "/nemoshell/background") != 0) {
 					nemoenvs_execute_background(envs, one);
-				} else if (nemoitem_one_has_path(one, "/nemoshell/sound") != 0) {
-					nemoenvs_execute_soundmanager(envs, one);
+				} else if (nemoitem_one_has_path(one, "/nemoshell/daemon") != 0) {
+					nemoenvs_execute_daemon(envs, one);
 				}
 			}
 
@@ -197,13 +197,13 @@ void nemoenvs_execute_backgrounds(struct nemoenvs *envs)
 	}
 }
 
-void nemoenvs_execute_soundmanagers(struct nemoenvs *envs)
+void nemoenvs_execute_daemons(struct nemoenvs *envs)
 {
 	struct itemone *one;
 
 	nemoitem_for_each(one, envs->configs) {
-		if (nemoitem_one_has_path(one, "/nemoshell/sound") != 0) {
-			nemoenvs_execute_soundmanager(envs, one);
+		if (nemoitem_one_has_path(one, "/nemoshell/daemon") != 0) {
+			nemoenvs_execute_daemon(envs, one);
 		}
 	}
 }
