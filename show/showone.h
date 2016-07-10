@@ -287,8 +287,6 @@ extern int nemoshow_one_connect_signal(struct showone *one, const char *name, ne
 extern void nemoshow_one_disconnect_signal(struct showone *one, const char *name);
 extern int nemoshow_one_emit_signal(struct showone *one, const char *name, struct nemoobject *attrs);
 
-extern void nemoshow_one_dump(struct showone *one, FILE *out);
-
 static inline void nemoshow_one_attach(struct showone *parent, struct showone *one)
 {
 	if (one->attach != NULL) {

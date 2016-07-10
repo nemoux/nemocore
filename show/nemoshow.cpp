@@ -659,16 +659,45 @@ int nemoshow_has_transition(struct nemoshow *show)
 	return !nemolist_empty(&show->transition_list);
 }
 
+void nemoshow_revoke_transition(struct nemoshow *show, struct showone *one, const char *name)
+{
+	struct showtransition *trans;
+	struct showone *sequence;
+	struct showone *frame;
+	struct showone *child;
+	struct showset *set;
+	struct showact *act, *nact;
+	struct nemoattr *attr;
+	int i;
+
+	attr = nemoobject_get(&one->object, name);
+	if (attr == NULL)
+		return;
+
+	nemolist_for_each(trans, &show->transition_list, link) {
+		for (i = 0; i < trans->nsequences; i++) {
+			sequence = trans->sequences[i];
+
+			nemoshow_children_for_each(frame, sequence) {
+				nemoshow_children_for_each(child, frame) {
+					set = NEMOSHOW_SET(child);
+
+					if (set->src == one) {
+						nemolist_for_each_safe(act, nact, &set->act_list, link) {
+							if (act->attr == attr) {
+								nemolist_remove(&act->link);
+
+								free(act);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
 void nemoshow_set_keyboard_focus(struct nemoshow *show, struct showone *one)
 {
 	nemotale_set_keyboard_focus(show->tale, NEMOSHOW_CANVAS_AT(one, node));
-}
-
-void nemoshow_dump_all(struct nemoshow *show, FILE *out)
-{
-	struct showone *one;
-
-	nemoshow_for_each(one, show) {
-		nemoshow_one_dump(one, out);
-	}
 }

@@ -396,24 +396,22 @@ static void nemoshow_sequence_prepare_frame(struct showone *one, uint32_t serial
 	struct showact *act;
 
 	nemoshow_children_for_each(child, one) {
-		if (child->type == NEMOSHOW_SET_TYPE) {
-			uint32_t state = 0x0;
+		uint32_t state = 0x0;
 
-			set = NEMOSHOW_SET(child);
+		set = NEMOSHOW_SET(child);
 
-			nemolist_for_each(act, &set->act_list, link) {
-				if (nemoattr_get_serial(act->attr) <= serial) {
-					if (act->type == NEMOSHOW_DOUBLE_PROP)
-						act->sattr = nemoattr_getd_offset(act->attr, act->offset);
-					else
-						act->sattr = nemoattr_getf_offset(act->attr, act->offset);
+		nemolist_for_each(act, &set->act_list, link) {
+			if (nemoattr_get_serial(act->attr) <= serial) {
+				if (act->type == NEMOSHOW_DOUBLE_PROP)
+					act->sattr = nemoattr_getd_offset(act->attr, act->offset);
+				else
+					act->sattr = nemoattr_getf_offset(act->attr, act->offset);
 
-					state |= act->state;
-				}
+				state |= act->state;
 			}
-
-			nemoshow_one_set_state(set->src, state);
 		}
+
+		nemoshow_one_set_state(set->src, state);
 	}
 }
 
@@ -426,29 +424,27 @@ static void nemoshow_sequence_dispatch_frame(struct showone *one, double s, doub
 	double dt = (t - s) / (frame->t - s);
 
 	nemoshow_children_for_each(child, one) {
-		if (child->type == NEMOSHOW_SET_TYPE) {
-			uint32_t dirty = 0x0;
+		uint32_t dirty = 0x0;
 
-			set = NEMOSHOW_SET(child);
+		set = NEMOSHOW_SET(child);
 
-			nemolist_for_each(act, &set->act_list, link) {
-				if (nemoattr_get_serial(act->attr) <= serial) {
-					double v = (act->eattr - act->sattr) * dt + act->sattr;
+		nemolist_for_each(act, &set->act_list, link) {
+			if (nemoattr_get_serial(act->attr) <= serial) {
+				double v = (act->eattr - act->sattr) * dt + act->sattr;
 
-					if (act->type == NEMOSHOW_DOUBLE_PROP)
-						nemoattr_setd_offset(act->attr, act->offset, v);
-					else
-						nemoattr_setf_offset(act->attr, act->offset, v);
+				if (act->type == NEMOSHOW_DOUBLE_PROP)
+					nemoattr_setd_offset(act->attr, act->offset, v);
+				else
+					nemoattr_setf_offset(act->attr, act->offset, v);
 
-					if (set->src->dattr != NULL)
-						set->src->dattr(set->src, nemoattr_get_name(act->attr), v);
+				if (set->src->dattr != NULL)
+					set->src->dattr(set->src, nemoattr_get_name(act->attr), v);
 
-					dirty |= act->dirty;
-				}
+				dirty |= act->dirty;
 			}
-
-			nemoshow_one_dirty(set->src, dirty);
 		}
+
+		nemoshow_one_dirty(set->src, dirty);
 	}
 }
 
@@ -460,29 +456,27 @@ static void nemoshow_sequence_finish_frame(struct showone *one, uint32_t serial)
 	struct showact *act;
 
 	nemoshow_children_for_each(child, one) {
-		if (child->type == NEMOSHOW_SET_TYPE) {
-			uint32_t dirty = 0x0;
+		uint32_t dirty = 0x0;
 
-			set = NEMOSHOW_SET(child);
+		set = NEMOSHOW_SET(child);
 
-			nemolist_for_each(act, &set->act_list, link) {
-				if (nemoattr_get_serial(act->attr) <= serial) {
-					double v = act->fattr;
+		nemolist_for_each(act, &set->act_list, link) {
+			if (nemoattr_get_serial(act->attr) <= serial) {
+				double v = act->fattr;
 
-					if (act->type == NEMOSHOW_DOUBLE_PROP)
-						nemoattr_setd_offset(act->attr, act->offset, v);
-					else
-						nemoattr_setf_offset(act->attr, act->offset, v);
+				if (act->type == NEMOSHOW_DOUBLE_PROP)
+					nemoattr_setd_offset(act->attr, act->offset, v);
+				else
+					nemoattr_setf_offset(act->attr, act->offset, v);
 
-					if (set->src->dattr != NULL)
-						set->src->dattr(set->src, nemoattr_get_name(act->attr), v);
+				if (set->src->dattr != NULL)
+					set->src->dattr(set->src, nemoattr_get_name(act->attr), v);
 
-					dirty |= act->dirty;
-				}
+				dirty |= act->dirty;
 			}
-
-			nemoshow_one_dirty(set->src, dirty);
 		}
+
+		nemoshow_one_dirty(set->src, dirty);
 	}
 }
 
@@ -503,13 +497,11 @@ void nemoshow_sequence_prepare(struct showone *one, uint32_t serial)
 
 	nemoshow_children_for_each(frame, one) {
 		nemoshow_children_for_each(child, frame) {
-			if (child->type == NEMOSHOW_SET_TYPE) {
-				struct showset *set = NEMOSHOW_SET(child);
+			struct showset *set = NEMOSHOW_SET(child);
 
-				nemolist_for_each(act, &set->act_list, link) {
-					if (nemoattr_get_serial(act->attr) < serial)
-						nemoattr_set_serial(act->attr, serial);
-				}
+			nemolist_for_each(act, &set->act_list, link) {
+				if (nemoattr_get_serial(act->attr) < serial)
+					nemoattr_set_serial(act->attr, serial);
 			}
 		}
 	}

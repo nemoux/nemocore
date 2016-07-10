@@ -155,9 +155,9 @@ extern void nemoshow_dispatch_transition(struct nemoshow *show, uint32_t msecs);
 extern void nemoshow_destroy_transition(struct nemoshow *show);
 extern int nemoshow_has_transition(struct nemoshow *show);
 
-extern void nemoshow_set_keyboard_focus(struct nemoshow *show, struct showone *one);
+extern void nemoshow_revoke_transition(struct nemoshow *show, struct showone *one, const char *name);
 
-extern void nemoshow_dump_all(struct nemoshow *show, FILE *out);
+extern void nemoshow_set_keyboard_focus(struct nemoshow *show, struct showone *one);
 
 static inline void nemoshow_set_tale(struct nemoshow *show, struct nemotale *tale)
 {

@@ -518,39 +518,3 @@ int nemoshow_one_emit_signal(struct showone *one, const char *name, struct nemoo
 
 	return 0;
 }
-
-void nemoshow_one_dump(struct showone *one, FILE *out)
-{
-	struct showprop *prop;
-	struct showattr *attr;
-	struct showone *child;
-	const char *name;
-	int i, count;
-
-	fprintf(out, "[%s] %u\n", one->id, one->tag);
-
-	count = nemoobject_get_count(&one->object);
-
-	for (i = 0; i < count; i++) {
-		name = nemoobject_get_name(&one->object, i);
-
-		prop = nemoshow_get_property(name);
-		if (prop != NULL) {
-			if (prop->type == NEMOSHOW_DOUBLE_PROP)
-				fprintf(out, "  %s = %f\n", name, nemoobject_igetd(&one->object, i));
-			else if (prop->type == NEMOSHOW_INTEGER_PROP)
-				fprintf(out, "  %s = %d\n", name, nemoobject_igeti(&one->object, i));
-			else if (prop->type == NEMOSHOW_STRING_PROP)
-				fprintf(out, "  %s = %s\n", name, nemoobject_igets(&one->object, i));
-		}
-	}
-
-	for (i = 0; i < one->nattrs; i++) {
-		attr = one->attrs[i];
-
-		fprintf(out, "  %s = <%s>\n", attr->name, attr->text);
-	}
-
-	nemoshow_children_for_each(child, one)
-		nemoshow_one_dump(child, out);
-}
