@@ -35,7 +35,7 @@ NEMO_BEGIN_EXTERN_C
 #include <nemotale.h>
 #include <nemopool.h>
 
-#define NEMOSHOW_DEFAULT_TILESIZE		(1024)
+#define NEMOSHOW_DEFAULT_TILESIZE		(512)
 
 typedef enum {
 	NEMOSHOW_ONTIME_STATE = (1 << 0)
