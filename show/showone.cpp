@@ -193,6 +193,14 @@ void nemoshow_one_dirty(struct showone *one, uint32_t dirty)
 	}
 }
 
+void nemoshow_one_dirty_all(struct showone *one, uint32_t dirty)
+{
+	struct showone *child;
+
+	nemoshow_children_for_each(child, one)
+		nemoshow_one_dirty(child, dirty);
+}
+
 void nemoshow_one_bounds(struct showone *one)
 {
 	struct nemoshow *show = one->show;

@@ -505,23 +505,6 @@ int nemoshow_contain_canvas(struct nemoshow *show, struct showone *one, float x,
 	return nemotale_contain_node(show->tale, canvas->node, x, y, sx, sy);
 }
 
-void nemoshow_damage_canvas_all(struct nemoshow *show)
-{
-	struct showone *one;
-	struct showone *child;
-
-	if (show->scene == NULL)
-		return;
-
-	one = show->scene;
-
-	nemoshow_children_for_each(child, one) {
-		if (child->type == NEMOSHOW_CANVAS_TYPE) {
-			nemotale_node_damage_all(NEMOSHOW_CANVAS_AT(child, node));
-		}
-	}
-}
-
 void nemoshow_attach_one(struct nemoshow *show, struct showone *one)
 {
 	nemolist_insert_tail(&show->one_list, &one->link);

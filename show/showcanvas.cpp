@@ -783,7 +783,8 @@ int nemoshow_canvas_set_viewport(struct showone *one, double sx, double sy)
 				nemotale_node_get_buffer(canvas->node));
 
 		nemoshow_canvas_damage_all(one);
-		nemoshow_canvas_dirty_all(one, NEMOSHOW_SHAPE_DIRTY);
+
+		nemoshow_one_dirty_all(one, NEMOSHOW_SHAPE_DIRTY);
 	} else if (one->sub == NEMOSHOW_CANVAS_PIPELINE_TYPE) {
 		canvas->viewport.sx = sx;
 		canvas->viewport.sy = sy;
@@ -881,14 +882,6 @@ void nemoshow_canvas_damage_filter(struct showone *one)
 	nemotale_node_damage_filter(canvas->node);
 
 	nemoshow_one_dirty(one, NEMOSHOW_CANVAS_DIRTY);
-}
-
-void nemoshow_canvas_dirty_all(struct showone *one, uint32_t dirty)
-{
-	struct showone *child;
-
-	nemoshow_children_for_each(child, one)
-		nemoshow_one_dirty(child, dirty);
 }
 
 static inline struct showone *nemoshow_canvas_pick_item(struct showone *one, float x, float y)

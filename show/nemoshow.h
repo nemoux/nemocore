@@ -140,8 +140,6 @@ extern int nemoshow_set_scale(struct nemoshow *show, double sx, double sy);
 
 extern int nemoshow_contain_canvas(struct nemoshow *show, struct showone *one, float x, float y, float *sx, float *sy);
 
-extern void nemoshow_damage_canvas_all(struct nemoshow *show);
-
 extern void nemoshow_attach_one(struct nemoshow *show, struct showone *one);
 extern void nemoshow_detach_one(struct showone *one);
 
