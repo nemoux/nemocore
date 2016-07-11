@@ -391,9 +391,7 @@ int nemoshow_set_scene(struct nemoshow *show, struct showone *one)
 
 	nemoshow_attach_ones(show, one);
 
-	nemoshow_one_dirty(one, NEMOSHOW_CHILDREN_DIRTY);
-
-	nemotale_resize(show->tale, NEMOSHOW_SCENE_AT(one, width), NEMOSHOW_SCENE_AT(one, height));
+	nemoshow_one_dirty(one, NEMOSHOW_SIZE_DIRTY | NEMOSHOW_CHILDREN_DIRTY);
 
 	return 0;
 }
@@ -409,8 +407,6 @@ void nemoshow_put_scene(struct nemoshow *show)
 
 	nemolist_remove(&show->scene_destroy_listener.link);
 	nemolist_init(&show->scene_destroy_listener.link);
-
-	nemotale_clear_node(show->tale);
 }
 
 int nemoshow_set_size(struct nemoshow *show, uint32_t width, uint32_t height)
