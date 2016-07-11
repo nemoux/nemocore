@@ -424,8 +424,6 @@ int nemoshow_set_size(struct nemoshow *show, uint32_t width, uint32_t height)
 	show->width = width;
 	show->height = height;
 
-	nemotale_set_viewport(show->tale, width, height);
-
 	if (show->scene != NULL)
 		nemoshow_one_dirty(show->scene, NEMOSHOW_VIEWPORT_DIRTY);
 

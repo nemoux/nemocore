@@ -51,7 +51,7 @@ int nemoshow_scene_update(struct showone *one)
 	struct showcanvas *canvas;
 	struct showone *child;
 
-	if (one->dirty & NEMOSHOW_CHILDREN_DIRTY) {
+	if ((one->dirty & NEMOSHOW_CHILDREN_DIRTY) != 0) {
 		nemotale_clear_node(show->tale);
 
 		nemoshow_children_for_each(child, one) {
@@ -62,9 +62,11 @@ int nemoshow_scene_update(struct showone *one)
 			}
 		}
 	}
-
-	if (one->dirty & NEMOSHOW_SIZE_DIRTY) {
+	if ((one->dirty & NEMOSHOW_SIZE_DIRTY) != 0) {
 		nemotale_resize(show->tale, scene->width, scene->height);
+	}
+	if ((one->dirty & NEMOSHOW_VIEWPORT_DIRTY) != 0) {
+		nemotale_set_viewport(show->tale, show->width, show->height);
 	}
 
 	return 0;
