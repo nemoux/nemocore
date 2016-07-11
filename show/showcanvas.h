@@ -57,10 +57,7 @@ struct showcanvas {
 	double width, height;
 
 	struct {
-		int dirty;
-
 		double width, height;
-
 		double sx, sy;
 	} viewport;
 
@@ -69,7 +66,6 @@ struct showcanvas {
 	double px, py;
 	double sx, sy;
 
-	int needs_resize;
 	int needs_redraw;
 	int needs_full_redraw;
 
@@ -201,7 +197,8 @@ static inline void nemoshow_canvas_set_width(struct showone *one, double width)
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
 	canvas->width = width;
-	canvas->needs_resize = 1;
+
+	nemoshow_one_set_state(one, NEMOSHOW_SIZE_STATE);
 }
 
 static inline void nemoshow_canvas_set_height(struct showone *one, double height)
@@ -209,7 +206,8 @@ static inline void nemoshow_canvas_set_height(struct showone *one, double height
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
 	canvas->height = height;
-	canvas->needs_resize = 1;
+
+	nemoshow_one_set_state(one, NEMOSHOW_SIZE_STATE);
 }
 
 static inline double nemoshow_canvas_get_width(struct showone *one)

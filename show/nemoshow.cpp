@@ -219,7 +219,6 @@ void nemoshow_update_one_expression_without_dirty(struct nemoshow *show, struct 
 void nemoshow_update_one(struct nemoshow *show)
 {
 	struct showone *scene = show->scene;
-	struct showcanvas *canvas;
 	struct showone *one, *none;
 
 	if (scene == NULL)
@@ -234,29 +233,6 @@ void nemoshow_update_one(struct nemoshow *show)
 	}
 
 	show->dirty_serial = 0;
-
-	nemoshow_children_for_each(one, scene) {
-		if (one->type == NEMOSHOW_CANVAS_TYPE) {
-			canvas = NEMOSHOW_CANVAS(one);
-
-			if (canvas->needs_resize != 0) {
-				canvas->needs_resize = 0;
-
-				nemoshow_canvas_resize(one);
-			}
-
-			if (canvas->viewport.dirty != 0) {
-				canvas->viewport.dirty = 0;
-
-				nemoshow_canvas_set_viewport(one,
-						(double)show->width / (double)NEMOSHOW_SCENE_AT(scene, width) * show->sx,
-						(double)show->height / (double)NEMOSHOW_SCENE_AT(scene, height) * show->sy);
-
-				if (canvas->dispatch_resize != NULL)
-					canvas->dispatch_resize(show, one, canvas->viewport.width, canvas->viewport.height);
-			}
-		}
-	}
 }
 
 void nemoshow_render_one(struct nemoshow *show)
@@ -449,20 +425,13 @@ int nemoshow_set_size(struct nemoshow *show, uint32_t width, uint32_t height)
 	if (show->width == width && show->height == height)
 		return 0;
 
-	nemotale_set_viewport(show->tale, width, height);
-
 	show->width = width;
 	show->height = height;
 
-	if (show->scene != NULL) {
-		one = show->scene;
+	nemotale_set_viewport(show->tale, width, height);
 
-		nemoshow_children_for_each(child, one) {
-			if (child->type == NEMOSHOW_CANVAS_TYPE) {
-				NEMOSHOW_CANVAS_AT(child, viewport.dirty) = 1;
-			}
-		}
-	}
+	if (show->scene != NULL)
+		nemoshow_one_dirty(show->scene, NEMOSHOW_VIEWPORT_DIRTY);
 
 	return 1;
 }
@@ -481,13 +450,7 @@ int nemoshow_set_scale(struct nemoshow *show, double sx, double sy)
 	show->sx = sx;
 	show->sy = sy;
 
-	one = show->scene;
-
-	nemoshow_children_for_each(child, one) {
-		if (child->type == NEMOSHOW_CANVAS_TYPE) {
-			NEMOSHOW_CANVAS_AT(child, viewport.dirty) = 1;
-		}
-	}
+	nemoshow_one_dirty(show->scene, NEMOSHOW_VIEWPORT_DIRTY);
 
 	return 1;
 }
