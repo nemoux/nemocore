@@ -759,7 +759,8 @@ void nemoshow_canvas_render_vector_tiled(struct nemoshow *show, struct showone *
 		_canvas->scale(canvas->viewport.sx, canvas->viewport.sy);
 
 		nemoshow_children_for_each(child, one) {
-			nemoshow_canvas_render_one(canvas, _canvas, child);
+			if (nemoshow_canvas_check_one(canvas, child) != 0)
+				nemoshow_canvas_render_one(canvas, _canvas, child);
 		}
 	}
 

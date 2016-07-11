@@ -289,38 +289,40 @@ void nemoshow_divide_one(struct nemoshow *show)
 	struct nemopool *pool = show->pool;
 	struct showcanvas *canvas, *ncanvas;
 	struct showtask *task;
-	int needs_tiling = 0;
-	int cw, ch;
-	int tr, tc;
-	int tw, th;
-	int i, j;
 
 	if (scene == NULL || pool == NULL)
 		return;
 
 	nemolist_for_each_safe(canvas, ncanvas, &show->canvas_list, link) {
+		int needs_tiling = 0;
+
 		if (canvas->dispatch_redraw_tiled == NULL)
 			continue;
 
-		cw = canvas->viewport.width;
-		ch = canvas->viewport.height;
-		tc = cw / show->tilesize + 1;
-		tr = ch / show->tilesize + 1;
-		tw = ceil(cw / tc);
-		th = ceil(ch / tr);
-
-		if (tc > 1 || tr > 1) {
+		if (canvas->viewport.width >= show->tilesize || canvas->viewport.height >= show->tilesize) {
 			if (nemoshow_one_has_state(NEMOSHOW_CANVAS_ONE(canvas), NEMOSHOW_REDRAW_STATE)) {
 				needs_tiling = 1;
 			} else {
 				SkIRect box = NEMOSHOW_CANVAS_CC(canvas, damage)->getBounds();
 
-				if (box.width() * box.height() >= show->tilesize * show->tilesize)
+				if (box.width() >= show->tilesize || box.height() >= show->tilesize)
 					needs_tiling = 1;
 			}
 		}
 
 		if (needs_tiling != 0) {
+			int cw, ch;
+			int tr, tc;
+			int tw, th;
+			int i, j;
+
+			cw = canvas->viewport.width;
+			ch = canvas->viewport.height;
+			tc = cw / show->tilesize + 1;
+			tr = ch / show->tilesize + 1;
+			tw = ceil(cw / tc);
+			th = ceil(ch / tr);
+
 			for (i = 0; i < tr; i++) {
 				for (j = 0; j < tc; j++) {
 					if (nemoshow_one_has_state(NEMOSHOW_CANVAS_ONE(canvas), NEMOSHOW_REDRAW_STATE) ||
