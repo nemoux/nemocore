@@ -740,12 +740,27 @@ void nemoshow_canvas_render_vector_tiled(struct nemoshow *show, struct showone *
 
 	_device = new SkBitmapDevice(*NEMOSHOW_CANVAS_CC(canvas, bitmap));
 	_canvas = new SkCanvas(_device);
-	_canvas->clipRect(SkRect::MakeXYWH(x, y, width, height));
-	_canvas->clear(SK_ColorTRANSPARENT);
-	_canvas->scale(canvas->viewport.sx, canvas->viewport.sy);
 
-	nemoshow_children_for_each(child, one) {
-		nemoshow_canvas_render_one(canvas, _canvas, child);
+	if (nemoshow_one_has_state(one, NEMOSHOW_REDRAW_STATE)) {
+		_canvas->clipRect(SkRect::MakeXYWH(x, y, width, height));
+		_canvas->clear(SK_ColorTRANSPARENT);
+		_canvas->scale(canvas->viewport.sx, canvas->viewport.sy);
+
+		nemoshow_children_for_each(child, one) {
+			nemoshow_canvas_render_one(canvas, _canvas, child);
+		}
+	} else {
+		SkRegion region;
+
+		region.op(*NEMOSHOW_CANVAS_CC(canvas, damage), SkIRect::MakeXYWH(x, y, width, height), SkRegion::kIntersect_Op);
+
+		_canvas->clipRegion(region);
+		_canvas->clear(SK_ColorTRANSPARENT);
+		_canvas->scale(canvas->viewport.sx, canvas->viewport.sy);
+
+		nemoshow_children_for_each(child, one) {
+			nemoshow_canvas_render_one(canvas, _canvas, child);
+		}
 	}
 
 	delete _canvas;
