@@ -52,9 +52,6 @@ struct showone *nemoshow_canvas_create(void)
 
 	canvas->alpha = 1.0f;
 
-	canvas->needs_redraw = 1;
-	canvas->needs_full_redraw = 1;
-
 	canvas->dispatch_redraw = nemoshow_canvas_render_none;
 	canvas->dispatch_redraw_tiled = NULL;
 
@@ -600,14 +597,14 @@ static inline void nemoshow_canvas_render_item_group(struct showcanvas *canvas, 
 {
 	struct showone *child;
 
-	if (canvas->needs_full_redraw == 0) {
+	if (nemoshow_one_has_state(NEMOSHOW_CANVAS_ONE(canvas), NEMOSHOW_REDRAW_STATE)) {
 		nemoshow_children_for_each(child, one) {
-			if (nemoshow_canvas_check_one(canvas, child) != 0)
-				nemoshow_canvas_render_one(canvas, _canvas, child);
+			nemoshow_canvas_render_one(canvas, _canvas, child);
 		}
 	} else {
 		nemoshow_children_for_each(child, one) {
-			nemoshow_canvas_render_one(canvas, _canvas, child);
+			if (nemoshow_canvas_check_one(canvas, child) != 0)
+				nemoshow_canvas_render_one(canvas, _canvas, child);
 		}
 	}
 }
@@ -616,7 +613,7 @@ static inline void nemoshow_canvas_render_item_container(struct showcanvas *canv
 {
 	struct showone *child;
 
-	if (canvas->needs_full_redraw == 0) {
+	if (nemoshow_one_has_state(NEMOSHOW_CANVAS_ONE(canvas), NEMOSHOW_REDRAW_STATE)) {
 		nemoshow_children_for_each(child, one) {
 			if (nemoshow_canvas_check_one(canvas, child) != 0)
 				nemoshow_canvas_render_one(canvas, _canvas, child);
@@ -708,7 +705,16 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 	_device = new SkBitmapDevice(*NEMOSHOW_CANVAS_CC(canvas, bitmap));
 	_canvas = new SkCanvas(_device);
 
-	if (canvas->needs_full_redraw == 0) {
+	if (nemoshow_one_has_state(one, NEMOSHOW_REDRAW_STATE)) {
+		_canvas->clear(SK_ColorTRANSPARENT);
+		_canvas->scale(canvas->viewport.sx, canvas->viewport.sy);
+
+		nemoshow_children_for_each(child, one) {
+			nemoshow_canvas_render_one(canvas, _canvas, child);
+		}
+
+		nemoshow_one_put_state(one, NEMOSHOW_REDRAW_STATE);
+	} else {
 		_canvas->clipRegion(*NEMOSHOW_CANVAS_CC(canvas, damage));
 		_canvas->clear(SK_ColorTRANSPARENT);
 		_canvas->scale(canvas->viewport.sx, canvas->viewport.sy);
@@ -717,15 +723,6 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 			if (nemoshow_canvas_check_one(canvas, child) != 0)
 				nemoshow_canvas_render_one(canvas, _canvas, child);
 		}
-	} else {
-		_canvas->clear(SK_ColorTRANSPARENT);
-		_canvas->scale(canvas->viewport.sx, canvas->viewport.sy);
-
-		nemoshow_children_for_each(child, one) {
-			nemoshow_canvas_render_one(canvas, _canvas, child);
-		}
-
-		canvas->needs_full_redraw = 0;
 	}
 
 	delete _canvas;
@@ -849,8 +846,6 @@ void nemoshow_canvas_damage(struct showone *one, int32_t x, int32_t y, int32_t w
 
 	nemotale_node_damage(canvas->node, x, y, width, height);
 
-	canvas->needs_redraw = 1;
-
 	nemoshow_one_dirty(one, NEMOSHOW_CANVAS_DIRTY);
 }
 
@@ -864,8 +859,6 @@ void nemoshow_canvas_damage_one(struct showone *one, struct showone *child)
 
 	nemotale_node_damage(canvas->node, child->x, child->y, child->w, child->h);
 
-	canvas->needs_redraw = 1;
-
 	nemoshow_one_dirty(one, NEMOSHOW_CANVAS_DIRTY);
 }
 
@@ -875,8 +868,7 @@ void nemoshow_canvas_damage_all(struct showone *one)
 
 	nemotale_node_damage_all(canvas->node);
 
-	canvas->needs_redraw = 1;
-	canvas->needs_full_redraw = 1;
+	nemoshow_one_set_state(one, NEMOSHOW_REDRAW_STATE);
 
 	nemoshow_one_dirty(one, NEMOSHOW_CANVAS_DIRTY);
 }

@@ -69,7 +69,8 @@ typedef enum {
 	NEMOSHOW_BOUNDS_STATE = (1 << 9),
 	NEMOSHOW_EFFECT_STATE = (1 << 10),
 	NEMOSHOW_CLIP_STATE = (1 << 11),
-	NEMOSHOW_PICK_STATE = (1 << 12)
+	NEMOSHOW_PICK_STATE = (1 << 12),
+	NEMOSHOW_REDRAW_STATE = (1 << 13),
 } NemoShowOneState;
 
 typedef enum {

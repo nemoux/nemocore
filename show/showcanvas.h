@@ -66,9 +66,6 @@ struct showcanvas {
 	double px, py;
 	double sx, sy;
 
-	int needs_redraw;
-	int needs_full_redraw;
-
 	nemoshow_canvas_dispatch_redraw_t dispatch_redraw;
 	nemoshow_canvas_dispatch_redraw_tiled_t dispatch_redraw_tiled;
 	nemoshow_canvas_dispatch_resize_t dispatch_resize;

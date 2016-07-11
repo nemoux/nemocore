@@ -246,8 +246,6 @@ void nemoshow_render_one(struct nemoshow *show)
 	nemolist_for_each_safe(canvas, ncanvas, &show->canvas_list, link) {
 		canvas->dispatch_redraw(show, NEMOSHOW_CANVAS_ONE(canvas));
 
-		canvas->needs_redraw = 0;
-
 		nemotale_node_flush_gl(show->tale, canvas->node);
 		nemotale_node_filter_gl(show->tale, canvas->node);
 
@@ -257,8 +255,6 @@ void nemoshow_render_one(struct nemoshow *show)
 
 	nemolist_for_each_safe(canvas, ncanvas, &show->pipeline_list, link) {
 		canvas->dispatch_redraw(show, NEMOSHOW_CANVAS_ONE(canvas));
-
-		canvas->needs_redraw = 0;
 
 		nemotale_node_filter_gl(show->tale, canvas->node);
 
@@ -314,7 +310,7 @@ void nemoshow_divide_one(struct nemoshow *show)
 		th = ceil(ch / tr);
 
 		if (tc > 1 || tr > 1) {
-			if (canvas->needs_full_redraw != 0) {
+			if (nemoshow_one_has_state(NEMOSHOW_CANVAS_ONE(canvas), NEMOSHOW_REDRAW_STATE)) {
 				needs_tiling = 1;
 			} else {
 				SkIRect box = NEMOSHOW_CANVAS_CC(canvas, damage)->getBounds();
@@ -327,7 +323,8 @@ void nemoshow_divide_one(struct nemoshow *show)
 		if (needs_tiling != 0) {
 			for (i = 0; i < tr; i++) {
 				for (j = 0; j < tc; j++) {
-					if (canvas->needs_full_redraw != 0 || NEMOSHOW_CANVAS_CC(canvas, damage)->intersects(SkIRect::MakeXYWH(j * tw, i * th, tw, th))) {
+					if (nemoshow_one_has_state(NEMOSHOW_CANVAS_ONE(canvas), NEMOSHOW_REDRAW_STATE) ||
+							NEMOSHOW_CANVAS_CC(canvas, damage)->intersects(SkIRect::MakeXYWH(j * tw, i * th, tw, th))) {
 						task = (struct showtask *)malloc(sizeof(struct showtask));
 						task->show = show;
 						task->one = NEMOSHOW_CANVAS_ONE(canvas);
@@ -355,8 +352,7 @@ void nemoshow_divide_one(struct nemoshow *show)
 	nemopool_finish_task(pool);
 
 	nemolist_for_each_safe(canvas, ncanvas, &show->tiling_list, link) {
-		canvas->needs_redraw = 0;
-		canvas->needs_full_redraw = 0;
+		nemoshow_one_put_state(NEMOSHOW_CANVAS_ONE(canvas), NEMOSHOW_REDRAW_STATE);
 
 		NEMOSHOW_CANVAS_CC(canvas, damage)->setEmpty();
 
