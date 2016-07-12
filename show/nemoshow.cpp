@@ -373,8 +373,10 @@ void nemoshow_divide_one(struct nemoshow *show)
 
 		NEMOSHOW_CANVAS_CC(canvas, damage)->setEmpty();
 
+#ifdef NEMOUX_WITH_OPENGL_UNPACK_SUBIMAGE
 		if (nemotale_node_needs_full_upload(canvas->node) != 0)
 			nemotale_node_flush(canvas->node);
+#endif
 
 		nemotale_node_filter(canvas->node);
 
