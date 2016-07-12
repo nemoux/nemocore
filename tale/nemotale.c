@@ -107,19 +107,9 @@ void nemotale_attach_node(struct nemotale *tale, struct talenode *node)
 	nemolist_insert_tail(&tale->node_list, &node->link);
 
 	nemotale_damage_below(tale, node);
+	nemotale_prepare_node(tale, node);
 
 	node->tale = tale;
-
-	if (nemotale_has_gl_context(tale) != 0) {
-		if (nemotale_has_unpack_subimage(tale) == 0)
-			node->dispatch_flush = nemotale_node_flush_gl;
-		else
-			node->dispatch_flush = nemotale_node_flush_gl_subimage;
-
-		node->dispatch_filter = nemotale_node_filter_gl;
-
-		nemotale_node_prepare_gl(node);
-	}
 }
 
 void nemotale_detach_node(struct talenode *node)
