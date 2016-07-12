@@ -287,8 +287,10 @@ static void nemoshow_handle_vector_canvas_render_done(void *arg)
 
 	if (task->tag == 0) {
 		nemotale_node_flush(canvas->node);
-	} else if (nemotale_has_unpack_subimage(show->tale) != 0 && nemotale_node_needs_full_upload(canvas->node) == 0) {
+#ifdef NEMOUX_WITH_OPENGL_UNPACK_SUBIMAGE
+	} else if (nemotale_node_needs_full_upload(canvas->node) == 0) {
 		nemotale_node_flush_area(canvas->node, task->x, task->y, task->w, task->h);
+#endif
 	}
 
 	free(task);
@@ -371,7 +373,7 @@ void nemoshow_divide_one(struct nemoshow *show)
 
 		NEMOSHOW_CANVAS_CC(canvas, damage)->setEmpty();
 
-		if (nemotale_has_unpack_subimage(show->tale) == 0 || nemotale_node_needs_full_upload(canvas->node) != 0)
+		if (nemotale_node_needs_full_upload(canvas->node) != 0)
 			nemotale_node_flush(canvas->node);
 
 		nemotale_node_filter(canvas->node);

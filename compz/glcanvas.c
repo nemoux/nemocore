@@ -330,53 +330,51 @@ void glrenderer_flush_canvas(struct nemorenderer *base, struct nemocanvas *canva
 
 	glBindTexture(GL_TEXTURE_2D, glcontent->textures[0]);
 
-	if (!renderer->has_unpack_subimage) {
+#ifdef NEMOUX_WITH_OPENGL_UNPACK_SUBIMAGE
+	pixman_box32_t *rects;
+	void *data;
+	int i, n;
+
+	glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, glcontent->pitch);
+	data = wl_shm_buffer_get_data(buffer->shmbuffer);
+
+	if (glcontent->needs_full_upload) {
 		glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
 		glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
 
 		wl_shm_buffer_begin_access(buffer->shmbuffer);
 		glTexImage2D(GL_TEXTURE_2D, 0, glcontent->format,
 				glcontent->pitch, buffer->height, 0,
-				glcontent->format, glcontent->pixeltype,
-				wl_shm_buffer_get_data(buffer->shmbuffer));
+				glcontent->format, glcontent->pixeltype, data);
 		wl_shm_buffer_end_access(buffer->shmbuffer);
 	} else {
-#ifdef GL_EXT_unpack_subimage
-		pixman_box32_t *rects;
-		void *data;
-		int i, n;
+		rects = pixman_region32_rectangles(&glcontent->damage, &n);
 
-		glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, glcontent->pitch);
-		data = wl_shm_buffer_get_data(buffer->shmbuffer);
+		wl_shm_buffer_begin_access(buffer->shmbuffer);
 
-		if (glcontent->needs_full_upload) {
-			glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
-			glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
+		for (i = 0; i < n; i++) {
+			pixman_box32_t box = nemocontent_transform_to_buffer_rect(&canvas->base, rects[i]);
 
-			wl_shm_buffer_begin_access(buffer->shmbuffer);
-			glTexImage2D(GL_TEXTURE_2D, 0, glcontent->format,
-					glcontent->pitch, buffer->height, 0,
+			glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, box.x1);
+			glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, box.y1);
+			glTexSubImage2D(GL_TEXTURE_2D, 0, box.x1, box.y1,
+					box.x2 - box.x1, box.y2 - box.y1,
 					glcontent->format, glcontent->pixeltype, data);
-			wl_shm_buffer_end_access(buffer->shmbuffer);
-		} else {
-			rects = pixman_region32_rectangles(&glcontent->damage, &n);
-
-			wl_shm_buffer_begin_access(buffer->shmbuffer);
-
-			for (i = 0; i < n; i++) {
-				pixman_box32_t box = nemocontent_transform_to_buffer_rect(&canvas->base, rects[i]);
-
-				glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, box.x1);
-				glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, box.y1);
-				glTexSubImage2D(GL_TEXTURE_2D, 0, box.x1, box.y1,
-						box.x2 - box.x1, box.y2 - box.y1,
-						glcontent->format, glcontent->pixeltype, data);
-			}
-
-			wl_shm_buffer_end_access(buffer->shmbuffer);
 		}
-#endif
+
+		wl_shm_buffer_end_access(buffer->shmbuffer);
 	}
+#else
+	glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
+	glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
+
+	wl_shm_buffer_begin_access(buffer->shmbuffer);
+	glTexImage2D(GL_TEXTURE_2D, 0, glcontent->format,
+			glcontent->pitch, buffer->height, 0,
+			glcontent->format, glcontent->pixeltype,
+			wl_shm_buffer_get_data(buffer->shmbuffer));
+	wl_shm_buffer_end_access(buffer->shmbuffer);
+#endif
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 

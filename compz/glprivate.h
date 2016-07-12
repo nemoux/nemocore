@@ -58,7 +58,6 @@ struct glrenderer {
 	int has_bind_display;
 	int has_buffer_age;
 	int has_configless_context;
-	int has_unpack_subimage;
 	int has_egl_image_external;
 
 	struct wl_signal destroy_signal;

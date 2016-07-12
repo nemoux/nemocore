@@ -57,8 +57,6 @@ extern void nemotale_destroy_egl(struct taleegl *egl);
 extern int nemotale_composite_egl(struct nemotale *tale, pixman_region32_t *region);
 extern int nemotale_composite_egl_full(struct nemotale *tale);
 
-extern int nemotale_has_unpack_subimage(struct nemotale *tale);
-
 extern struct talefbo *nemotale_create_fbo(GLuint texture, int32_t width, int32_t height);
 extern void nemotale_destroy_fbo(struct talefbo *fbo);
 extern int nemotale_resize_fbo(struct talefbo *fbo, int32_t width, int32_t height);

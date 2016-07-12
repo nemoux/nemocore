@@ -284,7 +284,13 @@ void glrenderer_flush_actor(struct nemorenderer *base, struct nemoactor *actor)
 
 	glBindTexture(GL_TEXTURE_2D, glcontent->textures[0]);
 
-	if (!renderer->has_unpack_subimage) {
+#ifdef NEMOUX_WITH_OPENGL_UNPACK_SUBIMAGE
+	pixman_box32_t *rects;
+	int i, n;
+
+	glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, glcontent->pitch);
+
+	if (glcontent->needs_full_upload) {
 		glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
 		glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
 
@@ -292,34 +298,26 @@ void glrenderer_flush_actor(struct nemorenderer *base, struct nemoactor *actor)
 				glcontent->pitch, height, 0,
 				glcontent->format, glcontent->pixeltype, (void *)data);
 	} else {
-#ifdef GL_EXT_unpack_subimage
-		pixman_box32_t *rects;
-		int i, n;
+		rects = pixman_region32_rectangles(&glcontent->damage, &n);
 
-		glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, glcontent->pitch);
+		for (i = 0; i < n; i++) {
+			pixman_box32_t box = nemocontent_transform_to_buffer_rect(&actor->base, rects[i]);
 
-		if (glcontent->needs_full_upload) {
-			glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
-			glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
-
-			glTexImage2D(GL_TEXTURE_2D, 0, glcontent->format,
-					glcontent->pitch, height, 0,
+			glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, box.x1);
+			glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, box.y1);
+			glTexSubImage2D(GL_TEXTURE_2D, 0, box.x1, box.y1,
+					box.x2 - box.x1, box.y2 - box.y1,
 					glcontent->format, glcontent->pixeltype, (void *)data);
-		} else {
-			rects = pixman_region32_rectangles(&glcontent->damage, &n);
-
-			for (i = 0; i < n; i++) {
-				pixman_box32_t box = nemocontent_transform_to_buffer_rect(&actor->base, rects[i]);
-
-				glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, box.x1);
-				glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, box.y1);
-				glTexSubImage2D(GL_TEXTURE_2D, 0, box.x1, box.y1,
-						box.x2 - box.x1, box.y2 - box.y1,
-						glcontent->format, glcontent->pixeltype, (void *)data);
-			}
 		}
-#endif
 	}
+#else
+	glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
+	glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, glcontent->format,
+			glcontent->pitch, height, 0,
+			glcontent->format, glcontent->pixeltype, (void *)data);
+#endif
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 

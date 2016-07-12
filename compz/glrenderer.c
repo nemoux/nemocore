@@ -698,10 +698,10 @@ static int glrenderer_prepare_egl_context(struct glrenderer *renderer, struct ne
 	else
 		screen->read_format = PIXMAN_a8b8g8r8;
 
-#ifdef GL_EXT_unpack_subimage
 	if (strstr(extensions, "GL_EXT_unpack_subimage"))
-		renderer->has_unpack_subimage = 1;
-#endif
+		nemolog_message("GLRENDERER", "OpenGL has unpack subimage extension\n");
+	else
+		nemolog_message("GLRENDERER", "OpenGL has no unpack subimage extension\n");
 
 	if (strstr(extensions, "GL_OES_EGL_image_external"))
 		renderer->has_egl_image_external = 1;
