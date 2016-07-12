@@ -30,10 +30,10 @@ static void *nemopool_handle_node_thread(void *arg)
 			pthread_mutex_unlock(&pool->lock);
 
 			task->dispatch(task->data);
-			free(task);
 
 			pthread_mutex_lock(&pool->lock);
 
+			nemolist_insert_tail(&pool->done_list, &task->link);
 			pool->task_remains--;
 
 			pthread_cond_signal(&pool->signal);
@@ -109,6 +109,7 @@ struct nemopool *nemopool_create(int nodes)
 
 	nemolist_init(&pool->node_list);
 	nemolist_init(&pool->task_list);
+	nemolist_init(&pool->done_list);
 
 	for (i = 0; i < nodes; i++) {
 		nemopool_create_node(pool);
@@ -169,14 +170,32 @@ int nemopool_dispatch_task(struct nemopool *pool, nemopool_dispatch_t dispatch, 
 	return 0;
 }
 
-int nemopool_finish_task(struct nemopool *pool)
+int nemopool_dispatch_done(struct nemopool *pool, nemopool_dispatch_t dispatch)
 {
+	struct pooltask *task;
+	void *data = NULL;
+	int done;
+
 	pthread_mutex_lock(&pool->lock);
 
-	while (pool->task_remains > 0)
+	while (pool->task_remains > 0 && nemolist_empty(&pool->done_list) != 0)
 		pthread_cond_wait(&pool->signal, &pool->lock);
+
+	if (nemolist_empty(&pool->done_list) == 0) {
+		task = nemolist_node0(&pool->done_list, struct pooltask, link);
+		nemolist_remove(&task->link);
+
+		data = task->data;
+
+		free(task);
+	}
+
+	done = pool->task_remains <= 0 && nemolist_empty(&pool->done_list) != 0;
 
 	pthread_mutex_unlock(&pool->lock);
 
-	return 0;
+	if (data != NULL)
+		dispatch(data);
+
+	return done;
 }

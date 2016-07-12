@@ -269,8 +269,6 @@ static void nemoshow_handle_vector_canvas_render(void *arg)
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(task->one);
 
 	canvas->dispatch_redraw(task->show, task->one);
-
-	free(task);
 }
 
 static void nemoshow_handle_vector_canvas_render_tiled(void *arg)
@@ -279,6 +277,12 @@ static void nemoshow_handle_vector_canvas_render_tiled(void *arg)
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(task->one);
 
 	canvas->dispatch_redraw_tiled(task->show, task->one, task->x, task->y, task->w, task->h);
+}
+
+static void nemoshow_handle_vector_canvas_render_done(void *arg)
+{
+	struct showtask *task = (struct showtask *)arg;
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(task->one);
 
 	free(task);
 }
@@ -351,7 +355,7 @@ void nemoshow_divide_one(struct nemoshow *show)
 		nemolist_insert_tail(&show->tiling_list, &canvas->link);
 	}
 
-	nemopool_finish_task(pool);
+	while (nemopool_dispatch_done(pool, nemoshow_handle_vector_canvas_render_done) == 0);
 
 	nemolist_for_each_safe(canvas, ncanvas, &show->tiling_list, link) {
 		nemoshow_one_put_state(NEMOSHOW_CANVAS_ONE(canvas), NEMOSHOW_REDRAW_STATE);

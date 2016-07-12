@@ -30,6 +30,7 @@ struct nemopool {
 	pthread_cond_t task_signal;
 
 	struct nemolist task_list;
+	struct nemolist done_list;
 	int task_remains;
 };
 
@@ -52,7 +53,7 @@ extern struct nemopool *nemopool_create(int nodes);
 extern void nemopool_destroy(struct nemopool *pool);
 
 extern int nemopool_dispatch_task(struct nemopool *pool, nemopool_dispatch_t dispatch, void *data);
-extern int nemopool_finish_task(struct nemopool *pool);
+extern int nemopool_dispatch_done(struct nemopool *pool, nemopool_dispatch_t dispatch);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
