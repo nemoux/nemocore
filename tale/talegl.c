@@ -117,6 +117,9 @@ struct talenode *nemotale_node_create_gl(int32_t width, int32_t height)
 	node->viewport.width = width;
 	node->viewport.height = height;
 
+	node->dispatch_flush = nemotale_node_flush_gl;
+	node->dispatch_filter = nemotale_node_filter_gl;
+
 	pixman_region32_init_rect(&node->blend, 0, 0, width, height);
 	pixman_region32_init_rect(&node->region, 0, 0, width, height);
 	pixman_region32_init_rect(&node->input, 0, 0, width + 1, height + 1);
