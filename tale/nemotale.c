@@ -155,10 +155,12 @@ void nemotale_below_node(struct nemotale *tale, struct talenode *node, struct ta
 void nemotale_prepare_node(struct nemotale *tale, struct talenode *node)
 {
 	if (nemotale_has_gl_context(tale) != 0) {
-		if (nemotale_has_unpack_subimage(tale) == 0)
+		if (nemotale_has_unpack_subimage(tale) == 0) {
 			node->dispatch_flush = nemotale_node_flush_gl;
-		else
+		} else {
 			node->dispatch_flush = nemotale_node_flush_gl_subimage;
+			node->dispatch_flush_area = nemotale_node_flush_gl_area;
+		}
 
 		node->dispatch_filter = nemotale_node_filter_gl;
 

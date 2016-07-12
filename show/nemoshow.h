@@ -55,6 +55,7 @@ typedef int (*nemoshow_dispatch_destroy_t)(struct nemoshow *show);
 struct showtask {
 	struct nemoshow *show;
 	struct showone *one;
+	int tag;
 
 	int32_t x, y;
 	int32_t w, h;

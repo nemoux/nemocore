@@ -282,7 +282,14 @@ static void nemoshow_handle_vector_canvas_render_tiled(void *arg)
 static void nemoshow_handle_vector_canvas_render_done(void *arg)
 {
 	struct showtask *task = (struct showtask *)arg;
+	struct nemoshow *show = task->show;
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(task->one);
+
+	if (task->tag == 0) {
+		nemotale_node_flush(canvas->node);
+	} else if (nemotale_has_unpack_subimage(show->tale) != 0 && nemotale_node_needs_full_upload(canvas->node) == 0) {
+		nemotale_node_flush_area(canvas->node, task->x, task->y, task->w, task->h);
+	}
 
 	free(task);
 }
@@ -334,6 +341,7 @@ void nemoshow_divide_one(struct nemoshow *show)
 						task = (struct showtask *)malloc(sizeof(struct showtask));
 						task->show = show;
 						task->one = NEMOSHOW_CANVAS_ONE(canvas);
+						task->tag = 1;
 						task->x = j * tw;
 						task->y = i * th;
 						task->w = tw;
@@ -347,6 +355,7 @@ void nemoshow_divide_one(struct nemoshow *show)
 			task = (struct showtask *)malloc(sizeof(struct showtask));
 			task->show = show;
 			task->one = NEMOSHOW_CANVAS_ONE(canvas);
+			task->tag = 0;
 
 			nemopool_dispatch_task(pool, nemoshow_handle_vector_canvas_render, task);
 		}
@@ -362,7 +371,9 @@ void nemoshow_divide_one(struct nemoshow *show)
 
 		NEMOSHOW_CANVAS_CC(canvas, damage)->setEmpty();
 
-		nemotale_node_flush(canvas->node);
+		if (nemotale_has_unpack_subimage(show->tale) == 0 || nemotale_node_needs_full_upload(canvas->node) != 0)
+			nemotale_node_flush(canvas->node);
+
 		nemotale_node_filter(canvas->node);
 
 		nemolist_remove(&canvas->link);

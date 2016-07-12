@@ -756,7 +756,7 @@ int nemotale_has_unpack_subimage(struct nemotale *tale)
 {
 	struct nemogltale *context = (struct nemogltale *)tale->glcontext;
 
-	return context != NULL && context->has_unpack_subimage;
+	return context != NULL && context->has_unpack_subimage != 0;
 }
 
 struct talefbo *nemotale_create_fbo(GLuint texture, int32_t width, int32_t height)
@@ -985,6 +985,35 @@ int nemotale_node_flush_gl_subimage(struct talenode *node)
 
 		node->needs_flush = 0;
 		node->needs_filter = 1;
+	}
+
+	return 0;
+}
+
+int nemotale_node_flush_gl_area(struct talenode *node, int32_t x, int32_t y, int32_t width, int32_t height)
+{
+	struct talepmnode *pcontext = (struct talepmnode *)node->pmcontext;
+	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
+
+	if (pcontext != NULL) {
+		int32_t x1 = MAX(x, 0);
+		int32_t y1 = MAX(y, 0);
+		int32_t x2 = MIN(x + width, node->viewport.width);
+		int32_t y2 = MIN(y + height, node->viewport.height);
+
+		glBindTexture(GL_TEXTURE_2D, gcontext->texture);
+
+#ifdef GL_EXT_unpack_subimage
+		glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, node->viewport.width);
+
+		glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, x1);
+		glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, y1);
+		glTexSubImage2D(GL_TEXTURE_2D, 0,
+				x1, y1, x2 - x1, y2 - y1,
+				GL_BGRA_EXT, GL_UNSIGNED_BYTE, pcontext->data);
+#endif
+
+		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
 	return 0;

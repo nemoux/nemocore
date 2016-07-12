@@ -17,6 +17,11 @@ static int nemotale_node_flush_none(struct talenode *node)
 	return 0;
 }
 
+static int nemotale_node_flush_area_none(struct talenode *node, int32_t x, int32_t y, int32_t width, int32_t height)
+{
+	return 0;
+}
+
 static int nemotale_node_filter_none(struct talenode *node)
 {
 	return 0;
@@ -60,6 +65,7 @@ int nemotale_node_prepare(struct talenode *node)
 	node->alpha = 1.0f;
 
 	node->dispatch_flush = nemotale_node_flush_none;
+	node->dispatch_flush_area = nemotale_node_flush_area_none;
 	node->dispatch_filter = nemotale_node_filter_none;
 	node->dispatch_resize = nemotale_node_resize_none;
 	node->dispatch_viewport = nemotale_node_viewport_none;
