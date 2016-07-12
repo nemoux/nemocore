@@ -700,7 +700,7 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 	_device = new SkBitmapDevice(*NEMOSHOW_CANVAS_CC(canvas, bitmap));
 	_canvas = new SkCanvas(_device);
 
-	if (nemoshow_one_has_state(one, NEMOSHOW_REDRAW_STATE)) {
+	if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE)) {
 		_canvas->clear(SK_ColorTRANSPARENT);
 		_canvas->scale(canvas->viewport.sx, canvas->viewport.sy);
 
@@ -708,7 +708,7 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 			nemoshow_canvas_render_one(canvas, _canvas, child, NULL);
 		}
 
-		nemoshow_one_put_state(one, NEMOSHOW_REDRAW_STATE);
+		nemoshow_canvas_put_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE);
 	} else {
 		_canvas->clipRegion(*NEMOSHOW_CANVAS_CC(canvas, damage));
 		_canvas->clear(SK_ColorTRANSPARENT);
@@ -733,7 +733,7 @@ void nemoshow_canvas_render_vector_tiled(struct nemoshow *show, struct showone *
 	SkCanvas *_canvas;
 	SkRegion region;
 
-	if (nemoshow_one_has_state(one, NEMOSHOW_REDRAW_STATE))
+	if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE))
 		region.setRect(SkIRect::MakeXYWH(x, y, width, height));
 	else
 		region.op(*NEMOSHOW_CANVAS_CC(canvas, damage), SkIRect::MakeXYWH(x, y, width, height), SkRegion::kIntersect_Op);
@@ -869,7 +869,7 @@ void nemoshow_canvas_damage_all(struct showone *one)
 
 	nemotale_node_damage_all(canvas->node);
 
-	nemoshow_one_set_state(one, NEMOSHOW_REDRAW_STATE);
+	nemoshow_canvas_set_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE);
 
 	nemoshow_one_dirty(one, NEMOSHOW_CANVAS_DIRTY);
 }

@@ -29,6 +29,11 @@ typedef enum {
 	NEMOSHOW_CANVAS_LAST_TYPE
 } NemoShowCanvasType;
 
+typedef enum {
+	NEMOSHOW_CANVAS_REDRAW_STATE = (1 << 0),
+	NEMOSHOW_CANVAS_TILING_STATE = (1 << 1)
+} NemoShowCanvasState;
+
 struct nemoshow;
 
 typedef void (*nemoshow_canvas_dispatch_redraw_t)(struct nemoshow *show, struct showone *one);
@@ -39,6 +44,8 @@ typedef int (*nemoshow_canvas_contain_point_t)(struct nemoshow *show, struct sho
 
 struct showcanvas {
 	struct showone base;
+
+	uint32_t state;
 
 	struct nemoshow *show;
 	struct nemolist link;
@@ -121,6 +128,26 @@ extern void nemoshow_canvas_set_one(struct showone *canvas, struct showone *one)
 extern void nemoshow_canvas_put_one(struct showone *one);
 extern void nemoshow_canvas_set_ones(struct showone *canvas, struct showone *one);
 extern void nemoshow_canvas_put_ones(struct showone *one);
+
+static inline void nemoshow_canvas_set_state(struct showcanvas *canvas, uint32_t state)
+{
+	canvas->state |= state;
+}
+
+static inline void nemoshow_canvas_put_state(struct showcanvas *canvas, uint32_t state)
+{
+	canvas->state &= ~state;
+}
+
+static inline int nemoshow_canvas_has_state(struct showcanvas *canvas, uint32_t state)
+{
+	return canvas->state & state;
+}
+
+static inline int nemoshow_canvas_has_state_all(struct showcanvas *canvas, uint32_t state)
+{
+	return (canvas->state & state) == state;
+}
 
 static inline void nemoshow_canvas_set_dispatch_redraw(struct showone *one, nemoshow_canvas_dispatch_redraw_t dispatch_redraw)
 {

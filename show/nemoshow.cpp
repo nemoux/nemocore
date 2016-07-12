@@ -268,15 +268,10 @@ static void nemoshow_handle_vector_canvas_render(void *arg)
 	struct showtask *task = (struct showtask *)arg;
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(task->one);
 
-	canvas->dispatch_redraw(task->show, task->one);
-}
-
-static void nemoshow_handle_vector_canvas_render_tiled(void *arg)
-{
-	struct showtask *task = (struct showtask *)arg;
-	struct showcanvas *canvas = NEMOSHOW_CANVAS(task->one);
-
-	canvas->dispatch_redraw_tiled(task->show, task->one, task->x, task->y, task->w, task->h);
+	if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_TILING_STATE))
+		canvas->dispatch_redraw_tiled(task->show, task->one, task->x, task->y, task->w, task->h);
+	else
+		canvas->dispatch_redraw(task->show, task->one);
 }
 
 static void nemoshow_handle_vector_canvas_render_done(void *arg)
@@ -285,7 +280,7 @@ static void nemoshow_handle_vector_canvas_render_done(void *arg)
 	struct nemoshow *show = task->show;
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(task->one);
 
-	if (task->tag == 0) {
+	if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_TILING_STATE) == 0) {
 		nemotale_node_flush(canvas->node);
 #ifdef NEMOUX_WITH_OPENGL_UNPACK_SUBIMAGE
 	} else if (nemotale_node_needs_full_upload(canvas->node) == 0) {
@@ -307,23 +302,21 @@ void nemoshow_divide_one(struct nemoshow *show)
 		return;
 
 	nemolist_for_each_safe(canvas, ncanvas, &show->canvas_list, link) {
-		int needs_tiling = 0;
-
 		if (canvas->dispatch_redraw_tiled == NULL)
 			continue;
 
 		if (canvas->viewport.width >= show->tilesize || canvas->viewport.height >= show->tilesize) {
-			if (nemoshow_one_has_state(NEMOSHOW_CANVAS_ONE(canvas), NEMOSHOW_REDRAW_STATE)) {
-				needs_tiling = 1;
+			if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE)) {
+				nemoshow_canvas_set_state(canvas, NEMOSHOW_CANVAS_TILING_STATE);
 			} else {
 				SkIRect box = NEMOSHOW_CANVAS_CC(canvas, damage)->getBounds();
 
 				if (box.width() >= show->tilesize || box.height() >= show->tilesize)
-					needs_tiling = 1;
+					nemoshow_canvas_set_state(canvas, NEMOSHOW_CANVAS_TILING_STATE);
 			}
 		}
 
-		if (needs_tiling != 0) {
+		if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_TILING_STATE)) {
 			int cw, ch;
 			int tr, tc;
 			int tw, th;
@@ -338,18 +331,17 @@ void nemoshow_divide_one(struct nemoshow *show)
 
 			for (i = 0; i < tr; i++) {
 				for (j = 0; j < tc; j++) {
-					if (nemoshow_one_has_state(NEMOSHOW_CANVAS_ONE(canvas), NEMOSHOW_REDRAW_STATE) ||
+					if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE) ||
 							NEMOSHOW_CANVAS_CC(canvas, damage)->intersects(SkIRect::MakeXYWH(j * tw, i * th, tw, th))) {
 						task = (struct showtask *)malloc(sizeof(struct showtask));
 						task->show = show;
 						task->one = NEMOSHOW_CANVAS_ONE(canvas);
-						task->tag = 1;
 						task->x = j * tw;
 						task->y = i * th;
 						task->w = tw;
 						task->h = th;
 
-						nemopool_dispatch_task(pool, nemoshow_handle_vector_canvas_render_tiled, task);
+						nemopool_dispatch_task(pool, nemoshow_handle_vector_canvas_render, task);
 					}
 				}
 			}
@@ -357,7 +349,6 @@ void nemoshow_divide_one(struct nemoshow *show)
 			task = (struct showtask *)malloc(sizeof(struct showtask));
 			task->show = show;
 			task->one = NEMOSHOW_CANVAS_ONE(canvas);
-			task->tag = 0;
 
 			nemopool_dispatch_task(pool, nemoshow_handle_vector_canvas_render, task);
 		}
@@ -369,14 +360,16 @@ void nemoshow_divide_one(struct nemoshow *show)
 	while (nemopool_dispatch_done(pool, nemoshow_handle_vector_canvas_render_done) == 0);
 
 	nemolist_for_each_safe(canvas, ncanvas, &show->tiling_list, link) {
-		nemoshow_one_put_state(NEMOSHOW_CANVAS_ONE(canvas), NEMOSHOW_REDRAW_STATE);
+		if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_TILING_STATE)) {
+			nemoshow_canvas_put_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE | NEMOSHOW_CANVAS_TILING_STATE);
 
-		NEMOSHOW_CANVAS_CC(canvas, damage)->setEmpty();
+			NEMOSHOW_CANVAS_CC(canvas, damage)->setEmpty();
 
 #ifdef NEMOUX_WITH_OPENGL_UNPACK_SUBIMAGE
-		if (nemotale_node_needs_full_upload(canvas->node) != 0)
-			nemotale_node_flush(canvas->node);
+			if (nemotale_node_needs_full_upload(canvas->node) != 0)
+				nemotale_node_flush(canvas->node);
 #endif
+		}
 
 		nemotale_node_filter(canvas->node);
 
