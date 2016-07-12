@@ -200,19 +200,12 @@ int nemoshow_canvas_resize(struct showone *one)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
-	if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
-		nemotale_node_resize_pixman(canvas->node, canvas->width, canvas->height);
+	nemotale_node_resize(canvas->node, canvas->width, canvas->height);
 
+	if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
 		canvas->viewport.sx = canvas->viewport.width / canvas->width;
 		canvas->viewport.sy = canvas->viewport.height / canvas->height;
-	} else if (one->sub == NEMOSHOW_CANVAS_PIPELINE_TYPE) {
-		nemotale_node_resize_gl(canvas->node, canvas->width, canvas->height);
-	} else if (one->sub == NEMOSHOW_CANVAS_PIXMAN_TYPE) {
-		nemotale_node_resize_pixman(canvas->node, canvas->width, canvas->height);
-	} else if (one->sub == NEMOSHOW_CANVAS_OPENGL_TYPE) {
-		nemotale_node_resize_gl(canvas->node, canvas->width, canvas->height);
 	} else if (one->sub == NEMOSHOW_CANVAS_BACK_TYPE) {
-		nemotale_node_resize_pixman(canvas->node, canvas->width, canvas->height);
 		nemotale_node_opaque(canvas->node, 0, 0, canvas->width, canvas->height);
 	}
 
@@ -766,7 +759,7 @@ int nemoshow_canvas_set_viewport(struct showone *one, double sx, double sy)
 
 		delete NEMOSHOW_CANVAS_CC(canvas, bitmap);
 
-		nemotale_node_set_viewport_pixman(canvas->node, canvas->viewport.width, canvas->viewport.height);
+		nemotale_node_viewport(canvas->node, canvas->viewport.width, canvas->viewport.height);
 
 		NEMOSHOW_CANVAS_CC(canvas, bitmap) = new SkBitmap;
 		NEMOSHOW_CANVAS_CC(canvas, bitmap)->setInfo(
@@ -784,7 +777,7 @@ int nemoshow_canvas_set_viewport(struct showone *one, double sx, double sy)
 		canvas->viewport.width = canvas->width * sx;
 		canvas->viewport.height = canvas->height * sy;
 
-		nemotale_node_set_viewport_gl(canvas->node, canvas->viewport.width, canvas->viewport.height);
+		nemotale_node_viewport(canvas->node, canvas->viewport.width, canvas->viewport.height);
 
 		fbo_prepare_context(
 				nemotale_node_get_texture(canvas->node),
@@ -800,7 +793,7 @@ int nemoshow_canvas_set_viewport(struct showone *one, double sx, double sy)
 		canvas->viewport.width = canvas->width * sx;
 		canvas->viewport.height = canvas->height * sy;
 
-		nemotale_node_set_viewport_pixman(canvas->node, canvas->viewport.width, canvas->viewport.height);
+		nemotale_node_viewport(canvas->node, canvas->viewport.width, canvas->viewport.height);
 
 		nemoshow_canvas_damage_all(one);
 	} else if (one->sub == NEMOSHOW_CANVAS_OPENGL_TYPE) {
@@ -810,7 +803,7 @@ int nemoshow_canvas_set_viewport(struct showone *one, double sx, double sy)
 		canvas->viewport.width = canvas->width * sx;
 		canvas->viewport.height = canvas->height * sy;
 
-		nemotale_node_set_viewport_gl(canvas->node, canvas->viewport.width, canvas->viewport.height);
+		nemotale_node_viewport(canvas->node, canvas->viewport.width, canvas->viewport.height);
 
 		nemoshow_canvas_damage_all(one);
 	}

@@ -262,6 +262,9 @@ struct talenode *nemotale_node_create_pixman(int32_t width, int32_t height)
 	node->viewport.width = width;
 	node->viewport.height = height;
 
+	node->dispatch_resize = nemotale_node_resize_pixman;
+	node->dispatch_viewport = nemotale_node_viewport_pixman;
+
 	pixman_region32_init_rect(&node->blend, 0, 0, width, height);
 	pixman_region32_init_rect(&node->region, 0, 0, width, height);
 	pixman_region32_init_rect(&node->input, 0, 0, width + 1, height + 1);
@@ -334,6 +337,29 @@ void nemotale_node_detach_pixman(struct talenode *node)
 	context->needs_free = 0;
 }
 
+void nemotale_node_fill_pixman(struct talenode *node, double r, double g, double b, double a)
+{
+	struct talepmnode *context = (struct talepmnode *)node->pmcontext;
+	pixman_image_t *mask;
+	pixman_color_t color;
+
+	color.red = r * 0xffff;
+	color.green = g * 0xffff;
+	color.blue = b * 0xffff;
+	color.alpha = a * 0xffff;
+
+	mask = pixman_image_create_solid_fill(&color);
+
+	pixman_image_composite32(PIXMAN_OP_SRC,
+			mask,
+			NULL,
+			context->image,
+			0, 0, 0, 0, 0, 0,
+			node->viewport.width, node->viewport.height);
+
+	pixman_image_unref(mask);
+}
+
 int nemotale_node_resize_pixman(struct talenode *node, int32_t width, int32_t height)
 {
 	if (node->geometry.width != width || node->geometry.height != height) {
@@ -377,30 +403,7 @@ int nemotale_node_resize_pixman(struct talenode *node, int32_t width, int32_t he
 	return 0;
 }
 
-void nemotale_node_fill_pixman(struct talenode *node, double r, double g, double b, double a)
-{
-	struct talepmnode *context = (struct talepmnode *)node->pmcontext;
-	pixman_image_t *mask;
-	pixman_color_t color;
-
-	color.red = r * 0xffff;
-	color.green = g * 0xffff;
-	color.blue = b * 0xffff;
-	color.alpha = a * 0xffff;
-
-	mask = pixman_image_create_solid_fill(&color);
-
-	pixman_image_composite32(PIXMAN_OP_SRC,
-			mask,
-			NULL,
-			context->image,
-			0, 0, 0, 0, 0, 0,
-			node->viewport.width, node->viewport.height);
-
-	pixman_image_unref(mask);
-}
-
-int nemotale_node_set_viewport_pixman(struct talenode *node, int32_t width, int32_t height)
+int nemotale_node_viewport_pixman(struct talenode *node, int32_t width, int32_t height)
 {
 	struct talepmnode *context = (struct talepmnode *)node->pmcontext;
 	pixman_image_t *pimage = context->image;

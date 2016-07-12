@@ -65,6 +65,8 @@ extern int nemotale_resize_fbo(struct talefbo *fbo, int32_t width, int32_t heigh
 extern int nemotale_composite_fbo(struct nemotale *tale, pixman_region32_t *region);
 extern int nemotale_composite_fbo_full(struct nemotale *tale);
 
+extern int nemotale_node_resize_gl(struct talenode *node, int32_t width, int32_t height);
+extern int nemotale_node_viewport_gl(struct talenode *node, int32_t width, int32_t height);
 extern int nemotale_node_flush_gl(struct talenode *node);
 extern int nemotale_node_flush_gl_subimage(struct talenode *node);
 extern int nemotale_node_filter_gl(struct talenode *node);
@@ -72,8 +74,6 @@ extern int nemotale_node_filter_gl(struct talenode *node);
 extern int nemotale_node_set_filter(struct talenode *node, const char *shader);
 
 extern struct talenode *nemotale_node_create_gl(int32_t width, int32_t height);
-extern int nemotale_node_resize_gl(struct talenode *node, int32_t width, int32_t height);
-extern int nemotale_node_set_viewport_gl(struct talenode *node, int32_t width, int32_t height);
 
 static inline GLuint nemotale_node_get_texture(struct talenode *node)
 {

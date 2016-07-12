@@ -119,6 +119,8 @@ struct talenode *nemotale_node_create_gl(int32_t width, int32_t height)
 
 	node->dispatch_flush = nemotale_node_flush_gl;
 	node->dispatch_filter = nemotale_node_filter_gl;
+	node->dispatch_resize = nemotale_node_resize_gl;
+	node->dispatch_viewport = nemotale_node_viewport_gl;
 
 	pixman_region32_init_rect(&node->blend, 0, 0, width, height);
 	pixman_region32_init_rect(&node->region, 0, 0, width, height);
@@ -178,7 +180,7 @@ int nemotale_node_resize_gl(struct talenode *node, int32_t width, int32_t height
 	return 0;
 }
 
-int nemotale_node_set_viewport_gl(struct talenode *node, int32_t width, int32_t height)
+int nemotale_node_viewport_gl(struct talenode *node, int32_t width, int32_t height)
 {
 	struct taleglnode *context = (struct taleglnode *)node->glcontext;
 

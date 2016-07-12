@@ -22,6 +22,16 @@ static int nemotale_node_filter_none(struct talenode *node)
 	return 0;
 }
 
+static int nemotale_node_resize_none(struct talenode *node, int32_t width, int32_t height)
+{
+	return 0;
+}
+
+static int nemotale_node_viewport_none(struct talenode *node, int32_t width, int32_t height)
+{
+	return 0;
+}
+
 void nemotale_node_destroy(struct talenode *node)
 {
 	nemotale_node_finish(node);
@@ -51,6 +61,8 @@ int nemotale_node_prepare(struct talenode *node)
 
 	node->dispatch_flush = nemotale_node_flush_none;
 	node->dispatch_filter = nemotale_node_filter_none;
+	node->dispatch_resize = nemotale_node_resize_none;
+	node->dispatch_viewport = nemotale_node_viewport_none;
 
 	nemomatrix_init_identity(&node->transform.matrix);
 	nemomatrix_init_identity(&node->transform.inverse);

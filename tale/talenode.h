@@ -23,6 +23,8 @@ struct talenode;
 
 typedef int (*nemotale_node_dispatch_flush_t)(struct talenode *node);
 typedef int (*nemotale_node_dispatch_filter_t)(struct talenode *node);
+typedef int (*nemotale_node_dispatch_resize_t)(struct talenode *node, int32_t width, int32_t height);
+typedef int (*nemotale_node_dispatch_viewport_t)(struct talenode *node, int32_t width, int32_t height);
 
 struct talenode {
 	struct nemosignal destroy_signal;
@@ -69,6 +71,8 @@ struct talenode {
 
 	nemotale_node_dispatch_flush_t dispatch_flush;
 	nemotale_node_dispatch_filter_t dispatch_filter;
+	nemotale_node_dispatch_resize_t dispatch_resize;
+	nemotale_node_dispatch_viewport_t dispatch_viewport;
 
 	struct {
 		int enable;
@@ -304,6 +308,16 @@ static inline int nemotale_node_flush(struct talenode *node)
 static inline int nemotale_node_filter(struct talenode *node)
 {
 	return node->dispatch_filter(node);
+}
+
+static inline int nemotale_node_resize(struct talenode *node, int32_t width, int32_t height)
+{
+	return node->dispatch_resize(node, width, height);
+}
+
+static inline int nemotale_node_viewport(struct talenode *node, int32_t width, int32_t height)
+{
+	return node->dispatch_viewport(node, width, height);
 }
 
 #ifdef __cplusplus
