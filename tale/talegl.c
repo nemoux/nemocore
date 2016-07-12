@@ -137,6 +137,33 @@ err1:
 	return NULL;
 }
 
+int nemotale_node_prepare_gl(struct talenode *node)
+{
+	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
+
+	if (gcontext == NULL) {
+		gcontext = (struct taleglnode *)malloc(sizeof(struct taleglnode));
+		if (gcontext == NULL)
+			return -1;
+		memset(gcontext, 0, sizeof(struct taleglnode));
+
+		glGenTextures(1, &gcontext->texture);
+		glBindTexture(GL_TEXTURE_2D, gcontext->texture);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		node->glcontext = gcontext;
+
+		gcontext->destroy_listener.notify = nemotale_node_handle_destroy_signal;
+		nemosignal_add(&node->destroy_signal, &gcontext->destroy_listener);
+	}
+
+	return 0;
+}
+
 int nemotale_node_resize_gl(struct talenode *node, int32_t width, int32_t height)
 {
 	if (node->geometry.width != width || node->geometry.height != height) {
@@ -875,26 +902,6 @@ int nemotale_node_flush_gl(struct talenode *node)
 	struct talepmnode *pcontext = (struct talepmnode *)node->pmcontext;
 	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
 
-	if (gcontext == NULL) {
-		gcontext = (struct taleglnode *)malloc(sizeof(struct taleglnode));
-		if (gcontext == NULL)
-			return -1;
-		memset(gcontext, 0, sizeof(struct taleglnode));
-
-		glGenTextures(1, &gcontext->texture);
-		glBindTexture(GL_TEXTURE_2D, gcontext->texture);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-		node->glcontext = gcontext;
-
-		gcontext->destroy_listener.notify = nemotale_node_handle_destroy_signal;
-		nemosignal_add(&node->destroy_signal, &gcontext->destroy_listener);
-	}
-
 	if (pcontext != NULL && node->needs_flush != 0) {
 		glBindTexture(GL_TEXTURE_2D, gcontext->texture);
 
@@ -918,26 +925,6 @@ int nemotale_node_flush_gl_subimage(struct talenode *node)
 {
 	struct talepmnode *pcontext = (struct talepmnode *)node->pmcontext;
 	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
-
-	if (gcontext == NULL) {
-		gcontext = (struct taleglnode *)malloc(sizeof(struct taleglnode));
-		if (gcontext == NULL)
-			return -1;
-		memset(gcontext, 0, sizeof(struct taleglnode));
-
-		glGenTextures(1, &gcontext->texture);
-		glBindTexture(GL_TEXTURE_2D, gcontext->texture);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-		node->glcontext = gcontext;
-
-		gcontext->destroy_listener.notify = nemotale_node_handle_destroy_signal;
-		nemosignal_add(&node->destroy_signal, &gcontext->destroy_listener);
-	}
 
 	if (pcontext != NULL && node->needs_flush != 0) {
 		glBindTexture(GL_TEXTURE_2D, gcontext->texture);
@@ -1064,26 +1051,6 @@ int nemotale_node_set_filter(struct talenode *node, const char *shader)
 		node->has_filter = 0;
 
 		return 0;
-	}
-
-	if (gcontext == NULL) {
-		gcontext = (struct taleglnode *)malloc(sizeof(struct taleglnode));
-		if (gcontext == NULL)
-			return -1;
-		memset(gcontext, 0, sizeof(struct taleglnode));
-
-		glGenTextures(1, &gcontext->texture);
-		glBindTexture(GL_TEXTURE_2D, gcontext->texture);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-		node->glcontext = gcontext;
-
-		gcontext->destroy_listener.notify = nemotale_node_handle_destroy_signal;
-		nemosignal_add(&node->destroy_signal, &gcontext->destroy_listener);
 	}
 
 	glGenTextures(1, &gcontext->ftexture);

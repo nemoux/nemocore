@@ -104,7 +104,7 @@ extern void nemotale_update_node(struct nemotale *tale);
 extern void nemotale_accumulate_damage(struct nemotale *tale);
 extern void nemotale_flush_damage(struct nemotale *tale);
 
-extern void nemotale_set_node_dispatch(struct nemotale *tale, struct talenode *node);
+extern void nemotale_set_node_context(struct nemotale *tale, struct talenode *node);
 
 extern void nemotale_set_keyboard_focus(struct nemotale *tale, struct talenode *node);
 

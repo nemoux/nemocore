@@ -108,6 +108,9 @@ void nemoshow_canvas_destroy(struct showone *one)
 
 	delete static_cast<showcanvas_t *>(canvas->cc);
 
+	if (canvas->shader != NULL)
+		free(canvas->shader);
+
 	free(canvas);
 }
 
@@ -235,25 +238,34 @@ void nemoshow_canvas_set_alpha(struct showone *one, double alpha)
 	canvas->alpha = alpha;
 }
 
-int nemoshow_canvas_set_filter(struct showone *one, const char *shader)
+int nemoshow_canvas_set_shader(struct showone *one, const char *shader)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
-	return nemotale_node_set_filter(canvas->node, shader);
+	if (canvas->shader != NULL)
+		free(canvas->shader);
+
+	canvas->shader = strdup(shader);
+
+	nemoshow_one_dirty(one, NEMOSHOW_SHADER_DIRTY);
+
+	return 0;
 }
 
-int nemoshow_canvas_load_filter(struct showone *one, const char *shaderpath)
+int nemoshow_canvas_load_shader(struct showone *one, const char *shaderpath)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 	char *shader = NULL;
-	int r;
 
 	if (os_load_path(shaderpath, &shader, NULL) < 0)
 		return -1;
 
-	r = nemotale_node_set_filter(canvas->node, shader);
+	if (canvas->shader != NULL)
+		free(canvas->shader);
 
-	free(shader);
+	canvas->shader = shader;
+
+	nemoshow_one_dirty(one, NEMOSHOW_SHADER_DIRTY);
 
 	return 0;
 }
@@ -285,7 +297,7 @@ int nemoshow_canvas_update(struct showone *one)
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
 	if ((one->dirty & NEMOSHOW_INIT_DIRTY) != 0) {
-		nemotale_set_node_dispatch(show->tale, canvas->node);
+		nemotale_set_node_context(show->tale, canvas->node);
 	}
 	if ((one->dirty & NEMOSHOW_SIZE_DIRTY) != 0) {
 		nemoshow_canvas_resize(one);
@@ -318,6 +330,12 @@ int nemoshow_canvas_update(struct showone *one)
 		nemotale_node_pivot(canvas->node, canvas->px, canvas->py);
 
 		nemoshow_canvas_damage_all(one);
+	}
+	if ((one->dirty & NEMOSHOW_SHADER_DIRTY) != 0) {
+		if (canvas->shader != NULL)
+			nemotale_node_set_filter(canvas->node, canvas->shader);
+
+		one->dirty |= NEMOSHOW_FILTER_DIRTY;
 	}
 	if ((one->dirty & NEMOSHOW_FILTER_DIRTY) != 0) {
 		nemoshow_canvas_damage_filter(one);

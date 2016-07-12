@@ -239,7 +239,7 @@ static void nemotale_handle_keyboard_focus_destroy(struct nemolistener *listener
 	tale->keyboard.focus = NULL;
 }
 
-void nemotale_set_node_dispatch(struct nemotale *tale, struct talenode *node)
+void nemotale_set_node_context(struct nemotale *tale, struct talenode *node)
 {
 	if (nemotale_has_gl_context(tale) != 0) {
 		if (nemotale_has_unpack_subimage(tale) == 0)
@@ -248,6 +248,8 @@ void nemotale_set_node_dispatch(struct nemotale *tale, struct talenode *node)
 			node->dispatch_flush = nemotale_node_flush_gl_subimage;
 
 		node->dispatch_filter = nemotale_node_filter_gl;
+
+		nemotale_node_prepare_gl(node);
 	}
 }
 
