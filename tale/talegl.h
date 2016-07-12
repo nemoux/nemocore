@@ -57,14 +57,17 @@ extern void nemotale_destroy_egl(struct taleegl *egl);
 extern int nemotale_composite_egl(struct nemotale *tale, pixman_region32_t *region);
 extern int nemotale_composite_egl_full(struct nemotale *tale);
 
+extern int nemotale_has_unpack_subimage(struct nemotale *tale);
+
 extern struct talefbo *nemotale_create_fbo(GLuint texture, int32_t width, int32_t height);
 extern void nemotale_destroy_fbo(struct talefbo *fbo);
 extern int nemotale_resize_fbo(struct talefbo *fbo, int32_t width, int32_t height);
 extern int nemotale_composite_fbo(struct nemotale *tale, pixman_region32_t *region);
 extern int nemotale_composite_fbo_full(struct nemotale *tale);
 
-extern int nemotale_node_flush_gl(struct nemotale *tale, struct talenode *node);
-extern int nemotale_node_filter_gl(struct nemotale *tale, struct talenode *node);
+extern int nemotale_node_flush_gl(struct talenode *node);
+extern int nemotale_node_flush_gl_subimage(struct talenode *node);
+extern int nemotale_node_filter_gl(struct talenode *node);
 
 extern int nemotale_node_set_filter(struct talenode *node, const char *shader);
 

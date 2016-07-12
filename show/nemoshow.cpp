@@ -246,8 +246,8 @@ void nemoshow_render_one(struct nemoshow *show)
 	nemolist_for_each_safe(canvas, ncanvas, &show->canvas_list, link) {
 		canvas->dispatch_redraw(show, NEMOSHOW_CANVAS_ONE(canvas));
 
-		nemotale_node_flush_gl(show->tale, canvas->node);
-		nemotale_node_filter_gl(show->tale, canvas->node);
+		nemotale_node_flush(canvas->node);
+		nemotale_node_filter(canvas->node);
 
 		nemolist_remove(&canvas->link);
 		nemolist_init(&canvas->link);
@@ -256,7 +256,7 @@ void nemoshow_render_one(struct nemoshow *show)
 	nemolist_for_each_safe(canvas, ncanvas, &show->pipeline_list, link) {
 		canvas->dispatch_redraw(show, NEMOSHOW_CANVAS_ONE(canvas));
 
-		nemotale_node_filter_gl(show->tale, canvas->node);
+		nemotale_node_filter(canvas->node);
 
 		nemolist_remove(&canvas->link);
 		nemolist_init(&canvas->link);
@@ -358,8 +358,8 @@ void nemoshow_divide_one(struct nemoshow *show)
 
 		NEMOSHOW_CANVAS_CC(canvas, damage)->setEmpty();
 
-		nemotale_node_flush_gl(show->tale, canvas->node);
-		nemotale_node_filter_gl(show->tale, canvas->node);
+		nemotale_node_flush(canvas->node);
+		nemotale_node_filter(canvas->node);
 
 		nemolist_remove(&canvas->link);
 		nemolist_init(&canvas->link);

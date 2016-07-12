@@ -9,6 +9,8 @@
 
 #include <nemotale.h>
 #include <talenode.h>
+#include <talegl.h>
+#include <talepixman.h>
 #include <nemolist.h>
 #include <nemolistener.h>
 #include <nemomisc.h>
@@ -235,6 +237,18 @@ static void nemotale_handle_keyboard_focus_destroy(struct nemolistener *listener
 	nemolist_init(&tale->keyboard.node_destroy_listener.link);
 
 	tale->keyboard.focus = NULL;
+}
+
+void nemotale_set_node_dispatch(struct nemotale *tale, struct talenode *node)
+{
+	if (nemotale_has_gl_context(tale) != 0) {
+		if (nemotale_has_unpack_subimage(tale) == 0)
+			node->dispatch_flush = nemotale_node_flush_gl;
+		else
+			node->dispatch_flush = nemotale_node_flush_gl_subimage;
+
+		node->dispatch_filter = nemotale_node_filter_gl;
+	}
 }
 
 void nemotale_set_keyboard_focus(struct nemotale *tale, struct talenode *node)

@@ -21,6 +21,9 @@ NEMO_BEGIN_EXTERN_C
 struct nemotale;
 struct talenode;
 
+typedef int (*nemotale_node_dispatch_flush_t)(struct talenode *node);
+typedef int (*nemotale_node_dispatch_filter_t)(struct talenode *node);
+
 struct talenode {
 	struct nemosignal destroy_signal;
 
@@ -63,6 +66,9 @@ struct talenode {
 	int needs_flush;
 	int needs_filter;
 	int needs_full_upload;
+
+	nemotale_node_dispatch_flush_t dispatch_flush;
+	nemotale_node_dispatch_filter_t dispatch_filter;
 
 	struct {
 		int enable;
@@ -288,6 +294,16 @@ static inline void nemotale_node_transform_from_viewport(struct talenode *node, 
 		*x = sx;
 		*y = sy;
 	}
+}
+
+static inline int nemotale_node_flush(struct talenode *node)
+{
+	return node->dispatch_flush(node);
+}
+
+static inline int nemotale_node_filter(struct talenode *node)
+{
+	return node->dispatch_filter(node);
 }
 
 #ifdef __cplusplus

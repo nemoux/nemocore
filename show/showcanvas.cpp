@@ -291,6 +291,9 @@ int nemoshow_canvas_update(struct showone *one)
 	struct nemoshow *show = one->show;
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
+	if ((one->dirty & NEMOSHOW_INIT_DIRTY) != 0) {
+		nemotale_set_node_dispatch(show->tale, canvas->node);
+	}
 	if ((one->dirty & NEMOSHOW_SIZE_DIRTY) != 0) {
 		nemoshow_canvas_resize(one);
 

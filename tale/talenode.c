@@ -12,6 +12,16 @@
 #include <nemomatrix.h>
 #include <nemomisc.h>
 
+static int nemotale_node_flush_none(struct talenode *node)
+{
+	return 0;
+}
+
+static int nemotale_node_filter_none(struct talenode *node)
+{
+	return 0;
+}
+
 void nemotale_node_destroy(struct talenode *node)
 {
 	nemotale_node_finish(node);
@@ -38,6 +48,9 @@ int nemotale_node_prepare(struct talenode *node)
 	node->transform.custom = 0;
 
 	node->alpha = 1.0f;
+
+	node->dispatch_flush = nemotale_node_flush_none;
+	node->dispatch_filter = nemotale_node_filter_none;
 
 	nemomatrix_init_identity(&node->transform.matrix);
 	nemomatrix_init_identity(&node->transform.inverse);

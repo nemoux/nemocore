@@ -104,6 +104,8 @@ extern void nemotale_update_node(struct nemotale *tale);
 extern void nemotale_accumulate_damage(struct nemotale *tale);
 extern void nemotale_flush_damage(struct nemotale *tale);
 
+extern void nemotale_set_node_dispatch(struct nemotale *tale, struct talenode *node);
+
 extern void nemotale_set_keyboard_focus(struct nemotale *tale, struct talenode *node);
 
 static inline void nemotale_set_state(struct nemotale *tale, uint32_t state)
@@ -276,6 +278,16 @@ static inline void nemotale_set_backend(struct nemotale *tale, void *backend)
 static inline void *nemotale_get_backend(struct nemotale *tale)
 {
 	return tale->backend;
+}
+
+static inline int nemotale_has_gl_context(struct nemotale *tale)
+{
+	return tale->glcontext != NULL;
+}
+
+static inline int nemotale_has_pixman_context(struct nemotale *tale)
+{
+	return tale->pmcontext != NULL;
 }
 
 static inline void nemotale_set_userdata(struct nemotale *tale, void *data)
