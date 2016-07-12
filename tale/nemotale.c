@@ -109,6 +109,17 @@ void nemotale_attach_node(struct nemotale *tale, struct talenode *node)
 	nemotale_damage_below(tale, node);
 
 	node->tale = tale;
+
+	if (nemotale_has_gl_context(tale) != 0) {
+		if (nemotale_has_unpack_subimage(tale) == 0)
+			node->dispatch_flush = nemotale_node_flush_gl;
+		else
+			node->dispatch_flush = nemotale_node_flush_gl_subimage;
+
+		node->dispatch_filter = nemotale_node_filter_gl;
+
+		nemotale_node_prepare_gl(node);
+	}
 }
 
 void nemotale_detach_node(struct talenode *node)
@@ -149,6 +160,20 @@ void nemotale_below_node(struct nemotale *tale, struct talenode *node, struct ta
 	nemotale_damage_below(tale, node);
 
 	node->tale = tale;
+}
+
+void nemotale_prepare_node(struct nemotale *tale, struct talenode *node)
+{
+	if (nemotale_has_gl_context(tale) != 0) {
+		if (nemotale_has_unpack_subimage(tale) == 0)
+			node->dispatch_flush = nemotale_node_flush_gl;
+		else
+			node->dispatch_flush = nemotale_node_flush_gl_subimage;
+
+		node->dispatch_filter = nemotale_node_filter_gl;
+
+		nemotale_node_prepare_gl(node);
+	}
 }
 
 void nemotale_clear_node(struct nemotale *tale)
@@ -237,20 +262,6 @@ static void nemotale_handle_keyboard_focus_destroy(struct nemolistener *listener
 	nemolist_init(&tale->keyboard.node_destroy_listener.link);
 
 	tale->keyboard.focus = NULL;
-}
-
-void nemotale_set_node_context(struct nemotale *tale, struct talenode *node)
-{
-	if (nemotale_has_gl_context(tale) != 0) {
-		if (nemotale_has_unpack_subimage(tale) == 0)
-			node->dispatch_flush = nemotale_node_flush_gl;
-		else
-			node->dispatch_flush = nemotale_node_flush_gl_subimage;
-
-		node->dispatch_filter = nemotale_node_filter_gl;
-
-		nemotale_node_prepare_gl(node);
-	}
 }
 
 void nemotale_set_keyboard_focus(struct nemotale *tale, struct talenode *node)

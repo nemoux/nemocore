@@ -48,7 +48,6 @@ int nemoshow_scene_update(struct showone *one)
 {
 	struct nemoshow *show = one->show;
 	struct showscene *scene = NEMOSHOW_SCENE(one);
-	struct showcanvas *canvas;
 	struct showone *child;
 
 	if ((one->dirty & NEMOSHOW_CHILDREN_DIRTY) != 0) {
@@ -56,9 +55,7 @@ int nemoshow_scene_update(struct showone *one)
 
 		nemoshow_children_for_each(child, one) {
 			if (child->type == NEMOSHOW_CANVAS_TYPE) {
-				canvas = NEMOSHOW_CANVAS(child);
-
-				nemotale_attach_node(show->tale, canvas->node);
+				nemotale_attach_node(show->tale, NEMOSHOW_CANVAS_AT(child, node));
 			}
 		}
 	}

@@ -96,6 +96,7 @@ extern void nemotale_attach_node(struct nemotale *tale, struct talenode *node);
 extern void nemotale_detach_node(struct talenode *node);
 extern void nemotale_above_node(struct nemotale *tale, struct talenode *node, struct talenode *above);
 extern void nemotale_below_node(struct nemotale *tale, struct talenode *node, struct talenode *below);
+extern void nemotale_prepare_node(struct nemotale *tale, struct talenode *node);
 
 extern void nemotale_clear_node(struct nemotale *tale);
 
@@ -103,8 +104,6 @@ extern void nemotale_update_node(struct nemotale *tale);
 
 extern void nemotale_accumulate_damage(struct nemotale *tale);
 extern void nemotale_flush_damage(struct nemotale *tale);
-
-extern void nemotale_set_node_context(struct nemotale *tale, struct talenode *node);
 
 extern void nemotale_set_keyboard_focus(struct nemotale *tale, struct talenode *node);
 
