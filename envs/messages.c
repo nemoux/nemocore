@@ -128,82 +128,86 @@ static void nemoenvs_handle_set_nemoshell_input(struct nemoshell *shell, struct 
 	struct nemocompz *compz = shell->compz;
 	struct nemoscreen *screen;
 	struct inputnode *node;
-	const char *devnode = nemoitem_one_get_attr(one, "devnode");
 	struct itemattr *attr;
 	const char *id;
 	const char *name;
 	const char *value;
+	const char *devnode = nemoitem_one_get_attr(one, "devnode");
+	int32_t x = 0, y = 0;
+	int32_t width = 0, height = 0;
+	float sx = 1.0f, sy = 1.0f;
+	float r = 0.0f;
+	float px = 0.0f, py = 0.0f;
+	uint32_t nodeid, screenid;
+	uint32_t sampling = 0;
+	const char *transform = NULL;
+	int has_screen = 0;
 
-	node = nemocompz_get_input(compz, devnode, NEMOINPUT_TOUCH_TYPE);
-	if (node != NULL) {
-		int32_t x = 0, y = 0;
-		int32_t width = 0, height = 0;
-		float sx = 1.0f, sy = 1.0f;
-		float r = 0.0f;
-		float px = 0.0f, py = 0.0f;
-		uint32_t nodeid, screenid;
-		uint32_t sampling = 0;
-		const char *transform = NULL;
-		int has_screen = 0;
+	nemoitem_attr_for_each(attr, one) {
+		name = nemoitem_attr_get_name(attr);
+		value = nemoitem_attr_get_value(attr);
 
-		nemoitem_attr_for_each(attr, one) {
-			name = nemoitem_attr_get_name(attr);
-			value = nemoitem_attr_get_value(attr);
-
-			if (strcmp(name, "x") == 0) {
-				x = strtoul(value, NULL, 10);
-			} else if (strcmp(name, "y") == 0) {
-				y = strtoul(value, NULL, 10);
-			} else if (strcmp(name, "width") == 0) {
-				width = strtoul(value, NULL, 10);
-			} else if (strcmp(name, "height") == 0) {
-				height = strtoul(value, NULL, 10);
-			} else if (strcmp(name, "sx") == 0) {
-				sx = strtod(value, NULL);
-			} else if (strcmp(name, "sy") == 0) {
-				sy = strtod(value, NULL);
-			} else if (strcmp(name, "r") == 0) {
-				r = strtod(value, NULL) * M_PI / 180.0f;
-			} else if (strcmp(name, "px") == 0) {
-				px = strtod(value, NULL);
-			} else if (strcmp(name, "py") == 0) {
-				py = strtod(value, NULL);
-			} else if (strcmp(name, "nodeid") == 0) {
-				nodeid = strtoul(value, NULL, 10);
-			} else if (strcmp(name, "screenid") == 0) {
-				screenid = strtoul(value, NULL, 10);
-				has_screen = 1;
-			} else if (strcmp(name, "transform") == 0) {
-				transform = value;
-			} else if (strcmp(name, "sampling") == 0) {
-				sampling = strtoul(value, NULL, 10);
-			}
+		if (strcmp(name, "x") == 0) {
+			x = strtoul(value, NULL, 10);
+		} else if (strcmp(name, "y") == 0) {
+			y = strtoul(value, NULL, 10);
+		} else if (strcmp(name, "width") == 0) {
+			width = strtoul(value, NULL, 10);
+		} else if (strcmp(name, "height") == 0) {
+			height = strtoul(value, NULL, 10);
+		} else if (strcmp(name, "sx") == 0) {
+			sx = strtod(value, NULL);
+		} else if (strcmp(name, "sy") == 0) {
+			sy = strtod(value, NULL);
+		} else if (strcmp(name, "r") == 0) {
+			r = strtod(value, NULL) * M_PI / 180.0f;
+		} else if (strcmp(name, "px") == 0) {
+			px = strtod(value, NULL);
+		} else if (strcmp(name, "py") == 0) {
+			py = strtod(value, NULL);
+		} else if (strcmp(name, "nodeid") == 0) {
+			nodeid = strtoul(value, NULL, 10);
+		} else if (strcmp(name, "screenid") == 0) {
+			screenid = strtoul(value, NULL, 10);
+			has_screen = 1;
+		} else if (strcmp(name, "transform") == 0) {
+			transform = value;
+		} else if (strcmp(name, "sampling") == 0) {
+			sampling = strtoul(value, NULL, 10);
 		}
+	}
 
-		if (has_screen != 0) {
-			screen = nemocompz_get_screen(compz, nodeid, screenid);
-			if (node->screen != screen)
-				nemoinput_set_screen(node, screen);
-		} else {
-			nemoinput_put_screen(node);
-
-			nemoinput_set_size(node, width, height);
-
-			nemoinput_clear_transform(node);
-
-			if (transform != NULL) {
-				nemoinput_set_custom(node, transform);
+	wl_list_for_each(node, &compz->input_list, link) {
+		if ((devnode != NULL && strcmp(node->devnode, devnode) == 0) ||
+				(devnode == NULL && nemoinput_has_state(node, NEMOINPUT_CONFIG_STATE)) == 0) {
+			if (has_screen != 0) {
+				screen = nemocompz_get_screen(compz, nodeid, screenid);
+				if (node->screen != screen)
+					nemoinput_set_screen(node, screen);
 			} else {
-				nemoinput_set_position(node, x, y);
-				nemoinput_set_scale(node, sx, sy);
-				nemoinput_set_rotation(node, r);
-				nemoinput_set_pivot(node, px, py);
+				nemoinput_put_screen(node);
+
+				nemoinput_set_size(node, width, height);
+
+				nemoinput_clear_transform(node);
+
+				if (transform != NULL) {
+					nemoinput_set_custom(node, transform);
+				} else {
+					nemoinput_set_position(node, x, y);
+					nemoinput_set_scale(node, sx, sy);
+					nemoinput_set_rotation(node, r);
+					nemoinput_set_pivot(node, px, py);
+				}
+
+				nemoinput_update_transform(node);
 			}
 
-			nemoinput_update_transform(node);
-		}
+			nemoinput_set_sampling(node, sampling);
 
-		nemoinput_set_sampling(node, sampling);
+			if (devnode != NULL)
+				nemoinput_set_state(node, NEMOINPUT_CONFIG_STATE);
+		}
 	}
 }
 

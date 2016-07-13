@@ -15,6 +15,10 @@ typedef enum {
 	NEMOINPUT_TOUCH_TYPE = (1 << 2)
 } NemoInputType;
 
+typedef enum {
+	NEMOINPUT_CONFIG_STATE = (1 << 0)
+} NemoInputState;
+
 struct nemocompz;
 struct nemoscreen;
 
@@ -22,6 +26,8 @@ struct inputnode {
 	char *devnode;
 
 	uint32_t type;
+
+	uint32_t state;
 
 	struct wl_list link;
 
@@ -72,6 +78,26 @@ extern void nemoinput_transform_from_global(struct inputnode *node, float x, flo
 static inline int nemoinput_has_type(struct inputnode *node, uint32_t type)
 {
 	return (node->type & type) == type;
+}
+
+static inline void nemoinput_set_state(struct inputnode *node, uint32_t state)
+{
+	node->state |= state;
+}
+
+static inline void nemoinput_put_state(struct inputnode *node, uint32_t state)
+{
+	node->state &= ~state;
+}
+
+static inline int nemoinput_has_state(struct inputnode *node, uint32_t state)
+{
+	return node->state & state;
+}
+
+static inline int nemoinput_has_state_all(struct inputnode *node, uint32_t state)
+{
+	return (node->state & state) == state;
 }
 
 #ifdef __cplusplus
