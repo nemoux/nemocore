@@ -177,6 +177,8 @@ int nemoshow_canvas_set_type(struct showone *one, int type)
 
 		canvas->dispatch_redraw = nemoshow_canvas_render_vector;
 		canvas->dispatch_redraw_tile = nemoshow_canvas_render_vector_tile;
+
+		nemoshow_canvas_set_state(canvas, NEMOSHOW_CANVAS_POOLING_STATE);
 	} else if (type == NEMOSHOW_CANVAS_PIPELINE_TYPE) {
 		canvas->node = nemotale_node_create_gl(canvas->width, canvas->height);
 

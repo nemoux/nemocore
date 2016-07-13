@@ -263,7 +263,7 @@ void nemoshow_render_one(struct nemoshow *show)
 	}
 }
 
-static void nemoshow_handle_vector_canvas_render(void *arg)
+static void nemoshow_handle_canvas_render_task(void *arg)
 {
 	struct showtask *task = (struct showtask *)arg;
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(task->one);
@@ -274,7 +274,7 @@ static void nemoshow_handle_vector_canvas_render(void *arg)
 		canvas->dispatch_redraw(task->show, task->one);
 }
 
-static void nemoshow_handle_vector_canvas_render_done(void *arg)
+static void nemoshow_handle_canvas_render_task_done(void *arg)
 {
 	struct showtask *task = (struct showtask *)arg;
 	struct nemoshow *show = task->show;
@@ -302,7 +302,7 @@ void nemoshow_divide_one(struct nemoshow *show)
 		return;
 
 	nemolist_for_each_safe(canvas, ncanvas, &show->canvas_list, link) {
-		if (canvas->dispatch_redraw_tile == NULL)
+		if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_POOLING_STATE) == 0)
 			continue;
 
 		if (canvas->viewport.width >= show->tilesize || canvas->viewport.height >= show->tilesize) {
@@ -341,7 +341,7 @@ void nemoshow_divide_one(struct nemoshow *show)
 						task->w = tw;
 						task->h = th;
 
-						nemopool_dispatch_task(pool, nemoshow_handle_vector_canvas_render, task);
+						nemopool_dispatch_task(pool, nemoshow_handle_canvas_render_task, task);
 					}
 				}
 			}
@@ -350,14 +350,14 @@ void nemoshow_divide_one(struct nemoshow *show)
 			task->show = show;
 			task->one = NEMOSHOW_CANVAS_ONE(canvas);
 
-			nemopool_dispatch_task(pool, nemoshow_handle_vector_canvas_render, task);
+			nemopool_dispatch_task(pool, nemoshow_handle_canvas_render_task, task);
 		}
 
 		nemolist_remove(&canvas->link);
 		nemolist_insert_tail(&show->tiling_list, &canvas->link);
 	}
 
-	while (nemopool_dispatch_done(pool, nemoshow_handle_vector_canvas_render_done) == 0);
+	while (nemopool_dispatch_done(pool, nemoshow_handle_canvas_render_task_done) == 0);
 
 	nemolist_for_each_safe(canvas, ncanvas, &show->tiling_list, link) {
 		if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_TILING_STATE)) {
