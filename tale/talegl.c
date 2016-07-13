@@ -117,7 +117,7 @@ struct talenode *nemotale_node_create_gl(int32_t width, int32_t height)
 
 #ifdef NEMOUX_WITH_OPENGL_UNPACK_SUBIMAGE
 	node->dispatch_flush = nemotale_node_flush_gl_subimage;
-	node->dispatch_flush_area = nemotale_node_flush_gl_area;
+	node->dispatch_flush_tile = nemotale_node_flush_gl_tile;
 #else
 	node->dispatch_flush = nemotale_node_flush_gl;
 #endif
@@ -981,7 +981,7 @@ int nemotale_node_flush_gl_subimage(struct talenode *node)
 	return 0;
 }
 
-int nemotale_node_flush_gl_area(struct talenode *node, int32_t x, int32_t y, int32_t width, int32_t height)
+int nemotale_node_flush_gl_tile(struct talenode *node, int32_t x, int32_t y, int32_t width, int32_t height)
 {
 	struct talepmnode *pcontext = (struct talepmnode *)node->pmcontext;
 	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;

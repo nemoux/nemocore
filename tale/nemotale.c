@@ -157,7 +157,7 @@ void nemotale_prepare_node(struct nemotale *tale, struct talenode *node)
 	if (nemotale_has_gl_context(tale) != 0) {
 #ifdef NEMOUX_WITH_OPENGL_UNPACK_SUBIMAGE
 		node->dispatch_flush = nemotale_node_flush_gl_subimage;
-		node->dispatch_flush_area = nemotale_node_flush_gl_area;
+		node->dispatch_flush_tile = nemotale_node_flush_gl_tile;
 #else
 		node->dispatch_flush = nemotale_node_flush_gl;
 #endif

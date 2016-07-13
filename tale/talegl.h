@@ -67,7 +67,7 @@ extern int nemotale_node_resize_gl(struct talenode *node, int32_t width, int32_t
 extern int nemotale_node_viewport_gl(struct talenode *node, int32_t width, int32_t height);
 extern int nemotale_node_flush_gl(struct talenode *node);
 extern int nemotale_node_flush_gl_subimage(struct talenode *node);
-extern int nemotale_node_flush_gl_area(struct talenode *node, int32_t x, int32_t y, int32_t width, int32_t height);
+extern int nemotale_node_flush_gl_tile(struct talenode *node, int32_t x, int32_t y, int32_t width, int32_t height);
 extern int nemotale_node_filter_gl(struct talenode *node);
 
 extern int nemotale_node_set_filter(struct talenode *node, const char *shader);

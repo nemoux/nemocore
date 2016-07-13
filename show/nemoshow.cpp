@@ -269,7 +269,7 @@ static void nemoshow_handle_vector_canvas_render(void *arg)
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(task->one);
 
 	if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_TILING_STATE))
-		canvas->dispatch_redraw_tiled(task->show, task->one, task->x, task->y, task->w, task->h);
+		canvas->dispatch_redraw_tile(task->show, task->one, task->x, task->y, task->w, task->h);
 	else
 		canvas->dispatch_redraw(task->show, task->one);
 }
@@ -284,7 +284,7 @@ static void nemoshow_handle_vector_canvas_render_done(void *arg)
 		nemotale_node_flush(canvas->node);
 #ifdef NEMOUX_WITH_OPENGL_UNPACK_SUBIMAGE
 	} else if (nemotale_node_needs_full_upload(canvas->node) == 0) {
-		nemotale_node_flush_area(canvas->node, task->x, task->y, task->w, task->h);
+		nemotale_node_flush_tile(canvas->node, task->x, task->y, task->w, task->h);
 #endif
 	}
 
@@ -302,7 +302,7 @@ void nemoshow_divide_one(struct nemoshow *show)
 		return;
 
 	nemolist_for_each_safe(canvas, ncanvas, &show->canvas_list, link) {
-		if (canvas->dispatch_redraw_tiled == NULL)
+		if (canvas->dispatch_redraw_tile == NULL)
 			continue;
 
 		if (canvas->viewport.width >= show->tilesize || canvas->viewport.height >= show->tilesize) {

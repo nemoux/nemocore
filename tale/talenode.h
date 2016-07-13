@@ -22,7 +22,7 @@ struct nemotale;
 struct talenode;
 
 typedef int (*nemotale_node_dispatch_flush_t)(struct talenode *node);
-typedef int (*nemotale_node_dispatch_flush_area_t)(struct talenode *node, int32_t x, int32_t y, int32_t width, int32_t height);
+typedef int (*nemotale_node_dispatch_flush_tile_t)(struct talenode *node, int32_t x, int32_t y, int32_t width, int32_t height);
 typedef int (*nemotale_node_dispatch_filter_t)(struct talenode *node);
 typedef int (*nemotale_node_dispatch_resize_t)(struct talenode *node, int32_t width, int32_t height);
 typedef int (*nemotale_node_dispatch_viewport_t)(struct talenode *node, int32_t width, int32_t height);
@@ -71,7 +71,7 @@ struct talenode {
 	int needs_full_upload;
 
 	nemotale_node_dispatch_flush_t dispatch_flush;
-	nemotale_node_dispatch_flush_area_t dispatch_flush_area;
+	nemotale_node_dispatch_flush_tile_t dispatch_flush_tile;
 	nemotale_node_dispatch_filter_t dispatch_filter;
 	nemotale_node_dispatch_resize_t dispatch_resize;
 	nemotale_node_dispatch_viewport_t dispatch_viewport;
@@ -307,9 +307,9 @@ static inline int nemotale_node_flush(struct talenode *node)
 	return node->dispatch_flush(node);
 }
 
-static inline int nemotale_node_flush_area(struct talenode *node, int32_t x, int32_t y, int32_t width, int32_t height)
+static inline int nemotale_node_flush_tile(struct talenode *node, int32_t x, int32_t y, int32_t width, int32_t height)
 {
-	return node->dispatch_flush_area(node, x, y, width, height);
+	return node->dispatch_flush_tile(node, x, y, width, height);
 }
 
 static inline int nemotale_node_filter(struct talenode *node)

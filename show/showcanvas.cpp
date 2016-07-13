@@ -53,7 +53,7 @@ struct showone *nemoshow_canvas_create(void)
 	canvas->alpha = 1.0f;
 
 	canvas->dispatch_redraw = nemoshow_canvas_render_none;
-	canvas->dispatch_redraw_tiled = NULL;
+	canvas->dispatch_redraw_tile = NULL;
 
 	nemolist_init(&canvas->link);
 
@@ -176,7 +176,7 @@ int nemoshow_canvas_set_type(struct showone *one, int type)
 		NEMOSHOW_CANVAS_CC(canvas, damage) = new SkRegion;
 
 		canvas->dispatch_redraw = nemoshow_canvas_render_vector;
-		canvas->dispatch_redraw_tiled = nemoshow_canvas_render_vector_tiled;
+		canvas->dispatch_redraw_tile = nemoshow_canvas_render_vector_tile;
 	} else if (type == NEMOSHOW_CANVAS_PIPELINE_TYPE) {
 		canvas->node = nemotale_node_create_gl(canvas->width, canvas->height);
 
@@ -725,7 +725,7 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 	NEMOSHOW_CANVAS_CC(canvas, damage)->setEmpty();
 }
 
-void nemoshow_canvas_render_vector_tiled(struct nemoshow *show, struct showone *one, int32_t x, int32_t y, int32_t width, int32_t height)
+void nemoshow_canvas_render_vector_tile(struct nemoshow *show, struct showone *one, int32_t x, int32_t y, int32_t width, int32_t height)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 	struct showone *child;
