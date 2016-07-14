@@ -179,7 +179,7 @@ static void nemoenvs_handle_set_nemoshell_input(struct nemoshell *shell, struct 
 
 	wl_list_for_each(node, &compz->input_list, link) {
 		if ((devnode != NULL && strcmp(node->devnode, devnode) == 0) ||
-				(devnode == NULL && nemoinput_has_state(node, NEMOINPUT_CONFIG_STATE)) == 0) {
+				(devnode == NULL && nemoinput_has_state(node, NEMOINPUT_CONFIG_STATE) == 0)) {
 			if (has_screen != 0) {
 				screen = nemocompz_get_screen(compz, nodeid, screenid);
 				if (node->screen != screen)
