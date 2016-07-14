@@ -226,6 +226,8 @@ static inline void nemoshow_canvas_set_width(struct showone *one, double width)
 	canvas->width = width;
 
 	nemoshow_one_set_state(one, NEMOSHOW_SIZE_STATE);
+
+	nemoshow_one_dirty(one, NEMOSHOW_SIZE_DIRTY);
 }
 
 static inline void nemoshow_canvas_set_height(struct showone *one, double height)
@@ -235,6 +237,8 @@ static inline void nemoshow_canvas_set_height(struct showone *one, double height
 	canvas->height = height;
 
 	nemoshow_one_set_state(one, NEMOSHOW_SIZE_STATE);
+
+	nemoshow_one_dirty(one, NEMOSHOW_SIZE_DIRTY);
 }
 
 static inline double nemoshow_canvas_get_width(struct showone *one)
@@ -264,6 +268,8 @@ static inline void nemoshow_canvas_set_fill_color(struct showone *one, double r,
 	canvas->fills[3] = a;
 
 	canvas->fill = 1;
+
+	nemoshow_one_dirty(one, NEMOSHOW_STYLE_DIRTY);
 }
 
 static inline uint32_t nemoshow_canvas_pick_tag(struct showone *one, float x, float y)
@@ -276,39 +282,39 @@ static inline void nemoshow_canvas_translate(struct showone *one, double tx, dou
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
-	nemotale_node_translate(canvas->node, tx, ty);
-
 	canvas->tx = tx;
 	canvas->ty = ty;
+
+	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
 }
 
 static inline void nemoshow_canvas_rotate(struct showone *one, double ro)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
-	nemotale_node_rotate(canvas->node, ro * M_PI / 180.0f);
-
 	canvas->ro = ro;
+
+	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
 }
 
 static inline void nemoshow_canvas_pivot(struct showone *one, double px, double py)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
-	nemotale_node_pivot(canvas->node, px, py);
-
 	canvas->px = px;
 	canvas->py = py;
+
+	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
 }
 
 static inline void nemoshow_canvas_scale(struct showone *one, double sx, double sy)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
-	nemotale_node_scale(canvas->node, sx, sy);
-
 	canvas->sx = sx;
 	canvas->sy = sy;
+
+	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
 }
 
 static inline void nemoshow_canvas_transform_to_global(struct showone *one, float sx, float sy, float *x, float *y)

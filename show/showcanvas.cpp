@@ -235,9 +235,9 @@ void nemoshow_canvas_set_alpha(struct showone *one, double alpha)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
-	nemotale_node_set_alpha(canvas->node, alpha);
-
 	canvas->alpha = alpha;
+
+	nemoshow_one_dirty(one, NEMOSHOW_STYLE_DIRTY);
 }
 
 int nemoshow_canvas_set_shader(struct showone *one, const char *shader)
@@ -840,7 +840,9 @@ int nemoshow_canvas_set_size(struct showone *one, int32_t width, int32_t height)
 
 	nemoshow_one_set_state(one, NEMOSHOW_SIZE_STATE);
 
-	return nemoshow_canvas_resize(one);
+	nemoshow_one_dirty(one, NEMOSHOW_SIZE_DIRTY);
+
+	return 0;
 }
 
 void nemoshow_canvas_damage(struct showone *one, int32_t x, int32_t y, int32_t width, int32_t height)
