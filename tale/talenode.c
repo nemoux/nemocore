@@ -201,7 +201,8 @@ void nemotale_node_update_transform(struct talenode *node)
 	if (node->transform.custom != 0)
 		return;
 
-	nemotale_damage_below(node->tale, node);
+	if (node->tale != NULL)
+		nemotale_damage_below(node->tale, node);
 
 	if (node->transform.enable == 0) {
 		nemotale_node_transform_disable(node);
@@ -209,7 +210,8 @@ void nemotale_node_update_transform(struct talenode *node)
 		nemotale_node_transform_disable(node);
 	}
 
-	nemotale_damage_below(node->tale, node);
+	if (node->tale != NULL)
+		nemotale_damage_below(node->tale, node);
 }
 
 void nemotale_node_correct_pivot(struct talenode *node, float px, float py)

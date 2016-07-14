@@ -322,16 +322,12 @@ int nemoshow_canvas_update(struct showone *one)
 	}
 	if ((one->dirty & NEMOSHOW_STYLE_DIRTY) != 0) {
 		nemotale_node_set_alpha(canvas->node, canvas->alpha);
-
-		nemoshow_canvas_damage_all(one);
 	}
 	if ((one->dirty & NEMOSHOW_MATRIX_DIRTY) != 0) {
 		nemotale_node_translate(canvas->node, canvas->tx, canvas->ty);
 		nemotale_node_rotate(canvas->node, canvas->ro * M_PI / 180.0f);
 		nemotale_node_scale(canvas->node, canvas->sx, canvas->sy);
 		nemotale_node_pivot(canvas->node, canvas->px, canvas->py);
-
-		nemoshow_canvas_damage_all(one);
 	}
 	if ((one->dirty & NEMOSHOW_SHADER_DIRTY) != 0) {
 		if (canvas->shader != NULL)

@@ -68,6 +68,7 @@ struct talenode {
 	int dirty;
 	int needs_flush;
 	int needs_filter;
+	int needs_redraw;
 	int needs_full_upload;
 
 	nemotale_node_dispatch_flush_t dispatch_flush;
@@ -244,6 +245,8 @@ static inline int nemotale_node_is_mapped(struct talenode *node)
 static inline void nemotale_node_set_alpha(struct talenode *node, double alpha)
 {
 	node->alpha = alpha;
+
+	node->needs_redraw = 1;
 }
 
 static inline void nemotale_node_set_id(struct talenode *node, uint32_t id)

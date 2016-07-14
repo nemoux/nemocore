@@ -195,8 +195,10 @@ void nemotale_accumulate_damage(struct nemotale *tale)
 	struct talenode *node;
 
 	nemolist_for_each(node, &tale->node_list, link) {
-		if (node->has_filter != 0) {
+		if (node->has_filter != 0 || node->needs_redraw != 0) {
 			nemotale_damage_below(tale, node);
+
+			node->needs_redraw = 0;
 		} else if (node->dirty != 0) {
 			pixman_region32_t damage;
 
