@@ -59,7 +59,7 @@ static void nemo_send_close(struct nemocanvas *canvas)
 	nemo_surface_send_close(bin->resource);
 }
 
-static struct nemoclient nemo_client = {
+static struct nemocanvas_callback nemo_callback = {
 	nemo_send_configure,
 	nemo_send_transform,
 	nemo_send_layer,
@@ -455,7 +455,7 @@ static void nemo_get_nemo_surface(struct wl_client *client, struct wl_resource *
 		return;
 	}
 
-	bin = nemoshell_create_bin(shell, canvas, &nemo_client);
+	bin = nemoshell_create_bin(shell, canvas, &nemo_callback);
 	if (bin == NULL) {
 		wl_resource_post_error(surface_resource,
 				WL_DISPLAY_ERROR_INVALID_OBJECT,

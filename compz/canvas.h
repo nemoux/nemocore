@@ -121,7 +121,7 @@ struct nemocanvas {
 	uint64_t touchid0;
 };
 
-struct nemoclient {
+struct nemocanvas_callback {
 	void (*send_configure)(struct nemocanvas *canvas, int32_t width, int32_t height);
 	void (*send_transform)(struct nemocanvas *canvas, int visible, int32_t x, int32_t y, int32_t width, int32_t height);
 	void (*send_layer)(struct nemocanvas *canvas, int visible);

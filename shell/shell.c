@@ -381,21 +381,21 @@ static void shellbin_update_canvas_transform(struct nemocanvas *canvas, int visi
 {
 	struct shellbin *bin = nemoshell_get_bin(canvas);
 
-	bin->client->send_transform(canvas, visible, x, y, width, height);
+	bin->callback->send_transform(canvas, visible, x, y, width, height);
 }
 
 static void shellbin_update_canvas_layer(struct nemocanvas *canvas, int visible)
 {
 	struct shellbin *bin = nemoshell_get_bin(canvas);
 
-	bin->client->send_layer(canvas, visible);
+	bin->callback->send_layer(canvas, visible);
 }
 
 static void shellbin_update_canvas_fullscreen(struct nemocanvas *canvas, const char *id, int32_t x, int32_t y, int32_t width, int32_t height)
 {
 	struct shellbin *bin = nemoshell_get_bin(canvas);
 
-	bin->client->send_fullscreen(canvas, id, x, y, width, height);
+	bin->callback->send_fullscreen(canvas, id, x, y, width, height);
 }
 
 static void shellbin_handle_canvas_destroy(struct wl_listener *listener, void *data)
@@ -408,7 +408,7 @@ static void shellbin_handle_canvas_destroy(struct wl_listener *listener, void *d
 	nemoshell_destroy_bin(bin);
 }
 
-struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas *canvas, struct nemoclient *client)
+struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas *canvas, struct nemocanvas_callback *callback)
 {
 	struct shellbin *bin;
 
@@ -449,7 +449,7 @@ struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas
 
 	bin->shell = shell;
 	bin->canvas = canvas;
-	bin->client = client;
+	bin->callback = callback;
 	bin->flags = NEMOSHELL_SURFACE_ALL_FLAGS;
 	bin->layer = &shell->service_layer;
 
@@ -746,7 +746,7 @@ void nemoshell_set_default_layer(struct nemoshell *shell, struct nemolayer *laye
 
 void nemoshell_send_bin_close(struct shellbin *bin)
 {
-	bin->client->send_close(bin->canvas);
+	bin->callback->send_close(bin->canvas);
 }
 
 void nemoshell_send_bin_state(struct shellbin *bin)
@@ -772,7 +772,7 @@ void nemoshell_send_bin_state(struct shellbin *bin)
 		height = 0;
 	}
 
-	bin->client->send_configure(bin->canvas, width, height);
+	bin->callback->send_configure(bin->canvas, width, height);
 }
 
 void nemoshell_change_bin_state(struct shellbin *bin)

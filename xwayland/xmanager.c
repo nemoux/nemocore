@@ -1194,7 +1194,7 @@ static void xserver_send_close(struct nemocanvas *canvas)
 {
 }
 
-static struct nemoclient xserver_client = {
+static struct nemocanvas_callback xserver_callback = {
 	xserver_send_configure,
 	xserver_send_transform,
 	xserver_send_layer,
@@ -1209,7 +1209,7 @@ void nemoxmanager_map_window(struct nemoxmanager *xmanager, struct nemoxwindow *
 	struct nemoxserver *xserver = xmanager->xserver;
 	struct shellbin *bin;
 
-	bin = nemoshell_create_bin(shell, canvas, &xserver_client);
+	bin = nemoshell_create_bin(shell, canvas, &xserver_callback);
 	if (bin == NULL) {
 		wl_resource_post_no_memory(canvas->resource);
 		return;

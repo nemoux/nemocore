@@ -52,7 +52,7 @@ static void resize_grab_motion(struct nemopointer_grab *base, uint32_t time, flo
 		height += (toy - fromy);
 	}
 
-	bin->client->send_configure(bin->canvas, width, height);
+	bin->callback->send_configure(bin->canvas, width, height);
 }
 
 static void resize_grab_axis(struct nemopointer_grab *base, uint32_t time, uint32_t axis, float value)

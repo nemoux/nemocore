@@ -71,7 +71,7 @@ static void xdg_send_close(struct nemocanvas *canvas)
 {
 }
 
-static struct nemoclient xdg_client = {
+static struct nemocanvas_callback xdg_callback = {
 	xdg_send_configure,
 	xdg_send_transform,
 	xdg_send_layer,
@@ -245,7 +245,7 @@ static void xdg_popup_send_close(struct nemocanvas *canvas)
 {
 }
 
-static struct nemoclient xdg_popup_client = {
+static struct nemocanvas_callback xdg_popup_callback = {
 	xdg_popup_send_configure,
 	xdg_popup_send_transform,
 	xdg_popup_send_layer,
@@ -297,7 +297,7 @@ static void xdg_get_xdg_surface(struct wl_client *client, struct wl_resource *re
 		return;
 	}
 
-	bin = nemoshell_create_bin(shell, canvas, &xdg_client);
+	bin = nemoshell_create_bin(shell, canvas, &xdg_callback);
 	if (bin == NULL) {
 		wl_resource_post_error(surface_resource,
 				WL_DISPLAY_ERROR_INVALID_OBJECT,
@@ -342,7 +342,7 @@ static void xdg_get_xdg_popup(struct wl_client *client, struct wl_resource *reso
 		return;
 	}
 
-	bin = nemoshell_create_bin(shell, canvas, &xdg_popup_client);
+	bin = nemoshell_create_bin(shell, canvas, &xdg_popup_callback);
 	if (bin == NULL) {
 		wl_resource_post_error(surface_resource,
 				WL_DISPLAY_ERROR_INVALID_OBJECT,

@@ -110,10 +110,10 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 							nemoseat_set_stick_focus(compz->seat, bin->view);
 						}
 					} else {
-						bin->client->send_configure(bin->canvas, width, height);
+						bin->callback->send_configure(bin->canvas, width, height);
 					}
 				} else {
-					bin->client->send_configure(bin->canvas, width, height);
+					bin->callback->send_configure(bin->canvas, width, height);
 				}
 
 				bin->has_scale = 1;
@@ -260,7 +260,7 @@ static void pick_shellgrab_touchpoint_frame(struct touchpoint_grab *base, uint32
 				width = MIN(width, bin->max_width);
 				height = MIN(height, bin->max_height);
 
-				bin->client->send_configure(bin->canvas, width, height);
+				bin->callback->send_configure(bin->canvas, width, height);
 
 				pick->resize.distance = pick->other->resize.distance = d;
 			}

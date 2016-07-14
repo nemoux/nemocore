@@ -184,8 +184,8 @@ struct shellbin {
 
 	uint32_t min_width, min_height;
 	uint32_t max_width, max_height;
-
-	struct nemoclient *client;
+	
+	struct nemocanvas_callback *callback;
 
 	struct wl_list link;
 
@@ -283,7 +283,7 @@ extern void nemoshell_destroy(struct nemoshell *shell);
 
 extern void nemoshell_set_default_layer(struct nemoshell *shell, struct nemolayer *layer);
 
-extern struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas *canvas, struct nemoclient *client);
+extern struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas *canvas, struct nemocanvas_callback *callback);
 extern void nemoshell_destroy_bin(struct shellbin *bin);
 
 extern struct shellbin *nemoshell_get_bin(struct nemocanvas *canvas);

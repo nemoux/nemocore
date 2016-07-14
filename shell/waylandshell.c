@@ -46,7 +46,7 @@ static void shell_send_close(struct nemocanvas *canvas)
 {
 }
 
-static struct nemoclient shell_client = {
+static struct nemocanvas_callback shell_callback = {
 	shell_send_configure,
 	shell_send_transform,
 	shell_send_layer,
@@ -176,7 +176,7 @@ static void shell_get_shell_surface(struct wl_client *client, struct wl_resource
 		return;
 	}
 
-	bin = nemoshell_create_bin(shell, canvas, &shell_client);
+	bin = nemoshell_create_bin(shell, canvas, &shell_callback);
 	if (bin == NULL) {
 		wl_resource_post_error(surface_resource,
 				WL_DISPLAY_ERROR_INVALID_OBJECT,
