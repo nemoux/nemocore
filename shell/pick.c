@@ -25,8 +25,6 @@
 #include <nemolog.h>
 #include <nemomisc.h>
 
-#define NEMOSHELL_PICK_CLOSE_EPSILON			(0.92f)
-
 static inline float pickgrab_calculate_touchpoint_distance(struct touchpoint *tp0, struct touchpoint *tp1)
 {
 	float dx, dy;
@@ -85,7 +83,7 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 			if (shell->is_logging_grab != 0)
 				nemolog_message("PICK", "[UP:SCALE] %llu: sx(%f) sy(%f) width(%d) height(%d) (%u)\n", touchid, bin->view->geometry.sx, bin->view->geometry.sy, width, height, time);
 
-			if (bin->min_width >= width * NEMOSHELL_PICK_CLOSE_EPSILON || bin->min_height >= height * NEMOSHELL_PICK_CLOSE_EPSILON) {
+			if (bin->min_width >= width || bin->min_height >= height) {
 				if (nemoview_has_state(bin->view, NEMOVIEW_CLOSE_STATE) == 0) {
 					kill(bin->pid, SIGKILL);
 				} else {
@@ -213,16 +211,6 @@ static void pick_shellgrab_touchpoint_frame(struct touchpoint_grab *base, uint32
 						nemoview_set_scale(bin->view, sy, sy);
 					} else {
 						nemoview_set_scale(bin->view, sx, sx);
-					}
-				} else if (bin->view->geometry.sx * s * nemoshell_bin_get_geometry_width(bin) < bin->min_width ||
-						bin->view->geometry.sy * s * nemoshell_bin_get_geometry_height(bin) < bin->min_height) {
-					double sx = (double)bin->min_width / (double)nemoshell_bin_get_geometry_width(bin);
-					double sy = (double)bin->min_height / (double)nemoshell_bin_get_geometry_height(bin);
-
-					if (sx > sy) {
-						nemoview_set_scale(bin->view, sx, sx);
-					} else {
-						nemoview_set_scale(bin->view, sy, sy);
 					}
 				} else {
 					nemoview_set_scale(bin->view,
@@ -407,7 +395,7 @@ static void pick_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 			int32_t width = actor->view->content->width * actor->view->geometry.sx;
 			int32_t height = actor->view->content->height * actor->view->geometry.sy;
 
-			if (actor->min_width >= width * NEMOSHELL_PICK_CLOSE_EPSILON || actor->min_height >= height * NEMOSHELL_PICK_CLOSE_EPSILON) {
+			if (actor->min_width >= width || actor->min_height >= height) {
 				nemoactor_dispatch_destroy(actor);
 			} else if (nemoview_has_state(actor->view, NEMOVIEW_RESIZE_STATE) != 0) {
 				int32_t sx, sy;
@@ -497,16 +485,6 @@ static void pick_actorgrab_touchpoint_frame(struct touchpoint_grab *base, uint32
 						nemoview_set_scale(actor->view, sy, sy);
 					} else {
 						nemoview_set_scale(actor->view, sx, sx);
-					}
-				} else if (actor->view->geometry.sx * s * actor->view->content->width < actor->min_width ||
-						actor->view->geometry.sy * s * actor->view->content->height < actor->min_height) {
-					double sx = (double)actor->min_width / (double)actor->view->content->width;
-					double sy = (double)actor->min_height / (double)actor->view->content->height;
-
-					if (sx > sy) {
-						nemoview_set_scale(actor->view, sx, sx);
-					} else {
-						nemoview_set_scale(actor->view, sy, sy);
 					}
 				} else {
 					nemoview_set_scale(actor->view,
