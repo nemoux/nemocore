@@ -59,12 +59,6 @@ int nemoshow_scene_update(struct showone *one)
 			}
 		}
 	}
-	if ((one->dirty & NEMOSHOW_SIZE_DIRTY) != 0) {
-		nemotale_resize(show->tale, scene->width, scene->height);
-	}
-	if ((one->dirty & NEMOSHOW_VIEWPORT_DIRTY) != 0) {
-		nemotale_set_viewport(show->tale, show->width, show->height);
-	}
 
 	return 0;
 }
@@ -75,6 +69,9 @@ void nemoshow_scene_set_width(struct showone *one, double width)
 
 	scene->width = width;
 
+	if (one->show != NULL)
+		nemotale_set_width(one->show->tale, width);
+
 	nemoshow_one_dirty(one, NEMOSHOW_SIZE_DIRTY);
 }
 
@@ -83,6 +80,9 @@ void nemoshow_scene_set_height(struct showone *one, double height)
 	struct showscene *scene = NEMOSHOW_SCENE(one);
 
 	scene->height = height;
+
+	if (one->show != NULL)
+		nemotale_set_height(one->show->tale, height);
 
 	nemoshow_one_dirty(one, NEMOSHOW_SIZE_DIRTY);
 }
