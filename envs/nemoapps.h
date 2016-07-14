@@ -19,6 +19,12 @@ struct nemoapp {
 	struct nemolist link;
 };
 
+struct nemoclient {
+	pid_t pid;
+
+	struct nemolist link;
+};
+
 extern struct nemoapp *nemoenvs_create_app(void);
 extern void nemoenvs_destroy_app(struct nemoapp *app);
 
@@ -29,6 +35,12 @@ extern int nemoenvs_respawn_app(struct nemoenvs *envs, pid_t pid);
 
 extern void nemoenvs_execute_backgrounds(struct nemoenvs *envs);
 extern void nemoenvs_execute_daemons(struct nemoenvs *envs);
+
+extern int nemoenvs_attach_client(struct nemoenvs *envs, pid_t pid);
+extern void nemoenvs_detach_client(struct nemoenvs *envs, pid_t pid);
+
+extern int nemoenvs_terminate_client(struct nemoenvs *envs, pid_t pid);
+extern int nemoenvs_terminate_clients(struct nemoenvs *envs);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

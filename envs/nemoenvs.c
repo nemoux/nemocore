@@ -48,6 +48,7 @@ struct nemoenvs *nemoenvs_create(struct nemoshell *shell)
 		goto err1;
 
 	nemolist_init(&envs->app_list);
+	nemolist_init(&envs->client_list);
 	nemolist_init(&envs->callback_list);
 
 	wl_list_init(&envs->xserver_list);
@@ -88,6 +89,7 @@ void nemoenvs_destroy(struct nemoenvs *envs)
 	}
 
 	nemolist_remove(&envs->app_list);
+	nemolist_remove(&envs->client_list);
 
 	nemoitem_destroy(envs->configs);
 

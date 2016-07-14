@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <signal.h>
 #include <wayland-server.h>
 
 #include <shell.h>
@@ -206,4 +207,62 @@ void nemoenvs_execute_daemons(struct nemoenvs *envs)
 			nemoenvs_execute_daemon(envs, one);
 		}
 	}
+}
+
+int nemoenvs_attach_client(struct nemoenvs *envs, pid_t pid)
+{
+	struct nemoclient *client;
+
+	client = (struct nemoclient *)malloc(sizeof(struct nemoclient));
+	if (client == NULL)
+		return -1;
+
+	client->pid = pid;
+
+	nemolist_insert(&envs->client_list, &client->link);
+
+	return 0;
+}
+
+void nemoenvs_detach_client(struct nemoenvs *envs, pid_t pid)
+{
+	struct nemoclient *client;
+
+	nemolist_for_each(client, &envs->client_list, link) {
+		if (client->pid == pid) {
+			nemolist_remove(&client->link);
+
+			free(client);
+
+			break;
+		}
+	}
+}
+
+int nemoenvs_terminate_client(struct nemoenvs *envs, pid_t pid)
+{
+	struct nemoclient *client;
+
+	nemolist_for_each(client, &envs->client_list, link) {
+		if (client->pid == pid) {
+			nemolist_remove(&client->link);
+
+			free(client);
+
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+int nemoenvs_terminate_clients(struct nemoenvs *envs)
+{
+	struct nemoclient *client;
+
+	nemolist_for_each(client, &envs->client_list, link) {
+		kill(client->pid, SIGKILL);
+	}
+
+	return 0;
 }

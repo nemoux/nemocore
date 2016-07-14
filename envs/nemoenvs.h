@@ -34,6 +34,7 @@ struct nemoenvs {
 	struct nemoitem *configs;
 
 	struct nemolist app_list;
+	struct nemolist client_list;
 
 	struct nemolist callback_list;
 
