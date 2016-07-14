@@ -112,7 +112,7 @@ void nemotale_node_finish(struct talenode *node)
 	nemolist_remove(&node->link);
 }
 
-void nemotale_node_boundingbox_update(struct talenode *node, int32_t x, int32_t y, int32_t width, int32_t height, pixman_region32_t *bbox)
+void nemotale_node_update_boundingbox(struct talenode *node, int32_t x, int32_t y, int32_t width, int32_t height, pixman_region32_t *bbox)
 {
 	float minx = HUGE_VALF, miny = HUGE_VALF;
 	float maxx = -HUGE_VALF, maxy = -HUGE_VALF;
@@ -186,21 +186,30 @@ static int nemotale_node_transform_enable(struct talenode *node)
 	if (nemomatrix_invert(inverse, matrix) < 0)
 		return -1;
 
-	nemotale_node_boundingbox_update(node, 0, 0, node->geometry.width, node->geometry.height, &node->boundingbox);
+	nemotale_node_update_boundingbox(node, 0, 0, node->geometry.width, node->geometry.height, &node->boundingbox);
 
 	return 0;
 }
 
-void nemotale_node_transform_update(struct talenode *node)
+void nemotale_node_update_transform(struct talenode *node)
 {
+	if (node->transform.dirty == 0)
+		return;
+
+	node->transform.dirty = 0;
+
 	if (node->transform.custom != 0)
 		return;
+
+	nemotale_damage_below(node->tale, node);
 
 	if (node->transform.enable == 0) {
 		nemotale_node_transform_disable(node);
 	} else if (nemotale_node_transform_enable(node) < 0) {
 		nemotale_node_transform_disable(node);
 	}
+
+	nemotale_damage_below(node->tale, node);
 }
 
 void nemotale_node_correct_pivot(struct talenode *node, float px, float py)
@@ -289,7 +298,7 @@ int nemotale_node_transform(struct talenode *node, float d[9])
 	if (nemomatrix_invert(inverse, matrix) < 0)
 		return -1;
 
-	nemotale_node_boundingbox_update(node, 0, 0, node->geometry.width, node->geometry.height, &node->boundingbox);
+	nemotale_node_update_boundingbox(node, 0, 0, node->geometry.width, node->geometry.height, &node->boundingbox);
 
 	return 0;
 }

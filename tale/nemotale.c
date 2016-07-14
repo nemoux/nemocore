@@ -185,13 +185,8 @@ void nemotale_update_node(struct nemotale *tale)
 	struct talenode *node;
 
 	nemolist_for_each(node, &tale->node_list, link) {
-		if (node->transform.dirty != 0) {
-			nemotale_damage_below(tale, node);
-			nemotale_node_transform_update(node);
-			nemotale_damage_below(tale, node);
-
-			node->transform.dirty = 0;
-		}
+		if (node->transform.dirty != 0)
+			nemotale_node_update_transform(node);
 	}
 }
 
@@ -213,7 +208,7 @@ void nemotale_accumulate_damage(struct nemotale *tale)
 				pixman_box32_t *extents;
 
 				extents = pixman_region32_extents(&node->damage);
-				nemotale_node_boundingbox_update(node,
+				nemotale_node_update_boundingbox(node,
 						extents->x1, extents->y1,
 						extents->x2 - extents->x1,
 						extents->y2 - extents->y1,

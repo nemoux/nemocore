@@ -100,8 +100,8 @@ extern void nemotale_node_destroy(struct talenode *node);
 extern int nemotale_node_prepare(struct talenode *node);
 extern void nemotale_node_finish(struct talenode *node);
 
-extern void nemotale_node_boundingbox_update(struct talenode *node, int32_t x, int32_t y, int32_t width, int32_t height, pixman_region32_t *bbox);
-extern void nemotale_node_transform_update(struct talenode *node);
+extern void nemotale_node_update_boundingbox(struct talenode *node, int32_t x, int32_t y, int32_t width, int32_t height, pixman_region32_t *bbox);
+extern void nemotale_node_update_transform(struct talenode *node);
 
 extern void nemotale_node_correct_pivot(struct talenode *node, float px, float py);
 extern int nemotale_node_transform(struct talenode *node, float d[9]);
@@ -146,6 +146,9 @@ static inline void nemotale_node_damage_filter(struct talenode *node)
 
 static inline void nemotale_node_transform_to_global(struct talenode *node, float sx, float sy, float *x, float *y)
 {
+	if (node->transform.dirty != 0)
+		nemotale_node_update_transform(node);
+
 	if (node->transform.enable) {
 		struct nemovector v = { { sx, sy, 0.0f, 1.0f } };
 
@@ -166,6 +169,9 @@ static inline void nemotale_node_transform_to_global(struct talenode *node, floa
 
 static inline void nemotale_node_transform_from_global(struct talenode *node, float x, float y, float *sx, float *sy)
 {
+	if (node->transform.dirty != 0)
+		nemotale_node_update_transform(node);
+
 	if (node->transform.enable) {
 		struct nemovector v = { { x, y, 0.0f, 1.0f } };
 
