@@ -210,12 +210,6 @@ static inline void nemoshow_set_dispatch_transition_done(struct nemoshow *show, 
 
 static inline void nemoshow_set_dispatch_event(struct nemoshow *show, nemoshow_dispatch_event_t dispatch)
 {
-	if (dispatch == NULL) {
-		nemotale_put_state(show->tale, NEMOTALE_NOFOCUS_STATE);
-	} else {
-		nemotale_set_state(show->tale, NEMOTALE_NOFOCUS_STATE);
-	}
-
 	show->dispatch_event = dispatch;
 }
 

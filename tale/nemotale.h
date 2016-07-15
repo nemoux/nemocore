@@ -16,10 +16,6 @@ NEMO_BEGIN_EXTERN_C
 #include <nemomatrix.h>
 #include <nemobox.h>
 
-typedef enum {
-	NEMOTALE_NOFOCUS_STATE = (1 << 0)
-} NemoTaleState;
-
 struct nemotale;
 struct talenode;
 struct taleevent;
@@ -32,8 +28,6 @@ struct nemotale {
 	void *backend;
 
 	void *userdata;
-
-	uint32_t state;
 
 	struct nemolist node_list;
 
@@ -106,21 +100,6 @@ extern void nemotale_accumulate_damage(struct nemotale *tale);
 extern void nemotale_flush_damage(struct nemotale *tale);
 
 extern void nemotale_set_keyboard_focus(struct nemotale *tale, struct talenode *node);
-
-static inline void nemotale_set_state(struct nemotale *tale, uint32_t state)
-{
-	tale->state |= state;
-}
-
-static inline void nemotale_put_state(struct nemotale *tale, uint32_t state)
-{
-	tale->state &= ~state;
-}
-
-static inline int nemotale_has_state(struct nemotale *tale, uint32_t state)
-{
-	return tale->state & state;
-}
 
 static inline void nemotale_resize(struct nemotale *tale, int32_t width, int32_t height)
 {

@@ -143,13 +143,11 @@ void nemotale_push_pointer_down_event(struct nemotale *tale, uint32_t serial, ui
 	else
 		type = NEMOTALE_POINTER_BUTTON_DOWN_EVENT;
 
-	if (nemotale_has_state(tale, NEMOTALE_NOFOCUS_STATE) == 0) {
-		tap->node = nemotale_pick_node(tale, tap->x, tap->y, &sx, &sy);
-		if (tap->node != NULL) {
-			nemolist_remove(&tap->node_destroy_listener.link);
+	tap->node = nemotale_pick_node(tale, tap->x, tap->y, &sx, &sy);
+	if (tap->node != NULL) {
+		nemolist_remove(&tap->node_destroy_listener.link);
 
-			nemosignal_add(&tap->node->destroy_signal, &tap->node_destroy_listener);
-		}
+		nemosignal_add(&tap->node->destroy_signal, &tap->node_destroy_listener);
 	}
 
 	event.x = tap->x;
@@ -319,11 +317,9 @@ void nemotale_push_touch_down_event(struct nemotale *tale, uint32_t serial, uint
 	tap->gy = gy;
 	tap->serial = serial;
 
-	if (nemotale_has_state(tale, NEMOTALE_NOFOCUS_STATE) == 0) {
-		tap->node = nemotale_pick_node(tale, tap->x, tap->y, &sx, &sy);
-		if (tap->node != NULL) {
-			nemosignal_add(&tap->node->destroy_signal, &tap->node_destroy_listener);
-		}
+	tap->node = nemotale_pick_node(tale, tap->x, tap->y, &sx, &sy);
+	if (tap->node != NULL) {
+		nemosignal_add(&tap->node->destroy_signal, &tap->node_destroy_listener);
 	}
 
 	tap->grab_time = time;
