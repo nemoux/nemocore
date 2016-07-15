@@ -56,17 +56,13 @@ typedef enum {
 	NEMOTALE_LONG_PRESS_EVENT = NEMOTALE_POINTER_LONG_PRESS_EVENT | NEMOTALE_TOUCH_LONG_PRESS_EVENT
 } NemoTaleEventType;
 
-typedef enum {
-	NEMOTALE_TAP_USED_STATE = (1 << 0)
-} NemoTaleTapState;
-
 struct nemotale;
 struct talenode;
 
 struct taletap {
 	struct talenode *node;
 
-	uint32_t state;
+	int done;
 
 	uint32_t tag;
 
@@ -135,21 +131,6 @@ extern void nemotale_push_stick_translate_event(struct nemotale *tale, uint32_t 
 extern void nemotale_push_stick_rotate_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, float x, float y, float z);
 
 extern void nemotale_push_timer_event(struct nemotale *tale, uint32_t time);
-
-static inline void nemotale_tap_set_state(struct taletap *tap, uint32_t state)
-{
-	tap->state |= state;
-}
-
-static inline void nemotale_tap_put_state(struct taletap *tap, uint32_t state)
-{
-	tap->state &= ~state;
-}
-
-static inline int nemotale_tap_has_state(struct taletap *tap, uint32_t state)
-{
-	return tap->state & state;
-}
 
 static inline void nemotale_tap_set_tag(struct taletap *tap, uint32_t tag)
 {
@@ -340,28 +321,28 @@ static inline const char *nemotale_event_get_name(struct taleevent *event)
 	return event->name;
 }
 
-static inline void nemotale_event_set_used(struct taleevent *event)
+static inline void nemotale_event_set_done(struct taleevent *event)
 {
-	nemotale_tap_set_state(event->tap, NEMOTALE_TAP_USED_STATE);
+	event->tap->done = 1;
 }
 
-static inline void nemotale_event_set_used_on(struct taleevent *event, int index)
+static inline void nemotale_event_set_done_on(struct taleevent *event, int index)
 {
-	nemotale_tap_set_state(event->taps[index], NEMOTALE_TAP_USED_STATE);
+	event->taps[index]->done = 1;
 }
 
-static inline void nemotale_event_set_used_all(struct taleevent *event)
+static inline void nemotale_event_set_done_all(struct taleevent *event)
 {
 	int i;
 
 	for (i = 0; i < event->tapcount; i++) {
-		nemotale_tap_set_state(event->taps[i], NEMOTALE_TAP_USED_STATE);
+		event->taps[i]->done = 1;
 	}
 }
 
-static inline int nemotale_event_is_used(struct taleevent *event)
+static inline int nemotale_event_is_done(struct taleevent *event)
 {
-	return nemotale_tap_has_state(event->tap, NEMOTALE_TAP_USED_STATE);
+	return event->tap->done;
 }
 
 static inline void nemotale_event_set_cancel(struct taleevent *event)

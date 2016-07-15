@@ -170,24 +170,24 @@ static inline const char *nemoshow_event_get_name(void *event)
 	return nemotale_event_get_name((struct taleevent *)event);
 }
 
-static inline void nemoshow_event_set_used(void *event)
+static inline void nemoshow_event_set_done(void *event)
 {
-	nemotale_event_set_used((struct taleevent *)event);
+	nemotale_event_set_done((struct taleevent *)event);
 }
 
-static inline void nemoshow_event_set_used_on(void *event, int index)
+static inline void nemoshow_event_set_done_on(void *event, int index)
 {
-	nemotale_event_set_used_on((struct taleevent *)event, index);
+	nemotale_event_set_done_on((struct taleevent *)event, index);
 }
 
-static inline void nemoshow_event_set_used_all(void *event)
+static inline void nemoshow_event_set_done_all(void *event)
 {
-	nemotale_event_set_used_all((struct taleevent *)event);
+	nemotale_event_set_done_all((struct taleevent *)event);
 }
 
-static inline int nemoshow_event_is_used(void *event)
+static inline int nemoshow_event_is_done(void *event)
 {
-	return nemotale_event_is_used((struct taleevent *)event);
+	return nemotale_event_is_done((struct taleevent *)event);
 }
 
 static inline void nemoshow_event_set_cancel(void *event)

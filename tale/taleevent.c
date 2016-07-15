@@ -43,7 +43,7 @@ static struct taletap *nemotale_create_tap(struct nemotale *tale, uint64_t devic
 	if (tap == NULL)
 		return NULL;
 
-	tap->state = 0x0;
+	tap->done = 0;
 
 	tap->device = device;
 	tap->node = NULL;
@@ -403,7 +403,7 @@ void nemotale_push_timer_event(struct nemotale *tale, uint32_t time)
 	struct taletap *tap;
 
 	nemolist_for_each(tap, &tale->tap_list, link) {
-		if (nemotale_tap_has_state(tap, NEMOTALE_TAP_USED_STATE))
+		if (tap->done != 0)
 			continue;
 
 		if (tap->grab_time + tale->long_press_duration <= time) {

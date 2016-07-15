@@ -633,8 +633,8 @@ int nemoshow_view_pick_distant(struct nemoshow *show, void *event, uint32_t type
 
 	nemotale_event_get_distant_tapindices(show->tale, event, &tap0, &tap1);
 
-	nemotale_event_set_used_on(event, tap0);
-	nemotale_event_set_used_on(event, tap1);
+	nemotale_event_set_done_on(event, tap0);
+	nemotale_event_set_done_on(event, tap1);
 
 	tp0 = nemoseat_get_touchpoint_by_id(seat, nemotale_event_get_device_on(event, tap0));
 	tp1 = nemoseat_get_touchpoint_by_id(seat, nemotale_event_get_device_on(event, tap1));

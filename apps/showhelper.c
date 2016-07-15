@@ -597,8 +597,8 @@ int nemoshow_view_pick_distant(struct nemoshow *show, void *event, uint32_t type
 
 	nemotale_event_get_distant_tapindices(show->tale, event, &tap0, &tap1);
 
-	nemotale_event_set_used_on(event, tap0);
-	nemotale_event_set_used_on(event, tap1);
+	nemotale_event_set_done_on(event, tap0);
+	nemotale_event_set_done_on(event, tap1);
 
 	if (type & NEMOSHOW_VIEW_PICK_ROTATE_TYPE)
 		ptype |= (1 << NEMO_SURFACE_PICK_TYPE_ROTATE);
