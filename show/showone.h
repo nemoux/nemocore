@@ -15,6 +15,7 @@ NEMO_BEGIN_EXTERN_C
 #include <nemolistener.h>
 
 #define NEMOSHOW_ID_MAX						(32)
+#define NEMOSHOW_NAME_MAX					(32)
 #define NEMOSHOW_ATTR_MAX					(48)
 #define NEMOSHOW_ATTR_NAME_MAX		(32)
 #define NEMOSHOW_SYMBOL_MAX				(32)
@@ -173,6 +174,7 @@ struct showsignal {
 struct showone {
 	int type, sub;
 	char id[NEMOSHOW_ID_MAX];
+	char name[NEMOSHOW_NAME_MAX];
 
 	struct nemolist link;
 	struct nemolist children_link;
@@ -182,6 +184,7 @@ struct showone {
 	uint32_t state;
 
 	uint32_t tag;
+	uint32_t zone;
 
 	struct nemosignal unpin_signal;
 	struct nemosignal destroy_signal;
@@ -229,11 +232,6 @@ struct showone {
 };
 
 #define NEMOSHOW_REF(one, index)			(one->refs[index] != NULL ? one->refs[index]->src : NULL)
-
-#define NEMOSHOW_ONE_TAG(tag)								((tag >> 0) & 0xffff)
-#define NEMOSHOW_ONE_GROUP(tag)							((tag >> 16) & 0xffff)
-
-#define NEMOSHOW_ONE_TAGGROUP(tag, group)		(((tag & 0xffff) << 0) | ((group & 0xffff) << 16))
 
 #define NEMOSHOW_POINTS_OFFSET_X(index)				(index * 2 + 0)
 #define NEMOSHOW_POINTS_OFFSET_Y(index)				(index * 2 + 1)
@@ -382,6 +380,16 @@ static inline uint32_t nemoshow_one_get_tag(struct showone *one)
 	return one == NULL ? 0 : one->tag;
 }
 
+static inline void nemoshow_one_set_zone(struct showone *one, uint32_t zone)
+{
+	one->zone = zone;
+}
+
+static inline uint32_t nemoshow_one_get_zone(struct showone *one)
+{
+	return one == NULL ? 0 : one->zone;
+}
+
 static inline void nemoshow_one_set_dispatch_destroy(struct showone *one, nemoshow_one_destroy_t destroy)
 {
 	one->destroy = destroy;
@@ -426,6 +434,21 @@ static inline const char *nemoshow_one_gets(struct showone *one, const char *att
 static inline void nemoshow_one_set_id(struct showone *one, const char *id)
 {
 	strncpy(one->id, id, NEMOSHOW_ID_MAX);
+}
+
+static inline const char *nemoshow_one_get_id(struct showone *one)
+{
+	return one->id;
+}
+
+static inline void nemoshow_one_set_name(struct showone *one, const char *name)
+{
+	strncpy(one->name, name, NEMOSHOW_NAME_MAX);
+}
+
+static inline const char *nemoshow_one_get_name(struct showone *one)
+{
+	return one->name;
 }
 
 static inline struct showone *nemoshow_one_get_parent(struct showone *one, int type, int sub)
