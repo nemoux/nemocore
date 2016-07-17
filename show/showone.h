@@ -438,7 +438,7 @@ static inline void nemoshow_one_set_id(struct showone *one, const char *id)
 
 static inline const char *nemoshow_one_get_id(struct showone *one)
 {
-	return one->id;
+	return one == NULL ? NULL : one->id;
 }
 
 static inline void nemoshow_one_set_name(struct showone *one, const char *name)
@@ -448,7 +448,12 @@ static inline void nemoshow_one_set_name(struct showone *one, const char *name)
 
 static inline const char *nemoshow_one_get_name(struct showone *one)
 {
-	return one->name;
+	return one == NULL ? NULL : one->name;
+}
+
+static inline int nemoshow_one_has_name(struct showone *one, const char *name)
+{
+	return one == NULL ? 0 : strcmp(one->name, name) == 0;
 }
 
 static inline struct showone *nemoshow_one_get_parent(struct showone *one, int type, int sub)
