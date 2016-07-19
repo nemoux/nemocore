@@ -225,7 +225,7 @@ static void pick_shellgrab_touchpoint_frame(struct touchpoint_grab *base, uint32
 			pick->scale.distance = pick->other->scale.distance = d;
 		}
 
-		if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_RESIZE)) {
+		if ((shell->pick.flags & NEMOSHELL_PICK_RESIZE_FLAG) && (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_RESIZE))) {
 			if (fabsf(pick->resize.distance - d) > shell->pick.resize_interval) {
 				int32_t width, height;
 

@@ -297,6 +297,9 @@ static void nemoenvs_handle_set_nemoshell_pick(struct nemoshell *shell, struct i
 		} else if (strcmp(name, "translate") == 0) {
 			if (strcmp(value, "off") == 0)
 				nemoshell_put_pick_flags(shell, NEMOSHELL_PICK_TRANSLATE_FLAG);
+		} else if (strcmp(name, "resize") == 0) {
+			if (strcmp(value, "off") == 0)
+				nemoshell_put_pick_flags(shell, NEMOSHELL_PICK_RESIZE_FLAG);
 		}
 	}
 }

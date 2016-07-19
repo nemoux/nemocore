@@ -32,27 +32,26 @@ static void resize_grab_motion(struct nemopointer_grab *base, uint32_t time, flo
 
 	nemopointer_move(pointer, x, y);
 
-	if (grab->bin == NULL)
-		return;
+	if (bin != NULL && bin->shell->pick.flags & NEMOSHELL_PICK_RESIZE_FLAG) {
+		nemoview_transform_from_global(bin->view, pointer->grab_x, pointer->grab_y, &fromx, &fromy);
+		nemoview_transform_from_global(bin->view, pointer->x, pointer->y, &tox, &toy);
 
-	nemoview_transform_from_global(bin->view, pointer->grab_x, pointer->grab_y, &fromx, &fromy);
-	nemoview_transform_from_global(bin->view, pointer->x, pointer->y, &tox, &toy);
+		width = resize->width;
+		if (resize->edges & WL_SHELL_SURFACE_RESIZE_LEFT) {
+			width += (fromx - tox);
+		} else if (resize->edges & WL_SHELL_SURFACE_RESIZE_RIGHT) {
+			width += (tox - fromx);
+		}
 
-	width = resize->width;
-	if (resize->edges & WL_SHELL_SURFACE_RESIZE_LEFT) {
-		width += (fromx - tox);
-	} else if (resize->edges & WL_SHELL_SURFACE_RESIZE_RIGHT) {
-		width += (tox - fromx);
+		height = resize->height;
+		if (resize->edges & WL_SHELL_SURFACE_RESIZE_TOP) {
+			height += (fromy - toy);
+		} else if (resize->edges & WL_SHELL_SURFACE_RESIZE_BOTTOM) {
+			height += (toy - fromy);
+		}
+
+		bin->callback->send_configure(bin->canvas, width, height);
 	}
-
-	height = resize->height;
-	if (resize->edges & WL_SHELL_SURFACE_RESIZE_TOP) {
-		height += (fromy - toy);
-	} else if (resize->edges & WL_SHELL_SURFACE_RESIZE_BOTTOM) {
-		height += (toy - fromy);
-	}
-
-	bin->callback->send_configure(bin->canvas, width, height);
 }
 
 static void resize_grab_axis(struct nemopointer_grab *base, uint32_t time, uint32_t axis, float value)
