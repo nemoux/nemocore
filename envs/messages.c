@@ -274,7 +274,7 @@ static void nemoenvs_handle_set_nemoshell_pick(struct nemoshell *shell, struct i
 	const char *name;
 	const char *value;
 
-	nemoshell_set_pick_flags(shell, NEMOSHELL_PICK_ALL_FLAGS);
+	shell->pick.flags = NEMOSHELL_PICK_ALL_FLAGS;
 
 	nemoitem_attr_for_each(attr, one) {
 		name = nemoitem_attr_get_name(attr);
@@ -290,16 +290,16 @@ static void nemoenvs_handle_set_nemoshell_pick(struct nemoshell *shell, struct i
 			shell->pick.resize_interval = strtod(value, NULL);
 		} else if (strcmp(name, "scale") == 0) {
 			if (strcmp(value, "off") == 0)
-				nemoshell_put_pick_flags(shell, NEMOSHELL_PICK_SCALE_FLAG);
+				shell->pick.flags &= ~NEMOSHELL_PICK_SCALE_FLAG;
 		} else if (strcmp(name, "rotate") == 0) {
 			if (strcmp(value, "off") == 0)
-				nemoshell_put_pick_flags(shell, NEMOSHELL_PICK_ROTATE_FLAG);
+				shell->pick.flags &= ~NEMOSHELL_PICK_ROTATE_FLAG;
 		} else if (strcmp(name, "translate") == 0) {
 			if (strcmp(value, "off") == 0)
-				nemoshell_put_pick_flags(shell, NEMOSHELL_PICK_TRANSLATE_FLAG);
+				shell->pick.flags &= ~NEMOSHELL_PICK_TRANSLATE_FLAG;
 		} else if (strcmp(name, "resize") == 0) {
 			if (strcmp(value, "off") == 0)
-				nemoshell_put_pick_flags(shell, NEMOSHELL_PICK_RESIZE_FLAG);
+				shell->pick.flags &= ~NEMOSHELL_PICK_RESIZE_FLAG;
 		}
 	}
 }

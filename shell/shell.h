@@ -353,16 +353,6 @@ extern void nemoshell_set_maximized_bin_on_screen(struct nemoshell *shell, struc
 extern void nemoshell_set_maximized_bin(struct nemoshell *shell, struct shellbin *bin, struct shellscreen *screen);
 extern void nemoshell_put_maximized_bin(struct nemoshell *shell, struct shellbin *bin);
 
-static inline void nemoshell_set_pick_flags(struct nemoshell *shell, uint32_t flags)
-{
-	shell->pick.flags |= flags;
-}
-
-static inline void nemoshell_put_pick_flags(struct nemoshell *shell, uint32_t flags)
-{
-	shell->pick.flags &= ~flags;
-}
-
 static inline void nemoshell_set_execute_command(struct nemoshell *shell, nemoshell_execute_command_t execute)
 {
 	shell->execute_command = execute;
