@@ -404,6 +404,49 @@ static void nemoenvs_handle_put_nemoshell_fullscreen(struct nemoshell *shell, st
 	}
 }
 
+static void nemoenvs_handle_set_nemoshell_stage(struct nemoshell *shell, struct itemone *one)
+{
+	struct itemattr *attr;
+	const char *id;
+	const char *name;
+	const char *value;
+
+	id = nemoitem_one_get_attr(one, "id");
+	if (id != NULL) {
+		struct shellstage *stage;
+
+		stage = nemoshell_get_stage(shell, id);
+		if (stage != NULL) {
+			nemoitem_attr_for_each(attr, one) {
+				name = nemoitem_attr_get_name(attr);
+				value = nemoitem_attr_get_value(attr);
+
+				if (strcmp(name, "sx") == 0) {
+					stage->sx = strtoul(value, NULL, 10);
+				} else if (strcmp(name, "sy") == 0) {
+					stage->sy = strtoul(value, NULL, 10);
+				} else if (strcmp(name, "sw") == 0) {
+					stage->sw = strtoul(value, NULL, 10);
+				} else if (strcmp(name, "sh") == 0) {
+					stage->sh = strtoul(value, NULL, 10);
+				} else if (strcmp(name, "dr") == 0) {
+					stage->dr = strtoul(value, NULL, 10);
+				}
+			}
+		}
+	}
+}
+
+static void nemoenvs_handle_put_nemoshell_stage(struct nemoshell *shell, struct itemone *one)
+{
+	const char *id;
+
+	id = nemoitem_one_get_attr(one, "id");
+	if (id != NULL) {
+		nemoshell_put_stage(shell, id);
+	}
+}
+
 static void nemoenvs_handle_set_nemoshell_font(struct nemoshell *shell, struct itemone *one)
 {
 	char contents[1024];
@@ -508,6 +551,8 @@ int nemoenvs_dispatch_system_message(struct nemoenvs *envs, const char *src, con
 				nemoenvs_handle_set_nemoshell_bin(shell, one);
 			} else if (strcmp(path, "/nemoshell/fullscreen") == 0) {
 				nemoenvs_handle_set_nemoshell_fullscreen(shell, one);
+			} else if (strcmp(path, "/nemoshell/stage") == 0) {
+				nemoenvs_handle_set_nemoshell_stage(shell, one);
 			} else if (strcmp(path, "/nemoshell/font") == 0) {
 				nemoenvs_handle_set_nemoshell_font(shell, one);
 			} else if (strcmp(path, "/nemoshell/show") == 0) {
@@ -528,6 +573,8 @@ int nemoenvs_dispatch_system_message(struct nemoenvs *envs, const char *src, con
 			} else if (strcmp(path, "/nemoshell/bin") == 0) {
 			} else if (strcmp(path, "/nemoshell/fullscreen") == 0) {
 				nemoenvs_handle_put_nemoshell_fullscreen(shell, one);
+			} else if (strcmp(path, "/nemoshell/stage") == 0) {
+				nemoenvs_handle_put_nemoshell_stage(shell, one);
 			} else if (strcmp(path, "/nemoshell/font") == 0) {
 			} else if (strcmp(path, "/nemoshell/show") == 0) {
 			} else if (strcmp(path, "/nemoshell/tale") == 0) {

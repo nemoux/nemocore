@@ -55,7 +55,7 @@ struct nemoview *nemoview_create(struct nemocompz *compz, struct nemocontent *co
 
 	pixman_region32_init(&view->clip);
 
-	view->state = NEMOVIEW_CATCH_STATE | NEMOVIEW_PICK_STATE | NEMOVIEW_KEYPAD_STATE | NEMOVIEW_SOUND_STATE | NEMOVIEW_RESIZE_STATE;
+	view->state = NEMOVIEW_CATCH_STATE | NEMOVIEW_PICK_STATE | NEMOVIEW_KEYPAD_STATE | NEMOVIEW_SOUND_STATE | NEMOVIEW_RESIZE_STATE | NEMOVIEW_STAGE_STATE;
 
 	view->psf_flags = 0x0;
 

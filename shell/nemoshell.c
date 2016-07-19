@@ -102,6 +102,8 @@ static void nemo_surface_set_state(struct wl_client *client, struct wl_resource 
 		nemoview_set_state(bin->view, NEMOVIEW_LAYER_STATE);
 	else if (strcmp(state, "opaque") == 0)
 		nemoview_set_state(bin->view, NEMOVIEW_OPAQUE_STATE);
+	else if (strcmp(state, "stage") == 0)
+		nemoview_set_state(bin->view, NEMOVIEW_STAGE_STATE);
 	else if (strcmp(state, "close") == 0)
 		nemoview_set_state(bin->view, NEMOVIEW_CLOSE_STATE);
 }
@@ -122,6 +124,8 @@ static void nemo_surface_put_state(struct wl_client *client, struct wl_resource 
 		nemoview_put_state(bin->view, NEMOVIEW_LAYER_STATE);
 	else if (strcmp(state, "opaque") == 0)
 		nemoview_put_state(bin->view, NEMOVIEW_OPAQUE_STATE);
+	else if (strcmp(state, "stage") == 0)
+		nemoview_put_state(bin->view, NEMOVIEW_STAGE_STATE);
 	else if (strcmp(state, "close") == 0)
 		nemoview_put_state(bin->view, NEMOVIEW_CLOSE_STATE);
 }
@@ -483,8 +487,6 @@ static void nemo_get_nemo_surface(struct wl_client *client, struct wl_resource *
 
 	if (type == NEMO_SHELL_SURFACE_TYPE_NORMAL) {
 		bin->type = NEMOSHELL_SURFACE_NORMAL_TYPE;
-
-		nemoshell_use_client_state(shell, bin);
 	} else if (type == NEMO_SHELL_SURFACE_TYPE_OVERLAY) {
 		bin->type = NEMOSHELL_SURFACE_OVERLAY_TYPE;
 		bin->view->transform.type = NEMOVIEW_TRANSFORM_OVERLAY;

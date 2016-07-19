@@ -189,6 +189,11 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 	}
 
 	if (!nemoview_has_state(view, NEMOVIEW_MAP_STATE)) {
+		nemoshell_use_client_state(bin->shell, bin);
+
+		if (nemoview_has_state(view, NEMOVIEW_STAGE_STATE) != 0)
+			nemoshell_use_client_stage(bin->shell, bin);
+
 		if (bin->type == NEMOSHELL_SURFACE_NORMAL_TYPE) {
 			if (bin->has_screen != 0) {
 				nemoview_correct_pivot(view, bin->screen.width / 2.0f, bin->screen.height / 2.0f);
@@ -214,6 +219,7 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 					if (bin->view->geometry.has_pivot == 0)
 						nemoview_correct_pivot(bin->view, view->content->width * bin->initial.dx, view->content->height * bin->initial.dy);
 				}
+
 				nemoview_set_rotation(view, bin->initial.r);
 
 				nemoview_attach_layer(view, bin->layer);
@@ -703,6 +709,7 @@ struct nemoshell *nemoshell_create(struct nemocompz *compz)
 
 	wl_list_init(&shell->bin_list);
 	wl_list_init(&shell->fullscreen_list);
+	wl_list_init(&shell->stage_list);
 	wl_list_init(&shell->clientstate_list);
 
 	shell->pitch.samples = 7;
@@ -993,6 +1000,20 @@ int nemoshell_use_client_state(struct nemoshell *shell, struct shellbin *bin)
 	return 0;
 }
 
+int nemoshell_use_client_stage(struct nemoshell *shell, struct shellbin *bin)
+{
+	struct shellstage *stage;
+
+	stage = nemoshell_get_stage_on(shell, bin->initial.x, bin->initial.y);
+	if (stage != NULL) {
+		bin->initial.r = stage->dr * M_PI / 180.0f;
+
+		return 1;
+	}
+
+	return 0;
+}
+
 struct shellscreen *nemoshell_get_fullscreen(struct nemoshell *shell, const char *id)
 {
 	struct shellscreen *screen;
@@ -1044,6 +1065,56 @@ struct shellscreen *nemoshell_get_fullscreen_on(struct nemoshell *shell, int32_t
 		if (screen->sx <= x && x <= screen->sx + screen->sw &&
 				screen->sy <= y && y <= screen->sy + screen->sh)
 			return screen;
+	}
+
+	return NULL;
+}
+
+struct shellstage *nemoshell_get_stage(struct nemoshell *shell, const char *id)
+{
+	struct shellstage *stage;
+
+	wl_list_for_each(stage, &shell->stage_list, link) {
+		if (strcmp(stage->id, id) == 0)
+			return stage;
+	}
+
+	stage = (struct shellstage *)malloc(sizeof(struct shellstage));
+	if (stage == NULL)
+		return NULL;
+	memset(stage, 0, sizeof(struct shellstage));
+
+	stage->id = strdup(id);
+
+	wl_list_insert(&shell->stage_list, &stage->link);
+
+	return stage;
+}
+
+void nemoshell_put_stage(struct nemoshell *shell, const char *id)
+{
+	struct shellstage *stage;
+
+	wl_list_for_each(stage, &shell->stage_list, link) {
+		if (strcmp(stage->id, id) == 0) {
+			wl_list_remove(&stage->link);
+
+			free(stage->id);
+			free(stage);
+
+			break;
+		}
+	}
+}
+
+struct shellstage *nemoshell_get_stage_on(struct nemoshell *shell, int32_t x, int32_t y)
+{
+	struct shellstage *stage;
+
+	wl_list_for_each(stage, &shell->stage_list, link) {
+		if (stage->sx <= x && x <= stage->sx + stage->sw &&
+				stage->sy <= y && y <= stage->sy + stage->sh)
+			return stage;
 	}
 
 	return NULL;

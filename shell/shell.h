@@ -77,6 +77,7 @@ struct nemoshell {
 
 	struct wl_list bin_list;
 	struct wl_list fullscreen_list;
+	struct wl_list stage_list;
 	struct wl_list clientstate_list;
 
 	struct {
@@ -184,7 +185,7 @@ struct shellbin {
 
 	uint32_t min_width, min_height;
 	uint32_t max_width, max_height;
-	
+
 	struct nemocanvas_callback *callback;
 
 	struct wl_list link;
@@ -278,6 +279,16 @@ struct shellscreen {
 	struct wl_list bin_list;
 };
 
+struct shellstage {
+	char *id;
+
+	struct wl_list link;
+
+	int32_t sx, sy, sw, sh;
+
+	int32_t dr;
+};
+
 extern struct nemoshell *nemoshell_create(struct nemocompz *compz);
 extern void nemoshell_destroy(struct nemoshell *shell);
 
@@ -313,11 +324,15 @@ extern void nemoshell_destroy_client_state(struct nemoshell *shell, struct clien
 extern struct clientstate *nemoshell_get_client_state(struct nemoshell *shell, uint32_t pid);
 
 extern int nemoshell_use_client_state(struct nemoshell *shell, struct shellbin *bin);
+extern int nemoshell_use_client_stage(struct nemoshell *shell, struct shellbin *bin);
 
 extern struct shellscreen *nemoshell_get_fullscreen(struct nemoshell *shell, const char *id);
 extern void nemoshell_put_fullscreen(struct nemoshell *shell, const char *id);
-
 extern struct shellscreen *nemoshell_get_fullscreen_on(struct nemoshell *shell, int32_t x, int32_t y, uint32_t type);
+
+extern struct shellstage *nemoshell_get_stage(struct nemoshell *shell, const char *id);
+extern void nemoshell_put_stage(struct nemoshell *shell, const char *id);
+extern struct shellstage *nemoshell_get_stage_on(struct nemoshell *shell, int32_t x, int32_t y);
 
 extern void nemoshell_set_toplevel_bin(struct nemoshell *shell, struct shellbin *bin);
 extern void nemoshell_set_popup_bin(struct nemoshell *shell, struct shellbin *bin, struct shellbin *parent, int32_t x, int32_t y, uint32_t serial);
