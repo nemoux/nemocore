@@ -51,11 +51,13 @@ static void move_shellgrab_pointer_motion(struct nemopointer_grab *base, uint32_
 	if (grab->bin == NULL)
 		return;
 
-	cx = x + move->dx;
-	cy = y + move->dy;
+	if (bin->shell->pick.flags & NEMOSHELL_PICK_TRANSLATE_FLAG) {
+		cx = x + move->dx;
+		cy = y + move->dy;
 
-	nemoview_set_position(bin->view, cx, cy);
-	nemoview_schedule_repaint(bin->view);
+		nemoview_set_position(bin->view, cx, cy);
+		nemoview_schedule_repaint(bin->view);
+	}
 }
 
 static void move_shellgrab_pointer_axis(struct nemopointer_grab *base, uint32_t time, uint32_t axis, float value)
@@ -189,6 +191,7 @@ static void move_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 	if (bin != NULL &&
 			bin->state.fullscreen == 0 &&
 			bin->state.maximized == 0 &&
+			bin->shell->pick.flags & NEMOSHELL_PICK_TRANSLATE_FLAG &&
 			nemoshell_check_touchgrab_duration(&move->touch, bin->shell->pitch.samples, bin->shell->pitch.max_duration) > 0) {
 		struct nemoshell *shell = bin->shell;
 		struct vieweffect *effect;
@@ -248,7 +251,8 @@ static void move_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 
 	if (bin != NULL &&
 			bin->state.fullscreen == 0 &&
-			bin->state.maximized == 0) {
+			bin->state.maximized == 0 &&
+			bin->shell->pick.flags & NEMOSHELL_PICK_TRANSLATE_FLAG) {
 		int32_t cx, cy;
 
 		if (bin->reset_move != 0) {
@@ -356,18 +360,18 @@ static void move_actorgrab_pointer_motion(struct nemopointer_grab *base, uint32_
 	struct actorgrab_move *move = (struct actorgrab_move *)container_of(grab, struct actorgrab_move, base);
 	struct nemopointer *pointer = base->pointer;
 	struct nemoactor *actor = grab->actor;
+	struct nemoshell *shell = grab->shell;
 	int32_t cx, cy;
 
 	nemopointer_move(pointer, x, y);
 
-	if (grab->actor == NULL)
-		return;
+	if (actor != NULL && shell->pick.flags & NEMOSHELL_PICK_TRANSLATE_FLAG) {
+		cx = x + move->dx;
+		cy = y + move->dy;
 
-	cx = x + move->dx;
-	cy = y + move->dy;
-
-	nemoview_set_position(actor->view, cx, cy);
-	nemoview_schedule_repaint(actor->view);
+		nemoview_set_position(actor->view, cx, cy);
+		nemoview_schedule_repaint(actor->view);
+	}
 }
 
 static void move_actorgrab_pointer_axis(struct nemopointer_grab *base, uint32_t time, uint32_t axis, float value)
@@ -449,7 +453,7 @@ static void move_actorgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 
 	touchpoint_up(tp);
 
-	if (actor != NULL && nemoshell_check_touchgrab_duration(&move->touch, shell->pitch.samples, shell->pitch.max_duration) > 0) {
+	if (actor != NULL && shell->pick.flags & NEMOSHELL_PICK_TRANSLATE_FLAG && nemoshell_check_touchgrab_duration(&move->touch, shell->pitch.samples, shell->pitch.max_duration) > 0) {
 		struct vieweffect *effect;
 		float dx, dy;
 
@@ -492,11 +496,12 @@ static void move_actorgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 	struct actorgrab_move *move = (struct actorgrab_move *)container_of(grab, struct actorgrab_move, base);
 	struct touchpoint *tp = base->touchpoint;
 	struct nemoactor *actor = grab->actor;
+	struct nemoshell *shell = grab->shell;
 	int32_t cx, cy;
 
 	touchpoint_motion(tp, x, y);
 
-	if (actor != NULL) {
+	if (actor != NULL && shell->pick.flags & NEMOSHELL_PICK_TRANSLATE_FLAG) {
 		cx = x + move->dx;
 		cy = y + move->dy;
 

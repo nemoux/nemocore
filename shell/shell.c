@@ -717,6 +717,7 @@ struct nemoshell *nemoshell_create(struct nemocompz *compz)
 	shell->pitch.friction = 0.015f;
 	shell->pitch.coefficient = 1.8f;
 
+	shell->pick.flags = NEMOSHELL_PICK_ALL_FLAGS;
 	shell->pick.rotate_distance = 25.0f;
 	shell->pick.scale_distance = 25.0f;
 	shell->pick.fullscreen_scale = 1.25f;

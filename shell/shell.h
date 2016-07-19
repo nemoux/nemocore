@@ -34,6 +34,13 @@ typedef enum {
 } NemoShellSurfaceFlag;
 
 typedef enum {
+	NEMOSHELL_PICK_SCALE_FLAG = (1 << 0),
+	NEMOSHELL_PICK_ROTATE_FLAG = (1 << 1),
+	NEMOSHELL_PICK_TRANSLATE_FLAG = (1 << 2),
+	NEMOSHELL_PICK_ALL_FLAGS = NEMOSHELL_PICK_SCALE_FLAG | NEMOSHELL_PICK_ROTATE_FLAG | NEMOSHELL_PICK_TRANSLATE_FLAG
+} NemoShellPickFlag;
+
+typedef enum {
 	NEMOSHELL_FULLSCREEN_NORMAL_TYPE = 0,
 	NEMOSHELL_FULLSCREEN_PICK_TYPE = 1,
 	NEMOSHELL_FULLSCREEN_PITCH_TYPE = 2,
@@ -88,6 +95,8 @@ struct nemoshell {
 	} pitch;
 
 	struct {
+		uint32_t flags;
+
 		double rotate_distance;
 		double scale_distance;
 
@@ -342,6 +351,16 @@ extern void nemoshell_put_fullscreen_bin(struct nemoshell *shell, struct shellbi
 extern void nemoshell_set_maximized_bin_on_screen(struct nemoshell *shell, struct shellbin *bin, struct nemoscreen *screen);
 extern void nemoshell_set_maximized_bin(struct nemoshell *shell, struct shellbin *bin, struct shellscreen *screen);
 extern void nemoshell_put_maximized_bin(struct nemoshell *shell, struct shellbin *bin);
+
+static inline void nemoshell_set_pick_flags(struct nemoshell *shell, uint32_t flags)
+{
+	shell->pick.flags |= flags;
+}
+
+static inline void nemoshell_put_pick_flags(struct nemoshell *shell, uint32_t flags)
+{
+	shell->pick.flags &= ~flags;
+}
 
 static inline void nemoshell_set_execute_command(struct nemoshell *shell, nemoshell_execute_command_t execute)
 {

@@ -187,7 +187,7 @@ static void pick_shellgrab_touchpoint_frame(struct touchpoint_grab *base, uint32
 			bin->reset_move = 0;
 		}
 
-		if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_ROTATE)) {
+		if ((shell->pick.flags & NEMOSHELL_PICK_ROTATE_FLAG) && (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_ROTATE))) {
 			if (d > shell->pick.rotate_distance) {
 				nemoview_set_rotation(bin->view, bin->view->geometry.r + pick->rotate.r - r);
 
@@ -198,7 +198,7 @@ static void pick_shellgrab_touchpoint_frame(struct touchpoint_grab *base, uint32
 			pick->rotate.r = pick->other->rotate.r = r;
 		}
 
-		if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALE)) {
+		if ((shell->pick.flags & NEMOSHELL_PICK_SCALE_FLAG) && (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALE))) {
 			if (d > shell->pick.scale_distance) {
 				float s = d / pick->scale.distance;
 
@@ -254,7 +254,7 @@ static void pick_shellgrab_touchpoint_frame(struct touchpoint_grab *base, uint32
 			}
 		}
 
-		if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_MOVE)) {
+		if ((shell->pick.flags & NEMOSHELL_PICK_TRANSLATE_FLAG) && (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_MOVE))) {
 			float cx, cy;
 
 			cx = pick->move.dx + (pick->tp0->x + pick->tp1->x) / 2.0f;
@@ -464,7 +464,7 @@ static void pick_actorgrab_touchpoint_frame(struct touchpoint_grab *base, uint32
 			return;
 		pick->frameid = pick->other->frameid = frameid;
 
-		if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_ROTATE)) {
+		if ((shell->pick.flags & NEMOSHELL_PICK_ROTATE_FLAG) && (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_ROTATE))) {
 			if (d > shell->pick.rotate_distance) {
 				nemoview_set_rotation(actor->view, actor->view->geometry.r + pick->rotate.r - r);
 			}
@@ -472,7 +472,7 @@ static void pick_actorgrab_touchpoint_frame(struct touchpoint_grab *base, uint32
 			pick->rotate.r = pick->other->rotate.r = r;
 		}
 
-		if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALE)) {
+		if ((shell->pick.flags & NEMOSHELL_PICK_SCALE_FLAG) && (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALE))) {
 			if (d > shell->pick.scale_distance) {
 				float s = d / pick->scale.distance;
 
@@ -496,7 +496,7 @@ static void pick_actorgrab_touchpoint_frame(struct touchpoint_grab *base, uint32
 			pick->scale.distance = pick->other->scale.distance = d;
 		}
 
-		if (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_MOVE)) {
+		if ((shell->pick.flags & NEMOSHELL_PICK_TRANSLATE_FLAG) && (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_MOVE))) {
 			float cx, cy;
 
 			cx = pick->move.dx + (pick->tp0->x + pick->tp1->x) / 2.0f;
