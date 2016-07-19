@@ -189,8 +189,6 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 	}
 
 	if (!nemoview_has_state(view, NEMOVIEW_MAP_STATE)) {
-		nemoshell_use_client_state(bin->shell, bin);
-
 		if (nemoview_has_state(view, NEMOVIEW_STAGE_STATE) != 0)
 			nemoshell_use_client_stage(bin->shell, bin);
 

@@ -322,6 +322,8 @@ static void xdg_get_xdg_surface(struct wl_client *client, struct wl_resource *re
 
 	wl_resource_set_implementation(bin->resource, &xdg_surface_implementation, bin, xdgshell_unbind_xdg_surface);
 
+	nemoshell_use_client_state(shell, bin);
+
 	bin->flags |= NEMOSHELL_SURFACE_BINDABLE_FLAG;
 }
 
