@@ -41,8 +41,6 @@ struct nemoactor {
 
 	struct wl_list link;
 
-	int grabcount;
-
 	int newly_attached;
 
 	pixman_image_t *image;

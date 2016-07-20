@@ -295,7 +295,7 @@ int nemoshell_pick_canvas_by_touchpoint(struct nemoshell *shell, struct touchpoi
 	if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_FIXED_STATE) != 0)
 		return 0;
 
-	if (bin->grabcount > 0)
+	if (nemoview_has_grab(bin->view) != 0)
 		wl_signal_emit(&bin->ungrab_signal, bin);
 
 	if (bin->config.fullscreen != 0 || bin->config.maximized != 0)
@@ -533,7 +533,7 @@ int nemoshell_pick_actor_by_touchpoint(struct nemoshell *shell, struct touchpoin
 	if (actor == NULL)
 		return -1;
 
-	if (actor->grabcount > 0)
+	if (nemoview_has_grab(actor->view) != 0)
 		wl_signal_emit(&actor->ungrab_signal, actor);
 
 	pick0 = (struct actorgrab_pick *)malloc(sizeof(struct actorgrab_pick));

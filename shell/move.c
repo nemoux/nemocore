@@ -107,7 +107,7 @@ int nemoshell_move_canvas_by_pointer(struct nemoshell *shell, struct nemopointer
 	if (bin->config.fullscreen != 0 || bin->config.maximized != 0)
 		return 0;
 
-	if (bin->grabcount > 0)
+	if (nemoview_has_grab(bin->view) != 0)
 		wl_signal_emit(&bin->ungrab_signal, bin);
 
 	move = (struct shellgrab_move *)malloc(sizeof(struct shellgrab_move));
@@ -305,7 +305,7 @@ int nemoshell_move_canvas_by_touchpoint(struct nemoshell *shell, struct touchpoi
 	if (bin->config.fullscreen != 0 || bin->config.maximized != 0)
 		return 0;
 
-	if (bin->grabcount > 0)
+	if (nemoview_has_grab(bin->view) != 0)
 		touchpoint_done_grab(tp);
 
 	move = (struct shellgrab_move *)malloc(sizeof(struct shellgrab_move));
@@ -418,7 +418,7 @@ int nemoshell_move_actor_by_pointer(struct nemoshell *shell, struct nemopointer 
 	if (actor == NULL)
 		return -1;
 
-	if (actor->grabcount > 0)
+	if (nemoview_has_grab(actor->view) != 0)
 		wl_signal_emit(&actor->ungrab_signal, actor);
 
 	move = (struct actorgrab_move *)malloc(sizeof(struct actorgrab_move));
@@ -539,7 +539,7 @@ int nemoshell_move_actor_by_touchpoint(struct nemoshell *shell, struct touchpoin
 	if (actor == NULL)
 		return -1;
 
-	if (actor->grabcount > 0)
+	if (nemoview_has_grab(actor->view) != 0)
 		touchpoint_done_grab(tp);
 
 	move = (struct actorgrab_move *)malloc(sizeof(struct actorgrab_move));

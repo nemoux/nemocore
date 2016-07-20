@@ -272,8 +272,6 @@ struct shellbin {
 	struct binconfig config, next_config, requested_config;
 	int config_changed;
 	int config_requested;
-
-	int grabcount;
 };
 
 struct shellscreen {

@@ -132,6 +132,8 @@ struct nemoview {
 
 	struct nemoxkb *xkb;
 
+	int grabcount;
+
 	void *data;
 };
 
@@ -507,6 +509,21 @@ static inline int nemoview_has_state_all(struct nemoview *view, uint32_t state)
 static inline int nemoview_has_type(struct nemoview *view, const char *type)
 {
 	return view->type != NULL && strcmp(view->type, type) == 0;
+}
+
+static inline int nemoview_grab(struct nemoview *view)
+{
+	return view->grabcount++;
+}
+
+static inline int nemoview_ungrab(struct nemoview *view)
+{
+	return --view->grabcount;
+}
+
+static inline int nemoview_has_grab(struct nemoview *view)
+{
+	return view->grabcount > 0;
 }
 
 static inline void nemoview_set_tag(struct nemoview *view, uint32_t tag)

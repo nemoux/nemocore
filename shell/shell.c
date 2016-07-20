@@ -164,7 +164,7 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 {
 	struct shellbin *bin = nemoshell_get_bin(canvas);
 	struct nemoview *view = bin->view;
-	int state_changed = 0;
+	int config_changed = 0;
 
 	assert(bin);
 
@@ -185,7 +185,7 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 			bin->config_changed = 0;
 		}
 
-		state_changed = 1;
+		config_changed = 1;
 	}
 
 	if (!nemoview_has_state(view, NEMOVIEW_MAP_STATE)) {
@@ -274,7 +274,7 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 
 		bin->last_width = canvas->base.width;
 		bin->last_height = canvas->base.height;
-	} else if (state_changed != 0 || sx != 0 || sy != 0 ||
+	} else if (config_changed != 0 || sx != 0 || sy != 0 ||
 			bin->last_width != canvas->base.width ||
 			bin->last_height != canvas->base.height ||
 			bin->has_scale != 0) {
@@ -354,7 +354,7 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 
 				bin->reset_move = 1;
 
-				if (bin->grabcount > 0) {
+				if (nemoview_has_grab(bin->view) != 0) {
 					bin->last_sx = sx;
 					bin->last_sy = sy;
 

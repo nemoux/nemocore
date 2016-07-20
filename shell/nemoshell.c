@@ -299,7 +299,7 @@ static void nemo_surface_set_fullscreen(struct wl_client *client, struct wl_reso
 
 		screen = nemoshell_get_fullscreen(shell, id);
 		if (screen != NULL) {
-			if (bin->grabcount > 0)
+			if (nemoview_has_grab(bin->view) != 0)
 				wl_signal_emit(&bin->ungrab_signal, bin);
 
 			nemoshell_set_fullscreen_bin(shell, bin, screen);
@@ -346,7 +346,7 @@ static void nemo_surface_miss(struct wl_client *client, struct wl_resource *reso
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 
-	if (bin->grabcount > 0)
+	if (nemoview_has_grab(bin->view) != 0)
 		wl_signal_emit(&bin->ungrab_signal, bin);
 }
 
