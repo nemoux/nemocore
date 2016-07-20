@@ -34,6 +34,13 @@ typedef enum {
 } NemoShellSurfaceFlag;
 
 typedef enum {
+	NEMOSHELL_BIN_BINDABLE_STATE = (1 << 0),
+	NEMOSHELL_BIN_FIXED_STATE = (1 << 1),
+	NEMOSHELL_BIN_PICKSCREEN_STATE = (1 << 2),
+	NEMOSHELL_BIN_PITCHSCREEN_STATE = (1 << 3)
+} NemoShellBinState;
+
+typedef enum {
 	NEMOSHELL_PICK_SCALE_FLAG = (1 << 0),
 	NEMOSHELL_PICK_ROTATE_FLAG = (1 << 1),
 	NEMOSHELL_PICK_TRANSLATE_FLAG = (1 << 2),
@@ -159,7 +166,7 @@ struct clientstate {
 	uint32_t state_off;
 };
 
-struct binstate {
+struct binconfig {
 	int maximized;
 	int fullscreen;
 	int relative;
@@ -181,6 +188,7 @@ struct shellbin {
 	int type;
 
 	uint32_t flags;
+	uint32_t state;
 
 	struct nemoshell *shell;
 	struct nemocanvas *canvas;
@@ -225,9 +233,6 @@ struct shellbin {
 		float px, py;
 	} fullscreen;
 
-	int on_pickscreen;
-	int on_pitchscreen;
-
 	struct {
 		float x, y;
 		float r;
@@ -264,13 +269,11 @@ struct shellbin {
 	uint32_t next_serial;
 	uint32_t done_serial;
 
-	struct binstate state, next_state, requested_state;
-	int state_changed;
-	int state_requested;
+	struct binconfig config, next_config, requested_config;
+	int config_changed;
+	int config_requested;
 
-	int grabbed;
-	int fixed;
-	int bindable;
+	int grabcount;
 };
 
 struct shellscreen {
@@ -321,11 +324,11 @@ extern void nemoshell_destroy_client(struct shellclient *sc);
 extern struct shellclient *nemoshell_get_client(struct wl_client *client);
 
 extern void nemoshell_send_bin_close(struct shellbin *bin);
-extern void nemoshell_send_bin_state(struct shellbin *bin);
-extern void nemoshell_change_bin_state(struct shellbin *bin);
-extern void nemoshell_clear_bin_state(struct shellbin *bin);
+extern void nemoshell_send_bin_config(struct shellbin *bin);
+extern void nemoshell_change_bin_config(struct shellbin *bin);
+extern void nemoshell_clear_bin_config(struct shellbin *bin);
 
-extern void nemoshell_send_xdg_state(struct shellbin *bin);
+extern void nemoshell_send_xdg_config(struct shellbin *bin);
 
 extern struct nemoview *nemoshell_get_default_view(struct nemocanvas *canvas);
 
@@ -376,6 +379,26 @@ static inline void nemoshell_set_update_pointer(struct nemoshell *shell, nemoshe
 static inline void nemoshell_set_userdata(struct nemoshell *shell, void *data)
 {
 	shell->userdata = data;
+}
+
+static inline void nemoshell_bin_set_state(struct shellbin *bin, uint32_t state)
+{
+	bin->state |= state;
+}
+
+static inline void nemoshell_bin_put_state(struct shellbin *bin, uint32_t state)
+{
+	bin->state &= ~state;
+}
+
+static inline int nemoshell_bin_has_state(struct shellbin *bin, uint32_t state)
+{
+	return bin->state & state;
+}
+
+static inline int nemoshell_bin_has_state_all(struct shellbin *bin, uint32_t state)
+{
+	return (bin->state & state) == state;
 }
 
 static inline int32_t nemoshell_bin_get_geometry_width(struct shellbin *bin)

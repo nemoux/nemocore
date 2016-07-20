@@ -104,10 +104,10 @@ int nemoshell_move_canvas_by_pointer(struct nemoshell *shell, struct nemopointer
 	if (bin == NULL)
 		return -1;
 
-	if (bin->state.fullscreen != 0 || bin->state.maximized != 0)
+	if (bin->config.fullscreen != 0 || bin->config.maximized != 0)
 		return 0;
 
-	if (bin->grabbed > 0)
+	if (bin->grabcount > 0)
 		wl_signal_emit(&bin->ungrab_signal, bin);
 
 	move = (struct shellgrab_move *)malloc(sizeof(struct shellgrab_move));
@@ -140,7 +140,7 @@ static void move_shellgrab_dispatch_effect_done(struct nemoeffect *base)
 	struct shellscreen *screen;
 	float tx, ty;
 
-	if (bin->on_pitchscreen != 0) {
+	if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_PITCHSCREEN_STATE) != 0) {
 		nemoview_transform_to_global(bin->view,
 				bin->view->content->width * 0.5f,
 				bin->view->content->height * 0.5f,
@@ -189,8 +189,8 @@ static void move_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		nemolog_message("MOVE", "[UP] %llu: (%u)\n", touchid, time);
 
 	if (bin != NULL &&
-			bin->state.fullscreen == 0 &&
-			bin->state.maximized == 0 &&
+			bin->config.fullscreen == 0 &&
+			bin->config.maximized == 0 &&
 			bin->shell->pick.flags & NEMOSHELL_PICK_TRANSLATE_FLAG &&
 			nemoshell_check_touchgrab_duration(&move->touch, bin->shell->pitch.samples, bin->shell->pitch.max_duration) > 0) {
 		struct nemoshell *shell = bin->shell;
@@ -250,8 +250,8 @@ static void move_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 	touchpoint_motion(tp, x, y);
 
 	if (bin != NULL &&
-			bin->state.fullscreen == 0 &&
-			bin->state.maximized == 0 &&
+			bin->config.fullscreen == 0 &&
+			bin->config.maximized == 0 &&
 			bin->shell->pick.flags & NEMOSHELL_PICK_TRANSLATE_FLAG) {
 		int32_t cx, cy;
 
@@ -302,10 +302,10 @@ int nemoshell_move_canvas_by_touchpoint(struct nemoshell *shell, struct touchpoi
 	if (bin == NULL)
 		return -1;
 
-	if (bin->state.fullscreen != 0 || bin->state.maximized != 0)
+	if (bin->config.fullscreen != 0 || bin->config.maximized != 0)
 		return 0;
 
-	if (bin->grabbed > 0)
+	if (bin->grabcount > 0)
 		touchpoint_done_grab(tp);
 
 	move = (struct shellgrab_move *)malloc(sizeof(struct shellgrab_move));
@@ -418,7 +418,7 @@ int nemoshell_move_actor_by_pointer(struct nemoshell *shell, struct nemopointer 
 	if (actor == NULL)
 		return -1;
 
-	if (actor->grabbed > 0)
+	if (actor->grabcount > 0)
 		wl_signal_emit(&actor->ungrab_signal, actor);
 
 	move = (struct actorgrab_move *)malloc(sizeof(struct actorgrab_move));
@@ -539,7 +539,7 @@ int nemoshell_move_actor_by_touchpoint(struct nemoshell *shell, struct touchpoin
 	if (actor == NULL)
 		return -1;
 
-	if (actor->grabbed > 0)
+	if (actor->grabcount > 0)
 		touchpoint_done_grab(tp);
 
 	move = (struct actorgrab_move *)malloc(sizeof(struct actorgrab_move));

@@ -73,7 +73,7 @@ static void resize_grab_button(struct nemopointer_grab *base, uint32_t time, uin
 		if (grab->bin != NULL) {
 			grab->bin->resize_edges = 0;
 
-			nemoshell_send_xdg_state(grab->bin);
+			nemoshell_send_xdg_config(grab->bin);
 		}
 
 		nemoshell_end_pointer_shellgrab(grab);
@@ -89,7 +89,7 @@ static void resize_grab_cancel(struct nemopointer_grab *base)
 	if (grab->bin != NULL) {
 		grab->bin->resize_edges = 0;
 
-		nemoshell_send_xdg_state(grab->bin);
+		nemoshell_send_xdg_config(grab->bin);
 	}
 
 	nemoshell_end_pointer_shellgrab(grab);
@@ -111,7 +111,7 @@ int nemoshell_resize_canvas_by_pointer(struct nemopointer *pointer, struct shell
 	if (bin == NULL)
 		return -1;
 
-	if (bin->grabbed > 0)
+	if (bin->grabcount > 0)
 		wl_signal_emit(&bin->ungrab_signal, bin);
 
 	resize = (struct shellgrab_resize *)malloc(sizeof(struct shellgrab_resize));
@@ -126,7 +126,7 @@ int nemoshell_resize_canvas_by_pointer(struct nemopointer *pointer, struct shell
 
 	bin->resize_edges = edges;
 
-	nemoshell_send_xdg_state(bin);
+	nemoshell_send_xdg_config(bin);
 
 	nemoshell_start_pointer_shellgrab(bin->shell, &resize->base, &resize_grab_interface, bin, pointer);
 

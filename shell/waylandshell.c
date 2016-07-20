@@ -189,8 +189,9 @@ static void shell_get_shell_surface(struct wl_client *client, struct wl_resource
 
 	bin->type = NEMOSHELL_SURFACE_NORMAL_TYPE;
 	bin->owner = sc;
-	bin->bindable = 1;
-
+	
+	nemoshell_bin_set_state(bin, NEMOSHELL_BIN_BINDABLE_STATE);
+	
 	wl_client_get_credentials(client, &bin->pid, NULL, NULL);
 
 	bin->resource = wl_resource_create(client, &wl_shell_surface_interface, 1, id);

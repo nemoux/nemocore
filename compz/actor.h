@@ -41,7 +41,7 @@ struct nemoactor {
 
 	struct wl_list link;
 
-	int grabbed;
+	int grabcount;
 
 	int newly_attached;
 

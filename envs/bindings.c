@@ -176,7 +176,7 @@ void nemoenvs_handle_touch_event(struct nemocompz *compz, struct touchpoint *tp,
 				nemoseat_set_stick_focus(tp->touch->seat, tp->focus);
 				datadevice_set_focus(tp->touch->seat, tp->focus);
 
-				if (bin->bindable != 0 && bin->fixed == 0) {
+				if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_BINDABLE_STATE) != 0) {
 					struct touchpoint *tps[10];
 					int tapcount;
 

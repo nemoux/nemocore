@@ -264,11 +264,11 @@ static void nemo_surface_set_fullscreen_type(struct wl_client *client, struct wl
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 
 	if (type & (1 << NEMO_SURFACE_FULLSCREEN_TYPE_PICK)) {
-		bin->on_pickscreen = 1;
+		nemoshell_bin_set_state(bin, NEMOSHELL_BIN_PICKSCREEN_STATE);
 	}
 
 	if (type & (1 << NEMO_SURFACE_FULLSCREEN_TYPE_PITCH)) {
-		bin->on_pitchscreen = 1;
+		nemoshell_bin_set_state(bin, NEMOSHELL_BIN_PITCHSCREEN_STATE);
 	}
 #endif
 }
@@ -279,11 +279,11 @@ static void nemo_surface_put_fullscreen_type(struct wl_client *client, struct wl
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 
 	if (type & (1 << NEMO_SURFACE_FULLSCREEN_TYPE_PICK)) {
-		bin->on_pickscreen = 0;
+		nemoshell_bin_put_state(bin, NEMOSHELL_BIN_PICKSCREEN_STATE);
 	}
 
 	if (type & (1 << NEMO_SURFACE_FULLSCREEN_TYPE_PITCH)) {
-		bin->on_pitchscreen = 0;
+		nemoshell_bin_put_state(bin, NEMOSHELL_BIN_PITCHSCREEN_STATE);
 	}
 #endif
 }
@@ -299,7 +299,7 @@ static void nemo_surface_set_fullscreen(struct wl_client *client, struct wl_reso
 
 		screen = nemoshell_get_fullscreen(shell, id);
 		if (screen != NULL) {
-			if (bin->grabbed > 0)
+			if (bin->grabcount > 0)
 				wl_signal_emit(&bin->ungrab_signal, bin);
 
 			nemoshell_set_fullscreen_bin(shell, bin, screen);
@@ -346,7 +346,7 @@ static void nemo_surface_miss(struct wl_client *client, struct wl_resource *reso
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 
-	if (bin->grabbed > 0)
+	if (bin->grabcount > 0)
 		wl_signal_emit(&bin->ungrab_signal, bin);
 }
 

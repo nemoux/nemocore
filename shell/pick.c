@@ -92,7 +92,7 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 			} else if (nemoview_has_state(bin->view, NEMOVIEW_RESIZE_STATE) != 0) {
 				bin->resize_edges = WL_SHELL_SURFACE_RESIZE_LEFT | WL_SHELL_SURFACE_RESIZE_TOP;
 
-				if (bin->on_pickscreen != 0) {
+				if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_PICKSCREEN_STATE) != 0) {
 					if (nemocompz_get_scene_width(compz) * shell->pick.fullscreen_scale <= width ||
 							nemocompz_get_scene_height(compz) * shell->pick.fullscreen_scale <= height)
 						screen = nemoshell_get_fullscreen_on(shell, tp0->x, tp0->y, NEMOSHELL_FULLSCREEN_PICK_TYPE);
@@ -292,13 +292,13 @@ int nemoshell_pick_canvas_by_touchpoint(struct nemoshell *shell, struct touchpoi
 	if (bin == NULL)
 		return -1;
 
-	if (bin->fixed > 0)
+	if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_FIXED_STATE) != 0)
 		return 0;
 
-	if (bin->grabbed > 0)
+	if (bin->grabcount > 0)
 		wl_signal_emit(&bin->ungrab_signal, bin);
 
-	if (bin->state.fullscreen != 0 || bin->state.maximized != 0)
+	if (bin->config.fullscreen != 0 || bin->config.maximized != 0)
 		nemoshell_put_fullscreen_bin(shell, bin);
 
 	pick0 = (struct shellgrab_pick *)malloc(sizeof(struct shellgrab_pick));
@@ -533,7 +533,7 @@ int nemoshell_pick_actor_by_touchpoint(struct nemoshell *shell, struct touchpoin
 	if (actor == NULL)
 		return -1;
 
-	if (actor->grabbed > 0)
+	if (actor->grabcount > 0)
 		wl_signal_emit(&actor->ungrab_signal, actor);
 
 	pick0 = (struct actorgrab_pick *)malloc(sizeof(struct actorgrab_pick));

@@ -22,7 +22,7 @@
 static void xdg_send_configure(struct nemocanvas *canvas, int32_t width, int32_t height)
 {
 	struct shellbin *bin = nemoshell_get_bin(canvas);
-	struct wl_array states;
+	struct wl_array configs;
 	uint32_t *s;
 	uint32_t serial;
 
@@ -31,28 +31,28 @@ static void xdg_send_configure(struct nemocanvas *canvas, int32_t width, int32_t
 	if (bin->resource == NULL)
 		return;
 
-	wl_array_init(&states);
+	wl_array_init(&configs);
 
-	if (bin->requested_state.fullscreen) {
-		s = wl_array_add(&states, sizeof(uint32_t));
+	if (bin->requested_config.fullscreen) {
+		s = wl_array_add(&configs, sizeof(uint32_t));
 		*s = XDG_SURFACE_STATE_FULLSCREEN;
-	} else if (bin->requested_state.maximized) {
-		s = wl_array_add(&states, sizeof(uint32_t));
+	} else if (bin->requested_config.maximized) {
+		s = wl_array_add(&configs, sizeof(uint32_t));
 		*s = XDG_SURFACE_STATE_MAXIMIZED;
 	}
 	if (bin->resize_edges != 0) {
-		s = wl_array_add(&states, sizeof(uint32_t));
+		s = wl_array_add(&configs, sizeof(uint32_t));
 		*s = XDG_SURFACE_STATE_RESIZING;
 	}
 	if (bin->view->keyboard_count > 0) {
-		s = wl_array_add(&states, sizeof(uint32_t));
+		s = wl_array_add(&configs, sizeof(uint32_t));
 		*s = XDG_SURFACE_STATE_ACTIVATED;
 	}
 
 	serial = wl_display_next_serial(canvas->compz->display);
-	xdg_surface_send_configure(bin->resource, width, height, &states, serial);
+	xdg_surface_send_configure(bin->resource, width, height, &configs, serial);
 
-	wl_array_release(&states);
+	wl_array_release(&configs);
 }
 
 static void xdg_send_transform(struct nemocanvas *canvas, int visible, int32_t x, int32_t y, int32_t width, int32_t height)
@@ -131,10 +131,10 @@ static void xdg_surface_ack_configure(struct wl_client *client, struct wl_resour
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 
-	if (bin->state_requested) {
-		bin->next_state = bin->requested_state;
-		bin->state_changed = 1;
-		bin->state_requested = 0;
+	if (bin->config_requested) {
+		bin->next_config = bin->requested_config;
+		bin->config_changed = 1;
+		bin->config_requested = 0;
 	}
 }
 
@@ -310,7 +310,8 @@ static void xdg_get_xdg_surface(struct wl_client *client, struct wl_resource *re
 
 	bin->type = NEMOSHELL_SURFACE_NORMAL_TYPE;
 	bin->owner = sc;
-	bin->bindable = 1;
+
+	nemoshell_bin_set_state(bin, NEMOSHELL_BIN_BINDABLE_STATE);
 
 	wl_client_get_credentials(client, &bin->pid, NULL, NULL);
 
