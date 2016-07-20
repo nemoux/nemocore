@@ -398,7 +398,7 @@ void nemoview_update_transform_notify(struct nemoview *view)
 
 	view->compz->layer_notify = 1;
 
-	if (nemoview_has_state(view, NEMOVIEW_GRAB_STATE) == 0) {
+	if (nemoview_has_grab(view) == 0) {
 		pixman_region32_t region;
 		pixman_box32_t *extents;
 		float p[4][2];
