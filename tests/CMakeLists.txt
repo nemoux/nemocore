@@ -61,6 +61,15 @@ if(WITH_CEF)
 		)
 endif(WITH_CEF)
 
+add_executable(nemomote-show
+	nemomote-show.c
+	)
+
+TARGET_LINK_LIBRARIES(nemomote-show
+	nemomote
+	nemoapps
+	)
+
 add_executable(nemolog
 	nemolog.c
 	)

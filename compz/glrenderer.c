@@ -513,6 +513,30 @@ extern int glrenderer_read_actor(struct nemorenderer *base, struct nemoactor *ac
 
 struct nemorenderer *glrenderer_create(struct rendernode *node, EGLNativeDisplayType display, int use_alpha, const EGLint *visualid)
 {
+#ifdef NEMOUX_WITH_OPENGL_ES3
+	static const EGLint opaque_attribs[] = {
+		EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+		EGL_RED_SIZE, 1,
+		EGL_GREEN_SIZE, 1,
+		EGL_BLUE_SIZE, 1,
+		EGL_ALPHA_SIZE, 0,
+		EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT,
+		EGL_SAMPLE_BUFFERS, 1,
+		EGL_SAMPLES, 4,
+		EGL_NONE
+	};
+	static const EGLint alpha_attribs[] = {
+		EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+		EGL_RED_SIZE, 1,
+		EGL_GREEN_SIZE, 1,
+		EGL_BLUE_SIZE, 1,
+		EGL_ALPHA_SIZE, 1,
+		EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT,
+		EGL_SAMPLE_BUFFERS, 1,
+		EGL_SAMPLES, 4,
+		EGL_NONE
+	};
+#else
 	static const EGLint opaque_attribs[] = {
 		EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
 		EGL_RED_SIZE, 1,
@@ -535,6 +559,7 @@ struct nemorenderer *glrenderer_create(struct rendernode *node, EGLNativeDisplay
 		EGL_SAMPLES, 4,
 		EGL_NONE
 	};
+#endif
 	struct nemocompz *compz = node->compz;
 	struct glrenderer *renderer;
 	EGLint major, minor;

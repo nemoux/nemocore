@@ -145,6 +145,26 @@ int nemolog_error(const char *tag, const char *fmt, ...)
 	return r;
 }
 
+int nemolog_check(int check, const char *tag, const char *fmt, ...)
+{
+	if (check != 0) {
+		uint64_t nsecs = time_current_nsecs();
+		va_list vargs;
+		int r;
+
+		if (nemologfile < 0)
+			return 0;
+
+		va_start(vargs, fmt);
+		r = nemolog_write("\e[32;1mNEMO:\e[m \e[1;34m[%s] (%.3f)\e[0m ", tag, (double)(nsecs - __nsecs) / 1000000000.0f, fmt, vargs);
+		va_end(vargs);
+
+		return r;
+	}
+
+	return 0;
+}
+
 void nemolog_checkpoint(void)
 {
 	__nsecs = time_current_nsecs();

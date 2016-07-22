@@ -50,6 +50,34 @@ err1:
 
 int egl_prepare_context(EGLNativeDisplayType nativedisplay, EGLDisplay *egl_display, EGLContext *egl_context, EGLConfig *egl_config, int use_alpha, const EGLint *visualid)
 {
+#ifdef NEMOUX_WITH_OPENGL_ES3
+	static const EGLint opaque_attribs[] = {
+		EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+		EGL_RED_SIZE, 1,
+		EGL_GREEN_SIZE, 1,
+		EGL_BLUE_SIZE, 1,
+		EGL_ALPHA_SIZE, 0,
+		EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT,
+		EGL_SAMPLE_BUFFERS, 1,
+		EGL_SAMPLES, 4,
+		EGL_NONE
+	};
+	static const EGLint alpha_attribs[] = {
+		EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+		EGL_RED_SIZE, 1,
+		EGL_GREEN_SIZE, 1,
+		EGL_BLUE_SIZE, 1,
+		EGL_ALPHA_SIZE, 1,
+		EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT,
+		EGL_SAMPLE_BUFFERS, 1,
+		EGL_SAMPLES, 4,
+		EGL_NONE
+	};
+	static const EGLint client_attribs[] = {
+		EGL_CONTEXT_CLIENT_VERSION, 3,
+		EGL_NONE
+	};
+#else
 	static const EGLint opaque_attribs[] = {
 		EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
 		EGL_RED_SIZE, 1,
@@ -76,6 +104,7 @@ int egl_prepare_context(EGLNativeDisplayType nativedisplay, EGLDisplay *egl_disp
 		EGL_CONTEXT_CLIENT_VERSION, 2,
 		EGL_NONE
 	};
+#endif
 	EGLConfig config;
 	EGLint major, minor;
 	const char *extensions;

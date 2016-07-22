@@ -37,10 +37,12 @@ NEMO_BEGIN_EXTERN_C
 #	define	NEMO_ERROR(fmt, a...)	fprintf(stderr, "NEMO: (%s:%d) " fmt, __FUNCTION__, __LINE__, ##a)
 #	define	NEMO_DEBUG(fmt, a...)	fprintf(stderr, "NEMO: (%s:%d) " fmt, __FUNCTION__, __LINE__, ##a)
 #	define	NEMO_TRACE()					fprintf(stderr, "NEMO: (%s:%d)\n", __FUNCTION__, __LINE__)
+#	define	NEMO_CHECK(check, fmt, a...) if ((check) != 0) fprintf(stderr, "NEMO: (%s:%d) " fmt, __FUNCTION__, __LINE__, ##a)
 #else
 #	define	NEMO_ERROR(fmt, a...)
 #	define	NEMO_DEBUG(fmt, a...)
 #	define	NEMO_TRACE()
+#	define	NEMO_CHECK(check, fmt, a...)
 #endif
 
 #define ARRAY_LENGTH(a) (sizeof(a) / sizeof(a)[0])
