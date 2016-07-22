@@ -537,6 +537,15 @@ static void nemoenvs_handle_set_nemoshell_tale(struct nemoshell *shell, struct i
 	}
 }
 
+static void nemoenvs_handle_set_nemoshell_idle(struct nemoshell *shell, struct itemone *one)
+{
+	uint32_t timeout;
+
+	timeout = nemoitem_one_get_iattr(one, "timeout", 0);
+
+	nemocompz_set_idle_timeout(shell->compz, timeout);
+}
+
 int nemoenvs_dispatch_system_message(struct nemoenvs *envs, const char *src, const char *dst, const char *cmd, const char *path, struct itemone *one, void *data)
 {
 	struct nemoshell *shell = (struct nemoshell *)data;
@@ -573,6 +582,8 @@ int nemoenvs_dispatch_system_message(struct nemoenvs *envs, const char *src, con
 				nemoenvs_handle_set_nemoshell_show(shell, one);
 			} else if (strcmp(path, "/nemoshell/tale") == 0) {
 				nemoenvs_handle_set_nemoshell_tale(shell, one);
+			} else if (strcmp(path, "/nemoshell/idle") == 0) {
+				nemoenvs_handle_set_nemoshell_idle(shell, one);
 			}
 		} else if (strcmp(cmd, "put") == 0) {
 			if (strcmp(path, "/nemoshell/screen") == 0) {

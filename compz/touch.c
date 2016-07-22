@@ -24,10 +24,11 @@
 static void default_touchpoint_grab_down(struct touchpoint_grab *grab, uint32_t time, uint64_t touchid, float x, float y)
 {
 	struct touchpoint *tp = grab->touchpoint;
+	struct nemocompz *compz = tp->touch->seat->compz;
 	struct nemoview *view;
 	float sx, sy;
 
-	view = nemocompz_pick_view(tp->touch->seat->compz, x, y, &sx, &sy, NEMOVIEW_PICK_STATE);
+	view = nemocompz_pick_view(compz, x, y, &sx, &sy, NEMOVIEW_PICK_STATE);
 	if (view != NULL) {
 		touchpoint_set_focus(tp, view);
 	}
@@ -38,7 +39,9 @@ static void default_touchpoint_grab_down(struct touchpoint_grab *grab, uint32_t 
 		nemocontent_touch_down(tp, tp->focus->content, time, touchid, sx, sy, x, y);
 	}
 
-	virtuio_dispatch_events(tp->touch->seat->compz);
+	virtuio_dispatch_events(compz);
+
+	wl_event_source_timer_update(compz->idle_timer, compz->idle_timeout);
 }
 
 static void default_touchpoint_grab_up(struct touchpoint_grab *grab, uint32_t time, uint64_t touchid)

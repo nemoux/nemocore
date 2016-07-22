@@ -70,6 +70,8 @@ typedef void (*nemoshell_transform_bin_t)(void *data, struct shellbin *bin);
 typedef void (*nemoshell_destroy_client_t)(void *data, pid_t pid);
 typedef void (*nemoshell_update_pointer_t)(void *data, struct nemopointer *pointer);
 
+typedef void (*nemoshell_enter_idle_t)(void *data);
+
 struct nemoshell {
 	struct nemocompz *compz;
 
@@ -88,6 +90,8 @@ struct nemoshell {
 
 	struct wl_listener child_signal_listener;
 	struct wl_listener pointer_sprite_listener;
+
+	struct wl_listener idle_listener;
 
 	struct wl_list bin_list;
 	struct wl_list fullscreen_list;
@@ -121,6 +125,7 @@ struct nemoshell {
 	nemoshell_transform_bin_t transform_bin;
 	nemoshell_destroy_client_t destroy_client;
 	nemoshell_update_pointer_t update_pointer;
+	nemoshell_enter_idle_t enter_idle;
 	void *userdata;
 
 	int is_logging_grab;
@@ -372,6 +377,11 @@ static inline void nemoshell_set_destroy_client(struct nemoshell *shell, nemoshe
 static inline void nemoshell_set_update_pointer(struct nemoshell *shell, nemoshell_update_pointer_t dispatch)
 {
 	shell->update_pointer = dispatch;
+}
+
+static inline void nemoshell_set_enter_idle(struct nemoshell *shell, nemoshell_enter_idle_t dispatch)
+{
+	shell->enter_idle = dispatch;
 }
 
 static inline void nemoshell_set_userdata(struct nemoshell *shell, void *data)

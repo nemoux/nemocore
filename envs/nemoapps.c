@@ -162,6 +162,56 @@ static void nemoenvs_execute_daemon(struct nemoenvs *envs, struct itemone *one)
 	nemotoken_destroy(token);
 }
 
+static void nemoenvs_execute_screensaver(struct nemoenvs *envs, struct itemone *one)
+{
+	struct nemoshell *shell = envs->shell;
+	struct nemocompz *compz = shell->compz;
+	struct nemotoken *token;
+	struct itemattr *attr;
+	char cmds[512];
+	int32_t x, y;
+	const char *path;
+	const char *id;
+	const char *name;
+	const char *value;
+	pid_t pid;
+
+	x = nemoitem_one_get_iattr(one, "x", 0);
+	y = nemoitem_one_get_iattr(one, "y", 0);
+	path = nemoitem_one_get_attr(one, "path");
+	id = nemoitem_one_get_attr(one, "id");
+
+	strcpy(cmds, path);
+
+	nemoitem_attr_for_each(attr, one) {
+		name = nemoitem_attr_get_name(attr);
+		value = nemoitem_attr_get_value(attr);
+
+		strcat(cmds, ";--");
+		strcat(cmds, name);
+		strcat(cmds, ";");
+		strcat(cmds, value);
+	}
+
+	token = nemotoken_create(cmds, strlen(cmds));
+	nemotoken_divide(token, ';');
+	nemotoken_update(token);
+
+	pid = wayland_execute_path(path, nemotoken_get_tokens(token), NULL);
+	if (pid > 0) {
+		struct clientstate *state;
+
+		state = nemoshell_create_client_state(shell, pid);
+		if (state != NULL) {
+			clientstate_set_position(state, x, y);
+			clientstate_set_anchor(state, 0.0f, 0.0f);
+			clientstate_set_bin_flags(state, NEMOSHELL_SURFACE_ALL_FLAGS);
+		}
+	}
+
+	nemotoken_destroy(token);
+}
+
 int nemoenvs_respawn_app(struct nemoenvs *envs, pid_t pid)
 {
 	struct nemoapp *app, *napp;
@@ -205,6 +255,17 @@ void nemoenvs_execute_daemons(struct nemoenvs *envs)
 	nemoitem_for_each(one, envs->configs) {
 		if (nemoitem_one_has_path(one, "/nemoshell/daemon") != 0) {
 			nemoenvs_execute_daemon(envs, one);
+		}
+	}
+}
+
+void nemoenvs_execute_screensavers(struct nemoenvs *envs)
+{
+	struct itemone *one;
+
+	nemoitem_for_each(one, envs->configs) {
+		if (nemoitem_one_has_path(one, "/nemoshell/screensaver") != 0) {
+			nemoenvs_execute_screensaver(envs, one);
 		}
 	}
 }

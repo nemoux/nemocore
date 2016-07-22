@@ -655,6 +655,14 @@ static void nemoshell_handle_pointer_sprite(struct wl_listener *listener, void *
 		shell->update_pointer(shell->userdata, (struct nemopointer *)data);
 }
 
+static void nemoshell_handle_idle(struct wl_listener *listener, void *data)
+{
+	struct nemoshell *shell = (struct nemoshell *)container_of(listener, struct nemoshell, idle_listener);
+
+	if (shell->enter_idle != NULL)
+		shell->enter_idle(shell->userdata);
+}
+
 struct nemoshell *nemoshell_create(struct nemocompz *compz)
 {
 	struct nemoshell *shell;
@@ -706,6 +714,10 @@ struct nemoshell *nemoshell_create(struct nemocompz *compz)
 	wl_list_init(&shell->pointer_sprite_listener.link);
 	shell->pointer_sprite_listener.notify = nemoshell_handle_pointer_sprite;
 	wl_signal_add(&compz->seat->pointer.sprite_signal, &shell->pointer_sprite_listener);
+
+	wl_list_init(&shell->idle_listener.link);
+	shell->idle_listener.notify = nemoshell_handle_idle;
+	wl_signal_add(&compz->idle_signal, &shell->idle_listener);
 
 	wl_list_init(&shell->bin_list);
 	wl_list_init(&shell->fullscreen_list);
