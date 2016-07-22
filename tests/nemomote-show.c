@@ -31,6 +31,7 @@ static void nemomote_dispatch_show_resize(struct nemoshow *show, int32_t width, 
 	struct motecontext *context = (struct motecontext *)nemoshow_get_userdata(show);
 
 	nemoshow_view_resize(context->show, width, height);
+	nemoshow_view_redraw(context->show);
 }
 
 static void nemomote_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, void *event)
