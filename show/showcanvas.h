@@ -121,7 +121,6 @@ extern int nemoshow_canvas_set_size(struct showone *one, int32_t width, int32_t 
 extern void nemoshow_canvas_damage(struct showone *one, int32_t x, int32_t y, int32_t width, int32_t height);
 extern void nemoshow_canvas_damage_one(struct showone *one, struct showone *child);
 extern void nemoshow_canvas_damage_all(struct showone *one);
-extern void nemoshow_canvas_damage_filter(struct showone *one);
 
 extern struct showone *nemoshow_canvas_pick_one(struct showone *one, float x, float y);
 

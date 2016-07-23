@@ -336,10 +336,12 @@ int nemoshow_canvas_update(struct showone *one)
 		one->dirty |= NEMOSHOW_FILTER_DIRTY;
 	}
 	if ((one->dirty & NEMOSHOW_FILTER_DIRTY) != 0) {
-		nemoshow_canvas_damage_filter(one);
+		nemotale_node_damage_filter(canvas->node);
 	}
 	if ((one->dirty & NEMOSHOW_REDRAW_DIRTY) != 0) {
-		nemoshow_canvas_damage_all(one);
+		nemotale_node_damage_all(canvas->node);
+
+		nemoshow_canvas_set_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE);
 	}
 
 	nemolist_remove(&canvas->link);
@@ -841,13 +843,28 @@ int nemoshow_canvas_set_size(struct showone *one, int32_t width, int32_t height)
 	return 0;
 }
 
+static void nemoshow_canvas_dirty(struct showone *one)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+	struct nemoshow *show = one->show;
+
+	if (show != NULL) {
+		nemolist_remove(&canvas->link);
+
+		if (one->sub != NEMOSHOW_CANVAS_PIPELINE_TYPE)
+			nemolist_insert(&show->canvas_list, &canvas->link);
+		else
+			nemolist_insert(&show->pipeline_list, &canvas->link);
+	}
+}
+
 void nemoshow_canvas_damage(struct showone *one, int32_t x, int32_t y, int32_t width, int32_t height)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
 	nemotale_node_damage(canvas->node, x, y, width, height);
 
-	nemoshow_one_dirty(one, NEMOSHOW_CANVAS_DIRTY);
+	nemoshow_canvas_dirty(one);
 }
 
 void nemoshow_canvas_damage_one(struct showone *one, struct showone *child)
@@ -860,7 +877,7 @@ void nemoshow_canvas_damage_one(struct showone *one, struct showone *child)
 
 	nemotale_node_damage(canvas->node, child->x, child->y, child->w, child->h);
 
-	nemoshow_one_dirty(one, NEMOSHOW_CANVAS_DIRTY);
+	nemoshow_canvas_dirty(one);
 }
 
 void nemoshow_canvas_damage_all(struct showone *one)
@@ -871,16 +888,7 @@ void nemoshow_canvas_damage_all(struct showone *one)
 
 	nemoshow_canvas_set_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE);
 
-	nemoshow_one_dirty(one, NEMOSHOW_CANVAS_DIRTY);
-}
-
-void nemoshow_canvas_damage_filter(struct showone *one)
-{
-	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
-
-	nemotale_node_damage_filter(canvas->node);
-
-	nemoshow_one_dirty(one, NEMOSHOW_CANVAS_DIRTY);
+	nemoshow_canvas_dirty(one);
 }
 
 static inline struct showone *nemoshow_canvas_pick_item(struct showone *one, float x, float y)
