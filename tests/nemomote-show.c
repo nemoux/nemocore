@@ -34,24 +34,7 @@ static void nemomote_dispatch_show_resize(struct nemoshow *show, int32_t width, 
 	nemoshow_view_redraw(context->show);
 }
 
-static void nemomote_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, void *event)
-{
-	struct motecontext *context = (struct motecontext *)nemoshow_get_userdata(show);
-
-	if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event)) {
-		nemoshow_event_update_taps(show, canvas, event);
-
-		if (nemoshow_event_is_more_taps(show, event, 3)) {
-			nemoshow_view_pick_distant(show, event, NEMOSHOW_VIEW_PICK_ALL_TYPE);
-
-			nemoshow_event_set_cancel(event);
-
-			nemoshow_dispatch_grab_all(show, event);
-		}
-	}
-}
-
-static void nemomote_prepare_compute(struct motecontext *context)
+static void nemomote_dispatch_canvas_redraw(struct nemoshow *show, struct showone *canvas)
 {
 	static const char *vertexshader =
 		"attribute vec2 position;\n"
@@ -85,13 +68,15 @@ static void nemomote_prepare_compute(struct motecontext *context)
 		"  imageStore(tex0, pos, vec4(1.0 - gcoef * lcoef, 1.0, 1.0, 1.0));\n"
 		"}\n";
 
-	GLfloat vertices[] = {
+	static GLfloat vertices[] = {
 		-1.0f, -1.0f, 0.0f, 0.0f,
 		1.0f, -1.0f, 1.0f, 0.0f,
 		1.0f, 1.0f, 1.0f, 1.0f,
 		-1.0f, 1.0f, 0.0f, 1.0f
 	};
 
+	GLuint width = nemoshow_canvas_get_viewport_width(canvas);
+	GLuint height = nemoshow_canvas_get_viewport_height(canvas);
 	GLuint fbo, dbo;
 	GLuint program;
 	GLuint frag, vert;
@@ -99,9 +84,8 @@ static void nemomote_prepare_compute(struct motecontext *context)
 	GLuint texture;
 
 	fbo_prepare_context(
-			nemoshow_canvas_get_texture(context->view),
-			nemoshow_canvas_get_width(context->view),
-			nemoshow_canvas_get_height(context->view),
+			nemoshow_canvas_get_texture(canvas),
+			width, height,
 			&fbo, &dbo);
 
 	glGenTextures(1, &texture);
@@ -113,19 +97,13 @@ static void nemomote_prepare_compute(struct motecontext *context)
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
 	glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
-	glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, nemoshow_canvas_get_width(context->view));
-	glTexImage2D(GL_TEXTURE_2D, 0,
-			GL_RGBA32F,
-			nemoshow_canvas_get_width(context->view),
-			nemoshow_canvas_get_height(context->view),
-			0, GL_RGBA, GL_FLOAT, NULL);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, width);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
-	glViewport(0, 0,
-			nemoshow_canvas_get_width(context->view),
-			nemoshow_canvas_get_height(context->view));
+	glViewport(0, 0, width, height);
 
 	glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
 	glClearDepth(0.0f);
@@ -136,7 +114,6 @@ static void nemomote_prepare_compute(struct motecontext *context)
 	program = glCreateProgram();
 	glAttachShader(program, comp);
 	glLinkProgram(program);
-
 	glUseProgram(program);
 
 	glUniform1i(glGetUniformLocation(program, "tex0"), 0);
@@ -144,13 +121,7 @@ static void nemomote_prepare_compute(struct motecontext *context)
 
 	glBindTexture(GL_TEXTURE_2D, texture);
 
-	glBindImageTexture(0,
-			texture,
-			0,
-			GL_FALSE,
-			0,
-			GL_WRITE_ONLY,
-			GL_RGBA32F);
+	glBindImageTexture(0, texture, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
 	glDispatchCompute(16, 16, 1);
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
@@ -158,19 +129,20 @@ static void nemomote_prepare_compute(struct motecontext *context)
 	NEMO_CHECK((frag = glshader_compile(GL_FRAGMENT_SHADER, 1, &fragmentshader)) == GL_NONE, "failed to compile shader\n");
 	NEMO_CHECK((vert = glshader_compile(GL_VERTEX_SHADER, 1, &vertexshader)) == GL_NONE, "failed to compile shader\n");
 
+	glDeleteProgram(program);
+
 	program = glCreateProgram();
 	glAttachShader(program, frag);
 	glAttachShader(program, vert);
 	glLinkProgram(program);
-
 	glUseProgram(program);
+
+	glUniform1i(glGetUniformLocation(program, "tex"), 0);
 
 	glBindTexture(GL_TEXTURE_2D, texture);
 
 	glBindAttribLocation(program, 0, "position");
 	glBindAttribLocation(program, 1, "texcoord");
-
-	glUniform1i(glGetUniformLocation(program, "tex"), 0);
 
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &vertices[0]);
 	glEnableVertexAttribArray(0);
@@ -179,13 +151,32 @@ static void nemomote_prepare_compute(struct motecontext *context)
 
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
+	glDeleteProgram(program);
+
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glDeleteTextures(1, &texture);
+	glDeleteFramebuffers(1, &fbo);
+	glDeleteRenderbuffers(1, &dbo);
 }
 
-static void nemomote_finish_compute(struct motecontext *context)
+static void nemomote_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, void *event)
 {
+	struct motecontext *context = (struct motecontext *)nemoshow_get_userdata(show);
+
+	if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event)) {
+		nemoshow_event_update_taps(show, canvas, event);
+
+		if (nemoshow_event_is_more_taps(show, event, 3)) {
+			nemoshow_view_pick_distant(show, event, NEMOSHOW_VIEW_PICK_ALL_TYPE);
+
+			nemoshow_event_set_cancel(event);
+
+			nemoshow_dispatch_grab_all(show, event);
+		}
+	}
 }
 
 int main(int argc, char *argv[])
@@ -254,16 +245,13 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_width(canvas, width);
 	nemoshow_canvas_set_height(canvas, height);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_OPENGL_TYPE);
+	nemoshow_canvas_set_dispatch_redraw(canvas, nemomote_dispatch_canvas_redraw);
 	nemoshow_canvas_set_dispatch_event(canvas, nemomote_dispatch_canvas_event);
 	nemoshow_one_attach(scene, canvas);
-
-	nemomote_prepare_compute(context);
 
 	nemoshow_dispatch_frame(show);
 
 	nemotool_run(tool);
-
-	nemomote_finish_compute(context);
 
 	nemoshow_destroy_view(show);
 
