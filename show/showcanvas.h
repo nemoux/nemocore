@@ -100,8 +100,6 @@ extern int nemoshow_canvas_above_one(struct showone *one, struct showone *above)
 extern int nemoshow_canvas_below_one(struct showone *one, struct showone *below);
 
 extern int nemoshow_canvas_set_type(struct showone *one, int type);
-extern int nemoshow_canvas_resize(struct showone *one);
-extern int nemoshow_canvas_redraw(struct showone *one);
 extern void nemoshow_canvas_set_alpha(struct showone *one, double alpha);
 extern int nemoshow_canvas_set_shader(struct showone *one, const char *shader);
 extern int nemoshow_canvas_load_shader(struct showone *one, const char *shaderpath);
@@ -114,6 +112,8 @@ extern void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone 
 extern void nemoshow_canvas_render_vector_tile(struct nemoshow *show, struct showone *one, int32_t x, int32_t y, int32_t width, int32_t height);
 extern void nemoshow_canvas_render_back(struct nemoshow *show, struct showone *one);
 extern void nemoshow_canvas_render_none(struct nemoshow *show, struct showone *one);
+
+extern int nemoshow_canvas_redraw(struct showone *one);
 
 extern int nemoshow_canvas_set_viewport(struct showone *one, double sx, double sy);
 extern int nemoshow_canvas_set_size(struct showone *one, int32_t width, int32_t height);

@@ -201,36 +201,6 @@ int nemoshow_canvas_set_type(struct showone *one, int type)
 	return 0;
 }
 
-int nemoshow_canvas_resize(struct showone *one)
-{
-	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
-
-	nemotale_node_resize(canvas->node, canvas->width, canvas->height);
-
-	if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
-		canvas->viewport.sx = canvas->viewport.width / canvas->width;
-		canvas->viewport.sy = canvas->viewport.height / canvas->height;
-	} else if (one->sub == NEMOSHOW_CANVAS_BACK_TYPE) {
-		nemotale_node_opaque(canvas->node, 0, 0, canvas->width, canvas->height);
-	}
-
-	return 0;
-}
-
-int nemoshow_canvas_redraw(struct showone *one)
-{
-	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
-
-	if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE)
-		nemoshow_canvas_render_vector(one->show, one);
-	else if (one->sub == NEMOSHOW_CANVAS_PIPELINE_TYPE)
-		nemoshow_canvas_render_pipeline(one->show, one);
-	else if (one->sub == NEMOSHOW_CANVAS_BACK_TYPE)
-		nemoshow_canvas_render_back(one->show, one);
-
-	return 0;
-}
-
 void nemoshow_canvas_set_alpha(struct showone *one, double alpha)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
@@ -302,7 +272,14 @@ int nemoshow_canvas_update(struct showone *one)
 		nemotale_prepare_node(show->tale, canvas->node);
 	}
 	if ((one->dirty & NEMOSHOW_SIZE_DIRTY) != 0) {
-		nemoshow_canvas_resize(one);
+		nemotale_node_resize(canvas->node, canvas->width, canvas->height);
+
+		if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
+			canvas->viewport.sx = canvas->viewport.width / canvas->width;
+			canvas->viewport.sy = canvas->viewport.height / canvas->height;
+		} else if (one->sub == NEMOSHOW_CANVAS_BACK_TYPE) {
+			nemotale_node_opaque(canvas->node, 0, 0, canvas->width, canvas->height);
+		}
 
 		one->dirty |= NEMOSHOW_VIEWPORT_DIRTY;
 	}
@@ -762,6 +739,20 @@ void nemoshow_canvas_render_back(struct nemoshow *show, struct showone *one)
 
 void nemoshow_canvas_render_none(struct nemoshow *show, struct showone *one)
 {
+}
+
+int nemoshow_canvas_redraw(struct showone *one)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE)
+		nemoshow_canvas_render_vector(one->show, one);
+	else if (one->sub == NEMOSHOW_CANVAS_PIPELINE_TYPE)
+		nemoshow_canvas_render_pipeline(one->show, one);
+	else if (one->sub == NEMOSHOW_CANVAS_BACK_TYPE)
+		nemoshow_canvas_render_back(one->show, one);
+
+	return 0;
 }
 
 int nemoshow_canvas_set_viewport(struct showone *one, double sx, double sy)
