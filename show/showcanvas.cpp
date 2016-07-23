@@ -322,8 +322,6 @@ int nemoshow_canvas_update(struct showone *one)
 	}
 
 	if (nemolist_empty(&canvas->link) != 0) {
-		nemolist_remove(&canvas->link);
-
 		if (one->sub != NEMOSHOW_CANVAS_PIPELINE_TYPE)
 			nemolist_insert(&show->canvas_list, &canvas->link);
 		else
@@ -842,8 +840,6 @@ static void nemoshow_canvas_dirty(struct showone *one)
 	struct nemoshow *show = one->show;
 
 	if (show != NULL && nemolist_empty(&canvas->link) != 0) {
-		nemolist_remove(&canvas->link);
-
 		if (one->sub != NEMOSHOW_CANVAS_PIPELINE_TYPE)
 			nemolist_insert(&show->canvas_list, &canvas->link);
 		else
