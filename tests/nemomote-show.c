@@ -117,7 +117,7 @@ static void nemomote_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 	glUseProgram(program);
 
 	glUniform1i(glGetUniformLocation(program, "tex0"), 0);
-	glUniform1f(glGetUniformLocation(program, "roll"), (float)0.1f);
+	glUniform1f(glGetUniformLocation(program, "roll"), (float)time_current_msecs());
 
 	glBindTexture(GL_TEXTURE_2D, texture);
 
@@ -160,6 +160,9 @@ static void nemomote_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 	glDeleteTextures(1, &texture);
 	glDeleteFramebuffers(1, &fbo);
 	glDeleteRenderbuffers(1, &dbo);
+
+	nemoshow_one_dirty(canvas, NEMOSHOW_REDRAW_DIRTY);
+	nemoshow_dispatch_feedback(show);
 }
 
 static void nemomote_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, void *event)
