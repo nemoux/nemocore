@@ -265,7 +265,7 @@ int nemoplay_decode_media(struct nemoplay *play, int reqcount, int maxcount)
 		}
 
 		av_frame_unref(frame);
-		av_free_packet(&packet);
+		av_packet_unref(&packet);
 	}
 
 	av_frame_free(&frame);
