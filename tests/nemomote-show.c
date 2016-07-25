@@ -34,16 +34,9 @@ struct motecontext {
 	cl_command_queue queue;
 	cl_program program;
 	cl_kernel kernel;
+	cl_mem memobj;
 #endif
 };
-
-static void nemomote_dispatch_show_resize(struct nemoshow *show, int32_t width, int32_t height)
-{
-	struct motecontext *context = (struct motecontext *)nemoshow_get_userdata(show);
-
-	nemoshow_view_resize(context->show, width, height);
-	nemoshow_view_redraw(context->show);
-}
 
 static void nemomote_dispatch_canvas_redraw_cs(struct nemoshow *show, struct showone *canvas)
 {
@@ -184,19 +177,14 @@ static void nemomote_dispatch_canvas_redraw_cl(struct nemoshow *show, struct sho
 	GLuint height = nemoshow_canvas_get_viewport_height(canvas);
 	char buffer[width * height * 4];
 	size_t globalsize[2] = { width, height };
-	cl_mem memobj;
 	cl_int r;
 
-	memobj = clCreateBuffer(context->context, CL_MEM_WRITE_ONLY, sizeof(buffer), NULL, &r);
-
-	r = clSetKernelArg(context->kernel, 0, sizeof(cl_mem), (void *)&memobj);
+	r = clSetKernelArg(context->kernel, 0, sizeof(cl_mem), (void *)&context->memobj);
 	r = clSetKernelArg(context->kernel, 1, sizeof(cl_int), &width);
 	r = clSetKernelArg(context->kernel, 2, sizeof(cl_int), &height);
 
 	r = clEnqueueNDRangeKernel(context->queue, context->kernel, 2, NULL, globalsize, NULL, 0, NULL, NULL);
-	r = clEnqueueReadBuffer(context->queue, memobj, CL_TRUE, 0, sizeof(buffer), buffer, 0, NULL, NULL);
-
-	clReleaseMemObject(memobj);
+	r = clEnqueueReadBuffer(context->queue, context->memobj, CL_TRUE, 0, sizeof(buffer), buffer, 0, NULL, NULL);
 
 	glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_texture(canvas));
 	glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
@@ -209,7 +197,7 @@ static void nemomote_dispatch_canvas_redraw_cl(struct nemoshow *show, struct sho
 	nemoshow_dispatch_feedback(show);
 }
 
-static int nemomote_prepare_opencl(struct motecontext *context, const char *path)
+static int nemomote_prepare_opencl(struct motecontext *context, const char *path, int width, int height)
 {
 	cl_platform_id platforms[2] = { 0 };
 	cl_uint ndevices;
@@ -231,6 +219,19 @@ static int nemomote_prepare_opencl(struct motecontext *context, const char *path
 
 	context->kernel = clCreateKernel(context->program, "dispatch", &r);
 
+	context->memobj = clCreateBuffer(context->context, CL_MEM_WRITE_ONLY, sizeof(char[4]) * width * height, NULL, &r);
+
+	return 0;
+}
+
+static int nemomote_resize_opencl(struct motecontext *context, int width, int height)
+{
+	cl_int r;
+
+	clReleaseMemObject(context->memobj);
+
+	context->memobj = clCreateBuffer(context->context, CL_MEM_WRITE_ONLY, sizeof(char[4]) * width * height, NULL, &r);
+
 	return 0;
 }
 
@@ -238,6 +239,7 @@ static void nemomote_finish_opencl(struct motecontext *context)
 {
 	clFlush(context->queue);
 	clFinish(context->queue);
+	clReleaseMemObject(context->memobj);
 	clReleaseKernel(context->kernel);
 	clReleaseProgram(context->program);
 	clReleaseCommandQueue(context->queue);
@@ -260,6 +262,19 @@ static void nemomote_dispatch_canvas_event(struct nemoshow *show, struct showone
 			nemoshow_dispatch_grab_all(show, event);
 		}
 	}
+}
+
+static void nemomote_dispatch_show_resize(struct nemoshow *show, int32_t width, int32_t height)
+{
+	struct motecontext *context = (struct motecontext *)nemoshow_get_userdata(show);
+
+	nemoshow_view_resize(context->show, width, height);
+
+#ifdef NEMOUX_WITH_OPENCL
+	nemomote_resize_opencl(context, width, height);
+#endif
+
+	nemoshow_view_redraw(context->show);
 }
 
 int main(int argc, char *argv[])
@@ -342,7 +357,7 @@ int main(int argc, char *argv[])
 	nemoshow_one_attach(scene, canvas);
 
 #ifdef NEMOUX_WITH_OPENCL
-	nemomote_prepare_opencl(context, programpath);
+	nemomote_prepare_opencl(context, programpath, width, height);
 #endif
 
 	nemoshow_dispatch_frame(show);
