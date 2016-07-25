@@ -266,6 +266,8 @@ static int nemomote_prepare_opencl(struct motecontext *context, const char *path
 	context->positions = clCreateBuffer(context->context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float[2]) * NEMOMOTE_PARTICLES, positions, &r);
 	context->framebuffer = clCreateBuffer(context->context, CL_MEM_WRITE_ONLY, sizeof(char[4]) * width * height, NULL, &r);
 
+	context->msecs = time_current_msecs();
+
 	return 0;
 }
 

@@ -9,8 +9,6 @@ __kernel void gravity(__global float *velocities, __global float *positions, int
 	float f;
 	int i;
 
-	dt = 0.016f;
-
 	ax = 0.0f;
 	ay = 0.0f;
 
