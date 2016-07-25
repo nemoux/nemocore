@@ -49,8 +49,9 @@ struct motecontext {
 #endif
 
 	uint32_t msecs;
-	float cx, cy;
-	float intensity;
+
+	float taps[16];
+	int ntaps;
 };
 
 static void nemomote_dispatch_canvas_redraw_cs(struct nemoshow *show, struct showone *canvas)
@@ -195,11 +196,9 @@ static void nemomote_dispatch_canvas_redraw_cl(struct nemoshow *show, struct sho
 	size_t partcount = NEMOMOTE_PARTICLES;
 	uint32_t msecs = time_current_msecs();
 	cl_float dt = (float)(msecs - context->msecs) / 1000.0f;
-	cl_float cx = context->cx;
-	cl_float cy = context->cy;
-	cl_float intensity = context->intensity;
 	cl_int count = NEMOMOTE_PARTICLES;
 	cl_int r;
+	int i;
 
 	clSetKernelArg(context->clear, 0, sizeof(cl_mem), (void *)&context->framebuffer);
 	clSetKernelArg(context->clear, 1, sizeof(cl_int), (void *)&width);
@@ -212,7 +211,11 @@ static void nemomote_dispatch_canvas_redraw_cl(struct nemoshow *show, struct sho
 	clSetKernelArg(context->mutualgravity, 3, sizeof(cl_float), (void *)&dt);
 	clEnqueueNDRangeKernel(context->queue, context->mutualgravity, 1, NULL, &partcount, NULL, 0, NULL, NULL);
 
-	if (intensity > 0.0f) {
+	for (i = 0; i < context->ntaps; i++) {
+		cl_float cx = context->taps[i * 2 + 0];
+		cl_float cy = context->taps[i * 2 + 1];
+		cl_float intensity = 700000.0f;
+
 		clSetKernelArg(context->gravitywell, 0, sizeof(cl_mem), (void *)&context->positions);
 		clSetKernelArg(context->gravitywell, 1, sizeof(cl_mem), (void *)&context->velocities);
 		clSetKernelArg(context->gravitywell, 2, sizeof(cl_int), (void *)&count);
@@ -293,7 +296,6 @@ static int nemomote_prepare_opencl(struct motecontext *context, const char *path
 	context->framebuffer = clCreateBuffer(context->context, CL_MEM_WRITE_ONLY, sizeof(char[4]) * width * height, NULL, &r);
 
 	context->msecs = time_current_msecs();
-	context->intensity = 0.0f;
 
 	return 0;
 }
@@ -329,10 +331,21 @@ static void nemomote_finish_opencl(struct motecontext *context)
 static void nemomote_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, void *event)
 {
 	struct motecontext *context = (struct motecontext *)nemoshow_get_userdata(show);
+	int i;
+
+	nemoshow_event_update_taps(show, canvas, event);
+
+	context->ntaps = nemoshow_event_get_tapcount(event);
+
+	for (i = 0; i < context->ntaps; i++) {
+		nemoshow_event_transform_to_viewport(show,
+				nemoshow_event_get_x_on(event, i),
+				nemoshow_event_get_y_on(event, i),
+				&context->taps[i * 2 + 0],
+				&context->taps[i * 2 + 1]);
+	}
 
 	if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event)) {
-		nemoshow_event_update_taps(show, canvas, event);
-
 		if (nemoshow_event_is_more_taps(show, event, 3)) {
 			nemoshow_view_pick_distant(show, event, NEMOSHOW_VIEW_PICK_ALL_TYPE);
 
@@ -340,17 +353,6 @@ static void nemomote_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 			nemoshow_dispatch_grab_all(show, event);
 		}
-	}
-
-	if (nemoshow_event_is_touch_down(show, event)) {
-		context->intensity = 700000.0f;
-	} else if (nemoshow_event_is_touch_up(show, event)) {
-		context->intensity = 0.0f;
-	} else if (nemoshow_event_is_touch_motion(show, event)) {
-		nemoshow_event_transform_to_viewport(show,
-				nemoshow_event_get_x(event),
-				nemoshow_event_get_y(event),
-				&context->cx, &context->cy);
 	}
 }
 
