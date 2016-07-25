@@ -183,8 +183,8 @@ static void nemomote_dispatch_canvas_redraw_cs(struct nemoshow *show, struct sho
 static void nemomote_dispatch_canvas_redraw_cl(struct nemoshow *show, struct showone *canvas)
 {
 	struct motecontext *context = (struct motecontext *)nemoshow_get_userdata(show);
-	GLuint width = nemoshow_canvas_get_viewport_width(canvas);
-	GLuint height = nemoshow_canvas_get_viewport_height(canvas);
+	cl_int width = nemoshow_canvas_get_viewport_width(canvas);
+	cl_int height = nemoshow_canvas_get_viewport_height(canvas);
 	char buffer[width * height * 4];
 	size_t clearsize[2] = { width, height };
 	size_t dispatchsize = NEMOMOTE_PARTICLES;
@@ -194,19 +194,19 @@ static void nemomote_dispatch_canvas_redraw_cl(struct nemoshow *show, struct sho
 	cl_int r;
 
 	clSetKernelArg(context->clear, 0, sizeof(cl_mem), (void *)&context->framebuffer);
-	clSetKernelArg(context->clear, 1, sizeof(cl_int), &width);
-	clSetKernelArg(context->clear, 2, sizeof(cl_int), &height);
+	clSetKernelArg(context->clear, 1, sizeof(cl_int), (void *)&width);
+	clSetKernelArg(context->clear, 2, sizeof(cl_int), (void *)&height);
+	clEnqueueNDRangeKernel(context->queue, context->clear, 2, NULL, clearsize, NULL, 0, NULL, NULL);
 
 	clSetKernelArg(context->dispatch, 0, sizeof(cl_mem), (void *)&context->velocities);
 	clSetKernelArg(context->dispatch, 1, sizeof(cl_mem), (void *)&context->positions);
 	clSetKernelArg(context->dispatch, 2, sizeof(cl_mem), (void *)&context->framebuffer);
-	clSetKernelArg(context->dispatch, 3, sizeof(cl_int), &count);
-	clSetKernelArg(context->dispatch, 4, sizeof(cl_float), &dt);
-	clSetKernelArg(context->dispatch, 5, sizeof(cl_int), &width);
-	clSetKernelArg(context->dispatch, 6, sizeof(cl_int), &height);
-
-	clEnqueueNDRangeKernel(context->queue, context->clear, 2, NULL, clearsize, NULL, 0, NULL, NULL);
+	clSetKernelArg(context->dispatch, 3, sizeof(cl_float), (void *)&dt);
+	clSetKernelArg(context->dispatch, 4, sizeof(cl_int), (void *)&count);
+	clSetKernelArg(context->dispatch, 5, sizeof(cl_int), (void *)&width);
+	clSetKernelArg(context->dispatch, 6, sizeof(cl_int), (void *)&height);
 	clEnqueueNDRangeKernel(context->queue, context->dispatch, 1, NULL, &dispatchsize, NULL, 0, NULL, NULL);
+
 	clEnqueueReadBuffer(context->queue, context->framebuffer, CL_TRUE, 0, sizeof(buffer), buffer, 0, NULL, NULL);
 
 	glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_texture(canvas));

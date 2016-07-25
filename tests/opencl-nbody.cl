@@ -1,17 +1,17 @@
 #pragma OPENCL EXTENSION cl_khr_byte_addressable_store : enable
 
-__kernel void clear(__global char *buffer, int width, int height)
+__kernel void clear(__global char *framebuffer, int width, int height)
 {
 	int x = get_global_id(0);
 	int y = get_global_id(1);
 
-	buffer[(y * width + x) * 4 + 0] = 0x0;
-	buffer[(y * width + x) * 4 + 1] = 0x0;
-	buffer[(y * width + x) * 4 + 2] = 0x0;
-	buffer[(y * width + x) * 4 + 3] = 0xff;
+	framebuffer[(y * width + x) * 4 + 0] = 0x0;
+	framebuffer[(y * width + x) * 4 + 1] = 0x0;
+	framebuffer[(y * width + x) * 4 + 2] = 0x0;
+	framebuffer[(y * width + x) * 4 + 3] = 0xff;
 }
 
-__kernel void dispatch(__global float *velocities, __global float *positions, __global char *buffer, int count, float dt, int width, int height)
+__kernel void dispatch(__global float *velocities, __global float *positions, __global char *framebuffer, float dt, int count, int width, int height)
 {
 	int id = get_global_id(0);
 	float ax, ay;
@@ -45,8 +45,8 @@ __kernel void dispatch(__global float *velocities, __global float *positions, __
 	x = floor(positions[id * 2 + 0]);
 	y = floor(positions[id * 2 + 1]);
 
-	buffer[(y * width + x) * 4 + 0] = 0x0;
-	buffer[(y * width + x) * 4 + 1] = 0xff;
-	buffer[(y * width + x) * 4 + 2] = 0xff;
-	buffer[(y * width + x) * 4 + 3] = 0xff;
+	framebuffer[(y * width + x) * 4 + 0] = 0x0;
+	framebuffer[(y * width + x) * 4 + 1] = 0xff;
+	framebuffer[(y * width + x) * 4 + 2] = 0xff;
+	framebuffer[(y * width + x) * 4 + 3] = 0xff;
 }
