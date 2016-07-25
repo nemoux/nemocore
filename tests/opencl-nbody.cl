@@ -28,7 +28,7 @@ __kernel void dispatch(__global float *velocities, __global float *positions, __
 		dx = positions[i * 2 + 0] - positions[id * 2 + 0];
 		dy = positions[i * 2 + 1] - positions[id * 2 + 1];
 
-		invr = 1.0f / sqrt(dx * dx + dy * dy);
+		invr = 1.0f / sqrt(dx * dx + dy * dy + 1.0f);
 		invr3 = invr * invr * invr;
 
 		f = 1.0f * invr3;

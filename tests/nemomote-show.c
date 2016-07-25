@@ -229,6 +229,7 @@ static int nemomote_prepare_opencl(struct motecontext *context, const char *path
 	cl_uint nplatforms;
 	cl_int r;
 	float positions[NEMOMOTE_PARTICLES * 2];
+	float velocities[NEMOMOTE_PARTICLES * 2];
 	char *sources;
 	int nsources;
 	int i;
@@ -250,9 +251,12 @@ static int nemomote_prepare_opencl(struct motecontext *context, const char *path
 	for (i = 0; i < NEMOMOTE_PARTICLES; i++) {
 		positions[i * 2 + 0] = random_get_double(0, width);
 		positions[i * 2 + 1] = random_get_double(0, height);
+
+		velocities[i * 2 + 0] = 0.0f;
+		velocities[i * 2 + 1] = 0.0f;
 	}
 
-	context->velocities = clCreateBuffer(context->context, CL_MEM_READ_WRITE, sizeof(float[2]) * NEMOMOTE_PARTICLES, NULL, &r);
+	context->velocities = clCreateBuffer(context->context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float[2]) * NEMOMOTE_PARTICLES, velocities, &r);
 	context->positions = clCreateBuffer(context->context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float[2]) * NEMOMOTE_PARTICLES, positions, &r);
 	context->framebuffer = clCreateBuffer(context->context, CL_MEM_WRITE_ONLY, sizeof(char[4]) * width * height, NULL, &r);
 
