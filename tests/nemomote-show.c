@@ -37,7 +37,8 @@ struct motecontext {
 	cl_context context;
 	cl_command_queue queue;
 	cl_program program;
-	cl_kernel gravity;
+	cl_kernel mutualgravity;
+	cl_kernel update;
 	cl_kernel render;
 	cl_kernel clear;
 
@@ -187,9 +188,8 @@ static void nemomote_dispatch_canvas_redraw_cl(struct nemoshow *show, struct sho
 	cl_int width = nemoshow_canvas_get_viewport_width(canvas);
 	cl_int height = nemoshow_canvas_get_viewport_height(canvas);
 	char buffer[width * height * 4];
-	size_t clearsize[2] = { width, height };
-	size_t gravitysize = NEMOMOTE_PARTICLES;
-	size_t rendersize = NEMOMOTE_PARTICLES;
+	size_t framesize[2] = { width, height };
+	size_t partcount = NEMOMOTE_PARTICLES;
 	uint32_t msecs = time_current_msecs();
 	cl_float dt = (float)(msecs - context->msecs) / 1000.0f;
 	cl_int count = NEMOMOTE_PARTICLES;
@@ -198,19 +198,24 @@ static void nemomote_dispatch_canvas_redraw_cl(struct nemoshow *show, struct sho
 	clSetKernelArg(context->clear, 0, sizeof(cl_mem), (void *)&context->framebuffer);
 	clSetKernelArg(context->clear, 1, sizeof(cl_int), (void *)&width);
 	clSetKernelArg(context->clear, 2, sizeof(cl_int), (void *)&height);
-	clEnqueueNDRangeKernel(context->queue, context->clear, 2, NULL, clearsize, NULL, 0, NULL, NULL);
+	clEnqueueNDRangeKernel(context->queue, context->clear, 2, NULL, framesize, NULL, 0, NULL, NULL);
 
-	clSetKernelArg(context->gravity, 0, sizeof(cl_mem), (void *)&context->velocities);
-	clSetKernelArg(context->gravity, 1, sizeof(cl_mem), (void *)&context->positions);
-	clSetKernelArg(context->gravity, 2, sizeof(cl_int), (void *)&count);
-	clSetKernelArg(context->gravity, 3, sizeof(cl_float), (void *)&dt);
-	clEnqueueNDRangeKernel(context->queue, context->gravity, 1, NULL, &gravitysize, NULL, 0, NULL, NULL);
+	clSetKernelArg(context->mutualgravity, 0, sizeof(cl_mem), (void *)&context->positions);
+	clSetKernelArg(context->mutualgravity, 1, sizeof(cl_mem), (void *)&context->velocities);
+	clSetKernelArg(context->mutualgravity, 2, sizeof(cl_int), (void *)&count);
+	clSetKernelArg(context->mutualgravity, 3, sizeof(cl_float), (void *)&dt);
+	clEnqueueNDRangeKernel(context->queue, context->mutualgravity, 1, NULL, &partcount, NULL, 0, NULL, NULL);
+
+	clSetKernelArg(context->update, 0, sizeof(cl_mem), (void *)&context->positions);
+	clSetKernelArg(context->update, 1, sizeof(cl_mem), (void *)&context->velocities);
+	clSetKernelArg(context->update, 2, sizeof(cl_float), (void *)&dt);
+	clEnqueueNDRangeKernel(context->queue, context->update, 1, NULL, &partcount, NULL, 0, NULL, NULL);
 
 	clSetKernelArg(context->render, 0, sizeof(cl_mem), (void *)&context->framebuffer);
 	clSetKernelArg(context->render, 1, sizeof(cl_int), (void *)&width);
 	clSetKernelArg(context->render, 2, sizeof(cl_int), (void *)&height);
 	clSetKernelArg(context->render, 3, sizeof(cl_mem), (void *)&context->positions);
-	clEnqueueNDRangeKernel(context->queue, context->render, 1, NULL, &rendersize, NULL, 0, NULL, NULL);
+	clEnqueueNDRangeKernel(context->queue, context->render, 1, NULL, &partcount, NULL, 0, NULL, NULL);
 
 	clEnqueueReadBuffer(context->queue, context->framebuffer, CL_TRUE, 0, sizeof(buffer), buffer, 0, NULL, NULL);
 
@@ -252,7 +257,8 @@ static int nemomote_prepare_opencl(struct motecontext *context, const char *path
 
 	context->clear = clCreateKernel(context->program, "clear", &r);
 	context->render = clCreateKernel(context->program, "render", &r);
-	context->gravity = clCreateKernel(context->program, "gravity", &r);
+	context->update = clCreateKernel(context->program, "update", &r);
+	context->mutualgravity = clCreateKernel(context->program, "mutualgravity", &r);
 
 	for (i = 0; i < NEMOMOTE_PARTICLES; i++) {
 		positions[i * 2 + 0] = random_get_double(0, width);
@@ -293,7 +299,8 @@ static void nemomote_finish_opencl(struct motecontext *context)
 
 	clReleaseKernel(context->clear);
 	clReleaseKernel(context->render);
-	clReleaseKernel(context->gravity);
+	clReleaseKernel(context->update);
+	clReleaseKernel(context->mutualgravity);
 	clReleaseProgram(context->program);
 	clReleaseCommandQueue(context->queue);
 	clReleaseContext(context->context);

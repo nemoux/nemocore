@@ -1,6 +1,6 @@
 #pragma OPENCL EXTENSION cl_khr_byte_addressable_store : enable
 
-__kernel void gravity(__global float *velocities, __global float *positions, int count, float dt)
+__kernel void mutualgravity(__global float *positions, __global float *velocities, int count, float dt)
 {
 	int id = get_global_id(0);
 	float ax, ay;
@@ -24,10 +24,16 @@ __kernel void gravity(__global float *velocities, __global float *positions, int
 		ay += f * dy;
 	}
 
-	positions[id * 2 + 0] = positions[id * 2 + 0] + velocities[id * 2 + 0] * dt + 0.5f * ax * dt * dt;
-	positions[id * 2 + 1] = positions[id * 2 + 1] + velocities[id * 2 + 1] * dt + 0.5f * ay * dt * dt;
 	velocities[id * 2 + 0] = velocities[id * 2 + 0] + ax * dt;
 	velocities[id * 2 + 1] = velocities[id * 2 + 1] + ay * dt;
+}
+
+__kernel void update(__global float *positions, __global float *velocities, float dt)
+{
+	int id = get_global_id(0);
+
+	positions[id * 2 + 0] = positions[id * 2 + 0] + velocities[id * 2 + 0] * dt;
+	positions[id * 2 + 1] = positions[id * 2 + 1] + velocities[id * 2 + 1] * dt;
 }
 
 __kernel void render(__global char *framebuffer, int width, int height, __global float *positions)
