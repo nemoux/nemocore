@@ -347,8 +347,10 @@ static void nemomote_dispatch_canvas_event(struct nemoshow *show, struct showone
 	} else if (nemoshow_event_is_touch_up(show, event)) {
 		context->intensity = 0.0f;
 	} else if (nemoshow_event_is_touch_motion(show, event)) {
-		context->cx = nemoshow_event_get_x(event);
-		context->cy = nemoshow_event_get_y(event);
+		nemoshow_event_transform_to_viewport(show,
+				nemoshow_event_get_x(event),
+				nemoshow_event_get_y(event),
+				&context->cx, &context->cy);
 	}
 }
 
