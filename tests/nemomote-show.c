@@ -8,8 +8,10 @@
 #include <getopt.h>
 #include <ctype.h>
 
+#ifdef NEMOUX_WITH_OPENCL
 #define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 #include <CL/cl.h>
+#endif
 
 #include <nemoshow.h>
 #include <showhelper.h>
@@ -18,6 +20,8 @@
 #include <nemohelper.h>
 #include <nemolog.h>
 #include <nemomisc.h>
+
+#define NEMOMOTE_PARTICLES			(1024)
 
 struct motecontext {
 	struct nemotool *tool;
@@ -33,20 +37,26 @@ struct motecontext {
 	cl_context context;
 	cl_command_queue queue;
 	cl_program program;
-	cl_kernel kernel;
-	cl_mem memobj;
+	cl_kernel dispatch;
+	cl_kernel clear;
+
+	cl_mem velocities;
+	cl_mem positions;
+	cl_mem framebuffer;
 #endif
+
+	uint32_t msecs;
 };
 
 static void nemomote_dispatch_canvas_redraw_cs(struct nemoshow *show, struct showone *canvas)
 {
 	static const char *vertexshader =
-		"attribute vec2 position;\n"
+		"attribute vec2 positions;\n"
 		"attribute vec2 texcoord;\n"
 		"varying vec2 vtexcoord;\n"
 		"void main()\n"
 		"{\n"
-		"  gl_Position = vec4(position, 0.0, 1.0);\n"
+		"  gl_Position = vec4(positions, 0.0, 1.0);\n"
 		"  vtexcoord = texcoord;\n"
 		"}\n";
 
@@ -145,7 +155,7 @@ static void nemomote_dispatch_canvas_redraw_cs(struct nemoshow *show, struct sho
 
 	glBindTexture(GL_TEXTURE_2D, texture);
 
-	glBindAttribLocation(program, 0, "position");
+	glBindAttribLocation(program, 0, "positions");
 	glBindAttribLocation(program, 1, "texcoord");
 
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &vertices[0]);
@@ -176,15 +186,28 @@ static void nemomote_dispatch_canvas_redraw_cl(struct nemoshow *show, struct sho
 	GLuint width = nemoshow_canvas_get_viewport_width(canvas);
 	GLuint height = nemoshow_canvas_get_viewport_height(canvas);
 	char buffer[width * height * 4];
-	size_t globalsize[2] = { width, height };
+	size_t clearsize[2] = { width, height };
+	size_t dispatchsize = NEMOMOTE_PARTICLES;
+	uint32_t msecs = time_current_msecs();
+	cl_float dt = (float)(msecs - context->msecs) / 1000.0f;
+	cl_int count = NEMOMOTE_PARTICLES;
 	cl_int r;
 
-	r = clSetKernelArg(context->kernel, 0, sizeof(cl_mem), (void *)&context->memobj);
-	r = clSetKernelArg(context->kernel, 1, sizeof(cl_int), &width);
-	r = clSetKernelArg(context->kernel, 2, sizeof(cl_int), &height);
+	clSetKernelArg(context->clear, 0, sizeof(cl_mem), (void *)&context->framebuffer);
+	clSetKernelArg(context->clear, 1, sizeof(cl_int), &width);
+	clSetKernelArg(context->clear, 2, sizeof(cl_int), &height);
 
-	r = clEnqueueNDRangeKernel(context->queue, context->kernel, 2, NULL, globalsize, NULL, 0, NULL, NULL);
-	r = clEnqueueReadBuffer(context->queue, context->memobj, CL_TRUE, 0, sizeof(buffer), buffer, 0, NULL, NULL);
+	clSetKernelArg(context->dispatch, 0, sizeof(cl_mem), (void *)&context->velocities);
+	clSetKernelArg(context->dispatch, 1, sizeof(cl_mem), (void *)&context->positions);
+	clSetKernelArg(context->dispatch, 2, sizeof(cl_mem), (void *)&context->framebuffer);
+	clSetKernelArg(context->dispatch, 3, sizeof(cl_int), &count);
+	clSetKernelArg(context->dispatch, 4, sizeof(cl_float), &dt);
+	clSetKernelArg(context->dispatch, 5, sizeof(cl_int), &width);
+	clSetKernelArg(context->dispatch, 6, sizeof(cl_int), &height);
+
+	clEnqueueNDRangeKernel(context->queue, context->clear, 2, NULL, clearsize, NULL, 0, NULL, NULL);
+	clEnqueueNDRangeKernel(context->queue, context->dispatch, 1, NULL, &dispatchsize, NULL, 0, NULL, NULL);
+	clEnqueueReadBuffer(context->queue, context->framebuffer, CL_TRUE, 0, sizeof(buffer), buffer, 0, NULL, NULL);
 
 	glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_texture(canvas));
 	glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
@@ -195,6 +218,8 @@ static void nemomote_dispatch_canvas_redraw_cl(struct nemoshow *show, struct sho
 
 	nemoshow_one_dirty(canvas, NEMOSHOW_REDRAW_DIRTY);
 	nemoshow_dispatch_feedback(show);
+
+	context->msecs = msecs;
 }
 
 static int nemomote_prepare_opencl(struct motecontext *context, const char *path, int width, int height)
@@ -203,8 +228,10 @@ static int nemomote_prepare_opencl(struct motecontext *context, const char *path
 	cl_uint ndevices;
 	cl_uint nplatforms;
 	cl_int r;
+	float positions[NEMOMOTE_PARTICLES * 2];
 	char *sources;
 	int nsources;
+	int i;
 
 	os_load_path(path, &sources, &nsources);
 
@@ -217,9 +244,17 @@ static int nemomote_prepare_opencl(struct motecontext *context, const char *path
 	context->program = clCreateProgramWithSource(context->context, 1, (const char **)&sources, (const size_t *)&nsources, &r);
 	r = clBuildProgram(context->program, 1, &context->device, NULL, NULL, NULL);
 
-	context->kernel = clCreateKernel(context->program, "dispatch", &r);
+	context->clear = clCreateKernel(context->program, "clear", &r);
+	context->dispatch = clCreateKernel(context->program, "dispatch", &r);
 
-	context->memobj = clCreateBuffer(context->context, CL_MEM_WRITE_ONLY, sizeof(char[4]) * width * height, NULL, &r);
+	for (i = 0; i < NEMOMOTE_PARTICLES; i++) {
+		positions[i * 2 + 0] = random_get_double(0, width);
+		positions[i * 2 + 1] = random_get_double(0, height);
+	}
+
+	context->velocities = clCreateBuffer(context->context, CL_MEM_READ_WRITE, sizeof(float[2]) * NEMOMOTE_PARTICLES, NULL, &r);
+	context->positions = clCreateBuffer(context->context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(float[2]) * NEMOMOTE_PARTICLES, positions, &r);
+	context->framebuffer = clCreateBuffer(context->context, CL_MEM_WRITE_ONLY, sizeof(char[4]) * width * height, NULL, &r);
 
 	return 0;
 }
@@ -228,9 +263,9 @@ static int nemomote_resize_opencl(struct motecontext *context, int width, int he
 {
 	cl_int r;
 
-	clReleaseMemObject(context->memobj);
+	clReleaseMemObject(context->framebuffer);
 
-	context->memobj = clCreateBuffer(context->context, CL_MEM_WRITE_ONLY, sizeof(char[4]) * width * height, NULL, &r);
+	context->framebuffer = clCreateBuffer(context->context, CL_MEM_WRITE_ONLY, sizeof(char[4]) * width * height, NULL, &r);
 
 	return 0;
 }
@@ -239,8 +274,13 @@ static void nemomote_finish_opencl(struct motecontext *context)
 {
 	clFlush(context->queue);
 	clFinish(context->queue);
-	clReleaseMemObject(context->memobj);
-	clReleaseKernel(context->kernel);
+
+	clReleaseMemObject(context->velocities);
+	clReleaseMemObject(context->positions);
+	clReleaseMemObject(context->framebuffer);
+
+	clReleaseKernel(context->clear);
+	clReleaseKernel(context->dispatch);
 	clReleaseProgram(context->program);
 	clReleaseCommandQueue(context->queue);
 	clReleaseContext(context->context);
