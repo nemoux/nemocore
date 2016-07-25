@@ -8,6 +8,9 @@
 #include <getopt.h>
 #include <ctype.h>
 
+#define CL_USE_DEPRECATED_OPENCL_1_2_APIS
+#include <CL/cl.h>
+
 #include <nemoshow.h>
 #include <showhelper.h>
 #include <fbohelper.h>
@@ -24,6 +27,14 @@ struct motecontext {
 	struct showone *back;
 
 	struct showone *view;
+
+#ifdef NEMOUX_WITH_OPENCL
+	cl_device_id device;
+	cl_context context;
+	cl_command_queue queue;
+	cl_program program;
+	cl_kernel kernel;
+#endif
 };
 
 static void nemomote_dispatch_show_resize(struct nemoshow *show, int32_t width, int32_t height)
@@ -165,93 +176,74 @@ static void nemomote_dispatch_canvas_redraw_cs(struct nemoshow *show, struct sho
 	nemoshow_dispatch_feedback(show);
 }
 
+#ifdef NEMOUX_WITH_OPENCL
 static void nemomote_dispatch_canvas_redraw_cl(struct nemoshow *show, struct showone *canvas)
 {
-	static const char *vertexshader =
-		"attribute vec2 position;\n"
-		"void main()\n"
-		"{\n"
-		"  gl_Position = vec4(position, 0.0, 1.0);\n"
-		"}\n";
-
-	static const char *fragmentshader =
-		"precision mediump float;\n"
-		"void main()\n"
-		"{\n"
-		"  gl_FragColor = vec4(0.0, 0.0, 1.0, 1.0);\n"
-		"}\n";
-
+	struct motecontext *context = (struct motecontext *)nemoshow_get_userdata(show);
 	GLuint width = nemoshow_canvas_get_viewport_width(canvas);
 	GLuint height = nemoshow_canvas_get_viewport_height(canvas);
-	GLuint varray;
-	GLuint vvertex;
-	GLuint fbo, dbo;
-	GLuint program;
-	GLuint frag, vert;
-	GLuint nvertices = 128;
-	GLfloat vertices[nvertices * 6];
-	GLfloat r = 0.005f;
-	GLfloat x, y;
-	int i;
+	char buffer[width * height * 4];
+	size_t globalsize[2] = { width, height };
+	cl_mem memobj;
+	cl_int r;
 
-	fbo_prepare_context(
-			nemoshow_canvas_get_texture(canvas),
-			width, height,
-			&fbo, &dbo);
+	memobj = clCreateBuffer(context->context, CL_MEM_WRITE_ONLY, sizeof(buffer), NULL, &r);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+	r = clSetKernelArg(context->kernel, 0, sizeof(cl_mem), (void *)&memobj);
+	r = clSetKernelArg(context->kernel, 1, sizeof(cl_int), &width);
+	r = clSetKernelArg(context->kernel, 2, sizeof(cl_int), &height);
 
-	glViewport(0, 0, width, height);
+	r = clEnqueueNDRangeKernel(context->queue, context->kernel, 2, NULL, globalsize, NULL, 0, NULL, NULL);
+	r = clEnqueueReadBuffer(context->queue, memobj, CL_TRUE, 0, sizeof(buffer), buffer, 0, NULL, NULL);
 
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	glClearDepth(0.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	clReleaseMemObject(memobj);
 
-	NEMO_CHECK((frag = glshader_compile(GL_FRAGMENT_SHADER, 1, &fragmentshader)) == GL_NONE, "failed to compile shader\n");
-	NEMO_CHECK((vert = glshader_compile(GL_VERTEX_SHADER, 1, &vertexshader)) == GL_NONE, "failed to compile shader\n");
-
-	program = glCreateProgram();
-	glAttachShader(program, frag);
-	glAttachShader(program, vert);
-	glLinkProgram(program);
-	glUseProgram(program);
-
-	glGenVertexArrays(1, &varray);
-	glGenBuffers(1, &vvertex);
-
-	for (i = 0; i < nvertices; i++) {
-		x = random_get_double(-1.0f, 1.0f);
-		y = random_get_double(-1.0f, 1.0f);
-
-		vertices[i*6+0] = x;
-		vertices[i*6+1] = y - r;
-		vertices[i*6+2] = x - r;
-		vertices[i*6+3] = y + r;
-		vertices[i*6+4] = x + r;
-		vertices[i*6+5] = y + r;
-	}
-
-	glBindVertexArray(varray);
-	glBindBuffer(GL_ARRAY_BUFFER, vvertex);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (void *)0);
-	glEnableVertexAttribArray(0);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat[2]) * nvertices * 3, vertices, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-
-	glBindVertexArray(varray);
-	glDrawArrays(GL_TRIANGLES, 0, nvertices);
-	glBindVertexArray(0);
-
-	glDeleteBuffers(1, &vvertex);
-	glDeleteVertexArrays(1, &varray);
-
-	glDeleteFramebuffers(1, &fbo);
-	glDeleteRenderbuffers(1, &dbo);
+	glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_texture(canvas));
+	glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
+	glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, width);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, buffer);
+	glBindTexture(GL_TEXTURE_2D, 0);
 
 	nemoshow_one_dirty(canvas, NEMOSHOW_REDRAW_DIRTY);
 	nemoshow_dispatch_feedback(show);
 }
+
+static int nemomote_prepare_opencl(struct motecontext *context, const char *path)
+{
+	cl_platform_id platforms[2] = { 0 };
+	cl_uint ndevices;
+	cl_uint nplatforms;
+	cl_int r;
+	char *sources;
+	int nsources;
+
+	os_load_path(path, &sources, &nsources);
+
+	r = clGetPlatformIDs(2, platforms, &nplatforms);
+	r = clGetDeviceIDs(platforms[0], CL_DEVICE_TYPE_GPU, 1, &context->device, &ndevices);
+
+	context->context = clCreateContext(NULL, 1, &context->device, NULL, NULL, &r);
+	context->queue = clCreateCommandQueue(context->context, context->device, 0, &r);
+
+	context->program = clCreateProgramWithSource(context->context, 1, (const char **)&sources, (const size_t *)&nsources, &r);
+	r = clBuildProgram(context->program, 1, &context->device, NULL, NULL, NULL);
+
+	context->kernel = clCreateKernel(context->program, "dispatch", &r);
+
+	return 0;
+}
+
+static void nemomote_finish_opencl(struct motecontext *context)
+{
+	clFlush(context->queue);
+	clFinish(context->queue);
+	clReleaseKernel(context->kernel);
+	clReleaseProgram(context->program);
+	clReleaseCommandQueue(context->queue);
+	clReleaseContext(context->context);
+}
+#endif
 
 static void nemomote_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, void *event)
 {
@@ -273,8 +265,7 @@ static void nemomote_dispatch_canvas_event(struct nemoshow *show, struct showone
 int main(int argc, char *argv[])
 {
 	struct option options[] = {
-		{ "file",				required_argument,			NULL,			'f' },
-		{ "compute",		no_argument,						NULL,			'c' },
+		{ "program",				required_argument,			NULL,			'p' },
 		{ 0 }
 	};
 
@@ -284,31 +275,31 @@ int main(int argc, char *argv[])
 	struct showone *scene;
 	struct showone *canvas;
 	struct showone *one;
-	char *file = NULL;
+	char *programpath = NULL;
 	int width = 640;
 	int height = 480;
-	int on_compute_shader = 0;
 	int opt;
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "f:c", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "p:", options, NULL)) {
 		if (opt == -1)
 			break;
 
 		switch (opt) {
-			case 'f':
-				file = strdup(optarg);
-				break;
-
-			case 'c':
-				on_compute_shader = 1;
+			case 'p':
+				programpath = strdup(optarg);
 				break;
 
 			default:
 				break;
 		}
 	}
+
+#ifdef NEMOUX_WITH_OPENCL
+	if (programpath == NULL)
+		return 0;
+#endif
 
 	context = (struct motecontext *)malloc(sizeof(struct motecontext));
 	if (context == NULL)
@@ -342,16 +333,25 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_width(canvas, width);
 	nemoshow_canvas_set_height(canvas, height);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_OPENGL_TYPE);
-	if (on_compute_shader != 0)
-		nemoshow_canvas_set_dispatch_redraw(canvas, nemomote_dispatch_canvas_redraw_cs);
-	else
-		nemoshow_canvas_set_dispatch_redraw(canvas, nemomote_dispatch_canvas_redraw_cl);
+#ifdef NEMOUX_WITH_OPENCL
+	nemoshow_canvas_set_dispatch_redraw(canvas, nemomote_dispatch_canvas_redraw_cl);
+#else
+	nemoshow_canvas_set_dispatch_redraw(canvas, nemomote_dispatch_canvas_redraw_cs);
+#endif
 	nemoshow_canvas_set_dispatch_event(canvas, nemomote_dispatch_canvas_event);
 	nemoshow_one_attach(scene, canvas);
+
+#ifdef NEMOUX_WITH_OPENCL
+	nemomote_prepare_opencl(context, programpath);
+#endif
 
 	nemoshow_dispatch_frame(show);
 
 	nemotool_run(tool);
+
+#ifdef NEMOUX_WITH_OPENCL
+	nemomote_finish_opencl(context);
+#endif
 
 	nemoshow_destroy_view(show);
 
