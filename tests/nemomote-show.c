@@ -21,7 +21,7 @@
 #include <nemolog.h>
 #include <nemomisc.h>
 
-#define NEMOMOTE_PARTICLES			(1024)
+#define NEMOMOTE_PARTICLES			(10000)
 
 struct motecontext {
 	struct nemotool *tool;
@@ -37,7 +37,8 @@ struct motecontext {
 	cl_context context;
 	cl_command_queue queue;
 	cl_program program;
-	cl_kernel dispatch;
+	cl_kernel gravity;
+	cl_kernel render;
 	cl_kernel clear;
 
 	cl_mem velocities;
@@ -187,7 +188,8 @@ static void nemomote_dispatch_canvas_redraw_cl(struct nemoshow *show, struct sho
 	cl_int height = nemoshow_canvas_get_viewport_height(canvas);
 	char buffer[width * height * 4];
 	size_t clearsize[2] = { width, height };
-	size_t dispatchsize = NEMOMOTE_PARTICLES;
+	size_t gravitysize = NEMOMOTE_PARTICLES;
+	size_t rendersize = NEMOMOTE_PARTICLES;
 	uint32_t msecs = time_current_msecs();
 	cl_float dt = (float)(msecs - context->msecs) / 1000.0f;
 	cl_int count = NEMOMOTE_PARTICLES;
@@ -198,14 +200,17 @@ static void nemomote_dispatch_canvas_redraw_cl(struct nemoshow *show, struct sho
 	clSetKernelArg(context->clear, 2, sizeof(cl_int), (void *)&height);
 	clEnqueueNDRangeKernel(context->queue, context->clear, 2, NULL, clearsize, NULL, 0, NULL, NULL);
 
-	clSetKernelArg(context->dispatch, 0, sizeof(cl_mem), (void *)&context->velocities);
-	clSetKernelArg(context->dispatch, 1, sizeof(cl_mem), (void *)&context->positions);
-	clSetKernelArg(context->dispatch, 2, sizeof(cl_mem), (void *)&context->framebuffer);
-	clSetKernelArg(context->dispatch, 3, sizeof(cl_float), (void *)&dt);
-	clSetKernelArg(context->dispatch, 4, sizeof(cl_int), (void *)&count);
-	clSetKernelArg(context->dispatch, 5, sizeof(cl_int), (void *)&width);
-	clSetKernelArg(context->dispatch, 6, sizeof(cl_int), (void *)&height);
-	clEnqueueNDRangeKernel(context->queue, context->dispatch, 1, NULL, &dispatchsize, NULL, 0, NULL, NULL);
+	clSetKernelArg(context->gravity, 0, sizeof(cl_mem), (void *)&context->velocities);
+	clSetKernelArg(context->gravity, 1, sizeof(cl_mem), (void *)&context->positions);
+	clSetKernelArg(context->gravity, 2, sizeof(cl_int), (void *)&count);
+	clSetKernelArg(context->gravity, 3, sizeof(cl_float), (void *)&dt);
+	clEnqueueNDRangeKernel(context->queue, context->gravity, 1, NULL, &gravitysize, NULL, 0, NULL, NULL);
+
+	clSetKernelArg(context->render, 0, sizeof(cl_mem), (void *)&context->framebuffer);
+	clSetKernelArg(context->render, 1, sizeof(cl_int), (void *)&width);
+	clSetKernelArg(context->render, 2, sizeof(cl_int), (void *)&height);
+	clSetKernelArg(context->render, 3, sizeof(cl_mem), (void *)&context->positions);
+	clEnqueueNDRangeKernel(context->queue, context->render, 1, NULL, &rendersize, NULL, 0, NULL, NULL);
 
 	clEnqueueReadBuffer(context->queue, context->framebuffer, CL_TRUE, 0, sizeof(buffer), buffer, 0, NULL, NULL);
 
@@ -236,17 +241,18 @@ static int nemomote_prepare_opencl(struct motecontext *context, const char *path
 
 	os_load_path(path, &sources, &nsources);
 
-	r = clGetPlatformIDs(2, platforms, &nplatforms);
-	r = clGetDeviceIDs(platforms[0], CL_DEVICE_TYPE_GPU, 1, &context->device, &ndevices);
+	clGetPlatformIDs(2, platforms, &nplatforms);
+	clGetDeviceIDs(platforms[0], CL_DEVICE_TYPE_GPU, 1, &context->device, &ndevices);
 
 	context->context = clCreateContext(NULL, 1, &context->device, NULL, NULL, &r);
 	context->queue = clCreateCommandQueue(context->context, context->device, 0, &r);
 
 	context->program = clCreateProgramWithSource(context->context, 1, (const char **)&sources, (const size_t *)&nsources, &r);
-	r = clBuildProgram(context->program, 1, &context->device, NULL, NULL, NULL);
+	NEMO_CHECK(clBuildProgram(context->program, 1, &context->device, NULL, NULL, NULL) != CL_SUCCESS, "failed to build opencl program\n");
 
 	context->clear = clCreateKernel(context->program, "clear", &r);
-	context->dispatch = clCreateKernel(context->program, "dispatch", &r);
+	context->render = clCreateKernel(context->program, "render", &r);
+	context->gravity = clCreateKernel(context->program, "gravity", &r);
 
 	for (i = 0; i < NEMOMOTE_PARTICLES; i++) {
 		positions[i * 2 + 0] = random_get_double(0, width);
@@ -284,7 +290,8 @@ static void nemomote_finish_opencl(struct motecontext *context)
 	clReleaseMemObject(context->framebuffer);
 
 	clReleaseKernel(context->clear);
-	clReleaseKernel(context->dispatch);
+	clReleaseKernel(context->render);
+	clReleaseKernel(context->gravity);
 	clReleaseProgram(context->program);
 	clReleaseCommandQueue(context->queue);
 	clReleaseContext(context->context);
@@ -335,8 +342,8 @@ int main(int argc, char *argv[])
 	struct showone *canvas;
 	struct showone *one;
 	char *programpath = NULL;
-	int width = 640;
-	int height = 480;
+	int width = 800;
+	int height = 800;
 	int opt;
 
 	opterr = 0;
