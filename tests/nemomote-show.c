@@ -34,7 +34,7 @@ static void nemomote_dispatch_show_resize(struct nemoshow *show, int32_t width, 
 	nemoshow_view_redraw(context->show);
 }
 
-static void nemomote_dispatch_canvas_redraw(struct nemoshow *show, struct showone *canvas)
+static void nemomote_dispatch_canvas_redraw_cs(struct nemoshow *show, struct showone *canvas)
 {
 	static const char *vertexshader =
 		"attribute vec2 position;\n"
@@ -126,10 +126,10 @@ static void nemomote_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 	glDispatchCompute(16, 16, 1);
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
+	glDeleteProgram(program);
+
 	NEMO_CHECK((frag = glshader_compile(GL_FRAGMENT_SHADER, 1, &fragmentshader)) == GL_NONE, "failed to compile shader\n");
 	NEMO_CHECK((vert = glshader_compile(GL_VERTEX_SHADER, 1, &vertexshader)) == GL_NONE, "failed to compile shader\n");
-
-	glDeleteProgram(program);
 
 	program = glCreateProgram();
 	glAttachShader(program, frag);
@@ -165,6 +165,94 @@ static void nemomote_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 	nemoshow_dispatch_feedback(show);
 }
 
+static void nemomote_dispatch_canvas_redraw_cl(struct nemoshow *show, struct showone *canvas)
+{
+	static const char *vertexshader =
+		"attribute vec2 position;\n"
+		"void main()\n"
+		"{\n"
+		"  gl_Position = vec4(position, 0.0, 1.0);\n"
+		"}\n";
+
+	static const char *fragmentshader =
+		"precision mediump float;\n"
+		"void main()\n"
+		"{\n"
+		"  gl_FragColor = vec4(0.0, 0.0, 1.0, 1.0);\n"
+		"}\n";
+
+	GLuint width = nemoshow_canvas_get_viewport_width(canvas);
+	GLuint height = nemoshow_canvas_get_viewport_height(canvas);
+	GLuint varray;
+	GLuint vvertex;
+	GLuint fbo, dbo;
+	GLuint program;
+	GLuint frag, vert;
+	GLuint nvertices = 128;
+	GLfloat vertices[nvertices * 6];
+	GLfloat r = 0.005f;
+	GLfloat x, y;
+	int i;
+
+	fbo_prepare_context(
+			nemoshow_canvas_get_texture(canvas),
+			width, height,
+			&fbo, &dbo);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+	glViewport(0, 0, width, height);
+
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClearDepth(0.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	NEMO_CHECK((frag = glshader_compile(GL_FRAGMENT_SHADER, 1, &fragmentshader)) == GL_NONE, "failed to compile shader\n");
+	NEMO_CHECK((vert = glshader_compile(GL_VERTEX_SHADER, 1, &vertexshader)) == GL_NONE, "failed to compile shader\n");
+
+	program = glCreateProgram();
+	glAttachShader(program, frag);
+	glAttachShader(program, vert);
+	glLinkProgram(program);
+	glUseProgram(program);
+
+	glGenVertexArrays(1, &varray);
+	glGenBuffers(1, &vvertex);
+
+	for (i = 0; i < nvertices; i++) {
+		x = random_get_double(-1.0f, 1.0f);
+		y = random_get_double(-1.0f, 1.0f);
+
+		vertices[i*6+0] = x;
+		vertices[i*6+1] = y - r;
+		vertices[i*6+2] = x - r;
+		vertices[i*6+3] = y + r;
+		vertices[i*6+4] = x + r;
+		vertices[i*6+5] = y + r;
+	}
+
+	glBindVertexArray(varray);
+	glBindBuffer(GL_ARRAY_BUFFER, vvertex);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (void *)0);
+	glEnableVertexAttribArray(0);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat[2]) * nvertices * 3, vertices, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+	glBindVertexArray(varray);
+	glDrawArrays(GL_TRIANGLES, 0, nvertices);
+	glBindVertexArray(0);
+
+	glDeleteBuffers(1, &vvertex);
+	glDeleteVertexArrays(1, &varray);
+
+	glDeleteFramebuffers(1, &fbo);
+	glDeleteRenderbuffers(1, &dbo);
+
+	nemoshow_one_dirty(canvas, NEMOSHOW_REDRAW_DIRTY);
+	nemoshow_dispatch_feedback(show);
+}
+
 static void nemomote_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, void *event)
 {
 	struct motecontext *context = (struct motecontext *)nemoshow_get_userdata(show);
@@ -186,6 +274,7 @@ int main(int argc, char *argv[])
 {
 	struct option options[] = {
 		{ "file",				required_argument,			NULL,			'f' },
+		{ "compute",		no_argument,						NULL,			'c' },
 		{ 0 }
 	};
 
@@ -198,17 +287,22 @@ int main(int argc, char *argv[])
 	char *file = NULL;
 	int width = 640;
 	int height = 480;
+	int on_compute_shader = 0;
 	int opt;
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "f:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "f:c", options, NULL)) {
 		if (opt == -1)
 			break;
 
 		switch (opt) {
 			case 'f':
 				file = strdup(optarg);
+				break;
+
+			case 'c':
+				on_compute_shader = 1;
 				break;
 
 			default:
@@ -248,7 +342,10 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_width(canvas, width);
 	nemoshow_canvas_set_height(canvas, height);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_OPENGL_TYPE);
-	nemoshow_canvas_set_dispatch_redraw(canvas, nemomote_dispatch_canvas_redraw);
+	if (on_compute_shader != 0)
+		nemoshow_canvas_set_dispatch_redraw(canvas, nemomote_dispatch_canvas_redraw_cs);
+	else
+		nemoshow_canvas_set_dispatch_redraw(canvas, nemomote_dispatch_canvas_redraw_cl);
 	nemoshow_canvas_set_dispatch_event(canvas, nemomote_dispatch_canvas_event);
 	nemoshow_one_attach(scene, canvas);
 
