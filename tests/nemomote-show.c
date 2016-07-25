@@ -21,7 +21,7 @@
 #include <nemolog.h>
 #include <nemomisc.h>
 
-#define NEMOMOTE_PARTICLES			(10000)
+#define NEMOMOTE_PARTICLES			(15000)
 
 struct motecontext {
 	struct nemotool *tool;
@@ -38,6 +38,7 @@ struct motecontext {
 	cl_command_queue queue;
 	cl_program program;
 	cl_kernel mutualgravity;
+	cl_kernel gravitywell;
 	cl_kernel update;
 	cl_kernel render;
 	cl_kernel clear;
@@ -48,6 +49,8 @@ struct motecontext {
 #endif
 
 	uint32_t msecs;
+	float cx, cy;
+	float intensity;
 };
 
 static void nemomote_dispatch_canvas_redraw_cs(struct nemoshow *show, struct showone *canvas)
@@ -192,6 +195,9 @@ static void nemomote_dispatch_canvas_redraw_cl(struct nemoshow *show, struct sho
 	size_t partcount = NEMOMOTE_PARTICLES;
 	uint32_t msecs = time_current_msecs();
 	cl_float dt = (float)(msecs - context->msecs) / 1000.0f;
+	cl_float cx = context->cx;
+	cl_float cy = context->cy;
+	cl_float intensity = context->intensity;
 	cl_int count = NEMOMOTE_PARTICLES;
 	cl_int r;
 
@@ -206,9 +212,22 @@ static void nemomote_dispatch_canvas_redraw_cl(struct nemoshow *show, struct sho
 	clSetKernelArg(context->mutualgravity, 3, sizeof(cl_float), (void *)&dt);
 	clEnqueueNDRangeKernel(context->queue, context->mutualgravity, 1, NULL, &partcount, NULL, 0, NULL, NULL);
 
+	if (intensity > 0.0f) {
+		clSetKernelArg(context->gravitywell, 0, sizeof(cl_mem), (void *)&context->positions);
+		clSetKernelArg(context->gravitywell, 1, sizeof(cl_mem), (void *)&context->velocities);
+		clSetKernelArg(context->gravitywell, 2, sizeof(cl_int), (void *)&count);
+		clSetKernelArg(context->gravitywell, 3, sizeof(cl_float), (void *)&dt);
+		clSetKernelArg(context->gravitywell, 4, sizeof(cl_float), (void *)&cx);
+		clSetKernelArg(context->gravitywell, 5, sizeof(cl_float), (void *)&cy);
+		clSetKernelArg(context->gravitywell, 6, sizeof(cl_float), (void *)&intensity);
+		clEnqueueNDRangeKernel(context->queue, context->gravitywell, 1, NULL, &partcount, NULL, 0, NULL, NULL);
+	}
+
 	clSetKernelArg(context->update, 0, sizeof(cl_mem), (void *)&context->positions);
 	clSetKernelArg(context->update, 1, sizeof(cl_mem), (void *)&context->velocities);
 	clSetKernelArg(context->update, 2, sizeof(cl_float), (void *)&dt);
+	clSetKernelArg(context->update, 3, sizeof(cl_int), (void *)&width);
+	clSetKernelArg(context->update, 4, sizeof(cl_int), (void *)&height);
 	clEnqueueNDRangeKernel(context->queue, context->update, 1, NULL, &partcount, NULL, 0, NULL, NULL);
 
 	clSetKernelArg(context->render, 0, sizeof(cl_mem), (void *)&context->framebuffer);
@@ -259,6 +278,7 @@ static int nemomote_prepare_opencl(struct motecontext *context, const char *path
 	context->render = clCreateKernel(context->program, "render", &r);
 	context->update = clCreateKernel(context->program, "update", &r);
 	context->mutualgravity = clCreateKernel(context->program, "mutualgravity", &r);
+	context->gravitywell = clCreateKernel(context->program, "gravitywell", &r);
 
 	for (i = 0; i < NEMOMOTE_PARTICLES; i++) {
 		positions[i * 2 + 0] = random_get_double(0, width);
@@ -273,6 +293,7 @@ static int nemomote_prepare_opencl(struct motecontext *context, const char *path
 	context->framebuffer = clCreateBuffer(context->context, CL_MEM_WRITE_ONLY, sizeof(char[4]) * width * height, NULL, &r);
 
 	context->msecs = time_current_msecs();
+	context->intensity = 0.0f;
 
 	return 0;
 }
@@ -290,9 +311,6 @@ static int nemomote_resize_opencl(struct motecontext *context, int width, int he
 
 static void nemomote_finish_opencl(struct motecontext *context)
 {
-	clFlush(context->queue);
-	clFinish(context->queue);
-
 	clReleaseMemObject(context->velocities);
 	clReleaseMemObject(context->positions);
 	clReleaseMemObject(context->framebuffer);
@@ -301,6 +319,7 @@ static void nemomote_finish_opencl(struct motecontext *context)
 	clReleaseKernel(context->render);
 	clReleaseKernel(context->update);
 	clReleaseKernel(context->mutualgravity);
+	clReleaseKernel(context->gravitywell);
 	clReleaseProgram(context->program);
 	clReleaseCommandQueue(context->queue);
 	clReleaseContext(context->context);
@@ -321,6 +340,15 @@ static void nemomote_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 			nemoshow_dispatch_grab_all(show, event);
 		}
+	}
+
+	if (nemoshow_event_is_touch_down(show, event)) {
+		context->intensity = 700000.0f;
+	} else if (nemoshow_event_is_touch_up(show, event)) {
+		context->intensity = 0.0f;
+	} else if (nemoshow_event_is_touch_motion(show, event)) {
+		context->cx = nemoshow_event_get_x(event);
+		context->cy = nemoshow_event_get_y(event);
 	}
 }
 
