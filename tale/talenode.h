@@ -90,6 +90,7 @@ struct talenode {
 	double alpha;
 
 	int has_filter;
+	int has_correct;
 };
 
 #define	NTNODE_OBJECT(node)						(&node->object)
@@ -246,6 +247,13 @@ static inline void nemotale_node_set_alpha(struct talenode *node, double alpha)
 {
 	node->alpha = alpha;
 
+	node->needs_redraw = 1;
+}
+
+static inline void nemotale_node_set_correct(struct talenode *node, int has_correct)
+{
+	node->has_correct = has_correct;
+	
 	node->needs_redraw = 1;
 }
 

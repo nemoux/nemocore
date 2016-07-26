@@ -64,6 +64,8 @@ int nemotale_node_prepare(struct talenode *node)
 
 	node->alpha = 1.0f;
 
+	node->has_correct = 1;
+
 	node->dispatch_flush = nemotale_node_flush_none;
 	node->dispatch_flush_tile = nemotale_node_flush_tile_none;
 	node->dispatch_filter = nemotale_node_filter_none;

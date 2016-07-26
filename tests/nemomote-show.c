@@ -111,8 +111,8 @@ static void nemomote_dispatch_canvas_redraw_cs(struct nemoshow *show, struct sho
 
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -441,6 +441,8 @@ int main(int argc, char *argv[])
 	nemoshow_set_dispatch_resize(show, nemomote_dispatch_show_resize);
 	nemoshow_set_userdata(show, context);
 
+	nemoshow_view_put_state(show, "correct");
+
 	context->scene = scene = nemoshow_scene_create();
 	nemoshow_scene_set_width(scene, width);
 	nemoshow_scene_set_height(scene, height);
@@ -457,6 +459,7 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_width(canvas, width);
 	nemoshow_canvas_set_height(canvas, height);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_OPENGL_TYPE);
+	nemoshow_canvas_set_correct(canvas, 0);
 #ifdef NEMOUX_WITH_OPENCL
 	nemoshow_canvas_set_dispatch_redraw(canvas, nemomote_dispatch_canvas_redraw_cl);
 #else

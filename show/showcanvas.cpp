@@ -834,6 +834,15 @@ int nemoshow_canvas_set_size(struct showone *one, int32_t width, int32_t height)
 	return 0;
 }
 
+int nemoshow_canvas_set_correct(struct showone *one, int has_correct)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	nemotale_node_set_correct(canvas->node, has_correct);
+
+	return 0;
+}
+
 static void nemoshow_canvas_dirty(struct showone *one)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);

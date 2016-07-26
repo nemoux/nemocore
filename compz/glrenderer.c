@@ -256,7 +256,7 @@ static void glrenderer_draw_view(struct glrenderer *renderer, struct nemoview *v
 	struct glcontent *glcontent = (struct glcontent *)nemocontent_get_opengl_context(view->content, renderer->base.node);
 	pixman_region32_t repaint;
 	pixman_region32_t blend;
-	GLint filter;
+	GLint filter = GL_NEAREST;
 	int i;
 
 	if (glcontent == NULL || glcontent->shader == NULL)
@@ -274,12 +274,9 @@ static void glrenderer_draw_view(struct glrenderer *renderer, struct nemoview *v
 	glrenderer_use_shader(renderer, glcontent->shader);
 	glrenderer_use_uniforms(glcontent->shader, view, screen);
 
-	if (view->transform.enable != 0 ||
-			screen->transform.enable != 0 ||
-			nemocontent_get_buffer_scale(view->content) != 1)
+	if ((nemoview_has_state(view, NEMOVIEW_CORRECT_STATE) != 0) &&
+			(view->transform.enable != 0 || screen->transform.enable != 0 || nemocontent_get_buffer_scale(view->content) != 1))
 		filter = GL_LINEAR;
-	else
-		filter = GL_NEAREST;
 
 	for (i = 0; i < glcontent->ntextures; i++) {
 		glActiveTexture(GL_TEXTURE0 + i);
