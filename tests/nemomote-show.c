@@ -39,6 +39,7 @@ struct motecontext {
 	cl_program program;
 	cl_kernel mutualgravity;
 	cl_kernel gravitywell;
+	cl_kernel boundingbox;
 	cl_kernel update;
 	cl_kernel render;
 	cl_kernel clear;
@@ -196,6 +197,11 @@ static void nemomote_dispatch_canvas_redraw_cl(struct nemoshow *show, struct sho
 	size_t partcount = NEMOMOTE_PARTICLES;
 	uint32_t msecs = time_current_msecs();
 	cl_float dt = (float)(msecs - context->msecs) / 1000.0f;
+	cl_float x0 = 0.0f;
+	cl_float y0 = 0.0f;
+	cl_float x1 = width;
+	cl_float y1 = height;
+	cl_float bounce = 0.15f;
 	cl_int count = NEMOMOTE_PARTICLES;
 	cl_int r;
 	int i;
@@ -204,6 +210,17 @@ static void nemomote_dispatch_canvas_redraw_cl(struct nemoshow *show, struct sho
 	clSetKernelArg(context->clear, 1, sizeof(cl_int), (void *)&width);
 	clSetKernelArg(context->clear, 2, sizeof(cl_int), (void *)&height);
 	clEnqueueNDRangeKernel(context->queue, context->clear, 2, NULL, framesize, NULL, 0, NULL, NULL);
+
+	clSetKernelArg(context->boundingbox, 0, sizeof(cl_mem), (void *)&context->positions);
+	clSetKernelArg(context->boundingbox, 1, sizeof(cl_mem), (void *)&context->velocities);
+	clSetKernelArg(context->boundingbox, 2, sizeof(cl_int), (void *)&count);
+	clSetKernelArg(context->boundingbox, 3, sizeof(cl_float), (void *)&dt);
+	clSetKernelArg(context->boundingbox, 4, sizeof(cl_float), (void *)&x0);
+	clSetKernelArg(context->boundingbox, 5, sizeof(cl_float), (void *)&y0);
+	clSetKernelArg(context->boundingbox, 6, sizeof(cl_float), (void *)&x1);
+	clSetKernelArg(context->boundingbox, 7, sizeof(cl_float), (void *)&y1);
+	clSetKernelArg(context->boundingbox, 8, sizeof(cl_float), (void *)&bounce);
+	clEnqueueNDRangeKernel(context->queue, context->boundingbox, 1, NULL, &partcount, NULL, 0, NULL, NULL);
 
 	clSetKernelArg(context->mutualgravity, 0, sizeof(cl_mem), (void *)&context->positions);
 	clSetKernelArg(context->mutualgravity, 1, sizeof(cl_mem), (void *)&context->velocities);
@@ -229,8 +246,6 @@ static void nemomote_dispatch_canvas_redraw_cl(struct nemoshow *show, struct sho
 	clSetKernelArg(context->update, 0, sizeof(cl_mem), (void *)&context->positions);
 	clSetKernelArg(context->update, 1, sizeof(cl_mem), (void *)&context->velocities);
 	clSetKernelArg(context->update, 2, sizeof(cl_float), (void *)&dt);
-	clSetKernelArg(context->update, 3, sizeof(cl_int), (void *)&width);
-	clSetKernelArg(context->update, 4, sizeof(cl_int), (void *)&height);
 	clEnqueueNDRangeKernel(context->queue, context->update, 1, NULL, &partcount, NULL, 0, NULL, NULL);
 
 	clSetKernelArg(context->render, 0, sizeof(cl_mem), (void *)&context->framebuffer);
@@ -282,6 +297,7 @@ static int nemomote_prepare_opencl(struct motecontext *context, const char *path
 	context->update = clCreateKernel(context->program, "update", &r);
 	context->mutualgravity = clCreateKernel(context->program, "mutualgravity", &r);
 	context->gravitywell = clCreateKernel(context->program, "gravitywell", &r);
+	context->boundingbox = clCreateKernel(context->program, "boundingbox", &r);
 
 	for (i = 0; i < NEMOMOTE_PARTICLES; i++) {
 		positions[i * 2 + 0] = random_get_double(0, width);
@@ -322,6 +338,7 @@ static void nemomote_finish_opencl(struct motecontext *context)
 	clReleaseKernel(context->update);
 	clReleaseKernel(context->mutualgravity);
 	clReleaseKernel(context->gravitywell);
+	clReleaseKernel(context->boundingbox);
 	clReleaseProgram(context->program);
 	clReleaseCommandQueue(context->queue);
 	clReleaseContext(context->context);

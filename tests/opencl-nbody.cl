@@ -50,21 +50,24 @@ __kernel void gravitywell(__global float *positions, __global float *velocities,
 	velocities[id * 2 + 1] = velocities[id * 2 + 1] + ay * dt;
 }
 
-__kernel void update(__global float *positions, __global float *velocities, float dt, int width, int height)
+__kernel void boundingbox(__global float *positions, __global float *velocities, int count, float dt, float x0, float y0, float x1, float y1, float bounce)
 {
 	int id = get_global_id(0);
-	int x, y;
+	float x = positions[id * 2 + 0];
+	float y = positions[id * 2 + 1];
+
+	if (x0 > x || x >= x1 || y0 > y || y >= y1) {
+		velocities[id * 2 + 0] = velocities[id * 2 + 0] * -bounce;
+		velocities[id * 2 + 1] = velocities[id * 2 + 1] * -bounce;
+	}
+}
+
+__kernel void update(__global float *positions, __global float *velocities, float dt)
+{
+	int id = get_global_id(0);
 
 	positions[id * 2 + 0] = positions[id * 2 + 0] + velocities[id * 2 + 0] * dt;
 	positions[id * 2 + 1] = positions[id * 2 + 1] + velocities[id * 2 + 1] * dt;
-
-	x = floor(positions[id * 2 + 0]);
-	y = floor(positions[id * 2 + 1]);
-
-	if (0 > x || x >= width || 0 > y || y >= height) {
-		velocities[id * 2 + 0] = 0.0f;
-		velocities[id * 2 + 1] = 0.0f;
-	}
 }
 
 __kernel void render(__global char *framebuffer, int width, int height, __global float *positions)
