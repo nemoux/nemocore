@@ -221,6 +221,7 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 				}
 
 				nemoview_set_rotation(view, bin->initial.r);
+				nemoview_set_scale(view, bin->initial.sx, bin->initial.sy);
 
 				nemoview_attach_layer(view, bin->layer);
 				nemoview_update_transform(view);
@@ -466,6 +467,9 @@ struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas
 
 	bin->scale.ax = 0.5f;
 	bin->scale.ay = 0.5f;
+
+	bin->initial.sx = 1.0f;
+	bin->initial.sy = 1.0f;
 
 	canvas->configure = shellbin_configure_canvas;
 	canvas->configure_private = (void *)bin;
@@ -952,6 +956,8 @@ static inline void nemoshell_set_client_state(struct shellbin *bin, struct clien
 			bin->initial.y = random_get_int(extents->y1, extents->y2);
 		}
 		bin->initial.r = state->r;
+		bin->initial.sx = state->sx;
+		bin->initial.sy = state->sy;
 		bin->initial.dx = state->dx;
 		bin->initial.dy = state->dy;
 	}

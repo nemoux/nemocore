@@ -149,6 +149,7 @@ struct clientstate {
 
 	float x, y;
 	float r;
+	float sx, sy;
 	int32_t width, height;
 
 	int has_position;
@@ -254,6 +255,7 @@ struct shellbin {
 	struct {
 		float x, y;
 		float r;
+		float sx, sy;
 		float dx, dy;
 	} initial;
 
@@ -440,6 +442,12 @@ static inline void clientstate_set_position(struct clientstate *state, float x, 
 static inline void clientstate_set_rotate(struct clientstate *state, float r)
 {
 	state->r = r;
+}
+
+static inline void clientstate_set_scale(struct clientstate *state, float sx, float sy)
+{
+	state->sx = sx;
+	state->sy = sy;
 }
 
 static inline void clientstate_set_anchor(struct clientstate *state, float dx, float dy)
