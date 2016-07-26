@@ -903,6 +903,9 @@ struct clientstate *nemoshell_create_client_state(struct nemoshell *shell, uint3
 
 	state->pid = pid;
 
+	state->sx = 1.0f;
+	state->sy = 1.0f;
+
 	wl_list_insert(&shell->clientstate_list, &state->link);
 
 	return state;
