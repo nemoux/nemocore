@@ -90,7 +90,7 @@ struct talenode {
 	double alpha;
 
 	int has_filter;
-	int has_correct;
+	int has_smooth;
 };
 
 #define	NTNODE_OBJECT(node)						(&node->object)
@@ -250,10 +250,10 @@ static inline void nemotale_node_set_alpha(struct talenode *node, double alpha)
 	node->needs_redraw = 1;
 }
 
-static inline void nemotale_node_set_correct(struct talenode *node, int has_correct)
+static inline void nemotale_node_set_smooth(struct talenode *node, int has_smooth)
 {
-	node->has_correct = has_correct;
-	
+	node->has_smooth = has_smooth;
+
 	node->needs_redraw = 1;
 }
 

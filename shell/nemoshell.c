@@ -104,8 +104,8 @@ static void nemo_surface_set_state(struct wl_client *client, struct wl_resource 
 		nemoview_set_state(bin->view, NEMOVIEW_OPAQUE_STATE);
 	else if (strcmp(state, "stage") == 0)
 		nemoview_set_state(bin->view, NEMOVIEW_STAGE_STATE);
-	else if (strcmp(state, "correct") == 0)
-		nemoview_set_state(bin->view, NEMOVIEW_CORRECT_STATE);
+	else if (strcmp(state, "smooth") == 0)
+		nemoview_set_state(bin->view, NEMOVIEW_SMOOTH_STATE);
 	else if (strcmp(state, "close") == 0)
 		nemoview_set_state(bin->view, NEMOVIEW_CLOSE_STATE);
 }
@@ -128,8 +128,8 @@ static void nemo_surface_put_state(struct wl_client *client, struct wl_resource 
 		nemoview_put_state(bin->view, NEMOVIEW_OPAQUE_STATE);
 	else if (strcmp(state, "stage") == 0)
 		nemoview_put_state(bin->view, NEMOVIEW_STAGE_STATE);
-	else if (strcmp(state, "correct") == 0)
-		nemoview_put_state(bin->view, NEMOVIEW_CORRECT_STATE);
+	else if (strcmp(state, "smooth") == 0)
+		nemoview_put_state(bin->view, NEMOVIEW_SMOOTH_STATE);
 	else if (strcmp(state, "close") == 0)
 		nemoview_put_state(bin->view, NEMOVIEW_CLOSE_STATE);
 }

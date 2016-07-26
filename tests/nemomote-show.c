@@ -441,7 +441,7 @@ int main(int argc, char *argv[])
 	nemoshow_set_dispatch_resize(show, nemomote_dispatch_show_resize);
 	nemoshow_set_userdata(show, context);
 
-	nemoshow_view_put_state(show, "correct");
+	nemoshow_view_put_state(show, "smooth");
 
 	context->scene = scene = nemoshow_scene_create();
 	nemoshow_scene_set_width(scene, width);
@@ -459,7 +459,7 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_width(canvas, width);
 	nemoshow_canvas_set_height(canvas, height);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_OPENGL_TYPE);
-	nemoshow_canvas_set_correct(canvas, 0);
+	nemoshow_canvas_set_smooth(canvas, 0);
 #ifdef NEMOUX_WITH_OPENCL
 	nemoshow_canvas_set_dispatch_redraw(canvas, nemomote_dispatch_canvas_redraw_cl);
 #else

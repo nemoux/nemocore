@@ -386,7 +386,7 @@ static void nemotale_repaint_node(struct nemotale *tale, struct talenode *node, 
 
 		glBindTexture(GL_TEXTURE_2D, nemotale_node_get_texture(node));
 
-		if (node->has_correct != 0 && node->transform.enable != 0) {
+		if (node->has_smooth != 0 && node->transform.enable != 0) {
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		} else {
