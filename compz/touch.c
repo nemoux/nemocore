@@ -336,6 +336,9 @@ static struct touchpoint *nemotouch_create_touchpoint(struct nemotouch *touch, u
 
 	tp->nsamples = touch->node->sampling;
 
+	if (tp->nsamples > 0)
+		tp->samples = (float *)malloc(sizeof(float[2]) * tp->nsamples);
+
 	wl_signal_init(&tp->destroy_signal);
 
 	tp->default_grab.interface = &default_touchpoint_grab_interface;
@@ -360,6 +363,9 @@ static void nemotouch_destroy_touchpoint(struct nemotouch *touch, struct touchpo
 	wl_list_remove(&tp->focus_view_listener.link);
 
 	wl_list_remove(&tp->link);
+
+	if (tp->samples != NULL)
+		free(tp->samples);
 
 	free(tp);
 }

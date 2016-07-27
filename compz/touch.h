@@ -9,8 +9,6 @@ NEMO_BEGIN_EXTERN_C
 
 #include <input.h>
 
-#define NEMOCOMPZ_TOUCH_SAMPLE_MAX			(32)
-
 typedef enum {
 	TOUCHPOINT_DOWN_STATE = 0,
 	TOUCHPOINT_MOTION_STATE = 1,
@@ -63,7 +61,7 @@ struct touchpoint {
 
 	float x, y;
 
-	float samples[NEMOCOMPZ_TOUCH_SAMPLE_MAX * 2];
+	float *samples;
 	int nsamples;
 	int isamples;
 
