@@ -36,6 +36,7 @@ struct inputnode {
 	int32_t x, y, width, height;
 
 	uint32_t sampling;
+	float distance;
 
 	struct {
 		float px, py;
@@ -71,6 +72,7 @@ extern void nemoinput_set_pivot(struct inputnode *node, float px, float py);
 extern int nemoinput_set_custom(struct inputnode *node, const char *cmd);
 
 extern void nemoinput_set_sampling(struct inputnode *node, uint32_t sampling);
+extern void nemoinput_set_maximum_distance(struct inputnode *node, float distance);
 
 extern void nemoinput_transform_to_global(struct inputnode *node, float dx, float dy, float *x, float *y);
 extern void nemoinput_transform_from_global(struct inputnode *node, float x, float y, float *dx, float *dy);

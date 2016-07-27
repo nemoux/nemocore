@@ -60,10 +60,13 @@ struct touchpoint {
 	uint32_t grab_time;
 
 	float x, y;
+	float rx, ry;
 
 	float *samples;
 	int nsamples;
 	int isamples;
+
+	float distance;
 
 	void *binding;
 };

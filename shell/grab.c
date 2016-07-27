@@ -178,8 +178,8 @@ static int nemoshell_dispatch_touchgrab_timeout(void *data)
 	struct touchpoint *tp = grab->tp;
 	uint32_t msecs = time_current_msecs();
 
-	grab->samples[grab->esample].x = tp->x;
-	grab->samples[grab->esample].y = tp->y;
+	grab->samples[grab->esample].x = tp->rx;
+	grab->samples[grab->esample].y = tp->ry;
 	grab->samples[grab->esample].time = msecs;
 
 	grab->nsamples++;

@@ -64,9 +64,9 @@ static void default_touchpoint_grab_motion(struct touchpoint_grab *grab, uint32_
 	if (tp->focus != NULL && nemoview_has_grab(tp->focus) == 0) {
 		float sx, sy;
 
-		nemoview_transform_from_global(tp->focus, x, y, &sx, &sy);
+		nemoview_transform_from_global(tp->focus, tp->x, tp->y, &sx, &sy);
 
-		nemocontent_touch_motion(tp, tp->focus->content, time, touchid, sx, sy, x, y);
+		nemocontent_touch_motion(tp, tp->focus->content, time, touchid, sx, sy, tp->x, tp->y);
 	}
 }
 
@@ -242,8 +242,8 @@ void nemotouch_destroy(struct nemotouch *touch)
 void touchpoint_down(struct touchpoint *tp, float x, float y)
 {
 	if (tp->nsamples == 0) {
-		tp->x = x;
-		tp->y = y;
+		tp->rx = tp->x = x;
+		tp->ry = tp->y = y;
 	} else {
 		int i;
 
@@ -252,16 +252,28 @@ void touchpoint_down(struct touchpoint *tp, float x, float y)
 			tp->samples[i * 2 + 1] = y;
 		}
 
-		tp->x = x;
-		tp->y = y;
+		tp->rx = tp->x = x;
+		tp->ry = tp->y = y;
 	}
 }
 
 void touchpoint_motion(struct touchpoint *tp, float x, float y)
 {
+	if (tp->distance > 1e-6) {
+		float dx = x - tp->x;
+		float dy = y - tp->y;
+
+		if (sqrtf(dx * dx + dy * dy) > tp->distance) {
+			tp->rx = x;
+			tp->ry = y;
+
+			return;
+		}
+	}
+
 	if (tp->nsamples == 0) {
-		tp->x = x;
-		tp->y = y;
+		tp->rx = tp->x = x;
+		tp->ry = tp->y = y;
 	} else {
 		float sx = 0.0f;
 		float sy = 0.0f;
@@ -277,8 +289,8 @@ void touchpoint_motion(struct touchpoint *tp, float x, float y)
 			sy += tp->samples[i * 2 + 1];
 		}
 
-		tp->x = sx / (float)tp->nsamples;
-		tp->y = sy / (float)tp->nsamples;
+		tp->rx = tp->x = sx / (float)tp->nsamples;
+		tp->ry = tp->y = sy / (float)tp->nsamples;
 	}
 }
 
@@ -338,6 +350,8 @@ static struct touchpoint *nemotouch_create_touchpoint(struct nemotouch *touch, u
 
 	if (tp->nsamples > 0)
 		tp->samples = (float *)malloc(sizeof(float[2]) * tp->nsamples);
+
+	tp->distance = touch->node->distance;
 
 	wl_signal_init(&tp->destroy_signal);
 

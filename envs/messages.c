@@ -140,6 +140,7 @@ static void nemoenvs_handle_set_nemoshell_input(struct nemoshell *shell, struct 
 	float px = 0.0f, py = 0.0f;
 	uint32_t nodeid, screenid;
 	uint32_t sampling = 0;
+	float distance = 0.0f;
 	const char *transform = NULL;
 	int has_screen = 0;
 
@@ -174,6 +175,8 @@ static void nemoenvs_handle_set_nemoshell_input(struct nemoshell *shell, struct 
 			transform = value;
 		} else if (strcmp(name, "sampling") == 0) {
 			sampling = strtoul(value, NULL, 10);
+		} else if (strcmp(name, "maximum_distance") == 0) {
+			distance = strtod(value, NULL);
 		}
 	}
 
@@ -204,6 +207,7 @@ static void nemoenvs_handle_set_nemoshell_input(struct nemoshell *shell, struct 
 			}
 
 			nemoinput_set_sampling(node, sampling);
+			nemoinput_set_maximum_distance(node, distance);
 
 			if (devnode != NULL)
 				nemoinput_set_state(node, NEMOINPUT_CONFIG_STATE);
