@@ -331,3 +331,8 @@ int nemoenvs_terminate_clients(struct nemoenvs *envs)
 
 	return 0;
 }
+
+int nemoenvs_get_client_count(struct nemoenvs *envs)
+{
+	return nemolist_length(&envs->client_list);
+}

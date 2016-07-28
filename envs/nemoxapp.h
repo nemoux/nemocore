@@ -39,6 +39,8 @@ extern int nemoenvs_terminate_xclients(struct nemoenvs *envs);
 extern int nemoenvs_terminate_xservers(struct nemoenvs *envs);
 extern int nemoenvs_terminate_xapps(struct nemoenvs *envs);
 
+extern int nemoenvs_get_xclient_count(struct nemoenvs *envs);
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

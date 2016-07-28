@@ -43,6 +43,8 @@ extern int nemoenvs_detach_client(struct nemoenvs *envs, pid_t pid);
 extern int nemoenvs_terminate_client(struct nemoenvs *envs, pid_t pid);
 extern int nemoenvs_terminate_clients(struct nemoenvs *envs);
 
+extern int nemoenvs_get_client_count(struct nemoenvs *envs);
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif
