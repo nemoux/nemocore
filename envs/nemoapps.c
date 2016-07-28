@@ -285,7 +285,7 @@ int nemoenvs_attach_client(struct nemoenvs *envs, pid_t pid)
 	return 0;
 }
 
-void nemoenvs_detach_client(struct nemoenvs *envs, pid_t pid)
+int nemoenvs_detach_client(struct nemoenvs *envs, pid_t pid)
 {
 	struct nemoclient *client;
 
@@ -295,9 +295,11 @@ void nemoenvs_detach_client(struct nemoenvs *envs, pid_t pid)
 
 			free(client);
 
-			break;
+			return 1;
 		}
 	}
+
+	return 0;
 }
 
 int nemoenvs_terminate_client(struct nemoenvs *envs, pid_t pid)
@@ -306,6 +308,8 @@ int nemoenvs_terminate_client(struct nemoenvs *envs, pid_t pid)
 
 	nemolist_for_each(client, &envs->client_list, link) {
 		if (client->pid == pid) {
+			kill(client->pid, SIGKILL);
+
 			nemolist_remove(&client->link);
 
 			free(client);

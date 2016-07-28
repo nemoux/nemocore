@@ -31,6 +31,9 @@ extern int nemoenvs_launch_xserver0(struct nemoenvs *envs);
 
 extern int nemoenvs_launch_xapp(struct nemoenvs *envs, const char *path, const char *args, struct clientstate *state);
 
+extern int nemoenvs_attach_xclient(struct nemoenvs *envs, struct nemoxserver *xserver, pid_t pid);
+extern int nemoenvs_detach_xclient(struct nemoenvs *envs, pid_t pid);
+
 extern int nemoenvs_terminate_xclient(struct nemoenvs *envs, pid_t pid);
 extern int nemoenvs_terminate_xclients(struct nemoenvs *envs);
 extern int nemoenvs_terminate_xservers(struct nemoenvs *envs);

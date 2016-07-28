@@ -36,6 +36,8 @@ static void default_touchpoint_grab_down(struct touchpoint_grab *grab, uint32_t 
 	touchpoint_down(tp, x, y);
 
 	if (tp->focus != NULL) {
+		tp->focus->lasttouch = time;
+
 		nemocontent_touch_down(tp, tp->focus->content, time, touchid, sx, sy, x, y);
 	}
 

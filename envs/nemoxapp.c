@@ -128,18 +128,10 @@ static int nemoenvs_execute_xapp(struct nemoenvs *envs, struct nemoxserver *xser
 
 	pid = wayland_execute_path(nemotoken_get_token(args, 0), nemotoken_get_tokens(args), nemotoken_get_tokens(envp));
 	if (pid > 0) {
-		struct nemoxclient *xclient;
-
-		xclient = (struct nemoxclient *)malloc(sizeof(struct nemoxclient));
-		xclient->xserver = xserver;
-		xclient->pid = pid;
-
-		wl_list_insert(&envs->xclient_list, &xclient->link);
+		nemoenvs_attach_xclient(envs, xserver, pid);
 
 		if (state != NULL)
 			clientstate_set_pid(state, pid);
-
-		xserver->state = NEMOXSERVER_USED_STATE;
 	}
 
 	nemotoken_destroy(args);
@@ -169,12 +161,48 @@ int nemoenvs_launch_xapp(struct nemoenvs *envs, const char *path, const char *ar
 	return 0;
 }
 
+int nemoenvs_attach_xclient(struct nemoenvs *envs, struct nemoxserver *xserver, pid_t pid)
+{
+	struct nemoxclient *xclient;
+
+	xclient = (struct nemoxclient *)malloc(sizeof(struct nemoxclient));
+	xclient->xserver = xserver;
+	xclient->pid = pid;
+
+	xserver->state = NEMOXSERVER_USED_STATE;
+
+	wl_list_insert(&envs->xclient_list, &xclient->link);
+
+	return 0;
+}
+
+int nemoenvs_detach_xclient(struct nemoenvs *envs, pid_t pid)
+{
+	struct nemoxclient *xclient;
+
+	wl_list_for_each(xclient, &envs->xclient_list, link) {
+		if (xclient->pid == pid) {
+			wl_list_remove(&xclient->link);
+
+			xclient->xserver->state = NEMOXSERVER_READY_STATE;
+
+			free(xclient);
+
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
 int nemoenvs_terminate_xclient(struct nemoenvs *envs, pid_t pid)
 {
 	struct nemoxclient *xclient;
 
 	wl_list_for_each(xclient, &envs->xclient_list, link) {
 		if (xclient->pid == pid) {
+			kill(-xclient->pid, SIGKILL);
+
 			wl_list_remove(&xclient->link);
 
 			xclient->xserver->state = NEMOXSERVER_READY_STATE;

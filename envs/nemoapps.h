@@ -38,7 +38,7 @@ extern void nemoenvs_execute_daemons(struct nemoenvs *envs);
 extern void nemoenvs_execute_screensavers(struct nemoenvs *envs);
 
 extern int nemoenvs_attach_client(struct nemoenvs *envs, pid_t pid);
-extern void nemoenvs_detach_client(struct nemoenvs *envs, pid_t pid);
+extern int nemoenvs_detach_client(struct nemoenvs *envs, pid_t pid);
 
 extern int nemoenvs_terminate_client(struct nemoenvs *envs, pid_t pid);
 extern int nemoenvs_terminate_clients(struct nemoenvs *envs);

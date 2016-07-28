@@ -134,6 +134,8 @@ struct nemoview {
 
 	int grabcount;
 
+	uint32_t lasttouch;
+
 	void *data;
 };
 
