@@ -251,6 +251,7 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 						bin->initial.y - canvas->base.height * bin->initial.dy);
 				nemoview_correct_pivot(view, view->content->width * bin->initial.dx, view->content->height * bin->initial.dy);
 				nemoview_set_rotation(view, bin->initial.r);
+				nemoview_set_scale(view, bin->initial.sx, bin->initial.sy);
 				nemoview_update_transform(view);
 				nemoview_damage_below(view);
 			} else {
