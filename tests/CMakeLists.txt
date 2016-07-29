@@ -90,6 +90,16 @@ TARGET_LINK_LIBRARIES(nemolog
 
 INSTALL(TARGETS nemolog DESTINATION bin)
 
+add_executable(nemologdump
+	nemologdump.c
+	)
+
+TARGET_LINK_LIBRARIES(nemologdump
+	nemoasst
+	)
+
+INSTALL(TARGETS nemologdump DESTINATION bin)
+
 add_executable(nemomsg
 	nemomsg.c
 	)
