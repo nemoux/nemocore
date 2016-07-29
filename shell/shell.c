@@ -1006,6 +1006,8 @@ int nemoshell_use_client_state(struct nemoshell *shell, struct shellbin *bin)
 		if (proc_get_process_parent_id(pid, &ppid) > 0) {
 			state = nemoshell_get_client_state(shell, ppid);
 			if (state != NULL) {
+				bin->pid = ppid;
+
 				nemoshell_set_client_state(bin, state);
 
 				return 1;
