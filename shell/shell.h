@@ -159,10 +159,6 @@ struct clientstate {
 	int is_maximized;
 	int is_fullscreen;
 
-	uint32_t min_width, min_height;
-	uint32_t max_width, max_height;
-	int has_min_size, has_max_size;
-
 	int has_pickscreen;
 	int has_pitchscreen;
 
@@ -460,20 +456,6 @@ static inline void clientstate_set_size(struct clientstate *state, uint32_t widt
 {
 	state->width = width;
 	state->height = height;
-}
-
-static inline void clientstate_set_max_size(struct clientstate *state, uint32_t width, uint32_t height)
-{
-	state->max_width = width;
-	state->max_height = height;
-	state->has_max_size = 1;
-}
-
-static inline void clientstate_set_min_size(struct clientstate *state, uint32_t width, uint32_t height)
-{
-	state->min_width = width;
-	state->min_height = height;
-	state->has_min_size = 1;
 }
 
 static inline void clientstate_set_pickscreen(struct clientstate *state, int pickscreen)

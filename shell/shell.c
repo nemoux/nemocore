@@ -463,8 +463,8 @@ struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas
 
 	bin->min_width = shell->bin.min_width;
 	bin->min_height = shell->bin.min_height;
-	bin->max_width = shell->bin.max_width != 0 ? shell->bin.max_width : nemocompz_get_scene_width(shell->compz) * 1.5f;
-	bin->max_height = shell->bin.max_height != 0 ? shell->bin.max_height : nemocompz_get_scene_height(shell->compz) * 1.5f;
+	bin->max_width = shell->bin.max_width != 0 ? shell->bin.max_width : nemocompz_get_scene_width(shell->compz);
+	bin->max_height = shell->bin.max_height != 0 ? shell->bin.max_height : nemocompz_get_scene_height(shell->compz);
 
 	bin->scale.ax = 0.5f;
 	bin->scale.ay = 0.5f;
@@ -964,15 +964,6 @@ static inline void nemoshell_set_client_state(struct shellbin *bin, struct clien
 		bin->initial.sy = state->sy;
 		bin->initial.dx = state->dx;
 		bin->initial.dy = state->dy;
-	}
-
-	if (state->has_max_size != 0) {
-		bin->max_width = state->max_width;
-		bin->max_height = state->max_height;
-	}
-	if (state->has_min_size != 0) {
-		bin->min_width = state->min_width;
-		bin->min_height = state->min_height;
 	}
 
 	if (state->has_pickscreen != 0)
