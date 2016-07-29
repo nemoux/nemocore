@@ -180,8 +180,7 @@ static void nemoscreen_bind_output(struct wl_client *client, void *data, uint32_
 	wl_resource_set_implementation(resource, NULL, screen, nemoscreen_unbind_output);
 
 	wl_output_send_geometry(resource,
-			screen->x,
-			screen->y,
+			0, 0,
 			screen->mmwidth,
 			screen->mmheight,
 			screen->subpixel,
@@ -191,21 +190,11 @@ static void nemoscreen_bind_output(struct wl_client *client, void *data, uint32_
 	if (version >= 2)
 		wl_output_send_scale(resource, 1);
 
-#if	0
-	wl_list_for_each(mode, &screen->mode_list, link) {
-		wl_output_send_mode(resource,
-				mode->flags,
-				mode->width,
-				mode->height,
-				mode->refresh);
-	}
-#else
 	wl_output_send_mode(resource,
 			WL_OUTPUT_MODE_CURRENT | WL_OUTPUT_MODE_PREFERRED,
 			nemocompz_get_scene_width(screen->compz),
 			nemocompz_get_scene_height(screen->compz),
 			60000);
-#endif
 
 	if (version >= 2)
 		wl_output_send_done(resource);

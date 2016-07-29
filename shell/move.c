@@ -155,7 +155,10 @@ static void move_shellgrab_dispatch_effect_done(struct nemoeffect *base)
 				wl_list_init(&sbin->screen_link);
 
 				if (sbin->resource != NULL) {
-					kill(sbin->pid, SIGKILL);
+					if (sbin->type == NEMOSHELL_SURFACE_XWAYLAND_TYPE)
+						kill(-sbin->pid, SIGKILL);
+					else
+						kill(sbin->pid, SIGKILL);
 				}
 			}
 
