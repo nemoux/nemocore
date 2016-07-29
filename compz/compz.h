@@ -64,6 +64,12 @@ struct nemocompz {
 
 	int scene_dirty;
 
+	struct {
+		int32_t x, y;
+		int32_t width, height;
+	} output;
+	int has_output;
+
 	struct wl_event_source *sigsrc[8];
 
 	struct udev *udev;
@@ -165,6 +171,8 @@ extern void nemocompz_update_scene(struct nemocompz *compz);
 extern void nemocompz_scene_dirty(struct nemocompz *compz);
 extern void nemocompz_set_scene(struct nemocompz *compz, int32_t x, int32_t y, int32_t width, int32_t height);
 extern void nemocompz_set_scope(struct nemocompz *compz, int32_t x, int32_t y, int32_t width, int32_t height);
+
+extern void nemocompz_set_output(struct nemocompz *compz, int32_t x, int32_t y, int32_t width, int32_t height);
 
 extern void nemocompz_update_transform(struct nemocompz *compz);
 extern void nemocompz_update_output(struct nemocompz *compz);

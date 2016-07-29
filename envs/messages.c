@@ -351,6 +351,9 @@ static void nemoenvs_handle_set_nemoshell_bin(struct nemoshell *shell, struct it
 		} else if (strcmp(name, "max_height") == 0) {
 			shell->bin.max_height = strtoul(value, NULL, 10);
 		}
+
+		if (shell->bin.max_width > 0 && shell->bin.max_height > 0)
+			nemocompz_set_output(shell->compz, 0, 0, shell->bin.max_width, shell->bin.max_height);
 	}
 }
 

@@ -167,6 +167,7 @@ static void nemoscreen_unbind_output(struct wl_resource *resource)
 static void nemoscreen_bind_output(struct wl_client *client, void *data, uint32_t version, uint32_t id)
 {
 	struct nemoscreen *screen = (struct nemoscreen *)data;
+	struct nemocompz *compz = screen->compz;
 	struct nemomode *mode;
 	struct wl_resource *resource;
 
@@ -180,7 +181,8 @@ static void nemoscreen_bind_output(struct wl_client *client, void *data, uint32_
 	wl_resource_set_implementation(resource, NULL, screen, nemoscreen_unbind_output);
 
 	wl_output_send_geometry(resource,
-			0, 0,
+			compz->output.x,
+			compz->output.y,
 			screen->mmwidth,
 			screen->mmheight,
 			screen->subpixel,
@@ -192,8 +194,8 @@ static void nemoscreen_bind_output(struct wl_client *client, void *data, uint32_
 
 	wl_output_send_mode(resource,
 			WL_OUTPUT_MODE_CURRENT | WL_OUTPUT_MODE_PREFERRED,
-			nemocompz_get_scene_width(screen->compz),
-			nemocompz_get_scene_height(screen->compz),
+			compz->output.width,
+			compz->output.height,
 			60000);
 
 	if (version >= 2)
