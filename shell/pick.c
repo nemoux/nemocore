@@ -85,7 +85,10 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 
 			if (bin->min_width >= width || bin->min_height >= height) {
 				if (nemoview_has_state(bin->view, NEMOVIEW_CLOSE_STATE) == 0) {
-					kill(bin->pid, SIGKILL);
+					if (bin->type == NEMOSHELL_SURFACE_XWAYLAND_TYPE)
+						kill(-bin->pid, SIGKILL);
+					else
+						kill(bin->pid, SIGKILL);
 				} else {
 					nemoshell_send_bin_close(bin);
 				}
