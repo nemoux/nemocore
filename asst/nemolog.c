@@ -22,6 +22,15 @@ static int nemologtype = 0;
 
 void __attribute__((constructor(101))) nemolog_initialize(void)
 {
+	__nsecs = time_current_nsecs();
+}
+
+void __attribute__((destructor(101))) nemolog_finalize(void)
+{
+}
+
+static int nemolog_prepare(void)
+{
 	if (getenv("NEMOLOG_SOCKET_PATH") != NULL)
 		nemolog_open_socket(getenv("NEMOLOG_SOCKET_PATH"));
 	else if (getenv("NEMOLOG_FILE_PATH") != NULL)
@@ -29,10 +38,10 @@ void __attribute__((constructor(101))) nemolog_initialize(void)
 	else
 		nemolog_set_file(2);
 
-	__nsecs = time_current_nsecs();
+	return nemologfile;
 }
 
-void __attribute__((destructor(101))) nemolog_finalize(void)
+static void nemolog_finish(void)
 {
 	nemolog_close_file();
 }
@@ -40,6 +49,7 @@ void __attribute__((destructor(101))) nemolog_finalize(void)
 int nemolog_open_file(const char *filepath)
 {
 	nemologfile = open(filepath, O_RDWR | O_CREAT, 0644);
+	nemologtype = 0;
 
 	return nemologfile;
 }
@@ -103,12 +113,15 @@ int nemolog_message(const char *tag, const char *fmt, ...)
 	va_list vargs;
 	int r;
 
-	if (nemologfile < 0)
+	if (nemologfile < 0 && nemolog_prepare() < 0)
 		return 0;
 
 	va_start(vargs, fmt);
 	r = nemolog_write("\e[32;1mNEMO:\e[m \e[1;33m[%s] (%.3f)\e[0m ", tag, (double)(nsecs - __nsecs) / 1000000000.0f, fmt, vargs);
 	va_end(vargs);
+
+	if (r <= 0)
+		nemologfile = -1;
 
 	return r;
 }
@@ -119,12 +132,15 @@ int nemolog_warning(const char *tag, const char *fmt, ...)
 	va_list vargs;
 	int r;
 
-	if (nemologfile < 0)
+	if (nemologfile < 0 && nemolog_prepare() < 0)
 		return 0;
 
 	va_start(vargs, fmt);
 	r = nemolog_write("\e[32;1mNEMO:\e[m \e[1;30m[%s] (%.3f)\e[0m ", tag, (double)(nsecs - __nsecs) / 1000000000.0f, fmt, vargs);
 	va_end(vargs);
+
+	if (r <= 0)
+		nemologfile = -1;
 
 	return r;
 }
@@ -135,12 +151,15 @@ int nemolog_error(const char *tag, const char *fmt, ...)
 	va_list vargs;
 	int r;
 
-	if (nemologfile < 0)
+	if (nemologfile < 0 && nemolog_prepare() < 0)
 		return 0;
 
 	va_start(vargs, fmt);
 	r = nemolog_write("\e[32;1mNEMO:\e[m \e[1;31m[%s] (%.3f)\e[0m ", tag, (double)(nsecs - __nsecs) / 1000000000.0f, fmt, vargs);
 	va_end(vargs);
+
+	if (r <= 0)
+		nemologfile = -1;
 
 	return r;
 }
@@ -152,12 +171,15 @@ int nemolog_check(int check, const char *tag, const char *fmt, ...)
 		va_list vargs;
 		int r;
 
-		if (nemologfile < 0)
+		if (nemologfile < 0 && nemolog_prepare() < 0)
 			return 0;
 
 		va_start(vargs, fmt);
 		r = nemolog_write("\e[32;1mNEMO:\e[m \e[1;34m[%s] (%.3f)\e[0m ", tag, (double)(nsecs - __nsecs) / 1000000000.0f, fmt, vargs);
 		va_end(vargs);
+
+		if (r <= 0)
+			nemologfile = -1;
 
 		return r;
 	}
