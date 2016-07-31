@@ -812,11 +812,11 @@ static inline int nemocompz_check_layer(struct nemocompz *compz, struct nemoview
 				}
 			}
 
-			if (nemoview_has_state(view, NEMOVIEW_LAYER_STATE | NEMOVIEW_OPAQUE_STATE) &&
+			if (nemoview_has_state_all(view, NEMOVIEW_LAYER_STATE | NEMOVIEW_OPAQUE_STATE) &&
 					nemoview_contain_view(view, cview) != 0)
 				return -1;
 
-			if (nemoview_has_state(view, NEMOVIEW_LAYER_STATE) &&
+			if (nemoview_has_state_all(view, NEMOVIEW_LAYER_STATE) &&
 					nemoview_overlap_view(cview, view) != 0)
 				visible = 0;
 		}
