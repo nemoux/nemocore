@@ -292,6 +292,8 @@ static void nemoenvs_handle_set_nemoshell_pick(struct nemoshell *shell, struct i
 			shell->pick.fullscreen_scale = strtod(value, NULL);
 		} else if (strcmp(name, "resize_interval") == 0) {
 			shell->pick.resize_interval = strtod(value, NULL);
+		} else if (strcmp(name, "minimum_taps") == 0) {
+			shell->pick.minimum_taps = strtoul(value, NULL, 10);
 		} else if (strcmp(name, "scale") == 0) {
 			if (strcmp(value, "off") == 0)
 				shell->pick.flags &= ~NEMOSHELL_PICK_SCALE_FLAG;

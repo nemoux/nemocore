@@ -739,6 +739,7 @@ struct nemoshell *nemoshell_create(struct nemocompz *compz)
 	shell->pick.scale_distance = 25.0f;
 	shell->pick.fullscreen_scale = 1.25f;
 	shell->pick.resize_interval = 50.0f;
+	shell->pick.minimum_taps = 3;
 
 	shell->bin.min_width = 0;
 	shell->bin.min_height = 0;

@@ -256,11 +256,12 @@ void nemoenvs_handle_touch_event(struct nemocompz *compz, struct touchpoint *tp,
 				datadevice_set_focus(tp->touch->seat, tp->focus);
 
 				if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_BINDABLE_STATE) != 0) {
+					struct nemoshell *shell = (struct nemoshell *)data;
 					struct touchpoint *tps[10];
 					int tapcount;
 
 					tapcount = nemoseat_get_touchpoint_by_view(compz->seat, tp->focus, tps, 10);
-					if (tapcount >= 3) {
+					if (tapcount >= shell->pick.minimum_taps) {
 						struct touchpoint *tp0, *tp1;
 
 						nemoseat_get_distant_touchpoint(compz->seat, tps, tapcount, &tp0, &tp1);

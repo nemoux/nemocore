@@ -114,6 +114,8 @@ struct nemoshell {
 
 		double fullscreen_scale;
 		double resize_interval;
+
+		int minimum_taps;
 	} pick;
 
 	struct {
