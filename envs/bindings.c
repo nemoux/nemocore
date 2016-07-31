@@ -90,7 +90,8 @@ static void nemoenvs_dispatch_touch_canvas_event(struct nemoshow *show, struct s
 void nemoenvs_handle_touch_key(struct nemocompz *compz, struct nemokeyboard *keyboard, uint32_t time, uint32_t key, enum wl_keyboard_key_state state, void *data)
 {
 	if (state == WL_KEYBOARD_KEY_STATE_PRESSED) {
-		struct nemoshell *shell = (struct nemoshell *)data;
+		struct nemoenvs *envs = (struct nemoenvs *)data;
+		struct nemoshell *shell = envs->shell;
 		struct nemoshow *show;
 		struct showone *scene;
 		struct showone *canvas;
@@ -256,7 +257,8 @@ void nemoenvs_handle_touch_event(struct nemocompz *compz, struct touchpoint *tp,
 				datadevice_set_focus(tp->touch->seat, tp->focus);
 
 				if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_BINDABLE_STATE) != 0) {
-					struct nemoshell *shell = (struct nemoshell *)data;
+					struct nemoenvs *envs = (struct nemoenvs *)data;
+					struct nemoshell *shell = envs->shell;
 					struct touchpoint *tps[10];
 					int tapcount;
 
