@@ -55,10 +55,17 @@ struct nemoenvs {
 	struct wl_listener xserver_listener;
 	int is_waiting_sigusr1;
 
-	int beat_soc;
-	int beat_port;
-	int beat_timeout;
-	struct nemotimer *beat_timer;
+	struct {
+		int pick_taps;
+	} legacy;
+
+	struct {
+		int soc;
+		int port;
+		int timeout;
+
+		struct nemotimer *timer;
+	} beat;
 };
 
 extern struct nemoenvs *nemoenvs_create(struct nemoshell *shell);

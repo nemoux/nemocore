@@ -215,62 +215,6 @@ static void nemoenvs_handle_set_nemoshell_input(struct nemoshell *shell, struct 
 	}
 }
 
-static void nemoenvs_handle_set_nemoshell_scene(struct nemoshell *shell, struct itemone *one)
-{
-	struct nemocompz *compz = shell->compz;
-	int32_t x = nemoitem_one_get_iattr(one, "x", 0);
-	int32_t y = nemoitem_one_get_iattr(one, "y", 0);
-	int32_t width = nemoitem_one_get_iattr(one, "width", 0);
-	int32_t height = nemoitem_one_get_iattr(one, "height", 0);
-
-	nemocompz_set_scene(compz, x, y, width, height);
-}
-
-static void nemoenvs_handle_set_nemoshell_scope(struct nemoshell *shell, struct itemone *one)
-{
-	struct nemocompz *compz = shell->compz;
-	int32_t x = nemoitem_one_get_iattr(one, "x", 0);
-	int32_t y = nemoitem_one_get_iattr(one, "y", 0);
-	int32_t width = nemoitem_one_get_iattr(one, "width", 0);
-	int32_t height = nemoitem_one_get_iattr(one, "height", 0);
-
-	nemocompz_set_scope(compz, x, y, width, height);
-}
-
-static void nemoenvs_handle_set_nemoshell_virtuio(struct nemoshell *shell, struct itemone *one)
-{
-	struct nemocompz *compz = shell->compz;
-	int32_t port = nemoitem_one_get_iattr(one, "port", 3333);
-	int32_t fps = nemoitem_one_get_iattr(one, "fps", 60);
-	int32_t x = nemoitem_one_get_iattr(one, "x", 0);
-	int32_t y = nemoitem_one_get_iattr(one, "y", 0);
-	int32_t width = nemoitem_one_get_iattr(one, "width", 0);
-	int32_t height = nemoitem_one_get_iattr(one, "height", 0);
-
-	virtuio_create(compz, port, fps, x, y, width, height);
-}
-
-static void nemoenvs_handle_set_nemoshell_tuio(struct nemoshell *shell, struct itemone *one)
-{
-	struct nemocompz *compz = shell->compz;
-	int32_t port = nemoitem_one_get_iattr(one, "port", 3333);
-	int32_t max = nemoitem_one_get_iattr(one, "max", 16);
-	const char *protocol = nemoitem_one_get_sattr(one, "protocol", "osc");
-
-	tuio_create(compz,
-			strcmp(protocol, "osc") == 0 ? NEMOTUIO_OSC_PROTOCOL : NEMOTUIO_XML_PROTOCOL,
-			port, max);
-}
-
-static void nemoenvs_handle_set_nemoshell_plugin(struct nemoshell *shell, struct itemone *one)
-{
-	struct nemocompz *compz = shell->compz;
-
-	nemocompz_load_plugin(compz,
-			nemoitem_one_get_attr(one, "path"),
-			nemoitem_one_get_attr(one, "args"));
-}
-
 static void nemoenvs_handle_set_nemoshell_pick(struct nemoshell *shell, struct itemone *one)
 {
 	struct itemattr *attr;
@@ -292,8 +236,6 @@ static void nemoenvs_handle_set_nemoshell_pick(struct nemoshell *shell, struct i
 			shell->pick.fullscreen_scale = strtod(value, NULL);
 		} else if (strcmp(name, "resize_interval") == 0) {
 			shell->pick.resize_interval = strtod(value, NULL);
-		} else if (strcmp(name, "minimum_taps") == 0) {
-			shell->pick.minimum_taps = strtoul(value, NULL, 10);
 		} else if (strcmp(name, "scale") == 0) {
 			if (strcmp(value, "off") == 0)
 				shell->pick.flags &= ~NEMOSHELL_PICK_SCALE_FLAG;
@@ -470,14 +412,6 @@ static void nemoenvs_handle_put_nemoshell_stage(struct nemoshell *shell, struct 
 	}
 }
 
-static void nemoenvs_handle_set_nemoshell_font(struct nemoshell *shell, struct itemone *one)
-{
-	char contents[1024];
-
-	nemoitem_one_save(one, contents, ' ', '\"');
-	setenv("NEMOSHELL_FONT", contents, 1);
-}
-
 static void nemoenvs_handle_set_nemoshell_show(struct nemoshell *shell, struct itemone *one)
 {
 	char contents[128];
@@ -546,18 +480,10 @@ static void nemoenvs_handle_set_nemoshell_tale(struct nemoshell *shell, struct i
 	}
 }
 
-static void nemoenvs_handle_set_nemoshell_idle(struct nemoshell *shell, struct itemone *one)
-{
-	uint32_t timeout;
-
-	timeout = nemoitem_one_get_iattr(one, "timeout", 0);
-
-	nemocompz_set_idle_timeout(shell->compz, timeout);
-}
-
 int nemoenvs_dispatch_system_message(struct nemoenvs *envs, const char *src, const char *dst, const char *cmd, const char *path, struct itemone *one, void *data)
 {
 	struct nemoshell *shell = (struct nemoshell *)data;
+	struct nemocompz *compz = shell->compz;
 
 	if (strcmp(dst, envs->name) == 0) {
 		if (strcmp(cmd, "set") == 0) {
@@ -566,15 +492,40 @@ int nemoenvs_dispatch_system_message(struct nemoenvs *envs, const char *src, con
 			} else if (strcmp(path, "/nemoshell/input") == 0) {
 				nemoenvs_handle_set_nemoshell_input(shell, one);
 			} else if (strcmp(path, "/nemoshell/scene") == 0) {
-				nemoenvs_handle_set_nemoshell_scene(shell, one);
+				int32_t x = nemoitem_one_get_iattr(one, "x", 0);
+				int32_t y = nemoitem_one_get_iattr(one, "y", 0);
+				int32_t width = nemoitem_one_get_iattr(one, "width", 0);
+				int32_t height = nemoitem_one_get_iattr(one, "height", 0);
+
+				nemocompz_set_scene(compz, x, y, width, height);
 			} else if (strcmp(path, "/nemoshell/scope") == 0) {
-				nemoenvs_handle_set_nemoshell_scope(shell, one);
+				int32_t x = nemoitem_one_get_iattr(one, "x", 0);
+				int32_t y = nemoitem_one_get_iattr(one, "y", 0);
+				int32_t width = nemoitem_one_get_iattr(one, "width", 0);
+				int32_t height = nemoitem_one_get_iattr(one, "height", 0);
+
+				nemocompz_set_scope(compz, x, y, width, height);
 			} else if (strcmp(path, "/nemoshell/virtuio") == 0) {
-				nemoenvs_handle_set_nemoshell_virtuio(shell, one);
+				int32_t port = nemoitem_one_get_iattr(one, "port", 3333);
+				int32_t fps = nemoitem_one_get_iattr(one, "fps", 60);
+				int32_t x = nemoitem_one_get_iattr(one, "x", 0);
+				int32_t y = nemoitem_one_get_iattr(one, "y", 0);
+				int32_t width = nemoitem_one_get_iattr(one, "width", 0);
+				int32_t height = nemoitem_one_get_iattr(one, "height", 0);
+
+				virtuio_create(compz, port, fps, x, y, width, height);
 			} else if (strcmp(path, "/nemoshell/tuio") == 0) {
-				nemoenvs_handle_set_nemoshell_tuio(shell, one);
+				int32_t port = nemoitem_one_get_iattr(one, "port", 3333);
+				int32_t max = nemoitem_one_get_iattr(one, "max", 16);
+				const char *protocol = nemoitem_one_get_sattr(one, "protocol", "osc");
+
+				tuio_create(compz,
+						strcmp(protocol, "osc") == 0 ? NEMOTUIO_OSC_PROTOCOL : NEMOTUIO_XML_PROTOCOL,
+						port, max);
 			} else if (strcmp(path, "/nemoshell/plugin") == 0) {
-				nemoenvs_handle_set_nemoshell_plugin(shell, one);
+				nemocompz_load_plugin(compz,
+						nemoitem_one_get_attr(one, "path"),
+						nemoitem_one_get_attr(one, "args"));
 			} else if (strcmp(path, "/nemoshell/pick") == 0) {
 				nemoenvs_handle_set_nemoshell_pick(shell, one);
 			} else if (strcmp(path, "/nemoshell/pitch") == 0) {
@@ -586,13 +537,22 @@ int nemoenvs_dispatch_system_message(struct nemoenvs *envs, const char *src, con
 			} else if (strcmp(path, "/nemoshell/stage") == 0) {
 				nemoenvs_handle_set_nemoshell_stage(shell, one);
 			} else if (strcmp(path, "/nemoshell/font") == 0) {
-				nemoenvs_handle_set_nemoshell_font(shell, one);
+				char contents[1024];
+
+				nemoitem_one_save(one, contents, ' ', '\"');
+				setenv("NEMOSHELL_FONT", contents, 1);
 			} else if (strcmp(path, "/nemoshell/show") == 0) {
 				nemoenvs_handle_set_nemoshell_show(shell, one);
 			} else if (strcmp(path, "/nemoshell/tale") == 0) {
 				nemoenvs_handle_set_nemoshell_tale(shell, one);
 			} else if (strcmp(path, "/nemoshell/idle") == 0) {
-				nemoenvs_handle_set_nemoshell_idle(shell, one);
+				uint32_t timeout;
+
+				timeout = nemoitem_one_get_iattr(one, "timeout", 0);
+
+				nemocompz_set_idle_timeout(shell->compz, timeout);
+			} else if (strcmp(path, "/nemoshell/legacy") == 0) {
+				envs->legacy.pick_taps = nemoitem_one_get_iattr(one, "pick_taps", 3);
 			}
 		} else if (strcmp(cmd, "put") == 0) {
 			if (strcmp(path, "/nemoshell/screen") == 0) {
@@ -612,6 +572,7 @@ int nemoenvs_dispatch_system_message(struct nemoenvs *envs, const char *src, con
 			} else if (strcmp(path, "/nemoshell/font") == 0) {
 			} else if (strcmp(path, "/nemoshell/show") == 0) {
 			} else if (strcmp(path, "/nemoshell/tale") == 0) {
+			} else if (strcmp(path, "/nemoshell/legacy") == 0) {
 			}
 		}
 	}

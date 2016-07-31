@@ -57,7 +57,9 @@ struct nemoenvs *nemoenvs_create(struct nemoshell *shell)
 
 	wl_list_init(&envs->xserver_listener.link);
 
-	envs->beat_soc = -1;
+	envs->legacy.pick_taps = 3;
+
+	envs->beat.soc = -1;
 
 	nemoenvs_set_callback(envs, nemoenvs_dispatch_client_message, shell);
 	nemoenvs_set_callback(envs, nemoenvs_dispatch_system_message, shell);
@@ -100,10 +102,10 @@ void nemoenvs_destroy(struct nemoenvs *envs)
 	if (envs->timer != NULL)
 		nemotimer_destroy(envs->timer);
 
-	if (envs->beat_soc >= 0)
-		close(envs->beat_soc);
-	if (envs->beat_timer != NULL)
-		nemotimer_destroy(envs->beat_timer);
+	if (envs->beat.soc >= 0)
+		close(envs->beat.soc);
+	if (envs->beat.timer != NULL)
+		nemotimer_destroy(envs->beat.timer);
 
 	if (envs->name != NULL)
 		free(envs->name);
