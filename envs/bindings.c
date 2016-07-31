@@ -46,9 +46,30 @@
 
 #include <nemoenvs.h>
 #include <nemotoken.h>
+#include <nemoitem.h>
 #include <showhelper.h>
 #include <nemohelper.h>
 #include <nemolog.h>
+
+void nemoenvs_handle_terminal_key(struct nemocompz *compz, struct nemokeyboard *keyboard, uint32_t time, uint32_t key, enum wl_keyboard_key_state state, void *data)
+{
+	if (state == WL_KEYBOARD_KEY_STATE_PRESSED) {
+		struct nemoenvs *envs = (struct nemoenvs *)data;
+		const char *_path = nemoitem_get_sattr(envs->configs, "/nemoshell/terminal", "path", NULL);
+		const char *_args = nemoitem_get_sattr(envs->configs, "/nemoshell/terminal", "args", NULL);
+		struct nemotoken *args;
+
+		args = nemotoken_create(_path, strlen(_path));
+		if (_args != NULL)
+			nemotoken_append_format(args, ";%s", _args);
+		nemotoken_divide(args, ';');
+		nemotoken_update(args);
+
+		wayland_execute_path(_path, nemotoken_get_tokens(args), NULL);
+
+		nemotoken_destroy(args);
+	}
+}
 
 static void nemoenvs_dispatch_touch_canvas_event(struct nemoshow *show, struct showone *canvas, void *event)
 {
