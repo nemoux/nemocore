@@ -543,6 +543,8 @@ void nemoactor_schedule_repaint(struct nemoactor *actor)
 {
 	struct nemoscreen *screen;
 
+	nemoview_update_transform(actor->view);
+
 	wl_list_for_each(screen, &actor->compz->screen_list, link) {
 		if (actor->base.screen_mask & (1 << screen->id))
 			nemoscreen_schedule_repaint(screen);

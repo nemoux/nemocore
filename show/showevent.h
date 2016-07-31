@@ -165,6 +165,16 @@ static inline uint32_t nemoshow_event_get_tag(void *event)
 	return nemotale_event_get_tag((struct taleevent *)event);
 }
 
+static inline void nemoshow_event_set_data(void *event, void *data)
+{
+	nemotale_event_set_data((struct taleevent *)event, data);
+}
+
+static inline void *nemoshow_event_get_data(void *event)
+{
+	return nemotale_event_get_data((struct taleevent *)event);
+}
+
 static inline const char *nemoshow_event_get_name(void *event)
 {
 	return nemotale_event_get_name((struct taleevent *)event);

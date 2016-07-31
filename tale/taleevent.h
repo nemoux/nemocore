@@ -65,6 +65,7 @@ struct taletap {
 	int done;
 
 	uint32_t tag;
+	void *data;
 
 	float x, y;
 	float gx, gy;
@@ -140,6 +141,16 @@ static inline void nemotale_tap_set_tag(struct taletap *tap, uint32_t tag)
 static inline uint32_t nemotale_tap_get_tag(struct taletap *tap)
 {
 	return tap->tag;
+}
+
+static inline void nemotale_tap_set_data(struct taletap *tap, void *data)
+{
+	tap->data = data;
+}
+
+static inline void *nemotale_tap_get_data(struct taletap *tap)
+{
+	return tap->data;
 }
 
 static inline struct taletap *nemotale_pointer_get_tap(struct nemotale *tale, uint64_t device)
@@ -314,6 +325,16 @@ static inline void nemotale_event_set_tag(struct taleevent *event, uint32_t tag)
 static inline uint32_t nemotale_event_get_tag(struct taleevent *event)
 {
 	return nemotale_tap_get_tag(event->tap);
+}
+
+static inline void nemotale_event_set_data(struct taleevent *event, void *data)
+{
+	nemotale_tap_set_data(event->tap, data);
+}
+
+static inline void *nemotale_event_get_data(struct taleevent *event)
+{
+	return nemotale_tap_get_data(event->tap);
 }
 
 static inline const char *nemotale_event_get_name(struct taleevent *event)
