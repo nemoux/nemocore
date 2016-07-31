@@ -270,7 +270,7 @@ void nemoenvs_execute_screensavers(struct nemoenvs *envs)
 	}
 }
 
-int nemoenvs_attach_client(struct nemoenvs *envs, pid_t pid)
+int nemoenvs_attach_client(struct nemoenvs *envs, pid_t pid, const char *name)
 {
 	struct nemoclient *client;
 
@@ -279,6 +279,7 @@ int nemoenvs_attach_client(struct nemoenvs *envs, pid_t pid)
 		return -1;
 
 	client->pid = pid;
+	client->name = strdup(name);
 
 	nemolist_insert(&envs->client_list, &client->link);
 
@@ -293,6 +294,7 @@ int nemoenvs_detach_client(struct nemoenvs *envs, pid_t pid)
 		if (client->pid == pid) {
 			nemolist_remove(&client->link);
 
+			free(client->name);
 			free(client);
 
 			return 1;
@@ -312,6 +314,7 @@ int nemoenvs_terminate_client(struct nemoenvs *envs, pid_t pid)
 
 			nemolist_remove(&client->link);
 
+			free(client->name);
 			free(client);
 
 			return 1;

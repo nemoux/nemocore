@@ -128,7 +128,7 @@ static int nemoenvs_execute_xapp(struct nemoenvs *envs, struct nemoxserver *xser
 
 	pid = wayland_execute_path(nemotoken_get_token(args, 0), nemotoken_get_tokens(args), nemotoken_get_tokens(envp));
 	if (pid > 0) {
-		nemoenvs_attach_xclient(envs, xserver, pid);
+		nemoenvs_attach_xclient(envs, xserver, pid, _path);
 
 		if (state != NULL)
 			clientstate_set_pid(state, pid);
@@ -161,13 +161,14 @@ int nemoenvs_launch_xapp(struct nemoenvs *envs, const char *path, const char *ar
 	return 0;
 }
 
-int nemoenvs_attach_xclient(struct nemoenvs *envs, struct nemoxserver *xserver, pid_t pid)
+int nemoenvs_attach_xclient(struct nemoenvs *envs, struct nemoxserver *xserver, pid_t pid, const char *name)
 {
 	struct nemoxclient *xclient;
 
 	xclient = (struct nemoxclient *)malloc(sizeof(struct nemoxclient));
 	xclient->xserver = xserver;
 	xclient->pid = pid;
+	xclient->name = strdup(name);
 
 	xserver->state = NEMOXSERVER_USED_STATE;
 
@@ -186,6 +187,7 @@ int nemoenvs_detach_xclient(struct nemoenvs *envs, pid_t pid)
 
 			xclient->xserver->state = NEMOXSERVER_READY_STATE;
 
+			free(xclient->name);
 			free(xclient);
 
 			return 1;
@@ -207,6 +209,7 @@ int nemoenvs_terminate_xclient(struct nemoenvs *envs, pid_t pid)
 
 			xclient->xserver->state = NEMOXSERVER_READY_STATE;
 
+			free(xclient->name);
 			free(xclient);
 
 			return 1;
