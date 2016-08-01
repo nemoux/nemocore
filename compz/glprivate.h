@@ -48,9 +48,7 @@ struct glrenderer {
 	PFNGLEGLIMAGETARGETTEXTURE2DOESPROC image_target_texture_2d;
 	PFNEGLCREATEIMAGEKHRPROC create_image;
 	PFNEGLDESTROYIMAGEKHRPROC destroy_image;
-#ifdef EGL_EXT_swap_buffers_with_damage
 	PFNEGLSWAPBUFFERSWITHDAMAGEEXTPROC swap_buffers_with_damage;
-#endif
 	PFNEGLBINDWAYLANDDISPLAYWL bind_display;
 	PFNEGLUNBINDWAYLANDDISPLAYWL unbind_display;
 	PFNEGLQUERYWAYLANDBUFFERWL query_buffer;
@@ -58,6 +56,8 @@ struct glrenderer {
 	int has_bind_display;
 	int has_buffer_age;
 	int has_configless_context;
+	int has_surfaceless_context;
+	int has_dmabuf_import;
 	int has_egl_image_external;
 
 	struct wl_signal destroy_signal;

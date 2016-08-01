@@ -368,7 +368,6 @@ static void glrenderer_repaint_screen(struct nemorenderer *base, struct nemoscre
 	pixman_region32_fini(&total_damage);
 	pixman_region32_fini(&buffer_damage);
 
-#ifdef EGL_EXT_swap_buffers_with_damage
 	if (renderer->swap_buffers_with_damage != NULL) {
 		pixman_box32_t *rects;
 		EGLint *edamages, *edamage;
@@ -404,9 +403,6 @@ static void glrenderer_repaint_screen(struct nemorenderer *base, struct nemoscre
 	} else {
 		r = eglSwapBuffers(renderer->egl_display, surface->egl_surface);
 	}
-#else
-	r = eglSwapBuffers(renderer->egl_display, surface->egl_surface);
-#endif
 
 	if (r == EGL_FALSE) {
 		nemolog_error("GLRENDERER", "failed to swap egl buffers\n");
@@ -482,19 +478,25 @@ static int glrenderer_prepare_egl_extentsion(struct glrenderer *renderer)
 	else
 		nemolog_warning("GLRENDERER", "no egl buffer age extension\n");
 
-#ifdef EGL_EXT_swap_buffers_with_damage
 	if (strstr(extensions, "EGL_EXT_swap_buffers_with_damage"))
 		renderer->swap_buffers_with_damage = (void *)eglGetProcAddress("eglSwapBuffersWithDamageEXT");
 	else
 		nemolog_warning("GLRENDERER", "no egl swap buffers with damage extension\n");
-#endif
 
-#ifdef EGL_MESA_configless_context
 	if (strstr(extensions, "EGL_MESA_configless_context"))
 		renderer->has_configless_context = 1;
 	else
 		nemolog_warning("GLRENDERER", "no egl configless context extension\n");
-#endif
+
+	if (strstr(extensions, "EGL_KHR_surfaceless_context"))
+		renderer->has_surfaceless_context = 1;
+	else
+		nemolog_warning("GLRENDERER", "no egl surfaceless context extension\n");
+
+	if (strstr(extensions, "EGL_EXT_image_dma_buf_import"))
+		renderer->has_dmabuf_import = 1;
+	else
+		nemolog_warning("GLRENDERER", "no egl dmabuf import extension\n");
 
 	return 0;
 }
@@ -679,10 +681,8 @@ static int glrenderer_prepare_egl_context(struct glrenderer *renderer, struct ne
 
 	egl_config = renderer->egl_config;
 
-#ifdef EGL_MESA_configless_context
 	if (renderer->has_configless_context)
 		egl_config = EGL_NO_CONFIG_MESA;
-#endif
 
 	renderer->egl_context = eglCreateContext(renderer->egl_display, egl_config, EGL_NO_CONTEXT, attribs);
 	if (renderer->egl_context == NULL) {
