@@ -300,6 +300,13 @@ static void surface_set_buffer_scale(struct wl_client *client, struct wl_resourc
 	canvas->pending.buffer_viewport.changed = 1;
 }
 
+static void surface_damage_buffer(struct wl_client *client, struct wl_resource *resource, int32_t x, int32_t y, int32_t width, int32_t height)
+{
+	struct nemocanvas *canvas = (struct nemocanvas *)wl_resource_get_user_data(resource);
+
+	pixman_region32_union_rect(&canvas->pending.damage, &canvas->pending.damage, x, y, width, height);
+}
+
 static const struct wl_surface_interface surface_implementation = {
 	surface_destroy,
 	surface_attach,
@@ -309,7 +316,8 @@ static const struct wl_surface_interface surface_implementation = {
 	surface_set_input_region,
 	surface_commit,
 	surface_set_buffer_transform,
-	surface_set_buffer_scale
+	surface_set_buffer_scale,
+	surface_damage_buffer
 };
 
 static void nemocanvas_apply_viewport_transform(struct nemocanvas *canvas, pixman_transform_t *transform)

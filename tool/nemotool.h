@@ -116,6 +116,8 @@ struct nemotool {
 	uint32_t formats;
 	clockid_t clock_id;
 
+	uint32_t compositor_version;
+
 	int epoll_fd;
 
 	int display_fd;
@@ -142,7 +144,7 @@ struct nemotool {
 	} xkb;
 
 	uint32_t modifiers;
-	
+
 	void *userdata;
 };
 
@@ -190,6 +192,11 @@ static inline uint32_t nemotool_get_formats(struct nemotool *tool)
 static inline clockid_t nemotool_get_clock_id(struct nemotool *tool)
 {
 	return tool->clock_id;
+}
+
+static inline uint32_t nemotool_get_compositor_version(struct nemotool *tool)
+{
+	return tool->compositor_version;
 }
 
 static inline int nemotool_is_running(struct nemotool *tool)

@@ -576,7 +576,8 @@ static void registry_handle_global(void *data, struct wl_registry *registry, uin
 	nemolist_insert(&tool->global_list, &global->link);
 
 	if (strcmp(interface, "wl_compositor") == 0) {
-		tool->compositor = wl_registry_bind(registry, id, &wl_compositor_interface, 1);
+		tool->compositor = wl_registry_bind(registry, id, &wl_compositor_interface, version);
+		tool->compositor_version = version;
 	} else if (strcmp(interface, "wl_subcompositor") == 0) {
 		tool->subcompositor = wl_registry_bind(registry, id, &wl_subcompositor_interface, 1);
 	} else if (strcmp(interface, "wl_output") == 0) {

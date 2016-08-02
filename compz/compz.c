@@ -67,7 +67,7 @@ static void nemocompz_bind_compositor(struct wl_client *client, void *data, uint
 	struct nemocompz *compz = (struct nemocompz *)data;
 	struct wl_resource *resource;
 
-	resource = wl_resource_create(client, &wl_compositor_interface, MIN(version, 3), id);
+	resource = wl_resource_create(client, &wl_compositor_interface, version, id);
 	if (resource == NULL) {
 		wl_client_post_no_memory(client);
 		return;
@@ -394,7 +394,7 @@ struct nemocompz *nemocompz_create(void)
 	if (compz->session == NULL)
 		goto err1;
 
-	if (!wl_global_create(compz->display, &wl_compositor_interface, 3, compz, nemocompz_bind_compositor))
+	if (!wl_global_create(compz->display, &wl_compositor_interface, 4, compz, nemocompz_bind_compositor))
 		goto err1;
 
 	if (!wl_global_create(compz->display, &wl_subcompositor_interface, 1, compz, nemocompz_bind_subcompositor))
