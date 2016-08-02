@@ -16,9 +16,7 @@ NEMO_BEGIN_EXTERN_C
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
-extern int egl_choose_config(EGLDisplay egl_display, const EGLint *attribs, const EGLint *visualid, EGLConfig *config);
-extern int egl_prepare_context(EGLNativeDisplayType nativedisplay, EGLDisplay *egl_display, EGLContext *egl_context, EGLConfig *egl_config, int use_alpha, const EGLint *visualid);
-extern int egl_make_current(EGLDisplay *egl_display, EGLContext *egl_context);
+extern int egl_prepare_context(EGLNativeDisplayType nativedisplay, EGLDisplay *egl_display, EGLContext *egl_context, EGLConfig *egl_config, int buffer_size, int use_alpha);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

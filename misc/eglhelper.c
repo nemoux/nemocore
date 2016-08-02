@@ -7,48 +7,7 @@
 
 #include <eglhelper.h>
 
-int egl_choose_config(EGLDisplay egl_display, const EGLint *attribs, const EGLint *visualid, EGLConfig *config)
-{
-	EGLint count = 0;
-	EGLint matched = 0;
-	EGLint id;
-	EGLConfig *configs;
-	int i;
-
-	if (!eglGetConfigs(egl_display, NULL, 0, &count) || count < 1)
-		return -1;
-
-	configs = (EGLConfig *)malloc(sizeof(EGLConfig) * count);
-	if (configs == NULL)
-		return -1;
-	memset(configs, 0, sizeof(EGLConfig) * count);
-
-	if (!eglChooseConfig(egl_display, attribs, configs, count, &matched))
-		goto err1;
-
-	for (i = 0; i < matched; i++) {
-		if (visualid != NULL) {
-			if (!eglGetConfigAttrib(egl_display, configs[i], EGL_NATIVE_VISUAL_ID, &id))
-				continue;
-
-			if (id != 0 && id != *visualid)
-				continue;
-		}
-
-		*config = configs[i];
-
-		free(configs);
-
-		return 0;
-	}
-
-err1:
-	free(configs);
-
-	return -1;
-}
-
-int egl_prepare_context(EGLNativeDisplayType nativedisplay, EGLDisplay *egl_display, EGLContext *egl_context, EGLConfig *egl_config, int use_alpha, const EGLint *visualid)
+int egl_prepare_context(EGLNativeDisplayType nativedisplay, EGLDisplay *egl_display, EGLContext *egl_context, EGLConfig *egl_config, int buffer_size, int use_alpha)
 {
 #ifdef NEMOUX_WITH_OPENGL_ES3
 	static const EGLint opaque_attribs[] = {
@@ -105,9 +64,9 @@ int egl_prepare_context(EGLNativeDisplayType nativedisplay, EGLDisplay *egl_disp
 		EGL_NONE
 	};
 #endif
-	EGLConfig config;
+	EGLConfig configs[16];
 	EGLint major, minor;
-	const char *extensions;
+	EGLint count, n, i, s;
 
 	*egl_display = eglGetDisplay(nativedisplay);
 	if (*egl_display == EGL_NO_DISPLAY)
@@ -119,28 +78,26 @@ int egl_prepare_context(EGLNativeDisplayType nativedisplay, EGLDisplay *egl_disp
 	if (!eglBindAPI(EGL_OPENGL_ES_API))
 		return -1;
 
-	if (egl_choose_config(*egl_display, use_alpha == 0 ? opaque_attribs : alpha_attribs, visualid, egl_config) < 0)
+	if (!eglGetConfigs(*egl_display, NULL, 0, &count) || count < 1)
 		return -1;
 
-	config = *egl_config;
-
-	extensions = (const char *)eglQueryString(*egl_display, EGL_EXTENSIONS);
-	if (extensions == NULL)
+	if (!eglChooseConfig(*egl_display, use_alpha == 0 ? opaque_attribs : alpha_attribs, configs, count, &n))
 		return -1;
 
-	if (strstr(extensions, "EGL_MESA_configless_context"))
-		config = EGL_NO_CONFIG_MESA;
+	for (i = 0; i < n; i++) {
+		eglGetConfigAttrib(*egl_display, configs[i], EGL_BUFFER_SIZE, &s);
 
-	*egl_context = eglCreateContext(*egl_display, config, EGL_NO_CONTEXT, client_attribs);
+		if (s == buffer_size) {
+			*egl_config = configs[i];
+			break;
+		}
+	}
+
+	*egl_context = eglCreateContext(*egl_display, *egl_config, EGL_NO_CONTEXT, client_attribs);
 	if (*egl_context == NULL)
 		return -1;
 
-	return 0;
-}
-
-int egl_make_current(EGLDisplay *egl_display, EGLContext *egl_context)
-{
-	if (!eglMakeCurrent(egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE, egl_context))
+	if (!eglMakeCurrent(*egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE, *egl_context))
 		return -1;
 
 	return 0;
