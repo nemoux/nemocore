@@ -7,8 +7,14 @@
 NEMO_BEGIN_EXTERN_C
 #endif
 
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
+#include <GL/glext.h>
 #include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+
 #include <EGL/egl.h>
+#include <EGL/eglext.h>
 
 #include <nemotool.h>
 #include <nemocanvas.h>
@@ -18,25 +24,25 @@ NEMO_BEGIN_EXTERN_C
 struct eglcontext {
 	struct nemotool *tool;
 
-	EGLDisplay egl_display;
-	EGLContext egl_context;
-	EGLConfig egl_config;
+	EGLDisplay display;
+	EGLContext context;
+	EGLConfig config;
 };
 
-#define	NTEGL_DISPLAY(egl)		(egl->egl_display)
-#define	NTEGL_CONTEXT(egl)		(egl->egl_context)
-#define	NTEGL_CONFIG(egl)			(egl->egl_config)
+#define	NTEGL_DISPLAY(egl)		(egl->display)
+#define	NTEGL_CONTEXT(egl)		(egl->context)
+#define	NTEGL_CONFIG(egl)			(egl->config)
 
 struct eglcanvas {
 	struct eglcontext *egl;
 
 	struct nemocanvas *canvas;
 
-	struct wl_egl_window *egl_window;
+	struct wl_egl_window *window;
 };
 
 #define	NTEGL_CANVAS(ec)		(ec->canvas)
-#define	NTEGL_WINDOW(ec)		(ec->egl_window)
+#define	NTEGL_WINDOW(ec)		(ec->window)
 
 extern struct eglcontext *nemoegl_create(struct nemotool *tool);
 extern void nemoegl_destroy(struct eglcontext *egl);
