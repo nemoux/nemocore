@@ -424,7 +424,6 @@ struct nemotale *nemotale_create_gl(void)
 {
 	struct nemotale *tale;
 	struct nemogltale *context;
-	const char *extensions;
 
 	tale = (struct nemotale *)malloc(sizeof(struct nemotale));
 	if (tale == NULL)
@@ -437,18 +436,6 @@ struct nemotale *nemotale_create_gl(void)
 	if (context == NULL)
 		goto err1;
 	memset(context, 0, sizeof(struct nemogltale));
-
-	extensions = (const char *)glGetString(GL_EXTENSIONS);
-	if (extensions == NULL)
-		goto err2;
-
-	if (!strstr(extensions, "GL_EXT_texture_format_BGRA8888"))
-		goto err2;
-
-	if (strstr(extensions, "GL_EXT_read_format_bgra"))
-		tale->read_format = PIXMAN_a8r8g8b8;
-	else
-		tale->read_format = PIXMAN_a8b8g8r8;
 
 	context->texture_shader_rgba.vertex_source = GLHELPER_VERTEX_SHADER;
 	context->texture_shader_rgba.fragment_source = GLHELPER_TEXTURE_FRAGMENT_SHADER_RGBA;
@@ -466,9 +453,6 @@ struct nemotale *nemotale_create_gl(void)
 	context->solid_shader.fragment_source = GLHELPER_SOLID_FRAGMENT_SHADER;
 
 	return tale;
-
-err2:
-	free(tale->glcontext);
 
 err1:
 	free(tale);

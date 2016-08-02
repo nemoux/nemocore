@@ -97,8 +97,5 @@ int egl_prepare_context(EGLNativeDisplayType nativedisplay, EGLDisplay *egl_disp
 	if (*egl_context == NULL)
 		return -1;
 
-	if (!eglMakeCurrent(*egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE, *egl_context))
-		return -1;
-
 	return 0;
 }

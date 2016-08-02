@@ -38,8 +38,6 @@ struct nemotale {
 	pixman_region32_t input;
 	pixman_region32_t damage;
 
-	pixman_format_code_t read_format;
-
 	struct {
 		struct nemomatrix matrix;
 
