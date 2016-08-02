@@ -51,7 +51,6 @@ struct taleegl {
 	PFNEGLQUERYWAYLANDBUFFERWL query_buffer;
 
 	int has_bind_display;
-	int has_buffer_age;
 	int has_configless_context;
 	int has_egl_image_external;
 };
@@ -230,14 +229,7 @@ int nemotale_node_viewport_gl(struct talenode *node, int32_t width, int32_t heig
 	return 0;
 }
 
-static void nemotale_clear_shader(struct nemotale *tale)
-{
-	struct nemogltale *context = (struct nemogltale *)tale->glcontext;
-
-	context->current_shader = NULL;
-}
-
-static void nemotale_use_shader(struct nemotale *tale, struct talenode *node, struct glshader *shader)
+static void nemotale_set_shader(struct nemotale *tale, struct talenode *node, struct glshader *shader)
 {
 	struct nemogltale *context = (struct nemogltale *)tale->glcontext;
 
@@ -258,6 +250,13 @@ static void nemotale_use_shader(struct nemotale *tale, struct talenode *node, st
 
 		context->current_shader = shader;
 	}
+}
+
+static void nemotale_put_shader(struct nemotale *tale)
+{
+	struct nemogltale *context = (struct nemogltale *)tale->glcontext;
+
+	context->current_shader = NULL;
 }
 
 static int nemotale_calculate_edges(struct talenode *node, pixman_box32_t *rect, pixman_box32_t *rrect, GLfloat *ex, GLfloat *ey)
@@ -396,7 +395,7 @@ static void nemotale_repaint_node(struct nemotale *tale, struct talenode *node, 
 		pixman_region32_subtract(&blend, &blend, &node->opaque);
 
 		if (pixman_region32_not_empty(&node->opaque)) {
-			nemotale_use_shader(tale, node, &context->texture_shader_rgba);
+			nemotale_set_shader(tale, node, &context->texture_shader_rgba);
 
 			glDisable(GL_BLEND);
 
@@ -404,7 +403,7 @@ static void nemotale_repaint_node(struct nemotale *tale, struct talenode *node, 
 		}
 
 		if (pixman_region32_not_empty(&blend)) {
-			nemotale_use_shader(tale, node, &context->texture_shader_rgba);
+			nemotale_set_shader(tale, node, &context->texture_shader_rgba);
 
 			glEnable(GL_BLEND);
 
@@ -506,10 +505,7 @@ struct taleegl *nemotale_create_egl(EGLDisplay egl_display, EGLContext egl_conte
 	if (strstr(extensions, "EGL_WL_bind_wayland_display"))
 		egl->has_bind_display = 1;
 
-	if (strstr(extensions, "EGL_EXT_buffer_age"))
-		egl->has_buffer_age = 1;
-
-	if (strstr(extensions, "EGL_EXT_swap_buffers_with_damage"))
+	if (strstr(extensions, "EGL_EXT_swap_buffers_with_damage") && strstr(extensions, "EGL_EXT_buffer_age"))
 		egl->swap_buffers_with_damage = (void *)eglGetProcAddress("eglSwapBuffersWithDamageEXT");
 
 	if (strstr(extensions, "EGL_MESA_configless_context"))
@@ -556,16 +552,13 @@ void nemotale_destroy_egl(struct taleegl *egl)
 	free(egl);
 }
 
-static void nemotale_get_egl_damage(struct taleegl *egl, pixman_region32_t *region, pixman_region32_t *damage)
+static inline void nemotale_fetch_buffer_damage(struct taleegl *egl, pixman_region32_t *region, pixman_region32_t *damage)
 {
 	EGLint buffer_age = 0;
 	int i;
 
-	if (egl->has_buffer_age) {
-		if (eglQuerySurface(egl->display, egl->surface, EGL_BUFFER_AGE_EXT, &buffer_age) == EGL_FALSE) {
-			nemolog_error("TALEGL", "failed to query buffer age\n");
-		}
-	}
+	if (eglQuerySurface(egl->display, egl->surface, EGL_BUFFER_AGE_EXT, &buffer_age) == EGL_FALSE)
+		nemolog_error("TALEGL", "failed to query buffer age\n");
 
 	if (buffer_age == 0 || buffer_age - 1 > NEMOTALE_BUFFER_AGE_COUNT) {
 		pixman_region32_copy(damage, region);
@@ -576,12 +569,9 @@ static void nemotale_get_egl_damage(struct taleegl *egl, pixman_region32_t *regi
 	}
 }
 
-static void nemotale_rotate_egl_damage(struct taleegl *egl, pixman_region32_t *damage)
+static inline void nemotale_rotate_buffer_damage(struct taleegl *egl, pixman_region32_t *damage)
 {
 	int i;
-
-	if (!egl->has_buffer_age)
-		return;
 
 	for (i = NEMOTALE_BUFFER_AGE_COUNT - 1; i >= 1; i--) {
 		pixman_region32_copy(&egl->damages[i], &egl->damages[i - 1]);
@@ -595,9 +585,7 @@ static inline int nemotale_composite_egl_in(struct nemotale *tale)
 	struct nemogltale *context = (struct nemogltale *)tale->glcontext;
 	struct taleegl *egl = (struct taleegl *)tale->backend;
 	struct talenode *node;
-	pixman_region32_t buffer_damage, total_damage;
 	EGLBoolean r;
-	int i;
 
 	if (!eglMakeCurrent(egl->display, egl->surface, egl->surface, egl->context))
 		return -1;
@@ -615,31 +603,33 @@ static inline int nemotale_composite_egl_in(struct nemotale *tale)
 		tale->transform.dirty = 0;
 	}
 
-	pixman_region32_init(&total_damage);
-	pixman_region32_init(&buffer_damage);
-
-	nemotale_get_egl_damage(egl, &tale->region, &buffer_damage);
-	nemotale_rotate_egl_damage(egl, &tale->damage);
-
-	pixman_region32_union(&total_damage, &buffer_damage, &tale->damage);
-
 	glViewport(0, 0, tale->viewport.width, tale->viewport.height);
 
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-	nemotale_clear_shader(tale);
-
-	nemolist_for_each(node, &tale->node_list, link) {
-		nemotale_repaint_node(tale, node, &total_damage);
-	}
-
-	pixman_region32_fini(&total_damage);
-	pixman_region32_fini(&buffer_damage);
+	nemotale_put_shader(tale);
 
 	if (egl->swap_buffers_with_damage != NULL) {
+		pixman_region32_t buffer_damage, total_damage;
 		pixman_box32_t *rects;
 		EGLint *edamages, *edamage;
 		int nrects;
+		int i;
+
+		pixman_region32_init(&total_damage);
+		pixman_region32_init(&buffer_damage);
+
+		nemotale_fetch_buffer_damage(egl, &tale->region, &buffer_damage);
+		nemotale_rotate_buffer_damage(egl, &tale->damage);
+
+		pixman_region32_union(&total_damage, &buffer_damage, &tale->damage);
+
+		nemolist_for_each(node, &tale->node_list, link) {
+			nemotale_repaint_node(tale, node, &total_damage);
+		}
+
+		pixman_region32_fini(&total_damage);
+		pixman_region32_fini(&buffer_damage);
 
 		pixman_region32_init(&buffer_damage);
 		pixman_region32_union(&buffer_damage, &buffer_damage, &tale->damage);
@@ -673,6 +663,10 @@ static inline int nemotale_composite_egl_in(struct nemotale *tale)
 		free(edamages);
 		pixman_region32_fini(&buffer_damage);
 	} else {
+		nemolist_for_each(node, &tale->node_list, link) {
+			nemotale_repaint_node(tale, node, &tale->damage);
+		}
+
 		r = eglSwapBuffers(egl->display, egl->surface);
 	}
 
@@ -792,7 +786,7 @@ int nemotale_composite_fbo(struct nemotale *tale, pixman_region32_t *region)
 
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-	nemotale_clear_shader(tale);
+	nemotale_put_shader(tale);
 
 	nemolist_for_each(node, &tale->node_list, link) {
 		nemotale_repaint_node(tale, node, &tale->damage);
@@ -852,7 +846,7 @@ int nemotale_composite_fbo_full(struct nemotale *tale)
 
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-	nemotale_clear_shader(tale);
+	nemotale_put_shader(tale);
 
 	nemolist_for_each(node, &tale->node_list, link) {
 		nemotale_repaint_node(tale, node, &tale->damage);
