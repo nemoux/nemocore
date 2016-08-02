@@ -571,6 +571,10 @@ void nemoshow_view_put_scope(struct nemoshow *show)
 	nemoview_put_scope(actor->view);
 }
 
+void nemoshow_view_set_framerate(struct nemoshow *show, uint32_t framerate)
+{
+}
+
 void nemoshow_view_set_tag(struct nemoshow *show, uint32_t tag)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
