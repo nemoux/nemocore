@@ -510,16 +510,10 @@ void nemopointer_set_keyboard(struct nemopointer *pointer, struct nemokeyboard *
 void nemopointer_set_keyboard_focus(struct nemopointer *pointer, struct nemoview *view)
 {
 	if (pointer->keyboard == NULL) {
-		struct nemokeyboard *keyboard;
-
-		keyboard = nemoseat_get_first_keyboard(pointer->seat);
-		if (keyboard == NULL)
-			return;
-
-		nemopointer_set_keyboard(pointer, keyboard);
+		nemoseat_set_keyboard_focus(pointer->seat, view);
+	} else {
+		nemokeyboard_set_focus(pointer->keyboard, view);
 	}
-
-	nemokeyboard_set_focus(pointer->keyboard, view);
 }
 
 void nemopointer_start_grab(struct nemopointer *pointer, struct nemopointer_grab *grab)
