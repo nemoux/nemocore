@@ -41,9 +41,7 @@ static void nemoshow_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 	struct nemotale *tale = (struct nemotale *)nemocanvas_get_userdata(canvas);
 	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
 
-	if (secs == 0 && nsecs == 0) {
-		nemocanvas_dispatch_feedback(canvas);
-	} else if (nemoshow_has_transition(show) != 0) {
+	if (nemoshow_has_transition(show) != 0) {
 		nemoshow_dispatch_transition(show, secs * 1000 + nsecs / 1000000);
 		nemoshow_destroy_transition(show);
 

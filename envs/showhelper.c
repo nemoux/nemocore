@@ -131,9 +131,7 @@ static void nemoshow_dispatch_actor_frame(struct nemoactor *actor, uint32_t msec
 
 	nemocompz_make_current(compz);
 
-	if (msecs == 0) {
-		nemoactor_dispatch_feedback(actor);
-	} else if (nemoshow_has_transition(show) != 0) {
+	if (nemoshow_has_transition(show) != 0) {
 		nemoshow_dispatch_transition(show, msecs);
 		nemoshow_destroy_transition(show);
 
