@@ -315,6 +315,8 @@ struct nemocompz *nemocompz_create(void)
 	struct nemocompz *compz;
 	struct wl_display *display;
 	struct wl_event_loop *loop;
+	int compositor_version = 4;
+	char *version;
 
 	compz = (struct nemocompz *)malloc(sizeof(struct nemocompz));
 	if (compz == NULL)
@@ -394,7 +396,11 @@ struct nemocompz *nemocompz_create(void)
 	if (compz->session == NULL)
 		goto err1;
 
-	if (!wl_global_create(compz->display, &wl_compositor_interface, 4, compz, nemocompz_bind_compositor))
+	version = getenv("WAYLAND_COMPOSITOR_VERSION");
+	if (version != NULL)
+		compositor_version = strtoul(version, NULL, 10);
+
+	if (!wl_global_create(compz->display, &wl_compositor_interface, compositor_version, compz, nemocompz_bind_compositor))
 		goto err1;
 
 	if (!wl_global_create(compz->display, &wl_subcompositor_interface, 1, compz, nemocompz_bind_subcompositor))
