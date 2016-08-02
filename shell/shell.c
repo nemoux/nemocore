@@ -685,9 +685,10 @@ static int nemoshell_dispatch_frame_timeout(void *data)
 	wl_list_for_each(canvas, &compz->canvas_list, link) {
 		bin = nemoshell_get_bin(canvas);
 		if (bin != NULL) {
-			nemolog_message("CANVAS", "[%s:%d] %d frames...\n", bin->name == NULL ? "NONAME" : bin->name, bin->pid, canvas->frame_count);
+			nemolog_message("CANVAS", "[%s:%d] %d frames %d (%d) damages...\n", bin->name == NULL ? "NONAME" : bin->name, bin->pid, canvas->frame_count, canvas->frame_damage, canvas->frame_count > 0 ? canvas->frame_damage / canvas->frame_count : 0);
 
 			canvas->frame_count = 0;
+			canvas->frame_damage = 0;
 		}
 	}
 

@@ -268,8 +268,6 @@ static void surface_commit(struct wl_client *client, struct wl_resource *resourc
 		if (sub->canvas != canvas)
 			nemosubcanvas_commit_parent(sub, 0);
 	}
-
-	canvas->frame_count++;
 }
 
 static void surface_set_buffer_transform(struct wl_client *client, struct wl_resource *resource, int transform)
@@ -1545,7 +1543,13 @@ void nemocanvas_commit_state(struct nemocanvas *canvas, struct nemocanvas_state 
 
 void nemocanvas_commit(struct nemocanvas *canvas)
 {
+	pixman_box32_t *extents;
+
 	nemocanvas_commit_state(canvas, &canvas->pending);
+
+	extents = pixman_region32_extents(&canvas->base.damage);
+	canvas->frame_damage = canvas->frame_damage + (extents->x2 - extents->x1) * (extents->y2 - extents->y1);
+	canvas->frame_count++;
 
 	nemocanvas_schedule_repaint(canvas);
 }
