@@ -128,10 +128,8 @@ int egl_prepare_context(EGLNativeDisplayType nativedisplay, EGLDisplay *egl_disp
 	if (extensions == NULL)
 		return -1;
 
-#ifdef EGL_MESA_configless_context
 	if (strstr(extensions, "EGL_MESA_configless_context"))
 		config = EGL_NO_CONFIG_MESA;
-#endif
 
 	*egl_context = eglCreateContext(*egl_display, config, EGL_NO_CONTEXT, client_attribs);
 	if (*egl_context == NULL)

@@ -26,6 +26,7 @@
 #include <nemoshow.h>
 #include <nemobox.h>
 #include <nemometro.h>
+#include <nemolog.h>
 #include <nemomisc.h>
 
 struct showone *nemoshow_canvas_create(void)

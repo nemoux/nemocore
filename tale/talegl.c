@@ -45,9 +45,7 @@ struct taleegl {
 	PFNGLEGLIMAGETARGETTEXTURE2DOESPROC image_target_texture_2d;
 	PFNEGLCREATEIMAGEKHRPROC create_image;
 	PFNEGLDESTROYIMAGEKHRPROC destroy_image;
-#ifdef EGL_EXT_swap_buffers_with_damage
 	PFNEGLSWAPBUFFERSWITHDAMAGEEXTPROC swap_buffers_with_damage;
-#endif
 	PFNEGLBINDWAYLANDDISPLAYWL bind_display;
 	PFNEGLUNBINDWAYLANDDISPLAYWL unbind_display;
 	PFNEGLQUERYWAYLANDBUFFERWL query_buffer;
@@ -527,15 +525,11 @@ struct taleegl *nemotale_create_egl(EGLDisplay egl_display, EGLContext egl_conte
 	if (strstr(extensions, "EGL_EXT_buffer_age"))
 		egl->has_buffer_age = 1;
 
-#ifdef EGL_EXT_swap_buffers_with_damage
 	if (strstr(extensions, "EGL_EXT_swap_buffers_with_damage"))
 		egl->swap_buffers_with_damage = (void *)eglGetProcAddress("eglSwapBuffersWithDamageEXT");
-#endif
 
-#ifdef EGL_MESA_configless_context
 	if (strstr(extensions, "EGL_MESA_configless_context"))
 		egl->has_configless_context = 1;
-#endif
 
 	if (strstr(extensions, "GL_OES_EGL_image_external"))
 		egl->has_egl_image_external = 1;
@@ -658,7 +652,6 @@ static inline int nemotale_composite_egl_in(struct nemotale *tale)
 	pixman_region32_fini(&total_damage);
 	pixman_region32_fini(&buffer_damage);
 
-#ifdef EGL_EXT_swap_buffers_with_damage
 	if (egl->swap_buffers_with_damage != NULL) {
 		pixman_box32_t *rects;
 		EGLint *edamages, *edamage;
@@ -698,9 +691,6 @@ static inline int nemotale_composite_egl_in(struct nemotale *tale)
 	} else {
 		r = eglSwapBuffers(egl->display, egl->surface);
 	}
-#else
-	r = eglSwapBuffers(egl->display, egl->surface);
-#endif
 
 	return r == EGL_TRUE;
 }
