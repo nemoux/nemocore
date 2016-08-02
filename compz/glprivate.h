@@ -54,7 +54,6 @@ struct glrenderer {
 	PFNEGLQUERYWAYLANDBUFFERWL query_buffer;
 
 	int has_bind_display;
-	int has_buffer_age;
 	int has_configless_context;
 	int has_surfaceless_context;
 	int has_dmabuf_import;

@@ -56,16 +56,13 @@ static int glrenderer_read_pixels(struct nemorenderer *base, struct nemoscreen *
 	return 0;
 }
 
-static void glrenderer_get_damage(struct glrenderer *renderer, struct glsurface *surface, pixman_region32_t *region, pixman_region32_t *damage)
+static inline void glrenderer_fetch_buffer_damage(struct glrenderer *renderer, struct glsurface *surface, pixman_region32_t *region, pixman_region32_t *damage)
 {
 	EGLint buffer_age = 0;
 	int i;
 
-	if (renderer->has_buffer_age) {
-		if (eglQuerySurface(renderer->egl_display, surface->egl_surface, EGL_BUFFER_AGE_EXT, &buffer_age) == EGL_FALSE) {
-			nemolog_error("GLRENDERER", "failed to query buffer age\n");
-		}
-	}
+	if (eglQuerySurface(renderer->egl_display, surface->egl_surface, EGL_BUFFER_AGE_EXT, &buffer_age) == EGL_FALSE)
+		nemolog_error("GLRENDERER", "failed to query buffer age\n");
 
 	if (buffer_age == 0 || buffer_age - 1 > GLRENDERER_BUFFER_AGE_COUNT) {
 		pixman_region32_copy(damage, region);
@@ -76,12 +73,9 @@ static void glrenderer_get_damage(struct glrenderer *renderer, struct glsurface 
 	}
 }
 
-static void glrenderer_rotate_damage(struct glrenderer *renderer, struct glsurface *surface, pixman_region32_t *damage)
+static inline void glrenderer_rotate_buffer_damage(struct glrenderer *renderer, struct glsurface *surface, pixman_region32_t *damage)
 {
 	int i;
-
-	if (!renderer->has_buffer_age)
-		return;
 
 	for (i = GLRENDERER_BUFFER_AGE_COUNT - 1; i >= 1; i--) {
 		pixman_region32_copy(&surface->damages[i], &surface->damages[i - 1]);
@@ -90,12 +84,7 @@ static void glrenderer_rotate_damage(struct glrenderer *renderer, struct glsurfa
 	pixman_region32_copy(&surface->damages[0], damage);
 }
 
-static void glrenderer_reset_shader(struct glrenderer *renderer)
-{
-	renderer->current_shader = NULL;
-}
-
-static void glrenderer_use_shader(struct glrenderer *renderer, struct glshader *shader)
+static inline void glrenderer_use_shader(struct glrenderer *renderer, struct glshader *shader)
 {
 	if (!shader->program) {
 		if (glshader_prepare(shader, shader->vertex_source, shader->fragment_source, 0) < 0) {
@@ -111,7 +100,12 @@ static void glrenderer_use_shader(struct glrenderer *renderer, struct glshader *
 	renderer->current_shader = shader;
 }
 
-static void glrenderer_use_uniforms(struct glshader *shader, struct nemoview *view, struct nemoscreen *screen)
+static inline void glrenderer_clear_shader(struct glrenderer *renderer)
+{
+	renderer->current_shader = NULL;
+}
+
+static inline void glrenderer_use_uniforms(struct glshader *shader, struct nemoview *view, struct nemoscreen *screen)
 {
 	struct glcontent *glcontent = (struct glcontent *)nemocontent_get_opengl_context(view->content, screen->node);
 	int i;
@@ -328,6 +322,8 @@ static void glrenderer_repaint_views(struct glrenderer *renderer, struct nemoscr
 
 	glViewport(0, 0, screen->width, screen->height);
 
+	glrenderer_clear_shader(renderer);
+
 	wl_list_for_each_reverse(layer, &compz->layer_list, link) {
 		wl_list_for_each_reverse(view, &layer->view_list, layer_link) {
 			glrenderer_draw_view(renderer, view, screen, damage);
@@ -345,7 +341,6 @@ static void glrenderer_repaint_screen(struct nemorenderer *base, struct nemoscre
 {
 	struct glrenderer *renderer = (struct glrenderer *)container_of(base, struct glrenderer, base);
 	struct glsurface *surface = (struct glsurface *)screen->gcontext;
-	pixman_region32_t buffer_damage, total_damage;
 	EGLBoolean r;
 
 	if (eglMakeCurrent(renderer->egl_display, surface->egl_surface, surface->egl_surface, renderer->egl_context) == EGL_FALSE) {
@@ -353,25 +348,24 @@ static void glrenderer_repaint_screen(struct nemorenderer *base, struct nemoscre
 		return;
 	}
 
-	pixman_region32_init(&total_damage);
-	pixman_region32_init(&buffer_damage);
-
-	glrenderer_get_damage(renderer, surface, &screen->region, &buffer_damage);
-	glrenderer_rotate_damage(renderer, surface, screen_damage);
-
-	pixman_region32_union(&total_damage, &buffer_damage, screen_damage);
-
-	glrenderer_reset_shader(renderer);
-
-	glrenderer_repaint_views(renderer, screen, &total_damage);
-
-	pixman_region32_fini(&total_damage);
-	pixman_region32_fini(&buffer_damage);
-
 	if (renderer->swap_buffers_with_damage != NULL) {
+		pixman_region32_t buffer_damage, total_damage;
 		pixman_box32_t *rects;
 		EGLint *edamages, *edamage;
 		int i, nrects, buffer_height;
+
+		pixman_region32_init(&total_damage);
+		pixman_region32_init(&buffer_damage);
+
+		glrenderer_fetch_buffer_damage(renderer, surface, &screen->region, &buffer_damage);
+		glrenderer_rotate_buffer_damage(renderer, surface, screen_damage);
+
+		pixman_region32_union(&total_damage, &buffer_damage, screen_damage);
+
+		glrenderer_repaint_views(renderer, screen, &total_damage);
+
+		pixman_region32_fini(&total_damage);
+		pixman_region32_fini(&buffer_damage);
 
 		pixman_region32_init(&buffer_damage);
 
@@ -401,6 +395,8 @@ static void glrenderer_repaint_screen(struct nemorenderer *base, struct nemoscre
 		free(edamages);
 		pixman_region32_fini(&buffer_damage);
 	} else {
+		glrenderer_repaint_views(renderer, screen, screen_damage);
+
 		r = eglSwapBuffers(renderer->egl_display, surface->egl_surface);
 	}
 
@@ -473,12 +469,7 @@ static int glrenderer_prepare_egl_extentsion(struct glrenderer *renderer)
 		renderer->has_bind_display = 1;
 	}
 
-	if (strstr(extensions, "EGL_EXT_buffer_age"))
-		renderer->has_buffer_age = 1;
-	else
-		nemolog_warning("GLRENDERER", "no egl buffer age extension\n");
-
-	if (strstr(extensions, "EGL_EXT_swap_buffers_with_damage"))
+	if (strstr(extensions, "EGL_EXT_swap_buffers_with_damage") && strstr(extensions, "EGL_EXT_buffer_age"))
 		renderer->swap_buffers_with_damage = (void *)eglGetProcAddress("eglSwapBuffersWithDamageEXT");
 	else
 		nemolog_warning("GLRENDERER", "no egl swap buffers with damage extension\n");

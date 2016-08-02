@@ -229,7 +229,7 @@ int nemotale_node_viewport_gl(struct talenode *node, int32_t width, int32_t heig
 	return 0;
 }
 
-static void nemotale_set_shader(struct nemotale *tale, struct talenode *node, struct glshader *shader)
+static inline void nemotale_use_shader(struct nemotale *tale, struct talenode *node, struct glshader *shader)
 {
 	struct nemogltale *context = (struct nemogltale *)tale->glcontext;
 
@@ -252,7 +252,7 @@ static void nemotale_set_shader(struct nemotale *tale, struct talenode *node, st
 	}
 }
 
-static void nemotale_put_shader(struct nemotale *tale)
+static inline void nemotale_clear_shader(struct nemotale *tale)
 {
 	struct nemogltale *context = (struct nemogltale *)tale->glcontext;
 
@@ -395,7 +395,7 @@ static void nemotale_repaint_node(struct nemotale *tale, struct talenode *node, 
 		pixman_region32_subtract(&blend, &blend, &node->opaque);
 
 		if (pixman_region32_not_empty(&node->opaque)) {
-			nemotale_set_shader(tale, node, &context->texture_shader_rgba);
+			nemotale_use_shader(tale, node, &context->texture_shader_rgba);
 
 			glDisable(GL_BLEND);
 
@@ -403,7 +403,7 @@ static void nemotale_repaint_node(struct nemotale *tale, struct talenode *node, 
 		}
 
 		if (pixman_region32_not_empty(&blend)) {
-			nemotale_set_shader(tale, node, &context->texture_shader_rgba);
+			nemotale_use_shader(tale, node, &context->texture_shader_rgba);
 
 			glEnable(GL_BLEND);
 
@@ -607,7 +607,7 @@ static inline int nemotale_composite_egl_in(struct nemotale *tale)
 
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-	nemotale_put_shader(tale);
+	nemotale_clear_shader(tale);
 
 	if (egl->swap_buffers_with_damage != NULL) {
 		pixman_region32_t buffer_damage, total_damage;
@@ -786,7 +786,7 @@ int nemotale_composite_fbo(struct nemotale *tale, pixman_region32_t *region)
 
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-	nemotale_put_shader(tale);
+	nemotale_clear_shader(tale);
 
 	nemolist_for_each(node, &tale->node_list, link) {
 		nemotale_repaint_node(tale, node, &tale->damage);
@@ -846,7 +846,7 @@ int nemotale_composite_fbo_full(struct nemotale *tale)
 
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-	nemotale_put_shader(tale);
+	nemotale_clear_shader(tale);
 
 	nemolist_for_each(node, &tale->node_list, link) {
 		nemotale_repaint_node(tale, node, &tale->damage);
