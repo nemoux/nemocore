@@ -268,6 +268,8 @@ static void surface_commit(struct wl_client *client, struct wl_resource *resourc
 		if (sub->canvas != canvas)
 			nemosubcanvas_commit_parent(sub, 0);
 	}
+
+	canvas->frame_count++;
 }
 
 static void surface_set_buffer_transform(struct wl_client *client, struct wl_resource *resource, int transform)

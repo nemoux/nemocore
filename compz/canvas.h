@@ -119,6 +119,8 @@ struct nemocanvas {
 	struct wl_list subcanvas_list;
 
 	uint64_t touchid0;
+
+	uint32_t frame_count;
 };
 
 struct nemocanvas_callback {

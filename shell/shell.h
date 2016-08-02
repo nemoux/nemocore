@@ -93,6 +93,9 @@ struct nemoshell {
 
 	struct wl_listener idle_listener;
 
+	struct wl_event_source *frame_timer;
+	uint32_t frame_timeout;
+
 	struct wl_list bin_list;
 	struct wl_list fullscreen_list;
 	struct wl_list stage_list;
@@ -305,6 +308,8 @@ struct shellstage {
 
 extern struct nemoshell *nemoshell_create(struct nemocompz *compz);
 extern void nemoshell_destroy(struct nemoshell *shell);
+
+extern void nemoshell_set_frame_timeout(struct nemoshell *shell, uint32_t timeout);
 
 extern void nemoshell_set_default_layer(struct nemoshell *shell, struct nemolayer *layer);
 

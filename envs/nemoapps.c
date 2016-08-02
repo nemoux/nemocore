@@ -113,6 +113,7 @@ static void nemoenvs_execute_background(struct nemoenvs *envs, struct itemone *o
 
 		state = nemoshell_create_client_state(shell, pid);
 		if (state != NULL) {
+			clientstate_set_name(state, path);
 			clientstate_set_position(state, x, y);
 			clientstate_set_anchor(state, 0.0f, 0.0f);
 			clientstate_set_bin_flags(state, NEMOSHELL_SURFACE_ALL_FLAGS);
@@ -203,6 +204,7 @@ static void nemoenvs_execute_screensaver(struct nemoenvs *envs, struct itemone *
 
 		state = nemoshell_create_client_state(shell, pid);
 		if (state != NULL) {
+			clientstate_set_name(state, path);
 			clientstate_set_position(state, x, y);
 			clientstate_set_anchor(state, 0.0f, 0.0f);
 			clientstate_set_bin_flags(state, NEMOSHELL_SURFACE_ALL_FLAGS);

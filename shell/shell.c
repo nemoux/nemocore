@@ -668,6 +668,34 @@ static void nemoshell_handle_idle(struct wl_listener *listener, void *data)
 		shell->enter_idle(shell->userdata);
 }
 
+static int nemoshell_dispatch_frame_timeout(void *data)
+{
+	struct nemoshell *shell = (struct nemoshell *)data;
+	struct nemocompz *compz = shell->compz;
+	struct nemoscreen *screen;
+	struct nemocanvas *canvas;
+	struct shellbin *bin;
+
+	wl_list_for_each(screen, &compz->screen_list, link) {
+		nemolog_message("SCREEN", "[%d:%d] %d frames...\n", screen->node->nodeid, screen->screenid, screen->frame_count);
+
+		screen->frame_count = 0;
+	}
+
+	wl_list_for_each(canvas, &compz->canvas_list, link) {
+		bin = nemoshell_get_bin(canvas);
+		if (bin != NULL) {
+			nemolog_message("CANVAS", "[%s:%d] %d frames...\n", bin->name == NULL ? "NONAME" : bin->name, bin->pid, canvas->frame_count);
+
+			canvas->frame_count = 0;
+		}
+	}
+
+	wl_event_source_timer_update(shell->frame_timer, shell->frame_timeout);
+
+	return 1;
+}
+
 struct nemoshell *nemoshell_create(struct nemocompz *compz)
 {
 	struct nemoshell *shell;
@@ -724,6 +752,10 @@ struct nemoshell *nemoshell_create(struct nemocompz *compz)
 	shell->idle_listener.notify = nemoshell_handle_idle;
 	wl_signal_add(&compz->idle_signal, &shell->idle_listener);
 
+	shell->frame_timer = wl_event_loop_add_timer(compz->loop, nemoshell_dispatch_frame_timeout, shell);
+	if (shell->frame_timer == NULL)
+		goto err1;
+
 	wl_list_init(&shell->bin_list);
 	wl_list_init(&shell->fullscreen_list);
 	wl_list_init(&shell->stage_list);
@@ -739,7 +771,7 @@ struct nemoshell *nemoshell_create(struct nemocompz *compz)
 	shell->pick.scale_distance = 25.0f;
 	shell->pick.fullscreen_scale = 1.25f;
 	shell->pick.resize_interval = 50.0f;
-	
+
 	shell->bin.min_width = 0;
 	shell->bin.min_height = 0;
 	shell->bin.max_width = 0;
@@ -755,6 +787,9 @@ err1:
 
 void nemoshell_destroy(struct nemoshell *shell)
 {
+	if (shell->frame_timer != NULL)
+		wl_event_source_remove(shell->frame_timer);
+
 	nemolayer_finish(&shell->overlay_layer);
 	nemolayer_finish(&shell->fullscreen_layer);
 	nemolayer_finish(&shell->service_layer);
@@ -762,6 +797,13 @@ void nemoshell_destroy(struct nemoshell *shell)
 	nemolayer_finish(&shell->background_layer);
 
 	free(shell);
+}
+
+void nemoshell_set_frame_timeout(struct nemoshell *shell, uint32_t timeout)
+{
+	shell->frame_timeout = timeout;
+
+	wl_event_source_timer_update(shell->frame_timer, shell->frame_timeout);
 }
 
 void nemoshell_set_default_layer(struct nemoshell *shell, struct nemolayer *layer)
