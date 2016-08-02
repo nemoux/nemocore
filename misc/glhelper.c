@@ -18,9 +18,17 @@ GLuint glshader_compile(GLenum type, int count, const char **sources)
 	s = glCreateShader(type);
 	glShaderSource(s, count, sources, NULL);
 	glCompileShader(s);
+
 	glGetShaderiv(s, GL_COMPILE_STATUS, &status);
-	if (!status)
+	if (!status) {
+		GLsizei len;
+		char log[1000];
+
+		glGetShaderInfoLog(s, 1000, &len, log);
+		fprintf(stderr, "Error: compiling:\n%*s\n", len, log);
+
 		return GL_NONE;
+	}
 
 	return s;
 }
@@ -28,7 +36,6 @@ GLuint glshader_compile(GLenum type, int count, const char **sources)
 int glshader_prepare(struct glshader *shader, const char *vertex_source, const char *fragment_source, int debug)
 {
 	const char *sources[3];
-	char msg[512];
 	GLint status;
 	int count;
 
@@ -56,7 +63,12 @@ int glshader_prepare(struct glshader *shader, const char *vertex_source, const c
 	glLinkProgram(shader->program);
 	glGetProgramiv(shader->program, GL_LINK_STATUS, &status);
 	if (!status) {
-		glGetProgramInfoLog(shader->program, sizeof(msg), NULL, msg);
+		GLsizei len;
+		char log[1000];
+
+		glGetProgramInfoLog(shader->program, 1000, &len, log);
+		fprintf(stderr, "Error: linking:\n%*s\n", len, log);
+
 		return -1;
 	}
 
@@ -103,7 +115,7 @@ GLuint glshader_create_program(const char *fshader, const char *vshader)
 		glGetProgramInfoLog(program, 1000, &len, log);
 		fprintf(stderr, "Error: linking:\n%*s\n", len, log);
 
-		return 0;
+		return GL_NONE;
 	}
 
 	return program;
