@@ -102,7 +102,7 @@ static int tuio_dispatch_xml_event(int fd, uint32_t mask, void *data)
 
 	len = read(fd, msg, sizeof(msg));
 	if (len < 0) {
-		if (errno != EINTR) {
+		if (errno != EAGAIN && errno != EINTR) {
 			wl_event_source_remove(tuio->source);
 			tuio->source = NULL;
 		}
@@ -246,7 +246,7 @@ static int tuio_dispatch_osc_event(int fd, uint32_t mask, void *data)
 	do {
 		len = read(fd, msg, sizeof(msg));
 		if (len < 0) {
-			if (errno != EINTR) {
+			if (errno != EAGAIN && errno != EINTR) {
 				wl_event_source_remove(tuio->source);
 				tuio->source = NULL;
 			}

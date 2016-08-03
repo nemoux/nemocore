@@ -32,11 +32,17 @@ static void nemolog_dispatch_message_task(int efd, struct logtask *task)
 
 	len = read(task->fd, msg, sizeof(msg) - 8);
 	if (len <= 0) {
-		epoll_ctl(efd, EPOLL_CTL_DEL, task->fd, &ep);
+		if (errno == EAGAIN) {
+			ep.events = EPOLLIN | EPOLLOUT | EPOLLERR | EPOLLHUP;
+			ep.data.ptr = (void *)task;
+			epoll_ctl(efd, EPOLL_CTL_MOD, task->fd, &ep);
+		} else {
+			epoll_ctl(efd, EPOLL_CTL_DEL, task->fd, &ep);
 
-		close(task->fd);
+			close(task->fd);
 
-		free(task);
+			free(task);
+		}
 	} else {
 		msg[len] = '\0';
 
