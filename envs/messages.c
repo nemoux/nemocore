@@ -34,7 +34,7 @@
 #include <waylandshell.h>
 #include <xdgshell.h>
 #include <nemoshell.h>
-#include <prochelper.h>
+#include <syshelper.h>
 #include <namespacehelper.h>
 #include <nemotoken.h>
 #include <nemoitem.h>

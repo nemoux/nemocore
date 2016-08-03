@@ -16,7 +16,6 @@
 #include <screen.h>
 #include <move.h>
 #include <resize.h>
-#include <prochelper.h>
 #include <nemomisc.h>
 
 static void shell_send_configure(struct nemocanvas *canvas, int32_t width, int32_t height)

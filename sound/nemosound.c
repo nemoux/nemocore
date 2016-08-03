@@ -13,7 +13,7 @@
 #include <nemotool.h>
 #include <nemosound.h>
 #include <nemoglib.h>
-#include <prochelper.h>
+#include <nemohelper.h>
 #include <nemolog.h>
 #include <nemomisc.h>
 
@@ -582,7 +582,7 @@ struct soundone *nemosound_create_one(struct nemosound *sound, uint32_t pid)
 	one->sound = sound;
 	one->pid = pid;
 
-	proc_get_process_parent_id(pid, &one->ppid);
+	sys_get_process_parent_id(pid, &one->ppid);
 
 	nemolist_init(&one->cmd_list);
 

@@ -6,7 +6,6 @@
 #include <errno.h>
 
 #include <assert.h>
-#include <sys/sysinfo.h>
 #include <wayland-server.h>
 #include <wayland-xdg-shell-server-protocol.h>
 #include <wayland-nemo-shell-server-protocol.h>
@@ -30,7 +29,7 @@
 #include <waylandshell.h>
 #include <xdgshell.h>
 #include <nemoshell.h>
-#include <prochelper.h>
+#include <syshelper.h>
 #include <nemotoken.h>
 #include <nemoitem.h>
 #include <nemomisc.h>
@@ -676,16 +675,10 @@ static int nemoshell_dispatch_frame_timeout(void *data)
 	struct nemoscreen *screen;
 	struct nemocanvas *canvas;
 	struct shellbin *bin;
-	struct sysinfo sinfo;
 
-	sysinfo(&sinfo);
-
-	nemolog_message("SYSTEM", "loads(%f, %f, %f), mems(%f, %f)\n",
-			(float)sinfo.loads[0] / (float)(1 << SI_LOAD_SHIFT),
-			(float)sinfo.loads[1] / (float)(1 << SI_LOAD_SHIFT),
-			(float)sinfo.loads[2] / (float)(1 << SI_LOAD_SHIFT),
-			(float)sinfo.totalram / 1024.0f / 1024.0f,
-			(float)sinfo.freeram / 1024.0f / 1024.0f);
+	nemolog_message("SYSTEM", "cpu(%f), memory(%f)\n",
+			sys_get_cpu_usage(),
+			sys_get_memory_usage());
 
 	wl_list_for_each(screen, &compz->screen_list, link) {
 		nemolog_message("SCREEN", "[%d:%d] %d frames...\n", screen->node->nodeid, screen->screenid, screen->frame_count);
@@ -1053,7 +1046,7 @@ int nemoshell_use_client_state(struct nemoshell *shell, struct shellbin *bin)
 	} else {
 		pid_t ppid;
 
-		if (proc_get_process_parent_id(pid, &ppid) > 0) {
+		if (sys_get_process_parent_id(pid, &ppid) > 0) {
 			state = nemoshell_get_client_state(shell, ppid);
 			if (state != NULL) {
 				bin->pid = ppid;

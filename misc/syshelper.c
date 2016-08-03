@@ -5,7 +5,20 @@
 #include <unistd.h>
 #include <errno.h>
 
-int proc_get_process_name(pid_t pid, char *name, int size)
+#include <sys/sysinfo.h>
+
+static unsigned int sysprocessors = 1;
+
+void __attribute__((constructor(101))) sys_initialize(void)
+{
+	sysprocessors = get_nprocs();
+}
+
+void __attribute__((destructor(101))) sys_finalize(void)
+{
+}
+
+int sys_get_process_name(pid_t pid, char *name, int size)
 {
 	FILE *fp;
 	char procname[256];
@@ -29,7 +42,7 @@ int proc_get_process_name(pid_t pid, char *name, int size)
 	return 0;
 }
 
-int proc_get_process_parent_id(pid_t pid, pid_t *ppid)
+int sys_get_process_parent_id(pid_t pid, pid_t *ppid)
 {
 	FILE *fp;
 	char procname[256];
@@ -65,4 +78,22 @@ int proc_get_process_parent_id(pid_t pid, pid_t *ppid)
 	}
 
 	return 0;
+}
+
+float sys_get_cpu_usage(void)
+{
+	struct sysinfo sinfo;
+
+	sysinfo(&sinfo);
+
+	return (float)sinfo.loads[0] / (float)(1 << SI_LOAD_SHIFT) / (float)sysprocessors;
+}
+
+float sys_get_memory_usage(void)
+{
+	struct sysinfo sinfo;
+
+	sysinfo(&sinfo);
+
+	return (float)(sinfo.totalram - sinfo.freeram) / (float)sinfo.totalram;
 }

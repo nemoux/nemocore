@@ -43,6 +43,12 @@ extern char *os_get_file_path(const char *name);
 
 extern int os_set_nonblocking_mode(int fd);
 
+extern int sys_get_process_name(pid_t pid, char *name, int size);
+extern int sys_get_process_parent_id(pid_t pid, pid_t *ppid);
+
+extern float sys_get_cpu_usage(void);
+extern float sys_get_memory_usage(void);
+
 extern int udp_create_socket(const char *ip, int port);
 extern int udp_send_to(int soc, const char *ip, int port, const char *msg, int size);
 extern int udp_recv_from(int soc, char *ip, int *port, char *msg, int size);
