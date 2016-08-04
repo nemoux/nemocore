@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+#define __USE_GNU
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -74,6 +76,18 @@ void nemoenvs_set_id(struct nemoenvs *envs, const char *id)
 		envs->id = strdup(id);
 	else
 		envs->id = NULL;
+}
+
+void nemoenvs_set_name(struct nemoenvs *envs, const char *fmt, ...)
+{
+	va_list vargs;
+
+	if (envs->clientname != NULL)
+		free(envs->clientname);
+
+	va_start(vargs, fmt);
+	vasprintf(&envs->clientname, fmt, vargs);
+	va_end(vargs);
 }
 
 int nemoenvs_set_callback(struct nemoenvs *envs, nemoenvs_callback_t callback, void *data)
@@ -172,22 +186,21 @@ static int nemoenvs_handle_message(void *data)
 	return 0;
 }
 
-int nemoenvs_connect(struct nemoenvs *envs, const char *client, const char *server, const char *ip, int port)
+int nemoenvs_connect(struct nemoenvs *envs, const char *servername, const char *ip, int port)
 {
 	envs->msg = nemomsg_create(NULL, 0);
 	if (envs->msg == NULL)
 		return -1;
+
+	envs->servername = strdup(servername);
 
 	envs->monitor = nemomonitor_create(envs->tool,
 			nemomsg_get_socket(envs->msg),
 			nemoenvs_handle_message,
 			envs);
 
-	nemomsg_set_client(envs->msg, server, ip, port);
-	nemomsg_send_format(envs->msg, server, "%s %s rep /check/live", client, server);
-
-	envs->clientname = strdup(client);
-	envs->servername = strdup(server);
+	nemomsg_set_client(envs->msg, servername, ip, port);
+	nemomsg_send_format(envs->msg, servername, "%s %s rep /check/live", envs->clientname, servername);
 
 	return 0;
 }

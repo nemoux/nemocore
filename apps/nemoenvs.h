@@ -45,8 +45,9 @@ extern struct nemoenvs *nemoenvs_create(struct nemotool *tool);
 extern void nemoenvs_destroy(struct nemoenvs *envs);
 
 extern void nemoenvs_set_id(struct nemoenvs *envs, const char *id);
+extern void nemoenvs_set_name(struct nemoenvs *envs, const char *fmt, ...);
 
-extern int nemoenvs_connect(struct nemoenvs *envs, const char *client, const char *server, const char *ip, int port);
+extern int nemoenvs_connect(struct nemoenvs *envs, const char *servername, const char *ip, int port);
 extern int nemoenvs_send(struct nemoenvs *envs, const char *fmt, ...);
 extern int nemoenvs_reply(struct nemoenvs *envs, const char *fmt, ...);
 

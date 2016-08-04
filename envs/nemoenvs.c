@@ -113,12 +113,16 @@ void nemoenvs_destroy(struct nemoenvs *envs)
 	free(envs);
 }
 
-void nemoenvs_set_name(struct nemoenvs *envs, const char *name)
+void nemoenvs_set_name(struct nemoenvs *envs, const char *fmt, ...)
 {
+	va_list vargs;
+
 	if (envs->name != NULL)
 		free(envs->name);
 
-	envs->name = strdup(name);
+	va_start(vargs, fmt);
+	vasprintf(&envs->name, fmt, vargs);
+	va_end(vargs);
 }
 
 void nemoenvs_set_args(struct nemoenvs *envs, char *args[], int argc)
