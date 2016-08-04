@@ -98,6 +98,11 @@ extern void nemoenvs_handle_left_button(struct nemocompz *compz, struct nemopoin
 extern void nemoenvs_handle_right_button(struct nemocompz *compz, struct nemopointer *pointer, uint32_t time, uint32_t button, enum wl_pointer_button_state state, void *data);
 extern void nemoenvs_handle_touch_event(struct nemocompz *compz, struct touchpoint *tp, uint32_t time, void *data);
 
+static inline const char *nemoenvs_get_name(struct nemoenvs *envs)
+{
+	return envs->name;
+}
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

@@ -61,9 +61,14 @@ extern int nemoenvs_dispatch(struct nemoenvs *envs, const char *src, const char 
 extern int nemoenvs_dispatch_config_message(struct nemoenvs *envs, const char *src, const char *dst, const char *cmd, const char *path, struct itemone *one, void *data);
 extern int nemoenvs_dispatch_client_message(struct nemoenvs *envs, const char *src, const char *dst, const char *cmd, const char *path, struct itemone *one, void *data);
 
-static int nemoenvs_has_id(struct nemoenvs *envs, const char *id)
+static inline int nemoenvs_has_id(struct nemoenvs *envs, const char *id)
 {
 	return envs->id != NULL && strcmp(envs->id, id) == 0;
+}
+
+static inline const char *nemoenvs_get_name(struct nemoenvs *envs)
+{
+	return envs->clientname;
 }
 
 #ifdef __cplusplus
