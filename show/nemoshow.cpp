@@ -64,7 +64,7 @@ struct nemoshow *nemoshow_create(void)
 	show->tilesize = NEMOSHOW_DEFAULT_TILESIZE;
 
 	show->state = NEMOSHOW_ANTIALIAS_STATE | NEMOSHOW_FILTER_STATE;
-	show->quality = NEMOSHOW_FILTER_HIGH_QUALITY;
+	show->quality = NEMOSHOW_FILTER_NORMAL_QUALITY;
 
 	return show;
 

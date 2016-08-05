@@ -110,6 +110,7 @@ int nemoshow_filter_update(struct showone *one)
 {
 	static SkBlurMaskFilter::BlurFlags flags[] = {
 		SkBlurMaskFilter::kNone_BlurFlag,
+		SkBlurMaskFilter::kIgnoreTransform_BlurFlag,
 		SkBlurMaskFilter::kHighQuality_BlurFlag
 	};
 	struct nemoshow *show = one->show;
