@@ -282,6 +282,10 @@ static void move_shellgrab_touchpoint_pressure(struct touchpoint_grab *base, uin
 	struct touchpoint *tp = base->touchpoint;
 
 	touchpoint_pressure(tp, p);
+
+	if (tp->focus != NULL) {
+		nemocontent_touch_pressure(tp, tp->focus->content, time, touchid, p);
+	}
 }
 
 static void move_shellgrab_touchpoint_frame(struct touchpoint_grab *base, uint32_t frameid)
@@ -528,6 +532,10 @@ static void move_actorgrab_touchpoint_pressure(struct touchpoint_grab *base, uin
 	struct touchpoint *tp = base->touchpoint;
 
 	touchpoint_pressure(tp, p);
+
+	if (tp->focus != NULL) {
+		nemocontent_touch_pressure(tp, tp->focus->content, time, touchid, p);
+	}
 }
 
 static void move_actorgrab_touchpoint_frame(struct touchpoint_grab *base, uint32_t frameid)
