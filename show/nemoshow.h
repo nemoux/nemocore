@@ -43,6 +43,12 @@ typedef enum {
 	NEMOSHOW_FILTER_STATE = (1 << 2)
 } NemoShowState;
 
+typedef enum {
+	NEMOSHOW_FILTER_LOW_QUALITY = 0,
+	NEMOSHOW_FILTER_HIGH_QUALITY = 1,
+	NEMOSHOW_FILTER_LAST_QUALITY
+} NemoshowfilterQuality;
+
 struct nemoshow;
 struct showone;
 
@@ -66,6 +72,7 @@ struct nemoshow {
 	struct nemotale *tale;
 
 	uint32_t state;
+	uint32_t quality;
 
 	struct showexpr *expr;
 	struct showsymtable *stable;
@@ -163,6 +170,7 @@ extern void nemoshow_enable_antialias(struct nemoshow *show);
 extern void nemoshow_disable_antialias(struct nemoshow *show);
 extern void nemoshow_enable_filtering(struct nemoshow *show);
 extern void nemoshow_disable_filtering(struct nemoshow *show);
+extern void nemoshow_set_filtering_quality(struct nemoshow *show, uint32_t quality);
 
 static inline void nemoshow_set_tale(struct nemoshow *show, struct nemotale *tale)
 {

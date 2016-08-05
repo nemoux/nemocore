@@ -8,7 +8,6 @@ typedef struct _showfilter {
 	SkImageFilter *imagefilter;
 	SkColorFilter *colorfilter;
 
-	SkBlurMaskFilter::BlurFlags flags;
 	SkBlurStyle style;
 } showfilter_t;
 

@@ -64,6 +64,7 @@ struct nemoshow *nemoshow_create(void)
 	show->tilesize = NEMOSHOW_DEFAULT_TILESIZE;
 
 	show->state = NEMOSHOW_ANTIALIAS_STATE | NEMOSHOW_FILTER_STATE;
+	show->quality = NEMOSHOW_FILTER_HIGH_QUALITY;
 
 	return show;
 
@@ -707,6 +708,19 @@ void nemoshow_disable_filtering(struct nemoshow *show)
 	if (nemoshow_has_state(show, NEMOSHOW_FILTER_STATE) == 0)
 		return;
 	nemoshow_put_state(show, NEMOSHOW_FILTER_STATE);
+
+	nemolist_for_each(one, &show->one_list, link) {
+		nemoshow_one_dirty(one, NEMOSHOW_FILTER_DIRTY);
+	}
+}
+
+void nemoshow_set_filtering_quality(struct nemoshow *show, uint32_t quality)
+{
+	struct showone *one;
+
+	if (show->quality == quality)
+		return;
+	show->quality = quality;
 
 	nemolist_for_each(one, &show->one_list, link) {
 		nemoshow_one_dirty(one, NEMOSHOW_FILTER_DIRTY);
