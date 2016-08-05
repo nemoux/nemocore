@@ -39,20 +39,21 @@ typedef enum {
 	NEMOTALE_TOUCH_DOWN_EVENT = (1 << 15),
 	NEMOTALE_TOUCH_UP_EVENT = (1 << 16),
 	NEMOTALE_TOUCH_MOTION_EVENT = (1 << 17),
-	NEMOTALE_STICK_ENTER_EVENT = (1 << 18),
-	NEMOTALE_STICK_LEAVE_EVENT = (1 << 19),
-	NEMOTALE_STICK_TRANSLATE_EVENT = (1 << 20),
-	NEMOTALE_STICK_ROTATE_EVENT = (1 << 21),
-	NEMOTALE_STICK_BUTTON_DOWN_EVENT = (1 << 22),
-	NEMOTALE_STICK_BUTTON_UP_EVENT = (1 << 23),
-	NEMOTALE_POINTER_LONG_PRESS_EVENT = (1 << 24),
-	NEMOTALE_TOUCH_LONG_PRESS_EVENT = (1 << 25),
-	NEMOTALE_CANCEL_EVENT = (1 << 26),
+	NEMOTALE_TOUCH_PRESSURE_EVENT = (1 << 18),
+	NEMOTALE_STICK_ENTER_EVENT = (1 << 19),
+	NEMOTALE_STICK_LEAVE_EVENT = (1 << 20),
+	NEMOTALE_STICK_TRANSLATE_EVENT = (1 << 21),
+	NEMOTALE_STICK_ROTATE_EVENT = (1 << 22),
+	NEMOTALE_STICK_BUTTON_DOWN_EVENT = (1 << 23),
+	NEMOTALE_STICK_BUTTON_UP_EVENT = (1 << 24),
+	NEMOTALE_POINTER_LONG_PRESS_EVENT = (1 << 25),
+	NEMOTALE_TOUCH_LONG_PRESS_EVENT = (1 << 26),
+	NEMOTALE_CANCEL_EVENT = (1 << 27),
 	NEMOTALE_DOWN_EVENT = NEMOTALE_POINTER_DOWN_EVENT | NEMOTALE_TOUCH_DOWN_EVENT,
 	NEMOTALE_UP_EVENT = NEMOTALE_POINTER_UP_EVENT | NEMOTALE_TOUCH_UP_EVENT,
 	NEMOTALE_MOTION_EVENT = NEMOTALE_POINTER_MOTION_EVENT | NEMOTALE_TOUCH_MOTION_EVENT,
 	NEMOTALE_POINTER_EVENT = NEMOTALE_POINTER_ENTER_EVENT | NEMOTALE_POINTER_LEAVE_EVENT | NEMOTALE_POINTER_DOWN_EVENT | NEMOTALE_POINTER_UP_EVENT | NEMOTALE_POINTER_MOTION_EVENT,
-	NEMOTALE_TOUCH_EVENT = NEMOTALE_TOUCH_DOWN_EVENT | NEMOTALE_TOUCH_UP_EVENT | NEMOTALE_TOUCH_MOTION_EVENT,
+	NEMOTALE_TOUCH_EVENT = NEMOTALE_TOUCH_DOWN_EVENT | NEMOTALE_TOUCH_UP_EVENT | NEMOTALE_TOUCH_MOTION_EVENT | NEMOTALE_TOUCH_PRESSURE_EVENT,
 	NEMOTALE_LONG_PRESS_EVENT = NEMOTALE_POINTER_LONG_PRESS_EVENT | NEMOTALE_TOUCH_LONG_PRESS_EVENT
 } NemoTaleEventType;
 
@@ -101,6 +102,7 @@ struct taleevent {
 
 	uint32_t axis;
 	float r;
+	float p;
 
 	const char *name;
 
@@ -124,6 +126,7 @@ extern void nemotale_push_keyboard_layout_event(struct nemotale *tale, uint32_t 
 extern void nemotale_push_touch_down_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, float x, float y, float gx, float gy);
 extern void nemotale_push_touch_up_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time);
 extern void nemotale_push_touch_motion_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, float x, float y, float gx, float gy);
+extern void nemotale_push_touch_pressure_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, float p);
 extern void nemotale_push_stick_enter_event(struct nemotale *tale, uint32_t serial, uint64_t device);
 extern void nemotale_push_stick_leave_event(struct nemotale *tale, uint32_t serial, uint64_t device);
 extern void nemotale_push_stick_down_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, uint32_t button);
@@ -222,9 +225,14 @@ static inline float nemotale_event_get_gy_on(struct taleevent *event, int index)
 	return event->taps[index]->gy;
 }
 
-static inline float nemotale_event_get_r(struct taleevent *event)
+static inline float nemotale_event_get_rotate(struct taleevent *event)
 {
 	return event->r;
+}
+
+static inline float nemotale_event_get_pressure(struct taleevent *event)
+{
+	return event->p;
 }
 
 static inline uint32_t nemotale_event_get_axis(struct taleevent *event)

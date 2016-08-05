@@ -398,6 +398,25 @@ void nemotale_push_touch_motion_event(struct nemotale *tale, uint32_t serial, ui
 	tale->dispatch_event(tale, tap->node, &event);
 }
 
+void nemotale_push_touch_pressure_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, float p)
+{
+	struct taleevent event;
+	struct taletap *tap;
+
+	tap = nemotale_touch_get_tap(tale, device);
+	if (tap == NULL)
+		return;
+
+	event.type = NEMOTALE_TOUCH_PRESSURE_EVENT;
+	event.device = device;
+	event.serial = tap->serial;
+	event.time = time;
+	event.p = p;
+	event.tap = tap;
+
+	tale->dispatch_event(tale, tap->node, &event);
+}
+
 void nemotale_push_timer_event(struct nemotale *tale, uint32_t time)
 {
 	struct taletap *tap;

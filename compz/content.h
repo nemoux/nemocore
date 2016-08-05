@@ -79,6 +79,7 @@ struct nemocontent {
 	void (*touch_down)(struct touchpoint *tp, struct nemocontent *content, uint32_t time, uint64_t touchid, float x, float y, float gx, float gy);
 	void (*touch_up)(struct touchpoint *tp, struct nemocontent *content, uint32_t time, uint64_t touchid);
 	void (*touch_motion)(struct touchpoint *tp, struct nemocontent *content, uint32_t time, uint64_t touchid, float x, float y, float gx, float gy);
+	void (*touch_pressure)(struct touchpoint *tp, struct nemocontent *content, uint32_t time, uint64_t touchid, float p);
 	void (*touch_frame)(struct touchpoint *tp, struct nemocontent *content);
 
 	void (*stick_enter)(struct nemostick *stick, struct nemocontent *content);
@@ -231,6 +232,12 @@ static inline void nemocontent_touch_motion(struct touchpoint *tp, struct nemoco
 {
 	if (content->touch_motion != NULL)
 		content->touch_motion(tp, content, time, touchid, x, y, gx, gy);
+}
+
+static inline void nemocontent_touch_pressure(struct touchpoint *tp, struct nemocontent *content, uint32_t time, uint64_t touchid, float p)
+{
+	if (content->touch_pressure != NULL)
+		content->touch_pressure(tp, content, time, touchid, p);
 }
 
 static inline void nemocontent_touch_frame(struct touchpoint *tp, struct nemocontent *content)

@@ -217,6 +217,19 @@ static void nemoactor_dispatch_touch_motion(struct touchpoint *tp, struct nemoco
 	nemoactor_dispatch_event(actor, NEMOEVENT_TOUCH_MOTION_TYPE, &event);
 }
 
+static void nemoactor_dispatch_touch_pressure(struct touchpoint *tp, struct nemocontent *content, uint32_t time, uint64_t touchid, float p)
+{
+	struct nemoactor *actor = (struct nemoactor *)container_of(content, struct nemoactor, base);
+	struct nemoevent event;
+
+	event.device = touchid;
+	event.serial = 0;
+	event.time = time;
+	event.p = p;
+
+	nemoactor_dispatch_event(actor, NEMOEVENT_TOUCH_PRESSURE_TYPE, &event);
+}
+
 static void nemoactor_dispatch_touch_frame(struct touchpoint *tp, struct nemocontent *content)
 {
 }
@@ -338,6 +351,7 @@ struct nemoactor *nemoactor_create_pixman(struct nemocompz *compz, int width, in
 	actor->base.touch_down = nemoactor_dispatch_touch_down;
 	actor->base.touch_up = nemoactor_dispatch_touch_up;
 	actor->base.touch_motion = nemoactor_dispatch_touch_motion;
+	actor->base.touch_pressure = nemoactor_dispatch_touch_pressure;
 	actor->base.touch_frame = nemoactor_dispatch_touch_frame;
 
 	actor->min_width = 0;
@@ -489,6 +503,7 @@ struct nemoactor *nemoactor_create_gl(struct nemocompz *compz, int width, int he
 	actor->base.touch_down = nemoactor_dispatch_touch_down;
 	actor->base.touch_up = nemoactor_dispatch_touch_up;
 	actor->base.touch_motion = nemoactor_dispatch_touch_motion;
+	actor->base.touch_pressure = nemoactor_dispatch_touch_pressure;
 	actor->base.touch_frame = nemoactor_dispatch_touch_frame;
 
 	actor->min_width = 0;

@@ -26,6 +26,7 @@ struct touchpoint_grab_interface {
 	void (*down)(struct touchpoint_grab *grab, uint32_t time, uint64_t touchid, float x, float y);
 	void (*up)(struct touchpoint_grab *grab, uint32_t time, uint64_t touchid);
 	void (*motion)(struct touchpoint_grab *grab, uint32_t time, uint64_t touchid, float x, float y);
+	void (*pressure)(struct touchpoint_grab *grab, uint32_t time, uint64_t touchid, float p);
 	void (*frame)(struct touchpoint_grab *grab, uint32_t frameid);
 	void (*cancel)(struct touchpoint_grab *grab);
 };
@@ -61,6 +62,7 @@ struct touchpoint {
 
 	float x, y;
 	float rx, ry;
+	float p;
 
 	float *samples;
 	int nsamples;
@@ -120,6 +122,7 @@ extern struct touchpoint *nemotouch_get_touchpoint_by_serial(struct nemotouch *t
 extern void nemotouch_notify_down(struct nemotouch *touch, uint32_t time, int id, float x, float y);
 extern void nemotouch_notify_up(struct nemotouch *touch, uint32_t time, int id);
 extern void nemotouch_notify_motion(struct nemotouch *touch, uint32_t time, int id, float x, float y);
+extern void nemotouch_notify_pressure(struct nemotouch *touch, uint32_t time, int id, float p);
 extern void nemotouch_notify_frame(struct nemotouch *touch, int id);
 extern void nemotouch_notify_frames(struct nemotouch *touch);
 
@@ -128,6 +131,7 @@ extern void nemotouch_flush_tuio(struct tuio *tuio);
 extern void touchpoint_down(struct touchpoint *tp, float x, float y);
 extern void touchpoint_motion(struct touchpoint *tp, float x, float y);
 extern void touchpoint_up(struct touchpoint *tp);
+extern void touchpoint_pressure(struct touchpoint *tp, float p);
 
 extern void touchpoint_set_focus(struct touchpoint *tp, struct nemoview *view);
 

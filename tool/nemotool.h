@@ -34,11 +34,12 @@ typedef enum {
 	NEMOTOOL_TOUCH_DOWN_EVENT = (1 << 10),
 	NEMOTOOL_TOUCH_UP_EVENT = (1 << 11),
 	NEMOTOOL_TOUCH_MOTION_EVENT = (1 << 12),
-	NEMOTOOL_STICK_ENTER_EVENT = (1 << 13),
-	NEMOTOOL_STICK_LEAVE_EVENT = (1 << 14),
-	NEMOTOOL_STICK_TRANSLATE_EVENT = (1 << 15),
-	NEMOTOOL_STICK_ROTATE_EVENT = (1 << 16),
-	NEMOTOOL_STICK_BUTTON_EVENT = (1 << 17),
+	NEMOTOOL_TOUCH_PRESSURE_EVENT = (1 << 13),
+	NEMOTOOL_STICK_ENTER_EVENT = (1 << 14),
+	NEMOTOOL_STICK_LEAVE_EVENT = (1 << 15),
+	NEMOTOOL_STICK_TRANSLATE_EVENT = (1 << 16),
+	NEMOTOOL_STICK_ROTATE_EVENT = (1 << 17),
+	NEMOTOOL_STICK_BUTTON_EVENT = (1 << 18),
 } NemoToolEventType;
 
 typedef enum {
@@ -87,6 +88,7 @@ struct nemoevent {
 	float x, y, z;
 	float gx, gy;
 	float r;
+	float p;
 
 	const char *name;
 };

@@ -60,9 +60,14 @@ static inline float nemoshow_event_get_gy_on(void *event, int index)
 	return nemotale_event_get_gy_on((struct taleevent *)event, index);
 }
 
-static inline float nemoshow_event_get_r(void *event)
+static inline float nemoshow_event_get_rotate(void *event)
 {
-	return nemotale_event_get_r((struct taleevent *)event);
+	return nemotale_event_get_rotate((struct taleevent *)event);
+}
+
+static inline float nemoshow_event_get_pressure(void *event)
+{
+	return nemotale_event_get_pressure((struct taleevent *)event);
 }
 
 static inline uint32_t nemoshow_event_get_axis(void *event)
@@ -346,6 +351,11 @@ static inline int nemoshow_event_is_touch_up(struct nemoshow *show, void *event)
 static inline int nemoshow_event_is_touch_motion(struct nemoshow *show, void *event)
 {
 	return nemotale_event_is_touch_motion(show->tale, (struct taleevent *)event);
+}
+
+static inline int nemoshow_event_is_touch_pressure(struct nemoshow *show, void *event)
+{
+	return nemotale_event_is_touch_pressure(show->tale, (struct taleevent *)event);
 }
 
 static inline int nemoshow_event_is_touch_single_click(struct nemoshow *show, void *event)

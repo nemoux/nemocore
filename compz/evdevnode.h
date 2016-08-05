@@ -23,9 +23,10 @@ typedef enum {
 	EVDEV_ABSOLUTE_MT_DOWN = 5,
 	EVDEV_ABSOLUTE_MT_MOTION = 6,
 	EVDEV_ABSOLUTE_MT_UP = 7,
-	EVDEV_RELATIVE_MOTION = 8,
-	EVDEV_ABSOLUTE_TRANSLATE = 9,
-	EVDEV_ABSOLUTE_ROTATE = 10
+	EVDEV_ABSOLUTE_MT_PRESSURE = 8,
+	EVDEV_RELATIVE_MOTION = 9,
+	EVDEV_ABSOLUTE_TRANSLATE = 10,
+	EVDEV_ABSOLUTE_ROTATE = 11
 } EvdevEventType;
 
 typedef enum {
@@ -58,9 +59,11 @@ struct evdevnode {
 	struct {
 		float min_x, max_x, min_y, max_y, min_z, max_z;
 		float min_rx, max_rx, min_ry, max_ry, min_rz, max_rz;
+		float min_p, max_p;
 		float x, y, z;
 		float rx, ry, rz;
 		float r;
+		float p;
 		uint32_t seat_slot;
 		int axis;
 
@@ -72,6 +75,7 @@ struct evdevnode {
 		int slot;
 		struct {
 			float x, y;
+			float p;
 			uint32_t seat_slot;
 		} slots[EVDEV_MAX_SLOTS];
 	} mt;

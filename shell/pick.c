@@ -156,6 +156,13 @@ static void pick_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 	touchpoint_motion(tp, x, y);
 }
 
+static void pick_shellgrab_touchpoint_pressure(struct touchpoint_grab *base, uint32_t time, uint64_t touchid, float p)
+{
+	struct touchpoint *tp = base->touchpoint;
+
+	touchpoint_pressure(tp, p);
+}
+
 static void pick_shellgrab_touchpoint_frame(struct touchpoint_grab *base, uint32_t frameid)
 {
 	struct shellgrab *grab = (struct shellgrab *)container_of(base, struct shellgrab, base.touchpoint);
@@ -284,6 +291,7 @@ static const struct touchpoint_grab_interface pick_shellgrab_touchpoint_interfac
 	pick_shellgrab_touchpoint_down,
 	pick_shellgrab_touchpoint_up,
 	pick_shellgrab_touchpoint_motion,
+	pick_shellgrab_touchpoint_pressure,
 	pick_shellgrab_touchpoint_frame,
 	pick_shellgrab_touchpoint_cancel
 };
@@ -450,6 +458,13 @@ static void pick_actorgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 	touchpoint_motion(tp, x, y);
 }
 
+static void pick_actorgrab_touchpoint_pressure(struct touchpoint_grab *base, uint32_t time, uint64_t touchid, float p)
+{
+	struct touchpoint *tp = base->touchpoint;
+
+	touchpoint_pressure(tp, p);
+}
+
 static void pick_actorgrab_touchpoint_frame(struct touchpoint_grab *base, uint32_t frameid)
 {
 	struct actorgrab *grab = (struct actorgrab *)container_of(base, struct actorgrab, base.touchpoint);
@@ -525,6 +540,7 @@ static const struct touchpoint_grab_interface pick_actorgrab_touchpoint_interfac
 	pick_actorgrab_touchpoint_down,
 	pick_actorgrab_touchpoint_up,
 	pick_actorgrab_touchpoint_motion,
+	pick_actorgrab_touchpoint_pressure,
 	pick_actorgrab_touchpoint_frame,
 	pick_actorgrab_touchpoint_cancel
 };

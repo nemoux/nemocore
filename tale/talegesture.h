@@ -151,6 +151,11 @@ static inline int nemotale_event_is_touch_motion(struct nemotale *tale, struct t
 	return event->type & NEMOTALE_TOUCH_MOTION_EVENT;
 }
 
+static inline int nemotale_event_is_touch_pressure(struct nemotale *tale, struct taleevent *event)
+{
+	return event->type & NEMOTALE_TOUCH_PRESSURE_EVENT;
+}
+
 static inline int nemotale_event_is_touch_long_press(struct nemotale *tale, struct taleevent *event)
 {
 	return event->type & NEMOTALE_TOUCH_LONG_PRESS_EVENT;

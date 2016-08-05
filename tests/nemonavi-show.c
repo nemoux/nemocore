@@ -297,9 +297,9 @@ static void nemonavi_dispatch_canvas_event(struct nemoshow *show, struct showone
 		nemonavi_send_pointer_motion_event(context->navi, x, y);
 	} else if (nemoshow_event_is_pointer_axis(show, event)) {
 		if (nemoshow_event_get_axis(event) == NEMO_POINTER_AXIS_ROTATE_X) {
-			nemonavi_send_pointer_wheel_event(context->navi, 0.0f, nemoshow_event_get_r(event) < 0.0f ? 40.0f : -40.0f);
+			nemonavi_send_pointer_wheel_event(context->navi, 0.0f, nemoshow_event_get_rotate(event) < 0.0f ? 40.0f : -40.0f);
 		} else {
-			nemonavi_send_pointer_wheel_event(context->navi, nemoshow_event_get_r(event) < 0.0f ? 40.0f : -40.0f, 0.0f);
+			nemonavi_send_pointer_wheel_event(context->navi, nemoshow_event_get_rotate(event) < 0.0f ? 40.0f : -40.0f, 0.0f);
 		}
 	}
 

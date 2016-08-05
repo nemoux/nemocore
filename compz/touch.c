@@ -72,6 +72,17 @@ static void default_touchpoint_grab_motion(struct touchpoint_grab *grab, uint32_
 	}
 }
 
+static void default_touchpoint_grab_pressure(struct touchpoint_grab *grab, uint32_t time, uint64_t touchid, float p)
+{
+	struct touchpoint *tp = grab->touchpoint;
+
+	touchpoint_pressure(tp, p);
+
+	if (tp->focus != NULL) {
+		nemocontent_touch_pressure(tp, tp->focus->content, time, touchid, p);
+	}
+}
+
 static void default_touchpoint_grab_frame(struct touchpoint_grab *grab, uint32_t frameid)
 {
 	struct touchpoint *tp = grab->touchpoint;
@@ -89,6 +100,7 @@ static const struct touchpoint_grab_interface default_touchpoint_grab_interface 
 	default_touchpoint_grab_down,
 	default_touchpoint_grab_up,
 	default_touchpoint_grab_motion,
+	default_touchpoint_grab_pressure,
 	default_touchpoint_grab_frame,
 	default_touchpoint_grab_cancel
 };
@@ -300,6 +312,11 @@ void touchpoint_up(struct touchpoint *tp)
 {
 }
 
+void touchpoint_pressure(struct touchpoint *tp, float p)
+{
+	tp->p = p;
+}
+
 static void touchpoint_handle_focus_resource_destroy(struct wl_listener *listener, void *data)
 {
 	struct touchpoint *tp = (struct touchpoint *)container_of(listener, struct touchpoint, focus_resource_listener);
@@ -485,6 +502,20 @@ void nemotouch_notify_motion(struct nemotouch *touch, uint32_t time, int id, flo
 	tp->state = TOUCHPOINT_MOTION_STATE;
 
 	tp->grab->interface->motion(tp->grab, time, tp->gid, x, y);
+}
+
+void nemotouch_notify_pressure(struct nemotouch *touch, uint32_t time, int id, float p)
+{
+	struct touchpoint *tp;
+
+	if (touch == NULL)
+		return;
+
+	tp = nemotouch_get_touchpoint_by_id(touch, id);
+	if (tp == NULL)
+		return;
+
+	tp->grab->interface->pressure(tp->grab, time, tp->gid, p);
 }
 
 void nemotouch_notify_frame(struct nemotouch *touch, int id)

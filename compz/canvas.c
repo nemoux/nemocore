@@ -1147,6 +1147,25 @@ static void nemocanvas_touch_motion(struct touchpoint *tp, struct nemocontent *c
 #endif
 }
 
+static void nemocanvas_touch_pressure(struct touchpoint *tp, struct nemocontent *content, uint32_t time, uint64_t touchid, float p)
+{
+	struct nemocanvas *canvas = (struct nemocanvas *)container_of(content, struct nemocanvas, base);
+	struct wl_list *resource_list;
+	struct wl_client *client = wl_resource_get_client(canvas->resource);
+	struct wl_resource *resource;
+
+	resource_list = &tp->touch->seat->touch.nemo_resource_list;
+
+	wl_resource_for_each(resource, resource_list) {
+		if (wl_resource_get_client(resource) == client) {
+			nemo_touch_send_pressure(resource, time,
+					canvas->resource,
+					touchid,
+					wl_fixed_from_double(p));
+		}
+	}
+}
+
 static void nemocanvas_touch_frame(struct touchpoint *tp, struct nemocontent *content)
 {
 	struct nemocanvas *canvas = (struct nemocanvas *)container_of(content, struct nemocanvas, base);
@@ -1321,6 +1340,7 @@ struct nemocanvas *nemocanvas_create(struct wl_client *client, struct wl_resourc
 	canvas->base.touch_down = nemocanvas_touch_down;
 	canvas->base.touch_up = nemocanvas_touch_up;
 	canvas->base.touch_motion = nemocanvas_touch_motion;
+	canvas->base.touch_pressure = nemocanvas_touch_pressure;
 	canvas->base.touch_frame = nemocanvas_touch_frame;
 
 	canvas->base.stick_enter = nemocanvas_stick_enter;

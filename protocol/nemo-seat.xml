@@ -207,6 +207,13 @@
 			<arg name="gx" type="fixed"/>
 			<arg name="gy" type="fixed"/>
 		</event>
+		
+		<event name="pressure">
+			<arg name="time" type="uint"/>
+			<arg name="surface" type="object" interface="wl_surface"/>
+			<arg name="id" type="int"/>
+			<arg name="p" type="fixed"/>
+		</event>
 
 		<event name="frame">
 		</event>

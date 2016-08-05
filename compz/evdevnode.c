@@ -104,6 +104,11 @@ static int evdev_flush_events(struct evdevnode *node, uint32_t time)
 			nemotouch_notify_up(node->touch, time, id);
 			break;
 
+		case EVDEV_ABSOLUTE_MT_PRESSURE:
+			id = node->mt.slots[slot].seat_slot;
+			nemotouch_notify_pressure(node->touch, time, id, node->mt.slots[slot].p);
+			break;
+
 		case EVDEV_ABSOLUTE_TOUCH_DOWN:
 			evdev_transform_absolute(node, &cx, &cy);
 			if (node->base.screen != NULL) {
@@ -255,6 +260,12 @@ static void evdev_process_absolute(struct evdevnode *node, struct input_event *e
 				node->mt.slots[node->mt.slot].y = (e->value - node->abs.min_y) / (node->abs.max_y - node->abs.min_y);
 				if (node->pending_event == EVDEV_NONE)
 					node->pending_event = EVDEV_ABSOLUTE_MT_MOTION;
+				break;
+
+			case ABS_MT_PRESSURE:
+				evdev_flush_events(node, time);
+				node->mt.slots[node->mt.slot].p = (e->value - node->abs.min_p) / (node->abs.max_p - node->abs.min_p);
+				node->pending_event = EVDEV_ABSOLUTE_MT_PRESSURE;
 				break;
 		}
 	} else if (node->seat_caps & EVDEV_SEAT_POINTER) {
@@ -537,6 +548,11 @@ static int evdev_configure_node(struct evdevnode *node)
 				ioctl(node->fd, EVIOCGABS(ABS_MT_SLOT), &absinfo);
 				node->mt.slot = absinfo.value;
 			}
+		}
+		if (TEST_BIT(abs_bits, ABS_MT_PRESSURE)) {
+			ioctl(node->fd, EVIOCGABS(ABS_MT_PRESSURE), &absinfo);
+			node->abs.min_p = absinfo.minimum;
+			node->abs.max_p = absinfo.maximum;
 		}
 	}
 	if (TEST_BIT(ev_bits, EV_REL)) {

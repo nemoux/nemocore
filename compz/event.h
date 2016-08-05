@@ -20,11 +20,12 @@ typedef enum {
 	NEMOEVENT_TOUCH_DOWN_TYPE = (1 << 9),
 	NEMOEVENT_TOUCH_UP_TYPE = (1 << 10),
 	NEMOEVENT_TOUCH_MOTION_TYPE = (1 << 11),
-	NEMOEVENT_STICK_ENTER_TYPE = (1 << 12),
-	NEMOEVENT_STICK_LEAVE_TYPE = (1 << 13),
-	NEMOEVENT_STICK_TRANSLATE_TYPE = (1 << 14),
-	NEMOEVENT_STICK_ROTATE_TYPE = (1 << 15),
-	NEMOEVENT_STICK_BUTTON_TYPE = (1 << 16),
+	NEMOEVENT_TOUCH_PRESSURE_TYPE = (1 << 12),
+	NEMOEVENT_STICK_ENTER_TYPE = (1 << 13),
+	NEMOEVENT_STICK_LEAVE_TYPE = (1 << 14),
+	NEMOEVENT_STICK_TRANSLATE_TYPE = (1 << 15),
+	NEMOEVENT_STICK_ROTATE_TYPE = (1 << 16),
+	NEMOEVENT_STICK_BUTTON_TYPE = (1 << 17),
 } NemoEventType;
 
 struct nemoevent {
@@ -39,6 +40,7 @@ struct nemoevent {
 	float x, y, z;
 	float gx, gy;
 	float r;
+	float p;
 };
 
 #ifdef __cplusplus

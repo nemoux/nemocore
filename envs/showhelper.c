@@ -74,6 +74,8 @@ static int nemoshow_dispatch_actor_event(struct nemoactor *actor, uint32_t type,
 		nemotale_push_touch_up_event(tale, event->serial, event->device, event->time);
 	} else if (type & NEMOEVENT_TOUCH_MOTION_TYPE) {
 		nemotale_push_touch_motion_event(tale, event->serial, event->device, event->time, event->x, event->y, event->gx, event->gy);
+	} else if (type & NEMOEVENT_TOUCH_PRESSURE_TYPE) {
+		nemotale_push_touch_pressure_event(tale, event->serial, event->device, event->time, event->p);
 	} else if (type & NEMOEVENT_STICK_ENTER_TYPE) {
 		nemotale_push_stick_enter_event(tale, event->serial, event->device);
 	} else if (type & NEMOEVENT_STICK_LEAVE_TYPE) {

@@ -355,6 +355,23 @@ static void touch_handle_motion(void *data, struct nemo_touch *touch, uint32_t t
 	}
 }
 
+static void touch_handle_pressure(void *data, struct nemo_touch *touch, uint32_t time, struct wl_surface *surface, int32_t id, wl_fixed_t p)
+{
+	if (surface != NULL) {
+		struct nemocanvas *canvas = (struct nemocanvas *)wl_surface_get_user_data(surface);
+
+		if (canvas != NULL && canvas->dispatch_event != NULL) {
+			struct nemoevent event;
+
+			event.device = id;
+			event.time = time;
+			event.p = wl_fixed_to_double(p);
+
+			canvas->dispatch_event(canvas, NEMOTOOL_TOUCH_PRESSURE_EVENT, &event);
+		}
+	}
+}
+
 static void touch_handle_frame(void *data, struct nemo_touch *touch)
 {
 }
@@ -367,6 +384,7 @@ static const struct nemo_touch_listener touch_listener = {
 	touch_handle_down,
 	touch_handle_up,
 	touch_handle_motion,
+	touch_handle_pressure,
 	touch_handle_frame,
 	touch_handle_cancel
 };
