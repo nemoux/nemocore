@@ -63,7 +63,7 @@ struct nemoshow *nemoshow_create(void)
 
 	show->tilesize = NEMOSHOW_DEFAULT_TILESIZE;
 
-	show->state = NEMOSHOW_FILTER_STATE;
+	show->state = NEMOSHOW_ANTIALIAS_STATE | NEMOSHOW_FILTER_STATE;
 
 	return show;
 
@@ -661,7 +661,33 @@ void nemoshow_set_keyboard_focus(struct nemoshow *show, struct showone *one)
 	nemotale_set_keyboard_focus(show->tale, NEMOSHOW_CANVAS_AT(one, node));
 }
 
-void nemoshow_enable_filter_effect(struct nemoshow *show)
+void nemoshow_enable_antialias(struct nemoshow *show)
+{
+	struct showone *one;
+
+	if (nemoshow_has_state(show, NEMOSHOW_ANTIALIAS_STATE) != 0)
+		return;
+	nemoshow_set_state(show, NEMOSHOW_ANTIALIAS_STATE);
+
+	nemolist_for_each(one, &show->one_list, link) {
+		nemoshow_one_dirty(one, NEMOSHOW_STYLE_DIRTY);
+	}
+}
+
+void nemoshow_disable_antialias(struct nemoshow *show)
+{
+	struct showone *one;
+
+	if (nemoshow_has_state(show, NEMOSHOW_ANTIALIAS_STATE) == 0)
+		return;
+	nemoshow_put_state(show, NEMOSHOW_ANTIALIAS_STATE);
+
+	nemolist_for_each(one, &show->one_list, link) {
+		nemoshow_one_dirty(one, NEMOSHOW_STYLE_DIRTY);
+	}
+}
+
+void nemoshow_enable_filtering(struct nemoshow *show)
 {
 	struct showone *one;
 
@@ -674,7 +700,7 @@ void nemoshow_enable_filter_effect(struct nemoshow *show)
 	}
 }
 
-void nemoshow_disable_filter_effect(struct nemoshow *show)
+void nemoshow_disable_filtering(struct nemoshow *show)
 {
 	struct showone *one;
 

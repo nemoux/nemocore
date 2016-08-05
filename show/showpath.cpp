@@ -126,6 +126,14 @@ static inline void nemoshow_path_update_style(struct nemoshow *show, struct show
 	struct showpath *path = NEMOSHOW_PATH(one);
 	struct showitem *group;
 
+	if (nemoshow_has_state(show, NEMOSHOW_ANTIALIAS_STATE)) {
+		NEMOSHOW_PATH_CC(path, fill)->setAntiAlias(true);
+		NEMOSHOW_PATH_CC(path, stroke)->setAntiAlias(true);
+	} else {
+		NEMOSHOW_PATH_CC(path, fill)->setAntiAlias(false);
+		NEMOSHOW_PATH_CC(path, stroke)->setAntiAlias(false);
+	}
+
 	if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE)) {
 		if (nemoshow_one_has_state(one->parent, NEMOSHOW_INHERIT_STATE)) {
 			group = NEMOSHOW_ITEM(one->parent);

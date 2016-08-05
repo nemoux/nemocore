@@ -39,7 +39,8 @@ NEMO_BEGIN_EXTERN_C
 
 typedef enum {
 	NEMOSHOW_ONTIME_STATE = (1 << 0),
-	NEMOSHOW_FILTER_STATE = (1 << 1)
+	NEMOSHOW_ANTIALIAS_STATE = (1 << 1),
+	NEMOSHOW_FILTER_STATE = (1 << 2)
 } NemoShowState;
 
 struct nemoshow;
@@ -158,8 +159,10 @@ extern void nemoshow_revoke_transition(struct nemoshow *show, struct showone *on
 
 extern void nemoshow_set_keyboard_focus(struct nemoshow *show, struct showone *one);
 
-extern void nemoshow_enable_filter_effect(struct nemoshow *show);
-extern void nemoshow_disable_filter_effect(struct nemoshow *show);
+extern void nemoshow_enable_antialias(struct nemoshow *show);
+extern void nemoshow_disable_antialias(struct nemoshow *show);
+extern void nemoshow_enable_filtering(struct nemoshow *show);
+extern void nemoshow_disable_filtering(struct nemoshow *show);
 
 static inline void nemoshow_set_tale(struct nemoshow *show, struct nemotale *tale)
 {

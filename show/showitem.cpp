@@ -276,6 +276,14 @@ static inline void nemoshow_item_update_style(struct nemoshow *show, struct show
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	struct showitem *group;
 
+	if (nemoshow_has_state(show, NEMOSHOW_ANTIALIAS_STATE)) {
+		NEMOSHOW_ITEM_CC(item, fill)->setAntiAlias(true);
+		NEMOSHOW_ITEM_CC(item, stroke)->setAntiAlias(true);
+	} else {
+		NEMOSHOW_ITEM_CC(item, fill)->setAntiAlias(false);
+		NEMOSHOW_ITEM_CC(item, stroke)->setAntiAlias(false);
+	}
+
 	if (nemoshow_one_has_state(one, NEMOSHOW_FILL_STATE)) {
 		if (one->parent != NULL && nemoshow_one_has_state(one->parent, NEMOSHOW_INHERIT_STATE)) {
 			group = NEMOSHOW_ITEM(one->parent);
@@ -335,7 +343,7 @@ static inline void nemoshow_item_update_filter(struct nemoshow *show, struct sho
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	if (NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF) != NULL && nemoshow_has_state(show, NEMOSHOW_FILTER_STATE) != 0) {
+	if (NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF) != NULL && nemoshow_has_state(show, NEMOSHOW_FILTER_STATE)) {
 		struct showone *ref = NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF);
 		struct showfilter *filter = NEMOSHOW_FILTER(ref);
 
