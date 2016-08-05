@@ -335,7 +335,7 @@ static inline void nemoshow_item_update_filter(struct nemoshow *show, struct sho
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
-	if (NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF) != NULL) {
+	if (NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF) != NULL && nemoshow_has_state(show, NEMOSHOW_FILTER_STATE) != 0) {
 		struct showone *ref = NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF);
 		struct showfilter *filter = NEMOSHOW_FILTER(ref);
 
