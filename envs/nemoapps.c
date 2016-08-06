@@ -18,6 +18,7 @@
 #include <nemoapps.h>
 #include <nemolist.h>
 #include <nemoitem.h>
+#include <nemolog.h>
 #include <nemomisc.h>
 
 struct nemoapp *nemoenvs_create_app(void)
@@ -119,7 +120,10 @@ static void nemoenvs_execute_background(struct nemoenvs *envs, struct itemone *o
 			clientstate_set_bin_flags(state, NEMOSHELL_SURFACE_ALL_FLAGS);
 		}
 
-		nemoenvs_attach_app(envs, id, pid);
+		if (id != NULL)
+			nemoenvs_attach_app(envs, id, pid);
+		else
+			nemolog_warning("ENVS", "should set '%s' background's id!\n", path);
 	}
 
 	nemotoken_destroy(token);
@@ -157,7 +161,10 @@ static void nemoenvs_execute_daemon(struct nemoenvs *envs, struct itemone *one)
 
 	pid = wayland_execute_path(path, nemotoken_get_tokens(token), NULL);
 	if (pid > 0) {
-		nemoenvs_attach_app(envs, id, pid);
+		if (id != NULL)
+			nemoenvs_attach_app(envs, id, pid);
+		else
+			nemolog_warning("ENVS", "should set '%s' daemon's id!\n", path);
 	}
 
 	nemotoken_destroy(token);
