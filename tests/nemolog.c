@@ -33,7 +33,7 @@ static void nemolog_dispatch_message_task(int efd, struct logtask *task)
 	len = read(task->fd, msg, sizeof(msg) - 8);
 	if (len < 0) {
 		if (errno == EAGAIN) {
-			ep.events = EPOLLIN | EPOLLOUT | EPOLLERR | EPOLLHUP;
+			ep.events = EPOLLIN | EPOLLERR | EPOLLHUP;
 			ep.data.ptr = (void *)task;
 			epoll_ctl(efd, EPOLL_CTL_MOD, task->fd, &ep);
 		} else {
@@ -74,7 +74,7 @@ static void nemolog_dispatch_listen_task(int efd, struct logtask *task)
 	ctask->fd = csoc;
 	ctask->dispatch = nemolog_dispatch_message_task;
 
-	os_epoll_add_fd(efd, csoc, EPOLLIN | EPOLLOUT | EPOLLERR | EPOLLHUP, ctask);
+	os_epoll_add_fd(efd, csoc, EPOLLIN | EPOLLERR | EPOLLHUP, ctask);
 }
 
 int main(int argc, char *argv[])
@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
 	task->fd = lsoc;
 	task->dispatch = nemolog_dispatch_listen_task;
 
-	os_epoll_add_fd(efd, lsoc, EPOLLIN | EPOLLOUT | EPOLLERR | EPOLLHUP, task);
+	os_epoll_add_fd(efd, lsoc, EPOLLIN | EPOLLERR | EPOLLHUP, task);
 
 	while (1) {
 		neps = epoll_wait(efd, eps, ARRAY_LENGTH(eps), -1);
