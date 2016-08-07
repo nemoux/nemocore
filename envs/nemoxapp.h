@@ -25,6 +25,8 @@ struct nemoxclient {
 	char *name;
 	pid_t pid;
 
+	uint32_t stime;
+
 	struct wl_list link;
 };
 

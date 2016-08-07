@@ -24,6 +24,8 @@ struct nemoclient {
 
 	pid_t pid;
 
+	uint32_t stime;
+
 	struct nemolist link;
 };
 

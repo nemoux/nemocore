@@ -289,8 +289,11 @@ int nemoenvs_attach_client(struct nemoenvs *envs, pid_t pid, const char *name)
 
 	client->pid = pid;
 	client->name = strdup(name);
+	client->stime = time_current_msecs();
 
 	nemolist_insert(&envs->client_list, &client->link);
+
+	nemolog_message("EVENT", "type(attach-client) name(%s) pid(%d)\n", name, pid);
 
 	return 0;
 }
@@ -302,6 +305,8 @@ int nemoenvs_detach_client(struct nemoenvs *envs, pid_t pid)
 	nemolist_for_each(client, &envs->client_list, link) {
 		if (client->pid == pid) {
 			nemolist_remove(&client->link);
+
+			nemolog_message("EVENT", "type(detach-client) name(%s) pid(%d) runtime(%u)\n", client->name, client->pid, time_current_msecs() - client->stime);
 
 			free(client->name);
 			free(client);
@@ -322,6 +327,8 @@ int nemoenvs_terminate_client(struct nemoenvs *envs, pid_t pid)
 			kill(client->pid, SIGKILL);
 
 			nemolist_remove(&client->link);
+
+			nemolog_message("EVENT", "type(terminate-client) name(%s) pid(%d) runtime(%u)\n", client->name, client->pid, time_current_msecs() - client->stime);
 
 			free(client->name);
 			free(client);
