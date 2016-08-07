@@ -192,4 +192,38 @@ void nemolog_checkpoint(void)
 	__nsecs = time_current_nsecs();
 }
 
+int nemolog_event(const char *tag, const char *fmt, ...)
+{
+	time_t ttime;
+	struct tm *stime;
+	char times[128];
+	char msg[1024];
+	va_list vargs;
+	int r;
+
+	if (nemologfile < 0 && nemolog_prepare() < 0)
+		return 0;
+
+	time(&ttime);
+	stime = localtime(&ttime);
+	strftime(times, sizeof(times), "%Y:%m:%d-%H:%M:%S", stime);
+
+	va_start(vargs, fmt);
+
+	snprintf(msg, sizeof(msg), "\e[32;1mNEMO-EVENT:\e[m \e[1;35m[%s] (%s)\e[0m ", tag, times);
+	vsnprintf(msg + strlen(msg), sizeof(msg) - strlen(msg), fmt, vargs);
+
+	if (nemologtype == 1)
+		r = send(nemologfile, msg, strlen(msg), MSG_NOSIGNAL | MSG_DONTWAIT);
+	else
+		r = write(nemologfile, msg, strlen(msg));
+
+	va_end(vargs);
+
+	if (r <= 0)
+		nemologfile = -1;
+
+	return r;
+}
+
 #endif

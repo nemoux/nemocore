@@ -175,7 +175,7 @@ int nemoenvs_attach_xclient(struct nemoenvs *envs, struct nemoxserver *xserver, 
 
 	wl_list_insert(&envs->xclient_list, &xclient->link);
 
-	nemolog_message("EVENT", "type(attach-xclient) name(%s) pid(%d)\n", name, pid);
+	nemolog_event("ENVS", "type(attach-xclient) name(%s) pid(%d)\n", name, pid);
 
 	return 0;
 }
@@ -188,7 +188,7 @@ int nemoenvs_detach_xclient(struct nemoenvs *envs, pid_t pid)
 		if (xclient->pid == pid) {
 			wl_list_remove(&xclient->link);
 
-			nemolog_message("EVENT", "type(detach-xclient) name(%s) pid(%d) runtime(%u)\n", xclient->name, xclient->pid, time_current_msecs() - xclient->stime);
+			nemolog_event("ENVS", "type(detach-xclient) name(%s) pid(%d) runtime(%u)\n", xclient->name, xclient->pid, time_current_msecs() - xclient->stime);
 
 			xclient->xserver->state = NEMOXSERVER_READY_STATE;
 
@@ -212,7 +212,7 @@ int nemoenvs_terminate_xclient(struct nemoenvs *envs, pid_t pid)
 
 			wl_list_remove(&xclient->link);
 
-			nemolog_message("EVENT", "type(terminate-xclient) name(%s) pid(%d) runtime(%u)\n", xclient->name, xclient->pid, time_current_msecs() - xclient->stime);
+			nemolog_event("ENVS", "type(terminate-xclient) name(%s) pid(%d) runtime(%u)\n", xclient->name, xclient->pid, time_current_msecs() - xclient->stime);
 
 			xclient->xserver->state = NEMOXSERVER_READY_STATE;
 

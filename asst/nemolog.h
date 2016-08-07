@@ -21,6 +21,7 @@ extern int nemolog_warning(const char *tag, const char *fmt, ...);
 extern int nemolog_error(const char *tag, const char *fmt, ...);
 extern int nemolog_check(int check, const char *tag, const char *fmt, ...);
 extern void nemolog_checkpoint(void);
+extern int nemolog_event(const char *tag, const char *fmt, ...);
 
 #else
 
@@ -34,6 +35,7 @@ static inline int nemolog_warning(const char *tag, const char *fmt, ...) { retur
 static inline int nemolog_error(const char *tag, const char *fmt, ...) { return 0; }
 static inline int nemolog_check(int check, const char *tag, const char *fmt, ...) { return 0; }
 static inline void nemolog_checkpoint(void) {}
+static inline int nemolog_event(const char *tag, const char *fmt, ...) { return 0; }
 
 #endif
 
