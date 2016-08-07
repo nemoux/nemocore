@@ -210,7 +210,7 @@ int nemolog_event(const char *tag, const char *fmt, ...)
 
 	va_start(vargs, fmt);
 
-	snprintf(msg, sizeof(msg), "\e[32;1mNEMO-EVENT:\e[m \e[1;35m[%s] (%s)\e[0m ", tag, times);
+	snprintf(msg, sizeof(msg), "NEMO-EVENT: [%s] (%s) ", tag, times);
 	vsnprintf(msg + strlen(msg), sizeof(msg) - strlen(msg), fmt, vargs);
 
 	if (nemologtype == 1)
