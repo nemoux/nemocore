@@ -27,6 +27,7 @@
 #include <nemotoken.h>
 #include <udphelper.h>
 #include <stringhelper.h>
+#include <namespacehelper.h>
 #include <nemolog.h>
 #include <nemomisc.h>
 
@@ -64,6 +65,7 @@ struct nemoenvs *nemoenvs_create(struct nemoshell *shell)
 	nemoenvs_set_callback(envs, nemoenvs_dispatch_client_message, shell);
 	nemoenvs_set_callback(envs, nemoenvs_dispatch_system_message, shell);
 	nemoenvs_set_callback(envs, nemoenvs_dispatch_device_message, shell);
+	nemoenvs_set_callback(envs, nemoenvs_dispatch_comm_message, shell);
 	nemoenvs_set_callback(envs, nemoenvs_dispatch_config_message, shell);
 
 	return envs;
@@ -339,10 +341,12 @@ int nemoenvs_save_configs(struct nemoenvs *envs, const char *configpath)
 		return -1;
 
 	nemoitem_for_each(one, envs->configs) {
-		nemoitem_one_save(one, buffer, ' ', '\"');
+		if (namespace_has_prefix(nemoitem_one_get_path(one), "/nemoshell") != 0) {
+			nemoitem_one_save(one, buffer, ' ', '\"');
 
-		fputs(buffer, fp);
-		fputc('\n', fp);
+			fputs(buffer, fp);
+			fputc('\n', fp);
+		}
 	}
 
 	fclose(fp);

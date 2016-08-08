@@ -650,6 +650,66 @@ int nemoenvs_dispatch_device_message(struct nemoenvs *envs, const char *src, con
 	return 0;
 }
 
+int nemoenvs_dispatch_comm_message(struct nemoenvs *envs, const char *src, const char *dst, const char *cmd, const char *path, struct itemone *one, void *data)
+{
+	if (namespace_has_prefix(path, "/nemocomm") != 0) {
+		if (strcmp(cmd, "set") == 0) {
+			struct itemone *tone;
+			const char *id;
+
+			id = nemoitem_one_get_attr(one, "id");
+			if (id != NULL) {
+				tone = nemoitem_search_attr(envs->configs, path, "id", id);
+				if (tone != NULL)
+					nemoitem_one_destroy(tone);
+
+				nemoitem_attach_one(envs->configs,
+						nemoitem_one_clone(one));
+			} else {
+				nemoitem_attach_one(envs->configs,
+						nemoitem_one_clone(one));
+			}
+		} else if (strcmp(cmd, "get") == 0) {
+			struct itemone *tone;
+			const char *id;
+
+			id = nemoitem_one_get_attr(one, "id");
+			if (id != NULL) {
+				tone = nemoitem_search_attr(envs->configs, path, "id", id);
+				if (tone != NULL) {
+					char contents[1024] = { 0 };
+
+					nemoitem_one_save(tone, contents, ' ', '\"');
+
+					nemoenvs_reply(envs, "%s %s set %s", dst, src, contents);
+				}
+			} else {
+				nemoitem_for_each(tone, envs->configs) {
+					if (nemoitem_one_has_path(tone, path) != 0) {
+						char contents[1024] = { 0 };
+
+						nemoitem_one_save(tone, contents, ' ', '\"');
+
+						nemoenvs_reply(envs, "%s %s set %s", dst, src, contents);
+					}
+				}
+			}
+		} else if (strcmp(cmd, "put") == 0) {
+			struct itemone *tone;
+			const char *id;
+
+			id = nemoitem_one_get_attr(one, "id");
+			if (id != NULL) {
+				tone = nemoitem_search_attr(envs->configs, path, "id", id);
+				if (tone != NULL)
+					nemoitem_one_destroy(tone);
+			}
+		}
+	}
+
+	return 0;
+}
+
 int nemoenvs_dispatch_config_message(struct nemoenvs *envs, const char *src, const char *dst, const char *cmd, const char *path, struct itemone *one, void *data)
 {
 	if (namespace_has_prefix(path, "/nemoshell") != 0) {

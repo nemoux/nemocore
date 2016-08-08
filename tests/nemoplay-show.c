@@ -51,14 +51,14 @@ static void nemoplay_dispatch_show_fullscreen(struct nemoshow *show, const char 
 		free(context->screenid);
 
 	if (id != NULL) {
-		nemoenvs_send(context->envs, "%s /nemoshell set /nemoshell/control id %s src %s type video",
+		nemoenvs_send(context->envs, "%s /nemoshell set /nemocomm/control id %s src %s type video",
 				nemoenvs_get_name(context->envs),
 				id,
 				nemoenvs_get_name(context->envs));
 
 		context->screenid = strdup(id);
 	} else {
-		nemoenvs_send(context->envs, "%s /nemoshell put /nemoshell/control id %s",
+		nemoenvs_send(context->envs, "%s /nemoshell put /nemocomm/control id %s",
 				nemoenvs_get_name(context->envs),
 				context->screenid);
 
