@@ -426,6 +426,19 @@ int nemoitem_one_has_path(struct itemone *one, const char *path)
 	return strcmp(one->path, path) == 0;
 }
 
+int nemoitem_one_has_path_prefix(struct itemone *one, const char *prefix)
+{
+	int length = strlen(prefix);
+	int i;
+
+	for (i = 0; i < length; i++) {
+		if (one->path[i] != prefix[i])
+			return 0;
+	}
+
+	return 1;
+}
+
 int nemoitem_one_set_attr(struct itemone *one, const char *name, const char *value)
 {
 	struct itemattr *attr;

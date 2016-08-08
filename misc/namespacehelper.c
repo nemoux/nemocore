@@ -18,7 +18,7 @@ int namespace_has_prefix(const char *ns, const char *ps)
 	int i;
 
 	for (i = 0; i < length; i++) {
-		if (ns[i] == '\0' || ns[i] != ps[i])
+		if (ns[i] != ps[i])
 			return 0;
 	}
 
@@ -39,7 +39,7 @@ int namespace_has_prefix_format(const char *ns, const char *fmt, ...)
 	length = strlen(ps);
 
 	for (i = 0; i < length; i++) {
-		if (ns[i] == '\0' || ns[i] != ps[i]) {
+		if (ns[i] != ps[i]) {
 			free(ps);
 
 			return 0;

@@ -650,9 +650,9 @@ int nemoenvs_dispatch_device_message(struct nemoenvs *envs, const char *src, con
 	return 0;
 }
 
-int nemoenvs_dispatch_comm_message(struct nemoenvs *envs, const char *src, const char *dst, const char *cmd, const char *path, struct itemone *one, void *data)
+int nemoenvs_dispatch_link_message(struct nemoenvs *envs, const char *src, const char *dst, const char *cmd, const char *path, struct itemone *one, void *data)
 {
-	if (namespace_has_prefix(path, "/nemocomm") != 0) {
+	if (namespace_has_prefix(path, "/nemolink") != 0) {
 		if (strcmp(cmd, "set") == 0) {
 			struct itemone *tone;
 			const char *id;
