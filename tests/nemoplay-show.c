@@ -50,10 +50,20 @@ static void nemoplay_dispatch_show_fullscreen(struct nemoshow *show, const char 
 	if (context->screenid != NULL)
 		free(context->screenid);
 
-	if (id != NULL)
+	if (id != NULL) {
+		nemoenvs_send(context->envs, "%s /nemoshell set /nemoshell/control id %s src %s type video",
+				nemoenvs_get_name(context->envs),
+				id,
+				nemoenvs_get_name(context->envs));
+
 		context->screenid = strdup(id);
-	else
+	} else {
+		nemoenvs_send(context->envs, "%s /nemoshell put /nemoshell/control id %s",
+				nemoenvs_get_name(context->envs),
+				context->screenid);
+
 		context->screenid = NULL;
+	}
 
 	if (id != NULL) {
 		double ratio = ((double)width / nemoplay_get_video_aspectratio(context->play)) / (double)height;
@@ -342,8 +352,8 @@ int main(int argc, char *argv[])
 	context->envs = envs = nemoenvs_create(tool);
 	if (envs == NULL)
 		goto err4;
-	nemoenvs_set_name(envs, "/nemoplay");
-	nemoenvs_connect(envs, "/nemoshell", "127.0.0.1", 10000);
+	nemoenvs_set_name(envs, "/nemoplay/%d", getpid());
+	nemoenvs_connect(envs, "/nemoshell", "127.0.0.1", 30000);
 
 	context->show = show = nemoshow_create_view(tool, width, height);
 	if (show == NULL)
