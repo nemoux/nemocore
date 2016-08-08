@@ -352,8 +352,6 @@ extern struct shellstage *nemoshell_get_stage(struct nemoshell *shell, const cha
 extern void nemoshell_put_stage(struct nemoshell *shell, const char *id);
 extern struct shellstage *nemoshell_get_stage_on(struct nemoshell *shell, int32_t x, int32_t y);
 
-extern void nemoshell_set_toplevel_bin(struct nemoshell *shell, struct shellbin *bin);
-extern void nemoshell_set_popup_bin(struct nemoshell *shell, struct shellbin *bin, struct shellbin *parent, int32_t x, int32_t y, uint32_t serial);
 extern void nemoshell_set_fullscreen_bin_on_screen(struct nemoshell *shell, struct shellbin *bin, struct nemoscreen *screen);
 extern void nemoshell_set_fullscreen_bin(struct nemoshell *shell, struct shellbin *bin, struct shellscreen *screen);
 extern void nemoshell_put_fullscreen_bin(struct nemoshell *shell, struct shellbin *bin);

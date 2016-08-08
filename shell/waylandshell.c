@@ -84,7 +84,11 @@ static void shell_surface_set_toplevel(struct wl_client *client, struct wl_resou
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 	struct nemoshell *shell = bin->shell;
 
-	nemoshell_set_toplevel_bin(shell, bin);
+	nemoshell_clear_bin_config(bin);
+
+	bin->type = NEMOSHELL_SURFACE_NORMAL_TYPE;
+
+	nemoshell_set_parent_bin(bin, NULL);
 }
 
 static void shell_surface_set_transient(struct wl_client *client, struct wl_resource *resource, struct wl_resource *parent_resource, int x, int y, uint32_t flags)
@@ -115,7 +119,14 @@ static void shell_surface_set_popup(struct wl_client *client, struct wl_resource
 	struct nemocanvas *parent = (struct nemocanvas *)wl_resource_get_user_data(parent_resource);
 	struct nemoshell *shell = bin->shell;
 
-	nemoshell_set_popup_bin(shell, bin, nemoshell_get_bin(parent), x, y, serial);
+	nemoshell_clear_bin_config(bin);
+
+	bin->type = NEMOSHELL_SURFACE_POPUP_TYPE;
+	bin->popup.x = x;
+	bin->popup.y = y;
+	bin->popup.serial = serial;
+
+	nemoshell_set_parent_bin(bin, nemoshell_get_bin(parent));
 }
 
 static void shell_surface_set_maximized(struct wl_client *client, struct wl_resource *resource, struct wl_resource *output_resource)
@@ -188,9 +199,9 @@ static void shell_get_shell_surface(struct wl_client *client, struct wl_resource
 
 	bin->type = NEMOSHELL_SURFACE_NORMAL_TYPE;
 	bin->owner = sc;
-	
+
 	nemoshell_bin_set_state(bin, NEMOSHELL_BIN_BINDABLE_STATE);
-	
+
 	wl_client_get_credentials(client, &bin->pid, NULL, NULL);
 
 	bin->resource = wl_resource_create(client, &wl_shell_surface_interface, 1, id);
