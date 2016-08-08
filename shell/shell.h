@@ -159,8 +159,7 @@ struct clientstate {
 
 	float dx, dy;
 
-	int is_maximized;
-	int is_fullscreen;
+	char *screenid;
 
 	int has_pickscreen;
 	int has_pitchscreen;
@@ -488,14 +487,9 @@ static inline void clientstate_put_view_state(struct clientstate *state, uint32_
 	state->state_off |= _state;
 }
 
-static inline void clientstate_set_maximized(struct clientstate *state, int is_maximized)
+static inline void clientstate_set_fullscreen(struct clientstate *state, const char *id)
 {
-	state->is_maximized = is_maximized;
-}
-
-static inline void clientstate_set_fullscreen(struct clientstate *state, int is_fullscreen)
-{
-	state->is_fullscreen = is_fullscreen;
+	state->screenid = strdup(id);
 }
 
 #ifdef __cplusplus

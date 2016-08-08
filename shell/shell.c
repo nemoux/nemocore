@@ -968,6 +968,9 @@ void nemoshell_destroy_client_state(struct nemoshell *shell, struct clientstate 
 {
 	wl_list_remove(&state->link);
 
+	if (state->screenid != NULL)
+		free(state->screenid);
+
 	if (state->name != NULL)
 		free(state->name);
 
@@ -988,19 +991,12 @@ struct clientstate *nemoshell_get_client_state(struct nemoshell *shell, uint32_t
 
 static inline void nemoshell_set_client_state(struct shellbin *bin, struct clientstate *state)
 {
-	if (state->is_fullscreen || state->is_maximized) {
-		nemoshell_clear_bin_config(bin);
-		bin->requested_config.maximized = state->is_maximized;
-		bin->requested_config.fullscreen = state->is_fullscreen;
-		bin->config_requested = 1;
+	if (state->screenid != NULL) {
+		struct shellscreen *screen;
 
-		bin->screen.x = state->x;
-		bin->screen.y = state->y;
-		bin->screen.width = state->width;
-		bin->screen.height = state->height;
-		bin->has_screen = 1;
-
-		nemoshell_send_bin_config(bin);
+		screen = nemoshell_get_fullscreen(bin->shell, state->screenid);
+		if (screen != NULL)
+			nemoshell_set_fullscreen_bin(bin->shell, bin, screen);
 	} else {
 		if (state->has_position != 0) {
 			bin->initial.x = state->x;
