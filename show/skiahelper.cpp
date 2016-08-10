@@ -67,27 +67,8 @@ int skia_clear_canvas(void *pixels, int32_t width, int32_t height)
 
 int skia_read_image(SkBitmap *bitmap, const char *imagepath)
 {
-	class NemoShowPngChunkReader : public SkPngChunkReader {
-		public:
-			NemoShowPngChunkReader()
-			{
-			}
-
-			bool readChunk(const char tags[], const void *data, size_t length) override
-			{
-				return true;
-			}
-
-			bool allHaveBeenSeen()
-			{
-				return true;
-			}
-	};
-
-	NemoShowPngChunkReader chunkReader;
-
 	SkAutoTUnref<SkData> data(SkData::NewFromFileName(imagepath));
-	SkAutoTDelete<SkCodec> codec(SkCodec::NewFromData(data, &chunkReader));
+	SkAutoTDelete<SkCodec> codec(SkCodec::NewFromData(data, NULL));
 
 	if (codec == NULL)
 		return -1;
