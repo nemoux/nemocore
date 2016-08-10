@@ -159,8 +159,7 @@ struct clientstate {
 
 	float dx, dy;
 
-	int is_maximized;
-	int is_fullscreen;
+	char *screenid;
 
 	int has_pickscreen;
 	int has_pitchscreen;
@@ -353,8 +352,6 @@ extern struct shellstage *nemoshell_get_stage(struct nemoshell *shell, const cha
 extern void nemoshell_put_stage(struct nemoshell *shell, const char *id);
 extern struct shellstage *nemoshell_get_stage_on(struct nemoshell *shell, int32_t x, int32_t y);
 
-extern void nemoshell_set_toplevel_bin(struct nemoshell *shell, struct shellbin *bin);
-extern void nemoshell_set_popup_bin(struct nemoshell *shell, struct shellbin *bin, struct shellbin *parent, int32_t x, int32_t y, uint32_t serial);
 extern void nemoshell_set_fullscreen_bin_on_screen(struct nemoshell *shell, struct shellbin *bin, struct nemoscreen *screen);
 extern void nemoshell_set_fullscreen_bin(struct nemoshell *shell, struct shellbin *bin, struct shellscreen *screen);
 extern void nemoshell_put_fullscreen_bin(struct nemoshell *shell, struct shellbin *bin);
@@ -488,14 +485,9 @@ static inline void clientstate_put_view_state(struct clientstate *state, uint32_
 	state->state_off |= _state;
 }
 
-static inline void clientstate_set_maximized(struct clientstate *state, int is_maximized)
+static inline void clientstate_set_fullscreen(struct clientstate *state, const char *id)
 {
-	state->is_maximized = is_maximized;
-}
-
-static inline void clientstate_set_fullscreen(struct clientstate *state, int is_fullscreen)
-{
-	state->is_fullscreen = is_fullscreen;
+	state->screenid = strdup(id);
 }
 
 #ifdef __cplusplus

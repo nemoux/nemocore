@@ -968,6 +968,9 @@ void nemoshell_destroy_client_state(struct nemoshell *shell, struct clientstate 
 {
 	wl_list_remove(&state->link);
 
+	if (state->screenid != NULL)
+		free(state->screenid);
+
 	if (state->name != NULL)
 		free(state->name);
 
@@ -988,19 +991,12 @@ struct clientstate *nemoshell_get_client_state(struct nemoshell *shell, uint32_t
 
 static inline void nemoshell_set_client_state(struct shellbin *bin, struct clientstate *state)
 {
-	if (state->is_fullscreen || state->is_maximized) {
-		nemoshell_clear_bin_config(bin);
-		bin->requested_config.maximized = state->is_maximized;
-		bin->requested_config.fullscreen = state->is_fullscreen;
-		bin->config_requested = 1;
+	if (state->screenid != NULL) {
+		struct shellscreen *screen;
 
-		bin->screen.x = state->x;
-		bin->screen.y = state->y;
-		bin->screen.width = state->width;
-		bin->screen.height = state->height;
-		bin->has_screen = 1;
-
-		nemoshell_send_bin_config(bin);
+		screen = nemoshell_get_fullscreen(bin->shell, state->screenid);
+		if (screen != NULL)
+			nemoshell_set_fullscreen_bin(bin->shell, bin, screen);
 	} else {
 		if (state->has_position != 0) {
 			bin->initial.x = state->x;
@@ -1188,26 +1184,6 @@ struct shellstage *nemoshell_get_stage_on(struct nemoshell *shell, int32_t x, in
 	return NULL;
 }
 
-void nemoshell_set_toplevel_bin(struct nemoshell *shell, struct shellbin *bin)
-{
-	nemoshell_clear_bin_config(bin);
-
-	bin->type = NEMOSHELL_SURFACE_NORMAL_TYPE;
-	nemoshell_set_parent_bin(bin, NULL);
-}
-
-void nemoshell_set_popup_bin(struct nemoshell *shell, struct shellbin *bin, struct shellbin *parent, int32_t x, int32_t y, uint32_t serial)
-{
-	nemoshell_clear_bin_config(bin);
-
-	bin->type = NEMOSHELL_SURFACE_POPUP_TYPE;
-	bin->popup.x = x;
-	bin->popup.y = y;
-	bin->popup.serial = serial;
-
-	nemoshell_set_parent_bin(bin, parent);
-}
-
 void nemoshell_set_fullscreen_bin_on_screen(struct nemoshell *shell, struct shellbin *bin, struct nemoscreen *screen)
 {
 	nemoshell_clear_bin_config(bin);
@@ -1220,7 +1196,6 @@ void nemoshell_set_fullscreen_bin_on_screen(struct nemoshell *shell, struct shel
 		bin->config_changed = 1;
 	}
 
-	bin->type = NEMOSHELL_SURFACE_NORMAL_TYPE;
 	nemoshell_set_parent_bin(bin, NULL);
 
 	bin->screen.x = screen->rx;
@@ -1247,7 +1222,6 @@ void nemoshell_set_fullscreen_bin(struct nemoshell *shell, struct shellbin *bin,
 		bin->config_changed = 1;
 	}
 
-	bin->type = NEMOSHELL_SURFACE_NORMAL_TYPE;
 	nemoshell_set_parent_bin(bin, NULL);
 
 	bin->screen.x = screen->dx;
@@ -1321,7 +1295,6 @@ void nemoshell_set_maximized_bin_on_screen(struct nemoshell *shell, struct shell
 		bin->config_changed = 1;
 	}
 
-	bin->type = NEMOSHELL_SURFACE_NORMAL_TYPE;
 	nemoshell_set_parent_bin(bin, NULL);
 
 	bin->screen.x = screen->rx;
@@ -1348,7 +1321,6 @@ void nemoshell_set_maximized_bin(struct nemoshell *shell, struct shellbin *bin, 
 		bin->config_changed = 1;
 	}
 
-	bin->type = NEMOSHELL_SURFACE_NORMAL_TYPE;
 	nemoshell_set_parent_bin(bin, NULL);
 
 	bin->screen.x = screen->dx;
