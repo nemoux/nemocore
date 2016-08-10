@@ -4,7 +4,7 @@
 #include <skiaconfig.hpp>
 
 typedef struct _showshader {
-	SkShader *shader;
+	sk_sp<SkShader> shader;
 	SkMatrix *matrix;
 } showshader_t;
 

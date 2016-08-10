@@ -4,7 +4,7 @@
 #include <skiaconfig.hpp>
 
 typedef struct _showfont {
-	SkTypeface *face;
+	sk_sp<SkTypeface> face;
 } showfont_t;
 
 #define NEMOSHOW_FONT_CC(base, name)				(((showfont_t *)((base)->cc))->name)

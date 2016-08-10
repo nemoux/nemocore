@@ -4,9 +4,9 @@
 #include <skiaconfig.hpp>
 
 typedef struct _showfilter {
-	SkMaskFilter *maskfilter;
-	SkImageFilter *imagefilter;
-	SkColorFilter *colorfilter;
+	sk_sp<SkMaskFilter> maskfilter;
+	sk_sp<SkImageFilter> imagefilter;
+	sk_sp<SkColorFilter> colorfilter;
 
 	SkBlurStyle style;
 } showfilter_t;

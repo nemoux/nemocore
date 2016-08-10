@@ -22,6 +22,7 @@
 #include <showfont.h>
 #include <showfont.hpp>
 #include <nemoshow.h>
+#include <skiahelper.hpp>
 #include <fonthelper.h>
 #include <svghelper.hpp>
 #include <stringhelper.h>
@@ -249,7 +250,6 @@ void nemoshow_item_destroy(struct showone *one)
 static inline void nemoshow_item_update_uri(struct nemoshow *show, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
-	bool r;
 
 	if (item->uri != NULL) {
 		if (NEMOSHOW_ITEM_CC(item, needs_free) == true && NEMOSHOW_ITEM_CC(item, bitmap) != NULL)
@@ -259,8 +259,7 @@ static inline void nemoshow_item_update_uri(struct nemoshow *show, struct showon
 			NEMOSHOW_ITEM_CC(item, bitmap) = new SkBitmap;
 			NEMOSHOW_ITEM_CC(item, needs_free) = true;
 
-			r = SkImageDecoder::DecodeFile(item->uri, NEMOSHOW_ITEM_CC(item, bitmap));
-			if (r == false) {
+			if (skia_read_image(NEMOSHOW_ITEM_CC(item, bitmap), item->uri) < 0) {
 				delete NEMOSHOW_ITEM_CC(item, bitmap);
 
 				NEMOSHOW_ITEM_CC(item, bitmap) = NULL;
@@ -630,29 +629,27 @@ static inline void nemoshow_item_update_patheffect(struct nemoshow *show, struct
 
 	if (one->sub == NEMOSHOW_PATH_ITEM || one->sub == NEMOSHOW_PATHTWICE_ITEM || one->sub == NEMOSHOW_PATHARRAY_ITEM || one->sub == NEMOSHOW_PATHLIST_ITEM) {
 		if (item->pathsegment >= 1.0f) {
-			SkPathEffect *effect;
+			sk_sp<SkPathEffect> effect;
 
-			effect = SkDiscretePathEffect::Create(item->pathsegment, item->pathdeviation, item->pathseed);
+			effect = SkDiscretePathEffect::Make(item->pathsegment, item->pathdeviation, item->pathseed);
 			if (effect != NULL) {
 				NEMOSHOW_ITEM_CC(item, stroke)->setPathEffect(effect);
 				NEMOSHOW_ITEM_CC(item, fill)->setPathEffect(effect);
-				effect->unref();
 			}
 		}
 
 		if (item->pathdashcount > 0) {
-			SkPathEffect *effect;
+			sk_sp<SkPathEffect> effect;
 			SkScalar dashes[NEMOSHOW_ITEM_PATH_DASH_MAX];
 			int i;
 
 			for (i = 0; i < item->pathdashcount; i++)
 				dashes[i] = item->pathdashes[i];
 
-			effect = SkDashPathEffect::Create(dashes, item->pathdashcount, 0);
+			effect = SkDashPathEffect::Make(dashes, item->pathdashcount, 0);
 			if (effect != NULL) {
 				NEMOSHOW_ITEM_CC(item, stroke)->setPathEffect(effect);
 				NEMOSHOW_ITEM_CC(item, fill)->setPathEffect(effect);
-				effect->unref();
 			}
 		}
 
@@ -1337,20 +1334,20 @@ void nemoshow_item_path_text(struct showone *one, const char *font, int fontsize
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	SkPaint paint;
 	SkPath path;
-	SkTypeface *face;
+	sk_sp<SkTypeface> face;
 	SkPaint::FontMetrics metrics;
 
-	SkSafeUnref(
-			paint.setTypeface(
-				SkTypeface::CreateFromFile(
-					fontconfig_get_path(
-						font,
-						NULL,
-						FC_SLANT_ROMAN,
-						FC_WEIGHT_NORMAL,
-						FC_WIDTH_NORMAL,
-						FC_MONO), 0)));
+	face = SkTypeface::MakeFromFile(
+			fontconfig_get_path(
+				font,
+				NULL,
+				FC_SLANT_ROMAN,
+				FC_WEIGHT_NORMAL,
+				FC_WIDTH_NORMAL,
+				FC_MONO),
+			0);
 
+	paint.setTypeface(face);
 	paint.setAntiAlias(true);
 	paint.setTextSize(fontsize);
 	paint.getFontMetrics(&metrics, 0);

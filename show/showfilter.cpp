@@ -94,13 +94,6 @@ void nemoshow_filter_destroy(struct showone *one)
 
 	nemoshow_one_finish(one);
 
-	if (NEMOSHOW_FILTER_CC(filter, maskfilter) != NULL)
-		NEMOSHOW_FILTER_CC(filter, maskfilter)->unref();
-	if (NEMOSHOW_FILTER_CC(filter, imagefilter) != NULL)
-		NEMOSHOW_FILTER_CC(filter, imagefilter)->unref();
-	if (NEMOSHOW_FILTER_CC(filter, colorfilter) != NULL)
-		NEMOSHOW_FILTER_CC(filter, colorfilter)->unref();
-
 	delete static_cast<showfilter_t *>(filter->cc);
 
 	free(filter);
@@ -117,13 +110,10 @@ int nemoshow_filter_update(struct showone *one)
 	struct showfilter *filter = NEMOSHOW_FILTER(one);
 
 	if (filter->type == NEMOSHOW_FILTER_MASK_TYPE) {
-		if (NEMOSHOW_FILTER_CC(filter, maskfilter) != NULL)
-			NEMOSHOW_FILTER_CC(filter, maskfilter)->unref();
-
 		if (one->sub == NEMOSHOW_BLUR_FILTER) {
-			NEMOSHOW_FILTER_CC(filter, maskfilter) = SkBlurMaskFilter::Create(
+			NEMOSHOW_FILTER_CC(filter, maskfilter) = SkBlurMaskFilter::Make(
 					NEMOSHOW_FILTER_CC(filter, style),
-					SkBlurMask::ConvertRadiusToSigma(filter->r),
+					SkBlurMaskFilter::ConvertRadiusToSigma(filter->r),
 					flags[show->quality]);
 		} else if (one->sub == NEMOSHOW_EMBOSS_FILTER) {
 			SkEmbossMaskFilter::Light light;
@@ -134,20 +124,17 @@ int nemoshow_filter_update(struct showone *one)
 			light.fAmbient = filter->ambient;
 			light.fSpecular = filter->specular;
 
-			NEMOSHOW_FILTER_CC(filter, maskfilter) = SkEmbossMaskFilter::Create(
-					SkBlurMask::ConvertRadiusToSigma(filter->r), light);
+			NEMOSHOW_FILTER_CC(filter, maskfilter) = SkEmbossMaskFilter::Make(
+					SkBlurMaskFilter::ConvertRadiusToSigma(filter->r), light);
 		}
 	} else if (filter->type == NEMOSHOW_FILTER_IMAGE_TYPE) {
-		if (NEMOSHOW_FILTER_CC(filter, imagefilter) != NULL)
-			NEMOSHOW_FILTER_CC(filter, imagefilter)->unref();
-
 		if (one->sub == NEMOSHOW_SHADOW_FILTER) {
 			static const SkDropShadowImageFilter::ShadowMode shadowmodes[] = {
 				SkDropShadowImageFilter::kDrawShadowAndForeground_ShadowMode,
 				SkDropShadowImageFilter::kDrawShadowOnly_ShadowMode
 			};
 
-			NEMOSHOW_FILTER_CC(filter, imagefilter) = SkDropShadowImageFilter::Create(
+			NEMOSHOW_FILTER_CC(filter, imagefilter) = SkDropShadowImageFilter::Make(
 					SkDoubleToScalar(filter->dx),
 					SkDoubleToScalar(filter->dy),
 					SkDoubleToScalar(filter->sx),
@@ -157,11 +144,11 @@ int nemoshow_filter_update(struct showone *one)
 						filter->fills[NEMOSHOW_RED_COLOR],
 						filter->fills[NEMOSHOW_GREEN_COLOR],
 						filter->fills[NEMOSHOW_BLUE_COLOR]),
-					shadowmodes[filter->mode]);
+					shadowmodes[filter->mode],
+					NULL,
+					NULL);
 		}
 	} else if (filter->type == NEMOSHOW_FILTER_COLOR_TYPE) {
-		if (NEMOSHOW_FILTER_CC(filter, colorfilter) != NULL)
-			NEMOSHOW_FILTER_CC(filter, colorfilter)->unref();
 	}
 
 	return 0;

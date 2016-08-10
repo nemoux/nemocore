@@ -296,28 +296,26 @@ static inline void nemoshow_path_update_patheffect(struct nemoshow *show, struct
 	int i;
 
 	if (path->pathsegment >= 1.0f) {
-		SkPathEffect *effect;
+		sk_sp<SkPathEffect> effect;
 
-		effect = SkDiscretePathEffect::Create(path->pathsegment, path->pathdeviation, path->pathseed);
+		effect = SkDiscretePathEffect::Make(path->pathsegment, path->pathdeviation, path->pathseed);
 		if (effect != NULL) {
 			NEMOSHOW_PATH_CC(path, fill)->setPathEffect(effect);
 			NEMOSHOW_PATH_CC(path, stroke)->setPathEffect(effect);
-			effect->unref();
 		}
 	}
 
 	if (path->pathdashcount > 0) {
-		SkPathEffect *effect;
+		sk_sp<SkPathEffect> effect;
 		SkScalar dashes[NEMOSHOW_PATH_DASH_MAX];
 
 		for (i = 0; i < path->pathdashcount; i++)
 			dashes[i] = path->pathdashes[i];
 
-		effect = SkDashPathEffect::Create(dashes, path->pathdashcount, 0);
+		effect = SkDashPathEffect::Make(dashes, path->pathdashcount, 0);
 		if (effect != NULL) {
 			NEMOSHOW_PATH_CC(path, fill)->setPathEffect(effect);
 			NEMOSHOW_PATH_CC(path, stroke)->setPathEffect(effect);
-			effect->unref();
 		}
 	}
 }
@@ -594,20 +592,20 @@ void nemoshow_path_text(struct showone *one, const char *font, int fontsize, con
 	struct showpath *path = NEMOSHOW_PATH(one);
 	SkPaint paint;
 	SkPath rpath;
-	SkTypeface *face;
+	sk_sp<SkTypeface> face;
 	SkPaint::FontMetrics metrics;
 
-	SkSafeUnref(
-			paint.setTypeface(
-				SkTypeface::CreateFromFile(
-					fontconfig_get_path(
-						font,
-						NULL,
-						FC_SLANT_ROMAN,
-						FC_WEIGHT_NORMAL,
-						FC_WIDTH_NORMAL,
-						FC_MONO), 0)));
+	face = SkTypeface::MakeFromFile(
+			fontconfig_get_path(
+				font,
+				NULL,
+				FC_SLANT_ROMAN,
+				FC_WEIGHT_NORMAL,
+				FC_WIDTH_NORMAL,
+				FC_MONO),
+			0);
 
+	paint.setTypeface(face);
 	paint.setAntiAlias(true);
 	paint.setTextSize(fontsize);
 	paint.getFontMetrics(&metrics, 0);

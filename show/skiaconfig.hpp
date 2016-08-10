@@ -13,9 +13,10 @@
 #include <SkGraphics.h>
 #include <SkImageInfo.h>
 #include <SkImageEncoder.h>
-#include <SkImageDecoder.h>
 #include <SkBitmapDevice.h>
 #include <SkBitmap.h>
+#include <SkCodec.h>
+#include <SkPngChunkReader.h>
 #include <SkStream.h>
 #include <SkString.h>
 #include <SkMatrix.h>
@@ -24,7 +25,6 @@
 #include <SkTypeface.h>
 #include <SkTextBox.h>
 
-#include <SkBlurMask.h>
 #include <SkBlurMaskFilter.h>
 #include <SkEmbossMaskFilter.h>
 #include <SkDropShadowImageFilter.h>
@@ -36,9 +36,6 @@
 #include <SkPathEffect.h>
 #include <SkDiscretePathEffect.h>
 #include <SkDashPathEffect.h>
-
-#include <SkGeometry.h>
-
 #include <SkPathMeasure.h>
 
 #endif

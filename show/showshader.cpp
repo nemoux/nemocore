@@ -103,8 +103,6 @@ void nemoshow_shader_destroy(struct showone *one)
 
 	if (NEMOSHOW_SHADER_CC(shader, matrix) != NULL)
 		delete NEMOSHOW_SHADER_CC(shader, matrix);
-	if (NEMOSHOW_SHADER_CC(shader, shader) != NULL)
-		NEMOSHOW_SHADER_CC(shader, shader)->unref();
 
 	delete static_cast<showshader_t *>(shader->cc);
 
@@ -121,9 +119,6 @@ int nemoshow_shader_update(struct showone *one)
 	struct showshader *shader = NEMOSHOW_SHADER(one);
 
 	if ((one->dirty & (NEMOSHOW_SHADER_DIRTY | NEMOSHOW_SHAPE_DIRTY | NEMOSHOW_BITMAP_DIRTY)) != 0) {
-		if (NEMOSHOW_SHADER_CC(shader, shader) != NULL)
-			NEMOSHOW_SHADER_CC(shader, shader)->unref();
-
 		if (one->sub == NEMOSHOW_LINEAR_GRADIENT_SHADER || one->sub == NEMOSHOW_RADIAL_GRADIENT_SHADER) {
 			struct showone *ref = NEMOSHOW_REF(one, NEMOSHOW_SHADER_REF);
 			struct showstop *stop;
@@ -166,14 +161,14 @@ int nemoshow_shader_update(struct showone *one)
 					{ SkDoubleToScalar(shader->x1), SkDoubleToScalar(shader->y1) }
 				};
 
-				NEMOSHOW_SHADER_CC(shader, shader) = SkGradientShader::CreateLinear(
+				NEMOSHOW_SHADER_CC(shader, shader) = SkGradientShader::MakeLinear(
 						points,
 						colors,
 						offsets,
 						noffsets,
 						tilemodes[shader->tmx]);
 			} else if (one->sub == NEMOSHOW_RADIAL_GRADIENT_SHADER) {
-				NEMOSHOW_SHADER_CC(shader, shader) = SkGradientShader::CreateRadial(
+				NEMOSHOW_SHADER_CC(shader, shader) = SkGradientShader::MakeRadial(
 						SkPoint::Make(shader->x0, shader->y0),
 						shader->r,
 						colors,
@@ -187,18 +182,18 @@ int nemoshow_shader_update(struct showone *one)
 			if (ref != NULL) {
 				struct showitem *item = NEMOSHOW_ITEM(ref);
 
-				NEMOSHOW_SHADER_CC(shader, shader) = SkShader::CreateBitmapShader(
+				NEMOSHOW_SHADER_CC(shader, shader) = SkShader::MakeBitmapShader(
 						*NEMOSHOW_ITEM_CC(item, bitmap),
 						tilemodes[shader->tmx],
 						tilemodes[shader->tmy]);
 			}
 		} else if (one->sub == NEMOSHOW_PERLIN_FRACTAL_NOISE_SHADER) {
-			NEMOSHOW_SHADER_CC(shader, shader) = SkPerlinNoiseShader::CreateFractalNoise(
+			NEMOSHOW_SHADER_CC(shader, shader) = SkPerlinNoiseShader::MakeFractalNoise(
 					SkDoubleToScalar(shader->x0), SkDoubleToScalar(shader->y0),
 					shader->octaves,
 					SkDoubleToScalar(shader->seed));
 		} else if (one->sub == NEMOSHOW_PERLIN_TURBULENCE_NOISE_SHADER) {
-			NEMOSHOW_SHADER_CC(shader, shader) = SkPerlinNoiseShader::CreateTurbulence(
+			NEMOSHOW_SHADER_CC(shader, shader) = SkPerlinNoiseShader::MakeTurbulence(
 					SkDoubleToScalar(shader->x0), SkDoubleToScalar(shader->y0),
 					shader->octaves,
 					SkDoubleToScalar(shader->seed));
@@ -207,9 +202,7 @@ int nemoshow_shader_update(struct showone *one)
 
 	if ((one->dirty & NEMOSHOW_MATRIX_DIRTY) != 0) {
 		if (nemoshow_one_has_state(one, NEMOSHOW_TRANSFORM_STATE)) {
-			NEMOSHOW_SHADER_CC(shader, shader) = SkShader::CreateLocalMatrixShader(
-					NEMOSHOW_SHADER_CC(shader, shader),
-					*NEMOSHOW_SHADER_CC(shader, matrix));
+			NEMOSHOW_SHADER_CC(shader, shader) = NEMOSHOW_SHADER_CC(shader, shader)->makeWithLocalMatrix(*NEMOSHOW_SHADER_CC(shader, matrix));
 		}
 	}
 

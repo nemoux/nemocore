@@ -41,9 +41,6 @@ void nemoshow_font_destroy(struct showone *one)
 
 	nemoshow_one_finish(one);
 
-	if (NEMOSHOW_FONT_CC(font, face) != NULL)
-		SkSafeUnref(NEMOSHOW_FONT_CC(font, face));
-
 	delete static_cast<showfont_t *>(font->cc);
 
 	if (font->path != NULL)
@@ -68,7 +65,7 @@ int nemoshow_font_load(struct showone *one, const char *path)
 
 	font->path = strdup(path);
 
-	NEMOSHOW_FONT_CC(font, face) = SkTypeface::CreateFromFile(path, 0);
+	NEMOSHOW_FONT_CC(font, face) = SkTypeface::MakeFromFile(path, 0);
 
 	font->upem = NEMOSHOW_FONT_CC(font, face)->getUnitsPerEm();
 	font->max_advance_height = fontconfig_get_max_advance_height(path, 0);
