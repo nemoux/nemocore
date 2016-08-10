@@ -8,6 +8,7 @@
 #include <skiahelper.h>
 #include <colorhelper.h>
 #include <skiaconfig.hpp>
+#include <nemolog.h>
 
 int skia_draw_circle(void *pixels, int32_t width, int32_t height, double x, double y, double r, double w, double b, int32_t c)
 {
@@ -73,10 +74,12 @@ int skia_read_image(SkBitmap *bitmap, const char *imagepath)
 	if (codec == NULL)
 		return -1;
 
-	bitmap->setInfo(codec->getInfo());
+	SkImageInfo info = codec->getInfo().makeColorSpace(nullptr);
+
+	bitmap->setInfo(info);
 	bitmap->allocPixels();
 
-	SkCodec::Result r = codec->getPixels(codec->getInfo(), bitmap->getPixels(), bitmap->rowBytes());
+	SkCodec::Result r = codec->getPixels(info, bitmap->getPixels(), bitmap->rowBytes());
 
 	if (r != SkCodec::kSuccess)
 		return -1;
