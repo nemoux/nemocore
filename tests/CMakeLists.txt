@@ -23,23 +23,6 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -std=c++11")
 set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 
-add_executable(nemoimage-show
-	nemoimage-show.c
-	)
-
-TARGET_LINK_LIBRARIES(nemoimage-show
-	nemoapps
-	)
-
-add_executable(nemoplay-decode
-	nemoplay-decode.c
-	)
-
-TARGET_LINK_LIBRARIES(nemoplay-decode
-	nemoplay
-	${AO_LIBRARIES}
-	)
-
 add_executable(nemoplay-show
 	nemoplay-show.c
 	)
