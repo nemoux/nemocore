@@ -74,7 +74,7 @@ int skia_read_image(SkBitmap *bitmap, const char *imagepath)
 	if (codec == NULL)
 		return -1;
 
-	SkImageInfo info = codec->getInfo().makeColorSpace(nullptr);
+	SkImageInfo info = codec->getInfo().makeColorSpace(NULL);
 
 	bitmap->setInfo(info);
 	bitmap->allocPixels();

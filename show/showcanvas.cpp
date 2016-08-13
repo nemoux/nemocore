@@ -42,6 +42,7 @@ struct showone *nemoshow_canvas_create(void)
 	canvas->cc = new showcanvas_t;
 	NEMOSHOW_CANVAS_CC(canvas, bitmap) = NULL;
 	NEMOSHOW_CANVAS_CC(canvas, damage) = NULL;
+	NEMOSHOW_CANVAS_CC(canvas, picture) = NULL;
 
 	canvas->viewport.sx = 1.0f;
 	canvas->viewport.sy = 1.0f;
@@ -54,7 +55,8 @@ struct showone *nemoshow_canvas_create(void)
 	canvas->alpha = 1.0f;
 
 	canvas->dispatch_redraw = nemoshow_canvas_render_none;
-	canvas->dispatch_redraw_tile = NULL;
+	canvas->dispatch_record = NULL;
+	canvas->dispatch_replay = NULL;
 
 	nemolist_init(&canvas->link);
 
@@ -177,7 +179,8 @@ int nemoshow_canvas_set_type(struct showone *one, int type)
 		NEMOSHOW_CANVAS_CC(canvas, damage) = new SkRegion;
 
 		canvas->dispatch_redraw = nemoshow_canvas_render_vector;
-		canvas->dispatch_redraw_tile = nemoshow_canvas_render_vector_tile;
+		canvas->dispatch_record = nemoshow_canvas_record_vector;
+		canvas->dispatch_replay = nemoshow_canvas_replay_vector;
 
 		nemoshow_canvas_set_state(canvas, NEMOSHOW_CANVAS_POOLING_STATE);
 	} else if (type == NEMOSHOW_CANVAS_PIPELINE_TYPE) {
@@ -703,10 +706,28 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 	NEMOSHOW_CANVAS_CC(canvas, damage)->setEmpty();
 }
 
-void nemoshow_canvas_render_vector_tile(struct nemoshow *show, struct showone *one, int32_t x, int32_t y, int32_t width, int32_t height)
+void nemoshow_canvas_record_vector(struct nemoshow *show, struct showone *one)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 	struct showone *child;
+	SkPictureRecorder recorder;
+	SkCanvas *_canvas;
+
+	_canvas = recorder.beginRecording(canvas->viewport.width, canvas->viewport.height);
+
+	_canvas->clear(SK_ColorTRANSPARENT);
+	_canvas->scale(canvas->viewport.sx, canvas->viewport.sy);
+
+	nemoshow_children_for_each(child, one) {
+		nemoshow_canvas_render_one(canvas, _canvas, child, NULL);
+	}
+
+	NEMOSHOW_CANVAS_CC(canvas, picture) = recorder.finishRecordingAsPicture();
+}
+
+void nemoshow_canvas_replay_vector(struct nemoshow *show, struct showone *one, int32_t x, int32_t y, int32_t width, int32_t height)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 	SkBitmapDevice *_device;
 	SkCanvas *_canvas;
 	SkRegion region;
@@ -720,12 +741,7 @@ void nemoshow_canvas_render_vector_tile(struct nemoshow *show, struct showone *o
 	_canvas = new SkCanvas(_device);
 
 	_canvas->clipRegion(region);
-	_canvas->clear(SK_ColorTRANSPARENT);
-	_canvas->scale(canvas->viewport.sx, canvas->viewport.sy);
-
-	nemoshow_children_for_each(child, one) {
-		nemoshow_canvas_render_one(canvas, _canvas, child, &region);
-	}
+	_canvas->drawPicture(NEMOSHOW_CANVAS_CC(canvas, picture));
 
 	delete _canvas;
 	delete _device;

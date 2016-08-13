@@ -38,4 +38,6 @@
 #include <SkDashPathEffect.h>
 #include <SkPathMeasure.h>
 
+#include <SkPictureRecorder.h>
+
 #endif

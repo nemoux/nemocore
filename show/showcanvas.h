@@ -38,7 +38,8 @@ typedef enum {
 struct nemoshow;
 
 typedef void (*nemoshow_canvas_dispatch_redraw_t)(struct nemoshow *show, struct showone *one);
-typedef void (*nemoshow_canvas_dispatch_redraw_tile_t)(struct nemoshow *show, struct showone *one, int32_t x, int32_t y, int32_t width, int32_t height);
+typedef void (*nemoshow_canvas_dispatch_record_t)(struct nemoshow *show, struct showone *one);
+typedef void (*nemoshow_canvas_dispatch_replay_t)(struct nemoshow *show, struct showone *one, int32_t x, int32_t y, int32_t width, int32_t height);
 typedef void (*nemoshow_canvas_dispatch_resize_t)(struct nemoshow *show, struct showone *one, int32_t width, int32_t height);
 typedef void (*nemoshow_canvas_dispatch_event_t)(struct nemoshow *show, struct showone *one, void *event);
 typedef int (*nemoshow_canvas_contain_point_t)(struct nemoshow *show, struct showone *one, float x, float y);
@@ -77,7 +78,8 @@ struct showcanvas {
 	double sx, sy;
 
 	nemoshow_canvas_dispatch_redraw_t dispatch_redraw;
-	nemoshow_canvas_dispatch_redraw_tile_t dispatch_redraw_tile;
+	nemoshow_canvas_dispatch_record_t dispatch_record;
+	nemoshow_canvas_dispatch_replay_t dispatch_replay;
 	nemoshow_canvas_dispatch_resize_t dispatch_resize;
 	nemoshow_canvas_dispatch_event_t dispatch_event;
 	nemoshow_canvas_contain_point_t contain_point;
@@ -109,7 +111,8 @@ extern void nemoshow_canvas_detach_pixman(struct showone *one);
 extern int nemoshow_canvas_resize_pixman(struct showone *one, int32_t width, int32_t height);
 
 extern void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one);
-extern void nemoshow_canvas_render_vector_tile(struct nemoshow *show, struct showone *one, int32_t x, int32_t y, int32_t width, int32_t height);
+extern void nemoshow_canvas_record_vector(struct nemoshow *show, struct showone *one);
+extern void nemoshow_canvas_replay_vector(struct nemoshow *show, struct showone *one, int32_t x, int32_t y, int32_t width, int32_t height);
 extern void nemoshow_canvas_render_back(struct nemoshow *show, struct showone *one);
 extern void nemoshow_canvas_render_none(struct nemoshow *show, struct showone *one);
 
@@ -153,6 +156,16 @@ static inline int nemoshow_canvas_has_state_all(struct showcanvas *canvas, uint3
 static inline void nemoshow_canvas_set_dispatch_redraw(struct showone *one, nemoshow_canvas_dispatch_redraw_t dispatch_redraw)
 {
 	NEMOSHOW_CANVAS_AT(one, dispatch_redraw) = dispatch_redraw;
+}
+
+static inline void nemoshow_canvas_set_dispatch_record(struct showone *one, nemoshow_canvas_dispatch_record_t dispatch_record)
+{
+	NEMOSHOW_CANVAS_AT(one, dispatch_record) = dispatch_record;
+}
+
+static inline void nemoshow_canvas_set_dispatch_replay(struct showone *one, nemoshow_canvas_dispatch_replay_t dispatch_replay)
+{
+	NEMOSHOW_CANVAS_AT(one, dispatch_replay) = dispatch_replay;
 }
 
 static inline void nemoshow_canvas_set_dispatch_resize(struct showone *one, nemoshow_canvas_dispatch_resize_t dispatch_resize)

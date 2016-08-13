@@ -272,7 +272,7 @@ static void nemoshow_handle_canvas_render_task(void *arg)
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(task->one);
 
 	if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_TILING_STATE))
-		canvas->dispatch_redraw_tile(task->show, task->one, task->x, task->y, task->w, task->h);
+		canvas->dispatch_replay(task->show, task->one, task->x, task->y, task->w, task->h);
 	else
 		canvas->dispatch_redraw(task->show, task->one);
 }
@@ -331,6 +331,8 @@ void nemoshow_divide_one(struct nemoshow *show)
 			tr = ch / show->tilesize + 1;
 			tw = ceil(cw / tc);
 			th = ceil(ch / tr);
+
+			canvas->dispatch_record(show, NEMOSHOW_CANVAS_ONE(canvas));
 
 			for (i = 0; i < tr; i++) {
 				for (j = 0; j < tc; j++) {

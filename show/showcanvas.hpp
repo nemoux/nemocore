@@ -8,6 +8,8 @@
 typedef struct _showcanvas {
 	SkBitmap *bitmap;
 	SkRegion *damage;
+
+	sk_sp<SkPicture> picture;
 } showcanvas_t;
 
 #define NEMOSHOW_CANVAS_CC(base, name)				(((showcanvas_t *)((base)->cc))->name)
