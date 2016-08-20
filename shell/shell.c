@@ -652,14 +652,6 @@ static void nemoshell_handle_child_signal(struct wl_listener *listener, void *da
 		shell->destroy_client(shell->userdata, proc->pid);
 }
 
-static void nemoshell_handle_pointer_sprite(struct wl_listener *listener, void *data)
-{
-	struct nemoshell *shell = (struct nemoshell *)container_of(listener, struct nemoshell, pointer_sprite_listener);
-
-	if (shell->update_pointer != NULL)
-		shell->update_pointer(shell->userdata, (struct nemopointer *)data);
-}
-
 static void nemoshell_handle_idle(struct wl_listener *listener, void *data)
 {
 	struct nemoshell *shell = (struct nemoshell *)container_of(listener, struct nemoshell, idle_listener);
@@ -753,10 +745,6 @@ struct nemoshell *nemoshell_create(struct nemocompz *compz)
 	wl_list_init(&shell->child_signal_listener.link);
 	shell->child_signal_listener.notify = nemoshell_handle_child_signal;
 	wl_signal_add(&compz->child_signal, &shell->child_signal_listener);
-
-	wl_list_init(&shell->pointer_sprite_listener.link);
-	shell->pointer_sprite_listener.notify = nemoshell_handle_pointer_sprite;
-	wl_signal_add(&compz->seat->pointer.sprite_signal, &shell->pointer_sprite_listener);
 
 	wl_list_init(&shell->idle_listener.link);
 	shell->idle_listener.notify = nemoshell_handle_idle;

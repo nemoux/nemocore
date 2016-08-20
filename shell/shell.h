@@ -68,7 +68,6 @@ typedef int (*nemoshell_execute_command_t)(void *data, struct shellbin *bin, con
 typedef void (*nemoshell_transform_bin_t)(void *data, struct shellbin *bin);
 
 typedef void (*nemoshell_destroy_client_t)(void *data, pid_t pid);
-typedef void (*nemoshell_update_pointer_t)(void *data, struct nemopointer *pointer);
 
 typedef void (*nemoshell_enter_idle_t)(void *data);
 
@@ -127,7 +126,6 @@ struct nemoshell {
 	nemoshell_execute_command_t execute_command;
 	nemoshell_transform_bin_t transform_bin;
 	nemoshell_destroy_client_t destroy_client;
-	nemoshell_update_pointer_t update_pointer;
 	nemoshell_enter_idle_t enter_idle;
 	void *userdata;
 
@@ -372,11 +370,6 @@ static inline void nemoshell_set_transform_bin(struct nemoshell *shell, nemoshel
 static inline void nemoshell_set_destroy_client(struct nemoshell *shell, nemoshell_destroy_client_t dispatch)
 {
 	shell->destroy_client = dispatch;
-}
-
-static inline void nemoshell_set_update_pointer(struct nemoshell *shell, nemoshell_update_pointer_t dispatch)
-{
-	shell->update_pointer = dispatch;
 }
 
 static inline void nemoshell_set_enter_idle(struct nemoshell *shell, nemoshell_enter_idle_t dispatch)

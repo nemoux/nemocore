@@ -90,8 +90,6 @@ extern void nemopointer_start_grab(struct nemopointer *pointer, struct nemopoint
 extern void nemopointer_end_grab(struct nemopointer *pointer);
 extern void nemopointer_cancel_grab(struct nemopointer *pointer);
 
-extern void nemopointer_set_cursor_actor(struct nemopointer *pointer, struct nemoactor *actor, int32_t dx, int32_t dy);
-
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif
