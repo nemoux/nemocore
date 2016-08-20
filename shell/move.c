@@ -101,7 +101,7 @@ int nemoshell_move_canvas_by_pointer(struct nemoshell *shell, struct nemopointer
 {
 	struct shellgrab_move *move;
 
-	if (bin == NULL)
+	if (bin == NULL || pointer->button_count == 0)
 		return -1;
 
 	if (bin->config.fullscreen != 0 || bin->config.maximized != 0)
