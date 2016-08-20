@@ -88,8 +88,7 @@ struct nemoshell {
 	struct wl_listener touch_focus_listener;
 
 	struct wl_listener child_signal_listener;
-	struct wl_listener pointer_sprite_listener;
-
+	
 	struct wl_listener idle_listener;
 
 	struct wl_event_source *frame_timer;

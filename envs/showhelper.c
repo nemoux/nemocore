@@ -596,14 +596,6 @@ int nemoshow_view_move(struct nemoshow *show, uint64_t device)
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemoseat *seat = scon->compz->seat;
 	struct nemoactor *actor = scon->actor;
-	struct touchpoint *tp;
-
-	tp = nemoseat_get_touchpoint_by_id(seat, device);
-	if (tp != NULL) {
-		nemoshell_move_actor_by_touchpoint(scon->shell, tp, actor);
-
-		return 1;
-	}
 
 	return 0;
 }
