@@ -74,7 +74,7 @@ static void move_shellgrab_pointer_button(struct nemopointer_grab *base, uint32_
 		nemocontent_pointer_button(pointer, pointer->focus->content, time, button, state);
 	}
 
-	if (pointer->button_count == 0 && state == WL_POINTER_BUTTON_STATE_RELEASED) {
+	if (state == WL_POINTER_BUTTON_STATE_RELEASED) {
 		nemoshell_end_pointer_shellgrab(grab);
 		free(move);
 	}
@@ -404,7 +404,7 @@ static void move_actorgrab_pointer_button(struct nemopointer_grab *base, uint32_
 		nemocontent_pointer_button(pointer, pointer->focus->content, time, button, state);
 	}
 
-	if (pointer->button_count == 0 && state == WL_POINTER_BUTTON_STATE_RELEASED) {
+	if (state == WL_POINTER_BUTTON_STATE_RELEASED) {
 		nemoshell_end_pointer_actorgrab(grab);
 		free(move);
 	}

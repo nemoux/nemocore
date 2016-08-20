@@ -613,24 +613,6 @@ int nemoshow_view_pick(struct nemoshow *show, uint64_t device0, uint64_t device1
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemoseat *seat = scon->compz->seat;
 	struct nemoactor *actor = scon->actor;
-	struct touchpoint *tp0, *tp1;
-
-	tp0 = nemoseat_get_touchpoint_by_id(seat, device0);
-	tp1 = nemoseat_get_touchpoint_by_id(seat, device1);
-	if (tp0 != NULL && tp1 != NULL) {
-		uint32_t ptype = 0x0;
-
-		if (type & NEMOSHOW_VIEW_PICK_ROTATE_TYPE)
-			ptype |= (1 << NEMO_SURFACE_PICK_TYPE_ROTATE);
-		if (type & NEMOSHOW_VIEW_PICK_SCALE_TYPE)
-			ptype |= (1 << NEMO_SURFACE_PICK_TYPE_SCALE);
-		if (type & NEMOSHOW_VIEW_PICK_TRANSLATE_TYPE)
-			ptype |= (1 << NEMO_SURFACE_PICK_TYPE_MOVE);
-
-		nemoshell_pick_actor_by_touchpoint(scon->shell, tp0, tp1, ptype, actor);
-
-		return 1;
-	}
 
 	return 0;
 }
@@ -640,30 +622,6 @@ int nemoshow_view_pick_distant(struct nemoshow *show, void *event, uint32_t type
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemoseat *seat = scon->compz->seat;
 	struct nemoactor *actor = scon->actor;
-	struct touchpoint *tp0, *tp1;
-	int tap0, tap1;
-
-	nemotale_event_get_distant_tapindices(show->tale, event, &tap0, &tap1);
-
-	nemotale_event_set_done_on(event, tap0);
-	nemotale_event_set_done_on(event, tap1);
-
-	tp0 = nemoseat_get_touchpoint_by_id(seat, nemotale_event_get_device_on(event, tap0));
-	tp1 = nemoseat_get_touchpoint_by_id(seat, nemotale_event_get_device_on(event, tap1));
-	if (tp0 != NULL && tp1 != NULL) {
-		uint32_t ptype = 0x0;
-
-		if (type & NEMOSHOW_VIEW_PICK_ROTATE_TYPE)
-			ptype |= (1 << NEMO_SURFACE_PICK_TYPE_ROTATE);
-		if (type & NEMOSHOW_VIEW_PICK_SCALE_TYPE)
-			ptype |= (1 << NEMO_SURFACE_PICK_TYPE_SCALE);
-		if (type & NEMOSHOW_VIEW_PICK_TRANSLATE_TYPE)
-			ptype |= (1 << NEMO_SURFACE_PICK_TYPE_MOVE);
-
-		nemoshell_pick_actor_by_touchpoint(scon->shell, tp0, tp1, ptype, actor);
-
-		return 1;
-	}
 
 	return 0;
 }

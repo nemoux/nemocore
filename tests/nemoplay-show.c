@@ -86,7 +86,7 @@ static void nemoplay_dispatch_canvas_event(struct nemoshow *show, struct showone
 {
 	struct playcontext *context = (struct playcontext *)nemoshow_get_userdata(show);
 
-	if (nemoshow_event_is_down(show, event) || nemoshow_event_is_up(show, event)) {
+	if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event)) {
 		nemoshow_event_update_taps(show, canvas, event);
 
 		if (nemoshow_event_is_single_tap(show, event)) {
@@ -94,6 +94,12 @@ static void nemoplay_dispatch_canvas_event(struct nemoshow *show, struct showone
 		} else if (nemoshow_event_is_many_taps(show, event)) {
 			nemoshow_view_pick_distant(show, event, NEMOSHOW_VIEW_PICK_ALL_TYPE);
 		}
+	}
+
+	if (nemoshow_event_is_pointer_button_down(show, event, BTN_LEFT)) {
+		nemoshow_view_move(show, nemoshow_event_get_serial(event));
+	} else if (nemoshow_event_is_pointer_button_down(show, event, BTN_RIGHT)) {
+		nemoshow_view_pick(show, nemoshow_event_get_serial(event), 0, NEMOSHOW_VIEW_PICK_ALL_TYPE);
 	}
 
 	if (nemoshow_event_is_single_click(show, event)) {
