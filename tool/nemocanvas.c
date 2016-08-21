@@ -709,16 +709,21 @@ static const struct presentation_feedback_listener presentation_feedback_listene
 
 void nemocanvas_dispatch_feedback(struct nemocanvas *canvas)
 {
-	if (canvas->framerate == 0) {
-		if (canvas->feedback != NULL) {
-			presentation_feedback_destroy(canvas->feedback);
+	canvas->needs_feedback = 1;
+}
+
+void nemocanvas_handle_feedback(struct nemocanvas *canvas)
+{
+	if (canvas->needs_feedback != 0) {
+		if (canvas->framerate == 0) {
+			canvas->feedback = presentation_feedback(canvas->tool->presentation, canvas->surface);
+			presentation_feedback_add_listener(canvas->feedback, &presentation_feedback_listener, canvas);
+		} else {
+			canvas->framefeed = 1;
+			nemotimer_set_timeout(canvas->frametimer, 1000 / canvas->framerate);
 		}
 
-		canvas->feedback = presentation_feedback(canvas->tool->presentation, canvas->surface);
-		presentation_feedback_add_listener(canvas->feedback, &presentation_feedback_listener, canvas);
-	} else {
-		canvas->framefeed = 1;
-		nemotimer_set_timeout(canvas->frametimer, 1000 / canvas->framerate);
+		canvas->needs_feedback = 0;
 	}
 }
 

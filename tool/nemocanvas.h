@@ -44,6 +44,7 @@ struct nemocanvas {
 	struct nemo_surface *nemo_surface;
 
 	struct presentation_feedback *feedback;
+	int needs_feedback;
 
 	struct nemotimer *frametimer;
 	uint32_t framerate;
@@ -140,6 +141,7 @@ extern void nemocanvas_set_dispatch_destroy(struct nemocanvas *canvas, nemocanva
 extern void nemocanvas_set_framerate(struct nemocanvas *canvas, uint32_t framerate);
 
 extern void nemocanvas_dispatch_feedback(struct nemocanvas *canvas);
+extern void nemocanvas_handle_feedback(struct nemocanvas *canvas);
 extern void nemocanvas_terminate_feedback(struct nemocanvas *canvas);
 
 extern void nemocanvas_dispatch_frame(struct nemocanvas *canvas);

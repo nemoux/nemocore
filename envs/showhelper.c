@@ -203,19 +203,17 @@ static void nemoshow_dispatch_tale_event(struct nemotale *tale, struct talenode 
 {
 	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
 
-	if (show->dispatch_event != NULL) {
-		show->dispatch_event(show, event);
-	} else {
-		if (nemotale_dispatch_grab(tale, event) == 0) {
-			uint32_t id = nemotale_node_get_id(node);
+	if (nemotale_dispatch_grab(tale, event) == 0) {
+		uint32_t id = nemotale_node_get_id(node);
 
-			if (id != 0) {
-				struct showone *one = (struct showone *)nemotale_node_get_data(node);
-				struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+		if (id != 0) {
+			struct showone *one = (struct showone *)nemotale_node_get_data(node);
+			struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
-				if (canvas->dispatch_event != NULL)
-					canvas->dispatch_event(show, one, event);
-			}
+			if (canvas->dispatch_event != NULL)
+				canvas->dispatch_event(show, one, event);
+		} else if (show->dispatch_event != NULL) {
+			show->dispatch_event(show, event);
 		}
 	}
 }

@@ -197,6 +197,13 @@ void nemotale_push_pointer_up_event(struct nemotale *tale, uint32_t serial, uint
 	event.tap = tap;
 
 	tale->dispatch_event(tale, tap->node, &event);
+
+	if (tap->node != NULL) {
+		nemolist_remove(&tap->node_destroy_listener.link);
+		nemolist_init(&tap->node_destroy_listener.link);
+
+		tap->node = NULL;
+	}
 }
 
 void nemotale_push_pointer_motion_event(struct nemotale *tale, uint32_t serial, uint64_t device, uint32_t time, float x, float y)
