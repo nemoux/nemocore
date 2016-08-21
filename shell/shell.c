@@ -191,6 +191,19 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 	if (!nemoview_has_state(view, NEMOVIEW_MAP_STATE)) {
 		nemoshell_use_client_state(bin->shell, bin);
 
+		if (bin->initial.has_position == 0) {
+			pixman_box32_t *extents = pixman_region32_extents(&bin->shell->compz->scope);
+			uint32_t dx = 0, dy = 0;
+
+			if (extents->x2 - extents->x1 > canvas->base.width && extents->y2 - extents->y1 > canvas->base.height) {
+				dx = canvas->base.width / 2;
+				dy = canvas->base.height / 2;
+			}
+
+			bin->initial.x = random_get_int(extents->x1 + dx, extents->x2 - dx);
+			bin->initial.y = random_get_int(extents->y1 + dy, extents->y2 - dy);
+		}
+
 		if (nemoview_has_state(view, NEMOVIEW_STAGE_STATE) != 0)
 			nemoshell_use_client_stage(bin->shell, bin);
 
@@ -471,6 +484,8 @@ struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas
 
 	bin->initial.sx = 1.0f;
 	bin->initial.sy = 1.0f;
+	bin->initial.dx = 0.5f;
+	bin->initial.dy = 0.5f;
 
 	canvas->configure = shellbin_configure_canvas;
 	canvas->configure_private = (void *)bin;
@@ -989,12 +1004,9 @@ static inline void nemoshell_set_client_state(struct shellbin *bin, struct clien
 		if (state->has_position != 0) {
 			bin->initial.x = state->x;
 			bin->initial.y = state->y;
-		} else {
-			pixman_box32_t *extents = pixman_region32_extents(&bin->shell->compz->scope);
-
-			bin->initial.x = random_get_int(extents->x1, extents->x2);
-			bin->initial.y = random_get_int(extents->y1, extents->y2);
+			bin->initial.has_position = 1;
 		}
+
 		bin->initial.r = state->r;
 		bin->initial.sx = state->sx;
 		bin->initial.sy = state->sy;
@@ -1041,13 +1053,6 @@ int nemoshell_use_client_state(struct nemoshell *shell, struct shellbin *bin)
 			}
 		}
 	}
-
-	extents = pixman_region32_extents(&shell->compz->scope);
-
-	bin->initial.x = random_get_int(extents->x1, extents->x2);
-	bin->initial.y = random_get_int(extents->y1, extents->y2);
-	bin->initial.dx = 0.5f;
-	bin->initial.dy = 0.5f;
 
 	return 0;
 }

@@ -88,7 +88,7 @@ struct nemoshell {
 	struct wl_listener touch_focus_listener;
 
 	struct wl_listener child_signal_listener;
-	
+
 	struct wl_listener idle_listener;
 
 	struct wl_event_source *frame_timer;
@@ -252,6 +252,8 @@ struct shellbin {
 		float r;
 		float sx, sy;
 		float dx, dy;
+
+		int has_position;
 	} initial;
 
 	struct {
