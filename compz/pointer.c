@@ -33,10 +33,7 @@ static void default_pointer_grab_focus(struct nemopointer_grab *grab)
 
 	view = nemocompz_pick_view(pointer->seat->compz, pointer->x, pointer->y, &sx, &sy, NEMOVIEW_PICK_STATE);
 
-	if (pointer->focus != view || pointer->sx != sx || pointer->sy != sy) {
-		pointer->sx = sx;
-		pointer->sy = sy;
-
+	if (pointer->focus != view) {
 		nemopointer_set_focus(pointer, view, sx, sy);
 	}
 }
@@ -45,13 +42,11 @@ static void default_pointer_grab_motion(struct nemopointer_grab *grab, uint32_t 
 {
 	struct nemopointer *pointer = grab->pointer;
 
-	if (pointer->focus != NULL) {
-		nemoview_transform_from_global(pointer->focus, x, y, &pointer->sx, &pointer->sy);
-	}
-
 	nemopointer_move(pointer, x, y);
 
 	if (pointer->focus != NULL) {
+		nemoview_transform_from_global(pointer->focus, x, y, &pointer->sx, &pointer->sy);
+
 		nemocontent_pointer_motion(pointer, pointer->focus->content, time, pointer->sx, pointer->sy);
 	}
 }
@@ -88,9 +83,6 @@ static void default_pointer_grab_button(struct nemopointer_grab *grab, uint32_t 
 		view = nemocompz_pick_view(pointer->seat->compz, pointer->x, pointer->y, &sx, &sy, NEMOVIEW_PICK_STATE);
 		if (pointer->focus != view) {
 			nemopointer_set_focus(pointer, view, sx, sy);
-
-			if (pointer->focus != NULL)
-				nemocontent_pointer_motion(pointer, pointer->focus->content, time, pointer->sx, pointer->sy);
 		}
 	}
 }
@@ -418,35 +410,35 @@ void nemopointer_move(struct nemopointer *pointer, float x, float y)
 
 void nemopointer_set_focus(struct nemopointer *pointer, struct nemoview *view, float sx, float sy)
 {
-	if ((pointer->focus == NULL && view) ||
-			(pointer->focus && view == NULL) ||
-			(pointer->focus && pointer->focus->content != view->content) ||
-			pointer->sx != sx || pointer->sy != sy) {
+	if ((pointer->focus == NULL) || (view == NULL) ||
+			(pointer->focus->content != view->content)) {
 		if (pointer->sprite != NULL)
 			nemopointer_destroy_sprite(pointer);
 
 		if (pointer->focus != NULL)
 			nemocontent_pointer_leave(pointer, pointer->focus->content);
-		if (view != NULL)
+
+		pointer->focused = pointer->focus;
+		pointer->focus = view;
+		pointer->sx = sx;
+		pointer->sy = sy;
+
+		if (view != NULL) {
 			nemocontent_pointer_enter(pointer, view->content);
+		}
+
+		wl_list_remove(&pointer->focus_view_listener.link);
+		wl_list_init(&pointer->focus_view_listener.link);
+		wl_list_remove(&pointer->focus_resource_listener.link);
+		wl_list_init(&pointer->focus_resource_listener.link);
+
+		if (view != NULL)
+			wl_signal_add(&view->destroy_signal, &pointer->focus_view_listener);
+		if (view != NULL && view->canvas != NULL && view->canvas->resource != NULL)
+			wl_resource_add_destroy_listener(view->canvas->resource, &pointer->focus_resource_listener);
+
+		wl_signal_emit(&pointer->seat->pointer.focus_signal, pointer);
 	}
-
-	wl_list_remove(&pointer->focus_view_listener.link);
-	wl_list_init(&pointer->focus_view_listener.link);
-	wl_list_remove(&pointer->focus_resource_listener.link);
-	wl_list_init(&pointer->focus_resource_listener.link);
-
-	if (view != NULL)
-		wl_signal_add(&view->destroy_signal, &pointer->focus_view_listener);
-	if (view != NULL && view->canvas != NULL && view->canvas->resource != NULL)
-		wl_resource_add_destroy_listener(view->canvas->resource, &pointer->focus_resource_listener);
-
-	pointer->focused = pointer->focus;
-	pointer->focus = view;
-	pointer->sx = sx;
-	pointer->sy = sy;
-
-	wl_signal_emit(&pointer->seat->pointer.focus_signal, pointer);
 }
 
 void nemopointer_notify_button(struct nemopointer *pointer, uint32_t time, int32_t button, enum wl_pointer_button_state state)
