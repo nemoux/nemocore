@@ -68,19 +68,30 @@ static void default_pointer_grab_axis(struct nemopointer_grab *grab, uint32_t ti
 static void default_pointer_grab_button(struct nemopointer_grab *grab, uint32_t time, uint32_t button, uint32_t state)
 {
 	struct nemopointer *pointer = grab->pointer;
+	struct nemoview *view;
+	float sx, sy;
 
 	if (state == WL_POINTER_BUTTON_STATE_PRESSED) {
-		struct nemoview *view;
-		float sx, sy;
-
 		view = nemocompz_pick_view(pointer->seat->compz, pointer->x, pointer->y, &sx, &sy, NEMOVIEW_PICK_STATE);
 		if (pointer->focus != view) {
 			nemopointer_set_focus(pointer, view, sx, sy);
 		}
-	}
 
-	if (pointer->focus != NULL) {
-		nemocontent_pointer_button(pointer, pointer->focus->content, time, button, state);
+		if (pointer->focus != NULL) {
+			nemocontent_pointer_button(pointer, pointer->focus->content, time, button, state);
+		}
+	} else {
+		if (pointer->focus != NULL) {
+			nemocontent_pointer_button(pointer, pointer->focus->content, time, button, state);
+		}
+
+		view = nemocompz_pick_view(pointer->seat->compz, pointer->x, pointer->y, &sx, &sy, NEMOVIEW_PICK_STATE);
+		if (pointer->focus != view) {
+			nemopointer_set_focus(pointer, view, sx, sy);
+
+			if (pointer->focus != NULL)
+				nemocontent_pointer_motion(pointer, pointer->focus->content, time, pointer->sx, pointer->sy);
+		}
 	}
 }
 
