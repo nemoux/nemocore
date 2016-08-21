@@ -51,6 +51,7 @@ struct evdevnode {
 	struct wl_event_source *source;
 	char *devname;
 	char *devphys;
+	char *devpath;
 
 	struct wl_list link;
 
@@ -96,7 +97,7 @@ struct evdevnode {
 	struct nemostick *stick;
 };
 
-extern struct evdevnode *evdev_create_node(struct nemocompz *compz, const char *path, int fd);
+extern struct evdevnode *evdev_create_node(struct nemocompz *compz, const char *devpath, int fd);
 extern void evdev_destroy_node(struct evdevnode *node);
 
 #ifdef __cplusplus

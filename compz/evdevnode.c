@@ -621,7 +621,7 @@ static int evdev_configure_node(struct evdevnode *node)
 	return 0;
 }
 
-struct evdevnode *evdev_create_node(struct nemocompz *compz, const char *path, int fd)
+struct evdevnode *evdev_create_node(struct nemocompz *compz, const char *devpath, int fd)
 {
 	struct evdevnode *node;
 	char devname[256] = "unknown";
@@ -648,6 +648,7 @@ struct evdevnode *evdev_create_node(struct nemocompz *compz, const char *path, i
 
 	node->devname = strdup(devname);
 	node->devphys = strdup(devphys);
+	node->devpath = strdup(devpath);
 
 	node->pointer = NULL;
 	node->keyboard = NULL;
@@ -713,5 +714,6 @@ void evdev_destroy_node(struct evdevnode *node)
 
 	free(node->devname);
 	free(node->devphys);
+	free(node->devpath);
 	free(node);
 }

@@ -375,6 +375,8 @@ void nemopointer_destroy(struct nemopointer *pointer)
 {
 	wl_signal_emit(&pointer->destroy_signal, pointer);
 
+	nemopointer_set_focus(pointer, NULL, 0, 0);
+
 	wl_list_remove(&pointer->focus_view_listener.link);
 	wl_list_remove(&pointer->focus_resource_listener.link);
 	wl_list_remove(&pointer->sprite_destroy_listener.link);

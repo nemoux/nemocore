@@ -46,6 +46,20 @@ err1:
 
 static int evdevbackend_remove_device(struct evdevbackend *evdev, struct udev_device *device)
 {
+	struct nemocompz *compz = evdev->compz;
+	struct evdevnode *node;
+	const char *devnode;
+
+	devnode = udev_device_get_devnode(device);
+
+	wl_list_for_each(node, &compz->evdev_list, link) {
+		if (strcmp(node->devpath, devnode) == 0) {
+			evdev_destroy_node(node);
+
+			return 1;
+		}
+	}
+
 	return 0;
 }
 

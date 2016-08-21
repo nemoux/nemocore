@@ -399,6 +399,8 @@ void nemokeyboard_destroy(struct nemokeyboard *keyboard)
 {
 	wl_signal_emit(&keyboard->destroy_signal, keyboard);
 
+	nemokeyboard_set_focus(keyboard, NULL);
+
 	nemoxkb_destroy(keyboard->xkb);
 
 	wl_list_remove(&keyboard->focus_resource_listener.link);
