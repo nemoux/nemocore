@@ -27,14 +27,13 @@ static int drmbackend_add_udev(struct drmbackend *drm, struct udev_device *devic
 {
 	struct nemocompz *compz = drm->compz;
 	struct drmnode *node;
-	const char *seat, *devnode;
+	const char *devnode;
 	uint32_t nodeid = 0;
 	int fd;
 
-	seat = udev_device_get_property_value(device, "ID_SEAT");
 	devnode = udev_device_get_devnode(device);
 
-	nemolog_message("DRM", "add udev device %s on %s\n", devnode, seat);
+	nemolog_message("DRM", "add udev device %s\n", devnode);
 
 	fd = nemosession_open(compz->session, devnode, O_RDWR);
 	if (fd < 0) {

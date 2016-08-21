@@ -425,9 +425,8 @@ void nemopointer_set_focus(struct nemopointer *pointer, struct nemoview *view, f
 		pointer->sx = sx;
 		pointer->sy = sy;
 
-		if (view != NULL) {
+		if (view != NULL)
 			nemocontent_pointer_enter(pointer, view->content);
-		}
 
 		wl_list_remove(&pointer->focus_view_listener.link);
 		wl_list_init(&pointer->focus_view_listener.link);

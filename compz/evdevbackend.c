@@ -18,10 +18,9 @@ static int evdevbackend_add_device(struct evdevbackend *evdev, struct udev_devic
 {
 	struct nemocompz *compz = evdev->compz;
 	struct evdevnode *node;
-	const char *seat, *devnode;
+	const char *devnode;
 	int fd;
 
-	seat = udev_device_get_property_value(device, "ID_SEAT");
 	devnode = udev_device_get_devnode(device);
 
 	fd = nemosession_open(compz->session, devnode, O_RDWR | O_NONBLOCK);
