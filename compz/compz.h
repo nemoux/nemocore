@@ -17,7 +17,7 @@ NEMO_BEGIN_EXTERN_C
 #include <nemoitem.h>
 
 #define	NEMOCOMPZ_NODE_MAX				(4)
-#define	NEMOCOMPZ_POINTER_MAX			(32)
+#define	NEMOCOMPZ_POINTER_MAX			(65536)
 
 #define NEMOCOMPZ_DEFAULT_FRAME_TIMEOUT		(1000.0f / 60.0f)
 
