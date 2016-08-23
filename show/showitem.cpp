@@ -1522,6 +1522,14 @@ int nemoshow_item_path_load_svg(struct showone *one, const char *uri, double x, 
 			double r = nemoxml_node_get_dattr(node, "r", 0.0f);
 
 			path.addCircle(x, y, r);
+		} else if (strcmp(node->name, "ellipse") == 0) {
+			double x = nemoxml_node_get_dattr(node, "cx", 0.0f);
+			double y = nemoxml_node_get_dattr(node, "cy", 0.0f);
+			double rx = nemoxml_node_get_dattr(node, "rx", 0.0f);
+			double ry = nemoxml_node_get_dattr(node, "ry", 0.0f);
+			SkRect oval = SkRect::MakeXYWH(x - rx, y - ry, rx * 2, ry * 2);
+
+			path.addArc(oval, 0, 360);
 		} else if (strcmp(node->name, "polygon") == 0) {
 			const char *points = nemoxml_node_get_attr(node, "points");
 			struct nemotoken *token;
