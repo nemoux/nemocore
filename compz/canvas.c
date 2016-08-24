@@ -1497,6 +1497,7 @@ void nemocanvas_schedule_repaint(struct nemocanvas *canvas)
 void nemocanvas_commit_state(struct nemocanvas *canvas, struct nemocanvas_state *state)
 {
 	pixman_region32_t opaque;
+	pixman_box32_t *extents;
 
 	canvas->buffer_viewport = state->buffer_viewport;
 
@@ -1531,7 +1532,13 @@ void nemocanvas_commit_state(struct nemocanvas *canvas, struct nemocanvas_state 
 			0, 0, canvas->base.width, canvas->base.height);
 	pixman_region32_clear(&state->damage);
 
-	canvas->base.dirty = 1;
+	extents = pixman_region32_extents(&canvas->base.damage);
+	if (extents->x2 - extents->x1 > 0 && extents->y2 - extents->y1 > 0) {
+		canvas->base.dirty = 1;
+
+		canvas->frame_damage = canvas->frame_damage + (extents->x2 - extents->x1) * (extents->y2 - extents->y1);
+		canvas->frame_count++;
+	}
 
 	pixman_region32_init(&opaque);
 	pixman_region32_intersect_rect(&opaque, &state->opaque,
@@ -1571,13 +1578,7 @@ void nemocanvas_commit_state(struct nemocanvas *canvas, struct nemocanvas_state 
 
 void nemocanvas_commit(struct nemocanvas *canvas)
 {
-	pixman_box32_t *extents;
-
 	nemocanvas_commit_state(canvas, &canvas->pending);
-
-	extents = pixman_region32_extents(&canvas->base.damage);
-	canvas->frame_damage = canvas->frame_damage + (extents->x2 - extents->x1) * (extents->y2 - extents->y1);
-	canvas->frame_count++;
 
 	nemocanvas_schedule_repaint(canvas);
 }
@@ -1608,7 +1609,6 @@ void nemocanvas_flush_damage(struct nemocanvas *canvas)
 
 	if (!canvas->base.dirty)
 		return;
-
 	canvas->base.dirty = 0;
 
 	wl_list_for_each(node, &canvas->compz->render_list, link) {
