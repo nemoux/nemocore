@@ -15,6 +15,8 @@ NEMO_BEGIN_EXTERN_C
 #include <nemolist.h>
 #include <nemolistener.h>
 
+#define NEMOCANVAS_DEFAULT_FRAMERATE			(60)
+
 struct nemocanvas;
 
 typedef int (*nemocanvas_dispatch_event_t)(struct nemocanvas *canvas, uint32_t type, struct nemoevent *event);
@@ -46,7 +48,9 @@ struct nemocanvas {
 	struct presentation_feedback *feedback;
 	int needs_feedback;
 
+	uint32_t framecount;
 	uint32_t framerate;
+	uint32_t framedivs;
 
 	struct nemocanvas *parent;
 
