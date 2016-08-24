@@ -491,8 +491,6 @@ static void nemo_get_nemo_surface(struct wl_client *client, struct wl_resource *
 
 	if (type == NEMO_SHELL_SURFACE_TYPE_NORMAL) {
 		bin->type = NEMOSHELL_SURFACE_NORMAL_TYPE;
-
-		nemoshell_use_client_state(shell, bin);
 	} else if (type == NEMO_SHELL_SURFACE_TYPE_OVERLAY) {
 		bin->type = NEMOSHELL_SURFACE_OVERLAY_TYPE;
 		bin->view->transform.type = NEMOVIEW_TRANSFORM_OVERLAY;
