@@ -741,6 +741,8 @@ void nemocanvas_terminate_feedback(struct nemocanvas *canvas)
 void nemocanvas_dispatch_frame(struct nemocanvas *canvas)
 {
 	if (canvas->feedback == NULL) {
+		canvas->framecount = 0;
+
 		canvas->dispatch_frame(canvas, 0, 0);
 	}
 }
