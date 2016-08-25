@@ -9,9 +9,11 @@
 #include <errno.h>
 
 #include <nemopool.h>
+#include <nemohelper.h>
+#include <nemolog.h>
 #include <nemomisc.h>
 
-static struct poolnode *nemopool_create_node(struct nemopool *pool);
+static struct poolnode *nemopool_create_node(struct nemopool *pool, uint32_t index);
 static void nemopool_destroy_node(struct nemopool *pool, struct poolnode *node);
 
 static void *nemopool_handle_node_thread(void *arg)
@@ -19,6 +21,7 @@ static void *nemopool_handle_node_thread(void *arg)
 	struct poolnode *node = (struct poolnode *)arg;
 	struct nemopool *pool = node->pool;
 	struct pooltask *task;
+	uint32_t stime, etime;
 
 	pthread_mutex_lock(&pool->lock);
 
@@ -29,12 +32,19 @@ static void *nemopool_handle_node_thread(void *arg)
 
 			pthread_mutex_unlock(&pool->lock);
 
+			stime = time_current_msecs();
+
 			task->dispatch(task->data);
+
+			etime = time_current_msecs();
 
 			pthread_mutex_lock(&pool->lock);
 
 			nemolist_insert_tail(&pool->done_list, &task->link);
-			pool->task_remains--;
+			pool->remains--;
+
+			node->dones += 1;
+			node->times += (etime - stime);
 
 			pthread_cond_signal(&pool->signal);
 		} else {
@@ -49,7 +59,7 @@ static void *nemopool_handle_node_thread(void *arg)
 	return NULL;
 }
 
-static struct poolnode *nemopool_create_node(struct nemopool *pool)
+static struct poolnode *nemopool_create_node(struct nemopool *pool, uint32_t index)
 {
 	struct poolnode *node;
 
@@ -59,6 +69,7 @@ static struct poolnode *nemopool_create_node(struct nemopool *pool)
 	memset(node, 0, sizeof(struct poolnode));
 
 	node->pool = pool;
+	node->index = index;
 
 	pthread_mutex_lock(&pool->lock);
 
@@ -112,7 +123,7 @@ struct nemopool *nemopool_create(int nodes)
 	nemolist_init(&pool->done_list);
 
 	for (i = 0; i < nodes; i++) {
-		nemopool_create_node(pool);
+		nemopool_create_node(pool, i);
 	}
 
 	return pool;
@@ -161,7 +172,7 @@ int nemopool_dispatch_task(struct nemopool *pool, nemopool_dispatch_t dispatch, 
 
 	nemolist_insert_tail(&pool->task_list, &task->link);
 
-	pool->task_remains++;
+	pool->remains++;
 
 	pthread_cond_broadcast(&pool->task_signal);
 
@@ -174,11 +185,14 @@ int nemopool_dispatch_done(struct nemopool *pool, nemopool_dispatch_t dispatch)
 {
 	struct pooltask *task;
 	void *data = NULL;
+	uint32_t stime, etime;
 	int done;
+
+	stime = time_current_msecs();
 
 	pthread_mutex_lock(&pool->lock);
 
-	while (pool->task_remains > 0 && nemolist_empty(&pool->done_list) != 0)
+	while (pool->remains > 0 && nemolist_empty(&pool->done_list) != 0)
 		pthread_cond_wait(&pool->signal, &pool->lock);
 
 	if (nemolist_empty(&pool->done_list) == 0) {
@@ -190,12 +204,39 @@ int nemopool_dispatch_done(struct nemopool *pool, nemopool_dispatch_t dispatch)
 		free(task);
 	}
 
-	done = pool->task_remains <= 0 && nemolist_empty(&pool->done_list) != 0;
+	done = pool->remains <= 0 && nemolist_empty(&pool->done_list) != 0;
 
 	pthread_mutex_unlock(&pool->lock);
 
 	if (data != NULL)
 		dispatch(data);
 
+	etime = time_current_msecs();
+
+	pool->times += (etime - stime);
+
 	return done;
+}
+
+void nemopool_reset(struct nemopool *pool)
+{
+	struct poolnode *node;
+
+	pool->times = 0;
+
+	nemolist_for_each(node, &pool->node_list, link) {
+		node->dones = 0;
+		node->times = 0;
+	}
+}
+
+void nemopool_dump(struct nemopool *pool)
+{
+	struct poolnode *node;
+
+	nemolog_message("POOL", "----- total times(%d)\n", pool->times);
+
+	nemolist_for_each(node, &pool->node_list, link) {
+		nemolog_message("POOL", "[%02d node] dones(%d) times(%d-%d)\n", node->index, node->dones, node->times, node->dones > 0 ? node->times / node->dones : 0);
+	}
 }

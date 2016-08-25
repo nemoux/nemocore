@@ -7,6 +7,7 @@
 NEMO_BEGIN_EXTERN_C
 #endif
 
+#include <stdint.h>
 #include <pthread.h>
 
 #include <nemolist.h>
@@ -31,7 +32,8 @@ struct nemopool {
 
 	struct nemolist task_list;
 	struct nemolist done_list;
-	int task_remains;
+	uint32_t remains;
+	uint32_t times;
 };
 
 struct pooltask {
@@ -44,6 +46,10 @@ struct pooltask {
 struct poolnode {
 	struct nemopool *pool;
 
+	uint32_t index;
+	uint32_t dones;
+	uint32_t times;
+
 	pthread_t thread;
 
 	struct nemolist link;
@@ -54,6 +60,9 @@ extern void nemopool_destroy(struct nemopool *pool);
 
 extern int nemopool_dispatch_task(struct nemopool *pool, nemopool_dispatch_t dispatch, void *data);
 extern int nemopool_dispatch_done(struct nemopool *pool, nemopool_dispatch_t dispatch);
+
+extern void nemopool_reset(struct nemopool *pool);
+extern void nemopool_dump(struct nemopool *pool);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
