@@ -48,9 +48,8 @@ struct nemocanvas {
 	struct presentation_feedback *feedback;
 	int needs_feedback;
 
-	uint32_t framecount;
+	uint32_t framemsecs;
 	uint32_t framerate;
-	uint32_t framedivs;
 
 	struct nemocanvas *parent;
 
