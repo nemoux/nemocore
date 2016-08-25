@@ -882,6 +882,49 @@ int nemotale_node_flush_gl(struct talenode *node)
 	return 0;
 }
 
+int nemotale_node_flush_gl_pbo(struct talenode *node)
+{
+#ifdef NEMOUX_WITH_OPENGL_PBO
+	struct talepmnode *pcontext = (struct talepmnode *)node->pmcontext;
+	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
+
+	if (pcontext != NULL && node->needs_flush != 0) {
+		GLuint pbo;
+		GLubyte *ptr;
+
+		glGenBuffers(1, &pbo);
+
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo);
+		glBufferData(GL_PIXEL_UNPACK_BUFFER, node->viewport.width * node->viewport.height * 4, NULL, GL_STATIC_DRAW);
+
+		ptr = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, node->viewport.width * node->viewport.height * 4, GL_MAP_WRITE_BIT);
+		memcpy(ptr, pcontext->data, node->viewport.width * node->viewport.height * 4);
+		glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+
+		glBindTexture(GL_TEXTURE_2D, gcontext->texture);
+
+		glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
+		glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
+
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT,
+				node->viewport.width, node->viewport.height, 0,
+				GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+		glDeleteBuffers(1, &pbo);
+
+		node->needs_flush = 0;
+		node->needs_filter = 1;
+		node->needs_full_upload = 0;
+	}
+#endif
+
+	return 0;
+}
+
 int nemotale_node_flush_gl_subimage(struct talenode *node)
 {
 	struct talepmnode *pcontext = (struct talepmnode *)node->pmcontext;
