@@ -415,6 +415,7 @@ int glrenderer_read_canvas(struct nemorenderer *base, struct nemocanvas *canvas,
 			return -1;
 	}
 
+#if	0
 	glGenBuffers(1, &pbo);
 	glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
 	glBufferData(GL_PIXEL_PACK_BUFFER, glcontent->pitch * glcontent->height * 4, NULL, GL_STREAM_DRAW);
@@ -432,6 +433,7 @@ int glrenderer_read_canvas(struct nemorenderer *base, struct nemocanvas *canvas,
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glDeleteBuffers(1, &pbo);
+#endif
 
 	return 0;
 }
