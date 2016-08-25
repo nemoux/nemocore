@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+#define __USE_GNU
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,6 +10,7 @@
 #include <stdarg.h>
 
 #include <signal.h>
+#include <sched.h>
 #include <sys/socket.h>
 #include <sys/epoll.h>
 #include <sys/timerfd.h>
@@ -353,4 +356,14 @@ int os_set_nonblocking_mode(int fd)
 	flags = fcntl(fd, F_GETFL, 0);
 
 	return fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+}
+
+int os_sched_set_affinity(pid_t pid, uint32_t cpuid)
+{
+	cpu_set_t cset;
+
+	CPU_ZERO(&cset);
+	CPU_SET(cpuid, &cset);
+
+	return sched_setaffinity(pid, sizeof(cpu_set_t), &cset);
 }

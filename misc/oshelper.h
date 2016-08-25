@@ -30,6 +30,8 @@ extern char *os_get_file_path(const char *name);
 
 extern int os_set_nonblocking_mode(int fd);
 
+extern int os_sched_set_affinity(pid_t pid, uint32_t cpuid);
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

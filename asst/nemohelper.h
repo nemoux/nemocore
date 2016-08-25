@@ -43,6 +43,8 @@ extern char *os_get_file_path(const char *name);
 
 extern int os_set_nonblocking_mode(int fd);
 
+extern int os_sched_set_affinity(pid_t pid, uint32_t cpuid);
+
 extern int sys_get_process_name(pid_t pid, char *name, int size);
 extern int sys_get_process_parent_id(pid_t pid, pid_t *ppid);
 
