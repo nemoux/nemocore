@@ -133,6 +133,9 @@ struct talenode *nemotale_node_create_gl(int32_t width, int32_t height)
 	node->dispatch_copy = nemotale_node_copy_pbo;
 #elif NEMOUX_WITH_OPENGL_UNPACK_SUBIMAGE
 	node->dispatch_flush = nemotale_node_flush_gl_subimage;
+	node->dispatch_map = nemotale_node_map_subimage;
+	node->dispatch_unmap = nemotale_node_unmap_subimage;
+	node->dispatch_copy = nemotale_node_copy_subimage;
 #else
 	node->dispatch_flush = nemotale_node_flush_gl;
 #endif
@@ -1155,6 +1158,21 @@ int nemotale_node_flush_gl_subimage(struct talenode *node)
 		node->needs_filter = 1;
 	}
 
+	return 0;
+}
+
+int nemotale_node_map_subimage(struct talenode *node)
+{
+	return 0;
+}
+
+int nemotale_node_unmap_subimage(struct talenode *node)
+{
+	return nemotale_node_flush_gl_subimage(node);
+}
+
+int nemotale_node_copy_subimage(struct talenode *node, int32_t x, int32_t y, int32_t width, int32_t height)
+{
 	return 0;
 }
 

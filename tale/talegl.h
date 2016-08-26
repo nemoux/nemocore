@@ -74,6 +74,9 @@ extern int nemotale_node_map_pbo(struct talenode *node);
 extern int nemotale_node_unmap_pbo(struct talenode *node);
 extern int nemotale_node_copy_pbo(struct talenode *node, int32_t x, int32_t y, int32_t width, int32_t height);
 extern int nemotale_node_flush_gl_subimage(struct talenode *node);
+extern int nemotale_node_map_subimage(struct talenode *node);
+extern int nemotale_node_unmap_subimage(struct talenode *node);
+extern int nemotale_node_copy_subimage(struct talenode *node, int32_t x, int32_t y, int32_t width, int32_t height);
 extern int nemotale_node_filter_gl(struct talenode *node);
 
 extern int nemotale_node_set_filter(struct talenode *node, const char *shader);

@@ -162,6 +162,9 @@ void nemotale_prepare_node(struct nemotale *tale, struct talenode *node)
 		node->dispatch_copy = nemotale_node_copy_pbo;
 #elif NEMOUX_WITH_OPENGL_UNPACK_SUBIMAGE
 		node->dispatch_flush = nemotale_node_flush_gl_subimage;
+		node->dispatch_map = nemotale_node_map_subimage;
+		node->dispatch_unmap = nemotale_node_unmap_subimage;
+		node->dispatch_copy = nemotale_node_copy_subimage;
 #else
 		node->dispatch_flush = nemotale_node_flush_gl;
 #endif
