@@ -1045,6 +1045,7 @@ int nemotale_node_unmap_pbo(struct talenode *node)
 
 		node->needs_flush = 0;
 		node->needs_filter = 1;
+		node->needs_full_upload = 0;
 	}
 #endif
 
@@ -1058,13 +1059,49 @@ int nemotale_node_copy_pbo(struct talenode *node, int32_t x, int32_t y, int32_t 
 	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
 
 	if (pcontext != NULL) {
-		int l;
+		if (node->needs_full_upload != 0) {
+			int l;
 
-		for (l = y; l < y + height; l++) {
-			uint32_t offset = (l * node->viewport.width + x) * 4;
-			uint32_t size = width * 4;
+			for (l = y; l < y + height; l++) {
+				uint32_t offset = (l * node->viewport.width + x) * 4;
+				uint32_t size = width * 4;
 
-			memcpy(gcontext->pbuffer + offset, pcontext->data + offset, size);
+				memcpy(gcontext->pbuffer + offset, pcontext->data + offset, size);
+			}
+		} else {
+			pixman_region32_t bound;
+			pixman_region32_t damage;
+			pixman_box32_t *rects;
+			int i, n, l;
+
+			pixman_region32_init(&damage);
+			pixman_region32_init_rect(&bound,
+					floor(x * node->viewport.rx),
+					floor(y * node->viewport.ry),
+					ceil(width * node->viewport.rx),
+					ceil(height * node->viewport.ry));
+			pixman_region32_intersect(&damage, &node->damage, &bound);
+
+			rects = pixman_region32_rectangles(&damage, &n);
+
+			for (i = 0; i < n; i++) {
+				pixman_box32_t box = rects[i];
+
+				box.x1 = MIN(MAX(box.x1 * node->viewport.sx - 3, 0), node->viewport.width);
+				box.y1 = MIN(MAX(box.y1 * node->viewport.sy - 3, 0), node->viewport.height);
+				box.x2 = MAX(MIN(box.x2 * node->viewport.sx + 3, node->viewport.width), 0);
+				box.y2 = MAX(MIN(box.y2 * node->viewport.sy + 3, node->viewport.height), 0);
+
+				for (l = box.y1; l < box.y2; l++) {
+					uint32_t offset = (l * node->viewport.width + box.x1) * 4;
+					uint32_t size = (box.x2 - box.x1) * 4;
+
+					memcpy(gcontext->pbuffer + offset, pcontext->data + offset, size);
+				}
+			}
+
+			pixman_region32_fini(&bound);
+			pixman_region32_fini(&damage);
 		}
 	}
 #endif

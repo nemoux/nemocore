@@ -325,11 +325,11 @@ void nemoshow_divide_one(struct nemoshow *show)
 
 					while (nemopool_dispatch_done(pool, NULL) == 0);
 
+					nemotale_node_unmap(canvas->node);
+
 					nemoshow_canvas_put_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE);
 
 					NEMOSHOW_CANVAS_CC(canvas, damage)->setEmpty();
-
-					nemotale_node_unmap(canvas->node);
 
 					nemolist_remove(&canvas->link);
 					nemolist_init(&canvas->link);
