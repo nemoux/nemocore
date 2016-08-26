@@ -137,6 +137,7 @@ static inline void nemotale_node_damage_all(struct talenode *node)
 	pixman_region32_union_rect(&node->damage, &node->damage, 0, 0, node->geometry.width, node->geometry.height);
 	node->dirty = 1;
 	node->needs_flush = 1;
+	node->needs_full_upload = 1;
 }
 
 static inline void nemotale_node_damage_filter(struct talenode *node)
