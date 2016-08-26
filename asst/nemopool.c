@@ -208,7 +208,7 @@ int nemopool_dispatch_done(struct nemopool *pool, nemopool_dispatch_t dispatch)
 
 	pthread_mutex_unlock(&pool->lock);
 
-	if (data != NULL)
+	if (data != NULL && dispatch != NULL)
 		dispatch(data);
 
 	etime = time_current_msecs();

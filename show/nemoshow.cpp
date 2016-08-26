@@ -277,23 +277,6 @@ static void nemoshow_handle_canvas_render_task(void *arg)
 		canvas->dispatch_redraw(task->show, task->one);
 }
 
-static void nemoshow_handle_canvas_render_task_done(void *arg)
-{
-	struct showtask *task = (struct showtask *)arg;
-	struct nemoshow *show = task->show;
-	struct showcanvas *canvas = NEMOSHOW_CANVAS(task->one);
-
-	if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_TILING_STATE) == 0) {
-		nemotale_node_flush(canvas->node);
-#ifdef NEMOUX_WITH_OPENGL_UNPACK_SUBIMAGE
-	} else if (nemotale_node_needs_full_upload(canvas->node) == 0) {
-		nemotale_node_flush_tile(canvas->node, task->x, task->y, task->w, task->h);
-#endif
-	}
-
-	free(task);
-}
-
 void nemoshow_divide_one(struct nemoshow *show)
 {
 	struct showone *scene = show->scene;
@@ -362,20 +345,16 @@ void nemoshow_divide_one(struct nemoshow *show)
 		nemolist_insert_tail(&show->tiling_list, &canvas->link);
 	}
 
-	while (nemopool_dispatch_done(pool, nemoshow_handle_canvas_render_task_done) == 0);
+	while (nemopool_dispatch_done(pool, NULL) == 0);
 
 	nemolist_for_each_safe(canvas, ncanvas, &show->tiling_list, link) {
 		if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_TILING_STATE)) {
 			nemoshow_canvas_put_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE | NEMOSHOW_CANVAS_TILING_STATE);
 
 			NEMOSHOW_CANVAS_CC(canvas, damage)->setEmpty();
-
-#ifdef NEMOUX_WITH_OPENGL_UNPACK_SUBIMAGE
-			if (nemotale_node_needs_full_upload(canvas->node) != 0)
-				nemotale_node_flush(canvas->node);
-#endif
 		}
 
+		nemotale_node_flush(canvas->node);
 		nemotale_node_filter(canvas->node);
 
 		nemolist_remove(&canvas->link);

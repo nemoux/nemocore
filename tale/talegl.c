@@ -130,7 +130,6 @@ struct talenode *nemotale_node_create_gl(int32_t width, int32_t height)
 	node->dispatch_flush = nemotale_node_flush_gl_pbo;
 #elif NEMOUX_WITH_OPENGL_UNPACK_SUBIMAGE
 	node->dispatch_flush = nemotale_node_flush_gl_subimage;
-	node->dispatch_flush_tile = nemotale_node_flush_gl_tile;
 #else
 	node->dispatch_flush = nemotale_node_flush_gl;
 #endif
