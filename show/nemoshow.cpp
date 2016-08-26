@@ -52,7 +52,6 @@ struct nemoshow *nemoshow_create(void)
 	nemolist_init(&show->bounds_list);
 	nemolist_init(&show->canvas_list);
 	nemolist_init(&show->pipeline_list);
-	nemolist_init(&show->tiling_list);
 	nemolist_init(&show->transition_list);
 	nemolist_init(&show->transition_destroy_list);
 
@@ -100,7 +99,6 @@ void nemoshow_destroy(struct nemoshow *show)
 	nemolist_remove(&show->bounds_list);
 	nemolist_remove(&show->canvas_list);
 	nemolist_remove(&show->pipeline_list);
-	nemolist_remove(&show->tiling_list);
 	nemolist_remove(&show->transition_list);
 	nemolist_remove(&show->transition_destroy_list);
 
@@ -271,94 +269,75 @@ static void nemoshow_handle_canvas_render_task(void *arg)
 	struct showtask *task = (struct showtask *)arg;
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(task->one);
 
-	if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_TILING_STATE))
-		canvas->dispatch_replay(task->show, task->one, task->x, task->y, task->w, task->h);
-	else
-		canvas->dispatch_redraw(task->show, task->one);
+	canvas->dispatch_replay(task->show, task->one, task->x, task->y, task->w, task->h);
+
+	nemotale_node_copy(canvas->node, task->x, task->y, task->w, task->h);
 }
 
 void nemoshow_divide_one(struct nemoshow *show)
 {
 	struct showone *scene = show->scene;
 	struct nemopool *pool = show->pool;
-	struct showcanvas *canvas, *ncanvas;
+	struct showcanvas *canvas;
 	struct showtask *task;
 
 	if (scene == NULL || pool == NULL)
 		return;
 
-	nemolist_for_each_safe(canvas, ncanvas, &show->canvas_list, link) {
-		if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_POOLING_STATE) == 0)
-			continue;
-
-		if (canvas->viewport.width >= show->tilesize || canvas->viewport.height >= show->tilesize) {
-			if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE)) {
-				nemoshow_canvas_set_state(canvas, NEMOSHOW_CANVAS_TILING_STATE);
-			} else {
+	nemolist_for_each(canvas, &show->canvas_list, link) {
+		if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_POOLING_STATE) != 0) {
+			if (canvas->viewport.width >= show->tilesize || canvas->viewport.height >= show->tilesize) {
 				SkIRect box = NEMOSHOW_CANVAS_CC(canvas, damage)->getBounds();
 
-				if (box.width() >= show->tilesize || box.height() >= show->tilesize)
-					nemoshow_canvas_set_state(canvas, NEMOSHOW_CANVAS_TILING_STATE);
-			}
-		}
+				if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE) || box.width() >= show->tilesize || box.height() >= show->tilesize) {
+					int cw, ch;
+					int tr, tc;
+					int tw, th;
+					int i, j;
 
-		if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_TILING_STATE)) {
-			int cw, ch;
-			int tr, tc;
-			int tw, th;
-			int i, j;
+					cw = canvas->viewport.width;
+					ch = canvas->viewport.height;
+					tc = cw / show->tilesize + 1;
+					tr = ch / show->tilesize + 1;
+					tw = ceil(cw / tc);
+					th = ceil(ch / tr);
 
-			cw = canvas->viewport.width;
-			ch = canvas->viewport.height;
-			tc = cw / show->tilesize + 1;
-			tr = ch / show->tilesize + 1;
-			tw = ceil(cw / tc);
-			th = ceil(ch / tr);
+					canvas->dispatch_record(show, NEMOSHOW_CANVAS_ONE(canvas));
 
-			canvas->dispatch_record(show, NEMOSHOW_CANVAS_ONE(canvas));
+					nemotale_node_map(canvas->node);
 
-			for (i = 0; i < tr; i++) {
-				for (j = 0; j < tc; j++) {
-					if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE) ||
-							NEMOSHOW_CANVAS_CC(canvas, damage)->intersects(SkIRect::MakeXYWH(j * tw, i * th, tw, th))) {
-						task = (struct showtask *)malloc(sizeof(struct showtask));
-						task->show = show;
-						task->one = NEMOSHOW_CANVAS_ONE(canvas);
-						task->x = j * tw;
-						task->y = i * th;
-						task->w = tw;
-						task->h = th;
+					for (i = 0; i < tr; i++) {
+						for (j = 0; j < tc; j++) {
+							if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE) ||
+									NEMOSHOW_CANVAS_CC(canvas, damage)->intersects(SkIRect::MakeXYWH(j * tw, i * th, tw, th))) {
+								task = (struct showtask *)malloc(sizeof(struct showtask));
+								task->show = show;
+								task->one = NEMOSHOW_CANVAS_ONE(canvas);
+								task->x = j * tw;
+								task->y = i * th;
+								task->w = tw;
+								task->h = th;
 
-						nemopool_dispatch_task(pool, nemoshow_handle_canvas_render_task, task);
+								nemopool_dispatch_task(pool, nemoshow_handle_canvas_render_task, task);
+							}
+						}
 					}
+
+					while (nemopool_dispatch_done(pool, NULL) == 0);
+
+					nemoshow_canvas_put_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE);
+
+					NEMOSHOW_CANVAS_CC(canvas, damage)->setEmpty();
+
+					nemotale_node_unmap(canvas->node);
+
+					nemolist_remove(&canvas->link);
+					nemolist_init(&canvas->link);
+
+					return;
 				}
 			}
-		} else {
-			task = (struct showtask *)malloc(sizeof(struct showtask));
-			task->show = show;
-			task->one = NEMOSHOW_CANVAS_ONE(canvas);
-
-			nemopool_dispatch_task(pool, nemoshow_handle_canvas_render_task, task);
 		}
-
-		nemolist_remove(&canvas->link);
-		nemolist_insert_tail(&show->tiling_list, &canvas->link);
-	}
-
-	while (nemopool_dispatch_done(pool, NULL) == 0);
-
-	nemolist_for_each_safe(canvas, ncanvas, &show->tiling_list, link) {
-		if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_TILING_STATE)) {
-			nemoshow_canvas_put_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE | NEMOSHOW_CANVAS_TILING_STATE);
-
-			NEMOSHOW_CANVAS_CC(canvas, damage)->setEmpty();
-		}
-
-		nemotale_node_flush(canvas->node);
-		nemotale_node_filter(canvas->node);
-
-		nemolist_remove(&canvas->link);
-		nemolist_init(&canvas->link);
 	}
 }
 

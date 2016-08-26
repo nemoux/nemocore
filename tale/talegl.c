@@ -128,6 +128,9 @@ struct talenode *nemotale_node_create_gl(int32_t width, int32_t height)
 
 #ifdef NEMOUX_WITH_OPENGL_PBO
 	node->dispatch_flush = nemotale_node_flush_gl_pbo;
+	node->dispatch_map = nemotale_node_map_pbo;
+	node->dispatch_unmap = nemotale_node_unmap_pbo;
+	node->dispatch_copy = nemotale_node_copy_pbo;
 #elif NEMOUX_WITH_OPENGL_UNPACK_SUBIMAGE
 	node->dispatch_flush = nemotale_node_flush_gl_subimage;
 #else
@@ -990,6 +993,79 @@ int nemotale_node_flush_gl_pbo(struct talenode *node)
 
 		node->needs_flush = 0;
 		node->needs_filter = 1;
+	}
+#endif
+
+	return 0;
+}
+
+int nemotale_node_map_pbo(struct talenode *node)
+{
+#ifdef NEMOUX_WITH_OPENGL_PBO
+	struct talepmnode *pcontext = (struct talepmnode *)node->pmcontext;
+	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
+
+	if (pcontext != NULL) {
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, gcontext->pbo);
+
+		if (gcontext->pwidth != node->viewport.width || gcontext->pheight != node->viewport.height) {
+			glBufferData(GL_PIXEL_UNPACK_BUFFER, node->viewport.width * node->viewport.height * 4, NULL, GL_DYNAMIC_DRAW);
+
+			gcontext->pwidth = node->viewport.width;
+			gcontext->pheight = node->viewport.height;
+		}
+
+		gcontext->pbuffer = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, node->viewport.width * node->viewport.height * 4, GL_MAP_WRITE_BIT);
+	}
+#endif
+
+	return 0;
+}
+
+int nemotale_node_unmap_pbo(struct talenode *node)
+{
+#ifdef NEMOUX_WITH_OPENGL_PBO
+	struct talepmnode *pcontext = (struct talepmnode *)node->pmcontext;
+	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
+
+	if (pcontext != NULL) {
+		glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+
+		glBindTexture(GL_TEXTURE_2D, gcontext->texture);
+
+		glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
+		glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT,
+				node->viewport.width, node->viewport.height, 0,
+				GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+		node->needs_flush = 0;
+		node->needs_filter = 1;
+	}
+#endif
+
+	return 0;
+}
+
+int nemotale_node_copy_pbo(struct talenode *node, int32_t x, int32_t y, int32_t width, int32_t height)
+{
+#ifdef NEMOUX_WITH_OPENGL_PBO
+	struct talepmnode *pcontext = (struct talepmnode *)node->pmcontext;
+	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
+
+	if (pcontext != NULL) {
+		int l;
+
+		for (l = y; l < y + height; l++) {
+			uint32_t offset = (l * node->viewport.width + x) * 4;
+			uint32_t size = width * 4;
+
+			memcpy(gcontext->pbuffer + offset, pcontext->data + offset, size);
+		}
 	}
 #endif
 

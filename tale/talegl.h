@@ -34,6 +34,7 @@ struct taleglnode {
 	GLuint pbo;
 	GLuint pwidth;
 	GLuint pheight;
+	GLubyte *pbuffer;
 
 	GLuint ftexture;
 	GLuint fbo, dbo;
@@ -69,6 +70,9 @@ extern int nemotale_node_resize_gl(struct talenode *node, int32_t width, int32_t
 extern int nemotale_node_viewport_gl(struct talenode *node, int32_t width, int32_t height);
 extern int nemotale_node_flush_gl(struct talenode *node);
 extern int nemotale_node_flush_gl_pbo(struct talenode *node);
+extern int nemotale_node_map_pbo(struct talenode *node);
+extern int nemotale_node_unmap_pbo(struct talenode *node);
+extern int nemotale_node_copy_pbo(struct talenode *node, int32_t x, int32_t y, int32_t width, int32_t height);
 extern int nemotale_node_flush_gl_subimage(struct talenode *node);
 extern int nemotale_node_filter_gl(struct talenode *node);
 
