@@ -36,6 +36,15 @@ void nemoplay_shader_destroy(struct playshader *shader)
 	if (shader->texv > 0)
 		glDeleteTextures(1, &shader->texv);
 
+#ifdef NEMOUX_WITH_OPENGL_PBO
+	if (shader->pboy > 0)
+		glDeleteBuffers(1, &shader->pboy);
+	if (shader->pbou > 0)
+		glDeleteBuffers(1, &shader->pbou);
+	if (shader->pbov > 0)
+		glDeleteBuffers(1, &shader->pbov);
+#endif
+
 	if (shader->shaders[0] > 0)
 		glDeleteShader(shader->shaders[0]);
 	if (shader->shaders[1] > 0)
@@ -54,6 +63,15 @@ int nemoplay_shader_set_texture(struct playshader *shader, int32_t width, int32_
 		glDeleteTextures(1, &shader->texu);
 	if (shader->texv > 0)
 		glDeleteTextures(1, &shader->texv);
+
+#ifdef NEMOUX_WITH_OPENGL_PBO
+	if (shader->pboy > 0)
+		glDeleteBuffers(1, &shader->pboy);
+	if (shader->pbou > 0)
+		glDeleteBuffers(1, &shader->pbou);
+	if (shader->pbov > 0)
+		glDeleteBuffers(1, &shader->pbov);
+#endif
 
 	glGenTextures(1, &shader->texy);
 	glBindTexture(GL_TEXTURE_2D, shader->texy);
@@ -111,6 +129,23 @@ int nemoplay_shader_set_texture(struct playshader *shader, int32_t width, int32_
 			GL_UNSIGNED_BYTE,
 			NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
+
+#ifdef NEMOUX_WITH_OPENGL_PBO
+	glGenBuffers(1, &shader->pboy);
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, shader->pboy);
+	glBufferData(GL_PIXEL_UNPACK_BUFFER, width * height, NULL, GL_DYNAMIC_DRAW);
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+	glGenBuffers(1, &shader->pbou);
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, shader->pbou);
+	glBufferData(GL_PIXEL_UNPACK_BUFFER, width * height / 4, NULL, GL_DYNAMIC_DRAW);
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+	glGenBuffers(1, &shader->pbov);
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, shader->pbov);
+	glBufferData(GL_PIXEL_UNPACK_BUFFER, width * height / 4, NULL, GL_DYNAMIC_DRAW);
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+#endif
 
 	shader->texture_width = width;
 	shader->texture_height = height;
@@ -195,6 +230,75 @@ void nemoplay_shader_finish(struct playshader *shader)
 
 int nemoplay_shader_update(struct playshader *shader, uint8_t *y, uint8_t *u, uint8_t *v)
 {
+#ifdef NEMOUX_WITH_OPENGL_PBO
+	GLubyte *ptr;
+
+	glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
+	glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
+
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, shader->pboy);
+
+	ptr = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, shader->texture_width * shader->texture_height, GL_MAP_WRITE_BIT);
+	memcpy(ptr, y, shader->texture_width * shader->texture_height);
+	glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+
+	glBindTexture(GL_TEXTURE_2D, shader->texy);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, shader->texture_linesize);
+	glTexImage2D(GL_TEXTURE_2D,
+			0,
+			GL_LUMINANCE,
+			shader->texture_width,
+			shader->texture_height,
+			0,
+			GL_LUMINANCE,
+			GL_UNSIGNED_BYTE,
+			NULL);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, shader->pbou);
+
+	ptr = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, shader->texture_width * shader->texture_height / 4, GL_MAP_WRITE_BIT);
+	memcpy(ptr, u, shader->texture_width * shader->texture_height / 4);
+	glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+
+	glBindTexture(GL_TEXTURE_2D, shader->texu);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, shader->texture_linesize / 2);
+	glTexImage2D(GL_TEXTURE_2D,
+			0,
+			GL_LUMINANCE,
+			shader->texture_width / 2,
+			shader->texture_height / 2,
+			0,
+			GL_LUMINANCE,
+			GL_UNSIGNED_BYTE,
+			NULL);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, shader->pbov);
+
+	ptr = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, shader->texture_width * shader->texture_height / 4, GL_MAP_WRITE_BIT);
+	memcpy(ptr, v, shader->texture_width * shader->texture_height / 4);
+	glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+
+	glBindTexture(GL_TEXTURE_2D, shader->texv);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, shader->texture_linesize / 2);
+	glTexImage2D(GL_TEXTURE_2D,
+			0,
+			GL_LUMINANCE,
+			shader->texture_width / 2,
+			shader->texture_height / 2,
+			0,
+			GL_LUMINANCE,
+			GL_UNSIGNED_BYTE,
+			NULL);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+#else
 	glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
 	glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
 
@@ -230,55 +334,7 @@ int nemoplay_shader_update(struct playshader *shader, uint8_t *y, uint8_t *u, ui
 			GL_UNSIGNED_BYTE,
 			y);
 	glBindTexture(GL_TEXTURE_2D, 0);
-
-	return 0;
-}
-
-int nemoplay_shader_clear(struct playshader *shader)
-{
-	uint8_t y[(shader->texture_width) * (shader->texture_height)];
-	uint8_t u[(shader->texture_width / 2) * (shader->texture_height / 2)];
-	uint8_t v[(shader->texture_width / 2) * (shader->texture_height / 2)];
-
-	memset(y, 0, (shader->texture_width) * (shader->texture_height));
-	memset(u, 0, (shader->texture_width / 2) * (shader->texture_height / 2));
-	memset(v, 0, (shader->texture_width / 2) * (shader->texture_height / 2));
-
-	glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
-	glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
-
-	glBindTexture(GL_TEXTURE_2D, shader->texv);
-	glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, shader->texture_width / 2);
-	glTexSubImage2D(GL_TEXTURE_2D, 0,
-			0, 0,
-			shader->texture_width / 2,
-			shader->texture_height / 2,
-			GL_LUMINANCE,
-			GL_UNSIGNED_BYTE,
-			v);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	glBindTexture(GL_TEXTURE_2D, shader->texu);
-	glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, shader->texture_width / 2);
-	glTexSubImage2D(GL_TEXTURE_2D, 0,
-			0, 0,
-			shader->texture_width / 2,
-			shader->texture_height / 2,
-			GL_LUMINANCE,
-			GL_UNSIGNED_BYTE,
-			u);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	glBindTexture(GL_TEXTURE_2D, shader->texy);
-	glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, shader->texture_width);
-	glTexSubImage2D(GL_TEXTURE_2D, 0,
-			0, 0,
-			shader->texture_width,
-			shader->texture_height,
-			GL_LUMINANCE,
-			GL_UNSIGNED_BYTE,
-			y);
-	glBindTexture(GL_TEXTURE_2D, 0);
+#endif
 
 	return 0;
 }
