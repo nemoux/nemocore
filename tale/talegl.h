@@ -31,6 +31,9 @@ NEMO_BEGIN_EXTERN_C
 
 struct taleglnode {
 	GLuint texture;
+	GLuint pbo;
+	GLuint pwidth;
+	GLuint pheight;
 
 	GLuint ftexture;
 	GLuint fbo, dbo;

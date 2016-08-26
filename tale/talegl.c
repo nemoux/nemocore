@@ -68,6 +68,10 @@ static void nemotale_node_handle_destroy_signal(struct nemolistener *listener, v
 
 	glDeleteTextures(1, &context->texture);
 
+#ifdef NEMOUX_WITH_OPENGL_PBO
+	glDeleteBuffers(1, &context->pbo);
+#endif
+
 	if (context->ftexture > 0)
 		glDeleteTextures(1, &context->ftexture);
 	if (context->fbo > 0)
@@ -104,6 +108,16 @@ struct talenode *nemotale_node_create_gl(int32_t width, int32_t height)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
+#ifdef NEMOUX_WITH_OPENGL_PBO
+	glGenBuffers(1, &context->pbo);
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, context->pbo);
+	glBufferData(GL_PIXEL_UNPACK_BUFFER, width * height * 4, NULL, GL_DYNAMIC_DRAW);
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+	context->pwidth = width;
+	context->pheight = height;
+#endif
+
 	nemotale_node_prepare(node);
 
 	node->dirty = 1;
@@ -112,7 +126,9 @@ struct talenode *nemotale_node_create_gl(int32_t width, int32_t height)
 	node->viewport.width = width;
 	node->viewport.height = height;
 
-#ifdef NEMOUX_WITH_OPENGL_UNPACK_SUBIMAGE
+#ifdef NEMOUX_WITH_OPENGL_PBO
+	node->dispatch_flush = nemotale_node_flush_gl_pbo;
+#elif NEMOUX_WITH_OPENGL_UNPACK_SUBIMAGE
 	node->dispatch_flush = nemotale_node_flush_gl_subimage;
 	node->dispatch_flush_tile = nemotale_node_flush_gl_tile;
 #else
@@ -156,6 +172,16 @@ int nemotale_node_prepare_gl(struct talenode *node)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
+#ifdef NEMOUX_WITH_OPENGL_PBO
+		glGenBuffers(1, &gcontext->pbo);
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, gcontext->pbo);
+		glBufferData(GL_PIXEL_UNPACK_BUFFER, node->viewport.width * node->viewport.height * 4, NULL, GL_DYNAMIC_DRAW);
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+		gcontext->pwidth = node->viewport.width;
+		gcontext->pheight = node->viewport.height;
+#endif
+
 		node->glcontext = gcontext;
 
 		gcontext->destroy_listener.notify = nemotale_node_handle_destroy_signal;
@@ -183,6 +209,15 @@ int nemotale_node_resize_gl(struct talenode *node, int32_t width, int32_t height
 			glBindTexture(GL_TEXTURE_2D, context->texture);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 			glBindTexture(GL_TEXTURE_2D, 0);
+
+#ifdef NEMOUX_WITH_OPENGL_PBO
+			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, context->pbo);
+			glBufferData(GL_PIXEL_UNPACK_BUFFER, width * height * 4, NULL, GL_DYNAMIC_DRAW);
+			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+			context->pwidth = width;
+			context->pheight = height;
+#endif
 
 			node->viewport.width = width;
 			node->viewport.height = height;
@@ -225,6 +260,15 @@ int nemotale_node_viewport_gl(struct talenode *node, int32_t width, int32_t heig
 	glBindTexture(GL_TEXTURE_2D, context->texture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
+
+#ifdef NEMOUX_WITH_OPENGL_PBO
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, context->pbo);
+	glBufferData(GL_PIXEL_UNPACK_BUFFER, width * height * 4, NULL, GL_DYNAMIC_DRAW);
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+	context->pwidth = width;
+	context->pheight = height;
+#endif
 
 	return 0;
 }
@@ -889,23 +933,56 @@ int nemotale_node_flush_gl_pbo(struct talenode *node)
 	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
 
 	if (pcontext != NULL && node->needs_flush != 0) {
-		GLuint pbo;
 		GLubyte *ptr;
 
-		glGenBuffers(1, &pbo);
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, gcontext->pbo);
 
-		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo);
-		glBufferData(GL_PIXEL_UNPACK_BUFFER, node->viewport.width * node->viewport.height * 4, NULL, GL_STATIC_DRAW);
+		if (gcontext->pwidth != node->viewport.width || gcontext->pheight != node->viewport.height) {
+			glBufferData(GL_PIXEL_UNPACK_BUFFER, node->viewport.width * node->viewport.height * 4, NULL, GL_DYNAMIC_DRAW);
 
-		ptr = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, node->viewport.width * node->viewport.height * 4, GL_MAP_WRITE_BIT);
-		memcpy(ptr, pcontext->data, node->viewport.width * node->viewport.height * 4);
+			gcontext->pwidth = node->viewport.width;
+			gcontext->pheight = node->viewport.height;
+
+			node->needs_full_upload = 1;
+		}
+
+		ptr = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, node->viewport.width * node->viewport.height * 4, GL_MAP_WRITE_BIT | GL_MAP_READ_BIT);
+
+		if (node->needs_full_upload != 0) {
+			memcpy(ptr, pcontext->data, node->viewport.width * node->viewport.height * 4);
+
+			node->needs_full_upload = 0;
+		} else {
+			pixman_box32_t *rects;
+			int i, n, x, y;
+
+			rects = pixman_region32_rectangles(&node->damage, &n);
+
+			for (i = 0; i < n; i++) {
+				pixman_box32_t box = rects[i];
+
+				box.x1 = MAX(box.x1 * node->viewport.sx - 1, 0);
+				box.y1 = MAX(box.y1 * node->viewport.sy - 1, 0);
+				box.x2 = MIN(box.x2 * node->viewport.sx + 1, node->viewport.width);
+				box.y2 = MIN(box.y2 * node->viewport.sy + 1, node->viewport.height);
+
+				for (y = box.y1; y < box.y2; y++) {
+					uint32_t *s = (uint32_t *)pcontext->data + y * node->viewport.width;
+					uint32_t *d = (uint32_t *)ptr + y * node->viewport.width;
+
+					for (x = box.x1; x < box.x2; x++) {
+						d[x] = s[x];
+					}
+				}
+			}
+		}
+
 		glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 
 		glBindTexture(GL_TEXTURE_2D, gcontext->texture);
 
 		glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
 		glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
-
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT,
 				node->viewport.width, node->viewport.height, 0,
 				GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
@@ -914,11 +991,8 @@ int nemotale_node_flush_gl_pbo(struct talenode *node)
 
 		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
-		glDeleteBuffers(1, &pbo);
-
 		node->needs_flush = 0;
 		node->needs_filter = 1;
-		node->needs_full_upload = 0;
 	}
 #endif
 
@@ -938,7 +1012,6 @@ int nemotale_node_flush_gl_subimage(struct talenode *node)
 		if (node->needs_full_upload != 0) {
 			glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
 			glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
-
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT,
 					node->viewport.width, node->viewport.height, 0,
 					GL_BGRA_EXT, GL_UNSIGNED_BYTE, pcontext->data);
@@ -950,36 +1023,19 @@ int nemotale_node_flush_gl_subimage(struct talenode *node)
 
 			rects = pixman_region32_rectangles(&node->damage, &n);
 
-			if (node->viewport.enable == 0) {
-				for (i = 0; i < n; i++) {
-					pixman_box32_t box = rects[i];
+			for (i = 0; i < n; i++) {
+				pixman_box32_t box = rects[i];
 
-					box.x1 = MAX(box.x1, 0);
-					box.y1 = MAX(box.y1, 0);
-					box.x2 = MIN(box.x2, node->viewport.width);
-					box.y2 = MIN(box.y2, node->viewport.height);
+				box.x1 = MAX(box.x1 * node->viewport.sx - 1, 0);
+				box.y1 = MAX(box.y1 * node->viewport.sy - 1, 0);
+				box.x2 = MIN(box.x2 * node->viewport.sx + 1, node->viewport.width);
+				box.y2 = MIN(box.y2 * node->viewport.sy + 1, node->viewport.height);
 
-					glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, box.x1);
-					glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, box.y1);
-					glTexSubImage2D(GL_TEXTURE_2D, 0, box.x1, box.y1,
-							box.x2 - box.x1, box.y2 - box.y1,
-							GL_BGRA_EXT, GL_UNSIGNED_BYTE, pcontext->data);
-				}
-			} else {
-				for (i = 0; i < n; i++) {
-					pixman_box32_t box = rects[i];
-
-					box.x1 = MAX(box.x1 * node->viewport.sx - 1, 0);
-					box.y1 = MAX(box.y1 * node->viewport.sy - 1, 0);
-					box.x2 = MIN(box.x2 * node->viewport.sx + 1, node->viewport.width);
-					box.y2 = MIN(box.y2 * node->viewport.sy + 1, node->viewport.height);
-
-					glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, box.x1);
-					glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, box.y1);
-					glTexSubImage2D(GL_TEXTURE_2D, 0, box.x1, box.y1,
-							box.x2 - box.x1, box.y2 - box.y1,
-							GL_BGRA_EXT, GL_UNSIGNED_BYTE, pcontext->data);
-				}
+				glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, box.x1);
+				glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, box.y1);
+				glTexSubImage2D(GL_TEXTURE_2D, 0, box.x1, box.y1,
+						box.x2 - box.x1, box.y2 - box.y1,
+						GL_BGRA_EXT, GL_UNSIGNED_BYTE, pcontext->data);
 			}
 		}
 
@@ -1006,7 +1062,6 @@ int nemotale_node_flush_gl_tile(struct talenode *node, int32_t x, int32_t y, int
 		glBindTexture(GL_TEXTURE_2D, gcontext->texture);
 
 		glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, node->viewport.width);
-
 		glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, x1);
 		glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, y1);
 		glTexSubImage2D(GL_TEXTURE_2D, 0,

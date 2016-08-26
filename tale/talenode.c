@@ -62,6 +62,11 @@ int nemotale_node_prepare(struct talenode *node)
 	node->transform.dirty = 1;
 	node->transform.custom = 0;
 
+	node->viewport.sx = 1.0f;
+	node->viewport.sy = 1.0f;
+	node->viewport.rx = 1.0f;
+	node->viewport.ry = 1.0f;
+
 	node->alpha = 1.0f;
 
 	node->has_smooth = 1;
