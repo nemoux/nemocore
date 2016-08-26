@@ -945,7 +945,7 @@ int nemotale_node_flush_gl_pbo(struct talenode *node)
 			node->needs_full_upload = 1;
 		}
 
-		ptr = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, node->viewport.width * node->viewport.height * 4, GL_MAP_WRITE_BIT | GL_MAP_READ_BIT);
+		ptr = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, node->viewport.width * node->viewport.height * 4, GL_MAP_WRITE_BIT);
 
 		if (node->needs_full_upload != 0) {
 			memcpy(ptr, pcontext->data, node->viewport.width * node->viewport.height * 4);
@@ -953,25 +953,23 @@ int nemotale_node_flush_gl_pbo(struct talenode *node)
 			node->needs_full_upload = 0;
 		} else {
 			pixman_box32_t *rects;
-			int i, n, x, y;
+			int i, n, l;
 
 			rects = pixman_region32_rectangles(&node->damage, &n);
 
 			for (i = 0; i < n; i++) {
 				pixman_box32_t box = rects[i];
 
-				box.x1 = MAX(box.x1 * node->viewport.sx - 1, 0);
-				box.y1 = MAX(box.y1 * node->viewport.sy - 1, 0);
-				box.x2 = MIN(box.x2 * node->viewport.sx + 1, node->viewport.width);
-				box.y2 = MIN(box.y2 * node->viewport.sy + 1, node->viewport.height);
+				box.x1 = MIN(MAX(box.x1 * node->viewport.sx - 1, 0), node->viewport.width);
+				box.y1 = MIN(MAX(box.y1 * node->viewport.sy - 1, 0), node->viewport.height);
+				box.x2 = MAX(MIN(box.x2 * node->viewport.sx + 1, node->viewport.width), 0);
+				box.y2 = MAX(MIN(box.y2 * node->viewport.sy + 1, node->viewport.height), 0);
 
-				for (y = box.y1; y < box.y2; y++) {
-					uint32_t *s = (uint32_t *)pcontext->data + y * node->viewport.width;
-					uint32_t *d = (uint32_t *)ptr + y * node->viewport.width;
+				for (l = box.y1; l < box.y2; l++) {
+					uint32_t offset = (l * node->viewport.width + box.x1) * 4;
+					uint32_t size = (box.x2 - box.x1) * 4;
 
-					for (x = box.x1; x < box.x2; x++) {
-						d[x] = s[x];
-					}
+					memcpy(ptr + offset, pcontext->data + offset, size);
 				}
 			}
 		}
@@ -1025,10 +1023,10 @@ int nemotale_node_flush_gl_subimage(struct talenode *node)
 			for (i = 0; i < n; i++) {
 				pixman_box32_t box = rects[i];
 
-				box.x1 = MAX(box.x1 * node->viewport.sx - 1, 0);
-				box.y1 = MAX(box.y1 * node->viewport.sy - 1, 0);
-				box.x2 = MIN(box.x2 * node->viewport.sx + 1, node->viewport.width);
-				box.y2 = MIN(box.y2 * node->viewport.sy + 1, node->viewport.height);
+				box.x1 = MIN(MAX(box.x1 * node->viewport.sx - 1, 0), node->viewport.width);
+				box.y1 = MIN(MAX(box.y1 * node->viewport.sy - 1, 0), node->viewport.height);
+				box.x2 = MAX(MIN(box.x2 * node->viewport.sx + 1, node->viewport.width), 0);
+				box.y2 = MAX(MIN(box.y2 * node->viewport.sy + 1, node->viewport.height), 0);
 
 				glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, box.x1);
 				glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, box.y1);
@@ -1042,32 +1040,6 @@ int nemotale_node_flush_gl_subimage(struct talenode *node)
 
 		node->needs_flush = 0;
 		node->needs_filter = 1;
-	}
-
-	return 0;
-}
-
-int nemotale_node_flush_gl_tile(struct talenode *node, int32_t x, int32_t y, int32_t width, int32_t height)
-{
-	struct talepmnode *pcontext = (struct talepmnode *)node->pmcontext;
-	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
-
-	if (pcontext != NULL) {
-		int32_t x1 = MAX(x, 0);
-		int32_t y1 = MAX(y, 0);
-		int32_t x2 = MIN(x + width, node->viewport.width);
-		int32_t y2 = MIN(y + height, node->viewport.height);
-
-		glBindTexture(GL_TEXTURE_2D, gcontext->texture);
-
-		glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, node->viewport.width);
-		glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, x1);
-		glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, y1);
-		glTexSubImage2D(GL_TEXTURE_2D, 0,
-				x1, y1, x2 - x1, y2 - y1,
-				GL_BGRA_EXT, GL_UNSIGNED_BYTE, pcontext->data);
-
-		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
 	return 0;
