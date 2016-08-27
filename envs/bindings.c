@@ -180,7 +180,7 @@ void nemoenvs_handle_left_button(struct nemocompz *compz, struct nemopointer *po
 			}
 		}
 
-		if (pointer->keyboard != NULL && nemoxkb_has_modifiers_state(pointer->keyboard->xkb, MODIFIER_SHIFT)) {
+		if (pointer->keyboard != NULL && nemoxkb_has_modifiers_state(pointer->keyboard->xkb, MODIFIER_CTRL)) {
 			if (pointer->focus != NULL && pointer->focus->canvas != NULL) {
 				struct nemocanvas *canvas = pointer->focus->canvas;
 				pixman_image_t *image;
@@ -204,7 +204,7 @@ void nemoenvs_handle_left_button(struct nemocompz *compz, struct nemopointer *po
 
 				pixman_image_unref(image);
 			}
-		} else if (pointer->keyboard != NULL && nemoxkb_has_modifiers_state(pointer->keyboard->xkb, MODIFIER_CTRL)) {
+		} else if (pointer->keyboard != NULL && nemoxkb_has_modifiers_state(pointer->keyboard->xkb, MODIFIER_ALT)) {
 			struct nemoscreen *screen;
 
 			screen = nemocompz_get_screen_on(compz, pointer->x, pointer->y);

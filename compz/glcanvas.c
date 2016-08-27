@@ -415,25 +415,21 @@ int glrenderer_read_canvas(struct nemorenderer *base, struct nemocanvas *canvas,
 			return -1;
 	}
 
-#if	0
 	glGenBuffers(1, &pbo);
 	glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
 	glBufferData(GL_PIXEL_PACK_BUFFER, glcontent->pitch * glcontent->height * 4, NULL, GL_STREAM_DRAW);
-	glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 
 	glBindTexture(GL_TEXTURE_2D, glcontent->textures[0]);
-	glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
 
-	ptr = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
+	ptr = glMapBufferRange(GL_PIXEL_PACK_BUFFER, 0, glcontent->pitch * glcontent->height * 4, GL_MAP_READ_BIT);
 	if (ptr != NULL)
 		memcpy(pixels, ptr, glcontent->pitch * glcontent->height * 4);
 	glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
 
-	glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
+	glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 	glDeleteBuffers(1, &pbo);
-#endif
 
 	return 0;
 }
