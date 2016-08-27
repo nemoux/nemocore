@@ -984,6 +984,8 @@ int nemotale_node_flush_gl_pbo(struct talenode *node)
 
 		glBindTexture(GL_TEXTURE_2D, gcontext->texture);
 
+		glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, node->viewport.width);
+
 		glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
 		glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT,
@@ -1035,6 +1037,8 @@ int nemotale_node_unmap_pbo(struct talenode *node)
 		glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 
 		glBindTexture(GL_TEXTURE_2D, gcontext->texture);
+
+		glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, node->viewport.width);
 
 		glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
 		glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
