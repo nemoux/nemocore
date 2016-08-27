@@ -31,6 +31,8 @@ static int glrenderer_read_pixels(struct nemorenderer *base, struct nemoscreen *
 	struct glrenderer *renderer = (struct glrenderer *)container_of(base, struct glrenderer, base);
 	struct glsurface *surface = (struct glsurface *)screen->gcontext;
 	GLenum glformat;
+	GLuint pbo;
+	void *ptr;
 
 	if (eglMakeCurrent(renderer->egl_display, surface->egl_surface, surface->egl_surface, renderer->egl_context) == EGL_FALSE) {
 		nemolog_error("GLRENDERER", "failed to make egl context current\n");
@@ -50,8 +52,19 @@ static int glrenderer_read_pixels(struct nemorenderer *base, struct nemoscreen *
 			return -1;
 	}
 
-	glPixelStorei(GL_PACK_ALIGNMENT, 1);
-	glReadPixels(x, y, width, height, glformat, GL_UNSIGNED_BYTE, pixels);
+	glGenBuffers(1, &pbo);
+	glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
+	glBufferData(GL_PIXEL_PACK_BUFFER, width * height * 4, NULL, GL_STATIC_DRAW);
+
+	glReadPixels(x, y, width, height, glformat, GL_UNSIGNED_BYTE, NULL);
+
+	ptr = glMapBufferRange(GL_PIXEL_PACK_BUFFER, 0, width * height * 4, GL_MAP_READ_BIT);
+	if (ptr != NULL)
+		memcpy(pixels, ptr, width * height * 4);
+	glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
+
+	glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+	glDeleteBuffers(1, &pbo);
 
 	return 0;
 }
