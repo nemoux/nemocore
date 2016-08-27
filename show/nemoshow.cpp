@@ -278,13 +278,13 @@ void nemoshow_divide_one(struct nemoshow *show)
 {
 	struct showone *scene = show->scene;
 	struct nemopool *pool = show->pool;
-	struct showcanvas *canvas;
+	struct showcanvas *canvas, *ncanvas;
 	struct showtask *task;
 
 	if (scene == NULL || pool == NULL)
 		return;
 
-	nemolist_for_each(canvas, &show->canvas_list, link) {
+	nemolist_for_each_safe(canvas, ncanvas, &show->canvas_list, link) {
 		if ((nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_POOLING_STATE) != 0) &&
 				(canvas->viewport.width >= show->tilesize || canvas->viewport.height >= show->tilesize)) {
 			SkIRect box = NEMOSHOW_CANVAS_CC(canvas, damage)->getBounds();
@@ -333,8 +333,6 @@ void nemoshow_divide_one(struct nemoshow *show)
 
 				nemolist_remove(&canvas->link);
 				nemolist_init(&canvas->link);
-
-				return;
 			}
 		}
 	}
