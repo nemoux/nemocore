@@ -80,6 +80,7 @@ extern int nemotale_node_copy_subimage(struct talenode *node, int32_t x, int32_t
 extern int nemotale_node_filter_gl(struct talenode *node);
 
 extern int nemotale_node_set_filter(struct talenode *node, const char *shader);
+extern int nemotale_node_set_pbo(struct talenode *node, int has_pbo);
 
 extern struct talenode *nemotale_node_create_gl(int32_t width, int32_t height);
 extern int nemotale_node_prepare_gl(struct talenode *node);

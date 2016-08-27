@@ -80,6 +80,7 @@ int nemotale_node_prepare(struct talenode *node)
 	node->alpha = 1.0f;
 
 	node->has_smooth = 1;
+	node->has_pbo = 1;
 
 	node->dispatch_flush = nemotale_node_flush_none;
 	node->dispatch_filter = nemotale_node_filter_none;

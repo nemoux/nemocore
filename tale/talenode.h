@@ -95,6 +95,7 @@ struct talenode {
 
 	int has_filter;
 	int has_smooth;
+	int has_pbo;
 };
 
 #define	NTNODE_OBJECT(node)						(&node->object)

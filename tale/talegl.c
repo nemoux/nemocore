@@ -1263,3 +1263,30 @@ int nemotale_node_set_filter(struct talenode *node, const char *shader)
 
 	return 0;
 }
+
+int nemotale_node_set_pbo(struct talenode *node, int has_pbo)
+{
+	node->has_pbo = has_pbo;
+
+#ifdef NEMOUX_WITH_OPENGL_PBO
+	if (has_pbo != 0) {
+		node->dispatch_flush = nemotale_node_flush_gl_pbo;
+		node->dispatch_map = nemotale_node_map_pbo;
+		node->dispatch_unmap = nemotale_node_unmap_pbo;
+		node->dispatch_copy = nemotale_node_copy_pbo;
+
+		return 0;
+	}
+#endif
+
+#ifdef NEMOUX_WITH_OPENGL_UNPACK_SUBIMAGE
+	node->dispatch_flush = nemotale_node_flush_gl_subimage;
+	node->dispatch_map = nemotale_node_map_subimage;
+	node->dispatch_unmap = nemotale_node_unmap_subimage;
+	node->dispatch_copy = nemotale_node_copy_subimage;
+#else
+	node->dispatch_flush = nemotale_node_flush_gl;
+#endif
+
+	return 0;
+}

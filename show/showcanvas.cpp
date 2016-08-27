@@ -860,6 +860,15 @@ int nemoshow_canvas_set_smooth(struct showone *one, int has_smooth)
 	return 0;
 }
 
+int nemoshow_canvas_set_pbo(struct showone *one, int has_pbo)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	nemotale_node_set_pbo(canvas->node, has_pbo);
+
+	return 0;
+}
+
 static void nemoshow_canvas_dirty(struct showone *one)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
