@@ -673,6 +673,7 @@ void nemoshow_canvas_finish_vector(struct nemoshow *show, struct showone *one)
 	NEMOSHOW_CANVAS_CC(canvas, bitmap) = NULL;
 
 	nemotale_node_unmap(canvas->node);
+	nemotale_node_flush(canvas->node);
 }
 
 void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
