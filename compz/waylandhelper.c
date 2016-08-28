@@ -22,8 +22,23 @@ uint32_t wayland_execute_path(const char *path, char *const argv[], char *const 
 	if (pid == -1)
 		return 0;
 
-	if (pid > 0)
+	if (pid > 0) {
+		int i;
+
+		nemolog_message("EXEC", "execute path(%s) pid(%d)\n", path, pid);
+
+		if (argv != NULL) {
+			for (i = 0; argv[i] != NULL; i++)
+				nemolog_message("EXEC", "  args[%2d] %s\n", i, argv[i]);
+		}
+
+		if (envp != NULL) {
+			for (i = 0; envp[i] != NULL; i++)
+				nemolog_message("EXEC", "  envp[%2d] %s\n", i, envp[i]);
+		}
+
 		return pid;
+	}
 
 	sigfillset(&allsigs);
 	sigprocmask(SIG_UNBLOCK, &allsigs, NULL);

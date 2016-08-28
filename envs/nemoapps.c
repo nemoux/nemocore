@@ -228,6 +228,8 @@ int nemoenvs_respawn_app(struct nemoenvs *envs, pid_t pid)
 
 	nemolist_for_each_safe(app, napp, &envs->app_list, link) {
 		if (app->pid == pid) {
+			nemolog_warning("ENVS", "respawn app(%s) pid(%d)!\n", app->id, pid);
+
 			one = nemoitem_search_attr(envs->configs, NULL, "id", app->id);
 			if (one != NULL) {
 				if (nemoitem_one_has_path(one, "/nemoshell/background") != 0) {

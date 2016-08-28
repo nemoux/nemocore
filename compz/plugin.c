@@ -19,7 +19,7 @@ int nemocompz_load_plugin(struct nemocompz *compz, const char *path, const char 
 	void *handle;
 	char *err;
 
-	nemolog_message("PLUGIN", "load '%s' plugin...\n", path);
+	nemolog_message("PLUGIN", "load '%s' plugin\n", path);
 
 	handle = dlopen(path, RTLD_LAZY);
 	if (handle == NULL) {

@@ -688,7 +688,7 @@ static int nemoshell_dispatch_frame_timeout(void *data)
 			sys_get_memory_usage());
 
 	wl_list_for_each(screen, &compz->screen_list, link) {
-		nemolog_message("SCREEN", "[%d:%d] %d frames...\n", screen->node->nodeid, screen->screenid, screen->frame_count);
+		nemolog_message("SCREEN", "[%d:%d] %d frames\n", screen->node->nodeid, screen->screenid, screen->frame_count);
 
 		screen->frame_count = 0;
 	}
@@ -696,7 +696,7 @@ static int nemoshell_dispatch_frame_timeout(void *data)
 	wl_list_for_each(canvas, &compz->canvas_list, link) {
 		bin = nemoshell_get_bin(canvas);
 		if (bin != NULL) {
-			nemolog_message("CANVAS", "[%s:%d] %d frames, %d(%f) damages...\n",
+			nemolog_message("CANVAS", "[%s:%d] %d frames, %d(%f) damages\n",
 					bin->name == NULL ? "NONAME" : bin->name,
 					bin->pid,
 					canvas->frame_count,

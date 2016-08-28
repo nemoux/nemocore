@@ -861,7 +861,7 @@ void nemotouch_dump_touchpoint(struct nemotouch *touch)
 {
 	struct touchpoint *tp;
 
-	nemolog_message("TOUCH", "dump '%s' touch's taps...\n", touch->node->devnode);
+	nemolog_message("TOUCH", "dump '%s' touch's taps\n", touch->node->devnode);
 
 	wl_list_for_each(tp, &touch->touchpoint_list, link) {
 		nemolog_message("TOUCH", "[%llu:%llu] %f %f\n", tp->id, tp->gid, tp->x, tp->y);

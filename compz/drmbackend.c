@@ -165,8 +165,6 @@ struct nemobackend *drmbackend_create(struct nemocompz *compz, const char *args)
 {
 	struct drmbackend *drm;
 
-	nemolog_message("DRM", "create drm backend\n");
-
 	drm = (struct drmbackend *)malloc(sizeof(struct drmbackend));
 	if (drm == NULL)
 		return NULL;
