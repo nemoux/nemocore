@@ -296,17 +296,13 @@ void nemoshow_divide_one(struct nemoshow *show)
 			SkIRect box = NEMOSHOW_CANVAS_CC(canvas, damage)->getBounds();
 
 			if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE) || box.width() >= show->tilesize || box.height() >= show->tilesize) {
-				int cw, ch;
-				int tr, tc;
-				int tw, th;
+				int cw = canvas->viewport.width;
+				int ch = canvas->viewport.height;
+				int tc = cw / show->tilesize + 1;
+				int tr = ch / show->tilesize + 1;
+				int tw = ceil(cw / tc) + 1;
+				int th = ceil(ch / tr) + 1;
 				int i, j;
-
-				cw = canvas->viewport.width;
-				ch = canvas->viewport.height;
-				tc = cw / show->tilesize + 1;
-				tr = ch / show->tilesize + 1;
-				tw = ceil(cw / tc);
-				th = ceil(ch / tr);
 
 				canvas->dispatch_record(show, NEMOSHOW_CANVAS_ONE(canvas));
 
