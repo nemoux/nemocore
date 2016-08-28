@@ -40,6 +40,7 @@ struct showone *nemoshow_canvas_create(void)
 	memset(canvas, 0, sizeof(struct showcanvas));
 
 	canvas->cc = new showcanvas_t;
+	NEMOSHOW_CANVAS_CC(canvas, bitmap) = NULL;
 	NEMOSHOW_CANVAS_CC(canvas, damage) = NULL;
 	NEMOSHOW_CANVAS_CC(canvas, picture) = NULL;
 
@@ -53,6 +54,8 @@ struct showone *nemoshow_canvas_create(void)
 
 	canvas->alpha = 1.0f;
 
+	canvas->prepare_render = nemoshow_canvas_prepare_none;
+	canvas->finish_render = nemoshow_canvas_finish_none;
 	canvas->dispatch_redraw = nemoshow_canvas_render_none;
 	canvas->dispatch_record = NULL;
 	canvas->dispatch_replay = NULL;
@@ -105,6 +108,8 @@ void nemoshow_canvas_destroy(struct showone *one)
 
 	if (NEMOSHOW_CANVAS_CC(canvas, damage) != NULL)
 		delete NEMOSHOW_CANVAS_CC(canvas, damage);
+	if (NEMOSHOW_CANVAS_CC(canvas, bitmap) != NULL)
+		delete NEMOSHOW_CANVAS_CC(canvas, bitmap);
 
 	delete static_cast<showcanvas_t *>(canvas->cc);
 
@@ -169,6 +174,8 @@ int nemoshow_canvas_set_type(struct showone *one, int type)
 
 		NEMOSHOW_CANVAS_CC(canvas, damage) = new SkRegion;
 
+		canvas->prepare_render = nemoshow_canvas_prepare_vector;
+		canvas->finish_render = nemoshow_canvas_finish_vector;
 		canvas->dispatch_redraw = nemoshow_canvas_render_vector;
 		canvas->dispatch_record = nemoshow_canvas_record_vector;
 		canvas->dispatch_replay = nemoshow_canvas_replay_vector;
@@ -641,17 +648,31 @@ static inline void nemoshow_canvas_render_one(struct showcanvas *canvas, SkCanva
 	}
 }
 
+int nemoshow_canvas_prepare_vector(struct nemoshow *show, struct showone *one)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	NEMOSHOW_CANVAS_CC(canvas, bitmap) = new SkBitmap;
+	NEMOSHOW_CANVAS_CC(canvas, bitmap)->setInfo(
+			SkImageInfo::Make(canvas->viewport.width, canvas->viewport.height, kN32_SkColorType, kPremul_SkAlphaType));
+	NEMOSHOW_CANVAS_CC(canvas, bitmap)->setPixels(
+			nemotale_node_get_buffer(canvas->node));
+
+	return 0;
+}
+
+void nemoshow_canvas_finish_vector(struct nemoshow *show, struct showone *one)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	delete NEMOSHOW_CANVAS_CC(canvas, bitmap);
+}
+
 void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 	struct showone *child;
-
-	SkBitmap _bitmap;
-	_bitmap.setInfo(
-			SkImageInfo::Make(canvas->viewport.width, canvas->viewport.height, kN32_SkColorType, kPremul_SkAlphaType));
-	_bitmap.setPixels(
-			nemotale_node_get_buffer(canvas->node));
-	SkBitmapDevice _device(_bitmap);
+	SkBitmapDevice _device(*NEMOSHOW_CANVAS_CC(canvas, bitmap));
 	SkCanvas _canvas(&_device);
 
 	if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE)) {
@@ -698,20 +719,14 @@ void nemoshow_canvas_record_vector(struct nemoshow *show, struct showone *one)
 void nemoshow_canvas_replay_vector(struct nemoshow *show, struct showone *one, int32_t x, int32_t y, int32_t width, int32_t height)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+	SkBitmapDevice _device(*NEMOSHOW_CANVAS_CC(canvas, bitmap));
+	SkCanvas _canvas(&_device);
 	SkRegion region;
 
 	if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE))
 		region.setRect(SkIRect::MakeXYWH(x, y, width, height));
 	else
 		region.op(*NEMOSHOW_CANVAS_CC(canvas, damage), SkIRect::MakeXYWH(x, y, width, height), SkRegion::kIntersect_Op);
-
-	SkBitmap _bitmap;
-	_bitmap.setInfo(
-			SkImageInfo::Make(canvas->viewport.width, canvas->viewport.height, kN32_SkColorType, kPremul_SkAlphaType));
-	_bitmap.setPixels(
-			nemotale_node_get_buffer(canvas->node));
-	SkBitmapDevice _device(_bitmap);
-	SkCanvas _canvas(&_device);
 
 	_canvas.clipRegion(region);
 	_canvas.drawPicture(NEMOSHOW_CANVAS_CC(canvas, picture));
@@ -722,6 +737,15 @@ void nemoshow_canvas_render_back(struct nemoshow *show, struct showone *one)
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
 	nemotale_node_fill_pixman(canvas->node, canvas->fills[2], canvas->fills[1], canvas->fills[0], canvas->fills[3]);
+}
+
+int nemoshow_canvas_prepare_none(struct nemoshow *show, struct showone *one)
+{
+	return 0;
+}
+
+void nemoshow_canvas_finish_none(struct nemoshow *show, struct showone *one)
+{
 }
 
 void nemoshow_canvas_render_none(struct nemoshow *show, struct showone *one)

@@ -6,6 +6,7 @@
 #include <showcanvas.h>
 
 typedef struct _showcanvas {
+	SkBitmap *bitmap;
 	SkRegion *damage;
 
 	sk_sp<SkPicture> picture;

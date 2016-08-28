@@ -245,7 +245,9 @@ void nemoshow_render_one(struct nemoshow *show)
 		return;
 
 	nemolist_for_each_safe(canvas, ncanvas, &show->canvas_list, link) {
+		canvas->prepare_render(show, NEMOSHOW_CANVAS_ONE(canvas));
 		canvas->dispatch_redraw(show, NEMOSHOW_CANVAS_ONE(canvas));
+		canvas->finish_render(show, NEMOSHOW_CANVAS_ONE(canvas));
 
 		nemotale_node_flush(canvas->node);
 		nemotale_node_filter(canvas->node);
@@ -255,7 +257,9 @@ void nemoshow_render_one(struct nemoshow *show)
 	}
 
 	nemolist_for_each_safe(canvas, ncanvas, &show->pipeline_list, link) {
+		canvas->prepare_render(show, NEMOSHOW_CANVAS_ONE(canvas));
 		canvas->dispatch_redraw(show, NEMOSHOW_CANVAS_ONE(canvas));
+		canvas->finish_render(show, NEMOSHOW_CANVAS_ONE(canvas));
 
 		nemotale_node_filter(canvas->node);
 
@@ -304,6 +308,8 @@ void nemoshow_divide_one(struct nemoshow *show)
 
 				canvas->dispatch_record(show, NEMOSHOW_CANVAS_ONE(canvas));
 
+				canvas->prepare_render(show, NEMOSHOW_CANVAS_ONE(canvas));
+
 				nemotale_node_map(canvas->node);
 
 				for (i = 0; i < tr; i++) {
@@ -326,6 +332,8 @@ void nemoshow_divide_one(struct nemoshow *show)
 				while (nemopool_dispatch_done(pool, NULL) == 0);
 
 				nemotale_node_unmap(canvas->node);
+
+				canvas->finish_render(show, NEMOSHOW_CANVAS_ONE(canvas));
 
 				nemoshow_canvas_put_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE);
 

@@ -36,6 +36,8 @@ typedef enum {
 
 struct nemoshow;
 
+typedef int (*nemoshow_canvas_prepare_render_t)(struct nemoshow *show, struct showone *one);
+typedef void (*nemoshow_canvas_finish_render_t)(struct nemoshow *show, struct showone *one);
 typedef void (*nemoshow_canvas_dispatch_redraw_t)(struct nemoshow *show, struct showone *one);
 typedef void (*nemoshow_canvas_dispatch_record_t)(struct nemoshow *show, struct showone *one);
 typedef void (*nemoshow_canvas_dispatch_replay_t)(struct nemoshow *show, struct showone *one, int32_t x, int32_t y, int32_t width, int32_t height);
@@ -76,6 +78,8 @@ struct showcanvas {
 	double px, py;
 	double sx, sy;
 
+	nemoshow_canvas_prepare_render_t prepare_render;
+	nemoshow_canvas_finish_render_t finish_render;
 	nemoshow_canvas_dispatch_redraw_t dispatch_redraw;
 	nemoshow_canvas_dispatch_record_t dispatch_record;
 	nemoshow_canvas_dispatch_replay_t dispatch_replay;
@@ -105,10 +109,16 @@ extern void nemoshow_canvas_set_alpha(struct showone *one, double alpha);
 extern int nemoshow_canvas_set_shader(struct showone *one, const char *shader);
 extern int nemoshow_canvas_load_shader(struct showone *one, const char *shaderpath);
 
+extern int nemoshow_canvas_prepare_vector(struct nemoshow *show, struct showone *one);
+extern void nemoshow_canvas_finish_vector(struct nemoshow *show, struct showone *one);
 extern void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one);
 extern void nemoshow_canvas_record_vector(struct nemoshow *show, struct showone *one);
 extern void nemoshow_canvas_replay_vector(struct nemoshow *show, struct showone *one, int32_t x, int32_t y, int32_t width, int32_t height);
+
 extern void nemoshow_canvas_render_back(struct nemoshow *show, struct showone *one);
+
+extern int nemoshow_canvas_prepare_none(struct nemoshow *show, struct showone *one);
+extern void nemoshow_canvas_finish_none(struct nemoshow *show, struct showone *one);
 extern void nemoshow_canvas_render_none(struct nemoshow *show, struct showone *one);
 
 extern int nemoshow_canvas_redraw(struct showone *one);
@@ -147,6 +157,16 @@ static inline int nemoshow_canvas_has_state(struct showcanvas *canvas, uint32_t 
 static inline int nemoshow_canvas_has_state_all(struct showcanvas *canvas, uint32_t state)
 {
 	return (canvas->state & state) == state;
+}
+
+static inline void nemoshow_canvas_set_prepare_render(struct showone *one, nemoshow_canvas_prepare_render_t prepare_render)
+{
+	NEMOSHOW_CANVAS_AT(one, prepare_render) = prepare_render;
+}
+
+static inline void nemoshow_canvas_set_finish_render(struct showone *one, nemoshow_canvas_finish_render_t finish_render)
+{
+	NEMOSHOW_CANVAS_AT(one, finish_render) = finish_render;
 }
 
 static inline void nemoshow_canvas_set_dispatch_redraw(struct showone *one, nemoshow_canvas_dispatch_redraw_t dispatch_redraw)
