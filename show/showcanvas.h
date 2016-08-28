@@ -126,7 +126,6 @@ extern int nemoshow_canvas_redraw(struct showone *one);
 extern int nemoshow_canvas_set_viewport(struct showone *one, double sx, double sy);
 extern int nemoshow_canvas_set_size(struct showone *one, int32_t width, int32_t height);
 extern int nemoshow_canvas_set_smooth(struct showone *one, int has_smooth);
-extern int nemoshow_canvas_set_pbo(struct showone *one, int has_pbo);
 
 extern void nemoshow_canvas_damage(struct showone *one, int32_t x, int32_t y, int32_t width, int32_t height);
 extern void nemoshow_canvas_damage_one(struct showone *one, struct showone *child);

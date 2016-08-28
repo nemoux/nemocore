@@ -32,17 +32,12 @@ static int nemotale_node_viewport_none(struct talenode *node, int32_t width, int
 	return 0;
 }
 
-int nemotale_node_map_none(struct talenode *node)
+void *nemotale_node_map_none(struct talenode *node)
 {
-	return 0;
+	return NULL;
 }
 
 int nemotale_node_unmap_none(struct talenode *node)
-{
-	return 0;
-}
-
-int nemotale_node_copy_none(struct talenode *node, int32_t x, int32_t y, int32_t width, int32_t height)
 {
 	return 0;
 }
@@ -80,7 +75,6 @@ int nemotale_node_prepare(struct talenode *node)
 	node->alpha = 1.0f;
 
 	node->has_smooth = 1;
-	node->has_pbo = 1;
 
 	node->dispatch_flush = nemotale_node_flush_none;
 	node->dispatch_filter = nemotale_node_filter_none;
@@ -88,7 +82,6 @@ int nemotale_node_prepare(struct talenode *node)
 	node->dispatch_viewport = nemotale_node_viewport_none;
 	node->dispatch_map = nemotale_node_map_none;
 	node->dispatch_unmap = nemotale_node_unmap_none;
-	node->dispatch_copy = nemotale_node_copy_none;
 
 	nemomatrix_init_identity(&node->transform.matrix);
 	nemomatrix_init_identity(&node->transform.inverse);

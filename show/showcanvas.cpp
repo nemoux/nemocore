@@ -170,7 +170,11 @@ int nemoshow_canvas_set_type(struct showone *one, int type)
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
 	if (type == NEMOSHOW_CANVAS_VECTOR_TYPE) {
+#ifdef NEMOUX_WITH_OPENGL_PBO
+		canvas->node = nemotale_node_create_gl(canvas->width, canvas->height);
+#else
 		canvas->node = nemotale_node_create_pixman(canvas->width, canvas->height);
+#endif
 
 		NEMOSHOW_CANVAS_CC(canvas, damage) = new SkRegion;
 
@@ -656,7 +660,7 @@ int nemoshow_canvas_prepare_vector(struct nemoshow *show, struct showone *one)
 	NEMOSHOW_CANVAS_CC(canvas, bitmap)->setInfo(
 			SkImageInfo::Make(canvas->viewport.width, canvas->viewport.height, kN32_SkColorType, kPremul_SkAlphaType));
 	NEMOSHOW_CANVAS_CC(canvas, bitmap)->setPixels(
-			nemotale_node_get_buffer(canvas->node));
+			nemotale_node_map(canvas->node));
 
 	return 0;
 }
@@ -666,6 +670,9 @@ void nemoshow_canvas_finish_vector(struct nemoshow *show, struct showone *one)
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
 	delete NEMOSHOW_CANVAS_CC(canvas, bitmap);
+	NEMOSHOW_CANVAS_CC(canvas, bitmap) = NULL;
+
+	nemotale_node_unmap(canvas->node);
 }
 
 void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
@@ -842,15 +849,6 @@ int nemoshow_canvas_set_smooth(struct showone *one, int has_smooth)
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
 	nemotale_node_set_smooth(canvas->node, has_smooth);
-
-	return 0;
-}
-
-int nemoshow_canvas_set_pbo(struct showone *one, int has_pbo)
-{
-	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
-
-	nemotale_node_set_pbo(canvas->node, has_pbo);
 
 	return 0;
 }

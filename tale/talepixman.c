@@ -263,6 +263,8 @@ struct talenode *nemotale_node_create_pixman(int32_t width, int32_t height)
 	node->viewport.height = height;
 
 	node->dispatch_resize = nemotale_node_resize_pixman;
+	node->dispatch_map = nemotale_node_map_pixman;
+	node->dispatch_unmap = nemotale_node_unmap_pixman;
 	node->dispatch_viewport = nemotale_node_viewport_pixman;
 
 	pixman_region32_init_rect(&node->blend, 0, 0, width, height);
@@ -400,6 +402,18 @@ int nemotale_node_resize_pixman(struct talenode *node, int32_t width, int32_t he
 		}
 	}
 
+	return 0;
+}
+
+void *nemotale_node_map_pixman(struct talenode *node)
+{
+	struct talepmnode *context = (struct talepmnode *)node->pmcontext;
+
+	return context->data;
+}
+
+int nemotale_node_unmap_pixman(struct talenode *node)
+{
 	return 0;
 }
 

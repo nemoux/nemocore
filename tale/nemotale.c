@@ -156,25 +156,9 @@ void nemotale_prepare_node(struct nemotale *tale, struct talenode *node)
 {
 	if (nemotale_has_gl_context(tale) != 0) {
 #ifdef NEMOUX_WITH_OPENGL_PBO
-		if (node->has_pbo != 0) {
-			node->dispatch_flush = nemotale_node_flush_gl_pbo;
-			node->dispatch_map = nemotale_node_map_pbo;
-			node->dispatch_unmap = nemotale_node_unmap_pbo;
-			node->dispatch_copy = nemotale_node_copy_pbo;
-
-			node->dispatch_filter = nemotale_node_filter_gl;
-
-			nemotale_node_prepare_gl(node);
-
-			return;
-		}
-#endif
-
-#ifdef NEMOUX_WITH_OPENGL_UNPACK_SUBIMAGE
+		node->dispatch_flush = nemotale_node_flush_gl_pbo;
+#elif NEMOUX_WITH_OPENGL_UNPACK_SUBIMAGE
 		node->dispatch_flush = nemotale_node_flush_gl_subimage;
-		node->dispatch_map = nemotale_node_map_subimage;
-		node->dispatch_unmap = nemotale_node_unmap_subimage;
-		node->dispatch_copy = nemotale_node_copy_subimage;
 #else
 		node->dispatch_flush = nemotale_node_flush_gl;
 #endif

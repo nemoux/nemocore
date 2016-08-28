@@ -130,12 +130,8 @@ struct talenode *nemotale_node_create_gl(int32_t width, int32_t height)
 	node->dispatch_flush = nemotale_node_flush_gl_pbo;
 	node->dispatch_map = nemotale_node_map_pbo;
 	node->dispatch_unmap = nemotale_node_unmap_pbo;
-	node->dispatch_copy = nemotale_node_copy_pbo;
 #elif NEMOUX_WITH_OPENGL_UNPACK_SUBIMAGE
 	node->dispatch_flush = nemotale_node_flush_gl_subimage;
-	node->dispatch_map = nemotale_node_map_subimage;
-	node->dispatch_unmap = nemotale_node_unmap_subimage;
-	node->dispatch_copy = nemotale_node_copy_subimage;
 #else
 	node->dispatch_flush = nemotale_node_flush_gl;
 #endif
@@ -1004,113 +1000,50 @@ int nemotale_node_flush_gl_pbo(struct talenode *node)
 	return 0;
 }
 
-int nemotale_node_map_pbo(struct talenode *node)
+void *nemotale_node_map_pbo(struct talenode *node)
 {
 #ifdef NEMOUX_WITH_OPENGL_PBO
-	struct talepmnode *pcontext = (struct talepmnode *)node->pmcontext;
 	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
 
-	if (pcontext != NULL) {
-		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, gcontext->pbo);
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, gcontext->pbo);
 
-		if (gcontext->pwidth != node->viewport.width || gcontext->pheight != node->viewport.height) {
-			glBufferData(GL_PIXEL_UNPACK_BUFFER, node->viewport.width * node->viewport.height * 4, NULL, GL_DYNAMIC_DRAW);
+	if (gcontext->pwidth != node->viewport.width || gcontext->pheight != node->viewport.height) {
+		glBufferData(GL_PIXEL_UNPACK_BUFFER, node->viewport.width * node->viewport.height * 4, NULL, GL_DYNAMIC_DRAW);
 
-			gcontext->pwidth = node->viewport.width;
-			gcontext->pheight = node->viewport.height;
-		}
-
-		gcontext->pbuffer = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, node->viewport.width * node->viewport.height * 4, GL_MAP_WRITE_BIT);
+		gcontext->pwidth = node->viewport.width;
+		gcontext->pheight = node->viewport.height;
 	}
-#endif
 
-	return 0;
+	return glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, node->viewport.width * node->viewport.height * 4, GL_MAP_WRITE_BIT);
+#else
+	return NULL;
+#endif
 }
 
 int nemotale_node_unmap_pbo(struct talenode *node)
 {
 #ifdef NEMOUX_WITH_OPENGL_PBO
-	struct talepmnode *pcontext = (struct talepmnode *)node->pmcontext;
 	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
 
-	if (pcontext != NULL) {
-		glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+	glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 
-		glBindTexture(GL_TEXTURE_2D, gcontext->texture);
+	glBindTexture(GL_TEXTURE_2D, gcontext->texture);
 
-		glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, node->viewport.width);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, node->viewport.width);
 
-		glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
-		glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT,
-				node->viewport.width, node->viewport.height, 0,
-				GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
+	glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
+	glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT,
+			node->viewport.width, node->viewport.height, 0,
+			GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 
-		glBindTexture(GL_TEXTURE_2D, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
 
-		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
-		node->needs_flush = 0;
-		node->needs_filter = 1;
-		node->needs_full_upload = 0;
-	}
-#endif
-
-	return 0;
-}
-
-int nemotale_node_copy_pbo(struct talenode *node, int32_t x, int32_t y, int32_t width, int32_t height)
-{
-#ifdef NEMOUX_WITH_OPENGL_PBO
-	struct talepmnode *pcontext = (struct talepmnode *)node->pmcontext;
-	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
-
-	if (pcontext != NULL) {
-		if (node->needs_full_upload != 0) {
-			int l;
-
-			for (l = y; l < y + height; l++) {
-				uint32_t offset = (l * node->viewport.width + x) * 4;
-				uint32_t size = width * 4;
-
-				memcpy(gcontext->pbuffer + offset, pcontext->data + offset, size);
-			}
-		} else {
-			pixman_region32_t bound;
-			pixman_region32_t damage;
-			pixman_box32_t *rects;
-			int i, n, l;
-
-			pixman_region32_init(&damage);
-			pixman_region32_init_rect(&bound,
-					floor(x * node->viewport.rx),
-					floor(y * node->viewport.ry),
-					ceil(width * node->viewport.rx),
-					ceil(height * node->viewport.ry));
-			pixman_region32_intersect(&damage, &node->damage, &bound);
-
-			rects = pixman_region32_rectangles(&damage, &n);
-
-			for (i = 0; i < n; i++) {
-				pixman_box32_t box = rects[i];
-
-				box.x1 = MIN(MAX(box.x1 * node->viewport.sx - 3, 0), node->viewport.width);
-				box.y1 = MIN(MAX(box.y1 * node->viewport.sy - 3, 0), node->viewport.height);
-				box.x2 = MAX(MIN(box.x2 * node->viewport.sx + 3, node->viewport.width), 0);
-				box.y2 = MAX(MIN(box.y2 * node->viewport.sy + 3, node->viewport.height), 0);
-
-				for (l = box.y1; l < box.y2; l++) {
-					uint32_t offset = (l * node->viewport.width + box.x1) * 4;
-					uint32_t size = (box.x2 - box.x1) * 4;
-
-					memcpy(gcontext->pbuffer + offset, pcontext->data + offset, size);
-				}
-			}
-
-			pixman_region32_fini(&bound);
-			pixman_region32_fini(&damage);
-		}
-	}
+	node->needs_flush = 0;
+	node->needs_filter = 1;
+	node->needs_full_upload = 0;
 #endif
 
 	return 0;
@@ -1162,21 +1095,6 @@ int nemotale_node_flush_gl_subimage(struct talenode *node)
 		node->needs_filter = 1;
 	}
 
-	return 0;
-}
-
-int nemotale_node_map_subimage(struct talenode *node)
-{
-	return 0;
-}
-
-int nemotale_node_unmap_subimage(struct talenode *node)
-{
-	return nemotale_node_flush_gl_subimage(node);
-}
-
-int nemotale_node_copy_subimage(struct talenode *node, int32_t x, int32_t y, int32_t width, int32_t height)
-{
 	return 0;
 }
 
@@ -1264,33 +1182,6 @@ int nemotale_node_set_filter(struct talenode *node, const char *shader)
 	fbo_prepare_context(gcontext->ftexture, node->viewport.width, node->viewport.height, &gcontext->fbo, &gcontext->dbo);
 
 	node->has_filter = 1;
-
-	return 0;
-}
-
-int nemotale_node_set_pbo(struct talenode *node, int has_pbo)
-{
-	node->has_pbo = has_pbo;
-
-#ifdef NEMOUX_WITH_OPENGL_PBO
-	if (has_pbo != 0) {
-		node->dispatch_flush = nemotale_node_flush_gl_pbo;
-		node->dispatch_map = nemotale_node_map_pbo;
-		node->dispatch_unmap = nemotale_node_unmap_pbo;
-		node->dispatch_copy = nemotale_node_copy_pbo;
-
-		return 0;
-	}
-#endif
-
-#ifdef NEMOUX_WITH_OPENGL_UNPACK_SUBIMAGE
-	node->dispatch_flush = nemotale_node_flush_gl_subimage;
-	node->dispatch_map = nemotale_node_map_subimage;
-	node->dispatch_unmap = nemotale_node_unmap_subimage;
-	node->dispatch_copy = nemotale_node_copy_subimage;
-#else
-	node->dispatch_flush = nemotale_node_flush_gl;
-#endif
 
 	return 0;
 }

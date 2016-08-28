@@ -25,9 +25,8 @@ typedef int (*nemotale_node_dispatch_flush_t)(struct talenode *node);
 typedef int (*nemotale_node_dispatch_filter_t)(struct talenode *node);
 typedef int (*nemotale_node_dispatch_resize_t)(struct talenode *node, int32_t width, int32_t height);
 typedef int (*nemotale_node_dispatch_viewport_t)(struct talenode *node, int32_t width, int32_t height);
-typedef int (*nemotale_node_dispatch_map_t)(struct talenode *node);
+typedef void *(*nemotale_node_dispatch_map_t)(struct talenode *node);
 typedef int (*nemotale_node_dispatch_unmap_t)(struct talenode *node);
-typedef int (*nemotale_node_dispatch_copy_t)(struct talenode *node, int32_t x, int32_t y, int32_t width, int32_t height);
 
 struct talenode {
 	struct nemosignal destroy_signal;
@@ -79,7 +78,6 @@ struct talenode {
 	nemotale_node_dispatch_viewport_t dispatch_viewport;
 	nemotale_node_dispatch_map_t dispatch_map;
 	nemotale_node_dispatch_unmap_t dispatch_unmap;
-	nemotale_node_dispatch_copy_t dispatch_copy;
 
 	struct {
 		int enable;
@@ -95,7 +93,6 @@ struct talenode {
 
 	int has_filter;
 	int has_smooth;
-	int has_pbo;
 };
 
 #define	NTNODE_OBJECT(node)						(&node->object)
@@ -345,7 +342,7 @@ static inline int nemotale_node_viewport(struct talenode *node, int32_t width, i
 	return node->dispatch_viewport(node, width, height);
 }
 
-static inline int nemotale_node_map(struct talenode *node)
+static inline void *nemotale_node_map(struct talenode *node)
 {
 	return node->dispatch_map(node);
 }
@@ -353,11 +350,6 @@ static inline int nemotale_node_map(struct talenode *node)
 static inline int nemotale_node_unmap(struct talenode *node)
 {
 	return node->dispatch_unmap(node);
-}
-
-static inline int nemotale_node_copy(struct talenode *node, int32_t x, int32_t y, int32_t width, int32_t height)
-{
-	return node->dispatch_copy(node, x, y, width, height);
 }
 
 static inline int nemotale_node_needs_full_upload(struct talenode *node)
