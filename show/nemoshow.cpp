@@ -117,6 +117,8 @@ void nemoshow_destroy(struct nemoshow *show)
 
 int nemoshow_prepare_threads(struct nemoshow *show, int threads)
 {
+	show->threads = threads;
+
 	show->pool = nemopool_create(threads);
 
 	return show->pool != NULL;
@@ -245,13 +247,20 @@ void nemoshow_render_one(struct nemoshow *show)
 		return;
 
 	nemolist_for_each_safe(canvas, ncanvas, &show->canvas_list, link) {
+		nemoshow_clear_time(show);
+
 		canvas->prepare_render(show, NEMOSHOW_CANVAS_ONE(canvas));
+
+		nemoshow_check_time(show, NEMOSHOW_FRAME_PREPARE_TIME);
 
 		canvas->dispatch_redraw(show, NEMOSHOW_CANVAS_ONE(canvas));
 
+		nemoshow_check_time(show, NEMOSHOW_FRAME_RENDER_TIME);
+
 		canvas->finish_render(show, NEMOSHOW_CANVAS_ONE(canvas));
 
-		nemotale_node_flush(canvas->node);
+		nemoshow_check_time(show, NEMOSHOW_FRAME_FINISH_TIME);
+
 		nemotale_node_filter(canvas->node);
 
 		nemolist_remove(&canvas->link);
@@ -306,7 +315,11 @@ void nemoshow_divide_one(struct nemoshow *show)
 
 				canvas->dispatch_record(show, NEMOSHOW_CANVAS_ONE(canvas));
 
+				nemoshow_clear_time(show);
+
 				canvas->prepare_render(show, NEMOSHOW_CANVAS_ONE(canvas));
+
+				nemoshow_check_time(show, NEMOSHOW_FRAME_PREPARE_TIME);
 
 				for (i = 0; i < tr; i++) {
 					for (j = 0; j < tc; j++) {
@@ -327,7 +340,11 @@ void nemoshow_divide_one(struct nemoshow *show)
 
 				while (nemopool_dispatch_done(pool, NULL) == 0);
 
+				nemoshow_check_time(show, NEMOSHOW_FRAME_RENDER_TIME);
+
 				canvas->finish_render(show, NEMOSHOW_CANVAS_ONE(canvas));
+
+				nemoshow_check_time(show, NEMOSHOW_FRAME_FINISH_TIME);
 
 				nemoshow_canvas_put_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE);
 
@@ -683,5 +700,27 @@ void nemoshow_set_filtering_quality(struct nemoshow *show, uint32_t quality)
 
 	nemolist_for_each(one, &show->one_list, link) {
 		nemoshow_one_dirty(one, NEMOSHOW_FILTER_DIRTY);
+	}
+}
+
+void nemoshow_dump_times(struct nemoshow *show)
+{
+	static const char *names[] = {
+		"FRAME_PREPARE",
+		"FRAME_RENDER ",
+		"FRAME_FINISH "
+	};
+	int i;
+
+	nemolog_message("SHOW", "[%d] size(%dx%d) frames(%d) threads(%d)\n", getpid(), show->width, show->height, show->frames, show->threads);
+
+	if (show->frames > 0) {
+		for (i = 0; i < NEMOSHOW_LAST_TIME; i++)
+			nemolog_message("SHOW", "  %s: times(%d-%d)\n", names[i], show->times[i], show->times[i] / show->frames);
+
+		show->frames = 0;
+
+		for (i = 0; i < NEMOSHOW_LAST_TIME; i++)
+			show->times[i] = 0;
 	}
 }

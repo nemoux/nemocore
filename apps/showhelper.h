@@ -44,6 +44,8 @@ struct showcontext {
 	struct nemotale *tale;
 
 	int32_t width, height;
+
+	int has_timelog;
 };
 
 #define NEMOSHOW_AT(show, at)			(((struct showcontext *)nemoshow_get_context(show))->at)

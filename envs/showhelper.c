@@ -194,7 +194,7 @@ static void nemoshow_dispatch_timer(struct nemotimer *timer, void *data)
 {
 	struct showcontext *scon = (struct showcontext *)data;
 
-	nemotimer_set_timeout(timer, 500);
+	nemotimer_set_timeout(timer, 1000);
 
 	nemotale_push_timer_event(scon->tale, time_current_msecs());
 }
@@ -239,7 +239,7 @@ struct nemoshow *nemoshow_create_view(struct nemoshell *shell, int32_t width, in
 	if (timer == NULL)
 		goto err2;
 	nemotimer_set_callback(timer, nemoshow_dispatch_timer);
-	nemotimer_set_timeout(timer, 500);
+	nemotimer_set_timeout(timer, 1000);
 	nemotimer_set_userdata(timer, scon);
 
 	nemoactor_set_dispatch_event(actor, nemoshow_dispatch_actor_event);

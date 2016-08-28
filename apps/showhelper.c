@@ -48,6 +48,8 @@ static void nemoshow_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 		nemocanvas_dispatch_feedback(canvas);
 	}
 
+	nemoshow_check_frame(show);
+
 	nemoshow_update_one(show);
 	nemoshow_divide_one(show);
 	nemoshow_render_one(show);
@@ -165,9 +167,15 @@ static void nemoshow_dispatch_timer(struct nemotimer *timer, void *data)
 {
 	struct showcontext *scon = (struct showcontext *)data;
 
-	nemotimer_set_timeout(timer, 500);
+	nemotimer_set_timeout(timer, 1000);
 
 	nemotale_push_timer_event(scon->tale, time_current_msecs());
+
+	if (scon->has_timelog != 0) {
+		struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(scon->tale);
+
+		nemoshow_dump_times(show);
+	}
 }
 
 static void nemoshow_dispatch_tale_event(struct nemotale *tale, struct talenode *node, struct taleevent *event)
@@ -205,7 +213,7 @@ struct nemoshow *nemoshow_create_view(struct nemotool *tool, int32_t width, int3
 	if (timer == NULL)
 		goto err1;
 	nemotimer_set_callback(timer, nemoshow_dispatch_timer);
-	nemotimer_set_timeout(timer, 500);
+	nemotimer_set_timeout(timer, 1000);
 	nemotimer_set_userdata(timer, scon);
 
 	scon->tool = tool;
@@ -252,6 +260,9 @@ struct nemoshow *nemoshow_create_view(struct nemotool *tool, int32_t width, int3
 	env = getenv("NEMOSHOW_TILESIZE");
 	if (env != NULL)
 		nemoshow_set_tilesize(show, strtoul(env, NULL, 10));
+	env = getenv("NEMOSHOW_TIMELOG");
+	if (env != NULL && strcasecmp(env, "ON") == 0)
+		scon->has_timelog = 1;
 
 	env = getenv("NEMOTALE_LONG_PRESS_DURATION");
 	if (env != NULL)

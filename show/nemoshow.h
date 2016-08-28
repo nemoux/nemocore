@@ -50,6 +50,13 @@ typedef enum {
 	NEMOSHOW_FILTER_LAST_QUALITY
 } NemoshowfilterQuality;
 
+typedef enum {
+	NEMOSHOW_FRAME_PREPARE_TIME = 0,
+	NEMOSHOW_FRAME_RENDER_TIME = 1,
+	NEMOSHOW_FRAME_FINISH_TIME = 2,
+	NEMOSHOW_LAST_TIME
+} NemoShowTime;
+
 struct nemoshow;
 struct showone;
 
@@ -107,6 +114,11 @@ struct nemoshow {
 
 	struct nemopool *pool;
 	int tilesize;
+	int threads;
+
+	uint32_t frames;
+	uint32_t times[NEMOSHOW_LAST_TIME];
+	uint32_t time0;
 
 	void *context;
 	void *userdata;
@@ -171,6 +183,8 @@ extern void nemoshow_disable_antialias(struct nemoshow *show);
 extern void nemoshow_enable_filtering(struct nemoshow *show);
 extern void nemoshow_disable_filtering(struct nemoshow *show);
 extern void nemoshow_set_filtering_quality(struct nemoshow *show, uint32_t quality);
+
+extern void nemoshow_dump_times(struct nemoshow *show);
 
 static inline void nemoshow_set_tale(struct nemoshow *show, struct nemotale *tale)
 {
@@ -256,6 +270,25 @@ static inline void nemoshow_set_dispatch_destroy(struct nemoshow *show, nemoshow
 static inline int nemoshow_make_current(struct nemoshow *show)
 {
 	return nemotale_make_current(show->tale);
+}
+
+static inline void nemoshow_check_frame(struct nemoshow *show)
+{
+	show->frames++;
+}
+
+static inline void nemoshow_clear_time(struct nemoshow *show)
+{
+	show->time0 = time_current_msecs();
+}
+
+static inline void nemoshow_check_time(struct nemoshow *show, int index)
+{
+	uint32_t time1 = time_current_msecs();
+
+	show->times[index] += (time1 - show->time0);
+
+	show->time0 = time1;
 }
 
 #include <showgrab.h>
