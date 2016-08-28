@@ -246,27 +246,6 @@ int nemoshow_canvas_load_shader(struct showone *one, const char *shaderpath)
 	return 0;
 }
 
-int nemoshow_canvas_attach_pixman(struct showone *one, void *data, int32_t width, int32_t height)
-{
-	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
-
-	return nemotale_node_attach_pixman(canvas->node, data, width, height);
-}
-
-void nemoshow_canvas_detach_pixman(struct showone *one)
-{
-	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
-
-	nemotale_node_detach_pixman(canvas->node);
-}
-
-int nemoshow_canvas_resize_pixman(struct showone *one, int32_t width, int32_t height)
-{
-	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
-
-	return nemotale_node_resize_pixman(canvas->node, width, height);
-}
-
 int nemoshow_canvas_update(struct showone *one)
 {
 	struct nemoshow *show = one->show;

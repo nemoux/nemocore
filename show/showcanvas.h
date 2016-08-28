@@ -105,10 +105,6 @@ extern void nemoshow_canvas_set_alpha(struct showone *one, double alpha);
 extern int nemoshow_canvas_set_shader(struct showone *one, const char *shader);
 extern int nemoshow_canvas_load_shader(struct showone *one, const char *shaderpath);
 
-extern int nemoshow_canvas_attach_pixman(struct showone *one, void *data, int32_t width, int32_t height);
-extern void nemoshow_canvas_detach_pixman(struct showone *one);
-extern int nemoshow_canvas_resize_pixman(struct showone *one, int32_t width, int32_t height);
-
 extern void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one);
 extern void nemoshow_canvas_record_vector(struct nemoshow *show, struct showone *one);
 extern void nemoshow_canvas_replay_vector(struct nemoshow *show, struct showone *one, int32_t x, int32_t y, int32_t width, int32_t height);
