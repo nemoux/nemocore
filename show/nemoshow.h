@@ -185,8 +185,6 @@ extern void nemoshow_enable_filtering(struct nemoshow *show);
 extern void nemoshow_disable_filtering(struct nemoshow *show);
 extern void nemoshow_set_filtering_quality(struct nemoshow *show, uint32_t quality);
 
-extern void nemoshow_dump_times(struct nemoshow *show);
-
 static inline void nemoshow_set_tale(struct nemoshow *show, struct nemotale *tale)
 {
 	show->tale = tale;
@@ -273,14 +271,13 @@ static inline int nemoshow_make_current(struct nemoshow *show)
 	return nemotale_make_current(show->tale);
 }
 
+#ifdef NEMOSHOW_TIMELOG_ON
+extern void nemoshow_check_damage(struct nemoshow *show);
+extern void nemoshow_dump_times(struct nemoshow *show);
+
 static inline void nemoshow_check_frame(struct nemoshow *show)
 {
 	show->frames++;
-}
-
-static inline void nemoshow_check_damage(struct nemoshow *show, uint64_t damage)
-{
-	show->damages += damage;
 }
 
 static inline void nemoshow_clear_time(struct nemoshow *show)
@@ -296,6 +293,13 @@ static inline void nemoshow_check_time(struct nemoshow *show, int index)
 
 	show->time0 = time1;
 }
+#else
+static inline void nemoshow_check_frame(struct nemoshow *show) {}
+static inline void nemoshow_check_damage(struct nemoshow *show) {}
+static inline void nemoshow_clear_time(struct nemoshow *show) {}
+static inline void nemoshow_check_time(struct nemoshow *show, int index) {}
+static inline void nemoshow_dump_times(struct nemoshow *show) {}
+#endif
 
 #include <showgrab.h>
 #include <showevent.h>

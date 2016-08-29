@@ -703,6 +703,24 @@ void nemoshow_set_filtering_quality(struct nemoshow *show, uint32_t quality)
 	}
 }
 
+#ifdef NEMOSHOW_TIMELOG_ON
+void nemoshow_check_damage(struct nemoshow *show)
+{
+	struct showcanvas *canvas;
+
+	nemolist_for_each(canvas, &show->canvas_list, link) {
+		if (nemoshow_canvas_is_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE) != 0) {
+			if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE)) {
+				show->damages += (canvas->viewport.width * canvas->viewport.height);
+			} else {
+				SkRegion::Iterator iter(*NEMOSHOW_CANVAS_CC(canvas, damage));
+
+				show->damages += (iter.rect().width() * iter.rect().height());
+			}
+		}
+	}
+}
+
 void nemoshow_dump_times(struct nemoshow *show)
 {
 	static const char *names[] = {
@@ -711,6 +729,9 @@ void nemoshow_dump_times(struct nemoshow *show)
 		"FRAME_FINISH "
 	};
 	int i;
+
+	if (show->frames == 0)
+		return;
 
 	nemolog_message("SHOW", "[%d] size(%dx%d) frames(%d) threads(%d) damages(%d/%f)\n",
 			getpid(),
@@ -721,14 +742,13 @@ void nemoshow_dump_times(struct nemoshow *show)
 			show->damages,
 			show->frames > 0 ? (double)show->damages / 1024.0f / 1024.0f / show->frames : 0.0f);
 
-	if (show->frames > 0) {
-		for (i = 0; i < NEMOSHOW_LAST_TIME; i++)
-			nemolog_message("SHOW", "  %s: times(%d-%d)\n", names[i], show->times[i], show->times[i] / show->frames);
+	for (i = 0; i < NEMOSHOW_LAST_TIME; i++)
+		nemolog_message("SHOW", "  %s: times(%d-%d)\n", names[i], show->times[i], show->times[i] / show->frames);
 
-		show->frames = 0;
-		show->damages = 0;
+	show->frames = 0;
+	show->damages = 0;
 
-		for (i = 0; i < NEMOSHOW_LAST_TIME; i++)
-			show->times[i] = 0;
-	}
+	for (i = 0; i < NEMOSHOW_LAST_TIME; i++)
+		show->times[i] = 0;
 }
+#endif

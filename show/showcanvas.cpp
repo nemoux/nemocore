@@ -874,8 +874,6 @@ void nemoshow_canvas_damage(struct showone *one, int32_t x, int32_t y, int32_t w
 	nemotale_node_damage(canvas->node, x, y, width, height);
 
 	nemoshow_canvas_dirty(one);
-
-	nemoshow_check_damage(one->show, width * height);
 }
 
 void nemoshow_canvas_damage_one(struct showone *one, struct showone *child)
@@ -889,8 +887,6 @@ void nemoshow_canvas_damage_one(struct showone *one, struct showone *child)
 	nemotale_node_damage(canvas->node, child->x, child->y, child->w, child->h);
 
 	nemoshow_canvas_dirty(one);
-
-	nemoshow_check_damage(one->show, child->sw * child->sh);
 }
 
 void nemoshow_canvas_damage_all(struct showone *one)
@@ -902,8 +898,6 @@ void nemoshow_canvas_damage_all(struct showone *one)
 	nemoshow_canvas_set_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE);
 
 	nemoshow_canvas_dirty(one);
-
-	nemoshow_check_damage(one->show, canvas->viewport.width * canvas->viewport.height);
 }
 
 static inline struct showone *nemoshow_canvas_pick_item(struct showone *one, float x, float y)

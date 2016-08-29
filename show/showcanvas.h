@@ -158,6 +158,11 @@ static inline int nemoshow_canvas_has_state_all(struct showcanvas *canvas, uint3
 	return (canvas->state & state) == state;
 }
 
+static inline int nemoshow_canvas_is_type(struct showcanvas *canvas, int type)
+{
+	return NEMOSHOW_CANVAS_ONE(canvas)->sub == type;
+}
+
 static inline void nemoshow_canvas_set_prepare_render(struct showone *one, nemoshow_canvas_prepare_render_t prepare_render)
 {
 	NEMOSHOW_CANVAS_AT(one, prepare_render) = prepare_render;
