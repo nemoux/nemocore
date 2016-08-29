@@ -712,13 +712,21 @@ void nemoshow_dump_times(struct nemoshow *show)
 	};
 	int i;
 
-	nemolog_message("SHOW", "[%d] size(%dx%d) frames(%d) threads(%d)\n", getpid(), show->width, show->height, show->frames, show->threads);
+	nemolog_message("SHOW", "[%d] size(%dx%d) frames(%d) threads(%d) damages(%d/%f)\n",
+			getpid(),
+			show->width,
+			show->height,
+			show->frames,
+			show->threads,
+			show->damages,
+			show->frames > 0 ? (double)show->damages / 1024.0f / 1024.0f / show->frames : 0.0f);
 
 	if (show->frames > 0) {
 		for (i = 0; i < NEMOSHOW_LAST_TIME; i++)
 			nemolog_message("SHOW", "  %s: times(%d-%d)\n", names[i], show->times[i], show->times[i] / show->frames);
 
 		show->frames = 0;
+		show->damages = 0;
 
 		for (i = 0; i < NEMOSHOW_LAST_TIME; i++)
 			show->times[i] = 0;

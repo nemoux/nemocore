@@ -117,6 +117,7 @@ struct nemoshow {
 	int threads;
 
 	uint32_t frames;
+	uint64_t damages;
 	uint32_t times[NEMOSHOW_LAST_TIME];
 	uint32_t time0;
 
@@ -275,6 +276,11 @@ static inline int nemoshow_make_current(struct nemoshow *show)
 static inline void nemoshow_check_frame(struct nemoshow *show)
 {
 	show->frames++;
+}
+
+static inline void nemoshow_check_damage(struct nemoshow *show, uint64_t damage)
+{
+	show->damages += damage;
 }
 
 static inline void nemoshow_clear_time(struct nemoshow *show)
