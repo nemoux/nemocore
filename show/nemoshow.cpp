@@ -112,6 +112,9 @@ void nemoshow_destroy(struct nemoshow *show)
 	if (show->pool != NULL)
 		nemopool_destroy(show->pool);
 
+	if (show->name != NULL)
+		free(show->name);
+
 	free(show);
 }
 
@@ -129,6 +132,14 @@ void nemoshow_finish_threads(struct nemoshow *show)
 	nemopool_destroy(show->pool);
 
 	show->pool = NULL;
+}
+
+void nemoshow_set_name(struct nemoshow *show, const char *name)
+{
+	if (show->name != NULL)
+		free(show->name);
+
+	show->name = strdup(name);
 }
 
 void nemoshow_set_tilesize(struct nemoshow *show, int tilesize)
@@ -733,7 +744,8 @@ void nemoshow_dump_times(struct nemoshow *show)
 	if (show->frames == 0)
 		return;
 
-	nemolog_message("SHOW", "[%d] size(%dx%d) frames(%d) threads(%d) damages(%d/%f)\n",
+	nemolog_message("SHOW", "[%s:%d] size(%dx%d) frames(%d) threads(%d) damages(%d/%f)\n",
+			show->name != NULL ? show->name : "noname",
 			getpid(),
 			show->width,
 			show->height,

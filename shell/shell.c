@@ -683,7 +683,7 @@ static int nemoshell_dispatch_frame_timeout(void *data)
 	struct nemocanvas *canvas;
 	struct shellbin *bin;
 
-	nemolog_message("SYSTEM", "cpu(%f), memory(%f)\n",
+	nemolog_message("SYSTEM", "SYSTEM[] cpu(%f) memory(%f)\n",
 			sys_get_cpu_usage(),
 			sys_get_memory_usage());
 

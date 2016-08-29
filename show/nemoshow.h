@@ -79,6 +79,8 @@ struct showtask {
 struct nemoshow {
 	struct nemotale *tale;
 
+	char *name;
+
 	uint32_t state;
 	uint32_t quality;
 
@@ -138,6 +140,8 @@ extern void nemoshow_destroy(struct nemoshow *show);
 
 extern int nemoshow_prepare_threads(struct nemoshow *show, int threads);
 extern void nemoshow_finish_threads(struct nemoshow *show);
+
+extern void nemoshow_set_name(struct nemoshow *show, const char *name);
 
 extern void nemoshow_set_tilesize(struct nemoshow *show, int tilesize);
 
