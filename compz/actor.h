@@ -101,10 +101,8 @@ extern void nemoactor_dispatch_transform(struct nemoactor *actor, int visible, i
 extern void nemoactor_dispatch_layer(struct nemoactor *actor, int visible);
 extern void nemoactor_dispatch_fullscreen(struct nemoactor *actor, const char *id, int32_t x, int32_t y, int32_t width, int32_t height);
 extern void nemoactor_dispatch_frame(struct nemoactor *actor);
-extern int nemoactor_dispatch_destroy(struct nemoactor *actor);
-
 extern void nemoactor_dispatch_feedback(struct nemoactor *actor);
-extern void nemoactor_terminate_feedback(struct nemoactor *actor);
+extern int nemoactor_dispatch_destroy(struct nemoactor *actor);
 
 extern void nemoactor_set_min_size(struct nemoactor *actor, uint32_t width, uint32_t height);
 extern void nemoactor_set_max_size(struct nemoactor *actor, uint32_t width, uint32_t height);

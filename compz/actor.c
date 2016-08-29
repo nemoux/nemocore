@@ -710,16 +710,10 @@ void nemoactor_dispatch_fullscreen(struct nemoactor *actor, const char *id, int3
 void nemoactor_dispatch_frame(struct nemoactor *actor)
 {
 	if (wl_list_empty(&actor->frame_link)) {
+		nemoactor_dispatch_feedback(actor);
+
 		actor->dispatch_frame(actor, 0);
 	}
-}
-
-int nemoactor_dispatch_destroy(struct nemoactor *actor)
-{
-	if (actor->dispatch_destroy != NULL)
-		return actor->dispatch_destroy(actor);
-
-	return 0;
 }
 
 void nemoactor_dispatch_feedback(struct nemoactor *actor)
@@ -733,10 +727,12 @@ void nemoactor_dispatch_feedback(struct nemoactor *actor)
 	}
 }
 
-void nemoactor_terminate_feedback(struct nemoactor *actor)
+int nemoactor_dispatch_destroy(struct nemoactor *actor)
 {
-	wl_list_remove(&actor->frame_link);
-	wl_list_init(&actor->frame_link);
+	if (actor->dispatch_destroy != NULL)
+		return actor->dispatch_destroy(actor);
+
+	return 0;
 }
 
 void nemoactor_set_min_size(struct nemoactor *actor, uint32_t width, uint32_t height)

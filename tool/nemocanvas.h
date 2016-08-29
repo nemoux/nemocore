@@ -143,7 +143,6 @@ extern void nemocanvas_set_framerate(struct nemocanvas *canvas, uint32_t framera
 
 extern void nemocanvas_dispatch_feedback(struct nemocanvas *canvas);
 extern void nemocanvas_handle_feedback(struct nemocanvas *canvas);
-extern void nemocanvas_terminate_feedback(struct nemocanvas *canvas);
 
 extern void nemocanvas_dispatch_frame(struct nemocanvas *canvas);
 extern void nemocanvas_dispatch_frame_force(struct nemocanvas *canvas);

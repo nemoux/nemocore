@@ -350,13 +350,6 @@ void nemoshow_dispatch_feedback(struct nemoshow *show)
 	nemocanvas_dispatch_feedback(scon->canvas);
 }
 
-void nemoshow_terminate_feedback(struct nemoshow *show)
-{
-	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
-
-	nemocanvas_terminate_feedback(scon->canvas);
-}
-
 void nemoshow_view_set_layer(struct nemoshow *show, const char *layer)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);

@@ -719,15 +719,6 @@ void nemocanvas_handle_feedback(struct nemocanvas *canvas)
 	}
 }
 
-void nemocanvas_terminate_feedback(struct nemocanvas *canvas)
-{
-	if (canvas->feedback != NULL) {
-		presentation_feedback_destroy(canvas->feedback);
-
-		canvas->feedback = NULL;
-	}
-}
-
 void nemocanvas_dispatch_frame(struct nemocanvas *canvas)
 {
 	if (canvas->feedback == NULL) {

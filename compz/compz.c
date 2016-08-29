@@ -210,6 +210,9 @@ static inline void nemocompz_dispatch_actor_frame(struct nemocompz *compz, uint3
 	struct nemoactor *actor, *next;
 
 	wl_list_for_each_safe(actor, next, &compz->frame_list, frame_link) {
+		wl_list_remove(&actor->frame_link);
+		wl_list_init(&actor->frame_link);
+
 		actor->dispatch_frame(actor, msecs);
 	}
 }

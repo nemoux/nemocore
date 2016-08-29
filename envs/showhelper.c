@@ -138,8 +138,6 @@ static void nemoshow_dispatch_actor_frame(struct nemoactor *actor, uint32_t msec
 		nemoshow_destroy_transition(show);
 
 		nemoactor_dispatch_feedback(actor);
-	} else {
-		nemoactor_terminate_feedback(actor);
 	}
 
 	nemoshow_update_one(show);
@@ -364,13 +362,6 @@ void nemoshow_dispatch_feedback(struct nemoshow *show)
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 
 	nemoactor_dispatch_feedback(scon->actor);
-}
-
-void nemoshow_terminate_feedback(struct nemoshow *show)
-{
-	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
-
-	nemoactor_terminate_feedback(scon->actor);
 }
 
 void nemoshow_view_set_layer(struct nemoshow *show, const char *layer)
