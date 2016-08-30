@@ -51,7 +51,7 @@ struct showcanvas {
 	uint32_t state;
 
 	struct nemoshow *show;
-	struct nemolist link;
+	struct nemolist redraw_link;
 
 	char type[NEMOSHOW_CANVAS_TYPE_MAX];
 

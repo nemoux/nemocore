@@ -50,8 +50,7 @@ struct nemoshow *nemoshow_create(void)
 	nemolist_init(&show->one_list);
 	nemolist_init(&show->dirty_list);
 	nemolist_init(&show->bounds_list);
-	nemolist_init(&show->canvas_list);
-	nemolist_init(&show->pipeline_list);
+	nemolist_init(&show->redraw_list);
 	nemolist_init(&show->transition_list);
 	nemolist_init(&show->transition_destroy_list);
 
@@ -97,8 +96,7 @@ void nemoshow_destroy(struct nemoshow *show)
 	nemolist_remove(&show->one_list);
 	nemolist_remove(&show->dirty_list);
 	nemolist_remove(&show->bounds_list);
-	nemolist_remove(&show->canvas_list);
-	nemolist_remove(&show->pipeline_list);
+	nemolist_remove(&show->redraw_list);
 	nemolist_remove(&show->transition_list);
 	nemolist_remove(&show->transition_destroy_list);
 
@@ -248,7 +246,7 @@ int nemoshow_update_one(struct nemoshow *show)
 
 	show->dirty_serial = 0;
 
-	return nemolist_empty(&show->canvas_list) == 0 || nemolist_empty(&show->pipeline_list) == 0;
+	return nemolist_empty(&show->redraw_list) == 0;
 }
 
 void nemoshow_render_one(struct nemoshow *show)
@@ -259,7 +257,7 @@ void nemoshow_render_one(struct nemoshow *show)
 	if (scene == NULL)
 		return;
 
-	nemolist_for_each_safe(canvas, ncanvas, &show->canvas_list, link) {
+	nemolist_for_each_safe(canvas, ncanvas, &show->redraw_list, redraw_link) {
 		nemoshow_clear_time(show);
 
 		canvas->prepare_render(show, NEMOSHOW_CANVAS_ONE(canvas));
@@ -276,21 +274,8 @@ void nemoshow_render_one(struct nemoshow *show)
 
 		nemotale_node_filter(canvas->node);
 
-		nemolist_remove(&canvas->link);
-		nemolist_init(&canvas->link);
-	}
-
-	nemolist_for_each_safe(canvas, ncanvas, &show->pipeline_list, link) {
-		canvas->prepare_render(show, NEMOSHOW_CANVAS_ONE(canvas));
-
-		canvas->dispatch_redraw(show, NEMOSHOW_CANVAS_ONE(canvas));
-
-		canvas->finish_render(show, NEMOSHOW_CANVAS_ONE(canvas));
-
-		nemotale_node_filter(canvas->node);
-
-		nemolist_remove(&canvas->link);
-		nemolist_init(&canvas->link);
+		nemolist_remove(&canvas->redraw_link);
+		nemolist_init(&canvas->redraw_link);
 	}
 }
 
@@ -312,7 +297,7 @@ void nemoshow_divide_one(struct nemoshow *show)
 	if (scene == NULL || pool == NULL)
 		return;
 
-	nemolist_for_each_safe(canvas, ncanvas, &show->canvas_list, link) {
+	nemolist_for_each_safe(canvas, ncanvas, &show->redraw_list, redraw_link) {
 		if ((nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_POOLING_STATE) != 0) &&
 				(canvas->viewport.width >= show->tilesize || canvas->viewport.height >= show->tilesize)) {
 			SkIRect box = NEMOSHOW_CANVAS_CC(canvas, damage)->getBounds();
@@ -363,8 +348,8 @@ void nemoshow_divide_one(struct nemoshow *show)
 
 				NEMOSHOW_CANVAS_CC(canvas, damage)->setEmpty();
 
-				nemolist_remove(&canvas->link);
-				nemolist_init(&canvas->link);
+				nemolist_remove(&canvas->redraw_link);
+				nemolist_init(&canvas->redraw_link);
 			}
 		}
 	}
@@ -721,7 +706,7 @@ void nemoshow_check_damage(struct nemoshow *show)
 {
 	struct showcanvas *canvas;
 
-	nemolist_for_each(canvas, &show->canvas_list, link) {
+	nemolist_for_each(canvas, &show->redraw_list, redraw_link) {
 		if (nemoshow_canvas_is_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE) != 0) {
 			if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE)) {
 				show->damages += (canvas->viewport.width * canvas->viewport.height);

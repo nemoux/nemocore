@@ -60,7 +60,7 @@ struct showone *nemoshow_canvas_create(void)
 	canvas->dispatch_record = NULL;
 	canvas->dispatch_replay = NULL;
 
-	nemolist_init(&canvas->link);
+	nemolist_init(&canvas->redraw_link);
 
 	one = &canvas->base;
 	one->type = NEMOSHOW_CANVAS_TYPE;
@@ -102,7 +102,7 @@ void nemoshow_canvas_destroy(struct showone *one)
 
 	nemoshow_one_finish(one);
 
-	nemolist_remove(&canvas->link);
+	nemolist_remove(&canvas->redraw_link);
 
 	nemotale_node_destroy(canvas->node);
 
@@ -306,12 +306,8 @@ int nemoshow_canvas_update(struct showone *one)
 		nemoshow_canvas_set_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE);
 	}
 
-	if (nemolist_empty(&canvas->link) != 0) {
-		if (one->sub != NEMOSHOW_CANVAS_PIPELINE_TYPE)
-			nemolist_insert(&show->canvas_list, &canvas->link);
-		else
-			nemolist_insert(&show->pipeline_list, &canvas->link);
-	}
+	if (nemolist_empty(&canvas->redraw_link) != 0)
+		nemolist_insert(&show->redraw_list, &canvas->redraw_link);
 
 	return 0;
 }
@@ -854,26 +850,14 @@ int nemoshow_canvas_set_smooth(struct showone *one, int has_smooth)
 	return 0;
 }
 
-static void nemoshow_canvas_dirty(struct showone *one)
-{
-	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
-	struct nemoshow *show = one->show;
-
-	if (show != NULL && nemolist_empty(&canvas->link) != 0) {
-		if (one->sub != NEMOSHOW_CANVAS_PIPELINE_TYPE)
-			nemolist_insert(&show->canvas_list, &canvas->link);
-		else
-			nemolist_insert(&show->pipeline_list, &canvas->link);
-	}
-}
-
 void nemoshow_canvas_damage(struct showone *one, int32_t x, int32_t y, int32_t width, int32_t height)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
 	nemotale_node_damage(canvas->node, x, y, width, height);
 
-	nemoshow_canvas_dirty(one);
+	if (one->show != NULL && nemolist_empty(&canvas->redraw_link) != 0)
+		nemolist_insert(&one->show->redraw_list, &canvas->redraw_link);
 }
 
 void nemoshow_canvas_damage_one(struct showone *one, struct showone *child)
@@ -886,7 +870,8 @@ void nemoshow_canvas_damage_one(struct showone *one, struct showone *child)
 
 	nemotale_node_damage(canvas->node, child->x, child->y, child->w, child->h);
 
-	nemoshow_canvas_dirty(one);
+	if (one->show != NULL && nemolist_empty(&canvas->redraw_link) != 0)
+		nemolist_insert(&one->show->redraw_list, &canvas->redraw_link);
 }
 
 void nemoshow_canvas_damage_all(struct showone *one)
@@ -897,7 +882,8 @@ void nemoshow_canvas_damage_all(struct showone *one)
 
 	nemoshow_canvas_set_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE);
 
-	nemoshow_canvas_dirty(one);
+	if (one->show != NULL && nemolist_empty(&canvas->redraw_link) != 0)
+		nemolist_insert(&one->show->redraw_list, &canvas->redraw_link);
 }
 
 static inline struct showone *nemoshow_canvas_pick_item(struct showone *one, float x, float y)
