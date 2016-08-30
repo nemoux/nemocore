@@ -59,9 +59,6 @@ struct showcanvas {
 
 	uint32_t fill;
 	double fills[4];
-
-	char *shader;
-
 	double alpha;
 
 	struct talenode *node;

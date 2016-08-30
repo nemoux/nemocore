@@ -211,6 +211,17 @@ int nemotale_node_resize_gl(struct talenode *node, int32_t width, int32_t height
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 			glBindTexture(GL_TEXTURE_2D, 0);
 
+			if (node->has_filter != 0) {
+				glBindTexture(GL_TEXTURE_2D, context->ftexture);
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
+				glBindTexture(GL_TEXTURE_2D, 0);
+
+				glDeleteFramebuffers(1, &context->fbo);
+				glDeleteRenderbuffers(1, &context->dbo);
+
+				fbo_prepare_context(context->ftexture, width, height, &context->fbo, &context->dbo);
+			}
+
 #ifdef NEMOUX_WITH_OPENGL_PBO
 			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, context->pbo);
 			glBufferData(GL_PIXEL_UNPACK_BUFFER, width * height * 4, NULL, GL_DYNAMIC_DRAW);
@@ -227,17 +238,6 @@ int nemotale_node_resize_gl(struct talenode *node, int32_t width, int32_t height
 			node->viewport.sy = (double)node->viewport.height / (double)node->geometry.height;
 			node->viewport.rx = (double)node->geometry.width / (double)node->viewport.width;
 			node->viewport.ry = (double)node->geometry.height / (double)node->viewport.height;
-		}
-
-		if (node->has_filter != 0) {
-			glBindTexture(GL_TEXTURE_2D, context->ftexture);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, node->viewport.width, node->viewport.height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
-			glBindTexture(GL_TEXTURE_2D, 0);
-
-			glDeleteFramebuffers(1, &context->fbo);
-			glDeleteRenderbuffers(1, &context->dbo);
-
-			fbo_prepare_context(context->ftexture, node->viewport.width, node->viewport.height, &context->fbo, &context->dbo);
 		}
 	}
 
@@ -261,6 +261,17 @@ int nemotale_node_viewport_gl(struct talenode *node, int32_t width, int32_t heig
 	glBindTexture(GL_TEXTURE_2D, context->texture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
+
+	if (node->has_filter != 0) {
+		glBindTexture(GL_TEXTURE_2D, context->ftexture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		glDeleteFramebuffers(1, &context->fbo);
+		glDeleteRenderbuffers(1, &context->dbo);
+
+		fbo_prepare_context(context->ftexture, width, height, &context->fbo, &context->dbo);
+	}
 
 #ifdef NEMOUX_WITH_OPENGL_PBO
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, context->pbo);

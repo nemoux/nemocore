@@ -113,9 +113,6 @@ void nemoshow_canvas_destroy(struct showone *one)
 
 	delete static_cast<showcanvas_t *>(canvas->cc);
 
-	if (canvas->shader != NULL)
-		free(canvas->shader);
-
 	free(canvas);
 }
 
@@ -220,12 +217,9 @@ int nemoshow_canvas_set_shader(struct showone *one, const char *shader)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
-	if (canvas->shader != NULL)
-		free(canvas->shader);
+	nemotale_node_set_filter(canvas->node, shader);
 
-	canvas->shader = strdup(shader);
-
-	nemoshow_one_dirty(one, NEMOSHOW_SHADER_DIRTY);
+	nemoshow_one_dirty(one, NEMOSHOW_FILTER_DIRTY);
 
 	return 0;
 }
@@ -233,17 +227,16 @@ int nemoshow_canvas_set_shader(struct showone *one, const char *shader)
 int nemoshow_canvas_load_shader(struct showone *one, const char *shaderpath)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
-	char *shader = NULL;
+	char *shader;
 
 	if (os_load_path(shaderpath, &shader, NULL) < 0)
 		return -1;
 
-	if (canvas->shader != NULL)
-		free(canvas->shader);
+	nemotale_node_set_filter(canvas->node, shader);
 
-	canvas->shader = shader;
+	free(shader);
 
-	nemoshow_one_dirty(one, NEMOSHOW_SHADER_DIRTY);
+	nemoshow_one_dirty(one, NEMOSHOW_FILTER_DIRTY);
 
 	return 0;
 }
@@ -290,12 +283,6 @@ int nemoshow_canvas_update(struct showone *one)
 		nemotale_node_rotate(canvas->node, canvas->ro * M_PI / 180.0f);
 		nemotale_node_scale(canvas->node, canvas->sx, canvas->sy);
 		nemotale_node_pivot(canvas->node, canvas->px, canvas->py);
-	}
-	if ((one->dirty & NEMOSHOW_SHADER_DIRTY) != 0) {
-		if (canvas->shader != NULL)
-			nemotale_node_set_filter(canvas->node, canvas->shader);
-
-		one->dirty |= NEMOSHOW_FILTER_DIRTY;
 	}
 	if ((one->dirty & NEMOSHOW_FILTER_DIRTY) != 0) {
 		nemotale_node_damage_filter(canvas->node);
