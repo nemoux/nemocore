@@ -127,31 +127,34 @@ static void nemoshow_dispatch_actor_frame(struct nemoactor *actor, uint32_t msec
 	struct nemotale *tale = (struct nemotale *)nemoactor_get_context(actor);
 	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
 	struct nemocompz *compz = actor->compz;
-	pixman_region32_t region;
-
-	pixman_region32_init(&region);
 
 	nemocompz_make_current(compz);
 
 	if (nemoshow_has_transition(show) != 0) {
 		nemoshow_dispatch_transition(show, msecs);
 		nemoshow_destroy_transition(show);
-
-		nemoactor_dispatch_feedback(actor);
 	}
 
-	nemoshow_update_one(show);
+	if (nemoshow_update_one(show) != 0) {
+		pixman_region32_t region;
 
-	nemoshow_check_frame(show);
-	nemoshow_check_damage(show);
+		pixman_region32_init(&region);
 
-	nemoshow_render_one(show);
+		nemoshow_check_frame(show);
+		nemoshow_check_damage(show);
 
-	nemotale_composite_fbo(tale, &region);
+		nemoshow_render_one(show);
 
-	nemoactor_damage_region(actor, &region);
+		nemoactor_dispatch_feedback(actor);
 
-	pixman_region32_fini(&region);
+		nemotale_composite_fbo(tale, &region);
+
+		nemoactor_damage_region(actor, &region);
+
+		pixman_region32_fini(&region);
+	} else {
+		nemoactor_terminate_feedback(actor);
+	}
 }
 
 static void nemoshow_dispatch_actor_transform(struct nemoactor *actor, int32_t visible, int32_t x, int32_t y, int32_t width, int32_t height)
