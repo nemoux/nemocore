@@ -274,8 +274,6 @@ void nemoshow_render_one(struct nemoshow *show)
 			canvas->finish_render(show, NEMOSHOW_CANVAS_ONE(canvas));
 
 			nemoshow_check_time(show, NEMOSHOW_FRAME_FINISH_TIME);
-
-			nemoshow_canvas_put_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE);
 		}
 
 		nemolist_remove(&canvas->redraw_link);
@@ -354,9 +352,6 @@ void nemoshow_divide_one(struct nemoshow *show)
 				canvas->finish_render(show, NEMOSHOW_CANVAS_ONE(canvas));
 
 				nemoshow_check_time(show, NEMOSHOW_FRAME_FINISH_TIME);
-
-				nemoshow_canvas_put_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE | NEMOSHOW_CANVAS_REDRAW_FULL_STATE);
-				NEMOSHOW_CANVAS_CC(canvas, damage)->setEmpty();
 
 				nemolist_remove(&canvas->redraw_link);
 				nemolist_init(&canvas->redraw_link);

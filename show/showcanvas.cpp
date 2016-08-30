@@ -667,6 +667,10 @@ void nemoshow_canvas_finish_vector(struct nemoshow *show, struct showone *one)
 	delete NEMOSHOW_CANVAS_CC(canvas, bitmap);
 	NEMOSHOW_CANVAS_CC(canvas, bitmap) = NULL;
 
+	nemoshow_canvas_put_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE | NEMOSHOW_CANVAS_REDRAW_FULL_STATE);
+
+	NEMOSHOW_CANVAS_CC(canvas, damage)->setEmpty();
+
 	nemotale_node_unmap(canvas->node);
 	nemotale_node_flush(canvas->node);
 }
@@ -685,8 +689,6 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 		nemoshow_children_for_each(child, one) {
 			nemoshow_canvas_render_one(canvas, &_canvas, child, NULL);
 		}
-
-		nemoshow_canvas_put_state(canvas, NEMOSHOW_CANVAS_REDRAW_FULL_STATE);
 	} else {
 		_canvas.clipRegion(*NEMOSHOW_CANVAS_CC(canvas, damage));
 		_canvas.clear(SK_ColorTRANSPARENT);
@@ -696,8 +698,6 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 			nemoshow_canvas_render_one(canvas, &_canvas, child, NEMOSHOW_CANVAS_CC(canvas, damage));
 		}
 	}
-
-	NEMOSHOW_CANVAS_CC(canvas, damage)->setEmpty();
 }
 
 void nemoshow_canvas_record_vector(struct nemoshow *show, struct showone *one)
@@ -849,7 +849,7 @@ int nemoshow_canvas_set_smooth(struct showone *one, int has_smooth)
 	return 0;
 }
 
-static inline void nemoshow_canvas_damage_after(struct nemoshow *show, struct showcanvas *canvas)
+static inline void nemoshow_canvas_damage_in(struct nemoshow *show, struct showcanvas *canvas)
 {
 	if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_FILTERING_STATE)) {
 		nemotale_node_damage_filter(canvas->node);
@@ -871,7 +871,7 @@ void nemoshow_canvas_damage(struct showone *one, int32_t x, int32_t y, int32_t w
 	nemoshow_canvas_set_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE);
 
 	if (one->show != NULL)
-		nemoshow_canvas_damage_after(one->show, canvas);
+		nemoshow_canvas_damage_in(one->show, canvas);
 }
 
 void nemoshow_canvas_damage_one(struct showone *one, struct showone *child)
@@ -887,7 +887,7 @@ void nemoshow_canvas_damage_one(struct showone *one, struct showone *child)
 	nemoshow_canvas_set_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE);
 
 	if (one->show != NULL)
-		nemoshow_canvas_damage_after(one->show, canvas);
+		nemoshow_canvas_damage_in(one->show, canvas);
 }
 
 void nemoshow_canvas_damage_all(struct showone *one)
@@ -899,7 +899,7 @@ void nemoshow_canvas_damage_all(struct showone *one)
 	nemoshow_canvas_set_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE | NEMOSHOW_CANVAS_REDRAW_FULL_STATE);
 
 	if (one->show != NULL)
-		nemoshow_canvas_damage_after(one->show, canvas);
+		nemoshow_canvas_damage_in(one->show, canvas);
 }
 
 static inline struct showone *nemoshow_canvas_pick_item(struct showone *one, float x, float y)
