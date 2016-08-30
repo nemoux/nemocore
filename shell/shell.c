@@ -6,6 +6,7 @@
 #include <errno.h>
 
 #include <assert.h>
+#include <signal.h>
 #include <wayland-server.h>
 #include <wayland-xdg-shell-server-protocol.h>
 #include <wayland-nemo-shell-server-protocol.h>
@@ -1347,4 +1348,27 @@ void nemoshell_put_maximized_bin(struct nemoshell *shell, struct shellbin *bin)
 	nemoshell_bin_put_state(bin, NEMOSHELL_BIN_FIXED_STATE);
 
 	nemoshell_send_bin_config(bin);
+}
+
+void nemoshell_kill_fullscreen_bin(struct nemoshell *shell, uint32_t target)
+{
+	struct shellscreen *screen;
+	struct shellbin *sbin, *nbin;
+
+	wl_list_for_each(screen, &shell->fullscreen_list, link) {
+		if (target != 0 && screen->target != target)
+			continue;
+
+		wl_list_for_each_safe(sbin, nbin, &screen->bin_list, screen_link) {
+			wl_list_remove(&sbin->screen_link);
+			wl_list_init(&sbin->screen_link);
+
+			if (sbin->resource != NULL) {
+				if (sbin->type == NEMOSHELL_SURFACE_XWAYLAND_TYPE)
+					kill(-sbin->pid, SIGKILL);
+				else
+					kill(sbin->pid, SIGKILL);
+			}
+		}
+	}
 }

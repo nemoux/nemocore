@@ -5,7 +5,6 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include <signal.h>
 #include <limits.h>
 #include <wayland-server.h>
 
@@ -147,19 +146,7 @@ static void move_shellgrab_dispatch_effect_done(struct nemoeffect *base)
 
 		screen = nemoshell_get_fullscreen_on(shell, tx, ty, NEMOSHELL_FULLSCREEN_PITCH_TYPE);
 		if (screen != NULL) {
-			struct shellbin *sbin, *nbin;
-
-			wl_list_for_each_safe(sbin, nbin, &screen->bin_list, screen_link) {
-				wl_list_remove(&sbin->screen_link);
-				wl_list_init(&sbin->screen_link);
-
-				if (sbin->resource != NULL) {
-					if (sbin->type == NEMOSHELL_SURFACE_XWAYLAND_TYPE)
-						kill(-sbin->pid, SIGKILL);
-					else
-						kill(sbin->pid, SIGKILL);
-				}
-			}
+			nemoshell_kill_fullscreen_bin(shell, screen->target);
 
 			nemoshell_set_fullscreen_bin(shell, bin, screen);
 

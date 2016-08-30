@@ -124,6 +124,8 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 						screen = nemoshell_get_fullscreen_on(shell, tp0->x, tp0->y, NEMOSHELL_FULLSCREEN_PICK_TYPE);
 
 					if (screen != NULL) {
+						nemoshell_kill_fullscreen_bin(shell, screen->target);
+
 						nemoshell_set_fullscreen_bin(shell, bin, screen);
 
 						nemoseat_put_touchpoint_by_view(compz->seat, bin->view);
@@ -434,6 +436,8 @@ static void pick_shellgrab_singletap_up(struct touchpoint_grab *base, uint32_t t
 						screen = nemoshell_get_fullscreen_on(shell, tp->x, tp->y, NEMOSHELL_FULLSCREEN_PICK_TYPE);
 
 					if (screen != NULL) {
+						nemoshell_kill_fullscreen_bin(shell, screen->target);
+
 						nemoshell_set_fullscreen_bin(shell, bin, screen);
 
 						nemoseat_put_touchpoint_by_view(compz->seat, bin->view);
@@ -760,6 +764,8 @@ static void pick_shellgrab_pointer_button(struct nemopointer_grab *base, uint32_
 							screen = nemoshell_get_fullscreen_on(shell, pointer->x, pointer->y, NEMOSHELL_FULLSCREEN_PICK_TYPE);
 
 						if (screen != NULL) {
+							nemoshell_kill_fullscreen_bin(shell, screen->target);
+
 							nemoshell_set_fullscreen_bin(shell, bin, screen);
 
 							if (screen->focus == NEMOSHELL_FULLSCREEN_ALL_FOCUS) {

@@ -283,6 +283,7 @@ struct shellscreen {
 
 	uint32_t type;
 	uint32_t focus;
+	uint32_t target;
 
 	int fixed;
 
@@ -357,6 +358,7 @@ extern void nemoshell_put_fullscreen_bin(struct nemoshell *shell, struct shellbi
 extern void nemoshell_set_maximized_bin_on_screen(struct nemoshell *shell, struct shellbin *bin, struct nemoscreen *screen);
 extern void nemoshell_set_maximized_bin(struct nemoshell *shell, struct shellbin *bin, struct shellscreen *screen);
 extern void nemoshell_put_maximized_bin(struct nemoshell *shell, struct shellbin *bin);
+extern void nemoshell_kill_fullscreen_bin(struct nemoshell *shell, uint32_t target);
 
 static inline void nemoshell_set_execute_command(struct nemoshell *shell, nemoshell_execute_command_t execute)
 {
