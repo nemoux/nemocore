@@ -353,6 +353,8 @@ static void nemoenvs_handle_set_nemoshell_fullscreen(struct nemoshell *shell, st
 						screen->fixed = 1;
 					else
 						screen->fixed = 0;
+				} else if (strcmp(name, "target") == 0) {
+					screen->target = strtoul(value, NULL, 10);
 				}
 			}
 		}
