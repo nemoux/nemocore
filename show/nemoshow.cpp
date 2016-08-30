@@ -258,21 +258,27 @@ void nemoshow_render_one(struct nemoshow *show)
 		return;
 
 	nemolist_for_each_safe(canvas, ncanvas, &show->redraw_list, redraw_link) {
-		nemoshow_clear_time(show);
+		if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE)) {
+			nemoshow_clear_time(show);
 
-		canvas->prepare_render(show, NEMOSHOW_CANVAS_ONE(canvas));
+			canvas->prepare_render(show, NEMOSHOW_CANVAS_ONE(canvas));
 
-		nemoshow_check_time(show, NEMOSHOW_FRAME_PREPARE_TIME);
+			nemoshow_check_time(show, NEMOSHOW_FRAME_PREPARE_TIME);
 
-		canvas->dispatch_redraw(show, NEMOSHOW_CANVAS_ONE(canvas));
+			canvas->dispatch_redraw(show, NEMOSHOW_CANVAS_ONE(canvas));
 
-		nemoshow_check_time(show, NEMOSHOW_FRAME_RENDER_TIME);
+			nemoshow_check_time(show, NEMOSHOW_FRAME_RENDER_TIME);
 
-		canvas->finish_render(show, NEMOSHOW_CANVAS_ONE(canvas));
+			canvas->finish_render(show, NEMOSHOW_CANVAS_ONE(canvas));
 
-		nemoshow_check_time(show, NEMOSHOW_FRAME_FINISH_TIME);
+			nemoshow_check_time(show, NEMOSHOW_FRAME_FINISH_TIME);
+		}
 
-		nemotale_node_filter(canvas->node);
+		if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_FILTER_STATE)) {
+			nemotale_node_filter(canvas->node);
+		}
+
+		nemoshow_canvas_put_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE | NEMOSHOW_CANVAS_FILTER_STATE);
 
 		nemolist_remove(&canvas->redraw_link);
 		nemolist_init(&canvas->redraw_link);
@@ -298,11 +304,11 @@ void nemoshow_divide_one(struct nemoshow *show)
 		return;
 
 	nemolist_for_each_safe(canvas, ncanvas, &show->redraw_list, redraw_link) {
-		if ((nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_POOLING_STATE) != 0) &&
+		if ((nemoshow_canvas_has_state_all(canvas, NEMOSHOW_CANVAS_REDRAW_STATE | NEMOSHOW_CANVAS_POOLING_STATE) != 0) &&
 				(canvas->viewport.width >= show->tilesize || canvas->viewport.height >= show->tilesize)) {
 			SkIRect box = NEMOSHOW_CANVAS_CC(canvas, damage)->getBounds();
 
-			if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE) || box.width() >= show->tilesize || box.height() >= show->tilesize) {
+			if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_REDRAW_FULL_STATE) || box.width() >= show->tilesize || box.height() >= show->tilesize) {
 				int cw = canvas->viewport.width;
 				int ch = canvas->viewport.height;
 				int tc = cw / show->tilesize + 1;
@@ -321,7 +327,7 @@ void nemoshow_divide_one(struct nemoshow *show)
 
 				for (i = 0; i < tr; i++) {
 					for (j = 0; j < tc; j++) {
-						if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE) ||
+						if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_REDRAW_FULL_STATE) ||
 								NEMOSHOW_CANVAS_CC(canvas, damage)->intersects(SkIRect::MakeXYWH(j * tw, i * th, tw, th))) {
 							task = (struct showtask *)malloc(sizeof(struct showtask));
 							task->show = show;
@@ -344,7 +350,10 @@ void nemoshow_divide_one(struct nemoshow *show)
 
 				nemoshow_check_time(show, NEMOSHOW_FRAME_FINISH_TIME);
 
-				nemoshow_canvas_put_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE);
+				if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_FILTER_STATE))
+					nemotale_node_filter(canvas->node);
+
+				nemoshow_canvas_put_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE | NEMOSHOW_CANVAS_FILTER_STATE | NEMOSHOW_CANVAS_REDRAW_FULL_STATE);
 
 				NEMOSHOW_CANVAS_CC(canvas, damage)->setEmpty();
 
@@ -708,7 +717,7 @@ void nemoshow_check_damage(struct nemoshow *show)
 
 	nemolist_for_each(canvas, &show->redraw_list, redraw_link) {
 		if (nemoshow_canvas_is_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE) != 0) {
-			if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE)) {
+			if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_REDRAW_FULL_STATE)) {
 				show->damages += (canvas->viewport.width * canvas->viewport.height);
 			} else {
 				SkRegion::Iterator iter(*NEMOSHOW_CANVAS_CC(canvas, damage));

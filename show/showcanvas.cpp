@@ -299,11 +299,13 @@ int nemoshow_canvas_update(struct showone *one)
 	}
 	if ((one->dirty & NEMOSHOW_FILTER_DIRTY) != 0) {
 		nemotale_node_damage_filter(canvas->node);
+
+		nemoshow_canvas_set_state(canvas, NEMOSHOW_CANVAS_FILTER_STATE);
 	}
 	if ((one->dirty & NEMOSHOW_REDRAW_DIRTY) != 0) {
 		nemotale_node_damage_all(canvas->node);
 
-		nemoshow_canvas_set_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE);
+		nemoshow_canvas_set_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE | NEMOSHOW_CANVAS_FILTER_STATE | NEMOSHOW_CANVAS_REDRAW_FULL_STATE);
 	}
 
 	if (nemolist_empty(&canvas->redraw_link) != 0)
@@ -679,7 +681,7 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 	SkBitmapDevice _device(*NEMOSHOW_CANVAS_CC(canvas, bitmap));
 	SkCanvas _canvas(&_device);
 
-	if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE)) {
+	if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_REDRAW_FULL_STATE)) {
 		_canvas.clear(SK_ColorTRANSPARENT);
 		_canvas.scale(canvas->viewport.sx, canvas->viewport.sy);
 
@@ -687,7 +689,7 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 			nemoshow_canvas_render_one(canvas, &_canvas, child, NULL);
 		}
 
-		nemoshow_canvas_put_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE);
+		nemoshow_canvas_put_state(canvas, NEMOSHOW_CANVAS_REDRAW_FULL_STATE);
 	} else {
 		_canvas.clipRegion(*NEMOSHOW_CANVAS_CC(canvas, damage));
 		_canvas.clear(SK_ColorTRANSPARENT);
@@ -727,7 +729,7 @@ void nemoshow_canvas_replay_vector(struct nemoshow *show, struct showone *one, i
 	SkCanvas _canvas(&_device);
 	SkRegion region;
 
-	if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE))
+	if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_REDRAW_FULL_STATE))
 		region.setRect(SkIRect::MakeXYWH(x, y, width, height));
 	else
 		region.op(*NEMOSHOW_CANVAS_CC(canvas, damage), SkIRect::MakeXYWH(x, y, width, height), SkRegion::kIntersect_Op);
@@ -856,6 +858,8 @@ void nemoshow_canvas_damage(struct showone *one, int32_t x, int32_t y, int32_t w
 
 	nemotale_node_damage(canvas->node, x, y, width, height);
 
+	nemoshow_canvas_set_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE | NEMOSHOW_CANVAS_FILTER_STATE);
+
 	if (one->show != NULL && nemolist_empty(&canvas->redraw_link) != 0)
 		nemolist_insert(&one->show->redraw_list, &canvas->redraw_link);
 }
@@ -870,6 +874,8 @@ void nemoshow_canvas_damage_one(struct showone *one, struct showone *child)
 
 	nemotale_node_damage(canvas->node, child->x, child->y, child->w, child->h);
 
+	nemoshow_canvas_set_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE | NEMOSHOW_CANVAS_FILTER_STATE);
+
 	if (one->show != NULL && nemolist_empty(&canvas->redraw_link) != 0)
 		nemolist_insert(&one->show->redraw_list, &canvas->redraw_link);
 }
@@ -880,7 +886,7 @@ void nemoshow_canvas_damage_all(struct showone *one)
 
 	nemotale_node_damage_all(canvas->node);
 
-	nemoshow_canvas_set_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE);
+	nemoshow_canvas_set_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE | NEMOSHOW_CANVAS_FILTER_STATE | NEMOSHOW_CANVAS_REDRAW_FULL_STATE);
 
 	if (one->show != NULL && nemolist_empty(&canvas->redraw_link) != 0)
 		nemolist_insert(&one->show->redraw_list, &canvas->redraw_link);

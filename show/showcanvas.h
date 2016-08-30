@@ -31,7 +31,9 @@ typedef enum {
 
 typedef enum {
 	NEMOSHOW_CANVAS_REDRAW_STATE = (1 << 0),
-	NEMOSHOW_CANVAS_POOLING_STATE = (1 << 1)
+	NEMOSHOW_CANVAS_FILTER_STATE = (1 << 1),
+	NEMOSHOW_CANVAS_REDRAW_FULL_STATE = (1 << 2),
+	NEMOSHOW_CANVAS_POOLING_STATE = (1 << 3)
 } NemoShowCanvasState;
 
 struct nemoshow;
