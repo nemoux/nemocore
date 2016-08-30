@@ -706,29 +706,25 @@ static const struct presentation_feedback_listener presentation_feedback_listene
 
 void nemocanvas_dispatch_feedback(struct nemocanvas *canvas)
 {
-	canvas->needs_feedback = 1;
-}
-
-void nemocanvas_handle_feedback(struct nemocanvas *canvas)
-{
-	if (canvas->needs_feedback != 0) {
+	if (canvas->feedback == NULL) {
 		canvas->feedback = presentation_feedback(canvas->tool->presentation, canvas->surface);
 		presentation_feedback_add_listener(canvas->feedback, &presentation_feedback_listener, canvas);
+	}
+}
 
-		canvas->needs_feedback = 0;
+void nemocanvas_terminate_feedback(struct nemocanvas *canvas)
+{
+	if (canvas->feedback != NULL) {
+		presentation_feedback_destroy(canvas->feedback);
+
+		canvas->feedback = NULL;
 	}
 }
 
 void nemocanvas_dispatch_frame(struct nemocanvas *canvas)
 {
-	if (canvas->feedback == NULL) {
+	if (canvas->feedback == NULL)
 		canvas->dispatch_frame(canvas, 0, 0);
-	}
-}
-
-void nemocanvas_dispatch_frame_force(struct nemocanvas *canvas)
-{
-	canvas->dispatch_frame(canvas, 0, 0);
 }
 
 void nemocanvas_dispatch_frame_async(struct nemocanvas *canvas)

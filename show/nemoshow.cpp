@@ -230,13 +230,13 @@ void nemoshow_update_one_expression_without_dirty(struct nemoshow *show, struct 
 }
 #endif
 
-void nemoshow_update_one(struct nemoshow *show)
+int nemoshow_update_one(struct nemoshow *show)
 {
 	struct showone *scene = show->scene;
 	struct showone *one, *none;
 
 	if (scene == NULL)
-		return;
+		return 0;
 
 	nemolist_for_each_safe(one, none, &show->dirty_list, dirty_link) {
 		nemoshow_one_update(one);
@@ -247,6 +247,8 @@ void nemoshow_update_one(struct nemoshow *show)
 	}
 
 	show->dirty_serial = 0;
+
+	return nemolist_empty(&show->canvas_list) == 0 || nemolist_empty(&show->pipeline_list) == 0;
 }
 
 void nemoshow_render_one(struct nemoshow *show)

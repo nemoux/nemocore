@@ -44,21 +44,21 @@ static void nemoshow_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 	if (nemoshow_has_transition(show) != 0) {
 		nemoshow_dispatch_transition(show, secs * 1000 + nsecs / 1000000);
 		nemoshow_destroy_transition(show);
-
-		nemocanvas_dispatch_feedback(canvas);
 	}
 
-	nemoshow_update_one(show);
+	if (nemoshow_update_one(show) != 0) {
+		nemoshow_check_frame(show);
+		nemoshow_check_damage(show);
 
-	nemoshow_check_frame(show);
-	nemoshow_check_damage(show);
+		nemoshow_divide_one(show);
+		nemoshow_render_one(show);
 
-	nemoshow_divide_one(show);
-	nemoshow_render_one(show);
+		nemocanvas_dispatch_feedback(canvas);
 
-	nemocanvas_handle_feedback(canvas);
-
-	nemotale_composite_egl(tale, NULL);
+		nemotale_composite_egl(tale, NULL);
+	} else {
+		nemocanvas_terminate_feedback(canvas);
+	}
 }
 
 static void nemoshow_dispatch_canvas_discard(struct nemocanvas *canvas)

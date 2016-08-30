@@ -105,12 +105,11 @@ void nemoscreen_finish_frame(struct nemoscreen *screen, uint32_t secs, uint32_t 
 				secs, usecs * 1000, screen->msc, psf_flags);
 	}
 
-	screen->frame_msecs = secs * 1000 + usecs / 1000;
-	screen->frame_count++;
-
 	if (screen->repaint_needed != 0) {
-		if (nemoscreen_repaint_frame(screen) < 0)
-			return;
+		screen->frame_msecs = secs * 1000 + usecs / 1000;
+		screen->frame_count++;
+
+		nemoscreen_repaint_frame(screen);
 	}
 
 	screen->repaint_scheduled = 0;
