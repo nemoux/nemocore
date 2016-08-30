@@ -31,8 +31,8 @@ typedef enum {
 
 typedef enum {
 	NEMOSHOW_CANVAS_REDRAW_STATE = (1 << 0),
-	NEMOSHOW_CANVAS_FILTER_STATE = (1 << 1),
-	NEMOSHOW_CANVAS_REDRAW_FULL_STATE = (1 << 2),
+	NEMOSHOW_CANVAS_REDRAW_FULL_STATE = (1 << 1),
+	NEMOSHOW_CANVAS_FILTERING_STATE = (1 << 2),
 	NEMOSHOW_CANVAS_POOLING_STATE = (1 << 3)
 } NemoShowCanvasState;
 
@@ -54,6 +54,7 @@ struct showcanvas {
 
 	struct nemoshow *show;
 	struct nemolist redraw_link;
+	struct nemolist filter_link;
 
 	char type[NEMOSHOW_CANVAS_TYPE_MAX];
 
@@ -301,7 +302,7 @@ static inline void nemoshow_canvas_set_fill_color(struct showone *one, double r,
 
 	canvas->fill = 1;
 
-	nemoshow_one_dirty(one, NEMOSHOW_STYLE_DIRTY);
+	nemoshow_one_dirty(one, NEMOSHOW_STYLE_DIRTY | NEMOSHOW_REDRAW_DIRTY);
 }
 
 static inline uint32_t nemoshow_canvas_pick_tag(struct showone *one, float x, float y)

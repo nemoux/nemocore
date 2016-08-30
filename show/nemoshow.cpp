@@ -51,6 +51,7 @@ struct nemoshow *nemoshow_create(void)
 	nemolist_init(&show->dirty_list);
 	nemolist_init(&show->bounds_list);
 	nemolist_init(&show->redraw_list);
+	nemolist_init(&show->filter_list);
 	nemolist_init(&show->transition_list);
 	nemolist_init(&show->transition_destroy_list);
 
@@ -96,6 +97,7 @@ void nemoshow_destroy(struct nemoshow *show)
 	nemolist_remove(&show->one_list);
 	nemolist_remove(&show->dirty_list);
 	nemolist_remove(&show->bounds_list);
+	nemolist_remove(&show->filter_list);
 	nemolist_remove(&show->redraw_list);
 	nemolist_remove(&show->transition_list);
 	nemolist_remove(&show->transition_destroy_list);
@@ -246,7 +248,7 @@ int nemoshow_update_one(struct nemoshow *show)
 
 	show->dirty_serial = 0;
 
-	return nemolist_empty(&show->redraw_list) == 0;
+	return nemolist_empty(&show->redraw_list) == 0 || nemolist_empty(&show->filter_list) == 0;
 }
 
 void nemoshow_render_one(struct nemoshow *show)
@@ -272,16 +274,19 @@ void nemoshow_render_one(struct nemoshow *show)
 			canvas->finish_render(show, NEMOSHOW_CANVAS_ONE(canvas));
 
 			nemoshow_check_time(show, NEMOSHOW_FRAME_FINISH_TIME);
-		}
 
-		if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_FILTER_STATE)) {
-			nemotale_node_filter(canvas->node);
+			nemoshow_canvas_put_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE);
 		}
-
-		nemoshow_canvas_put_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE | NEMOSHOW_CANVAS_FILTER_STATE);
 
 		nemolist_remove(&canvas->redraw_link);
 		nemolist_init(&canvas->redraw_link);
+	}
+
+	nemolist_for_each_safe(canvas, ncanvas, &show->filter_list, filter_link) {
+		nemotale_node_filter(canvas->node);
+
+		nemolist_remove(&canvas->filter_link);
+		nemolist_init(&canvas->filter_link);
 	}
 }
 
@@ -350,11 +355,7 @@ void nemoshow_divide_one(struct nemoshow *show)
 
 				nemoshow_check_time(show, NEMOSHOW_FRAME_FINISH_TIME);
 
-				if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_FILTER_STATE))
-					nemotale_node_filter(canvas->node);
-
-				nemoshow_canvas_put_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE | NEMOSHOW_CANVAS_FILTER_STATE | NEMOSHOW_CANVAS_REDRAW_FULL_STATE);
-
+				nemoshow_canvas_put_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE | NEMOSHOW_CANVAS_REDRAW_FULL_STATE);
 				NEMOSHOW_CANVAS_CC(canvas, damage)->setEmpty();
 
 				nemolist_remove(&canvas->redraw_link);

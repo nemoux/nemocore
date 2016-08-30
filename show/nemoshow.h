@@ -97,6 +97,7 @@ struct nemoshow {
 	struct nemolist dirty_list;
 	struct nemolist bounds_list;
 	struct nemolist redraw_list;
+	struct nemolist filter_list;
 	struct nemolist transition_list;
 	struct nemolist transition_destroy_list;
 
