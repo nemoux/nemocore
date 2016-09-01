@@ -441,15 +441,6 @@ static void nemotale_repaint_node(struct nemotale *tale, struct talenode *node, 
 	pixman_region32_intersect(&repaint, &node->boundingbox, damage);
 
 	if (pixman_region32_not_empty(&repaint)) {
-		if (node->glcontext == NULL)
-			nemotale_node_prepare_gl(node);
-
-		if (node->pmcontext != NULL && node->needs_flush != 0)
-			nemotale_node_flush(node);
-
-		if (node->has_filter != 0 && node->needs_filter != 0)
-			nemotale_node_filter(node);
-
 		glBindTexture(GL_TEXTURE_2D, nemotale_node_get_texture(node));
 
 		if (node->has_smooth != 0 && node->transform.enable != 0) {
@@ -484,8 +475,19 @@ static void nemotale_repaint_node(struct nemotale *tale, struct talenode *node, 
 		pixman_region32_fini(&blend);
 	}
 
-err1:
 	pixman_region32_fini(&repaint);
+}
+
+static void nemotale_flush_node(struct nemotale *tale, struct talenode *node)
+{
+	if (node->glcontext == NULL)
+		nemotale_node_prepare_gl(node);
+
+	if (node->pmcontext != NULL && node->needs_flush != 0)
+		nemotale_node_flush(node);
+
+	if (node->has_filter != 0 && node->needs_filter != 0)
+		nemotale_node_filter(node);
 }
 
 struct nemotale *nemotale_create_gl(void)
@@ -694,6 +696,10 @@ static inline int nemotale_composite_egl_in(struct nemotale *tale)
 		pixman_region32_union(&total_damage, &buffer_damage, &tale->damage);
 
 		nemolist_for_each(node, &tale->node_list, link) {
+			nemotale_flush_node(tale, node);
+		}
+
+		nemolist_for_each(node, &tale->node_list, link) {
 			nemotale_repaint_node(tale, node, &total_damage);
 		}
 
@@ -732,6 +738,10 @@ static inline int nemotale_composite_egl_in(struct nemotale *tale)
 		free(edamages);
 		pixman_region32_fini(&buffer_damage);
 	} else {
+		nemolist_for_each(node, &tale->node_list, link) {
+			nemotale_flush_node(tale, node);
+		}
+
 		nemolist_for_each(node, &tale->node_list, link) {
 			nemotale_repaint_node(tale, node, &tale->damage);
 		}
@@ -858,6 +868,10 @@ int nemotale_composite_fbo(struct nemotale *tale, pixman_region32_t *region)
 	nemotale_clear_shader(tale);
 
 	nemolist_for_each(node, &tale->node_list, link) {
+		nemotale_flush_node(tale, node);
+	}
+
+	nemolist_for_each(node, &tale->node_list, link) {
 		nemotale_repaint_node(tale, node, &tale->damage);
 	}
 
@@ -916,6 +930,10 @@ int nemotale_composite_fbo_full(struct nemotale *tale)
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
 	nemotale_clear_shader(tale);
+
+	nemolist_for_each(node, &tale->node_list, link) {
+		nemotale_flush_node(tale, node);
+	}
 
 	nemolist_for_each(node, &tale->node_list, link) {
 		nemotale_repaint_node(tale, node, &tale->damage);
