@@ -51,7 +51,6 @@ struct nemoshow *nemoshow_create(void)
 	nemolist_init(&show->dirty_list);
 	nemolist_init(&show->bounds_list);
 	nemolist_init(&show->redraw_list);
-	nemolist_init(&show->filter_list);
 	nemolist_init(&show->transition_list);
 	nemolist_init(&show->transition_destroy_list);
 
@@ -97,7 +96,6 @@ void nemoshow_destroy(struct nemoshow *show)
 	nemolist_remove(&show->one_list);
 	nemolist_remove(&show->dirty_list);
 	nemolist_remove(&show->bounds_list);
-	nemolist_remove(&show->filter_list);
 	nemolist_remove(&show->redraw_list);
 	nemolist_remove(&show->transition_list);
 	nemolist_remove(&show->transition_destroy_list);
@@ -248,7 +246,7 @@ int nemoshow_update_one(struct nemoshow *show)
 
 	show->dirty_serial = 0;
 
-	return nemolist_empty(&show->redraw_list) == 0 || nemolist_empty(&show->filter_list) == 0;
+	return nemolist_empty(&show->redraw_list) == 0;
 }
 
 void nemoshow_render_one(struct nemoshow *show)
@@ -278,13 +276,6 @@ void nemoshow_render_one(struct nemoshow *show)
 
 		nemolist_remove(&canvas->redraw_link);
 		nemolist_init(&canvas->redraw_link);
-	}
-
-	nemolist_for_each_safe(canvas, ncanvas, &show->filter_list, filter_link) {
-		nemotale_node_filter(canvas->node);
-
-		nemolist_remove(&canvas->filter_link);
-		nemolist_init(&canvas->filter_link);
 	}
 }
 
