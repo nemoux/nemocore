@@ -322,13 +322,6 @@ static inline void nemotale_use_shader(struct nemotale *tale, struct talenode *n
 	}
 }
 
-static inline void nemotale_clear_shader(struct nemotale *tale)
-{
-	struct nemogltale *context = (struct nemogltale *)tale->glcontext;
-
-	context->current_shader = NULL;
-}
-
 static int nemotale_calculate_edges(struct talenode *node, pixman_box32_t *rect, pixman_box32_t *rrect, GLfloat *ex, GLfloat *ey)
 {
 	struct clipcontext ctx;
@@ -550,6 +543,26 @@ int nemotale_make_current(struct nemotale *tale)
 	return 0;
 }
 
+static inline void nemotale_composite_ready(struct nemotale *tale, int flip)
+{
+	struct nemogltale *context = (struct nemogltale *)tale->glcontext;
+
+	if (tale->transform.dirty != 0) {
+		nemomatrix_init_identity(&context->transform);
+		nemomatrix_multiply(&context->transform, &tale->transform.matrix);
+		if (tale->viewport.enable != 0)
+			nemomatrix_scale(&context->transform, tale->viewport.sx, tale->viewport.sy);
+
+		context->projection = context->transform;
+		nemomatrix_translate(&context->projection, -tale->viewport.width / 2.0f, -tale->viewport.height / 2.0f);
+		nemomatrix_scale(&context->projection, 2.0f / tale->viewport.width, 2.0f / tale->viewport.height * flip);
+
+		tale->transform.dirty = 0;
+	}
+
+	context->current_shader = NULL;
+}
+
 struct taleegl *nemotale_create_egl(EGLDisplay egl_display, EGLContext egl_context, EGLConfig egl_config, EGLNativeWindowType egl_window)
 {
 	struct taleegl *egl;
@@ -662,24 +675,11 @@ static inline int nemotale_composite_egl_in(struct nemotale *tale)
 	if (!eglMakeCurrent(egl->display, egl->surface, egl->surface, egl->context))
 		return -1;
 
-	if (tale->transform.dirty != 0) {
-		nemomatrix_init_identity(&context->transform);
-		nemomatrix_multiply(&context->transform, &tale->transform.matrix);
-		if (tale->viewport.enable != 0)
-			nemomatrix_scale(&context->transform, tale->viewport.sx, tale->viewport.sy);
-
-		context->projection = context->transform;
-		nemomatrix_translate(&context->projection, -tale->viewport.width / 2.0f, -tale->viewport.height / 2.0f);
-		nemomatrix_scale(&context->projection, 2.0f / tale->viewport.width, -2.0f / tale->viewport.height);
-
-		tale->transform.dirty = 0;
-	}
+	nemotale_composite_ready(tale, -1);
 
 	glViewport(0, 0, tale->viewport.width, tale->viewport.height);
 
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-
-	nemotale_clear_shader(tale);
 
 	if (egl->swap_buffers_with_damage != NULL) {
 		pixman_region32_t buffer_damage, total_damage;
@@ -847,26 +847,13 @@ int nemotale_composite_fbo(struct nemotale *tale, pixman_region32_t *region)
 	nemotale_update_node(tale);
 	nemotale_accumulate_damage(tale);
 
-	if (tale->transform.dirty != 0) {
-		nemomatrix_init_identity(&context->transform);
-		nemomatrix_multiply(&context->transform, &tale->transform.matrix);
-		if (tale->viewport.enable != 0)
-			nemomatrix_scale(&context->transform, tale->viewport.sx, tale->viewport.sy);
-
-		context->projection = context->transform;
-		nemomatrix_translate(&context->projection, -tale->viewport.width / 2.0f, -tale->viewport.height / 2.0f);
-		nemomatrix_scale(&context->projection, 2.0f / tale->viewport.width, 2.0f / tale->viewport.height);
-
-		tale->transform.dirty = 0;
-	}
+	nemotale_composite_ready(tale, 1);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo->fbo);
 
 	glViewport(0, 0, tale->viewport.width, tale->viewport.height);
 
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-
-	nemotale_clear_shader(tale);
 
 	nemolist_for_each(node, &tale->node_list, link) {
 		nemotale_flush_node(tale, node);
@@ -911,26 +898,13 @@ int nemotale_composite_fbo_full(struct nemotale *tale)
 	nemotale_update_node(tale);
 	nemotale_damage_all(tale);
 
-	if (tale->transform.dirty != 0) {
-		nemomatrix_init_identity(&context->transform);
-		nemomatrix_multiply(&context->transform, &tale->transform.matrix);
-		if (tale->viewport.enable != 0)
-			nemomatrix_scale(&context->transform, tale->viewport.sx, tale->viewport.sy);
-
-		context->projection = context->transform;
-		nemomatrix_translate(&context->projection, -tale->viewport.width / 2.0f, -tale->viewport.height / 2.0f);
-		nemomatrix_scale(&context->projection, 2.0f / tale->viewport.width, 2.0f / tale->viewport.height);
-
-		tale->transform.dirty = 0;
-	}
+	nemotale_composite_ready(tale, 1);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo->fbo);
 
 	glViewport(0, 0, tale->viewport.width, tale->viewport.height);
 
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-
-	nemotale_clear_shader(tale);
 
 	nemolist_for_each(node, &tale->node_list, link) {
 		nemotale_flush_node(tale, node);
