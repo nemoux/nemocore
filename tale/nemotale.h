@@ -88,7 +88,6 @@ extern void nemotale_attach_node(struct nemotale *tale, struct talenode *node);
 extern void nemotale_detach_node(struct talenode *node);
 extern void nemotale_above_node(struct nemotale *tale, struct talenode *node, struct talenode *above);
 extern void nemotale_below_node(struct nemotale *tale, struct talenode *node, struct talenode *below);
-extern void nemotale_prepare_node(struct nemotale *tale, struct talenode *node);
 
 extern void nemotale_clear_node(struct nemotale *tale);
 

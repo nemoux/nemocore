@@ -107,7 +107,6 @@ void nemotale_attach_node(struct nemotale *tale, struct talenode *node)
 	nemolist_insert_tail(&tale->node_list, &node->link);
 
 	nemotale_damage_below(tale, node);
-	nemotale_prepare_node(tale, node);
 
 	node->tale = tale;
 }
@@ -150,23 +149,6 @@ void nemotale_below_node(struct nemotale *tale, struct talenode *node, struct ta
 	nemotale_damage_below(tale, node);
 
 	node->tale = tale;
-}
-
-void nemotale_prepare_node(struct nemotale *tale, struct talenode *node)
-{
-	if (nemotale_has_gl_context(tale) != 0) {
-#ifdef NEMOUX_WITH_OPENGL_PBO
-		node->dispatch_flush = nemotale_node_flush_gl_pbo;
-#elif NEMOUX_WITH_OPENGL_UNPACK_SUBIMAGE
-		node->dispatch_flush = nemotale_node_flush_gl_subimage;
-#else
-		node->dispatch_flush = nemotale_node_flush_gl;
-#endif
-
-		node->dispatch_filter = nemotale_node_filter_gl;
-
-		nemotale_node_prepare_gl(node);
-	}
 }
 
 void nemotale_clear_node(struct nemotale *tale)

@@ -252,9 +252,6 @@ int nemoshow_canvas_update(struct showone *one)
 	struct nemoshow *show = one->show;
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
-	if ((one->dirty & NEMOSHOW_INIT_DIRTY) != 0) {
-		nemotale_prepare_node(show->tale, canvas->node);
-	}
 	if ((one->dirty & NEMOSHOW_SIZE_DIRTY) != 0) {
 		nemotale_node_resize(canvas->node, canvas->width, canvas->height);
 
