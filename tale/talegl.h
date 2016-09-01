@@ -31,6 +31,9 @@ NEMO_BEGIN_EXTERN_C
 
 struct taleglnode {
 	GLuint texture;
+
+	GLuint _texture;
+
 	GLuint pbo;
 	GLuint pwidth;
 	GLuint pheight;
@@ -38,6 +41,7 @@ struct taleglnode {
 	GLuint ftexture;
 	GLuint fbo, dbo;
 	GLuint fprogram;
+
 	GLuint utexture;
 	GLuint uwidth;
 	GLuint uheight;
@@ -77,9 +81,14 @@ extern int nemotale_node_unmap_pbo(struct talenode *node);
 extern int nemotale_node_flush_gl_subimage(struct talenode *node);
 extern int nemotale_node_filter_gl(struct talenode *node);
 
-extern GLuint nemotale_node_get_texture(struct talenode *node);
-
 extern int nemotale_node_set_filter(struct talenode *node, const char *shader);
+
+static inline GLuint nemotale_node_get_texture(struct talenode *node)
+{
+	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
+
+	return gcontext->_texture;
+}
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
