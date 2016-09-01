@@ -171,6 +171,7 @@ int nemoshow_canvas_set_type(struct showone *one, int type)
 		canvas->node = nemotale_node_create_gl(canvas->width, canvas->height);
 #else
 		canvas->node = nemotale_node_create_pixman(canvas->width, canvas->height);
+		nemotale_node_prepare_gl(canvas->node);
 #endif
 
 		NEMOSHOW_CANVAS_CC(canvas, damage) = new SkRegion;
@@ -188,10 +189,12 @@ int nemoshow_canvas_set_type(struct showone *one, int type)
 		canvas->dispatch_redraw = nemoshow_canvas_render_pipeline;
 	} else if (type == NEMOSHOW_CANVAS_PIXMAN_TYPE) {
 		canvas->node = nemotale_node_create_pixman(canvas->width, canvas->height);
+		nemotale_node_prepare_gl(canvas->node);
 	} else if (type == NEMOSHOW_CANVAS_OPENGL_TYPE) {
 		canvas->node = nemotale_node_create_gl(canvas->width, canvas->height);
 	} else if (type == NEMOSHOW_CANVAS_BACK_TYPE) {
 		canvas->node = nemotale_node_create_pixman(canvas->width, canvas->height);
+		nemotale_node_prepare_gl(canvas->node);
 		nemotale_node_opaque(canvas->node, 0, 0, canvas->width, canvas->height);
 
 		canvas->dispatch_redraw = nemoshow_canvas_render_back;

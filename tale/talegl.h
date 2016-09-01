@@ -66,6 +66,7 @@ extern int nemotale_composite_fbo(struct nemotale *tale, pixman_region32_t *regi
 extern int nemotale_composite_fbo_full(struct nemotale *tale);
 
 extern struct talenode *nemotale_node_create_gl(int32_t width, int32_t height);
+extern int nemotale_node_prepare_gl(struct talenode *node);
 
 extern int nemotale_node_resize_gl(struct talenode *node, int32_t width, int32_t height);
 extern int nemotale_node_viewport_gl(struct talenode *node, int32_t width, int32_t height);
