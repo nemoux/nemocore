@@ -122,7 +122,7 @@ struct talenode *nemotale_node_create_gl(int32_t width, int32_t height)
 
 	nemotale_node_prepare(node);
 
-	node->dirty = 1;
+	node->dirty = 0x2;
 	node->geometry.width = width;
 	node->geometry.height = height;
 	node->viewport.width = width;
@@ -211,7 +211,7 @@ int nemotale_node_resize_gl(struct talenode *node, int32_t width, int32_t height
 	if (node->geometry.width != width || node->geometry.height != height) {
 		struct taleglnode *context = (struct taleglnode *)node->glcontext;
 
-		node->dirty = 1;
+		node->dirty = 0x2;
 		node->geometry.width = width;
 		node->geometry.height = height;
 		node->transform.dirty = 1;

@@ -69,7 +69,6 @@ struct talenode {
 	int dirty;
 	int needs_flush;
 	int needs_filter;
-	int needs_redraw;
 	int needs_full_upload;
 
 	nemotale_node_dispatch_flush_t dispatch_flush;
@@ -125,21 +124,21 @@ static inline void nemotale_node_input(struct talenode *node, int32_t x, int32_t
 static inline void nemotale_node_damage(struct talenode *node, int32_t x, int32_t y, int32_t width, int32_t height)
 {
 	pixman_region32_union_rect(&node->damage, &node->damage, x, y, width, height);
-	node->dirty = 1;
+	node->dirty |= 0x1;
 	node->needs_flush = 1;
 }
 
 static inline void nemotale_node_damage_region(struct talenode *node, pixman_region32_t *region)
 {
 	pixman_region32_union(&node->damage, &node->damage, region);
-	node->dirty = 1;
+	node->dirty |= 0x1;
 	node->needs_flush = 1;
 }
 
 static inline void nemotale_node_damage_all(struct talenode *node)
 {
 	pixman_region32_union_rect(&node->damage, &node->damage, 0, 0, node->geometry.width, node->geometry.height);
-	node->dirty = 1;
+	node->dirty |= 0x1;
 	node->needs_flush = 1;
 	node->needs_full_upload = 1;
 }
@@ -147,6 +146,8 @@ static inline void nemotale_node_damage_all(struct talenode *node)
 static inline void nemotale_node_damage_filter(struct talenode *node)
 {
 	node->needs_filter = 1;
+
+	node->dirty |= 0x2;
 }
 
 static inline void nemotale_node_transform_to_global(struct talenode *node, float sx, float sy, float *x, float *y)
@@ -250,14 +251,14 @@ static inline void nemotale_node_set_alpha(struct talenode *node, double alpha)
 {
 	node->alpha = alpha;
 
-	node->needs_redraw = 1;
+	node->dirty |= 0x2;
 }
 
 static inline void nemotale_node_set_smooth(struct talenode *node, int has_smooth)
 {
 	node->has_smooth = has_smooth;
 
-	node->needs_redraw = 1;
+	node->dirty |= 0x2;
 }
 
 static inline void nemotale_node_set_id(struct talenode *node, uint32_t id)
