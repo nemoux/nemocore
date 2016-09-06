@@ -470,6 +470,9 @@ static int glrenderer_prepare_egl_extentsion(struct glrenderer *renderer)
 	renderer->bind_display = (void *)eglGetProcAddress("eglBindWaylandDisplayWL");
 	renderer->unbind_display = (void *)eglGetProcAddress("eglUnbindWaylandDisplayWL");
 	renderer->query_buffer = (void *)eglGetProcAddress("eglQueryWaylandBufferWL");
+#ifdef NEMOUX_WITH_MESA_RENDERNODE
+	renderer->add_node = (void *)eglGetProcAddress("eglAddRenderNodeWL");
+#endif
 	renderer->image_target_texture_2d = (void *)eglGetProcAddress("glEGLImageTargetTexture2DOES");
 
 	extensions = (const char *)eglQueryString(renderer->egl_display, EGL_EXTENSIONS);
@@ -822,7 +825,7 @@ void glrenderer_set_render_nodes(struct nemocompz *compz)
 	wl_list_for_each(base, &compz->render_list, link) {
 		node = (struct drmnode *)container_of(base, struct drmnode, base);
 
-		eglAddRenderNodeWL(renderer->egl_display, node->devnode);
+		renderer->add_node(renderer->egl_display, node->devnode);
 	}
 }
 #endif

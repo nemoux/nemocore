@@ -52,6 +52,9 @@ struct glrenderer {
 	PFNEGLBINDWAYLANDDISPLAYWL bind_display;
 	PFNEGLUNBINDWAYLANDDISPLAYWL unbind_display;
 	PFNEGLQUERYWAYLANDBUFFERWL query_buffer;
+#ifdef NEMOUX_WITH_MESA_RENDERNODE
+	PFNEGLADDRENDERNODEWL add_node;
+#endif
 
 	int has_bind_display;
 	int has_configless_context;
