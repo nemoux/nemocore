@@ -602,7 +602,7 @@ void nemoshow_set_filtering_quality(struct nemoshow *show, uint32_t quality)
 	}
 }
 
-#ifdef NEMOSHOW_TIMELOG_ON
+#ifdef NEMOSHOW_FRAMELOG_ON
 void nemoshow_check_damage(struct nemoshow *show)
 {
 	struct showcanvas *canvas;

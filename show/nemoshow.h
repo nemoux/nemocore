@@ -263,7 +263,7 @@ static inline int nemoshow_make_current(struct nemoshow *show)
 	return nemotale_make_current(show->tale);
 }
 
-#ifdef NEMOSHOW_TIMELOG_ON
+#ifdef NEMOSHOW_FRAMELOG_ON
 extern void nemoshow_check_damage(struct nemoshow *show);
 extern void nemoshow_dump_times(struct nemoshow *show);
 

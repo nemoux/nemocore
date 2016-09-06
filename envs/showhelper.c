@@ -203,8 +203,8 @@ static void nemoshow_dispatch_timer(struct nemotimer *timer, void *data)
 
 	nemotale_push_timer_event(scon->tale, time_current_msecs());
 
-#ifdef NEMOSHOW_TIMELOG_ON
-	if (scon->has_timelog != 0) {
+#ifdef NEMOSHOW_FRAMELOG_ON
+	if (scon->has_framelog != 0) {
 		struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(scon->tale);
 
 		nemoshow_dump_times(show);
@@ -292,10 +292,10 @@ struct nemoshow *nemoshow_create_view(struct nemoshell *shell, int32_t width, in
 	scon->height = height;
 	scon->show = show;
 
-#ifdef NEMOSHOW_TIMELOG_ON
-	env = getenv("NEMOSHOW_TIMELOG");
+#ifdef NEMOSHOW_FRAMELOG_ON
+	env = getenv("NEMOSHOW_FRAMELOG");
 	if (env != NULL && strcasecmp(env, "ON") == 0)
-		scon->has_timelog = 1;
+		scon->has_framelog = 1;
 #endif
 
 	return show;

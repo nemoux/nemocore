@@ -45,7 +45,7 @@ struct showcontext {
 
 	int32_t width, height;
 
-	int has_timelog;
+	int has_framelog;
 };
 
 #define NEMOSHOW_AT(show, at)			(((struct showcontext *)nemoshow_get_context(show))->at)
