@@ -35,18 +35,6 @@ struct nemoshow *nemoshow_create(void)
 		return NULL;
 	memset(show, 0, sizeof(struct nemoshow));
 
-#ifdef NEMOUX_WITH_SHOWEXPR
-	show->expr = nemoshow_expr_create();
-	if (show->expr == NULL)
-		goto err1;
-
-	show->stable = nemoshow_expr_create_symbol_table();
-	if (show->stable == NULL)
-		goto err2;
-
-	nemoshow_expr_add_symbol_table(show->expr, show->stable);
-#endif
-
 	nemolist_init(&show->one_list);
 	nemolist_init(&show->dirty_list);
 	nemolist_init(&show->bounds_list);
@@ -65,16 +53,6 @@ struct nemoshow *nemoshow_create(void)
 	show->quality = NEMOSHOW_FILTER_NORMAL_QUALITY;
 
 	return show;
-
-#ifdef NEMOUX_WITH_SHOWEXPR
-err2:
-	nemoshow_expr_destroy(show->expr);
-#endif
-
-err1:
-	free(show);
-
-	return NULL;
 }
 
 void nemoshow_destroy(struct nemoshow *show)
@@ -101,11 +79,6 @@ void nemoshow_destroy(struct nemoshow *show)
 	nemolist_remove(&show->transition_destroy_list);
 
 	nemolist_remove(&show->scene_destroy_listener.link);
-
-#ifdef NEMOUX_WITH_SHOWEXPR
-	nemoshow_expr_destroy(show->expr);
-	nemoshow_expr_destroy_symbol_table(show->stable);
-#endif
 
 	if (show->pool != NULL)
 		nemopool_destroy(show->pool);
@@ -159,74 +132,6 @@ struct showone *nemoshow_search_one(struct nemoshow *show, const char *id)
 
 	return NULL;
 }
-
-#ifdef NEMOUX_WITH_SHOWEXPR
-void nemoshow_update_symbol(struct nemoshow *show, const char *name, double value)
-{
-	nemoshow_expr_add_symbol(show->stable, name, value);
-}
-
-void nemoshow_update_expression(struct nemoshow *show)
-{
-	struct showone *one;
-	struct showattr *attr;
-	int i;
-
-	nemoshow_for_each(one, show) {
-		uint32_t dirty = 0x0;
-
-		for (i = 0; i < one->nattrs; i++) {
-			attr = one->attrs[i];
-
-			nemoattr_setd(attr->ref,
-					nemoshow_expr_dispatch_expression(show->expr, attr->text));
-
-			dirty |= attr->dirty;
-		}
-
-		nemoshow_one_dirty(one, dirty);
-	}
-}
-
-void nemoshow_update_one_expression(struct nemoshow *show, struct showone *one)
-{
-	struct showattr *attr;
-	struct showone *child;
-	uint32_t dirty = 0x0;
-	int i;
-
-	for (i = 0; i < one->nattrs; i++) {
-		attr = one->attrs[i];
-
-		nemoattr_setd(attr->ref,
-				nemoshow_expr_dispatch_expression(show->expr, attr->text));
-
-		dirty |= attr->dirty;
-	}
-
-	nemoshow_children_for_each(child, one)
-		nemoshow_update_one_expression(show, child);
-
-	nemoshow_one_dirty(one, dirty);
-}
-
-void nemoshow_update_one_expression_without_dirty(struct nemoshow *show, struct showone *one)
-{
-	struct showattr *attr;
-	struct showone *child;
-	int i;
-
-	for (i = 0; i < one->nattrs; i++) {
-		attr = one->attrs[i];
-
-		nemoattr_setd(attr->ref,
-				nemoshow_expr_dispatch_expression(show->expr, attr->text));
-	}
-
-	nemoshow_children_for_each(child, one)
-		nemoshow_update_one_expression_without_dirty(show, child);
-}
-#endif
 
 int nemoshow_update_one(struct nemoshow *show)
 {

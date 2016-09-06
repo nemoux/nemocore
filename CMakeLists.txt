@@ -38,8 +38,6 @@ option(WITH_OPENCL "Build with OPENCL" OFF)
 
 option(WITH_TOUCH_TO_POINTER "Build with Touch to Pointer" OFF)
 
-option(WITH_SHOWEXPR "Build with NEMOSHOW's EXPR" OFF)
-
 option(WITH_OPTIMIZE "Build with OPTIMIZE" ON)
 option(WITH_DEBUG "Build with DEBUG" OFF)
 option(WITH_PROFILE "Build with PROFILE" OFF)

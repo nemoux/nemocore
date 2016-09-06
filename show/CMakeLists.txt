@@ -15,14 +15,6 @@ include_directories(
 	${CMAKE_SOURCE_DIR}/thirds
 	)
 
-if(WITH_SHOWEXPR)
-	add_definitions(-DNEMOUX_WITH_SHOWEXPR=1)
-
-	set(EXTRA_SOURCES ${EXTRA_SOURCES}
-		showexpr.cpp
-		)
-endif(WITH_SHOWEXPR)
-
 add_library(nemoshow SHARED
 	nemoshow.cpp
 	showone.cpp
@@ -74,7 +66,6 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/show/showmatrix.h
 	${CMAKE_SOURCE_DIR}/show/showfilter.h
 	${CMAKE_SOURCE_DIR}/show/showshader.h
-	${CMAKE_SOURCE_DIR}/show/showexpr.h
 	${CMAKE_SOURCE_DIR}/show/showfont.h
 	${CMAKE_SOURCE_DIR}/show/showeasy.h
 	${CMAKE_SOURCE_DIR}/show/showmisc.h
