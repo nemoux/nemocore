@@ -163,14 +163,6 @@ extern void nemoshow_item_path_set_dash_effect(struct showone *one, double *dash
 
 extern int nemoshow_item_path_contain_point(struct showone *one, double x, double y);
 
-extern void nemoshow_item_clear_points(struct showone *one);
-extern int nemoshow_item_append_point(struct showone *one, double x, double y);
-
-extern int nemoshow_item_set_buffer(struct showone *one, char *buffer, uint32_t width, uint32_t height);
-extern void nemoshow_item_put_buffer(struct showone *one);
-extern int nemoshow_item_copy_buffer(struct showone *one, char *buffer, uint32_t width, uint32_t height);
-extern int nemoshow_item_fill_buffer(struct showone *one, double r, double g, double b, double a);
-
 extern int nemoshow_item_contain_one(struct showone *one, float x, float y);
 extern struct showone *nemoshow_item_pick_one(struct showone *one, float x, float y);
 
