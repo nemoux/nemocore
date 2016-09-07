@@ -151,76 +151,6 @@ static int glrenderer_attach_shm(struct glrenderer *renderer, struct glcontent *
 	return 0;
 }
 
-#ifdef NEMOUX_WITH_MESA_DMABUF
-static int glrenderer_attach_egl(struct glrenderer *renderer, struct glcontent *glcontent, struct nemoactor *actor)
-{
-	struct nemocompz *compz = actor->compz;
-	struct glrenderer *srenderer = (struct glrenderer *)container_of(compz->renderer, struct glrenderer, base);
-	EGLImageKHR image;
-	EGLint attribs[16];
-	int fds[4];
-	int i;
-
-	for (i = 0; i < glcontent->nimages; i++)
-		renderer->destroy_image(renderer->egl_display, glcontent->images[i]);
-	glcontent->nimages = 0;
-	glcontent->target = GL_TEXTURE_2D;
-
-	image = srenderer->create_image(srenderer->egl_display,
-			srenderer->egl_context,
-			EGL_GL_TEXTURE_2D_KHR,
-			(EGLClientBuffer)(uint64_t)actor->texture,
-			NULL);
-	if (image == NULL) {
-		nemolog_error("GLRENDERER", "failed to create image from texture\n");
-		return -1;
-	}
-
-	if (eglExportDMABUFImageMESA(srenderer->egl_display, image, fds, NULL, NULL) == EGL_FALSE) {
-		nemolog_error("GLRENDERER", "failed to export dmabuf from image\n");
-		return -1;
-	}
-
-	glrenderer_prepare_textures(glcontent, 1);
-
-	attribs[0] = EGL_WIDTH;
-	attribs[1] = actor->base.width;
-	attribs[2] = EGL_HEIGHT;
-	attribs[3] = actor->base.height;
-	attribs[4] = EGL_LINUX_DRM_FOURCC_EXT;
-	attribs[5] = DRM_FORMAT_ARGB8888;
-	attribs[6] = EGL_DMA_BUF_PLANE0_FD_EXT;
-	attribs[7] = fds[0];
-	attribs[8] = EGL_DMA_BUF_PLANE0_OFFSET_EXT;
-	attribs[9] = 0;
-	attribs[10] = EGL_DMA_BUF_PLANE0_PITCH_EXT;
-	attribs[11] = actor->base.width * 4;
-	attribs[12] = EGL_NONE;
-
-	glcontent->images[0] = renderer->create_image(renderer->egl_display,
-			NULL,
-			EGL_LINUX_DMA_BUF_EXT,
-			NULL,
-			attribs);
-	if (glcontent->images[0] == NULL) {
-		nemolog_error("GLRENDERER", "failed to create image from prime fd\n");
-		return -1;
-	}
-
-	glBindTexture(glcontent->target, glcontent->textures[0]);
-	renderer->image_target_texture_2d(glcontent->target, glcontent->images[0]);
-	glBindTexture(glcontent->target, 0);
-
-	glcontent->shader = &renderer->texture_shader_rgba;
-	glcontent->pitch = actor->base.width;
-	glcontent->height = actor->base.height;
-	glcontent->buffer_type = GL_BUFFER_EGL_TYPE;
-	glcontent->y_inverted = 1;
-
-	return 0;
-}
-#endif
-
 void glrenderer_attach_actor(struct nemorenderer *base, struct nemoactor *actor)
 {
 	struct glrenderer *renderer = (struct glrenderer *)container_of(base, struct glrenderer, base);
@@ -240,10 +170,6 @@ void glrenderer_attach_actor(struct nemorenderer *base, struct nemoactor *actor)
 
 	if (actor->image != NULL) {
 		glrenderer_attach_shm(renderer, glcontent, actor);
-#ifdef NEMOUX_WITH_MESA_DMABUF
-	} else if (compz->renderer != &renderer->base) {
-		glrenderer_attach_egl(renderer, glcontent, actor);
-#endif
 	} else {
 		glcontent->pitch = actor->base.width;
 		glcontent->height = actor->base.height;

@@ -12,10 +12,6 @@
 #include <xf86drmMode.h>
 #include <wayland-server.h>
 
-#ifdef NEMOUX_WITH_MESA_RENDERNODE
-#include <glrenderer.h>
-#endif
-
 #include <drmbackend.h>
 #include <drmnode.h>
 #include <compz.h>
@@ -180,11 +176,6 @@ struct nemobackend *drmbackend_create(struct nemocompz *compz, const char *args)
 	} else {
 		drmbackend_monitor_devs(drm);
 		drmbackend_scan_devs(drm);
-
-#ifdef NEMOUX_WITH_MESA_RENDERNODE
-		if (compz->use_pixman == 0)
-			glrenderer_set_render_nodes(compz);
-#endif
 	}
 
 	wl_list_insert(&compz->backend_list, &drm->base.link);
