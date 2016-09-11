@@ -156,6 +156,7 @@ extern void nemotool_disconnect_wayland(struct nemotool *tool);
 extern void nemotool_dispatch(struct nemotool *tool);
 extern void nemotool_run(struct nemotool *tool);
 extern void nemotool_flush(struct nemotool *tool);
+extern int nemotool_roundtrip(struct nemotool *tool);
 extern void nemotool_exit(struct nemotool *tool);
 
 extern int nemotool_watch_source(struct nemotool *tool, int fd, uint32_t events, nemotool_dispatch_source_t dispatch, void *data);

@@ -785,6 +785,37 @@ void nemotool_flush(struct nemotool *tool)
 	wl_display_flush(tool->display);
 }
 
+static void sync_handle_done(void *data, struct wl_callback *callback, uint32_t serial)
+{
+	int *done = (int *)data;
+
+	*done = 1;
+
+	wl_callback_destroy(callback);
+}
+
+static const struct wl_callback_listener sync_listener = {
+	.done = sync_handle_done
+};
+
+int nemotool_roundtrip(struct nemotool *tool)
+{
+	struct wl_callback *callback;
+	int done = 0;
+	int r = 0;
+
+	callback = wl_display_sync(tool->display);
+	wl_callback_add_listener(callback, &sync_listener, &done);
+
+	while (r != -1 && done == 0)
+		r = wl_display_dispatch(tool->display);
+
+	if (done == 0)
+		wl_callback_destroy(callback);
+
+	return r;
+}
+
 void nemotool_exit(struct nemotool *tool)
 {
 	tool->running = 0;
