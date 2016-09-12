@@ -66,6 +66,7 @@ struct nemoenvs *nemoenvs_create(struct nemoshell *shell)
 	nemoenvs_set_callback(envs, nemoenvs_dispatch_system_message, shell);
 	nemoenvs_set_callback(envs, nemoenvs_dispatch_device_message, shell);
 	nemoenvs_set_callback(envs, nemoenvs_dispatch_link_message, shell);
+	nemoenvs_set_callback(envs, nemoenvs_dispatch_envs_message, shell);
 	nemoenvs_set_callback(envs, nemoenvs_dispatch_config_message, shell);
 
 	return envs;

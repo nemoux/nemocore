@@ -426,7 +426,7 @@ static void nemoenvs_handle_set_nemoshell_show(struct nemoshell *shell, struct i
 
 		setenv("NEMOSHOW_THREADS", contents, 1);
 	} else {
-		putenv("NEMOSHOW_THREADS");
+		unsetenv("NEMOSHOW_THREADS");
 	}
 
 	tilesize = nemoitem_one_get_iattr(one, "tilesize", 0);
@@ -435,7 +435,7 @@ static void nemoenvs_handle_set_nemoshell_show(struct nemoshell *shell, struct i
 
 		setenv("NEMOSHOW_TILESIZE", contents, 1);
 	} else {
-		putenv("NEMOSHOW_TILESIZE");
+		unsetenv("NEMOSHOW_TILESIZE");
 	}
 }
 
@@ -451,7 +451,7 @@ static void nemoenvs_handle_set_nemoshell_tale(struct nemoshell *shell, struct i
 
 		setenv("NEMOTALE_LONG_PRESS_DURATION", contents, 1);
 	} else {
-		putenv("NEMOTALE_LONG_PRESS_DURATION");
+		unsetenv("NEMOTALE_LONG_PRESS_DURATION");
 	}
 
 	distance = nemoitem_one_get_iattr(one, "long_press_distance", 0);
@@ -460,7 +460,7 @@ static void nemoenvs_handle_set_nemoshell_tale(struct nemoshell *shell, struct i
 
 		setenv("NEMOTALE_LONG_PRESS_DISTANCE", contents, 1);
 	} else {
-		putenv("NEMOTALE_LONG_PRESS_DISTANCE");
+		unsetenv("NEMOTALE_LONG_PRESS_DISTANCE");
 	}
 
 	duration = nemoitem_one_get_iattr(one, "single_click_duration", 0);
@@ -469,7 +469,7 @@ static void nemoenvs_handle_set_nemoshell_tale(struct nemoshell *shell, struct i
 
 		setenv("NEMOTALE_SINGLE_CLICK_DURATION", contents, 1);
 	} else {
-		putenv("NEMOTALE_SINGLE_CLICK_DURATION");
+		unsetenv("NEMOTALE_SINGLE_CLICK_DURATION");
 	}
 
 	distance = nemoitem_one_get_iattr(one, "single_click_distance", 0);
@@ -478,7 +478,7 @@ static void nemoenvs_handle_set_nemoshell_tale(struct nemoshell *shell, struct i
 
 		setenv("NEMOTALE_SINGLE_CLICK_DISTANCE", contents, 1);
 	} else {
-		putenv("NEMOTALE_SINGLE_CLICK_DISTANCE");
+		unsetenv("NEMOTALE_SINGLE_CLICK_DISTANCE");
 	}
 }
 
@@ -706,6 +706,31 @@ int nemoenvs_dispatch_link_message(struct nemoenvs *envs, const char *src, const
 				if (tone != NULL)
 					nemoitem_one_destroy(tone);
 			}
+		}
+	}
+
+	return 0;
+}
+
+int nemoenvs_dispatch_envs_message(struct nemoenvs *envs, const char *src, const char *dst, const char *cmd, const char *path, struct itemone *one, void *data)
+{
+	if (namespace_has_prefix(path, "/nemoenvs") != 0) {
+		if (strcmp(cmd, "set") == 0) {
+			const char *name = nemoitem_one_get_attr(one, "name");
+			const char *value = nemoitem_one_get_attr(one, "value");
+
+			if (name != NULL && value != NULL)
+				setenv(name, value, 1);
+		} else if (strcmp(cmd, "get") == 0) {
+			const char *name = nemoitem_one_get_attr(one, "name");
+
+			if (name != NULL && getenv(name) != NULL)
+				nemoenvs_reply(envs, "%s %s set /nemoenvs name %s value %s", dst, src, name, getenv(name));
+		} else if (strcmp(cmd, "put") == 0) {
+			const char *name = nemoitem_one_get_attr(one, "name");
+
+			if (name != NULL)
+				unsetenv(name);
 		}
 	}
 
