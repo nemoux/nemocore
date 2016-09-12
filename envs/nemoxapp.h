@@ -30,7 +30,7 @@ struct nemoxclient {
 	struct wl_list link;
 };
 
-extern int nemoenvs_launch_xserver0(struct nemoenvs *envs);
+extern int nemoenvs_launch_xserver(struct nemoenvs *envs, int xdisplay, const char *rendernode);
 
 extern int nemoenvs_launch_xapp(struct nemoenvs *envs, const char *path, const char *args, struct clientstate *state);
 

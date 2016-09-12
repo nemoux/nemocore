@@ -21,17 +21,20 @@
 #include <nemolog.h>
 #include <nemomisc.h>
 
-int nemoenvs_launch_xserver0(struct nemoenvs *envs)
+int nemoenvs_launch_xserver(struct nemoenvs *envs, int xdisplay, const char *rendernode)
 {
 	struct nemoxserver *xserver;
 	char display[256];
 
 	xserver = nemoxserver_create(envs->shell,
-			nemoitem_get_sattr(envs->configs, "/nemoshell/xserver", "path", NULL), 0);
+			nemoitem_get_sattr(envs->configs, "/nemoshell/xserver", "path", NULL), xdisplay);
 	if (xserver == NULL)
 		return -1;
 
-	snprintf(display, sizeof(display), ":%d", 0);
+	if (rendernode != NULL)
+		nemoxserver_set_rendernode(xserver, rendernode);
+
+	snprintf(display, sizeof(display), ":%d", xdisplay);
 	setenv("DISPLAY", display, 1);
 
 	nemoxserver_execute(xserver);
@@ -52,7 +55,7 @@ static struct nemoxserver *nemoenvs_search_xserver(struct nemoenvs *envs)
 }
 
 static int nemoenvs_execute_xapp(struct nemoenvs *envs, struct nemoxserver *xserver, const char *_path, const char *_args, struct clientstate *state);
-static int nemoenvs_launch_xserver(struct nemoenvs *envs, uint32_t xdisplay);
+static int nemoenvs_execute_xserver(struct nemoenvs *envs, uint32_t xdisplay);
 
 static void nemoenvs_handle_xserver_sigusr1(struct wl_listener *listener, void *data)
 {
@@ -83,10 +86,10 @@ static void nemoenvs_handle_xserver_sigusr1(struct wl_listener *listener, void *
 	}
 
 	if (wl_list_empty(&envs->xapp_list) == 0)
-		nemoenvs_launch_xserver(envs, ++envs->xdisplay);
+		nemoenvs_execute_xserver(envs, ++envs->xdisplay);
 }
 
-static int nemoenvs_launch_xserver(struct nemoenvs *envs, uint32_t xdisplay)
+static int nemoenvs_execute_xserver(struct nemoenvs *envs, uint32_t xdisplay)
 {
 	if (envs->is_waiting_sigusr1 == 0) {
 		struct nemoxserver *xserver;
@@ -156,7 +159,7 @@ int nemoenvs_launch_xapp(struct nemoenvs *envs, const char *path, const char *ar
 
 	wl_list_insert(&envs->xapp_list, &xapp->link);
 
-	nemoenvs_launch_xserver(envs, ++envs->xdisplay);
+	nemoenvs_execute_xserver(envs, ++envs->xdisplay);
 
 	return 0;
 }

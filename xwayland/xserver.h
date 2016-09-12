@@ -53,6 +53,8 @@ struct nemoxserver {
 
 	int xdisplay;
 
+	char *rendernode;
+
 	struct nemotask task;
 
 	struct wl_resource *resource;
@@ -67,6 +69,8 @@ extern struct nemoxserver *nemoxserver_create(struct nemoshell *shell, const cha
 extern void nemoxserver_destroy(struct nemoxserver *xserver);
 
 extern int nemoxserver_execute(struct nemoxserver *xserver);
+
+extern void nemoxserver_set_rendernode(struct nemoxserver *xserver, const char *rendernode);
 
 static inline pid_t nemoxserver_get_pid(struct nemoxserver *xserver)
 {

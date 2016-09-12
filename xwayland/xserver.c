@@ -64,6 +64,9 @@ static int nemoxserver_handle_event(int listenfd, uint32_t mask, void *data)
 
 		snprintf(display, sizeof(display), ":%d", xserver->xdisplay);
 
+		if (xserver->rendernode != NULL)
+			setenv("XWAYLAND_RENDERNODE", xserver->rendernode, 1);
+
 		fd = dup(xserver->abstract_fd);
 		if (fd < 0)
 			return 1;
@@ -315,6 +318,9 @@ void nemoxserver_destroy(struct nemoxserver *xserver)
 	if (xserver->xserverpath != NULL)
 		free(xserver->xserverpath);
 
+	if (xserver->rendernode != NULL)
+		free(xserver->rendernode);
+
 	if (xserver->abstract_source != NULL)
 		wl_event_source_remove(xserver->abstract_source);
 	if (xserver->unix_source != NULL)
@@ -361,6 +367,9 @@ int nemoxserver_execute(struct nemoxserver *xserver)
 
 		snprintf(display, sizeof(display), ":%d", xserver->xdisplay);
 
+		if (xserver->rendernode != NULL)
+			setenv("XWAYLAND_RENDERNODE", xserver->rendernode, 1);
+
 		fd = dup(xserver->abstract_fd);
 		if (fd < 0)
 			return -1;
@@ -403,4 +412,12 @@ int nemoxserver_execute(struct nemoxserver *xserver)
 	}
 
 	return 0;
+}
+
+void nemoxserver_set_rendernode(struct nemoxserver *xserver, const char *rendernode)
+{
+	if (xserver->rendernode != NULL)
+		free(xserver->rendernode);
+
+	xserver->rendernode = strdup(rendernode);
 }
