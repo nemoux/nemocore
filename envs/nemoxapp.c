@@ -64,27 +64,28 @@ static void nemoenvs_handle_xserver_sigusr1(struct wl_listener *listener, void *
 			xserver = nemoenvs_search_xserver_display(envs, xapp->xdisplay);
 			if (xserver == NULL)
 				nemoenvs_execute_xserver(envs, xapp->xdisplay, xapp->rendernode);
-		}
 
-		if (xapp->path != NULL) {
+			wl_list_remove(&xapp->link);
+
+			if (xapp->rendernode != NULL)
+				free(xapp->rendernode);
+
+			free(xapp);
+		} else if (xapp->path != NULL) {
 			xserver = nemoenvs_search_xserver_ready(envs);
 			if (xserver == NULL)
 				break;
 
 			nemoenvs_execute_xapp(envs, xserver, xapp->path, xapp->args, xapp->state);
 
+			wl_list_remove(&xapp->link);
+
+			if (xapp->args != NULL)
+				free(xapp->args);
+
 			free(xapp->path);
+			free(xapp);
 		}
-
-		if (xapp->rendernode != NULL)
-			free(xapp->rendernode);
-
-		if (xapp->args != NULL)
-			free(xapp->args);
-
-		wl_list_remove(&xapp->link);
-
-		free(xapp);
 	}
 
 	if (envs->is_waiting_sigusr1 == 0 && wl_list_empty(&envs->xapp_list) == 0) {
