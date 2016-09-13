@@ -21,7 +21,78 @@
 #include <nemolog.h>
 #include <nemomisc.h>
 
-int nemoenvs_launch_xserver(struct nemoenvs *envs, int xdisplay, const char *rendernode)
+static int nemoenvs_execute_xapp(struct nemoenvs *envs, struct nemoxserver *xserver, const char *_path, const char *_args, struct clientstate *state);
+static int nemoenvs_execute_xserver(struct nemoenvs *envs, int xdisplay, const char *rendernode);
+
+static struct nemoxserver *nemoenvs_search_xserver_ready(struct nemoenvs *envs)
+{
+	struct nemoxserver *xserver;
+
+	wl_list_for_each(xserver, &envs->xserver_list, link) {
+		if (xserver->state == NEMOXSERVER_READY_STATE)
+			return xserver;
+	}
+
+	return NULL;
+}
+
+static struct nemoxserver *nemoenvs_search_xserver_display(struct nemoenvs *envs, int xdisplay)
+{
+	struct nemoxserver *xserver;
+
+	wl_list_for_each(xserver, &envs->xserver_list, link) {
+		if (xserver->xdisplay == xdisplay)
+			return xserver;
+	}
+
+	return NULL;
+}
+
+static void nemoenvs_handle_xserver_sigusr1(struct wl_listener *listener, void *data)
+{
+	struct nemoenvs *envs = (struct nemoenvs *)container_of(listener, struct nemoenvs, xserver_listener);
+	struct nemoxserver *xserver;
+	struct nemoxapp *xapp, *next;
+
+	wl_list_remove(&envs->xserver_listener.link);
+	wl_list_init(&envs->xserver_listener.link);
+
+	envs->is_waiting_sigusr1 = 0;
+
+	wl_list_for_each_safe(xapp, next, &envs->xapp_list, link) {
+		if (xapp->xdisplay >= 0 && envs->is_waiting_sigusr1 == 0) {
+			xserver = nemoenvs_search_xserver_display(envs, xapp->xdisplay);
+			if (xserver == NULL)
+				nemoenvs_execute_xserver(envs, xapp->xdisplay, xapp->rendernode);
+		}
+
+		if (xapp->path != NULL) {
+			xserver = nemoenvs_search_xserver_ready(envs);
+			if (xserver == NULL)
+				break;
+
+			nemoenvs_execute_xapp(envs, xserver, xapp->path, xapp->args, xapp->state);
+
+			free(xapp->path);
+		}
+
+		if (xapp->rendernode != NULL)
+			free(xapp->rendernode);
+
+		if (xapp->args != NULL)
+			free(xapp->args);
+
+		wl_list_remove(&xapp->link);
+
+		free(xapp);
+	}
+
+	if (envs->is_waiting_sigusr1 == 0 && wl_list_empty(&envs->xapp_list) == 0) {
+		nemoenvs_execute_xserver(envs, ++envs->xdisplay, NULL);
+	}
+}
+
+static int nemoenvs_execute_xserver(struct nemoenvs *envs, int xdisplay, const char *rendernode)
 {
 	struct nemoxserver *xserver;
 	char display[256];
@@ -36,79 +107,12 @@ int nemoenvs_launch_xserver(struct nemoenvs *envs, int xdisplay, const char *ren
 
 	nemoxserver_execute(xserver);
 
-	snprintf(display, sizeof(display), ":%d", xdisplay);
-	setenv("DISPLAY", display, 1);
+	wl_list_insert(&envs->xserver_list, &xserver->link);
 
-	return 0;
-}
+	envs->xserver_listener.notify = nemoenvs_handle_xserver_sigusr1;
+	wl_signal_add(&xserver->sigusr1_signal, &envs->xserver_listener);
 
-static struct nemoxserver *nemoenvs_search_xserver(struct nemoenvs *envs)
-{
-	struct nemoxserver *xserver;
-
-	wl_list_for_each(xserver, &envs->xserver_list, link) {
-		if (xserver->state == NEMOXSERVER_READY_STATE)
-			return xserver;
-	}
-
-	return NULL;
-}
-
-static int nemoenvs_execute_xapp(struct nemoenvs *envs, struct nemoxserver *xserver, const char *_path, const char *_args, struct clientstate *state);
-static int nemoenvs_execute_xserver(struct nemoenvs *envs);
-
-static void nemoenvs_handle_xserver_sigusr1(struct wl_listener *listener, void *data)
-{
-	struct nemoenvs *envs = (struct nemoenvs *)container_of(listener, struct nemoenvs, xserver_listener);
-	struct nemoxserver *xserver;
-	struct nemoxapp *xapp, *next;
-
-	wl_list_remove(&envs->xserver_listener.link);
-	wl_list_init(&envs->xserver_listener.link);
-
-	envs->is_waiting_sigusr1 = 0;
-
-	wl_list_for_each_safe(xapp, next, &envs->xapp_list, link) {
-		xserver = nemoenvs_search_xserver(envs);
-		if (xserver == NULL)
-			break;
-
-		nemoenvs_execute_xapp(envs, xserver, xapp->path, xapp->args, xapp->state);
-
-		wl_list_remove(&xapp->link);
-
-		if (xapp->path != NULL)
-			free(xapp->path);
-		if (xapp->args != NULL)
-			free(xapp->args);
-
-		free(xapp);
-	}
-
-	if (wl_list_empty(&envs->xapp_list) == 0)
-		nemoenvs_execute_xserver(envs);
-}
-
-static int nemoenvs_execute_xserver(struct nemoenvs *envs)
-{
-	if (envs->is_waiting_sigusr1 == 0) {
-		struct nemoxserver *xserver;
-		char display[256];
-
-		xserver = nemoxserver_create(envs->shell,
-				nemoitem_get_sattr(envs->configs, "/nemoshell/xserver", "path", NULL), ++envs->xdisplay);
-		if (xserver == NULL)
-			return -1;
-
-		nemoxserver_execute(xserver);
-
-		wl_list_insert(&envs->xserver_list, &xserver->link);
-
-		envs->xserver_listener.notify = nemoenvs_handle_xserver_sigusr1;
-		wl_signal_add(&xserver->sigusr1_signal, &envs->xserver_listener);
-
-		envs->is_waiting_sigusr1 = 1;
-	}
+	envs->is_waiting_sigusr1 = 1;
 
 	return 0;
 }
@@ -143,12 +147,42 @@ static int nemoenvs_execute_xapp(struct nemoenvs *envs, struct nemoxserver *xser
 	return 0;
 }
 
+int nemoenvs_launch_xserver(struct nemoenvs *envs, int xdisplay, const char *rendernode)
+{
+	struct nemoxapp *xapp;
+
+	if (envs->is_waiting_sigusr1 == 0) {
+		nemoenvs_execute_xserver(envs, xdisplay, rendernode);
+
+		return 0;
+	}
+
+	xapp = (struct nemoxapp *)malloc(sizeof(struct nemoxapp));
+	xapp->path = NULL;
+	xapp->args = NULL;
+	xapp->state = NULL;
+	xapp->xdisplay = xdisplay;
+	xapp->rendernode = rendernode != NULL ? strdup(rendernode) : NULL;
+
+	wl_list_insert(&envs->xapp_list, &xapp->link);
+
+	return 0;
+}
+
+void nemoenvs_use_xserver(struct nemoenvs *envs, int xdisplay)
+{
+	char display[256];
+
+	snprintf(display, sizeof(display), ":%d", xdisplay);
+	setenv("DISPLAY", display, 1);
+}
+
 int nemoenvs_launch_xapp(struct nemoenvs *envs, const char *path, const char *args, struct clientstate *state)
 {
 	struct nemoxserver *xserver;
 	struct nemoxapp *xapp;
 
-	xserver = nemoenvs_search_xserver(envs);
+	xserver = nemoenvs_search_xserver_ready(envs);
 	if (xserver != NULL)
 		return nemoenvs_execute_xapp(envs, xserver, path, args, state);
 
@@ -156,10 +190,13 @@ int nemoenvs_launch_xapp(struct nemoenvs *envs, const char *path, const char *ar
 	xapp->path = strdup(path);
 	xapp->args = args != NULL ? strdup(args) : NULL;
 	xapp->state = state;
+	xapp->xdisplay = -1;
+	xapp->rendernode = NULL;
 
 	wl_list_insert(&envs->xapp_list, &xapp->link);
 
-	nemoenvs_execute_xserver(envs);
+	if (envs->is_waiting_sigusr1 == 0)
+		nemoenvs_execute_xserver(envs, ++envs->xdisplay, NULL);
 
 	return 0;
 }
@@ -258,6 +295,8 @@ int nemoenvs_terminate_xapps(struct nemoenvs *envs)
 	wl_list_for_each_safe(xapp, next, &envs->xapp_list, link) {
 		wl_list_remove(&xapp->link);
 
+		if (xapp->rendernode != NULL)
+			free(xapp->rendernode);
 		if (xapp->path != NULL)
 			free(xapp->path);
 		if (xapp->args != NULL)

@@ -11,6 +11,9 @@ struct nemoenvs;
 struct clientstate;
 
 struct nemoxapp {
+	int xdisplay;
+	char *rendernode;
+
 	char *path;
 	char *args;
 
@@ -31,6 +34,7 @@ struct nemoxclient {
 };
 
 extern int nemoenvs_launch_xserver(struct nemoenvs *envs, int xdisplay, const char *rendernode);
+extern void nemoenvs_use_xserver(struct nemoenvs *envs, int xdisplay);
 
 extern int nemoenvs_launch_xapp(struct nemoenvs *envs, const char *path, const char *args, struct clientstate *state);
 
