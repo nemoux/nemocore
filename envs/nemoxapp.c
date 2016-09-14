@@ -150,7 +150,12 @@ static int nemoenvs_execute_xapp(struct nemoenvs *envs, struct nemoxserver *xser
 
 int nemoenvs_launch_xserver(struct nemoenvs *envs, int xdisplay, const char *rendernode)
 {
+	struct nemoxserver *xserver;
 	struct nemoxapp *xapp;
+
+	xserver = nemoenvs_search_xserver_display(envs, xdisplay);
+	if (xserver != NULL)
+		return 0;
 
 	if (envs->is_waiting_sigusr1 == 0) {
 		nemoenvs_execute_xserver(envs, xdisplay, rendernode);
