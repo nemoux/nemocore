@@ -35,11 +35,6 @@ typedef struct _showitem {
 #define NEMOSHOW_ITEM_CC(base, name)				(((showitem_t *)((base)->cc))->name)
 #define NEMOSHOW_ITEM_ATCC(one, name)				(NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(one), name))
 
-static inline SkPath *nemoshow_item_get_skia_path(struct showone *one)
-{
-	return NEMOSHOW_ITEM_CC(NEMOSHOW_ITEM(one), path);
-}
-
 extern int nemoshow_item_set_bitmap(struct showone *one, SkBitmap *bitmap);
 
 #endif
