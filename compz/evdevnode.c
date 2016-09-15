@@ -16,7 +16,6 @@
 #include <pointer.h>
 #include <keyboard.h>
 #include <touch.h>
-#include <stick.h>
 #include <screen.h>
 #include <nemomisc.h>
 #include <nemolog.h>
@@ -160,11 +159,9 @@ static int evdev_flush_events(struct evdevnode *node, uint32_t time)
 			break;
 
 		case EVDEV_ABSOLUTE_TRANSLATE:
-			nemostick_notify_translate(node->stick, time, node->abs.x, node->abs.y, node->abs.z);
 			break;
 
 		case EVDEV_ABSOLUTE_ROTATE:
-			nemostick_notify_rotate(node->stick, time, node->abs.rx, node->abs.ry, node->abs.rz);
 			break;
 
 		default:
@@ -303,44 +300,6 @@ static void evdev_process_absolute(struct evdevnode *node, struct input_event *e
 					node->pending_event = EVDEV_ABSOLUTE_AXIS;
 				break;
 		}
-	} else if (node->seat_caps & EVDEV_SEAT_STICK) {
-		switch (e->code) {
-			case ABS_X:
-				node->abs.x = (e->value - node->abs.min_x) / (node->abs.max_x - node->abs.min_x);
-				if (node->pending_event == EVDEV_NONE)
-					node->pending_event = EVDEV_ABSOLUTE_TRANSLATE;
-				break;
-
-			case ABS_Y:
-				node->abs.y = (e->value - node->abs.min_y) / (node->abs.max_y - node->abs.min_y);
-				if (node->pending_event == EVDEV_NONE)
-					node->pending_event = EVDEV_ABSOLUTE_TRANSLATE;
-				break;
-
-			case ABS_Z:
-				node->abs.z = (e->value - node->abs.min_z) / (node->abs.max_z - node->abs.min_z);
-				if (node->pending_event == EVDEV_NONE)
-					node->pending_event = EVDEV_ABSOLUTE_TRANSLATE;
-				break;
-
-			case ABS_RX:
-				node->abs.rx = (e->value - node->abs.min_rx) / (node->abs.max_rx - node->abs.min_rx);
-				if (node->pending_event == EVDEV_NONE)
-					node->pending_event = EVDEV_ABSOLUTE_ROTATE;
-				break;
-
-			case ABS_RY:
-				node->abs.ry = (e->value - node->abs.min_ry) / (node->abs.max_ry - node->abs.min_ry);
-				if (node->pending_event == EVDEV_NONE)
-					node->pending_event = EVDEV_ABSOLUTE_ROTATE;
-				break;
-
-			case ABS_RZ:
-				node->abs.rz = (e->value - node->abs.min_rz) / (node->abs.max_rz - node->abs.min_rz);
-				if (node->pending_event == EVDEV_NONE)
-					node->pending_event = EVDEV_ABSOLUTE_ROTATE;
-				break;
-		}
 	}
 }
 
@@ -377,8 +336,6 @@ static void evdev_process_key(struct evdevnode *node, struct input_event *e, uin
 
 			if (node->seat_caps & EVDEV_SEAT_POINTER) {
 				nemopointer_notify_button(node->pointer, time, e->code, e->value ? WL_POINTER_BUTTON_STATE_PRESSED : WL_POINTER_BUTTON_STATE_RELEASED);
-			} else if (node->seat_caps & EVDEV_SEAT_STICK) {
-				nemostick_notify_button(node->stick, time, e->code, e->value ? WL_POINTER_BUTTON_STATE_PRESSED : WL_POINTER_BUTTON_STATE_RELEASED);
 			}
 			break;
 
@@ -585,14 +542,6 @@ static int evdev_configure_node(struct evdevnode *node)
 		}
 	}
 
-	if ((has_abs || has_rel) && has_button && has_z) {
-		// add stick device
-		node->stick = nemostick_create(node->compz->seat, &node->base);
-		if (node->stick != NULL) {
-			node->seat_caps |= EVDEV_SEAT_STICK;
-			nemolog_message("EVDEV", "%s [%s] is a stick\n", node->devname, node->base.devnode);
-		}
-	}
 	if ((has_abs || has_rel) && has_button && !has_z) {
 		// add pointer device
 		node->pointer = nemopointer_create(node->compz->seat, &node->base);

@@ -153,7 +153,6 @@ static void move_shellgrab_dispatch_effect_done(struct nemoeffect *base)
 			if (screen->focus == NEMOSHELL_FULLSCREEN_ALL_FOCUS) {
 				nemoseat_set_keyboard_focus(shell->compz->seat, bin->view);
 				nemoseat_set_pointer_focus(shell->compz->seat, bin->view);
-				nemoseat_set_stick_focus(shell->compz->seat, bin->view);
 			}
 		}
 	}

@@ -241,36 +241,6 @@ static inline int nemotale_event_is_keyboard_layout(struct nemotale *tale, struc
 	return event->type & NEMOTALE_KEYBOARD_LAYOUT_EVENT;
 }
 
-static inline int nemotale_event_is_stick_enter(struct nemotale *tale, struct taleevent *event)
-{
-	return event->type & NEMOTALE_STICK_ENTER_EVENT;
-}
-
-static inline int nemotale_event_is_stick_leave(struct nemotale *tale, struct taleevent *event)
-{
-	return event->type & NEMOTALE_STICK_LEAVE_EVENT;
-}
-
-static inline int nemotale_event_is_stick_translate(struct nemotale *tale, struct taleevent *event)
-{
-	return event->type & NEMOTALE_STICK_TRANSLATE_EVENT;
-}
-
-static inline int nemotale_event_is_stick_rotate(struct nemotale *tale, struct taleevent *event)
-{
-	return event->type & NEMOTALE_STICK_ROTATE_EVENT;
-}
-
-static inline int nemotale_event_is_stick_button_down(struct nemotale *tale, struct taleevent *event)
-{
-	return event->type & NEMOTALE_STICK_BUTTON_DOWN_EVENT;
-}
-
-static inline int nemotale_event_is_stick_button_up(struct nemotale *tale, struct taleevent *event)
-{
-	return event->type & NEMOTALE_STICK_BUTTON_UP_EVENT;
-}
-
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

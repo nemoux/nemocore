@@ -107,19 +107,6 @@ static int nemoshow_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t ty
 		nemotale_push_touch_motion_event(tale, event->serial, event->device, event->time, event->x, event->y, event->gx, event->gy);
 	} else if (type & NEMOTOOL_TOUCH_PRESSURE_EVENT) {
 		nemotale_push_touch_pressure_event(tale, event->serial, event->device, event->time, event->p);
-	} else if (type & NEMOTOOL_STICK_ENTER_EVENT) {
-		nemotale_push_stick_enter_event(tale, event->serial, event->device);
-	} else if (type & NEMOTOOL_STICK_LEAVE_EVENT) {
-		nemotale_push_stick_leave_event(tale, event->serial, event->device);
-	} else if (type & NEMOTOOL_STICK_TRANSLATE_EVENT) {
-		nemotale_push_stick_translate_event(tale, event->serial, event->device, event->time, event->x, event->y, event->z);
-	} else if (type & NEMOTOOL_STICK_ROTATE_EVENT) {
-		nemotale_push_stick_rotate_event(tale, event->serial, event->device, event->time, event->x, event->y, event->z);
-	} else if (type & NEMOTOOL_STICK_BUTTON_EVENT) {
-		if (event->state == WL_POINTER_BUTTON_STATE_PRESSED)
-			nemotale_push_stick_down_event(tale, event->serial, event->device, event->time, event->value);
-		else
-			nemotale_push_stick_up_event(tale, event->serial, event->device, event->time, event->value);
 	}
 
 	return 0;

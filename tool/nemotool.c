@@ -403,103 +403,6 @@ void nemotool_touch_calibrate(struct nemotool *tool, const char *name, float x0,
 			wl_fixed_from_double(x3), wl_fixed_from_double(y3));
 }
 
-static void stick_handle_enter(void *data, struct nemo_stick *stick, uint32_t serial, struct wl_surface *surface, int32_t id)
-{
-	if (surface != NULL) {
-		struct nemocanvas *canvas = (struct nemocanvas *)wl_surface_get_user_data(surface);
-
-		if (canvas != NULL && canvas->dispatch_event != NULL) {
-			struct nemoevent event;
-
-			event.device = id;
-			event.serial = serial;
-
-			canvas->dispatch_event(canvas, NEMOTOOL_STICK_ENTER_EVENT, &event);
-		}
-	}
-}
-
-static void stick_handle_leave(void *data, struct nemo_stick *stick, uint32_t serial, struct wl_surface *surface, int32_t id)
-{
-	if (surface != NULL) {
-		struct nemocanvas *canvas = (struct nemocanvas *)wl_surface_get_user_data(surface);
-
-		if (canvas != NULL && canvas->dispatch_event != NULL) {
-			struct nemoevent event;
-
-			event.device = id;
-			event.serial = serial;
-
-			canvas->dispatch_event(canvas, NEMOTOOL_STICK_LEAVE_EVENT, &event);
-		}
-	}
-}
-
-static void stick_handle_translate(void *data, struct nemo_stick *stick, uint32_t time, struct wl_surface *surface, int32_t id, wl_fixed_t sx, wl_fixed_t sy, wl_fixed_t sz)
-{
-	if (surface != NULL) {
-		struct nemocanvas *canvas = (struct nemocanvas *)wl_surface_get_user_data(surface);
-
-		if (canvas != NULL && canvas->dispatch_event != NULL) {
-			struct nemoevent event;
-
-			event.device = id;
-			event.time = time;
-			event.x = wl_fixed_to_double(sx);
-			event.y = wl_fixed_to_double(sy);
-			event.z = wl_fixed_to_double(sz);
-
-			canvas->dispatch_event(canvas, NEMOTOOL_STICK_TRANSLATE_EVENT, &event);
-		}
-	}
-}
-
-static void stick_handle_rotate(void *data, struct nemo_stick *stick, uint32_t time, struct wl_surface *surface, int32_t id, wl_fixed_t sx, wl_fixed_t sy, wl_fixed_t sz)
-{
-	if (surface != NULL) {
-		struct nemocanvas *canvas = (struct nemocanvas *)wl_surface_get_user_data(surface);
-
-		if (canvas != NULL && canvas->dispatch_event != NULL) {
-			struct nemoevent event;
-
-			event.device = id;
-			event.time = time;
-			event.x = wl_fixed_to_double(sx);
-			event.y = wl_fixed_to_double(sy);
-			event.z = wl_fixed_to_double(sz);
-
-			canvas->dispatch_event(canvas, NEMOTOOL_STICK_ROTATE_EVENT, &event);
-		}
-	}
-}
-
-static void stick_handle_button(void *data, struct nemo_stick *stick, uint32_t serial, uint32_t time, struct wl_surface *surface, int32_t id, uint32_t button, uint32_t state)
-{
-	if (surface != NULL) {
-		struct nemocanvas *canvas = (struct nemocanvas *)wl_surface_get_user_data(surface);
-
-		if (canvas != NULL && canvas->dispatch_event != NULL) {
-			struct nemoevent event;
-
-			event.device = id;
-			event.serial = serial;
-			event.time = time;
-			event.value = button;
-			event.state = state;
-
-			canvas->dispatch_event(canvas, NEMOTOOL_STICK_BUTTON_EVENT, &event);
-		}
-	}
-}
-
-static const struct nemo_stick_listener stick_listener = {
-	stick_handle_enter,
-	stick_handle_leave,
-	stick_handle_translate,
-	stick_handle_rotate,
-	stick_handle_button
-};
-
 static void seat_handle_capabilities(void *data, struct nemo_seat *seat, enum nemo_seat_capability caps)
 {
 	struct nemotool *tool = (struct nemotool *)data;
@@ -526,14 +429,6 @@ static void seat_handle_capabilities(void *data, struct nemo_seat *seat, enum ne
 	} else if (!(caps & NEMO_SEAT_CAPABILITY_TOUCH) && tool->touch != NULL) {
 		nemo_touch_destroy(tool->touch);
 		tool->touch = NULL;
-	}
-
-	if ((caps & NEMO_SEAT_CAPABILITY_STICK) && tool->stick == NULL) {
-		tool->stick = nemo_seat_get_stick(seat);
-		nemo_stick_add_listener(tool->stick, &stick_listener, data);
-	} else if (!(caps & NEMO_SEAT_CAPABILITY_STICK) && tool->stick != NULL) {
-		nemo_stick_destroy(tool->stick);
-		tool->stick = NULL;
 	}
 }
 

@@ -34,12 +34,7 @@ typedef enum {
 	NEMOTOOL_TOUCH_DOWN_EVENT = (1 << 10),
 	NEMOTOOL_TOUCH_UP_EVENT = (1 << 11),
 	NEMOTOOL_TOUCH_MOTION_EVENT = (1 << 12),
-	NEMOTOOL_TOUCH_PRESSURE_EVENT = (1 << 13),
-	NEMOTOOL_STICK_ENTER_EVENT = (1 << 14),
-	NEMOTOOL_STICK_LEAVE_EVENT = (1 << 15),
-	NEMOTOOL_STICK_TRANSLATE_EVENT = (1 << 16),
-	NEMOTOOL_STICK_ROTATE_EVENT = (1 << 17),
-	NEMOTOOL_STICK_BUTTON_EVENT = (1 << 18),
+	NEMOTOOL_TOUCH_PRESSURE_EVENT = (1 << 13)
 } NemoToolEventType;
 
 typedef enum {
@@ -111,7 +106,6 @@ struct nemotool {
 	struct nemo_pointer *pointer;
 	struct nemo_keyboard *keyboard;
 	struct nemo_touch *touch;
-	struct nemo_stick *stick;
 	struct nemo_sound *sound;
 	struct nemo_shell *shell;
 	struct wl_shm *shm;

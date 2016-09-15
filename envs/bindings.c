@@ -172,7 +172,6 @@ void nemoenvs_handle_left_button(struct nemocompz *compz, struct nemopointer *po
 
 				if (bin != NULL) {
 					nemopointer_set_keyboard_focus(pointer, pointer->focus);
-					nemoseat_set_stick_focus(pointer->seat, pointer->focus);
 					datadevice_set_focus(pointer->seat, pointer->focus);
 				}
 			} else if (pointer->focus->actor != NULL) {
@@ -274,7 +273,6 @@ void nemoenvs_handle_touch_event(struct nemocompz *compz, struct touchpoint *tp,
 			struct shellbin *bin = nemoshell_get_bin(tp->focus->canvas);
 
 			if (bin != NULL) {
-				nemoseat_set_stick_focus(tp->touch->seat, tp->focus);
 				datadevice_set_focus(tp->touch->seat, tp->focus);
 
 				if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_BINDABLE_STATE) != 0) {

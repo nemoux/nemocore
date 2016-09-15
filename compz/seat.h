@@ -51,15 +51,6 @@ struct nemoseat {
 	} touch;
 
 	struct {
-		struct wl_list resource_list;
-		struct wl_list nemo_resource_list;
-
-		struct wl_list device_list;
-
-		struct wl_signal focus_signal;
-	} stick;
-
-	struct {
 		uint32_t serial;
 		struct nemodatasource *data_source;
 		struct wl_listener data_source_listener;
@@ -98,7 +89,6 @@ extern struct wl_resource *nemoseat_find_resource_for_view(struct wl_list *list,
 
 extern void nemoseat_set_keyboard_focus(struct nemoseat *seat, struct nemoview *view);
 extern void nemoseat_set_pointer_focus(struct nemoseat *seat, struct nemoview *view);
-extern void nemoseat_set_stick_focus(struct nemoseat *seat, struct nemoview *view);
 extern void nemoseat_put_focus(struct nemoseat *seat, struct nemoview *view);
 
 #ifdef __cplusplus

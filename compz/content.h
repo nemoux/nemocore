@@ -16,7 +16,6 @@ struct nemopointer;
 struct nemokeyboard;
 struct nemokeypad;
 struct touchpoint;
-struct nemostick;
 struct nemocontent;
 
 typedef void (*nemocontent_key_handler_t)(struct nemokeyboard *keyboard, struct nemocontent *content, uint32_t time, uint32_t key, void *data);
@@ -81,12 +80,6 @@ struct nemocontent {
 	void (*touch_motion)(struct touchpoint *tp, struct nemocontent *content, uint32_t time, uint64_t touchid, float x, float y, float gx, float gy);
 	void (*touch_pressure)(struct touchpoint *tp, struct nemocontent *content, uint32_t time, uint64_t touchid, float p);
 	void (*touch_frame)(struct touchpoint *tp, struct nemocontent *content);
-
-	void (*stick_enter)(struct nemostick *stick, struct nemocontent *content);
-	void (*stick_leave)(struct nemostick *stick, struct nemocontent *content);
-	void (*stick_translate)(struct nemostick *stick, struct nemocontent *content, uint32_t time, float x, float y, float z);
-	void (*stick_rotate)(struct nemostick *stick, struct nemocontent *content, uint32_t time, float rx, float ry, float rz);
-	void (*stick_button)(struct nemostick *stick, struct nemocontent *content, uint32_t time, uint32_t button, uint32_t state);
 };
 
 extern int nemocontent_prepare(struct nemocontent *content, int nodemax);
@@ -244,37 +237,6 @@ static inline void nemocontent_touch_frame(struct touchpoint *tp, struct nemocon
 {
 	if (content->touch_frame != NULL)
 		content->touch_frame(tp, content);
-}
-
-static inline void nemocontent_stick_enter(struct nemostick *stick, struct nemocontent *content)
-{
-	if (content->stick_enter != NULL)
-		content->stick_enter(stick, content);
-}
-
-static inline void nemocontent_stick_leave(struct nemostick *stick, struct nemocontent *content)
-{
-	if (content->stick_leave != NULL)
-		content->stick_leave(stick, content);
-}
-
-static inline void nemocontent_stick_translate(struct nemostick *stick, struct nemocontent *content, uint32_t time, float x, float y, float z)
-{
-	if (content->stick_translate != NULL)
-		content->stick_translate(stick, content, time, x, y, z);
-}
-
-static inline void nemocontent_stick_rotate(struct nemostick *stick, struct nemocontent *content, uint32_t time, float rx, float ry, float rz)
-{
-	if (content->stick_rotate != NULL)
-		content->stick_rotate(stick, content, time, rx, ry, rz);
-}
-
-static inline void nemocontent_stick_button(struct nemostick *stick, struct nemocontent *content, uint32_t time, uint32_t button, uint32_t state)
-{
-	if (content->stick_button != NULL) {
-		content->stick_button(stick, content, time, button, state);
-	}
 }
 
 static inline void nemocontent_set_pixman_context(struct nemocontent *content, struct rendernode *node, void *context)

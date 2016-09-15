@@ -112,7 +112,6 @@ struct nemocompz {
 
 	uint32_t keyboard_ids;
 	uint32_t pointer_ids;
-	uint32_t stick_ids;
 
 	uint64_t touch_ids;
 

@@ -345,7 +345,6 @@ struct nemocompz *nemocompz_create(void)
 	compz->screen_idpool = 0;
 	compz->keyboard_ids = 0;
 	compz->pointer_ids = 0;
-	compz->stick_ids = 0;
 	compz->touch_ids = NEMOCOMPZ_POINTER_MAX;
 	compz->nodemax = NEMOCOMPZ_NODE_MAX;
 	compz->name = nemocompz_get_display_name();

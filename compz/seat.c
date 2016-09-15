@@ -14,7 +14,6 @@
 #include <keyboard.h>
 #include <keypad.h>
 #include <touch.h>
-#include <stick.h>
 #include <canvas.h>
 #include <view.h>
 #include <picker.h>
@@ -82,16 +81,10 @@ static void nemo_seat_get_touch(struct wl_client *client, struct wl_resource *se
 	nemotouch_bind_nemo(client, seat_resource, id);
 }
 
-static void nemo_seat_get_stick(struct wl_client *client, struct wl_resource *seat_resource, uint32_t id)
-{
-	nemostick_bind_nemo(client, seat_resource, id);
-}
-
 static const struct nemo_seat_interface nemo_seat_implementation = {
 	nemo_seat_get_pointer,
 	nemo_seat_get_keyboard,
-	nemo_seat_get_touch,
-	nemo_seat_get_stick
+	nemo_seat_get_touch
 };
 
 static void nemoseat_unbind_nemo(struct wl_resource *resource)
@@ -113,7 +106,7 @@ static void nemoseat_bind_nemo(struct wl_client *client, void *data, uint32_t ve
 	wl_list_insert(&seat->resource_list, wl_resource_get_link(resource));
 	wl_resource_set_implementation(resource, &nemo_seat_implementation, seat, nemoseat_unbind_nemo);
 
-	wl_seat_send_capabilities(resource, NEMO_SEAT_CAPABILITY_POINTER | NEMO_SEAT_CAPABILITY_KEYBOARD | NEMO_SEAT_CAPABILITY_TOUCH | NEMO_SEAT_CAPABILITY_STICK);
+	wl_seat_send_capabilities(resource, NEMO_SEAT_CAPABILITY_POINTER | NEMO_SEAT_CAPABILITY_KEYBOARD | NEMO_SEAT_CAPABILITY_TOUCH);
 
 	wl_seat_send_name(resource, "seat0");
 }
@@ -151,11 +144,6 @@ struct nemoseat *nemoseat_create(struct nemocompz *compz)
 	wl_list_init(&seat->touch.nemo_resource_list);
 	wl_list_init(&seat->touch.device_list);
 	wl_signal_init(&seat->touch.focus_signal);
-
-	wl_list_init(&seat->stick.resource_list);
-	wl_list_init(&seat->stick.nemo_resource_list);
-	wl_list_init(&seat->stick.device_list);
-	wl_signal_init(&seat->stick.focus_signal);
 
 	wl_list_init(&seat->selection.data_source_listener.link);
 	wl_signal_init(&seat->selection.signal);
@@ -472,15 +460,6 @@ void nemoseat_set_pointer_focus(struct nemoseat *seat, struct nemoview *view)
 	}
 }
 
-void nemoseat_set_stick_focus(struct nemoseat *seat, struct nemoview *view)
-{
-	struct nemostick *stick;
-
-	wl_list_for_each(stick, &seat->stick.device_list, link) {
-		nemostick_set_focus(stick, view);
-	}
-}
-
 void nemoseat_put_focus(struct nemoseat *seat, struct nemoview *view)
 {
 	struct nemopointer *pointer;
@@ -488,7 +467,6 @@ void nemoseat_put_focus(struct nemoseat *seat, struct nemoview *view)
 	struct nemokeypad *keypad;
 	struct nemotouch *touch;
 	struct touchpoint *tp;
-	struct nemostick *stick;
 
 	wl_list_for_each(pointer, &seat->pointer.device_list, link) {
 		if (pointer->focus == view) {
@@ -513,12 +491,6 @@ void nemoseat_put_focus(struct nemoseat *seat, struct nemoview *view)
 			if (tp->focus == view) {
 				touchpoint_set_focus(tp, NULL);
 			}
-		}
-	}
-
-	wl_list_for_each(stick, &seat->stick.device_list, link) {
-		if (stick->focus == view) {
-			nemostick_set_focus(stick, NULL);
 		}
 	}
 }

@@ -423,36 +423,6 @@ static inline int nemoshow_event_is_keyboard_layout(struct nemoshow *show, void 
 	return nemotale_event_is_keyboard_layout(show->tale, (struct taleevent *)event);
 }
 
-static inline int nemoshow_event_is_stick_enter(struct nemoshow *show, void *event)
-{
-	return nemotale_event_is_stick_enter(show->tale, (struct taleevent *)event);
-}
-
-static inline int nemoshow_event_is_stick_leave(struct nemoshow *show, void *event)
-{
-	return nemotale_event_is_stick_leave(show->tale, (struct taleevent *)event);
-}
-
-static inline int nemoshow_event_is_stick_translate(struct nemoshow *show, void *event)
-{
-	return nemotale_event_is_stick_translate(show->tale, (struct taleevent *)event);
-}
-
-static inline int nemoshow_event_is_stick_rotate(struct nemoshow *show, void *event)
-{
-	return nemotale_event_is_stick_rotate(show->tale, (struct taleevent *)event);
-}
-
-static inline int nemoshow_event_is_stick_button_down(struct nemoshow *show, void *event)
-{
-	return nemotale_event_is_stick_button_down(show->tale, (struct taleevent *)event);
-}
-
-static inline int nemoshow_event_is_stick_button_up(struct nemoshow *show, void *event)
-{
-	return nemotale_event_is_stick_button_up(show->tale, (struct taleevent *)event);
-}
-
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

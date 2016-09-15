@@ -311,7 +311,6 @@ static void nemo_surface_set_fullscreen(struct wl_client *client, struct wl_reso
 			if (screen->focus == NEMOSHELL_FULLSCREEN_ALL_FOCUS) {
 				nemoseat_set_keyboard_focus(shell->compz->seat, bin->view);
 				nemoseat_set_pointer_focus(shell->compz->seat, bin->view);
-				nemoseat_set_stick_focus(shell->compz->seat, bin->view);
 			}
 		}
 	}

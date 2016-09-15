@@ -133,7 +133,6 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 						if (screen->focus == NEMOSHELL_FULLSCREEN_ALL_FOCUS) {
 							nemoseat_set_keyboard_focus(compz->seat, bin->view);
 							nemoseat_set_pointer_focus(compz->seat, bin->view);
-							nemoseat_set_stick_focus(compz->seat, bin->view);
 						}
 					} else {
 						bin->callback->send_configure(bin->canvas, width, height);
@@ -445,7 +444,6 @@ static void pick_shellgrab_singletap_up(struct touchpoint_grab *base, uint32_t t
 						if (screen->focus == NEMOSHELL_FULLSCREEN_ALL_FOCUS) {
 							nemoseat_set_keyboard_focus(compz->seat, bin->view);
 							nemoseat_set_pointer_focus(compz->seat, bin->view);
-							nemoseat_set_stick_focus(compz->seat, bin->view);
 						}
 					} else {
 						bin->callback->send_configure(bin->canvas, width, height);
@@ -771,7 +769,6 @@ static void pick_shellgrab_pointer_button(struct nemopointer_grab *base, uint32_
 							if (screen->focus == NEMOSHELL_FULLSCREEN_ALL_FOCUS) {
 								nemoseat_set_keyboard_focus(compz->seat, bin->view);
 								nemoseat_set_pointer_focus(compz->seat, bin->view);
-								nemoseat_set_stick_focus(compz->seat, bin->view);
 							}
 						} else {
 							bin->callback->send_configure(bin->canvas, width, height);

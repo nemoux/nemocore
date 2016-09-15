@@ -21,7 +21,6 @@
 #include <keyboard.h>
 #include <pointer.h>
 #include <touch.h>
-#include <stick.h>
 #include <keypad.h>
 #include <datadevice.h>
 #include <screen.h>
