@@ -6,6 +6,8 @@
 #include <showcanvas.h>
 
 typedef struct _showcanvas {
+	SkMatrix *matrix, *inverse;
+
 	SkBitmap *bitmap;
 	SkRegion *damage;
 

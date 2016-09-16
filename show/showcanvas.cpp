@@ -40,12 +40,16 @@ struct showone *nemoshow_canvas_create(void)
 	memset(canvas, 0, sizeof(struct showcanvas));
 
 	canvas->cc = new showcanvas_t;
+	NEMOSHOW_CANVAS_CC(canvas, matrix) = new SkMatrix;
+	NEMOSHOW_CANVAS_CC(canvas, inverse) = new SkMatrix;
 	NEMOSHOW_CANVAS_CC(canvas, bitmap) = NULL;
 	NEMOSHOW_CANVAS_CC(canvas, damage) = NULL;
 	NEMOSHOW_CANVAS_CC(canvas, picture) = NULL;
 
 	canvas->viewport.sx = 1.0f;
 	canvas->viewport.sy = 1.0f;
+	canvas->viewport.rx = 1.0f;
+	canvas->viewport.ry = 1.0f;
 
 	canvas->sx = 1.0f;
 	canvas->sy = 1.0f;
@@ -106,6 +110,10 @@ void nemoshow_canvas_destroy(struct showone *one)
 
 	nemotale_node_destroy(canvas->node);
 
+	if (NEMOSHOW_CANVAS_CC(canvas, matrix) != NULL)
+		delete NEMOSHOW_CANVAS_CC(canvas, matrix);
+	if (NEMOSHOW_CANVAS_CC(canvas, inverse) != NULL)
+		delete NEMOSHOW_CANVAS_CC(canvas, inverse);
 	if (NEMOSHOW_CANVAS_CC(canvas, damage) != NULL)
 		delete NEMOSHOW_CANVAS_CC(canvas, damage);
 	if (NEMOSHOW_CANVAS_CC(canvas, bitmap) != NULL)
@@ -244,45 +252,86 @@ int nemoshow_canvas_load_shader(struct showone *one, const char *shaderpath)
 	return 0;
 }
 
+static inline void nemoshow_canvas_update_size(struct nemoshow *show, struct showone *one)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	nemotale_node_resize(canvas->node, canvas->width, canvas->height);
+
+	if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
+		canvas->viewport.sx = canvas->viewport.width / canvas->width;
+		canvas->viewport.sy = canvas->viewport.height / canvas->height;
+		canvas->viewport.rx = canvas->width / canvas->viewport.width;
+		canvas->viewport.ry = canvas->height / canvas->viewport.height;
+	} else if (one->sub == NEMOSHOW_CANVAS_BACK_TYPE) {
+		nemotale_node_opaque(canvas->node, 0, 0, canvas->width, canvas->height);
+	}
+
+	one->dirty |= NEMOSHOW_VIEWPORT_DIRTY;
+}
+
+static inline void nemoshow_canvas_update_viewport(struct nemoshow *show, struct showone *one)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	if (one->parent != NULL && one->parent->type == NEMOSHOW_SCENE_TYPE) {
+		struct showone *scene = one->parent;
+
+		nemoshow_canvas_set_viewport(one,
+				(double)show->width / (double)NEMOSHOW_SCENE_AT(scene, width),
+				(double)show->height / (double)NEMOSHOW_SCENE_AT(scene, height));
+
+		if (canvas->dispatch_resize != NULL)
+			canvas->dispatch_resize(show, one, canvas->viewport.width, canvas->viewport.height);
+	} else {
+		nemoshow_canvas_set_viewport(one, 1.0f, 1.0f);
+	}
+}
+
+static inline void nemoshow_canvas_update_matrix(struct nemoshow *show, struct showone *one)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	NEMOSHOW_CANVAS_CC(canvas, matrix)->setIdentity();
+
+	if (canvas->ro != 0.0f) {
+		NEMOSHOW_CANVAS_CC(canvas, matrix)->postTranslate(-canvas->width * canvas->px, -canvas->height * canvas->py);
+		NEMOSHOW_CANVAS_CC(canvas, matrix)->postRotate(canvas->ro);
+		NEMOSHOW_CANVAS_CC(canvas, matrix)->postTranslate(canvas->width * canvas->px, canvas->height * canvas->py);
+	}
+
+	if (canvas->sx != 1.0f || canvas->sy != 1.0f) {
+		NEMOSHOW_CANVAS_CC(canvas, matrix)->postTranslate(-canvas->width * canvas->px, -canvas->height * canvas->py);
+		NEMOSHOW_CANVAS_CC(canvas, matrix)->postScale(canvas->sx, canvas->sy);
+		NEMOSHOW_CANVAS_CC(canvas, matrix)->postTranslate(canvas->width * canvas->px, canvas->height * canvas->py);
+	}
+
+	NEMOSHOW_CANVAS_CC(canvas, matrix)->postTranslate(canvas->tx, canvas->ty);
+
+	NEMOSHOW_CANVAS_CC(canvas, matrix)->invert(NEMOSHOW_CANVAS_CC(canvas, inverse));
+
+	nemotale_node_translate(canvas->node, canvas->tx, canvas->ty);
+	nemotale_node_rotate(canvas->node, canvas->ro * M_PI / 180.0f);
+	nemotale_node_scale(canvas->node, canvas->sx, canvas->sy);
+	nemotale_node_pivot(canvas->node, canvas->px, canvas->py);
+}
+
 int nemoshow_canvas_update(struct showone *one)
 {
 	struct nemoshow *show = one->show;
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
 	if ((one->dirty & NEMOSHOW_SIZE_DIRTY) != 0) {
-		nemotale_node_resize(canvas->node, canvas->width, canvas->height);
-
-		if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
-			canvas->viewport.sx = canvas->viewport.width / canvas->width;
-			canvas->viewport.sy = canvas->viewport.height / canvas->height;
-		} else if (one->sub == NEMOSHOW_CANVAS_BACK_TYPE) {
-			nemotale_node_opaque(canvas->node, 0, 0, canvas->width, canvas->height);
-		}
-
-		one->dirty |= NEMOSHOW_VIEWPORT_DIRTY;
+		nemoshow_canvas_update_size(show, one);
 	}
 	if ((one->dirty & NEMOSHOW_VIEWPORT_DIRTY) != 0) {
-		if (one->parent != NULL && one->parent->type == NEMOSHOW_SCENE_TYPE) {
-			struct showone *scene = one->parent;
-
-			nemoshow_canvas_set_viewport(one,
-					(double)show->width / (double)NEMOSHOW_SCENE_AT(scene, width) * show->sx,
-					(double)show->height / (double)NEMOSHOW_SCENE_AT(scene, height) * show->sy);
-
-			if (canvas->dispatch_resize != NULL)
-				canvas->dispatch_resize(show, one, canvas->viewport.width, canvas->viewport.height);
-		} else {
-			nemoshow_canvas_set_viewport(one, 1.0f, 1.0f);
-		}
+		nemoshow_canvas_update_viewport(show, one);
 	}
 	if ((one->dirty & NEMOSHOW_STYLE_DIRTY) != 0) {
 		nemotale_node_set_alpha(canvas->node, canvas->alpha);
 	}
 	if ((one->dirty & NEMOSHOW_MATRIX_DIRTY) != 0) {
-		nemotale_node_translate(canvas->node, canvas->tx, canvas->ty);
-		nemotale_node_rotate(canvas->node, canvas->ro * M_PI / 180.0f);
-		nemotale_node_scale(canvas->node, canvas->sx, canvas->sy);
-		nemotale_node_pivot(canvas->node, canvas->px, canvas->py);
+		nemoshow_canvas_update_matrix(show, one);
 	}
 	if ((one->dirty & NEMOSHOW_REDRAW_DIRTY) != 0) {
 		nemotale_node_damage_all(canvas->node);
@@ -761,25 +810,21 @@ int nemoshow_canvas_set_viewport(struct showone *one, double sx, double sy)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
+	canvas->viewport.sx = sx;
+	canvas->viewport.sy = sy;
+	canvas->viewport.rx = 1.0f / sx;
+	canvas->viewport.ry = 1.0f / sy;
+
+	canvas->viewport.width = canvas->width * sx;
+	canvas->viewport.height = canvas->height * sy;
+
 	if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
-		canvas->viewport.sx = sx;
-		canvas->viewport.sy = sy;
-
-		canvas->viewport.width = canvas->width * sx;
-		canvas->viewport.height = canvas->height * sy;
-
 		nemotale_node_viewport(canvas->node, canvas->viewport.width, canvas->viewport.height);
 
 		nemoshow_canvas_damage_all(one);
 
 		nemoshow_one_dirty_all(one, NEMOSHOW_SHAPE_DIRTY);
 	} else if (one->sub == NEMOSHOW_CANVAS_PIPELINE_TYPE) {
-		canvas->viewport.sx = sx;
-		canvas->viewport.sy = sy;
-
-		canvas->viewport.width = canvas->width * sx;
-		canvas->viewport.height = canvas->height * sy;
-
 		nemotale_node_viewport(canvas->node, canvas->viewport.width, canvas->viewport.height);
 
 		fbo_prepare_context(
@@ -790,22 +835,10 @@ int nemoshow_canvas_set_viewport(struct showone *one, double sx, double sy)
 
 		nemoshow_canvas_damage_all(one);
 	} else if (one->sub == NEMOSHOW_CANVAS_PIXMAN_TYPE) {
-		canvas->viewport.sx = sx;
-		canvas->viewport.sy = sy;
-
-		canvas->viewport.width = canvas->width * sx;
-		canvas->viewport.height = canvas->height * sy;
-
 		nemotale_node_viewport(canvas->node, canvas->viewport.width, canvas->viewport.height);
 
 		nemoshow_canvas_damage_all(one);
 	} else if (one->sub == NEMOSHOW_CANVAS_OPENGL_TYPE) {
-		canvas->viewport.sx = sx;
-		canvas->viewport.sy = sy;
-
-		canvas->viewport.width = canvas->width * sx;
-		canvas->viewport.height = canvas->height * sy;
-
 		nemotale_node_viewport(canvas->node, canvas->viewport.width, canvas->viewport.height);
 
 		nemoshow_canvas_damage_all(one);
@@ -973,4 +1006,36 @@ void nemoshow_canvas_put_ones(struct showone *one)
 
 	nemoshow_children_for_each(child, one)
 		nemoshow_canvas_put_ones(child);
+}
+
+void nemoshow_canvas_transform_to_global(struct showone *one, float sx, float sy, float *x, float *y)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	if ((one->dirty & NEMOSHOW_MATRIX_DIRTY) != 0) {
+		nemoshow_canvas_update_matrix(one->show, one);
+
+		one->dirty &= ~NEMOSHOW_MATRIX_DIRTY;
+	}
+
+	SkPoint p = NEMOSHOW_CANVAS_CC(canvas, matrix)->mapXY(sx, sy);
+
+	*x = p.x();
+	*y = p.y();
+}
+
+void nemoshow_canvas_transform_from_global(struct showone *one, float x, float y, float *sx, float *sy)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	if ((one->dirty & NEMOSHOW_MATRIX_DIRTY) != 0) {
+		nemoshow_canvas_update_matrix(one->show, one);
+
+		one->dirty &= ~NEMOSHOW_MATRIX_DIRTY;
+	}
+
+	SkPoint p = NEMOSHOW_CANVAS_CC(canvas, inverse)->mapXY(x, y);
+
+	*sx = p.x();
+	*sy = p.y();
 }

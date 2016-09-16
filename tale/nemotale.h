@@ -18,9 +18,6 @@ NEMO_BEGIN_EXTERN_C
 
 struct nemotale;
 struct talenode;
-struct taleevent;
-
-typedef void (*nemotale_dispatch_event_t)(struct nemotale *tale, struct talenode *node, struct taleevent *event);
 
 struct nemotale {
 	void *pmcontext;
@@ -35,7 +32,6 @@ struct nemotale {
 
 	int32_t width, height, stride;
 	pixman_region32_t region;
-	pixman_region32_t input;
 	pixman_region32_t damage;
 
 	struct {
@@ -52,24 +48,6 @@ struct nemotale {
 
 		int enable;
 	} viewport;
-
-	struct {
-		struct talenode *focus;
-
-		struct nemolistener node_destroy_listener;
-	} keyboard;
-
-	struct nemolist ptap_list;
-	struct nemolist tap_list;
-	struct nemolist grab_list;
-
-	nemotale_dispatch_event_t dispatch_event;
-
-	uint32_t long_press_duration;
-	uint32_t long_press_distance;
-
-	uint32_t single_click_duration;
-	uint32_t single_click_distance;
 };
 
 #define	NEMOTALE_DESTROY_SIGNAL(tale)		(&tale->destroy_signal)
@@ -77,9 +55,6 @@ struct nemotale {
 
 extern int nemotale_prepare(struct nemotale *tale);
 extern void nemotale_finish(struct nemotale *tale);
-
-extern struct talenode *nemotale_pick_node(struct nemotale *tale, float x, float y, float *sx, float *sy);
-extern int nemotale_contain_node(struct nemotale *tale, struct talenode *node, float x, float y, float *sx, float *sy);
 
 extern void nemotale_damage_region(struct nemotale *tale, pixman_region32_t *region);
 extern void nemotale_damage_below(struct nemotale *tale, struct talenode *node);
@@ -96,8 +71,6 @@ extern void nemotale_update_node(struct nemotale *tale);
 extern void nemotale_accumulate_damage(struct nemotale *tale);
 extern void nemotale_flush_damage(struct nemotale *tale);
 
-extern void nemotale_set_keyboard_focus(struct nemotale *tale, struct talenode *node);
-
 static inline void nemotale_resize(struct nemotale *tale, int32_t width, int32_t height)
 {
 	tale->width = width;
@@ -105,7 +78,6 @@ static inline void nemotale_resize(struct nemotale *tale, int32_t width, int32_t
 	tale->transform.dirty = 1;
 
 	pixman_region32_init_rect(&tale->region, 0, 0, width, height);
-	pixman_region32_init_rect(&tale->input, 0, 0, width, height);
 
 	if (tale->viewport.enable == 0) {
 		tale->viewport.width = width;
@@ -124,7 +96,6 @@ static inline void nemotale_set_width(struct nemotale *tale, int32_t width)
 	tale->transform.dirty = 1;
 
 	pixman_region32_init_rect(&tale->region, 0, 0, tale->width, tale->height);
-	pixman_region32_init_rect(&tale->input, 0, 0, tale->width, tale->height);
 
 	if (tale->viewport.enable == 0) {
 		tale->viewport.width = width;
@@ -140,7 +111,6 @@ static inline void nemotale_set_height(struct nemotale *tale, int32_t height)
 	tale->transform.dirty = 1;
 
 	pixman_region32_init_rect(&tale->region, 0, 0, tale->width, tale->height);
-	pixman_region32_init_rect(&tale->input, 0, 0, tale->width, tale->height);
 
 	if (tale->viewport.enable == 0) {
 		tale->viewport.height = height;
@@ -213,36 +183,6 @@ static inline int32_t nemotale_get_width(struct nemotale *tale)
 static inline int32_t nemotale_get_height(struct nemotale *tale)
 {
 	return tale->height;
-}
-
-static inline void nemotale_set_dispatch_event(struct nemotale *tale, nemotale_dispatch_event_t dispatch)
-{
-	tale->dispatch_event = dispatch;
-}
-
-static inline int nemotale_has_dispatch_event(struct nemotale *tale)
-{
-	return tale->dispatch_event != NULL;
-}
-
-static inline void nemotale_set_long_press_duration(struct nemotale *tale, uint32_t duration)
-{
-	tale->long_press_duration = duration;
-}
-
-static inline void nemotale_set_long_press_distance(struct nemotale *tale, uint32_t distance)
-{
-	tale->long_press_distance = distance;
-}
-
-static inline void nemotale_set_single_click_duration(struct nemotale *tale, uint32_t duration)
-{
-	tale->single_click_duration = duration;
-}
-
-static inline void nemotale_set_single_click_distance(struct nemotale *tale, uint32_t distance)
-{
-	tale->single_click_distance = distance;
 }
 
 static inline void nemotale_set_backend(struct nemotale *tale, void *backend)

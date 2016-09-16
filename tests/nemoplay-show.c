@@ -82,7 +82,7 @@ static void nemoplay_dispatch_show_fullscreen(struct nemoshow *show, const char 
 	}
 }
 
-static void nemoplay_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, void *event)
+static void nemoplay_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, struct showevent *event)
 {
 	struct playcontext *context = (struct playcontext *)nemoshow_get_userdata(show);
 

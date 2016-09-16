@@ -36,6 +36,7 @@ typedef enum {
 } NemoShowCanvasState;
 
 struct nemoshow;
+struct showevent;
 
 typedef int (*nemoshow_canvas_prepare_render_t)(struct nemoshow *show, struct showone *one);
 typedef void (*nemoshow_canvas_finish_render_t)(struct nemoshow *show, struct showone *one);
@@ -43,7 +44,7 @@ typedef void (*nemoshow_canvas_dispatch_redraw_t)(struct nemoshow *show, struct 
 typedef void (*nemoshow_canvas_dispatch_record_t)(struct nemoshow *show, struct showone *one);
 typedef void (*nemoshow_canvas_dispatch_replay_t)(struct nemoshow *show, struct showone *one, int32_t x, int32_t y, int32_t width, int32_t height);
 typedef void (*nemoshow_canvas_dispatch_resize_t)(struct nemoshow *show, struct showone *one, int32_t width, int32_t height);
-typedef void (*nemoshow_canvas_dispatch_event_t)(struct nemoshow *show, struct showone *one, void *event);
+typedef void (*nemoshow_canvas_dispatch_event_t)(struct nemoshow *show, struct showone *one, struct showevent *event);
 typedef int (*nemoshow_canvas_contain_point_t)(struct nemoshow *show, struct showone *one, float x, float y);
 
 struct showcanvas {
@@ -69,6 +70,7 @@ struct showcanvas {
 	struct {
 		double width, height;
 		double sx, sy;
+		double rx, ry;
 	} viewport;
 
 	double tx, ty;
@@ -136,6 +138,25 @@ extern void nemoshow_canvas_put_one(struct showone *one);
 extern void nemoshow_canvas_set_ones(struct showone *canvas, struct showone *one);
 extern void nemoshow_canvas_put_ones(struct showone *one);
 
+extern void nemoshow_canvas_transform_to_global(struct showone *one, float sx, float sy, float *x, float *y);
+extern void nemoshow_canvas_transform_from_global(struct showone *one, float x, float y, float *sx, float *sy);
+
+static inline void nemoshow_canvas_transform_to_viewport(struct showone *one, float x, float y, float *sx, float *sy)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	*sx = x * canvas->viewport.sx;
+	*sy = y * canvas->viewport.sy;
+}
+
+static inline void nemoshow_canvas_transform_from_viewport(struct showone *one, float sx, float sy, float *x, float *y)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	*x = sx * canvas->viewport.rx;
+	*y = sy * canvas->viewport.ry;
+}
+
 static inline void nemoshow_canvas_set_state(struct showcanvas *canvas, uint32_t state)
 {
 	canvas->state |= state;
@@ -193,14 +214,6 @@ static inline void nemoshow_canvas_set_dispatch_resize(struct showone *one, nemo
 
 static inline void nemoshow_canvas_set_dispatch_event(struct showone *one, nemoshow_canvas_dispatch_event_t dispatch_event)
 {
-	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
-
-	if (dispatch_event == NULL) {
-		nemotale_node_set_id(canvas->node, 0);
-	} else {
-		nemotale_node_set_id(canvas->node, 1);
-	}
-
 	NEMOSHOW_CANVAS_AT(one, dispatch_event) = dispatch_event;
 }
 
@@ -346,34 +359,6 @@ static inline void nemoshow_canvas_scale(struct showone *one, double sx, double 
 	canvas->sy = sy;
 
 	nemoshow_one_dirty(one, NEMOSHOW_MATRIX_DIRTY);
-}
-
-static inline void nemoshow_canvas_transform_to_global(struct showone *one, float sx, float sy, float *x, float *y)
-{
-	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
-
-	nemotale_node_transform_to_global(canvas->node, sx, sy, x, y);
-}
-
-static inline void nemoshow_canvas_transform_from_global(struct showone *one, float x, float y, float *sx, float *sy)
-{
-	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
-
-	nemotale_node_transform_from_global(canvas->node, x, y, sx, sy);
-}
-
-static inline void nemoshow_canvas_transform_to_viewport(struct showone *one, float x, float y, float *sx, float *sy)
-{
-	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
-
-	nemotale_node_transform_to_viewport(canvas->node, x, y, sx, sy);
-}
-
-static inline void nemoshow_canvas_transform_from_viewport(struct showone *one, float sx, float sy, float *x, float *y)
-{
-	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
-
-	nemotale_node_transform_from_viewport(canvas->node, sx, sy, x, y);
 }
 
 #ifdef __cplusplus

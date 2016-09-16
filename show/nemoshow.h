@@ -29,6 +29,8 @@ NEMO_BEGIN_EXTERN_C
 #include <showeasy.h>
 #include <showpoly.h>
 #include <showpipe.h>
+#include <showevent.h>
+#include <showgrab.h>
 #include <skiahelper.h>
 
 #include <nemotale.h>
@@ -60,7 +62,7 @@ struct nemoshow;
 struct showone;
 
 typedef void (*nemoshow_dispatch_transition_done_t)(void *userdata);
-typedef void (*nemoshow_dispatch_event_t)(struct nemoshow *show, void *event);
+typedef void (*nemoshow_dispatch_event_t)(struct nemoshow *show, struct showevent *event);
 typedef void (*nemoshow_dispatch_resize_t)(struct nemoshow *show, int32_t width, int32_t height);
 typedef void (*nemoshow_dispatch_transform_t)(struct nemoshow *show, int32_t visible, int32_t x, int32_t y, int32_t width, int32_t height);
 typedef void (*nemoshow_dispatch_layer_t)(struct nemoshow *show, int32_t visible);
@@ -83,11 +85,12 @@ struct nemoshow {
 	uint32_t state;
 	uint32_t quality;
 
+	uint32_t width, height;
+
+	struct nemosignal destroy_signal;
+
 	struct showone *scene;
 	struct nemolistener scene_destroy_listener;
-
-	uint32_t width, height;
-	double sx, sy;
 
 	struct nemolist one_list;
 	struct nemolist dirty_list;
@@ -117,6 +120,22 @@ struct nemoshow {
 	uint64_t damages;
 	uint32_t times[NEMOSHOW_LAST_TIME];
 	uint32_t time0;
+
+	struct nemolist ptap_list;
+	struct nemolist tap_list;
+	struct nemolist grab_list;
+
+	struct {
+		struct showone *focus;
+
+		struct nemolistener one_destroy_listener;
+	} keyboard;
+
+	uint32_t long_press_duration;
+	uint32_t long_press_distance;
+
+	uint32_t single_click_duration;
+	uint32_t single_click_distance;
 
 	void *context;
 	void *userdata;
@@ -152,6 +171,7 @@ extern void nemoshow_put_scene(struct nemoshow *show);
 extern int nemoshow_set_size(struct nemoshow *show, uint32_t width, uint32_t height);
 extern int nemoshow_set_scale(struct nemoshow *show, double sx, double sy);
 
+extern struct showone *nemoshow_pick_canvas(struct nemoshow *show, float x, float y, float *sx, float *sy);
 extern int nemoshow_contain_canvas(struct nemoshow *show, struct showone *one, float x, float y, float *sx, float *sy);
 
 extern void nemoshow_attach_one(struct nemoshow *show, struct showone *one);
@@ -176,6 +196,22 @@ extern void nemoshow_disable_antialias(struct nemoshow *show);
 extern void nemoshow_enable_filtering(struct nemoshow *show);
 extern void nemoshow_disable_filtering(struct nemoshow *show);
 extern void nemoshow_set_filtering_quality(struct nemoshow *show, uint32_t quality);
+
+static inline void nemoshow_transform_to_viewport(struct nemoshow *show, float x, float y, float *sx, float *sy)
+{
+	struct showone *scene = show->scene;
+
+	*sx = x * show->width / NEMOSHOW_SCENE_AT(scene, width);
+	*sy = y * show->height / NEMOSHOW_SCENE_AT(scene, height);
+}
+
+static inline void nemoshow_transform_from_viewport(struct nemoshow *show, float sx, float sy, float *x, float *y)
+{
+	struct showone *scene = show->scene;
+
+	*x = sx * NEMOSHOW_SCENE_AT(scene, width) / show->width;
+	*y = sy * NEMOSHOW_SCENE_AT(scene, height) / show->height;
+}
 
 static inline void nemoshow_set_tale(struct nemoshow *show, struct nemotale *tale)
 {
@@ -263,6 +299,26 @@ static inline int nemoshow_make_current(struct nemoshow *show)
 	return nemotale_make_current(show->tale);
 }
 
+static inline void nemoshow_set_long_press_duration(struct nemoshow *show, uint32_t duration)
+{
+	show->long_press_duration = duration;
+}
+
+static inline void nemoshow_set_long_press_distance(struct nemoshow *show, uint32_t distance)
+{
+	show->long_press_distance = distance;
+}
+
+static inline void nemoshow_set_single_click_duration(struct nemoshow *show, uint32_t duration)
+{
+	show->single_click_duration = duration;
+}
+
+static inline void nemoshow_set_single_click_distance(struct nemoshow *show, uint32_t distance)
+{
+	show->single_click_distance = distance;
+}
+
 #ifdef NEMOSHOW_FRAMELOG_ON
 extern void nemoshow_check_damage(struct nemoshow *show);
 extern void nemoshow_dump_times(struct nemoshow *show);
@@ -292,9 +348,6 @@ static inline void nemoshow_clear_time(struct nemoshow *show) {}
 static inline void nemoshow_check_time(struct nemoshow *show, int index) {}
 static inline void nemoshow_dump_times(struct nemoshow *show) {}
 #endif
-
-#include <showgrab.h>
-#include <showevent.h>
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

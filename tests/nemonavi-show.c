@@ -132,8 +132,8 @@ static void nemonavi_dispatch_popup_rect(struct nemonavi *navi, int x, int y, in
 	float x0, y0;
 	float x1, y1;
 
-	nemoshow_event_transform_from_viewport(context->show, x, y, &x0, &y0);
-	nemoshow_event_transform_from_viewport(context->show, x + width, y + height, &x1, &y1);
+	nemoshow_transform_from_viewport(context->show, x, y, &x0, &y0);
+	nemoshow_transform_from_viewport(context->show, x + width, y + height, &x1, &y1);
 
 	nemoshow_canvas_translate(context->popup, x0, y0);
 	nemoshow_canvas_set_size(context->popup, x1 - x0, y1 - y0);
@@ -163,7 +163,7 @@ static void nemonavi_dispatch_loading_state(struct nemonavi *navi, int is_loadin
 {
 }
 
-static int nemonavi_dispatch_touch_grab(struct nemoshow *show, struct showgrab *grab, void *event)
+static int nemonavi_dispatch_touch_grab(struct nemoshow *show, struct showgrab *grab, struct showevent *event)
 {
 	struct navicontext *context = (struct navicontext *)nemoshow_grab_get_userdata(grab);
 	float x, y;
@@ -175,7 +175,7 @@ static int nemonavi_dispatch_touch_grab(struct nemoshow *show, struct showgrab *
 
 		nemoshow_set_keyboard_focus(show, context->view);
 
-		nemoshow_event_transform_to_viewport(show,
+		nemoshow_transform_to_viewport(show,
 				nemoshow_event_get_x(event),
 				nemoshow_event_get_y(event),
 				&x, &y);
@@ -187,7 +187,7 @@ static int nemonavi_dispatch_touch_grab(struct nemoshow *show, struct showgrab *
 		int id = nemoshow_grab_get_tag(grab);
 
 		if (id > 0) {
-			nemoshow_event_transform_to_viewport(show,
+			nemoshow_transform_to_viewport(show,
 					nemoshow_event_get_x(event),
 					nemoshow_event_get_y(event),
 					&x, &y);
@@ -200,7 +200,7 @@ static int nemonavi_dispatch_touch_grab(struct nemoshow *show, struct showgrab *
 		int id = nemoshow_grab_get_tag(grab);
 
 		if (id > 0) {
-			nemoshow_event_transform_to_viewport(show,
+			nemoshow_transform_to_viewport(show,
 					nemoshow_event_get_x(event),
 					nemoshow_event_get_y(event),
 					&x, &y);
@@ -219,7 +219,7 @@ static int nemonavi_dispatch_touch_grab(struct nemoshow *show, struct showgrab *
 		int id = nemoshow_grab_get_tag(grab);
 
 		if (id > 0) {
-			nemoshow_event_transform_to_viewport(show,
+			nemoshow_transform_to_viewport(show,
 					nemoshow_event_get_x(event),
 					nemoshow_event_get_y(event),
 					&x, &y);
@@ -239,7 +239,7 @@ static int nemonavi_dispatch_touch_grab(struct nemoshow *show, struct showgrab *
 	return 1;
 }
 
-static void nemonavi_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, void *event)
+static void nemonavi_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, struct showevent *event)
 {
 	struct navicontext *context = (struct navicontext *)nemoshow_get_userdata(show);
 	float x, y;
@@ -257,14 +257,14 @@ static void nemonavi_dispatch_canvas_event(struct nemoshow *show, struct showone
 	}
 
 	if (nemoshow_event_is_pointer_enter(show, event)) {
-		nemoshow_event_transform_to_viewport(show,
+		nemoshow_transform_to_viewport(show,
 				nemoshow_event_get_x(event),
 				nemoshow_event_get_y(event),
 				&x, &y);
 
 		nemonavi_send_pointer_enter_event(context->navi, x, y);
 	} else if (nemoshow_event_is_pointer_leave(show, event)) {
-		nemoshow_event_transform_to_viewport(show,
+		nemoshow_transform_to_viewport(show,
 				nemoshow_event_get_x(event),
 				nemoshow_event_get_y(event),
 				&x, &y);
@@ -273,7 +273,7 @@ static void nemonavi_dispatch_canvas_event(struct nemoshow *show, struct showone
 	} else if (nemoshow_event_is_pointer_button_down(show, event, 0)) {
 		nemoshow_set_keyboard_focus(show, canvas);
 
-		nemoshow_event_transform_to_viewport(show,
+		nemoshow_transform_to_viewport(show,
 				nemoshow_event_get_x(event),
 				nemoshow_event_get_y(event),
 				&x, &y);
@@ -281,7 +281,7 @@ static void nemonavi_dispatch_canvas_event(struct nemoshow *show, struct showone
 		nemonavi_send_pointer_down_event(context->navi, x, y,
 				nemoshow_event_get_value(event));
 	} else if (nemoshow_event_is_pointer_button_up(show, event, 0)) {
-		nemoshow_event_transform_to_viewport(show,
+		nemoshow_transform_to_viewport(show,
 				nemoshow_event_get_x(event),
 				nemoshow_event_get_y(event),
 				&x, &y);
@@ -289,7 +289,7 @@ static void nemonavi_dispatch_canvas_event(struct nemoshow *show, struct showone
 		nemonavi_send_pointer_up_event(context->navi, x, y,
 				nemoshow_event_get_value(event));
 	} else if (nemoshow_event_is_pointer_motion(show, event)) {
-		nemoshow_event_transform_to_viewport(show,
+		nemoshow_transform_to_viewport(show,
 				nemoshow_event_get_x(event),
 				nemoshow_event_get_y(event),
 				&x, &y);

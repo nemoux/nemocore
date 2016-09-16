@@ -90,7 +90,6 @@ int nemotale_node_prepare(struct talenode *node)
 	pixman_region32_init(&node->boundingbox);
 	pixman_region32_init(&node->opaque);
 	pixman_region32_init(&node->blend);
-	pixman_region32_init(&node->input);
 	pixman_region32_init(&node->damage);
 
 	nemoobject_prepare(&node->object, NEMOTALE_NODE_ATTR_MAX);
@@ -118,7 +117,6 @@ void nemotale_node_finish(struct talenode *node)
 	pixman_region32_fini(&node->boundingbox);
 	pixman_region32_fini(&node->opaque);
 	pixman_region32_fini(&node->blend);
-	pixman_region32_fini(&node->input);
 	pixman_region32_fini(&node->damage);
 	pixman_region32_fini(&node->region);
 

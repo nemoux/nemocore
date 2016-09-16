@@ -345,7 +345,7 @@ static void nemomote_finish_opencl(struct motecontext *context)
 }
 #endif
 
-static void nemomote_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, void *event)
+static void nemomote_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, struct showevent *event)
 {
 	struct motecontext *context = (struct motecontext *)nemoshow_get_userdata(show);
 	int i;
@@ -355,7 +355,7 @@ static void nemomote_dispatch_canvas_event(struct nemoshow *show, struct showone
 	context->ntaps = nemoshow_event_get_tapcount(event);
 
 	for (i = 0; i < context->ntaps; i++) {
-		nemoshow_event_transform_to_viewport(show,
+		nemoshow_transform_to_viewport(show,
 				nemoshow_event_get_x_on(event, i),
 				nemoshow_event_get_y_on(event, i),
 				&context->taps[i * 2 + 0],

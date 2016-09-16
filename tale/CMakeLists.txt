@@ -13,8 +13,6 @@ add_library(nemotale SHARED
 	talenode.c
 	talegl.c
 	talepixman.c
-	taleevent.c
-	talegrab.c
 	)
 
 TARGET_LINK_LIBRARIES(nemotale
@@ -29,9 +27,6 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/tale/talenode.h
 	${CMAKE_SOURCE_DIR}/tale/talegl.h
 	${CMAKE_SOURCE_DIR}/tale/talepixman.h
-	${CMAKE_SOURCE_DIR}/tale/taleevent.h
-	${CMAKE_SOURCE_DIR}/tale/talegrab.h
-	${CMAKE_SOURCE_DIR}/tale/talegesture.h
 	)
 
 set(NEMOTALE_PKGCONFIG_REQUIRES "pixman-1 cairo expat egl")

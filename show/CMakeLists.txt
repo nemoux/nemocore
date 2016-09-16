@@ -35,6 +35,7 @@ add_library(nemoshow SHARED
 	showmisc.cpp
 	showpoly.c
 	showpipe.c
+	showevent.c
 	showgrab.c
 	svghelper.cpp
 	skiahelper.cpp

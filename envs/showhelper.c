@@ -29,53 +29,49 @@
 
 static int nemoshow_dispatch_actor_pick(struct nemoactor *actor, float x, float y)
 {
-	struct nemotale *tale = (struct nemotale *)nemoactor_get_context(actor);
+	struct nemoshow *show = (struct nemoshow *)nemoactor_get_context(actor);
 	float sx, sy;
 
-	x *= tale->viewport.rx;
-	y *= tale->viewport.ry;
+	nemoshow_transform_from_viewport(show, x, y, &x, &y);
 
-	if (nemotale_get_node_count(tale) == 0)
-		return pixman_region32_contains_point(&tale->input, x, y, NULL);
-
-	return nemotale_pick_node(tale, x, y, &sx, &sy) != NULL;
+	return nemoshow_pick_canvas(show, x, y, &sx, &sy) != NULL;
 }
 
 static int nemoshow_dispatch_actor_event(struct nemoactor *actor, uint32_t type, struct nemoevent *event)
 {
-	struct nemotale *tale = (struct nemotale *)nemoactor_get_context(actor);
+	struct nemoshow *show = (struct nemoshow *)nemoactor_get_context(actor);
 
 	if (type & NEMOEVENT_POINTER_ENTER_TYPE) {
-		nemotale_push_pointer_enter_event(tale, event->serial, event->device, event->x, event->y);
+		nemoshow_push_pointer_enter_event(show, event->serial, event->device, event->x, event->y);
 	} else if (type & NEMOEVENT_POINTER_LEAVE_TYPE) {
-		nemotale_push_pointer_leave_event(tale, event->serial, event->device);
+		nemoshow_push_pointer_leave_event(show, event->serial, event->device);
 	} else if (type & NEMOEVENT_POINTER_MOTION_TYPE) {
-		nemotale_push_pointer_motion_event(tale, event->serial, event->device, event->time, event->x, event->y);
+		nemoshow_push_pointer_motion_event(show, event->serial, event->device, event->time, event->x, event->y);
 	} else if (type & NEMOEVENT_POINTER_BUTTON_TYPE) {
 		if (event->state == WL_POINTER_BUTTON_STATE_PRESSED)
-			nemotale_push_pointer_down_event(tale, event->serial, event->device, event->time, event->value);
+			nemoshow_push_pointer_down_event(show, event->serial, event->device, event->time, event->value);
 		else
-			nemotale_push_pointer_up_event(tale, event->serial, event->device, event->time, event->value);
+			nemoshow_push_pointer_up_event(show, event->serial, event->device, event->time, event->value);
 	} else if (type & NEMOEVENT_POINTER_AXIS_TYPE) {
-		nemotale_push_pointer_axis_event(tale, event->serial, event->device, event->time, event->state, event->r);
+		nemoshow_push_pointer_axis_event(show, event->serial, event->device, event->time, event->state, event->r);
 	} else if (type & NEMOEVENT_KEYBOARD_ENTER_TYPE) {
-		nemotale_push_keyboard_enter_event(tale, event->serial, event->device);
+		nemoshow_push_keyboard_enter_event(show, event->serial, event->device);
 	} else if (type & NEMOEVENT_KEYBOARD_LEAVE_TYPE) {
-		nemotale_push_keyboard_leave_event(tale, event->serial, event->device);
+		nemoshow_push_keyboard_leave_event(show, event->serial, event->device);
 	} else if (type & NEMOEVENT_KEYBOARD_KEY_TYPE) {
 		if (event->state == WL_KEYBOARD_KEY_STATE_PRESSED)
-			nemotale_push_keyboard_down_event(tale, event->serial, event->device, event->time, event->value);
+			nemoshow_push_keyboard_down_event(show, event->serial, event->device, event->time, event->value);
 		else
-			nemotale_push_keyboard_up_event(tale, event->serial, event->device, event->time, event->value);
+			nemoshow_push_keyboard_up_event(show, event->serial, event->device, event->time, event->value);
 	} else if (type & NEMOEVENT_KEYBOARD_MODIFIERS_TYPE) {
 	} else if (type & NEMOEVENT_TOUCH_DOWN_TYPE) {
-		nemotale_push_touch_down_event(tale, event->serial, event->device, event->time, event->x, event->y, event->gx, event->gy);
+		nemoshow_push_touch_down_event(show, event->serial, event->device, event->time, event->x, event->y, event->gx, event->gy);
 	} else if (type & NEMOEVENT_TOUCH_UP_TYPE) {
-		nemotale_push_touch_up_event(tale, event->serial, event->device, event->time);
+		nemoshow_push_touch_up_event(show, event->serial, event->device, event->time);
 	} else if (type & NEMOEVENT_TOUCH_MOTION_TYPE) {
-		nemotale_push_touch_motion_event(tale, event->serial, event->device, event->time, event->x, event->y, event->gx, event->gy);
+		nemoshow_push_touch_motion_event(show, event->serial, event->device, event->time, event->x, event->y, event->gx, event->gy);
 	} else if (type & NEMOEVENT_TOUCH_PRESSURE_TYPE) {
-		nemotale_push_touch_pressure_event(tale, event->serial, event->device, event->time, event->p);
+		nemoshow_push_touch_pressure_event(show, event->serial, event->device, event->time, event->p);
 	}
 
 	return 0;
@@ -83,10 +79,9 @@ static int nemoshow_dispatch_actor_event(struct nemoactor *actor, uint32_t type,
 
 static int nemoshow_dispatch_actor_resize(struct nemoactor *actor, int32_t width, int32_t height)
 {
-	struct nemotale *tale = (struct nemotale *)nemoactor_get_context(actor);
-	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
+	struct nemoshow *show = (struct nemoshow *)nemoactor_get_context(actor);
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
-	struct talefbo *fbo = (struct talefbo *)nemotale_get_backend(tale);
+	struct talefbo *fbo = (struct talefbo *)nemotale_get_backend(show->tale);
 
 	if (show->dispatch_resize != NULL) {
 		show->dispatch_resize(show, width, height);
@@ -102,7 +97,7 @@ static int nemoshow_dispatch_actor_resize(struct nemoactor *actor, int32_t width
 	nemoshow_update_one(show);
 	nemoshow_render_one(show);
 
-	nemotale_composite_fbo_full(tale);
+	nemotale_composite_fbo_full(show->tale);
 
 	nemoactor_damage_dirty(actor);
 
@@ -111,8 +106,7 @@ static int nemoshow_dispatch_actor_resize(struct nemoactor *actor, int32_t width
 
 static void nemoshow_dispatch_actor_frame(struct nemoactor *actor, uint32_t msecs)
 {
-	struct nemotale *tale = (struct nemotale *)nemoactor_get_context(actor);
-	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
+	struct nemoshow *show = (struct nemoshow *)nemoactor_get_context(actor);
 	struct nemocompz *compz = actor->compz;
 
 	nemocompz_make_current(compz);
@@ -134,7 +128,7 @@ static void nemoshow_dispatch_actor_frame(struct nemoactor *actor, uint32_t msec
 
 		nemoactor_dispatch_feedback(actor);
 
-		nemotale_composite_fbo(tale, &region);
+		nemotale_composite_fbo(show->tale, &region);
 
 		nemoactor_damage_region(actor, &region);
 
@@ -146,8 +140,7 @@ static void nemoshow_dispatch_actor_frame(struct nemoactor *actor, uint32_t msec
 
 static void nemoshow_dispatch_actor_transform(struct nemoactor *actor, int32_t visible, int32_t x, int32_t y, int32_t width, int32_t height)
 {
-	struct nemotale *tale = (struct nemotale *)nemoactor_get_context(actor);
-	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
+	struct nemoshow *show = (struct nemoshow *)nemoactor_get_context(actor);
 
 	if (show->dispatch_transform != NULL)
 		show->dispatch_transform(show, visible, x, y, width, height);
@@ -155,8 +148,7 @@ static void nemoshow_dispatch_actor_transform(struct nemoactor *actor, int32_t v
 
 static void nemoshow_dispatch_actor_layer(struct nemoactor *actor, int32_t visible)
 {
-	struct nemotale *tale = (struct nemotale *)nemoactor_get_context(actor);
-	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
+	struct nemoshow *show = (struct nemoshow *)nemoactor_get_context(actor);
 
 	if (show->dispatch_layer != NULL)
 		show->dispatch_layer(show, visible);
@@ -164,8 +156,7 @@ static void nemoshow_dispatch_actor_layer(struct nemoactor *actor, int32_t visib
 
 static void nemoshow_dispatch_actor_fullscreen(struct nemoactor *actor, const char *id, int32_t x, int32_t y, int32_t width, int32_t height)
 {
-	struct nemotale *tale = (struct nemotale *)nemoactor_get_context(actor);
-	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
+	struct nemoshow *show = (struct nemoshow *)nemoactor_get_context(actor);
 
 	if (show->dispatch_fullscreen != NULL)
 		show->dispatch_fullscreen(show, id, x, y, width, height);
@@ -173,8 +164,7 @@ static void nemoshow_dispatch_actor_fullscreen(struct nemoactor *actor, const ch
 
 static int nemoshow_dispatch_actor_destroy(struct nemoactor *actor)
 {
-	struct nemotale *tale = (struct nemotale *)nemoactor_get_context(actor);
-	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
+	struct nemoshow *show = (struct nemoshow *)nemoactor_get_context(actor);
 
 	if (show->dispatch_destroy != NULL)
 		return show->dispatch_destroy(show);
@@ -185,37 +175,17 @@ static int nemoshow_dispatch_actor_destroy(struct nemoactor *actor)
 static void nemoshow_dispatch_timer(struct nemotimer *timer, void *data)
 {
 	struct showcontext *scon = (struct showcontext *)data;
+	struct nemoshow *show = (struct nemoshow *)nemoactor_get_context(scon->actor);
 
 	nemotimer_set_timeout(timer, 1000);
 
-	nemotale_push_timer_event(scon->tale, time_current_msecs());
+	nemoshow_push_timer_event(show, time_current_msecs());
 
 #ifdef NEMOSHOW_FRAMELOG_ON
 	if (scon->has_framelog != 0) {
-		struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(scon->tale);
-
 		nemoshow_dump_times(show);
 	}
 #endif
-}
-
-static void nemoshow_dispatch_tale_event(struct nemotale *tale, struct talenode *node, struct taleevent *event)
-{
-	struct nemoshow *show = (struct nemoshow *)nemotale_get_userdata(tale);
-
-	if (nemotale_dispatch_grab(tale, event) == 0) {
-		uint32_t id = nemotale_node_get_id(node);
-
-		if (id != 0) {
-			struct showone *one = (struct showone *)nemotale_node_get_data(node);
-			struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
-
-			if (canvas->dispatch_event != NULL)
-				canvas->dispatch_event(show, one, event);
-		} else if (show->dispatch_event != NULL) {
-			show->dispatch_event(show, event);
-		}
-	}
 }
 
 struct nemoshow *nemoshow_create_view(struct nemoshell *shell, int32_t width, int32_t height)
@@ -223,6 +193,7 @@ struct nemoshow *nemoshow_create_view(struct nemoshell *shell, int32_t width, in
 	struct nemocompz *compz = shell->compz;
 	struct showcontext *scon;
 	struct nemoshow *show;
+	struct nemotale *tale;
 	struct nemoactor *actor;
 	struct nemotimer *timer;
 	const char *env;
@@ -252,32 +223,28 @@ struct nemoshow *nemoshow_create_view(struct nemoshell *shell, int32_t width, in
 	nemoactor_set_dispatch_fullscreen(actor, nemoshow_dispatch_actor_fullscreen);
 	nemoactor_set_dispatch_destroy(actor, nemoshow_dispatch_actor_destroy);
 
-	scon->tale = nemotale_create_gl();
-	nemotale_set_backend(scon->tale,
+	tale = nemotale_create_gl();
+	nemotale_set_backend(tale,
 			nemotale_create_fbo(
 				actor->texture,
 				actor->base.width,
 				actor->base.height));
-	nemotale_resize(scon->tale, actor->base.width, actor->base.height);
-	nemotale_set_dispatch_event(scon->tale, nemoshow_dispatch_tale_event);
+	nemotale_resize(tale, actor->base.width, actor->base.height);
 
 	show = nemoshow_create();
-	nemoshow_set_tale(show, scon->tale);
+	nemoshow_set_tale(show, tale);
 	nemoshow_set_size(show, width, height);
 	nemoshow_set_context(show, scon);
 
 	nemoview_set_state(scon->actor->view, NEMOVIEW_CLOSE_STATE);
 
-	nemotale_set_userdata(scon->tale, show);
-
-	nemoactor_set_context(actor, scon->tale);
+	nemoactor_set_context(actor, show);
 
 	scon->shell = shell;
 	scon->compz = compz;
 	scon->timer = timer;
 	scon->width = width;
 	scon->height = height;
-	scon->show = show;
 
 #ifdef NEMOSHOW_FRAMELOG_ON
 	env = getenv("NEMOSHOW_FRAMELOG");
@@ -299,12 +266,13 @@ err1:
 void nemoshow_destroy_view(struct nemoshow *show)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemotale *tale = nemoshow_get_tale(show);
 
 	nemotimer_destroy(scon->timer);
 
-	nemoshow_destroy(scon->show);
+	nemoshow_destroy(show);
 
-	nemotale_destroy_gl(scon->tale);
+	nemotale_destroy_gl(tale);
 
 	nemoactor_destroy(scon->actor);
 
@@ -632,8 +600,7 @@ void nemoshow_view_resize(struct nemoshow *show, int32_t width, int32_t height)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemoactor *actor = scon->actor;
-	struct nemotale *tale = (struct nemotale *)nemoactor_get_context(actor);
-	struct talefbo *fbo = (struct talefbo *)nemotale_get_backend(tale);
+	struct talefbo *fbo = (struct talefbo *)nemotale_get_backend(show->tale);
 
 	nemoactor_resize_gl(actor, width, height);
 
@@ -648,12 +615,11 @@ void nemoshow_view_redraw(struct nemoshow *show)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemoactor *actor = scon->actor;
-	struct nemotale *tale = (struct nemotale *)nemoactor_get_context(actor);
 
 	nemoshow_update_one(show);
 	nemoshow_render_one(show);
 
-	nemotale_composite_fbo_full(tale);
+	nemotale_composite_fbo_full(show->tale);
 
 	nemoactor_damage_dirty(actor);
 }

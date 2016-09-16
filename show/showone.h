@@ -159,10 +159,6 @@ struct showref {
 	int index;
 };
 
-struct showevent {
-	uint32_t dirty;
-};
-
 struct showsignal {
 	struct nemolist link;
 

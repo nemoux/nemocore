@@ -13,14 +13,6 @@ NEMO_BEGIN_EXTERN_C
 #include <nemoegl.h>
 #include <nemohangul.h>
 
-#include <nemotale.h>
-#include <talenode.h>
-#include <talepixman.h>
-#include <talegl.h>
-#include <taleevent.h>
-#include <talegrab.h>
-#include <talegesture.h>
-
 #include <nemoshow.h>
 
 typedef enum {
@@ -40,8 +32,6 @@ struct showcontext {
 	struct eglcanvas *eglcanvas;
 
 	struct nemocanvas *canvas;
-
-	struct nemotale *tale;
 
 	int32_t width, height;
 

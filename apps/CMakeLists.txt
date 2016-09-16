@@ -31,7 +31,6 @@ add_library(nemoapps SHARED
 	nemocurl.c
 	nemohttp.c
 	messages.c
-	talehelper.c
 	showhelper.c
 	${CMAKE_SOURCE_DIR}/thirds/http_parser.c
 	)
@@ -52,7 +51,6 @@ set(HEADER_FILES
 	nemoglib.h
 	nemocurl.h
 	nemohttp.h
-	talehelper.h
 	showhelper.h
 	)
 

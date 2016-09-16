@@ -6,16 +6,10 @@
 #include <errno.h>
 
 #include <nemoshow.h>
+#include <showevent.h>
 #include <showgrab.h>
 
-static int nemoshow_grab_dispatch_tale_event(struct talegrab *base, struct taleevent *event)
-{
-	struct showgrab *grab = (struct showgrab *)container_of(base, struct showgrab, base);
-
-	return grab->dispatch_event(grab->show, grab, event);
-}
-
-struct showgrab *nemoshow_grab_create(struct nemoshow *show, void *event, nemoshow_grab_dispatch_event_t dispatch)
+struct showgrab *nemoshow_grab_create(struct nemoshow *show, struct showevent *event, nemoshow_grab_dispatch_event_t dispatch)
 {
 	struct showgrab *grab;
 
@@ -24,21 +18,22 @@ struct showgrab *nemoshow_grab_create(struct nemoshow *show, void *event, nemosh
 		return NULL;
 	memset(grab, 0, sizeof(struct showgrab));
 
-	nemotale_grab_prepare(&grab->base, show->tale, event, nemoshow_grab_dispatch_tale_event);
+	grab->show = show;
+	grab->device = event->device;
+	grab->dispatch_event = dispatch;
 
 	nemolist_init(&grab->destroy_listener.link);
 
-	grab->show = show;
-	grab->dispatch_event = dispatch;
+	nemolist_insert(&show->grab_list, &grab->link);
 
 	return grab;
 }
 
 void nemoshow_grab_destroy(struct showgrab *grab)
 {
-	nemolist_remove(&grab->destroy_listener.link);
+	nemolist_remove(&grab->link);
 
-	nemotale_grab_finish(&grab->base);
+	nemolist_remove(&grab->destroy_listener.link);
 
 	free(grab);
 }
@@ -56,12 +51,27 @@ void nemoshow_grab_check_signal(struct showgrab *grab, struct nemosignal *signal
 	nemosignal_add(signal, &grab->destroy_listener);
 }
 
-void nemoshow_dispatch_grab(struct nemoshow *show, void *event)
+int nemoshow_dispatch_grab(struct nemoshow *show, struct showevent *event)
 {
-	nemotale_dispatch_grab(show->tale, (struct taleevent *)event);
+	struct showgrab *grab;
+
+	nemolist_for_each(grab, &show->grab_list, link) {
+		if (grab->device == event->device)
+			return grab->dispatch_event(show, grab, event);
+	}
+
+	return 0;
 }
 
-void nemoshow_dispatch_grab_all(struct nemoshow *show, void *event)
+void nemoshow_dispatch_grab_all(struct nemoshow *show, struct showevent *event)
 {
-	nemotale_dispatch_grab_all(show->tale, (struct taleevent *)event);
+	struct showgrab *grab, *next;
+	int i;
+
+	for (i = 0; i < event->tapcount; i++) {
+		nemolist_for_each_safe(grab, next, &show->grab_list, link) {
+			if (grab->device == event->taps[i]->device)
+				grab->dispatch_event(show, grab, event);
+		}
+	}
 }

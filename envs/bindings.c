@@ -71,7 +71,7 @@ void nemoenvs_handle_terminal_key(struct nemocompz *compz, struct nemokeyboard *
 	}
 }
 
-static void nemoenvs_dispatch_touch_canvas_event(struct nemoshow *show, struct showone *canvas, void *event)
+static void nemoenvs_dispatch_touch_canvas_event(struct nemoshow *show, struct showone *canvas, struct showevent *event)
 {
 	if (nemoshow_event_is_touch_down(show, event)) {
 		struct showone *one;

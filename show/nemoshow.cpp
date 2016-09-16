@@ -35,6 +35,8 @@ struct nemoshow *nemoshow_create(void)
 		return NULL;
 	memset(show, 0, sizeof(struct nemoshow));
 
+	nemosignal_init(&show->destroy_signal);
+
 	nemolist_init(&show->one_list);
 	nemolist_init(&show->dirty_list);
 	nemolist_init(&show->bounds_list);
@@ -42,15 +44,24 @@ struct nemoshow *nemoshow_create(void)
 	nemolist_init(&show->transition_list);
 	nemolist_init(&show->transition_destroy_list);
 
-	nemolist_init(&show->scene_destroy_listener.link);
+	nemolist_init(&show->ptap_list);
+	nemolist_init(&show->tap_list);
+	nemolist_init(&show->grab_list);
 
-	show->sx = 1.0f;
-	show->sy = 1.0f;
+	nemolist_init(&show->scene_destroy_listener.link);
 
 	show->tilesize = NEMOSHOW_DEFAULT_TILESIZE;
 
 	show->state = NEMOSHOW_ANTIALIAS_STATE | NEMOSHOW_FILTER_STATE;
 	show->quality = NEMOSHOW_FILTER_NORMAL_QUALITY;
+
+	show->keyboard.focus = NULL;
+	nemolist_init(&show->keyboard.one_destroy_listener.link);
+
+	show->long_press_duration = 1500;
+	show->long_press_distance = 50;
+	show->single_click_duration = 700;
+	show->single_click_distance = 30;
 
 	return show;
 }
@@ -58,6 +69,8 @@ struct nemoshow *nemoshow_create(void)
 void nemoshow_destroy(struct nemoshow *show)
 {
 	struct showtransition *trans;
+
+	nemosignal_emit(&show->destroy_signal, show);
 
 	while (nemolist_empty(&show->transition_destroy_list) == 0) {
 		trans = nemolist_node0(&show->transition_destroy_list, struct showtransition, link);
@@ -78,7 +91,13 @@ void nemoshow_destroy(struct nemoshow *show)
 	nemolist_remove(&show->transition_list);
 	nemolist_remove(&show->transition_destroy_list);
 
+	nemolist_remove(&show->ptap_list);
+	nemolist_remove(&show->tap_list);
+	nemolist_remove(&show->grab_list);
+
 	nemolist_remove(&show->scene_destroy_listener.link);
+
+	nemolist_remove(&show->keyboard.one_destroy_listener.link);
 
 	if (show->pool != NULL)
 		nemopool_destroy(show->pool);
@@ -322,36 +341,35 @@ int nemoshow_set_size(struct nemoshow *show, uint32_t width, uint32_t height)
 	return 1;
 }
 
-int nemoshow_set_scale(struct nemoshow *show, double sx, double sy)
+struct showone *nemoshow_pick_canvas(struct nemoshow *show, float x, float y, float *sx, float *sy)
 {
+	struct showone *scene = show->scene;
 	struct showone *one;
-	struct showone *child;
 
-	if (show->scene == NULL)
-		return 0;
+	nemoshow_children_for_each_reverse(one, scene) {
+		if (NEMOSHOW_CANVAS_AT(one, dispatch_event) != NULL) {
+			struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
-	if (show->sx == sx && show->sy == sy)
-		return 0;
+			nemoshow_canvas_transform_from_global(one, x, y, sx, sy);
 
-	show->sx = sx;
-	show->sy = sy;
+			if (0.0f <= *sx && *sx <= canvas->width && 0.0f <= *sy && *sy <= canvas->height)
+				return one;
+		}
+	}
 
-	nemoshow_one_dirty(show->scene, NEMOSHOW_VIEWPORT_DIRTY);
-
-	return 1;
+	return NULL;
 }
 
 int nemoshow_contain_canvas(struct nemoshow *show, struct showone *one, float x, float y, float *sx, float *sy)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
-	if (canvas->contain_point != NULL) {
-		nemotale_node_transform_from_global(canvas->node, x, y, sx, sy);
+	nemoshow_canvas_transform_from_global(one, x, y, sx, sy);
 
+	if (canvas->contain_point != NULL)
 		return canvas->contain_point(show, one, *sx, *sy);
-	}
 
-	return nemotale_contain_node(show->tale, canvas->node, x, y, sx, sy);
+	return (0.0f <= *sx && *sx <= canvas->width && 0.0f <= *sy && *sy <= canvas->height);
 }
 
 void nemoshow_attach_one(struct nemoshow *show, struct showone *one)
@@ -532,9 +550,29 @@ void nemoshow_revoke_transition(struct nemoshow *show, struct showone *one, cons
 	}
 }
 
+static void nemoshow_handle_keyboard_focus_destroy(struct nemolistener *listener, void *data)
+{
+	struct nemoshow *show = (struct nemoshow *)container_of(listener, struct nemoshow, keyboard.one_destroy_listener);
+
+	nemolist_remove(&show->keyboard.one_destroy_listener.link);
+	nemolist_init(&show->keyboard.one_destroy_listener.link);
+
+	show->keyboard.focus = NULL;
+}
+
 void nemoshow_set_keyboard_focus(struct nemoshow *show, struct showone *one)
 {
-	nemotale_set_keyboard_focus(show->tale, NEMOSHOW_CANVAS_AT(one, node));
+	if (show->keyboard.focus != NULL) {
+		nemolist_remove(&show->keyboard.one_destroy_listener.link);
+		nemolist_init(&show->keyboard.one_destroy_listener.link);
+	}
+
+	show->keyboard.focus = one;
+
+	if (one != NULL) {
+		show->keyboard.one_destroy_listener.notify = nemoshow_handle_keyboard_focus_destroy;
+		nemosignal_add(&one->destroy_signal, &show->keyboard.one_destroy_listener);
+	}
 }
 
 void nemoshow_enable_antialias(struct nemoshow *show)

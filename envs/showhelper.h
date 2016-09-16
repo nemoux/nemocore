@@ -7,14 +7,6 @@
 NEMO_BEGIN_EXTERN_C
 #endif
 
-#include <nemotale.h>
-#include <talenode.h>
-#include <talepixman.h>
-#include <talegl.h>
-#include <taleevent.h>
-#include <talegrab.h>
-#include <talegesture.h>
-
 #include <nemoshow.h>
 
 typedef enum {
@@ -36,10 +28,6 @@ struct showcontext {
 	struct nemocompz *compz;
 	struct nemoactor *actor;
 	struct nemotimer *timer;
-
-	struct nemotale *tale;
-
-	struct nemoshow *show;
 
 	int32_t width, height;
 

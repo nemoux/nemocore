@@ -40,8 +40,6 @@ struct talenode {
 
 	struct nemotale *tale;
 
-	uint32_t id;
-
 	struct nemoobject object;
 
 	struct {
@@ -64,7 +62,6 @@ struct talenode {
 	pixman_region32_t region;
 	pixman_region32_t boundingbox;
 	pixman_region32_t opaque, blend;
-	pixman_region32_t input;
 	pixman_region32_t damage;
 	int dirty;
 	int needs_flush;
@@ -114,11 +111,6 @@ static inline void nemotale_node_opaque(struct talenode *node, int32_t x, int32_
 	pixman_region32_init_rect(&node->opaque, x, y, width, height);
 	pixman_region32_init_rect(&node->blend, 0, 0, node->geometry.width, node->geometry.height);
 	pixman_region32_subtract(&node->blend, &node->blend, &node->opaque);
-}
-
-static inline void nemotale_node_input(struct talenode *node, int32_t x, int32_t y, int32_t width, int32_t height)
-{
-	pixman_region32_init_rect(&node->input, x, y, width + 1, height + 1);
 }
 
 static inline void nemotale_node_damage(struct talenode *node, int32_t x, int32_t y, int32_t width, int32_t height)
@@ -259,16 +251,6 @@ static inline void nemotale_node_set_smooth(struct talenode *node, int has_smoot
 	node->has_smooth = has_smooth;
 
 	node->dirty |= 0x2;
-}
-
-static inline void nemotale_node_set_id(struct talenode *node, uint32_t id)
-{
-	node->id = id;
-}
-
-static inline uint32_t nemotale_node_get_id(struct talenode *node)
-{
-	return node == NULL ? 0 : node->id;
 }
 
 static inline int32_t nemotale_node_get_width(struct talenode *node)
