@@ -261,8 +261,6 @@ static inline void nemoshow_canvas_update_size(struct nemoshow *show, struct sho
 		canvas->viewport.sy = canvas->viewport.height / canvas->height;
 		canvas->viewport.rx = canvas->width / canvas->viewport.width;
 		canvas->viewport.ry = canvas->height / canvas->viewport.height;
-	} else if (one->sub == NEMOSHOW_CANVAS_BACK_TYPE) {
-		nemotale_node_opaque(canvas->node, 0, 0, canvas->width, canvas->height);
 	}
 
 	one->dirty |= NEMOSHOW_VIEWPORT_DIRTY;
@@ -816,31 +814,21 @@ int nemoshow_canvas_set_viewport(struct showone *one, double sx, double sy)
 	canvas->viewport.width = canvas->width * sx;
 	canvas->viewport.height = canvas->height * sy;
 
+	nemotale_node_resize(canvas->node, canvas->viewport.width, canvas->viewport.height);
+
 	if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
-		nemotale_node_resize(canvas->node, canvas->viewport.width, canvas->viewport.height);
-
-		nemoshow_canvas_damage_all(one);
-
 		nemoshow_one_dirty_all(one, NEMOSHOW_SHAPE_DIRTY);
 	} else if (one->sub == NEMOSHOW_CANVAS_PIPELINE_TYPE) {
-		nemotale_node_resize(canvas->node, canvas->viewport.width, canvas->viewport.height);
-
 		fbo_prepare_context(
 				nemotale_node_get_texture(canvas->node),
 				canvas->viewport.width,
 				canvas->viewport.height,
 				&canvas->fbo, &canvas->dbo);
-
-		nemoshow_canvas_damage_all(one);
-	} else if (one->sub == NEMOSHOW_CANVAS_PIXMAN_TYPE) {
-		nemotale_node_resize(canvas->node, canvas->viewport.width, canvas->viewport.height);
-
-		nemoshow_canvas_damage_all(one);
-	} else if (one->sub == NEMOSHOW_CANVAS_OPENGL_TYPE) {
-		nemotale_node_resize(canvas->node, canvas->viewport.width, canvas->viewport.height);
-
-		nemoshow_canvas_damage_all(one);
+	} else if (one->sub == NEMOSHOW_CANVAS_BACK_TYPE) {
+		nemotale_node_opaque(canvas->node, 0, 0, canvas->viewport.width, canvas->viewport.height);
 	}
+
+	nemoshow_canvas_damage_all(one);
 
 	return 0;
 }
