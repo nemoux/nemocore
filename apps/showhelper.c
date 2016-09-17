@@ -32,12 +32,13 @@ static void nemoshow_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t w
 	nemoshow_divide_one(show);
 	nemoshow_render_one(show);
 
-	nemotale_composite_egl_full(show->tale);
+	nemotale_composite_egl_full(scon->tale);
 }
 
 static void nemoshow_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t secs, uint32_t nsecs)
 {
 	struct nemoshow *show = (struct nemoshow *)nemocanvas_get_userdata(canvas);
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 
 	if (nemoshow_has_transition(show) != 0) {
 		nemoshow_dispatch_transition(show, secs * 1000 + nsecs / 1000000);
@@ -53,7 +54,7 @@ static void nemoshow_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 
 		nemocanvas_dispatch_feedback(canvas);
 
-		nemotale_composite_egl(show->tale, NULL);
+		nemotale_composite_egl(scon->tale, NULL);
 	} else {
 		nemocanvas_terminate_feedback(canvas);
 	}
@@ -165,7 +166,6 @@ struct nemoshow *nemoshow_create_view(struct nemotool *tool, int32_t width, int3
 {
 	struct showcontext *scon;
 	struct nemoshow *show;
-	struct nemotale *tale;
 	struct nemotimer *timer;
 	const char *env;
 
@@ -200,8 +200,8 @@ struct nemoshow *nemoshow_create_view(struct nemotool *tool, int32_t width, int3
 	nemocanvas_set_dispatch_fullscreen(scon->canvas, nemoshow_dispatch_canvas_fullscreen);
 	nemocanvas_set_dispatch_destroy(scon->canvas, nemoshow_dispatch_canvas_destroy);
 
-	tale = nemotale_create_gl();
-	nemotale_set_backend(tale,
+	scon->tale = nemotale_create_gl();
+	nemotale_set_backend(scon->tale,
 			nemotale_create_egl(
 				NTEGL_DISPLAY(scon->egl),
 				NTEGL_CONTEXT(scon->egl),
@@ -209,7 +209,7 @@ struct nemoshow *nemoshow_create_view(struct nemotool *tool, int32_t width, int3
 				(EGLNativeWindowType)NTEGL_WINDOW(scon->eglcanvas)));
 
 	show = nemoshow_create();
-	nemoshow_set_tale(show, tale);
+	nemoshow_set_tale(show, scon->tale);
 	nemoshow_set_size(show, width, height);
 	nemoshow_set_context(show, scon);
 
@@ -253,13 +253,12 @@ err1:
 void nemoshow_destroy_view(struct nemoshow *show)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
-	struct nemotale *tale = nemoshow_get_tale(show);
 
 	nemoshow_destroy(show);
 
 	nemoshow_finalize();
 
-	nemotale_destroy_gl(tale);
+	nemotale_destroy_gl(scon->tale);
 
 	nemoegl_destroy_canvas(scon->eglcanvas);
 	nemoegl_destroy(scon->egl);
@@ -652,5 +651,5 @@ void nemoshow_view_redraw(struct nemoshow *show)
 	nemoshow_divide_one(show);
 	nemoshow_render_one(show);
 
-	nemotale_composite_egl_full(show->tale);
+	nemotale_composite_egl_full(scon->tale);
 }

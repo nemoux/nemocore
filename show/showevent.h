@@ -129,6 +129,7 @@ extern void nemoshow_event_get_distant_tapserials(struct nemoshow *show, struct 
 extern void nemoshow_event_get_distant_tapdevices(struct nemoshow *show, struct showevent *event, uint64_t *device0, uint64_t *device1);
 
 extern int nemoshow_event_is_single_click(struct nemoshow *show, struct showevent *event);
+extern int nemoshow_event_is_long_press(struct nemoshow *show, struct showevent *event);
 
 static inline void nemoshow_tap_set_tag(struct showtap *tap, uint32_t tag)
 {
@@ -434,11 +435,6 @@ static inline int nemoshow_event_is_cancel(struct nemoshow *show, struct showeve
 	return event->type & NEMOSHOW_CANCEL_EVENT;
 }
 
-static inline int nemoshow_event_is_long_press(struct nemoshow *show, struct showevent *event)
-{
-	return event->type & NEMOSHOW_LONG_PRESS_EVENT;
-}
-
 static inline int nemoshow_event_is_touch_down(struct nemoshow *show, struct showevent *event)
 {
 	return event->type & NEMOSHOW_TOUCH_DOWN_EVENT;
@@ -457,11 +453,6 @@ static inline int nemoshow_event_is_touch_motion(struct nemoshow *show, struct s
 static inline int nemoshow_event_is_touch_pressure(struct nemoshow *show, struct showevent *event)
 {
 	return event->type & NEMOSHOW_TOUCH_PRESSURE_EVENT;
-}
-
-static inline int nemoshow_event_is_touch_long_press(struct nemoshow *show, struct showevent *event)
-{
-	return event->type & NEMOSHOW_TOUCH_LONG_PRESS_EVENT;
 }
 
 static inline int nemoshow_event_is_pointer_enter(struct nemoshow *show, struct showevent *event)
@@ -512,11 +503,6 @@ static inline int nemoshow_event_is_pointer_button_down(struct nemoshow *show, s
 static inline int nemoshow_event_is_pointer_button_up(struct nemoshow *show, struct showevent *event, uint32_t button)
 {
 	return (event->type & NEMOSHOW_POINTER_UP_EVENT) && (button == 0 || event->value == button);
-}
-
-static inline int nemoshow_event_is_pointer_long_press(struct nemoshow *show, struct showevent *event)
-{
-	return event->type & NEMOSHOW_POINTER_LONG_PRESS_EVENT;
 }
 
 static inline int nemoshow_event_is_keyboard_enter(struct nemoshow *show, struct showevent *event)

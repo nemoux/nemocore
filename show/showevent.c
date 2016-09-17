@@ -27,7 +27,7 @@ static inline void nemoshow_dispatch_event(struct nemoshow *show, struct showone
 	}
 }
 
-static inline struct showtap *nemoshow_pointer_get_tap(struct nemoshow *show, uint64_t device)
+static inline struct showtap *nemoshow_get_pointer_tap(struct nemoshow *show, uint64_t device)
 {
 	struct showtap *tap;
 
@@ -39,7 +39,7 @@ static inline struct showtap *nemoshow_pointer_get_tap(struct nemoshow *show, ui
 	return NULL;
 }
 
-static inline struct showtap *nemoshow_touch_get_tap(struct nemoshow *show, uint64_t device)
+static inline struct showtap *nemoshow_get_touch_tap(struct nemoshow *show, uint64_t device)
 {
 	struct showtap *tap;
 
@@ -119,7 +119,7 @@ void nemoshow_push_pointer_enter_event(struct nemoshow *show, uint32_t serial, u
 
 	nemoshow_transform_from_viewport(show, x, y, &x, &y);
 
-	tap = nemoshow_pointer_get_tap(show, device);
+	tap = nemoshow_get_pointer_tap(show, device);
 	if (tap == NULL) {
 		tap = nemoshow_create_tap(show, device);
 		if (tap == NULL)
@@ -147,7 +147,7 @@ void nemoshow_push_pointer_leave_event(struct nemoshow *show, uint32_t serial, u
 	struct showevent event;
 	struct showtap *tap;
 
-	tap = nemoshow_pointer_get_tap(show, device);
+	tap = nemoshow_get_pointer_tap(show, device);
 	if (tap == NULL)
 		return;
 
@@ -168,7 +168,7 @@ void nemoshow_push_pointer_down_event(struct nemoshow *show, uint32_t serial, ui
 	uint32_t type;
 	float sx, sy;
 
-	tap = nemoshow_pointer_get_tap(show, device);
+	tap = nemoshow_get_pointer_tap(show, device);
 	if (tap == NULL)
 		return;
 
@@ -212,7 +212,7 @@ void nemoshow_push_pointer_up_event(struct nemoshow *show, uint32_t serial, uint
 	uint64_t value;
 	uint32_t type;
 
-	tap = nemoshow_pointer_get_tap(show, device);
+	tap = nemoshow_get_pointer_tap(show, device);
 	if (tap == NULL)
 		return;
 
@@ -249,7 +249,7 @@ void nemoshow_push_pointer_motion_event(struct nemoshow *show, uint32_t serial, 
 
 	nemoshow_transform_from_viewport(show, x, y, &x, &y);
 
-	tap = nemoshow_pointer_get_tap(show, device);
+	tap = nemoshow_get_pointer_tap(show, device);
 	if (tap == NULL)
 		return;
 
@@ -271,7 +271,7 @@ void nemoshow_push_pointer_axis_event(struct nemoshow *show, uint32_t serial, ui
 	struct showevent event;
 	struct showtap *tap;
 
-	tap = nemoshow_pointer_get_tap(show, device);
+	tap = nemoshow_get_pointer_tap(show, device);
 	if (tap == NULL)
 		return;
 
@@ -389,7 +389,7 @@ void nemoshow_push_touch_up_event(struct nemoshow *show, uint32_t serial, uint64
 	struct showevent event;
 	struct showtap *tap;
 
-	tap = nemoshow_touch_get_tap(show, device);
+	tap = nemoshow_get_touch_tap(show, device);
 	if (tap == NULL)
 		return;
 
@@ -417,7 +417,7 @@ void nemoshow_push_touch_motion_event(struct nemoshow *show, uint32_t serial, ui
 
 	nemoshow_transform_from_viewport(show, x, y, &x, &y);
 
-	tap = nemoshow_touch_get_tap(show, device);
+	tap = nemoshow_get_touch_tap(show, device);
 	if (tap == NULL)
 		return;
 
@@ -446,7 +446,7 @@ void nemoshow_push_touch_pressure_event(struct nemoshow *show, uint32_t serial, 
 	struct showevent event;
 	struct showtap *tap;
 
-	tap = nemoshow_touch_get_tap(show, device);
+	tap = nemoshow_get_touch_tap(show, device);
 	if (tap == NULL)
 		return;
 
@@ -595,7 +595,7 @@ void nemoshow_event_get_distant_tapdevices(struct nemoshow *show, struct showeve
 
 static inline int nemoshow_event_is_pointer_single_click(struct nemoshow *show, struct showevent *event)
 {
-	struct showtap *tap = nemoshow_pointer_get_tap(show, event->device);
+	struct showtap *tap = nemoshow_get_pointer_tap(show, event->device);
 
 	if (tap->done != 0)
 		return 0;
@@ -629,4 +629,9 @@ int nemoshow_event_is_single_click(struct nemoshow *show, struct showevent *even
 		return nemoshow_event_is_touch_single_click(show, event);
 
 	return 0;
+}
+
+int nemoshow_event_is_long_press(struct nemoshow *show, struct showevent *event)
+{
+	return event->type & NEMOSHOW_LONG_PRESS_EVENT;
 }

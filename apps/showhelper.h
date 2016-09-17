@@ -32,6 +32,8 @@ struct showcontext {
 	struct eglcanvas *eglcanvas;
 
 	struct nemocanvas *canvas;
+	
+	struct nemotale *tale;
 
 	int32_t width, height;
 

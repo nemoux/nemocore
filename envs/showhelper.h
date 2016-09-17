@@ -29,6 +29,8 @@ struct showcontext {
 	struct nemoactor *actor;
 	struct nemotimer *timer;
 
+	struct nemotale *tale;
+
 	int32_t width, height;
 
 	int has_framelog;

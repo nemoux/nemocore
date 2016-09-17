@@ -81,7 +81,7 @@ static int nemoshow_dispatch_actor_resize(struct nemoactor *actor, int32_t width
 {
 	struct nemoshow *show = (struct nemoshow *)nemoactor_get_context(actor);
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
-	struct talefbo *fbo = (struct talefbo *)nemotale_get_backend(show->tale);
+	struct talefbo *fbo = (struct talefbo *)nemotale_get_backend(scon->tale);
 
 	if (show->dispatch_resize != NULL) {
 		show->dispatch_resize(show, width, height);
@@ -97,7 +97,7 @@ static int nemoshow_dispatch_actor_resize(struct nemoactor *actor, int32_t width
 	nemoshow_update_one(show);
 	nemoshow_render_one(show);
 
-	nemotale_composite_fbo_full(show->tale);
+	nemotale_composite_fbo_full(scon->tale);
 
 	nemoactor_damage_dirty(actor);
 
@@ -107,6 +107,7 @@ static int nemoshow_dispatch_actor_resize(struct nemoactor *actor, int32_t width
 static void nemoshow_dispatch_actor_frame(struct nemoactor *actor, uint32_t msecs)
 {
 	struct nemoshow *show = (struct nemoshow *)nemoactor_get_context(actor);
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemocompz *compz = actor->compz;
 
 	nemocompz_make_current(compz);
@@ -128,7 +129,7 @@ static void nemoshow_dispatch_actor_frame(struct nemoactor *actor, uint32_t msec
 
 		nemoactor_dispatch_feedback(actor);
 
-		nemotale_composite_fbo(show->tale, &region);
+		nemotale_composite_fbo(scon->tale, &region);
 
 		nemoactor_damage_region(actor, &region);
 
@@ -193,7 +194,6 @@ struct nemoshow *nemoshow_create_view(struct nemoshell *shell, int32_t width, in
 	struct nemocompz *compz = shell->compz;
 	struct showcontext *scon;
 	struct nemoshow *show;
-	struct nemotale *tale;
 	struct nemoactor *actor;
 	struct nemotimer *timer;
 	const char *env;
@@ -223,16 +223,16 @@ struct nemoshow *nemoshow_create_view(struct nemoshell *shell, int32_t width, in
 	nemoactor_set_dispatch_fullscreen(actor, nemoshow_dispatch_actor_fullscreen);
 	nemoactor_set_dispatch_destroy(actor, nemoshow_dispatch_actor_destroy);
 
-	tale = nemotale_create_gl();
-	nemotale_set_backend(tale,
+	scon->tale = nemotale_create_gl();
+	nemotale_set_backend(scon->tale,
 			nemotale_create_fbo(
 				actor->texture,
 				actor->base.width,
 				actor->base.height));
-	nemotale_resize(tale, actor->base.width, actor->base.height);
+	nemotale_resize(scon->tale, actor->base.width, actor->base.height);
 
 	show = nemoshow_create();
-	nemoshow_set_tale(show, tale);
+	nemoshow_set_tale(show, scon->tale);
 	nemoshow_set_size(show, width, height);
 	nemoshow_set_context(show, scon);
 
@@ -266,13 +266,12 @@ err1:
 void nemoshow_destroy_view(struct nemoshow *show)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
-	struct nemotale *tale = nemoshow_get_tale(show);
 
 	nemotimer_destroy(scon->timer);
 
 	nemoshow_destroy(show);
 
-	nemotale_destroy_gl(tale);
+	nemotale_destroy_gl(scon->tale);
 
 	nemoactor_destroy(scon->actor);
 
@@ -600,7 +599,7 @@ void nemoshow_view_resize(struct nemoshow *show, int32_t width, int32_t height)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemoactor *actor = scon->actor;
-	struct talefbo *fbo = (struct talefbo *)nemotale_get_backend(show->tale);
+	struct talefbo *fbo = (struct talefbo *)nemotale_get_backend(scon->tale);
 
 	nemoactor_resize_gl(actor, width, height);
 
@@ -619,7 +618,7 @@ void nemoshow_view_redraw(struct nemoshow *show)
 	nemoshow_update_one(show);
 	nemoshow_render_one(show);
 
-	nemotale_composite_fbo_full(show->tale);
+	nemotale_composite_fbo_full(scon->tale);
 
 	nemoactor_damage_dirty(actor);
 }
