@@ -124,7 +124,6 @@ extern void nemoshow_canvas_render_none(struct nemoshow *show, struct showone *o
 extern int nemoshow_canvas_redraw(struct showone *one);
 
 extern int nemoshow_canvas_set_viewport(struct showone *one, double sx, double sy);
-extern int nemoshow_canvas_set_size(struct showone *one, int32_t width, int32_t height);
 extern int nemoshow_canvas_set_smooth(struct showone *one, int has_smooth);
 
 extern void nemoshow_canvas_damage(struct showone *one, int32_t x, int32_t y, int32_t width, int32_t height);
@@ -140,22 +139,8 @@ extern void nemoshow_canvas_put_ones(struct showone *one);
 
 extern void nemoshow_canvas_transform_to_global(struct showone *one, float sx, float sy, float *x, float *y);
 extern void nemoshow_canvas_transform_from_global(struct showone *one, float x, float y, float *sx, float *sy);
-
-static inline void nemoshow_canvas_transform_to_viewport(struct showone *one, float x, float y, float *sx, float *sy)
-{
-	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
-
-	*sx = x * canvas->viewport.sx;
-	*sy = y * canvas->viewport.sy;
-}
-
-static inline void nemoshow_canvas_transform_from_viewport(struct showone *one, float sx, float sy, float *x, float *y)
-{
-	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
-
-	*x = sx * canvas->viewport.rx;
-	*y = sy * canvas->viewport.ry;
-}
+extern void nemoshow_canvas_transform_to_viewport(struct showone *one, float x, float y, float *sx, float *sy);
+extern void nemoshow_canvas_transform_from_viewport(struct showone *one, float sx, float sy, float *x, float *y);
 
 static inline void nemoshow_canvas_set_state(struct showcanvas *canvas, uint32_t state)
 {
@@ -261,6 +246,18 @@ static inline int32_t nemoshow_canvas_get_viewport_width(struct showone *one)
 static inline int32_t nemoshow_canvas_get_viewport_height(struct showone *one)
 {
 	return NEMOSHOW_CANVAS_AT(one, viewport.height);
+}
+
+static inline void nemoshow_canvas_set_size(struct showone *one, int32_t width, int32_t height)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	canvas->width = width;
+	canvas->height = height;
+
+	nemoshow_one_set_state(one, NEMOSHOW_SIZE_STATE);
+
+	nemoshow_one_dirty(one, NEMOSHOW_SIZE_DIRTY);
 }
 
 static inline void nemoshow_canvas_set_width(struct showone *one, double width)

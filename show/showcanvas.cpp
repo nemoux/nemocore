@@ -344,6 +344,25 @@ int nemoshow_canvas_update(struct showone *one)
 	return 0;
 }
 
+static inline void nemoshow_canvas_update_geometry(struct showone *one)
+{
+	if ((one->dirty & NEMOSHOW_SIZE_DIRTY) != 0) {
+		nemoshow_canvas_update_size(one->show, one);
+
+		one->dirty &= ~NEMOSHOW_SIZE_DIRTY;
+	}
+	if ((one->dirty & NEMOSHOW_VIEWPORT_DIRTY) != 0) {
+		nemoshow_canvas_update_viewport(one->show, one);
+
+		one->dirty &= ~NEMOSHOW_VIEWPORT_DIRTY;
+	}
+	if ((one->dirty & NEMOSHOW_MATRIX_DIRTY) != 0) {
+		nemoshow_canvas_update_matrix(one->show, one);
+
+		one->dirty &= ~NEMOSHOW_MATRIX_DIRTY;
+	}
+}
+
 static inline void nemoshow_canvas_render_one(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region);
 
 static inline void nemoshow_canvas_render_item_none(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
@@ -833,20 +852,6 @@ int nemoshow_canvas_set_viewport(struct showone *one, double sx, double sy)
 	return 0;
 }
 
-int nemoshow_canvas_set_size(struct showone *one, int32_t width, int32_t height)
-{
-	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
-
-	canvas->width = width;
-	canvas->height = height;
-
-	nemoshow_one_set_state(one, NEMOSHOW_SIZE_STATE);
-
-	nemoshow_one_dirty(one, NEMOSHOW_SIZE_DIRTY);
-
-	return 0;
-}
-
 int nemoshow_canvas_set_smooth(struct showone *one, int has_smooth)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
@@ -998,11 +1003,7 @@ void nemoshow_canvas_transform_to_global(struct showone *one, float sx, float sy
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
-	if ((one->dirty & NEMOSHOW_MATRIX_DIRTY) != 0) {
-		nemoshow_canvas_update_matrix(one->show, one);
-
-		one->dirty &= ~NEMOSHOW_MATRIX_DIRTY;
-	}
+	nemoshow_canvas_update_geometry(one);
 
 	SkPoint p = NEMOSHOW_CANVAS_CC(canvas, matrix)->mapXY(sx, sy);
 
@@ -1014,14 +1015,30 @@ void nemoshow_canvas_transform_from_global(struct showone *one, float x, float y
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
-	if ((one->dirty & NEMOSHOW_MATRIX_DIRTY) != 0) {
-		nemoshow_canvas_update_matrix(one->show, one);
-
-		one->dirty &= ~NEMOSHOW_MATRIX_DIRTY;
-	}
+	nemoshow_canvas_update_geometry(one);
 
 	SkPoint p = NEMOSHOW_CANVAS_CC(canvas, inverse)->mapXY(x, y);
 
 	*sx = p.x();
 	*sy = p.y();
+}
+
+void nemoshow_canvas_transform_to_viewport(struct showone *one, float x, float y, float *sx, float *sy)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	nemoshow_canvas_update_geometry(one);
+
+	*sx = x * canvas->viewport.sx;
+	*sy = y * canvas->viewport.sy;
+}
+
+void nemoshow_canvas_transform_from_viewport(struct showone *one, float sx, float sy, float *x, float *y)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	nemoshow_canvas_update_geometry(one);
+
+	*x = sx * canvas->viewport.rx;
+	*y = sy * canvas->viewport.ry;
 }
