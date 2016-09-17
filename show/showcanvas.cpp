@@ -256,8 +256,6 @@ static inline void nemoshow_canvas_update_size(struct nemoshow *show, struct sho
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
-	nemotale_node_resize(canvas->node, canvas->width, canvas->height);
-
 	if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
 		canvas->viewport.sx = canvas->viewport.width / canvas->width;
 		canvas->viewport.sy = canvas->viewport.height / canvas->height;
@@ -819,13 +817,13 @@ int nemoshow_canvas_set_viewport(struct showone *one, double sx, double sy)
 	canvas->viewport.height = canvas->height * sy;
 
 	if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
-		nemotale_node_viewport(canvas->node, canvas->viewport.width, canvas->viewport.height);
+		nemotale_node_resize(canvas->node, canvas->viewport.width, canvas->viewport.height);
 
 		nemoshow_canvas_damage_all(one);
 
 		nemoshow_one_dirty_all(one, NEMOSHOW_SHAPE_DIRTY);
 	} else if (one->sub == NEMOSHOW_CANVAS_PIPELINE_TYPE) {
-		nemotale_node_viewport(canvas->node, canvas->viewport.width, canvas->viewport.height);
+		nemotale_node_resize(canvas->node, canvas->viewport.width, canvas->viewport.height);
 
 		fbo_prepare_context(
 				nemotale_node_get_texture(canvas->node),
@@ -835,11 +833,11 @@ int nemoshow_canvas_set_viewport(struct showone *one, double sx, double sy)
 
 		nemoshow_canvas_damage_all(one);
 	} else if (one->sub == NEMOSHOW_CANVAS_PIXMAN_TYPE) {
-		nemotale_node_viewport(canvas->node, canvas->viewport.width, canvas->viewport.height);
+		nemotale_node_resize(canvas->node, canvas->viewport.width, canvas->viewport.height);
 
 		nemoshow_canvas_damage_all(one);
 	} else if (one->sub == NEMOSHOW_CANVAS_OPENGL_TYPE) {
-		nemotale_node_viewport(canvas->node, canvas->viewport.width, canvas->viewport.height);
+		nemotale_node_resize(canvas->node, canvas->viewport.width, canvas->viewport.height);
 
 		nemoshow_canvas_damage_all(one);
 	}
@@ -890,7 +888,7 @@ void nemoshow_canvas_damage_one(struct showone *one, struct showone *child)
 			SkIRect::MakeXYWH(child->sx, child->sy, child->sw, child->sh),
 			SkRegion::kUnion_Op);
 
-	nemotale_node_damage(canvas->node, child->x, child->y, child->w, child->h);
+	nemotale_node_damage(canvas->node, child->sx, child->sy, child->sw, child->sh);
 
 	nemoshow_canvas_set_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE);
 

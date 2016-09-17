@@ -27,11 +27,6 @@ static int nemotale_node_resize_none(struct talenode *node, int32_t width, int32
 	return 0;
 }
 
-static int nemotale_node_viewport_none(struct talenode *node, int32_t width, int32_t height)
-{
-	return 0;
-}
-
 void *nemotale_node_map_none(struct talenode *node)
 {
 	return NULL;
@@ -67,11 +62,6 @@ int nemotale_node_prepare(struct talenode *node)
 	node->transform.dirty = 1;
 	node->transform.custom = 0;
 
-	node->viewport.sx = 1.0f;
-	node->viewport.sy = 1.0f;
-	node->viewport.rx = 1.0f;
-	node->viewport.ry = 1.0f;
-
 	node->alpha = 1.0f;
 
 	node->has_smooth = 1;
@@ -79,7 +69,6 @@ int nemotale_node_prepare(struct talenode *node)
 	node->dispatch_flush = nemotale_node_flush_none;
 	node->dispatch_filter = nemotale_node_filter_none;
 	node->dispatch_resize = nemotale_node_resize_none;
-	node->dispatch_viewport = nemotale_node_viewport_none;
 	node->dispatch_map = nemotale_node_map_none;
 	node->dispatch_unmap = nemotale_node_unmap_none;
 
@@ -92,16 +81,6 @@ int nemotale_node_prepare(struct talenode *node)
 	pixman_region32_init(&node->blend);
 	pixman_region32_init(&node->damage);
 
-	nemoobject_prepare(&node->object, NEMOTALE_NODE_ATTR_MAX);
-
-	nemoobject_set_reserved(&node->object, "x", &node->geometry.x, sizeof(float));
-	nemoobject_set_reserved(&node->object, "y", &node->geometry.y, sizeof(float));
-	nemoobject_set_reserved(&node->object, "width", &node->geometry.width, sizeof(int32_t));
-	nemoobject_set_reserved(&node->object, "height", &node->geometry.height, sizeof(int32_t));
-	nemoobject_set_reserved(&node->object, "px", &node->geometry.px, sizeof(float));
-	nemoobject_set_reserved(&node->object, "py", &node->geometry.px, sizeof(float));
-	nemoobject_set_reserved(&node->object, "r", &node->geometry.r, sizeof(float));
-
 	return 0;
 }
 
@@ -111,8 +90,6 @@ void nemotale_node_finish(struct talenode *node)
 
 	if (node->tale != NULL)
 		nemotale_detach_node(node);
-
-	nemoobject_finish(&node->object);
 
 	pixman_region32_fini(&node->boundingbox);
 	pixman_region32_fini(&node->opaque);

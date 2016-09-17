@@ -23,11 +23,6 @@ int nemotale_prepare(struct nemotale *tale)
 
 	nemomatrix_init_identity(&tale->transform.matrix);
 
-	tale->viewport.sx = 1.0f;
-	tale->viewport.sy = 1.0f;
-	tale->viewport.rx = 1.0f;
-	tale->viewport.ry = 1.0f;
-
 	nemolist_init(&tale->node_list);
 
 	return 0;

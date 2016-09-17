@@ -14,9 +14,6 @@ NEMO_BEGIN_EXTERN_C
 #include <nemolist.h>
 #include <nemolistener.h>
 #include <nemomatrix.h>
-#include <nemoattr.h>
-
-#define	NEMOTALE_NODE_ATTR_MAX			(16)
 
 struct nemotale;
 struct talenode;
@@ -24,7 +21,6 @@ struct talenode;
 typedef int (*nemotale_node_dispatch_flush_t)(struct talenode *node);
 typedef int (*nemotale_node_dispatch_filter_t)(struct talenode *node);
 typedef int (*nemotale_node_dispatch_resize_t)(struct talenode *node, int32_t width, int32_t height);
-typedef int (*nemotale_node_dispatch_viewport_t)(struct talenode *node, int32_t width, int32_t height);
 typedef void *(*nemotale_node_dispatch_map_t)(struct talenode *node);
 typedef int (*nemotale_node_dispatch_unmap_t)(struct talenode *node);
 
@@ -40,24 +36,14 @@ struct talenode {
 
 	struct nemotale *tale;
 
-	struct nemoobject object;
-
 	struct {
-		float x, y;
 		int32_t width, height;
+
+		float x, y;
 		float px, py;
 		float r;
 		float sx, sy;
 	} geometry;
-
-	struct {
-		int32_t width, height;
-
-		double sx, sy;
-		double rx, ry;
-
-		int enable;
-	} viewport;
 
 	pixman_region32_t region;
 	pixman_region32_t boundingbox;
@@ -71,7 +57,6 @@ struct talenode {
 	nemotale_node_dispatch_flush_t dispatch_flush;
 	nemotale_node_dispatch_filter_t dispatch_filter;
 	nemotale_node_dispatch_resize_t dispatch_resize;
-	nemotale_node_dispatch_viewport_t dispatch_viewport;
 	nemotale_node_dispatch_map_t dispatch_map;
 	nemotale_node_dispatch_unmap_t dispatch_unmap;
 
@@ -90,10 +75,6 @@ struct talenode {
 	int has_filter;
 	int has_smooth;
 };
-
-#define	NTNODE_OBJECT(node)						(&node->object)
-#define	NTNODE_DESTROY_SIGNAL(node)		(&node->destroy_signal)
-#define	NTNODE_DAMAGE(node)						(&node->damage)
 
 extern void nemotale_node_destroy(struct talenode *node);
 
@@ -263,16 +244,6 @@ static inline int32_t nemotale_node_get_height(struct talenode *node)
 	return node->geometry.height;
 }
 
-static inline int32_t nemotale_node_get_viewport_width(struct talenode *node)
-{
-	return node->viewport.width;
-}
-
-static inline int32_t nemotale_node_get_viewport_height(struct talenode *node)
-{
-	return node->viewport.height;
-}
-
 static inline void nemotale_node_set_data(struct talenode *node, void *data)
 {
 	node->userdata = data;
@@ -281,28 +252,6 @@ static inline void nemotale_node_set_data(struct talenode *node, void *data)
 static inline void *nemotale_node_get_data(struct talenode *node)
 {
 	return node->userdata;
-}
-
-static inline void nemotale_node_transform_to_viewport(struct talenode *node, float x, float y, float *sx, float *sy)
-{
-	if (node->viewport.enable != 0) {
-		*sx = x * node->viewport.sx;
-		*sy = y * node->viewport.sy;
-	} else {
-		*sx = x;
-		*sy = y;
-	}
-}
-
-static inline void nemotale_node_transform_from_viewport(struct talenode *node, float sx, float sy, float *x, float *y)
-{
-	if (node->viewport.enable != 0) {
-		*x = sx * node->viewport.rx;
-		*y = sy * node->viewport.ry;
-	} else {
-		*x = sx;
-		*y = sy;
-	}
 }
 
 static inline int nemotale_node_flush(struct talenode *node)
@@ -318,11 +267,6 @@ static inline int nemotale_node_filter(struct talenode *node)
 static inline int nemotale_node_resize(struct talenode *node, int32_t width, int32_t height)
 {
 	return node->dispatch_resize(node, width, height);
-}
-
-static inline int nemotale_node_viewport(struct talenode *node, int32_t width, int32_t height)
-{
-	return node->dispatch_viewport(node, width, height);
 }
 
 static inline void *nemotale_node_map(struct talenode *node)

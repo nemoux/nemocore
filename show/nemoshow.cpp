@@ -302,8 +302,6 @@ int nemoshow_set_scene(struct nemoshow *show, struct showone *one)
 
 	nemoshow_attach_ones(show, one);
 
-	nemotale_resize(show->tale, NEMOSHOW_SCENE_AT(one, width), NEMOSHOW_SCENE_AT(one, height));
-
 	nemoshow_one_dirty(one, NEMOSHOW_SIZE_DIRTY | NEMOSHOW_CHILDREN_DIRTY);
 
 	return 0;
@@ -333,7 +331,7 @@ int nemoshow_set_size(struct nemoshow *show, uint32_t width, uint32_t height)
 	show->width = width;
 	show->height = height;
 
-	nemotale_set_viewport(show->tale, show->width, show->height);
+	nemotale_resize(show->tale, show->width, show->height);
 
 	if (show->scene != NULL)
 		nemoshow_one_dirty(show->scene, NEMOSHOW_VIEWPORT_DIRTY);

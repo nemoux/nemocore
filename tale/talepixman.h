@@ -44,7 +44,6 @@ extern void nemotale_node_fill_pixman(struct talenode *node, double r, double g,
 extern int nemotale_node_resize_pixman(struct talenode *node, int32_t width, int32_t height);
 extern void *nemotale_node_map_pixman(struct talenode *node);
 extern int nemotale_node_unmap_pixman(struct talenode *node);
-extern int nemotale_node_viewport_pixman(struct talenode *node, int32_t width, int32_t height);
 
 static inline pixman_image_t *nemotale_get_pixman(struct nemotale *tale)
 {

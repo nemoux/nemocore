@@ -73,7 +73,6 @@ extern struct talenode *nemotale_node_create_gl(int32_t width, int32_t height);
 extern int nemotale_node_prepare_gl(struct talenode *node);
 
 extern int nemotale_node_resize_gl(struct talenode *node, int32_t width, int32_t height);
-extern int nemotale_node_viewport_gl(struct talenode *node, int32_t width, int32_t height);
 extern int nemotale_node_flush_gl(struct talenode *node);
 extern int nemotale_node_flush_gl_pbo(struct talenode *node);
 extern void *nemotale_node_map_pbo(struct talenode *node);
