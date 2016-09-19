@@ -259,6 +259,11 @@ static inline void *nemocontent_get_opengl_context(struct nemocontent *content, 
 	return content->gcontexts[node->id];
 }
 
+static inline void *nemocontent_get_opengl_context_on(struct nemocontent *content, int index)
+{
+	return content->gcontexts[index];
+}
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

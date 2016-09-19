@@ -228,6 +228,13 @@ static inline GLuint nemoshow_canvas_get_texture(struct showone *one)
 	return nemotale_node_get_texture(canvas->node);
 }
 
+static inline int nemoshow_canvas_set_texture(struct showone *one, GLuint texture)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	return nemotale_node_set_texture(canvas->node, texture);
+}
+
 static inline double nemoshow_canvas_get_viewport_sx(struct showone *one)
 {
 	return NEMOSHOW_CANVAS_AT(one, viewport.sx);

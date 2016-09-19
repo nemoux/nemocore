@@ -449,3 +449,13 @@ void *glrenderer_get_canvas_buffer(struct nemorenderer *base, struct nemocanvas 
 
 	return glcontent->buffer_reference.buffer;
 }
+
+uint32_t nemocanvas_get_opengl_texture(struct nemocanvas *canvas, int index)
+{
+	struct glcontent *glcontent = (struct glcontent *)nemocontent_get_opengl_context_on(&canvas->base, 0);
+
+	if (glcontent == NULL)
+		return 0;
+
+	return glcontent->textures[index];
+}

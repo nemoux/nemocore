@@ -159,6 +159,40 @@ void nemoenvs_handle_escape_key(struct nemocompz *compz, struct nemokeyboard *ke
 	}
 }
 
+struct nemomirror {
+	struct wl_listener canvas_damage_listener;
+	struct wl_listener canvas_destroy_listener;
+
+	struct nemoshow *show;
+	struct showone *canvas;
+};
+
+static void nemoenvs_dispatch_mirror_canvas_event(struct nemoshow *show, struct showone *canvas, struct showevent *event)
+{
+	if (nemoshow_event_is_keyboard_down(show, event)) {
+		nemoshow_revoke_view(show);
+		nemoshow_destroy_view_on_idle(show);
+	}
+}
+
+static void nemoenvs_handle_mirror_damage(struct wl_listener *listener, void *data)
+{
+	struct nemomirror *mirror = (struct nemomirror *)container_of(listener, struct nemomirror, canvas_damage_listener);
+
+	nemoshow_canvas_damage_all(mirror->canvas);
+	nemoshow_dispatch_frame(mirror->show);
+}
+
+static void nemoenvs_handle_mirror_destroy(struct wl_listener *listener, void *data)
+{
+	struct nemomirror *mirror = (struct nemomirror *)container_of(listener, struct nemomirror, canvas_destroy_listener);
+
+	wl_list_remove(&mirror->canvas_damage_listener.link);
+	wl_list_remove(&mirror->canvas_destroy_listener.link);
+
+	free(mirror);
+}
+
 void nemoenvs_handle_left_button(struct nemocompz *compz, struct nemopointer *pointer, uint32_t time, uint32_t button, enum wl_pointer_button_state state, void *data)
 {
 	if (state == WL_POINTER_BUTTON_STATE_PRESSED) {
@@ -220,6 +254,63 @@ void nemoenvs_handle_left_button(struct nemocompz *compz, struct nemopointer *po
 				pixman_save_png_file(image, "nemoshot.png");
 
 				pixman_image_unref(image);
+			}
+		} else if (pointer->keyboard != NULL && nemoxkb_has_modifiers_state(pointer->keyboard->xkb, MODIFIER_CTRL | MODIFIER_ALT)) {
+			struct nemoenvs *envs = (struct nemoenvs *)data;
+			struct nemoshell *shell = envs->shell;
+			struct shellscreen *screen;
+			struct nemoview *view;
+			float sx, sy;
+
+			view = nemocompz_pick_view(compz, pointer->x, pointer->y, &sx, &sy, NEMOVIEW_PICK_STATE);
+			screen = nemoshell_get_fullscreen(shell, "fullscreen-mirror");
+
+			if (view != NULL && view->canvas != NULL && screen != NULL) {
+				struct nemoshow *show;
+				struct showone *scene;
+				struct showone *canvas;
+				struct nemomirror *mirror;
+				int x = screen->dx;
+				int y = screen->dy;
+				int width = screen->dw;
+				int height = screen->dh;
+
+				show = nemoshow_create_view(shell, width, height);
+				nemoshow_view_set_position(show, x, y);
+				nemoshow_view_set_layer(show, "overlay");
+
+				scene = nemoshow_scene_create();
+				nemoshow_scene_set_width(scene, width);
+				nemoshow_scene_set_height(scene, height);
+				nemoshow_set_scene(show, scene);
+
+				canvas = nemoshow_canvas_create();
+				nemoshow_canvas_set_width(canvas, width);
+				nemoshow_canvas_set_height(canvas, height);
+				nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_BACK_TYPE);
+				nemoshow_canvas_set_fill_color(canvas, 0.0f, 0.0f, 0.0f, 255.0f);
+				nemoshow_canvas_set_alpha(canvas, 1.0f);
+				nemoshow_one_attach(scene, canvas);
+
+				canvas = nemoshow_canvas_create();
+				nemoshow_canvas_set_width(canvas, width);
+				nemoshow_canvas_set_height(canvas, height);
+				nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_OPENGL_TYPE);
+				nemoshow_canvas_set_texture(canvas, nemocanvas_get_opengl_texture(view->canvas, 0));
+				nemoshow_canvas_set_dispatch_event(canvas, nemoenvs_dispatch_mirror_canvas_event);
+				nemoshow_one_attach(scene, canvas);
+
+				mirror = (struct nemomirror *)malloc(sizeof(struct nemomirror));
+				mirror->show = show;
+				mirror->canvas = canvas;
+				mirror->canvas_damage_listener.notify = nemoenvs_handle_mirror_damage;
+				wl_signal_add(&view->canvas->damage_signal, &mirror->canvas_damage_listener);
+				mirror->canvas_destroy_listener.notify = nemoenvs_handle_mirror_destroy;
+				wl_signal_add(&view->canvas->destroy_signal, &mirror->canvas_destroy_listener);
+
+				nemoshow_set_keyboard_focus(show, canvas);
+				nemoshow_set_userdata(show, mirror);
+				nemoshow_dispatch_frame(show);
 			}
 		}
 

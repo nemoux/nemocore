@@ -154,6 +154,8 @@ extern struct nemoview *nemocanvas_get_default_view(struct nemocanvas *canvas);
 
 extern void nemobuffer_reference(struct nemobuffer_reference *ref, struct nemobuffer *buffer);
 
+extern uint32_t nemocanvas_get_opengl_texture(struct nemocanvas *canvas, int index);
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif
