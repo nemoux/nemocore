@@ -1202,6 +1202,7 @@ struct nemocanvas *nemocanvas_create(struct wl_client *client, struct wl_resourc
 	memset(canvas, 0, sizeof(struct nemocanvas));
 
 	wl_signal_init(&canvas->destroy_signal);
+	wl_signal_init(&canvas->damage_signal);
 
 	canvas->compz = compz;
 	canvas->resource = NULL;
@@ -1525,6 +1526,8 @@ void nemocanvas_flush_damage(struct nemocanvas *canvas)
 			}
 		}
 	}
+
+	wl_signal_emit(&canvas->damage_signal, canvas);
 
 	pixman_region32_clear(&canvas->base.damage);
 }

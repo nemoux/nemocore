@@ -90,6 +90,7 @@ struct nemocanvas {
 
 	struct wl_resource *resource;
 	struct wl_signal destroy_signal;
+	struct wl_signal damage_signal;
 
 	struct nemobuffer_reference buffer_reference;
 	struct nemobuffer_viewport buffer_viewport;
@@ -119,7 +120,7 @@ struct nemocanvas {
 	struct wl_list subcanvas_list;
 
 	uint64_t touchid0;
-	
+
 	uint32_t frame_count;
 	uint64_t frame_damage;
 };
