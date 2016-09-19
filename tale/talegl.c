@@ -66,7 +66,8 @@ static void nemotale_node_handle_destroy_signal(struct nemolistener *listener, v
 
 	nemolist_remove(&context->destroy_listener.link);
 
-	glDeleteTextures(1, &context->texture);
+	if (context->has_texture_external == 0)
+		glDeleteTextures(1, &context->texture);
 
 #ifdef NEMOUX_WITH_OPENGL_PBO
 	glDeleteBuffers(1, &context->pbo);
@@ -215,9 +216,11 @@ int nemotale_node_resize_gl(struct talenode *node, int32_t width, int32_t height
 		pixman_region32_init_rect(&node->blend, 0, 0, width, height);
 		pixman_region32_init_rect(&node->region, 0, 0, width, height);
 
-		glBindTexture(GL_TEXTURE_2D, context->texture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
-		glBindTexture(GL_TEXTURE_2D, 0);
+		if (context->has_texture_external == 0) {
+			glBindTexture(GL_TEXTURE_2D, context->texture);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
 
 		if (node->has_filter != 0) {
 			glBindTexture(GL_TEXTURE_2D, context->ftexture);
@@ -1024,6 +1027,13 @@ int nemotale_node_flush_gl_subimage(struct talenode *node)
 	return 0;
 }
 
+int nemotale_node_flush_gl_external(struct talenode *node)
+{
+	node->needs_filter = 1;
+
+	return 0;
+}
+
 int nemotale_node_filter_gl(struct talenode *node)
 {
 	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
@@ -1110,6 +1120,28 @@ int nemotale_node_set_filter(struct talenode *node, const char *shader)
 	node->has_filter = 1;
 
 	gcontext->_texture = gcontext->ftexture;
+
+	return 0;
+}
+
+int nemotale_node_set_texture(struct talenode *node, GLuint texture)
+{
+	struct taleglnode *context = (struct taleglnode *)node->glcontext;
+
+	if (context->has_texture_external == 0) {
+		glDeleteTextures(1, &context->texture);
+
+		context->has_texture_external = 1;
+
+		node->dispatch_flush = nemotale_node_flush_gl_external;
+	}
+
+	context->texture = texture;
+
+	if (node->has_filter == 0)
+		context->_texture = texture;
+	else
+		node->needs_filter = 1;
 
 	return 0;
 }

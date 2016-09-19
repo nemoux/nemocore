@@ -30,9 +30,10 @@ NEMO_BEGIN_EXTERN_C
 #define NEMOTALE_BUFFER_AGE_COUNT		(2)
 
 struct taleglnode {
-	GLuint texture;
-
 	GLuint _texture;
+
+	GLuint texture;
+	int has_texture_external;
 
 	GLuint pbo;
 	GLuint pwidth;
@@ -78,9 +79,12 @@ extern int nemotale_node_flush_gl_pbo(struct talenode *node);
 extern void *nemotale_node_map_pbo(struct talenode *node);
 extern int nemotale_node_unmap_pbo(struct talenode *node);
 extern int nemotale_node_flush_gl_subimage(struct talenode *node);
+extern int nemotale_node_flush_gl_external(struct talenode *node);
 extern int nemotale_node_filter_gl(struct talenode *node);
 
 extern int nemotale_node_set_filter(struct talenode *node, const char *shader);
+
+extern int nemotale_node_set_texture(struct talenode *node, GLuint texture);
 
 static inline GLuint nemotale_node_get_texture(struct talenode *node)
 {
