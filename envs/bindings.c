@@ -164,14 +164,113 @@ struct nemomirror {
 	struct wl_listener canvas_destroy_listener;
 
 	struct nemoshow *show;
-	struct showone *canvas;
+	struct showone *one;
+
+	struct nemoshell *shell;
+	struct nemoview *view;
 };
+
+static void nemoenvs_dispatch_mirror_show_event(struct nemoshow *show, struct showevent *event)
+{
+	struct nemomirror *mirror = (struct nemomirror *)nemoshow_get_userdata(show);
+	struct nemoshell *shell = mirror->shell;
+	struct nemocompz *compz = shell->compz;
+
+	if (nemoshow_event_is_pointer_enter(show, event)) {
+		struct nemopointer *pointer;
+
+		pointer = nemoseat_get_pointer_by_id(compz->seat, nemoshow_event_get_device(event));
+		if (pointer != NULL) {
+			nemocontent_pointer_enter(pointer, mirror->view->content);
+		}
+	} else if (nemoshow_event_is_pointer_leave(show, event)) {
+		struct nemopointer *pointer;
+
+		pointer = nemoseat_get_pointer_by_id(compz->seat, nemoshow_event_get_device(event));
+		if (pointer != NULL) {
+			nemocontent_pointer_leave(pointer, mirror->view->content);
+		}
+	}
+}
 
 static void nemoenvs_dispatch_mirror_canvas_event(struct nemoshow *show, struct showone *canvas, struct showevent *event)
 {
+	struct nemomirror *mirror = (struct nemomirror *)nemoshow_get_userdata(show);
+	struct nemoshell *shell = mirror->shell;
+	struct nemocompz *compz = shell->compz;
+
 	if (nemoshow_event_is_keyboard_down(show, event)) {
 		nemoshow_revoke_view(show);
 		nemoshow_destroy_view_on_idle(show);
+	}
+
+	if (nemoshow_event_is_touch_down(show, event)) {
+		struct touchpoint *tp;
+
+		tp = nemoseat_get_touchpoint_by_id(compz->seat, nemoshow_event_get_device(event));
+		if (tp != NULL) {
+			nemocontent_touch_down(tp, mirror->view->content,
+					nemoshow_event_get_time(event),
+					nemoshow_event_get_device(event),
+					nemoshow_event_get_x(event) * mirror->view->content->width / nemoshow_canvas_get_width(mirror->one),
+					nemoshow_event_get_y(event) * mirror->view->content->height / nemoshow_canvas_get_height(mirror->one),
+					nemoshow_event_get_gx(event),
+					nemoshow_event_get_gy(event));
+		}
+	} else if (nemoshow_event_is_touch_up(show, event)) {
+		struct touchpoint *tp;
+
+		tp = nemoseat_get_touchpoint_by_id(compz->seat, nemoshow_event_get_device(event));
+		if (tp != NULL) {
+			nemocontent_touch_up(tp, mirror->view->content,
+					nemoshow_event_get_time(event),
+					nemoshow_event_get_device(event));
+		}
+	} else if (nemoshow_event_is_touch_motion(show, event)) {
+		struct touchpoint *tp;
+
+		tp = nemoseat_get_touchpoint_by_id(compz->seat, nemoshow_event_get_device(event));
+		if (tp != NULL) {
+			nemocontent_touch_motion(tp, mirror->view->content,
+					nemoshow_event_get_time(event),
+					nemoshow_event_get_device(event),
+					nemoshow_event_get_x(event) * mirror->view->content->width / nemoshow_canvas_get_width(mirror->one),
+					nemoshow_event_get_y(event) * mirror->view->content->height / nemoshow_canvas_get_height(mirror->one),
+					nemoshow_event_get_gx(event),
+					nemoshow_event_get_gy(event));
+		}
+	}
+
+	if (nemoshow_event_is_pointer_button_down(show, event, 0)) {
+		struct nemopointer *pointer;
+
+		pointer = nemoseat_get_pointer_by_id(compz->seat, nemoshow_event_get_device(event));
+		if (pointer != NULL) {
+			nemocontent_pointer_button(pointer, mirror->view->content,
+					nemoshow_event_get_time(event),
+					nemoshow_event_get_value(event),
+					WL_POINTER_BUTTON_STATE_PRESSED);
+		}
+	} else if (nemoshow_event_is_pointer_button_up(show, event, 0)) {
+		struct nemopointer *pointer;
+
+		pointer = nemoseat_get_pointer_by_id(compz->seat, nemoshow_event_get_device(event));
+		if (pointer != NULL) {
+			nemocontent_pointer_button(pointer, mirror->view->content,
+					nemoshow_event_get_time(event),
+					nemoshow_event_get_value(event),
+					WL_POINTER_BUTTON_STATE_RELEASED);
+		}
+	} else if (nemoshow_event_is_pointer_motion(show, event)) {
+		struct nemopointer *pointer;
+
+		pointer = nemoseat_get_pointer_by_id(compz->seat, nemoshow_event_get_device(event));
+		if (pointer != NULL) {
+			nemocontent_pointer_motion(pointer, mirror->view->content,
+					nemoshow_event_get_time(event),
+					nemoshow_event_get_x(event) * mirror->view->content->width / nemoshow_canvas_get_width(mirror->one),
+					nemoshow_event_get_y(event) * mirror->view->content->height / nemoshow_canvas_get_height(mirror->one));
+		}
 	}
 }
 
@@ -179,7 +278,7 @@ static void nemoenvs_handle_mirror_damage(struct wl_listener *listener, void *da
 {
 	struct nemomirror *mirror = (struct nemomirror *)container_of(listener, struct nemomirror, canvas_damage_listener);
 
-	nemoshow_canvas_damage_all(mirror->canvas);
+	nemoshow_canvas_damage_all(mirror->one);
 	nemoshow_dispatch_frame(mirror->show);
 }
 
@@ -276,6 +375,7 @@ void nemoenvs_handle_left_button(struct nemocompz *compz, struct nemopointer *po
 				int height = screen->dh;
 
 				show = nemoshow_create_view(shell, width, height);
+				nemoshow_set_dispatch_event(show, nemoenvs_dispatch_mirror_show_event);
 				nemoshow_view_set_position(show, x, y);
 				nemoshow_view_set_layer(show, "overlay");
 
@@ -301,8 +401,10 @@ void nemoenvs_handle_left_button(struct nemocompz *compz, struct nemopointer *po
 				nemoshow_one_attach(scene, canvas);
 
 				mirror = (struct nemomirror *)malloc(sizeof(struct nemomirror));
+				mirror->shell = shell;
+				mirror->view = view;
 				mirror->show = show;
-				mirror->canvas = canvas;
+				mirror->one = canvas;
 				mirror->canvas_damage_listener.notify = nemoenvs_handle_mirror_damage;
 				wl_signal_add(&view->canvas->damage_signal, &mirror->canvas_damage_listener);
 				mirror->canvas_destroy_listener.notify = nemoenvs_handle_mirror_destroy;
