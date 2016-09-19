@@ -285,6 +285,10 @@ static void nemoenvs_handle_mirror_damage(struct wl_listener *listener, void *da
 static void nemoenvs_handle_mirror_destroy(struct wl_listener *listener, void *data)
 {
 	struct nemomirror *mirror = (struct nemomirror *)container_of(listener, struct nemomirror, canvas_destroy_listener);
+	struct nemoshow *show = mirror->show;
+
+	nemoshow_revoke_view(show);
+	nemoshow_destroy_view_on_idle(show);
 
 	wl_list_remove(&mirror->canvas_damage_listener.link);
 	wl_list_remove(&mirror->canvas_destroy_listener.link);
