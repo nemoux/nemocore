@@ -326,6 +326,21 @@ struct touchpoint *nemoseat_get_touchpoint_by_id(struct nemoseat *seat, uint64_t
 	return NULL;
 }
 
+struct touchpoint *nemoseat_get_touchpoint_by_id_nocheck(struct nemoseat *seat, uint64_t id)
+{
+	struct nemotouch *touch;
+	struct touchpoint *tp;
+
+	wl_list_for_each(touch, &seat->touch.device_list, link) {
+		wl_list_for_each(tp, &touch->touchpoint_list, link) {
+			if (tp->gid == id)
+				return tp;
+		}
+	}
+
+	return NULL;
+}
+
 int nemoseat_get_touchpoint_by_view(struct nemoseat *seat, struct nemoview *view, struct touchpoint *tps[], int max)
 {
 	struct nemotouch *touch;

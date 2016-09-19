@@ -207,7 +207,7 @@ static void nemoenvs_dispatch_mirror_canvas_event(struct nemoshow *show, struct 
 	if (nemoshow_event_is_touch_down(show, event)) {
 		struct touchpoint *tp;
 
-		tp = nemoseat_get_touchpoint_by_id(compz->seat, nemoshow_event_get_device(event));
+		tp = nemoseat_get_touchpoint_by_id_nocheck(compz->seat, nemoshow_event_get_device(event));
 		if (tp != NULL) {
 			nemocontent_touch_down(tp, mirror->view->content,
 					nemoshow_event_get_time(event),
@@ -220,7 +220,7 @@ static void nemoenvs_dispatch_mirror_canvas_event(struct nemoshow *show, struct 
 	} else if (nemoshow_event_is_touch_up(show, event)) {
 		struct touchpoint *tp;
 
-		tp = nemoseat_get_touchpoint_by_id(compz->seat, nemoshow_event_get_device(event));
+		tp = nemoseat_get_touchpoint_by_id_nocheck(compz->seat, nemoshow_event_get_device(event));
 		if (tp != NULL) {
 			nemocontent_touch_up(tp, mirror->view->content,
 					nemoshow_event_get_time(event),
@@ -229,7 +229,7 @@ static void nemoenvs_dispatch_mirror_canvas_event(struct nemoshow *show, struct 
 	} else if (nemoshow_event_is_touch_motion(show, event)) {
 		struct touchpoint *tp;
 
-		tp = nemoseat_get_touchpoint_by_id(compz->seat, nemoshow_event_get_device(event));
+		tp = nemoseat_get_touchpoint_by_id_nocheck(compz->seat, nemoshow_event_get_device(event));
 		if (tp != NULL) {
 			nemocontent_touch_motion(tp, mirror->view->content,
 					nemoshow_event_get_time(event),

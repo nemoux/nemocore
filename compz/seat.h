@@ -79,6 +79,7 @@ extern struct nemokeypad *nemoseat_get_keypad_by_id(struct nemoseat *seat, uint6
 
 extern struct touchpoint *nemoseat_get_touchpoint_by_grab_serial(struct nemoseat *seat, uint32_t serial);
 extern struct touchpoint *nemoseat_get_touchpoint_by_id(struct nemoseat *seat, uint64_t id);
+extern struct touchpoint *nemoseat_get_touchpoint_by_id_nocheck(struct nemoseat *seat, uint64_t id);
 extern int nemoseat_get_touchpoint_by_view(struct nemoseat *seat, struct nemoview *view, struct touchpoint *tps[], int max);
 extern int nemoseat_put_touchpoint_by_view(struct nemoseat *seat, struct nemoview *view);
 extern void nemoseat_bypass_touchpoint_by_view(struct nemoseat *seat, struct nemoview *view);
