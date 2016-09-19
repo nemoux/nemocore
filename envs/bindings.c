@@ -166,15 +166,14 @@ struct nemomirror {
 	struct nemoshow *show;
 	struct showone *one;
 
-	struct nemoshell *shell;
+	struct nemocompz *compz;
 	struct nemoview *view;
 };
 
 static void nemoenvs_dispatch_mirror_show_event(struct nemoshow *show, struct showevent *event)
 {
 	struct nemomirror *mirror = (struct nemomirror *)nemoshow_get_userdata(show);
-	struct nemoshell *shell = mirror->shell;
-	struct nemocompz *compz = shell->compz;
+	struct nemocompz *compz = mirror->compz;
 
 	if (nemoshow_event_is_pointer_enter(show, event)) {
 		struct nemopointer *pointer;
@@ -196,8 +195,7 @@ static void nemoenvs_dispatch_mirror_show_event(struct nemoshow *show, struct sh
 static void nemoenvs_dispatch_mirror_canvas_event(struct nemoshow *show, struct showone *canvas, struct showevent *event)
 {
 	struct nemomirror *mirror = (struct nemomirror *)nemoshow_get_userdata(show);
-	struct nemoshell *shell = mirror->shell;
-	struct nemocompz *compz = shell->compz;
+	struct nemocompz *compz = mirror->compz;
 
 	if (nemoshow_event_is_keyboard_down(show, event)) {
 		nemoshow_revoke_view(show);
@@ -405,7 +403,7 @@ void nemoenvs_handle_left_button(struct nemocompz *compz, struct nemopointer *po
 				nemoshow_one_attach(scene, canvas);
 
 				mirror = (struct nemomirror *)malloc(sizeof(struct nemomirror));
-				mirror->shell = shell;
+				mirror->compz = compz;
 				mirror->view = view;
 				mirror->show = show;
 				mirror->one = canvas;
