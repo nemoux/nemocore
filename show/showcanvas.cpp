@@ -306,7 +306,7 @@ static inline void nemoshow_canvas_update_matrix(struct nemoshow *show, struct s
 
 	NEMOSHOW_CANVAS_CC(canvas, matrix)->invert(NEMOSHOW_CANVAS_CC(canvas, inverse));
 
-	nemotale_node_translate(canvas->node, canvas->tx, canvas->ty);
+	nemotale_node_translate(canvas->node, canvas->tx * canvas->viewport.sx, canvas->ty * canvas->viewport.sy);
 	nemotale_node_rotate(canvas->node, canvas->ro * M_PI / 180.0f);
 	nemotale_node_scale(canvas->node, canvas->sx, canvas->sy);
 	nemotale_node_pivot(canvas->node, canvas->px, canvas->py);
@@ -833,6 +833,7 @@ int nemoshow_canvas_set_viewport(struct showone *one, double sx, double sy)
 	canvas->viewport.width = canvas->width * sx;
 	canvas->viewport.height = canvas->height * sy;
 
+	nemotale_node_translate(canvas->node, canvas->tx * canvas->viewport.sx, canvas->ty * canvas->viewport.sy);
 	nemotale_node_resize(canvas->node, canvas->viewport.width, canvas->viewport.height);
 
 	if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
