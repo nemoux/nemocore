@@ -79,6 +79,7 @@ extern int nemoactor_resize_gl(struct nemoactor *actor, int width, int height);
 
 extern void nemoactor_schedule_repaint(struct nemoactor *actor);
 extern void nemoactor_damage_dirty(struct nemoactor *actor);
+extern void nemoactor_damage_below(struct nemoactor *actor);
 extern void nemoactor_damage(struct nemoactor *actor, int32_t x, int32_t y, int32_t width, int32_t height);
 extern void nemoactor_damage_region(struct nemoactor *actor, pixman_region32_t *region);
 extern void nemoactor_flush_damage(struct nemoactor *actor);

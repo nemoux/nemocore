@@ -621,4 +621,5 @@ void nemoshow_view_redraw(struct nemoshow *show)
 	nemotale_composite_fbo_full(scon->tale);
 
 	nemoactor_damage_dirty(actor);
+	nemoactor_damage_below(actor);
 }

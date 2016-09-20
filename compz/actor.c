@@ -557,6 +557,11 @@ void nemoactor_damage_dirty(struct nemoactor *actor)
 	nemoactor_schedule_repaint(actor);
 }
 
+void nemoactor_damage_below(struct nemoactor *actor)
+{
+	nemoview_damage_below(actor->view);
+}
+
 void nemoactor_damage(struct nemoactor *actor, int32_t x, int32_t y, int32_t width, int32_t height)
 {
 	pixman_region32_union_rect(&actor->base.damage, &actor->base.damage, x, y, width, height);
