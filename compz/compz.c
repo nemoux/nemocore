@@ -315,7 +315,7 @@ struct nemocompz *nemocompz_create(void)
 	struct nemocompz *compz;
 	struct wl_display *display;
 	struct wl_event_loop *loop;
-	int compositor_version = 3;
+	int compositor_version = NEMOUX_WITH_WAYLAND_COMPOSITOR_VERSION;
 	char *version;
 
 	compz = (struct nemocompz *)malloc(sizeof(struct nemocompz));

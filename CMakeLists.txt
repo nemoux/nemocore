@@ -44,6 +44,8 @@ option(WITH_XWAYLAND_DEBUG "Build with XWAYLAND DEBUG" OFF)
 option(WITH_NEMONAVI_DEBUG "Build with NEMONAVI DEBUG" OFF)
 option(WITH_NEMOSHOW_FRAMELOG "Build with NEMOSHOW FRAMELOG" ON)
 
+set(WAYLAND_COMPOSITOR_VERSION "4" CACHE STRING "Wayland default compositor version")
+
 include(wayland)
 
 FIND_PACKAGE(PkgConfig REQUIRED)
