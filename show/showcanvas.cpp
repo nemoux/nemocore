@@ -901,6 +901,16 @@ void nemoshow_canvas_damage_all(struct showone *one)
 		nemolist_insert(&one->show->redraw_list, &canvas->redraw_link);
 }
 
+void nemoshow_canvas_damage_below(struct showone *one)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	nemotale_damage_below(one->show->tale, canvas->node);
+
+	if (one->show != NULL && nemolist_empty(&canvas->redraw_link) != 0)
+		nemolist_insert(&one->show->redraw_list, &canvas->redraw_link);
+}
+
 static inline struct showone *nemoshow_canvas_pick_item(struct showone *one, float x, float y)
 {
 	struct showone *child;
