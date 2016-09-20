@@ -40,7 +40,7 @@ static int nemoscreen_repaint_frame(struct nemoscreen *screen)
 		}
 
 		nemocompz_update_transform(compz);
-		nemocompz_acculumate_damage(compz);
+		nemocompz_accumulate_damage(compz);
 		nemocompz_flush_damage(compz);
 
 		compz->dirty = 0;

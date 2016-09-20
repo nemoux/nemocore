@@ -559,9 +559,8 @@ void nemocompz_destroy_clients(struct nemocompz *compz)
 	}
 }
 
-void nemocompz_acculumate_damage(struct nemocompz *compz)
+void nemocompz_accumulate_damage(struct nemocompz *compz)
 {
-	struct nemoscreen *screen;
 	struct nemolayer *layer;
 	struct nemoview *view, *child;
 	pixman_region32_t opaque;
@@ -581,19 +580,13 @@ void nemocompz_acculumate_damage(struct nemocompz *compz)
 	}
 
 	pixman_region32_fini(&opaque);
-
-	wl_list_for_each(screen, &compz->screen_list, link) {
-		pixman_region32_union(&screen->damage, &screen->damage, &compz->damage);
-		pixman_region32_intersect(&screen->damage, &screen->damage, &screen->region);
-	}
-
-	pixman_region32_clear(&compz->damage);
 }
 
 void nemocompz_flush_damage(struct nemocompz *compz)
 {
 	struct nemocanvas *canvas;
 	struct nemoactor *actor;
+	struct nemoscreen *screen;
 
 	wl_list_for_each(canvas, &compz->canvas_list, link) {
 		if (canvas->base.dirty != 0)
@@ -604,6 +597,13 @@ void nemocompz_flush_damage(struct nemocompz *compz)
 		if (actor->base.dirty != 0)
 			nemoactor_flush_damage(actor);
 	}
+
+	wl_list_for_each(screen, &compz->screen_list, link) {
+		pixman_region32_union(&screen->damage, &screen->damage, &compz->damage);
+		pixman_region32_intersect(&screen->damage, &screen->damage, &screen->region);
+	}
+
+	pixman_region32_clear(&compz->damage);
 }
 
 void nemocompz_make_current(struct nemocompz *compz)

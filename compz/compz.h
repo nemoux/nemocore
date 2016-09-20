@@ -150,7 +150,7 @@ extern void nemocompz_exit(struct nemocompz *compz);
 
 extern void nemocompz_destroy_clients(struct nemocompz *compz);
 
-extern void nemocompz_acculumate_damage(struct nemocompz *compz);
+extern void nemocompz_accumulate_damage(struct nemocompz *compz);
 extern void nemocompz_flush_damage(struct nemocompz *compz);
 
 extern void nemocompz_make_current(struct nemocompz *compz);

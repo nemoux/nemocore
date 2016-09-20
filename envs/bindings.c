@@ -277,7 +277,8 @@ static void nemoenvs_handle_mirror_damage(struct wl_listener *listener, void *da
 	struct nemomirror *mirror = (struct nemomirror *)container_of(listener, struct nemomirror, canvas_damage_listener);
 
 	nemoshow_canvas_damage_below(mirror->one);
-	nemoshow_dispatch_frame(mirror->show);
+
+	nemoshow_view_redraw(mirror->show);
 }
 
 static void nemoenvs_handle_mirror_destroy(struct wl_listener *listener, void *data)
