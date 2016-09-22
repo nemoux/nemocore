@@ -83,8 +83,9 @@ extern int nemotale_node_flush_gl_external(struct talenode *node);
 extern int nemotale_node_filter_gl(struct talenode *node);
 
 extern int nemotale_node_set_filter(struct talenode *node, const char *shader);
-
 extern int nemotale_node_set_texture(struct talenode *node, GLuint texture);
+
+extern int nemotale_node_use_pbo(struct talenode *node, int use_pbo);
 
 static inline GLuint nemotale_node_get_texture(struct talenode *node)
 {

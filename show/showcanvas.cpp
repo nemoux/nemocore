@@ -834,7 +834,7 @@ int nemoshow_canvas_set_viewport(struct showone *one, double sx, double sy)
 	canvas->viewport.height = canvas->height * sy;
 
 	nemotale_node_translate(canvas->node, canvas->tx * canvas->viewport.sx, canvas->ty * canvas->viewport.sy);
-	nemotale_node_resize(canvas->node, canvas->viewport.width, canvas->viewport.height);
+	nemotale_node_resize(canvas->node, canvas->width * canvas->viewport.sx, canvas->height * canvas->viewport.sy);
 
 	if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
 		nemoshow_one_dirty_all(one, NEMOSHOW_SHAPE_DIRTY);
