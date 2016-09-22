@@ -175,12 +175,8 @@ int nemoshow_canvas_set_type(struct showone *one, int type)
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
 	if (type == NEMOSHOW_CANVAS_VECTOR_TYPE) {
-#ifdef NEMOUX_WITH_OPENGL_PBO
-		canvas->node = nemotale_node_create_gl(canvas->width, canvas->height);
-#else
 		canvas->node = nemotale_node_create_pixman(canvas->width, canvas->height);
 		nemotale_node_prepare_gl(canvas->node);
-#endif
 
 		NEMOSHOW_CANVAS_CC(canvas, damage) = new SkRegion;
 
@@ -224,18 +220,7 @@ void nemoshow_canvas_set_alpha(struct showone *one, double alpha)
 	nemoshow_one_dirty(one, NEMOSHOW_STYLE_DIRTY);
 }
 
-int nemoshow_canvas_set_shader(struct showone *one, const char *shader)
-{
-	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
-
-	nemotale_node_set_filter(canvas->node, shader);
-
-	nemoshow_one_dirty(one, NEMOSHOW_FILTER_DIRTY);
-
-	return 0;
-}
-
-int nemoshow_canvas_load_shader(struct showone *one, const char *shaderpath)
+int nemoshow_canvas_set_shader(struct showone *one, const char *shaderpath)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 	char *shader;
@@ -250,6 +235,13 @@ int nemoshow_canvas_load_shader(struct showone *one, const char *shaderpath)
 	nemoshow_one_dirty(one, NEMOSHOW_FILTER_DIRTY);
 
 	return 0;
+}
+
+int nemoshow_canvas_use_pbo(struct showone *one, int use_pbo)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	return nemotale_node_use_pbo(canvas->node, use_pbo);
 }
 
 static inline void nemoshow_canvas_update_size(struct nemoshow *show, struct showone *one)

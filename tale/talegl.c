@@ -1148,36 +1148,23 @@ int nemotale_node_set_texture(struct talenode *node, GLuint texture)
 
 int nemotale_node_use_pbo(struct talenode *node, int use_pbo)
 {
+#ifdef NEMOUX_WITH_OPENGL_PBO
 	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
+	struct talepmnode *pcontext = (struct talepmnode *)node->pmcontext;
 
-	if (gcontext->has_texture_external != 0)
+	if (pcontext == NULL || gcontext->has_texture_external != 0)
 		return 0;
 
 	if (use_pbo != 0) {
-#ifdef NEMOUX_WITH_OPENGL_PBO
-		struct talepmnode *pcontext = (struct talepmnode *)node->pmcontext;
-
 		node->dispatch_flush = nemotale_node_flush_gl_pbo;
-		if (pcontext == NULL) {
-			node->dispatch_map = nemotale_node_map_pbo;
-			node->dispatch_unmap = nemotale_node_unmap_pbo;
-		}
-#endif
 	} else {
-#ifdef NEMOUX_WITH_OPENGL_PBO
-		struct talepmnode *pcontext = (struct talepmnode *)node->pmcontext;
-
 #ifdef NEMOUX_WITH_OPENGL_UNPACK_SUBIMAGE
 		node->dispatch_flush = nemotale_node_flush_gl_subimage;
 #else
 		node->dispatch_flush = nemotale_node_flush_gl;
 #endif
-		if (pcontext == NULL) {
-			node->dispatch_map = nemotale_node_map_none;
-			node->dispatch_unmap = nemotale_node_unmap_none;
-		}
-#endif
 	}
+#endif
 
 	return 0;
 }
