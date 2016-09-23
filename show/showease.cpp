@@ -64,11 +64,6 @@ void nemoshow_ease_destroy(struct showone *one)
 	free(ease);
 }
 
-static int nemoshow_ease_compare(const void *a, const void *b)
-{
-	return strcasecmp((const char *)a, (const char *)b);
-}
-
 int nemoshow_ease_update(struct showone *one)
 {
 	return 0;

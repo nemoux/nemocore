@@ -165,11 +165,6 @@ int nemoshow_canvas_below_one(struct showone *one, struct showone *below)
 	return 0;
 }
 
-static int nemoshow_canvas_compare(const void *a, const void *b)
-{
-	return strcasecmp((const char *)a, (const char *)b);
-}
-
 int nemoshow_canvas_set_type(struct showone *one, int type)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
