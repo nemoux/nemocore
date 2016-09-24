@@ -195,7 +195,7 @@ static char *nemocompz_get_display_name(void)
 
 	for (i = 0; i < 8; i++) {
 		asprintf(&dname, "wayland-%d", i);
-		if (ename == NULL || strcmp(ename, dname) != 0) {
+		if (ename == NULL || strcmp(ename, dname) == 0) {
 			break;
 		}
 
