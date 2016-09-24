@@ -88,9 +88,8 @@ static void nemoenvs_handle_xserver_sigusr1(struct wl_listener *listener, void *
 		}
 	}
 
-	if (envs->is_waiting_sigusr1 == 0 && wl_list_empty(&envs->xapp_list) == 0) {
+	if (envs->is_waiting_sigusr1 == 0 && wl_list_empty(&envs->xapp_list) == 0)
 		nemoenvs_execute_xserver(envs, ++envs->xdisplay, NULL);
-	}
 }
 
 static int nemoenvs_execute_xserver(struct nemoenvs *envs, int xdisplay, const char *rendernode)
@@ -156,6 +155,8 @@ int nemoenvs_launch_xserver(struct nemoenvs *envs, int xdisplay, const char *ren
 	xserver = nemoenvs_search_xserver_display(envs, xdisplay);
 	if (xserver != NULL)
 		return 0;
+
+	envs->xdisplay = xdisplay;
 
 	if (envs->is_waiting_sigusr1 == 0) {
 		nemoenvs_execute_xserver(envs, xdisplay, rendernode);
