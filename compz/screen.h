@@ -13,7 +13,8 @@ NEMO_BEGIN_EXTERN_C
 #include <nemomatrix.h>
 
 typedef enum {
-	NEMOSCREEN_SCOPE_STATE = (1 << 0),
+	NEMOSCREEN_DISPLAY_STATE = (1 << 0),
+	NEMOSCREEN_SCOPE_STATE = (1 << 1),
 	NEMOSCREEN_LAST_STATE
 } NemoScreenState;
 

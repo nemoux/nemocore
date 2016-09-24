@@ -116,6 +116,7 @@ static void nemoenvs_handle_set_nemoshell_screen(struct nemoshell *shell, struct
 			nemoscreen_set_state(screen, NEMOSCREEN_SCOPE_STATE);
 		}
 
+		nemoscreen_set_state(screen, NEMOSCREEN_DISPLAY_STATE);
 		nemoscreen_schedule_repaint(screen);
 
 		nemocompz_scene_dirty(compz);

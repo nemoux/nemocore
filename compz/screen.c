@@ -119,7 +119,8 @@ static void nemoscreen_dispatch_repaint(void *data)
 {
 	struct nemoscreen *screen = (struct nemoscreen *)data;
 
-	screen->repaint(screen);
+	if (nemoscreen_has_state(screen, NEMOSCREEN_DISPLAY_STATE) != 0)
+		screen->repaint(screen);
 }
 
 void nemoscreen_schedule_repaint(struct nemoscreen *screen)
