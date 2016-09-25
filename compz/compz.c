@@ -658,6 +658,18 @@ struct inputnode *nemocompz_get_input(struct nemocompz *compz, const char *devno
 	return NULL;
 }
 
+struct evdevnode *nemocompz_get_evdev(struct nemocompz *compz, const char *devpath)
+{
+	struct evdevnode *node;
+
+	wl_list_for_each(node, &compz->evdev_list, link) {
+		if (strcmp(node->devpath, devpath) == 0)
+			return node;
+	}
+
+	return NULL;
+}
+
 int32_t nemocompz_get_scene_width(struct nemocompz *compz)
 {
 	pixman_box32_t *extents;

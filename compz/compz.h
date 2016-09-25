@@ -36,6 +36,7 @@ struct nemoanimation;
 struct nemoeffect;
 struct nemoscreen;
 struct nemoview;
+struct evdevnode;
 
 typedef void (*nemocompz_dispatch_idle_t)(void *data);
 
@@ -163,6 +164,7 @@ extern void nemocompz_set_screen_frame_listener(struct nemocompz *compz, struct 
 extern void nemocompz_put_screen_frame_listener(struct nemocompz *compz);
 
 extern struct inputnode *nemocompz_get_input(struct nemocompz *compz, const char *devnode, uint32_t type);
+extern struct evdevnode *nemocompz_get_evdev(struct nemocompz *compz, const char *devpath);
 
 extern int32_t nemocompz_get_scene_width(struct nemocompz *compz);
 extern int32_t nemocompz_get_scene_height(struct nemocompz *compz);

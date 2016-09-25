@@ -238,18 +238,22 @@ static void nemoenvs_handle_set_nemoshell_evdev(struct nemoshell *shell, struct 
 	float distance = 0.0f;
 	const char *transform = NULL;
 	int has_screen = 0;
-	int fd;
 
-	fd = nemosession_open(compz->session, devpath, O_RDWR | O_NONBLOCK);
-	if (fd < 0) {
-		nemolog_error("ENVS", "failed to open evdev device '%s'\n", devpath);
-		return;
-	}
-
-	enode = evdev_create_node(compz, devpath, fd);
+	enode = nemocompz_get_evdev(compz, devpath);
 	if (enode == NULL) {
-		nemosession_close(compz->session, fd);
-		return;
+		int fd;
+
+		fd = nemosession_open(compz->session, devpath, O_RDWR | O_NONBLOCK);
+		if (fd < 0) {
+			nemolog_error("ENVS", "failed to open evdev device '%s'\n", devpath);
+			return;
+		}
+
+		enode = evdev_create_node(compz, devpath, fd);
+		if (enode == NULL) {
+			nemosession_close(compz->session, fd);
+			return;
+		}
 	}
 
 	node = &enode->base;
