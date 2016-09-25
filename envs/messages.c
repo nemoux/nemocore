@@ -419,6 +419,8 @@ static void nemoenvs_handle_set_nemoshell_show(struct nemoshell *shell, struct i
 	char contents[128];
 	int threads;
 	int tilesize;
+	int duration;
+	int distance;
 
 	threads = nemoitem_one_get_iattr(one, "threads", 0);
 	if (threads > 0) {
@@ -437,48 +439,41 @@ static void nemoenvs_handle_set_nemoshell_show(struct nemoshell *shell, struct i
 	} else {
 		unsetenv("NEMOSHOW_TILESIZE");
 	}
-}
-
-static void nemoenvs_handle_set_nemoshell_tale(struct nemoshell *shell, struct itemone *one)
-{
-	char contents[128];
-	int duration;
-	int distance;
 
 	duration = nemoitem_one_get_iattr(one, "long_press_duration", 0);
 	if (duration > 0) {
 		snprintf(contents, sizeof(contents), "%d", duration);
 
-		setenv("NEMOTALE_LONG_PRESS_DURATION", contents, 1);
+		setenv("NEMOSHOW_LONG_PRESS_DURATION", contents, 1);
 	} else {
-		unsetenv("NEMOTALE_LONG_PRESS_DURATION");
+		unsetenv("NEMOSHOW_LONG_PRESS_DURATION");
 	}
 
 	distance = nemoitem_one_get_iattr(one, "long_press_distance", 0);
 	if (distance > 0) {
 		snprintf(contents, sizeof(contents), "%d", distance);
 
-		setenv("NEMOTALE_LONG_PRESS_DISTANCE", contents, 1);
+		setenv("NEMOSHOW_LONG_PRESS_DISTANCE", contents, 1);
 	} else {
-		unsetenv("NEMOTALE_LONG_PRESS_DISTANCE");
+		unsetenv("NEMOSHOW_LONG_PRESS_DISTANCE");
 	}
 
 	duration = nemoitem_one_get_iattr(one, "single_click_duration", 0);
 	if (duration > 0) {
 		snprintf(contents, sizeof(contents), "%d", duration);
 
-		setenv("NEMOTALE_SINGLE_CLICK_DURATION", contents, 1);
+		setenv("NEMOSHOW_SINGLE_CLICK_DURATION", contents, 1);
 	} else {
-		unsetenv("NEMOTALE_SINGLE_CLICK_DURATION");
+		unsetenv("NEMOSHOW_SINGLE_CLICK_DURATION");
 	}
 
 	distance = nemoitem_one_get_iattr(one, "single_click_distance", 0);
 	if (distance > 0) {
 		snprintf(contents, sizeof(contents), "%d", distance);
 
-		setenv("NEMOTALE_SINGLE_CLICK_DISTANCE", contents, 1);
+		setenv("NEMOSHOW_SINGLE_CLICK_DISTANCE", contents, 1);
 	} else {
-		unsetenv("NEMOTALE_SINGLE_CLICK_DISTANCE");
+		unsetenv("NEMOSHOW_SINGLE_CLICK_DISTANCE");
 	}
 }
 
@@ -545,8 +540,6 @@ int nemoenvs_dispatch_system_message(struct nemoenvs *envs, const char *src, con
 				setenv("NEMOSHELL_FONT", contents, 1);
 			} else if (strcmp(path, "/nemoshell/show") == 0) {
 				nemoenvs_handle_set_nemoshell_show(shell, one);
-			} else if (strcmp(path, "/nemoshell/tale") == 0) {
-				nemoenvs_handle_set_nemoshell_tale(shell, one);
 			} else if (strcmp(path, "/nemoshell/idle") == 0) {
 				uint32_t timeout;
 
@@ -573,7 +566,6 @@ int nemoenvs_dispatch_system_message(struct nemoenvs *envs, const char *src, con
 				nemoenvs_handle_put_nemoshell_stage(shell, one);
 			} else if (strcmp(path, "/nemoshell/font") == 0) {
 			} else if (strcmp(path, "/nemoshell/show") == 0) {
-			} else if (strcmp(path, "/nemoshell/tale") == 0) {
 			} else if (strcmp(path, "/nemoshell/legacy") == 0) {
 			}
 		}
