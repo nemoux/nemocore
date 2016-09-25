@@ -167,8 +167,10 @@ struct nemobackend *evdevbackend_create(struct nemocompz *compz, const char *arg
 	evdev->compz = compz;
 	evdev->udev = udev_ref(compz->udev);
 
-	evdevbackend_monitor_devices(evdev);
-	evdevbackend_scan_devices(evdev);
+	if (args == NULL || strstr(args, "noplug") == NULL)
+		evdevbackend_monitor_devices(evdev);
+	if (args == NULL || strstr(args, "noscan") == NULL)
+		evdevbackend_scan_devices(evdev);
 
 	wl_list_insert(&compz->backend_list, &evdev->base.link);
 
