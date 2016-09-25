@@ -30,6 +30,8 @@
 #include <vieweffect.h>
 #include <tuio.h>
 #include <virtuio.h>
+#include <session.h>
+#include <evdevnode.h>
 #include <waylandshell.h>
 #include <xdgshell.h>
 #include <nemoshell.h>
@@ -213,6 +215,107 @@ static void nemoenvs_handle_set_nemoshell_input(struct nemoshell *shell, struct 
 				nemoinput_set_state(node, NEMOINPUT_CONFIG_STATE);
 		}
 	}
+}
+
+static void nemoenvs_handle_set_nemoshell_evdev(struct nemoshell *shell, struct itemone *one)
+{
+	struct nemocompz *compz = shell->compz;
+	struct nemoscreen *screen;
+	struct inputnode *node;
+	struct evdevnode *enode;
+	struct itemattr *attr;
+	const char *devpath = nemoitem_one_get_attr(one, "devpath");
+	const char *id;
+	const char *name;
+	const char *value;
+	int32_t x = 0, y = 0;
+	int32_t width = 0, height = 0;
+	float sx = 1.0f, sy = 1.0f;
+	float r = 0.0f;
+	float px = 0.0f, py = 0.0f;
+	uint32_t nodeid, screenid;
+	uint32_t sampling = 0;
+	float distance = 0.0f;
+	const char *transform = NULL;
+	int has_screen = 0;
+	int fd;
+
+	fd = nemosession_open(compz->session, devpath, O_RDWR | O_NONBLOCK);
+	if (fd < 0) {
+		nemolog_error("ENVS", "failed to open evdev device '%s'\n", devpath);
+		return;
+	}
+
+	enode = evdev_create_node(compz, devpath, fd);
+	if (enode == NULL) {
+		nemosession_close(compz->session, fd);
+		return;
+	}
+
+	node = &enode->base;
+
+	nemoitem_attr_for_each(attr, one) {
+		name = nemoitem_attr_get_name(attr);
+		value = nemoitem_attr_get_value(attr);
+
+		if (strcmp(name, "x") == 0) {
+			x = strtoul(value, NULL, 10);
+		} else if (strcmp(name, "y") == 0) {
+			y = strtoul(value, NULL, 10);
+		} else if (strcmp(name, "width") == 0) {
+			width = strtoul(value, NULL, 10);
+		} else if (strcmp(name, "height") == 0) {
+			height = strtoul(value, NULL, 10);
+		} else if (strcmp(name, "sx") == 0) {
+			sx = strtod(value, NULL);
+		} else if (strcmp(name, "sy") == 0) {
+			sy = strtod(value, NULL);
+		} else if (strcmp(name, "r") == 0) {
+			r = strtod(value, NULL) * M_PI / 180.0f;
+		} else if (strcmp(name, "px") == 0) {
+			px = strtod(value, NULL);
+		} else if (strcmp(name, "py") == 0) {
+			py = strtod(value, NULL);
+		} else if (strcmp(name, "nodeid") == 0) {
+			nodeid = strtoul(value, NULL, 10);
+		} else if (strcmp(name, "screenid") == 0) {
+			screenid = strtoul(value, NULL, 10);
+			has_screen = 1;
+		} else if (strcmp(name, "transform") == 0) {
+			transform = value;
+		} else if (strcmp(name, "sampling") == 0) {
+			sampling = strtoul(value, NULL, 10);
+		} else if (strcmp(name, "maximum_distance") == 0) {
+			distance = strtod(value, NULL);
+		}
+	}
+
+	if (has_screen != 0) {
+		screen = nemocompz_get_screen(compz, nodeid, screenid);
+		if (node->screen != screen)
+			nemoinput_set_screen(node, screen);
+	} else {
+		nemoinput_put_screen(node);
+
+		nemoinput_set_size(node, width, height);
+
+		nemoinput_clear_transform(node);
+
+		if (transform != NULL) {
+			nemoinput_set_custom(node, transform);
+		} else {
+			nemoinput_set_position(node, x, y);
+			nemoinput_set_scale(node, sx, sy);
+			nemoinput_set_rotation(node, r);
+			nemoinput_set_pivot(node, px, py);
+		}
+
+		nemoinput_update_transform(node);
+	}
+
+	nemoinput_set_sampling(node, sampling);
+	nemoinput_set_maximum_distance(node, distance);
+	nemoinput_set_state(node, NEMOINPUT_CONFIG_STATE);
 }
 
 static void nemoenvs_handle_set_nemoshell_pick(struct nemoshell *shell, struct itemone *one)
@@ -488,6 +591,8 @@ int nemoenvs_dispatch_system_message(struct nemoenvs *envs, const char *src, con
 				nemoenvs_handle_set_nemoshell_screen(shell, one);
 			} else if (strcmp(path, "/nemoshell/input") == 0) {
 				nemoenvs_handle_set_nemoshell_input(shell, one);
+			} else if (strcmp(path, "/nemoshell/evdev") == 0) {
+				nemoenvs_handle_set_nemoshell_evdev(shell, one);
 			} else if (strcmp(path, "/nemoshell/scene") == 0) {
 				int32_t x = nemoitem_one_get_iattr(one, "x", 0);
 				int32_t y = nemoitem_one_get_iattr(one, "y", 0);
@@ -552,6 +657,7 @@ int nemoenvs_dispatch_system_message(struct nemoenvs *envs, const char *src, con
 		} else if (strcmp(cmd, "put") == 0) {
 			if (strcmp(path, "/nemoshell/screen") == 0) {
 			} else if (strcmp(path, "/nemoshell/input") == 0) {
+			} else if (strcmp(path, "/nemoshell/evdev") == 0) {
 			} else if (strcmp(path, "/nemoshell/scene") == 0) {
 			} else if (strcmp(path, "/nemoshell/scope") == 0) {
 			} else if (strcmp(path, "/nemoshell/virtuio") == 0) {
