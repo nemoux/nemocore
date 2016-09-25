@@ -500,7 +500,8 @@ static void drm_destroy_mode(struct drmmode *mode)
 
 static struct drmmode *drm_choose_mode(struct drmscreen *screen, struct nemomode *mode)
 {
-	struct drmmode *dmode, *tmode;
+	struct drmmode *tmode = NULL;
+	struct drmmode *dmode;
 
 	if ((screen->base.current_mode->width == mode->width) &&
 			(screen->base.current_mode->height == mode->height) &&
