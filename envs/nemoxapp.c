@@ -95,15 +95,18 @@ static void nemoenvs_handle_xserver_sigusr1(struct wl_listener *listener, void *
 static int nemoenvs_execute_xserver(struct nemoenvs *envs, int xdisplay, const char *rendernode)
 {
 	struct nemoxserver *xserver;
+	const char *xpath = nemoitem_get_sattr(envs->configs, "/nemoshell/xserver", "path", NULL);
+	const char *xnode = nemoitem_get_sattr(envs->configs, "/nemoshell/xserver", "node", NULL);
 	char display[256];
 
-	xserver = nemoxserver_create(envs->shell,
-			nemoitem_get_sattr(envs->configs, "/nemoshell/xserver", "path", NULL), xdisplay);
+	xserver = nemoxserver_create(envs->shell, xpath, xdisplay);
 	if (xserver == NULL)
 		return -1;
 
 	if (rendernode != NULL)
 		nemoxserver_set_rendernode(xserver, rendernode);
+	else if (xnode != NULL)
+		nemoxserver_set_rendernode(xserver, xnode);
 
 	nemoxserver_execute(xserver);
 
