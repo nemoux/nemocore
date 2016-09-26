@@ -599,8 +599,28 @@ void nemocompz_flush_damage(struct nemocompz *compz)
 	}
 
 	wl_list_for_each(screen, &compz->screen_list, link) {
-		pixman_region32_union(&screen->damage, &screen->damage, &compz->damage);
-		pixman_region32_intersect(&screen->damage, &screen->damage, &screen->region);
+		if (nemoscreen_has_state(screen, NEMOSCREEN_OVERLAY_STATE) == 0) {
+			pixman_region32_union(&screen->damage, &screen->damage, &compz->damage);
+			pixman_region32_intersect(&screen->damage, &screen->damage, &screen->region);
+		} else {
+			nemoview_merge_damage(screen->overlay, &screen->damage);
+		}
+	}
+
+	wl_list_for_each(canvas, &compz->canvas_list, link) {
+		if (canvas->base.dirty != 0) {
+			canvas->base.dirty = 0;
+
+			pixman_region32_clear(&canvas->base.damage);
+		}
+	}
+
+	wl_list_for_each(actor, &compz->actor_list, link) {
+		if (actor->base.dirty != 0) {
+			actor->base.dirty = 0;
+
+			pixman_region32_clear(&actor->base.damage);
+		}
 	}
 
 	pixman_region32_clear(&compz->damage);

@@ -1177,7 +1177,7 @@ struct shellstage *nemoshell_get_stage_on(struct nemoshell *shell, int32_t x, in
 	return NULL;
 }
 
-void nemoshell_set_fullscreen_bin_on_screen(struct nemoshell *shell, struct shellbin *bin, struct nemoscreen *screen)
+void nemoshell_set_fullscreen_bin_legacy(struct nemoshell *shell, struct shellbin *bin, struct nemoscreen *screen)
 {
 	nemoshell_clear_bin_config(bin);
 
@@ -1202,9 +1202,48 @@ void nemoshell_set_fullscreen_bin_on_screen(struct nemoshell *shell, struct shel
 	nemoshell_send_bin_config(bin);
 }
 
+void nemoshell_set_fullscreen_bin_overlay(struct nemoshell *shell, struct shellbin *bin, const char *id, int fixed, struct nemoscreen *screen)
+{
+	nemoshell_clear_bin_config(bin);
+
+	if (xdgshell_is_xdg_surface(bin) || xdgshell_is_xdg_popup(bin)) {
+		bin->requested_config.fullscreen = 1;
+		bin->config_requested = 1;
+	} else {
+		nemoshell_clear_bin_config(bin);
+		bin->next_config.fullscreen = 1;
+		bin->config_changed = 1;
+	}
+
+	nemoshell_set_parent_bin(bin, NULL);
+
+	bin->screen.x = screen->rx;
+	bin->screen.y = screen->ry;
+	bin->screen.width = screen->rw;
+	bin->screen.height = screen->rh;
+	bin->screen.overlay = screen;
+	bin->has_screen = 1;
+
+	nemoscreen_set_overlay(screen, bin->view);
+
+	if (fixed != 0)
+		nemoshell_bin_set_state(bin, NEMOSHELL_BIN_FIXED_STATE);
+	else
+		nemoshell_bin_put_state(bin, NEMOSHELL_BIN_FIXED_STATE);
+
+	nemocontent_update_fullscreen(bin->view->content, id, bin->screen.x, bin->screen.y, bin->screen.width, bin->screen.height);
+
+	nemoshell_send_bin_config(bin);
+}
+
 void nemoshell_set_fullscreen_bin(struct nemoshell *shell, struct shellbin *bin, struct shellscreen *screen)
 {
 	wl_list_insert(&screen->bin_list, &bin->screen_link);
+
+	if (screen->has_screen != 0) {
+		nemoshell_set_fullscreen_bin_overlay(shell, bin, screen->id, screen->fixed, nemocompz_get_screen(shell->compz, screen->nodeid, screen->screenid));
+		return;
+	}
 
 	if (xdgshell_is_xdg_surface(bin) || xdgshell_is_xdg_popup(bin)) {
 		bin->requested_config.fullscreen = 1;
@@ -1229,7 +1268,7 @@ void nemoshell_set_fullscreen_bin(struct nemoshell *shell, struct shellbin *bin,
 	else
 		nemoshell_bin_put_state(bin, NEMOSHELL_BIN_FIXED_STATE);
 
-	nemocontent_update_fullscreen(bin->view->content, screen->id, screen->dx, screen->dy, screen->dw, screen->dh);
+	nemocontent_update_fullscreen(bin->view->content, screen->id, bin->screen.x, bin->screen.y, bin->screen.width, bin->screen.height);
 
 	nemoshell_send_bin_config(bin);
 }
@@ -1245,6 +1284,12 @@ void nemoshell_put_fullscreen_bin(struct nemoshell *shell, struct shellbin *bin)
 	} else {
 		bin->config_changed = 1;
 		bin->next_config.fullscreen = 0;
+	}
+
+	if (bin->screen.overlay != NULL) {
+		nemoscreen_set_overlay(bin->screen.overlay, NULL);
+
+		bin->screen.overlay = NULL;
 	}
 
 	nemoshell_bin_put_state(bin, NEMOSHELL_BIN_FIXED_STATE);
@@ -1276,7 +1321,7 @@ static inline int nemoshell_bin_contain_view(struct shellbin *bin, struct nemovi
 	return 1;
 }
 
-void nemoshell_set_maximized_bin_on_screen(struct nemoshell *shell, struct shellbin *bin, struct nemoscreen *screen)
+void nemoshell_set_maximized_bin_legacy(struct nemoshell *shell, struct shellbin *bin, struct nemoscreen *screen)
 {
 	nemoshell_clear_bin_config(bin);
 

@@ -593,6 +593,23 @@ void nemoview_accumulate_damage(struct nemoview *view, pixman_region32_t *opaque
 	pixman_region32_union(opaque, opaque, &view->transform.opaque);
 }
 
+void nemoview_merge_damage(struct nemoview *view, pixman_region32_t *damage)
+{
+	if (view->transform.enable) {
+		pixman_box32_t *extents;
+
+		extents = pixman_region32_extents(&view->content->damage);
+		nemoview_update_boundingbox(view,
+				extents->x1, extents->y1,
+				extents->x2 - extents->x1,
+				extents->y2 - extents->y1,
+				damage);
+	} else {
+		pixman_region32_copy(damage, &view->content->damage);
+		pixman_region32_translate(damage, view->geometry.x, view->geometry.y);
+	}
+}
+
 void nemoview_attach_layer(struct nemoview *view, struct nemolayer *layer)
 {
 	struct wl_list *layer_link = &layer->view_list;

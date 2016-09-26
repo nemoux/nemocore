@@ -441,8 +441,14 @@ static void nemoenvs_handle_set_nemoshell_fullscreen(struct nemoshell *shell, st
 					screen->dw = strtoul(value, NULL, 10);
 				} else if (strcmp(name, "dh") == 0) {
 					screen->dh = strtoul(value, NULL, 10);
+					screen->has_screen = 0;
 				} else if (strcmp(name, "dr") == 0) {
 					screen->dr = strtoul(value, NULL, 10);
+				} else if (strcmp(name, "nodeid") == 0) {
+					screen->nodeid = strtoul(value, NULL, 10);
+				} else if (strcmp(name, "screenid") == 0) {
+					screen->screenid = strtoul(value, NULL, 10);
+					screen->has_screen = 1;
 				} else if (strcmp(name, "type") == 0) {
 					if (strcmp(value, "pick") == 0)
 						screen->type = NEMOSHELL_FULLSCREEN_PICK_TYPE;

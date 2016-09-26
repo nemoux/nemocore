@@ -165,6 +165,7 @@ extern void nemoview_set_scope(struct nemoview *view, const char *cmds);
 extern void nemoview_put_scope(struct nemoview *view);
 
 extern void nemoview_accumulate_damage(struct nemoview *view, pixman_region32_t *opaque);
+extern void nemoview_merge_damage(struct nemoview *view, pixman_region32_t *damage);
 
 extern void nemoview_attach_layer(struct nemoview *view, struct nemolayer *layer);
 extern void nemoview_detach_layer(struct nemoview *view);

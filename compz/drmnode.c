@@ -23,6 +23,8 @@
 #include <compz.h>
 #include <screen.h>
 #include <renderer.h>
+#include <view.h>
+#include <canvas.h>
 #include <nemomisc.h>
 #include <nemolog.h>
 
@@ -142,8 +144,7 @@ static struct drmframe *drm_get_frame_from_bo(struct gbm_bo *bo, struct drmnode 
 	frame->size = frame->stride * height;
 	frame->fd = node->fd;
 
-	if (node->min_width > width || width > node->max_width ||
-			node->min_height > height || height > node->max_height) {
+	if (node->min_width > width || width > node->max_width || node->min_height > height || height > node->max_height) {
 		nemolog_error("DRM", "bo geometry out of bounds\n");
 		goto err1;
 	}
@@ -175,15 +176,6 @@ err1:
 	free(frame);
 
 	return NULL;
-}
-
-static void drm_set_frame_buffer(struct drmframe *frame, struct nemobuffer *buffer)
-{
-	assert(frame->buffer_reference.buffer == NULL);
-
-	frame->is_client_buffer = 1;
-
-	nemobuffer_reference(&frame->buffer_reference, buffer);
 }
 
 static void drm_release_screen_frame(struct drmscreen *screen, struct drmframe *frame)
@@ -592,14 +584,44 @@ static void drm_screen_render_gl(struct drmscreen *screen, pixman_region32_t *da
 	}
 }
 
+static void drm_screen_render_overlay(struct drmscreen *screen, pixman_region32_t *damage)
+{
+	struct drmnode *node = screen->node;
+	struct nemobuffer *buffer = screen->base.overlay->canvas->buffer_reference.buffer;
+	struct gbm_bo *bo;
+
+	bo = gbm_bo_import(node->gbm, GBM_BO_IMPORT_WL_BUFFER, buffer->resource, GBM_BO_USE_SCANOUT);
+	if (bo == NULL) {
+		nemolog_error("DRM", "failed to lock front buffer\n");
+		return;
+	}
+
+	screen->next = drm_get_frame_from_bo(bo, node, screen->format);
+	if (screen->next == NULL) {
+		nemolog_error("DRM", "failed to get frame for bo\n");
+		gbm_bo_destroy(bo);
+		return;
+	}
+
+	assert(screen->next->buffer_reference.buffer == NULL);
+
+	screen->next->is_client_buffer = 1;
+
+	nemobuffer_reference(&screen->next->buffer_reference, buffer);
+}
+
 static void drm_screen_render_frame(struct drmscreen *screen, pixman_region32_t *damage)
 {
 	struct nemocompz *compz = screen->base.compz;
 
-	if (compz->use_pixman != 0) {
-		drm_screen_render_pixman(screen, damage);
+	if (nemoscreen_has_state(&screen->base, NEMOSCREEN_OVERLAY_STATE) == 0) {
+		if (compz->use_pixman != 0) {
+			drm_screen_render_pixman(screen, damage);
+		} else {
+			drm_screen_render_gl(screen, damage);
+		}
 	} else {
-		drm_screen_render_gl(screen, damage);
+		drm_screen_render_overlay(screen, damage);
 	}
 
 	pixman_region32_subtract(&screen->base.damage, &screen->base.damage, damage);

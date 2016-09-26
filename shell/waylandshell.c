@@ -108,7 +108,7 @@ static void shell_surface_set_fullscreen(struct wl_client *client, struct wl_res
 			screen = nemocompz_get_main_screen(shell->compz);
 
 		if (screen != NULL)
-			nemoshell_set_fullscreen_bin_on_screen(shell, bin, screen);
+			nemoshell_set_fullscreen_bin_legacy(shell, bin, screen);
 	}
 #endif
 }
@@ -142,7 +142,7 @@ static void shell_surface_set_maximized(struct wl_client *client, struct wl_reso
 			screen = nemocompz_get_main_screen(shell->compz);
 
 		if (screen != NULL)
-			nemoshell_set_maximized_bin_on_screen(shell, bin, screen);
+			nemoshell_set_maximized_bin_legacy(shell, bin, screen);
 	}
 #endif
 }

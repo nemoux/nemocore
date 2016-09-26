@@ -1502,7 +1502,6 @@ void nemocanvas_flush_damage(struct nemocanvas *canvas)
 
 	if (!canvas->base.dirty)
 		return;
-	canvas->base.dirty = 0;
 
 	wl_list_for_each(node, &canvas->compz->render_list, link) {
 		if (canvas->base.node_mask & (1 << node->id)) {
@@ -1528,8 +1527,6 @@ void nemocanvas_flush_damage(struct nemocanvas *canvas)
 	}
 
 	wl_signal_emit(&canvas->damage_signal, canvas);
-
-	pixman_region32_clear(&canvas->base.damage);
 }
 
 struct nemoview *nemocanvas_get_default_view(struct nemocanvas *canvas)

@@ -238,6 +238,8 @@ struct shellbin {
 		float x, y;
 		float r;
 		int32_t width, height;
+
+		struct nemoscreen *overlay;
 	} screen;
 	int has_screen;
 
@@ -289,6 +291,9 @@ struct shellscreen {
 
 	int32_t sx, sy, sw, sh;
 	int32_t dx, dy, dw, dh, dr;
+
+	uint32_t nodeid, screenid;
+	int has_screen;
 
 	struct wl_list link;
 
@@ -352,10 +357,11 @@ extern struct shellstage *nemoshell_get_stage(struct nemoshell *shell, const cha
 extern void nemoshell_put_stage(struct nemoshell *shell, const char *id);
 extern struct shellstage *nemoshell_get_stage_on(struct nemoshell *shell, int32_t x, int32_t y);
 
-extern void nemoshell_set_fullscreen_bin_on_screen(struct nemoshell *shell, struct shellbin *bin, struct nemoscreen *screen);
+extern void nemoshell_set_fullscreen_bin_legacy(struct nemoshell *shell, struct shellbin *bin, struct nemoscreen *screen);
+extern void nemoshell_set_fullscreen_bin_overlay(struct nemoshell *shell, struct shellbin *bin, const char *id, int fixed, struct nemoscreen *screen);
 extern void nemoshell_set_fullscreen_bin(struct nemoshell *shell, struct shellbin *bin, struct shellscreen *screen);
 extern void nemoshell_put_fullscreen_bin(struct nemoshell *shell, struct shellbin *bin);
-extern void nemoshell_set_maximized_bin_on_screen(struct nemoshell *shell, struct shellbin *bin, struct nemoscreen *screen);
+extern void nemoshell_set_maximized_bin_legacy(struct nemoshell *shell, struct shellbin *bin, struct nemoscreen *screen);
 extern void nemoshell_set_maximized_bin(struct nemoshell *shell, struct shellbin *bin, struct shellscreen *screen);
 extern void nemoshell_put_maximized_bin(struct nemoshell *shell, struct shellbin *bin);
 extern void nemoshell_kill_fullscreen_bin(struct nemoshell *shell, uint32_t target);

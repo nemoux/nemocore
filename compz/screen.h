@@ -15,6 +15,7 @@ NEMO_BEGIN_EXTERN_C
 typedef enum {
 	NEMOSCREEN_DISPLAY_STATE = (1 << 0),
 	NEMOSCREEN_SCOPE_STATE = (1 << 1),
+	NEMOSCREEN_OVERLAY_STATE = (1 << 2),
 	NEMOSCREEN_LAST_STATE
 } NemoScreenState;
 
@@ -27,6 +28,7 @@ typedef enum {
 } NemoDpmsState;
 
 struct nemocompz;
+struct nemoview;
 struct rendernode;
 
 struct nemomode {
@@ -82,6 +84,9 @@ struct nemoscreen {
 		struct nemomatrix inverse;
 	} transform;
 
+	struct nemoview *overlay;
+	struct wl_listener overlay_destroy_listener;
+
 	int32_t rx, ry, rw, rh;
 
 	pixman_region32_t region;
@@ -129,6 +134,8 @@ extern void nemoscreen_set_rotation(struct nemoscreen *screen, float r);
 extern void nemoscreen_set_scale(struct nemoscreen *screen, float sx, float sy);
 extern void nemoscreen_set_pivot(struct nemoscreen *screen, float px, float py);
 extern int nemoscreen_set_custom(struct nemoscreen *screen, const char *cmd);
+
+extern int nemoscreen_set_overlay(struct nemoscreen *screen, struct nemoview *view);
 
 extern void nemoscreen_transform_dirty(struct nemoscreen *screen);
 extern void nemoscreen_damage_dirty(struct nemoscreen *screen);

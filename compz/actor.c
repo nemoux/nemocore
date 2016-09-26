@@ -587,8 +587,6 @@ void nemoactor_flush_damage(struct nemoactor *actor)
 	if (!actor->base.dirty)
 		return;
 
-	actor->base.dirty = 0;
-
 	wl_list_for_each(node, &actor->compz->render_list, link) {
 		if (actor->base.node_mask & (1 << node->id)) {
 			if (node->pixman != NULL) {
@@ -615,8 +613,6 @@ void nemoactor_flush_damage(struct nemoactor *actor)
 			}
 		}
 	}
-
-	pixman_region32_clear(&actor->base.damage);
 }
 
 void nemoactor_set_dispatch_event(struct nemoactor *actor, nemoactor_dispatch_event_t dispatch)

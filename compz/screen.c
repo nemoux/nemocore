@@ -214,6 +214,8 @@ void nemoscreen_prepare(struct nemoscreen *screen)
 	wl_signal_init(&screen->destroy_signal);
 	wl_list_init(&screen->resource_list);
 
+	wl_list_init(&screen->overlay_destroy_listener.link);
+
 	pixman_region32_init(&screen->region);
 	pixman_region32_init(&screen->damage);
 
@@ -235,6 +237,8 @@ void nemoscreen_finish(struct nemoscreen *screen)
 	screen->compz->screen_idpool &= ~(1 << screen->id);
 
 	wl_signal_emit(&screen->destroy_signal, screen);
+
+	wl_list_remove(&screen->overlay_destroy_listener.link);
 
 	pixman_region32_fini(&screen->region);
 	pixman_region32_fini(&screen->damage);
@@ -467,6 +471,36 @@ int nemoscreen_set_custom(struct nemoscreen *screen, const char *cmd)
 	screen->transform.enable = 1;
 	screen->transform.dirty = 1;
 	screen->transform.custom = 1;
+
+	return 0;
+}
+
+static void nemoscreen_handle_overlay_destroy(struct wl_listener *listener, void *data)
+{
+	struct nemoscreen *screen = (struct nemoscreen *)container_of(listener, struct nemoscreen, overlay_destroy_listener);
+
+	nemoscreen_set_overlay(screen, NULL);
+}
+
+int nemoscreen_set_overlay(struct nemoscreen *screen, struct nemoview *view)
+{
+	if (screen->overlay != NULL) {
+		wl_list_remove(&screen->overlay_destroy_listener.link);
+		wl_list_init(&screen->overlay_destroy_listener.link);
+	}
+
+	if (view != NULL) {
+		screen->overlay_destroy_listener.notify = nemoscreen_handle_overlay_destroy;
+		wl_signal_add(&view->destroy_signal, &screen->overlay_destroy_listener);
+
+		screen->overlay = view;
+
+		nemoscreen_set_state(screen, NEMOSCREEN_OVERLAY_STATE);
+	} else {
+		screen->overlay = NULL;
+
+		nemoscreen_put_state(screen, NEMOSCREEN_OVERLAY_STATE);
+	}
 
 	return 0;
 }
