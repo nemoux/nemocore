@@ -104,3 +104,13 @@ TARGET_LINK_LIBRARIES(nemobeat
 	)
 
 INSTALL(TARGETS nemobeat DESTINATION bin)
+
+add_executable(nemokeys
+	nemokeys.c
+	)
+
+TARGET_LINK_LIBRARIES(nemokeys
+	nemoasst
+	)
+
+INSTALL(TARGETS nemokeys DESTINATION bin)
