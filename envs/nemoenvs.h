@@ -41,7 +41,6 @@ struct nemoenvs {
 	struct nemomonitor *monitor;
 
 	char *name;
-	char args[512];
 
 	struct wl_list xserver_list;
 	uint32_t xdisplay;
@@ -65,7 +64,6 @@ extern int nemoenvs_send(struct nemoenvs *envs, const char *name, const char *fm
 extern int nemoenvs_reply(struct nemoenvs *envs, const char *fmt, ...);
 
 extern void nemoenvs_set_name(struct nemoenvs *envs, const char *fmt, ...);
-extern void nemoenvs_set_args(struct nemoenvs *envs, char *args[], int argc);
 
 extern int nemoenvs_set_callback(struct nemoenvs *envs, nemoenvs_callback_t callback, void *data);
 extern int nemoenvs_put_callback(struct nemoenvs *envs, nemoenvs_callback_t callback, void *data);

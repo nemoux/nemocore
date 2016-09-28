@@ -115,18 +115,6 @@ void nemoenvs_set_name(struct nemoenvs *envs, const char *fmt, ...)
 	va_end(vargs);
 }
 
-void nemoenvs_set_args(struct nemoenvs *envs, char *args[], int argc)
-{
-	int i;
-
-	strcpy(envs->args, args[0]);
-
-	for (i = 1; i < argc; i++) {
-		strcat(envs->args, ";");
-		strcat(envs->args, args[i]);
-	}
-}
-
 int nemoenvs_set_callback(struct nemoenvs *envs, nemoenvs_callback_t callback, void *data)
 {
 	struct envscallback *cb;
