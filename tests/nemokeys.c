@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
 		}
 	} else if (strcmp(cmd, "dump") == 0) {
 		iter = nemokeys_create_iterator(keys);
-		if (iter != NULL) {
+		if (iter != NULL && nemokeys_iterator_seek_to_first(iter) != 0) {
 			do {
 				fprintf(stderr, "%s => %s\n",
 						nemokeys_iterator_key(iter),

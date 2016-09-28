@@ -106,15 +106,8 @@ struct keysiter *nemokeys_create_iterator(struct nemokeys *keys)
 	memset(iter, 0, sizeof(struct keysiter));
 
 	iter->iter = leveldb_create_iterator(keys->db, keys->roptions);
-	if (leveldb_iter_valid(iter->iter) == 0)
-		goto err1;
 
 	return iter;
-
-err1:
-	free(iter);
-
-	return NULL;
 }
 
 void nemokeys_destroy_iterator(struct keysiter *iter)
