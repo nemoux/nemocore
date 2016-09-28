@@ -96,6 +96,9 @@ int nemosession_connect(struct nemosession *session, const char *seatid, int tty
 {
 	struct nemocompz *compz = session->compz;
 
+	if (seatid == NULL)
+		return -1;
+
 #ifdef NEMOUX_WITH_LOGIND
 	session->logind = logind_connect(compz, seatid, tty);
 	if (session->logind == NULL) {
