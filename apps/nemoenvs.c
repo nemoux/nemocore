@@ -12,6 +12,19 @@
 #include <udphelper.h>
 #include <nemomisc.h>
 
+static int nemoenvs_dispatch_client_message(struct nemoenvs *envs, const char *src, const char *dst, const char *cmd, const char *path, struct itemone *one, void *data)
+{
+	struct nemotool *tool = (struct nemotool *)data;
+
+	if (strcmp(cmd, "req") == 0) {
+		if (strcmp(path, "/check/live") == 0) {
+			nemoenvs_reply(envs, "%s %s rep /check/live", envs->clientname, src);
+		}
+	}
+
+	return 0;
+}
+
 struct nemoenvs *nemoenvs_create(struct nemotool *tool)
 {
 	struct nemoenvs *envs;
@@ -23,21 +36,11 @@ struct nemoenvs *nemoenvs_create(struct nemotool *tool)
 
 	envs->tool = tool;
 
-	envs->configs = nemoitem_create();
-	if (envs->configs == NULL)
-		goto err1;
-
 	nemolist_init(&envs->callback_list);
 
 	nemoenvs_set_callback(envs, nemoenvs_dispatch_client_message, tool);
-	nemoenvs_set_callback(envs, nemoenvs_dispatch_config_message, tool);
 
 	return envs;
-
-err1:
-	free(envs);
-
-	return NULL;
 }
 
 void nemoenvs_destroy(struct nemoenvs *envs)
@@ -49,8 +52,6 @@ void nemoenvs_destroy(struct nemoenvs *envs)
 
 		free(cb);
 	}
-
-	nemoitem_destroy(envs->configs);
 
 	if (envs->monitor != NULL)
 		nemomonitor_destroy(envs->monitor);

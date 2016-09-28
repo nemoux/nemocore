@@ -29,8 +29,6 @@ struct envscallback {
 struct nemoenvs {
 	struct nemotool *tool;
 
-	struct nemoitem *configs;
-
 	struct nemolist callback_list;
 
 	struct nemomsg *msg;
@@ -55,9 +53,6 @@ extern int nemoenvs_set_callback(struct nemoenvs *envs, nemoenvs_callback_t call
 extern int nemoenvs_put_callback(struct nemoenvs *envs, nemoenvs_callback_t callback, void *data);
 
 extern int nemoenvs_dispatch(struct nemoenvs *envs, const char *src, const char *dst, const char *cmd, const char *path, struct itemone *one);
-
-extern int nemoenvs_dispatch_config_message(struct nemoenvs *envs, const char *src, const char *dst, const char *cmd, const char *path, struct itemone *one, void *data);
-extern int nemoenvs_dispatch_client_message(struct nemoenvs *envs, const char *src, const char *dst, const char *cmd, const char *path, struct itemone *one, void *data);
 
 static inline int nemoenvs_has_id(struct nemoenvs *envs, const char *id)
 {
