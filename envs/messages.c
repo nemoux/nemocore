@@ -648,11 +648,6 @@ int nemoenvs_dispatch_system_message(struct nemoenvs *envs, const char *src, con
 				nemoenvs_handle_set_nemoshell_fullscreen(shell, one);
 			} else if (strcmp(path, "/nemoshell/stage") == 0) {
 				nemoenvs_handle_set_nemoshell_stage(shell, one);
-			} else if (strcmp(path, "/nemoshell/font") == 0) {
-				char contents[1024];
-
-				nemoitem_one_save(one, contents, ' ', '\"');
-				setenv("NEMOSHELL_FONT", contents, 1);
 			} else if (strcmp(path, "/nemoshell/show") == 0) {
 				nemoenvs_handle_set_nemoshell_show(shell, one);
 			} else if (strcmp(path, "/nemoshell/idle") == 0) {
@@ -680,7 +675,6 @@ int nemoenvs_dispatch_system_message(struct nemoenvs *envs, const char *src, con
 				nemoenvs_handle_put_nemoshell_fullscreen(shell, one);
 			} else if (strcmp(path, "/nemoshell/stage") == 0) {
 				nemoenvs_handle_put_nemoshell_stage(shell, one);
-			} else if (strcmp(path, "/nemoshell/font") == 0) {
 			} else if (strcmp(path, "/nemoshell/show") == 0) {
 			} else if (strcmp(path, "/nemoshell/legacy") == 0) {
 			}

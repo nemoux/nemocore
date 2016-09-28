@@ -236,21 +236,3 @@ int nemoenvs_reply(struct nemoenvs *envs, const char *fmt, ...)
 
 	return r;
 }
-
-int nemoenvs_load_variable(struct nemoenvs *envs, const char *name, const char *path)
-{
-	struct itemone *one;
-	char *env;
-
-	env = getenv(name);
-	if (env != NULL) {
-		one = nemoitem_one_create();
-		nemoitem_one_load(one, env, ' ', '\"');
-
-		nemoenvs_dispatch(envs, "/envs", envs->clientname, "set", path, one);
-
-		nemoitem_one_destroy(one);
-	}
-
-	return 0;
-}
