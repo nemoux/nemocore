@@ -24,6 +24,7 @@ extern void nemokeys_destroy(struct nemokeys *keys);
 
 extern int nemokeys_set(struct nemokeys *keys, const char *key, const char *value);
 extern char *nemokeys_get(struct nemokeys *keys, const char *key);
+extern int nemokeys_put(struct nemokeys *keys, const char *key);
 
 extern struct keysiter *nemokeys_create_iterator(struct nemokeys *keys);
 extern void nemokeys_destroy_iterator(struct keysiter *iter);

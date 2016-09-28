@@ -96,6 +96,20 @@ char *nemokeys_get(struct nemokeys *keys, const char *key)
 	return value;
 }
 
+int nemokeys_put(struct nemokeys *keys, const char *key)
+{
+	char *err = NULL;
+
+	leveldb_delete(keys->db, keys->woptions, key, strlen(key), &err);
+	if (err != NULL) {
+		fprintf(stderr, "failed to put key: %s\n", err);
+		leveldb_free(err);
+		return -1;
+	}
+
+	return 0;
+}
+
 struct keysiter *nemokeys_create_iterator(struct nemokeys *keys)
 {
 	struct keysiter *iter;
