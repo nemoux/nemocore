@@ -901,15 +901,11 @@ int nemoenvs_dispatch_config_message(struct nemoenvs *envs, const char *src, con
 
 int nemoenvs_dispatch_client_message(struct nemoenvs *envs, const char *src, const char *dst, const char *cmd, const char *path, struct itemone *one, void *data)
 {
-	if (strcmp(dst, envs->name) == 0) {
-		if (strcmp(cmd, "rep") == 0) {
-			if (strcmp(path, "/check/live") == 0) {
-				nemomsg_set_client(envs->msg, src,
-						nemomsg_get_source_ip(envs->msg),
-						nemomsg_get_source_port(envs->msg));
-			}
-		}
-	} else {
+	if (strcmp(dst, envs->name) != 0) {
+		nemomsg_set_client(envs->msg, src,
+				nemomsg_get_source_ip(envs->msg),
+				nemomsg_get_source_port(envs->msg));
+
 		nemomsg_send_message(envs->msg, dst,
 				nemomsg_get_source_buffer(envs->msg),
 				nemomsg_get_source_size(envs->msg));

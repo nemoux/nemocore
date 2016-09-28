@@ -28,8 +28,6 @@ struct msgclient {
 	char *ip;
 	int port;
 
-	int liveness;
-
 	struct nemolist link;
 };
 
@@ -72,9 +70,6 @@ extern int nemomsg_clean(struct nemomsg *msg);
 
 extern int nemomsg_set_client(struct nemomsg *msg, const char *name, const char *ip, int port);
 extern int nemomsg_put_client(struct nemomsg *msg, const char *name, const char *ip, int port);
-
-extern int nemomsg_check_clients(struct nemomsg *msg);
-extern int nemomsg_clean_clients(struct nemomsg *msg);
 
 extern int nemomsg_recv_message(struct nemomsg *msg, char *contents, int size);
 extern int nemomsg_send_message(struct nemomsg *msg, const char *name, const char *contents, int size);

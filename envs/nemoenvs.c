@@ -15,7 +15,6 @@
 #include <compz.h>
 #include <view.h>
 #include <monitor.h>
-#include <timer.h>
 #include <xserver.h>
 #include <waylandhelper.h>
 
@@ -30,8 +29,6 @@
 #include <namespacehelper.h>
 #include <nemolog.h>
 #include <nemomisc.h>
-
-#define NEMOENVS_LIVENESS_TIMEOUT		(7000)
 
 struct nemoenvs *nemoenvs_create(struct nemoshell *shell)
 {
@@ -100,9 +97,6 @@ void nemoenvs_destroy(struct nemoenvs *envs)
 		nemomonitor_destroy(envs->monitor);
 	if (envs->msg != NULL)
 		nemomsg_destroy(envs->msg);
-	if (envs->timer != NULL)
-		nemotimer_destroy(envs->timer);
-
 	if (envs->name != NULL)
 		free(envs->name);
 
@@ -229,17 +223,6 @@ static int nemoenvs_handle_message(void *data)
 	return 0;
 }
 
-static void nemoenvs_dispatch_timer(struct nemotimer *timer, void *data)
-{
-	struct nemoenvs *envs = (struct nemoenvs *)data;
-
-	nemomsg_clean_clients(envs->msg);
-	nemomsg_check_clients(envs->msg);
-	nemomsg_send_format(envs->msg, "/*", "/nemoshell /* req /check/live");
-
-	nemotimer_set_timeout(envs->timer, NEMOENVS_LIVENESS_TIMEOUT);
-}
-
 int nemoenvs_listen(struct nemoenvs *envs, const char *ip, int port)
 {
 	envs->msg = nemomsg_create(ip, port);
@@ -250,11 +233,6 @@ int nemoenvs_listen(struct nemoenvs *envs, const char *ip, int port)
 			nemomsg_get_socket(envs->msg),
 			nemoenvs_handle_message,
 			envs);
-
-	envs->timer = nemotimer_create(envs->shell->compz);
-	nemotimer_set_callback(envs->timer, nemoenvs_dispatch_timer);
-	nemotimer_set_timeout(envs->timer, NEMOENVS_LIVENESS_TIMEOUT);
-	nemotimer_set_userdata(envs->timer, envs);
 
 	return 0;
 }

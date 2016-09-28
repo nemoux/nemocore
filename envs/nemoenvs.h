@@ -40,8 +40,6 @@ struct nemoenvs {
 	struct nemomsg *msg;
 	struct nemomonitor *monitor;
 
-	struct nemotimer *timer;
-
 	char *name;
 	char args[512];
 

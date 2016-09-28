@@ -241,8 +241,6 @@ int nemomsg_set_client(struct nemomsg *msg, const char *name, const char *ip, in
 		if (strcmp(client->name, name) == 0 &&
 				strcmp(client->ip, ip) == 0 &&
 				client->port == port) {
-			client->liveness = 1;
-
 			return 1;
 		}
 	}
@@ -254,7 +252,6 @@ int nemomsg_set_client(struct nemomsg *msg, const char *name, const char *ip, in
 	client->name = strdup(name);
 	client->ip = strdup(ip);
 	client->port = port;
-	client->liveness = 1;
 
 	nemolist_insert_tail(&msg->client_list, &client->link);
 
@@ -276,34 +273,6 @@ int nemomsg_put_client(struct nemomsg *msg, const char *name, const char *ip, in
 			free(client);
 
 			break;
-		}
-	}
-
-	return 0;
-}
-
-int nemomsg_check_clients(struct nemomsg *msg)
-{
-	struct msgclient *client;
-
-	nemolist_for_each(client, &msg->client_list, link) {
-		client->liveness = 0;
-	}
-
-	return 0;
-}
-
-int nemomsg_clean_clients(struct nemomsg *msg)
-{
-	struct msgclient *client;
-
-	nemolist_for_each(client, &msg->client_list, link) {
-		if (client->liveness == 0) {
-			nemolist_remove(&client->link);
-
-			free(client->name);
-			free(client->ip);
-			free(client);
 		}
 	}
 
