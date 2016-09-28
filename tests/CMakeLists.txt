@@ -85,26 +85,6 @@ TARGET_LINK_LIBRARIES(nemolog
 
 INSTALL(TARGETS nemolog DESTINATION bin)
 
-add_executable(nemomsg
-	nemomsg.c
-	)
-
-TARGET_LINK_LIBRARIES(nemomsg
-	nemoasst
-	)
-
-INSTALL(TARGETS nemomsg DESTINATION bin)
-
-add_executable(nemobeat
-	nemobeat.c
-	)
-
-TARGET_LINK_LIBRARIES(nemobeat
-	nemoasst
-	)
-
-INSTALL(TARGETS nemobeat DESTINATION bin)
-
 add_executable(nemokeys
 	nemokeys.c
 	)

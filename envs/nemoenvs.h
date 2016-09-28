@@ -9,7 +9,6 @@ NEMO_BEGIN_EXTERN_C
 
 #include <nemoapps.h>
 #include <nemoxapp.h>
-#include <nemobeat.h>
 #include <nemomsg.h>
 
 #include <nemobox.h>
@@ -58,14 +57,6 @@ struct nemoenvs {
 	struct {
 		int pick_taps;
 	} legacy;
-
-	struct {
-		int soc;
-		int port;
-		int timeout;
-
-		struct nemotimer *timer;
-	} beat;
 };
 
 extern struct nemoenvs *nemoenvs_create(struct nemoshell *shell);
