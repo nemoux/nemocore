@@ -75,9 +75,9 @@ int main(int argc, char *argv[])
 		iter = nemokeys_create_iterator(keys);
 		if (iter != NULL && nemokeys_iterator_seek_to_first(iter) != 0) {
 			do {
-				fprintf(stderr, "[%s]\n", nemokeys_iterator_key(iter));
+				fprintf(stderr, "[%s]\n", nemokeys_iterator_key_safe(iter));
 
-				jobj = json_tokener_parse(nemokeys_iterator_value(iter));
+				jobj = json_tokener_parse(nemokeys_iterator_value_safe(iter));
 
 				json_object_object_foreach(jobj, k, v) {
 					fprintf(stderr, "  %s: %s\n", k, json_object_get_string(v));
@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
 	} else if (strcmp(cmd, "clear") == 0) {
 		nemokeys_clear(keys);
 	} else {
-		contents = nemokeys_get(keys, namespace);
+		contents = nemokeys_get_safe(keys, namespace);
 		if (contents != NULL) {
 			jobj = json_tokener_parse(contents);
 		} else {

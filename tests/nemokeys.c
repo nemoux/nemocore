@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
 	if (strcmp(cmd, "set") == 0) {
 		nemokeys_set(keys, key, value);
 	} else if (strcmp(cmd, "get") == 0) {
-		value = nemokeys_get(keys, key);
+		value = nemokeys_get_safe(keys, key);
 		if (value != NULL) {
 			fprintf(stderr, "%s: %s\n", key, value);
 			free(value);
@@ -73,8 +73,8 @@ int main(int argc, char *argv[])
 		if (iter != NULL && nemokeys_iterator_seek_to_first(iter) != 0) {
 			do {
 				fprintf(stderr, "%s: %s\n",
-						nemokeys_iterator_key(iter),
-						nemokeys_iterator_value(iter));
+						nemokeys_iterator_key_safe(iter),
+						nemokeys_iterator_value_safe(iter));
 			} while (nemokeys_iterator_next(iter) != 0);
 
 			nemokeys_destroy_iterator(iter);
