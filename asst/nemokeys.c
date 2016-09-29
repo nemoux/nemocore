@@ -66,6 +66,26 @@ void nemokeys_destroy(struct nemokeys *keys)
 	free(keys);
 }
 
+void nemokeys_clear(struct nemokeys *keys)
+{
+	leveldb_iterator_t *iter;
+	char *err = NULL;
+	const char *key;
+	size_t length;
+
+	iter = leveldb_create_iterator(keys->db, keys->roptions);
+	leveldb_iter_seek_to_first(iter);
+
+	while (leveldb_iter_valid(iter) != 0) {
+		key = leveldb_iter_key(iter, &length);
+
+		leveldb_delete(keys->db, keys->woptions, key, length, &err);
+		leveldb_iter_next(iter);
+	}
+
+	leveldb_iter_destroy(iter);
+}
+
 int nemokeys_set(struct nemokeys *keys, const char *key, const char *value)
 {
 	char *err = NULL;

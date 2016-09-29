@@ -31,6 +31,7 @@ int main(int argc, char *argv[])
 	char *contents = NULL;
 	char *attr = NULL;
 	char *value = NULL;
+	int needs_destroy = 0;
 	int opt;
 	int i;
 
@@ -74,7 +75,7 @@ int main(int argc, char *argv[])
 		iter = nemokeys_create_iterator(keys);
 		if (iter != NULL && nemokeys_iterator_seek_to_first(iter) != 0) {
 			do {
-				fprintf(stderr, "%s:\n", nemokeys_iterator_key(iter));
+				fprintf(stderr, "[%s]\n", nemokeys_iterator_key(iter));
 
 				jobj = json_tokener_parse(nemokeys_iterator_value(iter));
 
@@ -87,6 +88,8 @@ int main(int argc, char *argv[])
 
 			nemokeys_destroy_iterator(iter);
 		}
+	} else if (strcmp(cmd, "clear") == 0) {
+		nemokeys_clear(keys);
 	} else {
 		contents = nemokeys_get(keys, namespace);
 		if (contents != NULL) {
@@ -96,7 +99,8 @@ int main(int argc, char *argv[])
 		}
 
 		if (strcmp(cmd, "set") == 0) {
-			json_object_object_add(jobj, attr, json_object_new_string(value));
+			if (attr != NULL && value != NULL)
+				json_object_object_add(jobj, attr, json_object_new_string(value));
 		} else if (strcmp(cmd, "get") == 0) {
 			if (attr != NULL) {
 				if (json_object_object_get_ex(jobj, attr, &robj) != 0)
@@ -107,10 +111,14 @@ int main(int argc, char *argv[])
 				}
 			}
 		} else if (strcmp(cmd, "put") == 0) {
-			json_object_object_del(jobj, attr);
+			if (attr != NULL) {
+				json_object_object_del(jobj, attr);
+			} else {
+				needs_destroy = 1;
+			}
 		}
 
-		if (json_object_object_length(jobj) == 0)
+		if (needs_destroy != 0 || json_object_object_length(jobj) == 0)
 			nemokeys_put(keys, namespace);
 		else
 			nemokeys_set(keys, namespace, json_object_to_json_string(jobj));

@@ -22,6 +22,8 @@ struct keysiter {
 extern struct nemokeys *nemokeys_create(const char *path);
 extern void nemokeys_destroy(struct nemokeys *keys);
 
+extern void nemokeys_clear(struct nemokeys *keys);
+
 extern int nemokeys_set(struct nemokeys *keys, const char *key, const char *value);
 extern char *nemokeys_get(struct nemokeys *keys, const char *key);
 extern int nemokeys_put(struct nemokeys *keys, const char *key);
