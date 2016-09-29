@@ -178,6 +178,32 @@ void nemonote_object_put(struct nemonote *note, struct noteobject *obj, const ch
 	obj->dirty = 1;
 }
 
+struct jsoniter *nemonote_object_create_iterator(struct nemonote *note, struct noteobject *obj)
+{
+	struct jsoniter *iter;
+
+	iter = (struct jsoniter *)malloc(sizeof(struct jsoniter));
+	if (iter == NULL)
+		return NULL;
+	memset(iter, 0, sizeof(struct jsoniter));
+
+	iter->jobj = obj->jobj;
+	iter->needs_free = 0;
+
+	iter->jiter = json_object_iter_begin(iter->jobj);
+	iter->jiter0 = json_object_iter_end(iter->jobj);
+
+	if (json_object_iter_equal(&iter->jiter, &iter->jiter0) != 0)
+		goto err1;
+
+	return iter;
+
+err1:
+	free(iter);
+
+	return NULL;
+}
+
 struct noteiter *nemonote_create_iterator(struct nemonote *note)
 {
 	struct noteiter *iter;
@@ -280,6 +306,7 @@ struct jsoniter *nemonote_create_json_iterator(const char *contents)
 	memset(iter, 0, sizeof(struct jsoniter));
 
 	iter->jobj = json_tokener_parse(contents);
+	iter->needs_free = 1;
 
 	iter->jiter = json_object_iter_begin(iter->jobj);
 	iter->jiter0 = json_object_iter_end(iter->jobj);
@@ -299,7 +326,8 @@ err1:
 
 void nemonote_destroy_json_iterator(struct jsoniter *iter)
 {
-	json_object_put(iter->jobj);
+	if (iter->needs_free != 0)
+		json_object_put(iter->jobj);
 
 	free(iter);
 }

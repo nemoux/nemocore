@@ -31,6 +31,7 @@ struct noteiter {
 
 struct jsoniter {
 	struct json_object *jobj;
+	int needs_free;
 
 	struct json_object_iterator jiter;
 	struct json_object_iterator jiter0;
@@ -52,6 +53,7 @@ extern void nemonote_object_unref(struct nemonote *note, struct noteobject *obj)
 extern int nemonote_object_set(struct nemonote *note, struct noteobject *obj, const char *attr, const char *value);
 extern char *nemonote_object_get(struct nemonote *note, struct noteobject *obj, const char *attr);
 extern void nemonote_object_put(struct nemonote *note, struct noteobject *obj, const char *attr);
+extern struct jsoniter *nemonote_object_create_iterator(struct nemonote *note, struct noteobject *obj);
 
 extern struct noteiter *nemonote_create_iterator(struct nemonote *note);
 extern void nemonote_destroy_iterator(struct noteiter *iter);
