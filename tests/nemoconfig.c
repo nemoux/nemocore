@@ -29,6 +29,8 @@ int main(int argc, char *argv[])
 	struct nemotoken *token;
 	struct json_object *jobj;
 	struct json_object *robj;
+	struct json_object_iterator jiter;
+	struct json_object_iterator jiter0;
 	char *config = NULL;
 	char *cmd = NULL;
 	char *namespace = NULL;
@@ -93,8 +95,15 @@ int main(int argc, char *argv[])
 
 				jobj = json_tokener_parse(nemokeys_iterator_value_safe(iter));
 
-				json_object_object_foreach(jobj, k, v) {
-					fprintf(stderr, "  %s: %s\n", k, json_object_get_string(v));
+				jiter = json_object_iter_begin(jobj);
+				jiter0 = json_object_iter_end(jobj);
+
+				while (json_object_iter_equal(&jiter, &jiter0) == 0) {
+					fprintf(stderr, "  %s: %s\n",
+							json_object_iter_peek_name(&jiter),
+							json_object_get_string(json_object_iter_peek_value(&jiter)));
+
+					json_object_iter_next(&jiter);
 				}
 
 				json_object_put(jobj);
@@ -180,8 +189,15 @@ int main(int argc, char *argv[])
 				if (json_object_object_get_ex(jobj, attr, &robj) != 0)
 					fprintf(stderr, "%s: %s\n", attr, json_object_get_string(robj));
 			} else {
-				json_object_object_foreach(jobj, k, v) {
-					fprintf(stderr, "%s: %s\n", k, json_object_get_string(v));
+				jiter = json_object_iter_begin(jobj);
+				jiter0 = json_object_iter_end(jobj);
+
+				while (json_object_iter_equal(&jiter, &jiter0) == 0) {
+					fprintf(stderr, "%s: %s\n",
+							json_object_iter_peek_name(&jiter),
+							json_object_get_string(json_object_iter_peek_value(&jiter)));
+
+					json_object_iter_next(&jiter);
 				}
 			}
 		} else if (strcmp(cmd, "put") == 0) {
