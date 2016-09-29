@@ -10,6 +10,7 @@
 #include <json.h>
 
 #include <nemokeys.h>
+#include <nemotoken.h>
 #include <nemomisc.h>
 
 int main(int argc, char *argv[])
@@ -19,10 +20,13 @@ int main(int argc, char *argv[])
 		{ "namespace",		required_argument,		NULL,		'n' },
 		{ "attr",					required_argument,		NULL,		'a' },
 		{ "value",				required_argument,		NULL,		'v' },
+		{ "stream",				required_argument,		NULL,		's' },
+		{ "file",					required_argument,		NULL,		'f' },
 		{ 0 }
 	};
 	struct nemokeys *keys;
 	struct keysiter *iter;
+	struct nemotoken *token;
 	struct json_object *jobj;
 	struct json_object *robj;
 	char *config = NULL;
@@ -31,11 +35,13 @@ int main(int argc, char *argv[])
 	char *contents = NULL;
 	char *attr = NULL;
 	char *value = NULL;
+	char *stream = NULL;
+	char *file = NULL;
 	int needs_destroy = 0;
 	int opt;
 	int i;
 
-	while (opt = getopt_long(argc, argv, "c:n:a:v:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "c:n:a:v:s:f:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -54,6 +60,14 @@ int main(int argc, char *argv[])
 
 			case 'v':
 				value = strdup(optarg);
+				break;
+
+			case 's':
+				stream = strdup(optarg);
+				break;
+
+			case 'f':
+				file = strdup(optarg);
 				break;
 
 			default:
@@ -90,6 +104,64 @@ int main(int argc, char *argv[])
 		}
 	} else if (strcmp(cmd, "clear") == 0) {
 		nemokeys_clear(keys);
+	} else if (strcmp(cmd, "load") == 0) {
+		if (stream != NULL) {
+			token = nemotoken_create(stream, strlen(stream));
+			nemotoken_divide(token, ' ');
+			nemotoken_update(token);
+
+			jobj = json_object_new_object();
+
+			for (i = 1; i < nemotoken_get_token_count(token); i += 2) {
+				json_object_object_add(jobj,
+						nemotoken_get_token(token, i + 0),
+						json_object_new_string(nemotoken_get_token(token, i + 1)));
+			}
+
+			nemokeys_set(keys, nemotoken_get_token(token, 0), json_object_to_json_string(jobj));
+
+			json_object_put(jobj);
+
+			nemotoken_destroy(token);
+		} else if (file != NULL) {
+			FILE *fp;
+			char buffer[1024];
+
+			fp = fopen(file, "r");
+			if (fp == NULL)
+				return -1;
+
+			while (fgets(buffer, sizeof(buffer), fp) != NULL) {
+				int length = strlen(buffer);
+
+				if (buffer[0] == '/' && buffer[1] == '/')
+					continue;
+				if (buffer[0] != '/')
+					continue;
+				if (buffer[length - 1] == '\n')
+					buffer[length - 1] = '\0';
+
+				token = nemotoken_create(buffer, strlen(buffer));
+				nemotoken_divide(token, ' ');
+				nemotoken_update(token);
+
+				jobj = json_object_new_object();
+
+				for (i = 1; i < nemotoken_get_token_count(token); i += 2) {
+					json_object_object_add(jobj,
+							nemotoken_get_token(token, i + 0),
+							json_object_new_string(nemotoken_get_token(token, i + 1)));
+				}
+
+				nemokeys_set(keys, nemotoken_get_token(token, 0), json_object_to_json_string(jobj));
+
+				json_object_put(jobj);
+
+				nemotoken_destroy(token);
+			}
+
+			fclose(fp);
+		}
 	} else {
 		contents = nemokeys_get_safe(keys, namespace);
 		if (contents != NULL) {
@@ -124,6 +196,8 @@ int main(int argc, char *argv[])
 			nemokeys_put(keys, namespace);
 		else
 			nemokeys_set(keys, namespace, json_object_to_json_string(jobj));
+
+		json_object_put(jobj);
 	}
 
 	nemokeys_destroy(keys);
