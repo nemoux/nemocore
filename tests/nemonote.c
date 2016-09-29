@@ -7,9 +7,7 @@
 
 #include <getopt.h>
 
-#include <json.h>
-
-#include <nemokeys.h>
+#include <nemonote.h>
 #include <nemotoken.h>
 #include <nemomisc.h>
 
@@ -24,22 +22,18 @@ int main(int argc, char *argv[])
 		{ "file",					required_argument,		NULL,		'f' },
 		{ 0 }
 	};
-	struct nemokeys *keys;
-	struct keysiter *iter;
+	struct nemonote *note;
+	struct noteobject *nobj;
+	struct noteiter *niter;
+	struct jsoniter *jiter;
 	struct nemotoken *token;
-	struct json_object *jobj;
-	struct json_object *robj;
-	struct json_object_iterator jiter;
-	struct json_object_iterator jiter0;
 	char *config = NULL;
 	char *cmd = NULL;
-	char *namespace = NULL;
-	char *contents = NULL;
+	char *ns = NULL;
 	char *attr = NULL;
 	char *value = NULL;
 	char *stream = NULL;
 	char *file = NULL;
-	int needs_destroy = 0;
 	int opt;
 	int i;
 
@@ -53,7 +47,7 @@ int main(int argc, char *argv[])
 				break;
 
 			case 'n':
-				namespace = strdup(optarg);
+				ns = strdup(optarg);
 				break;
 
 			case 'a':
@@ -83,53 +77,47 @@ int main(int argc, char *argv[])
 	if (cmd == NULL || config == NULL)
 		return -1;
 
-	keys = nemokeys_create(config);
-	if (keys == NULL)
+	note = nemonote_create(config);
+	if (note == NULL)
 		return -1;
 
 	if (strcmp(cmd, "dump") == 0) {
-		iter = nemokeys_create_iterator(keys);
-		if (iter != NULL && nemokeys_iterator_seek_to_first(iter) != 0) {
+		niter = nemonote_create_iterator(note);
+		if (niter != NULL) {
 			do {
-				fprintf(stderr, "[%s]\n", nemokeys_iterator_key_safe(iter));
+				fprintf(stderr, "[%s]\n", nemonote_iterator_key(niter));
 
-				jobj = json_tokener_parse(nemokeys_iterator_value_safe(iter));
+				jiter = nemonote_json_iterator_create(nemonote_iterator_value(niter));
+				if (jiter != NULL) {
+					do {
+						fprintf(stderr, "  %s: %s\n",
+								nemonote_json_iterator_key(jiter),
+								nemonote_json_iterator_value(jiter));
+					} while (nemonote_json_iterator_next(jiter) != 0);
 
-				jiter = json_object_iter_begin(jobj);
-				jiter0 = json_object_iter_end(jobj);
-
-				while (json_object_iter_equal(&jiter, &jiter0) == 0) {
-					fprintf(stderr, "  %s: %s\n",
-							json_object_iter_peek_name(&jiter),
-							json_object_get_string(json_object_iter_peek_value(&jiter)));
-
-					json_object_iter_next(&jiter);
+					nemonote_json_iterator_destroy(jiter);
 				}
+			} while (nemonote_iterator_next(niter) != 0);
 
-				json_object_put(jobj);
-			} while (nemokeys_iterator_next(iter) != 0);
-
-			nemokeys_destroy_iterator(iter);
+			nemonote_destroy_iterator(niter);
 		}
 	} else if (strcmp(cmd, "clear") == 0) {
-		nemokeys_clear(keys);
+		nemonote_clear(note);
 	} else if (strcmp(cmd, "load") == 0) {
 		if (stream != NULL) {
 			token = nemotoken_create(stream, strlen(stream));
 			nemotoken_divide(token, ' ');
 			nemotoken_update(token);
 
-			jobj = json_object_new_object();
+			nobj = nemonote_object_ref(note, nemotoken_get_token(token, 0));
 
 			for (i = 1; i < nemotoken_get_token_count(token); i += 2) {
-				json_object_object_add(jobj,
+				nemonote_object_set(note, nobj,
 						nemotoken_get_token(token, i + 0),
-						json_object_new_string(nemotoken_get_token(token, i + 1)));
+						nemotoken_get_token(token, i + 1));
 			}
 
-			nemokeys_set(keys, nemotoken_get_token(token, 0), json_object_to_json_string(jobj));
-
-			json_object_put(jobj);
+			nemonote_object_unref(note, nobj);
 
 			nemotoken_destroy(token);
 		} else if (file != NULL) {
@@ -154,17 +142,15 @@ int main(int argc, char *argv[])
 				nemotoken_divide(token, ' ');
 				nemotoken_update(token);
 
-				jobj = json_object_new_object();
+				nobj = nemonote_object_ref(note, nemotoken_get_token(token, 0));
 
 				for (i = 1; i < nemotoken_get_token_count(token); i += 2) {
-					json_object_object_add(jobj,
+					nemonote_object_set(note, nobj,
 							nemotoken_get_token(token, i + 0),
-							json_object_new_string(nemotoken_get_token(token, i + 1)));
+							nemotoken_get_token(token, i + 1));
 				}
 
-				nemokeys_set(keys, nemotoken_get_token(token, 0), json_object_to_json_string(jobj));
-
-				json_object_put(jobj);
+				nemonote_object_unref(note, nobj);
 
 				nemotoken_destroy(token);
 			}
@@ -172,51 +158,35 @@ int main(int argc, char *argv[])
 			fclose(fp);
 		}
 	} else {
-		contents = nemokeys_get(keys, namespace);
-		if (contents != NULL) {
-			jobj = json_tokener_parse(contents);
-
-			free(contents);
-		} else {
-			jobj = json_object_new_object();
-		}
-
 		if (strcmp(cmd, "set") == 0) {
 			if (attr != NULL && value != NULL)
-				json_object_object_add(jobj, attr, json_object_new_string(value));
+				nemonote_set_attr(note, ns, attr, value);
 		} else if (strcmp(cmd, "get") == 0) {
 			if (attr != NULL) {
-				if (json_object_object_get_ex(jobj, attr, &robj) != 0)
-					fprintf(stderr, "%s: %s\n", attr, json_object_get_string(robj));
+				value = nemonote_get_attr(note, ns, attr);
+				if (value != NULL)
+					fprintf(stderr, "%s: %s\n", attr, value);
 			} else {
-				jiter = json_object_iter_begin(jobj);
-				jiter0 = json_object_iter_end(jobj);
+				jiter = nemonote_json_iterator_create(nemonote_get(note, ns));
+				if (jiter != NULL) {
+					do {
+						fprintf(stderr, "%s: %s\n",
+								nemonote_json_iterator_key(jiter),
+								nemonote_json_iterator_value(jiter));
+					} while (nemonote_json_iterator_next(jiter) != 0);
 
-				while (json_object_iter_equal(&jiter, &jiter0) == 0) {
-					fprintf(stderr, "%s: %s\n",
-							json_object_iter_peek_name(&jiter),
-							json_object_get_string(json_object_iter_peek_value(&jiter)));
-
-					json_object_iter_next(&jiter);
+					nemonote_json_iterator_destroy(jiter);
 				}
 			}
 		} else if (strcmp(cmd, "put") == 0) {
-			if (attr != NULL) {
-				json_object_object_del(jobj, attr);
-			} else {
-				needs_destroy = 1;
-			}
+			if (attr != NULL)
+				nemonote_put_attr(note, ns, attr);
+			else
+				nemonote_put(note, ns);
 		}
-
-		if (needs_destroy != 0 || json_object_object_length(jobj) == 0)
-			nemokeys_put(keys, namespace);
-		else
-			nemokeys_set(keys, namespace, json_object_to_json_string(jobj));
-
-		json_object_put(jobj);
 	}
 
-	nemokeys_destroy(keys);
+	nemonote_destroy(note);
 
 	return 0;
 }

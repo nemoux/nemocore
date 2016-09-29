@@ -37,6 +37,11 @@ void nemonote_destroy(struct nemonote *note)
 	free(note);
 }
 
+void nemonote_clear(struct nemonote *note)
+{
+	nemokeys_clear(note->keys);
+}
+
 static inline struct json_object *nemonote_get_json_object(struct nemonote *note, const char *ns)
 {
 	struct json_object *jobj;
@@ -296,7 +301,7 @@ struct noteobject *nemonote_iterator_object(struct noteiter *iter)
 	return obj;
 }
 
-struct jsoniter *nemonote_create_json_iterator(const char *contents)
+struct jsoniter *nemonote_json_iterator_create(const char *contents)
 {
 	struct jsoniter *iter;
 
@@ -324,7 +329,7 @@ err1:
 	return NULL;
 }
 
-void nemonote_destroy_json_iterator(struct jsoniter *iter)
+void nemonote_json_iterator_destroy(struct jsoniter *iter)
 {
 	if (iter->needs_free != 0)
 		json_object_put(iter->jobj);
