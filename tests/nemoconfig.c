@@ -94,6 +94,8 @@ int main(int argc, char *argv[])
 		contents = nemokeys_get_safe(keys, namespace);
 		if (contents != NULL) {
 			jobj = json_tokener_parse(contents);
+
+			free(contents);
 		} else {
 			jobj = json_object_new_object();
 		}

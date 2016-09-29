@@ -118,6 +118,7 @@ char *nemokeys_get(struct nemokeys *keys, const char *key, size_t *length)
 char *nemokeys_get_safe(struct nemokeys *keys, const char *key)
 {
 	char *value;
+	char *_value;
 	char *err = NULL;
 	size_t length;
 
@@ -128,7 +129,11 @@ char *nemokeys_get_safe(struct nemokeys *keys, const char *key)
 		return NULL;
 	}
 
-	return strndup(value, length);
+	_value = strndup(value, length);
+
+	free(value);
+
+	return _value;
 }
 
 int nemokeys_put(struct nemokeys *keys, const char *key)
