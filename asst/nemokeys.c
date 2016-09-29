@@ -100,25 +100,9 @@ int nemokeys_set(struct nemokeys *keys, const char *key, const char *value)
 	return 0;
 }
 
-char *nemokeys_get(struct nemokeys *keys, const char *key, size_t *length)
+char *nemokeys_get(struct nemokeys *keys, const char *key)
 {
 	char *value;
-	char *err = NULL;
-
-	value = leveldb_get(keys->db, keys->roptions, key, strlen(key), length, &err);
-	if (err != NULL) {
-		fprintf(stderr, "failed to get key/value: %s\n", err);
-		leveldb_free(err);
-		return NULL;
-	}
-
-	return value;
-}
-
-char *nemokeys_get_safe(struct nemokeys *keys, const char *key)
-{
-	char *value;
-	char *_value;
 	char *err = NULL;
 	size_t length;
 
@@ -129,11 +113,7 @@ char *nemokeys_get_safe(struct nemokeys *keys, const char *key)
 		return NULL;
 	}
 
-	_value = strndup(value, length);
-
-	free(value);
-
-	return _value;
+	return value;
 }
 
 int nemokeys_put(struct nemokeys *keys, const char *key)
@@ -216,7 +196,7 @@ const char *nemokeys_iterator_value(struct keysiter *iter, size_t *length)
 	return leveldb_iter_value(iter->iter, length);
 }
 
-const char *nemokeys_iterator_key_safe(struct keysiter *iter)
+char *nemokeys_iterator_key_safe(struct keysiter *iter)
 {
 	const char *key;
 	size_t length;
@@ -226,7 +206,7 @@ const char *nemokeys_iterator_key_safe(struct keysiter *iter)
 	return strndup(key, length);
 }
 
-const char *nemokeys_iterator_value_safe(struct keysiter *iter)
+char *nemokeys_iterator_value_safe(struct keysiter *iter)
 {
 	const char *value;
 	size_t length;

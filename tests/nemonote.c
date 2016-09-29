@@ -172,7 +172,7 @@ int main(int argc, char *argv[])
 			fclose(fp);
 		}
 	} else {
-		contents = nemokeys_get_safe(keys, namespace);
+		contents = nemokeys_get(keys, namespace);
 		if (contents != NULL) {
 			jobj = json_tokener_parse(contents);
 

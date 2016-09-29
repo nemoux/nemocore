@@ -1,3 +1,9 @@
+FIND_PACKAGE(PkgConfig REQUIRED)
+
+PKG_CHECK_MODULES(JSON REQUIRED json-c)
+INCLUDE_DIRECTORIES(${JSON_INCLUDE_DIRS})
+LINK_DIRECTORIES(${JSON_LIBRARY_DIRS})
+
 include_directories(
 	${CMAKE_SOURCE_DIR}/thirds
 	)
@@ -25,6 +31,7 @@ add_library(nemoasst SHARED
 	nemoscope.c
 	nemopool.c
 	nemokeys.c
+	nemonote.c
 	nemomisc.c
 	${CMAKE_SOURCE_DIR}/misc/xmlparser.c
 	${CMAKE_SOURCE_DIR}/misc/pixmanhelper.c
@@ -47,9 +54,10 @@ add_library(nemoasst SHARED
 
 TARGET_LINK_LIBRARIES(nemoasst
 	${NEMOUX_COMMON_LIBRARIES}
+	${JSON_LIBRARIES}
 	)
 
-set(NEMOASST_PKGCONFIG_REQUIRES "pixman-1 cairo expat")
+set(NEMOASST_PKGCONFIG_REQUIRES "pixman-1 cairo expat json-c")
 
 INSTALL(TARGETS nemoasst DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
 
@@ -73,6 +81,7 @@ set(HEADER_FILES
 	nemoscope.h
 	nemopool.h
 	nemokeys.h
+	nemonote.h
 	nemoconfig.h
 	nemohelper.h
 	)

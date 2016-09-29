@@ -99,13 +99,13 @@ TARGET_LINK_LIBRARIES(nemokeys
 
 INSTALL(TARGETS nemokeys DESTINATION bin)
 
-add_executable(nemoconfig
-	nemoconfig.c
+add_executable(nemonote
+	nemonote.c
 	)
 
-TARGET_LINK_LIBRARIES(nemoconfig
+TARGET_LINK_LIBRARIES(nemonote
 	nemoasst
 	${JSON_LIBRARIES}
 	)
 
-INSTALL(TARGETS nemoconfig DESTINATION bin)
+INSTALL(TARGETS nemonote DESTINATION bin)

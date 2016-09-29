@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
 	if (strcmp(cmd, "set") == 0) {
 		nemokeys_set(keys, key, value);
 	} else if (strcmp(cmd, "get") == 0) {
-		value = nemokeys_get_safe(keys, key);
+		value = nemokeys_get(keys, key);
 		if (value != NULL) {
 			fprintf(stderr, "%s: %s\n", key, value);
 			free(value);

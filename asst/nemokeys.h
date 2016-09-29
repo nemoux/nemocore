@@ -25,8 +25,7 @@ extern void nemokeys_destroy(struct nemokeys *keys);
 extern void nemokeys_clear(struct nemokeys *keys);
 
 extern int nemokeys_set(struct nemokeys *keys, const char *key, const char *value);
-extern char *nemokeys_get(struct nemokeys *keys, const char *key, size_t *length);
-extern char *nemokeys_get_safe(struct nemokeys *keys, const char *key);
+extern char *nemokeys_get(struct nemokeys *keys, const char *key);
 extern int nemokeys_put(struct nemokeys *keys, const char *key);
 
 extern struct keysiter *nemokeys_create_iterator(struct nemokeys *keys);
@@ -41,8 +40,8 @@ extern int nemokeys_iterator_prev(struct keysiter *iter);
 extern const char *nemokeys_iterator_key(struct keysiter *iter, size_t *length);
 extern const char *nemokeys_iterator_value(struct keysiter *iter, size_t *length);
 
-extern const char *nemokeys_iterator_key_safe(struct keysiter *iter);
-extern const char *nemokeys_iterator_value_safe(struct keysiter *iter);
+extern char *nemokeys_iterator_key_safe(struct keysiter *iter);
+extern char *nemokeys_iterator_value_safe(struct keysiter *iter);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
