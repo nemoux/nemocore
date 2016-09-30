@@ -230,11 +230,11 @@ int nemoenvs_respawn_app(struct nemoenvs *envs, pid_t pid)
 		if (app->pid == pid) {
 			nemolog_warning("ENVS", "respawn app(%s) pid(%d)!\n", app->id, pid);
 
-			one = nemoitem_search_attr(envs->configs, NULL, "id", app->id);
+			one = nemoitem_search_attr(envs->apps, NULL, "id", app->id);
 			if (one != NULL) {
-				if (nemoitem_one_has_path(one, "/nemoshell/background") != 0) {
+				if (nemoitem_one_has_path_prefix(one, "/nemoshell/background") != 0) {
 					nemoenvs_execute_background(envs, one);
-				} else if (nemoitem_one_has_path(one, "/nemoshell/daemon") != 0) {
+				} else if (nemoitem_one_has_path_prefix(one, "/nemoshell/daemon") != 0) {
 					nemoenvs_execute_daemon(envs, one);
 				}
 			}
@@ -252,8 +252,8 @@ void nemoenvs_execute_backgrounds(struct nemoenvs *envs)
 {
 	struct itemone *one;
 
-	nemoitem_for_each(one, envs->configs) {
-		if (nemoitem_one_has_path(one, "/nemoshell/background") != 0) {
+	nemoitem_for_each(one, envs->apps) {
+		if (nemoitem_one_has_path_prefix(one, "/nemoshell/background") != 0) {
 			nemoenvs_execute_background(envs, one);
 		}
 	}
@@ -263,8 +263,8 @@ void nemoenvs_execute_daemons(struct nemoenvs *envs)
 {
 	struct itemone *one;
 
-	nemoitem_for_each(one, envs->configs) {
-		if (nemoitem_one_has_path(one, "/nemoshell/daemon") != 0) {
+	nemoitem_for_each(one, envs->apps) {
+		if (nemoitem_one_has_path_prefix(one, "/nemoshell/daemon") != 0) {
 			nemoenvs_execute_daemon(envs, one);
 		}
 	}
@@ -274,8 +274,8 @@ void nemoenvs_execute_screensavers(struct nemoenvs *envs)
 {
 	struct itemone *one;
 
-	nemoitem_for_each(one, envs->configs) {
-		if (nemoitem_one_has_path(one, "/nemoshell/screensaver") != 0) {
+	nemoitem_for_each(one, envs->apps) {
+		if (nemoitem_one_has_path_prefix(one, "/nemoshell/screensaver") != 0) {
 			nemoenvs_execute_screensaver(envs, one);
 		}
 	}

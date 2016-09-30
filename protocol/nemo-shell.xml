@@ -168,19 +168,13 @@
 		<request name="miss">
 		</request>
 
-		<request name="focus">
+		<request name="focus_to">
 			<arg name="id" type="uint"/>
 		</request>
 
 		<request name="focus_on">
 			<arg name="x" type="fixed"/>
 			<arg name="y" type="fixed"/>
-		</request>
-
-		<request name="execute">
-			<arg name="type" type="string"/>
-			<arg name="name" type="string"/>
-			<arg name="cmds" type="string"/>
 		</request>
 
 		<request name="update">

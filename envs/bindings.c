@@ -55,8 +55,8 @@ void nemoenvs_handle_terminal_key(struct nemocompz *compz, struct nemokeyboard *
 {
 	if (state == WL_KEYBOARD_KEY_STATE_PRESSED) {
 		struct nemoenvs *envs = (struct nemoenvs *)data;
-		const char *_path = nemoitem_get_sattr(envs->configs, "/nemoshell/terminal", "path", NULL);
-		const char *_args = nemoitem_get_sattr(envs->configs, "/nemoshell/terminal", "args", NULL);
+		const char *_path = envs->terminal.path;
+		const char *_args = envs->terminal.args;
 		struct nemotoken *args;
 
 		args = nemotoken_create(_path, strlen(_path));

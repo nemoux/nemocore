@@ -353,15 +353,12 @@ static void nemo_surface_miss(struct wl_client *client, struct wl_resource *reso
 		wl_signal_emit(&bin->ungrab_signal, bin);
 }
 
-static void nemo_surface_focus(struct wl_client *client, struct wl_resource *resource, uint32_t id)
+static void nemo_surface_focus_to(struct wl_client *client, struct wl_resource *resource, uint32_t id)
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 	struct nemoshell *shell = bin->shell;
 
 	nemoview_set_focus(bin->view, nemocompz_get_view_by_id(shell->compz, id));
-
-	if (shell->transform_bin != NULL)
-		shell->transform_bin(shell->userdata, bin);
 }
 
 static void nemo_surface_focus_on(struct wl_client *client, struct wl_resource *resource, wl_fixed_t x, wl_fixed_t y)
@@ -378,18 +375,6 @@ static void nemo_surface_focus_on(struct wl_client *client, struct wl_resource *
 
 	nemoview_set_focus(bin->view,
 			nemocompz_pick_view(shell->compz, tx, ty, &sx, &sy, NEMOVIEW_PICK_STATE | NEMOVIEW_CANVAS_STATE | NEMOVIEW_KEYPAD_STATE));
-
-	if (shell->transform_bin != NULL)
-		shell->transform_bin(shell->userdata, bin);
-}
-
-static void nemo_surface_execute(struct wl_client *client, struct wl_resource *resource, const char *type, const char *name, const char *cmds)
-{
-	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
-	struct nemoshell *shell = bin->shell;
-
-	if (shell->execute_command != NULL)
-		shell->execute_command(shell->userdata, bin, type, name, cmds);
 }
 
 static void nemo_surface_update(struct wl_client *client, struct wl_resource *resource, uint32_t serial)
@@ -427,9 +412,8 @@ static const struct nemo_surface_interface nemo_surface_implementation = {
 	nemo_surface_move,
 	nemo_surface_pick,
 	nemo_surface_miss,
-	nemo_surface_focus,
+	nemo_surface_focus_to,
 	nemo_surface_focus_on,
-	nemo_surface_execute,
 	nemo_surface_update
 };
 

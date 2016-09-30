@@ -157,9 +157,6 @@ static void move_shellgrab_dispatch_effect_done(struct nemoeffect *base)
 		}
 	}
 
-	if (shell->transform_bin != NULL)
-		shell->transform_bin(shell->userdata, bin);
-
 	vieweffect_destroy(effect);
 }
 
@@ -202,11 +199,6 @@ static void move_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		vieweffect_dispatch(bin->shell->compz, effect);
 
 		needs_notify = 0;
-	} else if (bin != NULL) {
-		struct nemoshell *shell = bin->shell;
-
-		if (shell->transform_bin != NULL)
-			shell->transform_bin(shell->userdata, bin);
 	}
 
 	nemoshell_end_touchpoint_shellgrab(grab);

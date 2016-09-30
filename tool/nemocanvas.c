@@ -539,9 +539,9 @@ void nemocanvas_miss(struct nemocanvas *canvas)
 	nemo_surface_miss(canvas->nemo_surface);
 }
 
-void nemocanvas_focus(struct nemocanvas *canvas, uint32_t id)
+void nemocanvas_focus_to(struct nemocanvas *canvas, uint32_t id)
 {
-	nemo_surface_focus(canvas->nemo_surface, id);
+	nemo_surface_focus_to(canvas->nemo_surface, id);
 }
 
 void nemocanvas_focus_on(struct nemocanvas *canvas, double x, double y)
@@ -549,11 +549,6 @@ void nemocanvas_focus_on(struct nemocanvas *canvas, double x, double y)
 	nemo_surface_focus_on(canvas->nemo_surface,
 			wl_fixed_from_double(x),
 			wl_fixed_from_double(y));
-}
-
-void nemocanvas_execute(struct nemocanvas *canvas, const char *type, const char *name, const char *cmds)
-{
-	nemo_surface_execute(canvas->nemo_surface, type, name, cmds);
 }
 
 void nemocanvas_update(struct nemocanvas *canvas, uint32_t serial)

@@ -148,9 +148,6 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 			}
 		}
 
-		if (shell->transform_bin != NULL)
-			shell->transform_bin(shell->userdata, bin);
-
 		nemoview_transform_notify(bin->view);
 
 		touchpoint_update_grab(tp1);
@@ -458,9 +455,6 @@ static void pick_shellgrab_singletap_up(struct touchpoint_grab *base, uint32_t t
 				bin->scale.height = height;
 			}
 		}
-
-		if (shell->transform_bin != NULL)
-			shell->transform_bin(shell->userdata, bin);
 
 		nemoview_transform_notify(bin->view);
 	}
@@ -783,9 +777,6 @@ static void pick_shellgrab_pointer_button(struct nemopointer_grab *base, uint32_
 					bin->scale.height = height;
 				}
 			}
-
-			if (shell->transform_bin != NULL)
-				shell->transform_bin(shell->userdata, bin);
 
 			nemoview_transform_notify(bin->view);
 		}

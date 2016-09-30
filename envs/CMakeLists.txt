@@ -24,8 +24,8 @@ add_library(nemoenvs SHARED
 	nemoenvs.c
 	nemoapps.c
 	nemoxapp.c
-	messages.c
 	bindings.c
+	configs.c
 	showhelper.c
 	)
 
