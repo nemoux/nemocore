@@ -639,3 +639,11 @@ void nemoshow_view_redraw(struct nemoshow *show)
 
 	nemotale_composite_egl_full(scon->tale);
 }
+
+uint32_t nemoshow_view_get_id(struct nemoshow *show)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemocanvas *canvas = scon->canvas;
+
+	return nemocanvas_get_id(canvas);
+}

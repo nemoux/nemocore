@@ -623,3 +623,11 @@ void nemoshow_view_redraw(struct nemoshow *show)
 	nemoactor_damage_dirty(actor);
 	nemoactor_damage_below(actor);
 }
+
+uint32_t nemoshow_view_get_id(struct nemoshow *show)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemoactor *actor = scon->actor;
+
+	return actor->view->id;
+}

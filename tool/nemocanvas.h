@@ -51,6 +51,8 @@ struct nemocanvas {
 
 	struct nemocanvas *parent;
 
+	uint32_t id;
+
 	int width, height;
 	pixman_region32_t damage;
 
@@ -168,6 +170,11 @@ static inline struct wl_surface *nemocanvas_get_surface(struct nemocanvas *canva
 static inline char *nemocanvas_get_data(struct nemocanvas *canvas)
 {
 	return canvas->buffer == NULL ? NULL : canvas->buffer->shm_data;
+}
+
+static inline uint32_t nemocanvas_get_id(struct nemocanvas *canvas)
+{
+	return canvas->id;
 }
 
 static inline int nemocanvas_get_width(struct nemocanvas *canvas)

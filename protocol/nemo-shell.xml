@@ -182,6 +182,7 @@
 		</request>
 
 		<event name="configure">
+			<arg name="id" type="uint"/>
 			<arg name="width" type="int"/>
 			<arg name="height" type="int"/>
 			<arg name="serial" type="uint"/>

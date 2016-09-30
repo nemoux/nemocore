@@ -82,6 +82,8 @@ extern void nemoshow_view_focus_on(struct nemoshow *show, double x, double y);
 extern void nemoshow_view_resize(struct nemoshow *show, int32_t width, int32_t height);
 extern void nemoshow_view_redraw(struct nemoshow *show);
 
+extern uint32_t nemoshow_view_get_id(struct nemoshow *show);
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

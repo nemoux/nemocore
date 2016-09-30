@@ -27,9 +27,11 @@
 #include <pixmanhelper.h>
 #include <nemomisc.h>
 
-static void nemo_surface_handle_configure(void *data, struct nemo_surface *surface, int32_t width, int32_t height, uint32_t serial)
+static void nemo_surface_handle_configure(void *data, struct nemo_surface *surface, uint32_t id, int32_t width, int32_t height, uint32_t serial)
 {
 	struct nemocanvas *canvas = (struct nemocanvas *)data;
+
+	canvas->id = id;
 
 	nemocanvas_update(canvas, serial);
 

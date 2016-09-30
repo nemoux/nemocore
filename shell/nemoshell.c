@@ -28,7 +28,7 @@ static void nemo_send_configure(struct nemocanvas *canvas, int32_t width, int32_
 	struct shellbin *bin = nemoshell_get_bin(canvas);
 	uint32_t serial = ++bin->next_serial;
 
-	nemo_surface_send_configure(bin->resource, width, height, serial);
+	nemo_surface_send_configure(bin->resource, bin->view->id, width, height, serial);
 }
 
 static void nemo_send_transform(struct nemocanvas *canvas, int visible, int32_t x, int32_t y, int32_t width, int32_t height)
