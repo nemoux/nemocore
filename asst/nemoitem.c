@@ -359,55 +359,6 @@ struct itemone *nemoitem_one_clone(struct itemone *one)
 	return done;
 }
 
-int nemoitem_one_load(struct itemone *one, const char *buffer, char delimiter, char fence)
-{
-	struct nemotoken *token;
-	int count;
-	int i;
-
-	token = nemotoken_create(buffer, strlen(buffer));
-	if (token == NULL)
-		return -1;
-	nemotoken_fence(token, fence);
-	nemotoken_divide(token, delimiter);
-	nemotoken_update(token);
-
-	nemoitem_one_set_path(one, nemotoken_get_token(token, 0));
-
-	count = (nemotoken_get_token_count(token) - 1) / 2;
-
-	for (i = 0; i < count; i++) {
-		nemoitem_one_set_attr(one,
-				nemotoken_get_token(token, 1 + i * 2 + 0),
-				nemotoken_get_token(token, 1 + i * 2 + 1));
-	}
-
-	return 0;
-}
-
-int nemoitem_one_save(struct itemone *one, char *buffer, char delimiter, char fence)
-{
-	struct itemattr *attr;
-
-	strcpy(buffer, one->path);
-
-	nemoitem_attr_for_each(attr, one) {
-		strncat(buffer, &delimiter, 1);
-		strcat(buffer, attr->name);
-		strncat(buffer, &delimiter, 1);
-
-		if (fence == '\0') {
-			strcat(buffer, attr->value);
-		} else {
-			strncat(buffer, &fence, 1);
-			strcat(buffer, attr->value);
-			strncat(buffer, &fence, 1);
-		}
-	}
-
-	return 0;
-}
-
 void nemoitem_one_set_path(struct itemone *one, const char *path)
 {
 	if (one->path != NULL)
@@ -524,52 +475,4 @@ int nemoitem_one_copy_attr(struct itemone *done, struct itemone *sone)
 	}
 
 	return 1;
-}
-
-int nemoitem_load(struct nemoitem *item, const char *filepath, char delimiter, char fence)
-{
-	struct itemone *one;
-	FILE *fp;
-	char buffer[1024];
-
-	fp = fopen(filepath, "r");
-	if (fp == NULL)
-		return -1;
-
-	while (fgets(buffer, sizeof(buffer), fp) != NULL) {
-		if (buffer[0] == '/' && buffer[1] == '/')
-			continue;
-		if (buffer[0] != '/')
-			continue;
-
-		one = nemoitem_one_create();
-		nemoitem_one_load(one, buffer, delimiter, fence);
-		nemoitem_attach_one(item, one);
-	}
-
-	fclose(fp);
-
-	return 0;
-}
-
-int nemoitem_save(struct nemoitem *item, const char *filepath, char delimiter, char fence)
-{
-	struct itemone *one;
-	FILE *fp;
-	char buffer[1024];
-
-	fp = fopen(filepath, "w");
-	if (fp == NULL)
-		return -1;
-
-	nemoitem_for_each(one, item) {
-		nemoitem_one_save(one, buffer, delimiter, fence);
-
-		fputs(buffer, fp);
-		fputc('\n', fp);
-	}
-
-	fclose(fp);
-
-	return 0;
 }
