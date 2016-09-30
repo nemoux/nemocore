@@ -537,6 +537,14 @@ void nemoshow_view_set_type(struct nemoshow *show, const char *type)
 	nemocanvas_set_type(canvas, type);
 }
 
+void nemoshow_view_set_uuid(struct nemoshow *show, const char *uuid)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemocanvas *canvas = scon->canvas;
+
+	nemocanvas_set_uuid(canvas, uuid);
+}
+
 int nemoshow_view_move(struct nemoshow *show, uint32_t serial)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
@@ -600,12 +608,12 @@ void nemoshow_view_miss(struct nemoshow *show)
 	nemocanvas_miss(canvas);
 }
 
-void nemoshow_view_focus_to(struct nemoshow *show, uint32_t id)
+void nemoshow_view_focus_to(struct nemoshow *show, const char *uuid)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemocanvas *canvas = scon->canvas;
 
-	nemocanvas_focus_to(canvas, id);
+	nemocanvas_focus_to(canvas, uuid);
 }
 
 void nemoshow_view_focus_on(struct nemoshow *show, double x, double y)
@@ -638,12 +646,4 @@ void nemoshow_view_redraw(struct nemoshow *show)
 	nemoshow_render_one(show);
 
 	nemotale_composite_egl_full(scon->tale);
-}
-
-uint32_t nemoshow_view_get_id(struct nemoshow *show)
-{
-	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
-	struct nemocanvas *canvas = scon->canvas;
-
-	return nemocanvas_get_id(canvas);
 }

@@ -27,11 +27,9 @@
 #include <pixmanhelper.h>
 #include <nemomisc.h>
 
-static void nemo_surface_handle_configure(void *data, struct nemo_surface *surface, uint32_t id, int32_t width, int32_t height, uint32_t serial)
+static void nemo_surface_handle_configure(void *data, struct nemo_surface *surface, int32_t width, int32_t height, uint32_t serial)
 {
 	struct nemocanvas *canvas = (struct nemocanvas *)data;
-
-	canvas->id = id;
 
 	nemocanvas_update(canvas, serial);
 
@@ -401,6 +399,11 @@ void nemocanvas_set_type(struct nemocanvas *canvas, const char *type)
 	nemo_surface_set_type(canvas->nemo_surface, type);
 }
 
+void nemocanvas_set_uuid(struct nemocanvas *canvas, const char *uuid)
+{
+	nemo_surface_set_uuid(canvas->nemo_surface, uuid);
+}
+
 void nemocanvas_set_state(struct nemocanvas *canvas, const char *state)
 {
 	nemo_surface_set_state(canvas->nemo_surface, state);
@@ -541,9 +544,9 @@ void nemocanvas_miss(struct nemocanvas *canvas)
 	nemo_surface_miss(canvas->nemo_surface);
 }
 
-void nemocanvas_focus_to(struct nemocanvas *canvas, uint32_t id)
+void nemocanvas_focus_to(struct nemocanvas *canvas, const char *uuid)
 {
-	nemo_surface_focus_to(canvas->nemo_surface, id);
+	nemo_surface_focus_to(canvas->nemo_surface, uuid);
 }
 
 void nemocanvas_focus_on(struct nemocanvas *canvas, double x, double y)

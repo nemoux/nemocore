@@ -1207,8 +1207,6 @@ struct nemocanvas *nemocanvas_create(struct wl_client *client, struct wl_resourc
 	canvas->compz = compz;
 	canvas->resource = NULL;
 
-	canvas->id = ++compz->canvas_ids;
-
 	canvas->base.get_viewport_transform = nemocanvas_get_viewport_transform;
 	canvas->base.get_buffer_scale = nemocanvas_get_buffer_scale;
 	canvas->base.transform_to_buffer_point = nemocanvas_transform_to_buffer_point;

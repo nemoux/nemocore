@@ -77,16 +77,15 @@ extern void nemoshow_view_put_scope(struct nemoshow *show);
 extern void nemoshow_view_set_framerate(struct nemoshow *show, uint32_t framerate);
 extern void nemoshow_view_set_tag(struct nemoshow *show, uint32_t tag);
 extern void nemoshow_view_set_type(struct nemoshow *show, const char *type);
+extern void nemoshow_view_set_uuid(struct nemoshow *show, const char *uuid);
 extern int nemoshow_view_move(struct nemoshow *show, uint32_t serial);
 extern int nemoshow_view_pick(struct nemoshow *show, uint32_t serial0, uint32_t serial1, uint32_t type);
 extern int nemoshow_view_pick_distant(struct nemoshow *show, void *event, uint32_t type);
 extern void nemoshow_view_miss(struct nemoshow *show);
-extern void nemoshow_view_focus_to(struct nemoshow *show, uint32_t id);
+extern void nemoshow_view_focus_to(struct nemoshow *show, const char *uuid);
 extern void nemoshow_view_focus_on(struct nemoshow *show, double x, double y);
 extern void nemoshow_view_resize(struct nemoshow *show, int32_t width, int32_t height);
 extern void nemoshow_view_redraw(struct nemoshow *show);
-
-extern uint32_t nemoshow_view_get_id(struct nemoshow *show);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

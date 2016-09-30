@@ -6,6 +6,7 @@
 #include <errno.h>
 
 #include <assert.h>
+#include <uuid/uuid.h>
 #include <wayland-server.h>
 
 #include <view.h>
@@ -23,6 +24,7 @@
 struct nemoview *nemoview_create(struct nemocompz *compz, struct nemocontent *content)
 {
 	struct nemoview *view;
+	uuid_t uuid;
 
 	view = (struct nemoview *)malloc(sizeof(struct nemoview));
 	if (view == NULL)
@@ -38,7 +40,9 @@ struct nemoview *nemoview_create(struct nemocompz *compz, struct nemocontent *co
 	view->canvas = NULL;
 	view->actor = NULL;
 
-	view->id = ++compz->view_ids;
+	uuid_generate_time_safe(uuid);
+	uuid_unparse_lower(uuid, view->uuid);
+	uuid_clear(uuid);
 
 	wl_signal_init(&view->destroy_signal);
 
@@ -480,6 +484,11 @@ void nemoview_set_type(struct nemoview *view, const char *type)
 		free(view->type);
 
 	view->type = strdup(type);
+}
+
+void nemoview_set_uuid(struct nemoview *view, const char *uuid)
+{
+	strcpy(view->uuid, uuid);
 }
 
 static void nemoview_handle_transform_parent_destroy(struct wl_listener *listener, void *data)

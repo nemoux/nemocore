@@ -41,6 +41,10 @@
 			<arg name="type" type="string"/>
 		</request>
 
+		<request name="set_uuid">
+			<arg name="uuid" type="string"/>
+		</request>
+
 		<request name="set_state">
 			<arg name="state" type="string"/>
 		</request>
@@ -169,7 +173,7 @@
 		</request>
 
 		<request name="focus_to">
-			<arg name="id" type="uint"/>
+			<arg name="uuid" type="string"/>
 		</request>
 
 		<request name="focus_on">
@@ -182,7 +186,6 @@
 		</request>
 
 		<event name="configure">
-			<arg name="id" type="uint"/>
 			<arg name="width" type="int"/>
 			<arg name="height" type="int"/>
 			<arg name="serial" type="uint"/>

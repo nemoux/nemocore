@@ -556,6 +556,12 @@ void nemoshow_view_set_type(struct nemoshow *show, const char *type)
 	nemoview_set_type(actor->view, type);
 }
 
+void nemoshow_view_set_uuid(struct nemoshow *show, const char *uuid)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	struct nemoactor *actor = scon->actor;
+}
+
 int nemoshow_view_move(struct nemoshow *show, uint64_t device)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
@@ -587,7 +593,7 @@ void nemoshow_view_miss(struct nemoshow *show)
 {
 }
 
-void nemoshow_view_focus(struct nemoshow *show, uint32_t id)
+void nemoshow_view_focus_to(struct nemoshow *show, const char *uuid)
 {
 }
 
@@ -622,12 +628,4 @@ void nemoshow_view_redraw(struct nemoshow *show)
 
 	nemoactor_damage_dirty(actor);
 	nemoactor_damage_below(actor);
-}
-
-uint32_t nemoshow_view_get_id(struct nemoshow *show)
-{
-	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
-	struct nemoactor *actor = scon->actor;
-
-	return actor->view->id;
 }

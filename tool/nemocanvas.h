@@ -51,8 +51,6 @@ struct nemocanvas {
 
 	struct nemocanvas *parent;
 
-	uint32_t id;
-
 	int width, height;
 	pixman_region32_t damage;
 
@@ -93,6 +91,7 @@ extern pixman_image_t *nemocanvas_get_pixman_image(struct nemocanvas *canvas);
 
 extern void nemocanvas_set_tag(struct nemocanvas *canvas, uint32_t tag);
 extern void nemocanvas_set_type(struct nemocanvas *canvas, const char *type);
+extern void nemocanvas_set_uuid(struct nemocanvas *canvas, const char *uuid);
 extern void nemocanvas_set_state(struct nemocanvas *canvas, const char *state);
 extern void nemocanvas_put_state(struct nemocanvas *canvas, const char *state);
 extern void nemocanvas_set_size(struct nemocanvas *canvas, int32_t width, int32_t height);
@@ -117,7 +116,7 @@ extern void nemocanvas_put_fullscreen(struct nemocanvas *canvas);
 extern void nemocanvas_move(struct nemocanvas *canvas, uint32_t serial);
 extern void nemocanvas_pick(struct nemocanvas *canvas, uint32_t serial0, uint32_t serial1, uint32_t type);
 extern void nemocanvas_miss(struct nemocanvas *canvas);
-extern void nemocanvas_focus_to(struct nemocanvas *canvas, uint32_t id);
+extern void nemocanvas_focus_to(struct nemocanvas *canvas, const char *uuid);
 extern void nemocanvas_focus_on(struct nemocanvas *canvas, double x, double y);
 extern void nemocanvas_update(struct nemocanvas *canvas, uint32_t serial);
 
@@ -170,11 +169,6 @@ static inline struct wl_surface *nemocanvas_get_surface(struct nemocanvas *canva
 static inline char *nemocanvas_get_data(struct nemocanvas *canvas)
 {
 	return canvas->buffer == NULL ? NULL : canvas->buffer->shm_data;
-}
-
-static inline uint32_t nemocanvas_get_id(struct nemocanvas *canvas)
-{
-	return canvas->id;
 }
 
 static inline int nemocanvas_get_width(struct nemocanvas *canvas)

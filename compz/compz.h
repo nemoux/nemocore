@@ -108,9 +108,6 @@ struct nemocompz {
 	uint32_t screen_idpool;
 	uint32_t render_idpool;
 
-	uint32_t canvas_ids;
-	uint32_t view_ids;
-
 	uint32_t keyboard_ids;
 	uint32_t pointer_ids;
 
@@ -200,8 +197,7 @@ extern int nemocompz_is_running(struct nemocompz *compz);
 extern int nemocompz_contain_view(struct nemocompz *compz, struct nemoview *view);
 extern int nemocompz_contain_view_near(struct nemocompz *compz, struct nemoview *view, float dx, float dy);
 
-extern struct nemocanvas *nemocompz_get_canvas_by_id(struct nemocompz *compz, uint32_t id);
-extern struct nemoview *nemocompz_get_view_by_id(struct nemocompz *compz, uint32_t id);
+extern struct nemoview *nemocompz_get_view_by_uuid(struct nemocompz *compz, const char *uuid);
 extern struct nemoview *nemocompz_get_view_by_client(struct nemocompz *compz, struct wl_client *client);
 
 #ifdef __cplusplus

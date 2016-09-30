@@ -28,7 +28,7 @@ static void nemo_send_configure(struct nemocanvas *canvas, int32_t width, int32_
 	struct shellbin *bin = nemoshell_get_bin(canvas);
 	uint32_t serial = ++bin->next_serial;
 
-	nemo_surface_send_configure(bin->resource, bin->view->id, width, height, serial);
+	nemo_surface_send_configure(bin->resource, width, height, serial);
 }
 
 static void nemo_send_transform(struct nemocanvas *canvas, int visible, int32_t x, int32_t y, int32_t width, int32_t height)
@@ -84,6 +84,13 @@ static void nemo_surface_set_type(struct wl_client *client, struct wl_resource *
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 
 	nemoview_set_type(bin->view, type);
+}
+
+static void nemo_surface_set_uuid(struct wl_client *client, struct wl_resource *resource, const char *uuid)
+{
+	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
+
+	nemoview_set_uuid(bin->view, uuid);
 }
 
 static void nemo_surface_set_state(struct wl_client *client, struct wl_resource *resource, const char *state)
@@ -353,12 +360,12 @@ static void nemo_surface_miss(struct wl_client *client, struct wl_resource *reso
 		wl_signal_emit(&bin->ungrab_signal, bin);
 }
 
-static void nemo_surface_focus_to(struct wl_client *client, struct wl_resource *resource, uint32_t id)
+static void nemo_surface_focus_to(struct wl_client *client, struct wl_resource *resource, const char *uuid)
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 	struct nemoshell *shell = bin->shell;
 
-	nemoview_set_focus(bin->view, nemocompz_get_view_by_id(shell->compz, id));
+	nemoview_set_focus(bin->view, nemocompz_get_view_by_uuid(shell->compz, uuid));
 }
 
 static void nemo_surface_focus_on(struct wl_client *client, struct wl_resource *resource, wl_fixed_t x, wl_fixed_t y)
@@ -388,6 +395,7 @@ static const struct nemo_surface_interface nemo_surface_implementation = {
 	nemo_surface_destroy,
 	nemo_surface_set_tag,
 	nemo_surface_set_type,
+	nemo_surface_set_uuid,
 	nemo_surface_set_state,
 	nemo_surface_put_state,
 	nemo_surface_set_size,
