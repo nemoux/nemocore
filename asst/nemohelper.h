@@ -109,6 +109,14 @@ extern const char *string_find_number(const char *str, int offset, int length);
 extern int string_is_alphabet(const char *str, int offset, int length);
 extern int string_is_number(const char *str, int offset, int length);
 
+extern int namespace_has_prefix(const char *ns, const char *ps);
+extern int namespace_has_prefix_format(const char *ns, const char *fmt, ...);
+extern int namespace_has_regex(const char *ns, const char *expr);
+extern int namespace_has_regex_format(const char *ns, const char *fmt, ...);
+
+extern int namespace_get_count(const char *ns);
+extern int namespace_get_path(const char *ns, char *ps, int index);
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif
