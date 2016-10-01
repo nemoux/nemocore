@@ -18,7 +18,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -std=c++11")
 set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 
 add_library(nemoapps SHARED
-	nemoenvs.c
 	nemoglib.c
 	nemocurl.c
 	nemohttp.c
@@ -38,7 +37,6 @@ set(NEMOAPPS_PKGCONFIG_REQUIRES "nemoasst nemotool nemotale nemoshow")
 INSTALL(TARGETS nemoapps DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
 
 set(HEADER_FILES
-	nemoenvs.h
 	nemoglib.h
 	nemocurl.h
 	nemohttp.h

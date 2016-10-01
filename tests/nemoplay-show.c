@@ -13,15 +13,12 @@
 #include <nemoplay.h>
 #include <nemoshow.h>
 #include <showhelper.h>
-#include <nemoenvs.h>
 #include <nemohelper.h>
 #include <nemolog.h>
 #include <nemomisc.h>
 
 struct playcontext {
 	struct nemotool *tool;
-
-	struct nemoenvs *envs;
 
 	struct nemoshow *show;
 	struct showone *scene;
@@ -32,8 +29,6 @@ struct playcontext {
 	struct playshader *shader;
 
 	struct nemotimer *timer;
-
-	char *screenid;
 
 	int32_t width;
 	int32_t height;
@@ -46,22 +41,6 @@ static void nemoplay_dispatch_show_transform(struct nemoshow *show, int32_t visi
 static void nemoplay_dispatch_show_fullscreen(struct nemoshow *show, const char *id, int32_t x, int32_t y, int32_t width, int32_t height)
 {
 	struct playcontext *context = (struct playcontext *)nemoshow_get_userdata(show);
-
-	if (id != NULL) {
-		nemoenvs_send(context->envs, "%s /nemoshell set /nemolink/control id %s src %s type video",
-				nemoenvs_get_name(context->envs),
-				id,
-				nemoenvs_get_name(context->envs));
-
-		context->screenid = strdup(id);
-	} else if (context->screenid != NULL) {
-		nemoenvs_send(context->envs, "%s /nemoshell put /nemolink/control id %s",
-				nemoenvs_get_name(context->envs),
-				context->screenid);
-
-		free(context->screenid);
-		context->screenid = NULL;
-	}
 
 	if (id != NULL) {
 		double ratio = ((double)width / nemoplay_get_video_aspectratio(context->play)) / (double)height;
@@ -289,7 +268,6 @@ int main(int argc, char *argv[])
 
 	struct playcontext *context;
 	struct nemotool *tool;
-	struct nemoenvs *envs;
 	struct nemoshow *show;
 	struct showone *scene;
 	struct showone *canvas;
@@ -331,8 +309,6 @@ int main(int argc, char *argv[])
 		return -1;
 	memset(context, 0, sizeof(struct playcontext));
 
-	context->screenid = NULL;
-
 	context->width = width;
 	context->height = height;
 
@@ -353,15 +329,9 @@ int main(int argc, char *argv[])
 		goto err3;
 	nemotool_connect_wayland(tool, NULL);
 
-	context->envs = envs = nemoenvs_create(tool);
-	if (envs == NULL)
-		goto err4;
-	nemoenvs_set_name(envs, "/nemoplay/%d", getpid());
-	nemoenvs_connect(envs, "/nemoshell", "127.0.0.1", 30000);
-
 	context->show = show = nemoshow_create_view(tool, width, height);
 	if (show == NULL)
-		goto err5;
+		goto err4;
 	nemoshow_set_dispatch_transform(show, nemoplay_dispatch_show_transform);
 	nemoshow_set_dispatch_fullscreen(show, nemoplay_dispatch_show_fullscreen);
 	nemoshow_set_userdata(show, context);
@@ -409,9 +379,6 @@ int main(int argc, char *argv[])
 	nemotimer_destroy(timer);
 
 	nemoshow_destroy_view(show);
-
-err5:
-	nemoenvs_destroy(envs);
 
 err4:
 	nemotool_disconnect_wayland(tool);
