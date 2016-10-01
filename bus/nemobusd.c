@@ -12,22 +12,21 @@
 
 #include <getopt.h>
 
-#include <oshelper.h>
+#include <nemobus.h>
+#include <nemohelper.h>
 #include <nemomisc.h>
 
-struct logtask;
+struct bustask;
 
-typedef void (*nemolog_dispatch_task)(int efd, struct logtask *task);
+typedef void (*nemobus_dispatch_task)(int efd, struct bustask *task);
 
-struct logtask {
+struct bustask {
 	int fd;
 
-	nemolog_dispatch_task dispatch;
+	nemobus_dispatch_task dispatch;
 };
 
-static FILE *nemologfile = NULL;
-
-static void nemolog_dispatch_message_task(int efd, struct logtask *task)
+static void nemobus_dispatch_message_task(int efd, struct bustask *task)
 {
 	struct epoll_event ep;
 	char msg[4096];
@@ -55,19 +54,14 @@ static void nemolog_dispatch_message_task(int efd, struct logtask *task)
 	} else {
 		msg[len] = '\0';
 
-		if (nemologfile == NULL) {
-			fprintf(stdout, "%s", msg);
-		} else {
-			fprintf(nemologfile, "%s", msg);
-			fflush(nemologfile);
-		}
+		fprintf(stderr, "%s\n", msg);
 	}
 }
 
-static void nemolog_dispatch_listen_task(int efd, struct logtask *task)
+static void nemobus_dispatch_listen_task(int efd, struct bustask *task)
 {
 	struct sockaddr_un addr;
-	struct logtask *ctask;
+	struct bustask *ctask;
 	struct epoll_event ep;
 	socklen_t size;
 	int csoc;
@@ -78,9 +72,9 @@ static void nemolog_dispatch_listen_task(int efd, struct logtask *task)
 
 	os_set_nonblocking_mode(csoc);
 
-	ctask = (struct logtask *)malloc(sizeof(struct logtask));
+	ctask = (struct bustask *)malloc(sizeof(struct bustask));
 	ctask->fd = csoc;
-	ctask->dispatch = nemolog_dispatch_message_task;
+	ctask->dispatch = nemobus_dispatch_message_task;
 
 	os_epoll_add_fd(efd, csoc, EPOLLIN | EPOLLERR | EPOLLHUP, ctask);
 }
@@ -88,24 +82,22 @@ static void nemolog_dispatch_listen_task(int efd, struct logtask *task)
 int main(int argc, char *argv[])
 {
 	struct option options[] = {
-		{ "socketpath",		required_argument,	NULL,		's' },
-		{ "directory",		required_argument,	NULL,		'd' },
+		{ "socketpath",				required_argument,		NULL,		's' },
 		{ 0 }
 	};
 	struct sockaddr_un addr;
 	socklen_t size, namesize;
-	struct logtask *task;
+	struct bustask *task;
 	struct epoll_event ep;
 	struct epoll_event eps[16];
 	char *socketpath = NULL;
-	char *dirpath = NULL;
-	int opt;
 	int efd;
 	int neps;
 	int lsoc;
+	int opt;
 	int i;
 
-	while (opt = getopt_long(argc, argv, "s:d:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "s:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -114,33 +106,14 @@ int main(int argc, char *argv[])
 				socketpath = strdup(optarg);
 				break;
 
-			case 'd':
-				dirpath = strdup(optarg);
-				break;
-
 			default:
 				break;
 		}
 	}
 
 	if (socketpath == NULL)
-		socketpath = strdup("/tmp/nemo.log.0");
+		socketpath = strdup("/tmp/nemo.bus.0");
 	unlink(socketpath);
-
-	if (dirpath != NULL) {
-		time_t ttime;
-		struct tm *stime;
-		char filepath[256];
-		char filename[128];
-
-		time(&ttime);
-		stime = localtime(&ttime);
-
-		strftime(filename, sizeof(filename), "%Y-%m-%d.log", stime);
-		snprintf(filepath, sizeof(filepath), "%s/%s", dirpath, filename);
-
-		nemologfile = fopen(filepath, "a");
-	}
 
 	lsoc = socket(PF_LOCAL, SOCK_STREAM | SOCK_CLOEXEC, 0);
 	if (lsoc < 0)
@@ -162,9 +135,9 @@ int main(int argc, char *argv[])
 	if (efd < 0)
 		goto err1;
 
-	task = (struct logtask *)malloc(sizeof(struct logtask));
+	task = (struct bustask *)malloc(sizeof(struct bustask));
 	task->fd = lsoc;
-	task->dispatch = nemolog_dispatch_listen_task;
+	task->dispatch = nemobus_dispatch_listen_task;
 
 	os_epoll_add_fd(efd, lsoc, EPOLLIN | EPOLLERR | EPOLLHUP, task);
 
@@ -183,9 +156,6 @@ err1:
 	close(lsoc);
 
 err0:
-	if (nemologfile != NULL)
-		fclose(nemologfile);
-
 	free(socketpath);
 
 	return 0;

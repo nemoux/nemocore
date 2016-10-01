@@ -9,6 +9,8 @@ NEMO_BEGIN_EXTERN_C
 
 #include <stdint.h>
 
+#include <json.h>
+
 #include <nemolist.h>
 
 struct nemobus {
@@ -44,13 +46,10 @@ extern void nemobus_disconnect(struct nemobus *bus);
 
 extern int nemobus_advertise(struct nemobus *bus, const char *type, const char *path);
 
+extern int nemobus_send(struct nemobus *bus, const char *type, const char *path, struct busmsg *msg);
 extern int nemobus_send_raw(struct nemobus *bus, const char *buffer);
 extern int nemobus_send_format(struct nemobus *bus, const char *fmt, ...);
 extern int nemobus_recv_raw(struct nemobus *bus, char *buffer, size_t size);
-
-extern int nemobus_unicast(struct nemobus *bus, const char *type, const char *path, struct busmsg *msg);
-extern int nemobus_multicast(struct nemobus *bus, const char *types, int ntypes, const char *paths, int npaths, struct busmsg *msg);
-extern int nemobus_broadcast(struct nemobus *bus, struct busmsg *msg);
 
 extern struct busmsg *nemobus_msg_create(void);
 extern void nemobus_msg_destroy(struct busmsg *msg);
@@ -65,6 +64,11 @@ extern void nemobus_msg_set_name(struct busmsg *msg, const char *name);
 extern void nemobus_msg_set_attr(struct busmsg *msg, const char *name, const char *value);
 extern const char *nemobus_msg_get_attr(struct busmsg *msg, const char *name);
 extern void nemobus_msg_put_attr(struct busmsg *msg, const char *name);
+
+extern struct json_object *nemobus_msg_to_json(struct busmsg *msg);
+extern const char *nemobus_msg_to_json_string(struct busmsg *msg);
+extern struct busmsg *nemobus_msg_from_json(struct json_object *jobj);
+extern struct busmsg *nemobus_msg_from_json_string(const char *contents);
 
 static inline const char *nemobus_msg_get_name(struct busmsg *msg)
 {

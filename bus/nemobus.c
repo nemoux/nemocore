@@ -77,6 +77,30 @@ int nemobus_advertise(struct nemobus *bus, const char *type, const char *path)
 	return 0;
 }
 
+int nemobus_send(struct nemobus *bus, const char *type, const char *path, struct busmsg *msg)
+{
+	struct json_object *jobj;
+	const char *contents;
+	int r;
+
+	jobj = json_object_new_object();
+
+	if (type != NULL)
+		json_object_object_add(jobj, "type", json_object_new_string(type));
+	if (path != NULL)
+		json_object_object_add(jobj, "path", json_object_new_string(path));
+
+	json_object_object_add(jobj, "body", nemobus_msg_to_json(msg));
+
+	contents = json_object_get_string(jobj);
+
+	r = send(bus->soc, contents, strlen(contents), MSG_NOSIGNAL | MSG_DONTWAIT);
+
+	json_object_put(jobj);
+
+	return r;
+}
+
 int nemobus_send_raw(struct nemobus *bus, const char *buffer)
 {
 	return send(bus->soc, buffer, strlen(buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
@@ -102,18 +126,6 @@ int nemobus_send_format(struct nemobus *bus, const char *fmt, ...)
 int nemobus_recv_raw(struct nemobus *bus, char *buffer, size_t size)
 {
 	return recv(bus->soc, buffer, size, MSG_NOSIGNAL | MSG_DONTWAIT);
-}
-
-int nemobus_unicast(struct nemobus *bus, const char *type, const char *path, struct busmsg *msg)
-{
-}
-
-int nemobus_multicast(struct nemobus *bus, const char *types, int ntypes, const char *paths, int npaths, struct busmsg *msg)
-{
-}
-
-int nemobus_broadcast(struct nemobus *bus, struct busmsg *msg)
-{
 }
 
 struct busmsg *nemobus_msg_create(void)
@@ -166,7 +178,7 @@ void nemobus_msg_clear(struct busmsg *msg)
 
 void nemobus_msg_attach(struct busmsg *msg, struct busmsg *cmsg)
 {
-	nemolist_insert(&msg->msg_list, &cmsg->link);
+	nemolist_insert_tail(&msg->msg_list, &cmsg->link);
 }
 
 void nemobus_msg_detach(struct busmsg *msg)
@@ -183,7 +195,7 @@ void nemobus_msg_set_name(struct busmsg *msg, const char *name)
 	msg->name = strdup(name);
 }
 
-static struct msgattr *nemobus_msg_get_attr_raw(struct busmsg *msg, const char *name)
+static struct msgattr *nemobus_msg_get_attr_in(struct busmsg *msg, const char *name)
 {
 	struct msgattr *attr;
 
@@ -210,7 +222,7 @@ const char *nemobus_msg_get_attr(struct busmsg *msg, const char *name)
 {
 	struct msgattr *attr;
 
-	attr = nemobus_msg_get_attr_raw(msg, name);
+	attr = nemobus_msg_get_attr_in(msg, name);
 	if (attr != NULL)
 		return attr->value;
 
@@ -221,7 +233,7 @@ void nemobus_msg_put_attr(struct busmsg *msg, const char *name)
 {
 	struct msgattr *attr;
 
-	attr = nemobus_msg_get_attr_raw(msg, name);
+	attr = nemobus_msg_get_attr_in(msg, name);
 	if (attr != NULL) {
 		nemolist_remove(&attr->link);
 
@@ -230,4 +242,54 @@ void nemobus_msg_put_attr(struct busmsg *msg, const char *name)
 
 		free(attr);
 	}
+}
+
+struct json_object *nemobus_msg_to_json(struct busmsg *msg)
+{
+	struct json_object *jobj;
+	struct msgattr *attr;
+	struct busmsg *cmsg;
+
+	jobj = json_object_new_object();
+
+	nemolist_for_each(attr, &msg->attr_list, link) {
+		json_object_object_add(jobj, attr->name, json_object_new_string(attr->value));
+	}
+
+	nemolist_for_each(cmsg, &msg->msg_list, link) {
+		json_object_object_add(jobj, cmsg->name, nemobus_msg_to_json(cmsg));
+	}
+
+	return jobj;
+}
+
+const char *nemobus_msg_to_json_string(struct busmsg *msg)
+{
+	return json_object_get_string(nemobus_msg_to_json(msg));
+}
+
+struct busmsg *nemobus_msg_from_json(struct json_object *jobj)
+{
+	struct busmsg *msg;
+	struct busmsg *cmsg;
+
+	msg = nemobus_msg_create();
+
+	json_object_object_foreach(jobj, key, value) {
+		if (json_object_is_type(value, json_type_string)) {
+			nemobus_msg_set_attr(msg, key, json_object_get_string(value));
+		} else if (json_object_is_type(value, json_type_object)) {
+			cmsg = nemobus_msg_from_json(value);
+			nemobus_msg_set_name(cmsg, key);
+
+			nemobus_msg_attach(msg, cmsg);
+		}
+	}
+
+	return msg;
+}
+
+struct busmsg *nemobus_msg_from_json_string(const char *contents)
+{
+	return nemobus_msg_from_json(json_tokener_parse(contents));
 }
