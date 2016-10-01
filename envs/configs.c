@@ -629,6 +629,12 @@ int nemoenvs_set_config(struct nemoenvs *envs, struct itemone *one)
 		nemocompz_set_idle_timeout(shell->compz, timeout);
 	} else if (namespace_has_prefix(path, "/nemoshell/legacy") != 0) {
 		envs->legacy.pick_taps = nemoitem_one_get_iattr(one, "pick_taps", 3);
+	} else if (namespace_has_prefix(path, "/nemoshell/terminal") != 0) {
+		nemoenvs_set_terminal_path(envs, nemoitem_one_get_attr(one, "path"));
+		nemoenvs_set_terminal_args(envs, nemoitem_one_get_attr(one, "args"));
+	} else if (namespace_has_prefix(path, "/nemoshell/xserver") != 0) {
+		nemoenvs_set_xserver_path(envs, nemoitem_one_get_attr(one, "path"));
+		nemoenvs_set_xserver_node(envs, nemoitem_one_get_attr(one, "node"));
 	}
 
 	return 0;

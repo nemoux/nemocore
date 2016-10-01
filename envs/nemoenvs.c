@@ -72,7 +72,10 @@ void nemoenvs_set_terminal_path(struct nemoenvs *envs, const char *path)
 	if (envs->terminal.path != NULL)
 		free(envs->terminal.path);
 
-	envs->terminal.path = strdup(path);
+	if (path != NULL)
+		envs->terminal.path = strdup(path);
+	else
+		envs->terminal.path = NULL;
 }
 
 void nemoenvs_set_terminal_args(struct nemoenvs *envs, const char *args)
@@ -80,7 +83,10 @@ void nemoenvs_set_terminal_args(struct nemoenvs *envs, const char *args)
 	if (envs->terminal.args != NULL)
 		free(envs->terminal.args);
 
-	envs->terminal.args = strdup(args);
+	if (args != NULL)
+		envs->terminal.args = strdup(args);
+	else
+		envs->terminal.args = NULL;
 }
 
 void nemoenvs_set_xserver_path(struct nemoenvs *envs, const char *path)
@@ -88,7 +94,10 @@ void nemoenvs_set_xserver_path(struct nemoenvs *envs, const char *path)
 	if (envs->xserver.path != NULL)
 		free(envs->xserver.path);
 
-	envs->xserver.path = strdup(path);
+	if (path != NULL)
+		envs->xserver.path = strdup(path);
+	else
+		envs->xserver.path = NULL;
 }
 
 void nemoenvs_set_xserver_node(struct nemoenvs *envs, const char *node)
@@ -96,7 +105,10 @@ void nemoenvs_set_xserver_node(struct nemoenvs *envs, const char *node)
 	if (envs->xserver.node != NULL)
 		free(envs->xserver.node);
 
-	envs->xserver.node = strdup(node);
+	if (node != NULL)
+		envs->xserver.node = strdup(node);
+	else
+		envs->xserver.node = NULL;
 }
 
 int nemoenvs_set_service(struct nemoenvs *envs, struct itemone *one)
