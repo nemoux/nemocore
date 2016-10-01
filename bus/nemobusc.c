@@ -14,7 +14,6 @@ int main(int argc, char *argv[])
 {
 	struct option options[] = {
 		{ "socketpath",				required_argument,		NULL,		's' },
-		{ "type",							required_argument,		NULL,		't' },
 		{ "path",							required_argument,		NULL,		'p' },
 		{ 0 }
 	};
@@ -22,21 +21,16 @@ int main(int argc, char *argv[])
 	struct busmsg *msg;
 	char *socketpath = NULL;
 	char *contents = NULL;
-	char *type = NULL;
 	char *path = NULL;
 	int opt;
 
-	while (opt = getopt_long(argc, argv, "s:t:p:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "s:p:", options, NULL)) {
 		if (opt == -1)
 			break;
 
 		switch (opt) {
 			case 's':
 				socketpath = strdup(optarg);
-				break;
-
-			case 't':
-				type = strdup(optarg);
 				break;
 
 			case 'p':
@@ -56,10 +50,11 @@ int main(int argc, char *argv[])
 
 	bus = nemobus_create();
 	nemobus_connect(bus, socketpath);
+	nemobus_advertise(bus, "/nemobusc");
 
 	msg = nemobus_msg_from_json_string(contents);
 
-	nemobus_send(bus, type, path, msg);
+	nemobus_send(bus, path, msg);
 
 	nemobus_msg_destroy(msg);
 

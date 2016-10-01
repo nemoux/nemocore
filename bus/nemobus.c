@@ -72,12 +72,12 @@ void nemobus_disconnect(struct nemobus *bus)
 	bus->soc = -1;
 }
 
-int nemobus_advertise(struct nemobus *bus, const char *type, const char *path)
+int nemobus_advertise(struct nemobus *bus, const char *path)
 {
-	return 0;
+	return nemobus_send_format(bus, "{ \"path\": \"/nemobusd\", \"body\": { \"type\": \"advertise\", \"path\": \"%s\" } }", path);
 }
 
-int nemobus_send(struct nemobus *bus, const char *type, const char *path, struct busmsg *msg)
+int nemobus_send(struct nemobus *bus, const char *path, struct busmsg *msg)
 {
 	struct json_object *jobj;
 	const char *contents;
@@ -85,8 +85,6 @@ int nemobus_send(struct nemobus *bus, const char *type, const char *path, struct
 
 	jobj = json_object_new_object();
 
-	if (type != NULL)
-		json_object_object_add(jobj, "type", json_object_new_string(type));
 	if (path != NULL)
 		json_object_object_add(jobj, "path", json_object_new_string(path));
 
