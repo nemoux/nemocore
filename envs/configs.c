@@ -570,25 +570,25 @@ int nemoenvs_set_config(struct nemoenvs *envs, struct itemone *one)
 
 	if (namespace_has_prefix(path, "/nemoshell/screen") != 0) {
 		nemoenvs_handle_set_nemoshell_screen(shell, one);
-	} else if (namespace_has_prefix(path, "/nemoshell/input") == 0) {
+	} else if (namespace_has_prefix(path, "/nemoshell/input") != 0) {
 		nemoenvs_handle_set_nemoshell_input(shell, one);
-	} else if (namespace_has_prefix(path, "/nemoshell/evdev") == 0) {
+	} else if (namespace_has_prefix(path, "/nemoshell/evdev") != 0) {
 		nemoenvs_handle_set_nemoshell_evdev(shell, one);
-	} else if (namespace_has_prefix(path, "/nemoshell/scene") == 0) {
+	} else if (namespace_has_prefix(path, "/nemoshell/scene") != 0) {
 		int32_t x = nemoitem_one_get_iattr(one, "x", 0);
 		int32_t y = nemoitem_one_get_iattr(one, "y", 0);
 		int32_t width = nemoitem_one_get_iattr(one, "width", 0);
 		int32_t height = nemoitem_one_get_iattr(one, "height", 0);
 
 		nemocompz_set_scene(compz, x, y, width, height);
-	} else if (namespace_has_prefix(path, "/nemoshell/scope") == 0) {
+	} else if (namespace_has_prefix(path, "/nemoshell/scope") != 0) {
 		int32_t x = nemoitem_one_get_iattr(one, "x", 0);
 		int32_t y = nemoitem_one_get_iattr(one, "y", 0);
 		int32_t width = nemoitem_one_get_iattr(one, "width", 0);
 		int32_t height = nemoitem_one_get_iattr(one, "height", 0);
 
 		nemocompz_set_scope(compz, x, y, width, height);
-	} else if (namespace_has_prefix(path, "/nemoshell/virtuio") == 0) {
+	} else if (namespace_has_prefix(path, "/nemoshell/virtuio") != 0) {
 		int32_t port = nemoitem_one_get_iattr(one, "port", 3333);
 		int32_t fps = nemoitem_one_get_iattr(one, "fps", 60);
 		int32_t x = nemoitem_one_get_iattr(one, "x", 0);
@@ -597,7 +597,7 @@ int nemoenvs_set_config(struct nemoenvs *envs, struct itemone *one)
 		int32_t height = nemoitem_one_get_iattr(one, "height", 0);
 
 		virtuio_create(compz, port, fps, x, y, width, height);
-	} else if (namespace_has_prefix(path, "/nemoshell/tuio") == 0) {
+	} else if (namespace_has_prefix(path, "/nemoshell/tuio") != 0) {
 		int32_t port = nemoitem_one_get_iattr(one, "port", 3333);
 		int32_t max = nemoitem_one_get_iattr(one, "max", 16);
 		const char *protocol = nemoitem_one_get_sattr(one, "protocol", "osc");
@@ -605,29 +605,29 @@ int nemoenvs_set_config(struct nemoenvs *envs, struct itemone *one)
 		tuio_create(compz,
 				namespace_has_prefix(protocol, "osc") == 0 ? NEMOTUIO_OSC_PROTOCOL : NEMOTUIO_XML_PROTOCOL,
 				port, max);
-	} else if (namespace_has_prefix(path, "/nemoshell/plugin") == 0) {
+	} else if (namespace_has_prefix(path, "/nemoshell/plugin") != 0) {
 		nemocompz_load_plugin(compz,
 				nemoitem_one_get_attr(one, "path"),
 				nemoitem_one_get_attr(one, "args"));
-	} else if (namespace_has_prefix(path, "/nemoshell/pick") == 0) {
+	} else if (namespace_has_prefix(path, "/nemoshell/pick") != 0) {
 		nemoenvs_handle_set_nemoshell_pick(shell, one);
-	} else if (namespace_has_prefix(path, "/nemoshell/pitch") == 0) {
+	} else if (namespace_has_prefix(path, "/nemoshell/pitch") != 0) {
 		nemoenvs_handle_set_nemoshell_pitch(shell, one);
-	} else if (namespace_has_prefix(path, "/nemoshell/bin") == 0) {
+	} else if (namespace_has_prefix(path, "/nemoshell/bin") != 0) {
 		nemoenvs_handle_set_nemoshell_bin(shell, one);
-	} else if (namespace_has_prefix(path, "/nemoshell/fullscreen") == 0) {
+	} else if (namespace_has_prefix(path, "/nemoshell/fullscreen") != 0) {
 		nemoenvs_handle_set_nemoshell_fullscreen(shell, one);
-	} else if (namespace_has_prefix(path, "/nemoshell/stage") == 0) {
+	} else if (namespace_has_prefix(path, "/nemoshell/stage") != 0) {
 		nemoenvs_handle_set_nemoshell_stage(shell, one);
-	} else if (namespace_has_prefix(path, "/nemoshell/show") == 0) {
+	} else if (namespace_has_prefix(path, "/nemoshell/show") != 0) {
 		nemoenvs_handle_set_nemoshell_show(shell, one);
-	} else if (namespace_has_prefix(path, "/nemoshell/idle") == 0) {
+	} else if (namespace_has_prefix(path, "/nemoshell/idle") != 0) {
 		uint32_t timeout;
 
 		timeout = nemoitem_one_get_iattr(one, "timeout", 0);
 
 		nemocompz_set_idle_timeout(shell->compz, timeout);
-	} else if (namespace_has_prefix(path, "/nemoshell/legacy") == 0) {
+	} else if (namespace_has_prefix(path, "/nemoshell/legacy") != 0) {
 		envs->legacy.pick_taps = nemoitem_one_get_iattr(one, "pick_taps", 3);
 	}
 
@@ -639,9 +639,9 @@ void nemoenvs_put_config(struct nemoenvs *envs, const char *path)
 	struct nemoshell *shell = envs->shell;
 	struct nemocompz *compz = shell->compz;
 
-	if (namespace_has_prefix(path, "/nemoshell/fullscreen") == 0) {
+	if (namespace_has_prefix(path, "/nemoshell/fullscreen") != 0) {
 		nemoshell_put_fullscreen(shell, path);
-	} else if (namespace_has_prefix(path, "/nemoshell/stage") == 0) {
+	} else if (namespace_has_prefix(path, "/nemoshell/stage") != 0) {
 		nemoshell_put_stage(shell, path);
 	}
 }

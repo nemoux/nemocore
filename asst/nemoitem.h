@@ -84,6 +84,9 @@ extern int nemoitem_one_copy_attr(struct itemone *done, struct itemone *sone);
 extern int nemoitem_load_json(struct nemoitem *item, struct json_object *jobj);
 extern int nemoitem_load_json_string(struct nemoitem *item, const char *contents);
 
+extern int nemoitem_one_load_json(struct itemone *one, struct json_object *jobj);
+extern int nemoitem_one_load_json_string(struct itemone *one, const char *contents);
+
 static inline int nemoitem_one_get_iattr(struct itemone *one, const char *name, int value)
 {
 	const char *str = nemoitem_one_get_attr(one, name);

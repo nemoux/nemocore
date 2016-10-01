@@ -289,5 +289,15 @@ struct busmsg *nemobus_msg_from_json(struct json_object *jobj)
 
 struct busmsg *nemobus_msg_from_json_string(const char *contents)
 {
-	return nemobus_msg_from_json(json_tokener_parse(contents));
+	struct json_object *jobj;
+	struct busmsg *msg = NULL;
+
+	jobj = json_tokener_parse(contents);
+	if (jobj != NULL) {
+		msg = nemobus_msg_from_json(jobj);
+
+		json_object_put(jobj);
+	}
+
+	return msg;
 }
