@@ -70,7 +70,6 @@ extern struct itemone *nemoitem_one_clone(struct itemone *one);
 
 extern void nemoitem_one_set_path(struct itemone *one, const char *path);
 extern void nemoitem_one_set_path_format(struct itemone *one, const char *fmt, ...);
-extern const char *nemoitem_one_get_path(struct itemone *one);
 extern int nemoitem_one_has_path(struct itemone *one, const char *path);
 extern int nemoitem_one_has_path_prefix(struct itemone *one, const char *prefix);
 extern int nemoitem_one_has_path_format(struct itemone *one, const char *fmt, ...);
@@ -86,6 +85,11 @@ extern int nemoitem_load_json_string(struct nemoitem *item, const char *contents
 
 extern int nemoitem_one_load_json(struct itemone *one, struct json_object *jobj);
 extern int nemoitem_one_load_json_string(struct itemone *one, const char *contents);
+
+static inline const char *nemoitem_one_get_path(struct itemone *one)
+{
+	return one->path;
+}
 
 static inline int nemoitem_one_get_iattr(struct itemone *one, const char *name, int value)
 {
@@ -154,6 +158,11 @@ static inline const char *nemoitem_get_sattr(struct nemoitem *item, const char *
 static inline int nemoitem_box_get_count(struct itembox *box)
 {
 	return box->nones;
+}
+
+static inline const char *nemoitem_box_get_path(struct itembox *box, int index)
+{
+	return nemoitem_one_get_path(box->ones[index]);
 }
 
 static inline int nemoitem_box_get_iattr(struct itembox *box, int index, const char *name, int value)

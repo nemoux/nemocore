@@ -379,11 +379,6 @@ void nemoitem_one_set_path_format(struct itemone *one, const char *fmt, ...)
 	va_end(vargs);
 }
 
-const char *nemoitem_one_get_path(struct itemone *one)
-{
-	return one->path;
-}
-
 int nemoitem_one_has_path(struct itemone *one, const char *path)
 {
 	return strcmp(one->path, path) == 0;
