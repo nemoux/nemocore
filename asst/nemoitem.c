@@ -145,7 +145,7 @@ struct itembox *nemoitem_box_search_one(struct nemoitem *item, const char *path)
 	int count = 0;
 
 	nemolist_for_each(one, &item->list, link) {
-		if (strcmp(one->path, path) == 0)
+		if (nemoitem_one_has_path_prefix(one, path) != 0)
 			count++;
 	}
 
@@ -162,7 +162,7 @@ struct itembox *nemoitem_box_search_one(struct nemoitem *item, const char *path)
 		goto err1;
 
 	nemolist_for_each(one, &item->list, link) {
-		if (strcmp(one->path, path) == 0)
+		if (nemoitem_one_has_path_prefix(one, path) != 0)
 			box->ones[box->nones++] = one;
 	}
 
@@ -181,7 +181,7 @@ struct itembox *nemoitem_box_search_attr(struct nemoitem *item, const char *path
 	int count = 0;
 
 	nemolist_for_each(one, &item->list, link) {
-		if ((path == NULL || strcmp(one->path, path) == 0) && nemoitem_one_has_attr(one, name, value) != 0)
+		if ((path == NULL || nemoitem_one_has_path_prefix(one, path) != 0) && nemoitem_one_has_attr(one, name, value) != 0)
 			count++;
 	}
 
@@ -198,7 +198,7 @@ struct itembox *nemoitem_box_search_attr(struct nemoitem *item, const char *path
 		goto err1;
 
 	nemolist_for_each(one, &item->list, link) {
-		if ((path == NULL || strcmp(one->path, path) == 0) && nemoitem_one_has_attr(one, name, value) != 0)
+		if ((path == NULL || nemoitem_one_has_path_prefix(one, path) != 0) && nemoitem_one_has_attr(one, name, value) != 0)
 			box->ones[box->nones++] = one;
 	}
 
@@ -226,7 +226,7 @@ struct itembox *nemoitem_box_search_attrs(struct nemoitem *item, const char *pat
 	ntokens = nemotoken_get_token_count(token) / 2;
 
 	nemolist_for_each(one, &item->list, link) {
-		if (path != NULL && strcmp(one->path, path) != 0)
+		if (path != NULL && nemoitem_one_has_path_prefix(one, path) != 0)
 			continue;
 
 		for (i = 0; i < ntokens; i++) {
@@ -254,7 +254,7 @@ struct itembox *nemoitem_box_search_attrs(struct nemoitem *item, const char *pat
 		goto err2;
 
 	nemolist_for_each(one, &item->list, link) {
-		if (path != NULL && strcmp(one->path, path) != 0)
+		if (path != NULL && nemoitem_one_has_path_prefix(one, path) != 0)
 			continue;
 
 		for (i = 0; i < ntokens; i++) {
