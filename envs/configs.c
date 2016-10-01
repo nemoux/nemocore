@@ -635,6 +635,12 @@ int nemoenvs_set_config(struct nemoenvs *envs, struct itemone *one)
 	} else if (namespace_has_prefix(path, "/nemoshell/xserver") != 0) {
 		nemoenvs_set_xserver_path(envs, nemoitem_one_get_attr(one, "path"));
 		nemoenvs_set_xserver_node(envs, nemoitem_one_get_attr(one, "node"));
+	} else if (namespace_has_prefix(path, "/nemoshell/background") != 0) {
+		nemoenvs_set_service(envs, one);
+	} else if (namespace_has_prefix(path, "/nemoshell/daemon") != 0) {
+		nemoenvs_set_service(envs, one);
+	} else if (namespace_has_prefix(path, "/nemoshell/screensaver") != 0) {
+		nemoenvs_set_service(envs, one);
 	}
 
 	return 0;

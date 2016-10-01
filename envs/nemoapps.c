@@ -82,7 +82,6 @@ static void nemoenvs_execute_background(struct nemoenvs *envs, struct itemone *o
 	char cmds[512];
 	int32_t x, y;
 	const char *path;
-	const char *id;
 	const char *name;
 	const char *value;
 	pid_t pid;
@@ -90,7 +89,6 @@ static void nemoenvs_execute_background(struct nemoenvs *envs, struct itemone *o
 	x = nemoitem_one_get_iattr(one, "x", 0);
 	y = nemoitem_one_get_iattr(one, "y", 0);
 	path = nemoitem_one_get_attr(one, "path");
-	id = nemoitem_one_get_attr(one, "id");
 
 	strcpy(cmds, path);
 
@@ -120,10 +118,7 @@ static void nemoenvs_execute_background(struct nemoenvs *envs, struct itemone *o
 			clientstate_set_bin_flags(state, NEMOSHELL_SURFACE_ALL_FLAGS);
 		}
 
-		if (id != NULL)
-			nemoenvs_attach_app(envs, id, pid);
-		else
-			nemolog_warning("ENVS", "should set '%s' background's id!\n", path);
+		nemoenvs_attach_app(envs, nemoitem_one_get_path(one), pid);
 	}
 
 	nemotoken_destroy(token);
@@ -135,13 +130,11 @@ static void nemoenvs_execute_daemon(struct nemoenvs *envs, struct itemone *one)
 	struct itemattr *attr;
 	char cmds[512];
 	const char *path;
-	const char *id;
 	const char *name;
 	const char *value;
 	pid_t pid;
 
 	path = nemoitem_one_get_attr(one, "path");
-	id = nemoitem_one_get_attr(one, "id");
 
 	strcpy(cmds, path);
 
@@ -160,12 +153,8 @@ static void nemoenvs_execute_daemon(struct nemoenvs *envs, struct itemone *one)
 	nemotoken_update(token);
 
 	pid = wayland_execute_path(path, nemotoken_get_tokens(token), NULL);
-	if (pid > 0) {
-		if (id != NULL)
-			nemoenvs_attach_app(envs, id, pid);
-		else
-			nemolog_warning("ENVS", "should set '%s' daemon's id!\n", path);
-	}
+	if (pid > 0)
+		nemoenvs_attach_app(envs, nemoitem_one_get_path(one), pid);
 
 	nemotoken_destroy(token);
 }
@@ -179,7 +168,6 @@ static void nemoenvs_execute_screensaver(struct nemoenvs *envs, struct itemone *
 	char cmds[512];
 	int32_t x, y;
 	const char *path;
-	const char *id;
 	const char *name;
 	const char *value;
 	pid_t pid;
@@ -187,7 +175,6 @@ static void nemoenvs_execute_screensaver(struct nemoenvs *envs, struct itemone *
 	x = nemoitem_one_get_iattr(one, "x", 0);
 	y = nemoitem_one_get_iattr(one, "y", 0);
 	path = nemoitem_one_get_attr(one, "path");
-	id = nemoitem_one_get_attr(one, "id");
 
 	strcpy(cmds, path);
 
@@ -230,7 +217,7 @@ int nemoenvs_respawn_app(struct nemoenvs *envs, pid_t pid)
 		if (app->pid == pid) {
 			nemolog_warning("ENVS", "respawn app(%s) pid(%d)!\n", app->id, pid);
 
-			one = nemoitem_search_attr(envs->apps, NULL, "id", app->id);
+			one = nemoitem_search_one(envs->apps, app->id);
 			if (one != NULL) {
 				if (nemoitem_one_has_path_prefix(one, "/nemoshell/background") != 0) {
 					nemoenvs_execute_background(envs, one);
