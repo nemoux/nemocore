@@ -160,6 +160,11 @@ static inline int nemoitem_box_get_count(struct itembox *box)
 	return box->nones;
 }
 
+static inline struct itemone *nemoitem_box_get_one(struct itembox *box, int index)
+{
+	return box->ones[index];
+}
+
 static inline const char *nemoitem_box_get_path(struct itembox *box, int index)
 {
 	return nemoitem_one_get_path(box->ones[index]);
