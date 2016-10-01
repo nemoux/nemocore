@@ -429,11 +429,37 @@ int nemoitem_one_set_attr(struct itemone *one, const char *name, const char *val
 	}
 
 	attr = (struct itemattr *)malloc(sizeof(struct itemattr));
-	if (attr == NULL)
-		return -1;
-
 	attr->name = strdup(name);
 	attr->value = strdup(value);
+
+	nemolist_insert_tail(&one->list, &attr->link);
+
+	return 0;
+}
+
+int nemoitem_one_set_attr_format(struct itemone *one, const char *name, const char *fmt, ...)
+{
+	struct itemattr *attr;
+	va_list vargs;
+	char *value;
+
+	va_start(vargs, fmt);
+	vasprintf(&value, fmt, vargs);
+	va_end(vargs);
+
+	nemolist_for_each(attr, &one->list, link) {
+		if (strcmp(attr->name, name) == 0) {
+			free(attr->value);
+
+			attr->value = value;
+
+			return 1;
+		}
+	}
+
+	attr = (struct itemattr *)malloc(sizeof(struct itemattr));
+	attr->name = strdup(name);
+	attr->value = value;
 
 	nemolist_insert_tail(&one->list, &attr->link);
 

@@ -62,6 +62,7 @@ extern void nemobus_msg_detach(struct busmsg *msg);
 extern void nemobus_msg_set_name(struct busmsg *msg, const char *name);
 
 extern void nemobus_msg_set_attr(struct busmsg *msg, const char *name, const char *value);
+extern void nemobus_msg_set_format(struct busmsg *msg, const char *name, const char *fmt, ...);
 extern const char *nemobus_msg_get_attr(struct busmsg *msg, const char *name);
 extern void nemobus_msg_put_attr(struct busmsg *msg, const char *name);
 
@@ -69,6 +70,11 @@ extern struct json_object *nemobus_msg_to_json(struct busmsg *msg);
 extern const char *nemobus_msg_to_json_string(struct busmsg *msg);
 extern struct busmsg *nemobus_msg_from_json(struct json_object *jobj);
 extern struct busmsg *nemobus_msg_from_json_string(const char *contents);
+
+static inline int nemobus_get_socket(struct nemobus *bus)
+{
+	return bus->soc;
+}
 
 static inline const char *nemobus_msg_get_name(struct busmsg *msg)
 {
@@ -83,6 +89,27 @@ static inline const char *nemobus_attr_get_name(struct msgattr *attr)
 static inline const char *nemobus_attr_get_value(struct msgattr *attr)
 {
 	return attr->value;
+}
+
+static inline int nemobus_msg_get_iattr(struct busmsg *msg, const char *name, int value)
+{
+	const char *str = nemobus_msg_get_attr(msg, name);
+
+	return str != NULL ? strtoul(str, NULL, 10) : value;
+}
+
+static inline float nemobus_msg_get_fattr(struct busmsg *msg, const char *name, float value)
+{
+	const char *str = nemobus_msg_get_attr(msg, name);
+
+	return str != NULL ? strtod(str, NULL) : value;
+}
+
+static inline const char *nemobus_msg_get_sattr(struct busmsg *msg, const char *name, const char *value)
+{
+	const char *str = nemobus_msg_get_attr(msg, name);
+
+	return str != NULL ? str : value;
 }
 
 #ifdef __cplusplus

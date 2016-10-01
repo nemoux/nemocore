@@ -216,6 +216,23 @@ void nemobus_msg_set_attr(struct busmsg *msg, const char *name, const char *valu
 	nemolist_insert(&msg->attr_list, &attr->link);
 }
 
+void nemobus_msg_set_format(struct busmsg *msg, const char *name, const char *fmt, ...)
+{
+	struct msgattr *attr;
+	va_list vargs;
+	char *value;
+
+	va_start(vargs, fmt);
+	vasprintf(&value, fmt, vargs);
+	va_end(vargs);
+
+	attr = (struct msgattr *)malloc(sizeof(struct msgattr));
+	attr->name = strdup(name);
+	attr->value = value;
+
+	nemolist_insert(&msg->attr_list, &attr->link);
+}
+
 const char *nemobus_msg_get_attr(struct busmsg *msg, const char *name)
 {
 	struct msgattr *attr;
