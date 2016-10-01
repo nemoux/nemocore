@@ -1,0 +1,11 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+bindir=${prefix}/bin
+libdir=${prefix}/lib@CMAKE_LIBRARY_SUFFIX@
+incdir=${prefix}/include
+
+Name: Nemobus
+Description: NEMO-UX bus for local ipc library
+Version: 0.1.0
+Requires: @NEMOBUS_PKGCONFIG_REQUIRES@
+Libs: -L${libdir} -lnemobus
+Cflags: -I${incdir}/nemobus

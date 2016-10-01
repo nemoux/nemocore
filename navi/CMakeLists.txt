@@ -28,7 +28,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/navi/nemonavi.h
 	)
 
-set(NEMOSHOW_PKGCONFIG_REQUIRES "nemoasst")
+set(NEMONAVI_PKGCONFIG_REQUIRES "nemoasst")
 
 configure_file(
 	nemonavi.pc.in

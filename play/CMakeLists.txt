@@ -53,7 +53,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/play/ffmpegconfig.h
 	)
 
-set(NEMOSHOW_PKGCONFIG_REQUIRES "nemoasst libavcodec libavformat libavutil libswscale")
+set(NEMOPLAY_PKGCONFIG_REQUIRES "nemoasst libavcodec libavformat libavutil libswscale")
 
 configure_file(
 	nemoplay.pc.in
