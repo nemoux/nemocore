@@ -31,17 +31,50 @@ struct nemobusd {
 
 struct bustask;
 
-typedef void (*nemobus_dispatch_task)(int efd, struct bustask *task);
+typedef void (*nemobusd_dispatch_task)(int efd, struct bustask *task);
 
 struct bustask {
 	struct nemobusd *busd;
 
 	int fd;
 
-	nemobus_dispatch_task dispatch;
+	nemobusd_dispatch_task dispatch;
 };
 
-static void nemobus_dispatch_message(struct nemobusd *busd, int soc, const char *path, struct json_object *bobj)
+static struct busclient *nemobusd_create_client(struct nemobusd *busd, int soc, const char *path)
+{
+	struct busclient *client;
+
+	client = (struct busclient *)malloc(sizeof(struct busclient));
+	if (client == NULL)
+		return NULL;
+	memset(client, 0, sizeof(struct busclient));
+
+	client->path = strdup(path);
+	client->soc = soc;
+
+	nemolist_insert_tail(&busd->client_list, &client->link);
+
+	return client;
+}
+
+static void nemobusd_destroy_client(struct nemobusd *busd, int soc)
+{
+	struct busclient *client;
+
+	nemolist_for_each(client, &busd->client_list, link) {
+		if (client->soc == soc) {
+			nemolist_remove(&client->link);
+
+			free(client->path);
+			free(client);
+
+			break;
+		}
+	}
+}
+
+static void nemobusd_dispatch_message(struct nemobusd *busd, int soc, const char *path, struct json_object *bobj)
 {
 	if (strcmp(path, "/nemobusd") == 0) {
 		struct json_object *tobj;
@@ -54,13 +87,7 @@ static void nemobus_dispatch_message(struct nemobusd *busd, int soc, const char 
 				struct json_object *pobj;
 
 				if (json_object_object_get_ex(bobj, "path", &pobj) != 0) {
-					struct busclient *client;
-
-					client = (struct busclient *)malloc(sizeof(struct busclient));
-					client->path = strdup(json_object_get_string(pobj));
-					client->soc = soc;
-
-					nemolist_insert_tail(&busd->client_list, &client->link);
+					nemobusd_create_client(busd, soc, json_object_get_string(pobj));
 
 					json_object_put(pobj);
 				}
@@ -84,7 +111,7 @@ static void nemobus_dispatch_message(struct nemobusd *busd, int soc, const char 
 	}
 }
 
-static void nemobus_dispatch_message_task(int efd, struct bustask *task)
+static void nemobusd_dispatch_message_task(int efd, struct bustask *task)
 {
 	struct nemobusd *busd = task->busd;
 	struct epoll_event ep;
@@ -106,6 +133,8 @@ static void nemobus_dispatch_message_task(int efd, struct bustask *task)
 			ep.data.ptr = (void *)task;
 			epoll_ctl(efd, EPOLL_CTL_MOD, task->fd, &ep);
 		} else {
+			nemobusd_destroy_client(busd, task->fd);
+
 			epoll_ctl(efd, EPOLL_CTL_DEL, task->fd, &ep);
 
 			close(task->fd);
@@ -113,6 +142,8 @@ static void nemobus_dispatch_message_task(int efd, struct bustask *task)
 			free(task);
 		}
 	} else if (len == 0) {
+		nemobusd_destroy_client(busd, task->fd);
+
 		epoll_ctl(efd, EPOLL_CTL_DEL, task->fd, &ep);
 
 		close(task->fd);
@@ -129,12 +160,12 @@ static void nemobus_dispatch_message_task(int efd, struct bustask *task)
 			goto out1;
 
 		if (json_object_is_type(pobj, json_type_string)) {
-			nemobus_dispatch_message(busd, task->fd, json_object_get_string(pobj), bobj);
+			nemobusd_dispatch_message(busd, task->fd, json_object_get_string(pobj), bobj);
 		} else if (json_object_is_type(pobj, json_type_array)) {
 			for (i = 0; i < json_object_array_length(pobj); i++) {
 				cobj = json_object_array_get_idx(pobj, i);
 
-				nemobus_dispatch_message(busd, task->fd, json_object_get_string(cobj), bobj);
+				nemobusd_dispatch_message(busd, task->fd, json_object_get_string(cobj), bobj);
 			}
 		}
 
@@ -146,7 +177,7 @@ out0:
 	}
 }
 
-static void nemobus_dispatch_listen_task(int efd, struct bustask *task)
+static void nemobusd_dispatch_listen_task(int efd, struct bustask *task)
 {
 	struct nemobusd *busd = task->busd;
 	struct busclient *client;
@@ -165,7 +196,7 @@ static void nemobus_dispatch_listen_task(int efd, struct bustask *task)
 	ctask = (struct bustask *)malloc(sizeof(struct bustask));
 	ctask->fd = csoc;
 	ctask->busd = busd;
-	ctask->dispatch = nemobus_dispatch_message_task;
+	ctask->dispatch = nemobusd_dispatch_message_task;
 
 	os_epoll_add_fd(efd, csoc, EPOLLIN | EPOLLERR | EPOLLHUP, ctask);
 }
@@ -233,7 +264,7 @@ int main(int argc, char *argv[])
 	task = (struct bustask *)malloc(sizeof(struct bustask));
 	task->fd = lsoc;
 	task->busd = busd;
-	task->dispatch = nemobus_dispatch_listen_task;
+	task->dispatch = nemobusd_dispatch_listen_task;
 
 	os_epoll_add_fd(efd, lsoc, EPOLLIN | EPOLLERR | EPOLLHUP, task);
 
