@@ -15,6 +15,7 @@
 #include <nemobus.h>
 #include <nemohelper.h>
 #include <nemolist.h>
+#include <nemolog.h>
 #include <nemomisc.h>
 
 struct busclient {
@@ -55,6 +56,8 @@ static struct busclient *nemobusd_create_client(struct nemobusd *busd, int soc, 
 
 	nemolist_insert_tail(&busd->client_list, &client->link);
 
+	nemolog_message("BUSD", "advertise(%d:%s)\n", soc, path);
+
 	return client;
 }
 
@@ -65,6 +68,8 @@ static void nemobusd_destroy_client(struct nemobusd *busd, int soc)
 	nemolist_for_each(client, &busd->client_list, link) {
 		if (client->soc == soc) {
 			nemolist_remove(&client->link);
+
+			nemolog_message("BUSD", "disconnect(%d)\n", client->soc);
 
 			free(client->path);
 			free(client);
@@ -106,6 +111,8 @@ static void nemobusd_dispatch_message(struct nemobusd *busd, int soc, const char
 		nemolist_for_each(client, &busd->client_list, link) {
 			if (namespace_has_prefix(client->path, path) != 0) {
 				send(client->soc, contents, ncontents, MSG_NOSIGNAL | MSG_DONTWAIT);
+
+				nemolog_message("BUSD", "send(%d) [%s]\n", client->soc, contents);
 			}
 		}
 	}
@@ -151,6 +158,8 @@ static void nemobusd_dispatch_message_task(int efd, struct bustask *task)
 		free(task);
 	} else {
 		msg[len] = '\0';
+
+		nemolog_message("BUSD", "recv(%d) [%s]\n", task->fd, msg);
 
 		jobj = json_tokener_parse(msg);
 
@@ -199,6 +208,8 @@ static void nemobusd_dispatch_listen_task(int efd, struct bustask *task)
 	ctask->dispatch = nemobusd_dispatch_message_task;
 
 	os_epoll_add_fd(efd, csoc, EPOLLIN | EPOLLERR | EPOLLHUP, ctask);
+
+	nemolog_message("BUSD", "connect(%d)\n", csoc);
 }
 
 int main(int argc, char *argv[])
