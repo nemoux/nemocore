@@ -78,29 +78,15 @@ static void nemoenvs_execute_background(struct nemoenvs *envs, struct itemone *o
 	struct nemoshell *shell = envs->shell;
 	struct nemocompz *compz = shell->compz;
 	struct nemotoken *token;
-	struct itemattr *attr;
 	char cmds[512];
-	int32_t x, y;
-	const char *path;
-	const char *name;
-	const char *value;
+	int32_t x = nemoitem_one_get_iattr(one, "x", 0);
+	int32_t y = nemoitem_one_get_iattr(one, "y", 0);
+	const char *path = nemoitem_one_get_attr(one, "path");
 	pid_t pid;
 
-	x = nemoitem_one_get_iattr(one, "x", 0);
-	y = nemoitem_one_get_iattr(one, "y", 0);
 	path = nemoitem_one_get_attr(one, "path");
 
-	strcpy(cmds, path);
-
-	nemoitem_attr_for_each(attr, one) {
-		name = nemoitem_attr_get_name(attr);
-		value = nemoitem_attr_get_value(attr);
-
-		strcat(cmds, ";--");
-		strcat(cmds, name);
-		strcat(cmds, ";");
-		strcat(cmds, value);
-	}
+	nemoitem_one_save_string(one, cmds, sizeof(cmds), ";--", ";", ";--");
 
 	token = nemotoken_create(cmds, strlen(cmds));
 	nemotoken_divide(token, ';');
@@ -127,26 +113,11 @@ static void nemoenvs_execute_background(struct nemoenvs *envs, struct itemone *o
 static void nemoenvs_execute_daemon(struct nemoenvs *envs, struct itemone *one)
 {
 	struct nemotoken *token;
-	struct itemattr *attr;
+	const char *path = nemoitem_one_get_attr(one, "path");
 	char cmds[512];
-	const char *path;
-	const char *name;
-	const char *value;
 	pid_t pid;
 
-	path = nemoitem_one_get_attr(one, "path");
-
-	strcpy(cmds, path);
-
-	nemoitem_attr_for_each(attr, one) {
-		name = nemoitem_attr_get_name(attr);
-		value = nemoitem_attr_get_value(attr);
-
-		strcat(cmds, ";--");
-		strcat(cmds, name);
-		strcat(cmds, ";");
-		strcat(cmds, value);
-	}
+	nemoitem_one_save_string(one, cmds, sizeof(cmds), ";--", ";", ";--");
 
 	token = nemotoken_create(cmds, strlen(cmds));
 	nemotoken_divide(token, ';');
@@ -164,29 +135,13 @@ static void nemoenvs_execute_screensaver(struct nemoenvs *envs, struct itemone *
 	struct nemoshell *shell = envs->shell;
 	struct nemocompz *compz = shell->compz;
 	struct nemotoken *token;
-	struct itemattr *attr;
 	char cmds[512];
-	int32_t x, y;
-	const char *path;
-	const char *name;
-	const char *value;
+	int32_t x = nemoitem_one_get_iattr(one, "x", 0);
+	int32_t y = nemoitem_one_get_iattr(one, "y", 0);
+	const char *path = nemoitem_one_get_attr(one, "path");
 	pid_t pid;
 
-	x = nemoitem_one_get_iattr(one, "x", 0);
-	y = nemoitem_one_get_iattr(one, "y", 0);
-	path = nemoitem_one_get_attr(one, "path");
-
-	strcpy(cmds, path);
-
-	nemoitem_attr_for_each(attr, one) {
-		name = nemoitem_attr_get_name(attr);
-		value = nemoitem_attr_get_value(attr);
-
-		strcat(cmds, ";--");
-		strcat(cmds, name);
-		strcat(cmds, ";");
-		strcat(cmds, value);
-	}
+	nemoitem_one_save_string(one, cmds, sizeof(cmds), ";--", ";", ";--");
 
 	token = nemotoken_create(cmds, strlen(cmds));
 	nemotoken_divide(token, ';');

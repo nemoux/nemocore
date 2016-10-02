@@ -523,6 +523,35 @@ int nemoitem_one_copy_attr(struct itemone *done, struct itemone *sone)
 	return 1;
 }
 
+int nemoitem_one_save_string(struct itemone *one, char *buffer, int size, const char *atpath, const char *atattr, const char *atvalue)
+{
+	struct itemattr *attr;
+	const char *name;
+	const char *value;
+	int is_first_attr = 1;
+
+	strcpy(buffer, one->path);
+
+	nemoitem_attr_for_each(attr, one) {
+		name = nemoitem_attr_get_name(attr);
+		value = nemoitem_attr_get_value(attr);
+
+		if (is_first_attr != 0) {
+			strcat(buffer, atpath);
+
+			is_first_attr = 0;
+		} else {
+			strcat(buffer, atvalue);
+		}
+
+		strcat(buffer, name);
+		strcat(buffer, atattr);
+		strcat(buffer, value);
+	}
+
+	return 0;
+}
+
 static int nemoitem_load_json_object(struct nemoitem *item, struct itemone *one, struct json_object *jobj)
 {
 	struct itemone *cone;
