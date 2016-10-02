@@ -742,13 +742,13 @@ int nemotool_watch_source(struct nemotool *tool, int fd, const char *events, nem
 
 	ep.events = 0x0;
 	if (strchr(events, 'r') != NULL)
-		ep.events = EPOLLIN;
+		ep.events |= EPOLLIN;
 	if (strchr(events, 'w') != NULL)
-		ep.events = EPOLLOUT;
+		ep.events |= EPOLLOUT;
 	if (strchr(events, 'e') != NULL)
-		ep.events = EPOLLERR;
+		ep.events |= EPOLLERR;
 	if (strchr(events, 'u') != NULL)
-		ep.events = EPOLLHUP;
+		ep.events |= EPOLLHUP;
 
 	ep.data.ptr = source;
 	epoll_ctl(tool->epoll_fd, EPOLL_CTL_ADD, fd, &ep);
@@ -778,13 +778,13 @@ void nemotool_change_source(struct nemotool *tool, int fd, const char *events)
 
 		ep.events = 0x0;
 		if (strchr(events, 'r') != NULL)
-			ep.events = EPOLLIN;
+			ep.events |= EPOLLIN;
 		if (strchr(events, 'w') != NULL)
-			ep.events = EPOLLOUT;
+			ep.events |= EPOLLOUT;
 		if (strchr(events, 'e') != NULL)
-			ep.events = EPOLLERR;
+			ep.events |= EPOLLERR;
 		if (strchr(events, 'u') != NULL)
-			ep.events = EPOLLHUP;
+			ep.events |= EPOLLHUP;
 
 		ep.data.ptr = source;
 		epoll_ctl(tool->epoll_fd, EPOLL_CTL_MOD, fd, &ep);
