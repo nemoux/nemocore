@@ -65,7 +65,7 @@ struct itemone *nemoitem_search_attr(struct nemoitem *item, const char *path, co
 	struct itemone *one;
 
 	nemolist_for_each(one, &item->list, link) {
-		if ((path == NULL || strcmp(one->path, path) == 0) && nemoitem_one_has_attr(one, name, value) != 0)
+		if ((path == NULL || strcmp(one->path, path) == 0) && nemoitem_one_has_sattr(one, name, value) != 0)
 			return one;
 	}
 
@@ -90,7 +90,7 @@ struct itemone *nemoitem_search_attrs(struct nemoitem *item, const char *path, c
 			continue;
 
 		for (i = 0; i < ntokens; i++) {
-			if (nemoitem_one_has_attr(one,
+			if (nemoitem_one_has_sattr(one,
 						nemotoken_get_token(token, i * 2 + 0),
 						nemotoken_get_token(token, i * 2 + 1)) == 0)
 				break;
@@ -181,7 +181,7 @@ struct itembox *nemoitem_box_search_attr(struct nemoitem *item, const char *path
 	int count = 0;
 
 	nemolist_for_each(one, &item->list, link) {
-		if ((path == NULL || nemoitem_one_has_path_prefix(one, path) != 0) && nemoitem_one_has_attr(one, name, value) != 0)
+		if ((path == NULL || nemoitem_one_has_path_prefix(one, path) != 0) && nemoitem_one_has_sattr(one, name, value) != 0)
 			count++;
 	}
 
@@ -198,7 +198,7 @@ struct itembox *nemoitem_box_search_attr(struct nemoitem *item, const char *path
 		goto err1;
 
 	nemolist_for_each(one, &item->list, link) {
-		if ((path == NULL || nemoitem_one_has_path_prefix(one, path) != 0) && nemoitem_one_has_attr(one, name, value) != 0)
+		if ((path == NULL || nemoitem_one_has_path_prefix(one, path) != 0) && nemoitem_one_has_sattr(one, name, value) != 0)
 			box->ones[box->nones++] = one;
 	}
 
@@ -230,7 +230,7 @@ struct itembox *nemoitem_box_search_attrs(struct nemoitem *item, const char *pat
 			continue;
 
 		for (i = 0; i < ntokens; i++) {
-			if (nemoitem_one_has_attr(one,
+			if (nemoitem_one_has_sattr(one,
 						nemotoken_get_token(token, i * 2 + 0),
 						nemotoken_get_token(token, i * 2 + 1)) == 0)
 				break;
@@ -258,7 +258,7 @@ struct itembox *nemoitem_box_search_attrs(struct nemoitem *item, const char *pat
 			continue;
 
 		for (i = 0; i < ntokens; i++) {
-			if (nemoitem_one_has_attr(one,
+			if (nemoitem_one_has_sattr(one,
 						nemotoken_get_token(token, i * 2 + 0),
 						nemotoken_get_token(token, i * 2 + 1)) == 0)
 				break;
@@ -495,17 +495,13 @@ void nemoitem_one_put_attr(struct itemone *one, const char *name)
 	}
 }
 
-int nemoitem_one_has_attr(struct itemone *one, const char *name, const char *value)
+int nemoitem_one_has_attr(struct itemone *one, const char *name)
 {
 	struct itemattr *attr;
 
 	nemolist_for_each(attr, &one->list, link) {
-		if (strcmp(attr->name, name) == 0) {
-			if (value == NULL || strcmp(attr->value, value) == 0)
-				return 1;
-
-			break;
-		}
+		if (strcmp(attr->name, name) == 0)
+			return 1;
 	}
 
 	return 0;

@@ -78,7 +78,7 @@ extern int nemoitem_one_set_attr(struct itemone *one, const char *name, const ch
 extern int nemoitem_one_set_attr_format(struct itemone *one, const char *name, const char *fmt, ...);
 extern const char *nemoitem_one_get_attr(struct itemone *one, const char *name);
 extern void nemoitem_one_put_attr(struct itemone *one, const char *name);
-extern int nemoitem_one_has_attr(struct itemone *one, const char *name, const char *value);
+extern int nemoitem_one_has_attr(struct itemone *one, const char *name);
 extern int nemoitem_one_copy_attr(struct itemone *done, struct itemone *sone);
 
 extern int nemoitem_load_json(struct nemoitem *item, struct json_object *jobj);
@@ -129,7 +129,9 @@ static inline int nemoitem_one_has_fattr(struct itemone *one, const char *name, 
 
 static inline int nemoitem_one_has_sattr(struct itemone *one, const char *name, const char *value)
 {
-	return nemoitem_one_has_attr(one, name, value);
+	const char *str = nemoitem_one_get_attr(one, name);
+
+	return str != NULL ? strcmp(str, value) == 0 : 0;
 }
 
 static inline int nemoitem_get_iattr(struct nemoitem *item, const char *path, const char *name, int value)
