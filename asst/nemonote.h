@@ -33,8 +33,8 @@ struct jsoniter {
 	struct json_object *jobj;
 	int needs_free;
 
-	struct json_object_iterator jiter;
-	struct json_object_iterator jiter0;
+	struct json_object_iterator siter;
+	struct json_object_iterator eiter;
 };
 
 extern struct nemonote *nemonote_create(const char *path);
@@ -61,6 +61,7 @@ extern struct noteiter *nemonote_create_iterator(struct nemonote *note);
 extern void nemonote_destroy_iterator(struct noteiter *iter);
 
 extern int nemonote_iterator_next(struct noteiter *iter);
+extern int nemonote_iterator_valid(struct noteiter *iter);
 extern const char *nemonote_iterator_key(struct noteiter *iter);
 extern const char *nemonote_iterator_value(struct noteiter *iter);
 extern struct noteobject *nemonote_iterator_object(struct noteiter *iter);
@@ -68,6 +69,7 @@ extern struct noteobject *nemonote_iterator_object(struct noteiter *iter);
 extern struct jsoniter *nemonote_json_iterator_create(const char *contents);
 extern void nemonote_json_iterator_destroy(struct jsoniter *iter);
 extern int nemonote_json_iterator_next(struct jsoniter *iter);
+extern int nemonote_json_iterator_valid(struct jsoniter *iter);
 extern const char *nemonote_json_iterator_key(struct jsoniter *iter);
 extern const char *nemonote_json_iterator_value(struct jsoniter *iter);
 

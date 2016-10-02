@@ -36,6 +36,7 @@ extern int nemokeys_iterator_seek_to_last(struct keysiter *iter);
 extern int nemokeys_iterator_seek(struct keysiter *iter, const char *key);
 extern int nemokeys_iterator_next(struct keysiter *iter);
 extern int nemokeys_iterator_prev(struct keysiter *iter);
+extern int nemokeys_iterator_valid(struct keysiter *iter);
 
 extern const char *nemokeys_iterator_key(struct keysiter *iter, size_t *length);
 extern const char *nemokeys_iterator_value(struct keysiter *iter, size_t *length);

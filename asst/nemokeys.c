@@ -140,6 +140,7 @@ struct keysiter *nemokeys_create_iterator(struct nemokeys *keys)
 	memset(iter, 0, sizeof(struct keysiter));
 
 	iter->iter = leveldb_create_iterator(keys->db, keys->roptions);
+	leveldb_iter_seek_to_first(iter->iter);
 
 	return iter;
 }
@@ -183,6 +184,11 @@ int nemokeys_iterator_prev(struct keysiter *iter)
 {
 	leveldb_iter_prev(iter->iter);
 
+	return leveldb_iter_valid(iter->iter) != 0;
+}
+
+int nemokeys_iterator_valid(struct keysiter *iter)
+{
 	return leveldb_iter_valid(iter->iter) != 0;
 }
 

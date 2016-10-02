@@ -82,25 +82,19 @@ int main(int argc, char *argv[])
 		return -1;
 
 	if (strcmp(cmd, "dump") == 0) {
-		niter = nemonote_create_iterator(note);
-		if (niter != NULL) {
-			do {
-				fprintf(stderr, "[%s]\n", nemonote_iterator_key(niter));
+		for (niter = nemonote_create_iterator(note); nemonote_iterator_valid(niter) != 0; nemonote_iterator_next(niter)) {
+			fprintf(stderr, "[%s]\n", nemonote_iterator_key(niter));
 
-				jiter = nemonote_json_iterator_create(nemonote_iterator_value(niter));
-				if (jiter != NULL) {
-					do {
-						fprintf(stderr, "  %s: %s\n",
-								nemonote_json_iterator_key(jiter),
-								nemonote_json_iterator_value(jiter));
-					} while (nemonote_json_iterator_next(jiter) != 0);
+			for (jiter = nemonote_json_iterator_create(nemonote_iterator_value(niter)); nemonote_json_iterator_valid(jiter) != 0; nemonote_json_iterator_next(jiter)) {
+				fprintf(stderr, "  %s: %s\n",
+						nemonote_json_iterator_key(jiter),
+						nemonote_json_iterator_value(jiter));
+			}
 
-					nemonote_json_iterator_destroy(jiter);
-				}
-			} while (nemonote_iterator_next(niter) != 0);
-
-			nemonote_destroy_iterator(niter);
+			nemonote_json_iterator_destroy(jiter);
 		}
+
+		nemonote_destroy_iterator(niter);
 	} else if (strcmp(cmd, "clear") == 0) {
 		nemonote_clear(note);
 	} else if (strcmp(cmd, "load") == 0) {
@@ -167,16 +161,13 @@ int main(int argc, char *argv[])
 				if (value != NULL)
 					fprintf(stderr, "%s: %s\n", attr, value);
 			} else {
-				jiter = nemonote_json_iterator_create(nemonote_get(note, ns));
-				if (jiter != NULL) {
-					do {
-						fprintf(stderr, "%s: %s\n",
-								nemonote_json_iterator_key(jiter),
-								nemonote_json_iterator_value(jiter));
-					} while (nemonote_json_iterator_next(jiter) != 0);
-
-					nemonote_json_iterator_destroy(jiter);
+				for (jiter = nemonote_json_iterator_create(nemonote_get(note, ns)); nemonote_json_iterator_valid(jiter) != 0; nemonote_json_iterator_next(jiter)) {
+					fprintf(stderr, "%s: %s\n",
+							nemonote_json_iterator_key(jiter),
+							nemonote_json_iterator_value(jiter));
 				}
+
+				nemonote_json_iterator_destroy(jiter);
 			}
 		} else if (strcmp(cmd, "put") == 0) {
 			if (attr != NULL)

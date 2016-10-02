@@ -195,18 +195,10 @@ struct jsoniter *nemonote_object_create_iterator(struct nemonote *note, struct n
 	iter->jobj = obj->jobj;
 	iter->needs_free = 0;
 
-	iter->jiter = json_object_iter_begin(iter->jobj);
-	iter->jiter0 = json_object_iter_end(iter->jobj);
-
-	if (json_object_iter_equal(&iter->jiter, &iter->jiter0) != 0)
-		goto err1;
+	iter->siter = json_object_iter_begin(iter->jobj);
+	iter->eiter = json_object_iter_end(iter->jobj);
 
 	return iter;
-
-err1:
-	free(iter);
-
-	return NULL;
 }
 
 struct noteiter *nemonote_create_iterator(struct nemonote *note)
@@ -220,16 +212,16 @@ struct noteiter *nemonote_create_iterator(struct nemonote *note)
 	iter->kiter = nemokeys_create_iterator(note->keys);
 	if (iter->kiter == NULL)
 		goto err1;
-	if (nemokeys_iterator_seek_to_first(iter->kiter) == 0)
-		goto err2;
 
-	iter->key = nemokeys_iterator_key_safe(iter->kiter);
-	iter->value = nemokeys_iterator_value_safe(iter->kiter);
+	if (nemokeys_iterator_seek_to_first(iter->kiter) != 0) {
+		iter->key = nemokeys_iterator_key_safe(iter->kiter);
+		iter->value = nemokeys_iterator_value_safe(iter->kiter);
+	} else {
+		iter->key = NULL;
+		iter->value = NULL;
+	}
 
 	return iter;
-
-err2:
-	nemokeys_destroy_iterator(iter->kiter);
 
 err1:
 	free(iter);
@@ -267,6 +259,11 @@ int nemonote_iterator_next(struct noteiter *iter)
 	iter->value = nemokeys_iterator_value_safe(iter->kiter);
 
 	return 1;
+}
+
+int nemonote_iterator_valid(struct noteiter *iter)
+{
+	return iter->key != NULL;
 }
 
 const char *nemonote_iterator_key(struct noteiter *iter)
@@ -313,20 +310,10 @@ struct jsoniter *nemonote_json_iterator_create(const char *contents)
 	iter->jobj = json_tokener_parse(contents);
 	iter->needs_free = 1;
 
-	iter->jiter = json_object_iter_begin(iter->jobj);
-	iter->jiter0 = json_object_iter_end(iter->jobj);
-
-	if (json_object_iter_equal(&iter->jiter, &iter->jiter0) != 0)
-		goto err1;
+	iter->siter = json_object_iter_begin(iter->jobj);
+	iter->eiter = json_object_iter_end(iter->jobj);
 
 	return iter;
-
-err1:
-	json_object_put(iter->jobj);
-
-	free(iter);
-
-	return NULL;
 }
 
 void nemonote_json_iterator_destroy(struct jsoniter *iter)
@@ -339,17 +326,22 @@ void nemonote_json_iterator_destroy(struct jsoniter *iter)
 
 int nemonote_json_iterator_next(struct jsoniter *iter)
 {
-	json_object_iter_next(&iter->jiter);
+	json_object_iter_next(&iter->siter);
 
-	return json_object_iter_equal(&iter->jiter, &iter->jiter0) == 0;
+	return json_object_iter_equal(&iter->siter, &iter->eiter) == 0;
+}
+
+int nemonote_json_iterator_valid(struct jsoniter *iter)
+{
+	return json_object_iter_equal(&iter->siter, &iter->eiter) == 0;
 }
 
 const char *nemonote_json_iterator_key(struct jsoniter *iter)
 {
-	return json_object_iter_peek_name(&iter->jiter);
+	return json_object_iter_peek_name(&iter->siter);
 }
 
 const char *nemonote_json_iterator_value(struct jsoniter *iter)
 {
-	return json_object_get_string(json_object_iter_peek_value(&iter->jiter));
+	return json_object_get_string(json_object_iter_peek_value(&iter->siter));
 }

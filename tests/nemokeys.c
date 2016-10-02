@@ -69,16 +69,13 @@ int main(int argc, char *argv[])
 	} else if (strcmp(cmd, "put") == 0) {
 		nemokeys_put(keys, key);
 	} else if (strcmp(cmd, "dump") == 0) {
-		iter = nemokeys_create_iterator(keys);
-		if (iter != NULL && nemokeys_iterator_seek_to_first(iter) != 0) {
-			do {
-				fprintf(stderr, "%s: %s\n",
-						nemokeys_iterator_key_safe(iter),
-						nemokeys_iterator_value_safe(iter));
-			} while (nemokeys_iterator_next(iter) != 0);
-
-			nemokeys_destroy_iterator(iter);
+		for (iter = nemokeys_create_iterator(keys); nemokeys_iterator_valid(iter) != 0; nemokeys_iterator_next(iter)) {
+			fprintf(stderr, "%s: %s\n",
+					nemokeys_iterator_key_safe(iter),
+					nemokeys_iterator_value_safe(iter));
 		}
+
+		nemokeys_destroy_iterator(iter);
 	}
 
 	nemokeys_destroy(keys);
