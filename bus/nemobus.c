@@ -121,6 +121,37 @@ int nemobus_send_format(struct nemobus *bus, const char *fmt, ...)
 	return r;
 }
 
+struct busmsg *nemobus_recv(struct nemobus *bus)
+{
+	struct busmsg *msg;
+	char buffer[4096];
+	int r;
+
+	r = recv(bus->soc, buffer, sizeof(buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
+	if (r <= 0)
+		return NULL;
+	buffer[r] = '\0';
+
+	return nemobus_msg_from_json_string(buffer);
+}
+
+struct nemoitem *nemobus_recv_item(struct nemobus *bus)
+{
+	struct nemoitem *item;
+	char buffer[4096];
+	int r;
+
+	r = recv(bus->soc, buffer, sizeof(buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
+	if (r <= 0)
+		return NULL;
+	buffer[r] = '\0';
+
+	item = nemoitem_create();
+	nemoitem_load_json_string(item, buffer);
+
+	return item;
+}
+
 int nemobus_recv_raw(struct nemobus *bus, char *buffer, size_t size)
 {
 	return recv(bus->soc, buffer, size, MSG_NOSIGNAL | MSG_DONTWAIT);
