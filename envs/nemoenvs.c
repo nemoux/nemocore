@@ -14,7 +14,6 @@
 #include <shell.h>
 #include <compz.h>
 #include <view.h>
-#include <monitor.h>
 #include <xserver.h>
 #include <waylandhelper.h>
 
