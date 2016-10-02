@@ -539,20 +539,18 @@ static const struct wl_registry_listener registry_listener = {
 	registry_handle_global_remove
 };
 
-static void nemotool_dispatch_wayland_display(void *data, uint32_t events)
+static void nemotool_dispatch_wayland_display(void *data, const char *events)
 {
 	struct nemotool *tool = (struct nemotool *)data;
 	struct epoll_event ep;
 	int ret;
 
-	tool->display_events = events;
-
-	if (events & EPOLLERR || events & EPOLLHUP) {
+	if (strchr(events, 'e') != NULL || strchr(events, 'h') != NULL) {
 		tool->running = 0;
 		return;
 	}
 
-	if (events & EPOLLIN) {
+	if (strchr(events, 'r') != NULL) {
 		ret = wl_display_dispatch(tool->display);
 		if (ret == -1) {
 			tool->running = 0;
@@ -560,10 +558,10 @@ static void nemotool_dispatch_wayland_display(void *data, uint32_t events)
 		}
 	}
 
-	if (events & EPOLLOUT) {
+	if (strchr(events, 'w') != NULL) {
 		ret = wl_display_flush(tool->display);
 		if (ret == 0) {
-			nemotool_change_source(tool, tool->display_fd, EPOLLIN | EPOLLERR | EPOLLHUP);
+			nemotool_change_source(tool, tool->display_fd, "reh");
 		} else if (ret == -1 && errno != EAGAIN) {
 			tool->running = 0;
 			return;
@@ -576,7 +574,7 @@ void nemotool_connect_wayland(struct nemotool *tool, const char *name)
 	tool->display = wl_display_connect(name);
 	tool->display_fd = wl_display_get_fd(tool->display);
 
-	nemotool_watch_source(tool, tool->display_fd, EPOLLIN | EPOLLERR | EPOLLHUP, nemotool_dispatch_wayland_display, tool);
+	nemotool_watch_source(tool, tool->display_fd, "reh", nemotool_dispatch_wayland_display, tool);
 
 	tool->registry = wl_display_get_registry(tool->display);
 	wl_registry_add_listener(tool->registry, &registry_listener, tool);
@@ -648,7 +646,7 @@ void nemotool_dispatch(struct nemotool *tool)
 
 		ret = wl_display_flush(tool->display);
 		if (ret < 0 && errno == EAGAIN) {
-			nemotool_change_source(tool, tool->display_fd, EPOLLIN | EPOLLOUT | EPOLLERR | EPOLLHUP);
+			nemotool_change_source(tool, tool->display_fd, "rweh");
 		} else if (ret < 0) {
 			return;
 		}
@@ -658,7 +656,20 @@ void nemotool_dispatch(struct nemotool *tool)
 	for (i = 0; i < count; i++) {
 		source = ep[i].data.ptr;
 		if (source->fd >= 0) {
-			source->dispatch(source->data, ep[i].events);
+			char events[8];
+			int nevents = 0;
+
+			if (ep[i].events & EPOLLIN)
+				events[nevents++] = 'r';
+			if (ep[i].events & EPOLLOUT)
+				events[nevents++] = 'w';
+			if (ep[i].events & EPOLLERR)
+				events[nevents++] = 'e';
+			if (ep[i].events & EPOLLHUP)
+				events[nevents++] = 'h';
+			events[nevents] = '\0';
+
+			source->dispatch(source->data, events);
 		} else {
 			nemotool_destroy_source(source);
 		}
@@ -716,7 +727,7 @@ void nemotool_exit(struct nemotool *tool)
 	tool->running = 0;
 }
 
-int nemotool_watch_source(struct nemotool *tool, int fd, uint32_t events, nemotool_dispatch_source_t dispatch, void *data)
+int nemotool_watch_source(struct nemotool *tool, int fd, const char *events, nemotool_dispatch_source_t dispatch, void *data)
 {
 	struct nemosource *source;
 	struct epoll_event ep;
@@ -729,7 +740,16 @@ int nemotool_watch_source(struct nemotool *tool, int fd, uint32_t events, nemoto
 	source->data = data;
 	source->fd = fd;
 
-	ep.events = events;
+	ep.events = 0x0;
+	if (strchr(events, 'r') != NULL)
+		ep.events = EPOLLIN;
+	if (strchr(events, 'w') != NULL)
+		ep.events = EPOLLOUT;
+	if (strchr(events, 'e') != NULL)
+		ep.events = EPOLLERR;
+	if (strchr(events, 'u') != NULL)
+		ep.events = EPOLLHUP;
+
 	ep.data.ptr = source;
 	epoll_ctl(tool->epoll_fd, EPOLL_CTL_ADD, fd, &ep);
 
@@ -748,7 +768,7 @@ void nemotool_unwatch_source(struct nemotool *tool, int fd)
 	epoll_ctl(tool->epoll_fd, EPOLL_CTL_DEL, fd, NULL);
 }
 
-void nemotool_change_source(struct nemotool *tool, int fd, uint32_t events)
+void nemotool_change_source(struct nemotool *tool, int fd, const char *events)
 {
 	struct nemosource *source;
 
@@ -756,7 +776,16 @@ void nemotool_change_source(struct nemotool *tool, int fd, uint32_t events)
 	if (source != NULL) {
 		struct epoll_event ep;
 
-		ep.events = events;
+		ep.events = 0x0;
+		if (strchr(events, 'r') != NULL)
+			ep.events = EPOLLIN;
+		if (strchr(events, 'w') != NULL)
+			ep.events = EPOLLOUT;
+		if (strchr(events, 'e') != NULL)
+			ep.events = EPOLLERR;
+		if (strchr(events, 'u') != NULL)
+			ep.events = EPOLLHUP;
+
 		ep.data.ptr = source;
 		epoll_ctl(tool->epoll_fd, EPOLL_CTL_MOD, fd, &ep);
 	}

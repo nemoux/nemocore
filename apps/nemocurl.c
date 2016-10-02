@@ -16,7 +16,7 @@
 
 static int nemocurl_perform(struct nemocurl *curl);
 
-static void nemocurl_dispatch_event(void *data, uint32_t events)
+static void nemocurl_dispatch_event(void *data, const char *events)
 {
 	struct nemocurl *curl = (struct nemocurl *)data;
 
@@ -73,7 +73,8 @@ static int nemocurl_update_fds(struct nemocurl *curl)
 	fd_set readfds;
 	fd_set writefds;
 	fd_set errfds;
-	uint32_t events;
+	char events[8];
+	int nevents;
 	int maxfd;
 	int fd;
 	int i;
@@ -93,16 +94,17 @@ static int nemocurl_update_fds(struct nemocurl *curl)
 	curl->nfds = 0;
 
 	for (fd = 0; fd <= maxfd; fd++) {
-		events = 0;
+		nevents = 0;
 
 		if (FD_ISSET(fd, &readfds))
-			events |= EPOLLIN;
+			events[nevents++] = 'r';
 		if (FD_ISSET(fd, &writefds))
-			events |= EPOLLOUT;
+			events[nevents++] = 'w';
 		if (FD_ISSET(fd, &errfds))
-			events |= EPOLLERR;
+			events[nevents++] = 'e';
+		events[nevents] = '\0';
 
-		if (events == 0)
+		if (nevents == 0)
 			continue;
 
 		nemotool_watch_source(curl->tool, fd, events, nemocurl_dispatch_event, curl);

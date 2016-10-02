@@ -45,7 +45,7 @@ typedef enum {
 
 struct nemotool;
 
-typedef void (*nemotool_dispatch_source_t)(void *data, uint32_t events);
+typedef void (*nemotool_dispatch_source_t)(void *data, const char *events);
 typedef void (*nemotool_dispatch_idle_t)(void *data);
 typedef void (*nemotool_dispatch_global_t)(struct nemotool *tool, uint32_t id, const char *interface, uint32_t version);
 
@@ -117,7 +117,6 @@ struct nemotool {
 	int epoll_fd;
 
 	int display_fd;
-	uint32_t display_events;
 
 	nemotool_dispatch_global_t dispatch_global;
 
@@ -153,9 +152,9 @@ extern void nemotool_flush(struct nemotool *tool);
 extern int nemotool_roundtrip(struct nemotool *tool);
 extern void nemotool_exit(struct nemotool *tool);
 
-extern int nemotool_watch_source(struct nemotool *tool, int fd, uint32_t events, nemotool_dispatch_source_t dispatch, void *data);
+extern int nemotool_watch_source(struct nemotool *tool, int fd, const char *events, nemotool_dispatch_source_t dispatch, void *data);
 extern void nemotool_unwatch_source(struct nemotool *tool, int fd);
-extern void nemotool_change_source(struct nemotool *tool, int fd, uint32_t events);
+extern void nemotool_change_source(struct nemotool *tool, int fd, const char *events);
 extern int nemotool_get_fd(struct nemotool *tool);
 
 extern struct nemotool *nemotool_create(void);

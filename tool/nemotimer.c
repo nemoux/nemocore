@@ -12,7 +12,7 @@
 #include <nemotimer.h>
 #include <nemomisc.h>
 
-static void nemotimer_dispatch_event(void *data, uint32_t events)
+static void nemotimer_dispatch_event(void *data, const char *events)
 {
 	struct nemotimer *timer = (struct nemotimer *)data;
 	uint64_t exp;
@@ -39,7 +39,7 @@ struct nemotimer *nemotimer_create(struct nemotool *tool)
 
 	timer->tool = tool;
 
-	nemotool_watch_source(tool, timer->timer_fd, EPOLLIN, nemotimer_dispatch_event, timer);
+	nemotool_watch_source(tool, timer->timer_fd, "r", nemotimer_dispatch_event, timer);
 
 	return timer;
 

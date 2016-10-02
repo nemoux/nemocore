@@ -11,7 +11,7 @@
 #include <nemotool.h>
 #include <nemomisc.h>
 
-static void nemomonitor_dispatch_event(void *data, uint32_t events)
+static void nemomonitor_dispatch_event(void *data, const char *events)
 {
 	struct nemomonitor *monitor = (struct nemomonitor *)data;
 
@@ -32,7 +32,7 @@ struct nemomonitor *nemomonitor_create(struct nemotool *tool, int fd, nemomonito
 	monitor->callback = callback;
 	monitor->data = data;
 
-	nemotool_watch_source(tool, fd, EPOLLIN | EPOLLERR | EPOLLHUP, nemomonitor_dispatch_event, monitor);
+	nemotool_watch_source(tool, fd, "reh", nemomonitor_dispatch_event, monitor);
 
 	return monitor;
 

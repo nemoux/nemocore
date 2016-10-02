@@ -281,7 +281,7 @@ static const struct wl_surface_listener surface_listener = {
 	surface_leave
 };
 
-static void nemocanvas_dispatch_frame_event(void *data, uint32_t events)
+static void nemocanvas_dispatch_frame_event(void *data, const char *events)
 {
 	struct nemocanvas *canvas = (struct nemocanvas *)data;
 
@@ -301,7 +301,7 @@ struct nemocanvas *nemocanvas_create(struct nemotool *tool)
 	if (canvas->eventfd < 0)
 		goto err1;
 
-	nemotool_watch_source(tool, canvas->eventfd, EPOLLIN, nemocanvas_dispatch_frame_event, canvas);
+	nemotool_watch_source(tool, canvas->eventfd, "r", nemocanvas_dispatch_frame_event, canvas);
 
 	nemosignal_init(&canvas->destroy_signal);
 
