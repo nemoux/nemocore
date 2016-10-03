@@ -136,7 +136,7 @@ static void nemobusd_dispatch_message_task(int efd, struct bustask *task)
 
 		jobj = json_tokener_parse(msg);
 
-		if (json_object_object_get_ex(jobj, "path", &pobj) == 0)
+		if (json_object_object_get_ex(jobj, "to", &pobj) == 0)
 			goto out0;
 		path = json_object_get_string(pobj);
 
@@ -145,7 +145,7 @@ static void nemobusd_dispatch_message_task(int efd, struct bustask *task)
 			struct json_object *tobj1;
 
 			json_object_object_foreach(jobj, key, value) {
-				if (strcmp(key, "path") == 0)
+				if (strcmp(key, "from") == 0 || strcmp(key, "to") == 0)
 					continue;
 
 				if (strcmp(key, "advertise") == 0) {
@@ -172,7 +172,7 @@ static void nemobusd_dispatch_message_task(int efd, struct bustask *task)
 			struct busclient *client;
 
 			json_object_object_foreach(jobj, key, value) {
-				if (strcmp(key, "path") == 0)
+				if (strcmp(key, "from") == 0 || strcmp(key, "to") == 0)
 					continue;
 
 				nemolist_for_each(client, &busd->client_list, link) {

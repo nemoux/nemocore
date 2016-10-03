@@ -47,8 +47,8 @@ extern void nemobus_disconnect(struct nemobus *bus);
 
 extern int nemobus_advertise(struct nemobus *bus, const char *type, const char *path);
 
-extern int nemobus_send(struct nemobus *bus, const char *path, struct busmsg *msg);
-extern int nemobus_send_many(struct nemobus *bus, const char *path, struct busmsg **msgs, int count);
+extern int nemobus_send(struct nemobus *bus, const char *from, const char *to, struct busmsg *msg);
+extern int nemobus_send_many(struct nemobus *bus, const char *from, const char *to, struct busmsg **msgs, int count);
 extern int nemobus_send_raw(struct nemobus *bus, const char *buffer);
 extern int nemobus_send_format(struct nemobus *bus, const char *fmt, ...);
 extern struct busmsg *nemobus_recv(struct nemobus *bus);

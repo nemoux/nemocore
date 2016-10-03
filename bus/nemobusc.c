@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 
 	msg = nemobus_msg_from_json_string(contents);
 
-	nemobus_send(bus, path, msg);
+	nemobus_send(bus, "/nemobusc", path, msg);
 
 	nemobus_msg_destroy(msg);
 

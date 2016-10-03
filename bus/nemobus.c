@@ -74,17 +74,18 @@ void nemobus_disconnect(struct nemobus *bus)
 
 int nemobus_advertise(struct nemobus *bus, const char *type, const char *path)
 {
-	return nemobus_send_format(bus, "{ \"path\": \"/nemobusd\", \"advertise\": { \"type\": \"%s\", \"path\": \"%s\" } }", type, path);
+	return nemobus_send_format(bus, "{ \"to\": \"/nemobusd\", \"advertise\": { \"type\": \"%s\", \"path\": \"%s\" } }", type, path);
 }
 
-int nemobus_send(struct nemobus *bus, const char *path, struct busmsg *msg)
+int nemobus_send(struct nemobus *bus, const char *from, const char *to, struct busmsg *msg)
 {
 	struct json_object *jobj;
 	const char *contents;
 	int r;
 
 	jobj = json_object_new_object();
-	json_object_object_add(jobj, "path", json_object_new_string(path));
+	json_object_object_add(jobj, "from", json_object_new_string(from));
+	json_object_object_add(jobj, "to", json_object_new_string(to));
 	json_object_object_add(jobj, nemobus_msg_get_name(msg), nemobus_msg_to_json(msg));
 
 	contents = json_object_get_string(jobj);
@@ -96,7 +97,7 @@ int nemobus_send(struct nemobus *bus, const char *path, struct busmsg *msg)
 	return r;
 }
 
-int nemobus_send_many(struct nemobus *bus, const char *path, struct busmsg **msgs, int count)
+int nemobus_send_many(struct nemobus *bus, const char *from, const char *to, struct busmsg **msgs, int count)
 {
 	struct json_object *jobj;
 	const char *contents;
@@ -104,7 +105,8 @@ int nemobus_send_many(struct nemobus *bus, const char *path, struct busmsg **msg
 	int i;
 
 	jobj = json_object_new_object();
-	json_object_object_add(jobj, "path", json_object_new_string(path));
+	json_object_object_add(jobj, "from", json_object_new_string(from));
+	json_object_object_add(jobj, "to", json_object_new_string(to));
 
 	for (i = 0; i < count; i++)
 		json_object_object_add(jobj, nemobus_msg_get_name(msgs[i]), nemobus_msg_to_json(msgs[i]));
@@ -170,7 +172,7 @@ struct nemoitem *nemobus_recv_item(struct nemobus *bus)
 	if (jobj != NULL) {
 		struct json_object *pobj;
 
-		if (json_object_object_get_ex(jobj, "path", &pobj) != 0) {
+		if (json_object_object_get_ex(jobj, "to", &pobj) != 0) {
 			item = nemoitem_create();
 
 			nemoitem_load_json(item, json_object_get_string(pobj), jobj);
