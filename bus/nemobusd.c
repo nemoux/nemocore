@@ -69,53 +69,12 @@ static void nemobusd_destroy_client(struct nemobusd *busd, int soc)
 		if (client->soc == soc) {
 			nemolist_remove(&client->link);
 
-			nemolog_message("BUSD", "disconnect(%d)\n", client->soc);
-
 			free(client->path);
 			free(client);
-
-			break;
 		}
 	}
-}
 
-static void nemobusd_dispatch_message(struct nemobusd *busd, int soc, const char *path, struct json_object *bobj)
-{
-	if (strcmp(path, "/nemobusd") == 0) {
-		struct json_object *tobj;
-		const char *type;
-
-		if (json_object_object_get_ex(bobj, "type", &tobj) != 0) {
-			type = json_object_get_string(tobj);
-
-			if (strcmp(type, "advertise") == 0) {
-				struct json_object *pobj;
-
-				if (json_object_object_get_ex(bobj, "path", &pobj) != 0) {
-					nemobusd_create_client(busd, soc, json_object_get_string(pobj));
-
-					json_object_put(pobj);
-				}
-			}
-
-			json_object_put(tobj);
-		}
-	} else {
-		struct busclient *client;
-		const char *contents;
-		int ncontents;
-
-		contents = json_object_get_string(bobj);
-		ncontents = strlen(contents);
-
-		nemolist_for_each(client, &busd->client_list, link) {
-			if (namespace_has_prefix(client->path, path) != 0) {
-				send(client->soc, contents, ncontents, MSG_NOSIGNAL | MSG_DONTWAIT);
-
-				nemolog_message("BUSD", "send(%d) [%s]\n", client->soc, contents);
-			}
-		}
-	}
+	nemolog_message("BUSD", "disconnect(%d)\n", soc);
 }
 
 static void nemobusd_dispatch_message_task(int efd, struct bustask *task)
@@ -124,14 +83,9 @@ static void nemobusd_dispatch_message_task(int efd, struct bustask *task)
 	struct epoll_event ep;
 	struct json_object *jobj;
 	struct json_object *pobj;
-	struct json_object *bobj;
-	struct json_object *cobj;
-	const char *type;
 	const char *path;
-	const char *body;
 	char msg[4096];
 	int len;
-	int i;
 
 	len = read(task->fd, msg, sizeof(msg));
 	if (len < 0) {
@@ -165,21 +119,40 @@ static void nemobusd_dispatch_message_task(int efd, struct bustask *task)
 
 		if (json_object_object_get_ex(jobj, "path", &pobj) == 0)
 			goto out0;
-		if (json_object_object_get_ex(jobj, "body", &bobj) == 0)
-			goto out1;
+		path = json_object_get_string(pobj);
 
-		if (json_object_is_type(pobj, json_type_string)) {
-			nemobusd_dispatch_message(busd, task->fd, json_object_get_string(pobj), bobj);
-		} else if (json_object_is_type(pobj, json_type_array)) {
-			for (i = 0; i < json_object_array_length(pobj); i++) {
-				cobj = json_object_array_get_idx(pobj, i);
+		if (strcmp(path, "/nemobusd") == 0) {
+			struct json_object *tobj;
 
-				nemobusd_dispatch_message(busd, task->fd, json_object_get_string(cobj), bobj);
+			json_object_object_foreach(jobj, key, value) {
+				if (strcmp(key, "path") == 0)
+					continue;
+
+				if (strcmp(key, "advertise") == 0) {
+					if (json_object_object_get_ex(value, "path", &tobj) != 0) {
+						nemobusd_create_client(busd, task->fd, json_object_get_string(tobj));
+
+						json_object_put(tobj);
+					}
+				}
+			}
+		} else {
+			struct busclient *client;
+
+			json_object_object_foreach(jobj, key, value) {
+				if (strcmp(key, "path") == 0)
+					continue;
+
+				nemolist_for_each(client, &busd->client_list, link) {
+					if (namespace_has_prefix(client->path, path) != 0) {
+						send(client->soc, msg, len, MSG_NOSIGNAL | MSG_DONTWAIT);
+
+						nemolog_message("BUSD", "send(%s:%d) [%s]\n", client->path, client->soc, msg);
+					}
+				}
 			}
 		}
 
-		json_object_put(bobj);
-out1:
 		json_object_put(pobj);
 out0:
 		json_object_put(jobj);

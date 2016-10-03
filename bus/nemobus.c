@@ -74,7 +74,7 @@ void nemobus_disconnect(struct nemobus *bus)
 
 int nemobus_advertise(struct nemobus *bus, const char *path)
 {
-	return nemobus_send_format(bus, "{ \"path\": \"/nemobusd\", \"body\": { \"type\": \"advertise\", \"path\": \"%s\" } }", path);
+	return nemobus_send_format(bus, "{ \"path\": \"/nemobusd\", \"advertise\": { \"path\": \"%s\" } }", path);
 }
 
 int nemobus_send(struct nemobus *bus, const char *path, struct busmsg *msg)
@@ -84,11 +84,8 @@ int nemobus_send(struct nemobus *bus, const char *path, struct busmsg *msg)
 	int r;
 
 	jobj = json_object_new_object();
-
-	if (path != NULL)
-		json_object_object_add(jobj, "path", json_object_new_string(path));
-
-	json_object_object_add(jobj, "body", nemobus_msg_to_json(msg));
+	json_object_object_add(jobj, "path", json_object_new_string(path));
+	json_object_object_add(jobj, nemobus_msg_get_name(msg), nemobus_msg_to_json(msg));
 
 	contents = json_object_get_string(jobj);
 
@@ -138,6 +135,7 @@ struct busmsg *nemobus_recv(struct nemobus *bus)
 struct nemoitem *nemobus_recv_item(struct nemobus *bus)
 {
 	struct nemoitem *item;
+	struct json_object *jobj;
 	char buffer[4096];
 	int r;
 
@@ -146,8 +144,20 @@ struct nemoitem *nemobus_recv_item(struct nemobus *bus)
 		return NULL;
 	buffer[r] = '\0';
 
-	item = nemoitem_create();
-	nemoitem_load_json_string(item, buffer);
+	jobj = json_tokener_parse(buffer);
+	if (jobj != NULL) {
+		struct json_object *pobj;
+
+		if (json_object_object_get_ex(jobj, "path", &pobj) != 0) {
+			item = nemoitem_create();
+
+			nemoitem_load_json(item, json_object_get_string(pobj), jobj);
+
+			json_object_put(pobj);
+		}
+
+		json_object_put(jobj);
+	}
 
 	return item;
 }

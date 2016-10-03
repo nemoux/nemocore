@@ -588,12 +588,12 @@ static int nemoitem_load_json_object(struct nemoitem *item, struct itemone *one,
 	return 0;
 }
 
-int nemoitem_load_json(struct nemoitem *item, struct json_object *jobj)
+int nemoitem_load_json(struct nemoitem *item, const char *prefix, struct json_object *jobj)
 {
 	struct itemone *one;
 
 	one = nemoitem_one_create();
-	nemoitem_one_set_path(one, "/");
+	nemoitem_one_set_path(one, prefix);
 	nemoitem_attach_one(item, one);
 
 	nemoitem_load_json_object(item, one, jobj);
@@ -601,14 +601,14 @@ int nemoitem_load_json(struct nemoitem *item, struct json_object *jobj)
 	return 0;
 }
 
-int nemoitem_load_json_string(struct nemoitem *item, const char *contents)
+int nemoitem_load_json_string(struct nemoitem *item, const char *prefix, const char *contents)
 {
 	struct json_object *jobj;
 	int r = 0;
 
 	jobj = json_tokener_parse(contents);
 	if (jobj != NULL) {
-		r = nemoitem_load_json(item, jobj);
+		r = nemoitem_load_json(item, prefix, jobj);
 
 		json_object_put(jobj);
 	}
