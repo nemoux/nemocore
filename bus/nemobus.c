@@ -96,6 +96,28 @@ int nemobus_send(struct nemobus *bus, const char *path, struct busmsg *msg)
 	return r;
 }
 
+int nemobus_send_many(struct nemobus *bus, const char *path, struct busmsg **msgs, int count)
+{
+	struct json_object *jobj;
+	const char *contents;
+	int r;
+	int i;
+
+	jobj = json_object_new_object();
+	json_object_object_add(jobj, "path", json_object_new_string(path));
+
+	for (i = 0; i < count; i++)
+		json_object_object_add(jobj, nemobus_msg_get_name(msgs[i]), nemobus_msg_to_json(msgs[i]));
+
+	contents = json_object_get_string(jobj);
+
+	r = send(bus->soc, contents, strlen(contents), MSG_NOSIGNAL | MSG_DONTWAIT);
+
+	json_object_put(jobj);
+
+	return r;
+}
+
 int nemobus_send_raw(struct nemobus *bus, const char *buffer)
 {
 	return send(bus->soc, buffer, strlen(buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
