@@ -523,9 +523,6 @@ void nemoshell_destroy_bin(struct shellbin *bin)
 		nemoshell_set_parent_bin(child, NULL);
 	}
 
-	if (bin->name != NULL)
-		free(bin->name);
-
 	free(bin);
 }
 
@@ -561,14 +558,13 @@ struct shellbin *nemoshell_get_bin_by_pid(struct nemoshell *shell, uint32_t pid)
 	return NULL;
 }
 
-struct shellbin *nemoshell_get_bin_by_name(struct nemoshell *shell, const char *name)
+struct shellbin *nemoshell_get_bin_by_uuid(struct nemoshell *shell, const char *uuid)
 {
-	struct shellbin *bin;
+	struct nemoview *view;
 
-	wl_list_for_each(bin, &shell->bin_list, link) {
-		if (bin->name != NULL && strcmp(bin->name, name) == 0)
-			return bin;
-	}
+	view = nemocompz_get_view_by_uuid(shell->compz, uuid);
+	if (view != NULL && view->canvas != NULL)
+		return nemoshell_get_bin(view->canvas);
 
 	return NULL;
 }
@@ -690,8 +686,7 @@ static int nemoshell_dispatch_frame_timeout(void *data)
 	wl_list_for_each(canvas, &compz->canvas_list, link) {
 		bin = nemoshell_get_bin(canvas);
 		if (bin != NULL) {
-			nemolog_message("SYSTEM", "  CANVAS[%s:%d] frames(%d) damages(%d/%f)\n",
-					bin->name == NULL ? "noname" : bin->name,
+			nemolog_message("SYSTEM", "  CANVAS[%d] frames(%d) damages(%d/%f)\n",
 					bin->pid,
 					canvas->frame_count,
 					canvas->frame_damage,
@@ -968,8 +963,8 @@ void nemoshell_destroy_client_state(struct nemoshell *shell, struct clientstate 
 	if (state->screenid != NULL)
 		free(state->screenid);
 
-	if (state->name != NULL)
-		free(state->name);
+	if (state->uuid != NULL)
+		free(state->uuid);
 
 	free(state);
 }
@@ -1015,8 +1010,8 @@ static inline void nemoshell_set_client_state(struct shellbin *bin, struct clien
 
 	bin->flags = state->flags;
 
-	if (state->name != NULL)
-		bin->name = strdup(state->name);
+	if (state->uuid != NULL)
+		nemoview_set_uuid(bin->view, state->uuid);
 
 	nemoview_set_state(bin->view, state->state_on);
 	nemoview_put_state(bin->view, state->state_off);
