@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 
 	bus = nemobus_create();
 	nemobus_connect(bus, socketpath);
-	nemobus_advertise(bus, "/nemobusc");
+	nemobus_advertise(bus, "set", "/nemobusc");
 
 	msg = nemobus_msg_from_json_string(contents);
 

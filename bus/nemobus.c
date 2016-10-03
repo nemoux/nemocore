@@ -72,9 +72,9 @@ void nemobus_disconnect(struct nemobus *bus)
 	bus->soc = -1;
 }
 
-int nemobus_advertise(struct nemobus *bus, const char *path)
+int nemobus_advertise(struct nemobus *bus, const char *type, const char *path)
 {
-	return nemobus_send_format(bus, "{ \"path\": \"/nemobusd\", \"advertise\": { \"path\": \"%s\" } }", path);
+	return nemobus_send_format(bus, "{ \"path\": \"/nemobusd\", \"advertise\": { \"type\": \"%s\", \"path\": \"%s\" } }", type, path);
 }
 
 int nemobus_send(struct nemobus *bus, const char *path, struct busmsg *msg)

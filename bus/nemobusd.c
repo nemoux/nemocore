@@ -61,7 +61,25 @@ static struct busclient *nemobusd_create_client(struct nemobusd *busd, int soc, 
 	return client;
 }
 
-static void nemobusd_destroy_client(struct nemobusd *busd, int soc)
+static void nemobusd_destroy_client(struct nemobusd *busd, int soc, const char *path)
+{
+	struct busclient *client;
+
+	nemolist_for_each(client, &busd->client_list, link) {
+		if (client->soc == soc && strcmp(client->path, path) == 0) {
+			nemolist_remove(&client->link);
+
+			free(client->path);
+			free(client);
+
+			break;
+		}
+	}
+
+	nemolog_message("BUSD", "disconnect(%s:%d)\n", path, soc);
+}
+
+static void nemobusd_destroy_client_all(struct nemobusd *busd, int soc)
 {
 	struct busclient *client;
 
@@ -83,6 +101,7 @@ static void nemobusd_dispatch_message_task(int efd, struct bustask *task)
 	struct epoll_event ep;
 	struct json_object *jobj;
 	struct json_object *pobj;
+	const char *type;
 	const char *path;
 	char msg[4096];
 	int len;
@@ -94,7 +113,7 @@ static void nemobusd_dispatch_message_task(int efd, struct bustask *task)
 			ep.data.ptr = (void *)task;
 			epoll_ctl(efd, EPOLL_CTL_MOD, task->fd, &ep);
 		} else {
-			nemobusd_destroy_client(busd, task->fd);
+			nemobusd_destroy_client_all(busd, task->fd);
 
 			epoll_ctl(efd, EPOLL_CTL_DEL, task->fd, &ep);
 
@@ -103,7 +122,7 @@ static void nemobusd_dispatch_message_task(int efd, struct bustask *task)
 			free(task);
 		}
 	} else if (len == 0) {
-		nemobusd_destroy_client(busd, task->fd);
+		nemobusd_destroy_client_all(busd, task->fd);
 
 		epoll_ctl(efd, EPOLL_CTL_DEL, task->fd, &ep);
 
@@ -122,18 +141,31 @@ static void nemobusd_dispatch_message_task(int efd, struct bustask *task)
 		path = json_object_get_string(pobj);
 
 		if (strcmp(path, "/nemobusd") == 0) {
-			struct json_object *tobj;
+			struct json_object *tobj0;
+			struct json_object *tobj1;
 
 			json_object_object_foreach(jobj, key, value) {
 				if (strcmp(key, "path") == 0)
 					continue;
 
 				if (strcmp(key, "advertise") == 0) {
-					if (json_object_object_get_ex(value, "path", &tobj) != 0) {
-						nemobusd_create_client(busd, task->fd, json_object_get_string(tobj));
+					if (json_object_object_get_ex(value, "type", &tobj0) == 0)
+						continue;
+					type = json_object_get_string(tobj0);
 
-						json_object_put(tobj);
+					if (json_object_object_get_ex(value, "path", &tobj1) == 0) {
+						json_object_put(tobj0);
+						continue;
 					}
+					path = json_object_get_string(tobj1);
+
+					if (strcmp(type, "set") == 0)
+						nemobusd_create_client(busd, task->fd, path);
+					else if (strcmp(type, "put") == 0)
+						nemobusd_destroy_client(busd, task->fd, path);
+
+					json_object_put(tobj1);
+					json_object_put(tobj0);
 				}
 			}
 		} else {
