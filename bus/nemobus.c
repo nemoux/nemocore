@@ -214,6 +214,9 @@ void nemobus_msg_destroy(struct busmsg *msg)
 
 	nemobus_msg_clear(msg);
 
+	if (msg->elems != NULL)
+		free(msg->elems);
+
 	if (msg->name != NULL)
 		free(msg->name);
 
@@ -232,6 +235,20 @@ void nemobus_msg_clear(struct busmsg *msg)
 		free(attr->value);
 
 		free(attr);
+	}
+
+	if (msg->elems != NULL) {
+		int i;
+
+		for (i = 0; msg->nelems; i++) {
+			if (msg->elems[i] != NULL) {
+				free(msg->elems[i]);
+
+				msg->elems[i] = NULL;
+			}
+		}
+
+		msg->nelems = 0;
 	}
 
 	nemolist_for_each_safe(cmsg, nmsg, &msg->msg_list, link) {
@@ -258,7 +275,7 @@ void nemobus_msg_set_name(struct busmsg *msg, const char *name)
 	msg->name = strdup(name);
 }
 
-static struct msgattr *nemobus_msg_get_attr_in(struct busmsg *msg, const char *name)
+static inline struct msgattr *nemobus_msg_get_attr_in(struct busmsg *msg, const char *name)
 {
 	struct msgattr *attr;
 
@@ -281,7 +298,7 @@ void nemobus_msg_set_attr(struct busmsg *msg, const char *name, const char *valu
 	nemolist_insert(&msg->attr_list, &attr->link);
 }
 
-void nemobus_msg_set_format(struct busmsg *msg, const char *name, const char *fmt, ...)
+void nemobus_msg_set_attr_format(struct busmsg *msg, const char *name, const char *fmt, ...)
 {
 	struct msgattr *attr;
 	va_list vargs;
@@ -324,20 +341,100 @@ void nemobus_msg_put_attr(struct busmsg *msg, const char *name)
 	}
 }
 
+static inline void nemobus_msg_set_elem_in(struct busmsg *msg, int index)
+{
+	if (msg->selems <= index) {
+		char **elems;
+		int selems = MAX(index * 2, 8);
+
+		elems = (char **)malloc(sizeof(char *) * selems);
+		memset(elems, 0, sizeof(char *) * selems);
+		memcpy(elems, msg->elems, sizeof(char *) * msg->selems);
+		free(msg->elems);
+
+		msg->elems = elems;
+		msg->selems = selems;
+	}
+}
+
+void nemobus_msg_set_elem(struct busmsg *msg, int index, const char *value)
+{
+	nemobus_msg_set_elem_in(msg, index);
+
+	if (msg->elems[index] != NULL)
+		free(msg->elems[index]);
+
+	msg->elems[index] = strdup(value);
+
+	msg->nelems = MAX(msg->nelems, index);
+}
+
+void nemobus_msg_set_elem_format(struct busmsg *msg, int index, const char *fmt, ...)
+{
+	va_list vargs;
+	char *value;
+
+	va_start(vargs, fmt);
+	vasprintf(&value, fmt, vargs);
+	va_end(vargs);
+
+	nemobus_msg_set_elem_in(msg, index);
+
+	if (msg->elems[index] != NULL)
+		free(msg->elems[index]);
+
+	msg->elems[index] = value;
+
+	msg->nelems = MAX(msg->nelems, index);
+}
+
+const char *nemobus_msg_get_elem(struct busmsg *msg, int index)
+{
+	return index < msg->selems ? msg->elems[index] : NULL;
+}
+
+void nemobus_msg_put_elem(struct busmsg *msg, int index)
+{
+	if (index >= msg->selems)
+		return;
+
+	if (msg->elems[index] != NULL) {
+		free(msg->elems[index]);
+
+		msg->elems[index] = NULL;
+	}
+}
+
+int nemobus_msg_get_elements_length(struct busmsg *msg)
+{
+	return msg->nelems;
+}
+
 struct json_object *nemobus_msg_to_json(struct busmsg *msg)
 {
 	struct json_object *jobj;
 	struct msgattr *attr;
 	struct busmsg *cmsg;
 
-	jobj = json_object_new_object();
+	if (msg->elems == NULL) {
+		jobj = json_object_new_object();
 
-	nemolist_for_each(attr, &msg->attr_list, link) {
-		json_object_object_add(jobj, attr->name, json_object_new_string(attr->value));
-	}
+		nemolist_for_each(attr, &msg->attr_list, link) {
+			json_object_object_add(jobj, attr->name, json_object_new_string(attr->value));
+		}
 
-	nemolist_for_each(cmsg, &msg->msg_list, link) {
-		json_object_object_add(jobj, cmsg->name, nemobus_msg_to_json(cmsg));
+		nemolist_for_each(cmsg, &msg->msg_list, link) {
+			json_object_object_add(jobj, cmsg->name, nemobus_msg_to_json(cmsg));
+		}
+	} else {
+		int i;
+
+		jobj = json_object_new_array();
+
+		for (i = 0; i < msg->nelems; i++) {
+			if (msg->elems[i] != NULL)
+				json_object_array_add(jobj, json_object_new_string(msg->elems[i]));
+		}
 	}
 
 	return jobj;
@@ -355,14 +452,25 @@ struct busmsg *nemobus_msg_from_json(struct json_object *jobj)
 
 	msg = nemobus_msg_create();
 
-	json_object_object_foreach(jobj, key, value) {
-		if (json_object_is_type(value, json_type_string)) {
-			nemobus_msg_set_attr(msg, key, json_object_get_string(value));
-		} else if (json_object_is_type(value, json_type_object)) {
-			cmsg = nemobus_msg_from_json(value);
-			nemobus_msg_set_name(cmsg, key);
+	if (json_object_is_type(jobj, json_type_object)) {
+		json_object_object_foreach(jobj, key, value) {
+			if (json_object_is_type(value, json_type_string)) {
+				nemobus_msg_set_attr(msg, key, json_object_get_string(value));
+			} else if (json_object_is_type(value, json_type_object) || json_object_is_type(value, json_type_array)) {
+				cmsg = nemobus_msg_from_json(value);
+				nemobus_msg_set_name(cmsg, key);
 
-			nemobus_msg_attach(msg, cmsg);
+				nemobus_msg_attach(msg, cmsg);
+			}
+		}
+	} else if (json_object_is_type(jobj, json_type_array)) {
+		struct json_object *cobj;
+		int i;
+
+		for (i = 0; i < json_object_array_length(jobj); i++) {
+			cobj = json_object_array_get_idx(jobj, i);
+
+			nemobus_msg_set_elem(msg, i, json_object_get_string(cobj));
 		}
 	}
 

@@ -28,6 +28,9 @@ struct msgattr {
 struct busmsg {
 	char *name;
 
+	char **elems;
+	int selems, nelems;
+
 	struct nemolist attr_list;
 	struct nemolist msg_list;
 
@@ -66,9 +69,16 @@ extern void nemobus_msg_detach(struct busmsg *msg);
 extern void nemobus_msg_set_name(struct busmsg *msg, const char *name);
 
 extern void nemobus_msg_set_attr(struct busmsg *msg, const char *name, const char *value);
-extern void nemobus_msg_set_format(struct busmsg *msg, const char *name, const char *fmt, ...);
+extern void nemobus_msg_set_attr_format(struct busmsg *msg, const char *name, const char *fmt, ...);
 extern const char *nemobus_msg_get_attr(struct busmsg *msg, const char *name);
 extern void nemobus_msg_put_attr(struct busmsg *msg, const char *name);
+
+extern void nemobus_msg_set_elem(struct busmsg *msg, int index, const char *value);
+extern void nemobus_msg_set_elem_format(struct busmsg *msg, int index, const char *fmt, ...);
+extern const char *nemobus_msg_get_elem(struct busmsg *msg, int index);
+extern void nemobus_msg_put_elem(struct busmsg *msg, int index);
+
+extern int nemobus_msg_get_elements_length(struct busmsg *msg);
 
 extern struct json_object *nemobus_msg_to_json(struct busmsg *msg);
 extern const char *nemobus_msg_to_json_string(struct busmsg *msg);
@@ -112,6 +122,27 @@ static inline float nemobus_msg_get_fattr(struct busmsg *msg, const char *name, 
 static inline const char *nemobus_msg_get_sattr(struct busmsg *msg, const char *name, const char *value)
 {
 	const char *str = nemobus_msg_get_attr(msg, name);
+
+	return str != NULL ? str : value;
+}
+
+static inline int nemobus_msg_get_ielem(struct busmsg *msg, int index, int value)
+{
+	const char *str = nemobus_msg_get_elem(msg, index);
+
+	return str != NULL ? strtoul(str, NULL, 10) : value;
+}
+
+static inline float nemobus_msg_get_felem(struct busmsg *msg, int index, float value)
+{
+	const char *str = nemobus_msg_get_elem(msg, index);
+
+	return str != NULL ? strtod(str, NULL) : value;
+}
+
+static inline const char *nemobus_msg_get_selem(struct busmsg *msg, int index, const char *value)
+{
+	const char *str = nemobus_msg_get_elem(msg, index);
 
 	return str != NULL ? str : value;
 }
