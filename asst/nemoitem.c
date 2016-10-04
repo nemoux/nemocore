@@ -339,17 +339,6 @@ void nemoitem_one_destroy(struct itemone *one)
 		free(attr);
 	}
 
-	if (one->elems != NULL) {
-		int i;
-
-		for (i = 0; i < one->nelems; i++) {
-			if (one->elems[i] != NULL)
-				free(one->elems[i]);
-		}
-
-		free(one->elems);
-	}
-
 	free(one);
 }
 
@@ -357,7 +346,6 @@ struct itemone *nemoitem_one_clone(struct itemone *one)
 {
 	struct itemone *done;
 	struct itemattr *attr;
-	int i;
 
 	done = nemoitem_one_create();
 	if (done == NULL)
@@ -367,13 +355,6 @@ struct itemone *nemoitem_one_clone(struct itemone *one)
 
 	nemolist_for_each(attr, &one->list, link) {
 		nemoitem_one_set_attr(done, attr->name, attr->value);
-	}
-
-	if (one->elems != NULL) {
-		for (i = 0; i < one->selems; i++) {
-			if (one->elems[i] != NULL)
-				nemoitem_one_set_elem(done, i, one->elems[i]);
-		}
 	}
 
 	return done;
@@ -527,83 +508,6 @@ int nemoitem_one_has_attr(struct itemone *one, const char *name)
 	return 0;
 }
 
-static inline void nemoitem_one_set_elem_in(struct itemone *one, int index)
-{
-	if (one->selems <= index) {
-		char **elems;
-		int selems = MAX(index * 2, 8);
-
-		elems = (char **)malloc(sizeof(char *) * selems);
-		memset(elems, 0, sizeof(char *) * selems);
-
-		if (one->elems != NULL) {
-			memcpy(elems, one->elems, sizeof(char *) * one->selems);
-			free(one->elems);
-		}
-
-		one->elems = elems;
-		one->selems = selems;
-	}
-}
-
-int nemoitem_one_set_elem(struct itemone *one, int index, const char *value)
-{
-	nemoitem_one_set_elem_in(one, index);
-
-	if (one->elems[index] != NULL)
-		free(one->elems[index]);
-
-	one->elems[index] = strdup(value);
-
-	one->nelems = MAX(one->nelems, index);
-}
-
-int nemoitem_one_set_elem_format(struct itemone *one, int index, const char *fmt, ...)
-{
-	va_list vargs;
-	char *value;
-
-	va_start(vargs, fmt);
-	vasprintf(&value, fmt, vargs);
-	va_end(vargs);
-
-	nemoitem_one_set_elem_in(one, index);
-
-	if (one->elems[index] != NULL)
-		free(one->elems[index]);
-
-	one->elems[index] = value;
-
-	one->nelems = MAX(one->nelems, index);
-}
-
-const char *nemoitem_one_get_elem(struct itemone *one, int index)
-{
-	return index < one->selems ? one->elems[index] : NULL;
-}
-
-void nemoitem_one_put_elem(struct itemone *one, int index)
-{
-	if (index >= one->selems)
-		return;
-
-	if (one->elems[index] != NULL) {
-		free(one->elems[index]);
-
-		one->elems[index] = NULL;
-	}
-}
-
-int nemoitem_one_has_elem(struct itemone *one, int index)
-{
-	return index < one->selems ? one->elems[index] != NULL : 0;
-}
-
-int nemoitem_one_get_elem_size(struct itemone *one)
-{
-	return one->nelems;
-}
-
 int nemoitem_one_load_simple(struct itemone *one, const char *buffer, char delimiter)
 {
 	struct nemotoken *token;
@@ -730,35 +634,16 @@ int nemoitem_save_textfile(struct nemoitem *item, const char *filepath, char del
 static int nemoitem_load_json_object(struct nemoitem *item, struct itemone *one, struct json_object *jobj)
 {
 	struct itemone *cone;
-	struct json_object *cobj;
 
-	if (json_object_is_type(jobj, json_type_array)) {
-		int i, s;
+	json_object_object_foreach(jobj, key, value) {
+		if (json_object_is_type(value, json_type_object)) {
+			cone = nemoitem_one_create();
+			nemoitem_one_set_path_format(cone, "%s/%s", one->path, key);
+			nemoitem_attach_one(item, cone);
 
-		for (i = 0, s = 0; i < json_object_array_length(jobj); i++) {
-			cobj = json_object_array_get_idx(jobj, i);
-
-			if (json_object_is_type(cobj, json_type_array) || json_object_is_type(cobj, json_type_object)) {
-				cone = nemoitem_one_create();
-				nemoitem_one_set_path(cone, one->path);
-				nemoitem_attach_one(item, cone);
-
-				nemoitem_load_json_object(item, cone, cobj);
-			} else if (json_object_is_type(cobj, json_type_string)) {
-				nemoitem_one_set_elem(one, s++, json_object_get_string(cobj));
-			}
-		}
-	} else if (json_object_is_type(jobj, json_type_object)) {
-		json_object_object_foreach(jobj, key, value) {
-			if (json_object_is_type(value, json_type_array) || json_object_is_type(value, json_type_object)) {
-				cone = nemoitem_one_create();
-				nemoitem_one_set_path_format(cone, "%s/%s", one->path, key);
-				nemoitem_attach_one(item, cone);
-
-				nemoitem_load_json_object(item, cone, value);
-			} else if (json_object_is_type(value, json_type_string)) {
-				nemoitem_one_set_attr(one, key, json_object_get_string(value));
-			}
+			nemoitem_load_json_object(item, cone, value);
+		} else if (json_object_is_type(value, json_type_string)) {
+			nemoitem_one_set_attr(one, key, json_object_get_string(value));
 		}
 	}
 
@@ -795,19 +680,8 @@ int nemoitem_load_json_string(struct nemoitem *item, const char *prefix, const c
 
 int nemoitem_one_load_json(struct itemone *one, struct json_object *jobj)
 {
-	if (json_object_is_type(jobj, json_type_object)) {
-		json_object_object_foreach(jobj, key, value) {
-			nemoitem_one_set_attr(one, key, json_object_get_string(value));
-		}
-	} else if (json_object_is_type(jobj, json_type_array)) {
-		struct json_object *cobj;
-		int i;
-
-		for (i = 0; i < json_object_array_length(jobj); i++) {
-			cobj = json_object_array_get_idx(jobj, i);
-
-			nemoitem_one_set_elem(one, i, json_object_get_string(cobj));
-		}
+	json_object_object_foreach(jobj, key, value) {
+		nemoitem_one_set_attr(one, key, json_object_get_string(value));
 	}
 
 	return 0;

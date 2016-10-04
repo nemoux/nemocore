@@ -21,9 +21,6 @@ struct itemattr {
 struct itemone {
 	char *path;
 
-	char **elems;
-	int selems, nelems;
-
 	struct nemolist list;
 
 	struct nemolist link;
@@ -82,14 +79,6 @@ extern int nemoitem_one_set_attr_format(struct itemone *one, const char *name, c
 extern const char *nemoitem_one_get_attr(struct itemone *one, const char *name);
 extern void nemoitem_one_put_attr(struct itemone *one, const char *name);
 extern int nemoitem_one_has_attr(struct itemone *one, const char *name);
-
-extern int nemoitem_one_set_elem(struct itemone *one, int index, const char *value);
-extern int nemoitem_one_set_elem_format(struct itemone *one, int index, const char *fmt, ...);
-extern const char *nemoitem_one_get_elem(struct itemone *one, int index);
-extern void nemoitem_one_put_elem(struct itemone *one, int index);
-extern int nemoitem_one_has_elem(struct itemone *one, int index);
-
-extern int nemoitem_one_get_elem_size(struct itemone *one);
 
 extern int nemoitem_one_load_simple(struct itemone *one, const char *buffer, char delimiter);
 extern int nemoitem_one_save_simple(struct itemone *one, char *buffer, char delimiter);
@@ -151,48 +140,6 @@ static inline int nemoitem_one_has_sattr(struct itemone *one, const char *name, 
 	return str != NULL ? strcmp(str, value) == 0 : 0;
 }
 
-static inline int nemoitem_one_get_ielem(struct itemone *one, int index, int value)
-{
-	const char *str = nemoitem_one_get_elem(one, index);
-
-	return str != NULL ? strtoul(str, NULL, 10) : value;
-}
-
-static inline float nemoitem_one_get_felem(struct itemone *one, int index, float value)
-{
-	const char *str = nemoitem_one_get_elem(one, index);
-
-	return str != NULL ? strtod(str, NULL) : value;
-}
-
-static inline const char *nemoitem_one_get_selem(struct itemone *one, int index, const char *value)
-{
-	const char *str = nemoitem_one_get_elem(one, index);
-
-	return str != NULL ? str : value;
-}
-
-static inline int nemoitem_one_has_ielem(struct itemone *one, int index, int value)
-{
-	const char *str = nemoitem_one_get_elem(one, index);
-
-	return str != NULL ? strtoul(str, NULL, 10) == value : 0;
-}
-
-static inline int nemoitem_one_has_felem(struct itemone *one, int index, float value)
-{
-	const char *str = nemoitem_one_get_elem(one, index);
-
-	return str != NULL ? strtod(str, NULL) == value : 0;
-}
-
-static inline int nemoitem_one_has_selem(struct itemone *one, int index, const char *value)
-{
-	const char *str = nemoitem_one_get_elem(one, index);
-
-	return str != NULL ? strcmp(str, value) == 0 : 0;
-}
-
 static inline int nemoitem_box_get_count(struct itembox *box)
 {
 	return box->nones;
@@ -221,21 +168,6 @@ static inline float nemoitem_box_get_fattr(struct itembox *box, int index, const
 static inline const char *nemoitem_box_get_sattr(struct itembox *box, int index, const char *name, const char *value)
 {
 	return nemoitem_one_get_sattr(box->ones[index], name, value);
-}
-
-static inline int nemoitem_box_get_ielem(struct itembox *box, int index, int eindex, int value)
-{
-	return nemoitem_one_get_ielem(box->ones[index], eindex, value);
-}
-
-static inline float nemoitem_box_get_felem(struct itembox *box, int index, int eindex, float value)
-{
-	return nemoitem_one_get_felem(box->ones[index], eindex, value);
-}
-
-static inline const char *nemoitem_box_get_selem(struct itembox *box, int index, int eindex, const char *value)
-{
-	return nemoitem_one_get_selem(box->ones[index], eindex, value);
 }
 
 static inline void nemoitem_attr_set_name(struct itemattr *attr, const char *name)
