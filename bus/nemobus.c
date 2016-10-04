@@ -240,7 +240,7 @@ void nemobus_msg_clear(struct busmsg *msg)
 	if (msg->elems != NULL) {
 		int i;
 
-		for (i = 0; msg->nelems; i++) {
+		for (i = 0; i < msg->nelems; i++) {
 			if (msg->elems[i] != NULL) {
 				free(msg->elems[i]);
 
@@ -349,8 +349,11 @@ static inline void nemobus_msg_set_elem_in(struct busmsg *msg, int index)
 
 		elems = (char **)malloc(sizeof(char *) * selems);
 		memset(elems, 0, sizeof(char *) * selems);
-		memcpy(elems, msg->elems, sizeof(char *) * msg->selems);
-		free(msg->elems);
+
+		if (msg->elems != NULL) {
+			memcpy(elems, msg->elems, sizeof(char *) * msg->selems);
+			free(msg->elems);
+		}
 
 		msg->elems = elems;
 		msg->selems = selems;
@@ -405,7 +408,7 @@ void nemobus_msg_put_elem(struct busmsg *msg, int index)
 	}
 }
 
-int nemobus_msg_get_elements_length(struct busmsg *msg)
+int nemobus_msg_get_elem_size(struct busmsg *msg)
 {
 	return msg->nelems;
 }

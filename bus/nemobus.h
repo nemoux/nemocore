@@ -78,7 +78,7 @@ extern void nemobus_msg_set_elem_format(struct busmsg *msg, int index, const cha
 extern const char *nemobus_msg_get_elem(struct busmsg *msg, int index);
 extern void nemobus_msg_put_elem(struct busmsg *msg, int index);
 
-extern int nemobus_msg_get_elements_length(struct busmsg *msg);
+extern int nemobus_msg_get_elem_size(struct busmsg *msg);
 
 extern struct json_object *nemobus_msg_to_json(struct busmsg *msg);
 extern const char *nemobus_msg_to_json_string(struct busmsg *msg);
