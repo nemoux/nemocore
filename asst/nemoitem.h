@@ -81,7 +81,12 @@ extern void nemoitem_one_put_attr(struct itemone *one, const char *name);
 extern int nemoitem_one_has_attr(struct itemone *one, const char *name);
 extern int nemoitem_one_copy_attr(struct itemone *done, struct itemone *sone);
 
+extern int nemoitem_one_load_simple(struct itemone *one, const char *buffer, char delimiter);
+extern int nemoitem_one_save_simple(struct itemone *one, char *buffer, char delimiter);
 extern int nemoitem_one_save_string(struct itemone *one, char *buffer, int size, const char *atpath, const char *atattr, const char *atvalue);
+
+extern int nemoitem_load_textfile(struct nemoitem *item, const char *filepath, char delimiter);
+extern int nemoitem_save_textfile(struct nemoitem *item, const char *filepath, char delimiter);
 
 extern int nemoitem_load_json(struct nemoitem *item, const char *prefix, struct json_object *jobj);
 extern int nemoitem_load_json_string(struct nemoitem *item, const char *prefix, const char *contents);
