@@ -27,6 +27,20 @@
 #include <nemoscope.h>
 #include <nemomisc.h>
 
+static inline void nemoshow_enter_canvas_frame(struct nemoshow *show)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+
+	scon->framedepth++;
+}
+
+static inline void nemoshow_leave_canvas_frame(struct nemoshow *show)
+{
+	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+
+	scon->framedepth--;
+}
+
 static int nemoshow_dispatch_actor_pick(struct nemoactor *actor, float x, float y)
 {
 	struct nemoshow *show = (struct nemoshow *)nemoactor_get_context(actor);
@@ -110,6 +124,8 @@ static void nemoshow_dispatch_actor_frame(struct nemoactor *actor, uint32_t msec
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemocompz *compz = actor->compz;
 
+	nemoshow_enter_canvas_frame(show);
+
 	nemocompz_make_current(compz);
 
 	if (nemoshow_has_transition(show) != 0) {
@@ -137,6 +153,8 @@ static void nemoshow_dispatch_actor_frame(struct nemoactor *actor, uint32_t msec
 	} else {
 		nemoactor_terminate_feedback(actor);
 	}
+
+	nemoshow_leave_canvas_frame(show);
 }
 
 static void nemoshow_dispatch_actor_transform(struct nemoactor *actor, int32_t visible, int32_t x, int32_t y, int32_t width, int32_t height)
@@ -304,7 +322,8 @@ void nemoshow_dispatch_frame(struct nemoshow *show)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 
-	nemoactor_dispatch_frame(scon->actor);
+	if (scon->framedepth == 0)
+		nemoactor_dispatch_frame(scon->actor);
 }
 
 void nemoshow_dispatch_resize(struct nemoshow *show, int32_t width, int32_t height)
