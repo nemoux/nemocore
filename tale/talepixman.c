@@ -74,13 +74,13 @@ void nemotale_detach_pixman(struct nemotale *tale)
 static inline void nemotale_repaint_region(struct nemotale *tale, struct talenode *node, pixman_region32_t *repaint, pixman_region32_t *region, pixman_op_t op)
 {
 	struct nemopmtale *context = (struct nemopmtale *)tale->pmcontext;
-	struct talepmnode *ncontext = (struct talepmnode *)node->pmcontext;
+	struct talepmnode *pcontext = (struct talepmnode *)node->pmcontext;
 
 	if (region == NULL) {
 		pixman_image_set_clip_region32(context->image, repaint);
 
 		pixman_image_composite32(op,
-				ncontext->image,
+				pcontext->image,
 				NULL,
 				context->image,
 				0, 0,
@@ -109,7 +109,7 @@ static inline void nemotale_repaint_region(struct nemotale *tale, struct talenod
 		pixman_image_set_clip_region32(context->image, &final_region);
 
 		pixman_image_composite32(op,
-				ncontext->image,
+				pcontext->image,
 				NULL,
 				context->image,
 				0, 0,
@@ -126,7 +126,7 @@ static inline void nemotale_repaint_region(struct nemotale *tale, struct talenod
 
 static void nemotale_repaint_node(struct nemotale *tale, struct talenode *node)
 {
-	struct talepmnode *ncontext = (struct talepmnode *)node->pmcontext;
+	struct talepmnode *pcontext = (struct talepmnode *)node->pmcontext;
 	pixman_region32_t repaint;
 
 	pixman_region32_init(&repaint);
@@ -160,12 +160,12 @@ static void nemotale_repaint_node(struct nemotale *tale, struct talenode *node)
 					pixman_double_to_fixed((double)-node->geometry.y));
 		}
 
-		pixman_image_set_transform(ncontext->image, &transform);
+		pixman_image_set_transform(pcontext->image, &transform);
 
 		if (node->transform.enable != 0)
-			pixman_image_set_filter(ncontext->image, PIXMAN_FILTER_BILINEAR, NULL, 0);
+			pixman_image_set_filter(pcontext->image, PIXMAN_FILTER_BILINEAR, NULL, 0);
 		else
-			pixman_image_set_filter(ncontext->image, PIXMAN_FILTER_NEAREST, NULL, 0);
+			pixman_image_set_filter(pcontext->image, PIXMAN_FILTER_NEAREST, NULL, 0);
 
 		if (node->transform.enable != 0) {
 			nemotale_repaint_region(tale, node, &repaint, NULL, PIXMAN_OP_OVER);
@@ -230,26 +230,25 @@ static void nemotale_node_handle_destroy_signal(struct nemolistener *listener, v
 struct talenode *nemotale_node_create_pixman(int32_t width, int32_t height)
 {
 	struct talenode *node;
-	struct talepmnode *context;
+	struct talepmnode *pcontext;
 
 	node = (struct talenode *)malloc(sizeof(struct talenode));
 	if (node == NULL)
 		return NULL;
 	memset(node, 0, sizeof(struct talenode));
 
-	node->pmcontext = context = (struct talepmnode *)malloc(sizeof(struct talepmnode));
-	if (context == NULL)
+	node->pmcontext = pcontext = (struct talepmnode *)malloc(sizeof(struct talepmnode));
+	if (pcontext == NULL)
 		goto err1;
-	memset(context, 0, sizeof(struct talepmnode));
+	memset(pcontext, 0, sizeof(struct talepmnode));
 
-	context->data = malloc(width * height * 4);
-	if (context->data == NULL)
+	pcontext->data = malloc(width * height * 4);
+	if (pcontext->data == NULL)
 		goto err2;
-	memset(context->data, 0, width * height * 4);
+	memset(pcontext->data, 0, width * height * 4);
 
-	context->image = pixman_image_create_bits(PIXMAN_a8r8g8b8, width, height, context->data, width * 4);
-
-	context->needs_free = 1;
+	pcontext->image = pixman_image_create_bits(PIXMAN_a8r8g8b8, width, height, pcontext->data, width * 4);
+	pcontext->needs_free = 1;
 
 	nemotale_node_prepare(node);
 
@@ -267,8 +266,8 @@ struct talenode *nemotale_node_create_pixman(int32_t width, int32_t height)
 	pixman_region32_init_rect(&node->region, 0, 0, width, height);
 	pixman_region32_init_rect(&node->damage, 0, 0, width, height);
 
-	context->destroy_listener.notify = nemotale_node_handle_destroy_signal;
-	nemosignal_add(&node->destroy_signal, &context->destroy_listener);
+	pcontext->destroy_listener.notify = nemotale_node_handle_destroy_signal;
+	nemosignal_add(&node->destroy_signal, &pcontext->destroy_listener);
 
 	return node;
 
@@ -283,7 +282,7 @@ err1:
 
 int nemotale_node_attach_pixman(struct talenode *node, void *data, int32_t width, int32_t height)
 {
-	struct talepmnode *context = (struct talepmnode *)node->pmcontext;
+	struct talepmnode *pcontext = (struct talepmnode *)node->pmcontext;
 
 	node->dirty = 0x2;
 	node->needs_flush = 1;
@@ -295,37 +294,36 @@ int nemotale_node_attach_pixman(struct talenode *node, void *data, int32_t width
 	pixman_region32_init_rect(&node->blend, 0, 0, width, height);
 	pixman_region32_init_rect(&node->region, 0, 0, width, height);
 
-	if (context->needs_free != 0)
-		free(context->data);
-	if (context->image != NULL)
-		pixman_image_unref(context->image);
+	if (pcontext->needs_free != 0)
+		free(pcontext->data);
+	if (pcontext->image != NULL)
+		pixman_image_unref(pcontext->image);
 
-	context->data = data;
-	context->image = pixman_image_create_bits(PIXMAN_a8r8g8b8, width, height, context->data, width * 4);
+	pcontext->data = data;
+	pcontext->image = pixman_image_create_bits(PIXMAN_a8r8g8b8, width, height, pcontext->data, width * 4);
 
-	context->needs_free = 0;
+	pcontext->needs_free = 0;
 
 	return 0;
 }
 
 void nemotale_node_detach_pixman(struct talenode *node)
 {
-	struct talepmnode *context = (struct talepmnode *)node->pmcontext;
+	struct talepmnode *pcontext = (struct talepmnode *)node->pmcontext;
 
-	if (context->needs_free != 0)
-		free(context->data);
-	if (context->image != NULL)
-		pixman_image_unref(context->image);
+	if (pcontext->needs_free != 0)
+		free(pcontext->data);
+	if (pcontext->image != NULL)
+		pixman_image_unref(pcontext->image);
 
-	context->data = NULL;
-	context->image = NULL;
-
-	context->needs_free = 0;
+	pcontext->data = NULL;
+	pcontext->image = NULL;
+	pcontext->needs_free = 0;
 }
 
 void nemotale_node_fill_pixman(struct talenode *node, double r, double g, double b, double a)
 {
-	struct talepmnode *context = (struct talepmnode *)node->pmcontext;
+	struct talepmnode *pcontext = (struct talepmnode *)node->pmcontext;
 	pixman_image_t *mask;
 	pixman_color_t color;
 
@@ -339,7 +337,7 @@ void nemotale_node_fill_pixman(struct talenode *node, double r, double g, double
 	pixman_image_composite32(PIXMAN_OP_SRC,
 			mask,
 			NULL,
-			context->image,
+			pcontext->image,
 			0, 0, 0, 0, 0, 0,
 			node->geometry.width, node->geometry.height);
 
@@ -349,7 +347,7 @@ void nemotale_node_fill_pixman(struct talenode *node, double r, double g, double
 int nemotale_node_resize_pixman(struct talenode *node, int32_t width, int32_t height)
 {
 	if (node->geometry.width != width || node->geometry.height != height) {
-		struct talepmnode *context = (struct talepmnode *)node->pmcontext;
+		struct talepmnode *pcontext = (struct talepmnode *)node->pmcontext;
 
 		node->dirty = 0x2;
 		node->needs_flush = 1;
@@ -362,16 +360,16 @@ int nemotale_node_resize_pixman(struct talenode *node, int32_t width, int32_t he
 		pixman_region32_init_rect(&node->region, 0, 0, width, height);
 		pixman_region32_init_rect(&node->damage, 0, 0, width, height);
 
-		if (context->needs_free != 0)
-			free(context->data);
-		if (context->image != NULL)
-			pixman_image_unref(context->image);
+		if (pcontext->needs_free != 0)
+			free(pcontext->data);
+		if (pcontext->image != NULL)
+			pixman_image_unref(pcontext->image);
 
-		context->data = malloc(width * height * 4);
-		memset(context->data, 0, width * height * 4);
+		pcontext->data = malloc(width * height * 4);
+		memset(pcontext->data, 0, width * height * 4);
 
-		context->image = pixman_image_create_bits(PIXMAN_a8r8g8b8, width, height, context->data, width * 4);
-		context->needs_free = 1;
+		pcontext->image = pixman_image_create_bits(PIXMAN_a8r8g8b8, width, height, pcontext->data, width * 4);
+		pcontext->needs_free = 1;
 	}
 
 	return 0;
@@ -379,9 +377,9 @@ int nemotale_node_resize_pixman(struct talenode *node, int32_t width, int32_t he
 
 void *nemotale_node_map_pixman(struct talenode *node)
 {
-	struct talepmnode *context = (struct talepmnode *)node->pmcontext;
+	struct talepmnode *pcontext = (struct talepmnode *)node->pmcontext;
 
-	return context->data;
+	return pcontext->data;
 }
 
 int nemotale_node_unmap_pixman(struct talenode *node)

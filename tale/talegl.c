@@ -78,20 +78,20 @@ static void nemotale_node_handle_destroy_signal(struct nemolistener *listener, v
 struct talenode *nemotale_node_create_gl(int32_t width, int32_t height)
 {
 	struct talenode *node;
-	struct taleglnode *context;
+	struct taleglnode *gcontext;
 
 	node = (struct talenode *)malloc(sizeof(struct talenode));
 	if (node == NULL)
 		return NULL;
 	memset(node, 0, sizeof(struct talenode));
 
-	node->glcontext = context = (struct taleglnode *)malloc(sizeof(struct taleglnode));
-	if (context == NULL)
+	node->glcontext = gcontext = (struct taleglnode *)malloc(sizeof(struct taleglnode));
+	if (gcontext == NULL)
 		goto err1;
-	memset(context, 0, sizeof(struct taleglnode));
+	memset(gcontext, 0, sizeof(struct taleglnode));
 
-	glGenTextures(1, &context->texture);
-	glBindTexture(GL_TEXTURE_2D, context->texture);
+	glGenTextures(1, &gcontext->texture);
+	glBindTexture(GL_TEXTURE_2D, gcontext->texture);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -100,13 +100,13 @@ struct talenode *nemotale_node_create_gl(int32_t width, int32_t height)
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 #ifdef NEMOUX_WITH_OPENGL_PBO
-	glGenBuffers(1, &context->pbo);
-	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, context->pbo);
+	glGenBuffers(1, &gcontext->pbo);
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, gcontext->pbo);
 	glBufferData(GL_PIXEL_UNPACK_BUFFER, width * height * 4, NULL, GL_DYNAMIC_DRAW);
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
-	context->pwidth = width;
-	context->pheight = height;
+	gcontext->pwidth = width;
+	gcontext->pheight = height;
 #endif
 
 	nemotale_node_prepare(node);
@@ -130,8 +130,8 @@ struct talenode *nemotale_node_create_gl(int32_t width, int32_t height)
 	pixman_region32_init_rect(&node->blend, 0, 0, width, height);
 	pixman_region32_init_rect(&node->region, 0, 0, width, height);
 
-	context->destroy_listener.notify = nemotale_node_handle_destroy_signal;
-	nemosignal_add(&node->destroy_signal, &context->destroy_listener);
+	gcontext->destroy_listener.notify = nemotale_node_handle_destroy_signal;
+	nemosignal_add(&node->destroy_signal, &gcontext->destroy_listener);
 
 	return node;
 
@@ -189,7 +189,7 @@ int nemotale_node_prepare_gl(struct talenode *node)
 int nemotale_node_resize_gl(struct talenode *node, int32_t width, int32_t height)
 {
 	if (node->geometry.width != width || node->geometry.height != height) {
-		struct taleglnode *context = (struct taleglnode *)node->glcontext;
+		struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
 
 		node->dirty = 0x2;
 		node->geometry.width = width;
@@ -199,19 +199,19 @@ int nemotale_node_resize_gl(struct talenode *node, int32_t width, int32_t height
 		pixman_region32_init_rect(&node->blend, 0, 0, width, height);
 		pixman_region32_init_rect(&node->region, 0, 0, width, height);
 
-		if (context->has_texture_external == 0) {
-			glBindTexture(GL_TEXTURE_2D, context->texture);
+		if (gcontext->has_texture_external == 0) {
+			glBindTexture(GL_TEXTURE_2D, gcontext->texture);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 
 #ifdef NEMOUX_WITH_OPENGL_PBO
-		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, context->pbo);
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, gcontext->pbo);
 		glBufferData(GL_PIXEL_UNPACK_BUFFER, width * height * 4, NULL, GL_DYNAMIC_DRAW);
 		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
-		context->pwidth = width;
-		context->pheight = height;
+		gcontext->pwidth = width;
+		gcontext->pheight = height;
 #endif
 	}
 
