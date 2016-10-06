@@ -215,23 +215,6 @@ void nemoshow_canvas_set_alpha(struct showone *one, double alpha)
 	nemoshow_one_dirty(one, NEMOSHOW_STYLE_DIRTY);
 }
 
-int nemoshow_canvas_set_shader(struct showone *one, const char *shaderpath)
-{
-	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
-	char *shader;
-
-	if (os_load_path(shaderpath, &shader, NULL) < 0)
-		return -1;
-
-	nemotale_node_set_filter(canvas->node, shader);
-
-	free(shader);
-
-	nemoshow_one_dirty(one, NEMOSHOW_FILTER_DIRTY);
-
-	return 0;
-}
-
 int nemoshow_canvas_use_pbo(struct showone *one, int use_pbo)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
@@ -320,9 +303,6 @@ int nemoshow_canvas_update(struct showone *one)
 		nemotale_node_damage_all(canvas->node);
 
 		nemoshow_canvas_set_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE | NEMOSHOW_CANVAS_REDRAW_FULL_STATE);
-	}
-	if ((one->dirty & NEMOSHOW_FILTER_DIRTY) != 0) {
-		nemotale_node_damage_filter(canvas->node);
 	}
 
 	if (nemolist_empty(&canvas->redraw_link) != 0)

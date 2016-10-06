@@ -17,11 +17,6 @@ static int nemotale_node_flush_none(struct talenode *node)
 	return 0;
 }
 
-static int nemotale_node_filter_none(struct talenode *node)
-{
-	return 0;
-}
-
 static int nemotale_node_resize_none(struct talenode *node, int32_t width, int32_t height)
 {
 	return 0;
@@ -67,7 +62,6 @@ int nemotale_node_prepare(struct talenode *node)
 	node->has_smooth = 1;
 
 	node->dispatch_flush = nemotale_node_flush_none;
-	node->dispatch_filter = nemotale_node_filter_none;
 	node->dispatch_resize = nemotale_node_resize_none;
 	node->dispatch_map = nemotale_node_map_none;
 	node->dispatch_unmap = nemotale_node_unmap_none;

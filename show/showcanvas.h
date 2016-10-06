@@ -106,7 +106,6 @@ extern int nemoshow_canvas_below_one(struct showone *one, struct showone *below)
 
 extern int nemoshow_canvas_set_type(struct showone *one, int type);
 extern void nemoshow_canvas_set_alpha(struct showone *one, double alpha);
-extern int nemoshow_canvas_set_shader(struct showone *one, const char *shader);
 extern int nemoshow_canvas_use_pbo(struct showone *one, int use_pbo);
 
 extern int nemoshow_canvas_prepare_vector(struct nemoshow *show, struct showone *one);

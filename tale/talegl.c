@@ -10,7 +10,6 @@
 #include <talegl.h>
 #include <talepixman.h>
 #include <glhelper.h>
-#include <glfilter.h>
 #include <fbohelper.h>
 #include <cliphelper.h>
 #include <nemolog.h>
@@ -73,15 +72,6 @@ static void nemotale_node_handle_destroy_signal(struct nemolistener *listener, v
 	glDeleteBuffers(1, &context->pbo);
 #endif
 
-	if (context->ftexture > 0)
-		glDeleteTextures(1, &context->ftexture);
-	if (context->fbo > 0)
-		glDeleteFramebuffers(1, &context->fbo);
-	if (context->dbo > 0)
-		glDeleteRenderbuffers(1, &context->dbo);
-	if (context->fprogram > 0)
-		glDeleteProgram(context->fprogram);
-
 	free(context);
 }
 
@@ -109,8 +99,6 @@ struct talenode *nemotale_node_create_gl(int32_t width, int32_t height)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	context->_texture = context->texture;
-
 #ifdef NEMOUX_WITH_OPENGL_PBO
 	glGenBuffers(1, &context->pbo);
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, context->pbo);
@@ -137,7 +125,6 @@ struct talenode *nemotale_node_create_gl(int32_t width, int32_t height)
 	node->dispatch_flush = nemotale_node_flush_gl;
 #endif
 
-	node->dispatch_filter = nemotale_node_filter_gl;
 	node->dispatch_resize = nemotale_node_resize_gl;
 
 	pixman_region32_init_rect(&node->blend, 0, 0, width, height);
@@ -172,8 +159,6 @@ int nemotale_node_prepare_gl(struct talenode *node)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
-		gcontext->_texture = gcontext->texture;
-
 #ifdef NEMOUX_WITH_OPENGL_PBO
 		glGenBuffers(1, &gcontext->pbo);
 		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, gcontext->pbo);
@@ -191,8 +176,6 @@ int nemotale_node_prepare_gl(struct talenode *node)
 #else
 		node->dispatch_flush = nemotale_node_flush_gl;
 #endif
-
-		node->dispatch_filter = nemotale_node_filter_gl;
 
 		node->glcontext = gcontext;
 
@@ -220,17 +203,6 @@ int nemotale_node_resize_gl(struct talenode *node, int32_t width, int32_t height
 			glBindTexture(GL_TEXTURE_2D, context->texture);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 			glBindTexture(GL_TEXTURE_2D, 0);
-		}
-
-		if (node->has_filter != 0) {
-			glBindTexture(GL_TEXTURE_2D, context->ftexture);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
-			glBindTexture(GL_TEXTURE_2D, 0);
-
-			glDeleteFramebuffers(1, &context->fbo);
-			glDeleteRenderbuffers(1, &context->dbo);
-
-			fbo_prepare_context(context->ftexture, width, height, &context->fbo, &context->dbo);
 		}
 
 #ifdef NEMOUX_WITH_OPENGL_PBO
@@ -385,7 +357,9 @@ static void nemotale_repaint_node(struct nemotale *tale, struct talenode *node, 
 	pixman_region32_intersect(&repaint, &node->boundingbox, damage);
 
 	if (pixman_region32_not_empty(&repaint)) {
-		glBindTexture(GL_TEXTURE_2D, nemotale_node_get_texture(node));
+		struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
+
+		glBindTexture(GL_TEXTURE_2D, gcontext->texture);
 
 		if (node->has_smooth != 0 && node->transform.enable != 0) {
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -426,9 +400,6 @@ static void nemotale_flush_node(struct nemotale *tale, struct talenode *node)
 {
 	if (node->pmcontext != NULL && node->needs_flush != 0)
 		nemotale_node_flush(node);
-
-	if (node->has_filter != 0 && node->needs_filter != 0)
-		nemotale_node_filter(node);
 }
 
 struct nemotale *nemotale_create_gl(void)
@@ -849,7 +820,6 @@ int nemotale_node_flush_gl(struct talenode *node)
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		node->needs_flush = 0;
-		node->needs_filter = 1;
 		node->needs_full_upload = 0;
 	}
 
@@ -922,7 +892,6 @@ int nemotale_node_flush_gl_pbo(struct talenode *node)
 		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
 		node->needs_flush = 0;
-		node->needs_filter = 1;
 	}
 #endif
 
@@ -971,7 +940,6 @@ int nemotale_node_unmap_pbo(struct talenode *node)
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
 	node->needs_flush = 0;
-	node->needs_filter = 1;
 	node->needs_full_upload = 0;
 #endif
 
@@ -1021,7 +989,6 @@ int nemotale_node_flush_gl_subimage(struct talenode *node)
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		node->needs_flush = 0;
-		node->needs_filter = 1;
 	}
 
 	return 0;
@@ -1029,98 +996,6 @@ int nemotale_node_flush_gl_subimage(struct talenode *node)
 
 int nemotale_node_flush_gl_external(struct talenode *node)
 {
-	node->needs_filter = 1;
-
-	return 0;
-}
-
-int nemotale_node_filter_gl(struct talenode *node)
-{
-	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
-
-	if (node->has_filter != 0 && node->needs_filter != 0) {
-		GLfloat vertices[] = {
-			-1.0f, -1.0f, 0.0f, 0.0f,
-			1.0f, -1.0f, 1.0f, 0.0f,
-			1.0f, 1.0f, 1.0f, 1.0f,
-			-1.0f, 1.0f, 0.0f, 1.0f
-		};
-
-		glBindFramebuffer(GL_FRAMEBUFFER, gcontext->fbo);
-
-		glViewport(0, 0, node->geometry.width, node->geometry.height);
-
-		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-		glClearDepth(0.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		glUseProgram(gcontext->fprogram);
-		glUniform1i(gcontext->utexture, 0);
-		glUniform1f(gcontext->uwidth, node->geometry.width);
-		glUniform1f(gcontext->uheight, node->geometry.height);
-		glUniform1f(gcontext->utime, (float)time_current_nsecs() / 1000000000.0f);
-
-		glBindTexture(GL_TEXTURE_2D, gcontext->texture);
-
-		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &vertices[0]);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &vertices[2]);
-		glEnableVertexAttribArray(1);
-
-		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		node->needs_filter = 0;
-	}
-
-	return 0;
-}
-
-int nemotale_node_set_filter(struct talenode *node, const char *shader)
-{
-	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
-	GLuint program;
-
-	if (node->has_filter != 0) {
-		glDeleteTextures(1, &gcontext->ftexture);
-		glDeleteFramebuffers(1, &gcontext->fbo);
-		glDeleteRenderbuffers(1, &gcontext->dbo);
-		glDeleteProgram(gcontext->fprogram);
-	}
-
-	if (shader == NULL) {
-		node->has_filter = 0;
-
-		return 0;
-	}
-
-	glGenTextures(1, &gcontext->ftexture);
-	glBindTexture(GL_TEXTURE_2D, gcontext->ftexture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, node->geometry.width, node->geometry.height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	gcontext->fprogram = program = glfilter_create_program(shader);
-	if (program == 0)
-		return 0;
-
-	gcontext->utexture = glGetUniformLocation(program, "tex");
-	gcontext->uwidth = glGetUniformLocation(program, "width");
-	gcontext->uheight = glGetUniformLocation(program, "height");
-	gcontext->utime = glGetUniformLocation(program, "time");
-
-	fbo_prepare_context(gcontext->ftexture, node->geometry.width, node->geometry.height, &gcontext->fbo, &gcontext->dbo);
-
-	node->has_filter = 1;
-
-	gcontext->_texture = gcontext->ftexture;
-
 	return 0;
 }
 
@@ -1138,12 +1013,14 @@ int nemotale_node_set_texture(struct talenode *node, GLuint texture)
 
 	context->texture = texture;
 
-	if (node->has_filter == 0)
-		context->_texture = texture;
-	else
-		node->needs_filter = 1;
-
 	return 0;
+}
+
+GLuint nemotale_node_get_texture(struct talenode *node)
+{
+	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
+
+	return gcontext->texture;
 }
 
 int nemotale_node_use_pbo(struct talenode *node, int use_pbo)
