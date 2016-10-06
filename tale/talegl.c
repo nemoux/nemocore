@@ -400,10 +400,13 @@ static void nemotale_flush_node(struct nemotale *tale, struct talenode *node)
 {
 	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
 
-	gcontext->texture = gcontext->otexture;
-
 	if (node->pmcontext != NULL && node->needs_flush != 0)
 		nemotale_node_flush(node);
+
+	if (gcontext->dispatch_effect == NULL)
+		gcontext->texture = gcontext->otexture;
+	else
+		gcontext->texture = gcontext->dispatch_effect(gcontext->effect_data, gcontext->otexture, node->geometry.width, node->geometry.height, node->dirty);
 }
 
 struct nemotale *nemotale_create_gl(void)
@@ -1025,6 +1028,14 @@ GLuint nemotale_node_get_texture(struct talenode *node)
 	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
 
 	return gcontext->otexture;
+}
+
+void nemotale_node_set_dispatch_effect(struct talenode *node, nemotale_node_dispatch_effect_t dispatch, void *data)
+{
+	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
+
+	gcontext->dispatch_effect = dispatch;
+	gcontext->effect_data = data;
 }
 
 int nemotale_node_use_pbo(struct talenode *node, int use_pbo)
