@@ -66,7 +66,7 @@ static void nemotale_node_handle_destroy_signal(struct nemolistener *listener, v
 	nemolist_remove(&context->destroy_listener.link);
 
 	if (context->has_texture_external == 0)
-		glDeleteTextures(1, &context->texture);
+		glDeleteTextures(1, &context->otexture);
 
 #ifdef NEMOUX_WITH_OPENGL_PBO
 	glDeleteBuffers(1, &context->pbo);
@@ -90,8 +90,8 @@ struct talenode *nemotale_node_create_gl(int32_t width, int32_t height)
 		goto err1;
 	memset(gcontext, 0, sizeof(struct taleglnode));
 
-	glGenTextures(1, &gcontext->texture);
-	glBindTexture(GL_TEXTURE_2D, gcontext->texture);
+	glGenTextures(1, &gcontext->otexture);
+	glBindTexture(GL_TEXTURE_2D, gcontext->otexture);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -151,8 +151,8 @@ int nemotale_node_prepare_gl(struct talenode *node)
 			return -1;
 		memset(gcontext, 0, sizeof(struct taleglnode));
 
-		glGenTextures(1, &gcontext->texture);
-		glBindTexture(GL_TEXTURE_2D, gcontext->texture);
+		glGenTextures(1, &gcontext->otexture);
+		glBindTexture(GL_TEXTURE_2D, gcontext->otexture);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -200,7 +200,7 @@ int nemotale_node_resize_gl(struct talenode *node, int32_t width, int32_t height
 		pixman_region32_init_rect(&node->region, 0, 0, width, height);
 
 		if (gcontext->has_texture_external == 0) {
-			glBindTexture(GL_TEXTURE_2D, gcontext->texture);
+			glBindTexture(GL_TEXTURE_2D, gcontext->otexture);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
@@ -398,6 +398,10 @@ static void nemotale_repaint_node(struct nemotale *tale, struct talenode *node, 
 
 static void nemotale_flush_node(struct nemotale *tale, struct talenode *node)
 {
+	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
+
+	gcontext->texture = gcontext->otexture;
+
 	if (node->pmcontext != NULL && node->needs_flush != 0)
 		nemotale_node_flush(node);
 }
@@ -808,7 +812,7 @@ int nemotale_node_flush_gl(struct talenode *node)
 	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
 
 	if (pcontext != NULL && node->needs_flush != 0) {
-		glBindTexture(GL_TEXTURE_2D, gcontext->texture);
+		glBindTexture(GL_TEXTURE_2D, gcontext->otexture);
 
 		glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
 		glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
@@ -877,7 +881,7 @@ int nemotale_node_flush_gl_pbo(struct talenode *node)
 
 		glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 
-		glBindTexture(GL_TEXTURE_2D, gcontext->texture);
+		glBindTexture(GL_TEXTURE_2D, gcontext->otexture);
 
 		glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, node->geometry.width);
 
@@ -925,7 +929,7 @@ int nemotale_node_unmap_pbo(struct talenode *node)
 
 	glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 
-	glBindTexture(GL_TEXTURE_2D, gcontext->texture);
+	glBindTexture(GL_TEXTURE_2D, gcontext->otexture);
 
 	glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, node->geometry.width);
 
@@ -952,7 +956,7 @@ int nemotale_node_flush_gl_subimage(struct talenode *node)
 	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
 
 	if (pcontext != NULL && node->needs_flush != 0) {
-		glBindTexture(GL_TEXTURE_2D, gcontext->texture);
+		glBindTexture(GL_TEXTURE_2D, gcontext->otexture);
 
 		glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, node->geometry.width);
 
@@ -1001,17 +1005,17 @@ int nemotale_node_flush_gl_external(struct talenode *node)
 
 int nemotale_node_set_texture(struct talenode *node, GLuint texture)
 {
-	struct taleglnode *context = (struct taleglnode *)node->glcontext;
+	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
 
-	if (context->has_texture_external == 0) {
-		glDeleteTextures(1, &context->texture);
+	if (gcontext->has_texture_external == 0) {
+		glDeleteTextures(1, &gcontext->otexture);
 
-		context->has_texture_external = 1;
+		gcontext->has_texture_external = 1;
 
 		node->dispatch_flush = nemotale_node_flush_gl_external;
 	}
 
-	context->texture = texture;
+	gcontext->otexture = texture;
 
 	return 0;
 }
@@ -1020,7 +1024,7 @@ GLuint nemotale_node_get_texture(struct talenode *node)
 {
 	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
 
-	return gcontext->texture;
+	return gcontext->otexture;
 }
 
 int nemotale_node_use_pbo(struct talenode *node, int use_pbo)
