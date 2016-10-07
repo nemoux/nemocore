@@ -7,6 +7,10 @@
 NEMO_BEGIN_EXTERN_C
 #endif
 
+#include <stdint.h>
+
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
@@ -128,7 +132,40 @@ static const char GLFILTER_SHARPNESS_FRAGMENT_SHADER[] =
 "  gl_FragColor = clamp(s / 1.0 + 0.0, 0.0, 1.0);\n"
 "}\n";
 
-extern GLuint glfilter_create_program(const char *shader);
+struct glfilter {
+	GLuint texture;
+	GLuint fbo, dbo;
+
+	GLuint program;
+
+	GLuint utexture;
+	GLuint uwidth;
+	GLuint uheight;
+	GLuint utime;
+
+	int32_t width, height;
+};
+
+extern struct glfilter *glfilter_create(const char *shaderpath, int32_t width, int32_t height);
+extern void glfilter_destroy(struct glfilter *filter);
+
+extern void glfilter_resize(struct glfilter *filter, int32_t width, int32_t height);
+extern void glfilter_dispatch(struct glfilter *filter, GLuint texture);
+
+static inline int32_t glfilter_get_width(struct glfilter *filter)
+{
+	return filter->width;
+}
+
+static inline int32_t glfilter_get_height(struct glfilter *filter)
+{
+	return filter->height;
+}
+
+static inline GLuint glfilter_get_texture(struct glfilter *filter)
+{
+	return filter->texture;
+}
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

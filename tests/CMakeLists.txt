@@ -79,6 +79,14 @@ if(WITH_OPENCL)
 		)
 endif(WITH_OPENCL)
 
+add_executable(nemoeffect-show
+	nemoeffect-show.c
+	)
+
+TARGET_LINK_LIBRARIES(nemoeffect-show
+	nemoapps
+	)
+
 add_executable(nemolog
 	nemolog.c
 	)

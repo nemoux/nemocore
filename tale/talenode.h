@@ -97,6 +97,11 @@ static inline void nemotale_node_damage(struct talenode *node, int32_t x, int32_
 	node->needs_flush = 1;
 }
 
+static inline void nemotale_node_damage_below(struct talenode *node)
+{
+	node->dirty |= 0x2;
+}
+
 static inline void nemotale_node_damage_region(struct talenode *node, pixman_region32_t *region)
 {
 	pixman_region32_union(&node->damage, &node->damage, region);
