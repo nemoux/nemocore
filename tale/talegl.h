@@ -29,7 +29,7 @@ NEMO_BEGIN_EXTERN_C
 
 #define NEMOTALE_BUFFER_AGE_COUNT		(2)
 
-typedef GLuint (*nemotale_node_dispatch_effect_t)(void *data, GLuint texture, int32_t width, int32_t height, int dirty);
+typedef GLuint (*nemotale_node_dispatch_effect_t)(struct talenode *node, void *data);
 
 struct taleglnode {
 	GLuint texture;

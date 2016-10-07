@@ -406,7 +406,7 @@ static void nemotale_flush_node(struct nemotale *tale, struct talenode *node)
 	if (gcontext->dispatch_effect == NULL)
 		gcontext->texture = gcontext->otexture;
 	else
-		gcontext->texture = gcontext->dispatch_effect(gcontext->effect_data, gcontext->otexture, node->geometry.width, node->geometry.height, node->dirty);
+		gcontext->texture = gcontext->dispatch_effect(node, gcontext->effect_data);
 }
 
 struct nemotale *nemotale_create_gl(void)

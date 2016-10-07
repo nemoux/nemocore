@@ -204,6 +204,11 @@ static inline void nemotale_node_scale(struct talenode *node, float sx, float sy
 	node->transform.dirty = 1;
 }
 
+static inline int nemotale_node_is_dirty(struct talenode *node)
+{
+	return node->dirty != 0;
+}
+
 static inline int nemotale_node_is_mapped(struct talenode *node)
 {
 	return node->tale != NULL;
