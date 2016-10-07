@@ -28,11 +28,20 @@ struct effectcontext {
 
 	struct glfilter *filter;
 	struct glripple *ripple;
+
+	float width, height;
 };
 
 static void nemoeffect_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, struct showevent *event)
 {
 	struct effectcontext *context = (struct effectcontext *)nemoshow_get_userdata(show);
+
+	if (nemoshow_event_is_touch_down(show, event)) {
+		glripple_shoot(context->ripple,
+				nemoshow_event_get_x(event) / context->width,
+				nemoshow_event_get_y(event) / context->height,
+				7);
+	}
 
 	if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event)) {
 		nemoshow_event_update_taps(show, canvas, event);
@@ -64,6 +73,8 @@ static GLuint nemoeffect_dispatch_tale_effect(struct talenode *node, void *data)
 	struct effectcontext *context = (struct effectcontext *)data;
 
 	glfilter_dispatch(context->filter, nemotale_node_get_texture(node));
+
+	glripple_update(context->ripple);
 	glripple_dispatch(context->ripple, glfilter_get_texture(context->filter));
 
 	return glripple_get_texture(context->ripple);
@@ -115,6 +126,9 @@ int main(int argc, char *argv[])
 		goto err1;
 	memset(context, 0, sizeof(struct effectcontext));
 
+	context->width = width;
+	context->height = height;
+
 	context->tool = tool = nemotool_create();
 	if (tool == NULL)
 		goto err2;
@@ -150,7 +164,6 @@ int main(int argc, char *argv[])
 
 	context->filter = filter = glfilter_create(width, height, programpath);
 	context->ripple = ripple = glripple_create(width, height);
-	glripple_layout(ripple, 2, 2);
 
 	trans = nemoshow_transition_create(NEMOSHOW_LINEAR_EASE, 18000, 0);
 	nemoshow_transition_dirty_one(trans, context->canvas, NEMOSHOW_FILTER_DIRTY);

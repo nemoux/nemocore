@@ -5,10 +5,84 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <math.h>
+
 #include <glripple.h>
 #include <glhelper.h>
 #include <fbohelper.h>
+#include <ripplehelper.h>
 #include <nemomisc.h>
+
+static void glripple_layout(struct glripple *ripple, int32_t rows, int32_t columns, int32_t length)
+{
+	GLfloat *vertices;
+	GLfloat *vertices0;
+	GLfloat *texcoords;
+	GLuint *indices;
+	GLfloat ox = -1.0f;
+	GLfloat oy = -1.0f;
+	GLfloat px = 2.0f / columns;
+	GLfloat py = 2.0f / rows;
+	int idx;
+	int x, y;
+
+	vertices = (GLfloat *)malloc(sizeof(GLfloat[3]) * (rows + 1) * (columns + 1));
+	vertices0 = (GLfloat *)malloc(sizeof(GLfloat[3]) * (rows + 1) * (columns + 1));
+	texcoords = (GLfloat *)malloc(sizeof(GLfloat[2]) * (rows + 1) * (columns + 1));
+	indices = (GLuint *)malloc(sizeof(GLuint[2]) * rows * (columns + 1));
+
+	for (y = 0; y <= rows; y++) {
+		for (x = 0; x <= columns; x++) {
+			idx = y * (columns + 1) + x;
+
+			vertices0[idx * 3 + 0] = vertices[idx * 3 + 0] = ox + (float)x * px;
+			vertices0[idx * 3 + 1] = vertices[idx * 3 + 1] = oy + (float)y * py;
+			vertices0[idx * 3 + 2] = vertices[idx * 3 + 2] = 0.0f;
+
+			texcoords[idx * 2 + 0] = (float)x / (float)columns;
+			texcoords[idx * 2 + 1] = (float)y / (float)rows;
+		}
+	}
+
+	for (y = 0; y < rows; y++) {
+		for (x = 0; x <= columns; x++) {
+			idx = y * (columns + 1) + x;
+
+			indices[idx * 2 + 0] = y * (columns + 1) + x;
+			indices[idx * 2 + 1] = (y + 1) * (columns + 1) + x;
+		}
+	}
+
+	glBindVertexArray(ripple->varray);
+
+	glBindBuffer(GL_ARRAY_BUFFER, ripple->vvertex);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void *)0);
+	glEnableVertexAttribArray(0);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat[3]) * (rows + 1) * (columns + 1), vertices, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, ripple->vtexcoord);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (void *)0);
+	glEnableVertexAttribArray(1);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat[2]) * (rows + 1) * (columns + 1), texcoords, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	glBindVertexArray(0);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ripple->vindex);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint[2]) * rows * (columns + 1), indices, GL_STATIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	ripple->vertices = vertices;
+	ripple->vertices0 = vertices0;
+	ripple->texcoords = texcoords;
+	ripple->indices = indices;
+
+	ripple->rows = rows;
+	ripple->columns = columns;
+	ripple->elements = rows * (columns + 1) * 2;
+	ripple->length = length;
+}
 
 static GLuint glripple_create_program(void)
 {
@@ -91,10 +165,14 @@ struct glripple *glripple_create(int32_t width, int32_t height)
 	glGenBuffers(1, &ripple->vtexcoord);
 	glGenBuffers(1, &ripple->vindex);
 
+	glripple_layout(ripple, RIPPLE_GRID_ROWS, RIPPLE_GRID_COLUMNS, RIPPLE_LENGTH);
+
 	fbo_prepare_context(ripple->texture, width, height, &ripple->fbo, &ripple->dbo);
 
 	ripple->width = width;
 	ripple->height = height;
+
+	nemolist_init(&ripple->list);
 
 	return ripple;
 
@@ -106,6 +184,8 @@ err1:
 
 void glripple_destroy(struct glripple *ripple)
 {
+	nemolist_remove(&ripple->list);
+
 	glDeleteTextures(1, &ripple->texture);
 
 	glDeleteBuffers(1, &ripple->vvertex);
@@ -118,74 +198,14 @@ void glripple_destroy(struct glripple *ripple)
 
 	glDeleteProgram(ripple->program);
 
+	if (ripple->vertices != NULL)
+		free(ripple->vertices);
+	if (ripple->texcoords != NULL)
+		free(ripple->texcoords);
+	if (ripple->indices != NULL)
+		free(ripple->indices);
+
 	free(ripple);
-}
-
-void glripple_layout(struct glripple *ripple, int32_t rows, int32_t columns)
-{
-	GLfloat *vertices;
-	GLfloat *texcoords;
-	GLuint *indices;
-	GLfloat ox = -1.0f;
-	GLfloat oy = -1.0f;
-	GLfloat px = 2.0f / columns;
-	GLfloat py = 2.0f / rows;
-	int idx;
-	int x, y;
-
-	vertices = (GLfloat *)malloc(sizeof(GLfloat[3]) * (rows + 1) * (columns + 1));
-	texcoords = (GLfloat *)malloc(sizeof(GLfloat[2]) * (rows + 1) * (columns + 1));
-	indices = (GLuint *)malloc(sizeof(GLuint[2]) * rows * (columns + 1));
-
-	for (y = 0; y <= rows; y++) {
-		for (x = 0; x <= columns; x++) {
-			idx = y * (columns + 1) + x;
-
-			vertices[idx * 3 + 0] = ox + (float)x * px;
-			vertices[idx * 3 + 1] = oy + (float)y * py;
-			vertices[idx * 3 + 2] = 0.0f;
-
-			texcoords[idx * 2 + 0] = (float)x / (float)columns;
-			texcoords[idx * 2 + 1] = (float)y / (float)rows;
-		}
-	}
-
-	for (y = 0; y < rows; y++) {
-		for (x = 0; x <= columns; x++) {
-			idx = y * (columns + 1) + x;
-
-			indices[idx * 2 + 0] = y * (columns + 1) + x;
-			indices[idx * 2 + 1] = (y + 1) * (columns + 1) + x;
-		}
-	}
-
-	glBindVertexArray(ripple->varray);
-
-	glBindBuffer(GL_ARRAY_BUFFER, ripple->vvertex);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void *)0);
-	glEnableVertexAttribArray(0);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat[3]) * (rows + 1) * (columns + 1), vertices, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, ripple->vtexcoord);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (void *)0);
-	glEnableVertexAttribArray(1);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat[2]) * (rows + 1) * (columns + 1), texcoords, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	glBindVertexArray(0);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ripple->vindex);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint[2]) * rows * (columns + 1), indices, GL_STATIC_DRAW);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-	free(vertices);
-	free(texcoords);
-	free(indices);
-
-	ripple->rows = rows;
-	ripple->columns = columns;
-	ripple->elements = rows * (columns + 1) * 2;
 }
 
 void glripple_resize(struct glripple *ripple, int32_t width, int32_t height)
@@ -203,6 +223,66 @@ void glripple_resize(struct glripple *ripple, int32_t width, int32_t height)
 		ripple->width = width;
 		ripple->height = height;
 	}
+}
+
+void glripple_update(struct glripple *ripple)
+{
+	struct rippleone *one, *next;
+	int offset;
+	int x, y;
+
+	nemolist_for_each_safe(one, next, &ripple->list, link) {
+		if (one->delta > one->duration) {
+			nemolist_remove(&one->link);
+
+			free(one);
+		} else {
+			one->delta += one->step;
+		}
+	}
+
+	for (y = 1; y < ripple->rows; y++) {
+		for (x = 1; x < ripple->columns; x++) {
+			offset = y * (ripple->columns + 1) + x;
+
+			ripple->vertices[offset * 3 + 0] = ripple->vertices0[offset * 3 + 0];
+			ripple->vertices[offset * 3 + 1] = ripple->vertices0[offset * 3 + 1];
+
+			nemolist_for_each(one, &ripple->list, link) {
+				int mx = x - one->gx;
+				int my = y - one->gy;
+				float sx = 1.0f;
+				float sy = 1.0f;
+				float amp;
+				int r;
+
+				if (mx < 0) {
+					mx *= -1;
+					sx *= -1;
+				}
+
+				if (my < 0) {
+					my *= -1;
+					sy *= -1;
+				}
+
+				r = MINMAX(one->delta - glripple_vector[mx][my].r, 0, ripple->length - 1);
+
+				amp = 1.0f - (float)one->delta / ripple->length;
+				amp *= amp;
+
+				if (amp < 0.0f)
+					amp = 0.0f;
+
+				ripple->vertices[offset * 3 + 0] += glripple_vector[mx][my].dx * sx * glripple_amplitude[r] * amp;
+				ripple->vertices[offset * 3 + 1] += glripple_vector[mx][my].dy * sy * glripple_amplitude[r] * amp;
+			}
+		}
+	}
+
+	glBindBuffer(GL_ARRAY_BUFFER, ripple->vvertex);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat[3]) * (ripple->rows + 1) * (ripple->columns + 1), ripple->vertices, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void glripple_dispatch(struct glripple *ripple, GLuint texture)
@@ -231,4 +311,18 @@ void glripple_dispatch(struct glripple *ripple, GLuint texture)
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void glripple_shoot(struct glripple *ripple, float x, float y, int step)
+{
+	struct rippleone *one;
+
+	one = (struct rippleone *)malloc(sizeof(struct rippleone));
+	one->gx = x * ripple->columns;
+	one->gy = y * ripple->rows;
+	one->delta = 0;
+	one->duration = sqrtf(ripple->width * ripple->width + ripple->height * ripple->height) + ripple->length;
+	one->step = step;
+
+	nemolist_insert(&ripple->list, &one->link);
 }

@@ -14,6 +14,17 @@ NEMO_BEGIN_EXTERN_C
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
+#include <nemolist.h>
+
+struct rippleone {
+	int gx, gy;
+	int delta;
+	int duration;
+	int step;
+
+	struct nemolist link;
+};
+
 struct glripple {
 	GLuint texture;
 	GLuint fbo, dbo;
@@ -27,17 +38,28 @@ struct glripple {
 
 	GLuint utexture;
 
+	GLfloat *vertices;
+	GLfloat *vertices0;
+	GLfloat *texcoords;
+	GLuint *indices;
+
 	int32_t width, height;
+
 	int32_t rows, columns;
 	int32_t elements;
+	int32_t length;
+
+	struct nemolist list;
 };
 
 extern struct glripple *glripple_create(int32_t width, int32_t height);
 extern void glripple_destroy(struct glripple *ripple);
 
-extern void glripple_layout(struct glripple *ripple, int32_t rows, int32_t columns);
 extern void glripple_resize(struct glripple *ripple, int32_t width, int32_t height);
+extern void glripple_update(struct glripple *ripple);
 extern void glripple_dispatch(struct glripple *ripple, GLuint texture);
+
+extern void glripple_shoot(struct glripple *ripple, float x, float y, int step);
 
 static inline int32_t glripple_get_width(struct glripple *ripple)
 {
