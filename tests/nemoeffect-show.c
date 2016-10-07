@@ -13,6 +13,7 @@
 #include <fbohelper.h>
 #include <glhelper.h>
 #include <glfilter.h>
+#include <glripple.h>
 #include <nemohelper.h>
 #include <nemolog.h>
 #include <nemomisc.h>
@@ -26,6 +27,7 @@ struct effectcontext {
 	struct showone *canvas;
 
 	struct glfilter *filter;
+	struct glripple *ripple;
 };
 
 static void nemoeffect_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, struct showevent *event)
@@ -52,6 +54,7 @@ static void nemoeffect_dispatch_show_resize(struct nemoshow *show, int32_t width
 	nemoshow_view_resize(context->show, width, height);
 
 	glfilter_resize(context->filter, width, height);
+	glripple_resize(context->ripple, width, height);
 
 	nemoshow_view_redraw(context->show);
 }
@@ -61,8 +64,9 @@ static GLuint nemoeffect_dispatch_tale_effect(struct talenode *node, void *data)
 	struct effectcontext *context = (struct effectcontext *)data;
 
 	glfilter_dispatch(context->filter, nemotale_node_get_texture(node));
+	glripple_dispatch(context->ripple, glfilter_get_texture(context->filter));
 
-	return glfilter_get_texture(context->filter);
+	return glripple_get_texture(context->ripple);
 }
 
 int main(int argc, char *argv[])
@@ -81,6 +85,7 @@ int main(int argc, char *argv[])
 	struct showtransition *trans;
 	struct talenode *node;
 	struct glfilter *filter;
+	struct glripple *ripple;
 	char *programpath = NULL;
 	int width = 800;
 	int height = 800;
@@ -143,7 +148,9 @@ int main(int argc, char *argv[])
 	node = nemoshow_canvas_get_node(canvas);
 	nemotale_node_set_dispatch_effect(node, nemoeffect_dispatch_tale_effect, context);
 
-	context->filter = filter = glfilter_create(programpath, width, height);
+	context->filter = filter = glfilter_create(width, height, programpath);
+	context->ripple = ripple = glripple_create(width, height);
+	glripple_layout(ripple, 2, 2);
 
 	trans = nemoshow_transition_create(NEMOSHOW_LINEAR_EASE, 18000, 0);
 	nemoshow_transition_dirty_one(trans, context->canvas, NEMOSHOW_FILTER_DIRTY);
@@ -154,6 +161,7 @@ int main(int argc, char *argv[])
 
 	nemotool_run(tool);
 
+	glripple_destroy(ripple);
 	glfilter_destroy(filter);
 
 	nemoshow_destroy_view(show);

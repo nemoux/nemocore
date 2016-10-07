@@ -44,7 +44,7 @@ static GLuint glfilter_create_program(const char *shader)
 	return program;
 }
 
-struct glfilter *glfilter_create(const char *shaderpath, int32_t width, int32_t height)
+struct glfilter *glfilter_create(int32_t width, int32_t height, const char *shaderpath)
 {
 	struct glfilter *filter;
 	char *shader;

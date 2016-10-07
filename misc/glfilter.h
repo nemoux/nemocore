@@ -146,7 +146,7 @@ struct glfilter {
 	int32_t width, height;
 };
 
-extern struct glfilter *glfilter_create(const char *shaderpath, int32_t width, int32_t height);
+extern struct glfilter *glfilter_create(int32_t width, int32_t height, const char *shaderpath);
 extern void glfilter_destroy(struct glfilter *filter);
 
 extern void glfilter_resize(struct glfilter *filter, int32_t width, int32_t height);
