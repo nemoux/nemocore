@@ -44,12 +44,10 @@ static void glripple_layout(struct glripple *ripple, int32_t rows, int32_t colum
 		}
 	}
 
-	for (y = 0; y < rows; y++) {
+	for (y = 0, idx = 0; y < rows; y++) {
 		for (x = 0; x <= columns; x++) {
-			idx = y * (columns + 1) + x;
-
-			indices[idx * 2 + 0] = y * (columns + 1) + x;
-			indices[idx * 2 + 1] = (y + 1) * (columns + 1) + x;
+			indices[idx++] = y * (columns + 1) + x;
+			indices[idx++] = (y + 1) * (columns + 1) + x;
 		}
 	}
 
