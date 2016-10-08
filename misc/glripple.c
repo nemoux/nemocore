@@ -269,10 +269,7 @@ void glripple_update(struct glripple *ripple)
 				r = MINMAX(one->delta - glripple_vector[mx][my].r, 0, ripple->length - 1);
 
 				amp = 1.0f - (float)one->delta / ripple->length;
-				amp *= amp;
-
-				if (amp < 0.0f)
-					amp = 0.0f;
+				amp = MAX(amp * amp, 0.0f);
 
 				ripple->vertices[offset * 3 + 0] += glripple_vector[mx][my].dx * sx * glripple_amplitude[r] * amp;
 				ripple->vertices[offset * 3 + 1] += glripple_vector[mx][my].dy * sy * glripple_amplitude[r] * amp;

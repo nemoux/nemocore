@@ -1,6 +1,8 @@
 #ifndef __RIPPLE_HELPER_H__
 #define __RIPPLE_HELPER_H__
 
+#pragma GCC diagnostic ignored "-Wmissing-braces"
+
 #define RIPPLE_GRID_ROWS				(32)
 #define RIPPLE_GRID_COLUMNS			(32)
 #define RIPPLE_LENGTH						(2048)
@@ -10,7 +12,7 @@ struct ripplevector {
 	int r;
 };
 
-static const struct ripplevector glripple_vector[RIPPLE_GRID_ROWS][RIPPLE_GRID_COLUMNS] = {
+static const struct ripplevector glripple_vector[RIPPLE_GRID_COLUMNS][RIPPLE_GRID_ROWS] = {
 	0, 0, 0,
 	0, 1, 25,
 	0, 1, 51,
