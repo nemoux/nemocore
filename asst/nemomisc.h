@@ -19,7 +19,11 @@ NEMO_BEGIN_EXTERN_C
 #endif
 
 #ifndef MINMAX
-# define MINMAX(x,y,z)	(MIN(MAX(x,y), z))
+#	define MINMAX(x,y,z)	(MIN(MAX(x,y), z))
+#endif
+
+#ifndef SQUARE
+#	define SQUARE(x)			((x) * (x))
 #endif
 
 #ifndef offsetof
