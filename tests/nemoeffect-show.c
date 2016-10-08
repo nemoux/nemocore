@@ -30,6 +30,8 @@ struct effectcontext {
 	struct glripple *ripple;
 
 	float width, height;
+
+	int step;
 };
 
 static void nemoeffect_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, struct showevent *event)
@@ -40,7 +42,7 @@ static void nemoeffect_dispatch_canvas_event(struct nemoshow *show, struct showo
 		glripple_shoot(context->ripple,
 				nemoshow_event_get_x(event) / context->width,
 				nemoshow_event_get_y(event) / context->height,
-				7);
+				context->step);
 	}
 
 	if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event)) {
@@ -84,6 +86,7 @@ int main(int argc, char *argv[])
 {
 	struct option options[] = {
 		{ "program",				required_argument,			NULL,			'p' },
+		{ "step",						required_argument,			NULL,			's' },
 		{ 0 }
 	};
 
@@ -100,17 +103,22 @@ int main(int argc, char *argv[])
 	char *programpath = NULL;
 	int width = 800;
 	int height = 800;
+	int step = 7;
 	int opt;
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "p:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "p:s:", options, NULL)) {
 		if (opt == -1)
 			break;
 
 		switch (opt) {
 			case 'p':
 				programpath = strdup(optarg);
+				break;
+
+			case 's':
+				step = strtoul(optarg, NULL, 10);
 				break;
 
 			default:
@@ -128,6 +136,8 @@ int main(int argc, char *argv[])
 
 	context->width = width;
 	context->height = height;
+
+	context->step = step;
 
 	context->tool = tool = nemotool_create();
 	if (tool == NULL)
