@@ -87,6 +87,14 @@ TARGET_LINK_LIBRARIES(nemoeffect-show
 	nemoapps
 	)
 
+add_executable(nemoripple
+	nemoripple.c
+	)
+
+TARGET_LINK_LIBRARIES(nemoripple
+	nemoapps
+	)
+
 add_executable(nemolog
 	nemolog.c
 	)
