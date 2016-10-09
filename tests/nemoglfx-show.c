@@ -18,7 +18,7 @@
 #include <nemolog.h>
 #include <nemomisc.h>
 
-struct effectcontext {
+struct glfxcontext {
 	struct nemotool *tool;
 
 	struct nemoshow *show;
@@ -34,9 +34,9 @@ struct effectcontext {
 	int step;
 };
 
-static void nemoeffect_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, struct showevent *event)
+static void nemoglfx_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, struct showevent *event)
 {
-	struct effectcontext *context = (struct effectcontext *)nemoshow_get_userdata(show);
+	struct glfxcontext *context = (struct glfxcontext *)nemoshow_get_userdata(show);
 
 	if (nemoshow_event_is_touch_down(show, event) && context->ripple != NULL) {
 		glripple_shoot(context->ripple,
@@ -58,9 +58,9 @@ static void nemoeffect_dispatch_canvas_event(struct nemoshow *show, struct showo
 	}
 }
 
-static void nemoeffect_dispatch_show_resize(struct nemoshow *show, int32_t width, int32_t height)
+static void nemoglfx_dispatch_show_resize(struct nemoshow *show, int32_t width, int32_t height)
 {
-	struct effectcontext *context = (struct effectcontext *)nemoshow_get_userdata(show);
+	struct glfxcontext *context = (struct glfxcontext *)nemoshow_get_userdata(show);
 
 	nemoshow_view_resize(context->show, width, height);
 
@@ -72,9 +72,9 @@ static void nemoeffect_dispatch_show_resize(struct nemoshow *show, int32_t width
 	nemoshow_view_redraw(context->show);
 }
 
-static GLuint nemoeffect_dispatch_tale_effect(struct talenode *node, void *data)
+static GLuint nemoglfx_dispatch_tale_glfx(struct talenode *node, void *data)
 {
-	struct effectcontext *context = (struct effectcontext *)data;
+	struct glfxcontext *context = (struct glfxcontext *)data;
 	GLuint texture = nemotale_node_get_texture(node);
 
 	if (context->filter != NULL) {
@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
 		{ 0 }
 	};
 
-	struct effectcontext *context;
+	struct glfxcontext *context;
 	struct nemotool *tool;
 	struct nemoshow *show;
 	struct showone *scene;
@@ -141,10 +141,10 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	context = (struct effectcontext *)malloc(sizeof(struct effectcontext));
+	context = (struct glfxcontext *)malloc(sizeof(struct glfxcontext));
 	if (context == NULL)
 		goto err1;
-	memset(context, 0, sizeof(struct effectcontext));
+	memset(context, 0, sizeof(struct glfxcontext));
 
 	context->width = width;
 	context->height = height;
@@ -159,7 +159,7 @@ int main(int argc, char *argv[])
 	context->show = show = nemoshow_create_view(tool, width, height);
 	if (show == NULL)
 		goto err3;
-	nemoshow_set_dispatch_resize(show, nemoeffect_dispatch_show_resize);
+	nemoshow_set_dispatch_resize(show, nemoglfx_dispatch_show_resize);
 	nemoshow_set_userdata(show, context);
 
 	context->scene = scene = nemoshow_scene_create();
@@ -178,7 +178,7 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_width(canvas, width);
 	nemoshow_canvas_set_height(canvas, height);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
-	nemoshow_canvas_set_dispatch_event(canvas, nemoeffect_dispatch_canvas_event);
+	nemoshow_canvas_set_dispatch_event(canvas, nemoglfx_dispatch_canvas_event);
 	nemoshow_one_attach(scene, canvas);
 
 	if (imagepath != NULL) {
@@ -192,7 +192,7 @@ int main(int argc, char *argv[])
 	}
 
 	node = nemoshow_canvas_get_node(canvas);
-	nemotale_node_set_dispatch_effect(node, nemoeffect_dispatch_tale_effect, context);
+	nemotale_node_set_dispatch_effect(node, nemoglfx_dispatch_tale_glfx, context);
 
 	if (programpath != NULL)
 		context->filter = glfilter_create(width, height, programpath);

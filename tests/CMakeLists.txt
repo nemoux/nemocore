@@ -79,11 +79,11 @@ if(WITH_OPENCL)
 		)
 endif(WITH_OPENCL)
 
-add_executable(nemoeffect-show
-	nemoeffect-show.c
+add_executable(nemoglfx-show
+	nemoglfx-show.c
 	)
 
-TARGET_LINK_LIBRARIES(nemoeffect-show
+TARGET_LINK_LIBRARIES(nemoglfx-show
 	nemoapps
 	)
 
