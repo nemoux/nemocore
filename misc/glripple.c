@@ -285,8 +285,9 @@ void glripple_dispatch(struct glripple *ripple, GLuint texture)
 	glViewport(0, 0, ripple->width, ripple->height);
 
 	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
+	glCullFace(GL_FRONT);
 
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClearDepth(0.0f);

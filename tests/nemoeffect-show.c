@@ -38,7 +38,7 @@ static void nemoeffect_dispatch_canvas_event(struct nemoshow *show, struct showo
 {
 	struct effectcontext *context = (struct effectcontext *)nemoshow_get_userdata(show);
 
-	if (nemoshow_event_is_touch_down(show, event)) {
+	if (nemoshow_event_is_touch_down(show, event) && context->ripple != NULL) {
 		glripple_shoot(context->ripple,
 				nemoshow_event_get_x(event) / context->width,
 				nemoshow_event_get_y(event) / context->height,
@@ -64,8 +64,10 @@ static void nemoeffect_dispatch_show_resize(struct nemoshow *show, int32_t width
 
 	nemoshow_view_resize(context->show, width, height);
 
-	glfilter_resize(context->filter, width, height);
-	glripple_resize(context->ripple, width, height);
+	if (context->filter != NULL)
+		glfilter_resize(context->filter, width, height);
+	if (context->ripple != NULL)
+		glripple_resize(context->ripple, width, height);
 
 	nemoshow_view_redraw(context->show);
 }
@@ -73,19 +75,29 @@ static void nemoeffect_dispatch_show_resize(struct nemoshow *show, int32_t width
 static GLuint nemoeffect_dispatch_tale_effect(struct talenode *node, void *data)
 {
 	struct effectcontext *context = (struct effectcontext *)data;
+	GLuint texture = nemotale_node_get_texture(node);
 
-	glfilter_dispatch(context->filter, nemotale_node_get_texture(node));
+	if (context->filter != NULL) {
+		glfilter_dispatch(context->filter, texture);
 
-	glripple_update(context->ripple);
-	glripple_dispatch(context->ripple, glfilter_get_texture(context->filter));
+		texture = glfilter_get_texture(context->filter);
+	}
 
-	return glripple_get_texture(context->ripple);
+	if (context->ripple != NULL) {
+		glripple_update(context->ripple);
+		glripple_dispatch(context->ripple, texture);
+
+		texture = glripple_get_texture(context->ripple);
+	}
+
+	return texture;
 }
 
 int main(int argc, char *argv[])
 {
 	struct option options[] = {
 		{ "program",				required_argument,			NULL,			'p' },
+		{ "image",					required_argument,			NULL,			'i' },
 		{ "step",						required_argument,			NULL,			's' },
 		{ 0 }
 	};
@@ -98,9 +110,8 @@ int main(int argc, char *argv[])
 	struct showone *one;
 	struct showtransition *trans;
 	struct talenode *node;
-	struct glfilter *filter;
-	struct glripple *ripple;
 	char *programpath = NULL;
+	char *imagepath = NULL;
 	int width = 800;
 	int height = 800;
 	int step = 7;
@@ -108,13 +119,17 @@ int main(int argc, char *argv[])
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "p:s:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "p:i:s:", options, NULL)) {
 		if (opt == -1)
 			break;
 
 		switch (opt) {
 			case 'p':
 				programpath = strdup(optarg);
+				break;
+
+			case 'i':
+				imagepath = strdup(optarg);
 				break;
 
 			case 's':
@@ -125,9 +140,6 @@ int main(int argc, char *argv[])
 				break;
 		}
 	}
-
-	if (programpath == NULL)
-		return 0;
 
 	context = (struct effectcontext *)malloc(sizeof(struct effectcontext));
 	if (context == NULL)
@@ -169,11 +181,22 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_dispatch_event(canvas, nemoeffect_dispatch_canvas_event);
 	nemoshow_one_attach(scene, canvas);
 
+	if (imagepath != NULL) {
+		one = nemoshow_item_create(NEMOSHOW_IMAGE_ITEM);
+		nemoshow_one_attach(canvas, one);
+		nemoshow_item_set_x(one, 0.0f);
+		nemoshow_item_set_y(one, 0.0f);
+		nemoshow_item_set_width(one, width);
+		nemoshow_item_set_height(one, height);
+		nemoshow_item_set_uri(one, imagepath);
+	}
+
 	node = nemoshow_canvas_get_node(canvas);
 	nemotale_node_set_dispatch_effect(node, nemoeffect_dispatch_tale_effect, context);
 
-	context->filter = filter = glfilter_create(width, height, programpath);
-	context->ripple = ripple = glripple_create(width, height);
+	if (programpath != NULL)
+		context->filter = glfilter_create(width, height, programpath);
+	context->ripple = glripple_create(width, height);
 
 	trans = nemoshow_transition_create(NEMOSHOW_LINEAR_EASE, 18000, 0);
 	nemoshow_transition_dirty_one(trans, context->canvas, NEMOSHOW_FILTER_DIRTY);
@@ -184,8 +207,10 @@ int main(int argc, char *argv[])
 
 	nemotool_run(tool);
 
-	glripple_destroy(ripple);
-	glfilter_destroy(filter);
+	if (context->filter != NULL)
+		glfilter_destroy(context->filter);
+	if (context->ripple != NULL)
+		glripple_destroy(context->ripple);
 
 	nemoshow_destroy_view(show);
 
