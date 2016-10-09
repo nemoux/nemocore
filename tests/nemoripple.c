@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
 	amplitudes = (float *)malloc(sizeof(float) * length);
 	glripple_build_amplitudes(amplitudes, length, cycles, amplitude);
 
-	fprintf(stdout, "--- ripple amplitudes(length: %d, cycles: %d, amplitude: %f\n", length, cycles, amplitude);
+	fprintf(stdout, "--- ripple amplitudes(length: %d, cycles: %d, amplitude: %f)\n", length, cycles, amplitude);
 
 	for (i = 0; i < length; i++) {
 		fprintf(stdout, "%g,\n", amplitudes[i]);
