@@ -8,6 +8,8 @@
 #include <getopt.h>
 #include <math.h>
 
+#include <glripple.h>
+
 int main(int argc, char *argv[])
 {
 	struct option options[] = {
@@ -27,8 +29,8 @@ int main(int argc, char *argv[])
 	int height = 400;
 	int cycles = 18;
 	float amplitude = 0.125f;
-	float x, y, l;
-	double t, a;
+	float *vectors;
+	float *amplitudes;
 	int i, j;
 	int opt;
 
@@ -70,34 +72,29 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	vectors = (float *)malloc(sizeof(float[3]) * rows * columns);
+	glripple_build_vectors(vectors, rows, columns, width, height);
+
+	fprintf(stdout, "--- ripple vectors(rows: %d, columns: %d, width: %d, height: %d)\n", rows, columns, width, height);
+
 	for (i = 0; i < columns; i++) {
 		for (j = 0; j < rows; j++) {
-			x = (float)i / (float)(columns - 1);
-			y = (float)j / (float)(rows - 1);
-
-			l = (float)sqrt(x * x + y * y);
-
-			if (l == 0.0f) {
-				x = 0.0f;
-				y = 0.0f;
-			} else {
-				x /= l;
-				y /= l;
-			}
-
-			fprintf(stdout, "%g, %g, %d,\n", x, y, (int)(l * width * 2));
+			fprintf(stdout, "%g, %g, %f,\n",
+					vectors[(i * rows + j) * 3 + 0],
+					vectors[(i * rows + j) * 3 + 1],
+					vectors[(i * rows + j) * 3 + 2]);
 		}
 	}
 
 	fprintf(stdout, "\n");
 
-	for (i = 0; i < length; i++) {
-		t = 1.0f - i / (length - 1.0f);
-		a = (-cos(t * 2.0f * 3.1428571f * cycles) * 0.5f + 0.5f) * amplitude * t * t * t * t * t * t * t * t;
-		if (i == 0)
-			a = 0.0f;
+	amplitudes = (float *)malloc(sizeof(float) * length);
+	glripple_build_amplitudes(amplitudes, length, cycles, amplitude);
 
-		fprintf(stdout, "%g,\n", a);
+	fprintf(stdout, "--- ripple amplitudes(length: %d, cycles: %d, amplitude: %f\n", length, cycles, amplitude);
+
+	for (i = 0; i < length; i++) {
+		fprintf(stdout, "%g,\n", amplitudes[i]);
 	}
 
 	return 0;

@@ -196,7 +196,11 @@ int main(int argc, char *argv[])
 
 	if (programpath != NULL)
 		context->filter = glfilter_create(width, height, programpath);
+
 	context->ripple = glripple_create(width, height);
+	glripple_use_vectors(context->ripple, NULL, 32, 32, 400, 400);
+	glripple_use_amplitudes(context->ripple, NULL, 2048, 18, 0.125f);
+	glripple_layout(context->ripple, 32, 32, 2048);
 
 	trans = nemoshow_transition_create(NEMOSHOW_LINEAR_EASE, 18000, 0);
 	nemoshow_transition_dirty_one(trans, context->canvas, NEMOSHOW_FILTER_DIRTY);

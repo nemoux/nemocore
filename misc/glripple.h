@@ -45,8 +45,13 @@ struct glripple {
 
 	int32_t width, height;
 
+	float *vectors;
+	float *vectors_;
 	int32_t rows, columns;
 	int32_t elements;
+
+	float *amplitudes;
+	float *amplitudes_;
 	int32_t length;
 
 	struct nemolist list;
@@ -55,11 +60,18 @@ struct glripple {
 extern struct glripple *glripple_create(int32_t width, int32_t height);
 extern void glripple_destroy(struct glripple *ripple);
 
+extern void glripple_use_vectors(struct glripple *ripple, float *vectors, int rows, int columns, int width, int height);
+extern void glripple_use_amplitudes(struct glripple *ripple, float *amplitudes, int length, int cycles, float amplitude);
+
+extern void glripple_layout(struct glripple *ripple, int32_t rows, int32_t columns, int32_t length);
 extern void glripple_resize(struct glripple *ripple, int32_t width, int32_t height);
 extern void glripple_update(struct glripple *ripple);
 extern void glripple_dispatch(struct glripple *ripple, GLuint texture);
 
 extern void glripple_shoot(struct glripple *ripple, float x, float y, int step);
+
+extern void glripple_build_vectors(float *vectors, int rows, int columns, int width, int height);
+extern void glripple_build_amplitudes(float *amplitudes, int length, int cycles, float amplitude);
 
 static inline int32_t glripple_get_width(struct glripple *ripple)
 {
