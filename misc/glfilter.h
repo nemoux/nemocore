@@ -84,6 +84,30 @@ static const char GLFILTER_LAPLACIAN_FRAGMENT_SHADER[] =
 "  gl_FragColor = clamp(s / 0.1 + 0.0, 0.0, 1.0);\n"
 "}\n";
 
+static const char GLFILTER_EDGEDETECTION_FRAGMENT_SHADER[] =
+"precision mediump float;\n"
+"varying vec2 vtexcoord;\n"
+"uniform sampler2D tex;\n"
+"uniform float width;\n"
+"uniform float height;\n"
+"uniform float time;\n"
+"void main()\n"
+"{\n"
+"  float sw = 1.0 / width;\n"
+"  float sh = 1.0 / height;\n"
+"  vec4 s = vec4(0.0);\n"
+"  s += texture2D(tex, vtexcoord + vec2(-sw, -sh)) * -1.0 / 8.0;\n"
+"  s += texture2D(tex, vtexcoord + vec2(0.0, -sh)) * -1.0 / 8.0;\n"
+"  s += texture2D(tex, vtexcoord + vec2(sw, -sh)) * -1.0 / 8.0;\n"
+"  s += texture2D(tex, vtexcoord + vec2(-sw, 0.0)) * -1.0 / 8.0;\n"
+"  s += texture2D(tex, vtexcoord + vec2(0.0, 0.0)) * 1.0;\n"
+"  s += texture2D(tex, vtexcoord + vec2(sw, 0.0)) * -1.0 / 8.0;\n"
+"  s += texture2D(tex, vtexcoord + vec2(-sw, sh)) * -1.0 / 8.0;\n"
+"  s += texture2D(tex, vtexcoord + vec2(0.0, sh)) * -1.0 / 8.0;\n"
+"  s += texture2D(tex, vtexcoord + vec2(sw, sh)) * -1.0 / 8.0;\n"
+"  gl_FragColor = clamp(s / 0.1 + 0.0, 0.0, 1.0);\n"
+"}\n";
+
 static const char GLFILTER_EMBOSS_FRAGMENT_SHADER[] =
 "precision mediump float;\n"
 "varying vec2 vtexcoord;\n"

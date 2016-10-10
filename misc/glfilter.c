@@ -64,13 +64,34 @@ struct glfilter *glfilter_create(int32_t width, int32_t height, const char *shad
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	if (os_load_path(shaderpath, &shader, &size) < 0)
-		goto err1;
+	if (shaderpath[0] != '@') {
+		if (os_load_path(shaderpath, &shader, &size) < 0)
+			goto err1;
 
-	filter->program = glfilter_create_program(shader);
-	if (filter->program == 0)
-		goto err2;
-	free(shader);
+		filter->program = glfilter_create_program(shader);
+		if (filter->program == 0)
+			goto err2;
+		free(shader);
+	} else {
+		const char *convolutionshader = NULL;
+
+		if (strcmp(shaderpath, "@gaussian") == 0)
+			convolutionshader = GLFILTER_GAUSSIAN_FRAGMENT_SHADER;
+		else if (strcmp(shaderpath, "@laplacian") == 0)
+			convolutionshader = GLFILTER_LAPLACIAN_FRAGMENT_SHADER;
+		else if (strcmp(shaderpath, "@sharpness") == 0)
+			convolutionshader = GLFILTER_SHARPNESS_FRAGMENT_SHADER;
+		else if (strcmp(shaderpath, "@edgedetection") == 0)
+			convolutionshader = GLFILTER_EDGEDETECTION_FRAGMENT_SHADER;
+		else if (strcmp(shaderpath, "@emboss") == 0)
+			convolutionshader = GLFILTER_EMBOSS_FRAGMENT_SHADER;
+		if (convolutionshader == NULL)
+			goto err1;
+
+		filter->program = glfilter_create_program(convolutionshader);
+		if (filter->program == 0)
+			goto err1;
+	}
 
 	filter->utexture = glGetUniformLocation(filter->program, "tex");
 	filter->uwidth = glGetUniformLocation(filter->program, "width");
