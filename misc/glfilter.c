@@ -153,6 +153,19 @@ static const char GLFILTER_SHARPNESS_FRAGMENT_SHADER[] =
 "  gl_FragColor = clamp(s / 1.0 + 0.0, 0.0, 1.0);\n"
 "}\n";
 
+static const char GLFILTER_NOISE_FRAGMENT_SHADER[] =
+"precision mediump float;\n"
+"varying vec2 vtexcoord;\n"
+"uniform sampler2D tex;\n"
+"uniform float width;\n"
+"uniform float height;\n"
+"uniform float time;\n"
+"void main()\n"
+"{\n"
+"  float n = fract(sin(dot(vtexcoord.xy, vec2(12.9898, 78.233))) * 43758.5453);\n"
+"  gl_FragColor = vec4(n, n, n, 1.0);\n"
+"}\n";
+
 static GLuint glfilter_create_program(const char *shader)
 {
 	const char *vertexshader = GLFILTER_SIMPLE_VERTEX_SHADER;
@@ -189,7 +202,6 @@ static GLuint glfilter_create_program(const char *shader)
 struct glfilter *glfilter_create(int32_t width, int32_t height, const char *shaderpath)
 {
 	struct glfilter *filter;
-	char *shader;
 	int size;
 
 	filter = (struct glfilter *)malloc(sizeof(struct glfilter));
@@ -207,33 +219,37 @@ struct glfilter *glfilter_create(int32_t width, int32_t height, const char *shad
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	if (shaderpath[0] != '@') {
+		char *shader;
+
 		if (os_load_path(shaderpath, &shader, &size) < 0)
 			goto err1;
 
 		filter->program = glfilter_create_program(shader);
-		if (filter->program == 0)
-			goto err2;
+
 		free(shader);
 	} else {
-		const char *convolutionshader = NULL;
+		const char *shader = NULL;
 
 		if (strcmp(shaderpath, "@gaussian") == 0)
-			convolutionshader = GLFILTER_GAUSSIAN_FRAGMENT_SHADER;
+			shader = GLFILTER_GAUSSIAN_FRAGMENT_SHADER;
 		else if (strcmp(shaderpath, "@laplacian") == 0)
-			convolutionshader = GLFILTER_LAPLACIAN_FRAGMENT_SHADER;
+			shader = GLFILTER_LAPLACIAN_FRAGMENT_SHADER;
 		else if (strcmp(shaderpath, "@sharpness") == 0)
-			convolutionshader = GLFILTER_SHARPNESS_FRAGMENT_SHADER;
+			shader = GLFILTER_SHARPNESS_FRAGMENT_SHADER;
 		else if (strcmp(shaderpath, "@edgedetection") == 0)
-			convolutionshader = GLFILTER_EDGEDETECTION_FRAGMENT_SHADER;
+			shader = GLFILTER_EDGEDETECTION_FRAGMENT_SHADER;
 		else if (strcmp(shaderpath, "@emboss") == 0)
-			convolutionshader = GLFILTER_EMBOSS_FRAGMENT_SHADER;
-		if (convolutionshader == NULL)
+			shader = GLFILTER_EMBOSS_FRAGMENT_SHADER;
+		else if (strcmp(shaderpath, "@noise") == 0)
+			shader = GLFILTER_NOISE_FRAGMENT_SHADER;
+		if (shader == NULL)
 			goto err1;
 
-		filter->program = glfilter_create_program(convolutionshader);
-		if (filter->program == 0)
-			goto err1;
+		filter->program = glfilter_create_program(shader);
 	}
+
+	if (filter->program == 0)
+		goto err1;
 
 	filter->utexture = glGetUniformLocation(filter->program, "tex");
 	filter->uwidth = glGetUniformLocation(filter->program, "width");
@@ -246,9 +262,6 @@ struct glfilter *glfilter_create(int32_t width, int32_t height, const char *shad
 	filter->height = height;
 
 	return filter;
-
-err2:
-	free(shader);
 
 err1:
 	glDeleteTextures(1, &filter->texture);
