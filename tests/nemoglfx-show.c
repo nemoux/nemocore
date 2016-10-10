@@ -72,7 +72,7 @@ static void nemoglfx_dispatch_show_resize(struct nemoshow *show, int32_t width, 
 	nemoshow_view_redraw(context->show);
 }
 
-static GLuint nemoglfx_dispatch_tale_glfx(struct talenode *node, void *data)
+static GLuint nemoglfx_dispatch_tale_effect(struct talenode *node, void *data)
 {
 	struct glfxcontext *context = (struct glfxcontext *)data;
 	GLuint texture = nemotale_node_get_texture(node);
@@ -192,7 +192,7 @@ int main(int argc, char *argv[])
 	}
 
 	node = nemoshow_canvas_get_node(canvas);
-	nemotale_node_set_dispatch_effect(node, nemoglfx_dispatch_tale_glfx, context);
+	nemotale_node_set_dispatch_effect(node, nemoglfx_dispatch_tale_effect, context);
 
 	if (programpath != NULL)
 		context->filter = glfilter_create(width, height, programpath);
