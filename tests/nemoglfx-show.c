@@ -13,6 +13,7 @@
 #include <fbohelper.h>
 #include <glhelper.h>
 #include <glfilter.h>
+#include <glblur.h>
 #include <glripple.h>
 #include <nemohelper.h>
 #include <nemolog.h>
@@ -27,6 +28,7 @@ struct glfxcontext {
 	struct showone *canvas;
 
 	struct glfilter *filter;
+	struct glblur *blur;
 	struct glripple *ripple;
 
 	float width, height;
@@ -66,6 +68,8 @@ static void nemoglfx_dispatch_show_resize(struct nemoshow *show, int32_t width, 
 
 	if (context->filter != NULL)
 		glfilter_resize(context->filter, width, height);
+	if (context->blur != NULL)
+		glblur_resize(context->blur, width, height);
 	if (context->ripple != NULL)
 		glripple_resize(context->ripple, width, height);
 
@@ -81,6 +85,12 @@ static GLuint nemoglfx_dispatch_tale_effect(struct talenode *node, void *data)
 		glfilter_dispatch(context->filter, texture);
 
 		texture = glfilter_get_texture(context->filter);
+	}
+
+	if (context->blur != NULL) {
+		glblur_dispatch(context->blur, texture);
+
+		texture = glblur_get_texture(context->blur);
 	}
 
 	if (context->ripple != NULL) {
@@ -99,6 +109,7 @@ int main(int argc, char *argv[])
 		{ "program",				required_argument,			NULL,			'p' },
 		{ "image",					required_argument,			NULL,			'i' },
 		{ "step",						required_argument,			NULL,			's' },
+		{ "blur",						required_argument,			NULL,			'b' },
 		{ 0 }
 	};
 
@@ -114,12 +125,13 @@ int main(int argc, char *argv[])
 	char *imagepath = NULL;
 	int width = 800;
 	int height = 800;
-	int step = 7;
+	int step = 0;
+	int blur = 0;
 	int opt;
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "p:i:s:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "p:i:s:b:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -134,6 +146,10 @@ int main(int argc, char *argv[])
 
 			case 's':
 				step = strtoul(optarg, NULL, 10);
+				break;
+
+			case 'b':
+				blur = strtoul(optarg, NULL, 10);
 				break;
 
 			default:
@@ -171,7 +187,7 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_width(canvas, width);
 	nemoshow_canvas_set_height(canvas, height);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_BACK_TYPE);
-	nemoshow_canvas_set_fill_color(canvas, 1.0f, 1.0f, 1.0f, 1.0f);
+	nemoshow_canvas_set_fill_color(canvas, 0.0f, 0.0f, 0.0f, 1.0f);
 	nemoshow_one_attach(scene, canvas);
 
 	context->canvas = canvas = nemoshow_canvas_create();
@@ -189,6 +205,14 @@ int main(int argc, char *argv[])
 		nemoshow_item_set_width(one, width);
 		nemoshow_item_set_height(one, height);
 		nemoshow_item_set_uri(one, imagepath);
+	} else {
+		one = nemoshow_item_create(NEMOSHOW_RECT_ITEM);
+		nemoshow_one_attach(canvas, one);
+		nemoshow_item_set_x(one, width / 4.0f);
+		nemoshow_item_set_y(one, height / 4.0f);
+		nemoshow_item_set_width(one, width / 2.0f);
+		nemoshow_item_set_height(one, height / 2.0f);
+		nemoshow_item_set_fill_color(one, 0.0f, 255.0f, 255.0f, 255.0f);
 	}
 
 	node = nemoshow_canvas_get_node(canvas);
@@ -197,10 +221,17 @@ int main(int argc, char *argv[])
 	if (programpath != NULL)
 		context->filter = glfilter_create(width, height, programpath);
 
-	context->ripple = glripple_create(width, height);
-	glripple_use_vectors(context->ripple, NULL, 32, 32, 400, 400);
-	glripple_use_amplitudes(context->ripple, NULL, 2048, 18, 0.125f);
-	glripple_layout(context->ripple, 32, 32, 2048);
+	if (blur > 0) {
+		context->blur = glblur_create(width, height);
+		glblur_set_radius(context->blur, blur, blur);
+	}
+
+	if (step > 0) {
+		context->ripple = glripple_create(width, height);
+		glripple_use_vectors(context->ripple, NULL, 32, 32, 400, 400);
+		glripple_use_amplitudes(context->ripple, NULL, 2048, 18, 0.125f);
+		glripple_layout(context->ripple, 32, 32, 2048);
+	}
 
 	trans = nemoshow_transition_create(NEMOSHOW_LINEAR_EASE, 18000, 0);
 	nemoshow_transition_dirty_one(trans, context->canvas, NEMOSHOW_FILTER_DIRTY);
@@ -213,6 +244,8 @@ int main(int argc, char *argv[])
 
 	if (context->filter != NULL)
 		glfilter_destroy(context->filter);
+	if (context->blur != NULL)
+		glblur_destroy(context->blur);
 	if (context->ripple != NULL)
 		glripple_destroy(context->ripple);
 
