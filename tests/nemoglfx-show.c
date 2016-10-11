@@ -257,10 +257,10 @@ int main(int argc, char *argv[])
 
 	if (light > 0.0f) {
 		context->light = gllight_create(width, height);
-		gllight_set_pointlight_position(context->light, 0, -0.5f, -0.5f, 1.0f);
+		gllight_set_pointlight_position(context->light, 0, -0.5f, -0.5f);
 		gllight_set_pointlight_color(context->light, 0, 1.0f, 1.0f, 1.0f);
 		gllight_set_pointlight_size(context->light, 0, light);
-		gllight_set_pointlight_position(context->light, 1, 0.5f, 0.5f, 1.0f);
+		gllight_set_pointlight_position(context->light, 1, 0.5f, 0.5f);
 		gllight_set_pointlight_color(context->light, 1, 1.0f, 1.0f, 1.0f);
 		gllight_set_pointlight_size(context->light, 1, light / 2.0f);
 	}

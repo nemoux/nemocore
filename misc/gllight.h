@@ -1,3 +1,4 @@
+	glDepthMask(GL_FALSE);
 #ifndef	__GL_LIGHT_H__
 #define	__GL_LIGHT_H__
 
@@ -20,28 +21,12 @@ struct gllight {
 	GLuint texture;
 	GLuint fbo, dbo;
 
-	GLuint gbuffer0;
-	GLuint gbuffer1;
-	GLuint dbuffer;
-	GLuint gfbo;
+	GLuint program;
 
-	struct {
-		GLuint program;
-
-		GLuint utexture;
-	} geometry;
-
-	struct {
-		GLuint program;
-
-		GLuint udiffuse;
-		GLuint unormal;
-		GLuint udepth;
-
-		GLuint uposition;
-		GLuint ucolor;
-		GLuint usize;
-	} light;
+	GLuint udiffuse;
+	GLuint uposition;
+	GLuint ucolor;
+	GLuint usize;
 
 	int32_t width, height;
 
@@ -55,7 +40,7 @@ struct gllight {
 extern struct gllight *gllight_create(int32_t width, int32_t height);
 extern void gllight_destroy(struct gllight *light);
 
-extern void gllight_set_pointlight_position(struct gllight *light, int index, float x, float y, float z);
+extern void gllight_set_pointlight_position(struct gllight *light, int index, float x, float y);
 extern void gllight_set_pointlight_color(struct gllight *light, int index, float r, float g, float b);
 extern void gllight_set_pointlight_size(struct gllight *light, int index, float size);
 
