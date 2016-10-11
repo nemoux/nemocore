@@ -126,8 +126,8 @@ void gllight_destroy(struct gllight *light)
 
 void gllight_set_pointlight_position(struct gllight *light, int index, float x, float y)
 {
-	light->pointlights[index].position[0] = x;
-	light->pointlights[index].position[1] = y;
+	light->pointlights[index].position[0] = x * 2.0f - 1.0f;
+	light->pointlights[index].position[1] = y * 2.0f - 1.0f;
 	light->pointlights[index].position[2] = 0.0f;
 }
 

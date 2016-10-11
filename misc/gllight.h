@@ -1,4 +1,3 @@
-	glDepthMask(GL_FALSE);
 #ifndef	__GL_LIGHT_H__
 #define	__GL_LIGHT_H__
 

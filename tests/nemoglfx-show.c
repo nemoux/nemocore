@@ -36,17 +36,40 @@ struct glfxcontext {
 	float width, height;
 
 	int step;
+
+	float lightsize;
+	int lightcount;
 };
 
 static void nemoglfx_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, struct showevent *event)
 {
 	struct glfxcontext *context = (struct glfxcontext *)nemoshow_get_userdata(show);
 
-	if (nemoshow_event_is_touch_down(show, event) && context->ripple != NULL) {
-		glripple_shoot(context->ripple,
-				nemoshow_event_get_x(event) / context->width,
-				nemoshow_event_get_y(event) / context->height,
-				context->step);
+	if (context->ripple != NULL) {
+		if (nemoshow_event_is_touch_down(show, event)) {
+			glripple_shoot(context->ripple,
+					nemoshow_event_get_x(event) / context->width,
+					nemoshow_event_get_y(event) / context->height,
+					context->step);
+		}
+	}
+
+	if (context->light != NULL) {
+		if (nemoshow_event_is_touch_down(show, event)) {
+			int index = context->lightcount;
+
+			gllight_set_pointlight_position(context->light, index,
+					nemoshow_event_get_x(event) / context->width,
+					nemoshow_event_get_y(event) / context->height);
+			gllight_set_pointlight_color(context->light, index, 1.0f, 1.0f, 1.0f);
+			gllight_set_pointlight_size(context->light, index, context->lightsize);
+		} else if (nemoshow_event_is_touch_motion(show, event)) {
+			gllight_set_pointlight_position(context->light, context->lightcount,
+					nemoshow_event_get_x(event) / context->width,
+					nemoshow_event_get_y(event) / context->height);
+		} else if (nemoshow_event_is_touch_up(show, event)) {
+			context->lightcount++;
+		}
 	}
 
 	if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event)) {
@@ -132,7 +155,7 @@ int main(int argc, char *argv[])
 	struct talenode *node;
 	char *programpath = NULL;
 	char *imagepath = NULL;
-	float light = 0.0f;
+	float lightsize = 0.0f;
 	int width = 800;
 	int height = 800;
 	int step = 0;
@@ -163,7 +186,7 @@ int main(int argc, char *argv[])
 				break;
 
 			case 'l':
-				light = strtod(optarg, NULL);
+				lightsize = strtod(optarg, NULL);
 				break;
 
 			default:
@@ -180,6 +203,9 @@ int main(int argc, char *argv[])
 	context->height = height;
 
 	context->step = step;
+
+	context->lightsize = lightsize;
+	context->lightcount = 0;
 
 	context->tool = tool = nemotool_create();
 	if (tool == NULL)
@@ -255,15 +281,8 @@ int main(int argc, char *argv[])
 		glripple_layout(context->ripple, 32, 32, 2048);
 	}
 
-	if (light > 0.0f) {
+	if (lightsize > 0.0f)
 		context->light = gllight_create(width, height);
-		gllight_set_pointlight_position(context->light, 0, -0.5f, -0.5f);
-		gllight_set_pointlight_color(context->light, 0, 1.0f, 1.0f, 1.0f);
-		gllight_set_pointlight_size(context->light, 0, light);
-		gllight_set_pointlight_position(context->light, 1, 0.5f, 0.5f);
-		gllight_set_pointlight_color(context->light, 1, 1.0f, 1.0f, 1.0f);
-		gllight_set_pointlight_size(context->light, 1, light / 2.0f);
-	}
 
 	trans = nemoshow_transition_create(NEMOSHOW_LINEAR_EASE, 18000, 0);
 	nemoshow_transition_dirty_one(trans, context->canvas, NEMOSHOW_FILTER_DIRTY);
