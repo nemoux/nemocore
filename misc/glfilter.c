@@ -202,7 +202,6 @@ static GLuint glfilter_create_program(const char *shader)
 struct glfilter *glfilter_create(int32_t width, int32_t height, const char *shaderpath)
 {
 	struct glfilter *filter;
-	int size;
 
 	filter = (struct glfilter *)malloc(sizeof(struct glfilter));
 	if (filter == NULL)
@@ -220,6 +219,7 @@ struct glfilter *glfilter_create(int32_t width, int32_t height, const char *shad
 
 	if (shaderpath[0] != '@') {
 		char *shader;
+		int size;
 
 		if (os_load_path(shaderpath, &shader, &size) < 0)
 			goto err1;

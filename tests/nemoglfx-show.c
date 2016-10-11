@@ -15,6 +15,7 @@
 #include <glfilter.h>
 #include <glblur.h>
 #include <glripple.h>
+#include <gllight.h>
 #include <nemohelper.h>
 #include <nemolog.h>
 #include <nemomisc.h>
@@ -30,6 +31,7 @@ struct glfxcontext {
 	struct glfilter *filter;
 	struct glblur *blur;
 	struct glripple *ripple;
+	struct gllight *light;
 
 	float width, height;
 
@@ -93,6 +95,12 @@ static GLuint nemoglfx_dispatch_tale_effect(struct talenode *node, void *data)
 		texture = glblur_get_texture(context->blur);
 	}
 
+	if (context->light != NULL) {
+		gllight_dispatch(context->light, texture);
+
+		texture = gllight_get_texture(context->light);
+	}
+
 	if (context->ripple != NULL) {
 		glripple_update(context->ripple);
 		glripple_dispatch(context->ripple, texture);
@@ -110,6 +118,7 @@ int main(int argc, char *argv[])
 		{ "image",					required_argument,			NULL,			'i' },
 		{ "step",						required_argument,			NULL,			's' },
 		{ "blur",						required_argument,			NULL,			'b' },
+		{ "light",					required_argument,			NULL,			'l' },
 		{ 0 }
 	};
 
@@ -123,6 +132,7 @@ int main(int argc, char *argv[])
 	struct talenode *node;
 	char *programpath = NULL;
 	char *imagepath = NULL;
+	float light = 0.0f;
 	int width = 800;
 	int height = 800;
 	int step = 0;
@@ -131,7 +141,7 @@ int main(int argc, char *argv[])
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "p:i:s:b:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "p:i:s:b:l:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -150,6 +160,10 @@ int main(int argc, char *argv[])
 
 			case 'b':
 				blur = strtoul(optarg, NULL, 10);
+				break;
+
+			case 'l':
+				light = strtod(optarg, NULL);
 				break;
 
 			default:
@@ -208,6 +222,14 @@ int main(int argc, char *argv[])
 	} else {
 		one = nemoshow_item_create(NEMOSHOW_RECT_ITEM);
 		nemoshow_one_attach(canvas, one);
+		nemoshow_item_set_x(one, 0.0f);
+		nemoshow_item_set_y(one, 0.0f);
+		nemoshow_item_set_width(one, width);
+		nemoshow_item_set_height(one, height);
+		nemoshow_item_set_fill_color(one, 255.0f, 255.0f, 255.0f, 255.0f);
+
+		one = nemoshow_item_create(NEMOSHOW_RECT_ITEM);
+		nemoshow_one_attach(canvas, one);
 		nemoshow_item_set_x(one, width / 4.0f);
 		nemoshow_item_set_y(one, height / 4.0f);
 		nemoshow_item_set_width(one, width / 2.0f);
@@ -233,6 +255,16 @@ int main(int argc, char *argv[])
 		glripple_layout(context->ripple, 32, 32, 2048);
 	}
 
+	if (light > 0.0f) {
+		context->light = gllight_create(width, height);
+		gllight_set_pointlight_position(context->light, 0, -0.5f, -0.5f, 1.0f);
+		gllight_set_pointlight_color(context->light, 0, 1.0f, 1.0f, 1.0f);
+		gllight_set_pointlight_size(context->light, 0, light);
+		gllight_set_pointlight_position(context->light, 1, 0.5f, 0.5f, 1.0f);
+		gllight_set_pointlight_color(context->light, 1, 1.0f, 1.0f, 1.0f);
+		gllight_set_pointlight_size(context->light, 1, light / 2.0f);
+	}
+
 	trans = nemoshow_transition_create(NEMOSHOW_LINEAR_EASE, 18000, 0);
 	nemoshow_transition_dirty_one(trans, context->canvas, NEMOSHOW_FILTER_DIRTY);
 	nemoshow_transition_set_repeat(trans, 0);
@@ -248,6 +280,8 @@ int main(int argc, char *argv[])
 		glblur_destroy(context->blur);
 	if (context->ripple != NULL)
 		glripple_destroy(context->ripple);
+	if (context->light != NULL)
+		gllight_destroy(context->light);
 
 	nemoshow_destroy_view(show);
 
