@@ -55,6 +55,7 @@ extern void gllight_set_pointlight_position(struct gllight *light, int index, fl
 extern void gllight_set_pointlight_color(struct gllight *light, int index, float r, float g, float b);
 extern void gllight_set_pointlight_size(struct gllight *light, int index, float size);
 extern void gllight_set_pointlight_scope(struct gllight *light, int index, float scope);
+extern void gllight_clear_pointlights(struct gllight *light);
 
 extern void gllight_resize(struct gllight *light, int32_t width, int32_t height);
 extern void gllight_dispatch(struct gllight *light, GLuint texture);

@@ -53,9 +53,9 @@ static const char GLLIGHT_POINT_LIGHT_FRAGMENT_SHADER[] =
 "  vec4 diffuse = texture2D(tdiffuse, vtexcoord);\n"
 "  vec4 position = vec4(vtexcoord * 2.0 - 1.0, 0.0, 1.0);\n"
 "  vec3 ldir = lposition - position.xyz;\n"
-"  float attenuation = 1.0 - pow(clamp(length(ldir) / lsize, 0.0, 1.0), 2.0);\n"
+"  float attenuation = 1.0 - pow(clamp(length(ldir) / lscope, 0.0, 1.0), 2.0);\n"
 "  vec3 color = attenuation * lcolor;\n"
-"  gl_FragColor = vec4(color * diffuse.rgb + ball(position.xy, lposition.xy, lcolor, lscope), 1.0);\n"
+"  gl_FragColor = vec4(color * diffuse.rgb + ball(position.xy, lposition.xy, lcolor, lsize), 1.0);\n"
 "}\n";
 
 static GLuint gllight_create_program(const char *vshader, const char *fshader)
@@ -187,6 +187,15 @@ void gllight_set_pointlight_scope(struct gllight *light, int index, float scope)
 	light->pointlights[index].scope = scope;
 }
 
+void gllight_clear_pointlights(struct gllight *light)
+{
+	int i;
+
+	for (i = 0; i < GLLIGHT_POINTLIGHTS_MAX; i++) {
+		light->pointlights[i].scope = 0.0f;
+	}
+}
+
 void gllight_resize(struct gllight *light, int32_t width, int32_t height)
 {
 	if (light->width != width || light->height != height) {
@@ -245,7 +254,7 @@ void gllight_dispatch(struct gllight *light, GLuint texture)
 	glUniform1f(light->utime1, secs);
 
 	for (i = 0; i < GLLIGHT_POINTLIGHTS_MAX; i++) {
-		if (light->pointlights[i].size > 0.0f) {
+		if (light->pointlights[i].scope > 0.0f) {
 			glUniform3fv(light->uposition1, 1, light->pointlights[i].position);
 			glUniform3fv(light->ucolor1, 1, light->pointlights[i].color);
 			glUniform1f(light->usize1, light->pointlights[i].size);
