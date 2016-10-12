@@ -63,6 +63,7 @@ static void nemoglfx_dispatch_canvas_event(struct nemoshow *show, struct showone
 					nemoshow_event_get_y(event) / context->height);
 			gllight_set_pointlight_color(context->light, index, 1.0f, 1.0f, 1.0f);
 			gllight_set_pointlight_size(context->light, index, context->lightsize);
+			gllight_set_pointlight_scope(context->light, index, context->lightsize / 16.0f);
 		} else if (nemoshow_event_is_touch_motion(show, event)) {
 			gllight_set_pointlight_position(context->light, context->lightcount,
 					nemoshow_event_get_x(event) / context->width,

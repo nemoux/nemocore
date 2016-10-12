@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <math.h>
+
 #include <gllight.h>
 #include <glhelper.h>
 #include <fbohelper.h>
@@ -39,6 +41,13 @@ static const char GLLIGHT_POINT_LIGHT_FRAGMENT_SHADER[] =
 "uniform vec3 lposition;\n"
 "uniform vec3 lcolor;\n"
 "uniform float lsize;\n"
+"uniform float lscope;\n"
+"uniform float time;\n"
+"vec3 ball(vec2 p, vec2 o, vec3 c, float s)\n"
+"{\n"
+"  vec2 r = vec2(o.x - p.x, o.y - p.y);\n"
+"  return pow(s / length(r), 1.0) * c;\n"
+"}\n"
 "void main()\n"
 "{\n"
 "  vec4 diffuse = texture2D(tdiffuse, vtexcoord);\n"
@@ -46,7 +55,7 @@ static const char GLLIGHT_POINT_LIGHT_FRAGMENT_SHADER[] =
 "  vec3 ldir = lposition - position.xyz;\n"
 "  float attenuation = 1.0 - pow(clamp(length(ldir) / lsize, 0.0, 1.0), 2.0);\n"
 "  vec3 color = attenuation * lcolor;\n"
-"  gl_FragColor = vec4(color * diffuse.rgb, 1.0);\n"
+"  gl_FragColor = vec4(color * diffuse.rgb + ball(position.xy, lposition.xy, lcolor, lscope), 1.0);\n"
 "}\n";
 
 static GLuint gllight_create_program(const char *vshader, const char *fshader)
@@ -113,6 +122,8 @@ struct gllight *gllight_create(int32_t width, int32_t height)
 	light->uposition1 = glGetUniformLocation(light->program1, "lposition");
 	light->ucolor1 = glGetUniformLocation(light->program1, "lcolor");
 	light->usize1 = glGetUniformLocation(light->program1, "lsize");
+	light->uscope1 = glGetUniformLocation(light->program1, "lscope");
+	light->utime1 = glGetUniformLocation(light->program1, "time");
 
 	fbo_prepare_context(light->texture, width, height, &light->fbo, &light->dbo);
 
@@ -171,6 +182,11 @@ void gllight_set_pointlight_size(struct gllight *light, int index, float size)
 	light->pointlights[index].size = size;
 }
 
+void gllight_set_pointlight_scope(struct gllight *light, int index, float scope)
+{
+	light->pointlights[index].scope = scope;
+}
+
 void gllight_resize(struct gllight *light, int32_t width, int32_t height)
 {
 	if (light->width != width || light->height != height) {
@@ -196,6 +212,7 @@ void gllight_dispatch(struct gllight *light, GLuint texture)
 		1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
 		-1.0f, 1.0f, 0.0f, 0.0f, 1.0f
 	};
+	float secs = (float)time_current_nsecs() / 1000000000.0f;
 	int i;
 
 	glBindFramebuffer(GL_FRAMEBUFFER, light->fbo);
@@ -225,12 +242,14 @@ void gllight_dispatch(struct gllight *light, GLuint texture)
 
 	glUseProgram(light->program1);
 	glUniform1i(light->udiffuse1, 0);
+	glUniform1f(light->utime1, secs);
 
 	for (i = 0; i < GLLIGHT_POINTLIGHTS_MAX; i++) {
 		if (light->pointlights[i].size > 0.0f) {
 			glUniform3fv(light->uposition1, 1, light->pointlights[i].position);
 			glUniform3fv(light->ucolor1, 1, light->pointlights[i].color);
 			glUniform1f(light->usize1, light->pointlights[i].size);
+			glUniform1f(light->uscope1, light->pointlights[i].scope);
 
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), &vertices[0]);
 			glEnableVertexAttribArray(0);

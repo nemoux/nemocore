@@ -29,6 +29,8 @@ struct gllight {
 	GLuint uposition1;
 	GLuint ucolor1;
 	GLuint usize1;
+	GLuint uscope1;
+	GLuint utime1;
 
 	int32_t width, height;
 
@@ -40,6 +42,7 @@ struct gllight {
 		float position[3];
 		float color[3];
 		float size;
+		float scope;
 	} pointlights[GLLIGHT_POINTLIGHTS_MAX];
 };
 
@@ -51,6 +54,7 @@ extern void gllight_set_ambientlight_color(struct gllight *light, float r, float
 extern void gllight_set_pointlight_position(struct gllight *light, int index, float x, float y);
 extern void gllight_set_pointlight_color(struct gllight *light, int index, float r, float g, float b);
 extern void gllight_set_pointlight_size(struct gllight *light, int index, float size);
+extern void gllight_set_pointlight_scope(struct gllight *light, int index, float scope);
 
 extern void gllight_resize(struct gllight *light, int32_t width, int32_t height);
 extern void gllight_dispatch(struct gllight *light, GLuint texture);
