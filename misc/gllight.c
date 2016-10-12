@@ -145,11 +145,11 @@ void gllight_destroy(struct gllight *light)
 	free(light);
 }
 
-void gllight_set_ambient_color(struct gllight *light, float r, float g, float b)
+void gllight_set_ambientlight_color(struct gllight *light, float r, float g, float b)
 {
-	light->ambient.color[0] = r;
-	light->ambient.color[1] = g;
-	light->ambient.color[2] = b;
+	light->ambientlight.color[0] = r;
+	light->ambientlight.color[1] = g;
+	light->ambientlight.color[2] = b;
 }
 
 void gllight_set_pointlight_position(struct gllight *light, int index, float x, float y)
@@ -214,7 +214,7 @@ void gllight_dispatch(struct gllight *light, GLuint texture)
 
 	glUseProgram(light->program0);
 	glUniform1i(light->udiffuse0, 0);
-	glUniform3fv(light->uambient0, 1, light->ambient.color);
+	glUniform3fv(light->uambient0, 1, light->ambientlight.color);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), &vertices[0]);
 	glEnableVertexAttribArray(0);

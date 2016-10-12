@@ -34,7 +34,7 @@ struct gllight {
 
 	struct {
 		float color[3];
-	} ambient;
+	} ambientlight;
 
 	struct {
 		float position[3];
@@ -46,7 +46,7 @@ struct gllight {
 extern struct gllight *gllight_create(int32_t width, int32_t height);
 extern void gllight_destroy(struct gllight *light);
 
-extern void gllight_set_ambient_color(struct gllight *light, float r, float g, float b);
+extern void gllight_set_ambientlight_color(struct gllight *light, float r, float g, float b);
 
 extern void gllight_set_pointlight_position(struct gllight *light, int index, float x, float y);
 extern void gllight_set_pointlight_color(struct gllight *light, int index, float r, float g, float b);

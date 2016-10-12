@@ -283,7 +283,7 @@ int main(int argc, char *argv[])
 
 	if (lightsize > 0.0f) {
 		context->light = gllight_create(width, height);
-		gllight_set_ambient_color(context->light, 0.3f, 0.3f, 0.3f);
+		gllight_set_ambientlight_color(context->light, 0.3f, 0.3f, 0.3f);
 	}
 
 	trans = nemoshow_transition_create(NEMOSHOW_LINEAR_EASE, 18000, 0);
