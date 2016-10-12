@@ -1217,9 +1217,11 @@ void nemoxmanager_map_window(struct nemoxmanager *xmanager, struct nemoxwindow *
 
 	bin->type = NEMOSHELL_SURFACE_XWAYLAND_TYPE;
 	bin->pid = xwindow->pid;
-	
+
 	nemoshell_bin_set_state(bin, NEMOSHELL_BIN_BINDABLE_STATE);
-	
+
+	nemoshell_use_client_uuid(shell, bin);
+
 	xwindow->bin = bin;
 
 	if (xwindow->fullscreen) {

@@ -339,6 +339,7 @@ extern void nemoshell_destroy_client_state(struct nemoshell *shell, struct clien
 extern struct clientstate *nemoshell_get_client_state(struct nemoshell *shell, uint32_t pid);
 
 extern int nemoshell_use_client_state(struct nemoshell *shell, struct shellbin *bin);
+extern int nemoshell_use_client_uuid(struct nemoshell *shell, struct shellbin *bin);
 extern int nemoshell_use_client_stage(struct nemoshell *shell, struct shellbin *bin);
 
 extern struct shellscreen *nemoshell_get_fullscreen(struct nemoshell *shell, const char *id);

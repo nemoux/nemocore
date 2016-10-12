@@ -1010,9 +1010,6 @@ static inline void nemoshell_set_client_state(struct shellbin *bin, struct clien
 
 	bin->flags = state->flags;
 
-	if (state->uuid != NULL)
-		nemoview_set_uuid(bin->view, state->uuid);
-
 	nemoview_set_state(bin->view, state->state_on);
 	nemoview_put_state(bin->view, state->state_off);
 }
@@ -1041,6 +1038,19 @@ int nemoshell_use_client_state(struct nemoshell *shell, struct shellbin *bin)
 				return 1;
 			}
 		}
+	}
+
+	return 0;
+}
+
+int nemoshell_use_client_uuid(struct nemoshell *shell, struct shellbin *bin)
+{
+	struct clientstate *state;
+	pid_t pid = bin->pid;
+
+	state = nemoshell_get_client_state(shell, pid);
+	if (state != NULL && state->uuid != NULL) {
+		nemoview_set_uuid(bin->view, state->uuid);
 	}
 
 	return 0;

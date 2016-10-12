@@ -486,6 +486,8 @@ static void nemo_get_nemo_surface(struct wl_client *client, struct wl_resource *
 		bin->type = NEMOSHELL_SURFACE_OVERLAY_TYPE;
 		bin->view->transform.type = NEMOVIEW_TRANSFORM_OVERLAY;
 	}
+
+	nemoshell_use_client_uuid(shell, bin);
 }
 
 static void nemo_pong(struct wl_client *client, struct wl_resource *resource, uint32_t serial)
