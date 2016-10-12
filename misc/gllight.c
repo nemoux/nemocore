@@ -21,7 +21,18 @@ static const char GLLIGHT_LIGHT_VERTEX_SHADER[] =
 "  vtexcoord = texcoord;\n"
 "}\n";
 
-static const char GLLIGHT_LIGHT_FRAGMENT_SHADER[] =
+static const char GLLIGHT_AMBIENT_LIGHT_FRAGMENT_SHADER[] =
+"precision mediump float;\n"
+"varying vec2 vtexcoord;\n"
+"uniform sampler2D tdiffuse;\n"
+"uniform vec3 lambient;\n"
+"void main()\n"
+"{\n"
+"  vec4 diffuse = texture2D(tdiffuse, vtexcoord);\n"
+"  gl_FragColor = vec4(lambient * diffuse.rgb, 1.0);\n"
+"}\n";
+
+static const char GLLIGHT_POINT_LIGHT_FRAGMENT_SHADER[] =
 "precision mediump float;\n"
 "varying vec2 vtexcoord;\n"
 "uniform sampler2D tdiffuse;\n"
@@ -88,14 +99,20 @@ struct gllight *gllight_create(int32_t width, int32_t height)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	light->program = gllight_create_program(GLLIGHT_LIGHT_VERTEX_SHADER, GLLIGHT_LIGHT_FRAGMENT_SHADER);
-	if (light->program == 0)
+	light->program0 = gllight_create_program(GLLIGHT_LIGHT_VERTEX_SHADER, GLLIGHT_AMBIENT_LIGHT_FRAGMENT_SHADER);
+	if (light->program0 == 0)
 		goto err1;
+	light->program1 = gllight_create_program(GLLIGHT_LIGHT_VERTEX_SHADER, GLLIGHT_POINT_LIGHT_FRAGMENT_SHADER);
+	if (light->program1 == 0)
+		goto err2;
 
-	light->udiffuse = glGetUniformLocation(light->program, "tdiffuse");
-	light->uposition = glGetUniformLocation(light->program, "lposition");
-	light->ucolor = glGetUniformLocation(light->program, "lcolor");
-	light->usize = glGetUniformLocation(light->program, "lsize");
+	light->udiffuse0 = glGetUniformLocation(light->program0, "tdiffuse");
+	light->uambient0 = glGetUniformLocation(light->program0, "lambient");
+
+	light->udiffuse1 = glGetUniformLocation(light->program1, "tdiffuse");
+	light->uposition1 = glGetUniformLocation(light->program1, "lposition");
+	light->ucolor1 = glGetUniformLocation(light->program1, "lcolor");
+	light->usize1 = glGetUniformLocation(light->program1, "lsize");
 
 	fbo_prepare_context(light->texture, width, height, &light->fbo, &light->dbo);
 
@@ -103,6 +120,9 @@ struct gllight *gllight_create(int32_t width, int32_t height)
 	light->height = height;
 
 	return light;
+
+err2:
+	glDeleteProgram(light->program0);
 
 err1:
 	glDeleteTextures(1, &light->texture);
@@ -119,9 +139,17 @@ void gllight_destroy(struct gllight *light)
 	glDeleteFramebuffers(1, &light->fbo);
 	glDeleteRenderbuffers(1, &light->dbo);
 
-	glDeleteProgram(light->program);
+	glDeleteProgram(light->program0);
+	glDeleteProgram(light->program1);
 
 	free(light);
+}
+
+void gllight_set_ambient_color(struct gllight *light, float r, float g, float b)
+{
+	light->ambient.color[0] = r;
+	light->ambient.color[1] = g;
+	light->ambient.color[2] = b;
 }
 
 void gllight_set_pointlight_position(struct gllight *light, int index, float x, float y)
@@ -182,16 +210,27 @@ void gllight_dispatch(struct gllight *light, GLuint texture)
 	glClearDepth(0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glUseProgram(light->program);
-	glUniform1i(light->udiffuse, 0);
-
 	glBindTexture(GL_TEXTURE_2D, texture);
+
+	glUseProgram(light->program0);
+	glUniform1i(light->udiffuse0, 0);
+	glUniform3fv(light->uambient0, 1, light->ambient.color);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), &vertices[0]);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), &vertices[3]);
+	glEnableVertexAttribArray(1);
+
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
+	glUseProgram(light->program1);
+	glUniform1i(light->udiffuse1, 0);
 
 	for (i = 0; i < GLLIGHT_POINTLIGHTS_MAX; i++) {
 		if (light->pointlights[i].size > 0.0f) {
-			glUniform3fv(light->uposition, 1, light->pointlights[i].position);
-			glUniform3fv(light->ucolor, 1, light->pointlights[i].color);
-			glUniform1f(light->usize, light->pointlights[i].size);
+			glUniform3fv(light->uposition1, 1, light->pointlights[i].position);
+			glUniform3fv(light->ucolor1, 1, light->pointlights[i].color);
+			glUniform1f(light->usize1, light->pointlights[i].size);
 
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), &vertices[0]);
 			glEnableVertexAttribArray(0);

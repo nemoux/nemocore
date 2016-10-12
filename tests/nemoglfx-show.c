@@ -281,8 +281,10 @@ int main(int argc, char *argv[])
 		glripple_layout(context->ripple, 32, 32, 2048);
 	}
 
-	if (lightsize > 0.0f)
+	if (lightsize > 0.0f) {
 		context->light = gllight_create(width, height);
+		gllight_set_ambient_color(context->light, 0.3f, 0.3f, 0.3f);
+	}
 
 	trans = nemoshow_transition_create(NEMOSHOW_LINEAR_EASE, 18000, 0);
 	nemoshow_transition_dirty_one(trans, context->canvas, NEMOSHOW_FILTER_DIRTY);

@@ -20,14 +20,21 @@ struct gllight {
 	GLuint texture;
 	GLuint fbo, dbo;
 
-	GLuint program;
+	GLuint program0;
+	GLuint udiffuse0;
+	GLuint uambient0;
 
-	GLuint udiffuse;
-	GLuint uposition;
-	GLuint ucolor;
-	GLuint usize;
+	GLuint program1;
+	GLuint udiffuse1;
+	GLuint uposition1;
+	GLuint ucolor1;
+	GLuint usize1;
 
 	int32_t width, height;
+
+	struct {
+		float color[3];
+	} ambient;
 
 	struct {
 		float position[3];
@@ -38,6 +45,8 @@ struct gllight {
 
 extern struct gllight *gllight_create(int32_t width, int32_t height);
 extern void gllight_destroy(struct gllight *light);
+
+extern void gllight_set_ambient_color(struct gllight *light, float r, float g, float b);
 
 extern void gllight_set_pointlight_position(struct gllight *light, int index, float x, float y);
 extern void gllight_set_pointlight_color(struct gllight *light, int index, float r, float g, float b);
