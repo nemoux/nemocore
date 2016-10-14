@@ -124,8 +124,8 @@ static const char GLSHADOW_RENDER_FRAGMENT_SHADER[] =
 "  sum += step(r, texture2D(tshadow, vec2(tc.x + 2.0 * blur, tc.y)).r) * 0.12;\n"
 "  sum += step(r, texture2D(tshadow, vec2(tc.x + 3.0 * blur, tc.y)).r) * 0.09;\n"
 "  sum += step(r, texture2D(tshadow, vec2(tc.x + 4.0 * blur, tc.y)).r) * 0.05;\n"
-"  float t = sum * smoothstep(1.0, 0.0, r);\n"
-"  gl_FragColor = vec4(lcolor * t, t);\n"
+"  float lit = mix(center, sum, 1.0) * smoothstep(1.0, 0.0, r);\n"
+"  gl_FragColor = vec4(lcolor * lit, lit);\n"
 "}\n";
 
 static GLuint glshadow_create_program(const char *vshader, const char *fshader)
