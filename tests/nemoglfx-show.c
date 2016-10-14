@@ -16,6 +16,7 @@
 #include <glblur.h>
 #include <glripple.h>
 #include <gllight.h>
+#include <glshadow.h>
 #include <nemohelper.h>
 #include <nemolog.h>
 #include <nemomisc.h>
@@ -32,12 +33,14 @@ struct glfxcontext {
 	struct glblur *blur;
 	struct glripple *ripple;
 	struct gllight *light;
+	struct glshadow *shadow;
 
 	float width, height;
 
-	int step;
+	int ripplestep;
 
 	float lightscope;
+	float shadowscope;
 };
 
 static void nemoglfx_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, struct showevent *event)
@@ -51,7 +54,7 @@ static void nemoglfx_dispatch_canvas_event(struct nemoshow *show, struct showone
 			glripple_shoot(context->ripple,
 					nemoshow_event_get_x(event) / context->width,
 					nemoshow_event_get_y(event) / context->height,
-					context->step);
+					context->ripplestep);
 		}
 	}
 
@@ -71,6 +74,25 @@ static void nemoglfx_dispatch_canvas_event(struct nemoshow *show, struct showone
 				gllight_set_pointlight_color(context->light, i, 1.0f, 1.0f, 1.0f);
 				gllight_set_pointlight_scope(context->light, i, context->lightscope);
 				gllight_set_pointlight_size(context->light, i, context->lightscope / 8.0f);
+			}
+		}
+	}
+
+	if (context->shadow != NULL) {
+		if (nemoshow_event_is_touch_down(show, event) ||
+				nemoshow_event_is_touch_motion(show, event) ||
+				nemoshow_event_is_touch_up(show, event)) {
+			int tapcount = nemoshow_event_get_tapcount(event);
+			int i;
+
+			glshadow_clear_pointlights(context->shadow);
+
+			for (i = 0; i < tapcount; i++) {
+				glshadow_set_pointlight_position(context->shadow, i,
+						nemoshow_event_get_x_on(event, i) / context->width,
+						nemoshow_event_get_y_on(event, i) / context->height);
+				glshadow_set_pointlight_color(context->shadow, i, 1.0f, 1.0f, 1.0f);
+				glshadow_set_pointlight_size(context->shadow, i, context->shadowscope / 8.0f);
 			}
 		}
 	}
@@ -125,6 +147,12 @@ static GLuint nemoglfx_dispatch_tale_effect(struct talenode *node, void *data)
 		texture = gllight_get_texture(context->light);
 	}
 
+	if (context->shadow != NULL) {
+		glshadow_dispatch(context->shadow, texture);
+
+		texture = glshadow_get_texture(context->shadow);
+	}
+
 	if (context->ripple != NULL) {
 		glripple_update(context->ripple);
 		glripple_dispatch(context->ripple, texture);
@@ -140,9 +168,10 @@ int main(int argc, char *argv[])
 	struct option options[] = {
 		{ "program",				required_argument,			NULL,			'p' },
 		{ "image",					required_argument,			NULL,			'i' },
-		{ "step",						required_argument,			NULL,			's' },
+		{ "ripple",					required_argument,			NULL,			'r' },
 		{ "blur",						required_argument,			NULL,			'b' },
 		{ "light",					required_argument,			NULL,			'l' },
+		{ "shadow",					required_argument,			NULL,			's' },
 		{ 0 }
 	};
 
@@ -157,15 +186,16 @@ int main(int argc, char *argv[])
 	char *programpath = NULL;
 	char *imagepath = NULL;
 	float lightscope = 0.0f;
+	float shadowscope = 0.0f;
 	int width = 800;
 	int height = 800;
-	int step = 0;
+	int ripplestep = 0;
 	int blur = 0;
 	int opt;
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "p:i:s:b:l:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "p:i:r:b:l:s:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -178,8 +208,8 @@ int main(int argc, char *argv[])
 				imagepath = strdup(optarg);
 				break;
 
-			case 's':
-				step = strtoul(optarg, NULL, 10);
+			case 'r':
+				ripplestep = strtoul(optarg, NULL, 10);
 				break;
 
 			case 'b':
@@ -188,6 +218,10 @@ int main(int argc, char *argv[])
 
 			case 'l':
 				lightscope = strtod(optarg, NULL);
+				break;
+
+			case 's':
+				shadowscope = strtod(optarg, NULL);
 				break;
 
 			default:
@@ -203,9 +237,10 @@ int main(int argc, char *argv[])
 	context->width = width;
 	context->height = height;
 
-	context->step = step;
+	context->ripplestep = ripplestep;
 
 	context->lightscope = lightscope;
+	context->shadowscope = shadowscope * width;
 
 	context->tool = tool = nemotool_create();
 	if (tool == NULL)
@@ -252,7 +287,7 @@ int main(int argc, char *argv[])
 		nemoshow_item_set_y(one, 0.0f);
 		nemoshow_item_set_width(one, width);
 		nemoshow_item_set_height(one, height);
-		nemoshow_item_set_fill_color(one, 255.0f, 255.0f, 255.0f, 255.0f);
+		nemoshow_item_set_fill_color(one, 0.0f, 0.0f, 0.0f, 0.0f);
 
 		one = nemoshow_item_create(NEMOSHOW_RECT_ITEM);
 		nemoshow_one_attach(canvas, one);
@@ -260,21 +295,38 @@ int main(int argc, char *argv[])
 		nemoshow_item_set_y(one, height / 4.0f);
 		nemoshow_item_set_width(one, width / 2.0f);
 		nemoshow_item_set_height(one, height / 2.0f);
+		nemoshow_item_set_stroke_width(one, 5.0f);
+		nemoshow_item_set_stroke_color(one, 0.0f, 255.0f, 255.0f, 255.0f);
+
+		one = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
+		nemoshow_one_attach(canvas, one);
+		nemoshow_item_set_cx(one, width / 2.0f);
+		nemoshow_item_set_cy(one, height / 2.0f);
+		nemoshow_item_set_r(one, width / 6.0f);
 		nemoshow_item_set_fill_color(one, 0.0f, 255.0f, 255.0f, 255.0f);
+
+		one = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
+		nemoshow_one_attach(canvas, one);
+		nemoshow_item_set_cx(one, width / 1.0f);
+		nemoshow_item_set_cy(one, height / 2.0f);
+		nemoshow_item_set_r(one, width / 4.0f);
+		nemoshow_item_set_stroke_width(one, 5.0f);
+		nemoshow_item_set_stroke_color(one, 0.0f, 255.0f, 255.0f, 255.0f);
 	}
 
 	node = nemoshow_canvas_get_node(canvas);
 	nemotale_node_set_dispatch_effect(node, nemoglfx_dispatch_tale_effect, context);
 
-	if (programpath != NULL)
+	if (programpath != NULL) {
 		context->filter = glfilter_create(width, height, programpath);
+	}
 
 	if (blur > 0) {
 		context->blur = glblur_create(width, height);
 		glblur_set_radius(context->blur, blur, blur);
 	}
 
-	if (step > 0) {
+	if (ripplestep > 0) {
 		context->ripple = glripple_create(width, height);
 		glripple_use_vectors(context->ripple, NULL, 32, 32, 400, 400);
 		glripple_use_amplitudes(context->ripple, NULL, 2048, 18, 0.125f);
@@ -284,6 +336,10 @@ int main(int argc, char *argv[])
 	if (lightscope > 0.0f) {
 		context->light = gllight_create(width, height);
 		gllight_set_ambientlight_color(context->light, 0.0f, 0.0f, 0.0f);
+	}
+
+	if (shadowscope > 0.0f) {
+		context->shadow = glshadow_create(width, height, context->shadowscope);
 	}
 
 	trans = nemoshow_transition_create(NEMOSHOW_LINEAR_EASE, 18000, 0);
@@ -303,6 +359,8 @@ int main(int argc, char *argv[])
 		glripple_destroy(context->ripple);
 	if (context->light != NULL)
 		gllight_destroy(context->light);
+	if (context->shadow != NULL)
+		glshadow_destroy(context->shadow);
 
 	nemoshow_destroy_view(show);
 
