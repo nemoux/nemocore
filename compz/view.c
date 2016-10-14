@@ -151,7 +151,7 @@ void nemoview_correct_pivot(struct nemoview *view, float px, float py)
 		vector.f[2] = 0.0f;
 		vector.f[3] = 1.0f;
 
-		nemomatrix_transform(&matrix, &vector);
+		nemomatrix_transform_vector(&matrix, &vector);
 
 		if (fabsf(vector.f[3]) < 1e-6) {
 			sx = 0.0f;
@@ -183,7 +183,7 @@ void nemoview_correct_pivot(struct nemoview *view, float px, float py)
 		vector.f[2] = 0.0f;
 		vector.f[3] = 1.0f;
 
-		nemomatrix_transform(&matrix, &vector);
+		nemomatrix_transform_vector(&matrix, &vector);
 
 		if (fabsf(vector.f[3]) < 1e-6) {
 			ex = 0.0f;

@@ -125,7 +125,7 @@ void nemomatrix_multiply(struct nemomatrix *m, const struct nemomatrix *n)
 	memcpy(m, &tmp, sizeof(tmp));
 }
 
-void nemomatrix_transform(struct nemomatrix *matrix, struct nemovector *v)
+void nemomatrix_transform_vector(struct nemomatrix *matrix, struct nemovector *v)
 {
 	struct nemovector t;
 	int i, j;
@@ -137,6 +137,27 @@ void nemomatrix_transform(struct nemomatrix *matrix, struct nemovector *v)
 	}
 
 	*v = t;
+}
+
+int nemomatrix_transform(struct nemomatrix *matrix, float *x, float *y)
+{
+	struct nemovector v = { { *x, *y, 0.0f, 1.0f } };
+	struct nemovector t;
+	int i, j;
+
+	for (i = 0; i < 4; i++) {
+		t.f[i] = 0;
+		for (j = 0; j < 4; j++)
+			t.f[i] += v.f[j] * matrix->d[i + j * 4];
+	}
+
+	if (fabsf(t.f[3]) < 1e-6)
+		return -1;
+
+	*x = t.f[0];
+	*y = t.f[1];
+
+	return 0;
 }
 
 int nemomatrix_transform_xyz(struct nemomatrix *matrix, float *x, float *y, float *z)

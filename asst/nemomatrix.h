@@ -65,7 +65,8 @@ struct nemoquaternion {
 };
 
 extern void nemomatrix_multiply(struct nemomatrix *m, const struct nemomatrix *n);
-extern void nemomatrix_transform(struct nemomatrix *matrix, struct nemovector *v);
+extern void nemomatrix_transform_vector(struct nemomatrix *matrix, struct nemovector *v);
+extern int nemomatrix_transform(struct nemomatrix *matrix, float *x, float *y);
 extern int nemomatrix_transform_xyz(struct nemomatrix *matrix, float *x, float *y, float *z);
 extern int nemomatrix_invert(struct nemomatrix *inverse, const struct nemomatrix *matrix);
 

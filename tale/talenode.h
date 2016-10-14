@@ -125,7 +125,7 @@ static inline void nemotale_node_transform_to_global(struct talenode *node, floa
 	if (node->transform.enable) {
 		struct nemovector v = { { sx, sy, 0.0f, 1.0f } };
 
-		nemomatrix_transform(&node->transform.matrix, &v);
+		nemomatrix_transform_vector(&node->transform.matrix, &v);
 
 		if (fabsf(v.f[3]) < 1e-6) {
 			*x = 0.0f;
@@ -148,7 +148,7 @@ static inline void nemotale_node_transform_from_global(struct talenode *node, fl
 	if (node->transform.enable) {
 		struct nemovector v = { { x, y, 0.0f, 1.0f } };
 
-		nemomatrix_transform(&node->transform.inverse, &v);
+		nemomatrix_transform_vector(&node->transform.inverse, &v);
 
 		if (fabsf(v.f[3]) < 1e-6) {
 			*sx = 0.0f;

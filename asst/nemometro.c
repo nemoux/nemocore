@@ -23,7 +23,7 @@ static inline void nemometro_unproject(struct nemomatrix *projection, int32_t wi
 	in.f[2] = z * 2.0f - 1.0f;
 	in.f[3] = 1.0f;
 
-	nemomatrix_transform(&inverse, &in);
+	nemomatrix_transform_vector(&inverse, &in);
 
 	if (fabsf(in.f[3]) < 1e-6) {
 		out[0] = 0.0f;

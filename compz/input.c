@@ -63,7 +63,7 @@ void nemoinput_transform_to_global(struct inputnode *node, float dx, float dy, f
 	if (node->transform.enable != 0) {
 		struct nemovector v = { { dx, dy, 0.0f, 1.0f } };
 
-		nemomatrix_transform(&node->transform.matrix, &v);
+		nemomatrix_transform_vector(&node->transform.matrix, &v);
 
 		if (fabsf(v.f[3]) < 1e-6) {
 			*x = 0.0f;
@@ -84,7 +84,7 @@ void nemoinput_transform_from_global(struct inputnode *node, float x, float y, f
 	if (node->transform.enable != 0) {
 		struct nemovector v = { { x, y, 0.0f, 1.0f } };
 
-		nemomatrix_transform(&node->transform.inverse, &v);
+		nemomatrix_transform_vector(&node->transform.inverse, &v);
 
 		if (fabsf(v.f[3]) < 1e-6) {
 			*dx = 0.0f;
