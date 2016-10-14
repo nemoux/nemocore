@@ -71,7 +71,6 @@ static void nemoglfx_dispatch_canvas_event(struct nemoshow *show, struct showone
 				gllight_set_pointlight_position(context->light, i,
 						nemoshow_event_get_x_on(event, i) / context->width,
 						nemoshow_event_get_y_on(event, i) / context->height);
-				gllight_set_pointlight_color(context->light, i, 1.0f, 1.0f, 1.0f);
 				gllight_set_pointlight_scope(context->light, i, context->lightscope);
 				gllight_set_pointlight_size(context->light, i, context->lightscope / 8.0f);
 			}
@@ -91,7 +90,6 @@ static void nemoglfx_dispatch_canvas_event(struct nemoshow *show, struct showone
 				glshadow_set_pointlight_position(context->shadow, i,
 						nemoshow_event_get_x_on(event, i) / context->width,
 						nemoshow_event_get_y_on(event, i) / context->height);
-				glshadow_set_pointlight_color(context->shadow, i, 1.0f, 1.0f, 1.0f);
 				glshadow_set_pointlight_size(context->shadow, i, context->shadowscope / 8.0f);
 			}
 		}
@@ -336,10 +334,20 @@ int main(int argc, char *argv[])
 	if (lightscope > 0.0f) {
 		context->light = gllight_create(width, height);
 		gllight_set_ambientlight_color(context->light, 0.0f, 0.0f, 0.0f);
+		gllight_set_pointlight_color(context->light, 0, random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f));
+		gllight_set_pointlight_color(context->light, 1, random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f));
+		gllight_set_pointlight_color(context->light, 2, random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f));
+		gllight_set_pointlight_color(context->light, 3, random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f));
+		gllight_set_pointlight_color(context->light, 4, random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f));
 	}
 
 	if (shadowscope > 0.0f) {
 		context->shadow = glshadow_create(width, height, context->shadowscope);
+		glshadow_set_pointlight_color(context->shadow, 0, random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f));
+		glshadow_set_pointlight_color(context->shadow, 1, random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f));
+		glshadow_set_pointlight_color(context->shadow, 2, random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f));
+		glshadow_set_pointlight_color(context->shadow, 3, random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f));
+		glshadow_set_pointlight_color(context->shadow, 4, random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f));
 	}
 
 	trans = nemoshow_transition_create(NEMOSHOW_LINEAR_EASE, 18000, 0);
