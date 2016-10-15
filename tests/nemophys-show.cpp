@@ -24,18 +24,6 @@
 #include <nemolog.h>
 #include <nemomisc.h>
 
-struct physball {
-	struct nemolist link;
-
-	btRigidBody *body;
-
-	float color[3];
-	float radius;
-
-	uint32_t stime;
-	uint32_t etime;
-};
-
 struct physcontext {
 	struct nemotool *tool;
 
@@ -64,6 +52,26 @@ struct physcontext {
 	struct nemolist ball_list;
 };
 
+struct physball {
+	struct nemolist link;
+
+	btRigidBody *body;
+
+	float color[3];
+	float radius;
+};
+
+struct physpitch {
+	struct physcontext *context;
+
+	struct showone *one;
+
+	btRigidBody *body;
+	btPoint2PointConstraint *p2p;
+
+	int state;
+};
+
 static int nemophys_prepare_wall(struct physcontext *context);
 static void nemophys_finish_wall(struct physcontext *context);
 
@@ -71,7 +79,6 @@ static void nemophys_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 {
 	struct physcontext *context = (struct physcontext *)nemoshow_get_userdata(show);
 	struct physball *ball, *next;
-	uint32_t ctime = time_current_msecs();
 
 	context->dynamicsworld->stepSimulation(1.0f / 60.0f, 0);
 
@@ -99,33 +106,25 @@ static void nemophys_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 	paint.setMaskFilter(filter);
 
 	nemolist_for_each_safe(ball, next, &context->ball_list, link) {
-		if (ball->etime > ctime) {
-			btRigidBody *body = ball->body;
+		btRigidBody *body = ball->body;
 
-			if (body != NULL && body->getMotionState()) {
-				btTransform transform;
+		if (body != NULL && body->getMotionState()) {
+			btTransform transform;
 
-				body->getMotionState()->getWorldTransform(transform);
+			body->getMotionState()->getWorldTransform(transform);
 
-				paint.setColor(
-						SkColorSetARGB(
-							255.0f,
-							ball->color[0],
-							ball->color[1],
-							ball->color[2]));
+			paint.setColor(
+					SkColorSetARGB(
+						255.0f,
+						ball->color[0],
+						ball->color[1],
+						ball->color[2]));
 
-				canvas.drawCircle(
-						float(transform.getOrigin().getX()),
-						float(transform.getOrigin().getY()),
-						ball->radius,
-						paint);
-			}
-		} else {
-			nemolist_remove(&ball->link);
-
-			context->dynamicsworld->removeRigidBody(ball->body);
-
-			free(ball);
+			canvas.drawCircle(
+					float(transform.getOrigin().getX()),
+					float(transform.getOrigin().getY()),
+					ball->radius,
+					paint);
 		}
 	}
 
@@ -134,48 +133,97 @@ static void nemophys_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 	nemoshow_one_dirty(one, NEMOSHOW_REDRAW_DIRTY);
 }
 
+static int nemophys_dispatch_touch_grab(struct nemoshow *show, struct showgrab *grab, struct showevent *event)
+{
+	struct physpitch *pitch = (struct physpitch *)nemoshow_grab_get_userdata(grab);
+	struct physcontext *context = pitch->context;
+
+	if (nemoshow_event_is_touch_down(show, event)) {
+	} else if (nemoshow_event_is_touch_motion(show, event)) {
+		float x = nemoshow_event_get_x(event) * nemoshow_canvas_get_viewport_sx(pitch->one);
+		float y = nemoshow_event_get_y(event) * nemoshow_canvas_get_viewport_sy(pitch->one);
+
+		pitch->p2p->setPivotB(btVector3(x, y, 0.0f));
+	} else if (nemoshow_event_is_touch_up(show, event)) {
+		pitch->body->forceActivationState(pitch->state);
+		pitch->body->activate();
+
+		context->dynamicsworld->removeConstraint(pitch->p2p);
+
+		delete pitch->p2p;
+		free(pitch);
+
+		nemoshow_grab_destroy(grab);
+
+		return 0;
+	}
+
+	return 1;
+}
+
 static void nemophys_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, struct showevent *event)
 {
 	struct physcontext *context = (struct physcontext *)nemoshow_get_userdata(show);
+	float x = nemoshow_event_get_x(event) * nemoshow_canvas_get_viewport_sx(canvas);
+	float y = nemoshow_event_get_y(event) * nemoshow_canvas_get_viewport_sy(canvas);
 
 	nemoshow_event_update_taps(show, canvas, event);
 
 	if (nemoshow_event_is_touch_down(show, event)) {
-		struct physball *ball;
-		float r = random_get_double(0.0f, 255.0f);
-		float g = random_get_double(0.0f, 255.0f);
-		float b = random_get_double(0.0f, 255.0f);
-		float s = random_get_double(15.0f, 45.0f);
+		btVector3 from(x, y, -1000.0f);
+		btVector3 to(x, y, 1000.0f);
 
-		btConvexShape *cicle = new btCylinderShapeZ(btVector3(btScalar(s), btScalar(s), btScalar(s)));
-		btConvexShape *shape = new btConvex2dShape(cicle);
+		btCollisionWorld::ClosestRayResultCallback raycallback(from, to);
 
-		btTransform transform;
-		transform.setIdentity();
-		transform.setOrigin(btVector3(
-					nemoshow_event_get_x(event) * nemoshow_canvas_get_viewport_sx(canvas),
-					nemoshow_event_get_y(event) * nemoshow_canvas_get_viewport_sy(canvas),
-					0.0f));
+		context->dynamicsworld->rayTest(from, to, raycallback);
+		if (raycallback.hasHit()) {
+			struct showgrab *grab;
+			struct physpitch *pitch;
 
-		btScalar mass(1.0f);
-		btVector3 linertia(0, 0, 0);
+			pitch = (struct physpitch *)malloc(sizeof(struct physpitch));
+			pitch->context = context;
+			pitch->one = canvas;
+			pitch->body = (btRigidBody *)btRigidBody::upcast(raycallback.m_collisionObject);
+			pitch->state = pitch->body->getActivationState();
+			pitch->body->setActivationState(DISABLE_DEACTIVATION);
+			pitch->p2p = new btPoint2PointConstraint(*pitch->body, pitch->body->getCenterOfMassTransform().inverse() * raycallback.m_hitPointWorld);
+			context->dynamicsworld->addConstraint(pitch->p2p, true);
 
-		btDefaultMotionState *motionstate = new btDefaultMotionState(transform);
-		btRigidBody::btRigidBodyConstructionInfo bodyinfo(mass, motionstate, shape, linertia);
-		btRigidBody *body = new btRigidBody(bodyinfo);
+			grab = nemoshow_grab_create(show, event, nemophys_dispatch_touch_grab);
+			nemoshow_grab_set_userdata(grab, pitch);
+			nemoshow_dispatch_grab(show, event);
+		} else {
+			struct physball *ball;
+			float r = random_get_double(0.0f, 255.0f);
+			float g = random_get_double(0.0f, 255.0f);
+			float b = random_get_double(0.0f, 255.0f);
+			float s = random_get_double(15.0f, 45.0f);
 
-		context->dynamicsworld->addRigidBody(body);
+			btConvexShape *cicle = new btCylinderShapeZ(btVector3(btScalar(s), btScalar(s), btScalar(s)));
+			btConvexShape *shape = new btConvex2dShape(cicle);
 
-		ball = (struct physball *)malloc(sizeof(struct physball));
-		ball->body = body;
-		ball->color[0] = r;
-		ball->color[1] = g;
-		ball->color[2] = b;
-		ball->radius = s;
-		ball->stime = time_current_msecs();
-		ball->etime = ball->stime + random_get_int(5000, 70000);
+			btTransform transform;
+			transform.setIdentity();
+			transform.setOrigin(btVector3(x, y, 0.0f));
 
-		nemolist_insert_tail(&context->ball_list, &ball->link);
+			btScalar mass(1.0f);
+			btVector3 linertia(0, 0, 0);
+
+			btDefaultMotionState *motionstate = new btDefaultMotionState(transform);
+			btRigidBody::btRigidBodyConstructionInfo bodyinfo(mass, motionstate, shape, linertia);
+			btRigidBody *body = new btRigidBody(bodyinfo);
+
+			context->dynamicsworld->addRigidBody(body);
+
+			ball = (struct physball *)malloc(sizeof(struct physball));
+			ball->body = body;
+			ball->color[0] = r;
+			ball->color[1] = g;
+			ball->color[2] = b;
+			ball->radius = s;
+
+			nemolist_insert_tail(&context->ball_list, &ball->link);
+		}
 	}
 
 	if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event)) {
