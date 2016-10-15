@@ -368,6 +368,9 @@ void glshadow_dispatch(struct glshadow *shadow, GLuint texture)
 			nemomatrix_translate(&matrix,
 					-shadow->pointlights[i].position[0],
 					-shadow->pointlights[i].position[1]);
+			nemomatrix_scale(&matrix,
+					(float)shadow->width / (float)shadow->lightscope,
+					(float)shadow->height / (float)shadow->lightscope);
 
 			glUseProgram(shadow->program1);
 			glUniformMatrix4fv(shadow->uprojection1, 1, GL_FALSE, matrix.d);
@@ -409,6 +412,9 @@ void glshadow_dispatch(struct glshadow *shadow, GLuint texture)
 			glViewport(0, 0, shadow->width, shadow->height);
 
 			nemomatrix_init_identity(&matrix);
+			nemomatrix_scale(&matrix,
+					(float)shadow->lightscope / (float)shadow->width,
+					(float)shadow->lightscope / (float)shadow->height);
 			nemomatrix_translate(&matrix,
 					shadow->pointlights[i].position[0],
 					shadow->pointlights[i].position[1]);
