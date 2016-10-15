@@ -89,7 +89,7 @@ static void nemophys_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 			canvas.drawCircle(
 					float(transform.getOrigin().getX()),
 					float(transform.getOrigin().getY()),
-					50.0f,
+					25.0f,
 					paint);
 		}
 	}
@@ -106,7 +106,7 @@ static void nemophys_dispatch_canvas_event(struct nemoshow *show, struct showone
 	nemoshow_event_update_taps(show, canvas, event);
 
 	if (nemoshow_event_is_touch_down(show, event)) {
-		btConvexShape *cicle = new btCylinderShapeZ(btVector3(btScalar(10.0f), btScalar(10.0f), btScalar(0.04f)));
+		btConvexShape *cicle = new btCylinderShapeZ(btVector3(btScalar(25.0f), btScalar(25.0f), btScalar(25.0f)));
 		btConvexShape *shape = new btConvex2dShape(cicle);
 
 		btTransform transform;
@@ -164,13 +164,13 @@ static int nemophys_prepare_bullet(struct physcontext *context)
 	context->solver = new btSequentialImpulseConstraintSolver;
 
 	context->dynamicsworld = new btDiscreteDynamicsWorld(context->dispatcher, context->broadphase, context->solver, context->configuration);
-	context->dynamicsworld->setGravity(btVector3(0, 100, 0));
+	context->dynamicsworld->setGravity(btVector3(0, 300, 0));
 
-	btCollisionShape *ground = new btBoxShape(btVector3(btScalar(context->width), btScalar(context->height), btScalar(100.0f)));
+	btCollisionShape *ground = new btBoxShape(btVector3(btScalar(context->width / 2), btScalar(context->height / 2), btScalar(context->width / 2)));
 
 	btTransform transform;
 	transform.setIdentity();
-	transform.setOrigin(btVector3(0, 0, 0));
+	transform.setOrigin(btVector3(context->width / 2, context->height + context->height / 2, 0));
 
 	btScalar mass(0.0f);
 	btVector3 linertia(0, 0, 0);
