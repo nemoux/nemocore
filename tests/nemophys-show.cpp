@@ -147,6 +147,14 @@ static void nemophys_dispatch_show_resize(struct nemoshow *show, int32_t width, 
 
 static int nemophys_prepare_bullet(struct physcontext *context)
 {
+	static float grounds[4][6] = {
+		{ context->width / 2.0f, context->height / 2.0f, context->width / 2.0f, context->width / 2.0f, context->height + context->height / 2.0f, 0.0f },
+		{ context->width / 2.0f, context->height / 2.0f, context->width / 2.0f, context->width / 2.0f, 0 - context->height / 2.0f, 0.0f },
+		{ context->width / 2.0f, context->height / 2.0f, context->width / 2.0f, 0 - context->width / 2.0f, context->height / 2.0f, 0.0f },
+		{ context->width / 2.0f, context->height / 2.0f, context->width / 2.0f, context->width + context->width / 2.0f, context->height / 2.0f, 0.0f },
+	};
+	int i;
+
 	context->configuration = new btDefaultCollisionConfiguration();
 	context->dispatcher = new btCollisionDispatcher(context->configuration);
 	context->simplexsolver = new btVoronoiSimplexSolver();
@@ -166,23 +174,21 @@ static int nemophys_prepare_bullet(struct physcontext *context)
 	context->dynamicsworld = new btDiscreteDynamicsWorld(context->dispatcher, context->broadphase, context->solver, context->configuration);
 	context->dynamicsworld->setGravity(btVector3(0, 300, 0));
 
-	btCollisionShape *ground = new btBoxShape(btVector3(btScalar(context->width / 2), btScalar(context->height / 2), btScalar(context->width / 2)));
+	for (i = 0; i < 4; i++) {
+		btCollisionShape *shape = new btBoxShape(btVector3(btScalar(grounds[i][0]), btScalar(grounds[i][1]), btScalar(grounds[i][2])));
 
-	btTransform transform;
-	transform.setIdentity();
-	transform.setOrigin(btVector3(context->width / 2, context->height + context->height / 2, 0));
+		btTransform transform;
+		transform.setIdentity();
+		transform.setOrigin(btVector3(grounds[i][3], grounds[i][4], grounds[i][5]));
 
-	btScalar mass(0.0f);
-	btVector3 linertia(0, 0, 0);
+		btScalar mass(0.0f);
+		btVector3 linertia(0, 0, 0);
+		btDefaultMotionState *motionstate = new btDefaultMotionState(transform);
+		btRigidBody::btRigidBodyConstructionInfo bodyinfo(mass, motionstate, shape, linertia);
+		btRigidBody *body = new btRigidBody(bodyinfo);
 
-	if (mass != 0.0f)
-		ground->calculateLocalInertia(mass, linertia);
-
-	btDefaultMotionState *motionstate = new btDefaultMotionState(transform);
-	btRigidBody::btRigidBodyConstructionInfo bodyinfo(mass, motionstate, ground, linertia);
-	btRigidBody *body = new btRigidBody(bodyinfo);
-
-	context->dynamicsworld->addRigidBody(body);
+		context->dynamicsworld->addRigidBody(body);
+	}
 
 	return 0;
 }
