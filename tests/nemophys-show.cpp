@@ -21,6 +21,7 @@
 #include <skiahelper.hpp>
 #include <nemohelper.h>
 #include <nemolist.h>
+#include <nemolog.h>
 #include <nemomisc.h>
 
 struct physball {
@@ -58,8 +59,13 @@ struct physcontext {
 
 	btDiscreteDynamicsWorld *dynamicsworld;
 
+	btRigidBody *walls[4];
+
 	struct nemolist ball_list;
 };
+
+static int nemophys_prepare_wall(struct physcontext *context);
+static void nemophys_finish_wall(struct physcontext *context);
 
 static void nemophys_dispatch_canvas_redraw(struct nemoshow *show, struct showone *one)
 {
@@ -146,7 +152,10 @@ static void nemophys_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 		btTransform transform;
 		transform.setIdentity();
-		transform.setOrigin(btVector3(nemoshow_event_get_x(event), nemoshow_event_get_y(event), 0.0f));
+		transform.setOrigin(btVector3(
+					nemoshow_event_get_x(event) * nemoshow_canvas_get_viewport_sx(canvas),
+					nemoshow_event_get_y(event) * nemoshow_canvas_get_viewport_sy(canvas),
+					0.0f));
 
 		btScalar mass(1.0f);
 		btVector3 linertia(0, 0, 0);
@@ -164,7 +173,7 @@ static void nemophys_dispatch_canvas_event(struct nemoshow *show, struct showone
 		ball->color[2] = b;
 		ball->radius = s;
 		ball->stime = time_current_msecs();
-		ball->etime = ball->stime + random_get_int(5000, 60000);
+		ball->etime = ball->stime + random_get_int(5000, 70000);
 
 		nemolist_insert_tail(&context->ball_list, &ball->link);
 	}
@@ -186,12 +195,18 @@ static void nemophys_dispatch_show_resize(struct nemoshow *show, int32_t width, 
 
 	nemoshow_view_resize(context->show, width, height);
 
+	context->width = width;
+	context->height = height;
+
+	nemophys_finish_wall(context);
+	nemophys_prepare_wall(context);
+
 	nemoshow_view_redraw(context->show);
 }
 
-static int nemophys_prepare_bullet(struct physcontext *context)
+static int nemophys_prepare_wall(struct physcontext *context)
 {
-	static float walls[4][6] = {
+	float walls[4][6] = {
 		{ context->width / 2.0f, context->height / 2.0f, context->width / 2.0f, context->width / 2.0f, context->height + context->height / 2.0f, 0.0f },
 		{ context->width / 2.0f, context->height / 2.0f, context->width / 2.0f, context->width / 2.0f, 0 - context->height / 2.0f, 0.0f },
 		{ context->width / 2.0f, context->height / 2.0f, context->width / 2.0f, 0 - context->width / 2.0f, context->height / 2.0f, 0.0f },
@@ -199,6 +214,37 @@ static int nemophys_prepare_bullet(struct physcontext *context)
 	};
 	int i;
 
+	for (i = 0; i < 4; i++) {
+		btCollisionShape *shape = new btBoxShape(btVector3(btScalar(walls[i][0]), btScalar(walls[i][1]), btScalar(walls[i][2])));
+
+		btTransform transform;
+		transform.setIdentity();
+		transform.setOrigin(btVector3(walls[i][3], walls[i][4], walls[i][5]));
+
+		btScalar mass(0.0f);
+		btVector3 linertia(0, 0, 0);
+		btDefaultMotionState *motionstate = new btDefaultMotionState(transform);
+		btRigidBody::btRigidBodyConstructionInfo bodyinfo(mass, motionstate, shape, linertia);
+		btRigidBody *body = new btRigidBody(bodyinfo);
+
+		context->dynamicsworld->addRigidBody(body);
+
+		context->walls[i] = body;
+	}
+
+	return 0;
+}
+
+static void nemophys_finish_wall(struct physcontext *context)
+{
+	int i;
+
+	for (i = 0; i < 4; i++)
+		context->dynamicsworld->removeRigidBody(context->walls[i]);
+}
+
+static int nemophys_prepare_bullet(struct physcontext *context)
+{
 	context->configuration = new btDefaultCollisionConfiguration();
 	context->dispatcher = new btCollisionDispatcher(context->configuration);
 	context->simplexsolver = new btVoronoiSimplexSolver();
@@ -217,22 +263,6 @@ static int nemophys_prepare_bullet(struct physcontext *context)
 
 	context->dynamicsworld = new btDiscreteDynamicsWorld(context->dispatcher, context->broadphase, context->solver, context->configuration);
 	context->dynamicsworld->setGravity(btVector3(0, 300, 0));
-
-	for (i = 0; i < 4; i++) {
-		btCollisionShape *shape = new btBoxShape(btVector3(btScalar(walls[i][0]), btScalar(walls[i][1]), btScalar(walls[i][2])));
-
-		btTransform transform;
-		transform.setIdentity();
-		transform.setOrigin(btVector3(walls[i][3], walls[i][4], walls[i][5]));
-
-		btScalar mass(0.0f);
-		btVector3 linertia(0, 0, 0);
-		btDefaultMotionState *motionstate = new btDefaultMotionState(transform);
-		btRigidBody::btRigidBodyConstructionInfo bodyinfo(mass, motionstate, shape, linertia);
-		btRigidBody *body = new btRigidBody(bodyinfo);
-
-		context->dynamicsworld->addRigidBody(body);
-	}
 
 	return 0;
 }
@@ -258,6 +288,7 @@ static void nemophys_finish_bullet(struct physcontext *context)
 int main(int argc, char *argv[])
 {
 	struct option options[] = {
+		{ "fullscreen",			required_argument,			NULL,		'f' },
 		{ 0 }
 	};
 
@@ -268,17 +299,22 @@ int main(int argc, char *argv[])
 	struct showone *canvas;
 	struct showone *one;
 	struct showtransition *trans;
+	char *fullscreen = NULL;
 	int width = 800;
 	int height = 800;
 	int opt;
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "f:", options, NULL)) {
 		if (opt == -1)
 			break;
 
 		switch (opt) {
+			case 'f':
+				fullscreen = strdup(optarg);
+				break;
+
 			default:
 				break;
 		}
@@ -305,6 +341,9 @@ int main(int argc, char *argv[])
 	nemoshow_set_dispatch_resize(show, nemophys_dispatch_show_resize);
 	nemoshow_set_userdata(show, context);
 
+	if (fullscreen != NULL)
+		nemoshow_view_set_fullscreen(show, fullscreen);
+
 	context->scene = scene = nemoshow_scene_create();
 	nemoshow_scene_set_width(scene, width);
 	nemoshow_scene_set_height(scene, height);
@@ -326,6 +365,7 @@ int main(int argc, char *argv[])
 	nemoshow_one_attach(scene, canvas);
 
 	nemophys_prepare_bullet(context);
+	nemophys_prepare_wall(context);
 
 	trans = nemoshow_transition_create(NEMOSHOW_LINEAR_EASE, 18000, 0);
 	nemoshow_transition_dirty_one(trans, context->canvas, NEMOSHOW_FILTER_DIRTY);
@@ -336,6 +376,7 @@ int main(int argc, char *argv[])
 
 	nemotool_run(tool);
 
+	nemophys_finish_wall(context);
 	nemophys_finish_bullet(context);
 
 	nemoshow_destroy_view(show);
