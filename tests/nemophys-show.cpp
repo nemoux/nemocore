@@ -28,6 +28,7 @@ struct physcontext {
 	struct nemotool *tool;
 
 	int width, height;
+	int is_fullscreen;
 
 	struct nemoshow *show;
 	struct showone *scene;
@@ -144,7 +145,7 @@ static int nemophys_dispatch_touch_grab(struct nemoshow *show, struct showgrab *
 		float y = nemoshow_event_get_y(event) * nemoshow_canvas_get_viewport_sy(pitch->one);
 
 		pitch->p2p->setPivotB(btVector3(x, y, 0.0f));
-	} else if (nemoshow_event_is_touch_up(show, event)) {
+	} else if (nemoshow_event_is_touch_up(show, event) || nemoshow_event_is_cancel(show, event)) {
 		pitch->body->forceActivationState(pitch->state);
 		pitch->body->activate();
 
@@ -168,6 +169,22 @@ static void nemophys_dispatch_canvas_event(struct nemoshow *show, struct showone
 	float y = nemoshow_event_get_y(event) * nemoshow_canvas_get_viewport_sy(canvas);
 
 	nemoshow_event_update_taps(show, canvas, event);
+
+	if (nemoshow_event_is_more_taps(show, event, 10)) {
+		struct physball *ball, *next;
+
+		nemoshow_event_set_cancel(event);
+		nemoshow_dispatch_grab_all(show, event);
+
+		nemolist_for_each_safe(ball, next, &context->ball_list, link) {
+			nemolist_remove(&ball->link);
+
+			context->dynamicsworld->removeRigidBody(ball->body);
+
+			delete ball->body;
+			free(ball);
+		}
+	}
 
 	if (nemoshow_event_is_touch_down(show, event)) {
 		btVector3 from(x, y, -100.0f);
@@ -228,13 +245,15 @@ static void nemophys_dispatch_canvas_event(struct nemoshow *show, struct showone
 		}
 	}
 
-	if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event)) {
-		if (nemoshow_event_is_more_taps(show, event, 3)) {
-			nemoshow_view_pick_distant(show, event, NEMOSHOW_VIEW_PICK_ROTATE_TYPE | NEMOSHOW_VIEW_PICK_TRANSLATE_TYPE);
+	if (context->is_fullscreen == 0) {
+		if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event)) {
+			if (nemoshow_event_is_more_taps(show, event, 3)) {
+				nemoshow_view_pick_distant(show, event, NEMOSHOW_VIEW_PICK_ROTATE_TYPE | NEMOSHOW_VIEW_PICK_TRANSLATE_TYPE);
 
-			nemoshow_event_set_cancel(event);
+				nemoshow_event_set_cancel(event);
 
-			nemoshow_dispatch_grab_all(show, event);
+				nemoshow_dispatch_grab_all(show, event);
+			}
 		}
 	}
 }
@@ -252,6 +271,16 @@ static void nemophys_dispatch_show_resize(struct nemoshow *show, int32_t width, 
 	nemophys_prepare_wall(context);
 
 	nemoshow_view_redraw(context->show);
+}
+
+static void nemophys_dispatch_show_fullscreen(struct nemoshow *show, const char *id, int32_t x, int32_t y, int32_t width, int32_t height)
+{
+	struct physcontext *context = (struct physcontext *)nemoshow_get_userdata(show);
+
+	if (id == NULL)
+		context->is_fullscreen = 0;
+	else
+		context->is_fullscreen = 1;
 }
 
 static int nemophys_prepare_wall(struct physcontext *context)
@@ -389,6 +418,7 @@ int main(int argc, char *argv[])
 	if (show == NULL)
 		goto err3;
 	nemoshow_set_dispatch_resize(show, nemophys_dispatch_show_resize);
+	nemoshow_set_dispatch_fullscreen(show, nemophys_dispatch_show_fullscreen);
 	nemoshow_set_userdata(show, context);
 
 	if (fullscreen != NULL)
