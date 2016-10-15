@@ -90,6 +90,7 @@ if(WITH_BULLET)
 
 	TARGET_LINK_LIBRARIES(nemophys-show
 		nemoapps
+		${BULLET_LIBRARIES}
 		)
 endif(WITH_BULLET)
 
