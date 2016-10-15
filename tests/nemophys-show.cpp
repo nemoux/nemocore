@@ -20,7 +20,20 @@
 #include <showhelper.h>
 #include <skiahelper.hpp>
 #include <nemohelper.h>
+#include <nemolist.h>
 #include <nemomisc.h>
+
+struct physball {
+	struct nemolist link;
+
+	btRigidBody *body;
+
+	float color[3];
+	float radius;
+
+	uint32_t stime;
+	uint32_t etime;
+};
 
 struct physcontext {
 	struct nemotool *tool;
@@ -45,12 +58,16 @@ struct physcontext {
 
 	btDiscreteDynamicsWorld *dynamicsworld;
 
-	btAlignedObjectArray<btRigidBody *> circles;
+	struct nemolist ball_list;
 };
 
 static void nemophys_dispatch_canvas_redraw(struct nemoshow *show, struct showone *one)
 {
 	struct physcontext *context = (struct physcontext *)nemoshow_get_userdata(show);
+	struct physball *ball, *next;
+	uint32_t ctime = time_current_msecs();
+
+	context->dynamicsworld->stepSimulation(1.0f / 60.0f, 0);
 
 	SkBitmap bitmap;
 	bitmap.setInfo(
@@ -71,26 +88,38 @@ static void nemophys_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 			SkBlurMaskFilter::kIgnoreTransform_BlurFlag);
 
 	SkPaint paint;
-	paint.setStyle(SkPaint::kStrokeAndFill_Style);
-	paint.setStrokeWidth(3.0f);
-	paint.setColor(SK_ColorYELLOW);
+	paint.setStyle(SkPaint::kFill_Style);
+	paint.setColor(SK_ColorWHITE);
 	paint.setMaskFilter(filter);
 
-	context->dynamicsworld->stepSimulation(1.0f / 60.0f, 0);
+	nemolist_for_each_safe(ball, next, &context->ball_list, link) {
+		if (ball->etime > ctime) {
+			btRigidBody *body = ball->body;
 
-	for (int i = 0; i < context->circles.size(); i++) {
-		btRigidBody *body = context->circles[i];
+			if (body != NULL && body->getMotionState()) {
+				btTransform transform;
 
-		if (body != NULL && body->getMotionState()) {
-			btTransform transform;
+				body->getMotionState()->getWorldTransform(transform);
 
-			body->getMotionState()->getWorldTransform(transform);
+				paint.setColor(
+						SkColorSetARGB(
+							255.0f,
+							ball->color[0],
+							ball->color[1],
+							ball->color[2]));
 
-			canvas.drawCircle(
-					float(transform.getOrigin().getX()),
-					float(transform.getOrigin().getY()),
-					25.0f,
-					paint);
+				canvas.drawCircle(
+						float(transform.getOrigin().getX()),
+						float(transform.getOrigin().getY()),
+						ball->radius,
+						paint);
+			}
+		} else {
+			nemolist_remove(&ball->link);
+
+			context->dynamicsworld->removeRigidBody(ball->body);
+
+			free(ball);
 		}
 	}
 
@@ -106,7 +135,13 @@ static void nemophys_dispatch_canvas_event(struct nemoshow *show, struct showone
 	nemoshow_event_update_taps(show, canvas, event);
 
 	if (nemoshow_event_is_touch_down(show, event)) {
-		btConvexShape *cicle = new btCylinderShapeZ(btVector3(btScalar(25.0f), btScalar(25.0f), btScalar(25.0f)));
+		struct physball *ball;
+		float r = random_get_double(0.0f, 255.0f);
+		float g = random_get_double(0.0f, 255.0f);
+		float b = random_get_double(0.0f, 255.0f);
+		float s = random_get_double(15.0f, 45.0f);
+
+		btConvexShape *cicle = new btCylinderShapeZ(btVector3(btScalar(s), btScalar(s), btScalar(s)));
 		btConvexShape *shape = new btConvex2dShape(cicle);
 
 		btTransform transform;
@@ -122,7 +157,16 @@ static void nemophys_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 		context->dynamicsworld->addRigidBody(body);
 
-		context->circles.push_back(body);
+		ball = (struct physball *)malloc(sizeof(struct physball));
+		ball->body = body;
+		ball->color[0] = r;
+		ball->color[1] = g;
+		ball->color[2] = b;
+		ball->radius = s;
+		ball->stime = time_current_msecs();
+		ball->etime = ball->stime + random_get_int(5000, 60000);
+
+		nemolist_insert_tail(&context->ball_list, &ball->link);
 	}
 
 	if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event)) {
@@ -147,7 +191,7 @@ static void nemophys_dispatch_show_resize(struct nemoshow *show, int32_t width, 
 
 static int nemophys_prepare_bullet(struct physcontext *context)
 {
-	static float grounds[4][6] = {
+	static float walls[4][6] = {
 		{ context->width / 2.0f, context->height / 2.0f, context->width / 2.0f, context->width / 2.0f, context->height + context->height / 2.0f, 0.0f },
 		{ context->width / 2.0f, context->height / 2.0f, context->width / 2.0f, context->width / 2.0f, 0 - context->height / 2.0f, 0.0f },
 		{ context->width / 2.0f, context->height / 2.0f, context->width / 2.0f, 0 - context->width / 2.0f, context->height / 2.0f, 0.0f },
@@ -175,11 +219,11 @@ static int nemophys_prepare_bullet(struct physcontext *context)
 	context->dynamicsworld->setGravity(btVector3(0, 300, 0));
 
 	for (i = 0; i < 4; i++) {
-		btCollisionShape *shape = new btBoxShape(btVector3(btScalar(grounds[i][0]), btScalar(grounds[i][1]), btScalar(grounds[i][2])));
+		btCollisionShape *shape = new btBoxShape(btVector3(btScalar(walls[i][0]), btScalar(walls[i][1]), btScalar(walls[i][2])));
 
 		btTransform transform;
 		transform.setIdentity();
-		transform.setOrigin(btVector3(grounds[i][3], grounds[i][4], grounds[i][5]));
+		transform.setOrigin(btVector3(walls[i][3], walls[i][4], walls[i][5]));
 
 		btScalar mass(0.0f);
 		btVector3 linertia(0, 0, 0);
@@ -244,6 +288,8 @@ int main(int argc, char *argv[])
 	if (context == NULL)
 		goto err1;
 	memset(context, 0, sizeof(struct physcontext));
+
+	nemolist_init(&context->ball_list);
 
 	context->width = width;
 	context->height = height;
