@@ -79,6 +79,20 @@ if(WITH_OPENCL)
 		)
 endif(WITH_OPENCL)
 
+if(WITH_BULLET)
+	PKG_CHECK_MODULES(BULLET REQUIRED bullet)
+	INCLUDE_DIRECTORIES(${BULLET_INCLUDE_DIRS})
+	LINK_DIRECTORIES(${BULLET_LIBRARY_DIRS})
+
+	add_executable(nemophys-show
+		nemophys-show.cpp
+		)
+
+	TARGET_LINK_LIBRARIES(nemophys-show
+		nemoapps
+		)
+endif(WITH_BULLET)
+
 add_executable(nemoglfx-show
 	nemoglfx-show.c
 	)

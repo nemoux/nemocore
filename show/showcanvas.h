@@ -226,6 +226,27 @@ static inline GLuint nemoshow_canvas_get_texture(struct showone *one)
 	return nemotale_node_get_texture(canvas->node);
 }
 
+static inline void *nemoshow_canvas_map(struct showone *one)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	return nemotale_node_map(canvas->node);
+}
+
+static inline int nemoshow_canvas_unmap(struct showone *one)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	return nemotale_node_unmap(canvas->node);
+}
+
+static inline int nemoshow_canvas_flush(struct showone *one)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	return nemotale_node_flush(canvas->node);
+}
+
 static inline int nemoshow_canvas_set_texture(struct showone *one, GLuint texture)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);

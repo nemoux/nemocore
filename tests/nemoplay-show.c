@@ -92,7 +92,7 @@ static void nemoplay_dispatch_canvas_event(struct nemoshow *show, struct showone
 	}
 }
 
-static void nemoplay_dispatch_canvas_resize(struct nemoshow *show, struct showone *one, int32_t width, int32_t height)
+static void nemoplay_dispatch_canvas_resize(struct nemoshow *show, struct showone *canvas, int32_t width, int32_t height)
 {
 	struct playcontext *context = (struct playcontext *)nemoshow_get_userdata(show);
 

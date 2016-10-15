@@ -33,6 +33,8 @@ option(WITH_OPENGL_UNPACK_SUBIMAGE "Build with OPENGL's UNPACK SUBIMAGE" ON)
 
 option(WITH_OPENCL "Build with OPENCL" OFF)
 
+option(WITH_BULLET "Build with BULLET" OFF)
+
 option(WITH_TOUCH_TO_POINTER "Build with Touch to Pointer" OFF)
 
 option(WITH_OPTIMIZE "Build with OPTIMIZE" ON)
