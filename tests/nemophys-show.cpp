@@ -170,8 +170,8 @@ static void nemophys_dispatch_canvas_event(struct nemoshow *show, struct showone
 	nemoshow_event_update_taps(show, canvas, event);
 
 	if (nemoshow_event_is_touch_down(show, event)) {
-		btVector3 from(x, y, -1000.0f);
-		btVector3 to(x, y, 1000.0f);
+		btVector3 from(x, y, -100.0f);
+		btVector3 to(x, y, 100.0f);
 
 		btCollisionWorld::ClosestRayResultCallback raycallback(from, to);
 
@@ -197,7 +197,7 @@ static void nemophys_dispatch_canvas_event(struct nemoshow *show, struct showone
 			float r = random_get_double(0.0f, 255.0f);
 			float g = random_get_double(0.0f, 255.0f);
 			float b = random_get_double(0.0f, 255.0f);
-			float s = random_get_double(15.0f, 45.0f);
+			float s = random_get_double(15.0f, 60.0f);
 
 			btConvexShape *cicle = new btCylinderShapeZ(btVector3(btScalar(s), btScalar(s), btScalar(s)));
 			btConvexShape *shape = new btConvex2dShape(cicle);
@@ -212,6 +212,8 @@ static void nemophys_dispatch_canvas_event(struct nemoshow *show, struct showone
 			btDefaultMotionState *motionstate = new btDefaultMotionState(transform);
 			btRigidBody::btRigidBodyConstructionInfo bodyinfo(mass, motionstate, shape, linertia);
 			btRigidBody *body = new btRigidBody(bodyinfo);
+			body->setLinearFactor(btVector3(1, 1, 0));
+			body->setAngularFactor(btVector3(0, 0, 1));
 
 			context->dynamicsworld->addRigidBody(body);
 
