@@ -12,7 +12,6 @@ include_directories(
 	${CMAKE_SOURCE_DIR}/misc
 	${CMAKE_SOURCE_DIR}/asst
 	${CMAKE_SOURCE_DIR}/tale
-	${CMAKE_SOURCE_DIR}/thirds
 	)
 
 add_library(nemoshow SHARED

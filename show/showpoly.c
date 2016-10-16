@@ -11,7 +11,6 @@
 #include <showpipe.h>
 #include <showcanvas.h>
 #include <nemoshow.h>
-#include <meshhelper.h>
 #include <oshelper.h>
 #include <nemometro.h>
 #include <nemomisc.h>
@@ -589,64 +588,4 @@ float nemoshow_poly_contain_point(struct showone *cone, struct showone *pone, st
 		return mint;
 
 	return FLT_MAX;
-}
-
-int nemoshow_poly_load_obj(struct showone *one, const char *uri)
-{
-	struct showpoly *poly = NEMOSHOW_POLY(one);
-	struct nemomatrix matrix;
-	float *vertices;
-	float *normals;
-	float *texcoords;
-	float *colors;
-	float minx = FLT_MAX, miny = FLT_MAX, minz = FLT_MAX, maxx = FLT_MIN, maxy = FLT_MIN, maxz = FLT_MIN;
-	float max;
-	int elements;
-	int i;
-
-	elements = mesh_load_triangles(uri, os_get_file_path(uri), &vertices, &normals, &texcoords, &colors);
-	if (elements <= 0)
-		return 0;
-
-	for (i = 0; i < elements; i++) {
-		minx = MIN(vertices[3 * i + NEMOSHOW_POLY_X_VERTEX], minx);
-		miny = MIN(vertices[3 * i + NEMOSHOW_POLY_Y_VERTEX], miny);
-		minz = MIN(vertices[3 * i + NEMOSHOW_POLY_Z_VERTEX], minz);
-		maxx = MAX(vertices[3 * i + NEMOSHOW_POLY_X_VERTEX], maxx);
-		maxy = MAX(vertices[3 * i + NEMOSHOW_POLY_Y_VERTEX], maxy);
-		maxz = MAX(vertices[3 * i + NEMOSHOW_POLY_Z_VERTEX], maxz);
-	}
-
-	max = MAX(maxx - minx, MAX(maxy - miny, maxz - minz));
-
-	nemomatrix_init_identity(&matrix);
-	nemomatrix_translate_xyz(&matrix,
-			-(maxx + minx) / 2.0f,
-			-(maxy + miny) / 2.0f,
-			-(maxz + minz) / 2.0f);
-	nemomatrix_scale_xyz(&matrix,
-			2.0f / max,
-			2.0f / max,
-			2.0f / max);
-
-	for (i = 0; i < elements; i++) {
-		nemomatrix_transform_xyz(&matrix,
-				&vertices[3 * i + NEMOSHOW_POLY_X_VERTEX],
-				&vertices[3 * i + NEMOSHOW_POLY_Y_VERTEX],
-				&vertices[3 * i + NEMOSHOW_POLY_Z_VERTEX]);
-	}
-
-	poly->vertices = vertices;
-	poly->normals = normals;
-	poly->texcoords = texcoords;
-	poly->diffuses = colors;
-	poly->elements = elements;
-
-	poly->on_normals = 1;
-	poly->on_texcoords = 1;
-	poly->on_diffuses = 1;
-
-	poly->mode = GL_TRIANGLES;
-
-	return elements;
 }

@@ -1,7 +1,3 @@
-include_directories(
-	${CMAKE_SOURCE_DIR}/thirds
-	)
-
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -std=c++11")
 set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
@@ -41,8 +37,6 @@ add_library(nemoasst SHARED
 	${CMAKE_SOURCE_DIR}/misc/oshelper.c
 	${CMAKE_SOURCE_DIR}/misc/syshelper.c
 	${CMAKE_SOURCE_DIR}/misc/udphelper.c
-	${CMAKE_SOURCE_DIR}/misc/meshhelper.cpp
-	${CMAKE_SOURCE_DIR}/thirds/tiny_obj_loader.cc
 	${NEMOASST_EGL_SOURCES}
 	)
 
