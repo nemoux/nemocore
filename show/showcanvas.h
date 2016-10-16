@@ -24,15 +24,16 @@ typedef enum {
 	NEMOSHOW_CANVAS_VECTOR_TYPE = 1,
 	NEMOSHOW_CANVAS_OPENGL_TYPE = 2,
 	NEMOSHOW_CANVAS_PIXMAN_TYPE = 3,
-	NEMOSHOW_CANVAS_BACK_TYPE = 4,
-	NEMOSHOW_CANVAS_PIPELINE_TYPE = 5,
+	NEMOSHOW_CANVAS_PIPELINE_TYPE = 4,
+	NEMOSHOW_CANVAS_BACK_TYPE = 5,
 	NEMOSHOW_CANVAS_LAST_TYPE
 } NemoShowCanvasType;
 
 typedef enum {
 	NEMOSHOW_CANVAS_REDRAW_STATE = (1 << 0),
 	NEMOSHOW_CANVAS_REDRAW_FULL_STATE = (1 << 1),
-	NEMOSHOW_CANVAS_POOLING_STATE = (1 << 2)
+	NEMOSHOW_CANVAS_POOLING_STATE = (1 << 2),
+	NEMOSHOW_CANVAS_OPAQUE_STATE = (1 << 3)
 } NemoShowCanvasState;
 
 struct nemoshow;
@@ -106,6 +107,7 @@ extern int nemoshow_canvas_below_one(struct showone *one, struct showone *below)
 
 extern int nemoshow_canvas_set_type(struct showone *one, int type);
 extern void nemoshow_canvas_set_alpha(struct showone *one, double alpha);
+extern void nemoshow_canvas_set_opaque(struct showone *one, int opaque);
 extern int nemoshow_canvas_use_pbo(struct showone *one, int use_pbo);
 
 extern int nemoshow_canvas_prepare_vector(struct nemoshow *show, struct showone *one);

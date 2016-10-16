@@ -215,6 +215,21 @@ void nemoshow_canvas_set_alpha(struct showone *one, double alpha)
 	nemoshow_one_dirty(one, NEMOSHOW_STYLE_DIRTY);
 }
 
+void nemoshow_canvas_set_opaque(struct showone *one, int opaque)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	if (opaque == 0) {
+		nemoshow_canvas_put_state(canvas, NEMOSHOW_CANVAS_OPAQUE_STATE);
+
+		nemotale_node_opaque(canvas->node, 0, 0, 0, 0);
+	} else {
+		nemoshow_canvas_set_state(canvas, NEMOSHOW_CANVAS_OPAQUE_STATE);
+
+		nemotale_node_opaque(canvas->node, 0, 0, canvas->viewport.width, canvas->viewport.height);
+	}
+}
+
 int nemoshow_canvas_use_pbo(struct showone *one, int use_pbo)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
@@ -803,6 +818,9 @@ int nemoshow_canvas_set_viewport(struct showone *one, double sx, double sy)
 	} else if (one->sub == NEMOSHOW_CANVAS_BACK_TYPE) {
 		nemotale_node_opaque(canvas->node, 0, 0, canvas->viewport.width, canvas->viewport.height);
 	}
+
+	if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_OPAQUE_STATE))
+		nemotale_node_opaque(canvas->node, 0, 0, canvas->viewport.width, canvas->viewport.height);
 
 	nemoshow_canvas_damage_all(one);
 

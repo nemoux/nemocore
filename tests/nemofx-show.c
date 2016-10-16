@@ -277,6 +277,7 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_width(canvas, width);
 	nemoshow_canvas_set_height(canvas, height);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_PIXMAN_TYPE);
+	nemoshow_canvas_set_opaque(canvas, 1);
 	nemoshow_one_attach(scene, canvas);
 
 	context->canvas = canvas = nemoshow_canvas_create();
