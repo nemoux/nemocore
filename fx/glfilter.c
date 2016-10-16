@@ -166,7 +166,7 @@ static const char GLFILTER_NOISE_FRAGMENT_SHADER[] =
 "  gl_FragColor = vec4(n, n, n, 1.0);\n"
 "}\n";
 
-static GLuint glfilter_create_program(const char *shader)
+static GLuint nemofx_glfilter_create_program(const char *shader)
 {
 	const char *vertexshader = GLFILTER_SIMPLE_VERTEX_SHADER;
 	GLuint frag, vert;
@@ -199,7 +199,7 @@ static GLuint glfilter_create_program(const char *shader)
 	return program;
 }
 
-struct glfilter *glfilter_create(int32_t width, int32_t height, const char *shaderpath)
+struct glfilter *nemofx_glfilter_create(int32_t width, int32_t height, const char *shaderpath)
 {
 	struct glfilter *filter;
 
@@ -224,7 +224,7 @@ struct glfilter *glfilter_create(int32_t width, int32_t height, const char *shad
 		if (os_load_path(shaderpath, &shader, &size) < 0)
 			goto err1;
 
-		filter->program = glfilter_create_program(shader);
+		filter->program = nemofx_glfilter_create_program(shader);
 
 		free(shader);
 	} else {
@@ -245,7 +245,7 @@ struct glfilter *glfilter_create(int32_t width, int32_t height, const char *shad
 		if (shader == NULL)
 			goto err1;
 
-		filter->program = glfilter_create_program(shader);
+		filter->program = nemofx_glfilter_create_program(shader);
 	}
 
 	if (filter->program == 0)
@@ -271,7 +271,7 @@ err1:
 	return NULL;
 }
 
-void glfilter_destroy(struct glfilter *filter)
+void nemofx_glfilter_destroy(struct glfilter *filter)
 {
 	glDeleteTextures(1, &filter->texture);
 
@@ -283,7 +283,7 @@ void glfilter_destroy(struct glfilter *filter)
 	free(filter);
 }
 
-void glfilter_resize(struct glfilter *filter, int32_t width, int32_t height)
+void nemofx_glfilter_resize(struct glfilter *filter, int32_t width, int32_t height)
 {
 	if (filter->width != width || filter->height != height) {
 		glBindTexture(GL_TEXTURE_2D, filter->texture);
@@ -300,7 +300,7 @@ void glfilter_resize(struct glfilter *filter, int32_t width, int32_t height)
 	}
 }
 
-void glfilter_dispatch(struct glfilter *filter, GLuint texture)
+void nemofx_glfilter_dispatch(struct glfilter *filter, GLuint texture)
 {
 	static GLfloat vertices[] = {
 		-1.0f, -1.0f, 0.0f, 0.0f,

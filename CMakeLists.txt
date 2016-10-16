@@ -217,6 +217,7 @@ add_subdirectory(show)
 add_subdirectory(mote)
 add_subdirectory(play)
 add_subdirectory(bus)
+add_subdirectory(fx)
 
 if(WITH_CEF)
 	add_subdirectory(navi)

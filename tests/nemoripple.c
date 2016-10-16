@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
 	}
 
 	vectors = (float *)malloc(sizeof(float[3]) * rows * columns);
-	glripple_build_vectors(vectors, rows, columns, width, height);
+	nemofx_glripple_build_vectors(vectors, rows, columns, width, height);
 
 	fprintf(stdout, "--- ripple vectors(rows: %d, columns: %d, width: %d, height: %d)\n", rows, columns, width, height);
 
@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
 	fprintf(stdout, "\n");
 
 	amplitudes = (float *)malloc(sizeof(float) * length);
-	glripple_build_amplitudes(amplitudes, length, cycles, amplitude);
+	nemofx_glripple_build_amplitudes(amplitudes, length, cycles, amplitude);
 
 	fprintf(stdout, "--- ripple amplitudes(length: %d, cycles: %d, amplitude: %f)\n", length, cycles, amplitude);
 

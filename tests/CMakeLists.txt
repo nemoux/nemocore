@@ -33,6 +33,7 @@ include_directories(
 	${CMAKE_SOURCE_DIR}/apps
 	${CMAKE_SOURCE_DIR}/play
 	${CMAKE_SOURCE_DIR}/navi
+	${CMAKE_SOURCE_DIR}/fx
 	)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
@@ -94,12 +95,13 @@ if(WITH_BULLET)
 		)
 endif(WITH_BULLET)
 
-add_executable(nemoglfx-show
-	nemoglfx-show.c
+add_executable(nemofx-show
+	nemofx-show.c
 	)
 
-TARGET_LINK_LIBRARIES(nemoglfx-show
+TARGET_LINK_LIBRARIES(nemofx-show
 	nemoapps
+	nemofx
 	)
 
 add_executable(nemoripple
@@ -108,6 +110,7 @@ add_executable(nemoripple
 
 TARGET_LINK_LIBRARIES(nemoripple
 	nemoapps
+	nemofx
 	)
 
 add_executable(nemolog

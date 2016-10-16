@@ -45,7 +45,7 @@ static const char GLBLUR_GAUSSIAN_9TAP_FRAGMENT_SHADER[] =
 "  gl_FragColor = vec4(sum.rgb, 1.0);\n"
 "}\n";
 
-static GLuint glblur_create_program(const char *shader)
+static GLuint nemofx_glblur_create_program(const char *shader)
 {
 	const char *vertexshader = GLBLUR_SIMPLE_VERTEX_SHADER;
 	GLuint frag, vert;
@@ -78,7 +78,7 @@ static GLuint glblur_create_program(const char *shader)
 	return program;
 }
 
-struct glblur *glblur_create(int32_t width, int32_t height)
+struct glblur *nemofx_glblur_create(int32_t width, int32_t height)
 {
 	struct glblur *blur;
 	int size;
@@ -106,7 +106,7 @@ struct glblur *glblur_create(int32_t width, int32_t height)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	blur->program = glblur_create_program(GLBLUR_GAUSSIAN_9TAP_FRAGMENT_SHADER);
+	blur->program = nemofx_glblur_create_program(GLBLUR_GAUSSIAN_9TAP_FRAGMENT_SHADER);
 	if (blur->program == 0)
 		goto err1;
 
@@ -133,7 +133,7 @@ err1:
 	return NULL;
 }
 
-void glblur_destroy(struct glblur *blur)
+void nemofx_glblur_destroy(struct glblur *blur)
 {
 	glDeleteTextures(2, &blur->texture[0]);
 
@@ -147,13 +147,13 @@ void glblur_destroy(struct glblur *blur)
 	free(blur);
 }
 
-void glblur_set_radius(struct glblur *blur, int32_t rx, int32_t ry)
+void nemofx_glblur_set_radius(struct glblur *blur, int32_t rx, int32_t ry)
 {
 	blur->rx = rx;
 	blur->ry = ry;
 }
 
-void glblur_resize(struct glblur *blur, int32_t width, int32_t height)
+void nemofx_glblur_resize(struct glblur *blur, int32_t width, int32_t height)
 {
 	if (blur->width != width || blur->height != height) {
 		int i;
@@ -174,7 +174,7 @@ void glblur_resize(struct glblur *blur, int32_t width, int32_t height)
 	}
 }
 
-void glblur_dispatch(struct glblur *blur, GLuint texture)
+void nemofx_glblur_dispatch(struct glblur *blur, GLuint texture)
 {
 	static GLfloat vertices[] = {
 		-1.0f, -1.0f, 0.0f, 0.0f,

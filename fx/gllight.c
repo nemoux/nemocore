@@ -58,7 +58,7 @@ static const char GLLIGHT_POINT_LIGHT_FRAGMENT_SHADER[] =
 "  gl_FragColor = vec4(color * diffuse.rgb + ball(position.xy, lposition.xy, lcolor, lsize), 1.0);\n"
 "}\n";
 
-static GLuint gllight_create_program(const char *vshader, const char *fshader)
+static GLuint nemofx_gllight_create_program(const char *vshader, const char *fshader)
 {
 	GLuint frag, vert;
 	GLuint program;
@@ -90,7 +90,7 @@ static GLuint gllight_create_program(const char *vshader, const char *fshader)
 	return program;
 }
 
-struct gllight *gllight_create(int32_t width, int32_t height)
+struct gllight *nemofx_gllight_create(int32_t width, int32_t height)
 {
 	struct gllight *light;
 
@@ -108,10 +108,10 @@ struct gllight *gllight_create(int32_t width, int32_t height)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	light->program0 = gllight_create_program(GLLIGHT_LIGHT_VERTEX_SHADER, GLLIGHT_AMBIENT_LIGHT_FRAGMENT_SHADER);
+	light->program0 = nemofx_gllight_create_program(GLLIGHT_LIGHT_VERTEX_SHADER, GLLIGHT_AMBIENT_LIGHT_FRAGMENT_SHADER);
 	if (light->program0 == 0)
 		goto err1;
-	light->program1 = gllight_create_program(GLLIGHT_LIGHT_VERTEX_SHADER, GLLIGHT_POINT_LIGHT_FRAGMENT_SHADER);
+	light->program1 = nemofx_gllight_create_program(GLLIGHT_LIGHT_VERTEX_SHADER, GLLIGHT_POINT_LIGHT_FRAGMENT_SHADER);
 	if (light->program1 == 0)
 		goto err2;
 
@@ -143,7 +143,7 @@ err1:
 	return NULL;
 }
 
-void gllight_destroy(struct gllight *light)
+void nemofx_gllight_destroy(struct gllight *light)
 {
 	glDeleteTextures(1, &light->texture);
 
@@ -156,38 +156,38 @@ void gllight_destroy(struct gllight *light)
 	free(light);
 }
 
-void gllight_set_ambientlight_color(struct gllight *light, float r, float g, float b)
+void nemofx_gllight_set_ambientlight_color(struct gllight *light, float r, float g, float b)
 {
 	light->ambientlight.color[0] = r;
 	light->ambientlight.color[1] = g;
 	light->ambientlight.color[2] = b;
 }
 
-void gllight_set_pointlight_position(struct gllight *light, int index, float x, float y)
+void nemofx_gllight_set_pointlight_position(struct gllight *light, int index, float x, float y)
 {
 	light->pointlights[index].position[0] = x * 2.0f - 1.0f;
 	light->pointlights[index].position[1] = y * 2.0f - 1.0f;
 	light->pointlights[index].position[2] = 0.0f;
 }
 
-void gllight_set_pointlight_color(struct gllight *light, int index, float r, float g, float b)
+void nemofx_gllight_set_pointlight_color(struct gllight *light, int index, float r, float g, float b)
 {
 	light->pointlights[index].color[0] = r;
 	light->pointlights[index].color[1] = g;
 	light->pointlights[index].color[2] = b;
 }
 
-void gllight_set_pointlight_size(struct gllight *light, int index, float size)
+void nemofx_gllight_set_pointlight_size(struct gllight *light, int index, float size)
 {
 	light->pointlights[index].size = size;
 }
 
-void gllight_set_pointlight_scope(struct gllight *light, int index, float scope)
+void nemofx_gllight_set_pointlight_scope(struct gllight *light, int index, float scope)
 {
 	light->pointlights[index].scope = scope;
 }
 
-void gllight_clear_pointlights(struct gllight *light)
+void nemofx_gllight_clear_pointlights(struct gllight *light)
 {
 	int i;
 
@@ -196,7 +196,7 @@ void gllight_clear_pointlights(struct gllight *light)
 	}
 }
 
-void gllight_resize(struct gllight *light, int32_t width, int32_t height)
+void nemofx_gllight_resize(struct gllight *light, int32_t width, int32_t height)
 {
 	if (light->width != width || light->height != height) {
 		glBindTexture(GL_TEXTURE_2D, light->texture);
@@ -213,7 +213,7 @@ void gllight_resize(struct gllight *light, int32_t width, int32_t height)
 	}
 }
 
-void gllight_dispatch(struct gllight *light, GLuint texture)
+void nemofx_gllight_dispatch(struct gllight *light, GLuint texture)
 {
 	static GLfloat vertices[] = {
 		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,

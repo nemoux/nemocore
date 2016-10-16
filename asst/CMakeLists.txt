@@ -8,11 +8,6 @@ set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 
 set(NEMOASST_EGL_SOURCES
 	${CMAKE_SOURCE_DIR}/misc/glhelper.c
-	${CMAKE_SOURCE_DIR}/misc/glfilter.c
-	${CMAKE_SOURCE_DIR}/misc/glblur.c
-	${CMAKE_SOURCE_DIR}/misc/glripple.c
-	${CMAKE_SOURCE_DIR}/misc/gllight.c
-	${CMAKE_SOURCE_DIR}/misc/glshadow.c
 	${CMAKE_SOURCE_DIR}/misc/fbohelper.c
 	)
 

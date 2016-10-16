@@ -51,7 +51,7 @@ static void nemoglfx_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 	if (context->ripple != NULL) {
 		if (nemoshow_event_is_touch_down(show, event)) {
-			glripple_shoot(context->ripple,
+			nemofx_glripple_shoot(context->ripple,
 					nemoshow_event_get_x(event) / context->width,
 					nemoshow_event_get_y(event) / context->height,
 					context->ripplestep);
@@ -65,14 +65,14 @@ static void nemoglfx_dispatch_canvas_event(struct nemoshow *show, struct showone
 			int tapcount = nemoshow_event_get_tapcount(event);
 			int i;
 
-			gllight_clear_pointlights(context->light);
+			nemofx_gllight_clear_pointlights(context->light);
 
 			for (i = 0; i < tapcount; i++) {
-				gllight_set_pointlight_position(context->light, i,
+				nemofx_gllight_set_pointlight_position(context->light, i,
 						nemoshow_event_get_x_on(event, i) / context->width,
 						nemoshow_event_get_y_on(event, i) / context->height);
-				gllight_set_pointlight_scope(context->light, i, context->lightscope);
-				gllight_set_pointlight_size(context->light, i, context->lightscope / 8.0f);
+				nemofx_gllight_set_pointlight_scope(context->light, i, context->lightscope);
+				nemofx_gllight_set_pointlight_size(context->light, i, context->lightscope / 8.0f);
 			}
 		}
 	}
@@ -84,13 +84,13 @@ static void nemoglfx_dispatch_canvas_event(struct nemoshow *show, struct showone
 			int tapcount = nemoshow_event_get_tapcount(event);
 			int i;
 
-			glshadow_clear_pointlights(context->shadow);
+			nemofx_glshadow_clear_pointlights(context->shadow);
 
 			for (i = 0; i < tapcount; i++) {
-				glshadow_set_pointlight_position(context->shadow, i,
+				nemofx_glshadow_set_pointlight_position(context->shadow, i,
 						nemoshow_event_get_x_on(event, i) / context->width,
 						nemoshow_event_get_y_on(event, i) / context->height);
-				glshadow_set_pointlight_size(context->shadow, i, context->shadowscope / 8.0f);
+				nemofx_glshadow_set_pointlight_size(context->shadow, i, context->shadowscope / 8.0f);
 			}
 		}
 	}
@@ -113,11 +113,11 @@ static void nemoglfx_dispatch_show_resize(struct nemoshow *show, int32_t width, 
 	nemoshow_view_resize(context->show, width, height);
 
 	if (context->filter != NULL)
-		glfilter_resize(context->filter, width, height);
+		nemofx_glfilter_resize(context->filter, width, height);
 	if (context->blur != NULL)
-		glblur_resize(context->blur, width, height);
+		nemofx_glblur_resize(context->blur, width, height);
 	if (context->ripple != NULL)
-		glripple_resize(context->ripple, width, height);
+		nemofx_glripple_resize(context->ripple, width, height);
 
 	nemoshow_view_redraw(context->show);
 }
@@ -128,34 +128,34 @@ static GLuint nemoglfx_dispatch_tale_effect(struct talenode *node, void *data)
 	GLuint texture = nemotale_node_get_texture(node);
 
 	if (context->filter != NULL) {
-		glfilter_dispatch(context->filter, texture);
+		nemofx_glfilter_dispatch(context->filter, texture);
 
-		texture = glfilter_get_texture(context->filter);
+		texture = nemofx_glfilter_get_texture(context->filter);
 	}
 
 	if (context->blur != NULL) {
-		glblur_dispatch(context->blur, texture);
+		nemofx_glblur_dispatch(context->blur, texture);
 
-		texture = glblur_get_texture(context->blur);
+		texture = nemofx_glblur_get_texture(context->blur);
 	}
 
 	if (context->light != NULL) {
-		gllight_dispatch(context->light, texture);
+		nemofx_gllight_dispatch(context->light, texture);
 
-		texture = gllight_get_texture(context->light);
+		texture = nemofx_gllight_get_texture(context->light);
 	}
 
 	if (context->shadow != NULL) {
-		glshadow_dispatch(context->shadow, texture);
+		nemofx_glshadow_dispatch(context->shadow, texture);
 
-		texture = glshadow_get_texture(context->shadow);
+		texture = nemofx_glshadow_get_texture(context->shadow);
 	}
 
 	if (context->ripple != NULL) {
-		glripple_update(context->ripple);
-		glripple_dispatch(context->ripple, texture);
+		nemofx_glripple_update(context->ripple);
+		nemofx_glripple_dispatch(context->ripple, texture);
 
-		texture = glripple_get_texture(context->ripple);
+		texture = nemofx_glripple_get_texture(context->ripple);
 	}
 
 	return texture;
@@ -316,38 +316,38 @@ int main(int argc, char *argv[])
 	nemotale_node_set_dispatch_effect(node, nemoglfx_dispatch_tale_effect, context);
 
 	if (programpath != NULL) {
-		context->filter = glfilter_create(width, height, programpath);
+		context->filter = nemofx_glfilter_create(width, height, programpath);
 	}
 
 	if (blur > 0) {
-		context->blur = glblur_create(width, height);
-		glblur_set_radius(context->blur, blur, blur);
+		context->blur = nemofx_glblur_create(width, height);
+		nemofx_glblur_set_radius(context->blur, blur, blur);
 	}
 
 	if (ripplestep > 0) {
-		context->ripple = glripple_create(width, height);
-		glripple_use_vectors(context->ripple, NULL, 32, 32, 400, 400);
-		glripple_use_amplitudes(context->ripple, NULL, 2048, 18, 0.125f);
-		glripple_layout(context->ripple, 32, 32, 2048);
+		context->ripple = nemofx_glripple_create(width, height);
+		nemofx_glripple_use_vectors(context->ripple, NULL, 32, 32, 400, 400);
+		nemofx_glripple_use_amplitudes(context->ripple, NULL, 2048, 18, 0.125f);
+		nemofx_glripple_layout(context->ripple, 32, 32, 2048);
 	}
 
 	if (lightscope > 0.0f) {
-		context->light = gllight_create(width, height);
-		gllight_set_ambientlight_color(context->light, 0.0f, 0.0f, 0.0f);
-		gllight_set_pointlight_color(context->light, 0, random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f));
-		gllight_set_pointlight_color(context->light, 1, random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f));
-		gllight_set_pointlight_color(context->light, 2, random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f));
-		gllight_set_pointlight_color(context->light, 3, random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f));
-		gllight_set_pointlight_color(context->light, 4, random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f));
+		context->light = nemofx_gllight_create(width, height);
+		nemofx_gllight_set_ambientlight_color(context->light, 0.0f, 0.0f, 0.0f);
+		nemofx_gllight_set_pointlight_color(context->light, 0, random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f));
+		nemofx_gllight_set_pointlight_color(context->light, 1, random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f));
+		nemofx_gllight_set_pointlight_color(context->light, 2, random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f));
+		nemofx_gllight_set_pointlight_color(context->light, 3, random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f));
+		nemofx_gllight_set_pointlight_color(context->light, 4, random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f));
 	}
 
 	if (shadowscope > 0.0f) {
-		context->shadow = glshadow_create(width, height, context->shadowscope);
-		glshadow_set_pointlight_color(context->shadow, 0, random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f));
-		glshadow_set_pointlight_color(context->shadow, 1, random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f));
-		glshadow_set_pointlight_color(context->shadow, 2, random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f));
-		glshadow_set_pointlight_color(context->shadow, 3, random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f));
-		glshadow_set_pointlight_color(context->shadow, 4, random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f));
+		context->shadow = nemofx_glshadow_create(width, height, context->shadowscope);
+		nemofx_glshadow_set_pointlight_color(context->shadow, 0, random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f));
+		nemofx_glshadow_set_pointlight_color(context->shadow, 1, random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f));
+		nemofx_glshadow_set_pointlight_color(context->shadow, 2, random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f));
+		nemofx_glshadow_set_pointlight_color(context->shadow, 3, random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f));
+		nemofx_glshadow_set_pointlight_color(context->shadow, 4, random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f));
 	}
 
 	trans = nemoshow_transition_create(NEMOSHOW_LINEAR_EASE, 18000, 0);
@@ -360,15 +360,15 @@ int main(int argc, char *argv[])
 	nemotool_run(tool);
 
 	if (context->filter != NULL)
-		glfilter_destroy(context->filter);
+		nemofx_glfilter_destroy(context->filter);
 	if (context->blur != NULL)
-		glblur_destroy(context->blur);
+		nemofx_glblur_destroy(context->blur);
 	if (context->ripple != NULL)
-		glripple_destroy(context->ripple);
+		nemofx_glripple_destroy(context->ripple);
 	if (context->light != NULL)
-		gllight_destroy(context->light);
+		nemofx_gllight_destroy(context->light);
 	if (context->shadow != NULL)
-		glshadow_destroy(context->shadow);
+		nemofx_glshadow_destroy(context->shadow);
 
 	nemoshow_destroy_view(show);
 

@@ -128,7 +128,7 @@ static const char GLSHADOW_RENDER_FRAGMENT_SHADER[] =
 "  gl_FragColor = vec4(lcolor * lit, lit);\n"
 "}\n";
 
-static GLuint glshadow_create_program(const char *vshader, const char *fshader)
+static GLuint nemofx_glshadow_create_program(const char *vshader, const char *fshader)
 {
 	GLuint frag, vert;
 	GLuint program;
@@ -160,7 +160,7 @@ static GLuint glshadow_create_program(const char *vshader, const char *fshader)
 	return program;
 }
 
-struct glshadow *glshadow_create(int32_t width, int32_t height, int32_t lightscope)
+struct glshadow *nemofx_glshadow_create(int32_t width, int32_t height, int32_t lightscope)
 {
 	struct glshadow *shadow;
 
@@ -196,16 +196,16 @@ struct glshadow *glshadow_create(int32_t width, int32_t height, int32_t lightsco
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, GLSHADOW_MAP_SIZE, 1, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	shadow->program0 = glshadow_create_program(GLSHADOW_COVER_VERTEX_SHADER, GLSHADOW_COVER_FRAGMENT_SHADER);
+	shadow->program0 = nemofx_glshadow_create_program(GLSHADOW_COVER_VERTEX_SHADER, GLSHADOW_COVER_FRAGMENT_SHADER);
 	if (shadow->program0 == 0)
 		goto err1;
-	shadow->program1 = glshadow_create_program(GLSHADOW_OCCLUDE_VERTEX_SHADER, GLSHADOW_OCCLUDE_FRAGMENT_SHADER);
+	shadow->program1 = nemofx_glshadow_create_program(GLSHADOW_OCCLUDE_VERTEX_SHADER, GLSHADOW_OCCLUDE_FRAGMENT_SHADER);
 	if (shadow->program1 == 0)
 		goto err2;
-	shadow->program2 = glshadow_create_program(GLSHADOW_MAP_VERTEX_SHADER, GLSHADOW_MAP_FRAGMENT_SHADER);
+	shadow->program2 = nemofx_glshadow_create_program(GLSHADOW_MAP_VERTEX_SHADER, GLSHADOW_MAP_FRAGMENT_SHADER);
 	if (shadow->program2 == 0)
 		goto err3;
-	shadow->program3 = glshadow_create_program(GLSHADOW_RENDER_VERTEX_SHADER, GLSHADOW_RENDER_FRAGMENT_SHADER);
+	shadow->program3 = nemofx_glshadow_create_program(GLSHADOW_RENDER_VERTEX_SHADER, GLSHADOW_RENDER_FRAGMENT_SHADER);
 	if (shadow->program3 == 0)
 		goto err4;
 
@@ -253,7 +253,7 @@ err1:
 	return NULL;
 }
 
-void glshadow_destroy(struct glshadow *shadow)
+void nemofx_glshadow_destroy(struct glshadow *shadow)
 {
 	glDeleteTextures(1, &shadow->texture);
 	glDeleteFramebuffers(1, &shadow->fbo);
@@ -275,26 +275,26 @@ void glshadow_destroy(struct glshadow *shadow)
 	free(shadow);
 }
 
-void glshadow_set_pointlight_position(struct glshadow *shadow, int index, float x, float y)
+void nemofx_glshadow_set_pointlight_position(struct glshadow *shadow, int index, float x, float y)
 {
 	shadow->pointlights[index].position[0] = x * 2.0f - 1.0f;
 	shadow->pointlights[index].position[1] = y * 2.0f - 1.0f;
 	shadow->pointlights[index].position[2] = 0.0f;
 }
 
-void glshadow_set_pointlight_color(struct glshadow *shadow, int index, float r, float g, float b)
+void nemofx_glshadow_set_pointlight_color(struct glshadow *shadow, int index, float r, float g, float b)
 {
 	shadow->pointlights[index].color[0] = r;
 	shadow->pointlights[index].color[1] = g;
 	shadow->pointlights[index].color[2] = b;
 }
 
-void glshadow_set_pointlight_size(struct glshadow *shadow, int index, float size)
+void nemofx_glshadow_set_pointlight_size(struct glshadow *shadow, int index, float size)
 {
 	shadow->pointlights[index].size = size;
 }
 
-void glshadow_clear_pointlights(struct glshadow *shadow)
+void nemofx_glshadow_clear_pointlights(struct glshadow *shadow)
 {
 	int i;
 
@@ -303,7 +303,7 @@ void glshadow_clear_pointlights(struct glshadow *shadow)
 	}
 }
 
-void glshadow_resize(struct glshadow *shadow, int32_t width, int32_t height)
+void nemofx_glshadow_resize(struct glshadow *shadow, int32_t width, int32_t height)
 {
 	if (shadow->width != width || shadow->height != height) {
 		glBindTexture(GL_TEXTURE_2D, shadow->texture);
@@ -320,7 +320,7 @@ void glshadow_resize(struct glshadow *shadow, int32_t width, int32_t height)
 	}
 }
 
-void glshadow_dispatch(struct glshadow *shadow, GLuint texture)
+void nemofx_glshadow_dispatch(struct glshadow *shadow, GLuint texture)
 {
 	static GLfloat vertices[] = {
 		-1.0f, -1.0f, 0.0f, 0.0f,

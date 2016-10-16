@@ -12,7 +12,7 @@
 #include <fbohelper.h>
 #include <nemomisc.h>
 
-static GLuint glripple_create_program(void)
+static GLuint nemofx_glripple_create_program(void)
 {
 	static const char GLRIPPLE_SIMPLE_VERTEX_SHADER[] =
 		"attribute vec3 position;\n"
@@ -64,7 +64,7 @@ static GLuint glripple_create_program(void)
 	return program;
 }
 
-struct glripple *glripple_create(int32_t width, int32_t height)
+struct glripple *nemofx_glripple_create(int32_t width, int32_t height)
 {
 	struct glripple *ripple;
 
@@ -73,7 +73,7 @@ struct glripple *glripple_create(int32_t width, int32_t height)
 		return NULL;
 	memset(ripple, 0, sizeof(struct glripple));
 
-	ripple->program = glripple_create_program();
+	ripple->program = nemofx_glripple_create_program();
 	if (ripple->program == 0)
 		goto err1;
 
@@ -108,7 +108,7 @@ err1:
 	return NULL;
 }
 
-void glripple_destroy(struct glripple *ripple)
+void nemofx_glripple_destroy(struct glripple *ripple)
 {
 	nemolist_remove(&ripple->list);
 
@@ -141,14 +141,14 @@ void glripple_destroy(struct glripple *ripple)
 	free(ripple);
 }
 
-void glripple_use_vectors(struct glripple *ripple, float *vectors, int rows, int columns, int width, int height)
+void nemofx_glripple_use_vectors(struct glripple *ripple, float *vectors, int rows, int columns, int width, int height)
 {
 	if (vectors != NULL) {
 		ripple->vectors = vectors;
 	} else {
 		ripple->vectors = ripple->vectors_ = (float *)malloc(sizeof(float[3]) * rows * columns);
 
-		glripple_build_vectors(ripple->vectors, rows, columns, width, height);
+		nemofx_glripple_build_vectors(ripple->vectors, rows, columns, width, height);
 	}
 
 	ripple->rows = rows;
@@ -156,20 +156,20 @@ void glripple_use_vectors(struct glripple *ripple, float *vectors, int rows, int
 	ripple->elements = rows * (columns + 1) * 2;
 }
 
-void glripple_use_amplitudes(struct glripple *ripple, float *amplitudes, int length, int cycles, float amplitude)
+void nemofx_glripple_use_amplitudes(struct glripple *ripple, float *amplitudes, int length, int cycles, float amplitude)
 {
 	if (amplitudes != NULL) {
 		ripple->amplitudes = amplitudes;
 	} else {
 		ripple->amplitudes = ripple->amplitudes_ = (float *)malloc(sizeof(float) * length);
 
-		glripple_build_amplitudes(ripple->amplitudes, length, cycles, amplitude);
+		nemofx_glripple_build_amplitudes(ripple->amplitudes, length, cycles, amplitude);
 	}
 
 	ripple->length = length;
 }
 
-void glripple_layout(struct glripple *ripple, int32_t rows, int32_t columns, int32_t length)
+void nemofx_glripple_layout(struct glripple *ripple, int32_t rows, int32_t columns, int32_t length)
 {
 	GLfloat *vertices;
 	GLfloat *vertices0;
@@ -233,7 +233,7 @@ void glripple_layout(struct glripple *ripple, int32_t rows, int32_t columns, int
 	ripple->indices = indices;
 }
 
-void glripple_resize(struct glripple *ripple, int32_t width, int32_t height)
+void nemofx_glripple_resize(struct glripple *ripple, int32_t width, int32_t height)
 {
 	if (ripple->width != width || ripple->height != height) {
 		glBindTexture(GL_TEXTURE_2D, ripple->texture);
@@ -250,7 +250,7 @@ void glripple_resize(struct glripple *ripple, int32_t width, int32_t height)
 	}
 }
 
-void glripple_update(struct glripple *ripple)
+void nemofx_glripple_update(struct glripple *ripple)
 {
 	struct rippleone *one, *next;
 	int offset;
@@ -305,7 +305,7 @@ void glripple_update(struct glripple *ripple)
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void glripple_dispatch(struct glripple *ripple, GLuint texture)
+void nemofx_glripple_dispatch(struct glripple *ripple, GLuint texture)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, ripple->fbo);
 
@@ -341,7 +341,7 @@ void glripple_dispatch(struct glripple *ripple, GLuint texture)
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void glripple_shoot(struct glripple *ripple, float x, float y, int step)
+void nemofx_glripple_shoot(struct glripple *ripple, float x, float y, int step)
 {
 	struct rippleone *one;
 
@@ -355,7 +355,7 @@ void glripple_shoot(struct glripple *ripple, float x, float y, int step)
 	nemolist_insert(&ripple->list, &one->link);
 }
 
-void glripple_build_vectors(float *vectors, int rows, int columns, int width, int height)
+void nemofx_glripple_build_vectors(float *vectors, int rows, int columns, int width, int height)
 {
 	float x, y, l;
 	int i, j;
@@ -382,7 +382,7 @@ void glripple_build_vectors(float *vectors, int rows, int columns, int width, in
 	}
 }
 
-void glripple_build_amplitudes(float *amplitudes, int length, int cycles, float amplitude)
+void nemofx_glripple_build_amplitudes(float *amplitudes, int length, int cycles, float amplitude)
 {
 	double t, a;
 	int i;
