@@ -1,12 +1,13 @@
 FIND_PACKAGE(PkgConfig REQUIRED)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -std=c++11")
 set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 
 include_directories(
 	${CMAKE_SOURCE_DIR}/misc
 	${CMAKE_SOURCE_DIR}/asst
+	${CMAKE_SOURCE_DIR}/thirds
 	)
 
 add_library(nemofx SHARED
@@ -15,6 +16,8 @@ add_library(nemofx SHARED
 	glblur.c
 	gllight.c
 	glshadow.c
+	fxnoise.cpp
+	${CMAKE_SOURCE_DIR}/thirds/fastnoise.cpp
 	)
 
 TARGET_LINK_LIBRARIES(nemofx
@@ -29,6 +32,7 @@ set(HEADER_FILES
 	glblur.h
 	gllight.h
 	glshadow.h
+	fxnoise.h
 	)
 
 set(NEMOPLAY_PKGCONFIG_REQUIRES "nemoasst")

@@ -17,6 +17,7 @@
 #include <glripple.h>
 #include <gllight.h>
 #include <glshadow.h>
+#include <fxnoise.h>
 #include <nemohelper.h>
 #include <nemolog.h>
 #include <nemomisc.h>
@@ -34,6 +35,7 @@ struct glfxcontext {
 	struct glripple *ripple;
 	struct gllight *light;
 	struct glshadow *shadow;
+	struct fxnoise *noise;
 
 	float width, height;
 
@@ -112,10 +114,19 @@ static void nemoglfx_dispatch_show_resize(struct nemoshow *show, int32_t width, 
 
 	nemoshow_view_resize(context->show, width, height);
 
+	if (context->noise != NULL) {
+		nemofx_noise_dispatch(context->noise, nemoshow_canvas_map(context->back), width, height);
+		nemoshow_canvas_unmap(context->back);
+	}
+
 	if (context->filter != NULL)
 		nemofx_glfilter_resize(context->filter, width, height);
 	if (context->blur != NULL)
 		nemofx_glblur_resize(context->blur, width, height);
+	if (context->light != NULL)
+		nemofx_gllight_resize(context->light, width, height);
+	if (context->shadow != NULL)
+		nemofx_glshadow_resize(context->shadow, width, height);
 	if (context->ripple != NULL)
 		nemofx_glripple_resize(context->ripple, width, height);
 
@@ -170,6 +181,7 @@ int main(int argc, char *argv[])
 		{ "blur",						required_argument,			NULL,			'b' },
 		{ "light",					required_argument,			NULL,			'l' },
 		{ "shadow",					required_argument,			NULL,			's' },
+		{ "noise",					required_argument,			NULL,			'n' },
 		{ 0 }
 	};
 
@@ -183,6 +195,7 @@ int main(int argc, char *argv[])
 	struct talenode *node;
 	char *programpath = NULL;
 	char *imagepath = NULL;
+	char *noisetype = NULL;
 	float lightscope = 0.0f;
 	float shadowscope = 0.0f;
 	int width = 800;
@@ -193,7 +206,7 @@ int main(int argc, char *argv[])
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "p:i:r:b:l:s:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "p:i:r:b:l:s:n:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -220,6 +233,10 @@ int main(int argc, char *argv[])
 
 			case 's':
 				shadowscope = strtod(optarg, NULL);
+				break;
+
+			case 'n':
+				noisetype = strdup(optarg);
 				break;
 
 			default:
@@ -259,8 +276,7 @@ int main(int argc, char *argv[])
 	context->back = canvas = nemoshow_canvas_create();
 	nemoshow_canvas_set_width(canvas, width);
 	nemoshow_canvas_set_height(canvas, height);
-	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_BACK_TYPE);
-	nemoshow_canvas_set_fill_color(canvas, 0.0f, 0.0f, 0.0f, 1.0f);
+	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_PIXMAN_TYPE);
 	nemoshow_one_attach(scene, canvas);
 
 	context->canvas = canvas = nemoshow_canvas_create();
@@ -319,6 +335,13 @@ int main(int argc, char *argv[])
 		context->filter = nemofx_glfilter_create(width, height, programpath);
 	}
 
+	if (noisetype != NULL) {
+		context->noise = nemofx_noise_create();
+		nemofx_noise_set_type(context->noise, noisetype);
+		nemofx_noise_dispatch(context->noise, nemoshow_canvas_map(context->back), width, height);
+		nemoshow_canvas_unmap(context->back);
+	}
+
 	if (blur > 0) {
 		context->blur = nemofx_glblur_create(width, height);
 		nemofx_glblur_set_radius(context->blur, blur, blur);
@@ -369,6 +392,8 @@ int main(int argc, char *argv[])
 		nemofx_gllight_destroy(context->light);
 	if (context->shadow != NULL)
 		nemofx_glshadow_destroy(context->shadow);
+	if (context->noise != NULL)
+		nemofx_noise_destroy(context->noise);
 
 	nemoshow_destroy_view(show);
 
