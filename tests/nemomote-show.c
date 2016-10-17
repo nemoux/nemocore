@@ -55,6 +55,7 @@ struct motecontext {
 	int ntaps;
 };
 
+#ifdef NEMOUX_WITH_OPENGL_CS
 static void nemomote_dispatch_canvas_redraw_cs(struct nemoshow *show, struct showone *canvas)
 {
 	static const char *vertexshader =
@@ -185,6 +186,7 @@ static void nemomote_dispatch_canvas_redraw_cs(struct nemoshow *show, struct sho
 	nemoshow_one_dirty(canvas, NEMOSHOW_REDRAW_DIRTY);
 	nemoshow_dispatch_feedback(show);
 }
+#endif
 
 #ifdef NEMOUX_WITH_OPENCL
 static void nemomote_dispatch_canvas_redraw_cl(struct nemoshow *show, struct showone *canvas)
@@ -462,7 +464,7 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_smooth(canvas, 0);
 #ifdef NEMOUX_WITH_OPENCL
 	nemoshow_canvas_set_dispatch_redraw(canvas, nemomote_dispatch_canvas_redraw_cl);
-#else
+#elif NEMOUX_WITH_OPENGL_CS
 	nemoshow_canvas_set_dispatch_redraw(canvas, nemomote_dispatch_canvas_redraw_cs);
 #endif
 	nemoshow_canvas_set_dispatch_event(canvas, nemomote_dispatch_canvas_event);
