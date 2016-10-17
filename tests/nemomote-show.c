@@ -31,6 +31,7 @@ struct motecontext {
 	struct showone *back;
 
 	struct showone *view;
+	struct showone *sprite;
 
 #ifdef NEMOUX_WITH_OPENCL
 	cl_device_id device;
@@ -55,16 +56,98 @@ struct motecontext {
 	int ntaps;
 };
 
+static void nemomote_dispatch_canvas_redraw(struct nemoshow *show, struct showone *canvas)
+{
+	static const char *vertexshader =
+		"attribute vec3 position;\n"
+		"void main()\n"
+		"{\n"
+		"  gl_Position = vec4(position.xy, 0.0, 1.0);\n"
+		"  gl_PointSize = position.z;\n"
+		"}\n";
+
+	static const char *fragmentshader =
+		"precision mediump float;\n"
+		"uniform sampler2D tex;\n"
+		"void main()\n"
+		"{\n"
+		"  gl_FragColor = texture2D(tex, gl_PointCoord);\n"
+		"}\n";
+
+	struct motecontext *context = (struct motecontext *)nemoshow_get_userdata(show);
+	GLuint width = nemoshow_canvas_get_viewport_width(canvas);
+	GLuint height = nemoshow_canvas_get_viewport_height(canvas);
+	GLuint fbo, dbo;
+	GLuint program;
+	GLuint frag, vert;
+	GLfloat vertices[128 * 3];
+	int i;
+
+	for (i = 0; i < 128; i++) {
+		vertices[i * 3 + 0] = random_get_double(-1.0f, 1.0f);
+		vertices[i * 3 + 1] = random_get_double(-1.0f, 1.0f);
+		vertices[i * 3 + 2] = random_get_double(32.0f, 64.0f);
+	}
+
+	fbo_prepare_context(
+			nemoshow_canvas_get_texture(canvas),
+			width, height,
+			&fbo, &dbo);
+
+	NEMO_CHECK((frag = glshader_compile(GL_FRAGMENT_SHADER, 1, &fragmentshader)) == GL_NONE, "failed to compile shader\n");
+	NEMO_CHECK((vert = glshader_compile(GL_VERTEX_SHADER, 1, &vertexshader)) == GL_NONE, "failed to compile shader\n");
+
+	program = glCreateProgram();
+	glAttachShader(program, frag);
+	glAttachShader(program, vert);
+	glLinkProgram(program);
+	glUseProgram(program);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE);
+
+	glViewport(0, 0, width, height);
+
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearDepth(0.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glUniform1i(glGetUniformLocation(program, "tex"), 0);
+
+	glBindAttribLocation(program, 0, "position");
+
+	glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_texture(context->sprite));
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &vertices[0]);
+	glEnableVertexAttribArray(0);
+
+	glDrawArrays(GL_POINTS, 0, 128);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glDeleteProgram(program);
+
+	glDeleteFramebuffers(1, &fbo);
+	glDeleteRenderbuffers(1, &dbo);
+
+	nemoshow_one_dirty(canvas, NEMOSHOW_REDRAW_DIRTY);
+	nemoshow_dispatch_feedback(show);
+}
+
 #ifdef NEMOUX_WITH_OPENGL_CS
 static void nemomote_dispatch_canvas_redraw_cs(struct nemoshow *show, struct showone *canvas)
 {
 	static const char *vertexshader =
-		"attribute vec2 positions;\n"
+		"attribute vec2 position;\n"
 		"attribute vec2 texcoord;\n"
 		"varying vec2 vtexcoord;\n"
 		"void main()\n"
 		"{\n"
-		"  gl_Position = vec4(positions, 0.0, 1.0);\n"
+		"  gl_Position = vec4(position, 0.0, 1.0);\n"
 		"  vtexcoord = texcoord;\n"
 		"}\n";
 
@@ -163,7 +246,7 @@ static void nemomote_dispatch_canvas_redraw_cs(struct nemoshow *show, struct sho
 
 	glBindTexture(GL_TEXTURE_2D, texture);
 
-	glBindAttribLocation(program, 0, "positions");
+	glBindAttribLocation(program, 0, "position");
 	glBindAttribLocation(program, 1, "texcoord");
 
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &vertices[0]);
@@ -401,6 +484,7 @@ int main(int argc, char *argv[])
 	struct showone *scene;
 	struct showone *canvas;
 	struct showone *one;
+	struct showone *blur;
 	char *programpath = NULL;
 	int width = 800;
 	int height = 800;
@@ -466,9 +550,28 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_dispatch_redraw(canvas, nemomote_dispatch_canvas_redraw_cl);
 #elif NEMOUX_WITH_OPENGL_CS
 	nemoshow_canvas_set_dispatch_redraw(canvas, nemomote_dispatch_canvas_redraw_cs);
+#else
+	nemoshow_canvas_set_dispatch_redraw(canvas, nemomote_dispatch_canvas_redraw);
 #endif
 	nemoshow_canvas_set_dispatch_event(canvas, nemomote_dispatch_canvas_event);
 	nemoshow_one_attach(scene, canvas);
+
+	context->sprite = canvas = nemoshow_canvas_create();
+	nemoshow_canvas_set_width(canvas, 64);
+	nemoshow_canvas_set_height(canvas, 64);
+	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
+	nemoshow_attach_one(show, canvas);
+
+	blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
+	nemoshow_filter_set_blur(blur, "solid", 8.0f);
+
+	one = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
+	nemoshow_one_attach(canvas, one);
+	nemoshow_item_set_cx(one, 64.0f / 2.0f);
+	nemoshow_item_set_cy(one, 64.0f / 2.0f);
+	nemoshow_item_set_r(one, 64.0f / 3.0f);
+	nemoshow_item_set_fill_color(one, 255.0f, 255.0f, 255.0f, 255.0f);
+	nemoshow_item_set_filter(one, blur);
 
 #ifdef NEMOUX_WITH_OPENCL
 	nemomote_prepare_opencl(context, programpath, width, height);
