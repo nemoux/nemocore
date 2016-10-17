@@ -30,7 +30,7 @@ struct motecontext {
 	struct showone *scene;
 	struct showone *back;
 
-	struct showone *view;
+	struct showone *canvas;
 	struct showone *sprite;
 
 #ifdef NEMOUX_WITH_OPENCL
@@ -107,6 +107,8 @@ static void nemomote_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE);
+	glEnable(GL_POINT_SMOOTH);
+	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
 
 	glViewport(0, 0, width, height);
 
@@ -133,9 +135,6 @@ static void nemomote_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 
 	glDeleteFramebuffers(1, &fbo);
 	glDeleteRenderbuffers(1, &dbo);
-
-	nemoshow_one_dirty(canvas, NEMOSHOW_REDRAW_DIRTY);
-	nemoshow_dispatch_feedback(show);
 }
 
 #ifdef NEMOUX_WITH_OPENGL_CS
@@ -265,9 +264,6 @@ static void nemomote_dispatch_canvas_redraw_cs(struct nemoshow *show, struct sho
 	glDeleteTextures(1, &texture);
 	glDeleteFramebuffers(1, &fbo);
 	glDeleteRenderbuffers(1, &dbo);
-
-	nemoshow_one_dirty(canvas, NEMOSHOW_REDRAW_DIRTY);
-	nemoshow_dispatch_feedback(show);
 }
 #endif
 
@@ -347,9 +343,6 @@ static void nemomote_dispatch_canvas_redraw_cl(struct nemoshow *show, struct sho
 	glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, width);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, buffer);
 	glBindTexture(GL_TEXTURE_2D, 0);
-
-	nemoshow_one_dirty(canvas, NEMOSHOW_REDRAW_DIRTY);
-	nemoshow_dispatch_feedback(show);
 
 	context->msecs = msecs;
 }
@@ -485,6 +478,7 @@ int main(int argc, char *argv[])
 	struct showone *canvas;
 	struct showone *one;
 	struct showone *blur;
+	struct showtransition *trans;
 	char *programpath = NULL;
 	int width = 800;
 	int height = 800;
@@ -541,7 +535,7 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_fill_color(canvas, 1.0f, 1.0f, 1.0f, 1.0f);
 	nemoshow_one_attach(scene, canvas);
 
-	context->view = canvas = nemoshow_canvas_create();
+	context->canvas = canvas = nemoshow_canvas_create();
 	nemoshow_canvas_set_width(canvas, width);
 	nemoshow_canvas_set_height(canvas, height);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_OPENGL_TYPE);
@@ -576,6 +570,11 @@ int main(int argc, char *argv[])
 #ifdef NEMOUX_WITH_OPENCL
 	nemomote_prepare_opencl(context, programpath, width, height);
 #endif
+
+	trans = nemoshow_transition_create(NEMOSHOW_LINEAR_EASE, 18000, 0);
+	nemoshow_transition_dirty_one(trans, context->canvas, NEMOSHOW_REDRAW_DIRTY);
+	nemoshow_transition_set_repeat(trans, 0);
+	nemoshow_attach_transition(show, trans);
 
 	nemoshow_dispatch_frame(show);
 
