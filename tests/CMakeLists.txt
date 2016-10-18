@@ -95,6 +95,15 @@ if(WITH_BULLET)
 		)
 endif(WITH_BULLET)
 
+add_executable(nemofluid-show
+	nemofluid-show.cpp
+	)
+
+TARGET_LINK_LIBRARIES(nemofluid-show
+	nemoapps
+	nemofx
+	)
+
 add_executable(nemofx-show
 	nemofx-show.c
 	)

@@ -17,6 +17,7 @@ add_library(nemofx SHARED
 	gllight.c
 	glshadow.c
 	fxnoise.cpp
+	fxsph.c
 	${CMAKE_SOURCE_DIR}/thirds/fastnoise.cpp
 	)
 
@@ -33,6 +34,7 @@ set(HEADER_FILES
 	gllight.h
 	glshadow.h
 	fxnoise.h
+	fxsph.h
 	)
 
 set(NEMOPLAY_PKGCONFIG_REQUIRES "nemoasst")

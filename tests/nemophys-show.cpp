@@ -130,8 +130,6 @@ static void nemophys_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 	}
 
 	nemoshow_canvas_unmap(one);
-
-	nemoshow_one_dirty(one, NEMOSHOW_REDRAW_DIRTY);
 }
 
 static int nemophys_dispatch_touch_grab(struct nemoshow *show, struct showgrab *grab, struct showevent *event)
@@ -448,7 +446,7 @@ int main(int argc, char *argv[])
 	nemophys_prepare_wall(context);
 
 	trans = nemoshow_transition_create(NEMOSHOW_LINEAR_EASE, 18000, 0);
-	nemoshow_transition_dirty_one(trans, context->canvas, NEMOSHOW_FILTER_DIRTY);
+	nemoshow_transition_dirty_one(trans, context->canvas, NEMOSHOW_REDRAW_DIRTY);
 	nemoshow_transition_set_repeat(trans, 0);
 	nemoshow_attach_transition(show, trans);
 
