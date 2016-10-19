@@ -41,7 +41,6 @@
 #include <nemoxml.h>
 #include <nemolog.h>
 #include <nemoitem.h>
-#include <nemobox.h>
 #include <nemomisc.h>
 
 #include <nemoenvs.h>

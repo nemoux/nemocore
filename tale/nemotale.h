@@ -14,7 +14,6 @@ NEMO_BEGIN_EXTERN_C
 #include <nemolist.h>
 #include <nemolistener.h>
 #include <nemomatrix.h>
-#include <nemobox.h>
 
 struct nemotale;
 struct talenode;

@@ -18,6 +18,7 @@
 #include <showshader.hpp>
 #include <nemoshow.h>
 #include <fonthelper.h>
+#include <nemobox.h>
 #include <nemomisc.h>
 
 struct showone *nemoshow_path_create(int type)

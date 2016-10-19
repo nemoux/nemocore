@@ -9,7 +9,6 @@
 
 #include <nemoxml.h>
 #include <oshelper.h>
-#include <nemobox.h>
 #include <nemomisc.h>
 
 struct nemoxml *nemoxml_create(void)
@@ -178,11 +177,14 @@ static void nemoxml_handle_sax_characters(void *data, const char *contents, int 
 		context->node->scontents = length + 1;
 	}
 
-	NEMOBOX_APPEND_STRING(
-			context->node->contents,
-			context->node->scontents,
-			context->node->ncontents,
-			contents, length);
+	if (context->node->ncontents + length + 1 >= context->node->scontents) {
+		context->node->contents = (char *)realloc(context->node->contents, sizeof(char) * (context->node->scontents + length + 1));
+		context->node->scontents = context->node->scontents + length + 1;
+	}
+
+	memcpy(&context->node->contents[context->node->ncontents], contents, length);
+	context->node->contents[context->node->ncontents + length] = '\0';
+	context->node->ncontents += length;
 }
 
 int nemoxml_load_file(struct nemoxml *xml, const char *filepath)
