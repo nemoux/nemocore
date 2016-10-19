@@ -53,12 +53,15 @@ static void nemoshow_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 {
 	struct nemoshow *show = (struct nemoshow *)nemocanvas_get_userdata(canvas);
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
+	int needs_composite = 0;
 
 	nemoshow_enter_canvas_frame(show);
 
 	if (nemoshow_has_transition(show) != 0) {
 		nemoshow_dispatch_transition(show, secs * 1000 + nsecs / 1000000);
 		nemoshow_destroy_transition(show);
+
+		needs_composite = 1;
 	}
 
 	if (nemoshow_update_one(show) != 0) {
@@ -68,6 +71,10 @@ static void nemoshow_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 		nemoshow_divide_one(show);
 		nemoshow_render_one(show);
 
+		needs_composite = 1;
+	}
+
+	if (needs_composite != 0) {
 		nemocanvas_dispatch_feedback(canvas);
 
 		nemotale_composite_egl(scon->tale, NULL);
@@ -318,13 +325,6 @@ void nemoshow_dispatch_resize(struct nemoshow *show, int32_t width, int32_t heig
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 
 	nemocanvas_dispatch_resize(scon->canvas, width, height);
-}
-
-void nemoshow_dispatch_feedback(struct nemoshow *show)
-{
-	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
-
-	nemocanvas_dispatch_feedback(scon->canvas);
 }
 
 void nemoshow_view_set_layer(struct nemoshow *show, const char *layer)

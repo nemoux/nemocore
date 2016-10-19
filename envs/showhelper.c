@@ -123,6 +123,7 @@ static void nemoshow_dispatch_actor_frame(struct nemoactor *actor, uint32_t msec
 	struct nemoshow *show = (struct nemoshow *)nemoactor_get_context(actor);
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemocompz *compz = actor->compz;
+	int needs_composite = 0;
 
 	nemoshow_enter_canvas_frame(show);
 
@@ -131,17 +132,23 @@ static void nemoshow_dispatch_actor_frame(struct nemoactor *actor, uint32_t msec
 	if (nemoshow_has_transition(show) != 0) {
 		nemoshow_dispatch_transition(show, msecs);
 		nemoshow_destroy_transition(show);
+
+		needs_composite = 1;
 	}
 
 	if (nemoshow_update_one(show) != 0) {
-		pixman_region32_t region;
-
-		pixman_region32_init(&region);
-
 		nemoshow_check_frame(show);
 		nemoshow_check_damage(show);
 
 		nemoshow_render_one(show);
+
+		needs_composite = 1;
+	}
+
+	if (needs_composite != 0) {
+		pixman_region32_t region;
+
+		pixman_region32_init(&region);
 
 		nemoactor_dispatch_feedback(actor);
 
@@ -331,13 +338,6 @@ void nemoshow_dispatch_resize(struct nemoshow *show, int32_t width, int32_t heig
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 
 	nemoactor_dispatch_resize(scon->actor, width, height);
-}
-
-void nemoshow_dispatch_feedback(struct nemoshow *show)
-{
-	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
-
-	nemoactor_dispatch_feedback(scon->actor);
 }
 
 void nemoshow_view_set_layer(struct nemoshow *show, const char *layer)
