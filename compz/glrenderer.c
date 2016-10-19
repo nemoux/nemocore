@@ -21,8 +21,8 @@
 #include <view.h>
 #include <drmnode.h>
 #include <content.h>
-#include <cliphelper.h>
 #include <waylandhelper.h>
+#include <nemoclip.h>
 #include <nemomisc.h>
 #include <nemolog.h>
 
@@ -134,8 +134,8 @@ static inline void glrenderer_use_uniforms(struct glshader *shader, struct nemov
 
 static int glrenderer_calculate_edges(struct nemoview *view, pixman_box32_t *rect, pixman_box32_t *rrect, GLfloat *ex, GLfloat *ey)
 {
-	struct clipcontext ctx;
-	struct polygon8 surf = {
+	struct nemoclip clip;
+	struct polygon8 poly = {
 		{ rrect->x1, rrect->x2, rrect->x2, rrect->x1 },
 		{ rrect->y1, rrect->y1, rrect->y2, rrect->y2 },
 		4
@@ -143,33 +143,29 @@ static int glrenderer_calculate_edges(struct nemoview *view, pixman_box32_t *rec
 	GLfloat min_x, max_x, min_y, max_y;
 	int i, n;
 
-	ctx.clip.x1 = rect->x1;
-	ctx.clip.y1 = rect->y1;
-	ctx.clip.x2 = rect->x2;
-	ctx.clip.y2 = rect->y2;
+	nemoclip_set_region(&clip, rect->x1, rect->y1, rect->x2, rect->y2);
 
-	for (i = 0; i < surf.n; i++) {
-		nemoview_transform_to_global_nocheck(view, surf.x[i], surf.y[i], &surf.x[i], &surf.y[i]);
+	for (i = 0; i < poly.n; i++) {
+		nemoview_transform_to_global_nocheck(view, poly.x[i], poly.y[i], &poly.x[i], &poly.y[i]);
 	}
 
-	min_x = max_x = surf.x[0];
-	min_y = max_y = surf.y[0];
+	min_x = max_x = poly.x[0];
+	min_y = max_y = poly.y[0];
 
-	for (i = 1; i < surf.n; i++) {
-		min_x = MIN(min_x, surf.x[i]);
-		max_x = MAX(max_x, surf.x[i]);
-		min_y = MIN(min_y, surf.y[i]);
-		max_y = MAX(max_y, surf.y[i]);
+	for (i = 1; i < poly.n; i++) {
+		min_x = MIN(min_x, poly.x[i]);
+		max_x = MAX(max_x, poly.x[i]);
+		min_y = MIN(min_y, poly.y[i]);
+		max_y = MAX(max_y, poly.y[i]);
 	}
 
-	if ((min_x >= ctx.clip.x2) || (max_x <= ctx.clip.x1) ||
-			(min_y >= ctx.clip.y2) || (max_y <= ctx.clip.y1))
+	if (nemoclip_check_minmax(&clip, min_x, min_y, max_x, max_y) != 0)
 		return 0;
 
 	if (!view->transform.enable)
-		return clip_simple(&ctx, &surf, ex, ey);
+		return nemoclip_simple(&clip, &poly, ex, ey);
 
-	n = clip_transformed(&ctx, &surf, ex, ey);
+	n = nemoclip_transformed(&clip, &poly, ex, ey);
 	if (n < 3)
 		return 0;
 

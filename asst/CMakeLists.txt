@@ -19,6 +19,7 @@ add_library(nemoasst SHARED
 	nemometro.c
 	nemospin.c
 	nemoscope.c
+	nemoclip.c
 	nemopool.c
 	nemokeys.c
 	nemonote.c
@@ -27,7 +28,6 @@ add_library(nemoasst SHARED
 	${CMAKE_SOURCE_DIR}/misc/pixmanhelper.c
 	${CMAKE_SOURCE_DIR}/misc/bezierhelper.c
 	${CMAKE_SOURCE_DIR}/misc/codehelper.c
-	${CMAKE_SOURCE_DIR}/misc/cliphelper.c
 	${CMAKE_SOURCE_DIR}/misc/utf8helper.c
 	${CMAKE_SOURCE_DIR}/misc/fonthelper.c
 	${CMAKE_SOURCE_DIR}/misc/stringhelper.c
@@ -67,6 +67,7 @@ set(HEADER_FILES
 	nemometro.h
 	nemospin.h
 	nemoscope.h
+	nemoclip.h
 	nemopool.h
 	nemokeys.h
 	nemonote.h

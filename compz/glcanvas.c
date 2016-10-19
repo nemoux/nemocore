@@ -16,7 +16,6 @@
 #include <actor.h>
 #include <view.h>
 #include <content.h>
-#include <cliphelper.h>
 #include <waylandhelper.h>
 #include <nemomisc.h>
 #include <nemolog.h>
