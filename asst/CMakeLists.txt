@@ -20,6 +20,7 @@ add_library(nemoasst SHARED
 	nemospin.c
 	nemoscope.c
 	nemoclip.c
+	nemotrix.c
 	nemopool.c
 	nemokeys.c
 	nemonote.c
@@ -66,6 +67,7 @@ set(HEADER_FILES
 	nemospin.h
 	nemoscope.h
 	nemoclip.h
+	nemotrix.h
 	nemopool.h
 	nemokeys.h
 	nemonote.h
