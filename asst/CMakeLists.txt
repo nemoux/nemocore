@@ -63,7 +63,6 @@ set(HEADER_FILES
 	nemolistener.h
 	nemoease.h
 	nemobox.h
-	nemobook.h
 	nemometro.h
 	nemospin.h
 	nemoscope.h
