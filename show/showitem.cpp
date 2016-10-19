@@ -21,6 +21,7 @@
 #include <showpathcmd.h>
 #include <showfont.h>
 #include <showfont.hpp>
+#include <showmisc.h>
 #include <nemoshow.h>
 #include <skiahelper.hpp>
 #include <fonthelper.h>
@@ -28,7 +29,6 @@
 #include <stringhelper.h>
 #include <colorhelper.h>
 #include <nemoxml.h>
-#include <nemobox.h>
 #include <nemomisc.h>
 
 #define	NEMOSHOW_ANTIALIAS_EPSILON			(5.0f)
@@ -485,8 +485,8 @@ static inline void nemoshow_item_update_text(struct nemoshow *show, struct showo
 				item->textwidth = 0.0f;
 
 				for (i = 0; i < nhbglyphs; i++) {
-					NEMOBOX_APPEND(item->points, item->spoints, item->npoints, hbglyphspos[i].x_offset * fontscale + item->textwidth + item->x);
-					NEMOBOX_APPEND(item->points, item->spoints, item->npoints, item->y - item->fontascent);
+					NEMOSHOW_ARRAY_APPEND(item->points, item->spoints, item->npoints, hbglyphspos[i].x_offset * fontscale + item->textwidth + item->x);
+					NEMOSHOW_ARRAY_APPEND(item->points, item->spoints, item->npoints, item->y - item->fontascent);
 
 					item->textwidth += hbglyphspos[i].x_advance * fontscale;
 				}
@@ -1100,14 +1100,14 @@ int nemoshow_item_path_moveto(struct showone *one, double x, double y)
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	if (one->sub == NEMOSHOW_PATHARRAY_ITEM) {
-		NEMOBOX_APPEND(item->cmds, item->scmds, item->ncmds, NEMOSHOW_PATH_MOVETO_CMD);
+		NEMOSHOW_ARRAY_APPEND(item->cmds, item->scmds, item->ncmds, NEMOSHOW_PATH_MOVETO_CMD);
 
-		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, x);
-		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, y);
-		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, 0.0f);
-		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, 0.0f);
-		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, 0.0f);
-		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, 0.0f);
+		NEMOSHOW_ARRAY_APPEND(item->points, item->spoints, item->npoints, x);
+		NEMOSHOW_ARRAY_APPEND(item->points, item->spoints, item->npoints, y);
+		NEMOSHOW_ARRAY_APPEND(item->points, item->spoints, item->npoints, 0.0f);
+		NEMOSHOW_ARRAY_APPEND(item->points, item->spoints, item->npoints, 0.0f);
+		NEMOSHOW_ARRAY_APPEND(item->points, item->spoints, item->npoints, 0.0f);
+		NEMOSHOW_ARRAY_APPEND(item->points, item->spoints, item->npoints, 0.0f);
 
 		nemoobject_set_reserved(&one->object, "points", item->points, sizeof(double) * item->npoints);
 
@@ -1145,14 +1145,14 @@ int nemoshow_item_path_lineto(struct showone *one, double x, double y)
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	if (one->sub == NEMOSHOW_PATHARRAY_ITEM) {
-		NEMOBOX_APPEND(item->cmds, item->scmds, item->ncmds, NEMOSHOW_PATH_LINETO_CMD);
+		NEMOSHOW_ARRAY_APPEND(item->cmds, item->scmds, item->ncmds, NEMOSHOW_PATH_LINETO_CMD);
 
-		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, x);
-		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, y);
-		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, 0.0f);
-		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, 0.0f);
-		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, 0.0f);
-		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, 0.0f);
+		NEMOSHOW_ARRAY_APPEND(item->points, item->spoints, item->npoints, x);
+		NEMOSHOW_ARRAY_APPEND(item->points, item->spoints, item->npoints, y);
+		NEMOSHOW_ARRAY_APPEND(item->points, item->spoints, item->npoints, 0.0f);
+		NEMOSHOW_ARRAY_APPEND(item->points, item->spoints, item->npoints, 0.0f);
+		NEMOSHOW_ARRAY_APPEND(item->points, item->spoints, item->npoints, 0.0f);
+		NEMOSHOW_ARRAY_APPEND(item->points, item->spoints, item->npoints, 0.0f);
 
 		nemoobject_set_reserved(&one->object, "points", item->points, sizeof(double) * item->npoints);
 
@@ -1190,14 +1190,14 @@ int nemoshow_item_path_cubicto(struct showone *one, double x0, double y0, double
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	if (one->sub == NEMOSHOW_PATHARRAY_ITEM) {
-		NEMOBOX_APPEND(item->cmds, item->scmds, item->ncmds, NEMOSHOW_PATH_CURVETO_CMD);
+		NEMOSHOW_ARRAY_APPEND(item->cmds, item->scmds, item->ncmds, NEMOSHOW_PATH_CURVETO_CMD);
 
-		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, x0);
-		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, y0);
-		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, x1);
-		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, y1);
-		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, x2);
-		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, y2);
+		NEMOSHOW_ARRAY_APPEND(item->points, item->spoints, item->npoints, x0);
+		NEMOSHOW_ARRAY_APPEND(item->points, item->spoints, item->npoints, y0);
+		NEMOSHOW_ARRAY_APPEND(item->points, item->spoints, item->npoints, x1);
+		NEMOSHOW_ARRAY_APPEND(item->points, item->spoints, item->npoints, y1);
+		NEMOSHOW_ARRAY_APPEND(item->points, item->spoints, item->npoints, x2);
+		NEMOSHOW_ARRAY_APPEND(item->points, item->spoints, item->npoints, y2);
 
 		nemoobject_set_reserved(&one->object, "points", item->points, sizeof(double) * item->npoints);
 
@@ -1256,14 +1256,14 @@ int nemoshow_item_path_close(struct showone *one)
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
 	if (one->sub == NEMOSHOW_PATHARRAY_ITEM) {
-		NEMOBOX_APPEND(item->cmds, item->scmds, item->ncmds, NEMOSHOW_PATH_CLOSE_CMD);
+		NEMOSHOW_ARRAY_APPEND(item->cmds, item->scmds, item->ncmds, NEMOSHOW_PATH_CLOSE_CMD);
 
-		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, 0.0f);
-		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, 0.0f);
-		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, 0.0f);
-		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, 0.0f);
-		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, 0.0f);
-		NEMOBOX_APPEND(item->points, item->spoints, item->npoints, 0.0f);
+		NEMOSHOW_ARRAY_APPEND(item->points, item->spoints, item->npoints, 0.0f);
+		NEMOSHOW_ARRAY_APPEND(item->points, item->spoints, item->npoints, 0.0f);
+		NEMOSHOW_ARRAY_APPEND(item->points, item->spoints, item->npoints, 0.0f);
+		NEMOSHOW_ARRAY_APPEND(item->points, item->spoints, item->npoints, 0.0f);
+		NEMOSHOW_ARRAY_APPEND(item->points, item->spoints, item->npoints, 0.0f);
+		NEMOSHOW_ARRAY_APPEND(item->points, item->spoints, item->npoints, 0.0f);
 
 		nemoobject_set_reserved(&one->object, "points", item->points, sizeof(double) * item->npoints);
 

@@ -24,7 +24,6 @@
 #include <fbohelper.h>
 #include <oshelper.h>
 #include <nemoshow.h>
-#include <nemobox.h>
 #include <nemometro.h>
 #include <nemolog.h>
 #include <nemomisc.h>

@@ -7,7 +7,7 @@
 
 #include <showtransition.h>
 #include <showsequence.h>
-#include <nemobox.h>
+#include <showmisc.h>
 #include <nemomisc.h>
 
 struct showtransition *nemoshow_transition_create(struct showone *ease, uint32_t duration, uint32_t delay)
@@ -142,8 +142,8 @@ void nemoshow_transition_dirty_one(struct showtransition *trans, struct showone 
 
 	pin = (struct transitionpin *)malloc(sizeof(struct transitionpin));
 	if (pin != NULL) {
-		NEMOBOX_APPEND(trans->dones, trans->sdones, trans->ndones, one);
-		NEMOBOX_APPEND(trans->dirties, trans->sdirties, trans->ndirties, dirty);
+		NEMOSHOW_ARRAY_APPEND(trans->dones, trans->sdones, trans->ndones, one);
+		NEMOSHOW_ARRAY_APPEND(trans->dirties, trans->sdirties, trans->ndirties, dirty);
 
 		pin->transition = trans;
 		pin->index = trans->ndones - 1;
@@ -168,7 +168,7 @@ void nemoshow_transition_destroy_one(struct showtransition *trans, struct showon
 
 	pin = (struct transitionpin *)malloc(sizeof(struct transitionpin));
 	if (pin != NULL) {
-		NEMOBOX_APPEND(trans->tones, trans->stones, trans->ntones, one);
+		NEMOSHOW_ARRAY_APPEND(trans->tones, trans->stones, trans->ntones, one);
 
 		pin->transition = trans;
 		pin->index = trans->ntones - 1;
@@ -182,7 +182,7 @@ void nemoshow_transition_destroy_one(struct showtransition *trans, struct showon
 
 void nemoshow_transition_attach_sequence(struct showtransition *trans, struct showone *sequence)
 {
-	NEMOBOX_APPEND(trans->sequences, trans->ssequences, trans->nsequences, sequence);
+	NEMOSHOW_ARRAY_APPEND(trans->sequences, trans->ssequences, trans->nsequences, sequence);
 }
 
 int nemoshow_transition_dispatch(struct showtransition *trans, uint32_t time)

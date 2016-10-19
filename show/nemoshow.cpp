@@ -10,7 +10,6 @@
 #include <nemoshow.h>
 #include <showcanvas.h>
 #include <showcanvas.hpp>
-#include <nemobox.h>
 #include <nemoattr.h>
 #include <showmisc.h>
 #include <nemomisc.h>

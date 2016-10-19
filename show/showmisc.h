@@ -7,6 +7,15 @@
 NEMO_BEGIN_EXTERN_C
 #endif
 
+#define NEMOSHOW_ARRAY_APPEND(a, s, n, v)	\
+	do {	\
+		if (n >= s) {	\
+			a = (__typeof__(a))realloc(a, sizeof(a[0]) * s * 2);	\
+			s = s * 2;	\
+		}	\
+		a[n++] = v;	\
+	} while (0)
+
 typedef enum {
 	NEMOSHOW_NONE_PROP = 0,
 	NEMOSHOW_FLOAT_PROP = 1,

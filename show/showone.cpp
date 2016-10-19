@@ -9,7 +9,6 @@
 #include <showone.h>
 #include <showcolor.h>
 #include <showmisc.h>
-#include <nemobox.h>
 #include <nemomisc.h>
 
 void nemoshow_one_prepare(struct showone *one)
