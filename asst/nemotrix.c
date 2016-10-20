@@ -8,7 +8,12 @@
 #include <math.h>
 
 #include <nemotrix.h>
+#include <nemolist.h>
 #include <nemomisc.h>
+
+struct nemotrix {
+	struct nemolist list;
+};
 
 struct trione {
 	float x[3];
@@ -26,23 +31,38 @@ struct edgeone {
 	struct nemolist link;
 };
 
-static inline int nemotrix_triangle_circumcircle_contain_point(struct trione *one, float x, float y)
+static inline int nemotrix_triangle_circumcircle_contain_point(struct trione *tone, float x, float y)
 {
-	float ab = (one->x[0] * one->x[0]) + (one->y[0] * one->y[0]);
-	float cd = (one->x[1] * one->x[1]) + (one->y[1] * one->y[1]);
-	float ef = (one->x[2] * one->x[2]) + (one->y[2] * one->y[2]);
+	float ab = (tone->x[0] * tone->x[0]) + (tone->y[0] * tone->y[0]);
+	float cd = (tone->x[1] * tone->x[1]) + (tone->y[1] * tone->y[1]);
+	float ef = (tone->x[2] * tone->x[2]) + (tone->y[2] * tone->y[2]);
 
-	float cx = (ab * (one->y[2] - one->y[1]) + cd * (one->y[0] - one->y[2]) + ef * (one->y[1] - one->y[0])) / (one->x[0] * (one->y[2] - one->y[1]) + one->x[1] * (one->y[0] - one->y[2]) + one->x[2] * (one->y[1] - one->y[0])) / 2.0f;
-	float cy = (ab * (one->x[2] - one->x[1]) + cd * (one->x[0] - one->x[2]) + ef * (one->x[1] - one->x[0])) / (one->y[0] * (one->x[2] - one->x[1]) + one->y[1] * (one->x[0] - one->x[2]) + one->y[2] * (one->x[1] - one->x[0])) / 2.0f;
-	float cr = sqrtf(((one->x[0] - cx) * (one->x[0] - cx)) + ((one->y[0] - cy) * (one->y[0] - cy)));
+	float cx = (ab * (tone->y[2] - tone->y[1]) + cd * (tone->y[0] - tone->y[2]) + ef * (tone->y[1] - tone->y[0])) / (tone->x[0] * (tone->y[2] - tone->y[1]) + tone->x[1] * (tone->y[0] - tone->y[2]) + tone->x[2] * (tone->y[1] - tone->y[0])) / 2.0f;
+	float cy = (ab * (tone->x[2] - tone->x[1]) + cd * (tone->x[0] - tone->x[2]) + ef * (tone->x[1] - tone->x[0])) / (tone->y[0] * (tone->x[2] - tone->x[1]) + tone->y[1] * (tone->x[0] - tone->x[2]) + tone->y[2] * (tone->x[1] - tone->x[0])) / 2.0f;
+	float cr = sqrtf(((tone->x[0] - cx) * (tone->x[0] - cx)) + ((tone->y[0] - cy) * (tone->y[0] - cy)));
 	float dist = sqrtf(((x - cx) * (x - cx)) + ((y - cy) * (y - cy)));
 
 	return dist <= cr;
 }
 
-static inline int nemotrix_triangle_contain_point(struct trione *one, float x, float y)
+static inline int nemotrix_triangle_contain_point(struct trione *tone, float x, float y)
 {
-	return (one->x[0] == x && one->y[0] == y) || (one->x[1] == x && one->y[1] == y) || (one->x[2] == x && one->y[2] == y);
+	return (tone->x[0] == x && tone->y[0] == y) || (tone->x[1] == x && tone->y[1] == y) || (tone->x[2] == x && tone->y[2] == y);
+}
+
+static inline int nemotrix_triangle_compare(struct trione *tone0, struct trione *tone1)
+{
+	return
+		((tone0->x[0] == tone1->x[0] && tone0->y[0] == tone1->y[0]) || (tone0->x[0] == tone1->x[1] && tone0->y[0] == tone1->y[1]) || (tone0->x[0] == tone1->x[2] && tone0->y[0] == tone1->y[2])) &&
+		((tone0->x[1] == tone1->x[0] && tone0->y[1] == tone1->y[0]) || (tone0->x[1] == tone1->x[1] && tone0->y[1] == tone1->y[1]) || (tone0->x[1] == tone1->x[2] && tone0->y[1] == tone1->y[2])) &&
+		((tone0->x[2] == tone1->x[0] && tone0->y[2] == tone1->y[0]) || (tone0->x[2] == tone1->x[1] && tone0->y[2] == tone1->y[1]) || (tone0->x[2] == tone1->x[2] && tone0->y[2] == tone1->y[2]));
+}
+
+static inline int nemotrix_edge_compare(struct edgeone *eone0, struct edgeone *eone1)
+{
+	return
+		(eone0->x[0] == eone1->x[0] && eone0->y[0] == eone1->y[0] && eone0->x[1] == eone1->x[1] && eone0->y[1] == eone1->y[1]) ||
+		(eone0->x[0] == eone1->x[1] && eone0->y[0] == eone1->y[1] && eone0->x[1] == eone1->x[0] && eone0->y[1] == eone1->y[0]);
 }
 
 struct nemotrix *nemotrix_create(void)
@@ -179,7 +199,7 @@ int nemotrix_triangulate(struct nemotrix *trix, float *vertices, int nvertices)
 				if (eone0 == eone1)
 					continue;
 
-				if ((eone0->x[0] == eone1->x[0] && eone0->y[0] == eone1->y[0]) && (eone0->x[1] == eone1->x[1] && eone0->y[1] == eone1->y[1])) {
+				if (nemotrix_edge_compare(eone0, eone1) != 0) {
 					eone0->is_bad = 1;
 					eone1->is_bad = 1;
 				}
@@ -222,7 +242,7 @@ int nemotrix_get_triangles(struct nemotrix *trix, float *triangles)
 		triangles[i++] = tone->y[2];
 	}
 
-	return i;
+	return i / 6;
 }
 
 int nemotrix_get_edges(struct nemotrix *trix, float *edges)
@@ -245,5 +265,5 @@ int nemotrix_get_edges(struct nemotrix *trix, float *edges)
 		edges[i++] = tone->y[0];
 	}
 
-	return i;
+	return i / 4;
 }

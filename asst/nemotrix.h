@@ -9,11 +9,7 @@ NEMO_BEGIN_EXTERN_C
 
 #include <stdint.h>
 
-#include <nemolist.h>
-
-struct nemotrix {
-	struct nemolist list;
-};
+struct nemotrix;
 
 extern struct nemotrix *nemotrix_create(void);
 extern void nemotrix_destroy(struct nemotrix *trix);
