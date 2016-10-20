@@ -12,7 +12,7 @@
 #include <showcanvas.h>
 #include <nemoshow.h>
 #include <oshelper.h>
-#include <nemometro.h>
+#include <nemopoly.h>
 #include <nemomisc.h>
 
 static const float quad_vertices[] = {
@@ -81,12 +81,12 @@ static const float cube_vertices[] = {
 };
 
 static const int cube_planes[] = {
-	NEMOMETRO_BOTTOM_PLANE,
-	NEMOMETRO_TOP_PLANE,
-	NEMOMETRO_LEFT_PLANE,
-	NEMOMETRO_RIGHT_PLANE,
-	NEMOMETRO_FRONT_PLANE,
-	NEMOMETRO_BACK_PLANE
+	NEMOPOLY_BOTTOM_PLANE,
+	NEMOPOLY_TOP_PLANE,
+	NEMOPOLY_LEFT_PLANE,
+	NEMOPOLY_RIGHT_PLANE,
+	NEMOPOLY_FRONT_PLANE,
+	NEMOPOLY_BACK_PLANE
 };
 
 static const float cube_texcoords[] = {
@@ -501,7 +501,7 @@ int nemoshow_poly_pick_plane(struct showone *cone, struct showone *pone, struct 
 	float t, u, v;
 
 	if (one->sub == NEMOSHOW_QUAD_POLY) {
-		if (nemometro_pick_triangle(
+		if (nemopoly_pick_triangle(
 					&pipe->projection,
 					canvas->width, canvas->height,
 					&poly->modelview,
@@ -514,7 +514,7 @@ int nemoshow_poly_pick_plane(struct showone *cone, struct showone *pone, struct 
 			*ty = 1.0f - v;
 
 			return 1;
-		} else if (nemometro_pick_triangle(
+		} else if (nemopoly_pick_triangle(
 					&pipe->projection,
 					canvas->width, canvas->height,
 					&poly->modelview,
@@ -530,11 +530,11 @@ int nemoshow_poly_pick_plane(struct showone *cone, struct showone *pone, struct 
 		}
 	} else if (one->sub == NEMOSHOW_CUBE_POLY) {
 		float min = FLT_MAX;
-		int plane = NEMOMETRO_NONE_PLANE;
+		int plane = NEMOPOLY_NONE_PLANE;
 		int i;
 
-		for (i = 0; i < NEMOMETRO_LAST_PLANE; i++) {
-			if (nemometro_pick_triangle(
+		for (i = 0; i < NEMOPOLY_LAST_PLANE; i++) {
+			if (nemopoly_pick_triangle(
 						&pipe->projection,
 						canvas->width, canvas->height,
 						&poly->modelview,
@@ -551,7 +551,7 @@ int nemoshow_poly_pick_plane(struct showone *cone, struct showone *pone, struct 
 
 					plane = cube_planes[i];
 				}
-			} else if (nemometro_pick_triangle(
+			} else if (nemopoly_pick_triangle(
 						&pipe->projection,
 						canvas->width, canvas->height,
 						&poly->modelview,
@@ -584,7 +584,7 @@ float nemoshow_poly_contain_point(struct showone *cone, struct showone *pone, st
 	struct showpoly *poly = NEMOSHOW_POLY(one);
 	float mint, maxt;
 
-	if (nemometro_pick_cube(&pipe->projection, canvas->width, canvas->height, &poly->modelview, poly->bounds, x, y, &mint, &maxt) > 0)
+	if (nemopoly_pick_cube(&pipe->projection, canvas->width, canvas->height, &poly->modelview, poly->bounds, x, y, &mint, &maxt) > 0)
 		return mint;
 
 	return FLT_MAX;

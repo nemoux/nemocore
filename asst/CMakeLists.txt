@@ -16,7 +16,7 @@ add_library(nemoasst SHARED
 	nemotrans.c
 	nemolog.c
 	nemomsg.c
-	nemometro.c
+	nemopoly.c
 	nemospin.c
 	nemoscope.c
 	nemoclip.c
@@ -63,7 +63,7 @@ set(HEADER_FILES
 	nemolist.h
 	nemolistener.h
 	nemoease.h
-	nemometro.h
+	nemopoly.h
 	nemospin.h
 	nemoscope.h
 	nemoclip.h

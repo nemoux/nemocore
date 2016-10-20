@@ -12,7 +12,7 @@ NEMO_BEGIN_EXTERN_C
 #include <compz.h>
 #include <content.h>
 #include <nemomatrix.h>
-#include <nemometro.h>
+#include <nemopoly.h>
 #include <nemoscope.h>
 
 typedef enum {
@@ -445,7 +445,7 @@ static inline int nemoview_overlap_view(struct nemoview *view, struct nemoview *
 	nemoview_transform_to_global_nocheck(oview, box1->x2, box1->y2, &b1[2*2+0], &b1[2*2+1]);
 	nemoview_transform_to_global_nocheck(oview, box1->x2, box1->y1, &b1[2*3+0], &b1[2*3+1]);
 
-	return nemometro_intersect_boxes(b0, b1);
+	return nemopoly_intersect_boxes(b0, b1);
 }
 
 static inline int nemoview_contain_point(struct nemoview *view, float x, float y)
