@@ -166,11 +166,11 @@ int nemotrix_triangulate(struct nemotrix *trix, float *vertices, int nvertices)
 
 		nemolist_for_each_safe(tone, ntone, &trix->list, link) {
 			if (nemotrix_triangle_circumcircle_contain_point(tone, x, y) != 0) {
-				nemotrix_destroy_triangle(tone);
-
 				nemotrix_create_edge(&edge_list, tone->x[0], tone->y[0], tone->x[1], tone->y[1]);
 				nemotrix_create_edge(&edge_list, tone->x[1], tone->y[1], tone->x[2], tone->y[2]);
 				nemotrix_create_edge(&edge_list, tone->x[2], tone->y[2], tone->x[0], tone->y[0]);
+
+				nemotrix_destroy_triangle(tone);
 			}
 		}
 
@@ -222,7 +222,7 @@ int nemotrix_get_triangles(struct nemotrix *trix, float *triangles)
 		triangles[i++] = tone->y[2];
 	}
 
-	return 0;
+	return i;
 }
 
 int nemotrix_get_edges(struct nemotrix *trix, float *edges)
@@ -245,5 +245,5 @@ int nemotrix_get_edges(struct nemotrix *trix, float *edges)
 		edges[i++] = tone->y[0];
 	}
 
-	return 0;
+	return i;
 }
