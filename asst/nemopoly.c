@@ -341,14 +341,24 @@ int nemopoly_pick_cube(struct nemomatrix *projection, int32_t width, int32_t hei
 	return nemopoly_intersect_ray_cube(boundingbox, rayorg, rayvec, mint, maxt);
 }
 
-static inline float nemopoly_convex_hull_ccw(float x0, float y0, float x1, float y1, float x2, float y2)
+static float nemopoly_convex_hull_ccw(float x0, float y0, float x1, float y1, float x2, float y2)
 {
 	return (x1 - x0) * (y2 - y0) - (y1 - y0) * (x2 - x0);
+}
+
+static int nemopoly_convex_hull_compare(const void *a, const void *b)
+{
+	float *v0 = (float *)a;
+	float *v1 = (float *)b;
+
+	return v0[0] < v1[0] || (v0[0] == v1[0] && v0[1] < v1[1]);
 }
 
 int nemopoly_convex_hull(float *points, int npoints, float *hulls)
 {
 	int i, t, k = 0;
+
+	qsort(points, npoints, sizeof(float[2]), nemopoly_convex_hull_compare);
 
 	for (i = 0; i < npoints; i++) {
 		while (k >= 2 && nemopoly_convex_hull_ccw(hulls[(k - 2) * 2 + 0], hulls[(k - 2) * 2 + 1], hulls[(k - 1) * 2 + 0], hulls[(k - 1) * 2 + 1], points[i * 2 + 0], points[i * 2 + 1]) <= 0.0f) --k;
