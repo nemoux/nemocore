@@ -340,3 +340,29 @@ int nemopoly_pick_cube(struct nemomatrix *projection, int32_t width, int32_t hei
 
 	return nemopoly_intersect_ray_cube(boundingbox, rayorg, rayvec, mint, maxt);
 }
+
+static inline float nemopoly_convex_hull_ccw(float x0, float y0, float x1, float y1, float x2, float y2)
+{
+	return (x1 - x0) * (y2 - y0) - (y1 - y0) * (x2 - x0);
+}
+
+int nemopoly_convex_hull(float *points, int npoints, float *hulls)
+{
+	int i, t, k = 0;
+
+	for (i = 0; i < npoints; i++) {
+		while (k >= 2 && nemopoly_convex_hull_ccw(hulls[(k - 2) * 2 + 0], hulls[(k - 2) * 2 + 1], hulls[(k - 1) * 2 + 0], hulls[(k - 1) * 2 + 1], points[i * 2 + 0], points[i * 2 + 1]) <= 0.0f) --k;
+		hulls[k * 2 + 0] = points[i * 2 + 0];
+		hulls[k * 2 + 1] = points[i * 2 + 1];
+		k++;
+	}
+
+	for (i = npoints - 2, t = k + 1; i >= 0; i--) {
+		while (k >= t && nemopoly_convex_hull_ccw(hulls[(k - 2) * 2 + 0], hulls[(k - 2) * 2 + 1], hulls[(k - 1) * 2 + 0], hulls[(k - 1) * 2 + 1], points[i * 2 + 0], points[i * 2 + 1]) <= 0.0f) --k;
+		hulls[k * 2 + 0] = points[i * 2 + 0];
+		hulls[k * 2 + 1] = points[i * 2 + 1];
+		k++;
+	}
+
+	return k;
+}
