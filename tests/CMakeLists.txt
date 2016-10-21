@@ -113,15 +113,6 @@ TARGET_LINK_LIBRARIES(nemofx-show
 	nemofx
 	)
 
-add_executable(nemoripple
-	nemoripple.c
-	)
-
-TARGET_LINK_LIBRARIES(nemoripple
-	nemoapps
-	nemofx
-	)
-
 add_executable(nemolog
 	nemolog.c
 	)
