@@ -29,7 +29,8 @@ extern int nemopoly_intersect_ray_cube(float *cube, float *o, float *d, float *m
 extern int nemopoly_pick_triangle(struct nemomatrix *projection, int32_t width, int32_t height, struct nemomatrix *modelview, float *v0, float *v1, float *v2, float x, float y, float *t, float *u, float *v);
 extern int nemopoly_pick_cube(struct nemomatrix *projection, int32_t width, int32_t height, struct nemomatrix *modelview, float *boundingbox, float x, float y, float *mint, float *maxt);
 
-extern int nemopoly_convex_hull(float *points, int npoints, float *hulls);
+extern int nemopoly_convex_hull(float *vertices, int nvertices, float *hulls);
+extern int nemopoly_triangulate(float *vertices, int nvertices, float *triangles, float *edges);
 
 static inline double nemopoly_get_point_distance(double x0, double y0, double x1, double y1)
 {
