@@ -2,11 +2,6 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -std=c++11")
 set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 
-set(NEMOASST_EGL_SOURCES
-	${CMAKE_SOURCE_DIR}/misc/glhelper.c
-	${CMAKE_SOURCE_DIR}/misc/fbohelper.c
-	)
-
 add_library(nemoasst SHARED
 	nemoxml.c
 	nemomatrix.c
@@ -38,7 +33,6 @@ add_library(nemoasst SHARED
 	${CMAKE_SOURCE_DIR}/misc/oshelper.c
 	${CMAKE_SOURCE_DIR}/misc/syshelper.c
 	${CMAKE_SOURCE_DIR}/misc/udphelper.c
-	${NEMOASST_EGL_SOURCES}
 	)
 
 TARGET_LINK_LIBRARIES(nemoasst

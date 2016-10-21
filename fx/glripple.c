@@ -8,7 +8,7 @@
 #include <math.h>
 
 #include <glripple.h>
-#include <glhelper.h>
+#include <glshader.h>
 #include <fbohelper.h>
 #include <nemomisc.h>
 

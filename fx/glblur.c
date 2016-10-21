@@ -6,7 +6,7 @@
 #include <errno.h>
 
 #include <glblur.h>
-#include <glhelper.h>
+#include <glshader.h>
 #include <fbohelper.h>
 #include <oshelper.h>
 #include <nemomisc.h>

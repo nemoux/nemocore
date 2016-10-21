@@ -8,7 +8,7 @@
 #include <math.h>
 
 #include <glshadow.h>
-#include <glhelper.h>
+#include <glshader.h>
 #include <fbohelper.h>
 #include <oshelper.h>
 #include <nemomatrix.h>

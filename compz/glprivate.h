@@ -18,7 +18,7 @@ NEMO_BEGIN_EXTERN_C
 
 #include <canvas.h>
 #include <renderer.h>
-#include <glhelper.h>
+#include <glcompz.h>
 
 #ifndef EGL_TEXTURE_EXTERNAL_WL
 #define	EGL_TEXTURE_EXTERNAL_WL		(0x31da)
@@ -61,15 +61,15 @@ struct glrenderer {
 
 	struct wl_signal destroy_signal;
 
-	struct glshader texture_shader_rgba;
-	struct glshader texture_shader_rgbx;
-	struct glshader texture_shader_egl_external;
-	struct glshader texture_shader_y_uv;
-	struct glshader texture_shader_y_u_v;
-	struct glshader texture_shader_y_xuxv;
-	struct glshader invert_color_shader;
-	struct glshader solid_shader;
-	struct glshader *current_shader;
+	struct glcompz texture_shader_rgba;
+	struct glcompz texture_shader_rgbx;
+	struct glcompz texture_shader_egl_external;
+	struct glcompz texture_shader_y_uv;
+	struct glcompz texture_shader_y_u_v;
+	struct glcompz texture_shader_y_xuxv;
+	struct glcompz invert_color_shader;
+	struct glcompz solid_shader;
+	struct glcompz *current_shader;
 };
 
 struct glsurface {
@@ -79,7 +79,7 @@ struct glsurface {
 
 struct glcontent {
 	GLfloat colors[4];
-	struct glshader *shader;
+	struct glcompz *shader;
 
 	GLuint textures[3];
 	int ntextures;

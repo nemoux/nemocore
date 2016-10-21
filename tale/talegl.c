@@ -9,7 +9,7 @@
 #include <talenode.h>
 #include <talegl.h>
 #include <talepixman.h>
-#include <glhelper.h>
+#include <glcompz.h>
 #include <fbohelper.h>
 #include <nemoclip.h>
 #include <nemolog.h>
@@ -21,16 +21,16 @@ struct nemogltale {
 	struct nemomatrix transform;
 	struct nemomatrix projection;
 
-	struct glshader texture_shader_rgba;
-	struct glshader texture_shader_rgbx;
-	struct glshader texture_shader_egl_external;
-	struct glshader texture_shader_y_uv;
-	struct glshader texture_shader_y_u_v;
-	struct glshader texture_shader_y_xuxv;
-	struct glshader invert_color_shader;
-	struct glshader solid_shader;
+	struct glcompz texture_shader_rgba;
+	struct glcompz texture_shader_rgbx;
+	struct glcompz texture_shader_egl_external;
+	struct glcompz texture_shader_y_uv;
+	struct glcompz texture_shader_y_u_v;
+	struct glcompz texture_shader_y_xuxv;
+	struct glcompz invert_color_shader;
+	struct glcompz solid_shader;
 
-	struct glshader *current_shader;
+	struct glcompz *current_shader;
 };
 
 struct taleegl {
@@ -218,12 +218,12 @@ int nemotale_node_resize_gl(struct talenode *node, int32_t width, int32_t height
 	return 0;
 }
 
-static inline void nemotale_use_shader(struct nemotale *tale, struct talenode *node, struct glshader *shader)
+static inline void nemotale_use_shader(struct nemotale *tale, struct talenode *node, struct glcompz *shader)
 {
 	struct nemogltale *context = (struct nemogltale *)tale->glcontext;
 
 	if (!shader->program) {
-		if (glshader_prepare(shader, shader->vertex_source, shader->fragment_source, 0) < 0) {
+		if (glcompz_prepare(shader, shader->vertex_source, shader->fragment_source) < 0) {
 			nemolog_error("TALEGL", "failed to compile shader\n");
 		}
 	}
@@ -422,20 +422,20 @@ struct nemotale *nemotale_create_gl(void)
 		goto err1;
 	memset(context, 0, sizeof(struct nemogltale));
 
-	context->texture_shader_rgba.vertex_source = GLHELPER_VERTEX_SHADER;
-	context->texture_shader_rgba.fragment_source = GLHELPER_TEXTURE_FRAGMENT_SHADER_RGBA;
-	context->texture_shader_rgbx.vertex_source = GLHELPER_VERTEX_SHADER;
-	context->texture_shader_rgbx.fragment_source = GLHELPER_TEXTURE_FRAGMENT_SHADER_RGBX;
-	context->texture_shader_egl_external.vertex_source = GLHELPER_VERTEX_SHADER;
-	context->texture_shader_egl_external.fragment_source = GLHELPER_TEXTURE_FRAGMENT_SHADER_EGL_EXTERNAL;
-	context->texture_shader_y_uv.vertex_source = GLHELPER_VERTEX_SHADER;
-	context->texture_shader_y_uv.fragment_source = GLHELPER_TEXTURE_FRAGMENT_SHADER_Y_UV;
-	context->texture_shader_y_u_v.vertex_source = GLHELPER_VERTEX_SHADER;
-	context->texture_shader_y_u_v.fragment_source = GLHELPER_TEXTURE_FRAGMENT_SHADER_Y_U_V;
-	context->texture_shader_y_xuxv.vertex_source = GLHELPER_VERTEX_SHADER;
-	context->texture_shader_y_xuxv.fragment_source = GLHELPER_TEXTURE_FRAGMENT_SHADER_Y_XUXV;
-	context->solid_shader.vertex_source = GLHELPER_VERTEX_SHADER;
-	context->solid_shader.fragment_source = GLHELPER_SOLID_FRAGMENT_SHADER;
+	context->texture_shader_rgba.vertex_source = GLCOMPZ_VERTEX_SHADER;
+	context->texture_shader_rgba.fragment_source = GLCOMPZ_TEXTURE_FRAGMENT_SHADER_RGBA;
+	context->texture_shader_rgbx.vertex_source = GLCOMPZ_VERTEX_SHADER;
+	context->texture_shader_rgbx.fragment_source = GLCOMPZ_TEXTURE_FRAGMENT_SHADER_RGBX;
+	context->texture_shader_egl_external.vertex_source = GLCOMPZ_VERTEX_SHADER;
+	context->texture_shader_egl_external.fragment_source = GLCOMPZ_TEXTURE_FRAGMENT_SHADER_EGL_EXTERNAL;
+	context->texture_shader_y_uv.vertex_source = GLCOMPZ_VERTEX_SHADER;
+	context->texture_shader_y_uv.fragment_source = GLCOMPZ_TEXTURE_FRAGMENT_SHADER_Y_UV;
+	context->texture_shader_y_u_v.vertex_source = GLCOMPZ_VERTEX_SHADER;
+	context->texture_shader_y_u_v.fragment_source = GLCOMPZ_TEXTURE_FRAGMENT_SHADER_Y_U_V;
+	context->texture_shader_y_xuxv.vertex_source = GLCOMPZ_VERTEX_SHADER;
+	context->texture_shader_y_xuxv.fragment_source = GLCOMPZ_TEXTURE_FRAGMENT_SHADER_Y_XUXV;
+	context->solid_shader.vertex_source = GLCOMPZ_VERTEX_SHADER;
+	context->solid_shader.fragment_source = GLCOMPZ_SOLID_FRAGMENT_SHADER;
 
 	return tale;
 

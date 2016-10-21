@@ -13,7 +13,7 @@
 
 #include <glrenderer.h>
 #include <renderer.h>
-#include <glhelper.h>
+#include <glshader.h>
 #include <compz.h>
 #include <screen.h>
 #include <canvas.h>
@@ -97,10 +97,10 @@ static inline void glrenderer_rotate_buffer_damage(struct glrenderer *renderer, 
 	pixman_region32_copy(&surface->damages[0], damage);
 }
 
-static inline void glrenderer_use_shader(struct glrenderer *renderer, struct glshader *shader)
+static inline void glrenderer_use_shader(struct glrenderer *renderer, struct glcompz *shader)
 {
 	if (!shader->program) {
-		if (glshader_prepare(shader, shader->vertex_source, shader->fragment_source, 0) < 0) {
+		if (glcompz_prepare(shader, shader->vertex_source, shader->fragment_source) < 0) {
 			nemolog_error("GLRENDERER", "failed to compile shader\n");
 		}
 	}
@@ -118,7 +118,7 @@ static inline void glrenderer_clear_shader(struct glrenderer *renderer)
 	renderer->current_shader = NULL;
 }
 
-static inline void glrenderer_use_uniforms(struct glshader *shader, struct nemoview *view, struct nemoscreen *screen)
+static inline void glrenderer_use_uniforms(struct glcompz *shader, struct nemoview *view, struct nemoscreen *screen)
 {
 	struct glcontent *glcontent = (struct glcontent *)nemocontent_get_opengl_context(view->content, screen->node);
 	int i;
@@ -728,20 +728,20 @@ static int glrenderer_prepare_egl_context(struct glrenderer *renderer, struct ne
 	if (strstr(extensions, "GL_OES_EGL_image_external"))
 		renderer->has_egl_image_external = 1;
 
-	renderer->texture_shader_rgba.vertex_source = GLHELPER_VERTEX_SHADER;
-	renderer->texture_shader_rgba.fragment_source = GLHELPER_TEXTURE_FRAGMENT_SHADER_RGBA;
-	renderer->texture_shader_rgbx.vertex_source = GLHELPER_VERTEX_SHADER;
-	renderer->texture_shader_rgbx.fragment_source = GLHELPER_TEXTURE_FRAGMENT_SHADER_RGBX;
-	renderer->texture_shader_egl_external.vertex_source = GLHELPER_VERTEX_SHADER;
-	renderer->texture_shader_egl_external.fragment_source = GLHELPER_TEXTURE_FRAGMENT_SHADER_EGL_EXTERNAL;
-	renderer->texture_shader_y_uv.vertex_source = GLHELPER_VERTEX_SHADER;
-	renderer->texture_shader_y_uv.fragment_source = GLHELPER_TEXTURE_FRAGMENT_SHADER_Y_UV;
-	renderer->texture_shader_y_u_v.vertex_source = GLHELPER_VERTEX_SHADER;
-	renderer->texture_shader_y_u_v.fragment_source = GLHELPER_TEXTURE_FRAGMENT_SHADER_Y_U_V;
-	renderer->texture_shader_y_xuxv.vertex_source = GLHELPER_VERTEX_SHADER;
-	renderer->texture_shader_y_xuxv.fragment_source = GLHELPER_TEXTURE_FRAGMENT_SHADER_Y_XUXV;
-	renderer->solid_shader.vertex_source = GLHELPER_VERTEX_SHADER;
-	renderer->solid_shader.fragment_source = GLHELPER_SOLID_FRAGMENT_SHADER;
+	renderer->texture_shader_rgba.vertex_source = GLCOMPZ_VERTEX_SHADER;
+	renderer->texture_shader_rgba.fragment_source = GLCOMPZ_TEXTURE_FRAGMENT_SHADER_RGBA;
+	renderer->texture_shader_rgbx.vertex_source = GLCOMPZ_VERTEX_SHADER;
+	renderer->texture_shader_rgbx.fragment_source = GLCOMPZ_TEXTURE_FRAGMENT_SHADER_RGBX;
+	renderer->texture_shader_egl_external.vertex_source = GLCOMPZ_VERTEX_SHADER;
+	renderer->texture_shader_egl_external.fragment_source = GLCOMPZ_TEXTURE_FRAGMENT_SHADER_EGL_EXTERNAL;
+	renderer->texture_shader_y_uv.vertex_source = GLCOMPZ_VERTEX_SHADER;
+	renderer->texture_shader_y_uv.fragment_source = GLCOMPZ_TEXTURE_FRAGMENT_SHADER_Y_UV;
+	renderer->texture_shader_y_u_v.vertex_source = GLCOMPZ_VERTEX_SHADER;
+	renderer->texture_shader_y_u_v.fragment_source = GLCOMPZ_TEXTURE_FRAGMENT_SHADER_Y_U_V;
+	renderer->texture_shader_y_xuxv.vertex_source = GLCOMPZ_VERTEX_SHADER;
+	renderer->texture_shader_y_xuxv.fragment_source = GLCOMPZ_TEXTURE_FRAGMENT_SHADER_Y_XUXV;
+	renderer->solid_shader.vertex_source = GLCOMPZ_VERTEX_SHADER;
+	renderer->solid_shader.fragment_source = GLCOMPZ_SOLID_FRAGMENT_SHADER;
 
 	return 0;
 }

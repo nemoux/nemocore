@@ -10,7 +10,7 @@
 #include <nemoshow.h>
 #include <showhelper.h>
 #include <skiahelper.hpp>
-#include <glhelper.h>
+#include <glshader.h>
 #include <fbohelper.h>
 #include <fxsph.h>
 #include <nemohelper.h>

@@ -9,7 +9,7 @@
 
 #include <glrenderer.h>
 #include <renderer.h>
-#include <glhelper.h>
+#include <glshader.h>
 #include <compz.h>
 #include <screen.h>
 #include <canvas.h>

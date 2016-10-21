@@ -34,6 +34,8 @@ struct showpipe {
 	struct showone base;
 
 	GLuint program;
+	GLuint vshader;
+	GLuint fshader;
 
 	GLuint uprojection;
 	GLuint umodelview;

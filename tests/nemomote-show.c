@@ -16,7 +16,7 @@
 #include <nemoshow.h>
 #include <showhelper.h>
 #include <fbohelper.h>
-#include <glhelper.h>
+#include <glshader.h>
 #include <nemohelper.h>
 #include <nemolog.h>
 #include <nemomisc.h>

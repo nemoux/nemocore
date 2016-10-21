@@ -7,7 +7,7 @@
 
 #include <playshader.h>
 #include <fbohelper.h>
-#include <glhelper.h>
+#include <glshader.h>
 #include <nemomisc.h>
 
 struct playshader *nemoplay_shader_create(void)
