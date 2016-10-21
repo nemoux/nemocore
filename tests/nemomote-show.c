@@ -468,6 +468,7 @@ int main(int argc, char *argv[])
 {
 	struct option options[] = {
 		{ "program",				required_argument,			NULL,			'p' },
+		{ "framerate",			required_argument,			NULL,			'f' },
 		{ 0 }
 	};
 
@@ -482,17 +483,22 @@ int main(int argc, char *argv[])
 	char *programpath = NULL;
 	int width = 800;
 	int height = 800;
+	int fps = 60;
 	int opt;
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "p:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "p:f:", options, NULL)) {
 		if (opt == -1)
 			break;
 
 		switch (opt) {
 			case 'p':
 				programpath = strdup(optarg);
+				break;
+
+			case 'f':
+				fps = strtoul(optarg, NULL, 10);
 				break;
 
 			default:
@@ -520,6 +526,8 @@ int main(int argc, char *argv[])
 		goto err3;
 	nemoshow_set_dispatch_resize(show, nemomote_dispatch_show_resize);
 	nemoshow_set_userdata(show, context);
+
+	nemoshow_view_set_framerate(show, fps);
 
 	nemoshow_view_put_state(show, "smooth");
 
