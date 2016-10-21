@@ -188,7 +188,7 @@ struct showone *nemoshow_pipe_create(int type)
 	nemoobject_set_reserved(&one->object, "rz", &pipe->rz, sizeof(double));
 
 	if (one->sub == NEMOSHOW_SIMPLE_PIPE) {
-		pipe->program = glshader_compile_program(simple_fragment_shader, simple_vertex_shader, &pipe->vshader, &pipe->fshader);
+		pipe->program = glshader_compile_program(simple_vertex_shader, simple_fragment_shader, &pipe->vshader, &pipe->fshader);
 
 		glUseProgram(pipe->program);
 		glBindAttribLocation(pipe->program, 0, "vertex");
@@ -203,7 +203,7 @@ struct showone *nemoshow_pipe_create(int type)
 		pipe->umodelview = glGetUniformLocation(pipe->program, "modelview");
 		pipe->ucolor = glGetUniformLocation(pipe->program, "color");
 	} else if (one->sub == NEMOSHOW_TEXTURE_PIPE) {
-		pipe->program = glshader_compile_program(texture_fragment_shader, texture_vertex_shader, &pipe->vshader, &pipe->fshader);
+		pipe->program = glshader_compile_program(texture_vertex_shader, texture_fragment_shader, &pipe->vshader, &pipe->fshader);
 
 		glUseProgram(pipe->program);
 		glBindAttribLocation(pipe->program, 0, "vertex");
@@ -220,7 +220,7 @@ struct showone *nemoshow_pipe_create(int type)
 		pipe->ucolor = glGetUniformLocation(pipe->program, "color");
 		pipe->utex0 = glGetUniformLocation(pipe->program, "tex0");
 	} else if (one->sub == NEMOSHOW_LIGHTING_DIFFUSE_PIPE) {
-		pipe->program = glshader_compile_program(lighting_diffuse_fragment_shader, lighting_diffuse_vertex_shader, &pipe->vshader, &pipe->fshader);
+		pipe->program = glshader_compile_program(lighting_diffuse_vertex_shader, lighting_diffuse_fragment_shader, &pipe->vshader, &pipe->fshader);
 
 		glUseProgram(pipe->program);
 		glBindAttribLocation(pipe->program, 0, "vertex");
@@ -238,7 +238,7 @@ struct showone *nemoshow_pipe_create(int type)
 		pipe->ucolor = glGetUniformLocation(pipe->program, "color");
 		pipe->ulight = glGetUniformLocation(pipe->program, "light");
 	} else if (one->sub == NEMOSHOW_LIGHTING_TEXTURE_PIPE) {
-		pipe->program = glshader_compile_program(lighting_texture_fragment_shader, lighting_texture_vertex_shader, &pipe->vshader, &pipe->fshader);
+		pipe->program = glshader_compile_program(lighting_texture_vertex_shader, lighting_texture_fragment_shader, &pipe->vshader, &pipe->fshader);
 
 		glUseProgram(pipe->program);
 		glBindAttribLocation(pipe->program, 0, "vertex");
@@ -257,7 +257,7 @@ struct showone *nemoshow_pipe_create(int type)
 		pipe->utex0 = glGetUniformLocation(pipe->program, "tex0");
 		pipe->ulight = glGetUniformLocation(pipe->program, "light");
 	} else if (one->sub == NEMOSHOW_LIGHTING_DIFFUSE_TEXTURE_PIPE) {
-		pipe->program = glshader_compile_program(lighting_diffuse_texture_fragment_shader, lighting_diffuse_texture_vertex_shader, &pipe->vshader, &pipe->fshader);
+		pipe->program = glshader_compile_program(lighting_diffuse_texture_vertex_shader, lighting_diffuse_texture_fragment_shader, &pipe->vshader, &pipe->fshader);
 
 		glUseProgram(pipe->program);
 		glBindAttribLocation(pipe->program, 0, "vertex");
