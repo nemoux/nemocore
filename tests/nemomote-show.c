@@ -17,6 +17,7 @@
 #include <showhelper.h>
 #include <fbohelper.h>
 #include <glshader.h>
+#include <nemopoly.h>
 #include <nemohelper.h>
 #include <nemolog.h>
 #include <nemomisc.h>
@@ -58,50 +59,63 @@ struct motecontext {
 
 static void nemomote_dispatch_canvas_redraw(struct nemoshow *show, struct showone *canvas)
 {
-	static const char *vertexshader =
+	static const char *vertexshader0 =
 		"attribute vec3 position;\n"
 		"void main()\n"
 		"{\n"
 		"  gl_Position = vec4(position.xy, 0.0, 1.0);\n"
 		"  gl_PointSize = position.z;\n"
 		"}\n";
-
-	static const char *fragmentshader =
+	static const char *fragmentshader0 =
 		"precision mediump float;\n"
 		"uniform sampler2D tex;\n"
 		"void main()\n"
 		"{\n"
 		"  gl_FragColor = texture2D(tex, gl_PointCoord);\n"
 		"}\n";
+	static const char *vertexshader1 =
+		"attribute vec2 position;\n"
+		"void main()\n"
+		"{\n"
+		"  gl_Position = vec4(position.xy, 0.0, 1.0);\n"
+		"}\n";
+	static const char *fragmentshader1 =
+		"precision mediump float;\n"
+		"void main()\n"
+		"{\n"
+		"  gl_FragColor = vec4(0.0, 1.0, 1.0, 1.0);\n"
+		"}\n";
 
 	struct motecontext *context = (struct motecontext *)nemoshow_get_userdata(show);
 	GLuint width = nemoshow_canvas_get_viewport_width(canvas);
 	GLuint height = nemoshow_canvas_get_viewport_height(canvas);
 	GLuint fbo, dbo;
-	GLuint program;
-	GLuint frag, vert;
+	GLuint program0;
+	GLuint program1;
 	GLfloat vertices[128 * 3];
+	GLfloat points[128 * 2];
+	GLfloat hulls[128 * 2];
+	GLfloat edges[4096 * 2];
+	int nhulls;
+	int nedges;
 	int i;
 
 	for (i = 0; i < 128; i++) {
-		vertices[i * 3 + 0] = random_get_double(-1.0f, 1.0f);
-		vertices[i * 3 + 1] = random_get_double(-1.0f, 1.0f);
-		vertices[i * 3 + 2] = random_get_double(32.0f, 64.0f);
+		vertices[i * 3 + 0] = points[i * 2 + 0] = random_get_double(-1.0f, 1.0f);
+		vertices[i * 3 + 1] = points[i * 2 + 1] = random_get_double(-1.0f, 1.0f);
+		vertices[i * 3 + 2] = random_get_double(16.0f, 32.0f);
 	}
+
+	nedges = nemopoly_triangulate(points, 128, NULL, edges);
+	nhulls = nemopoly_convex_hull(points, 128, hulls);
 
 	fbo_prepare_context(
 			nemoshow_canvas_get_texture(canvas),
 			width, height,
 			&fbo, &dbo);
 
-	NEMO_CHECK((frag = glshader_compile(GL_FRAGMENT_SHADER, 1, &fragmentshader)) == GL_NONE, "failed to compile shader\n");
-	NEMO_CHECK((vert = glshader_compile(GL_VERTEX_SHADER, 1, &vertexshader)) == GL_NONE, "failed to compile shader\n");
-
-	program = glCreateProgram();
-	glAttachShader(program, frag);
-	glAttachShader(program, vert);
-	glLinkProgram(program);
-	glUseProgram(program);
+	program0 = glshader_compile_program(vertexshader0, fragmentshader0, NULL, NULL);
+	program1 = glshader_compile_program(vertexshader1, fragmentshader1, NULL, NULL);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
@@ -116,22 +130,33 @@ static void nemomote_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 	glClearDepth(0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glUniform1i(glGetUniformLocation(program, "tex"), 0);
-
-	glBindAttribLocation(program, 0, "position");
-
 	glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_texture(context->sprite));
+
+	glUseProgram(program0);
+
+	glUniform1i(glGetUniformLocation(program0, "tex"), 0);
+
+	glBindAttribLocation(program0, 0, "position");
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &vertices[0]);
 	glEnableVertexAttribArray(0);
 
 	glDrawArrays(GL_POINTS, 0, 128);
 
+	glUseProgram(program1);
+
+	glBindAttribLocation(program1, 0, "position");
+
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), &edges[0]);
+	glEnableVertexAttribArray(0);
+
+	glDrawArrays(GL_LINES, 0, nedges * 6);
+
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	glDeleteProgram(program);
+	glDeleteProgram(program0);
 
 	glDeleteFramebuffers(1, &fbo);
 	glDeleteRenderbuffers(1, &dbo);
@@ -149,7 +174,6 @@ static void nemomote_dispatch_canvas_redraw_cs(struct nemoshow *show, struct sho
 		"  gl_Position = vec4(position, 0.0, 1.0);\n"
 		"  vtexcoord = texcoord;\n"
 		"}\n";
-
 	static const char *fragmentshader =
 		"precision mediump float;\n"
 		"varying vec2 vtexcoord;\n"
@@ -159,7 +183,6 @@ static void nemomote_dispatch_canvas_redraw_cs(struct nemoshow *show, struct sho
 		"  gl_FragColor = texture2D(tex, vtexcoord);\n"
 		"  gl_FragColor.a = 1.0;\n"
 		"}\n";
-
 	static const char *computeshader =
 		"#version 310 es\n"
 		"uniform float roll;\n"
@@ -171,7 +194,6 @@ static void nemomote_dispatch_canvas_redraw_cs(struct nemoshow *show, struct sho
 		"  float gcoef = sin(float(gl_WorkGroupID.x + gl_WorkGroupID.y) * 0.1 + roll) * 0.5;\n"
 		"  imageStore(tex0, pos, vec4(1.0 - gcoef * lcoef, 1.0, 1.0, 1.0));\n"
 		"}\n";
-
 	static GLfloat vertices[] = {
 		-1.0f, -1.0f, 0.0f, 0.0f,
 		1.0f, -1.0f, 1.0f, 0.0f,
