@@ -222,6 +222,7 @@ add_subdirectory(tale)
 add_subdirectory(show)
 add_subdirectory(mote)
 add_subdirectory(play)
+add_subdirectory(pixs)
 add_subdirectory(bus)
 add_subdirectory(fx)
 
