@@ -386,7 +386,7 @@ int main(int argc, char *argv[])
 		nemoshow_item_set_height(one, pixels);
 		nemoshow_item_set_fill_color(one, 0.0f, 255.0f, 255.0f, 255.0f);
 		nemoshow_item_path_load_svg(one, imagepath, 0.0f, 0.0f, pixels, pixels);
-	} else if (os_has_file_extension(imagepath, "png", NULL) != 0) {
+	} else if (os_has_file_extension(imagepath, "png", "jpg", NULL) != 0) {
 		one = nemoshow_item_create(NEMOSHOW_IMAGE_ITEM);
 		nemoshow_one_attach(canvas, one);
 		nemoshow_item_set_x(one, 0.0f);
