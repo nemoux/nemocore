@@ -88,6 +88,7 @@ static void nemopixs_dispatch_canvas_update(void *userdata, uint32_t msecs, doub
 	float dx, dy, dd, ds;
 	float f;
 	float c;
+	float mc;
 	int i, n;
 
 	nemopixs_set_diffuse(pixs, pixs->sprites[pixs->isprites]);
@@ -117,45 +118,73 @@ static void nemopixs_dispatch_canvas_update(void *userdata, uint32_t msecs, doub
 			pixs->vertices[i * 3 + 0] = pixs->vertices[i * 3 + 0] + pixs->velocities[i * 2 + 0] * dt;
 			pixs->vertices[i * 3 + 1] = pixs->vertices[i * 3 + 1] + pixs->velocities[i * 2 + 1] * dt;
 		}
+
+		pixs->is_updated = 1;
 	} else if (pixs->state == NEMOPIXS_FADEIN_STATE) {
+		mc = random_get_double(0.05f, 0.1f);
+
 		for (i = 0; i < pixs->rows * pixs->columns; i++) {
-			c = MAX(MAX(pixs->diffuses[i * 4 + 0], pixs->diffuses[i * 4 + 1]), pixs->diffuses[i * 4 + 2]);
+			c = MAX(MAX(pixs->diffuses[i * 4 + 0], pixs->diffuses[i * 4 + 1]), MAX(pixs->diffuses[i * 4 + 2], mc));
 
 			x0 = ((float)(i % pixs->columns) / (float)pixs->columns) * 2.0f - 1.0f;
 			y0 = ((float)(i / pixs->columns) / (float)pixs->rows) * 2.0f - 1.0f;
 
 			dx = x0 - pixs->vertices[i * 3 + 0];
 			dy = y0 - pixs->vertices[i * 3 + 1];
-			dd = dx * dx + dy * dy;
-			ds = sqrtf(dd + 0.1f);
 
-			f = 512.0f * dt / ds * c;
+			if (dx != 0.0f || dy != 0.0f) {
+				dd = dx * dx + dy * dy;
 
-			pixs->velocities[i * 2 + 0] = dx * f;
-			pixs->velocities[i * 2 + 1] = dy * f;
+				if (dd > 0.0001f) {
+					ds = sqrtf(dd + 0.1f);
 
-			pixs->vertices[i * 3 + 0] = pixs->vertices[i * 3 + 0] + pixs->velocities[i * 2 + 0] * dt;
-			pixs->vertices[i * 3 + 1] = pixs->vertices[i * 3 + 1] + pixs->velocities[i * 2 + 1] * dt;
+					f = 512.0f * dt / ds * c;
+
+					pixs->velocities[i * 2 + 0] = dx * f;
+					pixs->velocities[i * 2 + 1] = dy * f;
+
+					pixs->vertices[i * 3 + 0] = pixs->vertices[i * 3 + 0] + pixs->velocities[i * 2 + 0] * dt;
+					pixs->vertices[i * 3 + 1] = pixs->vertices[i * 3 + 1] + pixs->velocities[i * 2 + 1] * dt;
+				} else {
+					pixs->vertices[i * 3 + 0] = x0;
+					pixs->vertices[i * 3 + 1] = y0;
+				}
+
+				pixs->is_updated = 1;
+			}
 		}
 	} else if (pixs->state == NEMOPIXS_FADEOUT_STATE) {
+		mc = random_get_double(0.05f, 0.1f);
+
 		for (i = 0; i < pixs->rows * pixs->columns; i++) {
-			c = MAX(MAX(pixs->diffuses[i * 4 + 0], pixs->diffuses[i * 4 + 1]), pixs->diffuses[i * 4 + 2]);
+			c = MAX(MAX(pixs->diffuses[i * 4 + 0], pixs->diffuses[i * 4 + 1]), MAX(pixs->diffuses[i * 4 + 2], mc));
 
 			x0 = cos(pixs->seeds[i] * M_PI * 2.0f) * 3.0f;
 			y0 = sin(pixs->seeds[i] * M_PI * 2.0f) * 3.0f;
 
 			dx = x0 - pixs->vertices[i * 3 + 0];
 			dy = y0 - pixs->vertices[i * 3 + 1];
-			dd = dx * dx + dy * dy;
-			ds = sqrtf(dd + 0.1f);
 
-			f = 1024.0f * dt / ds * c;
+			if (dx != 0.0f || dy != 0.0f) {
+				dd = dx * dx + dy * dy;
 
-			pixs->velocities[i * 2 + 0] = dx * f;
-			pixs->velocities[i * 2 + 1] = dy * f;
+				if (dd > 0.0001f) {
+					ds = sqrtf(dd + 0.1f);
 
-			pixs->vertices[i * 3 + 0] = pixs->vertices[i * 3 + 0] + pixs->velocities[i * 2 + 0] * dt;
-			pixs->vertices[i * 3 + 1] = pixs->vertices[i * 3 + 1] + pixs->velocities[i * 2 + 1] * dt;
+					f = 1024.0f * dt / ds * c;
+
+					pixs->velocities[i * 2 + 0] = dx * f;
+					pixs->velocities[i * 2 + 1] = dy * f;
+
+					pixs->vertices[i * 3 + 0] = pixs->vertices[i * 3 + 0] + pixs->velocities[i * 2 + 0] * dt;
+					pixs->vertices[i * 3 + 1] = pixs->vertices[i * 3 + 1] + pixs->velocities[i * 2 + 1] * dt;
+				} else {
+					pixs->vertices[i * 3 + 0] = x0;
+					pixs->vertices[i * 3 + 1] = y0;
+				}
+
+				pixs->is_updated = 1;
+			}
 		}
 	}
 
@@ -166,34 +195,38 @@ static void nemopixs_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 {
 	struct nemopixs *pixs = (struct nemopixs *)nemoshow_get_userdata(show);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, pixs->fbo);
+	if (pixs->is_updated != 0) {
+		glBindFramebuffer(GL_FRAMEBUFFER, pixs->fbo);
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_ONE, GL_ONE);
-	glEnable(GL_POINT_SMOOTH);
-	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_ONE, GL_ONE);
+		glEnable(GL_POINT_SMOOTH);
+		glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
 
-	glViewport(0, 0,
-			nemoshow_canvas_get_viewport_width(canvas),
-			nemoshow_canvas_get_viewport_height(canvas));
+		glViewport(0, 0,
+				nemoshow_canvas_get_viewport_width(canvas),
+				nemoshow_canvas_get_viewport_height(canvas));
 
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glClearDepth(0.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearDepth(0.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glUseProgram(pixs->program);
+		glUseProgram(pixs->program);
 
-	glBindAttribLocation(pixs->program, 0, "position");
-	glBindAttribLocation(pixs->program, 1, "diffuse");
+		glBindAttribLocation(pixs->program, 0, "position");
+		glBindAttribLocation(pixs->program, 1, "diffuse");
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &pixs->vertices[0]);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &pixs->diffuses[0]);
-	glEnableVertexAttribArray(1);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &pixs->vertices[0]);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &pixs->diffuses[0]);
+		glEnableVertexAttribArray(1);
 
-	glDrawArrays(GL_POINTS, 0, pixs->rows * pixs->columns);
+		glDrawArrays(GL_POINTS, 0, pixs->rows * pixs->columns);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		pixs->is_updated = 0;
+	}
 }
 
 static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, struct showevent *event)

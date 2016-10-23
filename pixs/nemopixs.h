@@ -48,6 +48,8 @@ struct nemopixs {
 
 	float taps[128];
 	int ntaps;
+
+	int is_updated;
 };
 
 #endif
