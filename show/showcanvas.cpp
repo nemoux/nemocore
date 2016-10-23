@@ -257,13 +257,13 @@ static inline void nemoshow_canvas_update_viewport(struct nemoshow *show, struct
 		struct showone *scene = one->parent;
 
 		nemoshow_canvas_set_viewport(one,
-				(double)show->width / (double)NEMOSHOW_SCENE_AT(scene, width),
-				(double)show->height / (double)NEMOSHOW_SCENE_AT(scene, height));
+				canvas->width * (double)show->width / (double)NEMOSHOW_SCENE_AT(scene, width),
+				canvas->height * (double)show->height / (double)NEMOSHOW_SCENE_AT(scene, height));
 
 		if (canvas->dispatch_resize != NULL)
 			canvas->dispatch_resize(show, one, canvas->viewport.width, canvas->viewport.height);
 	} else {
-		nemoshow_canvas_set_viewport(one, 1.0f, 1.0f);
+		nemoshow_canvas_set_viewport(one, canvas->width, canvas->height);
 	}
 }
 
@@ -790,20 +790,20 @@ void nemoshow_canvas_render_none(struct nemoshow *show, struct showone *one)
 {
 }
 
-int nemoshow_canvas_set_viewport(struct showone *one, double sx, double sy)
+int nemoshow_canvas_set_viewport(struct showone *one, int32_t width, int32_t height)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
-	canvas->viewport.sx = sx;
-	canvas->viewport.sy = sy;
-	canvas->viewport.rx = 1.0f / sx;
-	canvas->viewport.ry = 1.0f / sy;
+	canvas->viewport.width = width;
+	canvas->viewport.height = height;
 
-	canvas->viewport.width = canvas->width * sx;
-	canvas->viewport.height = canvas->height * sy;
+	canvas->viewport.sx = canvas->viewport.width / canvas->width;
+	canvas->viewport.sy = canvas->viewport.height / canvas->height;
+	canvas->viewport.rx = canvas->width / canvas->viewport.width;
+	canvas->viewport.ry = canvas->height / canvas->viewport.height;
 
 	nemotale_node_translate(canvas->node, canvas->tx * canvas->viewport.sx, canvas->ty * canvas->viewport.sy);
-	nemotale_node_resize(canvas->node, canvas->width * canvas->viewport.sx, canvas->height * canvas->viewport.sy);
+	nemotale_node_resize(canvas->node, canvas->viewport.width, canvas->viewport.height);
 
 	if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
 		nemoshow_one_dirty_all(one, NEMOSHOW_SHAPE_DIRTY);

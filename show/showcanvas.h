@@ -122,7 +122,7 @@ extern int nemoshow_canvas_prepare_none(struct nemoshow *show, struct showone *o
 extern void nemoshow_canvas_finish_none(struct nemoshow *show, struct showone *one);
 extern void nemoshow_canvas_render_none(struct nemoshow *show, struct showone *one);
 
-extern int nemoshow_canvas_set_viewport(struct showone *one, double sx, double sy);
+extern int nemoshow_canvas_set_viewport(struct showone *one, int32_t width, int32_t height);
 extern int nemoshow_canvas_set_smooth(struct showone *one, int has_smooth);
 
 extern void nemoshow_canvas_damage(struct showone *one, int32_t x, int32_t y, int32_t width, int32_t height);

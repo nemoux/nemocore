@@ -20,6 +20,8 @@ struct nemopixs {
 
 	struct showone *canvas;
 
+	struct showone *sprite;
+
 	uint32_t width, height;
 
 	GLuint fbo, dbo;
@@ -28,6 +30,8 @@ struct nemopixs {
 	float *vertices;
 	float *velocities;
 	float *diffuses;
+
+	int pixels;
 	int rows, columns;
 
 	uint32_t msecs;
