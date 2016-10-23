@@ -1754,11 +1754,19 @@ int nemoshow_item_path_get_position(struct showone *one, double t, double *px, d
 	if (r == false)
 		return -1;
 
-	*px = point.x();
-	*py = point.y();
+	if (px != NULL && py != NULL) {
+		NEMOSHOW_ITEM_CC(item, matrix)->mapPoints(&point, 1);
 
-	*tx = tangent.x();
-	*ty = tangent.y();
+		*px = point.x();
+		*py = point.y();
+	}
+
+	if (tx != NULL && ty != NULL) {
+		NEMOSHOW_ITEM_CC(item, matrix)->mapVectors(&tangent, 1);
+
+		*tx = tangent.x();
+		*ty = tangent.y();
+	}
 
 	return 0;
 }
