@@ -161,6 +161,7 @@ extern void nemoshow_item_path_rotate(struct showone *one, double ro);
 extern void nemoshow_item_path_set_discrete_effect(struct showone *one, double segment, double deviation, uint32_t seed);
 extern void nemoshow_item_path_set_dash_effect(struct showone *one, double *dashes, int dashcount);
 
+extern int nemoshow_item_path_get_position(struct showone *one, double t, double *px, double *py, double *tx, double *ty);
 extern int nemoshow_item_path_contain_point(struct showone *one, double x, double y);
 
 extern int nemoshow_item_contain_one(struct showone *one, float x, float y);

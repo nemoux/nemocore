@@ -1740,6 +1740,29 @@ void nemoshow_item_path_set_dash_effect(struct showone *one, double *dashes, int
 	nemoshow_one_dirty(one, NEMOSHOW_PATHEFFECT_DIRTY);
 }
 
+int nemoshow_item_path_get_position(struct showone *one, double t, double *px, double *py, double *tx, double *ty)
+{
+	struct showitem *item = NEMOSHOW_ITEM(one);
+	SkPoint point;
+	SkVector tangent;
+	bool r;
+
+	r = NEMOSHOW_ITEM_CC(item, measure)->getPosTan(
+			NEMOSHOW_ITEM_CC(item, measure)->getLength() * t,
+			&point,
+			&tangent);
+	if (r == false)
+		return -1;
+
+	*px = point.x();
+	*py = point.y();
+
+	*tx = tangent.x();
+	*ty = tangent.y();
+
+	return 0;
+}
+
 int nemoshow_item_path_contain_point(struct showone *one, double x, double y)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
