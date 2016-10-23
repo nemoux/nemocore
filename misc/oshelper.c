@@ -14,6 +14,7 @@
 #include <sys/socket.h>
 #include <sys/epoll.h>
 #include <sys/timerfd.h>
+#include <sys/stat.h>
 
 static int os_set_cloexec_or_close(int fd)
 {
@@ -182,6 +183,24 @@ int os_create_anonymous_file(off_t size)
 int os_exist_path(const char *path)
 {
 	return access(path, F_OK) == 0;
+}
+
+int os_check_path_is_directory(const char *path)
+{
+	struct stat st;
+
+	stat(path, &st);
+
+	return S_ISDIR(st.st_mode);
+}
+
+int os_check_path_is_file(const char *path)
+{
+	struct stat st;
+
+	stat(path, &st);
+
+	return S_ISREG(st.st_mode);
 }
 
 pid_t os_execute_path(const char *path, char *const argv[])

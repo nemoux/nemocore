@@ -19,6 +19,8 @@ extern int os_timerfd_set_timeout(int tfd, uint32_t secs, uint32_t nsecs);
 extern int os_create_anonymous_file(off_t size);
 
 extern int os_exist_path(const char *path);
+extern int os_check_path_is_directory(const char *path);
+extern int os_check_path_is_file(const char *path);
 extern pid_t os_execute_path(const char *path, char *const argv[]);
 extern int os_load_path(const char *path, char **buffer, int *size);
 extern int os_save_path(const char *path, char *buffer, int size);

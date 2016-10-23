@@ -26,7 +26,8 @@ struct nemopixs {
 
 	struct showone *canvas;
 
-	struct showone *sprite;
+	struct showone *sprites[128];
+	int nsprites, isprites;
 
 	uint32_t width, height;
 

@@ -8,6 +8,7 @@
 #include <getopt.h>
 #include <ctype.h>
 #include <math.h>
+#include <dirent.h>
 
 #include <nemopixs.h>
 #include <nemoshow.h>
@@ -89,7 +90,7 @@ static void nemopixs_dispatch_canvas_update(void *userdata, uint32_t msecs, doub
 	float c;
 	int i, n;
 
-	nemopixs_set_diffuse(pixs, pixs->sprite);
+	nemopixs_set_diffuse(pixs, pixs->sprites[pixs->isprites]);
 
 	if (msecs == 0 || pixs->msecs == 0)
 		pixs->msecs = msecs;
@@ -211,10 +212,13 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 	if (nemoshow_event_is_touch_down(show, event)) {
 		if (nemoshow_event_is_more_taps(show, event, 5)) {
-			if (pixs->state == NEMOPIXS_FADEIN_STATE)
+			if (pixs->state == NEMOPIXS_FADEIN_STATE) {
 				pixs->state = NEMOPIXS_FADEOUT_STATE;
-			else
+			} else {
 				pixs->state = NEMOPIXS_FADEIN_STATE;
+
+				pixs->isprites = (pixs->isprites + 1) % pixs->nsprites;
+			}
 		}
 	}
 
@@ -232,6 +236,7 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 static void nemopixs_dispatch_show_resize(struct nemoshow *show, int32_t width, int32_t height)
 {
 	struct nemopixs *pixs = (struct nemopixs *)nemoshow_get_userdata(show);
+	int i;
 
 	nemoshow_view_resize(pixs->show, width, height);
 
@@ -253,7 +258,8 @@ static void nemopixs_dispatch_show_resize(struct nemoshow *show, int32_t width, 
 		nemopixs_prepare_pixels(pixs, width, height, pixs->pixels * (float)width / (float)height, pixs->pixels);
 	}
 
-	nemoshow_canvas_set_viewport(pixs->sprite, pixs->columns, pixs->rows);
+	for (i = 0; i < pixs->nsprites; i++)
+		nemoshow_canvas_set_viewport(pixs->sprites[i], pixs->columns, pixs->rows);
 
 	nemoshow_view_redraw(pixs->show);
 }
@@ -394,36 +400,85 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_dispatch_event(canvas, nemopixs_dispatch_canvas_event);
 	nemoshow_one_attach(scene, canvas);
 
-	pixs->sprite = canvas = nemoshow_canvas_create();
-	nemoshow_canvas_set_width(canvas, pixels);
-	nemoshow_canvas_set_height(canvas, pixels);
-	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
-	nemoshow_attach_one(show, canvas);
+	if (os_check_path_is_directory(imagepath) != 0) {
+		struct dirent **entries;
+		const char *filename;
+		char filepath[128];
+		int i, count;
 
-	if (imagepath == NULL) {
-		one = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
-		nemoshow_one_attach(canvas, one);
-		nemoshow_item_set_cx(one, pixels / 2.0f);
-		nemoshow_item_set_cy(one, pixels / 2.0f);
-		nemoshow_item_set_r(one, pixels / 3.0f);
-		nemoshow_item_set_fill_color(one, 0.0f, 255.0f, 255.0f, 255.0f);
-	} else if (os_has_file_extension(imagepath, "svg", NULL) != 0) {
-		one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
-		nemoshow_one_attach(canvas, one);
-		nemoshow_item_set_x(one, 0.0f);
-		nemoshow_item_set_y(one, 0.0f);
-		nemoshow_item_set_width(one, pixels);
-		nemoshow_item_set_height(one, pixels);
-		nemoshow_item_set_fill_color(one, 0.0f, 255.0f, 255.0f, 255.0f);
-		nemoshow_item_path_load_svg(one, imagepath, 0.0f, 0.0f, pixels, pixels);
-	} else if (os_has_file_extension(imagepath, "png", "jpg", NULL) != 0) {
-		one = nemoshow_item_create(NEMOSHOW_IMAGE_ITEM);
-		nemoshow_one_attach(canvas, one);
-		nemoshow_item_set_x(one, 0.0f);
-		nemoshow_item_set_y(one, 0.0f);
-		nemoshow_item_set_width(one, pixels);
-		nemoshow_item_set_height(one, pixels);
-		nemoshow_item_set_uri(one, imagepath);
+		count = scandir(imagepath, &entries, NULL, alphasort);
+
+		for (i = 0; i < count; i++) {
+			filename = entries[i]->d_name;
+			if (filename[0] == '.')
+				continue;
+
+			strcpy(filepath, imagepath);
+			strcat(filepath, "/");
+			strcat(filepath, filename);
+
+			pixs->sprites[pixs->nsprites++] = canvas = nemoshow_canvas_create();
+			nemoshow_canvas_set_width(canvas, pixels);
+			nemoshow_canvas_set_height(canvas, pixels);
+			nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
+			nemoshow_attach_one(show, canvas);
+
+			if (os_has_file_extension(filepath, "svg", NULL) != 0) {
+				one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
+				nemoshow_one_attach(canvas, one);
+				nemoshow_item_set_x(one, 0.0f);
+				nemoshow_item_set_y(one, 0.0f);
+				nemoshow_item_set_width(one, pixels);
+				nemoshow_item_set_height(one, pixels);
+				nemoshow_item_set_fill_color(one, 0.0f, 255.0f, 255.0f, 255.0f);
+				nemoshow_item_path_load_svg(one, filepath, 0.0f, 0.0f, pixels, pixels);
+			} else if (os_has_file_extension(filepath, "png", "jpg", NULL) != 0) {
+				one = nemoshow_item_create(NEMOSHOW_IMAGE_ITEM);
+				nemoshow_one_attach(canvas, one);
+				nemoshow_item_set_x(one, 0.0f);
+				nemoshow_item_set_y(one, 0.0f);
+				nemoshow_item_set_width(one, pixels);
+				nemoshow_item_set_height(one, pixels);
+				nemoshow_item_set_uri(one, filepath);
+			}
+		}
+
+		free(entries);
+	} else {
+		pixs->sprites[0] = canvas = nemoshow_canvas_create();
+		nemoshow_canvas_set_width(canvas, pixels);
+		nemoshow_canvas_set_height(canvas, pixels);
+		nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
+		nemoshow_attach_one(show, canvas);
+
+		pixs->nsprites = 1;
+		pixs->isprites = 0;
+
+		if (imagepath == NULL) {
+			one = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
+			nemoshow_one_attach(canvas, one);
+			nemoshow_item_set_cx(one, pixels / 2.0f);
+			nemoshow_item_set_cy(one, pixels / 2.0f);
+			nemoshow_item_set_r(one, pixels / 3.0f);
+			nemoshow_item_set_fill_color(one, 0.0f, 255.0f, 255.0f, 255.0f);
+		} else if (os_has_file_extension(imagepath, "svg", NULL) != 0) {
+			one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
+			nemoshow_one_attach(canvas, one);
+			nemoshow_item_set_x(one, 0.0f);
+			nemoshow_item_set_y(one, 0.0f);
+			nemoshow_item_set_width(one, pixels);
+			nemoshow_item_set_height(one, pixels);
+			nemoshow_item_set_fill_color(one, 0.0f, 255.0f, 255.0f, 255.0f);
+			nemoshow_item_path_load_svg(one, imagepath, 0.0f, 0.0f, pixels, pixels);
+		} else if (os_has_file_extension(imagepath, "png", "jpg", NULL) != 0) {
+			one = nemoshow_item_create(NEMOSHOW_IMAGE_ITEM);
+			nemoshow_one_attach(canvas, one);
+			nemoshow_item_set_x(one, 0.0f);
+			nemoshow_item_set_y(one, 0.0f);
+			nemoshow_item_set_width(one, pixels);
+			nemoshow_item_set_height(one, pixels);
+			nemoshow_item_set_uri(one, imagepath);
+		}
 	}
 
 	trans = nemoshow_transition_create(NEMOSHOW_LINEAR_EASE, 18000, 0);
