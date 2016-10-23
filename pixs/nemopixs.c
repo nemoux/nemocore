@@ -178,11 +178,8 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 	pixs->ntaps = nemoshow_event_get_tapcount(event);
 
 	for (i = 0; i < pixs->ntaps; i++) {
-		nemoshow_transform_to_viewport(show,
-				nemoshow_event_get_x_on(event, i),
-				nemoshow_event_get_y_on(event, i),
-				&pixs->taps[i * 2 + 0],
-				&pixs->taps[i * 2 + 1]);
+		pixs->taps[i * 2 + 0] = nemoshow_event_get_x_on(event, i);
+		pixs->taps[i * 2 + 1] = nemoshow_event_get_y_on(event, i);
 	}
 
 	if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event)) {
@@ -199,9 +196,6 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 static void nemopixs_dispatch_show_resize(struct nemoshow *show, int32_t width, int32_t height)
 {
 	struct nemopixs *pixs = (struct nemopixs *)nemoshow_get_userdata(show);
-
-	pixs->width = width;
-	pixs->height = height;
 
 	nemoshow_view_resize(pixs->show, width, height);
 

@@ -36,7 +36,7 @@ struct nemopixs {
 
 	uint32_t msecs;
 
-	float taps[16];
+	float taps[128];
 	int ntaps;
 };
 
