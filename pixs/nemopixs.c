@@ -31,6 +31,7 @@ static int nemopixs_prepare_pixels(struct nemopixs *pixs, int32_t width, int32_t
 	pixs->velocities = (float *)malloc(sizeof(float[2]) * rows * columns);
 	pixs->positions = (float *)malloc(sizeof(float[2]) * rows * columns);
 	pixs->diffuses = (float *)malloc(sizeof(float[4]) * rows * columns);
+	pixs->noises = (float *)malloc(sizeof(float) * rows * columns);
 
 	for (i = 0; i < rows * columns; i++) {
 		pixs->vertices[i * 3 + 0] = random_get_double(-1.0f, 1.0f);
@@ -44,6 +45,8 @@ static int nemopixs_prepare_pixels(struct nemopixs *pixs, int32_t width, int32_t
 		pixs->diffuses[i * 4 + 1] = 0.0f;
 		pixs->diffuses[i * 4 + 2] = 0.0f;
 		pixs->diffuses[i * 4 + 3] = 0.0f;
+
+		pixs->noises[i] = 1.0f;
 	}
 
 	return 0;
@@ -55,6 +58,7 @@ static void nemopixs_finish_pixels(struct nemopixs *pixs)
 	free(pixs->velocities);
 	free(pixs->positions);
 	free(pixs->diffuses);
+	free(pixs->noises);
 }
 
 static int nemopixs_set_position(struct nemopixs *pixs, int state)
@@ -69,14 +73,22 @@ static int nemopixs_set_position(struct nemopixs *pixs, int state)
 			}
 		}
 	} else if (state == NEMOPIXS_FADEOUT_STATE) {
-		float seed;
+		if (pixs->action == 0) {
+			float seed;
 
-		for (y = 0; y < pixs->rows; y++) {
-			for (x = 0; x < pixs->columns; x++) {
-				seed = random_get_double(0.0f, 1.0f);
+			for (y = 0; y < pixs->rows; y++) {
+				for (x = 0; x < pixs->columns; x++) {
+					seed = random_get_double(0.0f, 1.0f);
 
-				pixs->positions[(y * pixs->columns) * 2 + x * 2 + 0] = cos(seed * M_PI * 2.0f) * 2.0f;
-				pixs->positions[(y * pixs->columns) * 2 + x * 2 + 1] = sin(seed * M_PI * 2.0f) * 2.0f;
+					pixs->positions[(y * pixs->columns) * 2 + x * 2 + 0] = cos(seed * M_PI * 2.0f) * 2.0f;
+					pixs->positions[(y * pixs->columns) * 2 + x * 2 + 1] = sin(seed * M_PI * 2.0f) * 2.0f;
+				}
+			}
+		} else if (pixs->action == 1) {
+			for (y = 0; y < pixs->rows; y++) {
+				for (x = 0; x < pixs->columns; x++) {
+					pixs->positions[(y * pixs->columns) * 2 + x * 2 + 1] = 1.0f;
+				}
 			}
 		}
 	}
@@ -101,6 +113,17 @@ static int nemopixs_set_diffuse(struct nemopixs *pixs, struct showone *canvas)
 	}
 
 	nemoshow_canvas_unmap(canvas);
+
+	return 0;
+}
+
+static int nemopixs_set_noise(struct nemopixs *pixs, float min, float max)
+{
+	int i;
+
+	for (i = 0; i < pixs->rows * pixs->columns; i++) {
+		pixs->noises[i] = random_get_double(min, max);
+	}
 
 	return 0;
 }
@@ -161,7 +184,7 @@ static int nemopixs_update_pixels(struct nemopixs *pixs, uint32_t msecs)
 				if (dd > 0.0001f) {
 					ds = sqrtf(dd + 0.1f);
 
-					f = 512.0f * dt / ds * c;
+					f = 512.0f * dt / ds * c * pixs->noises[i];
 
 					pixs->velocities[i * 2 + 0] = dx * f;
 					pixs->velocities[i * 2 + 1] = dy * f;
@@ -305,8 +328,10 @@ static void nemopixs_dispatch_timer(struct nemotimer *timer, void *data)
 	struct nemopixs *pixs = (struct nemopixs *)data;
 
 	pixs->state = NEMOPIXS_FADEOUT_STATE;
+	pixs->action = (pixs->action + 1) % 2;
 
 	nemopixs_set_position(pixs, pixs->state);
+	nemopixs_set_noise(pixs, 0.95f, 1.05f);
 
 	nemoshow_one_dirty(pixs->canvas, NEMOSHOW_REDRAW_DIRTY);
 	nemoshow_dispatch_frame(pixs->show);

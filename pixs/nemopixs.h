@@ -43,8 +43,10 @@ struct nemopixs {
 
 	float *positions;
 	float *diffuses;
+	float *noises;
 
 	int state;
+	int action;
 
 	int pixels;
 	int rows, columns;
