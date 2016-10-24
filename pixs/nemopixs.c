@@ -75,8 +75,8 @@ static int nemopixs_set_position(struct nemopixs *pixs, int state)
 			for (x = 0; x < pixs->columns; x++) {
 				seed = random_get_double(0.0f, 1.0f);
 
-				pixs->positions[(y * pixs->columns) * 2 + x * 2 + 0] = cos(seed * M_PI * 2.0f) * 3.0f;
-				pixs->positions[(y * pixs->columns) * 2 + x * 2 + 1] = sin(seed * M_PI * 2.0f) * 3.0f;
+				pixs->positions[(y * pixs->columns) * 2 + x * 2 + 0] = cos(seed * M_PI * 2.0f) * 2.0f;
+				pixs->positions[(y * pixs->columns) * 2 + x * 2 + 1] = sin(seed * M_PI * 2.0f) * 2.0f;
 			}
 		}
 	}
@@ -223,8 +223,18 @@ static void nemopixs_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 		nemopixs_redraw_pixels(pixs, canvas);
 
 		nemoshow_one_dirty(canvas, NEMOSHOW_REDRAW_DIRTY);
+	} else if (pixs->state == NEMOPIXS_FADEOUT_STATE) {
+		pixs->state = NEMOPIXS_FADEIN_STATE;
+		pixs->isprites = (pixs->isprites + 1) % pixs->nsprites;
+
+		nemopixs_set_position(pixs, pixs->state);
+		nemopixs_set_diffuse(pixs, pixs->sprites[pixs->isprites]);
+
+		nemoshow_one_dirty(canvas, NEMOSHOW_REDRAW_DIRTY);
 	} else {
 		pixs->msecs = 0;
+
+		nemotimer_set_timeout(pixs->timer, pixs->timeout);
 	}
 }
 
@@ -240,22 +250,6 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 	for (i = 0; i < pixs->ntaps; i++) {
 		pixs->taps[i * 2 + 0] = nemoshow_event_get_x_on(event, i);
 		pixs->taps[i * 2 + 1] = nemoshow_event_get_y_on(event, i);
-	}
-
-	if (nemoshow_event_is_touch_down(show, event)) {
-		if (nemoshow_event_is_more_taps(show, event, 5)) {
-			if (pixs->state == NEMOPIXS_FADEIN_STATE) {
-				pixs->state = NEMOPIXS_FADEOUT_STATE;
-
-				nemopixs_set_position(pixs, pixs->state);
-			} else {
-				pixs->state = NEMOPIXS_FADEIN_STATE;
-				pixs->isprites = (pixs->isprites + 1) % pixs->nsprites;
-
-				nemopixs_set_position(pixs, pixs->state);
-				nemopixs_set_diffuse(pixs, pixs->sprites[pixs->isprites]);
-			}
-		}
 	}
 
 	if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event)) {
@@ -306,6 +300,18 @@ static void nemopixs_dispatch_show_resize(struct nemoshow *show, int32_t width, 
 	nemopixs_set_diffuse(pixs, pixs->sprites[pixs->isprites]);
 }
 
+static void nemopixs_dispatch_timer(struct nemotimer *timer, void *data)
+{
+	struct nemopixs *pixs = (struct nemopixs *)data;
+
+	pixs->state = NEMOPIXS_FADEOUT_STATE;
+
+	nemopixs_set_position(pixs, pixs->state);
+
+	nemoshow_one_dirty(pixs->canvas, NEMOSHOW_REDRAW_DIRTY);
+	nemoshow_dispatch_frame(pixs->show);
+}
+
 static int nemopixs_prepare_opengl(struct nemopixs *pixs, int32_t width, int32_t height)
 {
 	static const char *vertexshader =
@@ -350,18 +356,21 @@ int main(int argc, char *argv[])
 		{ "framerate",			required_argument,			NULL,			'r' },
 		{ "image",					required_argument,			NULL,			'i' },
 		{ "pixels",					required_argument,			NULL,			'p' },
+		{ "timeout",				required_argument,			NULL,			't' },
 		{ "fullscreen",			required_argument,			NULL,			'f' },
 		{ 0 }
 	};
 
 	struct nemopixs *pixs;
 	struct nemotool *tool;
+	struct nemotimer *timer;
 	struct nemoshow *show;
 	struct showone *scene;
 	struct showone *canvas;
 	struct showone *one;
 	char *imagepath = NULL;
 	char *fullscreen = NULL;
+	int timeout = 3000;
 	int width = 800;
 	int height = 800;
 	int pixels = 128;
@@ -370,7 +379,7 @@ int main(int argc, char *argv[])
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "r:i:p:f:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "r:i:p:t:f:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -385,6 +394,10 @@ int main(int argc, char *argv[])
 
 			case 'p':
 				pixels = strtoul(optarg, NULL, 10);
+				break;
+
+			case 't':
+				timeout = strtoul(optarg, NULL, 10);
 				break;
 
 			case 'f':
@@ -404,6 +417,7 @@ int main(int argc, char *argv[])
 	pixs->width = width;
 	pixs->height = height;
 	pixs->pixels = pixels;
+	pixs->timeout = timeout;
 
 	pixs->tool = tool = nemotool_create();
 	if (tool == NULL)
@@ -534,9 +548,15 @@ int main(int argc, char *argv[])
 	nemopixs_set_position(pixs, pixs->state);
 	nemopixs_set_diffuse(pixs, pixs->sprites[pixs->isprites]);
 
+	pixs->timer = timer = nemotimer_create(tool);
+	nemotimer_set_callback(timer, nemopixs_dispatch_timer);
+	nemotimer_set_userdata(timer, pixs);
+
 	nemoshow_dispatch_frame(show);
 
 	nemotool_run(tool);
+
+	nemotimer_destroy(timer);
 
 	nemopixs_finish_pixels(pixs);
 	nemopixs_finish_opengl(pixs);

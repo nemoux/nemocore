@@ -9,6 +9,7 @@
 #include <GLES2/gl2ext.h>
 
 #include <nemotool.h>
+#include <nemotimer.h>
 #include <nemoshow.h>
 
 typedef enum {
@@ -30,6 +31,9 @@ struct nemopixs {
 	int nsprites, isprites;
 
 	uint32_t width, height;
+
+	struct nemotimer *timer;
+	uint32_t timeout;
 
 	GLuint fbo, dbo;
 	GLuint program;
