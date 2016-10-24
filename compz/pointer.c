@@ -412,8 +412,10 @@ void nemopointer_move(struct nemopointer *pointer, float x, float y)
 
 void nemopointer_set_focus(struct nemopointer *pointer, struct nemoview *view, float sx, float sy)
 {
-	if ((pointer->focus == NULL) || (view == NULL) ||
-			(pointer->focus->content != view->content)) {
+	if (view != NULL && nemoseat_has_pointer_resource_by_view(pointer->seat, view) == 0)
+		view = NULL;
+
+	if ((pointer->focus == NULL) || (view == NULL) || (pointer->focus->content != view->content)) {
 		if (pointer->sprite != NULL)
 			nemopointer_destroy_sprite(pointer);
 

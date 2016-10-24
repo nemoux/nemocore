@@ -237,6 +237,36 @@ int nemoseat_get_pointer_by_view(struct nemoseat *seat, struct nemoview *view, s
 	return ptrcount;
 }
 
+int nemoseat_has_pointer_resource_by_view(struct nemoseat *seat, struct nemoview *view)
+{
+	struct nemocanvas *canvas;
+	struct wl_list *resource_list;
+	struct wl_client *client;
+	struct wl_resource *resource;
+
+	canvas = view->canvas;
+	if (canvas == NULL)
+		return 1;
+
+	client = wl_resource_get_client(canvas->resource);
+
+	resource_list = &seat->pointer.resource_list;
+
+	wl_resource_for_each(resource, resource_list) {
+		if (wl_resource_get_client(resource) == client)
+			return 1;
+	}
+
+	resource_list = &seat->pointer.nemo_resource_list;
+
+	wl_resource_for_each(resource, resource_list) {
+		if (wl_resource_get_client(resource) == client)
+			return 1;
+	}
+
+	return 0;
+}
+
 struct nemokeyboard *nemoseat_get_keyboard_by_focus_serial(struct nemoseat *seat, uint32_t serial)
 {
 	struct nemokeyboard *keyboard;

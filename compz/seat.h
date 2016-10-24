@@ -70,6 +70,7 @@ extern struct nemopointer *nemoseat_get_pointer_by_focus_serial(struct nemoseat 
 extern struct nemopointer *nemoseat_get_pointer_by_grab_serial(struct nemoseat *seat, uint32_t serial);
 extern struct nemopointer *nemoseat_get_pointer_by_id(struct nemoseat *seat, uint64_t id);
 extern int nemoseat_get_pointer_by_view(struct nemoseat *seat, struct nemoview *view, struct nemopointer *ptrs[], int max);
+extern int nemoseat_has_pointer_resource_by_view(struct nemoseat *seat, struct nemoview *view);
 
 extern struct nemokeyboard *nemoseat_get_keyboard_by_focus_serial(struct nemoseat *seat, uint32_t serial);
 extern struct nemokeyboard *nemoseat_get_keyboard_by_id(struct nemoseat *seat, uint64_t id);
