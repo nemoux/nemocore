@@ -51,6 +51,8 @@ struct nemopixs {
 	int pixels;
 	int rows, columns;
 
+	float minimum_distance;
+
 	uint32_t msecs;
 
 	float taps[128];

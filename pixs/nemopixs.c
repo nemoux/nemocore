@@ -153,7 +153,7 @@ static int nemopixs_update_pixels(struct nemopixs *pixs, uint32_t msecs)
 				dx = x0 - pixs->vertices[i * 3 + 0];
 				dy = y0 - pixs->vertices[i * 3 + 1];
 				dd = dx * dx + dy * dy;
-				ds = sqrtf(dd + 0.1f);
+				ds = sqrtf(dd + pixs->minimum_distance);
 
 				f = (3.0f / pixs->ntaps) * dt / (ds * ds * ds);
 
@@ -182,7 +182,7 @@ static int nemopixs_update_pixels(struct nemopixs *pixs, uint32_t msecs)
 				dd = dx * dx + dy * dy;
 
 				if (dd > 0.0001f) {
-					ds = sqrtf(dd + 0.1f);
+					ds = sqrtf(dd + pixs->minimum_distance);
 
 					f = 512.0f * dt / ds * c * pixs->noises[i];
 
@@ -443,6 +443,8 @@ int main(int argc, char *argv[])
 	pixs->height = height;
 	pixs->pixels = pixels;
 	pixs->timeout = timeout;
+
+	pixs->minimum_distance = 0.01f;
 
 	pixs->tool = tool = nemotool_create();
 	if (tool == NULL)
