@@ -52,8 +52,7 @@ struct nemopixs {
 
 	uint32_t msecs;
 
-	float taps[128];
-	int ntaps;
+	struct showevent events;
 };
 
 #endif

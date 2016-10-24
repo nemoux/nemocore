@@ -345,6 +345,11 @@ static inline int nemoshow_event_is_done(struct showevent *event)
 	return event->tap->done;
 }
 
+static inline void nemoshow_event_set_type(struct showevent *event, uint32_t type)
+{
+	event->type = type;
+}
+
 static inline void nemoshow_event_set_cancel(struct showevent *event)
 {
 	event->type = NEMOSHOW_CANCEL_EVENT;

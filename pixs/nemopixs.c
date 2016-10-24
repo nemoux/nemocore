@@ -134,6 +134,7 @@ static int nemopixs_set_noise(struct nemopixs *pixs, float min, float max)
 
 static int nemopixs_update_pixels(struct nemopixs *pixs, uint32_t msecs)
 {
+	int tapcount = nemoshow_event_get_tapcount(&pixs->events);
 	int is_updated = 0;
 	float x0, y0;
 	float dt;
@@ -150,18 +151,18 @@ static int nemopixs_update_pixels(struct nemopixs *pixs, uint32_t msecs)
 
 	dt = (float)(msecs - pixs->msecs) / 1000.0f;
 
-	if (pixs->ntaps > 0) {
+	if (tapcount > 0) {
 		for (i = 0; i < pixs->rows * pixs->columns; i++) {
-			for (n = 0; n < pixs->ntaps; n++) {
-				x0 = (pixs->taps[n * 2 + 0] / (float)pixs->width) * 2.0f - 1.0f;
-				y0 = (pixs->taps[n * 2 + 1] / (float)pixs->height) * 2.0f - 1.0f;
+			for (n = 0; n < tapcount; n++) {
+				x0 = (nemoshow_event_get_x_on(&pixs->events, n) / (float)pixs->width) * 2.0f - 1.0f;
+				y0 = (nemoshow_event_get_y_on(&pixs->events, n) / (float)pixs->height) * 2.0f - 1.0f;
 
 				dx = x0 - pixs->vertices[i * 3 + 0];
 				dy = y0 - pixs->vertices[i * 3 + 1];
 				dd = dx * dx + dy * dy;
 				ds = sqrtf(dd + pixs->gravitywell_minimum_distance);
 
-				f = (3.0f / pixs->ntaps) * dt / (ds * ds * ds);
+				f = (3.0f / tapcount) * dt / (ds * ds * ds);
 
 				pixs->velocities[i * 2 + 0] += dx * f;
 				pixs->velocities[i * 2 + 1] += dy * f;
@@ -176,7 +177,7 @@ static int nemopixs_update_pixels(struct nemopixs *pixs, uint32_t msecs)
 		pixs->is_vertices_dirty = 1;
 	}
 
-	if (pixs->is_vertices_dirty != 0 && pixs->ntaps == 0) {
+	if (pixs->is_vertices_dirty != 0 && tapcount == 0) {
 		int needs_feedback = 0;
 
 		mc = random_get_double(0.015f, 0.075f);
@@ -324,19 +325,14 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 	}
 
 	if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event) || nemoshow_event_is_touch_motion(show, event)) {
-		int i;
+		nemoshow_event_set_type(&pixs->events, NEMOSHOW_TOUCH_EVENT);
 
-		nemoshow_event_update_taps(show, canvas, event);
-
-		pixs->ntaps = nemoshow_event_get_tapcount(event);
-
-		for (i = 0; i < pixs->ntaps; i++) {
-			pixs->taps[i * 2 + 0] = nemoshow_event_get_x_on(event, i);
-			pixs->taps[i * 2 + 1] = nemoshow_event_get_y_on(event, i);
-		}
+		nemoshow_event_update_taps(show, canvas, &pixs->events);
 	}
 
 	if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event)) {
+		nemoshow_event_update_taps(show, canvas, event);
+
 		if (nemoshow_event_is_more_taps(show, event, 8)) {
 			nemoshow_view_pick_distant(show, event, NEMOSHOW_VIEW_PICK_ALL_TYPE);
 
