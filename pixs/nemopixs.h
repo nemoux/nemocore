@@ -36,8 +36,9 @@ struct nemopixs {
 
 	float *vertices;
 	float *velocities;
+
+	float *positions;
 	float *diffuses;
-	float *seeds;
 
 	int state;
 

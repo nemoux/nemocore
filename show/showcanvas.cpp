@@ -790,6 +790,19 @@ void nemoshow_canvas_render_none(struct nemoshow *show, struct showone *one)
 {
 }
 
+int nemoshow_canvas_render(struct nemoshow *show, struct showone *one)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	canvas->prepare_render(show, one);
+
+	canvas->dispatch_redraw(show, one);
+
+	canvas->finish_render(show, one);
+
+	return 0;
+}
+
 int nemoshow_canvas_set_viewport(struct showone *one, int32_t width, int32_t height)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
