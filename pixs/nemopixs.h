@@ -12,12 +12,6 @@
 #include <nemotimer.h>
 #include <nemoshow.h>
 
-typedef enum {
-	NEMOPIXS_FADEIN_STATE = 0,
-	NEMOPIXS_FADEOUT_STATE = 1,
-	NEMOPIXS_LAST_STATE
-} NemoPixsState;
-
 struct nemopixs {
 	struct nemotool *tool;
 
@@ -41,12 +35,14 @@ struct nemopixs {
 	float *vertices;
 	float *velocities;
 
-	float *positions;
 	float *diffuses;
 	float *noises;
 
-	int state;
-	int action;
+	float *vertices0;
+	float *diffuses0;
+
+	int is_vertices_dirty;
+	int is_diffuses_dirty;
 
 	int pixels;
 	int rows, columns;

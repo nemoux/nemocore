@@ -29,9 +29,10 @@ static int nemopixs_prepare_pixels(struct nemopixs *pixs, int32_t width, int32_t
 
 	pixs->vertices = (float *)malloc(sizeof(float[3]) * rows * columns);
 	pixs->velocities = (float *)malloc(sizeof(float[2]) * rows * columns);
-	pixs->positions = (float *)malloc(sizeof(float[2]) * rows * columns);
 	pixs->diffuses = (float *)malloc(sizeof(float[4]) * rows * columns);
 	pixs->noises = (float *)malloc(sizeof(float) * rows * columns);
+	pixs->vertices0 = (float *)malloc(sizeof(float[3]) * rows * columns);
+	pixs->diffuses0 = (float *)malloc(sizeof(float[4]) * rows * columns);
 
 	for (i = 0; i < rows * columns; i++) {
 		pixs->vertices[i * 3 + 0] = random_get_double(-1.0f, 1.0f);
@@ -56,42 +57,43 @@ static void nemopixs_finish_pixels(struct nemopixs *pixs)
 {
 	free(pixs->vertices);
 	free(pixs->velocities);
-	free(pixs->positions);
 	free(pixs->diffuses);
 	free(pixs->noises);
+	free(pixs->vertices0);
+	free(pixs->diffuses0);
 }
 
-static int nemopixs_set_position(struct nemopixs *pixs, int state)
+static int nemopixs_set_position(struct nemopixs *pixs, int action)
 {
 	int x, y;
 
-	if (state == NEMOPIXS_FADEIN_STATE) {
+	if (action == 0) {
 		for (y = 0; y < pixs->rows; y++) {
 			for (x = 0; x < pixs->columns; x++) {
-				pixs->positions[(y * pixs->columns) * 2 + x * 2 + 0] = ((float)x / (float)pixs->columns) * 2.0f - 1.0f;
-				pixs->positions[(y * pixs->columns) * 2 + x * 2 + 1] = ((float)y / (float)pixs->rows) * 2.0f - 1.0f;
+				pixs->vertices0[(y * pixs->columns) * 3 + x * 3 + 0] = ((float)x / (float)pixs->columns) * 2.0f - 1.0f;
+				pixs->vertices0[(y * pixs->columns) * 3 + x * 3 + 1] = ((float)y / (float)pixs->rows) * 2.0f - 1.0f;
 			}
 		}
-	} else if (state == NEMOPIXS_FADEOUT_STATE) {
-		if (pixs->action == 0) {
-			float seed;
+	} else if (action == 1) {
+		float seed;
 
-			for (y = 0; y < pixs->rows; y++) {
-				for (x = 0; x < pixs->columns; x++) {
-					seed = random_get_double(0.0f, 1.0f);
+		for (y = 0; y < pixs->rows; y++) {
+			for (x = 0; x < pixs->columns; x++) {
+				seed = random_get_double(0.0f, 1.0f);
 
-					pixs->positions[(y * pixs->columns) * 2 + x * 2 + 0] = cos(seed * M_PI * 2.0f) * 2.0f;
-					pixs->positions[(y * pixs->columns) * 2 + x * 2 + 1] = sin(seed * M_PI * 2.0f) * 2.0f;
-				}
+				pixs->vertices0[(y * pixs->columns) * 3 + x * 3 + 0] = cos(seed * M_PI * 2.0f) * 2.0f;
+				pixs->vertices0[(y * pixs->columns) * 3 + x * 3 + 1] = sin(seed * M_PI * 2.0f) * 2.0f;
 			}
-		} else if (pixs->action == 1) {
-			for (y = 0; y < pixs->rows; y++) {
-				for (x = 0; x < pixs->columns; x++) {
-					pixs->positions[(y * pixs->columns) * 2 + x * 2 + 1] = 1.0f;
-				}
+		}
+	} else if (action == 2) {
+		for (y = 0; y < pixs->rows; y++) {
+			for (x = 0; x < pixs->columns; x++) {
+				pixs->vertices0[(y * pixs->columns) * 3 + x * 3 + 1] = 1.0f;
 			}
 		}
 	}
+
+	pixs->is_vertices_dirty = 1;
 
 	return 0;
 }
@@ -105,14 +107,16 @@ static int nemopixs_set_diffuse(struct nemopixs *pixs, struct showone *canvas)
 
 	for (y = 0; y < pixs->rows; y++) {
 		for (x = 0; x < pixs->columns; x++) {
-			pixs->diffuses[(y * pixs->columns) * 4 + x * 4 + 0] = (float)pixels[(y * pixs->columns) * 4 + x * 4 + 2] / 255.0f;
-			pixs->diffuses[(y * pixs->columns) * 4 + x * 4 + 1] = (float)pixels[(y * pixs->columns) * 4 + x * 4 + 1] / 255.0f;
-			pixs->diffuses[(y * pixs->columns) * 4 + x * 4 + 2] = (float)pixels[(y * pixs->columns) * 4 + x * 4 + 0] / 255.0f;
-			pixs->diffuses[(y * pixs->columns) * 4 + x * 4 + 3] = (float)pixels[(y * pixs->columns) * 4 + x * 4 + 3] / 255.0f;
+			pixs->diffuses0[(y * pixs->columns) * 4 + x * 4 + 0] = (float)pixels[(y * pixs->columns) * 4 + x * 4 + 2] / 255.0f;
+			pixs->diffuses0[(y * pixs->columns) * 4 + x * 4 + 1] = (float)pixels[(y * pixs->columns) * 4 + x * 4 + 1] / 255.0f;
+			pixs->diffuses0[(y * pixs->columns) * 4 + x * 4 + 2] = (float)pixels[(y * pixs->columns) * 4 + x * 4 + 0] / 255.0f;
+			pixs->diffuses0[(y * pixs->columns) * 4 + x * 4 + 3] = (float)pixels[(y * pixs->columns) * 4 + x * 4 + 3] / 255.0f;
 		}
 	}
 
 	nemoshow_canvas_unmap(canvas);
+
+	pixs->is_diffuses_dirty = 1;
 
 	return 0;
 }
@@ -134,6 +138,8 @@ static int nemopixs_update_pixels(struct nemopixs *pixs, uint32_t msecs)
 	float x0, y0;
 	float dt;
 	float dx, dy, dd, ds;
+	float dr, dg, db, da;
+	float r0, g0, b0, a0;
 	float f;
 	float c;
 	float mc;
@@ -166,14 +172,20 @@ static int nemopixs_update_pixels(struct nemopixs *pixs, uint32_t msecs)
 		}
 
 		is_updated = 1;
-	} else {
+
+		pixs->is_vertices_dirty = 1;
+	}
+
+	if (pixs->is_vertices_dirty != 0 && pixs->ntaps == 0) {
+		int needs_feedback = 0;
+
 		mc = random_get_double(0.015f, 0.075f);
 
 		for (i = 0; i < pixs->rows * pixs->columns; i++) {
 			c = MAX(MAX(pixs->diffuses[i * 4 + 0], pixs->diffuses[i * 4 + 1]), MAX(pixs->diffuses[i * 4 + 2], mc));
 
-			x0 = pixs->positions[i * 2 + 0];
-			y0 = pixs->positions[i * 2 + 1];
+			x0 = pixs->vertices0[i * 3 + 0];
+			y0 = pixs->vertices0[i * 3 + 1];
 
 			dx = x0 - pixs->vertices[i * 3 + 0];
 			dy = y0 - pixs->vertices[i * 3 + 1];
@@ -191,6 +203,8 @@ static int nemopixs_update_pixels(struct nemopixs *pixs, uint32_t msecs)
 
 					pixs->vertices[i * 3 + 0] = pixs->vertices[i * 3 + 0] + pixs->velocities[i * 2 + 0] * dt;
 					pixs->vertices[i * 3 + 1] = pixs->vertices[i * 3 + 1] + pixs->velocities[i * 2 + 1] * dt;
+
+					needs_feedback = 1;
 				} else {
 					pixs->vertices[i * 3 + 0] = x0;
 					pixs->vertices[i * 3 + 1] = y0;
@@ -199,6 +213,52 @@ static int nemopixs_update_pixels(struct nemopixs *pixs, uint32_t msecs)
 				is_updated = 1;
 			}
 		}
+
+		if (needs_feedback == 0)
+			pixs->is_vertices_dirty = 0;
+	}
+
+	if (pixs->is_diffuses_dirty != 0) {
+		int needs_feedback = 0;
+
+		for (i = 0; i < pixs->rows * pixs->columns; i++) {
+			r0 = pixs->diffuses0[i * 4 + 0];
+			g0 = pixs->diffuses0[i * 4 + 1];
+			b0 = pixs->diffuses0[i * 4 + 2];
+			a0 = pixs->diffuses0[i * 4 + 3];
+
+			dr = r0 - pixs->diffuses[i * 4 + 0];
+			dg = g0 - pixs->diffuses[i * 4 + 1];
+			db = b0 - pixs->diffuses[i * 4 + 2];
+			da = a0 - pixs->diffuses[i * 4 + 3];
+
+			if (dr != 0.0f || dg != 0.0f || db != 0.0f || da != 0.0f) {
+				dd = dr * dr + dg * dg + db * db + da * da;
+
+				if (dd > 0.0001f) {
+					ds = sqrtf(dd + pixs->move_minimum_distance);
+
+					f = 64.0f * dt / ds * pixs->noises[i];
+
+					pixs->diffuses[i * 4 + 0] = pixs->diffuses[i * 4 + 0] + dr * f * dt;
+					pixs->diffuses[i * 4 + 1] = pixs->diffuses[i * 4 + 1] + dg * f * dt;
+					pixs->diffuses[i * 4 + 2] = pixs->diffuses[i * 4 + 2] + db * f * dt;
+					pixs->diffuses[i * 4 + 3] = pixs->diffuses[i * 4 + 3] + da * f * dt;
+
+					needs_feedback = 1;
+				} else {
+					pixs->diffuses[i * 4 + 0] = r0;
+					pixs->diffuses[i * 4 + 1] = g0;
+					pixs->diffuses[i * 4 + 2] = b0;
+					pixs->diffuses[i * 4 + 3] = a0;
+				}
+
+				is_updated = 1;
+			}
+		}
+
+		if (needs_feedback == 0)
+			pixs->is_diffuses_dirty = 0;
 	}
 
 	pixs->msecs = msecs;
@@ -246,33 +306,34 @@ static void nemopixs_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 		nemopixs_redraw_pixels(pixs, canvas);
 
 		nemoshow_one_dirty(canvas, NEMOSHOW_REDRAW_DIRTY);
-	} else if (pixs->state == NEMOPIXS_FADEOUT_STATE) {
-		pixs->state = NEMOPIXS_FADEIN_STATE;
-		pixs->isprites = (pixs->isprites + 1) % pixs->nsprites;
-
-		nemopixs_set_position(pixs, pixs->state);
-		nemopixs_set_diffuse(pixs, pixs->sprites[pixs->isprites]);
-
-		nemoshow_one_dirty(canvas, NEMOSHOW_REDRAW_DIRTY);
 	} else {
 		pixs->msecs = 0;
-
-		nemotimer_set_timeout(pixs->timer, pixs->timeout);
 	}
 }
 
 static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, struct showevent *event)
 {
 	struct nemopixs *pixs = (struct nemopixs *)nemoshow_get_userdata(show);
-	int i;
 
-	nemoshow_event_update_taps(show, canvas, event);
+	if (nemoshow_event_is_pointer_left_down(show, event)) {
+		nemopixs_set_noise(pixs, 0.75f, 1.25f);
+		nemopixs_set_position(pixs, 0);
+	} else if (nemoshow_event_is_pointer_right_down(show, event)) {
+		nemopixs_set_noise(pixs, 0.75f, 1.25f);
+		nemopixs_set_position(pixs, 2);
+	}
 
-	pixs->ntaps = nemoshow_event_get_tapcount(event);
+	if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event) || nemoshow_event_is_touch_motion(show, event)) {
+		int i;
 
-	for (i = 0; i < pixs->ntaps; i++) {
-		pixs->taps[i * 2 + 0] = nemoshow_event_get_x_on(event, i);
-		pixs->taps[i * 2 + 1] = nemoshow_event_get_y_on(event, i);
+		nemoshow_event_update_taps(show, canvas, event);
+
+		pixs->ntaps = nemoshow_event_get_tapcount(event);
+
+		for (i = 0; i < pixs->ntaps; i++) {
+			pixs->taps[i * 2 + 0] = nemoshow_event_get_x_on(event, i);
+			pixs->taps[i * 2 + 1] = nemoshow_event_get_y_on(event, i);
+		}
 	}
 
 	if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event)) {
@@ -319,7 +380,7 @@ static void nemopixs_dispatch_show_resize(struct nemoshow *show, int32_t width, 
 
 	nemoshow_view_redraw(pixs->show);
 
-	nemopixs_set_position(pixs, pixs->state);
+	nemopixs_set_position(pixs, 0);
 	nemopixs_set_diffuse(pixs, pixs->sprites[pixs->isprites]);
 }
 
@@ -327,14 +388,15 @@ static void nemopixs_dispatch_timer(struct nemotimer *timer, void *data)
 {
 	struct nemopixs *pixs = (struct nemopixs *)data;
 
-	pixs->state = NEMOPIXS_FADEOUT_STATE;
-	pixs->action = (pixs->action + 1) % 2;
+	pixs->isprites = (pixs->isprites + 1) % pixs->nsprites;
 
-	nemopixs_set_position(pixs, pixs->state);
-	nemopixs_set_noise(pixs, 0.95f, 1.05f);
+	nemopixs_set_noise(pixs, 0.85f, 1.15f);
+	nemopixs_set_diffuse(pixs, pixs->sprites[pixs->isprites]);
 
 	nemoshow_one_dirty(pixs->canvas, NEMOSHOW_REDRAW_DIRTY);
 	nemoshow_dispatch_frame(pixs->show);
+
+	nemotimer_set_timeout(pixs->timer, pixs->timeout);
 }
 
 static int nemopixs_prepare_opengl(struct nemopixs *pixs, int32_t width, int32_t height)
@@ -395,7 +457,7 @@ int main(int argc, char *argv[])
 	struct showone *one;
 	char *imagepath = NULL;
 	char *fullscreen = NULL;
-	int timeout = 3000;
+	int timeout = 15000;
 	int width = 800;
 	int height = 800;
 	int pixels = 128;
@@ -573,12 +635,13 @@ int main(int argc, char *argv[])
 	nemopixs_prepare_opengl(pixs, width, height);
 	nemopixs_prepare_pixels(pixs, width, height, pixels, pixels);
 
-	nemopixs_set_position(pixs, pixs->state);
+	nemopixs_set_position(pixs, 0);
 	nemopixs_set_diffuse(pixs, pixs->sprites[pixs->isprites]);
 
 	pixs->timer = timer = nemotimer_create(tool);
 	nemotimer_set_callback(timer, nemopixs_dispatch_timer);
 	nemotimer_set_userdata(timer, pixs);
+	nemotimer_set_timeout(pixs->timer, pixs->timeout);
 
 	nemoshow_dispatch_frame(show);
 
