@@ -168,8 +168,8 @@ static int nemopixs_update_pixels(struct nemopixs *pixs, uint32_t msecs)
 				pixs->velocities[i * 2 + 1] += dy * f;
 			}
 
-			pixs->vertices[i * 3 + 0] = pixs->vertices[i * 3 + 0] + pixs->velocities[i * 2 + 0] * dt;
-			pixs->vertices[i * 3 + 1] = pixs->vertices[i * 3 + 1] + pixs->velocities[i * 2 + 1] * dt;
+			pixs->vertices[i * 3 + 0] = CLIP(pixs->vertices[i * 3 + 0] + pixs->velocities[i * 2 + 0] * dt, -1.0f, 1.0f);
+			pixs->vertices[i * 3 + 1] = CLIP(pixs->vertices[i * 3 + 1] + pixs->velocities[i * 2 + 1] * dt, -1.0f, 1.0f);
 		}
 
 		is_updated = 1;
