@@ -51,7 +51,8 @@ struct nemopixs {
 	int pixels;
 	int rows, columns;
 
-	float minimum_distance;
+	float gravitywell_minimum_distance;
+	float move_minimum_distance;
 
 	uint32_t msecs;
 
