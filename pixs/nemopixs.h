@@ -45,7 +45,6 @@ struct nemopixs {
 
 	int is_vertices_dirty;
 	int is_diffuses_dirty;
-	int force_redraw;
 
 	int pixels;
 	int rows, columns;

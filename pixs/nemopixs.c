@@ -112,8 +112,6 @@ static int nemopixs_set_position(struct nemopixs *pixs, int action)
 		}
 	}
 
-	pixs->force_redraw = 1;
-
 	return 0;
 }
 
@@ -154,8 +152,6 @@ static int nemopixs_set_diffuse(struct nemopixs *pixs, struct showone *canvas, f
 	}
 
 	nemoshow_canvas_unmap(canvas);
-
-	pixs->force_redraw = 1;
 
 	nemolog_message("PIXS", "[set_diffuse] columns(%d) rows(%d) pixels(%d)\n", pixs->columns, pixs->rows, pixs->pixscount);
 
@@ -422,12 +418,10 @@ static void nemopixs_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 {
 	struct nemopixs *pixs = (struct nemopixs *)nemoshow_get_userdata(show);
 
-	if (nemopixs_update_pixels(pixs, time_current_msecs()) != 0 || pixs->force_redraw != 0) {
+	if (nemopixs_update_pixels(pixs, time_current_msecs()) != 0) {
 		nemopixs_redraw_pixels(pixs, canvas);
 
 		nemoshow_one_dirty(canvas, NEMOSHOW_REDRAW_DIRTY);
-
-		pixs->force_redraw = 0;
 
 		nemotimer_set_timeout(pixs->timer, 0);
 	} else {
