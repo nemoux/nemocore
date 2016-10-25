@@ -142,6 +142,8 @@ static void nemobusd_dispatch_message_task(int efd, struct bustask *task)
 		for (pmsg = msg; pmsg < msg; pmsg += jtok->char_offset) {
 			plen = jtok->char_offset;
 			jobj = json_tokener_parse_ex(jtok, pmsg, plen);
+			if (jobj == NULL)
+				break;
 			pmsg[plen] = '\0';
 
 			if (json_object_object_get_ex(jobj, "to", &pobj) == 0)

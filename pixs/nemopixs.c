@@ -416,15 +416,16 @@ static void nemopixs_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 	glBindAttribLocation(pixs->program, 1, "diffuse");
 
 	one = pixs->one;
-	if (one != NULL && nemopixs_update_one(pixs, one, dt) != 0) {
+	if (one != NULL) {
+		if (nemopixs_update_one(pixs, one, dt) != 0)
+			is_updated = 1;
+
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &one->vertices[0]);
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &one->diffuses[0]);
 		glEnableVertexAttribArray(1);
 
 		glDrawArrays(GL_POINTS, 0, one->pixscount);
-
-		is_updated = 1;
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
