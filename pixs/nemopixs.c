@@ -777,7 +777,8 @@ int main(int argc, char *argv[])
 	nemotimer_set_userdata(timer, pixs);
 	nemotimer_set_timeout(pixs->timer, pixs->timeout);
 
-	nemoshow_dispatch_frame(show);
+	if (fullscreen == NULL)
+		nemoshow_dispatch_frame(show);
 
 	nemotool_run(tool);
 

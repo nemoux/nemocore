@@ -111,6 +111,8 @@ static int nemoshow_dispatch_actor_resize(struct nemoactor *actor, int32_t width
 	nemoshow_update_one(show);
 	nemoshow_render_one(show);
 
+	nemoactor_dispatch_feedback(actor);
+
 	nemotale_composite_fbo_full(scon->tale);
 
 	nemoactor_damage_dirty(actor);
@@ -642,6 +644,8 @@ void nemoshow_view_redraw(struct nemoshow *show)
 
 	nemoshow_update_one(show);
 	nemoshow_render_one(show);
+
+	nemoactor_dispatch_feedback(actor);
 
 	nemotale_composite_fbo_full(scon->tale);
 

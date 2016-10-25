@@ -46,6 +46,8 @@ static void nemoshow_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t w
 	nemoshow_divide_one(show);
 	nemoshow_render_one(show);
 
+	nemocanvas_dispatch_feedback(canvas);
+
 	nemotale_composite_egl_full(scon->tale);
 }
 
@@ -663,6 +665,8 @@ void nemoshow_view_redraw(struct nemoshow *show)
 	nemoshow_update_one(show);
 	nemoshow_divide_one(show);
 	nemoshow_render_one(show);
+
+	nemocanvas_dispatch_feedback(canvas);
 
 	nemotale_composite_egl_full(scon->tale);
 }

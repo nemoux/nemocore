@@ -213,7 +213,7 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 				nemoview_set_position(view, bin->screen.x, bin->screen.y);
 				nemoview_set_rotation(view, bin->screen.r);
 
-				nemoview_attach_layer(view, bin->layer);
+				nemoview_attach_layer(view, &bin->shell->fullscreen_layer);
 				nemoview_update_transform(view);
 				nemoview_damage_below(view);
 			} else {
