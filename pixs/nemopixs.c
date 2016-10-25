@@ -399,7 +399,7 @@ static void nemopixs_redraw_pixels(struct nemopixs *pixs, struct showone *canvas
 			nemoshow_canvas_get_viewport_width(canvas),
 			nemoshow_canvas_get_viewport_height(canvas));
 
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClearDepth(0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -655,7 +655,7 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_width(canvas, width);
 	nemoshow_canvas_set_height(canvas, height);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_BACK_TYPE);
-	nemoshow_canvas_set_fill_color(canvas, 1.0f, 1.0f, 1.0f, 1.0f);
+	nemoshow_canvas_set_fill_color(canvas, 0.0f, 0.0f, 0.0f, 1.0f);
 	nemoshow_one_attach(scene, canvas);
 
 	pixs->canvas = canvas = nemoshow_canvas_create();
