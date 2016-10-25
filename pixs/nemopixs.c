@@ -428,8 +428,12 @@ static void nemopixs_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 		nemoshow_one_dirty(canvas, NEMOSHOW_REDRAW_DIRTY);
 
 		pixs->force_redraw = 0;
+
+		nemotimer_set_timeout(pixs->timer, 0);
 	} else {
 		pixs->msecs = 0;
+
+		nemotimer_set_timeout(pixs->timer, pixs->timeout);
 	}
 }
 
@@ -516,8 +520,6 @@ static void nemopixs_dispatch_timer(struct nemotimer *timer, void *data)
 
 	nemoshow_one_dirty(pixs->canvas, NEMOSHOW_REDRAW_DIRTY);
 	nemoshow_dispatch_frame(pixs->show);
-
-	nemotimer_set_timeout(pixs->timer, pixs->timeout);
 }
 
 static int nemopixs_prepare_opengl(struct nemopixs *pixs, int32_t width, int32_t height)
@@ -578,7 +580,7 @@ int main(int argc, char *argv[])
 	struct showone *one;
 	char *imagepath = NULL;
 	char *fullscreen = NULL;
-	int timeout = 15000;
+	int timeout = 10000;
 	int width = 800;
 	int height = 800;
 	int pixels = 128;
