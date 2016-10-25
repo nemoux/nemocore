@@ -501,6 +501,7 @@ static void nemopixs_dispatch_show_resize(struct nemoshow *show, int32_t width, 
 		nemoshow_canvas_render(show, pixs->sprites[i]);
 	}
 
+	nemopixs_set_noise(pixs, 0.75f, 1.25f);
 	nemopixs_set_diffuse_to(pixs, pixs->sprites[pixs->isprites], 0.05f);
 	nemopixs_set_position_to(pixs, 0);
 
@@ -768,6 +769,7 @@ int main(int argc, char *argv[])
 	nemopixs_prepare_opengl(pixs, width, height);
 	nemopixs_prepare_pixels(pixs, width, height, pixels, pixels);
 
+	nemopixs_set_noise(pixs, 0.75f, 1.25f);
 	nemopixs_set_diffuse(pixs, pixs->sprites[pixs->isprites], 0.05f);
 	nemopixs_set_position(pixs, 4);
 	nemopixs_set_position_to(pixs, 0);
