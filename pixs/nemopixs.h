@@ -12,6 +12,24 @@
 #include <nemotimer.h>
 #include <nemoshow.h>
 
+struct pixsone {
+	float *vertices;
+	float *velocities;
+
+	float *diffuses;
+	float *noises;
+
+	float *vertices0;
+	float *diffuses0;
+	float *positions0;
+	uint32_t pixscount;
+
+	int is_vertices_dirty;
+	int is_diffuses_dirty;
+
+	int rows, columns;
+};
+
 struct nemopixs {
 	struct nemotool *tool;
 
@@ -32,25 +50,12 @@ struct nemopixs {
 	GLuint fbo, dbo;
 	GLuint program;
 
-	float *vertices;
-	float *velocities;
-
-	float *diffuses;
-	float *noises;
-
-	float *vertices0;
-	float *diffuses0;
-	float *positions0;
-	uint32_t pixscount;
-
-	int is_vertices_dirty;
-	int is_diffuses_dirty;
-
-	int pixels;
-	int rows, columns;
+	struct pixsone *one;
 
 	float gravitywell_minimum_distance;
 	float move_minimum_distance;
+
+	int pixels;
 
 	uint32_t msecs;
 
