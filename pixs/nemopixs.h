@@ -40,9 +40,12 @@ struct nemopixs {
 
 	float *vertices0;
 	float *diffuses0;
+	float *positions0;
+	uint32_t pixscount;
 
 	int is_vertices_dirty;
 	int is_diffuses_dirty;
+	int force_redraw;
 
 	int pixels;
 	int rows, columns;
