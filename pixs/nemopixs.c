@@ -390,7 +390,7 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 			if (dx != 0.0f || dy != 0.0f) {
 				dd = dx * dx + dy * dy;
 
-				if (dd > 0.0001f) {
+				if (dd > 0.005f) {
 					ds = sqrtf(dd + pixs->move_minimum_distance);
 
 					f = 512.0f * dt / ds * c * one->noises[i];
@@ -432,7 +432,7 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 			if (dr != 0.0f || dg != 0.0f || db != 0.0f || da != 0.0f) {
 				dd = dr * dr + dg * dg + db * db + da * da;
 
-				if (dd > 0.0001f) {
+				if (dd > 0.005f) {
 					ds = sqrtf(dd + pixs->move_minimum_distance);
 
 					f = 64.0f * dt / ds * one->noises[i];
