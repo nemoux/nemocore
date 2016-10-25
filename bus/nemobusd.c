@@ -99,12 +99,15 @@ static void nemobusd_dispatch_message_task(int efd, struct bustask *task)
 {
 	struct nemobusd *busd = task->busd;
 	struct epoll_event ep;
+	struct json_tokener *jtok;
 	struct json_object *jobj;
 	struct json_object *pobj;
 	const char *type;
 	const char *path;
 	char msg[4096];
+	char *pmsg;
 	int len;
+	int plen;
 
 	len = read(task->fd, msg, sizeof(msg));
 	if (len < 0) {
@@ -134,60 +137,68 @@ static void nemobusd_dispatch_message_task(int efd, struct bustask *task)
 
 		nemolog_message("BUSD", "recv(%d) [%s]\n", task->fd, msg);
 
-		jobj = json_tokener_parse(msg);
+		jtok = json_tokener_new();
 
-		if (json_object_object_get_ex(jobj, "to", &pobj) == 0)
-			goto out0;
-		path = json_object_get_string(pobj);
+		for (pmsg = msg; pmsg < msg; pmsg += jtok->char_offset) {
+			plen = jtok->char_offset;
+			jobj = json_tokener_parse_ex(jtok, pmsg, plen);
+			pmsg[plen] = '\0';
 
-		if (strcmp(path, "/nemobusd") == 0) {
-			struct json_object *tobj0;
-			struct json_object *tobj1;
+			if (json_object_object_get_ex(jobj, "to", &pobj) == 0)
+				goto out0;
+			path = json_object_get_string(pobj);
 
-			json_object_object_foreach(jobj, key, value) {
-				if (strcmp(key, "from") == 0 || strcmp(key, "to") == 0)
-					continue;
+			if (strcmp(path, "/nemobusd") == 0) {
+				struct json_object *tobj0;
+				struct json_object *tobj1;
 
-				if (strcmp(key, "advertise") == 0) {
-					if (json_object_object_get_ex(value, "type", &tobj0) == 0)
+				json_object_object_foreach(jobj, key, value) {
+					if (strcmp(key, "from") == 0 || strcmp(key, "to") == 0)
 						continue;
-					type = json_object_get_string(tobj0);
 
-					if (json_object_object_get_ex(value, "path", &tobj1) == 0) {
+					if (strcmp(key, "advertise") == 0) {
+						if (json_object_object_get_ex(value, "type", &tobj0) == 0)
+							continue;
+						type = json_object_get_string(tobj0);
+
+						if (json_object_object_get_ex(value, "path", &tobj1) == 0) {
+							json_object_put(tobj0);
+							continue;
+						}
+						path = json_object_get_string(tobj1);
+
+						if (strcmp(type, "set") == 0)
+							nemobusd_create_client(busd, task->fd, path);
+						else if (strcmp(type, "put") == 0)
+							nemobusd_destroy_client(busd, task->fd, path);
+
+						json_object_put(tobj1);
 						json_object_put(tobj0);
+					}
+				}
+			} else {
+				struct busclient *client;
+
+				json_object_object_foreach(jobj, key, value) {
+					if (strcmp(key, "from") == 0 || strcmp(key, "to") == 0)
 						continue;
-					}
-					path = json_object_get_string(tobj1);
 
-					if (strcmp(type, "set") == 0)
-						nemobusd_create_client(busd, task->fd, path);
-					else if (strcmp(type, "put") == 0)
-						nemobusd_destroy_client(busd, task->fd, path);
+					nemolist_for_each(client, &busd->client_list, link) {
+						if (namespace_has_prefix(client->path, path) != 0) {
+							send(client->soc, pmsg, plen, MSG_NOSIGNAL | MSG_DONTWAIT);
 
-					json_object_put(tobj1);
-					json_object_put(tobj0);
-				}
-			}
-		} else {
-			struct busclient *client;
-
-			json_object_object_foreach(jobj, key, value) {
-				if (strcmp(key, "from") == 0 || strcmp(key, "to") == 0)
-					continue;
-
-				nemolist_for_each(client, &busd->client_list, link) {
-					if (namespace_has_prefix(client->path, path) != 0) {
-						send(client->soc, msg, len, MSG_NOSIGNAL | MSG_DONTWAIT);
-
-						nemolog_message("BUSD", "send(%s:%d) [%s]\n", client->path, client->soc, msg);
+							nemolog_message("BUSD", "send(%s:%d) [%s]\n", client->path, client->soc, pmsg);
+						}
 					}
 				}
 			}
+
+			json_object_put(pobj);
+out0:
+			json_object_put(jobj);
 		}
 
-		json_object_put(pobj);
-out0:
-		json_object_put(jobj);
+		json_tokener_free(jtok);
 	}
 }
 
