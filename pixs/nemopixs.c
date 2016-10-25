@@ -614,8 +614,8 @@ static void nemopixs_dispatch_show_resize(struct nemoshow *show, int32_t width, 
 	nemopixs_one_destroy(pixs->one);
 
 	pixs->one = nemopixs_one_create(width, height, columns, rows);
-	nemopixs_one_set_noise(pixs->one, 0.75f, 1.25f);
 	nemopixs_one_set_diffuse_to(pixs->one, pixs->sprites[pixs->isprites], 0.05f);
+	nemopixs_one_set_noise(pixs->one, 0.75f, 1.25f);
 	nemopixs_one_set_position_to(pixs->one, 0);
 
 	nemoshow_one_dirty(pixs->canvas, NEMOSHOW_REDRAW_DIRTY);
@@ -645,11 +645,12 @@ static void nemopixs_dispatch_timer(struct nemotimer *timer, void *data)
 	pixs->isprites = (pixs->isprites + 1) % pixs->nsprites;
 
 	one = nemopixs_one_create(width, height, columns, rows);
-	nemopixs_one_set_noise(one, 0.75f, 1.25f);
 	nemopixs_one_set_diffuse(one, pixs->sprites[pixs->isprites], 0.05f);
+	nemopixs_one_set_noise(one, 0.75f, 1.25f);
 	nemopixs_one_set_position(one, 5);
 	nemopixs_one_set_position_to(one, 0);
 
+	nemopixs_one_set_noise(pixs->one, 0.95f, 1.25f);
 	nemopixs_one_set_position_to(pixs->one, 6);
 
 	pixs->one0 = pixs->one;
@@ -905,8 +906,8 @@ int main(int argc, char *argv[])
 	nemopixs_prepare_opengl(pixs, width, height);
 
 	pixs->one = nemopixs_one_create(width, height, pixels, pixels);
-	nemopixs_one_set_noise(pixs->one, 0.75f, 1.25f);
 	nemopixs_one_set_diffuse(pixs->one, pixs->sprites[pixs->isprites], 0.05f);
+	nemopixs_one_set_noise(pixs->one, 0.75f, 1.25f);
 	nemopixs_one_set_position(pixs->one, 4);
 	nemopixs_one_set_position_to(pixs->one, 0);
 
