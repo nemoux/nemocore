@@ -563,6 +563,8 @@ static void nemopixs_finish_opengl(struct nemopixs *pixs)
 int main(int argc, char *argv[])
 {
 	struct option options[] = {
+		{ "width",					required_argument,			NULL,			'w' },
+		{ "height",					required_argument,			NULL,			'h' },
 		{ "framerate",			required_argument,			NULL,			'r' },
 		{ "image",					required_argument,			NULL,			'i' },
 		{ "pixels",					required_argument,			NULL,			'p' },
@@ -589,11 +591,19 @@ int main(int argc, char *argv[])
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "r:i:p:t:f:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:r:i:p:t:f:", options, NULL)) {
 		if (opt == -1)
 			break;
 
 		switch (opt) {
+			case 'w':
+				width = strtoul(optarg, NULL, 10);
+				break;
+
+			case 'h':
+				height = strtoul(optarg, NULL, 10);
+				break;
+
 			case 'r':
 				fps = strtoul(optarg, NULL, 10);
 				break;
@@ -759,7 +769,8 @@ int main(int argc, char *argv[])
 	nemopixs_prepare_pixels(pixs, width, height, pixels, pixels);
 
 	nemopixs_set_diffuse(pixs, pixs->sprites[pixs->isprites], 0.05f);
-	nemopixs_set_position(pixs, 0);
+	nemopixs_set_position(pixs, 4);
+	nemopixs_set_position_to(pixs, 0);
 
 	pixs->timer = timer = nemotimer_create(tool);
 	nemotimer_set_callback(timer, nemopixs_dispatch_timer);
