@@ -139,6 +139,21 @@ static int nemopixs_one_set_position(struct pixsone *one, int action)
 	return 0;
 }
 
+static int nemopixs_one_set_transform(struct pixsone *one, float x, float y, float w, float h)
+{
+	int i;
+
+	for (i = 0; i < one->pixscount; i++) {
+		one->vertices[i * 3 + 0] = one->positions0[i * 2 + 0] * w + x;
+		one->vertices[i * 3 + 1] = one->positions0[i * 2 + 1] * h + y;
+
+		one->vertices0[i * 3 + 0] = one->vertices[i * 3 + 0];
+		one->vertices0[i * 3 + 1] = one->vertices[i * 3 + 1];
+	}
+
+	return 0;
+}
+
 static int nemopixs_one_set_diffuse(struct pixsone *one, struct showone *canvas, float minimum_alpha)
 {
 	uint8_t *pixels;
@@ -262,6 +277,20 @@ static int nemopixs_one_set_position_to(struct pixsone *one, int action)
 			one->vertices0[i * 3 + 0] = one->positions0[i * 2 + 0];
 			one->vertices0[i * 3 + 1] = 1.2f;
 		}
+	}
+
+	one->is_vertices_dirty = 1;
+
+	return 0;
+}
+
+static int nemopixs_one_set_transform_to(struct pixsone *one, float x, float y, float w, float h)
+{
+	int i;
+
+	for (i = 0; i < one->pixscount; i++) {
+		one->vertices0[i * 3 + 0] = one->positions0[i * 2 + 0] * w + x;
+		one->vertices0[i * 3 + 1] = one->positions0[i * 2 + 1] * h + y;
 	}
 
 	one->is_vertices_dirty = 1;
@@ -550,11 +579,9 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 	struct nemopixs *pixs = (struct nemopixs *)nemoshow_get_userdata(show);
 
 	if (nemoshow_event_is_pointer_left_down(show, event)) {
-		nemopixs_one_set_noise(pixs->one, 0.75f, 1.25f);
-		nemopixs_one_set_position_to(pixs->one, 0);
+		nemopixs_one_set_transform_to(pixs->one, -0.5f, -0.5f, 0.5f, 0.5f);
 	} else if (nemoshow_event_is_pointer_right_down(show, event)) {
-		nemopixs_one_set_noise(pixs->one, 0.75f, 1.25f);
-		nemopixs_one_set_position_to(pixs->one, 2);
+		nemopixs_one_set_transform_to(pixs->one, 0.0f, 0.0f, 1.0f, 1.0f);
 	}
 
 	if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event) || nemoshow_event_is_touch_motion(show, event)) {
