@@ -728,6 +728,14 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 		nemopixs_one_set_position_to(pixs->one, 0);
 
 		nemotimer_set_timeout(pixs->timer, pixs->timeout);
+	} else if (nemoshow_event_is_pointer_right_down(show, event)) {
+		pixs->isprites = (pixs->isprites + pixs->nsprites - 1) % pixs->nsprites;
+
+		nemopixs_one_set_diffuse_to(pixs->one, pixs->sprites[pixs->isprites], 0.05f);
+		nemopixs_one_set_noise(pixs->one, 0.85f, 1.05f);
+		nemopixs_one_set_position_to(pixs->one, 0);
+
+		nemotimer_set_timeout(pixs->timer, pixs->timeout);
 	}
 
 	if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event) || nemoshow_event_is_touch_motion(show, event)) {
