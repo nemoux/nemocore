@@ -90,6 +90,37 @@ static void nemopixs_one_destroy(struct pixsone *one)
 	free(one);
 }
 
+static inline void nemopixs_one_move(struct pixsone *one, int s, int d)
+{
+	one->vertices[d * 3 + 0] = one->vertices[s * 3 + 0];
+	one->vertices[d * 3 + 1] = one->vertices[s * 3 + 1];
+	one->vertices[d * 3 + 2] = one->vertices[s * 3 + 2];
+
+	one->velocities[d * 2 + 0] = one->velocities[s * 2 + 0];
+	one->velocities[d * 2 + 1] = one->velocities[s * 2 + 1];
+
+	one->diffuses[d * 4 + 0] = one->diffuses[s * 4 + 0];
+	one->diffuses[d * 4 + 1] = one->diffuses[s * 4 + 1];
+	one->diffuses[d * 4 + 2] = one->diffuses[s * 4 + 2];
+	one->diffuses[d * 4 + 3] = one->diffuses[s * 4 + 3];
+
+	one->noises[d] = one->noises[s];
+
+	one->vertices0[d * 3 + 0] = one->vertices0[s * 3 + 0];
+	one->vertices0[d * 3 + 1] = one->vertices0[s * 3 + 1];
+	one->vertices0[d * 3 + 2] = one->vertices0[s * 3 + 2];
+
+	one->diffuses0[d * 4 + 0] = one->diffuses0[s * 4 + 0];
+	one->diffuses0[d * 4 + 1] = one->diffuses0[s * 4 + 1];
+	one->diffuses0[d * 4 + 2] = one->diffuses0[s * 4 + 2];
+	one->diffuses0[d * 4 + 3] = one->diffuses0[s * 4 + 3];
+
+	one->positions0[d * 2 + 0] = one->positions0[s * 2 + 0];
+	one->positions0[d * 2 + 1] = one->positions0[s * 2 + 1];
+
+	one->pixels0[d] = one->pixels0[s];
+}
+
 static int nemopixs_one_set_position(struct pixsone *one, int action)
 {
 	float seed;
@@ -505,6 +536,11 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 					one->vertices[i * 3 + 1] = one->vertices[i * 3 + 1] + one->velocities[i * 2 + 1] * dt;
 
 					needs_feedback = 1;
+				} else if (i >= one->pixscount0) {
+					if (i < one->pixscount - 1)
+						nemopixs_one_move(one, one->pixscount - 1, i);
+
+					one->pixscount--;
 				} else {
 					one->vertices[i * 3 + 0] = x0;
 					one->vertices[i * 3 + 1] = y0;
@@ -631,11 +667,8 @@ static void nemopixs_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 
 	one = pixs->one;
 	if (one != NULL) {
-		if (nemopixs_update_one(pixs, one, dt) != 0) {
+		if (nemopixs_update_one(pixs, one, dt) != 0)
 			is_updated = 1;
-		} else {
-			one->pixscount = one->pixscount0;
-		}
 
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &one->vertices[0]);
 		glEnableVertexAttribArray(0);
@@ -649,13 +682,10 @@ static void nemopixs_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 	if (one != NULL) {
 		int is_done = 0;
 
-		if (nemopixs_update_one(pixs, one, dt) != 0) {
+		if (nemopixs_update_one(pixs, one, dt) != 0)
 			is_updated = 1;
-		} else {
-			one->pixscount = one->pixscount0;
-
+		else
 			is_done = 1;
-		}
 
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &one->vertices[0]);
 		glEnableVertexAttribArray(0);
