@@ -25,9 +25,9 @@
 #define NEMOPIXS_COLOR_MINIMUM_DISTANCE						(0.01f)
 
 #define NEMOPIXS_GRAVITYWELL_INTENSITY		(3.0f)
-#define NEMOPIXS_MOVE_INTENSITY						(512.0f)
+#define NEMOPIXS_MOVE_INTENSITY						(256.0f)
 #define NEMOPIXS_COLOR_INTENSITY					(64.0f)
-#define NEMOPIXS_PIXEL_INTENSITY					(512.0f)
+#define NEMOPIXS_PIXEL_INTENSITY					(256.0f)
 
 #define NEMOPIXS_MOVE_EPSILON							(0.025f)
 #define NEMOPIXS_COLOR_EPSILON						(0.025f)
@@ -174,9 +174,8 @@ static int nemopixs_one_set_transform(struct pixsone *one, float x, float y, flo
 static int nemopixs_one_set_diffuse(struct pixsone *one, struct showone *canvas, float minimum_alpha)
 {
 	uint8_t *pixels;
+	int idx = 0;
 	int x, y;
-
-	one->pixscount = 0;
 
 	pixels = (uint8_t *)nemoshow_canvas_map(canvas);
 
@@ -189,25 +188,27 @@ static int nemopixs_one_set_diffuse(struct pixsone *one, struct showone *canvas,
 				float g = (float)pixels[(y * one->columns) * 4 + x * 4 + 1] / 255.0f;
 				float b = (float)pixels[(y * one->columns) * 4 + x * 4 + 0] / 255.0f;
 
-				one->diffuses[(y * one->columns) * 4 + x * 4 + 0] = r;
-				one->diffuses[(y * one->columns) * 4 + x * 4 + 1] = g;
-				one->diffuses[(y * one->columns) * 4 + x * 4 + 2] = b;
-				one->diffuses[(y * one->columns) * 4 + x * 4 + 3] = a;
+				one->diffuses[idx * 4 + 0] = r;
+				one->diffuses[idx * 4 + 1] = g;
+				one->diffuses[idx * 4 + 2] = b;
+				one->diffuses[idx * 4 + 3] = a;
 
-				one->diffuses0[(y * one->columns) * 4 + x * 4 + 0] = r;
-				one->diffuses0[(y * one->columns) * 4 + x * 4 + 1] = g;
-				one->diffuses0[(y * one->columns) * 4 + x * 4 + 2] = b;
-				one->diffuses0[(y * one->columns) * 4 + x * 4 + 3] = a;
+				one->diffuses0[idx * 4 + 0] = r;
+				one->diffuses0[idx * 4 + 1] = g;
+				one->diffuses0[idx * 4 + 2] = b;
+				one->diffuses0[idx * 4 + 3] = a;
 
-				one->positions0[(y * one->columns) * 2 + x * 2 + 0] = ((float)x / (float)one->columns) * 2.0f - 1.0f;
-				one->positions0[(y * one->columns) * 2 + x * 2 + 1] = ((float)y / (float)one->rows) * 2.0f - 1.0f;
+				one->positions0[idx * 2 + 0] = ((float)x / (float)one->columns) * 2.0f - 1.0f;
+				one->positions0[idx * 2 + 1] = ((float)y / (float)one->rows) * 2.0f - 1.0f;
 
-				one->pixscount++;
+				idx++;
 			}
 		}
 	}
 
 	nemoshow_canvas_unmap(canvas);
+
+	one->pixscount = idx;
 
 	nemolog_message("PIXS", "[set_diffuse] columns(%d) rows(%d) pixels(%d)\n", one->columns, one->rows, one->pixscount);
 
@@ -234,10 +235,10 @@ static int nemopixs_one_set_color(struct pixsone *one, float r, float g, float b
 
 			one->positions0[(y * one->columns) * 2 + x * 2 + 0] = ((float)x / (float)one->columns) * 2.0f - 1.0f;
 			one->positions0[(y * one->columns) * 2 + x * 2 + 1] = ((float)y / (float)one->rows) * 2.0f - 1.0f;
-
-			one->pixscount++;
 		}
 	}
+
+	one->pixscount = one->rows * one->columns;
 
 	return 0;
 }
@@ -331,6 +332,7 @@ static int nemopixs_one_set_transform_to(struct pixsone *one, float x, float y, 
 static int nemopixs_one_set_diffuse_to(struct pixsone *one, struct showone *canvas, float minimum_alpha)
 {
 	uint8_t *pixels;
+	int idx = 0;
 	int x, y;
 
 	one->pixscount = 0;
@@ -346,20 +348,22 @@ static int nemopixs_one_set_diffuse_to(struct pixsone *one, struct showone *canv
 				float g = (float)pixels[(y * one->columns) * 4 + x * 4 + 1] / 255.0f;
 				float b = (float)pixels[(y * one->columns) * 4 + x * 4 + 0] / 255.0f;
 
-				one->diffuses0[(y * one->columns) * 4 + x * 4 + 0] = r;
-				one->diffuses0[(y * one->columns) * 4 + x * 4 + 1] = g;
-				one->diffuses0[(y * one->columns) * 4 + x * 4 + 2] = b;
-				one->diffuses0[(y * one->columns) * 4 + x * 4 + 3] = a;
+				one->diffuses0[idx * 4 + 0] = r;
+				one->diffuses0[idx * 4 + 1] = g;
+				one->diffuses0[idx * 4 + 2] = b;
+				one->diffuses0[idx * 4 + 3] = a;
 
-				one->positions0[(y * one->columns) * 2 + x * 2 + 0] = ((float)x / (float)one->columns) * 2.0f - 1.0f;
-				one->positions0[(y * one->columns) * 2 + x * 2 + 1] = ((float)y / (float)one->rows) * 2.0f - 1.0f;
+				one->positions0[idx * 2 + 0] = ((float)x / (float)one->columns) * 2.0f - 1.0f;
+				one->positions0[idx * 2 + 1] = ((float)y / (float)one->rows) * 2.0f - 1.0f;
 
-				one->pixscount++;
+				idx++;
 			}
 		}
 	}
 
 	nemoshow_canvas_unmap(canvas);
+
+	one->pixscount = idx;
 
 	one->is_diffuses_dirty = 1;
 
@@ -383,10 +387,10 @@ static int nemopixs_one_set_color_to(struct pixsone *one, float r, float g, floa
 
 			one->positions0[(y * one->columns) * 2 + x * 2 + 0] = ((float)x / (float)one->columns) * 2.0f - 1.0f;
 			one->positions0[(y * one->columns) * 2 + x * 2 + 1] = ((float)y / (float)one->rows) * 2.0f - 1.0f;
-
-			one->pixscount++;
 		}
 	}
+
+	one->pixscount = one->rows * one->columns;
 
 	one->is_diffuses_dirty = 1;
 
