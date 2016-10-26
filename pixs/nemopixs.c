@@ -417,7 +417,7 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 				dd = dx * dx + dy * dy;
 				ds = sqrtf(dd + pixs->gravitywell_minimum_distance);
 
-				f = (3.0f / tapcount) * dt / (ds * ds * ds);
+				f = (3.0f / tapcount) * dt / (ds * ds * ds) * one->noises[i];
 
 				one->velocities[i * 2 + 0] += dx * f;
 				one->velocities[i * 2 + 1] += dy * f;
@@ -464,6 +464,9 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 				} else {
 					one->vertices[i * 3 + 0] = x0;
 					one->vertices[i * 3 + 1] = y0;
+
+					one->velocities[i * 2 + 0] = 0.0f;
+					one->velocities[i * 2 + 1] = 0.0f;
 				}
 
 				is_updated = 1;
@@ -703,7 +706,7 @@ static void nemopixs_dispatch_show_resize(struct nemoshow *show, int32_t width, 
 
 	pixs->one = nemopixs_one_create(width, height, columns, rows);
 	nemopixs_one_set_diffuse_to(pixs->one, pixs->sprites[pixs->isprites], 0.05f);
-	nemopixs_one_set_noise(pixs->one, 0.75f, 1.25f);
+	nemopixs_one_set_noise(pixs->one, 0.85f, 1.05f);
 	nemopixs_one_set_position_to(pixs->one, 0);
 
 	nemoshow_one_dirty(pixs->canvas, NEMOSHOW_REDRAW_DIRTY);
@@ -734,7 +737,7 @@ static void nemopixs_dispatch_timer(struct nemotimer *timer, void *data)
 
 	one = nemopixs_one_create(width, height, columns, rows);
 	nemopixs_one_set_diffuse(one, pixs->sprites[pixs->isprites], 0.05f);
-	nemopixs_one_set_noise(one, 0.75f, 1.25f);
+	nemopixs_one_set_noise(one, 0.85f, 1.05f);
 	nemopixs_one_set_position(one, 5);
 	nemopixs_one_set_position_to(one, 0);
 
@@ -995,7 +998,7 @@ int main(int argc, char *argv[])
 
 	pixs->one = nemopixs_one_create(width, height, pixels, pixels);
 	nemopixs_one_set_diffuse(pixs->one, pixs->sprites[pixs->isprites], 0.05f);
-	nemopixs_one_set_noise(pixs->one, 0.75f, 1.25f);
+	nemopixs_one_set_noise(pixs->one, 0.85f, 1.05f);
 	nemopixs_one_set_position(pixs->one, 4);
 	nemopixs_one_set_position_to(pixs->one, 0);
 
