@@ -209,6 +209,7 @@ static int nemopixs_one_set_diffuse(struct pixsone *one, struct showone *canvas,
 	nemoshow_canvas_unmap(canvas);
 
 	one->pixscount = idx;
+	one->pixscount0 = one->pixscount;
 
 	nemolog_message("PIXS", "[set_diffuse] columns(%d) rows(%d) pixels(%d)\n", one->columns, one->rows, one->pixscount);
 
@@ -239,6 +240,7 @@ static int nemopixs_one_set_color(struct pixsone *one, float r, float g, float b
 	}
 
 	one->pixscount = one->rows * one->columns;
+	one->pixscount0 = one->pixscount;
 
 	return 0;
 }
@@ -335,8 +337,6 @@ static int nemopixs_one_set_diffuse_to(struct pixsone *one, struct showone *canv
 	int idx = 0;
 	int x, y;
 
-	one->pixscount = 0;
-
 	pixels = (uint8_t *)nemoshow_canvas_map(canvas);
 
 	for (y = 0; y < one->rows; y++) {
@@ -361,9 +361,36 @@ static int nemopixs_one_set_diffuse_to(struct pixsone *one, struct showone *canv
 		}
 	}
 
+	if (idx < one->pixscount) {
+		int i, s;
+
+		for (i = idx; i < one->pixscount; i++) {
+			s = random_get_int(0, idx - 1);
+
+			one->positions0[i * 2 + 0] = one->positions0[s * 2 + 0];
+			one->positions0[i * 2 + 1] = one->positions0[s * 2 + 1];
+		}
+	} else if (idx > one->pixscount) {
+		int i, s;
+
+		for (i = one->pixscount; i < idx; i++) {
+			s = random_get_int(0, one->pixscount - 1);
+
+			one->vertices[i * 3 + 0] = one->vertices[s * 3 + 0];
+			one->vertices[i * 3 + 1] = one->vertices[s * 3 + 1];
+			one->vertices[i * 3 + 2] = one->vertices[s * 3 + 2];
+
+			one->diffuses[i * 4 + 0] = one->diffuses[s * 4 + 0];
+			one->diffuses[i * 4 + 1] = one->diffuses[s * 4 + 1];
+			one->diffuses[i * 4 + 2] = one->diffuses[s * 4 + 2];
+			one->diffuses[i * 4 + 3] = one->diffuses[s * 4 + 3];
+		}
+	}
+
 	nemoshow_canvas_unmap(canvas);
 
-	one->pixscount = idx;
+	one->pixscount = MAX(one->pixscount, idx);
+	one->pixscount0 = idx;
 
 	one->is_diffuses_dirty = 1;
 
@@ -375,8 +402,6 @@ static int nemopixs_one_set_diffuse_to(struct pixsone *one, struct showone *canv
 static int nemopixs_one_set_color_to(struct pixsone *one, float r, float g, float b, float a)
 {
 	int x, y;
-
-	one->pixscount = 0;
 
 	for (y = 0; y < one->rows; y++) {
 		for (x = 0; x < one->columns; x++) {
@@ -391,6 +416,7 @@ static int nemopixs_one_set_color_to(struct pixsone *one, float r, float g, floa
 	}
 
 	one->pixscount = one->rows * one->columns;
+	one->pixscount0 = one->rows * one->columns;
 
 	one->is_diffuses_dirty = 1;
 
@@ -605,8 +631,11 @@ static void nemopixs_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 
 	one = pixs->one;
 	if (one != NULL) {
-		if (nemopixs_update_one(pixs, one, dt) != 0)
+		if (nemopixs_update_one(pixs, one, dt) != 0) {
 			is_updated = 1;
+		} else {
+			one->pixscount = one->pixscount0;
+		}
 
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &one->vertices[0]);
 		glEnableVertexAttribArray(0);
@@ -620,10 +649,13 @@ static void nemopixs_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 	if (one != NULL) {
 		int is_done = 0;
 
-		if (nemopixs_update_one(pixs, one, dt) != 0)
+		if (nemopixs_update_one(pixs, one, dt) != 0) {
 			is_updated = 1;
-		else
+		} else {
+			one->pixscount = one->pixscount0;
+
 			is_done = 1;
+		}
 
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &one->vertices[0]);
 		glEnableVertexAttribArray(0);
@@ -659,11 +691,13 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 	struct nemopixs *pixs = (struct nemopixs *)nemoshow_get_userdata(show);
 
 	if (nemoshow_event_is_pointer_left_down(show, event)) {
-		nemopixs_one_set_transform_to(pixs->one, -0.5f, -0.5f, 0.5f, 0.5f);
-		nemopixs_one_set_pixel_to(pixs->one, 0.5f);
-	} else if (nemoshow_event_is_pointer_right_down(show, event)) {
-		nemopixs_one_set_transform_to(pixs->one, 0.0f, 0.0f, 1.0f, 1.0f);
-		nemopixs_one_set_pixel_to(pixs->one, 1.0f);
+		pixs->isprites = (pixs->isprites + 1) % pixs->nsprites;
+
+		nemopixs_one_set_diffuse_to(pixs->one, pixs->sprites[pixs->isprites], 0.05f);
+		nemopixs_one_set_noise(pixs->one, 0.85f, 1.05f);
+		nemopixs_one_set_position_to(pixs->one, 0);
+
+		nemotimer_set_timeout(pixs->timer, pixs->timeout);
 	}
 
 	if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event) || nemoshow_event_is_touch_motion(show, event)) {
@@ -1020,7 +1054,7 @@ int main(int argc, char *argv[])
 	pixs->timer = timer = nemotimer_create(tool);
 	nemotimer_set_callback(timer, nemopixs_dispatch_timer);
 	nemotimer_set_userdata(timer, pixs);
-	nemotimer_set_timeout(pixs->timer, pixs->timeout);
+	nemotimer_set_timeout(timer, pixs->timeout);
 
 	if (fullscreen == NULL)
 		nemoshow_dispatch_frame(show);

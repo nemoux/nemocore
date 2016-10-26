@@ -24,6 +24,7 @@ struct pixsone {
 	float *positions0;
 	float *pixels0;
 	uint32_t pixscount;
+	uint32_t pixscount0;
 
 	int is_vertices_dirty;
 	int is_diffuses_dirty;
