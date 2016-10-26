@@ -19,6 +19,20 @@
 #include <nemolog.h>
 #include <nemomisc.h>
 
+#define NEMOPIXS_GRAVITYWELL_MINIMUM_DISTANCE			(0.18f)
+#define NEMOPIXS_MOVE_MINIMUM_DISTANCE						(0.01f)
+#define NEMOPIXS_PIXEL_MINIMUM_DISTANCE						(1.0f)
+#define NEMOPIXS_COLOR_MINIMUM_DISTANCE						(0.01f)
+
+#define NEMOPIXS_GRAVITYWELL_INTENSITY		(3.0f)
+#define NEMOPIXS_MOVE_INTENSITY						(512.0f)
+#define NEMOPIXS_COLOR_INTENSITY					(64.0f)
+#define NEMOPIXS_PIXEL_INTENSITY					(512.0f)
+
+#define NEMOPIXS_MOVE_EPSILON							(0.025f)
+#define NEMOPIXS_COLOR_EPSILON						(0.025f)
+#define NEMOPIXS_PIXEL_EPSILON						(1.0f)
+
 static struct pixsone *nemopixs_one_create(int32_t width, int32_t height, int32_t columns, int32_t rows)
 {
 	struct pixsone *one;
@@ -415,9 +429,9 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 				dx = x0 - one->vertices[i * 3 + 0];
 				dy = y0 - one->vertices[i * 3 + 1];
 				dd = dx * dx + dy * dy;
-				ds = sqrtf(dd + pixs->gravitywell_minimum_distance);
+				ds = sqrtf(dd + NEMOPIXS_GRAVITYWELL_MINIMUM_DISTANCE);
 
-				f = (3.0f / tapcount) * dt / (ds * ds * ds) * one->noises[i];
+				f = (NEMOPIXS_GRAVITYWELL_INTENSITY / tapcount) * dt / (ds * ds * ds) * one->noises[i];
 
 				one->velocities[i * 2 + 0] += dx * f;
 				one->velocities[i * 2 + 1] += dy * f;
@@ -449,10 +463,10 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 			if (dx != 0.0f || dy != 0.0f) {
 				dd = dx * dx + dy * dy;
 
-				if (dd > 0.005f) {
-					ds = sqrtf(dd + pixs->move_minimum_distance);
+				if (dd > NEMOPIXS_MOVE_EPSILON) {
+					ds = sqrtf(dd + NEMOPIXS_MOVE_MINIMUM_DISTANCE);
 
-					f = 512.0f * dt / ds * c * one->noises[i];
+					f = NEMOPIXS_MOVE_INTENSITY * dt / ds * c * one->noises[i];
 
 					one->velocities[i * 2 + 0] = dx * f;
 					one->velocities[i * 2 + 1] = dy * f;
@@ -486,10 +500,10 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 			dd = s0 - one->vertices[i * 3 + 2];
 
 			if (dd != 0.0f) {
-				if (dd > 1.0f) {
-					ds = sqrtf(dd + 1.0f);
+				if (dd > NEMOPIXS_PIXEL_EPSILON) {
+					ds = sqrtf(dd + NEMOPIXS_PIXEL_MINIMUM_DISTANCE);
 
-					f = 512.0f * dt / ds * one->noises[i];
+					f = NEMOPIXS_PIXEL_INTENSITY * dt / ds * one->noises[i];
 
 					one->vertices[i * 3 + 2] = one->vertices[i * 3 + 2] + dd * f * dt;
 
@@ -523,10 +537,10 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 			if (dr != 0.0f || dg != 0.0f || db != 0.0f || da != 0.0f) {
 				dd = dr * dr + dg * dg + db * db + da * da;
 
-				if (dd > 0.005f) {
-					ds = sqrtf(dd + pixs->move_minimum_distance);
+				if (dd > NEMOPIXS_COLOR_EPSILON) {
+					ds = sqrtf(dd + NEMOPIXS_COLOR_MINIMUM_DISTANCE);
 
-					f = 64.0f * dt / ds * one->noises[i];
+					f = NEMOPIXS_COLOR_INTENSITY * dt / ds * one->noises[i];
 
 					one->diffuses[i * 4 + 0] = one->diffuses[i * 4 + 0] + dr * f * dt;
 					one->diffuses[i * 4 + 1] = one->diffuses[i * 4 + 1] + dg * f * dt;
@@ -867,9 +881,6 @@ int main(int argc, char *argv[])
 	pixs->height = height;
 	pixs->pixels = pixels;
 	pixs->timeout = timeout;
-
-	pixs->gravitywell_minimum_distance = 0.18f;
-	pixs->move_minimum_distance = 0.01f;
 
 	pixs->tool = tool = nemotool_create();
 	if (tool == NULL)

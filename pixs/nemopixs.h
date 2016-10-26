@@ -57,9 +57,6 @@ struct nemopixs {
 	struct pixsone *one;
 	struct pixsone *one0;
 
-	float gravitywell_minimum_distance;
-	float move_minimum_distance;
-
 	int pixels;
 
 	uint32_t msecs;
