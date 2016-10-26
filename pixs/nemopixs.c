@@ -121,6 +121,38 @@ static inline void nemopixs_one_move(struct pixsone *one, int s, int d)
 	one->pixels0[d] = one->pixels0[s];
 }
 
+static inline void nemopixs_one_shuffle(struct pixsone *one)
+{
+	float d[4];
+	float p[2];
+	int i, s;
+
+	for (i = 0; i < one->pixscount0; i++) {
+		s = random_get_int(0, one->pixscount0 - 1);
+
+		d[0] = one->diffuses0[s * 4 + 0];
+		d[1] = one->diffuses0[s * 4 + 1];
+		d[2] = one->diffuses0[s * 4 + 2];
+		d[3] = one->diffuses0[s * 4 + 3];
+		p[0] = one->positions0[s * 2 + 0];
+		p[1] = one->positions0[s * 2 + 1];
+
+		one->diffuses0[s * 4 + 0] = one->diffuses0[i * 4 + 0];
+		one->diffuses0[s * 4 + 1] = one->diffuses0[i * 4 + 1];
+		one->diffuses0[s * 4 + 2] = one->diffuses0[i * 4 + 2];
+		one->diffuses0[s * 4 + 3] = one->diffuses0[i * 4 + 3];
+		one->positions0[s * 2 + 0] = one->positions0[i * 2 + 0];
+		one->positions0[s * 2 + 1] = one->positions0[i * 2 + 1];
+
+		one->diffuses0[i * 4 + 0] = d[0];
+		one->diffuses0[i * 4 + 1] = d[1];
+		one->diffuses0[i * 4 + 2] = d[2];
+		one->diffuses0[i * 4 + 3] = d[3];
+		one->positions0[i * 2 + 0] = p[0];
+		one->positions0[i * 2 + 1] = p[1];
+	}
+}
+
 static int nemopixs_one_set_position(struct pixsone *one, int action)
 {
 	float seed;
@@ -724,6 +756,7 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 		pixs->isprites = (pixs->isprites + 1) % pixs->nsprites;
 
 		nemopixs_one_set_diffuse_to(pixs->one, pixs->sprites[pixs->isprites], 0.05f);
+		nemopixs_one_shuffle(pixs->one);
 		nemopixs_one_set_noise(pixs->one, 0.85f, 1.05f);
 		nemopixs_one_set_position_to(pixs->one, 0);
 
@@ -732,6 +765,7 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 		pixs->isprites = (pixs->isprites + pixs->nsprites - 1) % pixs->nsprites;
 
 		nemopixs_one_set_diffuse_to(pixs->one, pixs->sprites[pixs->isprites], 0.05f);
+		nemopixs_one_shuffle(pixs->one);
 		nemopixs_one_set_noise(pixs->one, 0.85f, 1.05f);
 		nemopixs_one_set_position_to(pixs->one, 0);
 
