@@ -22,12 +22,16 @@ struct pixsone {
 	float *vertices0;
 	float *diffuses0;
 	float *positions0;
+	float *pixels0;
 	uint32_t pixscount;
 
 	int is_vertices_dirty;
 	int is_diffuses_dirty;
+	int is_pixels_dirty;
 
 	int rows, columns;
+
+	float pixsize;
 };
 
 struct nemopixs {

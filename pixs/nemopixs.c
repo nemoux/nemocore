@@ -32,6 +32,7 @@ static struct pixsone *nemopixs_one_create(int32_t width, int32_t height, int32_
 
 	one->rows = rows;
 	one->columns = columns;
+	one->pixsize = pixsize;
 
 	one->vertices = (float *)malloc(sizeof(float[3]) * rows * columns);
 	one->velocities = (float *)malloc(sizeof(float[2]) * rows * columns);
@@ -40,6 +41,7 @@ static struct pixsone *nemopixs_one_create(int32_t width, int32_t height, int32_
 	one->vertices0 = (float *)malloc(sizeof(float[3]) * rows * columns);
 	one->diffuses0 = (float *)malloc(sizeof(float[4]) * rows * columns);
 	one->positions0 = (float *)malloc(sizeof(float[2]) * rows * columns);
+	one->pixels0 = (float *)malloc(sizeof(float) * rows * columns);
 
 	for (i = 0; i < rows * columns; i++) {
 		one->vertices[i * 3 + 0] = 0.0f;
@@ -69,6 +71,7 @@ static void nemopixs_one_destroy(struct pixsone *one)
 	free(one->vertices0);
 	free(one->diffuses0);
 	free(one->positions0);
+	free(one->pixels0);
 
 	free(one);
 }
@@ -225,6 +228,19 @@ static int nemopixs_one_set_color(struct pixsone *one, float r, float g, float b
 	return 0;
 }
 
+static int nemopixs_one_set_pixel(struct pixsone *one, float r)
+{
+	int i;
+
+	for (i = 0; i < one->pixscount; i++) {
+		one->vertices[i * 3 + 2] = one->pixsize * r;
+
+		one->pixels0[i] = one->pixsize * r;
+	}
+
+	return 0;
+}
+
 static int nemopixs_one_set_noise(struct pixsone *one, float min, float max)
 {
 	int i;
@@ -363,11 +379,25 @@ static int nemopixs_one_set_color_to(struct pixsone *one, float r, float g, floa
 	return 0;
 }
 
+static int nemopixs_one_set_pixel_to(struct pixsone *one, float r)
+{
+	int i;
+
+	for (i = 0; i < one->pixscount; i++) {
+		one->pixels0[i] = one->pixsize * r;
+	}
+
+	one->is_pixels_dirty = 1;
+
+	return 0;
+}
+
 static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float dt)
 {
 	int tapcount = nemoshow_event_get_tapcount(&pixs->events);
 	int is_updated = 0;
 	float x0, y0;
+	float s0;
 	float dx, dy, dd, ds;
 	float dr, dg, db, da;
 	float r0, g0, b0, a0;
@@ -442,6 +472,35 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 
 		if (needs_feedback == 0)
 			one->is_vertices_dirty = 0;
+	}
+
+	if (one->is_pixels_dirty != 0) {
+		int needs_feedback = 0;
+
+		for (i = 0; i < one->pixscount; i++) {
+			s0 = one->pixels0[i];
+
+			dd = s0 - one->vertices[i * 3 + 2];
+
+			if (dd != 0.0f) {
+				if (dd > 1.0f) {
+					ds = sqrtf(dd + 1.0f);
+
+					f = 512.0f * dt / ds * one->noises[i];
+
+					one->vertices[i * 3 + 2] = one->vertices[i * 3 + 2] + dd * f * dt;
+
+					needs_feedback = 1;
+				} else {
+					one->vertices[i * 3 + 2] = s0;
+				}
+
+				is_updated = 1;
+			}
+		}
+
+		if (needs_feedback == 0)
+			one->is_pixels_dirty = 0;
 	}
 
 	if (one->is_diffuses_dirty != 0) {
@@ -580,8 +639,10 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 	if (nemoshow_event_is_pointer_left_down(show, event)) {
 		nemopixs_one_set_transform_to(pixs->one, -0.5f, -0.5f, 0.5f, 0.5f);
+		nemopixs_one_set_pixel_to(pixs->one, 0.5f);
 	} else if (nemoshow_event_is_pointer_right_down(show, event)) {
 		nemopixs_one_set_transform_to(pixs->one, 0.0f, 0.0f, 1.0f, 1.0f);
+		nemopixs_one_set_pixel_to(pixs->one, 1.0f);
 	}
 
 	if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event) || nemoshow_event_is_touch_motion(show, event)) {
