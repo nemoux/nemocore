@@ -92,7 +92,7 @@ static void nemopixs_one_destroy(struct pixsone *one)
 	free(one);
 }
 
-static inline void nemopixs_one_move(struct pixsone *one, int s, int d)
+static inline void nemopixs_one_copy(struct pixsone *one, int s, int d)
 {
 	one->vertices[d * 3 + 0] = one->vertices[s * 3 + 0];
 	one->vertices[d * 3 + 1] = one->vertices[s * 3 + 1];
@@ -153,6 +153,18 @@ static inline void nemopixs_one_shuffle(struct pixsone *one)
 		one->positions0[i * 2 + 0] = p[0];
 		one->positions0[i * 2 + 1] = p[1];
 	}
+}
+
+static int nemopixs_one_transform(struct pixsone *one, float tx, float ty, float sx, float sy)
+{
+	int i;
+
+	for (i = 0; i < one->pixscount; i++) {
+		one->positions0[i * 2 + 0] = one->positions0[i * 2 + 0] * sx + tx;
+		one->positions0[i * 2 + 1] = one->positions0[i * 2 + 1] * sy + ty;
+	}
+
+	return 0;
 }
 
 static inline void nemopixs_one_jitter(struct pixsone *one, float size)
@@ -226,21 +238,6 @@ static int nemopixs_one_set_position(struct pixsone *one, int action)
 			one->vertices0[i * 3 + 0] = one->vertices[i * 3 + 0];
 			one->vertices0[i * 3 + 1] = one->vertices[i * 3 + 1];
 		}
-	}
-
-	return 0;
-}
-
-static int nemopixs_one_set_transform(struct pixsone *one, float x, float y, float w, float h)
-{
-	int i;
-
-	for (i = 0; i < one->pixscount; i++) {
-		one->vertices[i * 3 + 0] = one->positions0[i * 2 + 0] * w + x;
-		one->vertices[i * 3 + 1] = one->positions0[i * 2 + 1] * h + y;
-
-		one->vertices0[i * 3 + 0] = one->vertices[i * 3 + 0];
-		one->vertices0[i * 3 + 1] = one->vertices[i * 3 + 1];
 	}
 
 	return 0;
@@ -385,20 +382,6 @@ static int nemopixs_one_set_position_to(struct pixsone *one, int action)
 			one->vertices0[i * 3 + 0] = one->positions0[i * 2 + 0];
 			one->vertices0[i * 3 + 1] = 1.2f;
 		}
-	}
-
-	one->is_vertices_dirty = 1;
-
-	return 0;
-}
-
-static int nemopixs_one_set_transform_to(struct pixsone *one, float x, float y, float w, float h)
-{
-	int i;
-
-	for (i = 0; i < one->pixscount; i++) {
-		one->vertices0[i * 3 + 0] = one->positions0[i * 2 + 0] * w + x;
-		one->vertices0[i * 3 + 1] = one->positions0[i * 2 + 1] * h + y;
 	}
 
 	one->is_vertices_dirty = 1;
@@ -583,7 +566,7 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 					needs_feedback = 1;
 				} else if (i >= one->pixscount0) {
 					if (i < one->pixscount - 1)
-						nemopixs_one_move(one, one->pixscount - 1, i);
+						nemopixs_one_copy(one, one->pixscount - 1, i);
 
 					one->pixscount--;
 				} else {
