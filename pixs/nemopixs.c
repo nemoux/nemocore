@@ -525,10 +525,9 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 			one->vertices[i * 3 + 1] = CLAMP(one->vertices[i * 3 + 1] + one->velocities[i * 2 + 1] * dt, -1.0f, 1.0f);
 		}
 
-		is_updated = 1;
+		one->is_vertices_dirty = 1;
 
-		if (one->is_vertices_dirty == 0)
-			one->is_vertices_dirty = 1;
+		is_updated = 1;
 	} else {
 		if (one->is_vertices_dirty == 1) {
 			int needs_feedback = 0;
@@ -574,6 +573,7 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 						nemopixs_one_copy(one, one->pixscount - 1, i);
 
 					one->pixscount--;
+					i--;
 				}
 			}
 
@@ -625,6 +625,7 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 						nemopixs_one_copy(one, one->pixscount - 1, i);
 
 					one->pixscount--;
+					i--;
 				}
 			}
 
