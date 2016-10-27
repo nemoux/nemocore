@@ -155,7 +155,7 @@ static inline void nemopixs_one_shuffle(struct pixsone *one)
 	}
 }
 
-static int nemopixs_one_transform(struct pixsone *one, float tx, float ty, float sx, float sy)
+static inline void nemopixs_one_transform(struct pixsone *one, float tx, float ty, float sx, float sy)
 {
 	int i;
 
@@ -163,8 +163,6 @@ static int nemopixs_one_transform(struct pixsone *one, float tx, float ty, float
 		one->positions0[i * 2 + 0] = one->positions0[i * 2 + 0] * sx + tx;
 		one->positions0[i * 2 + 1] = one->positions0[i * 2 + 1] * sy + ty;
 	}
-
-	return 0;
 }
 
 static inline void nemopixs_one_jitter(struct pixsone *one, float size)
@@ -531,7 +529,8 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 
 		is_updated = 1;
 
-		one->is_vertices_dirty = 1;
+		if (one->is_vertices_dirty == 0)
+			one->is_vertices_dirty = 1;
 	}
 
 	if (one->is_vertices_dirty != 0 && tapcount == 0) {
