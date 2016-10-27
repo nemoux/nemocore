@@ -59,6 +59,7 @@ struct nemopixs {
 	struct pixsone *one0;
 
 	int pixels;
+	float jitter;
 
 	uint32_t msecs;
 

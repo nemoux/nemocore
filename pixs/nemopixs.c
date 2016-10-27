@@ -763,7 +763,7 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 		nemopixs_one_set_diffuse_to(pixs->one, pixs->sprites[pixs->isprites], 0.05f);
 		nemopixs_one_shuffle(pixs->one);
-		nemopixs_one_jitter(pixs->one, 0.005f);
+		nemopixs_one_jitter(pixs->one, pixs->jitter);
 		nemopixs_one_set_noise(pixs->one, 0.85f, 1.05f);
 		nemopixs_one_set_position_to(pixs->one, 0);
 	} else if (nemoshow_event_is_pointer_right_down(show, event)) {
@@ -771,7 +771,7 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 		nemopixs_one_set_diffuse_to(pixs->one, pixs->sprites[pixs->isprites], 0.05f);
 		nemopixs_one_shuffle(pixs->one);
-		nemopixs_one_jitter(pixs->one, 0.005f);
+		nemopixs_one_jitter(pixs->one, pixs->jitter);
 		nemopixs_one_set_noise(pixs->one, 0.85f, 1.05f);
 		nemopixs_one_set_position_to(pixs->one, 0);
 	}
@@ -836,7 +836,7 @@ static void nemopixs_dispatch_show_resize(struct nemoshow *show, int32_t width, 
 
 	pixs->one = nemopixs_one_create(width, height, columns, rows);
 	nemopixs_one_set_diffuse_to(pixs->one, pixs->sprites[pixs->isprites], 0.05f);
-	nemopixs_one_jitter(pixs->one, 0.005f);
+	nemopixs_one_jitter(pixs->one, pixs->jitter);
 	nemopixs_one_set_noise(pixs->one, 0.85f, 1.05f);
 	nemopixs_one_set_position_to(pixs->one, 0);
 
@@ -868,7 +868,7 @@ static void nemopixs_dispatch_timer(struct nemotimer *timer, void *data)
 
 	one = nemopixs_one_create(width, height, columns, rows);
 	nemopixs_one_set_diffuse(one, pixs->sprites[pixs->isprites], 0.05f);
-	nemopixs_one_jitter(one, 0.005f);
+	nemopixs_one_jitter(one, pixs->jitter);
 	nemopixs_one_set_noise(one, 0.85f, 1.05f);
 	nemopixs_one_set_position(one, 5);
 	nemopixs_one_set_position_to(one, 0);
@@ -931,6 +931,7 @@ int main(int argc, char *argv[])
 		{ "framerate",			required_argument,			NULL,			'r' },
 		{ "image",					required_argument,			NULL,			'i' },
 		{ "pixels",					required_argument,			NULL,			'p' },
+		{ "jitter",					required_argument,			NULL,			'j' },
 		{ "timeout",				required_argument,			NULL,			't' },
 		{ "fullscreen",			required_argument,			NULL,			'f' },
 		{ 0 }
@@ -945,6 +946,7 @@ int main(int argc, char *argv[])
 	struct showone *one;
 	char *imagepath = NULL;
 	char *fullscreen = NULL;
+	float jitter = 0.0f;
 	int timeout = 10000;
 	int width = 800;
 	int height = 800;
@@ -954,7 +956,7 @@ int main(int argc, char *argv[])
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "w:h:r:i:p:t:f:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:r:i:p:j:t:f:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -979,6 +981,10 @@ int main(int argc, char *argv[])
 				pixels = strtoul(optarg, NULL, 10);
 				break;
 
+			case 'j':
+				jitter = strtod(optarg, NULL);
+				break;
+
 			case 't':
 				timeout = strtoul(optarg, NULL, 10);
 				break;
@@ -1000,6 +1006,7 @@ int main(int argc, char *argv[])
 	pixs->width = width;
 	pixs->height = height;
 	pixs->pixels = pixels;
+	pixs->jitter = jitter;
 	pixs->timeout = timeout;
 
 	pixs->tool = tool = nemotool_create();
@@ -1129,7 +1136,7 @@ int main(int argc, char *argv[])
 
 	pixs->one = nemopixs_one_create(width, height, pixels, pixels);
 	nemopixs_one_set_diffuse(pixs->one, pixs->sprites[pixs->isprites], 0.05f);
-	nemopixs_one_jitter(pixs->one, 0.005f);
+	nemopixs_one_jitter(pixs->one, pixs->jitter);
 	nemopixs_one_set_noise(pixs->one, 0.85f, 1.05f);
 	nemopixs_one_set_position(pixs->one, 4);
 	nemopixs_one_set_position_to(pixs->one, 0);
