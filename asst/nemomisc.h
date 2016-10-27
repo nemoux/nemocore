@@ -11,11 +11,19 @@ NEMO_BEGIN_EXTERN_C
 #include <stdint.h>
 
 #ifndef MIN
-#	define MIN(x,y) (((x) < (y)) ? (x) : (y))
+#	define MIN(x, y) ((x) < (y) ? (x) : (y))
 #endif
 
 #ifndef MAX
-#	define MAX(x,y) (((x) > (y)) ? (x) : (y))
+#	define MAX(x, y) ((x) > (y) ? (x) : (y))
+#endif
+
+#ifndef MIN3
+# define MIN3(x, y, z)		((x) < (y) ? ((x) < (z) ? (x) : (z)) : ((y) < (z) ? (y) : (z)))
+#endif
+
+#ifndef MAX3
+# define MAX3(x, y, z)		((x) > (y) ? ((x) > (z) ? (x) : (z)) : ((y) > (z) ? (y) : (z)))
 #endif
 
 #ifndef CLAMP
@@ -23,7 +31,7 @@ NEMO_BEGIN_EXTERN_C
 #endif
 
 #ifndef MINMAX
-#	define MINMAX(x,y,z)	(MIN(MAX(x,y), z))
+#	define MINMAX(x, y, z)	(MIN(MAX(x, y), z))
 #endif
 
 #ifndef SQUARE

@@ -25,13 +25,15 @@
 #define NEMOPIXS_COLOR_MINIMUM_DISTANCE						(0.01f)
 
 #define NEMOPIXS_GRAVITYWELL_INTENSITY		(3.0f)
-#define NEMOPIXS_MOVE_INTENSITY						(256.0f)
+#define NEMOPIXS_MOVE_INTENSITY						(128.0f)
 #define NEMOPIXS_COLOR_INTENSITY					(64.0f)
-#define NEMOPIXS_PIXEL_INTENSITY					(256.0f)
+#define NEMOPIXS_PIXEL_INTENSITY					(128.0f)
 
 #define NEMOPIXS_MOVE_EPSILON							(0.025f)
 #define NEMOPIXS_COLOR_EPSILON						(0.025f)
 #define NEMOPIXS_PIXEL_EPSILON						(1.0f)
+
+#define NEMOPIXS_MOVE_MINIMUM_COLOR_FORCE		(0.3f)
 
 static struct pixsone *nemopixs_one_create(int32_t width, int32_t height, int32_t columns, int32_t rows)
 {
@@ -555,7 +557,8 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 		mc = random_get_double(0.015f, 0.075f);
 
 		for (i = 0; i < one->pixscount; i++) {
-			c = MAX(MAX(one->diffuses[i * 4 + 0], one->diffuses[i * 4 + 1]), MAX(one->diffuses[i * 4 + 2], mc));
+			c = MAX3(one->diffuses[i * 4 + 0], one->diffuses[i * 4 + 1], one->diffuses[i * 4 + 2]);
+			c = c * (1.0f - NEMOPIXS_MOVE_MINIMUM_COLOR_FORCE) + NEMOPIXS_MOVE_MINIMUM_COLOR_FORCE;
 
 			x0 = one->vertices0[i * 3 + 0];
 			y0 = one->vertices0[i * 3 + 1];
