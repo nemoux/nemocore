@@ -26,14 +26,16 @@
 
 #define NEMOPIXS_GRAVITYWELL_INTENSITY		(3.0f)
 #define NEMOPIXS_MOVE_INTENSITY						(128.0f)
+#define NEMOPIXS_ANGULAR_INTENSITY				(3.0f)
 #define NEMOPIXS_COLOR_INTENSITY					(64.0f)
 #define NEMOPIXS_PIXEL_INTENSITY					(128.0f)
 
 #define NEMOPIXS_MOVE_EPSILON							(0.025f)
+#define NEMOPIXS_ANGULAR_EPSILON					(0.005f)
 #define NEMOPIXS_COLOR_EPSILON						(0.025f)
 #define NEMOPIXS_PIXEL_EPSILON						(1.0f)
 
-#define NEMOPIXS_MOVE_MINIMUM_COLOR_FORCE		(0.3f)
+#define NEMOPIXS_MOVE_MINIMUM_COLOR_FORCE				(0.3f)
 
 static struct pixsone *nemopixs_one_create(int32_t width, int32_t height, int32_t columns, int32_t rows)
 {
@@ -339,7 +341,7 @@ static int nemopixs_one_set_noise(struct pixsone *one, float min, float max)
 	return 0;
 }
 
-static int nemopixs_one_set_position_to(struct pixsone *one, int action)
+static int nemopixs_one_set_position_to(struct pixsone *one, int action, int dirty)
 {
 	float seed;
 	int i;
@@ -382,7 +384,7 @@ static int nemopixs_one_set_position_to(struct pixsone *one, int action)
 		}
 	}
 
-	one->is_vertices_dirty = 1;
+	one->is_vertices_dirty = dirty;
 
 	return 0;
 }
@@ -496,17 +498,13 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 {
 	int tapcount = nemoshow_event_get_tapcount(&pixs->events);
 	int is_updated = 0;
-	float x0, y0;
-	float s0;
-	float dx, dy, dd, ds;
-	float dr, dg, db, da;
-	float r0, g0, b0, a0;
-	float f;
-	float c;
-	float mc;
-	int i, n;
 
 	if (tapcount > 0) {
+		float x0, y0;
+		float dx, dy, dd, ds;
+		float f;
+		int i, n;
+
 		for (i = 0; i < one->pixscount; i++) {
 			for (n = 0; n < tapcount; n++) {
 				x0 = (nemoshow_event_get_x_on(&pixs->events, n) / (float)pixs->width) * 2.0f - 1.0f;
@@ -531,61 +529,118 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 
 		if (one->is_vertices_dirty == 0)
 			one->is_vertices_dirty = 1;
-	}
+	} else {
+		if (one->is_vertices_dirty == 1) {
+			int needs_feedback = 0;
+			float x0, y0;
+			float dx, dy, dd, ds;
+			float f, c;
+			int i;
 
-	if (one->is_vertices_dirty != 0 && tapcount == 0) {
-		int needs_feedback = 0;
+			for (i = 0; i < one->pixscount; i++) {
+				c = MAX3(one->diffuses[i * 4 + 0], one->diffuses[i * 4 + 1], one->diffuses[i * 4 + 2]);
+				c = c * (1.0f - NEMOPIXS_MOVE_MINIMUM_COLOR_FORCE) + NEMOPIXS_MOVE_MINIMUM_COLOR_FORCE;
 
-		mc = random_get_double(0.015f, 0.075f);
+				x0 = one->vertices0[i * 3 + 0];
+				y0 = one->vertices0[i * 3 + 1];
 
-		for (i = 0; i < one->pixscount; i++) {
-			c = MAX3(one->diffuses[i * 4 + 0], one->diffuses[i * 4 + 1], one->diffuses[i * 4 + 2]);
-			c = c * (1.0f - NEMOPIXS_MOVE_MINIMUM_COLOR_FORCE) + NEMOPIXS_MOVE_MINIMUM_COLOR_FORCE;
+				dx = x0 - one->vertices[i * 3 + 0];
+				dy = y0 - one->vertices[i * 3 + 1];
 
-			x0 = one->vertices0[i * 3 + 0];
-			y0 = one->vertices0[i * 3 + 1];
+				if (dx != 0.0f || dy != 0.0f) {
+					dd = dx * dx + dy * dy;
 
-			dx = x0 - one->vertices[i * 3 + 0];
-			dy = y0 - one->vertices[i * 3 + 1];
+					if (dd > NEMOPIXS_MOVE_EPSILON) {
+						ds = sqrtf(dd + NEMOPIXS_MOVE_MINIMUM_DISTANCE);
 
-			if (dx != 0.0f || dy != 0.0f) {
-				dd = dx * dx + dy * dy;
+						f = NEMOPIXS_MOVE_INTENSITY * dt / ds * c * one->noises[i];
 
-				if (dd > NEMOPIXS_MOVE_EPSILON) {
-					ds = sqrtf(dd + NEMOPIXS_MOVE_MINIMUM_DISTANCE);
+						one->velocities[i * 2 + 0] = dx * f;
+						one->velocities[i * 2 + 1] = dy * f;
 
-					f = NEMOPIXS_MOVE_INTENSITY * dt / ds * c * one->noises[i];
+						one->vertices[i * 3 + 0] = one->vertices[i * 3 + 0] + one->velocities[i * 2 + 0] * dt;
+						one->vertices[i * 3 + 1] = one->vertices[i * 3 + 1] + one->velocities[i * 2 + 1] * dt;
 
-					one->velocities[i * 2 + 0] = dx * f;
-					one->velocities[i * 2 + 1] = dy * f;
+						needs_feedback = 1;
+					} else {
+						one->vertices[i * 3 + 0] = x0;
+						one->vertices[i * 3 + 1] = y0;
 
-					one->vertices[i * 3 + 0] = one->vertices[i * 3 + 0] + one->velocities[i * 2 + 0] * dt;
-					one->vertices[i * 3 + 1] = one->vertices[i * 3 + 1] + one->velocities[i * 2 + 1] * dt;
+						one->velocities[i * 2 + 0] = 0.0f;
+						one->velocities[i * 2 + 1] = 0.0f;
+					}
 
-					needs_feedback = 1;
+					is_updated = 1;
 				} else if (i >= one->pixscount0) {
 					if (i < one->pixscount - 1)
 						nemopixs_one_copy(one, one->pixscount - 1, i);
 
 					one->pixscount--;
-				} else {
-					one->vertices[i * 3 + 0] = x0;
-					one->vertices[i * 3 + 1] = y0;
-
-					one->velocities[i * 2 + 0] = 0.0f;
-					one->velocities[i * 2 + 1] = 0.0f;
 				}
-
-				is_updated = 1;
 			}
-		}
 
-		if (needs_feedback == 0)
-			one->is_vertices_dirty = 0;
+			if (needs_feedback == 0)
+				one->is_vertices_dirty = 0;
+		} else if (one->is_vertices_dirty == 2) {
+			int needs_feedback = 0;
+			float x0, y0;
+			float x1, y1;
+			float dx, dy;
+			float a0, a1;
+			float a, r;
+			float f;
+			int i;
+
+			for (i = 0; i < one->pixscount; i++) {
+				x0 = one->vertices[i * 3 + 0];
+				y0 = one->vertices[i * 3 + 1];
+				x1 = one->vertices0[i * 3 + 0];
+				y1 = one->vertices0[i * 3 + 1];
+
+				dx = x1 - x0;
+				dy = y1 - y0;
+
+				if (dx != 0.0f || dy != 0.0f) {
+					if (dx * dx + dy * dy > NEMOPIXS_ANGULAR_EPSILON) {
+						a0 = M_PI / 2.0f - atan2(x0, y0);
+						a1 = M_PI / 2.0f - atan2(x1, y1);
+
+						f = NEMOPIXS_ANGULAR_INTENSITY * one->noises[i];
+						r = sqrtf(x1 * x1 + y1 * y1);
+						a = a0 + (a1 - a0) * f * dt;
+
+						one->vertices[i * 3 + 0] = cos(a) * r;
+						one->vertices[i * 3 + 1] = sin(a) * r;
+
+						needs_feedback = 1;
+					} else {
+						one->vertices[i * 3 + 0] = x1;
+						one->vertices[i * 3 + 1] = y1;
+
+						one->velocities[i * 2 + 0] = 0.0f;
+						one->velocities[i * 2 + 1] = 0.0f;
+					}
+
+					is_updated = 1;
+				} else if (i >= one->pixscount0) {
+					if (i < one->pixscount - 1)
+						nemopixs_one_copy(one, one->pixscount - 1, i);
+
+					one->pixscount--;
+				}
+			}
+
+			if (needs_feedback == 0)
+				one->is_vertices_dirty = 0;
+		}
 	}
 
 	if (one->is_pixels_dirty != 0) {
 		int needs_feedback = 0;
+		float s0;
+		float dd, ds;
+		float f;
+		int i;
 
 		for (i = 0; i < one->pixscount; i++) {
 			s0 = one->pixels0[i];
@@ -615,6 +670,11 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 
 	if (one->is_diffuses_dirty != 0) {
 		int needs_feedback = 0;
+		float dd, ds;
+		float dr, dg, db, da;
+		float r0, g0, b0, a0;
+		float f;
+		int i;
 
 		for (i = 0; i < one->pixscount; i++) {
 			r0 = one->diffuses0[i * 4 + 0];
@@ -750,7 +810,7 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 		nemopixs_one_shuffle(pixs->one);
 		nemopixs_one_jitter(pixs->one, pixs->jitter);
 		nemopixs_one_set_noise(pixs->one, 0.85f, 1.05f);
-		nemopixs_one_set_position_to(pixs->one, 0);
+		nemopixs_one_set_position_to(pixs->one, 0, 2);
 	} else if (nemoshow_event_is_pointer_right_down(show, event)) {
 		pixs->isprites = (pixs->isprites + pixs->nsprites - 1) % pixs->nsprites;
 
@@ -758,7 +818,7 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 		nemopixs_one_shuffle(pixs->one);
 		nemopixs_one_jitter(pixs->one, pixs->jitter);
 		nemopixs_one_set_noise(pixs->one, 0.85f, 1.05f);
-		nemopixs_one_set_position_to(pixs->one, 0);
+		nemopixs_one_set_position_to(pixs->one, 0, 1);
 	}
 
 	if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event) || nemoshow_event_is_touch_motion(show, event)) {
@@ -823,7 +883,7 @@ static void nemopixs_dispatch_show_resize(struct nemoshow *show, int32_t width, 
 	nemopixs_one_set_diffuse_to(pixs->one, pixs->sprites[pixs->isprites], 0.05f);
 	nemopixs_one_jitter(pixs->one, pixs->jitter);
 	nemopixs_one_set_noise(pixs->one, 0.85f, 1.05f);
-	nemopixs_one_set_position_to(pixs->one, 0);
+	nemopixs_one_set_position_to(pixs->one, 0, 1);
 
 	nemoshow_one_dirty(pixs->canvas, NEMOSHOW_REDRAW_DIRTY);
 
@@ -856,10 +916,10 @@ static void nemopixs_dispatch_timer(struct nemotimer *timer, void *data)
 	nemopixs_one_jitter(one, pixs->jitter);
 	nemopixs_one_set_noise(one, 0.85f, 1.05f);
 	nemopixs_one_set_position(one, 5);
-	nemopixs_one_set_position_to(one, 0);
+	nemopixs_one_set_position_to(one, 0, 1);
 
 	nemopixs_one_set_noise(pixs->one, 0.95f, 1.25f);
-	nemopixs_one_set_position_to(pixs->one, 6);
+	nemopixs_one_set_position_to(pixs->one, 6, 1);
 
 	pixs->one0 = pixs->one;
 	pixs->one = one;
@@ -1124,7 +1184,7 @@ int main(int argc, char *argv[])
 	nemopixs_one_jitter(pixs->one, pixs->jitter);
 	nemopixs_one_set_noise(pixs->one, 0.85f, 1.05f);
 	nemopixs_one_set_position(pixs->one, 4);
-	nemopixs_one_set_position_to(pixs->one, 0);
+	nemopixs_one_set_position_to(pixs->one, 0, 1);
 
 	pixs->timer = timer = nemotimer_create(tool);
 	nemotimer_set_callback(timer, nemopixs_dispatch_timer);
