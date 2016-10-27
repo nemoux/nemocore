@@ -540,8 +540,8 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 				one->velocities[i * 2 + 1] += dy * f;
 			}
 
-			one->vertices[i * 3 + 0] = CLIP(one->vertices[i * 3 + 0] + one->velocities[i * 2 + 0] * dt, -1.0f, 1.0f);
-			one->vertices[i * 3 + 1] = CLIP(one->vertices[i * 3 + 1] + one->velocities[i * 2 + 1] * dt, -1.0f, 1.0f);
+			one->vertices[i * 3 + 0] = CLAMP(one->vertices[i * 3 + 0] + one->velocities[i * 2 + 0] * dt, -1.0f, 1.0f);
+			one->vertices[i * 3 + 1] = CLAMP(one->vertices[i * 3 + 1] + one->velocities[i * 2 + 1] * dt, -1.0f, 1.0f);
 		}
 
 		is_updated = 1;

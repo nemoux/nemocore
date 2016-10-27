@@ -219,8 +219,8 @@ int nemoclip_simple(struct nemoclip *clip, struct polygon8 *poly, float *ex, flo
 	int i;
 
 	for (i = 0; i < poly->n; i++) {
-		ex[i] = CLIP(poly->x[i], clip->clip.x1, clip->clip.x2);
-		ey[i] = CLIP(poly->y[i], clip->clip.y1, clip->clip.y2);
+		ex[i] = CLAMP(poly->x[i], clip->clip.x1, clip->clip.x2);
+		ey[i] = CLAMP(poly->y[i], clip->clip.y1, clip->clip.y2);
 	}
 
 	return poly->n;

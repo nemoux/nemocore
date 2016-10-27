@@ -18,8 +18,8 @@ NEMO_BEGIN_EXTERN_C
 #	define MAX(x,y) (((x) > (y)) ? (x) : (y))
 #endif
 
-#ifndef CLIP
-#	define CLIP(x, a, b)	(MIN(MAX(x, a), b))
+#ifndef CLAMP
+#	define CLAMP(x, a, b)	(MIN(MAX(x, a), b))
 #endif
 
 #ifndef MINMAX
