@@ -153,6 +153,16 @@ static inline void nemopixs_one_shuffle(struct pixsone *one)
 	}
 }
 
+static inline void nemopixs_one_jitter(struct pixsone *one, float size)
+{
+	int i;
+
+	for (i = 0; i < one->pixscount; i++) {
+		one->positions0[i * 2 + 0] += random_get_double(-size / 2.0f, size / 2.0f);
+		one->positions0[i * 2 + 1] += random_get_double(-size / 2.0f, size / 2.0f);
+	}
+}
+
 static int nemopixs_one_set_position(struct pixsone *one, int action)
 {
 	float seed;
@@ -757,6 +767,7 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 		nemopixs_one_set_diffuse_to(pixs->one, pixs->sprites[pixs->isprites], 0.05f);
 		nemopixs_one_shuffle(pixs->one);
+		nemopixs_one_jitter(pixs->one, 0.005f);
 		nemopixs_one_set_noise(pixs->one, 0.85f, 1.05f);
 		nemopixs_one_set_position_to(pixs->one, 0);
 
@@ -766,6 +777,7 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 		nemopixs_one_set_diffuse_to(pixs->one, pixs->sprites[pixs->isprites], 0.05f);
 		nemopixs_one_shuffle(pixs->one);
+		nemopixs_one_jitter(pixs->one, 0.005f);
 		nemopixs_one_set_noise(pixs->one, 0.85f, 1.05f);
 		nemopixs_one_set_position_to(pixs->one, 0);
 
@@ -830,6 +842,7 @@ static void nemopixs_dispatch_show_resize(struct nemoshow *show, int32_t width, 
 
 	pixs->one = nemopixs_one_create(width, height, columns, rows);
 	nemopixs_one_set_diffuse_to(pixs->one, pixs->sprites[pixs->isprites], 0.05f);
+	nemopixs_one_jitter(pixs->one, 0.005f);
 	nemopixs_one_set_noise(pixs->one, 0.85f, 1.05f);
 	nemopixs_one_set_position_to(pixs->one, 0);
 
@@ -861,6 +874,7 @@ static void nemopixs_dispatch_timer(struct nemotimer *timer, void *data)
 
 	one = nemopixs_one_create(width, height, columns, rows);
 	nemopixs_one_set_diffuse(one, pixs->sprites[pixs->isprites], 0.05f);
+	nemopixs_one_jitter(one, 0.005f);
 	nemopixs_one_set_noise(one, 0.85f, 1.05f);
 	nemopixs_one_set_position(one, 5);
 	nemopixs_one_set_position_to(one, 0);
@@ -1119,6 +1133,7 @@ int main(int argc, char *argv[])
 
 	pixs->one = nemopixs_one_create(width, height, pixels, pixels);
 	nemopixs_one_set_diffuse(pixs->one, pixs->sprites[pixs->isprites], 0.05f);
+	nemopixs_one_jitter(pixs->one, 0.005f);
 	nemopixs_one_set_noise(pixs->one, 0.85f, 1.05f);
 	nemopixs_one_set_position(pixs->one, 4);
 	nemopixs_one_set_position_to(pixs->one, 0);
