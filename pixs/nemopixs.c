@@ -560,8 +560,6 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 
 						one->vertices[i * 3 + 0] = one->vertices[i * 3 + 0] + one->velocities[i * 2 + 0] * dt;
 						one->vertices[i * 3 + 1] = one->vertices[i * 3 + 1] + one->velocities[i * 2 + 1] * dt;
-
-						needs_feedback = 1;
 					} else {
 						one->vertices[i * 3 + 0] = x0;
 						one->vertices[i * 3 + 1] = y0;
@@ -570,7 +568,7 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 						one->velocities[i * 2 + 1] = 0.0f;
 					}
 
-					is_updated = 1;
+					needs_feedback = 1;
 				} else if (i >= one->pixscount0) {
 					if (i < one->pixscount - 1)
 						nemopixs_one_copy(one, one->pixscount - 1, i);
@@ -581,6 +579,8 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 
 			if (needs_feedback == 0)
 				one->is_vertices_dirty = 0;
+			else
+				is_updated = 1;
 		} else if (one->is_vertices_dirty == 2) {
 			int needs_feedback = 0;
 			float x0, y0;
@@ -611,8 +611,6 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 
 						one->vertices[i * 3 + 0] = cos(a) * r;
 						one->vertices[i * 3 + 1] = sin(a) * r;
-
-						needs_feedback = 1;
 					} else {
 						one->vertices[i * 3 + 0] = x1;
 						one->vertices[i * 3 + 1] = y1;
@@ -621,7 +619,7 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 						one->velocities[i * 2 + 1] = 0.0f;
 					}
 
-					is_updated = 1;
+					needs_feedback = 1;
 				} else if (i >= one->pixscount0) {
 					if (i < one->pixscount - 1)
 						nemopixs_one_copy(one, one->pixscount - 1, i);
@@ -632,6 +630,8 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 
 			if (needs_feedback == 0)
 				one->is_vertices_dirty = 0;
+			else
+				is_updated = 1;
 		}
 	}
 
@@ -654,18 +654,18 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 					f = NEMOPIXS_PIXEL_INTENSITY * dt / ds * one->noises[i];
 
 					one->vertices[i * 3 + 2] = one->vertices[i * 3 + 2] + dd * f * dt;
-
-					needs_feedback = 1;
 				} else {
 					one->vertices[i * 3 + 2] = s0;
 				}
 
-				is_updated = 1;
+				needs_feedback = 1;
 			}
 		}
 
 		if (needs_feedback == 0)
 			one->is_pixels_dirty = 0;
+		else
+			is_updated = 1;
 	}
 
 	if (one->is_diffuses_dirty != 0) {
@@ -699,8 +699,6 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 					one->diffuses[i * 4 + 1] = one->diffuses[i * 4 + 1] + dg * f * dt;
 					one->diffuses[i * 4 + 2] = one->diffuses[i * 4 + 2] + db * f * dt;
 					one->diffuses[i * 4 + 3] = one->diffuses[i * 4 + 3] + da * f * dt;
-
-					needs_feedback = 1;
 				} else {
 					one->diffuses[i * 4 + 0] = r0;
 					one->diffuses[i * 4 + 1] = g0;
@@ -708,12 +706,14 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 					one->diffuses[i * 4 + 3] = a0;
 				}
 
-				is_updated = 1;
+				needs_feedback = 1;
 			}
 		}
 
 		if (needs_feedback == 0)
 			one->is_diffuses_dirty = 0;
+		else
+			is_updated = 1;
 	}
 
 	return is_updated;
