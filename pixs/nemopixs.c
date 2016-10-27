@@ -749,12 +749,8 @@ static void nemopixs_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 		nemoshow_one_dirty(canvas, NEMOSHOW_REDRAW_DIRTY);
 
 		pixs->msecs = msecs;
-
-		nemotimer_set_timeout(pixs->timer, 0);
 	} else {
 		pixs->msecs = 0;
-
-		nemotimer_set_timeout(pixs->timer, pixs->timeout);
 	}
 }
 
@@ -770,8 +766,6 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 		nemopixs_one_jitter(pixs->one, 0.005f);
 		nemopixs_one_set_noise(pixs->one, 0.85f, 1.05f);
 		nemopixs_one_set_position_to(pixs->one, 0);
-
-		nemotimer_set_timeout(pixs->timer, pixs->timeout);
 	} else if (nemoshow_event_is_pointer_right_down(show, event)) {
 		pixs->isprites = (pixs->isprites + pixs->nsprites - 1) % pixs->nsprites;
 
@@ -780,8 +774,6 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 		nemopixs_one_jitter(pixs->one, 0.005f);
 		nemopixs_one_set_noise(pixs->one, 0.85f, 1.05f);
 		nemopixs_one_set_position_to(pixs->one, 0);
-
-		nemotimer_set_timeout(pixs->timer, pixs->timeout);
 	}
 
 	if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event) || nemoshow_event_is_touch_motion(show, event)) {
@@ -804,6 +796,8 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 	nemoshow_one_dirty(pixs->canvas, NEMOSHOW_REDRAW_DIRTY);
 	nemoshow_dispatch_frame(show);
+
+	nemotimer_set_timeout(pixs->timer, pixs->timeout);
 }
 
 static void nemopixs_dispatch_show_resize(struct nemoshow *show, int32_t width, int32_t height)
@@ -887,6 +881,8 @@ static void nemopixs_dispatch_timer(struct nemotimer *timer, void *data)
 
 	nemoshow_one_dirty(pixs->canvas, NEMOSHOW_REDRAW_DIRTY);
 	nemoshow_dispatch_frame(pixs->show);
+
+	nemotimer_set_timeout(timer, pixs->timeout);
 }
 
 static int nemopixs_prepare_opengl(struct nemopixs *pixs, int32_t width, int32_t height)
