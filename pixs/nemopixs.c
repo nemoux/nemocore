@@ -20,15 +20,23 @@
 #include <nemomisc.h>
 
 #define NEMOPIXS_GRAVITYWELL_MINIMUM_DISTANCE			(0.18f)
+#define NEMOPIXS_MUTUALGRAVITY_MINIMUM_DISTANCE		(0.18f)
 #define NEMOPIXS_MOVE_MINIMUM_DISTANCE						(0.01f)
 #define NEMOPIXS_PIXEL_MINIMUM_DISTANCE						(1.0f)
 #define NEMOPIXS_COLOR_MINIMUM_DISTANCE						(0.01f)
 
+#define NEMOPIXS_GRAVITYWELL_SCOPE				(0.5f)
+#define NEMOPIXS_MUTUALGRAVITY_SCOPE			(0.05f)
+
 #define NEMOPIXS_GRAVITYWELL_INTENSITY		(3.0f)
+#define NEMOPIXS_MUTUALGRAVITY_INTENSITY	(3.0f)
 #define NEMOPIXS_MOVE_INTENSITY						(128.0f)
 #define NEMOPIXS_ANGULAR_INTENSITY				(3.0f)
 #define NEMOPIXS_COLOR_INTENSITY					(64.0f)
 #define NEMOPIXS_PIXEL_INTENSITY					(128.0f)
+
+#define NEMOPIXS_GRAVITYWELL_FRICTION			(0.5f)
+#define NEMOPIXS_MUTUALGRAVITY_FRICTION		(2.5f)
 
 #define NEMOPIXS_MOVE_EPSILON							(0.0001f)
 #define NEMOPIXS_ANGULAR_EPSILON					(0.0001f)
@@ -488,29 +496,66 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 	int is_updated = 0;
 
 	if (tapcount > 0) {
-		float x0, y0;
-		float dx, dy, dd, ds;
-		float f;
-		int i, n;
+		if (pixs->iactions == 0) {
+			float x0, y0;
+			float dx, dy, dd, ds;
+			float f;
+			int i, n;
 
-		for (i = 0; i < one->pixscount; i++) {
-			for (n = 0; n < tapcount; n++) {
-				x0 = (nemoshow_event_get_x_on(&pixs->events, n) / (float)pixs->width) * 2.0f - 1.0f;
-				y0 = (nemoshow_event_get_y_on(&pixs->events, n) / (float)pixs->height) * 2.0f - 1.0f;
+			for (i = 0; i < one->pixscount; i++) {
+				for (n = 0; n < tapcount; n++) {
+					x0 = (nemoshow_event_get_x_on(&pixs->events, n) / (float)pixs->width) * 2.0f - 1.0f;
+					y0 = (nemoshow_event_get_y_on(&pixs->events, n) / (float)pixs->height) * 2.0f - 1.0f;
 
-				dx = x0 - one->vertices[i * 3 + 0];
-				dy = y0 - one->vertices[i * 3 + 1];
-				dd = dx * dx + dy * dy;
-				ds = sqrtf(dd + NEMOPIXS_GRAVITYWELL_MINIMUM_DISTANCE);
+					dx = x0 - one->vertices[i * 3 + 0];
+					dy = y0 - one->vertices[i * 3 + 1];
+					dd = dx * dx + dy * dy;
+					ds = sqrtf(dd + NEMOPIXS_GRAVITYWELL_MINIMUM_DISTANCE);
 
-				f = (NEMOPIXS_GRAVITYWELL_INTENSITY / tapcount) * dt / (ds * ds * ds) * one->noises[i];
+					if (dd < NEMOPIXS_GRAVITYWELL_SCOPE) {
+						f = (NEMOPIXS_GRAVITYWELL_INTENSITY / tapcount) * dt / (ds * ds * ds) * one->noises[i];
 
-				one->velocities[i * 2 + 0] += dx * f;
-				one->velocities[i * 2 + 1] += dy * f;
+						one->velocities[i * 2 + 0] += dx * f;
+						one->velocities[i * 2 + 1] += dy * f;
+					}
+				}
+
+				one->velocities[i * 2 + 0] -= one->velocities[i * 2 + 0] * NEMOPIXS_GRAVITYWELL_FRICTION * dt;
+				one->velocities[i * 2 + 1] -= one->velocities[i * 2 + 1] * NEMOPIXS_GRAVITYWELL_FRICTION * dt;
+
+				one->vertices[i * 3 + 0] = CLAMP(one->vertices[i * 3 + 0] + one->velocities[i * 2 + 0] * dt, -1.0f, 1.0f);
+				one->vertices[i * 3 + 1] = CLAMP(one->vertices[i * 3 + 1] + one->velocities[i * 2 + 1] * dt, -1.0f, 1.0f);
 			}
+		} else if (pixs->iactions == 1) {
+			float x0, y0;
+			float dx, dy, dd, ds;
+			float f;
+			int i, n;
 
-			one->vertices[i * 3 + 0] = CLAMP(one->vertices[i * 3 + 0] + one->velocities[i * 2 + 0] * dt, -1.0f, 1.0f);
-			one->vertices[i * 3 + 1] = CLAMP(one->vertices[i * 3 + 1] + one->velocities[i * 2 + 1] * dt, -1.0f, 1.0f);
+			for (i = 0; i < one->pixscount; i++) {
+				for (n = 0; n < tapcount; n++) {
+					x0 = (nemoshow_event_get_x_on(&pixs->events, n) / (float)pixs->width) * 2.0f - 1.0f;
+					y0 = (nemoshow_event_get_y_on(&pixs->events, n) / (float)pixs->height) * 2.0f - 1.0f;
+
+					dx = x0 - one->vertices[i * 3 + 0];
+					dy = y0 - one->vertices[i * 3 + 1];
+					dd = dx * dx + dy * dy;
+					ds = sqrtf(dd + NEMOPIXS_MUTUALGRAVITY_MINIMUM_DISTANCE);
+
+					if (dd < NEMOPIXS_MUTUALGRAVITY_SCOPE) {
+						f = (-NEMOPIXS_MUTUALGRAVITY_INTENSITY / tapcount) * dt / (ds * ds * ds) * one->noises[i];
+
+						one->velocities[i * 2 + 0] += dx * f;
+						one->velocities[i * 2 + 1] += dy * f;
+					}
+				}
+
+				one->velocities[i * 2 + 0] -= one->velocities[i * 2 + 0] * NEMOPIXS_MUTUALGRAVITY_FRICTION * dt;
+				one->velocities[i * 2 + 1] -= one->velocities[i * 2 + 1] * NEMOPIXS_MUTUALGRAVITY_FRICTION * dt;
+
+				one->vertices[i * 3 + 0] = CLAMP(one->vertices[i * 3 + 0] + one->velocities[i * 2 + 0] * dt, -1.0f, 1.0f);
+				one->vertices[i * 3 + 1] = CLAMP(one->vertices[i * 3 + 1] + one->velocities[i * 2 + 1] * dt, -1.0f, 1.0f);
+			}
 		}
 
 		one->is_vertices_dirty = 1;
@@ -890,6 +935,8 @@ static void nemopixs_dispatch_timer(struct nemotimer *timer, void *data)
 
 	nemoshow_one_dirty(pixs->canvas, NEMOSHOW_REDRAW_DIRTY);
 	nemoshow_dispatch_frame(pixs->show);
+
+	pixs->iactions = (pixs->iactions + 1) % 2;
 
 	nemotimer_set_timeout(timer, pixs->timeout);
 }

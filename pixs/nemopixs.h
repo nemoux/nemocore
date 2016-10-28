@@ -47,6 +47,8 @@ struct nemopixs {
 	struct showone *sprites[128];
 	int nsprites, isprites;
 
+	int iactions;
+
 	struct showone *pointsprite;
 
 	uint32_t width, height;
