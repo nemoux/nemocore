@@ -430,11 +430,6 @@ static int nemopixs_one_set_diffuse_to(struct pixsone *one, struct showone *canv
 			one->vertices0[i * 3 + 0] = one->vertices0[s * 3 + 0];
 			one->vertices0[i * 3 + 1] = one->vertices0[s * 3 + 1];
 			one->vertices0[i * 3 + 2] = one->vertices0[s * 3 + 2];
-
-			one->diffuses0[i * 4 + 0] = one->diffuses0[s * 4 + 0];
-			one->diffuses0[i * 4 + 1] = one->diffuses0[s * 4 + 1];
-			one->diffuses0[i * 4 + 2] = one->diffuses0[s * 4 + 2];
-			one->diffuses0[i * 4 + 3] = one->diffuses0[s * 4 + 3];
 		}
 	}
 
