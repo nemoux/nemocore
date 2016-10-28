@@ -1116,13 +1116,25 @@ int main(int argc, char *argv[])
 			nemoshow_attach_one(show, canvas);
 
 			if (os_has_file_extension(filepath, "svg", NULL) != 0) {
+				srand(time_current_msecs());
+
 				one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
 				nemoshow_one_attach(canvas, one);
 				nemoshow_item_set_x(one, 0.0f);
 				nemoshow_item_set_y(one, 0.0f);
 				nemoshow_item_set_width(one, pixels);
 				nemoshow_item_set_height(one, pixels);
-				nemoshow_item_set_fill_color(one, 0.0f, 255.0f, 255.0f, 255.0f);
+				nemoshow_item_set_fill_color(one,
+						random_get_double(0.0f, 255.0f),
+						random_get_double(0.0f, 255.0f),
+						random_get_double(0.0f, 255.0f),
+						255.0f);
+				nemoshow_item_set_stroke_color(one,
+						random_get_double(0.0f, 255.0f),
+						random_get_double(0.0f, 255.0f),
+						random_get_double(0.0f, 255.0f),
+						255.0f);
+				nemoshow_item_set_stroke_width(one, pixels / 128);
 				nemoshow_item_path_load_svg(one, filepath, 0.0f, 0.0f, pixels, pixels);
 			} else if (os_has_file_extension(filepath, "png", "jpg", NULL) != 0) {
 				one = nemoshow_item_create(NEMOSHOW_IMAGE_ITEM);
