@@ -56,7 +56,6 @@ struct nemopixs {
 	GLuint program;
 
 	struct pixsone *one;
-	struct pixsone *one0;
 
 	int pixels;
 	float jitter;
