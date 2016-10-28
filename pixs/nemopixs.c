@@ -426,6 +426,15 @@ static int nemopixs_one_set_diffuse_to(struct pixsone *one, struct showone *canv
 			one->diffuses[i * 4 + 1] = one->diffuses[s * 4 + 1];
 			one->diffuses[i * 4 + 2] = one->diffuses[s * 4 + 2];
 			one->diffuses[i * 4 + 3] = one->diffuses[s * 4 + 3];
+
+			one->vertices0[i * 3 + 0] = one->vertices0[s * 3 + 0];
+			one->vertices0[i * 3 + 1] = one->vertices0[s * 3 + 1];
+			one->vertices0[i * 3 + 2] = one->vertices0[s * 3 + 2];
+
+			one->diffuses0[i * 4 + 0] = one->diffuses0[s * 4 + 0];
+			one->diffuses0[i * 4 + 1] = one->diffuses0[s * 4 + 1];
+			one->diffuses0[i * 4 + 2] = one->diffuses0[s * 4 + 2];
+			one->diffuses0[i * 4 + 3] = one->diffuses0[s * 4 + 3];
 		}
 	}
 
@@ -835,7 +844,7 @@ static void nemopixs_dispatch_show_resize(struct nemoshow *show, int32_t width, 
 	nemopixs_one_destroy(pixs->one);
 
 	pixs->one = nemopixs_one_create(width, height, columns, rows);
-	nemopixs_one_set_diffuse_to(pixs->one, pixs->sprites[pixs->isprites], 0.05f);
+	nemopixs_one_set_diffuse(pixs->one, pixs->sprites[pixs->isprites], 0.05f);
 	nemopixs_one_jitter(pixs->one, pixs->jitter);
 	nemopixs_one_set_noise(pixs->one, 0.85f, 1.05f);
 	nemopixs_one_set_position_to(pixs->one, 0, 1);
