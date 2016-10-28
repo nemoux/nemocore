@@ -47,13 +47,16 @@ struct nemopixs {
 	struct showone *sprites[128];
 	int nsprites, isprites;
 
+	struct showone *pointsprite;
+
 	uint32_t width, height;
 
 	struct nemotimer *timer;
 	uint32_t timeout;
 
 	GLuint fbo, dbo;
-	GLuint program;
+	GLuint programs[2];
+	GLuint usprite;
 
 	struct pixsone *one;
 

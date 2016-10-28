@@ -741,10 +741,21 @@ static void nemopixs_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 	glClearDepth(0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glUseProgram(pixs->program);
+	if (pixs->pointsprite == NULL) {
+		glUseProgram(pixs->programs[0]);
 
-	glBindAttribLocation(pixs->program, 0, "position");
-	glBindAttribLocation(pixs->program, 1, "diffuse");
+		glBindAttribLocation(pixs->programs[0], 0, "position");
+		glBindAttribLocation(pixs->programs[0], 1, "diffuse");
+	} else {
+		glUseProgram(pixs->programs[1]);
+
+		glBindAttribLocation(pixs->programs[1], 0, "position");
+		glBindAttribLocation(pixs->programs[1], 1, "diffuse");
+
+		glUniform1i(pixs->usprite, 0);
+
+		glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_texture(pixs->pointsprite));
+	}
 
 	one = pixs->one;
 	if (one != NULL) {
@@ -758,6 +769,8 @@ static void nemopixs_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 
 		glDrawArrays(GL_POINTS, 0, one->pixscount);
 	}
+
+	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -905,13 +918,24 @@ static int nemopixs_prepare_opengl(struct nemopixs *pixs, int32_t width, int32_t
 		"{\n"
 		"  gl_FragColor = vdiffuse;\n"
 		"}\n";
+	static const char *fragmentshader_pointsprite =
+		"precision mediump float;\n"
+		"uniform sampler2D sprite;\n"
+		"varying vec4 vdiffuse;\n"
+		"void main()\n"
+		"{\n"
+		"  gl_FragColor = vdiffuse * texture2D(sprite, gl_PointCoord);\n"
+		"}\n";
 
 	fbo_prepare_context(
 			nemoshow_canvas_get_texture(pixs->canvas),
 			width, height,
 			&pixs->fbo, &pixs->dbo);
 
-	pixs->program = glshader_compile_program(vertexshader, fragmentshader, NULL, NULL);
+	pixs->programs[0] = glshader_compile_program(vertexshader, fragmentshader, NULL, NULL);
+	pixs->programs[1] = glshader_compile_program(vertexshader, fragmentshader_pointsprite, NULL, NULL);
+
+	pixs->usprite = glGetUniformLocation(pixs->programs[1], "sprite");
 
 	return 0;
 }
@@ -921,7 +945,8 @@ static void nemopixs_finish_opengl(struct nemopixs *pixs)
 	glDeleteFramebuffers(1, &pixs->fbo);
 	glDeleteRenderbuffers(1, &pixs->dbo);
 
-	glDeleteProgram(pixs->program);
+	glDeleteProgram(pixs->programs[0]);
+	glDeleteProgram(pixs->programs[1]);
 }
 
 int main(int argc, char *argv[])
@@ -934,6 +959,7 @@ int main(int argc, char *argv[])
 		{ "pixels",					required_argument,			NULL,			'p' },
 		{ "jitter",					required_argument,			NULL,			'j' },
 		{ "timeout",				required_argument,			NULL,			't' },
+		{ "pointsprite",		required_argument,			NULL,			's' },
 		{ "fullscreen",			required_argument,			NULL,			'f' },
 		{ 0 }
 	};
@@ -945,8 +971,10 @@ int main(int argc, char *argv[])
 	struct showone *scene;
 	struct showone *canvas;
 	struct showone *one;
+	struct showone *blur;
 	char *imagepath = NULL;
 	char *fullscreen = NULL;
+	char *pointsprite = NULL;
 	float jitter = 0.0f;
 	int timeout = 10000;
 	int width = 800;
@@ -957,7 +985,7 @@ int main(int argc, char *argv[])
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "w:h:r:i:p:j:t:f:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:r:i:p:j:t:s:f:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -988,6 +1016,10 @@ int main(int argc, char *argv[])
 
 			case 't':
 				timeout = strtoul(optarg, NULL, 10);
+				break;
+
+			case 's':
+				pointsprite = strdup(optarg);
 				break;
 
 			case 'f':
@@ -1045,6 +1077,25 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_dispatch_redraw(canvas, nemopixs_dispatch_canvas_redraw);
 	nemoshow_canvas_set_dispatch_event(canvas, nemopixs_dispatch_canvas_event);
 	nemoshow_one_attach(scene, canvas);
+
+	if (pointsprite != NULL) {
+		pixs->pointsprite = canvas = nemoshow_canvas_create();
+		nemoshow_canvas_set_width(canvas, 64);
+		nemoshow_canvas_set_height(canvas, 64);
+		nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
+		nemoshow_attach_one(show, canvas);
+
+		blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
+		nemoshow_filter_set_blur(blur, pointsprite, 16.0f);
+
+		one = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
+		nemoshow_one_attach(canvas, one);
+		nemoshow_item_set_cx(one, 64.0f / 2.0f);
+		nemoshow_item_set_cy(one, 64.0f / 2.0f);
+		nemoshow_item_set_r(one, 64.0f / 3.0f);
+		nemoshow_item_set_fill_color(one, 255.0f, 255.0f, 255.0f, 255.0f);
+		nemoshow_item_set_filter(one, blur);
+	}
 
 	if (os_check_path_is_directory(imagepath) != 0) {
 		struct dirent **entries;
