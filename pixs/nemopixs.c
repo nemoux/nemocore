@@ -775,13 +775,13 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 	struct nemopixs *pixs = (struct nemopixs *)nemoshow_get_userdata(show);
 
 	if (nemoshow_event_is_pointer_left_down(show, event)) {
+		nemopixs_one_set_position_to(pixs->one, random_get_int(1, 5), 1);
+	} else if (nemoshow_event_is_pointer_right_down(show, event)) {
 		pixs->isprites = (pixs->isprites + 1) % pixs->nsprites;
 
 		nemopixs_one_set_diffuse_to(pixs->one, pixs->sprites[pixs->isprites], 0.05f);
 		nemopixs_one_jitter(pixs->one, pixs->jitter);
 		nemopixs_one_set_noise(pixs->one, 0.85f, 1.05f);
-		nemopixs_one_set_position_to(pixs->one, random_get_int(1, 5), 1);
-	} else if (nemoshow_event_is_pointer_right_down(show, event)) {
 		nemopixs_one_set_position_to(pixs->one, 0, 1);
 	}
 
