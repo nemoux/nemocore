@@ -45,6 +45,8 @@
 
 #define NEMOPIXS_MOVE_MINIMUM_COLOR_FORCE				(0.3f)
 
+#define NEMOPIXS_PIXEL_TIMEOUT						(100)
+
 static struct pixsone *nemopixs_one_create(int32_t width, int32_t height, int32_t columns, int32_t rows)
 {
 	struct pixsone *one;
@@ -163,6 +165,42 @@ static inline void nemopixs_one_shuffle(struct pixsone *one)
 		one->positions0[i * 2 + 0] = p[0];
 		one->positions0[i * 2 + 1] = p[1];
 	}
+}
+
+static inline void nemopixs_one_swap(struct pixsone *one, int a, int b)
+{
+	float d[4];
+	float p[2];
+
+	d[0] = one->diffuses0[a * 4 + 0];
+	d[1] = one->diffuses0[a * 4 + 1];
+	d[2] = one->diffuses0[a * 4 + 2];
+	d[3] = one->diffuses0[a * 4 + 3];
+	p[0] = one->positions0[a * 2 + 0];
+	p[1] = one->positions0[a * 2 + 1];
+
+	one->diffuses0[a * 4 + 0] = one->diffuses0[b * 4 + 0];
+	one->diffuses0[a * 4 + 1] = one->diffuses0[b * 4 + 1];
+	one->diffuses0[a * 4 + 2] = one->diffuses0[b * 4 + 2];
+	one->diffuses0[a * 4 + 3] = one->diffuses0[b * 4 + 3];
+	one->positions0[a * 2 + 0] = one->positions0[b * 2 + 0];
+	one->positions0[a * 2 + 1] = one->positions0[b * 2 + 1];
+
+	one->diffuses0[b * 4 + 0] = d[0];
+	one->diffuses0[b * 4 + 1] = d[1];
+	one->diffuses0[b * 4 + 2] = d[2];
+	one->diffuses0[b * 4 + 3] = d[3];
+	one->positions0[b * 2 + 0] = p[0];
+	one->positions0[b * 2 + 1] = p[1];
+
+	one->vertices0[a * 3 + 0] = one->positions0[a * 2 + 0];
+	one->vertices0[a * 3 + 1] = one->positions0[a * 2 + 1];
+
+	one->vertices0[b * 3 + 0] = one->positions0[b * 2 + 0];
+	one->vertices0[b * 3 + 1] = one->positions0[b * 2 + 1];
+
+	one->is_vertices_dirty = 1;
+	one->is_diffuses_dirty = 1;
 }
 
 static inline void nemopixs_one_transform(struct pixsone *one, float tx, float ty, float sx, float sy)
@@ -819,6 +857,8 @@ static void nemopixs_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 
 		pixs->msecs = msecs;
 	} else {
+		nemotimer_set_timeout(pixs->ptimer, NEMOPIXS_PIXEL_TIMEOUT);
+
 		pixs->msecs = 0;
 	}
 }
@@ -859,7 +899,8 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 	nemoshow_one_dirty(pixs->canvas, NEMOSHOW_REDRAW_DIRTY);
 	nemoshow_dispatch_frame(show);
 
-	nemotimer_set_timeout(pixs->timer, pixs->timeout);
+	nemotimer_set_timeout(pixs->stimer, pixs->timeout);
+	nemotimer_set_timeout(pixs->ptimer, 0);
 }
 
 static void nemopixs_dispatch_show_resize(struct nemoshow *show, int32_t width, int32_t height)
@@ -907,7 +948,7 @@ static void nemopixs_dispatch_show_resize(struct nemoshow *show, int32_t width, 
 	nemoshow_view_redraw(show);
 }
 
-static void nemopixs_dispatch_timer(struct nemotimer *timer, void *data)
+static void nemopixs_dispatch_scene_timer(struct nemotimer *timer, void *data)
 {
 	struct nemopixs *pixs = (struct nemopixs *)data;
 	int width = nemoshow_canvas_get_viewport_width(pixs->canvas);
@@ -938,7 +979,22 @@ static void nemopixs_dispatch_timer(struct nemotimer *timer, void *data)
 
 	pixs->iactions = (pixs->iactions + 1) % 2;
 
-	nemotimer_set_timeout(timer, pixs->timeout);
+	nemotimer_set_timeout(pixs->stimer, pixs->timeout);
+	nemotimer_set_timeout(pixs->ptimer, 0);
+}
+
+static void nemopixs_dispatch_pixel_timer(struct nemotimer *timer, void *data)
+{
+	struct nemopixs *pixs = (struct nemopixs *)data;
+
+	nemopixs_one_swap(pixs->one,
+			random_get_int(0, pixs->one->pixscount - 1),
+			random_get_int(0, pixs->one->pixscount - 1));
+
+	nemoshow_one_dirty(pixs->canvas, NEMOSHOW_REDRAW_DIRTY);
+	nemoshow_dispatch_frame(pixs->show);
+
+	nemotimer_set_timeout(pixs->ptimer, NEMOPIXS_PIXEL_TIMEOUT);
 }
 
 static int nemopixs_prepare_opengl(struct nemopixs *pixs, int32_t width, int32_t height)
@@ -1247,17 +1303,23 @@ int main(int argc, char *argv[])
 	nemopixs_one_set_position(pixs->one, 4);
 	nemopixs_one_set_position_to(pixs->one, 0, 1);
 
-	pixs->timer = timer = nemotimer_create(tool);
-	nemotimer_set_callback(timer, nemopixs_dispatch_timer);
+	pixs->stimer = timer = nemotimer_create(tool);
+	nemotimer_set_callback(timer, nemopixs_dispatch_scene_timer);
 	nemotimer_set_userdata(timer, pixs);
 	nemotimer_set_timeout(timer, pixs->timeout);
+
+	pixs->ptimer = timer = nemotimer_create(tool);
+	nemotimer_set_callback(timer, nemopixs_dispatch_pixel_timer);
+	nemotimer_set_userdata(timer, pixs);
+	nemotimer_set_timeout(timer, NEMOPIXS_PIXEL_TIMEOUT);
 
 	if (fullscreen == NULL)
 		nemoshow_dispatch_frame(show);
 
 	nemotool_run(tool);
 
-	nemotimer_destroy(timer);
+	nemotimer_destroy(pixs->stimer);
+	nemotimer_destroy(pixs->ptimer);
 
 	nemopixs_one_destroy(pixs->one);
 

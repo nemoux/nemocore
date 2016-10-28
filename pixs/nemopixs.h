@@ -53,8 +53,10 @@ struct nemopixs {
 
 	uint32_t width, height;
 
-	struct nemotimer *timer;
+	struct nemotimer *stimer;
 	uint32_t timeout;
+
+	struct nemotimer *ptimer;
 
 	GLuint fbo, dbo;
 	GLuint programs[2];
