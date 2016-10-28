@@ -874,7 +874,7 @@ static void nemopixs_dispatch_timer(struct nemotimer *timer, void *data)
 
 	pixs->isprites = (pixs->isprites + 1) % pixs->nsprites;
 
-	nemopixs_one_set_diffuse(pixs->one, pixs->sprites[pixs->isprites], 0.05f);
+	nemopixs_one_set_diffuse_to(pixs->one, pixs->sprites[pixs->isprites], 0.05f);
 	nemopixs_one_shuffle(pixs->one);
 	nemopixs_one_jitter(pixs->one, pixs->jitter);
 	nemopixs_one_set_noise(pixs->one, 0.85f, 1.05f);
