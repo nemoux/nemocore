@@ -512,7 +512,7 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 					dd = dx * dx + dy * dy;
 					ds = sqrtf(dd + NEMOPIXS_GRAVITYWELL_MINIMUM_DISTANCE);
 
-					if (dd < NEMOPIXS_GRAVITYWELL_SCOPE) {
+					if (dd < NEMOPIXS_GRAVITYWELL_SCOPE * one->noises[i]) {
 						f = (NEMOPIXS_GRAVITYWELL_INTENSITY / tapcount) * dt / (ds * ds * ds) * one->noises[i];
 
 						one->velocities[i * 2 + 0] += dx * f;
@@ -542,8 +542,8 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 					dd = dx * dx + dy * dy;
 					ds = sqrtf(dd + NEMOPIXS_MUTUALGRAVITY_MINIMUM_DISTANCE);
 
-					if (dd < NEMOPIXS_MUTUALGRAVITY_SCOPE) {
-						f = (-NEMOPIXS_MUTUALGRAVITY_INTENSITY / tapcount) * dt / (ds * ds * ds) * one->noises[i];
+					if (dd < NEMOPIXS_MUTUALGRAVITY_SCOPE * one->noises[i]) {
+						f = -NEMOPIXS_MUTUALGRAVITY_INTENSITY * dt / (ds * ds * ds) * one->noises[i];
 
 						one->velocities[i * 2 + 0] += dx * f;
 						one->velocities[i * 2 + 1] += dy * f;
