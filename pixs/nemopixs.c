@@ -20,30 +20,30 @@
 #include <nemomisc.h>
 
 #define NEMOPIXS_GRAVITYWELL_MINIMUM_DISTANCE			(0.18f)
-#define NEMOPIXS_MUTUALGRAVITY_MINIMUM_DISTANCE		(0.18f)
+#define NEMOPIXS_ANTIGRAVITY_MINIMUM_DISTANCE			(0.18f)
 #define NEMOPIXS_MOVE_MINIMUM_DISTANCE						(0.01f)
 #define NEMOPIXS_PIXEL_MINIMUM_DISTANCE						(1.0f)
 #define NEMOPIXS_COLOR_MINIMUM_DISTANCE						(0.01f)
 
 #define NEMOPIXS_GRAVITYWELL_SCOPE				(0.5f)
-#define NEMOPIXS_MUTUALGRAVITY_SCOPE			(0.05f)
+#define NEMOPIXS_ANTIGRAVITY_SCOPE				(0.05f)
 
 #define NEMOPIXS_GRAVITYWELL_INTENSITY		(3.0f)
-#define NEMOPIXS_MUTUALGRAVITY_INTENSITY	(3.0f)
+#define NEMOPIXS_ANTIGRAVITY_INTENSITY		(3.0f)
 #define NEMOPIXS_MOVE_INTENSITY						(128.0f)
 #define NEMOPIXS_ANGULAR_INTENSITY				(3.0f)
 #define NEMOPIXS_COLOR_INTENSITY					(64.0f)
 #define NEMOPIXS_PIXEL_INTENSITY					(128.0f)
 
 #define NEMOPIXS_GRAVITYWELL_FRICTION			(0.5f)
-#define NEMOPIXS_MUTUALGRAVITY_FRICTION		(2.5f)
+#define NEMOPIXS_ANTIGRAVITY_FRICTION			(2.5f)
 
 #define NEMOPIXS_MOVE_EPSILON							(0.0001f)
 #define NEMOPIXS_ANGULAR_EPSILON					(0.0001f)
 #define NEMOPIXS_COLOR_EPSILON						(0.0001f)
 #define NEMOPIXS_PIXEL_EPSILON						(1.0f)
 
-#define NEMOPIXS_MOVE_MINIMUM_COLOR_FORCE				(0.3f)
+#define NEMOPIXS_MOVE_MINIMUM_COLOR_FORCE	(0.3f)
 
 #define NEMOPIXS_PIXEL_TIMEOUT						(100)
 
@@ -578,18 +578,18 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 					dx = x0 - one->vertices[i * 3 + 0];
 					dy = y0 - one->vertices[i * 3 + 1];
 					dd = dx * dx + dy * dy;
-					ds = sqrtf(dd + NEMOPIXS_MUTUALGRAVITY_MINIMUM_DISTANCE);
+					ds = sqrtf(dd + NEMOPIXS_ANTIGRAVITY_MINIMUM_DISTANCE);
 
-					if (dd < NEMOPIXS_MUTUALGRAVITY_SCOPE * one->noises[i]) {
-						f = -NEMOPIXS_MUTUALGRAVITY_INTENSITY * dt / (ds * ds * ds) * one->noises[i];
+					if (dd < NEMOPIXS_ANTIGRAVITY_SCOPE * one->noises[i]) {
+						f = -NEMOPIXS_ANTIGRAVITY_INTENSITY * dt / (ds * ds * ds) * one->noises[i];
 
 						one->velocities[i * 2 + 0] += dx * f;
 						one->velocities[i * 2 + 1] += dy * f;
 					}
 				}
 
-				one->velocities[i * 2 + 0] -= one->velocities[i * 2 + 0] * NEMOPIXS_MUTUALGRAVITY_FRICTION * dt;
-				one->velocities[i * 2 + 1] -= one->velocities[i * 2 + 1] * NEMOPIXS_MUTUALGRAVITY_FRICTION * dt;
+				one->velocities[i * 2 + 0] -= one->velocities[i * 2 + 0] * NEMOPIXS_ANTIGRAVITY_FRICTION * dt;
+				one->velocities[i * 2 + 1] -= one->velocities[i * 2 + 1] * NEMOPIXS_ANTIGRAVITY_FRICTION * dt;
 
 				one->vertices[i * 3 + 0] = CLAMP(one->vertices[i * 3 + 0] + one->velocities[i * 2 + 0] * dt, -1.0f, 1.0f);
 				one->vertices[i * 3 + 1] = CLAMP(one->vertices[i * 3 + 1] + one->velocities[i * 2 + 1] * dt, -1.0f, 1.0f);
