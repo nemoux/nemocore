@@ -18,6 +18,7 @@ struct pixsone {
 
 	float *diffuses;
 	float *noises;
+	float *sleeps;
 
 	float *vertices0;
 	float *diffuses0;

@@ -66,6 +66,7 @@ static struct pixsone *nemopixs_one_create(int32_t width, int32_t height, int32_
 	one->velocities = (float *)malloc(sizeof(float[2]) * rows * columns);
 	one->diffuses = (float *)malloc(sizeof(float[4]) * rows * columns);
 	one->noises = (float *)malloc(sizeof(float) * rows * columns);
+	one->sleeps = (float *)malloc(sizeof(float) * rows * columns);
 	one->vertices0 = (float *)malloc(sizeof(float[3]) * rows * columns);
 	one->diffuses0 = (float *)malloc(sizeof(float[4]) * rows * columns);
 	one->positions0 = (float *)malloc(sizeof(float[2]) * rows * columns);
@@ -85,6 +86,7 @@ static struct pixsone *nemopixs_one_create(int32_t width, int32_t height, int32_
 		one->diffuses[i * 4 + 3] = 0.0f;
 
 		one->noises[i] = 1.0f;
+		one->sleeps[i] = 0.0f;
 	}
 
 	return one;
@@ -96,6 +98,7 @@ static void nemopixs_one_destroy(struct pixsone *one)
 	free(one->velocities);
 	free(one->diffuses);
 	free(one->noises);
+	free(one->sleeps);
 	free(one->vertices0);
 	free(one->diffuses0);
 	free(one->positions0);
@@ -119,6 +122,7 @@ static inline void nemopixs_one_copy(struct pixsone *one, int s, int d)
 	one->diffuses[d * 4 + 3] = one->diffuses[s * 4 + 3];
 
 	one->noises[d] = one->noises[s];
+	one->sleeps[d] = one->sleeps[s];
 
 	one->vertices0[d * 3 + 0] = one->vertices0[s * 3 + 0];
 	one->vertices0[d * 3 + 1] = one->vertices0[s * 3 + 1];
@@ -377,6 +381,17 @@ static int nemopixs_one_set_noise(struct pixsone *one, float min, float max)
 	return 0;
 }
 
+static int nemopixs_one_set_sleep(struct pixsone *one, float interval)
+{
+	int i;
+
+	for (i = 0; i < one->pixscount; i++) {
+		one->sleeps[i] = i * interval;
+	}
+
+	return 0;
+}
+
 static int nemopixs_one_set_position_to(struct pixsone *one, int action, int dirty)
 {
 	float seed;
@@ -608,6 +623,12 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 			int i;
 
 			for (i = 0; i < one->pixscount; i++) {
+				if (one->sleeps[i] > 0.0f) {
+					one->sleeps[i] -= dt;
+					needs_feedback = 1;
+					continue;
+				}
+
 				c = MAX3(one->diffuses[i * 4 + 0], one->diffuses[i * 4 + 1], one->diffuses[i * 4 + 2]);
 				c = c * (1.0f - NEMOPIXS_MOVE_MINIMUM_COLOR_FORCE) + NEMOPIXS_MOVE_MINIMUM_COLOR_FORCE;
 
@@ -663,6 +684,12 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 			int i;
 
 			for (i = 0; i < one->pixscount; i++) {
+				if (one->sleeps[i] > 0.0f) {
+					one->sleeps[i] -= dt;
+					needs_feedback = 1;
+					continue;
+				}
+
 				x0 = one->vertices[i * 3 + 0];
 				y0 = one->vertices[i * 3 + 1];
 				x1 = one->vertices0[i * 3 + 0];
@@ -715,6 +742,12 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 		int i;
 
 		for (i = 0; i < one->pixscount; i++) {
+			if (one->sleeps[i] > 0.0f) {
+				one->sleeps[i] -= dt;
+				needs_feedback = 1;
+				continue;
+			}
+
 			s0 = one->pixels0[i];
 
 			dd = s0 - one->vertices[i * 3 + 2];
@@ -749,6 +782,12 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 		int i;
 
 		for (i = 0; i < one->pixscount; i++) {
+			if (one->sleeps[i] > 0.0f) {
+				one->sleeps[i] -= dt;
+				needs_feedback = 1;
+				continue;
+			}
+
 			r0 = one->diffuses0[i * 4 + 0];
 			g0 = one->diffuses0[i * 4 + 1];
 			b0 = one->diffuses0[i * 4 + 2];
@@ -868,12 +907,14 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 	struct nemopixs *pixs = (struct nemopixs *)nemoshow_get_userdata(show);
 
 	if (nemoshow_event_is_pointer_left_down(show, event)) {
+		nemopixs_one_set_sleep(pixs->one, 0.001f);
 		nemopixs_one_set_position_to(pixs->one, random_get_int(1, 5), 1);
 	} else if (nemoshow_event_is_pointer_right_down(show, event)) {
 		pixs->isprites = (pixs->isprites + 1) % pixs->nsprites;
 
 		nemopixs_one_set_diffuse_to(pixs->one, pixs->sprites[pixs->isprites], 0.05f);
 		nemopixs_one_jitter(pixs->one, pixs->jitter);
+		nemopixs_one_set_sleep(pixs->one, 0.0f);
 		nemopixs_one_set_noise(pixs->one, 0.85f, 1.05f);
 		nemopixs_one_set_position_to(pixs->one, 0, 1);
 	}
@@ -979,6 +1020,7 @@ static void nemopixs_dispatch_scene_timer(struct nemotimer *timer, void *data)
 	nemopixs_one_set_diffuse_to(pixs->one, pixs->sprites[pixs->isprites], 0.05f);
 	nemopixs_one_shuffle(pixs->one);
 	nemopixs_one_jitter(pixs->one, pixs->jitter);
+	nemopixs_one_set_sleep(pixs->one, 0.0f);
 	nemopixs_one_set_noise(pixs->one, 0.85f, 1.05f);
 	nemopixs_one_set_position_to(pixs->one, 0, 2);
 
