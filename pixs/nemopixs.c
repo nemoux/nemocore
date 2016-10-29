@@ -45,7 +45,43 @@
 
 #define NEMOPIXS_MOVE_MINIMUM_COLOR_FORCE	(0.3f)
 
+#define NEMOPIXS_FENCE_BOUNCE							(0.85f)
+
 #define NEMOPIXS_PIXEL_TIMEOUT						(100)
+
+static struct pixsfence *nemopixs_fence_create(struct showone *canvas)
+{
+	struct pixsfence *fence;
+
+	fence = (struct pixsfence *)malloc(sizeof(struct pixsfence));
+	if (fence == NULL)
+		return NULL;
+	memset(fence, 0, sizeof(struct pixsfence));
+
+	fence->canvas = canvas;
+
+	fence->pixels = (uint8_t *)nemoshow_canvas_map(canvas);
+
+	fence->width = nemoshow_canvas_get_viewport_width(canvas);
+	fence->height = nemoshow_canvas_get_viewport_height(canvas);
+
+	return fence;
+}
+
+static void nemopixs_fence_destroy(struct pixsfence *fence)
+{
+	nemoshow_canvas_unmap(fence->canvas);
+
+	free(fence);
+}
+
+static int nemopixs_fence_contain_pixel(struct pixsfence *fence, float x, float y, float minimum_alpha)
+{
+	int ix = (x + 1.0f) / 2.0f * fence->width;
+	int iy = (y + 1.0f) / 2.0f * fence->height;
+
+	return fence->pixels[(iy * fence->width) * 4 + ix * 4 + 3] > minimum_alpha * 255;
+}
 
 static struct pixsone *nemopixs_one_create(int32_t width, int32_t height, int32_t columns, int32_t rows)
 {
@@ -549,10 +585,16 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 	int is_updated = 0;
 
 	if (tapcount > 0) {
+		struct pixsfence *fence = NULL;
+
+		if (pixs->over != NULL)
+			fence = nemopixs_fence_create(pixs->over);
+
 		if (pixs->iactions == 0) {
+			float x, y;
 			float x0, y0;
 			float dx, dy, dd, ds;
-			float f;
+			float f, v;
 			int i, n;
 
 			for (i = 0; i < one->pixscount; i++) {
@@ -576,13 +618,28 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 				one->velocities[i * 2 + 0] -= one->velocities[i * 2 + 0] * NEMOPIXS_GRAVITYWELL_FRICTION * dt;
 				one->velocities[i * 2 + 1] -= one->velocities[i * 2 + 1] * NEMOPIXS_GRAVITYWELL_FRICTION * dt;
 
-				one->vertices[i * 3 + 0] = CLAMP(one->vertices[i * 3 + 0] + one->velocities[i * 2 + 0] * dt, -1.0f, 1.0f);
-				one->vertices[i * 3 + 1] = CLAMP(one->vertices[i * 3 + 1] + one->velocities[i * 2 + 1] * dt, -1.0f, 1.0f);
+				x = CLAMP(one->vertices[i * 3 + 0] + one->velocities[i * 2 + 0] * dt, -1.0f, 1.0f);
+				y = CLAMP(one->vertices[i * 3 + 1] + one->velocities[i * 2 + 1] * dt, -1.0f, 1.0f);
+
+				if (nemopixs_fence_contain_pixel(fence, x, y, 0.05f) == 0) {
+					one->vertices[i * 3 + 0] = x;
+					one->vertices[i * 3 + 1] = y;
+				} else {
+					v = sqrtf(one->velocities[i * 2 + 0] * one->velocities[i * 2 + 0] + one->velocities[i * 2 + 1] * one->velocities[i * 2 + 1]) * NEMOPIXS_FENCE_BOUNCE;
+
+					dx = one->vertices[i * 3 + 0] - x;
+					dy = one->vertices[i * 3 + 1] - y;
+					ds = sqrtf(dx * dx + dy * dy);
+
+					one->velocities[i * 2 + 0] = dx / ds * v;
+					one->velocities[i * 2 + 1] = dy / ds * v;
+				}
 			}
 		} else if (pixs->iactions == 1) {
+			float x, y;
 			float x0, y0;
 			float dx, dy, dd, ds;
-			float f;
+			float f, v;
 			int i, n;
 
 			for (i = 0; i < one->pixscount; i++) {
@@ -606,14 +663,31 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 				one->velocities[i * 2 + 0] -= one->velocities[i * 2 + 0] * NEMOPIXS_ANTIGRAVITY_FRICTION * dt;
 				one->velocities[i * 2 + 1] -= one->velocities[i * 2 + 1] * NEMOPIXS_ANTIGRAVITY_FRICTION * dt;
 
-				one->vertices[i * 3 + 0] = CLAMP(one->vertices[i * 3 + 0] + one->velocities[i * 2 + 0] * dt, -1.0f, 1.0f);
-				one->vertices[i * 3 + 1] = CLAMP(one->vertices[i * 3 + 1] + one->velocities[i * 2 + 1] * dt, -1.0f, 1.0f);
+				x = CLAMP(one->vertices[i * 3 + 0] + one->velocities[i * 2 + 0] * dt, -1.0f, 1.0f);
+				y = CLAMP(one->vertices[i * 3 + 1] + one->velocities[i * 2 + 1] * dt, -1.0f, 1.0f);
+
+				if (nemopixs_fence_contain_pixel(fence, x, y, 0.05f) == 0) {
+					one->vertices[i * 3 + 0] = x;
+					one->vertices[i * 3 + 1] = y;
+				} else {
+					v = sqrtf(one->velocities[i * 2 + 0] * one->velocities[i * 2 + 0] + one->velocities[i * 2 + 1] * one->velocities[i * 2 + 1]) * NEMOPIXS_FENCE_BOUNCE;
+
+					dx = one->vertices[i * 3 + 0] - x;
+					dy = one->vertices[i * 3 + 1] - y;
+					ds = sqrtf(dx * dx + dy * dy);
+
+					one->velocities[i * 2 + 0] = dx / ds * v;
+					one->velocities[i * 2 + 1] = dy / ds * v;
+				}
 			}
 		}
 
 		one->is_vertices_dirty = 1;
 
 		is_updated = 1;
+
+		if (fence != NULL)
+			nemopixs_fence_destroy(fence);
 	} else {
 		if (one->is_vertices_dirty == 1) {
 			int needs_feedback = 0;

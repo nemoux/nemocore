@@ -12,6 +12,14 @@
 #include <nemotimer.h>
 #include <nemoshow.h>
 
+struct pixsfence {
+	struct showone *canvas;
+
+	uint8_t *pixels;
+
+	int width, height;
+};
+
 struct pixsone {
 	float *vertices;
 	float *velocities;
