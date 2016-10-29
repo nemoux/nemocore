@@ -1106,6 +1106,7 @@ int main(int argc, char *argv[])
 		{ "timeout",				required_argument,			NULL,			't' },
 		{ "pointsprite",		required_argument,			NULL,			's' },
 		{ "background",			required_argument,			NULL,			'b' },
+		{ "overlay",				required_argument,			NULL,			'o' },
 		{ "fullscreen",			required_argument,			NULL,			'f' },
 		{ 0 }
 	};
@@ -1122,6 +1123,7 @@ int main(int argc, char *argv[])
 	char *fullscreen = NULL;
 	char *pointsprite = NULL;
 	char *background = NULL;
+	char *overlay = NULL;
 	float jitter = 0.0f;
 	int timeout = 10000;
 	int width = 800;
@@ -1132,7 +1134,7 @@ int main(int argc, char *argv[])
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "w:h:r:i:p:j:t:s:b:f:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:r:i:p:j:t:s:b:o:f:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -1171,6 +1173,10 @@ int main(int argc, char *argv[])
 
 			case 'b':
 				background = strdup(optarg);
+				break;
+
+			case 'o':
+				overlay = strdup(optarg);
 				break;
 
 			case 'f':
@@ -1214,14 +1220,7 @@ int main(int argc, char *argv[])
 	nemoshow_scene_set_height(scene, height);
 	nemoshow_set_scene(show, scene);
 
-	if (background == NULL) {
-		pixs->back = canvas = nemoshow_canvas_create();
-		nemoshow_canvas_set_width(canvas, width);
-		nemoshow_canvas_set_height(canvas, height);
-		nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_BACK_TYPE);
-		nemoshow_canvas_set_fill_color(canvas, 0.0f, 0.0f, 0.0f, 1.0f);
-		nemoshow_one_attach(scene, canvas);
-	} else {
+	if (background != NULL) {
 		pixs->back = canvas = nemoshow_canvas_create();
 		nemoshow_canvas_set_width(canvas, width);
 		nemoshow_canvas_set_height(canvas, height);
@@ -1236,6 +1235,13 @@ int main(int argc, char *argv[])
 		nemoshow_item_set_width(one, width);
 		nemoshow_item_set_height(one, height);
 		nemoshow_item_set_uri(one, background);
+	} else {
+		pixs->back = canvas = nemoshow_canvas_create();
+		nemoshow_canvas_set_width(canvas, width);
+		nemoshow_canvas_set_height(canvas, height);
+		nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_BACK_TYPE);
+		nemoshow_canvas_set_fill_color(canvas, 0.0f, 0.0f, 0.0f, 1.0f);
+		nemoshow_one_attach(scene, canvas);
 	}
 
 	pixs->canvas = canvas = nemoshow_canvas_create();
@@ -1245,6 +1251,22 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_dispatch_redraw(canvas, nemopixs_dispatch_canvas_redraw);
 	nemoshow_canvas_set_dispatch_event(canvas, nemopixs_dispatch_canvas_event);
 	nemoshow_one_attach(scene, canvas);
+
+	if (overlay != NULL) {
+		pixs->over = canvas = nemoshow_canvas_create();
+		nemoshow_canvas_set_width(canvas, width);
+		nemoshow_canvas_set_height(canvas, height);
+		nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
+		nemoshow_one_attach(scene, canvas);
+
+		one = nemoshow_item_create(NEMOSHOW_IMAGE_ITEM);
+		nemoshow_one_attach(canvas, one);
+		nemoshow_item_set_x(one, 0.0f);
+		nemoshow_item_set_y(one, 0.0f);
+		nemoshow_item_set_width(one, width);
+		nemoshow_item_set_height(one, height);
+		nemoshow_item_set_uri(one, overlay);
+	}
 
 	if (pointsprite != NULL) {
 		pixs->pointsprite = canvas = nemoshow_canvas_create();

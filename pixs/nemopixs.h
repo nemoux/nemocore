@@ -42,6 +42,7 @@ struct nemopixs {
 	struct nemoshow *show;
 	struct showone *scene;
 	struct showone *back;
+	struct showone *over;
 
 	struct showone *canvas;
 
