@@ -883,10 +883,12 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 		nemoshow_event_update_taps(show, canvas, &pixs->events);
 
-		if (nemoshow_event_is_touch_down(show, event) && nemoshow_event_get_tapcount(&pixs->events) == 1) {
-			nemoshow_transition_dispatch_easy(pixs->show, pixs->pointone, NEMOSHOW_CUBIC_OUT_EASE, 450, 0, 1, "r", 64.0f * 0.45f, 64.0f * 0.25f);
-		} else if (nemoshow_event_is_touch_up(show, event) && nemoshow_event_get_tapcount(&pixs->events) == 0) {
-			nemoshow_transition_dispatch_easy(pixs->show, pixs->pointone, NEMOSHOW_CUBIC_OUT_EASE, 450, 0, 1, "r", 64.0f * 0.25f, 64.0f * 0.45f);
+		if (pixs->pointsprite != NULL) {
+			if (nemoshow_event_is_touch_down(show, event) && nemoshow_event_get_tapcount(&pixs->events) == 1) {
+				nemoshow_transition_dispatch_easy(pixs->show, pixs->pointone, NEMOSHOW_CUBIC_OUT_EASE, 450, 0, 1, "r", 64.0f * 0.45f, 64.0f * 0.25f);
+			} else if (nemoshow_event_is_touch_up(show, event) && nemoshow_event_get_tapcount(&pixs->events) == 0) {
+				nemoshow_transition_dispatch_easy(pixs->show, pixs->pointone, NEMOSHOW_CUBIC_OUT_EASE, 450, 0, 1, "r", 64.0f * 0.25f, 64.0f * 0.45f);
+			}
 		}
 	}
 
