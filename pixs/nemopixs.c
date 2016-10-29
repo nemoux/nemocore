@@ -1259,13 +1259,24 @@ int main(int argc, char *argv[])
 		nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
 		nemoshow_one_attach(scene, canvas);
 
-		one = nemoshow_item_create(NEMOSHOW_IMAGE_ITEM);
-		nemoshow_one_attach(canvas, one);
-		nemoshow_item_set_x(one, 0.0f);
-		nemoshow_item_set_y(one, 0.0f);
-		nemoshow_item_set_width(one, width);
-		nemoshow_item_set_height(one, height);
-		nemoshow_item_set_uri(one, overlay);
+		if (os_has_file_extension(overlay, "svg", NULL) != 0) {
+			one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
+			nemoshow_one_attach(canvas, one);
+			nemoshow_item_set_x(one, 0.0f);
+			nemoshow_item_set_y(one, 0.0f);
+			nemoshow_item_set_width(one, width);
+			nemoshow_item_set_height(one, height);
+			nemoshow_item_set_fill_color(one, 0.0f, 255.0f, 255.0f, 255.0f);
+			nemoshow_item_path_load_svg(one, overlay, 0.0f, 0.0f, width, height);
+		} else {
+			one = nemoshow_item_create(NEMOSHOW_IMAGE_ITEM);
+			nemoshow_one_attach(canvas, one);
+			nemoshow_item_set_x(one, 0.0f);
+			nemoshow_item_set_y(one, 0.0f);
+			nemoshow_item_set_width(one, width);
+			nemoshow_item_set_height(one, height);
+			nemoshow_item_set_uri(one, overlay);
+		}
 	}
 
 	if (pointsprite != NULL) {
