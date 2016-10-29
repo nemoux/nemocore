@@ -907,14 +907,12 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 	struct nemopixs *pixs = (struct nemopixs *)nemoshow_get_userdata(show);
 
 	if (nemoshow_event_is_pointer_left_down(show, event)) {
-		nemopixs_one_set_sleep(pixs->one, 0.001f);
 		nemopixs_one_set_position_to(pixs->one, random_get_int(1, 5), 1);
 	} else if (nemoshow_event_is_pointer_right_down(show, event)) {
 		pixs->isprites = (pixs->isprites + 1) % pixs->nsprites;
 
 		nemopixs_one_set_diffuse_to(pixs->one, pixs->sprites[pixs->isprites], 0.05f);
 		nemopixs_one_jitter(pixs->one, pixs->jitter);
-		nemopixs_one_set_sleep(pixs->one, 0.0f);
 		nemopixs_one_set_noise(pixs->one, 0.85f, 1.05f);
 		nemopixs_one_set_position_to(pixs->one, 0, 1);
 	}
@@ -1020,7 +1018,6 @@ static void nemopixs_dispatch_scene_timer(struct nemotimer *timer, void *data)
 	nemopixs_one_set_diffuse_to(pixs->one, pixs->sprites[pixs->isprites], 0.05f);
 	nemopixs_one_shuffle(pixs->one);
 	nemopixs_one_jitter(pixs->one, pixs->jitter);
-	nemopixs_one_set_sleep(pixs->one, 0.0f);
 	nemopixs_one_set_noise(pixs->one, 0.85f, 1.05f);
 	nemopixs_one_set_position_to(pixs->one, 0, 2);
 
@@ -1108,6 +1105,7 @@ int main(int argc, char *argv[])
 		{ "jitter",					required_argument,			NULL,			'j' },
 		{ "timeout",				required_argument,			NULL,			't' },
 		{ "pointsprite",		required_argument,			NULL,			's' },
+		{ "background",			required_argument,			NULL,			'b' },
 		{ "fullscreen",			required_argument,			NULL,			'f' },
 		{ 0 }
 	};
@@ -1123,6 +1121,7 @@ int main(int argc, char *argv[])
 	char *imagepath = NULL;
 	char *fullscreen = NULL;
 	char *pointsprite = NULL;
+	char *background = NULL;
 	float jitter = 0.0f;
 	int timeout = 10000;
 	int width = 800;
@@ -1133,7 +1132,7 @@ int main(int argc, char *argv[])
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "w:h:r:i:p:j:t:s:f:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:r:i:p:j:t:s:b:f:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -1168,6 +1167,10 @@ int main(int argc, char *argv[])
 
 			case 's':
 				pointsprite = strdup(optarg);
+				break;
+
+			case 'b':
+				background = strdup(optarg);
 				break;
 
 			case 'f':
@@ -1211,12 +1214,29 @@ int main(int argc, char *argv[])
 	nemoshow_scene_set_height(scene, height);
 	nemoshow_set_scene(show, scene);
 
-	pixs->back = canvas = nemoshow_canvas_create();
-	nemoshow_canvas_set_width(canvas, width);
-	nemoshow_canvas_set_height(canvas, height);
-	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_BACK_TYPE);
-	nemoshow_canvas_set_fill_color(canvas, 0.0f, 0.0f, 0.0f, 1.0f);
-	nemoshow_one_attach(scene, canvas);
+	if (background == NULL) {
+		pixs->back = canvas = nemoshow_canvas_create();
+		nemoshow_canvas_set_width(canvas, width);
+		nemoshow_canvas_set_height(canvas, height);
+		nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_BACK_TYPE);
+		nemoshow_canvas_set_fill_color(canvas, 0.0f, 0.0f, 0.0f, 1.0f);
+		nemoshow_one_attach(scene, canvas);
+	} else {
+		pixs->back = canvas = nemoshow_canvas_create();
+		nemoshow_canvas_set_width(canvas, width);
+		nemoshow_canvas_set_height(canvas, height);
+		nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
+		nemoshow_canvas_set_opaque(canvas, 1);
+		nemoshow_one_attach(scene, canvas);
+
+		one = nemoshow_item_create(NEMOSHOW_IMAGE_ITEM);
+		nemoshow_one_attach(canvas, one);
+		nemoshow_item_set_x(one, 0.0f);
+		nemoshow_item_set_y(one, 0.0f);
+		nemoshow_item_set_width(one, width);
+		nemoshow_item_set_height(one, height);
+		nemoshow_item_set_uri(one, background);
+	}
 
 	pixs->canvas = canvas = nemoshow_canvas_create();
 	nemoshow_canvas_set_width(canvas, width);
@@ -1257,6 +1277,8 @@ int main(int argc, char *argv[])
 			filename = entries[i]->d_name;
 			if (filename[0] == '.')
 				continue;
+			if (os_has_file_extension(filename, "svg", "png", "jpg", NULL) == 0)
+				continue;
 
 			strcpy(filepath, imagepath);
 			strcat(filepath, "/");
@@ -1289,7 +1311,7 @@ int main(int argc, char *argv[])
 						255.0f);
 				nemoshow_item_set_stroke_width(one, pixels / 128);
 				nemoshow_item_path_load_svg(one, filepath, 0.0f, 0.0f, pixels, pixels);
-			} else if (os_has_file_extension(filepath, "png", "jpg", NULL) != 0) {
+			} else {
 				one = nemoshow_item_create(NEMOSHOW_IMAGE_ITEM);
 				nemoshow_one_attach(canvas, one);
 				nemoshow_item_set_x(one, 0.0f);
