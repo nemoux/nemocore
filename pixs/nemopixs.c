@@ -882,6 +882,12 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 		nemoshow_event_set_type(&pixs->events, NEMOSHOW_TOUCH_EVENT);
 
 		nemoshow_event_update_taps(show, canvas, &pixs->events);
+
+		if (nemoshow_event_is_touch_down(show, event) && nemoshow_event_get_tapcount(&pixs->events) == 1) {
+			nemoshow_transition_dispatch_easy(pixs->show, pixs->pointone, NEMOSHOW_CUBIC_OUT_EASE, 450, 0, 1, "r", 64.0f * 0.45f, 64.0f * 0.25f);
+		} else if (nemoshow_event_is_touch_up(show, event) && nemoshow_event_get_tapcount(&pixs->events) == 0) {
+			nemoshow_transition_dispatch_easy(pixs->show, pixs->pointone, NEMOSHOW_CUBIC_OUT_EASE, 450, 0, 1, "r", 64.0f * 0.25f, 64.0f * 0.45f);
+		}
 	}
 
 	if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event)) {
@@ -1186,11 +1192,11 @@ int main(int argc, char *argv[])
 		blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
 		nemoshow_filter_set_blur(blur, pointsprite, 16.0f);
 
-		one = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
+		pixs->pointone = one = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
 		nemoshow_one_attach(canvas, one);
-		nemoshow_item_set_cx(one, 64.0f / 2.0f);
-		nemoshow_item_set_cy(one, 64.0f / 2.0f);
-		nemoshow_item_set_r(one, 64.0f / 3.0f);
+		nemoshow_item_set_cx(one, 64.0f * 0.5f);
+		nemoshow_item_set_cy(one, 64.0f * 0.5f);
+		nemoshow_item_set_r(one, 64.0f * 0.45f);
 		nemoshow_item_set_fill_color(one, 255.0f, 255.0f, 255.0f, 255.0f);
 		nemoshow_item_set_filter(one, blur);
 	}

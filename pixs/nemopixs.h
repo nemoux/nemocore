@@ -50,6 +50,7 @@ struct nemopixs {
 	int iactions;
 
 	struct showone *pointsprite;
+	struct showone *pointone;
 
 	uint32_t width, height;
 

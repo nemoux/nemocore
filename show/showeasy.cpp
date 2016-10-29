@@ -32,7 +32,7 @@ struct showtransition *nemoshow_transition_create_easy(struct nemoshow *show, st
 	return trans;
 }
 
-void nemoshow_transition_dispatch_easy(struct nemoshow *show, struct showone *one, struct showone *ease, uint32_t duration, uint32_t delay, uint32_t repeat, const char *attr, double v0, double v1)
+struct showtransition *nemoshow_transition_dispatch_easy(struct nemoshow *show, struct showone *one, struct showone *ease, uint32_t duration, uint32_t delay, uint32_t repeat, const char *attr, double v0, double v1)
 {
 	struct showtransition *trans;
 	struct showone *sequence;
@@ -42,10 +42,9 @@ void nemoshow_transition_dispatch_easy(struct nemoshow *show, struct showone *on
 	set0 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set0, one);
 
-	if (repeat != 1) {
-		index = nemoshow_sequence_set_dattr(set0, attr, v1);
+	index = nemoshow_sequence_set_dattr(set0, attr, v1);
+	if (repeat != 1)
 		nemoshow_sequence_fix_dattr(set0, index, v0);
-	}
 
 	sequence = nemoshow_sequence_create_easy(show,
 			nemoshow_sequence_create_frame_easy(show,
@@ -57,6 +56,8 @@ void nemoshow_transition_dispatch_easy(struct nemoshow *show, struct showone *on
 	nemoshow_transition_attach_sequence(trans, sequence);
 	nemoshow_transition_set_repeat(trans, repeat);
 	nemoshow_attach_transition(show, trans);
+
+	return trans;
 }
 
 void nemoshow_attach_transition_easy(struct nemoshow *show, ...)
