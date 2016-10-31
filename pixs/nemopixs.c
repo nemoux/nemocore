@@ -621,7 +621,7 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 				x = CLAMP(one->vertices[i * 3 + 0] + one->velocities[i * 2 + 0] * dt, -1.0f, 1.0f);
 				y = CLAMP(one->vertices[i * 3 + 1] + one->velocities[i * 2 + 1] * dt, -1.0f, 1.0f);
 
-				if (nemopixs_fence_contain_pixel(fence, x, y, 0.05f) == 0) {
+				if (fence == NULL || nemopixs_fence_contain_pixel(fence, x, y, 0.05f) == 0) {
 					one->vertices[i * 3 + 0] = x;
 					one->vertices[i * 3 + 1] = y;
 				} else {
@@ -666,7 +666,7 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 				x = CLAMP(one->vertices[i * 3 + 0] + one->velocities[i * 2 + 0] * dt, -1.0f, 1.0f);
 				y = CLAMP(one->vertices[i * 3 + 1] + one->velocities[i * 2 + 1] * dt, -1.0f, 1.0f);
 
-				if (nemopixs_fence_contain_pixel(fence, x, y, 0.05f) == 0) {
+				if (fence == NULL || nemopixs_fence_contain_pixel(fence, x, y, 0.05f) == 0) {
 					one->vertices[i * 3 + 0] = x;
 					one->vertices[i * 3 + 1] = y;
 				} else {
