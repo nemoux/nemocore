@@ -584,7 +584,7 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 	int tapcount = nemoshow_event_get_tapcount(&pixs->events);
 	int is_updated = 0;
 
-	if (tapcount > 0) {
+	if (tapcount > 0 && one->is_hidden == 0) {
 		struct pixsfence *fence = NULL;
 
 		if (pixs->over != NULL)
@@ -982,6 +982,8 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 	if (nemoshow_event_is_pointer_left_down(show, event)) {
 		nemopixs_one_set_position_to(pixs->one, random_get_int(1, 5), 1);
+
+		pixs->one->is_hidden = 1;
 	} else if (nemoshow_event_is_pointer_right_down(show, event)) {
 		pixs->isprites = (pixs->isprites + 1) % pixs->nsprites;
 		pixs->iactions = (pixs->iactions + 1) % 2;
@@ -990,6 +992,8 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 		nemopixs_one_jitter(pixs->one, pixs->jitter);
 		nemopixs_one_set_noise(pixs->one, 0.85f, 1.05f);
 		nemopixs_one_set_position_to(pixs->one, 0, 1);
+
+		pixs->one->is_hidden = 0;
 	}
 
 	if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event) || nemoshow_event_is_touch_motion(show, event)) {
@@ -1108,12 +1112,14 @@ static void nemopixs_dispatch_pixel_timer(struct nemotimer *timer, void *data)
 {
 	struct nemopixs *pixs = (struct nemopixs *)data;
 
-	nemopixs_one_swap(pixs->one,
-			random_get_int(0, pixs->one->pixscount - 1),
-			random_get_int(0, pixs->one->pixscount - 1));
+	if (pixs->one->is_hidden == 0) {
+		nemopixs_one_swap(pixs->one,
+				random_get_int(0, pixs->one->pixscount - 1),
+				random_get_int(0, pixs->one->pixscount - 1));
 
-	nemoshow_one_dirty(pixs->canvas, NEMOSHOW_REDRAW_DIRTY);
-	nemoshow_dispatch_frame(pixs->show);
+		nemoshow_one_dirty(pixs->canvas, NEMOSHOW_REDRAW_DIRTY);
+		nemoshow_dispatch_frame(pixs->show);
+	}
 
 	nemotimer_set_timeout(pixs->ptimer, NEMOPIXS_PIXEL_TIMEOUT);
 }

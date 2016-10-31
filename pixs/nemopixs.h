@@ -38,6 +38,7 @@ struct pixsone {
 	int is_vertices_dirty;
 	int is_diffuses_dirty;
 	int is_pixels_dirty;
+	int is_hidden;
 
 	int rows, columns;
 
