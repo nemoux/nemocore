@@ -35,6 +35,10 @@ struct pixsone {
 	uint32_t pixscount;
 	uint32_t pixscount0;
 
+	GLuint varray;
+	GLuint vvertex;
+	GLuint vdiffuse;
+
 	int is_vertices_dirty;
 	int is_diffuses_dirty;
 	int is_pixels_dirty;

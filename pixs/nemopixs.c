@@ -125,11 +125,19 @@ static struct pixsone *nemopixs_one_create(int32_t width, int32_t height, int32_
 		one->sleeps[i] = 0.0f;
 	}
 
+	glGenVertexArrays(1, &one->varray);
+	glGenBuffers(1, &one->vvertex);
+	glGenBuffers(1, &one->vdiffuse);
+
 	return one;
 }
 
 static void nemopixs_one_destroy(struct pixsone *one)
 {
+	glDeleteBuffers(1, &one->vvertex);
+	glDeleteBuffers(1, &one->vdiffuse);
+	glDeleteVertexArrays(1, &one->varray);
+
 	free(one->vertices);
 	free(one->velocities);
 	free(one->diffuses);
@@ -950,15 +958,33 @@ static void nemopixs_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 
 	one = pixs->one;
 	if (one != NULL) {
-		if (nemopixs_update_one(pixs, one, dt) != 0)
+		if (nemopixs_update_one(pixs, one, dt) != 0) {
+			glBindVertexArray(one->varray);
+
+			if (one->is_vertices_dirty != 0 || one->is_pixels_dirty != 0) {
+				glBindBuffer(GL_ARRAY_BUFFER, one->vvertex);
+				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void *)0);
+				glEnableVertexAttribArray(0);
+				glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat[3]) * one->pixscount, &one->vertices[0], GL_STATIC_DRAW);
+				glBindBuffer(GL_ARRAY_BUFFER, 0);
+			}
+
+			if (one->is_diffuses_dirty != 0) {
+				glBindBuffer(GL_ARRAY_BUFFER, one->vdiffuse);
+				glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void *)0);
+				glEnableVertexAttribArray(1);
+				glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat[4]) * one->pixscount, &one->diffuses[0], GL_STATIC_DRAW);
+				glBindBuffer(GL_ARRAY_BUFFER, 0);
+			}
+
+			glBindVertexArray(0);
+
 			is_updated = 1;
+		}
 
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &one->vertices[0]);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &one->diffuses[0]);
-		glEnableVertexAttribArray(1);
-
+		glBindVertexArray(one->varray);
 		glDrawArrays(GL_POINTS, 0, one->pixscount);
+		glBindVertexArray(0);
 	}
 
 	glBindTexture(GL_TEXTURE_2D, 0);
