@@ -1392,16 +1392,39 @@ int main(int argc, char *argv[])
 		nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
 		nemoshow_attach_one(show, canvas);
 
-		blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
-		nemoshow_filter_set_blur(blur, pointsprite, 16.0f);
+		if (pointsprite[0] == '@') {
+			blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
+			nemoshow_filter_set_blur(blur, pointsprite + 1, 8.0f);
 
-		pixs->pointone = one = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
-		nemoshow_one_attach(canvas, one);
-		nemoshow_item_set_cx(one, 64.0f * 0.5f);
-		nemoshow_item_set_cy(one, 64.0f * 0.5f);
-		nemoshow_item_set_r(one, 64.0f * 0.45f);
-		nemoshow_item_set_fill_color(one, 255.0f, 255.0f, 255.0f, 255.0f);
-		nemoshow_item_set_filter(one, blur);
+			pixs->pointone = one = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
+			nemoshow_one_attach(canvas, one);
+			nemoshow_item_set_cx(one, 64.0f * 0.5f);
+			nemoshow_item_set_cy(one, 64.0f * 0.5f);
+			nemoshow_item_set_r(one, 64.0f * 0.45f);
+			nemoshow_item_set_fill_color(one, 255.0f, 255.0f, 255.0f, 255.0f);
+			nemoshow_item_set_filter(one, blur);
+		} else if (os_has_file_extension(pointsprite, "svg", NULL) != 0) {
+			blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
+			nemoshow_filter_set_blur(blur, "solid", 8.0f);
+
+			pixs->pointone = one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
+			nemoshow_one_attach(canvas, one);
+			nemoshow_item_set_x(one, 0.0f);
+			nemoshow_item_set_y(one, 0.0f);
+			nemoshow_item_set_width(one, 64.0f);
+			nemoshow_item_set_height(one, 64.0f);
+			nemoshow_item_set_fill_color(one, 0.0f, 255.0f, 255.0f, 255.0f);
+			nemoshow_item_set_filter(one, blur);
+			nemoshow_item_path_load_svg(one, pointsprite, 0.0f, 0.0f, 64.0f, 64.0f);
+		} else {
+			pixs->pointone = one = nemoshow_item_create(NEMOSHOW_IMAGE_ITEM);
+			nemoshow_one_attach(canvas, one);
+			nemoshow_item_set_x(one, 0.0f);
+			nemoshow_item_set_y(one, 0.0f);
+			nemoshow_item_set_width(one, 64.0f);
+			nemoshow_item_set_height(one, 64.0f);
+			nemoshow_item_set_uri(one, pointsprite);
+		}
 	}
 
 	if (os_check_path_is_directory(imagepath) != 0) {
