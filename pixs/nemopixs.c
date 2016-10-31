@@ -984,6 +984,7 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 		nemopixs_one_set_position_to(pixs->one, random_get_int(1, 5), 1);
 	} else if (nemoshow_event_is_pointer_right_down(show, event)) {
 		pixs->isprites = (pixs->isprites + 1) % pixs->nsprites;
+		pixs->iactions = (pixs->iactions + 1) % 2;
 
 		nemopixs_one_set_diffuse_to(pixs->one, pixs->sprites[pixs->isprites], 0.05f);
 		nemopixs_one_jitter(pixs->one, pixs->jitter);
@@ -1088,6 +1089,7 @@ static void nemopixs_dispatch_scene_timer(struct nemotimer *timer, void *data)
 	}
 
 	pixs->isprites = (pixs->isprites + 1) % pixs->nsprites;
+	pixs->iactions = (pixs->iactions + 1) % 2;
 
 	nemopixs_one_set_diffuse_to(pixs->one, pixs->sprites[pixs->isprites], 0.05f);
 	nemopixs_one_shuffle(pixs->one);
@@ -1097,8 +1099,6 @@ static void nemopixs_dispatch_scene_timer(struct nemotimer *timer, void *data)
 
 	nemoshow_one_dirty(pixs->canvas, NEMOSHOW_REDRAW_DIRTY);
 	nemoshow_dispatch_frame(pixs->show);
-
-	pixs->iactions = (pixs->iactions + 1) % 2;
 
 	nemotimer_set_timeout(pixs->stimer, pixs->timeout);
 	nemotimer_set_timeout(pixs->ptimer, 0);
