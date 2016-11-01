@@ -398,6 +398,20 @@ int nemoitem_one_has_path_prefix(struct itemone *one, const char *prefix)
 	return 1;
 }
 
+int nemoitem_one_has_path_suffix(struct itemone *one, const char *suffix)
+{
+	int slength = strlen(suffix);
+	int plength = strlen(one->path);
+	int i;
+
+	for (i = 0; i < slength; i++) {
+		if (one->path[plength - i - 1] != suffix[slength - i - 1])
+			return 0;
+	}
+
+	return 1;
+}
+
 int nemoitem_one_has_path_format(struct itemone *one, const char *fmt, ...)
 {
 	va_list vargs;
