@@ -16,8 +16,6 @@ add_library(nemoasst SHARED
 	nemoscope.c
 	nemoclip.c
 	nemopool.c
-	nemokeys.c
-	nemonote.c
 	nemomisc.c
 	${CMAKE_SOURCE_DIR}/misc/xmlparser.c
 	${CMAKE_SOURCE_DIR}/misc/pixmanhelper.c
@@ -61,8 +59,6 @@ set(HEADER_FILES
 	nemoscope.h
 	nemoclip.h
 	nemopool.h
-	nemokeys.h
-	nemonote.h
 	nemoconfig.h
 	nemohelper.h
 	)

@@ -21,24 +21,3 @@ TARGET_LINK_LIBRARIES(nemolog
 	)
 
 INSTALL(TARGETS nemolog DESTINATION bin)
-
-add_executable(nemokeys
-	nemokeys.c
-	)
-
-TARGET_LINK_LIBRARIES(nemokeys
-	nemoasst
-	)
-
-INSTALL(TARGETS nemokeys DESTINATION bin)
-
-add_executable(nemonote
-	nemonote.c
-	)
-
-TARGET_LINK_LIBRARIES(nemonote
-	nemoasst
-	${JSON_LIBRARIES}
-	)
-
-INSTALL(TARGETS nemonote DESTINATION bin)
