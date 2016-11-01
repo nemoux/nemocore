@@ -74,6 +74,7 @@ extern int nemoitem_one_has_path(struct itemone *one, const char *path);
 extern int nemoitem_one_has_path_prefix(struct itemone *one, const char *prefix);
 extern int nemoitem_one_has_path_suffix(struct itemone *one, const char *suffix);
 extern int nemoitem_one_has_path_format(struct itemone *one, const char *fmt, ...);
+extern int nemoitem_one_has_path_regex(struct itemone *one, const char *expr);
 
 extern int nemoitem_one_set_attr(struct itemone *one, const char *name, const char *value);
 extern int nemoitem_one_set_attr_format(struct itemone *one, const char *name, const char *fmt, ...);

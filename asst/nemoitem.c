@@ -9,6 +9,7 @@
 #include <errno.h>
 
 #include <ctype.h>
+#include <regex.h>
 
 #include <nemoitem.h>
 #include <nemotoken.h>
@@ -428,6 +429,21 @@ int nemoitem_one_has_path_format(struct itemone *one, const char *fmt, ...)
 	r = strcmp(one->path, path) == 0;
 
 	free(path);
+
+	return r;
+}
+
+int nemoitem_one_has_path_regex(struct itemone *one, const char *expr)
+{
+	regex_t regex;
+	int r;
+
+	if (regcomp(&regex, expr, REG_EXTENDED))
+		return 0;
+
+	r = regexec(&regex, one->path, 0, NULL, 0) == 0;
+
+	regfree(&regex);
 
 	return r;
 }
