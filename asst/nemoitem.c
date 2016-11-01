@@ -404,6 +404,9 @@ int nemoitem_one_has_path_suffix(struct itemone *one, const char *suffix)
 	int plength = strlen(one->path);
 	int i;
 
+	if (plength < slength)
+		return 0;
+
 	for (i = 0; i < slength; i++) {
 		if (one->path[plength - i - 1] != suffix[slength - i - 1])
 			return 0;
