@@ -6,6 +6,7 @@ LINK_DIRECTORIES(${JSON_LIBRARY_DIRS})
 
 include_directories(
 	${CMAKE_SOURCE_DIR}/asst
+	${CMAKE_SOURCE_DIR}/bus
 	)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
@@ -21,3 +22,27 @@ TARGET_LINK_LIBRARIES(nemolog
 	)
 
 INSTALL(TARGETS nemolog DESTINATION bin)
+
+add_executable(nemobusc
+	nemobusc.c
+	)
+
+TARGET_LINK_LIBRARIES(nemobusc
+	nemoasst
+	nemobus
+	${JSON_LIBRARIES}
+	)
+
+INSTALL(TARGETS nemobusc DESTINATION bin)
+
+add_executable(nemobusd
+	nemobusd.c
+	)
+
+TARGET_LINK_LIBRARIES(nemobusd
+	nemoasst
+	nemobus
+	${JSON_LIBRARIES}
+	)
+
+INSTALL(TARGETS nemobusd DESTINATION bin)

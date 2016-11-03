@@ -31,27 +31,3 @@ configure_file(
 
 INSTALL(FILES ${HEADER_FILES} DESTINATION include/nemobus)
 INSTALL(FILES ${CMAKE_BINARY_DIR}/bus/nemobus.pc DESTINATION lib${CMAKE_LIBRARY_SUFFIX}/pkgconfig)
-
-add_executable(nemobusc
-	nemobusc.c
-	)
-
-TARGET_LINK_LIBRARIES(nemobusc
-	nemoasst
-	nemobus
-	${JSON_LIBRARIES}
-	)
-
-INSTALL(TARGETS nemobusc DESTINATION bin)
-
-add_executable(nemobusd
-	nemobusd.c
-	)
-
-TARGET_LINK_LIBRARIES(nemobusd
-	nemoasst
-	nemobus
-	${JSON_LIBRARIES}
-	)
-
-INSTALL(TARGETS nemobusd DESTINATION bin)
