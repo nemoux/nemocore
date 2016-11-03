@@ -63,6 +63,8 @@ struct nemopixs {
 	int nsprites, isprites;
 
 	int iactions;
+	int tapmax;
+	int tapidx;
 
 	struct showone *pointsprite;
 	struct showone *pointone;

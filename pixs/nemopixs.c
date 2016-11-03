@@ -49,6 +49,8 @@
 
 #define NEMOPIXS_PIXEL_TIMEOUT						(100)
 
+#define NEMOPIXS_ACTION_TAPMAX						(3)
+
 static struct pixsfence *nemopixs_fence_create(struct showone *canvas)
 {
 	struct pixsfence *fence;
@@ -599,14 +601,18 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 			fence = nemopixs_fence_create(pixs->over);
 
 		if (pixs->iactions == 0) {
+			int tapmax = MIN(tapcount, pixs->tapmax);
+			float intensity = NEMOPIXS_GRAVITYWELL_INTENSITY / (float)tapmax;
 			float x, y;
 			float x0, y0;
 			float dx, dy, dd, ds;
 			float f, v;
-			int i, n;
+			int i, j, n;
 
 			for (i = 0; i < one->pixscount; i++) {
-				for (n = 0; n < tapcount; n++) {
+				for (j = 0; j < tapmax; j++) {
+					n = pixs->tapidx = (pixs->tapidx + 1) % tapcount;
+
 					x0 = (nemoshow_event_get_x_on(&pixs->events, n) / (float)pixs->width) * 2.0f - 1.0f;
 					y0 = (nemoshow_event_get_y_on(&pixs->events, n) / (float)pixs->height) * 2.0f - 1.0f;
 
@@ -616,7 +622,7 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 					ds = sqrtf(dd + NEMOPIXS_GRAVITYWELL_MINIMUM_DISTANCE);
 
 					if (dd < NEMOPIXS_GRAVITYWELL_SCOPE * one->noises[i]) {
-						f = (NEMOPIXS_GRAVITYWELL_INTENSITY / tapcount) * dt / (ds * ds * ds) * one->noises[i];
+						f = intensity * dt / (ds * ds * ds) * one->noises[i];
 
 						one->velocities[i * 2 + 0] += dx * f;
 						one->velocities[i * 2 + 1] += dy * f;
@@ -644,14 +650,18 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 				}
 			}
 		} else if (pixs->iactions == 1) {
+			int tapmax = MIN(tapcount, pixs->tapmax);
+			float intensity = NEMOPIXS_ANTIGRAVITY_INTENSITY * (float)tapcount / (float)tapmax;
 			float x, y;
 			float x0, y0;
 			float dx, dy, dd, ds;
 			float f, v;
-			int i, n;
+			int i, j, n;
 
 			for (i = 0; i < one->pixscount; i++) {
-				for (n = 0; n < tapcount; n++) {
+				for (j = 0; j < tapmax; j++) {
+					n = pixs->tapidx = (pixs->tapidx + 1) % tapcount;
+
 					x0 = (nemoshow_event_get_x_on(&pixs->events, n) / (float)pixs->width) * 2.0f - 1.0f;
 					y0 = (nemoshow_event_get_y_on(&pixs->events, n) / (float)pixs->height) * 2.0f - 1.0f;
 
@@ -661,7 +671,7 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 					ds = sqrtf(dd + NEMOPIXS_ANTIGRAVITY_MINIMUM_DISTANCE);
 
 					if (dd < NEMOPIXS_ANTIGRAVITY_SCOPE * one->noises[i]) {
-						f = -NEMOPIXS_ANTIGRAVITY_INTENSITY * dt / (ds * ds * ds) * one->noises[i];
+						f = -intensity * dt / (ds * ds * ds) * one->noises[i];
 
 						one->velocities[i * 2 + 0] += dx * f;
 						one->velocities[i * 2 + 1] += dy * f;
@@ -1304,6 +1314,7 @@ int main(int argc, char *argv[])
 	pixs->pixels = pixels;
 	pixs->jitter = jitter;
 	pixs->timeout = timeout;
+	pixs->tapmax = NEMOPIXS_ACTION_TAPMAX;
 
 	pixs->tool = tool = nemotool_create();
 	if (tool == NULL)
