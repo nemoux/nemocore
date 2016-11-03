@@ -92,15 +92,21 @@ static inline struct itemone *nemodb_ione_from_bson(const bson_t *bson)
 {
 	struct itemone *one;
 	bson_iter_t iter;
+	const char *key;
+	const char *value;
 
 	one = nemoitem_one_create();
 
 	bson_iter_init(&iter, bson);
 
 	while (bson_iter_next(&iter)) {
-		nemoitem_one_set_attr(one,
-				bson_iter_key(&iter),
-				bson_iter_utf8(&iter, NULL));
+		key = bson_iter_key(&iter);
+		value = bson_iter_utf8(&iter, NULL);
+
+		if (key[0] == '_')
+			continue;
+
+		nemoitem_one_set_attr(one, key, value);
 	}
 
 	return one;
