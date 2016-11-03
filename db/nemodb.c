@@ -87,9 +87,11 @@ static inline bson_t *nemodb_bson_from_ione(struct itemone *one)
 
 	bson = bson_new();
 
-	BSON_APPEND_UTF8(bson,
-			"_path",
-			nemoitem_one_get_path(one));
+	if (nemoitem_one_get_path(one) != NULL) {
+		BSON_APPEND_UTF8(bson,
+				"_path",
+				nemoitem_one_get_path(one));
+	}
 
 	nemoitem_attr_for_each(attr, one) {
 		BSON_APPEND_UTF8(bson,
