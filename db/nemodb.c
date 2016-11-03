@@ -103,10 +103,12 @@ static inline struct itemone *nemodb_ione_from_bson(const bson_t *bson)
 		key = bson_iter_key(&iter);
 		value = bson_iter_utf8(&iter, NULL);
 
-		if (key[0] == '_')
-			continue;
-
-		nemoitem_one_set_attr(one, key, value);
+		if (key[0] == '_') {
+			if (strcmp(key, "_path") == 0)
+				nemoitem_one_set_path(one, value);
+		} else {
+			nemoitem_one_set_attr(one, key, value);
+		}
 	}
 
 	return one;
