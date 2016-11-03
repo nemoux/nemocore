@@ -220,6 +220,7 @@ add_subdirectory(play)
 add_subdirectory(pixs)
 add_subdirectory(bus)
 add_subdirectory(fx)
+add_subdirectory(db)
 
 if(WITH_CEF)
 	add_subdirectory(navi)

@@ -1,0 +1,11 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+bindir=${prefix}/bin
+libdir=${prefix}/lib@CMAKE_LIBRARY_SUFFIX@
+incdir=${prefix}/include
+
+Name: Nemodb
+Description: NEMO-UX database
+Version: 0.1.0
+Requires: @NEMODB_PKGCONFIG_REQUIRES@
+Libs: -L${libdir} -lnemodb
+Cflags: -I${incdir}/nemodb
