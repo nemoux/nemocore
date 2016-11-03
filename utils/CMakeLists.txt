@@ -7,6 +7,7 @@ LINK_DIRECTORIES(${JSON_LIBRARY_DIRS})
 include_directories(
 	${CMAKE_SOURCE_DIR}/asst
 	${CMAKE_SOURCE_DIR}/bus
+	${CMAKE_SOURCE_DIR}/db
 	)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
@@ -46,3 +47,14 @@ TARGET_LINK_LIBRARIES(nemobusd
 	)
 
 INSTALL(TARGETS nemobusd DESTINATION bin)
+
+add_executable(nemodbs
+	nemodbs.c
+	)
+
+TARGET_LINK_LIBRARIES(nemodbs
+	nemoasst
+	nemodb
+	)
+
+INSTALL(TARGETS nemodbs DESTINATION bin)

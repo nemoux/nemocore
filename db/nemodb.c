@@ -72,12 +72,24 @@ int nemodb_use_collection(struct nemodb *db, const char *dbname, const char *dbc
 	return 0;
 }
 
+int nemodb_drop_collection(struct nemodb *db)
+{
+	if (mongoc_collection_drop(db->collection, NULL) == 0)
+		return -1;
+
+	return 0;
+}
+
 static inline bson_t *nemodb_bson_from_ione(struct itemone *one)
 {
 	struct itemattr *attr;
 	bson_t *bson;
 
 	bson = bson_new();
+
+	BSON_APPEND_UTF8(bson,
+			"_path",
+			nemoitem_one_get_path(one));
 
 	nemoitem_attr_for_each(attr, one) {
 		BSON_APPEND_UTF8(bson,
