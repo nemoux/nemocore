@@ -337,6 +337,29 @@ struct dbiter *nemodb_query_iter_by_many(struct nemodb *db, struct itemone *one)
 	return iter;
 }
 
+struct dbiter *nemodb_query_iter_all(struct nemodb *db)
+{
+	struct dbiter *iter;
+	mongoc_cursor_t *cursor;
+	const bson_t *bdoc;
+	bson_error_t berr;
+	bson_t *bson;
+
+	bson = bson_new();
+
+	cursor = mongoc_collection_find(db->collection, MONGOC_QUERY_NONE, 0, 0, 0, bson, NULL, NULL);
+
+	bson_destroy(bson);
+
+	if (mongoc_cursor_error(cursor, &berr))
+		return NULL;
+
+	iter = (struct dbiter *)malloc(sizeof(struct dbiter));
+	iter->cursor = cursor;
+
+	return iter;
+}
+
 struct itemone *nemodb_iter_next(struct dbiter *iter)
 {
 	const bson_t *bson;

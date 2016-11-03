@@ -28,6 +28,7 @@ extern struct itemone *nemodb_query_many_by_one(struct nemodb *db, const char *k
 extern struct itemone *nemodb_query_many_by_many(struct nemodb *db, struct itemone *one);
 extern struct dbiter *nemodb_query_iter_by_one(struct nemodb *db, const char *key, const char *value);
 extern struct dbiter *nemodb_query_iter_by_many(struct nemodb *db, struct itemone *one);
+extern struct dbiter *nemodb_query_iter_all(struct nemodb *db);
 
 extern struct itemone *nemodb_iter_next(struct dbiter *iter);
 
