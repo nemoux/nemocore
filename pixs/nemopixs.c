@@ -32,7 +32,8 @@
 #define NEMOPIXS_ANTIGRAVITY_INTENSITY		(3.0f)
 #define NEMOPIXS_MOVE_INTENSITY						(128.0f)
 #define NEMOPIXS_ANGULAR_INTENSITY				(3.0f)
-#define NEMOPIXS_COLOR_INTENSITY					(32.0f)
+#define NEMOPIXS_COLOR_CHANGE_INTENSITY		(32.0f)
+#define NEMOPIXS_COLOR_FADEOUT_INTENSITY	(128.0f)
 #define NEMOPIXS_PIXEL_INTENSITY					(128.0f)
 
 #define NEMOPIXS_GRAVITYWELL_FRICTION			(0.5f)
@@ -441,6 +442,7 @@ static int nemopixs_one_set_sleep(struct pixsone *one, float interval)
 static int nemopixs_one_set_position_to(struct pixsone *one, int action, int dirty)
 {
 	float seed;
+	float r;
 	int i;
 
 	if (action == 0) {
@@ -463,10 +465,10 @@ static int nemopixs_one_set_position_to(struct pixsone *one, int action, int dir
 		}
 	} else if (action == 4) {
 		for (i = 0; i < one->pixscount; i++) {
-			seed = random_get_double(0.0f, 1.0f);
+			r = M_PI / 2.0f - atan2(one->vertices[i * 3 + 0], one->vertices[i * 3 + 1]);
 
-			one->vertices0[i * 3 + 0] = cos(seed * M_PI * 2.0f) * 2.0f;
-			one->vertices0[i * 3 + 1] = sin(seed * M_PI * 2.0f) * 2.0f;
+			one->vertices0[i * 3 + 0] = cos(r) * 2.0f;
+			one->vertices0[i * 3 + 1] = sin(r) * 2.0f;
 		}
 	} else if (action == 5) {
 		for (i = 0; i < one->pixscount; i++) {
@@ -511,19 +513,18 @@ static int nemopixs_one_set_diffuse_to(struct pixsone *one, struct showone *canv
 	}
 
 	if (idx < one->pixscount) {
-		float seed;
-		int i;
+		int i, s;
 
 		for (i = idx; i < one->pixscount; i++) {
-			seed = random_get_double(0.0f, 1.0f);
+			s = random_get_int(0, one->pixscount - 1);
 
 			one->diffuses0[i * 4 + 0] = 0.0f;
 			one->diffuses0[i * 4 + 1] = 0.0f;
 			one->diffuses0[i * 4 + 2] = 0.0f;
 			one->diffuses0[i * 4 + 3] = 0.0f;
 
-			one->positions0[i * 2 + 0] = cos(seed * M_PI * 2.0f) * 2.0f;
-			one->positions0[i * 2 + 1] = sin(seed * M_PI * 2.0f) * 2.0f;
+			one->positions0[i * 2 + 0] = one->positions0[s * 2 + 0] * one->noises[i];
+			one->positions0[i * 2 + 1] = one->positions0[s * 2 + 1] * one->noises[i];
 		}
 	} else if (idx > one->pixscount) {
 		int i, s;
@@ -906,7 +907,10 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 				if (dd > NEMOPIXS_COLOR_EPSILON) {
 					ds = sqrtf(dd + NEMOPIXS_COLOR_MINIMUM_DISTANCE);
 
-					f = NEMOPIXS_COLOR_INTENSITY * dt / ds * one->noises[i];
+					if (i >= one->pixscount0)
+						f = NEMOPIXS_COLOR_FADEOUT_INTENSITY * dt / ds * one->noises[i];
+					else
+						f = NEMOPIXS_COLOR_CHANGE_INTENSITY * dt / ds * one->noises[i];
 
 					one->diffuses[i * 4 + 0] = one->diffuses[i * 4 + 0] + dr * f * dt;
 					one->diffuses[i * 4 + 1] = one->diffuses[i * 4 + 1] + dg * f * dt;
