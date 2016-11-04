@@ -84,6 +84,7 @@ struct nemopixs {
 
 	int pixels;
 	float jitter;
+	float pixsize;
 
 	uint32_t msecs;
 

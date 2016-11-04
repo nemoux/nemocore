@@ -1044,6 +1044,7 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 		nemopixs_one_set_diffuse_to(pixs->one, pixs->sprites[pixs->isprites], 0.05f);
 		nemopixs_one_jitter(pixs->one, pixs->jitter);
 		nemopixs_one_set_noise(pixs->one, 0.85f, 1.05f);
+		nemopixs_one_set_pixel(pixs->one, pixs->pixsize);
 		nemopixs_one_set_position_to(pixs->one, 0, 1);
 
 		pixs->one->is_hidden = 0;
@@ -1054,6 +1055,7 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 		nemoshow_event_update_taps(show, canvas, &pixs->events);
 
+#if 0
 		if (pixs->pointsprite != NULL) {
 			if (nemoshow_event_is_touch_down(show, event) && nemoshow_event_get_tapcount(&pixs->events) == 1) {
 				nemoshow_transition_dispatch_easy(pixs->show, pixs->pointone, NEMOSHOW_CUBIC_OUT_EASE, 450, 0, 1, "r", 64.0f * 0.45f, 64.0f * 0.25f);
@@ -1061,6 +1063,7 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 				nemoshow_transition_dispatch_easy(pixs->show, pixs->pointone, NEMOSHOW_CUBIC_OUT_EASE, 450, 0, 1, "r", 64.0f * 0.25f, 64.0f * 0.45f);
 			}
 		}
+#endif
 	}
 
 	if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event)) {
@@ -1120,6 +1123,7 @@ static void nemopixs_dispatch_show_resize(struct nemoshow *show, int32_t width, 
 	nemopixs_one_set_diffuse(pixs->one, pixs->sprites[pixs->isprites], 0.05f);
 	nemopixs_one_jitter(pixs->one, pixs->jitter);
 	nemopixs_one_set_noise(pixs->one, 0.85f, 1.05f);
+	nemopixs_one_set_pixel(pixs->one, pixs->pixsize);
 	nemopixs_one_set_position_to(pixs->one, 0, 1);
 
 	nemoshow_one_dirty(pixs->canvas, NEMOSHOW_REDRAW_DIRTY);
@@ -1152,6 +1156,7 @@ static void nemopixs_dispatch_scene_timer(struct nemotimer *timer, void *data)
 	nemopixs_one_shuffle(pixs->one);
 	nemopixs_one_jitter(pixs->one, pixs->jitter);
 	nemopixs_one_set_noise(pixs->one, 0.85f, 1.05f);
+	nemopixs_one_set_pixel(pixs->one, pixs->pixsize);
 	nemopixs_one_set_position_to(pixs->one, 0, 2);
 
 	nemoshow_one_dirty(pixs->canvas, NEMOSHOW_REDRAW_DIRTY);
@@ -1241,6 +1246,7 @@ int main(int argc, char *argv[])
 		{ "background",			required_argument,			NULL,			'b' },
 		{ "overlay",				required_argument,			NULL,			'o' },
 		{ "fullscreen",			required_argument,			NULL,			'f' },
+		{ "pixsize",				required_argument,			NULL,			'x' },
 		{ 0 }
 	};
 
@@ -1258,6 +1264,7 @@ int main(int argc, char *argv[])
 	char *background = NULL;
 	char *overlay = NULL;
 	float jitter = 0.0f;
+	float pixsize = 1.0f;
 	int timeout = 10000;
 	int width = 800;
 	int height = 800;
@@ -1267,7 +1274,7 @@ int main(int argc, char *argv[])
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "w:h:r:i:p:j:t:s:b:o:f:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:r:i:p:j:t:s:b:o:f:x:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -1316,6 +1323,10 @@ int main(int argc, char *argv[])
 				fullscreen = strdup(optarg);
 				break;
 
+			case 'x':
+				pixsize = strtod(optarg, NULL);
+				break;
+
 			default:
 				break;
 		}
@@ -1330,6 +1341,7 @@ int main(int argc, char *argv[])
 	pixs->height = height;
 	pixs->pixels = pixels;
 	pixs->jitter = jitter;
+	pixs->pixsize = pixsize;
 	pixs->timeout = timeout;
 	pixs->tapmax = NEMOPIXS_ACTION_TAPMAX;
 
@@ -1341,6 +1353,7 @@ int main(int argc, char *argv[])
 	pixs->show = show = nemoshow_create_view(tool, width, height);
 	if (show == NULL)
 		goto err3;
+	nemoshow_set_filtering_quality(show, NEMOSHOW_FILTER_HIGH_QUALITY);
 	nemoshow_set_dispatch_resize(show, nemopixs_dispatch_show_resize);
 	nemoshow_set_userdata(show, pixs);
 
@@ -1422,13 +1435,13 @@ int main(int argc, char *argv[])
 
 		if (pointsprite[0] == '@') {
 			blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
-			nemoshow_filter_set_blur(blur, pointsprite + 1, 8.0f);
+			nemoshow_filter_set_blur(blur, pointsprite + 1, 64.0f * 0.08f);
 
 			pixs->pointone = one = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
 			nemoshow_one_attach(canvas, one);
 			nemoshow_item_set_cx(one, 64.0f * 0.5f);
 			nemoshow_item_set_cy(one, 64.0f * 0.5f);
-			nemoshow_item_set_r(one, 64.0f * 0.45f);
+			nemoshow_item_set_r(one, 64.0f * 0.42f);
 			nemoshow_item_set_fill_color(one, 255.0f, 255.0f, 255.0f, 255.0f);
 			nemoshow_item_set_filter(one, blur);
 		} else if (os_has_file_extension(pointsprite, "svg", NULL) != 0) {
@@ -1562,6 +1575,7 @@ int main(int argc, char *argv[])
 	nemopixs_one_set_diffuse(pixs->one, pixs->sprites[pixs->isprites], 0.05f);
 	nemopixs_one_jitter(pixs->one, pixs->jitter);
 	nemopixs_one_set_noise(pixs->one, 0.85f, 1.05f);
+	nemopixs_one_set_pixel(pixs->one, pixs->pixsize);
 	nemopixs_one_set_position(pixs->one, 4);
 	nemopixs_one_set_position_to(pixs->one, 0, 1);
 
