@@ -576,6 +576,22 @@ static int nemopixs_one_set_color_to(struct pixsone *one, float r, float g, floa
 	return 0;
 }
 
+static int nemopixs_one_set_alpha_to(struct pixsone *one, float a)
+{
+	int i;
+
+	for (i = 0; i < one->pixscount; i++) {
+		one->diffuses0[i * 4 + 0] = one->diffuses0[i * 4 + 0] * a;
+		one->diffuses0[i * 4 + 1] = one->diffuses0[i * 4 + 1] * a;
+		one->diffuses0[i * 4 + 2] = one->diffuses0[i * 4 + 2] * a;
+		one->diffuses0[i * 4 + 3] = a;
+	}
+
+	one->is_diffuses_dirty = 1;
+
+	return 0;
+}
+
 static int nemopixs_one_set_pixel_to(struct pixsone *one, float r)
 {
 	int i;
@@ -1018,6 +1034,7 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 	if (nemoshow_event_is_pointer_left_down(show, event)) {
 		nemopixs_one_set_position_to(pixs->one, random_get_int(1, 5), 1);
+		nemopixs_one_set_alpha_to(pixs->one, 0.0f);
 
 		pixs->one->is_hidden = 1;
 	} else if (nemoshow_event_is_pointer_right_down(show, event)) {
