@@ -32,7 +32,7 @@
 #define NEMOPIXS_ANTIGRAVITY_INTENSITY		(3.0f)
 #define NEMOPIXS_MOVE_INTENSITY						(128.0f)
 #define NEMOPIXS_ANGULAR_INTENSITY				(3.0f)
-#define NEMOPIXS_COLOR_INTENSITY					(16.0f)
+#define NEMOPIXS_COLOR_INTENSITY					(32.0f)
 #define NEMOPIXS_PIXEL_INTENSITY					(128.0f)
 
 #define NEMOPIXS_GRAVITYWELL_FRICTION			(0.5f)
@@ -511,13 +511,19 @@ static int nemopixs_one_set_diffuse_to(struct pixsone *one, struct showone *canv
 	}
 
 	if (idx < one->pixscount) {
-		int i, s;
+		float seed;
+		int i;
 
 		for (i = idx; i < one->pixscount; i++) {
-			s = random_get_int(0, idx - 1);
+			seed = random_get_double(0.0f, 1.0f);
 
-			one->positions0[i * 2 + 0] = one->positions0[s * 2 + 0];
-			one->positions0[i * 2 + 1] = one->positions0[s * 2 + 1];
+			one->diffuses0[i * 4 + 0] = 0.0f;
+			one->diffuses0[i * 4 + 1] = 0.0f;
+			one->diffuses0[i * 4 + 2] = 0.0f;
+			one->diffuses0[i * 4 + 3] = 0.0f;
+
+			one->positions0[i * 2 + 0] = cos(seed * M_PI * 2.0f) * 2.0f;
+			one->positions0[i * 2 + 1] = sin(seed * M_PI * 2.0f) * 2.0f;
 		}
 	} else if (idx > one->pixscount) {
 		int i, s;
@@ -768,12 +774,6 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 					}
 
 					needs_feedback = 1;
-				} else if (i >= one->pixscount0) {
-					if (i < one->pixscount - 1)
-						nemopixs_one_copy(one, one->pixscount - 1, i);
-
-					one->pixscount--;
-					i--;
 				}
 			}
 
@@ -826,12 +826,6 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 					}
 
 					needs_feedback = 1;
-				} else if (i >= one->pixscount0) {
-					if (i < one->pixscount - 1)
-						nemopixs_one_copy(one, one->pixscount - 1, i);
-
-					one->pixscount--;
-					i--;
 				}
 			}
 
@@ -926,6 +920,12 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 				}
 
 				needs_feedback = 1;
+			} else if (i >= one->pixscount0) {
+				if (i < one->pixscount - 1)
+					nemopixs_one_copy(one, one->pixscount - 1, i);
+
+				one->pixscount--;
+				i--;
 			}
 		}
 
