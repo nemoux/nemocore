@@ -884,7 +884,7 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 		float f;
 		int i;
 
-		for (i = 0; i < one->pixscount; i++) {
+		for (i = 0; i < one->pixscount0; i++) {
 			if (one->sleeps[i] > 0.0f) {
 				one->sleeps[i] -= dt;
 				needs_feedback = 1;
@@ -907,10 +907,7 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 				if (dd > NEMOPIXS_COLOR_EPSILON) {
 					ds = sqrtf(dd + NEMOPIXS_COLOR_MINIMUM_DISTANCE);
 
-					if (i >= one->pixscount0)
-						f = NEMOPIXS_COLOR_FADEOUT_INTENSITY * dt / ds * one->noises[i];
-					else
-						f = NEMOPIXS_COLOR_CHANGE_INTENSITY * dt / ds * one->noises[i];
+					f = NEMOPIXS_COLOR_CHANGE_INTENSITY * dt / ds * one->noises[i];
 
 					one->diffuses[i * 4 + 0] = one->diffuses[i * 4 + 0] + dr * f * dt;
 					one->diffuses[i * 4 + 1] = one->diffuses[i * 4 + 1] + dg * f * dt;
@@ -924,7 +921,47 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 				}
 
 				needs_feedback = 1;
-			} else if (i >= one->pixscount0) {
+			}
+		}
+
+		for (i = one->pixscount0; i < one->pixscount; i++) {
+			if (one->sleeps[i] > 0.0f) {
+				one->sleeps[i] -= dt;
+				needs_feedback = 1;
+				continue;
+			}
+
+			r0 = one->diffuses0[i * 4 + 0];
+			g0 = one->diffuses0[i * 4 + 1];
+			b0 = one->diffuses0[i * 4 + 2];
+			a0 = one->diffuses0[i * 4 + 3];
+
+			dr = r0 - one->diffuses[i * 4 + 0];
+			dg = g0 - one->diffuses[i * 4 + 1];
+			db = b0 - one->diffuses[i * 4 + 2];
+			da = a0 - one->diffuses[i * 4 + 3];
+
+			if (dr != 0.0f || dg != 0.0f || db != 0.0f || da != 0.0f) {
+				dd = dr * dr + dg * dg + db * db + da * da;
+
+				if (dd > NEMOPIXS_COLOR_EPSILON) {
+					ds = sqrtf(dd + NEMOPIXS_COLOR_MINIMUM_DISTANCE);
+
+					f = NEMOPIXS_COLOR_FADEOUT_INTENSITY * dt / ds * one->noises[i];
+
+					one->diffuses[i * 4 + 0] = one->diffuses[i * 4 + 0] + dr * f * dt;
+					one->diffuses[i * 4 + 1] = one->diffuses[i * 4 + 1] + dg * f * dt;
+					one->diffuses[i * 4 + 2] = one->diffuses[i * 4 + 2] + db * f * dt;
+					one->diffuses[i * 4 + 3] = one->diffuses[i * 4 + 3] + da * f * dt;
+				} else {
+					one->diffuses[i * 4 + 0] = r0;
+					one->diffuses[i * 4 + 1] = g0;
+					one->diffuses[i * 4 + 2] = b0;
+					one->diffuses[i * 4 + 3] = a0;
+				}
+
+				needs_feedback = 1;
+			} else {
 				if (i < one->pixscount - 1)
 					nemopixs_one_copy(one, one->pixscount - 1, i);
 
