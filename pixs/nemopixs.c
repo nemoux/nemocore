@@ -1108,6 +1108,15 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 		nemoshow_event_update_taps(show, canvas, &pixs->events);
 
+		if (nemoshow_event_is_touch_down(show, event) && nemoshow_event_get_tapcount(&pixs->events) == 1) {
+			pixs->has_taps = 1;
+		} else if (nemoshow_event_is_touch_up(show, event) && nemoshow_event_get_tapcount(&pixs->events) == 0) {
+			pixs->has_taps = 0;
+
+			if (pixs->motion != NULL)
+				nemofx_glmotion_clear(pixs->motion);
+		}
+
 #if 0
 		if (pixs->pointsprite != NULL) {
 			if (nemoshow_event_is_touch_down(show, event) && nemoshow_event_get_tapcount(&pixs->events) == 1) {
@@ -1246,7 +1255,7 @@ static GLuint nemopixs_dispatch_tale_effect(struct talenode *node, void *data)
 		texture = nemofx_glblur_get_texture(pixs->blur);
 	}
 
-	if (pixs->motion != NULL) {
+	if (pixs->motion != NULL && pixs->has_taps != 0) {
 		nemofx_glmotion_dispatch(pixs->motion, texture);
 
 		texture = nemofx_glmotion_get_texture(pixs->motion);

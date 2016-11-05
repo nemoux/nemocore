@@ -241,3 +241,18 @@ void nemofx_glmotion_dispatch(struct glmotion *motion, GLuint texture)
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
+
+void nemofx_glmotion_clear(struct glmotion *motion)
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, motion->fbo[0]);
+	glViewport(0, 0, motion->width, motion->height);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, motion->fbo[1]);
+	glViewport(0, 0, motion->width, motion->height);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}

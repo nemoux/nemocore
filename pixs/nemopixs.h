@@ -94,6 +94,7 @@ struct nemopixs {
 	uint32_t msecs;
 
 	struct showevent events;
+	int has_taps;
 };
 
 #endif
