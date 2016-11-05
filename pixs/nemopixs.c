@@ -46,7 +46,7 @@
 
 #define NEMOPIXS_GRAVITYWELL_MINIMUM_COLOR_FORCE		(0.15f)
 #define NEMOPIXS_ANTIGRAVITY_MINIMUM_COLOR_FORCE		(0.15f)
-#define NEMOPIXS_ANGULAR_MINIMUM_COLOR_FORCE				(0.15f)
+#define NEMOPIXS_ANGULAR_MINIMUM_COLOR_FORCE				(0.85f)
 #define NEMOPIXS_MOVE_MINIMUM_COLOR_FORCE						(0.15f)
 
 #define NEMOPIXS_FENCE_BOUNCE							(0.96f)
@@ -1246,6 +1246,12 @@ static GLuint nemopixs_dispatch_tale_effect(struct talenode *node, void *data)
 		texture = nemofx_glblur_get_texture(pixs->blur);
 	}
 
+	if (pixs->motion != NULL) {
+		nemofx_glmotion_dispatch(pixs->motion, texture);
+
+		texture = nemofx_glmotion_get_texture(pixs->motion);
+	}
+
 	return texture;
 }
 
@@ -1314,7 +1320,8 @@ int main(int argc, char *argv[])
 		{ "overlay",				required_argument,			NULL,			'o' },
 		{ "fullscreen",			required_argument,			NULL,			'f' },
 		{ "pixsize",				required_argument,			NULL,			'x' },
-		{ "blurradius",			required_argument,			NULL,			'u' },
+		{ "blursize",				required_argument,			NULL,			'u' },
+		{ "motionblur",			required_argument,			NULL,			'm' },
 		{ 0 }
 	};
 
@@ -1334,7 +1341,8 @@ int main(int argc, char *argv[])
 	char *overlay = NULL;
 	float jitter = 0.0f;
 	float pixsize = 1.0f;
-	float blurradius = 0.0f;
+	float blursize = 0.0f;
+	float motionblur = 0.0f;
 	int timeout = 10000;
 	int width = 800;
 	int height = 800;
@@ -1344,7 +1352,7 @@ int main(int argc, char *argv[])
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "w:h:r:i:p:j:t:s:b:o:f:x:u:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:r:i:p:j:t:s:b:o:f:x:u:m:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -1398,7 +1406,11 @@ int main(int argc, char *argv[])
 				break;
 
 			case 'u':
-				blurradius = strtod(optarg, NULL);
+				blursize = strtod(optarg, NULL);
+				break;
+
+			case 'm':
+				motionblur = strtod(optarg, NULL);
 				break;
 
 			default:
@@ -1476,9 +1488,14 @@ int main(int argc, char *argv[])
 	node = nemoshow_canvas_get_node(canvas);
 	nemotale_node_set_dispatch_effect(node, nemopixs_dispatch_tale_effect, pixs);
 
-	if (blurradius > 0.0f) {
+	if (blursize > 0.0f) {
 		pixs->blur = nemofx_glblur_create(width, height);
-		nemofx_glblur_set_radius(pixs->blur, blurradius, blurradius);
+		nemofx_glblur_set_radius(pixs->blur, blursize, blursize);
+	}
+
+	if (motionblur > 0.0f) {
+		pixs->motion = nemofx_glmotion_create(width, height);
+		nemofx_glmotion_set_velocity(pixs->motion, motionblur);
 	}
 
 	if (overlay != NULL) {

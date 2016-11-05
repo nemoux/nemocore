@@ -12,6 +12,7 @@
 #include <nemotimer.h>
 #include <nemoshow.h>
 #include <glblur.h>
+#include <glmotion.h>
 
 struct pixsfence {
 	struct showone *canvas;
@@ -61,6 +62,7 @@ struct nemopixs {
 	struct showone *canvas;
 
 	struct glblur *blur;
+	struct glmotion *motion;
 
 	struct showone *sprites[128];
 	int nsprites, isprites;
