@@ -42,7 +42,7 @@ static const char GLBLUR_GAUSSIAN_9TAP_FRAGMENT_SHADER[] =
 "  sum += texture2D(tex, vec2(vtexcoord.x + 2.0 * r * dx, vtexcoord.y + 2.0 * r * dy)) * 0.1216216216;\n"
 "  sum += texture2D(tex, vec2(vtexcoord.x + 3.0 * r * dx, vtexcoord.y + 3.0 * r * dy)) * 0.0540540541;\n"
 "  sum += texture2D(tex, vec2(vtexcoord.x + 4.0 * r * dx, vtexcoord.y + 4.0 * r * dy)) * 0.0162162162;\n"
-"  gl_FragColor = vec4(sum.rgb, 1.0);\n"
+"  gl_FragColor = sum;\n"
 "}\n";
 
 static GLuint nemofx_glblur_create_program(const char *shader)
