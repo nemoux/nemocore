@@ -218,7 +218,8 @@ void nemofx_glmotion_dispatch(struct glmotion *motion, GLuint texture)
 	glBindFramebuffer(GL_FRAMEBUFFER, motion->fbo[0]);
 
 	glEnable(GL_BLEND);
-	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	glBlendEquation(GL_MAX);
+	glBlendFunc(GL_ONE, GL_ONE);
 
 	glViewport(0, 0, motion->width, motion->height);
 
