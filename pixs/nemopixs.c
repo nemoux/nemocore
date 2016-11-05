@@ -44,7 +44,10 @@
 #define NEMOPIXS_COLOR_EPSILON						(0.0000001f)
 #define NEMOPIXS_PIXEL_EPSILON						(1.0f)
 
-#define NEMOPIXS_MOVE_MINIMUM_COLOR_FORCE	(0.3f)
+#define NEMOPIXS_GRAVITYWELL_MINIMUM_COLOR_FORCE		(0.15f)
+#define NEMOPIXS_ANTIGRAVITY_MINIMUM_COLOR_FORCE		(0.15f)
+#define NEMOPIXS_ANGULAR_MINIMUM_COLOR_FORCE				(0.15f)
+#define NEMOPIXS_MOVE_MINIMUM_COLOR_FORCE						(0.15f)
 
 #define NEMOPIXS_FENCE_BOUNCE							(0.96f)
 
@@ -629,7 +632,7 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 			float x, y;
 			float x0, y0;
 			float dx, dy, dd, ds;
-			float f, v;
+			float f, v, c;
 			int i, j, n;
 
 			for (i = 0; i < one->pixscount; i++) {
@@ -645,7 +648,10 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 					ds = sqrtf(dd + NEMOPIXS_GRAVITYWELL_MINIMUM_DISTANCE);
 
 					if (dd < NEMOPIXS_GRAVITYWELL_SCOPE * one->noises[i]) {
-						f = intensity * dt / (ds * ds * ds) * one->noises[i];
+						c = MAX3(one->diffuses[i * 4 + 0], one->diffuses[i * 4 + 1], one->diffuses[i * 4 + 2]);
+						c = c * (1.0f - NEMOPIXS_GRAVITYWELL_MINIMUM_COLOR_FORCE) + NEMOPIXS_GRAVITYWELL_MINIMUM_COLOR_FORCE;
+
+						f = intensity * dt / (ds * ds * ds) * c * one->noises[i];
 
 						one->velocities[i * 2 + 0] += dx * f;
 						one->velocities[i * 2 + 1] += dy * f;
@@ -678,7 +684,7 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 			float x, y;
 			float x0, y0;
 			float dx, dy, dd, ds;
-			float f, v;
+			float f, v, c;
 			int i, j, n;
 
 			for (i = 0; i < one->pixscount; i++) {
@@ -694,7 +700,10 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 					ds = sqrtf(dd + NEMOPIXS_ANTIGRAVITY_MINIMUM_DISTANCE);
 
 					if (dd < NEMOPIXS_ANTIGRAVITY_SCOPE * one->noises[i]) {
-						f = -intensity * dt / (ds * ds * ds) * one->noises[i];
+						c = MAX3(one->diffuses[i * 4 + 0], one->diffuses[i * 4 + 1], one->diffuses[i * 4 + 2]);
+						c = c * (1.0f - NEMOPIXS_ANTIGRAVITY_MINIMUM_COLOR_FORCE) + NEMOPIXS_ANTIGRAVITY_MINIMUM_COLOR_FORCE;
+
+						f = -intensity * dt / (ds * ds * ds) * c * one->noises[i];
 
 						one->velocities[i * 2 + 0] += dx * f;
 						one->velocities[i * 2 + 1] += dy * f;
@@ -744,9 +753,6 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 					continue;
 				}
 
-				c = MAX3(one->diffuses[i * 4 + 0], one->diffuses[i * 4 + 1], one->diffuses[i * 4 + 2]);
-				c = c * (1.0f - NEMOPIXS_MOVE_MINIMUM_COLOR_FORCE) + NEMOPIXS_MOVE_MINIMUM_COLOR_FORCE;
-
 				x0 = one->vertices0[i * 3 + 0];
 				y0 = one->vertices0[i * 3 + 1];
 
@@ -757,6 +763,9 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 					dd = dx * dx + dy * dy;
 
 					if (dd > NEMOPIXS_MOVE_EPSILON) {
+						c = MAX3(one->diffuses[i * 4 + 0], one->diffuses[i * 4 + 1], one->diffuses[i * 4 + 2]);
+						c = c * (1.0f - NEMOPIXS_MOVE_MINIMUM_COLOR_FORCE) + NEMOPIXS_MOVE_MINIMUM_COLOR_FORCE;
+
 						ds = sqrtf(dd + NEMOPIXS_MOVE_MINIMUM_DISTANCE);
 
 						f = NEMOPIXS_MOVE_INTENSITY * dt / ds * c * one->noises[i];
@@ -789,7 +798,7 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 			float dx, dy;
 			float a0, a1;
 			float a, r;
-			float f;
+			float f, c;
 			int i;
 
 			for (i = 0; i < one->pixscount; i++) {
@@ -809,10 +818,13 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 
 				if (dx != 0.0f || dy != 0.0f) {
 					if (dx * dx + dy * dy > NEMOPIXS_ANGULAR_EPSILON) {
+						c = MAX3(one->diffuses[i * 4 + 0], one->diffuses[i * 4 + 1], one->diffuses[i * 4 + 2]);
+						c = c * (1.0f - NEMOPIXS_ANGULAR_MINIMUM_COLOR_FORCE) + NEMOPIXS_ANGULAR_MINIMUM_COLOR_FORCE;
+
 						a0 = M_PI / 2.0f - atan2(x0, y0);
 						a1 = M_PI / 2.0f - atan2(x1, y1);
 
-						f = NEMOPIXS_ANGULAR_INTENSITY * one->noises[i];
+						f = NEMOPIXS_ANGULAR_INTENSITY * c * one->noises[i];
 						r = sqrtf(x1 * x1 + y1 * y1);
 						a = a0 + (a1 - a0) * f * dt;
 
@@ -1544,14 +1556,14 @@ int main(int argc, char *argv[])
 				nemoshow_item_set_width(one, pixels);
 				nemoshow_item_set_height(one, pixels);
 				nemoshow_item_set_fill_color(one,
-						random_get_double(0.0f, 255.0f),
-						random_get_double(0.0f, 255.0f),
-						random_get_double(0.0f, 255.0f),
+						random_get_double(0.0f, 128.0f),
+						random_get_double(0.0f, 128.0f),
+						random_get_double(0.0f, 128.0f),
 						255.0f);
 				nemoshow_item_set_stroke_color(one,
-						random_get_double(0.0f, 255.0f),
-						random_get_double(0.0f, 255.0f),
-						random_get_double(0.0f, 255.0f),
+						random_get_double(128.0f, 255.0f),
+						random_get_double(128.0f, 255.0f),
+						random_get_double(128.0f, 255.0f),
 						255.0f);
 				nemoshow_item_set_stroke_width(one, pixels / 128);
 				nemoshow_item_path_load_svg(one, filepath, 0.0f, 0.0f, pixels, pixels);
