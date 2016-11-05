@@ -15,8 +15,8 @@ NEMO_BEGIN_EXTERN_C
 #include <GLES2/gl2ext.h>
 
 struct glmotion {
-	GLuint texture;
-	GLuint fbo, dbo;
+	GLuint texture[2];
+	GLuint fbo[2], dbo[2];
 
 	GLuint program;
 
@@ -45,7 +45,7 @@ static inline float nemofx_glmotion_get_velocity(struct glmotion *motion)
 
 static inline GLuint nemofx_glmotion_get_texture(struct glmotion *motion)
 {
-	return motion->texture;
+	return motion->texture[0];
 }
 
 #ifdef __cplusplus
