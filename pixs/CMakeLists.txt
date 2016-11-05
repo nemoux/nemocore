@@ -24,4 +24,5 @@ add_executable(nemopixs
 
 TARGET_LINK_LIBRARIES(nemopixs
 	nemoapps
+	nemofx
 	)

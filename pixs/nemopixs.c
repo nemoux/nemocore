@@ -1235,6 +1235,20 @@ static void nemopixs_dispatch_pixel_timer(struct nemotimer *timer, void *data)
 	nemotimer_set_timeout(pixs->ptimer, NEMOPIXS_PIXEL_TIMEOUT);
 }
 
+static GLuint nemopixs_dispatch_tale_effect(struct talenode *node, void *data)
+{
+	struct nemopixs *pixs = (struct nemopixs *)data;
+	GLuint texture = nemotale_node_get_texture(node);
+
+	if (pixs->blur != NULL) {
+		nemofx_glblur_dispatch(pixs->blur, texture);
+
+		texture = nemofx_glblur_get_texture(pixs->blur);
+	}
+
+	return texture;
+}
+
 static int nemopixs_prepare_opengl(struct nemopixs *pixs, int32_t width, int32_t height)
 {
 	static const char *vertexshader =
@@ -1300,6 +1314,7 @@ int main(int argc, char *argv[])
 		{ "overlay",				required_argument,			NULL,			'o' },
 		{ "fullscreen",			required_argument,			NULL,			'f' },
 		{ "pixsize",				required_argument,			NULL,			'x' },
+		{ "blurradius",			required_argument,			NULL,			'u' },
 		{ 0 }
 	};
 
@@ -1311,6 +1326,7 @@ int main(int argc, char *argv[])
 	struct showone *canvas;
 	struct showone *one;
 	struct showone *blur;
+	struct talenode *node;
 	char *imagepath = NULL;
 	char *fullscreen = NULL;
 	char *pointsprite = NULL;
@@ -1318,6 +1334,7 @@ int main(int argc, char *argv[])
 	char *overlay = NULL;
 	float jitter = 0.0f;
 	float pixsize = 1.0f;
+	float blurradius = 0.0f;
 	int timeout = 10000;
 	int width = 800;
 	int height = 800;
@@ -1327,7 +1344,7 @@ int main(int argc, char *argv[])
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "w:h:r:i:p:j:t:s:b:o:f:x:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:r:i:p:j:t:s:b:o:f:x:u:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -1378,6 +1395,10 @@ int main(int argc, char *argv[])
 
 			case 'x':
 				pixsize = strtod(optarg, NULL);
+				break;
+
+			case 'u':
+				blurradius = strtod(optarg, NULL);
 				break;
 
 			default:
@@ -1451,6 +1472,14 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_dispatch_redraw(canvas, nemopixs_dispatch_canvas_redraw);
 	nemoshow_canvas_set_dispatch_event(canvas, nemopixs_dispatch_canvas_event);
 	nemoshow_one_attach(scene, canvas);
+
+	node = nemoshow_canvas_get_node(canvas);
+	nemotale_node_set_dispatch_effect(node, nemopixs_dispatch_tale_effect, pixs);
+
+	if (blurradius > 0.0f) {
+		pixs->blur = nemofx_glblur_create(width, height);
+		nemofx_glblur_set_radius(pixs->blur, blurradius, blurradius);
+	}
 
 	if (overlay != NULL) {
 		pixs->over = canvas = nemoshow_canvas_create();
