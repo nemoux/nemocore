@@ -240,6 +240,8 @@ void nemofx_glmotion_dispatch(struct glmotion *motion, GLuint texture)
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 
+	glBlendEquation(GL_FUNC_ADD);
+
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
