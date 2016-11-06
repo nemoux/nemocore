@@ -6,11 +6,9 @@
 #include <errno.h>
 
 #include <getopt.h>
-#include <pthread.h>
-
-#include <ao/ao.h>
 
 #include <nemoplay.h>
+#include <playback.h>
 #include <nemoshow.h>
 #include <showhelper.h>
 #include <nemohelper.h>
@@ -26,9 +24,10 @@ struct playcontext {
 	struct showone *canvas;
 
 	struct nemoplay *play;
-	struct playshader *shader;
 
-	struct nemotimer *timer;
+	struct playback_decoder *decoderback;
+	struct playback_audio *audioback;
+	struct playback_video *videoback;
 
 	int32_t width;
 	int32_t height;
@@ -54,11 +53,9 @@ static void nemoplay_dispatch_show_fullscreen(struct nemoshow *show, const char 
 		nemoshow_view_resize(context->show, width, width / nemoplay_get_video_aspectratio(context->play));
 	}
 
-	if (nemoplay_get_frame(context->play) != 0) {
-		nemoplay_shader_dispatch(context->shader);
+	nemoplay_back_update_video(context->videoback);
 
-		nemoshow_dispatch_frame(context->show);
-	}
+	nemoshow_dispatch_frame(context->show);
 }
 
 static void nemoplay_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, struct showevent *event)
@@ -96,167 +93,15 @@ static void nemoplay_dispatch_canvas_resize(struct nemoshow *show, struct showon
 {
 	struct playcontext *context = (struct playcontext *)nemoshow_get_userdata(show);
 
-	nemoplay_shader_set_viewport(context->shader,
-			nemoshow_canvas_get_texture(context->canvas),
-			width, height);
-
-	if (nemoplay_get_frame(context->play) != 0)
-		nemoplay_shader_dispatch(context->shader);
+	nemoplay_back_resize_video(context->videoback, width, height);
 }
 
-static void nemoplay_dispatch_video_timer(struct nemotimer *timer, void *data)
+static void nemoplay_dispatch_video_update(struct nemoplay *play, void *data)
 {
 	struct playcontext *context = (struct playcontext *)data;
-	struct nemoplay *play = context->play;
-	struct playqueue *queue;
-	struct playone *one;
-	int state;
 
-	queue = nemoplay_get_video_queue(play);
-
-	state = nemoplay_queue_get_state(queue);
-	if (state == NEMOPLAY_QUEUE_NORMAL_STATE) {
-		double threshold = 1.0f / nemoplay_get_video_framerate(play);
-		double cts = nemoplay_get_cts(play);
-		double pts;
-
-		if (cts >= nemoplay_get_duration(play))
-			nemoplay_set_cmd(play, NEMOPLAY_SEEK_CMD);
-
-		if (nemoplay_queue_get_count(queue) < 64)
-			nemoplay_set_state(play, NEMOPLAY_WAKE_STATE);
-
-		one = nemoplay_queue_dequeue(queue);
-		if (one == NULL) {
-			nemotimer_set_timeout(timer, threshold * 1000);
-		} else if (nemoplay_queue_get_one_serial(one) != nemoplay_queue_get_serial(queue)) {
-			nemoplay_queue_destroy_one(one);
-			nemotimer_set_timeout(timer, 1);
-		} else if (nemoplay_queue_get_one_cmd(one) == NEMOPLAY_QUEUE_NORMAL_COMMAND) {
-			nemoplay_set_video_pts(play, nemoplay_queue_get_one_pts(one));
-
-			if (cts > nemoplay_queue_get_one_pts(one) + threshold) {
-				nemoplay_queue_destroy_one(one);
-				nemotimer_set_timeout(timer, 1);
-			} else if (cts < nemoplay_queue_get_one_pts(one) - threshold) {
-				nemoplay_queue_enqueue_tail(queue, one);
-				nemotimer_set_timeout(timer, threshold * 1000);
-			} else {
-				if (nemoplay_shader_get_texture_linesize(context->shader) != nemoplay_queue_get_one_width(one))
-					nemoplay_shader_set_texture_linesize(context->shader, nemoplay_queue_get_one_width(one));
-
-				nemoplay_shader_update(context->shader,
-						nemoplay_queue_get_one_y(one),
-						nemoplay_queue_get_one_u(one),
-						nemoplay_queue_get_one_v(one));
-				nemoplay_shader_dispatch(context->shader);
-
-				nemoshow_canvas_damage_all(context->canvas);
-				nemoshow_dispatch_frame(context->show);
-
-				if (nemoplay_queue_peek_pts(queue, &pts) != 0)
-					nemotimer_set_timeout(timer, MINMAX(pts > cts ? pts - cts : 1.0f, 1.0f, threshold) * 1000);
-				else
-					nemotimer_set_timeout(timer, threshold * 1000);
-
-				nemoplay_queue_destroy_one(one);
-
-				nemoplay_next_frame(play);
-			}
-		}
-	} else if (state == NEMOPLAY_QUEUE_STOP_STATE) {
-		nemotimer_set_timeout(timer, 1000 / nemoplay_get_video_framerate(play));
-	}
-}
-
-static void *nemoplay_handle_audioplay(void *arg)
-{
-	struct playcontext *context = (struct playcontext *)arg;
-	struct nemoplay *play = context->play;
-	struct playqueue *queue;
-	struct playone *one;
-	ao_device *device;
-	ao_sample_format format;
-	int driver;
-	int state;
-
-	nemoplay_enter_thread(play);
-
-	ao_initialize();
-
-	format.channels = nemoplay_get_audio_channels(play);
-	format.bits = nemoplay_get_audio_samplebits(play);
-	format.rate = nemoplay_get_audio_samplerate(play);
-	format.byte_format = AO_FMT_NATIVE;
-	format.matrix = 0;
-
-	driver = ao_default_driver_id();
-	device = ao_open_live(driver, &format, NULL);
-	if (device == NULL) {
-		nemoplay_revoke_audio(play);
-		goto out;
-	}
-
-	queue = nemoplay_get_audio_queue(play);
-
-	while ((state = nemoplay_queue_get_state(queue)) != NEMOPLAY_QUEUE_DONE_STATE) {
-		if (state == NEMOPLAY_QUEUE_NORMAL_STATE) {
-			if (nemoplay_queue_get_count(queue) < 64)
-				nemoplay_set_state(play, NEMOPLAY_WAKE_STATE);
-
-			one = nemoplay_queue_dequeue(queue);
-			if (one == NULL) {
-				nemoplay_queue_wait(queue);
-			} else if (nemoplay_queue_get_one_serial(one) != nemoplay_queue_get_serial(queue)) {
-				nemoplay_queue_destroy_one(one);
-			} else if (nemoplay_queue_get_one_cmd(one) == NEMOPLAY_QUEUE_NORMAL_COMMAND) {
-				nemoplay_set_audio_pts(play, nemoplay_queue_get_one_pts(one));
-
-				ao_play(device,
-						nemoplay_queue_get_one_data(one),
-						nemoplay_queue_get_one_size(one));
-
-				nemoplay_queue_destroy_one(one);
-			}
-		} else if (state == NEMOPLAY_QUEUE_STOP_STATE) {
-			nemoplay_queue_wait(queue);
-		}
-	}
-
-	ao_close(device);
-
-out:
-	ao_shutdown();
-
-	nemoplay_leave_thread(play);
-
-	return NULL;
-}
-
-static void *nemoplay_handle_decodeframe(void *arg)
-{
-	struct playcontext *context = (struct playcontext *)arg;
-	struct nemoplay *play = context->play;
-	int state;
-
-	nemoplay_enter_thread(play);
-
-	while ((state = nemoplay_get_state(play)) != NEMOPLAY_DONE_STATE) {
-		if (nemoplay_has_cmd(play, NEMOPLAY_SEEK_CMD) != 0) {
-			nemoplay_seek_media(play, 0.0f);
-			nemoplay_put_cmd(play, NEMOPLAY_SEEK_CMD);
-		}
-
-		if (state == NEMOPLAY_PLAY_STATE) {
-			nemoplay_decode_media(play, 256, 128);
-		} else if (state == NEMOPLAY_WAIT_STATE || state == NEMOPLAY_STOP_STATE) {
-			nemoplay_wait_media(play);
-		}
-	}
-
-	nemoplay_leave_thread(play);
-
-	return NULL;
+	nemoshow_canvas_damage_all(context->canvas);
+	nemoshow_dispatch_frame(context->show);
 }
 
 int main(int argc, char *argv[])
@@ -273,9 +118,6 @@ int main(int argc, char *argv[])
 	struct showone *canvas;
 	struct showone *one;
 	struct nemoplay *play;
-	struct playshader *shader;
-	struct nemotimer *timer;
-	pthread_t thread;
 	char *mediapath = NULL;
 	int on_audio = 1;
 	int width, height;
@@ -321,9 +163,6 @@ int main(int argc, char *argv[])
 	if (on_audio == 0)
 		nemoplay_revoke_audio(play);
 
-	pthread_create(&thread, NULL, nemoplay_handle_decodeframe, (void *)context);
-	pthread_create(&thread, NULL, nemoplay_handle_audioplay, (void *)context);
-
 	context->tool = tool = nemotool_create();
 	if (tool == NULL)
 		goto err3;
@@ -361,22 +200,20 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_dispatch_resize(canvas, nemoplay_dispatch_canvas_resize);
 	nemoshow_one_attach(scene, canvas);
 
-	context->shader = shader = nemoplay_shader_create();
-	nemoplay_shader_prepare(shader,
-			NEMOPLAY_TO_RGBA_VERTEX_SHADER,
-			NEMOPLAY_TO_RGBA_FRAGMENT_SHADER);
-	nemoplay_shader_set_texture(shader, width, height);
-
-	context->timer = timer = nemotimer_create(tool);
-	nemotimer_set_callback(timer, nemoplay_dispatch_video_timer);
-	nemotimer_set_userdata(timer, context);
-	nemotimer_set_timeout(timer, 10);
+	context->decoderback = nemoplay_back_create_decoder(play);
+	context->audioback = nemoplay_back_create_audio_by_ao(play);
+	context->videoback = nemoplay_back_create_video_by_timer(play, tool);
+	nemoplay_back_set_video_canvas(context->videoback, canvas);
+	nemoplay_back_set_video_update(context->videoback, nemoplay_dispatch_video_update);
+	nemoplay_back_set_video_data(context->videoback, context);
 
 	nemoshow_dispatch_frame(show);
 
 	nemotool_run(tool);
 
-	nemotimer_destroy(timer);
+	nemoplay_back_destroy_video(context->videoback);
+	nemoplay_back_destroy_audio(context->audioback);
+	nemoplay_back_destroy_decoder(context->decoderback);
 
 	nemoshow_destroy_view(show);
 

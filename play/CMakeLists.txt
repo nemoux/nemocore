@@ -16,6 +16,14 @@ PKG_CHECK_MODULES(LIBSWSCALE REQUIRED libswscale)
 INCLUDE_DIRECTORIES(${LIBSWSCALE_INCLUDE_DIRS})
 LINK_DIRECTORIES(${LIBSWSCALE_LIBRARY_DIRS})
 
+PKG_CHECK_MODULES(AO REQUIRED ao)
+INCLUDE_DIRECTORIES(${AO_INCLUDE_DIRS})
+LINK_DIRECTORIES(${AO_LIBRARY_DIRS})
+
+PKG_CHECK_MODULES(SKIA REQUIRED skia)
+INCLUDE_DIRECTORIES(${SKIA_INCLUDE_DIRS})
+LINK_DIRECTORIES(${SKIA_LIBRARY_DIRS})
+
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
 set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
@@ -23,6 +31,10 @@ set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 include_directories(
 	${CMAKE_SOURCE_DIR}/misc
 	${CMAKE_SOURCE_DIR}/asst
+	${CMAKE_SOURCE_DIR}/tool
+	${CMAKE_BINARY_DIR}/tool
+	${CMAKE_SOURCE_DIR}/show
+	${CMAKE_SOURCE_DIR}/tale
 	)
 
 add_library(nemoplay SHARED
@@ -30,16 +42,21 @@ add_library(nemoplay SHARED
 	playqueue.c
 	playclock.c
 	playshader.c
+	playback.c
 	playmisc.c
 	)
 
 TARGET_LINK_LIBRARIES(nemoplay
 	nemoasst
+	nemotool
+	nemoshow
+	nemotale
 	pthread
 	${LIBAVCODEC_LIBRARIES}
 	${LIBAVFORMAT_LIBRARIES}
 	${LIBAVUTIL_LIBRARIES}
 	${LIBSWSCALE_LIBRARIES}
+	${AO_LIBRARIES}
 	)
 
 INSTALL(TARGETS nemoplay DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
@@ -49,11 +66,12 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/play/playqueue.h
 	${CMAKE_SOURCE_DIR}/play/playclock.h
 	${CMAKE_SOURCE_DIR}/play/playshader.h
+	${CMAKE_SOURCE_DIR}/play/playback.h
 	${CMAKE_SOURCE_DIR}/play/playmisc.h
 	${CMAKE_SOURCE_DIR}/play/ffmpegconfig.h
 	)
 
-set(NEMOPLAY_PKGCONFIG_REQUIRES "nemoasst libavcodec libavformat libavutil libswscale")
+set(NEMOPLAY_PKGCONFIG_REQUIRES "nemoasst nemotool nemoshow nemotale libavcodec libavformat libavutil libswscale ao")
 
 configure_file(
 	nemoplay.pc.in
