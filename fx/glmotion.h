@@ -23,25 +23,25 @@ struct glmotion {
 	GLuint utexture;
 	GLuint uwidth, uheight;
 	GLuint udirectx, udirecty;
-	GLuint uvelocity;
+	GLuint ustep;
 
 	int32_t width, height;
 
-	float velocity;
+	float step;
 };
 
 extern struct glmotion *nemofx_glmotion_create(int32_t width, int32_t height);
 extern void nemofx_glmotion_destroy(struct glmotion *motion);
 
-extern void nemofx_glmotion_set_velocity(struct glmotion *motion, float velocity);
+extern void nemofx_glmotion_set_step(struct glmotion *motion, float step);
 
 extern void nemofx_glmotion_resize(struct glmotion *motion, int32_t width, int32_t height);
 extern void nemofx_glmotion_dispatch(struct glmotion *motion, GLuint texture);
 extern void nemofx_glmotion_clear(struct glmotion *motion);
 
-static inline float nemofx_glmotion_get_velocity(struct glmotion *motion)
+static inline float nemofx_glmotion_get_step(struct glmotion *motion)
 {
-	return motion->velocity;
+	return motion->step;
 }
 
 static inline GLuint nemofx_glmotion_get_texture(struct glmotion *motion)

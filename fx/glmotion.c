@@ -27,10 +27,10 @@ static const char GLMOTION_ACCUMULATE_FRAGMENT_SHADER[] =
 "uniform sampler2D tex;\n"
 "uniform float width;\n"
 "uniform float height;\n"
-"uniform float velocity;\n"
+"uniform float step;\n"
 "void main()\n"
 "{\n"
-"  gl_FragColor = texture2D(tex, vtexcoord) * velocity;\n"
+"  gl_FragColor = texture2D(tex, vtexcoord) * step;\n"
 "}\n";
 
 static GLuint nemofx_glmotion_create_program(const char *shader)
@@ -101,7 +101,7 @@ struct glmotion *nemofx_glmotion_create(int32_t width, int32_t height)
 	motion->utexture = glGetUniformLocation(motion->program, "tex");
 	motion->uwidth = glGetUniformLocation(motion->program, "width");
 	motion->uheight = glGetUniformLocation(motion->program, "height");
-	motion->uvelocity = glGetUniformLocation(motion->program, "velocity");
+	motion->ustep = glGetUniformLocation(motion->program, "step");
 
 	fbo_prepare_context(motion->texture[0], width, height, &motion->fbo[0], &motion->dbo[0]);
 	fbo_prepare_context(motion->texture[1], width, height, &motion->fbo[1], &motion->dbo[1]);
@@ -133,9 +133,9 @@ void nemofx_glmotion_destroy(struct glmotion *motion)
 	free(motion);
 }
 
-void nemofx_glmotion_set_velocity(struct glmotion *motion, float velocity)
+void nemofx_glmotion_set_step(struct glmotion *motion, float step)
 {
-	motion->velocity = velocity;
+	motion->step = step;
 }
 
 void nemofx_glmotion_resize(struct glmotion *motion, int32_t width, int32_t height)
@@ -201,7 +201,7 @@ void nemofx_glmotion_dispatch(struct glmotion *motion, GLuint texture)
 	glUniform1i(motion->utexture, 0);
 	glUniform1f(motion->uwidth, motion->width);
 	glUniform1f(motion->uheight, motion->height);
-	glUniform1f(motion->uvelocity, motion->velocity);
+	glUniform1f(motion->ustep, motion->step);
 
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &vertices[0]);
 	glEnableVertexAttribArray(0);
@@ -229,7 +229,7 @@ void nemofx_glmotion_dispatch(struct glmotion *motion, GLuint texture)
 	glUniform1i(motion->utexture, 0);
 	glUniform1f(motion->uwidth, motion->width);
 	glUniform1f(motion->uheight, motion->height);
-	glUniform1f(motion->uvelocity, 1.0f);
+	glUniform1f(motion->ustep, 1.0f);
 
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &vertices[0]);
 	glEnableVertexAttribArray(0);

@@ -1504,7 +1504,7 @@ int main(int argc, char *argv[])
 
 	if (motionblur > 0.0f) {
 		pixs->motion = nemofx_glmotion_create(width, height);
-		nemofx_glmotion_set_velocity(pixs->motion, motionblur);
+		nemofx_glmotion_set_step(pixs->motion, motionblur);
 	}
 
 	if (overlay != NULL) {
