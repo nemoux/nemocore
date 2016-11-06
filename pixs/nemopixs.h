@@ -43,8 +43,11 @@ struct pixsone {
 
 	int is_vertices_dirty;
 	int is_diffuses_dirty;
+	int is_texcoords_dirty;
 	int is_pixels_dirty;
 	int is_hidden;
+
+	struct showone *texture;
 
 	int rows, columns;
 
@@ -67,6 +70,8 @@ struct nemopixs {
 	struct showone *sprites[128];
 	int nsprites, isprites;
 
+	struct showone *video;
+
 	int iactions;
 	int tapmax;
 	int tapidx;
@@ -82,8 +87,9 @@ struct nemopixs {
 	struct nemotimer *ptimer;
 
 	GLuint fbo, dbo;
-	GLuint programs[2];
-	GLuint usprite;
+	GLuint programs[4];
+	GLuint usprite1, usprite3;
+	GLuint utexture3;
 
 	struct pixsone *one;
 

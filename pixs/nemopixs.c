@@ -277,7 +277,7 @@ static inline void nemopixs_one_jitter(struct pixsone *one, float size)
 	}
 }
 
-static int nemopixs_one_set_position(struct pixsone *one, int action)
+static int nemopixs_one_set_position(struct pixsone *one, int action, int dirty)
 {
 	float seed;
 	int i;
@@ -330,6 +330,8 @@ static int nemopixs_one_set_position(struct pixsone *one, int action)
 		}
 	}
 
+	one->is_vertices_dirty = dirty;
+
 	return 0;
 }
 
@@ -373,7 +375,33 @@ static int nemopixs_one_set_diffuse(struct pixsone *one, struct showone *canvas,
 	one->pixscount = idx;
 	one->pixscount0 = one->pixscount;
 
+	one->is_diffuses_dirty = 1;
+
 	nemolog_message("PIXS", "[set_diffuse] columns(%d) rows(%d) pixels(%d)\n", one->columns, one->rows, one->pixscount);
+
+	return 0;
+}
+
+static int nemopixs_one_set_texture(struct pixsone *one, struct showone *canvas)
+{
+	int x, y;
+
+	for (y = 0; y < one->rows; y++) {
+		for (x = 0; x < one->columns; x++) {
+			one->diffuses[(y * one->columns) * 4 + x * 4 + 0] = (float)x / (float)one->columns;
+			one->diffuses[(y * one->columns) * 4 + x * 4 + 1] = (float)y / (float)one->rows;
+
+			one->positions0[(y * one->columns) * 2 + x * 2 + 0] = ((float)x / (float)one->columns) * 2.0f - 1.0f;
+			one->positions0[(y * one->columns) * 2 + x * 2 + 1] = ((float)y / (float)one->rows) * 2.0f - 1.0f;
+		}
+	}
+
+	one->pixscount = one->rows * one->columns;
+	one->pixscount0 = one->pixscount;
+
+	one->texture = canvas;
+
+	one->is_texcoords_dirty = 1;
 
 	return 0;
 }
@@ -404,6 +432,8 @@ static int nemopixs_one_set_color(struct pixsone *one, float r, float g, float b
 	one->pixscount = one->rows * one->columns;
 	one->pixscount0 = one->pixscount;
 
+	one->is_diffuses_dirty = 1;
+
 	return 0;
 }
 
@@ -416,6 +446,8 @@ static int nemopixs_one_set_pixel(struct pixsone *one, float r)
 
 		one->pixels0[i] = one->pixsize * r;
 	}
+
+	one->is_pixels_dirty = 1;
 
 	return 0;
 }
@@ -888,7 +920,7 @@ static int nemopixs_update_one(struct nemopixs *pixs, struct pixsone *one, float
 			is_updated = 1;
 	}
 
-	if (one->is_diffuses_dirty != 0) {
+	if (one->texture == NULL && one->is_diffuses_dirty != 0) {
 		int needs_feedback = 0;
 		float dd, ds;
 		float dr, dg, db, da;
@@ -1019,24 +1051,48 @@ static void nemopixs_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 	glClearDepth(0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	if (pixs->pointsprite == NULL) {
-		glUseProgram(pixs->programs[0]);
-
-		glBindAttribLocation(pixs->programs[0], 0, "position");
-		glBindAttribLocation(pixs->programs[0], 1, "diffuse");
-	} else {
-		glUseProgram(pixs->programs[1]);
-
-		glBindAttribLocation(pixs->programs[1], 0, "position");
-		glBindAttribLocation(pixs->programs[1], 1, "diffuse");
-
-		glUniform1i(pixs->usprite, 0);
-
-		glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_texture(pixs->pointsprite));
-	}
-
 	one = pixs->one;
 	if (one != NULL) {
+		if (one->texture == NULL) {
+			if (pixs->pointsprite == NULL) {
+				glUseProgram(pixs->programs[0]);
+
+				glBindAttribLocation(pixs->programs[0], 0, "position");
+				glBindAttribLocation(pixs->programs[0], 1, "diffuse");
+			} else {
+				glUseProgram(pixs->programs[1]);
+
+				glBindAttribLocation(pixs->programs[1], 0, "position");
+				glBindAttribLocation(pixs->programs[1], 1, "diffuse");
+
+				glUniform1i(pixs->usprite1, 0);
+
+				glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_texture(pixs->pointsprite));
+			}
+		} else {
+			if (pixs->pointsprite == NULL) {
+				glUseProgram(pixs->programs[2]);
+
+				glBindAttribLocation(pixs->programs[2], 0, "position");
+				glBindAttribLocation(pixs->programs[2], 1, "diffuse");
+
+				glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_texture(one->texture));
+			} else {
+				glUseProgram(pixs->programs[3]);
+
+				glBindAttribLocation(pixs->programs[3], 0, "position");
+				glBindAttribLocation(pixs->programs[3], 1, "diffuse");
+
+				glUniform1i(pixs->utexture3, 0);
+				glUniform1i(pixs->usprite3, 1);
+
+				glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_texture(pixs->pointsprite));
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_texture(one->texture));
+			}
+		}
+
 		if (nemopixs_update_one(pixs, one, dt) != 0) {
 			glBindVertexArray(one->varray);
 
@@ -1054,6 +1110,16 @@ static void nemopixs_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 				glEnableVertexAttribArray(1);
 				glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat[4]) * one->pixscount, &one->diffuses[0], GL_STATIC_DRAW);
 				glBindBuffer(GL_ARRAY_BUFFER, 0);
+			}
+
+			if (one->is_texcoords_dirty != 0) {
+				glBindBuffer(GL_ARRAY_BUFFER, one->vdiffuse);
+				glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void *)0);
+				glEnableVertexAttribArray(1);
+				glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat[4]) * one->pixscount, &one->diffuses[0], GL_STATIC_DRAW);
+				glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+				one->is_texcoords_dirty = 0;
 			}
 
 			glBindVertexArray(0);
@@ -1091,10 +1157,13 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 		pixs->one->is_hidden = 1;
 	} else if (nemoshow_event_is_pointer_right_down(show, event)) {
-		pixs->isprites = (pixs->isprites + 1) % pixs->nsprites;
-		pixs->iactions = (pixs->iactions + 1) % 2;
+		if (pixs->one->texture == NULL) {
+			pixs->isprites = (pixs->isprites + 1) % pixs->nsprites;
+			pixs->iactions = (pixs->iactions + 1) % 2;
 
-		nemopixs_one_set_diffuse_to(pixs->one, pixs->sprites[pixs->isprites], 0.05f);
+			nemopixs_one_set_diffuse_to(pixs->one, pixs->sprites[pixs->isprites], 0.05f);
+		}
+
 		nemopixs_one_jitter(pixs->one, pixs->jitter);
 		nemopixs_one_set_noise(pixs->one, 0.85f, 1.05f);
 		nemopixs_one_set_pixel(pixs->one, pixs->pixsize);
@@ -1182,7 +1251,10 @@ static void nemopixs_dispatch_show_resize(struct nemoshow *show, int32_t width, 
 	nemopixs_one_destroy(pixs->one);
 
 	pixs->one = nemopixs_one_create(width, height, columns, rows);
-	nemopixs_one_set_diffuse(pixs->one, pixs->sprites[pixs->isprites], 0.05f);
+	if (pixs->video == NULL)
+		nemopixs_one_set_diffuse(pixs->one, pixs->sprites[pixs->isprites], 0.05f);
+	else
+		nemopixs_one_set_texture(pixs->one, pixs->video);
 	nemopixs_one_jitter(pixs->one, pixs->jitter);
 	nemopixs_one_set_noise(pixs->one, 0.85f, 1.05f);
 	nemopixs_one_set_pixel(pixs->one, pixs->pixsize);
@@ -1196,52 +1268,57 @@ static void nemopixs_dispatch_show_resize(struct nemoshow *show, int32_t width, 
 static void nemopixs_dispatch_scene_timer(struct nemotimer *timer, void *data)
 {
 	struct nemopixs *pixs = (struct nemopixs *)data;
-	int width = nemoshow_canvas_get_viewport_width(pixs->canvas);
-	int height = nemoshow_canvas_get_viewport_height(pixs->canvas);
-	int columns, rows;
+	struct pixsone *one = pixs->one;
 
-	if (width == height) {
-		columns = pixs->pixels;
-		rows = pixs->pixels;
-	} else if (width > height) {
-		columns = pixs->pixels;
-		rows = pixs->pixels * (float)height / (float)width;
-	} else if (width < height) {
-		columns = pixs->pixels * (float)width / (float)height;
-		rows = pixs->pixels;
+	if (one->texture == NULL) {
+		int width = nemoshow_canvas_get_viewport_width(pixs->canvas);
+		int height = nemoshow_canvas_get_viewport_height(pixs->canvas);
+		int columns, rows;
+
+		if (width == height) {
+			columns = pixs->pixels;
+			rows = pixs->pixels;
+		} else if (width > height) {
+			columns = pixs->pixels;
+			rows = pixs->pixels * (float)height / (float)width;
+		} else if (width < height) {
+			columns = pixs->pixels * (float)width / (float)height;
+			rows = pixs->pixels;
+		}
+
+		pixs->isprites = (pixs->isprites + 1) % pixs->nsprites;
+		pixs->iactions = (pixs->iactions + 1) % 2;
+
+		nemopixs_one_set_diffuse_to(one, pixs->sprites[pixs->isprites], 0.05f);
+		nemopixs_one_shuffle(one);
+		nemopixs_one_jitter(one, pixs->jitter);
+		nemopixs_one_set_noise(one, 0.85f, 1.05f);
+		nemopixs_one_set_pixel(one, pixs->pixsize);
+		nemopixs_one_set_position_to(one, 0, 2);
+
+		nemoshow_one_dirty(pixs->canvas, NEMOSHOW_REDRAW_DIRTY);
+		nemoshow_dispatch_frame(pixs->show);
+
+		nemotimer_set_timeout(pixs->stimer, pixs->timeout);
+		nemotimer_set_timeout(pixs->ptimer, 0);
 	}
-
-	pixs->isprites = (pixs->isprites + 1) % pixs->nsprites;
-	pixs->iactions = (pixs->iactions + 1) % 2;
-
-	nemopixs_one_set_diffuse_to(pixs->one, pixs->sprites[pixs->isprites], 0.05f);
-	nemopixs_one_shuffle(pixs->one);
-	nemopixs_one_jitter(pixs->one, pixs->jitter);
-	nemopixs_one_set_noise(pixs->one, 0.85f, 1.05f);
-	nemopixs_one_set_pixel(pixs->one, pixs->pixsize);
-	nemopixs_one_set_position_to(pixs->one, 0, 2);
-
-	nemoshow_one_dirty(pixs->canvas, NEMOSHOW_REDRAW_DIRTY);
-	nemoshow_dispatch_frame(pixs->show);
-
-	nemotimer_set_timeout(pixs->stimer, pixs->timeout);
-	nemotimer_set_timeout(pixs->ptimer, 0);
 }
 
 static void nemopixs_dispatch_pixel_timer(struct nemotimer *timer, void *data)
 {
 	struct nemopixs *pixs = (struct nemopixs *)data;
+	struct pixsone *one = pixs->one;
 
-	if (pixs->one->is_hidden == 0) {
-		nemopixs_one_swap(pixs->one,
-				random_get_int(0, pixs->one->pixscount - 1),
-				random_get_int(0, pixs->one->pixscount - 1));
+	if (one->texture == NULL || one->is_hidden == 0) {
+		nemopixs_one_swap(one,
+				random_get_int(0, one->pixscount - 1),
+				random_get_int(0, one->pixscount - 1));
 
 		nemoshow_one_dirty(pixs->canvas, NEMOSHOW_REDRAW_DIRTY);
 		nemoshow_dispatch_frame(pixs->show);
-	}
 
-	nemotimer_set_timeout(pixs->ptimer, NEMOPIXS_PIXEL_TIMEOUT);
+		nemotimer_set_timeout(pixs->ptimer, NEMOPIXS_PIXEL_TIMEOUT);
+	}
 }
 
 static GLuint nemopixs_dispatch_tale_effect(struct talenode *node, void *data)
@@ -1276,6 +1353,16 @@ static int nemopixs_prepare_opengl(struct nemopixs *pixs, int32_t width, int32_t
 		"  gl_PointSize = position.z;\n"
 		"  vdiffuse = diffuse;\n"
 		"}\n";
+	static const char *vertexshader_texture =
+		"attribute vec3 position;\n"
+		"attribute vec4 diffuse;\n"
+		"varying vec2 vtexcoord;\n"
+		"void main()\n"
+		"{\n"
+		"  gl_Position = vec4(position.xy, 0.0, 1.0);\n"
+		"  gl_PointSize = position.z;\n"
+		"  vtexcoord = diffuse.xy;\n"
+		"}\n";
 	static const char *fragmentshader =
 		"precision mediump float;\n"
 		"varying vec4 vdiffuse;\n"
@@ -1291,6 +1378,23 @@ static int nemopixs_prepare_opengl(struct nemopixs *pixs, int32_t width, int32_t
 		"{\n"
 		"  gl_FragColor = vdiffuse * texture2D(sprite, gl_PointCoord);\n"
 		"}\n";
+	static const char *fragmentshader_texture =
+		"precision mediump float;\n"
+		"uniform sampler2D texture;\n"
+		"varying vec2 vtexcoord;\n"
+		"void main()\n"
+		"{\n"
+		"  gl_FragColor = texture2D(texture, vtexcoord);\n"
+		"}\n";
+	static const char *fragmentshader_texture_pointsprite =
+		"precision mediump float;\n"
+		"uniform sampler2D texture;\n"
+		"uniform sampler2D sprite;\n"
+		"varying vec2 vtexcoord;\n"
+		"void main()\n"
+		"{\n"
+		"  gl_FragColor = texture2D(texture, vtexcoord) * texture2D(sprite, gl_PointCoord);\n"
+		"}\n";
 
 	fbo_prepare_context(
 			nemoshow_canvas_get_texture(pixs->canvas),
@@ -1299,8 +1403,12 @@ static int nemopixs_prepare_opengl(struct nemopixs *pixs, int32_t width, int32_t
 
 	pixs->programs[0] = glshader_compile_program(vertexshader, fragmentshader, NULL, NULL);
 	pixs->programs[1] = glshader_compile_program(vertexshader, fragmentshader_pointsprite, NULL, NULL);
+	pixs->programs[2] = glshader_compile_program(vertexshader_texture, fragmentshader_texture, NULL, NULL);
+	pixs->programs[3] = glshader_compile_program(vertexshader_texture, fragmentshader_texture_pointsprite, NULL, NULL);
 
-	pixs->usprite = glGetUniformLocation(pixs->programs[1], "sprite");
+	pixs->usprite1 = glGetUniformLocation(pixs->programs[1], "sprite");
+	pixs->usprite3 = glGetUniformLocation(pixs->programs[3], "sprite");
+	pixs->utexture3 = glGetUniformLocation(pixs->programs[3], "texture");
 
 	return 0;
 }
@@ -1312,6 +1420,8 @@ static void nemopixs_finish_opengl(struct nemopixs *pixs)
 
 	glDeleteProgram(pixs->programs[0]);
 	glDeleteProgram(pixs->programs[1]);
+	glDeleteProgram(pixs->programs[2]);
+	glDeleteProgram(pixs->programs[3]);
 }
 
 int main(int argc, char *argv[])
@@ -1321,6 +1431,7 @@ int main(int argc, char *argv[])
 		{ "height",					required_argument,			NULL,			'h' },
 		{ "framerate",			required_argument,			NULL,			'r' },
 		{ "image",					required_argument,			NULL,			'i' },
+		{ "video",					required_argument,			NULL,			'v' },
 		{ "pixels",					required_argument,			NULL,			'p' },
 		{ "jitter",					required_argument,			NULL,			'j' },
 		{ "timeout",				required_argument,			NULL,			't' },
@@ -1344,6 +1455,7 @@ int main(int argc, char *argv[])
 	struct showone *blur;
 	struct talenode *node;
 	char *imagepath = NULL;
+	char *videopath = NULL;
 	char *fullscreen = NULL;
 	char *pointsprite = NULL;
 	char *background = NULL;
@@ -1361,7 +1473,7 @@ int main(int argc, char *argv[])
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "w:h:r:i:p:j:t:s:b:o:f:x:u:m:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:r:i:v:p:j:t:s:b:o:f:x:u:m:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -1380,6 +1492,10 @@ int main(int argc, char *argv[])
 
 			case 'i':
 				imagepath = strdup(optarg);
+				break;
+
+			case 'v':
+				videopath = strdup(optarg);
 				break;
 
 			case 'p':
@@ -1677,14 +1793,33 @@ int main(int argc, char *argv[])
 		nemoshow_canvas_render(show, canvas);
 	}
 
+	if (videopath != NULL) {
+		pixs->video = canvas = nemoshow_canvas_create();
+		nemoshow_canvas_set_width(canvas, pixels);
+		nemoshow_canvas_set_height(canvas, pixels);
+		nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
+		nemoshow_attach_one(show, canvas);
+
+		one = nemoshow_item_create(NEMOSHOW_IMAGE_ITEM);
+		nemoshow_one_attach(canvas, one);
+		nemoshow_item_set_x(one, 0.0f);
+		nemoshow_item_set_y(one, 0.0f);
+		nemoshow_item_set_width(one, pixels);
+		nemoshow_item_set_height(one, pixels);
+		nemoshow_item_set_uri(one, videopath);
+	}
+
 	nemopixs_prepare_opengl(pixs, width, height);
 
 	pixs->one = nemopixs_one_create(width, height, pixels, pixels);
-	nemopixs_one_set_diffuse(pixs->one, pixs->sprites[pixs->isprites], 0.05f);
+	if (pixs->video == NULL)
+		nemopixs_one_set_diffuse(pixs->one, pixs->sprites[pixs->isprites], 0.05f);
+	else
+		nemopixs_one_set_texture(pixs->one, pixs->video);
 	nemopixs_one_jitter(pixs->one, pixs->jitter);
 	nemopixs_one_set_noise(pixs->one, 0.85f, 1.05f);
 	nemopixs_one_set_pixel(pixs->one, pixs->pixsize);
-	nemopixs_one_set_position(pixs->one, 4);
+	nemopixs_one_set_position(pixs->one, 4, 1);
 	nemopixs_one_set_position_to(pixs->one, 0, 1);
 
 	pixs->stimer = timer = nemotimer_create(tool);
