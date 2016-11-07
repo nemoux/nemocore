@@ -296,7 +296,7 @@ void nemoplay_back_resize_video(struct playback_video *video, int width, int hei
 		nemoplay_shader_dispatch(video->shader);
 }
 
-void nemoplay_back_update_video(struct playback_video *video)
+void nemoplay_back_redraw_video(struct playback_video *video)
 {
 	if (nemoplay_get_frame(video->play) != 0)
 		nemoplay_shader_dispatch(video->shader);

@@ -53,7 +53,7 @@ static void nemoplay_dispatch_show_fullscreen(struct nemoshow *show, const char 
 		nemoshow_view_resize(context->show, width, width / nemoplay_get_video_aspectratio(context->play));
 	}
 
-	nemoplay_back_update_video(context->videoback);
+	nemoplay_back_redraw_video(context->videoback);
 
 	nemoshow_dispatch_frame(context->show);
 }
