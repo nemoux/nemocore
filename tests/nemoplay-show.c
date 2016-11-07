@@ -203,7 +203,7 @@ int main(int argc, char *argv[])
 	context->decoderback = nemoplay_back_create_decoder(play);
 	context->audioback = nemoplay_back_create_audio_by_ao(play);
 	context->videoback = nemoplay_back_create_video_by_timer(play, tool);
-	nemoplay_back_set_video_canvas(context->videoback, canvas);
+	nemoplay_back_set_video_canvas(context->videoback, canvas, width, height);
 	nemoplay_back_set_video_update(context->videoback, nemoplay_dispatch_video_update);
 	nemoplay_back_set_video_data(context->videoback, context);
 

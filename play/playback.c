@@ -302,9 +302,13 @@ void nemoplay_back_redraw_video(struct playback_video *video)
 		nemoplay_shader_dispatch(video->shader);
 }
 
-void nemoplay_back_set_video_canvas(struct playback_video *video, struct showone *canvas)
+void nemoplay_back_set_video_canvas(struct playback_video *video, struct showone *canvas, int width, int height)
 {
 	video->canvas = canvas;
+
+	nemoplay_shader_set_viewport(video->shader,
+			nemoshow_canvas_get_texture(video->canvas),
+			width, height);
 }
 
 void nemoplay_back_set_video_update(struct playback_video *video, nemoplay_back_video_update_t dispatch)

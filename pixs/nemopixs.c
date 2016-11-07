@@ -1157,9 +1157,10 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 		pixs->one->is_hidden = 1;
 	} else if (nemoshow_event_is_pointer_right_down(show, event)) {
+		pixs->iactions = (pixs->iactions + 1) % 2;
+
 		if (pixs->one->texture == NULL) {
 			pixs->isprites = (pixs->isprites + 1) % pixs->nsprites;
-			pixs->iactions = (pixs->iactions + 1) % 2;
 
 			nemopixs_one_set_diffuse_to(pixs->one, pixs->sprites[pixs->isprites], 0.05f);
 		}
@@ -1185,16 +1186,6 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 			if (pixs->motion != NULL)
 				nemofx_glmotion_clear(pixs->motion);
 		}
-
-#if 0
-		if (pixs->pointsprite != NULL) {
-			if (nemoshow_event_is_touch_down(show, event) && nemoshow_event_get_tapcount(&pixs->events) == 1) {
-				nemoshow_transition_dispatch_easy(pixs->show, pixs->pointone, NEMOSHOW_CUBIC_OUT_EASE, 450, 0, 1, "r", 64.0f * 0.45f, 64.0f * 0.25f);
-			} else if (nemoshow_event_is_touch_up(show, event) && nemoshow_event_get_tapcount(&pixs->events) == 0) {
-				nemoshow_transition_dispatch_easy(pixs->show, pixs->pointone, NEMOSHOW_CUBIC_OUT_EASE, 450, 0, 1, "r", 64.0f * 0.25f, 64.0f * 0.45f);
-			}
-		}
-#endif
 	}
 
 	if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event)) {
@@ -1319,6 +1310,14 @@ static void nemopixs_dispatch_pixel_timer(struct nemotimer *timer, void *data)
 
 		nemotimer_set_timeout(pixs->ptimer, NEMOPIXS_PIXEL_TIMEOUT);
 	}
+}
+
+static void nemopixs_dispatch_video_update(struct nemoplay *play, void *data)
+{
+	struct nemopixs *pixs = (struct nemopixs *)data;
+
+	nemoshow_canvas_damage_all(pixs->video);
+	nemoshow_dispatch_frame(pixs->show);
 }
 
 static GLuint nemopixs_dispatch_tale_effect(struct talenode *node, void *data)
@@ -1794,19 +1793,26 @@ int main(int argc, char *argv[])
 	}
 
 	if (videopath != NULL) {
+		int video_width, video_height;
+
+		if (nemoplay_get_video_info(videopath, &video_width, &video_height) <= 0)
+			goto err3;
+
+		pixs->play = nemoplay_create();
+		nemoplay_prepare_media(pixs->play, videopath);
+
 		pixs->video = canvas = nemoshow_canvas_create();
-		nemoshow_canvas_set_width(canvas, pixels);
-		nemoshow_canvas_set_height(canvas, pixels);
-		nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
+		nemoshow_canvas_set_width(canvas, video_width);
+		nemoshow_canvas_set_height(canvas, video_height);
+		nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_OPENGL_TYPE);
 		nemoshow_attach_one(show, canvas);
 
-		one = nemoshow_item_create(NEMOSHOW_IMAGE_ITEM);
-		nemoshow_one_attach(canvas, one);
-		nemoshow_item_set_x(one, 0.0f);
-		nemoshow_item_set_y(one, 0.0f);
-		nemoshow_item_set_width(one, pixels);
-		nemoshow_item_set_height(one, pixels);
-		nemoshow_item_set_uri(one, videopath);
+		pixs->decoderback = nemoplay_back_create_decoder(pixs->play);
+		pixs->audioback = nemoplay_back_create_audio_by_ao(pixs->play);
+		pixs->videoback = nemoplay_back_create_video_by_timer(pixs->play, tool);
+		nemoplay_back_set_video_canvas(pixs->videoback, pixs->video, video_width, video_height);
+		nemoplay_back_set_video_update(pixs->videoback, nemopixs_dispatch_video_update);
+		nemoplay_back_set_video_data(pixs->videoback, pixs);
 	}
 
 	nemopixs_prepare_opengl(pixs, width, height);

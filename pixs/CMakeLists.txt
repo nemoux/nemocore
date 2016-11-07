@@ -10,6 +10,7 @@ include_directories(
 	${CMAKE_BINARY_DIR}/tool
 	${CMAKE_SOURCE_DIR}/tale
 	${CMAKE_SOURCE_DIR}/show
+	${CMAKE_SOURCE_DIR}/play
 	${CMAKE_SOURCE_DIR}/apps
 	${CMAKE_SOURCE_DIR}/fx
 	)
@@ -25,4 +26,5 @@ add_executable(nemopixs
 TARGET_LINK_LIBRARIES(nemopixs
 	nemoapps
 	nemofx
+	nemoplay
 	)

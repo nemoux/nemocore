@@ -11,6 +11,8 @@
 #include <nemotool.h>
 #include <nemotimer.h>
 #include <nemoshow.h>
+#include <nemoplay.h>
+#include <playback.h>
 #include <glblur.h>
 #include <glmotion.h>
 
@@ -71,6 +73,10 @@ struct nemopixs {
 	int nsprites, isprites;
 
 	struct showone *video;
+	struct nemoplay *play;
+	struct playback_decoder *decoderback;
+	struct playback_audio *audioback;
+	struct playback_video *videoback;
 
 	int iactions;
 	int tapmax;
