@@ -1321,6 +1321,13 @@ static void nemopixs_dispatch_video_update(struct nemoplay *play, void *data)
 	nemoshow_dispatch_frame(pixs->show);
 }
 
+static void nemopixs_dispatch_video_done(struct nemoplay *play, void *data)
+{
+	struct nemopixs *pixs = (struct nemopixs *)data;
+
+	nemoplay_back_seek_decoder(pixs->decoderback, 0.0f);
+}
+
 static GLuint nemopixs_dispatch_tale_effect(struct talenode *node, void *data)
 {
 	struct nemopixs *pixs = (struct nemopixs *)data;
@@ -1813,6 +1820,7 @@ int main(int argc, char *argv[])
 		pixs->videoback = nemoplay_back_create_video_by_timer(pixs->play, tool);
 		nemoplay_back_set_video_canvas(pixs->videoback, pixs->video, video_width, video_height);
 		nemoplay_back_set_video_update(pixs->videoback, nemopixs_dispatch_video_update);
+		nemoplay_back_set_video_done(pixs->videoback, nemopixs_dispatch_video_done);
 		nemoplay_back_set_video_data(pixs->videoback, pixs);
 	}
 

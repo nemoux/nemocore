@@ -19,6 +19,8 @@ struct playback_decoder {
 	struct nemoplay *play;
 
 	pthread_t thread;
+
+	double pts_to_seek;
 };
 
 static void *nemoplay_back_handle_decoder(void *arg)
@@ -31,7 +33,7 @@ static void *nemoplay_back_handle_decoder(void *arg)
 
 	while ((state = nemoplay_get_state(play)) != NEMOPLAY_DONE_STATE) {
 		if (nemoplay_has_cmd(play, NEMOPLAY_SEEK_CMD) != 0) {
-			nemoplay_seek_media(play, 0.0f);
+			nemoplay_seek_media(play, decoder->pts_to_seek);
 			nemoplay_put_cmd(play, NEMOPLAY_SEEK_CMD);
 		}
 
@@ -71,6 +73,13 @@ void nemoplay_back_destroy_decoder(struct playback_decoder *decoder)
 	nemoplay_wait_thread(play);
 
 	free(decoder);
+}
+
+void nemoplay_back_seek_decoder(struct playback_decoder *decoder, double pts)
+{
+	decoder->pts_to_seek = pts;
+
+	nemoplay_set_cmd(decoder->play, NEMOPLAY_SEEK_CMD);
 }
 
 struct playback_audio {
@@ -179,6 +188,7 @@ struct playback_video {
 	struct showone *canvas;
 
 	nemoplay_back_video_update_t dispatch_update;
+	nemoplay_back_video_done_t dispatch_done;
 	void *data;
 };
 
@@ -198,8 +208,10 @@ static void nemoplay_back_handle_video(struct nemotimer *timer, void *data)
 		double cts = nemoplay_get_cts(play);
 		double pts;
 
-		if (cts >= nemoplay_get_duration(play))
-			nemoplay_set_cmd(play, NEMOPLAY_SEEK_CMD);
+		if (cts >= nemoplay_get_duration(play)) {
+			if (video->dispatch_done != NULL)
+				video->dispatch_done(video->play, video->data);
+		}
 
 		if (nemoplay_queue_get_count(queue) < 64)
 			nemoplay_set_state(play, NEMOPLAY_WAKE_STATE);
@@ -316,6 +328,11 @@ void nemoplay_back_set_video_canvas(struct playback_video *video, struct showone
 void nemoplay_back_set_video_update(struct playback_video *video, nemoplay_back_video_update_t dispatch)
 {
 	video->dispatch_update = dispatch;
+}
+
+void nemoplay_back_set_video_done(struct playback_video *video, nemoplay_back_video_done_t dispatch)
+{
+	video->dispatch_done = dispatch;
 }
 
 void nemoplay_back_set_video_data(struct playback_video *video, void *data)

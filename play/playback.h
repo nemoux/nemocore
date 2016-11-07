@@ -18,9 +18,11 @@ struct playback_audio;
 struct playback_video;
 
 typedef void (*nemoplay_back_video_update_t)(struct nemoplay *play, void *data);
+typedef void (*nemoplay_back_video_done_t)(struct nemoplay *play, void *data);
 
 extern struct playback_decoder *nemoplay_back_create_decoder(struct nemoplay *play);
 extern void nemoplay_back_destroy_decoder(struct playback_decoder *decoder);
+extern void nemoplay_back_seek_decoder(struct playback_decoder *decoder, double pts);
 
 extern struct playback_audio *nemoplay_back_create_audio_by_ao(struct nemoplay *play);
 extern void nemoplay_back_destroy_audio(struct playback_audio *audio);
@@ -31,6 +33,7 @@ extern void nemoplay_back_resize_video(struct playback_video *video, int width, 
 extern void nemoplay_back_redraw_video(struct playback_video *video);
 extern void nemoplay_back_set_video_canvas(struct playback_video *video, struct showone *canvas, int width, int height);
 extern void nemoplay_back_set_video_update(struct playback_video *video, nemoplay_back_video_update_t dispatch);
+extern void nemoplay_back_set_video_done(struct playback_video *video, nemoplay_back_video_done_t dispatch);
 extern void nemoplay_back_set_video_data(struct playback_video *video, void *data);
 
 #ifdef __cplusplus
