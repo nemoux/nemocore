@@ -390,6 +390,7 @@ static int nemopixs_one_set_texture(struct pixsone *one, struct showone *canvas)
 		for (x = 0; x < one->columns; x++) {
 			one->diffuses[(y * one->columns) * 4 + x * 4 + 0] = (float)x / (float)one->columns;
 			one->diffuses[(y * one->columns) * 4 + x * 4 + 1] = (float)y / (float)one->rows;
+			one->diffuses[(y * one->columns) * 4 + x * 4 + 2] = 1.0f;
 
 			one->positions0[(y * one->columns) * 2 + x * 2 + 0] = ((float)x / (float)one->columns) * 2.0f - 1.0f;
 			one->positions0[(y * one->columns) * 2 + x * 2 + 1] = ((float)y / (float)one->rows) * 2.0f - 1.0f;
