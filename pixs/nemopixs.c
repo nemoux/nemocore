@@ -1136,7 +1136,7 @@ static void nemopixs_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	if (is_updated != 0) {
+	if (pixs->video != NULL || is_updated != 0) {
 		nemoshow_one_dirty(canvas, NEMOSHOW_REDRAW_DIRTY);
 
 		pixs->msecs = msecs;
@@ -1300,7 +1300,7 @@ static void nemopixs_dispatch_pixel_timer(struct nemotimer *timer, void *data)
 	struct nemopixs *pixs = (struct nemopixs *)data;
 	struct pixsone *one = pixs->one;
 
-	if (one->texture == NULL || one->is_hidden == 0) {
+	if (one->texture == NULL && one->is_hidden == 0) {
 		nemopixs_one_swap(one,
 				random_get_int(0, one->pixscount - 1),
 				random_get_int(0, one->pixscount - 1));
