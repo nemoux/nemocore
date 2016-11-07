@@ -69,7 +69,7 @@ void nemoplay_destroy(struct nemoplay *play)
 	free(play);
 }
 
-int nemoplay_prepare_media(struct nemoplay *play, const char *mediapath)
+int nemoplay_load_media(struct nemoplay *play, const char *mediapath)
 {
 	AVFormatContext *container;
 	AVCodecContext *context;
@@ -172,10 +172,6 @@ err1:
 	avformat_close_input(&container);
 
 	return -1;
-}
-
-void nemoplay_finish_media(struct nemoplay *play)
-{
 }
 
 int nemoplay_decode_media(struct nemoplay *play, int reqcount, int maxcount)

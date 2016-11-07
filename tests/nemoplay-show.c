@@ -157,8 +157,7 @@ int main(int argc, char *argv[])
 	context->play = play = nemoplay_create();
 	if (context->play == NULL)
 		goto err2;
-
-	nemoplay_prepare_media(play, mediapath);
+	nemoplay_load_media(play, mediapath);
 
 	if (on_audio == 0)
 		nemoplay_revoke_audio(play);

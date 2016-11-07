@@ -1800,7 +1800,7 @@ int main(int argc, char *argv[])
 			goto err3;
 
 		pixs->play = nemoplay_create();
-		nemoplay_prepare_media(pixs->play, videopath);
+		nemoplay_load_media(pixs->play, videopath);
 
 		pixs->video = canvas = nemoshow_canvas_create();
 		nemoshow_canvas_set_width(canvas, video_width);
