@@ -8,13 +8,13 @@
 #include <getopt.h>
 #include <ctype.h>
 #include <math.h>
-#include <dirent.h>
 
 #include <nemopixs.h>
 #include <nemoshow.h>
 #include <showhelper.h>
 #include <fbohelper.h>
 #include <glshader.h>
+#include <nemofs.h>
 #include <nemohelper.h>
 #include <nemolog.h>
 #include <nemomisc.h>
@@ -1637,7 +1637,7 @@ int main(int argc, char *argv[])
 		nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
 		nemoshow_one_attach(scene, canvas);
 
-		if (os_has_file_extension(overlay, "svg", NULL) != 0) {
+		if (os_has_file_extension(overlay, "svg") != 0) {
 			one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
 			nemoshow_one_attach(canvas, one);
 			nemoshow_item_set_x(one, 0.0f);
@@ -1675,7 +1675,7 @@ int main(int argc, char *argv[])
 			nemoshow_item_set_r(one, 64.0f * 0.42f);
 			nemoshow_item_set_fill_color(one, 255.0f, 255.0f, 255.0f, 255.0f);
 			nemoshow_item_set_filter(one, blur);
-		} else if (os_has_file_extension(pointsprite, "svg", NULL) != 0) {
+		} else if (os_has_file_extension(pointsprite, "svg") != 0) {
 			blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
 			nemoshow_filter_set_blur(blur, "solid", 8.0f);
 
@@ -1700,23 +1700,14 @@ int main(int argc, char *argv[])
 	}
 
 	if (os_check_path_is_directory(imagepath) != 0) {
-		struct dirent **entries;
-		const char *filename;
+		struct fsdir *dir;
 		char filepath[128];
-		int i, count;
+		int i;
 
-		count = scandir(imagepath, &entries, NULL, alphasort);
+		dir = nemofs_dir_create_for_extensions(imagepath, "svg;png;jpg");
 
-		for (i = 0; i < count; i++) {
-			filename = entries[i]->d_name;
-			if (filename[0] == '.')
-				continue;
-			if (os_has_file_extension(filename, "svg", "png", "jpg", NULL) == 0)
-				continue;
-
-			strcpy(filepath, imagepath);
-			strcat(filepath, "/");
-			strcat(filepath, filename);
+		for (i = 0; i < nemofs_dir_get_filecount(dir); i++) {
+			nemofs_dir_get_filepath(dir, i, filepath);
 
 			pixs->sprites[pixs->nsprites++] = canvas = nemoshow_canvas_create();
 			nemoshow_canvas_set_width(canvas, pixels);
@@ -1724,7 +1715,7 @@ int main(int argc, char *argv[])
 			nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
 			nemoshow_attach_one(show, canvas);
 
-			if (os_has_file_extension(filepath, "svg", NULL) != 0) {
+			if (os_has_file_extension(filepath, "svg") != 0) {
 				srand(time_current_msecs());
 
 				one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
@@ -1759,7 +1750,7 @@ int main(int argc, char *argv[])
 			nemoshow_canvas_render(show, canvas);
 		}
 
-		free(entries);
+		nemofs_dir_destroy(dir);
 	} else {
 		pixs->sprites[0] = canvas = nemoshow_canvas_create();
 		nemoshow_canvas_set_width(canvas, pixels);
@@ -1777,7 +1768,7 @@ int main(int argc, char *argv[])
 			nemoshow_item_set_cy(one, pixels / 2.0f);
 			nemoshow_item_set_r(one, pixels / 3.0f);
 			nemoshow_item_set_fill_color(one, 0.0f, 255.0f, 255.0f, 255.0f);
-		} else if (os_has_file_extension(imagepath, "svg", NULL) != 0) {
+		} else if (os_has_file_extension(imagepath, "svg") != 0) {
 			one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
 			nemoshow_one_attach(canvas, one);
 			nemoshow_item_set_x(one, 0.0f);
@@ -1786,7 +1777,7 @@ int main(int argc, char *argv[])
 			nemoshow_item_set_height(one, pixels);
 			nemoshow_item_set_fill_color(one, 0.0f, 255.0f, 255.0f, 255.0f);
 			nemoshow_item_path_load_svg(one, imagepath, 0.0f, 0.0f, pixels, pixels);
-		} else if (os_has_file_extension(imagepath, "png", "jpg", NULL) != 0) {
+		} else if (os_has_file_extensions(imagepath, "png", "jpg", NULL) != 0) {
 			one = nemoshow_item_create(NEMOSHOW_IMAGE_ITEM);
 			nemoshow_one_attach(canvas, one);
 			nemoshow_item_set_x(one, 0.0f);

@@ -327,7 +327,12 @@ const char *os_get_file_extension(const char *name)
 	return NULL;
 }
 
-int os_has_file_extension(const char *name, ...)
+int os_has_file_extension(const char *name, const char *ext)
+{
+	return strcmp(ext, os_get_file_extension(name)) == 0;
+}
+
+int os_has_file_extensions(const char *name, ...)
 {
 	const char *ext;
 	const char *cmp;

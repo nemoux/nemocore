@@ -27,7 +27,8 @@ extern int os_save_path(const char *path, char *buffer, int size);
 
 extern int os_append_path(char *path, const char *name);
 extern const char *os_get_file_extension(const char *name);
-extern int os_has_file_extension(const char *name, ...);
+extern int os_has_file_extension(const char *name, const char *ext);
+extern int os_has_file_extensions(const char *name, ...);
 extern char *os_get_file_path(const char *name);
 
 extern int os_set_nonblocking_mode(int fd);
