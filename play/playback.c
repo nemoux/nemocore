@@ -154,6 +154,8 @@ struct playback_audio *nemoplay_back_create_audio_by_ao(struct nemoplay *play)
 
 	audio->play = play;
 
+	pthread_create(&audio->thread, NULL, nemoplay_back_handle_audio, (void *)audio);
+
 	return audio;
 }
 
