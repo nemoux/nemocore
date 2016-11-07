@@ -26,7 +26,7 @@ static void busy_cursor_grab_focus(struct nemopointer_grab *base)
 
 	view = nemocompz_pick_view(pointer->seat->compz, pointer->x, pointer->y, &sx, &sy, NEMOVIEW_PICK_STATE);
 
-	if (grab->bin == NULL || grab->bin->canvas != view->canvas) {
+	if (grab->bin == NULL || view == NULL || grab->bin->canvas != view->canvas) {
 		nemoshell_end_pointer_shellgrab(grab);
 		free(grab);
 	}

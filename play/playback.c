@@ -208,11 +208,6 @@ static void nemoplay_back_handle_video(struct nemotimer *timer, void *data)
 		double cts = nemoplay_get_cts(play);
 		double pts;
 
-		if (cts >= nemoplay_get_duration(play)) {
-			if (video->dispatch_done != NULL)
-				video->dispatch_done(video->play, video->data);
-		}
-
 		if (nemoplay_queue_get_count(queue) < 64)
 			nemoplay_set_state(play, NEMOPLAY_WAKE_STATE);
 
@@ -253,6 +248,11 @@ static void nemoplay_back_handle_video(struct nemotimer *timer, void *data)
 
 				nemoplay_next_frame(play);
 			}
+		}
+
+		if (cts >= nemoplay_get_duration(play)) {
+			if (video->dispatch_done != NULL)
+				video->dispatch_done(video->play, video->data);
 		}
 	} else if (state == NEMOPLAY_QUEUE_STOP_STATE) {
 		nemotimer_set_timeout(timer, 1000 / nemoplay_get_video_framerate(play));

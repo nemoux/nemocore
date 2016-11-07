@@ -1324,8 +1324,31 @@ static void nemopixs_dispatch_video_update(struct nemoplay *play, void *data)
 static void nemopixs_dispatch_video_done(struct nemoplay *play, void *data)
 {
 	struct nemopixs *pixs = (struct nemopixs *)data;
+	char videopath[128];
+	int video_width, video_height;
 
-	nemoplay_back_seek_decoder(pixs->decoderback, 0.0f);
+	nemoplay_back_destroy_decoder(pixs->decoderback);
+	nemoplay_back_destroy_audio(pixs->audioback);
+	nemoplay_back_destroy_video(pixs->videoback);
+	nemoplay_destroy(pixs->play);
+
+	pixs->imovies = (pixs->imovies + 1) % nemofs_dir_get_filecount(pixs->movies);
+	nemofs_dir_get_filepath(pixs->movies, pixs->imovies, videopath);
+
+	nemoplay_get_video_info(videopath, &video_width, &video_height);
+
+	pixs->play = nemoplay_create();
+	nemoplay_load_media(pixs->play, videopath);
+
+	nemoshow_canvas_set_size(pixs->video, video_width, video_height);
+
+	pixs->decoderback = nemoplay_back_create_decoder(pixs->play);
+	pixs->audioback = nemoplay_back_create_audio_by_ao(pixs->play);
+	pixs->videoback = nemoplay_back_create_video_by_timer(pixs->play, pixs->tool);
+	nemoplay_back_set_video_canvas(pixs->videoback, pixs->video, video_width, video_height);
+	nemoplay_back_set_video_update(pixs->videoback, nemopixs_dispatch_video_update);
+	nemoplay_back_set_video_done(pixs->videoback, nemopixs_dispatch_video_done);
+	nemoplay_back_set_video_data(pixs->videoback, pixs);
 }
 
 static GLuint nemopixs_dispatch_tale_effect(struct talenode *node, void *data)
@@ -1462,7 +1485,7 @@ int main(int argc, char *argv[])
 	struct showone *blur;
 	struct talenode *node;
 	char *imagepath = NULL;
-	char *videopath = NULL;
+	char *videodir = NULL;
 	char *fullscreen = NULL;
 	char *pointsprite = NULL;
 	char *background = NULL;
@@ -1502,7 +1525,7 @@ int main(int argc, char *argv[])
 				break;
 
 			case 'v':
-				videopath = strdup(optarg);
+				videodir = strdup(optarg);
 				break;
 
 			case 'p':
@@ -1791,8 +1814,13 @@ int main(int argc, char *argv[])
 		nemoshow_canvas_render(show, canvas);
 	}
 
-	if (videopath != NULL) {
+	if (videodir != NULL) {
+		char videopath[128];
 		int video_width, video_height;
+
+		pixs->movies = nemofs_dir_create_for_extensions(videodir, "mp4;avi;ts");
+		pixs->imovies = 0;
+		nemofs_dir_get_filepath(pixs->movies, pixs->imovies, videopath);
 
 		if (nemoplay_get_video_info(videopath, &video_width, &video_height) <= 0)
 			goto err3;
