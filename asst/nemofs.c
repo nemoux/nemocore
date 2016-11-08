@@ -9,6 +9,7 @@
 #include <errno.h>
 
 #include <dirent.h>
+#include <regex.h>
 
 #include <nemofs.h>
 #include <oshelper.h>
@@ -164,6 +165,44 @@ int nemofs_dir_scan_extension(struct fsdir *dir, const char *extension)
 	dir->nfiles += nfiles;
 
 	free(entries);
+
+	return nfiles;
+}
+
+int nemofs_dir_scan_regex(struct fsdir *dir, const char *expr)
+{
+	struct dirent **entries;
+	regex_t regex;
+	const char *filename;
+	char filepath[128];
+	int nfiles = 0;
+	int i, count;
+
+	if (regcomp(&regex, expr, REG_EXTENDED))
+		return 0;
+
+	count = scandir(dir->path, &entries, NULL, alphasort);
+	count = MIN(count, dir->mfiles - dir->nfiles);
+
+	for (i = 0; i < count; i++) {
+		filename = entries[i]->d_name;
+
+		strcpy(filepath, dir->path);
+		strcat(filepath, "/");
+		strcat(filepath, filename);
+
+		if (os_check_path_is_file(filepath) != 0 && regexec(&regex, filename, 0, NULL, 0) == 0) {
+			dir->filenames[dir->nfiles + nfiles] = strdup(filename);
+			dir->filepaths[dir->nfiles + nfiles] = strdup(filepath);
+			nfiles++;
+		}
+	}
+
+	dir->nfiles += nfiles;
+
+	free(entries);
+
+	regfree(&regex);
 
 	return nfiles;
 }
