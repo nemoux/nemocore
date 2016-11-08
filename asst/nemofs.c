@@ -8,173 +8,33 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include <ctype.h>
 #include <dirent.h>
 
 #include <nemofs.h>
-#include <nemotoken.h>
 #include <oshelper.h>
 #include <nemomisc.h>
 
-struct fsdir *nemofs_dir_create(const char *path)
+struct fsdir *nemofs_dir_create(const char *path, int minimum_files)
 {
 	struct fsdir *dir;
 	struct dirent **entries;
-	const char *filename;
-	int i, count;
+	int count;
 
 	dir = (struct fsdir *)malloc(sizeof(struct fsdir));
 	if (dir == NULL)
 		return NULL;
 	memset(dir, 0, sizeof(struct fsdir));
 
-	dir->path = strdup(path);
-
 	count = scandir(path, &entries, NULL, alphasort);
+	if (count > 0)
+		free(entries);
+	count = MAX(count, minimum_files);
 
-	dir->files = (char **)malloc(sizeof(char *) * count);
-
-	for (i = 0; i < count; i++) {
-		filename = entries[i]->d_name;
-
-		dir->files[i] = strdup(filename);
-	}
-
-	dir->nfiles = count;
-
-	free(entries);
-
-	return dir;
-}
-
-struct fsdir *nemofs_dir_create_for_directories(const char *path)
-{
-	struct fsdir *dir;
-	struct dirent **entries;
-	const char *filename;
-	char filepath[128];
-	int idx = 0;
-	int i, count;
-
-	dir = (struct fsdir *)malloc(sizeof(struct fsdir));
-	if (dir == NULL)
-		return NULL;
-	memset(dir, 0, sizeof(struct fsdir));
-
+	dir->filenames = (char **)malloc(sizeof(char *) * count);
+	dir->filepaths = (char **)malloc(sizeof(char *) * count);
+	dir->nfiles = 0;
+	dir->mfiles = count;
 	dir->path = strdup(path);
-
-	count = scandir(path, &entries, NULL, alphasort);
-
-	dir->files = (char **)malloc(sizeof(char *) * count);
-
-	for (i = 0; i < count; i++) {
-		filename = entries[i]->d_name;
-
-		strcpy(filepath, path);
-		strcat(filepath, "/");
-		strcat(filepath, filename);
-
-		if (os_check_path_is_directory(filepath) != 0)
-			dir->files[idx++] = strdup(filename);
-	}
-
-	dir->nfiles = idx;
-
-	free(entries);
-
-	return dir;
-}
-
-struct fsdir *nemofs_dir_create_for_files(const char *path)
-{
-	struct fsdir *dir;
-	struct dirent **entries;
-	const char *filename;
-	char filepath[128];
-	int idx = 0;
-	int i, count;
-
-	dir = (struct fsdir *)malloc(sizeof(struct fsdir));
-	if (dir == NULL)
-		return NULL;
-	memset(dir, 0, sizeof(struct fsdir));
-
-	dir->path = strdup(path);
-
-	count = scandir(path, &entries, NULL, alphasort);
-
-	dir->files = (char **)malloc(sizeof(char *) * count);
-
-	for (i = 0; i < count; i++) {
-		filename = entries[i]->d_name;
-
-		strcpy(filepath, path);
-		strcat(filepath, "/");
-		strcat(filepath, filename);
-
-		if (os_check_path_is_file(filepath) != 0)
-			dir->files[idx++] = strdup(filename);
-	}
-
-	dir->nfiles = idx;
-
-	free(entries);
-
-	return dir;
-}
-
-struct fsdir *nemofs_dir_create_for_extensions(const char *path, const char *extensions)
-{
-	struct fsdir *dir;
-	struct dirent **entries;
-	struct nemotoken *exts;
-	const char *filename;
-	const char *fileext;
-	char filepath[128];
-	int idx = 0;
-	int i, count;
-	int e;
-
-	dir = (struct fsdir *)malloc(sizeof(struct fsdir));
-	if (dir == NULL)
-		return NULL;
-	memset(dir, 0, sizeof(struct fsdir));
-
-	dir->path = strdup(path);
-
-	exts = nemotoken_create(extensions, strlen(extensions));
-	nemotoken_divide(exts, ';');
-	nemotoken_update(exts);
-
-	count = scandir(path, &entries, NULL, alphasort);
-
-	dir->files = (char **)malloc(sizeof(char *) * count);
-
-	for (i = 0; i < count; i++) {
-		filename = entries[i]->d_name;
-
-		strcpy(filepath, path);
-		strcat(filepath, "/");
-		strcat(filepath, filename);
-
-		if (os_check_path_is_file(filepath) != 0) {
-			fileext = os_get_file_extension(filename);
-			if (fileext != NULL) {
-				for (e = 0; e < nemotoken_get_token_count(exts); e++) {
-					if (strcmp(fileext, nemotoken_get_token(exts, e)) == 0) {
-						dir->files[idx++] = strdup(filename);
-						break;
-					}
-				}
-			}
-		}
-	}
-
-	dir->nfiles = idx;
-
-	free(entries);
-
-	nemotoken_destroy(exts);
 
 	return dir;
 }
@@ -184,11 +44,132 @@ void nemofs_dir_destroy(struct fsdir *dir)
 	int i;
 
 	for (i = 0; i < dir->nfiles; i++) {
-		free(dir->files[i]);
+		free(dir->filenames[i]);
+		free(dir->filepaths[i]);
 	}
 
-	free(dir->files);
+	free(dir->filenames);
+	free(dir->filepaths);
 	free(dir->path);
 
 	free(dir);
+}
+
+void nemofs_dir_clear(struct fsdir *dir)
+{
+	int i;
+
+	for (i = 0; i < dir->nfiles; i++) {
+		free(dir->filenames[i]);
+		free(dir->filepaths[i]);
+	}
+
+	dir->nfiles = 0;
+}
+
+int nemofs_dir_scan_directories(struct fsdir *dir)
+{
+	struct dirent **entries;
+	const char *filename;
+	char filepath[128];
+	int nfiles = 0;
+	int i, count;
+
+	count = scandir(dir->path, &entries, NULL, alphasort);
+	count = MIN(count, dir->mfiles - dir->nfiles);
+
+	for (i = 0; i < count; i++) {
+		filename = entries[i]->d_name;
+
+		strcpy(filepath, dir->path);
+		strcat(filepath, "/");
+		strcat(filepath, filename);
+
+		if (os_check_path_is_directory(filepath) != 0) {
+			dir->filenames[dir->nfiles + nfiles] = strdup(filename);
+			dir->filepaths[dir->nfiles + nfiles] = strdup(filepath);
+			nfiles++;
+		}
+	}
+
+	dir->nfiles += nfiles;
+
+	free(entries);
+
+	return nfiles;
+}
+
+int nemofs_dir_scan_files(struct fsdir *dir)
+{
+	struct dirent **entries;
+	const char *filename;
+	char filepath[128];
+	int nfiles = 0;
+	int i, count;
+
+	count = scandir(dir->path, &entries, NULL, alphasort);
+	count = MIN(count, dir->mfiles - dir->nfiles);
+
+	for (i = 0; i < count; i++) {
+		filename = entries[i]->d_name;
+
+		strcpy(filepath, dir->path);
+		strcat(filepath, "/");
+		strcat(filepath, filename);
+
+		if (os_check_path_is_file(filepath) != 0) {
+			dir->filenames[dir->nfiles + nfiles] = strdup(filename);
+			dir->filepaths[dir->nfiles + nfiles] = strdup(filepath);
+			nfiles++;
+		}
+	}
+
+	dir->nfiles += nfiles;
+
+	free(entries);
+
+	return nfiles;
+}
+
+int nemofs_dir_scan_extension(struct fsdir *dir, const char *extension)
+{
+	struct dirent **entries;
+	const char *filename;
+	char filepath[128];
+	int nfiles = 0;
+	int i, count;
+
+	count = scandir(dir->path, &entries, NULL, alphasort);
+	count = MIN(count, dir->mfiles - dir->nfiles);
+
+	for (i = 0; i < count; i++) {
+		filename = entries[i]->d_name;
+
+		strcpy(filepath, dir->path);
+		strcat(filepath, "/");
+		strcat(filepath, filename);
+
+		if (os_check_path_is_file(filepath) != 0 && os_has_file_extension(filename, extension) != 0) {
+			dir->filenames[dir->nfiles + nfiles] = strdup(filename);
+			dir->filepaths[dir->nfiles + nfiles] = strdup(filepath);
+			nfiles++;
+		}
+	}
+
+	dir->nfiles += nfiles;
+
+	free(entries);
+
+	return nfiles;
+}
+
+int nemofs_dir_insert_file(struct fsdir *dir, const char *filename)
+{
+	if (dir->nfiles >= dir->mfiles)
+		return -1;
+
+	dir->filenames[dir->nfiles] = strdup(filename);
+	asprintf(&dir->filepaths[dir->nfiles], "%s/%s", dir->path, filename);
+
+	return dir->nfiles++;
 }

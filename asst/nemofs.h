@@ -8,17 +8,24 @@ NEMO_BEGIN_EXTERN_C
 #endif
 
 struct fsdir {
-	char **files;
+	char **filenames;
+	char **filepaths;
 	int nfiles;
+	int mfiles;
 
 	char *path;
 };
 
-extern struct fsdir *nemofs_dir_create(const char *path);
-extern struct fsdir *nemofs_dir_create_for_directories(const char *path);
-extern struct fsdir *nemofs_dir_create_for_files(const char *path);
-extern struct fsdir *nemofs_dir_create_for_extensions(const char *path, const char *extensions);
+extern struct fsdir *nemofs_dir_create(const char *path, int minimum_files);
 extern void nemofs_dir_destroy(struct fsdir *dir);
+
+extern void nemofs_dir_clear(struct fsdir *dir);
+
+extern int nemofs_dir_scan_directories(struct fsdir *dir);
+extern int nemofs_dir_scan_files(struct fsdir *dir);
+extern int nemofs_dir_scan_extension(struct fsdir *dir, const char *extension);
+
+extern int nemofs_dir_insert_file(struct fsdir *dir, const char *filename);
 
 static inline int nemofs_dir_get_filecount(struct fsdir *dir)
 {
@@ -27,14 +34,12 @@ static inline int nemofs_dir_get_filecount(struct fsdir *dir)
 
 static inline const char *nemofs_dir_get_filename(struct fsdir *dir, int index)
 {
-	return dir->files[index];
+	return dir->filenames[index];
 }
 
-static inline void nemofs_dir_get_filepath(struct fsdir *dir, int index, char *filepath)
+static inline const char *nemofs_dir_get_filepath(struct fsdir *dir, int index)
 {
-	strcpy(filepath, dir->path);
-	strcat(filepath, "/");
-	strcat(filepath, dir->files[index]);
+	return dir->filepaths[index];
 }
 
 #ifdef __cplusplus

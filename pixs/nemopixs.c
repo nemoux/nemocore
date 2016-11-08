@@ -1324,7 +1324,6 @@ static void nemopixs_dispatch_video_update(struct nemoplay *play, void *data)
 static void nemopixs_dispatch_video_done(struct nemoplay *play, void *data)
 {
 	struct nemopixs *pixs = (struct nemopixs *)data;
-	char videopath[128];
 
 	nemoplay_back_destroy_decoder(pixs->decoderback);
 	nemoplay_back_destroy_audio(pixs->audioback);
@@ -1332,10 +1331,9 @@ static void nemopixs_dispatch_video_done(struct nemoplay *play, void *data)
 	nemoplay_destroy(pixs->play);
 
 	pixs->imovies = (pixs->imovies + 1) % nemofs_dir_get_filecount(pixs->movies);
-	nemofs_dir_get_filepath(pixs->movies, pixs->imovies, videopath);
 
 	pixs->play = nemoplay_create();
-	nemoplay_load_media(pixs->play, videopath);
+	nemoplay_load_media(pixs->play, nemofs_dir_get_filepath(pixs->movies, pixs->imovies));
 
 	nemoshow_canvas_set_size(pixs->video,
 			nemoplay_get_video_width(pixs->play),
@@ -1487,7 +1485,7 @@ int main(int argc, char *argv[])
 	struct showone *blur;
 	struct talenode *node;
 	char *imagepath = NULL;
-	char *videodir = NULL;
+	char *videopath = NULL;
 	char *fullscreen = NULL;
 	char *pointsprite = NULL;
 	char *background = NULL;
@@ -1527,7 +1525,7 @@ int main(int argc, char *argv[])
 				break;
 
 			case 'v':
-				videodir = strdup(optarg);
+				videopath = strdup(optarg);
 				break;
 
 			case 'p':
@@ -1724,24 +1722,25 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	if (os_check_path_is_directory(imagepath) != 0) {
-		struct fsdir *dir;
-		char filepath[128];
-		int i;
+	if (imagepath != NULL) {
+		if (os_check_path_is_directory(imagepath) != 0) {
+			struct fsdir *dir;
+			const char *filepath;
+			int i;
 
-		dir = nemofs_dir_create_for_extensions(imagepath, "svg;png;jpg");
+			dir = nemofs_dir_create(imagepath, 32);
+			nemofs_dir_scan_extension(dir, "svg");
 
-		for (i = 0; i < nemofs_dir_get_filecount(dir); i++) {
-			nemofs_dir_get_filepath(dir, i, filepath);
-
-			pixs->sprites[pixs->nsprites++] = canvas = nemoshow_canvas_create();
-			nemoshow_canvas_set_width(canvas, pixels);
-			nemoshow_canvas_set_height(canvas, pixels);
-			nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
-			nemoshow_attach_one(show, canvas);
-
-			if (os_has_file_extension(filepath, "svg") != 0) {
+			for (i = 0; i < nemofs_dir_get_filecount(dir); i++) {
 				srand(time_current_msecs());
+
+				filepath = nemofs_dir_get_filepath(dir, i);
+
+				pixs->sprites[pixs->nsprites++] = canvas = nemoshow_canvas_create();
+				nemoshow_canvas_set_width(canvas, pixels);
+				nemoshow_canvas_set_height(canvas, pixels);
+				nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
+				nemoshow_attach_one(show, canvas);
 
 				one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
 				nemoshow_one_attach(canvas, one);
@@ -1761,7 +1760,24 @@ int main(int argc, char *argv[])
 						255.0f);
 				nemoshow_item_set_stroke_width(one, pixels / 128);
 				nemoshow_item_path_load_svg(one, filepath, 0.0f, 0.0f, pixels, pixels);
-			} else {
+
+				nemoshow_update_one(show);
+				nemoshow_canvas_render(show, canvas);
+			}
+
+			nemofs_dir_clear(dir);
+			nemofs_dir_scan_extension(dir, "png");
+			nemofs_dir_scan_extension(dir, "jpg");
+
+			for (i = 0; i < nemofs_dir_get_filecount(dir); i++) {
+				filepath = nemofs_dir_get_filepath(dir, i);
+
+				pixs->sprites[pixs->nsprites++] = canvas = nemoshow_canvas_create();
+				nemoshow_canvas_set_width(canvas, pixels);
+				nemoshow_canvas_set_height(canvas, pixels);
+				nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
+				nemoshow_attach_one(show, canvas);
+
 				one = nemoshow_item_create(NEMOSHOW_IMAGE_ITEM);
 				nemoshow_one_attach(canvas, one);
 				nemoshow_item_set_x(one, 0.0f);
@@ -1769,62 +1785,66 @@ int main(int argc, char *argv[])
 				nemoshow_item_set_width(one, pixels);
 				nemoshow_item_set_height(one, pixels);
 				nemoshow_item_set_uri(one, filepath);
+
+				nemoshow_update_one(show);
+				nemoshow_canvas_render(show, canvas);
+			}
+
+			nemofs_dir_destroy(dir);
+		} else {
+			pixs->sprites[0] = canvas = nemoshow_canvas_create();
+			nemoshow_canvas_set_width(canvas, pixels);
+			nemoshow_canvas_set_height(canvas, pixels);
+			nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
+			nemoshow_attach_one(show, canvas);
+
+			pixs->nsprites = 1;
+			pixs->isprites = 0;
+
+			if (imagepath == NULL) {
+				one = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
+				nemoshow_one_attach(canvas, one);
+				nemoshow_item_set_cx(one, pixels / 2.0f);
+				nemoshow_item_set_cy(one, pixels / 2.0f);
+				nemoshow_item_set_r(one, pixels / 3.0f);
+				nemoshow_item_set_fill_color(one, 0.0f, 255.0f, 255.0f, 255.0f);
+			} else if (os_has_file_extension(imagepath, "svg") != 0) {
+				one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
+				nemoshow_one_attach(canvas, one);
+				nemoshow_item_set_x(one, 0.0f);
+				nemoshow_item_set_y(one, 0.0f);
+				nemoshow_item_set_width(one, pixels);
+				nemoshow_item_set_height(one, pixels);
+				nemoshow_item_set_fill_color(one, 0.0f, 255.0f, 255.0f, 255.0f);
+				nemoshow_item_path_load_svg(one, imagepath, 0.0f, 0.0f, pixels, pixels);
+			} else if (os_has_file_extensions(imagepath, "png", "jpg", NULL) != 0) {
+				one = nemoshow_item_create(NEMOSHOW_IMAGE_ITEM);
+				nemoshow_one_attach(canvas, one);
+				nemoshow_item_set_x(one, 0.0f);
+				nemoshow_item_set_y(one, 0.0f);
+				nemoshow_item_set_width(one, pixels);
+				nemoshow_item_set_height(one, pixels);
+				nemoshow_item_set_uri(one, imagepath);
 			}
 
 			nemoshow_update_one(show);
 			nemoshow_canvas_render(show, canvas);
 		}
-
-		nemofs_dir_destroy(dir);
-	} else {
-		pixs->sprites[0] = canvas = nemoshow_canvas_create();
-		nemoshow_canvas_set_width(canvas, pixels);
-		nemoshow_canvas_set_height(canvas, pixels);
-		nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
-		nemoshow_attach_one(show, canvas);
-
-		pixs->nsprites = 1;
-		pixs->isprites = 0;
-
-		if (imagepath == NULL) {
-			one = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
-			nemoshow_one_attach(canvas, one);
-			nemoshow_item_set_cx(one, pixels / 2.0f);
-			nemoshow_item_set_cy(one, pixels / 2.0f);
-			nemoshow_item_set_r(one, pixels / 3.0f);
-			nemoshow_item_set_fill_color(one, 0.0f, 255.0f, 255.0f, 255.0f);
-		} else if (os_has_file_extension(imagepath, "svg") != 0) {
-			one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
-			nemoshow_one_attach(canvas, one);
-			nemoshow_item_set_x(one, 0.0f);
-			nemoshow_item_set_y(one, 0.0f);
-			nemoshow_item_set_width(one, pixels);
-			nemoshow_item_set_height(one, pixels);
-			nemoshow_item_set_fill_color(one, 0.0f, 255.0f, 255.0f, 255.0f);
-			nemoshow_item_path_load_svg(one, imagepath, 0.0f, 0.0f, pixels, pixels);
-		} else if (os_has_file_extensions(imagepath, "png", "jpg", NULL) != 0) {
-			one = nemoshow_item_create(NEMOSHOW_IMAGE_ITEM);
-			nemoshow_one_attach(canvas, one);
-			nemoshow_item_set_x(one, 0.0f);
-			nemoshow_item_set_y(one, 0.0f);
-			nemoshow_item_set_width(one, pixels);
-			nemoshow_item_set_height(one, pixels);
-			nemoshow_item_set_uri(one, imagepath);
-		}
-
-		nemoshow_update_one(show);
-		nemoshow_canvas_render(show, canvas);
 	}
 
-	if (videodir != NULL) {
-		char videopath[128];
-
-		pixs->movies = nemofs_dir_create_for_extensions(videodir, "mp4;avi;ts");
-		pixs->imovies = 0;
-		nemofs_dir_get_filepath(pixs->movies, pixs->imovies, videopath);
+	if (videopath != NULL) {
+		if (os_check_path_is_directory(videopath) != 0) {
+			pixs->movies = nemofs_dir_create(videopath, 32);
+			nemofs_dir_scan_extension(pixs->movies, "mp4");
+			nemofs_dir_scan_extension(pixs->movies, "avi");
+			nemofs_dir_scan_extension(pixs->movies, "ts");
+		} else {
+			pixs->movies = nemofs_dir_create("", 32);
+			nemofs_dir_insert_file(pixs->movies, videopath);
+		}
 
 		pixs->play = nemoplay_create();
-		nemoplay_load_media(pixs->play, videopath);
+		nemoplay_load_media(pixs->play, nemofs_dir_get_filepath(pixs->movies, pixs->imovies));
 
 		pixs->video = canvas = nemoshow_canvas_create();
 		nemoshow_canvas_set_width(canvas, nemoplay_get_video_width(pixs->play));
