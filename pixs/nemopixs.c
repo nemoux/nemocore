@@ -1325,7 +1325,6 @@ static void nemopixs_dispatch_video_done(struct nemoplay *play, void *data)
 {
 	struct nemopixs *pixs = (struct nemopixs *)data;
 	char videopath[128];
-	int video_width, video_height;
 
 	nemoplay_back_destroy_decoder(pixs->decoderback);
 	nemoplay_back_destroy_audio(pixs->audioback);
@@ -1335,17 +1334,20 @@ static void nemopixs_dispatch_video_done(struct nemoplay *play, void *data)
 	pixs->imovies = (pixs->imovies + 1) % nemofs_dir_get_filecount(pixs->movies);
 	nemofs_dir_get_filepath(pixs->movies, pixs->imovies, videopath);
 
-	nemoplay_get_video_info(videopath, &video_width, &video_height);
-
 	pixs->play = nemoplay_create();
 	nemoplay_load_media(pixs->play, videopath);
 
-	nemoshow_canvas_set_size(pixs->video, video_width, video_height);
+	nemoshow_canvas_set_size(pixs->video,
+			nemoplay_get_video_width(pixs->play),
+			nemoplay_get_video_height(pixs->play));
 
 	pixs->decoderback = nemoplay_back_create_decoder(pixs->play);
 	pixs->audioback = nemoplay_back_create_audio_by_ao(pixs->play);
 	pixs->videoback = nemoplay_back_create_video_by_timer(pixs->play, pixs->tool);
-	nemoplay_back_set_video_canvas(pixs->videoback, pixs->video, video_width, video_height);
+	nemoplay_back_set_video_canvas(pixs->videoback,
+			pixs->video,
+			nemoplay_get_video_width(pixs->play),
+			nemoplay_get_video_height(pixs->play));
 	nemoplay_back_set_video_update(pixs->videoback, nemopixs_dispatch_video_update);
 	nemoplay_back_set_video_done(pixs->videoback, nemopixs_dispatch_video_done);
 	nemoplay_back_set_video_data(pixs->videoback, pixs);
@@ -1816,28 +1818,27 @@ int main(int argc, char *argv[])
 
 	if (videodir != NULL) {
 		char videopath[128];
-		int video_width, video_height;
 
 		pixs->movies = nemofs_dir_create_for_extensions(videodir, "mp4;avi;ts");
 		pixs->imovies = 0;
 		nemofs_dir_get_filepath(pixs->movies, pixs->imovies, videopath);
 
-		if (nemoplay_get_video_info(videopath, &video_width, &video_height) <= 0)
-			goto err3;
-
 		pixs->play = nemoplay_create();
 		nemoplay_load_media(pixs->play, videopath);
 
 		pixs->video = canvas = nemoshow_canvas_create();
-		nemoshow_canvas_set_width(canvas, video_width);
-		nemoshow_canvas_set_height(canvas, video_height);
+		nemoshow_canvas_set_width(canvas, nemoplay_get_video_width(pixs->play));
+		nemoshow_canvas_set_height(canvas, nemoplay_get_video_height(pixs->play));
 		nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_OPENGL_TYPE);
 		nemoshow_attach_one(show, canvas);
 
 		pixs->decoderback = nemoplay_back_create_decoder(pixs->play);
 		pixs->audioback = nemoplay_back_create_audio_by_ao(pixs->play);
 		pixs->videoback = nemoplay_back_create_video_by_timer(pixs->play, tool);
-		nemoplay_back_set_video_canvas(pixs->videoback, pixs->video, video_width, video_height);
+		nemoplay_back_set_video_canvas(pixs->videoback,
+				pixs->video,
+				nemoplay_get_video_width(pixs->play),
+				nemoplay_get_video_height(pixs->play));
 		nemoplay_back_set_video_update(pixs->videoback, nemopixs_dispatch_video_update);
 		nemoplay_back_set_video_done(pixs->videoback, nemopixs_dispatch_video_done);
 		nemoplay_back_set_video_data(pixs->videoback, pixs);
