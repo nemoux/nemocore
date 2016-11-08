@@ -1839,7 +1839,7 @@ int main(int argc, char *argv[])
 			nemofs_dir_scan_extension(pixs->movies, "avi");
 			nemofs_dir_scan_extension(pixs->movies, "ts");
 		} else {
-			pixs->movies = nemofs_dir_create("", 32);
+			pixs->movies = nemofs_dir_create(NULL, 32);
 			nemofs_dir_insert_file(pixs->movies, videopath);
 		}
 

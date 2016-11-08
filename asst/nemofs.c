@@ -18,23 +18,26 @@ struct fsdir *nemofs_dir_create(const char *path, int minimum_files)
 {
 	struct fsdir *dir;
 	struct dirent **entries;
-	int count;
+	int count = 0;
 
 	dir = (struct fsdir *)malloc(sizeof(struct fsdir));
 	if (dir == NULL)
 		return NULL;
 	memset(dir, 0, sizeof(struct fsdir));
 
-	count = scandir(path, &entries, NULL, alphasort);
-	if (count > 0)
-		free(entries);
+	if (path != NULL) {
+		count = scandir(path, &entries, NULL, alphasort);
+		if (count > 0)
+			free(entries);
+	}
+
 	count = MAX(count, minimum_files);
 
 	dir->filenames = (char **)malloc(sizeof(char *) * count);
 	dir->filepaths = (char **)malloc(sizeof(char *) * count);
 	dir->nfiles = 0;
 	dir->mfiles = count;
-	dir->path = strdup(path);
+	dir->path = path != NULL ? strdup(path) : NULL;
 
 	return dir;
 }
@@ -50,7 +53,9 @@ void nemofs_dir_destroy(struct fsdir *dir)
 
 	free(dir->filenames);
 	free(dir->filepaths);
-	free(dir->path);
+
+	if (dir->path != NULL)
+		free(dir->path);
 
 	free(dir);
 }
@@ -169,7 +174,11 @@ int nemofs_dir_insert_file(struct fsdir *dir, const char *filename)
 		return -1;
 
 	dir->filenames[dir->nfiles] = strdup(filename);
-	asprintf(&dir->filepaths[dir->nfiles], "%s/%s", dir->path, filename);
+
+	if (dir->path == NULL)
+		dir->filepaths[dir->nfiles] = strdup(filename);
+	else
+		asprintf(&dir->filepaths[dir->nfiles], "%s/%s", dir->path, filename);
 
 	return dir->nfiles++;
 }
