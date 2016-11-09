@@ -33,12 +33,12 @@ static inline float nemotile_get_row_y(int rows, int idx)
 	return 2.0f / (float)rows * (rows / 2 - idx - dy);
 }
 
-static inline float nemotile_get_column_sx(int columns, int idx)
+static inline float nemotile_get_column_sx(int columns)
 {
 	return 1.0f / (float)columns;
 }
 
-static inline float nemotile_get_row_sy(int rows, int idx)
+static inline float nemotile_get_row_sy(int rows)
 {
 	return 1.0f / (float)rows;
 }
@@ -410,15 +410,15 @@ static int nemotile_prepare_tiles(struct nemotile *tile, int columns, int rows)
 					nemotile_get_column_x(columns, x),
 					nemotile_get_row_y(rows, y));
 			nemotile_one_scale_vertices(one,
-					nemotile_get_column_sx(columns, x),
-					nemotile_get_row_sy(rows, y));
+					nemotile_get_column_sx(columns),
+					nemotile_get_row_sy(rows));
 
 			nemotile_one_translate_texcoords(one,
 					nemotile_get_column_tx(columns, x),
 					nemotile_get_row_ty(rows, y));
 			nemotile_one_scale_texcoords(one,
-					nemotile_get_column_sx(columns, x),
-					nemotile_get_row_sy(rows, y));
+					nemotile_get_column_sx(columns),
+					nemotile_get_row_sy(rows));
 
 			nemolist_insert_tail(&tile->tile_list, &one->link);
 		}
@@ -446,6 +446,7 @@ int main(int argc, char *argv[])
 		{ "fullscreen",			required_argument,			NULL,			'f' },
 		{ "motionblur",			required_argument,			NULL,			'm' },
 		{ "linewidth",			required_argument,			NULL,			'l' },
+		{ "padding",				required_argument,			NULL,			'p' },
 		{ 0 }
 	};
 
@@ -465,6 +466,7 @@ int main(int argc, char *argv[])
 	char *overlay = NULL;
 	float motionblur = 0.0f;
 	float linewidth = 0.0f;
+	float padding = 0.0f;
 	int timeout = 10000;
 	int width = 800;
 	int height = 800;
@@ -475,7 +477,7 @@ int main(int argc, char *argv[])
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "w:h:c:r:i:v:t:b:o:f:m:l:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:c:r:i:v:t:b:o:f:m:l:p:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -526,6 +528,10 @@ int main(int argc, char *argv[])
 
 			case 'l':
 				linewidth = strtod(optarg, NULL);
+				break;
+
+			case 'p':
+				padding = strtod(optarg, NULL);
 				break;
 
 			default:
