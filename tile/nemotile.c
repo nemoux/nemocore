@@ -151,6 +151,7 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 	struct tileone *one;
 	struct nemomatrix vtransform, ttransform;
 	uint32_t msecs = time_current_msecs();
+	float linecolor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	float dt;
 
 	if (tile->msecs == 0)
@@ -168,12 +169,6 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 	glClearDepth(0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glUseProgram(tile->program);
-	glBindAttribLocation(tile->program, 0, "position");
-	glBindAttribLocation(tile->program, 1, "texcoord");
-
-	glUniform1i(tile->utexture, 0);
-
 	nemolist_for_each(one, &tile->tile_list, link) {
 		nemomatrix_init_identity(&vtransform);
 		nemomatrix_rotate(&vtransform, cos(one->vtransform.r), sin(one->vtransform.r));
@@ -185,8 +180,13 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 		nemomatrix_scale(&ttransform, one->ttransform.sx, one->ttransform.sy);
 		nemomatrix_translate(&ttransform, one->ttransform.tx, one->ttransform.ty);
 
-		glUniformMatrix4fv(tile->uvtransform, 1, GL_FALSE, vtransform.d);
-		glUniformMatrix4fv(tile->uttransform, 1, GL_FALSE, ttransform.d);
+		glUseProgram(tile->programs[0]);
+		glBindAttribLocation(tile->programs[0], 0, "position");
+		glBindAttribLocation(tile->programs[0], 1, "texcoord");
+
+		glUniform1i(tile->utexture0, 0);
+		glUniformMatrix4fv(tile->uvtransform0, 1, GL_FALSE, vtransform.d);
+		glUniformMatrix4fv(tile->uttransform0, 1, GL_FALSE, ttransform.d);
 
 		glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_texture(one->texture));
 
@@ -198,6 +198,20 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, one->count);
 
 		glBindTexture(GL_TEXTURE_2D, 0);
+
+		if (tile->linewidth > 0.0f) {
+			glUseProgram(tile->programs[1]);
+			glBindAttribLocation(tile->programs[1], 0, "position");
+
+			glUniformMatrix4fv(tile->uvtransform1, 1, GL_FALSE, vtransform.d);
+			glUniform4fv(tile->ucolor1, 1, linecolor);
+
+			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), &one->vertices[0]);
+			glEnableVertexAttribArray(0);
+
+			glLineWidth(tile->linewidth);
+			glDrawArrays(GL_LINE_STRIP, 0, one->count);
+		}
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -329,17 +343,35 @@ static int nemotile_prepare_opengl(struct nemotile *tile, int32_t width, int32_t
 		"{\n"
 		"  gl_FragColor = texture2D(texture, vtexcoord.xy);\n"
 		"}\n";
+	static const char *vertexshader_solid =
+		"uniform mat4 vtransform;\n"
+		"attribute vec2 position;\n"
+		"void main()\n"
+		"{\n"
+		"  gl_Position = vtransform * vec4(position.xy, 0.0, 1.0);\n"
+		"}\n";
+	static const char *fragmentshader_solid =
+		"precision mediump float;\n"
+		"uniform vec4 color;\n"
+		"void main()\n"
+		"{\n"
+		"  gl_FragColor = color;\n"
+		"}\n";
 
 	fbo_prepare_context(
 			nemoshow_canvas_get_texture(tile->canvas),
 			width, height,
 			&tile->fbo, &tile->dbo);
 
-	tile->program = glshader_compile_program(vertexshader, fragmentshader, NULL, NULL);
+	tile->programs[0] = glshader_compile_program(vertexshader, fragmentshader, NULL, NULL);
+	tile->programs[1] = glshader_compile_program(vertexshader_solid, fragmentshader_solid, NULL, NULL);
 
-	tile->uvtransform = glGetUniformLocation(tile->program, "vtransform");
-	tile->uttransform = glGetUniformLocation(tile->program, "ttransform");
-	tile->utexture = glGetUniformLocation(tile->program, "texture");
+	tile->uvtransform0 = glGetUniformLocation(tile->programs[0], "vtransform");
+	tile->uttransform0 = glGetUniformLocation(tile->programs[0], "ttransform");
+	tile->utexture0 = glGetUniformLocation(tile->programs[0], "texture");
+
+	tile->uvtransform1 = glGetUniformLocation(tile->programs[1], "vtransform");
+	tile->ucolor1 = glGetUniformLocation(tile->programs[1], "color");
 
 	return 0;
 }
@@ -349,7 +381,8 @@ static void nemotile_finish_opengl(struct nemotile *tile)
 	glDeleteFramebuffers(1, &tile->fbo);
 	glDeleteRenderbuffers(1, &tile->dbo);
 
-	glDeleteProgram(tile->program);
+	glDeleteProgram(tile->programs[0]);
+	glDeleteProgram(tile->programs[1]);
 }
 
 static int nemotile_prepare_tiles(struct nemotile *tile, int columns, int rows)
@@ -412,6 +445,7 @@ int main(int argc, char *argv[])
 		{ "overlay",				required_argument,			NULL,			'o' },
 		{ "fullscreen",			required_argument,			NULL,			'f' },
 		{ "motionblur",			required_argument,			NULL,			'm' },
+		{ "linewidth",			required_argument,			NULL,			'l' },
 		{ 0 }
 	};
 
@@ -430,6 +464,7 @@ int main(int argc, char *argv[])
 	char *background = NULL;
 	char *overlay = NULL;
 	float motionblur = 0.0f;
+	float linewidth = 0.0f;
 	int timeout = 10000;
 	int width = 800;
 	int height = 800;
@@ -440,7 +475,7 @@ int main(int argc, char *argv[])
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "w:h:c:r:i:v:t:b:o:f:m:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:c:r:i:v:t:b:o:f:m:l:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -489,6 +524,10 @@ int main(int argc, char *argv[])
 				motionblur = strtod(optarg, NULL);
 				break;
 
+			case 'l':
+				linewidth = strtod(optarg, NULL);
+				break;
+
 			default:
 				break;
 		}
@@ -502,6 +541,7 @@ int main(int argc, char *argv[])
 	tile->width = width;
 	tile->height = height;
 	tile->timeout = timeout;
+	tile->linewidth = linewidth;
 
 	nemolist_init(&tile->tile_list);
 

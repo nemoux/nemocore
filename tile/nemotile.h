@@ -70,10 +70,14 @@ struct nemotile {
 	uint32_t timeout;
 
 	GLuint fbo, dbo;
-	GLuint program;
-	GLuint uvtransform;
-	GLuint uttransform;
-	GLuint utexture;
+	GLuint programs[2];
+	GLuint uvtransform0;
+	GLuint uttransform0;
+	GLuint utexture0;
+	GLuint uvtransform1;
+	GLuint ucolor1;
+
+	float linewidth;
 
 	struct nemolist tile_list;
 
