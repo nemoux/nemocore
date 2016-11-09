@@ -19,6 +19,40 @@
 #include <nemolog.h>
 #include <nemomisc.h>
 
+static inline float nemotile_get_column_x(int columns, int idx)
+{
+	float dx = columns % 2 == 0 ? 0.5f : 0.0f;
+
+	return 2.0f / (float)columns * (idx - columns / 2 + dx);
+}
+
+static inline float nemotile_get_row_y(int rows, int idx)
+{
+	float dy = rows % 2 == 0 ? 0.5f : 0.0f;
+
+	return 2.0f / (float)rows * (rows / 2 - idx - dy);
+}
+
+static inline float nemotile_get_column_sx(int columns, int idx)
+{
+	return 1.0f / (float)columns;
+}
+
+static inline float nemotile_get_row_sy(int rows, int idx)
+{
+	return 1.0f / (float)rows;
+}
+
+static inline float nemotile_get_column_tx(int columns, int idx)
+{
+	return 1.0f / (float)columns * idx;
+}
+
+static inline float nemotile_get_row_ty(int rows, int idx)
+{
+	return 1.0f / (float)rows * (rows - idx - 1);
+}
+
 static struct tileone *nemotile_one_create(int vertices)
 {
 	struct tileone *one;
@@ -321,8 +355,6 @@ static void nemotile_finish_opengl(struct nemotile *tile)
 static int nemotile_prepare_tiles(struct nemotile *tile, int columns, int rows)
 {
 	struct tileone *one;
-	float dx = columns % 2 == 0 ? 0.5f : 0.0f;
-	float dy = rows % 2 == 0 ? 0.5f : 0.0f;
 	int x, y;
 
 	for (y = 0; y < rows; y++) {
@@ -342,18 +374,18 @@ static int nemotile_prepare_tiles(struct nemotile *tile, int columns, int rows)
 			nemotile_one_set_texture(one, tile->video);
 
 			nemotile_one_translate_vertices(one,
-					2.0f / (float)columns * (x - columns / 2 + dx),
-					2.0f / (float)rows * (rows / 2 - y - dy));
+					nemotile_get_column_x(columns, x),
+					nemotile_get_row_y(rows, y));
 			nemotile_one_scale_vertices(one,
-					1.0f / (float)columns,
-					1.0f / (float)rows);
+					nemotile_get_column_sx(columns, x),
+					nemotile_get_row_sy(rows, y));
 
 			nemotile_one_translate_texcoords(one,
-					1.0f / (float)columns * x,
-					1.0f / (float)rows * (rows - y - 1));
+					nemotile_get_column_tx(columns, x),
+					nemotile_get_row_ty(rows, y));
 			nemotile_one_scale_texcoords(one,
-					1.0f / (float)columns,
-					1.0f / (float)rows);
+					nemotile_get_column_sx(columns, x),
+					nemotile_get_row_sy(rows, y));
 
 			nemolist_insert_tail(&tile->tile_list, &one->link);
 		}
