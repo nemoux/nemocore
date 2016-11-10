@@ -452,7 +452,7 @@ static void nemotile_finish_opengl(struct nemotile *tile)
 	glDeleteProgram(tile->programs[1]);
 }
 
-static int nemotile_prepare_tiles(struct nemotile *tile, int columns, int rows)
+static int nemotile_prepare_tiles(struct nemotile *tile, int columns, int rows, float padding)
 {
 	struct tileone *one;
 	int x, y;
@@ -477,14 +477,14 @@ static int nemotile_prepare_tiles(struct nemotile *tile, int columns, int rows)
 					nemotile_get_column_x(columns, x),
 					nemotile_get_row_y(rows, y));
 			nemotile_one_vertices_scale_to(one,
-					nemotile_get_column_sx(columns),
-					nemotile_get_row_sy(rows));
+					nemotile_get_column_sx(columns) * (1.0f - padding),
+					nemotile_get_row_sy(rows) * (1.0f - padding));
 			nemotile_one_vertices_translate(one,
 					nemotile_get_column_x(columns, x),
 					nemotile_get_row_y(rows, y));
 			nemotile_one_vertices_scale(one,
-					nemotile_get_column_sx(columns),
-					nemotile_get_row_sy(rows));
+					nemotile_get_column_sx(columns) * (1.0f - padding),
+					nemotile_get_row_sy(rows) * (1.0f - padding));
 
 			nemotile_one_texcoords_translate_to(one,
 					nemotile_get_column_tx(columns, x),
@@ -855,7 +855,7 @@ int main(int argc, char *argv[])
 	}
 
 	nemotile_prepare_opengl(tile, width, height);
-	nemotile_prepare_tiles(tile, columns, rows);
+	nemotile_prepare_tiles(tile, columns, rows, padding);
 
 	tile->timer = timer = nemotimer_create(tool);
 	nemotimer_set_callback(timer, nemotile_dispatch_timer);
