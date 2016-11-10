@@ -286,27 +286,31 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 	struct nemotrans *trans;
 
 	if (nemoshow_event_is_pointer_left_down(show, event)) {
-		trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE, 1800, 300);
-
 		nemolist_for_each(one, &tile->tile_list, link) {
+			trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
+					random_get_int(1200, 2400),
+					random_get_int(300, 1200));
+
 			nemotrans_set_float(trans, &one->ttransform.tx, 0.0f);
 			nemotrans_set_float(trans, &one->ttransform.ty, 0.0f);
 			nemotrans_set_float(trans, &one->ttransform.sx, 1.0f);
 			nemotrans_set_float(trans, &one->ttransform.sy, 1.0f);
+
+			nemolist_insert_tail(&tile->trans_list, &trans->link);
 		}
-
-		nemolist_insert_tail(&tile->trans_list, &trans->link);
 	} else if (nemoshow_event_is_pointer_right_down(show, event)) {
-		trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE, 1800, 300);
-
 		nemolist_for_each(one, &tile->tile_list, link) {
+			trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
+					random_get_int(1200, 2400),
+					random_get_int(300, 1200));
+
 			nemotrans_set_float(trans, &one->ttransform.tx, one->ttransform0.tx);
 			nemotrans_set_float(trans, &one->ttransform.ty, one->ttransform0.ty);
 			nemotrans_set_float(trans, &one->ttransform.sx, one->ttransform0.sx);
 			nemotrans_set_float(trans, &one->ttransform.sy, one->ttransform0.sy);
-		}
 
-		nemolist_insert_tail(&tile->trans_list, &trans->link);
+			nemolist_insert_tail(&tile->trans_list, &trans->link);
+		}
 	}
 
 	if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event)) {
