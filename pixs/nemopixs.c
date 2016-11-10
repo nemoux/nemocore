@@ -1157,7 +1157,7 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 		nemopixs_one_set_alpha_to(pixs->one, 0.0f);
 
 		pixs->one->is_hidden = 1;
-	} else if (nemoshow_event_is_pointer_right_down(show, event)) {
+	} else if (nemoshow_event_is_pointer_left_up(show, event)) {
 		pixs->iactions = (pixs->iactions + 1) % 2;
 
 		if (pixs->one->texture == NULL) {

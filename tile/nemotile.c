@@ -335,7 +335,7 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 		}
 
 		tile->state = 1;
-	} else if (nemoshow_event_is_pointer_right_down(show, event)) {
+	} else if (nemoshow_event_is_pointer_left_up(show, event)) {
 		nemolist_for_each(one, &tile->tile_list, link) {
 			trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
 					random_get_int(1200, 2400),
