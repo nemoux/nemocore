@@ -19,7 +19,7 @@
 #include <glmotion.h>
 
 struct tileone {
-	int column, row;
+	int index;
 
 	float *vertices;
 	float *texcoords;
@@ -70,6 +70,8 @@ struct nemotile {
 	struct glmotion *motion;
 
 	int state;
+
+	int iactions;
 
 	struct showone *sprites[128];
 	int nsprites, isprites;
