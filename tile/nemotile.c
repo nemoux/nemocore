@@ -214,6 +214,31 @@ static void nemotile_one_set_color(struct tileone *one, float r, float g, float 
 	one->color[3] = a;
 }
 
+static struct tileone *nemotile_pick_one(struct nemotile *tile, float x, float y)
+{
+	struct tileone *one;
+	struct nemomatrix matrix, inverse;
+
+	nemolist_for_each_reverse(one, &tile->tile_list, link) {
+		nemomatrix_init_identity(&matrix);
+		nemomatrix_rotate(&matrix, cos(one->vtransform.r), sin(one->vtransform.r));
+		nemomatrix_scale(&matrix, one->vtransform.sx, one->vtransform.sy);
+		nemomatrix_translate(&matrix, one->vtransform.tx, one->vtransform.ty);
+
+		if (nemomatrix_invert(&inverse, &matrix) == 0) {
+			float tx = x;
+			float ty = y;
+
+			nemomatrix_transform(&inverse, &tx, &ty);
+
+			if (-1.0f < tx && tx < 1.0f && -1.0f < ty && ty < 1.0f)
+				return one;
+		}
+	}
+
+	return NULL;
+}
+
 static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showone *canvas)
 {
 	struct nemotile *tile = (struct nemotile *)nemoshow_get_userdata(show);
@@ -325,6 +350,14 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 		}
 
 		tile->state = 0;
+	}
+
+	if (nemoshow_event_is_touch_down(show, event)) {
+		one = nemotile_pick_one(tile,
+				(nemoshow_event_get_x(event) / tile->width * 2.0f) - 1.0f,
+				1.0f - (nemoshow_event_get_y(event) / tile->height * 2.0f));
+		if (one != NULL) {
+		}
 	}
 
 	if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event)) {
