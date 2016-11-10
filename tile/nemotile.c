@@ -208,14 +208,14 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 {
 	struct nemotile *tile = (struct nemotile *)nemoshow_get_userdata(show);
 	struct tileone *one;
+	struct nemotrans *trans, *ntrans;
 	struct nemomatrix vtransform, ttransform;
+	uint32_t msecs = time_current_msecs();
 	float linecolor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
-	if (tile->trans != NULL) {
-		if (nemotrans_dispatch(tile->trans, time_current_msecs()) != 0) {
-			nemotrans_destroy(tile->trans);
-			tile->trans = NULL;
-		}
+	nemolist_for_each_safe(trans, ntrans, &tile->trans_list, link) {
+		if (nemotrans_dispatch(trans, msecs) != 0)
+			nemotrans_destroy(trans);
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, tile->fbo);
@@ -283,25 +283,30 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 {
 	struct nemotile *tile = (struct nemotile *)nemoshow_get_userdata(show);
 	struct tileone *one;
+	struct nemotrans *trans;
 
 	if (nemoshow_event_is_pointer_left_down(show, event)) {
-		tile->trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE, 1800, 300);
+		trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE, 1800, 300);
 
 		nemolist_for_each(one, &tile->tile_list, link) {
-			nemotrans_set_float(tile->trans, &one->ttransform.tx, 0.0f);
-			nemotrans_set_float(tile->trans, &one->ttransform.ty, 0.0f);
-			nemotrans_set_float(tile->trans, &one->ttransform.sx, 1.0f);
-			nemotrans_set_float(tile->trans, &one->ttransform.sy, 1.0f);
+			nemotrans_set_float(trans, &one->ttransform.tx, 0.0f);
+			nemotrans_set_float(trans, &one->ttransform.ty, 0.0f);
+			nemotrans_set_float(trans, &one->ttransform.sx, 1.0f);
+			nemotrans_set_float(trans, &one->ttransform.sy, 1.0f);
 		}
+
+		nemolist_insert_tail(&tile->trans_list, &trans->link);
 	} else if (nemoshow_event_is_pointer_right_down(show, event)) {
-		tile->trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE, 1800, 300);
+		trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE, 1800, 300);
 
 		nemolist_for_each(one, &tile->tile_list, link) {
-			nemotrans_set_float(tile->trans, &one->ttransform.tx, one->ttransform0.tx);
-			nemotrans_set_float(tile->trans, &one->ttransform.ty, one->ttransform0.ty);
-			nemotrans_set_float(tile->trans, &one->ttransform.sx, one->ttransform0.sx);
-			nemotrans_set_float(tile->trans, &one->ttransform.sy, one->ttransform0.sy);
+			nemotrans_set_float(trans, &one->ttransform.tx, one->ttransform0.tx);
+			nemotrans_set_float(trans, &one->ttransform.ty, one->ttransform0.ty);
+			nemotrans_set_float(trans, &one->ttransform.sx, one->ttransform0.sx);
+			nemotrans_set_float(trans, &one->ttransform.sy, one->ttransform0.sy);
 		}
+
+		nemolist_insert_tail(&tile->trans_list, &trans->link);
 	}
 
 	if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event)) {
@@ -649,6 +654,7 @@ int main(int argc, char *argv[])
 	tile->linewidth = linewidth;
 
 	nemolist_init(&tile->tile_list);
+	nemolist_init(&tile->trans_list);
 
 	tile->tool = tool = nemotool_create();
 	if (tool == NULL)

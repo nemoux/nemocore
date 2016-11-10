@@ -16,6 +16,7 @@ struct nemotrans *nemotrans_create(int type, uint32_t duration, uint32_t delay)
 		return NULL;
 	memset(trans, 0, sizeof(struct nemotrans));
 
+	nemolist_init(&trans->link);
 	nemolist_init(&trans->list);
 
 	nemoease_set(&trans->ease, type);
@@ -32,6 +33,8 @@ struct nemotrans *nemotrans_create(int type, uint32_t duration, uint32_t delay)
 void nemotrans_destroy(struct nemotrans *trans)
 {
 	struct transone *one, *next;
+
+	nemolist_remove(&trans->link);
 
 	nemolist_for_each_safe(one, next, &trans->list, link) {
 		nemolist_remove(&one->link);

@@ -96,8 +96,7 @@ struct nemotile {
 	float linewidth;
 
 	struct nemolist tile_list;
-
-	struct nemotrans *trans;
+	struct nemolist trans_list;
 };
 
 #endif

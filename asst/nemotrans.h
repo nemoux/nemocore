@@ -24,6 +24,8 @@ struct transone {
 };
 
 struct nemotrans {
+	struct nemolist link;
+
 	struct nemoease ease;
 
 	struct nemolist list;
