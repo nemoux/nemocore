@@ -22,6 +22,8 @@ struct tileone {
 	float *vertices;
 	float *texcoords;
 
+	float color[4];
+
 	int count;
 
 	struct {
@@ -87,6 +89,7 @@ struct nemotile {
 	GLuint uvtransform0;
 	GLuint uttransform0;
 	GLuint utexture0;
+	GLuint ucolor0;
 	GLuint uvtransform1;
 	GLuint ucolor1;
 

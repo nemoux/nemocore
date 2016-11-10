@@ -91,6 +91,11 @@ static struct tileone *nemotile_one_create(int vertices)
 	one->ttransform.sx = 1.0f;
 	one->ttransform.sy = 1.0f;
 
+	one->color[0] = 1.0f;
+	one->color[1] = 1.0f;
+	one->color[2] = 1.0f;
+	one->color[3] = 1.0f;
+
 	nemolist_init(&one->link);
 
 	return one;
@@ -191,6 +196,14 @@ static void nemotile_one_set_texture(struct tileone *one, struct showone *canvas
 	one->texture = canvas;
 }
 
+static void nemotile_one_set_color(struct tileone *one, float r, float g, float b, float a)
+{
+	one->color[0] = r;
+	one->color[1] = g;
+	one->color[2] = b;
+	one->color[3] = a;
+}
+
 static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showone *canvas)
 {
 	struct nemotile *tile = (struct nemotile *)nemoshow_get_userdata(show);
@@ -233,6 +246,7 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 		glUniform1i(tile->utexture0, 0);
 		glUniformMatrix4fv(tile->uvtransform0, 1, GL_FALSE, vtransform.d);
 		glUniformMatrix4fv(tile->uttransform0, 1, GL_FALSE, ttransform.d);
+		glUniform4fv(tile->ucolor0, 1, one->color);
 
 		glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_texture(one->texture));
 
@@ -405,10 +419,11 @@ static int nemotile_prepare_opengl(struct nemotile *tile, int32_t width, int32_t
 	static const char *fragmentshader =
 		"precision mediump float;\n"
 		"uniform sampler2D texture;\n"
+		"uniform vec4 color;\n"
 		"varying vec4 vtexcoord;\n"
 		"void main()\n"
 		"{\n"
-		"  gl_FragColor = texture2D(texture, vtexcoord.xy);\n"
+		"  gl_FragColor = texture2D(texture, vtexcoord.xy) * color;\n"
 		"}\n";
 	static const char *vertexshader_solid =
 		"uniform mat4 vtransform;\n"
@@ -436,6 +451,7 @@ static int nemotile_prepare_opengl(struct nemotile *tile, int32_t width, int32_t
 	tile->uvtransform0 = glGetUniformLocation(tile->programs[0], "vtransform");
 	tile->uttransform0 = glGetUniformLocation(tile->programs[0], "ttransform");
 	tile->utexture0 = glGetUniformLocation(tile->programs[0], "texture");
+	tile->ucolor0 = glGetUniformLocation(tile->programs[0], "color");
 
 	tile->uvtransform1 = glGetUniformLocation(tile->programs[1], "vtransform");
 	tile->ucolor1 = glGetUniformLocation(tile->programs[1], "color");
@@ -459,19 +475,23 @@ static int nemotile_prepare_tiles(struct nemotile *tile, int columns, int rows, 
 
 	for (y = 0; y < rows; y++) {
 		for (x = 0; x < columns; x++) {
-			one = nemotile_one_create(5);
+			one = nemotile_one_create(4);
 			nemotile_one_set_vertex(one, 0, -1.0f, 1.0f);
 			nemotile_one_set_texcoord(one, 0, 0.0f, 1.0f);
 			nemotile_one_set_vertex(one, 1, 1.0f, 1.0f);
 			nemotile_one_set_texcoord(one, 1, 1.0f, 1.0f);
-			nemotile_one_set_vertex(one, 2, 1.0f, -1.0f);
-			nemotile_one_set_texcoord(one, 2, 1.0f, 0.0f);
-			nemotile_one_set_vertex(one, 3, -1.0f, -1.0f);
-			nemotile_one_set_texcoord(one, 3, 0.0f, 0.0f);
-			nemotile_one_set_vertex(one, 4, -1.0f, 1.0f);
-			nemotile_one_set_texcoord(one, 4, 0.0f, 1.0f);
+			nemotile_one_set_vertex(one, 2, -1.0f, -1.0f);
+			nemotile_one_set_texcoord(one, 2, 0.0f, 0.0f);
+			nemotile_one_set_vertex(one, 3, 1.0f, -1.0f);
+			nemotile_one_set_texcoord(one, 3, 1.0f, 0.0f);
 
 			nemotile_one_set_texture(one, tile->video);
+
+			nemotile_one_set_color(one,
+					random_get_double(0.0f, 1.0f),
+					random_get_double(0.0f, 1.0f),
+					random_get_double(0.0f, 1.0f),
+					random_get_double(0.0f, 1.0f));
 
 			nemotile_one_vertices_translate_to(one,
 					nemotile_get_column_x(columns, x),
