@@ -13,6 +13,7 @@
 #include <nemoshow.h>
 #include <nemoplay.h>
 #include <nemofs.h>
+#include <nemotrans.h>
 #include <nemolist.h>
 #include <playback.h>
 #include <glmotion.h>
@@ -27,7 +28,19 @@ struct tileone {
 		float tx, ty;
 		float r;
 		float sx, sy;
+	} vtransform0;
+
+	struct {
+		float tx, ty;
+		float r;
+		float sx, sy;
 	} vtransform;
+
+	struct {
+		float tx, ty;
+		float r;
+		float sx, sy;
+	} ttransform0;
 
 	struct {
 		float tx, ty;
@@ -81,7 +94,7 @@ struct nemotile {
 
 	struct nemolist tile_list;
 
-	uint32_t msecs;
+	struct nemotrans *trans;
 };
 
 #endif

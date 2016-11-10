@@ -67,6 +67,18 @@ static struct tileone *nemotile_one_create(int vertices)
 
 	one->count = vertices;
 
+	one->vtransform0.tx = 0.0f;
+	one->vtransform0.ty = 0.0f;
+	one->vtransform0.r = 0.0f;
+	one->vtransform0.sx = 1.0f;
+	one->vtransform0.sy = 1.0f;
+
+	one->ttransform0.tx = 0.0f;
+	one->ttransform0.ty = 0.0f;
+	one->ttransform0.r = 0.0f;
+	one->ttransform0.sx = 1.0f;
+	one->ttransform0.sy = 1.0f;
+
 	one->vtransform.tx = 0.0f;
 	one->vtransform.ty = 0.0f;
 	one->vtransform.r = 0.0f;
@@ -100,21 +112,38 @@ static void nemotile_one_set_vertex(struct tileone *one, int index, float x, flo
 	one->vertices[index * 2 + 1] = y;
 }
 
-static void nemotile_one_translate_vertices(struct tileone *one, float tx, float ty)
+static void nemotile_one_vertices_translate(struct tileone *one, float tx, float ty)
 {
 	one->vtransform.tx = tx;
 	one->vtransform.ty = ty;
 }
 
-static void nemotile_one_rotate_vertices(struct tileone *one, float r)
+static void nemotile_one_vertices_rotate(struct tileone *one, float r)
 {
 	one->vtransform.r = r;
 }
 
-static void nemotile_one_scale_vertices(struct tileone *one, float sx, float sy)
+static void nemotile_one_vertices_scale(struct tileone *one, float sx, float sy)
 {
 	one->vtransform.sx = sx;
 	one->vtransform.sy = sy;
+}
+
+static void nemotile_one_vertices_translate_to(struct tileone *one, float tx, float ty)
+{
+	one->vtransform0.tx = tx;
+	one->vtransform0.ty = ty;
+}
+
+static void nemotile_one_vertices_rotate_to(struct tileone *one, float r)
+{
+	one->vtransform0.r = r;
+}
+
+static void nemotile_one_vertices_scale_to(struct tileone *one, float sx, float sy)
+{
+	one->vtransform0.sx = sx;
+	one->vtransform0.sy = sy;
 }
 
 static void nemotile_one_set_texcoord(struct tileone *one, int index, float tx, float ty)
@@ -123,21 +152,38 @@ static void nemotile_one_set_texcoord(struct tileone *one, int index, float tx, 
 	one->texcoords[index * 2 + 1] = ty;
 }
 
-static void nemotile_one_translate_texcoords(struct tileone *one, float tx, float ty)
+static void nemotile_one_texcoords_translate(struct tileone *one, float tx, float ty)
 {
 	one->ttransform.tx = tx;
 	one->ttransform.ty = ty;
 }
 
-static void nemotile_one_rotate_texcoords(struct tileone *one, float r)
+static void nemotile_one_texcoords_rotate(struct tileone *one, float r)
 {
 	one->ttransform.r = r;
 }
 
-static void nemotile_one_scale_texcoords(struct tileone *one, float sx, float sy)
+static void nemotile_one_texcoords_scale(struct tileone *one, float sx, float sy)
 {
 	one->ttransform.sx = sx;
 	one->ttransform.sy = sy;
+}
+
+static void nemotile_one_texcoords_translate_to(struct tileone *one, float tx, float ty)
+{
+	one->ttransform0.tx = tx;
+	one->ttransform0.ty = ty;
+}
+
+static void nemotile_one_texcoords_rotate_to(struct tileone *one, float r)
+{
+	one->ttransform0.r = r;
+}
+
+static void nemotile_one_texcoords_scale_to(struct tileone *one, float sx, float sy)
+{
+	one->ttransform0.sx = sx;
+	one->ttransform0.sy = sy;
 }
 
 static void nemotile_one_set_texture(struct tileone *one, struct showone *canvas)
@@ -150,14 +196,14 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 	struct nemotile *tile = (struct nemotile *)nemoshow_get_userdata(show);
 	struct tileone *one;
 	struct nemomatrix vtransform, ttransform;
-	uint32_t msecs = time_current_msecs();
 	float linecolor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	float dt;
 
-	if (tile->msecs == 0)
-		tile->msecs = msecs;
-
-	dt = (float)(msecs - tile->msecs) / 1000.0f;
+	if (tile->trans != NULL) {
+		if (nemotrans_dispatch(tile->trans, time_current_msecs()) != 0) {
+			nemotrans_destroy(tile->trans);
+			tile->trans = NULL;
+		}
+	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, tile->fbo);
 
@@ -222,6 +268,27 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, struct showevent *event)
 {
 	struct nemotile *tile = (struct nemotile *)nemoshow_get_userdata(show);
+	struct tileone *one;
+
+	if (nemoshow_event_is_pointer_left_down(show, event)) {
+		tile->trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE, 1800, 300);
+
+		nemolist_for_each(one, &tile->tile_list, link) {
+			nemotrans_set_float(tile->trans, &one->ttransform.tx, 0.0f);
+			nemotrans_set_float(tile->trans, &one->ttransform.ty, 0.0f);
+			nemotrans_set_float(tile->trans, &one->ttransform.sx, 1.0f);
+			nemotrans_set_float(tile->trans, &one->ttransform.sy, 1.0f);
+		}
+	} else if (nemoshow_event_is_pointer_right_down(show, event)) {
+		tile->trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE, 1800, 300);
+
+		nemolist_for_each(one, &tile->tile_list, link) {
+			nemotrans_set_float(tile->trans, &one->ttransform.tx, one->ttransform0.tx);
+			nemotrans_set_float(tile->trans, &one->ttransform.ty, one->ttransform0.ty);
+			nemotrans_set_float(tile->trans, &one->ttransform.sx, one->ttransform0.sx);
+			nemotrans_set_float(tile->trans, &one->ttransform.sy, one->ttransform0.sy);
+		}
+	}
 
 	if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event)) {
 		nemoshow_event_update_taps(show, canvas, event);
@@ -406,17 +473,29 @@ static int nemotile_prepare_tiles(struct nemotile *tile, int columns, int rows)
 
 			nemotile_one_set_texture(one, tile->video);
 
-			nemotile_one_translate_vertices(one,
+			nemotile_one_vertices_translate_to(one,
 					nemotile_get_column_x(columns, x),
 					nemotile_get_row_y(rows, y));
-			nemotile_one_scale_vertices(one,
+			nemotile_one_vertices_scale_to(one,
+					nemotile_get_column_sx(columns),
+					nemotile_get_row_sy(rows));
+			nemotile_one_vertices_translate(one,
+					nemotile_get_column_x(columns, x),
+					nemotile_get_row_y(rows, y));
+			nemotile_one_vertices_scale(one,
 					nemotile_get_column_sx(columns),
 					nemotile_get_row_sy(rows));
 
-			nemotile_one_translate_texcoords(one,
+			nemotile_one_texcoords_translate_to(one,
 					nemotile_get_column_tx(columns, x),
 					nemotile_get_row_ty(rows, y));
-			nemotile_one_scale_texcoords(one,
+			nemotile_one_texcoords_scale_to(one,
+					nemotile_get_column_sx(columns),
+					nemotile_get_row_sy(rows));
+			nemotile_one_texcoords_translate(one,
+					nemotile_get_column_tx(columns, x),
+					nemotile_get_row_ty(rows, y));
+			nemotile_one_texcoords_scale(one,
 					nemotile_get_column_sx(columns),
 					nemotile_get_row_sy(rows));
 
