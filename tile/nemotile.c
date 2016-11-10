@@ -376,6 +376,8 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 				nemolist_insert_tail(&tile->trans_list, &trans->link);
 			}
+
+			tile->state = 1;
 		}
 	} else if (nemoshow_event_is_touch_up(show, event)) {
 		nemolist_for_each(one, &tile->tile_list, link) {
@@ -387,13 +389,13 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 			nemotrans_set_float(trans, &one->ttransform.ty, one->ttransform0.ty);
 			nemotrans_set_float(trans, &one->ttransform.sx, one->ttransform0.sx);
 			nemotrans_set_float(trans, &one->ttransform.sy, one->ttransform0.sy);
-			nemotrans_set_float(trans, &one->vtransform.tx,
-					nemotile_get_column_x(tile->columns, one->column));
-			nemotrans_set_float(trans, &one->vtransform.ty,
-					nemotile_get_row_y(tile->rows, one->row));
+			nemotrans_set_float(trans, &one->vtransform.tx, one->vtransform0.tx);
+			nemotrans_set_float(trans, &one->vtransform.ty, one->vtransform0.ty);
 
 			nemolist_insert_tail(&tile->trans_list, &trans->link);
 		}
+
+		tile->state = 0;
 	}
 
 	if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event)) {
@@ -447,16 +449,13 @@ static void nemotile_dispatch_timer(struct nemotimer *timer, void *data)
 		nemotile_one_set_column(one, tile->columns - one->column - 1);
 		nemotile_one_set_row(one, tile->rows - one->row - 1);
 
-		nemotrans_set_float(trans, &one->ttransform0.tx,
-				nemotile_get_column_tx(tile->columns, one->column));
-		nemotrans_set_float(trans, &one->ttransform0.ty,
+		nemotile_one_texcoords_translate_to(one,
+				nemotile_get_column_tx(tile->columns, one->column),
 				nemotile_get_row_ty(tile->rows, one->row));
 
 		if (tile->state == 0) {
-			nemotrans_set_float(trans, &one->ttransform.tx,
-					nemotile_get_column_tx(tile->columns, one->column));
-			nemotrans_set_float(trans, &one->ttransform.ty,
-					nemotile_get_row_ty(tile->rows, one->row));
+			nemotrans_set_float(trans, &one->ttransform.tx, one->ttransform0.tx);
+			nemotrans_set_float(trans, &one->ttransform.ty, one->ttransform0.ty);
 		}
 
 		nemolist_insert_tail(&tile->trans_list, &trans->link);
