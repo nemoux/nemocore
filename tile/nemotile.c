@@ -444,10 +444,15 @@ static void nemotile_dispatch_timer(struct nemotimer *timer, void *data)
 
 		nemotrans_set_float(trans, &one->vtransform.r, one->vtransform.r + M_PI);
 
-		if (tile->state == 0) {
-			nemotile_one_set_column(one, tile->columns - one->column - 1);
-			nemotile_one_set_row(one, tile->rows - one->row - 1);
+		nemotile_one_set_column(one, tile->columns - one->column - 1);
+		nemotile_one_set_row(one, tile->rows - one->row - 1);
 
+		nemotrans_set_float(trans, &one->ttransform0.tx,
+				nemotile_get_column_tx(tile->columns, one->column));
+		nemotrans_set_float(trans, &one->ttransform0.ty,
+				nemotile_get_row_ty(tile->rows, one->row));
+
+		if (tile->state == 0) {
 			nemotrans_set_float(trans, &one->ttransform.tx,
 					nemotile_get_column_tx(tile->columns, one->column));
 			nemotrans_set_float(trans, &one->ttransform.ty,
