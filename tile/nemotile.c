@@ -30,7 +30,7 @@ static inline float nemotile_get_row_y(int rows, int idx)
 {
 	float dy = rows % 2 == 0 ? 0.5f : 0.0f;
 
-	return 2.0f / (float)rows * (rows / 2 - idx - dy);
+	return 2.0f / (float)rows * (idx - rows / 2 + dy);
 }
 
 static inline float nemotile_get_column_sx(int columns)
@@ -50,7 +50,7 @@ static inline float nemotile_get_column_tx(int columns, int idx)
 
 static inline float nemotile_get_row_ty(int rows, int idx)
 {
-	return 1.0f / (float)rows * (rows - idx - 1);
+	return 1.0f / (float)rows * idx;
 }
 
 static struct tileone *nemotile_one_create(int vertices)
@@ -353,10 +353,46 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 	}
 
 	if (nemoshow_event_is_touch_down(show, event)) {
-		one = nemotile_pick_one(tile,
+		struct tileone *pone;
+
+		pone = nemotile_pick_one(tile,
 				(nemoshow_event_get_x(event) / tile->width * 2.0f) - 1.0f,
-				1.0f - (nemoshow_event_get_y(event) / tile->height * 2.0f));
-		if (one != NULL) {
+				(nemoshow_event_get_y(event) / tile->height * 2.0f) - 1.0f);
+		if (pone != NULL) {
+			nemolist_remove(&pone->link);
+			nemolist_insert_tail(&tile->tile_list, &pone->link);
+
+			nemolist_for_each(one, &tile->tile_list, link) {
+				trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
+						random_get_int(600, 1200),
+						random_get_int(30, 300));
+
+				nemotrans_set_float(trans, &one->ttransform.tx, 0.0f);
+				nemotrans_set_float(trans, &one->ttransform.ty, 0.0f);
+				nemotrans_set_float(trans, &one->ttransform.sx, 1.0f);
+				nemotrans_set_float(trans, &one->ttransform.sy, 1.0f);
+				nemotrans_set_float(trans, &one->vtransform.tx, pone->vtransform.tx);
+				nemotrans_set_float(trans, &one->vtransform.ty, pone->vtransform.ty);
+
+				nemolist_insert_tail(&tile->trans_list, &trans->link);
+			}
+		}
+	} else if (nemoshow_event_is_touch_up(show, event)) {
+		nemolist_for_each(one, &tile->tile_list, link) {
+			trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
+					random_get_int(600, 1200),
+					random_get_int(30, 300));
+
+			nemotrans_set_float(trans, &one->ttransform.tx, one->ttransform0.tx);
+			nemotrans_set_float(trans, &one->ttransform.ty, one->ttransform0.ty);
+			nemotrans_set_float(trans, &one->ttransform.sx, one->ttransform0.sx);
+			nemotrans_set_float(trans, &one->ttransform.sy, one->ttransform0.sy);
+			nemotrans_set_float(trans, &one->vtransform.tx,
+					nemotile_get_column_x(tile->columns, one->column));
+			nemotrans_set_float(trans, &one->vtransform.ty,
+					nemotile_get_row_y(tile->rows, one->row));
+
+			nemolist_insert_tail(&tile->trans_list, &trans->link);
 		}
 	}
 
@@ -563,10 +599,10 @@ static int nemotile_prepare_tiles(struct nemotile *tile, int columns, int rows, 
 			nemotile_one_set_texture(one, tile->video);
 
 			nemotile_one_set_color(one,
-					random_get_double(0.18f, 1.0f),
-					random_get_double(0.18f, 1.0f),
-					random_get_double(0.18f, 1.0f),
-					random_get_double(0.18f, 1.0f));
+					random_get_double(0.12f, 1.0f),
+					random_get_double(0.12f, 1.0f),
+					random_get_double(0.12f, 1.0f),
+					random_get_double(0.12f, 1.0f));
 
 			nemotile_one_vertices_translate_to(one,
 					nemotile_get_column_x(columns, x),
