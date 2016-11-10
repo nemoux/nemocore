@@ -111,6 +111,16 @@ static void nemotile_one_destroy(struct tileone *one)
 	free(one);
 }
 
+static void nemotile_one_set_column(struct tileone *one, int column)
+{
+	one->column = column;
+}
+
+static void nemotile_one_set_row(struct tileone *one, int row)
+{
+	one->row = row;
+}
+
 static void nemotile_one_set_vertex(struct tileone *one, int index, float x, float y)
 {
 	one->vertices[index * 2 + 0] = x;
@@ -298,6 +308,8 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 			nemolist_insert_tail(&tile->trans_list, &trans->link);
 		}
+
+		tile->state = 1;
 	} else if (nemoshow_event_is_pointer_right_down(show, event)) {
 		nemolist_for_each(one, &tile->tile_list, link) {
 			trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
@@ -311,6 +323,8 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 			nemolist_insert_tail(&tile->trans_list, &trans->link);
 		}
+
+		tile->state = 0;
 	}
 
 	if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event)) {
@@ -351,11 +365,28 @@ static void nemotile_dispatch_show_resize(struct nemoshow *show, int32_t width, 
 static void nemotile_dispatch_timer(struct nemotimer *timer, void *data)
 {
 	struct nemotile *tile = (struct nemotile *)data;
-	int width = nemoshow_canvas_get_viewport_width(tile->canvas);
-	int height = nemoshow_canvas_get_viewport_height(tile->canvas);
+	struct tileone *one;
+	struct nemotrans *trans;
 
-	nemoshow_one_dirty(tile->canvas, NEMOSHOW_REDRAW_DIRTY);
-	nemoshow_dispatch_frame(tile->show);
+	nemolist_for_each(one, &tile->tile_list, link) {
+		trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
+				random_get_int(700, 1400),
+				random_get_int(100, 500));
+
+		nemotrans_set_float(trans, &one->vtransform.r, one->vtransform.r + M_PI);
+
+		if (tile->state == 0) {
+			nemotile_one_set_column(one, tile->columns - one->column - 1);
+			nemotile_one_set_row(one, tile->rows - one->row - 1);
+
+			nemotrans_set_float(trans, &one->ttransform.tx,
+					nemotile_get_column_tx(tile->columns, one->column));
+			nemotrans_set_float(trans, &one->ttransform.ty,
+					nemotile_get_row_ty(tile->rows, one->row));
+		}
+
+		nemolist_insert_tail(&tile->trans_list, &trans->link);
+	}
 
 	nemotimer_set_timeout(tile->timer, tile->timeout);
 }
@@ -485,6 +516,8 @@ static int nemotile_prepare_tiles(struct nemotile *tile, int columns, int rows, 
 	for (y = 0; y < rows; y++) {
 		for (x = 0; x < columns; x++) {
 			one = nemotile_one_create(4);
+			nemotile_one_set_column(one, x);
+			nemotile_one_set_row(one, y);
 			nemotile_one_set_vertex(one, 0, -1.0f, 1.0f);
 			nemotile_one_set_texcoord(one, 0, 0.0f, 1.0f);
 			nemotile_one_set_vertex(one, 1, 1.0f, 1.0f);
@@ -497,10 +530,10 @@ static int nemotile_prepare_tiles(struct nemotile *tile, int columns, int rows, 
 			nemotile_one_set_texture(one, tile->video);
 
 			nemotile_one_set_color(one,
-					random_get_double(0.0f, 1.0f),
-					random_get_double(0.0f, 1.0f),
-					random_get_double(0.0f, 1.0f),
-					random_get_double(0.0f, 1.0f));
+					random_get_double(0.18f, 1.0f),
+					random_get_double(0.18f, 1.0f),
+					random_get_double(0.18f, 1.0f),
+					random_get_double(0.18f, 1.0f));
 
 			nemotile_one_vertices_translate_to(one,
 					nemotile_get_column_x(columns, x),
@@ -575,7 +608,7 @@ int main(int argc, char *argv[])
 	float motionblur = 0.0f;
 	float linewidth = 0.0f;
 	float padding = 0.0f;
-	int timeout = 10000;
+	int timeout = 5000;
 	int width = 800;
 	int height = 800;
 	int columns = 1;
@@ -654,6 +687,8 @@ int main(int argc, char *argv[])
 
 	tile->width = width;
 	tile->height = height;
+	tile->columns = columns;
+	tile->rows = rows;
 	tile->timeout = timeout;
 	tile->linewidth = linewidth;
 

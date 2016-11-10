@@ -19,6 +19,8 @@
 #include <glmotion.h>
 
 struct tileone {
+	int column, row;
+
 	float *vertices;
 	float *texcoords;
 
@@ -67,6 +69,8 @@ struct nemotile {
 
 	struct glmotion *motion;
 
+	int state;
+
 	struct showone *sprites[128];
 	int nsprites, isprites;
 
@@ -80,6 +84,7 @@ struct nemotile {
 	struct playback_video *videoback;
 
 	uint32_t width, height;
+	uint32_t columns, rows;
 
 	struct nemotimer *timer;
 	uint32_t timeout;
