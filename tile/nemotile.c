@@ -446,6 +446,11 @@ static void nemotile_dispatch_timer(struct nemotimer *timer, void *data)
 
 		nemotrans_set_float(trans, &one->vtransform.r, one->vtransform.r + M_PI);
 
+		nemotrans_set_float(trans, &one->color[0], random_get_double(0.0f, 1.0f));
+		nemotrans_set_float(trans, &one->color[1], random_get_double(0.0f, 1.0f));
+		nemotrans_set_float(trans, &one->color[2], random_get_double(0.0f, 1.0f));
+		nemotrans_set_float(trans, &one->color[3], random_get_double(0.0f, 1.0f));
+
 		nemotile_one_set_column(one, tile->columns - one->column - 1);
 		nemotile_one_set_row(one, tile->rows - one->row - 1);
 
@@ -603,10 +608,10 @@ static int nemotile_prepare_tiles(struct nemotile *tile, int columns, int rows, 
 			nemotile_one_set_texture(one, tile->video);
 
 			nemotile_one_set_color(one,
-					random_get_double(0.12f, 1.0f),
-					random_get_double(0.12f, 1.0f),
-					random_get_double(0.12f, 1.0f),
-					random_get_double(0.12f, 1.0f));
+					random_get_double(0.0f, 1.0f),
+					random_get_double(0.0f, 1.0f),
+					random_get_double(0.0f, 1.0f),
+					random_get_double(0.0f, 1.0f));
 
 			nemotile_one_vertices_translate_to(one,
 					nemotile_get_column_x(columns, x),
