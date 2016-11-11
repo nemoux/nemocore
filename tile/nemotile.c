@@ -53,11 +53,11 @@ static inline float nemotile_get_row_ty(int rows, int idx)
 	return 1.0f / (float)rows * idx;
 }
 
-static inline float nemotile_get_tx_from_vx(int columns, int flip, float x)
+static inline float nemotile_get_tx_from_vx(int columns, int flip, float sx, float x)
 {
 	float tx;
 
-	tx = (x + 1.0f) / 2.0f - 1.0f / (float)columns / 2.0f;
+	tx = (x + 1.0f) / 2.0f - sx / 2.0f;
 
 	if (flip != 0)
 		tx = 0.5f - (tx - 0.5f) - 1.0f / (float)columns;
@@ -65,11 +65,11 @@ static inline float nemotile_get_tx_from_vx(int columns, int flip, float x)
 	return tx;
 }
 
-static inline float nemotile_get_ty_from_vy(int rows, int flip, float y)
+static inline float nemotile_get_ty_from_vy(int rows, int flip, float sy, float y)
 {
 	float ty;
 
-	ty = (y + 1.0f) / 2.0f - 1.0f / (float)rows / 2.0f;
+	ty = (y + 1.0f) / 2.0f - sy / 2.0f;
 
 	if (flip != 0)
 		ty = 0.5f - (ty - 0.5f) - 1.0f / (float)rows;
@@ -372,8 +372,8 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 					random_get_int(1200, 2400),
 					random_get_int(100, 300));
 
-			nemotrans_set_float(trans, &one->ttransform.tx, nemotile_get_tx_from_vx(tile->columns, tile->flip, one->vtransform.tx));
-			nemotrans_set_float(trans, &one->ttransform.ty, nemotile_get_ty_from_vy(tile->rows, tile->flip, one->vtransform.ty));
+			nemotrans_set_float(trans, &one->ttransform.tx, nemotile_get_tx_from_vx(tile->columns, tile->flip, one->vtransform.sx, one->vtransform.tx));
+			nemotrans_set_float(trans, &one->ttransform.ty, nemotile_get_ty_from_vy(tile->rows, tile->flip, one->vtransform.sy, one->vtransform.ty));
 			nemotrans_set_float(trans, &one->ttransform.sx, one->ttransform0.sx);
 			nemotrans_set_float(trans, &one->ttransform.sy, one->ttransform0.sy);
 
@@ -455,8 +455,8 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 			nemotrans_set_float(trans, &one->vtransform.tx, one->vtransform0.tx * dx);
 			nemotrans_set_float(trans, &one->vtransform.ty, one->vtransform0.ty * dy);
-			nemotrans_set_float(trans, &one->ttransform.tx, nemotile_get_tx_from_vx(tile->columns, tile->flip, one->vtransform0.tx * dx));
-			nemotrans_set_float(trans, &one->ttransform.ty, nemotile_get_ty_from_vy(tile->rows, tile->flip, one->vtransform0.ty * dy));
+			nemotrans_set_float(trans, &one->ttransform.tx, nemotile_get_tx_from_vx(tile->columns, tile->flip, one->vtransform0.sx, one->vtransform0.tx * dx));
+			nemotrans_set_float(trans, &one->ttransform.ty, nemotile_get_ty_from_vy(tile->rows, tile->flip, one->vtransform0.sy, one->vtransform0.ty * dy));
 			nemotrans_set_float(trans, &one->ttransform.sx, one->ttransform0.sx);
 			nemotrans_set_float(trans, &one->ttransform.sy, one->ttransform0.sy);
 
@@ -549,10 +549,10 @@ static void nemotile_dispatch_timer(struct nemotimer *timer, void *data)
 					none->vtransform0.tx = tx;
 					none->vtransform0.ty = ty;
 
-					one->ttransform0.tx = nemotile_get_tx_from_vx(tile->columns, tile->flip, one->vtransform0.tx);
-					one->ttransform0.ty = nemotile_get_ty_from_vy(tile->rows, tile->flip, one->vtransform0.ty);
-					none->ttransform0.tx = nemotile_get_tx_from_vx(tile->columns, tile->flip, none->vtransform0.tx);
-					none->ttransform0.ty = nemotile_get_ty_from_vy(tile->rows, tile->flip, none->vtransform0.ty);
+					one->ttransform0.tx = nemotile_get_tx_from_vx(tile->columns, tile->flip, one->vtransform0.sx, one->vtransform0.tx);
+					one->ttransform0.ty = nemotile_get_ty_from_vy(tile->rows, tile->flip, one->vtransform0.sy, one->vtransform0.ty);
+					none->ttransform0.tx = nemotile_get_tx_from_vx(tile->columns, tile->flip, none->vtransform0.sx, none->vtransform0.tx);
+					none->ttransform0.ty = nemotile_get_ty_from_vy(tile->rows, tile->flip, none->vtransform0.sy, none->vtransform0.ty);
 				}
 			}
 
@@ -573,8 +573,8 @@ static void nemotile_dispatch_timer(struct nemotimer *timer, void *data)
 						random_get_int(400, 800),
 						random_get_int(2400, 2800));
 
-				nemotrans_set_float(trans, &one->ttransform.tx, nemotile_get_tx_from_vx(tile->columns, tile->flip, one->vtransform0.tx * dx));
-				nemotrans_set_float(trans, &one->ttransform.ty, nemotile_get_ty_from_vy(tile->rows, tile->flip, one->vtransform0.ty * dy));
+				nemotrans_set_float(trans, &one->ttransform.tx, nemotile_get_tx_from_vx(tile->columns, tile->flip, one->vtransform0.sx, one->vtransform0.tx * dx));
+				nemotrans_set_float(trans, &one->ttransform.ty, nemotile_get_ty_from_vy(tile->rows, tile->flip, one->vtransform0.sy, one->vtransform0.ty * dy));
 
 				nemolist_insert_tail(&tile->trans_list, &trans->link);
 			}
@@ -743,14 +743,14 @@ static int nemotile_prepare_tiles(struct nemotile *tile, int columns, int rows, 
 					nemotile_get_row_sy(rows) * (1.0f - padding));
 
 			nemotile_one_texcoords_translate_to(one,
-					nemotile_get_tx_from_vx(tile->columns, 0, one->vtransform0.tx),
-					nemotile_get_ty_from_vy(tile->rows, 0, one->vtransform0.ty));
+					nemotile_get_tx_from_vx(tile->columns, 0, one->vtransform.sx, one->vtransform0.tx),
+					nemotile_get_ty_from_vy(tile->rows, 0, one->vtransform.sy, one->vtransform0.ty));
 			nemotile_one_texcoords_scale_to(one,
 					one->vtransform0.sx,
 					one->vtransform0.sy);
 			nemotile_one_texcoords_translate(one,
-					nemotile_get_tx_from_vx(tile->columns, 0, one->vtransform.tx),
-					nemotile_get_ty_from_vy(tile->rows, 0, one->vtransform.ty));
+					nemotile_get_tx_from_vx(tile->columns, 0, one->vtransform.sx, one->vtransform.tx),
+					nemotile_get_ty_from_vy(tile->rows, 0, one->vtransform.sy, one->vtransform.ty));
 			nemotile_one_texcoords_scale(one,
 					one->vtransform0.sx,
 					one->vtransform0.sy);
