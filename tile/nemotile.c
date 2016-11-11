@@ -534,7 +534,8 @@ static void nemotile_dispatch_timer(struct nemotimer *timer, void *data)
 		} else if (tile->iactions == 1) {
 			struct tileone *none;
 			float tx, ty;
-			float dx, dy;
+			float dtx, dty;
+			float dsx, dsy;
 			int index;
 
 			nemolist_for_each(one, &tile->tile_list, link) {
@@ -557,15 +558,19 @@ static void nemotile_dispatch_timer(struct nemotimer *timer, void *data)
 			}
 
 			nemolist_for_each(one, &tile->tile_list, link) {
-				dx = random_get_double(1.0f - tile->jitter, 1.0f + tile->jitter);
-				dy = random_get_double(1.0f - tile->jitter, 1.0f + tile->jitter);
+				dtx = random_get_double(1.0f - tile->jitter, 1.0f + tile->jitter);
+				dty = random_get_double(1.0f - tile->jitter, 1.0f + tile->jitter);
+				dsx = random_get_double(1.0f - tile->jitter, 1.0f + tile->jitter);
+				dsy = random_get_double(1.0f - tile->jitter, 1.0f + tile->jitter);
 
 				trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
 						random_get_int(1200, 1800),
 						random_get_int(200, 400));
 
-				nemotrans_set_float(trans, &one->vtransform.tx, one->vtransform0.tx * dx);
-				nemotrans_set_float(trans, &one->vtransform.ty, one->vtransform0.ty * dy);
+				nemotrans_set_float(trans, &one->vtransform.tx, one->vtransform0.tx * dtx);
+				nemotrans_set_float(trans, &one->vtransform.ty, one->vtransform0.ty * dty);
+				nemotrans_set_float(trans, &one->vtransform.sx, one->vtransform0.sx * dsx);
+				nemotrans_set_float(trans, &one->vtransform.sy, one->vtransform0.sy * dsy);
 
 				nemolist_insert_tail(&tile->trans_list, &trans->link);
 
@@ -573,8 +578,10 @@ static void nemotile_dispatch_timer(struct nemotimer *timer, void *data)
 						random_get_int(400, 800),
 						random_get_int(2400, 2800));
 
-				nemotrans_set_float(trans, &one->ttransform.tx, nemotile_get_tx_from_vx(tile->columns, tile->flip, one->vtransform.sx, one->vtransform0.tx * dx));
-				nemotrans_set_float(trans, &one->ttransform.ty, nemotile_get_ty_from_vy(tile->rows, tile->flip, one->vtransform.sy, one->vtransform0.ty * dy));
+				nemotrans_set_float(trans, &one->ttransform.tx, nemotile_get_tx_from_vx(tile->columns, tile->flip, one->vtransform0.sx * dsx, one->vtransform0.tx * dtx));
+				nemotrans_set_float(trans, &one->ttransform.ty, nemotile_get_ty_from_vy(tile->rows, tile->flip, one->vtransform0.sy * dsy, one->vtransform0.ty * dty));
+				nemotrans_set_float(trans, &one->ttransform.sx, one->vtransform0.sx * dsx);
+				nemotrans_set_float(trans, &one->ttransform.sy, one->vtransform0.sy * dsy);
 
 				nemolist_insert_tail(&tile->trans_list, &trans->link);
 			}
