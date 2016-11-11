@@ -53,14 +53,28 @@ static inline float nemotile_get_row_ty(int rows, int idx)
 	return 1.0f / (float)rows * idx;
 }
 
-static inline float nemotile_get_tx_from_vx(int columns, float x)
+static inline float nemotile_get_tx_from_vx(int columns, float x, float r)
 {
-	return (x + 1.0f) / 2.0f - 1.0f / (float)columns / 2.0f;
+	float tx;
+
+	tx = (x + 1.0f) / 2.0f - 1.0f / (float)columns / 2.0f;
+
+	if (((int)(r / M_PI)) % 2 != 0)
+		tx = 0.5f - (tx - 0.5f) - 1.0f / (float)columns;
+
+	return tx;
 }
 
-static inline float nemotile_get_ty_from_vy(int rows, float y)
+static inline float nemotile_get_ty_from_vy(int rows, float y, float r)
 {
-	return (y + 1.0f) / 2.0f - 1.0f / (float)rows / 2.0f;
+	float ty;
+
+	ty = (y + 1.0f) / 2.0f - 1.0f / (float)rows / 2.0f;
+
+	if (((int)(r / M_PI)) % 2 != 0)
+		ty = 0.5f - (ty - 0.5f) - 1.0f / (float)rows;
+
+	return ty;
 }
 
 static struct tileone *nemotile_one_create(int vertices)
@@ -524,17 +538,15 @@ static void nemotile_dispatch_timer(struct nemotimer *timer, void *data)
 				if (none != one) {
 					tx = one->vtransform0.tx;
 					ty = one->vtransform0.ty;
-					one->vtransform0.tx = none->vtransform0.tx;
-					one->vtransform0.ty = none->vtransform0.ty;
-					none->vtransform0.tx = tx;
-					none->vtransform0.ty = ty;
+					one->vtransform0.tx = none->vtransform0.tx * random_get_double(1.0f - tile->jitter, 1.0f + tile->jitter);
+					one->vtransform0.ty = none->vtransform0.ty * random_get_double(1.0f - tile->jitter, 1.0f + tile->jitter);
+					none->vtransform0.tx = tx * random_get_double(1.0f - tile->jitter, 1.0f + tile->jitter);
+					none->vtransform0.ty = ty * random_get_double(1.0f - tile->jitter, 1.0f + tile->jitter);
 
-					tx = one->ttransform0.tx;
-					ty = one->ttransform0.ty;
-					one->ttransform0.tx = none->ttransform0.tx;
-					one->ttransform0.ty = none->ttransform0.ty;
-					none->ttransform0.tx = tx;
-					none->ttransform0.ty = ty;
+					one->ttransform0.tx = nemotile_get_tx_from_vx(tile->columns, one->vtransform0.tx, one->vtransform.r);
+					one->ttransform0.ty = nemotile_get_ty_from_vy(tile->rows, one->vtransform0.ty, one->vtransform.r);
+					none->ttransform0.tx = nemotile_get_tx_from_vx(tile->columns, none->vtransform0.tx, none->vtransform.r);
+					none->ttransform0.ty = nemotile_get_ty_from_vy(tile->rows, none->vtransform0.ty, none->vtransform.r);
 				}
 			}
 
@@ -726,14 +738,14 @@ static int nemotile_prepare_tiles(struct nemotile *tile, int columns, int rows, 
 					nemotile_get_row_sy(rows) * (1.0f - padding));
 
 			nemotile_one_texcoords_translate_to(one,
-					nemotile_get_tx_from_vx(tile->columns, one->vtransform0.tx),
-					nemotile_get_ty_from_vy(tile->rows, one->vtransform0.ty));
+					nemotile_get_tx_from_vx(tile->columns, one->vtransform0.tx, 0.0f),
+					nemotile_get_ty_from_vy(tile->rows, one->vtransform0.ty, 0.0f));
 			nemotile_one_texcoords_scale_to(one,
 					one->vtransform0.sx,
 					one->vtransform0.sy);
 			nemotile_one_texcoords_translate(one,
-					nemotile_get_tx_from_vx(tile->columns, one->vtransform0.tx),
-					nemotile_get_ty_from_vy(tile->rows, one->vtransform0.ty));
+					nemotile_get_tx_from_vx(tile->columns, one->vtransform0.tx, 0.0f),
+					nemotile_get_ty_from_vy(tile->rows, one->vtransform0.ty, 0.0f));
 			nemotile_one_texcoords_scale(one,
 					one->vtransform0.sx,
 					one->vtransform0.sy);
