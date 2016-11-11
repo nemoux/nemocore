@@ -510,7 +510,9 @@ static void nemotile_dispatch_timer(struct nemotimer *timer, void *data)
 						random_get_int(700, 1400),
 						random_get_int(100, 500));
 
-				nemotrans_set_float(trans, &one->vtransform.r, one->vtransform.r + M_PI);
+				nemotile_one_vertices_rotate_to(one, one->vtransform0.r + M_PI);
+
+				nemotrans_set_float(trans, &one->vtransform.r, one->vtransform0.r);
 
 				nemotrans_set_float(trans, &one->color[0], random_get_double(tile->brightness, 1.0f));
 				nemotrans_set_float(trans, &one->color[1], random_get_double(tile->brightness, 1.0f));
@@ -543,10 +545,10 @@ static void nemotile_dispatch_timer(struct nemotimer *timer, void *data)
 					none->vtransform0.tx = tx * random_get_double(1.0f - tile->jitter, 1.0f + tile->jitter);
 					none->vtransform0.ty = ty * random_get_double(1.0f - tile->jitter, 1.0f + tile->jitter);
 
-					one->ttransform0.tx = nemotile_get_tx_from_vx(tile->columns, one->vtransform0.tx, one->vtransform.r);
-					one->ttransform0.ty = nemotile_get_ty_from_vy(tile->rows, one->vtransform0.ty, one->vtransform.r);
-					none->ttransform0.tx = nemotile_get_tx_from_vx(tile->columns, none->vtransform0.tx, none->vtransform.r);
-					none->ttransform0.ty = nemotile_get_ty_from_vy(tile->rows, none->vtransform0.ty, none->vtransform.r);
+					one->ttransform0.tx = nemotile_get_tx_from_vx(tile->columns, one->vtransform0.tx, one->vtransform0.r);
+					one->ttransform0.ty = nemotile_get_ty_from_vy(tile->rows, one->vtransform0.ty, one->vtransform0.r);
+					none->ttransform0.tx = nemotile_get_tx_from_vx(tile->columns, none->vtransform0.tx, none->vtransform0.r);
+					none->ttransform0.ty = nemotile_get_ty_from_vy(tile->rows, none->vtransform0.ty, none->vtransform0.r);
 				}
 			}
 
