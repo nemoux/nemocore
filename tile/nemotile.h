@@ -102,6 +102,7 @@ struct nemotile {
 
 	float linewidth;
 	float brightness;
+	float jitter;
 
 	struct nemolist tile_list;
 	struct nemolist trans_list;

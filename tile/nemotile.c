@@ -53,6 +53,16 @@ static inline float nemotile_get_row_ty(int rows, int idx)
 	return 1.0f / (float)rows * idx;
 }
 
+static inline float nemotile_get_tx_from_vx(int columns, float x)
+{
+	return (x + 1.0f) / 2.0f - 1.0f / (float)columns / 2.0f;
+}
+
+static inline float nemotile_get_ty_from_vy(int rows, float y)
+{
+	return (y + 1.0f) / 2.0f - 1.0f / (float)rows / 2.0f;
+}
+
 static struct tileone *nemotile_one_create(int vertices)
 {
 	struct tileone *one;
@@ -675,10 +685,14 @@ static void nemotile_finish_opengl(struct nemotile *tile)
 static int nemotile_prepare_tiles(struct nemotile *tile, int columns, int rows, float padding)
 {
 	struct tileone *one;
+	float dx, dy;
 	int x, y;
 
 	for (y = 0; y < rows; y++) {
 		for (x = 0; x < columns; x++) {
+			dx = random_get_double(1.0f - tile->jitter, 1.0f + tile->jitter);
+			dy = random_get_double(1.0f - tile->jitter, 1.0f + tile->jitter);
+
 			one = nemotile_one_create(4);
 			nemotile_one_set_index(one, (y * columns) + x);
 			nemotile_one_set_vertex(one, 0, -1.0f, 1.0f);
@@ -699,30 +713,30 @@ static int nemotile_prepare_tiles(struct nemotile *tile, int columns, int rows, 
 					random_get_double(tile->brightness, 1.0f));
 
 			nemotile_one_vertices_translate_to(one,
-					nemotile_get_column_x(columns, x),
-					nemotile_get_row_y(rows, y));
+					nemotile_get_column_x(columns, x) * dx,
+					nemotile_get_row_y(rows, y) * dy);
 			nemotile_one_vertices_scale_to(one,
 					nemotile_get_column_sx(columns) * (1.0f - padding),
 					nemotile_get_row_sy(rows) * (1.0f - padding));
 			nemotile_one_vertices_translate(one,
-					nemotile_get_column_x(columns, x),
-					nemotile_get_row_y(rows, y));
+					nemotile_get_column_x(columns, x) * dx,
+					nemotile_get_row_y(rows, y) * dy);
 			nemotile_one_vertices_scale(one,
 					nemotile_get_column_sx(columns) * (1.0f - padding),
 					nemotile_get_row_sy(rows) * (1.0f - padding));
 
 			nemotile_one_texcoords_translate_to(one,
-					nemotile_get_column_tx(columns, x),
-					nemotile_get_row_ty(rows, y));
+					nemotile_get_tx_from_vx(tile->columns, one->vtransform0.tx),
+					nemotile_get_ty_from_vy(tile->rows, one->vtransform0.ty));
 			nemotile_one_texcoords_scale_to(one,
-					nemotile_get_column_sx(columns),
-					nemotile_get_row_sy(rows));
+					one->vtransform0.sx,
+					one->vtransform0.sy);
 			nemotile_one_texcoords_translate(one,
-					nemotile_get_column_tx(columns, x),
-					nemotile_get_row_ty(rows, y));
+					nemotile_get_tx_from_vx(tile->columns, one->vtransform0.tx),
+					nemotile_get_ty_from_vy(tile->rows, one->vtransform0.ty));
 			nemotile_one_texcoords_scale(one,
-					nemotile_get_column_sx(columns),
-					nemotile_get_row_sy(rows));
+					one->vtransform0.sx,
+					one->vtransform0.sy);
 
 			nemolist_insert_tail(&tile->tile_list, &one->link);
 		}
@@ -751,6 +765,7 @@ int main(int argc, char *argv[])
 		{ "motionblur",			required_argument,			NULL,			'm' },
 		{ "linewidth",			required_argument,			NULL,			'l' },
 		{ "brightness",			required_argument,			NULL,			'e' },
+		{ "jitter",					required_argument,			NULL,			'j' },
 		{ "padding",				required_argument,			NULL,			'p' },
 		{ 0 }
 	};
@@ -772,6 +787,7 @@ int main(int argc, char *argv[])
 	float motionblur = 0.0f;
 	float linewidth = 0.0f;
 	float brightness = 0.85f;
+	float jitter = 0.0f;
 	float padding = 0.0f;
 	int timeout = 5000;
 	int width = 800;
@@ -783,7 +799,7 @@ int main(int argc, char *argv[])
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "w:h:c:r:i:v:t:b:o:f:m:l:e:p:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:c:r:i:v:t:b:o:f:m:l:e:j:p:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -840,6 +856,10 @@ int main(int argc, char *argv[])
 				brightness = strtod(optarg, NULL);
 				break;
 
+			case 'j':
+				jitter = strtod(optarg, NULL);
+				break;
+
 			case 'p':
 				padding = strtod(optarg, NULL);
 				break;
@@ -861,6 +881,7 @@ int main(int argc, char *argv[])
 	tile->timeout = timeout;
 	tile->linewidth = linewidth;
 	tile->brightness = brightness;
+	tile->jitter = jitter;
 
 	nemolist_init(&tile->tile_list);
 	nemolist_init(&tile->trans_list);
