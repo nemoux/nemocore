@@ -101,6 +101,7 @@ struct nemotile {
 	GLuint ucolor1;
 
 	float linewidth;
+	float brightness;
 
 	struct nemolist tile_list;
 	struct nemolist trans_list;

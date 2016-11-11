@@ -456,10 +456,10 @@ static void nemotile_dispatch_timer(struct nemotimer *timer, void *data)
 
 				nemotrans_set_float(trans, &one->vtransform.r, one->vtransform.r + M_PI);
 
-				nemotrans_set_float(trans, &one->color[0], random_get_double(0.0f, 0.0f));
-				nemotrans_set_float(trans, &one->color[1], random_get_double(0.0f, 1.0f));
-				nemotrans_set_float(trans, &one->color[2], random_get_double(0.0f, 1.0f));
-				nemotrans_set_float(trans, &one->color[3], random_get_double(0.0f, 1.0f));
+				nemotrans_set_float(trans, &one->color[0], random_get_double(tile->brightness, 1.0f));
+				nemotrans_set_float(trans, &one->color[1], random_get_double(tile->brightness, 1.0f));
+				nemotrans_set_float(trans, &one->color[2], random_get_double(tile->brightness, 1.0f));
+				nemotrans_set_float(trans, &one->color[3], random_get_double(tile->brightness, 1.0f));
 
 				nemotile_one_texcoords_translate_to(one,
 						0.5f - (one->ttransform0.tx - 0.5f) - nemotile_get_column_sx(tile->columns),
@@ -661,10 +661,10 @@ static int nemotile_prepare_tiles(struct nemotile *tile, int columns, int rows, 
 			nemotile_one_set_texture(one, tile->video);
 
 			nemotile_one_set_color(one,
-					random_get_double(0.0f, 0.0f),
-					random_get_double(0.0f, 1.0f),
-					random_get_double(0.0f, 1.0f),
-					random_get_double(0.0f, 1.0f));
+					random_get_double(tile->brightness, 1.0f),
+					random_get_double(tile->brightness, 1.0f),
+					random_get_double(tile->brightness, 1.0f),
+					random_get_double(tile->brightness, 1.0f));
 
 			nemotile_one_vertices_translate_to(one,
 					nemotile_get_column_x(columns, x),
@@ -718,6 +718,7 @@ int main(int argc, char *argv[])
 		{ "fullscreen",			required_argument,			NULL,			'f' },
 		{ "motionblur",			required_argument,			NULL,			'm' },
 		{ "linewidth",			required_argument,			NULL,			'l' },
+		{ "brightness",			required_argument,			NULL,			'e' },
 		{ "padding",				required_argument,			NULL,			'p' },
 		{ 0 }
 	};
@@ -738,6 +739,7 @@ int main(int argc, char *argv[])
 	char *overlay = NULL;
 	float motionblur = 0.0f;
 	float linewidth = 0.0f;
+	float brightness = 0.85f;
 	float padding = 0.0f;
 	int timeout = 5000;
 	int width = 800;
@@ -749,7 +751,7 @@ int main(int argc, char *argv[])
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "w:h:c:r:i:v:t:b:o:f:m:l:p:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:c:r:i:v:t:b:o:f:m:l:e:p:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -802,6 +804,10 @@ int main(int argc, char *argv[])
 				linewidth = strtod(optarg, NULL);
 				break;
 
+			case 'e':
+				brightness = strtod(optarg, NULL);
+				break;
+
 			case 'p':
 				padding = strtod(optarg, NULL);
 				break;
@@ -822,6 +828,7 @@ int main(int argc, char *argv[])
 	tile->rows = rows;
 	tile->timeout = timeout;
 	tile->linewidth = linewidth;
+	tile->brightness = brightness;
 
 	nemolist_init(&tile->tile_list);
 	nemolist_init(&tile->trans_list);
