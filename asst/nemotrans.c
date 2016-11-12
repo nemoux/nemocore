@@ -7,6 +7,71 @@
 
 #include <nemotrans.h>
 
+struct transgroup *nemotrans_group_create(void)
+{
+	struct transgroup *group;
+
+	group = (struct transgroup *)malloc(sizeof(struct transgroup));
+	if (group == NULL)
+		return NULL;
+	memset(group, 0, sizeof(struct transgroup));
+
+	nemolist_init(&group->list);
+
+	return group;
+}
+
+void nemotrans_group_destroy(struct transgroup *group)
+{
+	free(group);
+}
+
+void nemotrans_group_attach_trans(struct transgroup *group, struct nemotrans *trans)
+{
+	int is_first = nemolist_empty(&group->list) != 0;
+
+	nemolist_insert_tail(&group->list, &trans->link);
+
+	if (is_first != 0 && group->dispatch_first != NULL)
+		group->dispatch_first(group, group->data);
+}
+
+void nemotrans_group_detach_trans(struct transgroup *group, struct nemotrans *trans)
+{
+	nemolist_remove(&trans->link);
+
+	if (nemolist_empty(&group->list) != 0 && group->dispatch_last != NULL)
+		group->dispatch_last(group, group->data);
+}
+
+void nemotrans_group_set_dispatch_first(struct transgroup *group, nemotrans_group_dispatch_first_t dispatch)
+{
+	group->dispatch_first = dispatch;
+}
+
+void nemotrans_group_set_dispatch_last(struct transgroup *group, nemotrans_group_dispatch_last_t dispatch)
+{
+	group->dispatch_last = dispatch;
+}
+
+void nemotrans_group_set_userdata(struct transgroup *group, void *data)
+{
+	group->data = data;
+}
+
+void nemotrans_group_dispatch(struct transgroup *group, uint32_t msecs)
+{
+	struct nemotrans *trans, *ntrans;
+
+	nemolist_for_each_safe(trans, ntrans, &group->list, link) {
+		if (nemotrans_dispatch(trans, msecs) != 0)
+			nemotrans_destroy(trans);
+	}
+
+	if (nemolist_empty(&group->list) != 0 && group->dispatch_last != NULL)
+		group->dispatch_last(group, group->data);
+}
+
 struct nemotrans *nemotrans_create(int type, uint32_t duration, uint32_t delay)
 {
 	struct nemotrans *trans;
@@ -55,25 +120,25 @@ void nemotrans_ease_set_bezier(struct nemotrans *trans, double x0, double y0, do
 	nemoease_set_cubic(&trans->ease, x0, y0, x1, y1);
 }
 
-int nemotrans_dispatch(struct nemotrans *trans, uint32_t time)
+int nemotrans_dispatch(struct nemotrans *trans, uint32_t msecs)
 {
 	struct transone *one;
 	double t;
 	int done = 0;
 
 	if (trans->stime == 0) {
-		trans->stime = time + trans->delay;
-		trans->etime = time + trans->delay + trans->duration;
+		trans->stime = msecs + trans->delay;
+		trans->etime = msecs + trans->delay + trans->duration;
 	}
 
-	if (trans->stime > time)
+	if (trans->stime > msecs)
 		return 0;
 
-	if (trans->etime <= time) {
+	if (trans->etime <= msecs) {
 		t = 1.0f;
 		done = 1;
 	} else {
-		t = nemoease_get(&trans->ease, time - trans->stime, trans->duration);
+		t = nemoease_get(&trans->ease, msecs - trans->stime, trans->duration);
 	}
 
 	nemolist_for_each(one, &trans->list, link) {

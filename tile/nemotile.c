@@ -276,13 +276,9 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 	struct tileone *one;
 	struct nemotrans *trans, *ntrans;
 	struct nemomatrix vtransform, ttransform;
-	uint32_t msecs = time_current_msecs();
 	float linecolor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
-	nemolist_for_each_safe(trans, ntrans, &tile->trans_list, link) {
-		if (nemotrans_dispatch(trans, msecs) != 0)
-			nemotrans_destroy(trans);
-	}
+	nemotrans_group_dispatch(tile->trans_group, time_current_msecs());
 
 	glBindFramebuffer(GL_FRAMEBUFFER, tile->fbo);
 
@@ -362,7 +358,7 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 			nemotrans_set_float(trans, &one->ttransform.sx, 1.0f);
 			nemotrans_set_float(trans, &one->ttransform.sy, 1.0f);
 
-			nemolist_insert_tail(&tile->trans_list, &trans->link);
+			nemotrans_group_attach_trans(tile->trans_group, trans);
 		}
 
 		tile->state = 1;
@@ -377,7 +373,7 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 			nemotrans_set_float(trans, &one->ttransform.sx, one->vtransform.sx);
 			nemotrans_set_float(trans, &one->ttransform.sy, one->vtransform.sy);
 
-			nemolist_insert_tail(&tile->trans_list, &trans->link);
+			nemotrans_group_attach_trans(tile->trans_group, trans);
 		}
 
 		tile->state = 0;
@@ -394,7 +390,7 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 			nemotrans_set_float(trans, &one->color[2], 0.08f);
 			nemotrans_set_float(trans, &one->color[3], 0.08f);
 
-			nemolist_insert_tail(&tile->trans_list, &trans->link);
+			nemotrans_group_attach_trans(tile->trans_group, trans);
 		}
 
 		tile->state = 1;
@@ -409,7 +405,7 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 			nemotrans_set_float(trans, &one->color[2], random_get_double(tile->brightness, 1.0f));
 			nemotrans_set_float(trans, &one->color[3], random_get_double(tile->brightness, 1.0f));
 
-			nemolist_insert_tail(&tile->trans_list, &trans->link);
+			nemotrans_group_attach_trans(tile->trans_group, trans);
 		}
 
 		tile->state = 0;
@@ -437,7 +433,7 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 				nemotrans_set_float(trans, &one->vtransform.tx, pone->vtransform.tx);
 				nemotrans_set_float(trans, &one->vtransform.ty, pone->vtransform.ty);
 
-				nemolist_insert_tail(&tile->trans_list, &trans->link);
+				nemotrans_group_attach_trans(tile->trans_group, trans);
 			}
 
 			tile->state = 1;
@@ -460,7 +456,7 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 			nemotrans_set_float(trans, &one->ttransform.sx, one->vtransform.sx);
 			nemotrans_set_float(trans, &one->ttransform.sy, one->vtransform.sy);
 
-			nemolist_insert_tail(&tile->trans_list, &trans->link);
+			nemotrans_group_attach_trans(tile->trans_group, trans);
 		}
 
 		tile->state = 0;
@@ -529,7 +525,7 @@ static void nemotile_dispatch_timer(struct nemotimer *timer, void *data)
 				nemotrans_set_float(trans, &one->ttransform.ty,
 						0.5f - (one->ttransform.ty - 0.5f) - one->vtransform.sy);
 
-				nemolist_insert_tail(&tile->trans_list, &trans->link);
+				nemotrans_group_attach_trans(tile->trans_group, trans);
 			}
 		} else if (tile->iactions == 1) {
 			struct tileone *none;
@@ -572,7 +568,7 @@ static void nemotile_dispatch_timer(struct nemotimer *timer, void *data)
 				nemotrans_set_float(trans, &one->vtransform.sx, one->vtransform0.sx * dsx);
 				nemotrans_set_float(trans, &one->vtransform.sy, one->vtransform0.sy * dsy);
 
-				nemolist_insert_tail(&tile->trans_list, &trans->link);
+				nemotrans_group_attach_trans(tile->trans_group, trans);
 
 				trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
 						random_get_int(400, 800),
@@ -583,7 +579,7 @@ static void nemotile_dispatch_timer(struct nemotimer *timer, void *data)
 				nemotrans_set_float(trans, &one->ttransform.sx, one->vtransform0.sx * dsx);
 				nemotrans_set_float(trans, &one->ttransform.sy, one->vtransform0.sy * dsy);
 
-				nemolist_insert_tail(&tile->trans_list, &trans->link);
+				nemotrans_group_attach_trans(tile->trans_group, trans);
 			}
 		}
 
@@ -636,13 +632,30 @@ static GLuint nemotile_dispatch_tale_effect(struct talenode *node, void *data)
 	struct nemotile *tile = (struct nemotile *)data;
 	GLuint texture = nemotale_node_get_texture(node);
 
-	if (tile->motion != NULL) {
+	if (tile->motion != NULL && tile->has_transitions != 0) {
 		nemofx_glmotion_dispatch(tile->motion, texture);
 
 		texture = nemofx_glmotion_get_texture(tile->motion);
 	}
 
 	return texture;
+}
+
+static void nemotile_dispatch_first_trans(struct transgroup *group, void *data)
+{
+	struct nemotile *tile = (struct nemotile *)data;
+
+	tile->has_transitions = 1;
+}
+
+static void nemotile_dispatch_last_trans(struct transgroup *group, void *data)
+{
+	struct nemotile *tile = (struct nemotile *)data;
+
+	tile->has_transitions = 0;
+
+	if (tile->motion != NULL)
+		nemofx_glmotion_clear(tile->motion);
 }
 
 static int nemotile_prepare_opengl(struct nemotile *tile, int32_t width, int32_t height)
@@ -908,7 +921,11 @@ int main(int argc, char *argv[])
 	tile->jitter = jitter;
 
 	nemolist_init(&tile->tile_list);
-	nemolist_init(&tile->trans_list);
+
+	tile->trans_group = nemotrans_group_create();
+	nemotrans_group_set_dispatch_first(tile->trans_group, nemotile_dispatch_first_trans);
+	nemotrans_group_set_dispatch_last(tile->trans_group, nemotile_dispatch_last_trans);
+	nemotrans_group_set_userdata(tile->trans_group, tile);
 
 	tile->tool = tool = nemotool_create();
 	if (tool == NULL)
@@ -1159,6 +1176,8 @@ err3:
 	nemotool_destroy(tool);
 
 err2:
+	nemotrans_group_destroy(tile->trans_group);
+
 	free(tile);
 
 err1:

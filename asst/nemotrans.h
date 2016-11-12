@@ -13,6 +13,11 @@ NEMO_BEGIN_EXTERN_C
 #include <nemoattr.h>
 #include <nemolist.h>
 
+struct transgroup;
+
+typedef void (*nemotrans_group_dispatch_first_t)(struct transgroup *group, void *data);
+typedef void (*nemotrans_group_dispatch_last_t)(struct transgroup *group, void *data);
+
 struct transone {
 	struct nemolist link;
 
@@ -37,13 +42,34 @@ struct nemotrans {
 	uint32_t etime;
 };
 
+struct transgroup {
+	struct nemolist list;
+
+	nemotrans_group_dispatch_first_t dispatch_first;
+	nemotrans_group_dispatch_last_t dispatch_last;
+
+	void *data;
+};
+
+extern struct transgroup *nemotrans_group_create(void);
+extern void nemotrans_group_destroy(struct transgroup *group);
+
+extern void nemotrans_group_attach_trans(struct transgroup *group, struct nemotrans *trans);
+extern void nemotrans_group_detach_trans(struct transgroup *group, struct nemotrans *trans);
+
+extern void nemotrans_group_set_dispatch_first(struct transgroup *group, nemotrans_group_dispatch_first_t dispatch);
+extern void nemotrans_group_set_dispatch_last(struct transgroup *group, nemotrans_group_dispatch_last_t dispatch);
+extern void nemotrans_group_set_userdata(struct transgroup *group, void *data);
+
+extern void nemotrans_group_dispatch(struct transgroup *group, uint32_t msecs);
+
 extern struct nemotrans *nemotrans_create(int type, uint32_t duration, uint32_t delay);
 extern void nemotrans_destroy(struct nemotrans *trans);
 
 extern void nemotrans_ease_set_type(struct nemotrans *trans, int type);
 extern void nemotrans_ease_set_bezier(struct nemotrans *trans, double x0, double y0, double x1, double y1);
 
-extern int nemotrans_dispatch(struct nemotrans *trans, uint32_t time);
+extern int nemotrans_dispatch(struct nemotrans *trans, uint32_t msecs);
 
 extern void nemotrans_set_float(struct nemotrans *trans, float *var, float value);
 extern void nemotrans_set_double(struct nemotrans *trans, double *var, double value);

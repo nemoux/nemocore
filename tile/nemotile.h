@@ -105,8 +105,10 @@ struct nemotile {
 	float brightness;
 	float jitter;
 
+	struct transgroup *trans_group;
+	int has_transitions;
+
 	struct nemolist tile_list;
-	struct nemolist trans_list;
 };
 
 #endif
