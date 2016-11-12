@@ -360,8 +360,6 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 			nemotrans_group_attach_trans(tile->trans_group, trans);
 		}
-
-		tile->state = 1;
 	} else if (nemoshow_event_is_pointer_left_up(show, event)) {
 		nemolist_for_each(one, &tile->tile_list, link) {
 			trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
@@ -375,8 +373,6 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 			nemotrans_group_attach_trans(tile->trans_group, trans);
 		}
-
-		tile->state = 0;
 	}
 
 	if (nemoshow_event_is_pointer_right_down(show, event)) {
@@ -392,8 +388,6 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 			nemotrans_group_attach_trans(tile->trans_group, trans);
 		}
-
-		tile->state = 1;
 	} else if (nemoshow_event_is_pointer_right_up(show, event)) {
 		nemolist_for_each(one, &tile->tile_list, link) {
 			trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
@@ -407,8 +401,6 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 			nemotrans_group_attach_trans(tile->trans_group, trans);
 		}
-
-		tile->state = 0;
 	}
 
 	if (nemoshow_event_is_touch_down(show, event)) {
@@ -435,8 +427,6 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 				nemotrans_group_attach_trans(tile->trans_group, trans);
 			}
-
-			tile->state = 1;
 		}
 	} else if (nemoshow_event_is_touch_up(show, event)) {
 		float dx, dy;
@@ -458,8 +448,6 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 			nemotrans_group_attach_trans(tile->trans_group, trans);
 		}
-
-		tile->state = 0;
 	}
 
 	if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event)) {
@@ -500,91 +488,88 @@ static void nemotile_dispatch_show_resize(struct nemoshow *show, int32_t width, 
 static void nemotile_dispatch_timer(struct nemotimer *timer, void *data)
 {
 	struct nemotile *tile = (struct nemotile *)data;
+	struct nemotrans *trans;
+	struct tileone *one;
 
-	if (tile->state == 0) {
-		struct nemotrans *trans;
-		struct tileone *one;
+	if (tile->iactions == 0) {
+		tile->flip = !tile->flip;
 
-		if (tile->iactions == 0) {
-			tile->flip = !tile->flip;
+		nemolist_for_each(one, &tile->tile_list, link) {
+			trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
+					random_get_int(700, 1400),
+					random_get_int(100, 500));
 
-			nemolist_for_each(one, &tile->tile_list, link) {
-				trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
-						random_get_int(700, 1400),
-						random_get_int(100, 500));
+			nemotrans_set_float(trans, &one->vtransform.r, tile->flip == 0 ? 0.0f : M_PI);
 
-				nemotrans_set_float(trans, &one->vtransform.r, tile->flip == 0 ? 0.0f : M_PI);
+			nemotrans_set_float(trans, &one->color[0], random_get_double(tile->brightness, 1.0f));
+			nemotrans_set_float(trans, &one->color[1], random_get_double(tile->brightness, 1.0f));
+			nemotrans_set_float(trans, &one->color[2], random_get_double(tile->brightness, 1.0f));
+			nemotrans_set_float(trans, &one->color[3], random_get_double(tile->brightness, 1.0f));
 
-				nemotrans_set_float(trans, &one->color[0], random_get_double(tile->brightness, 1.0f));
-				nemotrans_set_float(trans, &one->color[1], random_get_double(tile->brightness, 1.0f));
-				nemotrans_set_float(trans, &one->color[2], random_get_double(tile->brightness, 1.0f));
-				nemotrans_set_float(trans, &one->color[3], random_get_double(tile->brightness, 1.0f));
+			nemotrans_set_float(trans, &one->ttransform.tx,
+					0.5f - (one->ttransform.tx - 0.5f) - one->vtransform.sx);
+			nemotrans_set_float(trans, &one->ttransform.ty,
+					0.5f - (one->ttransform.ty - 0.5f) - one->vtransform.sy);
 
-				nemotrans_set_float(trans, &one->ttransform.tx,
-						0.5f - (one->ttransform.tx - 0.5f) - one->vtransform.sx);
-				nemotrans_set_float(trans, &one->ttransform.ty,
-						0.5f - (one->ttransform.ty - 0.5f) - one->vtransform.sy);
+			nemotrans_group_attach_trans(tile->trans_group, trans);
+		}
+	} else if (tile->iactions == 1) {
+		struct tileone *none;
+		float tx, ty;
+		float dtx, dty;
+		float dsx, dsy;
+		int index;
 
-				nemotrans_group_attach_trans(tile->trans_group, trans);
-			}
-		} else if (tile->iactions == 1) {
-			struct tileone *none;
-			float tx, ty;
-			float dtx, dty;
-			float dsx, dsy;
-			int index;
+		nemolist_for_each(one, &tile->tile_list, link) {
+			index = random_get_int(0, tile->columns * tile->rows - 1);
 
-			nemolist_for_each(one, &tile->tile_list, link) {
-				index = random_get_int(0, tile->columns * tile->rows - 1);
+			none = nemotile_find_one(tile, index);
+			if (none != one) {
+				tx = one->vtransform0.tx;
+				ty = one->vtransform0.ty;
+				one->vtransform0.tx = none->vtransform0.tx;
+				one->vtransform0.ty = none->vtransform0.ty;
+				none->vtransform0.tx = tx;
+				none->vtransform0.ty = ty;
 
-				none = nemotile_find_one(tile, index);
-				if (none != one) {
-					tx = one->vtransform0.tx;
-					ty = one->vtransform0.ty;
-					one->vtransform0.tx = none->vtransform0.tx;
-					one->vtransform0.ty = none->vtransform0.ty;
-					none->vtransform0.tx = tx;
-					none->vtransform0.ty = ty;
-
-					one->ttransform0.tx = nemotile_get_tx_from_vx(tile->columns, tile->flip, one->vtransform0.sx, one->vtransform0.tx);
-					one->ttransform0.ty = nemotile_get_ty_from_vy(tile->rows, tile->flip, one->vtransform0.sy, one->vtransform0.ty);
-					none->ttransform0.tx = nemotile_get_tx_from_vx(tile->columns, tile->flip, none->vtransform0.sx, none->vtransform0.tx);
-					none->ttransform0.ty = nemotile_get_ty_from_vy(tile->rows, tile->flip, none->vtransform0.sy, none->vtransform0.ty);
-				}
-			}
-
-			nemolist_for_each(one, &tile->tile_list, link) {
-				dtx = random_get_double(1.0f - tile->jitter, 1.0f + tile->jitter);
-				dty = random_get_double(1.0f - tile->jitter, 1.0f + tile->jitter);
-				dsx = random_get_double(1.0f - tile->jitter, 1.0f + tile->jitter);
-				dsy = random_get_double(1.0f - tile->jitter, 1.0f + tile->jitter);
-
-				trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
-						random_get_int(1200, 1800),
-						random_get_int(200, 400));
-
-				nemotrans_set_float(trans, &one->vtransform.tx, one->vtransform0.tx * dtx);
-				nemotrans_set_float(trans, &one->vtransform.ty, one->vtransform0.ty * dty);
-				nemotrans_set_float(trans, &one->vtransform.sx, one->vtransform0.sx * dsx);
-				nemotrans_set_float(trans, &one->vtransform.sy, one->vtransform0.sy * dsy);
-
-				nemotrans_group_attach_trans(tile->trans_group, trans);
-
-				trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
-						random_get_int(400, 800),
-						random_get_int(2400, 2800));
-
-				nemotrans_set_float(trans, &one->ttransform.tx, nemotile_get_tx_from_vx(tile->columns, tile->flip, one->vtransform0.sx * dsx, one->vtransform0.tx * dtx));
-				nemotrans_set_float(trans, &one->ttransform.ty, nemotile_get_ty_from_vy(tile->rows, tile->flip, one->vtransform0.sy * dsy, one->vtransform0.ty * dty));
-				nemotrans_set_float(trans, &one->ttransform.sx, one->vtransform0.sx * dsx);
-				nemotrans_set_float(trans, &one->ttransform.sy, one->vtransform0.sy * dsy);
-
-				nemotrans_group_attach_trans(tile->trans_group, trans);
+				one->ttransform0.tx = nemotile_get_tx_from_vx(tile->columns, tile->flip, one->vtransform0.sx, one->vtransform0.tx);
+				one->ttransform0.ty = nemotile_get_ty_from_vy(tile->rows, tile->flip, one->vtransform0.sy, one->vtransform0.ty);
+				none->ttransform0.tx = nemotile_get_tx_from_vx(tile->columns, tile->flip, none->vtransform0.sx, none->vtransform0.tx);
+				none->ttransform0.ty = nemotile_get_ty_from_vy(tile->rows, tile->flip, none->vtransform0.sy, none->vtransform0.ty);
 			}
 		}
 
-		tile->iactions = (tile->iactions + 1) % 2;
+		nemolist_for_each(one, &tile->tile_list, link) {
+			dtx = random_get_double(1.0f - tile->jitter, 1.0f + tile->jitter);
+			dty = random_get_double(1.0f - tile->jitter, 1.0f + tile->jitter);
+			dsx = random_get_double(1.0f - tile->jitter, 1.0f + tile->jitter);
+			dsy = random_get_double(1.0f - tile->jitter, 1.0f + tile->jitter);
+
+			trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
+					random_get_int(1200, 1800),
+					random_get_int(200, 400));
+
+			nemotrans_set_float(trans, &one->vtransform.tx, one->vtransform0.tx * dtx);
+			nemotrans_set_float(trans, &one->vtransform.ty, one->vtransform0.ty * dty);
+			nemotrans_set_float(trans, &one->vtransform.sx, one->vtransform0.sx * dsx);
+			nemotrans_set_float(trans, &one->vtransform.sy, one->vtransform0.sy * dsy);
+
+			nemotrans_group_attach_trans(tile->trans_group, trans);
+
+			trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
+					random_get_int(400, 800),
+					random_get_int(2400, 2800));
+
+			nemotrans_set_float(trans, &one->ttransform.tx, nemotile_get_tx_from_vx(tile->columns, tile->flip, one->vtransform0.sx * dsx, one->vtransform0.tx * dtx));
+			nemotrans_set_float(trans, &one->ttransform.ty, nemotile_get_ty_from_vy(tile->rows, tile->flip, one->vtransform0.sy * dsy, one->vtransform0.ty * dty));
+			nemotrans_set_float(trans, &one->ttransform.sx, one->vtransform0.sx * dsx);
+			nemotrans_set_float(trans, &one->ttransform.sy, one->vtransform0.sy * dsy);
+
+			nemotrans_group_attach_trans(tile->trans_group, trans);
+		}
 	}
+
+	tile->iactions = (tile->iactions + 1) % 2;
 
 	nemotimer_set_timeout(tile->timer, tile->timeout);
 }

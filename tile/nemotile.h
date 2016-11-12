@@ -69,7 +69,6 @@ struct nemotile {
 
 	struct glmotion *motion;
 
-	int state;
 	int flip;
 
 	int iactions;

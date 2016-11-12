@@ -28,7 +28,23 @@ void nemotrans_group_destroy(struct transgroup *group)
 
 void nemotrans_group_attach_trans(struct transgroup *group, struct nemotrans *trans)
 {
+	struct nemotrans *strans;
+	struct transone *one, *sone, *none;
 	int is_first = nemolist_empty(&group->list) != 0;
+
+	nemolist_for_each(one, &trans->list, link) {
+		nemolist_for_each(strans, &group->list, link) {
+			nemolist_for_each_safe(sone, none, &strans->list, link) {
+				if (nemoattr_getp(&one->attr) == nemoattr_getp(&sone->attr)) {
+					nemolist_remove(&sone->link);
+
+					free(sone);
+
+					break;
+				}
+			}
+		}
+	}
 
 	nemolist_insert_tail(&group->list, &trans->link);
 
