@@ -106,7 +106,6 @@ struct nemotile {
 	float jitter;
 
 	struct transgroup *trans_group;
-	int has_transitions;
 
 	struct nemolist tile_list;
 };

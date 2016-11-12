@@ -74,6 +74,11 @@ extern int nemotrans_dispatch(struct nemotrans *trans, uint32_t msecs);
 extern void nemotrans_set_float(struct nemotrans *trans, float *var, float value);
 extern void nemotrans_set_double(struct nemotrans *trans, double *var, double value);
 
+static inline int nemotrans_group_has_transition(struct transgroup *group)
+{
+	return nemolist_empty(&group->list) == 0;
+}
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

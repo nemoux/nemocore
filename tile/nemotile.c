@@ -632,7 +632,7 @@ static GLuint nemotile_dispatch_tale_effect(struct talenode *node, void *data)
 	struct nemotile *tile = (struct nemotile *)data;
 	GLuint texture = nemotale_node_get_texture(node);
 
-	if (tile->motion != NULL && tile->has_transitions != 0) {
+	if (tile->motion != NULL && nemotrans_group_has_transition(tile->trans_group) != 0) {
 		nemofx_glmotion_dispatch(tile->motion, texture);
 
 		texture = nemofx_glmotion_get_texture(tile->motion);
@@ -644,15 +644,11 @@ static GLuint nemotile_dispatch_tale_effect(struct talenode *node, void *data)
 static void nemotile_dispatch_first_trans(struct transgroup *group, void *data)
 {
 	struct nemotile *tile = (struct nemotile *)data;
-
-	tile->has_transitions = 1;
 }
 
 static void nemotile_dispatch_last_trans(struct transgroup *group, void *data)
 {
 	struct nemotile *tile = (struct nemotile *)data;
-
-	tile->has_transitions = 0;
 
 	if (tile->motion != NULL)
 		nemofx_glmotion_clear(tile->motion);
