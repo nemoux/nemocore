@@ -16,6 +16,7 @@
 #include <nemotrans.h>
 #include <nemolist.h>
 #include <playback.h>
+#include <glfilter.h>
 #include <glmotion.h>
 
 struct tileone {
@@ -67,6 +68,7 @@ struct nemotile {
 
 	struct showone *canvas;
 
+	struct glfilter *filter;
 	struct glmotion *motion;
 
 	int flip;

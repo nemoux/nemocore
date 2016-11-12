@@ -617,6 +617,12 @@ static GLuint nemotile_dispatch_tale_effect(struct talenode *node, void *data)
 	struct nemotile *tile = (struct nemotile *)data;
 	GLuint texture = nemotale_node_get_texture(node);
 
+	if (tile->filter != NULL) {
+		nemofx_glfilter_dispatch(tile->filter, texture);
+
+		texture = nemofx_glfilter_get_texture(tile->filter);
+	}
+
 	if (tile->motion != NULL && nemotrans_group_has_transition(tile->trans_group) != 0) {
 		nemofx_glmotion_dispatch(tile->motion, texture);
 
@@ -784,7 +790,8 @@ int main(int argc, char *argv[])
 		{ "linewidth",			required_argument,			NULL,			'l' },
 		{ "brightness",			required_argument,			NULL,			'e' },
 		{ "jitter",					required_argument,			NULL,			'j' },
-		{ "padding",				required_argument,			NULL,			'p' },
+		{ "padding",				required_argument,			NULL,			'd' },
+		{ "program",				required_argument,			NULL,			'p' },
 		{ 0 }
 	};
 
@@ -799,6 +806,7 @@ int main(int argc, char *argv[])
 	struct talenode *node;
 	char *imagepath = NULL;
 	char *videopath = NULL;
+	char *programpath = NULL;
 	char *fullscreen = NULL;
 	char *background = NULL;
 	char *overlay = NULL;
@@ -817,7 +825,7 @@ int main(int argc, char *argv[])
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "w:h:c:r:i:v:t:b:o:f:m:l:e:j:p:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:c:r:i:v:t:b:o:f:m:l:e:j:d:p:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -878,8 +886,12 @@ int main(int argc, char *argv[])
 				jitter = strtod(optarg, NULL);
 				break;
 
-			case 'p':
+			case 'd':
 				padding = strtod(optarg, NULL);
+				break;
+
+			case 'p':
+				programpath = strdup(optarg);
 				break;
 
 			default:
@@ -964,6 +976,10 @@ int main(int argc, char *argv[])
 
 	node = nemoshow_canvas_get_node(canvas);
 	nemotale_node_set_dispatch_effect(node, nemotile_dispatch_tale_effect, tile);
+
+	if (programpath != NULL) {
+		tile->filter = nemofx_glfilter_create(width, height, programpath);
+	}
 
 	if (motionblur > 0.0f) {
 		tile->motion = nemofx_glmotion_create(width, height);
