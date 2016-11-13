@@ -358,6 +358,7 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 	struct nemotile *tile = (struct nemotile *)nemoshow_get_userdata(show);
 	struct tileone *one;
 	struct nemotrans *trans;
+	float dx, dy;
 
 	if (tile->is_single != 0) {
 		if (nemoshow_event_is_pointer_left_down(show, event)) {
@@ -438,8 +439,6 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 				}
 			}
 		} else if (nemoshow_event_is_touch_up(show, event)) {
-			float dx, dy;
-
 			nemolist_for_each(one, &tile->tile_list, link) {
 				dx = random_get_double(1.0f - tile->jitter, 1.0f + tile->jitter);
 				dy = random_get_double(1.0f - tile->jitter, 1.0f + tile->jitter);
@@ -536,6 +535,8 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 						nemotrans_set_float(trans, &one->vtransform.ty, 0.0f);
 
 						nemotrans_set_float(trans, &one->vtransform.rx, 0.0f);
+						nemotrans_set_float(trans, &one->vtransform.ry, 0.0f);
+						nemotrans_set_float(trans, &one->vtransform.rz, 0.0f);
 
 						nemotrans_set_float(trans, &one->vtransform.sx, one->vtransform0.sx * 3.6f);
 						nemotrans_set_float(trans, &one->vtransform.sy, one->vtransform0.sy * 3.6f);
@@ -553,13 +554,18 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 								random_get_int(800, 1600),
 								random_get_int(200, 400));
 
-						nemotrans_set_float(trans, &one->vtransform.tx, cos(one->index * M_PI * 2.0f / tile->nsprites) * 0.75f);
-						nemotrans_set_float(trans, &one->vtransform.ty, sin(one->index * M_PI * 2.0f / tile->nsprites) * 0.75f);
+						dx = cos(one->index * M_PI * 2.0f / tile->nsprites) * 0.75f;
+						dy = sin(one->index * M_PI * 2.0f / tile->nsprites) * 0.75f;
+
+						nemotrans_set_float(trans, &one->vtransform.tx, dx);
+						nemotrans_set_float(trans, &one->vtransform.ty, dy);
 
 						nemotrans_set_float(trans, &one->vtransform.rx, M_PI);
+						nemotrans_set_float(trans, &one->vtransform.ry, 0.0f);
+						nemotrans_set_float(trans, &one->vtransform.rz, -atan2(dx, dy));
 
-						nemotrans_set_float(trans, &one->vtransform.sx, one->vtransform0.sx * 1.0f);
-						nemotrans_set_float(trans, &one->vtransform.sy, one->vtransform0.sy * 1.0f);
+						nemotrans_set_float(trans, &one->vtransform.sx, one->vtransform0.sx * 0.75f);
+						nemotrans_set_float(trans, &one->vtransform.sy, one->vtransform0.sy * 0.75f);
 
 						nemotrans_set_float(trans, &one->color[0], 0.12f);
 						nemotrans_set_float(trans, &one->color[1], 0.12f);
@@ -653,6 +659,8 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 							nemotrans_set_float(trans, &one->vtransform.ty, 0.0f);
 
 							nemotrans_set_float(trans, &one->vtransform.rx, 0.0f);
+							nemotrans_set_float(trans, &one->vtransform.ry, 0.0f);
+							nemotrans_set_float(trans, &one->vtransform.rz, 0.0f);
 
 							nemotrans_set_float(trans, &one->vtransform.sx, one->vtransform0.sx * 3.6f);
 							nemotrans_set_float(trans, &one->vtransform.sy, one->vtransform0.sy * 3.6f);
@@ -670,13 +678,18 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 									random_get_int(400, 800),
 									0);
 
-							nemotrans_set_float(trans, &one->vtransform.tx, cos(one->index * M_PI * 2.0f / tile->nsprites) * 0.75f);
-							nemotrans_set_float(trans, &one->vtransform.ty, sin(one->index * M_PI * 2.0f / tile->nsprites) * 0.75f);
+							dx = cos(one->index * M_PI * 2.0f / tile->nsprites) * 0.75f;
+							dy = sin(one->index * M_PI * 2.0f / tile->nsprites) * 0.75f;
+
+							nemotrans_set_float(trans, &one->vtransform.tx, dx);
+							nemotrans_set_float(trans, &one->vtransform.ty, dy);
 
 							nemotrans_set_float(trans, &one->vtransform.rx, M_PI);
+							nemotrans_set_float(trans, &one->vtransform.ry, 0.0f);
+							nemotrans_set_float(trans, &one->vtransform.rz, -atan2(dx, dy));
 
-							nemotrans_set_float(trans, &one->vtransform.sx, one->vtransform0.sx * 1.0f);
-							nemotrans_set_float(trans, &one->vtransform.sy, one->vtransform0.sy * 1.0f);
+							nemotrans_set_float(trans, &one->vtransform.sx, one->vtransform0.sx * 0.75f);
+							nemotrans_set_float(trans, &one->vtransform.sy, one->vtransform0.sy * 0.75f);
 
 							nemotrans_set_float(trans, &one->color[0], 0.12f);
 							nemotrans_set_float(trans, &one->color[1], 0.12f);
