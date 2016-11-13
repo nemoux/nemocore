@@ -72,11 +72,11 @@ struct nemotile {
 	struct glmotion *motion;
 
 	int flip;
+	int slideshow;
 
 	int iactions;
 
 	int is_single;
-	int is_slideshow;
 
 	struct showone *sprites[128];
 	int nsprites, isprites;
@@ -114,8 +114,6 @@ struct nemotile {
 
 	struct nemolist tile_list;
 	struct tileone *pone;
-
-	uint32_t etime;
 };
 
 #endif
