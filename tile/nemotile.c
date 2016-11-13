@@ -285,10 +285,19 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 	struct nemotile *tile = (struct nemotile *)nemoshow_get_userdata(show);
 	struct tileone *one;
 	struct nemotrans *trans, *ntrans;
-	struct nemomatrix vtransform, ttransform;
+	struct nemomatrix projection;
+	struct nemomatrix vtransform;
+	struct nemomatrix ttransform;
 	float linecolor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 	nemotrans_group_dispatch(tile->trans_group, time_current_msecs());
+
+	nemomatrix_init_identity(&projection);
+	nemomatrix_rotate_x(&projection, cos(tile->projection.rx), sin(tile->projection.rx));
+	nemomatrix_rotate_y(&projection, cos(tile->projection.ry), sin(tile->projection.ry));
+	nemomatrix_rotate_z(&projection, cos(tile->projection.rz), sin(tile->projection.rz));
+	nemomatrix_scale(&projection, tile->projection.sx, tile->projection.sy);
+	nemomatrix_translate(&projection, tile->projection.tx, tile->projection.ty);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, tile->fbo);
 
@@ -318,6 +327,7 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 		glBindAttribLocation(tile->programs[0], 1, "texcoord");
 
 		glUniform1i(tile->utexture0, 0);
+		glUniformMatrix4fv(tile->uprojection0, 1, GL_FALSE, projection.d);
 		glUniformMatrix4fv(tile->uvtransform0, 1, GL_FALSE, vtransform.d);
 		glUniformMatrix4fv(tile->uttransform0, 1, GL_FALSE, ttransform.d);
 		glUniform4fv(tile->ucolor0, 1, one->color);
@@ -337,6 +347,7 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 			glUseProgram(tile->programs[1]);
 			glBindAttribLocation(tile->programs[1], 0, "position");
 
+			glUniformMatrix4fv(tile->uprojection1, 1, GL_FALSE, projection.d);
 			glUniformMatrix4fv(tile->uvtransform1, 1, GL_FALSE, vtransform.d);
 			glUniform4fv(tile->ucolor1, 1, linecolor);
 
@@ -463,7 +474,9 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 							random_get_int(800, 1600),
 							random_get_int(200, 400));
 
+					nemotrans_set_float(trans, &one->vtransform.rx, 0.0f);
 					nemotrans_set_float(trans, &one->vtransform.ry, 0.0f);
+					nemotrans_set_float(trans, &one->vtransform.rz, 0.0f);
 
 					nemotrans_set_float(trans, &one->vtransform.tx, one->vtransform0.tx);
 					nemotrans_set_float(trans, &one->vtransform.ty, one->vtransform0.ty);
@@ -1022,6 +1035,7 @@ static void nemotile_dispatch_last_trans(struct transgroup *group, void *data)
 static int nemotile_prepare_opengl(struct nemotile *tile, int32_t width, int32_t height)
 {
 	static const char *vertexshader =
+		"uniform mat4 projection;\n"
 		"uniform mat4 vtransform;\n"
 		"uniform mat4 ttransform;\n"
 		"attribute vec2 position;\n"
@@ -1029,7 +1043,7 @@ static int nemotile_prepare_opengl(struct nemotile *tile, int32_t width, int32_t
 		"varying vec4 vtexcoord;\n"
 		"void main()\n"
 		"{\n"
-		"  gl_Position = vtransform * vec4(position.xy, 0.0, 1.0);\n"
+		"  gl_Position = projection * vtransform * vec4(position.xy, 0.0, 1.0);\n"
 		"  vtexcoord = ttransform * vec4(texcoord.xy, 0.0, 1.0);\n"
 		"}\n";
 	static const char *fragmentshader =
@@ -1042,11 +1056,12 @@ static int nemotile_prepare_opengl(struct nemotile *tile, int32_t width, int32_t
 		"  gl_FragColor = texture2D(texture, vtexcoord.xy) * color;\n"
 		"}\n";
 	static const char *vertexshader_solid =
+		"uniform mat4 projection;\n"
 		"uniform mat4 vtransform;\n"
 		"attribute vec2 position;\n"
 		"void main()\n"
 		"{\n"
-		"  gl_Position = vtransform * vec4(position.xy, 0.0, 1.0);\n"
+		"  gl_Position = projection * vtransform * vec4(position.xy, 0.0, 1.0);\n"
 		"}\n";
 	static const char *fragmentshader_solid =
 		"precision mediump float;\n"
@@ -1064,11 +1079,13 @@ static int nemotile_prepare_opengl(struct nemotile *tile, int32_t width, int32_t
 	tile->programs[0] = glshader_compile_program(vertexshader, fragmentshader, NULL, NULL);
 	tile->programs[1] = glshader_compile_program(vertexshader_solid, fragmentshader_solid, NULL, NULL);
 
+	tile->uprojection0 = glGetUniformLocation(tile->programs[0], "projection");
 	tile->uvtransform0 = glGetUniformLocation(tile->programs[0], "vtransform");
 	tile->uttransform0 = glGetUniformLocation(tile->programs[0], "ttransform");
 	tile->utexture0 = glGetUniformLocation(tile->programs[0], "texture");
 	tile->ucolor0 = glGetUniformLocation(tile->programs[0], "color");
 
+	tile->uprojection1 = glGetUniformLocation(tile->programs[1], "projection");
 	tile->uvtransform1 = glGetUniformLocation(tile->programs[1], "vtransform");
 	tile->ucolor1 = glGetUniformLocation(tile->programs[1], "color");
 
@@ -1333,6 +1350,14 @@ int main(int argc, char *argv[])
 	tile->linewidth = linewidth;
 	tile->brightness = brightness;
 	tile->jitter = jitter;
+
+	tile->projection.tx = 0.0f;
+	tile->projection.ty = 0.0f;
+	tile->projection.rx = 0.0f;
+	tile->projection.ry = 0.0f;
+	tile->projection.rz = 0.0f;
+	tile->projection.sx = 1.0f;
+	tile->projection.sy = 1.0f;
 
 	nemolist_init(&tile->tile_list);
 

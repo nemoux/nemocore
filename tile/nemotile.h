@@ -99,12 +99,20 @@ struct nemotile {
 
 	GLuint fbo, dbo;
 	GLuint programs[2];
+	GLuint uprojection0;
 	GLuint uvtransform0;
 	GLuint uttransform0;
 	GLuint utexture0;
 	GLuint ucolor0;
+	GLuint uprojection1;
 	GLuint uvtransform1;
 	GLuint ucolor1;
+
+	struct {
+		float tx, ty;
+		float rx, ry, rz;
+		float sx, sy;
+	} projection;
 
 	float linewidth;
 	float brightness;
