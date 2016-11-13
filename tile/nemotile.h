@@ -75,6 +75,8 @@ struct nemotile {
 
 	int iactions;
 
+	int is_single;
+
 	struct showone *sprites[128];
 	int nsprites, isprites;
 
@@ -109,6 +111,7 @@ struct nemotile {
 	struct transgroup *trans_group;
 
 	struct nemolist tile_list;
+	struct tileone *pone;
 };
 
 #endif
