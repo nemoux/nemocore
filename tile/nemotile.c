@@ -93,7 +93,9 @@ static struct tileone *nemotile_one_create(int vertices)
 
 	one->vtransform0.tx = 0.0f;
 	one->vtransform0.ty = 0.0f;
-	one->vtransform0.r = 0.0f;
+	one->vtransform0.rx = 0.0f;
+	one->vtransform0.ry = 0.0f;
+	one->vtransform0.rz = 0.0f;
 	one->vtransform0.sx = 1.0f;
 	one->vtransform0.sy = 1.0f;
 
@@ -105,7 +107,9 @@ static struct tileone *nemotile_one_create(int vertices)
 
 	one->vtransform.tx = 0.0f;
 	one->vtransform.ty = 0.0f;
-	one->vtransform.r = 0.0f;
+	one->vtransform.rx = 0.0f;
+	one->vtransform.ry = 0.0f;
+	one->vtransform.rz = 0.0f;
 	one->vtransform.sx = 1.0f;
 	one->vtransform.sy = 1.0f;
 
@@ -152,9 +156,11 @@ static void nemotile_one_vertices_translate(struct tileone *one, float tx, float
 	one->vtransform.ty = ty;
 }
 
-static void nemotile_one_vertices_rotate(struct tileone *one, float r)
+static void nemotile_one_vertices_rotate(struct tileone *one, float rx, float ry, float rz)
 {
-	one->vtransform.r = r;
+	one->vtransform.rx = rx;
+	one->vtransform.ry = ry;
+	one->vtransform.rz = rz;
 }
 
 static void nemotile_one_vertices_scale(struct tileone *one, float sx, float sy)
@@ -169,9 +175,11 @@ static void nemotile_one_vertices_translate_to(struct tileone *one, float tx, fl
 	one->vtransform0.ty = ty;
 }
 
-static void nemotile_one_vertices_rotate_to(struct tileone *one, float r)
+static void nemotile_one_vertices_rotate_to(struct tileone *one, float rx, float ry, float rz)
 {
-	one->vtransform0.r = r;
+	one->vtransform0.rx = rx;
+	one->vtransform0.ry = ry;
+	one->vtransform0.rz = rz;
 }
 
 static void nemotile_one_vertices_scale_to(struct tileone *one, float sx, float sy)
@@ -240,7 +248,9 @@ static struct tileone *nemotile_pick_one(struct nemotile *tile, float x, float y
 
 	nemolist_for_each_reverse(one, &tile->tile_list, link) {
 		nemomatrix_init_identity(&matrix);
-		nemomatrix_rotate(&matrix, cos(one->vtransform.r), sin(one->vtransform.r));
+		nemomatrix_rotate_x(&matrix, cos(one->vtransform.rx), sin(one->vtransform.rx));
+		nemomatrix_rotate_y(&matrix, cos(one->vtransform.ry), sin(one->vtransform.ry));
+		nemomatrix_rotate_z(&matrix, cos(one->vtransform.rz), sin(one->vtransform.rz));
 		nemomatrix_scale(&matrix, one->vtransform.sx, one->vtransform.sy);
 		nemomatrix_translate(&matrix, one->vtransform.tx, one->vtransform.ty);
 
@@ -292,7 +302,9 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 
 	nemolist_for_each(one, &tile->tile_list, link) {
 		nemomatrix_init_identity(&vtransform);
-		nemomatrix_rotate(&vtransform, cos(one->vtransform.r), sin(one->vtransform.r));
+		nemomatrix_rotate_x(&vtransform, cos(one->vtransform.rx), sin(one->vtransform.rx));
+		nemomatrix_rotate_y(&vtransform, cos(one->vtransform.ry), sin(one->vtransform.ry));
+		nemomatrix_rotate_z(&vtransform, cos(one->vtransform.rz), sin(one->vtransform.rz));
 		nemomatrix_scale(&vtransform, one->vtransform.sx, one->vtransform.sy);
 		nemomatrix_translate(&vtransform, one->vtransform.tx, one->vtransform.ty);
 
@@ -457,6 +469,8 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 				nemotrans_set_float(trans, &one->vtransform.ty, 0.0f);
 
 				if (one->index == tile->csprites) {
+					nemotrans_set_float(trans, &one->vtransform.ry, 0.0f);
+
 					nemotrans_set_float(trans, &one->vtransform.sx, one->vtransform0.sx * 3.6f);
 					nemotrans_set_float(trans, &one->vtransform.sy, one->vtransform0.sy * 3.6f);
 
@@ -467,6 +481,8 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 					tile->pone = one;
 				} else {
+					nemotrans_set_float(trans, &one->vtransform.ry, M_PI);
+
 					nemotrans_set_float(trans, &one->vtransform.sx, one->vtransform0.sx * 1.0f);
 					nemotrans_set_float(trans, &one->vtransform.sy, one->vtransform0.sy * 1.0f);
 
@@ -489,6 +505,8 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 				trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
 						random_get_int(800, 1600),
 						random_get_int(200, 400));
+
+				nemotrans_set_float(trans, &one->vtransform.ry, 0.0f);
 
 				nemotrans_set_float(trans, &one->vtransform.tx, one->vtransform0.tx);
 				nemotrans_set_float(trans, &one->vtransform.ty, one->vtransform0.ty);
@@ -551,6 +569,8 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 						nemotrans_set_float(trans, &one->vtransform.ty, 0.0f);
 
 						if (one->index == tile->csprites) {
+							nemotrans_set_float(trans, &one->vtransform.ry, 0.0f);
+
 							nemotrans_set_float(trans, &one->vtransform.sx, one->vtransform0.sx * 3.6f);
 							nemotrans_set_float(trans, &one->vtransform.sy, one->vtransform0.sy * 3.6f);
 
@@ -561,6 +581,8 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 							tile->pone = one;
 						} else {
+							nemotrans_set_float(trans, &one->vtransform.ry, M_PI);
+
 							nemotrans_set_float(trans, &one->vtransform.sx, one->vtransform0.sx * 1.0f);
 							nemotrans_set_float(trans, &one->vtransform.sy, one->vtransform0.sy * 1.0f);
 
@@ -662,7 +684,7 @@ static void nemotile_dispatch_timer(struct nemotimer *timer, void *data)
 						random_get_int(700, 1400),
 						random_get_int(100, 500));
 
-				nemotrans_set_float(trans, &one->vtransform.r, tile->flip == 0 ? 0.0f : M_PI);
+				nemotrans_set_float(trans, &one->vtransform.rz, tile->flip == 0 ? 0.0f : M_PI);
 
 				nemotrans_set_float(trans, &one->color[0], random_get_double(tile->brightness, 1.0f));
 				nemotrans_set_float(trans, &one->color[1], random_get_double(tile->brightness, 1.0f));
@@ -742,7 +764,7 @@ static void nemotile_dispatch_timer(struct nemotimer *timer, void *data)
 						random_get_int(700, 1400),
 						random_get_int(100, 500));
 
-				nemotrans_set_float(trans, &one->vtransform.r, tile->flip == 0 ? 0.0f : M_PI);
+				nemotrans_set_float(trans, &one->vtransform.rz, tile->flip == 0 ? 0.0f : M_PI);
 
 				nemotrans_set_float(trans, &one->color[0], random_get_double(tile->brightness, 1.0f));
 				nemotrans_set_float(trans, &one->color[1], random_get_double(tile->brightness, 1.0f));

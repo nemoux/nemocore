@@ -31,13 +31,13 @@ struct tileone {
 
 	struct {
 		float tx, ty;
-		float r;
+		float rx, ry, rz;
 		float sx, sy;
 	} vtransform0;
 
 	struct {
 		float tx, ty;
-		float r;
+		float rx, ry, rz;
 		float sx, sy;
 	} vtransform;
 
