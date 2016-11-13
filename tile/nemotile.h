@@ -80,7 +80,7 @@ struct nemotile {
 
 	struct showone *sprites[128];
 	int nsprites, isprites;
-	int csprites;
+	int csprites, rsprites;
 
 	struct fsdir *movies;
 	int imovies;

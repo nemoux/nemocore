@@ -466,9 +466,24 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 		}
 	} else {
 		if (nemoshow_event_is_pointer_left_down(show, event)) {
-			tile->slideshow = (tile->slideshow + 1) % 3;
+			tile->slideshow = (tile->slideshow + 1) % 4;
 
 			if (tile->slideshow == 0) {
+				trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
+						random_get_int(800, 1600),
+						random_get_int(200, 400));
+
+				nemotrans_set_float(trans, &tile->projection.rx, 0.0f);
+				nemotrans_set_float(trans, &tile->projection.ry, 0.0f);
+				nemotrans_set_float(trans, &tile->projection.rz, 0.0f);
+
+				nemotrans_set_float(trans, &tile->projection.tx, 0.0f);
+				nemotrans_set_float(trans, &tile->projection.ty, 0.0f);
+				nemotrans_set_float(trans, &tile->projection.sx, 1.0f);
+				nemotrans_set_float(trans, &tile->projection.sy, 1.0f);
+
+				nemotrans_group_attach_trans(tile->trans_group, trans);
+
 				nemolist_for_each(one, &tile->tile_list, link) {
 					trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
 							random_get_int(800, 1600),
@@ -591,6 +606,38 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 				nemolist_remove(&tile->pone->link);
 				nemolist_insert_tail(&tile->tile_list, &tile->pone->link);
+			} else if (tile->slideshow == 3) {
+				tile->csprites = tile->columns / 2;
+				tile->rsprites = tile->rows / 2;
+
+				trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE, 2400, 1800);
+
+				nemotrans_set_float(trans, &tile->projection.tx, tile->csprites * -2.0f);
+				nemotrans_set_float(trans, &tile->projection.ty, tile->rsprites * -2.0f);
+
+				nemotrans_group_attach_trans(tile->trans_group, trans);
+
+				nemolist_for_each(one, &tile->tile_list, link) {
+					trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
+							random_get_int(800, 1600),
+							random_get_int(200, 400));
+
+					nemotrans_set_float(trans, &one->vtransform.rx, 0.0f);
+					nemotrans_set_float(trans, &one->vtransform.ry, 0.0f);
+					nemotrans_set_float(trans, &one->vtransform.rz, 0.0f);
+
+					nemotrans_set_float(trans, &one->vtransform.tx, (one->index % tile->columns) * 2.0f);
+					nemotrans_set_float(trans, &one->vtransform.ty, (one->index / tile->columns) * 2.0f);
+					nemotrans_set_float(trans, &one->vtransform.sx, 1.0f);
+					nemotrans_set_float(trans, &one->vtransform.sy, 1.0f);
+
+					nemotrans_set_float(trans, &one->color[0], 1.0f);
+					nemotrans_set_float(trans, &one->color[1], 1.0f);
+					nemotrans_set_float(trans, &one->color[2], 1.0f);
+					nemotrans_set_float(trans, &one->color[3], 1.0f);
+
+					nemotrans_group_attach_trans(tile->trans_group, trans);
+				}
 			}
 		}
 
@@ -715,6 +762,33 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 					nemolist_remove(&tile->pone->link);
 					nemolist_insert_tail(&tile->tile_list, &tile->pone->link);
+				}
+			} else if (tile->slideshow == 3) {
+				int csprites = tile->csprites;
+				int rsprites = tile->rsprites;
+
+				if (nemoshow_event_get_value(event) == KEY_LEFT) {
+					csprites = CLAMP(tile->csprites - 1, 0, tile->columns - 1);
+				} else if (nemoshow_event_get_value(event) == KEY_RIGHT) {
+					csprites = CLAMP(tile->csprites + 1, 0, tile->columns - 1);
+				} else if (nemoshow_event_get_value(event) == KEY_UP) {
+					rsprites = CLAMP(tile->rsprites - 1, 0, tile->rows - 1);
+				} else if (nemoshow_event_get_value(event) == KEY_DOWN) {
+					rsprites = CLAMP(tile->rsprites + 1, 0, tile->rows + 1);
+				}
+
+				if (tile->csprites != csprites || tile->rsprites != rsprites) {
+					tile->csprites = csprites;
+					tile->rsprites = rsprites;
+
+					trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
+							random_get_int(800, 1600),
+							random_get_int(200, 400));
+
+					nemotrans_set_float(trans, &tile->projection.tx, tile->csprites * -2.0f);
+					nemotrans_set_float(trans, &tile->projection.ty, tile->rsprites * -2.0f);
+
+					nemotrans_group_attach_trans(tile->trans_group, trans);
 				}
 			}
 		}
