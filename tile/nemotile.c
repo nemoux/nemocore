@@ -470,7 +470,7 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 			if (tile->slideshow == 0) {
 				trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
-						random_get_int(800, 1600),
+						random_get_int(1200, 2400),
 						random_get_int(200, 400));
 
 				nemotrans_set_float(trans, &tile->projection.rx, 0.0f);
@@ -610,7 +610,9 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 				tile->csprites = tile->columns / 2;
 				tile->rsprites = tile->rows / 2;
 
-				trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE, 2400, 1800);
+				trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
+						random_get_int(1200, 2400),
+						random_get_int(200, 400));
 
 				nemotrans_set_float(trans, &tile->projection.tx, tile->csprites * -2.0f);
 				nemotrans_set_float(trans, &tile->projection.ty, tile->rsprites * -2.0f);
@@ -782,8 +784,8 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 					tile->rsprites = rsprites;
 
 					trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
-							random_get_int(800, 1600),
-							random_get_int(200, 400));
+							random_get_int(600, 1200),
+							0);
 
 					nemotrans_set_float(trans, &tile->projection.tx, tile->csprites * -2.0f);
 					nemotrans_set_float(trans, &tile->projection.ty, tile->rsprites * -2.0f);
