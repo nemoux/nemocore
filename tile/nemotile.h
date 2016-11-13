@@ -118,6 +118,9 @@ struct nemotile {
 	float brightness;
 	float jitter;
 
+	float amplitude;
+	float wavelength;
+
 	struct transgroup *trans_group;
 
 	struct nemolist tile_list;
