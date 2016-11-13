@@ -733,7 +733,7 @@ static void nemotile_dispatch_timer(struct nemotimer *timer, void *data)
 		}
 
 		tile->iactions = (tile->iactions + 1) % 2;
-	} else {
+	} else if (tile->is_slideshow == 0) {
 		if (tile->iactions == 0) {
 			tile->flip = !tile->flip;
 
