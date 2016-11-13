@@ -13,8 +13,10 @@ NEMO_BEGIN_EXTERN_C
 #include <nemoattr.h>
 #include <nemolist.h>
 
+struct nemotrans;
 struct transgroup;
 
+typedef void (*nemotrans_dispatch_update_t)(struct nemotrans *trans, void *data);
 typedef void (*nemotrans_group_dispatch_first_t)(struct transgroup *group, void *data);
 typedef void (*nemotrans_group_dispatch_last_t)(struct transgroup *group, void *data);
 
@@ -40,6 +42,10 @@ struct nemotrans {
 
 	uint32_t stime;
 	uint32_t etime;
+
+	nemotrans_dispatch_update_t dispatch_update;
+
+	void *data;
 };
 
 struct transgroup {
@@ -73,6 +79,9 @@ extern int nemotrans_dispatch(struct nemotrans *trans, uint32_t msecs);
 
 extern void nemotrans_set_float(struct nemotrans *trans, float *var, float value);
 extern void nemotrans_set_double(struct nemotrans *trans, double *var, double value);
+
+extern void nemotrans_set_dispatch_update(struct nemotrans *trans, nemotrans_dispatch_update_t dispatch);
+extern void nemotrans_set_userdata(struct nemotrans *trans, void *data);
 
 static inline int nemotrans_group_has_transition(struct transgroup *group)
 {

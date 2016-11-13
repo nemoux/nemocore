@@ -166,6 +166,9 @@ int nemotrans_dispatch(struct nemotrans *trans, uint32_t msecs)
 			nemoattr_setd(&one->attr, v);
 	}
 
+	if (trans->dispatch_update != NULL)
+		trans->dispatch_update(trans, trans->data);
+
 	return done;
 }
 
@@ -195,4 +198,14 @@ void nemotrans_set_double(struct nemotrans *trans, double *var, double value)
 	nemoattr_setp(&one->attr, var);
 
 	nemolist_insert_tail(&trans->list, &one->link);
+}
+
+void nemotrans_set_dispatch_update(struct nemotrans *trans, nemotrans_dispatch_update_t dispatch)
+{
+	trans->dispatch_update = dispatch;
+}
+
+void nemotrans_set_userdata(struct nemotrans *trans, void *data)
+{
+	trans->data = data;
 }
