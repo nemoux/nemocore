@@ -681,9 +681,7 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 							tile->pone = one;
 						} else {
-							trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
-									random_get_int(400, 800),
-									0);
+							trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE, 600, 0);
 
 							nemotrans_set_float(trans, &one->vtransform.tx, (one->index - tile->csprites) * one->vtransform0.sx * 3.0f);
 							nemotrans_set_float(trans, &one->vtransform.ty, 0.0f);
@@ -717,57 +715,60 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 				if (tile->csprites != csprites) {
 					tile->csprites = csprites;
 
-					nemolist_for_each(one, &tile->tile_list, link) {
-						if (one->index == tile->csprites) {
-							trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE, 600, 0);
+					if (tile->pone != NULL) {
+						one = tile->pone;
 
-							nemotrans_set_float(trans, &one->vtransform.tx, 0.0f);
-							nemotrans_set_float(trans, &one->vtransform.ty, 0.0f);
+						trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
+								random_get_int(400, 800),
+								0);
 
-							nemotrans_set_float(trans, &one->vtransform.rx, 0.0f);
-							nemotrans_set_float(trans, &one->vtransform.ry, 0.0f);
-							nemotrans_set_float(trans, &one->vtransform.rz, 0.0f);
+						dx = cos(one->index * M_PI * 2.0f / tile->nsprites) * 0.75f;
+						dy = sin(one->index * M_PI * 2.0f / tile->nsprites) * 0.75f;
 
-							nemotrans_set_float(trans, &one->vtransform.sx, one->vtransform0.sx * 3.6f);
-							nemotrans_set_float(trans, &one->vtransform.sy, one->vtransform0.sy * 3.6f);
+						nemotrans_set_float(trans, &one->vtransform.tx, dx);
+						nemotrans_set_float(trans, &one->vtransform.ty, dy);
 
-							nemotrans_set_float(trans, &one->color[0], 1.0f);
-							nemotrans_set_float(trans, &one->color[1], 1.0f);
-							nemotrans_set_float(trans, &one->color[2], 1.0f);
-							nemotrans_set_float(trans, &one->color[3], 1.0f);
+						nemotrans_set_float(trans, &one->vtransform.rx, M_PI);
+						nemotrans_set_float(trans, &one->vtransform.ry, 0.0f);
+						nemotrans_set_float(trans, &one->vtransform.rz, -atan2(dx, dy));
 
-							nemotrans_group_attach_trans(tile->trans_group, trans);
+						nemotrans_set_float(trans, &one->vtransform.sx, one->vtransform0.sx * 0.75f);
+						nemotrans_set_float(trans, &one->vtransform.sy, one->vtransform0.sy * 0.75f);
 
-							tile->pone = one;
-						} else {
-							trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
-									random_get_int(400, 800),
-									0);
+						nemotrans_set_float(trans, &one->color[0], 0.12f);
+						nemotrans_set_float(trans, &one->color[1], 0.12f);
+						nemotrans_set_float(trans, &one->color[2], 0.12f);
+						nemotrans_set_float(trans, &one->color[3], 0.12f);
 
-							dx = cos(one->index * M_PI * 2.0f / tile->nsprites) * 0.75f;
-							dy = sin(one->index * M_PI * 2.0f / tile->nsprites) * 0.75f;
-
-							nemotrans_set_float(trans, &one->vtransform.tx, dx);
-							nemotrans_set_float(trans, &one->vtransform.ty, dy);
-
-							nemotrans_set_float(trans, &one->vtransform.rx, M_PI);
-							nemotrans_set_float(trans, &one->vtransform.ry, 0.0f);
-							nemotrans_set_float(trans, &one->vtransform.rz, -atan2(dx, dy));
-
-							nemotrans_set_float(trans, &one->vtransform.sx, one->vtransform0.sx * 0.75f);
-							nemotrans_set_float(trans, &one->vtransform.sy, one->vtransform0.sy * 0.75f);
-
-							nemotrans_set_float(trans, &one->color[0], 0.12f);
-							nemotrans_set_float(trans, &one->color[1], 0.12f);
-							nemotrans_set_float(trans, &one->color[2], 0.12f);
-							nemotrans_set_float(trans, &one->color[3], 0.12f);
-
-							nemotrans_group_attach_trans(tile->trans_group, trans);
-						}
+						nemotrans_group_attach_trans(tile->trans_group, trans);
 					}
 
-					nemolist_remove(&tile->pone->link);
-					nemolist_insert_tail(&tile->tile_list, &tile->pone->link);
+					tile->pone = nemotile_find_one(tile, tile->csprites);
+					if (tile->pone != NULL) {
+						one = tile->pone;
+
+						trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE, 600, 0);
+
+						nemotrans_set_float(trans, &one->vtransform.tx, 0.0f);
+						nemotrans_set_float(trans, &one->vtransform.ty, 0.0f);
+
+						nemotrans_set_float(trans, &one->vtransform.rx, 0.0f);
+						nemotrans_set_float(trans, &one->vtransform.ry, 0.0f);
+						nemotrans_set_float(trans, &one->vtransform.rz, 0.0f);
+
+						nemotrans_set_float(trans, &one->vtransform.sx, one->vtransform0.sx * 3.6f);
+						nemotrans_set_float(trans, &one->vtransform.sy, one->vtransform0.sy * 3.6f);
+
+						nemotrans_set_float(trans, &one->color[0], 1.0f);
+						nemotrans_set_float(trans, &one->color[1], 1.0f);
+						nemotrans_set_float(trans, &one->color[2], 1.0f);
+						nemotrans_set_float(trans, &one->color[3], 1.0f);
+
+						nemotrans_group_attach_trans(tile->trans_group, trans);
+
+						nemolist_remove(&one->link);
+						nemolist_insert_tail(&tile->tile_list, &one->link);
+					}
 				}
 			} else if (tile->slideshow == 3) {
 				int csprites = tile->csprites;
