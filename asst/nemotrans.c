@@ -88,6 +88,33 @@ void nemotrans_group_dispatch(struct transgroup *group, uint32_t msecs)
 		group->dispatch_last(group, group->data);
 }
 
+void nemotrans_group_remove_one(struct transgroup *group, void *var)
+{
+	struct nemotrans *trans;
+	struct transone *one, *none;
+
+	nemolist_for_each(trans, &group->list, link) {
+		nemolist_for_each_safe(one, none, &trans->list, link) {
+			if (nemoattr_getp(&one->attr) == var) {
+				nemolist_remove(&one->link);
+
+				free(one);
+
+				break;
+			}
+		}
+	}
+}
+
+void nemotrans_group_remove_all(struct transgroup *group)
+{
+	struct nemotrans *trans, *ntrans;
+
+	nemolist_for_each_safe(trans, ntrans, &group->list, link) {
+		nemotrans_destroy(trans);
+	}
+}
+
 struct nemotrans *nemotrans_create(int type, uint32_t duration, uint32_t delay)
 {
 	struct nemotrans *trans;

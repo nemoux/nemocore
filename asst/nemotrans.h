@@ -69,6 +69,9 @@ extern void nemotrans_group_set_userdata(struct transgroup *group, void *data);
 
 extern void nemotrans_group_dispatch(struct transgroup *group, uint32_t msecs);
 
+extern void nemotrans_group_remove_one(struct transgroup *group, void *var);
+extern void nemotrans_group_remove_all(struct transgroup *group);
+
 extern struct nemotrans *nemotrans_create(int type, uint32_t duration, uint32_t delay);
 extern void nemotrans_destroy(struct nemotrans *trans);
 
