@@ -667,8 +667,6 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 				nemolist_remove(&tile->pone->link);
 				nemolist_insert_tail(&tile->tile_list, &tile->pone->link);
-
-				nemotimer_set_timeout(tile->timer, tile->timeout);
 			} else if (tile->slideshow == 4) {
 				tile->csprites = tile->columns / 2;
 				tile->rsprites = tile->rows / 2;
@@ -1018,25 +1016,6 @@ static void nemotile_dispatch_show_resize(struct nemoshow *show, int32_t width, 
 	nemoshow_view_redraw(show);
 }
 
-static void nemotile_update_wave_layout(struct nemotrans *trans, void *data)
-{
-	struct nemotile *tile = (struct nemotile *)data;
-	struct tileone *one;
-	float dx, dy;
-
-	nemolist_for_each(one, &tile->tile_list, link) {
-		if (one->index != tile->csprites) {
-			dx = (float)one->index / (float)tile->nsprites * 2.0f - 1.0f;
-			dy = sin((float)one->index / (float)tile->nsprites * M_PI * tile->wavelength) * tile->amplitude;
-
-			one->vtransform.tx = dx;
-			one->vtransform.ty = dy;
-
-			one->vtransform.rz = M_PI / 2.0f - atan2(dx, dy);
-		}
-	}
-}
-
 static void nemotile_dispatch_timer(struct nemotimer *timer, void *data)
 {
 	struct nemotile *tile = (struct nemotile *)data;
@@ -1184,15 +1163,25 @@ static void nemotile_dispatch_timer(struct nemotimer *timer, void *data)
 
 		tile->iactions = (tile->iactions + 1) % 2;
 	} else if (tile->slideshow == 3) {
-		trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE, tile->timeout, 0);
+		tile->amplitude = random_get_double(0.15f, 0.85f);
+		tile->wavelength = random_get_double(1.5f, 4.0f);
 
-		nemotrans_set_float(trans, &tile->amplitude, random_get_double(0.15f, 0.85f));
-		nemotrans_set_float(trans, &tile->wavelength, random_get_double(1.5f, 4.0f));
+		nemolist_for_each(one, &tile->tile_list, link) {
+			if (tile->pone == one)
+				continue;
 
-		nemotrans_set_dispatch_update(trans, nemotile_update_wave_layout);
-		nemotrans_set_userdata(trans, tile);
+			trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE, tile->timeout, 0);
 
-		nemotrans_group_attach_trans(tile->trans_group, trans);
+			dx = (float)one->index / (float)tile->nsprites * 2.0f - 1.0f;
+			dy = sin((float)one->index / (float)tile->nsprites * M_PI * tile->wavelength) * tile->amplitude;
+
+			nemotrans_set_float(trans, &one->vtransform.tx, dx);
+			nemotrans_set_float(trans, &one->vtransform.ty, dy);
+
+			nemotrans_set_float(trans, &one->vtransform.rz, M_PI / 2.0f - atan2(dx, dy));
+
+			nemotrans_group_attach_trans(tile->trans_group, trans);
+		}
 	}
 
 	nemotimer_set_timeout(tile->timer, tile->timeout);
