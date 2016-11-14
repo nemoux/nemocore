@@ -43,6 +43,8 @@ struct nemotrans {
 	uint32_t stime;
 	uint32_t etime;
 
+	uint32_t tag;
+
 	nemotrans_dispatch_update_t dispatch_update;
 
 	void *data;
@@ -70,10 +72,13 @@ extern void nemotrans_group_set_userdata(struct transgroup *group, void *data);
 extern void nemotrans_group_dispatch(struct transgroup *group, uint32_t msecs);
 
 extern void nemotrans_group_remove_one(struct transgroup *group, void *var);
+extern void nemotrans_group_remove_tag(struct transgroup *group, uint32_t tag);
 extern void nemotrans_group_remove_all(struct transgroup *group);
 
 extern struct nemotrans *nemotrans_create(int type, uint32_t duration, uint32_t delay);
 extern void nemotrans_destroy(struct nemotrans *trans);
+
+extern void nemotrans_set_tag(struct nemotrans *trans, uint32_t tag);
 
 extern void nemotrans_ease_set_type(struct nemotrans *trans, int type);
 extern void nemotrans_ease_set_bezier(struct nemotrans *trans, double x0, double y0, double x1, double y1);

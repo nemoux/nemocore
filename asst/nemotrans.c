@@ -106,6 +106,16 @@ void nemotrans_group_remove_one(struct transgroup *group, void *var)
 	}
 }
 
+void nemotrans_group_remove_tag(struct transgroup *group, uint32_t tag)
+{
+	struct nemotrans *trans, *ntrans;
+
+	nemolist_for_each_safe(trans, ntrans, &group->list, link) {
+		if (trans->tag == tag)
+			nemotrans_destroy(trans);
+	}
+}
+
 void nemotrans_group_remove_all(struct transgroup *group)
 {
 	struct nemotrans *trans, *ntrans;
@@ -151,6 +161,11 @@ void nemotrans_destroy(struct nemotrans *trans)
 	}
 
 	free(trans);
+}
+
+void nemotrans_set_tag(struct nemotrans *trans, uint32_t tag)
+{
+	trans->tag = tag;
 }
 
 void nemotrans_ease_set_type(struct nemotrans *trans, int type)
