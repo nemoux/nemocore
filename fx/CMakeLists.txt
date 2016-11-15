@@ -14,6 +14,7 @@ add_library(nemofx SHARED
 	glfilter.c
 	glripple.c
 	glblur.c
+	glmask.c
 	glmotion.c
 	gllight.c
 	glshadow.c
@@ -32,6 +33,7 @@ set(HEADER_FILES
 	glfilter.h
 	glripple.h
 	glblur.h
+	glmask.h
 	glmotion.h
 	gllight.h
 	glshadow.h

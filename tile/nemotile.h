@@ -18,6 +18,7 @@
 #include <playback.h>
 #include <glfilter.h>
 #include <glmotion.h>
+#include <glmask.h>
 
 struct tileone {
 	int index;
@@ -70,6 +71,7 @@ struct nemotile {
 
 	struct glfilter *filter;
 	struct glmotion *motion;
+	struct glmask *mask;
 
 	int flip;
 	int slideshow;

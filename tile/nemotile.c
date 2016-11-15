@@ -1094,6 +1094,12 @@ static GLuint nemotile_dispatch_tale_effect(struct talenode *node, void *data)
 		texture = nemofx_glmotion_get_texture(tile->motion);
 	}
 
+	if (tile->mask != NULL) {
+		nemofx_glmask_dispatch(tile->mask, texture, nemoshow_canvas_get_texture(tile->over));
+
+		texture = nemofx_glmask_get_texture(tile->mask);
+	}
+
 	return texture;
 }
 
@@ -1515,7 +1521,7 @@ int main(int argc, char *argv[])
 		nemoshow_canvas_set_width(canvas, width);
 		nemoshow_canvas_set_height(canvas, height);
 		nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
-		nemoshow_one_attach(scene, canvas);
+		nemoshow_attach_one(show, canvas);
 
 		if (os_has_file_extension(overlay, "svg") != 0) {
 			one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
@@ -1524,7 +1530,7 @@ int main(int argc, char *argv[])
 			nemoshow_item_set_y(one, 0.0f);
 			nemoshow_item_set_width(one, width);
 			nemoshow_item_set_height(one, height);
-			nemoshow_item_set_fill_color(one, 0.0f, 255.0f, 255.0f, 255.0f);
+			nemoshow_item_set_fill_color(one, 255.0f, 255.0f, 255.0f, 255.0f);
 			nemoshow_item_path_load_svg(one, overlay, 0.0f, 0.0f, width, height);
 		} else {
 			one = nemoshow_item_create(NEMOSHOW_IMAGE_ITEM);
@@ -1535,6 +1541,8 @@ int main(int argc, char *argv[])
 			nemoshow_item_set_height(one, height);
 			nemoshow_item_set_uri(one, overlay);
 		}
+
+		tile->mask = nemofx_glmask_create(width, height);
 	}
 
 	nemotile_prepare_opengl(tile, width, height);
