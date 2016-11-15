@@ -122,6 +122,9 @@ extern int nemoshow_canvas_prepare_none(struct nemoshow *show, struct showone *o
 extern void nemoshow_canvas_finish_none(struct nemoshow *show, struct showone *one);
 extern void nemoshow_canvas_render_none(struct nemoshow *show, struct showone *one);
 
+extern int nemoshow_canvas_prepare_opengl(struct nemoshow *show, struct showone *one);
+extern void nemoshow_canvas_finish_opengl(struct nemoshow *show, struct showone *one);
+
 extern int nemoshow_canvas_render(struct nemoshow *show, struct showone *one);
 
 extern int nemoshow_canvas_set_viewport(struct showone *one, int32_t width, int32_t height);
@@ -230,6 +233,13 @@ static inline GLuint nemoshow_canvas_get_texture(struct showone *one)
 	return nemotale_node_get_texture(canvas->node);
 }
 
+static inline GLuint nemoshow_canvas_get_effective_texture(struct showone *one)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	return nemotale_node_get_effective_texture(canvas->node);
+}
+
 static inline void *nemoshow_canvas_map(struct showone *one)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
@@ -242,13 +252,6 @@ static inline int nemoshow_canvas_unmap(struct showone *one)
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
 	return nemotale_node_unmap(canvas->node);
-}
-
-static inline int nemoshow_canvas_flush(struct showone *one)
-{
-	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
-
-	return nemotale_node_flush(canvas->node);
 }
 
 static inline int nemoshow_canvas_set_texture(struct showone *one, GLuint texture)

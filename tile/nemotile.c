@@ -332,7 +332,7 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 		glUniformMatrix4fv(tile->uttransform0, 1, GL_FALSE, ttransform.d);
 		glUniform4fv(tile->ucolor0, 1, one->color);
 
-		glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_texture(one->texture));
+		glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_effective_texture(one->texture));
 
 		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), &one->vertices[0]);
 		glEnableVertexAttribArray(0);
@@ -1094,6 +1094,14 @@ static GLuint nemotile_dispatch_canvas_filter(struct talenode *node, void *data)
 		texture = nemofx_glmotion_get_texture(tile->motion);
 	}
 
+	return texture;
+}
+
+static GLuint nemotile_dispatch_video_filter(struct talenode *node, void *data)
+{
+	struct nemotile *tile = (struct nemotile *)data;
+	GLuint texture = nemotale_node_get_texture(node);
+
 	if (tile->mask != NULL) {
 		nemofx_glmask_dispatch(tile->mask, texture, nemoshow_canvas_get_texture(tile->over));
 
@@ -1677,6 +1685,9 @@ int main(int argc, char *argv[])
 		nemoshow_canvas_set_height(canvas, nemoplay_get_video_height(tile->play));
 		nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_OPENGL_TYPE);
 		nemoshow_attach_one(show, canvas);
+
+		node = nemoshow_canvas_get_node(canvas);
+		nemotale_node_set_dispatch_filter(node, nemotile_dispatch_video_filter, tile);
 
 		tile->decoderback = nemoplay_back_create_decoder(tile->play);
 		tile->audioback = nemoplay_back_create_audio_by_ao(tile->play);

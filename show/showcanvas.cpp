@@ -189,6 +189,9 @@ int nemoshow_canvas_set_type(struct showone *one, int type)
 		nemotale_node_prepare_gl(canvas->node);
 	} else if (type == NEMOSHOW_CANVAS_OPENGL_TYPE) {
 		canvas->node = nemotale_node_create_gl(canvas->width, canvas->height);
+
+		canvas->prepare_render = nemoshow_canvas_prepare_opengl;
+		canvas->finish_render = nemoshow_canvas_finish_opengl;
 	} else if (type == NEMOSHOW_CANVAS_BACK_TYPE) {
 		canvas->node = nemotale_node_create_pixman(canvas->width, canvas->height);
 		nemotale_node_prepare_gl(canvas->node);
@@ -708,6 +711,7 @@ void nemoshow_canvas_finish_vector(struct nemoshow *show, struct showone *one)
 
 	nemotale_node_unmap(canvas->node);
 	nemotale_node_flush(canvas->node);
+	nemotale_node_filter(canvas->node);
 }
 
 void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
@@ -788,6 +792,18 @@ void nemoshow_canvas_finish_none(struct nemoshow *show, struct showone *one)
 
 void nemoshow_canvas_render_none(struct nemoshow *show, struct showone *one)
 {
+}
+
+int nemoshow_canvas_prepare_opengl(struct nemoshow *show, struct showone *one)
+{
+	return 0;
+}
+
+void nemoshow_canvas_finish_opengl(struct nemoshow *show, struct showone *one)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	nemotale_node_filter(canvas->node);
 }
 
 int nemoshow_canvas_render(struct nemoshow *show, struct showone *one)
