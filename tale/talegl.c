@@ -1001,7 +1001,7 @@ int nemotale_node_filter_gl(struct talenode *node)
 {
 	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
 
-	if (gcontext == NULL || gcontext->dispatch_filter == NULL) {
+	if (gcontext->dispatch_filter == NULL) {
 		gcontext->texture = gcontext->otexture;
 	} else if (node->needs_filter != 0) {
 		gcontext->texture = gcontext->dispatch_filter(node, gcontext->filter_data);
