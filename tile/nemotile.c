@@ -1077,7 +1077,7 @@ static void nemotile_dispatch_video_done(struct nemoplay *play, void *data)
 	nemoplay_back_set_video_data(tile->videoback, tile);
 }
 
-static GLuint nemotile_dispatch_tale_effect(struct talenode *node, void *data)
+static GLuint nemotile_dispatch_canvas_filter(struct talenode *node, void *data)
 {
 	struct nemotile *tile = (struct nemotile *)data;
 	GLuint texture = nemotale_node_get_texture(node);
@@ -1505,7 +1505,7 @@ int main(int argc, char *argv[])
 	nemoshow_one_attach(scene, canvas);
 
 	node = nemoshow_canvas_get_node(canvas);
-	nemotale_node_set_dispatch_effect(node, nemotile_dispatch_tale_effect, tile);
+	nemotale_node_set_dispatch_filter(node, nemotile_dispatch_canvas_filter, tile);
 
 	if (programpath != NULL) {
 		tile->filter = nemofx_glfilter_create(width, height, programpath);

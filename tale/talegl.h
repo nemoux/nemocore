@@ -29,7 +29,7 @@ NEMO_BEGIN_EXTERN_C
 
 #define NEMOTALE_BUFFER_AGE_COUNT		(2)
 
-typedef GLuint (*nemotale_node_dispatch_effect_t)(struct talenode *node, void *data);
+typedef GLuint (*nemotale_node_opengl_dispatch_filter_t)(struct talenode *node, void *data);
 
 struct taleglnode {
 	GLuint texture;
@@ -48,8 +48,8 @@ struct taleglnode {
 
 	struct nemolistener destroy_listener;
 
-	nemotale_node_dispatch_effect_t dispatch_effect;
-	void *effect_data;
+	nemotale_node_opengl_dispatch_filter_t dispatch_filter;
+	void *filter_data;
 };
 
 struct taleegl;
@@ -81,11 +81,13 @@ extern void *nemotale_node_map_pbo(struct talenode *node);
 extern int nemotale_node_unmap_pbo(struct talenode *node);
 extern int nemotale_node_flush_gl_subimage(struct talenode *node);
 extern int nemotale_node_flush_gl_external(struct talenode *node);
+extern int nemotale_node_filter_gl(struct talenode *node);
 
 extern int nemotale_node_set_texture(struct talenode *node, GLuint texture);
 extern GLuint nemotale_node_get_texture(struct talenode *node);
+extern GLuint nemotale_node_get_effective_texture(struct talenode *node);
 
-extern void nemotale_node_set_dispatch_effect(struct talenode *node, nemotale_node_dispatch_effect_t dispatch, void *data);
+extern void nemotale_node_set_dispatch_filter(struct talenode *node, nemotale_node_opengl_dispatch_filter_t dispatch, void *data);
 
 extern int nemotale_node_use_pbo(struct talenode *node, int use_pbo);
 

@@ -318,7 +318,7 @@ int nemoshow_canvas_update(struct showone *one)
 		nemoshow_canvas_set_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE | NEMOSHOW_CANVAS_REDRAW_FULL_STATE);
 	}
 	if ((one->dirty & NEMOSHOW_FILTER_DIRTY) != 0) {
-		nemotale_node_damage_below(canvas->node);
+		nemotale_node_damage_filter(canvas->node);
 	}
 
 	if (nemolist_empty(&canvas->redraw_link) != 0)

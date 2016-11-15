@@ -19,6 +19,7 @@ struct nemotale;
 struct talenode;
 
 typedef int (*nemotale_node_dispatch_flush_t)(struct talenode *node);
+typedef int (*nemotale_node_dispatch_filter_t)(struct talenode *node);
 typedef int (*nemotale_node_dispatch_resize_t)(struct talenode *node, int32_t width, int32_t height);
 typedef void *(*nemotale_node_dispatch_map_t)(struct talenode *node);
 typedef int (*nemotale_node_dispatch_unmap_t)(struct talenode *node);
@@ -50,9 +51,11 @@ struct talenode {
 	pixman_region32_t damage;
 	int dirty;
 	int needs_flush;
+	int needs_filter;
 	int needs_full_upload;
 
 	nemotale_node_dispatch_flush_t dispatch_flush;
+	nemotale_node_dispatch_filter_t dispatch_filter;
 	nemotale_node_dispatch_resize_t dispatch_resize;
 	nemotale_node_dispatch_map_t dispatch_map;
 	nemotale_node_dispatch_unmap_t dispatch_unmap;
@@ -95,6 +98,7 @@ static inline void nemotale_node_damage(struct talenode *node, int32_t x, int32_
 	pixman_region32_union_rect(&node->damage, &node->damage, x, y, width, height);
 	node->dirty |= 0x1;
 	node->needs_flush = 1;
+	node->needs_filter = 1;
 }
 
 static inline void nemotale_node_damage_below(struct talenode *node)
@@ -107,6 +111,13 @@ static inline void nemotale_node_damage_region(struct talenode *node, pixman_reg
 	pixman_region32_union(&node->damage, &node->damage, region);
 	node->dirty |= 0x1;
 	node->needs_flush = 1;
+	node->needs_filter = 1;
+}
+
+static inline void nemotale_node_damage_filter(struct talenode *node)
+{
+	node->dirty |= 0x2;
+	node->needs_filter = 1;
 }
 
 static inline void nemotale_node_damage_all(struct talenode *node)
@@ -114,6 +125,7 @@ static inline void nemotale_node_damage_all(struct talenode *node)
 	pixman_region32_union_rect(&node->damage, &node->damage, 0, 0, node->geometry.width, node->geometry.height);
 	node->dirty |= 0x1;
 	node->needs_flush = 1;
+	node->needs_filter = 1;
 	node->needs_full_upload = 1;
 }
 
@@ -256,6 +268,11 @@ static inline void *nemotale_node_get_data(struct talenode *node)
 static inline int nemotale_node_flush(struct talenode *node)
 {
 	return node->dispatch_flush(node);
+}
+
+static inline int nemotale_node_filter(struct talenode *node)
+{
+	return node->dispatch_filter(node);
 }
 
 static inline int nemotale_node_resize(struct talenode *node, int32_t width, int32_t height)

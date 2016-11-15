@@ -125,6 +125,7 @@ struct talenode *nemotale_node_create_gl(int32_t width, int32_t height)
 	node->dispatch_flush = nemotale_node_flush_gl;
 #endif
 
+	node->dispatch_filter = nemotale_node_filter_gl;
 	node->dispatch_resize = nemotale_node_resize_gl;
 
 	pixman_region32_init_rect(&node->blend, 0, 0, width, height);
@@ -176,6 +177,8 @@ int nemotale_node_prepare_gl(struct talenode *node)
 #else
 		node->dispatch_flush = nemotale_node_flush_gl;
 #endif
+
+		node->dispatch_filter = nemotale_node_filter_gl;
 
 		node->glcontext = gcontext;
 
@@ -394,15 +397,11 @@ static void nemotale_repaint_node(struct nemotale *tale, struct talenode *node, 
 
 static void nemotale_flush_node(struct nemotale *tale, struct talenode *node)
 {
-	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
-
 	if (node->pmcontext != NULL && node->needs_flush != 0)
 		nemotale_node_flush(node);
 
-	if (gcontext->dispatch_effect == NULL)
-		gcontext->texture = gcontext->otexture;
-	else
-		gcontext->texture = gcontext->dispatch_effect(node, gcontext->effect_data);
+	if (node->glcontext != NULL && node->needs_filter != 0)
+		nemotale_node_filter(node);
 }
 
 struct nemotale *nemotale_create_gl(void)
@@ -998,6 +997,21 @@ int nemotale_node_flush_gl_external(struct talenode *node)
 	return 0;
 }
 
+int nemotale_node_filter_gl(struct talenode *node)
+{
+	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
+
+	if (gcontext == NULL || gcontext->dispatch_filter == NULL) {
+		gcontext->texture = gcontext->otexture;
+	} else if (node->needs_filter != 0) {
+		gcontext->texture = gcontext->dispatch_filter(node, gcontext->filter_data);
+
+		node->needs_filter = 0;
+	}
+
+	return 0;
+}
+
 int nemotale_node_set_texture(struct talenode *node, GLuint texture)
 {
 	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
@@ -1022,12 +1036,19 @@ GLuint nemotale_node_get_texture(struct talenode *node)
 	return gcontext->otexture;
 }
 
-void nemotale_node_set_dispatch_effect(struct talenode *node, nemotale_node_dispatch_effect_t dispatch, void *data)
+GLuint nemotale_node_get_effective_texture(struct talenode *node)
 {
 	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
 
-	gcontext->dispatch_effect = dispatch;
-	gcontext->effect_data = data;
+	return gcontext->texture;
+}
+
+void nemotale_node_set_dispatch_filter(struct talenode *node, nemotale_node_opengl_dispatch_filter_t dispatch, void *data)
+{
+	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
+
+	gcontext->dispatch_filter = dispatch;
+	gcontext->filter_data = data;
 }
 
 int nemotale_node_use_pbo(struct talenode *node, int use_pbo)

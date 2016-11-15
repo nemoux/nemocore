@@ -254,6 +254,7 @@ struct talenode *nemotale_node_create_pixman(int32_t width, int32_t height)
 
 	node->dirty = 0x2;
 	node->needs_flush = 1;
+	node->needs_filter = 1;
 	node->needs_full_upload = 1;
 	node->geometry.width = width;
 	node->geometry.height = height;
@@ -286,6 +287,7 @@ int nemotale_node_attach_pixman(struct talenode *node, void *data, int32_t width
 
 	node->dirty = 0x2;
 	node->needs_flush = 1;
+	node->needs_filter = 1;
 	node->needs_full_upload = 1;
 	node->geometry.width = width;
 	node->geometry.height = height;
@@ -351,6 +353,7 @@ int nemotale_node_resize_pixman(struct talenode *node, int32_t width, int32_t he
 
 		node->dirty = 0x2;
 		node->needs_flush = 1;
+		node->needs_filter = 1;
 		node->needs_full_upload = 1;
 		node->geometry.width = width;
 		node->geometry.height = height;
