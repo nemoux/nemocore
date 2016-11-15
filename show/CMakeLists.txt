@@ -32,8 +32,6 @@ add_library(nemoshow SHARED
 	showfont.cpp
 	showeasy.cpp
 	showmisc.cpp
-	showpoly.c
-	showpipe.c
 	showevent.c
 	showgrab.c
 	svghelper.cpp
@@ -69,8 +67,6 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/show/showfont.h
 	${CMAKE_SOURCE_DIR}/show/showeasy.h
 	${CMAKE_SOURCE_DIR}/show/showmisc.h
-	${CMAKE_SOURCE_DIR}/show/showpoly.h
-	${CMAKE_SOURCE_DIR}/show/showpipe.h
 	${CMAKE_SOURCE_DIR}/show/showgrab.h
 	${CMAKE_SOURCE_DIR}/show/showevent.h
 	${CMAKE_SOURCE_DIR}/show/skiahelper.h

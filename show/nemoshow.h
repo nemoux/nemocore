@@ -27,8 +27,6 @@ NEMO_BEGIN_EXTERN_C
 #include <showshader.h>
 #include <showfont.h>
 #include <showeasy.h>
-#include <showpoly.h>
-#include <showpipe.h>
 #include <showevent.h>
 #include <showgrab.h>
 #include <skiahelper.h>

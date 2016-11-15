@@ -13,15 +13,12 @@
 #include <showcanvas.hpp>
 #include <showitem.h>
 #include <showitem.hpp>
-#include <showpoly.h>
-#include <showpipe.h>
 #include <showmatrix.h>
 #include <showmatrix.hpp>
 #include <showpath.h>
 #include <showpath.hpp>
 #include <showfont.h>
 #include <showfont.hpp>
-#include <fbohelper.h>
 #include <oshelper.h>
 #include <nemoshow.h>
 #include <nemolog.h>
@@ -180,10 +177,6 @@ int nemoshow_canvas_set_type(struct showone *one, int type)
 		canvas->dispatch_replay = nemoshow_canvas_replay_vector;
 
 		nemoshow_canvas_set_state(canvas, NEMOSHOW_CANVAS_POOLING_STATE);
-	} else if (type == NEMOSHOW_CANVAS_PIPELINE_TYPE) {
-		canvas->node = nemotale_node_create_gl(canvas->width, canvas->height);
-
-		canvas->dispatch_redraw = nemoshow_canvas_render_pipeline;
 	} else if (type == NEMOSHOW_CANVAS_PIXMAN_TYPE) {
 		canvas->node = nemotale_node_create_pixman(canvas->width, canvas->height);
 		nemotale_node_prepare_gl(canvas->node);
@@ -836,12 +829,6 @@ int nemoshow_canvas_set_viewport(struct showone *one, int32_t width, int32_t hei
 
 	if (one->sub == NEMOSHOW_CANVAS_VECTOR_TYPE) {
 		nemoshow_one_dirty_all(one, NEMOSHOW_SHAPE_DIRTY);
-	} else if (one->sub == NEMOSHOW_CANVAS_PIPELINE_TYPE) {
-		fbo_prepare_context(
-				nemotale_node_get_texture(canvas->node),
-				canvas->viewport.width,
-				canvas->viewport.height,
-				&canvas->fbo, &canvas->dbo);
 	} else if (one->sub == NEMOSHOW_CANVAS_BACK_TYPE) {
 		nemotale_node_opaque(canvas->node, 0, 0, canvas->viewport.width, canvas->viewport.height);
 	}
@@ -939,34 +926,8 @@ static inline struct showone *nemoshow_canvas_pick_item(struct showone *one, flo
 	return NULL;
 }
 
-static inline struct showone *nemoshow_canvas_pick_poly(struct showone *one, float x, float y)
-{
-	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
-	struct showone *pone, *cone;
-	struct showone *pick = NULL;
-	float min = FLT_MAX;
-	float t;
-
-	nemoshow_children_for_each(pone, one) {
-		nemoshow_children_for_each(cone, pone) {
-			if (nemoshow_one_has_state(cone, NEMOSHOW_PICK_STATE)) {
-				t = nemoshow_poly_contain_point(one, pone, cone, x, y);
-				if (min > t) {
-					min = t;
-					pick = cone;
-				}
-			}
-		}
-	}
-
-	return pick;
-}
-
 struct showone *nemoshow_canvas_pick_one(struct showone *one, float x, float y)
 {
-	if (one->sub == NEMOSHOW_CANVAS_PIPELINE_TYPE)
-		return nemoshow_canvas_pick_poly(one, x, y);
-
 	return nemoshow_canvas_pick_item(one, x, y);
 }
 

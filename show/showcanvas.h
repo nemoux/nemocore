@@ -15,7 +15,6 @@ NEMO_BEGIN_EXTERN_C
 #include <talegl.h>
 
 #include <showone.h>
-#include <showpipe.h>
 
 #define	NEMOSHOW_CANVAS_TYPE_MAX		(32)
 
@@ -24,8 +23,7 @@ typedef enum {
 	NEMOSHOW_CANVAS_VECTOR_TYPE = 1,
 	NEMOSHOW_CANVAS_OPENGL_TYPE = 2,
 	NEMOSHOW_CANVAS_PIXMAN_TYPE = 3,
-	NEMOSHOW_CANVAS_PIPELINE_TYPE = 4,
-	NEMOSHOW_CANVAS_BACK_TYPE = 5,
+	NEMOSHOW_CANVAS_BACK_TYPE = 4,
 	NEMOSHOW_CANVAS_LAST_TYPE
 } NemoShowCanvasType;
 
@@ -63,8 +61,6 @@ struct showcanvas {
 	double alpha;
 
 	struct talenode *node;
-
-	GLuint fbo, dbo;
 
 	double width, height;
 
