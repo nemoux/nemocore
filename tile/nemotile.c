@@ -1524,6 +1524,9 @@ int main(int argc, char *argv[])
 		nemoshow_attach_one(show, canvas);
 
 		if (os_has_file_extension(overlay, "svg") != 0) {
+			blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
+			nemoshow_filter_set_blur(blur, "solid", width * 0.05f);
+
 			one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
 			nemoshow_one_attach(canvas, one);
 			nemoshow_item_set_x(one, 0.0f);
@@ -1531,6 +1534,7 @@ int main(int argc, char *argv[])
 			nemoshow_item_set_width(one, width);
 			nemoshow_item_set_height(one, height);
 			nemoshow_item_set_fill_color(one, 255.0f, 255.0f, 255.0f, 255.0f);
+			nemoshow_item_set_filter(one, blur);
 			nemoshow_item_path_load_svg(one, overlay, 0.0f, 0.0f, width, height);
 		} else {
 			one = nemoshow_item_create(NEMOSHOW_IMAGE_ITEM);
