@@ -1082,16 +1082,16 @@ static GLuint nemotile_dispatch_canvas_filter(struct talenode *node, void *data)
 	struct nemotile *tile = (struct nemotile *)data;
 	GLuint texture = nemotale_node_get_texture(node);
 
-	if (tile->filter != NULL) {
-		nemofx_glfilter_dispatch(tile->filter, texture);
-
-		texture = nemofx_glfilter_get_texture(tile->filter);
-	}
-
 	if (tile->motion != NULL && nemotrans_group_has_transition(tile->trans_group) != 0) {
 		nemofx_glmotion_dispatch(tile->motion, texture);
 
 		texture = nemofx_glmotion_get_texture(tile->motion);
+	}
+
+	if (tile->mask != NULL) {
+		nemofx_glmask_dispatch(tile->mask, texture, nemoshow_canvas_get_texture(tile->over));
+
+		texture = nemofx_glmask_get_texture(tile->mask);
 	}
 
 	return texture;
@@ -1102,10 +1102,10 @@ static GLuint nemotile_dispatch_video_filter(struct talenode *node, void *data)
 	struct nemotile *tile = (struct nemotile *)data;
 	GLuint texture = nemotale_node_get_texture(node);
 
-	if (tile->mask != NULL) {
-		nemofx_glmask_dispatch(tile->mask, texture, nemoshow_canvas_get_texture(tile->over));
+	if (tile->filter != NULL) {
+		nemofx_glfilter_dispatch(tile->filter, texture);
 
-		texture = nemofx_glmask_get_texture(tile->mask);
+		texture = nemofx_glfilter_get_texture(tile->filter);
 	}
 
 	return texture;
