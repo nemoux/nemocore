@@ -309,6 +309,8 @@ void nemofx_glfilter_dispatch(struct glfilter *filter, GLuint texture)
 	glUniform1f(filter->utime, (float)time_current_nsecs() / 1000000000.0f);
 
 	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &vertices[0]);
 	glEnableVertexAttribArray(0);

@@ -324,6 +324,8 @@ void nemofx_glripple_dispatch(struct glripple *ripple, GLuint texture)
 	glUniform1i(ripple->program, 0);
 
 	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	glBindVertexArray(ripple->varray);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ripple->vindex);

@@ -196,6 +196,8 @@ void nemofx_glmotion_dispatch(struct glmotion *motion, GLuint texture)
 	glViewport(0, 0, motion->width, motion->height);
 
 	glBindTexture(GL_TEXTURE_2D, motion->texture[1]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	glUseProgram(motion->program);
 	glUniform1i(motion->utexture, 0);
@@ -224,6 +226,8 @@ void nemofx_glmotion_dispatch(struct glmotion *motion, GLuint texture)
 	glViewport(0, 0, motion->width, motion->height);
 
 	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	glUseProgram(motion->program);
 	glUniform1i(motion->utexture, 0);

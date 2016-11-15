@@ -11,7 +11,7 @@
 #include <oshelper.h>
 #include <nemomisc.h>
 
-static const char GLMASK_SIMPLE_VERTEX_SHADER[] =
+static const char GLMASK_VERTEX_SHADER[] =
 "attribute vec2 position;\n"
 "attribute vec2 texcoord;\n"
 "varying vec2 vtexcoord;\n"
@@ -21,7 +21,7 @@ static const char GLMASK_SIMPLE_VERTEX_SHADER[] =
 "  vtexcoord = texcoord;\n"
 "}\n";
 
-static const char GLMASK_GAUSSIAN_9TAP_FRAGMENT_SHADER[] =
+static const char GLMASK_FRAGMENT_SHADER[] =
 "precision mediump float;\n"
 "varying vec2 vtexcoord;\n"
 "uniform sampler2D tex;\n"
@@ -35,7 +35,7 @@ static const char GLMASK_GAUSSIAN_9TAP_FRAGMENT_SHADER[] =
 
 static GLuint nemofx_glmask_create_program(const char *shader)
 {
-	const char *vertexshader = GLMASK_SIMPLE_VERTEX_SHADER;
+	const char *vertexshader = GLMASK_VERTEX_SHADER;
 	GLuint frag, vert;
 	GLuint program;
 	GLint status;
@@ -86,7 +86,7 @@ struct glmask *nemofx_glmask_create(int32_t width, int32_t height)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	mask->program = nemofx_glmask_create_program(GLMASK_GAUSSIAN_9TAP_FRAGMENT_SHADER);
+	mask->program = nemofx_glmask_create_program(GLMASK_FRAGMENT_SHADER);
 	if (mask->program == 0)
 		goto err1;
 
@@ -159,6 +159,9 @@ void nemofx_glmask_dispatch(struct glmask *mask, GLuint texture, GLuint overlay)
 	glBindTexture(GL_TEXTURE_2D, overlay);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	glUseProgram(mask->program);
 	glUniform1i(mask->utexture, 0);

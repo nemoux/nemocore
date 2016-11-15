@@ -237,6 +237,8 @@ void nemofx_gllight_dispatch(struct gllight *light, GLuint texture)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	glUseProgram(light->program0);
 	glUniform1i(light->udiffuse0, 0);

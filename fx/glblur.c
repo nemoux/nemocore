@@ -192,6 +192,8 @@ void nemofx_glblur_dispatch(struct glblur *blur, GLuint texture)
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	glUseProgram(blur->program);
 	glUniform1i(blur->utexture, 0);
@@ -221,6 +223,8 @@ void nemofx_glblur_dispatch(struct glblur *blur, GLuint texture)
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glBindTexture(GL_TEXTURE_2D, blur->texture[0]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	glUseProgram(blur->program);
 	glUniform1i(blur->utexture, 0);
