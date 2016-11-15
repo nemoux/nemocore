@@ -333,6 +333,8 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 		glUniform4fv(tile->ucolor0, 1, one->color);
 
 		glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_effective_texture(one->texture));
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), &one->vertices[0]);
 		glEnableVertexAttribArray(0);
@@ -1097,6 +1099,20 @@ static GLuint nemotile_dispatch_canvas_filter(struct talenode *node, void *data)
 	return texture;
 }
 
+static GLuint nemotile_dispatch_image_filter(struct talenode *node, void *data)
+{
+	struct nemotile *tile = (struct nemotile *)data;
+	GLuint texture = nemotale_node_get_texture(node);
+
+	if (tile->filter != NULL) {
+		nemofx_glfilter_dispatch(tile->filter, texture);
+
+		texture = nemofx_glfilter_get_texture(tile->filter);
+	}
+
+	return texture;
+}
+
 static GLuint nemotile_dispatch_video_filter(struct talenode *node, void *data)
 {
 	struct nemotile *tile = (struct nemotile *)data;
@@ -1579,6 +1595,9 @@ int main(int argc, char *argv[])
 				nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
 				nemoshow_attach_one(show, canvas);
 
+				node = nemoshow_canvas_get_node(canvas);
+				nemotale_node_set_dispatch_filter(node, nemotile_dispatch_image_filter, tile);
+
 				one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
 				nemoshow_one_attach(canvas, one);
 				nemoshow_item_set_x(one, 0.0f);
@@ -1636,6 +1655,9 @@ int main(int argc, char *argv[])
 			nemoshow_canvas_set_height(canvas, height);
 			nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
 			nemoshow_attach_one(show, canvas);
+
+			node = nemoshow_canvas_get_node(canvas);
+			nemotale_node_set_dispatch_filter(node, nemotile_dispatch_image_filter, tile);
 
 			tile->nsprites = 1;
 			tile->isprites = 0;
