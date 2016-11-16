@@ -89,6 +89,9 @@ extern void nemomatrix_rotate_x(struct nemomatrix *matrix, float cos, float sin)
 extern void nemomatrix_rotate_y(struct nemomatrix *matrix, float cos, float sin);
 extern void nemomatrix_rotate_z(struct nemomatrix *matrix, float cos, float sin);
 
+extern void nemomatrix_perspective(struct nemomatrix *matrix, float left, float right, float bottom, float top, float near, float far);
+extern void nemomatrix_orthogonal(struct nemomatrix *matrix, float left, float right, float bottom, float top, float near, float far);
+
 extern void nemomatrix_append_command(struct nemomatrix *matrix, const char *str);
 
 extern double nemovector_distance(struct nemovector *v0, struct nemovector *v1);

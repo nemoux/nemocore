@@ -485,6 +485,30 @@ void nemomatrix_rotate_z(struct nemomatrix *matrix, float cos, float sin)
 	nemomatrix_multiply(matrix, &rotate);
 }
 
+void nemomatrix_perspective(struct nemomatrix *matrix, float left, float right, float bottom, float top, float near, float far)
+{
+	struct nemomatrix perspective = {
+		2.0f * near / (right - left), 0.0f, (right + left) / (right - left), 0.0f,
+		0.0f, 2.0f * near / (top - bottom), (top + bottom) / (top - bottom), 0.0f,
+		0.0f, 0.0f, -(far + near) / (far - near), -2.0f * far * near / (far - near),
+		0.0f, 0.0f, -1.0f, 0.0f
+	};
+
+	nemomatrix_multiply(matrix, &perspective);
+}
+
+void nemomatrix_orthogonal(struct nemomatrix *matrix, float left, float right, float bottom, float top, float near, float far)
+{
+	struct nemomatrix orthogonal = {
+		2.0f / (right - left), 0.0f, 0.0f, -(right + left) / (right - left),
+		0.0f, 2.0f / (top - bottom), 0.0f, -(top + bottom) / (top - bottom),
+		0.0f, 0.0f, 2.0f / (far - near), -(far + near) / (far - near),
+		0.0f, 0.0f, 0.0f, 1.0f
+	};
+
+	nemomatrix_multiply(matrix, &orthogonal);
+}
+
 void nemomatrix_append_command(struct nemomatrix *matrix, const char *str)
 {
 	struct nemotoken *token;
