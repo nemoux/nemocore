@@ -491,7 +491,7 @@ void nemomatrix_perspective(struct nemomatrix *matrix, float left, float right, 
 		2.0f * near / (right - left), 0.0f, (right + left) / (right - left), 0.0f,
 		0.0f, 2.0f * near / (top - bottom), (top + bottom) / (top - bottom), 0.0f,
 		0.0f, 0.0f, -(far + near) / (far - near), -2.0f * far * near / (far - near),
-		0.0f, 0.0f, -1.0f, 0.0f
+		0.0f, 0.0f, -1.0f, 1.0f
 	};
 
 	nemomatrix_multiply(matrix, &perspective);
