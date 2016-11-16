@@ -73,7 +73,7 @@ int random_get_int(int min, int max)
 	if (min == max)
 		return min;
 
-	return random() % (max - min) + min;
+	return random() % (max - min + 1) + min;
 }
 
 double random_get_double(double min, double max)
