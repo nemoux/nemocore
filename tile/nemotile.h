@@ -79,6 +79,7 @@ struct nemotile {
 	int iactions;
 
 	int is_single;
+	int is_3d;
 
 	struct showone *sprites[128];
 	int nsprites, isprites;

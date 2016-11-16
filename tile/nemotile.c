@@ -15,6 +15,7 @@
 #include <fbohelper.h>
 #include <glshader.h>
 #include <nemofs.h>
+#include <nemopoly.h>
 #include <nemohelper.h>
 #include <nemolog.h>
 #include <nemomisc.h>
@@ -250,10 +251,13 @@ static void nemotile_one_set_color(struct tileone *one, float r, float g, float 
 	one->color[3] = a;
 }
 
-static struct tileone *nemotile_pick_one(struct nemotile *tile, float x, float y)
+static struct tileone *nemotile_pick_simple(struct nemotile *tile, float x, float y)
 {
 	struct tileone *one;
 	struct nemomatrix matrix, inverse;
+
+	x = (x / tile->width * 2.0f) - 1.0f;
+	y = (y / tile->height * 2.0f) - 1.0f;
 
 	nemolist_for_each_reverse(one, &tile->tile_list, link) {
 		nemomatrix_init_identity(&matrix);
@@ -275,6 +279,54 @@ static struct tileone *nemotile_pick_one(struct nemotile *tile, float x, float y
 	}
 
 	return NULL;
+}
+
+static struct tileone *nemotile_pick_complex(struct nemotile *tile, float x, float y)
+{
+	struct tileone *one;
+	struct nemomatrix projection;
+	struct nemomatrix modelview;
+	float t, u, v;
+	int i;
+
+	nemomatrix_init_identity(&projection);
+	nemomatrix_rotate_x(&projection, cos(tile->projection.rx), sin(tile->projection.rx));
+	nemomatrix_rotate_y(&projection, cos(tile->projection.ry), sin(tile->projection.ry));
+	nemomatrix_rotate_z(&projection, cos(tile->projection.rz), sin(tile->projection.rz));
+	nemomatrix_scale_xyz(&projection, tile->projection.sx, tile->projection.sy, tile->projection.sz);
+	nemomatrix_translate_xyz(&projection, tile->projection.tx, tile->projection.ty, tile->projection.tz);
+
+	nemolist_for_each_reverse(one, &tile->tile_list, link) {
+		nemomatrix_init_identity(&modelview);
+		nemomatrix_rotate_x(&modelview, cos(one->vtransform.rx), sin(one->vtransform.rx));
+		nemomatrix_rotate_y(&modelview, cos(one->vtransform.ry), sin(one->vtransform.ry));
+		nemomatrix_rotate_z(&modelview, cos(one->vtransform.rz), sin(one->vtransform.rz));
+		nemomatrix_scale_xyz(&modelview, one->vtransform.sx, one->vtransform.sy, one->vtransform.sz);
+		nemomatrix_translate_xyz(&modelview, one->vtransform.tx, one->vtransform.ty, one->vtransform.tz);
+
+		for (i = 0; i < one->count - 2; i++) {
+			if (nemopoly_pick_triangle(
+						&projection,
+						tile->width, tile->height,
+						&modelview,
+						&one->vertices[i * 3 + 3],
+						&one->vertices[i * 3 + 6],
+						&one->vertices[i * 3 + 9],
+						x, y,
+						&t, &u, &v) > 0)
+				return one;
+		}
+	}
+
+	return NULL;
+}
+
+static struct tileone *nemotile_pick_one(struct nemotile *tile, float x, float y)
+{
+	if (tile->is_3d == 0)
+		return nemotile_pick_simple(tile, x, y);
+
+	return nemotile_pick_complex(tile, x, y);
 }
 
 static struct tileone *nemotile_find_one(struct nemotile *tile, int index)
@@ -442,9 +494,7 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 		if (nemoshow_event_is_touch_down(show, event)) {
 			struct tileone *pone;
 
-			pone = nemotile_pick_one(tile,
-					(nemoshow_event_get_x(event) / tile->width * 2.0f) - 1.0f,
-					(nemoshow_event_get_y(event) / tile->height * 2.0f) - 1.0f);
+			pone = nemotile_pick_one(tile, nemoshow_event_get_x(event), nemoshow_event_get_y(event));
 			if (pone != NULL) {
 				nemolist_remove(&pone->link);
 				nemolist_insert_tail(&tile->tile_list, &pone->link);
@@ -490,8 +540,10 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 				nemotrans_set_float(trans, &tile->projection.tx, 0.0f);
 				nemotrans_set_float(trans, &tile->projection.ty, 0.0f);
+				nemotrans_set_float(trans, &tile->projection.tz, 0.0f);
 				nemotrans_set_float(trans, &tile->projection.sx, 1.0f);
 				nemotrans_set_float(trans, &tile->projection.sy, 1.0f);
+				nemotrans_set_float(trans, &tile->projection.sz, 1.0f);
 
 				nemotrans_group_attach_trans(tile->trans_group, trans);
 
@@ -808,9 +860,7 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 		}
 
 		if (nemoshow_event_is_touch_down(show, event)) {
-			tile->pone = nemotile_pick_one(tile,
-					(nemoshow_event_get_x(event) / tile->width * 2.0f) - 1.0f,
-					(nemoshow_event_get_y(event) / tile->height * 2.0f) - 1.0f);
+			tile->pone = nemotile_pick_one(tile, nemoshow_event_get_x(event), nemoshow_event_get_y(event));
 			if (tile->pone != NULL) {
 				nemolist_remove(&tile->pone->link);
 				nemolist_insert_tail(&tile->tile_list, &tile->pone->link);
@@ -1355,6 +1405,7 @@ int main(int argc, char *argv[])
 		{ "jitter",					required_argument,			NULL,			'j' },
 		{ "padding",				required_argument,			NULL,			'd' },
 		{ "program",				required_argument,			NULL,			'p' },
+		{ "3dspace",				required_argument,			NULL,			's' },
 		{ 0 }
 	};
 
@@ -1384,11 +1435,12 @@ int main(int argc, char *argv[])
 	int columns = 1;
 	int rows = 1;
 	int fps = 60;
+	int is_3d = 0;
 	int opt;
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "w:h:c:r:i:v:t:b:o:f:m:l:e:j:d:p:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:c:r:i:v:t:b:o:f:m:l:e:j:d:p:s", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -1457,6 +1509,10 @@ int main(int argc, char *argv[])
 				programpath = strdup(optarg);
 				break;
 
+			case 's':
+				is_3d = 1;
+				break;
+
 			default:
 				break;
 		}
@@ -1475,14 +1531,17 @@ int main(int argc, char *argv[])
 	tile->linewidth = linewidth;
 	tile->brightness = brightness;
 	tile->jitter = jitter;
+	tile->is_3d = is_3d;
 
 	tile->projection.tx = 0.0f;
 	tile->projection.ty = 0.0f;
+	tile->projection.tz = 0.0f;
 	tile->projection.rx = 0.0f;
 	tile->projection.ry = 0.0f;
 	tile->projection.rz = 0.0f;
 	tile->projection.sx = 1.0f;
 	tile->projection.sy = 1.0f;
+	tile->projection.sz = 1.0f;
 
 	nemolist_init(&tile->tile_list);
 
