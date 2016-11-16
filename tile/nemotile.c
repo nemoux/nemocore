@@ -86,18 +86,20 @@ static struct tileone *nemotile_one_create(int vertices)
 		return NULL;
 	memset(one, 0, sizeof(struct tileone));
 
-	one->vertices = (float *)malloc(sizeof(float[2]) * vertices);
+	one->vertices = (float *)malloc(sizeof(float[3]) * vertices);
 	one->texcoords = (float *)malloc(sizeof(float[2]) * vertices);
 
 	one->count = vertices;
 
 	one->vtransform0.tx = 0.0f;
 	one->vtransform0.ty = 0.0f;
+	one->vtransform0.tz = 0.0f;
 	one->vtransform0.rx = 0.0f;
 	one->vtransform0.ry = 0.0f;
 	one->vtransform0.rz = 0.0f;
 	one->vtransform0.sx = 1.0f;
 	one->vtransform0.sy = 1.0f;
+	one->vtransform0.sz = 1.0f;
 
 	one->ttransform0.tx = 0.0f;
 	one->ttransform0.ty = 0.0f;
@@ -107,11 +109,13 @@ static struct tileone *nemotile_one_create(int vertices)
 
 	one->vtransform.tx = 0.0f;
 	one->vtransform.ty = 0.0f;
+	one->vtransform.tz = 0.0f;
 	one->vtransform.rx = 0.0f;
 	one->vtransform.ry = 0.0f;
 	one->vtransform.rz = 0.0f;
 	one->vtransform.sx = 1.0f;
 	one->vtransform.sy = 1.0f;
+	one->vtransform.sz = 1.0f;
 
 	one->ttransform.tx = 0.0f;
 	one->ttransform.ty = 0.0f;
@@ -144,16 +148,18 @@ static void nemotile_one_set_index(struct tileone *one, int index)
 	one->index = index;
 }
 
-static void nemotile_one_set_vertex(struct tileone *one, int index, float x, float y)
+static void nemotile_one_set_vertex(struct tileone *one, int index, float x, float y, float z)
 {
-	one->vertices[index * 2 + 0] = x;
-	one->vertices[index * 2 + 1] = y;
+	one->vertices[index * 3 + 0] = x;
+	one->vertices[index * 3 + 1] = y;
+	one->vertices[index * 3 + 2] = z;
 }
 
-static void nemotile_one_vertices_translate(struct tileone *one, float tx, float ty)
+static void nemotile_one_vertices_translate(struct tileone *one, float tx, float ty, float tz)
 {
 	one->vtransform.tx = tx;
 	one->vtransform.ty = ty;
+	one->vtransform.tz = tz;
 }
 
 static void nemotile_one_vertices_rotate(struct tileone *one, float rx, float ry, float rz)
@@ -163,16 +169,18 @@ static void nemotile_one_vertices_rotate(struct tileone *one, float rx, float ry
 	one->vtransform.rz = rz;
 }
 
-static void nemotile_one_vertices_scale(struct tileone *one, float sx, float sy)
+static void nemotile_one_vertices_scale(struct tileone *one, float sx, float sy, float sz)
 {
 	one->vtransform.sx = sx;
 	one->vtransform.sy = sy;
+	one->vtransform.sz = sz;
 }
 
-static void nemotile_one_vertices_translate_to(struct tileone *one, float tx, float ty)
+static void nemotile_one_vertices_translate_to(struct tileone *one, float tx, float ty, float tz)
 {
 	one->vtransform0.tx = tx;
 	one->vtransform0.ty = ty;
+	one->vtransform0.tz = tz;
 }
 
 static void nemotile_one_vertices_rotate_to(struct tileone *one, float rx, float ry, float rz)
@@ -182,10 +190,11 @@ static void nemotile_one_vertices_rotate_to(struct tileone *one, float rx, float
 	one->vtransform0.rz = rz;
 }
 
-static void nemotile_one_vertices_scale_to(struct tileone *one, float sx, float sy)
+static void nemotile_one_vertices_scale_to(struct tileone *one, float sx, float sy, float sz)
 {
 	one->vtransform0.sx = sx;
 	one->vtransform0.sy = sy;
+	one->vtransform0.sz = sz;
 }
 
 static void nemotile_one_set_texcoord(struct tileone *one, int index, float tx, float ty)
@@ -251,8 +260,8 @@ static struct tileone *nemotile_pick_one(struct nemotile *tile, float x, float y
 		nemomatrix_rotate_x(&matrix, cos(one->vtransform.rx), sin(one->vtransform.rx));
 		nemomatrix_rotate_y(&matrix, cos(one->vtransform.ry), sin(one->vtransform.ry));
 		nemomatrix_rotate_z(&matrix, cos(one->vtransform.rz), sin(one->vtransform.rz));
-		nemomatrix_scale(&matrix, one->vtransform.sx, one->vtransform.sy);
-		nemomatrix_translate(&matrix, one->vtransform.tx, one->vtransform.ty);
+		nemomatrix_scale_xyz(&matrix, one->vtransform.sx, one->vtransform.sy, one->vtransform.sz);
+		nemomatrix_translate_xyz(&matrix, one->vtransform.tx, one->vtransform.ty, one->vtransform.tz);
 
 		if (nemomatrix_invert(&inverse, &matrix) == 0) {
 			float tx = x;
@@ -296,8 +305,8 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 	nemomatrix_rotate_x(&projection, cos(tile->projection.rx), sin(tile->projection.rx));
 	nemomatrix_rotate_y(&projection, cos(tile->projection.ry), sin(tile->projection.ry));
 	nemomatrix_rotate_z(&projection, cos(tile->projection.rz), sin(tile->projection.rz));
-	nemomatrix_scale(&projection, tile->projection.sx, tile->projection.sy);
-	nemomatrix_translate(&projection, tile->projection.tx, tile->projection.ty);
+	nemomatrix_scale_xyz(&projection, tile->projection.sx, tile->projection.sy, tile->projection.sz);
+	nemomatrix_translate_xyz(&projection, tile->projection.tx, tile->projection.ty, tile->projection.tz);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, tile->fbo);
 
@@ -314,8 +323,8 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 		nemomatrix_rotate_x(&vtransform, cos(one->vtransform.rx), sin(one->vtransform.rx));
 		nemomatrix_rotate_y(&vtransform, cos(one->vtransform.ry), sin(one->vtransform.ry));
 		nemomatrix_rotate_z(&vtransform, cos(one->vtransform.rz), sin(one->vtransform.rz));
-		nemomatrix_scale(&vtransform, one->vtransform.sx, one->vtransform.sy);
-		nemomatrix_translate(&vtransform, one->vtransform.tx, one->vtransform.ty);
+		nemomatrix_scale_xyz(&vtransform, one->vtransform.sx, one->vtransform.sy, one->vtransform.sz);
+		nemomatrix_translate_xyz(&vtransform, one->vtransform.tx, one->vtransform.ty, one->vtransform.tz);
 
 		nemomatrix_init_identity(&ttransform);
 		nemomatrix_rotate(&ttransform, cos(one->ttransform.r), sin(one->ttransform.r));
@@ -336,7 +345,7 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), &one->vertices[0]);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &one->vertices[0]);
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), &one->texcoords[0]);
 		glEnableVertexAttribArray(1);
@@ -1146,12 +1155,12 @@ static int nemotile_prepare_opengl(struct nemotile *tile, int32_t width, int32_t
 		"uniform mat4 projection;\n"
 		"uniform mat4 vtransform;\n"
 		"uniform mat4 ttransform;\n"
-		"attribute vec2 position;\n"
+		"attribute vec3 position;\n"
 		"attribute vec2 texcoord;\n"
 		"varying vec4 vtexcoord;\n"
 		"void main()\n"
 		"{\n"
-		"  gl_Position = projection * vtransform * vec4(position.xy, 0.0, 1.0);\n"
+		"  gl_Position = projection * vtransform * vec4(position.xyz, 1.0);\n"
 		"  vtexcoord = ttransform * vec4(texcoord.xy, 0.0, 1.0);\n"
 		"}\n";
 	static const char *fragmentshader =
@@ -1166,10 +1175,10 @@ static int nemotile_prepare_opengl(struct nemotile *tile, int32_t width, int32_t
 	static const char *vertexshader_solid =
 		"uniform mat4 projection;\n"
 		"uniform mat4 vtransform;\n"
-		"attribute vec2 position;\n"
+		"attribute vec3 position;\n"
 		"void main()\n"
 		"{\n"
-		"  gl_Position = projection * vtransform * vec4(position.xy, 0.0, 1.0);\n"
+		"  gl_Position = projection * vtransform * vec4(position.xyz, 1.0);\n"
 		"}\n";
 	static const char *fragmentshader_solid =
 		"precision mediump float;\n"
@@ -1219,13 +1228,13 @@ static int nemotile_prepare_image(struct nemotile *tile, int columns, int rows, 
 		for (x = 0; x < columns && index < tile->nsprites; x++, index++) {
 			one = nemotile_one_create(4);
 			nemotile_one_set_index(one, (y * columns) + x);
-			nemotile_one_set_vertex(one, 0, -1.0f, 1.0f);
+			nemotile_one_set_vertex(one, 0, -1.0f, 1.0f, 0.0f);
 			nemotile_one_set_texcoord(one, 0, 0.0f, 1.0f);
-			nemotile_one_set_vertex(one, 1, 1.0f, 1.0f);
+			nemotile_one_set_vertex(one, 1, 1.0f, 1.0f, 0.0f);
 			nemotile_one_set_texcoord(one, 1, 1.0f, 1.0f);
-			nemotile_one_set_vertex(one, 2, -1.0f, -1.0f);
+			nemotile_one_set_vertex(one, 2, -1.0f, -1.0f, 0.0f);
 			nemotile_one_set_texcoord(one, 2, 0.0f, 0.0f);
-			nemotile_one_set_vertex(one, 3, 1.0f, -1.0f);
+			nemotile_one_set_vertex(one, 3, 1.0f, -1.0f, 0.0f);
 			nemotile_one_set_texcoord(one, 3, 1.0f, 0.0f);
 
 			nemotile_one_set_texture(one, tile->sprites[index]);
@@ -1238,16 +1247,20 @@ static int nemotile_prepare_image(struct nemotile *tile, int columns, int rows, 
 
 			nemotile_one_vertices_translate_to(one,
 					nemotile_get_column_x(columns, x),
-					nemotile_get_row_y(rows, y));
+					nemotile_get_row_y(rows, y),
+					0.0f);
 			nemotile_one_vertices_scale_to(one,
 					nemotile_get_column_sx(columns) * (1.0f - padding),
-					nemotile_get_row_sy(rows) * (1.0f - padding));
+					nemotile_get_row_sy(rows) * (1.0f - padding),
+					1.0f);
 			nemotile_one_vertices_translate(one,
 					nemotile_get_column_x(columns, x) * random_get_double(1.0f - tile->jitter, 1.0f + tile->jitter),
-					nemotile_get_row_y(rows, y) * random_get_double(1.0f - tile->jitter, 1.0f + tile->jitter));
+					nemotile_get_row_y(rows, y) * random_get_double(1.0f - tile->jitter, 1.0f + tile->jitter),
+					0.0f);
 			nemotile_one_vertices_scale(one,
 					nemotile_get_column_sx(columns) * (1.0f - padding) * random_get_double(1.0f - tile->jitter, 1.0f + tile->jitter),
-					nemotile_get_row_sy(rows) * (1.0f - padding) * random_get_double(1.0f - tile->jitter, 1.0f + tile->jitter));
+					nemotile_get_row_sy(rows) * (1.0f - padding) * random_get_double(1.0f - tile->jitter, 1.0f + tile->jitter),
+					1.0f);
 
 			nemolist_insert_tail(&tile->tile_list, &one->link);
 		}
@@ -1265,13 +1278,13 @@ static int nemotile_prepare_video(struct nemotile *tile, int columns, int rows, 
 		for (x = 0; x < columns; x++) {
 			one = nemotile_one_create(4);
 			nemotile_one_set_index(one, (y * columns) + x);
-			nemotile_one_set_vertex(one, 0, -1.0f, 1.0f);
+			nemotile_one_set_vertex(one, 0, -1.0f, 1.0f, 0.0f);
 			nemotile_one_set_texcoord(one, 0, 0.0f, 1.0f);
-			nemotile_one_set_vertex(one, 1, 1.0f, 1.0f);
+			nemotile_one_set_vertex(one, 1, 1.0f, 1.0f, 0.0f);
 			nemotile_one_set_texcoord(one, 1, 1.0f, 1.0f);
-			nemotile_one_set_vertex(one, 2, -1.0f, -1.0f);
+			nemotile_one_set_vertex(one, 2, -1.0f, -1.0f, 0.0f);
 			nemotile_one_set_texcoord(one, 2, 0.0f, 0.0f);
-			nemotile_one_set_vertex(one, 3, 1.0f, -1.0f);
+			nemotile_one_set_vertex(one, 3, 1.0f, -1.0f, 0.0f);
 			nemotile_one_set_texcoord(one, 3, 1.0f, 0.0f);
 
 			nemotile_one_set_texture(one, tile->video);
@@ -1284,16 +1297,20 @@ static int nemotile_prepare_video(struct nemotile *tile, int columns, int rows, 
 
 			nemotile_one_vertices_translate_to(one,
 					nemotile_get_column_x(columns, x),
-					nemotile_get_row_y(rows, y));
+					nemotile_get_row_y(rows, y),
+					0.0f);
 			nemotile_one_vertices_scale_to(one,
 					nemotile_get_column_sx(columns) * (1.0f - padding),
-					nemotile_get_row_sy(rows) * (1.0f - padding));
+					nemotile_get_row_sy(rows) * (1.0f - padding),
+					1.0f);
 			nemotile_one_vertices_translate(one,
 					nemotile_get_column_x(columns, x) * random_get_double(1.0f - tile->jitter, 1.0f + tile->jitter),
-					nemotile_get_row_y(rows, y) * random_get_double(1.0f - tile->jitter, 1.0f + tile->jitter));
+					nemotile_get_row_y(rows, y) * random_get_double(1.0f - tile->jitter, 1.0f + tile->jitter),
+					0.0f);
 			nemotile_one_vertices_scale(one,
 					nemotile_get_column_sx(columns) * (1.0f - padding) * random_get_double(1.0f - tile->jitter, 1.0f + tile->jitter),
-					nemotile_get_row_sy(rows) * (1.0f - padding) * random_get_double(1.0f - tile->jitter, 1.0f + tile->jitter));
+					nemotile_get_row_sy(rows) * (1.0f - padding) * random_get_double(1.0f - tile->jitter, 1.0f + tile->jitter),
+					1.0f);
 
 			nemotile_one_texcoords_translate_to(one,
 					nemotile_get_tx_from_vx(tile->columns, 0, one->vtransform.sx, one->vtransform0.tx),

@@ -31,15 +31,15 @@ struct tileone {
 	int count;
 
 	struct {
-		float tx, ty;
+		float tx, ty, tz;
 		float rx, ry, rz;
-		float sx, sy;
+		float sx, sy, sz;
 	} vtransform0;
 
 	struct {
-		float tx, ty;
+		float tx, ty, tz;
 		float rx, ry, rz;
-		float sx, sy;
+		float sx, sy, sz;
 	} vtransform;
 
 	struct {
@@ -111,9 +111,9 @@ struct nemotile {
 	GLuint ucolor1;
 
 	struct {
-		float tx, ty;
+		float tx, ty, tz;
 		float rx, ry, rz;
-		float sx, sy;
+		float sx, sy, sz;
 	} projection;
 
 	float linewidth;
