@@ -117,7 +117,6 @@ struct nemotile {
 		float sx, sy, sz;
 	} projection;
 
-	float linewidth;
 	float brightness;
 	float jitter;
 

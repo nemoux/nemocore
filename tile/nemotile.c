@@ -384,7 +384,6 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 	struct nemomatrix projection;
 	struct nemomatrix vtransform;
 	struct nemomatrix ttransform;
-	float linecolor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	int i;
 
 	nemotrans_group_dispatch(tile->trans_group, time_current_msecs());
@@ -445,28 +444,13 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, one->count);
 
 			glBindTexture(GL_TEXTURE_2D, 0);
-
-			if (tile->linewidth > 0.0f) {
-				glUseProgram(tile->programs[1]);
-				glBindAttribLocation(tile->programs[1], 0, "position");
-
-				glUniformMatrix4fv(tile->uprojection1, 1, GL_FALSE, projection.d);
-				glUniformMatrix4fv(tile->uvtransform1, 1, GL_FALSE, vtransform.d);
-				glUniform4fv(tile->ucolor1, 1, linecolor);
-
-				glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), &one->vertices[0]);
-				glEnableVertexAttribArray(0);
-
-				glLineWidth(tile->linewidth);
-				glDrawArrays(GL_LINE_STRIP, 0, one->count);
-			}
 		}
 	} else {
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LEQUAL);
 
 		nemomatrix_init_identity(&projection);
-		nemomatrix_perspective(&projection, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f);
+		nemomatrix_perspective(&projection, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 10.0f);
 
 		if (tile->tile_dirty != 0) {
 			nemotile_sort_z_order(tile);
@@ -511,21 +495,6 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, one->count);
 
 			glBindTexture(GL_TEXTURE_2D, 0);
-
-			if (tile->linewidth > 0.0f) {
-				glUseProgram(tile->programs[1]);
-				glBindAttribLocation(tile->programs[1], 0, "position");
-
-				glUniformMatrix4fv(tile->uprojection1, 1, GL_FALSE, projection.d);
-				glUniformMatrix4fv(tile->uvtransform1, 1, GL_FALSE, vtransform.d);
-				glUniform4fv(tile->ucolor1, 1, linecolor);
-
-				glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), &one->vertices[0]);
-				glEnableVertexAttribArray(0);
-
-				glLineWidth(tile->linewidth);
-				glDrawArrays(GL_LINE_STRIP, 0, one->count);
-			}
 		}
 	}
 
@@ -1513,7 +1482,6 @@ int main(int argc, char *argv[])
 		{ "overlay",				required_argument,			NULL,			'o' },
 		{ "fullscreen",			required_argument,			NULL,			'f' },
 		{ "motionblur",			required_argument,			NULL,			'm' },
-		{ "linewidth",			required_argument,			NULL,			'l' },
 		{ "brightness",			required_argument,			NULL,			'e' },
 		{ "jitter",					required_argument,			NULL,			'j' },
 		{ "padding",				required_argument,			NULL,			'd' },
@@ -1538,7 +1506,6 @@ int main(int argc, char *argv[])
 	char *background = NULL;
 	char *overlay = NULL;
 	float motionblur = 0.0f;
-	float linewidth = 0.0f;
 	float brightness = 0.85f;
 	float jitter = 0.0f;
 	float padding = 0.0f;
@@ -1553,7 +1520,7 @@ int main(int argc, char *argv[])
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "w:h:c:r:i:v:t:b:o:f:m:l:e:j:d:p:s", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:c:r:i:v:t:b:o:f:m:e:j:d:p:s", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -1602,10 +1569,6 @@ int main(int argc, char *argv[])
 				motionblur = strtod(optarg, NULL);
 				break;
 
-			case 'l':
-				linewidth = strtod(optarg, NULL);
-				break;
-
 			case 'e':
 				brightness = strtod(optarg, NULL);
 				break;
@@ -1641,7 +1604,6 @@ int main(int argc, char *argv[])
 	tile->columns = columns;
 	tile->rows = rows;
 	tile->timeout = timeout;
-	tile->linewidth = linewidth;
 	tile->brightness = brightness;
 	tile->jitter = jitter;
 	tile->is_3d = is_3d;
