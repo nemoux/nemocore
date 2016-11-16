@@ -1096,10 +1096,10 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 		float planes[6][6] = {
 			{ 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f },
 			{ 0.0f, 0.0f, -2.0f, 0.0f, 0.0f, 0.0f },
-			{ 0.0f, -1.0f, -1.0f, M_PI / 2.0f, 0.0f, 0.0f },
+			{ 0.0f, -1.0f, -1.0f, -M_PI / 2.0f, 0.0f, 0.0f },
 			{ 0.0f, 1.0f, -1.0f, M_PI / 2.0f, 0.0f, 0.0f },
 			{ -1.0f, 0.0f, -1.0f, 0.0f, M_PI / 2.0f, 0.0f },
-			{ 1.0f, 0.0f, -1.0f, 0.0f, M_PI / 2.0f, 0.0f },
+			{ 1.0f, 0.0f, -1.0f, 0.0f, -M_PI / 2.0f, 0.0f },
 		};
 
 		if (nemoshow_event_is_pointer_left_down(show, event)) {
