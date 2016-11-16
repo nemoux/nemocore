@@ -289,12 +289,17 @@ static struct tileone *nemotile_pick_complex(struct nemotile *tile, float x, flo
 	float t, u, v;
 	int i;
 
-	nemomatrix_init_identity(&projection);
-	nemomatrix_rotate_x(&projection, cos(tile->projection.rx), sin(tile->projection.rx));
-	nemomatrix_rotate_y(&projection, cos(tile->projection.ry), sin(tile->projection.ry));
-	nemomatrix_rotate_z(&projection, cos(tile->projection.rz), sin(tile->projection.rz));
-	nemomatrix_scale_xyz(&projection, tile->projection.sx, tile->projection.sy, tile->projection.sz);
-	nemomatrix_translate_xyz(&projection, tile->projection.tx, tile->projection.ty, tile->projection.tz);
+	if (tile->is_3d == 0) {
+		nemomatrix_init_identity(&projection);
+		nemomatrix_rotate_x(&projection, cos(tile->projection.rx), sin(tile->projection.rx));
+		nemomatrix_rotate_y(&projection, cos(tile->projection.ry), sin(tile->projection.ry));
+		nemomatrix_rotate_z(&projection, cos(tile->projection.rz), sin(tile->projection.rz));
+		nemomatrix_scale_xyz(&projection, tile->projection.sx, tile->projection.sy, tile->projection.sz);
+		nemomatrix_translate_xyz(&projection, tile->projection.tx, tile->projection.ty, tile->projection.tz);
+	} else {
+		nemomatrix_init_identity(&projection);
+		nemomatrix_perspective(&projection, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f);
+	}
 
 	nemolist_for_each_reverse(one, &tile->tile_list, link) {
 		nemomatrix_init_identity(&modelview);
@@ -353,14 +358,24 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 
 	nemotrans_group_dispatch(tile->trans_group, time_current_msecs());
 
-	nemomatrix_init_identity(&projection);
-	nemomatrix_rotate_x(&projection, cos(tile->projection.rx), sin(tile->projection.rx));
-	nemomatrix_rotate_y(&projection, cos(tile->projection.ry), sin(tile->projection.ry));
-	nemomatrix_rotate_z(&projection, cos(tile->projection.rz), sin(tile->projection.rz));
-	nemomatrix_scale_xyz(&projection, tile->projection.sx, tile->projection.sy, tile->projection.sz);
-	nemomatrix_translate_xyz(&projection, tile->projection.tx, tile->projection.ty, tile->projection.tz);
+	if (tile->is_3d == 0) {
+		nemomatrix_init_identity(&projection);
+		nemomatrix_rotate_x(&projection, cos(tile->projection.rx), sin(tile->projection.rx));
+		nemomatrix_rotate_y(&projection, cos(tile->projection.ry), sin(tile->projection.ry));
+		nemomatrix_rotate_z(&projection, cos(tile->projection.rz), sin(tile->projection.rz));
+		nemomatrix_scale_xyz(&projection, tile->projection.sx, tile->projection.sy, tile->projection.sz);
+		nemomatrix_translate_xyz(&projection, tile->projection.tx, tile->projection.ty, tile->projection.tz);
+	} else {
+		nemomatrix_init_identity(&projection);
+		nemomatrix_perspective(&projection, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f);
+	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, tile->fbo);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
 
 	glViewport(0, 0,
 			nemoshow_canvas_get_viewport_width(canvas),
