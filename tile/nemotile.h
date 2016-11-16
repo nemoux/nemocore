@@ -34,13 +34,13 @@ struct tileone {
 		float tx, ty, tz;
 		float rx, ry, rz;
 		float sx, sy, sz;
-	} ptransform0;
+	} gtransform0;
 
 	struct {
 		float tx, ty, tz;
 		float rx, ry, rz;
 		float sx, sy, sz;
-	} ptransform;
+	} gtransform;
 
 	struct {
 		float tx, ty, tz;
