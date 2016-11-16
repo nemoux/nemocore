@@ -391,11 +391,6 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 
 	glBindFramebuffer(GL_FRAMEBUFFER, tile->fbo);
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
-
 	glViewport(0, 0,
 			nemoshow_canvas_get_viewport_width(canvas),
 			nemoshow_canvas_get_viewport_height(canvas));
@@ -403,6 +398,9 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClearDepth(0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
 	if (tile->is_3d == 0) {
 		nemomatrix_init_identity(&projection);
@@ -464,6 +462,9 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 			}
 		}
 	} else {
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LEQUAL);
+
 		nemomatrix_init_identity(&projection);
 		nemomatrix_perspective(&projection, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f);
 
