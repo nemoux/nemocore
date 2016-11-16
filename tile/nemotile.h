@@ -34,6 +34,18 @@ struct tileone {
 		float tx, ty, tz;
 		float rx, ry, rz;
 		float sx, sy, sz;
+	} ptransform0;
+
+	struct {
+		float tx, ty, tz;
+		float rx, ry, rz;
+		float sx, sy, sz;
+	} ptransform;
+
+	struct {
+		float tx, ty, tz;
+		float rx, ry, rz;
+		float sx, sy, sz;
 	} vtransform0;
 
 	struct {
@@ -116,6 +128,12 @@ struct nemotile {
 		float rx, ry, rz;
 		float sx, sy, sz;
 	} projection;
+
+	struct {
+		float left, right;
+		float bottom, top;
+		float near, far;
+	} perspective;
 
 	float brightness;
 	float jitter;

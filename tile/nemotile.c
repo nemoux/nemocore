@@ -92,6 +92,16 @@ static struct tileone *nemotile_one_create(int vertices)
 
 	one->count = vertices;
 
+	one->ptransform0.tx = 0.0f;
+	one->ptransform0.ty = 0.0f;
+	one->ptransform0.tz = 0.0f;
+	one->ptransform0.rx = 0.0f;
+	one->ptransform0.ry = 0.0f;
+	one->ptransform0.rz = 0.0f;
+	one->ptransform0.sx = 1.0f;
+	one->ptransform0.sy = 1.0f;
+	one->ptransform0.sz = 1.0f;
+
 	one->vtransform0.tx = 0.0f;
 	one->vtransform0.ty = 0.0f;
 	one->vtransform0.tz = 0.0f;
@@ -107,6 +117,16 @@ static struct tileone *nemotile_one_create(int vertices)
 	one->ttransform0.r = 0.0f;
 	one->ttransform0.sx = 1.0f;
 	one->ttransform0.sy = 1.0f;
+
+	one->ptransform.tx = 0.0f;
+	one->ptransform.ty = 0.0f;
+	one->ptransform.tz = 0.0f;
+	one->ptransform.rx = 0.0f;
+	one->ptransform.ry = 0.0f;
+	one->ptransform.rz = 0.0f;
+	one->ptransform.sx = 1.0f;
+	one->ptransform.sy = 1.0f;
+	one->ptransform.sz = 1.0f;
 
 	one->vtransform.tx = 0.0f;
 	one->vtransform.ty = 0.0f;
@@ -147,6 +167,48 @@ static void nemotile_one_destroy(struct tileone *one)
 static void nemotile_one_set_index(struct tileone *one, int index)
 {
 	one->index = index;
+}
+
+static void nemotile_one_plane_translate(struct tileone *one, float tx, float ty, float tz)
+{
+	one->ptransform.tx = tx;
+	one->ptransform.ty = ty;
+	one->ptransform.tz = tz;
+}
+
+static void nemotile_one_plane_rotate(struct tileone *one, float rx, float ry, float rz)
+{
+	one->ptransform.rx = rx;
+	one->ptransform.ry = ry;
+	one->ptransform.rz = rz;
+}
+
+static void nemotile_one_plane_scale(struct tileone *one, float sx, float sy, float sz)
+{
+	one->ptransform.sx = sx;
+	one->ptransform.sy = sy;
+	one->ptransform.sz = sz;
+}
+
+static void nemotile_one_plane_translate_to(struct tileone *one, float tx, float ty, float tz)
+{
+	one->ptransform0.tx = tx;
+	one->ptransform0.ty = ty;
+	one->ptransform0.tz = tz;
+}
+
+static void nemotile_one_plane_rotate_to(struct tileone *one, float rx, float ry, float rz)
+{
+	one->ptransform0.rx = rx;
+	one->ptransform0.ry = ry;
+	one->ptransform0.rz = rz;
+}
+
+static void nemotile_one_plane_scale_to(struct tileone *one, float sx, float sy, float sz)
+{
+	one->ptransform0.sx = sx;
+	one->ptransform0.sy = sy;
+	one->ptransform0.sz = sz;
 }
 
 static void nemotile_one_set_vertex(struct tileone *one, int index, float x, float y, float z)
@@ -290,7 +352,13 @@ static struct tileone *nemotile_pick_complex(struct nemotile *tile, float x, flo
 	int i, j;
 
 	nemomatrix_init_identity(&projection);
-	nemomatrix_perspective(&projection, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f);
+	nemomatrix_perspective(&projection,
+			tile->perspective.left,
+			tile->perspective.right,
+			tile->perspective.bottom,
+			tile->perspective.top,
+			tile->perspective.near,
+			tile->perspective.far);
 
 	for (i = tile->ntiles - 1; i >= 0; i--) {
 		one = tile->tiles[i];
@@ -301,6 +369,11 @@ static struct tileone *nemotile_pick_complex(struct nemotile *tile, float x, flo
 		nemomatrix_rotate_z(&modelview, cos(one->vtransform.rz), sin(one->vtransform.rz));
 		nemomatrix_scale_xyz(&modelview, one->vtransform.sx, one->vtransform.sy, one->vtransform.sz);
 		nemomatrix_translate_xyz(&modelview, one->vtransform.tx, one->vtransform.ty, one->vtransform.tz);
+		nemomatrix_rotate_x(&modelview, cos(one->ptransform.rx), sin(one->ptransform.rx));
+		nemomatrix_rotate_y(&modelview, cos(one->ptransform.ry), sin(one->ptransform.ry));
+		nemomatrix_rotate_z(&modelview, cos(one->ptransform.rz), sin(one->ptransform.rz));
+		nemomatrix_scale_xyz(&modelview, one->ptransform.sx, one->ptransform.sy, one->ptransform.sz);
+		nemomatrix_translate_xyz(&modelview, one->ptransform.tx, one->ptransform.ty, one->ptransform.tz);
 
 		for (j = 0; j < one->count - 2; j++) {
 			if (nemopoly_pick_triangle(
@@ -450,7 +523,13 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 		glDepthFunc(GL_LEQUAL);
 
 		nemomatrix_init_identity(&projection);
-		nemomatrix_perspective(&projection, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 10.0f);
+		nemomatrix_perspective(&projection,
+				tile->perspective.left,
+				tile->perspective.right,
+				tile->perspective.bottom,
+				tile->perspective.top,
+				tile->perspective.near,
+				tile->perspective.far);
 
 		if (tile->tile_dirty != 0) {
 			nemotile_sort_z_order(tile);
@@ -467,6 +546,11 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 			nemomatrix_rotate_z(&vtransform, cos(one->vtransform.rz), sin(one->vtransform.rz));
 			nemomatrix_scale_xyz(&vtransform, one->vtransform.sx, one->vtransform.sy, one->vtransform.sz);
 			nemomatrix_translate_xyz(&vtransform, one->vtransform.tx, one->vtransform.ty, one->vtransform.tz);
+			nemomatrix_rotate_x(&vtransform, cos(one->ptransform.rx), sin(one->ptransform.rx));
+			nemomatrix_rotate_y(&vtransform, cos(one->ptransform.ry), sin(one->ptransform.ry));
+			nemomatrix_rotate_z(&vtransform, cos(one->ptransform.rz), sin(one->ptransform.rz));
+			nemomatrix_scale_xyz(&vtransform, one->ptransform.sx, one->ptransform.sy, one->ptransform.sz);
+			nemomatrix_translate_xyz(&vtransform, one->ptransform.tx, one->ptransform.ty, one->ptransform.tz);
 
 			nemomatrix_init_identity(&ttransform);
 			nemomatrix_rotate(&ttransform, cos(one->ttransform.r), sin(one->ttransform.r));
@@ -1617,6 +1701,13 @@ int main(int argc, char *argv[])
 	tile->projection.sx = 1.0f;
 	tile->projection.sy = 1.0f;
 	tile->projection.sz = 1.0f;
+
+	tile->perspective.left = -1.0f;
+	tile->perspective.right = 1.0f;
+	tile->perspective.bottom = -1.0f;
+	tile->perspective.top = 1.0f;
+	tile->perspective.near = 1.0f;
+	tile->perspective.far = 10.0f;
 
 	nemolist_init(&tile->tile_list);
 
