@@ -352,6 +352,11 @@ static struct tileone *nemotile_pick_complex(struct nemotile *tile, float x, flo
 	int i, j;
 
 	nemomatrix_init_identity(&projection);
+	nemomatrix_rotate_x(&projection, cos(tile->projection.rx), sin(tile->projection.rx));
+	nemomatrix_rotate_y(&projection, cos(tile->projection.ry), sin(tile->projection.ry));
+	nemomatrix_rotate_z(&projection, cos(tile->projection.rz), sin(tile->projection.rz));
+	nemomatrix_scale_xyz(&projection, tile->projection.sx, tile->projection.sy, tile->projection.sz);
+	nemomatrix_translate_xyz(&projection, tile->projection.tx, tile->projection.ty, tile->projection.tz);
 	nemomatrix_perspective(&projection,
 			tile->perspective.left,
 			tile->perspective.right,
@@ -525,6 +530,11 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 		glDepthFunc(GL_ALWAYS);
 
 		nemomatrix_init_identity(&projection);
+		nemomatrix_rotate_x(&projection, cos(tile->projection.rx), sin(tile->projection.rx));
+		nemomatrix_rotate_y(&projection, cos(tile->projection.ry), sin(tile->projection.ry));
+		nemomatrix_rotate_z(&projection, cos(tile->projection.rz), sin(tile->projection.rz));
+		nemomatrix_scale_xyz(&projection, tile->projection.sx, tile->projection.sy, tile->projection.sz);
+		nemomatrix_translate_xyz(&projection, tile->projection.tx, tile->projection.ty, tile->projection.tz);
 		nemomatrix_perspective(&projection,
 				tile->perspective.left,
 				tile->perspective.right,
@@ -1085,7 +1095,7 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 	} else {
 		float planes[6][6] = {
 			{ 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f },
-			{ 0.0f, 0.0f, -0.25f, 0.0f, 0.0f, 0.0f },
+			{ 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f },
 			{ 0.0f, -1.0f, -1.0f, M_PI / 2.0f, 0.0f, 0.0f },
 			{ 0.0f, 1.0f, -1.0f, M_PI / 2.0f, 0.0f, 0.0f },
 			{ -1.0f, 0.0f, -1.0f, 0.0f, M_PI / 2.0f, 0.0f },
@@ -1761,7 +1771,7 @@ int main(int argc, char *argv[])
 	tile->projection.rz = 0.0f;
 	tile->projection.sx = 1.0f;
 	tile->projection.sy = 1.0f;
-	tile->projection.sz = 1.0f;
+	tile->projection.sz = 0.2f;
 
 	tile->perspective.left = -1.0f;
 	tile->perspective.right = 1.0f;
