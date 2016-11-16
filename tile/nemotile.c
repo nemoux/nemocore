@@ -1097,12 +1097,18 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 			nemolist_for_each(one, &tile->tile_list, link) {
 				trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
-						random_get_int(800, 1600),
-						random_get_int(100, 300));
+						random_get_int(600, 1200), 0);
+
+				nemotrans_set_float(trans, &one->gtransform.tz, planes[plane][2]);
+
+				nemotrans_group_attach_trans(tile->trans_group, trans);
+
+				trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
+						random_get_int(600, 1200),
+						random_get_int(300, 600));
 
 				nemotrans_set_float(trans, &one->gtransform.tx, planes[plane][0]);
 				nemotrans_set_float(trans, &one->gtransform.ty, planes[plane][1]);
-				nemotrans_set_float(trans, &one->gtransform.tz, planes[plane][2]);
 				nemotrans_set_float(trans, &one->gtransform.rx, planes[plane][3]);
 				nemotrans_set_float(trans, &one->gtransform.ry, planes[plane][4]);
 				nemotrans_set_float(trans, &one->gtransform.rz, planes[plane][5]);
@@ -1114,12 +1120,18 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 			nemolist_for_each(one, &tile->tile_list, link) {
 				trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
-						random_get_int(800, 1600),
-						random_get_int(100, 300));
+						random_get_int(600, 1200),
+						random_get_int(300, 600));
+
+				nemotrans_set_float(trans, &one->gtransform.tz, planes[plane][2]);
+
+				nemotrans_group_attach_trans(tile->trans_group, trans);
+
+				trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
+						random_get_int(600, 1200), 0);
 
 				nemotrans_set_float(trans, &one->gtransform.tx, planes[plane][0]);
 				nemotrans_set_float(trans, &one->gtransform.ty, planes[plane][1]);
-				nemotrans_set_float(trans, &one->gtransform.tz, planes[plane][2]);
 				nemotrans_set_float(trans, &one->gtransform.rx, planes[plane][3]);
 				nemotrans_set_float(trans, &one->gtransform.ry, planes[plane][4]);
 				nemotrans_set_float(trans, &one->gtransform.rz, planes[plane][5]);
