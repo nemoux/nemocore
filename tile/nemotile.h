@@ -124,6 +124,11 @@ struct nemotile {
 	struct transgroup *trans_group;
 
 	struct nemolist tile_list;
+	int tile_dirty;
+
+	struct tileone **tiles;
+	int ntiles;
+
 	struct tileone *pone;
 };
 

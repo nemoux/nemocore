@@ -287,21 +287,14 @@ static struct tileone *nemotile_pick_complex(struct nemotile *tile, float x, flo
 	struct nemomatrix projection;
 	struct nemomatrix modelview;
 	float t, u, v;
-	int i;
+	int i, j;
 
-	if (tile->is_3d == 0) {
-		nemomatrix_init_identity(&projection);
-		nemomatrix_rotate_x(&projection, cos(tile->projection.rx), sin(tile->projection.rx));
-		nemomatrix_rotate_y(&projection, cos(tile->projection.ry), sin(tile->projection.ry));
-		nemomatrix_rotate_z(&projection, cos(tile->projection.rz), sin(tile->projection.rz));
-		nemomatrix_scale_xyz(&projection, tile->projection.sx, tile->projection.sy, tile->projection.sz);
-		nemomatrix_translate_xyz(&projection, tile->projection.tx, tile->projection.ty, tile->projection.tz);
-	} else {
-		nemomatrix_init_identity(&projection);
-		nemomatrix_perspective(&projection, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f);
-	}
+	nemomatrix_init_identity(&projection);
+	nemomatrix_perspective(&projection, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f);
 
-	nemolist_for_each_reverse(one, &tile->tile_list, link) {
+	for (i = tile->ntiles - 1; i >= 0; i--) {
+		one = tile->tiles[i];
+
 		nemomatrix_init_identity(&modelview);
 		nemomatrix_rotate_x(&modelview, cos(one->vtransform.rx), sin(one->vtransform.rx));
 		nemomatrix_rotate_y(&modelview, cos(one->vtransform.ry), sin(one->vtransform.ry));
@@ -309,14 +302,14 @@ static struct tileone *nemotile_pick_complex(struct nemotile *tile, float x, flo
 		nemomatrix_scale_xyz(&modelview, one->vtransform.sx, one->vtransform.sy, one->vtransform.sz);
 		nemomatrix_translate_xyz(&modelview, one->vtransform.tx, one->vtransform.ty, one->vtransform.tz);
 
-		for (i = 0; i < one->count - 2; i++) {
+		for (j = 0; j < one->count - 2; j++) {
 			if (nemopoly_pick_triangle(
 						&projection,
 						tile->width, tile->height,
 						&modelview,
-						&one->vertices[i * 3 + 3],
-						&one->vertices[i * 3 + 6],
-						&one->vertices[i * 3 + 9],
+						&one->vertices[j * 3 + 3],
+						&one->vertices[j * 3 + 6],
+						&one->vertices[j * 3 + 9],
 						x, y,
 						&t, &u, &v) > 0)
 				return one;
@@ -346,6 +339,43 @@ static struct tileone *nemotile_find_one(struct nemotile *tile, int index)
 	return NULL;
 }
 
+static void nemotile_prepare_z_order(struct nemotile *tile)
+{
+	struct tileone *one;
+	int index = 0;
+
+	tile->ntiles = nemolist_length(&tile->tile_list);
+	tile->tiles = (struct tileone **)malloc(sizeof(struct tileone *) * tile->ntiles);
+
+	nemolist_for_each(one, &tile->tile_list, link) {
+		tile->tiles[index++] = one;
+	}
+}
+
+static void nemotile_finish_z_order(struct nemotile *tile)
+{
+	free(tile->tiles);
+
+	tile->ntiles = 0;
+}
+
+static int nemotile_compare_z_order(const void *a, const void *b)
+{
+	const struct tileone *one0 = *((const struct tileone **)a);
+	const struct tileone *one1 = *((const struct tileone **)b);
+
+	if (one0->vtransform.tz < one1->vtransform.tz)
+		return -1;
+	if (one0->vtransform.tz == one1->vtransform.tz)
+		return 0;
+	return 1;
+}
+
+static void nemotile_sort_z_order(struct nemotile *tile)
+{
+	qsort(tile->tiles, tile->ntiles, sizeof(struct tileone *), nemotile_compare_z_order);
+}
+
 static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showone *canvas)
 {
 	struct nemotile *tile = (struct nemotile *)nemoshow_get_userdata(show);
@@ -355,20 +385,9 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 	struct nemomatrix vtransform;
 	struct nemomatrix ttransform;
 	float linecolor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	int i;
 
 	nemotrans_group_dispatch(tile->trans_group, time_current_msecs());
-
-	if (tile->is_3d == 0) {
-		nemomatrix_init_identity(&projection);
-		nemomatrix_rotate_x(&projection, cos(tile->projection.rx), sin(tile->projection.rx));
-		nemomatrix_rotate_y(&projection, cos(tile->projection.ry), sin(tile->projection.ry));
-		nemomatrix_rotate_z(&projection, cos(tile->projection.rz), sin(tile->projection.rz));
-		nemomatrix_scale_xyz(&projection, tile->projection.sx, tile->projection.sy, tile->projection.sz);
-		nemomatrix_translate_xyz(&projection, tile->projection.tx, tile->projection.ty, tile->projection.tz);
-	} else {
-		nemomatrix_init_identity(&projection);
-		nemomatrix_perspective(&projection, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f);
-	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, tile->fbo);
 
@@ -385,55 +404,127 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 	glClearDepth(0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	nemolist_for_each(one, &tile->tile_list, link) {
-		nemomatrix_init_identity(&vtransform);
-		nemomatrix_rotate_x(&vtransform, cos(one->vtransform.rx), sin(one->vtransform.rx));
-		nemomatrix_rotate_y(&vtransform, cos(one->vtransform.ry), sin(one->vtransform.ry));
-		nemomatrix_rotate_z(&vtransform, cos(one->vtransform.rz), sin(one->vtransform.rz));
-		nemomatrix_scale_xyz(&vtransform, one->vtransform.sx, one->vtransform.sy, one->vtransform.sz);
-		nemomatrix_translate_xyz(&vtransform, one->vtransform.tx, one->vtransform.ty, one->vtransform.tz);
+	if (tile->is_3d == 0) {
+		nemomatrix_init_identity(&projection);
+		nemomatrix_rotate_x(&projection, cos(tile->projection.rx), sin(tile->projection.rx));
+		nemomatrix_rotate_y(&projection, cos(tile->projection.ry), sin(tile->projection.ry));
+		nemomatrix_rotate_z(&projection, cos(tile->projection.rz), sin(tile->projection.rz));
+		nemomatrix_scale_xyz(&projection, tile->projection.sx, tile->projection.sy, tile->projection.sz);
+		nemomatrix_translate_xyz(&projection, tile->projection.tx, tile->projection.ty, tile->projection.tz);
 
-		nemomatrix_init_identity(&ttransform);
-		nemomatrix_rotate(&ttransform, cos(one->ttransform.r), sin(one->ttransform.r));
-		nemomatrix_scale(&ttransform, one->ttransform.sx, one->ttransform.sy);
-		nemomatrix_translate(&ttransform, one->ttransform.tx, one->ttransform.ty);
+		nemolist_for_each(one, &tile->tile_list, link) {
+			nemomatrix_init_identity(&vtransform);
+			nemomatrix_rotate_x(&vtransform, cos(one->vtransform.rx), sin(one->vtransform.rx));
+			nemomatrix_rotate_y(&vtransform, cos(one->vtransform.ry), sin(one->vtransform.ry));
+			nemomatrix_rotate_z(&vtransform, cos(one->vtransform.rz), sin(one->vtransform.rz));
+			nemomatrix_scale_xyz(&vtransform, one->vtransform.sx, one->vtransform.sy, one->vtransform.sz);
+			nemomatrix_translate_xyz(&vtransform, one->vtransform.tx, one->vtransform.ty, one->vtransform.tz);
 
-		glUseProgram(tile->programs[0]);
-		glBindAttribLocation(tile->programs[0], 0, "position");
-		glBindAttribLocation(tile->programs[0], 1, "texcoord");
+			nemomatrix_init_identity(&ttransform);
+			nemomatrix_rotate(&ttransform, cos(one->ttransform.r), sin(one->ttransform.r));
+			nemomatrix_scale(&ttransform, one->ttransform.sx, one->ttransform.sy);
+			nemomatrix_translate(&ttransform, one->ttransform.tx, one->ttransform.ty);
 
-		glUniform1i(tile->utexture0, 0);
-		glUniformMatrix4fv(tile->uprojection0, 1, GL_FALSE, projection.d);
-		glUniformMatrix4fv(tile->uvtransform0, 1, GL_FALSE, vtransform.d);
-		glUniformMatrix4fv(tile->uttransform0, 1, GL_FALSE, ttransform.d);
-		glUniform4fv(tile->ucolor0, 1, one->color);
+			glUseProgram(tile->programs[0]);
+			glBindAttribLocation(tile->programs[0], 0, "position");
+			glBindAttribLocation(tile->programs[0], 1, "texcoord");
 
-		glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_effective_texture(one->texture));
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glUniform1i(tile->utexture0, 0);
+			glUniformMatrix4fv(tile->uprojection0, 1, GL_FALSE, projection.d);
+			glUniformMatrix4fv(tile->uvtransform0, 1, GL_FALSE, vtransform.d);
+			glUniformMatrix4fv(tile->uttransform0, 1, GL_FALSE, ttransform.d);
+			glUniform4fv(tile->ucolor0, 1, one->color);
 
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &one->vertices[0]);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), &one->texcoords[0]);
-		glEnableVertexAttribArray(1);
+			glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_effective_texture(one->texture));
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, one->count);
-
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-		if (tile->linewidth > 0.0f) {
-			glUseProgram(tile->programs[1]);
-			glBindAttribLocation(tile->programs[1], 0, "position");
-
-			glUniformMatrix4fv(tile->uprojection1, 1, GL_FALSE, projection.d);
-			glUniformMatrix4fv(tile->uvtransform1, 1, GL_FALSE, vtransform.d);
-			glUniform4fv(tile->ucolor1, 1, linecolor);
-
-			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), &one->vertices[0]);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &one->vertices[0]);
 			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), &one->texcoords[0]);
+			glEnableVertexAttribArray(1);
 
-			glLineWidth(tile->linewidth);
-			glDrawArrays(GL_LINE_STRIP, 0, one->count);
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, one->count);
+
+			glBindTexture(GL_TEXTURE_2D, 0);
+
+			if (tile->linewidth > 0.0f) {
+				glUseProgram(tile->programs[1]);
+				glBindAttribLocation(tile->programs[1], 0, "position");
+
+				glUniformMatrix4fv(tile->uprojection1, 1, GL_FALSE, projection.d);
+				glUniformMatrix4fv(tile->uvtransform1, 1, GL_FALSE, vtransform.d);
+				glUniform4fv(tile->ucolor1, 1, linecolor);
+
+				glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), &one->vertices[0]);
+				glEnableVertexAttribArray(0);
+
+				glLineWidth(tile->linewidth);
+				glDrawArrays(GL_LINE_STRIP, 0, one->count);
+			}
+		}
+	} else {
+		nemomatrix_init_identity(&projection);
+		nemomatrix_perspective(&projection, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f);
+
+		if (tile->tile_dirty != 0) {
+			nemotile_sort_z_order(tile);
+
+			tile->tile_dirty = 0;
+		}
+
+		for (i = 0; i < tile->ntiles; i++) {
+			one = tile->tiles[i];
+
+			nemomatrix_init_identity(&vtransform);
+			nemomatrix_rotate_x(&vtransform, cos(one->vtransform.rx), sin(one->vtransform.rx));
+			nemomatrix_rotate_y(&vtransform, cos(one->vtransform.ry), sin(one->vtransform.ry));
+			nemomatrix_rotate_z(&vtransform, cos(one->vtransform.rz), sin(one->vtransform.rz));
+			nemomatrix_scale_xyz(&vtransform, one->vtransform.sx, one->vtransform.sy, one->vtransform.sz);
+			nemomatrix_translate_xyz(&vtransform, one->vtransform.tx, one->vtransform.ty, one->vtransform.tz);
+
+			nemomatrix_init_identity(&ttransform);
+			nemomatrix_rotate(&ttransform, cos(one->ttransform.r), sin(one->ttransform.r));
+			nemomatrix_scale(&ttransform, one->ttransform.sx, one->ttransform.sy);
+			nemomatrix_translate(&ttransform, one->ttransform.tx, one->ttransform.ty);
+
+			glUseProgram(tile->programs[0]);
+			glBindAttribLocation(tile->programs[0], 0, "position");
+			glBindAttribLocation(tile->programs[0], 1, "texcoord");
+
+			glUniform1i(tile->utexture0, 0);
+			glUniformMatrix4fv(tile->uprojection0, 1, GL_FALSE, projection.d);
+			glUniformMatrix4fv(tile->uvtransform0, 1, GL_FALSE, vtransform.d);
+			glUniformMatrix4fv(tile->uttransform0, 1, GL_FALSE, ttransform.d);
+			glUniform4fv(tile->ucolor0, 1, one->color);
+
+			glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_effective_texture(one->texture));
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &one->vertices[0]);
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), &one->texcoords[0]);
+			glEnableVertexAttribArray(1);
+
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, one->count);
+
+			glBindTexture(GL_TEXTURE_2D, 0);
+
+			if (tile->linewidth > 0.0f) {
+				glUseProgram(tile->programs[1]);
+				glBindAttribLocation(tile->programs[1], 0, "position");
+
+				glUniformMatrix4fv(tile->uprojection1, 1, GL_FALSE, projection.d);
+				glUniformMatrix4fv(tile->uvtransform1, 1, GL_FALSE, vtransform.d);
+				glUniform4fv(tile->ucolor1, 1, linecolor);
+
+				glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), &one->vertices[0]);
+				glEnableVertexAttribArray(0);
+
+				glLineWidth(tile->linewidth);
+				glDrawArrays(GL_LINE_STRIP, 0, one->count);
+			}
 		}
 	}
 
@@ -513,6 +604,7 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 			if (pone != NULL) {
 				nemolist_remove(&pone->link);
 				nemolist_insert_tail(&tile->tile_list, &pone->link);
+				tile->tile_dirty = 1;
 
 				nemolist_for_each(one, &tile->tile_list, link) {
 					trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
@@ -634,6 +726,7 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 				nemolist_remove(&tile->pone->link);
 				nemolist_insert_tail(&tile->tile_list, &tile->pone->link);
+				tile->tile_dirty = 1;
 			} else if (tile->slideshow == 2) {
 				tile->csprites = tile->nsprites / 2;
 
@@ -688,6 +781,7 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 				nemolist_remove(&tile->pone->link);
 				nemolist_insert_tail(&tile->tile_list, &tile->pone->link);
+				tile->tile_dirty = 1;
 			} else if (tile->slideshow == 3) {
 				tile->csprites = tile->columns / 2;
 				tile->rsprites = tile->rows / 2;
@@ -780,6 +874,7 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 					nemolist_remove(&tile->pone->link);
 					nemolist_insert_tail(&tile->tile_list, &tile->pone->link);
+					tile->tile_dirty = 1;
 				}
 			} else if (tile->slideshow == 2) {
 				int csprites = tile->csprites;
@@ -844,6 +939,7 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 						nemolist_remove(&one->link);
 						nemolist_insert_tail(&tile->tile_list, &one->link);
+						tile->tile_dirty = 1;
 					}
 				}
 			} else if (tile->slideshow == 3) {
@@ -879,6 +975,7 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 			if (tile->pone != NULL) {
 				nemolist_remove(&tile->pone->link);
 				nemolist_insert_tail(&tile->tile_list, &tile->pone->link);
+				tile->tile_dirty = 1;
 
 				nemolist_for_each(one, &tile->tile_list, link) {
 					if (one == tile->pone) {
@@ -1816,6 +1913,11 @@ int main(int argc, char *argv[])
 		nemotile_prepare_video(tile, columns, rows, padding);
 
 		tile->is_single = 1;
+	}
+
+	if (tile->is_3d != 0) {
+		nemotile_prepare_z_order(tile);
+		nemotile_sort_z_order(tile);
 	}
 
 	tile->timer = timer = nemotimer_create(tool);
