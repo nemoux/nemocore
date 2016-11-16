@@ -96,6 +96,16 @@ static inline int nemotrans_group_has_transition(struct transgroup *group)
 	return nemolist_empty(&group->list) == 0;
 }
 
+static inline uint32_t nemotrans_get_duration(struct nemotrans *trans)
+{
+	return trans->duration;
+}
+
+static inline uint32_t nemotrans_get_delay(struct nemotrans *trans)
+{
+	return trans->delay;
+}
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif
