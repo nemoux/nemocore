@@ -89,6 +89,7 @@ static struct tileone *nemotile_one_create(int vertices)
 
 	one->vertices = (float *)malloc(sizeof(float[3]) * vertices);
 	one->texcoords = (float *)malloc(sizeof(float[2]) * vertices);
+	one->normals = (float *)malloc(sizeof(float[3]) * vertices);
 
 	one->count = vertices;
 
@@ -160,6 +161,7 @@ static void nemotile_one_destroy(struct tileone *one)
 
 	free(one->vertices);
 	free(one->texcoords);
+	free(one->normals);
 
 	free(one);
 }
@@ -303,6 +305,13 @@ static void nemotile_one_texcoords_scale_to(struct tileone *one, float sx, float
 static void nemotile_one_set_texture(struct tileone *one, struct showone *canvas)
 {
 	one->texture = canvas;
+}
+
+static void nemotile_one_set_normal(struct tileone *one, int index, float x, float y, float z)
+{
+	one->normals[index * 3 + 0] = x;
+	one->normals[index * 3 + 1] = y;
+	one->normals[index * 3 + 2] = z;
 }
 
 static void nemotile_one_set_color(struct tileone *one, float r, float g, float b, float a)
@@ -569,15 +578,17 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 			nemomatrix_scale(&ttransform, one->ttransform.sx, one->ttransform.sy);
 			nemomatrix_translate(&ttransform, one->ttransform.tx, one->ttransform.ty);
 
-			glUseProgram(tile->programs[0]);
-			glBindAttribLocation(tile->programs[0], 0, "position");
-			glBindAttribLocation(tile->programs[0], 1, "texcoord");
+			glUseProgram(tile->programs[2]);
+			glBindAttribLocation(tile->programs[2], 0, "position");
+			glBindAttribLocation(tile->programs[2], 1, "texcoord");
+			glBindAttribLocation(tile->programs[2], 2, "normal");
 
-			glUniform1i(tile->utexture0, 0);
-			glUniformMatrix4fv(tile->uprojection0, 1, GL_FALSE, projection.d);
-			glUniformMatrix4fv(tile->uvtransform0, 1, GL_FALSE, vtransform.d);
-			glUniformMatrix4fv(tile->uttransform0, 1, GL_FALSE, ttransform.d);
-			glUniform4fv(tile->ucolor0, 1, one->color);
+			glUniform1i(tile->utexture2, 0);
+			glUniformMatrix4fv(tile->uprojection2, 1, GL_FALSE, projection.d);
+			glUniformMatrix4fv(tile->uvtransform2, 1, GL_FALSE, vtransform.d);
+			glUniformMatrix4fv(tile->uttransform2, 1, GL_FALSE, ttransform.d);
+			glUniform4fv(tile->uambient2, 1, tile->ambient);
+			glUniform4fv(tile->ulight2, 1, tile->light);
 
 			glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_effective_texture(one->texture));
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -587,6 +598,8 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 			glEnableVertexAttribArray(0);
 			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), &one->texcoords[0]);
 			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &one->normals[0]);
+			glEnableVertexAttribArray(2);
 
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, one->count);
 
@@ -1503,6 +1516,40 @@ static int nemotile_prepare_opengl(struct nemotile *tile, int32_t width, int32_t
 		"{\n"
 		"  gl_FragColor = color;\n"
 		"}\n";
+	static const char *vertexshader_light =
+		"uniform mat4 projection;\n"
+		"uniform mat4 vtransform;\n"
+		"uniform mat4 ttransform;\n"
+		"uniform vec4 light;\n"
+		"attribute vec3 position;\n"
+		"attribute vec2 texcoord;\n"
+		"attribute vec3 normal;\n"
+		"varying vec4 vtexcoord;\n"
+		"varying vec4 vnormal;\n"
+		"varying vec4 vlight;\n"
+		"void main()\n"
+		"{\n"
+		"  gl_Position = projection * vtransform * vec4(position.xyz, 1.0);\n"
+		"  vlight = vec4(light.xyz, 1.0) - vtransform * vec4(position.xyz, 1.0);\n"
+		"  vlight.w = light.w;\n"
+		"  vtexcoord = ttransform * vec4(texcoord.xy, 0.0, 1.0);\n"
+		"  vnormal = normalize(vtransform * vec4(normal, 1.0));\n"
+		"}\n";
+	static const char *fragmentshader_light =
+		"precision mediump float;\n"
+		"uniform sampler2D texture;\n"
+		"uniform vec4 ambient;\n"
+		"varying vec4 vtexcoord;\n"
+		"varying vec4 vnormal;\n"
+		"varying vec4 vlight;\n"
+		"void main()\n"
+		"{\n"
+		"  float v = max(dot(normalize(vlight.xyz), vnormal.xyz), 0.0);\n"
+		"  float f = length(vlight.xyz);\n"
+		"  vec4 t = texture2D(texture, vtexcoord.xy);\n"
+		"  gl_FragColor.rgb = t.rgb * ambient.rgb * t.a + t.rgb * vec3(v, v, v) * vlight.w / f / f / f * t.a;\n"
+		"  gl_FragColor.a = t.a;\n"
+		"}\n";
 
 	fbo_prepare_context(
 			nemoshow_canvas_get_texture(tile->canvas),
@@ -1511,6 +1558,7 @@ static int nemotile_prepare_opengl(struct nemotile *tile, int32_t width, int32_t
 
 	tile->programs[0] = glshader_compile_program(vertexshader, fragmentshader, NULL, NULL);
 	tile->programs[1] = glshader_compile_program(vertexshader_solid, fragmentshader_solid, NULL, NULL);
+	tile->programs[2] = glshader_compile_program(vertexshader_light, fragmentshader_light, NULL, NULL);
 
 	tile->uprojection0 = glGetUniformLocation(tile->programs[0], "projection");
 	tile->uvtransform0 = glGetUniformLocation(tile->programs[0], "vtransform");
@@ -1522,6 +1570,13 @@ static int nemotile_prepare_opengl(struct nemotile *tile, int32_t width, int32_t
 	tile->uvtransform1 = glGetUniformLocation(tile->programs[1], "vtransform");
 	tile->ucolor1 = glGetUniformLocation(tile->programs[1], "color");
 
+	tile->uprojection2 = glGetUniformLocation(tile->programs[2], "projection");
+	tile->uvtransform2 = glGetUniformLocation(tile->programs[2], "vtransform");
+	tile->uttransform2 = glGetUniformLocation(tile->programs[2], "ttransform");
+	tile->utexture2 = glGetUniformLocation(tile->programs[2], "texture");
+	tile->uambient2 = glGetUniformLocation(tile->programs[2], "ambient");
+	tile->ulight2 = glGetUniformLocation(tile->programs[2], "light");
+
 	return 0;
 }
 
@@ -1532,6 +1587,7 @@ static void nemotile_finish_opengl(struct nemotile *tile)
 
 	glDeleteProgram(tile->programs[0]);
 	glDeleteProgram(tile->programs[1]);
+	glDeleteProgram(tile->programs[2]);
 }
 
 static int nemotile_prepare_image(struct nemotile *tile, int columns, int rows, float padding)
@@ -1552,6 +1608,11 @@ static int nemotile_prepare_image(struct nemotile *tile, int columns, int rows, 
 			nemotile_one_set_texcoord(one, 2, 0.0f, 0.0f);
 			nemotile_one_set_vertex(one, 3, 1.0f, -1.0f, 0.0f);
 			nemotile_one_set_texcoord(one, 3, 1.0f, 0.0f);
+
+			nemotile_one_set_normal(one, 0, 0.0f, 0.0f, 1.0f);
+			nemotile_one_set_normal(one, 1, 0.0f, 0.0f, 1.0f);
+			nemotile_one_set_normal(one, 2, 0.0f, 0.0f, 1.0f);
+			nemotile_one_set_normal(one, 3, 0.0f, 0.0f, 1.0f);
 
 			nemotile_one_set_texture(one, tile->sprites[index]);
 
@@ -1602,6 +1663,11 @@ static int nemotile_prepare_video(struct nemotile *tile, int columns, int rows, 
 			nemotile_one_set_texcoord(one, 2, 0.0f, 0.0f);
 			nemotile_one_set_vertex(one, 3, 1.0f, -1.0f, 0.0f);
 			nemotile_one_set_texcoord(one, 3, 1.0f, 0.0f);
+
+			nemotile_one_set_normal(one, 0, 0.0f, 0.0f, 1.0f);
+			nemotile_one_set_normal(one, 1, 0.0f, 0.0f, 1.0f);
+			nemotile_one_set_normal(one, 2, 0.0f, 0.0f, 1.0f);
+			nemotile_one_set_normal(one, 3, 0.0f, 0.0f, 1.0f);
 
 			nemotile_one_set_texture(one, tile->video);
 
@@ -1808,6 +1874,16 @@ int main(int argc, char *argv[])
 	tile->perspective.top = 1.0f;
 	tile->perspective.near = 1.0f;
 	tile->perspective.far = 10.0f;
+
+	tile->light[0] = -0.98f;
+	tile->light[1] = -0.98f;
+	tile->light[2] = -1.98f;
+	tile->light[3] = 1.2f;
+
+	tile->ambient[0] = 0.12f;
+	tile->ambient[1] = 0.12f;
+	tile->ambient[2] = 0.12f;
+	tile->ambient[3] = 0.12f;
 
 	nemolist_init(&tile->tile_list);
 

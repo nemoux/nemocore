@@ -25,6 +25,7 @@ struct tileone {
 
 	float *vertices;
 	float *texcoords;
+	float *normals;
 
 	float color[4];
 
@@ -113,7 +114,7 @@ struct nemotile {
 	uint32_t timeout;
 
 	GLuint fbo, dbo;
-	GLuint programs[2];
+	GLuint programs[3];
 	GLuint uprojection0;
 	GLuint uvtransform0;
 	GLuint uttransform0;
@@ -122,6 +123,12 @@ struct nemotile {
 	GLuint uprojection1;
 	GLuint uvtransform1;
 	GLuint ucolor1;
+	GLuint uprojection2;
+	GLuint uvtransform2;
+	GLuint uttransform2;
+	GLuint utexture2;
+	GLuint uambient2;
+	GLuint ulight2;
 
 	struct {
 		float tx, ty, tz;
@@ -134,6 +141,9 @@ struct nemotile {
 		float bottom, top;
 		float near, far;
 	} perspective;
+
+	float light[4];
+	float ambient[4];
 
 	float brightness;
 	float jitter;
