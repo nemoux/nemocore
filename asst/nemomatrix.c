@@ -7,6 +7,7 @@
 
 #include <nemomatrix.h>
 #include <nemotoken.h>
+#include <nemomisc.h>
 
 static inline void swap_rows(double *a, double *b)
 {
@@ -507,6 +508,94 @@ void nemomatrix_orthogonal(struct nemomatrix *matrix, float left, float right, f
 	};
 
 	nemomatrix_multiply(matrix, &orthogonal);
+}
+
+void nemomatrix_asymmetric(struct nemomatrix *matrix, float *pa, float *pb, float *pc, float *pe, float near, float far)
+{
+	struct nemomatrix transform;
+	struct nemomatrix projection;
+	struct nemomatrix eyetranslate;
+	float va[3], vb[3], vc[3];
+	float vr[3], vu[3], vn[3];
+	float left, right;
+	float bottom, top;
+	float eyedist;
+
+	NEMOVECTOR_SUB(vr, pb, pa);
+	NEMOVECTOR_NORMALIZE(vr);
+	NEMOVECTOR_SUB(vu, pc, pa);
+	NEMOVECTOR_NORMALIZE(vu);
+	NEMOVECTOR_CROSS(vn, vr, vu);
+	NEMOVECTOR_NORMALIZE(vn);
+
+	NEMOVECTOR_SUB(va, pa, pe);
+	NEMOVECTOR_SUB(vb, pb, pe);
+	NEMOVECTOR_SUB(vc, pc, pe);
+
+	eyedist = -NEMOVECTOR_DOT(va, vn);
+
+	left = NEMOVECTOR_DOT(vr, va) * near / eyedist;
+	right = NEMOVECTOR_DOT(vr, vb) * near / eyedist;
+	bottom = NEMOVECTOR_DOT(vu, va) * near / eyedist;
+	top = NEMOVECTOR_DOT(vu, vc) * near / eyedist;
+
+	nemomatrix_init_identity(&projection);
+	nemomatrix_set_factor(&projection, 0, 0, 2.0f * near / (right - left));
+	nemomatrix_set_factor(&projection, 0, 1, 0.0f);
+	nemomatrix_set_factor(&projection, 0, 2, (right + left) / (right - left));
+	nemomatrix_set_factor(&projection, 0, 3, 0.0f);
+	nemomatrix_set_factor(&projection, 1, 0, 0.0f);
+	nemomatrix_set_factor(&projection, 1, 1, 2.0f * near / (top - bottom));
+	nemomatrix_set_factor(&projection, 1, 2, (top + bottom) / (top - bottom));
+	nemomatrix_set_factor(&projection, 1, 3, 0.0f);
+	nemomatrix_set_factor(&projection, 2, 0, 0.0f);
+	nemomatrix_set_factor(&projection, 2, 1, 0.0f);
+	nemomatrix_set_factor(&projection, 2, 2, -(far + near) / (far - near));
+	nemomatrix_set_factor(&projection, 2, 3, -2.0f * far * near / (far - near));
+	nemomatrix_set_factor(&projection, 3, 0, 0.0f);
+	nemomatrix_set_factor(&projection, 3, 1, 0.0f);
+	nemomatrix_set_factor(&projection, 3, 2, -1.0f);
+	nemomatrix_set_factor(&projection, 3, 3, 0.0f);
+
+	nemomatrix_init_identity(&transform);
+	nemomatrix_set_factor(&transform, 0, 0, vr[0]);
+	nemomatrix_set_factor(&transform, 0, 1, vu[0]);
+	nemomatrix_set_factor(&transform, 0, 2, vn[0]);
+	nemomatrix_set_factor(&transform, 0, 3, 0.0f);
+	nemomatrix_set_factor(&transform, 1, 0, vr[1]);
+	nemomatrix_set_factor(&transform, 1, 1, vu[1]);
+	nemomatrix_set_factor(&transform, 1, 2, vn[1]);
+	nemomatrix_set_factor(&transform, 1, 3, 0.0f);
+	nemomatrix_set_factor(&transform, 2, 0, vr[2]);
+	nemomatrix_set_factor(&transform, 2, 1, vu[2]);
+	nemomatrix_set_factor(&transform, 2, 2, vn[2]);
+	nemomatrix_set_factor(&transform, 2, 3, 0.0f);
+	nemomatrix_set_factor(&transform, 3, 0, 0.0f);
+	nemomatrix_set_factor(&transform, 3, 1, 0.0f);
+	nemomatrix_set_factor(&transform, 3, 2, 0.0f);
+	nemomatrix_set_factor(&transform, 3, 3, 1.0f);
+
+	nemomatrix_init_identity(&eyetranslate);
+	nemomatrix_set_factor(&eyetranslate, 0, 0, 1.0f);
+	nemomatrix_set_factor(&eyetranslate, 0, 1, 0.0f);
+	nemomatrix_set_factor(&eyetranslate, 0, 2, 0.0f);
+	nemomatrix_set_factor(&eyetranslate, 0, 3, 0.0f);
+	nemomatrix_set_factor(&eyetranslate, 1, 0, 0.0f);
+	nemomatrix_set_factor(&eyetranslate, 1, 1, 1.0f);
+	nemomatrix_set_factor(&eyetranslate, 1, 2, 0.0f);
+	nemomatrix_set_factor(&eyetranslate, 1, 3, 0.0f);
+	nemomatrix_set_factor(&eyetranslate, 2, 0, 0.0f);
+	nemomatrix_set_factor(&eyetranslate, 2, 1, 0.0f);
+	nemomatrix_set_factor(&eyetranslate, 2, 2, 1.0f);
+	nemomatrix_set_factor(&eyetranslate, 2, 3, 0.0f);
+	nemomatrix_set_factor(&eyetranslate, 3, 0, -pe[0]);
+	nemomatrix_set_factor(&eyetranslate, 3, 1, -pe[1]);
+	nemomatrix_set_factor(&eyetranslate, 3, 2, -pe[2]);
+	nemomatrix_set_factor(&eyetranslate, 3, 3, 1.0f);
+
+	nemomatrix_multiply(matrix, &projection);
+	nemomatrix_multiply(matrix, &transform);
+	nemomatrix_multiply(matrix, &eyetranslate);
 }
 
 void nemomatrix_append_command(struct nemomatrix *matrix, const char *str)

@@ -93,6 +93,8 @@ struct nemotile {
 
 	int is_single;
 	int is_3d;
+	int is_lighting;
+	int is_dynamic_perspective;
 
 	struct showone *sprites[128];
 	int nsprites, isprites;
@@ -141,6 +143,11 @@ struct nemotile {
 		float bottom, top;
 		float near, far;
 	} perspective;
+
+	struct {
+		float a[3], b[3], c[3], e[3];
+		float near, far;
+	} asymmetric;
 
 	float light[4];
 	float ambient[4];

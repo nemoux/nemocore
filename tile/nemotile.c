@@ -538,19 +538,24 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_ALWAYS);
 
-		nemomatrix_init_identity(&projection);
-		nemomatrix_rotate_x(&projection, cos(tile->projection.rx), sin(tile->projection.rx));
-		nemomatrix_rotate_y(&projection, cos(tile->projection.ry), sin(tile->projection.ry));
-		nemomatrix_rotate_z(&projection, cos(tile->projection.rz), sin(tile->projection.rz));
-		nemomatrix_scale_xyz(&projection, tile->projection.sx, tile->projection.sy, tile->projection.sz);
-		nemomatrix_translate_xyz(&projection, tile->projection.tx, tile->projection.ty, tile->projection.tz);
-		nemomatrix_perspective(&projection,
-				tile->perspective.left,
-				tile->perspective.right,
-				tile->perspective.bottom,
-				tile->perspective.top,
-				tile->perspective.near,
-				tile->perspective.far);
+		if (tile->is_dynamic_perspective == 0) {
+			nemomatrix_init_identity(&projection);
+			nemomatrix_rotate_x(&projection, cos(tile->projection.rx), sin(tile->projection.rx));
+			nemomatrix_rotate_y(&projection, cos(tile->projection.ry), sin(tile->projection.ry));
+			nemomatrix_rotate_z(&projection, cos(tile->projection.rz), sin(tile->projection.rz));
+			nemomatrix_scale_xyz(&projection, tile->projection.sx, tile->projection.sy, tile->projection.sz);
+			nemomatrix_translate_xyz(&projection, tile->projection.tx, tile->projection.ty, tile->projection.tz);
+			nemomatrix_perspective(&projection,
+					tile->perspective.left,
+					tile->perspective.right,
+					tile->perspective.bottom,
+					tile->perspective.top,
+					tile->perspective.near,
+					tile->perspective.far);
+		} else {
+			nemomatrix_init_identity(&projection);
+			nemomatrix_asymmetric(&projection, tile->asymmetric.a, tile->asymmetric.b, tile->asymmetric.c, tile->asymmetric.e, tile->asymmetric.near, tile->asymmetric.far);
+		}
 
 		if (tile->tile_dirty != 0) {
 			nemotile_sort_z_order(tile);
@@ -578,28 +583,51 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 			nemomatrix_scale(&ttransform, one->ttransform.sx, one->ttransform.sy);
 			nemomatrix_translate(&ttransform, one->ttransform.tx, one->ttransform.ty);
 
-			glUseProgram(tile->programs[2]);
-			glBindAttribLocation(tile->programs[2], 0, "position");
-			glBindAttribLocation(tile->programs[2], 1, "texcoord");
-			glBindAttribLocation(tile->programs[2], 2, "normal");
+			if (tile->is_lighting == 0) {
+				glUseProgram(tile->programs[0]);
+				glBindAttribLocation(tile->programs[0], 0, "position");
+				glBindAttribLocation(tile->programs[0], 1, "texcoord");
 
-			glUniform1i(tile->utexture2, 0);
-			glUniformMatrix4fv(tile->uprojection2, 1, GL_FALSE, projection.d);
-			glUniformMatrix4fv(tile->uvtransform2, 1, GL_FALSE, vtransform.d);
-			glUniformMatrix4fv(tile->uttransform2, 1, GL_FALSE, ttransform.d);
-			glUniform4fv(tile->uambient2, 1, tile->ambient);
-			glUniform4fv(tile->ulight2, 1, tile->light);
+				glUniform1i(tile->utexture0, 0);
+				glUniformMatrix4fv(tile->uprojection0, 1, GL_FALSE, projection.d);
+				glUniformMatrix4fv(tile->uvtransform0, 1, GL_FALSE, vtransform.d);
+				glUniformMatrix4fv(tile->uttransform0, 1, GL_FALSE, ttransform.d);
+				glUniform4fv(tile->ucolor0, 1, one->color);
 
-			glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_effective_texture(one->texture));
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_effective_texture(one->texture));
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &one->vertices[0]);
-			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), &one->texcoords[0]);
-			glEnableVertexAttribArray(1);
-			glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &one->normals[0]);
-			glEnableVertexAttribArray(2);
+				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &one->vertices[0]);
+				glEnableVertexAttribArray(0);
+				glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), &one->texcoords[0]);
+				glEnableVertexAttribArray(1);
+
+				glDrawArrays(GL_TRIANGLE_STRIP, 0, one->count);
+			} else {
+				glUseProgram(tile->programs[2]);
+				glBindAttribLocation(tile->programs[2], 0, "position");
+				glBindAttribLocation(tile->programs[2], 1, "texcoord");
+				glBindAttribLocation(tile->programs[2], 2, "normal");
+
+				glUniform1i(tile->utexture2, 0);
+				glUniformMatrix4fv(tile->uprojection2, 1, GL_FALSE, projection.d);
+				glUniformMatrix4fv(tile->uvtransform2, 1, GL_FALSE, vtransform.d);
+				glUniformMatrix4fv(tile->uttransform2, 1, GL_FALSE, ttransform.d);
+				glUniform4fv(tile->uambient2, 1, tile->ambient);
+				glUniform4fv(tile->ulight2, 1, tile->light);
+
+				glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_effective_texture(one->texture));
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &one->vertices[0]);
+				glEnableVertexAttribArray(0);
+				glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), &one->texcoords[0]);
+				glEnableVertexAttribArray(1);
+				glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &one->normals[0]);
+				glEnableVertexAttribArray(2);
+			}
 
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, one->count);
 
@@ -1161,6 +1189,13 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 				nemotrans_group_attach_trans(tile->trans_group, trans);
 			}
+		}
+
+		if (nemoshow_event_is_touch_motion(show, event)) {
+			if (nemoshow_event_get_x(event) < tile->width / 2)
+				tile->asymmetric.e[0] += 0.001f;
+			else
+				tile->asymmetric.e[0] -= 0.001f;
 		}
 	}
 
@@ -1730,22 +1765,24 @@ static void nemotile_finish_tiles(struct nemotile *tile)
 int main(int argc, char *argv[])
 {
 	struct option options[] = {
-		{ "width",					required_argument,			NULL,			'w' },
-		{ "height",					required_argument,			NULL,			'h' },
-		{ "columns",				required_argument,			NULL,			'c' },
-		{ "rows",						required_argument,			NULL,			'r' },
-		{ "image",					required_argument,			NULL,			'i' },
-		{ "video",					required_argument,			NULL,			'v' },
-		{ "timeout",				required_argument,			NULL,			't' },
-		{ "background",			required_argument,			NULL,			'b' },
-		{ "overlay",				required_argument,			NULL,			'o' },
-		{ "fullscreen",			required_argument,			NULL,			'f' },
-		{ "motionblur",			required_argument,			NULL,			'm' },
-		{ "brightness",			required_argument,			NULL,			'e' },
-		{ "jitter",					required_argument,			NULL,			'j' },
-		{ "padding",				required_argument,			NULL,			'd' },
-		{ "program",				required_argument,			NULL,			'p' },
-		{ "3dspace",				required_argument,			NULL,			's' },
+		{ "width",									required_argument,			NULL,			'w' },
+		{ "height",									required_argument,			NULL,			'h' },
+		{ "columns",								required_argument,			NULL,			'c' },
+		{ "rows",										required_argument,			NULL,			'r' },
+		{ "image",									required_argument,			NULL,			'i' },
+		{ "video",									required_argument,			NULL,			'v' },
+		{ "timeout",								required_argument,			NULL,			't' },
+		{ "background",							required_argument,			NULL,			'b' },
+		{ "overlay",								required_argument,			NULL,			'o' },
+		{ "fullscreen",							required_argument,			NULL,			'f' },
+		{ "motionblur",							required_argument,			NULL,			'm' },
+		{ "brightness",							required_argument,			NULL,			'e' },
+		{ "jitter",									required_argument,			NULL,			'j' },
+		{ "padding",								required_argument,			NULL,			'd' },
+		{ "program",								required_argument,			NULL,			'p' },
+		{ "3dspace",								required_argument,			NULL,			's' },
+		{ "lighting",								required_argument,			NULL,			'l' },
+		{ "dynamic_perspective",		required_argument,			NULL,			'y' },
 		{ 0 }
 	};
 
@@ -1775,11 +1812,13 @@ int main(int argc, char *argv[])
 	int rows = 1;
 	int fps = 60;
 	int is_3d = 0;
+	int is_lighting = 0;
+	int is_dynamic_perspective = 0;
 	int opt;
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "w:h:c:r:i:v:t:b:o:f:m:e:j:d:p:s", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:c:r:i:v:t:b:o:f:m:e:j:d:p:sly", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -1848,6 +1887,14 @@ int main(int argc, char *argv[])
 				is_3d = 1;
 				break;
 
+			case 'l':
+				is_lighting = 1;
+				break;
+
+			case 'y':
+				is_dynamic_perspective = 1;
+				break;
+
 			default:
 				break;
 		}
@@ -1866,6 +1913,8 @@ int main(int argc, char *argv[])
 	tile->brightness = brightness;
 	tile->jitter = jitter;
 	tile->is_3d = is_3d;
+	tile->is_lighting = is_lighting;
+	tile->is_dynamic_perspective = is_dynamic_perspective;
 
 	tile->projection.tx = 0.0f;
 	tile->projection.ty = 0.0f;
@@ -1883,6 +1932,21 @@ int main(int argc, char *argv[])
 	tile->perspective.top = 1.0f;
 	tile->perspective.near = 1.0f;
 	tile->perspective.far = 10.0f;
+
+	tile->asymmetric.a[0] = -1.0f;
+	tile->asymmetric.a[1] = -1.0f;
+	tile->asymmetric.a[2] = 0.0f;
+	tile->asymmetric.b[0] = 1.0f;
+	tile->asymmetric.b[1] = -1.0f;
+	tile->asymmetric.b[2] = 0.0f;
+	tile->asymmetric.c[0] = -1.0f;
+	tile->asymmetric.c[1] = 1.0f;
+	tile->asymmetric.c[2] = 0.0f;
+	tile->asymmetric.e[0] = 0.0f;
+	tile->asymmetric.e[1] = 0.0f;
+	tile->asymmetric.e[2] = 1.0f;
+	tile->asymmetric.near = 1.0f;
+	tile->asymmetric.far = 10.0f;
 
 	tile->light[0] = -0.98f;
 	tile->light[1] = -0.98f;

@@ -44,6 +44,14 @@ v0[2] = v1[2] + v2[2]
 v0[1] = v1[1] - v2[1];	\
 v0[2] = v1[2] - v2[2]
 
+#define NEMOVECTOR_NORMALIZE(v0)	\
+{	\
+	double l = sqrtf(v0[0] * v0[0] + v0[1] * v0[1] + v0[2] * v0[2]);	\
+	v0[0] /= l;	\
+	v0[1] /= l;	\
+	v0[2] /= l;	\
+}
+
 typedef enum {
 	NEMOMATRIX_TRANSFORM_TRANSLATE = (1 << 0),
 	NEMOMATRIX_TRANSFORM_SCALE = (1 << 1),
@@ -91,6 +99,7 @@ extern void nemomatrix_rotate_z(struct nemomatrix *matrix, float cos, float sin)
 
 extern void nemomatrix_perspective(struct nemomatrix *matrix, float left, float right, float bottom, float top, float near, float far);
 extern void nemomatrix_orthogonal(struct nemomatrix *matrix, float left, float right, float bottom, float top, float near, float far);
+extern void nemomatrix_asymmetric(struct nemomatrix *matrix, float *pa, float *pb, float *pc, float *pe, float near, float far);
 
 extern void nemomatrix_append_command(struct nemomatrix *matrix, const char *str);
 
@@ -112,6 +121,16 @@ extern float nemoquaternion_length(struct nemoquaternion *quat);
 extern void nemoquaternion_conjugate(struct nemoquaternion *quat);
 extern void nemoquaternion_invert(struct nemoquaternion *quat);
 extern void nemoquaternion_normalize(struct nemoquaternion *quat);
+
+static inline void nemomatrix_set_factor(struct nemomatrix *matrix, int y, int x, float v)
+{
+	matrix->d[y * 4 + x] = v;
+}
+
+static inline float nemomatrix_get_factor(struct nemomatrix *matrix, int y, int x)
+{
+	return matrix->d[y * 4 + x];
+}
 
 static inline double nemovector2d_distance(double x0, double y0, double x1, double y1)
 {
