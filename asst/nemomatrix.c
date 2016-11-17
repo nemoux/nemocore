@@ -593,9 +593,9 @@ void nemomatrix_asymmetric(struct nemomatrix *matrix, float *pa, float *pb, floa
 	nemomatrix_set_factor(&eyetranslate, 2, 3, 0.0f);
 	nemomatrix_set_factor(&eyetranslate, 3, 3, 1.0f);
 
-	nemomatrix_multiply(matrix, &projection);
-	nemomatrix_multiply(matrix, &transform);
 	nemomatrix_multiply(matrix, &eyetranslate);
+	nemomatrix_multiply(matrix, &transform);
+	nemomatrix_multiply(matrix, &projection);
 }
 
 void nemomatrix_append_command(struct nemomatrix *matrix, const char *str)
