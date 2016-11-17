@@ -1348,30 +1348,39 @@ static void nemotile_dispatch_timer(struct nemotimer *timer, void *data)
 	}
 
 	if (tile->is_3d != 0) {
-		float planes[6][6] = {
-			{ 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f },
-			{ 0.0f, 0.0f, -2.0f, 0.0f, 0.0f, 0.0f },
-			{ 0.0f, -1.0f, -1.0f, -M_PI / 2.0f, 0.0f, 0.0f },
-			{ 0.0f, 1.0f, -1.0f, M_PI / 2.0f, 0.0f, 0.0f },
-			{ -1.0f, 0.0f, -1.0f, 0.0f, M_PI / 2.0f, 0.0f },
-			{ 1.0f, 0.0f, -1.0f, 0.0f, -M_PI / 2.0f, 0.0f },
-		};
-		int plane;
+		if (tile->iactions == 0) {
+			float planes[6][6] = {
+				{ 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f },
+				{ 0.0f, 0.0f, -2.0f, 0.0f, 0.0f, 0.0f },
+				{ 0.0f, -1.0f, -1.0f, -M_PI / 2.0f, 0.0f, 0.0f },
+				{ 0.0f, 1.0f, -1.0f, M_PI / 2.0f, 0.0f, 0.0f },
+				{ -1.0f, 0.0f, -1.0f, 0.0f, M_PI / 2.0f, 0.0f },
+				{ 1.0f, 0.0f, -1.0f, 0.0f, -M_PI / 2.0f, 0.0f },
+			};
+			int plane;
 
-		nemolist_for_each(one, &tile->tile_list, link) {
-			plane = random_get_int(1, 5);
+			nemolist_for_each(one, &tile->tile_list, link) {
+				plane = random_get_int(1, 5);
 
-			trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
-					random_get_int(800, 1600),
-					random_get_int(600, 1200));
+				trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
+						random_get_int(800, 1600),
+						random_get_int(600, 1200));
 
-			nemotrans_set_float(trans, &one->gtransform.tx, planes[plane][0]);
-			nemotrans_set_float(trans, &one->gtransform.ty, planes[plane][1]);
-			nemotrans_set_float(trans, &one->gtransform.tz, planes[plane][2]);
-			nemotrans_set_float(trans, &one->gtransform.rx, planes[plane][3]);
-			nemotrans_set_float(trans, &one->gtransform.ry, planes[plane][4]);
-			nemotrans_set_float(trans, &one->gtransform.rz, planes[plane][5]);
+				nemotrans_set_float(trans, &one->gtransform.tx, planes[plane][0]);
+				nemotrans_set_float(trans, &one->gtransform.ty, planes[plane][1]);
+				nemotrans_set_float(trans, &one->gtransform.tz, planes[plane][2]);
+				nemotrans_set_float(trans, &one->gtransform.rx, planes[plane][3]);
+				nemotrans_set_float(trans, &one->gtransform.ry, planes[plane][4]);
+				nemotrans_set_float(trans, &one->gtransform.rz, planes[plane][5]);
 
+				nemotrans_group_attach_trans(tile->trans_group, trans);
+			}
+		} else {
+			trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE, random_get_int(2400, 4800), 0);
+			nemotrans_set_float(trans, &tile->light[0], random_get_double(-1.0f, 1.0f));
+			nemotrans_set_float(trans, &tile->light[1], random_get_double(-1.0f, 1.0f));
+			nemotrans_set_float(trans, &tile->light[2], random_get_double(0.0f, -2.0f));
+			nemotrans_set_float(trans, &tile->light[3], random_get_double(1.0f, 2.0f));
 			nemotrans_group_attach_trans(tile->trans_group, trans);
 		}
 	}
@@ -1544,7 +1553,7 @@ static int nemotile_prepare_opengl(struct nemotile *tile, int32_t width, int32_t
 		"varying vec4 vlight;\n"
 		"void main()\n"
 		"{\n"
-		"  float v = max(dot(normalize(vlight.xyz), vnormal.xyz), 0.0);\n"
+		"  float v = abs(dot(normalize(vlight.xyz), vnormal.xyz));\n"
 		"  float f = length(vlight.xyz);\n"
 		"  vec4 t = texture2D(texture, vtexcoord.xy);\n"
 		"  gl_FragColor.rgb = t.rgb * ambient.rgb * t.a + t.rgb * vec3(v, v, v) * vlight.w / f / f / f * t.a;\n"
