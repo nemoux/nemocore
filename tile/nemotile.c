@@ -1285,9 +1285,11 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 				nemotrans_group_attach_trans(tile->trans_group, trans);
 			}
 		} else if (nemoshow_event_is_pointer_motion(show, event)) {
-			float t = nemoshow_event_get_x(event) / tile->width;
+			float tx = nemoshow_event_get_x(event) / tile->width;
+			float ty = nemoshow_event_get_y(event) / tile->height;
 
-			tile->asymmetric.e[0] = t * 3.0f - 1.5f;
+			tile->asymmetric.e[0] = tx * 3.0f - 1.5f;
+			tile->asymmetric.e[1] = ty * 3.0f - 1.5f;
 		}
 	}
 
@@ -1876,9 +1878,9 @@ static int nemotile_prepare_overlay(struct nemotile *tile, int count, float padd
 
 		nemotile_one_set_color(one,
 				random_get_double(0.0f, 0.0f),
-				random_get_double(0.15f, 0.85f),
-				random_get_double(0.15f, 0.85f),
-				random_get_double(0.15f, 0.85f));
+				random_get_double(0.15f, 0.65f),
+				random_get_double(0.15f, 0.65f),
+				random_get_double(0.15f, 0.65f));
 
 		nemotile_one_vertices_translate(one,
 				random_get_double(-0.085f, 0.085f),
