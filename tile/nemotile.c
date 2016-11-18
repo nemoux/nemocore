@@ -1942,7 +1942,7 @@ int main(int argc, char *argv[])
 	tile->asymmetric.e[0] = 0.0f;
 	tile->asymmetric.e[1] = 0.0f;
 	tile->asymmetric.e[2] = 1.0f;
-	tile->asymmetric.near = 1.0f;
+	tile->asymmetric.near = 0.1f;
 	tile->asymmetric.far = 10.0f;
 
 	tile->light[0] = -0.98f;
