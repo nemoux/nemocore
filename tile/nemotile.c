@@ -360,19 +360,29 @@ static struct tileone *nemotile_pick_complex(struct nemotile *tile, float x, flo
 	float t, u, v;
 	int i, j;
 
-	nemomatrix_init_identity(&projection);
-	nemomatrix_rotate_x(&projection, cos(tile->projection.rx), sin(tile->projection.rx));
-	nemomatrix_rotate_y(&projection, cos(tile->projection.ry), sin(tile->projection.ry));
-	nemomatrix_rotate_z(&projection, cos(tile->projection.rz), sin(tile->projection.rz));
-	nemomatrix_scale_xyz(&projection, tile->projection.sx, tile->projection.sy, tile->projection.sz);
-	nemomatrix_translate_xyz(&projection, tile->projection.tx, tile->projection.ty, tile->projection.tz);
-	nemomatrix_perspective(&projection,
-			tile->perspective.left,
-			tile->perspective.right,
-			tile->perspective.bottom,
-			tile->perspective.top,
-			tile->perspective.near,
-			tile->perspective.far);
+	if (tile->is_dynamic_perspective == 0) {
+		nemomatrix_init_identity(&projection);
+		nemomatrix_rotate_x(&projection, cos(tile->projection.rx), sin(tile->projection.rx));
+		nemomatrix_rotate_y(&projection, cos(tile->projection.ry), sin(tile->projection.ry));
+		nemomatrix_rotate_z(&projection, cos(tile->projection.rz), sin(tile->projection.rz));
+		nemomatrix_scale_xyz(&projection, tile->projection.sx, tile->projection.sy, tile->projection.sz);
+		nemomatrix_translate_xyz(&projection, tile->projection.tx, tile->projection.ty, tile->projection.tz);
+		nemomatrix_perspective(&projection,
+				tile->perspective.left,
+				tile->perspective.right,
+				tile->perspective.bottom,
+				tile->perspective.top,
+				tile->perspective.near,
+				tile->perspective.far);
+	} else {
+		nemomatrix_init_identity(&projection);
+		nemomatrix_rotate_x(&projection, cos(tile->projection.rx), sin(tile->projection.rx));
+		nemomatrix_rotate_y(&projection, cos(tile->projection.ry), sin(tile->projection.ry));
+		nemomatrix_rotate_z(&projection, cos(tile->projection.rz), sin(tile->projection.rz));
+		nemomatrix_scale_xyz(&projection, tile->projection.sx, tile->projection.sy, tile->projection.sz);
+		nemomatrix_translate_xyz(&projection, tile->projection.tx, tile->projection.ty, tile->projection.tz);
+		nemomatrix_asymmetric(&projection, tile->asymmetric.a, tile->asymmetric.b, tile->asymmetric.c, tile->asymmetric.e, tile->asymmetric.near, tile->asymmetric.far);
+	}
 
 	for (i = tile->ntiles - 1; i >= 0; i--) {
 		one = tile->tiles[i];
@@ -554,6 +564,11 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 					tile->perspective.far);
 		} else {
 			nemomatrix_init_identity(&projection);
+			nemomatrix_rotate_x(&projection, cos(tile->projection.rx), sin(tile->projection.rx));
+			nemomatrix_rotate_y(&projection, cos(tile->projection.ry), sin(tile->projection.ry));
+			nemomatrix_rotate_z(&projection, cos(tile->projection.rz), sin(tile->projection.rz));
+			nemomatrix_scale_xyz(&projection, tile->projection.sx, tile->projection.sy, tile->projection.sz);
+			nemomatrix_translate_xyz(&projection, tile->projection.tx, tile->projection.ty, tile->projection.tz);
 			nemomatrix_asymmetric(&projection, tile->asymmetric.a, tile->asymmetric.b, tile->asymmetric.c, tile->asymmetric.e, tile->asymmetric.near, tile->asymmetric.far);
 		}
 
@@ -1913,37 +1928,49 @@ int main(int argc, char *argv[])
 	tile->is_lighting = is_lighting;
 	tile->is_dynamic_perspective = is_dynamic_perspective;
 
-	tile->projection.tx = 0.0f;
-	tile->projection.ty = 0.0f;
-	tile->projection.tz = 0.0f;
-	tile->projection.rx = 0.0f;
-	tile->projection.ry = 0.0f;
-	tile->projection.rz = 0.0f;
-	tile->projection.sx = 1.0f;
-	tile->projection.sy = 1.0f;
-	tile->projection.sz = 0.2f;
+	if (is_dynamic_perspective == 0) {
+		tile->projection.tx = 0.0f;
+		tile->projection.ty = 0.0f;
+		tile->projection.tz = -1.0f;
+		tile->projection.rx = 0.0f;
+		tile->projection.ry = 0.0f;
+		tile->projection.rz = 0.0f;
+		tile->projection.sx = 1.0f;
+		tile->projection.sy = 1.0f;
+		tile->projection.sz = 0.5f;
 
-	tile->perspective.left = -1.0f;
-	tile->perspective.right = 1.0f;
-	tile->perspective.bottom = -1.0f;
-	tile->perspective.top = 1.0f;
-	tile->perspective.near = 1.0f;
-	tile->perspective.far = 10.0f;
+		tile->perspective.left = -1.0f;
+		tile->perspective.right = 1.0f;
+		tile->perspective.bottom = -1.0f;
+		tile->perspective.top = 1.0f;
+		tile->perspective.near = 0.99999f;
+		tile->perspective.far = 10.0f;
+	} else {
+		tile->projection.tx = 0.0f;
+		tile->projection.ty = 0.0f;
+		tile->projection.tz = 0.0f;
+		tile->projection.rx = 0.0f;
+		tile->projection.ry = 0.0f;
+		tile->projection.rz = 0.0f;
+		tile->projection.sx = 1.0f;
+		tile->projection.sy = 1.0f;
+		tile->projection.sz = 1.0f;
 
-	tile->asymmetric.a[0] = -1.0f;
-	tile->asymmetric.a[1] = -1.0f;
-	tile->asymmetric.a[2] = 0.0f;
-	tile->asymmetric.b[0] = 1.0f;
-	tile->asymmetric.b[1] = -1.0f;
-	tile->asymmetric.b[2] = 0.0f;
-	tile->asymmetric.c[0] = -1.0f;
-	tile->asymmetric.c[1] = 1.0f;
-	tile->asymmetric.c[2] = 0.0f;
-	tile->asymmetric.e[0] = 0.0f;
-	tile->asymmetric.e[1] = 0.0f;
-	tile->asymmetric.e[2] = 1.0f;
-	tile->asymmetric.near = 0.1f;
-	tile->asymmetric.far = 10.0f;
+		tile->asymmetric.a[0] = -1.0f;
+		tile->asymmetric.a[1] = -1.0f;
+		tile->asymmetric.a[2] = 0.0f;
+		tile->asymmetric.b[0] = 1.0f;
+		tile->asymmetric.b[1] = -1.0f;
+		tile->asymmetric.b[2] = 0.0f;
+		tile->asymmetric.c[0] = -1.0f;
+		tile->asymmetric.c[1] = 1.0f;
+		tile->asymmetric.c[2] = 0.0f;
+		tile->asymmetric.e[0] = 0.0f;
+		tile->asymmetric.e[1] = 0.0f;
+		tile->asymmetric.e[2] = 1.0f;
+		tile->asymmetric.near = 0.99999f;
+		tile->asymmetric.far = 10.0f;
+	}
 
 	tile->light[0] = -0.98f;
 	tile->light[1] = -0.98f;
