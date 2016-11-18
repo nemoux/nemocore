@@ -1574,6 +1574,12 @@ static void nemotile_dispatch_timer(struct nemotimer *timer, void *data)
 			tile->iactions = (tile->iactions + 1) % 2;
 		}
 
+		if (tile->mesh != NULL) {
+			trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE, tile->timeout, 0);
+			nemotrans_set_float(trans, &tile->mesh->vtransform.ry, tile->mesh->vtransform.ry + M_PI * 2.0f);
+			nemotrans_group_attach_trans(tile->trans_group, trans);
+		}
+
 		trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE, random_get_int(2400, 4800), 0);
 		nemotrans_set_float(trans, &tile->light[0], random_get_double(-1.0f, 1.0f));
 		nemotrans_set_float(trans, &tile->light[1], random_get_double(-1.0f, 1.0f));
