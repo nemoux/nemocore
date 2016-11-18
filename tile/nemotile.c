@@ -332,10 +332,10 @@ static struct tileone *nemotile_pick_simple(struct nemotile *tile, float x, floa
 
 	nemolist_for_each_reverse(one, &tile->tile_list, link) {
 		nemomatrix_init_identity(&matrix);
+		nemomatrix_scale_xyz(&matrix, one->vtransform.sx, one->vtransform.sy, one->vtransform.sz);
 		nemomatrix_rotate_x(&matrix, cos(one->vtransform.rx), sin(one->vtransform.rx));
 		nemomatrix_rotate_y(&matrix, cos(one->vtransform.ry), sin(one->vtransform.ry));
 		nemomatrix_rotate_z(&matrix, cos(one->vtransform.rz), sin(one->vtransform.rz));
-		nemomatrix_scale_xyz(&matrix, one->vtransform.sx, one->vtransform.sy, one->vtransform.sz);
 		nemomatrix_translate_xyz(&matrix, one->vtransform.tx, one->vtransform.ty, one->vtransform.tz);
 
 		if (nemomatrix_invert(&inverse, &matrix) == 0) {
@@ -362,10 +362,10 @@ static struct tileone *nemotile_pick_complex(struct nemotile *tile, float x, flo
 
 	if (tile->is_dynamic_perspective == 0) {
 		nemomatrix_init_identity(&projection);
+		nemomatrix_scale_xyz(&projection, tile->projection.sx, tile->projection.sy, tile->projection.sz);
 		nemomatrix_rotate_x(&projection, cos(tile->projection.rx), sin(tile->projection.rx));
 		nemomatrix_rotate_y(&projection, cos(tile->projection.ry), sin(tile->projection.ry));
 		nemomatrix_rotate_z(&projection, cos(tile->projection.rz), sin(tile->projection.rz));
-		nemomatrix_scale_xyz(&projection, tile->projection.sx, tile->projection.sy, tile->projection.sz);
 		nemomatrix_translate_xyz(&projection, tile->projection.tx, tile->projection.ty, tile->projection.tz);
 		nemomatrix_perspective(&projection,
 				tile->perspective.left,
@@ -376,10 +376,10 @@ static struct tileone *nemotile_pick_complex(struct nemotile *tile, float x, flo
 				tile->perspective.far);
 	} else {
 		nemomatrix_init_identity(&projection);
+		nemomatrix_scale_xyz(&projection, tile->projection.sx, tile->projection.sy, tile->projection.sz);
 		nemomatrix_rotate_x(&projection, cos(tile->projection.rx), sin(tile->projection.rx));
 		nemomatrix_rotate_y(&projection, cos(tile->projection.ry), sin(tile->projection.ry));
 		nemomatrix_rotate_z(&projection, cos(tile->projection.rz), sin(tile->projection.rz));
-		nemomatrix_scale_xyz(&projection, tile->projection.sx, tile->projection.sy, tile->projection.sz);
 		nemomatrix_translate_xyz(&projection, tile->projection.tx, tile->projection.ty, tile->projection.tz);
 		nemomatrix_asymmetric(&projection, tile->asymmetric.a, tile->asymmetric.b, tile->asymmetric.c, tile->asymmetric.e, tile->asymmetric.near, tile->asymmetric.far);
 	}
@@ -388,15 +388,15 @@ static struct tileone *nemotile_pick_complex(struct nemotile *tile, float x, flo
 		one = tile->tiles[i];
 
 		nemomatrix_init_identity(&modelview);
+		nemomatrix_scale_xyz(&modelview, one->vtransform.sx, one->vtransform.sy, one->vtransform.sz);
 		nemomatrix_rotate_x(&modelview, cos(one->vtransform.rx), sin(one->vtransform.rx));
 		nemomatrix_rotate_y(&modelview, cos(one->vtransform.ry), sin(one->vtransform.ry));
 		nemomatrix_rotate_z(&modelview, cos(one->vtransform.rz), sin(one->vtransform.rz));
-		nemomatrix_scale_xyz(&modelview, one->vtransform.sx, one->vtransform.sy, one->vtransform.sz);
 		nemomatrix_translate_xyz(&modelview, one->vtransform.tx, one->vtransform.ty, one->vtransform.tz);
+		nemomatrix_scale_xyz(&modelview, one->gtransform.sx, one->gtransform.sy, one->gtransform.sz);
 		nemomatrix_rotate_x(&modelview, cos(one->gtransform.rx), sin(one->gtransform.rx));
 		nemomatrix_rotate_y(&modelview, cos(one->gtransform.ry), sin(one->gtransform.ry));
 		nemomatrix_rotate_z(&modelview, cos(one->gtransform.rz), sin(one->gtransform.rz));
-		nemomatrix_scale_xyz(&modelview, one->gtransform.sx, one->gtransform.sy, one->gtransform.sz);
 		nemomatrix_translate_xyz(&modelview, one->gtransform.tx, one->gtransform.ty, one->gtransform.tz);
 
 		for (j = 0; j < one->count - 2; j++) {
@@ -480,15 +480,15 @@ static void nemotile_render_2d_one(struct nemotile *tile, struct nemomatrix *pro
 	struct nemomatrix ttransform;
 
 	nemomatrix_init_identity(&vtransform);
+	nemomatrix_scale_xyz(&vtransform, one->vtransform.sx, one->vtransform.sy, one->vtransform.sz);
 	nemomatrix_rotate_x(&vtransform, cos(one->vtransform.rx), sin(one->vtransform.rx));
 	nemomatrix_rotate_y(&vtransform, cos(one->vtransform.ry), sin(one->vtransform.ry));
 	nemomatrix_rotate_z(&vtransform, cos(one->vtransform.rz), sin(one->vtransform.rz));
-	nemomatrix_scale_xyz(&vtransform, one->vtransform.sx, one->vtransform.sy, one->vtransform.sz);
 	nemomatrix_translate_xyz(&vtransform, one->vtransform.tx, one->vtransform.ty, one->vtransform.tz);
 
 	nemomatrix_init_identity(&ttransform);
-	nemomatrix_rotate(&ttransform, cos(one->ttransform.r), sin(one->ttransform.r));
 	nemomatrix_scale(&ttransform, one->ttransform.sx, one->ttransform.sy);
+	nemomatrix_rotate(&ttransform, cos(one->ttransform.r), sin(one->ttransform.r));
 	nemomatrix_translate(&ttransform, one->ttransform.tx, one->ttransform.ty);
 
 	glUseProgram(tile->programs[0]);
@@ -521,20 +521,20 @@ static void nemotile_render_3d_one(struct nemotile *tile, struct nemomatrix *pro
 	struct nemomatrix ttransform;
 
 	nemomatrix_init_identity(&vtransform);
+	nemomatrix_scale_xyz(&vtransform, one->vtransform.sx, one->vtransform.sy, one->vtransform.sz);
 	nemomatrix_rotate_x(&vtransform, cos(one->vtransform.rx), sin(one->vtransform.rx));
 	nemomatrix_rotate_y(&vtransform, cos(one->vtransform.ry), sin(one->vtransform.ry));
 	nemomatrix_rotate_z(&vtransform, cos(one->vtransform.rz), sin(one->vtransform.rz));
-	nemomatrix_scale_xyz(&vtransform, one->vtransform.sx, one->vtransform.sy, one->vtransform.sz);
 	nemomatrix_translate_xyz(&vtransform, one->vtransform.tx, one->vtransform.ty, one->vtransform.tz);
+	nemomatrix_scale_xyz(&vtransform, one->gtransform.sx, one->gtransform.sy, one->gtransform.sz);
 	nemomatrix_rotate_x(&vtransform, cos(one->gtransform.rx), sin(one->gtransform.rx));
 	nemomatrix_rotate_y(&vtransform, cos(one->gtransform.ry), sin(one->gtransform.ry));
 	nemomatrix_rotate_z(&vtransform, cos(one->gtransform.rz), sin(one->gtransform.rz));
-	nemomatrix_scale_xyz(&vtransform, one->gtransform.sx, one->gtransform.sy, one->gtransform.sz);
 	nemomatrix_translate_xyz(&vtransform, one->gtransform.tx, one->gtransform.ty, one->gtransform.tz);
 
 	nemomatrix_init_identity(&ttransform);
-	nemomatrix_rotate(&ttransform, cos(one->ttransform.r), sin(one->ttransform.r));
 	nemomatrix_scale(&ttransform, one->ttransform.sx, one->ttransform.sy);
+	nemomatrix_rotate(&ttransform, cos(one->ttransform.r), sin(one->ttransform.r));
 	nemomatrix_translate(&ttransform, one->ttransform.tx, one->ttransform.ty);
 
 	glUseProgram(tile->programs[0]);
@@ -567,20 +567,20 @@ static void nemotile_render_3d_lighting_one(struct nemotile *tile, struct nemoma
 	struct nemomatrix ttransform;
 
 	nemomatrix_init_identity(&vtransform);
+	nemomatrix_scale_xyz(&vtransform, one->vtransform.sx, one->vtransform.sy, one->vtransform.sz);
 	nemomatrix_rotate_x(&vtransform, cos(one->vtransform.rx), sin(one->vtransform.rx));
 	nemomatrix_rotate_y(&vtransform, cos(one->vtransform.ry), sin(one->vtransform.ry));
 	nemomatrix_rotate_z(&vtransform, cos(one->vtransform.rz), sin(one->vtransform.rz));
-	nemomatrix_scale_xyz(&vtransform, one->vtransform.sx, one->vtransform.sy, one->vtransform.sz);
 	nemomatrix_translate_xyz(&vtransform, one->vtransform.tx, one->vtransform.ty, one->vtransform.tz);
+	nemomatrix_scale_xyz(&vtransform, one->gtransform.sx, one->gtransform.sy, one->gtransform.sz);
 	nemomatrix_rotate_x(&vtransform, cos(one->gtransform.rx), sin(one->gtransform.rx));
 	nemomatrix_rotate_y(&vtransform, cos(one->gtransform.ry), sin(one->gtransform.ry));
 	nemomatrix_rotate_z(&vtransform, cos(one->gtransform.rz), sin(one->gtransform.rz));
-	nemomatrix_scale_xyz(&vtransform, one->gtransform.sx, one->gtransform.sy, one->gtransform.sz);
 	nemomatrix_translate_xyz(&vtransform, one->gtransform.tx, one->gtransform.ty, one->gtransform.tz);
 
 	nemomatrix_init_identity(&ttransform);
-	nemomatrix_rotate(&ttransform, cos(one->ttransform.r), sin(one->ttransform.r));
 	nemomatrix_scale(&ttransform, one->ttransform.sx, one->ttransform.sy);
+	nemomatrix_rotate(&ttransform, cos(one->ttransform.r), sin(one->ttransform.r));
 	nemomatrix_translate(&ttransform, one->ttransform.tx, one->ttransform.ty);
 
 	glUseProgram(tile->programs[2]);
@@ -637,10 +637,10 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 
 	if (tile->is_3d == 0) {
 		nemomatrix_init_identity(&projection);
+		nemomatrix_scale_xyz(&projection, tile->projection.sx, tile->projection.sy, tile->projection.sz);
 		nemomatrix_rotate_x(&projection, cos(tile->projection.rx), sin(tile->projection.rx));
 		nemomatrix_rotate_y(&projection, cos(tile->projection.ry), sin(tile->projection.ry));
 		nemomatrix_rotate_z(&projection, cos(tile->projection.rz), sin(tile->projection.rz));
-		nemomatrix_scale_xyz(&projection, tile->projection.sx, tile->projection.sy, tile->projection.sz);
 		nemomatrix_translate_xyz(&projection, tile->projection.tx, tile->projection.ty, tile->projection.tz);
 
 		nemolist_for_each(one, &tile->tile_list, link) {
@@ -652,10 +652,10 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 
 		if (tile->is_dynamic_perspective == 0) {
 			nemomatrix_init_identity(&projection);
+			nemomatrix_scale_xyz(&projection, tile->projection.sx, tile->projection.sy, tile->projection.sz);
 			nemomatrix_rotate_x(&projection, cos(tile->projection.rx), sin(tile->projection.rx));
 			nemomatrix_rotate_y(&projection, cos(tile->projection.ry), sin(tile->projection.ry));
 			nemomatrix_rotate_z(&projection, cos(tile->projection.rz), sin(tile->projection.rz));
-			nemomatrix_scale_xyz(&projection, tile->projection.sx, tile->projection.sy, tile->projection.sz);
 			nemomatrix_translate_xyz(&projection, tile->projection.tx, tile->projection.ty, tile->projection.tz);
 			nemomatrix_perspective(&projection,
 					tile->perspective.left,
@@ -666,10 +666,10 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 					tile->perspective.far);
 		} else {
 			nemomatrix_init_identity(&projection);
+			nemomatrix_scale_xyz(&projection, tile->projection.sx, tile->projection.sy, tile->projection.sz);
 			nemomatrix_rotate_x(&projection, cos(tile->projection.rx), sin(tile->projection.rx));
 			nemomatrix_rotate_y(&projection, cos(tile->projection.ry), sin(tile->projection.ry));
 			nemomatrix_rotate_z(&projection, cos(tile->projection.rz), sin(tile->projection.rz));
-			nemomatrix_scale_xyz(&projection, tile->projection.sx, tile->projection.sy, tile->projection.sz);
 			nemomatrix_translate_xyz(&projection, tile->projection.tx, tile->projection.ty, tile->projection.tz);
 			nemomatrix_asymmetric(&projection, tile->asymmetric.a, tile->asymmetric.b, tile->asymmetric.c, tile->asymmetric.e, tile->asymmetric.near, tile->asymmetric.far);
 		}
@@ -693,10 +693,10 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 
 		if (tile->is_dynamic_perspective == 0) {
 			nemomatrix_init_identity(&projection);
+			nemomatrix_scale_xyz(&projection, tile->projection.sx, tile->projection.sy, tile->projection.sz);
 			nemomatrix_rotate_x(&projection, cos(tile->projection.rx), sin(tile->projection.rx));
 			nemomatrix_rotate_y(&projection, cos(tile->projection.ry), sin(tile->projection.ry));
 			nemomatrix_rotate_z(&projection, cos(tile->projection.rz), sin(tile->projection.rz));
-			nemomatrix_scale_xyz(&projection, tile->projection.sx, tile->projection.sy, tile->projection.sz);
 			nemomatrix_translate_xyz(&projection, tile->projection.tx, tile->projection.ty, tile->projection.tz);
 			nemomatrix_perspective(&projection,
 					tile->perspective.left,
@@ -707,10 +707,10 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 					tile->perspective.far);
 		} else {
 			nemomatrix_init_identity(&projection);
+			nemomatrix_scale_xyz(&projection, tile->projection.sx, tile->projection.sy, tile->projection.sz);
 			nemomatrix_rotate_x(&projection, cos(tile->projection.rx), sin(tile->projection.rx));
 			nemomatrix_rotate_y(&projection, cos(tile->projection.ry), sin(tile->projection.ry));
 			nemomatrix_rotate_z(&projection, cos(tile->projection.rz), sin(tile->projection.rz));
-			nemomatrix_scale_xyz(&projection, tile->projection.sx, tile->projection.sy, tile->projection.sz);
 			nemomatrix_translate_xyz(&projection, tile->projection.tx, tile->projection.ty, tile->projection.tz);
 			nemomatrix_asymmetric(&projection, tile->asymmetric.a, tile->asymmetric.b, tile->asymmetric.c, tile->asymmetric.e, tile->asymmetric.near, tile->asymmetric.far);
 		}
@@ -1505,15 +1505,29 @@ static void nemotile_dispatch_timer(struct nemotimer *timer, void *data)
 				nemotrans_group_attach_trans(tile->trans_group, trans);
 			}
 		} else {
-			nemolist_for_each(one, &tile->tile_list, link) {
-				trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
-						random_get_int(700, 1400),
-						random_get_int(100, 500));
+			if (tile->iactions == 0) {
+				nemolist_for_each(one, &tile->tile_list, link) {
+					trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
+							random_get_int(700, 1400),
+							random_get_int(100, 500));
 
-				nemotrans_set_float(trans, &one->vtransform.tz, random_get_double(-0.25f, 0.75f));
+					nemotrans_set_float(trans, &one->vtransform.tz, random_get_double(-0.25f, 0.75f));
 
-				nemotrans_group_attach_trans(tile->trans_group, trans);
+					nemotrans_group_attach_trans(tile->trans_group, trans);
+				}
+			} else if (tile->iactions == 1) {
+				nemolist_for_each(one, &tile->tile_list, link) {
+					trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
+							random_get_int(700, 1400),
+							random_get_int(100, 500));
+
+					nemotrans_set_float(trans, &one->vtransform.ry, one->vtransform.ry + M_PI * 2.0f);
+
+					nemotrans_group_attach_trans(tile->trans_group, trans);
+				}
 			}
+
+			tile->iactions = (tile->iactions + 1) % 2;
 		}
 
 		trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE, random_get_int(2400, 4800), 0);
