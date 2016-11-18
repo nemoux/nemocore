@@ -1407,6 +1407,26 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 				tile->asymmetric.e[0] = tx * 3.0f - 1.5f;
 				tile->asymmetric.e[1] = ty * 3.0f - 1.5f;
 			}
+
+			if (nemoshow_event_is_touch_down(show, event)) {
+				trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
+						random_get_int(1200, 1600),
+						random_get_int(200, 400));
+
+				nemotrans_set_float(trans, &tile->projection.sz, 0.001f);
+				nemotrans_set_float(trans, &tile->asymmetric.e[0], 0.0f);
+				nemotrans_set_float(trans, &tile->asymmetric.e[1], 0.0f);
+
+				nemotrans_group_attach_trans(tile->trans_group, trans);
+			} else if (nemoshow_event_is_touch_up(show, event)) {
+				trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
+						random_get_int(1200, 1600),
+						random_get_int(200, 400));
+
+				nemotrans_set_float(trans, &tile->projection.sz, 1.0f);
+
+				nemotrans_group_attach_trans(tile->trans_group, trans);
+			}
 		}
 	}
 
