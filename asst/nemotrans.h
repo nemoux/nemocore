@@ -17,6 +17,7 @@ struct nemotrans;
 struct transgroup;
 
 typedef void (*nemotrans_dispatch_update_t)(struct nemotrans *trans, void *data);
+typedef void (*nemotrans_dispatch_done_t)(struct nemotrans *trans, void *data);
 typedef void (*nemotrans_group_dispatch_first_t)(struct transgroup *group, void *data);
 typedef void (*nemotrans_group_dispatch_last_t)(struct transgroup *group, void *data);
 
@@ -46,6 +47,7 @@ struct nemotrans {
 	uint32_t tag;
 
 	nemotrans_dispatch_update_t dispatch_update;
+	nemotrans_dispatch_done_t dispatch_done;
 
 	void *data;
 };
@@ -69,7 +71,12 @@ extern void nemotrans_group_set_dispatch_first(struct transgroup *group, nemotra
 extern void nemotrans_group_set_dispatch_last(struct transgroup *group, nemotrans_group_dispatch_last_t dispatch);
 extern void nemotrans_group_set_userdata(struct transgroup *group, void *data);
 
+extern void nemotrans_group_ready(struct transgroup *group, uint32_t msecs);
 extern void nemotrans_group_dispatch(struct transgroup *group, uint32_t msecs);
+
+extern struct nemotrans *nemotrans_group_get_last_one(struct transgroup *group, void *var);
+extern struct nemotrans *nemotrans_group_get_last_tag(struct transgroup *group, uint32_t tag);
+extern struct nemotrans *nemotrans_group_get_last_all(struct transgroup *group);
 
 extern void nemotrans_group_remove_one(struct transgroup *group, void *var);
 extern void nemotrans_group_remove_tag(struct transgroup *group, uint32_t tag);
@@ -83,12 +90,14 @@ extern void nemotrans_set_tag(struct nemotrans *trans, uint32_t tag);
 extern void nemotrans_ease_set_type(struct nemotrans *trans, int type);
 extern void nemotrans_ease_set_bezier(struct nemotrans *trans, double x0, double y0, double x1, double y1);
 
+extern int nemotrans_ready(struct nemotrans *trans, uint32_t msecs);
 extern int nemotrans_dispatch(struct nemotrans *trans, uint32_t msecs);
 
 extern void nemotrans_set_float(struct nemotrans *trans, float *var, float value);
 extern void nemotrans_set_double(struct nemotrans *trans, double *var, double value);
 
 extern void nemotrans_set_dispatch_update(struct nemotrans *trans, nemotrans_dispatch_update_t dispatch);
+extern void nemotrans_set_dispatch_done(struct nemotrans *trans, nemotrans_dispatch_done_t dispatch);
 extern void nemotrans_set_userdata(struct nemotrans *trans, void *data);
 
 static inline int nemotrans_group_has_transition(struct transgroup *group)

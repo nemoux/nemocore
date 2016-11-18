@@ -21,6 +21,9 @@
 #include <nemolog.h>
 #include <nemomisc.h>
 
+static void nemotile_dispatch_video_update(struct nemoplay *play, void *data);
+static void nemotile_dispatch_video_done(struct nemoplay *play, void *data);
+
 static inline float nemotile_get_column_x(int columns, int idx)
 {
 	float dx = columns % 2 == 0 ? 0.5f : 0.0f;
@@ -787,6 +790,49 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 	nemoshow_one_dirty(canvas, NEMOSHOW_REDRAW_DIRTY);
 }
 
+static void nemotile_dispatch_video_trans_done(struct nemotrans *trans, void *data)
+{
+	struct nemotile *tile = (struct nemotile *)data;
+	struct tileone *one;
+
+	nemoplay_back_destroy_decoder(tile->decoderback);
+	nemoplay_back_destroy_audio(tile->audioback);
+	nemoplay_back_destroy_video(tile->videoback);
+	nemoplay_destroy(tile->play);
+
+	tile->imovies = (tile->imovies + 1) % nemofs_dir_get_filecount(tile->movies);
+
+	tile->play = nemoplay_create();
+	nemoplay_load_media(tile->play, nemofs_dir_get_filepath(tile->movies, tile->imovies));
+
+	nemoshow_canvas_set_size(tile->video,
+			nemoplay_get_video_width(tile->play),
+			nemoplay_get_video_height(tile->play));
+
+	tile->decoderback = nemoplay_back_create_decoder(tile->play);
+	tile->audioback = nemoplay_back_create_audio_by_ao(tile->play);
+	tile->videoback = nemoplay_back_create_video_by_timer(tile->play, tile->tool);
+	nemoplay_back_set_video_canvas(tile->videoback,
+			tile->video,
+			nemoplay_get_video_width(tile->play),
+			nemoplay_get_video_height(tile->play));
+	nemoplay_back_set_video_update(tile->videoback, nemotile_dispatch_video_update);
+	nemoplay_back_set_video_done(tile->videoback, nemotile_dispatch_video_done);
+	nemoplay_back_set_video_data(tile->videoback, tile);
+
+	nemolist_for_each(one, &tile->tile_list, link) {
+		trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
+				random_get_int(800, 1600),
+				random_get_int(100, 1200));
+
+		nemotrans_set_float(trans, &one->vtransform.tz, random_get_double(-0.25f, 0.75f));
+
+		nemotrans_group_attach_trans(tile->trans_group, trans);
+	}
+
+	nemotimer_set_timeout(tile->timer, tile->timeout);
+}
+
 static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, struct showevent *event)
 {
 	struct nemotile *tile = (struct nemotile *)nemoshow_get_userdata(show);
@@ -1333,7 +1379,28 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 				}
 			}
 		} else {
-			if (nemoshow_event_is_pointer_motion(show, event)) {
+			if (nemoshow_event_is_pointer_right_down(show, event)) {
+				nemolist_for_each(one, &tile->tile_list, link) {
+					trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
+							random_get_int(800, 1600),
+							random_get_int(100, 1200));
+					nemotrans_set_tag(trans, 0x10001);
+
+					nemotrans_set_float(trans, &one->vtransform.tz, 3.0f);
+
+					nemotrans_group_attach_trans(tile->trans_group, trans);
+				}
+
+				nemotrans_group_ready(tile->trans_group, time_current_msecs());
+
+				trans = nemotrans_group_get_last_tag(tile->trans_group, 0x10001);
+				if (trans != NULL) {
+					nemotrans_set_dispatch_done(trans, nemotile_dispatch_video_trans_done);
+					nemotrans_set_userdata(trans, tile);
+
+					nemotimer_set_timeout(tile->timer, tile->timeout);
+				}
+			} else if (nemoshow_event_is_pointer_motion(show, event)) {
 				float tx = nemoshow_event_get_x(event) / tile->width;
 				float ty = nemoshow_event_get_y(event) / tile->height;
 
