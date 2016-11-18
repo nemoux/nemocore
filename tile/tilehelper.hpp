@@ -9,7 +9,8 @@ NEMO_BEGIN_EXTERN_C
 
 struct tileone;
 
-extern struct tileone *nemotile_one_create_mesh(const char *filepath, const char *basepath);
+extern struct tileone *nemotile_one_create_polygon(const char *filepath, const char *basepath);
+extern struct tileone *nemotile_one_create_polyline(const char *filepath, const char *basepath);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

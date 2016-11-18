@@ -2402,7 +2402,7 @@ int main(int argc, char *argv[])
 	}
 
 	if (meshpath != NULL) {
-		tile->mesh = nemotile_one_create_mesh(meshpath, os_get_file_path(meshpath));
+		tile->mesh = nemotile_one_create_polyline(meshpath, os_get_file_path(meshpath));
 		nemotile_one_vertices_scale_to(tile->mesh, 0.25f, -0.25f, 0.25f);
 		nemotile_one_vertices_scale(tile->mesh, 0.25f, -0.25f, 0.25f);
 		nemotile_one_vertices_translate_to(tile->mesh, 0.0f, 0.0f, 0.5f);
