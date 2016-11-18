@@ -30,9 +30,12 @@ struct tileone {
 
 	float *vertices;
 	float *texcoords;
+	float *diffuses;
 	float *normals;
 
 	float color[4];
+
+	int has_diffuses;
 
 	int count;
 	int type;
@@ -122,7 +125,7 @@ struct nemotile {
 	uint32_t timeout;
 
 	GLuint fbo, dbo;
-	GLuint programs[3];
+	GLuint programs[4];
 	GLuint uprojection0;
 	GLuint uvtransform0;
 	GLuint uttransform0;
@@ -130,13 +133,17 @@ struct nemotile {
 	GLuint ucolor0;
 	GLuint uprojection1;
 	GLuint uvtransform1;
-	GLuint ucolor1;
+	GLuint uttransform1;
+	GLuint utexture1;
+	GLuint uambient1;
+	GLuint ulight1;
 	GLuint uprojection2;
 	GLuint uvtransform2;
-	GLuint uttransform2;
-	GLuint utexture2;
-	GLuint uambient2;
-	GLuint ulight2;
+	GLuint ucolor2;
+	GLuint uprojection3;
+	GLuint uvtransform3;
+	GLuint uambient3;
+	GLuint ulight3;
 
 	struct {
 		float tx, ty, tz;

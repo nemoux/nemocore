@@ -90,6 +90,7 @@ static struct tileone *nemotile_one_create(int vertices)
 
 	one->vertices = (float *)malloc(sizeof(float[3]) * vertices);
 	one->texcoords = (float *)malloc(sizeof(float[2]) * vertices);
+	one->diffuses = (float *)malloc(sizeof(float[4]) * vertices);
 	one->normals = (float *)malloc(sizeof(float[3]) * vertices);
 
 	one->count = vertices;
@@ -163,6 +164,7 @@ static void nemotile_one_destroy(struct tileone *one)
 
 	free(one->vertices);
 	free(one->texcoords);
+	free(one->diffuses);
 	free(one->normals);
 
 	free(one);
@@ -539,24 +541,39 @@ static void nemotile_render_3d_one(struct nemotile *tile, struct nemomatrix *pro
 	nemomatrix_rotate(&ttransform, cos(one->ttransform.r), sin(one->ttransform.r));
 	nemomatrix_translate(&ttransform, one->ttransform.tx, one->ttransform.ty);
 
-	glUseProgram(tile->programs[0]);
-	glBindAttribLocation(tile->programs[0], 0, "position");
-	glBindAttribLocation(tile->programs[0], 1, "texcoord");
+	if (one->has_diffuses == 0) {
+		glUseProgram(tile->programs[0]);
+		glBindAttribLocation(tile->programs[0], 0, "position");
+		glBindAttribLocation(tile->programs[0], 1, "texcoord");
 
-	glUniform1i(tile->utexture0, 0);
-	glUniformMatrix4fv(tile->uprojection0, 1, GL_FALSE, projection->d);
-	glUniformMatrix4fv(tile->uvtransform0, 1, GL_FALSE, vtransform.d);
-	glUniformMatrix4fv(tile->uttransform0, 1, GL_FALSE, ttransform.d);
-	glUniform4fv(tile->ucolor0, 1, one->color);
+		glUniform1i(tile->utexture0, 0);
+		glUniformMatrix4fv(tile->uprojection0, 1, GL_FALSE, projection->d);
+		glUniformMatrix4fv(tile->uvtransform0, 1, GL_FALSE, vtransform.d);
+		glUniformMatrix4fv(tile->uttransform0, 1, GL_FALSE, ttransform.d);
+		glUniform4fv(tile->ucolor0, 1, one->color);
 
-	glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_effective_texture(one->texture));
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_effective_texture(one->texture));
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &one->vertices[0]);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), &one->texcoords[0]);
-	glEnableVertexAttribArray(1);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &one->vertices[0]);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), &one->texcoords[0]);
+		glEnableVertexAttribArray(1);
+	} else {
+		glUseProgram(tile->programs[2]);
+		glBindAttribLocation(tile->programs[2], 0, "position");
+		glBindAttribLocation(tile->programs[2], 1, "diffuse");
+
+		glUniformMatrix4fv(tile->uprojection2, 1, GL_FALSE, projection->d);
+		glUniformMatrix4fv(tile->uvtransform2, 1, GL_FALSE, vtransform.d);
+		glUniform4fv(tile->ucolor2, 1, one->color);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &one->vertices[0]);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &one->diffuses[0]);
+		glEnableVertexAttribArray(1);
+	}
 
 	glDrawArrays(one->type, 0, one->count);
 
@@ -585,28 +602,47 @@ static void nemotile_render_3d_lighting_one(struct nemotile *tile, struct nemoma
 	nemomatrix_rotate(&ttransform, cos(one->ttransform.r), sin(one->ttransform.r));
 	nemomatrix_translate(&ttransform, one->ttransform.tx, one->ttransform.ty);
 
-	glUseProgram(tile->programs[2]);
-	glBindAttribLocation(tile->programs[2], 0, "position");
-	glBindAttribLocation(tile->programs[2], 1, "texcoord");
-	glBindAttribLocation(tile->programs[2], 2, "normal");
+	if (one->has_diffuses == 0) {
+		glUseProgram(tile->programs[1]);
+		glBindAttribLocation(tile->programs[1], 0, "position");
+		glBindAttribLocation(tile->programs[1], 1, "texcoord");
+		glBindAttribLocation(tile->programs[1], 2, "normal");
 
-	glUniform1i(tile->utexture2, 0);
-	glUniformMatrix4fv(tile->uprojection2, 1, GL_FALSE, projection->d);
-	glUniformMatrix4fv(tile->uvtransform2, 1, GL_FALSE, vtransform.d);
-	glUniformMatrix4fv(tile->uttransform2, 1, GL_FALSE, ttransform.d);
-	glUniform4fv(tile->uambient2, 1, tile->ambient);
-	glUniform4fv(tile->ulight2, 1, tile->light);
+		glUniform1i(tile->utexture1, 0);
+		glUniformMatrix4fv(tile->uprojection1, 1, GL_FALSE, projection->d);
+		glUniformMatrix4fv(tile->uvtransform1, 1, GL_FALSE, vtransform.d);
+		glUniformMatrix4fv(tile->uttransform1, 1, GL_FALSE, ttransform.d);
+		glUniform4fv(tile->uambient1, 1, tile->ambient);
+		glUniform4fv(tile->ulight1, 1, tile->light);
 
-	glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_effective_texture(one->texture));
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_effective_texture(one->texture));
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &one->vertices[0]);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), &one->texcoords[0]);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &one->normals[0]);
-	glEnableVertexAttribArray(2);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &one->vertices[0]);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), &one->texcoords[0]);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &one->normals[0]);
+		glEnableVertexAttribArray(2);
+	} else {
+		glUseProgram(tile->programs[3]);
+		glBindAttribLocation(tile->programs[3], 0, "position");
+		glBindAttribLocation(tile->programs[3], 1, "diffuse");
+		glBindAttribLocation(tile->programs[3], 2, "normal");
+
+		glUniformMatrix4fv(tile->uprojection3, 1, GL_FALSE, projection->d);
+		glUniformMatrix4fv(tile->uvtransform3, 1, GL_FALSE, vtransform.d);
+		glUniform4fv(tile->uambient3, 1, tile->ambient);
+		glUniform4fv(tile->ulight3, 1, tile->light);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &one->vertices[0]);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &one->diffuses[0]);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &one->normals[0]);
+		glEnableVertexAttribArray(2);
+	}
 
 	glDrawArrays(one->type, 0, one->count);
 
@@ -1631,7 +1667,7 @@ static GLuint nemotile_dispatch_video_filter(struct talenode *node, void *data)
 
 static int nemotile_prepare_opengl(struct nemotile *tile, int32_t width, int32_t height)
 {
-	static const char *vertexshader =
+	static const char *vertexshader_texture =
 		"uniform mat4 projection;\n"
 		"uniform mat4 vtransform;\n"
 		"uniform mat4 ttransform;\n"
@@ -1643,7 +1679,7 @@ static int nemotile_prepare_opengl(struct nemotile *tile, int32_t width, int32_t
 		"  gl_Position = projection * vtransform * vec4(position.xyz, 1.0);\n"
 		"  vtexcoord = ttransform * vec4(texcoord.xy, 0.0, 1.0);\n"
 		"}\n";
-	static const char *fragmentshader =
+	static const char *fragmentshader_texture =
 		"precision mediump float;\n"
 		"uniform sampler2D texture;\n"
 		"uniform vec4 color;\n"
@@ -1652,22 +1688,7 @@ static int nemotile_prepare_opengl(struct nemotile *tile, int32_t width, int32_t
 		"{\n"
 		"  gl_FragColor = texture2D(texture, vtexcoord.xy) * color;\n"
 		"}\n";
-	static const char *vertexshader_solid =
-		"uniform mat4 projection;\n"
-		"uniform mat4 vtransform;\n"
-		"attribute vec3 position;\n"
-		"void main()\n"
-		"{\n"
-		"  gl_Position = projection * vtransform * vec4(position.xyz, 1.0);\n"
-		"}\n";
-	static const char *fragmentshader_solid =
-		"precision mediump float;\n"
-		"uniform vec4 color;\n"
-		"void main()\n"
-		"{\n"
-		"  gl_FragColor = color;\n"
-		"}\n";
-	static const char *vertexshader_light =
+	static const char *vertexshader_texture_light =
 		"uniform mat4 projection;\n"
 		"uniform mat4 vtransform;\n"
 		"uniform mat4 ttransform;\n"
@@ -1686,7 +1707,7 @@ static int nemotile_prepare_opengl(struct nemotile *tile, int32_t width, int32_t
 		"  vtexcoord = ttransform * vec4(texcoord.xy, 0.0, 1.0);\n"
 		"  vnormal = normalize(vtransform * vec4(normal, 1.0));\n"
 		"}\n";
-	static const char *fragmentshader_light =
+	static const char *fragmentshader_texture_light =
 		"precision mediump float;\n"
 		"uniform sampler2D texture;\n"
 		"uniform vec4 ambient;\n"
@@ -1701,15 +1722,67 @@ static int nemotile_prepare_opengl(struct nemotile *tile, int32_t width, int32_t
 		"  gl_FragColor.rgb = t.rgb * ambient.rgb * t.a + t.rgb * vec3(v, v, v) * vlight.w / f / f / f * t.a;\n"
 		"  gl_FragColor.a = t.a;\n"
 		"}\n";
+	static const char *vertexshader_diffuse =
+		"uniform mat4 projection;\n"
+		"uniform mat4 vtransform;\n"
+		"attribute vec3 position;\n"
+		"attribute vec4 diffuse;\n"
+		"varying vec4 vdiffuse;\n"
+		"void main()\n"
+		"{\n"
+		"  gl_Position = projection * vtransform * vec4(position.xyz, 1.0);\n"
+		"  vdiffuse = diffuse;\n"
+		"}\n";
+	static const char *fragmentshader_diffuse =
+		"precision mediump float;\n"
+		"uniform vec4 color;\n"
+		"varying vec4 vdiffuse;\n"
+		"void main()\n"
+		"{\n"
+		"  gl_FragColor = vdiffuse * color;\n"
+		"}\n";
+	static const char *vertexshader_diffuse_light =
+		"uniform mat4 projection;\n"
+		"uniform mat4 vtransform;\n"
+		"uniform vec4 light;\n"
+		"attribute vec3 position;\n"
+		"attribute vec4 diffuse;\n"
+		"attribute vec3 normal;\n"
+		"varying vec4 vdiffuse;\n"
+		"varying vec4 vnormal;\n"
+		"varying vec4 vlight;\n"
+		"void main()\n"
+		"{\n"
+		"  gl_Position = projection * vtransform * vec4(position.xyz, 1.0);\n"
+		"  vlight = vec4(light.xyz, 1.0) - vtransform * vec4(position.xyz, 1.0);\n"
+		"  vlight.w = light.w;\n"
+		"  vdiffuse = diffuse;\n"
+		"  vnormal = normalize(vtransform * vec4(normal, 1.0));\n"
+		"}\n";
+	static const char *fragmentshader_diffuse_light =
+		"precision mediump float;\n"
+		"uniform vec4 ambient;\n"
+		"varying vec4 vdiffuse;\n"
+		"varying vec4 vnormal;\n"
+		"varying vec4 vlight;\n"
+		"void main()\n"
+		"{\n"
+		"  float v = abs(dot(normalize(vlight.xyz), vnormal.xyz));\n"
+		"  float f = length(vlight.xyz);\n"
+		"  vec4 t = vdiffuse;\n"
+		"  gl_FragColor.rgb = t.rgb * ambient.rgb * t.a + t.rgb * vec3(v, v, v) * vlight.w / f / f / f * t.a;\n"
+		"  gl_FragColor.a = t.a;\n"
+		"}\n";
 
 	fbo_prepare_context(
 			nemoshow_canvas_get_texture(tile->canvas),
 			width, height,
 			&tile->fbo, &tile->dbo);
 
-	tile->programs[0] = glshader_compile_program(vertexshader, fragmentshader, NULL, NULL);
-	tile->programs[1] = glshader_compile_program(vertexshader_solid, fragmentshader_solid, NULL, NULL);
-	tile->programs[2] = glshader_compile_program(vertexshader_light, fragmentshader_light, NULL, NULL);
+	tile->programs[0] = glshader_compile_program(vertexshader_texture, fragmentshader_texture, NULL, NULL);
+	tile->programs[1] = glshader_compile_program(vertexshader_texture_light, fragmentshader_texture_light, NULL, NULL);
+	tile->programs[2] = glshader_compile_program(vertexshader_diffuse, fragmentshader_diffuse, NULL, NULL);
+	tile->programs[3] = glshader_compile_program(vertexshader_diffuse_light, fragmentshader_diffuse_light, NULL, NULL);
 
 	tile->uprojection0 = glGetUniformLocation(tile->programs[0], "projection");
 	tile->uvtransform0 = glGetUniformLocation(tile->programs[0], "vtransform");
@@ -1719,14 +1792,19 @@ static int nemotile_prepare_opengl(struct nemotile *tile, int32_t width, int32_t
 
 	tile->uprojection1 = glGetUniformLocation(tile->programs[1], "projection");
 	tile->uvtransform1 = glGetUniformLocation(tile->programs[1], "vtransform");
-	tile->ucolor1 = glGetUniformLocation(tile->programs[1], "color");
+	tile->uttransform1 = glGetUniformLocation(tile->programs[1], "ttransform");
+	tile->utexture1 = glGetUniformLocation(tile->programs[1], "texture");
+	tile->uambient1 = glGetUniformLocation(tile->programs[1], "ambient");
+	tile->ulight1 = glGetUniformLocation(tile->programs[1], "light");
 
 	tile->uprojection2 = glGetUniformLocation(tile->programs[2], "projection");
 	tile->uvtransform2 = glGetUniformLocation(tile->programs[2], "vtransform");
-	tile->uttransform2 = glGetUniformLocation(tile->programs[2], "ttransform");
-	tile->utexture2 = glGetUniformLocation(tile->programs[2], "texture");
-	tile->uambient2 = glGetUniformLocation(tile->programs[2], "ambient");
-	tile->ulight2 = glGetUniformLocation(tile->programs[2], "light");
+	tile->ucolor2 = glGetUniformLocation(tile->programs[2], "color");
+
+	tile->uprojection3 = glGetUniformLocation(tile->programs[3], "projection");
+	tile->uvtransform3 = glGetUniformLocation(tile->programs[3], "vtransform");
+	tile->uambient3 = glGetUniformLocation(tile->programs[3], "ambient");
+	tile->ulight3 = glGetUniformLocation(tile->programs[3], "light");
 
 	return 0;
 }
@@ -1739,6 +1817,7 @@ static void nemotile_finish_opengl(struct nemotile *tile)
 	glDeleteProgram(tile->programs[0]);
 	glDeleteProgram(tile->programs[1]);
 	glDeleteProgram(tile->programs[2]);
+	glDeleteProgram(tile->programs[3]);
 }
 
 static int nemotile_prepare_image(struct nemotile *tile, int columns, int rows, float padding)
@@ -2310,7 +2389,6 @@ int main(int argc, char *argv[])
 
 	if (meshpath != NULL) {
 		tile->mesh = nemotile_one_create_mesh(meshpath, os_get_file_path(meshpath));
-		nemotile_one_set_texture(tile->mesh, tile->wall);
 		nemotile_one_vertices_scale_to(tile->mesh, 0.25f, -0.25f, 0.25f);
 		nemotile_one_vertices_scale(tile->mesh, 0.25f, -0.25f, 0.25f);
 		nemotile_one_vertices_translate_to(tile->mesh, 0.0f, 0.0f, 0.5f);

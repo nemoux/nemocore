@@ -39,9 +39,11 @@ struct tileone *nemotile_one_create_mesh(const char *filepath, const char *basep
 	}
 
 	one->type = GL_TRIANGLES;
+	one->has_diffuses = 1;
 
 	one->vertices = (float *)malloc(sizeof(float[3]) * one->count);
 	one->texcoords = (float *)malloc(sizeof(float[2]) * one->count);
+	one->diffuses = (float *)malloc(sizeof(float[4]) * one->count);
 	one->normals = (float *)malloc(sizeof(float[3]) * one->count);
 
 	for (i = 0, idx = 0; i < shapes.size(); i++) {
@@ -108,6 +110,19 @@ struct tileone *nemotile_one_create_mesh(const char *filepath, const char *basep
 			one->vertices[idx * 9 + 6] = p2[0];
 			one->vertices[idx * 9 + 7] = p2[1];
 			one->vertices[idx * 9 + 8] = p2[2];
+
+			one->diffuses[idx * 12 + 0] = r;
+			one->diffuses[idx * 12 + 1] = g;
+			one->diffuses[idx * 12 + 2] = b;
+			one->diffuses[idx * 12 + 3] = 1.0f;
+			one->diffuses[idx * 12 + 4] = r;
+			one->diffuses[idx * 12 + 5] = g;
+			one->diffuses[idx * 12 + 6] = b;
+			one->diffuses[idx * 12 + 7] = 1.0f;
+			one->diffuses[idx * 12 + 8] = r;
+			one->diffuses[idx * 12 + 9] = g;
+			one->diffuses[idx * 12 + 10] = b;
+			one->diffuses[idx * 12 + 11] = 1.0f;
 
 			one->normals[idx * 9 + 0] = n0[0];
 			one->normals[idx * 9 + 1] = n0[1];
