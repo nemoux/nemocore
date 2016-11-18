@@ -680,6 +680,10 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 			tile->tile_dirty = 0;
 		}
 
+		nemolist_for_each(one, &tile->wall_list, link) {
+			nemotile_render_3d_one(tile, &projection, one);
+		}
+
 		for (i = 0; i < tile->ntiles; i++) {
 			nemotile_render_3d_one(tile, &projection, tile->tiles[i]);
 		}
@@ -719,6 +723,10 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 			nemotile_sort_z_order(tile);
 
 			tile->tile_dirty = 0;
+		}
+
+		nemolist_for_each(one, &tile->wall_list, link) {
+			nemotile_render_3d_lighting_one(tile, &projection, one);
 		}
 
 		for (i = 0; i < tile->ntiles; i++) {
@@ -1229,67 +1237,71 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 			}
 		}
 	} else {
-		float planes[6][6] = {
-			{ 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f },
-			{ 0.0f, 0.0f, -2.0f, 0.0f, 0.0f, 0.0f },
-			{ 0.0f, -1.0f, -1.0f, -M_PI / 2.0f, 0.0f, 0.0f },
-			{ 0.0f, 1.0f, -1.0f, M_PI / 2.0f, 0.0f, 0.0f },
-			{ -1.0f, 0.0f, -1.0f, 0.0f, M_PI / 2.0f, 0.0f },
-			{ 1.0f, 0.0f, -1.0f, 0.0f, -M_PI / 2.0f, 0.0f },
-		};
+		if (tile->is_dynamic_perspective == 0) {
+			float planes[6][6] = {
+				{ 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f },
+				{ 0.0f, 0.0f, -2.0f, 0.0f, 0.0f, 0.0f },
+				{ 0.0f, -1.0f, -1.0f, -M_PI / 2.0f, 0.0f, 0.0f },
+				{ 0.0f, 1.0f, -1.0f, M_PI / 2.0f, 0.0f, 0.0f },
+				{ -1.0f, 0.0f, -1.0f, 0.0f, M_PI / 2.0f, 0.0f },
+				{ 1.0f, 0.0f, -1.0f, 0.0f, -M_PI / 2.0f, 0.0f },
+			};
 
-		if (nemoshow_event_is_pointer_left_down(show, event)) {
-			int plane = random_get_int(1, 5);
+			if (nemoshow_event_is_pointer_left_down(show, event)) {
+				int plane = random_get_int(1, 5);
 
-			nemolist_for_each(one, &tile->tile_list, link) {
-				trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
-						random_get_int(600, 1200), 0);
+				nemolist_for_each(one, &tile->tile_list, link) {
+					trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
+							random_get_int(600, 1200), 0);
 
-				nemotrans_set_float(trans, &one->gtransform.tz, planes[plane][2]);
+					nemotrans_set_float(trans, &one->gtransform.tz, planes[plane][2]);
 
-				nemotrans_group_attach_trans(tile->trans_group, trans);
+					nemotrans_group_attach_trans(tile->trans_group, trans);
 
-				trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
-						random_get_int(800, 1600),
-						nemotrans_get_duration(trans) * 0.85f);
+					trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
+							random_get_int(800, 1600),
+							nemotrans_get_duration(trans) * 0.85f);
 
-				nemotrans_set_float(trans, &one->gtransform.tx, planes[plane][0]);
-				nemotrans_set_float(trans, &one->gtransform.ty, planes[plane][1]);
-				nemotrans_set_float(trans, &one->gtransform.rx, planes[plane][3]);
-				nemotrans_set_float(trans, &one->gtransform.ry, planes[plane][4]);
-				nemotrans_set_float(trans, &one->gtransform.rz, planes[plane][5]);
+					nemotrans_set_float(trans, &one->gtransform.tx, planes[plane][0]);
+					nemotrans_set_float(trans, &one->gtransform.ty, planes[plane][1]);
+					nemotrans_set_float(trans, &one->gtransform.rx, planes[plane][3]);
+					nemotrans_set_float(trans, &one->gtransform.ry, planes[plane][4]);
+					nemotrans_set_float(trans, &one->gtransform.rz, planes[plane][5]);
 
-				nemotrans_group_attach_trans(tile->trans_group, trans);
+					nemotrans_group_attach_trans(tile->trans_group, trans);
+				}
+			} else if (nemoshow_event_is_pointer_right_down(show, event)) {
+				int plane = 0;
+
+				nemolist_for_each(one, &tile->tile_list, link) {
+					trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
+							random_get_int(800, 1600), 0);
+
+					nemotrans_set_float(trans, &one->gtransform.tx, planes[plane][0]);
+					nemotrans_set_float(trans, &one->gtransform.ty, planes[plane][1]);
+					nemotrans_set_float(trans, &one->gtransform.rx, planes[plane][3]);
+					nemotrans_set_float(trans, &one->gtransform.ry, planes[plane][4]);
+					nemotrans_set_float(trans, &one->gtransform.rz, planes[plane][5]);
+
+					nemotrans_group_attach_trans(tile->trans_group, trans);
+
+					trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
+							random_get_int(600, 1200),
+							nemotrans_get_duration(trans) * 0.85f);
+
+					nemotrans_set_float(trans, &one->gtransform.tz, planes[plane][2]);
+
+					nemotrans_group_attach_trans(tile->trans_group, trans);
+				}
 			}
-		} else if (nemoshow_event_is_pointer_right_down(show, event)) {
-			int plane = 0;
+		} else {
+			if (nemoshow_event_is_pointer_motion(show, event)) {
+				float tx = nemoshow_event_get_x(event) / tile->width;
+				float ty = nemoshow_event_get_y(event) / tile->height;
 
-			nemolist_for_each(one, &tile->tile_list, link) {
-				trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
-						random_get_int(800, 1600), 0);
-
-				nemotrans_set_float(trans, &one->gtransform.tx, planes[plane][0]);
-				nemotrans_set_float(trans, &one->gtransform.ty, planes[plane][1]);
-				nemotrans_set_float(trans, &one->gtransform.rx, planes[plane][3]);
-				nemotrans_set_float(trans, &one->gtransform.ry, planes[plane][4]);
-				nemotrans_set_float(trans, &one->gtransform.rz, planes[plane][5]);
-
-				nemotrans_group_attach_trans(tile->trans_group, trans);
-
-				trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
-						random_get_int(600, 1200),
-						nemotrans_get_duration(trans) * 0.85f);
-
-				nemotrans_set_float(trans, &one->gtransform.tz, planes[plane][2]);
-
-				nemotrans_group_attach_trans(tile->trans_group, trans);
+				tile->asymmetric.e[0] = tx * 3.0f - 1.5f;
+				tile->asymmetric.e[1] = ty * 3.0f - 1.5f;
 			}
-		} else if (nemoshow_event_is_pointer_motion(show, event)) {
-			float tx = nemoshow_event_get_x(event) / tile->width;
-			float ty = nemoshow_event_get_y(event) / tile->height;
-
-			tile->asymmetric.e[0] = tx * 3.0f - 1.5f;
-			tile->asymmetric.e[1] = ty * 3.0f - 1.5f;
 		}
 	}
 
@@ -1477,40 +1489,42 @@ static void nemotile_dispatch_timer(struct nemotimer *timer, void *data)
 	}
 
 	if (tile->is_3d != 0) {
-		if (tile->iactions == 0) {
-			float planes[6][6] = {
-				{ 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f },
-				{ 0.0f, 0.0f, -2.0f, 0.0f, 0.0f, 0.0f },
-				{ 0.0f, -1.0f, -1.0f, -M_PI / 2.0f, 0.0f, 0.0f },
-				{ 0.0f, 1.0f, -1.0f, M_PI / 2.0f, 0.0f, 0.0f },
-				{ -1.0f, 0.0f, -1.0f, 0.0f, M_PI / 2.0f, 0.0f },
-				{ 1.0f, 0.0f, -1.0f, 0.0f, -M_PI / 2.0f, 0.0f },
-			};
-			int plane;
+		if (tile->is_dynamic_perspective == 0) {
+			if (tile->iactions == 0) {
+				float planes[6][6] = {
+					{ 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f },
+					{ 0.0f, 0.0f, -2.0f, 0.0f, 0.0f, 0.0f },
+					{ 0.0f, -1.0f, -1.0f, -M_PI / 2.0f, 0.0f, 0.0f },
+					{ 0.0f, 1.0f, -1.0f, M_PI / 2.0f, 0.0f, 0.0f },
+					{ -1.0f, 0.0f, -1.0f, 0.0f, M_PI / 2.0f, 0.0f },
+					{ 1.0f, 0.0f, -1.0f, 0.0f, -M_PI / 2.0f, 0.0f },
+				};
+				int plane;
 
-			nemolist_for_each(one, &tile->tile_list, link) {
-				plane = random_get_int(1, 5);
+				nemolist_for_each(one, &tile->tile_list, link) {
+					plane = random_get_int(1, 5);
 
-				trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
-						random_get_int(800, 1600),
-						random_get_int(600, 1200));
+					trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
+							random_get_int(800, 1600),
+							random_get_int(600, 1200));
 
-				nemotrans_set_float(trans, &one->gtransform.tx, planes[plane][0]);
-				nemotrans_set_float(trans, &one->gtransform.ty, planes[plane][1]);
-				nemotrans_set_float(trans, &one->gtransform.tz, planes[plane][2]);
-				nemotrans_set_float(trans, &one->gtransform.rx, planes[plane][3]);
-				nemotrans_set_float(trans, &one->gtransform.ry, planes[plane][4]);
-				nemotrans_set_float(trans, &one->gtransform.rz, planes[plane][5]);
+					nemotrans_set_float(trans, &one->gtransform.tx, planes[plane][0]);
+					nemotrans_set_float(trans, &one->gtransform.ty, planes[plane][1]);
+					nemotrans_set_float(trans, &one->gtransform.tz, planes[plane][2]);
+					nemotrans_set_float(trans, &one->gtransform.rx, planes[plane][3]);
+					nemotrans_set_float(trans, &one->gtransform.ry, planes[plane][4]);
+					nemotrans_set_float(trans, &one->gtransform.rz, planes[plane][5]);
 
+					nemotrans_group_attach_trans(tile->trans_group, trans);
+				}
+			} else {
+				trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE, random_get_int(2400, 4800), 0);
+				nemotrans_set_float(trans, &tile->light[0], random_get_double(-1.0f, 1.0f));
+				nemotrans_set_float(trans, &tile->light[1], random_get_double(-1.0f, 1.0f));
+				nemotrans_set_float(trans, &tile->light[2], random_get_double(0.0f, -2.0f));
+				nemotrans_set_float(trans, &tile->light[3], random_get_double(1.0f, 2.0f));
 				nemotrans_group_attach_trans(tile->trans_group, trans);
 			}
-		} else {
-			trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE, random_get_int(2400, 4800), 0);
-			nemotrans_set_float(trans, &tile->light[0], random_get_double(-1.0f, 1.0f));
-			nemotrans_set_float(trans, &tile->light[1], random_get_double(-1.0f, 1.0f));
-			nemotrans_set_float(trans, &tile->light[2], random_get_double(0.0f, -2.0f));
-			nemotrans_set_float(trans, &tile->light[3], random_get_double(1.0f, 2.0f));
-			nemotrans_group_attach_trans(tile->trans_group, trans);
 		}
 	}
 
@@ -1832,6 +1846,9 @@ static int nemotile_prepare_video(struct nemotile *tile, int columns, int rows, 
 					nemotile_get_row_sy(rows) * (1.0f - padding) * random_get_double(1.0f - tile->jitter, 1.0f + tile->jitter),
 					1.0f);
 
+			nemotile_one_group_translate_to(one, 0.0f, 0.0f, -1.75f);
+			nemotile_one_group_translate(one, 0.0f, 0.0f, -1.75f);
+
 			nemotile_one_texcoords_translate_to(one,
 					nemotile_get_tx_from_vx(tile->columns, 0, one->vtransform.sx, one->vtransform0.tx),
 					nemotile_get_ty_from_vy(tile->rows, 0, one->vtransform.sy, one->vtransform0.ty));
@@ -1883,12 +1900,58 @@ static int nemotile_prepare_overlay(struct nemotile *tile, int count, float padd
 				random_get_double(0.15f, 0.65f));
 
 		nemotile_one_vertices_translate(one,
-				random_get_double(-0.085f, 0.085f),
-				random_get_double(-0.085f, 0.085f),
-				0.85f - 0.085f * i);
-		nemotile_one_vertices_scale(one, 0.03f, 0.03f, 0.03f);
+				random_get_double(-0.25f, 0.25f),
+				random_get_double(-0.25f, 0.25f),
+				0.9f - 0.1f * i);
+		nemotile_one_vertices_scale(one,
+				random_get_double(0.04f, 0.08f),
+				random_get_double(0.04f, 0.08f),
+				1.0f);
 
 		nemolist_insert_tail(&tile->over_list, &one->link);
+	}
+
+	return 0;
+}
+
+static int nemotile_prepare_wall(struct nemotile *tile, float padding)
+{
+	float planes[5][6] = {
+		{ 0.0f, 0.0f, -2.0f, 0.0f, 0.0f, 0.0f },
+		{ 0.0f, -1.0f, -1.0f, -M_PI / 2.0f, 0.0f, 0.0f },
+		{ 0.0f, 1.0f, -1.0f, M_PI / 2.0f, 0.0f, 0.0f },
+		{ -1.0f, 0.0f, -1.0f, 0.0f, M_PI / 2.0f, 0.0f },
+		{ 1.0f, 0.0f, -1.0f, 0.0f, -M_PI / 2.0f, 0.0f },
+	};
+	struct tileone *one;
+	int i;
+
+	for (i = 0; i < 5; i++) {
+		one = nemotile_one_create(4);
+		nemotile_one_set_index(one, i);
+		nemotile_one_set_vertex(one, 0, -1.0f, 1.0f, 0.0f);
+		nemotile_one_set_texcoord(one, 0, 0.0f, 1.0f);
+		nemotile_one_set_vertex(one, 1, 1.0f, 1.0f, 0.0f);
+		nemotile_one_set_texcoord(one, 1, 1.0f, 1.0f);
+		nemotile_one_set_vertex(one, 2, -1.0f, -1.0f, 0.0f);
+		nemotile_one_set_texcoord(one, 2, 0.0f, 0.0f);
+		nemotile_one_set_vertex(one, 3, 1.0f, -1.0f, 0.0f);
+		nemotile_one_set_texcoord(one, 3, 1.0f, 0.0f);
+
+		nemotile_one_set_normal(one, 0, 0.0f, 0.0f, 1.0f);
+		nemotile_one_set_normal(one, 1, 0.0f, 0.0f, 1.0f);
+		nemotile_one_set_normal(one, 2, 0.0f, 0.0f, 1.0f);
+		nemotile_one_set_normal(one, 3, 0.0f, 0.0f, 1.0f);
+
+		nemotile_one_set_texture(one, tile->wall);
+
+		nemotile_one_set_color(one, 1.0f, 1.0f, 1.0f, 1.0f);
+
+		nemotile_one_vertices_translate(one, planes[i][0], planes[i][1], planes[i][2]);
+		nemotile_one_vertices_rotate(one, planes[i][3], planes[i][4], planes[i][5]);
+		nemotile_one_vertices_scale(one, 1.0f - padding, 1.0f - padding, 1.0f);
+
+		nemolist_insert_tail(&tile->wall_list, &one->link);
 	}
 
 	return 0;
@@ -1910,6 +1973,7 @@ int main(int argc, char *argv[])
 		{ "timeout",								required_argument,			NULL,			't' },
 		{ "background",							required_argument,			NULL,			'b' },
 		{ "overlay",								required_argument,			NULL,			'o' },
+		{ "wall",										required_argument,			NULL,			'a' },
 		{ "fullscreen",							required_argument,			NULL,			'f' },
 		{ "motionblur",							required_argument,			NULL,			'm' },
 		{ "brightness",							required_argument,			NULL,			'e' },
@@ -1937,6 +2001,7 @@ int main(int argc, char *argv[])
 	char *fullscreen = NULL;
 	char *background = NULL;
 	char *overlay = NULL;
+	char *wall = NULL;
 	float motionblur = 0.0f;
 	float brightness = 0.85f;
 	float jitter = 0.0f;
@@ -1954,7 +2019,7 @@ int main(int argc, char *argv[])
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "w:h:c:r:i:v:t:b:o:f:m:e:j:d:p:sly", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:c:r:i:v:t:b:o:a:f:m:e:j:d:p:sly", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -1993,6 +2058,10 @@ int main(int argc, char *argv[])
 
 			case 'o':
 				overlay = strdup(optarg);
+				break;
+
+			case 'a':
+				wall = strdup(optarg);
 				break;
 
 			case 'f':
@@ -2108,6 +2177,7 @@ int main(int argc, char *argv[])
 
 	nemolist_init(&tile->tile_list);
 	nemolist_init(&tile->over_list);
+	nemolist_init(&tile->wall_list);
 
 	tile->trans_group = nemotrans_group_create();
 	nemotrans_group_set_dispatch_first(tile->trans_group, nemotile_dispatch_first_trans);
@@ -2211,6 +2281,39 @@ int main(int argc, char *argv[])
 		}
 
 		tile->mask = nemofx_glmask_create(width, height);
+	}
+
+	if (wall != NULL) {
+		tile->wall = canvas = nemoshow_canvas_create();
+		nemoshow_canvas_set_width(canvas, width);
+		nemoshow_canvas_set_height(canvas, height);
+		nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
+		nemoshow_attach_one(show, canvas);
+
+		if (os_has_file_extension(wall, "svg") != 0) {
+			blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
+			nemoshow_filter_set_blur(blur, "solid", width * 0.008f);
+
+			one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
+			nemoshow_one_attach(canvas, one);
+			nemoshow_item_set_x(one, 0.0f);
+			nemoshow_item_set_y(one, 0.0f);
+			nemoshow_item_set_width(one, width);
+			nemoshow_item_set_height(one, height);
+			nemoshow_item_set_stroke_color(one, 0.0f, 255.0f * 0.85f, 255.0f * 0.85f, 255.0f * 0.85f);
+			nemoshow_item_set_stroke_width(one, width * 0.004f);
+			nemoshow_item_set_fill_color(one, 0.0f, 0.0f, 0.0f, 0.0f);
+			nemoshow_item_set_filter(one, blur);
+			nemoshow_item_path_load_svg(one, wall, 0.0f, 0.0f, width, height);
+		} else {
+			one = nemoshow_item_create(NEMOSHOW_IMAGE_ITEM);
+			nemoshow_one_attach(canvas, one);
+			nemoshow_item_set_x(one, 0.0f);
+			nemoshow_item_set_y(one, 0.0f);
+			nemoshow_item_set_width(one, width);
+			nemoshow_item_set_height(one, height);
+			nemoshow_item_set_uri(one, wall);
+		}
 	}
 
 	nemotile_prepare_opengl(tile, width, height);
@@ -2374,6 +2477,10 @@ int main(int argc, char *argv[])
 
 	if (tile->is_3d != 0 && tile->over != NULL) {
 		nemotile_prepare_overlay(tile, 5, padding);
+	}
+
+	if (tile->is_3d != 0 && tile->wall != NULL) {
+		nemotile_prepare_wall(tile, 0.0f);
 	}
 
 	tile->timer = timer = nemotimer_create(tool);
