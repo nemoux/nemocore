@@ -1906,7 +1906,7 @@ static int nemotile_prepare_overlay(struct nemotile *tile, int count, float padd
 				random_get_double(0.04f, 0.08f),
 				1.0f);
 
-		nemolist_insert_tail(&tile->over_list, &one->link);
+		nemolist_insert(&tile->over_list, &one->link);
 	}
 
 	return 0;
