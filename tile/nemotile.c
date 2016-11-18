@@ -1189,13 +1189,10 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 				nemotrans_group_attach_trans(tile->trans_group, trans);
 			}
-		}
+		} else if (nemoshow_event_is_pointer_motion(show, event)) {
+			float t = nemoshow_event_get_x(event) / tile->width;
 
-		if (nemoshow_event_is_touch_motion(show, event)) {
-			if (nemoshow_event_get_x(event) < tile->width / 2)
-				tile->asymmetric.e[0] += 0.001f;
-			else
-				tile->asymmetric.e[0] -= 0.001f;
+			tile->asymmetric.e[0] = t * 3.0f - 1.5f;
 		}
 	}
 
