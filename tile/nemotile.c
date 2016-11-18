@@ -726,8 +726,12 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 			nemotile_render_3d_one(tile, &projection, one);
 		}
 
-		if (tile->mesh != NULL)
+		if (tile->mesh != NULL) {
+			glEnable(GL_DEPTH_TEST);
+			glDepthFunc(GL_LEQUAL);
+
 			nemotile_render_3d_one(tile, &projection, tile->mesh);
+		}
 	} else {
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_ALWAYS);
@@ -770,8 +774,12 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 			nemotile_render_3d_lighting_one(tile, &projection, one);
 		}
 
-		if (tile->mesh != NULL)
+		if (tile->mesh != NULL) {
+			glEnable(GL_DEPTH_TEST);
+			glDepthFunc(GL_LEQUAL);
+
 			nemotile_render_3d_lighting_one(tile, &projection, tile->mesh);
+		}
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
