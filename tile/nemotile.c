@@ -474,14 +474,149 @@ static void nemotile_sort_z_order(struct nemotile *tile)
 	qsort(tile->tiles, tile->ntiles, sizeof(struct tileone *), nemotile_compare_z_order);
 }
 
+static void nemotile_render_2d_one(struct nemotile *tile, struct nemomatrix *projection, struct tileone *one)
+{
+	struct nemomatrix vtransform;
+	struct nemomatrix ttransform;
+
+	nemomatrix_init_identity(&vtransform);
+	nemomatrix_rotate_x(&vtransform, cos(one->vtransform.rx), sin(one->vtransform.rx));
+	nemomatrix_rotate_y(&vtransform, cos(one->vtransform.ry), sin(one->vtransform.ry));
+	nemomatrix_rotate_z(&vtransform, cos(one->vtransform.rz), sin(one->vtransform.rz));
+	nemomatrix_scale_xyz(&vtransform, one->vtransform.sx, one->vtransform.sy, one->vtransform.sz);
+	nemomatrix_translate_xyz(&vtransform, one->vtransform.tx, one->vtransform.ty, one->vtransform.tz);
+
+	nemomatrix_init_identity(&ttransform);
+	nemomatrix_rotate(&ttransform, cos(one->ttransform.r), sin(one->ttransform.r));
+	nemomatrix_scale(&ttransform, one->ttransform.sx, one->ttransform.sy);
+	nemomatrix_translate(&ttransform, one->ttransform.tx, one->ttransform.ty);
+
+	glUseProgram(tile->programs[0]);
+	glBindAttribLocation(tile->programs[0], 0, "position");
+	glBindAttribLocation(tile->programs[0], 1, "texcoord");
+
+	glUniform1i(tile->utexture0, 0);
+	glUniformMatrix4fv(tile->uprojection0, 1, GL_FALSE, projection->d);
+	glUniformMatrix4fv(tile->uvtransform0, 1, GL_FALSE, vtransform.d);
+	glUniformMatrix4fv(tile->uttransform0, 1, GL_FALSE, ttransform.d);
+	glUniform4fv(tile->ucolor0, 1, one->color);
+
+	glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_effective_texture(one->texture));
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &one->vertices[0]);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), &one->texcoords[0]);
+	glEnableVertexAttribArray(1);
+
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, one->count);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+static void nemotile_render_3d_one(struct nemotile *tile, struct nemomatrix *projection, struct tileone *one)
+{
+	struct nemomatrix vtransform;
+	struct nemomatrix ttransform;
+
+	nemomatrix_init_identity(&vtransform);
+	nemomatrix_rotate_x(&vtransform, cos(one->vtransform.rx), sin(one->vtransform.rx));
+	nemomatrix_rotate_y(&vtransform, cos(one->vtransform.ry), sin(one->vtransform.ry));
+	nemomatrix_rotate_z(&vtransform, cos(one->vtransform.rz), sin(one->vtransform.rz));
+	nemomatrix_scale_xyz(&vtransform, one->vtransform.sx, one->vtransform.sy, one->vtransform.sz);
+	nemomatrix_translate_xyz(&vtransform, one->vtransform.tx, one->vtransform.ty, one->vtransform.tz);
+	nemomatrix_rotate_x(&vtransform, cos(one->gtransform.rx), sin(one->gtransform.rx));
+	nemomatrix_rotate_y(&vtransform, cos(one->gtransform.ry), sin(one->gtransform.ry));
+	nemomatrix_rotate_z(&vtransform, cos(one->gtransform.rz), sin(one->gtransform.rz));
+	nemomatrix_scale_xyz(&vtransform, one->gtransform.sx, one->gtransform.sy, one->gtransform.sz);
+	nemomatrix_translate_xyz(&vtransform, one->gtransform.tx, one->gtransform.ty, one->gtransform.tz);
+
+	nemomatrix_init_identity(&ttransform);
+	nemomatrix_rotate(&ttransform, cos(one->ttransform.r), sin(one->ttransform.r));
+	nemomatrix_scale(&ttransform, one->ttransform.sx, one->ttransform.sy);
+	nemomatrix_translate(&ttransform, one->ttransform.tx, one->ttransform.ty);
+
+	glUseProgram(tile->programs[0]);
+	glBindAttribLocation(tile->programs[0], 0, "position");
+	glBindAttribLocation(tile->programs[0], 1, "texcoord");
+
+	glUniform1i(tile->utexture0, 0);
+	glUniformMatrix4fv(tile->uprojection0, 1, GL_FALSE, projection->d);
+	glUniformMatrix4fv(tile->uvtransform0, 1, GL_FALSE, vtransform.d);
+	glUniformMatrix4fv(tile->uttransform0, 1, GL_FALSE, ttransform.d);
+	glUniform4fv(tile->ucolor0, 1, one->color);
+
+	glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_effective_texture(one->texture));
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &one->vertices[0]);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), &one->texcoords[0]);
+	glEnableVertexAttribArray(1);
+
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, one->count);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+static void nemotile_render_3d_lighting_one(struct nemotile *tile, struct nemomatrix *projection, struct tileone *one)
+{
+	struct nemomatrix vtransform;
+	struct nemomatrix ttransform;
+
+	nemomatrix_init_identity(&vtransform);
+	nemomatrix_rotate_x(&vtransform, cos(one->vtransform.rx), sin(one->vtransform.rx));
+	nemomatrix_rotate_y(&vtransform, cos(one->vtransform.ry), sin(one->vtransform.ry));
+	nemomatrix_rotate_z(&vtransform, cos(one->vtransform.rz), sin(one->vtransform.rz));
+	nemomatrix_scale_xyz(&vtransform, one->vtransform.sx, one->vtransform.sy, one->vtransform.sz);
+	nemomatrix_translate_xyz(&vtransform, one->vtransform.tx, one->vtransform.ty, one->vtransform.tz);
+	nemomatrix_rotate_x(&vtransform, cos(one->gtransform.rx), sin(one->gtransform.rx));
+	nemomatrix_rotate_y(&vtransform, cos(one->gtransform.ry), sin(one->gtransform.ry));
+	nemomatrix_rotate_z(&vtransform, cos(one->gtransform.rz), sin(one->gtransform.rz));
+	nemomatrix_scale_xyz(&vtransform, one->gtransform.sx, one->gtransform.sy, one->gtransform.sz);
+	nemomatrix_translate_xyz(&vtransform, one->gtransform.tx, one->gtransform.ty, one->gtransform.tz);
+
+	nemomatrix_init_identity(&ttransform);
+	nemomatrix_rotate(&ttransform, cos(one->ttransform.r), sin(one->ttransform.r));
+	nemomatrix_scale(&ttransform, one->ttransform.sx, one->ttransform.sy);
+	nemomatrix_translate(&ttransform, one->ttransform.tx, one->ttransform.ty);
+
+	glUseProgram(tile->programs[2]);
+	glBindAttribLocation(tile->programs[2], 0, "position");
+	glBindAttribLocation(tile->programs[2], 1, "texcoord");
+	glBindAttribLocation(tile->programs[2], 2, "normal");
+
+	glUniform1i(tile->utexture2, 0);
+	glUniformMatrix4fv(tile->uprojection2, 1, GL_FALSE, projection->d);
+	glUniformMatrix4fv(tile->uvtransform2, 1, GL_FALSE, vtransform.d);
+	glUniformMatrix4fv(tile->uttransform2, 1, GL_FALSE, ttransform.d);
+	glUniform4fv(tile->uambient2, 1, tile->ambient);
+	glUniform4fv(tile->ulight2, 1, tile->light);
+
+	glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_effective_texture(one->texture));
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &one->vertices[0]);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), &one->texcoords[0]);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &one->normals[0]);
+	glEnableVertexAttribArray(2);
+
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, one->count);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
 static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showone *canvas)
 {
 	struct nemotile *tile = (struct nemotile *)nemoshow_get_userdata(show);
 	struct tileone *one;
 	struct nemotrans *trans, *ntrans;
 	struct nemomatrix projection;
-	struct nemomatrix vtransform;
-	struct nemomatrix ttransform;
 	int i;
 
 	nemotrans_group_dispatch(tile->trans_group, time_current_msecs());
@@ -509,40 +644,48 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 		nemomatrix_translate_xyz(&projection, tile->projection.tx, tile->projection.ty, tile->projection.tz);
 
 		nemolist_for_each(one, &tile->tile_list, link) {
-			nemomatrix_init_identity(&vtransform);
-			nemomatrix_rotate_x(&vtransform, cos(one->vtransform.rx), sin(one->vtransform.rx));
-			nemomatrix_rotate_y(&vtransform, cos(one->vtransform.ry), sin(one->vtransform.ry));
-			nemomatrix_rotate_z(&vtransform, cos(one->vtransform.rz), sin(one->vtransform.rz));
-			nemomatrix_scale_xyz(&vtransform, one->vtransform.sx, one->vtransform.sy, one->vtransform.sz);
-			nemomatrix_translate_xyz(&vtransform, one->vtransform.tx, one->vtransform.ty, one->vtransform.tz);
+			nemotile_render_2d_one(tile, &projection, one);
+		}
+	} else if (tile->is_lighting == 0) {
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_ALWAYS);
 
-			nemomatrix_init_identity(&ttransform);
-			nemomatrix_rotate(&ttransform, cos(one->ttransform.r), sin(one->ttransform.r));
-			nemomatrix_scale(&ttransform, one->ttransform.sx, one->ttransform.sy);
-			nemomatrix_translate(&ttransform, one->ttransform.tx, one->ttransform.ty);
+		if (tile->is_dynamic_perspective == 0) {
+			nemomatrix_init_identity(&projection);
+			nemomatrix_rotate_x(&projection, cos(tile->projection.rx), sin(tile->projection.rx));
+			nemomatrix_rotate_y(&projection, cos(tile->projection.ry), sin(tile->projection.ry));
+			nemomatrix_rotate_z(&projection, cos(tile->projection.rz), sin(tile->projection.rz));
+			nemomatrix_scale_xyz(&projection, tile->projection.sx, tile->projection.sy, tile->projection.sz);
+			nemomatrix_translate_xyz(&projection, tile->projection.tx, tile->projection.ty, tile->projection.tz);
+			nemomatrix_perspective(&projection,
+					tile->perspective.left,
+					tile->perspective.right,
+					tile->perspective.bottom,
+					tile->perspective.top,
+					tile->perspective.near,
+					tile->perspective.far);
+		} else {
+			nemomatrix_init_identity(&projection);
+			nemomatrix_rotate_x(&projection, cos(tile->projection.rx), sin(tile->projection.rx));
+			nemomatrix_rotate_y(&projection, cos(tile->projection.ry), sin(tile->projection.ry));
+			nemomatrix_rotate_z(&projection, cos(tile->projection.rz), sin(tile->projection.rz));
+			nemomatrix_scale_xyz(&projection, tile->projection.sx, tile->projection.sy, tile->projection.sz);
+			nemomatrix_translate_xyz(&projection, tile->projection.tx, tile->projection.ty, tile->projection.tz);
+			nemomatrix_asymmetric(&projection, tile->asymmetric.a, tile->asymmetric.b, tile->asymmetric.c, tile->asymmetric.e, tile->asymmetric.near, tile->asymmetric.far);
+		}
 
-			glUseProgram(tile->programs[0]);
-			glBindAttribLocation(tile->programs[0], 0, "position");
-			glBindAttribLocation(tile->programs[0], 1, "texcoord");
+		if (tile->tile_dirty != 0) {
+			nemotile_sort_z_order(tile);
 
-			glUniform1i(tile->utexture0, 0);
-			glUniformMatrix4fv(tile->uprojection0, 1, GL_FALSE, projection.d);
-			glUniformMatrix4fv(tile->uvtransform0, 1, GL_FALSE, vtransform.d);
-			glUniformMatrix4fv(tile->uttransform0, 1, GL_FALSE, ttransform.d);
-			glUniform4fv(tile->ucolor0, 1, one->color);
+			tile->tile_dirty = 0;
+		}
 
-			glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_effective_texture(one->texture));
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		for (i = 0; i < tile->ntiles; i++) {
+			nemotile_render_3d_one(tile, &projection, tile->tiles[i]);
+		}
 
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &one->vertices[0]);
-			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), &one->texcoords[0]);
-			glEnableVertexAttribArray(1);
-
-			glDrawArrays(GL_TRIANGLE_STRIP, 0, one->count);
-
-			glBindTexture(GL_TEXTURE_2D, 0);
+		nemolist_for_each(one, &tile->over_list, link) {
+			nemotile_render_3d_one(tile, &projection, one);
 		}
 	} else {
 		glEnable(GL_DEPTH_TEST);
@@ -579,74 +722,11 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 		}
 
 		for (i = 0; i < tile->ntiles; i++) {
-			one = tile->tiles[i];
+			nemotile_render_3d_lighting_one(tile, &projection, tile->tiles[i]);
+		}
 
-			nemomatrix_init_identity(&vtransform);
-			nemomatrix_rotate_x(&vtransform, cos(one->vtransform.rx), sin(one->vtransform.rx));
-			nemomatrix_rotate_y(&vtransform, cos(one->vtransform.ry), sin(one->vtransform.ry));
-			nemomatrix_rotate_z(&vtransform, cos(one->vtransform.rz), sin(one->vtransform.rz));
-			nemomatrix_scale_xyz(&vtransform, one->vtransform.sx, one->vtransform.sy, one->vtransform.sz);
-			nemomatrix_translate_xyz(&vtransform, one->vtransform.tx, one->vtransform.ty, one->vtransform.tz);
-			nemomatrix_rotate_x(&vtransform, cos(one->gtransform.rx), sin(one->gtransform.rx));
-			nemomatrix_rotate_y(&vtransform, cos(one->gtransform.ry), sin(one->gtransform.ry));
-			nemomatrix_rotate_z(&vtransform, cos(one->gtransform.rz), sin(one->gtransform.rz));
-			nemomatrix_scale_xyz(&vtransform, one->gtransform.sx, one->gtransform.sy, one->gtransform.sz);
-			nemomatrix_translate_xyz(&vtransform, one->gtransform.tx, one->gtransform.ty, one->gtransform.tz);
-
-			nemomatrix_init_identity(&ttransform);
-			nemomatrix_rotate(&ttransform, cos(one->ttransform.r), sin(one->ttransform.r));
-			nemomatrix_scale(&ttransform, one->ttransform.sx, one->ttransform.sy);
-			nemomatrix_translate(&ttransform, one->ttransform.tx, one->ttransform.ty);
-
-			if (tile->is_lighting == 0) {
-				glUseProgram(tile->programs[0]);
-				glBindAttribLocation(tile->programs[0], 0, "position");
-				glBindAttribLocation(tile->programs[0], 1, "texcoord");
-
-				glUniform1i(tile->utexture0, 0);
-				glUniformMatrix4fv(tile->uprojection0, 1, GL_FALSE, projection.d);
-				glUniformMatrix4fv(tile->uvtransform0, 1, GL_FALSE, vtransform.d);
-				glUniformMatrix4fv(tile->uttransform0, 1, GL_FALSE, ttransform.d);
-				glUniform4fv(tile->ucolor0, 1, one->color);
-
-				glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_effective_texture(one->texture));
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &one->vertices[0]);
-				glEnableVertexAttribArray(0);
-				glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), &one->texcoords[0]);
-				glEnableVertexAttribArray(1);
-
-				glDrawArrays(GL_TRIANGLE_STRIP, 0, one->count);
-			} else {
-				glUseProgram(tile->programs[2]);
-				glBindAttribLocation(tile->programs[2], 0, "position");
-				glBindAttribLocation(tile->programs[2], 1, "texcoord");
-				glBindAttribLocation(tile->programs[2], 2, "normal");
-
-				glUniform1i(tile->utexture2, 0);
-				glUniformMatrix4fv(tile->uprojection2, 1, GL_FALSE, projection.d);
-				glUniformMatrix4fv(tile->uvtransform2, 1, GL_FALSE, vtransform.d);
-				glUniformMatrix4fv(tile->uttransform2, 1, GL_FALSE, ttransform.d);
-				glUniform4fv(tile->uambient2, 1, tile->ambient);
-				glUniform4fv(tile->ulight2, 1, tile->light);
-
-				glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_effective_texture(one->texture));
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &one->vertices[0]);
-				glEnableVertexAttribArray(0);
-				glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), &one->texcoords[0]);
-				glEnableVertexAttribArray(1);
-				glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &one->normals[0]);
-				glEnableVertexAttribArray(2);
-			}
-
-			glDrawArrays(GL_TRIANGLE_STRIP, 0, one->count);
-
-			glBindTexture(GL_TEXTURE_2D, 0);
+		nemolist_for_each(one, &tile->over_list, link) {
+			nemotile_render_3d_lighting_one(tile, &projection, one);
 		}
 	}
 
@@ -1484,7 +1564,7 @@ static GLuint nemotile_dispatch_canvas_filter(struct talenode *node, void *data)
 		texture = nemofx_glmotion_get_texture(tile->motion);
 	}
 
-	if (tile->mask != NULL) {
+	if (tile->mask != NULL && tile->is_3d == 0) {
 		nemofx_glmask_dispatch(tile->mask, texture, nemoshow_canvas_get_texture(tile->over));
 
 		texture = nemofx_glmask_get_texture(tile->mask);
@@ -1770,6 +1850,48 @@ static int nemotile_prepare_video(struct nemotile *tile, int columns, int rows, 
 	return 0;
 }
 
+static int nemotile_prepare_overlay(struct nemotile *tile, int count, float padding)
+{
+	struct tileone *one;
+	int i;
+
+	for (i = 0; i < count; i++) {
+		one = nemotile_one_create(4);
+		nemotile_one_set_index(one, i);
+		nemotile_one_set_vertex(one, 0, -1.0f, 1.0f, 0.0f);
+		nemotile_one_set_texcoord(one, 0, 0.0f, 1.0f);
+		nemotile_one_set_vertex(one, 1, 1.0f, 1.0f, 0.0f);
+		nemotile_one_set_texcoord(one, 1, 1.0f, 1.0f);
+		nemotile_one_set_vertex(one, 2, -1.0f, -1.0f, 0.0f);
+		nemotile_one_set_texcoord(one, 2, 0.0f, 0.0f);
+		nemotile_one_set_vertex(one, 3, 1.0f, -1.0f, 0.0f);
+		nemotile_one_set_texcoord(one, 3, 1.0f, 0.0f);
+
+		nemotile_one_set_normal(one, 0, 0.0f, 0.0f, 1.0f);
+		nemotile_one_set_normal(one, 1, 0.0f, 0.0f, 1.0f);
+		nemotile_one_set_normal(one, 2, 0.0f, 0.0f, 1.0f);
+		nemotile_one_set_normal(one, 3, 0.0f, 0.0f, 1.0f);
+
+		nemotile_one_set_texture(one, tile->over);
+
+		nemotile_one_set_color(one,
+				random_get_double(0.0f, 0.0f),
+				random_get_double(0.15f, 0.85f),
+				random_get_double(0.15f, 0.85f),
+				random_get_double(0.15f, 0.85f));
+
+		nemotile_one_vertices_translate(one,
+				random_get_double(-0.085f, 0.085f),
+				random_get_double(-0.085f, 0.085f),
+				0.85f - 0.085f * i);
+		nemotile_one_vertices_scale(one, 0.03f, 0.03f, 0.03f);
+
+		nemolist_insert_tail(&tile->over_list, &one->link);
+	}
+
+	return 0;
+}
+
 static void nemotile_finish_tiles(struct nemotile *tile)
 {
 }
@@ -1968,7 +2090,7 @@ int main(int argc, char *argv[])
 		tile->asymmetric.e[0] = 0.0f;
 		tile->asymmetric.e[1] = 0.0f;
 		tile->asymmetric.e[2] = 1.0f;
-		tile->asymmetric.near = 0.99999f;
+		tile->asymmetric.near = 0.00001f;
 		tile->asymmetric.far = 10.0f;
 	}
 
@@ -1983,6 +2105,7 @@ int main(int argc, char *argv[])
 	tile->ambient[3] = 0.12f;
 
 	nemolist_init(&tile->tile_list);
+	nemolist_init(&tile->over_list);
 
 	tile->trans_group = nemotrans_group_create();
 	nemotrans_group_set_dispatch_first(tile->trans_group, nemotile_dispatch_first_trans);
@@ -2245,6 +2368,10 @@ int main(int argc, char *argv[])
 	if (tile->is_3d != 0) {
 		nemotile_prepare_z_order(tile);
 		nemotile_sort_z_order(tile);
+	}
+
+	if (tile->is_3d != 0 && tile->over != NULL) {
+		nemotile_prepare_overlay(tile, 5, padding);
 	}
 
 	tile->timer = timer = nemotimer_create(tool);

@@ -160,6 +160,8 @@ struct nemotile {
 	struct nemolist tile_list;
 	int tile_dirty;
 
+	struct nemolist over_list;
+
 	struct tileone **tiles;
 	int ntiles;
 
