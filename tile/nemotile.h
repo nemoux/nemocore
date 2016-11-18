@@ -1,5 +1,11 @@
-#ifndef __NEMO_TILE_H__
-#define __NEMO_TILE_H__
+#ifndef __NEMOTILE_H__
+#define __NEMOTILE_H__
+
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
 
 #include <stdint.h>
 
@@ -17,7 +23,6 @@
 #include <nemolist.h>
 #include <playback.h>
 #include <glfilter.h>
-#include <glmotion.h>
 #include <glmask.h>
 
 struct tileone {
@@ -30,6 +35,7 @@ struct tileone {
 	float color[4];
 
 	int count;
+	int type;
 
 	struct {
 		float tx, ty, tz;
@@ -84,7 +90,6 @@ struct nemotile {
 	struct showone *canvas;
 
 	struct glfilter *filter;
-	struct glmotion *motion;
 	struct glmask *mask;
 
 	int flip;
@@ -165,7 +170,12 @@ struct nemotile {
 	struct tileone **tiles;
 	int ntiles;
 
+	struct tileone *mesh;
 	struct tileone *pone;
 };
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

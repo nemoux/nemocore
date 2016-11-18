@@ -14,6 +14,7 @@
 #include <showhelper.h>
 #include <fbohelper.h>
 #include <glshader.h>
+#include <tilehelper.hpp>
 #include <nemofs.h>
 #include <nemopoly.h>
 #include <nemohelper.h>
@@ -92,6 +93,7 @@ static struct tileone *nemotile_one_create(int vertices)
 	one->normals = (float *)malloc(sizeof(float[3]) * vertices);
 
 	one->count = vertices;
+	one->type = GL_TRIANGLE_STRIP;
 
 	one->gtransform0.tx = 0.0f;
 	one->gtransform0.ty = 0.0f;
@@ -510,7 +512,7 @@ static void nemotile_render_2d_one(struct nemotile *tile, struct nemomatrix *pro
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), &one->texcoords[0]);
 	glEnableVertexAttribArray(1);
 
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, one->count);
+	glDrawArrays(one->type, 0, one->count);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
@@ -556,7 +558,7 @@ static void nemotile_render_3d_one(struct nemotile *tile, struct nemomatrix *pro
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), &one->texcoords[0]);
 	glEnableVertexAttribArray(1);
 
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, one->count);
+	glDrawArrays(one->type, 0, one->count);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
@@ -606,7 +608,7 @@ static void nemotile_render_3d_lighting_one(struct nemotile *tile, struct nemoma
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &one->normals[0]);
 	glEnableVertexAttribArray(2);
 
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, one->count);
+	glDrawArrays(one->type, 0, one->count);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
@@ -687,6 +689,9 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 		nemolist_for_each(one, &tile->over_list, link) {
 			nemotile_render_3d_one(tile, &projection, one);
 		}
+
+		if (tile->mesh != NULL)
+			nemotile_render_3d_one(tile, &projection, tile->mesh);
 	} else {
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_ALWAYS);
@@ -728,6 +733,9 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 		nemolist_for_each(one, &tile->over_list, link) {
 			nemotile_render_3d_lighting_one(tile, &projection, one);
 		}
+
+		if (tile->mesh != NULL)
+			nemotile_render_3d_lighting_one(tile, &projection, tile->mesh);
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -1584,12 +1592,6 @@ static GLuint nemotile_dispatch_canvas_filter(struct talenode *node, void *data)
 	struct nemotile *tile = (struct nemotile *)data;
 	GLuint texture = nemotale_node_get_texture(node);
 
-	if (tile->motion != NULL && nemotrans_group_has_transition(tile->trans_group) != 0) {
-		nemofx_glmotion_dispatch(tile->motion, texture);
-
-		texture = nemofx_glmotion_get_texture(tile->motion);
-	}
-
 	if (tile->mask != NULL && tile->is_3d == 0) {
 		nemofx_glmask_dispatch(tile->mask, texture, nemoshow_canvas_get_texture(tile->over));
 
@@ -1625,19 +1627,6 @@ static GLuint nemotile_dispatch_video_filter(struct talenode *node, void *data)
 	}
 
 	return texture;
-}
-
-static void nemotile_dispatch_first_trans(struct transgroup *group, void *data)
-{
-	struct nemotile *tile = (struct nemotile *)data;
-}
-
-static void nemotile_dispatch_last_trans(struct transgroup *group, void *data)
-{
-	struct nemotile *tile = (struct nemotile *)data;
-
-	if (tile->motion != NULL)
-		nemofx_glmotion_clear(tile->motion);
 }
 
 static int nemotile_prepare_opengl(struct nemotile *tile, int32_t width, int32_t height)
@@ -1984,8 +1973,8 @@ int main(int argc, char *argv[])
 		{ "background",							required_argument,			NULL,			'b' },
 		{ "overlay",								required_argument,			NULL,			'o' },
 		{ "wall",										required_argument,			NULL,			'a' },
+		{ "mesh",										required_argument,			NULL,			'm' },
 		{ "fullscreen",							required_argument,			NULL,			'f' },
-		{ "motionblur",							required_argument,			NULL,			'm' },
 		{ "brightness",							required_argument,			NULL,			'e' },
 		{ "jitter",									required_argument,			NULL,			'j' },
 		{ "padding",								required_argument,			NULL,			'd' },
@@ -2010,9 +1999,9 @@ int main(int argc, char *argv[])
 	char *programpath = NULL;
 	char *fullscreen = NULL;
 	char *background = NULL;
-	char *overlay = NULL;
-	char *wall = NULL;
-	float motionblur = 0.0f;
+	char *overlaypath = NULL;
+	char *wallpath = NULL;
+	char *meshpath = NULL;
 	float brightness = 0.85f;
 	float jitter = 0.0f;
 	float padding = 0.0f;
@@ -2029,7 +2018,7 @@ int main(int argc, char *argv[])
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "w:h:c:r:i:v:t:b:o:a:f:m:e:j:d:p:sly", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:c:r:i:v:t:b:o:a:m:f:e:j:d:p:sly", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -2067,19 +2056,19 @@ int main(int argc, char *argv[])
 				break;
 
 			case 'o':
-				overlay = strdup(optarg);
+				overlaypath = strdup(optarg);
 				break;
 
 			case 'a':
-				wall = strdup(optarg);
+				wallpath = strdup(optarg);
+				break;
+
+			case 'm':
+				meshpath = strdup(optarg);
 				break;
 
 			case 'f':
 				fullscreen = strdup(optarg);
-				break;
-
-			case 'm':
-				motionblur = strtod(optarg, NULL);
 				break;
 
 			case 'e':
@@ -2190,8 +2179,6 @@ int main(int argc, char *argv[])
 	nemolist_init(&tile->wall_list);
 
 	tile->trans_group = nemotrans_group_create();
-	nemotrans_group_set_dispatch_first(tile->trans_group, nemotile_dispatch_first_trans);
-	nemotrans_group_set_dispatch_last(tile->trans_group, nemotile_dispatch_last_trans);
 	nemotrans_group_set_userdata(tile->trans_group, tile);
 
 	tile->tool = tool = nemotool_create();
@@ -2255,19 +2242,14 @@ int main(int argc, char *argv[])
 		tile->filter = nemofx_glfilter_create(width, height, programpath);
 	}
 
-	if (motionblur > 0.0f) {
-		tile->motion = nemofx_glmotion_create(width, height);
-		nemofx_glmotion_set_step(tile->motion, motionblur);
-	}
-
-	if (overlay != NULL) {
+	if (overlaypath != NULL) {
 		tile->over = canvas = nemoshow_canvas_create();
 		nemoshow_canvas_set_width(canvas, width);
 		nemoshow_canvas_set_height(canvas, height);
 		nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
 		nemoshow_attach_one(show, canvas);
 
-		if (os_has_file_extension(overlay, "svg") != 0) {
+		if (os_has_file_extension(overlaypath, "svg") != 0) {
 			blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
 			nemoshow_filter_set_blur(blur, "solid", width * 0.05f);
 
@@ -2279,7 +2261,7 @@ int main(int argc, char *argv[])
 			nemoshow_item_set_height(one, height);
 			nemoshow_item_set_fill_color(one, 255.0f, 255.0f, 255.0f, 255.0f);
 			nemoshow_item_set_filter(one, blur);
-			nemoshow_item_path_load_svg(one, overlay, 0.0f, 0.0f, width, height);
+			nemoshow_item_path_load_svg(one, overlaypath, 0.0f, 0.0f, width, height);
 		} else {
 			one = nemoshow_item_create(NEMOSHOW_IMAGE_ITEM);
 			nemoshow_one_attach(canvas, one);
@@ -2287,20 +2269,20 @@ int main(int argc, char *argv[])
 			nemoshow_item_set_y(one, 0.0f);
 			nemoshow_item_set_width(one, width);
 			nemoshow_item_set_height(one, height);
-			nemoshow_item_set_uri(one, overlay);
+			nemoshow_item_set_uri(one, overlaypath);
 		}
 
 		tile->mask = nemofx_glmask_create(width, height);
 	}
 
-	if (wall != NULL) {
+	if (wallpath != NULL) {
 		tile->wall = canvas = nemoshow_canvas_create();
 		nemoshow_canvas_set_width(canvas, width);
 		nemoshow_canvas_set_height(canvas, height);
 		nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
 		nemoshow_attach_one(show, canvas);
 
-		if (os_has_file_extension(wall, "svg") != 0) {
+		if (os_has_file_extension(wallpath, "svg") != 0) {
 			blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
 			nemoshow_filter_set_blur(blur, "solid", width * 0.008f);
 
@@ -2314,7 +2296,7 @@ int main(int argc, char *argv[])
 			nemoshow_item_set_stroke_width(one, width * 0.004f);
 			nemoshow_item_set_fill_color(one, 0.0f, 0.0f, 0.0f, 0.0f);
 			nemoshow_item_set_filter(one, blur);
-			nemoshow_item_path_load_svg(one, wall, 0.0f, 0.0f, width, height);
+			nemoshow_item_path_load_svg(one, wallpath, 0.0f, 0.0f, width, height);
 		} else {
 			one = nemoshow_item_create(NEMOSHOW_IMAGE_ITEM);
 			nemoshow_one_attach(canvas, one);
@@ -2322,8 +2304,17 @@ int main(int argc, char *argv[])
 			nemoshow_item_set_y(one, 0.0f);
 			nemoshow_item_set_width(one, width);
 			nemoshow_item_set_height(one, height);
-			nemoshow_item_set_uri(one, wall);
+			nemoshow_item_set_uri(one, wallpath);
 		}
+	}
+
+	if (meshpath != NULL) {
+		tile->mesh = nemotile_one_create_mesh(meshpath, os_get_file_path(meshpath));
+		nemotile_one_set_texture(tile->mesh, tile->wall);
+		nemotile_one_vertices_scale_to(tile->mesh, 0.25f, -0.25f, 0.25f);
+		nemotile_one_vertices_scale(tile->mesh, 0.25f, -0.25f, 0.25f);
+		nemotile_one_vertices_translate_to(tile->mesh, 0.0f, 0.0f, 0.5f);
+		nemotile_one_vertices_translate(tile->mesh, 0.0f, 0.0f, 0.5f);
 	}
 
 	nemotile_prepare_opengl(tile, width, height);

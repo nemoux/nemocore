@@ -1,5 +1,11 @@
-#ifndef __NEMO_PIXS_H__
-#define __NEMO_PIXS_H__
+#ifndef __NEMOPIXS_H__
+#define __NEMOPIXS_H__
+
+#include <nemoconfig.h>
+
+#ifdef __cplusplus
+NEMO_BEGIN_EXTERN_C
+#endif
 
 #include <stdint.h>
 
@@ -112,5 +118,9 @@ struct nemopixs {
 	struct showevent events;
 	int has_taps;
 };
+
+#ifdef __cplusplus
+NEMO_END_EXTERN_C
+#endif
 
 #endif

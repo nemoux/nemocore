@@ -13,6 +13,7 @@ include_directories(
 	${CMAKE_SOURCE_DIR}/play
 	${CMAKE_SOURCE_DIR}/apps
 	${CMAKE_SOURCE_DIR}/fx
+	${CMAKE_SOURCE_DIR}/thirds
 	)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
@@ -21,6 +22,8 @@ set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 
 add_executable(nemotile
 	nemotile.c
+	tilehelper.cpp
+	${CMAKE_SOURCE_DIR}/thirds/tiny_obj_loader.cc
 	)
 
 TARGET_LINK_LIBRARIES(nemotile
