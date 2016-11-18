@@ -159,8 +159,6 @@ struct nemotile {
 	struct transgroup *trans_group;
 
 	struct nemolist tile_list;
-	int tile_dirty;
-
 	struct nemolist over_list;
 	struct nemolist wall_list;
 

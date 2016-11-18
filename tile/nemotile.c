@@ -436,7 +436,7 @@ static struct tileone *nemotile_find_one(struct nemotile *tile, int index)
 	return NULL;
 }
 
-static void nemotile_prepare_z_order(struct nemotile *tile)
+static void nemotile_prepare_depth(struct nemotile *tile)
 {
 	struct tileone *one;
 	int index = 0;
@@ -449,14 +449,14 @@ static void nemotile_prepare_z_order(struct nemotile *tile)
 	}
 }
 
-static void nemotile_finish_z_order(struct nemotile *tile)
+static void nemotile_finish_depth(struct nemotile *tile)
 {
 	free(tile->tiles);
 
 	tile->ntiles = 0;
 }
 
-static int nemotile_compare_z_order(const void *a, const void *b)
+static int nemotile_compare_depth(const void *a, const void *b)
 {
 	const struct tileone *one0 = *((const struct tileone **)a);
 	const struct tileone *one1 = *((const struct tileone **)b);
@@ -469,9 +469,9 @@ static int nemotile_compare_z_order(const void *a, const void *b)
 	return 1;
 }
 
-static void nemotile_sort_z_order(struct nemotile *tile)
+static void nemotile_sort_depth(struct nemotile *tile)
 {
-	qsort(tile->tiles, tile->ntiles, sizeof(struct tileone *), nemotile_compare_z_order);
+	qsort(tile->tiles, tile->ntiles, sizeof(struct tileone *), nemotile_compare_depth);
 }
 
 static void nemotile_render_2d_one(struct nemotile *tile, struct nemomatrix *projection, struct tileone *one)
@@ -674,11 +674,7 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 			nemomatrix_asymmetric(&projection, tile->asymmetric.a, tile->asymmetric.b, tile->asymmetric.c, tile->asymmetric.e, tile->asymmetric.near, tile->asymmetric.far);
 		}
 
-		if (tile->tile_dirty != 0) {
-			nemotile_sort_z_order(tile);
-
-			tile->tile_dirty = 0;
-		}
+		nemotile_sort_depth(tile);
 
 		nemolist_for_each(one, &tile->wall_list, link) {
 			nemotile_render_3d_one(tile, &projection, one);
@@ -719,11 +715,7 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 			nemomatrix_asymmetric(&projection, tile->asymmetric.a, tile->asymmetric.b, tile->asymmetric.c, tile->asymmetric.e, tile->asymmetric.near, tile->asymmetric.far);
 		}
 
-		if (tile->tile_dirty != 0) {
-			nemotile_sort_z_order(tile);
-
-			tile->tile_dirty = 0;
-		}
+		nemotile_sort_depth(tile);
 
 		nemolist_for_each(one, &tile->wall_list, link) {
 			nemotile_render_3d_lighting_one(tile, &projection, one);
@@ -815,7 +807,6 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 				if (pone != NULL) {
 					nemolist_remove(&pone->link);
 					nemolist_insert_tail(&tile->tile_list, &pone->link);
-					tile->tile_dirty = 1;
 
 					nemolist_for_each(one, &tile->tile_list, link) {
 						trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
@@ -937,7 +928,6 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 					nemolist_remove(&tile->pone->link);
 					nemolist_insert_tail(&tile->tile_list, &tile->pone->link);
-					tile->tile_dirty = 1;
 				} else if (tile->slideshow == 2) {
 					tile->csprites = tile->nsprites / 2;
 
@@ -992,7 +982,6 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 					nemolist_remove(&tile->pone->link);
 					nemolist_insert_tail(&tile->tile_list, &tile->pone->link);
-					tile->tile_dirty = 1;
 				} else if (tile->slideshow == 3) {
 					tile->csprites = tile->columns / 2;
 					tile->rsprites = tile->rows / 2;
@@ -1085,7 +1074,6 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 						nemolist_remove(&tile->pone->link);
 						nemolist_insert_tail(&tile->tile_list, &tile->pone->link);
-						tile->tile_dirty = 1;
 					}
 				} else if (tile->slideshow == 2) {
 					int csprites = tile->csprites;
@@ -1150,7 +1138,6 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 							nemolist_remove(&one->link);
 							nemolist_insert_tail(&tile->tile_list, &one->link);
-							tile->tile_dirty = 1;
 						}
 					}
 				} else if (tile->slideshow == 3) {
@@ -1186,7 +1173,6 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 				if (tile->pone != NULL) {
 					nemolist_remove(&tile->pone->link);
 					nemolist_insert_tail(&tile->tile_list, &tile->pone->link);
-					tile->tile_dirty = 1;
 
 					nemolist_for_each(one, &tile->tile_list, link) {
 						if (one == tile->pone) {
@@ -2481,8 +2467,8 @@ int main(int argc, char *argv[])
 	}
 
 	if (tile->is_3d != 0) {
-		nemotile_prepare_z_order(tile);
-		nemotile_sort_z_order(tile);
+		nemotile_prepare_depth(tile);
+		nemotile_sort_depth(tile);
 	}
 
 	if (tile->is_3d != 0 && tile->over != NULL) {
