@@ -729,6 +729,10 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 			nemotile_render_3d_one(tile, &projection, one);
 		}
 
+		nemolist_for_each(one, &tile->test_list, link) {
+			nemotile_render_3d_one(tile, &projection, one);
+		}
+
 		if (tile->mesh != NULL) {
 			glEnable(GL_DEPTH_TEST);
 			glDepthFunc(GL_LEQUAL);
@@ -775,6 +779,10 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 
 		nemolist_for_each(one, &tile->over_list, link) {
 			nemotile_render_3d_lighting_one(tile, &projection, one);
+		}
+
+		nemolist_for_each(one, &tile->test_list, link) {
+			nemotile_render_3d_one(tile, &projection, one);
 		}
 
 		if (tile->mesh != NULL) {
@@ -2048,7 +2056,7 @@ static int nemotile_prepare_video(struct nemotile *tile, int columns, int rows, 
 	return 0;
 }
 
-static int nemotile_prepare_overlay(struct nemotile *tile, int count, float padding)
+static int nemotile_prepare_depthtest(struct nemotile *tile, int count, float padding)
 {
 	struct tileone *one;
 	int i;
@@ -2070,7 +2078,7 @@ static int nemotile_prepare_overlay(struct nemotile *tile, int count, float padd
 		nemotile_one_set_normal(one, 2, 0.0f, 0.0f, 1.0f);
 		nemotile_one_set_normal(one, 3, 0.0f, 0.0f, 1.0f);
 
-		nemotile_one_set_texture(one, tile->over);
+		nemotile_one_set_texture(one, tile->test);
 
 		nemotile_one_set_color(one,
 				random_get_double(0.0f, 0.0f),
@@ -2087,7 +2095,7 @@ static int nemotile_prepare_overlay(struct nemotile *tile, int count, float padd
 				random_get_double(0.04f, 0.08f),
 				1.0f);
 
-		nemolist_insert(&tile->over_list, &one->link);
+		nemolist_insert(&tile->test_list, &one->link);
 	}
 
 	return 0;
@@ -2162,6 +2170,7 @@ int main(int argc, char *argv[])
 		{ "3dspace",								required_argument,			NULL,			's' },
 		{ "lighting",								required_argument,			NULL,			'l' },
 		{ "dynamic_perspective",		required_argument,			NULL,			'y' },
+		{ "depthtest",							required_argument,			NULL,			'z' },
 		{ 0 }
 	};
 
@@ -2182,6 +2191,7 @@ int main(int argc, char *argv[])
 	char *overlaypath = NULL;
 	char *wallpath = NULL;
 	char *meshpath = NULL;
+	char *depthtest = NULL;
 	float brightness = 0.85f;
 	float jitter = 0.0f;
 	float padding = 0.0f;
@@ -2198,7 +2208,7 @@ int main(int argc, char *argv[])
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "w:h:c:r:i:v:t:b:o:a:m:f:e:j:d:p:sly", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:c:r:i:v:t:b:o:a:m:f:e:j:d:p:slyz:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -2279,6 +2289,10 @@ int main(int argc, char *argv[])
 				is_dynamic_perspective = 1;
 				break;
 
+			case 'z':
+				depthtest = strdup(optarg);
+				break;
+
 			default:
 				break;
 		}
@@ -2357,6 +2371,7 @@ int main(int argc, char *argv[])
 	nemolist_init(&tile->tile_list);
 	nemolist_init(&tile->over_list);
 	nemolist_init(&tile->wall_list);
+	nemolist_init(&tile->test_list);
 
 	tile->trans_group = nemotrans_group_create();
 	nemotrans_group_set_userdata(tile->trans_group, tile);
@@ -2494,6 +2509,37 @@ int main(int argc, char *argv[])
 		nemotile_one_vertices_scale(tile->mesh, 0.25f, -0.25f, 0.25f);
 		nemotile_one_vertices_translate_to(tile->mesh, 0.0f, 0.0f, 0.5f);
 		nemotile_one_vertices_translate(tile->mesh, 0.0f, 0.0f, 0.5f);
+	}
+
+	if (depthtest != NULL) {
+		tile->test = canvas = nemoshow_canvas_create();
+		nemoshow_canvas_set_width(canvas, width);
+		nemoshow_canvas_set_height(canvas, height);
+		nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
+		nemoshow_attach_one(show, canvas);
+
+		if (os_has_file_extension(depthtest, "svg") != 0) {
+			blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
+			nemoshow_filter_set_blur(blur, "solid", width * 0.05f);
+
+			one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
+			nemoshow_one_attach(canvas, one);
+			nemoshow_item_set_x(one, 0.0f);
+			nemoshow_item_set_y(one, 0.0f);
+			nemoshow_item_set_width(one, width);
+			nemoshow_item_set_height(one, height);
+			nemoshow_item_set_fill_color(one, 255.0f, 255.0f, 255.0f, 255.0f);
+			nemoshow_item_set_filter(one, blur);
+			nemoshow_item_path_load_svg(one, depthtest, 0.0f, 0.0f, width, height);
+		} else {
+			one = nemoshow_item_create(NEMOSHOW_IMAGE_ITEM);
+			nemoshow_one_attach(canvas, one);
+			nemoshow_item_set_x(one, 0.0f);
+			nemoshow_item_set_y(one, 0.0f);
+			nemoshow_item_set_width(one, width);
+			nemoshow_item_set_height(one, height);
+			nemoshow_item_set_uri(one, depthtest);
+		}
 	}
 
 	nemotile_prepare_opengl(tile, width, height);
@@ -2655,12 +2701,12 @@ int main(int argc, char *argv[])
 		nemotile_sort_depth(tile);
 	}
 
-	if (tile->is_3d != 0 && tile->over != NULL) {
-		nemotile_prepare_overlay(tile, 5, padding);
-	}
-
 	if (tile->is_3d != 0 && tile->wall != NULL) {
 		nemotile_prepare_wall(tile, 0.0f);
+	}
+
+	if (tile->is_3d != 0 && tile->test != NULL) {
+		nemotile_prepare_depthtest(tile, 5, padding);
 	}
 
 	tile->timer = timer = nemotimer_create(tool);

@@ -89,6 +89,7 @@ struct nemotile {
 	struct showone *back;
 	struct showone *over;
 	struct showone *wall;
+	struct showone *test;
 
 	struct showone *canvas;
 
@@ -173,6 +174,7 @@ struct nemotile {
 	struct nemolist tile_list;
 	struct nemolist over_list;
 	struct nemolist wall_list;
+	struct nemolist test_list;
 
 	struct tileone **tiles;
 	int ntiles;
