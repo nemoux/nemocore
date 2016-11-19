@@ -82,6 +82,16 @@ static inline float nemotile_get_ty_from_vy(int rows, int flip, float sy, float 
 	return ty;
 }
 
+static inline float nemotile_get_camera_degree(float v, float z)
+{
+	float r = M_PI - atan2(v, -z);
+
+	if (r > M_PI)
+		return r - M_PI * 2.0f;
+
+	return r;
+}
+
 static struct tileone *nemotile_one_create(int vertices)
 {
 	struct tileone *one;
@@ -1438,9 +1448,13 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 			} else if (nemoshow_event_is_pointer_motion(show, event)) {
 				float tx = nemoshow_event_get_x(event) / tile->width;
 				float ty = nemoshow_event_get_y(event) / tile->height;
+				float rx, ry;
 
 				tile->asymmetric.e[0] = tx * 3.0f - 1.5f;
 				tile->asymmetric.e[1] = ty * 3.0f - 1.5f;
+
+				rx = nemotile_get_camera_degree(tile->asymmetric.e[0], 2.0f);
+				ry = nemotile_get_camera_degree(tile->asymmetric.e[1], 2.0f);
 			}
 
 			if (nemoshow_event_is_touch_down(show, event)) {
