@@ -178,6 +178,11 @@ static void nemotile_one_set_index(struct tileone *one, int index)
 	one->index = index;
 }
 
+static void nemotile_one_set_type(struct tileone *one, int type)
+{
+	one->type = type;
+}
+
 static void nemotile_one_group_translate(struct tileone *one, float tx, float ty, float tz)
 {
 	one->gtransform.tx = tx;
@@ -725,12 +730,15 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 			nemotile_render_3d_one(tile, &projection, tile->tiles[i]);
 		}
 
-		nemolist_for_each(one, &tile->over_list, link) {
+		nemolist_for_each(one, &tile->test_list, link) {
 			nemotile_render_3d_one(tile, &projection, one);
 		}
 
-		nemolist_for_each(one, &tile->test_list, link) {
-			nemotile_render_3d_one(tile, &projection, one);
+		if (tile->cube != NULL) {
+			glEnable(GL_DEPTH_TEST);
+			glDepthFunc(GL_LEQUAL);
+
+			nemotile_render_3d_one(tile, &projection, tile->cube);
 		}
 
 		if (tile->mesh != NULL) {
@@ -777,12 +785,15 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 			nemotile_render_3d_lighting_one(tile, &projection, tile->tiles[i]);
 		}
 
-		nemolist_for_each(one, &tile->over_list, link) {
+		nemolist_for_each(one, &tile->test_list, link) {
 			nemotile_render_3d_lighting_one(tile, &projection, one);
 		}
 
-		nemolist_for_each(one, &tile->test_list, link) {
-			nemotile_render_3d_one(tile, &projection, one);
+		if (tile->cube != NULL) {
+			glEnable(GL_DEPTH_TEST);
+			glDepthFunc(GL_LEQUAL);
+
+			nemotile_render_3d_lighting_one(tile, &projection, tile->cube);
 		}
 
 		if (tile->mesh != NULL) {
@@ -1330,7 +1341,7 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 		}
 	} else {
 		if (tile->is_dynamic_perspective == 0) {
-			float planes[6][6] = {
+			static float planes[6][6] = {
 				{ 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f },
 				{ 0.0f, 0.0f, -2.0f, 0.0f, 0.0f, 0.0f },
 				{ 0.0f, -1.0f, -1.0f, -M_PI / 2.0f, 0.0f, 0.0f },
@@ -1625,7 +1636,7 @@ static void nemotile_dispatch_timer(struct nemotimer *timer, void *data)
 
 	if (tile->is_3d != 0) {
 		if (tile->is_dynamic_perspective == 0) {
-			float planes[6][6] = {
+			static float planes[6][6] = {
 				{ 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f },
 				{ 0.0f, 0.0f, -2.0f, 0.0f, 0.0f, 0.0f },
 				{ 0.0f, -1.0f, -1.0f, -M_PI / 2.0f, 0.0f, 0.0f },
@@ -1675,6 +1686,12 @@ static void nemotile_dispatch_timer(struct nemotimer *timer, void *data)
 			}
 
 			tile->iactions = (tile->iactions + 1) % 2;
+		}
+
+		if (tile->cube != NULL) {
+			trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE, tile->timeout, 0);
+			nemotrans_set_float(trans, &tile->cube->vtransform.ry, tile->cube->vtransform.ry + M_PI * 2.0f);
+			nemotrans_group_attach_trans(tile->trans_group, trans);
 		}
 
 		if (tile->mesh != NULL) {
@@ -2103,7 +2120,7 @@ static int nemotile_prepare_depthtest(struct nemotile *tile, int count, float pa
 
 static int nemotile_prepare_wall(struct nemotile *tile, float padding)
 {
-	float planes[5][6] = {
+	static float planes[5][6] = {
 		{ 0.0f, 0.0f, -2.0f, 0.0f, 0.0f, 0.0f },
 		{ 0.0f, -1.0f, -1.0f, -M_PI / 2.0f, 0.0f, 0.0f },
 		{ 0.0f, 1.0f, -1.0f, M_PI / 2.0f, 0.0f, 0.0f },
@@ -2140,6 +2157,160 @@ static int nemotile_prepare_wall(struct nemotile *tile, float padding)
 
 		nemolist_insert_tail(&tile->wall_list, &one->link);
 	}
+
+	return 0;
+}
+
+static int nemotile_prepare_cube(struct nemotile *tile)
+{
+	static const float vertices[] = {
+		1.0f, 1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f, -1.0f,
+		1.0f, 1.0f, -1.0f,
+		-1.0f, -1.0f, -1.0f,
+		-1.0f, 1.0f, -1.0f,
+
+		1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, -1.0f,
+		-1.0f, 1.0f, -1.0f,
+		1.0f, 1.0f, 1.0f,
+		-1.0f, 1.0f, -1.0f,
+		-1.0f, 1.0f, 1.0f,
+
+		1.0f, 1.0f, 1.0f,
+		1.0f, -1.0f, 1.0f,
+		1.0f, -1.0f, -1.0f,
+		1.0f, 1.0f, 1.0f,
+		1.0f, -1.0f, -1.0f,
+		1.0f, 1.0f, -1.0f,
+
+		-1.0f, 1.0f, -1.0f,
+		-1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f, 1.0f,
+		-1.0f, 1.0f, -1.0f,
+		-1.0f, -1.0f, 1.0f,
+		-1.0f, 1.0f, 1.0f,
+
+		1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f, 1.0f,
+		-1.0f, -1.0f, 1.0f,
+		1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f, 1.0f,
+		-1.0f, -1.0f, -1.0f,
+
+		-1.0f, 1.0f, 1.0f,
+		-1.0f, -1.0f, 1.0f,
+		1.0f, -1.0f, 1.0f,
+		-1.0f, 1.0f, 1.0f,
+		1.0f, -1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f
+	};
+	static const float texcoords[] = {
+		0.0f, 1.0f,
+		0.0f, 0.0f,
+		1.0f, 0.0f,
+		0.0f, 1.0f,
+		1.0f, 0.0f,
+		1.0f, 1.0f,
+
+		0.0f, 1.0f,
+		0.0f, 0.0f,
+		1.0f, 0.0f,
+		0.0f, 1.0f,
+		1.0f, 0.0f,
+		1.0f, 1.0f,
+
+		0.0f, 1.0f,
+		0.0f, 0.0f,
+		1.0f, 0.0f,
+		0.0f, 1.0f,
+		1.0f, 0.0f,
+		1.0f, 1.0f,
+
+		0.0f, 1.0f,
+		0.0f, 0.0f,
+		1.0f, 0.0f,
+		0.0f, 1.0f,
+		1.0f, 0.0f,
+		1.0f, 1.0f,
+
+		0.0f, 1.0f,
+		0.0f, 0.0f,
+		1.0f, 0.0f,
+		0.0f, 1.0f,
+		1.0f, 0.0f,
+		1.0f, 1.0f,
+
+		0.0f, 1.0f,
+		0.0f, 0.0f,
+		1.0f, 0.0f,
+		0.0f, 1.0f,
+		1.0f, 0.0f,
+		1.0f, 1.0f
+	};
+	static const float normals[] = {
+		0.0f, 0.0f, -1.0f,
+		0.0f, 0.0f, -1.0f,
+		0.0f, 0.0f, -1.0f,
+		0.0f, 0.0f, -1.0f,
+		0.0f, 0.0f, -1.0f,
+		0.0f, 0.0f, -1.0f,
+
+		0.0f, -1.0f, 0.0f,
+		0.0f, -1.0f, 0.0f,
+		0.0f, -1.0f, 0.0f,
+		0.0f, -1.0f, 0.0f,
+		0.0f, -1.0f, 0.0f,
+		0.0f, -1.0f, 0.0f,
+
+		-1.0f, 0.0f, 0.0f,
+		-1.0f, 0.0f, 0.0f,
+		-1.0f, 0.0f, 0.0f,
+		-1.0f, 0.0f, 0.0f,
+		-1.0f, 0.0f, 0.0f,
+		-1.0f, 0.0f, 0.0f,
+
+		1.0f, 0.0f, 0.0f,
+		1.0f, 0.0f, 0.0f,
+		1.0f, 0.0f, 0.0f,
+		1.0f, 0.0f, 0.0f,
+		1.0f, 0.0f, 0.0f,
+		1.0f, 0.0f, 0.0f,
+
+		0.0f, 1.0f, 0.0f,
+		0.0f, 1.0f, 0.0f,
+		0.0f, 1.0f, 0.0f,
+		0.0f, 1.0f, 0.0f,
+		0.0f, 1.0f, 0.0f,
+		0.0f, 1.0f, 0.0f,
+
+		0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f
+	};
+	struct tileone *one;
+	int i;
+
+	tile->cube = one = nemotile_one_create(36);
+	nemotile_one_set_index(one, 0);
+	nemotile_one_set_type(one, GL_TRIANGLES);
+
+	for (i = 0; i < 36; i++) {
+		nemotile_one_set_vertex(one, i, vertices[i * 3 + 0], vertices[i * 3 + 1], vertices[i * 3 + 2]);
+		nemotile_one_set_texcoord(one, i, texcoords[i * 2 + 0], texcoords[i * 2 + 1]);
+		nemotile_one_set_normal(one, i, normals[i * 3 + 0], normals[i * 3 + 1], normals[i * 3 + 2]);
+	}
+
+	nemotile_one_set_texture(one, tile->over);
+
+	nemotile_one_set_color(one, 1.0f, 1.0f, 1.0f, 1.0f);
+
+	nemotile_one_vertices_translate(one, 0.0f, 0.5f, 0.25f);
+	nemotile_one_vertices_scale(one, 0.25f, 0.25f, 0.25f);
 
 	return 0;
 }
@@ -2369,7 +2540,6 @@ int main(int argc, char *argv[])
 	tile->ambient[3] = 0.12f;
 
 	nemolist_init(&tile->tile_list);
-	nemolist_init(&tile->over_list);
 	nemolist_init(&tile->wall_list);
 	nemolist_init(&tile->test_list);
 
@@ -2703,6 +2873,10 @@ int main(int argc, char *argv[])
 
 	if (tile->is_3d != 0 && tile->wall != NULL) {
 		nemotile_prepare_wall(tile, 0.0f);
+	}
+
+	if (tile->is_3d != 0 && tile->over != NULL) {
+		nemotile_prepare_cube(tile);
 	}
 
 	if (tile->is_3d != 0 && tile->test != NULL) {

@@ -172,7 +172,6 @@ struct nemotile {
 	struct transgroup *trans_group;
 
 	struct nemolist tile_list;
-	struct nemolist over_list;
 	struct nemolist wall_list;
 	struct nemolist test_list;
 
@@ -180,6 +179,7 @@ struct nemotile {
 	int ntiles;
 
 	struct tileone *mesh;
+	struct tileone *cube;
 	struct tileone *pone;
 };
 
