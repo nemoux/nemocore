@@ -1784,16 +1784,18 @@ static GLuint nemotile_dispatch_image_filter(struct talenode *node, void *data)
 	struct nemotile *tile = (struct nemotile *)data;
 	GLuint texture = nemotale_node_get_texture(node);
 
-	if (tile->filter != NULL) {
-		nemofx_glfilter_dispatch(tile->filter, texture);
-
-		texture = nemofx_glfilter_get_texture(tile->filter);
-	}
-
 	return texture;
 }
 
 static GLuint nemotile_dispatch_video_filter(struct talenode *node, void *data)
+{
+	struct nemotile *tile = (struct nemotile *)data;
+	GLuint texture = nemotale_node_get_texture(node);
+
+	return texture;
+}
+
+static GLuint nemotile_dispatch_wall_filter(struct talenode *node, void *data)
 {
 	struct nemotile *tile = (struct nemotile *)data;
 	GLuint texture = nemotale_node_get_texture(node);
@@ -2369,6 +2371,7 @@ int main(int argc, char *argv[])
 	struct showone *canvas;
 	struct showone *one;
 	struct showone *blur;
+	struct showtransition *trans;
 	struct talenode *node;
 	char *imagepath = NULL;
 	char *videopath = NULL;
@@ -2663,6 +2666,9 @@ int main(int argc, char *argv[])
 		nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
 		nemoshow_attach_one(show, canvas);
 
+		node = nemoshow_canvas_get_node(canvas);
+		nemotale_node_set_dispatch_filter(node, nemotile_dispatch_wall_filter, tile);
+
 		if (os_has_file_extension(wallpath, "svg") != 0) {
 			blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
 			nemoshow_filter_set_blur(blur, "solid", width * 0.008f);
@@ -2687,6 +2693,11 @@ int main(int argc, char *argv[])
 			nemoshow_item_set_height(one, height);
 			nemoshow_item_set_uri(one, wallpath);
 		}
+
+		trans = nemoshow_transition_create(NEMOSHOW_LINEAR_EASE, 18000, 0);
+		nemoshow_transition_dirty_one(trans, canvas, NEMOSHOW_FILTER_DIRTY);
+		nemoshow_transition_set_repeat(trans, 0);
+		nemoshow_attach_transition(show, trans);
 	}
 
 	if (meshpath != NULL) {
