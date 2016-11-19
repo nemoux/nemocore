@@ -2136,15 +2136,38 @@ static int nemotile_prepare_depthtest(struct nemotile *tile, int count, float pa
 	return 0;
 }
 
-static int nemotile_prepare_wall(struct nemotile *tile, float padding)
+static int nemotile_prepare_wall(struct nemotile *tile, float padding, int div)
 {
-	static float planes[5][6] = {
+	static float vertices0[5][6] = {
 		{ 0.0f, 0.0f, -2.0f, 0.0f, 0.0f, 0.0f },
-		{ 0.0f, -1.0f, -1.0f, -M_PI / 2.0f, 0.0f, 0.0f },
-		{ 0.0f, 1.0f, -1.0f, M_PI / 2.0f, 0.0f, 0.0f },
-		{ -1.0f, 0.0f, -1.0f, 0.0f, M_PI / 2.0f, 0.0f },
-		{ 1.0f, 0.0f, -1.0f, 0.0f, -M_PI / 2.0f, 0.0f },
+		{ 0.0f, -1.0f, -1.0f, M_PI / 2.0f, 0.0f, 0.0f },
+		{ 1.0f, 0.0f, -1.0f, M_PI / 2.0f, 0.0f, -M_PI - M_PI / 2.0f },
+		{ 0.0f, 1.0f, -1.0f, M_PI / 2.0f, 0.0f, M_PI },
+		{ -1.0f, 0.0f, -1.0f, M_PI / 2.0f, 0.0f, -M_PI / 2.0f },
 	};
+	static float texcoords0[5][6] = {
+		{ 0.0f, 0.0f, 1.0f, 1.0f },
+		{ 0.0f, 0.0f, 1.0f, 1.0f },
+		{ 0.0f, 0.0f, 1.0f, 1.0f },
+		{ 0.0f, 0.0f, 1.0f, 1.0f },
+		{ 0.0f, 0.0f, 1.0f, 1.0f }
+	};
+	static float vertices1[5][6] = {
+		{ 0.0f, 0.0f, -2.0f, 0.0f, 0.0f, 0.0f },
+		{ 0.0f, -1.0f, -1.0f, M_PI / 2.0f, 0.0f, 0.0f },
+		{ 1.0f, 0.0f, -1.0f, M_PI / 2.0f, 0.0f, -M_PI - M_PI / 2.0f },
+		{ 0.0f, 1.0f, -1.0f, M_PI / 2.0f, 0.0f, M_PI },
+		{ -1.0f, 0.0f, -1.0f, M_PI / 2.0f, 0.0f, -M_PI / 2.0f },
+	};
+	static float texcoords1[5][6] = {
+		{ 0.0f, 0.0f, 1.0f, 1.0f },
+		{ 0.0f, 0.0f, 0.25f, 1.0f },
+		{ 0.25f, 0.0f, 0.25f, 1.0f },
+		{ 0.50f, 0.0f, 0.25f, 1.0f },
+		{ 0.75f, 0.0f, 0.25f, 1.0f }
+	};
+	float (*vertices)[6] = (div == 0 ? vertices0 : vertices1);
+	float (*texcoords)[6] = (div == 0 ? texcoords0 : texcoords1);
 	struct tileone *one;
 	int i;
 
@@ -2169,9 +2192,12 @@ static int nemotile_prepare_wall(struct nemotile *tile, float padding)
 
 		nemotile_one_set_color(one, 1.0f, 1.0f, 1.0f, 1.0f);
 
-		nemotile_one_vertices_translate(one, planes[i][0], planes[i][1], planes[i][2]);
-		nemotile_one_vertices_rotate(one, planes[i][3], planes[i][4], planes[i][5]);
+		nemotile_one_vertices_translate(one, vertices[i][0], vertices[i][1], vertices[i][2]);
+		nemotile_one_vertices_rotate(one, vertices[i][3], vertices[i][4], vertices[i][5]);
 		nemotile_one_vertices_scale(one, 1.0f - padding, 1.0f - padding, 1.0f);
+
+		nemotile_one_texcoords_translate(one, texcoords[i][0], texcoords[i][1]);
+		nemotile_one_texcoords_scale(one, texcoords[i][2], texcoords[i][3]);
 
 		nemolist_insert_tail(&tile->wall_list, &one->link);
 	}
@@ -2899,7 +2925,7 @@ int main(int argc, char *argv[])
 	}
 
 	if (tile->is_3d != 0 && tile->wall != NULL) {
-		nemotile_prepare_wall(tile, 0.0f);
+		nemotile_prepare_wall(tile, 0.0f, tile->filter == NULL ? 0 : 1);
 	}
 
 	if (tile->is_3d != 0 && tile->over != NULL) {
