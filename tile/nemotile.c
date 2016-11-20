@@ -2200,7 +2200,7 @@ static int nemotile_prepare_depthtest(struct nemotile *tile, int count, float pa
 	return 0;
 }
 
-static int nemotile_prepare_wall(struct nemotile *tile, float padding, int div)
+static int nemotile_prepare_wall(struct nemotile *tile, float padding, int is_united_wall)
 {
 	static float vertices0[5][6] = {
 		{ 0.0f, 0.0f, -2.0f, 0.0f, 0.0f, 0.0f },
@@ -2230,8 +2230,8 @@ static int nemotile_prepare_wall(struct nemotile *tile, float padding, int div)
 		{ 0.50f, 0.0f, 0.25f, 1.0f },
 		{ 0.75f, 0.0f, 0.25f, 1.0f }
 	};
-	float (*vertices)[6] = (div == 0 ? vertices0 : vertices1);
-	float (*texcoords)[6] = (div == 0 ? texcoords0 : texcoords1);
+	float (*vertices)[6] = (is_united_wall == 0 ? vertices0 : vertices1);
+	float (*texcoords)[6] = (is_united_wall == 0 ? texcoords0 : texcoords1);
 	struct tileone *one;
 	int i;
 
@@ -2480,10 +2480,11 @@ int main(int argc, char *argv[])
 		{ "jitter",									required_argument,			NULL,			'j' },
 		{ "padding",								required_argument,			NULL,			'd' },
 		{ "program",								required_argument,			NULL,			'p' },
-		{ "3dspace",								required_argument,			NULL,			's' },
-		{ "lighting",								required_argument,			NULL,			'l' },
-		{ "dynamic_perspective",		required_argument,			NULL,			'y' },
 		{ "depthtest",							required_argument,			NULL,			'z' },
+		{ "3dspace",								no_argument,						NULL,			's' },
+		{ "lighting",								no_argument,						NULL,			'l' },
+		{ "dynamic_perspective",		no_argument,						NULL,			'y' },
+		{ "wall_divide",						no_argument,						NULL,			'u' },
 		{ 0 }
 	};
 
@@ -2518,11 +2519,12 @@ int main(int argc, char *argv[])
 	int is_3d = 0;
 	int is_lighting = 0;
 	int is_dynamic_perspective = 0;
+	int is_united_wall = 0;
 	int opt;
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "w:h:c:r:i:v:t:b:o:a:m:f:e:j:d:p:slyz:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:c:r:i:v:t:b:o:a:m:f:e:j:d:p:z:slyu", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -2591,6 +2593,10 @@ int main(int argc, char *argv[])
 				programpath = strdup(optarg);
 				break;
 
+			case 'z':
+				depthtest = strdup(optarg);
+				break;
+
 			case 's':
 				is_3d = 1;
 				break;
@@ -2603,8 +2609,8 @@ int main(int argc, char *argv[])
 				is_dynamic_perspective = 1;
 				break;
 
-			case 'z':
-				depthtest = strdup(optarg);
+			case 'u':
+				is_united_wall = 1;
 				break;
 
 			default:
@@ -3023,7 +3029,7 @@ int main(int argc, char *argv[])
 	}
 
 	if (tile->is_3d != 0 && tile->wall != NULL) {
-		nemotile_prepare_wall(tile, 0.0f, tile->filter == NULL ? 0 : 1);
+		nemotile_prepare_wall(tile, 0.0f, is_united_wall);
 	}
 
 	if (tile->is_3d != 0 && tile->over != NULL) {
