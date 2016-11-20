@@ -1493,6 +1493,20 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 				ry = nemotile_get_camera_degree(tile->asymmetric.e[1], 2.0f);
 			}
 
+			if (nemoshow_event_is_keyboard_down(show, event)) {
+				trans = nemotrans_create(NEMOEASE_LINEAR_TYPE, 4500, 0);
+
+				if (nemoshow_event_get_value(event) == KEY_LEFT) {
+					nemotrans_set_float(trans, &tile->asymmetric.e[0], -1.5f);
+				} else if (nemoshow_event_get_value(event) == KEY_RIGHT) {
+					nemotrans_set_float(trans, &tile->asymmetric.e[0], 1.5f);
+				} else if (nemoshow_event_get_value(event) == KEY_DOWN || nemoshow_event_get_value(event) == KEY_UP) {
+					nemotrans_set_float(trans, &tile->asymmetric.e[0], 0.0f);
+				}
+
+				nemotrans_group_attach_trans(tile->trans_group, trans);
+			}
+
 			if (nemoshow_event_is_touch_down(show, event)) {
 				trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
 						random_get_int(1200, 1600),
