@@ -740,10 +740,6 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 			nemotile_render_3d_one(tile, &projection, tile->tiles[i]);
 		}
 
-		nemolist_for_each(one, &tile->test_list, link) {
-			nemotile_render_3d_one(tile, &projection, one);
-		}
-
 		if (tile->cube != NULL) {
 			glEnable(GL_DEPTH_TEST);
 			glDepthFunc(GL_LEQUAL);
@@ -764,6 +760,13 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 			nemotile_render_3d_one(tile, &projection, tile->mesh);
 
 			glDisable(GL_CULL_FACE);
+		}
+
+		if (tile->ceil != NULL)
+			nemotile_render_3d_one(tile, &projection, tile->ceil);
+
+		nemolist_for_each(one, &tile->test_list, link) {
+			nemotile_render_3d_one(tile, &projection, one);
 		}
 	} else {
 		glEnable(GL_DEPTH_TEST);
@@ -803,10 +806,6 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 			nemotile_render_3d_lighting_one(tile, &projection, tile->tiles[i]);
 		}
 
-		nemolist_for_each(one, &tile->test_list, link) {
-			nemotile_render_3d_lighting_one(tile, &projection, one);
-		}
-
 		if (tile->cube != NULL) {
 			glEnable(GL_DEPTH_TEST);
 			glDepthFunc(GL_LEQUAL);
@@ -827,6 +826,13 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 			nemotile_render_3d_lighting_one(tile, &projection, tile->mesh);
 
 			glDisable(GL_CULL_FACE);
+		}
+
+		if (tile->ceil != NULL)
+			nemotile_render_3d_lighting_one(tile, &projection, tile->ceil);
+
+		nemolist_for_each(one, &tile->test_list, link) {
+			nemotile_render_3d_lighting_one(tile, &projection, one);
 		}
 	}
 
@@ -870,7 +876,7 @@ static void nemotile_dispatch_video_trans_done(struct nemotrans *trans, void *da
 				random_get_int(800, 1600),
 				random_get_int(100, 1200));
 
-		nemotrans_set_float(trans, &one->vtransform.tz, random_get_double(-0.25f, 0.75f));
+		nemotrans_set_float(trans, &one->vtransform.tz, random_get_double(-0.25f, 0.45f));
 
 		nemotrans_group_attach_trans(tile->trans_group, trans);
 	}
@@ -1424,7 +1430,37 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 				}
 			}
 		} else {
-			if (nemoshow_event_is_pointer_right_down(show, event)) {
+			if (nemoshow_event_is_pointer_left_down(show, event)) {
+				if (tile->ceil != NULL) {
+					one = tile->ceil;
+
+					trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE, 800, 0);
+
+					nemotrans_set_float(trans, &one->gtransform.rx, 0.0f);
+
+					nemotrans_set_float(trans, &one->color[0], 0.45f);
+					nemotrans_set_float(trans, &one->color[1], 0.45f);
+					nemotrans_set_float(trans, &one->color[2], 0.45f);
+					nemotrans_set_float(trans, &one->color[3], 0.45f);
+
+					nemotrans_group_attach_trans(tile->trans_group, trans);
+				}
+			} else if (nemoshow_event_is_pointer_left_up(show, event)) {
+				if (tile->ceil != NULL) {
+					one = tile->ceil;
+
+					trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE, 800, 0);
+
+					nemotrans_set_float(trans, &one->gtransform.rx, M_PI / 2.0f);
+
+					nemotrans_set_float(trans, &one->color[0], 0.025f);
+					nemotrans_set_float(trans, &one->color[1], 0.025f);
+					nemotrans_set_float(trans, &one->color[2], 0.025f);
+					nemotrans_set_float(trans, &one->color[3], 0.025f);
+
+					nemotrans_group_attach_trans(tile->trans_group, trans);
+				}
+			} else if (nemoshow_event_is_pointer_right_down(show, event)) {
 				nemolist_for_each(one, &tile->tile_list, link) {
 					trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
 							random_get_int(800, 1600),
@@ -1699,7 +1735,7 @@ static void nemotile_dispatch_timer(struct nemotimer *timer, void *data)
 							random_get_int(700, 1400),
 							random_get_int(100, 500));
 
-					nemotrans_set_float(trans, &one->vtransform.tz, random_get_double(-0.25f, 0.75f));
+					nemotrans_set_float(trans, &one->vtransform.tz, random_get_double(-0.25f, 0.45f));
 
 					nemotrans_group_attach_trans(tile->trans_group, trans);
 				}
@@ -2373,6 +2409,40 @@ static int nemotile_prepare_cube(struct nemotile *tile)
 	return 0;
 }
 
+static int nemotile_prepare_ceil(struct nemotile *tile)
+{
+	struct tileone *one;
+
+	tile->ceil = one = nemotile_one_create(4);
+	nemotile_one_set_index(one, 0);
+	nemotile_one_set_vertex(one, 0, -1.0f, 1.0f, 0.0f);
+	nemotile_one_set_texcoord(one, 0, 0.0f, 1.0f);
+	nemotile_one_set_vertex(one, 1, 1.0f, 1.0f, 0.0f);
+	nemotile_one_set_texcoord(one, 1, 1.0f, 1.0f);
+	nemotile_one_set_vertex(one, 2, -1.0f, -1.0f, 0.0f);
+	nemotile_one_set_texcoord(one, 2, 0.0f, 0.0f);
+	nemotile_one_set_vertex(one, 3, 1.0f, -1.0f, 0.0f);
+	nemotile_one_set_texcoord(one, 3, 1.0f, 0.0f);
+
+	nemotile_one_set_normal(one, 0, 0.0f, 0.0f, 1.0f);
+	nemotile_one_set_normal(one, 1, 0.0f, 0.0f, 1.0f);
+	nemotile_one_set_normal(one, 2, 0.0f, 0.0f, 1.0f);
+	nemotile_one_set_normal(one, 3, 0.0f, 0.0f, 1.0f);
+
+	nemotile_one_set_texture(one, tile->over);
+
+	nemotile_one_set_color(one, 0.025f, 0.025f, 0.025f, 0.025f);
+
+	nemotile_one_group_translate(one, -0.5f, 1.0f, 0.0f);
+	nemotile_one_group_rotate(one, M_PI / 2.0f, 0.0f, 0.0f);
+
+	nemotile_one_vertices_translate(one, 0.0f, -0.5f, 0.0f);
+	nemotile_one_vertices_rotate(one, 0.0f, 0.0f, 0.0f);
+	nemotile_one_vertices_scale(one, 0.5f, 0.5f, 0.5f);
+
+	return 0;
+}
+
 static void nemotile_finish_tiles(struct nemotile *tile)
 {
 }
@@ -2943,7 +3013,7 @@ int main(int argc, char *argv[])
 	}
 
 	if (tile->is_3d != 0 && tile->over != NULL) {
-		nemotile_prepare_cube(tile);
+		nemotile_prepare_ceil(tile);
 	}
 
 	if (tile->is_3d != 0 && tile->test != NULL) {

@@ -180,6 +180,7 @@ struct nemotile {
 
 	struct tileone *mesh;
 	struct tileone *cube;
+	struct tileone *ceil;
 	struct tileone *pone;
 };
 
