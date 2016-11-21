@@ -87,6 +87,7 @@ struct nemotile {
 	struct nemoshow *show;
 	struct showone *scene;
 	struct showone *back;
+	struct showone *rear;
 	struct showone *over;
 	struct showone *wall;
 	struct showone *test;

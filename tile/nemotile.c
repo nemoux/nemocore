@@ -2252,7 +2252,10 @@ static int nemotile_prepare_wall(struct nemotile *tile, float padding, int is_un
 		nemotile_one_set_normal(one, 2, 0.0f, 0.0f, 1.0f);
 		nemotile_one_set_normal(one, 3, 0.0f, 0.0f, 1.0f);
 
-		nemotile_one_set_texture(one, tile->wall);
+		if (i == 0 && tile->rear != NULL)
+			nemotile_one_set_texture(one, tile->rear);
+		else
+			nemotile_one_set_texture(one, tile->wall);
 
 		nemotile_one_set_color(one, 1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -2502,7 +2505,7 @@ int main(int argc, char *argv[])
 	char *videopath = NULL;
 	char *programpath = NULL;
 	char *fullscreen = NULL;
-	char *background = NULL;
+	char *backgroundpath = NULL;
 	char *overlaypath = NULL;
 	char *wallpath = NULL;
 	char *meshpath = NULL;
@@ -2558,7 +2561,7 @@ int main(int argc, char *argv[])
 				break;
 
 			case 'b':
-				background = strdup(optarg);
+				backgroundpath = strdup(optarg);
 				break;
 
 			case 'o':
@@ -2717,29 +2720,12 @@ int main(int argc, char *argv[])
 	nemoshow_scene_set_height(scene, height);
 	nemoshow_set_scene(show, scene);
 
-	if (background != NULL) {
-		tile->back = canvas = nemoshow_canvas_create();
-		nemoshow_canvas_set_width(canvas, width);
-		nemoshow_canvas_set_height(canvas, height);
-		nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
-		nemoshow_canvas_set_opaque(canvas, 1);
-		nemoshow_one_attach(scene, canvas);
-
-		one = nemoshow_item_create(NEMOSHOW_IMAGE_ITEM);
-		nemoshow_one_attach(canvas, one);
-		nemoshow_item_set_x(one, 0.0f);
-		nemoshow_item_set_y(one, 0.0f);
-		nemoshow_item_set_width(one, width);
-		nemoshow_item_set_height(one, height);
-		nemoshow_item_set_uri(one, background);
-	} else {
-		tile->back = canvas = nemoshow_canvas_create();
-		nemoshow_canvas_set_width(canvas, width);
-		nemoshow_canvas_set_height(canvas, height);
-		nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_BACK_TYPE);
-		nemoshow_canvas_set_fill_color(canvas, 0.0f, 0.0f, 0.0f, 1.0f);
-		nemoshow_one_attach(scene, canvas);
-	}
+	tile->back = canvas = nemoshow_canvas_create();
+	nemoshow_canvas_set_width(canvas, width);
+	nemoshow_canvas_set_height(canvas, height);
+	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_BACK_TYPE);
+	nemoshow_canvas_set_fill_color(canvas, 0.0f, 0.0f, 0.0f, 1.0f);
+	nemoshow_one_attach(scene, canvas);
 
 	tile->canvas = canvas = nemoshow_canvas_create();
 	nemoshow_canvas_set_width(canvas, width);
@@ -2754,6 +2740,37 @@ int main(int argc, char *argv[])
 
 	if (programpath != NULL) {
 		tile->filter = nemofx_glfilter_create(width, height, programpath);
+	}
+
+	if (backgroundpath != NULL) {
+		tile->rear = canvas = nemoshow_canvas_create();
+		nemoshow_canvas_set_width(canvas, width);
+		nemoshow_canvas_set_height(canvas, height);
+		nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
+		nemoshow_attach_one(show, canvas);
+
+		if (os_has_file_extension(backgroundpath, "svg") != 0) {
+			blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
+			nemoshow_filter_set_blur(blur, "solid", width * 0.05f);
+
+			one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
+			nemoshow_one_attach(canvas, one);
+			nemoshow_item_set_x(one, 0.0f);
+			nemoshow_item_set_y(one, 0.0f);
+			nemoshow_item_set_width(one, width);
+			nemoshow_item_set_height(one, height);
+			nemoshow_item_set_fill_color(one, 255.0f, 255.0f, 255.0f, 255.0f);
+			nemoshow_item_set_filter(one, blur);
+			nemoshow_item_path_load_svg(one, backgroundpath, 0.0f, 0.0f, width, height);
+		} else {
+			one = nemoshow_item_create(NEMOSHOW_IMAGE_ITEM);
+			nemoshow_one_attach(canvas, one);
+			nemoshow_item_set_x(one, 0.0f);
+			nemoshow_item_set_y(one, 0.0f);
+			nemoshow_item_set_width(one, width);
+			nemoshow_item_set_height(one, height);
+			nemoshow_item_set_uri(one, backgroundpath);
+		}
 	}
 
 	if (overlaypath != NULL) {
