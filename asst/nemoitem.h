@@ -7,6 +7,9 @@
 NEMO_BEGIN_EXTERN_C
 #endif
 
+#include <stdlib.h>
+#include <string.h>
+
 #include <json.h>
 
 #include <nemolist.h>

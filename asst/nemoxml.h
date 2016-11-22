@@ -7,6 +7,9 @@
 NEMO_BEGIN_EXTERN_C
 #endif
 
+#include <stdlib.h>
+#include <string.h>
+
 #include <nemolist.h>
 
 #define	NEMOXML_NAME_MAX			(32)
