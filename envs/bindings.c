@@ -231,7 +231,7 @@ void nemoenvs_handle_left_button(struct nemocompz *compz, struct nemopointer *po
 			view = nemocompz_pick_view(compz, pointer->x, pointer->y, &sx, &sy, NEMOVIEW_PICK_STATE);
 			screen = nemoshell_get_fullscreen(shell, "/nemoshell/fullscreen/mirror");
 
-			if (view != NULL && view->canvas != NULL && screen != NULL) {
+			if (view != NULL && view->canvas != NULL && screen != NULL && screen->dw != 0 && screen->dh != 0) {
 				struct nemomirror *mirror;
 
 				mirror = nemomirror_create(shell, screen->dx, screen->dy, screen->dw, screen->dh, "overlay");
