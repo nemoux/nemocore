@@ -963,6 +963,9 @@ void nemoshell_destroy_client_state(struct nemoshell *shell, struct clientstate 
 	if (state->screenid != NULL)
 		free(state->screenid);
 
+	if (state->mirrorid != NULL)
+		free(state->mirrorid);
+
 	if (state->uuid != NULL)
 		free(state->uuid);
 
@@ -983,12 +986,14 @@ struct clientstate *nemoshell_get_client_state(struct nemoshell *shell, uint32_t
 
 static inline void nemoshell_set_client_state(struct shellbin *bin, struct clientstate *state)
 {
+	struct nemoshell *shell = bin->shell;
+
 	if (state->screenid != NULL) {
 		struct shellscreen *screen;
 
-		screen = nemoshell_get_fullscreen(bin->shell, state->screenid);
+		screen = nemoshell_get_fullscreen(shell, state->screenid);
 		if (screen != NULL)
-			nemoshell_set_fullscreen_bin(bin->shell, bin, screen);
+			nemoshell_set_fullscreen_bin(shell, bin, screen);
 	} else {
 		if (state->has_position != 0) {
 			bin->initial.x = state->x;
@@ -1012,6 +1017,9 @@ static inline void nemoshell_set_client_state(struct shellbin *bin, struct clien
 
 	nemoview_set_state(bin->view, state->state_on);
 	nemoview_put_state(bin->view, state->state_off);
+
+	if (shell->update_client_state != NULL)
+		shell->update_client_state(shell->userdata, bin, state);
 }
 
 int nemoshell_use_client_state(struct nemoshell *shell, struct shellbin *bin)

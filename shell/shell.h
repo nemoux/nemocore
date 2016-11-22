@@ -62,8 +62,10 @@ typedef enum {
 } NemoShellFullscreenFocus;
 
 struct shellbin;
+struct clientstate;
 
 typedef void (*nemoshell_destroy_client_t)(void *data, pid_t pid);
+typedef void (*nemoshell_update_client_state_t)(void *data, struct shellbin *bin, struct clientstate *state);
 typedef void (*nemoshell_enter_idle_t)(void *data);
 
 struct nemoshell {
@@ -118,6 +120,7 @@ struct nemoshell {
 	} bin;
 
 	nemoshell_destroy_client_t destroy_client;
+	nemoshell_update_client_state_t update_client_state;
 	nemoshell_enter_idle_t enter_idle;
 	void *userdata;
 
@@ -150,6 +153,7 @@ struct clientstate {
 	float dx, dy;
 
 	char *screenid;
+	char *mirrorid;
 
 	int has_pickscreen;
 	int has_pitchscreen;
@@ -365,6 +369,11 @@ static inline void nemoshell_set_destroy_client(struct nemoshell *shell, nemoshe
 	shell->destroy_client = dispatch;
 }
 
+static inline void nemoshell_set_update_client_state(struct nemoshell *shell, nemoshell_update_client_state_t dispatch)
+{
+	shell->update_client_state = dispatch;
+}
+
 static inline void nemoshell_set_enter_idle(struct nemoshell *shell, nemoshell_enter_idle_t dispatch)
 {
 	shell->enter_idle = dispatch;
@@ -474,6 +483,11 @@ static inline void clientstate_put_view_state(struct clientstate *state, uint32_
 static inline void clientstate_set_fullscreen(struct clientstate *state, const char *id)
 {
 	state->screenid = strdup(id);
+}
+
+static inline void clientstate_set_mirrorscreen(struct clientstate *state, const char *id)
+{
+	state->mirrorid = strdup(id);
 }
 
 #ifdef __cplusplus
