@@ -290,6 +290,7 @@ struct shellscreen {
 	struct wl_list link;
 
 	struct wl_list bin_list;
+	struct wl_signal kill_signal;
 };
 
 struct shellstage {

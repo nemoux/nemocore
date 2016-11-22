@@ -24,7 +24,7 @@
 static void nemomirror_dispatch_show_event(struct nemoshow *show, struct showevent *event)
 {
 	struct nemomirror *mirror = (struct nemomirror *)nemoshow_get_userdata(show);
-	struct nemocompz *compz = mirror->compz;
+	struct nemocompz *compz = mirror->shell->compz;
 
 	if (nemoshow_event_is_pointer_enter(show, event)) {
 		struct nemopointer *pointer;
@@ -46,7 +46,7 @@ static void nemomirror_dispatch_show_event(struct nemoshow *show, struct showeve
 static void nemomirror_dispatch_canvas_event(struct nemoshow *show, struct showone *canvas, struct showevent *event)
 {
 	struct nemomirror *mirror = (struct nemomirror *)nemoshow_get_userdata(show);
-	struct nemocompz *compz = mirror->compz;
+	struct nemocompz *compz = mirror->shell->compz;
 
 	if (nemoshow_event_is_touch_down(show, event)) {
 		struct touchpoint *tp;
@@ -161,8 +161,12 @@ struct nemomirror *nemomirror_create(struct nemoshell *shell, int32_t x, int32_t
 		return NULL;
 	memset(mirror, 0, sizeof(struct nemomirror));
 
+	mirror->shell = shell;
+
 	wl_list_init(&mirror->view_damage_listener.link);
 	wl_list_init(&mirror->view_destroy_listener.link);
+
+	wl_list_init(&mirror->destroy_listener.link);
 
 	mirror->show = show = nemoshow_create_view(shell, width, height);
 	nemoshow_set_dispatch_event(show, nemomirror_dispatch_show_event);
@@ -204,6 +208,8 @@ void nemomirror_destroy(struct nemomirror *mirror)
 	wl_list_remove(&mirror->view_damage_listener.link);
 	wl_list_remove(&mirror->view_destroy_listener.link);
 
+	wl_list_remove(&mirror->destroy_listener.link);
+
 	nemoshow_revoke_view(mirror->show);
 	nemoshow_destroy_view_on_idle(mirror->show);
 
@@ -232,6 +238,21 @@ int nemomirror_set_view(struct nemomirror *mirror, struct nemoview *view)
 	}
 
 	nemoshow_dispatch_frame(mirror->show);
+
+	return 0;
+}
+
+static void nemomirror_handle_screen_destroy(struct wl_listener *listener, void *data)
+{
+	struct nemomirror *mirror = (struct nemomirror *)container_of(listener, struct nemomirror, destroy_listener);
+
+	nemomirror_destroy(mirror);
+}
+
+int nemomirror_check_screen(struct nemomirror *mirror, struct shellscreen *screen)
+{
+	mirror->destroy_listener.notify = nemomirror_handle_screen_destroy;
+	wl_signal_add(&screen->kill_signal, &mirror->destroy_listener);
 
 	return 0;
 }

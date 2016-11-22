@@ -1088,6 +1088,8 @@ struct shellscreen *nemoshell_get_fullscreen(struct nemoshell *shell, const char
 
 	wl_list_init(&screen->bin_list);
 
+	wl_signal_init(&screen->kill_signal);
+
 	wl_list_insert(&shell->fullscreen_list, &screen->link);
 
 	return screen;
@@ -1413,5 +1415,7 @@ void nemoshell_kill_fullscreen_bin(struct nemoshell *shell, uint32_t target)
 					kill(sbin->pid, SIGKILL);
 			}
 		}
+
+		wl_signal_emit(&screen->kill_signal, screen);
 	}
 }
