@@ -143,9 +143,7 @@ static void nemomirror_handle_view_destroy(struct wl_listener *listener, void *d
 {
 	struct nemomirror *mirror = (struct nemomirror *)container_of(listener, struct nemomirror, view_destroy_listener);
 
-	nemomirror_set_view(mirror, NULL);
-
-	free(mirror);
+	nemomirror_destroy(mirror);
 }
 
 struct nemomirror *nemomirror_create(struct nemoshell *shell, int32_t x, int32_t y, int32_t width, int32_t height, const char *layer)
