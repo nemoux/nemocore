@@ -880,6 +880,18 @@ void nemoshow_canvas_damage_one(struct showone *one, struct showone *child)
 		nemolist_insert(&one->show->redraw_list, &canvas->redraw_link);
 }
 
+void nemoshow_canvas_damage_filter(struct showone *one)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	nemotale_node_damage_filter(canvas->node);
+
+	nemoshow_canvas_set_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE);
+
+	if (one->show != NULL && nemolist_empty(&canvas->redraw_link) != 0)
+		nemolist_insert(&one->show->redraw_list, &canvas->redraw_link);
+}
+
 void nemoshow_canvas_damage_all(struct showone *one)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
