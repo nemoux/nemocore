@@ -24,6 +24,7 @@ NEMO_BEGIN_EXTERN_C
 #include <playback.h>
 #include <glfilter.h>
 #include <glmask.h>
+#include <glpolar.h>
 
 struct tileone {
 	int index;
@@ -96,6 +97,7 @@ struct nemotile {
 
 	struct glfilter *filter;
 	struct glmask *mask;
+	struct glpolar *polar;
 
 	int flip;
 	int slideshow;

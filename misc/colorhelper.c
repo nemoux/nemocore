@@ -184,7 +184,7 @@ uint32_t color_parse(const char *value)
 	if (value == NULL || value[0] == '\0')
 		return 0;
 
-	if (value[0] == '#') {
+	if (value[0] == '#' || value[0] == '@') {
 		if (strlen(value) >= 9) {
 			rgba[2] = (uint8_t)string_parse_hexadecimal(value, 1, 2);
 			rgba[1] = (uint8_t)string_parse_hexadecimal(value, 3, 2);

@@ -1856,6 +1856,15 @@ static GLuint nemotile_dispatch_video_filter(struct talenode *node, void *data)
 	struct nemotile *tile = (struct nemotile *)data;
 	GLuint texture = nemotale_node_get_texture(node);
 
+	if (tile->polar != NULL) {
+		nemofx_glpolar_resize(tile->polar,
+				nemoplay_get_video_width(tile->play),
+				nemoplay_get_video_height(tile->play));
+		nemofx_glpolar_dispatch(tile->polar, texture);
+
+		texture = nemofx_glpolar_get_texture(tile->polar);
+	}
+
 	return texture;
 }
 
@@ -2483,6 +2492,7 @@ int main(int argc, char *argv[])
 		{ "jitter",									required_argument,			NULL,			'j' },
 		{ "padding",								required_argument,			NULL,			'd' },
 		{ "program",								required_argument,			NULL,			'p' },
+		{ "polar",									required_argument,			NULL,			'k' },
 		{ "depthtest",							required_argument,			NULL,			'z' },
 		{ "3dspace",								no_argument,						NULL,			's' },
 		{ "lighting",								no_argument,						NULL,			'l' },
@@ -2504,6 +2514,7 @@ int main(int argc, char *argv[])
 	char *imagepath = NULL;
 	char *videopath = NULL;
 	char *programpath = NULL;
+	char *polarcolor = NULL;
 	char *fullscreen = NULL;
 	char *backgroundpath = NULL;
 	char *overlaypath = NULL;
@@ -2527,7 +2538,7 @@ int main(int argc, char *argv[])
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "w:h:c:r:i:v:t:b:o:a:m:f:e:j:d:p:z:slyu", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:c:r:i:v:t:b:o:a:m:f:e:j:d:p:k:z:slyu", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -2594,6 +2605,10 @@ int main(int argc, char *argv[])
 
 			case 'p':
 				programpath = strdup(optarg);
+				break;
+
+			case 'k':
+				polarcolor = strdup(optarg);
 				break;
 
 			case 'z':
@@ -2740,6 +2755,17 @@ int main(int argc, char *argv[])
 
 	if (programpath != NULL) {
 		tile->filter = nemofx_glfilter_create(width, height, programpath);
+	}
+
+	if (polarcolor != NULL) {
+		uint32_t color = color_parse(polarcolor);
+
+		tile->polar = nemofx_glpolar_create(width, height);
+		nemofx_glpolar_set_color(tile->polar,
+				COLOR_DOUBLE_R(color),
+				COLOR_DOUBLE_G(color),
+				COLOR_DOUBLE_B(color),
+				COLOR_DOUBLE_A(color));
 	}
 
 	if (backgroundpath != NULL) {
