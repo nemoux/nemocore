@@ -28,8 +28,10 @@ struct glfilter {
 	int32_t width, height;
 };
 
-extern struct glfilter *nemofx_glfilter_create(int32_t width, int32_t height, const char *shaderpath);
+extern struct glfilter *nemofx_glfilter_create(int32_t width, int32_t height);
 extern void nemofx_glfilter_destroy(struct glfilter *filter);
+
+extern void nemofx_glfilter_set_program(struct glfilter *filter, const char *shaderpath);
 
 extern void nemofx_glfilter_resize(struct glfilter *filter, int32_t width, int32_t height);
 extern void nemofx_glfilter_dispatch(struct glfilter *filter, GLuint texture);

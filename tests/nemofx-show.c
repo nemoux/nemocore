@@ -356,7 +356,8 @@ int main(int argc, char *argv[])
 	nemotale_node_set_dispatch_filter(node, nemoglfx_dispatch_canvas_filter, context);
 
 	if (programpath != NULL) {
-		context->filter = nemofx_glfilter_create(width, height, programpath);
+		context->filter = nemofx_glfilter_create(width, height);
+		nemofx_glfilter_set_program(context->filter, programpath);
 	}
 
 	if (noisetype != NULL) {

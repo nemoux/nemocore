@@ -186,7 +186,7 @@ static GLuint nemofx_glfilter_create_program(const char *shader)
 	return program;
 }
 
-struct glfilter *nemofx_glfilter_create(int32_t width, int32_t height, const char *shaderpath)
+struct glfilter *nemofx_glfilter_create(int32_t width, int32_t height)
 {
 	struct glfilter *filter;
 
@@ -204,47 +204,11 @@ struct glfilter *nemofx_glfilter_create(int32_t width, int32_t height, const cha
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	if (shaderpath[0] != '@') {
-		char *shader;
-		int size;
-
-		if (os_load_path(shaderpath, &shader, &size) < 0)
-			goto err1;
-
-		filter->program = nemofx_glfilter_create_program(shader);
-
-		free(shader);
-	} else {
-		const char *shader = NULL;
-
-		if (strcmp(shaderpath, "@gaussian") == 0)
-			shader = GLFILTER_GAUSSIAN_FRAGMENT_SHADER;
-		else if (strcmp(shaderpath, "@laplacian") == 0)
-			shader = GLFILTER_LAPLACIAN_FRAGMENT_SHADER;
-		else if (strcmp(shaderpath, "@sharpness") == 0)
-			shader = GLFILTER_SHARPNESS_FRAGMENT_SHADER;
-		else if (strcmp(shaderpath, "@edgedetection") == 0)
-			shader = GLFILTER_EDGEDETECTION_FRAGMENT_SHADER;
-		else if (strcmp(shaderpath, "@emboss") == 0)
-			shader = GLFILTER_EMBOSS_FRAGMENT_SHADER;
-		if (shader == NULL)
-			goto err1;
-
-		filter->program = nemofx_glfilter_create_program(shader);
-	}
-
-	if (filter->program == 0)
-		goto err1;
-
-	filter->utexture = glGetUniformLocation(filter->program, "tex");
-	filter->uwidth = glGetUniformLocation(filter->program, "width");
-	filter->uheight = glGetUniformLocation(filter->program, "height");
-	filter->utime = glGetUniformLocation(filter->program, "time");
-
 	fbo_prepare_context(filter->texture, width, height, &filter->fbo, &filter->dbo);
 
 	filter->width = width;
 	filter->height = height;
+	filter->program = 0;
 
 	return filter;
 
@@ -263,9 +227,52 @@ void nemofx_glfilter_destroy(struct glfilter *filter)
 	glDeleteFramebuffers(1, &filter->fbo);
 	glDeleteRenderbuffers(1, &filter->dbo);
 
-	glDeleteProgram(filter->program);
+	if (filter->program > 0)
+		glDeleteProgram(filter->program);
 
 	free(filter);
+}
+
+void nemofx_glfilter_set_program(struct glfilter *filter, const char *shaderpath)
+{
+	if (filter->program > 0) {
+		glDeleteProgram(filter->program);
+		filter->program = 0;
+	}
+
+	if (shaderpath[0] != '@') {
+		char *shader;
+		int size;
+
+		if (os_load_path(shaderpath, &shader, &size) >= 0) {
+			filter->program = nemofx_glfilter_create_program(shader);
+
+			free(shader);
+		}
+	} else {
+		const char *shader = NULL;
+
+		if (strcmp(shaderpath, "@gaussian") == 0)
+			shader = GLFILTER_GAUSSIAN_FRAGMENT_SHADER;
+		else if (strcmp(shaderpath, "@laplacian") == 0)
+			shader = GLFILTER_LAPLACIAN_FRAGMENT_SHADER;
+		else if (strcmp(shaderpath, "@sharpness") == 0)
+			shader = GLFILTER_SHARPNESS_FRAGMENT_SHADER;
+		else if (strcmp(shaderpath, "@edgedetection") == 0)
+			shader = GLFILTER_EDGEDETECTION_FRAGMENT_SHADER;
+		else if (strcmp(shaderpath, "@emboss") == 0)
+			shader = GLFILTER_EMBOSS_FRAGMENT_SHADER;
+
+		if (shader != NULL)
+			filter->program = nemofx_glfilter_create_program(shader);
+	}
+
+	if (filter->program > 0) {
+		filter->utexture = glGetUniformLocation(filter->program, "tex");
+		filter->uwidth = glGetUniformLocation(filter->program, "width");
+		filter->uheight = glGetUniformLocation(filter->program, "height");
+		filter->utime = glGetUniformLocation(filter->program, "time");
+	}
 }
 
 void nemofx_glfilter_resize(struct glfilter *filter, int32_t width, int32_t height)
@@ -294,32 +301,34 @@ void nemofx_glfilter_dispatch(struct glfilter *filter, GLuint texture)
 		-1.0f, 1.0f, 0.0f, 1.0f
 	};
 
-	glBindFramebuffer(GL_FRAMEBUFFER, filter->fbo);
+	if (filter->program > 0) {
+		glBindFramebuffer(GL_FRAMEBUFFER, filter->fbo);
 
-	glViewport(0, 0, filter->width, filter->height);
+		glViewport(0, 0, filter->width, filter->height);
 
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	glClearDepth(0.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		glClearDepth(0.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glUseProgram(filter->program);
-	glUniform1i(filter->utexture, 0);
-	glUniform1f(filter->uwidth, filter->width);
-	glUniform1f(filter->uheight, filter->height);
-	glUniform1f(filter->utime, (float)time_current_nsecs() / 1000000000.0f);
+		glUseProgram(filter->program);
+		glUniform1i(filter->utexture, 0);
+		glUniform1f(filter->uwidth, filter->width);
+		glUniform1f(filter->uheight, filter->height);
+		glUniform1f(filter->utime, (float)time_current_nsecs() / 1000000000.0f);
 
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &vertices[0]);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &vertices[2]);
-	glEnableVertexAttribArray(1);
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &vertices[0]);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &vertices[2]);
+		glEnableVertexAttribArray(1);
 
-	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
-	glBindTexture(GL_TEXTURE_2D, 0);
+		glBindTexture(GL_TEXTURE_2D, 0);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
 }

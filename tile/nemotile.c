@@ -2754,7 +2754,8 @@ int main(int argc, char *argv[])
 	nemotale_node_set_dispatch_filter(node, nemotile_dispatch_canvas_filter, tile);
 
 	if (programpath != NULL) {
-		tile->filter = nemofx_glfilter_create(width, height, programpath);
+		tile->filter = nemofx_glfilter_create(width, height);
+		nemofx_glfilter_set_program(tile->filter, programpath);
 	}
 
 	if (polarcolor != NULL) {
