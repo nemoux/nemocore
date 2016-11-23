@@ -1049,8 +1049,8 @@ static inline void nemoshell_set_client_state(struct shellbin *bin, struct clien
 	else
 		nemoview_set_state(bin->view, NEMOVIEW_LAYER_STATE);
 
-	if (shell->update_client_state != NULL)
-		shell->update_client_state(shell->userdata, bin, state);
+	if (shell->update_client != NULL)
+		shell->update_client(shell->userdata, bin, state);
 }
 
 int nemoshell_use_client_state(struct nemoshell *shell, struct shellbin *bin)

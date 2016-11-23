@@ -66,7 +66,7 @@ struct shellbin;
 struct clientstate;
 
 typedef void (*nemoshell_destroy_client_t)(void *data, pid_t pid);
-typedef void (*nemoshell_update_client_state_t)(void *data, struct shellbin *bin, struct clientstate *state);
+typedef void (*nemoshell_update_client_t)(void *data, struct shellbin *bin, struct clientstate *state);
 typedef void (*nemoshell_enter_idle_t)(void *data);
 
 struct nemoshell {
@@ -121,7 +121,7 @@ struct nemoshell {
 	} bin;
 
 	nemoshell_destroy_client_t destroy_client;
-	nemoshell_update_client_state_t update_client_state;
+	nemoshell_update_client_t update_client;
 	nemoshell_enter_idle_t enter_idle;
 	void *userdata;
 
@@ -351,9 +351,9 @@ static inline void nemoshell_set_destroy_client(struct nemoshell *shell, nemoshe
 	shell->destroy_client = dispatch;
 }
 
-static inline void nemoshell_set_update_client_state(struct nemoshell *shell, nemoshell_update_client_state_t dispatch)
+static inline void nemoshell_set_update_client(struct nemoshell *shell, nemoshell_update_client_t dispatch)
 {
-	shell->update_client_state = dispatch;
+	shell->update_client = dispatch;
 }
 
 static inline void nemoshell_set_enter_idle(struct nemoshell *shell, nemoshell_enter_idle_t dispatch)
