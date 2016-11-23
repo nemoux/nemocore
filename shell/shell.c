@@ -947,9 +947,7 @@ struct clientstate *nemoshell_create_client_state(struct nemoshell *shell, uint3
 	memset(state, 0, sizeof(struct clientstate));
 
 	state->pid = pid;
-
-	state->sx = 1.0f;
-	state->sy = 1.0f;
+	state->one = nemoitem_one_create();
 
 	wl_list_insert(&shell->clientstate_list, &state->link);
 
@@ -960,14 +958,7 @@ void nemoshell_destroy_client_state(struct nemoshell *shell, struct clientstate 
 {
 	wl_list_remove(&state->link);
 
-	if (state->screenid != NULL)
-		free(state->screenid);
-
-	if (state->mirrorid != NULL)
-		free(state->mirrorid);
-
-	if (state->uuid != NULL)
-		free(state->uuid);
+	nemoitem_one_destroy(state->one);
 
 	free(state);
 }
@@ -988,35 +979,59 @@ static inline void nemoshell_set_client_state(struct shellbin *bin, struct clien
 {
 	struct nemoshell *shell = bin->shell;
 
-	if (state->screenid != NULL) {
+	if (nemoitem_one_has_attr(state->one, "fullscreen") != 0) {
 		struct shellscreen *screen;
 
-		screen = nemoshell_get_fullscreen(shell, state->screenid);
+		screen = nemoshell_get_fullscreen(shell, nemoitem_one_get_attr(state->one, "fullscreen"));
 		if (screen != NULL)
 			nemoshell_set_fullscreen_bin(shell, bin, screen);
 	} else {
-		if (state->has_position != 0) {
-			bin->initial.x = state->x;
-			bin->initial.y = state->y;
+		if (nemoitem_one_has_attr(state->one, "x") != 0) {
+			bin->initial.x = nemoitem_one_get_fattr(state->one, "x", 0.0f);
+			bin->initial.y = nemoitem_one_get_fattr(state->one, "y", 0.0f);
 			bin->initial.has_position = 1;
 		}
 
-		bin->initial.r = state->r;
-		bin->initial.sx = state->sx;
-		bin->initial.sy = state->sy;
-		bin->initial.dx = state->dx;
-		bin->initial.dy = state->dy;
+		bin->initial.r = nemoitem_one_get_fattr(state->one, "r", 0.0f) * M_PI / 180.0f;
+		bin->initial.sx = nemoitem_one_get_fattr(state->one, "sx", 1.0f);
+		bin->initial.sy = nemoitem_one_get_fattr(state->one, "sy", 1.0f);
+		bin->initial.dx = nemoitem_one_get_fattr(state->one, "dx", 0.5f);
+		bin->initial.dy = nemoitem_one_get_fattr(state->one, "dy", 0.5f);
 	}
 
-	if (state->has_pickscreen != 0)
+	if (nemoitem_one_has_sattr(state->one, "pickscreen", "off") != 0)
+		nemoshell_bin_put_state(bin, NEMOSHELL_BIN_PICKSCREEN_STATE);
+	else
 		nemoshell_bin_set_state(bin, NEMOSHELL_BIN_PICKSCREEN_STATE);
-	if (state->has_pitchscreen != 0)
+
+	if (nemoitem_one_has_sattr(state->one, "pitchscreen", "off") != 0)
+		nemoshell_bin_put_state(bin, NEMOSHELL_BIN_PITCHSCREEN_STATE);
+	else
 		nemoshell_bin_set_state(bin, NEMOSHELL_BIN_PITCHSCREEN_STATE);
 
-	bin->flags = state->flags;
+	if (nemoitem_one_has_sattr(state->one, "move", "off") == 0)
+		bin->flags |= NEMOSHELL_SURFACE_MOVABLE_FLAG;
+	if (nemoitem_one_has_sattr(state->one, "scale", "off") == 0)
+		bin->flags |= NEMOSHELL_SURFACE_SCALABLE_FLAG;
+	if (nemoitem_one_has_sattr(state->one, "pick", "off") == 0)
+		bin->flags |= NEMOSHELL_SURFACE_PICKABLE_FLAG;
+	if (nemoitem_one_has_sattr(state->one, "maximize", "off") == 0)
+		bin->flags |= NEMOSHELL_SURFACE_MAXIMIZABLE_FLAG;
+	if (nemoitem_one_has_sattr(state->one, "minimize", "off") == 0)
+		bin->flags |= NEMOSHELL_SURFACE_MINIMIZABLE_FLAG;
 
-	nemoview_set_state(bin->view, state->state_on);
-	nemoview_put_state(bin->view, state->state_off);
+	if (nemoitem_one_has_sattr(state->one, "resize", "off") != 0)
+		nemoview_put_state(bin->view, NEMOVIEW_RESIZE_STATE);
+	else
+		nemoview_set_state(bin->view, NEMOVIEW_RESIZE_STATE);
+	if (nemoitem_one_has_sattr(state->one, "keypad", "off") != 0)
+		nemoview_put_state(bin->view, NEMOVIEW_KEYPAD_STATE);
+	else
+		nemoview_set_state(bin->view, NEMOVIEW_KEYPAD_STATE);
+	if (nemoitem_one_has_sattr(state->one, "layer", "off") != 0)
+		nemoview_put_state(bin->view, NEMOVIEW_LAYER_STATE);
+	else
+		nemoview_set_state(bin->view, NEMOVIEW_LAYER_STATE);
 
 	if (shell->update_client_state != NULL)
 		shell->update_client_state(shell->userdata, bin, state);
@@ -1057,8 +1072,8 @@ int nemoshell_use_client_uuid(struct nemoshell *shell, struct shellbin *bin)
 	pid_t pid = bin->pid;
 
 	state = nemoshell_get_client_state(shell, pid);
-	if (state != NULL && state->uuid != NULL) {
-		nemoview_set_uuid(bin->view, state->uuid);
+	if (state != NULL && nemoitem_one_has_attr(state->one, "uuid") != 0) {
+		nemoview_set_uuid(bin->view, nemoitem_one_get_attr(state->one, "uuid"));
 	}
 
 	return 0;

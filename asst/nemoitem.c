@@ -361,6 +361,15 @@ struct itemone *nemoitem_one_clone(struct itemone *one)
 	return done;
 }
 
+void nemoitem_one_copy(struct itemone *done, struct itemone *sone)
+{
+	struct itemattr *attr;
+
+	nemolist_for_each(attr, &sone->list, link) {
+		nemoitem_one_set_attr(done, attr->name, attr->value);
+	}
+}
+
 void nemoitem_one_set_path(struct itemone *one, const char *path)
 {
 	if (one->path != NULL)

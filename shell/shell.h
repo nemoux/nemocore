@@ -139,29 +139,10 @@ struct shellclient {
 
 struct clientstate {
 	uint32_t pid;
-	char *uuid;
 
 	struct wl_list link;
 
-	float x, y;
-	float r;
-	float sx, sy;
-	int32_t width, height;
-
-	int has_position;
-
-	float dx, dy;
-
-	char *screenid;
-	char *mirrorid;
-
-	int has_pickscreen;
-	int has_pitchscreen;
-
-	uint32_t flags;
-
-	uint32_t state_on;
-	uint32_t state_off;
+	struct itemone *one;
 };
 
 struct binconfig {
@@ -419,75 +400,19 @@ static inline void clientstate_set_pid(struct clientstate *state, uint32_t pid)
 	state->pid = pid;
 }
 
-static inline void clientstate_set_uuid(struct clientstate *state, const char *uuid)
+static inline void clientstate_set_one(struct clientstate *state, struct itemone *one)
 {
-	state->uuid = strdup(uuid);
+	nemoitem_one_copy(state->one, one);
 }
 
-static inline void clientstate_set_position(struct clientstate *state, float x, float y)
+static inline void clientstate_set_sattr(struct clientstate *state, const char *name, const char *value)
 {
-	state->x = x;
-	state->y = y;
-
-	state->has_position = 1;
+	nemoitem_one_set_attr(state->one, name, value);
 }
 
-static inline void clientstate_set_rotate(struct clientstate *state, float r)
+static inline void clientstate_set_fattr(struct clientstate *state, const char *name, float value)
 {
-	state->r = r;
-}
-
-static inline void clientstate_set_scale(struct clientstate *state, float sx, float sy)
-{
-	state->sx = sx;
-	state->sy = sy;
-}
-
-static inline void clientstate_set_anchor(struct clientstate *state, float dx, float dy)
-{
-	state->dx = dx;
-	state->dy = dy;
-}
-
-static inline void clientstate_set_size(struct clientstate *state, uint32_t width, uint32_t height)
-{
-	state->width = width;
-	state->height = height;
-}
-
-static inline void clientstate_set_pickscreen(struct clientstate *state, int pickscreen)
-{
-	state->has_pickscreen = pickscreen;
-}
-
-static inline void clientstate_set_pitchscreen(struct clientstate *state, int pitchscreen)
-{
-	state->has_pitchscreen = pitchscreen;
-}
-
-static inline void clientstate_set_bin_flags(struct clientstate *state, uint32_t flags)
-{
-	state->flags = flags;
-}
-
-static inline void clientstate_set_view_state(struct clientstate *state, uint32_t _state)
-{
-	state->state_on |= _state;
-}
-
-static inline void clientstate_put_view_state(struct clientstate *state, uint32_t _state)
-{
-	state->state_off |= _state;
-}
-
-static inline void clientstate_set_fullscreen(struct clientstate *state, const char *id)
-{
-	state->screenid = strdup(id);
-}
-
-static inline void clientstate_set_mirrorscreen(struct clientstate *state, const char *id)
-{
-	state->mirrorid = strdup(id);
+	nemoitem_one_set_attr_format(state->one, name, "%f", value);
 }
 
 #ifdef __cplusplus

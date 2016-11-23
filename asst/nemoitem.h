@@ -70,6 +70,7 @@ extern struct itemone *nemoitem_one_create(void);
 extern void nemoitem_one_destroy(struct itemone *one);
 
 extern struct itemone *nemoitem_one_clone(struct itemone *one);
+extern void nemoitem_one_copy(struct itemone *done, struct itemone *sone);
 
 extern void nemoitem_one_set_path(struct itemone *one, const char *path);
 extern void nemoitem_one_set_path_format(struct itemone *one, const char *fmt, ...);
