@@ -116,6 +116,9 @@ struct nemotile {
 	struct fsdir *movies;
 	int imovies;
 
+	struct fsdir *shaders;
+	int ishaders;
+
 	struct showone *video;
 	struct nemoplay *play;
 	struct playback_decoder *decoderback;

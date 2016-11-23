@@ -1788,6 +1788,12 @@ static void nemotile_dispatch_timer(struct nemotimer *timer, void *data)
 		nemotrans_group_attach_trans(tile->trans_group, trans);
 	}
 
+	if (tile->filter != NULL) {
+		tile->ishaders = (tile->ishaders + 1) % nemofs_dir_get_filecount(tile->shaders);
+
+		nemofx_glfilter_set_program(tile->filter, nemofs_dir_get_filepath(tile->shaders, tile->ishaders));
+	}
+
 	nemotimer_set_timeout(tile->timer, tile->timeout);
 }
 
@@ -2754,8 +2760,16 @@ int main(int argc, char *argv[])
 	nemotale_node_set_dispatch_filter(node, nemotile_dispatch_canvas_filter, tile);
 
 	if (programpath != NULL) {
+		if (os_check_path_is_directory(programpath) != 0) {
+			tile->shaders = nemofs_dir_create(programpath, 32);
+			nemofs_dir_scan_extension(tile->shaders, "fsh");
+		} else {
+			tile->shaders = nemofs_dir_create(NULL, 32);
+			nemofs_dir_insert_file(tile->shaders, programpath);
+		}
+
 		tile->filter = nemofx_glfilter_create(width, height);
-		nemofx_glfilter_set_program(tile->filter, programpath);
+		nemofx_glfilter_set_program(tile->filter, nemofs_dir_get_filepath(tile->shaders, tile->ishaders));
 	}
 
 	if (polarcolor != NULL) {
