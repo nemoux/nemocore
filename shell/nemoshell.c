@@ -305,7 +305,7 @@ static void nemo_surface_set_fullscreen(struct wl_client *client, struct wl_reso
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 	struct nemoshell *shell = bin->shell;
 
-	if (bin->flags & NEMOSHELL_SURFACE_MAXIMIZABLE_FLAG) {
+	if (nemoshell_bin_has_flags(bin, NEMOSHELL_SURFACE_MAXIMIZABLE_FLAG)) {
 		struct shellscreen *screen;
 
 		screen = nemoshell_get_fullscreen(shell, id);
@@ -329,7 +329,7 @@ static void nemo_surface_put_fullscreen(struct wl_client *client, struct wl_reso
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 	struct nemoshell *shell = bin->shell;
 
-	if (bin->flags & NEMOSHELL_SURFACE_MAXIMIZABLE_FLAG)
+	if (nemoshell_bin_has_flags(bin, NEMOSHELL_SURFACE_MAXIMIZABLE_FLAG))
 		nemoshell_put_fullscreen_bin(shell, bin);
 }
 
@@ -337,7 +337,7 @@ static void nemo_surface_move(struct wl_client *client, struct wl_resource *reso
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 
-	if (bin->flags & NEMOSHELL_SURFACE_MOVABLE_FLAG) {
+	if (nemoshell_bin_has_flags(bin, NEMOSHELL_SURFACE_MOVABLE_FLAG)) {
 		nemoshell_move_canvas(bin->shell, bin, serial);
 	}
 }
@@ -347,7 +347,7 @@ static void nemo_surface_pick(struct wl_client *client, struct wl_resource *reso
 	struct nemoseat *seat = (struct nemoseat *)wl_resource_get_user_data(seat_resource);
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 
-	if (bin->flags & NEMOSHELL_SURFACE_PICKABLE_FLAG) {
+	if (nemoshell_bin_has_flags(bin, NEMOSHELL_SURFACE_PICKABLE_FLAG)) {
 		nemoshell_pick_canvas(bin->shell, bin, serial0, serial1, type);
 	}
 }

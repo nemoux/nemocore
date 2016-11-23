@@ -113,7 +113,7 @@ static void xdg_surface_move(struct wl_client *client, struct wl_resource *resou
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 
-	if (bin->flags & NEMOSHELL_SURFACE_MOVABLE_FLAG) {
+	if (nemoshell_bin_has_flags(bin, NEMOSHELL_SURFACE_MOVABLE_FLAG)) {
 		nemoshell_move_canvas(bin->shell, bin, serial);
 	}
 }
@@ -122,7 +122,7 @@ static void xdg_surface_resize(struct wl_client *client, struct wl_resource *res
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 
-	if (nemoview_has_state(bin->view, NEMOVIEW_RESIZE_STATE) != 0) {
+	if (nemoshell_bin_has_flags(bin, NEMOSHELL_SURFACE_RESIZABLE_FLAG) != 0) {
 		nemoshell_resize_canvas(bin->shell, bin, serial, edges);
 	}
 }
@@ -155,7 +155,7 @@ static void xdg_surface_set_maximized(struct wl_client *client, struct wl_resour
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 	struct nemoshell *shell = bin->shell;
 
-	if (bin->flags & NEMOSHELL_SURFACE_MAXIMIZABLE_FLAG) {
+	if (nemoshell_bin_has_flags(bin, NEMOSHELL_SURFACE_MAXIMIZABLE_FLAG)) {
 		struct nemoscreen *screen;
 
 		screen = nemocompz_get_main_screen(shell->compz);
@@ -171,7 +171,7 @@ static void xdg_surface_unset_maximized(struct wl_client *client, struct wl_reso
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 	struct nemoshell *shell = bin->shell;
 
-	if (bin->flags & NEMOSHELL_SURFACE_MAXIMIZABLE_FLAG) {
+	if (nemoshell_bin_has_flags(bin, NEMOSHELL_SURFACE_MAXIMIZABLE_FLAG)) {
 		nemoshell_put_maximized_bin(shell, bin);
 	}
 }
@@ -182,7 +182,7 @@ static void xdg_surface_set_fullscreen(struct wl_client *client, struct wl_resou
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 	struct nemoshell *shell = bin->shell;
 
-	if (bin->flags & NEMOSHELL_SURFACE_MAXIMIZABLE_FLAG) {
+	if (nemoshell_bin_has_flags(bin, NEMOSHELL_SURFACE_MAXIMIZABLE_FLAG)) {
 		struct nemoscreen *screen = output_resource != NULL ? (struct nemoscreen *)wl_resource_get_user_data(output_resource) : NULL;
 
 		if (screen == NULL)
@@ -199,7 +199,7 @@ static void xdg_surface_unset_fullscreen(struct wl_client *client, struct wl_res
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 	struct nemoshell *shell = bin->shell;
 
-	if (bin->flags & NEMOSHELL_SURFACE_MAXIMIZABLE_FLAG) {
+	if (nemoshell_bin_has_flags(bin, NEMOSHELL_SURFACE_MAXIMIZABLE_FLAG)) {
 		nemoshell_put_fullscreen_bin(shell, bin);
 	}
 }

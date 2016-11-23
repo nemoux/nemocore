@@ -986,7 +986,7 @@ static inline void nemoshell_set_client_state(struct shellbin *bin, struct clien
 		if (screen != NULL)
 			nemoshell_set_fullscreen_bin(shell, bin, screen);
 	} else {
-		if (nemoitem_one_has_attr(state->one, "x") != 0) {
+		if (nemoitem_one_has_attr(state->one, "x") != 0 || nemoitem_one_has_attr(state->one, "y") != 0) {
 			bin->initial.x = nemoitem_one_get_fattr(state->one, "x", 0.0f);
 			bin->initial.y = nemoitem_one_get_fattr(state->one, "y", 0.0f);
 			bin->initial.has_position = 1;
@@ -1009,25 +1009,41 @@ static inline void nemoshell_set_client_state(struct shellbin *bin, struct clien
 	else
 		nemoshell_bin_set_state(bin, NEMOSHELL_BIN_PITCHSCREEN_STATE);
 
-	if (nemoitem_one_has_sattr(state->one, "move", "off") == 0)
-		bin->flags |= NEMOSHELL_SURFACE_MOVABLE_FLAG;
-	if (nemoitem_one_has_sattr(state->one, "scale", "off") == 0)
-		bin->flags |= NEMOSHELL_SURFACE_SCALABLE_FLAG;
-	if (nemoitem_one_has_sattr(state->one, "pick", "off") == 0)
-		bin->flags |= NEMOSHELL_SURFACE_PICKABLE_FLAG;
-	if (nemoitem_one_has_sattr(state->one, "maximize", "off") == 0)
-		bin->flags |= NEMOSHELL_SURFACE_MAXIMIZABLE_FLAG;
-	if (nemoitem_one_has_sattr(state->one, "minimize", "off") == 0)
-		bin->flags |= NEMOSHELL_SURFACE_MINIMIZABLE_FLAG;
+	if (nemoitem_one_has_sattr(state->one, "move", "off") != 0)
+		nemoshell_bin_put_flags(bin, NEMOSHELL_SURFACE_MOVABLE_FLAG);
+	else
+		nemoshell_bin_set_flags(bin, NEMOSHELL_SURFACE_MOVABLE_FLAG);
 
 	if (nemoitem_one_has_sattr(state->one, "resize", "off") != 0)
-		nemoview_put_state(bin->view, NEMOVIEW_RESIZE_STATE);
+		nemoshell_bin_put_flags(bin, NEMOSHELL_SURFACE_RESIZABLE_FLAG);
 	else
-		nemoview_set_state(bin->view, NEMOVIEW_RESIZE_STATE);
+		nemoshell_bin_set_flags(bin, NEMOSHELL_SURFACE_RESIZABLE_FLAG);
+
+	if (nemoitem_one_has_sattr(state->one, "scale", "off") != 0)
+		nemoshell_bin_put_flags(bin, NEMOSHELL_SURFACE_SCALABLE_FLAG);
+	else
+		nemoshell_bin_set_flags(bin, NEMOSHELL_SURFACE_SCALABLE_FLAG);
+
+	if (nemoitem_one_has_sattr(state->one, "pick", "off") != 0)
+		nemoshell_bin_put_flags(bin, NEMOSHELL_SURFACE_PICKABLE_FLAG);
+	else
+		nemoshell_bin_set_flags(bin, NEMOSHELL_SURFACE_PICKABLE_FLAG);
+
+	if (nemoitem_one_has_sattr(state->one, "maximize", "off") != 0)
+		nemoshell_bin_put_flags(bin, NEMOSHELL_SURFACE_MAXIMIZABLE_FLAG);
+	else
+		nemoshell_bin_set_flags(bin, NEMOSHELL_SURFACE_MAXIMIZABLE_FLAG);
+
+	if (nemoitem_one_has_sattr(state->one, "minimize", "off") != 0)
+		nemoshell_bin_put_flags(bin, NEMOSHELL_SURFACE_MINIMIZABLE_FLAG);
+	else
+		nemoshell_bin_set_flags(bin, NEMOSHELL_SURFACE_MINIMIZABLE_FLAG);
+
 	if (nemoitem_one_has_sattr(state->one, "keypad", "off") != 0)
 		nemoview_put_state(bin->view, NEMOVIEW_KEYPAD_STATE);
 	else
 		nemoview_set_state(bin->view, NEMOVIEW_KEYPAD_STATE);
+
 	if (nemoitem_one_has_sattr(state->one, "layer", "off") != 0)
 		nemoview_put_state(bin->view, NEMOVIEW_LAYER_STATE);
 	else

@@ -26,11 +26,12 @@ typedef enum {
 
 typedef enum {
 	NEMOSHELL_SURFACE_MOVABLE_FLAG = (1 << 0),
-	NEMOSHELL_SURFACE_SCALABLE_FLAG = (1 << 1),
-	NEMOSHELL_SURFACE_PICKABLE_FLAG = (1 << 2),
-	NEMOSHELL_SURFACE_MAXIMIZABLE_FLAG = (1 << 3),
-	NEMOSHELL_SURFACE_MINIMIZABLE_FLAG = (1 << 4),
-	NEMOSHELL_SURFACE_ALL_FLAGS = NEMOSHELL_SURFACE_MOVABLE_FLAG | NEMOSHELL_SURFACE_SCALABLE_FLAG | NEMOSHELL_SURFACE_PICKABLE_FLAG | NEMOSHELL_SURFACE_MAXIMIZABLE_FLAG | NEMOSHELL_SURFACE_MINIMIZABLE_FLAG,
+	NEMOSHELL_SURFACE_RESIZABLE_FLAG = (1 << 1),
+	NEMOSHELL_SURFACE_SCALABLE_FLAG = (1 << 2),
+	NEMOSHELL_SURFACE_PICKABLE_FLAG = (1 << 3),
+	NEMOSHELL_SURFACE_MAXIMIZABLE_FLAG = (1 << 4),
+	NEMOSHELL_SURFACE_MINIMIZABLE_FLAG = (1 << 5),
+	NEMOSHELL_SURFACE_ALL_FLAGS = NEMOSHELL_SURFACE_MOVABLE_FLAG | NEMOSHELL_SURFACE_RESIZABLE_FLAG | NEMOSHELL_SURFACE_SCALABLE_FLAG | NEMOSHELL_SURFACE_PICKABLE_FLAG | NEMOSHELL_SURFACE_MAXIMIZABLE_FLAG | NEMOSHELL_SURFACE_MINIMIZABLE_FLAG,
 } NemoShellSurfaceFlag;
 
 typedef enum {
@@ -383,6 +384,26 @@ static inline int nemoshell_bin_has_state(struct shellbin *bin, uint32_t state)
 static inline int nemoshell_bin_has_state_all(struct shellbin *bin, uint32_t state)
 {
 	return (bin->state & state) == state;
+}
+
+static inline void nemoshell_bin_set_flags(struct shellbin *bin, uint32_t flags)
+{
+	bin->flags |= flags;
+}
+
+static inline void nemoshell_bin_put_flags(struct shellbin *bin, uint32_t flags)
+{
+	bin->flags &= ~flags;
+}
+
+static inline int nemoshell_bin_has_flags(struct shellbin *bin, uint32_t flags)
+{
+	return bin->flags & flags;
+}
+
+static inline int nemoshell_bin_has_flags_all(struct shellbin *bin, uint32_t flags)
+{
+	return (bin->flags & flags) == flags;
 }
 
 static inline int32_t nemoshell_bin_get_geometry_width(struct shellbin *bin)

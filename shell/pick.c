@@ -115,7 +115,7 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 				} else {
 					nemoshell_send_bin_close(bin);
 				}
-			} else if (nemoview_has_state(bin->view, NEMOVIEW_RESIZE_STATE) != 0) {
+			} else if (nemoshell_bin_has_flags(bin, NEMOSHELL_SURFACE_RESIZABLE_FLAG) != 0) {
 				bin->resize_edges = WL_SHELL_SURFACE_RESIZE_LEFT | WL_SHELL_SURFACE_RESIZE_TOP;
 
 				if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_PICKSCREEN_STATE) != 0) {
@@ -423,7 +423,7 @@ static void pick_shellgrab_singletap_up(struct touchpoint_grab *base, uint32_t t
 				} else {
 					nemoshell_send_bin_close(bin);
 				}
-			} else if (nemoview_has_state(bin->view, NEMOVIEW_RESIZE_STATE) != 0) {
+			} else if (nemoshell_bin_has_flags(bin, NEMOSHELL_SURFACE_RESIZABLE_FLAG) != 0) {
 				bin->resize_edges = WL_SHELL_SURFACE_RESIZE_LEFT | WL_SHELL_SURFACE_RESIZE_TOP;
 
 				if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_PICKSCREEN_STATE) != 0) {
@@ -747,7 +747,7 @@ static void pick_shellgrab_pointer_button(struct nemopointer_grab *base, uint32_
 					} else {
 						nemoshell_send_bin_close(bin);
 					}
-				} else if (nemoview_has_state(bin->view, NEMOVIEW_RESIZE_STATE) != 0) {
+				} else if (nemoshell_bin_has_flags(bin, NEMOSHELL_SURFACE_RESIZABLE_FLAG) != 0) {
 					bin->resize_edges = WL_SHELL_SURFACE_RESIZE_LEFT | WL_SHELL_SURFACE_RESIZE_TOP;
 
 					if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_PICKSCREEN_STATE) != 0) {
