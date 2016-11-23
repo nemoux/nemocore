@@ -421,7 +421,7 @@ static inline void clientstate_set_pid(struct clientstate *state, uint32_t pid)
 	state->pid = pid;
 }
 
-static inline void clientstate_set_one(struct clientstate *state, struct itemone *one)
+static inline void clientstate_set_attrs(struct clientstate *state, struct itemone *one)
 {
 	nemoitem_one_copy(state->one, one);
 }
