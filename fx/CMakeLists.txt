@@ -18,6 +18,7 @@ add_library(nemofx SHARED
 	glmotion.c
 	gllight.c
 	glshadow.c
+	glswirl.c
 	fxnoise.cpp
 	fxsph.c
 	${CMAKE_SOURCE_DIR}/thirds/fastnoise.cpp
@@ -37,6 +38,7 @@ set(HEADER_FILES
 	glmotion.h
 	gllight.h
 	glshadow.h
+	glswirl.h
 	fxnoise.h
 	fxsph.h
 	)

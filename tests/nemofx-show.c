@@ -17,6 +17,7 @@
 #include <glripple.h>
 #include <gllight.h>
 #include <glshadow.h>
+#include <glswirl.h>
 #include <fxnoise.h>
 #include <nemohelper.h>
 #include <nemolog.h>
@@ -35,6 +36,7 @@ struct glfxcontext {
 	struct glripple *ripple;
 	struct gllight *light;
 	struct glshadow *shadow;
+	struct glswirl *swirl;
 	struct fxnoise *noise;
 
 	float width, height;
@@ -97,6 +99,13 @@ static void nemoglfx_dispatch_canvas_event(struct nemoshow *show, struct showone
 		}
 	}
 
+	if (context->swirl != NULL) {
+		if (nemoshow_event_is_touch_motion(show, event)) {
+			nemofx_glswirl_set_angle(context->swirl,
+					(nemoshow_event_get_x(event) / context->width - 0.5f) * M_PI * 2.0f);
+		}
+	}
+
 	if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event)) {
 		if (nemoshow_event_is_more_taps(show, event, 5)) {
 			nemoshow_view_pick_distant(show, event, NEMOSHOW_VIEW_PICK_ALL_TYPE);
@@ -129,6 +138,8 @@ static void nemoglfx_dispatch_show_resize(struct nemoshow *show, int32_t width, 
 		nemofx_glshadow_resize(context->shadow, width, height);
 	if (context->ripple != NULL)
 		nemofx_glripple_resize(context->ripple, width, height);
+	if (context->swirl != NULL)
+		nemofx_glswirl_resize(context->swirl, width, height);
 
 	nemoshow_view_redraw(context->show);
 }
@@ -169,6 +180,12 @@ static GLuint nemoglfx_dispatch_canvas_filter(struct talenode *node, void *data)
 		texture = nemofx_glripple_get_texture(context->ripple);
 	}
 
+	if (context->swirl != NULL) {
+		nemofx_glswirl_dispatch(context->swirl, texture);
+
+		texture = nemofx_glswirl_get_texture(context->swirl);
+	}
+
 	return texture;
 }
 
@@ -182,6 +199,7 @@ int main(int argc, char *argv[])
 		{ "light",					required_argument,			NULL,			'l' },
 		{ "shadow",					required_argument,			NULL,			's' },
 		{ "noise",					required_argument,			NULL,			'n' },
+		{ "swirl",					required_argument,			NULL,			'w' },
 		{ 0 }
 	};
 
@@ -198,6 +216,7 @@ int main(int argc, char *argv[])
 	char *noisetype = NULL;
 	float lightscope = 0.0f;
 	float shadowscope = 0.0f;
+	float swirlradius = 0.0f;
 	int width = 800;
 	int height = 800;
 	int ripplestep = 0;
@@ -206,7 +225,7 @@ int main(int argc, char *argv[])
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "p:i:r:b:l:s:n:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "p:i:r:b:l:s:n:w:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -237,6 +256,10 @@ int main(int argc, char *argv[])
 
 			case 'n':
 				noisetype = strdup(optarg);
+				break;
+
+			case 'w':
+				swirlradius = strtod(optarg, NULL);
 				break;
 
 			default:
@@ -374,6 +397,12 @@ int main(int argc, char *argv[])
 		nemofx_glshadow_set_pointlight_color(context->shadow, 4, random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f), random_get_double(0.0f, 1.0f));
 	}
 
+	if (swirlradius > 0.0f) {
+		context->swirl = nemofx_glswirl_create(width, height);
+		nemofx_glswirl_set_radius(context->swirl, swirlradius);
+		nemofx_glswirl_set_center(context->swirl, 0.0f, 0.0f);
+	}
+
 	trans = nemoshow_transition_create(NEMOSHOW_LINEAR_EASE, 18000, 0);
 	nemoshow_transition_dirty_one(trans, context->canvas, NEMOSHOW_FILTER_DIRTY);
 	nemoshow_transition_set_repeat(trans, 0);
@@ -393,6 +422,8 @@ int main(int argc, char *argv[])
 		nemofx_gllight_destroy(context->light);
 	if (context->shadow != NULL)
 		nemofx_glshadow_destroy(context->shadow);
+	if (context->swirl != NULL)
+		nemofx_glswirl_destroy(context->swirl);
 	if (context->noise != NULL)
 		nemofx_noise_destroy(context->noise);
 
