@@ -101,6 +101,23 @@ static const char GLSWEEP_FAN_FRAGMENT_SHADER[] =
 "    gl_FragColor = texture2D(texture, vtexcoord);\n"
 "}\n";
 
+static const char GLSWEEP_MASK_FRAGMENT_SHADER[] =
+"precision mediump float;\n"
+"varying vec2 vtexcoord;\n"
+"uniform sampler2D texture;\n"
+"uniform sampler2D snapshot;\n"
+"uniform sampler2D mask;\n"
+"uniform float width;\n"
+"uniform float height;\n"
+"uniform float t;\n"
+"uniform vec2 p;\n"
+"void main()\n"
+"{\n"
+"  vec4 m4 = texture2D(mask, vtexcoord);\n"
+"  vec4 i4 = vec4(1.0) - m4;\n"
+"  gl_FragColor = texture2D(snapshot, vtexcoord) * i4 + texture2D(texture, vtexcoord) * m4;\n"
+"}\n";
+
 static GLuint nemofx_glsweep_create_program(const char *shader)
 {
 	const char *vertexshader = GLSWEEP_VERTEX_SHADER;
@@ -261,7 +278,8 @@ void nemofx_glsweep_set_type(struct glsweep *sweep, int type)
 		GLSWEEP_HORIZONTAL_FRAGMENT_SHADER,
 		GLSWEEP_VERTICAL_FRAGMENT_SHADER,
 		GLSWEEP_CIRCLE_FRAGMENT_SHADER,
-		GLSWEEP_FAN_FRAGMENT_SHADER
+		GLSWEEP_FAN_FRAGMENT_SHADER,
+		GLSWEEP_MASK_FRAGMENT_SHADER
 	};
 
 	if (sweep->program > 0)
@@ -275,6 +293,7 @@ void nemofx_glsweep_set_type(struct glsweep *sweep, int type)
 	sweep->uwidth = glGetUniformLocation(sweep->program, "width");
 	sweep->uheight = glGetUniformLocation(sweep->program, "height");
 	sweep->usnapshot = glGetUniformLocation(sweep->program, "snapshot");
+	sweep->umask = glGetUniformLocation(sweep->program, "mask");
 	sweep->utiming = glGetUniformLocation(sweep->program, "t");
 	sweep->upoint = glGetUniformLocation(sweep->program, "p");
 
@@ -291,6 +310,11 @@ void nemofx_glsweep_set_point(struct glsweep *sweep, float x, float y)
 	sweep->point[1] = y / 2.0f + 0.5f;
 
 	nemofx_glsweep_update_ratio(sweep);
+}
+
+void nemofx_glsweep_set_mask(struct glsweep *sweep, GLuint mask)
+{
+	sweep->mask = mask;
 }
 
 void nemofx_glsweep_resize(struct glsweep *sweep, int32_t width, int32_t height)
@@ -342,6 +366,13 @@ void nemofx_glsweep_dispatch(struct glsweep *sweep, GLuint texture)
 	glUniform1f(sweep->uheight, sweep->height);
 	glUniform1f(sweep->utiming, sweep->t * sweep->r);
 	glUniform2fv(sweep->upoint, 1, sweep->point);
+
+	if (sweep->type == NEMOFX_GLSWEEP_MASK_TYPE) {
+		glUniform1i(sweep->umask, 2);
+
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, sweep->mask);
+	}
 
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, sweep->snapshot);
