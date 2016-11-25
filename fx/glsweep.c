@@ -81,6 +81,26 @@ static const char GLSWEEP_CIRCLE_FRAGMENT_SHADER[] =
 "    gl_FragColor = texture2D(texture, vtexcoord);\n"
 "}\n";
 
+static const char GLSWEEP_FAN_FRAGMENT_SHADER[] =
+"precision mediump float;\n"
+"varying vec2 vtexcoord;\n"
+"uniform sampler2D texture;\n"
+"uniform sampler2D snapshot;\n"
+"uniform float width;\n"
+"uniform float height;\n"
+"uniform float t;\n"
+"uniform vec2 p;\n"
+"void main()\n"
+"{\n"
+"  float x = vtexcoord.x - 0.5;\n"
+"  float y = vtexcoord.y - 0.5;\n"
+"  float r = atan(y, x) + 3.141592;\n"
+"  if (t < r)\n"
+"    gl_FragColor = texture2D(snapshot, vtexcoord);\n"
+"  else\n"
+"    gl_FragColor = texture2D(texture, vtexcoord);\n"
+"}\n";
+
 static GLuint nemofx_glsweep_create_program(const char *shader)
 {
 	const char *vertexshader = GLSWEEP_VERTEX_SHADER;
@@ -228,6 +248,8 @@ static inline void nemofx_glsweep_update_ratio(struct glsweep *sweep)
 		float dy = MAX(sweep->point[1], 1.0f - sweep->point[1]);
 
 		sweep->r = sqrtf(dx * dx + dy * dy);
+	} else if (sweep->type == NEMOFX_GLSWEEP_FAN_TYPE) {
+		sweep->r = M_PI * 2.0f;
 	} else {
 		sweep->r = 1.0f;
 	}
@@ -238,7 +260,8 @@ void nemofx_glsweep_set_type(struct glsweep *sweep, int type)
 	const char *programs[] = {
 		GLSWEEP_HORIZONTAL_FRAGMENT_SHADER,
 		GLSWEEP_VERTICAL_FRAGMENT_SHADER,
-		GLSWEEP_CIRCLE_FRAGMENT_SHADER
+		GLSWEEP_CIRCLE_FRAGMENT_SHADER,
+		GLSWEEP_FAN_FRAGMENT_SHADER
 	};
 
 	if (sweep->program > 0)

@@ -1817,7 +1817,7 @@ static void nemotile_dispatch_timer(struct nemotimer *timer, void *data)
 
 		tile->is_sweeping = 1;
 
-		trans = nemotrans_create(NEMOEASE_CUBIC_OUT_TYPE, 800, 0);
+		trans = nemotrans_create(NEMOEASE_CUBIC_OUT_TYPE, 1200, 0);
 		nemotrans_set_dispatch_update(trans, nemotile_dispatch_sweep_trans_update);
 		nemotrans_set_dispatch_done(trans, nemotile_dispatch_sweep_trans_done);
 		nemotrans_set_userdata(trans, tile);
