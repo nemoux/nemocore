@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <math.h>
+
 #include <glsweep.h>
 #include <glshader.h>
 #include <fbohelper.h>
@@ -29,6 +31,7 @@ static const char GLSWEEP_HORIZONTAL_FRAGMENT_SHADER[] =
 "uniform float width;\n"
 "uniform float height;\n"
 "uniform float t;\n"
+"uniform vec2 p;\n"
 "void main()\n"
 "{\n"
 "  float x = vtexcoord.x;\n"
@@ -47,11 +50,32 @@ static const char GLSWEEP_VERTICAL_FRAGMENT_SHADER[] =
 "uniform float width;\n"
 "uniform float height;\n"
 "uniform float t;\n"
+"uniform vec2 p;\n"
 "void main()\n"
 "{\n"
 "  float x = vtexcoord.x;\n"
 "  float y = vtexcoord.y;\n"
 "  if (t < y)\n"
+"    gl_FragColor = texture2D(snapshot, vtexcoord);\n"
+"  else\n"
+"    gl_FragColor = texture2D(texture, vtexcoord);\n"
+"}\n";
+
+static const char GLSWEEP_CIRCLE_FRAGMENT_SHADER[] =
+"precision mediump float;\n"
+"varying vec2 vtexcoord;\n"
+"uniform sampler2D texture;\n"
+"uniform sampler2D snapshot;\n"
+"uniform float width;\n"
+"uniform float height;\n"
+"uniform float t;\n"
+"uniform vec2 p;\n"
+"void main()\n"
+"{\n"
+"  float x = vtexcoord.x;\n"
+"  float y = vtexcoord.y;\n"
+"  float r = length(vec2(x - p.x, y - p.y));\n"
+"  if (t < r)\n"
 "    gl_FragColor = texture2D(snapshot, vtexcoord);\n"
 "  else\n"
 "    gl_FragColor = texture2D(texture, vtexcoord);\n"
@@ -114,6 +138,9 @@ struct glsweep *nemofx_glsweep_create(int32_t width, int32_t height)
 
 	sweep->width = width;
 	sweep->height = height;
+
+	sweep->point[0] = 0.5f;
+	sweep->point[1] = 0.5f;
 
 	return sweep;
 
@@ -194,11 +221,24 @@ void nemofx_glsweep_set_timing(struct glsweep *sweep, float t)
 	sweep->t = t;
 }
 
+static inline void nemofx_glsweep_update_ratio(struct glsweep *sweep)
+{
+	if (sweep->type == NEMOFX_GLSWEEP_CIRCLE_TYPE) {
+		float dx = MAX(sweep->point[0], 1.0f - sweep->point[0]);
+		float dy = MAX(sweep->point[1], 1.0f - sweep->point[1]);
+
+		sweep->r = sqrtf(dx * dx + dy * dy);
+	} else {
+		sweep->r = 1.0f;
+	}
+}
+
 void nemofx_glsweep_set_type(struct glsweep *sweep, int type)
 {
 	const char *programs[] = {
 		GLSWEEP_HORIZONTAL_FRAGMENT_SHADER,
-		GLSWEEP_VERTICAL_FRAGMENT_SHADER
+		GLSWEEP_VERTICAL_FRAGMENT_SHADER,
+		GLSWEEP_CIRCLE_FRAGMENT_SHADER
 	};
 
 	if (sweep->program > 0)
@@ -213,6 +253,21 @@ void nemofx_glsweep_set_type(struct glsweep *sweep, int type)
 	sweep->uheight = glGetUniformLocation(sweep->program, "height");
 	sweep->usnapshot = glGetUniformLocation(sweep->program, "snapshot");
 	sweep->utiming = glGetUniformLocation(sweep->program, "t");
+	sweep->upoint = glGetUniformLocation(sweep->program, "p");
+
+	sweep->type = type;
+	sweep->point[0] = 0.5f;
+	sweep->point[1] = 0.5f;
+
+	nemofx_glsweep_update_ratio(sweep);
+}
+
+void nemofx_glsweep_set_point(struct glsweep *sweep, float x, float y)
+{
+	sweep->point[0] = x / 2.0f + 0.5f;
+	sweep->point[1] = y / 2.0f + 0.5f;
+
+	nemofx_glsweep_update_ratio(sweep);
 }
 
 void nemofx_glsweep_resize(struct glsweep *sweep, int32_t width, int32_t height)
@@ -262,7 +317,8 @@ void nemofx_glsweep_dispatch(struct glsweep *sweep, GLuint texture)
 	glUniform1i(sweep->usnapshot, 1);
 	glUniform1f(sweep->uwidth, sweep->width);
 	glUniform1f(sweep->uheight, sweep->height);
-	glUniform1f(sweep->utiming, sweep->t);
+	glUniform1f(sweep->utiming, sweep->t * sweep->r);
+	glUniform2fv(sweep->upoint, 1, sweep->point);
 
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, sweep->snapshot);

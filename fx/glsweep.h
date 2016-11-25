@@ -17,6 +17,7 @@ NEMO_BEGIN_EXTERN_C
 typedef enum {
 	NEMOFX_GLSWEEP_HORIZONTAL_TYPE = 0,
 	NEMOFX_GLSWEEP_VERTICAL_TYPE = 1,
+	NEMOFX_GLSWEEP_CIRCLE_TYPE = 2,
 	NEMOFX_GLSWEEP_LAST_TYPE
 } NemoFXGLSweepType;
 
@@ -33,10 +34,15 @@ struct glsweep {
 	GLuint uwidth, uheight;
 	GLuint usnapshot;
 	GLuint utiming;
+	GLuint upoint;
+
+	int type;
 
 	int32_t width, height;
 
 	float t;
+	float r;
+	float point[2];
 };
 
 extern struct glsweep *nemofx_glsweep_create(int32_t width, int32_t height);
@@ -48,6 +54,7 @@ extern void nemofx_glsweep_put_snapshot(struct glsweep *sweep);
 
 extern void nemofx_glsweep_set_timing(struct glsweep *sweep, float t);
 extern void nemofx_glsweep_set_type(struct glsweep *sweep, int type);
+extern void nemofx_glsweep_set_point(struct glsweep *sweep, float x, float y);
 
 extern void nemofx_glsweep_resize(struct glsweep *sweep, int32_t width, int32_t height);
 extern void nemofx_glsweep_dispatch(struct glsweep *sweep, GLuint texture);

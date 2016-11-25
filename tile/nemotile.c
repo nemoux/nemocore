@@ -1813,6 +1813,7 @@ static void nemotile_dispatch_timer(struct nemotimer *timer, void *data)
 				nemoshow_canvas_get_viewport_height(tile->wall));
 		nemofx_glsweep_set_type(tile->sweep, random_get_int(0, NEMOFX_GLSWEEP_LAST_TYPE - 1));
 		nemofx_glsweep_set_timing(tile->sweep, 0.0f);
+		nemofx_glsweep_set_point(tile->sweep, 0.0f, 0.0f);
 
 		tile->is_sweeping = 1;
 
