@@ -19,6 +19,7 @@ add_library(nemofx SHARED
 	gllight.c
 	glshadow.c
 	glswirl.c
+	glsweep.c
 	glpolar.c
 	fxnoise.cpp
 	fxsph.c
@@ -40,6 +41,7 @@ set(HEADER_FILES
 	gllight.h
 	glshadow.h
 	glswirl.h
+	glsweep.h
 	glpolar.h
 	fxnoise.h
 	fxsph.h

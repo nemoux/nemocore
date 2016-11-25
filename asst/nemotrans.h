@@ -16,7 +16,7 @@ NEMO_BEGIN_EXTERN_C
 struct nemotrans;
 struct transgroup;
 
-typedef void (*nemotrans_dispatch_update_t)(struct nemotrans *trans, void *data);
+typedef void (*nemotrans_dispatch_update_t)(struct nemotrans *trans, void *data, float t);
 typedef void (*nemotrans_dispatch_done_t)(struct nemotrans *trans, void *data);
 typedef void (*nemotrans_group_dispatch_first_t)(struct transgroup *group, void *data);
 typedef void (*nemotrans_group_dispatch_last_t)(struct transgroup *group, void *data);

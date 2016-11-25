@@ -276,7 +276,7 @@ int nemotrans_dispatch(struct nemotrans *trans, uint32_t msecs)
 	}
 
 	if (trans->dispatch_update != NULL)
-		trans->dispatch_update(trans, trans->data);
+		trans->dispatch_update(trans, trans->data, t);
 
 	if (done != 0 && trans->dispatch_done != NULL)
 		trans->dispatch_done(trans, trans->data);

@@ -1564,6 +1564,20 @@ static void nemotile_dispatch_show_resize(struct nemoshow *show, int32_t width, 
 	nemoshow_view_redraw(show);
 }
 
+static void nemotile_dispatch_sweep_trans_update(struct nemotrans *trans, void *data, float t)
+{
+	struct nemotile *tile = (struct nemotile *)data;
+
+	nemofx_glsweep_set_timing(tile->sweep, t);
+}
+
+static void nemotile_dispatch_sweep_trans_done(struct nemotrans *trans, void *data)
+{
+	struct nemotile *tile = (struct nemotile *)data;
+
+	tile->is_sweeping = 0;
+}
+
 static void nemotile_dispatch_timer(struct nemotimer *timer, void *data)
 {
 	struct nemotile *tile = (struct nemotile *)data;
@@ -1788,10 +1802,25 @@ static void nemotile_dispatch_timer(struct nemotimer *timer, void *data)
 		nemotrans_group_attach_trans(tile->trans_group, trans);
 	}
 
-	if (tile->filter != NULL) {
+	if (tile->filter != NULL && nemofs_dir_get_filecount(tile->shaders) >= 2) {
 		tile->ishaders = (tile->ishaders + 1) % nemofs_dir_get_filecount(tile->shaders);
 
 		nemofx_glfilter_set_program(tile->filter, nemofs_dir_get_filepath(tile->shaders, tile->ishaders));
+
+		nemofx_glsweep_set_snapshot(tile->sweep,
+				nemoshow_canvas_get_effective_texture(tile->wall),
+				nemoshow_canvas_get_viewport_width(tile->wall),
+				nemoshow_canvas_get_viewport_height(tile->wall));
+		nemofx_glsweep_set_type(tile->sweep, random_get_int(0, NEMOFX_GLSWEEP_LAST_TYPE - 1));
+		nemofx_glsweep_set_timing(tile->sweep, 0.0f);
+
+		tile->is_sweeping = 1;
+
+		trans = nemotrans_create(NEMOEASE_CUBIC_OUT_TYPE, 800, 0);
+		nemotrans_set_dispatch_update(trans, nemotile_dispatch_sweep_trans_update);
+		nemotrans_set_dispatch_done(trans, nemotile_dispatch_sweep_trans_done);
+		nemotrans_set_userdata(trans, tile);
+		nemotrans_group_attach_trans(tile->trans_group, trans);
 	}
 
 	nemotimer_set_timeout(tile->timer, tile->timeout);
@@ -1883,6 +1912,12 @@ static GLuint nemotile_dispatch_wall_filter(struct talenode *node, void *data)
 		nemofx_glfilter_dispatch(tile->filter, texture);
 
 		texture = nemofx_glfilter_get_texture(tile->filter);
+	}
+
+	if (tile->sweep != NULL && tile->is_sweeping != 0) {
+		nemofx_glsweep_dispatch(tile->sweep, texture);
+
+		texture = nemofx_glsweep_get_texture(tile->sweep);
 	}
 
 	return texture;
@@ -2770,6 +2805,8 @@ int main(int argc, char *argv[])
 
 		tile->filter = nemofx_glfilter_create(width, height);
 		nemofx_glfilter_set_program(tile->filter, nemofs_dir_get_filepath(tile->shaders, tile->ishaders));
+
+		tile->sweep = nemofx_glsweep_create(width, height);
 	}
 
 	if (polarcolor != NULL) {
