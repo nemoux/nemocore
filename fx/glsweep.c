@@ -143,6 +143,9 @@ void nemofx_glsweep_destroy(struct glsweep *sweep)
 
 void nemofx_glsweep_ref_snapshot(struct glsweep *sweep, GLuint texture, int32_t width, int32_t height)
 {
+	if (sweep->is_reference == 0 && sweep->snapshot > 0)
+		glDeleteTextures(1, &sweep->snapshot);
+
 	sweep->snapshot = texture;
 	sweep->is_reference = 1;
 }
@@ -151,20 +154,19 @@ void nemofx_glsweep_set_snapshot(struct glsweep *sweep, GLuint texture, int32_t 
 {
 	GLuint fbo, dbo;
 
-	if (sweep->is_reference == 0 && sweep->snapshot > 0)
-		glDeleteTextures(1, &sweep->snapshot);
+	if ((sweep->is_reference != 0) || (sweep->is_reference == 0 && sweep->snapshot == 0)) {
+		glGenTextures(1, &sweep->snapshot);
 
-	sweep->is_reference = 0;
+		glBindTexture(GL_TEXTURE_2D, sweep->snapshot);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, sweep->width, sweep->height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
+		glBindTexture(GL_TEXTURE_2D, 0);
 
-	glGenTextures(1, &sweep->snapshot);
-
-	glBindTexture(GL_TEXTURE_2D, sweep->snapshot);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, sweep->width, sweep->height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
-	glBindTexture(GL_TEXTURE_2D, 0);
+		sweep->is_reference = 0;
+	}
 
 	fbo_prepare_context(texture, width, height, &fbo, &dbo);
 
@@ -224,6 +226,12 @@ void nemofx_glsweep_resize(struct glsweep *sweep, int32_t width, int32_t height)
 		glDeleteRenderbuffers(1, &sweep->dbo);
 
 		fbo_prepare_context(sweep->texture, width, height, &sweep->fbo, &sweep->dbo);
+
+		if (sweep->is_reference == 0 && sweep->snapshot > 0) {
+			glBindTexture(GL_TEXTURE_2D, sweep->snapshot);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
 
 		sweep->width = width;
 		sweep->height = height;
