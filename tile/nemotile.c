@@ -1866,10 +1866,11 @@ static void nemotile_dispatch_video_done(struct nemoplay *play, void *data)
 	nemoplay_back_set_video_data(tile->videoback, tile);
 }
 
-static GLuint nemotile_dispatch_canvas_filter(struct talenode *node, void *data)
+static GLuint nemotile_dispatch_canvas_filter(void *node)
 {
-	struct nemotile *tile = (struct nemotile *)data;
-	GLuint texture = nemotale_node_get_texture(node);
+	struct showone *canvas = (struct showone *)node;
+	struct nemotile *tile = (struct nemotile *)nemoshow_one_get_userdata(canvas);
+	GLuint texture = nemoshow_canvas_get_texture(canvas);
 
 	if (tile->mask != NULL && tile->is_3d == 0) {
 		nemofx_glmask_dispatch(tile->mask, texture, nemoshow_canvas_get_texture(tile->over));
@@ -1880,18 +1881,11 @@ static GLuint nemotile_dispatch_canvas_filter(struct talenode *node, void *data)
 	return texture;
 }
 
-static GLuint nemotile_dispatch_image_filter(struct talenode *node, void *data)
+static GLuint nemotile_dispatch_video_filter(void *node)
 {
-	struct nemotile *tile = (struct nemotile *)data;
-	GLuint texture = nemotale_node_get_texture(node);
-
-	return texture;
-}
-
-static GLuint nemotile_dispatch_video_filter(struct talenode *node, void *data)
-{
-	struct nemotile *tile = (struct nemotile *)data;
-	GLuint texture = nemotale_node_get_texture(node);
+	struct showone *canvas = (struct showone *)node;
+	struct nemotile *tile = (struct nemotile *)nemoshow_one_get_userdata(canvas);
+	GLuint texture = nemoshow_canvas_get_texture(canvas);
 
 	if (tile->polar != NULL) {
 		nemofx_glpolar_resize(tile->polar,
@@ -1905,10 +1899,11 @@ static GLuint nemotile_dispatch_video_filter(struct talenode *node, void *data)
 	return texture;
 }
 
-static GLuint nemotile_dispatch_wall_filter(struct talenode *node, void *data)
+static GLuint nemotile_dispatch_wall_filter(void *node)
 {
-	struct nemotile *tile = (struct nemotile *)data;
-	GLuint texture = nemotale_node_get_texture(node);
+	struct showone *canvas = (struct showone *)node;
+	struct nemotile *tile = (struct nemotile *)nemoshow_one_get_userdata(canvas);
+	GLuint texture = nemoshow_canvas_get_texture(canvas);
 
 	if (tile->filter != NULL) {
 		nemofx_glfilter_dispatch(tile->filter, texture);
@@ -2553,7 +2548,6 @@ int main(int argc, char *argv[])
 	struct showone *one;
 	struct showone *blur;
 	struct showtransition *trans;
-	struct talenode *node;
 	char *imagepath = NULL;
 	char *videopath = NULL;
 	char *programpath = NULL;
@@ -2791,10 +2785,9 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_OPENGL_TYPE);
 	nemoshow_canvas_set_dispatch_redraw(canvas, nemotile_dispatch_canvas_redraw);
 	nemoshow_canvas_set_dispatch_event(canvas, nemotile_dispatch_canvas_event);
+	nemoshow_canvas_set_dispatch_filter(canvas, nemotile_dispatch_canvas_filter);
+	nemoshow_one_set_userdata(canvas, tile);
 	nemoshow_one_attach(scene, canvas);
-
-	node = nemoshow_canvas_get_node(canvas);
-	nemotale_node_set_dispatch_filter(node, nemotile_dispatch_canvas_filter, tile);
 
 	if (programpath != NULL) {
 		if (os_check_path_is_directory(programpath) != 0) {
@@ -2891,10 +2884,9 @@ int main(int argc, char *argv[])
 		nemoshow_canvas_set_width(canvas, width);
 		nemoshow_canvas_set_height(canvas, height);
 		nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
+		nemoshow_canvas_set_dispatch_filter(canvas, nemotile_dispatch_wall_filter);
+		nemoshow_one_set_userdata(canvas, tile);
 		nemoshow_attach_one(show, canvas);
-
-		node = nemoshow_canvas_get_node(canvas);
-		nemotale_node_set_dispatch_filter(node, nemotile_dispatch_wall_filter, tile);
 
 		if (os_has_file_extension(wallpath, "svg") != 0) {
 			blur = nemoshow_filter_create(NEMOSHOW_BLUR_FILTER);
@@ -2988,9 +2980,6 @@ int main(int argc, char *argv[])
 				nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
 				nemoshow_attach_one(show, canvas);
 
-				node = nemoshow_canvas_get_node(canvas);
-				nemotale_node_set_dispatch_filter(node, nemotile_dispatch_image_filter, tile);
-
 				one = nemoshow_item_create(NEMOSHOW_PATH_ITEM);
 				nemoshow_one_attach(canvas, one);
 				nemoshow_item_set_x(one, 0.0f);
@@ -3049,9 +3038,6 @@ int main(int argc, char *argv[])
 			nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
 			nemoshow_attach_one(show, canvas);
 
-			node = nemoshow_canvas_get_node(canvas);
-			nemotale_node_set_dispatch_filter(node, nemotile_dispatch_image_filter, tile);
-
 			tile->nsprites = 1;
 			tile->isprites = 0;
 
@@ -3099,10 +3085,9 @@ int main(int argc, char *argv[])
 		nemoshow_canvas_set_width(canvas, nemoplay_get_video_width(tile->play));
 		nemoshow_canvas_set_height(canvas, nemoplay_get_video_height(tile->play));
 		nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_OPENGL_TYPE);
+		nemoshow_canvas_set_dispatch_filter(canvas, nemotile_dispatch_video_filter);
+		nemoshow_one_set_userdata(canvas, tile);
 		nemoshow_attach_one(show, canvas);
-
-		node = nemoshow_canvas_get_node(canvas);
-		nemotale_node_set_dispatch_filter(node, nemotile_dispatch_video_filter, tile);
 
 		tile->decoderback = nemoplay_back_create_decoder(tile->play);
 		tile->audioback = nemoplay_back_create_audio_by_ao(tile->play);

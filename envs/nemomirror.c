@@ -118,10 +118,11 @@ static void nemomirror_dispatch_canvas_event(struct nemoshow *show, struct showo
 	}
 }
 
-static GLuint nemomirror_dispatch_canvas_filter(struct talenode *node, void *data)
+static GLuint nemomirror_dispatch_canvas_filter(void *node)
 {
-	struct nemomirror *mirror = (struct nemomirror *)data;
-	GLuint texture = nemotale_node_get_texture(node);
+	struct showone *canvas = (struct showone *)node;
+	struct nemomirror *mirror = (struct nemomirror *)nemoshow_one_get_userdata(canvas);
+	GLuint texture = nemoshow_canvas_get_texture(canvas);
 
 	if (mirror->view != NULL) {
 		texture = nemocanvas_get_opengl_texture(mirror->view->canvas, 0);
@@ -152,7 +153,6 @@ struct nemomirror *nemomirror_create(struct nemoshell *shell, int32_t x, int32_t
 	struct nemoshow *show;
 	struct showone *scene;
 	struct showone *canvas;
-	struct talenode *node;
 
 	mirror = (struct nemomirror *)malloc(sizeof(struct nemomirror));
 	if (mirror == NULL)
@@ -189,10 +189,9 @@ struct nemomirror *nemomirror_create(struct nemoshell *shell, int32_t x, int32_t
 	nemoshow_canvas_set_height(canvas, height);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_OPENGL_TYPE);
 	nemoshow_canvas_set_dispatch_event(canvas, nemomirror_dispatch_canvas_event);
+	nemoshow_canvas_set_dispatch_filter(canvas, nemomirror_dispatch_canvas_filter);
+	nemoshow_one_set_userdata(canvas, mirror);
 	nemoshow_one_attach(scene, canvas);
-
-	node = nemoshow_canvas_get_node(canvas);
-	nemotale_node_set_dispatch_filter(node, nemomirror_dispatch_canvas_filter, mirror);
 
 	nemoshow_set_keyboard_focus(show, canvas);
 	nemoshow_set_userdata(show, mirror);

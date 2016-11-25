@@ -195,7 +195,7 @@ int nemoshow_canvas_set_type(struct showone *one, int type)
 
 	one->sub = type;
 
-	nemotale_node_set_data(canvas->node, one);
+	nemotale_node_set_nodedata(canvas->node, one);
 
 	return 0;
 }

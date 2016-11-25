@@ -1351,10 +1351,11 @@ static void nemopixs_dispatch_video_done(struct nemoplay *play, void *data)
 	nemoplay_back_set_video_data(pixs->videoback, pixs);
 }
 
-static GLuint nemopixs_dispatch_canvas_filter(struct talenode *node, void *data)
+static GLuint nemopixs_dispatch_canvas_filter(void *node)
 {
-	struct nemopixs *pixs = (struct nemopixs *)data;
-	GLuint texture = nemotale_node_get_texture(node);
+	struct showone *canvas = (struct showone *)node;
+	struct nemopixs *pixs = (struct nemopixs *)nemoshow_one_get_userdata(canvas);
+	GLuint texture = nemoshow_canvas_get_texture(canvas);
 
 	if (pixs->blur != NULL) {
 		nemofx_glblur_dispatch(pixs->blur, texture);
@@ -1483,7 +1484,6 @@ int main(int argc, char *argv[])
 	struct showone *canvas;
 	struct showone *one;
 	struct showone *blur;
-	struct talenode *node;
 	char *imagepath = NULL;
 	char *videopath = NULL;
 	char *fullscreen = NULL;
@@ -1638,10 +1638,9 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_OPENGL_TYPE);
 	nemoshow_canvas_set_dispatch_redraw(canvas, nemopixs_dispatch_canvas_redraw);
 	nemoshow_canvas_set_dispatch_event(canvas, nemopixs_dispatch_canvas_event);
+	nemoshow_canvas_set_dispatch_filter(canvas, nemopixs_dispatch_canvas_filter);
+	nemoshow_one_set_userdata(canvas, pixs);
 	nemoshow_one_attach(scene, canvas);
-
-	node = nemoshow_canvas_get_node(canvas);
-	nemotale_node_set_dispatch_filter(node, nemopixs_dispatch_canvas_filter, pixs);
 
 	if (blursize > 0.0f) {
 		pixs->blur = nemofx_glblur_create(width, height);

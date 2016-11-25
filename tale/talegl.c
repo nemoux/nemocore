@@ -1004,7 +1004,7 @@ int nemotale_node_filter_gl(struct talenode *node)
 	if (gcontext->dispatch_filter == NULL) {
 		gcontext->texture = gcontext->otexture;
 	} else if (node->needs_filter != 0) {
-		gcontext->texture = gcontext->dispatch_filter(node, gcontext->filter_data);
+		gcontext->texture = gcontext->dispatch_filter(node->nodedata);
 
 		node->needs_filter = 0;
 	}
@@ -1043,12 +1043,11 @@ GLuint nemotale_node_get_effective_texture(struct talenode *node)
 	return gcontext->texture;
 }
 
-void nemotale_node_set_dispatch_filter(struct talenode *node, nemotale_node_opengl_dispatch_filter_t dispatch, void *data)
+void nemotale_node_set_dispatch_filter(struct talenode *node, nemotale_node_opengl_dispatch_filter_t dispatch)
 {
 	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
 
 	gcontext->dispatch_filter = dispatch;
-	gcontext->filter_data = data;
 }
 
 int nemotale_node_use_pbo(struct talenode *node, int use_pbo)

@@ -144,10 +144,11 @@ static void nemoglfx_dispatch_show_resize(struct nemoshow *show, int32_t width, 
 	nemoshow_view_redraw(context->show);
 }
 
-static GLuint nemoglfx_dispatch_canvas_filter(struct talenode *node, void *data)
+static GLuint nemoglfx_dispatch_canvas_filter(void *node)
 {
-	struct glfxcontext *context = (struct glfxcontext *)data;
-	GLuint texture = nemotale_node_get_texture(node);
+	struct showone *canvas = (struct showone *)node;
+	struct glfxcontext *context = (struct glfxcontext *)nemoshow_one_get_userdata(canvas);
+	GLuint texture = nemoshow_canvas_get_texture(canvas);
 
 	if (context->filter != NULL) {
 		nemofx_glfilter_dispatch(context->filter, texture);
@@ -210,7 +211,6 @@ int main(int argc, char *argv[])
 	struct showone *canvas;
 	struct showone *one;
 	struct showtransition *trans;
-	struct talenode *node;
 	char *programpath = NULL;
 	char *imagepath = NULL;
 	char *noisetype = NULL;
@@ -308,6 +308,8 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_height(canvas, height);
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
 	nemoshow_canvas_set_dispatch_event(canvas, nemoglfx_dispatch_canvas_event);
+	nemoshow_canvas_set_dispatch_filter(canvas, nemoglfx_dispatch_canvas_filter);
+	nemoshow_one_set_userdata(canvas, context);
 	nemoshow_one_attach(scene, canvas);
 
 	if (imagepath != NULL) {
@@ -351,9 +353,6 @@ int main(int argc, char *argv[])
 		nemoshow_item_set_stroke_width(one, 5.0f);
 		nemoshow_item_set_stroke_color(one, 0.0f, 255.0f, 255.0f, 255.0f);
 	}
-
-	node = nemoshow_canvas_get_node(canvas);
-	nemotale_node_set_dispatch_filter(node, nemoglfx_dispatch_canvas_filter, context);
 
 	if (programpath != NULL) {
 		context->filter = nemofx_glfilter_create(width, height);

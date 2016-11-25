@@ -32,6 +32,7 @@ struct talenode {
 	void *pmcontext;
 	void *glcontext;
 
+	void *nodedata;
 	void *userdata;
 
 	struct nemotale *tale;
@@ -255,12 +256,22 @@ static inline int32_t nemotale_node_get_height(struct talenode *node)
 	return node->geometry.height;
 }
 
-static inline void nemotale_node_set_data(struct talenode *node, void *data)
+static inline void nemotale_node_set_nodedata(struct talenode *node, void *data)
+{
+	node->nodedata = data;
+}
+
+static inline void *nemotale_node_get_nodedata(struct talenode *node)
+{
+	return node->nodedata;
+}
+
+static inline void nemotale_node_set_userdata(struct talenode *node, void *data)
 {
 	node->userdata = data;
 }
 
-static inline void *nemotale_node_get_data(struct talenode *node)
+static inline void *nemotale_node_get_userdata(struct talenode *node)
 {
 	return node->userdata;
 }

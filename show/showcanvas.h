@@ -204,6 +204,13 @@ static inline void nemoshow_canvas_set_dispatch_event(struct showone *one, nemos
 	NEMOSHOW_CANVAS_AT(one, dispatch_event) = dispatch_event;
 }
 
+static inline void nemoshow_canvas_set_dispatch_filter(struct showone *one, nemotale_node_opengl_dispatch_filter_t dispatch_filter)
+{
+	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+
+	nemotale_node_set_dispatch_filter(canvas->node, dispatch_filter);
+}
+
 static inline void nemoshow_canvas_set_contain_point(struct showone *one, nemoshow_canvas_contain_point_t contain_point)
 {
 	NEMOSHOW_CANVAS_AT(one, contain_point) = contain_point;
