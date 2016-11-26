@@ -1569,7 +1569,7 @@ static void nemotile_dispatch_sweep_trans_update(struct nemotrans *trans, void *
 	struct nemotile *tile = (struct nemotile *)data;
 
 	nemofx_glsweep_set_timing(tile->sweep, t);
-	nemofx_glsweep_set_rotate(tile->sweep, t * M_PI);
+	nemofx_glsweep_set_rotate(tile->sweep, t * M_PI * 2.0f);
 }
 
 static void nemotile_dispatch_sweep_trans_done(struct nemotrans *trans, void *data)
@@ -1814,12 +1814,12 @@ static void nemotile_dispatch_timer(struct nemotimer *timer, void *data)
 				nemoshow_canvas_get_viewport_height(tile->wall));
 		nemofx_glsweep_set_type(tile->sweep, random_get_int(0, NEMOFX_GLSWEEP_LAST_TYPE - 1));
 		nemofx_glsweep_set_timing(tile->sweep, 0.0f);
-		nemofx_glsweep_set_point(tile->sweep, 0.0f, 0.0f);
+		nemofx_glsweep_set_point(tile->sweep, random_get_double(-0.5f, 0.5f), random_get_double(-0.5f, 0.5f));
 		nemofx_glsweep_set_mask(tile->sweep, nemoshow_canvas_get_texture(tile->over));
 
 		tile->is_sweeping = 1;
 
-		trans = nemotrans_create(NEMOEASE_CUBIC_OUT_TYPE, 1600, 0);
+		trans = nemotrans_create(NEMOEASE_CUBIC_OUT_TYPE, 1800, 0);
 		nemotrans_set_dispatch_update(trans, nemotile_dispatch_sweep_trans_update);
 		nemotrans_set_dispatch_done(trans, nemotile_dispatch_sweep_trans_done);
 		nemotrans_set_userdata(trans, tile);
