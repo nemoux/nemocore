@@ -41,6 +41,7 @@ struct glsweep {
 	GLuint usnapshot;
 	GLuint umask;
 	GLuint utiming;
+	GLuint urotate;
 	GLuint upoint;
 
 	int type;
@@ -48,6 +49,7 @@ struct glsweep {
 	int32_t width, height;
 
 	float t, d;
+	float r;
 	float point[2];
 };
 
@@ -59,6 +61,7 @@ extern void nemofx_glsweep_set_snapshot(struct glsweep *sweep, GLuint texture, i
 extern void nemofx_glsweep_put_snapshot(struct glsweep *sweep);
 
 extern void nemofx_glsweep_set_timing(struct glsweep *sweep, float t);
+extern void nemofx_glsweep_set_rotate(struct glsweep *sweep, float r);
 extern void nemofx_glsweep_set_type(struct glsweep *sweep, int type);
 extern void nemofx_glsweep_set_point(struct glsweep *sweep, float x, float y);
 extern void nemofx_glsweep_set_mask(struct glsweep *sweep, GLuint mask);

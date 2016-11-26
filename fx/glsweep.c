@@ -88,8 +88,8 @@ static const char GLSWEEP_CIRCLE_FRAGMENT_SHADER[] =
 "{\n"
 "  float x = vtexcoord.x;\n"
 "  float y = vtexcoord.y;\n"
-"  float r = length(vec2(x - p.x, y - p.y));\n"
-"  if (t < r)\n"
+"  float d = length(vec2(x - p.x, y - p.y));\n"
+"  if (t < d)\n"
 "    gl_FragColor = texture2D(snapshot, vtexcoord);\n"
 "  else\n"
 "    gl_FragColor = texture2D(texture, vtexcoord);\n"
@@ -103,13 +103,16 @@ static const char GLSWEEP_RECT_FRAGMENT_SHADER[] =
 "uniform float width;\n"
 "uniform float height;\n"
 "uniform float t;\n"
+"uniform float r;\n"
 "uniform vec2 p;\n"
 "void main()\n"
 "{\n"
-"  float x = vtexcoord.x;\n"
-"  float y = vtexcoord.y;\n"
-"  float dx = abs(x - p.x);\n"
-"  float dy = abs(y - p.y);\n"
+"  float x = vtexcoord.x - 0.5;\n"
+"  float y = vtexcoord.y - 0.5;\n"
+"  float rx = x * cos(r) - y * sin(r) + 0.5;\n"
+"  float ry = x * sin(r) + y * cos(r) + 0.5;\n"
+"  float dx = abs(rx - p.x);\n"
+"  float dy = abs(ry - p.y);\n"
 "  if (t < dx || t < dy)\n"
 "    gl_FragColor = texture2D(snapshot, vtexcoord);\n"
 "  else\n"
@@ -129,8 +132,8 @@ static const char GLSWEEP_FAN_FRAGMENT_SHADER[] =
 "{\n"
 "  float x = vtexcoord.x - 0.5;\n"
 "  float y = vtexcoord.y - 0.5;\n"
-"  float r = atan(y, x) + 3.141592;\n"
-"  if (t < r)\n"
+"  float d = atan(y, x) + 3.141592;\n"
+"  if (t < d)\n"
 "    gl_FragColor = texture2D(snapshot, vtexcoord);\n"
 "  else\n"
 "    gl_FragColor = texture2D(texture, vtexcoord);\n"
@@ -293,6 +296,11 @@ void nemofx_glsweep_set_timing(struct glsweep *sweep, float t)
 	sweep->t = t;
 }
 
+void nemofx_glsweep_set_rotate(struct glsweep *sweep, float r)
+{
+	sweep->r = r;
+}
+
 static inline void nemofx_glsweep_update_ratio(struct glsweep *sweep)
 {
 	if (sweep->type == NEMOFX_GLSWEEP_CIRCLE_TYPE) {
@@ -337,9 +345,11 @@ void nemofx_glsweep_set_type(struct glsweep *sweep, int type)
 	sweep->usnapshot = glGetUniformLocation(sweep->program, "snapshot");
 	sweep->umask = glGetUniformLocation(sweep->program, "mask");
 	sweep->utiming = glGetUniformLocation(sweep->program, "t");
+	sweep->urotate = glGetUniformLocation(sweep->program, "r");
 	sweep->upoint = glGetUniformLocation(sweep->program, "p");
 
 	sweep->type = type;
+	sweep->r = 0.0f;
 	sweep->point[0] = 0.5f;
 	sweep->point[1] = 0.5f;
 
@@ -414,6 +424,8 @@ void nemofx_glsweep_dispatch(struct glsweep *sweep, GLuint texture)
 
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, sweep->mask);
+	} else if (sweep->type == NEMOFX_GLSWEEP_RECT_TYPE) {
+		glUniform1f(sweep->urotate, sweep->r);
 	}
 
 	glActiveTexture(GL_TEXTURE1);

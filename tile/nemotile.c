@@ -1569,6 +1569,7 @@ static void nemotile_dispatch_sweep_trans_update(struct nemotrans *trans, void *
 	struct nemotile *tile = (struct nemotile *)data;
 
 	nemofx_glsweep_set_timing(tile->sweep, t);
+	nemofx_glsweep_set_rotate(tile->sweep, t * M_PI);
 }
 
 static void nemotile_dispatch_sweep_trans_done(struct nemotrans *trans, void *data)
