@@ -23,6 +23,20 @@ static const char GLSWEEP_VERTEX_SHADER[] =
 "  vtexcoord = texcoord;\n"
 "}\n";
 
+static const char GLSWEEP_SIMPLE_FRAGMENT_SHADER[] =
+"precision mediump float;\n"
+"varying vec2 vtexcoord;\n"
+"uniform sampler2D texture;\n"
+"uniform sampler2D snapshot;\n"
+"uniform float width;\n"
+"uniform float height;\n"
+"uniform float t;\n"
+"uniform vec2 p;\n"
+"void main()\n"
+"{\n"
+"  gl_FragColor = texture2D(snapshot, vtexcoord) * vec4(1.0 - t) + texture2D(texture, vtexcoord) * vec4(t);\n"
+"}\n";
+
 static const char GLSWEEP_HORIZONTAL_FRAGMENT_SHADER[] =
 "precision mediump float;\n"
 "varying vec2 vtexcoord;\n"
@@ -275,6 +289,7 @@ static inline void nemofx_glsweep_update_ratio(struct glsweep *sweep)
 void nemofx_glsweep_set_type(struct glsweep *sweep, int type)
 {
 	const char *programs[] = {
+		GLSWEEP_SIMPLE_FRAGMENT_SHADER,
 		GLSWEEP_HORIZONTAL_FRAGMENT_SHADER,
 		GLSWEEP_VERTICAL_FRAGMENT_SHADER,
 		GLSWEEP_CIRCLE_FRAGMENT_SHADER,
