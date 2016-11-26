@@ -374,12 +374,11 @@ static struct tileone *nemotile_pick_simple(struct nemotile *tile, float x, floa
 	return NULL;
 }
 
-static struct tileone *nemotile_pick_complex(struct nemotile *tile, float x, float y)
+static struct tileone *nemotile_pick_complex(struct nemotile *tile, float x, float y, float *t, float *u, float *v)
 {
 	struct tileone *one;
 	struct nemomatrix projection;
 	struct nemomatrix modelview;
-	float t, u, v;
 	int i, j;
 
 	if (tile->is_dynamic_perspective == 0) {
@@ -430,20 +429,39 @@ static struct tileone *nemotile_pick_complex(struct nemotile *tile, float x, flo
 						&one->vertices[j * 3 + 6],
 						&one->vertices[j * 3 + 9],
 						x, y,
-						&t, &u, &v) > 0)
+						t, u, v) > 0)
+				return one;
+		}
+	}
+
+	nemolist_for_each(one, &tile->wall_list, link) {
+		nemomatrix_init_identity(&modelview);
+		nemomatrix_scale_xyz(&modelview, one->vtransform.sx, one->vtransform.sy, one->vtransform.sz);
+		nemomatrix_rotate_x(&modelview, cos(one->vtransform.rx), sin(one->vtransform.rx));
+		nemomatrix_rotate_y(&modelview, cos(one->vtransform.ry), sin(one->vtransform.ry));
+		nemomatrix_rotate_z(&modelview, cos(one->vtransform.rz), sin(one->vtransform.rz));
+		nemomatrix_translate_xyz(&modelview, one->vtransform.tx, one->vtransform.ty, one->vtransform.tz);
+		nemomatrix_scale_xyz(&modelview, one->gtransform.sx, one->gtransform.sy, one->gtransform.sz);
+		nemomatrix_rotate_x(&modelview, cos(one->gtransform.rx), sin(one->gtransform.rx));
+		nemomatrix_rotate_y(&modelview, cos(one->gtransform.ry), sin(one->gtransform.ry));
+		nemomatrix_rotate_z(&modelview, cos(one->gtransform.rz), sin(one->gtransform.rz));
+		nemomatrix_translate_xyz(&modelview, one->gtransform.tx, one->gtransform.ty, one->gtransform.tz);
+
+		for (j = 0; j < one->count - 2; j++) {
+			if (nemopoly_pick_triangle(
+						&projection,
+						tile->width, tile->height,
+						&modelview,
+						&one->vertices[j * 3 + 3],
+						&one->vertices[j * 3 + 6],
+						&one->vertices[j * 3 + 9],
+						x, y,
+						t, u, v) > 0)
 				return one;
 		}
 	}
 
 	return NULL;
-}
-
-static struct tileone *nemotile_pick_one(struct nemotile *tile, float x, float y)
-{
-	if (tile->is_3d == 0)
-		return nemotile_pick_simple(tile, x, y);
-
-	return nemotile_pick_complex(tile, x, y);
 }
 
 static struct tileone *nemotile_find_one(struct nemotile *tile, int index)
@@ -952,7 +970,7 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 			if (nemoshow_event_is_touch_down(show, event)) {
 				struct tileone *pone;
 
-				pone = nemotile_pick_one(tile, nemoshow_event_get_x(event), nemoshow_event_get_y(event));
+				pone = nemotile_pick_simple(tile, nemoshow_event_get_x(event), nemoshow_event_get_y(event));
 				if (pone != NULL) {
 					nemolist_remove(&pone->link);
 					nemolist_insert_tail(&tile->tile_list, &pone->link);
@@ -1318,7 +1336,7 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 			}
 
 			if (nemoshow_event_is_touch_down(show, event)) {
-				tile->pone = nemotile_pick_one(tile, nemoshow_event_get_x(event), nemoshow_event_get_y(event));
+				tile->pone = nemotile_pick_simple(tile, nemoshow_event_get_x(event), nemoshow_event_get_y(event));
 				if (tile->pone != NULL) {
 					nemolist_remove(&tile->pone->link);
 					nemolist_insert_tail(&tile->tile_list, &tile->pone->link);
@@ -1500,31 +1518,31 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 					nemotrans_set_float(trans, &tile->asymmetric.e[0], -1.5f);
 				} else if (nemoshow_event_get_value(event) == KEY_RIGHT) {
 					nemotrans_set_float(trans, &tile->asymmetric.e[0], 1.5f);
-				} else if (nemoshow_event_get_value(event) == KEY_DOWN || nemoshow_event_get_value(event) == KEY_UP) {
+				} else if (nemoshow_event_get_value(event) == KEY_DOWN) {
+					trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
+							random_get_int(1200, 1600),
+							random_get_int(200, 400));
+
+					nemotrans_set_float(trans, &tile->projection.sz, 0.001f);
 					nemotrans_set_float(trans, &tile->asymmetric.e[0], 0.0f);
+					nemotrans_set_float(trans, &tile->asymmetric.e[1], 0.0f);
+				} else if (nemoshow_event_get_value(event) == KEY_UP) {
+					trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
+							random_get_int(1200, 1600),
+							random_get_int(200, 400));
+
+					nemotrans_set_float(trans, &tile->projection.sz, 1.0f);
 				}
 
 				nemotrans_group_attach_trans(tile->trans_group, trans);
 			}
 
 			if (nemoshow_event_is_touch_down(show, event)) {
-				trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
-						random_get_int(1200, 1600),
-						random_get_int(200, 400));
+				float t, u, v;
 
-				nemotrans_set_float(trans, &tile->projection.sz, 0.001f);
-				nemotrans_set_float(trans, &tile->asymmetric.e[0], 0.0f);
-				nemotrans_set_float(trans, &tile->asymmetric.e[1], 0.0f);
-
-				nemotrans_group_attach_trans(tile->trans_group, trans);
-			} else if (nemoshow_event_is_touch_up(show, event)) {
-				trans = nemotrans_create(NEMOEASE_CUBIC_INOUT_TYPE,
-						random_get_int(1200, 1600),
-						random_get_int(200, 400));
-
-				nemotrans_set_float(trans, &tile->projection.sz, 1.0f);
-
-				nemotrans_group_attach_trans(tile->trans_group, trans);
+				one = nemotile_pick_complex(tile, nemoshow_event_get_x(event), nemoshow_event_get_y(event), &t, &u, &v);
+				if (one != NULL) {
+				}
 			}
 		}
 	}
