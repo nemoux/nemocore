@@ -36,7 +36,7 @@ struct glripple {
 	GLuint vtexcoord;
 	GLuint vindex;
 
-	GLuint utexture;
+	GLint utexture;
 
 	GLfloat *vertices;
 	GLfloat *vertices0;

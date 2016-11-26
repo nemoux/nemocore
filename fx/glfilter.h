@@ -20,10 +20,10 @@ struct glfilter {
 
 	GLuint program;
 
-	GLuint utexture;
-	GLuint uwidth;
-	GLuint uheight;
-	GLuint utime;
+	GLint utexture;
+	GLint uwidth;
+	GLint uheight;
+	GLint utime;
 
 	int32_t width, height;
 };

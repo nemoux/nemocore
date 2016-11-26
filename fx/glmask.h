@@ -20,9 +20,9 @@ struct glmask {
 
 	GLuint program;
 
-	GLuint utexture;
-	GLuint uoverlay;
-	GLuint uwidth, uheight;
+	GLint utexture;
+	GLint uoverlay;
+	GLint uwidth, uheight;
 
 	int32_t width, height;
 };

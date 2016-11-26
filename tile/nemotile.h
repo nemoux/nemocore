@@ -136,24 +136,24 @@ struct nemotile {
 
 	GLuint fbo, dbo;
 	GLuint programs[4];
-	GLuint uprojection0;
-	GLuint uvtransform0;
-	GLuint uttransform0;
-	GLuint utexture0;
-	GLuint ucolor0;
-	GLuint uprojection1;
-	GLuint uvtransform1;
-	GLuint uttransform1;
-	GLuint utexture1;
-	GLuint uambient1;
-	GLuint ulight1;
-	GLuint uprojection2;
-	GLuint uvtransform2;
-	GLuint ucolor2;
-	GLuint uprojection3;
-	GLuint uvtransform3;
-	GLuint uambient3;
-	GLuint ulight3;
+	GLint uprojection0;
+	GLint uvtransform0;
+	GLint uttransform0;
+	GLint utexture0;
+	GLint ucolor0;
+	GLint uprojection1;
+	GLint uvtransform1;
+	GLint uttransform1;
+	GLint utexture1;
+	GLint uambient1;
+	GLint ulight1;
+	GLint uprojection2;
+	GLint uvtransform2;
+	GLint ucolor2;
+	GLint uprojection3;
+	GLint uvtransform3;
+	GLint uambient3;
+	GLint ulight3;
 
 	struct {
 		float tx, ty, tz;

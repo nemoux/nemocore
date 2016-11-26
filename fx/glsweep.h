@@ -36,13 +36,13 @@ struct glsweep {
 
 	GLuint program;
 
-	GLuint utexture;
-	GLuint uwidth, uheight;
-	GLuint usnapshot;
-	GLuint umask;
-	GLuint utiming;
-	GLuint urotate;
-	GLuint upoint;
+	GLint utexture;
+	GLint uwidth, uheight;
+	GLint usnapshot;
+	GLint umask;
+	GLint utiming;
+	GLint urotate;
+	GLint upoint;
 
 	int type;
 

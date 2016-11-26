@@ -26,24 +26,24 @@ struct glshadow {
 	GLuint sfbo, sdbo;
 
 	GLuint program0;
-	GLuint utexture0;
+	GLint utexture0;
 
 	GLuint program1;
-	GLuint utexture1;
-	GLuint uprojection1;
+	GLint utexture1;
+	GLint uprojection1;
 
 	GLuint program2;
-	GLuint utexture2;
-	GLuint uwidth2;
-	GLuint uheight2;
+	GLint utexture2;
+	GLint uwidth2;
+	GLint uheight2;
 
 	GLuint program3;
-	GLuint ushadow3;
-	GLuint uprojection3;
-	GLuint uwidth3;
-	GLuint uheight3;
-	GLuint ucolor3;
-	GLuint usize3;
+	GLint ushadow3;
+	GLint uprojection3;
+	GLint uwidth3;
+	GLint uheight3;
+	GLint ucolor3;
+	GLint usize3;
 
 	int32_t width, height;
 	int32_t lightscope;

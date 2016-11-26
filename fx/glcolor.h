@@ -20,7 +20,7 @@ struct glcolor {
 
 	GLuint program;
 
-	GLuint ucolor;
+	GLint ucolor;
 
 	int32_t width, height;
 

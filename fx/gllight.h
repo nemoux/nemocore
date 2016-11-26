@@ -21,16 +21,16 @@ struct gllight {
 	GLuint fbo, dbo;
 
 	GLuint program0;
-	GLuint udiffuse0;
-	GLuint uambient0;
+	GLint udiffuse0;
+	GLint uambient0;
 
 	GLuint program1;
-	GLuint udiffuse1;
-	GLuint uposition1;
-	GLuint ucolor1;
-	GLuint usize1;
-	GLuint uscope1;
-	GLuint utime1;
+	GLint udiffuse1;
+	GLint uposition1;
+	GLint ucolor1;
+	GLint usize1;
+	GLint uscope1;
+	GLint utime1;
 
 	int32_t width, height;
 

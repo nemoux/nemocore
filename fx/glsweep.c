@@ -45,12 +45,14 @@ static const char GLSWEEP_HORIZONTAL_FRAGMENT_SHADER[] =
 "uniform float width;\n"
 "uniform float height;\n"
 "uniform float t;\n"
+"uniform float r;\n"
 "uniform vec2 p;\n"
 "void main()\n"
 "{\n"
-"  float x = vtexcoord.x;\n"
-"  float y = vtexcoord.y;\n"
-"  if (t < x)\n"
+"  float x = vtexcoord.x - p.x;\n"
+"  float y = vtexcoord.y - p.y;\n"
+"  float rx = x * cos(r) - y * sin(r) + p.x;\n"
+"  if (t < rx)\n"
 "    gl_FragColor = texture2D(snapshot, vtexcoord);\n"
 "  else\n"
 "    gl_FragColor = texture2D(texture, vtexcoord);\n"
@@ -64,12 +66,14 @@ static const char GLSWEEP_VERTICAL_FRAGMENT_SHADER[] =
 "uniform float width;\n"
 "uniform float height;\n"
 "uniform float t;\n"
+"uniform float r;\n"
 "uniform vec2 p;\n"
 "void main()\n"
 "{\n"
-"  float x = vtexcoord.x;\n"
-"  float y = vtexcoord.y;\n"
-"  if (t < y)\n"
+"  float x = vtexcoord.x - p.x;\n"
+"  float y = vtexcoord.y - p.y;\n"
+"  float ry = x * sin(r) + y * cos(r) + p.y;\n"
+"  if (t < ry)\n"
 "    gl_FragColor = texture2D(snapshot, vtexcoord);\n"
 "  else\n"
 "    gl_FragColor = texture2D(texture, vtexcoord);\n"
@@ -419,12 +423,14 @@ void nemofx_glsweep_dispatch(struct glsweep *sweep, GLuint texture)
 	glUniform1f(sweep->utiming, sweep->t * sweep->d);
 	glUniform2fv(sweep->upoint, 1, sweep->point);
 
-	if (sweep->type == NEMOFX_GLSWEEP_MASK_TYPE) {
+	if (sweep->umask >= 0) {
 		glUniform1i(sweep->umask, 2);
 
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, sweep->mask);
-	} else if (sweep->type == NEMOFX_GLSWEEP_RECT_TYPE) {
+	}
+
+	if (sweep->urotate >= 0) {
 		glUniform1f(sweep->urotate, sweep->r);
 	}
 

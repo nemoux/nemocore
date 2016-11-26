@@ -20,10 +20,10 @@ struct glblur {
 
 	GLuint program;
 
-	GLuint utexture;
-	GLuint uwidth, uheight;
-	GLuint udirectx, udirecty;
-	GLuint uradius;
+	GLint utexture;
+	GLint uwidth, uheight;
+	GLint udirectx, udirecty;
+	GLint uradius;
 
 	int32_t width, height;
 

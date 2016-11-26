@@ -20,11 +20,11 @@ struct glswirl {
 
 	GLuint program;
 
-	GLuint utexture;
-	GLuint uwidth, uheight;
-	GLuint uradius;
-	GLuint uangle;
-	GLuint ucenter;
+	GLint utexture;
+	GLint uwidth, uheight;
+	GLint uradius;
+	GLint uangle;
+	GLint ucenter;
 
 	int32_t width, height;
 

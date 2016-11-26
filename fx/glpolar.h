@@ -20,9 +20,9 @@ struct glpolar {
 
 	GLuint program;
 
-	GLuint utexture;
-	GLuint uwidth, uheight;
-	GLuint ucolor;
+	GLint utexture;
+	GLint uwidth, uheight;
+	GLint ucolor;
 
 	int32_t width, height;
 
