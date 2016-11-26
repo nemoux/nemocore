@@ -47,8 +47,7 @@ struct glsweep {
 
 	int32_t width, height;
 
-	float t;
-	float r;
+	float t, d;
 	float point[2];
 };
 

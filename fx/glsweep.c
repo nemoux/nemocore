@@ -299,16 +299,16 @@ static inline void nemofx_glsweep_update_ratio(struct glsweep *sweep)
 		float dx = MAX(sweep->point[0], 1.0f - sweep->point[0]);
 		float dy = MAX(sweep->point[1], 1.0f - sweep->point[1]);
 
-		sweep->r = sqrtf(dx * dx + dy * dy);
+		sweep->d = sqrtf(dx * dx + dy * dy);
 	} else if (sweep->type == NEMOFX_GLSWEEP_RECT_TYPE) {
 		float dx = MAX(sweep->point[0], 1.0f - sweep->point[0]);
 		float dy = MAX(sweep->point[1], 1.0f - sweep->point[1]);
 
-		sweep->r = MAX(dx, dy);
+		sweep->d = MAX(dx, dy);
 	} else if (sweep->type == NEMOFX_GLSWEEP_FAN_TYPE) {
-		sweep->r = M_PI * 2.0f;
+		sweep->d = M_PI * 2.0f;
 	} else {
-		sweep->r = 1.0f;
+		sweep->d = 1.0f;
 	}
 }
 
@@ -406,7 +406,7 @@ void nemofx_glsweep_dispatch(struct glsweep *sweep, GLuint texture)
 	glUniform1i(sweep->usnapshot, 1);
 	glUniform1f(sweep->uwidth, sweep->width);
 	glUniform1f(sweep->uheight, sweep->height);
-	glUniform1f(sweep->utiming, sweep->t * sweep->r);
+	glUniform1f(sweep->utiming, sweep->t * sweep->d);
 	glUniform2fv(sweep->upoint, 1, sweep->point);
 
 	if (sweep->type == NEMOFX_GLSWEEP_MASK_TYPE) {
