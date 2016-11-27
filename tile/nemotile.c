@@ -425,9 +425,9 @@ static struct tileone *nemotile_pick_complex(struct nemotile *tile, float x, flo
 						&projection,
 						tile->width, tile->height,
 						&modelview,
+						&one->vertices[j * 3 + 0],
 						&one->vertices[j * 3 + 3],
 						&one->vertices[j * 3 + 6],
-						&one->vertices[j * 3 + 9],
 						x, y,
 						t, u, v) > 0)
 				return one;
@@ -452,9 +452,9 @@ static struct tileone *nemotile_pick_complex(struct nemotile *tile, float x, flo
 						&projection,
 						tile->width, tile->height,
 						&modelview,
+						&one->vertices[j * 3 + 0],
 						&one->vertices[j * 3 + 3],
 						&one->vertices[j * 3 + 6],
-						&one->vertices[j * 3 + 9],
 						x, y,
 						t, u, v) > 0)
 				return one;
