@@ -379,6 +379,7 @@ static struct tileone *nemotile_pick_complex(struct nemotile *tile, float x, flo
 	struct tileone *one;
 	struct nemomatrix projection;
 	struct nemomatrix modelview;
+	float beta, gamma;
 	int i, j;
 
 	if (tile->is_dynamic_perspective == 0) {
@@ -429,8 +430,12 @@ static struct tileone *nemotile_pick_complex(struct nemotile *tile, float x, flo
 						&one->vertices[j * 3 + 3],
 						&one->vertices[j * 3 + 6],
 						x, y,
-						t, u, v) > 0)
+						t, &beta, &gamma) > 0) {
+				*u = 1.0f - (one->texcoords[j * 2 + 2] * beta + one->texcoords[j * 2 + 4] * gamma + one->texcoords[j * 2 + 0] * (1.0f - beta - gamma));
+				*v = 1.0f - (one->texcoords[j * 2 + 3] * beta + one->texcoords[j * 2 + 5] * gamma + one->texcoords[j * 2 + 1] * (1.0f - beta - gamma));
+
 				return one;
+			}
 		}
 	}
 
@@ -456,8 +461,12 @@ static struct tileone *nemotile_pick_complex(struct nemotile *tile, float x, flo
 						&one->vertices[j * 3 + 3],
 						&one->vertices[j * 3 + 6],
 						x, y,
-						t, u, v) > 0)
+						t, &beta, &gamma) > 0) {
+				*u = 1.0f - (one->texcoords[j * 2 + 2] * beta + one->texcoords[j * 2 + 4] * gamma + one->texcoords[j * 2 + 0] * (1.0f - beta - gamma));
+				*v = 1.0f - (one->texcoords[j * 2 + 3] * beta + one->texcoords[j * 2 + 5] * gamma + one->texcoords[j * 2 + 1] * (1.0f - beta - gamma));
+
 				return one;
+			}
 		}
 	}
 
