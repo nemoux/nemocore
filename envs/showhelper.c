@@ -117,10 +117,7 @@ static void nemoshow_dispatch_actor_frame(struct nemoactor *actor, uint32_t msec
 
 	nemoshow_enter_frame(show, msecs);
 
-	if (nemoshow_has_transition(show) != 0) {
-		nemoshow_dispatch_transition(show, msecs);
-		nemoshow_destroy_transition(show);
-
+	if (nemoshow_dispatch_transition(show, msecs) != 0) {
 		needs_composite = 1;
 	}
 

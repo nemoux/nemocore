@@ -20,9 +20,7 @@ struct showtransition *nemoshow_transition_create(struct showone *ease, uint32_t
 	memset(trans, 0, sizeof(struct showtransition));
 
 	nemolist_init(&trans->link);
-	nemolist_init(&trans->children_link);
 
-	nemolist_init(&trans->children_list);
 	nemolist_init(&trans->sensor_list);
 	nemolist_init(&trans->pin_list);
 
@@ -51,17 +49,13 @@ struct showtransition *nemoshow_transition_create(struct showone *ease, uint32_t
 	return trans;
 }
 
-void nemoshow_transition_destroy(struct showtransition *trans, int done)
+void nemoshow_transition_destroy(struct showtransition *trans)
 {
-	nemoshow_transition_dispatch_done_t dispatch_done = trans->dispatch_done;
-	void *userdata = trans->userdata;
-	struct showtransition *child, *nchild;
 	struct transitionsensor *sensor, *nsensor;
 	struct transitionpin *pin, *npin;
 	int i;
 
 	nemolist_remove(&trans->link);
-	nemolist_remove(&trans->children_link);
 
 	nemolist_for_each_safe(sensor, nsensor, &trans->sensor_list, link) {
 		nemolist_remove(&sensor->link);
@@ -81,10 +75,6 @@ void nemoshow_transition_destroy(struct showtransition *trans, int done)
 		nemoshow_one_destroy(trans->sequences[i]);
 	}
 
-	nemolist_for_each_safe(child, nchild, &trans->children_list, children_link) {
-		nemoshow_transition_destroy(child, done);
-	}
-
 	for (i = 0; i < trans->ntones; i++) {
 		if (trans->tones[i] != NULL)
 			nemoshow_one_destroy(trans->tones[i]);
@@ -95,17 +85,26 @@ void nemoshow_transition_destroy(struct showtransition *trans, int done)
 	free(trans->dirties);
 	free(trans->tones);
 	free(trans);
-
-	if (done != 0 && dispatch_done != NULL) {
-		dispatch_done(userdata);
-	}
 }
 
 static void nemoshow_transition_handle_destroy_signal(struct nemolistener *listener, void *data)
 {
 	struct transitionsensor *sensor = (struct transitionsensor *)container_of(listener, struct transitionsensor, listener);
+	struct showtransition *trans = sensor->transition;
+	struct showone *one = sensor->one;
+	int i;
 
-	nemoshow_transition_destroy(sensor->transition, 0);
+	for (i = 0; i < trans->ntones; i++) {
+		if (trans->tones[i] == one)
+			trans->tones[i] = NULL;
+	}
+
+	trans->done = 1;
+
+	nemolist_remove(&sensor->link);
+	nemolist_remove(&sensor->listener.link);
+
+	free(sensor);
 }
 
 void nemoshow_transition_check_one(struct showtransition *trans, struct showone *one)
@@ -134,6 +133,11 @@ static void nemoshow_transition_handle_dirty_unpin_signal(struct nemolistener *l
 	struct transitionpin *pin = (struct transitionpin *)container_of(listener, struct transitionpin, listener);
 
 	pin->transition->dones[pin->index] = NULL;
+
+	nemolist_remove(&pin->link);
+	nemolist_remove(&pin->listener.link);
+
+	free(pin);
 }
 
 void nemoshow_transition_dirty_one(struct showtransition *trans, struct showone *one, uint32_t dirty)
@@ -160,6 +164,11 @@ static void nemoshow_transition_handle_destroy_unpin_signal(struct nemolistener 
 	struct transitionpin *pin = (struct transitionpin *)container_of(listener, struct transitionpin, listener);
 
 	pin->transition->tones[pin->index] = NULL;
+
+	nemolist_remove(&pin->link);
+	nemolist_remove(&pin->listener.link);
+
+	free(pin);
 }
 
 void nemoshow_transition_destroy_one(struct showtransition *trans, struct showone *one)
@@ -191,6 +200,9 @@ int nemoshow_transition_dispatch(struct showtransition *trans, uint32_t time)
 	int done = 0;
 	int i;
 
+	if (trans->done != 0)
+		return 1;
+
 	if (trans->stime == 0) {
 		trans->stime = time + trans->delay;
 		trans->etime = time + trans->delay + trans->duration;
@@ -218,6 +230,9 @@ int nemoshow_transition_dispatch(struct showtransition *trans, uint32_t time)
 	if (trans->dispatch_frame != NULL) {
 		trans->dispatch_frame(trans->userdata, time, t);
 	}
+
+	if (done != 0 && trans->dispatch_done != NULL)
+		trans->dispatch_done(trans->userdata);
 
 	return done;
 }

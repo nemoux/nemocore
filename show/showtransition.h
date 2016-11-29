@@ -48,6 +48,8 @@ struct showtransition {
 
 	struct showease *ease;
 
+	int done;
+
 	uint32_t duration;
 	uint32_t delay;
 	uint32_t repeat;
@@ -58,9 +60,7 @@ struct showtransition {
 	uint32_t serial;
 
 	struct nemolist link;
-	struct nemolist children_link;
 
-	struct nemolist children_list;
 	struct nemolist sensor_list;
 	struct nemolist pin_list;
 
@@ -71,7 +71,7 @@ struct showtransition {
 };
 
 extern struct showtransition *nemoshow_transition_create(struct showone *ease, uint32_t duration, uint32_t delay);
-extern void nemoshow_transition_destroy(struct showtransition *trans, int done);
+extern void nemoshow_transition_destroy(struct showtransition *trans);
 
 extern void nemoshow_transition_check_one(struct showtransition *trans, struct showone *one);
 extern void nemoshow_transition_dirty_one(struct showtransition *trans, struct showone *one, uint32_t dirty);

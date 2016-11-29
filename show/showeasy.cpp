@@ -60,27 +60,6 @@ struct showtransition *nemoshow_transition_dispatch_easy(struct nemoshow *show, 
 	return trans;
 }
 
-void nemoshow_attach_transition_easy(struct nemoshow *show, ...)
-{
-	struct showtransition *ptrans = NULL;
-	struct showtransition *trans;
-	va_list vargs;
-
-	va_start(vargs, show);
-
-	while ((trans = va_arg(vargs, struct showtransition *)) != NULL) {
-		if (ptrans == NULL) {
-			nemoshow_attach_transition(show, trans);
-		} else {
-			nemoshow_attach_transition_after(show, ptrans, trans);
-		}
-
-		ptrans = trans;
-	}
-
-	va_end(vargs);
-}
-
 struct showone *nemoshow_sequence_create_set_easy(struct nemoshow *show, struct showone *src, ...)
 {
 	struct showone *set;

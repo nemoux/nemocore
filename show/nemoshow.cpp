@@ -41,7 +41,6 @@ struct nemoshow *nemoshow_create(void)
 	nemolist_init(&show->bounds_list);
 	nemolist_init(&show->redraw_list);
 	nemolist_init(&show->transition_list);
-	nemolist_init(&show->transition_destroy_list);
 
 	nemolist_init(&show->ptap_list);
 	nemolist_init(&show->tap_list);
@@ -67,20 +66,12 @@ struct nemoshow *nemoshow_create(void)
 
 void nemoshow_destroy(struct nemoshow *show)
 {
-	struct showtransition *trans;
+	struct showtransition *trans, *ntrans;
 
 	nemosignal_emit(&show->destroy_signal, show);
 
-	while (nemolist_empty(&show->transition_destroy_list) == 0) {
-		trans = nemolist_node0(&show->transition_destroy_list, struct showtransition, link);
-
-		nemoshow_transition_destroy(trans, 0);
-	}
-
-	while (nemolist_empty(&show->transition_list) == 0) {
-		trans = nemolist_node0(&show->transition_list, struct showtransition, link);
-
-		nemoshow_transition_destroy(trans, 0);
+	nemolist_for_each_safe(trans, ntrans, &show->transition_list, link) {
+		nemoshow_transition_destroy(trans);
 	}
 
 	nemolist_remove(&show->one_list);
@@ -88,7 +79,6 @@ void nemoshow_destroy(struct nemoshow *show)
 	nemolist_remove(&show->bounds_list);
 	nemolist_remove(&show->redraw_list);
 	nemolist_remove(&show->transition_list);
-	nemolist_remove(&show->transition_destroy_list);
 
 	nemolist_remove(&show->ptap_list);
 	nemolist_remove(&show->tap_list);
@@ -454,33 +444,20 @@ void nemoshow_detach_transition(struct nemoshow *show, struct showtransition *tr
 	nemolist_init(&trans->link);
 }
 
-void nemoshow_attach_transition_after(struct nemoshow *show, struct showtransition *trans, struct showtransition *ntrans)
-{
-	nemolist_insert_tail(&trans->children_list, &ntrans->children_link);
-
-	ntrans->serial = ++show->transition_serial;
-}
-
-void nemoshow_dispatch_transition(struct nemoshow *show, uint32_t msecs)
+int nemoshow_dispatch_transition(struct nemoshow *show, uint32_t msecs)
 {
 	struct showtransition *trans, *ntrans;
-	struct nemolist transition_list;
+	int has_transition = nemolist_empty(&show->transition_list) == 0;
 	int done, i;
 
 	if (nemoshow_has_state(show, NEMOSHOW_ONTIME_STATE))
 		msecs = time_current_msecs();
 
-	nemolist_init(&transition_list);
-
 	nemolist_for_each_safe(trans, ntrans, &show->transition_list, link) {
 		done = nemoshow_transition_dispatch(trans, msecs);
 		if (done != 0) {
-			if (trans->repeat == 1) {
-				nemolist_insert_list(&transition_list, &trans->children_list);
-				nemolist_init(&trans->children_list);
-
-				nemolist_remove(&trans->link);
-				nemolist_insert(&show->transition_destroy_list, &trans->link);
+			if (trans->done != 0 || trans->repeat == 1) {
+				nemoshow_transition_destroy(trans);
 			} else if (trans->repeat == 0 || --trans->repeat) {
 				trans->stime = 0;
 				trans->delay = 0;
@@ -492,33 +469,12 @@ void nemoshow_dispatch_transition(struct nemoshow *show, uint32_t msecs)
 		}
 	}
 
-	nemolist_for_each_safe(trans, ntrans, &transition_list, children_link) {
-		for (i = 0; i < trans->nsequences; i++) {
-			nemoshow_sequence_prepare(trans->sequences[i], trans->serial);
-		}
-
-		nemolist_insert(&show->transition_list, &trans->link);
-
-		nemolist_remove(&trans->children_link);
-		nemolist_init(&trans->children_link);
-	}
-}
-
-void nemoshow_destroy_transition(struct nemoshow *show)
-{
-	struct showtransition *trans;
-	int had_transitions = nemolist_empty(&show->transition_destroy_list) == 0;
-
-	while (nemolist_empty(&show->transition_destroy_list) == 0) {
-		trans = nemolist_node0(&show->transition_destroy_list, struct showtransition, link);
-
-		nemoshow_transition_destroy(trans, 1);
-	}
+	return has_transition;
 }
 
 int nemoshow_has_transition(struct nemoshow *show)
 {
-	return !nemolist_empty(&show->transition_list);
+	return nemolist_empty(&show->transition_list) == 0;
 }
 
 void nemoshow_revoke_transition(struct nemoshow *show, struct showone *one, const char *name)
