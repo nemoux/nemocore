@@ -144,11 +144,11 @@ static void nemoglfx_dispatch_show_resize(struct nemoshow *show, int32_t width, 
 	nemoshow_view_redraw(context->show);
 }
 
-static GLuint nemoglfx_dispatch_canvas_filter(void *node)
+static uint32_t nemoglfx_dispatch_canvas_filter(void *node)
 {
 	struct showone *canvas = (struct showone *)node;
 	struct glfxcontext *context = (struct glfxcontext *)nemoshow_one_get_userdata(canvas);
-	GLuint texture = nemoshow_canvas_get_texture(canvas);
+	uint32_t texture = nemoshow_canvas_get_texture(canvas);
 
 	if (context->filter != NULL) {
 		nemofx_glfilter_dispatch(context->filter, texture);

@@ -174,7 +174,7 @@ void nemofx_glblur_resize(struct glblur *blur, int32_t width, int32_t height)
 	}
 }
 
-void nemofx_glblur_dispatch(struct glblur *blur, GLuint texture)
+void nemofx_glblur_dispatch(struct glblur *blur, uint32_t texture)
 {
 	static GLfloat vertices[] = {
 		-1.0f, -1.0f, 0.0f, 0.0f,

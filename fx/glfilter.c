@@ -292,7 +292,7 @@ void nemofx_glfilter_resize(struct glfilter *filter, int32_t width, int32_t heig
 	}
 }
 
-void nemofx_glfilter_dispatch(struct glfilter *filter, GLuint texture)
+void nemofx_glfilter_dispatch(struct glfilter *filter, uint32_t texture)
 {
 	static GLfloat vertices[] = {
 		-1.0f, -1.0f, 0.0f, 0.0f,

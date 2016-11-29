@@ -28,7 +28,6 @@ struct showcontext {
 	struct nemocompz *compz;
 	struct nemoactor *actor;
 	struct nemotimer *timer;
-	int framedepth;
 
 	struct nemotale *tale;
 

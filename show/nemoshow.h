@@ -59,6 +59,9 @@ typedef enum {
 struct nemoshow;
 struct showone;
 
+typedef void (*nemoshow_enter_frame_t)(struct nemoshow *show, uint32_t msecs);
+typedef void (*nemoshow_leave_frame_t)(struct nemoshow *show, uint32_t msecs);
+
 typedef void (*nemoshow_dispatch_transition_done_t)(void *userdata);
 typedef void (*nemoshow_dispatch_event_t)(struct nemoshow *show, struct showevent *event);
 typedef void (*nemoshow_dispatch_resize_t)(struct nemoshow *show, int32_t width, int32_t height);
@@ -99,6 +102,10 @@ struct nemoshow {
 
 	nemoshow_dispatch_transition_done_t dispatch_done;
 	void *dispatch_data;
+
+	nemoshow_enter_frame_t enter_frame;
+	nemoshow_leave_frame_t leave_frame;
+	int frame_depth;
 
 	nemoshow_dispatch_event_t dispatch_event;
 	nemoshow_dispatch_resize_t dispatch_resize;
@@ -158,6 +165,9 @@ extern void nemoshow_set_name(struct nemoshow *show, const char *name);
 extern void nemoshow_set_tilesize(struct nemoshow *show, int tilesize);
 
 extern struct showone *nemoshow_search_one(struct nemoshow *show, const char *id);
+
+extern void nemoshow_enter_frame(struct nemoshow *show, uint32_t msecs);
+extern void nemoshow_leave_frame(struct nemoshow *show, uint32_t msecs);
 
 extern int nemoshow_update_one(struct nemoshow *show);
 extern void nemoshow_render_one(struct nemoshow *show);
@@ -262,6 +272,16 @@ static inline void nemoshow_set_dispatch_transition_done(struct nemoshow *show, 
 	show->dispatch_data = data;
 }
 
+static inline void nemoshow_set_enter_frame(struct nemoshow *show, nemoshow_enter_frame_t dispatch)
+{
+	show->enter_frame = dispatch;
+}
+
+static inline void nemoshow_set_leave_frame(struct nemoshow *show, nemoshow_leave_frame_t dispatch)
+{
+	show->leave_frame = dispatch;
+}
+
 static inline void nemoshow_set_dispatch_event(struct nemoshow *show, nemoshow_dispatch_event_t dispatch)
 {
 	show->dispatch_event = dispatch;
@@ -315,6 +335,11 @@ static inline void nemoshow_set_single_click_duration(struct nemoshow *show, uin
 static inline void nemoshow_set_single_click_distance(struct nemoshow *show, uint32_t distance)
 {
 	show->single_click_distance = distance;
+}
+
+static inline int nemoshow_get_frame_depth(struct nemoshow *show)
+{
+	return show->frame_depth;
 }
 
 #ifdef NEMOSHOW_FRAMELOG_ON

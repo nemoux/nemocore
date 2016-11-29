@@ -700,7 +700,7 @@ int nemotale_composite_egl_full(struct nemotale *tale)
 	return r;
 }
 
-struct talefbo *nemotale_create_fbo(GLuint texture, int32_t width, int32_t height)
+struct talefbo *nemotale_create_fbo(uint32_t texture, int32_t width, int32_t height)
 {
 	struct talefbo *fbo;
 
@@ -1012,7 +1012,7 @@ int nemotale_node_filter_gl(struct talenode *node)
 	return 0;
 }
 
-int nemotale_node_set_texture(struct talenode *node, GLuint texture)
+int nemotale_node_set_texture(struct talenode *node, uint32_t texture)
 {
 	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
 
@@ -1029,14 +1029,14 @@ int nemotale_node_set_texture(struct talenode *node, GLuint texture)
 	return 0;
 }
 
-GLuint nemotale_node_get_texture(struct talenode *node)
+uint32_t nemotale_node_get_texture(struct talenode *node)
 {
 	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
 
 	return gcontext->otexture;
 }
 
-GLuint nemotale_node_get_effective_texture(struct talenode *node)
+uint32_t nemotale_node_get_effective_texture(struct talenode *node)
 {
 	struct taleglnode *gcontext = (struct taleglnode *)node->glcontext;
 

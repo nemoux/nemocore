@@ -29,7 +29,7 @@ NEMO_BEGIN_EXTERN_C
 
 #define NEMOTALE_BUFFER_AGE_COUNT		(2)
 
-typedef GLuint (*nemotale_node_opengl_dispatch_filter_t)(void *node);
+typedef uint32_t (*nemotale_node_opengl_dispatch_filter_t)(void *node);
 
 struct taleglnode {
 	GLuint texture;
@@ -64,7 +64,7 @@ extern void nemotale_destroy_egl(struct taleegl *egl);
 extern int nemotale_composite_egl(struct nemotale *tale, pixman_region32_t *region);
 extern int nemotale_composite_egl_full(struct nemotale *tale);
 
-extern struct talefbo *nemotale_create_fbo(GLuint texture, int32_t width, int32_t height);
+extern struct talefbo *nemotale_create_fbo(uint32_t texture, int32_t width, int32_t height);
 extern void nemotale_destroy_fbo(struct talefbo *fbo);
 extern int nemotale_resize_fbo(struct talefbo *fbo, int32_t width, int32_t height);
 extern int nemotale_composite_fbo(struct nemotale *tale, pixman_region32_t *region);
@@ -82,9 +82,9 @@ extern int nemotale_node_flush_gl_subimage(struct talenode *node);
 extern int nemotale_node_flush_gl_external(struct talenode *node);
 extern int nemotale_node_filter_gl(struct talenode *node);
 
-extern int nemotale_node_set_texture(struct talenode *node, GLuint texture);
-extern GLuint nemotale_node_get_texture(struct talenode *node);
-extern GLuint nemotale_node_get_effective_texture(struct talenode *node);
+extern int nemotale_node_set_texture(struct talenode *node, uint32_t texture);
+extern uint32_t nemotale_node_get_texture(struct talenode *node);
+extern uint32_t nemotale_node_get_effective_texture(struct talenode *node);
 
 extern void nemotale_node_set_dispatch_filter(struct talenode *node, nemotale_node_opengl_dispatch_filter_t dispatch);
 

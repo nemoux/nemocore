@@ -151,6 +151,22 @@ struct showone *nemoshow_search_one(struct nemoshow *show, const char *id)
 	return NULL;
 }
 
+void nemoshow_enter_frame(struct nemoshow *show, uint32_t msecs)
+{
+	show->frame_depth++;
+
+	if (show->enter_frame != NULL)
+		show->enter_frame(show, msecs);
+}
+
+void nemoshow_leave_frame(struct nemoshow *show, uint32_t msecs)
+{
+	show->frame_depth--;
+
+	if (show->leave_frame != NULL)
+		show->leave_frame(show, msecs);
+}
+
 int nemoshow_update_one(struct nemoshow *show)
 {
 	struct showone *scene = show->scene;

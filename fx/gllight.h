@@ -58,7 +58,7 @@ extern void nemofx_gllight_set_pointlight_scope(struct gllight *light, int index
 extern void nemofx_gllight_clear_pointlights(struct gllight *light);
 
 extern void nemofx_gllight_resize(struct gllight *light, int32_t width, int32_t height);
-extern void nemofx_gllight_dispatch(struct gllight *light, GLuint texture);
+extern void nemofx_gllight_dispatch(struct gllight *light, uint32_t texture);
 
 static inline int32_t nemofx_gllight_get_width(struct gllight *light)
 {
@@ -70,7 +70,7 @@ static inline int32_t nemofx_gllight_get_height(struct gllight *light)
 	return light->height;
 }
 
-static inline GLuint nemofx_gllight_get_texture(struct gllight *light)
+static inline uint32_t nemofx_gllight_get_texture(struct gllight *light)
 {
 	return light->texture;
 }

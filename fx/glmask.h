@@ -31,7 +31,7 @@ extern struct glmask *nemofx_glmask_create(int32_t width, int32_t height);
 extern void nemofx_glmask_destroy(struct glmask *mask);
 
 extern void nemofx_glmask_resize(struct glmask *mask, int32_t width, int32_t height);
-extern void nemofx_glmask_dispatch(struct glmask *mask, GLuint texture, GLuint overlay);
+extern void nemofx_glmask_dispatch(struct glmask *mask, uint32_t texture, uint32_t overlay);
 
 static inline int32_t nemofx_glmask_get_width(struct glmask *mask)
 {
@@ -43,7 +43,7 @@ static inline int32_t nemofx_glmask_get_height(struct glmask *mask)
 	return mask->height;
 }
 
-static inline GLuint nemofx_glmask_get_texture(struct glmask *mask)
+static inline uint32_t nemofx_glmask_get_texture(struct glmask *mask)
 {
 	return mask->texture;
 }

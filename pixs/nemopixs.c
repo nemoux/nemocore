@@ -1351,11 +1351,11 @@ static void nemopixs_dispatch_video_done(struct nemoplay *play, void *data)
 	nemoplay_back_set_video_data(pixs->videoback, pixs);
 }
 
-static GLuint nemopixs_dispatch_canvas_filter(void *node)
+static uint32_t nemopixs_dispatch_canvas_filter(void *node)
 {
 	struct showone *canvas = (struct showone *)node;
 	struct nemopixs *pixs = (struct nemopixs *)nemoshow_one_get_userdata(canvas);
-	GLuint texture = nemoshow_canvas_get_texture(canvas);
+	uint32_t texture = nemoshow_canvas_get_texture(canvas);
 
 	if (pixs->blur != NULL) {
 		nemofx_glblur_dispatch(pixs->blur, texture);

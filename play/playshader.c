@@ -161,7 +161,7 @@ int nemoplay_shader_set_texture_linesize(struct playshader *shader, int32_t line
 	return 0;
 }
 
-int nemoplay_shader_set_viewport(struct playshader *shader, GLuint texture, int32_t width, int32_t height)
+int nemoplay_shader_set_viewport(struct playshader *shader, uint32_t texture, int32_t width, int32_t height)
 {
 	if (shader->fbo > 0)
 		glDeleteFramebuffers(1, &shader->fbo);

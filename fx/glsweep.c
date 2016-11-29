@@ -247,7 +247,7 @@ void nemofx_glsweep_destroy(struct glsweep *sweep)
 	free(sweep);
 }
 
-void nemofx_glsweep_ref_snapshot(struct glsweep *sweep, GLuint texture, int32_t width, int32_t height)
+void nemofx_glsweep_ref_snapshot(struct glsweep *sweep, uint32_t texture, int32_t width, int32_t height)
 {
 	if (sweep->is_reference == 0 && sweep->snapshot > 0)
 		glDeleteTextures(1, &sweep->snapshot);
@@ -256,7 +256,7 @@ void nemofx_glsweep_ref_snapshot(struct glsweep *sweep, GLuint texture, int32_t 
 	sweep->is_reference = 1;
 }
 
-void nemofx_glsweep_set_snapshot(struct glsweep *sweep, GLuint texture, int32_t width, int32_t height)
+void nemofx_glsweep_set_snapshot(struct glsweep *sweep, uint32_t texture, int32_t width, int32_t height)
 {
 	GLuint fbo, dbo;
 
@@ -368,7 +368,7 @@ void nemofx_glsweep_set_point(struct glsweep *sweep, float x, float y)
 	nemofx_glsweep_update_ratio(sweep);
 }
 
-void nemofx_glsweep_set_mask(struct glsweep *sweep, GLuint mask)
+void nemofx_glsweep_set_mask(struct glsweep *sweep, uint32_t mask)
 {
 	sweep->mask = mask;
 }
@@ -396,7 +396,7 @@ void nemofx_glsweep_resize(struct glsweep *sweep, int32_t width, int32_t height)
 	}
 }
 
-void nemofx_glsweep_dispatch(struct glsweep *sweep, GLuint texture)
+void nemofx_glsweep_dispatch(struct glsweep *sweep, uint32_t texture)
 {
 	static GLfloat vertices[] = {
 		-1.0f, -1.0f, 0.0f, 0.0f,

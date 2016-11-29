@@ -35,9 +35,9 @@ extern void nemofx_glpolar_destroy(struct glpolar *polar);
 extern void nemofx_glpolar_set_color(struct glpolar *polar, float r, float g, float b, float a);
 
 extern void nemofx_glpolar_resize(struct glpolar *polar, int32_t width, int32_t height);
-extern void nemofx_glpolar_dispatch(struct glpolar *polar, GLuint texture);
+extern void nemofx_glpolar_dispatch(struct glpolar *polar, uint32_t texture);
 
-static inline GLuint nemofx_glpolar_get_texture(struct glpolar *polar)
+static inline uint32_t nemofx_glpolar_get_texture(struct glpolar *polar)
 {
 	return polar->texture;
 }

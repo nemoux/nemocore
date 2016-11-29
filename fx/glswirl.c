@@ -168,7 +168,7 @@ void nemofx_glswirl_resize(struct glswirl *swirl, int32_t width, int32_t height)
 	}
 }
 
-void nemofx_glswirl_dispatch(struct glswirl *swirl, GLuint texture)
+void nemofx_glswirl_dispatch(struct glswirl *swirl, uint32_t texture)
 {
 	static GLfloat vertices[] = {
 		-1.0f, -1.0f, 0.0f, 0.0f,

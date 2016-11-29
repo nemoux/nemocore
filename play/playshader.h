@@ -41,7 +41,7 @@ extern void nemoplay_shader_destroy(struct playshader *shader);
 
 extern int nemoplay_shader_set_texture(struct playshader *shader, int32_t width, int32_t height);
 extern int nemoplay_shader_set_texture_linesize(struct playshader *shader, int32_t linesize);
-extern int nemoplay_shader_set_viewport(struct playshader *shader, GLuint texture, int32_t width, int32_t height);
+extern int nemoplay_shader_set_viewport(struct playshader *shader, uint32_t texture, int32_t width, int32_t height);
 
 extern int nemoplay_shader_prepare(struct playshader *shader, const char *vertex_source, const char *fragment_source);
 extern void nemoplay_shader_finish(struct playshader *shader);

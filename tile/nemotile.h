@@ -100,7 +100,6 @@ struct nemotile {
 	struct glmask *mask;
 	struct glpolar *polar;
 	struct glsweep *sweep;
-	int is_sweeping;
 
 	int flip;
 	int slideshow;

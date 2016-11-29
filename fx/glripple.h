@@ -66,7 +66,7 @@ extern void nemofx_glripple_use_amplitudes(struct glripple *ripple, float *ampli
 extern void nemofx_glripple_layout(struct glripple *ripple, int32_t rows, int32_t columns, int32_t length);
 extern void nemofx_glripple_resize(struct glripple *ripple, int32_t width, int32_t height);
 extern void nemofx_glripple_update(struct glripple *ripple);
-extern void nemofx_glripple_dispatch(struct glripple *ripple, GLuint texture);
+extern void nemofx_glripple_dispatch(struct glripple *ripple, uint32_t texture);
 
 extern void nemofx_glripple_shoot(struct glripple *ripple, float x, float y, int step);
 
@@ -93,7 +93,7 @@ static inline int32_t nemofx_glripple_get_columns(struct glripple *ripple)
 	return ripple->columns;
 }
 
-static inline GLuint nemofx_glripple_get_texture(struct glripple *ripple)
+static inline uint32_t nemofx_glripple_get_texture(struct glripple *ripple)
 {
 	return ripple->texture;
 }

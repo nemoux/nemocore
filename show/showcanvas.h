@@ -230,14 +230,14 @@ static inline pixman_image_t *nemoshow_canvas_get_pixman(struct showone *one)
 	return nemotale_node_get_pixman(canvas->node);
 }
 
-static inline GLuint nemoshow_canvas_get_texture(struct showone *one)
+static inline uint32_t nemoshow_canvas_get_texture(struct showone *one)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
 	return nemotale_node_get_texture(canvas->node);
 }
 
-static inline GLuint nemoshow_canvas_get_effective_texture(struct showone *one)
+static inline uint32_t nemoshow_canvas_get_effective_texture(struct showone *one)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 
@@ -258,7 +258,7 @@ static inline int nemoshow_canvas_unmap(struct showone *one)
 	return nemotale_node_unmap(canvas->node);
 }
 
-static inline int nemoshow_canvas_set_texture(struct showone *one, GLuint texture)
+static inline int nemoshow_canvas_set_texture(struct showone *one, uint32_t texture)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
 

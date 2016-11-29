@@ -35,7 +35,7 @@ extern void nemofx_glcolor_set_color(struct glcolor *color, float r, float g, fl
 extern void nemofx_glcolor_resize(struct glcolor *color, int32_t width, int32_t height);
 extern void nemofx_glcolor_dispatch(struct glcolor *color);
 
-static inline GLuint nemofx_glcolor_get_texture(struct glcolor *color)
+static inline uint32_t nemofx_glcolor_get_texture(struct glcolor *color)
 {
 	return color->texture;
 }

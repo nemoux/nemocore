@@ -118,11 +118,11 @@ static void nemomirror_dispatch_canvas_event(struct nemoshow *show, struct showo
 	}
 }
 
-static GLuint nemomirror_dispatch_canvas_filter(void *node)
+static uint32_t nemomirror_dispatch_canvas_filter(void *node)
 {
 	struct showone *canvas = (struct showone *)node;
 	struct nemomirror *mirror = (struct nemomirror *)nemoshow_one_get_userdata(canvas);
-	GLuint texture = nemoshow_canvas_get_texture(canvas);
+	uint32_t texture = nemoshow_canvas_get_texture(canvas);
 
 	if (mirror->view != NULL) {
 		texture = nemocanvas_get_opengl_texture(mirror->view->canvas, 0);

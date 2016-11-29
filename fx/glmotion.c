@@ -177,7 +177,7 @@ static inline void nemofx_glmotion_switch(struct glmotion *motion)
 	motion->dbo[1] = dbo;
 }
 
-void nemofx_glmotion_dispatch(struct glmotion *motion, GLuint texture)
+void nemofx_glmotion_dispatch(struct glmotion *motion, uint32_t texture)
 {
 	static GLfloat vertices[] = {
 		-1.0f, -1.0f, 0.0f, 0.0f,

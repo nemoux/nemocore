@@ -305,7 +305,7 @@ void nemofx_glripple_update(struct glripple *ripple)
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void nemofx_glripple_dispatch(struct glripple *ripple, GLuint texture)
+void nemofx_glripple_dispatch(struct glripple *ripple, uint32_t texture)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, ripple->fbo);
 

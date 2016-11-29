@@ -320,7 +320,7 @@ void nemofx_glshadow_resize(struct glshadow *shadow, int32_t width, int32_t heig
 	}
 }
 
-void nemofx_glshadow_dispatch(struct glshadow *shadow, GLuint texture)
+void nemofx_glshadow_dispatch(struct glshadow *shadow, uint32_t texture)
 {
 	static GLfloat vertices[] = {
 		-1.0f, -1.0f, 0.0f, 0.0f,

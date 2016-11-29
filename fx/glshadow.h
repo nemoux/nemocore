@@ -64,7 +64,7 @@ extern void nemofx_glshadow_set_pointlight_size(struct glshadow *shadow, int ind
 extern void nemofx_glshadow_clear_pointlights(struct glshadow *shadow);
 
 extern void nemofx_glshadow_resize(struct glshadow *shadow, int32_t width, int32_t height);
-extern void nemofx_glshadow_dispatch(struct glshadow *shadow, GLuint texture);
+extern void nemofx_glshadow_dispatch(struct glshadow *shadow, uint32_t texture);
 
 static inline int32_t nemofx_glshadow_get_width(struct glshadow *shadow)
 {
@@ -76,7 +76,7 @@ static inline int32_t nemofx_glshadow_get_height(struct glshadow *shadow)
 	return shadow->height;
 }
 
-static inline GLuint nemofx_glshadow_get_texture(struct glshadow *shadow)
+static inline uint32_t nemofx_glshadow_get_texture(struct glshadow *shadow)
 {
 	return shadow->texture;
 }
