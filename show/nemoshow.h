@@ -62,7 +62,6 @@ struct showone;
 typedef void (*nemoshow_enter_frame_t)(struct nemoshow *show, uint32_t msecs);
 typedef void (*nemoshow_leave_frame_t)(struct nemoshow *show, uint32_t msecs);
 
-typedef void (*nemoshow_dispatch_transition_done_t)(void *userdata);
 typedef void (*nemoshow_dispatch_event_t)(struct nemoshow *show, struct showevent *event);
 typedef void (*nemoshow_dispatch_resize_t)(struct nemoshow *show, int32_t width, int32_t height);
 typedef void (*nemoshow_dispatch_transform_t)(struct nemoshow *show, int32_t visible, int32_t x, int32_t y, int32_t width, int32_t height);
@@ -99,9 +98,6 @@ struct nemoshow {
 	struct nemolist redraw_list;
 	struct nemolist transition_list;
 	struct nemolist transition_destroy_list;
-
-	nemoshow_dispatch_transition_done_t dispatch_done;
-	void *dispatch_data;
 
 	nemoshow_enter_frame_t enter_frame;
 	nemoshow_leave_frame_t leave_frame;
@@ -264,12 +260,6 @@ static inline void nemoshow_put_state(struct nemoshow *show, uint32_t state)
 static inline int nemoshow_has_state(struct nemoshow *show, uint32_t state)
 {
 	return (show->state & state) == state;
-}
-
-static inline void nemoshow_set_dispatch_transition_done(struct nemoshow *show, nemoshow_dispatch_transition_done_t dispatch, void *data)
-{
-	show->dispatch_done = dispatch;
-	show->dispatch_data = data;
 }
 
 static inline void nemoshow_set_enter_frame(struct nemoshow *show, nemoshow_enter_frame_t dispatch)

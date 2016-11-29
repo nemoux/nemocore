@@ -514,10 +514,6 @@ void nemoshow_destroy_transition(struct nemoshow *show)
 
 		nemoshow_transition_destroy(trans, 1);
 	}
-
-	if (had_transitions != 0 && show->dispatch_done != NULL && nemolist_empty(&show->transition_list) != 0) {
-		show->dispatch_done(show->dispatch_data);
-	}
 }
 
 int nemoshow_has_transition(struct nemoshow *show)

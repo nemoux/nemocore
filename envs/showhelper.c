@@ -113,9 +113,9 @@ static void nemoshow_dispatch_actor_frame(struct nemoactor *actor, uint32_t msec
 	struct nemocompz *compz = actor->compz;
 	int needs_composite = 0;
 
-	nemoshow_enter_frame(show, msecs);
-
 	nemocompz_make_current(compz);
+
+	nemoshow_enter_frame(show, msecs);
 
 	if (nemoshow_has_transition(show) != 0) {
 		nemoshow_dispatch_transition(show, msecs);
