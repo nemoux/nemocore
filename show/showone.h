@@ -193,15 +193,6 @@ struct showone {
 
 #define NEMOSHOW_REF(one, index)			(one->refs[index] != NULL ? one->refs[index]->src : NULL)
 
-#define NEMOSHOW_POINTS_OFFSET_X(index)				(index * 2 + 0)
-#define NEMOSHOW_POINTS_OFFSET_Y(index)				(index * 2 + 1)
-#define NEMOSHOW_PATHARRAY_OFFSET_X0(index)		(index * 6 + 0)
-#define NEMOSHOW_PATHARRAY_OFFSET_Y0(index)		(index * 6 + 1)
-#define NEMOSHOW_PATHARRAY_OFFSET_X1(index)		(index * 6 + 2)
-#define NEMOSHOW_PATHARRAY_OFFSET_Y1(index)		(index * 6 + 3)
-#define NEMOSHOW_PATHARRAY_OFFSET_X2(index)		(index * 6 + 4)
-#define NEMOSHOW_PATHARRAY_OFFSET_Y2(index)		(index * 6 + 5)
-
 #define nemoshow_children_for_each(child, one)	\
 	nemolist_for_each(child, &((one)->children_list), children_link)
 #define nemoshow_children_for_each_reverse(child, one)	\

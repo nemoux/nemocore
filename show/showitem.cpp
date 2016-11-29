@@ -33,6 +33,13 @@
 
 #define	NEMOSHOW_ANTIALIAS_EPSILON			(5.0f)
 
+#define NEMOSHOW_PATHARRAY_OFFSET_X0(index)		(index * 6 + 0)
+#define NEMOSHOW_PATHARRAY_OFFSET_Y0(index)		(index * 6 + 1)
+#define NEMOSHOW_PATHARRAY_OFFSET_X1(index)		(index * 6 + 2)
+#define NEMOSHOW_PATHARRAY_OFFSET_Y1(index)		(index * 6 + 3)
+#define NEMOSHOW_PATHARRAY_OFFSET_X2(index)		(index * 6 + 4)
+#define NEMOSHOW_PATHARRAY_OFFSET_Y2(index)		(index * 6 + 5)
+
 struct showone *nemoshow_item_create(int type)
 {
 	struct showitem *item;
