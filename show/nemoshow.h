@@ -187,8 +187,15 @@ extern void nemoshow_attach_transition(struct nemoshow *show, struct showtransit
 extern void nemoshow_detach_transition(struct nemoshow *show, struct showtransition *trans);
 extern int nemoshow_dispatch_transition(struct nemoshow *show, uint32_t msecs);
 extern int nemoshow_has_transition(struct nemoshow *show);
+extern void nemoshow_ready_transition(struct nemoshow *show, uint32_t msecs);
 
-extern void nemoshow_revoke_transition(struct nemoshow *show, struct showone *one, const char *name);
+extern struct showtransition *nemoshow_get_last_transition_one(struct nemoshow *show, struct showone *one, const char *name);
+extern struct showtransition *nemoshow_get_last_transition_tag(struct nemoshow *show, uint32_t tag);
+extern struct showtransition *nemoshow_get_last_transition_all(struct nemoshow *show);
+
+extern void nemoshow_revoke_transition_one(struct nemoshow *show, struct showone *one, const char *name);
+extern void nemoshow_revoke_transition_tag(struct nemoshow *show, uint32_t tag);
+extern void nemoshow_revoke_transition_all(struct nemoshow *show);
 
 extern void nemoshow_set_keyboard_focus(struct nemoshow *show, struct showone *one);
 

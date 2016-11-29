@@ -477,7 +477,87 @@ int nemoshow_has_transition(struct nemoshow *show)
 	return nemolist_empty(&show->transition_list) == 0;
 }
 
-void nemoshow_revoke_transition(struct nemoshow *show, struct showone *one, const char *name)
+void nemoshow_ready_transition(struct nemoshow *show, uint32_t msecs)
+{
+	struct showtransition *trans;
+
+	nemolist_for_each(trans, &show->transition_list, link) {
+		if (trans->stime == 0) {
+			trans->stime = msecs + trans->delay;
+			trans->etime = msecs + trans->delay + trans->duration;
+		}
+	}
+}
+
+struct showtransition *nemoshow_get_last_transition_one(struct nemoshow *show, struct showone *one, const char *name)
+{
+	struct showtransition *ltrans = NULL;
+	struct showtransition *trans;
+	struct showone *sequence;
+	struct showone *frame;
+	struct showone *child;
+	struct showset *set;
+	struct showact *act;
+	struct nemoattr *attr;
+	int i;
+
+	attr = nemoobject_get(&one->object, name);
+	if (attr == NULL)
+		return NULL;
+
+	nemolist_for_each(trans, &show->transition_list, link) {
+		for (i = 0; i < trans->nsequences; i++) {
+			sequence = trans->sequences[i];
+
+			nemoshow_children_for_each(frame, sequence) {
+				nemoshow_children_for_each(child, frame) {
+					set = NEMOSHOW_SET(child);
+
+					if (set->src == one) {
+						nemolist_for_each(act, &set->act_list, link) {
+							if (act->attr == attr) {
+								if (ltrans == NULL || ltrans->etime < trans->etime)
+									ltrans = trans;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return ltrans;
+}
+
+struct showtransition *nemoshow_get_last_transition_tag(struct nemoshow *show, uint32_t tag)
+{
+	struct showtransition *ltrans = NULL;
+	struct showtransition *trans;
+
+	nemolist_for_each(trans, &show->transition_list, link) {
+		if (trans->tag == tag) {
+			if (ltrans == NULL || ltrans->etime < trans->etime)
+				ltrans = trans;
+		}
+	}
+
+	return ltrans;
+}
+
+struct showtransition *nemoshow_get_last_transition_all(struct nemoshow *show)
+{
+	struct showtransition *ltrans = NULL;
+	struct showtransition *trans;
+
+	nemolist_for_each(trans, &show->transition_list, link) {
+		if (ltrans == NULL || ltrans->etime < trans->etime)
+			ltrans = trans;
+	}
+
+	return ltrans;
+}
+
+void nemoshow_revoke_transition_one(struct nemoshow *show, struct showone *one, const char *name)
 {
 	struct showtransition *trans;
 	struct showone *sequence;
@@ -512,6 +592,25 @@ void nemoshow_revoke_transition(struct nemoshow *show, struct showone *one, cons
 				}
 			}
 		}
+	}
+}
+
+void nemoshow_revoke_transition_tag(struct nemoshow *show, uint32_t tag)
+{
+	struct showtransition *trans, *ntrans;
+
+	nemolist_for_each_safe(trans, ntrans, &show->transition_list, link) {
+		if (trans->tag == tag)
+			nemoshow_transition_destroy(trans);
+	}
+}
+
+void nemoshow_revoke_transition_all(struct nemoshow *show)
+{
+	struct showtransition *trans, *ntrans;
+
+	nemolist_for_each_safe(trans, ntrans, &show->transition_list, link) {
+		nemoshow_transition_destroy(trans);
 	}
 }
 

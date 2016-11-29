@@ -58,6 +58,7 @@ struct showtransition {
 	uint32_t etime;
 
 	uint32_t serial;
+	uint32_t tag;
 
 	struct nemolist link;
 
@@ -94,6 +95,11 @@ static inline void nemoshow_transition_set_dispatch_done(struct showtransition *
 static inline void nemoshow_transition_set_repeat(struct showtransition *trans, uint32_t repeat)
 {
 	trans->repeat = repeat;
+}
+
+static inline void nemoshow_transition_set_tag(struct showtransition *trans, uint32_t tag)
+{
+	trans->tag = tag;
 }
 
 static inline void nemoshow_transition_set_userdata(struct showtransition *trans, void *data)
