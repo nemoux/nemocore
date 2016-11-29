@@ -249,7 +249,7 @@ int nemotrans_dispatch(struct nemotrans *trans, uint32_t msecs)
 {
 	struct transone *one;
 	double t;
-	int done = 0;
+	int done;
 
 	if (trans->stime == 0) {
 		trans->stime = msecs + trans->delay;
@@ -259,11 +259,12 @@ int nemotrans_dispatch(struct nemotrans *trans, uint32_t msecs)
 	if (trans->stime > msecs)
 		return 0;
 
-	if (trans->etime <= msecs) {
+	if (trans->etime > msecs) {
+		t = nemoease_get(&trans->ease, msecs - trans->stime, trans->duration);
+		done = 0;
+	} else {
 		t = 1.0f;
 		done = 1;
-	} else {
-		t = nemoease_get(&trans->ease, msecs - trans->stime, trans->duration);
 	}
 
 	nemolist_for_each(one, &trans->list, link) {

@@ -194,28 +194,29 @@ void nemoshow_transition_attach_sequence(struct showtransition *trans, struct sh
 	NEMOSHOW_ARRAY_APPEND(trans->sequences, trans->ssequences, trans->nsequences, sequence);
 }
 
-int nemoshow_transition_dispatch(struct showtransition *trans, uint32_t time)
+int nemoshow_transition_dispatch(struct showtransition *trans, uint32_t msecs)
 {
 	double t;
-	int done = 0;
+	int done;
 	int i;
 
 	if (trans->done != 0)
 		return 1;
 
 	if (trans->stime == 0) {
-		trans->stime = time + trans->delay;
-		trans->etime = time + trans->delay + trans->duration;
+		trans->stime = msecs + trans->delay;
+		trans->etime = msecs + trans->delay + trans->duration;
 	}
 
-	if (trans->stime > time)
+	if (trans->stime > msecs)
 		return 0;
 
-	if (trans->etime <= time) {
+	if (trans->etime > msecs) {
+		t = nemoease_get(&trans->ease->ease, msecs - trans->stime, trans->duration);
+		done = 0;
+	} else {
 		t = 1.0f;
 		done = 1;
-	} else {
-		t = nemoease_get(&trans->ease->ease, time - trans->stime, trans->duration);
 	}
 
 	for (i = 0; i < trans->nsequences; i++) {
@@ -228,7 +229,7 @@ int nemoshow_transition_dispatch(struct showtransition *trans, uint32_t time)
 	}
 
 	if (trans->dispatch_frame != NULL) {
-		trans->dispatch_frame(trans->userdata, time, t);
+		trans->dispatch_frame(trans->userdata, msecs, t);
 	}
 
 	if (done != 0 && trans->dispatch_done != NULL)

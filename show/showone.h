@@ -324,11 +324,6 @@ static inline uint32_t nemoshow_one_get_tag(struct showone *one)
 	return one == NULL ? 0 : one->tag;
 }
 
-static inline void nemoshow_one_set_dispatch_destroy(struct showone *one, nemoshow_one_destroy_t destroy)
-{
-	one->destroy = destroy;
-}
-
 static inline void nemoshow_one_setd(struct showone *one, const char *attr, double value)
 {
 	nemoobject_setd(&one->object, attr, value);

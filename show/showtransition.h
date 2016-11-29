@@ -79,7 +79,7 @@ extern void nemoshow_transition_destroy_one(struct showtransition *trans, struct
 
 extern void nemoshow_transition_attach_sequence(struct showtransition *trans, struct showone *sequence);
 
-extern int nemoshow_transition_dispatch(struct showtransition *trans, uint32_t time);
+extern int nemoshow_transition_dispatch(struct showtransition *trans, uint32_t msecs);
 
 static inline void nemoshow_transition_set_dispatch_frame(struct showtransition *trans, nemoshow_transition_dispatch_frame_t dispatch_frame)
 {
