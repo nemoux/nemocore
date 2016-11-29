@@ -437,9 +437,6 @@ static void nemoshow_sequence_dispatch_frame(struct showone *one, double s, doub
 				else
 					nemoattr_setf_offset(act->attr, act->offset, v);
 
-				if (set->src->dattr != NULL)
-					set->src->dattr(set->src, nemoattr_get_name(act->attr), v);
-
 				dirty |= act->dirty;
 			}
 		}
@@ -468,9 +465,6 @@ static void nemoshow_sequence_finish_frame(struct showone *one, uint32_t serial)
 					nemoattr_setd_offset(act->attr, act->offset, v);
 				else
 					nemoattr_setf_offset(act->attr, act->offset, v);
-
-				if (set->src->dattr != NULL)
-					set->src->dattr(set->src, nemoattr_get_name(act->attr), v);
 
 				dirty |= act->dirty;
 			}

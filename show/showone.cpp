@@ -25,21 +25,14 @@ void nemoshow_one_prepare(struct showone *one)
 
 	nemolist_init(&one->children_list);
 	nemolist_init(&one->reference_list);
-	nemolist_init(&one->signal_list);
 
 	nemoobject_set_reserved(&one->object, "id", one->id, NEMOSHOW_ID_MAX);
-
-	one->attrs = (struct showattr **)malloc(sizeof(struct showattr *) * 4);
-	one->nattrs = 0;
-	one->sattrs = 4;
 }
 
 void nemoshow_one_finish(struct showone *one)
 {
 	struct showref *ref, *nref;
-	struct showsignal *signal, *nsignal;
 	struct showone *child, *nchild;
-	int i;
 
 	nemosignal_emit(&one->unpin_signal, one);
 
@@ -56,12 +49,6 @@ void nemoshow_one_finish(struct showone *one)
 		free(ref);
 	}
 
-	nemolist_for_each_safe(signal, nsignal, &one->signal_list, link) {
-		nemolist_remove(&signal->link);
-
-		free(signal);
-	}
-
 	nemoshow_children_for_each_safe(child, nchild, one) {
 		nemoshow_one_destroy(child);
 	}
@@ -74,10 +61,6 @@ void nemoshow_one_finish(struct showone *one)
 		nemoshow_one_detach(one);
 	}
 
-	for (i = 0; i < one->nattrs; i++) {
-		nemoshow_one_destroy_attr(one->attrs[i]);
-	}
-
 	nemolist_remove(&one->link);
 	nemolist_remove(&one->children_link);
 	nemolist_remove(&one->dirty_link);
@@ -86,8 +69,6 @@ void nemoshow_one_finish(struct showone *one)
 	nemoshow_one_unreference_all(one);
 
 	nemoobject_finish(&one->object);
-
-	free(one->attrs);
 }
 
 static int nemoshow_one_update_none(struct showone *one)
@@ -423,30 +404,6 @@ void nemoshow_one_unreference_all(struct showone *one)
 	}
 }
 
-struct showattr *nemoshow_one_create_attr(const char *name, const char *text, struct nemoattr *ref, uint32_t dirty)
-{
-	struct showattr *attr;
-
-	attr = (struct showattr *)malloc(sizeof(struct showattr));
-	if (attr == NULL)
-		return NULL;
-	memset(attr, 0, sizeof(struct showattr));
-
-	strcpy(attr->name, name);
-
-	attr->text = strdup(text);
-	attr->ref = ref;
-	attr->dirty = dirty;
-
-	return attr;
-}
-
-void nemoshow_one_destroy_attr(struct showattr *attr)
-{
-	free(attr->text);
-	free(attr);
-}
-
 struct showone *nemoshow_one_search_id(struct showone *one, const char *id)
 {
 	struct showone *child;
@@ -479,49 +436,4 @@ struct showone *nemoshow_one_search_tag(struct showone *one, uint32_t tag)
 	}
 
 	return NULL;
-}
-
-int nemoshow_one_connect_signal(struct showone *one, const char *name, nemoshow_one_signal_t callback)
-{
-	struct showsignal *signal;
-
-	signal = (struct showsignal *)malloc(sizeof(struct showsignal));
-	if (signal == NULL)
-		return -1;
-	memset(signal, 0, sizeof(struct showsignal));
-
-	strncpy(signal->name, name, NEMOSHOW_SIGNAL_NAME_MAX);
-	signal->callback = callback;
-
-	nemolist_insert(&one->signal_list, &signal->link);
-
-	return 0;
-}
-
-void nemoshow_one_disconnect_signal(struct showone *one, const char *name)
-{
-	struct showsignal *signal;
-
-	nemolist_for_each(signal, &one->signal_list, link) {
-		if (strcmp(signal->name, name) == 0) {
-			nemolist_remove(&signal->link);
-
-			free(signal);
-
-			return;
-		}
-	}
-}
-
-int nemoshow_one_emit_signal(struct showone *one, const char *name, struct nemoobject *attrs)
-{
-	struct showsignal *signal;
-
-	nemolist_for_each(signal, &one->signal_list, link) {
-		if (strcmp(signal->name, name) == 0) {
-			return signal->callback(one, name, attrs);
-		}
-	}
-
-	return 0;
 }
