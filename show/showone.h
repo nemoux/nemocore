@@ -155,10 +155,10 @@ struct showone {
 	struct nemolist bounds_link;
 
 	uint32_t state;
-
 	uint32_t tag;
 
-	struct nemosignal unpin_signal;
+	uint32_t dirty_serial;
+
 	struct nemosignal destroy_signal;
 
 	struct nemolist children_list;
@@ -166,8 +166,6 @@ struct showone {
 
 	struct nemoobject object;
 	uint32_t serial;
-
-	uint32_t dirty_serial;
 
 	nemoshow_one_update_t update;
 	nemoshow_one_destroy_t destroy;
@@ -190,7 +188,6 @@ struct showone {
 	int32_t sx, sy, sw, sh;
 	int32_t x0, y0, x1, y1;
 
-	void *context;
 	void *userdata;
 };
 
@@ -406,16 +403,6 @@ static inline struct showone *nemoshow_one_get_parent(struct showone *one, int t
 static inline struct nemoshow *nemoshow_one_get_show(struct showone *one)
 {
 	return one->show;
-}
-
-static inline void nemoshow_one_set_context(struct showone *one, void *context)
-{
-	one->context = context;
-}
-
-static inline void *nemoshow_one_get_context(struct showone *one)
-{
-	return one->context;
 }
 
 static inline void nemoshow_one_set_userdata(struct showone *one, void *userdata)

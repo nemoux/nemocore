@@ -87,7 +87,7 @@ void nemoshow_transition_destroy(struct showtransition *trans)
 	free(trans);
 }
 
-static void nemoshow_transition_handle_destroy_signal(struct nemolistener *listener, void *data)
+static void nemoshow_transition_handle_check_destroy_signal(struct nemolistener *listener, void *data)
 {
 	struct transitionsensor *sensor = (struct transitionsensor *)container_of(listener, struct transitionsensor, listener);
 	struct showtransition *trans = sensor->transition;
@@ -121,14 +121,14 @@ void nemoshow_transition_check_one(struct showtransition *trans, struct showone 
 		sensor->transition = trans;
 		sensor->one = one;
 
-		sensor->listener.notify = nemoshow_transition_handle_destroy_signal;
+		sensor->listener.notify = nemoshow_transition_handle_check_destroy_signal;
 		nemosignal_add(&one->destroy_signal, &sensor->listener);
 
 		nemolist_insert_tail(&trans->sensor_list, &sensor->link);
 	}
 }
 
-static void nemoshow_transition_handle_dirty_unpin_signal(struct nemolistener *listener, void *data)
+static void nemoshow_transition_handle_dirty_destroy_signal(struct nemolistener *listener, void *data)
 {
 	struct transitionpin *pin = (struct transitionpin *)container_of(listener, struct transitionpin, listener);
 
@@ -152,14 +152,14 @@ void nemoshow_transition_dirty_one(struct showtransition *trans, struct showone 
 		pin->transition = trans;
 		pin->index = trans->ndones - 1;
 
-		pin->listener.notify = nemoshow_transition_handle_dirty_unpin_signal;
-		nemosignal_add(&one->unpin_signal, &pin->listener);
+		pin->listener.notify = nemoshow_transition_handle_dirty_destroy_signal;
+		nemosignal_add(&one->destroy_signal, &pin->listener);
 
 		nemolist_insert_tail(&trans->pin_list, &pin->link);
 	}
 }
 
-static void nemoshow_transition_handle_destroy_unpin_signal(struct nemolistener *listener, void *data)
+static void nemoshow_transition_handle_destroy_signal(struct nemolistener *listener, void *data)
 {
 	struct transitionpin *pin = (struct transitionpin *)container_of(listener, struct transitionpin, listener);
 
@@ -182,8 +182,8 @@ void nemoshow_transition_destroy_one(struct showtransition *trans, struct showon
 		pin->transition = trans;
 		pin->index = trans->ntones - 1;
 
-		pin->listener.notify = nemoshow_transition_handle_destroy_unpin_signal;
-		nemosignal_add(&one->unpin_signal, &pin->listener);
+		pin->listener.notify = nemoshow_transition_handle_destroy_signal;
+		nemosignal_add(&one->destroy_signal, &pin->listener);
 
 		nemolist_insert_tail(&trans->pin_list, &pin->link);
 	}
