@@ -2786,7 +2786,6 @@ int main(int argc, char *argv[])
 	nemolist_init(&tile->test_list);
 
 	tile->trans_group = nemotrans_group_create();
-	nemotrans_group_set_userdata(tile->trans_group, tile);
 
 	tile->tool = tool = nemotool_create();
 	if (tool == NULL)

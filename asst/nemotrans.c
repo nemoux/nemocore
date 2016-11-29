@@ -47,32 +47,11 @@ void nemotrans_group_attach_trans(struct transgroup *group, struct nemotrans *tr
 	}
 
 	nemolist_insert_tail(&group->list, &trans->link);
-
-	if (is_first != 0 && group->dispatch_first != NULL)
-		group->dispatch_first(group, group->data);
 }
 
 void nemotrans_group_detach_trans(struct transgroup *group, struct nemotrans *trans)
 {
 	nemolist_remove(&trans->link);
-
-	if (nemolist_empty(&group->list) != 0 && group->dispatch_last != NULL)
-		group->dispatch_last(group, group->data);
-}
-
-void nemotrans_group_set_dispatch_first(struct transgroup *group, nemotrans_group_dispatch_first_t dispatch)
-{
-	group->dispatch_first = dispatch;
-}
-
-void nemotrans_group_set_dispatch_last(struct transgroup *group, nemotrans_group_dispatch_last_t dispatch)
-{
-	group->dispatch_last = dispatch;
-}
-
-void nemotrans_group_set_userdata(struct transgroup *group, void *data)
-{
-	group->data = data;
 }
 
 void nemotrans_group_ready(struct transgroup *group, uint32_t msecs)
@@ -92,9 +71,6 @@ void nemotrans_group_dispatch(struct transgroup *group, uint32_t msecs)
 		if (nemotrans_dispatch(trans, msecs) != 0)
 			nemotrans_destroy(trans);
 	}
-
-	if (nemolist_empty(&group->list) != 0 && group->dispatch_last != NULL)
-		group->dispatch_last(group, group->data);
 }
 
 struct nemotrans *nemotrans_group_get_last_one(struct transgroup *group, void *var)

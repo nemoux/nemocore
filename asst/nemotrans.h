@@ -18,8 +18,6 @@ struct transgroup;
 
 typedef void (*nemotrans_dispatch_update_t)(struct nemotrans *trans, void *data, float t);
 typedef void (*nemotrans_dispatch_done_t)(struct nemotrans *trans, void *data);
-typedef void (*nemotrans_group_dispatch_first_t)(struct transgroup *group, void *data);
-typedef void (*nemotrans_group_dispatch_last_t)(struct transgroup *group, void *data);
 
 struct transone {
 	struct nemolist link;
@@ -54,11 +52,6 @@ struct nemotrans {
 
 struct transgroup {
 	struct nemolist list;
-
-	nemotrans_group_dispatch_first_t dispatch_first;
-	nemotrans_group_dispatch_last_t dispatch_last;
-
-	void *data;
 };
 
 extern struct transgroup *nemotrans_group_create(void);
@@ -66,10 +59,6 @@ extern void nemotrans_group_destroy(struct transgroup *group);
 
 extern void nemotrans_group_attach_trans(struct transgroup *group, struct nemotrans *trans);
 extern void nemotrans_group_detach_trans(struct transgroup *group, struct nemotrans *trans);
-
-extern void nemotrans_group_set_dispatch_first(struct transgroup *group, nemotrans_group_dispatch_first_t dispatch);
-extern void nemotrans_group_set_dispatch_last(struct transgroup *group, nemotrans_group_dispatch_last_t dispatch);
-extern void nemotrans_group_set_userdata(struct transgroup *group, void *data);
 
 extern void nemotrans_group_ready(struct transgroup *group, uint32_t msecs);
 extern void nemotrans_group_dispatch(struct transgroup *group, uint32_t msecs);
