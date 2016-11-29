@@ -851,7 +851,7 @@ static inline void nemoshow_item_update_bounds(struct nemoshow *show, struct sho
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one->canvas);
 	SkRect box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
-	double outer;
+	double outer = NEMOSHOW_ANTIALIAS_EPSILON;
 
 	if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
 		box.outset(item->stroke_width, item->stroke_width);
@@ -863,7 +863,6 @@ static inline void nemoshow_item_update_bounds(struct nemoshow *show, struct sho
 
 	NEMOSHOW_ITEM_CC(item, matrix)->mapRect(&box);
 
-	outer = NEMOSHOW_ANTIALIAS_EPSILON;
 	if (NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF) != NULL)
 		outer += NEMOSHOW_FILTER_AT(NEMOSHOW_REF(one, NEMOSHOW_FILTER_REF), r) * 2.0f;
 	box.outset(outer, outer);
@@ -876,7 +875,6 @@ static inline void nemoshow_item_update_bounds(struct nemoshow *show, struct sho
 	one->sy = floor(one->y * canvas->viewport.sy);
 	one->sw = ceil(one->w * canvas->viewport.sx);
 	one->sh = ceil(one->h * canvas->viewport.sy);
-	one->outer = outer;
 }
 
 int nemoshow_item_update(struct showone *one)
