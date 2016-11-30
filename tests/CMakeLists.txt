@@ -79,6 +79,7 @@ if(WITH_BULLET)
 
 	TARGET_LINK_LIBRARIES(nemophys-3d
 		nemoapps
+		nemoplay
 		${BULLET_LIBRARIES}
 		)
 endif(WITH_BULLET)

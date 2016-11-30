@@ -7,20 +7,22 @@
 
 #include <getopt.h>
 
-#include <BulletCollision/CollisionShapes/btBox2dShape.h>
-#include <BulletCollision/CollisionShapes/btConvex2dShape.h>
-#include <BulletCollision/CollisionDispatch/btEmptyCollisionAlgorithm.h>
-#include <BulletCollision/CollisionDispatch/btBox2dBox2dCollisionAlgorithm.h>
-#include <BulletCollision/CollisionDispatch/btConvex2dConvex2dAlgorithm.h>
-#include <BulletCollision/NarrowPhaseCollision/btMinkowskiPenetrationDepthSolver.h>
-
 #include <btBulletDynamicsCommon.h>
+#include <BulletDynamics/Dynamics/btRigidBody.h>
+#include <BulletSoftBody/btSoftBody.h>
+#include <BulletSoftBody/btSoftRigidDynamicsWorld.h>
+#include <BulletSoftBody/btSoftBodyRigidBodyCollisionConfiguration.h>
+#include <BulletSoftBody/btSoftBodyHelpers.h>
+#include <BulletDynamics/ConstraintSolver/btPoint2PointConstraint.h>
 
 #include <nemoshow.h>
 #include <showhelper.h>
 #include <fbohelper.h>
 #include <glshader.h>
 #include <nemohelper.h>
+#include <nemoplay.h>
+#include <playback.h>
+#include <nemofs.h>
 #include <nemolist.h>
 #include <nemolog.h>
 #include <nemomisc.h>
@@ -37,17 +39,17 @@ struct physcontext {
 
 	struct showone *canvas;
 
-	btBroadphaseInterface *broadphase;
+	btSoftBodyWorldInfo *worldinfo;
 	btCollisionDispatcher *dispatcher;
-	btConstraintSolver *solver;
 	btDefaultCollisionConfiguration *configuration;
+	btBroadphaseInterface *broadphase;
+	btConstraintSolver *solver;
+	btSoftRigidDynamicsWorld *dynamicsworld;
 
-	btConvex2dConvex2dAlgorithm::CreateFunc *convex2dalgo;
-	btBox2dBox2dCollisionAlgorithm::CreateFunc *box2dalgo;
-	btVoronoiSimplexSolver *simplexsolver;
-	btMinkowskiPenetrationDepthSolver *pdsolver;
-
-	btDiscreteDynamicsWorld *dynamicsworld;
+	btSoftBody *softbody;
+	int nfaces;
+	float *vertices;
+	float *texcoords;
 
 	struct {
 		float tx, ty, tz;
@@ -66,6 +68,15 @@ struct physcontext {
 	GLint uprojection;
 	GLint uvtransform;
 	GLint utexture;
+
+	struct fsdir *movies;
+	int imovies;
+
+	struct showone *video;
+	struct nemoplay *play;
+	struct playback_decoder *decoderback;
+	struct playback_audio *audioback;
+	struct playback_video *videoback;
 };
 
 static void nemophys_render_3d_one(struct physcontext *context, struct nemomatrix *projection, uint32_t texture)
@@ -106,6 +117,32 @@ static void nemophys_render_3d_one(struct physcontext *context, struct nemomatri
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+static void nemophys_render_3d_softbody(struct physcontext *context, struct nemomatrix *projection, uint32_t texture)
+{
+	struct nemomatrix vtransform;
+
+	nemomatrix_init_identity(&vtransform);
+
+	glUseProgram(context->program);
+	glBindAttribLocation(context->program, 0, "position");
+	glBindAttribLocation(context->program, 1, "texcoord");
+
+	glUniform1i(context->utexture, 0);
+	glUniformMatrix4fv(context->uprojection, 1, GL_FALSE, projection->d);
+	glUniformMatrix4fv(context->uvtransform, 1, GL_FALSE, vtransform.d);
+
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &context->vertices[0]);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), &context->texcoords[0]);
+	glEnableVertexAttribArray(1);
+
+	glDrawArrays(GL_TRIANGLES, 0, context->nfaces * 3);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
 static void nemophys_dispatch_canvas_redraw(struct nemoshow *show, struct showone *canvas)
 {
 	struct physcontext *context = (struct physcontext *)nemoshow_get_userdata(show);
@@ -132,7 +169,7 @@ static void nemophys_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-	nemophys_render_3d_one(context, &projection, 0);
+	nemophys_render_3d_softbody(context, &projection, nemoshow_canvas_get_effective_texture(context->video));
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -146,6 +183,9 @@ static void nemophys_dispatch_canvas_event(struct nemoshow *show, struct showone
 	float y = nemoshow_event_get_y(event) * nemoshow_canvas_get_viewport_sy(canvas);
 
 	nemoshow_event_update_taps(show, canvas, event);
+
+	if (nemoshow_event_is_pointer_left_down(show, event)) {
+	}
 
 	if (context->is_fullscreen == 0) {
 		if (nemoshow_event_is_touch_down(show, event) || nemoshow_event_is_touch_up(show, event)) {
@@ -163,8 +203,24 @@ static void nemophys_dispatch_canvas_event(struct nemoshow *show, struct showone
 static void nemophys_enter_show_frame(struct nemoshow *show, uint32_t msecs)
 {
 	struct physcontext *context = (struct physcontext *)nemoshow_get_userdata(show);
+	int f;
 
 	context->dynamicsworld->stepSimulation(1.0f / 60.0f, 0);
+
+	for (f = 0; f < context->softbody->m_faces.size(); f++) {
+		const btSoftBody::Face &face = context->softbody->m_faces[f];
+		const btVector3 x[] = { face.m_n[0]->m_x, face.m_n[1]->m_x, face.m_n[2]->m_x };
+
+		context->vertices[f * 9 + 0] = x[0].getX();
+		context->vertices[f * 9 + 1] = x[0].getY();
+		context->vertices[f * 9 + 2] = x[0].getZ();
+		context->vertices[f * 9 + 3] = x[1].getX();
+		context->vertices[f * 9 + 4] = x[1].getY();
+		context->vertices[f * 9 + 5] = x[1].getZ();
+		context->vertices[f * 9 + 6] = x[2].getX();
+		context->vertices[f * 9 + 7] = x[2].getY();
+		context->vertices[f * 9 + 8] = x[2].getZ();
+	}
 }
 
 static void nemophys_leave_show_frame(struct nemoshow *show, uint32_t msecs)
@@ -181,6 +237,16 @@ static void nemophys_dispatch_show_resize(struct nemoshow *show, int32_t width, 
 	context->width = width;
 	context->height = height;
 
+	glDeleteFramebuffers(1, &context->fbo);
+	glDeleteRenderbuffers(1, &context->dbo);
+
+	fbo_prepare_context(
+			nemoshow_canvas_get_texture(context->canvas),
+			width, height,
+			&context->fbo, &context->dbo);
+
+	nemoshow_one_dirty(context->canvas, NEMOSHOW_REDRAW_DIRTY);
+
 	nemoshow_view_redraw(context->show);
 }
 
@@ -194,46 +260,124 @@ static void nemophys_dispatch_show_fullscreen(struct nemoshow *show, const char 
 		context->is_fullscreen = 1;
 }
 
+static void nemophys_dispatch_video_update(struct nemoplay *play, void *data)
+{
+	struct physcontext *context = (struct physcontext *)data;
+
+	nemoshow_canvas_damage_all(context->video);
+	nemoshow_dispatch_frame(context->show);
+}
+
+static void nemophys_dispatch_video_done(struct nemoplay *play, void *data)
+{
+	struct physcontext *context = (struct physcontext *)data;
+
+	nemoplay_back_destroy_decoder(context->decoderback);
+	nemoplay_back_destroy_audio(context->audioback);
+	nemoplay_back_destroy_video(context->videoback);
+	nemoplay_destroy(context->play);
+
+	context->imovies = (context->imovies + 1) % nemofs_dir_get_filecount(context->movies);
+
+	context->play = nemoplay_create();
+	nemoplay_load_media(context->play, nemofs_dir_get_filepath(context->movies, context->imovies));
+
+	nemoshow_canvas_set_size(context->video,
+			nemoplay_get_video_width(context->play),
+			nemoplay_get_video_height(context->play));
+
+	context->decoderback = nemoplay_back_create_decoder(context->play);
+	context->audioback = nemoplay_back_create_audio_by_ao(context->play);
+	context->videoback = nemoplay_back_create_video_by_timer(context->play, context->tool);
+	nemoplay_back_set_video_canvas(context->videoback,
+			context->video,
+			nemoplay_get_video_width(context->play),
+			nemoplay_get_video_height(context->play));
+	nemoplay_back_set_video_update(context->videoback, nemophys_dispatch_video_update);
+	nemoplay_back_set_video_done(context->videoback, nemophys_dispatch_video_done);
+	nemoplay_back_set_video_data(context->videoback, context);
+}
+
 static int nemophys_prepare_bullet(struct physcontext *context)
 {
-	context->configuration = new btDefaultCollisionConfiguration();
+	context->worldinfo = new btSoftBodyWorldInfo();
+	context->configuration = new btSoftBodyRigidBodyCollisionConfiguration();
 	context->dispatcher = new btCollisionDispatcher(context->configuration);
-	context->simplexsolver = new btVoronoiSimplexSolver();
-	context->pdsolver = new btMinkowskiPenetrationDepthSolver();
+	context->worldinfo->m_dispatcher = context->dispatcher;
 
-	context->convex2dalgo = new btConvex2dConvex2dAlgorithm::CreateFunc(context->simplexsolver, context->pdsolver);
-	context->box2dalgo = new btBox2dBox2dCollisionAlgorithm::CreateFunc();
+	btVector3 min(-1000.0f, -1000.0f, -1000.0f);
+	btVector3 max(1000.0f, 1000.0f, 1000.0f);
 
-	context->dispatcher->registerCollisionCreateFunc(CONVEX_2D_SHAPE_PROXYTYPE, CONVEX_2D_SHAPE_PROXYTYPE, context->convex2dalgo);
-	context->dispatcher->registerCollisionCreateFunc(BOX_2D_SHAPE_PROXYTYPE, CONVEX_2D_SHAPE_PROXYTYPE, context->convex2dalgo);
-	context->dispatcher->registerCollisionCreateFunc(CONVEX_2D_SHAPE_PROXYTYPE, BOX_2D_SHAPE_PROXYTYPE, context->convex2dalgo);
-	context->dispatcher->registerCollisionCreateFunc(BOX_2D_SHAPE_PROXYTYPE, BOX_2D_SHAPE_PROXYTYPE, context->box2dalgo);
+	context->broadphase = new btAxisSweep3(min, max, 32766);
+	context->worldinfo->m_broadphase = context->broadphase;
 
-	context->broadphase = new btDbvtBroadphase();
-	context->solver = new btSequentialImpulseConstraintSolver;
+	context->solver = new btSequentialImpulseConstraintSolver();
 
-	context->dynamicsworld = new btDiscreteDynamicsWorld(context->dispatcher, context->broadphase, context->solver, context->configuration);
-	context->dynamicsworld->setGravity(btVector3(0, 300, 0));
+	context->dynamicsworld = new btSoftRigidDynamicsWorld(context->dispatcher, context->broadphase, context->solver, context->configuration, NULL);
+	context->dynamicsworld->setGravity(btVector3(0.0f, 9.8f, 0.0f));
+	context->worldinfo->m_gravity.setValue(0.0f, 9.8f, 0.0f);
+	context->worldinfo->m_sparsesdf.Initialize();
 
 	return 0;
 }
 
 static void nemophys_finish_bullet(struct physcontext *context)
 {
-	delete context->dynamicsworld;
-
 	delete context->solver;
-
 	delete context->broadphase;
 	delete context->dispatcher;
-
 	delete context->configuration;
+	delete context->worldinfo;
+	delete context->dynamicsworld;
+}
 
-	delete context->convex2dalgo;
-	delete context->box2dalgo;
+static int nemophys_prepare_softbody(struct physcontext *context, int columns, int rows)
+{
+	btVector3 corners[4] = {
+		{ -1.0f, 1.0f, -0.5f },
+		{ 1.0f, 1.0f, -0.5f },
+		{ -1.0f, -1.0f, -0.5f },
+		{ 1.0f, -1.0f, -0.5f },
+	};
 
-	delete context->simplexsolver;
-	delete context->pdsolver;
+	context->vertices = (float *)malloc(sizeof(float[3]) * columns * rows * 12);
+	context->texcoords = (float *)malloc(sizeof(float[2]) * columns * rows * 12);
+
+	context->softbody = btSoftBodyHelpers::CreatePatchUV(
+			*context->worldinfo,
+			corners[0],
+			corners[1],
+			corners[2],
+			corners[3],
+			columns, rows,
+			4 + 8, true,
+			context->texcoords);
+	context->softbody->getCollisionShape()->setMargin(0.001f);
+
+	context->nfaces = context->softbody->m_faces.size();
+
+	btSoftBody::Material *material = context->softbody->appendMaterial();
+	material->m_kLST = 0.001f;
+
+	context->softbody->m_cfg.piterations = 10;
+	context->softbody->m_cfg.citerations = 10;
+	context->softbody->m_cfg.diterations = 10;
+	context->softbody->m_cfg.collisions = btSoftBody::fCollision::CL_SS + btSoftBody::fCollision::SDF_RS;
+	context->softbody->generateBendingConstraints(2, material);
+	context->softbody->generateClusters(64);
+	context->softbody->setTotalMass(1.0f);
+
+	context->dynamicsworld->addSoftBody(context->softbody);
+
+	return 0;
+}
+
+static void nemophys_finish_softbody(struct physcontext *context)
+{
+	free(context->vertices);
+	free(context->texcoords);
+
+	delete context->softbody;
 }
 
 static int nemophys_prepare_opengl(struct physcontext *context, int32_t width, int32_t height)
@@ -255,7 +399,7 @@ static int nemophys_prepare_opengl(struct physcontext *context, int32_t width, i
 		"varying vec2 vtexcoord;\n"
 		"void main()\n"
 		"{\n"
-		"  gl_FragColor = texture2D(texture, vtexcoord) + vec4(0.0, 1.0, 1.0, 1.0);\n"
+		"  gl_FragColor = texture2D(texture, vtexcoord);\n"
 		"}\n";
 
 	fbo_prepare_context(
@@ -284,6 +428,7 @@ int main(int argc, char *argv[])
 {
 	struct option options[] = {
 		{ "fullscreen",			required_argument,			NULL,		'f' },
+		{ "video",					required_argument,			NULL,		'v' },
 		{ 0 }
 	};
 
@@ -295,19 +440,24 @@ int main(int argc, char *argv[])
 	struct showone *one;
 	struct showtransition *trans;
 	char *fullscreen = NULL;
+	char *videopath = NULL;
 	int width = 800;
 	int height = 800;
 	int opt;
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "f:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "f:v:", options, NULL)) {
 		if (opt == -1)
 			break;
 
 		switch (opt) {
 			case 'f':
 				fullscreen = strdup(optarg);
+				break;
+
+			case 'v':
+				videopath = strdup(optarg);
 				break;
 
 			default:
@@ -385,8 +535,45 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_dispatch_event(canvas, nemophys_dispatch_canvas_event);
 	nemoshow_one_attach(scene, canvas);
 
+	context->video = canvas = nemoshow_canvas_create();
+	nemoshow_canvas_set_width(canvas, width);
+	nemoshow_canvas_set_height(canvas, height);
+	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_OPENGL_TYPE);
+	nemoshow_attach_one(show, canvas);
+
 	nemophys_prepare_opengl(context, width, height);
 	nemophys_prepare_bullet(context);
+	nemophys_prepare_softbody(context, 24, 24);
+
+	if (videopath != NULL) {
+		if (os_check_path_is_directory(videopath) != 0) {
+			context->movies = nemofs_dir_create(videopath, 32);
+			nemofs_dir_scan_extension(context->movies, "mp4");
+			nemofs_dir_scan_extension(context->movies, "avi");
+			nemofs_dir_scan_extension(context->movies, "ts");
+		} else {
+			context->movies = nemofs_dir_create(NULL, 32);
+			nemofs_dir_insert_file(context->movies, videopath);
+		}
+
+		context->play = nemoplay_create();
+		nemoplay_load_media(context->play, nemofs_dir_get_filepath(context->movies, context->imovies));
+
+		nemoshow_canvas_set_size(context->video,
+				nemoplay_get_video_width(context->play),
+				nemoplay_get_video_height(context->play));
+
+		context->decoderback = nemoplay_back_create_decoder(context->play);
+		context->audioback = nemoplay_back_create_audio_by_ao(context->play);
+		context->videoback = nemoplay_back_create_video_by_timer(context->play, tool);
+		nemoplay_back_set_video_canvas(context->videoback,
+				context->video,
+				nemoplay_get_video_width(context->play),
+				nemoplay_get_video_height(context->play));
+		nemoplay_back_set_video_update(context->videoback, nemophys_dispatch_video_update);
+		nemoplay_back_set_video_done(context->videoback, nemophys_dispatch_video_done);
+		nemoplay_back_set_video_data(context->videoback, context);
+	}
 
 	trans = nemoshow_transition_create(NEMOSHOW_LINEAR_EASE, 18000, 0);
 	nemoshow_transition_dirty_one(trans, context->canvas, NEMOSHOW_REDRAW_DIRTY);
@@ -397,6 +584,7 @@ int main(int argc, char *argv[])
 
 	nemotool_run(tool);
 
+	nemophys_finish_softbody(context);
 	nemophys_finish_bullet(context);
 	nemophys_finish_opengl(context);
 
