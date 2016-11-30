@@ -64,11 +64,11 @@ if(WITH_BULLET)
 	INCLUDE_DIRECTORIES(${BULLET_INCLUDE_DIRS})
 	LINK_DIRECTORIES(${BULLET_LIBRARY_DIRS})
 
-	add_executable(nemophys-show
-		nemophys-show.cpp
+	add_executable(nemophys-2d
+		nemophys-2d.cpp
 		)
 
-	TARGET_LINK_LIBRARIES(nemophys-show
+	TARGET_LINK_LIBRARIES(nemophys-2d
 		nemoapps
 		${BULLET_LIBRARIES}
 		)

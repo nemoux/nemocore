@@ -182,6 +182,48 @@ static void nemophys_dispatch_canvas_event(struct nemoshow *show, struct showone
 		}
 	}
 
+	if (nemoshow_event_is_pointer_left_down(show, event)) {
+		struct physball *ball;
+
+		nemolist_for_each(ball, &context->ball_list, link) {
+			ball->body->applyCentralForce(btVector3(random_get_int(-320000, 320000), random_get_int(-320000, 0), 0));
+		}
+	} else if (nemoshow_event_is_pointer_right_down(show, event)) {
+		struct physball *ball;
+		float r = random_get_double(0.0f, 255.0f);
+		float g = random_get_double(0.0f, 255.0f);
+		float b = random_get_double(0.0f, 255.0f);
+		float s = random_get_double(15.0f, 60.0f);
+
+		btConvexShape *cicle = new btCylinderShapeZ(btVector3(btScalar(s), btScalar(s), btScalar(s)));
+		btConvexShape *shape = new btConvex2dShape(cicle);
+
+		btTransform transform;
+		transform.setIdentity();
+		transform.setOrigin(btVector3(0.0f, y, 0.0f));
+
+		btScalar mass(100.0f);
+		btVector3 linertia(0, 0, 0);
+
+		btDefaultMotionState *motionstate = new btDefaultMotionState(transform);
+		btRigidBody::btRigidBodyConstructionInfo bodyinfo(mass, motionstate, shape, linertia);
+		btRigidBody *body = new btRigidBody(bodyinfo);
+		body->setLinearFactor(btVector3(1, 1, 0));
+		body->setAngularFactor(btVector3(0, 0, 1));
+		body->applyCentralForce(btVector3(60000000, 0, 0));
+
+		context->dynamicsworld->addRigidBody(body);
+
+		ball = (struct physball *)malloc(sizeof(struct physball));
+		ball->body = body;
+		ball->color[0] = r;
+		ball->color[1] = g;
+		ball->color[2] = b;
+		ball->radius = s;
+
+		nemolist_insert_tail(&context->ball_list, &ball->link);
+	}
+
 	if (nemoshow_event_is_touch_down(show, event)) {
 		btVector3 from(x, y, -100.0f);
 		btVector3 to(x, y, 100.0f);
@@ -257,11 +299,6 @@ static void nemophys_dispatch_canvas_event(struct nemoshow *show, struct showone
 static void nemophys_enter_show_frame(struct nemoshow *show, uint32_t msecs)
 {
 	struct physcontext *context = (struct physcontext *)nemoshow_get_userdata(show);
-	struct physball *ball;
-
-	nemolist_for_each(ball, &context->ball_list, link) {
-		ball->body->applyCentralForce(btVector3(random_get_int(-800, 800), random_get_int(-800, 800), 0));
-	}
 
 	context->dynamicsworld->stepSimulation(1.0f / 60.0f, 0);
 }
