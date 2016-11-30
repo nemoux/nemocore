@@ -72,6 +72,15 @@ if(WITH_BULLET)
 		nemoapps
 		${BULLET_LIBRARIES}
 		)
+
+	add_executable(nemophys-3d
+		nemophys-3d.cpp
+		)
+
+	TARGET_LINK_LIBRARIES(nemophys-3d
+		nemoapps
+		${BULLET_LIBRARIES}
+		)
 endif(WITH_BULLET)
 
 add_executable(nemofx-show
