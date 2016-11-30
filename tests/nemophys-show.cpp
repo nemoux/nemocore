@@ -257,6 +257,11 @@ static void nemophys_dispatch_canvas_event(struct nemoshow *show, struct showone
 static void nemophys_enter_show_frame(struct nemoshow *show, uint32_t msecs)
 {
 	struct physcontext *context = (struct physcontext *)nemoshow_get_userdata(show);
+	struct physball *ball;
+
+	nemolist_for_each(ball, &context->ball_list, link) {
+		ball->body->applyCentralForce(btVector3(random_get_int(-800, 800), random_get_int(-800, 800), 0));
+	}
 
 	context->dynamicsworld->stepSimulation(1.0f / 60.0f, 0);
 }
