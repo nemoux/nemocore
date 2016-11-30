@@ -58,9 +58,10 @@ struct physcontext {
 	} projection;
 
 	struct {
-		float a[3], b[3], c[3], e[3];
+		float left, right;
+		float bottom, top;
 		float near, far;
-	} asymmetric;
+	} perspective;
 
 	GLuint fbo, dbo;
 
@@ -154,7 +155,13 @@ static void nemophys_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 	nemomatrix_rotate_y(&projection, cos(context->projection.ry), sin(context->projection.ry));
 	nemomatrix_rotate_z(&projection, cos(context->projection.rz), sin(context->projection.rz));
 	nemomatrix_translate_xyz(&projection, context->projection.tx, context->projection.ty, context->projection.tz);
-	nemomatrix_asymmetric(&projection, context->asymmetric.a, context->asymmetric.b, context->asymmetric.c, context->asymmetric.e, context->asymmetric.near, context->asymmetric.far);
+	nemomatrix_perspective(&projection,
+			context->perspective.left,
+			context->perspective.right,
+			context->perspective.bottom,
+			context->perspective.top,
+			context->perspective.near,
+			context->perspective.far);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, context->fbo);
 
@@ -168,6 +175,9 @@ static void nemophys_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	glDisable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
 
 	nemophys_render_3d_softbody(context, &projection, nemoshow_canvas_get_effective_texture(context->video));
 
@@ -185,6 +195,27 @@ static void nemophys_dispatch_canvas_event(struct nemoshow *show, struct showone
 	nemoshow_event_update_taps(show, canvas, event);
 
 	if (nemoshow_event_is_pointer_left_down(show, event)) {
+	}
+
+	if (nemoshow_event_is_touch_down(show, event)) {
+		float x = nemoshow_event_get_x(event) / context->width * 2.0f - 1.0f;
+		float y = nemoshow_event_get_y(event) / context->height * 2.0f - 1.0f;
+
+		btSphereShape *sphere = new btSphereShape(1.0f);
+
+		btTransform transform;
+		transform.setIdentity();
+		transform.setOrigin(btVector3(x, y, 0.0f));
+
+		btScalar mass(3.0f);
+		btVector3 linertia(0, 0, 0);
+
+		btDefaultMotionState *motionstate = new btDefaultMotionState(transform);
+		btRigidBody::btRigidBodyConstructionInfo bodyinfo(mass, motionstate, sphere, linertia);
+		btRigidBody *body = new btRigidBody(bodyinfo);
+		body->applyCentralForce(btVector3(0, 0, -500));
+
+		context->dynamicsworld->addRigidBody(body);
 	}
 
 	if (context->is_fullscreen == 0) {
@@ -233,9 +264,6 @@ static void nemophys_dispatch_show_resize(struct nemoshow *show, int32_t width, 
 	struct physcontext *context = (struct physcontext *)nemoshow_get_userdata(show);
 
 	nemoshow_view_resize(context->show, width, height);
-
-	context->width = width;
-	context->height = height;
 
 	glDeleteFramebuffers(1, &context->fbo);
 	glDeleteRenderbuffers(1, &context->dbo);
@@ -334,10 +362,10 @@ static void nemophys_finish_bullet(struct physcontext *context)
 static int nemophys_prepare_softbody(struct physcontext *context, int columns, int rows)
 {
 	btVector3 corners[4] = {
-		{ -1.0f, 1.0f, -0.5f },
-		{ 1.0f, 1.0f, -0.5f },
-		{ -1.0f, -1.0f, -0.5f },
-		{ 1.0f, -1.0f, -0.5f },
+		{ -1.0f, 1.0f, -1.2f },
+		{ 1.0f, 1.0f, -1.2f },
+		{ -1.0f, -1.0f, -1.2f },
+		{ 1.0f, -1.0f, -1.2f },
 	};
 
 	context->vertices = (float *)malloc(sizeof(float[3]) * columns * rows * 12);
@@ -483,20 +511,12 @@ int main(int argc, char *argv[])
 	context->projection.sy = 1.0f;
 	context->projection.sz = 1.0f;
 
-	context->asymmetric.a[0] = -1.0f;
-	context->asymmetric.a[1] = -1.0f;
-	context->asymmetric.a[2] = 0.0f;
-	context->asymmetric.b[0] = 1.0f;
-	context->asymmetric.b[1] = -1.0f;
-	context->asymmetric.b[2] = 0.0f;
-	context->asymmetric.c[0] = -1.0f;
-	context->asymmetric.c[1] = 1.0f;
-	context->asymmetric.c[2] = 0.0f;
-	context->asymmetric.e[0] = 0.0f;
-	context->asymmetric.e[1] = 0.0f;
-	context->asymmetric.e[2] = 1.0f;
-	context->asymmetric.near = 0.00001f;
-	context->asymmetric.far = 10.0f;
+	context->perspective.left = -1.0f;
+	context->perspective.right = 1.0f;
+	context->perspective.bottom = -1.0f;
+	context->perspective.top = 1.0f;
+	context->perspective.near = 0.99999f;
+	context->perspective.far = 10.0f;
 
 	context->tool = tool = nemotool_create();
 	if (tool == NULL)
