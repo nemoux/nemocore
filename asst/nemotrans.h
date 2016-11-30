@@ -67,9 +67,9 @@ extern struct nemotrans *nemotrans_group_get_last_one(struct transgroup *group, 
 extern struct nemotrans *nemotrans_group_get_last_tag(struct transgroup *group, uint32_t tag);
 extern struct nemotrans *nemotrans_group_get_last_all(struct transgroup *group);
 
-extern void nemotrans_group_remove_one(struct transgroup *group, void *var);
-extern void nemotrans_group_remove_tag(struct transgroup *group, uint32_t tag);
-extern void nemotrans_group_remove_all(struct transgroup *group);
+extern void nemotrans_group_revoke_one(struct transgroup *group, void *var);
+extern void nemotrans_group_revoke_tag(struct transgroup *group, uint32_t tag);
+extern void nemotrans_group_revoke_all(struct transgroup *group);
 
 extern struct nemotrans *nemotrans_create(int type, uint32_t duration, uint32_t delay);
 extern void nemotrans_destroy(struct nemotrans *trans);

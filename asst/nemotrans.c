@@ -121,7 +121,7 @@ struct nemotrans *nemotrans_group_get_last_all(struct transgroup *group)
 	return ltrans;
 }
 
-void nemotrans_group_remove_one(struct transgroup *group, void *var)
+void nemotrans_group_revoke_one(struct transgroup *group, void *var)
 {
 	struct nemotrans *trans;
 	struct transone *one, *none;
@@ -139,7 +139,7 @@ void nemotrans_group_remove_one(struct transgroup *group, void *var)
 	}
 }
 
-void nemotrans_group_remove_tag(struct transgroup *group, uint32_t tag)
+void nemotrans_group_revoke_tag(struct transgroup *group, uint32_t tag)
 {
 	struct nemotrans *trans, *ntrans;
 
@@ -149,7 +149,7 @@ void nemotrans_group_remove_tag(struct transgroup *group, uint32_t tag)
 	}
 }
 
-void nemotrans_group_remove_all(struct transgroup *group)
+void nemotrans_group_revoke_all(struct transgroup *group)
 {
 	struct nemotrans *trans, *ntrans;
 
