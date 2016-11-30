@@ -81,8 +81,6 @@ static void nemophys_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 	struct physcontext *context = (struct physcontext *)nemoshow_get_userdata(show);
 	struct physball *ball, *next;
 
-	context->dynamicsworld->stepSimulation(1.0f / 60.0f, 0);
-
 	SkBitmap bitmap;
 	bitmap.setInfo(
 			SkImageInfo::Make(
@@ -256,6 +254,18 @@ static void nemophys_dispatch_canvas_event(struct nemoshow *show, struct showone
 	}
 }
 
+static void nemophys_enter_show_frame(struct nemoshow *show, uint32_t msecs)
+{
+	struct physcontext *context = (struct physcontext *)nemoshow_get_userdata(show);
+
+	context->dynamicsworld->stepSimulation(1.0f / 60.0f, 0);
+}
+
+static void nemophys_leave_show_frame(struct nemoshow *show, uint32_t msecs)
+{
+	struct physcontext *context = (struct physcontext *)nemoshow_get_userdata(show);
+}
+
 static void nemophys_dispatch_show_resize(struct nemoshow *show, int32_t width, int32_t height)
 {
 	struct physcontext *context = (struct physcontext *)nemoshow_get_userdata(show);
@@ -415,6 +425,8 @@ int main(int argc, char *argv[])
 	context->show = show = nemoshow_create_view(tool, width, height);
 	if (show == NULL)
 		goto err3;
+	nemoshow_set_enter_frame(show, nemophys_enter_show_frame);
+	nemoshow_set_leave_frame(show, nemophys_leave_show_frame);
 	nemoshow_set_dispatch_resize(show, nemophys_dispatch_show_resize);
 	nemoshow_set_dispatch_fullscreen(show, nemophys_dispatch_show_fullscreen);
 	nemoshow_set_userdata(show, context);
