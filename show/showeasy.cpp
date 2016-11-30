@@ -37,14 +37,13 @@ struct showtransition *nemoshow_transition_dispatch_easy(struct nemoshow *show, 
 	struct showtransition *trans;
 	struct showone *sequence;
 	struct showone *set0;
-	int index;
 
 	set0 = nemoshow_sequence_create_set();
 	nemoshow_sequence_set_source(set0, one);
 
-	index = nemoshow_sequence_set_dattr(set0, attr, v1);
+	nemoshow_sequence_set_dattr(set0, attr, v1);
 	if (repeat != 1)
-		nemoshow_sequence_fix_dattr(set0, index, v0);
+		nemoshow_sequence_fix_dattr(set0, attr, v0);
 
 	sequence = nemoshow_sequence_create_easy(show,
 			nemoshow_sequence_create_frame_easy(show,

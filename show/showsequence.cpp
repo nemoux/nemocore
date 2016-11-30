@@ -373,19 +373,25 @@ int nemoshow_sequence_set_cattr(struct showone *one, const char *name, double r,
 	return -1;
 }
 
-int nemoshow_sequence_fix_dattr(struct showone *one, int index, double value)
+int nemoshow_sequence_fix_dattr(struct showone *one, const char *name, double value)
 {
 	struct showset *set = NEMOSHOW_SET(one);
+	struct showone *src = set->src;
 	struct showact *act;
+	struct nemoattr *attr;
+
+	attr = nemoobject_get(&src->object, name);
+	if (attr == NULL)
+		return 0;
 
 	nemolist_for_each(act, &set->act_list, link) {
-		if (index-- <= 0) {
+		if (act->attr == attr) {
 			act->fattr = value;
 			break;
 		}
 	}
 
-	return 0;
+	return 1;
 }
 
 static void nemoshow_sequence_prepare_frame(struct showone *one, uint32_t serial)

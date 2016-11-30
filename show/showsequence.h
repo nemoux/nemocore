@@ -90,7 +90,7 @@ extern int nemoshow_sequence_set_fattr(struct showone *one, const char *name, do
 extern int nemoshow_sequence_set_fattr_offset(struct showone *one, const char *name, int offset, double value);
 extern int nemoshow_sequence_set_cattr(struct showone *one, const char *name, double r, double g, double b, double a);
 
-extern int nemoshow_sequence_fix_dattr(struct showone *one, int index, double value);
+extern int nemoshow_sequence_fix_dattr(struct showone *one, const char *name, double value);
 
 static inline void nemoshow_sequence_set_frame_t(struct showone *one, double t)
 {
