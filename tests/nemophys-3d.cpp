@@ -47,9 +47,9 @@ struct physcontext {
 	btSoftRigidDynamicsWorld *dynamicsworld;
 
 	btSoftBody *softbody;
-	int nfaces;
 	float *vertices;
 	float *texcoords;
+	int nvertices;
 
 	struct {
 		float tx, ty, tz;
@@ -65,10 +65,13 @@ struct physcontext {
 
 	GLuint fbo, dbo;
 
-	GLuint program;
-	GLint uprojection;
-	GLint uvtransform;
-	GLint utexture;
+	GLuint programs[2];
+	GLint uprojection0;
+	GLint uvtransform0;
+	GLint utexture0;
+	GLint uprojection1;
+	GLint uvtransform1;
+	GLint ucolor1;
 
 	struct fsdir *movies;
 	int imovies;
@@ -78,9 +81,214 @@ struct physcontext {
 	struct playback_decoder *decoderback;
 	struct playback_audio *audioback;
 	struct playback_video *videoback;
+
+	struct nemolist obj_list;
 };
 
-static void nemophys_render_3d_one(struct physcontext *context, struct nemomatrix *projection, uint32_t texture)
+struct objone {
+	struct nemolist link;
+
+	float *vertices;
+	float *texcoords;
+	float *normals;
+	int nvertices;
+
+	float color[4];
+
+	float sx, sy, sz;
+
+	btRigidBody *body;
+};
+
+static void nemophys_one_load_cube(struct objone *one)
+{
+	static const float vertices[] = {
+		1.0f, 1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f, -1.0f,
+		1.0f, 1.0f, -1.0f,
+		-1.0f, -1.0f, -1.0f,
+		-1.0f, 1.0f, -1.0f,
+
+		1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, -1.0f,
+		-1.0f, 1.0f, -1.0f,
+		1.0f, 1.0f, 1.0f,
+		-1.0f, 1.0f, -1.0f,
+		-1.0f, 1.0f, 1.0f,
+
+		1.0f, 1.0f, 1.0f,
+		1.0f, -1.0f, 1.0f,
+		1.0f, -1.0f, -1.0f,
+		1.0f, 1.0f, 1.0f,
+		1.0f, -1.0f, -1.0f,
+		1.0f, 1.0f, -1.0f,
+
+		-1.0f, 1.0f, -1.0f,
+		-1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f, 1.0f,
+		-1.0f, 1.0f, -1.0f,
+		-1.0f, -1.0f, 1.0f,
+		-1.0f, 1.0f, 1.0f,
+
+		1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f, 1.0f,
+		-1.0f, -1.0f, 1.0f,
+		1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f, 1.0f,
+		-1.0f, -1.0f, -1.0f,
+
+		-1.0f, 1.0f, 1.0f,
+		-1.0f, -1.0f, 1.0f,
+		1.0f, -1.0f, 1.0f,
+		-1.0f, 1.0f, 1.0f,
+		1.0f, -1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f
+	};
+	static const float texcoords[] = {
+		0.0f, 1.0f,
+		0.0f, 0.0f,
+		1.0f, 0.0f,
+		0.0f, 1.0f,
+		1.0f, 0.0f,
+		1.0f, 1.0f,
+
+		0.0f, 1.0f,
+		0.0f, 0.0f,
+		1.0f, 0.0f,
+		0.0f, 1.0f,
+		1.0f, 0.0f,
+		1.0f, 1.0f,
+
+		0.0f, 1.0f,
+		0.0f, 0.0f,
+		1.0f, 0.0f,
+		0.0f, 1.0f,
+		1.0f, 0.0f,
+		1.0f, 1.0f,
+
+		0.0f, 1.0f,
+		0.0f, 0.0f,
+		1.0f, 0.0f,
+		0.0f, 1.0f,
+		1.0f, 0.0f,
+		1.0f, 1.0f,
+
+		0.0f, 1.0f,
+		0.0f, 0.0f,
+		1.0f, 0.0f,
+		0.0f, 1.0f,
+		1.0f, 0.0f,
+		1.0f, 1.0f,
+
+		0.0f, 1.0f,
+		0.0f, 0.0f,
+		1.0f, 0.0f,
+		0.0f, 1.0f,
+		1.0f, 0.0f,
+		1.0f, 1.0f
+	};
+	static const float normals[] = {
+		0.0f, 0.0f, -1.0f,
+		0.0f, 0.0f, -1.0f,
+		0.0f, 0.0f, -1.0f,
+		0.0f, 0.0f, -1.0f,
+		0.0f, 0.0f, -1.0f,
+		0.0f, 0.0f, -1.0f,
+
+		0.0f, -1.0f, 0.0f,
+		0.0f, -1.0f, 0.0f,
+		0.0f, -1.0f, 0.0f,
+		0.0f, -1.0f, 0.0f,
+		0.0f, -1.0f, 0.0f,
+		0.0f, -1.0f, 0.0f,
+
+		-1.0f, 0.0f, 0.0f,
+		-1.0f, 0.0f, 0.0f,
+		-1.0f, 0.0f, 0.0f,
+		-1.0f, 0.0f, 0.0f,
+		-1.0f, 0.0f, 0.0f,
+		-1.0f, 0.0f, 0.0f,
+
+		1.0f, 0.0f, 0.0f,
+		1.0f, 0.0f, 0.0f,
+		1.0f, 0.0f, 0.0f,
+		1.0f, 0.0f, 0.0f,
+		1.0f, 0.0f, 0.0f,
+		1.0f, 0.0f, 0.0f,
+
+		0.0f, 1.0f, 0.0f,
+		0.0f, 1.0f, 0.0f,
+		0.0f, 1.0f, 0.0f,
+		0.0f, 1.0f, 0.0f,
+		0.0f, 1.0f, 0.0f,
+		0.0f, 1.0f, 0.0f,
+
+		0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f
+	};
+
+	one->nvertices = 6 * 6 * 3;
+
+	one->vertices = (float *)malloc(sizeof(float[3]) * 6 * 6);
+	one->texcoords = (float *)malloc(sizeof(float[2]) * 6 * 6);
+	one->normals = (float *)malloc(sizeof(float[3]) * 6 * 6);
+
+	memcpy(one->vertices, vertices, sizeof(float[3]) * 6 * 6);
+	memcpy(one->texcoords, texcoords, sizeof(float[2]) * 6 * 6);
+	memcpy(one->normals, normals, sizeof(float[3]) * 6 * 6);
+}
+
+static void nemophys_one_set_body(struct objone *one, btRigidBody *body)
+{
+	one->body = body;
+}
+
+static void nemophys_one_set_color(struct objone *one, float r, float g, float b, float a)
+{
+	one->color[0] = r;
+	one->color[1] = g;
+	one->color[2] = b;
+	one->color[3] = a;
+}
+
+static void nemophys_one_set_scale(struct objone *one, float sx, float sy, float sz)
+{
+	one->sx = sx;
+	one->sy = sy;
+	one->sz = sz;
+}
+
+static struct objone *nemophys_one_create(struct physcontext *context)
+{
+	struct objone *one;
+
+	one = (struct objone *)malloc(sizeof(struct objone));
+	if (one == NULL)
+		return NULL;
+	memset(one, 0, sizeof(struct objone));
+
+	nemolist_insert_tail(&context->obj_list, &one->link);
+
+	return one;
+}
+
+static void nemophys_one_destroy(struct physcontext *context, struct objone *one)
+{
+	nemolist_remove(&one->link);
+
+	free(one->vertices);
+	free(one->texcoords);
+	free(one->normals);
+
+	free(one);
+}
+
+static void nemophys_render_3d_one(struct physcontext *context, struct nemomatrix *projection, struct objone *one)
 {
 	struct nemomatrix vtransform;
 	float vertices[3 * 3] = {
@@ -93,27 +301,37 @@ static void nemophys_render_3d_one(struct physcontext *context, struct nemomatri
 		1.0f, 1.0f,
 		0.0f, 0.0f
 	};
-	double secs = time_current_secs();
+
+	btTransform transform;
+	one->body->getMotionState()->getWorldTransform(transform);
+
+	btQuaternion quaternion = transform.getRotation();
+	btVector3 rotation = quaternion.getAxis();
 
 	nemomatrix_init_identity(&vtransform);
-	nemomatrix_rotate_y(&vtransform, cos(secs * M_PI), sin(secs * M_PI));
+	nemomatrix_scale_xyz(&vtransform, one->sx, one->sy, one->sz);
+	nemomatrix_rotate_x(&vtransform, cos(rotation.x()), sin(rotation.x()));
+	nemomatrix_rotate_y(&vtransform, cos(rotation.y()), sin(rotation.y()));
+	nemomatrix_rotate_z(&vtransform, cos(rotation.z()), sin(rotation.z()));
+	nemomatrix_translate_xyz(&vtransform,
+			transform.getOrigin().getX(),
+			transform.getOrigin().getY(),
+			transform.getOrigin().getZ());
 
-	glUseProgram(context->program);
-	glBindAttribLocation(context->program, 0, "position");
-	glBindAttribLocation(context->program, 1, "texcoord");
+	glUseProgram(context->programs[1]);
+	glBindAttribLocation(context->programs[1], 0, "position");
+	glBindAttribLocation(context->programs[1], 1, "texcoord");
 
-	glUniform1i(context->utexture, 0);
-	glUniformMatrix4fv(context->uprojection, 1, GL_FALSE, projection->d);
-	glUniformMatrix4fv(context->uvtransform, 1, GL_FALSE, vtransform.d);
+	glUniform4fv(context->ucolor1, 1, one->color);
+	glUniformMatrix4fv(context->uprojection1, 1, GL_FALSE, projection->d);
+	glUniformMatrix4fv(context->uvtransform1, 1, GL_FALSE, vtransform.d);
 
-	glBindTexture(GL_TEXTURE_2D, texture);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &vertices[0]);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &one->vertices[0]);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), &texcoords[0]);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), &one->texcoords[0]);
 	glEnableVertexAttribArray(1);
 
-	glDrawArrays(GL_TRIANGLES, 0, 3);
+	glDrawArrays(GL_TRIANGLES, 0, one->nvertices);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
@@ -124,13 +342,13 @@ static void nemophys_render_3d_softbody(struct physcontext *context, struct nemo
 
 	nemomatrix_init_identity(&vtransform);
 
-	glUseProgram(context->program);
-	glBindAttribLocation(context->program, 0, "position");
-	glBindAttribLocation(context->program, 1, "texcoord");
+	glUseProgram(context->programs[0]);
+	glBindAttribLocation(context->programs[0], 0, "position");
+	glBindAttribLocation(context->programs[0], 1, "texcoord");
 
-	glUniform1i(context->utexture, 0);
-	glUniformMatrix4fv(context->uprojection, 1, GL_FALSE, projection->d);
-	glUniformMatrix4fv(context->uvtransform, 1, GL_FALSE, vtransform.d);
+	glUniform1i(context->utexture0, 0);
+	glUniformMatrix4fv(context->uprojection0, 1, GL_FALSE, projection->d);
+	glUniformMatrix4fv(context->uvtransform0, 1, GL_FALSE, vtransform.d);
 
 	glBindTexture(GL_TEXTURE_2D, texture);
 
@@ -139,7 +357,7 @@ static void nemophys_render_3d_softbody(struct physcontext *context, struct nemo
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), &context->texcoords[0]);
 	glEnableVertexAttribArray(1);
 
-	glDrawArrays(GL_TRIANGLES, 0, context->nfaces * 3);
+	glDrawArrays(GL_TRIANGLES, 0, context->nvertices);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
@@ -148,6 +366,7 @@ static void nemophys_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 {
 	struct physcontext *context = (struct physcontext *)nemoshow_get_userdata(show);
 	struct nemomatrix projection;
+	struct objone *one;
 
 	nemomatrix_init_identity(&projection);
 	nemomatrix_scale_xyz(&projection, context->projection.sx, context->projection.sy, context->projection.sz);
@@ -181,6 +400,10 @@ static void nemophys_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 
 	nemophys_render_3d_softbody(context, &projection, nemoshow_canvas_get_effective_texture(context->video));
 
+	nemolist_for_each(one, &context->obj_list, link) {
+		nemophys_render_3d_one(context, &projection, one);
+	}
+
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	nemoshow_one_dirty(canvas, NEMOSHOW_REDRAW_DIRTY);
@@ -198,6 +421,7 @@ static void nemophys_dispatch_canvas_event(struct nemoshow *show, struct showone
 	}
 
 	if (nemoshow_event_is_touch_down(show, event)) {
+		struct objone *one;
 		float x = nemoshow_event_get_x(event) / context->width * 2.0f - 1.0f;
 		float y = nemoshow_event_get_y(event) / context->height * 2.0f - 1.0f;
 
@@ -219,6 +443,12 @@ static void nemophys_dispatch_canvas_event(struct nemoshow *show, struct showone
 		body->setCcdSweptSphereRadius(0.1f);
 
 		context->dynamicsworld->addRigidBody(body);
+
+		one = nemophys_one_create(context);
+		nemophys_one_set_color(one, 0.0f, 1.0f, 1.0f, 1.0f);
+		nemophys_one_set_scale(one, 0.25f, 0.25f, 0.25f);
+		nemophys_one_set_body(one, body);
+		nemophys_one_load_cube(one);
 	}
 
 	if (context->is_fullscreen == 0) {
@@ -385,7 +615,7 @@ static int nemophys_prepare_softbody(struct physcontext *context, int columns, i
 			context->texcoords);
 	context->softbody->getCollisionShape()->setMargin(0.0f);
 
-	context->nfaces = context->softbody->m_faces.size();
+	context->nvertices = context->softbody->m_faces.size() * 3;
 
 	btSoftBody::Material *material = context->softbody->appendMaterial();
 	material->m_kLST = 0.001f;
@@ -455,17 +685,36 @@ static int nemophys_prepare_opengl(struct physcontext *context, int32_t width, i
 		"{\n"
 		"  gl_FragColor = texture2D(texture, vtexcoord);\n"
 		"}\n";
+	static const char *vertexshader_solid =
+		"uniform mat4 projection;\n"
+		"uniform mat4 vtransform;\n"
+		"attribute vec3 position;\n"
+		"void main()\n"
+		"{\n"
+		"  gl_Position = projection * vtransform * vec4(position.xyz, 1.0);\n"
+		"}\n";
+	static const char *fragmentshader_solid =
+		"precision mediump float;\n"
+		"uniform vec4 color;\n"
+		"void main()\n"
+		"{\n"
+		"  gl_FragColor = color;\n"
+		"}\n";
 
 	fbo_prepare_context(
 			nemoshow_canvas_get_texture(context->canvas),
 			width, height,
 			&context->fbo, &context->dbo);
 
-	context->program = glshader_compile_program(vertexshader_texture, fragmentshader_texture, NULL, NULL);
+	context->programs[0] = glshader_compile_program(vertexshader_texture, fragmentshader_texture, NULL, NULL);
+	context->programs[1] = glshader_compile_program(vertexshader_solid, fragmentshader_solid, NULL, NULL);
 
-	context->uprojection = glGetUniformLocation(context->program, "projection");
-	context->uvtransform = glGetUniformLocation(context->program, "vtransform");
-	context->utexture = glGetUniformLocation(context->program, "texture");
+	context->uprojection0 = glGetUniformLocation(context->programs[0], "projection");
+	context->uvtransform0 = glGetUniformLocation(context->programs[0], "vtransform");
+	context->utexture0 = glGetUniformLocation(context->programs[0], "texture");
+	context->uprojection1 = glGetUniformLocation(context->programs[1], "projection");
+	context->uvtransform1 = glGetUniformLocation(context->programs[1], "vtransform");
+	context->ucolor1 = glGetUniformLocation(context->programs[1], "color");
 
 	return 0;
 }
@@ -475,7 +724,8 @@ static void nemophys_finish_opengl(struct physcontext *context)
 	glDeleteFramebuffers(1, &context->fbo);
 	glDeleteRenderbuffers(1, &context->dbo);
 
-	glDeleteProgram(context->program);
+	glDeleteProgram(context->programs[0]);
+	glDeleteProgram(context->programs[1]);
 }
 
 int main(int argc, char *argv[])
@@ -543,6 +793,8 @@ int main(int argc, char *argv[])
 	context->perspective.top = 1.0f;
 	context->perspective.near = 0.99999f;
 	context->perspective.far = 10.0f;
+
+	nemolist_init(&context->obj_list);
 
 	context->tool = tool = nemotool_create();
 	if (tool == NULL)
