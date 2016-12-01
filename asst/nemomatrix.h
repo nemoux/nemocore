@@ -108,8 +108,8 @@ extern double nemovector_dot(struct nemovector *v0, struct nemovector *v1);
 extern void nemovector_cross(struct nemovector *v0, struct nemovector *v1);
 extern void nemovector_normalize(struct nemovector *v0);
 
-extern void nemomatrix_init_quaternion(struct nemomatrix *matrix, struct nemoquaternion *quat);
-extern void nemomatrix_multiply_quaternion(struct nemomatrix *matrix, struct nemoquaternion *quat);
+extern void nemomatrix_init_quaternion(struct nemomatrix *matrix, float qx, float qy, float qz, float qw);
+extern void nemomatrix_multiply_quaternion(struct nemomatrix *matrix, float qx, float qy, float qz, float qw);
 
 extern void nemomatrix_init_3x3(struct nemomatrix *matrix, float m[9]);
 extern void nemomatrix_init_4x4(struct nemomatrix *matrix, float m[16]);
@@ -121,6 +121,8 @@ extern float nemoquaternion_length(struct nemoquaternion *quat);
 extern void nemoquaternion_conjugate(struct nemoquaternion *quat);
 extern void nemoquaternion_invert(struct nemoquaternion *quat);
 extern void nemoquaternion_normalize(struct nemoquaternion *quat);
+extern void nemoquaternion_init_matrix(struct nemoquaternion *quat, struct nemomatrix *matrix);
+extern void nemoquaternion_multiply_matrix(struct nemoquaternion *quat, struct nemomatrix *matrix);
 
 static inline void nemomatrix_set_factor(struct nemomatrix *matrix, int y, int x, float v)
 {

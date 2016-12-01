@@ -305,14 +305,16 @@ static void nemophys_render_3d_one(struct physcontext *context, struct nemomatri
 	btTransform transform;
 	one->body->getMotionState()->getWorldTransform(transform);
 
-	btQuaternion quaternion = transform.getRotation();
-	btVector3 rotation = quaternion.getAxis();
+	btQuaternion quaternion;
+	quaternion = transform.getRotation();
 
 	nemomatrix_init_identity(&vtransform);
 	nemomatrix_scale_xyz(&vtransform, one->sx, one->sy, one->sz);
-	nemomatrix_rotate_x(&vtransform, cos(rotation.x()), sin(rotation.x()));
-	nemomatrix_rotate_y(&vtransform, cos(rotation.y()), sin(rotation.y()));
-	nemomatrix_rotate_z(&vtransform, cos(rotation.z()), sin(rotation.z()));
+	nemomatrix_multiply_quaternion(&vtransform,
+			quaternion.x(),
+			quaternion.y(),
+			quaternion.z(),
+			quaternion.w());
 	nemomatrix_translate_xyz(&vtransform,
 			transform.getOrigin().getX(),
 			transform.getOrigin().getY(),
@@ -421,24 +423,26 @@ static void nemophys_dispatch_canvas_event(struct nemoshow *show, struct showone
 	}
 
 	if (nemoshow_event_is_touch_down(show, event)) {
-		struct objone *one;
 		float x = nemoshow_event_get_x(event) / context->width * 2.0f - 1.0f;
 		float y = nemoshow_event_get_y(event) / context->height * 2.0f - 1.0f;
+		struct objone *one;
 
-		btSphereShape *sphere = new btSphereShape(1.0f);
-		sphere->setLocalScaling(btVector3(0.25f, 0.25f, 0.25f));
+		btBoxShape *shape = new btBoxShape(btVector3(1.0f, 1.0f, 1.0f));
+		shape->setLocalScaling(btVector3(0.25f, 0.25f, 0.25f));
 
 		btTransform transform;
 		transform.setIdentity();
 		transform.setOrigin(btVector3(x, y, 0.0f));
+		transform.setRotation(btQuaternion(btVector3(1, 1, 1), random_get_double(0.0f, M_PI)));
 
-		btScalar mass(100.0f);
+		btScalar mass(1.0f);
 		btVector3 linertia(0, 0, 0);
+		shape->calculateLocalInertia(mass, linertia);
 
 		btDefaultMotionState *motionstate = new btDefaultMotionState(transform);
-		btRigidBody::btRigidBodyConstructionInfo bodyinfo(mass, motionstate, sphere, linertia);
+		btRigidBody::btRigidBodyConstructionInfo bodyinfo(mass, motionstate, shape, linertia);
 		btRigidBody *body = new btRigidBody(bodyinfo);
-		body->applyCentralForce(btVector3(0, 0, -50000));
+		body->applyCentralForce(btVector3(0, 0, -200));
 		body->setCcdMotionThreshold(1.0f);
 		body->setCcdSweptSphereRadius(0.1f);
 

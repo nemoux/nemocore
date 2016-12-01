@@ -672,12 +672,8 @@ void nemovector_normalize(struct nemovector *v0)
 	v0->f[2] /= l;
 }
 
-void nemomatrix_init_quaternion(struct nemomatrix *matrix, struct nemoquaternion *quat)
+void nemomatrix_init_quaternion(struct nemomatrix *matrix, float qx, float qy, float qz, float qw)
 {
-	float qx = quat->q[0];
-	float qy = quat->q[1];
-	float qz = quat->q[2];
-	float qw = quat->q[3];
 	struct nemomatrix rotate = {
 		.d = {
 			1 - 2 * qy * qy - 2 * qz * qz, 2 * qx * qy + 2 * qz * qw, 2 * qx * qz - 2 * qy * qw, 0,
@@ -691,12 +687,8 @@ void nemomatrix_init_quaternion(struct nemomatrix *matrix, struct nemoquaternion
 	memcpy(matrix, &rotate, sizeof(rotate));
 }
 
-void nemomatrix_multiply_quaternion(struct nemomatrix *matrix, struct nemoquaternion *quat)
+void nemomatrix_multiply_quaternion(struct nemomatrix *matrix, float qx, float qy, float qz, float qw)
 {
-	float qx = quat->q[0];
-	float qy = quat->q[1];
-	float qz = quat->q[2];
-	float qw = quat->q[3];
 	struct nemomatrix rotate = {
 		.d = {
 			1 - 2 * qy * qy - 2 * qz * qz, 2 * qx * qy + 2 * qz * qw, 2 * qx * qz - 2 * qy * qw, 0,
@@ -790,4 +782,42 @@ void nemoquaternion_normalize(struct nemoquaternion *quat)
 	quat->q[1] = qy * s;
 	quat->q[2] = qz * s;
 	quat->q[3] = qw * s;
+}
+
+void nemoquaternion_init_matrix(struct nemoquaternion *quat, struct nemomatrix *matrix)
+{
+	float qx = quat->q[0];
+	float qy = quat->q[1];
+	float qz = quat->q[2];
+	float qw = quat->q[3];
+	struct nemomatrix rotate = {
+		.d = {
+			1 - 2 * qy * qy - 2 * qz * qz, 2 * qx * qy + 2 * qz * qw, 2 * qx * qz - 2 * qy * qw, 0,
+			2 * qx * qy - 2 * qz * qw, 1 - 2 * qx * qx - 2 * qz * qz, 2 * qy * qz + 2 * qx * qw, 0,
+			2 * qx * qz + 2 * qy * qw, 2 * qy * qz - 2 * qx * qw, 1 - 2 * qx * qx - 2 * qy * qy, 0,
+			0, 0, 0, 1
+		},
+		.type = NEMOMATRIX_TRANSFORM_ROTATE,
+	};
+
+	memcpy(matrix, &rotate, sizeof(rotate));
+}
+
+void nemoquaternion_multiply_matrix(struct nemoquaternion *quat, struct nemomatrix *matrix)
+{
+	float qx = quat->q[0];
+	float qy = quat->q[1];
+	float qz = quat->q[2];
+	float qw = quat->q[3];
+	struct nemomatrix rotate = {
+		.d = {
+			1 - 2 * qy * qy - 2 * qz * qz, 2 * qx * qy + 2 * qz * qw, 2 * qx * qz - 2 * qy * qw, 0,
+			2 * qx * qy - 2 * qz * qw, 1 - 2 * qx * qx - 2 * qz * qz, 2 * qy * qz + 2 * qx * qw, 0,
+			2 * qx * qz + 2 * qy * qw, 2 * qy * qz - 2 * qx * qw, 1 - 2 * qx * qx - 2 * qy * qy, 0,
+			0, 0, 0, 1
+		},
+		.type = NEMOMATRIX_TRANSFORM_ROTATE,
+	};
+
+	nemomatrix_multiply(matrix, &rotate);
 }
