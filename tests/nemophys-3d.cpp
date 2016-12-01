@@ -202,18 +202,21 @@ static void nemophys_dispatch_canvas_event(struct nemoshow *show, struct showone
 		float y = nemoshow_event_get_y(event) / context->height * 2.0f - 1.0f;
 
 		btSphereShape *sphere = new btSphereShape(1.0f);
+		sphere->setLocalScaling(btVector3(0.25f, 0.25f, 0.25f));
 
 		btTransform transform;
 		transform.setIdentity();
 		transform.setOrigin(btVector3(x, y, 0.0f));
 
-		btScalar mass(3.0f);
+		btScalar mass(100.0f);
 		btVector3 linertia(0, 0, 0);
 
 		btDefaultMotionState *motionstate = new btDefaultMotionState(transform);
 		btRigidBody::btRigidBodyConstructionInfo bodyinfo(mass, motionstate, sphere, linertia);
 		btRigidBody *body = new btRigidBody(bodyinfo);
-		body->applyCentralForce(btVector3(0, 0, -500));
+		body->applyCentralForce(btVector3(0, 0, -50000));
+		body->setCcdMotionThreshold(1.0f);
+		body->setCcdSweptSphereRadius(0.1f);
 
 		context->dynamicsworld->addRigidBody(body);
 	}
@@ -380,7 +383,7 @@ static int nemophys_prepare_softbody(struct physcontext *context, int columns, i
 			columns, rows,
 			4 + 8, true,
 			context->texcoords);
-	context->softbody->getCollisionShape()->setMargin(0.001f);
+	context->softbody->getCollisionShape()->setMargin(0.0f);
 
 	context->nfaces = context->softbody->m_faces.size();
 
@@ -406,6 +409,29 @@ static void nemophys_finish_softbody(struct physcontext *context)
 	free(context->texcoords);
 
 	delete context->softbody;
+}
+
+static int nemophys_prepare_floor(struct physcontext *context)
+{
+	btCollisionShape *shape = new btBoxShape(btVector3(100.0f, 5.0f, 100.0f));
+
+	btTransform transform;
+	transform.setIdentity();
+	transform.setOrigin(btVector3(0.0f, 6.0f, 0.0f));
+
+	btScalar mass(0.0f);
+	btVector3 linertia(0, 0, 0);
+	btDefaultMotionState *motionstate = new btDefaultMotionState(transform);
+	btRigidBody::btRigidBodyConstructionInfo bodyinfo(mass, motionstate, shape, linertia);
+	btRigidBody *body = new btRigidBody(bodyinfo);
+
+	context->dynamicsworld->addRigidBody(body);
+
+	return 0;
+}
+
+static void nemophys_finish_floor(struct physcontext *context)
+{
 }
 
 static int nemophys_prepare_opengl(struct physcontext *context, int32_t width, int32_t height)
@@ -564,6 +590,7 @@ int main(int argc, char *argv[])
 	nemophys_prepare_opengl(context, width, height);
 	nemophys_prepare_bullet(context);
 	nemophys_prepare_softbody(context, 24, 24);
+	nemophys_prepare_floor(context);
 
 	if (videopath != NULL) {
 		if (os_check_path_is_directory(videopath) != 0) {
@@ -604,6 +631,7 @@ int main(int argc, char *argv[])
 
 	nemotool_run(tool);
 
+	nemophys_finish_floor(context);
 	nemophys_finish_softbody(context);
 	nemophys_finish_bullet(context);
 	nemophys_finish_opengl(context);
