@@ -248,8 +248,10 @@ static void nemophys_one_load_cube(struct objone *one)
 
 static void nemophys_one_load_sphere(struct objone *one, int rings, int sectors, float radius)
 {
-	float dr = 1.0f / (float)(rings - 1);
-	float ds = 1.0f / (float)(sectors - 1);
+	float vr = 1.0f / (float)(rings - 0);
+	float vs = 1.0f / (float)(sectors - 0);
+	float tr = 1.0f / (float)(rings - 0);
+	float ts = 1.0f / (float)(sectors - 0);
 	int r, s;
 	int i;
 
@@ -259,61 +261,61 @@ static void nemophys_one_load_sphere(struct objone *one, int rings, int sectors,
 	one->texcoords = (float *)malloc(sizeof(float[2]) * rings * sectors * 6);
 	one->normals = (float *)malloc(sizeof(float[3]) * rings * sectors * 6);
 
-#define NEMOSPHERE_X(s, ds, r, dr)		(cos(2 * M_PI * (s) * ds) * sin(M_PI * (r) * dr))
-#define NEMOSPHERE_Y(s, ds, r, dr)		(sin(-M_PI_2 + M_PI * (r) * dr))
-#define NEMOSPHERE_Z(s, ds, r, dr)		(sin(2 * M_PI * (s) * ds) * sin(M_PI * (r) * dr))
+#define NEMOSPHERE_X(s, vs, r, vr)		(cos(2 * M_PI * (s) * vs) * sin(M_PI * (r) * vr))
+#define NEMOSPHERE_Y(s, vs, r, vr)		(sin(-M_PI_2 + M_PI * (r) * vr))
+#define NEMOSPHERE_Z(s, vs, r, vr)		(sin(2 * M_PI * (s) * vs) * sin(M_PI * (r) * vr))
 
 	for (r = 0, i = 0; r < rings; r++) {
 		for (s = 0; s < sectors; s++, i++) {
-			one->vertices[(i * 6 + 0) * 3 + 0] = NEMOSPHERE_X(s + 0, ds, r + 0, dr) * radius;
-			one->vertices[(i * 6 + 0) * 3 + 1] = NEMOSPHERE_Y(s + 0, ds, r + 0, dr) * radius;
-			one->vertices[(i * 6 + 0) * 3 + 2] = NEMOSPHERE_Z(s + 0, ds, r + 0, dr) * radius;
-			one->texcoords[(i * 6 + 0) * 2 + 0] = (s + 0) * ds;
-			one->texcoords[(i * 6 + 0) * 2 + 1] = (r + 0) * dr;
-			one->normals[(i * 6 + 0) * 3 + 0] = NEMOSPHERE_X(s + 0, ds, r + 0, dr);
-			one->normals[(i * 6 + 0) * 3 + 1] = NEMOSPHERE_Y(s + 0, ds, r + 0, dr);
-			one->normals[(i * 6 + 0) * 3 + 2] = NEMOSPHERE_Z(s + 0, ds, r + 0, dr);
-			one->vertices[(i * 6 + 1) * 3 + 0] = NEMOSPHERE_X(s + 1, ds, r + 0, dr) * radius;
-			one->vertices[(i * 6 + 1) * 3 + 1] = NEMOSPHERE_Y(s + 1, ds, r + 0, dr) * radius;
-			one->vertices[(i * 6 + 1) * 3 + 2] = NEMOSPHERE_Z(s + 1, ds, r + 0, dr) * radius;
-			one->texcoords[(i * 6 + 1) * 2 + 0] = (s + 1) * ds;
-			one->texcoords[(i * 6 + 1) * 2 + 1] = (r + 0) * dr;
-			one->normals[(i * 6 + 1) * 3 + 0] = NEMOSPHERE_X(s + 1, ds, r + 0, dr);
-			one->normals[(i * 6 + 1) * 3 + 1] = NEMOSPHERE_Y(s + 1, ds, r + 0, dr);
-			one->normals[(i * 6 + 1) * 3 + 2] = NEMOSPHERE_Z(s + 1, ds, r + 0, dr);
-			one->vertices[(i * 6 + 2) * 3 + 0] = NEMOSPHERE_X(s + 1, ds, r + 1, dr) * radius;
-			one->vertices[(i * 6 + 2) * 3 + 1] = NEMOSPHERE_Y(s + 1, ds, r + 1, dr) * radius;
-			one->vertices[(i * 6 + 2) * 3 + 2] = NEMOSPHERE_Z(s + 1, ds, r + 1, dr) * radius;
-			one->texcoords[(i * 6 + 2) * 2 + 0] = (s + 1) * ds;
-			one->texcoords[(i * 6 + 2) * 2 + 1] = (r + 1) * dr;
-			one->normals[(i * 6 + 2) * 3 + 0] = NEMOSPHERE_X(s + 1, ds, r + 1, dr);
-			one->normals[(i * 6 + 2) * 3 + 1] = NEMOSPHERE_Y(s + 1, ds, r + 1, dr);
-			one->normals[(i * 6 + 2) * 3 + 2] = NEMOSPHERE_Z(s + 1, ds, r + 1, dr);
+			one->vertices[(i * 6 + 0) * 3 + 0] = NEMOSPHERE_X(s + 0, vs, r + 0, vr) * radius;
+			one->vertices[(i * 6 + 0) * 3 + 1] = NEMOSPHERE_Y(s + 0, vs, r + 0, vr) * radius;
+			one->vertices[(i * 6 + 0) * 3 + 2] = NEMOSPHERE_Z(s + 0, vs, r + 0, vr) * radius;
+			one->texcoords[(i * 6 + 0) * 2 + 0] = (s + 0) * ts;
+			one->texcoords[(i * 6 + 0) * 2 + 1] = (r + 0) * tr;
+			one->normals[(i * 6 + 0) * 3 + 0] = NEMOSPHERE_X(s + 0, vs, r + 0, vr);
+			one->normals[(i * 6 + 0) * 3 + 1] = NEMOSPHERE_Y(s + 0, vs, r + 0, vr);
+			one->normals[(i * 6 + 0) * 3 + 2] = NEMOSPHERE_Z(s + 0, vs, r + 0, vr);
+			one->vertices[(i * 6 + 1) * 3 + 0] = NEMOSPHERE_X(s + 1, vs, r + 0, vr) * radius;
+			one->vertices[(i * 6 + 1) * 3 + 1] = NEMOSPHERE_Y(s + 1, vs, r + 0, vr) * radius;
+			one->vertices[(i * 6 + 1) * 3 + 2] = NEMOSPHERE_Z(s + 1, vs, r + 0, vr) * radius;
+			one->texcoords[(i * 6 + 1) * 2 + 0] = (s + 1) * ts;
+			one->texcoords[(i * 6 + 1) * 2 + 1] = (r + 0) * tr;
+			one->normals[(i * 6 + 1) * 3 + 0] = NEMOSPHERE_X(s + 1, vs, r + 0, vr);
+			one->normals[(i * 6 + 1) * 3 + 1] = NEMOSPHERE_Y(s + 1, vs, r + 0, vr);
+			one->normals[(i * 6 + 1) * 3 + 2] = NEMOSPHERE_Z(s + 1, vs, r + 0, vr);
+			one->vertices[(i * 6 + 2) * 3 + 0] = NEMOSPHERE_X(s + 1, vs, r + 1, vr) * radius;
+			one->vertices[(i * 6 + 2) * 3 + 1] = NEMOSPHERE_Y(s + 1, vs, r + 1, vr) * radius;
+			one->vertices[(i * 6 + 2) * 3 + 2] = NEMOSPHERE_Z(s + 1, vs, r + 1, vr) * radius;
+			one->texcoords[(i * 6 + 2) * 2 + 0] = (s + 1) * ts;
+			one->texcoords[(i * 6 + 2) * 2 + 1] = (r + 1) * tr;
+			one->normals[(i * 6 + 2) * 3 + 0] = NEMOSPHERE_X(s + 1, vs, r + 1, vr);
+			one->normals[(i * 6 + 2) * 3 + 1] = NEMOSPHERE_Y(s + 1, vs, r + 1, vr);
+			one->normals[(i * 6 + 2) * 3 + 2] = NEMOSPHERE_Z(s + 1, vs, r + 1, vr);
 
-			one->vertices[(i * 6 + 3) * 3 + 0] = NEMOSPHERE_X(s + 0, ds, r + 0, dr) * radius;
-			one->vertices[(i * 6 + 3) * 3 + 1] = NEMOSPHERE_Y(s + 0, ds, r + 0, dr) * radius;
-			one->vertices[(i * 6 + 3) * 3 + 2] = NEMOSPHERE_Z(s + 0, ds, r + 0, dr) * radius;
-			one->texcoords[(i * 6 + 3) * 2 + 0] = (s + 0) * ds;
-			one->texcoords[(i * 6 + 3) * 2 + 1] = (r + 0) * dr;
-			one->normals[(i * 6 + 3) * 3 + 0] = NEMOSPHERE_X(s + 0, ds, r + 0, dr);
-			one->normals[(i * 6 + 3) * 3 + 1] = NEMOSPHERE_Y(s + 0, ds, r + 0, dr);
-			one->normals[(i * 6 + 3) * 3 + 2] = NEMOSPHERE_Z(s + 0, ds, r + 0, dr);
-			one->vertices[(i * 6 + 4) * 3 + 0] = NEMOSPHERE_X(s + 1, ds, r + 1, dr) * radius;
-			one->vertices[(i * 6 + 4) * 3 + 1] = NEMOSPHERE_Y(s + 1, ds, r + 1, dr) * radius;
-			one->vertices[(i * 6 + 4) * 3 + 2] = NEMOSPHERE_Z(s + 1, ds, r + 1, dr) * radius;
-			one->texcoords[(i * 6 + 4) * 2 + 0] = (s + 1) * ds;
-			one->texcoords[(i * 6 + 4) * 2 + 1] = (r + 1) * dr;
-			one->normals[(i * 6 + 4) * 3 + 0] = NEMOSPHERE_X(s + 1, ds, r + 1, dr);
-			one->normals[(i * 6 + 4) * 3 + 1] = NEMOSPHERE_Y(s + 1, ds, r + 1, dr);
-			one->normals[(i * 6 + 4) * 3 + 2] = NEMOSPHERE_Z(s + 1, ds, r + 1, dr);
-			one->vertices[(i * 6 + 5) * 3 + 0] = NEMOSPHERE_X(s + 0, ds, r + 1, dr) * radius;
-			one->vertices[(i * 6 + 5) * 3 + 1] = NEMOSPHERE_Y(s + 0, ds, r + 1, dr) * radius;
-			one->vertices[(i * 6 + 5) * 3 + 2] = NEMOSPHERE_Z(s + 0, ds, r + 1, dr) * radius;
-			one->texcoords[(i * 6 + 5) * 2 + 0] = (s + 0) * ds;
-			one->texcoords[(i * 6 + 5) * 2 + 1] = (r + 1) * dr;
-			one->normals[(i * 6 + 5) * 3 + 0] = NEMOSPHERE_X(s + 0, ds, r + 1, dr);
-			one->normals[(i * 6 + 5) * 3 + 1] = NEMOSPHERE_Y(s + 0, ds, r + 1, dr);
-			one->normals[(i * 6 + 5) * 3 + 2] = NEMOSPHERE_Z(s + 0, ds, r + 1, dr);
+			one->vertices[(i * 6 + 3) * 3 + 0] = NEMOSPHERE_X(s + 0, vs, r + 0, vr) * radius;
+			one->vertices[(i * 6 + 3) * 3 + 1] = NEMOSPHERE_Y(s + 0, vs, r + 0, vr) * radius;
+			one->vertices[(i * 6 + 3) * 3 + 2] = NEMOSPHERE_Z(s + 0, vs, r + 0, vr) * radius;
+			one->texcoords[(i * 6 + 3) * 2 + 0] = (s + 0) * ts;
+			one->texcoords[(i * 6 + 3) * 2 + 1] = (r + 0) * tr;
+			one->normals[(i * 6 + 3) * 3 + 0] = NEMOSPHERE_X(s + 0, vs, r + 0, vr);
+			one->normals[(i * 6 + 3) * 3 + 1] = NEMOSPHERE_Y(s + 0, vs, r + 0, vr);
+			one->normals[(i * 6 + 3) * 3 + 2] = NEMOSPHERE_Z(s + 0, vs, r + 0, vr);
+			one->vertices[(i * 6 + 4) * 3 + 0] = NEMOSPHERE_X(s + 1, vs, r + 1, vr) * radius;
+			one->vertices[(i * 6 + 4) * 3 + 1] = NEMOSPHERE_Y(s + 1, vs, r + 1, vr) * radius;
+			one->vertices[(i * 6 + 4) * 3 + 2] = NEMOSPHERE_Z(s + 1, vs, r + 1, vr) * radius;
+			one->texcoords[(i * 6 + 4) * 2 + 0] = (s + 1) * ts;
+			one->texcoords[(i * 6 + 4) * 2 + 1] = (r + 1) * tr;
+			one->normals[(i * 6 + 4) * 3 + 0] = NEMOSPHERE_X(s + 1, vs, r + 1, vr);
+			one->normals[(i * 6 + 4) * 3 + 1] = NEMOSPHERE_Y(s + 1, vs, r + 1, vr);
+			one->normals[(i * 6 + 4) * 3 + 2] = NEMOSPHERE_Z(s + 1, vs, r + 1, vr);
+			one->vertices[(i * 6 + 5) * 3 + 0] = NEMOSPHERE_X(s + 0, vs, r + 1, vr) * radius;
+			one->vertices[(i * 6 + 5) * 3 + 1] = NEMOSPHERE_Y(s + 0, vs, r + 1, vr) * radius;
+			one->vertices[(i * 6 + 5) * 3 + 2] = NEMOSPHERE_Z(s + 0, vs, r + 1, vr) * radius;
+			one->texcoords[(i * 6 + 5) * 2 + 0] = (s + 0) * ts;
+			one->texcoords[(i * 6 + 5) * 2 + 1] = (r + 1) * tr;
+			one->normals[(i * 6 + 5) * 3 + 0] = NEMOSPHERE_X(s + 0, vs, r + 1, vr);
+			one->normals[(i * 6 + 5) * 3 + 1] = NEMOSPHERE_Y(s + 0, vs, r + 1, vr);
+			one->normals[(i * 6 + 5) * 3 + 2] = NEMOSPHERE_Z(s + 0, vs, r + 1, vr);
 		}
 	}
 }
@@ -568,7 +570,7 @@ static void nemophys_dispatch_canvas_event(struct nemoshow *show, struct showone
 			nemophys_one_set_scale(one, 0.25f, 0.25f, 0.25f);
 			nemophys_one_set_body(one, body);
 			nemophys_one_set_canvas(one, context->video);
-			nemophys_one_load_sphere(one, 16, 16, 1.0f);
+			nemophys_one_load_sphere(one, 12, 12, 1.0f);
 		}
 
 		context->ishapes = (context->ishapes + 1) % 2;
