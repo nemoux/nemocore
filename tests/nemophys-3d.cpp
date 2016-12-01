@@ -99,6 +99,8 @@ struct objone {
 	float sx, sy, sz;
 
 	btRigidBody *body;
+
+	struct showone *canvas;
 };
 
 static void nemophys_one_load_cube(struct objone *one)
@@ -321,6 +323,11 @@ static void nemophys_one_set_body(struct objone *one, btRigidBody *body)
 	one->body = body;
 }
 
+static void nemophys_one_set_canvas(struct objone *one, struct showone *canvas)
+{
+	one->canvas = canvas;
+}
+
 static void nemophys_one_set_color(struct objone *one, float r, float g, float b, float a)
 {
 	one->color[0] = r;
@@ -383,20 +390,36 @@ static void nemophys_render_3d_one(struct physcontext *context, struct nemomatri
 			transform.getOrigin().getY(),
 			transform.getOrigin().getZ());
 
-	glUseProgram(context->programs[1]);
-	glBindAttribLocation(context->programs[1], 0, "position");
-	glBindAttribLocation(context->programs[1], 1, "texcoord");
+	if (one->canvas == NULL) {
+		glUseProgram(context->programs[1]);
+		glBindAttribLocation(context->programs[1], 0, "position");
 
-	glUniform4fv(context->ucolor1, 1, one->color);
-	glUniformMatrix4fv(context->uprojection1, 1, GL_FALSE, projection->d);
-	glUniformMatrix4fv(context->uvtransform1, 1, GL_FALSE, vtransform.d);
+		glUniform4fv(context->ucolor1, 1, one->color);
+		glUniformMatrix4fv(context->uprojection1, 1, GL_FALSE, projection->d);
+		glUniformMatrix4fv(context->uvtransform1, 1, GL_FALSE, vtransform.d);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &one->vertices[0]);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), &one->texcoords[0]);
-	glEnableVertexAttribArray(1);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &one->vertices[0]);
+		glEnableVertexAttribArray(0);
 
-	glDrawArrays(GL_TRIANGLES, 0, one->nvertices);
+		glDrawArrays(GL_TRIANGLES, 0, one->nvertices);
+	} else {
+		glUseProgram(context->programs[0]);
+		glBindAttribLocation(context->programs[0], 0, "position");
+		glBindAttribLocation(context->programs[0], 1, "texcoord");
+
+		glUniform4fv(context->utexture0, 1, 0);
+		glUniformMatrix4fv(context->uprojection0, 1, GL_FALSE, projection->d);
+		glUniformMatrix4fv(context->uvtransform0, 1, GL_FALSE, vtransform.d);
+
+		glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_effective_texture(one->canvas));
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &one->vertices[0]);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), &one->texcoords[0]);
+		glEnableVertexAttribArray(1);
+
+		glDrawArrays(GL_TRIANGLES, 0, one->nvertices);
+	}
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
@@ -506,7 +529,7 @@ static void nemophys_dispatch_canvas_event(struct nemoshow *show, struct showone
 			btDefaultMotionState *motionstate = new btDefaultMotionState(transform);
 			btRigidBody::btRigidBodyConstructionInfo bodyinfo(mass, motionstate, shape, linertia);
 			btRigidBody *body = new btRigidBody(bodyinfo);
-			body->applyCentralForce(btVector3(0, 0, random_get_int(-400, -200)));
+			body->applyCentralForce(btVector3(0, 0, random_get_int(-300, -100)));
 			body->setCcdMotionThreshold(1.0f);
 			body->setCcdSweptSphereRadius(0.1f);
 
@@ -516,6 +539,7 @@ static void nemophys_dispatch_canvas_event(struct nemoshow *show, struct showone
 			nemophys_one_set_color(one, 0.0f, 1.0f, 1.0f, 1.0f);
 			nemophys_one_set_scale(one, 0.25f, 0.25f, 0.25f);
 			nemophys_one_set_body(one, body);
+			nemophys_one_set_canvas(one, context->video);
 			nemophys_one_load_cube(one);
 		} else {
 			btSphereShape *shape = new btSphereShape(1.0f);
@@ -543,6 +567,7 @@ static void nemophys_dispatch_canvas_event(struct nemoshow *show, struct showone
 			nemophys_one_set_color(one, 0.0f, 1.0f, 1.0f, 1.0f);
 			nemophys_one_set_scale(one, 0.25f, 0.25f, 0.25f);
 			nemophys_one_set_body(one, body);
+			nemophys_one_set_canvas(one, context->video);
 			nemophys_one_load_sphere(one, 16, 16, 1.0f);
 		}
 
