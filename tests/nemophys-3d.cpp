@@ -83,6 +83,7 @@ struct physcontext {
 	struct playback_video *videoback;
 
 	struct nemolist obj_list;
+	int ishapes;
 };
 
 struct objone {
@@ -232,7 +233,7 @@ static void nemophys_one_load_cube(struct objone *one)
 		0.0f, 0.0f, 1.0f
 	};
 
-	one->nvertices = 6 * 6 * 3;
+	one->nvertices = 6 * 6;
 
 	one->vertices = (float *)malloc(sizeof(float[3]) * 6 * 6);
 	one->texcoords = (float *)malloc(sizeof(float[2]) * 6 * 6);
@@ -241,6 +242,78 @@ static void nemophys_one_load_cube(struct objone *one)
 	memcpy(one->vertices, vertices, sizeof(float[3]) * 6 * 6);
 	memcpy(one->texcoords, texcoords, sizeof(float[2]) * 6 * 6);
 	memcpy(one->normals, normals, sizeof(float[3]) * 6 * 6);
+}
+
+static void nemophys_one_load_sphere(struct objone *one, int rings, int sectors, float radius)
+{
+	float dr = 1.0f / (float)(rings - 1);
+	float ds = 1.0f / (float)(sectors - 1);
+	int r, s;
+	int i;
+
+	one->nvertices = rings * sectors * 6;
+
+	one->vertices = (float *)malloc(sizeof(float[3]) * rings * sectors * 6);
+	one->texcoords = (float *)malloc(sizeof(float[2]) * rings * sectors * 6);
+	one->normals = (float *)malloc(sizeof(float[3]) * rings * sectors * 6);
+
+#define NEMOSPHERE_X(s, ds, r, dr)		(cos(2 * M_PI * (s) * ds) * sin(M_PI * (r) * dr))
+#define NEMOSPHERE_Y(s, ds, r, dr)		(sin(-M_PI_2 + M_PI * (r) * dr))
+#define NEMOSPHERE_Z(s, ds, r, dr)		(sin(2 * M_PI * (s) * ds) * sin(M_PI * (r) * dr))
+
+	for (r = 0, i = 0; r < rings; r++) {
+		for (s = 0; s < sectors; s++, i++) {
+			one->vertices[(i * 6 + 0) * 3 + 0] = NEMOSPHERE_X(s + 0, ds, r + 0, dr) * radius;
+			one->vertices[(i * 6 + 0) * 3 + 1] = NEMOSPHERE_Y(s + 0, ds, r + 0, dr) * radius;
+			one->vertices[(i * 6 + 0) * 3 + 2] = NEMOSPHERE_Z(s + 0, ds, r + 0, dr) * radius;
+			one->texcoords[(i * 6 + 0) * 2 + 0] = (s + 0) * ds;
+			one->texcoords[(i * 6 + 0) * 2 + 1] = (r + 0) * dr;
+			one->normals[(i * 6 + 0) * 3 + 0] = NEMOSPHERE_X(s + 0, ds, r + 0, dr);
+			one->normals[(i * 6 + 0) * 3 + 1] = NEMOSPHERE_Y(s + 0, ds, r + 0, dr);
+			one->normals[(i * 6 + 0) * 3 + 2] = NEMOSPHERE_Z(s + 0, ds, r + 0, dr);
+			one->vertices[(i * 6 + 1) * 3 + 0] = NEMOSPHERE_X(s + 1, ds, r + 0, dr) * radius;
+			one->vertices[(i * 6 + 1) * 3 + 1] = NEMOSPHERE_Y(s + 1, ds, r + 0, dr) * radius;
+			one->vertices[(i * 6 + 1) * 3 + 2] = NEMOSPHERE_Z(s + 1, ds, r + 0, dr) * radius;
+			one->texcoords[(i * 6 + 1) * 2 + 0] = (s + 1) * ds;
+			one->texcoords[(i * 6 + 1) * 2 + 1] = (r + 0) * dr;
+			one->normals[(i * 6 + 1) * 3 + 0] = NEMOSPHERE_X(s + 1, ds, r + 0, dr);
+			one->normals[(i * 6 + 1) * 3 + 1] = NEMOSPHERE_Y(s + 1, ds, r + 0, dr);
+			one->normals[(i * 6 + 1) * 3 + 2] = NEMOSPHERE_Z(s + 1, ds, r + 0, dr);
+			one->vertices[(i * 6 + 2) * 3 + 0] = NEMOSPHERE_X(s + 1, ds, r + 1, dr) * radius;
+			one->vertices[(i * 6 + 2) * 3 + 1] = NEMOSPHERE_Y(s + 1, ds, r + 1, dr) * radius;
+			one->vertices[(i * 6 + 2) * 3 + 2] = NEMOSPHERE_Z(s + 1, ds, r + 1, dr) * radius;
+			one->texcoords[(i * 6 + 2) * 2 + 0] = (s + 1) * ds;
+			one->texcoords[(i * 6 + 2) * 2 + 1] = (r + 1) * dr;
+			one->normals[(i * 6 + 2) * 3 + 0] = NEMOSPHERE_X(s + 1, ds, r + 1, dr);
+			one->normals[(i * 6 + 2) * 3 + 1] = NEMOSPHERE_Y(s + 1, ds, r + 1, dr);
+			one->normals[(i * 6 + 2) * 3 + 2] = NEMOSPHERE_Z(s + 1, ds, r + 1, dr);
+
+			one->vertices[(i * 6 + 3) * 3 + 0] = NEMOSPHERE_X(s + 0, ds, r + 0, dr) * radius;
+			one->vertices[(i * 6 + 3) * 3 + 1] = NEMOSPHERE_Y(s + 0, ds, r + 0, dr) * radius;
+			one->vertices[(i * 6 + 3) * 3 + 2] = NEMOSPHERE_Z(s + 0, ds, r + 0, dr) * radius;
+			one->texcoords[(i * 6 + 3) * 2 + 0] = (s + 0) * ds;
+			one->texcoords[(i * 6 + 3) * 2 + 1] = (r + 0) * dr;
+			one->normals[(i * 6 + 3) * 3 + 0] = NEMOSPHERE_X(s + 0, ds, r + 0, dr);
+			one->normals[(i * 6 + 3) * 3 + 1] = NEMOSPHERE_Y(s + 0, ds, r + 0, dr);
+			one->normals[(i * 6 + 3) * 3 + 2] = NEMOSPHERE_Z(s + 0, ds, r + 0, dr);
+			one->vertices[(i * 6 + 4) * 3 + 0] = NEMOSPHERE_X(s + 1, ds, r + 1, dr) * radius;
+			one->vertices[(i * 6 + 4) * 3 + 1] = NEMOSPHERE_Y(s + 1, ds, r + 1, dr) * radius;
+			one->vertices[(i * 6 + 4) * 3 + 2] = NEMOSPHERE_Z(s + 1, ds, r + 1, dr) * radius;
+			one->texcoords[(i * 6 + 4) * 2 + 0] = (s + 1) * ds;
+			one->texcoords[(i * 6 + 4) * 2 + 1] = (r + 1) * dr;
+			one->normals[(i * 6 + 4) * 3 + 0] = NEMOSPHERE_X(s + 1, ds, r + 1, dr);
+			one->normals[(i * 6 + 4) * 3 + 1] = NEMOSPHERE_Y(s + 1, ds, r + 1, dr);
+			one->normals[(i * 6 + 4) * 3 + 2] = NEMOSPHERE_Z(s + 1, ds, r + 1, dr);
+			one->vertices[(i * 6 + 5) * 3 + 0] = NEMOSPHERE_X(s + 0, ds, r + 1, dr) * radius;
+			one->vertices[(i * 6 + 5) * 3 + 1] = NEMOSPHERE_Y(s + 0, ds, r + 1, dr) * radius;
+			one->vertices[(i * 6 + 5) * 3 + 2] = NEMOSPHERE_Z(s + 0, ds, r + 1, dr) * radius;
+			one->texcoords[(i * 6 + 5) * 2 + 0] = (s + 0) * ds;
+			one->texcoords[(i * 6 + 5) * 2 + 1] = (r + 1) * dr;
+			one->normals[(i * 6 + 5) * 3 + 0] = NEMOSPHERE_X(s + 0, ds, r + 1, dr);
+			one->normals[(i * 6 + 5) * 3 + 1] = NEMOSPHERE_Y(s + 0, ds, r + 1, dr);
+			one->normals[(i * 6 + 5) * 3 + 2] = NEMOSPHERE_Z(s + 0, ds, r + 1, dr);
+		}
+	}
 }
 
 static void nemophys_one_set_body(struct objone *one, btRigidBody *body)
@@ -291,16 +364,6 @@ static void nemophys_one_destroy(struct physcontext *context, struct objone *one
 static void nemophys_render_3d_one(struct physcontext *context, struct nemomatrix *projection, struct objone *one)
 {
 	struct nemomatrix vtransform;
-	float vertices[3 * 3] = {
-		-1.0f, 1.0f, -0.5f,
-		1.0f, 1.0f, -0.5f,
-		-1.0f, -1.0f, -0.5f
-	};
-	float texcoords[2 * 3] = {
-		0.0f, 1.0f,
-		1.0f, 1.0f,
-		0.0f, 0.0f
-	};
 
 	btTransform transform;
 	one->body->getMotionState()->getWorldTransform(transform);
@@ -427,32 +490,63 @@ static void nemophys_dispatch_canvas_event(struct nemoshow *show, struct showone
 		float y = nemoshow_event_get_y(event) / context->height * 2.0f - 1.0f;
 		struct objone *one;
 
-		btBoxShape *shape = new btBoxShape(btVector3(1.0f, 1.0f, 1.0f));
-		shape->setLocalScaling(btVector3(0.25f, 0.25f, 0.25f));
+		if (context->ishapes == 0) {
+			btBoxShape *shape = new btBoxShape(btVector3(1.0f, 1.0f, 1.0f));
+			shape->setLocalScaling(btVector3(0.25f, 0.25f, 0.25f));
 
-		btTransform transform;
-		transform.setIdentity();
-		transform.setOrigin(btVector3(x, y, 0.0f));
-		transform.setRotation(btQuaternion(btVector3(1, 1, 1), random_get_double(0.0f, M_PI)));
+			btTransform transform;
+			transform.setIdentity();
+			transform.setOrigin(btVector3(x, y, 0.0f));
+			transform.setRotation(btQuaternion(btVector3(1, 1, 1), random_get_double(0.0f, M_PI)));
 
-		btScalar mass(1.0f);
-		btVector3 linertia(0, 0, 0);
-		shape->calculateLocalInertia(mass, linertia);
+			btScalar mass(1.0f);
+			btVector3 linertia(0, 0, 0);
+			shape->calculateLocalInertia(mass, linertia);
 
-		btDefaultMotionState *motionstate = new btDefaultMotionState(transform);
-		btRigidBody::btRigidBodyConstructionInfo bodyinfo(mass, motionstate, shape, linertia);
-		btRigidBody *body = new btRigidBody(bodyinfo);
-		body->applyCentralForce(btVector3(0, 0, -200));
-		body->setCcdMotionThreshold(1.0f);
-		body->setCcdSweptSphereRadius(0.1f);
+			btDefaultMotionState *motionstate = new btDefaultMotionState(transform);
+			btRigidBody::btRigidBodyConstructionInfo bodyinfo(mass, motionstate, shape, linertia);
+			btRigidBody *body = new btRigidBody(bodyinfo);
+			body->applyCentralForce(btVector3(0, 0, random_get_int(-400, -200)));
+			body->setCcdMotionThreshold(1.0f);
+			body->setCcdSweptSphereRadius(0.1f);
 
-		context->dynamicsworld->addRigidBody(body);
+			context->dynamicsworld->addRigidBody(body);
 
-		one = nemophys_one_create(context);
-		nemophys_one_set_color(one, 0.0f, 1.0f, 1.0f, 1.0f);
-		nemophys_one_set_scale(one, 0.25f, 0.25f, 0.25f);
-		nemophys_one_set_body(one, body);
-		nemophys_one_load_cube(one);
+			one = nemophys_one_create(context);
+			nemophys_one_set_color(one, 0.0f, 1.0f, 1.0f, 1.0f);
+			nemophys_one_set_scale(one, 0.25f, 0.25f, 0.25f);
+			nemophys_one_set_body(one, body);
+			nemophys_one_load_cube(one);
+		} else {
+			btSphereShape *shape = new btSphereShape(1.0f);
+			shape->setLocalScaling(btVector3(0.25f, 0.25f, 0.25f));
+
+			btTransform transform;
+			transform.setIdentity();
+			transform.setOrigin(btVector3(x, y, 0.0f));
+			transform.setRotation(btQuaternion(btVector3(1, 1, 1), random_get_double(0.0f, M_PI)));
+
+			btScalar mass(1.0f);
+			btVector3 linertia(0, 0, 0);
+			shape->calculateLocalInertia(mass, linertia);
+
+			btDefaultMotionState *motionstate = new btDefaultMotionState(transform);
+			btRigidBody::btRigidBodyConstructionInfo bodyinfo(mass, motionstate, shape, linertia);
+			btRigidBody *body = new btRigidBody(bodyinfo);
+			body->applyCentralForce(btVector3(0, 0, random_get_int(-400, -200)));
+			body->setCcdMotionThreshold(1.0f);
+			body->setCcdSweptSphereRadius(0.1f);
+
+			context->dynamicsworld->addRigidBody(body);
+
+			one = nemophys_one_create(context);
+			nemophys_one_set_color(one, 0.0f, 1.0f, 1.0f, 1.0f);
+			nemophys_one_set_scale(one, 0.25f, 0.25f, 0.25f);
+			nemophys_one_set_body(one, body);
+			nemophys_one_load_sphere(one, 16, 16, 1.0f);
+		}
+
+		context->ishapes = (context->ishapes + 1) % 2;
 	}
 
 	if (context->is_fullscreen == 0) {
