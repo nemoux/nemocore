@@ -513,65 +513,48 @@ static void nemophys_dispatch_canvas_event(struct nemoshow *show, struct showone
 	if (nemoshow_event_is_touch_down(show, event)) {
 		float x = nemoshow_event_get_x(event) / context->width * 2.0f - 1.0f;
 		float y = nemoshow_event_get_y(event) / context->height * 2.0f - 1.0f;
+		btCollisionShape *shape;
 		struct objone *one;
 
 		if (context->ishapes == 0) {
-			btBoxShape *shape = new btBoxShape(btVector3(1.0f, 1.0f, 1.0f));
-			shape->setLocalScaling(btVector3(0.25f, 0.25f, 0.25f));
-
-			btTransform transform;
-			transform.setIdentity();
-			transform.setOrigin(btVector3(x, y, 0.0f));
-			transform.setRotation(btQuaternion(btVector3(1, 1, 1), random_get_double(0.0f, M_PI)));
-
-			btScalar mass(1.0f);
-			btVector3 linertia(0, 0, 0);
-			shape->calculateLocalInertia(mass, linertia);
-
-			btDefaultMotionState *motionstate = new btDefaultMotionState(transform);
-			btRigidBody::btRigidBodyConstructionInfo bodyinfo(mass, motionstate, shape, linertia);
-			btRigidBody *body = new btRigidBody(bodyinfo);
-			body->applyCentralForce(btVector3(0, 0, random_get_int(-300, -100)));
-			body->setCcdMotionThreshold(1.0f);
-			body->setCcdSweptSphereRadius(0.01f);
-
-			context->dynamicsworld->addRigidBody(body);
+			shape = new btBoxShape(btVector3(1.0f, 1.0f, 1.0f));
 
 			one = nemophys_one_create(context);
 			nemophys_one_set_color(one, 0.0f, 1.0f, 1.0f, 1.0f);
 			nemophys_one_set_scale(one, 0.25f, 0.25f, 0.25f);
-			nemophys_one_set_body(one, body);
-			nemophys_one_set_canvas(one, context->video);
 			nemophys_one_load_cube(one);
 		} else {
-			btSphereShape *shape = new btSphereShape(1.0f);
-			shape->setLocalScaling(btVector3(0.25f, 0.25f, 0.25f));
-
-			btTransform transform;
-			transform.setIdentity();
-			transform.setOrigin(btVector3(x, y, 0.0f));
-			transform.setRotation(btQuaternion(btVector3(1, 1, 1), random_get_double(0.0f, M_PI)));
-
-			btScalar mass(1.0f);
-			btVector3 linertia(0, 0, 0);
-			shape->calculateLocalInertia(mass, linertia);
-
-			btDefaultMotionState *motionstate = new btDefaultMotionState(transform);
-			btRigidBody::btRigidBodyConstructionInfo bodyinfo(mass, motionstate, shape, linertia);
-			btRigidBody *body = new btRigidBody(bodyinfo);
-			body->applyCentralForce(btVector3(0, 0, random_get_int(-400, -200)));
-			body->setCcdMotionThreshold(1.0f);
-			body->setCcdSweptSphereRadius(0.01f);
-
-			context->dynamicsworld->addRigidBody(body);
+			shape = new btSphereShape(1.0f);
 
 			one = nemophys_one_create(context);
 			nemophys_one_set_color(one, 0.0f, 1.0f, 1.0f, 1.0f);
 			nemophys_one_set_scale(one, 0.25f, 0.25f, 0.25f);
-			nemophys_one_set_body(one, body);
-			nemophys_one_set_canvas(one, context->video);
 			nemophys_one_load_sphere(one, 12, 12, 1.0f);
 		}
+
+		shape->setLocalScaling(btVector3(0.25f, 0.25f, 0.25f));
+		shape->setMargin(0.001f);
+
+		btTransform transform;
+		transform.setIdentity();
+		transform.setOrigin(btVector3(x, y, 0.0f));
+		transform.setRotation(btQuaternion(btVector3(1, 1, 1), random_get_double(0.0f, M_PI)));
+
+		btScalar mass(1.0f);
+		btVector3 linertia(0, 0, 0);
+		shape->calculateLocalInertia(mass, linertia);
+
+		btDefaultMotionState *motionstate = new btDefaultMotionState(transform);
+		btRigidBody::btRigidBodyConstructionInfo bodyinfo(mass, motionstate, shape, linertia);
+		btRigidBody *body = new btRigidBody(bodyinfo);
+		body->applyCentralForce(btVector3(0, 0, random_get_int(-400, -200)));
+		body->setCcdMotionThreshold(1.0f);
+		body->setCcdSweptSphereRadius(0.01f);
+
+		context->dynamicsworld->addRigidBody(body);
+
+		nemophys_one_set_body(one, body);
+		nemophys_one_set_canvas(one, context->video);
 
 		context->ishapes = (context->ishapes + 1) % 2;
 	}
@@ -738,7 +721,7 @@ static int nemophys_prepare_softbody(struct physcontext *context, int columns, i
 			columns, rows,
 			4 + 8, true,
 			context->texcoords);
-	context->softbody->getCollisionShape()->setMargin(0.0f);
+	context->softbody->getCollisionShape()->setMargin(0.001f);
 
 	context->nvertices = context->softbody->m_faces.size() * 3;
 
@@ -768,7 +751,10 @@ static void nemophys_finish_softbody(struct physcontext *context)
 
 static int nemophys_prepare_floor(struct physcontext *context)
 {
-	btCollisionShape *shape = new btBoxShape(btVector3(100.0f, 5.0f, 100.0f));
+	btCollisionShape *shape;
+
+	shape = new btBoxShape(btVector3(100.0f, 5.0f, 100.0f));
+	shape->setMargin(0.001f);
 
 	btTransform transform;
 	transform.setIdentity();
