@@ -720,10 +720,10 @@ static void nemophys_finish_bullet(struct physcontext *context)
 static int nemophys_prepare_softbody(struct physcontext *context, int columns, int rows)
 {
 	btVector3 corners[4] = {
-		{ -1.0f, 1.0f, -1.2f },
-		{ 1.0f, 1.0f, -1.2f },
-		{ -1.0f, -1.0f, -1.2f },
-		{ 1.0f, -1.0f, -1.2f },
+		{ -1.0f, 1.0f, -1.25f },
+		{ 1.0f, 1.0f, -1.25f },
+		{ -1.0f, -1.0f, -1.25f },
+		{ 1.0f, -1.0f, -1.25f },
 	};
 
 	context->vertices = (float *)malloc(sizeof(float[3]) * columns * rows * 12);
@@ -916,8 +916,8 @@ int main(int argc, char *argv[])
 	context->perspective.right = 1.0f;
 	context->perspective.bottom = -1.0f;
 	context->perspective.top = 1.0f;
-	context->perspective.near = 0.99999f;
-	context->perspective.far = 10.0f;
+	context->perspective.near = 1.0f;
+	context->perspective.far = 4.0f;
 
 	nemolist_init(&context->obj_list);
 
