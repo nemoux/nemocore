@@ -482,11 +482,11 @@ static void nemophys_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 	glClearDepth(0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	glDisable(GL_BLEND);
 	glDisable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
+	glDepthMask(GL_TRUE);
+	glDepthFunc(GL_LESS);
 
 	nemophys_render_3d_softbody(context, &projection, nemoshow_canvas_get_effective_texture(context->video));
 
@@ -533,7 +533,7 @@ static void nemophys_dispatch_canvas_event(struct nemoshow *show, struct showone
 			btRigidBody *body = new btRigidBody(bodyinfo);
 			body->applyCentralForce(btVector3(0, 0, random_get_int(-300, -100)));
 			body->setCcdMotionThreshold(1.0f);
-			body->setCcdSweptSphereRadius(0.1f);
+			body->setCcdSweptSphereRadius(0.01f);
 
 			context->dynamicsworld->addRigidBody(body);
 
@@ -561,7 +561,7 @@ static void nemophys_dispatch_canvas_event(struct nemoshow *show, struct showone
 			btRigidBody *body = new btRigidBody(bodyinfo);
 			body->applyCentralForce(btVector3(0, 0, random_get_int(-400, -200)));
 			body->setCcdMotionThreshold(1.0f);
-			body->setCcdSweptSphereRadius(0.1f);
+			body->setCcdSweptSphereRadius(0.01f);
 
 			context->dynamicsworld->addRigidBody(body);
 
