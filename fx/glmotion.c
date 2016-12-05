@@ -5,11 +5,32 @@
 #include <unistd.h>
 #include <errno.h>
 
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+
 #include <glmotion.h>
 #include <glshader.h>
 #include <fbohelper.h>
 #include <oshelper.h>
 #include <nemomisc.h>
+
+struct glmotion {
+	GLuint texture[2];
+	GLuint fbo[2], dbo[2];
+
+	GLuint program;
+
+	GLuint utexture;
+	GLuint uwidth, uheight;
+	GLuint udirectx, udirecty;
+	GLuint ustep;
+
+	int32_t width, height;
+
+	float step;
+};
 
 static const char GLMOTION_SIMPLE_VERTEX_SHADER[] =
 "attribute vec2 position;\n"
@@ -262,4 +283,14 @@ void nemofx_glmotion_clear(struct glmotion *motion)
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+float nemofx_glmotion_get_step(struct glmotion *motion)
+{
+	return motion->step;
+}
+
+uint32_t nemofx_glmotion_get_texture(struct glmotion *motion)
+{
+	return motion->texture[0];
 }

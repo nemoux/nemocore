@@ -5,11 +5,29 @@
 #include <unistd.h>
 #include <errno.h>
 
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+
 #include <glmask.h>
 #include <glshader.h>
 #include <fbohelper.h>
 #include <oshelper.h>
 #include <nemomisc.h>
+
+struct glmask {
+	GLuint texture;
+	GLuint fbo, dbo;
+
+	GLuint program;
+
+	GLint utexture;
+	GLint uoverlay;
+	GLint uwidth, uheight;
+
+	int32_t width, height;
+};
 
 static const char GLMASK_VERTEX_SHADER[] =
 "attribute vec2 position;\n"
@@ -179,4 +197,19 @@ void nemofx_glmask_dispatch(struct glmask *mask, uint32_t texture, uint32_t over
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+int32_t nemofx_glmask_get_width(struct glmask *mask)
+{
+	return mask->width;
+}
+
+int32_t nemofx_glmask_get_height(struct glmask *mask)
+{
+	return mask->height;
+}
+
+uint32_t nemofx_glmask_get_texture(struct glmask *mask)
+{
+	return mask->texture;
 }

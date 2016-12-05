@@ -5,11 +5,32 @@
 #include <unistd.h>
 #include <errno.h>
 
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+
 #include <glblur.h>
 #include <glshader.h>
 #include <fbohelper.h>
 #include <oshelper.h>
 #include <nemomisc.h>
+
+struct glblur {
+	GLuint texture[2];
+	GLuint fbo[2], dbo[2];
+
+	GLuint program;
+
+	GLint utexture;
+	GLint uwidth, uheight;
+	GLint udirectx, udirecty;
+	GLint uradius;
+
+	int32_t width, height;
+
+	int32_t rx, ry;
+};
 
 static const char GLBLUR_SIMPLE_VERTEX_SHADER[] =
 "attribute vec2 position;\n"
@@ -244,4 +265,19 @@ void nemofx_glblur_dispatch(struct glblur *blur, uint32_t texture)
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+int32_t nemofx_glblur_get_width(struct glblur *blur)
+{
+	return blur->width;
+}
+
+int32_t nemofx_glblur_get_height(struct glblur *blur)
+{
+	return blur->height;
+}
+
+uint32_t nemofx_glblur_get_texture(struct glblur *blur)
+{
+	return blur->texture[1];
 }

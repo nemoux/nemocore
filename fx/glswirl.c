@@ -5,11 +5,35 @@
 #include <unistd.h>
 #include <errno.h>
 
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+
 #include <glswirl.h>
 #include <glshader.h>
 #include <fbohelper.h>
 #include <oshelper.h>
 #include <nemomisc.h>
+
+struct glswirl {
+	GLuint texture;
+	GLuint fbo, dbo;
+
+	GLuint program;
+
+	GLint utexture;
+	GLint uwidth, uheight;
+	GLint uradius;
+	GLint uangle;
+	GLint ucenter;
+
+	int32_t width, height;
+
+	float radius;
+	float angle;
+	float center[2];
+};
 
 static const char GLSWIRL_VERTEX_SHADER[] =
 "attribute vec2 position;\n"
@@ -206,4 +230,29 @@ void nemofx_glswirl_dispatch(struct glswirl *swirl, uint32_t texture)
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+float nemofx_glswirl_get_radius(struct glswirl *swirl)
+{
+	return swirl->radius;
+}
+
+float nemofx_glswirl_get_angle(struct glswirl *swirl)
+{
+	return swirl->angle;
+}
+
+float nemofx_glswirl_get_center_x(struct glswirl *swirl)
+{
+	return swirl->center[0];
+}
+
+float nemofx_glswirl_get_center_y(struct glswirl *swirl)
+{
+	return swirl->center[1];
+}
+
+uint32_t nemofx_glswirl_get_texture(struct glswirl *swirl)
+{
+	return swirl->texture;
 }

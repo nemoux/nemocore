@@ -7,11 +7,44 @@
 
 #include <math.h>
 
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+
 #include <glsweep.h>
 #include <glshader.h>
 #include <fbohelper.h>
 #include <oshelper.h>
 #include <nemomisc.h>
+
+struct glsweep {
+	GLuint texture;
+	GLuint fbo, dbo;
+
+	GLuint snapshot;
+	int is_reference;
+
+	GLuint mask;
+
+	GLuint program;
+
+	GLint utexture;
+	GLint uwidth, uheight;
+	GLint usnapshot;
+	GLint umask;
+	GLint utiming;
+	GLint urotate;
+	GLint upoint;
+
+	int type;
+
+	int32_t width, height;
+
+	float t, d;
+	float r;
+	float point[2];
+};
 
 static const char GLSWEEP_VERTEX_SHADER[] =
 "attribute vec2 position;\n"
@@ -452,4 +485,9 @@ void nemofx_glsweep_dispatch(struct glsweep *sweep, uint32_t texture)
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+uint32_t nemofx_glsweep_get_texture(struct glsweep *sweep)
+{
+	return sweep->texture;
 }

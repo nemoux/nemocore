@@ -8,6 +8,45 @@
 #include <math.h>
 
 #include <fxsph.h>
+#include <nemolist.h>
+
+struct sphone {
+	float x, y;
+	float vx, vy;
+	float ax, ay;
+	float ex, ey;
+
+	float density;
+	float pressure;
+
+	struct nemolist link;
+};
+
+struct sphcell {
+	struct nemolist list;
+};
+
+struct fxsph {
+	struct sphone *ones;
+	int nones;
+
+	float worldwidth, worldheight;
+	float cellsize;
+	uint32_t cellwidth, cellheight;
+
+	struct sphcell *cells;
+	int ncells;
+
+	float kernel;
+	float mass;
+
+	float stiffness;
+	float density;
+	float walldamping;
+	float viscosity;
+
+	float gx, gy;
+};
 
 static inline float nemofx_sph_get_length(float x, float y)
 {
@@ -253,4 +292,36 @@ void nemofx_sph_advect(struct fxsph *sph, float t)
 		one->ex = (one->ex + one->vx) / 2.0f;
 		one->ey = (one->ey + one->vy) / 2.0f;
 	}
+}
+
+void nemofx_sph_set_particle(struct fxsph *sph, int index, float x, float y, float vx, float vy)
+{
+	struct sphone *one = &sph->ones[index];
+
+	one->x = x;
+	one->y = y;
+	one->vx = vx;
+	one->vy = vy;
+	one->ax = 0.0f;
+	one->ay = 0.0f;
+	one->ex = vx;
+	one->ey = vy;
+	one->density = sph->density;
+
+	nemolist_init(&one->link);
+}
+
+int nemofx_sph_get_particles(struct fxsph *sph)
+{
+	return sph->nones;
+}
+
+float nemofx_sph_get_particle_x(struct fxsph *sph, int index)
+{
+	return sph->ones[index].x;
+}
+
+float nemofx_sph_get_particle_y(struct fxsph *sph, int index)
+{
+	return sph->ones[index].y;
 }

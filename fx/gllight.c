@@ -7,11 +7,46 @@
 
 #include <math.h>
 
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+
 #include <gllight.h>
 #include <glshader.h>
 #include <fbohelper.h>
 #include <oshelper.h>
 #include <nemomisc.h>
+
+struct gllight {
+	GLuint texture;
+	GLuint fbo, dbo;
+
+	GLuint program0;
+	GLint udiffuse0;
+	GLint uambient0;
+
+	GLuint program1;
+	GLint udiffuse1;
+	GLint uposition1;
+	GLint ucolor1;
+	GLint usize1;
+	GLint uscope1;
+	GLint utime1;
+
+	int32_t width, height;
+
+	struct {
+		float color[3];
+	} ambientlight;
+
+	struct {
+		float position[3];
+		float color[3];
+		float size;
+		float scope;
+	} pointlights[GLLIGHT_POINTLIGHTS_MAX];
+};
 
 static const char GLLIGHT_LIGHT_VERTEX_SHADER[] =
 "attribute vec3 position;\n"
@@ -277,4 +312,19 @@ void nemofx_gllight_dispatch(struct gllight *light, uint32_t texture)
 	glDepthMask(GL_TRUE);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+int32_t nemofx_gllight_get_width(struct gllight *light)
+{
+	return light->width;
+}
+
+int32_t nemofx_gllight_get_height(struct gllight *light)
+{
+	return light->height;
+}
+
+uint32_t nemofx_gllight_get_texture(struct gllight *light)
+{
+	return light->texture;
 }

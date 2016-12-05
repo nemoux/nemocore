@@ -9,24 +9,6 @@ NEMO_BEGIN_EXTERN_C
 
 #include <stdint.h>
 
-#define GL_GLEXT_PROTOTYPES
-#include <GL/gl.h>
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
-
-struct glcolor {
-	GLuint texture;
-	GLuint fbo, dbo;
-
-	GLuint program;
-
-	GLint ucolor;
-
-	int32_t width, height;
-
-	float color[4];
-};
-
 extern struct glcolor *nemofx_glcolor_create(int32_t width, int32_t height);
 extern void nemofx_glcolor_destroy(struct glcolor *color);
 
@@ -35,10 +17,7 @@ extern void nemofx_glcolor_set_color(struct glcolor *color, float r, float g, fl
 extern void nemofx_glcolor_resize(struct glcolor *color, int32_t width, int32_t height);
 extern void nemofx_glcolor_dispatch(struct glcolor *color);
 
-static inline uint32_t nemofx_glcolor_get_texture(struct glcolor *color)
-{
-	return color->texture;
-}
+extern uint32_t nemofx_glcolor_get_texture(struct glcolor *color);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

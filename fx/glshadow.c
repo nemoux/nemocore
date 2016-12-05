@@ -7,6 +7,11 @@
 
 #include <math.h>
 
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+
 #include <glshadow.h>
 #include <glshader.h>
 #include <fbohelper.h>
@@ -15,6 +20,45 @@
 #include <nemomisc.h>
 
 #define GLSHADOW_MAP_SIZE			(256)
+
+struct glshadow {
+	GLuint texture;
+	GLuint fbo, dbo;
+
+	GLuint occluder;
+	GLuint ofbo, odbo;
+	GLuint shadow;
+	GLuint sfbo, sdbo;
+
+	GLuint program0;
+	GLint utexture0;
+
+	GLuint program1;
+	GLint utexture1;
+	GLint uprojection1;
+
+	GLuint program2;
+	GLint utexture2;
+	GLint uwidth2;
+	GLint uheight2;
+
+	GLuint program3;
+	GLint ushadow3;
+	GLint uprojection3;
+	GLint uwidth3;
+	GLint uheight3;
+	GLint ucolor3;
+	GLint usize3;
+
+	int32_t width, height;
+	int32_t lightscope;
+
+	struct {
+		float position[3];
+		float color[3];
+		float size;
+	} pointlights[GLSHADOW_POINTLIGHTS_MAX];
+};
 
 static const char GLSHADOW_COVER_VERTEX_SHADER[] =
 "attribute vec2 position;\n"
@@ -451,4 +495,19 @@ void nemofx_glshadow_dispatch(struct glshadow *shadow, uint32_t texture)
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	glDisable(GL_BLEND);
+}
+
+int32_t nemofx_glshadow_get_width(struct glshadow *shadow)
+{
+	return shadow->width;
+}
+
+int32_t nemofx_glshadow_get_height(struct glshadow *shadow)
+{
+	return shadow->height;
+}
+
+uint32_t nemofx_glshadow_get_texture(struct glshadow *shadow)
+{
+	return shadow->texture;
 }

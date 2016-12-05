@@ -7,10 +7,57 @@
 
 #include <math.h>
 
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+
 #include <glripple.h>
 #include <glshader.h>
 #include <fbohelper.h>
 #include <nemomisc.h>
+#include <nemolist.h>
+
+struct rippleone {
+	int gx, gy;
+	int delta;
+	int duration;
+	int step;
+
+	struct nemolist link;
+};
+
+struct glripple {
+	GLuint texture;
+	GLuint fbo, dbo;
+
+	GLuint program;
+
+	GLuint varray;
+	GLuint vvertex;
+	GLuint vtexcoord;
+	GLuint vindex;
+
+	GLint utexture;
+
+	GLfloat *vertices;
+	GLfloat *vertices0;
+	GLfloat *texcoords;
+	GLuint *indices;
+
+	int32_t width, height;
+
+	float *vectors;
+	float *vectors_;
+	int32_t rows, columns;
+	int32_t elements;
+
+	float *amplitudes;
+	float *amplitudes_;
+	int32_t length;
+
+	struct nemolist list;
+};
 
 static GLuint nemofx_glripple_create_program(void)
 {
@@ -397,4 +444,29 @@ void nemofx_glripple_build_amplitudes(float *amplitudes, int length, int cycles,
 
 		amplitudes[i] = a;
 	}
+}
+
+int32_t nemofx_glripple_get_width(struct glripple *ripple)
+{
+	return ripple->width;
+}
+
+int32_t nemofx_glripple_get_height(struct glripple *ripple)
+{
+	return ripple->height;
+}
+
+int32_t nemofx_glripple_get_rows(struct glripple *ripple)
+{
+	return ripple->rows;
+}
+
+int32_t nemofx_glripple_get_columns(struct glripple *ripple)
+{
+	return ripple->columns;
+}
+
+uint32_t nemofx_glripple_get_texture(struct glripple *ripple)
+{
+	return ripple->texture;
 }

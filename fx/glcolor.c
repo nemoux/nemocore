@@ -5,11 +5,29 @@
 #include <unistd.h>
 #include <errno.h>
 
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+
 #include <glcolor.h>
 #include <glshader.h>
 #include <fbohelper.h>
 #include <oshelper.h>
 #include <nemomisc.h>
+
+struct glcolor {
+	GLuint texture;
+	GLuint fbo, dbo;
+
+	GLuint program;
+
+	GLint ucolor;
+
+	int32_t width, height;
+
+	float color[4];
+};
 
 static const char GLCOLOR_VERTEX_SHADER[] =
 "attribute vec2 position;\n"
@@ -167,4 +185,9 @@ void nemofx_glcolor_dispatch(struct glcolor *color)
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+uint32_t nemofx_glcolor_get_texture(struct glcolor *color)
+{
+	return color->texture;
 }

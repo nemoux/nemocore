@@ -9,25 +9,6 @@ NEMO_BEGIN_EXTERN_C
 
 #include <stdint.h>
 
-#define GL_GLEXT_PROTOTYPES
-#include <GL/gl.h>
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
-
-struct glfilter {
-	GLuint texture;
-	GLuint fbo, dbo;
-
-	GLuint program;
-
-	GLint utexture;
-	GLint uwidth;
-	GLint uheight;
-	GLint utime;
-
-	int32_t width, height;
-};
-
 extern struct glfilter *nemofx_glfilter_create(int32_t width, int32_t height);
 extern void nemofx_glfilter_destroy(struct glfilter *filter);
 
@@ -36,20 +17,9 @@ extern void nemofx_glfilter_set_program(struct glfilter *filter, const char *sha
 extern void nemofx_glfilter_resize(struct glfilter *filter, int32_t width, int32_t height);
 extern void nemofx_glfilter_dispatch(struct glfilter *filter, uint32_t texture);
 
-static inline int32_t nemofx_glfilter_get_width(struct glfilter *filter)
-{
-	return filter->width;
-}
-
-static inline int32_t nemofx_glfilter_get_height(struct glfilter *filter)
-{
-	return filter->height;
-}
-
-static inline uint32_t nemofx_glfilter_get_texture(struct glfilter *filter)
-{
-	return filter->texture;
-}
+extern int32_t nemofx_glfilter_get_width(struct glfilter *filter);
+extern int32_t nemofx_glfilter_get_height(struct glfilter *filter);
+extern uint32_t nemofx_glfilter_get_texture(struct glfilter *filter);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

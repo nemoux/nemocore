@@ -9,11 +9,6 @@ NEMO_BEGIN_EXTERN_C
 
 #include <stdint.h>
 
-#define GL_GLEXT_PROTOTYPES
-#include <GL/gl.h>
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
-
 typedef enum {
 	NEMOFX_GLSWEEP_SIMPLE_TYPE = 0,
 	NEMOFX_GLSWEEP_HORIZONTAL_TYPE = 1,
@@ -24,34 +19,6 @@ typedef enum {
 	NEMOFX_GLSWEEP_MASK_TYPE = 6,
 	NEMOFX_GLSWEEP_LAST_TYPE
 } NemoFXGLSweepType;
-
-struct glsweep {
-	GLuint texture;
-	GLuint fbo, dbo;
-
-	GLuint snapshot;
-	int is_reference;
-
-	GLuint mask;
-
-	GLuint program;
-
-	GLint utexture;
-	GLint uwidth, uheight;
-	GLint usnapshot;
-	GLint umask;
-	GLint utiming;
-	GLint urotate;
-	GLint upoint;
-
-	int type;
-
-	int32_t width, height;
-
-	float t, d;
-	float r;
-	float point[2];
-};
 
 extern struct glsweep *nemofx_glsweep_create(int32_t width, int32_t height);
 extern void nemofx_glsweep_destroy(struct glsweep *sweep);
@@ -69,10 +36,7 @@ extern void nemofx_glsweep_set_mask(struct glsweep *sweep, uint32_t mask);
 extern void nemofx_glsweep_resize(struct glsweep *sweep, int32_t width, int32_t height);
 extern void nemofx_glsweep_dispatch(struct glsweep *sweep, uint32_t texture);
 
-static inline uint32_t nemofx_glsweep_get_texture(struct glsweep *sweep)
-{
-	return sweep->texture;
-}
+extern uint32_t nemofx_glsweep_get_texture(struct glsweep *sweep);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

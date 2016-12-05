@@ -5,11 +5,31 @@
 #include <unistd.h>
 #include <errno.h>
 
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+
 #include <glpolar.h>
 #include <glshader.h>
 #include <fbohelper.h>
 #include <oshelper.h>
 #include <nemomisc.h>
+
+struct glpolar {
+	GLuint texture;
+	GLuint fbo, dbo;
+
+	GLuint program;
+
+	GLint utexture;
+	GLint uwidth, uheight;
+	GLint ucolor;
+
+	int32_t width, height;
+
+	float color[4];
+};
 
 static const char GLPOLAR_VERTEX_SHADER[] =
 "attribute vec2 position;\n"
@@ -181,4 +201,9 @@ void nemofx_glpolar_dispatch(struct glpolar *polar, uint32_t texture)
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+uint32_t nemofx_glpolar_get_texture(struct glpolar *polar)
+{
+	return polar->texture;
 }

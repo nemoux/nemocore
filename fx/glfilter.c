@@ -5,11 +5,30 @@
 #include <unistd.h>
 #include <errno.h>
 
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+
 #include <glfilter.h>
 #include <glshader.h>
 #include <fbohelper.h>
 #include <oshelper.h>
 #include <nemomisc.h>
+
+struct glfilter {
+	GLuint texture;
+	GLuint fbo, dbo;
+
+	GLuint program;
+
+	GLint utexture;
+	GLint uwidth;
+	GLint uheight;
+	GLint utime;
+
+	int32_t width, height;
+};
 
 static const char GLFILTER_SIMPLE_VERTEX_SHADER[] =
 "attribute vec2 position;\n"
@@ -331,4 +350,19 @@ void nemofx_glfilter_dispatch(struct glfilter *filter, uint32_t texture)
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
+}
+
+int32_t nemofx_glfilter_get_width(struct glfilter *filter)
+{
+	return filter->width;
+}
+
+int32_t nemofx_glfilter_get_height(struct glfilter *filter)
+{
+	return filter->height;
+}
+
+uint32_t nemofx_glfilter_get_texture(struct glfilter *filter)
+{
+	return filter->texture;
 }
