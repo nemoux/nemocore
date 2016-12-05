@@ -34,6 +34,9 @@ typedef enum {
 	NEMOEASE_CIRCULAR_IN_TYPE = 19,
 	NEMOEASE_CIRCULAR_OUT_TYPE = 20,
 	NEMOEASE_CIRCULAR_INOUT_TYPE = 21,
+	NEMOEASE_BOUNCE_IN_TYPE = 22,
+	NEMOEASE_BOUNCE_OUT_TYPE = 23,
+	NEMOEASE_BOUNCE_INOUT_TYPE = 24,
 	NEMOEASE_LAST_TYPE
 } NemoEaseType;
 
@@ -200,6 +203,45 @@ static inline double nemoease_circular_inout_function(double t, double d)
 	return 1.0f / 2 * (sqrt(1 - t * t) + 1) + 0.0f;
 }
 
+static inline double nemoease_bounce_out_in(double t)
+{
+	float n1 = 7.5625f;
+	float d1 = 2.75f;
+
+	if (t < 1.0f / d1) {
+		return n1 * t * t;
+	} else if (t < 2.0f / d1) {
+		t -= 1.5f / d1;
+		return n1 * t * t + 0.75f;
+	} else if (t < 2.5f / d1) {
+		t -= 2.25f / d1;
+		return n1 * t * t + 0.9375f;
+	} else {
+		t -= 2.625f / d1;
+		return n1 * t * t + 0.984375f;
+	}
+}
+
+static inline double nemoease_bounce_in_function(double t, double d)
+{
+	t /= d;
+	return 1.0f - nemoease_bounce_out_in(1.0f - t);
+}
+
+static inline double nemoease_bounce_out_function(double t, double d)
+{
+	t /= d;
+	return nemoease_bounce_out_in(t);
+}
+
+static inline double nemoease_bounce_inout_function(double t, double d)
+{
+	t /= d;
+	if (t < 0.5f)
+		return (1.0f - nemoease_bounce_out_in(1.0f - 2 * t)) / 2.0f;
+	return (1.0f + nemoease_bounce_out_in(2.0f * t - 1.0f)) / 2.0f;
+}
+
 static inline double nemoease_get_x_bezier(struct nemoease *ease, double progress)
 {
 	ease->cx = 3 * ease->sx;
@@ -260,7 +302,10 @@ static inline void nemoease_set(struct nemoease *ease, uint32_t type)
 		nemoease_exponential_inout_function,
 		nemoease_circular_in_function,
 		nemoease_circular_out_function,
-		nemoease_circular_inout_function
+		nemoease_circular_inout_function,
+		nemoease_bounce_in_function,
+		nemoease_bounce_out_function,
+		nemoease_bounce_inout_function
 	};
 
 	ease->dispatch = functions[type];
@@ -314,6 +359,12 @@ static inline uint32_t nemoease_get_type(const char *name)
 		type = NEMOEASE_CIRCULAR_OUT_TYPE;
 	else if (strcmp(name, "circular_inout") == 0)
 		type = NEMOEASE_CIRCULAR_INOUT_TYPE;
+	else if (strcmp(name, "bounce_in") == 0)
+		type = NEMOEASE_BOUNCE_IN_TYPE;
+	else if (strcmp(name, "bounce_out") == 0)
+		type = NEMOEASE_BOUNCE_OUT_TYPE;
+	else if (strcmp(name, "bounce_inout") == 0)
+		type = NEMOEASE_BOUNCE_INOUT_TYPE;
 
 	return type;
 }
