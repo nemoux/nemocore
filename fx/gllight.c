@@ -22,10 +22,14 @@ struct gllight {
 	GLuint texture;
 	GLuint fbo, dbo;
 
+	GLuint vshader0;
+	GLuint fshader0;
 	GLuint program0;
 	GLint udiffuse0;
 	GLint uambient0;
 
+	GLuint vshader1;
+	GLuint fshader1;
 	GLuint program1;
 	GLint udiffuse1;
 	GLint uposition1;
@@ -93,38 +97,6 @@ static const char GLLIGHT_POINT_LIGHT_FRAGMENT_SHADER[] =
 "  gl_FragColor = vec4(color * diffuse.rgb + ball(position.xy, lposition.xy, lcolor, lsize), 1.0);\n"
 "}\n";
 
-static GLuint nemofx_gllight_create_program(const char *vshader, const char *fshader)
-{
-	GLuint frag, vert;
-	GLuint program;
-	GLint status;
-
-	frag = glshader_compile(GL_FRAGMENT_SHADER, 1, &fshader);
-	vert = glshader_compile(GL_VERTEX_SHADER, 1, &vshader);
-
-	program = glCreateProgram();
-	glAttachShader(program, frag);
-	glAttachShader(program, vert);
-	glLinkProgram(program);
-
-	glGetProgramiv(program, GL_LINK_STATUS, &status);
-	if (!status) {
-		GLsizei len;
-		char log[1000];
-
-		glGetProgramInfoLog(program, 1000, &len, log);
-		fprintf(stderr, "Error: linking:\n%*s\n", len, log);
-
-		return 0;
-	}
-
-	glUseProgram(program);
-	glBindAttribLocation(program, 0, "position");
-	glBindAttribLocation(program, 1, "texcoord");
-
-	return program;
-}
-
 struct gllight *nemofx_gllight_create(int32_t width, int32_t height)
 {
 	struct gllight *light;
@@ -143,12 +115,19 @@ struct gllight *nemofx_gllight_create(int32_t width, int32_t height)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	light->program0 = nemofx_gllight_create_program(GLLIGHT_LIGHT_VERTEX_SHADER, GLLIGHT_AMBIENT_LIGHT_FRAGMENT_SHADER);
+	light->program0 = glshader_compile_program(GLLIGHT_LIGHT_VERTEX_SHADER, GLLIGHT_AMBIENT_LIGHT_FRAGMENT_SHADER, &light->vshader0, &light->fshader0);
 	if (light->program0 == 0)
 		goto err1;
-	light->program1 = nemofx_gllight_create_program(GLLIGHT_LIGHT_VERTEX_SHADER, GLLIGHT_POINT_LIGHT_FRAGMENT_SHADER);
+	light->program1 = glshader_compile_program(GLLIGHT_LIGHT_VERTEX_SHADER, GLLIGHT_POINT_LIGHT_FRAGMENT_SHADER, &light->vshader1, &light->fshader1);
 	if (light->program1 == 0)
 		goto err2;
+
+	glUseProgram(light->program0);
+	glBindAttribLocation(light->program0, 0, "position");
+	glBindAttribLocation(light->program0, 1, "texcoord");
+	glUseProgram(light->program1);
+	glBindAttribLocation(light->program1, 0, "position");
+	glBindAttribLocation(light->program1, 1, "texcoord");
 
 	light->udiffuse0 = glGetUniformLocation(light->program0, "tdiffuse");
 	light->uambient0 = glGetUniformLocation(light->program0, "lambient");
@@ -168,6 +147,8 @@ struct gllight *nemofx_gllight_create(int32_t width, int32_t height)
 	return light;
 
 err2:
+	glDeleteShader(light->vshader0);
+	glDeleteShader(light->fshader0);
 	glDeleteProgram(light->program0);
 
 err1:
@@ -185,7 +166,11 @@ void nemofx_gllight_destroy(struct gllight *light)
 	glDeleteFramebuffers(1, &light->fbo);
 	glDeleteRenderbuffers(1, &light->dbo);
 
+	glDeleteShader(light->vshader0);
+	glDeleteShader(light->fshader0);
 	glDeleteProgram(light->program0);
+	glDeleteShader(light->vshader1);
+	glDeleteShader(light->fshader1);
 	glDeleteProgram(light->program1);
 
 	free(light);

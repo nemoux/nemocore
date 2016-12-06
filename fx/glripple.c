@@ -31,6 +31,8 @@ struct glripple {
 	GLuint texture;
 	GLuint fbo, dbo;
 
+	GLuint vshader;
+	GLuint fshader;
 	GLuint program;
 
 	GLuint varray;
@@ -59,57 +61,24 @@ struct glripple {
 	struct nemolist list;
 };
 
-static GLuint nemofx_glripple_create_program(void)
-{
-	static const char GLRIPPLE_SIMPLE_VERTEX_SHADER[] =
-		"attribute vec3 position;\n"
-		"attribute vec2 texcoord;\n"
-		"varying vec2 vtexcoord;\n"
-		"void main()\n"
-		"{\n"
-		"  gl_Position = vec4(position, 1.0);\n"
-		"  vtexcoord = texcoord;\n"
-		"}\n";
-	static const char GLRIPPLE_SIMPLE_FRAGMENT_SHADER[] =
-		"precision mediump float;\n"
-		"varying vec2 vtexcoord;\n"
-		"uniform sampler2D tex;\n"
-		"void main()\n"
-		"{\n"
-		"  gl_FragColor = texture2D(tex, vtexcoord);\n"
-		"}\n";
+static const char GLRIPPLE_SIMPLE_VERTEX_SHADER[] =
+"attribute vec3 position;\n"
+"attribute vec2 texcoord;\n"
+"varying vec2 vtexcoord;\n"
+"void main()\n"
+"{\n"
+"  gl_Position = vec4(position, 1.0);\n"
+"  vtexcoord = texcoord;\n"
+"}\n";
 
-	const char *vertexshader = GLRIPPLE_SIMPLE_VERTEX_SHADER;
-	const char *fragmentshader = GLRIPPLE_SIMPLE_FRAGMENT_SHADER;
-	GLuint frag, vert;
-	GLuint program;
-	GLint status;
-
-	frag = glshader_compile(GL_FRAGMENT_SHADER, 1, &fragmentshader);
-	vert = glshader_compile(GL_VERTEX_SHADER, 1, &vertexshader);
-
-	program = glCreateProgram();
-	glAttachShader(program, frag);
-	glAttachShader(program, vert);
-	glLinkProgram(program);
-
-	glGetProgramiv(program, GL_LINK_STATUS, &status);
-	if (!status) {
-		GLsizei len;
-		char log[1000];
-
-		glGetProgramInfoLog(program, 1000, &len, log);
-		fprintf(stderr, "Error: linking:\n%*s\n", len, log);
-
-		return 0;
-	}
-
-	glUseProgram(program);
-	glBindAttribLocation(program, 0, "position");
-	glBindAttribLocation(program, 1, "texcoord");
-
-	return program;
-}
+static const char GLRIPPLE_SIMPLE_FRAGMENT_SHADER[] =
+"precision mediump float;\n"
+"varying vec2 vtexcoord;\n"
+"uniform sampler2D tex;\n"
+"void main()\n"
+"{\n"
+"  gl_FragColor = texture2D(tex, vtexcoord);\n"
+"}\n";
 
 struct glripple *nemofx_glripple_create(int32_t width, int32_t height)
 {
@@ -120,9 +89,12 @@ struct glripple *nemofx_glripple_create(int32_t width, int32_t height)
 		return NULL;
 	memset(ripple, 0, sizeof(struct glripple));
 
-	ripple->program = nemofx_glripple_create_program();
+	ripple->program = glshader_compile_program(GLRIPPLE_SIMPLE_VERTEX_SHADER, GLRIPPLE_SIMPLE_FRAGMENT_SHADER, &ripple->vshader, &ripple->fshader);
 	if (ripple->program == 0)
 		goto err1;
+	glUseProgram(ripple->program);
+	glBindAttribLocation(ripple->program, 0, "position");
+	glBindAttribLocation(ripple->program, 1, "texcoord");
 
 	ripple->utexture = glGetUniformLocation(ripple->program, "tex");
 
@@ -169,6 +141,8 @@ void nemofx_glripple_destroy(struct glripple *ripple)
 	glDeleteFramebuffers(1, &ripple->fbo);
 	glDeleteRenderbuffers(1, &ripple->dbo);
 
+	glDeleteShader(ripple->vshader);
+	glDeleteShader(ripple->fshader);
 	glDeleteProgram(ripple->program);
 
 	if (ripple->vectors_ != NULL)

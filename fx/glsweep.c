@@ -27,6 +27,8 @@ struct glsweep {
 
 	GLuint mask;
 
+	GLuint vshader;
+	GLuint fshader;
 	GLuint program;
 
 	GLint utexture;
@@ -193,39 +195,6 @@ static const char GLSWEEP_MASK_FRAGMENT_SHADER[] =
 "  gl_FragColor = texture2D(snapshot, vtexcoord) * i4 + texture2D(texture, vtexcoord) * m4;\n"
 "}\n";
 
-static GLuint nemofx_glsweep_create_program(const char *shader)
-{
-	const char *vertexshader = GLSWEEP_VERTEX_SHADER;
-	GLuint frag, vert;
-	GLuint program;
-	GLint status;
-
-	frag = glshader_compile(GL_FRAGMENT_SHADER, 1, &shader);
-	vert = glshader_compile(GL_VERTEX_SHADER, 1, &vertexshader);
-
-	program = glCreateProgram();
-	glAttachShader(program, frag);
-	glAttachShader(program, vert);
-	glLinkProgram(program);
-
-	glGetProgramiv(program, GL_LINK_STATUS, &status);
-	if (!status) {
-		GLsizei len;
-		char log[1000];
-
-		glGetProgramInfoLog(program, 1000, &len, log);
-		fprintf(stderr, "Error: linking:\n%*s\n", len, log);
-
-		return 0;
-	}
-
-	glUseProgram(program);
-	glBindAttribLocation(program, 0, "position");
-	glBindAttribLocation(program, 1, "texcoord");
-
-	return program;
-}
-
 struct glsweep *nemofx_glsweep_create(int32_t width, int32_t height)
 {
 	struct glsweep *sweep;
@@ -274,8 +243,11 @@ void nemofx_glsweep_destroy(struct glsweep *sweep)
 	glDeleteFramebuffers(1, &sweep->fbo);
 	glDeleteRenderbuffers(1, &sweep->dbo);
 
-	if (sweep->program > 0)
+	if (sweep->program > 0) {
+		glDeleteShader(sweep->vshader);
+		glDeleteShader(sweep->fshader);
 		glDeleteProgram(sweep->program);
+	}
 
 	free(sweep);
 }
@@ -369,12 +341,18 @@ void nemofx_glsweep_set_type(struct glsweep *sweep, int type)
 		GLSWEEP_MASK_FRAGMENT_SHADER
 	};
 
-	if (sweep->program > 0)
+	if (sweep->program > 0) {
+		glDeleteShader(sweep->vshader);
+		glDeleteShader(sweep->fshader);
 		glDeleteProgram(sweep->program);
+	}
 
-	sweep->program = nemofx_glsweep_create_program(programs[type]);
+	sweep->program = glshader_compile_program(GLSWEEP_VERTEX_SHADER, programs[type], &sweep->vshader, &sweep->fshader);
 	if (sweep->program == 0)
 		return;
+	glUseProgram(sweep->program);
+	glBindAttribLocation(sweep->program, 0, "position");
+	glBindAttribLocation(sweep->program, 1, "texcoord");
 
 	sweep->utexture = glGetUniformLocation(sweep->program, "texture");
 	sweep->uwidth = glGetUniformLocation(sweep->program, "width");

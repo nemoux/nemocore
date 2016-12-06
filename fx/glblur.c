@@ -20,6 +20,8 @@ struct glblur {
 	GLuint texture[2];
 	GLuint fbo[2], dbo[2];
 
+	GLuint vshader;
+	GLuint fshader;
 	GLuint program;
 
 	GLint utexture;
@@ -66,39 +68,6 @@ static const char GLBLUR_GAUSSIAN_9TAP_FRAGMENT_SHADER[] =
 "  gl_FragColor = sum;\n"
 "}\n";
 
-static GLuint nemofx_glblur_create_program(const char *shader)
-{
-	const char *vertexshader = GLBLUR_SIMPLE_VERTEX_SHADER;
-	GLuint frag, vert;
-	GLuint program;
-	GLint status;
-
-	frag = glshader_compile(GL_FRAGMENT_SHADER, 1, &shader);
-	vert = glshader_compile(GL_VERTEX_SHADER, 1, &vertexshader);
-
-	program = glCreateProgram();
-	glAttachShader(program, frag);
-	glAttachShader(program, vert);
-	glLinkProgram(program);
-
-	glGetProgramiv(program, GL_LINK_STATUS, &status);
-	if (!status) {
-		GLsizei len;
-		char log[1000];
-
-		glGetProgramInfoLog(program, 1000, &len, log);
-		fprintf(stderr, "Error: linking:\n%*s\n", len, log);
-
-		return 0;
-	}
-
-	glUseProgram(program);
-	glBindAttribLocation(program, 0, "position");
-	glBindAttribLocation(program, 1, "texcoord");
-
-	return program;
-}
-
 struct glblur *nemofx_glblur_create(int32_t width, int32_t height)
 {
 	struct glblur *blur;
@@ -127,9 +96,12 @@ struct glblur *nemofx_glblur_create(int32_t width, int32_t height)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	blur->program = nemofx_glblur_create_program(GLBLUR_GAUSSIAN_9TAP_FRAGMENT_SHADER);
+	blur->program = glshader_compile_program(GLBLUR_SIMPLE_VERTEX_SHADER, GLBLUR_GAUSSIAN_9TAP_FRAGMENT_SHADER, &blur->vshader, &blur->fshader);
 	if (blur->program == 0)
 		goto err1;
+	glUseProgram(blur->program);
+	glBindAttribLocation(blur->program, 0, "position");
+	glBindAttribLocation(blur->program, 1, "texcoord");
 
 	blur->utexture = glGetUniformLocation(blur->program, "tex");
 	blur->uwidth = glGetUniformLocation(blur->program, "width");
@@ -163,6 +135,8 @@ void nemofx_glblur_destroy(struct glblur *blur)
 	glDeleteFramebuffers(1, &blur->fbo[1]);
 	glDeleteRenderbuffers(1, &blur->dbo[1]);
 
+	glDeleteShader(blur->vshader);
+	glDeleteShader(blur->fshader);
 	glDeleteProgram(blur->program);
 
 	free(blur);

@@ -20,6 +20,8 @@ struct glfilter {
 	GLuint texture;
 	GLuint fbo, dbo;
 
+	GLuint vshader;
+	GLuint fshader;
 	GLuint program;
 
 	GLint utexture;
@@ -172,39 +174,6 @@ static const char GLFILTER_SHARPNESS_FRAGMENT_SHADER[] =
 "  gl_FragColor = clamp(s / 1.0 + 0.0, 0.0, 1.0);\n"
 "}\n";
 
-static GLuint nemofx_glfilter_create_program(const char *shader)
-{
-	const char *vertexshader = GLFILTER_SIMPLE_VERTEX_SHADER;
-	GLuint frag, vert;
-	GLuint program;
-	GLint status;
-
-	frag = glshader_compile(GL_FRAGMENT_SHADER, 1, &shader);
-	vert = glshader_compile(GL_VERTEX_SHADER, 1, &vertexshader);
-
-	program = glCreateProgram();
-	glAttachShader(program, frag);
-	glAttachShader(program, vert);
-	glLinkProgram(program);
-
-	glGetProgramiv(program, GL_LINK_STATUS, &status);
-	if (!status) {
-		GLsizei len;
-		char log[1000];
-
-		glGetProgramInfoLog(program, 1000, &len, log);
-		fprintf(stderr, "Error: linking:\n%*s\n", len, log);
-
-		return 0;
-	}
-
-	glUseProgram(program);
-	glBindAttribLocation(program, 0, "position");
-	glBindAttribLocation(program, 1, "texcoord");
-
-	return program;
-}
-
 struct glfilter *nemofx_glfilter_create(int32_t width, int32_t height)
 {
 	struct glfilter *filter;
@@ -227,7 +196,6 @@ struct glfilter *nemofx_glfilter_create(int32_t width, int32_t height)
 
 	filter->width = width;
 	filter->height = height;
-	filter->program = 0;
 
 	return filter;
 
@@ -246,6 +214,10 @@ void nemofx_glfilter_destroy(struct glfilter *filter)
 	glDeleteFramebuffers(1, &filter->fbo);
 	glDeleteRenderbuffers(1, &filter->dbo);
 
+	if (filter->vshader > 0)
+		glDeleteShader(filter->vshader);
+	if (filter->fshader > 0)
+		glDeleteShader(filter->fshader);
 	if (filter->program > 0)
 		glDeleteProgram(filter->program);
 
@@ -255,7 +227,12 @@ void nemofx_glfilter_destroy(struct glfilter *filter)
 void nemofx_glfilter_set_program(struct glfilter *filter, const char *shaderpath)
 {
 	if (filter->program > 0) {
+		glDeleteShader(filter->vshader);
+		glDeleteShader(filter->fshader);
 		glDeleteProgram(filter->program);
+
+		filter->vshader = 0;
+		filter->fshader = 0;
 		filter->program = 0;
 	}
 
@@ -264,7 +241,7 @@ void nemofx_glfilter_set_program(struct glfilter *filter, const char *shaderpath
 		int size;
 
 		if (os_load_path(shaderpath, &shader, &size) >= 0) {
-			filter->program = nemofx_glfilter_create_program(shader);
+			filter->program = glshader_compile_program(GLFILTER_SIMPLE_VERTEX_SHADER, shader, &filter->vshader, &filter->fshader);
 
 			free(shader);
 		}
@@ -283,10 +260,14 @@ void nemofx_glfilter_set_program(struct glfilter *filter, const char *shaderpath
 			shader = GLFILTER_EMBOSS_FRAGMENT_SHADER;
 
 		if (shader != NULL)
-			filter->program = nemofx_glfilter_create_program(shader);
+			filter->program = glshader_compile_program(GLFILTER_SIMPLE_VERTEX_SHADER, shader, &filter->vshader, &filter->fshader);
 	}
 
 	if (filter->program > 0) {
+		glUseProgram(filter->program);
+		glBindAttribLocation(filter->program, 0, "position");
+		glBindAttribLocation(filter->program, 1, "texcoord");
+
 		filter->utexture = glGetUniformLocation(filter->program, "tex");
 		filter->uwidth = glGetUniformLocation(filter->program, "width");
 		filter->uheight = glGetUniformLocation(filter->program, "height");
