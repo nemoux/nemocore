@@ -13,7 +13,7 @@
 #include <nemoshow.h>
 #include <showhelper.h>
 #include <fbohelper.h>
-#include <glshader.h>
+#include <glhelper.h>
 #include <tilehelper.hpp>
 #include <nemofs.h>
 #include <nemopoly.h>
@@ -2072,10 +2072,10 @@ static int nemotile_prepare_opengl(struct nemotile *tile, int32_t width, int32_t
 			width, height,
 			&tile->fbo, &tile->dbo);
 
-	tile->programs[0] = glshader_compile_program(vertexshader_texture, fragmentshader_texture, NULL, NULL);
-	tile->programs[1] = glshader_compile_program(vertexshader_texture_light, fragmentshader_texture_light, NULL, NULL);
-	tile->programs[2] = glshader_compile_program(vertexshader_diffuse, fragmentshader_diffuse, NULL, NULL);
-	tile->programs[3] = glshader_compile_program(vertexshader_diffuse_light, fragmentshader_diffuse_light, NULL, NULL);
+	tile->programs[0] = gl_compile_program(vertexshader_texture, fragmentshader_texture, NULL, NULL);
+	tile->programs[1] = gl_compile_program(vertexshader_texture_light, fragmentshader_texture_light, NULL, NULL);
+	tile->programs[2] = gl_compile_program(vertexshader_diffuse, fragmentshader_diffuse, NULL, NULL);
+	tile->programs[3] = gl_compile_program(vertexshader_diffuse_light, fragmentshader_diffuse_light, NULL, NULL);
 
 	tile->uprojection0 = glGetUniformLocation(tile->programs[0], "projection");
 	tile->uvtransform0 = glGetUniformLocation(tile->programs[0], "vtransform");

@@ -11,7 +11,7 @@
 #include <GLES2/gl2ext.h>
 
 #include <glblur.h>
-#include <glshader.h>
+#include <glhelper.h>
 #include <fbohelper.h>
 #include <oshelper.h>
 #include <nemomisc.h>
@@ -96,7 +96,7 @@ struct glblur *nemofx_glblur_create(int32_t width, int32_t height)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	blur->program = glshader_compile_program(GLBLUR_SIMPLE_VERTEX_SHADER, GLBLUR_GAUSSIAN_9TAP_FRAGMENT_SHADER, &blur->vshader, &blur->fshader);
+	blur->program = gl_compile_program(GLBLUR_SIMPLE_VERTEX_SHADER, GLBLUR_GAUSSIAN_9TAP_FRAGMENT_SHADER, &blur->vshader, &blur->fshader);
 	if (blur->program == 0)
 		goto err1;
 	glUseProgram(blur->program);

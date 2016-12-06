@@ -24,6 +24,7 @@ add_library(nemofx SHARED
 	glcolor.c
 	fxnoise.cpp
 	fxsph.c
+	${CMAKE_SOURCE_DIR}/misc/glhelper.c
 	${CMAKE_SOURCE_DIR}/thirds/fastnoise.cpp
 	)
 

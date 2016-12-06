@@ -8,9 +8,9 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
-#include <glshader.h>
+#include <glhelper.h>
 
-GLuint glshader_compile(GLenum type, int count, const char **sources)
+GLuint gl_compile_shader(GLenum type, int count, const char **sources)
 {
 	GLuint shader;
 	GLint status;
@@ -33,15 +33,15 @@ GLuint glshader_compile(GLenum type, int count, const char **sources)
 	return shader;
 }
 
-GLuint glshader_compile_program(const char *vertex_source, const char *fragment_source, GLuint *vertex_shader, GLuint *fragment_shader)
+GLuint gl_compile_program(const char *vertex_source, const char *fragment_source, GLuint *vertex_shader, GLuint *fragment_shader)
 {
 	GLuint program;
 	GLuint vshader;
 	GLuint fshader;
 	GLint status;
 
-	vshader = glshader_compile(GL_FRAGMENT_SHADER, 1, &fragment_source);
-	fshader = glshader_compile(GL_VERTEX_SHADER, 1, &vertex_source);
+	vshader = gl_compile_shader(GL_FRAGMENT_SHADER, 1, &fragment_source);
+	fshader = gl_compile_shader(GL_VERTEX_SHADER, 1, &vertex_source);
 
 	program = glCreateProgram();
 	glAttachShader(program, vshader);

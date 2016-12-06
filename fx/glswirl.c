@@ -11,7 +11,7 @@
 #include <GLES2/gl2ext.h>
 
 #include <glswirl.h>
-#include <glshader.h>
+#include <glhelper.h>
 #include <fbohelper.h>
 #include <oshelper.h>
 #include <nemomisc.h>
@@ -90,7 +90,7 @@ struct glswirl *nemofx_glswirl_create(int32_t width, int32_t height)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	swirl->program = glshader_compile_program(GLSWIRL_VERTEX_SHADER, GLSWIRL_FRAGMENT_SHADER, &swirl->vshader, &swirl->fshader);
+	swirl->program = gl_compile_program(GLSWIRL_VERTEX_SHADER, GLSWIRL_FRAGMENT_SHADER, &swirl->vshader, &swirl->fshader);
 	if (swirl->program == 0)
 		goto err1;
 	glUseProgram(swirl->program);

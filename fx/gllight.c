@@ -13,7 +13,7 @@
 #include <GLES2/gl2ext.h>
 
 #include <gllight.h>
-#include <glshader.h>
+#include <glhelper.h>
 #include <fbohelper.h>
 #include <oshelper.h>
 #include <nemomisc.h>
@@ -115,10 +115,10 @@ struct gllight *nemofx_gllight_create(int32_t width, int32_t height)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	light->program0 = glshader_compile_program(GLLIGHT_LIGHT_VERTEX_SHADER, GLLIGHT_AMBIENT_LIGHT_FRAGMENT_SHADER, &light->vshader0, &light->fshader0);
+	light->program0 = gl_compile_program(GLLIGHT_LIGHT_VERTEX_SHADER, GLLIGHT_AMBIENT_LIGHT_FRAGMENT_SHADER, &light->vshader0, &light->fshader0);
 	if (light->program0 == 0)
 		goto err1;
-	light->program1 = glshader_compile_program(GLLIGHT_LIGHT_VERTEX_SHADER, GLLIGHT_POINT_LIGHT_FRAGMENT_SHADER, &light->vshader1, &light->fshader1);
+	light->program1 = gl_compile_program(GLLIGHT_LIGHT_VERTEX_SHADER, GLLIGHT_POINT_LIGHT_FRAGMENT_SHADER, &light->vshader1, &light->fshader1);
 	if (light->program1 == 0)
 		goto err2;
 

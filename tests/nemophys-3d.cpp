@@ -18,7 +18,7 @@
 #include <nemoshow.h>
 #include <showhelper.h>
 #include <fbohelper.h>
-#include <glshader.h>
+#include <glhelper.h>
 #include <nemohelper.h>
 #include <nemoplay.h>
 #include <playback.h>
@@ -817,8 +817,8 @@ static int nemophys_prepare_opengl(struct physcontext *context, int32_t width, i
 			width, height,
 			&context->fbo, &context->dbo);
 
-	context->programs[0] = glshader_compile_program(vertexshader_texture, fragmentshader_texture, NULL, NULL);
-	context->programs[1] = glshader_compile_program(vertexshader_solid, fragmentshader_solid, NULL, NULL);
+	context->programs[0] = gl_compile_program(vertexshader_texture, fragmentshader_texture, NULL, NULL);
+	context->programs[1] = gl_compile_program(vertexshader_solid, fragmentshader_solid, NULL, NULL);
 
 	context->uprojection0 = glGetUniformLocation(context->programs[0], "projection");
 	context->uvtransform0 = glGetUniformLocation(context->programs[0], "vtransform");

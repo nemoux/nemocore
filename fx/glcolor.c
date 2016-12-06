@@ -11,7 +11,7 @@
 #include <GLES2/gl2ext.h>
 
 #include <glcolor.h>
-#include <glshader.h>
+#include <glhelper.h>
 #include <fbohelper.h>
 #include <oshelper.h>
 #include <nemomisc.h>
@@ -67,7 +67,7 @@ struct glcolor *nemofx_glcolor_create(int32_t width, int32_t height)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	color->program = glshader_compile_program(GLCOLOR_VERTEX_SHADER, GLCOLOR_FRAGMENT_SHADER, &color->vshader, &color->fshader);
+	color->program = gl_compile_program(GLCOLOR_VERTEX_SHADER, GLCOLOR_FRAGMENT_SHADER, &color->vshader, &color->fshader);
 	if (color->program == 0)
 		goto err1;
 	glUseProgram(color->program);

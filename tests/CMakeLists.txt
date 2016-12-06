@@ -42,6 +42,7 @@ endif(WITH_CEF)
 
 add_executable(nemomote-show
 	nemomote-show.c
+	${CMAKE_SOURCE_DIR}/misc/glhelper.c
 	)
 
 TARGET_LINK_LIBRARIES(nemomote-show
@@ -75,6 +76,7 @@ if(WITH_BULLET)
 
 	add_executable(nemophys-3d
 		nemophys-3d.cpp
+		${CMAKE_SOURCE_DIR}/misc/glhelper.c
 		)
 
 	TARGET_LINK_LIBRARIES(nemophys-3d

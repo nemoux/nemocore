@@ -16,7 +16,7 @@
 #include <nemoshow.h>
 #include <showhelper.h>
 #include <fbohelper.h>
-#include <glshader.h>
+#include <glhelper.h>
 #include <nemopoly.h>
 #include <nemohelper.h>
 #include <nemolog.h>
@@ -114,8 +114,8 @@ static void nemomote_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 			width, height,
 			&fbo, &dbo);
 
-	program0 = glshader_compile_program(vertexshader0, fragmentshader0, NULL, NULL);
-	program1 = glshader_compile_program(vertexshader1, fragmentshader1, NULL, NULL);
+	program0 = gl_compile_program(vertexshader0, fragmentshader0, NULL, NULL);
+	program1 = gl_compile_program(vertexshader1, fragmentshader1, NULL, NULL);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
@@ -235,7 +235,7 @@ static void nemomote_dispatch_canvas_redraw_cs(struct nemoshow *show, struct sho
 	glClearDepth(0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	NEMO_CHECK((comp = glshader_compile(GL_COMPUTE_SHADER, 1, &computeshader)) == GL_NONE, "failed to compile shader\n");
+	NEMO_CHECK((comp = gl_compile_shader(GL_COMPUTE_SHADER, 1, &computeshader)) == GL_NONE, "failed to compile shader\n");
 
 	program = glCreateProgram();
 	glAttachShader(program, comp);
@@ -254,8 +254,8 @@ static void nemomote_dispatch_canvas_redraw_cs(struct nemoshow *show, struct sho
 
 	glDeleteProgram(program);
 
-	NEMO_CHECK((frag = glshader_compile(GL_FRAGMENT_SHADER, 1, &fragmentshader)) == GL_NONE, "failed to compile shader\n");
-	NEMO_CHECK((vert = glshader_compile(GL_VERTEX_SHADER, 1, &vertexshader)) == GL_NONE, "failed to compile shader\n");
+	NEMO_CHECK((frag = gl_compile_shader(GL_FRAGMENT_SHADER, 1, &fragmentshader)) == GL_NONE, "failed to compile shader\n");
+	NEMO_CHECK((vert = gl_compile_shader(GL_VERTEX_SHADER, 1, &vertexshader)) == GL_NONE, "failed to compile shader\n");
 
 	program = glCreateProgram();
 	glAttachShader(program, frag);

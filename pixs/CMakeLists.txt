@@ -21,6 +21,7 @@ set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 
 add_executable(nemopixs
 	nemopixs.c
+	${CMAKE_SOURCE_DIR}/misc/glhelper.c
 	)
 
 TARGET_LINK_LIBRARIES(nemopixs

@@ -13,7 +13,7 @@ add_library(nemotale SHARED
 	talenode.c
 	talegl.c
 	talepixman.c
-	${CMAKE_SOURCE_DIR}/misc/glshader.c
+	${CMAKE_SOURCE_DIR}/misc/glhelper.c
 	${CMAKE_SOURCE_DIR}/misc/glcompz.c
 	${CMAKE_SOURCE_DIR}/misc/fbohelper.c
 	)

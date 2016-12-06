@@ -13,7 +13,7 @@
 #include <GLES2/gl2ext.h>
 
 #include <glsweep.h>
-#include <glshader.h>
+#include <glhelper.h>
 #include <fbohelper.h>
 #include <oshelper.h>
 #include <nemomisc.h>
@@ -347,7 +347,7 @@ void nemofx_glsweep_set_type(struct glsweep *sweep, int type)
 		glDeleteProgram(sweep->program);
 	}
 
-	sweep->program = glshader_compile_program(GLSWEEP_VERTEX_SHADER, programs[type], &sweep->vshader, &sweep->fshader);
+	sweep->program = gl_compile_program(GLSWEEP_VERTEX_SHADER, programs[type], &sweep->vshader, &sweep->fshader);
 	if (sweep->program == 0)
 		return;
 	glUseProgram(sweep->program);

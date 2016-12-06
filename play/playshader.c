@@ -7,7 +7,7 @@
 
 #include <playshader.h>
 #include <fbohelper.h>
-#include <glshader.h>
+#include <glhelper.h>
 #include <nemomisc.h>
 
 struct playshader *nemoplay_shader_create(void)
@@ -179,42 +179,18 @@ int nemoplay_shader_set_viewport(struct playshader *shader, uint32_t texture, in
 
 int nemoplay_shader_prepare(struct playshader *shader, const char *vertex_source, const char *fragment_source)
 {
-	GLuint frag, vert;
-	GLuint program;
-	GLint status;
+	shader->program = gl_compile_program(vertex_source, fragment_source, &shader->shaders[0], &shader->shaders[1]);
+	if (shader->program == 0)
+		return -1;
+	glUseProgram(shader->program);
+	glBindAttribLocation(shader->program, 0, "position");
+	glBindAttribLocation(shader->program, 1, "texcoord");
 
-	frag = glshader_compile(GL_FRAGMENT_SHADER, 1, &fragment_source);
-	vert = glshader_compile(GL_VERTEX_SHADER, 1, &vertex_source);
-
-	program = glCreateProgram();
-	glAttachShader(program, frag);
-	glAttachShader(program, vert);
-	glLinkProgram(program);
-
-	glGetProgramiv(program, GL_LINK_STATUS, &status);
-	if (!status)
-		goto err1;
-
-	glUseProgram(program);
-	glBindAttribLocation(program, 0, "position");
-	glBindAttribLocation(program, 1, "texcoord");
-
-	shader->utexy = glGetUniformLocation(program, "texy");
-	shader->utexu = glGetUniformLocation(program, "texu");
-	shader->utexv = glGetUniformLocation(program, "texv");
-
-	shader->shaders[0] = frag;
-	shader->shaders[1] = vert;
-	shader->program = program;
+	shader->utexy = glGetUniformLocation(shader->program, "texy");
+	shader->utexu = glGetUniformLocation(shader->program, "texu");
+	shader->utexv = glGetUniformLocation(shader->program, "texv");
 
 	return 0;
-
-err1:
-	glDeleteShader(frag);
-	glDeleteShader(vert);
-	glDeleteProgram(program);
-
-	return -1;
 }
 
 void nemoplay_shader_finish(struct playshader *shader)

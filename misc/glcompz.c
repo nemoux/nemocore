@@ -9,14 +9,14 @@
 #include <GLES2/gl2ext.h>
 
 #include <glcompz.h>
-#include <glshader.h>
+#include <glhelper.h>
 
 int glcompz_prepare(struct glcompz *shader, const char *vertex_source, const char *fragment_source)
 {
 	GLint status;
 
-	shader->vertex_shader = glshader_compile(GL_VERTEX_SHADER, 1, &vertex_source);
-	shader->fragment_shader = glshader_compile(GL_FRAGMENT_SHADER, 1, &fragment_source);
+	shader->vertex_shader = gl_compile_shader(GL_VERTEX_SHADER, 1, &vertex_source);
+	shader->fragment_shader = gl_compile_shader(GL_FRAGMENT_SHADER, 1, &fragment_source);
 
 	shader->program = glCreateProgram();
 	glAttachShader(shader->program, shader->vertex_shader);

@@ -13,7 +13,7 @@
 #include <nemoshow.h>
 #include <showhelper.h>
 #include <fbohelper.h>
-#include <glshader.h>
+#include <glhelper.h>
 #include <nemofs.h>
 #include <nemohelper.h>
 #include <nemolog.h>
@@ -1432,10 +1432,10 @@ static int nemopixs_prepare_opengl(struct nemopixs *pixs, int32_t width, int32_t
 			width, height,
 			&pixs->fbo, &pixs->dbo);
 
-	pixs->programs[0] = glshader_compile_program(vertexshader, fragmentshader, NULL, NULL);
-	pixs->programs[1] = glshader_compile_program(vertexshader, fragmentshader_pointsprite, NULL, NULL);
-	pixs->programs[2] = glshader_compile_program(vertexshader_texture, fragmentshader_texture, NULL, NULL);
-	pixs->programs[3] = glshader_compile_program(vertexshader_texture, fragmentshader_texture_pointsprite, NULL, NULL);
+	pixs->programs[0] = gl_compile_program(vertexshader, fragmentshader, NULL, NULL);
+	pixs->programs[1] = gl_compile_program(vertexshader, fragmentshader_pointsprite, NULL, NULL);
+	pixs->programs[2] = gl_compile_program(vertexshader_texture, fragmentshader_texture, NULL, NULL);
+	pixs->programs[3] = gl_compile_program(vertexshader_texture, fragmentshader_texture_pointsprite, NULL, NULL);
 
 	pixs->usprite1 = glGetUniformLocation(pixs->programs[1], "sprite");
 	pixs->usprite3 = glGetUniformLocation(pixs->programs[3], "sprite");

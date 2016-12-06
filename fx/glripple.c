@@ -13,7 +13,7 @@
 #include <GLES2/gl2ext.h>
 
 #include <glripple.h>
-#include <glshader.h>
+#include <glhelper.h>
 #include <fbohelper.h>
 #include <nemomisc.h>
 #include <nemolist.h>
@@ -89,7 +89,7 @@ struct glripple *nemofx_glripple_create(int32_t width, int32_t height)
 		return NULL;
 	memset(ripple, 0, sizeof(struct glripple));
 
-	ripple->program = glshader_compile_program(GLRIPPLE_SIMPLE_VERTEX_SHADER, GLRIPPLE_SIMPLE_FRAGMENT_SHADER, &ripple->vshader, &ripple->fshader);
+	ripple->program = gl_compile_program(GLRIPPLE_SIMPLE_VERTEX_SHADER, GLRIPPLE_SIMPLE_FRAGMENT_SHADER, &ripple->vshader, &ripple->fshader);
 	if (ripple->program == 0)
 		goto err1;
 	glUseProgram(ripple->program);

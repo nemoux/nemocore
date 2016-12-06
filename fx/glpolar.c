@@ -11,7 +11,7 @@
 #include <GLES2/gl2ext.h>
 
 #include <glpolar.h>
-#include <glshader.h>
+#include <glhelper.h>
 #include <fbohelper.h>
 #include <oshelper.h>
 #include <nemomisc.h>
@@ -75,7 +75,7 @@ struct glpolar *nemofx_glpolar_create(int32_t width, int32_t height)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	polar->program = glshader_compile_program(GLPOLAR_VERTEX_SHADER, GLPOLAR_FRAGMENT_SHADER, &polar->vshader, &polar->fshader);
+	polar->program = gl_compile_program(GLPOLAR_VERTEX_SHADER, GLPOLAR_FRAGMENT_SHADER, &polar->vshader, &polar->fshader);
 	if (polar->program == 0)
 		goto err1;
 	glUseProgram(polar->program);

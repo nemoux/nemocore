@@ -11,7 +11,6 @@
 #include <nemoshow.h>
 #include <showhelper.h>
 #include <fbohelper.h>
-#include <glshader.h>
 #include <glfilter.h>
 #include <glblur.h>
 #include <glripple.h>

@@ -11,7 +11,7 @@
 #include <GLES2/gl2ext.h>
 
 #include <glfilter.h>
-#include <glshader.h>
+#include <glhelper.h>
 #include <fbohelper.h>
 #include <oshelper.h>
 #include <nemomisc.h>
@@ -241,7 +241,7 @@ void nemofx_glfilter_set_program(struct glfilter *filter, const char *shaderpath
 		int size;
 
 		if (os_load_path(shaderpath, &shader, &size) >= 0) {
-			filter->program = glshader_compile_program(GLFILTER_SIMPLE_VERTEX_SHADER, shader, &filter->vshader, &filter->fshader);
+			filter->program = gl_compile_program(GLFILTER_SIMPLE_VERTEX_SHADER, shader, &filter->vshader, &filter->fshader);
 
 			free(shader);
 		}
@@ -260,7 +260,7 @@ void nemofx_glfilter_set_program(struct glfilter *filter, const char *shaderpath
 			shader = GLFILTER_EMBOSS_FRAGMENT_SHADER;
 
 		if (shader != NULL)
-			filter->program = glshader_compile_program(GLFILTER_SIMPLE_VERTEX_SHADER, shader, &filter->vshader, &filter->fshader);
+			filter->program = gl_compile_program(GLFILTER_SIMPLE_VERTEX_SHADER, shader, &filter->vshader, &filter->fshader);
 	}
 
 	if (filter->program > 0) {

@@ -13,7 +13,7 @@
 #include <GLES2/gl2ext.h>
 
 #include <glshadow.h>
-#include <glshader.h>
+#include <glhelper.h>
 #include <fbohelper.h>
 #include <oshelper.h>
 #include <nemomatrix.h>
@@ -216,16 +216,16 @@ struct glshadow *nemofx_glshadow_create(int32_t width, int32_t height, int32_t l
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, GLSHADOW_MAP_SIZE, 1, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	shadow->program0 = glshader_compile_program(GLSHADOW_COVER_VERTEX_SHADER, GLSHADOW_COVER_FRAGMENT_SHADER, &shadow->vshader0, &shadow->fshader0);
+	shadow->program0 = gl_compile_program(GLSHADOW_COVER_VERTEX_SHADER, GLSHADOW_COVER_FRAGMENT_SHADER, &shadow->vshader0, &shadow->fshader0);
 	if (shadow->program0 == 0)
 		goto err1;
-	shadow->program1 = glshader_compile_program(GLSHADOW_OCCLUDE_VERTEX_SHADER, GLSHADOW_OCCLUDE_FRAGMENT_SHADER, &shadow->vshader1, &shadow->fshader1);
+	shadow->program1 = gl_compile_program(GLSHADOW_OCCLUDE_VERTEX_SHADER, GLSHADOW_OCCLUDE_FRAGMENT_SHADER, &shadow->vshader1, &shadow->fshader1);
 	if (shadow->program1 == 0)
 		goto err2;
-	shadow->program2 = glshader_compile_program(GLSHADOW_MAP_VERTEX_SHADER, GLSHADOW_MAP_FRAGMENT_SHADER, &shadow->vshader2, &shadow->fshader2);
+	shadow->program2 = gl_compile_program(GLSHADOW_MAP_VERTEX_SHADER, GLSHADOW_MAP_FRAGMENT_SHADER, &shadow->vshader2, &shadow->fshader2);
 	if (shadow->program2 == 0)
 		goto err3;
-	shadow->program3 = glshader_compile_program(GLSHADOW_RENDER_VERTEX_SHADER, GLSHADOW_RENDER_FRAGMENT_SHADER, &shadow->vshader3, &shadow->fshader3);
+	shadow->program3 = gl_compile_program(GLSHADOW_RENDER_VERTEX_SHADER, GLSHADOW_RENDER_FRAGMENT_SHADER, &shadow->vshader3, &shadow->fshader3);
 	if (shadow->program3 == 0)
 		goto err4;
 

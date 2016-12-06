@@ -44,6 +44,7 @@ add_library(nemoplay SHARED
 	playshader.c
 	playback.c
 	playmisc.c
+	${CMAKE_SOURCE_DIR}/misc/glhelper.c
 	)
 
 TARGET_LINK_LIBRARIES(nemoplay

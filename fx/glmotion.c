@@ -11,7 +11,7 @@
 #include <GLES2/gl2ext.h>
 
 #include <glmotion.h>
-#include <glshader.h>
+#include <glhelper.h>
 #include <fbohelper.h>
 #include <oshelper.h>
 #include <nemomisc.h>
@@ -84,7 +84,7 @@ struct glmotion *nemofx_glmotion_create(int32_t width, int32_t height)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	motion->program = glshader_compile_program(GLMOTION_SIMPLE_VERTEX_SHADER, GLMOTION_ACCUMULATE_FRAGMENT_SHADER, &motion->vshader, &motion->fshader);
+	motion->program = gl_compile_program(GLMOTION_SIMPLE_VERTEX_SHADER, GLMOTION_ACCUMULATE_FRAGMENT_SHADER, &motion->vshader, &motion->fshader);
 	if (motion->program == 0)
 		goto err1;
 	glUseProgram(motion->program);

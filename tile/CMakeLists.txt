@@ -23,6 +23,7 @@ set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 add_executable(nemotile
 	nemotile.c
 	tilehelper.cpp
+	${CMAKE_SOURCE_DIR}/misc/glhelper.c
 	${CMAKE_SOURCE_DIR}/thirds/tiny_obj_loader.cc
 	)
 
