@@ -17,7 +17,6 @@
 
 #include <nemoshow.h>
 #include <showhelper.h>
-#include <fbohelper.h>
 #include <glhelper.h>
 #include <nemohelper.h>
 #include <nemoplay.h>
@@ -609,7 +608,7 @@ static void nemophys_dispatch_show_resize(struct nemoshow *show, int32_t width, 
 	glDeleteFramebuffers(1, &context->fbo);
 	glDeleteRenderbuffers(1, &context->dbo);
 
-	fbo_prepare_context(
+	gl_create_fbo(
 			nemoshow_canvas_get_texture(context->canvas),
 			width, height,
 			&context->fbo, &context->dbo);
@@ -812,7 +811,7 @@ static int nemophys_prepare_opengl(struct physcontext *context, int32_t width, i
 		"  gl_FragColor = color;\n"
 		"}\n";
 
-	fbo_prepare_context(
+	gl_create_fbo(
 			nemoshow_canvas_get_texture(context->canvas),
 			width, height,
 			&context->fbo, &context->dbo);

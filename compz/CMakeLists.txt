@@ -160,7 +160,6 @@ add_library(nemocompz SHARED
 	${CMAKE_SOURCE_DIR}/misc/fbhelper.c
 	${CMAKE_SOURCE_DIR}/misc/ttyhelper.c
 	${CMAKE_SOURCE_DIR}/misc/glcompz.c
-	${CMAKE_SOURCE_DIR}/misc/fbohelper.c
 	${EXTRA}
 	${PROTOCOLS}
 	)

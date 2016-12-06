@@ -12,7 +12,6 @@
 
 #include <glcolor.h>
 #include <glhelper.h>
-#include <fbohelper.h>
 #include <oshelper.h>
 #include <nemomisc.h>
 
@@ -76,7 +75,7 @@ struct glcolor *nemofx_glcolor_create(int32_t width, int32_t height)
 
 	color->ucolor = glGetUniformLocation(color->program, "color");
 
-	fbo_prepare_context(color->texture, width, height, &color->fbo, &color->dbo);
+	gl_create_fbo(color->texture, width, height, &color->fbo, &color->dbo);
 
 	color->width = width;
 	color->height = height;
@@ -123,7 +122,7 @@ void nemofx_glcolor_resize(struct glcolor *color, int32_t width, int32_t height)
 		glDeleteFramebuffers(1, &color->fbo);
 		glDeleteRenderbuffers(1, &color->dbo);
 
-		fbo_prepare_context(color->texture, width, height, &color->fbo, &color->dbo);
+		gl_create_fbo(color->texture, width, height, &color->fbo, &color->dbo);
 
 		color->width = width;
 		color->height = height;

@@ -12,7 +12,6 @@
 
 #include <glmotion.h>
 #include <glhelper.h>
-#include <fbohelper.h>
 #include <oshelper.h>
 #include <nemomisc.h>
 
@@ -96,8 +95,8 @@ struct glmotion *nemofx_glmotion_create(int32_t width, int32_t height)
 	motion->uheight = glGetUniformLocation(motion->program, "height");
 	motion->ustep = glGetUniformLocation(motion->program, "step");
 
-	fbo_prepare_context(motion->texture[0], width, height, &motion->fbo[0], &motion->dbo[0]);
-	fbo_prepare_context(motion->texture[1], width, height, &motion->fbo[1], &motion->dbo[1]);
+	gl_create_fbo(motion->texture[0], width, height, &motion->fbo[0], &motion->dbo[0]);
+	gl_create_fbo(motion->texture[1], width, height, &motion->fbo[1], &motion->dbo[1]);
 
 	motion->width = width;
 	motion->height = height;
@@ -146,7 +145,7 @@ void nemofx_glmotion_resize(struct glmotion *motion, int32_t width, int32_t heig
 			glDeleteFramebuffers(1, &motion->fbo[i]);
 			glDeleteRenderbuffers(1, &motion->dbo[i]);
 
-			fbo_prepare_context(motion->texture[i], width, height, &motion->fbo[i], &motion->dbo[i]);
+			gl_create_fbo(motion->texture[i], width, height, &motion->fbo[i], &motion->dbo[i]);
 		}
 
 		motion->width = width;

@@ -12,7 +12,6 @@
 
 #include <glswirl.h>
 #include <glhelper.h>
-#include <fbohelper.h>
 #include <oshelper.h>
 #include <nemomisc.h>
 
@@ -104,7 +103,7 @@ struct glswirl *nemofx_glswirl_create(int32_t width, int32_t height)
 	swirl->uangle = glGetUniformLocation(swirl->program, "angle");
 	swirl->ucenter = glGetUniformLocation(swirl->program, "center");
 
-	fbo_prepare_context(swirl->texture, width, height, &swirl->fbo, &swirl->dbo);
+	gl_create_fbo(swirl->texture, width, height, &swirl->fbo, &swirl->dbo);
 
 	swirl->width = width;
 	swirl->height = height;
@@ -159,7 +158,7 @@ void nemofx_glswirl_resize(struct glswirl *swirl, int32_t width, int32_t height)
 		glDeleteFramebuffers(1, &swirl->fbo);
 		glDeleteRenderbuffers(1, &swirl->dbo);
 
-		fbo_prepare_context(swirl->texture, width, height, &swirl->fbo, &swirl->dbo);
+		gl_create_fbo(swirl->texture, width, height, &swirl->fbo, &swirl->dbo);
 
 		swirl->width = width;
 		swirl->height = height;

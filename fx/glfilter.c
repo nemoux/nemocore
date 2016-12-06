@@ -12,7 +12,6 @@
 
 #include <glfilter.h>
 #include <glhelper.h>
-#include <fbohelper.h>
 #include <oshelper.h>
 #include <nemomisc.h>
 
@@ -192,7 +191,7 @@ struct glfilter *nemofx_glfilter_create(int32_t width, int32_t height)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	fbo_prepare_context(filter->texture, width, height, &filter->fbo, &filter->dbo);
+	gl_create_fbo(filter->texture, width, height, &filter->fbo, &filter->dbo);
 
 	filter->width = width;
 	filter->height = height;
@@ -285,7 +284,7 @@ void nemofx_glfilter_resize(struct glfilter *filter, int32_t width, int32_t heig
 		glDeleteFramebuffers(1, &filter->fbo);
 		glDeleteRenderbuffers(1, &filter->dbo);
 
-		fbo_prepare_context(filter->texture, width, height, &filter->fbo, &filter->dbo);
+		gl_create_fbo(filter->texture, width, height, &filter->fbo, &filter->dbo);
 
 		filter->width = width;
 		filter->height = height;

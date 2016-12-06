@@ -15,7 +15,6 @@
 
 #include <nemoshow.h>
 #include <showhelper.h>
-#include <fbohelper.h>
 #include <glhelper.h>
 #include <nemopoly.h>
 #include <nemohelper.h>
@@ -109,7 +108,7 @@ static void nemomote_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 	nedges = nemopoly_triangulate(points, 128, NULL, edges);
 	nhulls = nemopoly_convex_hull(points, 128, hulls);
 
-	fbo_prepare_context(
+	gl_create_fbo(
 			nemoshow_canvas_get_texture(canvas),
 			width, height,
 			&fbo, &dbo);
@@ -209,7 +208,7 @@ static void nemomote_dispatch_canvas_redraw_cs(struct nemoshow *show, struct sho
 	GLuint comp;
 	GLuint texture;
 
-	fbo_prepare_context(
+	gl_create_fbo(
 			nemoshow_canvas_get_texture(canvas),
 			width, height,
 			&fbo, &dbo);

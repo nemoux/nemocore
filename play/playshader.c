@@ -6,7 +6,6 @@
 #include <errno.h>
 
 #include <playshader.h>
-#include <fbohelper.h>
 #include <glhelper.h>
 #include <nemomisc.h>
 
@@ -168,7 +167,7 @@ int nemoplay_shader_set_viewport(struct playshader *shader, uint32_t texture, in
 	if (shader->dbo > 0)
 		glDeleteRenderbuffers(1, &shader->dbo);
 
-	fbo_prepare_context(texture, width, height, &shader->fbo, &shader->dbo);
+	gl_create_fbo(texture, width, height, &shader->fbo, &shader->dbo);
 
 	shader->texture = texture;
 	shader->viewport_width = width;

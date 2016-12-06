@@ -14,7 +14,6 @@
 
 #include <glripple.h>
 #include <glhelper.h>
-#include <fbohelper.h>
 #include <nemomisc.h>
 #include <nemolist.h>
 
@@ -112,7 +111,7 @@ struct glripple *nemofx_glripple_create(int32_t width, int32_t height)
 	glGenBuffers(1, &ripple->vtexcoord);
 	glGenBuffers(1, &ripple->vindex);
 
-	fbo_prepare_context(ripple->texture, width, height, &ripple->fbo, &ripple->dbo);
+	gl_create_fbo(ripple->texture, width, height, &ripple->fbo, &ripple->dbo);
 
 	ripple->width = width;
 	ripple->height = height;
@@ -264,7 +263,7 @@ void nemofx_glripple_resize(struct glripple *ripple, int32_t width, int32_t heig
 		glDeleteFramebuffers(1, &ripple->fbo);
 		glDeleteRenderbuffers(1, &ripple->dbo);
 
-		fbo_prepare_context(ripple->texture, width, height, &ripple->fbo, &ripple->dbo);
+		gl_create_fbo(ripple->texture, width, height, &ripple->fbo, &ripple->dbo);
 
 		ripple->width = width;
 		ripple->height = height;

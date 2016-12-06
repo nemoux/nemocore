@@ -14,7 +14,6 @@
 
 #include <gllight.h>
 #include <glhelper.h>
-#include <fbohelper.h>
 #include <oshelper.h>
 #include <nemomisc.h>
 
@@ -139,7 +138,7 @@ struct gllight *nemofx_gllight_create(int32_t width, int32_t height)
 	light->uscope1 = glGetUniformLocation(light->program1, "lscope");
 	light->utime1 = glGetUniformLocation(light->program1, "time");
 
-	fbo_prepare_context(light->texture, width, height, &light->fbo, &light->dbo);
+	gl_create_fbo(light->texture, width, height, &light->fbo, &light->dbo);
 
 	light->width = width;
 	light->height = height;
@@ -226,7 +225,7 @@ void nemofx_gllight_resize(struct gllight *light, int32_t width, int32_t height)
 		glDeleteFramebuffers(1, &light->fbo);
 		glDeleteRenderbuffers(1, &light->dbo);
 
-		fbo_prepare_context(light->texture, width, height, &light->fbo, &light->dbo);
+		gl_create_fbo(light->texture, width, height, &light->fbo, &light->dbo);
 
 		light->width = width;
 		light->height = height;

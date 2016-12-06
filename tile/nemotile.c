@@ -12,7 +12,6 @@
 #include <nemotile.h>
 #include <nemoshow.h>
 #include <showhelper.h>
-#include <fbohelper.h>
 #include <glhelper.h>
 #include <tilehelper.hpp>
 #include <nemofs.h>
@@ -1591,7 +1590,7 @@ static void nemotile_dispatch_show_resize(struct nemoshow *show, int32_t width, 
 	glDeleteFramebuffers(1, &tile->fbo);
 	glDeleteRenderbuffers(1, &tile->dbo);
 
-	fbo_prepare_context(
+	gl_create_fbo(
 			nemoshow_canvas_get_texture(tile->canvas),
 			width, height,
 			&tile->fbo, &tile->dbo);
@@ -2067,7 +2066,7 @@ static int nemotile_prepare_opengl(struct nemotile *tile, int32_t width, int32_t
 		"  gl_FragColor.a = t.a;\n"
 		"}\n";
 
-	fbo_prepare_context(
+	gl_create_fbo(
 			nemoshow_canvas_get_texture(tile->canvas),
 			width, height,
 			&tile->fbo, &tile->dbo);

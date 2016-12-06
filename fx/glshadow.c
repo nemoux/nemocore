@@ -14,7 +14,6 @@
 
 #include <glshadow.h>
 #include <glhelper.h>
-#include <fbohelper.h>
 #include <oshelper.h>
 #include <nemomatrix.h>
 #include <nemomisc.h>
@@ -258,9 +257,9 @@ struct glshadow *nemofx_glshadow_create(int32_t width, int32_t height, int32_t l
 	shadow->ucolor3 = glGetUniformLocation(shadow->program3, "lcolor");
 	shadow->usize3 = glGetUniformLocation(shadow->program3, "lsize");
 
-	fbo_prepare_context(shadow->occluder, lightscope, lightscope, &shadow->ofbo, &shadow->odbo);
-	fbo_prepare_context(shadow->shadow, GLSHADOW_MAP_SIZE, 1, &shadow->sfbo, &shadow->sdbo);
-	fbo_prepare_context(shadow->texture, width, height, &shadow->fbo, &shadow->dbo);
+	gl_create_fbo(shadow->occluder, lightscope, lightscope, &shadow->ofbo, &shadow->odbo);
+	gl_create_fbo(shadow->shadow, GLSHADOW_MAP_SIZE, 1, &shadow->sfbo, &shadow->sdbo);
+	gl_create_fbo(shadow->texture, width, height, &shadow->fbo, &shadow->dbo);
 
 	shadow->width = width;
 	shadow->height = height;
@@ -360,7 +359,7 @@ void nemofx_glshadow_resize(struct glshadow *shadow, int32_t width, int32_t heig
 		glDeleteFramebuffers(1, &shadow->fbo);
 		glDeleteRenderbuffers(1, &shadow->dbo);
 
-		fbo_prepare_context(shadow->texture, width, height, &shadow->fbo, &shadow->dbo);
+		gl_create_fbo(shadow->texture, width, height, &shadow->fbo, &shadow->dbo);
 
 		shadow->width = width;
 		shadow->height = height;

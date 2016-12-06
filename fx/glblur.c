@@ -12,7 +12,6 @@
 
 #include <glblur.h>
 #include <glhelper.h>
-#include <fbohelper.h>
 #include <oshelper.h>
 #include <nemomisc.h>
 
@@ -110,8 +109,8 @@ struct glblur *nemofx_glblur_create(int32_t width, int32_t height)
 	blur->udirecty = glGetUniformLocation(blur->program, "dy");
 	blur->uradius = glGetUniformLocation(blur->program, "r");
 
-	fbo_prepare_context(blur->texture[0], width, height, &blur->fbo[0], &blur->dbo[0]);
-	fbo_prepare_context(blur->texture[1], width, height, &blur->fbo[1], &blur->dbo[1]);
+	gl_create_fbo(blur->texture[0], width, height, &blur->fbo[0], &blur->dbo[0]);
+	gl_create_fbo(blur->texture[1], width, height, &blur->fbo[1], &blur->dbo[1]);
 
 	blur->width = width;
 	blur->height = height;
@@ -161,7 +160,7 @@ void nemofx_glblur_resize(struct glblur *blur, int32_t width, int32_t height)
 			glDeleteFramebuffers(1, &blur->fbo[i]);
 			glDeleteRenderbuffers(1, &blur->dbo[i]);
 
-			fbo_prepare_context(blur->texture[i], width, height, &blur->fbo[i], &blur->dbo[i]);
+			gl_create_fbo(blur->texture[i], width, height, &blur->fbo[i], &blur->dbo[i]);
 		}
 
 		blur->width = width;

@@ -12,7 +12,6 @@
 
 #include <glmask.h>
 #include <glhelper.h>
-#include <fbohelper.h>
 #include <oshelper.h>
 #include <nemomisc.h>
 
@@ -85,7 +84,7 @@ struct glmask *nemofx_glmask_create(int32_t width, int32_t height)
 	mask->uwidth = glGetUniformLocation(mask->program, "width");
 	mask->uheight = glGetUniformLocation(mask->program, "height");
 
-	fbo_prepare_context(mask->texture, width, height, &mask->fbo, &mask->dbo);
+	gl_create_fbo(mask->texture, width, height, &mask->fbo, &mask->dbo);
 
 	mask->width = width;
 	mask->height = height;
@@ -124,7 +123,7 @@ void nemofx_glmask_resize(struct glmask *mask, int32_t width, int32_t height)
 		glDeleteFramebuffers(1, &mask->fbo);
 		glDeleteRenderbuffers(1, &mask->dbo);
 
-		fbo_prepare_context(mask->texture, width, height, &mask->fbo, &mask->dbo);
+		gl_create_fbo(mask->texture, width, height, &mask->fbo, &mask->dbo);
 
 		mask->width = width;
 		mask->height = height;

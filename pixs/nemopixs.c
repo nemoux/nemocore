@@ -12,7 +12,6 @@
 #include <nemopixs.h>
 #include <nemoshow.h>
 #include <showhelper.h>
-#include <fbohelper.h>
 #include <glhelper.h>
 #include <nemofs.h>
 #include <nemohelper.h>
@@ -1230,7 +1229,7 @@ static void nemopixs_dispatch_show_resize(struct nemoshow *show, int32_t width, 
 	glDeleteFramebuffers(1, &pixs->fbo);
 	glDeleteRenderbuffers(1, &pixs->dbo);
 
-	fbo_prepare_context(
+	gl_create_fbo(
 			nemoshow_canvas_get_texture(pixs->canvas),
 			width, height,
 			&pixs->fbo, &pixs->dbo);
@@ -1427,7 +1426,7 @@ static int nemopixs_prepare_opengl(struct nemopixs *pixs, int32_t width, int32_t
 		"  gl_FragColor = texture2D(texture, vtexcoord) * texture2D(sprite, gl_PointCoord);\n"
 		"}\n";
 
-	fbo_prepare_context(
+	gl_create_fbo(
 			nemoshow_canvas_get_texture(pixs->canvas),
 			width, height,
 			&pixs->fbo, &pixs->dbo);

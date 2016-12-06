@@ -66,3 +66,44 @@ GLuint gl_compile_program(const char *vertex_source, const char *fragment_source
 
 	return program;
 }
+
+GLuint gl_create_texture(GLint filter, GLint wrap, GLuint width, GLuint height)
+{
+	GLuint texture;
+
+	glGenTextures(1, &texture);
+
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	return texture;
+}
+
+int gl_create_fbo(GLuint tex, GLuint width, GLuint height, GLuint *fbo, GLuint *dbo)
+{
+	GLenum status;
+
+	glGenFramebuffers(1, fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, *fbo);
+
+	glGenRenderbuffers(1, dbo);
+	glBindRenderbuffer(GL_RENDERBUFFER, *dbo);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex, 0);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, *dbo);
+
+	status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if (status != GL_FRAMEBUFFER_COMPLETE)
+		return -1;
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	return 0;
+}

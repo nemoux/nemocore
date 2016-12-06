@@ -12,7 +12,6 @@
 
 #include <glpolar.h>
 #include <glhelper.h>
-#include <fbohelper.h>
 #include <oshelper.h>
 #include <nemomisc.h>
 
@@ -87,7 +86,7 @@ struct glpolar *nemofx_glpolar_create(int32_t width, int32_t height)
 	polar->uheight = glGetUniformLocation(polar->program, "height");
 	polar->ucolor = glGetUniformLocation(polar->program, "color");
 
-	fbo_prepare_context(polar->texture, width, height, &polar->fbo, &polar->dbo);
+	gl_create_fbo(polar->texture, width, height, &polar->fbo, &polar->dbo);
 
 	polar->width = width;
 	polar->height = height;
@@ -134,7 +133,7 @@ void nemofx_glpolar_resize(struct glpolar *polar, int32_t width, int32_t height)
 		glDeleteFramebuffers(1, &polar->fbo);
 		glDeleteRenderbuffers(1, &polar->dbo);
 
-		fbo_prepare_context(polar->texture, width, height, &polar->fbo, &polar->dbo);
+		gl_create_fbo(polar->texture, width, height, &polar->fbo, &polar->dbo);
 
 		polar->width = width;
 		polar->height = height;

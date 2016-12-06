@@ -10,7 +10,7 @@
 #include <talegl.h>
 #include <talepixman.h>
 #include <glcompz.h>
-#include <fbohelper.h>
+#include <glhelper.h>
 #include <nemoclip.h>
 #include <nemolog.h>
 #include <nemomisc.h>
@@ -711,7 +711,7 @@ struct talefbo *nemotale_create_fbo(uint32_t texture, int32_t width, int32_t hei
 
 	fbo->texture = texture;
 
-	if (fbo_prepare_context(fbo->texture, width, height, &fbo->fbo, &fbo->dbo) < 0)
+	if (gl_create_fbo(fbo->texture, width, height, &fbo->fbo, &fbo->dbo) < 0)
 		goto err1;
 
 	return fbo;
@@ -735,7 +735,7 @@ int nemotale_resize_fbo(struct talefbo *fbo, int32_t width, int32_t height)
 	glDeleteFramebuffers(1, &fbo->fbo);
 	glDeleteRenderbuffers(1, &fbo->dbo);
 
-	return fbo_prepare_context(fbo->texture, width, height, &fbo->fbo, &fbo->dbo);
+	return gl_create_fbo(fbo->texture, width, height, &fbo->fbo, &fbo->dbo);
 }
 
 int nemotale_composite_fbo(struct nemotale *tale, pixman_region32_t *region)

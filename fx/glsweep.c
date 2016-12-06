@@ -14,7 +14,6 @@
 
 #include <glsweep.h>
 #include <glhelper.h>
-#include <fbohelper.h>
 #include <oshelper.h>
 #include <nemomisc.h>
 
@@ -215,7 +214,7 @@ struct glsweep *nemofx_glsweep_create(int32_t width, int32_t height)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	fbo_prepare_context(sweep->texture, width, height, &sweep->fbo, &sweep->dbo);
+	gl_create_fbo(sweep->texture, width, height, &sweep->fbo, &sweep->dbo);
 
 	sweep->width = width;
 	sweep->height = height;
@@ -279,7 +278,7 @@ void nemofx_glsweep_set_snapshot(struct glsweep *sweep, uint32_t texture, int32_
 		sweep->is_reference = 0;
 	}
 
-	fbo_prepare_context(texture, width, height, &fbo, &dbo);
+	gl_create_fbo(texture, width, height, &fbo, &dbo);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	glBindTexture(GL_TEXTURE_2D, sweep->snapshot);
@@ -394,7 +393,7 @@ void nemofx_glsweep_resize(struct glsweep *sweep, int32_t width, int32_t height)
 		glDeleteFramebuffers(1, &sweep->fbo);
 		glDeleteRenderbuffers(1, &sweep->dbo);
 
-		fbo_prepare_context(sweep->texture, width, height, &sweep->fbo, &sweep->dbo);
+		gl_create_fbo(sweep->texture, width, height, &sweep->fbo, &sweep->dbo);
 
 		if (sweep->is_reference == 0 && sweep->snapshot > 0) {
 			glBindTexture(GL_TEXTURE_2D, sweep->snapshot);
