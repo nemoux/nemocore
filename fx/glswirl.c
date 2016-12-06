@@ -72,22 +72,11 @@ static const char GLSWIRL_FRAGMENT_SHADER[] =
 struct glswirl *nemofx_glswirl_create(int32_t width, int32_t height)
 {
 	struct glswirl *swirl;
-	int size;
 
 	swirl = (struct glswirl *)malloc(sizeof(struct glswirl));
 	if (swirl == NULL)
 		return NULL;
 	memset(swirl, 0, sizeof(struct glswirl));
-
-	glGenTextures(1, &swirl->texture);
-
-	glBindTexture(GL_TEXTURE_2D, swirl->texture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
-	glBindTexture(GL_TEXTURE_2D, 0);
 
 	swirl->program = gl_compile_program(GLSWIRL_VERTEX_SHADER, GLSWIRL_FRAGMENT_SHADER, &swirl->vshader, &swirl->fshader);
 	if (swirl->program == 0)
@@ -103,6 +92,8 @@ struct glswirl *nemofx_glswirl_create(int32_t width, int32_t height)
 	swirl->uangle = glGetUniformLocation(swirl->program, "angle");
 	swirl->ucenter = glGetUniformLocation(swirl->program, "center");
 
+	swirl->texture = gl_create_texture(GL_LINEAR, GL_CLAMP_TO_EDGE, width, height);
+
 	gl_create_fbo(swirl->texture, width, height, &swirl->fbo, &swirl->dbo);
 
 	swirl->width = width;
@@ -111,8 +102,6 @@ struct glswirl *nemofx_glswirl_create(int32_t width, int32_t height)
 	return swirl;
 
 err1:
-	glDeleteTextures(1, &swirl->texture);
-
 	free(swirl);
 
 	return NULL;

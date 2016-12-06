@@ -105,15 +105,6 @@ struct gllight *nemofx_gllight_create(int32_t width, int32_t height)
 		return NULL;
 	memset(light, 0, sizeof(struct gllight));
 
-	glGenTextures(1, &light->texture);
-	glBindTexture(GL_TEXTURE_2D, light->texture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
 	light->program0 = gl_compile_program(GLLIGHT_LIGHT_VERTEX_SHADER, GLLIGHT_AMBIENT_LIGHT_FRAGMENT_SHADER, &light->vshader0, &light->fshader0);
 	if (light->program0 == 0)
 		goto err1;
@@ -138,6 +129,8 @@ struct gllight *nemofx_gllight_create(int32_t width, int32_t height)
 	light->uscope1 = glGetUniformLocation(light->program1, "lscope");
 	light->utime1 = glGetUniformLocation(light->program1, "time");
 
+	light->texture = gl_create_texture(GL_LINEAR, GL_CLAMP_TO_EDGE, width, height);
+
 	gl_create_fbo(light->texture, width, height, &light->fbo, &light->dbo);
 
 	light->width = width;
@@ -151,8 +144,6 @@ err2:
 	glDeleteProgram(light->program0);
 
 err1:
-	glDeleteTextures(1, &light->texture);
-
 	free(light);
 
 	return NULL;

@@ -182,14 +182,7 @@ struct glfilter *nemofx_glfilter_create(int32_t width, int32_t height)
 		return NULL;
 	memset(filter, 0, sizeof(struct glfilter));
 
-	glGenTextures(1, &filter->texture);
-	glBindTexture(GL_TEXTURE_2D, filter->texture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
-	glBindTexture(GL_TEXTURE_2D, 0);
+	filter->texture = gl_create_texture(GL_NEAREST, GL_CLAMP_TO_EDGE, width, height);
 
 	gl_create_fbo(filter->texture, width, height, &filter->fbo, &filter->dbo);
 
@@ -197,13 +190,6 @@ struct glfilter *nemofx_glfilter_create(int32_t width, int32_t height)
 	filter->height = height;
 
 	return filter;
-
-err1:
-	glDeleteTextures(1, &filter->texture);
-
-	free(filter);
-
-	return NULL;
 }
 
 void nemofx_glfilter_destroy(struct glfilter *filter)

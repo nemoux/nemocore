@@ -58,30 +58,11 @@ static const char GLMOTION_ACCUMULATE_FRAGMENT_SHADER[] =
 struct glmotion *nemofx_glmotion_create(int32_t width, int32_t height)
 {
 	struct glmotion *motion;
-	int size;
 
 	motion = (struct glmotion *)malloc(sizeof(struct glmotion));
 	if (motion == NULL)
 		return NULL;
 	memset(motion, 0, sizeof(struct glmotion));
-
-	glGenTextures(2, &motion->texture[0]);
-
-	glBindTexture(GL_TEXTURE_2D, motion->texture[0]);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	glBindTexture(GL_TEXTURE_2D, motion->texture[1]);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
-	glBindTexture(GL_TEXTURE_2D, 0);
 
 	motion->program = gl_compile_program(GLMOTION_SIMPLE_VERTEX_SHADER, GLMOTION_ACCUMULATE_FRAGMENT_SHADER, &motion->vshader, &motion->fshader);
 	if (motion->program == 0)
@@ -95,6 +76,9 @@ struct glmotion *nemofx_glmotion_create(int32_t width, int32_t height)
 	motion->uheight = glGetUniformLocation(motion->program, "height");
 	motion->ustep = glGetUniformLocation(motion->program, "step");
 
+	motion->texture[0] = gl_create_texture(GL_LINEAR, GL_CLAMP_TO_EDGE, width, height);
+	motion->texture[1] = gl_create_texture(GL_LINEAR, GL_CLAMP_TO_EDGE, width, height);
+
 	gl_create_fbo(motion->texture[0], width, height, &motion->fbo[0], &motion->dbo[0]);
 	gl_create_fbo(motion->texture[1], width, height, &motion->fbo[1], &motion->dbo[1]);
 
@@ -104,8 +88,6 @@ struct glmotion *nemofx_glmotion_create(int32_t width, int32_t height)
 	return motion;
 
 err1:
-	glDeleteTextures(2, &motion->texture[0]);
-
 	free(motion);
 
 	return NULL;

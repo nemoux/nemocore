@@ -70,30 +70,11 @@ static const char GLBLUR_GAUSSIAN_9TAP_FRAGMENT_SHADER[] =
 struct glblur *nemofx_glblur_create(int32_t width, int32_t height)
 {
 	struct glblur *blur;
-	int size;
 
 	blur = (struct glblur *)malloc(sizeof(struct glblur));
 	if (blur == NULL)
 		return NULL;
 	memset(blur, 0, sizeof(struct glblur));
-
-	glGenTextures(2, &blur->texture[0]);
-
-	glBindTexture(GL_TEXTURE_2D, blur->texture[0]);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	glBindTexture(GL_TEXTURE_2D, blur->texture[1]);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
-	glBindTexture(GL_TEXTURE_2D, 0);
 
 	blur->program = gl_compile_program(GLBLUR_SIMPLE_VERTEX_SHADER, GLBLUR_GAUSSIAN_9TAP_FRAGMENT_SHADER, &blur->vshader, &blur->fshader);
 	if (blur->program == 0)
@@ -109,6 +90,9 @@ struct glblur *nemofx_glblur_create(int32_t width, int32_t height)
 	blur->udirecty = glGetUniformLocation(blur->program, "dy");
 	blur->uradius = glGetUniformLocation(blur->program, "r");
 
+	blur->texture[0] = gl_create_texture(GL_LINEAR, GL_CLAMP_TO_EDGE, width, height);
+	blur->texture[1] = gl_create_texture(GL_LINEAR, GL_CLAMP_TO_EDGE, width, height);
+
 	gl_create_fbo(blur->texture[0], width, height, &blur->fbo[0], &blur->dbo[0]);
 	gl_create_fbo(blur->texture[1], width, height, &blur->fbo[1], &blur->dbo[1]);
 
@@ -118,8 +102,6 @@ struct glblur *nemofx_glblur_create(int32_t width, int32_t height)
 	return blur;
 
 err1:
-	glDeleteTextures(2, &blur->texture[0]);
-
 	free(blur);
 
 	return NULL;

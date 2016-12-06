@@ -97,21 +97,14 @@ struct glripple *nemofx_glripple_create(int32_t width, int32_t height)
 
 	ripple->utexture = glGetUniformLocation(ripple->program, "tex");
 
-	glGenTextures(1, &ripple->texture);
-	glBindTexture(GL_TEXTURE_2D, ripple->texture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
-	glBindTexture(GL_TEXTURE_2D, 0);
+	ripple->texture = gl_create_texture(GL_LINEAR, GL_REPEAT, width, height);
+
+	gl_create_fbo(ripple->texture, width, height, &ripple->fbo, &ripple->dbo);
 
 	glGenVertexArrays(1, &ripple->varray);
 	glGenBuffers(1, &ripple->vvertex);
 	glGenBuffers(1, &ripple->vtexcoord);
 	glGenBuffers(1, &ripple->vindex);
-
-	gl_create_fbo(ripple->texture, width, height, &ripple->fbo, &ripple->dbo);
 
 	ripple->width = width;
 	ripple->height = height;

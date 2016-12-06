@@ -55,22 +55,11 @@ static const char GLMASK_FRAGMENT_SHADER[] =
 struct glmask *nemofx_glmask_create(int32_t width, int32_t height)
 {
 	struct glmask *mask;
-	int size;
 
 	mask = (struct glmask *)malloc(sizeof(struct glmask));
 	if (mask == NULL)
 		return NULL;
 	memset(mask, 0, sizeof(struct glmask));
-
-	glGenTextures(1, &mask->texture);
-
-	glBindTexture(GL_TEXTURE_2D, mask->texture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
-	glBindTexture(GL_TEXTURE_2D, 0);
 
 	mask->program = gl_compile_program(GLMASK_VERTEX_SHADER, GLMASK_FRAGMENT_SHADER, &mask->vshader, &mask->fshader);
 	if (mask->program == 0)
@@ -84,6 +73,8 @@ struct glmask *nemofx_glmask_create(int32_t width, int32_t height)
 	mask->uwidth = glGetUniformLocation(mask->program, "width");
 	mask->uheight = glGetUniformLocation(mask->program, "height");
 
+	mask->texture = gl_create_texture(GL_LINEAR, GL_CLAMP_TO_EDGE, width, height);
+
 	gl_create_fbo(mask->texture, width, height, &mask->fbo, &mask->dbo);
 
 	mask->width = width;
@@ -92,8 +83,6 @@ struct glmask *nemofx_glmask_create(int32_t width, int32_t height)
 	return mask;
 
 err1:
-	glDeleteTextures(1, &mask->texture);
-
 	free(mask);
 
 	return NULL;

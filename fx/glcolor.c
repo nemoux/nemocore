@@ -49,22 +49,11 @@ static const char GLCOLOR_FRAGMENT_SHADER[] =
 struct glcolor *nemofx_glcolor_create(int32_t width, int32_t height)
 {
 	struct glcolor *color;
-	int size;
 
 	color = (struct glcolor *)malloc(sizeof(struct glcolor));
 	if (color == NULL)
 		return NULL;
 	memset(color, 0, sizeof(struct glcolor));
-
-	glGenTextures(1, &color->texture);
-
-	glBindTexture(GL_TEXTURE_2D, color->texture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
-	glBindTexture(GL_TEXTURE_2D, 0);
 
 	color->program = gl_compile_program(GLCOLOR_VERTEX_SHADER, GLCOLOR_FRAGMENT_SHADER, &color->vshader, &color->fshader);
 	if (color->program == 0)
@@ -75,6 +64,8 @@ struct glcolor *nemofx_glcolor_create(int32_t width, int32_t height)
 
 	color->ucolor = glGetUniformLocation(color->program, "color");
 
+	color->texture = gl_create_texture(GL_NEAREST, GL_CLAMP_TO_EDGE, width, height);
+
 	gl_create_fbo(color->texture, width, height, &color->fbo, &color->dbo);
 
 	color->width = width;
@@ -83,8 +74,6 @@ struct glcolor *nemofx_glcolor_create(int32_t width, int32_t height)
 	return color;
 
 err1:
-	glDeleteTextures(1, &color->texture);
-
 	free(color);
 
 	return NULL;

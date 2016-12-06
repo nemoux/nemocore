@@ -57,22 +57,11 @@ static const char GLPOLAR_FRAGMENT_SHADER[] =
 struct glpolar *nemofx_glpolar_create(int32_t width, int32_t height)
 {
 	struct glpolar *polar;
-	int size;
 
 	polar = (struct glpolar *)malloc(sizeof(struct glpolar));
 	if (polar == NULL)
 		return NULL;
 	memset(polar, 0, sizeof(struct glpolar));
-
-	glGenTextures(1, &polar->texture);
-
-	glBindTexture(GL_TEXTURE_2D, polar->texture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
-	glBindTexture(GL_TEXTURE_2D, 0);
 
 	polar->program = gl_compile_program(GLPOLAR_VERTEX_SHADER, GLPOLAR_FRAGMENT_SHADER, &polar->vshader, &polar->fshader);
 	if (polar->program == 0)
@@ -86,6 +75,8 @@ struct glpolar *nemofx_glpolar_create(int32_t width, int32_t height)
 	polar->uheight = glGetUniformLocation(polar->program, "height");
 	polar->ucolor = glGetUniformLocation(polar->program, "color");
 
+	polar->texture = gl_create_texture(GL_NEAREST, GL_CLAMP_TO_EDGE, width, height);
+
 	gl_create_fbo(polar->texture, width, height, &polar->fbo, &polar->dbo);
 
 	polar->width = width;
@@ -94,8 +85,6 @@ struct glpolar *nemofx_glpolar_create(int32_t width, int32_t height)
 	return polar;
 
 err1:
-	glDeleteTextures(1, &polar->texture);
-
 	free(polar);
 
 	return NULL;

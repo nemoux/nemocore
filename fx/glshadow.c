@@ -188,33 +188,6 @@ struct glshadow *nemofx_glshadow_create(int32_t width, int32_t height, int32_t l
 		return NULL;
 	memset(shadow, 0, sizeof(struct glshadow));
 
-	glGenTextures(1, &shadow->texture);
-	glBindTexture(GL_TEXTURE_2D, shadow->texture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	glGenTextures(1, &shadow->occluder);
-	glBindTexture(GL_TEXTURE_2D, shadow->occluder);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, lightscope, lightscope, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	glGenTextures(1, &shadow->shadow);
-	glBindTexture(GL_TEXTURE_2D, shadow->shadow);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, GLSHADOW_MAP_SIZE, 1, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
 	shadow->program0 = gl_compile_program(GLSHADOW_COVER_VERTEX_SHADER, GLSHADOW_COVER_FRAGMENT_SHADER, &shadow->vshader0, &shadow->fshader0);
 	if (shadow->program0 == 0)
 		goto err1;
@@ -257,6 +230,10 @@ struct glshadow *nemofx_glshadow_create(int32_t width, int32_t height, int32_t l
 	shadow->ucolor3 = glGetUniformLocation(shadow->program3, "lcolor");
 	shadow->usize3 = glGetUniformLocation(shadow->program3, "lsize");
 
+	shadow->occluder = gl_create_texture(GL_LINEAR, GL_CLAMP_TO_EDGE, lightscope, lightscope);
+	shadow->shadow = gl_create_texture(GL_LINEAR, GL_CLAMP_TO_EDGE, GLSHADOW_MAP_SIZE, 1);
+	shadow->texture = gl_create_texture(GL_LINEAR, GL_CLAMP_TO_EDGE, width, height);
+
 	gl_create_fbo(shadow->occluder, lightscope, lightscope, &shadow->ofbo, &shadow->odbo);
 	gl_create_fbo(shadow->shadow, GLSHADOW_MAP_SIZE, 1, &shadow->sfbo, &shadow->sdbo);
 	gl_create_fbo(shadow->texture, width, height, &shadow->fbo, &shadow->dbo);
@@ -283,9 +260,6 @@ err2:
 	glDeleteProgram(shadow->program0);
 
 err1:
-	glDeleteTextures(1, &shadow->texture);
-	glDeleteTextures(1, &shadow->shadow);
-
 	free(shadow);
 
 	return NULL;

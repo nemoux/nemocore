@@ -197,22 +197,13 @@ static const char GLSWEEP_MASK_FRAGMENT_SHADER[] =
 struct glsweep *nemofx_glsweep_create(int32_t width, int32_t height)
 {
 	struct glsweep *sweep;
-	int size;
 
 	sweep = (struct glsweep *)malloc(sizeof(struct glsweep));
 	if (sweep == NULL)
 		return NULL;
 	memset(sweep, 0, sizeof(struct glsweep));
 
-	glGenTextures(1, &sweep->texture);
-
-	glBindTexture(GL_TEXTURE_2D, sweep->texture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
-	glBindTexture(GL_TEXTURE_2D, 0);
+	sweep->texture = gl_create_texture(GL_LINEAR, GL_CLAMP_TO_EDGE, width, height);
 
 	gl_create_fbo(sweep->texture, width, height, &sweep->fbo, &sweep->dbo);
 
@@ -223,13 +214,6 @@ struct glsweep *nemofx_glsweep_create(int32_t width, int32_t height)
 	sweep->point[1] = 0.5f;
 
 	return sweep;
-
-err1:
-	glDeleteTextures(1, &sweep->texture);
-
-	free(sweep);
-
-	return NULL;
 }
 
 void nemofx_glsweep_destroy(struct glsweep *sweep)
@@ -265,15 +249,7 @@ void nemofx_glsweep_set_snapshot(struct glsweep *sweep, uint32_t texture, int32_
 	GLuint fbo, dbo;
 
 	if ((sweep->is_reference != 0) || (sweep->is_reference == 0 && sweep->snapshot == 0)) {
-		glGenTextures(1, &sweep->snapshot);
-
-		glBindTexture(GL_TEXTURE_2D, sweep->snapshot);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, sweep->width, sweep->height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
-		glBindTexture(GL_TEXTURE_2D, 0);
+		sweep->snapshot = gl_create_texture(GL_LINEAR, GL_CLAMP_TO_EDGE, sweep->width, sweep->height);
 
 		sweep->is_reference = 0;
 	}
