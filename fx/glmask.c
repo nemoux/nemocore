@@ -119,7 +119,7 @@ void nemofx_glmask_resize(struct glmask *mask, int32_t width, int32_t height)
 	}
 }
 
-void nemofx_glmask_dispatch(struct glmask *mask, uint32_t texture, uint32_t overlay)
+uint32_t nemofx_glmask_dispatch(struct glmask *mask, uint32_t texture, uint32_t overlay)
 {
 	static GLfloat vertices[] = {
 		-1.0f, -1.0f, 0.0f, 0.0f,
@@ -159,6 +159,8 @@ void nemofx_glmask_dispatch(struct glmask *mask, uint32_t texture, uint32_t over
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	return mask->texture;
 }
 
 int32_t nemofx_glmask_get_width(struct glmask *mask)

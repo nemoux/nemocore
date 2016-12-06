@@ -154,7 +154,7 @@ void nemofx_glswirl_resize(struct glswirl *swirl, int32_t width, int32_t height)
 	}
 }
 
-void nemofx_glswirl_dispatch(struct glswirl *swirl, uint32_t texture)
+uint32_t nemofx_glswirl_dispatch(struct glswirl *swirl, uint32_t texture)
 {
 	static GLfloat vertices[] = {
 		-1.0f, -1.0f, 0.0f, 0.0f,
@@ -192,6 +192,8 @@ void nemofx_glswirl_dispatch(struct glswirl *swirl, uint32_t texture)
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	return swirl->texture;
 }
 
 float nemofx_glswirl_get_radius(struct glswirl *swirl)

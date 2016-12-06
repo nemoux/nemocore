@@ -15,7 +15,7 @@ extern void nemofx_glblur_destroy(struct glblur *blur);
 extern void nemofx_glblur_set_radius(struct glblur *blur, int32_t rx, int32_t ry);
 
 extern void nemofx_glblur_resize(struct glblur *blur, int32_t width, int32_t height);
-extern void nemofx_glblur_dispatch(struct glblur *blur, uint32_t texture);
+extern uint32_t nemofx_glblur_dispatch(struct glblur *blur, uint32_t texture);
 
 extern int32_t nemofx_glblur_get_width(struct glblur *blur);
 extern int32_t nemofx_glblur_get_height(struct glblur *blur);

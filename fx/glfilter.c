@@ -277,7 +277,7 @@ void nemofx_glfilter_resize(struct glfilter *filter, int32_t width, int32_t heig
 	}
 }
 
-void nemofx_glfilter_dispatch(struct glfilter *filter, uint32_t texture)
+uint32_t nemofx_glfilter_dispatch(struct glfilter *filter, uint32_t texture)
 {
 	static GLfloat vertices[] = {
 		-1.0f, -1.0f, 0.0f, 0.0f,
@@ -286,36 +286,39 @@ void nemofx_glfilter_dispatch(struct glfilter *filter, uint32_t texture)
 		-1.0f, 1.0f, 0.0f, 1.0f
 	};
 
-	if (filter->program > 0) {
-		glBindFramebuffer(GL_FRAMEBUFFER, filter->fbo);
+	if (filter->program <= 0)
+		return texture;
 
-		glViewport(0, 0, filter->width, filter->height);
+	glBindFramebuffer(GL_FRAMEBUFFER, filter->fbo);
 
-		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-		glClearDepth(0.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glViewport(0, 0, filter->width, filter->height);
 
-		glUseProgram(filter->program);
-		glUniform1i(filter->utexture, 0);
-		glUniform1f(filter->uwidth, filter->width);
-		glUniform1f(filter->uheight, filter->height);
-		glUniform1f(filter->utime, (float)time_current_nsecs() / 1000000000.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClearDepth(0.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glBindTexture(GL_TEXTURE_2D, texture);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glUseProgram(filter->program);
+	glUniform1i(filter->utexture, 0);
+	glUniform1f(filter->uwidth, filter->width);
+	glUniform1f(filter->uheight, filter->height);
+	glUniform1f(filter->utime, (float)time_current_nsecs() / 1000000000.0f);
 
-		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &vertices[0]);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &vertices[2]);
-		glEnableVertexAttribArray(1);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &vertices[0]);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &vertices[2]);
+	glEnableVertexAttribArray(1);
 
-		glBindTexture(GL_TEXTURE_2D, 0);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	}
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	return filter->texture;
 }
 
 int32_t nemofx_glfilter_get_width(struct glfilter *filter)

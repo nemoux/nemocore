@@ -148,42 +148,26 @@ static uint32_t nemoglfx_dispatch_canvas_filter(void *node)
 	struct glfxcontext *context = (struct glfxcontext *)nemoshow_one_get_userdata(canvas);
 	uint32_t texture = nemoshow_canvas_get_texture(canvas);
 
-	if (context->filter != NULL) {
-		nemofx_glfilter_dispatch(context->filter, texture);
+	if (context->filter != NULL)
+		texture = nemofx_glfilter_dispatch(context->filter, texture);
 
-		texture = nemofx_glfilter_get_texture(context->filter);
-	}
+	if (context->blur != NULL)
+		texture = nemofx_glblur_dispatch(context->blur, texture);
 
-	if (context->blur != NULL) {
-		nemofx_glblur_dispatch(context->blur, texture);
+	if (context->light != NULL)
+		texture = nemofx_gllight_dispatch(context->light, texture);
 
-		texture = nemofx_glblur_get_texture(context->blur);
-	}
-
-	if (context->light != NULL) {
-		nemofx_gllight_dispatch(context->light, texture);
-
-		texture = nemofx_gllight_get_texture(context->light);
-	}
-
-	if (context->shadow != NULL) {
-		nemofx_glshadow_dispatch(context->shadow, texture);
-
-		texture = nemofx_glshadow_get_texture(context->shadow);
-	}
+	if (context->shadow != NULL)
+		texture = nemofx_glshadow_dispatch(context->shadow, texture);
 
 	if (context->ripple != NULL) {
 		nemofx_glripple_update(context->ripple);
-		nemofx_glripple_dispatch(context->ripple, texture);
 
-		texture = nemofx_glripple_get_texture(context->ripple);
+		texture = nemofx_glripple_dispatch(context->ripple, texture);
 	}
 
-	if (context->swirl != NULL) {
-		nemofx_glswirl_dispatch(context->swirl, texture);
-
-		texture = nemofx_glswirl_get_texture(context->swirl);
-	}
+	if (context->swirl != NULL)
+		texture = nemofx_glswirl_dispatch(context->swirl, texture);
 
 	return texture;
 }

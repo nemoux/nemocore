@@ -1356,17 +1356,11 @@ static uint32_t nemopixs_dispatch_canvas_filter(void *node)
 	struct nemopixs *pixs = (struct nemopixs *)nemoshow_one_get_userdata(canvas);
 	uint32_t texture = nemoshow_canvas_get_texture(canvas);
 
-	if (pixs->blur != NULL) {
-		nemofx_glblur_dispatch(pixs->blur, texture);
+	if (pixs->blur != NULL)
+		texture = nemofx_glblur_dispatch(pixs->blur, texture);
 
-		texture = nemofx_glblur_get_texture(pixs->blur);
-	}
-
-	if (pixs->motion != NULL && pixs->has_taps != 0) {
-		nemofx_glmotion_dispatch(pixs->motion, texture);
-
-		texture = nemofx_glmotion_get_texture(pixs->motion);
-	}
+	if (pixs->motion != NULL && pixs->has_taps != 0)
+		texture = nemofx_glmotion_dispatch(pixs->motion, texture);
 
 	return texture;
 }

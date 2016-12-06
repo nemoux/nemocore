@@ -15,7 +15,7 @@ extern void nemofx_glfilter_destroy(struct glfilter *filter);
 extern void nemofx_glfilter_set_program(struct glfilter *filter, const char *shaderpath);
 
 extern void nemofx_glfilter_resize(struct glfilter *filter, int32_t width, int32_t height);
-extern void nemofx_glfilter_dispatch(struct glfilter *filter, uint32_t texture);
+extern uint32_t nemofx_glfilter_dispatch(struct glfilter *filter, uint32_t texture);
 
 extern int32_t nemofx_glfilter_get_width(struct glfilter *filter);
 extern int32_t nemofx_glfilter_get_height(struct glfilter *filter);

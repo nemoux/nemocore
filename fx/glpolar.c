@@ -129,7 +129,7 @@ void nemofx_glpolar_resize(struct glpolar *polar, int32_t width, int32_t height)
 	}
 }
 
-void nemofx_glpolar_dispatch(struct glpolar *polar, uint32_t texture)
+uint32_t nemofx_glpolar_dispatch(struct glpolar *polar, uint32_t texture)
 {
 	static GLfloat vertices[] = {
 		-1.0f, -1.0f, 0.0f, 0.0f,
@@ -163,6 +163,8 @@ void nemofx_glpolar_dispatch(struct glpolar *polar, uint32_t texture)
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	return polar->texture;
 }
 
 uint32_t nemofx_glpolar_get_texture(struct glpolar *polar)

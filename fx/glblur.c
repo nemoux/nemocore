@@ -150,7 +150,7 @@ void nemofx_glblur_resize(struct glblur *blur, int32_t width, int32_t height)
 	}
 }
 
-void nemofx_glblur_dispatch(struct glblur *blur, uint32_t texture)
+uint32_t nemofx_glblur_dispatch(struct glblur *blur, uint32_t texture)
 {
 	static GLfloat vertices[] = {
 		-1.0f, -1.0f, 0.0f, 0.0f,
@@ -220,6 +220,8 @@ void nemofx_glblur_dispatch(struct glblur *blur, uint32_t texture)
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	return blur->texture[1];
 }
 
 int32_t nemofx_glblur_get_width(struct glblur *blur)

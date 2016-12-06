@@ -118,7 +118,7 @@ void nemofx_glcolor_resize(struct glcolor *color, int32_t width, int32_t height)
 	}
 }
 
-void nemofx_glcolor_dispatch(struct glcolor *color)
+uint32_t nemofx_glcolor_dispatch(struct glcolor *color)
 {
 	static GLfloat vertices[] = {
 		-1.0f, -1.0f, 0.0f, 0.0f,
@@ -147,6 +147,8 @@ void nemofx_glcolor_dispatch(struct glcolor *color)
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	return color->texture;
 }
 
 uint32_t nemofx_glcolor_get_texture(struct glcolor *color)

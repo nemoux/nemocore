@@ -340,7 +340,7 @@ void nemofx_glshadow_resize(struct glshadow *shadow, int32_t width, int32_t heig
 	}
 }
 
-void nemofx_glshadow_dispatch(struct glshadow *shadow, uint32_t texture)
+uint32_t nemofx_glshadow_dispatch(struct glshadow *shadow, uint32_t texture)
 {
 	static GLfloat vertices[] = {
 		-1.0f, -1.0f, 0.0f, 0.0f,
@@ -471,6 +471,8 @@ void nemofx_glshadow_dispatch(struct glshadow *shadow, uint32_t texture)
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	glDisable(GL_BLEND);
+
+	return shadow->texture;
 }
 
 int32_t nemofx_glshadow_get_width(struct glshadow *shadow)

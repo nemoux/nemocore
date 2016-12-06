@@ -382,7 +382,7 @@ void nemofx_glsweep_resize(struct glsweep *sweep, int32_t width, int32_t height)
 	}
 }
 
-void nemofx_glsweep_dispatch(struct glsweep *sweep, uint32_t texture)
+uint32_t nemofx_glsweep_dispatch(struct glsweep *sweep, uint32_t texture)
 {
 	static GLfloat vertices[] = {
 		-1.0f, -1.0f, 0.0f, 0.0f,
@@ -392,7 +392,7 @@ void nemofx_glsweep_dispatch(struct glsweep *sweep, uint32_t texture)
 	};
 
 	if (sweep->snapshot == 0 || sweep->program == 0)
-		return;
+		return texture;
 
 	glBindFramebuffer(GL_FRAMEBUFFER, sweep->fbo);
 
@@ -438,6 +438,8 @@ void nemofx_glsweep_dispatch(struct glsweep *sweep, uint32_t texture)
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	return sweep->texture;
 }
 
 uint32_t nemofx_glsweep_get_texture(struct glsweep *sweep)

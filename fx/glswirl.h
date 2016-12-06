@@ -17,7 +17,7 @@ extern void nemofx_glswirl_set_angle(struct glswirl *swirl, float angle);
 extern void nemofx_glswirl_set_center(struct glswirl *swirl, float cx, float cy);
 
 extern void nemofx_glswirl_resize(struct glswirl *swirl, int32_t width, int32_t height);
-extern void nemofx_glswirl_dispatch(struct glswirl *swirl, uint32_t texture);
+extern uint32_t nemofx_glswirl_dispatch(struct glswirl *swirl, uint32_t texture);
 
 extern float nemofx_glswirl_get_radius(struct glswirl *swirl);
 extern float nemofx_glswirl_get_angle(struct glswirl *swirl);

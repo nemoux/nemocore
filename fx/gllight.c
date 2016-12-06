@@ -223,7 +223,7 @@ void nemofx_gllight_resize(struct gllight *light, int32_t width, int32_t height)
 	}
 }
 
-void nemofx_gllight_dispatch(struct gllight *light, uint32_t texture)
+uint32_t nemofx_gllight_dispatch(struct gllight *light, uint32_t texture)
 {
 	static GLfloat vertices[] = {
 		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
@@ -287,6 +287,8 @@ void nemofx_gllight_dispatch(struct gllight *light, uint32_t texture)
 	glDepthMask(GL_TRUE);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	return light->texture;
 }
 
 int32_t nemofx_gllight_get_width(struct gllight *light)

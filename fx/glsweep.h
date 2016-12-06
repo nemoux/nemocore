@@ -34,7 +34,7 @@ extern void nemofx_glsweep_set_point(struct glsweep *sweep, float x, float y);
 extern void nemofx_glsweep_set_mask(struct glsweep *sweep, uint32_t mask);
 
 extern void nemofx_glsweep_resize(struct glsweep *sweep, int32_t width, int32_t height);
-extern void nemofx_glsweep_dispatch(struct glsweep *sweep, uint32_t texture);
+extern uint32_t nemofx_glsweep_dispatch(struct glsweep *sweep, uint32_t texture);
 
 extern uint32_t nemofx_glsweep_get_texture(struct glsweep *sweep);
 

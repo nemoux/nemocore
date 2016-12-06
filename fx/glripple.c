@@ -318,7 +318,7 @@ void nemofx_glripple_update(struct glripple *ripple)
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void nemofx_glripple_dispatch(struct glripple *ripple, uint32_t texture)
+uint32_t nemofx_glripple_dispatch(struct glripple *ripple, uint32_t texture)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, ripple->fbo);
 
@@ -354,6 +354,8 @@ void nemofx_glripple_dispatch(struct glripple *ripple, uint32_t texture)
 	glDisable(GL_CULL_FACE);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	return ripple->texture;
 }
 
 void nemofx_glripple_shoot(struct glripple *ripple, float x, float y, int step)
