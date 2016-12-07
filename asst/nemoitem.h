@@ -27,6 +27,7 @@ struct itemone {
 	char *path;
 
 	struct nemolist list;
+	int count;
 
 	struct nemolist link;
 };
@@ -43,6 +44,7 @@ struct itemarray {
 
 struct nemoitem {
 	struct nemolist list;
+	int count;
 };
 
 #define nemoitem_for_each(one, item)	\

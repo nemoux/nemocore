@@ -42,12 +42,16 @@ void nemoitem_destroy(struct nemoitem *item)
 void nemoitem_attach_one(struct nemoitem *item, struct itemone *one)
 {
 	nemolist_insert_tail(&item->list, &one->link);
+
+	item->count++;
 }
 
 void nemoitem_detach_one(struct nemoitem *item, struct itemone *one)
 {
 	nemolist_remove(&one->link);
 	nemolist_init(&one->link);
+
+	item->count--;
 }
 
 struct itemone *nemoitem_search_one(struct nemoitem *item, const char *path)
@@ -144,22 +148,13 @@ struct itembox *nemoitem_box_search_one(struct nemoitem *item, const char *path)
 {
 	struct itembox *box;
 	struct itemone *one;
-	int count = 0;
-
-	nemolist_for_each(one, &item->list, link) {
-		if (nemoitem_one_has_path_prefix(one, path) != 0)
-			count++;
-	}
-
-	if (count == 0)
-		return NULL;
 
 	box = (struct itembox *)malloc(sizeof(struct itembox));
 	if (box == NULL)
 		return NULL;
 	memset(box, 0, sizeof(struct itembox));
 
-	box->ones = (struct itemone **)malloc(sizeof(struct itemone *) * count);
+	box->ones = (struct itemone **)malloc(sizeof(struct itemone *) * item->count);
 	if (box->ones == NULL)
 		goto err1;
 
@@ -180,22 +175,13 @@ struct itembox *nemoitem_box_search_attr(struct nemoitem *item, const char *path
 {
 	struct itembox *box;
 	struct itemone *one;
-	int count = 0;
-
-	nemolist_for_each(one, &item->list, link) {
-		if ((path == NULL || nemoitem_one_has_path_prefix(one, path) != 0) && nemoitem_one_has_sattr(one, name, value) != 0)
-			count++;
-	}
-
-	if (count == 0)
-		return NULL;
 
 	box = (struct itembox *)malloc(sizeof(struct itembox));
 	if (box == NULL)
 		return NULL;
 	memset(box, 0, sizeof(struct itembox));
 
-	box->ones = (struct itemone **)malloc(sizeof(struct itemone *) * count);
+	box->ones = (struct itemone **)malloc(sizeof(struct itemone *) * item->count);
 	if (box->ones == NULL)
 		goto err1;
 
@@ -217,43 +203,23 @@ struct itembox *nemoitem_box_search_attrs(struct nemoitem *item, const char *pat
 	struct itembox *box;
 	struct itemone *one;
 	struct nemotoken *token;
-	int count = 0;
 	int ntokens;
 	int i;
+
+	box = (struct itembox *)malloc(sizeof(struct itembox));
+	if (box == NULL)
+		return NULL;
+	memset(box, 0, sizeof(struct itembox));
+
+	box->ones = (struct itemone **)malloc(sizeof(struct itemone *) * item->count);
+	if (box->ones == NULL)
+		goto err1;
 
 	token = nemotoken_create(attrs, strlen(attrs));
 	nemotoken_divide(token, delimiter);
 	nemotoken_update(token);
 
 	ntokens = nemotoken_get_token_count(token) / 2;
-
-	nemolist_for_each(one, &item->list, link) {
-		if (path != NULL && nemoitem_one_has_path_prefix(one, path) != 0)
-			continue;
-
-		for (i = 0; i < ntokens; i++) {
-			if (nemoitem_one_has_sattr(one,
-						nemotoken_get_token(token, i * 2 + 0),
-						nemotoken_get_token(token, i * 2 + 1)) == 0)
-				break;
-		}
-
-		if (i >= ntokens) {
-			count++;
-		}
-	}
-
-	if (count == 0)
-		goto err1;
-
-	box = (struct itembox *)malloc(sizeof(struct itembox));
-	if (box == NULL)
-		goto err1;
-	memset(box, 0, sizeof(struct itembox));
-
-	box->ones = (struct itemone **)malloc(sizeof(struct itemone *) * count);
-	if (box->ones == NULL)
-		goto err2;
 
 	nemolist_for_each(one, &item->list, link) {
 		if (path != NULL && nemoitem_one_has_path_prefix(one, path) != 0)
@@ -275,11 +241,8 @@ struct itembox *nemoitem_box_search_attrs(struct nemoitem *item, const char *pat
 
 	return box;
 
-err2:
-	free(box);
-
 err1:
-	nemotoken_destroy(token);
+	free(box);
 
 	return NULL;
 }
@@ -311,22 +274,13 @@ struct itemarray *nemoitem_array_search_attr(struct itemone *one, const char *na
 {
 	struct itemarray *array;
 	struct itemattr *attr;
-	int count = 0;
-
-	nemolist_for_each(attr, &one->list, link) {
-		if (strcmp(attr->name, name) == 0)
-			count++;
-	}
-
-	if (count == 0)
-		return NULL;
 
 	array = (struct itemarray *)malloc(sizeof(struct itemarray));
 	if (array == NULL)
 		return NULL;
 	memset(array, 0, sizeof(struct itemarray));
 
-	array->attrs = (struct itemattr **)malloc(sizeof(struct itemattr *) * count);
+	array->attrs = (struct itemattr **)malloc(sizeof(struct itemattr *) * one->count);
 	if (array->attrs == NULL)
 		goto err1;
 
@@ -519,6 +473,8 @@ int nemoitem_one_set_attr(struct itemone *one, const char *name, const char *val
 
 	nemolist_insert_tail(&one->list, &attr->link);
 
+	one->count++;
+
 	return 0;
 }
 
@@ -548,6 +504,8 @@ int nemoitem_one_set_attr_format(struct itemone *one, const char *name, const ch
 
 	nemolist_insert_tail(&one->list, &attr->link);
 
+	one->count++;
+
 	return 0;
 }
 
@@ -569,6 +527,8 @@ void nemoitem_one_put_attr(struct itemone *one, const char *name)
 
 	nemolist_for_each(attr, &one->list, link) {
 		if (strcmp(attr->name, name) == 0) {
+			one->count--;
+
 			nemolist_remove(&attr->link);
 
 			free(attr->name);
@@ -613,6 +573,8 @@ int nemoitem_one_set_attr_tag(struct itemone *one, const char *name, uint32_t ta
 
 	nemolist_insert_tail(&one->list, &attr->link);
 
+	one->count++;
+
 	return 0;
 }
 
@@ -643,6 +605,8 @@ int nemoitem_one_set_attr_tag_format(struct itemone *one, const char *name, uint
 
 	nemolist_insert_tail(&one->list, &attr->link);
 
+	one->count++;
+
 	return 0;
 }
 
@@ -664,6 +628,8 @@ void nemoitem_one_put_attr_tag(struct itemone *one, const char *name, uint32_t t
 
 	nemolist_for_each(attr, &one->list, link) {
 		if (strcmp(attr->name, name) == 0 && attr->tag == tag) {
+			one->count--;
+
 			nemolist_remove(&attr->link);
 
 			free(attr->name);
