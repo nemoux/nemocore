@@ -307,6 +307,48 @@ void nemoitem_box_destroy(struct itembox *box)
 	free(box);
 }
 
+struct itemarray *nemoitem_array_search_attr(struct itemone *one, const char *name)
+{
+	struct itemarray *array;
+	struct itemattr *attr;
+	int count = 0;
+
+	nemolist_for_each(attr, &one->list, link) {
+		if (strcmp(attr->name, name) == 0)
+			count++;
+	}
+
+	if (count == 0)
+		return NULL;
+
+	array = (struct itemarray *)malloc(sizeof(struct itemarray));
+	if (array == NULL)
+		return NULL;
+	memset(array, 0, sizeof(struct itemarray));
+
+	array->attrs = (struct itemattr **)malloc(sizeof(struct itemattr *) * count);
+	if (array->attrs == NULL)
+		goto err1;
+
+	nemolist_for_each(attr, &one->list, link) {
+		if (strcmp(attr->name, name) == 0)
+			array->attrs[array->nattrs++] = attr;
+	}
+
+	return array;
+
+err1:
+	free(array);
+
+	return NULL;
+}
+
+void nemoitem_array_destroy(struct itemarray *array)
+{
+	free(array->attrs);
+	free(array);
+}
+
 struct itemone *nemoitem_one_create(void)
 {
 	struct itemone *one;
@@ -544,6 +586,101 @@ int nemoitem_one_has_attr(struct itemone *one, const char *name)
 
 	nemolist_for_each(attr, &one->list, link) {
 		if (strcmp(attr->name, name) == 0)
+			return 1;
+	}
+
+	return 0;
+}
+
+int nemoitem_one_set_attr_tag(struct itemone *one, const char *name, uint32_t tag, const char *value)
+{
+	struct itemattr *attr;
+
+	nemolist_for_each(attr, &one->list, link) {
+		if (strcmp(attr->name, name) == 0 && attr->tag == tag) {
+			free(attr->value);
+
+			attr->value = strdup(value);
+
+			return 1;
+		}
+	}
+
+	attr = (struct itemattr *)malloc(sizeof(struct itemattr));
+	attr->name = strdup(name);
+	attr->value = strdup(value);
+	attr->tag = tag;
+
+	nemolist_insert_tail(&one->list, &attr->link);
+
+	return 0;
+}
+
+int nemoitem_one_set_attr_tag_format(struct itemone *one, const char *name, uint32_t tag, const char *fmt, ...)
+{
+	struct itemattr *attr;
+	va_list vargs;
+	char *value;
+
+	va_start(vargs, fmt);
+	vasprintf(&value, fmt, vargs);
+	va_end(vargs);
+
+	nemolist_for_each(attr, &one->list, link) {
+		if (strcmp(attr->name, name) == 0 && attr->tag == tag) {
+			free(attr->value);
+
+			attr->value = value;
+
+			return 1;
+		}
+	}
+
+	attr = (struct itemattr *)malloc(sizeof(struct itemattr));
+	attr->name = strdup(name);
+	attr->value = value;
+	attr->tag = tag;
+
+	nemolist_insert_tail(&one->list, &attr->link);
+
+	return 0;
+}
+
+const char *nemoitem_one_get_attr_tag(struct itemone *one, const char *name, uint32_t tag)
+{
+	struct itemattr *attr;
+
+	nemolist_for_each(attr, &one->list, link) {
+		if (strcmp(attr->name, name) == 0 && attr->tag == tag)
+			return attr->value;
+	}
+
+	return NULL;
+}
+
+void nemoitem_one_put_attr_tag(struct itemone *one, const char *name, uint32_t tag)
+{
+	struct itemattr *attr;
+
+	nemolist_for_each(attr, &one->list, link) {
+		if (strcmp(attr->name, name) == 0 && attr->tag == tag) {
+			nemolist_remove(&attr->link);
+
+			free(attr->name);
+			free(attr->value);
+			free(attr);
+
+			break;
+		}
+	}
+}
+
+int nemoitem_one_has_attr_tag(struct itemone *one, const char *name, uint32_t tag)
+{
+	struct itemattr *attr;
+
+	nemolist_for_each(attr, &one->list, link) {
+		if (strcmp(attr->name, name) == 0 && attr->tag == tag)
 			return 1;
 	}
 

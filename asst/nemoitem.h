@@ -18,6 +18,8 @@ struct itemattr {
 	char *name;
 	char *value;
 
+	uint32_t tag;
+
 	struct nemolist link;
 };
 
@@ -32,6 +34,11 @@ struct itemone {
 struct itembox {
 	struct itemone **ones;
 	int nones;
+};
+
+struct itemarray {
+	struct itemattr **attrs;
+	int nattrs;
 };
 
 struct nemoitem {
@@ -66,6 +73,9 @@ extern struct itembox *nemoitem_box_search_attrs(struct nemoitem *item, const ch
 extern struct itembox *nemoitem_box_search_format(struct nemoitem *item, const char *path, char delimiter, const char *fmt, ...);
 extern void nemoitem_box_destroy(struct itembox *box);
 
+extern struct itemarray *nemoitem_array_search_attr(struct itemone *one, const char *name);
+extern void nemoitem_array_destroy(struct itemarray *array);
+
 extern struct itemone *nemoitem_one_create(void);
 extern void nemoitem_one_destroy(struct itemone *one);
 
@@ -85,6 +95,12 @@ extern int nemoitem_one_set_attr_format(struct itemone *one, const char *name, c
 extern const char *nemoitem_one_get_attr(struct itemone *one, const char *name);
 extern void nemoitem_one_put_attr(struct itemone *one, const char *name);
 extern int nemoitem_one_has_attr(struct itemone *one, const char *name);
+
+extern int nemoitem_one_set_attr_tag(struct itemone *one, const char *name, uint32_t tag, const char *value);
+extern int nemoitem_one_set_attr_tag_format(struct itemone *one, const char *name, uint32_t tag, const char *fmt, ...);
+extern const char *nemoitem_one_get_attr_tag(struct itemone *one, const char *name, uint32_t tag);
+extern void nemoitem_one_put_attr_tag(struct itemone *one, const char *name, uint32_t tag);
+extern int nemoitem_one_has_attr_tag(struct itemone *one, const char *name, uint32_t tag);
 
 extern int nemoitem_one_load_simple(struct itemone *one, const char *buffer, char delimiter);
 extern int nemoitem_one_save_simple(struct itemone *one, char *buffer, char delimiter);
@@ -176,6 +192,37 @@ static inline const char *nemoitem_box_get_sattr(struct itembox *box, int index,
 	return nemoitem_one_get_sattr(box->ones[index], name, value);
 }
 
+static inline int nemoitem_array_get_count(struct itemarray *array)
+{
+	return array->nattrs;
+}
+
+static inline struct itemattr *nemoitem_array_get_attr(struct itemarray *array, int index)
+{
+	return array->attrs[index];
+}
+
+static inline int nemoitem_array_get_iattr(struct itemarray *array, int index, int value)
+{
+	const char *str = array->attrs[index]->value;
+
+	return str != NULL ? strtoul(str, NULL, 10) : value;
+}
+
+static inline float nemoitem_array_get_fattr(struct itemarray *array, int index, float value)
+{
+	const char *str = array->attrs[index]->value;
+
+	return str != NULL ? strtod(str, NULL) : value;
+}
+
+static inline const char *nemoitem_array_get_sattr(struct itemarray *array, int index, const char *value)
+{
+	const char *str = array->attrs[index]->value;
+
+	return str != NULL ? str : value;
+}
+
 static inline void nemoitem_attr_set_name(struct itemattr *attr, const char *name)
 {
 	free(attr->name);
@@ -198,6 +245,16 @@ static inline void nemoitem_attr_set_value(struct itemattr *attr, const char *va
 static inline const char *nemoitem_attr_get_value(struct itemattr *attr)
 {
 	return attr->value;
+}
+
+static inline void nemoitem_attr_set_tag(struct itemattr *attr, uint32_t tag)
+{
+	attr->tag = tag;
+}
+
+static inline uint32_t nemoitem_attr_get_tag(struct itemattr *attr)
+{
+	return attr->tag;
 }
 
 #ifdef __cplusplus
