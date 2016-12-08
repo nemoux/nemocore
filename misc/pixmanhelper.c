@@ -9,6 +9,7 @@
 #include <jpeglib.h>
 
 #include <pixmanhelper.h>
+#include <oshelper.h>
 
 static void a8r8g8b8_to_rgba_np(uint8_t *dst, uint8_t *src, int width, int height, int stride)
 {
@@ -473,8 +474,9 @@ pixman_image_t *pixman_load_image(const char *filepath, int32_t width, int32_t h
 	pixman_image_t *dst;
 	pixman_transform_t transform;
 
-	src = pixman_load_png_file(filepath);
-	if (src == NULL)
+	if (os_has_file_extensions(filepath, "png", NULL) != 0)
+		src = pixman_load_png_file(filepath);
+	else if (os_has_file_extensions(filepath, "jpg", "jpeg", NULL) != 0)
 		src = pixman_load_jpeg_file(filepath);
 	if (src == NULL)
 		return NULL;
