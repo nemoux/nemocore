@@ -11,6 +11,7 @@ extern GLuint gl_compile_shader(GLenum type, int count, const char **sources);
 extern GLuint gl_compile_program(const char *vertex_source, const char *fragment_source, GLuint *vertex_shader, GLuint *fragment_shader);
 
 extern GLuint gl_create_texture(GLint filter, GLint wrap, GLuint width, GLuint height);
+extern int gl_load_texture(GLuint texture, GLuint width, GLuint height, const char *filepath);
 
 extern int gl_create_fbo(GLuint tex, GLuint width, GLuint height, GLuint *fbo, GLuint *dbo);
 

@@ -9,6 +9,7 @@
 #include <GLES2/gl2ext.h>
 
 #include <glhelper.h>
+#include <pixmanhelper.h>
 
 GLuint gl_compile_shader(GLenum type, int count, const char **sources)
 {
@@ -82,6 +83,33 @@ GLuint gl_create_texture(GLint filter, GLint wrap, GLuint width, GLuint height)
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	return texture;
+}
+
+int gl_load_texture(GLuint texture, GLuint width, GLuint height, const char *filepath)
+{
+	pixman_image_t *image;
+
+	image = pixman_load_image(filepath, width, height);
+	if (image == NULL)
+		return -1;
+
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
+	glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
+	glTexImage2D(GL_TEXTURE_2D,
+			0,
+			GL_BGRA_EXT,
+			pixman_image_get_stride(image),
+			pixman_image_get_height(image),
+			0,
+			GL_BGRA_EXT,
+			GL_UNSIGNED_BYTE,
+			(void *)pixman_image_get_data(image));
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	pixman_image_unref(image);
+
+	return 0;
 }
 
 int gl_create_fbo(GLuint tex, GLuint width, GLuint height, GLuint *fbo, GLuint *dbo)
