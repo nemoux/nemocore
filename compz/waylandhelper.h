@@ -9,7 +9,6 @@ NEMO_BEGIN_EXTERN_C
 
 #include <pixman.h>
 
-extern uint32_t wayland_execute_path(const char *path, char *const argv[], char *const envp[]);
 extern struct wl_client *wayland_execute_client(struct wl_display *display, const char *path, char *const argv[], char *const envp[]);
 
 extern void wayland_transform_point(int width, int height, enum wl_output_transform transform, int32_t scale, float sx, float sy, float *bx, float *by);

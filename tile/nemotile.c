@@ -12,10 +12,8 @@
 #include <nemotile.h>
 #include <nemoshow.h>
 #include <showhelper.h>
-#include <glhelper.h>
 #include <tilehelper.hpp>
 #include <nemofs.h>
-#include <nemopoly.h>
 #include <nemohelper.h>
 #include <nemolog.h>
 #include <nemomisc.h>
@@ -421,7 +419,7 @@ static struct tileone *nemotile_pick_complex(struct nemotile *tile, float x, flo
 		nemomatrix_translate_xyz(&modelview, one->gtransform.tx, one->gtransform.ty, one->gtransform.tz);
 
 		for (j = 0; j < one->count - 2; j++) {
-			if (nemopoly_pick_triangle(
+			if (poly_pick_triangle(
 						&projection,
 						tile->width, tile->height,
 						&modelview,
@@ -452,7 +450,7 @@ static struct tileone *nemotile_pick_complex(struct nemotile *tile, float x, flo
 		nemomatrix_translate_xyz(&modelview, one->gtransform.tx, one->gtransform.ty, one->gtransform.tz);
 
 		for (j = 0; j < one->count - 2; j++) {
-			if (nemopoly_pick_triangle(
+			if (poly_pick_triangle(
 						&projection,
 						tile->width, tile->height,
 						&modelview,

@@ -3,6 +3,7 @@
 
 #include <pixmanhelper.h>
 #include <bezierhelper.h>
+#include <polyhelper.h>
 #include <codehelper.h>
 #include <utf8helper.h>
 #include <fonthelper.h>

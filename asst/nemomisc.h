@@ -84,7 +84,6 @@ extern int os_create_anonymous_file(off_t size);
 extern int os_exist_path(const char *path);
 extern int os_check_path_is_directory(const char *path);
 extern int os_check_path_is_file(const char *path);
-extern pid_t os_execute_path(const char *path, char *const argv[]);
 extern int os_load_path(const char *path, char **buffer, int *size);
 extern int os_save_path(const char *path, char *buffer, int size);
 
@@ -97,6 +96,8 @@ extern char *os_get_file_path(const char *name);
 extern int os_set_nonblocking_mode(int fd);
 
 extern int os_sched_set_affinity(pid_t pid, uint32_t cpuid);
+
+extern uint32_t os_execute_path(const char *path, char *const argv[], char *const envp[]);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

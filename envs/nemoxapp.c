@@ -136,7 +136,7 @@ static int nemoenvs_execute_xapp(struct nemoenvs *envs, struct nemoxserver *xser
 	nemotoken_divide(envp, ';');
 	nemotoken_update(envp);
 
-	pid = wayland_execute_path(nemotoken_get_token(args, 0), nemotoken_get_tokens(args), nemotoken_get_tokens(envp));
+	pid = os_execute_path(nemotoken_get_token(args, 0), nemotoken_get_tokens(args), nemotoken_get_tokens(envp));
 	if (pid > 0) {
 		nemoenvs_attach_xclient(envs, xserver, pid, _path);
 

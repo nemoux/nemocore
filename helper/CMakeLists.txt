@@ -5,6 +5,7 @@ set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 add_library(nemohelper SHARED
 	pixmanhelper.c
 	bezierhelper.c
+	polyhelper.c
 	codehelper.c
 	utf8helper.c
 	fonthelper.c
@@ -33,6 +34,7 @@ INSTALL(TARGETS nemohelper DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
 set(HEADER_FILES
 	pixmanhelper.h
 	bezierhelper.h
+	polyhelper.h
 	codehelper.h
 	utf8helper.h
 	fonthelper.h

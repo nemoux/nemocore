@@ -13,58 +13,6 @@
 #include <nemomisc.h>
 #include <nemolog.h>
 
-uint32_t wayland_execute_path(const char *path, char *const argv[], char *const envp[])
-{
-	sigset_t allsigs;
-	pid_t pid;
-
-	pid = fork();
-	if (pid == -1)
-		return 0;
-
-	if (pid > 0) {
-		int i;
-
-		nemolog_message("EXEC", "execute path(%s) pid(%d)\n", path, pid);
-
-		if (argv != NULL) {
-			for (i = 0; argv[i] != NULL; i++)
-				nemolog_message("EXEC", "  args[%2d] %s\n", i, argv[i]);
-		}
-
-		if (envp != NULL) {
-			for (i = 0; envp[i] != NULL; i++)
-				nemolog_message("EXEC", "  envp[%2d] %s\n", i, envp[i]);
-		}
-
-		return pid;
-	}
-
-	sigfillset(&allsigs);
-	sigprocmask(SIG_UNBLOCK, &allsigs, NULL);
-
-	if (seteuid(getuid()) == -1)
-		return 0;
-
-	if (setpgid(getpid(), getpid()) == -1)
-		return 0;
-
-	if (argv == NULL || argv[0] == NULL) {
-		if (execl(path, path, NULL) < 0)
-			nemolog_warning("WAYLAND", "failed to execute '%s' with errno %d\n", path, errno);
-	} else if (envp == NULL || envp[0] == NULL) {
-		if (execv(path, argv) < 0)
-			nemolog_warning("WAYLAND", "failed to execute '%s' with errno %d\n", path, errno);
-	} else {
-		if (execve(path, argv, envp) < 0)
-			nemolog_warning("WAYLAND", "failed to execute '%s' with errno %d\n", path, errno);
-	}
-
-	exit(EXIT_FAILURE);
-
-	return 0;
-}
-
 static inline void wayland_execute_client_in(int sockfd, const char *path, char *const argv[], char *const envp[])
 {
 	int clientfd;

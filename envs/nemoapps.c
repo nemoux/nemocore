@@ -92,7 +92,7 @@ static void nemoenvs_execute_background(struct nemoenvs *envs, struct itemone *o
 	nemotoken_divide(token, ';');
 	nemotoken_update(token);
 
-	pid = wayland_execute_path(path, nemotoken_get_tokens(token), NULL);
+	pid = os_execute_path(path, nemotoken_get_tokens(token), NULL);
 	if (pid > 0) {
 		struct clientstate *state;
 
@@ -123,7 +123,7 @@ static void nemoenvs_execute_daemon(struct nemoenvs *envs, struct itemone *one)
 	nemotoken_divide(token, ';');
 	nemotoken_update(token);
 
-	pid = wayland_execute_path(path, nemotoken_get_tokens(token), NULL);
+	pid = os_execute_path(path, nemotoken_get_tokens(token), NULL);
 	if (pid > 0)
 		nemoenvs_attach_app(envs, nemoitem_one_get_path(one), pid);
 
@@ -147,7 +147,7 @@ static void nemoenvs_execute_screensaver(struct nemoenvs *envs, struct itemone *
 	nemotoken_divide(token, ';');
 	nemotoken_update(token);
 
-	pid = wayland_execute_path(path, nemotoken_get_tokens(token), NULL);
+	pid = os_execute_path(path, nemotoken_get_tokens(token), NULL);
 	if (pid > 0) {
 		struct clientstate *state;
 

@@ -15,8 +15,6 @@
 
 #include <nemoshow.h>
 #include <showhelper.h>
-#include <glhelper.h>
-#include <nemopoly.h>
 #include <nemohelper.h>
 #include <nemolog.h>
 #include <nemomisc.h>
@@ -105,8 +103,8 @@ static void nemomote_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 		vertices[i * 3 + 2] = random_get_double(16.0f, 32.0f);
 	}
 
-	nedges = nemopoly_triangulate(points, 128, NULL, edges);
-	nhulls = nemopoly_convex_hull(points, 128, hulls);
+	nedges = poly_triangulate(points, 128, NULL, edges);
+	nhulls = poly_convex_hull(points, 128, hulls);
 
 	gl_create_fbo(
 			nemoshow_canvas_get_texture(canvas),

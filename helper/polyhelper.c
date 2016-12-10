@@ -5,11 +5,11 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include <nemopoly.h>
+#include <polyhelper.h>
 #include <nemolist.h>
 #include <nemomisc.h>
 
-static inline void nemopoly_unproject(struct nemomatrix *projection, int32_t width, int32_t height, struct nemomatrix *modelview, float x, float y, float z, float *out)
+static inline void poly_unproject(struct nemomatrix *projection, int32_t width, int32_t height, struct nemomatrix *modelview, float x, float y, float z, float *out)
 {
 	struct nemomatrix matrix;
 	struct nemomatrix inverse;
@@ -38,7 +38,7 @@ static inline void nemopoly_unproject(struct nemomatrix *projection, int32_t wid
 	}
 }
 
-int nemopoly_intersect_lines(float x00, float y00, float x01, float y01, float x10, float y10, float x11, float y11)
+int poly_intersect_lines(float x00, float y00, float x01, float y01, float x10, float y10, float x11, float y11)
 {
 	float sx = x01 - x00;
 	float sy = y01 - y00;
@@ -65,7 +65,7 @@ int nemopoly_intersect_lines(float x00, float y00, float x01, float y01, float x
 	return 1;
 }
 
-int nemopoly_intersect_boxes(float *b0, float *b1)
+int poly_intersect_boxes(float *b0, float *b1)
 {
 	float c0[2], c1[2];
 	float dx, dy;
@@ -123,7 +123,7 @@ int nemopoly_intersect_boxes(float *b0, float *b1)
 	return 1;
 }
 
-int nemopoly_intersect_ray_triangle(float *v0, float *v1, float *v2, float *o, float *d, float *t, float *u, float *v)
+int poly_intersect_ray_triangle(float *v0, float *v1, float *v2, float *o, float *d, float *t, float *u, float *v)
 {
 	float edge1[3], edge2[3];
 	float tvec[3], pvec[3], qvec[3];
@@ -156,13 +156,13 @@ int nemopoly_intersect_ray_triangle(float *v0, float *v1, float *v2, float *o, f
 	return 1;
 }
 
-int nemopoly_intersect_ray_cube(float *cube, float *o, float *d, float *mint, float *maxt)
+int poly_intersect_ray_cube(float *cube, float *o, float *d, float *mint, float *maxt)
 {
 	float nmin[3], nmax[3];
 	float tmin, tmax;
 	float tx1 = (cube[0] - o[0]) / d[0];
 	float tx2 = (cube[1] - o[0]) / d[0];
-	int plane = NEMOPOLY_NONE_PLANE;
+	int plane = POLY_NONE_PLANE;
 
 	if (tx1 < tx2) {
 		tmin = tx1;
@@ -187,7 +187,7 @@ int nemopoly_intersect_ray_cube(float *cube, float *o, float *d, float *mint, fl
 	}
 
 	if (tmin > tmax)
-		return NEMOPOLY_NONE_PLANE;
+		return POLY_NONE_PLANE;
 
 	float ty1 = (cube[2] - o[1]) / d[1];
 	float ty2 = (cube[3] - o[1]) / d[1];
@@ -225,7 +225,7 @@ int nemopoly_intersect_ray_cube(float *cube, float *o, float *d, float *mint, fl
 	}
 
 	if (tmin > tmax)
-		return NEMOPOLY_NONE_PLANE;
+		return POLY_NONE_PLANE;
 
 	float tz1 = (cube[4] - o[2]) / d[2];
 	float tz2 = (cube[5] - o[2]) / d[2];
@@ -263,24 +263,24 @@ int nemopoly_intersect_ray_cube(float *cube, float *o, float *d, float *mint, fl
 	}
 
 	if (tmin > tmax)
-		return NEMOPOLY_NONE_PLANE;
+		return POLY_NONE_PLANE;
 
 	if (tmin < 0.0f && tmax > 0.0f)
 		tmin = 0.0f;
 
 	if (tmin >= 0.0f) {
 		if (nmin[0] == 1.0f)
-			plane = NEMOPOLY_RIGHT_PLANE;
+			plane = POLY_RIGHT_PLANE;
 		else if (nmin[0] == -1.0f)
-			plane = NEMOPOLY_LEFT_PLANE;
+			plane = POLY_LEFT_PLANE;
 		else if (nmin[1] == 1.0f)
-			plane = NEMOPOLY_TOP_PLANE;
+			plane = POLY_TOP_PLANE;
 		else if (nmin[1] == -1.0f)
-			plane = NEMOPOLY_BOTTOM_PLANE;
+			plane = POLY_BOTTOM_PLANE;
 		else if (nmin[2] == 1.0f)
-			plane = NEMOPOLY_FRONT_PLANE;
+			plane = POLY_FRONT_PLANE;
 		else if (nmin[2] == -1.0f)
-			plane = NEMOPOLY_BACK_PLANE;
+			plane = POLY_BACK_PLANE;
 
 		*mint = tmin;
 		*maxt = tmax;
@@ -289,15 +289,15 @@ int nemopoly_intersect_ray_cube(float *cube, float *o, float *d, float *mint, fl
 	return plane;
 }
 
-int nemopoly_pick_triangle(struct nemomatrix *projection, int32_t width, int32_t height, struct nemomatrix *modelview, float *v0, float *v1, float *v2, float x, float y, float *t, float *u, float *v)
+int poly_pick_triangle(struct nemomatrix *projection, int32_t width, int32_t height, struct nemomatrix *modelview, float *v0, float *v1, float *v2, float x, float y, float *t, float *u, float *v)
 {
 	float near[3], far[3];
 	float rayorg[3];
 	float rayvec[3];
 	float raylen;
 
-	nemopoly_unproject(projection, width, height, modelview, x, y, -1.0f, near);
-	nemopoly_unproject(projection, width, height, modelview, x, y, 1.0f, far);
+	poly_unproject(projection, width, height, modelview, x, y, -1.0f, near);
+	poly_unproject(projection, width, height, modelview, x, y, 1.0f, far);
 
 	rayvec[0] = far[0] - near[0];
 	rayvec[1] = far[1] - near[1];
@@ -313,18 +313,18 @@ int nemopoly_pick_triangle(struct nemomatrix *projection, int32_t width, int32_t
 	rayorg[1] = near[1];
 	rayorg[2] = near[2];
 
-	return nemopoly_intersect_ray_triangle(v0, v1, v2, rayorg, rayvec, t, u, v);
+	return poly_intersect_ray_triangle(v0, v1, v2, rayorg, rayvec, t, u, v);
 }
 
-int nemopoly_pick_cube(struct nemomatrix *projection, int32_t width, int32_t height, struct nemomatrix *modelview, float *boundingbox, float x, float y, float *mint, float *maxt)
+int poly_pick_cube(struct nemomatrix *projection, int32_t width, int32_t height, struct nemomatrix *modelview, float *boundingbox, float x, float y, float *mint, float *maxt)
 {
 	float near[3], far[3];
 	float rayorg[3];
 	float rayvec[3];
 	float raylen;
 
-	nemopoly_unproject(projection, width, height, modelview, x, y, -1.0f, near);
-	nemopoly_unproject(projection, width, height, modelview, x, y, 1.0f, far);
+	poly_unproject(projection, width, height, modelview, x, y, -1.0f, near);
+	poly_unproject(projection, width, height, modelview, x, y, 1.0f, far);
 
 	rayvec[0] = far[0] - near[0];
 	rayvec[1] = far[1] - near[1];
@@ -340,15 +340,15 @@ int nemopoly_pick_cube(struct nemomatrix *projection, int32_t width, int32_t hei
 	rayorg[1] = near[1];
 	rayorg[2] = near[2];
 
-	return nemopoly_intersect_ray_cube(boundingbox, rayorg, rayvec, mint, maxt);
+	return poly_intersect_ray_cube(boundingbox, rayorg, rayvec, mint, maxt);
 }
 
-static float nemopoly_convex_hull_ccw(float x0, float y0, float x1, float y1, float x2, float y2)
+static float poly_convex_hull_ccw(float x0, float y0, float x1, float y1, float x2, float y2)
 {
 	return (x1 - x0) * (y2 - y0) - (y1 - y0) * (x2 - x0);
 }
 
-static int nemopoly_convex_hull_compare(const void *a, const void *b)
+static int poly_convex_hull_compare(const void *a, const void *b)
 {
 	float *v0 = (float *)a;
 	float *v1 = (float *)b;
@@ -356,21 +356,21 @@ static int nemopoly_convex_hull_compare(const void *a, const void *b)
 	return v0[0] < v1[0] || (v0[0] == v1[0] && v0[1] < v1[1]);
 }
 
-int nemopoly_convex_hull(float *vertices, int nvertices, float *hulls)
+int poly_convex_hull(float *vertices, int nvertices, float *hulls)
 {
 	int i, t, k = 0;
 
-	qsort(vertices, nvertices, sizeof(float[2]), nemopoly_convex_hull_compare);
+	qsort(vertices, nvertices, sizeof(float[2]), poly_convex_hull_compare);
 
 	for (i = 0; i < nvertices; i++) {
-		while (k >= 2 && nemopoly_convex_hull_ccw(hulls[(k - 2) * 2 + 0], hulls[(k - 2) * 2 + 1], hulls[(k - 1) * 2 + 0], hulls[(k - 1) * 2 + 1], vertices[i * 2 + 0], vertices[i * 2 + 1]) <= 0.0f) --k;
+		while (k >= 2 && poly_convex_hull_ccw(hulls[(k - 2) * 2 + 0], hulls[(k - 2) * 2 + 1], hulls[(k - 1) * 2 + 0], hulls[(k - 1) * 2 + 1], vertices[i * 2 + 0], vertices[i * 2 + 1]) <= 0.0f) --k;
 		hulls[k * 2 + 0] = vertices[i * 2 + 0];
 		hulls[k * 2 + 1] = vertices[i * 2 + 1];
 		k++;
 	}
 
 	for (i = nvertices - 2, t = k + 1; i >= 0; i--) {
-		while (k >= t && nemopoly_convex_hull_ccw(hulls[(k - 2) * 2 + 0], hulls[(k - 2) * 2 + 1], hulls[(k - 1) * 2 + 0], hulls[(k - 1) * 2 + 1], vertices[i * 2 + 0], vertices[i * 2 + 1]) <= 0.0f) --k;
+		while (k >= t && poly_convex_hull_ccw(hulls[(k - 2) * 2 + 0], hulls[(k - 2) * 2 + 1], hulls[(k - 1) * 2 + 0], hulls[(k - 1) * 2 + 1], vertices[i * 2 + 0], vertices[i * 2 + 1]) <= 0.0f) --k;
 		hulls[k * 2 + 0] = vertices[i * 2 + 0];
 		hulls[k * 2 + 1] = vertices[i * 2 + 1];
 		k++;
@@ -395,7 +395,7 @@ struct edgeone {
 	struct nemolist link;
 };
 
-static inline int nemopoly_triangle_circumcircle_contain_vertex(struct trione *tone, float x, float y)
+static inline int poly_triangle_circumcircle_contain_vertex(struct trione *tone, float x, float y)
 {
 	float ab = (tone->x[0] * tone->x[0]) + (tone->y[0] * tone->y[0]);
 	float cd = (tone->x[1] * tone->x[1]) + (tone->y[1] * tone->y[1]);
@@ -409,12 +409,12 @@ static inline int nemopoly_triangle_circumcircle_contain_vertex(struct trione *t
 	return dist <= cr;
 }
 
-static inline int nemopoly_triangle_contain_vertex(struct trione *tone, float x, float y)
+static inline int poly_triangle_contain_vertex(struct trione *tone, float x, float y)
 {
 	return (tone->x[0] == x && tone->y[0] == y) || (tone->x[1] == x && tone->y[1] == y) || (tone->x[2] == x && tone->y[2] == y);
 }
 
-static inline int nemopoly_triangle_compare(struct trione *tone0, struct trione *tone1)
+static inline int poly_triangle_compare(struct trione *tone0, struct trione *tone1)
 {
 	return
 		((tone0->x[0] == tone1->x[0] && tone0->y[0] == tone1->y[0]) || (tone0->x[0] == tone1->x[1] && tone0->y[0] == tone1->y[1]) || (tone0->x[0] == tone1->x[2] && tone0->y[0] == tone1->y[2])) &&
@@ -422,14 +422,14 @@ static inline int nemopoly_triangle_compare(struct trione *tone0, struct trione 
 		((tone0->x[2] == tone1->x[0] && tone0->y[2] == tone1->y[0]) || (tone0->x[2] == tone1->x[1] && tone0->y[2] == tone1->y[1]) || (tone0->x[2] == tone1->x[2] && tone0->y[2] == tone1->y[2]));
 }
 
-static inline int nemopoly_edge_compare(struct edgeone *eone0, struct edgeone *eone1)
+static inline int poly_edge_compare(struct edgeone *eone0, struct edgeone *eone1)
 {
 	return
 		(eone0->x[0] == eone1->x[0] && eone0->y[0] == eone1->y[0] && eone0->x[1] == eone1->x[1] && eone0->y[1] == eone1->y[1]) ||
 		(eone0->x[0] == eone1->x[1] && eone0->y[0] == eone1->y[1] && eone0->x[1] == eone1->x[0] && eone0->y[1] == eone1->y[0]);
 }
 
-static inline struct trione *nemopoly_create_triangle(struct nemolist *list, float x0, float y0, float x1, float y1, float x2, float y2)
+static inline struct trione *poly_create_triangle(struct nemolist *list, float x0, float y0, float x1, float y1, float x2, float y2)
 {
 	struct trione *tone;
 
@@ -446,14 +446,14 @@ static inline struct trione *nemopoly_create_triangle(struct nemolist *list, flo
 	return tone;
 }
 
-static inline void nemopoly_destroy_triangle(struct trione *tone)
+static inline void poly_destroy_triangle(struct trione *tone)
 {
 	nemolist_remove(&tone->link);
 
 	free(tone);
 }
 
-static inline struct edgeone *nemopoly_create_edge(struct nemolist *list, float x0, float y0, float x1, float y1)
+static inline struct edgeone *poly_create_edge(struct nemolist *list, float x0, float y0, float x1, float y1)
 {
 	struct edgeone *eone;
 
@@ -470,14 +470,14 @@ static inline struct edgeone *nemopoly_create_edge(struct nemolist *list, float 
 	return 0;
 }
 
-static inline void nemopoly_destroy_edge(struct edgeone *eone)
+static inline void poly_destroy_edge(struct edgeone *eone)
 {
 	nemolist_remove(&eone->link);
 
 	free(eone);
 }
 
-int nemopoly_triangulate(float *vertices, int nvertices, float *triangles, float *edges)
+int poly_triangulate(float *vertices, int nvertices, float *triangles, float *edges)
 {
 	struct nemolist tri_list;
 	struct trione *tone, *ntone;
@@ -513,7 +513,7 @@ int nemopoly_triangulate(float *vertices, int nvertices, float *triangles, float
 
 	nemolist_init(&tri_list);
 
-	nemopoly_create_triangle(&tri_list, x0, y0, x1, y1, x2, y2);
+	poly_create_triangle(&tri_list, x0, y0, x1, y1, x2, y2);
 
 	for (i = 0; i < nvertices; i++) {
 		struct nemolist edge_list;
@@ -525,12 +525,12 @@ int nemopoly_triangulate(float *vertices, int nvertices, float *triangles, float
 		nemolist_init(&edge_list);
 
 		nemolist_for_each_safe(tone, ntone, &tri_list, link) {
-			if (nemopoly_triangle_circumcircle_contain_vertex(tone, x, y) != 0) {
-				nemopoly_create_edge(&edge_list, tone->x[0], tone->y[0], tone->x[1], tone->y[1]);
-				nemopoly_create_edge(&edge_list, tone->x[1], tone->y[1], tone->x[2], tone->y[2]);
-				nemopoly_create_edge(&edge_list, tone->x[2], tone->y[2], tone->x[0], tone->y[0]);
+			if (poly_triangle_circumcircle_contain_vertex(tone, x, y) != 0) {
+				poly_create_edge(&edge_list, tone->x[0], tone->y[0], tone->x[1], tone->y[1]);
+				poly_create_edge(&edge_list, tone->x[1], tone->y[1], tone->x[2], tone->y[2]);
+				poly_create_edge(&edge_list, tone->x[2], tone->y[2], tone->x[0], tone->y[0]);
 
-				nemopoly_destroy_triangle(tone);
+				poly_destroy_triangle(tone);
 			}
 		}
 
@@ -539,7 +539,7 @@ int nemopoly_triangulate(float *vertices, int nvertices, float *triangles, float
 				if (eone0 == eone1)
 					continue;
 
-				if (nemopoly_edge_compare(eone0, eone1) != 0) {
+				if (poly_edge_compare(eone0, eone1) != 0) {
 					eone0->is_bad = 1;
 					eone1->is_bad = 1;
 				}
@@ -548,21 +548,21 @@ int nemopoly_triangulate(float *vertices, int nvertices, float *triangles, float
 
 		nemolist_for_each_safe(eone, neone, &edge_list, link) {
 			if (eone->is_bad == 0) {
-				nemopoly_create_triangle(&tri_list,
+				poly_create_triangle(&tri_list,
 						eone->x[0], eone->y[0],
 						eone->x[1], eone->y[1],
 						x, y);
 			}
 
-			nemopoly_destroy_edge(eone);
+			poly_destroy_edge(eone);
 		}
 	}
 
 	nemolist_for_each_safe(tone, ntone, &tri_list, link) {
-		if (nemopoly_triangle_contain_vertex(tone, x0, y0) ||
-				nemopoly_triangle_contain_vertex(tone, x1, y1) ||
-				nemopoly_triangle_contain_vertex(tone, x2, y2))
-			nemopoly_destroy_triangle(tone);
+		if (poly_triangle_contain_vertex(tone, x0, y0) ||
+				poly_triangle_contain_vertex(tone, x1, y1) ||
+				poly_triangle_contain_vertex(tone, x2, y2))
+			poly_destroy_triangle(tone);
 	}
 
 	if (triangles != NULL) {

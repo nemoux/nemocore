@@ -65,7 +65,7 @@ void nemoenvs_handle_terminal_key(struct nemocompz *compz, struct nemokeyboard *
 		nemotoken_divide(args, ';');
 		nemotoken_update(args);
 
-		wayland_execute_path(_path, nemotoken_get_tokens(args), NULL);
+		os_execute_path(_path, nemotoken_get_tokens(args), NULL);
 
 		nemotoken_destroy(args);
 	}
