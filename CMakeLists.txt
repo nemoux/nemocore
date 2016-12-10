@@ -15,7 +15,6 @@ set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 set(CMAKE_INSTALL_PREFIX "/usr")
 
 option(WITH_LOGIND "Build with LOGIND" OFF)
-option(WITH_UNWIND "Build with UNWIND" OFF)
 option(WITH_XWAYLAND "Build with XWAYLAND" ON)
 option(WITH_GLIB "Build with GLIB" ON)
 option(WITH_PULSEAUDIO "Build with PULSEAUDIO" ON)
@@ -182,15 +181,6 @@ endif(WITH_OPENGL_CS)
 if(WITH_OPENCL)
 	add_definitions(-DNEMOUX_WITH_OPENCL=1)
 endif(WITH_OPENCL)
-
-if(WITH_UNWIND)
-	add_definitions(-DNEMOUX_WITH_UNWIND=1)
-
-	set(NEMOUX_COMMON_LIBRARIES
-		${NEMOUX_COMMON_LIBRARIES}
-		unwind
-		)
-endif(WITH_UNWIND)
 
 if(WITH_GLIB)
 	add_definitions(-DNEMOUX_WITH_GLIB=1)

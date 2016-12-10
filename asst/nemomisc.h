@@ -63,8 +63,6 @@ NEMO_BEGIN_EXTERN_C
 
 #define ARRAY_LENGTH(a) (sizeof(a) / sizeof(a)[0])
 
-extern void debug_show_backtrace(void);
-
 extern uint32_t time_current_msecs(void);
 extern uint64_t time_current_nsecs(void);
 extern double time_current_secs(void);

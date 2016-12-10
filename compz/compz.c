@@ -149,8 +149,6 @@ static int on_fault_signal(int signum, void *data)
 		nemocompz_exit(compz);
 	}
 
-	debug_show_backtrace();
-
 	return 1;
 }
 
