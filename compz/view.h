@@ -13,7 +13,6 @@ NEMO_BEGIN_EXTERN_C
 #include <content.h>
 #include <nemomatrix.h>
 #include <nemopoly.h>
-#include <nemoscope.h>
 
 typedef enum {
 	NEMOVIEW_TRANSFORM_NORMAL = 0,
@@ -44,6 +43,7 @@ struct nemocontent;
 struct nemocanvas;
 struct nemoactor;
 struct nemoxkb;
+struct nemoscope;
 
 struct nemotransform {
 	struct nemomatrix matrix;

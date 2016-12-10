@@ -24,7 +24,6 @@
 
 #include <nemoshow.h>
 #include <showhelper.h>
-#include <nemoscope.h>
 #include <nemomisc.h>
 
 static int nemoshow_dispatch_actor_pick(struct nemoactor *actor, float x, float y)

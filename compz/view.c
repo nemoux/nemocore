@@ -18,6 +18,7 @@
 #include <seat.h>
 #include <keyboard.h>
 #include <keymap.h>
+#include <scope.h>
 #include <nemomisc.h>
 #include <nemolog.h>
 

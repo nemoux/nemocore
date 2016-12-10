@@ -110,6 +110,7 @@ add_library(nemocompz SHARED
 	scaler.c
 	presentation.c
 	region.c
+	scope.c
 	subcompz.c
 	subcanvas.c
 	view.c

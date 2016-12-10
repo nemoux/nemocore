@@ -11,6 +11,7 @@
 #include <compz.h>
 #include <view.h>
 #include <content.h>
+#include <scope.h>
 #include <nemomisc.h>
 
 struct nemoview *nemocompz_pick_view(struct nemocompz *compz, float x, float y, float *sx, float *sy, uint32_t state)

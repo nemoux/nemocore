@@ -7,7 +7,7 @@
 
 #include <math.h>
 
-#include <nemoscope.h>
+#include <scope.h>
 #include <nemotoken.h>
 #include <nemolog.h>
 
