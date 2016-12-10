@@ -48,8 +48,6 @@ struct nemoshow *nemoshow_create(void)
 
 	nemolist_init(&show->scene_destroy_listener.link);
 
-	show->tilesize = NEMOSHOW_DEFAULT_TILESIZE;
-
 	show->state = NEMOSHOW_ANTIALIAS_STATE | NEMOSHOW_FILTER_STATE;
 	show->quality = NEMOSHOW_FILTER_NORMAL_QUALITY;
 
@@ -88,29 +86,10 @@ void nemoshow_destroy(struct nemoshow *show)
 
 	nemolist_remove(&show->keyboard.one_destroy_listener.link);
 
-	if (show->pool != NULL)
-		nemopool_destroy(show->pool);
-
 	if (show->name != NULL)
 		free(show->name);
 
 	free(show);
-}
-
-int nemoshow_prepare_threads(struct nemoshow *show, int threads)
-{
-	show->threads = threads;
-
-	show->pool = nemopool_create(threads);
-
-	return show->pool != NULL;
-}
-
-void nemoshow_finish_threads(struct nemoshow *show)
-{
-	nemopool_destroy(show->pool);
-
-	show->pool = NULL;
 }
 
 void nemoshow_set_name(struct nemoshow *show, const char *name)
@@ -119,11 +98,6 @@ void nemoshow_set_name(struct nemoshow *show, const char *name)
 		free(show->name);
 
 	show->name = strdup(name);
-}
-
-void nemoshow_set_tilesize(struct nemoshow *show, int tilesize)
-{
-	show->tilesize = tilesize;
 }
 
 struct showone *nemoshow_search_one(struct nemoshow *show, const char *id)
@@ -205,78 +179,6 @@ void nemoshow_render_one(struct nemoshow *show)
 
 		nemolist_remove(&canvas->redraw_link);
 		nemolist_init(&canvas->redraw_link);
-	}
-}
-
-static void nemoshow_handle_canvas_render_task(void *arg)
-{
-	struct showtask *task = (struct showtask *)arg;
-	struct showcanvas *canvas = NEMOSHOW_CANVAS(task->one);
-
-	canvas->dispatch_replay(task->show, task->one, task->x, task->y, task->w, task->h);
-}
-
-void nemoshow_divide_one(struct nemoshow *show)
-{
-	struct showone *scene = show->scene;
-	struct nemopool *pool = show->pool;
-	struct showcanvas *canvas, *ncanvas;
-	struct showtask *task;
-
-	if (scene == NULL || pool == NULL)
-		return;
-
-	nemolist_for_each_safe(canvas, ncanvas, &show->redraw_list, redraw_link) {
-		if ((nemoshow_canvas_has_state_all(canvas, NEMOSHOW_CANVAS_REDRAW_STATE | NEMOSHOW_CANVAS_POOLING_STATE) != 0) &&
-				(canvas->viewport.width >= show->tilesize || canvas->viewport.height >= show->tilesize)) {
-			SkIRect box = NEMOSHOW_CANVAS_CC(canvas, damage)->getBounds();
-
-			if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_REDRAW_FULL_STATE) || box.width() >= show->tilesize || box.height() >= show->tilesize) {
-				int cw = canvas->viewport.width;
-				int ch = canvas->viewport.height;
-				int tc = cw / show->tilesize + 1;
-				int tr = ch / show->tilesize + 1;
-				int tw = ceil(cw / tc) + 1;
-				int th = ceil(ch / tr) + 1;
-				int i, j;
-
-				canvas->dispatch_record(show, NEMOSHOW_CANVAS_ONE(canvas));
-
-				nemoshow_clear_time(show);
-
-				canvas->prepare_render(show, NEMOSHOW_CANVAS_ONE(canvas));
-
-				nemoshow_check_time(show, NEMOSHOW_FRAME_PREPARE_TIME);
-
-				for (i = 0; i < tr; i++) {
-					for (j = 0; j < tc; j++) {
-						if (nemoshow_canvas_has_state(canvas, NEMOSHOW_CANVAS_REDRAW_FULL_STATE) ||
-								NEMOSHOW_CANVAS_CC(canvas, damage)->intersects(SkIRect::MakeXYWH(j * tw, i * th, tw, th))) {
-							task = (struct showtask *)malloc(sizeof(struct showtask));
-							task->show = show;
-							task->one = NEMOSHOW_CANVAS_ONE(canvas);
-							task->x = j * tw;
-							task->y = i * th;
-							task->w = tw;
-							task->h = th;
-
-							nemopool_dispatch_task(pool, nemoshow_handle_canvas_render_task, task);
-						}
-					}
-				}
-
-				while (nemopool_dispatch_done(pool, NULL) == 0);
-
-				nemoshow_check_time(show, NEMOSHOW_FRAME_RENDER_TIME);
-
-				canvas->finish_render(show, NEMOSHOW_CANVAS_ONE(canvas));
-
-				nemoshow_check_time(show, NEMOSHOW_FRAME_FINISH_TIME);
-
-				nemolist_remove(&canvas->redraw_link);
-				nemolist_init(&canvas->redraw_link);
-			}
-		}
 	}
 }
 
@@ -734,13 +636,12 @@ void nemoshow_dump_times(struct nemoshow *show)
 	if (show->frames == 0)
 		return;
 
-	nemolog_message("SHOW", "[%s:%d] size(%dx%d) frames(%d) threads(%d) damages(%d/%f)\n",
+	nemolog_message("SHOW", "[%s:%d] size(%dx%d) frames(%d) damages(%d/%f)\n",
 			show->name != NULL ? show->name : "noname",
 			getpid(),
 			show->width,
 			show->height,
 			show->frames,
-			show->threads,
 			show->damages,
 			show->frames > 0 ? (double)show->damages / 1024.0f / 1024.0f / show->frames : 0.0f);
 

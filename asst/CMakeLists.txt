@@ -9,7 +9,6 @@ add_library(nemoasst SHARED
 	nemoitem.c
 	nemotrans.c
 	nemolog.c
-	nemopool.c
 	nemofs.c
 	nemomisc.c
 	)
@@ -34,7 +33,6 @@ set(HEADER_FILES
 	nemolist.h
 	nemolistener.h
 	nemoease.h
-	nemopool.h
 	nemofs.h
 	nemoconfig.h
 	)

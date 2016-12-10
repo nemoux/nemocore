@@ -32,7 +32,6 @@ NEMO_BEGIN_EXTERN_C
 #include <skiahelper.h>
 
 #include <nemotale.h>
-#include <nemopool.h>
 
 #define NEMOSHOW_DEFAULT_TILESIZE		(512)
 
@@ -112,10 +111,6 @@ struct nemoshow {
 	uint32_t dirty_serial;
 	uint32_t transition_serial;
 
-	struct nemopool *pool;
-	int tilesize;
-	int threads;
-
 	uint32_t frames;
 	uint64_t damages;
 	uint32_t times[NEMOSHOW_LAST_TIME];
@@ -152,12 +147,7 @@ extern void nemoshow_finalize(void);
 extern struct nemoshow *nemoshow_create(void);
 extern void nemoshow_destroy(struct nemoshow *show);
 
-extern int nemoshow_prepare_threads(struct nemoshow *show, int threads);
-extern void nemoshow_finish_threads(struct nemoshow *show);
-
 extern void nemoshow_set_name(struct nemoshow *show, const char *name);
-
-extern void nemoshow_set_tilesize(struct nemoshow *show, int tilesize);
 
 extern struct showone *nemoshow_search_one(struct nemoshow *show, const char *id);
 
@@ -166,7 +156,6 @@ extern void nemoshow_leave_frame(struct nemoshow *show, uint32_t msecs);
 
 extern int nemoshow_update_one(struct nemoshow *show);
 extern void nemoshow_render_one(struct nemoshow *show);
-extern void nemoshow_divide_one(struct nemoshow *show);
 
 extern int nemoshow_set_scene(struct nemoshow *show, struct showone *one);
 extern void nemoshow_put_scene(struct nemoshow *show);

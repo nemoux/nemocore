@@ -29,7 +29,6 @@ static void nemoshow_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t w
 	nemoshow_set_size(show, width, height);
 
 	nemoshow_update_one(show);
-	nemoshow_divide_one(show);
 	nemoshow_render_one(show);
 
 	nemocanvas_dispatch_feedback(canvas);
@@ -54,7 +53,6 @@ static void nemoshow_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 		nemoshow_check_frame(show);
 		nemoshow_check_damage(show);
 
-		nemoshow_divide_one(show);
 		nemoshow_render_one(show);
 
 		needs_composite = 1;
@@ -226,13 +224,6 @@ struct nemoshow *nemoshow_create_view(struct nemotool *tool, int32_t width, int3
 
 	nemocanvas_set_state(scon->canvas, "close");
 	nemocanvas_set_userdata(NTEGL_CANVAS(scon->eglcanvas), show);
-
-	env = getenv("NEMOSHOW_THREADS");
-	if (env != NULL)
-		nemoshow_prepare_threads(show, strtoul(env, NULL, 10));
-	env = getenv("NEMOSHOW_TILESIZE");
-	if (env != NULL)
-		nemoshow_set_tilesize(show, strtoul(env, NULL, 10));
 
 #ifdef NEMOSHOW_FRAMELOG_ON
 	env = getenv("NEMOSHOW_FRAMELOG");
@@ -647,7 +638,6 @@ void nemoshow_view_redraw(struct nemoshow *show)
 	struct nemocanvas *canvas = scon->canvas;
 
 	nemoshow_update_one(show);
-	nemoshow_divide_one(show);
 	nemoshow_render_one(show);
 
 	nemocanvas_dispatch_feedback(canvas);
