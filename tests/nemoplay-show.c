@@ -11,7 +11,6 @@
 #include <playback.h>
 #include <nemoshow.h>
 #include <showhelper.h>
-#include <nemohelper.h>
 #include <nemolog.h>
 #include <nemomisc.h>
 

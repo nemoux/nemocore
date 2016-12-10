@@ -118,7 +118,6 @@ set(HEADER_FILES
 	compzhelper.h
 	cliphelper.h
 	ttyhelper.h
-	nemohelper.h
 	)
 
 configure_file(

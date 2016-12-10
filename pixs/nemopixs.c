@@ -14,7 +14,6 @@
 #include <showhelper.h>
 #include <glhelper.h>
 #include <nemofs.h>
-#include <nemohelper.h>
 #include <nemolog.h>
 #include <nemomisc.h>
 

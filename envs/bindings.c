@@ -48,8 +48,8 @@
 #include <nemotoken.h>
 #include <nemoitem.h>
 #include <showhelper.h>
-#include <nemohelper.h>
 #include <nemolog.h>
+#include <pixmanhelper.h>
 
 void nemoenvs_handle_terminal_key(struct nemocompz *compz, struct nemokeyboard *keyboard, uint32_t time, uint32_t key, enum wl_keyboard_key_state state, void *data)
 {

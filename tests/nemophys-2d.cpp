@@ -19,7 +19,6 @@
 #include <nemoshow.h>
 #include <showhelper.h>
 #include <skiahelper.hpp>
-#include <nemohelper.h>
 #include <nemolist.h>
 #include <nemolog.h>
 #include <nemomisc.h>

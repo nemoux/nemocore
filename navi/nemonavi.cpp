@@ -18,14 +18,13 @@
 #include <naviclient.hpp>
 #include <navikey.h>
 #include <nemolog.h>
-#include <nemohelper.h>
 #include <nemomisc.h>
 
 int nemonavi_init_once(int argc, char *argv[])
 {
 	CefMainArgs args(argc, argv);
 	CefRefPtr<NaviApp> app = new NaviApp();
-	
+
 	if (CefExecuteProcess(args, app, NULL) >= 0)
 		return 1;
 

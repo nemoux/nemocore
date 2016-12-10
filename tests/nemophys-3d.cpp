@@ -18,7 +18,6 @@
 #include <nemoshow.h>
 #include <showhelper.h>
 #include <glhelper.h>
-#include <nemohelper.h>
 #include <nemoplay.h>
 #include <playback.h>
 #include <nemofs.h>

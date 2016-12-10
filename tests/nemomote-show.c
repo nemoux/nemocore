@@ -15,9 +15,10 @@
 
 #include <nemoshow.h>
 #include <showhelper.h>
-#include <nemohelper.h>
 #include <nemolog.h>
 #include <nemomisc.h>
+#include <polyhelper.h>
+#include <glhelper.h>
 
 #define NEMOMOTE_PARTICLES			(15000)
 

@@ -17,7 +17,6 @@
 #include <glshadow.h>
 #include <glswirl.h>
 #include <fxnoise.h>
-#include <nemohelper.h>
 #include <nemolog.h>
 #include <nemomisc.h>
 

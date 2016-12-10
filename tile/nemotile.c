@@ -14,9 +14,11 @@
 #include <showhelper.h>
 #include <tilehelper.hpp>
 #include <nemofs.h>
-#include <nemohelper.h>
 #include <nemolog.h>
 #include <nemomisc.h>
+#include <colorhelper.h>
+#include <glhelper.h>
+#include <polyhelper.h>
 
 static void nemotile_dispatch_video_update(struct nemoplay *play, void *data);
 static void nemotile_dispatch_video_done(struct nemoplay *play, void *data);

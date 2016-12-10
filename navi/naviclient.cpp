@@ -19,7 +19,6 @@
 #include <naviclient.hpp>
 #include <naviapp.hpp>
 #include <nemolog.h>
-#include <nemohelper.h>
 #include <nemomisc.h>
 
 NaviClient::NaviClient(void *data) : m_userdata(data)
