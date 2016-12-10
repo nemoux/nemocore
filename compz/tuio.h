@@ -7,7 +7,7 @@
 NEMO_BEGIN_EXTERN_C
 #endif
 
-#include <xmlparser.h>
+#include <xmlhelper.h>
 
 #include <input.h>
 

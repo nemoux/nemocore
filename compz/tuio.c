@@ -17,7 +17,7 @@
 #include <compz.h>
 #include <screen.h>
 #include <oschelper.h>
-#include <xmlparser.h>
+#include <xmlhelper.h>
 #include <oshelper.h>
 #include <nemomisc.h>
 #include <nemolog.h>

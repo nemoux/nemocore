@@ -18,7 +18,7 @@ NEMO_BEGIN_EXTERN_C
 
 #include <canvas.h>
 #include <renderer.h>
-#include <glcompz.h>
+#include <compzhelper.h>
 
 #ifndef EGL_TEXTURE_EXTERNAL_WL
 #define	EGL_TEXTURE_EXTERNAL_WL		(0x31da)

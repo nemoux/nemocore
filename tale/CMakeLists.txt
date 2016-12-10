@@ -14,7 +14,7 @@ add_library(nemotale SHARED
 	talegl.c
 	talepixman.c
 	${CMAKE_SOURCE_DIR}/misc/glhelper.c
-	${CMAKE_SOURCE_DIR}/misc/glcompz.c
+	${CMAKE_SOURCE_DIR}/misc/compzhelper.c
 	)
 
 TARGET_LINK_LIBRARIES(nemotale

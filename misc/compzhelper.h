@@ -1,5 +1,5 @@
-#ifndef	__GL_COMPZ_H__
-#define	__GL_COMPZ_H__
+#ifndef	__COMPZ_HELPER_H__
+#define	__COMPZ_HELPER_H__
 
 #include <nemoconfig.h>
 

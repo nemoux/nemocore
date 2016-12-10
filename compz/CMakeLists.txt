@@ -157,9 +157,10 @@ add_library(nemocompz SHARED
 	plugin.c
 	eventqueue.c
 	waylandhelper.c
+	xmlhelper.c
 	${CMAKE_SOURCE_DIR}/misc/fbhelper.c
 	${CMAKE_SOURCE_DIR}/misc/ttyhelper.c
-	${CMAKE_SOURCE_DIR}/misc/glcompz.c
+	${CMAKE_SOURCE_DIR}/misc/compzhelper.c
 	${EXTRA}
 	${PROTOCOLS}
 	)

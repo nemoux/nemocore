@@ -12,13 +12,11 @@ add_library(nemoasst SHARED
 	nemolog.c
 	nemomsg.c
 	nemopoly.c
-	nemospin.c
 	nemoscope.c
 	nemoclip.c
 	nemopool.c
 	nemofs.c
 	nemomisc.c
-	${CMAKE_SOURCE_DIR}/misc/xmlparser.c
 	${CMAKE_SOURCE_DIR}/misc/pixmanhelper.c
 	${CMAKE_SOURCE_DIR}/misc/bezierhelper.c
 	${CMAKE_SOURCE_DIR}/misc/codehelper.c
@@ -56,7 +54,6 @@ set(HEADER_FILES
 	nemolistener.h
 	nemoease.h
 	nemopoly.h
-	nemospin.h
 	nemoscope.h
 	nemoclip.h
 	nemopool.h

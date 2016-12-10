@@ -9,7 +9,7 @@
 #include <talenode.h>
 #include <talegl.h>
 #include <talepixman.h>
-#include <glcompz.h>
+#include <compzhelper.h>
 #include <glhelper.h>
 #include <nemoclip.h>
 #include <nemolog.h>

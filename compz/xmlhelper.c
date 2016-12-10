@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include <xmlparser.h>
+#include <xmlhelper.h>
 
 #define	XML_NONE_EVENT				(0)
 #define	XML_TAG_EVENT					(1)

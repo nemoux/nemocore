@@ -1,5 +1,5 @@
-#ifndef	__XML_PARSER_H__
-#define	__XML_PARSER_H__
+#ifndef	__XML_HELPER_H__
+#define	__XML_HELPER_H__
 
 #include <nemoconfig.h>
 

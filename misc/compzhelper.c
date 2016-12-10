@@ -8,7 +8,7 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
-#include <glcompz.h>
+#include <compzhelper.h>
 #include <glhelper.h>
 
 int glcompz_prepare(struct glcompz *shader, const char *vertex_source, const char *fragment_source)
