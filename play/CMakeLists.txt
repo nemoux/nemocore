@@ -45,8 +45,6 @@ include_directories(
 	${CMAKE_SOURCE_DIR}/helper
 	${CMAKE_SOURCE_DIR}/tool
 	${CMAKE_BINARY_DIR}/tool
-	${CMAKE_SOURCE_DIR}/show
-	${CMAKE_SOURCE_DIR}/tale
 	)
 
 add_library(nemoplay SHARED
@@ -71,8 +69,6 @@ TARGET_LINK_LIBRARIES(nemoplay
 	nemoasst
 	nemohelper
 	nemotool
-	nemoshow
-	nemotale
 	)
 
 INSTALL(TARGETS nemoplay DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
@@ -87,7 +83,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/play/ffmpegconfig.h
 	)
 
-set(NEMOPLAY_PKGCONFIG_REQUIRES "nemoasst nemohelper nemotool nemoshow nemotale libavcodec libavformat libavutil libswscale ao")
+set(NEMOPLAY_PKGCONFIG_REQUIRES "nemoasst nemohelper nemotool libavcodec libavformat libavutil libswscale ao")
 
 configure_file(
 	nemoplay.pc.in

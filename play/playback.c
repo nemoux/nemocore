@@ -12,7 +12,6 @@
 #include <nemoplay.h>
 #include <nemotool.h>
 #include <nemotimer.h>
-#include <nemoshow.h>
 #include <nemomisc.h>
 
 struct playback_decoder {
@@ -185,7 +184,6 @@ struct playback_video {
 	struct nemotimer *timer;
 
 	struct playshader *shader;
-	struct showone *canvas;
 
 	nemoplay_back_video_update_t dispatch_update;
 	nemoplay_back_video_done_t dispatch_done;
@@ -300,29 +298,18 @@ void nemoplay_back_destroy_video(struct playback_video *video)
 	free(video);
 }
 
-void nemoplay_back_resize_video(struct playback_video *video, int width, int height)
-{
-	nemoplay_shader_set_viewport(video->shader,
-			nemoshow_canvas_get_texture(video->canvas),
-			width, height);
-
-	if (nemoplay_get_frame(video->play) != 0)
-		nemoplay_shader_dispatch(video->shader);
-}
-
 void nemoplay_back_redraw_video(struct playback_video *video)
 {
 	if (nemoplay_get_frame(video->play) != 0)
 		nemoplay_shader_dispatch(video->shader);
 }
 
-void nemoplay_back_set_video_canvas(struct playback_video *video, struct showone *canvas, int width, int height)
+void nemoplay_back_set_video_texture(struct playback_video *video, uint32_t texture, int width, int height)
 {
-	video->canvas = canvas;
+	nemoplay_shader_set_viewport(video->shader, texture, width, height);
 
-	nemoplay_shader_set_viewport(video->shader,
-			nemoshow_canvas_get_texture(video->canvas),
-			width, height);
+	if (nemoplay_get_frame(video->play) != 0)
+		nemoplay_shader_dispatch(video->shader);
 }
 
 void nemoplay_back_set_video_update(struct playback_video *video, nemoplay_back_video_update_t dispatch)

@@ -92,7 +92,10 @@ static void nemoplay_dispatch_canvas_resize(struct nemoshow *show, struct showon
 {
 	struct playcontext *context = (struct playcontext *)nemoshow_get_userdata(show);
 
-	nemoplay_back_resize_video(context->videoback, width, height);
+	nemoplay_back_set_video_texture(context->videoback,
+			nemoshow_canvas_get_texture(context->canvas),
+			nemoshow_canvas_get_viewport_width(context->canvas),
+			nemoshow_canvas_get_viewport_height(context->canvas));
 }
 
 static void nemoplay_dispatch_video_update(struct nemoplay *play, void *data)
@@ -201,7 +204,9 @@ int main(int argc, char *argv[])
 	context->decoderback = nemoplay_back_create_decoder(play);
 	context->audioback = nemoplay_back_create_audio_by_ao(play);
 	context->videoback = nemoplay_back_create_video_by_timer(play, tool);
-	nemoplay_back_set_video_canvas(context->videoback, canvas, width, height);
+	nemoplay_back_set_video_texture(context->videoback,
+			nemoshow_canvas_get_texture(canvas),
+			width, height);
 	nemoplay_back_set_video_update(context->videoback, nemoplay_dispatch_video_update);
 	nemoplay_back_set_video_data(context->videoback, context);
 

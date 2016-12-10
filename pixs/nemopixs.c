@@ -1340,8 +1340,8 @@ static void nemopixs_dispatch_video_done(struct nemoplay *play, void *data)
 	pixs->decoderback = nemoplay_back_create_decoder(pixs->play);
 	pixs->audioback = nemoplay_back_create_audio_by_ao(pixs->play);
 	pixs->videoback = nemoplay_back_create_video_by_timer(pixs->play, pixs->tool);
-	nemoplay_back_set_video_canvas(pixs->videoback,
-			pixs->video,
+	nemoplay_back_set_video_texture(pixs->videoback,
+			nemoshow_canvas_get_texture(pixs->video),
 			nemoplay_get_video_width(pixs->play),
 			nemoplay_get_video_height(pixs->play));
 	nemoplay_back_set_video_update(pixs->videoback, nemopixs_dispatch_video_update);
@@ -1846,8 +1846,8 @@ int main(int argc, char *argv[])
 		pixs->decoderback = nemoplay_back_create_decoder(pixs->play);
 		pixs->audioback = nemoplay_back_create_audio_by_ao(pixs->play);
 		pixs->videoback = nemoplay_back_create_video_by_timer(pixs->play, tool);
-		nemoplay_back_set_video_canvas(pixs->videoback,
-				pixs->video,
+		nemoplay_back_set_video_texture(pixs->videoback,
+				nemoshow_canvas_get_texture(pixs->video),
 				nemoplay_get_video_width(pixs->play),
 				nemoplay_get_video_height(pixs->play));
 		nemoplay_back_set_video_update(pixs->videoback, nemopixs_dispatch_video_update);

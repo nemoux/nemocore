@@ -11,7 +11,6 @@ NEMO_BEGIN_EXTERN_C
 
 #include <nemotool.h>
 #include <nemoplay.h>
-#include <nemoshow.h>
 
 struct playback_decoder;
 struct playback_audio;
@@ -29,9 +28,8 @@ extern void nemoplay_back_destroy_audio(struct playback_audio *audio);
 
 extern struct playback_video *nemoplay_back_create_video_by_timer(struct nemoplay *play, struct nemotool *tool);
 extern void nemoplay_back_destroy_video(struct playback_video *video);
-extern void nemoplay_back_resize_video(struct playback_video *video, int width, int height);
 extern void nemoplay_back_redraw_video(struct playback_video *video);
-extern void nemoplay_back_set_video_canvas(struct playback_video *video, struct showone *canvas, int width, int height);
+extern void nemoplay_back_set_video_texture(struct playback_video *video, uint32_t texture, int width, int height);
 extern void nemoplay_back_set_video_update(struct playback_video *video, nemoplay_back_video_update_t dispatch);
 extern void nemoplay_back_set_video_done(struct playback_video *video, nemoplay_back_video_done_t dispatch);
 extern void nemoplay_back_set_video_data(struct playback_video *video, void *data);

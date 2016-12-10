@@ -887,8 +887,8 @@ static void nemotile_dispatch_video_trans_done(struct nemotrans *trans, void *da
 	tile->decoderback = nemoplay_back_create_decoder(tile->play);
 	tile->audioback = nemoplay_back_create_audio_by_ao(tile->play);
 	tile->videoback = nemoplay_back_create_video_by_timer(tile->play, tile->tool);
-	nemoplay_back_set_video_canvas(tile->videoback,
-			tile->video,
+	nemoplay_back_set_video_texture(tile->videoback,
+			nemoshow_canvas_get_texture(tile->video),
 			nemoplay_get_video_width(tile->play),
 			nemoplay_get_video_height(tile->play));
 	nemoplay_back_set_video_update(tile->videoback, nemotile_dispatch_video_update);
@@ -1894,8 +1894,8 @@ static void nemotile_dispatch_video_done(struct nemoplay *play, void *data)
 	tile->decoderback = nemoplay_back_create_decoder(tile->play);
 	tile->audioback = nemoplay_back_create_audio_by_ao(tile->play);
 	tile->videoback = nemoplay_back_create_video_by_timer(tile->play, tile->tool);
-	nemoplay_back_set_video_canvas(tile->videoback,
-			tile->video,
+	nemoplay_back_set_video_texture(tile->videoback,
+			nemoshow_canvas_get_texture(tile->video),
 			nemoplay_get_video_width(tile->play),
 			nemoplay_get_video_height(tile->play));
 	nemoplay_back_set_video_update(tile->videoback, nemotile_dispatch_video_update);
@@ -3118,8 +3118,8 @@ int main(int argc, char *argv[])
 		tile->decoderback = nemoplay_back_create_decoder(tile->play);
 		tile->audioback = nemoplay_back_create_audio_by_ao(tile->play);
 		tile->videoback = nemoplay_back_create_video_by_timer(tile->play, tool);
-		nemoplay_back_set_video_canvas(tile->videoback,
-				tile->video,
+		nemoplay_back_set_video_texture(tile->videoback,
+				nemoshow_canvas_get_texture(tile->video),
 				nemoplay_get_video_width(tile->play),
 				nemoplay_get_video_height(tile->play));
 		nemoplay_back_set_video_update(tile->videoback, nemotile_dispatch_video_update);
