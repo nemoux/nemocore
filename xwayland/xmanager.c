@@ -17,7 +17,7 @@
 #include <selection.h>
 #include <dnd.h>
 #include <cursor.h>
-#include <nemohash.h>
+#include <hashhelper.h>
 #include <nemomisc.h>
 #include <nemolog.h>
 
@@ -1031,7 +1031,7 @@ struct nemoxmanager *nemoxmanager_create(struct nemoxserver *xserver, int fd)
 
 	wl_list_init(&xmanager->unpaired_list);
 
-	xmanager->window_table = nemohash_create(8);
+	xmanager->window_table = hash_create(8);
 	if (xmanager->window_table == NULL)
 		goto err1;
 
@@ -1105,7 +1105,7 @@ struct nemoxmanager *nemoxmanager_create(struct nemoxserver *xserver, int fd)
 	return xmanager;
 
 err2:
-	nemohash_destroy(xmanager->window_table);
+	hash_destroy(xmanager->window_table);
 
 err1:
 	free(xmanager);
@@ -1115,7 +1115,7 @@ err1:
 
 void nemoxmanager_destroy(struct nemoxmanager *xmanager)
 {
-	nemohash_destroy(xmanager->window_table);
+	hash_destroy(xmanager->window_table);
 
 	nemoxmanager_destroy_cursors(xmanager);
 
@@ -1356,19 +1356,19 @@ void nemoxmanager_read_properties(struct nemoxwindow *xwindow)
 
 void nemoxmanager_add_window(struct nemoxmanager *xmanager, uint32_t id, struct nemoxwindow *xwindow)
 {
-	nemohash_set_value(xmanager->window_table, (uint64_t)id, (uint64_t)xwindow);
+	hash_set_value(xmanager->window_table, (uint64_t)id, (uint64_t)xwindow);
 }
 
 void nemoxmanager_del_window(struct nemoxmanager *xmanager, uint32_t id)
 {
-	nemohash_put_value(xmanager->window_table, (uint64_t)id);
+	hash_put_value(xmanager->window_table, (uint64_t)id);
 }
 
 struct nemoxwindow *nemoxmanager_get_window(struct nemoxmanager *xmanager, uint32_t id)
 {
 	uint64_t value;
 
-	if (nemohash_get_value(xmanager->window_table, (uint64_t)id, &value) > 0)
+	if (hash_get_value(xmanager->window_table, (uint64_t)id, &value) > 0)
 		return (struct nemoxwindow *)value;
 
 	return NULL;

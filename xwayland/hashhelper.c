@@ -5,10 +5,10 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include <nemohash.h>
+#include <hashhelper.h>
 #include <codehelper.h>
 
-static uint64_t nemohash_get_tag(struct nemohash *hash, uint64_t key)
+static uint64_t hash_get_tag(struct hash *hash, uint64_t key)
 {
 	key += (key << 12);
 	key ^= (key >> 22);
@@ -24,16 +24,16 @@ static uint64_t nemohash_get_tag(struct nemohash *hash, uint64_t key)
 	return key % hash->tablesize;
 }
 
-struct nemohash *nemohash_create(int chainlength)
+struct hash *hash_create(int chainlength)
 {
-	struct nemohash *hash;
+	struct hash *hash;
 
-	hash = (struct nemohash *)malloc(sizeof(struct nemohash));
+	hash = (struct hash *)malloc(sizeof(struct hash));
 	if (hash == NULL)
 		return NULL;
 
-	hash->tablesize = NEMOHASH_INITIAL_SIZE;
-	hash->chainlength = NEMOHASH_CHAIN_LENGTH_MIN > chainlength ? NEMOHASH_CHAIN_LENGTH_MIN : chainlength;
+	hash->tablesize = HASH_INITIAL_SIZE;
+	hash->chainlength = HASH_CHAIN_LENGTH_MIN > chainlength ? HASH_CHAIN_LENGTH_MIN : chainlength;
 	hash->nodecount = 0;
 
 	hash->nodes = (struct hashnode *)malloc(sizeof(struct hashnode) * hash->tablesize);
@@ -49,18 +49,18 @@ err1:
 	return NULL;
 }
 
-void nemohash_destroy(struct nemohash *hash)
+void hash_destroy(struct hash *hash)
 {
 	free(hash->nodes);
 	free(hash);
 }
 
-int nemohash_length(struct nemohash *hash)
+int hash_length(struct hash *hash)
 {
 	return hash->nodecount;
 }
 
-int nemohash_clear(struct nemohash *hash)
+int hash_clear(struct hash *hash)
 {
 	memset(hash->nodes, 0, sizeof(struct hashnode) * hash->tablesize);
 
@@ -69,7 +69,7 @@ int nemohash_clear(struct nemohash *hash)
 	return 0;
 }
 
-static int nemohash_expand(struct nemohash *hash)
+static int hash_expand(struct hash *hash)
 {
 	struct hashnode *cnodes;
 	struct hashnode *tnodes;
@@ -93,7 +93,7 @@ static int nemohash_expand(struct nemohash *hash)
 		node = &cnodes[i];
 
 		if (node->used != 0) {
-			nemohash_set_value(hash, node->key, node->value);
+			hash_set_value(hash, node->key, node->value);
 		}
 	}
 
@@ -102,7 +102,7 @@ static int nemohash_expand(struct nemohash *hash)
 	return 0;
 }
 
-void nemohash_iterate(struct nemohash *hash, void (*iterate)(void *data, uint64_t key, uint64_t value), void *data)
+void hash_iterate(struct hash *hash, void (*iterate)(void *data, uint64_t key, uint64_t value), void *data)
 {
 	int i;
 
@@ -113,7 +113,7 @@ void nemohash_iterate(struct nemohash *hash, void (*iterate)(void *data, uint64_
 	}
 }
 
-int nemohash_set_value(struct nemohash *hash, uint64_t key, uint64_t value)
+int hash_set_value(struct hash *hash, uint64_t key, uint64_t value)
 {
 	struct hashnode *node;
 	uint64_t tag;
@@ -121,9 +121,9 @@ int nemohash_set_value(struct nemohash *hash, uint64_t key, uint64_t value)
 
 retry:
 	if (hash->nodecount >= hash->tablesize / 2)
-		nemohash_expand(hash);
+		hash_expand(hash);
 
-	tag = nemohash_get_tag(hash, key);
+	tag = hash_get_tag(hash, key);
 
 	for (i = 0; i < hash->chainlength; i++) {
 		node = &hash->nodes[tag];
@@ -142,18 +142,18 @@ retry:
 		tag = (tag + 1) % hash->tablesize;
 	}
 
-	if (nemohash_expand(hash) == 0)
+	if (hash_expand(hash) == 0)
 		goto retry;
 
 	return 0;
 }
 
-int nemohash_get_value(struct nemohash *hash, uint64_t key, uint64_t *value)
+int hash_get_value(struct hash *hash, uint64_t key, uint64_t *value)
 {
 	uint64_t tag;
 	int i;
 
-	tag = nemohash_get_tag(hash, key);
+	tag = hash_get_tag(hash, key);
 
 	for (i = 0; i < hash->chainlength; i++) {
 		if (hash->nodes[tag].used != 0 && hash->nodes[tag].key == key) {
@@ -167,12 +167,12 @@ int nemohash_get_value(struct nemohash *hash, uint64_t key, uint64_t *value)
 	return 0;
 }
 
-uint64_t nemohash_get_value_easy(struct nemohash *hash, uint64_t key)
+uint64_t hash_get_value_easy(struct hash *hash, uint64_t key)
 {
 	uint64_t tag;
 	int i;
 
-	tag = nemohash_get_tag(hash, key);
+	tag = hash_get_tag(hash, key);
 
 	for (i = 0; i < hash->chainlength; i++) {
 		if (hash->nodes[tag].used != 0 && hash->nodes[tag].key == key) {
@@ -185,13 +185,13 @@ uint64_t nemohash_get_value_easy(struct nemohash *hash, uint64_t key)
 	return 0;
 }
 
-int nemohash_put_value(struct nemohash *hash, uint64_t key)
+int hash_put_value(struct hash *hash, uint64_t key)
 {
 	struct hashnode *node;
 	uint64_t tag;
 	int i;
 
-	tag = nemohash_get_tag(hash, key);
+	tag = hash_get_tag(hash, key);
 
 	for (i = 0; i < hash->chainlength; i++) {
 		node = &hash->nodes[tag];
@@ -212,7 +212,7 @@ int nemohash_put_value(struct nemohash *hash, uint64_t key)
 	return 0;
 }
 
-int nemohash_put_value_all(struct nemohash *hash, uint64_t value)
+int hash_put_value_all(struct hash *hash, uint64_t value)
 {
 	int i;
 
@@ -231,34 +231,34 @@ int nemohash_put_value_all(struct nemohash *hash, uint64_t value)
 	return 0;
 }
 
-int nemohash_set_value_with_string(struct nemohash *hash, const char *str, uint64_t value)
+int hash_set_value_with_string(struct hash *hash, const char *str, uint64_t value)
 {
 	uint64_t key = crc32_from_string(str);
 
-	return nemohash_set_value(hash, key, value);
+	return hash_set_value(hash, key, value);
 }
 
-int nemohash_get_value_with_string(struct nemohash *hash, const char *str, uint64_t *value)
+int hash_get_value_with_string(struct hash *hash, const char *str, uint64_t *value)
 {
 	uint64_t key = crc32_from_string(str);
 
-	return nemohash_get_value(hash, key, value);
+	return hash_get_value(hash, key, value);
 }
 
-uint64_t nemohash_get_value_easy_with_string(struct nemohash *hash, const char *str)
+uint64_t hash_get_value_easy_with_string(struct hash *hash, const char *str)
 {
 	if (str != NULL) {
 		uint64_t key = crc32_from_string(str);
 
-		return nemohash_get_value_easy(hash, key);
+		return hash_get_value_easy(hash, key);
 	}
 
 	return 0;
 }
 
-int nemohash_put_value_with_string(struct nemohash *hash, const char *str)
+int hash_put_value_with_string(struct hash *hash, const char *str)
 {
 	uint64_t key = crc32_from_string(str);
 
-	return nemohash_put_value(hash, key);
+	return hash_put_value(hash, key);
 }

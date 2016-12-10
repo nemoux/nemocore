@@ -7,7 +7,7 @@
 NEMO_BEGIN_EXTERN_C
 #endif
 
-#include <nemohash.h>
+#include <hashhelper.h>
 
 struct wm_size_hints {
 	uint32_t flags;
@@ -135,7 +135,7 @@ struct nemoxwindow {
 struct nemoxmanager {
 	struct nemoxserver *xserver;
 
-	struct nemohash *window_table;
+	struct hash *window_table;
 
 	struct wl_list unpaired_list;
 

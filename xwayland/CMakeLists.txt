@@ -42,6 +42,7 @@ add_library(nemoxwayland SHARED
 	selection.c
 	cursor.c
 	dnd.c
+	hashhelper.c
 	)
 
 TARGET_LINK_LIBRARIES(nemoxwayland
