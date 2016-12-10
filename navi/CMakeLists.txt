@@ -4,11 +4,6 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -std=c++11")
 set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 
-include_directories(
-	${CMAKE_SOURCE_DIR}/misc
-	${CMAKE_SOURCE_DIR}/asst
-	)
-
 add_library(nemonavi SHARED
 	nemonavi.cpp
 	naviapp.cpp

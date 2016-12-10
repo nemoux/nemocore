@@ -12,7 +12,6 @@
 
 #include <glcolor.h>
 #include <glhelper.h>
-#include <oshelper.h>
 #include <nemomisc.h>
 
 struct glcolor {

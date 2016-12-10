@@ -5,7 +5,6 @@ INCLUDE_DIRECTORIES(${SKIA_INCLUDE_DIRS})
 LINK_DIRECTORIES(${SKIA_LIBRARY_DIRS})
 
 include_directories(
-	${CMAKE_SOURCE_DIR}/asst
 	${CMAKE_SOURCE_DIR}/tool
 	${CMAKE_BINARY_DIR}/tool
 	${CMAKE_SOURCE_DIR}/tale
@@ -21,7 +20,6 @@ set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 
 add_executable(nemopixs
 	nemopixs.c
-	${CMAKE_SOURCE_DIR}/misc/glhelper.c
 	)
 
 TARGET_LINK_LIBRARIES(nemopixs

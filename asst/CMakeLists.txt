@@ -15,25 +15,13 @@ add_library(nemoasst SHARED
 	nemopool.c
 	nemofs.c
 	nemomisc.c
-	${CMAKE_SOURCE_DIR}/misc/pixmanhelper.c
-	${CMAKE_SOURCE_DIR}/misc/bezierhelper.c
-	${CMAKE_SOURCE_DIR}/misc/codehelper.c
-	${CMAKE_SOURCE_DIR}/misc/utf8helper.c
-	${CMAKE_SOURCE_DIR}/misc/fonthelper.c
-	${CMAKE_SOURCE_DIR}/misc/stringhelper.c
-	${CMAKE_SOURCE_DIR}/misc/namespacehelper.c
-	${CMAKE_SOURCE_DIR}/misc/keycodehelper.c
-	${CMAKE_SOURCE_DIR}/misc/colorhelper.c
-	${CMAKE_SOURCE_DIR}/misc/oshelper.c
-	${CMAKE_SOURCE_DIR}/misc/syshelper.c
-	${CMAKE_SOURCE_DIR}/misc/udphelper.c
 	)
 
 TARGET_LINK_LIBRARIES(nemoasst
 	${NEMOUX_COMMON_LIBRARIES}
 	)
 
-set(NEMOASST_PKGCONFIG_REQUIRES "pixman-1 cairo expat json-c")
+set(NEMOASST_PKGCONFIG_REQUIRES "expat json-c")
 
 INSTALL(TARGETS nemoasst DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
 
@@ -55,7 +43,6 @@ set(HEADER_FILES
 	nemopool.h
 	nemofs.h
 	nemoconfig.h
-	nemohelper.h
 	)
 
 configure_file(

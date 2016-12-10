@@ -7,6 +7,9 @@
 NEMO_BEGIN_EXTERN_C
 #endif
 
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+
 extern GLuint gl_compile_shader(GLenum type, int count, const char **sources);
 extern GLuint gl_compile_program(const char *vertex_source, const char *fragment_source, GLuint *vertex_shader, GLuint *fragment_shader);
 

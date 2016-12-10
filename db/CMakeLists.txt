@@ -12,17 +12,13 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
 set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 
-include_directories(
-	${CMAKE_SOURCE_DIR}/misc
-	${CMAKE_SOURCE_DIR}/asst
-	)
-
 add_library(nemodb SHARED
 	nemodb.c
 	)
 
 TARGET_LINK_LIBRARIES(nemodb
 	nemoasst
+	nemohelper
 	${LIBMONGOC_LIBRARIES}
 	${LIBBSON_LIBRARIES}
 	)
@@ -33,7 +29,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/db/nemodb.h
 	)
 
-set(NEMOBUS_PKGCONFIG_REQUIRES "nemoasst libmongoc-1.0 libbson-1.0")
+set(NEMOBUS_PKGCONFIG_REQUIRES "nemoasst nemohelper libmongoc-1.0 libbson-1.0")
 
 configure_file(
 	nemodb.pc.in

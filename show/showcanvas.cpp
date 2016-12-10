@@ -19,7 +19,6 @@
 #include <showpath.hpp>
 #include <showfont.h>
 #include <showfont.hpp>
-#include <oshelper.h>
 #include <nemoshow.h>
 #include <nemolog.h>
 #include <nemomisc.h>

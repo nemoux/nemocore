@@ -12,7 +12,6 @@
 
 #include <glpolar.h>
 #include <glhelper.h>
-#include <oshelper.h>
 #include <nemomisc.h>
 
 struct glpolar {

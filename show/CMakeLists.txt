@@ -9,8 +9,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -std=c++11")
 set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 
 include_directories(
-	${CMAKE_SOURCE_DIR}/misc
-	${CMAKE_SOURCE_DIR}/asst
 	${CMAKE_SOURCE_DIR}/tale
 	)
 
@@ -41,6 +39,7 @@ add_library(nemoshow SHARED
 
 TARGET_LINK_LIBRARIES(nemoshow
 	nemoasst
+	nemohelper
 	nemotale
 	${NEMOUX_COMMON_LIBRARIES}
 	${SKIA_LIBRARIES}
@@ -74,7 +73,7 @@ set(HEADER_FILES
 	${EXTRA_HEADERS}
 	)
 
-set(NEMOSHOW_PKGCONFIG_REQUIRES "nemoasst nemotale skia harfbuzz")
+set(NEMOSHOW_PKGCONFIG_REQUIRES "nemoasst nemohelper nemotale skia harfbuzz")
 
 configure_file(
 	nemoshow.pc.in

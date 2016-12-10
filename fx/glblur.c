@@ -12,7 +12,6 @@
 
 #include <glblur.h>
 #include <glhelper.h>
-#include <oshelper.h>
 #include <nemomisc.h>
 
 struct glblur {

@@ -7,6 +7,8 @@
 NEMO_BEGIN_EXTERN_C
 #endif
 
+#include <hb-ft.h>
+#include <hb-ot.h>
 #include <fontconfig/fontconfig.h>
 
 extern const char *fontconfig_get_path(const char *fontfamily, const char *fontstyle, int fontslant, int fontweight, int fontwidth, int fontspacing);

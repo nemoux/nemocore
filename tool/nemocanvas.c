@@ -14,7 +14,6 @@
 #include <linux/input.h>
 
 #include <pixman.h>
-#include <cairo.h>
 
 #include <wayland-client.h>
 #include <wayland-nemo-seat-client-protocol.h>
@@ -23,7 +22,6 @@
 #include <nemotool.h>
 #include <nemocanvas.h>
 #include <nemooutput.h>
-#include <oshelper.h>
 #include <pixmanhelper.h>
 #include <nemomisc.h>
 

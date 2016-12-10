@@ -9,7 +9,6 @@ NEMO_BEGIN_EXTERN_C
 
 #include <stdint.h>
 #include <pixman.h>
-#include <cairo.h>
 
 #include <nemolist.h>
 #include <nemolistener.h>

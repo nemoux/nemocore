@@ -14,7 +14,6 @@
 
 #include <glshadow.h>
 #include <glhelper.h>
-#include <oshelper.h>
 #include <nemomatrix.h>
 #include <nemomisc.h>
 

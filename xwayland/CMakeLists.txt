@@ -25,8 +25,6 @@ INCLUDE_DIRECTORIES(${XCURSOR_INCLUDE_DIRS})
 LINK_DIRECTORIES(${XCURSOR_LIBRARY_DIRS})
 
 include_directories(
-	${CMAKE_SOURCE_DIR}/asst
-	${CMAKE_SOURCE_DIR}/misc
 	${CMAKE_SOURCE_DIR}/compz
 	${CMAKE_BINARY_DIR}/compz
 	${CMAKE_SOURCE_DIR}/shell
@@ -48,6 +46,7 @@ add_library(nemoxwayland SHARED
 
 TARGET_LINK_LIBRARIES(nemoxwayland
 	nemoasst
+	nemohelper
 	nemocompz
 	nemoshell
 	${XCB_LIBRARIES}

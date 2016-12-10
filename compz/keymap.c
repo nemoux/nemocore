@@ -9,7 +9,7 @@
 #include <wayland-server.h>
 
 #include <keymap.h>
-#include <oshelper.h>
+#include <nemomisc.h>
 
 static int nemoxkb_make_keymap(struct nemoxkbinfo *xkbinfo)
 {

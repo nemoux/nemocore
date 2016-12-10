@@ -8,7 +8,6 @@
 #include <expat.h>
 
 #include <nemoxml.h>
-#include <oshelper.h>
 #include <nemomisc.h>
 
 struct nemoxml *nemoxml_create(void)

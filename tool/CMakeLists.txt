@@ -28,11 +28,6 @@ wayland_add_protocol_client(PROTOCOLS
 	nemo-shell
 	)
 
-include_directories(
-	${CMAKE_SOURCE_DIR}/asst
-	${CMAKE_SOURCE_DIR}/misc
-	)
-
 if(WITH_HANGUL)
 	PKG_CHECK_MODULES(LIBHANGUL REQUIRED libhangul)
 	INCLUDE_DIRECTORIES(${LIBHANGUL_INCLUDE_DIRS})
@@ -68,13 +63,14 @@ add_library(nemotool SHARED
 
 TARGET_LINK_LIBRARIES(nemotool
 	nemoasst
+	nemohelper
 	${WAYLANDCLIENT_LIBRARIES}
 	${WAYLANDEGL_LIBRARIES}
 	${NEMOUX_COMMON_LIBRARIES}
 	${EXTRA_LIBRARIES}
 	)
 
-set(NEMOTOOL_PKGCONFIG_REQUIRES "pixman-1 cairo expat wayland-client wayland-egl")
+set(NEMOTOOL_PKGCONFIG_REQUIRES "nemoasst nemohelper pixman-1 expat wayland-client wayland-egl")
 
 INSTALL(TARGETS nemotool DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
 

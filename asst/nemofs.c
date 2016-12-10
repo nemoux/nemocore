@@ -12,7 +12,6 @@
 #include <regex.h>
 
 #include <nemofs.h>
-#include <oshelper.h>
 #include <nemomisc.h>
 
 struct fsdir *nemofs_dir_create(const char *path, int minimum_files)

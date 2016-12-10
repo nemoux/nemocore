@@ -5,8 +5,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -std=c++11")
 set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 
 include_directories(
-	${CMAKE_SOURCE_DIR}/misc
-	${CMAKE_SOURCE_DIR}/asst
 	${CMAKE_SOURCE_DIR}/thirds
 	)
 
@@ -24,12 +22,12 @@ add_library(nemofx SHARED
 	glcolor.c
 	fxnoise.cpp
 	fxsph.c
-	${CMAKE_SOURCE_DIR}/misc/glhelper.c
 	${CMAKE_SOURCE_DIR}/thirds/fastnoise.cpp
 	)
 
 TARGET_LINK_LIBRARIES(nemofx
 	nemoasst
+	nemohelper
 	)
 
 INSTALL(TARGETS nemofx DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
@@ -50,7 +48,7 @@ set(HEADER_FILES
 	fxsph.h
 	)
 
-set(NEMOPLAY_PKGCONFIG_REQUIRES "nemoasst")
+set(NEMOPLAY_PKGCONFIG_REQUIRES "nemoasst nemohelper")
 
 configure_file(
 	nemofx.pc.in

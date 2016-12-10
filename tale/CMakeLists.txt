@@ -1,10 +1,5 @@
 FIND_PACKAGE(PkgConfig REQUIRED)
 
-include_directories(
-	${CMAKE_SOURCE_DIR}/misc
-	${CMAKE_SOURCE_DIR}/asst
-	)
-
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 
@@ -13,13 +8,11 @@ add_library(nemotale SHARED
 	talenode.c
 	talegl.c
 	talepixman.c
-	${CMAKE_SOURCE_DIR}/misc/glhelper.c
-	${CMAKE_SOURCE_DIR}/misc/compzhelper.c
-	${CMAKE_SOURCE_DIR}/misc/cliphelper.c
 	)
 
 TARGET_LINK_LIBRARIES(nemotale
 	nemoasst
+	nemohelper
 	${NEMOUX_COMMON_LIBRARIES}
 	)
 
@@ -32,7 +25,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/tale/talepixman.h
 	)
 
-set(NEMOTALE_PKGCONFIG_REQUIRES "pixman-1 cairo expat egl")
+set(NEMOTALE_PKGCONFIG_REQUIRES "nemoasst nemohelper pixman-1 expat egl")
 
 configure_file(
 	nemotale.pc.in

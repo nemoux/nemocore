@@ -5,7 +5,6 @@ INCLUDE_DIRECTORIES(${SKIA_INCLUDE_DIRS})
 LINK_DIRECTORIES(${SKIA_LIBRARY_DIRS})
 
 include_directories(
-	${CMAKE_SOURCE_DIR}/asst
 	${CMAKE_SOURCE_DIR}/tool
 	${CMAKE_BINARY_DIR}/tool
 	${CMAKE_SOURCE_DIR}/tale
@@ -23,12 +22,13 @@ add_library(nemoapps SHARED
 
 TARGET_LINK_LIBRARIES(nemoapps
 	nemoasst
+	nemohelper
 	nemotool
 	nemotale
 	nemoshow
 	)
 
-set(NEMOAPPS_PKGCONFIG_REQUIRES "nemoasst nemotool nemotale nemoshow")
+set(NEMOAPPS_PKGCONFIG_REQUIRES "nemoasst nemohelper nemotool nemotale nemoshow")
 
 INSTALL(TARGETS nemoapps DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
 

@@ -11,8 +11,6 @@ wayland_add_protocol_server(PROTOCOLS
 	)
 
 include_directories(
-	${CMAKE_SOURCE_DIR}/asst
-	${CMAKE_SOURCE_DIR}/misc
 	${CMAKE_SOURCE_DIR}/compz
 	${CMAKE_BINARY_DIR}/compz
 	${CMAKE_SOURCE_DIR}/shell
@@ -50,11 +48,12 @@ add_library(nemoshell SHARED
 
 TARGET_LINK_LIBRARIES(nemoshell
 	nemoasst
+	nemohelper
 	nemocompz
 	${NEMOUX_COMMON_LIBRARIES}
 	)
 
-set(NEMOSHELL_PKGCONFIG_REQUIRES "nemocompz")
+set(NEMOSHELL_PKGCONFIG_REQUIRES "nemoasst nemohelper nemocompz")
 
 INSTALL(TARGETS nemoshell DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
 

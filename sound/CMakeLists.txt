@@ -17,7 +17,6 @@ INCLUDE_DIRECTORIES(${GLIBPULSE_INCLUDE_DIRS})
 LINK_DIRECTORIES(${GLIBPULSE_LIBRARY_DIRS})
 
 include_directories(
-	${CMAKE_SOURCE_DIR}/asst
 	${CMAKE_SOURCE_DIR}/tool
 	${CMAKE_BINARY_DIR}/tool
 	${CMAKE_SOURCE_DIR}/apps
@@ -33,6 +32,7 @@ add_executable(nemosound
 
 TARGET_LINK_LIBRARIES(nemosound
 	nemoasst
+	nemohelper
 	nemotool
 	nemoapps
 	${GLIB_LIBRARIES}
@@ -48,6 +48,7 @@ add_executable(nemopulse
 
 TARGET_LINK_LIBRARIES(nemopulse
 	nemoasst
+	nemohelper
 	${LIBPULSE_LIBRARIES}
 	)
 

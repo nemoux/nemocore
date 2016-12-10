@@ -10,7 +10,7 @@
 #include <wayland-server.h>
 
 #include <waylandhelper.h>
-#include <oshelper.h>
+#include <nemomisc.h>
 #include <nemolog.h>
 
 uint32_t wayland_execute_path(const char *path, char *const argv[], char *const envp[])

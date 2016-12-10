@@ -8,7 +8,6 @@ NEMO_BEGIN_EXTERN_C
 #endif
 
 #include <pixman.h>
-#include <cairo.h>
 
 #include <nemotool.h>
 #include <nemotimer.h>

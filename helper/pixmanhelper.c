@@ -9,7 +9,7 @@
 #include <jpeglib.h>
 
 #include <pixmanhelper.h>
-#include <oshelper.h>
+#include <nemomisc.h>
 
 static void a8r8g8b8_to_rgba_np(uint8_t *dst, uint8_t *src, int width, int height, int stride)
 {

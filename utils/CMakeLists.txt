@@ -20,6 +20,7 @@ add_executable(nemolog
 
 TARGET_LINK_LIBRARIES(nemolog
 	nemoasst
+	nemohelper
 	)
 
 INSTALL(TARGETS nemolog DESTINATION bin)

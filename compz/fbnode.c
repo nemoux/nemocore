@@ -7,7 +7,6 @@
 
 #include <assert.h>
 #include <time.h>
-#include <cairo.h>
 #include <pixman.h>
 #include <linux/fb.h>
 #include <sys/mman.h>

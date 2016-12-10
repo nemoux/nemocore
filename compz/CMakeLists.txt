@@ -71,8 +71,6 @@ wayland_add_protocol_server(PROTOCOLS
 	)
 
 include_directories(
-	${CMAKE_SOURCE_DIR}/asst
-	${CMAKE_SOURCE_DIR}/misc
 	${CMAKE_SOURCE_DIR}/compz
 	${CMAKE_BINARY_DIR}/compz
 	)
@@ -159,10 +157,6 @@ add_library(nemocompz SHARED
 	eventqueue.c
 	waylandhelper.c
 	xmlhelper.c
-	${CMAKE_SOURCE_DIR}/misc/fbhelper.c
-	${CMAKE_SOURCE_DIR}/misc/ttyhelper.c
-	${CMAKE_SOURCE_DIR}/misc/compzhelper.c
-	${CMAKE_SOURCE_DIR}/misc/cliphelper.c
 	${EXTRA}
 	${PROTOCOLS}
 	)
@@ -170,6 +164,7 @@ add_library(nemocompz SHARED
 TARGET_LINK_LIBRARIES(nemocompz
 	pthread
 	nemoasst
+	nemohelper
 	${WAYLANDCURSOR_LIBRARIES}
 	${WAYLANDSERVER_LIBRARIES}
 	${NEMOUX_COMMON_LIBRARIES}
@@ -178,7 +173,7 @@ TARGET_LINK_LIBRARIES(nemocompz
 	${LIBLO_LIBRARIES}
 	)
 
-set(NEMOCOMPZ_PKGCONFIG_REQUIRES "pixman-1 cairo expat libudev wayland-cursor wayland-server")
+set(NEMOCOMPZ_PKGCONFIG_REQUIRES "nemoasst nemohelper pixman-1 expat libudev wayland-cursor wayland-server")
 
 TARGET_LINK_LIBRARIES(nemocompz
 	${GL_LIBRARIES}

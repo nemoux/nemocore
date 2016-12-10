@@ -2,17 +2,13 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
 set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 
-include_directories(
-	${CMAKE_SOURCE_DIR}/misc
-	${CMAKE_SOURCE_DIR}/asst
-	)
-
 add_library(nemobus SHARED
 	nemobus.c
 	)
 
 TARGET_LINK_LIBRARIES(nemobus
 	nemoasst
+	nemohelper
 	)
 
 INSTALL(TARGETS nemobus DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
@@ -21,7 +17,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/bus/nemobus.h
 	)
 
-set(NEMOBUS_PKGCONFIG_REQUIRES "nemoasst")
+set(NEMOBUS_PKGCONFIG_REQUIRES "nemoasst nemohelper")
 
 configure_file(
 	nemobus.pc.in

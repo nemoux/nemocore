@@ -12,7 +12,6 @@
 
 #include <getopt.h>
 
-#include <oshelper.h>
 #include <nemomisc.h>
 
 struct logtask;

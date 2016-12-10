@@ -18,7 +18,6 @@
 #include <screen.h>
 #include <oschelper.h>
 #include <xmlhelper.h>
-#include <oshelper.h>
 #include <nemomisc.h>
 #include <nemolog.h>
 

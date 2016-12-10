@@ -11,7 +11,6 @@
 #include <xkbcommon/xkbcommon.h>
 
 #include <pixman.h>
-#include <cairo.h>
 
 #include <wayland-client.h>
 #include <wayland-nemo-seat-client-protocol.h>
@@ -21,7 +20,6 @@
 #include <nemocanvas.h>
 #include <nemooutput.h>
 #include <nemomisc.h>
-#include <oshelper.h>
 
 static void pointer_handle_enter(void *data, struct nemo_pointer *pointer, uint32_t serial, struct wl_surface *surface, int32_t id, wl_fixed_t sx, wl_fixed_t sy)
 {

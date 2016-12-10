@@ -12,7 +12,7 @@
 #include <compz.h>
 #include <task.h>
 #include <waylandhelper.h>
-#include <oshelper.h>
+#include <nemomisc.h>
 
 struct wl_client *nemotask_launch(struct nemocompz *compz, struct nemotask *task, const char *path, nemotask_cleanup_t cleanup)
 {
@@ -42,7 +42,7 @@ struct wl_client *nemotask_launch(struct nemocompz *compz, struct nemotask *task
 		setenv("WAYLAND_SOCKET", fdstr, 1);
 
 		execl(path, path, NULL);
-		
+
 		exit(EXIT_FAILURE);
 	}
 

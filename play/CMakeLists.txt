@@ -44,11 +44,11 @@ add_library(nemoplay SHARED
 	playshader.c
 	playback.c
 	playmisc.c
-	${CMAKE_SOURCE_DIR}/misc/glhelper.c
 	)
 
 TARGET_LINK_LIBRARIES(nemoplay
 	nemoasst
+	nemohelper
 	nemotool
 	nemoshow
 	nemotale
@@ -72,7 +72,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/play/ffmpegconfig.h
 	)
 
-set(NEMOPLAY_PKGCONFIG_REQUIRES "nemoasst nemotool nemoshow nemotale libavcodec libavformat libavutil libswscale ao")
+set(NEMOPLAY_PKGCONFIG_REQUIRES "nemoasst nemohelper nemotool nemoshow nemotale libavcodec libavformat libavutil libswscale ao")
 
 configure_file(
 	nemoplay.pc.in

@@ -14,7 +14,6 @@
 
 #include <glsweep.h>
 #include <glhelper.h>
-#include <oshelper.h>
 #include <nemomisc.h>
 
 struct glsweep {
