@@ -21,7 +21,7 @@
 #include <drmnode.h>
 #include <content.h>
 #include <waylandhelper.h>
-#include <nemoclip.h>
+#include <cliphelper.h>
 #include <nemomisc.h>
 #include <nemolog.h>
 
@@ -133,7 +133,7 @@ static inline void glrenderer_use_uniforms(struct glcompz *shader, struct nemovi
 
 static int glrenderer_calculate_edges(struct nemoview *view, pixman_box32_t *rect, pixman_box32_t *rrect, GLfloat *ex, GLfloat *ey)
 {
-	struct nemoclip clip;
+	struct clip clip;
 	struct polygon8 poly = {
 		{ rrect->x1, rrect->x2, rrect->x2, rrect->x1 },
 		{ rrect->y1, rrect->y1, rrect->y2, rrect->y2 },
@@ -142,7 +142,7 @@ static int glrenderer_calculate_edges(struct nemoview *view, pixman_box32_t *rec
 	GLfloat min_x, max_x, min_y, max_y;
 	int i, n;
 
-	nemoclip_set_region(&clip, rect->x1, rect->y1, rect->x2, rect->y2);
+	clip_set_region(&clip, rect->x1, rect->y1, rect->x2, rect->y2);
 
 	for (i = 0; i < poly.n; i++) {
 		nemoview_transform_to_global_nocheck(view, poly.x[i], poly.y[i], &poly.x[i], &poly.y[i]);
@@ -158,13 +158,13 @@ static int glrenderer_calculate_edges(struct nemoview *view, pixman_box32_t *rec
 		max_y = MAX(max_y, poly.y[i]);
 	}
 
-	if (nemoclip_check_minmax(&clip, min_x, min_y, max_x, max_y) != 0)
+	if (clip_check_minmax(&clip, min_x, min_y, max_x, max_y) != 0)
 		return 0;
 
 	if (!view->transform.enable)
-		return nemoclip_simple(&clip, &poly, ex, ey);
+		return clip_simple(&clip, &poly, ex, ey);
 
-	n = nemoclip_transformed(&clip, &poly, ex, ey);
+	n = clip_transformed(&clip, &poly, ex, ey);
 	if (n < 3)
 		return 0;
 

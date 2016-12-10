@@ -11,7 +11,7 @@
 #include <talepixman.h>
 #include <compzhelper.h>
 #include <glhelper.h>
-#include <nemoclip.h>
+#include <cliphelper.h>
 #include <nemolog.h>
 #include <nemomisc.h>
 
@@ -246,7 +246,7 @@ static inline void nemotale_use_shader(struct nemotale *tale, struct talenode *n
 
 static int nemotale_calculate_edges(struct talenode *node, pixman_box32_t *rect, pixman_box32_t *rrect, GLfloat *ex, GLfloat *ey)
 {
-	struct nemoclip clip;
+	struct clip clip;
 	struct polygon8 poly = {
 		{ rrect->x1, rrect->x2, rrect->x2, rrect->x1 },
 		{ rrect->y1, rrect->y1, rrect->y2, rrect->y2 },
@@ -255,7 +255,7 @@ static int nemotale_calculate_edges(struct talenode *node, pixman_box32_t *rect,
 	GLfloat min_x, max_x, min_y, max_y;
 	int i, n;
 
-	nemoclip_set_region(&clip, rect->x1, rect->y1, rect->x2, rect->y2);
+	clip_set_region(&clip, rect->x1, rect->y1, rect->x2, rect->y2);
 
 	for (i = 0; i < poly.n; i++) {
 		nemotale_node_transform_to_global(node, poly.x[i], poly.y[i], &poly.x[i], &poly.y[i]);
@@ -271,13 +271,13 @@ static int nemotale_calculate_edges(struct talenode *node, pixman_box32_t *rect,
 		max_y = MAX(max_y, poly.y[i]);
 	}
 
-	if (nemoclip_check_minmax(&clip, min_x, min_y, max_x, max_y) != 0)
+	if (clip_check_minmax(&clip, min_x, min_y, max_x, max_y) != 0)
 		return 0;
 
 	if (!node->transform.enable)
-		return nemoclip_simple(&clip, &poly, ex, ey);
+		return clip_simple(&clip, &poly, ex, ey);
 
-	n = nemoclip_transformed(&clip, &poly, ex, ey);
+	n = clip_transformed(&clip, &poly, ex, ey);
 	if (n < 3)
 		return 0;
 

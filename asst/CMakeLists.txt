@@ -12,7 +12,6 @@ add_library(nemoasst SHARED
 	nemolog.c
 	nemomsg.c
 	nemopoly.c
-	nemoclip.c
 	nemopool.c
 	nemofs.c
 	nemomisc.c
@@ -53,7 +52,6 @@ set(HEADER_FILES
 	nemolistener.h
 	nemoease.h
 	nemopoly.h
-	nemoclip.h
 	nemopool.h
 	nemofs.h
 	nemoconfig.h

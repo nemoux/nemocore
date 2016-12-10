@@ -15,6 +15,7 @@ add_library(nemotale SHARED
 	talepixman.c
 	${CMAKE_SOURCE_DIR}/misc/glhelper.c
 	${CMAKE_SOURCE_DIR}/misc/compzhelper.c
+	${CMAKE_SOURCE_DIR}/misc/cliphelper.c
 	)
 
 TARGET_LINK_LIBRARIES(nemotale
