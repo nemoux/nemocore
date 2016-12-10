@@ -7,12 +7,13 @@
 NEMO_BEGIN_EXTERN_C
 #endif
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include <json.h>
-
 #include <nemolist.h>
+
+struct json_object;
 
 struct itemattr {
 	char *name;

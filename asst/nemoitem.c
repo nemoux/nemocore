@@ -11,6 +11,8 @@
 #include <ctype.h>
 #include <regex.h>
 
+#include <json.h>
+
 #include <nemoitem.h>
 #include <nemotoken.h>
 #include <nemomisc.h>

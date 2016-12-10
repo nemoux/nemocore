@@ -13,10 +13,10 @@
 #include <getopt.h>
 
 #include <nemobus.h>
-#include <nemohelper.h>
 #include <nemolist.h>
 #include <nemolog.h>
 #include <nemomisc.h>
+#include <namespacehelper.h>
 
 struct busclient {
 	char *path;

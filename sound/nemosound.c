@@ -13,9 +13,9 @@
 #include <nemotool.h>
 #include <nemosound.h>
 #include <nemoglib.h>
-#include <nemohelper.h>
 #include <nemolog.h>
 #include <nemomisc.h>
+#include <syshelper.h>
 
 static void nemosound_dispatch_get_client_info_list(pa_context *context, const pa_client_info *info, int is_last, void *userdata)
 {

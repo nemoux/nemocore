@@ -1,3 +1,14 @@
+FIND_PACKAGE(PkgConfig REQUIRED)
+
+PKG_CHECK_MODULES(JSON REQUIRED json-c)
+INCLUDE_DIRECTORIES(${JSON_INCLUDE_DIRS})
+LINK_DIRECTORIES(${JSON_LIBRARY_DIRS})
+
+include_directories(
+	${CMAKE_SOURCE_DIR}/asst
+	${CMAKE_SOURCE_DIR}/helper
+	)
+
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
 set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
@@ -7,6 +18,7 @@ add_library(nemobus SHARED
 	)
 
 TARGET_LINK_LIBRARIES(nemobus
+	${JSON_LIBRARIES}
 	nemoasst
 	nemohelper
 	)
@@ -17,7 +29,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/bus/nemobus.h
 	)
 
-set(NEMOBUS_PKGCONFIG_REQUIRES "nemoasst nemohelper")
+set(NEMOBUS_PKGCONFIG_REQUIRES "nemoasst nemohelper json-c")
 
 configure_file(
 	nemobus.pc.in

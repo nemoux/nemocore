@@ -6,6 +6,7 @@ LINK_DIRECTORIES(${JSON_LIBRARY_DIRS})
 
 include_directories(
 	${CMAKE_SOURCE_DIR}/asst
+	${CMAKE_SOURCE_DIR}/helper
 	${CMAKE_SOURCE_DIR}/bus
 	${CMAKE_SOURCE_DIR}/db
 	)

@@ -1,5 +1,9 @@
 FIND_PACKAGE(PkgConfig REQUIRED)
 
+PKG_CHECK_MODULES(PIXMAN REQUIRED pixman-1)
+INCLUDE_DIRECTORIES(${PIXMAN_INCLUDE_DIRS})
+LINK_DIRECTORIES(${PIXMAN_LIBRARY_DIRS})
+
 PKG_CHECK_MODULES(WAYLANDCURSOR REQUIRED wayland-cursor)
 INCLUDE_DIRECTORIES(${WAYLANDCURSOR_INCLUDE_DIRS})
 LINK_DIRECTORIES(${WAYLANDCURSOR_LIBRARY_DIRS})
@@ -40,6 +44,8 @@ PKG_CHECK_MODULES(GBM REQUIRED gbm)
 INCLUDE_DIRECTORIES(${GBM_INCLUDE_DIRS})
 LINK_DIRECTORIES(${GBM_LIBRARY_DIRS})
 
+include(wayland)
+
 wayland_add_protocol_server(PROTOCOLS
 	${CMAKE_SOURCE_DIR}/protocol/scaler.xml
 	scaler
@@ -71,6 +77,8 @@ wayland_add_protocol_server(PROTOCOLS
 	)
 
 include_directories(
+	${CMAKE_SOURCE_DIR}/asst
+	${CMAKE_SOURCE_DIR}/helper
 	${CMAKE_SOURCE_DIR}/compz
 	${CMAKE_BINARY_DIR}/compz
 	)
@@ -163,14 +171,14 @@ add_library(nemocompz SHARED
 
 TARGET_LINK_LIBRARIES(nemocompz
 	pthread
-	nemoasst
-	nemohelper
+	${PIXMAN_LIBRARIES}
 	${WAYLANDCURSOR_LIBRARIES}
 	${WAYLANDSERVER_LIBRARIES}
-	${NEMOUX_COMMON_LIBRARIES}
 	${MTDEV_LIBRARIES}
 	${LIBUDEV_LIBRARIES}
 	${LIBLO_LIBRARIES}
+	nemoasst
+	nemohelper
 	)
 
 set(NEMOCOMPZ_PKGCONFIG_REQUIRES "nemoasst nemohelper pixman-1 expat libudev wayland-cursor wayland-server")
