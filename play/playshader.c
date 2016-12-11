@@ -54,7 +54,8 @@ static const char NEMOPLAY_BGRA_FRAGMENT_SHADER[] =
 "uniform sampler2D tex;\n"
 "void main()\n"
 "{\n"
-"  gl_FragColor = texture2D(tex, vtexcoord);\n"
+"  vec4 c = texture2D(tex, vtexcoord);\n"
+"  gl_FragColor = vec4(c.r * c.a, c.g * c.a, c.b * c.a, c.a);\n"
 "}\n";
 
 struct playshader *nemoplay_shader_create(void)
