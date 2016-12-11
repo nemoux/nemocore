@@ -106,6 +106,13 @@ static void nemoplay_dispatch_video_update(struct nemoplay *play, void *data)
 	nemoshow_dispatch_frame(context->show);
 }
 
+static void nemoplay_dispatch_video_done(struct nemoplay *play, void *data)
+{
+	struct playcontext *context = (struct playcontext *)data;
+
+	nemoplay_back_seek_decoder(context->decoderback, 0.0f);
+}
+
 int main(int argc, char *argv[])
 {
 	struct option options[] = {
@@ -208,6 +215,7 @@ int main(int argc, char *argv[])
 			nemoshow_canvas_get_texture(canvas),
 			width, height);
 	nemoplay_back_set_video_update(context->videoback, nemoplay_dispatch_video_update);
+	nemoplay_back_set_video_done(context->videoback, nemoplay_dispatch_video_done);
 	nemoplay_back_set_video_data(context->videoback, context);
 
 	nemoshow_dispatch_frame(show);
