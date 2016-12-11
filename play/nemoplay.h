@@ -29,6 +29,12 @@ typedef enum {
 } NemoPlayState;
 
 typedef enum {
+	NEMOPLAY_YUV420_PIXEL_FORMAT = 0,
+	NEMOPLAY_BGRA_PIXEL_FORMAT = 1,
+	NEMOPLAY_LAST_PIXEL_FORMAT
+} NemoPlayPixelFormat;
+
+typedef enum {
 	NEMOPLAY_SEEK_CMD = (1 << 0)
 } NemoPlayCmd;
 
@@ -64,6 +70,8 @@ struct nemoplay {
 	SwrContext *swr;
 
 	struct playclock *clock;
+
+	int pixel_format;
 
 	int video_width;
 	int video_height;
@@ -136,6 +144,11 @@ static inline struct playqueue *nemoplay_get_audio_queue(struct nemoplay *play)
 static inline struct playqueue *nemoplay_get_subtitle_queue(struct nemoplay *play)
 {
 	return play->subtitle_queue;
+}
+
+static inline int nemoplay_get_pixel_format(struct nemoplay *play)
+{
+	return play->pixel_format;
 }
 
 static inline int nemoplay_get_video_width(struct nemoplay *play)

@@ -65,14 +65,14 @@ void nemoplay_queue_destroy_one(struct playone *one)
 {
 	nemolist_remove(&one->link);
 
-	if (one->data != NULL)
-		free(one->data);
-	if (one->y != NULL)
-		free(one->y);
-	if (one->u != NULL)
-		free(one->u);
-	if (one->v != NULL)
-		free(one->v);
+	if (one->data[0] != NULL)
+		free(one->data[0]);
+	if (one->data[1] != NULL)
+		free(one->data[1]);
+	if (one->data[2] != NULL)
+		free(one->data[2]);
+	if (one->data[3] != NULL)
+		free(one->data[3]);
 
 	free(one);
 }

@@ -131,8 +131,8 @@ static void *nemoplay_back_handle_audio(void *arg)
 				nemoplay_set_audio_pts(play, nemoplay_queue_get_one_pts(one));
 
 				ao_play(device,
-						nemoplay_queue_get_one_data(one),
-						nemoplay_queue_get_one_size(one));
+						nemoplay_queue_get_one_data(one, 0),
+						nemoplay_queue_get_one_linesize(one, 0));
 
 				nemoplay_queue_destroy_one(one);
 			}
@@ -225,13 +225,7 @@ static void nemoplay_back_handle_video(struct nemotimer *timer, void *data)
 				nemoplay_queue_enqueue_tail(queue, one);
 				nemotimer_set_timeout(timer, threshold * 1000);
 			} else {
-				if (nemoplay_shader_get_texture_linesize(video->shader) != nemoplay_queue_get_one_width(one))
-					nemoplay_shader_set_texture_linesize(video->shader, nemoplay_queue_get_one_width(one));
-
-				nemoplay_shader_update(video->shader,
-						nemoplay_queue_get_one_y(one),
-						nemoplay_queue_get_one_u(one),
-						nemoplay_queue_get_one_v(one));
+				nemoplay_shader_update(video->shader, one);
 				nemoplay_shader_dispatch(video->shader);
 
 				if (video->dispatch_update != NULL)
@@ -270,9 +264,8 @@ struct playback_video *nemoplay_back_create_video_by_timer(struct nemoplay *play
 	video->tool = tool;
 
 	video->shader = nemoplay_shader_create();
-	nemoplay_shader_prepare(video->shader,
-			NEMOPLAY_TO_RGBA_VERTEX_SHADER,
-			NEMOPLAY_TO_RGBA_FRAGMENT_SHADER);
+	nemoplay_shader_set_format(video->shader,
+			nemoplay_get_pixel_format(play));
 	nemoplay_shader_set_texture(video->shader,
 			nemoplay_get_video_width(play),
 			nemoplay_get_video_height(play));

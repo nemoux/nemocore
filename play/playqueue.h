@@ -33,13 +33,9 @@ struct playone {
 
 	double pts;
 
-	void *data;
-	uint32_t size;
-
-	uint8_t *y;
-	uint8_t *u;
-	uint8_t *v;
-	int32_t width, height;
+	void *data[4];
+	int linesize[4];
+	int height;
 
 	uint32_t serial;
 };
@@ -98,39 +94,34 @@ static inline double nemoplay_queue_get_one_pts(struct playone *one)
 	return one->pts;
 }
 
-static inline void *nemoplay_queue_get_one_data(struct playone *one)
-{
-	return one->data;
-}
-
 static inline uint8_t *nemoplay_queue_get_one_y(struct playone *one)
 {
-	return one->y;
+	return (uint8_t *)one->data[0];
 }
 
 static inline uint8_t *nemoplay_queue_get_one_u(struct playone *one)
 {
-	return one->u;
+	return (uint8_t *)one->data[1];
 }
 
 static inline uint8_t *nemoplay_queue_get_one_v(struct playone *one)
 {
-	return one->v;
+	return (uint8_t *)one->data[2];
 }
 
-static inline int nemoplay_queue_get_one_width(struct playone *one)
+static inline void *nemoplay_queue_get_one_data(struct playone *one, int index)
 {
-	return one->width;
+	return one->data[index];
+}
+
+static inline uint32_t nemoplay_queue_get_one_linesize(struct playone *one, int index)
+{
+	return one->linesize[index];
 }
 
 static inline int nemoplay_queue_get_one_height(struct playone *one)
 {
 	return one->height;
-}
-
-static inline uint32_t nemoplay_queue_get_one_size(struct playone *one)
-{
-	return one->size;
 }
 
 static inline uint32_t nemoplay_queue_get_one_serial(struct playone *one)
