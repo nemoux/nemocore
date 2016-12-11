@@ -24,9 +24,9 @@ struct playcontext {
 
 	struct nemoplay *play;
 
-	struct playback_decoder *decoderback;
-	struct playback_audio *audioback;
-	struct playback_video *videoback;
+	struct playdecoder *decoderback;
+	struct playaudio *audioback;
+	struct playvideo *videoback;
 
 	int32_t width;
 	int32_t height;
@@ -52,7 +52,7 @@ static void nemoplay_dispatch_show_fullscreen(struct nemoshow *show, const char 
 		nemoshow_view_resize(context->show, width, width / nemoplay_get_video_aspectratio(context->play));
 	}
 
-	nemoplay_back_redraw_video(context->videoback);
+	nemoplay_video_redraw(context->videoback);
 
 	nemoshow_dispatch_frame(context->show);
 }
@@ -92,7 +92,7 @@ static void nemoplay_dispatch_canvas_resize(struct nemoshow *show, struct showon
 {
 	struct playcontext *context = (struct playcontext *)nemoshow_get_userdata(show);
 
-	nemoplay_back_set_video_texture(context->videoback,
+	nemoplay_video_set_texture(context->videoback,
 			nemoshow_canvas_get_texture(context->canvas),
 			nemoshow_canvas_get_viewport_width(context->canvas),
 			nemoshow_canvas_get_viewport_height(context->canvas));
@@ -110,7 +110,7 @@ static void nemoplay_dispatch_video_done(struct nemoplay *play, void *data)
 {
 	struct playcontext *context = (struct playcontext *)data;
 
-	nemoplay_back_seek_decoder(context->decoderback, 0.0f);
+	nemoplay_decoder_seek(context->decoderback, 0.0f);
 }
 
 int main(int argc, char *argv[])
@@ -208,23 +208,23 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_dispatch_resize(canvas, nemoplay_dispatch_canvas_resize);
 	nemoshow_one_attach(scene, canvas);
 
-	context->decoderback = nemoplay_back_create_decoder(play);
-	context->audioback = nemoplay_back_create_audio_by_ao(play);
-	context->videoback = nemoplay_back_create_video_by_timer(play, tool);
-	nemoplay_back_set_video_texture(context->videoback,
+	context->decoderback = nemoplay_decoder_create(play);
+	context->audioback = nemoplay_audio_create_by_ao(play);
+	context->videoback = nemoplay_video_create_by_timer(play, tool);
+	nemoplay_video_set_texture(context->videoback,
 			nemoshow_canvas_get_texture(canvas),
 			width, height);
-	nemoplay_back_set_video_update(context->videoback, nemoplay_dispatch_video_update);
-	nemoplay_back_set_video_done(context->videoback, nemoplay_dispatch_video_done);
-	nemoplay_back_set_video_data(context->videoback, context);
+	nemoplay_video_set_update(context->videoback, nemoplay_dispatch_video_update);
+	nemoplay_video_set_done(context->videoback, nemoplay_dispatch_video_done);
+	nemoplay_video_set_data(context->videoback, context);
 
 	nemoshow_dispatch_frame(show);
 
 	nemotool_run(tool);
 
-	nemoplay_back_destroy_video(context->videoback);
-	nemoplay_back_destroy_audio(context->audioback);
-	nemoplay_back_destroy_decoder(context->decoderback);
+	nemoplay_video_destroy(context->videoback);
+	nemoplay_audio_destroy(context->audioback);
+	nemoplay_decoder_destroy(context->decoderback);
 
 	nemoshow_destroy_view(show);
 

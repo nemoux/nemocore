@@ -76,9 +76,9 @@ struct physcontext {
 
 	struct showone *video;
 	struct nemoplay *play;
-	struct playback_decoder *decoderback;
-	struct playback_audio *audioback;
-	struct playback_video *videoback;
+	struct playdecoder *decoderback;
+	struct playaudio *audioback;
+	struct playvideo *videoback;
 
 	struct nemolist obj_list;
 	int ishapes;
@@ -639,9 +639,9 @@ static void nemophys_dispatch_video_done(struct nemoplay *play, void *data)
 {
 	struct physcontext *context = (struct physcontext *)data;
 
-	nemoplay_back_destroy_decoder(context->decoderback);
-	nemoplay_back_destroy_audio(context->audioback);
-	nemoplay_back_destroy_video(context->videoback);
+	nemoplay_decoder_destroy(context->decoderback);
+	nemoplay_audio_destroy(context->audioback);
+	nemoplay_video_destroy(context->videoback);
 	nemoplay_destroy(context->play);
 
 	context->imovies = (context->imovies + 1) % nemofs_dir_get_filecount(context->movies);
@@ -653,16 +653,16 @@ static void nemophys_dispatch_video_done(struct nemoplay *play, void *data)
 			nemoplay_get_video_width(context->play),
 			nemoplay_get_video_height(context->play));
 
-	context->decoderback = nemoplay_back_create_decoder(context->play);
-	context->audioback = nemoplay_back_create_audio_by_ao(context->play);
-	context->videoback = nemoplay_back_create_video_by_timer(context->play, context->tool);
-	nemoplay_back_set_video_texture(context->videoback,
+	context->decoderback = nemoplay_decoder_create(context->play);
+	context->audioback = nemoplay_audio_create_by_ao(context->play);
+	context->videoback = nemoplay_video_create_by_timer(context->play, context->tool);
+	nemoplay_video_set_texture(context->videoback,
 			nemoshow_canvas_get_texture(context->video),
 			nemoplay_get_video_width(context->play),
 			nemoplay_get_video_height(context->play));
-	nemoplay_back_set_video_update(context->videoback, nemophys_dispatch_video_update);
-	nemoplay_back_set_video_done(context->videoback, nemophys_dispatch_video_done);
-	nemoplay_back_set_video_data(context->videoback, context);
+	nemoplay_video_set_update(context->videoback, nemophys_dispatch_video_update);
+	nemoplay_video_set_done(context->videoback, nemophys_dispatch_video_done);
+	nemoplay_video_set_data(context->videoback, context);
 }
 
 static int nemophys_prepare_bullet(struct physcontext *context)
@@ -971,16 +971,16 @@ int main(int argc, char *argv[])
 				nemoplay_get_video_width(context->play),
 				nemoplay_get_video_height(context->play));
 
-		context->decoderback = nemoplay_back_create_decoder(context->play);
-		context->audioback = nemoplay_back_create_audio_by_ao(context->play);
-		context->videoback = nemoplay_back_create_video_by_timer(context->play, tool);
-		nemoplay_back_set_video_texture(context->videoback,
+		context->decoderback = nemoplay_decoder_create(context->play);
+		context->audioback = nemoplay_audio_create_by_ao(context->play);
+		context->videoback = nemoplay_video_create_by_timer(context->play, tool);
+		nemoplay_video_set_texture(context->videoback,
 				nemoshow_canvas_get_texture(context->video),
 				nemoplay_get_video_width(context->play),
 				nemoplay_get_video_height(context->play));
-		nemoplay_back_set_video_update(context->videoback, nemophys_dispatch_video_update);
-		nemoplay_back_set_video_done(context->videoback, nemophys_dispatch_video_done);
-		nemoplay_back_set_video_data(context->videoback, context);
+		nemoplay_video_set_update(context->videoback, nemophys_dispatch_video_update);
+		nemoplay_video_set_done(context->videoback, nemophys_dispatch_video_done);
+		nemoplay_video_set_data(context->videoback, context);
 	}
 
 	trans = nemoshow_transition_create(NEMOSHOW_LINEAR_EASE, 18000, 0);

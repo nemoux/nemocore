@@ -14,7 +14,7 @@
 #include <nemotimer.h>
 #include <nemomisc.h>
 
-struct playback_decoder {
+struct playdecoder {
 	struct nemoplay *play;
 
 	pthread_t thread;
@@ -22,9 +22,9 @@ struct playback_decoder {
 	double pts_to_seek;
 };
 
-static void *nemoplay_back_handle_decoder(void *arg)
+static void *nemoplay_decoder_handle_thread(void *arg)
 {
-	struct playback_decoder *decoder = (struct playback_decoder *)arg;
+	struct playdecoder *decoder = (struct playdecoder *)arg;
 	struct nemoplay *play = decoder->play;
 	int state;
 
@@ -48,23 +48,23 @@ static void *nemoplay_back_handle_decoder(void *arg)
 	return NULL;
 }
 
-struct playback_decoder *nemoplay_back_create_decoder(struct nemoplay *play)
+struct playdecoder *nemoplay_decoder_create(struct nemoplay *play)
 {
-	struct playback_decoder *decoder;
+	struct playdecoder *decoder;
 
-	decoder = (struct playback_decoder *)malloc(sizeof(struct playback_decoder));
+	decoder = (struct playdecoder *)malloc(sizeof(struct playdecoder));
 	if (decoder == NULL)
 		return NULL;
-	memset(decoder, 0, sizeof(struct playback_decoder));
+	memset(decoder, 0, sizeof(struct playdecoder));
 
 	decoder->play = play;
 
-	pthread_create(&decoder->thread, NULL, nemoplay_back_handle_decoder, (void *)decoder);
+	pthread_create(&decoder->thread, NULL, nemoplay_decoder_handle_thread, (void *)decoder);
 
 	return decoder;
 }
 
-void nemoplay_back_destroy_decoder(struct playback_decoder *decoder)
+void nemoplay_decoder_destroy(struct playdecoder *decoder)
 {
 	struct nemoplay *play = decoder->play;
 
@@ -74,22 +74,22 @@ void nemoplay_back_destroy_decoder(struct playback_decoder *decoder)
 	free(decoder);
 }
 
-void nemoplay_back_seek_decoder(struct playback_decoder *decoder, double pts)
+void nemoplay_decoder_seek(struct playdecoder *decoder, double pts)
 {
 	decoder->pts_to_seek = pts;
 
 	nemoplay_set_cmd(decoder->play, NEMOPLAY_SEEK_CMD);
 }
 
-struct playback_audio {
+struct playaudio {
 	struct nemoplay *play;
 
 	pthread_t thread;
 };
 
-static void *nemoplay_back_handle_audio(void *arg)
+static void *nemoplay_audio_handle_thread(void *arg)
 {
-	struct playback_audio *audio = (struct playback_audio *)arg;
+	struct playaudio *audio = (struct playaudio *)arg;
 	struct nemoplay *play = audio->play;
 	struct playqueue *queue;
 	struct playone *one;
@@ -151,23 +151,23 @@ out:
 	return NULL;
 }
 
-struct playback_audio *nemoplay_back_create_audio_by_ao(struct nemoplay *play)
+struct playaudio *nemoplay_audio_create_by_ao(struct nemoplay *play)
 {
-	struct playback_audio *audio;
+	struct playaudio *audio;
 
-	audio = (struct playback_audio *)malloc(sizeof(struct playback_audio));
+	audio = (struct playaudio *)malloc(sizeof(struct playaudio));
 	if (audio == NULL)
 		return NULL;
-	memset(audio, 0, sizeof(struct playback_audio));
+	memset(audio, 0, sizeof(struct playaudio));
 
 	audio->play = play;
 
-	pthread_create(&audio->thread, NULL, nemoplay_back_handle_audio, (void *)audio);
+	pthread_create(&audio->thread, NULL, nemoplay_audio_handle_thread, (void *)audio);
 
 	return audio;
 }
 
-void nemoplay_back_destroy_audio(struct playback_audio *audio)
+void nemoplay_audio_destroy(struct playaudio *audio)
 {
 	struct nemoplay *play = audio->play;
 
@@ -177,7 +177,7 @@ void nemoplay_back_destroy_audio(struct playback_audio *audio)
 	free(audio);
 }
 
-struct playback_video {
+struct playvideo {
 	struct nemoplay *play;
 
 	struct nemotool *tool;
@@ -185,14 +185,14 @@ struct playback_video {
 
 	struct playshader *shader;
 
-	nemoplay_back_video_update_t dispatch_update;
-	nemoplay_back_video_done_t dispatch_done;
+	nemoplay_video_update_t dispatch_update;
+	nemoplay_video_done_t dispatch_done;
 	void *data;
 };
 
-static void nemoplay_back_handle_video(struct nemotimer *timer, void *data)
+static void nemoplay_video_handle_timer(struct nemotimer *timer, void *data)
 {
-	struct playback_video *video = (struct playback_video *)data;
+	struct playvideo *video = (struct playvideo *)data;
 	struct nemoplay *play = video->play;
 	struct playqueue *queue;
 	struct playone *one;
@@ -251,14 +251,14 @@ static void nemoplay_back_handle_video(struct nemotimer *timer, void *data)
 	}
 }
 
-struct playback_video *nemoplay_back_create_video_by_timer(struct nemoplay *play, struct nemotool *tool)
+struct playvideo *nemoplay_video_create_by_timer(struct nemoplay *play, struct nemotool *tool)
 {
-	struct playback_video *video;
+	struct playvideo *video;
 
-	video = (struct playback_video *)malloc(sizeof(struct playback_video));
+	video = (struct playvideo *)malloc(sizeof(struct playvideo));
 	if (video == NULL)
 		return NULL;
-	memset(video, 0, sizeof(struct playback_video));
+	memset(video, 0, sizeof(struct playvideo));
 
 	video->play = play;
 	video->tool = tool;
@@ -271,14 +271,14 @@ struct playback_video *nemoplay_back_create_video_by_timer(struct nemoplay *play
 			nemoplay_get_video_height(play));
 
 	video->timer = nemotimer_create(tool);
-	nemotimer_set_callback(video->timer, nemoplay_back_handle_video);
+	nemotimer_set_callback(video->timer, nemoplay_video_handle_timer);
 	nemotimer_set_userdata(video->timer, video);
 	nemotimer_set_timeout(video->timer, 10);
 
 	return video;
 }
 
-void nemoplay_back_destroy_video(struct playback_video *video)
+void nemoplay_video_destroy(struct playvideo *video)
 {
 	struct nemoplay *play = video->play;
 
@@ -291,13 +291,13 @@ void nemoplay_back_destroy_video(struct playback_video *video)
 	free(video);
 }
 
-void nemoplay_back_redraw_video(struct playback_video *video)
+void nemoplay_video_redraw(struct playvideo *video)
 {
 	if (nemoplay_get_frame(video->play) != 0)
 		nemoplay_shader_dispatch(video->shader);
 }
 
-void nemoplay_back_set_video_texture(struct playback_video *video, uint32_t texture, int width, int height)
+void nemoplay_video_set_texture(struct playvideo *video, uint32_t texture, int width, int height)
 {
 	nemoplay_shader_set_viewport(video->shader, texture, width, height);
 
@@ -305,17 +305,17 @@ void nemoplay_back_set_video_texture(struct playback_video *video, uint32_t text
 		nemoplay_shader_dispatch(video->shader);
 }
 
-void nemoplay_back_set_video_update(struct playback_video *video, nemoplay_back_video_update_t dispatch)
+void nemoplay_video_set_update(struct playvideo *video, nemoplay_video_update_t dispatch)
 {
 	video->dispatch_update = dispatch;
 }
 
-void nemoplay_back_set_video_done(struct playback_video *video, nemoplay_back_video_done_t dispatch)
+void nemoplay_video_set_done(struct playvideo *video, nemoplay_video_done_t dispatch)
 {
 	video->dispatch_done = dispatch;
 }
 
-void nemoplay_back_set_video_data(struct playback_video *video, void *data)
+void nemoplay_video_set_data(struct playvideo *video, void *data)
 {
 	video->data = data;
 }

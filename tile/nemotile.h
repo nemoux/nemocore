@@ -123,9 +123,9 @@ struct nemotile {
 
 	struct showone *video;
 	struct nemoplay *play;
-	struct playback_decoder *decoderback;
-	struct playback_audio *audioback;
-	struct playback_video *videoback;
+	struct playdecoder *decoderback;
+	struct playaudio *audioback;
+	struct playvideo *videoback;
 
 	uint32_t width, height;
 	uint32_t columns, rows;

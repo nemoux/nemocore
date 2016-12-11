@@ -84,9 +84,9 @@ struct nemopixs {
 
 	struct showone *video;
 	struct nemoplay *play;
-	struct playback_decoder *decoderback;
-	struct playback_audio *audioback;
-	struct playback_video *videoback;
+	struct playdecoder *decoderback;
+	struct playaudio *audioback;
+	struct playvideo *videoback;
 
 	int iactions;
 	int tapmax;

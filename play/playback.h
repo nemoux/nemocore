@@ -12,27 +12,27 @@ NEMO_BEGIN_EXTERN_C
 #include <nemotool.h>
 #include <nemoplay.h>
 
-struct playback_decoder;
-struct playback_audio;
-struct playback_video;
+struct playdecoder;
+struct playaudio;
+struct playvideo;
 
-typedef void (*nemoplay_back_video_update_t)(struct nemoplay *play, void *data);
-typedef void (*nemoplay_back_video_done_t)(struct nemoplay *play, void *data);
+typedef void (*nemoplay_video_update_t)(struct nemoplay *play, void *data);
+typedef void (*nemoplay_video_done_t)(struct nemoplay *play, void *data);
 
-extern struct playback_decoder *nemoplay_back_create_decoder(struct nemoplay *play);
-extern void nemoplay_back_destroy_decoder(struct playback_decoder *decoder);
-extern void nemoplay_back_seek_decoder(struct playback_decoder *decoder, double pts);
+extern struct playdecoder *nemoplay_decoder_create(struct nemoplay *play);
+extern void nemoplay_decoder_destroy(struct playdecoder *decoder);
+extern void nemoplay_decoder_seek(struct playdecoder *decoder, double pts);
 
-extern struct playback_audio *nemoplay_back_create_audio_by_ao(struct nemoplay *play);
-extern void nemoplay_back_destroy_audio(struct playback_audio *audio);
+extern struct playaudio *nemoplay_audio_create_by_ao(struct nemoplay *play);
+extern void nemoplay_audio_destroy(struct playaudio *audio);
 
-extern struct playback_video *nemoplay_back_create_video_by_timer(struct nemoplay *play, struct nemotool *tool);
-extern void nemoplay_back_destroy_video(struct playback_video *video);
-extern void nemoplay_back_redraw_video(struct playback_video *video);
-extern void nemoplay_back_set_video_texture(struct playback_video *video, uint32_t texture, int width, int height);
-extern void nemoplay_back_set_video_update(struct playback_video *video, nemoplay_back_video_update_t dispatch);
-extern void nemoplay_back_set_video_done(struct playback_video *video, nemoplay_back_video_done_t dispatch);
-extern void nemoplay_back_set_video_data(struct playback_video *video, void *data);
+extern struct playvideo *nemoplay_video_create_by_timer(struct nemoplay *play, struct nemotool *tool);
+extern void nemoplay_video_destroy(struct playvideo *video);
+extern void nemoplay_video_redraw(struct playvideo *video);
+extern void nemoplay_video_set_texture(struct playvideo *video, uint32_t texture, int width, int height);
+extern void nemoplay_video_set_update(struct playvideo *video, nemoplay_video_update_t dispatch);
+extern void nemoplay_video_set_done(struct playvideo *video, nemoplay_video_done_t dispatch);
+extern void nemoplay_video_set_data(struct playvideo *video, void *data);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
