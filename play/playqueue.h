@@ -26,19 +26,7 @@ typedef enum {
 	NEMOPLAY_QUEUE_LAST_COMMAND
 } NemoPlayQueueCmd;
 
-struct playone {
-	struct nemolist link;
-
-	int cmd;
-
-	double pts;
-
-	void *data[4];
-	int linesize[4];
-	int height;
-
-	uint32_t serial;
-};
+struct playone;
 
 struct playqueue {
 	int state;
@@ -79,54 +67,6 @@ static inline int nemoplay_queue_get_count(struct playqueue *queue)
 static inline uint32_t nemoplay_queue_get_serial(struct playqueue *queue)
 {
 	return queue->serial;
-}
-
-extern struct playone *nemoplay_one_create(void);
-extern void nemoplay_one_destroy(struct playone *one);
-
-static inline int nemoplay_one_get_cmd(struct playone *one)
-{
-	return one->cmd;
-}
-
-static inline double nemoplay_one_get_pts(struct playone *one)
-{
-	return one->pts;
-}
-
-static inline uint8_t *nemoplay_one_get_y(struct playone *one)
-{
-	return (uint8_t *)one->data[0];
-}
-
-static inline uint8_t *nemoplay_one_get_u(struct playone *one)
-{
-	return (uint8_t *)one->data[1];
-}
-
-static inline uint8_t *nemoplay_one_get_v(struct playone *one)
-{
-	return (uint8_t *)one->data[2];
-}
-
-static inline void *nemoplay_one_get_data(struct playone *one, int index)
-{
-	return one->data[index];
-}
-
-static inline uint32_t nemoplay_one_get_linesize(struct playone *one, int index)
-{
-	return one->linesize[index];
-}
-
-static inline int nemoplay_one_get_height(struct playone *one)
-{
-	return one->height;
-}
-
-static inline uint32_t nemoplay_one_get_serial(struct playone *one)
-{
-	return one->serial;
 }
 
 #ifdef __cplusplus

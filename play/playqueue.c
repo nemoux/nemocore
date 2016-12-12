@@ -174,33 +174,3 @@ void nemoplay_queue_set_state(struct playqueue *queue, int state)
 
 	pthread_mutex_unlock(&queue->lock);
 }
-
-struct playone *nemoplay_one_create(void)
-{
-	struct playone *one;
-
-	one = (struct playone *)malloc(sizeof(struct playone));
-	if (one == NULL)
-		return NULL;
-	memset(one, 0, sizeof(struct playone));
-
-	nemolist_init(&one->link);
-
-	return one;
-}
-
-void nemoplay_one_destroy(struct playone *one)
-{
-	nemolist_remove(&one->link);
-
-	if (one->data[0] != NULL)
-		free(one->data[0]);
-	if (one->data[1] != NULL)
-		free(one->data[1]);
-	if (one->data[2] != NULL)
-		free(one->data[2]);
-	if (one->data[3] != NULL)
-		free(one->data[3]);
-
-	free(one);
-}
