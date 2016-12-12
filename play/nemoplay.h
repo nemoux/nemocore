@@ -92,6 +92,7 @@ extern int nemoplay_decode_media(struct nemoplay *play, int reqcount, int maxcou
 extern int nemoplay_seek_media(struct nemoplay *play, double pts);
 extern void nemoplay_wait_media(struct nemoplay *play);
 
+extern int nemoplay_extract_media(struct nemoplay *play);
 extern int nemoplay_extract_video(struct nemoplay *play);
 extern int nemoplay_extract_audio(struct nemoplay *play);
 
