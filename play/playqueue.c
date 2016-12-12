@@ -39,7 +39,16 @@ err1:
 
 void nemoplay_queue_destroy(struct playqueue *queue)
 {
+	struct playone *one, *none;
+
+	pthread_mutex_lock(&queue->lock);
+
+	nemolist_for_each_safe(one, none, &queue->list, link)
+		nemoplay_one_destroy(one);
+
 	nemolist_remove(&queue->list);
+
+	pthread_mutex_unlock(&queue->lock);
 
 	pthread_cond_destroy(&queue->signal);
 	pthread_mutex_destroy(&queue->lock);
