@@ -185,8 +185,8 @@ struct playvideo {
 
 	struct playshader *shader;
 
-	nemoplay_video_update_t dispatch_update;
-	nemoplay_video_done_t dispatch_done;
+	nemoplay_frame_update_t dispatch_update;
+	nemoplay_frame_done_t dispatch_done;
 	void *data;
 };
 
@@ -305,12 +305,12 @@ void nemoplay_video_set_texture(struct playvideo *video, uint32_t texture, int w
 		nemoplay_shader_dispatch(video->shader);
 }
 
-void nemoplay_video_set_update(struct playvideo *video, nemoplay_video_update_t dispatch)
+void nemoplay_video_set_update(struct playvideo *video, nemoplay_frame_update_t dispatch)
 {
 	video->dispatch_update = dispatch;
 }
 
-void nemoplay_video_set_done(struct playvideo *video, nemoplay_video_done_t dispatch)
+void nemoplay_video_set_done(struct playvideo *video, nemoplay_frame_done_t dispatch)
 {
 	video->dispatch_done = dispatch;
 }

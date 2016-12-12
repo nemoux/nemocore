@@ -16,8 +16,8 @@ struct playdecoder;
 struct playaudio;
 struct playvideo;
 
-typedef void (*nemoplay_video_update_t)(struct nemoplay *play, void *data);
-typedef void (*nemoplay_video_done_t)(struct nemoplay *play, void *data);
+typedef void (*nemoplay_frame_update_t)(struct nemoplay *play, void *data);
+typedef void (*nemoplay_frame_done_t)(struct nemoplay *play, void *data);
 
 extern struct playdecoder *nemoplay_decoder_create(struct nemoplay *play);
 extern void nemoplay_decoder_destroy(struct playdecoder *decoder);
@@ -30,8 +30,8 @@ extern struct playvideo *nemoplay_video_create_by_timer(struct nemoplay *play, s
 extern void nemoplay_video_destroy(struct playvideo *video);
 extern void nemoplay_video_redraw(struct playvideo *video);
 extern void nemoplay_video_set_texture(struct playvideo *video, uint32_t texture, int width, int height);
-extern void nemoplay_video_set_update(struct playvideo *video, nemoplay_video_update_t dispatch);
-extern void nemoplay_video_set_done(struct playvideo *video, nemoplay_video_done_t dispatch);
+extern void nemoplay_video_set_update(struct playvideo *video, nemoplay_frame_update_t dispatch);
+extern void nemoplay_video_set_done(struct playvideo *video, nemoplay_frame_done_t dispatch);
 extern void nemoplay_video_set_data(struct playvideo *video, void *data);
 
 #ifdef __cplusplus
