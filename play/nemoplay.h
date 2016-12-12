@@ -135,6 +135,16 @@ static inline int nemoplay_get_state(struct nemoplay *play)
 	return play->state;
 }
 
+static inline int nemoplay_is_state(struct nemoplay *play, int state)
+{
+	return play->state == state;
+}
+
+static inline int nemoplay_is_done(struct nemoplay *play)
+{
+	return play->state == NEMOPLAY_DONE_STATE;
+}
+
 static inline uint64_t nemoplay_get_frame(struct nemoplay *play)
 {
 	return play->frame;

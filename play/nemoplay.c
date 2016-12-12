@@ -369,7 +369,7 @@ int nemoplay_extract_media(struct nemoplay *play)
 					one->linesize[2] = frame->linesize[2];
 					one->height = frame->height;
 
-					nemoplay_queue_enqueue(play->video_queue, one);
+					nemoplay_queue_enqueue_tail(play->video_queue, one);
 				} else if (play->pixel_format == NEMOPLAY_BGRA_PIXEL_FORMAT) {
 					struct playone *one;
 					void *buffer;
@@ -387,7 +387,7 @@ int nemoplay_extract_media(struct nemoplay *play)
 					one->linesize[0] = frame->linesize[0];
 					one->height = frame->height;
 
-					nemoplay_queue_enqueue(play->video_queue, one);
+					nemoplay_queue_enqueue_tail(play->video_queue, one);
 				}
 			}
 		} else if (packet.stream_index == audio_stream) {
@@ -414,7 +414,7 @@ int nemoplay_extract_media(struct nemoplay *play)
 				one->data[0] = buffer;
 				one->linesize[0] = samplesize * audio_context->channels * av_get_bytes_per_sample(AV_SAMPLE_FMT_S16);
 
-				nemoplay_queue_enqueue(play->audio_queue, one);
+				nemoplay_queue_enqueue_tail(play->audio_queue, one);
 			}
 		}
 
@@ -468,7 +468,7 @@ int nemoplay_extract_video(struct nemoplay *play)
 					one->linesize[2] = frame->linesize[2];
 					one->height = frame->height;
 
-					nemoplay_queue_enqueue(play->video_queue, one);
+					nemoplay_queue_enqueue_tail(play->video_queue, one);
 				} else if (play->pixel_format == NEMOPLAY_BGRA_PIXEL_FORMAT) {
 					struct playone *one;
 					void *buffer;
@@ -486,7 +486,7 @@ int nemoplay_extract_video(struct nemoplay *play)
 					one->linesize[0] = frame->linesize[0];
 					one->height = frame->height;
 
-					nemoplay_queue_enqueue(play->video_queue, one);
+					nemoplay_queue_enqueue_tail(play->video_queue, one);
 				}
 			}
 		}
@@ -536,7 +536,7 @@ int nemoplay_extract_audio(struct nemoplay *play)
 				one->data[0] = buffer;
 				one->linesize[0] = samplesize * audio_context->channels * av_get_bytes_per_sample(AV_SAMPLE_FMT_S16);
 
-				nemoplay_queue_enqueue(play->audio_queue, one);
+				nemoplay_queue_enqueue_tail(play->audio_queue, one);
 			}
 		}
 

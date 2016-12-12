@@ -138,6 +138,66 @@ int nemoplay_queue_peek_pts(struct playqueue *queue, double *pts)
 	return one != NULL;
 }
 
+struct playone *nemoplay_queue_get_head(struct playqueue *queue)
+{
+	struct playone *one = NULL;
+	struct nemolist *elm;
+
+	pthread_mutex_lock(&queue->lock);
+
+	elm = nemolist_peek_head(&queue->list);
+	if (elm != NULL)
+		one = container_of(elm, struct playone, link);
+
+	pthread_mutex_unlock(&queue->lock);
+
+	return one;
+}
+
+struct playone *nemoplay_queue_get_tail(struct playqueue *queue)
+{
+	struct playone *one = NULL;
+	struct nemolist *elm;
+
+	pthread_mutex_lock(&queue->lock);
+
+	elm = nemolist_peek_tail(&queue->list);
+	if (elm != NULL)
+		one = container_of(elm, struct playone, link);
+
+	pthread_mutex_unlock(&queue->lock);
+
+	return one;
+}
+
+struct playone *nemoplay_queue_get_prev(struct playqueue *queue, struct playone *one)
+{
+	struct playone *pone = NULL;
+
+	pthread_mutex_lock(&queue->lock);
+
+	if (one->link.prev != &queue->list)
+		pone = container_of(one->link.prev, struct playone, link);
+
+	pthread_mutex_unlock(&queue->lock);
+
+	return pone;
+}
+
+struct playone *nemoplay_queue_get_next(struct playqueue *queue, struct playone *one)
+{
+	struct playone *none = NULL;
+
+	pthread_mutex_lock(&queue->lock);
+
+	if (one->link.next != &queue->list)
+		none = container_of(one->link.next, struct playone, link);
+
+	pthread_mutex_unlock(&queue->lock);
+
+	return none;
+}
+
 void nemoplay_queue_wait(struct playqueue *queue)
 {
 	pthread_mutex_lock(&queue->lock);

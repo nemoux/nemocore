@@ -23,9 +23,10 @@ struct playcontext {
 	struct showone *canvas;
 
 	struct nemoplay *play;
+	struct playextractor *extractor;
 	struct playshader *shader;
-	struct playbox *box;
-	int iframes;
+	struct playqueue *queue;
+	struct playone *cone;
 	int direction;
 
 	int32_t width;
@@ -88,21 +89,32 @@ static void nemoplay_dispatch_canvas_resize(struct nemoshow *show, struct showon
 			nemoshow_canvas_get_texture(context->canvas),
 			width, height);
 
-	nemoplay_shader_update(context->shader, nemoplay_box_get_one(context->box, context->iframes));
-	nemoplay_shader_dispatch(context->shader);
+	if (context->cone != NULL) {
+		nemoplay_shader_update(context->shader, context->cone);
+		nemoplay_shader_dispatch(context->shader);
+	}
 }
 
 static void nemoplay_dispatch_canvas_frame(void *userdata, uint32_t time, double t)
 {
 	struct playcontext *context = (struct playcontext *)userdata;
 
-	if (context->direction == 0)
-		context->iframes = (context->iframes + 1) % nemoplay_box_get_count(context->box);
-	else
-		context->iframes = (context->iframes + nemoplay_box_get_count(context->box) - 1) % nemoplay_box_get_count(context->box);
+	if (context->direction == 0) {
+		if (context->cone != NULL)
+			context->cone = nemoplay_queue_get_next(context->queue, context->cone);
+		if (context->cone == NULL)
+			context->cone = nemoplay_queue_get_head(context->queue);
+	} else {
+		if (context->cone != NULL)
+			context->cone = nemoplay_queue_get_prev(context->queue, context->cone);
+		if (context->cone == NULL)
+			context->cone = nemoplay_queue_get_tail(context->queue);
+	}
 
-	nemoplay_shader_update(context->shader, nemoplay_box_get_one(context->box, context->iframes));
-	nemoplay_shader_dispatch(context->shader);
+	if (context->cone != NULL) {
+		nemoplay_shader_update(context->shader, context->cone);
+		nemoplay_shader_dispatch(context->shader);
+	}
 }
 
 int main(int argc, char *argv[])
@@ -120,7 +132,6 @@ int main(int argc, char *argv[])
 	struct showtransition *trans;
 	struct nemoplay *play;
 	struct playshader *shader;
-	struct playbox *box;
 	char *mediapath = NULL;
 	int width, height;
 	int opt;
@@ -156,9 +167,9 @@ int main(int argc, char *argv[])
 	if (context->play == NULL)
 		goto err2;
 	nemoplay_load_media(play, mediapath);
-	nemoplay_extract_video(play);
 
-	context->box = box = nemoplay_box_create_by_queue(nemoplay_get_video_queue(play));
+	context->extractor = nemoplay_extractor_create(play);
+	context->queue = nemoplay_get_video_queue(play);
 
 	context->tool = tool = nemotool_create();
 	if (tool == NULL)
@@ -222,7 +233,7 @@ err4:
 	nemotool_destroy(tool);
 
 err3:
-	nemoplay_box_destroy(box);
+	nemoplay_extractor_destroy(context->extractor);
 
 	nemoplay_destroy(play);
 

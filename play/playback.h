@@ -15,6 +15,7 @@ NEMO_BEGIN_EXTERN_C
 struct playdecoder;
 struct playaudio;
 struct playvideo;
+struct playextractor;
 
 typedef void (*nemoplay_frame_update_t)(struct nemoplay *play, void *data);
 typedef void (*nemoplay_frame_done_t)(struct nemoplay *play, void *data);
@@ -33,6 +34,9 @@ extern void nemoplay_video_set_texture(struct playvideo *video, uint32_t texture
 extern void nemoplay_video_set_update(struct playvideo *video, nemoplay_frame_update_t dispatch);
 extern void nemoplay_video_set_done(struct playvideo *video, nemoplay_frame_done_t dispatch);
 extern void nemoplay_video_set_data(struct playvideo *video, void *data);
+
+extern struct playextractor *nemoplay_extractor_create(struct nemoplay *play);
+extern void nemoplay_extractor_destroy(struct playextractor *extractor);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
