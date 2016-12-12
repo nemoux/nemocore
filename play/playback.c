@@ -125,16 +125,16 @@ static void *nemoplay_audio_handle_thread(void *arg)
 			one = nemoplay_queue_dequeue(queue);
 			if (one == NULL) {
 				nemoplay_queue_wait(queue);
-			} else if (nemoplay_queue_get_one_serial(one) != nemoplay_queue_get_serial(queue)) {
-				nemoplay_queue_destroy_one(one);
-			} else if (nemoplay_queue_get_one_cmd(one) == NEMOPLAY_QUEUE_NORMAL_COMMAND) {
-				nemoplay_set_audio_pts(play, nemoplay_queue_get_one_pts(one));
+			} else if (nemoplay_one_get_serial(one) != nemoplay_queue_get_serial(queue)) {
+				nemoplay_one_destroy(one);
+			} else if (nemoplay_one_get_cmd(one) == NEMOPLAY_QUEUE_NORMAL_COMMAND) {
+				nemoplay_set_audio_pts(play, nemoplay_one_get_pts(one));
 
 				ao_play(device,
-						nemoplay_queue_get_one_data(one, 0),
-						nemoplay_queue_get_one_linesize(one, 0));
+						nemoplay_one_get_data(one, 0),
+						nemoplay_one_get_linesize(one, 0));
 
-				nemoplay_queue_destroy_one(one);
+				nemoplay_one_destroy(one);
 			}
 		} else if (state == NEMOPLAY_QUEUE_STOP_STATE) {
 			nemoplay_queue_wait(queue);
@@ -212,16 +212,16 @@ static void nemoplay_video_handle_timer(struct nemotimer *timer, void *data)
 		one = nemoplay_queue_dequeue(queue);
 		if (one == NULL) {
 			nemotimer_set_timeout(timer, threshold * 1000);
-		} else if (nemoplay_queue_get_one_serial(one) != nemoplay_queue_get_serial(queue)) {
-			nemoplay_queue_destroy_one(one);
+		} else if (nemoplay_one_get_serial(one) != nemoplay_queue_get_serial(queue)) {
+			nemoplay_one_destroy(one);
 			nemotimer_set_timeout(timer, 1);
-		} else if (nemoplay_queue_get_one_cmd(one) == NEMOPLAY_QUEUE_NORMAL_COMMAND) {
-			nemoplay_set_video_pts(play, nemoplay_queue_get_one_pts(one));
+		} else if (nemoplay_one_get_cmd(one) == NEMOPLAY_QUEUE_NORMAL_COMMAND) {
+			nemoplay_set_video_pts(play, nemoplay_one_get_pts(one));
 
-			if (cts > nemoplay_queue_get_one_pts(one) + threshold) {
-				nemoplay_queue_destroy_one(one);
+			if (cts > nemoplay_one_get_pts(one) + threshold) {
+				nemoplay_one_destroy(one);
 				nemotimer_set_timeout(timer, 1);
-			} else if (cts < nemoplay_queue_get_one_pts(one) - threshold) {
+			} else if (cts < nemoplay_one_get_pts(one) - threshold) {
 				nemoplay_queue_enqueue_tail(queue, one);
 				nemotimer_set_timeout(timer, threshold * 1000);
 			} else {
@@ -236,7 +236,7 @@ static void nemoplay_video_handle_timer(struct nemotimer *timer, void *data)
 				else
 					nemotimer_set_timeout(timer, threshold * 1000);
 
-				nemoplay_queue_destroy_one(one);
+				nemoplay_one_destroy(one);
 
 				nemoplay_next_frame(play);
 			}

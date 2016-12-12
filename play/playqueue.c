@@ -47,36 +47,6 @@ void nemoplay_queue_destroy(struct playqueue *queue)
 	free(queue);
 }
 
-struct playone *nemoplay_queue_create_one(void)
-{
-	struct playone *one;
-
-	one = (struct playone *)malloc(sizeof(struct playone));
-	if (one == NULL)
-		return NULL;
-	memset(one, 0, sizeof(struct playone));
-
-	nemolist_init(&one->link);
-
-	return one;
-}
-
-void nemoplay_queue_destroy_one(struct playone *one)
-{
-	nemolist_remove(&one->link);
-
-	if (one->data[0] != NULL)
-		free(one->data[0]);
-	if (one->data[1] != NULL)
-		free(one->data[1]);
-	if (one->data[2] != NULL)
-		free(one->data[2]);
-	if (one->data[3] != NULL)
-		free(one->data[3]);
-
-	free(one);
-}
-
 void nemoplay_queue_enqueue(struct playqueue *queue, struct playone *one)
 {
 	pthread_mutex_lock(&queue->lock);
@@ -175,9 +145,8 @@ void nemoplay_queue_flush(struct playqueue *queue)
 
 	pthread_mutex_lock(&queue->lock);
 
-	nemolist_for_each_safe(one, none, &queue->list, link) {
-		nemoplay_queue_destroy_one(one);
-	}
+	nemolist_for_each_safe(one, none, &queue->list, link)
+		nemoplay_one_destroy(one);
 
 	queue->count = 0;
 
@@ -195,4 +164,34 @@ void nemoplay_queue_set_state(struct playqueue *queue, int state)
 	pthread_cond_signal(&queue->signal);
 
 	pthread_mutex_unlock(&queue->lock);
+}
+
+struct playone *nemoplay_one_create(void)
+{
+	struct playone *one;
+
+	one = (struct playone *)malloc(sizeof(struct playone));
+	if (one == NULL)
+		return NULL;
+	memset(one, 0, sizeof(struct playone));
+
+	nemolist_init(&one->link);
+
+	return one;
+}
+
+void nemoplay_one_destroy(struct playone *one)
+{
+	nemolist_remove(&one->link);
+
+	if (one->data[0] != NULL)
+		free(one->data[0]);
+	if (one->data[1] != NULL)
+		free(one->data[1]);
+	if (one->data[2] != NULL)
+		free(one->data[2]);
+	if (one->data[3] != NULL)
+		free(one->data[3]);
+
+	free(one);
 }

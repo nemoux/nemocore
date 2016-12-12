@@ -257,7 +257,7 @@ int nemoplay_shader_update(struct playshader *shader, struct playone *one)
 				shader->texture_height / 2,
 				GL_LUMINANCE,
 				GL_UNSIGNED_BYTE,
-				nemoplay_queue_get_one_v(one));
+				nemoplay_one_get_v(one));
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		glBindTexture(GL_TEXTURE_2D, shader->texu);
@@ -268,7 +268,7 @@ int nemoplay_shader_update(struct playshader *shader, struct playone *one)
 				shader->texture_height / 2,
 				GL_LUMINANCE,
 				GL_UNSIGNED_BYTE,
-				nemoplay_queue_get_one_u(one));
+				nemoplay_one_get_u(one));
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		glBindTexture(GL_TEXTURE_2D, shader->texy);
@@ -279,7 +279,7 @@ int nemoplay_shader_update(struct playshader *shader, struct playone *one)
 				shader->texture_height,
 				GL_LUMINANCE,
 				GL_UNSIGNED_BYTE,
-				nemoplay_queue_get_one_y(one));
+				nemoplay_one_get_y(one));
 		glBindTexture(GL_TEXTURE_2D, 0);
 	} else if (shader->format == NEMOPLAY_BGRA_PIXEL_FORMAT) {
 		glBindTexture(GL_TEXTURE_2D, shader->tex);
@@ -290,7 +290,7 @@ int nemoplay_shader_update(struct playshader *shader, struct playone *one)
 				shader->texture_height,
 				GL_BGRA_EXT,
 				GL_UNSIGNED_BYTE,
-				nemoplay_queue_get_one_data(one, 0));
+				nemoplay_one_get_data(one, 0));
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
