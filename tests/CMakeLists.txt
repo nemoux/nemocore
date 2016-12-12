@@ -42,6 +42,15 @@ TARGET_LINK_LIBRARIES(nemoplay-show
 	nemoapps
 	)
 
+add_executable(nemoplay-quick
+	nemoplay-quick.c
+	)
+
+TARGET_LINK_LIBRARIES(nemoplay-quick
+	nemoplay
+	nemoapps
+	)
+
 if(WITH_CEF)
 	add_executable(nemonavi-show
 		nemonavi-show.c

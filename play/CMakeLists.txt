@@ -53,6 +53,7 @@ add_library(nemoplay SHARED
 	playclock.c
 	playshader.c
 	playback.c
+	playbox.c
 	playmisc.c
 	)
 
@@ -79,6 +80,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/play/playclock.h
 	${CMAKE_SOURCE_DIR}/play/playshader.h
 	${CMAKE_SOURCE_DIR}/play/playback.h
+	${CMAKE_SOURCE_DIR}/play/playbox.h
 	${CMAKE_SOURCE_DIR}/play/playmisc.h
 	${CMAKE_SOURCE_DIR}/play/ffmpegconfig.h
 	)

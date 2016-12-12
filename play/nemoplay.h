@@ -16,6 +16,7 @@ NEMO_BEGIN_EXTERN_C
 #include <playqueue.h>
 #include <playclock.h>
 #include <playshader.h>
+#include <playbox.h>
 #include <playmisc.h>
 
 typedef enum {
