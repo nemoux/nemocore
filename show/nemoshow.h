@@ -126,9 +126,6 @@ struct nemoshow {
 		struct nemolistener one_destroy_listener;
 	} keyboard;
 
-	uint32_t long_press_duration;
-	uint32_t long_press_distance;
-
 	uint32_t single_click_duration;
 	uint32_t single_click_distance;
 
@@ -298,16 +295,6 @@ static inline void nemoshow_set_dispatch_destroy(struct nemoshow *show, nemoshow
 static inline int nemoshow_make_current(struct nemoshow *show)
 {
 	return nemotale_make_current(show->tale);
-}
-
-static inline void nemoshow_set_long_press_duration(struct nemoshow *show, uint32_t duration)
-{
-	show->long_press_duration = duration;
-}
-
-static inline void nemoshow_set_long_press_distance(struct nemoshow *show, uint32_t distance)
-{
-	show->long_press_distance = distance;
 }
 
 static inline void nemoshow_set_single_click_duration(struct nemoshow *show, uint32_t duration)

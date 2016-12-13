@@ -162,8 +162,6 @@ static void nemoshow_dispatch_timer(struct nemotimer *timer, void *data)
 
 	nemotimer_set_timeout(timer, 1000);
 
-	nemoshow_push_timer_event(show, time_current_msecs());
-
 #ifdef NEMOSHOW_FRAMELOG_ON
 	if (scon->has_framelog != 0) {
 		nemoshow_dump_times(show);
@@ -231,12 +229,6 @@ struct nemoshow *nemoshow_create_view(struct nemotool *tool, int32_t width, int3
 		scon->has_framelog = 1;
 #endif
 
-	env = getenv("NEMOSHOW_LONG_PRESS_DURATION");
-	if (env != NULL)
-		nemoshow_set_long_press_duration(show, strtoul(env, NULL, 10));
-	env = getenv("NEMOSHOW_LONG_PRESS_DISTANCE");
-	if (env != NULL)
-		nemoshow_set_long_press_distance(show, strtoul(env, NULL, 10));
 	env = getenv("NEMOSHOW_SINGLE_CLICK_DURATION");
 	if (env != NULL)
 		nemoshow_set_single_click_duration(show, strtoul(env, NULL, 10));

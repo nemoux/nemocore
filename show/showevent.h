@@ -37,15 +37,12 @@ typedef enum {
 	NEMOSHOW_TOUCH_UP_EVENT = (1 << 16),
 	NEMOSHOW_TOUCH_MOTION_EVENT = (1 << 17),
 	NEMOSHOW_TOUCH_PRESSURE_EVENT = (1 << 18),
-	NEMOSHOW_POINTER_LONG_PRESS_EVENT = (1 << 19),
-	NEMOSHOW_TOUCH_LONG_PRESS_EVENT = (1 << 20),
-	NEMOSHOW_CANCEL_EVENT = (1 << 21),
+	NEMOSHOW_CANCEL_EVENT = (1 << 19),
 	NEMOSHOW_DOWN_EVENT = NEMOSHOW_POINTER_DOWN_EVENT | NEMOSHOW_TOUCH_DOWN_EVENT,
 	NEMOSHOW_UP_EVENT = NEMOSHOW_POINTER_UP_EVENT | NEMOSHOW_TOUCH_UP_EVENT,
 	NEMOSHOW_MOTION_EVENT = NEMOSHOW_POINTER_MOTION_EVENT | NEMOSHOW_TOUCH_MOTION_EVENT,
 	NEMOSHOW_POINTER_EVENT = NEMOSHOW_POINTER_ENTER_EVENT | NEMOSHOW_POINTER_LEAVE_EVENT | NEMOSHOW_POINTER_DOWN_EVENT | NEMOSHOW_POINTER_UP_EVENT | NEMOSHOW_POINTER_MOTION_EVENT,
 	NEMOSHOW_TOUCH_EVENT = NEMOSHOW_TOUCH_DOWN_EVENT | NEMOSHOW_TOUCH_UP_EVENT | NEMOSHOW_TOUCH_MOTION_EVENT | NEMOSHOW_TOUCH_PRESSURE_EVENT,
-	NEMOSHOW_LONG_PRESS_EVENT = NEMOSHOW_POINTER_LONG_PRESS_EVENT | NEMOSHOW_TOUCH_LONG_PRESS_EVENT
 } NemoShowEventType;
 
 struct nemoshow;
@@ -120,8 +117,6 @@ extern void nemoshow_push_touch_up_event(struct nemoshow *show, uint32_t serial,
 extern void nemoshow_push_touch_motion_event(struct nemoshow *show, uint32_t serial, uint64_t device, uint32_t time, float x, float y, float gx, float gy);
 extern void nemoshow_push_touch_pressure_event(struct nemoshow *show, uint32_t serial, uint64_t device, uint32_t time, float p);
 
-extern void nemoshow_push_timer_event(struct nemoshow *show, uint32_t time);
-
 extern int nemoshow_event_update_taps(struct nemoshow *show, struct showone *one, struct showevent *event);
 extern int nemoshow_event_update_taps_by_tag(struct nemoshow *show, struct showevent *event, uint32_t tag);
 extern void nemoshow_event_get_distant_tapindices(struct nemoshow *show, struct showevent *event, int *index0, int *index1);
@@ -129,7 +124,6 @@ extern void nemoshow_event_get_distant_tapserials(struct nemoshow *show, struct 
 extern void nemoshow_event_get_distant_tapdevices(struct nemoshow *show, struct showevent *event, uint64_t *device0, uint64_t *device1);
 
 extern int nemoshow_event_is_single_click(struct nemoshow *show, struct showevent *event);
-extern int nemoshow_event_is_long_press(struct nemoshow *show, struct showevent *event);
 
 static inline void nemoshow_tap_set_tag(struct showtap *tap, uint32_t tag)
 {

@@ -54,8 +54,6 @@ struct nemoshow *nemoshow_create(void)
 	show->keyboard.focus = NULL;
 	nemolist_init(&show->keyboard.one_destroy_listener.link);
 
-	show->long_press_duration = 1500;
-	show->long_press_distance = 50;
 	show->single_click_duration = 700;
 	show->single_click_distance = 30;
 

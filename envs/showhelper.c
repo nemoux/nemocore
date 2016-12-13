@@ -189,8 +189,6 @@ static void nemoshow_dispatch_timer(struct nemotimer *timer, void *data)
 
 	nemotimer_set_timeout(timer, 1000);
 
-	nemoshow_push_timer_event(show, time_current_msecs());
-
 #ifdef NEMOSHOW_FRAMELOG_ON
 	if (scon->has_framelog != 0) {
 		nemoshow_dump_times(show);

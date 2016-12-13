@@ -460,35 +460,6 @@ void nemoshow_push_touch_pressure_event(struct nemoshow *show, uint32_t serial, 
 	nemoshow_dispatch_event(show, tap->one, &event);
 }
 
-void nemoshow_push_timer_event(struct nemoshow *show, uint32_t time)
-{
-	struct showtap *tap;
-
-	nemolist_for_each(tap, &show->tap_list, link) {
-		if (tap->done != 0)
-			continue;
-
-		if (tap->grab_time + show->long_press_duration <= time) {
-			if (tap->dist <= show->long_press_distance) {
-				struct showevent event;
-
-				event.type = NEMOSHOW_TOUCH_LONG_PRESS_EVENT;
-				event.device = tap->device;
-				event.serial = tap->serial;
-				event.time = time;
-				event.duration = time - tap->grab_time;
-				event.x = tap->x;
-				event.y = tap->y;
-				event.gx = tap->gx;
-				event.gy = tap->gy;
-				event.tap = tap;
-
-				nemoshow_dispatch_event(show, tap->one, &event);
-			}
-		}
-	}
-}
-
 int nemoshow_event_update_taps(struct nemoshow *show, struct showone *one, struct showevent *event)
 {
 	struct showtap *tap;
@@ -629,9 +600,4 @@ int nemoshow_event_is_single_click(struct nemoshow *show, struct showevent *even
 		return nemoshow_event_is_touch_single_click(show, event);
 
 	return 0;
-}
-
-int nemoshow_event_is_long_press(struct nemoshow *show, struct showevent *event)
-{
-	return event->type & NEMOSHOW_LONG_PRESS_EVENT;
 }

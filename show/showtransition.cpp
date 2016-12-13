@@ -225,7 +225,7 @@ int nemoshow_transition_dispatch(struct showtransition *trans, uint32_t msecs)
 		nemoshow_sequence_dispatch(trans->sequences[i], t, trans->serial);
 
 	if (trans->dispatch_frame != NULL)
-		return trans->dispatch_frame(trans->userdata, msecs - trans->stime, t) + (trans->etime <= msecs);
+		return trans->dispatch_frame(trans->userdata, msecs - trans->stime, t) || (trans->etime <= msecs);
 
 	return (trans->etime <= msecs);
 }

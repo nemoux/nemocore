@@ -525,24 +525,6 @@ static void nemoenvs_handle_set_nemoshell_show(struct nemoshell *shell, struct i
 		unsetenv("NEMOSHOW_TILESIZE");
 	}
 
-	duration = nemoitem_one_get_iattr(one, "long_press_duration", 0);
-	if (duration > 0) {
-		snprintf(contents, sizeof(contents), "%d", duration);
-
-		setenv("NEMOSHOW_LONG_PRESS_DURATION", contents, 1);
-	} else {
-		unsetenv("NEMOSHOW_LONG_PRESS_DURATION");
-	}
-
-	distance = nemoitem_one_get_iattr(one, "long_press_distance", 0);
-	if (distance > 0) {
-		snprintf(contents, sizeof(contents), "%d", distance);
-
-		setenv("NEMOSHOW_LONG_PRESS_DISTANCE", contents, 1);
-	} else {
-		unsetenv("NEMOSHOW_LONG_PRESS_DISTANCE");
-	}
-
 	duration = nemoitem_one_get_iattr(one, "single_click_duration", 0);
 	if (duration > 0) {
 		snprintf(contents, sizeof(contents), "%d", duration);
