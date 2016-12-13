@@ -222,7 +222,6 @@ int nemoplay_shader_set_texture(struct playshader *shader, int32_t width, int32_
 
 	shader->texture_width = width;
 	shader->texture_height = height;
-	shader->texture_linesize = width;
 
 	return 0;
 }
@@ -250,40 +249,40 @@ int nemoplay_shader_update(struct playshader *shader, struct playone *one)
 
 	if (shader->format == NEMOPLAY_YUV420_PIXEL_FORMAT) {
 		glBindTexture(GL_TEXTURE_2D, shader->texv);
-		glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, shader->texture_linesize / 2);
+		glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, nemoplay_one_get_linesize(one, 2));
 		glTexSubImage2D(GL_TEXTURE_2D, 0,
 				0, 0,
 				shader->texture_width / 2,
 				shader->texture_height / 2,
 				GL_LUMINANCE,
 				GL_UNSIGNED_BYTE,
-				nemoplay_one_get_v(one));
+				nemoplay_one_get_data(one, 2));
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		glBindTexture(GL_TEXTURE_2D, shader->texu);
-		glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, shader->texture_linesize / 2);
+		glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, nemoplay_one_get_linesize(one, 1));
 		glTexSubImage2D(GL_TEXTURE_2D, 0,
 				0, 0,
 				shader->texture_width / 2,
 				shader->texture_height / 2,
 				GL_LUMINANCE,
 				GL_UNSIGNED_BYTE,
-				nemoplay_one_get_u(one));
+				nemoplay_one_get_data(one, 1));
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		glBindTexture(GL_TEXTURE_2D, shader->texy);
-		glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, shader->texture_linesize);
+		glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, nemoplay_one_get_linesize(one, 0));
 		glTexSubImage2D(GL_TEXTURE_2D, 0,
 				0, 0,
 				shader->texture_width,
 				shader->texture_height,
 				GL_LUMINANCE,
 				GL_UNSIGNED_BYTE,
-				nemoplay_one_get_y(one));
+				nemoplay_one_get_data(one, 0));
 		glBindTexture(GL_TEXTURE_2D, 0);
 	} else if (shader->format == NEMOPLAY_BGRA_PIXEL_FORMAT) {
 		glBindTexture(GL_TEXTURE_2D, shader->tex);
-		glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, shader->texture_linesize);
+		glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, nemoplay_one_get_linesize(one, 0));
 		glTexSubImage2D(GL_TEXTURE_2D, 0,
 				0, 0,
 				shader->texture_width,

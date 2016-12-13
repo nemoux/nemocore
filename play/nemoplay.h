@@ -249,21 +249,6 @@ static inline double nemoplay_one_get_pts(struct playone *one)
 	return one->pts;
 }
 
-static inline uint8_t *nemoplay_one_get_y(struct playone *one)
-{
-	return (uint8_t *)one->data[0];
-}
-
-static inline uint8_t *nemoplay_one_get_u(struct playone *one)
-{
-	return (uint8_t *)one->data[1];
-}
-
-static inline uint8_t *nemoplay_one_get_v(struct playone *one)
-{
-	return (uint8_t *)one->data[2];
-}
-
 static inline void *nemoplay_one_get_data(struct playone *one, int index)
 {
 	return one->data[index];

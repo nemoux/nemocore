@@ -37,7 +37,6 @@ struct playshader {
 	GLuint texv;
 
 	int32_t texture_width, texture_height;
-	int32_t texture_linesize;
 };
 
 extern struct playshader *nemoplay_shader_create(void);
