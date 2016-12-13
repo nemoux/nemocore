@@ -282,7 +282,7 @@ int nemoplay_shader_update(struct playshader *shader, struct playone *one)
 		glBindTexture(GL_TEXTURE_2D, 0);
 	} else if (shader->format == NEMOPLAY_BGRA_PIXEL_FORMAT) {
 		glBindTexture(GL_TEXTURE_2D, shader->tex);
-		glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, nemoplay_one_get_linesize(one, 0));
+		glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, nemoplay_one_get_linesize(one, 0) / 4);
 		glTexSubImage2D(GL_TEXTURE_2D, 0,
 				0, 0,
 				shader->texture_width,
