@@ -9,15 +9,14 @@ NEMO_BEGIN_EXTERN_C
 
 #include <stdint.h>
 
-struct playqueue;
 struct playone;
 
 struct playbox {
 	struct playone **ones;
-	int count;
+	int nones, sones;
 };
 
-extern struct playbox *nemoplay_box_create_by_queue(struct playqueue *queue);
+extern struct playbox *nemoplay_box_create(int size);
 extern void nemoplay_box_destroy(struct playbox *box);
 
 static inline struct playone *nemoplay_box_get_one(struct playbox *box, int index)
@@ -25,9 +24,29 @@ static inline struct playone *nemoplay_box_get_one(struct playbox *box, int inde
 	return box->ones[index];
 }
 
+static inline void nemoplay_box_set_one(struct playbox *box, int index, struct playone *one)
+{
+	box->ones[index] = one;
+}
+
+static inline void nemoplay_box_add_one(struct playbox *box, struct playone *one)
+{
+	box->ones[box->nones++] = one;
+}
+
 static inline int nemoplay_box_get_count(struct playbox *box)
 {
-	return box->count;
+	return box->nones;
+}
+
+static inline void nemoplay_box_set_count(struct playbox *box, int count)
+{
+	box->nones = count;
+}
+
+static inline int nemoplay_box_get_size(struct playbox *box)
+{
+	return box->sones;
 }
 
 #ifdef __cplusplus

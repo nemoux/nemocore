@@ -25,8 +25,8 @@ struct playcontext {
 	struct nemoplay *play;
 	struct playextractor *extractor;
 	struct playshader *shader;
-	struct playqueue *queue;
-	struct playone *cone;
+	struct playbox *box;
+	int iframes;
 	int direction;
 
 	int32_t width;
@@ -84,13 +84,15 @@ static void nemoplay_dispatch_canvas_event(struct nemoshow *show, struct showone
 static void nemoplay_dispatch_canvas_resize(struct nemoshow *show, struct showone *canvas, int32_t width, int32_t height)
 {
 	struct playcontext *context = (struct playcontext *)nemoshow_get_userdata(show);
+	struct playone *one;
 
 	nemoplay_shader_set_viewport(context->shader,
 			nemoshow_canvas_get_texture(context->canvas),
 			width, height);
 
-	if (context->cone != NULL) {
-		nemoplay_shader_update(context->shader, context->cone);
+	one = nemoplay_box_get_one(context->box, context->iframes);
+	if (one != NULL) {
+		nemoplay_shader_update(context->shader, one);
 		nemoplay_shader_dispatch(context->shader);
 	}
 }
@@ -98,21 +100,20 @@ static void nemoplay_dispatch_canvas_resize(struct nemoshow *show, struct showon
 static void nemoplay_dispatch_canvas_frame(void *userdata, uint32_t time, double t)
 {
 	struct playcontext *context = (struct playcontext *)userdata;
+	struct playone *one;
+
+	if (nemoplay_box_get_count(context->box) == 0)
+		return;
 
 	if (context->direction == 0) {
-		if (context->cone != NULL)
-			context->cone = nemoplay_queue_get_next(context->queue, context->cone);
-		if (context->cone == NULL)
-			context->cone = nemoplay_queue_get_head(context->queue);
+		context->iframes = (context->iframes + 1) % nemoplay_box_get_count(context->box);
 	} else {
-		if (context->cone != NULL)
-			context->cone = nemoplay_queue_get_prev(context->queue, context->cone);
-		if (context->cone == NULL)
-			context->cone = nemoplay_queue_get_tail(context->queue);
+		context->iframes = (context->iframes + nemoplay_box_get_count(context->box) - 1) % nemoplay_box_get_count(context->box);
 	}
 
-	if (context->cone != NULL) {
-		nemoplay_shader_update(context->shader, context->cone);
+	one = nemoplay_box_get_one(context->box, context->iframes);
+	if (one != NULL) {
+		nemoplay_shader_update(context->shader, one);
 		nemoplay_shader_dispatch(context->shader);
 	}
 }
@@ -131,6 +132,7 @@ int main(int argc, char *argv[])
 	struct showone *one;
 	struct showtransition *trans;
 	struct nemoplay *play;
+	struct playbox *box;
 	struct playshader *shader;
 	char *mediapath = NULL;
 	int width, height;
@@ -168,8 +170,9 @@ int main(int argc, char *argv[])
 		goto err2;
 	nemoplay_load_media(play, mediapath);
 
-	context->extractor = nemoplay_extractor_create(play);
-	context->queue = nemoplay_get_video_queue(play);
+	context->box = box = nemoplay_box_create(nemoplay_get_video_framecount(play));
+
+	context->extractor = nemoplay_extractor_create(play, box);
 
 	context->tool = tool = nemotool_create();
 	if (tool == NULL)
@@ -235,6 +238,7 @@ err4:
 err3:
 	nemoplay_extractor_destroy(context->extractor);
 
+	nemoplay_box_destroy(box);
 	nemoplay_destroy(play);
 
 err2:

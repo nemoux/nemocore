@@ -323,6 +323,8 @@ void nemoplay_video_set_data(struct playvideo *video, void *data)
 struct playextractor {
 	struct nemoplay *play;
 
+	struct playbox *box;
+
 	pthread_t thread;
 };
 
@@ -330,10 +332,11 @@ static void *nemoplay_extractor_handle_thread(void *arg)
 {
 	struct playextractor *extractor = (struct playextractor *)arg;
 	struct nemoplay *play = extractor->play;
+	struct playbox *box = extractor->box;
 
 	nemoplay_enter_thread(play);
 
-	nemoplay_extract_video(play);
+	nemoplay_extract_video(play, box);
 
 	nemoplay_leave_thread(play);
 
@@ -342,7 +345,7 @@ static void *nemoplay_extractor_handle_thread(void *arg)
 	return NULL;
 }
 
-struct playextractor *nemoplay_extractor_create(struct nemoplay *play)
+struct playextractor *nemoplay_extractor_create(struct nemoplay *play, struct playbox *box)
 {
 	struct playextractor *extractor;
 
@@ -352,6 +355,7 @@ struct playextractor *nemoplay_extractor_create(struct nemoplay *play)
 	memset(extractor, 0, sizeof(struct playextractor));
 
 	extractor->play = play;
+	extractor->box = box;
 
 	pthread_create(&extractor->thread, NULL, nemoplay_extractor_handle_thread, (void *)extractor);
 

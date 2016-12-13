@@ -52,7 +52,6 @@ struct nemoplay {
 
 	struct playqueue *video_queue;
 	struct playqueue *audio_queue;
-	struct playqueue *subtitle_queue;
 
 	AVFormatContext *container;
 
@@ -60,10 +59,8 @@ struct nemoplay {
 
 	AVCodecContext *video_context;
 	AVCodecContext *audio_context;
-	AVCodecContext *subtitle_context;
 	int video_stream;
 	int audio_stream;
-	int subtitle_stream;
 
 	double video_timebase;
 	double audio_timebase;
@@ -77,6 +74,7 @@ struct nemoplay {
 	int video_width;
 	int video_height;
 	double video_framerate;
+	int video_framecount;
 
 	int audio_channels;
 	int audio_samplerate;
@@ -107,9 +105,7 @@ extern int nemoplay_decode_media(struct nemoplay *play, int reqcount, int maxcou
 extern int nemoplay_seek_media(struct nemoplay *play, double pts);
 extern void nemoplay_wait_media(struct nemoplay *play);
 
-extern int nemoplay_extract_media(struct nemoplay *play);
-extern int nemoplay_extract_video(struct nemoplay *play);
-extern int nemoplay_extract_audio(struct nemoplay *play);
+extern int nemoplay_extract_video(struct nemoplay *play, struct playbox *box);
 
 extern void nemoplay_revoke_video(struct nemoplay *play);
 extern void nemoplay_revoke_audio(struct nemoplay *play);
@@ -170,11 +166,6 @@ static inline struct playqueue *nemoplay_get_audio_queue(struct nemoplay *play)
 	return play->audio_queue;
 }
 
-static inline struct playqueue *nemoplay_get_subtitle_queue(struct nemoplay *play)
-{
-	return play->subtitle_queue;
-}
-
 static inline int nemoplay_get_pixel_format(struct nemoplay *play)
 {
 	return play->pixel_format;
@@ -200,6 +191,11 @@ static inline double nemoplay_get_video_framerate(struct nemoplay *play)
 	return play->video_framerate;
 }
 
+static inline int nemoplay_get_video_framecount(struct nemoplay *play)
+{
+	return play->video_framecount;
+}
+
 static inline int nemoplay_get_audio_channels(struct nemoplay *play)
 {
 	return play->audio_channels;
@@ -223,11 +219,6 @@ static inline int nemoplay_has_video(struct nemoplay *play)
 static inline int nemoplay_has_audio(struct nemoplay *play)
 {
 	return play->audio_context != NULL;
-}
-
-static inline int nemoplay_has_subtitle(struct nemoplay *play)
-{
-	return play->subtitle_context != NULL;
 }
 
 static inline int32_t nemoplay_get_duration(struct nemoplay *play)
