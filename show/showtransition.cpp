@@ -216,7 +216,7 @@ int nemoshow_transition_dispatch(struct showtransition *trans, uint32_t msecs)
 	}
 
 	if (trans->duration == 0 && trans->dispatch_frame != NULL)
-		return trans->dispatch_frame(trans->userdata, msecs, 0.0f);
+		return trans->dispatch_frame(trans->userdata, msecs - trans->stime, 0.0f);
 
 	if (trans->etime > msecs)
 		t = nemoease_get(&trans->ease->ease, msecs - trans->stime, trans->duration);
@@ -225,7 +225,7 @@ int nemoshow_transition_dispatch(struct showtransition *trans, uint32_t msecs)
 		nemoshow_sequence_dispatch(trans->sequences[i], t, trans->serial);
 
 	if (trans->dispatch_frame != NULL)
-		return trans->dispatch_frame(trans->userdata, msecs, t) + (trans->etime <= msecs);
+		return trans->dispatch_frame(trans->userdata, msecs - trans->stime, t) + (trans->etime <= msecs);
 
 	return (trans->etime <= msecs);
 }
