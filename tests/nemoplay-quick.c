@@ -97,13 +97,13 @@ static void nemoplay_dispatch_canvas_resize(struct nemoshow *show, struct showon
 	}
 }
 
-static void nemoplay_dispatch_canvas_frame(void *userdata, uint32_t time, double t)
+static int nemoplay_dispatch_canvas_frame(void *userdata, uint32_t time, double t)
 {
 	struct playcontext *context = (struct playcontext *)userdata;
 	struct playone *one;
 
 	if (nemoplay_box_get_count(context->box) == 0)
-		return;
+		return 0;
 
 	if (context->direction == 0) {
 		context->iframes = (context->iframes + 1) % nemoplay_box_get_count(context->box);
@@ -116,6 +116,8 @@ static void nemoplay_dispatch_canvas_frame(void *userdata, uint32_t time, double
 		nemoplay_shader_update(context->shader, one);
 		nemoplay_shader_dispatch(context->shader);
 	}
+
+	return 0;
 }
 
 int main(int argc, char *argv[])
@@ -218,11 +220,10 @@ int main(int argc, char *argv[])
 			nemoplay_get_video_width(play),
 			nemoplay_get_video_height(play));
 
-	trans = nemoshow_transition_create(NEMOSHOW_LINEAR_EASE, 18000, 0);
+	trans = nemoshow_transition_create(NEMOSHOW_LINEAR_EASE, 0, 0);
 	nemoshow_transition_dirty_one(trans, canvas, NEMOSHOW_REDRAW_DIRTY);
 	nemoshow_transition_set_dispatch_frame(trans, nemoplay_dispatch_canvas_frame);
 	nemoshow_transition_set_userdata(trans, context);
-	nemoshow_transition_set_repeat(trans, 0);
 	nemoshow_attach_transition(show, trans);
 
 	nemoshow_dispatch_frame(show);

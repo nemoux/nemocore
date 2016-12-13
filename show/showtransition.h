@@ -15,7 +15,7 @@ NEMO_BEGIN_EXTERN_C
 #include <nemolist.h>
 #include <nemolistener.h>
 
-typedef void (*nemoshow_transition_dispatch_frame_t)(void *userdata, uint32_t time, double t);
+typedef int (*nemoshow_transition_dispatch_frame_t)(void *userdata, uint32_t time, double t);
 typedef void (*nemoshow_transition_dispatch_done_t)(void *userdata);
 
 struct transitionsensor {
