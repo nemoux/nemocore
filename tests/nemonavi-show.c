@@ -8,6 +8,8 @@
 #include <getopt.h>
 #include <ctype.h>
 
+#include <hangul-1.0/hangul.h>
+
 #include <nemonavi.h>
 #include <nemoshow.h>
 #include <showhelper.h>
@@ -20,8 +22,6 @@
 struct navicontext {
 	struct nemotool *tool;
 
-	struct nemohangul *hangul;
-
 	struct nemoshow *show;
 	struct showone *scene;
 	struct showone *back;
@@ -32,6 +32,8 @@ struct navicontext {
 	struct nemonavi *navi;
 
 	struct nemotimer *timer;
+
+	HangulInputContext *hangul;
 };
 
 static void nemonavi_dispatch_show_resize(struct nemoshow *show, int32_t width, int32_t height)
@@ -307,9 +309,9 @@ static void nemonavi_dispatch_canvas_event(struct nemoshow *show, struct showone
 	} else if (nemoshow_event_is_keyboard_up(show, event)) {
 		if (nemoshow_event_get_value(event) == KEY_HANGEUL) {
 			if (context->hangul == NULL) {
-				context->hangul = nemohangul_create();
+				context->hangul = hangul_ic_new("2");
 			} else {
-				nemohangul_destroy(context->hangul);
+				hangul_ic_delete(context->hangul);
 				context->hangul = NULL;
 			}
 		}
@@ -320,10 +322,10 @@ static void nemonavi_dispatch_canvas_event(struct nemoshow *show, struct showone
 
 		if (strcmp(layout, "kor") == 0) {
 			if (context->hangul == NULL)
-				context->hangul = nemohangul_create();
+				context->hangul = hangul_ic_new("2");
 		} else {
 			if (context->hangul != NULL) {
-				nemohangul_destroy(context->hangul);
+				hangul_ic_delete(context->hangul);
 				context->hangul = NULL;
 			}
 		}
@@ -351,31 +353,32 @@ static void nemonavi_dispatch_canvas_event(struct nemoshow *show, struct showone
 				const uint32_t *ucs;
 
 				if (keycode_is_alphabet(code) != 0) {
-					if (nemohangul_is_empty(context->hangul) == 0) {
+					if (hangul_ic_is_empty(context->hangul) == 0) {
 						nemonavi_send_keyboard_down_event(context->navi, KEY_BACKSPACE, 0, nemotool_get_modifiers(context->tool));
 						nemonavi_send_keyboard_up_event(context->navi, KEY_BACKSPACE, 0, nemotool_get_modifiers(context->tool));
 					}
 
-					nemohangul_process(context->hangul, sym);
+					hangul_ic_process(context->hangul, sym);
 				} else if (keycode_is_space(code) != 0) {
-					nemohangul_reset(context->hangul);
+					hangul_ic_reset(context->hangul);
 				} else if (keycode_is_backspace(code) != 0) {
 					nemonavi_send_keyboard_down_event(context->navi, code, sym, nemotool_get_modifiers(context->tool));
 					nemonavi_send_keyboard_up_event(context->navi, code, sym, nemotool_get_modifiers(context->tool));
 
-					nemohangul_backspace(context->hangul);
+					if (hangul_ic_is_empty(context->hangul) == 0)
+						hangul_ic_backspace(context->hangul);
 				} else {
 					nemonavi_send_keyboard_down_event(context->navi, code, sym, nemotool_get_modifiers(context->tool));
 					nemonavi_send_keyboard_up_event(context->navi, code, sym, nemotool_get_modifiers(context->tool));
 
-					nemohangul_reset(context->hangul);
+					hangul_ic_reset(context->hangul);
 				}
 
-				ucs = nemohangul_get_commit_string(context->hangul);
+				ucs = hangul_ic_get_commit_string(context->hangul);
 				if (ucs[0] != '\0')
 					nemonavi_send_keyboard_up_event(context->navi, KEY_A, ucs[0], nemotool_get_modifiers(context->tool));
 
-				ucs = nemohangul_get_preedit_string(context->hangul);
+				ucs = hangul_ic_get_preedit_string(context->hangul);
 				if (ucs[0] != '\0')
 					nemonavi_send_keyboard_up_event(context->navi, KEY_A, ucs[0], nemotool_get_modifiers(context->tool));
 

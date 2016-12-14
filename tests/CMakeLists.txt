@@ -52,11 +52,16 @@ TARGET_LINK_LIBRARIES(nemoplay-quick
 	)
 
 if(WITH_CEF)
+	PKG_CHECK_MODULES(LIBHANGUL REQUIRED libhangul)
+	INCLUDE_DIRECTORIES(${LIBHANGUL_INCLUDE_DIRS})
+	LINK_DIRECTORIES(${LIBHANGUL_LIBRARY_DIRS})
+
 	add_executable(nemonavi-show
 		nemonavi-show.c
 		)
 
 	TARGET_LINK_LIBRARIES(nemonavi-show
+		${LIBHANGUL_LIBRARIES}
 		nemonavi
 		nemoapps
 		)

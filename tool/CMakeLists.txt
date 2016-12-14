@@ -82,24 +82,6 @@ wayland_add_protocol_client(PROTOCOLS
 	nemo-shell
 	)
 
-if(WITH_HANGUL)
-	PKG_CHECK_MODULES(LIBHANGUL REQUIRED libhangul)
-	INCLUDE_DIRECTORIES(${LIBHANGUL_INCLUDE_DIRS})
-	LINK_DIRECTORIES(${LIBHANGUL_LIBRARY_DIRS})
-
-	set(EXTRA_LIBRARIES ${EXTRA_LIBRARIES}
-		${LIBHANGUL_LIBRARIES}
-		)
-
-	set(EXTRA_SOURCES ${EXTRA_SOURCES}
-		nemohangul.c
-		)
-
-	set(EXTRA_HEADERS ${EXTRA_HEADERS}
-		${CMAKE_SOURCE_DIR}/tool/nemohangul.h
-		)
-endif(WITH_HANGUL)
-
 include_directories(
 	${CMAKE_SOURCE_DIR}/asst
 	${CMAKE_SOURCE_DIR}/helper
@@ -118,7 +100,6 @@ add_library(nemotool SHARED
 	nemochannel.c
 	nemoegl.c
 	${PROTOCOLS}
-	${EXTRA_SOURCES}
 	)
 
 TARGET_LINK_LIBRARIES(nemotool
@@ -160,7 +141,6 @@ set(HEADER_FILES
 	${CMAKE_BINARY_DIR}/tool/wayland-nemo-shell-client-protocol.h
 	${CMAKE_BINARY_DIR}/tool/wayland-nemo-seat-client-protocol.h
 	${CMAKE_BINARY_DIR}/tool/wayland-nemo-sound-client-protocol.h
-	${EXTRA_HEADERS}
 	)
 
 configure_file(

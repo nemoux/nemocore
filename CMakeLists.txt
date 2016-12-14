@@ -22,7 +22,6 @@ option(WITH_GLIB "Build with GLIB" ON)
 option(WITH_PULSEAUDIO "Build with PULSEAUDIO" ON)
 option(WITH_MUPDF "Build with MUPDF" ON)
 option(WITH_CEF "Build with CEF" ON)
-option(WITH_HANGUL "Build with HANGUL" ON)
 
 option(WITH_WAYLANDSHELL "Build with WAYLANDSHELL" ON)
 option(WITH_XDGSHELL "Build with XDGSHELL" ON)
