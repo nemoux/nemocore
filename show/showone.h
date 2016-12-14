@@ -137,6 +137,8 @@ typedef int (*nemoshow_one_below_t)(struct showone *one, struct showone *below);
 struct showref {
 	struct nemolist link;
 
+	struct nemolistener destroy_listener;
+
 	struct showone *src;
 	uint32_t dirty;
 	uint32_t state;
