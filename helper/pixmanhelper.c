@@ -110,20 +110,6 @@ out1:
 	return result;
 }
 
-struct jpegerror {
-	struct jpeg_error_mgr pub;
-	jmp_buf setjmp_buffer;
-};
-
-static void jpegerror_exit(j_common_ptr cinfo)
-{
-	struct jpegerror *err = (struct jpegerror *)cinfo->err;
-
-	(*cinfo->err->output_message)(cinfo);
-
-	longjmp(err->setjmp_buffer, 1);
-}
-
 pixman_image_t *pixman_load_png_file(const char *path)
 {
 	pixman_image_t *image = NULL;
@@ -221,6 +207,20 @@ out:
 	fclose(fp);
 
 	return image;
+}
+
+struct jpegerror {
+	struct jpeg_error_mgr pub;
+	jmp_buf setjmp_buffer;
+};
+
+static void jpegerror_exit(j_common_ptr cinfo)
+{
+	struct jpegerror *err = (struct jpegerror *)cinfo->err;
+
+	(*cinfo->err->output_message)(cinfo);
+
+	longjmp(err->setjmp_buffer, 1);
 }
 
 pixman_image_t *pixman_load_jpeg_file(const char *path)
