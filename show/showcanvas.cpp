@@ -343,14 +343,14 @@ static inline void nemoshow_canvas_update_geometry(struct showone *one)
 	}
 }
 
-static inline void nemoshow_canvas_render_one(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region);
+static inline void nemoshow_canvas_render_one(struct showone *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region);
 
-static inline void nemoshow_canvas_render_item_none(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
+static inline void nemoshow_canvas_render_item_none(struct showone *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 }
 
-static inline void nemoshow_canvas_render_item_line(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
+static inline void nemoshow_canvas_render_item_line(struct showone *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
@@ -360,7 +360,7 @@ static inline void nemoshow_canvas_render_item_line(struct showcanvas *canvas, S
 		_canvas->drawLine(item->x, item->y, item->width, item->height, *NEMOSHOW_ITEM_CC(item, stroke));
 }
 
-static inline void nemoshow_canvas_render_item_rect(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
+static inline void nemoshow_canvas_render_item_rect(struct showone *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	SkRect rect = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
@@ -371,7 +371,7 @@ static inline void nemoshow_canvas_render_item_rect(struct showcanvas *canvas, S
 		_canvas->drawRect(rect, *NEMOSHOW_ITEM_CC(item, stroke));
 }
 
-static inline void nemoshow_canvas_render_item_rrect(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
+static inline void nemoshow_canvas_render_item_rrect(struct showone *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	SkRect rect = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
@@ -382,7 +382,7 @@ static inline void nemoshow_canvas_render_item_rrect(struct showcanvas *canvas, 
 		_canvas->drawRoundRect(rect, item->ox, item->oy, *NEMOSHOW_ITEM_CC(item, stroke));
 }
 
-static inline void nemoshow_canvas_render_item_circle(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
+static inline void nemoshow_canvas_render_item_circle(struct showone *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
@@ -392,7 +392,7 @@ static inline void nemoshow_canvas_render_item_circle(struct showcanvas *canvas,
 		_canvas->drawCircle(item->cx, item->cy, item->r, *NEMOSHOW_ITEM_CC(item, stroke));
 }
 
-static inline void nemoshow_canvas_render_item_arc(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
+static inline void nemoshow_canvas_render_item_arc(struct showone *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	SkRect rect = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
@@ -403,7 +403,7 @@ static inline void nemoshow_canvas_render_item_arc(struct showcanvas *canvas, Sk
 		_canvas->drawArc(rect, item->from, item->to - item->from, false, *NEMOSHOW_ITEM_CC(item, stroke));
 }
 
-static inline void nemoshow_canvas_render_item_text(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
+static inline void nemoshow_canvas_render_item_text(struct showone *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
@@ -460,7 +460,7 @@ static inline void nemoshow_canvas_render_item_text(struct showcanvas *canvas, S
 	}
 }
 
-static inline void nemoshow_canvas_render_item_textbox(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
+static inline void nemoshow_canvas_render_item_textbox(struct showone *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
@@ -476,7 +476,7 @@ static inline void nemoshow_canvas_render_item_textbox(struct showcanvas *canvas
 	}
 }
 
-static inline void nemoshow_canvas_render_item_path(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
+static inline void nemoshow_canvas_render_item_path(struct showone *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
@@ -490,7 +490,7 @@ static inline void nemoshow_canvas_render_item_path(struct showcanvas *canvas, S
 	}
 }
 
-static inline void nemoshow_canvas_render_item_pathtwice(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
+static inline void nemoshow_canvas_render_item_pathtwice(struct showone *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
@@ -504,7 +504,7 @@ static inline void nemoshow_canvas_render_item_pathtwice(struct showcanvas *canv
 	}
 }
 
-static inline void nemoshow_canvas_render_item_patharray(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
+static inline void nemoshow_canvas_render_item_patharray(struct showone *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
@@ -518,7 +518,7 @@ static inline void nemoshow_canvas_render_item_patharray(struct showcanvas *canv
 	}
 }
 
-static inline void nemoshow_canvas_render_item_pathlist(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
+static inline void nemoshow_canvas_render_item_pathlist(struct showone *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
@@ -532,7 +532,7 @@ static inline void nemoshow_canvas_render_item_pathlist(struct showcanvas *canva
 	}
 }
 
-static inline void nemoshow_canvas_render_item_pathgroup(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
+static inline void nemoshow_canvas_render_item_pathgroup(struct showone *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 	struct showone *child;
@@ -548,7 +548,7 @@ static inline void nemoshow_canvas_render_item_pathgroup(struct showcanvas *canv
 	}
 }
 
-static inline void nemoshow_canvas_render_item_points(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
+static inline void nemoshow_canvas_render_item_points(struct showone *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
@@ -558,7 +558,7 @@ static inline void nemoshow_canvas_render_item_points(struct showcanvas *canvas,
 		_canvas->drawPoints(SkCanvas::kPoints_PointMode, item->npoints / 2, NEMOSHOW_ITEM_CC(item, points), *NEMOSHOW_ITEM_CC(item, stroke));
 }
 
-static inline void nemoshow_canvas_render_item_polyline(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
+static inline void nemoshow_canvas_render_item_polyline(struct showone *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
@@ -568,7 +568,7 @@ static inline void nemoshow_canvas_render_item_polyline(struct showcanvas *canva
 		_canvas->drawPoints(SkCanvas::kLines_PointMode, item->npoints / 2, NEMOSHOW_ITEM_CC(item, points), *NEMOSHOW_ITEM_CC(item, stroke));
 }
 
-static inline void nemoshow_canvas_render_item_polygon(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
+static inline void nemoshow_canvas_render_item_polygon(struct showone *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
@@ -578,7 +578,7 @@ static inline void nemoshow_canvas_render_item_polygon(struct showcanvas *canvas
 		_canvas->drawPoints(SkCanvas::kPolygon_PointMode, item->npoints / 2, NEMOSHOW_ITEM_CC(item, points), *NEMOSHOW_ITEM_CC(item, stroke));
 }
 
-static inline void nemoshow_canvas_render_item_image(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
+static inline void nemoshow_canvas_render_item_image(struct showone *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
 
@@ -595,7 +595,7 @@ static inline void nemoshow_canvas_render_item_image(struct showcanvas *canvas, 
 	}
 }
 
-static inline void nemoshow_canvas_render_item_group(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
+static inline void nemoshow_canvas_render_item_group(struct showone *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
 {
 	struct showone *child;
 
@@ -604,7 +604,7 @@ static inline void nemoshow_canvas_render_item_group(struct showcanvas *canvas, 
 	}
 }
 
-static inline void nemoshow_canvas_render_item_container(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
+static inline void nemoshow_canvas_render_item_container(struct showone *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
 {
 	struct showone *child;
 
@@ -613,9 +613,9 @@ static inline void nemoshow_canvas_render_item_container(struct showcanvas *canv
 	}
 }
 
-typedef void (*nemoshow_canvas_render_t)(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region);
+typedef void (*nemoshow_canvas_render_t)(struct showone *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region);
 
-static inline void nemoshow_canvas_render_one(struct showcanvas *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
+static inline void nemoshow_canvas_render_one(struct showone *canvas, SkCanvas *_canvas, struct showone *one, SkRegion *region)
 {
 	static nemoshow_canvas_render_t renderers[NEMOSHOW_LAST_ITEM] = {
 		nemoshow_canvas_render_item_none,
@@ -659,8 +659,8 @@ static inline void nemoshow_canvas_render_one(struct showcanvas *canvas, SkCanva
 
 				_canvas->resetMatrix();
 				_canvas->scale(
-						nemoshow_canvas_get_viewport_sx(one->canvas),
-						nemoshow_canvas_get_viewport_sy(one->canvas));
+						nemoshow_canvas_get_viewport_sx(canvas),
+						nemoshow_canvas_get_viewport_sy(canvas));
 				_canvas->concat(*NEMOSHOW_ITEM_CC(clip, modelview));
 
 				_canvas->clipPath(*NEMOSHOW_ITEM_CC(clip, path));
@@ -720,7 +720,7 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 		_canvas.scale(canvas->viewport.sx, canvas->viewport.sy);
 
 		nemoshow_children_for_each(child, one) {
-			nemoshow_canvas_render_one(canvas, &_canvas, child, NULL);
+			nemoshow_canvas_render_one(one, &_canvas, child, NULL);
 		}
 	} else {
 		_canvas.clipRegion(*NEMOSHOW_CANVAS_CC(canvas, damage));
@@ -728,7 +728,7 @@ void nemoshow_canvas_render_vector(struct nemoshow *show, struct showone *one)
 		_canvas.scale(canvas->viewport.sx, canvas->viewport.sy);
 
 		nemoshow_children_for_each(child, one) {
-			nemoshow_canvas_render_one(canvas, &_canvas, child, NEMOSHOW_CANVAS_CC(canvas, damage));
+			nemoshow_canvas_render_one(one, &_canvas, child, NEMOSHOW_CANVAS_CC(canvas, damage));
 		}
 	}
 }
@@ -746,7 +746,7 @@ void nemoshow_canvas_record_vector(struct nemoshow *show, struct showone *one)
 	_canvas->scale(canvas->viewport.sx, canvas->viewport.sy);
 
 	nemoshow_children_for_each(child, one) {
-		nemoshow_canvas_render_one(canvas, _canvas, child, NULL);
+		nemoshow_canvas_render_one(one, _canvas, child, NULL);
 	}
 
 	NEMOSHOW_CANVAS_CC(canvas, picture) = recorder.finishRecordingAsPicture();
