@@ -1773,8 +1773,8 @@ int nemoshow_item_path_contain_point(struct showone *one, double x, double y)
 	if (NEMOSHOW_ITEM_CC(item, has_inverse)) {
 		SkPoint p = NEMOSHOW_ITEM_CC(item, inverse)->mapXY(x, y);
 
-		if (one->x < p.x() && p.x() < one->x + one->w &&
-				one->y < p.y() && p.y() < one->y + one->h) {
+		if (item->x < p.x() && p.x() < item->x + item->width &&
+				item->y < p.y() && p.y() < item->y + item->height) {
 			SkRegion region;
 			SkRegion clip;
 
@@ -1809,8 +1809,8 @@ int nemoshow_item_contain_one(struct showone *one, float x, float y)
 	if (NEMOSHOW_ITEM_CC(item, has_inverse)) {
 		SkPoint p = NEMOSHOW_ITEM_CC(item, inverse)->mapXY(x, y);
 
-		if (one->x < p.x() && p.x() < one->x + one->w &&
-				one->y < p.y() && p.y() < one->y + one->h) {
+		if (item->x < p.x() && p.x() < item->x + item->width &&
+				item->y < p.y() && p.y() < item->y + item->height) {
 			if (item->pick == NEMOSHOW_ITEM_NORMAL_PICK) {
 				return 1;
 			} else if (item->pick == NEMOSHOW_ITEM_PATH_PICK) {
