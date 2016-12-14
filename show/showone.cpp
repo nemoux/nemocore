@@ -184,82 +184,34 @@ void nemoshow_one_bounds(struct showone *one)
 void nemoshow_one_update_bounds(struct showone *one)
 {
 	if (nemoshow_children_empty(one) != 0) {
-		one->x0 = 0;
-		one->y0 = 0;
-		one->x1 = 0;
-		one->y1 = 0;
-
 		one->x = 0;
 		one->y = 0;
 		one->w = 0;
 		one->h = 0;
-
-		one->sx = 0;
-		one->sy = 0;
-		one->sw = 0;
-		one->sh = 0;
 	} else {
 		struct showone *child;
-		int32_t x00, y00, x01, y01, x10, y10, x11, y11, x20, y20, x21, y21;
+		int32_t x00, y00, x01, y01;
 
 		x00 = INT_MAX;
 		y00 = INT_MAX;
 		x01 = INT_MIN;
 		y01 = INT_MIN;
 
-		x10 = INT_MAX;
-		y10 = INT_MAX;
-		x11 = INT_MIN;
-		y11 = INT_MIN;
-
-		x20 = INT_MAX;
-		y20 = INT_MAX;
-		x21 = INT_MIN;
-		y21 = INT_MIN;
-
 		nemoshow_children_for_each(child, one) {
-			if (child->x0 < x00)
-				x00 = child->x0;
-			if (child->y0 < y00)
-				y00 = child->y0;
-			if (child->x1 > x01)
-				x01 = child->x1;
-			if (child->y1 > y01)
-				y01 = child->y1;
-
-			if (child->x < x10)
-				x10 = child->x;
-			if (child->y < y10)
-				y10 = child->y;
-			if (child->x + child->w > x11)
-				x11 = child->x + child->w;
-			if (child->y + child->h > y11)
-				y11 = child->y + child->h;
-
-			if (child->sx < x20)
-				x20 = child->sx;
-			if (child->sy < y20)
-				y20 = child->sy;
-			if (child->sx + child->sw > x21)
-				x21 = child->sx + child->sw;
-			if (child->sy + child->sh > y21)
-				y21 = child->sy + child->sh;
+			if (child->x < x00)
+				x00 = child->x;
+			if (child->y < y00)
+				y00 = child->y;
+			if (child->x + child->w > x01)
+				x01 = child->x + child->w;
+			if (child->y + child->h > y01)
+				y01 = child->y + child->h;
 		}
 
-		one->x0 = x00;
-		one->y0 = y00;
-		one->x1 = x01;
-		one->y1 = y01;
-
-		one->x = x10;
-		one->y = y10;
-		one->w = x11 - x10;
-		one->h = y11 - y10;
-
-		one->sx = x20;
-		one->sy = y20;
-		one->sw = x21 - x20;
-		one->sh = y21 - y20;
+		one->x = x00;
+		one->y = y00;
+		one->w = x01 - x00;
+		one->h = y01 - y00;
 	}
 
 	nemolist_remove(&one->bounds_link);

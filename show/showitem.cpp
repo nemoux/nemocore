@@ -856,17 +856,11 @@ static inline void nemoshow_item_update_matrix(struct nemoshow *show, struct sho
 static inline void nemoshow_item_update_bounds(struct nemoshow *show, struct showone *one)
 {
 	struct showitem *item = NEMOSHOW_ITEM(one);
-	struct showcanvas *canvas = NEMOSHOW_CANVAS(one->canvas);
 	SkRect box = SkRect::MakeXYWH(item->x, item->y, item->width, item->height);
 	double outer = NEMOSHOW_ANTIALIAS_EPSILON;
 
 	if (nemoshow_one_has_state(one, NEMOSHOW_STROKE_STATE))
 		box.outset(item->stroke_width, item->stroke_width);
-
-	one->x0 = box.x();
-	one->y0 = box.y();
-	one->x1 = box.x() + box.width();
-	one->y1 = box.y() + box.height();
 
 	NEMOSHOW_ITEM_CC(item, matrix)->mapRect(&box);
 
@@ -878,10 +872,6 @@ static inline void nemoshow_item_update_bounds(struct nemoshow *show, struct sho
 	one->y = MAX(floor(box.y()), 0);
 	one->w = ceil(box.width());
 	one->h = ceil(box.height());
-	one->sx = floor(one->x * canvas->viewport.sx);
-	one->sy = floor(one->y * canvas->viewport.sy);
-	one->sw = ceil(one->w * canvas->viewport.sx);
-	one->sh = ceil(one->h * canvas->viewport.sy);
 }
 
 int nemoshow_item_update(struct showone *one)
@@ -1783,8 +1773,8 @@ int nemoshow_item_path_contain_point(struct showone *one, double x, double y)
 	if (NEMOSHOW_ITEM_CC(item, has_inverse)) {
 		SkPoint p = NEMOSHOW_ITEM_CC(item, inverse)->mapXY(x, y);
 
-		if (one->x0 < p.x() && p.x() < one->x1 &&
-				one->y0 < p.y() && p.y() < one->y1) {
+		if (one->x < p.x() && p.x() < one->x + one->w &&
+				one->y < p.y() && p.y() < one->y + one->h) {
 			SkRegion region;
 			SkRegion clip;
 
@@ -1819,8 +1809,8 @@ int nemoshow_item_contain_one(struct showone *one, float x, float y)
 	if (NEMOSHOW_ITEM_CC(item, has_inverse)) {
 		SkPoint p = NEMOSHOW_ITEM_CC(item, inverse)->mapXY(x, y);
 
-		if (one->x0 < p.x() && p.x() < one->x1 &&
-				one->y0 < p.y() && p.y() < one->y1) {
+		if (one->x < p.x() && p.x() < one->x + one->w &&
+				one->y < p.y() && p.y() < one->y + one->h) {
 			if (item->pick == NEMOSHOW_ITEM_NORMAL_PICK) {
 				return 1;
 			} else if (item->pick == NEMOSHOW_ITEM_PATH_PICK) {

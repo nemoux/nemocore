@@ -638,8 +638,16 @@ static inline void nemoshow_canvas_render_one(struct showone *canvas, SkCanvas *
 		nemoshow_canvas_render_item_group,
 		nemoshow_canvas_render_item_container
 	};
+	float sx = NEMOSHOW_CANVAS_AT(canvas, viewport.sx);
+	float sy = NEMOSHOW_CANVAS_AT(canvas, viewport.sy);
 
-	if (region != NULL && region->intersects(SkIRect::MakeXYWH(one->sx, one->sy, one->sw, one->sh)) == false)
+	if (region != NULL &&
+			region->intersects(
+				SkIRect::MakeXYWH(
+					floor(one->x * sx),
+					floor(one->y * sy),
+					ceil(one->w * sx),
+					ceil(one->h * sy))) == false)
 		return;
 
 	if (nemoshow_one_has_state(one, NEMOSHOW_TRANSFORM_STATE | NEMOSHOW_CLIP_STATE)) {
@@ -658,9 +666,7 @@ static inline void nemoshow_canvas_render_one(struct showone *canvas, SkCanvas *
 				SkMatrix matrix = _canvas->getTotalMatrix();
 
 				_canvas->resetMatrix();
-				_canvas->scale(
-						nemoshow_canvas_get_viewport_sx(canvas),
-						nemoshow_canvas_get_viewport_sy(canvas));
+				_canvas->scale(sx, sy);
 				_canvas->concat(*NEMOSHOW_ITEM_CC(clip, modelview));
 
 				_canvas->clipPath(*NEMOSHOW_ITEM_CC(clip, path));
@@ -866,12 +872,16 @@ void nemoshow_canvas_damage(struct showone *one, int32_t x, int32_t y, int32_t w
 void nemoshow_canvas_damage_one(struct showone *one, struct showone *child)
 {
 	struct showcanvas *canvas = NEMOSHOW_CANVAS(one);
+	int32_t sx = floor(child->x * canvas->viewport.sx);
+	int32_t sy = floor(child->y * canvas->viewport.sy);
+	int32_t sw = ceil(child->w * canvas->viewport.sx);
+	int32_t sh = ceil(child->h * canvas->viewport.sy);
 
 	NEMOSHOW_CANVAS_CC(canvas, damage)->op(
-			SkIRect::MakeXYWH(child->sx, child->sy, child->sw, child->sh),
+			SkIRect::MakeXYWH(sx, sy, sw, sh),
 			SkRegion::kUnion_Op);
 
-	nemotale_node_damage(canvas->node, child->sx, child->sy, child->sw, child->sh);
+	nemotale_node_damage(canvas->node, sx, sy, sw, sh);
 
 	nemoshow_canvas_set_state(canvas, NEMOSHOW_CANVAS_REDRAW_STATE);
 
