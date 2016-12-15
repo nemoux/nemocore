@@ -24,7 +24,7 @@ static void nemoshow_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t w
 		return;
 	}
 
-	nemoegl_resize_canvas(scon->eglcanvas, width, height);
+	nemoegl_resize_canvas(canvas, width, height);
 
 	nemoshow_set_size(show, width, height);
 
@@ -193,9 +193,7 @@ struct nemoshow *nemoshow_create_view(struct nemotool *tool, int32_t width, int3
 	scon->height = height;
 
 	scon->egl = nemoegl_create(scon->tool);
-
-	scon->eglcanvas = nemoegl_create_canvas(scon->egl, width, height);
-	scon->canvas = NTEGL_CANVAS(scon->eglcanvas);
+	scon->canvas = nemoegl_create_canvas(scon->egl, width, height);
 
 	nemocanvas_set_nemosurface(scon->canvas, NEMO_SHELL_SURFACE_TYPE_NORMAL);
 	nemocanvas_set_dispatch_resize(scon->canvas, nemoshow_dispatch_canvas_resize);
@@ -213,7 +211,7 @@ struct nemoshow *nemoshow_create_view(struct nemotool *tool, int32_t width, int3
 				NTEGL_DISPLAY(scon->egl),
 				NTEGL_CONTEXT(scon->egl),
 				NTEGL_CONFIG(scon->egl),
-				NTEGL_WINDOW(scon->eglcanvas)));
+				NTEGL_WINDOW(scon->canvas)));
 
 	show = nemoshow_create();
 	nemoshow_set_tale(show, scon->tale);
@@ -221,7 +219,7 @@ struct nemoshow *nemoshow_create_view(struct nemotool *tool, int32_t width, int3
 	nemoshow_set_context(show, scon);
 
 	nemocanvas_set_state(scon->canvas, "close");
-	nemocanvas_set_userdata(NTEGL_CANVAS(scon->eglcanvas), show);
+	nemocanvas_set_userdata(scon->canvas, show);
 
 #ifdef NEMOSHOW_FRAMELOG_ON
 	env = getenv("NEMOSHOW_FRAMELOG");
@@ -254,7 +252,7 @@ void nemoshow_destroy_view(struct nemoshow *show)
 
 	nemotale_destroy_gl(scon->tale);
 
-	nemoegl_destroy_canvas(scon->eglcanvas);
+	nemoegl_destroy_canvas(scon->canvas);
 	nemoegl_destroy(scon->egl);
 
 	free(scon);
@@ -617,7 +615,7 @@ void nemoshow_view_resize(struct nemoshow *show, int32_t width, int32_t height)
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemocanvas *canvas = scon->canvas;
 
-	nemoegl_resize_canvas(scon->eglcanvas, width, height);
+	nemoegl_resize_canvas(canvas, width, height);
 
 	nemoshow_set_size(show, width, height);
 

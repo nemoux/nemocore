@@ -128,48 +128,54 @@ void nemoegl_destroy(struct eglcontext *egl)
 	free(egl);
 }
 
-struct eglcanvas *nemoegl_create_canvas(struct eglcontext *egl, int32_t width, int32_t height)
+struct nemocanvas *nemoegl_create_canvas(struct eglcontext *egl, int32_t width, int32_t height)
 {
-	struct eglcanvas *canvas;
+	struct eglcanvas *ecanvas;
+	struct nemocanvas *canvas;
 
-	canvas = (struct eglcanvas *)malloc(sizeof(struct eglcanvas));
-	if (canvas == NULL)
+	ecanvas = (struct eglcanvas *)malloc(sizeof(struct eglcanvas));
+	if (ecanvas == NULL)
 		return NULL;
-	memset(canvas, 0, sizeof(struct eglcanvas));
+	memset(ecanvas, 0, sizeof(struct eglcanvas));
 
-	canvas->canvas = nemocanvas_create(egl->tool);
-	if (canvas->canvas == NULL)
+	canvas = &ecanvas->base;
+
+	if (nemocanvas_init(canvas, egl->tool) < 0)
 		goto err1;
 
-	canvas->window = wl_egl_window_create(
-			canvas->canvas->surface,
+	ecanvas->window = wl_egl_window_create(
+			canvas->surface,
 			width, height);
-	if (canvas->window == NULL)
+	if (ecanvas->window == NULL)
 		goto err2;
 
 	return canvas;
 
 err2:
-	nemocanvas_destroy(canvas->canvas);
+	nemocanvas_exit(canvas);
 
 err1:
-	free(canvas);
+	free(ecanvas);
 
 	return NULL;
 }
 
-void nemoegl_destroy_canvas(struct eglcanvas *canvas)
+void nemoegl_destroy_canvas(struct nemocanvas *canvas)
 {
-	wl_egl_window_destroy(canvas->window);
+	struct eglcanvas *ecanvas = NTEGL_CANVAS(canvas);
 
-	nemocanvas_destroy(canvas->canvas);
+	wl_egl_window_destroy(ecanvas->window);
 
-	free(canvas);
+	nemocanvas_exit(canvas);
+
+	free(ecanvas);
 }
 
-void nemoegl_resize_canvas(struct eglcanvas *canvas, int32_t width, int32_t height)
+void nemoegl_resize_canvas(struct nemocanvas *canvas, int32_t width, int32_t height)
 {
-	nemocanvas_set_size(canvas->canvas, width, height);
+	struct eglcanvas *ecanvas = NTEGL_CANVAS(canvas);
 
-	wl_egl_window_resize(canvas->window, width, height, 0, 0);
+	nemocanvas_set_size(canvas, width, height);
+
+	wl_egl_window_resize(ecanvas->window, width, height, 0, 0);
 }

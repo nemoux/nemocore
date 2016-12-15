@@ -78,6 +78,9 @@ struct nemocanvas {
 extern struct nemocanvas *nemocanvas_create(struct nemotool *tool);
 extern void nemocanvas_destroy(struct nemocanvas *canvas);
 
+extern int nemocanvas_init(struct nemocanvas *canvas, struct nemotool *tool);
+extern void nemocanvas_exit(struct nemocanvas *canvas);
+
 extern int nemocanvas_buffer(struct nemocanvas *canvas);
 extern void nemocanvas_damage(struct nemocanvas *canvas, int32_t x, int32_t y, int32_t width, int32_t height);
 extern void nemocanvas_damage_region(struct nemocanvas *canvas, pixman_region32_t *region);

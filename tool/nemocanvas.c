@@ -353,6 +353,72 @@ void nemocanvas_destroy(struct nemocanvas *canvas)
 	free(canvas);
 }
 
+int nemocanvas_init(struct nemocanvas *canvas, struct nemotool *tool)
+{
+	nemosignal_init(&canvas->destroy_signal);
+
+	pixman_region32_init(&canvas->damage);
+
+	canvas->tool = tool;
+
+	canvas->framerate = NEMOCANVAS_DEFAULT_FRAMERATE;
+	canvas->framemsecs = 0;
+
+	canvas->surface = wl_compositor_create_surface(tool->compositor);
+	wl_surface_add_listener(canvas->surface, &surface_listener, canvas);
+	wl_surface_set_user_data(canvas->surface, canvas);
+
+	return 0;
+}
+
+void nemocanvas_exit(struct nemocanvas *canvas)
+{
+	struct nemobuffer *buffer;
+	int i;
+
+	nemosignal_emit(&canvas->destroy_signal, canvas);
+
+	for (i = 0; i < 2; i++) {
+		buffer = &canvas->buffers[i];
+
+		if (buffer->buffer != NULL) {
+			wl_buffer_destroy(buffer->buffer);
+
+			munmap(buffer->shm_data, buffer->shm_size);
+
+			buffer->busy = 0;
+			buffer->buffer = NULL;
+		}
+	}
+
+	if (canvas->nextras > 0) {
+		for (i = 0; i < canvas->nextras; i++) {
+			buffer = &canvas->extras[i];
+
+			if (buffer->buffer != NULL) {
+				wl_buffer_destroy(buffer->buffer);
+
+				munmap(buffer->shm_data, buffer->shm_size);
+
+				buffer->busy = 0;
+				buffer->buffer = NULL;
+			}
+		}
+
+		free(canvas->extras);
+	}
+
+	if (canvas->nemo_surface != NULL)
+		nemo_surface_destroy(canvas->nemo_surface);
+
+	if (canvas->subsurface != NULL)
+		wl_subsurface_destroy(canvas->subsurface);
+
+	wl_surface_destroy(canvas->surface);
+
+	pixman_region32_fini(&canvas->damage);
+}
+
 pixman_image_t *nemocanvas_get_pixman_image(struct nemocanvas *canvas)
 {
 	pixman_image_t *image;
