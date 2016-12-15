@@ -213,7 +213,7 @@ struct nemoshow *nemoshow_create_view(struct nemotool *tool, int32_t width, int3
 				NTEGL_DISPLAY(scon->egl),
 				NTEGL_CONTEXT(scon->egl),
 				NTEGL_CONFIG(scon->egl),
-				(EGLNativeWindowType)NTEGL_WINDOW(scon->eglcanvas)));
+				NTEGL_WINDOW(scon->eglcanvas)));
 
 	show = nemoshow_create();
 	nemoshow_set_tale(show, scon->tale);

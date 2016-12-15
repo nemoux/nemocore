@@ -41,7 +41,7 @@ struct eglcanvas {
 };
 
 #define	NTEGL_CANVAS(ec)		(ec->canvas)
-#define	NTEGL_WINDOW(ec)		(ec->window)
+#define	NTEGL_WINDOW(ec)		((EGLNativeWindowType)(ec->window))
 
 extern struct eglcontext *nemoegl_create(struct nemotool *tool);
 extern void nemoegl_destroy(struct eglcontext *egl);
