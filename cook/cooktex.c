@@ -8,7 +8,7 @@
 #include <cooktex.h>
 #include <nemomisc.h>
 
-struct cooktex *nemocook_texture_create(int format, int width, int height)
+struct cooktex *nemocook_texture_create(void)
 {
 	struct cooktex *tex;
 
@@ -17,6 +17,22 @@ struct cooktex *nemocook_texture_create(int format, int width, int height)
 		return NULL;
 	memset(tex, 0, sizeof(struct cooktex));
 
+	return tex;
+}
+
+void nemocook_texture_destroy(struct cooktex *tex)
+{
+	if (tex->is_mine != 0)
+		glDeleteTextures(1, &tex->texture);
+
+	if (tex->pbo > 0)
+		glDeleteBuffers(1, &tex->pbo);
+
+	free(tex);
+}
+
+void nemocook_texture_assign(struct cooktex *tex, int format, int width, int height)
+{
 	tex->width = width;
 	tex->height = height;
 
@@ -37,17 +53,7 @@ struct cooktex *nemocook_texture_create(int format, int width, int height)
 	glTexImage2D(GL_TEXTURE_2D, 0, tex->format, width, height, 0, tex->format, GL_UNSIGNED_BYTE, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	return tex;
-}
-
-void nemocook_texture_destroy(struct cooktex *tex)
-{
-	glDeleteTextures(1, &tex->texture);
-
-	if (tex->pbo > 0)
-		glDeleteBuffers(1, &tex->pbo);
-
-	free(tex);
+	tex->is_mine = 1;
 }
 
 void nemocook_texture_resize(struct cooktex *tex, int width, int height)

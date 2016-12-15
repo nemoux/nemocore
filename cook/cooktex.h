@@ -36,6 +36,8 @@ typedef enum {
 
 struct cooktex {
 	GLuint texture;
+	int is_mine;
+
 	GLuint format;
 	int width, height;
 	int bpp;
@@ -43,9 +45,10 @@ struct cooktex {
 	GLuint pbo;
 };
 
-extern struct cooktex *nemocook_texture_create(int format, int width, int height);
+extern struct cooktex *nemocook_texture_create(void);
 extern void nemocook_texture_destroy(struct cooktex *tex);
 
+extern void nemocook_texture_assign(struct cooktex *tex, int format, int width, int height);
 extern void nemocook_texture_resize(struct cooktex *tex, int width, int height);
 
 extern void nemocook_texture_set_filter(struct cooktex *tex, int filter);
@@ -56,6 +59,16 @@ extern void nemocook_texture_upload_slice(struct cooktex *tex, void *buffer, int
 
 extern void *nemocook_texture_map(struct cooktex *tex);
 extern void nemocook_texture_unmap(struct cooktex *tex);
+
+static inline void nemocook_texture_set(struct cooktex *tex, GLuint texture)
+{
+	tex->texture = texture;
+}
+
+static inline GLuint nemocook_texture_get(struct cooktex *tex)
+{
+	return tex->texture;
+}
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
