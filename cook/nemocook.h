@@ -12,7 +12,9 @@ NEMO_BEGIN_EXTERN_C
 #include <cookshader.h>
 #include <cooktex.h>
 #include <cookpoly.h>
+#include <cooktrans.h>
 #include <cookegl.h>
+#include <cookfbo.h>
 
 struct nemocook;
 

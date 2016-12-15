@@ -17,6 +17,8 @@ struct cookpoly *nemocook_polygon_create(void)
 		return NULL;
 	memset(poly, 0, sizeof(struct cookpoly));
 
+	nemomatrix_init_identity(&poly->matrix);
+
 	return poly;
 }
 
@@ -69,4 +71,22 @@ void nemocook_polygon_set_texture(struct cookpoly *poly, struct cooktex *tex)
 struct cooktex *nemocook_polygon_get_texture(struct cookpoly *poly)
 {
 	return poly->texture;
+}
+
+void nemocook_polygon_set_transform(struct cookpoly *poly, struct cooktrans *trans)
+{
+	poly->transform = trans;
+}
+
+int nemocook_polygon_update_transform(struct cookpoly *poly)
+{
+	struct cooktrans *trans;
+
+	nemomatrix_init_identity(&poly->matrix);
+
+	for (trans = poly->transform; trans != NULL; trans = trans->parent) {
+		nemomatrix_multiply(&poly->matrix, &trans->matrix);
+	}
+
+	return 0;
 }

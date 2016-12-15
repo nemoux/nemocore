@@ -65,6 +65,7 @@ add_library(nemocook SHARED
 	cookshader.c
 	cooktex.c
 	cookpoly.c
+	cooktrans.c
 	cookegl.c
 	cookfbo.c
 	)
@@ -96,6 +97,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/cook/cookshader.h
 	${CMAKE_SOURCE_DIR}/cook/cooktex.h
 	${CMAKE_SOURCE_DIR}/cook/cookpoly.h
+	${CMAKE_SOURCE_DIR}/cook/cooktrans.h
 	${CMAKE_SOURCE_DIR}/cook/cookegl.h
 	${CMAKE_SOURCE_DIR}/cook/cookfbo.h
 	)

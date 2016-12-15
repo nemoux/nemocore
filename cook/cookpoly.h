@@ -14,8 +14,11 @@ NEMO_BEGIN_EXTERN_C
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
+#include <nemomatrix.h>
+
 #include <cookshader.h>
 #include <cooktex.h>
+#include <cooktrans.h>
 
 struct cookpoly {
 	float *buffers[NEMOCOOK_SHADER_ATTRIBS_MAX];
@@ -24,6 +27,10 @@ struct cookpoly {
 	int count;
 
 	struct cooktex *texture;
+
+	struct cooktrans *transform;
+
+	struct nemomatrix matrix;
 };
 
 extern struct cookpoly *nemocook_polygon_create(void);
@@ -38,6 +45,9 @@ extern void nemocook_polygon_copy_buffer(struct cookpoly *poly, int attrib, floa
 
 extern void nemocook_polygon_set_texture(struct cookpoly *poly, struct cooktex *tex);
 extern struct cooktex *nemocook_polygon_get_texture(struct cookpoly *poly);
+
+extern void nemocook_polygon_set_transform(struct cookpoly *poly, struct cooktrans *trans);
+extern int nemocook_polygon_update_transform(struct cookpoly *poly);
 
 static inline void nemocook_polygon_set_element(struct cookpoly *poly, int attrib, int index, int element, float value)
 {
