@@ -138,12 +138,10 @@ struct nemotile {
 	GLint uprojection0;
 	GLint uvtransform0;
 	GLint uttransform0;
-	GLint utexture0;
 	GLint ucolor0;
 	GLint uprojection1;
 	GLint uvtransform1;
 	GLint uttransform1;
-	GLint utexture1;
 	GLint uambient1;
 	GLint ulight1;
 	GLint uprojection2;

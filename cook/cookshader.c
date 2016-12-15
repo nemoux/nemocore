@@ -47,6 +47,11 @@ int nemocook_shader_set_program(struct cookshader *shader, const char *vertex_so
 	return 0;
 }
 
+void nemocook_shader_use_program(struct cookshader *shader)
+{
+	glUseProgram(shader->program);
+}
+
 void nemocook_shader_set_attrib(struct cookshader *shader, int index, const char *name, int size)
 {
 	glBindAttribLocation(shader->program, index, name);

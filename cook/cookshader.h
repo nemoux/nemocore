@@ -32,6 +32,7 @@ extern struct cookshader *nemocook_shader_create(void);
 extern void nemocook_shader_destroy(struct cookshader *shader);
 
 extern int nemocook_shader_set_program(struct cookshader *shader, const char *vertex_source, const char *fragment_source);
+extern void nemocook_shader_use_program(struct cookshader *shader);
 
 extern void nemocook_shader_set_attrib(struct cookshader *shader, int index, const char *name, int size);
 extern void nemocook_shader_set_uniform(struct cookshader *shader, int index, const char *name);

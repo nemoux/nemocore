@@ -540,11 +540,7 @@ static void nemotile_render_2d_one(struct nemotile *tile, struct nemomatrix *pro
 	nemomatrix_translate(&ttransform, one->ttransform.tx, one->ttransform.ty);
 
 	glUseProgram(tile->programs[0]);
-	glBindAttribLocation(tile->programs[0], 0, "position");
-	glBindAttribLocation(tile->programs[0], 1, "texcoord");
 
-	glUniform1i(tile->utexture0, 0);
-	glUniformMatrix4fv(tile->uprojection0, 1, GL_FALSE, projection->d);
 	glUniformMatrix4fv(tile->uvtransform0, 1, GL_FALSE, vtransform.d);
 	glUniformMatrix4fv(tile->uttransform0, 1, GL_FALSE, ttransform.d);
 	glUniform4fv(tile->ucolor0, 1, one->color);
@@ -587,11 +583,7 @@ static void nemotile_render_3d_one(struct nemotile *tile, struct nemomatrix *pro
 
 	if (one->has_diffuses == 0) {
 		glUseProgram(tile->programs[0]);
-		glBindAttribLocation(tile->programs[0], 0, "position");
-		glBindAttribLocation(tile->programs[0], 1, "texcoord");
 
-		glUniform1i(tile->utexture0, 0);
-		glUniformMatrix4fv(tile->uprojection0, 1, GL_FALSE, projection->d);
 		glUniformMatrix4fv(tile->uvtransform0, 1, GL_FALSE, vtransform.d);
 		glUniformMatrix4fv(tile->uttransform0, 1, GL_FALSE, ttransform.d);
 		glUniform4fv(tile->ucolor0, 1, one->color);
@@ -606,10 +598,7 @@ static void nemotile_render_3d_one(struct nemotile *tile, struct nemomatrix *pro
 		glEnableVertexAttribArray(1);
 	} else {
 		glUseProgram(tile->programs[2]);
-		glBindAttribLocation(tile->programs[2], 0, "position");
-		glBindAttribLocation(tile->programs[2], 1, "diffuse");
 
-		glUniformMatrix4fv(tile->uprojection2, 1, GL_FALSE, projection->d);
 		glUniformMatrix4fv(tile->uvtransform2, 1, GL_FALSE, vtransform.d);
 		glUniform4fv(tile->ucolor2, 1, one->color);
 
@@ -648,16 +637,9 @@ static void nemotile_render_3d_lighting_one(struct nemotile *tile, struct nemoma
 
 	if (one->has_diffuses == 0) {
 		glUseProgram(tile->programs[1]);
-		glBindAttribLocation(tile->programs[1], 0, "position");
-		glBindAttribLocation(tile->programs[1], 1, "texcoord");
-		glBindAttribLocation(tile->programs[1], 2, "normal");
 
-		glUniform1i(tile->utexture1, 0);
-		glUniformMatrix4fv(tile->uprojection1, 1, GL_FALSE, projection->d);
 		glUniformMatrix4fv(tile->uvtransform1, 1, GL_FALSE, vtransform.d);
 		glUniformMatrix4fv(tile->uttransform1, 1, GL_FALSE, ttransform.d);
-		glUniform4fv(tile->uambient1, 1, tile->ambient);
-		glUniform4fv(tile->ulight1, 1, tile->light);
 
 		glBindTexture(GL_TEXTURE_2D, nemoshow_canvas_get_effective_texture(one->texture));
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -671,14 +653,8 @@ static void nemotile_render_3d_lighting_one(struct nemotile *tile, struct nemoma
 		glEnableVertexAttribArray(2);
 	} else {
 		glUseProgram(tile->programs[3]);
-		glBindAttribLocation(tile->programs[3], 0, "position");
-		glBindAttribLocation(tile->programs[3], 1, "diffuse");
-		glBindAttribLocation(tile->programs[3], 2, "normal");
 
-		glUniformMatrix4fv(tile->uprojection3, 1, GL_FALSE, projection->d);
 		glUniformMatrix4fv(tile->uvtransform3, 1, GL_FALSE, vtransform.d);
-		glUniform4fv(tile->uambient3, 1, tile->ambient);
-		glUniform4fv(tile->ulight3, 1, tile->light);
 
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), &one->vertices[0]);
 		glEnableVertexAttribArray(0);
@@ -723,6 +699,9 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 		nemomatrix_rotate_z(&projection, cos(tile->projection.rz), sin(tile->projection.rz));
 		nemomatrix_translate_xyz(&projection, tile->projection.tx, tile->projection.ty, tile->projection.tz);
 
+		glUseProgram(tile->programs[0]);
+		glUniformMatrix4fv(tile->uprojection0, 1, GL_FALSE, projection.d);
+
 		nemolist_for_each(one, &tile->tile_list, link) {
 			nemotile_render_2d_one(tile, &projection, one);
 		}
@@ -753,6 +732,11 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 			nemomatrix_translate_xyz(&projection, tile->projection.tx, tile->projection.ty, tile->projection.tz);
 			nemomatrix_asymmetric(&projection, tile->asymmetric.a, tile->asymmetric.b, tile->asymmetric.c, tile->asymmetric.e, tile->asymmetric.near, tile->asymmetric.far);
 		}
+
+		glUseProgram(tile->programs[0]);
+		glUniformMatrix4fv(tile->uprojection0, 1, GL_FALSE, projection.d);
+		glUseProgram(tile->programs[2]);
+		glUniformMatrix4fv(tile->uprojection2, 1, GL_FALSE, projection.d);
 
 		nemotile_sort_depth(tile);
 
@@ -819,6 +803,15 @@ static void nemotile_dispatch_canvas_redraw(struct nemoshow *show, struct showon
 			nemomatrix_translate_xyz(&projection, tile->projection.tx, tile->projection.ty, tile->projection.tz);
 			nemomatrix_asymmetric(&projection, tile->asymmetric.a, tile->asymmetric.b, tile->asymmetric.c, tile->asymmetric.e, tile->asymmetric.near, tile->asymmetric.far);
 		}
+
+		glUseProgram(tile->programs[1]);
+		glUniformMatrix4fv(tile->uprojection1, 1, GL_FALSE, projection.d);
+		glUniform4fv(tile->uambient1, 1, tile->ambient);
+		glUniform4fv(tile->ulight1, 1, tile->light);
+		glUseProgram(tile->programs[3]);
+		glUniformMatrix4fv(tile->uprojection3, 1, GL_FALSE, projection.d);
+		glUniform4fv(tile->uambient3, 1, tile->ambient);
+		glUniform4fv(tile->ulight3, 1, tile->light);
 
 		nemotile_sort_depth(tile);
 
@@ -2066,16 +2059,28 @@ static int nemotile_prepare_opengl(struct nemotile *tile, int32_t width, int32_t
 	tile->programs[2] = gl_compile_program(vertexshader_diffuse, fragmentshader_diffuse, NULL, NULL);
 	tile->programs[3] = gl_compile_program(vertexshader_diffuse_light, fragmentshader_diffuse_light, NULL, NULL);
 
+	glBindAttribLocation(tile->programs[0], 0, "position");
+	glBindAttribLocation(tile->programs[0], 1, "texcoord");
+	glBindAttribLocation(tile->programs[1], 0, "position");
+	glBindAttribLocation(tile->programs[1], 1, "texcoord");
+	glBindAttribLocation(tile->programs[1], 2, "normal");
+	glBindAttribLocation(tile->programs[2], 0, "position");
+	glBindAttribLocation(tile->programs[2], 1, "diffuse");
+	glBindAttribLocation(tile->programs[3], 0, "position");
+	glBindAttribLocation(tile->programs[3], 1, "diffuse");
+	glBindAttribLocation(tile->programs[3], 2, "normal");
+
+	glUniform1i(glGetUniformLocation(tile->programs[0], "texture"), 0);
+	glUniform1i(glGetUniformLocation(tile->programs[1], "texture"), 0);
+
 	tile->uprojection0 = glGetUniformLocation(tile->programs[0], "projection");
 	tile->uvtransform0 = glGetUniformLocation(tile->programs[0], "vtransform");
 	tile->uttransform0 = glGetUniformLocation(tile->programs[0], "ttransform");
-	tile->utexture0 = glGetUniformLocation(tile->programs[0], "texture");
 	tile->ucolor0 = glGetUniformLocation(tile->programs[0], "color");
 
 	tile->uprojection1 = glGetUniformLocation(tile->programs[1], "projection");
 	tile->uvtransform1 = glGetUniformLocation(tile->programs[1], "vtransform");
 	tile->uttransform1 = glGetUniformLocation(tile->programs[1], "ttransform");
-	tile->utexture1 = glGetUniformLocation(tile->programs[1], "texture");
 	tile->uambient1 = glGetUniformLocation(tile->programs[1], "ambient");
 	tile->ulight1 = glGetUniformLocation(tile->programs[1], "light");
 
