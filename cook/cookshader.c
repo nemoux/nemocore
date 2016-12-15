@@ -44,6 +44,9 @@ int nemocook_shader_set_program(struct cookshader *shader, const char *vertex_so
 	if (shader->program == 0)
 		return -1;
 
+	shader->uprojection = glGetUniformLocation(shader->program, "projection");
+	shader->utransform = glGetUniformLocation(shader->program, "transform");
+
 	return 0;
 }
 

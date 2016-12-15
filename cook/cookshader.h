@@ -25,6 +25,9 @@ struct cookshader {
 	int attribs[NEMOCOOK_SHADER_ATTRIBS_MAX];
 	int nattribs;
 
+	GLint uprojection;
+	GLint utransform;
+
 	GLint uniforms[NEMOCOOK_SHADER_UNIFORMS_MAX];
 };
 
