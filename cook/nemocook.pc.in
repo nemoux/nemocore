@@ -1,0 +1,11 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+bindir=${prefix}/bin
+libdir=${prefix}/lib@CMAKE_LIBRARY_SUFFIX@
+incdir=${prefix}/include
+
+Name: Nemocook
+Description: NEMO-UX OpenGL-based rendering/compositing library
+Version: 0.1.0
+Requires: @NEMOCOOK_PKGCONFIG_REQUIRES@
+Libs: -L${libdir} -lnemocook
+Cflags: -I${incdir}/nemocook
