@@ -14,12 +14,16 @@ NEMO_BEGIN_EXTERN_C
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
+#define NEMOCOOK_SHADER_ATTRIBS_MAX					(4)
 #define NEMOCOOK_SHADER_UNIFORMS_MAX				(16)
 
 struct cookshader {
 	GLuint program;
 	GLuint vshader;
 	GLuint fshader;
+
+	int attribs[NEMOCOOK_SHADER_ATTRIBS_MAX];
+	int nattribs;
 
 	GLint uniforms[NEMOCOOK_SHADER_UNIFORMS_MAX];
 };
@@ -29,7 +33,7 @@ extern void nemocook_shader_destroy(struct cookshader *shader);
 
 extern int nemocook_shader_set_program(struct cookshader *shader, const char *vertex_source, const char *fragment_source);
 
-extern void nemocook_shader_set_attrib(struct cookshader *shader, int index, const char *name);
+extern void nemocook_shader_set_attrib(struct cookshader *shader, int index, const char *name, int size);
 extern void nemocook_shader_set_uniform(struct cookshader *shader, int index, const char *name);
 
 extern void nemocook_shader_set_uniform_1i(struct cookshader *shader, int index, int value);

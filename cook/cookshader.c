@@ -47,9 +47,13 @@ int nemocook_shader_set_program(struct cookshader *shader, const char *vertex_so
 	return 0;
 }
 
-void nemocook_shader_set_attrib(struct cookshader *shader, int index, const char *name)
+void nemocook_shader_set_attrib(struct cookshader *shader, int index, const char *name, int size)
 {
 	glBindAttribLocation(shader->program, index, name);
+
+	shader->attribs[index] = size;
+
+	shader->nattribs = MAX(shader->nattribs, index);
 }
 
 void nemocook_shader_set_uniform(struct cookshader *shader, int index, const char *name)

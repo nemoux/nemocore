@@ -64,6 +64,7 @@ add_library(nemocook SHARED
 	nemocook.c
 	cookshader.c
 	cooktex.c
+	cookpoly.c
 	)
 
 TARGET_LINK_LIBRARIES(nemocook
@@ -92,6 +93,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/cook/nemocook.h
 	${CMAKE_SOURCE_DIR}/cook/cookshader.h
 	${CMAKE_SOURCE_DIR}/cook/cooktex.h
+	${CMAKE_SOURCE_DIR}/cook/cookpoly.h
 	)
 
 set(NEMOCOOK_PKGCONFIG_REQUIRES "nemoasst nemohelper pixman-1 expat egl")
