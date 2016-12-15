@@ -19,8 +19,6 @@ struct cookegl {
 	EGLConfig config;
 	EGLSurface surface;
 
-	pixman_region32_t damages[NEMOCOOK_BUFFER_AGE_COUNT];
-
 	PFNGLEGLIMAGETARGETTEXTURE2DOESPROC image_target_texture_2d;
 	PFNEGLCREATEIMAGEKHRPROC create_image;
 	PFNEGLDESTROYIMAGEKHRPROC destroy_image;
@@ -56,17 +54,15 @@ static int nemocook_egl_postrender(struct nemocook *cook)
 
 static int nemocook_egl_resize(struct nemocook *cook, int width, int height)
 {
+	cook->width = width;
+	cook->height = height;
+
 	return 0;
 }
 
 static void nemocook_egl_finish(struct nemocook *cook)
 {
 	struct cookegl *egl = (struct cookegl *)cook->backend;
-	int i;
-
-	for (i = 0; i < NEMOCOOK_BUFFER_AGE_COUNT; i++) {
-		pixman_region32_fini(&egl->damages[i]);
-	}
 
 	eglMakeCurrent(egl->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 
@@ -79,7 +75,6 @@ int nemocook_egl_prepare(struct nemocook *cook, EGLDisplay egl_display, EGLConte
 {
 	struct cookegl *egl;
 	const char *extensions;
-	int i;
 
 	egl = (struct cookegl *)malloc(sizeof(struct cookegl));
 	if (egl == NULL)
@@ -119,10 +114,6 @@ int nemocook_egl_prepare(struct nemocook *cook, EGLDisplay egl_display, EGLConte
 	egl->surface = eglCreateWindowSurface(egl->display, egl->config, egl_window, NULL);
 	if (egl->surface == EGL_NO_SURFACE)
 		goto err1;
-
-	for (i = 0; i < NEMOCOOK_BUFFER_AGE_COUNT; i++) {
-		pixman_region32_init(&egl->damages[i]);
-	}
 
 	cook->backend_prerender = nemocook_egl_prerender;
 	cook->backend_postrender = nemocook_egl_postrender;

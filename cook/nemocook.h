@@ -29,10 +29,14 @@ struct nemocook {
 	nemocook_backend_resize_t backend_resize;
 	nemocook_backend_finish_t backend_finish;
 	void *backend;
+
+	uint32_t width, height;
 };
 
 extern struct nemocook *nemocook_create(void);
 extern void nemocook_destroy(struct nemocook *cook);
+
+extern void nemocook_set_size(struct nemocook *cook, uint32_t width, uint32_t height);
 
 static inline int nemocook_backend_prerender(struct nemocook *cook)
 {

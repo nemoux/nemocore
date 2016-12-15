@@ -13,7 +13,6 @@
 struct cookfbo {
 	GLuint texture;
 	GLuint fbo, dbo;
-	GLuint width, height;
 };
 
 static int nemocook_fbo_prerender(struct nemocook *cook)
@@ -38,8 +37,8 @@ static int nemocook_fbo_resize(struct nemocook *cook, int width, int height)
 {
 	struct cookfbo *fbo = (struct cookfbo *)cook->backend;
 
-	fbo->width = width;
-	fbo->height = height;
+	cook->width = width;
+	cook->height = height;
 
 	glDeleteFramebuffers(1, &fbo->fbo);
 	glDeleteRenderbuffers(1, &fbo->dbo);
@@ -70,8 +69,6 @@ int nemocook_fbo_prepare(struct nemocook *cook, GLuint texture, GLuint width, GL
 	memset(fbo, 0, sizeof(struct cookfbo));
 
 	fbo->texture = texture;
-	fbo->width = width;
-	fbo->height = height;
 
 	if (gl_create_fbo(fbo->texture, width, height, &fbo->fbo, &fbo->dbo) < 0)
 		goto err1;
@@ -81,6 +78,9 @@ int nemocook_fbo_prepare(struct nemocook *cook, GLuint texture, GLuint width, GL
 	cook->backend_resize = nemocook_fbo_resize;
 	cook->backend_finish = nemocook_fbo_finish;
 	cook->backend = (void *)fbo;
+
+	cook->width = width;
+	cook->height = height;
 
 	return 0;
 

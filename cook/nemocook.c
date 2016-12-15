@@ -24,3 +24,9 @@ void nemocook_destroy(struct nemocook *cook)
 {
 	free(cook);
 }
+
+void nemocook_set_size(struct nemocook *cook, uint32_t width, uint32_t height)
+{
+	cook->width = width;
+	cook->height = height;
+}
