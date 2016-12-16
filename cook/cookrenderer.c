@@ -27,6 +27,9 @@ static int nemocook_renderer_render(struct nemocook *cook)
 	glClearDepth(0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+
 	nemolist_for_each(poly, &cook->poly_list, link) {
 		if (shader != poly->shader) {
 			nemocook_shader_use_program(poly->shader);
