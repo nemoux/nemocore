@@ -118,6 +118,8 @@ int nemoplay_load_media(struct nemoplay *play, const char *mediapath)
 
 		if (video_context->pix_fmt == AV_PIX_FMT_BGRA)
 			play->pixel_format = NEMOPLAY_BGRA_PIXEL_FORMAT;
+		else if (video_context->pix_fmt == AV_PIX_FMT_RGBA)
+			play->pixel_format = NEMOPLAY_RGBA_PIXEL_FORMAT;
 		else
 			play->pixel_format = NEMOPLAY_YUV420_PIXEL_FORMAT;
 	}
@@ -187,7 +189,7 @@ int nemoplay_decode_media(struct nemoplay *play, int reqcount, int maxcount)
 			avcodec_decode_video2(video_context, frame, &finished, &packet);
 
 			if (finished != 0) {
-				if (play->pixel_format == NEMOPLAY_YUV420_PIXEL_FORMAT) {
+				if (NEMOPLAY_PIXEL_IS_YUV420_FORMAT(play->pixel_format)) {
 					struct playone *one;
 					void *y, *u, *v;
 
@@ -213,7 +215,7 @@ int nemoplay_decode_media(struct nemoplay *play, int reqcount, int maxcount)
 					one->height = frame->height;
 
 					nemoplay_queue_enqueue(play->video_queue, one);
-				} else if (play->pixel_format == NEMOPLAY_BGRA_PIXEL_FORMAT) {
+				} else if (NEMOPLAY_PIXEL_IS_RGBA_FORMAT(play->pixel_format)) {
 					struct playone *one;
 					void *buffer;
 
@@ -319,7 +321,7 @@ int nemoplay_extract_video(struct nemoplay *play, struct playbox *box)
 			avcodec_decode_video2(video_context, frame, &finished, &packet);
 
 			if (finished != 0) {
-				if (play->pixel_format == NEMOPLAY_YUV420_PIXEL_FORMAT) {
+				if (NEMOPLAY_PIXEL_IS_YUV420_FORMAT(play->pixel_format)) {
 					struct playone *one;
 					void *y, *u, *v;
 
@@ -345,7 +347,7 @@ int nemoplay_extract_video(struct nemoplay *play, struct playbox *box)
 					one->height = frame->height;
 
 					nemoplay_box_add_one(box, one);
-				} else if (play->pixel_format == NEMOPLAY_BGRA_PIXEL_FORMAT) {
+				} else if (NEMOPLAY_PIXEL_IS_RGBA_FORMAT(play->pixel_format)) {
 					struct playone *one;
 					void *buffer;
 

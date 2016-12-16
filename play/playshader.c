@@ -58,6 +58,26 @@ static const char NEMOPLAY_BGRA_FRAGMENT_SHADER[] =
 "  gl_FragColor = vec4(c.r * c.a, c.g * c.a, c.b * c.a, c.a);\n"
 "}\n";
 
+static const char NEMOPLAY_RGBA_VERTEX_SHADER[] =
+"attribute vec2 position;\n"
+"attribute vec2 texcoord;\n"
+"varying vec2 vtexcoord;\n"
+"void main()\n"
+"{\n"
+"  gl_Position = vec4(position, 0.0, 1.0);\n"
+"  vtexcoord = texcoord;\n"
+"}\n";
+
+static const char NEMOPLAY_RGBA_FRAGMENT_SHADER[] =
+"precision mediump float;\n"
+"varying vec2 vtexcoord;\n"
+"uniform sampler2D tex;\n"
+"void main()\n"
+"{\n"
+"  vec4 c = texture2D(tex, vtexcoord);\n"
+"  gl_FragColor = vec4(c.b * c.a, c.g * c.a, c.r * c.a, c.a);\n"
+"}\n";
+
 struct playshader *nemoplay_shader_create(void)
 {
 	struct playshader *shader;
@@ -123,6 +143,15 @@ int nemoplay_shader_set_format(struct playshader *shader, int format)
 		glBindAttribLocation(shader->program, 1, "texcoord");
 
 		shader->utex = glGetUniformLocation(shader->program, "tex");
+	} else if (format == NEMOPLAY_RGBA_PIXEL_FORMAT) {
+		shader->program = gl_compile_program(NEMOPLAY_RGBA_VERTEX_SHADER, NEMOPLAY_RGBA_FRAGMENT_SHADER, &shader->shaders[0], &shader->shaders[1]);
+		if (shader->program == 0)
+			return -1;
+		glUseProgram(shader->program);
+		glBindAttribLocation(shader->program, 0, "position");
+		glBindAttribLocation(shader->program, 1, "texcoord");
+
+		shader->utex = glGetUniformLocation(shader->program, "tex");
 	}
 
 	shader->format = format;
@@ -132,7 +161,7 @@ int nemoplay_shader_set_format(struct playshader *shader, int format)
 
 int nemoplay_shader_set_texture(struct playshader *shader, int32_t width, int32_t height)
 {
-	if (shader->format == NEMOPLAY_YUV420_PIXEL_FORMAT) {
+	if (NEMOPLAY_PIXEL_IS_YUV420_FORMAT(shader->format)) {
 		if (shader->texy > 0)
 			glDeleteTextures(1, &shader->texy);
 		if (shader->texu > 0)
@@ -196,7 +225,7 @@ int nemoplay_shader_set_texture(struct playshader *shader, int32_t width, int32_
 				GL_UNSIGNED_BYTE,
 				NULL);
 		glBindTexture(GL_TEXTURE_2D, 0);
-	} else if (shader->format == NEMOPLAY_BGRA_PIXEL_FORMAT) {
+	} else if (NEMOPLAY_PIXEL_IS_RGBA_FORMAT(shader->format)) {
 		if (shader->tex > 0)
 			glDeleteTextures(1, &shader->tex);
 
@@ -247,7 +276,7 @@ int nemoplay_shader_update(struct playshader *shader, struct playone *one)
 	glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
 	glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
 
-	if (shader->format == NEMOPLAY_YUV420_PIXEL_FORMAT) {
+	if (NEMOPLAY_PIXEL_IS_YUV420_FORMAT(shader->format)) {
 		glBindTexture(GL_TEXTURE_2D, shader->texv);
 		glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, nemoplay_one_get_linesize(one, 2));
 		glTexSubImage2D(GL_TEXTURE_2D, 0,
@@ -280,7 +309,7 @@ int nemoplay_shader_update(struct playshader *shader, struct playone *one)
 				GL_UNSIGNED_BYTE,
 				nemoplay_one_get_data(one, 0));
 		glBindTexture(GL_TEXTURE_2D, 0);
-	} else if (shader->format == NEMOPLAY_BGRA_PIXEL_FORMAT) {
+	} else if (NEMOPLAY_PIXEL_IS_RGBA_FORMAT(shader->format)) {
 		glBindTexture(GL_TEXTURE_2D, shader->tex);
 		glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, nemoplay_one_get_linesize(one, 0) / 4);
 		glTexSubImage2D(GL_TEXTURE_2D, 0,
@@ -309,7 +338,7 @@ int nemoplay_shader_dispatch(struct playshader *shader)
 
 	glViewport(0, 0, shader->viewport_width, shader->viewport_height);
 
-	if (shader->format == NEMOPLAY_YUV420_PIXEL_FORMAT) {
+	if (NEMOPLAY_PIXEL_IS_YUV420_FORMAT(shader->format)) {
 		glUseProgram(shader->program);
 		glUniform1i(shader->utexy, 0);
 		glUniform1i(shader->utexu, 1);
@@ -335,7 +364,7 @@ int nemoplay_shader_dispatch(struct playshader *shader)
 		glBindTexture(GL_TEXTURE_2D, 0);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, 0);
-	} else if (shader->format == NEMOPLAY_BGRA_PIXEL_FORMAT) {
+	} else if (NEMOPLAY_PIXEL_IS_RGBA_FORMAT(shader->format)) {
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 

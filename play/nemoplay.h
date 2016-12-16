@@ -30,10 +30,14 @@ typedef enum {
 } NemoPlayState;
 
 typedef enum {
-	NEMOPLAY_YUV420_PIXEL_FORMAT = 0,
-	NEMOPLAY_BGRA_PIXEL_FORMAT = 1,
+	NEMOPLAY_YUV420_PIXEL_FORMAT = 0x0,
+	NEMOPLAY_BGRA_PIXEL_FORMAT = 0x100,
+	NEMOPLAY_RGBA_PIXEL_FORMAT = 0x101,
 	NEMOPLAY_LAST_PIXEL_FORMAT
 } NemoPlayPixelFormat;
+
+#define NEMOPLAY_PIXEL_IS_YUV420_FORMAT(fmt)			(((fmt) & 0xff00) == 0x0)
+#define NEMOPLAY_PIXEL_IS_RGBA_FORMAT(fmt)				(((fmt) & 0xff00) == 0x100)
 
 typedef enum {
 	NEMOPLAY_SEEK_CMD = (1 << 0)
