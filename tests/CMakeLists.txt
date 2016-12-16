@@ -23,6 +23,7 @@ include_directories(
 	${CMAKE_BINARY_DIR}/tool
 	${CMAKE_SOURCE_DIR}/tale
 	${CMAKE_SOURCE_DIR}/show
+	${CMAKE_SOURCE_DIR}/cook
 	${CMAKE_SOURCE_DIR}/apps
 	${CMAKE_SOURCE_DIR}/play
 	${CMAKE_SOURCE_DIR}/navi
@@ -49,6 +50,16 @@ add_executable(nemoplay-quick
 TARGET_LINK_LIBRARIES(nemoplay-quick
 	nemoplay
 	nemoapps
+	)
+
+add_executable(nemocook-play
+	nemocook-play.c
+	)
+
+TARGET_LINK_LIBRARIES(nemocook-play
+	nemotool
+	nemocook
+	nemoplay
 	)
 
 if(WITH_CEF)

@@ -12,7 +12,7 @@
 #include <nemoegl.h>
 #include <nemomisc.h>
 
-struct eglcontext *nemoegl_create(struct nemotool *tool)
+struct nemoegl *nemoegl_create(struct nemotool *tool)
 {
 #ifdef NEMOUX_WITH_OPENGL_ES3
 	static const EGLint opaque_attribs[] = {
@@ -70,17 +70,17 @@ struct eglcontext *nemoegl_create(struct nemotool *tool)
 	};
 #endif
 
-	struct eglcontext *egl;
+	struct nemoegl *egl;
 	EGLConfig configs[16];
 	EGLint major, minor;
 	EGLint count, n, i, s;
 	int buffer_size = 32;
 	int use_alpha = 1;
 
-	egl = (struct eglcontext *)malloc(sizeof(struct eglcontext));
+	egl = (struct nemoegl *)malloc(sizeof(struct nemoegl));
 	if (egl == NULL)
 		return NULL;
-	memset(egl, 0, sizeof(struct eglcontext));
+	memset(egl, 0, sizeof(struct nemoegl));
 
 	egl->tool = tool;
 
@@ -121,14 +121,14 @@ err1:
 	return NULL;
 }
 
-void nemoegl_destroy(struct eglcontext *egl)
+void nemoegl_destroy(struct nemoegl *egl)
 {
 	eglDestroyContext(egl->display, egl->context);
 
 	free(egl);
 }
 
-struct nemocanvas *nemoegl_create_canvas(struct eglcontext *egl, int32_t width, int32_t height)
+struct nemocanvas *nemoegl_create_canvas(struct nemoegl *egl, int32_t width, int32_t height)
 {
 	struct eglcanvas *ecanvas;
 	struct nemocanvas *canvas;

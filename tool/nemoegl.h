@@ -20,7 +20,7 @@ NEMO_BEGIN_EXTERN_C
 #include <nemolist.h>
 #include <nemolistener.h>
 
-struct eglcontext {
+struct nemoegl {
 	struct nemotool *tool;
 
 	EGLDisplay display;
@@ -35,7 +35,7 @@ struct eglcontext {
 struct eglcanvas {
 	struct nemocanvas base;
 
-	struct eglcontext *egl;
+	struct nemoegl *egl;
 
 	struct wl_egl_window *window;
 };
@@ -43,10 +43,10 @@ struct eglcanvas {
 #define NTEGL_CANVAS(canvas)		((struct eglcanvas *)container_of(canvas, struct eglcanvas, base))
 #define NTEGL_WINDOW(canvas)		((EGLNativeWindowType)(NTEGL_CANVAS(canvas)->window))
 
-extern struct eglcontext *nemoegl_create(struct nemotool *tool);
-extern void nemoegl_destroy(struct eglcontext *egl);
+extern struct nemoegl *nemoegl_create(struct nemotool *tool);
+extern void nemoegl_destroy(struct nemoegl *egl);
 
-extern struct nemocanvas *nemoegl_create_canvas(struct eglcontext *egl, int32_t width, int32_t height);
+extern struct nemocanvas *nemoegl_create_canvas(struct nemoegl *egl, int32_t width, int32_t height);
 extern void nemoegl_destroy_canvas(struct nemocanvas *canvas);
 
 extern void nemoegl_resize_canvas(struct nemocanvas *canvas, int32_t width, int32_t height);

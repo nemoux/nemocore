@@ -27,7 +27,7 @@ struct showcontext {
 
 	struct nemotimer *timer;
 
-	struct eglcontext *egl;
+	struct nemoegl *egl;
 	struct nemocanvas *canvas;
 
 	struct nemotale *tale;
