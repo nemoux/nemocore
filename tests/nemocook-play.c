@@ -13,6 +13,7 @@
 #include <nemocook.h>
 #include <nemoplay.h>
 #include <playback.h>
+#include <pixmanhelper.h>
 #include <nemomisc.h>
 
 struct cookcontext {
@@ -111,6 +112,8 @@ int main(int argc, char *argv[])
 		{ "width",			required_argument,		NULL,		'w' },
 		{ "height",			required_argument,		NULL,		'h' },
 		{ "fullscreen",	required_argument,		NULL,		'f' },
+		{ "image",			required_argument,		NULL,		'i' },
+		{ "video",			required_argument,		NULL,		'v' },
 		{ 0 }
 	};
 
@@ -123,13 +126,16 @@ int main(int argc, char *argv[])
 	struct cooktex *tex;
 	struct cookpoly *poly;
 	struct nemoplay *play;
+	pixman_image_t *image;
 	char *fullscreenid = NULL;
 	char *contentpath = NULL;
+	char *imagepath = NULL;
+	char *videopath = NULL;
 	int width = 1280;
 	int height = 720;
 	int opt;
 
-	while (opt = getopt_long(argc, argv, "w:h:f:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:f:i:v:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -146,6 +152,14 @@ int main(int argc, char *argv[])
 				fullscreenid = strdup(optarg);
 				break;
 
+			case 'i':
+				imagepath = strdup(optarg);
+				break;
+
+			case 'v':
+				videopath = strdup(optarg);
+				break;
+
 			default:
 				break;
 		}
@@ -153,9 +167,6 @@ int main(int argc, char *argv[])
 
 	if (optind < argc)
 		contentpath = strdup(argv[optind]);
-
-	if (contentpath == NULL)
-		return 0;
 
 	context = (struct cookcontext *)malloc(sizeof(struct cookcontext));
 	if (context == NULL)
@@ -220,14 +231,46 @@ int main(int argc, char *argv[])
 	nemocook_polygon_set_element(poly, 1, 3, 1, 1.0f);
 	nemocook_attach_polygon(cook, poly);
 
+	context->videotex = tex = nemocook_texture_create();
+	nemocook_texture_assign(tex, NEMOCOOK_TEXTURE_BGRA_FORMAT, width, height);
+	context->videopoly = poly = nemocook_polygon_create();
+	nemocook_polygon_set_texture(poly, tex);
+	nemocook_polygon_set_shader(poly, shader);
+	nemocook_polygon_set_type(poly, GL_TRIANGLE_STRIP);
+	nemocook_polygon_set_count(poly, 4);
+	nemocook_polygon_set_buffer(poly, 0, 2);
+	nemocook_polygon_set_buffer(poly, 1, 2);
+	nemocook_polygon_set_element(poly, 0, 0, 0, -0.75f);
+	nemocook_polygon_set_element(poly, 0, 0, 1, 0.75f);
+	nemocook_polygon_set_element(poly, 0, 1, 0, 0.75f);
+	nemocook_polygon_set_element(poly, 0, 1, 1, 0.75f);
+	nemocook_polygon_set_element(poly, 0, 2, 0, -0.75f);
+	nemocook_polygon_set_element(poly, 0, 2, 1, -0.75f);
+	nemocook_polygon_set_element(poly, 0, 3, 0, 0.75f);
+	nemocook_polygon_set_element(poly, 0, 3, 1, -0.75f);
+	nemocook_polygon_set_element(poly, 1, 0, 0, 0.0f);
+	nemocook_polygon_set_element(poly, 1, 0, 1, 0.0f);
+	nemocook_polygon_set_element(poly, 1, 1, 0, 1.0f);
+	nemocook_polygon_set_element(poly, 1, 1, 1, 0.0f);
+	nemocook_polygon_set_element(poly, 1, 2, 0, 0.0f);
+	nemocook_polygon_set_element(poly, 1, 2, 1, 1.0f);
+	nemocook_polygon_set_element(poly, 1, 3, 0, 1.0f);
+	nemocook_polygon_set_element(poly, 1, 3, 1, 1.0f);
+	nemocook_attach_polygon(cook, poly);
+
+	image = pixman_load_image(imagepath, width, height);
+	nemocook_texture_upload(context->backtex,
+			pixman_image_get_data(image));
+	pixman_image_unref(image);
+
 	context->play = play = nemoplay_create();
-	nemoplay_load_media(play, contentpath);
+	nemoplay_load_media(play, videopath);
 
 	context->decoderback = nemoplay_decoder_create(play);
 	context->audioback = nemoplay_audio_create_by_ao(play);
 	context->videoback = nemoplay_video_create_by_timer(play, tool);
 	nemoplay_video_set_texture(context->videoback,
-			nemocook_texture_get(context->backtex),
+			nemocook_texture_get(context->videotex),
 			width, height);
 	nemoplay_video_set_update(context->videoback, nemocook_dispatch_video_update);
 	nemoplay_video_set_done(context->videoback, nemocook_dispatch_video_done);
