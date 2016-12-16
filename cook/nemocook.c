@@ -19,12 +19,16 @@ struct nemocook *nemocook_create(void)
 
 	nemolist_init(&cook->poly_list);
 
+	nemocook_one_prepare(&cook->one);
+
 	return cook;
 }
 
 void nemocook_destroy(struct nemocook *cook)
 {
 	nemolist_remove(&cook->poly_list);
+
+	nemocook_one_finish(&cook->one);
 
 	free(cook);
 }

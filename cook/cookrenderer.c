@@ -23,12 +23,7 @@ static int nemocook_renderer_render(struct nemocook *cook)
 
 	glViewport(0, 0, cook->width, cook->height);
 
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	glClearDepth(0.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	nemocook_one_update(&cook->one);
 
 	nemolist_for_each(poly, &cook->poly_list, link) {
 		if (shader != poly->shader) {
@@ -43,6 +38,8 @@ static int nemocook_renderer_render(struct nemocook *cook)
 			glVertexAttribPointer(i, shader->attribs[i], GL_FLOAT, GL_FALSE, shader->attribs[i] * sizeof(GLfloat), poly->buffers[i]);
 			glEnableVertexAttribArray(i);
 		}
+
+		nemocook_one_update(&poly->one);
 
 		if (poly->texture != NULL) {
 			glBindTexture(GL_TEXTURE_2D, poly->texture->texture);

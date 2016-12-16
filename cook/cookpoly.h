@@ -17,11 +17,15 @@ NEMO_BEGIN_EXTERN_C
 #include <cookshader.h>
 #include <cooktex.h>
 #include <cooktrans.h>
+#include <cookone.h>
+#include <cookstate.h>
 
 #include <nemomatrix.h>
 #include <nemolist.h>
 
 struct cookpoly {
+	struct cookone one;
+
 	float *buffers[NEMOCOOK_SHADER_ATTRIBS_MAX];
 	int elements[NEMOCOOK_SHADER_ATTRIBS_MAX];
 
@@ -57,6 +61,11 @@ extern void nemocook_polygon_set_transform(struct cookpoly *poly, struct cooktra
 extern int nemocook_polygon_update_transform(struct cookpoly *poly);
 
 extern void nemocook_polygon_set_shader(struct cookpoly *poly, struct cookshader *shader);
+
+static inline void nemocook_polygon_attach_state(struct cookpoly *poly, struct cookstate *state)
+{
+	nemocook_one_attach_state(&poly->one, state);
+}
 
 static inline void nemocook_polygon_set_element(struct cookpoly *poly, int attrib, int index, int element, float value)
 {

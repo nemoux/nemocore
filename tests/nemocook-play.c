@@ -222,6 +222,9 @@ int main(int argc, char *argv[])
 			NTEGL_WINDOW(canvas));
 	nemocook_prepare_renderer(cook);
 
+	nemocook_attach_state(cook,
+			nemocook_state_create(1, NEMOCOOK_STATE_COLOR_BUFFER_TYPE, 0.0f, 0.0f, 0.0f, 0.0f));
+
 	context->shader = shader = nemocook_shader_create();
 	nemocook_shader_set_program(shader, vertexshader_texture, fragmentshader_texture);
 	nemocook_shader_set_attrib(shader, 0, "position", 2);
@@ -307,6 +310,9 @@ int main(int argc, char *argv[])
 	nemocook_polygon_set_element(poly, 1, 3, 0, 1.0f);
 	nemocook_polygon_set_element(poly, 1, 3, 1, 1.0f);
 	nemocook_attach_polygon(cook, poly);
+
+	nemocook_polygon_attach_state(poly,
+			nemocook_state_create(1, NEMOCOOK_STATE_BLEND_TYPE, 1, GL_ONE, GL_ONE_MINUS_SRC_ALPHA));
 
 	image = pixman_load_image(imagepath, width, height);
 	nemocook_texture_upload(context->backtex,

@@ -16,6 +16,8 @@ NEMO_BEGIN_EXTERN_C
 #include <cookegl.h>
 #include <cookfbo.h>
 #include <cookrenderer.h>
+#include <cookone.h>
+#include <cookstate.h>
 
 #include <nemolist.h>
 
@@ -29,6 +31,8 @@ typedef void (*nemocook_backend_finish_t)(struct nemocook *cook);
 typedef int (*nemocook_render_t)(struct nemocook *cook);
 
 struct nemocook {
+	struct cookone one;
+
 	nemocook_backend_prerender_t backend_prerender;
 	nemocook_backend_postrender_t backend_postrender;
 	nemocook_backend_resize_t backend_resize;
@@ -74,6 +78,11 @@ static inline void nemocook_backend_finish(struct nemocook *cook)
 static inline int nemocook_render(struct nemocook *cook)
 {
 	return cook->render(cook);
+}
+
+static inline void nemocook_attach_state(struct nemocook *cook, struct cookstate *state)
+{
+	nemocook_one_attach_state(&cook->one, state);
 }
 
 #ifdef __cplusplus

@@ -6,6 +6,7 @@
 #include <errno.h>
 
 #include <cookpoly.h>
+#include <cookone.h>
 #include <nemomisc.h>
 
 struct cookpoly *nemocook_polygon_create(void)
@@ -21,6 +22,8 @@ struct cookpoly *nemocook_polygon_create(void)
 
 	nemolist_init(&poly->link);
 
+	nemocook_one_prepare(&poly->one);
+
 	return poly;
 }
 
@@ -29,6 +32,8 @@ void nemocook_polygon_destroy(struct cookpoly *poly)
 	int i;
 
 	nemolist_remove(&poly->link);
+
+	nemocook_one_finish(&poly->one);
 
 	for (i = 0; i < NEMOCOOK_SHADER_ATTRIBS_MAX; i++) {
 		if (poly->buffers[i] != NULL)
