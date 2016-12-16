@@ -19,7 +19,7 @@ NEMO_BEGIN_EXTERN_C
 
 struct nemocook;
 
-extern int nemocook_egl_prepare(struct nemocook *cook, EGLDisplay egl_display, EGLContext egl_context, EGLConfig egl_config, EGLNativeWindowType egl_window);
+extern int nemocook_prepare_egl(struct nemocook *cook, EGLDisplay egl_display, EGLContext egl_context, EGLConfig egl_config, EGLNativeWindowType egl_window);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

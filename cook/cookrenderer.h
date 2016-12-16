@@ -11,7 +11,7 @@ NEMO_BEGIN_EXTERN_C
 
 struct nemocook;
 
-extern int nemocook_renderer_prepare(struct nemocook *cook);
+extern int nemocook_prepare_renderer(struct nemocook *cook);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

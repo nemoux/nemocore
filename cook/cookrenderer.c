@@ -55,7 +55,7 @@ static int nemocook_renderer_render(struct nemocook *cook)
 	return 0;
 }
 
-int nemocook_renderer_prepare(struct nemocook *cook)
+int nemocook_prepare_renderer(struct nemocook *cook)
 {
 	struct cookrenderer *renderer;
 

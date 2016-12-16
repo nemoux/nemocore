@@ -16,7 +16,7 @@ NEMO_BEGIN_EXTERN_C
 
 struct nemocook;
 
-extern int nemocook_fbo_prepare(struct nemocook *cook, GLuint texture, GLuint width, GLuint height);
+extern int nemocook_prepare_fbo(struct nemocook *cook, GLuint texture, GLuint width, GLuint height);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

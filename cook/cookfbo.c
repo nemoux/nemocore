@@ -59,7 +59,7 @@ static void nemocook_fbo_finish(struct nemocook *cook)
 	free(fbo);
 }
 
-int nemocook_fbo_prepare(struct nemocook *cook, GLuint texture, GLuint width, GLuint height)
+int nemocook_prepare_fbo(struct nemocook *cook, GLuint texture, GLuint width, GLuint height)
 {
 	struct cookfbo *fbo;
 

@@ -70,7 +70,7 @@ static void nemocook_dispatch_video_done(struct nemoplay *play, void *data)
 
 int main(int argc, char *argv[])
 {
-	static const char *vertexshader =
+	static const char *vertexshader_texture =
 		"uniform mat4 transform;\n"
 		"attribute vec2 position;\n"
 		"attribute vec2 texcoord;\n"
@@ -80,13 +80,31 @@ int main(int argc, char *argv[])
 		"  gl_Position = transform * vec4(position, 0.0, 1.0);\n"
 		"  vtexcoord = texcoord;\n"
 		"}\n";
-	static const char *fragmentshader =
+	static const char *fragmentshader_texture =
 		"precision mediump float;\n"
 		"uniform sampler2D texture;\n"
 		"varying vec2 vtexcoord;\n"
 		"void main()\n"
 		"{\n"
 		"  gl_FragColor = texture2D(texture, vtexcoord);\n"
+		"}\n";
+	static const char *vertexshader_diffuse =
+		"uniform mat4 transform;\n"
+		"attribute vec2 position;\n"
+		"attribute vec4 diffuse;\n"
+		"varying vec4 vdiffuse;\n"
+		"void main()\n"
+		"{\n"
+		"  gl_Position = transform * vec4(position, 0.0, 1.0);\n"
+		"  vdiffuse = diffuse;\n"
+		"}\n";
+	static const char *fragmentshader_diffuse =
+		"precision mediump float;\n"
+		"uniform sampler2D texture;\n"
+		"varying vec4 vdiffuse;\n"
+		"void main()\n"
+		"{\n"
+		"  gl_FragColor = vdiffuse;\n"
 		"}\n";
 
 	struct option options[] = {
@@ -163,15 +181,15 @@ int main(int argc, char *argv[])
 
 	context->cook = cook = nemocook_create();
 	nemocook_set_size(cook, width, height);
-	nemocook_egl_prepare(cook,
+	nemocook_prepare_egl(cook,
 			NTEGL_DISPLAY(egl),
 			NTEGL_CONTEXT(egl),
 			NTEGL_CONFIG(egl),
 			NTEGL_WINDOW(canvas));
-	nemocook_renderer_prepare(cook);
+	nemocook_prepare_renderer(cook);
 
 	context->shader = shader = nemocook_shader_create();
-	nemocook_shader_set_program(shader, vertexshader, fragmentshader);
+	nemocook_shader_set_program(shader, vertexshader_texture, fragmentshader_texture);
 	nemocook_shader_set_attrib(shader, 0, "position", 2);
 	nemocook_shader_set_attrib(shader, 1, "texcoord", 2);
 

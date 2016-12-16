@@ -71,7 +71,7 @@ static void nemocook_egl_finish(struct nemocook *cook)
 	free(egl);
 }
 
-int nemocook_egl_prepare(struct nemocook *cook, EGLDisplay egl_display, EGLContext egl_context, EGLConfig egl_config, EGLNativeWindowType egl_window)
+int nemocook_prepare_egl(struct nemocook *cook, EGLDisplay egl_display, EGLContext egl_context, EGLConfig egl_config, EGLNativeWindowType egl_window)
 {
 	struct cookegl *egl;
 	const char *extensions;
