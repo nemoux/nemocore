@@ -15,6 +15,9 @@ NEMO_BEGIN_EXTERN_C
 #include <cooktrans.h>
 #include <cookegl.h>
 #include <cookfbo.h>
+#include <cookrenderer.h>
+
+#include <nemolist.h>
 
 struct nemocook;
 
@@ -23,6 +26,8 @@ typedef int (*nemocook_backend_postrender_t)(struct nemocook *cook);
 typedef int (*nemocook_backend_resize_t)(struct nemocook *cook, int width, int height);
 typedef void (*nemocook_backend_finish_t)(struct nemocook *cook);
 
+typedef int (*nemocook_render_t)(struct nemocook *cook);
+
 struct nemocook {
 	nemocook_backend_prerender_t backend_prerender;
 	nemocook_backend_postrender_t backend_postrender;
@@ -30,13 +35,21 @@ struct nemocook {
 	nemocook_backend_finish_t backend_finish;
 	void *backend;
 
+	nemocook_render_t render;
+	void *context;
+
 	uint32_t width, height;
+
+	struct nemolist poly_list;
 };
 
 extern struct nemocook *nemocook_create(void);
 extern void nemocook_destroy(struct nemocook *cook);
 
 extern void nemocook_set_size(struct nemocook *cook, uint32_t width, uint32_t height);
+
+extern void nemocook_attach_polygon(struct nemocook *cook, struct cookpoly *poly);
+extern void nemocook_detach_polygon(struct nemocook *cook, struct cookpoly *poly);
 
 static inline int nemocook_backend_prerender(struct nemocook *cook)
 {
@@ -56,6 +69,11 @@ static inline int nemocook_backend_resize(struct nemocook *cook, int width, int 
 static inline void nemocook_backend_finish(struct nemocook *cook)
 {
 	cook->backend_finish(cook);
+}
+
+static inline int nemocook_render(struct nemocook *cook)
+{
+	return cook->render(cook);
 }
 
 #ifdef __cplusplus

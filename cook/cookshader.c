@@ -61,7 +61,7 @@ void nemocook_shader_set_attrib(struct cookshader *shader, int index, const char
 
 	shader->attribs[index] = size;
 
-	shader->nattribs = MAX(shader->nattribs, index);
+	shader->nattribs = MAX(shader->nattribs, index + 1);
 }
 
 void nemocook_shader_set_uniform(struct cookshader *shader, int index, const char *name)

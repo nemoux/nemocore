@@ -19,12 +19,16 @@ struct cookpoly *nemocook_polygon_create(void)
 
 	nemomatrix_init_identity(&poly->matrix);
 
+	nemolist_init(&poly->link);
+
 	return poly;
 }
 
 void nemocook_polygon_destroy(struct cookpoly *poly)
 {
 	int i;
+
+	nemolist_remove(&poly->link);
 
 	for (i = 0; i < NEMOCOOK_SHADER_ATTRIBS_MAX; i++) {
 		if (poly->buffers[i] != NULL)
@@ -44,6 +48,11 @@ void nemocook_polygon_set_count(struct cookpoly *poly, int count)
 		if (poly->buffers[i] != NULL)
 			poly->buffers[i] = (float *)realloc(poly->buffers[i], sizeof(float) * poly->count * poly->elements[i]);
 	}
+}
+
+void nemocook_polygon_set_type(struct cookpoly *poly, int type)
+{
+	poly->type = type;
 }
 
 void nemocook_polygon_set_buffer(struct cookpoly *poly, int attrib, int element)
@@ -89,4 +98,9 @@ int nemocook_polygon_update_transform(struct cookpoly *poly)
 	}
 
 	return 0;
+}
+
+void nemocook_polygon_set_shader(struct cookpoly *poly, struct cookshader *shader)
+{
+	poly->shader = shader;
 }

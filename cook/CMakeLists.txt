@@ -68,6 +68,7 @@ add_library(nemocook SHARED
 	cooktrans.c
 	cookegl.c
 	cookfbo.c
+	cookrenderer.c
 	)
 
 TARGET_LINK_LIBRARIES(nemocook
@@ -100,6 +101,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/cook/cooktrans.h
 	${CMAKE_SOURCE_DIR}/cook/cookegl.h
 	${CMAKE_SOURCE_DIR}/cook/cookfbo.h
+	${CMAKE_SOURCE_DIR}/cook/cookrenderer.h
 	)
 
 set(NEMOCOOK_PKGCONFIG_REQUIRES "nemoasst nemohelper pixman-1 expat egl")
