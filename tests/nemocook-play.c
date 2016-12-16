@@ -25,13 +25,21 @@ struct cookcontext {
 	struct cookshader *shader;
 	struct cooktex *backtex;
 	struct cooktex *videotex;
+	struct cooktex *motiontex;
 	struct cookpoly *backpoly;
 	struct cookpoly *videopoly;
+	struct cookpoly *motionpoly;
 
 	struct nemoplay *play;
 	struct playdecoder *decoderback;
 	struct playaudio *audioback;
 	struct playvideo *videoback;
+
+	struct nemoplay *motion;
+	struct playextractor *extractor;
+	struct playshader *player;
+	struct playbox *box;
+	int iframes;
 
 	int width, height;
 };
@@ -44,6 +52,15 @@ static void nemocook_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t w
 static void nemocook_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t secs, uint32_t nsecs)
 {
 	struct cookcontext *context = (struct cookcontext *)nemocanvas_get_userdata(canvas);
+	struct playone *one;
+
+	one = nemoplay_box_get_one(context->box, context->iframes);
+	if (one != NULL) {
+		nemoplay_shader_update(context->player, one);
+		nemoplay_shader_dispatch(context->player);
+
+		context->iframes = (context->iframes + 1) % nemoplay_box_get_count(context->box);
+	}
 
 	nemocook_render(context->cook);
 }
@@ -114,6 +131,7 @@ int main(int argc, char *argv[])
 		{ "fullscreen",	required_argument,		NULL,		'f' },
 		{ "image",			required_argument,		NULL,		'i' },
 		{ "video",			required_argument,		NULL,		'v' },
+		{ "motion",			required_argument,		NULL,		'm' },
 		{ 0 }
 	};
 
@@ -131,11 +149,12 @@ int main(int argc, char *argv[])
 	char *contentpath = NULL;
 	char *imagepath = NULL;
 	char *videopath = NULL;
+	char *motionpath = NULL;
 	int width = 1280;
 	int height = 720;
 	int opt;
 
-	while (opt = getopt_long(argc, argv, "w:h:f:i:v:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:f:i:v:m:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -158,6 +177,10 @@ int main(int argc, char *argv[])
 
 			case 'v':
 				videopath = strdup(optarg);
+				break;
+
+			case 'm':
+				motionpath = strdup(optarg);
 				break;
 
 			default:
@@ -258,6 +281,33 @@ int main(int argc, char *argv[])
 	nemocook_polygon_set_element(poly, 1, 3, 1, 1.0f);
 	nemocook_attach_polygon(cook, poly);
 
+	context->motiontex = tex = nemocook_texture_create();
+	nemocook_texture_assign(tex, NEMOCOOK_TEXTURE_BGRA_FORMAT, width, height);
+	context->motionpoly = poly = nemocook_polygon_create();
+	nemocook_polygon_set_texture(poly, tex);
+	nemocook_polygon_set_shader(poly, shader);
+	nemocook_polygon_set_type(poly, GL_TRIANGLE_STRIP);
+	nemocook_polygon_set_count(poly, 4);
+	nemocook_polygon_set_buffer(poly, 0, 2);
+	nemocook_polygon_set_buffer(poly, 1, 2);
+	nemocook_polygon_set_element(poly, 0, 0, 0, -0.45f);
+	nemocook_polygon_set_element(poly, 0, 0, 1, -0.45f);
+	nemocook_polygon_set_element(poly, 0, 1, 0, 0.45f);
+	nemocook_polygon_set_element(poly, 0, 1, 1, -0.45f);
+	nemocook_polygon_set_element(poly, 0, 2, 0, -0.45f);
+	nemocook_polygon_set_element(poly, 0, 2, 1, -0.95f);
+	nemocook_polygon_set_element(poly, 0, 3, 0, 0.45f);
+	nemocook_polygon_set_element(poly, 0, 3, 1, -0.95f);
+	nemocook_polygon_set_element(poly, 1, 0, 0, 0.0f);
+	nemocook_polygon_set_element(poly, 1, 0, 1, 0.0f);
+	nemocook_polygon_set_element(poly, 1, 1, 0, 1.0f);
+	nemocook_polygon_set_element(poly, 1, 1, 1, 0.0f);
+	nemocook_polygon_set_element(poly, 1, 2, 0, 0.0f);
+	nemocook_polygon_set_element(poly, 1, 2, 1, 1.0f);
+	nemocook_polygon_set_element(poly, 1, 3, 0, 1.0f);
+	nemocook_polygon_set_element(poly, 1, 3, 1, 1.0f);
+	nemocook_attach_polygon(cook, poly);
+
 	image = pixman_load_image(imagepath, width, height);
 	nemocook_texture_upload(context->backtex,
 			pixman_image_get_data(image));
@@ -275,6 +325,22 @@ int main(int argc, char *argv[])
 	nemoplay_video_set_update(context->videoback, nemocook_dispatch_video_update);
 	nemoplay_video_set_done(context->videoback, nemocook_dispatch_video_done);
 	nemoplay_video_set_data(context->videoback, context);
+
+	context->motion = play = nemoplay_create();
+	nemoplay_load_media(play, motionpath);
+
+	context->box = nemoplay_box_create(nemoplay_get_video_framecount(play));
+	context->extractor = nemoplay_extractor_create(play, context->box);
+
+	context->player = nemoplay_shader_create();
+	nemoplay_shader_set_format(context->player,
+			nemoplay_get_pixel_format(play));
+	nemoplay_shader_set_texture(context->player,
+			nemoplay_get_video_width(play),
+			nemoplay_get_video_height(play));
+	nemoplay_shader_set_viewport(context->player,
+			nemocook_texture_get(context->motiontex),
+			width, height);
 
 	nemocanvas_dispatch_frame(canvas);
 
