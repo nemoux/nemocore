@@ -60,13 +60,7 @@ static int nemocook_renderer_render(struct nemocook *cook)
 			glEnableVertexAttribArray(i);
 		}
 
-		if (poly->texture != NULL) {
-			glBindTexture(GL_TEXTURE_2D, poly->texture->texture);
-			glDrawArrays(poly->type, 0, poly->count);
-			glBindTexture(GL_TEXTURE_2D, 0);
-		} else {
-			glDrawArrays(poly->type, 0, poly->count);
-		}
+		nemocook_polygon_draw(poly);
 	}
 
 	nemocook_renderer_postrender(renderer);

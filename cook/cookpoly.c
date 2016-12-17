@@ -9,6 +9,18 @@
 #include <cookone.h>
 #include <nemomisc.h>
 
+static void nemocook_polygon_draw_simple(struct cookpoly *poly)
+{
+	glDrawArrays(poly->type, 0, poly->count);
+}
+
+static void nemocook_polygon_draw_texture(struct cookpoly *poly)
+{
+	glBindTexture(GL_TEXTURE_2D, poly->texture->texture);
+	glDrawArrays(poly->type, 0, poly->count);
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
 struct cookpoly *nemocook_polygon_create(void)
 {
 	struct cookpoly *poly;
@@ -17,6 +29,8 @@ struct cookpoly *nemocook_polygon_create(void)
 	if (poly == NULL)
 		return NULL;
 	memset(poly, 0, sizeof(struct cookpoly));
+
+	poly->draw = nemocook_polygon_draw_simple;
 
 	nemomatrix_init_identity(&poly->matrix);
 
@@ -80,6 +94,11 @@ void nemocook_polygon_copy_buffer(struct cookpoly *poly, int attrib, float *buff
 void nemocook_polygon_set_texture(struct cookpoly *poly, struct cooktex *tex)
 {
 	poly->texture = tex;
+
+	if (tex != NULL)
+		poly->draw = nemocook_polygon_draw_texture;
+	else
+		poly->draw = nemocook_polygon_draw_simple;
 }
 
 struct cooktex *nemocook_polygon_get_texture(struct cookpoly *poly)

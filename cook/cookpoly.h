@@ -23,6 +23,10 @@ NEMO_BEGIN_EXTERN_C
 #include <nemomatrix.h>
 #include <nemolist.h>
 
+struct cookpoly;
+
+typedef void (*nemocook_poly_draw_t)(struct cookpoly *poly);
+
 struct cookpoly {
 	struct cookone one;
 
@@ -41,6 +45,8 @@ struct cookpoly {
 	struct nemomatrix matrix;
 
 	struct nemolist link;
+
+	nemocook_poly_draw_t draw;
 };
 
 extern struct cookpoly *nemocook_polygon_create(void);
@@ -75,6 +81,11 @@ static inline void nemocook_polygon_set_element(struct cookpoly *poly, int attri
 static inline float nemocook_polygon_get_element(struct cookpoly *poly, int attrib, int index, int element)
 {
 	return poly->buffers[attrib][index * poly->elements[attrib] + element];
+}
+
+static inline void nemocook_polygon_draw(struct cookpoly *poly)
+{
+	poly->draw(poly);
 }
 
 #ifdef __cplusplus
