@@ -40,6 +40,8 @@ struct cookpoly {
 
 	struct cooktex *texture;
 
+	float color[4];
+
 	struct cooktrans *transform;
 
 	struct nemomatrix matrix;
@@ -62,6 +64,8 @@ extern void nemocook_polygon_copy_buffer(struct cookpoly *poly, int attrib, floa
 
 extern void nemocook_polygon_set_texture(struct cookpoly *poly, struct cooktex *tex);
 extern struct cooktex *nemocook_polygon_get_texture(struct cookpoly *poly);
+
+extern void nemocook_polygon_set_color(struct cookpoly *poly, float r, float g, float b, float a);
 
 extern void nemocook_polygon_set_transform(struct cookpoly *poly, struct cooktrans *trans);
 extern int nemocook_polygon_update_transform(struct cookpoly *poly);

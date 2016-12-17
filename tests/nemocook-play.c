@@ -231,6 +231,7 @@ int main(int argc, char *argv[])
 	nemocook_shader_set_program(shader, vertexshader_texture, fragmentshader_texture);
 	nemocook_shader_set_attrib(shader, 0, "position", 2);
 	nemocook_shader_set_attrib(shader, 1, "texcoord", 2);
+	nemocook_shader_set_polygon_uniforms(shader, NEMOCOOK_SHADER_POLYGON_TRANSFORM_UNIFORM);
 
 	context->backtex = tex = nemocook_texture_create();
 	nemocook_texture_assign(tex, NEMOCOOK_TEXTURE_BGRA_FORMAT, width, height);

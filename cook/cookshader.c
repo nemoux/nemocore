@@ -6,6 +6,7 @@
 #include <errno.h>
 
 #include <cookshader.h>
+#include <cookpoly.h>
 #include <nemomisc.h>
 #include <glhelper.h>
 
@@ -44,8 +45,8 @@ int nemocook_shader_set_program(struct cookshader *shader, const char *vertex_so
 	if (shader->program == 0)
 		return -1;
 
-	shader->uprojection = glGetUniformLocation(shader->program, "projection");
 	shader->utransform = glGetUniformLocation(shader->program, "transform");
+	shader->ucolor = glGetUniformLocation(shader->program, "color");
 
 	return 0;
 }
@@ -92,4 +93,29 @@ void nemocook_shader_set_uniform_matrix4fv(struct cookshader *shader, int index,
 void nemocook_shader_set_uniform_4fv(struct cookshader *shader, int index, float *value)
 {
 	glUniform4fv(shader->uniforms[index], 1, value);
+}
+
+void nemocook_shader_update_polygon_attribs(struct cookshader *shader, struct cookpoly *poly)
+{
+	int i;
+
+	for (i = 0; i < shader->nattribs; i++) {
+		glVertexAttribPointer(i,
+				shader->attribs[i],
+				GL_FLOAT,
+				GL_FALSE,
+				shader->attribs[i] * sizeof(GLfloat),
+				poly->buffers[i]);
+		glEnableVertexAttribArray(i);
+	}
+}
+
+void nemocook_shader_update_polygon_transform(struct cookshader *shader, struct cookpoly *poly)
+{
+	glUniformMatrix4fv(shader->utransform, 1, GL_FALSE, poly->matrix.d);
+}
+
+void nemocook_shader_update_polygon_color(struct cookshader *shader, struct cookpoly *poly)
+{
+	glUniform4fv(shader->ucolor, 1, poly->color);
 }

@@ -106,6 +106,14 @@ struct cooktex *nemocook_polygon_get_texture(struct cookpoly *poly)
 	return poly->texture;
 }
 
+void nemocook_polygon_set_color(struct cookpoly *poly, float r, float g, float b, float a)
+{
+	poly->color[0] = r;
+	poly->color[1] = g;
+	poly->color[2] = b;
+	poly->color[3] = a;
+}
+
 void nemocook_polygon_set_transform(struct cookpoly *poly, struct cooktrans *trans)
 {
 	poly->transform = trans;

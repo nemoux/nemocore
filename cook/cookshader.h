@@ -17,6 +17,13 @@ NEMO_BEGIN_EXTERN_C
 #define NEMOCOOK_SHADER_ATTRIBS_MAX					(4)
 #define NEMOCOOK_SHADER_UNIFORMS_MAX				(16)
 
+typedef enum {
+	NEMOCOOK_SHADER_POLYGON_TRANSFORM_UNIFORM = (1 << 0),
+	NEMOCOOK_SHADER_POLYGON_COLOR_UNIFORM = (1 << 1)
+} NemoCookShaderPolygonUniform;
+
+struct cookpoly;
+
 struct cookshader {
 	GLuint program;
 	GLuint vshader;
@@ -25,8 +32,10 @@ struct cookshader {
 	int attribs[NEMOCOOK_SHADER_ATTRIBS_MAX];
 	int nattribs;
 
-	GLint uprojection;
+	uint32_t polygon_uniforms;
+
 	GLint utransform;
+	GLint ucolor;
 
 	GLint uniforms[NEMOCOOK_SHADER_UNIFORMS_MAX];
 };
@@ -45,6 +54,25 @@ extern void nemocook_shader_set_uniform_1f(struct cookshader *shader, int index,
 extern void nemocook_shader_set_uniform_2fv(struct cookshader *shader, int index, float *value);
 extern void nemocook_shader_set_uniform_matrix4fv(struct cookshader *shader, int index, float *value);
 extern void nemocook_shader_set_uniform_4fv(struct cookshader *shader, int index, float *value);
+
+extern void nemocook_shader_update_polygon_attribs(struct cookshader *shader, struct cookpoly *poly);
+extern void nemocook_shader_update_polygon_transform(struct cookshader *shader, struct cookpoly *poly);
+extern void nemocook_shader_update_polygon_color(struct cookshader *shader, struct cookpoly *poly);
+
+static inline void nemocook_shader_set_polygon_uniforms(struct cookshader *shader, uint32_t uniforms)
+{
+	shader->polygon_uniforms |= uniforms;
+}
+
+static inline void nemocook_shader_put_polygon_uniforms(struct cookshader *shader, uint32_t uniforms)
+{
+	shader->polygon_uniforms &= ~uniforms;
+}
+
+static inline int nemocook_shader_has_polygon_uniforms(struct cookshader *shader, uint32_t uniforms)
+{
+	return (shader->polygon_uniforms & uniforms) == uniforms;
+}
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

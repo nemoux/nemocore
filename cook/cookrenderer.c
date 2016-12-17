@@ -35,7 +35,6 @@ static int nemocook_renderer_render(struct nemocook *cook)
 {
 	struct cookrenderer *renderer = (struct cookrenderer *)cook->context;
 	struct cookpoly *poly;
-	int i;
 
 	nemocook_backend_prerender(cook);
 	nemocook_renderer_prerender(renderer);
@@ -46,19 +45,15 @@ static int nemocook_renderer_render(struct nemocook *cook)
 
 	nemolist_for_each(poly, &cook->poly_list, link) {
 		nemocook_renderer_use_shader(renderer, poly->shader);
+
+		if (nemocook_shader_has_polygon_uniforms(renderer->shader, NEMOCOOK_SHADER_POLYGON_TRANSFORM_UNIFORM) != 0)
+			nemocook_shader_update_polygon_transform(renderer->shader, poly);
+		if (nemocook_shader_has_polygon_uniforms(renderer->shader, NEMOCOOK_SHADER_POLYGON_COLOR_UNIFORM) != 0)
+			nemocook_shader_update_polygon_color(renderer->shader, poly);
+
+		nemocook_shader_update_polygon_attribs(renderer->shader, poly);
+
 		nemocook_one_update(&poly->one);
-
-		glUniformMatrix4fv(renderer->shader->utransform, 1, GL_FALSE, poly->matrix.d);
-
-		for (i = 0; i < renderer->shader->nattribs; i++) {
-			glVertexAttribPointer(i,
-					renderer->shader->attribs[i],
-					GL_FLOAT,
-					GL_FALSE,
-					renderer->shader->attribs[i] * sizeof(GLfloat),
-					poly->buffers[i]);
-			glEnableVertexAttribArray(i);
-		}
 
 		nemocook_polygon_draw(poly);
 	}
