@@ -68,6 +68,7 @@ add_library(nemocook SHARED
 	cooktrans.c
 	cookone.c
 	cookstate.c
+	cookcamera.c
 	cookegl.c
 	cookfbo.c
 	cookrenderer.c
@@ -103,6 +104,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/cook/cooktrans.h
 	${CMAKE_SOURCE_DIR}/cook/cookone.h
 	${CMAKE_SOURCE_DIR}/cook/cookstate.h
+	${CMAKE_SOURCE_DIR}/cook/cookcamera.h
 	${CMAKE_SOURCE_DIR}/cook/cookegl.h
 	${CMAKE_SOURCE_DIR}/cook/cookfbo.h
 	${CMAKE_SOURCE_DIR}/cook/cookrenderer.h
