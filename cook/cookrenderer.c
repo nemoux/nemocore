@@ -10,12 +10,21 @@
 #include <nemomisc.h>
 
 struct cookrenderer {
+	struct cookshader *shader;
 };
+
+static inline void nemocook_renderer_use_shader(struct cookrenderer *renderer, struct cookshader *shader)
+{
+	if (renderer->shader != shader) {
+		nemocook_shader_use_program(shader);
+
+		renderer->shader = shader;
+	}
+}
 
 static int nemocook_renderer_render(struct nemocook *cook)
 {
 	struct cookrenderer *renderer = (struct cookrenderer *)cook->context;
-	struct cookshader *shader = NULL;
 	struct cookpoly *poly;
 	int i;
 
@@ -26,20 +35,20 @@ static int nemocook_renderer_render(struct nemocook *cook)
 	nemocook_one_update(&cook->one);
 
 	nemolist_for_each(poly, &cook->poly_list, link) {
-		if (shader != poly->shader) {
-			nemocook_shader_use_program(poly->shader);
+		nemocook_renderer_use_shader(renderer, poly->shader);
+		nemocook_one_update(&poly->one);
 
-			shader = poly->shader;
-		}
+		glUniformMatrix4fv(renderer->shader->utransform, 1, GL_FALSE, poly->matrix.d);
 
-		glUniformMatrix4fv(shader->utransform, 1, GL_FALSE, poly->matrix.d);
-
-		for (i = 0; i < shader->nattribs; i++) {
-			glVertexAttribPointer(i, shader->attribs[i], GL_FLOAT, GL_FALSE, shader->attribs[i] * sizeof(GLfloat), poly->buffers[i]);
+		for (i = 0; i < renderer->shader->nattribs; i++) {
+			glVertexAttribPointer(i,
+					renderer->shader->attribs[i],
+					GL_FLOAT,
+					GL_FALSE,
+					renderer->shader->attribs[i] * sizeof(GLfloat),
+					poly->buffers[i]);
 			glEnableVertexAttribArray(i);
 		}
-
-		nemocook_one_update(&poly->one);
 
 		if (poly->texture != NULL) {
 			glBindTexture(GL_TEXTURE_2D, poly->texture->texture);
