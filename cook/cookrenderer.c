@@ -13,6 +13,15 @@ struct cookrenderer {
 	struct cookshader *shader;
 };
 
+static inline void nemocook_renderer_prerender(struct cookrenderer *renderer)
+{
+	renderer->shader = NULL;
+}
+
+static inline void nemocook_renderer_postrender(struct cookrenderer *renderer)
+{
+}
+
 static inline void nemocook_renderer_use_shader(struct cookrenderer *renderer, struct cookshader *shader)
 {
 	if (renderer->shader != shader) {
@@ -29,6 +38,7 @@ static int nemocook_renderer_render(struct nemocook *cook)
 	int i;
 
 	nemocook_backend_prerender(cook);
+	nemocook_renderer_prerender(renderer);
 
 	glViewport(0, 0, cook->width, cook->height);
 
@@ -59,6 +69,7 @@ static int nemocook_renderer_render(struct nemocook *cook)
 		}
 	}
 
+	nemocook_renderer_postrender(renderer);
 	nemocook_backend_postrender(cook);
 
 	return 0;
