@@ -60,6 +60,8 @@ static void nemocook_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 		nemoplay_shader_dispatch(context->player);
 
 		context->iframes = (context->iframes + 1) % nemoplay_box_get_count(context->box);
+
+		nemocanvas_dispatch_feedback(canvas);
 	}
 
 	nemocook_render(context->cook);
