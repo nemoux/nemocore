@@ -60,6 +60,7 @@ TARGET_LINK_LIBRARIES(nemocook-play
 	nemotool
 	nemocook
 	nemoplay
+	nemofx
 	)
 
 if(WITH_CEF)

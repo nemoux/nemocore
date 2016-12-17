@@ -14,6 +14,7 @@
 #include <nemoplay.h>
 #include <playback.h>
 #include <pixmanhelper.h>
+#include <glfilter.h>
 #include <nemomisc.h>
 
 struct cookcontext {
@@ -24,11 +25,14 @@ struct cookcontext {
 	struct nemocook *cook;
 	struct cookshader *shader;
 	struct cooktex *backtex;
+	struct cooktex *imagetex;
 	struct cooktex *videotex;
 	struct cooktex *motiontex;
 	struct cookpoly *backpoly;
 	struct cookpoly *videopoly;
 	struct cookpoly *motionpoly;
+
+	struct glfilter *filter;
 
 	struct nemoplay *play;
 	struct playdecoder *decoderback;
@@ -62,6 +66,11 @@ static void nemocook_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 		context->iframes = (context->iframes + 1) % nemoplay_box_get_count(context->box);
 
 		nemocanvas_dispatch_feedback(canvas);
+	}
+
+	if (context->filter != NULL) {
+		nemocook_texture_set(context->backtex,
+				nemofx_glfilter_dispatch(context->filter, nemocook_texture_get(context->imagetex)));
 	}
 
 	nemocook_render(context->cook);
@@ -132,6 +141,7 @@ int main(int argc, char *argv[])
 		{ "height",			required_argument,		NULL,		'h' },
 		{ "fullscreen",	required_argument,		NULL,		'f' },
 		{ "image",			required_argument,		NULL,		'i' },
+		{ "shader",			required_argument,		NULL,		's' },
 		{ "video",			required_argument,		NULL,		'v' },
 		{ "motion",			required_argument,		NULL,		'm' },
 		{ 0 }
@@ -150,13 +160,14 @@ int main(int argc, char *argv[])
 	char *fullscreenid = NULL;
 	char *contentpath = NULL;
 	char *imagepath = NULL;
+	char *shaderpath = NULL;
 	char *videopath = NULL;
 	char *motionpath = NULL;
 	int width = 1280;
 	int height = 720;
 	int opt;
 
-	while (opt = getopt_long(argc, argv, "w:h:f:i:v:m:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:f:i:s:v:m:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -175,6 +186,10 @@ int main(int argc, char *argv[])
 
 			case 'i':
 				imagepath = strdup(optarg);
+				break;
+
+			case 's':
+				shaderpath = strdup(optarg);
 				break;
 
 			case 'v':
@@ -234,7 +249,6 @@ int main(int argc, char *argv[])
 	nemocook_shader_set_polygon_uniforms(shader, NEMOCOOK_SHADER_POLYGON_TRANSFORM_UNIFORM);
 
 	context->backtex = tex = nemocook_texture_create();
-	nemocook_texture_assign(tex, NEMOCOOK_TEXTURE_BGRA_FORMAT, width, height);
 	context->backpoly = poly = nemocook_polygon_create();
 	nemocook_polygon_set_texture(poly, tex);
 	nemocook_polygon_set_shader(poly, shader);
@@ -287,6 +301,9 @@ int main(int argc, char *argv[])
 	nemocook_polygon_set_element(poly, 1, 3, 1, 1.0f);
 	nemocook_attach_polygon(cook, poly);
 
+	context->imagetex = tex = nemocook_texture_create();
+	nemocook_texture_assign(tex, NEMOCOOK_TEXTURE_BGRA_FORMAT, width, height);
+
 	context->motiontex = tex = nemocook_texture_create();
 	nemocook_texture_assign(tex, NEMOCOOK_TEXTURE_BGRA_FORMAT, width, height);
 	context->motionpoly = poly = nemocook_polygon_create();
@@ -317,10 +334,17 @@ int main(int argc, char *argv[])
 	nemocook_polygon_attach_state(poly,
 			nemocook_state_create(1, NEMOCOOK_STATE_BLEND_TYPE, 1, GL_ONE, GL_ONE_MINUS_SRC_ALPHA));
 
-	image = pixman_load_image(imagepath, width, height);
-	nemocook_texture_upload(context->backtex,
-			pixman_image_get_data(image));
-	pixman_image_unref(image);
+	if (imagepath != NULL) {
+		image = pixman_load_image(imagepath, width, height);
+		nemocook_texture_upload(context->imagetex,
+				pixman_image_get_data(image));
+		pixman_image_unref(image);
+	}
+
+	if (shaderpath != NULL) {
+		context->filter = nemofx_glfilter_create(width, height);
+		nemofx_glfilter_set_program(context->filter, shaderpath);
+	}
 
 	context->play = play = nemoplay_create();
 	nemoplay_load_media(play, videopath);
