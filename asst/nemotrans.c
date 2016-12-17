@@ -193,12 +193,20 @@ void nemotrans_destroy(struct nemotrans *trans)
 		free(one);
 	}
 
+	if (trans->ones != NULL)
+		free(trans->ones);
+
 	free(trans);
 }
 
 void nemotrans_set_tag(struct nemotrans *trans, uint32_t tag)
 {
 	trans->tag = tag;
+}
+
+void nemotrans_set_max(struct nemotrans *trans, int max)
+{
+	trans->ones = (struct transone **)malloc(sizeof(struct transone *) * max);
 }
 
 void nemotrans_ease_set_type(struct nemotrans *trans, int type)
@@ -287,6 +295,46 @@ void nemotrans_set_double(struct nemotrans *trans, double *var, double value)
 	nemoattr_setp(&one->attr, var);
 
 	nemolist_insert_tail(&trans->list, &one->link);
+}
+
+void nemotrans_set_float_one(struct nemotrans *trans, int index, float sattr, float eattr)
+{
+	struct transone *one;
+
+	trans->ones[index] = one = (struct transone *)malloc(sizeof(struct transone));
+	one->sattr = sattr;
+	one->eattr = eattr;
+	one->is_double = 0;
+
+	nemoattr_setp(&one->attr, NULL);
+	nemoattr_setf(&one->attr, sattr);
+
+	nemolist_insert_tail(&trans->list, &one->link);
+}
+
+void nemotrans_set_double_one(struct nemotrans *trans, int index, double sattr, double eattr)
+{
+	struct transone *one;
+
+	trans->ones[index] = one = (struct transone *)malloc(sizeof(struct transone));
+	one->sattr = sattr;
+	one->eattr = eattr;
+	one->is_double = 1;
+
+	nemoattr_setp(&one->attr, NULL);
+	nemoattr_setd(&one->attr, sattr);
+
+	nemolist_insert_tail(&trans->list, &one->link);
+}
+
+float nemotrans_get_float_one(struct nemotrans *trans, int index)
+{
+	return nemoattr_getf(&trans->ones[index]->attr);
+}
+
+double nemotrans_get_double_one(struct nemotrans *trans, int index)
+{
+	return nemoattr_getd(&trans->ones[index]->attr);
 }
 
 void nemotrans_set_dispatch_update(struct nemotrans *trans, nemotrans_dispatch_update_t dispatch)

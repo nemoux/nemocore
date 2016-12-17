@@ -54,9 +54,6 @@ static inline uint32_t nemoattr_get_serial(struct nemoattr *attr)
 
 static inline void nemoattr_seti(struct nemoattr *attr, uint32_t i)
 {
-	if (attr->p == NULL)
-		attr->p = &attr->v.i;
-
 	*(uint32_t *)(attr->p) = i;
 }
 
@@ -77,9 +74,6 @@ static inline uint32_t nemoattr_geti_offset(struct nemoattr *attr, int offset)
 
 static inline void nemoattr_setl(struct nemoattr *attr, uint64_t l)
 {
-	if (attr->p == NULL)
-		attr->p = &attr->v.l;
-
 	*(uint64_t *)(attr->p) = l;
 }
 
@@ -100,9 +94,6 @@ static inline uint64_t nemoattr_getl_offset(struct nemoattr *attr, int offset)
 
 static inline void nemoattr_setf(struct nemoattr *attr, float f)
 {
-	if (attr->p == NULL)
-		attr->p = &attr->v.f;
-
 	*(float *)(attr->p) = f;
 }
 
@@ -123,9 +114,6 @@ static inline float nemoattr_getf_offset(struct nemoattr *attr, int offset)
 
 static inline void nemoattr_setd(struct nemoattr *attr, double d)
 {
-	if (attr->p == NULL)
-		attr->p = &attr->v.d;
-
 	*(double *)(attr->p) = d;
 }
 
@@ -169,7 +157,10 @@ static inline const char *nemoattr_gets(struct nemoattr *attr)
 
 static inline void nemoattr_setp(struct nemoattr *attr, void *p)
 {
-	attr->p = p;
+	if (p == NULL)
+		attr->p = &attr->v.d;
+	else
+		attr->p = p;
 }
 
 static inline void *nemoattr_getp(struct nemoattr *attr)

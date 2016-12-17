@@ -36,6 +36,8 @@ struct nemotrans {
 
 	struct nemolist list;
 
+	struct transone **ones;
+
 	uint32_t duration;
 	uint32_t delay;
 
@@ -76,6 +78,8 @@ extern void nemotrans_destroy(struct nemotrans *trans);
 
 extern void nemotrans_set_tag(struct nemotrans *trans, uint32_t tag);
 
+extern void nemotrans_set_max(struct nemotrans *trans, int max);
+
 extern void nemotrans_ease_set_type(struct nemotrans *trans, int type);
 extern void nemotrans_ease_set_bezier(struct nemotrans *trans, double x0, double y0, double x1, double y1);
 
@@ -84,6 +88,11 @@ extern int nemotrans_dispatch(struct nemotrans *trans, uint32_t msecs);
 
 extern void nemotrans_set_float(struct nemotrans *trans, float *var, float value);
 extern void nemotrans_set_double(struct nemotrans *trans, double *var, double value);
+
+extern void nemotrans_set_float_one(struct nemotrans *trans, int index, float sattr, float eattr);
+extern void nemotrans_set_double_one(struct nemotrans *trans, int index, double sattr, double eattr);
+extern float nemotrans_get_float_one(struct nemotrans *trans, int index);
+extern double nemotrans_get_double_one(struct nemotrans *trans, int index);
 
 extern void nemotrans_set_dispatch_update(struct nemotrans *trans, nemotrans_dispatch_update_t dispatch);
 extern void nemotrans_set_dispatch_done(struct nemotrans *trans, nemotrans_dispatch_done_t dispatch);
