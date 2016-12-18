@@ -14,6 +14,8 @@ NEMO_BEGIN_EXTERN_C
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
+#include <cookone.h>
+
 typedef enum {
 	NEMOCOOK_TEXTURE_BGRA_FORMAT = 0,
 	NEMOCOOK_TEXTURE_LUMINANCE_FORMAT = 1,
@@ -35,6 +37,8 @@ typedef enum {
 } NemoCookTextureWrap;
 
 struct cooktex {
+	struct cookone one;
+
 	GLuint texture;
 	int is_mine;
 
@@ -68,6 +72,11 @@ static inline void nemocook_texture_set(struct cooktex *tex, GLuint texture)
 static inline GLuint nemocook_texture_get(struct cooktex *tex)
 {
 	return tex->texture;
+}
+
+static inline void nemocook_texture_attach_state(struct cooktex *tex, struct cookstate *state)
+{
+	nemocook_one_attach_state(&tex->one, state);
 }
 
 #ifdef __cplusplus

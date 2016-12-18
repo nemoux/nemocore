@@ -17,11 +17,15 @@ struct cooktex *nemocook_texture_create(void)
 		return NULL;
 	memset(tex, 0, sizeof(struct cooktex));
 
+	nemocook_one_prepare(&tex->one);
+
 	return tex;
 }
 
 void nemocook_texture_destroy(struct cooktex *tex)
 {
+	nemocook_one_finish(&tex->one);
+
 	if (tex->is_mine != 0)
 		glDeleteTextures(1, &tex->texture);
 

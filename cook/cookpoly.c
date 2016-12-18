@@ -16,6 +16,8 @@ static void nemocook_polygon_draw_simple(struct cookpoly *poly)
 
 static void nemocook_polygon_draw_texture(struct cookpoly *poly)
 {
+	nemocook_one_update(&poly->texture->one);
+
 	glBindTexture(GL_TEXTURE_2D, poly->texture->texture);
 	glDrawArrays(poly->type, 0, poly->count);
 	glBindTexture(GL_TEXTURE_2D, 0);
