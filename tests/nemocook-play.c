@@ -332,7 +332,7 @@ int main(int argc, char *argv[])
 	nemocook_attach_polygon(cook, poly);
 
 	nemocook_polygon_attach_state(poly,
-			nemocook_state_create(1, NEMOCOOK_STATE_BLEND_TYPE, 1, GL_ONE, GL_ONE_MINUS_SRC_ALPHA));
+			nemocook_state_create(1, NEMOCOOK_STATE_BLEND_TYPE, 1, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
 	if (imagepath != NULL) {
 		image = pixman_load_image(imagepath, width, height);

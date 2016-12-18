@@ -55,7 +55,7 @@ static const char NEMOPLAY_BGRA_FRAGMENT_SHADER[] =
 "void main()\n"
 "{\n"
 "  vec4 c = texture2D(tex, vtexcoord);\n"
-"  gl_FragColor = vec4(c.r * c.a, c.g * c.a, c.b * c.a, c.a);\n"
+"  gl_FragColor = vec4(c.r, c.g, c.b, c.a);\n"
 "}\n";
 
 static const char NEMOPLAY_RGBA_VERTEX_SHADER[] =
@@ -75,7 +75,7 @@ static const char NEMOPLAY_RGBA_FRAGMENT_SHADER[] =
 "void main()\n"
 "{\n"
 "  vec4 c = texture2D(tex, vtexcoord);\n"
-"  gl_FragColor = vec4(c.b * c.a, c.g * c.a, c.r * c.a, c.a);\n"
+"  gl_FragColor = vec4(c.b, c.g, c.r, c.a);\n"
 "}\n";
 
 struct playshader *nemoplay_shader_create(void)
