@@ -255,8 +255,6 @@ void nemoshow_destroy_view(struct nemoshow *show)
 
 	nemocanvas_egl_destroy(scon->canvas);
 
-	nemotool_disconnect_egl(scon->tool);
-
 	free(scon);
 }
 

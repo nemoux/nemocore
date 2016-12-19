@@ -44,6 +44,7 @@ typedef enum {
 } NemoModMask;
 
 struct nemotool;
+struct eglcontext;
 
 typedef void (*nemotool_dispatch_source_t)(void *data, const char *events);
 typedef void (*nemotool_dispatch_idle_t)(void *data);
@@ -114,8 +115,9 @@ struct nemotool {
 
 	uint32_t compositor_version;
 
-	int epoll_fd;
+	struct eglcontext *eglcontext;
 
+	int epoll_fd;
 	int display_fd;
 
 	nemotool_dispatch_global_t dispatch_global;
@@ -124,7 +126,6 @@ struct nemotool {
 	struct nemolist output_list;
 
 	struct nemolist idle_list;
-
 	struct nemolist source_list;
 
 	int running;
@@ -139,8 +140,6 @@ struct nemotool {
 	} xkb;
 
 	uint32_t modifiers;
-
-	void *eglcontext;
 
 	void *userdata;
 };

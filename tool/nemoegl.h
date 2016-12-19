@@ -26,7 +26,7 @@ struct eglcontext {
 	EGLConfig config;
 };
 
-#define NEMOTOOL_EGLCONTEXT(tool)			((struct eglcontext *)((tool)->eglcontext))
+#define NEMOTOOL_EGLCONTEXT(tool)			((tool)->eglcontext)
 
 #define	NTEGL_DISPLAY(tool)		(NEMOTOOL_EGLCONTEXT(tool)->display)
 #define	NTEGL_CONTEXT(tool)		(NEMOTOOL_EGLCONTEXT(tool)->context)

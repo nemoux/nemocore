@@ -19,6 +19,7 @@
 #include <nemotool.h>
 #include <nemocanvas.h>
 #include <nemooutput.h>
+#include <nemoegl.h>
 #include <nemomisc.h>
 
 static void pointer_handle_enter(void *data, struct nemo_pointer *pointer, uint32_t serial, struct wl_surface *surface, int32_t id, wl_fixed_t sx, wl_fixed_t sy)
@@ -848,6 +849,11 @@ void nemotool_destroy(struct nemotool *tool)
 	}
 
 	xkb_context_unref(tool->xkb.context);
+
+	if (tool->display != NULL)
+		nemotool_disconnect_wayland(tool);
+	if (tool->eglcontext != NULL)
+		nemotool_disconnect_egl(tool);
 
 	nemolist_remove(&tool->global_list);
 	nemolist_remove(&tool->output_list);
