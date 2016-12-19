@@ -55,6 +55,18 @@ struct nemolist {
 			pos = tmp,							\
 			tmp = nemo_container_of((pos)->member.prev, tmp, member))
 
+#define nemolist_node_for_each(pos, head)	\
+	for (pos = (head)->next; pos != (head); pos = pos->next)
+
+#define nemolist_node_for_each_safe(pos, tmp, head)	\
+	for (pos = (head)->next, tmp = pos->next; pos != (head); pos = tmp, tmp = pos->next)
+
+#define nemolist_node_for_each_reverse(pos, head)	\
+	for (pos = (head)->prev; pos != (head); pos = pos->prev)
+
+#define nemolist_node_for_each_reverse_safe(pos, tmp, head)	\
+	for (pos = (head)->prev, tmp = pos->prev; pos != (head); pos = tmp, tmp = pos->prev)
+
 #define	nemolist_node0(head, type, member)	\
 	(head)->next == NULL ? NULL : nemo_type_of((head)->next, type, member)
 
