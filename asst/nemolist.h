@@ -10,6 +10,8 @@ NEMO_BEGIN_EXTERN_C
 struct nemolist {
 	struct nemolist *prev;
 	struct nemolist *next;
+
+	void *data;
 };
 
 #ifndef offsetof
@@ -185,6 +187,16 @@ static inline struct nemolist *nemolist_peek_tail(struct nemolist *list)
 		return NULL;
 
 	return list->prev;
+}
+
+static inline void nemolist_set_data(struct nemolist *list, void *data)
+{
+	list->data = data;
+}
+
+static inline void *nemolist_get_data(struct nemolist *list)
+{
+	return list->data;
 }
 
 #ifdef __cplusplus
