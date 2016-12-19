@@ -188,7 +188,7 @@ struct nemoshow *nemoshow_create_view(struct nemotool *tool, int32_t width, int3
 	nemotimer_set_timeout(timer, 1000);
 	nemotimer_set_userdata(timer, scon);
 
-	nemotool_egl_prepare(tool);
+	nemotool_connect_egl(tool);
 
 	scon->tool = tool;
 	scon->width = width;
@@ -255,7 +255,7 @@ void nemoshow_destroy_view(struct nemoshow *show)
 
 	nemocanvas_egl_destroy(scon->canvas);
 
-	nemotool_egl_finish(scon->tool);
+	nemotool_disconnect_egl(scon->tool);
 
 	free(scon);
 }

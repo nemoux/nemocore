@@ -43,8 +43,8 @@ struct eglcanvas {
 #define NTEGL_CANVAS(canvas)		((struct eglcanvas *)container_of(canvas, struct eglcanvas, base))
 #define NTEGL_WINDOW(canvas)		((EGLNativeWindowType)(NTEGL_CANVAS(canvas)->window))
 
-extern int nemotool_egl_prepare(struct nemotool *tool);
-extern void nemotool_egl_finish(struct nemotool *tool);
+extern int nemotool_connect_egl(struct nemotool *tool);
+extern void nemotool_disconnect_egl(struct nemotool *tool);
 
 extern struct nemocanvas *nemocanvas_egl_create(struct nemotool *tool, int32_t width, int32_t height);
 extern void nemocanvas_egl_destroy(struct nemocanvas *canvas);

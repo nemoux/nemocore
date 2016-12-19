@@ -12,7 +12,7 @@
 #include <nemoegl.h>
 #include <nemomisc.h>
 
-int nemotool_egl_prepare(struct nemotool *tool)
+int nemotool_connect_egl(struct nemotool *tool)
 {
 #ifdef NEMOUX_WITH_OPENGL_ES3
 	static const EGLint opaque_attribs[] = {
@@ -119,7 +119,7 @@ err1:
 	return -1;
 }
 
-void nemotool_egl_finish(struct nemotool *tool)
+void nemotool_disconnect_egl(struct nemotool *tool)
 {
 	struct eglcontext *econtext = (struct eglcontext *)NEMOTOOL_EGLCONTEXT(tool);
 
