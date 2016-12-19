@@ -10,7 +10,7 @@
 
 static int nemoshow_compare_property(const void *a, const void *b)
 {
-	return strcasecmp((const char *)a, (const char *)b);
+	return strcmp((const char *)a, (const char *)b);
 }
 
 struct showprop *nemoshow_get_property(const char *name)
