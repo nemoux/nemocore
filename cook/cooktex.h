@@ -79,6 +79,16 @@ static inline void nemocook_texture_attach_state(struct cooktex *tex, struct coo
 	nemocook_one_attach_state(&tex->one, state);
 }
 
+static inline void nemocook_texture_detach_state(struct cooktex *tex, int tag)
+{
+	nemocook_one_detach_state(&tex->one, tag);
+}
+
+static inline void nemocook_texture_update_state(struct cooktex *tex)
+{
+	nemocook_one_update_state(&tex->one);
+}
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

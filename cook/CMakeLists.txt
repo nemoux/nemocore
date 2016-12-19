@@ -61,7 +61,6 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 
 add_library(nemocook SHARED
-	nemocook.c
 	cookshader.c
 	cooktex.c
 	cookpoly.c
@@ -71,7 +70,6 @@ add_library(nemocook SHARED
 	cookcamera.c
 	cookegl.c
 	cookfbo.c
-	cookrenderer.c
 	)
 
 TARGET_LINK_LIBRARIES(nemocook
@@ -107,7 +105,6 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/cook/cookcamera.h
 	${CMAKE_SOURCE_DIR}/cook/cookegl.h
 	${CMAKE_SOURCE_DIR}/cook/cookfbo.h
-	${CMAKE_SOURCE_DIR}/cook/cookrenderer.h
 	)
 
 set(NEMOCOOK_PKGCONFIG_REQUIRES "nemoasst nemohelper pixman-1 expat egl")

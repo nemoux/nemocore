@@ -14,6 +14,12 @@
 #define NEMOCOOK_BUFFER_AGE_COUNT		(2)
 
 struct cookegl {
+	struct cookone one;
+
+	struct cookshader *shader;
+
+	int width, height;
+
 	EGLDisplay display;
 	EGLContext context;
 	EGLConfig config;
@@ -32,53 +38,53 @@ struct cookegl {
 	int has_egl_image_external;
 };
 
-static int nemocook_egl_prerender(struct nemocook *cook)
+int nemocook_egl_prerender(struct cookegl *egl)
 {
-	struct cookegl *egl = (struct cookegl *)cook->backend;
+	egl->shader = NULL;
 
 	if (eglMakeCurrent(egl->display, egl->surface, egl->surface, egl->context) == EGL_FALSE)
 		return -1;
 
+	glViewport(0, 0, egl->width, egl->height);
+
 	return 0;
 }
 
-static int nemocook_egl_postrender(struct nemocook *cook)
+int nemocook_egl_postrender(struct cookegl *egl)
 {
-	struct cookegl *egl = (struct cookegl *)cook->backend;
-
 	if (eglSwapBuffers(egl->display, egl->surface) == EGL_FALSE)
 		return -1;
 
 	return 0;
 }
 
-static int nemocook_egl_resize(struct nemocook *cook, int width, int height)
+struct cookshader *nemocook_egl_use_shader(struct cookegl *egl, struct cookshader *shader)
 {
-	cook->width = width;
-	cook->height = height;
+	if (egl->shader != shader) {
+		nemocook_shader_use_program(shader);
+
+		egl->shader = shader;
+	}
+
+	return egl->shader;
+}
+
+int nemocook_egl_resize(struct cookegl *egl, int width, int height)
+{
+	egl->width = width;
+	egl->height = height;
 
 	return 0;
 }
 
-static void nemocook_egl_finish(struct nemocook *cook)
-{
-	struct cookegl *egl = (struct cookegl *)cook->backend;
-
-	eglMakeCurrent(egl->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-
-	eglDestroySurface(egl->display, egl->surface);
-
-	free(egl);
-}
-
-int nemocook_prepare_egl(struct nemocook *cook, EGLDisplay egl_display, EGLContext egl_context, EGLConfig egl_config, EGLNativeWindowType egl_window)
+struct cookegl *nemocook_egl_create(EGLDisplay egl_display, EGLContext egl_context, EGLConfig egl_config, EGLNativeWindowType egl_window)
 {
 	struct cookegl *egl;
 	const char *extensions;
 
 	egl = (struct cookegl *)malloc(sizeof(struct cookegl));
 	if (egl == NULL)
-		return -1;
+		return NULL;
 	memset(egl, 0, sizeof(struct cookegl));
 
 	egl->display = egl_display;
@@ -115,16 +121,38 @@ int nemocook_prepare_egl(struct nemocook *cook, EGLDisplay egl_display, EGLConte
 	if (egl->surface == EGL_NO_SURFACE)
 		goto err1;
 
-	cook->backend_prerender = nemocook_egl_prerender;
-	cook->backend_postrender = nemocook_egl_postrender;
-	cook->backend_resize = nemocook_egl_resize;
-	cook->backend_finish = nemocook_egl_finish;
-	cook->backend = (void *)egl;
+	nemocook_one_prepare(&egl->one);
 
-	return 0;
+	return egl;
 
 err1:
 	free(egl);
 
-	return -1;
+	return NULL;
+}
+
+void nemocook_egl_destroy(struct cookegl *egl)
+{
+	nemocook_one_finish(&egl->one);
+
+	eglMakeCurrent(egl->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+
+	eglDestroySurface(egl->display, egl->surface);
+
+	free(egl);
+}
+
+void nemocook_egl_attach_state(struct cookegl *egl, struct cookstate *state)
+{
+	nemocook_one_attach_state(&egl->one, state);
+}
+
+void nemocook_egl_detach_state(struct cookegl *egl, int tag)
+{
+	nemocook_one_detach_state(&egl->one, tag);
+}
+
+void nemocook_egl_update_state(struct cookegl *egl)
+{
+	nemocook_one_update_state(&egl->one);
 }

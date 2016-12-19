@@ -11,81 +11,108 @@
 #include <glhelper.h>
 
 struct cookfbo {
+	struct cookone one;
+
+	struct cookshader *shader;
+
 	GLuint texture;
 	GLuint fbo, dbo;
+
+	int width, height;
 };
 
-static int nemocook_fbo_prerender(struct nemocook *cook)
+int nemocook_fbo_prerender(struct cookfbo *fbo)
 {
-	struct cookfbo *fbo = (struct cookfbo *)cook->backend;
+	fbo->shader = NULL;
 
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo->fbo);
+
+	glViewport(0, 0, fbo->width, fbo->height);
 
 	return 0;
 }
 
-static int nemocook_fbo_postrender(struct nemocook *cook)
+int nemocook_fbo_postrender(struct cookfbo *fbo)
 {
-	struct cookfbo *fbo = (struct cookfbo *)cook->backend;
-
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	return 0;
 }
 
-static int nemocook_fbo_resize(struct nemocook *cook, int width, int height)
+struct cookshader *nemocook_fbo_use_shader(struct cookfbo *fbo, struct cookshader *shader)
 {
-	struct cookfbo *fbo = (struct cookfbo *)cook->backend;
+	if (fbo->shader != shader) {
+		nemocook_shader_use_program(shader);
 
-	cook->width = width;
-	cook->height = height;
+		fbo->shader = shader;
+	}
 
-	glDeleteFramebuffers(1, &fbo->fbo);
-	glDeleteRenderbuffers(1, &fbo->dbo);
+	return fbo->shader;
+}
 
-	if (gl_create_fbo(fbo->texture, width, height, &fbo->fbo, &fbo->dbo) < 0)
-		return -1;
+int nemocook_fbo_resize(struct cookfbo *fbo, int width, int height)
+{
+	if (fbo->width != width || fbo->height != height) {
+		glDeleteFramebuffers(1, &fbo->fbo);
+		glDeleteRenderbuffers(1, &fbo->dbo);
+
+		if (gl_create_fbo(fbo->texture, width, height, &fbo->fbo, &fbo->dbo) < 0)
+			return -1;
+
+		fbo->width = width;
+		fbo->height = height;
+	}
 
 	return 0;
 }
 
-static void nemocook_fbo_finish(struct nemocook *cook)
-{
-	struct cookfbo *fbo = (struct cookfbo *)cook->backend;
-
-	glDeleteFramebuffers(1, &fbo->fbo);
-	glDeleteRenderbuffers(1, &fbo->dbo);
-
-	free(fbo);
-}
-
-int nemocook_prepare_fbo(struct nemocook *cook, GLuint texture, GLuint width, GLuint height)
+struct cookfbo *nemocook_fbo_create(GLuint texture, GLuint width, GLuint height)
 {
 	struct cookfbo *fbo;
 
 	fbo = (struct cookfbo *)malloc(sizeof(struct cookfbo));
 	if (fbo == NULL)
-		return -1;
+		return NULL;
 	memset(fbo, 0, sizeof(struct cookfbo));
 
 	fbo->texture = texture;
+	fbo->width = width;
+	fbo->height = height;
 
 	if (gl_create_fbo(fbo->texture, width, height, &fbo->fbo, &fbo->dbo) < 0)
 		goto err1;
 
-	cook->backend_prerender = nemocook_fbo_prerender;
-	cook->backend_postrender = nemocook_fbo_postrender;
-	cook->backend_resize = nemocook_fbo_resize;
-	cook->backend_finish = nemocook_fbo_finish;
-	cook->backend = (void *)fbo;
+	nemocook_one_prepare(&fbo->one);
 
-	cook->width = width;
-	cook->height = height;
-
-	return 0;
+	return fbo;
 
 err1:
 	free(fbo);
 
-	return -1;
+	return NULL;
+}
+
+void nemocook_fbo_destroy(struct cookfbo *fbo)
+{
+	nemocook_one_finish(&fbo->one);
+
+	glDeleteFramebuffers(1, &fbo->fbo);
+	glDeleteRenderbuffers(1, &fbo->dbo);
+
+	free(fbo);
+}
+
+void nemocook_fbo_attach_state(struct cookfbo *fbo, struct cookstate *state)
+{
+	nemocook_one_attach_state(&fbo->one, state);
+}
+
+void nemocook_fbo_detach_state(struct cookfbo *fbo, int tag)
+{
+	nemocook_one_detach_state(&fbo->one, tag);
+}
+
+void nemocook_fbo_update_state(struct cookfbo *fbo)
+{
+	nemocook_one_update_state(&fbo->one);
 }

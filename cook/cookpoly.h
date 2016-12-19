@@ -14,11 +14,11 @@ NEMO_BEGIN_EXTERN_C
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
-#include <cookshader.h>
 #include <cooktex.h>
 #include <cooktrans.h>
 #include <cookone.h>
 #include <cookstate.h>
+#include <cookshader.h>
 
 #include <nemomatrix.h>
 #include <nemolist.h>
@@ -35,8 +35,6 @@ struct cookpoly {
 
 	int count;
 	int type;
-
-	struct cookshader *shader;
 
 	struct cooktex *texture;
 
@@ -70,11 +68,19 @@ extern void nemocook_polygon_set_color(struct cookpoly *poly, float r, float g, 
 extern void nemocook_polygon_set_transform(struct cookpoly *poly, struct cooktrans *trans);
 extern int nemocook_polygon_update_transform(struct cookpoly *poly);
 
-extern void nemocook_polygon_set_shader(struct cookpoly *poly, struct cookshader *shader);
-
 static inline void nemocook_polygon_attach_state(struct cookpoly *poly, struct cookstate *state)
 {
 	nemocook_one_attach_state(&poly->one, state);
+}
+
+static inline void nemocook_polygon_detach_state(struct cookpoly *poly, int tag)
+{
+	nemocook_one_detach_state(&poly->one, tag);
+}
+
+static inline void nemocook_polygon_update_state(struct cookpoly *poly)
+{
+	nemocook_one_update_state(&poly->one);
 }
 
 static inline void nemocook_polygon_set_element(struct cookpoly *poly, int attrib, int index, int element, float value)

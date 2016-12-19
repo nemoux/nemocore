@@ -63,6 +63,7 @@ struct cookstate {
 };
 
 extern struct cookstate *nemocook_state_create(int tag, int type, ...);
+extern void nemocook_state_destroy(struct cookstate *state);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

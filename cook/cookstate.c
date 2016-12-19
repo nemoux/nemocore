@@ -127,3 +127,10 @@ struct cookstate *nemocook_state_create(int tag, int type, ...)
 
 	return state;
 }
+
+void nemocook_state_destroy(struct cookstate *state)
+{
+	nemolist_remove(&state->link);
+
+	free(state);
+}
