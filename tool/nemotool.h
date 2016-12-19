@@ -140,6 +140,8 @@ struct nemotool {
 
 	uint32_t modifiers;
 
+	void *eglcontext;
+
 	void *userdata;
 };
 

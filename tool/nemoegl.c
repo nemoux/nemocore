@@ -12,7 +12,7 @@
 #include <nemoegl.h>
 #include <nemomisc.h>
 
-struct nemoegl *nemoegl_create(struct nemotool *tool)
+int nemotool_egl_prepare(struct nemotool *tool)
 {
 #ifdef NEMOUX_WITH_OPENGL_ES3
 	static const EGLint opaque_attribs[] = {
@@ -70,66 +70,69 @@ struct nemoegl *nemoegl_create(struct nemotool *tool)
 	};
 #endif
 
-	struct nemoegl *egl;
+	struct eglcontext *econtext;
 	EGLConfig configs[16];
 	EGLint major, minor;
 	EGLint count, n, i, s;
 	int buffer_size = 32;
 	int use_alpha = 1;
 
-	egl = (struct nemoegl *)malloc(sizeof(struct nemoegl));
-	if (egl == NULL)
-		return NULL;
-	memset(egl, 0, sizeof(struct nemoegl));
+	tool->eglcontext = econtext = (struct eglcontext *)malloc(sizeof(struct eglcontext));
+	if (econtext == NULL)
+		return -1;
+	memset(econtext, 0, sizeof(struct eglcontext));
 
-	egl->tool = tool;
-
-	egl->display = eglGetDisplay((EGLNativeDisplayType)tool->display);
-	if (egl->display == EGL_NO_DISPLAY)
+	econtext->display = eglGetDisplay((EGLNativeDisplayType)tool->display);
+	if (econtext->display == EGL_NO_DISPLAY)
 		goto err1;
 
-	if (!eglInitialize(egl->display, &major, &minor))
+	if (!eglInitialize(econtext->display, &major, &minor))
 		goto err1;
 
 	if (!eglBindAPI(EGL_OPENGL_ES_API))
 		goto err1;
 
-	if (!eglGetConfigs(egl->display, NULL, 0, &count) || count < 1)
+	if (!eglGetConfigs(econtext->display, NULL, 0, &count) || count < 1)
 		goto err1;
 
-	if (!eglChooseConfig(egl->display, use_alpha == 0 ? opaque_attribs : alpha_attribs, configs, count, &n))
+	if (!eglChooseConfig(econtext->display, use_alpha == 0 ? opaque_attribs : alpha_attribs, configs, count, &n))
 		goto err1;
 
 	for (i = 0; i < n; i++) {
-		eglGetConfigAttrib(egl->display, configs[i], EGL_BUFFER_SIZE, &s);
+		eglGetConfigAttrib(econtext->display, configs[i], EGL_BUFFER_SIZE, &s);
 
 		if (s == buffer_size) {
-			egl->config = configs[i];
+			econtext->config = configs[i];
 			break;
 		}
 	}
 
-	egl->context = eglCreateContext(egl->display, egl->config, EGL_NO_CONTEXT, client_attribs);
-	if (egl->context == NULL)
+	econtext->context = eglCreateContext(econtext->display, econtext->config, EGL_NO_CONTEXT, client_attribs);
+	if (econtext->context == NULL)
 		goto err1;
 
-	return egl;
+	return 0;
 
 err1:
-	free(egl);
+	free(econtext);
 
-	return NULL;
+	return -1;
 }
 
-void nemoegl_destroy(struct nemoegl *egl)
+void nemotool_egl_finish(struct nemotool *tool)
 {
-	eglDestroyContext(egl->display, egl->context);
+	struct eglcontext *econtext = (struct eglcontext *)NEMOTOOL_EGLCONTEXT(tool);
 
-	free(egl);
+	eglDestroyContext(econtext->display, econtext->context);
+
+	free(econtext);
+
+	tool->eglcontext = NULL;
 }
 
-struct nemocanvas *nemoegl_create_canvas(struct nemoegl *egl, int32_t width, int32_t height)
+struct nemocanvas *nemocanvas_egl_create(struct nemotool *tool, int32_t width, int32_t height)
 {
+	struct eglcontext *econtext = (struct eglcontext *)NEMOTOOL_EGLCONTEXT(tool);
 	struct eglcanvas *ecanvas;
 	struct nemocanvas *canvas;
 
@@ -140,7 +143,7 @@ struct nemocanvas *nemoegl_create_canvas(struct nemoegl *egl, int32_t width, int
 
 	canvas = &ecanvas->base;
 
-	if (nemocanvas_init(canvas, egl->tool) < 0)
+	if (nemocanvas_init(canvas, tool) < 0)
 		goto err1;
 
 	ecanvas->window = wl_egl_window_create(
@@ -160,7 +163,7 @@ err1:
 	return NULL;
 }
 
-void nemoegl_destroy_canvas(struct nemocanvas *canvas)
+void nemocanvas_egl_destroy(struct nemocanvas *canvas)
 {
 	struct eglcanvas *ecanvas = NTEGL_CANVAS(canvas);
 
@@ -171,7 +174,7 @@ void nemoegl_destroy_canvas(struct nemocanvas *canvas)
 	free(ecanvas);
 }
 
-void nemoegl_resize_canvas(struct nemocanvas *canvas, int32_t width, int32_t height)
+void nemocanvas_egl_resize(struct nemocanvas *canvas, int32_t width, int32_t height)
 {
 	struct eglcanvas *ecanvas = NTEGL_CANVAS(canvas);
 

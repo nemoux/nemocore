@@ -24,10 +24,7 @@ typedef enum {
 
 struct showcontext {
 	struct nemotool *tool;
-
 	struct nemotimer *timer;
-
-	struct nemoegl *egl;
 	struct nemocanvas *canvas;
 
 	struct nemotale *tale;
