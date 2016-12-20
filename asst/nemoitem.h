@@ -118,6 +118,11 @@ extern int nemoitem_load_json_string(struct nemoitem *item, const char *prefix, 
 extern int nemoitem_one_load_json(struct itemone *one, struct json_object *jobj);
 extern int nemoitem_one_load_json_string(struct itemone *one, const char *contents);
 
+static inline int nemoitem_get_count(struct nemoitem *item)
+{
+	return item->count;
+}
+
 static inline const char *nemoitem_one_get_path(struct itemone *one)
 {
 	return one->path;
