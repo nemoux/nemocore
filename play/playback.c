@@ -110,8 +110,6 @@ static void *nemoplay_audio_handle_thread(void *arg)
 
 	nemoplay_enter_thread(play);
 
-	ao_initialize();
-
 	format.channels = nemoplay_get_audio_channels(play);
 	format.bits = nemoplay_get_audio_samplebits(play);
 	format.rate = nemoplay_get_audio_samplerate(play);
@@ -154,8 +152,6 @@ static void *nemoplay_audio_handle_thread(void *arg)
 	ao_close(device);
 
 out:
-	ao_shutdown();
-
 	nemoplay_leave_thread(play);
 
 	return NULL;
@@ -185,6 +181,16 @@ void nemoplay_audio_destroy(struct playaudio *audio)
 	nemoplay_wait_thread(play);
 
 	free(audio);
+}
+
+void __attribute__((constructor(101))) nemoplay_audio_initialize(void)
+{
+	ao_initialize();
+}
+
+void __attribute__((destructor(101))) nemoplay_audio_finalize(void)
+{
+	ao_shutdown();
 }
 
 struct playvideo {
