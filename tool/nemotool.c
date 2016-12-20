@@ -393,15 +393,6 @@ void nemotool_touch_bypass(struct nemotool *tool, int32_t id, float x, float y)
 	nemo_touch_bypass(tool->touch, id, wl_fixed_from_double(x), wl_fixed_from_double(y));
 }
 
-void nemotool_touch_calibrate(struct nemotool *tool, const char *name, float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3)
-{
-	nemo_touch_calibrate(tool->touch, name,
-			wl_fixed_from_double(x0), wl_fixed_from_double(y0),
-			wl_fixed_from_double(x1), wl_fixed_from_double(y1),
-			wl_fixed_from_double(x2), wl_fixed_from_double(y2),
-			wl_fixed_from_double(x3), wl_fixed_from_double(y3));
-}
-
 static void seat_handle_capabilities(void *data, struct nemo_seat *seat, enum nemo_seat_capability caps)
 {
 	struct nemotool *tool = (struct nemotool *)data;

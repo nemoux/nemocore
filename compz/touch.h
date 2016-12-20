@@ -82,16 +82,12 @@ struct touchtaps {
 
 struct touchnode;
 
-typedef void (*nemotouch_calibrate_t)(struct touchnode *node, double x0, double y0, double x1, double y1, double x2, double y2, double x3, double y3);
-
 struct touchnode {
 	struct inputnode base;
 
 	struct nemocompz *compz;
 
 	struct nemotouch *touch;
-
-	nemotouch_calibrate_t calibrate;
 
 	struct wl_list link;
 
@@ -155,11 +151,6 @@ extern void nemotouch_flush_taps(struct touchnode *node, struct touchtaps *taps)
 extern void nemotouch_bypass_event(struct nemocompz *compz, int32_t touchid, float sx, float sy);
 
 extern void nemotouch_dump_touchpoint(struct nemotouch *touch);
-
-static inline void nemotouch_set_calibrate_node(struct touchnode *node, nemotouch_calibrate_t calibrate)
-{
-	node->calibrate = calibrate;
-}
 
 static inline void *nemotouch_set_nodedata(struct touchnode *node, void *data)
 {

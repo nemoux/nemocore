@@ -224,17 +224,5 @@
 			<arg name="x" type="fixed"/>
 			<arg name="y" type="fixed"/>
 		</request>
-
-		<request name="calibrate">
-			<arg name="name" type="string"/>
-			<arg name="x0" type="fixed"/>
-			<arg name="y0" type="fixed"/>
-			<arg name="x1" type="fixed"/>
-			<arg name="y1" type="fixed"/>
-			<arg name="x2" type="fixed"/>
-			<arg name="y2" type="fixed"/>
-			<arg name="x3" type="fixed"/>
-			<arg name="y3" type="fixed"/>
-		</request>
 	</interface>
 </protocol>

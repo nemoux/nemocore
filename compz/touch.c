@@ -172,30 +172,9 @@ static void nemo_touch_bypass(struct wl_client *client, struct wl_resource *reso
 	}
 }
 
-static void nemo_touch_calibrate(struct wl_client *client, struct wl_resource *resource,
-		const char *name,
-		wl_fixed_t x0, wl_fixed_t y0,
-		wl_fixed_t x1, wl_fixed_t y1,
-		wl_fixed_t x2, wl_fixed_t y2,
-		wl_fixed_t x3, wl_fixed_t y3)
-{
-	struct nemoseat *seat = (struct nemoseat *)wl_resource_get_user_data(resource);
-	struct touchnode *node;
-
-	node = nemotouch_get_node_by_name(seat->compz, name);
-	if (node != NULL && node->calibrate != NULL) {
-		node->calibrate(node,
-				wl_fixed_to_double(x0), wl_fixed_to_double(y0),
-				wl_fixed_to_double(x1), wl_fixed_to_double(y1),
-				wl_fixed_to_double(x2), wl_fixed_to_double(y2),
-				wl_fixed_to_double(x3), wl_fixed_to_double(y3));
-	}
-}
-
 static const struct nemo_touch_interface nemo_touch_implementation = {
 	nemo_touch_release,
-	nemo_touch_bypass,
-	nemo_touch_calibrate
+	nemo_touch_bypass
 };
 
 static void nemotouch_unbind_nemo(struct wl_resource *resource)

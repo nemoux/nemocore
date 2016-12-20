@@ -244,7 +244,6 @@ extern void nemotool_keyboard_key(struct nemotool *tool, uint32_t time, uint32_t
 extern void nemotool_keyboard_layout(struct nemotool *tool, const char *name);
 
 extern void nemotool_touch_bypass(struct nemotool *tool, int32_t id, float x, float y);
-extern void nemotool_touch_calibrate(struct nemotool *tool, const char *name, float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
