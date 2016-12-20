@@ -312,7 +312,7 @@ static inline int nemoshow_get_frame_depth(struct nemoshow *show)
 	return show->frame_depth;
 }
 
-#ifdef NEMOSHOW_FRAMELOG_ON
+#ifdef NEMOSHOW_DEBUG_ON
 extern void nemoshow_check_damage(struct nemoshow *show);
 extern void nemoshow_dump_times(struct nemoshow *show);
 
