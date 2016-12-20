@@ -12,6 +12,7 @@
 #include <nemoplay.h>
 #include <nemotool.h>
 #include <nemotimer.h>
+#include <nemolog.h>
 #include <nemomisc.h>
 
 struct playdecoder {
@@ -235,9 +236,17 @@ static void nemoplay_video_handle_timer(struct nemotimer *timer, void *data)
 			nemoplay_set_video_pts(play, nemoplay_one_get_pts(one));
 
 			if (cts > nemoplay_one_get_pts(one) + threshold) {
+#ifdef NEMOPLAY_DEBUG_ON
+				nemolog_message("PLAY", "[VIDEO_DROP] cts(%f) pts(%f)\n", cts, nemoplay_one_get_pts(one));
+#endif
+
 				nemoplay_one_destroy(one);
 				nemotimer_set_timeout(timer, 1);
 			} else if (cts < nemoplay_one_get_pts(one) - threshold) {
+#ifdef NEMOPLAY_DEBUG_ON
+				nemolog_message("PLAY", "[VIDEO_WAIT] cts(%f) pts(%f)\n", cts, nemoplay_one_get_pts(one));
+#endif
+
 				nemoplay_queue_enqueue_tail(queue, one);
 				nemotimer_set_timeout(timer, threshold * 1000);
 			} else {
