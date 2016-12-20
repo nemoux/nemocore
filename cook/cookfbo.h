@@ -1,5 +1,5 @@
-#ifndef __NEMOCOOK_EGL_H__
-#define __NEMOCOOK_EGL_H__
+#ifndef __NEMOCOOK_FBO_H__
+#define __NEMOCOOK_FBO_H__
 
 #include <nemoconfig.h>
 
