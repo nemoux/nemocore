@@ -74,6 +74,16 @@ void nemoplay_decoder_destroy(struct playdecoder *decoder)
 	free(decoder);
 }
 
+void nemoplay_decoder_play(struct playdecoder *decoder)
+{
+	nemoplay_set_state(decoder->play, NEMOPLAY_PLAY_STATE);
+}
+
+void nemoplay_decoder_stop(struct playdecoder *decoder)
+{
+	nemoplay_set_state(decoder->play, NEMOPLAY_STOP_STATE);
+}
+
 void nemoplay_decoder_seek(struct playdecoder *decoder, double pts)
 {
 	decoder->pts_to_seek = pts;
