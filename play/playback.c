@@ -202,6 +202,8 @@ struct playvideo {
 
 	struct playshader *shader;
 
+	double threshold;
+
 	nemoplay_frame_update_t dispatch_update;
 	nemoplay_frame_done_t dispatch_done;
 	void *data;
@@ -219,7 +221,7 @@ static void nemoplay_video_handle_timer(struct nemotimer *timer, void *data)
 
 	state = nemoplay_queue_get_state(queue);
 	if (state == NEMOPLAY_QUEUE_NORMAL_STATE) {
-		double threshold = 1.0f / nemoplay_get_video_framerate(play);
+		double threshold = video->threshold;
 		double cts = nemoplay_get_cts(play);
 		double pts;
 
@@ -288,6 +290,8 @@ struct playvideo *nemoplay_video_create_by_timer(struct nemoplay *play, struct n
 	video->play = play;
 	video->tool = tool;
 
+	video->threshold = 1.0f / nemoplay_get_video_framerate(play);
+
 	video->shader = nemoplay_shader_create();
 	nemoplay_shader_set_format(video->shader,
 			nemoplay_get_pixel_format(play));
@@ -328,6 +332,11 @@ void nemoplay_video_set_texture(struct playvideo *video, uint32_t texture, int w
 
 	if (nemoplay_get_frame(video->play) != 0)
 		nemoplay_shader_dispatch(video->shader);
+}
+
+void nemoplay_video_set_threshold(struct playvideo *video, double threshold)
+{
+	video->threshold = 1.0f / nemoplay_get_video_framerate(video->play) * threshold;
 }
 
 void nemoplay_video_set_update(struct playvideo *video, nemoplay_frame_update_t dispatch)

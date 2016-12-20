@@ -33,6 +33,7 @@ extern struct playvideo *nemoplay_video_create_by_timer(struct nemoplay *play, s
 extern void nemoplay_video_destroy(struct playvideo *video);
 extern void nemoplay_video_redraw(struct playvideo *video);
 extern void nemoplay_video_set_texture(struct playvideo *video, uint32_t texture, int width, int height);
+extern void nemoplay_video_set_threshold(struct playvideo *video, double threshold);
 extern void nemoplay_video_set_update(struct playvideo *video, nemoplay_frame_update_t dispatch);
 extern void nemoplay_video_set_done(struct playvideo *video, nemoplay_frame_done_t dispatch);
 extern void nemoplay_video_set_data(struct playvideo *video, void *data);
