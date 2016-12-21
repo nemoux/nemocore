@@ -25,7 +25,6 @@ include_directories(
 	${CMAKE_SOURCE_DIR}/show
 	${CMAKE_SOURCE_DIR}/play
 	${CMAKE_SOURCE_DIR}/apps
-	${CMAKE_SOURCE_DIR}/fx
 	)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
@@ -38,6 +37,5 @@ add_executable(nemopixs
 
 TARGET_LINK_LIBRARIES(nemopixs
 	nemoapps
-	nemofx
 	nemoplay
 	)

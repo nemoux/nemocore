@@ -20,8 +20,6 @@ NEMO_BEGIN_EXTERN_C
 #include <nemoplay.h>
 #include <nemofs.h>
 #include <playback.h>
-#include <glblur.h>
-#include <glmotion.h>
 
 struct pixsfence {
 	struct showone *canvas;
@@ -72,9 +70,6 @@ struct nemopixs {
 	struct showone *over;
 
 	struct showone *canvas;
-
-	struct glblur *blur;
-	struct glmotion *motion;
 
 	struct showone *sprites[128];
 	int nsprites, isprites;

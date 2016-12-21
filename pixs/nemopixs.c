@@ -1181,9 +1181,6 @@ static void nemopixs_dispatch_canvas_event(struct nemoshow *show, struct showone
 			pixs->has_taps = 1;
 		} else if (nemoshow_event_is_touch_up(show, event) && nemoshow_event_get_tapcount(&pixs->events) == 0) {
 			pixs->has_taps = 0;
-
-			if (pixs->motion != NULL)
-				nemofx_glmotion_clear(pixs->motion);
 		}
 	}
 
@@ -1349,21 +1346,6 @@ static void nemopixs_dispatch_video_done(struct nemoplay *play, void *data)
 	nemoplay_video_set_data(pixs->videoback, pixs);
 }
 
-static uint32_t nemopixs_dispatch_canvas_filter(void *node)
-{
-	struct showone *canvas = (struct showone *)node;
-	struct nemopixs *pixs = (struct nemopixs *)nemoshow_one_get_userdata(canvas);
-	uint32_t texture = nemoshow_canvas_get_texture(canvas);
-
-	if (pixs->blur != NULL)
-		texture = nemofx_glblur_dispatch(pixs->blur, texture);
-
-	if (pixs->motion != NULL && pixs->has_taps != 0)
-		texture = nemofx_glmotion_dispatch(pixs->motion, texture);
-
-	return texture;
-}
-
 static int nemopixs_prepare_opengl(struct nemopixs *pixs, int32_t width, int32_t height)
 {
 	static const char *vertexshader =
@@ -1463,8 +1445,6 @@ int main(int argc, char *argv[])
 		{ "overlay",				required_argument,			NULL,			'o' },
 		{ "fullscreen",			required_argument,			NULL,			'f' },
 		{ "pixsize",				required_argument,			NULL,			'x' },
-		{ "blursize",				required_argument,			NULL,			'u' },
-		{ "motionblur",			required_argument,			NULL,			'm' },
 		{ 0 }
 	};
 
@@ -1484,8 +1464,6 @@ int main(int argc, char *argv[])
 	char *overlay = NULL;
 	float jitter = 0.0f;
 	float pixsize = 1.0f;
-	float blursize = 0.0f;
-	float motionblur = 0.0f;
 	int timeout = 10000;
 	int width = 800;
 	int height = 800;
@@ -1495,7 +1473,7 @@ int main(int argc, char *argv[])
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "w:h:r:i:v:p:j:t:s:b:o:f:x:u:m:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:r:i:v:p:j:t:s:b:o:f:x:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -1550,14 +1528,6 @@ int main(int argc, char *argv[])
 
 			case 'x':
 				pixsize = strtod(optarg, NULL);
-				break;
-
-			case 'u':
-				blursize = strtod(optarg, NULL);
-				break;
-
-			case 'm':
-				motionblur = strtod(optarg, NULL);
 				break;
 
 			default:
@@ -1630,19 +1600,8 @@ int main(int argc, char *argv[])
 	nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_OPENGL_TYPE);
 	nemoshow_canvas_set_dispatch_redraw(canvas, nemopixs_dispatch_canvas_redraw);
 	nemoshow_canvas_set_dispatch_event(canvas, nemopixs_dispatch_canvas_event);
-	nemoshow_canvas_set_dispatch_filter(canvas, nemopixs_dispatch_canvas_filter);
 	nemoshow_one_set_userdata(canvas, pixs);
 	nemoshow_one_attach(scene, canvas);
-
-	if (blursize > 0.0f) {
-		pixs->blur = nemofx_glblur_create(width, height);
-		nemofx_glblur_set_radius(pixs->blur, blursize, blursize);
-	}
-
-	if (motionblur > 0.0f) {
-		pixs->motion = nemofx_glmotion_create(width, height);
-		nemofx_glmotion_set_step(pixs->motion, motionblur);
-	}
 
 	if (overlay != NULL) {
 		pixs->over = canvas = nemoshow_canvas_create();
