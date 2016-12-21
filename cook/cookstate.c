@@ -36,6 +36,16 @@ static void nemocook_state_update_blend_enable(struct cookstate *state)
 	glBlendFunc(state->u.blend.sfactor, state->u.blend.dfactor);
 }
 
+static void nemocook_state_update_blend_separate_enable(struct cookstate *state)
+{
+	glEnable(GL_BLEND);
+	glBlendFuncSeparate(
+			state->u.blend_separate.srgb,
+			state->u.blend_separate.drgb,
+			state->u.blend_separate.salpha,
+			state->u.blend_separate.dalpha);
+}
+
 static void nemocook_state_update_blend_disable(struct cookstate *state)
 {
 	glDisable(GL_BLEND);
@@ -99,6 +109,18 @@ struct cookstate *nemocook_state_create(int tag, int type, ...)
 			state->u.blend.dfactor = va_arg(vargs, int);
 
 			state->update = nemocook_state_update_blend_enable;
+		} else {
+			state->update = nemocook_state_update_blend_disable;
+		}
+	} else if (type == NEMOCOOK_STATE_BLEND_SEPARATE_TYPE) {
+		enable = va_arg(vargs, int);
+		if (enable != 0) {
+			state->u.blend_separate.srgb = va_arg(vargs, int);
+			state->u.blend_separate.drgb = va_arg(vargs, int);
+			state->u.blend_separate.salpha = va_arg(vargs, int);
+			state->u.blend_separate.dalpha = va_arg(vargs, int);
+
+			state->update = nemocook_state_update_blend_separate_enable;
 		} else {
 			state->update = nemocook_state_update_blend_disable;
 		}

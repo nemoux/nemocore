@@ -21,8 +21,9 @@ typedef enum {
 	NEMOCOOK_STATE_COLOR_BUFFER_TYPE = 1,
 	NEMOCOOK_STATE_DEPTH_BUFFER_TYPE = 2,
 	NEMOCOOK_STATE_BLEND_TYPE = 3,
-	NEMOCOOK_STATE_DEPTH_TEST_TYPE = 4,
-	NEMOCOOK_STATE_CULL_FACE_TYPE = 5,
+	NEMOCOOK_STATE_BLEND_SEPARATE_TYPE = 4,
+	NEMOCOOK_STATE_DEPTH_TEST_TYPE = 5,
+	NEMOCOOK_STATE_CULL_FACE_TYPE = 6,
 	NEMOCOOK_STATE_LAST_TYPE
 } NemoCookStateType;
 
@@ -48,6 +49,13 @@ struct cookstate {
 			GLenum sfactor;
 			GLenum dfactor;
 		} blend;
+
+		struct {
+			GLenum srgb;
+			GLenum drgb;
+			GLenum salpha;
+			GLenum dalpha;
+		} blend_separate;
 
 		struct {
 			GLenum func;
