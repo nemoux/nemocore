@@ -70,7 +70,7 @@ struct eventone *nemoqueue_dequeue_one(struct nemoqueue *queue)
 	return one;
 }
 
-struct eventone *nemoqueue_one_create(uint32_t type, uint32_t tag, int size)
+struct eventone *nemoqueue_one_create(int isize, int fsize)
 {
 	struct eventone *one;
 
@@ -79,11 +79,15 @@ struct eventone *nemoqueue_one_create(uint32_t type, uint32_t tag, int size)
 		return NULL;
 	memset(one, 0, sizeof(struct eventone));
 
-	one->type = type;
-	one->tag = tag;
+	if (isize > 0) {
+		one->iattrs = (int *)malloc(sizeof(int) * isize);
+		one->niattrs = isize;
+	}
 
-	one->attrs = (float *)malloc(sizeof(float) * size);
-	one->nattrs = size;
+	if (fsize > 0) {
+		one->fattrs = (float *)malloc(sizeof(float) * fsize);
+		one->nfattrs = fsize;
+	}
 
 	nemolist_init(&one->link);
 
@@ -94,6 +98,10 @@ void nemoqueue_one_destroy(struct eventone *one)
 {
 	nemolist_remove(&one->link);
 
-	free(one->attrs);
+	if (one->iattrs != NULL)
+		free(one->iattrs);
+	if (one->fattrs != NULL)
+		free(one->fattrs);
+
 	free(one);
 }
