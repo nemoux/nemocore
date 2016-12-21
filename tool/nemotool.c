@@ -875,41 +875,6 @@ int nemotool_dispatch_idle(struct nemotool *tool, nemotool_dispatch_idle_t dispa
 	return 0;
 }
 
-struct nemoqueue *nemotool_create_queue(struct nemotool *tool)
-{
-	struct nemoqueue *queue;
-
-	queue = (struct nemoqueue *)malloc(sizeof(struct nemoqueue));
-	if (queue == NULL)
-		return NULL;
-	memset(queue, 0, sizeof(struct nemoqueue));
-
-	queue->tool = tool;
-
-	queue->queue = wl_display_create_queue(tool->display);
-	if (queue->queue == NULL)
-		goto err1;
-
-	return queue;
-
-err1:
-	free(queue);
-
-	return NULL;
-}
-
-void nemotool_destroy_queue(struct nemoqueue *queue)
-{
-	wl_event_queue_destroy(queue->queue);
-
-	free(queue);
-}
-
-int nemotool_dispatch_queue(struct nemoqueue *queue)
-{
-	return wl_display_dispatch_queue(queue->tool->display, queue->queue);
-}
-
 uint32_t nemotool_get_keysym(struct nemotool *tool, uint32_t code)
 {
 	if (tool->xkb.state != NULL) {

@@ -1,5 +1,5 @@
-#ifndef __NEMOTOOL_CANVAS_H__
-#define	__NEMOTOOL_CANVAS_H__
+#ifndef __NEMOTOOL_CHANNEL_H__
+#define	__NEMOTOOL_CHANNEL_H__
 
 #include <nemoconfig.h>
 

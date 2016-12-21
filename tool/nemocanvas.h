@@ -147,9 +147,6 @@ extern void nemocanvas_dispatch_frame(struct nemocanvas *canvas);
 extern void nemocanvas_dispatch_resize(struct nemocanvas *canvas, int32_t width, int32_t height);
 extern int nemocanvas_dispatch_destroy(struct nemocanvas *canvas);
 
-extern void nemocanvas_attach_queue(struct nemocanvas *canvas, struct nemoqueue *queue);
-extern void nemocanvas_detach_queue(struct nemocanvas *canvas);
-
 static inline struct nemotool *nemocanvas_get_tool(struct nemocanvas *canvas)
 {
 	return canvas->tool;

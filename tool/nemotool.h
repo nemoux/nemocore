@@ -66,12 +66,6 @@ struct nemoidle {
 	struct nemolist link;
 };
 
-struct nemoqueue {
-	struct nemotool *tool;
-
-	struct wl_event_queue *queue;
-};
-
 struct nemoevent {
 	uint64_t device;
 
@@ -163,6 +157,8 @@ extern void nemotool_destroy(struct nemotool *tool);
 
 extern int nemotool_dispatch_idle(struct nemotool *tool, nemotool_dispatch_idle_t dispatch, void *data);
 
+extern uint32_t nemotool_get_keysym(struct nemotool *tool, uint32_t code);
+
 static inline struct wl_display *nemotool_get_display(struct nemotool *tool)
 {
 	return tool->display;
@@ -230,13 +226,6 @@ static inline void *nemotool_get_userdata(struct nemotool *tool)
 {
 	return tool->userdata;
 }
-
-extern struct nemoqueue *nemotool_create_queue(struct nemotool *tool);
-extern void nemotool_destroy_queue(struct nemoqueue *queue);
-
-extern int nemotool_dispatch_queue(struct nemoqueue *queue);
-
-extern uint32_t nemotool_get_keysym(struct nemotool *tool, uint32_t code);
 
 extern void nemotool_keyboard_enter(struct nemotool *tool);
 extern void nemotool_keyboard_leave(struct nemotool *tool);

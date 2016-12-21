@@ -782,19 +782,3 @@ int nemocanvas_dispatch_destroy(struct nemocanvas *canvas)
 
 	return 0;
 }
-
-void nemocanvas_attach_queue(struct nemocanvas *canvas, struct nemoqueue *queue)
-{
-	if (canvas->surface != NULL)
-		wl_proxy_set_queue((struct wl_proxy *)canvas->surface, queue->queue);
-	if (canvas->nemo_surface != NULL)
-		wl_proxy_set_queue((struct wl_proxy *)canvas->nemo_surface, queue->queue);
-}
-
-void nemocanvas_detach_queue(struct nemocanvas *canvas)
-{
-	if (canvas->surface != NULL)
-		wl_proxy_set_queue((struct wl_proxy *)canvas->surface, NULL);
-	if (canvas->nemo_surface != NULL)
-		wl_proxy_set_queue((struct wl_proxy *)canvas->nemo_surface, NULL);
-}
