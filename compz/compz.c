@@ -932,14 +932,6 @@ void nemocompz_set_idle_timeout(struct nemocompz *compz, uint32_t timeout)
 	wl_event_source_timer_update(compz->idle_timer, compz->idle_timeout);
 }
 
-struct nemoeventqueue *nemocompz_get_main_eventqueue(struct nemocompz *compz)
-{
-	if (compz->queue == NULL)
-		compz->queue = nemoeventqueue_create(compz);
-
-	return compz->queue;
-}
-
 int nemocompz_set_presentation_clock(struct nemocompz *compz, clockid_t id)
 {
 	struct timespec ts;
