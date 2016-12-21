@@ -63,10 +63,6 @@ struct glcolor *nemofx_glcolor_create(int32_t width, int32_t height)
 
 	color->ucolor = glGetUniformLocation(color->program, "color");
 
-	color->texture = gl_create_texture(GL_NEAREST, GL_CLAMP_TO_EDGE, width, height);
-
-	gl_create_fbo(color->texture, width, height, &color->fbo, &color->dbo);
-
 	color->width = width;
 	color->height = height;
 
@@ -80,16 +76,26 @@ err1:
 
 void nemofx_glcolor_destroy(struct glcolor *color)
 {
-	glDeleteTextures(1, &color->texture);
+	if (color->texture > 0)
+		glDeleteTextures(1, &color->texture);
 
-	glDeleteFramebuffers(1, &color->fbo);
-	glDeleteRenderbuffers(1, &color->dbo);
+	if (color->fbo > 0)
+		glDeleteFramebuffers(1, &color->fbo);
+	if (color->dbo > 0)
+		glDeleteRenderbuffers(1, &color->dbo);
 
 	glDeleteShader(color->vshader);
 	glDeleteShader(color->fshader);
 	glDeleteProgram(color->program);
 
 	free(color);
+}
+
+void nemofx_glcolor_use_fbo(struct glcolor *color)
+{
+	color->texture = gl_create_texture(GL_LINEAR, GL_CLAMP_TO_EDGE, color->width, color->height);
+
+	gl_create_fbo(color->texture, color->width, color->height, &color->fbo, &color->dbo);
 }
 
 void nemofx_glcolor_set_color(struct glcolor *color, float r, float g, float b, float a)
@@ -102,7 +108,10 @@ void nemofx_glcolor_set_color(struct glcolor *color, float r, float g, float b, 
 
 void nemofx_glcolor_resize(struct glcolor *color, int32_t width, int32_t height)
 {
-	if (color->width != width || color->height != height) {
+	if (color->width == width && color->height == height)
+		return;
+
+	if (color->texture > 0) {
 		glBindTexture(GL_TEXTURE_2D, color->texture);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 		glBindTexture(GL_TEXTURE_2D, 0);
@@ -111,10 +120,10 @@ void nemofx_glcolor_resize(struct glcolor *color, int32_t width, int32_t height)
 		glDeleteRenderbuffers(1, &color->dbo);
 
 		gl_create_fbo(color->texture, width, height, &color->fbo, &color->dbo);
-
-		color->width = width;
-		color->height = height;
 	}
+
+	color->width = width;
+	color->height = height;
 }
 
 uint32_t nemofx_glcolor_dispatch(struct glcolor *color)

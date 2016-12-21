@@ -12,6 +12,8 @@ NEMO_BEGIN_EXTERN_C
 extern struct glblur *nemofx_glblur_create(int32_t width, int32_t height);
 extern void nemofx_glblur_destroy(struct glblur *blur);
 
+extern void nemofx_glblur_use_fbo(struct glblur *blur);
+
 extern void nemofx_glblur_set_radius(struct glblur *blur, int32_t rx, int32_t ry);
 
 extern void nemofx_glblur_resize(struct glblur *blur, int32_t width, int32_t height);

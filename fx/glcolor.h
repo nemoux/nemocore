@@ -12,6 +12,8 @@ NEMO_BEGIN_EXTERN_C
 extern struct glcolor *nemofx_glcolor_create(int32_t width, int32_t height);
 extern void nemofx_glcolor_destroy(struct glcolor *color);
 
+extern void nemofx_glcolor_use_fbo(struct glcolor *color);
+
 extern void nemofx_glcolor_set_color(struct glcolor *color, float r, float g, float b, float a);
 
 extern void nemofx_glcolor_resize(struct glcolor *color, int32_t width, int32_t height);

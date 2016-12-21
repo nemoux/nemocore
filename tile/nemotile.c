@@ -1839,6 +1839,7 @@ static void nemotile_dispatch_timer(struct nemotimer *timer, void *data)
 		nemofx_glfilter_set_program(tile->filter, nemofs_dir_get_filepath(tile->shaders, tile->ishaders));
 
 		tile->sweep = nemofx_glsweep_create(tile->width, tile->height);
+		nemofx_glsweep_use_fbo(tile->sweep);
 		nemofx_glsweep_set_snapshot(tile->sweep,
 				nemoshow_canvas_get_effective_texture(tile->wall),
 				nemoshow_canvas_get_viewport_width(tile->wall),

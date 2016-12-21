@@ -202,10 +202,6 @@ struct glsweep *nemofx_glsweep_create(int32_t width, int32_t height)
 		return NULL;
 	memset(sweep, 0, sizeof(struct glsweep));
 
-	sweep->texture = gl_create_texture(GL_LINEAR, GL_CLAMP_TO_EDGE, width, height);
-
-	gl_create_fbo(sweep->texture, width, height, &sweep->fbo, &sweep->dbo);
-
 	sweep->width = width;
 	sweep->height = height;
 
@@ -217,13 +213,16 @@ struct glsweep *nemofx_glsweep_create(int32_t width, int32_t height)
 
 void nemofx_glsweep_destroy(struct glsweep *sweep)
 {
-	glDeleteTextures(1, &sweep->texture);
+	if (sweep->texture > 0)
+		glDeleteTextures(1, &sweep->texture);
 
 	if (sweep->is_reference == 0 && sweep->snapshot > 0)
 		glDeleteTextures(1, &sweep->snapshot);
 
-	glDeleteFramebuffers(1, &sweep->fbo);
-	glDeleteRenderbuffers(1, &sweep->dbo);
+	if (sweep->fbo > 0)
+		glDeleteFramebuffers(1, &sweep->fbo);
+	if (sweep->dbo > 0)
+		glDeleteRenderbuffers(1, &sweep->dbo);
 
 	if (sweep->program > 0) {
 		glDeleteShader(sweep->vshader);
@@ -232,6 +231,13 @@ void nemofx_glsweep_destroy(struct glsweep *sweep)
 	}
 
 	free(sweep);
+}
+
+void nemofx_glsweep_use_fbo(struct glsweep *sweep)
+{
+	sweep->texture = gl_create_texture(GL_LINEAR, GL_CLAMP_TO_EDGE, sweep->width, sweep->height);
+
+	gl_create_fbo(sweep->texture, sweep->width, sweep->height, &sweep->fbo, &sweep->dbo);
 }
 
 void nemofx_glsweep_ref_snapshot(struct glsweep *sweep, uint32_t texture, int32_t width, int32_t height)
@@ -360,7 +366,10 @@ void nemofx_glsweep_set_mask(struct glsweep *sweep, uint32_t mask)
 
 void nemofx_glsweep_resize(struct glsweep *sweep, int32_t width, int32_t height)
 {
-	if (sweep->width != width || sweep->height != height) {
+	if (sweep->width == width && sweep->height == height)
+		return;
+
+	if (sweep->texture > 0) {
 		glBindTexture(GL_TEXTURE_2D, sweep->texture);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 		glBindTexture(GL_TEXTURE_2D, 0);
@@ -375,10 +384,10 @@ void nemofx_glsweep_resize(struct glsweep *sweep, int32_t width, int32_t height)
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
-
-		sweep->width = width;
-		sweep->height = height;
 	}
+
+	sweep->width = width;
+	sweep->height = height;
 }
 
 uint32_t nemofx_glsweep_dispatch(struct glsweep *sweep, uint32_t texture)

@@ -23,6 +23,8 @@ typedef enum {
 extern struct glsweep *nemofx_glsweep_create(int32_t width, int32_t height);
 extern void nemofx_glsweep_destroy(struct glsweep *sweep);
 
+extern void nemofx_glsweep_use_fbo(struct glsweep *sweep);
+
 extern void nemofx_glsweep_ref_snapshot(struct glsweep *sweep, uint32_t texture, int32_t width, int32_t height);
 extern void nemofx_glsweep_set_snapshot(struct glsweep *sweep, uint32_t texture, int32_t width, int32_t height);
 extern void nemofx_glsweep_put_snapshot(struct glsweep *sweep);

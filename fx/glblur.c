@@ -90,10 +90,8 @@ struct glblur *nemofx_glblur_create(int32_t width, int32_t height)
 	blur->uradius = glGetUniformLocation(blur->program, "r");
 
 	blur->texture[0] = gl_create_texture(GL_LINEAR, GL_CLAMP_TO_EDGE, width, height);
-	blur->texture[1] = gl_create_texture(GL_LINEAR, GL_CLAMP_TO_EDGE, width, height);
 
 	gl_create_fbo(blur->texture[0], width, height, &blur->fbo[0], &blur->dbo[0]);
-	gl_create_fbo(blur->texture[1], width, height, &blur->fbo[1], &blur->dbo[1]);
 
 	blur->width = width;
 	blur->height = height;
@@ -108,18 +106,30 @@ err1:
 
 void nemofx_glblur_destroy(struct glblur *blur)
 {
-	glDeleteTextures(2, &blur->texture[0]);
+	glDeleteTextures(1, &blur->texture[0]);
 
 	glDeleteFramebuffers(1, &blur->fbo[0]);
 	glDeleteRenderbuffers(1, &blur->dbo[0]);
-	glDeleteFramebuffers(1, &blur->fbo[1]);
-	glDeleteRenderbuffers(1, &blur->dbo[1]);
+
+	if (blur->texture[1] > 0)
+		glDeleteTextures(1, &blur->texture[1]);
+	if (blur->fbo[1] > 0)
+		glDeleteFramebuffers(1, &blur->fbo[1]);
+	if (blur->dbo[1] > 0)
+		glDeleteRenderbuffers(1, &blur->dbo[1]);
 
 	glDeleteShader(blur->vshader);
 	glDeleteShader(blur->fshader);
 	glDeleteProgram(blur->program);
 
 	free(blur);
+}
+
+void nemofx_glblur_use_fbo(struct glblur *blur)
+{
+	blur->texture[1] = gl_create_texture(GL_LINEAR, GL_CLAMP_TO_EDGE, blur->width, blur->height);
+
+	gl_create_fbo(blur->texture[1], blur->width, blur->height, &blur->fbo[1], &blur->dbo[1]);
 }
 
 void nemofx_glblur_set_radius(struct glblur *blur, int32_t rx, int32_t ry)
@@ -130,23 +140,31 @@ void nemofx_glblur_set_radius(struct glblur *blur, int32_t rx, int32_t ry)
 
 void nemofx_glblur_resize(struct glblur *blur, int32_t width, int32_t height)
 {
-	if (blur->width != width || blur->height != height) {
-		int i;
+	if (blur->width == width && blur->height == height)
+		return;
 
-		for (i = 0; i < 2; i++) {
-			glBindTexture(GL_TEXTURE_2D, blur->texture[i]);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
-			glBindTexture(GL_TEXTURE_2D, 0);
+	glBindTexture(GL_TEXTURE_2D, blur->texture[0]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
+	glBindTexture(GL_TEXTURE_2D, 0);
 
-			glDeleteFramebuffers(1, &blur->fbo[i]);
-			glDeleteRenderbuffers(1, &blur->dbo[i]);
+	glDeleteFramebuffers(1, &blur->fbo[0]);
+	glDeleteRenderbuffers(1, &blur->dbo[0]);
 
-			gl_create_fbo(blur->texture[i], width, height, &blur->fbo[i], &blur->dbo[i]);
-		}
+	gl_create_fbo(blur->texture[0], width, height, &blur->fbo[0], &blur->dbo[0]);
 
-		blur->width = width;
-		blur->height = height;
+	if (blur->texture[1] > 0) {
+		glBindTexture(GL_TEXTURE_2D, blur->texture[1]);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		glDeleteFramebuffers(1, &blur->fbo[1]);
+		glDeleteRenderbuffers(1, &blur->dbo[1]);
+
+		gl_create_fbo(blur->texture[1], width, height, &blur->fbo[1], &blur->dbo[1]);
 	}
+
+	blur->width = width;
+	blur->height = height;
 }
 
 uint32_t nemofx_glblur_dispatch(struct glblur *blur, uint32_t texture)
