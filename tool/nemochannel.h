@@ -9,8 +9,7 @@ NEMO_BEGIN_EXTERN_C
 
 #include <stdint.h>
 
-#include <nemotool.h>
-
+struct nemotool;
 struct nemochannel;
 
 typedef int (*nemochannel_dispatch_event_t)(struct nemochannel *chan, uint64_t event, void *data);

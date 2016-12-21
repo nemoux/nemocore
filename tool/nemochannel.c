@@ -9,8 +9,8 @@
 
 #include <wayland-client.h>
 
-#include <nemotool.h>
 #include <nemochannel.h>
+#include <nemotool.h>
 #include <nemomisc.h>
 
 static void nemochannel_dispatch_event(void *data, const char *events)

@@ -98,6 +98,7 @@ add_library(nemotool SHARED
 	nemosound.c
 	nemotimer.c
 	nemochannel.c
+	nemoqueue.c
 	nemoegl.c
 	${PROTOCOLS}
 	)
@@ -136,6 +137,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/tool/nemosound.h
 	${CMAKE_SOURCE_DIR}/tool/nemotimer.h
 	${CMAKE_SOURCE_DIR}/tool/nemochannel.h
+	${CMAKE_SOURCE_DIR}/tool/nemoqueue.h
 	${CMAKE_SOURCE_DIR}/tool/nemoegl.h
 	${CMAKE_BINARY_DIR}/tool/wayland-presentation-timing-client-protocol.h
 	${CMAKE_BINARY_DIR}/tool/wayland-nemo-shell-client-protocol.h
