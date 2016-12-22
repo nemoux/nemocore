@@ -85,86 +85,131 @@ static void nemocook_state_update_point_smooth_disable(struct cookstate *state)
 	glDisable(GL_POINT_SMOOTH);
 }
 
+static void nemocook_state_prepare_none(struct cookstate *state, va_list vargs)
+{
+	state->update = nemocook_state_update_none;
+}
+
+static void nemocook_state_prepare_color_buffer(struct cookstate *state, va_list vargs)
+{
+	state->u.color_buffer.r = va_arg(vargs, double);
+	state->u.color_buffer.g = va_arg(vargs, double);
+	state->u.color_buffer.b = va_arg(vargs, double);
+	state->u.color_buffer.a = va_arg(vargs, double);
+
+	state->update = nemocook_state_update_color_buffer;
+}
+
+static void nemocook_state_prepare_depth_buffer(struct cookstate *state, va_list vargs)
+{
+	state->u.depth_buffer.d = va_arg(vargs, double);
+
+	state->update = nemocook_state_update_depth_buffer;
+}
+
+static void nemocook_state_prepare_blend(struct cookstate *state, va_list vargs)
+{
+	int enable;
+
+	enable = va_arg(vargs, int);
+	if (enable != 0) {
+		state->u.blend.sfactor = va_arg(vargs, int);
+		state->u.blend.dfactor = va_arg(vargs, int);
+
+		state->update = nemocook_state_update_blend_enable;
+	} else {
+		state->update = nemocook_state_update_blend_disable;
+	}
+}
+
+static void nemocook_state_prepare_blend_separate(struct cookstate *state, va_list vargs)
+{
+	int enable;
+
+	enable = va_arg(vargs, int);
+	if (enable != 0) {
+		state->u.blend_separate.srgb = va_arg(vargs, int);
+		state->u.blend_separate.drgb = va_arg(vargs, int);
+		state->u.blend_separate.salpha = va_arg(vargs, int);
+		state->u.blend_separate.dalpha = va_arg(vargs, int);
+
+		state->update = nemocook_state_update_blend_separate_enable;
+	} else {
+		state->update = nemocook_state_update_blend_disable;
+	}
+}
+
+static void nemocook_state_prepare_depth_test(struct cookstate *state, va_list vargs)
+{
+	int enable;
+
+	enable = va_arg(vargs, int);
+	if (enable != 0) {
+		state->u.depth_test.func = va_arg(vargs, int);
+		state->u.depth_test.mask = va_arg(vargs, int);
+
+		state->update = nemocook_state_update_depth_test_enable;
+	} else {
+		state->update = nemocook_state_update_depth_test_disable;
+	}
+}
+
+static void nemocook_state_prepare_cull_face(struct cookstate *state, va_list vargs)
+{
+	int enable;
+
+	enable = va_arg(vargs, int);
+	if (enable != 0) {
+		state->u.cull_face.mode = va_arg(vargs, int);
+
+		state->update = nemocook_state_update_cull_face_enable;
+	} else {
+		state->update = nemocook_state_update_cull_face_disable;
+	}
+}
+
+static void nemocook_state_prepare_point_smooth(struct cookstate *state, va_list vargs)
+{
+	int enable;
+
+	enable = va_arg(vargs, int);
+	if (enable != 0) {
+		state->u.point_smooth.hint = va_arg(vargs, int);
+
+		state->update = nemocook_state_update_point_smooth_enable;
+	} else {
+		state->update = nemocook_state_update_point_smooth_disable;
+	}
+}
+
+typedef void (*nemocook_state_prepare_t)(struct cookstate *state, va_list vargs);
+
 struct cookstate *nemocook_state_create(int tag, int type, ...)
 {
+	static nemocook_state_prepare_t functions[] = {
+		nemocook_state_prepare_none,
+		nemocook_state_prepare_color_buffer,
+		nemocook_state_prepare_depth_buffer,
+		nemocook_state_prepare_blend,
+		nemocook_state_prepare_blend_separate,
+		nemocook_state_prepare_depth_test,
+		nemocook_state_prepare_cull_face,
+		nemocook_state_prepare_point_smooth
+	};
+
 	struct cookstate *state;
 	va_list vargs;
-	int enable;
 
 	state = (struct cookstate *)malloc(sizeof(struct cookstate));
 	if (state == NULL)
 		return NULL;
 
 	state->tag = tag;
-	state->update = nemocook_state_update_none;
 
 	nemolist_init(&state->link);
 
 	va_start(vargs, type);
-
-	if (type == NEMOCOOK_STATE_COLOR_BUFFER_TYPE) {
-		state->u.color_buffer.r = va_arg(vargs, double);
-		state->u.color_buffer.g = va_arg(vargs, double);
-		state->u.color_buffer.b = va_arg(vargs, double);
-		state->u.color_buffer.a = va_arg(vargs, double);
-
-		state->update = nemocook_state_update_color_buffer;
-	} else if (type == NEMOCOOK_STATE_DEPTH_BUFFER_TYPE) {
-		state->u.depth_buffer.d = va_arg(vargs, double);
-
-		state->update = nemocook_state_update_depth_buffer;
-	} else if (type == NEMOCOOK_STATE_BLEND_TYPE) {
-		enable = va_arg(vargs, int);
-		if (enable != 0) {
-			state->u.blend.sfactor = va_arg(vargs, int);
-			state->u.blend.dfactor = va_arg(vargs, int);
-
-			state->update = nemocook_state_update_blend_enable;
-		} else {
-			state->update = nemocook_state_update_blend_disable;
-		}
-	} else if (type == NEMOCOOK_STATE_BLEND_SEPARATE_TYPE) {
-		enable = va_arg(vargs, int);
-		if (enable != 0) {
-			state->u.blend_separate.srgb = va_arg(vargs, int);
-			state->u.blend_separate.drgb = va_arg(vargs, int);
-			state->u.blend_separate.salpha = va_arg(vargs, int);
-			state->u.blend_separate.dalpha = va_arg(vargs, int);
-
-			state->update = nemocook_state_update_blend_separate_enable;
-		} else {
-			state->update = nemocook_state_update_blend_disable;
-		}
-	} else if (type == NEMOCOOK_STATE_DEPTH_TEST_TYPE) {
-		enable = va_arg(vargs, int);
-		if (enable != 0) {
-			state->u.depth_test.func = va_arg(vargs, int);
-			state->u.depth_test.mask = va_arg(vargs, int);
-
-			state->update = nemocook_state_update_depth_test_enable;
-		} else {
-			state->update = nemocook_state_update_depth_test_disable;
-		}
-	} else if (type == NEMOCOOK_STATE_CULL_FACE_TYPE) {
-		enable = va_arg(vargs, int);
-		if (enable != 0) {
-			state->u.cull_face.mode = va_arg(vargs, int);
-
-			state->update = nemocook_state_update_cull_face_enable;
-		} else {
-			state->update = nemocook_state_update_cull_face_disable;
-		}
-	} else if (type == NEMOCOOK_STATE_POINT_SMOOTH_TYPE) {
-		enable = va_arg(vargs, int);
-		if (enable != 0) {
-			state->u.point_smooth.hint = va_arg(vargs, int);
-
-			state->update = nemocook_state_update_point_smooth_enable;
-		} else {
-			state->update = nemocook_state_update_point_smooth_disable;
-		}
-	}
-
+	functions[type](state, vargs);
 	va_end(vargs);
 
 	return state;
