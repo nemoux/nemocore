@@ -68,8 +68,8 @@ int skia_clear_canvas(void *pixels, int32_t width, int32_t height)
 
 int skia_read_image(SkBitmap *bitmap, const char *imagepath)
 {
-	SkAutoTUnref<SkData> data(SkData::NewFromFileName(imagepath));
-	SkAutoTDelete<SkCodec> codec(SkCodec::NewFromData(data, NULL));
+	sk_sp<SkData> data(SkData::MakeFromFileName(imagepath));
+	SkCodec *codec(SkCodec::NewFromData(data));
 
 	if (codec == NULL)
 		return -1;
