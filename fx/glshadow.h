@@ -14,6 +14,8 @@ NEMO_BEGIN_EXTERN_C
 extern struct glshadow *nemofx_glshadow_create(int32_t width, int32_t height, int32_t lightscope);
 extern void nemofx_glshadow_destroy(struct glshadow *shadow);
 
+extern void nemofx_glshadow_use_fbo(struct glshadow *shadow);
+
 extern void nemofx_glshadow_set_pointlight_position(struct glshadow *shadow, int index, float x, float y);
 extern void nemofx_glshadow_set_pointlight_color(struct glshadow *shadow, int index, float r, float g, float b);
 extern void nemofx_glshadow_set_pointlight_size(struct glshadow *shadow, int index, float size);

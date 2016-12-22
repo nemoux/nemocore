@@ -231,11 +231,9 @@ struct glshadow *nemofx_glshadow_create(int32_t width, int32_t height, int32_t l
 
 	shadow->occluder = gl_create_texture(GL_LINEAR, GL_CLAMP_TO_EDGE, lightscope, lightscope);
 	shadow->shadow = gl_create_texture(GL_LINEAR, GL_CLAMP_TO_EDGE, GLSHADOW_MAP_SIZE, 1);
-	shadow->texture = gl_create_texture(GL_LINEAR, GL_CLAMP_TO_EDGE, width, height);
 
 	gl_create_fbo(shadow->occluder, lightscope, lightscope, &shadow->ofbo, &shadow->odbo);
 	gl_create_fbo(shadow->shadow, GLSHADOW_MAP_SIZE, 1, &shadow->sfbo, &shadow->sdbo);
-	gl_create_fbo(shadow->texture, width, height, &shadow->fbo, &shadow->dbo);
 
 	shadow->width = width;
 	shadow->height = height;
@@ -266,9 +264,12 @@ err1:
 
 void nemofx_glshadow_destroy(struct glshadow *shadow)
 {
-	glDeleteTextures(1, &shadow->texture);
-	glDeleteFramebuffers(1, &shadow->fbo);
-	glDeleteRenderbuffers(1, &shadow->dbo);
+	if (shadow->texture > 0)
+		glDeleteTextures(1, &shadow->texture);
+	if (shadow->fbo > 0)
+		glDeleteFramebuffers(1, &shadow->fbo);
+	if (shadow->dbo > 0)
+		glDeleteRenderbuffers(1, &shadow->dbo);
 
 	glDeleteTextures(1, &shadow->shadow);
 	glDeleteFramebuffers(1, &shadow->sfbo);
@@ -292,6 +293,13 @@ void nemofx_glshadow_destroy(struct glshadow *shadow)
 	glDeleteProgram(shadow->program3);
 
 	free(shadow);
+}
+
+void nemofx_glshadow_use_fbo(struct glshadow *shadow)
+{
+	shadow->texture = gl_create_texture(GL_LINEAR, GL_CLAMP_TO_EDGE, shadow->width, shadow->height);
+
+	gl_create_fbo(shadow->texture, shadow->width, shadow->height, &shadow->fbo, &shadow->dbo);
 }
 
 void nemofx_glshadow_set_pointlight_position(struct glshadow *shadow, int index, float x, float y)
@@ -324,7 +332,10 @@ void nemofx_glshadow_clear_pointlights(struct glshadow *shadow)
 
 void nemofx_glshadow_resize(struct glshadow *shadow, int32_t width, int32_t height)
 {
-	if (shadow->width != width || shadow->height != height) {
+	if (shadow->width == width && shadow->height == height)
+		return;
+
+	if (shadow->texture > 0) {
 		glBindTexture(GL_TEXTURE_2D, shadow->texture);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 		glBindTexture(GL_TEXTURE_2D, 0);
@@ -333,10 +344,10 @@ void nemofx_glshadow_resize(struct glshadow *shadow, int32_t width, int32_t heig
 		glDeleteRenderbuffers(1, &shadow->dbo);
 
 		gl_create_fbo(shadow->texture, width, height, &shadow->fbo, &shadow->dbo);
-
-		shadow->width = width;
-		shadow->height = height;
 	}
+
+	shadow->width = width;
+	shadow->height = height;
 }
 
 uint32_t nemofx_glshadow_dispatch(struct glshadow *shadow, uint32_t texture)

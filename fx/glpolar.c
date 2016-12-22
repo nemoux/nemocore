@@ -74,10 +74,6 @@ struct glpolar *nemofx_glpolar_create(int32_t width, int32_t height)
 	polar->uheight = glGetUniformLocation(polar->program, "height");
 	polar->ucolor = glGetUniformLocation(polar->program, "color");
 
-	polar->texture = gl_create_texture(GL_NEAREST, GL_CLAMP_TO_EDGE, width, height);
-
-	gl_create_fbo(polar->texture, width, height, &polar->fbo, &polar->dbo);
-
 	polar->width = width;
 	polar->height = height;
 
@@ -91,16 +87,25 @@ err1:
 
 void nemofx_glpolar_destroy(struct glpolar *polar)
 {
-	glDeleteTextures(1, &polar->texture);
-
-	glDeleteFramebuffers(1, &polar->fbo);
-	glDeleteRenderbuffers(1, &polar->dbo);
+	if (polar->texture > 0)
+		glDeleteTextures(1, &polar->texture);
+	if (polar->fbo > 0)
+		glDeleteFramebuffers(1, &polar->fbo);
+	if (polar->dbo > 0)
+		glDeleteRenderbuffers(1, &polar->dbo);
 
 	glDeleteShader(polar->vshader);
 	glDeleteShader(polar->fshader);
 	glDeleteProgram(polar->program);
 
 	free(polar);
+}
+
+void nemofx_glpolar_use_fbo(struct glpolar *polar)
+{
+	polar->texture = gl_create_texture(GL_LINEAR, GL_CLAMP_TO_EDGE, polar->width, polar->height);
+
+	gl_create_fbo(polar->texture, polar->width, polar->height, &polar->fbo, &polar->dbo);
 }
 
 void nemofx_glpolar_set_color(struct glpolar *polar, float r, float g, float b, float a)
@@ -113,7 +118,10 @@ void nemofx_glpolar_set_color(struct glpolar *polar, float r, float g, float b, 
 
 void nemofx_glpolar_resize(struct glpolar *polar, int32_t width, int32_t height)
 {
-	if (polar->width != width || polar->height != height) {
+	if (polar->width == width && polar->height == height)
+		return;
+
+	if (polar->texture > 0) {
 		glBindTexture(GL_TEXTURE_2D, polar->texture);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 		glBindTexture(GL_TEXTURE_2D, 0);
@@ -122,10 +130,10 @@ void nemofx_glpolar_resize(struct glpolar *polar, int32_t width, int32_t height)
 		glDeleteRenderbuffers(1, &polar->dbo);
 
 		gl_create_fbo(polar->texture, width, height, &polar->fbo, &polar->dbo);
-
-		polar->width = width;
-		polar->height = height;
 	}
+
+	polar->width = width;
+	polar->height = height;
 }
 
 uint32_t nemofx_glpolar_dispatch(struct glpolar *polar, uint32_t texture)

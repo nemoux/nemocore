@@ -12,6 +12,8 @@ NEMO_BEGIN_EXTERN_C
 extern struct glmotion *nemofx_glmotion_create(int32_t width, int32_t height);
 extern void nemofx_glmotion_destroy(struct glmotion *motion);
 
+extern void nemofx_glmotion_use_fbo(struct glmotion *motion);
+
 extern void nemofx_glmotion_set_step(struct glmotion *motion, float step);
 
 extern void nemofx_glmotion_resize(struct glmotion *motion, int32_t width, int32_t height);

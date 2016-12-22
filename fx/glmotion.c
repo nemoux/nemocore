@@ -75,10 +75,8 @@ struct glmotion *nemofx_glmotion_create(int32_t width, int32_t height)
 	motion->uheight = glGetUniformLocation(motion->program, "height");
 	motion->ustep = glGetUniformLocation(motion->program, "step");
 
-	motion->texture[0] = gl_create_texture(GL_LINEAR, GL_CLAMP_TO_EDGE, width, height);
 	motion->texture[1] = gl_create_texture(GL_LINEAR, GL_CLAMP_TO_EDGE, width, height);
 
-	gl_create_fbo(motion->texture[0], width, height, &motion->fbo[0], &motion->dbo[0]);
 	gl_create_fbo(motion->texture[1], width, height, &motion->fbo[1], &motion->dbo[1]);
 
 	motion->width = width;
@@ -94,10 +92,14 @@ err1:
 
 void nemofx_glmotion_destroy(struct glmotion *motion)
 {
-	glDeleteTextures(2, &motion->texture[0]);
+	if (motion->texture[0] > 0)
+		glDeleteTextures(1, &motion->texture[0]);
+	if (motion->fbo[0] > 0)
+		glDeleteFramebuffers(1, &motion->fbo[0]);
+	if (motion->dbo[0] > 0)
+		glDeleteRenderbuffers(1, &motion->dbo[0]);
 
-	glDeleteFramebuffers(1, &motion->fbo[0]);
-	glDeleteRenderbuffers(1, &motion->dbo[0]);
+	glDeleteTextures(1, &motion->texture[1]);
 	glDeleteFramebuffers(1, &motion->fbo[1]);
 	glDeleteRenderbuffers(1, &motion->dbo[1]);
 
@@ -108,6 +110,13 @@ void nemofx_glmotion_destroy(struct glmotion *motion)
 	free(motion);
 }
 
+void nemofx_glmotion_use_fbo(struct glmotion *motion)
+{
+	motion->texture[0] = gl_create_texture(GL_LINEAR, GL_CLAMP_TO_EDGE, motion->width, motion->height);
+
+	gl_create_fbo(motion->texture[0], motion->width, motion->height, &motion->fbo[0], &motion->dbo[0]);
+}
+
 void nemofx_glmotion_set_step(struct glmotion *motion, float step)
 {
 	motion->step = step;
@@ -115,23 +124,31 @@ void nemofx_glmotion_set_step(struct glmotion *motion, float step)
 
 void nemofx_glmotion_resize(struct glmotion *motion, int32_t width, int32_t height)
 {
-	if (motion->width != width || motion->height != height) {
-		int i;
+	if (motion->width == width && motion->height == height)
+		return;
 
-		for (i = 0; i < 2; i++) {
-			glBindTexture(GL_TEXTURE_2D, motion->texture[i]);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
-			glBindTexture(GL_TEXTURE_2D, 0);
+	if (motion->texture[0] > 0) {
+		glBindTexture(GL_TEXTURE_2D, motion->texture[0]);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
+		glBindTexture(GL_TEXTURE_2D, 0);
 
-			glDeleteFramebuffers(1, &motion->fbo[i]);
-			glDeleteRenderbuffers(1, &motion->dbo[i]);
+		glDeleteFramebuffers(1, &motion->fbo[0]);
+		glDeleteRenderbuffers(1, &motion->dbo[0]);
 
-			gl_create_fbo(motion->texture[i], width, height, &motion->fbo[i], &motion->dbo[i]);
-		}
-
-		motion->width = width;
-		motion->height = height;
+		gl_create_fbo(motion->texture[0], width, height, &motion->fbo[0], &motion->dbo[0]);
 	}
+
+	glBindTexture(GL_TEXTURE_2D, motion->texture[1]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glDeleteFramebuffers(1, &motion->fbo[1]);
+	glDeleteRenderbuffers(1, &motion->dbo[1]);
+
+	gl_create_fbo(motion->texture[1], width, height, &motion->fbo[1], &motion->dbo[1]);
+
+	motion->width = width;
+	motion->height = height;
 }
 
 static inline void nemofx_glmotion_switch(struct glmotion *motion)

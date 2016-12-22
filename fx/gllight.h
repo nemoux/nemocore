@@ -14,6 +14,8 @@ NEMO_BEGIN_EXTERN_C
 extern struct gllight *nemofx_gllight_create(int32_t width, int32_t height);
 extern void nemofx_gllight_destroy(struct gllight *light);
 
+extern void nemofx_gllight_use_fbo(struct gllight *light);
+
 extern void nemofx_gllight_set_ambientlight_color(struct gllight *light, float r, float g, float b);
 
 extern void nemofx_gllight_set_pointlight_position(struct gllight *light, int index, float x, float y);

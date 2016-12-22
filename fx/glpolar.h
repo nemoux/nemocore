@@ -12,6 +12,8 @@ NEMO_BEGIN_EXTERN_C
 extern struct glpolar *nemofx_glpolar_create(int32_t width, int32_t height);
 extern void nemofx_glpolar_destroy(struct glpolar *polar);
 
+extern void nemofx_glpolar_use_fbo(struct glpolar *polar);
+
 extern void nemofx_glpolar_set_color(struct glpolar *polar, float r, float g, float b, float a);
 
 extern void nemofx_glpolar_resize(struct glpolar *polar, int32_t width, int32_t height);

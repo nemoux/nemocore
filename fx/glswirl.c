@@ -91,10 +91,6 @@ struct glswirl *nemofx_glswirl_create(int32_t width, int32_t height)
 	swirl->uangle = glGetUniformLocation(swirl->program, "angle");
 	swirl->ucenter = glGetUniformLocation(swirl->program, "center");
 
-	swirl->texture = gl_create_texture(GL_LINEAR, GL_CLAMP_TO_EDGE, width, height);
-
-	gl_create_fbo(swirl->texture, width, height, &swirl->fbo, &swirl->dbo);
-
 	swirl->width = width;
 	swirl->height = height;
 
@@ -108,16 +104,25 @@ err1:
 
 void nemofx_glswirl_destroy(struct glswirl *swirl)
 {
-	glDeleteTextures(1, &swirl->texture);
-
-	glDeleteFramebuffers(1, &swirl->fbo);
-	glDeleteRenderbuffers(1, &swirl->dbo);
+	if (swirl->texture > 0)
+		glDeleteTextures(1, &swirl->texture);
+	if (swirl->fbo > 0)
+		glDeleteFramebuffers(1, &swirl->fbo);
+	if (swirl->dbo > 0)
+		glDeleteRenderbuffers(1, &swirl->dbo);
 
 	glDeleteShader(swirl->vshader);
 	glDeleteShader(swirl->fshader);
 	glDeleteProgram(swirl->program);
 
 	free(swirl);
+}
+
+void nemofx_glswirl_use_fbo(struct glswirl *swirl)
+{
+	swirl->texture = gl_create_texture(GL_LINEAR, GL_CLAMP_TO_EDGE, swirl->width, swirl->height);
+
+	gl_create_fbo(swirl->texture, swirl->width, swirl->height, &swirl->fbo, &swirl->dbo);
 }
 
 void nemofx_glswirl_set_radius(struct glswirl *swirl, float radius)
@@ -138,7 +143,10 @@ void nemofx_glswirl_set_center(struct glswirl *swirl, float cx, float cy)
 
 void nemofx_glswirl_resize(struct glswirl *swirl, int32_t width, int32_t height)
 {
-	if (swirl->width != width || swirl->height != height) {
+	if (swirl->width == width && swirl->height == height)
+		return;
+
+	if (swirl->texture > 0) {
 		glBindTexture(GL_TEXTURE_2D, swirl->texture);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 		glBindTexture(GL_TEXTURE_2D, 0);
@@ -147,10 +155,10 @@ void nemofx_glswirl_resize(struct glswirl *swirl, int32_t width, int32_t height)
 		glDeleteRenderbuffers(1, &swirl->dbo);
 
 		gl_create_fbo(swirl->texture, width, height, &swirl->fbo, &swirl->dbo);
-
-		swirl->width = width;
-		swirl->height = height;
 	}
+
+	swirl->width = width;
+	swirl->height = height;
 }
 
 uint32_t nemofx_glswirl_dispatch(struct glswirl *swirl, uint32_t texture)

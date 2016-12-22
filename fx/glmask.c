@@ -72,10 +72,6 @@ struct glmask *nemofx_glmask_create(int32_t width, int32_t height)
 	mask->uwidth = glGetUniformLocation(mask->program, "width");
 	mask->uheight = glGetUniformLocation(mask->program, "height");
 
-	mask->texture = gl_create_texture(GL_LINEAR, GL_CLAMP_TO_EDGE, width, height);
-
-	gl_create_fbo(mask->texture, width, height, &mask->fbo, &mask->dbo);
-
 	mask->width = width;
 	mask->height = height;
 
@@ -89,10 +85,12 @@ err1:
 
 void nemofx_glmask_destroy(struct glmask *mask)
 {
-	glDeleteTextures(1, &mask->texture);
-
-	glDeleteFramebuffers(1, &mask->fbo);
-	glDeleteRenderbuffers(1, &mask->dbo);
+	if (mask->texture > 0)
+		glDeleteTextures(1, &mask->texture);
+	if (mask->fbo > 0)
+		glDeleteFramebuffers(1, &mask->fbo);
+	if (mask->dbo > 0)
+		glDeleteRenderbuffers(1, &mask->dbo);
 
 	glDeleteShader(mask->vshader);
 	glDeleteShader(mask->fshader);
@@ -101,9 +99,19 @@ void nemofx_glmask_destroy(struct glmask *mask)
 	free(mask);
 }
 
+void nemofx_glmask_use_fbo(struct glmask *mask)
+{
+	mask->texture = gl_create_texture(GL_LINEAR, GL_CLAMP_TO_EDGE, mask->width, mask->height);
+
+	gl_create_fbo(mask->texture, mask->width, mask->height, &mask->fbo, &mask->dbo);
+}
+
 void nemofx_glmask_resize(struct glmask *mask, int32_t width, int32_t height)
 {
-	if (mask->width != width || mask->height != height) {
+	if (mask->width == width && mask->height == height)
+		return;
+
+	if (mask->texture > 0) {
 		glBindTexture(GL_TEXTURE_2D, mask->texture);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 		glBindTexture(GL_TEXTURE_2D, 0);
@@ -112,10 +120,10 @@ void nemofx_glmask_resize(struct glmask *mask, int32_t width, int32_t height)
 		glDeleteRenderbuffers(1, &mask->dbo);
 
 		gl_create_fbo(mask->texture, width, height, &mask->fbo, &mask->dbo);
-
-		mask->width = width;
-		mask->height = height;
 	}
+
+	mask->width = width;
+	mask->height = height;
 }
 
 uint32_t nemofx_glmask_dispatch(struct glmask *mask, uint32_t texture, uint32_t overlay)

@@ -12,6 +12,8 @@ NEMO_BEGIN_EXTERN_C
 extern struct glfilter *nemofx_glfilter_create(int32_t width, int32_t height);
 extern void nemofx_glfilter_destroy(struct glfilter *filter);
 
+extern void nemofx_glfilter_use_fbo(struct glfilter *filter);
+
 extern void nemofx_glfilter_set_program(struct glfilter *filter, const char *shaderpath);
 
 extern void nemofx_glfilter_resize(struct glfilter *filter, int32_t width, int32_t height);

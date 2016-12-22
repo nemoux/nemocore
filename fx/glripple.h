@@ -12,6 +12,8 @@ NEMO_BEGIN_EXTERN_C
 extern struct glripple *nemofx_glripple_create(int32_t width, int32_t height);
 extern void nemofx_glripple_destroy(struct glripple *ripple);
 
+extern void nemofx_glripple_use_fbo(struct glripple *ripple);
+
 extern void nemofx_glripple_use_vectors(struct glripple *ripple, float *vectors, int rows, int columns, int width, int height);
 extern void nemofx_glripple_use_amplitudes(struct glripple *ripple, float *amplitudes, int length, int cycles, float amplitude);
 

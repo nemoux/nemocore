@@ -97,10 +97,6 @@ struct glripple *nemofx_glripple_create(int32_t width, int32_t height)
 
 	ripple->utexture = glGetUniformLocation(ripple->program, "tex");
 
-	ripple->texture = gl_create_texture(GL_LINEAR, GL_REPEAT, width, height);
-
-	gl_create_fbo(ripple->texture, width, height, &ripple->fbo, &ripple->dbo);
-
 	glGenVertexArrays(1, &ripple->varray);
 	glGenBuffers(1, &ripple->vvertex);
 	glGenBuffers(1, &ripple->vtexcoord);
@@ -123,15 +119,17 @@ void nemofx_glripple_destroy(struct glripple *ripple)
 {
 	nemolist_remove(&ripple->list);
 
-	glDeleteTextures(1, &ripple->texture);
+	if (ripple->texture > 0)
+		glDeleteTextures(1, &ripple->texture);
+	if (ripple->fbo > 0)
+		glDeleteFramebuffers(1, &ripple->fbo);
+	if (ripple->dbo > 0)
+		glDeleteRenderbuffers(1, &ripple->dbo);
 
 	glDeleteBuffers(1, &ripple->vvertex);
 	glDeleteBuffers(1, &ripple->vtexcoord);
 	glDeleteBuffers(1, &ripple->vindex);
 	glDeleteVertexArrays(1, &ripple->varray);
-
-	glDeleteFramebuffers(1, &ripple->fbo);
-	glDeleteRenderbuffers(1, &ripple->dbo);
 
 	glDeleteShader(ripple->vshader);
 	glDeleteShader(ripple->fshader);
@@ -152,6 +150,13 @@ void nemofx_glripple_destroy(struct glripple *ripple)
 		free(ripple->indices);
 
 	free(ripple);
+}
+
+void nemofx_glripple_use_fbo(struct glripple *ripple)
+{
+	ripple->texture = gl_create_texture(GL_LINEAR, GL_CLAMP_TO_EDGE, ripple->width, ripple->height);
+
+	gl_create_fbo(ripple->texture, ripple->width, ripple->height, &ripple->fbo, &ripple->dbo);
 }
 
 void nemofx_glripple_use_vectors(struct glripple *ripple, float *vectors, int rows, int columns, int width, int height)
@@ -248,7 +253,10 @@ void nemofx_glripple_layout(struct glripple *ripple, int32_t rows, int32_t colum
 
 void nemofx_glripple_resize(struct glripple *ripple, int32_t width, int32_t height)
 {
-	if (ripple->width != width || ripple->height != height) {
+	if (ripple->width == width && ripple->height == height)
+		return;
+
+	if (ripple->texture > 0) {
 		glBindTexture(GL_TEXTURE_2D, ripple->texture);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 		glBindTexture(GL_TEXTURE_2D, 0);
@@ -257,10 +265,10 @@ void nemofx_glripple_resize(struct glripple *ripple, int32_t width, int32_t heig
 		glDeleteRenderbuffers(1, &ripple->dbo);
 
 		gl_create_fbo(ripple->texture, width, height, &ripple->fbo, &ripple->dbo);
-
-		ripple->width = width;
-		ripple->height = height;
 	}
+
+	ripple->width = width;
+	ripple->height = height;
 }
 
 void nemofx_glripple_update(struct glripple *ripple)

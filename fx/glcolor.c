@@ -78,7 +78,6 @@ void nemofx_glcolor_destroy(struct glcolor *color)
 {
 	if (color->texture > 0)
 		glDeleteTextures(1, &color->texture);
-
 	if (color->fbo > 0)
 		glDeleteFramebuffers(1, &color->fbo);
 	if (color->dbo > 0)

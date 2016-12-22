@@ -107,7 +107,6 @@ err1:
 void nemofx_glblur_destroy(struct glblur *blur)
 {
 	glDeleteTextures(1, &blur->texture[0]);
-
 	glDeleteFramebuffers(1, &blur->fbo[0]);
 	glDeleteRenderbuffers(1, &blur->dbo[0]);
 

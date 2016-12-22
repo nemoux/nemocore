@@ -181,10 +181,6 @@ struct glfilter *nemofx_glfilter_create(int32_t width, int32_t height)
 		return NULL;
 	memset(filter, 0, sizeof(struct glfilter));
 
-	filter->texture = gl_create_texture(GL_NEAREST, GL_CLAMP_TO_EDGE, width, height);
-
-	gl_create_fbo(filter->texture, width, height, &filter->fbo, &filter->dbo);
-
 	filter->width = width;
 	filter->height = height;
 
@@ -193,10 +189,12 @@ struct glfilter *nemofx_glfilter_create(int32_t width, int32_t height)
 
 void nemofx_glfilter_destroy(struct glfilter *filter)
 {
-	glDeleteTextures(1, &filter->texture);
-
-	glDeleteFramebuffers(1, &filter->fbo);
-	glDeleteRenderbuffers(1, &filter->dbo);
+	if (filter->texture > 0)
+		glDeleteTextures(1, &filter->texture);
+	if (filter->fbo > 0)
+		glDeleteFramebuffers(1, &filter->fbo);
+	if (filter->dbo > 0)
+		glDeleteRenderbuffers(1, &filter->dbo);
 
 	if (filter->vshader > 0)
 		glDeleteShader(filter->vshader);
@@ -206,6 +204,13 @@ void nemofx_glfilter_destroy(struct glfilter *filter)
 		glDeleteProgram(filter->program);
 
 	free(filter);
+}
+
+void nemofx_glfilter_use_fbo(struct glfilter *filter)
+{
+	filter->texture = gl_create_texture(GL_LINEAR, GL_CLAMP_TO_EDGE, filter->width, filter->height);
+
+	gl_create_fbo(filter->texture, filter->width, filter->height, &filter->fbo, &filter->dbo);
 }
 
 void nemofx_glfilter_set_program(struct glfilter *filter, const char *shaderpath)
@@ -261,7 +266,10 @@ void nemofx_glfilter_set_program(struct glfilter *filter, const char *shaderpath
 
 void nemofx_glfilter_resize(struct glfilter *filter, int32_t width, int32_t height)
 {
-	if (filter->width != width || filter->height != height) {
+	if (filter->width == width && filter->height == height)
+		return;
+
+	if (filter->texture > 0) {
 		glBindTexture(GL_TEXTURE_2D, filter->texture);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 		glBindTexture(GL_TEXTURE_2D, 0);
@@ -270,10 +278,10 @@ void nemofx_glfilter_resize(struct glfilter *filter, int32_t width, int32_t heig
 		glDeleteRenderbuffers(1, &filter->dbo);
 
 		gl_create_fbo(filter->texture, width, height, &filter->fbo, &filter->dbo);
-
-		filter->width = width;
-		filter->height = height;
 	}
+
+	filter->width = width;
+	filter->height = height;
 }
 
 uint32_t nemofx_glfilter_dispatch(struct glfilter *filter, uint32_t texture)

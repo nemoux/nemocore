@@ -2833,6 +2833,7 @@ int main(int argc, char *argv[])
 		}
 
 		tile->filter = nemofx_glfilter_create(width, height);
+		nemofx_glfilter_use_fbo(tile->filter);
 		nemofx_glfilter_set_program(tile->filter, nemofs_dir_get_filepath(tile->shaders, tile->ishaders));
 	}
 
@@ -2840,6 +2841,7 @@ int main(int argc, char *argv[])
 		uint32_t color = color_parse(polarcolor);
 
 		tile->polar = nemofx_glpolar_create(width, height);
+		nemofx_glpolar_use_fbo(tile->polar);
 		nemofx_glpolar_set_color(tile->polar,
 				COLOR_DOUBLE_R(color),
 				COLOR_DOUBLE_G(color),
@@ -2909,6 +2911,7 @@ int main(int argc, char *argv[])
 		}
 
 		tile->mask = nemofx_glmask_create(width, height);
+		nemofx_glmask_use_fbo(tile->mask);
 	}
 
 	if (wallpath != NULL) {

@@ -128,10 +128,6 @@ struct gllight *nemofx_gllight_create(int32_t width, int32_t height)
 	light->uscope1 = glGetUniformLocation(light->program1, "lscope");
 	light->utime1 = glGetUniformLocation(light->program1, "time");
 
-	light->texture = gl_create_texture(GL_LINEAR, GL_CLAMP_TO_EDGE, width, height);
-
-	gl_create_fbo(light->texture, width, height, &light->fbo, &light->dbo);
-
 	light->width = width;
 	light->height = height;
 
@@ -150,10 +146,12 @@ err1:
 
 void nemofx_gllight_destroy(struct gllight *light)
 {
-	glDeleteTextures(1, &light->texture);
-
-	glDeleteFramebuffers(1, &light->fbo);
-	glDeleteRenderbuffers(1, &light->dbo);
+	if (light->texture > 0)
+		glDeleteTextures(1, &light->texture);
+	if (light->fbo > 0)
+		glDeleteFramebuffers(1, &light->fbo);
+	if (light->dbo > 0)
+		glDeleteRenderbuffers(1, &light->dbo);
 
 	glDeleteShader(light->vshader0);
 	glDeleteShader(light->fshader0);
@@ -163,6 +161,13 @@ void nemofx_gllight_destroy(struct gllight *light)
 	glDeleteProgram(light->program1);
 
 	free(light);
+}
+
+void nemofx_gllight_use_fbo(struct gllight *light)
+{
+	light->texture = gl_create_texture(GL_LINEAR, GL_CLAMP_TO_EDGE, light->width, light->height);
+
+	gl_create_fbo(light->texture, light->width, light->height, &light->fbo, &light->dbo);
 }
 
 void nemofx_gllight_set_ambientlight_color(struct gllight *light, float r, float g, float b)
@@ -207,7 +212,10 @@ void nemofx_gllight_clear_pointlights(struct gllight *light)
 
 void nemofx_gllight_resize(struct gllight *light, int32_t width, int32_t height)
 {
-	if (light->width != width || light->height != height) {
+	if (light->width == width && light->height == height)
+		return;
+
+	if (light->texture > 0) {
 		glBindTexture(GL_TEXTURE_2D, light->texture);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
 		glBindTexture(GL_TEXTURE_2D, 0);
@@ -216,10 +224,10 @@ void nemofx_gllight_resize(struct gllight *light, int32_t width, int32_t height)
 		glDeleteRenderbuffers(1, &light->dbo);
 
 		gl_create_fbo(light->texture, width, height, &light->fbo, &light->dbo);
-
-		light->width = width;
-		light->height = height;
 	}
+
+	light->width = width;
+	light->height = height;
 }
 
 uint32_t nemofx_gllight_dispatch(struct gllight *light, uint32_t texture)
