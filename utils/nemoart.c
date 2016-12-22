@@ -23,7 +23,16 @@ struct nemoart {
 
 	int width, height;
 
+	struct fsdir *contents;
+	int icontents;
+
 	struct cookegl *egl;
+
+	struct nemoplay *play;
+	struct playdecoder *decoderback;
+	struct playaudio *audioback;
+	struct playvideo *videoback;
+	struct playshader *shader;
 };
 
 static void nemoart_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t width, int32_t height)
@@ -49,12 +58,52 @@ static int nemoart_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t typ
 	return 0;
 }
 
+static void nemoart_dispatch_video_update(struct nemoplay *play, void *data)
+{
+	struct nemoart *art = (struct nemoart *)data;
+
+	nemocook_egl_prerender(art->egl);
+
+	nemoplay_shader_dispatch(art->shader);
+
+	nemocook_egl_postrender(art->egl);
+
+	nemocanvas_dispatch_frame(art->canvas);
+}
+
+static void nemoart_dispatch_video_done(struct nemoplay *play, void *data)
+{
+	struct nemoart *art = (struct nemoart *)data;
+
+	nemoplay_video_destroy(art->videoback);
+	nemoplay_audio_destroy(art->audioback);
+	nemoplay_decoder_destroy(art->decoderback);
+
+	nemoplay_destroy(art->play);
+
+	art->icontents = (art->icontents + 1) % nemofs_dir_get_filecount(art->contents);
+
+	art->play = nemoplay_create();
+	nemoplay_load_media(art->play, nemofs_dir_get_filepath(art->contents, art->icontents));
+
+	art->decoderback = nemoplay_decoder_create(art->play);
+	art->audioback = nemoplay_audio_create_by_ao(art->play);
+	art->videoback = nemoplay_video_create_by_timer(art->play, art->tool);
+	nemoplay_video_set_texture(art->videoback, 0, art->width, art->height);
+	nemoplay_video_set_update(art->videoback, nemoart_dispatch_video_update);
+	nemoplay_video_set_done(art->videoback, nemoart_dispatch_video_done);
+	nemoplay_video_set_data(art->videoback, art);
+	art->shader = nemoplay_video_get_shader(art->videoback);
+	nemoplay_shader_set_flip(art->shader, 1);
+}
+
 int main(int argc, char *argv[])
 {
 	struct option options[] = {
 		{ "width",				required_argument,		NULL,		'w' },
 		{ "height",				required_argument,		NULL,		'h' },
 		{ "fullscreen",		required_argument,		NULL,		'f' },
+		{ "content",			required_argument,		NULL,		'c' },
 		{ 0 }
 	};
 
@@ -68,7 +117,9 @@ int main(int argc, char *argv[])
 	int height = 1080;
 	int opt;
 
-	while (opt = getopt_long(argc, argv, "w:h:f:", options, NULL)) {
+	opterr = 0;
+
+	while (opt = getopt_long(argc, argv, "w:h:f:c:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -85,13 +136,14 @@ int main(int argc, char *argv[])
 				fullscreenid = strdup(optarg);
 				break;
 
+			case 'c':
+				contentpath = strdup(optarg);
+				break;
+
 			default:
 				break;
 		}
 	}
-
-	if (optind < argc)
-		contentpath = strdup(argv[optind]);
 
 	if (contentpath == NULL)
 		return 0;
@@ -100,6 +152,20 @@ int main(int argc, char *argv[])
 	if (art == NULL)
 		return -1;
 	memset(art, 0, sizeof(struct nemoart));
+
+	art->width = width;
+	art->height = height;
+
+	if (os_check_path_is_directory(contentpath) != 0) {
+		art->contents = nemofs_dir_create(contentpath, 128);
+		nemofs_dir_scan_extension(art->contents, "mp4");
+		nemofs_dir_scan_extension(art->contents, "avi");
+		nemofs_dir_scan_extension(art->contents, "mov");
+		nemofs_dir_scan_extension(art->contents, "ts");
+	} else {
+		art->contents = nemofs_dir_create(NULL, 32);
+		nemofs_dir_insert_file(art->contents, contentpath);
+	}
 
 	art->tool = tool = nemotool_create();
 	nemotool_connect_wayland(tool, NULL);
@@ -123,18 +189,34 @@ int main(int argc, char *argv[])
 			NTEGL_WINDOW(canvas));
 	nemocook_egl_resize(egl, width, height);
 
-	nemocook_egl_attach_state(egl,
-			nemocook_state_create(1, NEMOCOOK_STATE_COLOR_BUFFER_TYPE, 0.0f, 0.0f, 0.0f, 0.0f));
+	art->play = nemoplay_create();
+	nemoplay_load_media(art->play, nemofs_dir_get_filepath(art->contents, art->icontents));
 
-	nemocanvas_dispatch_frame(canvas);
+	art->decoderback = nemoplay_decoder_create(art->play);
+	art->audioback = nemoplay_audio_create_by_ao(art->play);
+	art->videoback = nemoplay_video_create_by_timer(art->play, tool);
+	nemoplay_video_set_texture(art->videoback, 0, width, height);
+	nemoplay_video_set_update(art->videoback, nemoart_dispatch_video_update);
+	nemoplay_video_set_done(art->videoback, nemoart_dispatch_video_done);
+	nemoplay_video_set_data(art->videoback, art);
+	art->shader = nemoplay_video_get_shader(art->videoback);
+	nemoplay_shader_set_flip(art->shader, 1);
 
 	nemotool_run(tool);
+
+	nemoplay_video_destroy(art->videoback);
+	nemoplay_audio_destroy(art->audioback);
+	nemoplay_decoder_destroy(art->decoderback);
+
+	nemoplay_destroy(art->play);
 
 	nemocook_egl_destroy(egl);
 
 	nemocanvas_egl_destroy(canvas);
 
 	nemotool_destroy(tool);
+
+	nemofs_dir_destroy(art->contents);
 
 	free(art);
 

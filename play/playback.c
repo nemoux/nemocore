@@ -253,7 +253,9 @@ static void nemoplay_video_handle_timer(struct nemotimer *timer, void *data)
 				nemotimer_set_timeout(timer, threshold * 1000);
 			} else {
 				nemoplay_shader_update(video->shader, one);
-				nemoplay_shader_dispatch(video->shader);
+
+				if (nemoplay_shader_get_viewport(video->shader) > 0)
+					nemoplay_shader_dispatch(video->shader);
 
 				if (video->dispatch_update != NULL)
 					video->dispatch_update(video->play, video->data);
@@ -324,6 +326,11 @@ void nemoplay_video_redraw(struct playvideo *video)
 {
 	if (nemoplay_get_frame(video->play) != 0)
 		nemoplay_shader_dispatch(video->shader);
+}
+
+struct playshader *nemoplay_video_get_shader(struct playvideo *video)
+{
+	return video->shader;
 }
 
 void nemoplay_video_set_texture(struct playvideo *video, uint32_t texture, int width, int height)

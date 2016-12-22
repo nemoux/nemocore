@@ -87,6 +87,8 @@ struct playshader *nemoplay_shader_create(void)
 		return NULL;
 	memset(shader, 0, sizeof(struct playshader));
 
+	shader->flip = 1;
+
 	return shader;
 }
 
@@ -262,11 +264,25 @@ int nemoplay_shader_set_viewport(struct playshader *shader, uint32_t texture, in
 	if (shader->dbo > 0)
 		glDeleteRenderbuffers(1, &shader->dbo);
 
-	gl_create_fbo(texture, width, height, &shader->fbo, &shader->dbo);
+	if (texture > 0) {
+		gl_create_fbo(texture, width, height, &shader->fbo, &shader->dbo);
 
-	shader->texture = texture;
+		shader->texture = texture;
+	} else {
+		shader->texture = 0;
+		shader->fbo = 0;
+		shader->dbo = 0;
+	}
+
 	shader->viewport_width = width;
 	shader->viewport_height = height;
+
+	return 0;
+}
+
+int nemoplay_shader_set_flip(struct playshader *shader, int flip)
+{
+	shader->flip = flip == 0 ? 1 : -1;
 
 	return 0;
 }
@@ -328,10 +344,10 @@ int nemoplay_shader_update(struct playshader *shader, struct playone *one)
 int nemoplay_shader_dispatch(struct playshader *shader)
 {
 	GLfloat vertices[] = {
-		-1.0f, -1.0f, 0.0f, 0.0f,
-		1.0f, -1.0f, 1.0f, 0.0f,
-		1.0f, 1.0f, 1.0f, 1.0f,
-		-1.0f, 1.0f, 0.0f, 1.0f
+		-1.0f, -1.0f * shader->flip, 0.0f, 0.0f,
+		1.0f, -1.0f * shader->flip, 1.0f, 0.0f,
+		1.0f, 1.0f * shader->flip, 1.0f, 1.0f,
+		-1.0f, 1.0f * shader->flip, 0.0f, 1.0f
 	};
 
 	glBindFramebuffer(GL_FRAMEBUFFER, shader->fbo);

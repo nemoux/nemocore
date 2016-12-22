@@ -36,6 +36,8 @@ struct playshader {
 	GLuint texu;
 	GLuint texv;
 
+	int flip;
+
 	int32_t texture_width, texture_height;
 };
 
@@ -45,16 +47,32 @@ extern void nemoplay_shader_destroy(struct playshader *shader);
 extern int nemoplay_shader_set_format(struct playshader *shader, int format);
 extern int nemoplay_shader_set_texture(struct playshader *shader, int32_t width, int32_t height);
 extern int nemoplay_shader_set_viewport(struct playshader *shader, uint32_t texture, int32_t width, int32_t height);
+extern int nemoplay_shader_set_flip(struct playshader *shader, int flip);
 
 extern int nemoplay_shader_update(struct playshader *shader, struct playone *one);
 extern int nemoplay_shader_dispatch(struct playshader *shader);
 
-static inline int nemoplay_shader_get_texture_width(struct playshader *shader)
+static inline uint32_t nemoplay_shader_get_viewport(struct playshader *shader)
+{
+	return shader->texture;
+}
+
+static inline int32_t nemoplay_shader_get_viewport_width(struct playshader *shader)
+{
+	return shader->viewport_width;
+}
+
+static inline int32_t nemoplay_shader_get_viewport_height(struct playshader *shader)
+{
+	return shader->viewport_height;
+}
+
+static inline int32_t nemoplay_shader_get_texture_width(struct playshader *shader)
 {
 	return shader->texture_width;
 }
 
-static inline int nemoplay_shader_get_texture_height(struct playshader *shader)
+static inline int32_t nemoplay_shader_get_texture_height(struct playshader *shader)
 {
 	return shader->texture_height;
 }
