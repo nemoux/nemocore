@@ -74,6 +74,17 @@ static void nemocook_state_update_cull_face_disable(struct cookstate *state)
 	glDisable(GL_CULL_FACE);
 }
 
+static void nemocook_state_update_point_smooth_enable(struct cookstate *state)
+{
+	glEnable(GL_POINT_SMOOTH);
+	glHint(GL_POINT_SMOOTH_HINT, state->u.point_smooth.hint);
+}
+
+static void nemocook_state_update_point_smooth_disable(struct cookstate *state)
+{
+	glDisable(GL_POINT_SMOOTH);
+}
+
 struct cookstate *nemocook_state_create(int tag, int type, ...)
 {
 	struct cookstate *state;
@@ -142,6 +153,15 @@ struct cookstate *nemocook_state_create(int tag, int type, ...)
 			state->update = nemocook_state_update_cull_face_enable;
 		} else {
 			state->update = nemocook_state_update_cull_face_disable;
+		}
+	} else if (type == NEMOCOOK_STATE_POINT_SMOOTH_TYPE) {
+		enable = va_arg(vargs, int);
+		if (enable != 0) {
+			state->u.point_smooth.hint = va_arg(vargs, int);
+
+			state->update = nemocook_state_update_point_smooth_enable;
+		} else {
+			state->update = nemocook_state_update_point_smooth_disable;
 		}
 	}
 

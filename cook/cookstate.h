@@ -24,6 +24,7 @@ typedef enum {
 	NEMOCOOK_STATE_BLEND_SEPARATE_TYPE = 4,
 	NEMOCOOK_STATE_DEPTH_TEST_TYPE = 5,
 	NEMOCOOK_STATE_CULL_FACE_TYPE = 6,
+	NEMOCOOK_STATE_POINT_SMOOTH_TYPE = 7,
 	NEMOCOOK_STATE_LAST_TYPE
 } NemoCookStateType;
 
@@ -65,6 +66,10 @@ struct cookstate {
 		struct {
 			GLenum mode;
 		} cull_face;
+
+		struct {
+			GLenum hint;
+		} point_smooth;
 	} u;
 
 	nemocook_state_update_t update;
