@@ -38,6 +38,16 @@ extern struct eventone *nemoqueue_dequeue_one(struct nemoqueue *queue);
 extern struct eventone *nemoqueue_one_create(int isize, int fsize);
 extern void nemoqueue_one_destroy(struct eventone *one);
 
+static inline int nemoqueue_one_get_icount(struct eventone *one)
+{
+	return one->niattrs;
+}
+
+static inline int nemoqueue_one_get_fcount(struct eventone *one)
+{
+	return one->nfattrs;
+}
+
 static inline void nemoqueue_one_seti(struct eventone *one, int index, int attr)
 {
 	one->iattrs[index] = attr;
