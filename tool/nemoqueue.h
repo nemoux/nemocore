@@ -32,6 +32,7 @@ extern struct nemoqueue *nemoqueue_create(void);
 extern void nemoqueue_destroy(struct nemoqueue *queue);
 
 extern void nemoqueue_enqueue_one(struct nemoqueue *queue, struct eventone *one);
+extern void nemoqueue_enqueue_one_tail(struct nemoqueue *queue, struct eventone *one);
 extern struct eventone *nemoqueue_dequeue_one(struct nemoqueue *queue);
 
 extern struct eventone *nemoqueue_one_create(int isize, int fsize);

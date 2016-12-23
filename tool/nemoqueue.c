@@ -47,27 +47,31 @@ void nemoqueue_enqueue_one(struct nemoqueue *queue, struct eventone *one)
 {
 	pthread_mutex_lock(&queue->lock);
 
-	nemolist_insert(&queue->list, &one->link);
+	nemolist_enqueue(&queue->list, &one->link);
+
+	pthread_mutex_unlock(&queue->lock);
+}
+
+void nemoqueue_enqueue_one_tail(struct nemoqueue *queue, struct eventone *one)
+{
+	pthread_mutex_lock(&queue->lock);
+
+	nemolist_enqueue_tail(&queue->list, &one->link);
 
 	pthread_mutex_unlock(&queue->lock);
 }
 
 struct eventone *nemoqueue_dequeue_one(struct nemoqueue *queue)
 {
-	struct eventone *one = NULL;
+	struct nemolist *elm;
 
 	pthread_mutex_lock(&queue->lock);
 
-	if (nemolist_empty(&queue->list) == 0) {
-		one = nemolist_node0(&queue->list, struct eventone, link);
-
-		nemolist_remove(&one->link);
-		nemolist_init(&one->link);
-	}
+	elm = nemolist_dequeue(&queue->list);
 
 	pthread_mutex_unlock(&queue->lock);
 
-	return one;
+	return elm != NULL ? container_of(elm, struct eventone, link) : NULL;
 }
 
 struct eventone *nemoqueue_one_create(int isize, int fsize)
