@@ -22,6 +22,7 @@ struct nemoart {
 	struct nemocanvas *canvas;
 
 	int width, height;
+	int flip;
 
 	struct fsdir *contents;
 	int icontents;
@@ -94,7 +95,7 @@ static void nemoart_dispatch_video_done(struct nemoplay *play, void *data)
 	nemoplay_video_set_done(art->videoback, nemoart_dispatch_video_done);
 	nemoplay_video_set_data(art->videoback, art);
 	art->shader = nemoplay_video_get_shader(art->videoback);
-	nemoplay_shader_set_flip(art->shader, 1);
+	nemoplay_shader_set_flip(art->shader, art->flip);
 }
 
 int main(int argc, char *argv[])
@@ -104,6 +105,7 @@ int main(int argc, char *argv[])
 		{ "height",				required_argument,		NULL,		'h' },
 		{ "fullscreen",		required_argument,		NULL,		'f' },
 		{ "content",			required_argument,		NULL,		'c' },
+		{ "flip",					required_argument,		NULL,		'l' },
 		{ 0 }
 	};
 
@@ -115,11 +117,12 @@ int main(int argc, char *argv[])
 	char *contentpath = NULL;
 	int width = 1920;
 	int height = 1080;
+	int flip = 1;
 	int opt;
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "w:h:f:c:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:f:c:l:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -140,6 +143,10 @@ int main(int argc, char *argv[])
 				contentpath = strdup(optarg);
 				break;
 
+			case 'l':
+				flip = strcasecmp(optarg, "off") == 0;
+				break;
+
 			default:
 				break;
 		}
@@ -155,6 +162,7 @@ int main(int argc, char *argv[])
 
 	art->width = width;
 	art->height = height;
+	art->flip = flip;
 
 	if (os_check_path_is_directory(contentpath) != 0) {
 		art->contents = nemofs_dir_create(contentpath, 128);
@@ -200,7 +208,7 @@ int main(int argc, char *argv[])
 	nemoplay_video_set_done(art->videoback, nemoart_dispatch_video_done);
 	nemoplay_video_set_data(art->videoback, art);
 	art->shader = nemoplay_video_get_shader(art->videoback);
-	nemoplay_shader_set_flip(art->shader, 1);
+	nemoplay_shader_set_flip(art->shader, flip);
 
 	nemotool_run(tool);
 
