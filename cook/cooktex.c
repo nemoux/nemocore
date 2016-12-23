@@ -106,24 +106,30 @@ void nemocook_texture_set_wrap(struct cooktex *tex, int wrap)
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void nemocook_texture_upload(struct cooktex *tex, void *buffer)
+void nemocook_texture_bind(struct cooktex *tex)
 {
 	glBindTexture(GL_TEXTURE_2D, tex->texture);
+}
+
+void nemocook_texture_unbind(struct cooktex *tex)
+{
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void nemocook_texture_upload(struct cooktex *tex, void *buffer)
+{
 	glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, tex->width);
 	glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
 	glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
 	glTexImage2D(GL_TEXTURE_2D, 0, tex->format, tex->width, tex->height, 0, tex->format, GL_UNSIGNED_BYTE, buffer);
-	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void nemocook_texture_upload_slice(struct cooktex *tex, void *buffer, int x, int y, int w, int h)
 {
-	glBindTexture(GL_TEXTURE_2D, tex->texture);
 	glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, tex->width);
 	glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, x);
 	glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, y);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, w, h, tex->format, GL_UNSIGNED_BYTE, buffer);
-	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void *nemocook_texture_map(struct cooktex *tex)
