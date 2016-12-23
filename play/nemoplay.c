@@ -305,7 +305,7 @@ void nemoplay_wait_media(struct nemoplay *play)
 	pthread_mutex_unlock(&play->lock);
 }
 
-int nemoplay_extract_video(struct nemoplay *play, struct playbox *box)
+int nemoplay_extract_video(struct nemoplay *play, struct playbox *box, int count)
 {
 	AVFormatContext *container = play->container;
 	AVCodecContext *video_context = play->video_context;
@@ -313,10 +313,11 @@ int nemoplay_extract_video(struct nemoplay *play, struct playbox *box)
 	AVPacket packet;
 	int video_stream = play->video_stream;
 	int finished = 0;
+	int i;
 
 	frame = av_frame_alloc();
 
-	while (av_read_frame(container, &packet) >= 0) {
+	for (i = 0; i < count && av_read_frame(container, &packet) >= 0; i++) {
 		if (packet.stream_index == video_stream) {
 			avcodec_decode_video2(video_context, frame, &finished, &packet);
 
@@ -375,7 +376,7 @@ int nemoplay_extract_video(struct nemoplay *play, struct playbox *box)
 
 	av_frame_free(&frame);
 
-	return 0;
+	return i;
 }
 
 void nemoplay_revoke_video(struct nemoplay *play)

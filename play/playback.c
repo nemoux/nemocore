@@ -373,7 +373,8 @@ static void *nemoplay_extractor_handle_thread(void *arg)
 
 	nemoplay_enter_thread(play);
 
-	nemoplay_extract_video(play, box);
+	while (nemoplay_extract_video(play, box, play->video_framerate * 2) > 0)
+		sleep(1);
 
 	nemoplay_leave_thread(play);
 
