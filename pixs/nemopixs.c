@@ -1336,7 +1336,7 @@ static void nemopixs_dispatch_video_done(struct nemoplay *play, void *data)
 
 	pixs->decoderback = nemoplay_decoder_create(pixs->play);
 	pixs->audioback = nemoplay_audio_create_by_ao(pixs->play);
-	pixs->videoback = nemoplay_video_create_by_timer(pixs->play, pixs->tool);
+	pixs->videoback = nemoplay_video_create_by_timer(pixs->play);
 	nemoplay_video_set_texture(pixs->videoback,
 			nemoshow_canvas_get_texture(pixs->video),
 			nemoplay_get_video_width(pixs->play),
@@ -1804,7 +1804,7 @@ int main(int argc, char *argv[])
 
 		pixs->decoderback = nemoplay_decoder_create(pixs->play);
 		pixs->audioback = nemoplay_audio_create_by_ao(pixs->play);
-		pixs->videoback = nemoplay_video_create_by_timer(pixs->play, tool);
+		pixs->videoback = nemoplay_video_create_by_timer(pixs->play);
 		nemoplay_video_set_texture(pixs->videoback,
 				nemoshow_canvas_get_texture(pixs->video),
 				nemoplay_get_video_width(pixs->play),

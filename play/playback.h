@@ -9,7 +9,6 @@ NEMO_BEGIN_EXTERN_C
 
 #include <stdint.h>
 
-#include <nemotool.h>
 #include <nemoplay.h>
 
 struct playdecoder;
@@ -29,7 +28,7 @@ extern void nemoplay_decoder_seek(struct playdecoder *decoder, double pts);
 extern struct playaudio *nemoplay_audio_create_by_ao(struct nemoplay *play);
 extern void nemoplay_audio_destroy(struct playaudio *audio);
 
-extern struct playvideo *nemoplay_video_create_by_timer(struct nemoplay *play, struct nemotool *tool);
+extern struct playvideo *nemoplay_video_create_by_timer(struct nemoplay *play);
 extern void nemoplay_video_destroy(struct playvideo *video);
 extern void nemoplay_video_redraw(struct playvideo *video);
 extern struct playshader *nemoplay_video_get_shader(struct playvideo *video);

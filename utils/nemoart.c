@@ -88,7 +88,7 @@ static void nemoart_dispatch_video_done(struct nemoplay *play, void *data)
 
 	art->decoderback = nemoplay_decoder_create(art->play);
 	art->audioback = nemoplay_audio_create_by_ao(art->play);
-	art->videoback = nemoplay_video_create_by_timer(art->play, art->tool);
+	art->videoback = nemoplay_video_create_by_timer(art->play);
 	nemoplay_video_set_texture(art->videoback, 0, art->width, art->height);
 	nemoplay_video_set_update(art->videoback, nemoart_dispatch_video_update);
 	nemoplay_video_set_done(art->videoback, nemoart_dispatch_video_done);
@@ -194,7 +194,7 @@ int main(int argc, char *argv[])
 
 	art->decoderback = nemoplay_decoder_create(art->play);
 	art->audioback = nemoplay_audio_create_by_ao(art->play);
-	art->videoback = nemoplay_video_create_by_timer(art->play, tool);
+	art->videoback = nemoplay_video_create_by_timer(art->play);
 	nemoplay_video_set_texture(art->videoback, 0, width, height);
 	nemoplay_video_set_update(art->videoback, nemoart_dispatch_video_update);
 	nemoplay_video_set_done(art->videoback, nemoart_dispatch_video_done);

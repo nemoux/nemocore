@@ -196,13 +196,11 @@ void __attribute__((destructor(101))) nemoplay_audio_finalize(void)
 
 struct playvideo {
 	struct nemoplay *play;
-
-	struct nemotool *tool;
-	struct nemotimer *timer;
-
 	struct playshader *shader;
 
 	double threshold;
+
+	struct nemotimer *timer;
 
 	nemoplay_frame_update_t dispatch_update;
 	nemoplay_frame_done_t dispatch_done;
@@ -280,7 +278,7 @@ static void nemoplay_video_handle_timer(struct nemotimer *timer, void *data)
 	}
 }
 
-struct playvideo *nemoplay_video_create_by_timer(struct nemoplay *play, struct nemotool *tool)
+struct playvideo *nemoplay_video_create_by_timer(struct nemoplay *play)
 {
 	struct playvideo *video;
 
@@ -290,8 +288,6 @@ struct playvideo *nemoplay_video_create_by_timer(struct nemoplay *play, struct n
 	memset(video, 0, sizeof(struct playvideo));
 
 	video->play = play;
-	video->tool = tool;
-
 	video->threshold = 1.0f / nemoplay_get_video_framerate(play);
 
 	video->shader = nemoplay_shader_create();
@@ -301,7 +297,7 @@ struct playvideo *nemoplay_video_create_by_timer(struct nemoplay *play, struct n
 			nemoplay_get_video_width(play),
 			nemoplay_get_video_height(play));
 
-	video->timer = nemotimer_create(tool);
+	video->timer = nemotimer_create(nemotool_get_instance());
 	nemotimer_set_callback(video->timer, nemoplay_video_handle_timer);
 	nemotimer_set_userdata(video->timer, video);
 	nemotimer_set_timeout(video->timer, 10);
