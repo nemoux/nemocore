@@ -786,11 +786,18 @@ int nemotool_get_fd(struct nemotool *tool)
 	return tool->epoll_fd;
 }
 
+static struct nemotool *s_nemotool = NULL;
+
+struct nemotool *nemotool_get_instance(void)
+{
+	return s_nemotool;
+}
+
 struct nemotool *nemotool_create(void)
 {
 	struct nemotool *tool;
 
-	tool = (struct nemotool *)malloc(sizeof(struct nemotool));
+	s_nemotool = tool = (struct nemotool *)malloc(sizeof(struct nemotool));
 	if (tool == NULL)
 		return NULL;
 	memset(tool, 0, sizeof(struct nemotool));

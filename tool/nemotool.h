@@ -152,6 +152,8 @@ extern void nemotool_unwatch_source(struct nemotool *tool, int fd);
 extern void nemotool_change_source(struct nemotool *tool, int fd, const char *events);
 extern int nemotool_get_fd(struct nemotool *tool);
 
+extern struct nemotool *nemotool_get_instance(void);
+
 extern struct nemotool *nemotool_create(void);
 extern void nemotool_destroy(struct nemotool *tool);
 

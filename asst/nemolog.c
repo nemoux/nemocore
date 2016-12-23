@@ -15,14 +15,14 @@
 #include <nemomisc.h>
 
 #ifdef NEMO_LOG_ON
-static __thread uint64_t __nsecs;
+static __thread uint64_t s_nsecs;
 
-static int nemologfile = -1;
-static int nemologtype = 0;
+static int s_logfile = -1;
+static int s_logtype = 0;
 
 void __attribute__((constructor(101))) nemolog_initialize(void)
 {
-	__nsecs = time_current_nsecs();
+	s_nsecs = time_current_nsecs();
 }
 
 void __attribute__((destructor(101))) nemolog_finalize(void)
@@ -38,7 +38,7 @@ static int nemolog_prepare(void)
 	else
 		nemolog_set_file(2);
 
-	return nemologfile;
+	return s_logfile;
 }
 
 static void nemolog_finish(void)
@@ -48,22 +48,22 @@ static void nemolog_finish(void)
 
 int nemolog_open_file(const char *filepath)
 {
-	nemologfile = open(filepath, O_RDWR | O_CREAT, 0644);
-	nemologtype = 0;
+	s_logfile = open(filepath, O_RDWR | O_CREAT, 0644);
+	s_logtype = 0;
 
-	return nemologfile;
+	return s_logfile;
 }
 
 void nemolog_close_file(void)
 {
-	close(nemologfile);
+	close(s_logfile);
 
-	nemologfile = -1;
+	s_logfile = -1;
 }
 
 void nemolog_set_file(int fd)
 {
-	nemologfile = fd;
+	s_logfile = fd;
 }
 
 int nemolog_open_socket(const char *socketpath)
@@ -83,8 +83,8 @@ int nemolog_open_socket(const char *socketpath)
 	if (connect(soc, (struct sockaddr *)&addr, size) < 0)
 		goto err1;
 
-	nemologfile = soc;
-	nemologtype = 1;
+	s_logfile = soc;
+	s_logtype = 1;
 
 	return soc;
 
@@ -101,10 +101,10 @@ static int nemolog_write(const char *syntax, const char *tag, double secs, const
 	snprintf(msg, sizeof(msg), syntax, tag, secs);
 	vsnprintf(msg + strlen(msg), sizeof(msg) - strlen(msg), fmt, vargs);
 
-	if (nemologtype == 1)
-		return send(nemologfile, msg, strlen(msg), MSG_NOSIGNAL | MSG_DONTWAIT);
+	if (s_logtype == 1)
+		return send(s_logfile, msg, strlen(msg), MSG_NOSIGNAL | MSG_DONTWAIT);
 
-	return write(nemologfile, msg, strlen(msg));
+	return write(s_logfile, msg, strlen(msg));
 }
 
 int nemolog_message(const char *tag, const char *fmt, ...)
@@ -113,15 +113,15 @@ int nemolog_message(const char *tag, const char *fmt, ...)
 	va_list vargs;
 	int r;
 
-	if (nemologfile < 0 && nemolog_prepare() < 0)
+	if (s_logfile < 0 && nemolog_prepare() < 0)
 		return 0;
 
 	va_start(vargs, fmt);
-	r = nemolog_write("\e[32;1mNEMO:\e[m \e[1;33m[%s] (%.3f)\e[0m ", tag, (double)(nsecs - __nsecs) / 1000000000.0f, fmt, vargs);
+	r = nemolog_write("\e[32;1mNEMO:\e[m \e[1;33m[%s] (%.3f)\e[0m ", tag, (double)(nsecs - s_nsecs) / 1000000000.0f, fmt, vargs);
 	va_end(vargs);
 
 	if (r <= 0)
-		nemologfile = -1;
+		s_logfile = -1;
 
 	return r;
 }
@@ -132,15 +132,15 @@ int nemolog_warning(const char *tag, const char *fmt, ...)
 	va_list vargs;
 	int r;
 
-	if (nemologfile < 0 && nemolog_prepare() < 0)
+	if (s_logfile < 0 && nemolog_prepare() < 0)
 		return 0;
 
 	va_start(vargs, fmt);
-	r = nemolog_write("\e[32;1mNEMO:\e[m \e[1;30m[%s] (%.3f)\e[0m ", tag, (double)(nsecs - __nsecs) / 1000000000.0f, fmt, vargs);
+	r = nemolog_write("\e[32;1mNEMO:\e[m \e[1;30m[%s] (%.3f)\e[0m ", tag, (double)(nsecs - s_nsecs) / 1000000000.0f, fmt, vargs);
 	va_end(vargs);
 
 	if (r <= 0)
-		nemologfile = -1;
+		s_logfile = -1;
 
 	return r;
 }
@@ -151,15 +151,15 @@ int nemolog_error(const char *tag, const char *fmt, ...)
 	va_list vargs;
 	int r;
 
-	if (nemologfile < 0 && nemolog_prepare() < 0)
+	if (s_logfile < 0 && nemolog_prepare() < 0)
 		return 0;
 
 	va_start(vargs, fmt);
-	r = nemolog_write("\e[32;1mNEMO:\e[m \e[1;31m[%s] (%.3f)\e[0m ", tag, (double)(nsecs - __nsecs) / 1000000000.0f, fmt, vargs);
+	r = nemolog_write("\e[32;1mNEMO:\e[m \e[1;31m[%s] (%.3f)\e[0m ", tag, (double)(nsecs - s_nsecs) / 1000000000.0f, fmt, vargs);
 	va_end(vargs);
 
 	if (r <= 0)
-		nemologfile = -1;
+		s_logfile = -1;
 
 	return r;
 }
@@ -171,15 +171,15 @@ int nemolog_check(int check, const char *tag, const char *fmt, ...)
 		va_list vargs;
 		int r;
 
-		if (nemologfile < 0 && nemolog_prepare() < 0)
+		if (s_logfile < 0 && nemolog_prepare() < 0)
 			return 0;
 
 		va_start(vargs, fmt);
-		r = nemolog_write("\e[32;1mNEMO:\e[m \e[1;34m[%s] (%.3f)\e[0m ", tag, (double)(nsecs - __nsecs) / 1000000000.0f, fmt, vargs);
+		r = nemolog_write("\e[32;1mNEMO:\e[m \e[1;34m[%s] (%.3f)\e[0m ", tag, (double)(nsecs - s_nsecs) / 1000000000.0f, fmt, vargs);
 		va_end(vargs);
 
 		if (r <= 0)
-			nemologfile = -1;
+			s_logfile = -1;
 
 		return r;
 	}
@@ -189,7 +189,7 @@ int nemolog_check(int check, const char *tag, const char *fmt, ...)
 
 void nemolog_checkpoint(void)
 {
-	__nsecs = time_current_nsecs();
+	s_nsecs = time_current_nsecs();
 }
 
 int nemolog_event(const char *tag, const char *fmt, ...)
@@ -201,7 +201,7 @@ int nemolog_event(const char *tag, const char *fmt, ...)
 	va_list vargs;
 	int r;
 
-	if (nemologfile < 0 && nemolog_prepare() < 0)
+	if (s_logfile < 0 && nemolog_prepare() < 0)
 		return 0;
 
 	time(&ttime);
@@ -213,15 +213,15 @@ int nemolog_event(const char *tag, const char *fmt, ...)
 	snprintf(msg, sizeof(msg), "NEMO-EVENT: [%s] (%s) ", tag, times);
 	vsnprintf(msg + strlen(msg), sizeof(msg) - strlen(msg), fmt, vargs);
 
-	if (nemologtype == 1)
-		r = send(nemologfile, msg, strlen(msg), MSG_NOSIGNAL | MSG_DONTWAIT);
+	if (s_logtype == 1)
+		r = send(s_logfile, msg, strlen(msg), MSG_NOSIGNAL | MSG_DONTWAIT);
 	else
-		r = write(nemologfile, msg, strlen(msg));
+		r = write(s_logfile, msg, strlen(msg));
 
 	va_end(vargs);
 
 	if (r <= 0)
-		nemologfile = -1;
+		s_logfile = -1;
 
 	return r;
 }
