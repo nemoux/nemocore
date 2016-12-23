@@ -168,7 +168,7 @@ err1:
 	return -1;
 }
 
-int nemoplay_decode_media(struct nemoplay *play, int reqcount, int maxcount)
+int nemoplay_decode_media(struct nemoplay *play, int maxcount)
 {
 	AVFormatContext *container = play->container;
 	AVCodecContext *video_context = play->video_context;
@@ -182,7 +182,7 @@ int nemoplay_decode_media(struct nemoplay *play, int reqcount, int maxcount)
 
 	frame = av_frame_alloc();
 
-	for (i = 0; i < reqcount && play->state == NEMOPLAY_PLAY_STATE && play->cmd == 0x0; i++) {
+	for (i = 0; i < maxcount && play->state == NEMOPLAY_PLAY_STATE && play->cmd == 0x0; i++) {
 		if (av_read_frame(container, &packet) < 0) {
 			nemoplay_set_state(play, NEMOPLAY_WAIT_STATE);
 		} else if (packet.stream_index == video_stream) {

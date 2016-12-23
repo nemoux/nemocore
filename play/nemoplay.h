@@ -105,7 +105,7 @@ extern struct nemoplay *nemoplay_create(void);
 extern void nemoplay_destroy(struct nemoplay *play);
 
 extern int nemoplay_load_media(struct nemoplay *play, const char *mediapath);
-extern int nemoplay_decode_media(struct nemoplay *play, int reqcount, int maxcount);
+extern int nemoplay_decode_media(struct nemoplay *play, int maxcount);
 extern int nemoplay_seek_media(struct nemoplay *play, double pts);
 extern void nemoplay_wait_media(struct nemoplay *play);
 

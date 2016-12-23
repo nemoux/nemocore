@@ -21,6 +21,8 @@ struct playdecoder {
 	pthread_t thread;
 
 	double pts_to_seek;
+
+	int maxcount;
 };
 
 static void *nemoplay_decoder_handle_thread(void *arg)
@@ -38,7 +40,7 @@ static void *nemoplay_decoder_handle_thread(void *arg)
 		}
 
 		if (state == NEMOPLAY_PLAY_STATE) {
-			nemoplay_decode_media(play, 256, 128);
+			nemoplay_decode_media(play, decoder->maxcount);
 		} else if (state == NEMOPLAY_WAIT_STATE || state == NEMOPLAY_STOP_STATE) {
 			nemoplay_wait_media(play);
 		}
@@ -59,6 +61,7 @@ struct playdecoder *nemoplay_decoder_create(struct nemoplay *play)
 	memset(decoder, 0, sizeof(struct playdecoder));
 
 	decoder->play = play;
+	decoder->maxcount = 128;
 
 	pthread_create(&decoder->thread, NULL, nemoplay_decoder_handle_thread, (void *)decoder);
 
@@ -92,10 +95,17 @@ void nemoplay_decoder_seek(struct playdecoder *decoder, double pts)
 	nemoplay_set_cmd(decoder->play, NEMOPLAY_SEEK_CMD);
 }
 
+void nemoplay_decoder_set_maxcount(struct playdecoder *decoder, int maxcount)
+{
+	decoder->maxcount = maxcount;
+}
+
 struct playaudio {
 	struct nemoplay *play;
 
 	pthread_t thread;
+
+	int mincount;
 };
 
 static void *nemoplay_audio_handle_thread(void *arg)
@@ -128,7 +138,7 @@ static void *nemoplay_audio_handle_thread(void *arg)
 
 	while ((state = nemoplay_queue_get_state(queue)) != NEMOPLAY_QUEUE_DONE_STATE) {
 		if (state == NEMOPLAY_QUEUE_NORMAL_STATE) {
-			if (nemoplay_queue_get_count(queue) < 64)
+			if (nemoplay_queue_get_count(queue) < audio->mincount)
 				nemoplay_set_state(play, NEMOPLAY_WAKE_STATE);
 
 			one = nemoplay_queue_dequeue(queue);
@@ -168,6 +178,7 @@ struct playaudio *nemoplay_audio_create_by_ao(struct nemoplay *play)
 	memset(audio, 0, sizeof(struct playaudio));
 
 	audio->play = play;
+	audio->mincount = 64;
 
 	pthread_create(&audio->thread, NULL, nemoplay_audio_handle_thread, (void *)audio);
 
@@ -182,6 +193,11 @@ void nemoplay_audio_destroy(struct playaudio *audio)
 	nemoplay_wait_thread(play);
 
 	free(audio);
+}
+
+void nemoplay_audio_set_mincount(struct playaudio *audio, int mincount)
+{
+	audio->mincount = mincount;
 }
 
 void __attribute__((constructor(101))) nemoplay_audio_initialize(void)
@@ -199,6 +215,8 @@ struct playvideo {
 	struct playshader *shader;
 
 	double threshold;
+
+	int mincount;
 
 	struct nemotimer *timer;
 
@@ -223,7 +241,7 @@ static void nemoplay_video_handle_timer(struct nemotimer *timer, void *data)
 		double cts = nemoplay_get_cts(play);
 		double pts;
 
-		if (nemoplay_queue_get_count(queue) < 64)
+		if (nemoplay_queue_get_count(queue) < video->mincount)
 			nemoplay_set_state(play, NEMOPLAY_WAKE_STATE);
 
 		one = nemoplay_queue_dequeue(queue);
@@ -289,6 +307,7 @@ struct playvideo *nemoplay_video_create_by_timer(struct nemoplay *play)
 
 	video->play = play;
 	video->threshold = 1.0f / nemoplay_get_video_framerate(play);
+	video->mincount = 64;
 
 	video->shader = nemoplay_shader_create();
 	nemoplay_shader_set_format(video->shader,
@@ -340,6 +359,11 @@ void nemoplay_video_set_texture(struct playvideo *video, uint32_t texture, int w
 void nemoplay_video_set_threshold(struct playvideo *video, double threshold)
 {
 	video->threshold = 1.0f / nemoplay_get_video_framerate(video->play) * threshold;
+}
+
+void nemoplay_video_set_mincount(struct playvideo *video, int mincount)
+{
+	video->mincount = mincount;
 }
 
 void nemoplay_video_set_update(struct playvideo *video, nemoplay_frame_update_t dispatch)
