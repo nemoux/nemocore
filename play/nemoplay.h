@@ -47,6 +47,8 @@ struct nemoplay {
 	int state;
 	uint32_t cmd;
 
+	char *path;
+
 	uint64_t frame;
 
 	pthread_mutex_t lock;
@@ -228,6 +230,11 @@ static inline int nemoplay_has_audio(struct nemoplay *play)
 static inline int32_t nemoplay_get_duration(struct nemoplay *play)
 {
 	return play->duration > 0 ? play->duration : INT32_MAX;
+}
+
+static inline const char *nemoplay_get_path(struct nemoplay *play)
+{
+	return play->path;
 }
 
 static inline void nemoplay_set_userdata(struct nemoplay *play, void *userdata)

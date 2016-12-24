@@ -64,6 +64,9 @@ void nemoplay_destroy(struct nemoplay *play)
 	pthread_cond_destroy(&play->signal);
 	pthread_mutex_destroy(&play->lock);
 
+	if (play->path != NULL)
+		free(play->path);
+
 	free(play);
 }
 
@@ -159,6 +162,7 @@ int nemoplay_load_media(struct nemoplay *play, const char *mediapath)
 	play->state = NEMOPLAY_PLAY_STATE;
 	play->cmd = 0x0;
 	play->frame = 0;
+	play->path = strdup(mediapath);
 
 	return 0;
 
