@@ -214,6 +214,7 @@ struct playvideo {
 	struct nemoplay *play;
 	struct playshader *shader;
 
+	double framerate;
 	double threshold;
 
 	int mincount;
@@ -231,43 +232,45 @@ static void nemoplay_video_handle_timer(struct nemotimer *timer, void *data)
 	struct nemoplay *play = video->play;
 	struct playqueue *queue;
 	struct playone *one;
+	double framerate = video->framerate;
+	double threshold = video->threshold;
 	int state;
 
 	queue = nemoplay_get_video_queue(play);
 
 	state = nemoplay_queue_get_state(queue);
 	if (state == NEMOPLAY_QUEUE_NORMAL_STATE) {
-		double threshold = video->threshold;
 		double cts = nemoplay_get_cts(play);
 		double pts;
 
 		if (nemoplay_queue_get_count(queue) < video->mincount)
 			nemoplay_set_state(play, NEMOPLAY_WAKE_STATE);
 
+retry_next:
 		one = nemoplay_queue_dequeue(queue);
 		if (one == NULL) {
 			nemotimer_set_timeout(timer, threshold * 1000);
 		} else if (nemoplay_one_get_serial(one) != nemoplay_queue_get_serial(queue)) {
 			nemoplay_one_destroy(one);
-			nemotimer_set_timeout(timer, 1);
+			goto retry_next;
 		} else if (nemoplay_one_get_cmd(one) == NEMOPLAY_QUEUE_NORMAL_COMMAND) {
-			nemoplay_set_video_pts(play, nemoplay_one_get_pts(one));
-
 			if (cts > nemoplay_one_get_pts(one) + threshold) {
 #ifdef NEMOPLAY_DEBUG_ON
 				nemolog_message("PLAY", "[VIDEO_DROP] cts(%f) pts(%f)\n", cts, nemoplay_one_get_pts(one));
 #endif
 
 				nemoplay_one_destroy(one);
-				nemotimer_set_timeout(timer, 1);
+				goto retry_next;
 			} else if (cts < nemoplay_one_get_pts(one) - threshold) {
 #ifdef NEMOPLAY_DEBUG_ON
 				nemolog_message("PLAY", "[VIDEO_WAIT] cts(%f) pts(%f)\n", cts, nemoplay_one_get_pts(one));
 #endif
 
 				nemoplay_queue_enqueue_tail(queue, one);
-				nemotimer_set_timeout(timer, threshold * 1000);
+				nemotimer_set_timeout(timer, (nemoplay_one_get_pts(one) - cts) * 1000);
 			} else {
+				nemoplay_set_video_pts(play, nemoplay_one_get_pts(one));
+
 				nemoplay_shader_update(video->shader, one);
 
 				if (nemoplay_shader_get_viewport(video->shader) > 0)
@@ -277,7 +280,7 @@ static void nemoplay_video_handle_timer(struct nemotimer *timer, void *data)
 					video->dispatch_update(video->play, video->data);
 
 				if (nemoplay_queue_peek_pts(queue, &pts) != 0)
-					nemotimer_set_timeout(timer, MINMAX(pts > cts ? pts - cts : 1.0f, 1.0f, threshold) * 1000);
+					nemotimer_set_timeout(timer, pts > cts ? (pts - cts) * 1000 : 1);
 				else
 					nemotimer_set_timeout(timer, threshold * 1000);
 
@@ -292,7 +295,7 @@ static void nemoplay_video_handle_timer(struct nemotimer *timer, void *data)
 				video->dispatch_done(video->play, video->data);
 		}
 	} else if (state == NEMOPLAY_QUEUE_STOP_STATE) {
-		nemotimer_set_timeout(timer, 1000 / nemoplay_get_video_framerate(play));
+		nemotimer_set_timeout(timer, framerate * 1000);
 	}
 }
 
@@ -306,7 +309,8 @@ struct playvideo *nemoplay_video_create_by_timer(struct nemoplay *play)
 	memset(video, 0, sizeof(struct playvideo));
 
 	video->play = play;
-	video->threshold = 1.0f / nemoplay_get_video_framerate(play);
+	video->framerate = 1.0f / nemoplay_get_video_framerate(play);
+	video->threshold = video->framerate * 0.5f;
 	video->mincount = 64;
 
 	video->shader = nemoplay_shader_create();
@@ -358,7 +362,7 @@ void nemoplay_video_set_texture(struct playvideo *video, uint32_t texture, int w
 
 void nemoplay_video_set_threshold(struct playvideo *video, double threshold)
 {
-	video->threshold = 1.0f / nemoplay_get_video_framerate(video->play) * threshold;
+	video->threshold = video->framerate * threshold;
 }
 
 void nemoplay_video_set_mincount(struct playvideo *video, int mincount)
