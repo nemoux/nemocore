@@ -36,6 +36,12 @@ struct playshader {
 	GLuint texu;
 	GLuint texv;
 
+	GLuint pbo;
+	GLuint pboy;
+	GLuint pbou;
+	GLuint pbov;
+	int use_pbo;
+
 	int flip;
 
 	int32_t texture_width, texture_height;
@@ -43,6 +49,8 @@ struct playshader {
 
 extern struct playshader *nemoplay_shader_create(void);
 extern void nemoplay_shader_destroy(struct playshader *shader);
+
+extern int nemoplay_shader_use_pbo(struct playshader *shader);
 
 extern int nemoplay_shader_set_format(struct playshader *shader, int format);
 extern int nemoplay_shader_set_texture(struct playshader *shader, int32_t width, int32_t height);

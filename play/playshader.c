@@ -99,12 +99,23 @@ void nemoplay_shader_destroy(struct playshader *shader)
 	if (shader->dbo > 0)
 		glDeleteRenderbuffers(1, &shader->dbo);
 
+	if (shader->tex > 0)
+		glDeleteTextures(1, &shader->tex);
 	if (shader->texy > 0)
 		glDeleteTextures(1, &shader->texy);
 	if (shader->texu > 0)
 		glDeleteTextures(1, &shader->texu);
 	if (shader->texv > 0)
 		glDeleteTextures(1, &shader->texv);
+
+	if (shader->pbo > 0)
+		glDeleteBuffers(1, &shader->pbo);
+	if (shader->pboy > 0)
+		glDeleteBuffers(1, &shader->pboy);
+	if (shader->pbou > 0)
+		glDeleteBuffers(1, &shader->pbou);
+	if (shader->pbov > 0)
+		glDeleteBuffers(1, &shader->pbo);
 
 	if (shader->shaders[0] > 0)
 		glDeleteShader(shader->shaders[0]);
@@ -114,6 +125,13 @@ void nemoplay_shader_destroy(struct playshader *shader)
 		glDeleteProgram(shader->program);
 
 	free(shader);
+}
+
+int nemoplay_shader_use_pbo(struct playshader *shader)
+{
+	shader->use_pbo = 1;
+
+	return 0;
 }
 
 int nemoplay_shader_set_format(struct playshader *shader, int format)
@@ -170,6 +188,12 @@ int nemoplay_shader_set_texture(struct playshader *shader, int32_t width, int32_
 			glDeleteTextures(1, &shader->texu);
 		if (shader->texv > 0)
 			glDeleteTextures(1, &shader->texv);
+		if (shader->pboy > 0)
+			glDeleteBuffers(1, &shader->pboy);
+		if (shader->pbou > 0)
+			glDeleteBuffers(1, &shader->pbou);
+		if (shader->pbov > 0)
+			glDeleteBuffers(1, &shader->pbov);
 
 		glGenTextures(1, &shader->texy);
 		glBindTexture(GL_TEXTURE_2D, shader->texy);
@@ -227,9 +251,26 @@ int nemoplay_shader_set_texture(struct playshader *shader, int32_t width, int32_
 				GL_UNSIGNED_BYTE,
 				NULL);
 		glBindTexture(GL_TEXTURE_2D, 0);
+
+		if (shader->use_pbo != 0) {
+			glGenBuffers(1, &shader->pboy);
+			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, shader->pboy);
+			glBufferData(GL_PIXEL_UNPACK_BUFFER, width * height, NULL, GL_DYNAMIC_DRAW);
+			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+			glGenBuffers(1, &shader->pbou);
+			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, shader->pbou);
+			glBufferData(GL_PIXEL_UNPACK_BUFFER, width * height / 4, NULL, GL_DYNAMIC_DRAW);
+			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+			glGenBuffers(1, &shader->pbov);
+			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, shader->pbov);
+			glBufferData(GL_PIXEL_UNPACK_BUFFER, width * height / 4, NULL, GL_DYNAMIC_DRAW);
+			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+		}
 	} else if (NEMOPLAY_PIXEL_IS_RGBA_FORMAT(shader->format)) {
 		if (shader->tex > 0)
 			glDeleteTextures(1, &shader->tex);
+		if (shader->pbo > 0)
+			glDeleteBuffers(1, &shader->pbo);
 
 		glGenTextures(1, &shader->tex);
 		glBindTexture(GL_TEXTURE_2D, shader->tex);
@@ -249,6 +290,13 @@ int nemoplay_shader_set_texture(struct playshader *shader, int32_t width, int32_
 				GL_UNSIGNED_BYTE,
 				NULL);
 		glBindTexture(GL_TEXTURE_2D, 0);
+
+		if (shader->use_pbo != 0) {
+			glGenBuffers(1, &shader->pbo);
+			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, shader->pbo);
+			glBufferData(GL_PIXEL_UNPACK_BUFFER, width * height * 4, NULL, GL_DYNAMIC_DRAW);
+			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+		}
 	}
 
 	shader->texture_width = width;
@@ -289,53 +337,138 @@ int nemoplay_shader_set_flip(struct playshader *shader, int flip)
 
 int nemoplay_shader_update(struct playshader *shader, struct playone *one)
 {
-	glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
-	glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
+	if (shader->use_pbo != 0) {
+		GLubyte *ptr;
 
-	if (NEMOPLAY_PIXEL_IS_YUV420_FORMAT(shader->format)) {
-		glBindTexture(GL_TEXTURE_2D, shader->texv);
-		glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, nemoplay_one_get_linesize(one, 2));
-		glTexSubImage2D(GL_TEXTURE_2D, 0,
-				0, 0,
-				shader->texture_width / 2,
-				shader->texture_height / 2,
-				GL_LUMINANCE,
-				GL_UNSIGNED_BYTE,
-				nemoplay_one_get_data(one, 2));
-		glBindTexture(GL_TEXTURE_2D, 0);
+		glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
+		glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
 
-		glBindTexture(GL_TEXTURE_2D, shader->texu);
-		glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, nemoplay_one_get_linesize(one, 1));
-		glTexSubImage2D(GL_TEXTURE_2D, 0,
-				0, 0,
-				shader->texture_width / 2,
-				shader->texture_height / 2,
-				GL_LUMINANCE,
-				GL_UNSIGNED_BYTE,
-				nemoplay_one_get_data(one, 1));
-		glBindTexture(GL_TEXTURE_2D, 0);
+		if (NEMOPLAY_PIXEL_IS_YUV420_FORMAT(shader->format)) {
+			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, shader->pbov);
 
-		glBindTexture(GL_TEXTURE_2D, shader->texy);
-		glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, nemoplay_one_get_linesize(one, 0));
-		glTexSubImage2D(GL_TEXTURE_2D, 0,
-				0, 0,
-				shader->texture_width,
-				shader->texture_height,
-				GL_LUMINANCE,
-				GL_UNSIGNED_BYTE,
-				nemoplay_one_get_data(one, 0));
-		glBindTexture(GL_TEXTURE_2D, 0);
-	} else if (NEMOPLAY_PIXEL_IS_RGBA_FORMAT(shader->format)) {
-		glBindTexture(GL_TEXTURE_2D, shader->tex);
-		glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, nemoplay_one_get_linesize(one, 0) / 4);
-		glTexSubImage2D(GL_TEXTURE_2D, 0,
-				0, 0,
-				shader->texture_width,
-				shader->texture_height,
-				GL_BGRA_EXT,
-				GL_UNSIGNED_BYTE,
-				nemoplay_one_get_data(one, 0));
-		glBindTexture(GL_TEXTURE_2D, 0);
+			ptr = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, shader->texture_width * shader->texture_height / 4, GL_MAP_WRITE_BIT);
+			memcpy(ptr, nemoplay_one_get_data(one, 2), shader->texture_width * shader->texture_height / 4);
+			glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+
+			glBindTexture(GL_TEXTURE_2D, shader->texv);
+			glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, nemoplay_one_get_linesize(one, 2));
+			glTexSubImage2D(GL_TEXTURE_2D, 0,
+					0, 0,
+					shader->texture_width / 2,
+					shader->texture_height / 2,
+					GL_LUMINANCE,
+					GL_UNSIGNED_BYTE,
+					NULL);
+			glBindTexture(GL_TEXTURE_2D, 0);
+
+			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, shader->pbou);
+
+			ptr = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, shader->texture_width * shader->texture_height / 4, GL_MAP_WRITE_BIT);
+			memcpy(ptr, nemoplay_one_get_data(one, 1), shader->texture_width * shader->texture_height / 4);
+			glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+
+			glBindTexture(GL_TEXTURE_2D, shader->texu);
+			glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, nemoplay_one_get_linesize(one, 1));
+			glTexSubImage2D(GL_TEXTURE_2D, 0,
+					0, 0,
+					shader->texture_width / 2,
+					shader->texture_height / 2,
+					GL_LUMINANCE,
+					GL_UNSIGNED_BYTE,
+					NULL);
+			glBindTexture(GL_TEXTURE_2D, 0);
+
+			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, shader->pboy);
+
+			ptr = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, shader->texture_width * shader->texture_height, GL_MAP_WRITE_BIT);
+			memcpy(ptr, nemoplay_one_get_data(one, 0), shader->texture_width * shader->texture_height);
+			glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+
+			glBindTexture(GL_TEXTURE_2D, shader->texy);
+			glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, nemoplay_one_get_linesize(one, 0));
+			glTexSubImage2D(GL_TEXTURE_2D, 0,
+					0, 0,
+					shader->texture_width,
+					shader->texture_height,
+					GL_LUMINANCE,
+					GL_UNSIGNED_BYTE,
+					NULL);
+			glBindTexture(GL_TEXTURE_2D, 0);
+
+			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+		} else if (NEMOPLAY_PIXEL_IS_RGBA_FORMAT(shader->format)) {
+			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, shader->pbo);
+
+			ptr = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, shader->texture_width * shader->texture_height * 4, GL_MAP_WRITE_BIT);
+			memcpy(ptr, nemoplay_one_get_data(one, 0), shader->texture_width * shader->texture_height * 4);
+			glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+
+			glBindTexture(GL_TEXTURE_2D, shader->tex);
+			glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, nemoplay_one_get_linesize(one, 0) / 4);
+			glTexSubImage2D(GL_TEXTURE_2D, 0,
+					0, 0,
+					shader->texture_width,
+					shader->texture_height,
+					GL_BGRA_EXT,
+					GL_UNSIGNED_BYTE,
+					NULL);
+			glBindTexture(GL_TEXTURE_2D, 0);
+
+			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+		}
+	} else {
+		glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
+		glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
+
+		if (NEMOPLAY_PIXEL_IS_YUV420_FORMAT(shader->format)) {
+			glBindTexture(GL_TEXTURE_2D, shader->texv);
+			glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, nemoplay_one_get_linesize(one, 2));
+			glTexSubImage2D(GL_TEXTURE_2D, 0,
+					0, 0,
+					shader->texture_width / 2,
+					shader->texture_height / 2,
+					GL_LUMINANCE,
+					GL_UNSIGNED_BYTE,
+					nemoplay_one_get_data(one, 2));
+			glBindTexture(GL_TEXTURE_2D, 0);
+
+			glBindTexture(GL_TEXTURE_2D, shader->texu);
+			glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, nemoplay_one_get_linesize(one, 1));
+			glTexSubImage2D(GL_TEXTURE_2D, 0,
+					0, 0,
+					shader->texture_width / 2,
+					shader->texture_height / 2,
+					GL_LUMINANCE,
+					GL_UNSIGNED_BYTE,
+					nemoplay_one_get_data(one, 1));
+			glBindTexture(GL_TEXTURE_2D, 0);
+
+			glBindTexture(GL_TEXTURE_2D, shader->texy);
+			glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, nemoplay_one_get_linesize(one, 0));
+			glTexSubImage2D(GL_TEXTURE_2D, 0,
+					0, 0,
+					shader->texture_width,
+					shader->texture_height,
+					GL_LUMINANCE,
+					GL_UNSIGNED_BYTE,
+					nemoplay_one_get_data(one, 0));
+			glBindTexture(GL_TEXTURE_2D, 0);
+		} else if (NEMOPLAY_PIXEL_IS_RGBA_FORMAT(shader->format)) {
+			glBindTexture(GL_TEXTURE_2D, shader->tex);
+			glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, nemoplay_one_get_linesize(one, 0) / 4);
+			glTexSubImage2D(GL_TEXTURE_2D, 0,
+					0, 0,
+					shader->texture_width,
+					shader->texture_height,
+					GL_BGRA_EXT,
+					GL_UNSIGNED_BYTE,
+					nemoplay_one_get_data(one, 0));
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
 	}
 
 	return 0;
