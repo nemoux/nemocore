@@ -45,7 +45,7 @@ option(WITH_NEMO_DEBUG "Build with NEMODEBUG" ON)
 option(WITH_NEMO_LOG "Build with NEMOLOG" ON)
 option(WITH_XWAYLAND_DEBUG "Build with XWAYLAND DEBUG" OFF)
 option(WITH_NEMONAVI_DEBUG "Build with NEMONAVI DEBUG" OFF)
-option(WITH_NEMOSHOW_DEBUG "Build with NEMOSHOW DEBUG" ON)
+option(WITH_NEMOSHOW_DEBUG "Build with NEMOSHOW DEBUG" OFF)
 option(WITH_NEMOPLAY_DEBUG "Build with NEMOPLAY DEBUG" OFF)
 
 include_directories(
