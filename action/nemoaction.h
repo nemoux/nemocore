@@ -14,9 +14,17 @@ NEMO_BEGIN_EXTERN_C
 #include <actionone.h>
 #include <actiontap.h>
 
+typedef enum {
+	NEMOACTION_TAP_DOWN_EVENT = (1 << 0),
+	NEMOACTION_TAP_UP_EVENT = (1 << 1),
+	NEMOACTION_TAP_MOTION_EVENT = (1 << 2)
+} NemoActionEventType;
+
 struct nemoaction {
 	struct nemolist one_list;
 	struct nemolist tap_list;
+
+	void *data;
 };
 
 extern struct nemoaction *nemoaction_create(void);
@@ -36,6 +44,16 @@ extern int nemoaction_get_taps_by_target(struct nemoaction *action, void *target
 extern int nemoaction_get_taps_all(struct nemoaction *action, struct actiontap **taps, int mtaps);
 
 extern void nemoaction_set_one_tap_callback(struct nemoaction *action, void *target, nemoaction_tap_dispatch_event_t dispatch);
+
+static inline void nemoaction_set_userdata(struct nemoaction *action, void *data)
+{
+	action->data = data;
+}
+
+static inline void *nemoaction_get_userdata(struct nemoaction *action)
+{
+	return action->data;
+}
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

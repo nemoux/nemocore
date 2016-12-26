@@ -17,6 +17,7 @@ include_directories(
 	${CMAKE_SOURCE_DIR}/db
 	${CMAKE_SOURCE_DIR}/play
 	${CMAKE_SOURCE_DIR}/cook
+	${CMAKE_SOURCE_DIR}/action
 	)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
@@ -78,6 +79,7 @@ TARGET_LINK_LIBRARIES(nemoart
 	nemotool
 	nemoplay
 	nemocook
+	nemoaction
 	)
 
 INSTALL(TARGETS nemoart DESTINATION bin)

@@ -14,12 +14,15 @@
 #include <nemoplay.h>
 #include <playback.h>
 #include <nemocook.h>
+#include <nemoaction.h>
 #include <nemofs.h>
 #include <nemomisc.h>
 
 struct nemoart {
 	struct nemotool *tool;
 	struct nemocanvas *canvas;
+
+	struct nemoaction *action;
 
 	int width, height;
 	int flip;
@@ -45,6 +48,15 @@ static void nemoart_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t wi
 
 	nemocanvas_egl_resize(art->canvas, width, height);
 	nemocanvas_opaque(art->canvas, 0, 0, width, height);
+
+	nemocook_egl_resize(art->egl, width, height);
+	nemoplay_video_set_texture(art->videoback, 0, width, height);
+
+	nemocook_egl_prerender(art->egl);
+	nemoplay_shader_dispatch(art->shader);
+	nemocook_egl_postrender(art->egl);
+
+	nemocanvas_dispatch_frame(art->canvas);
 }
 
 static void nemoart_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t secs, uint32_t nsecs)
@@ -55,6 +67,32 @@ static void nemoart_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t se
 static int nemoart_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t type, struct nemoevent *event)
 {
 	struct nemoart *art = (struct nemoart *)nemocanvas_get_userdata(canvas);
+	struct actiontap *tap;
+
+	if (type & NEMOTOOL_TOUCH_DOWN_EVENT) {
+		tap = nemoaction_tap_create(art->action);
+		nemoaction_tap_set_lx(tap, event->x);
+		nemoaction_tap_set_ly(tap, event->y);
+		nemoaction_tap_set_device(tap, event->device);
+		nemoaction_tap_set_serial(tap, event->serial);
+		nemoaction_tap_set_focus(tap, canvas);
+		nemoaction_tap_dispatch_event(art->action, tap, NEMOACTION_TAP_DOWN_EVENT);
+	} else if (type & NEMOTOOL_TOUCH_UP_EVENT) {
+		tap = nemoaction_get_tap_by_device(art->action, event->device);
+		if (tap != NULL) {
+			nemoaction_tap_set_lx(tap, event->x);
+			nemoaction_tap_set_ly(tap, event->y);
+			nemoaction_tap_dispatch_event(art->action, tap, NEMOACTION_TAP_UP_EVENT);
+			nemoaction_tap_destroy(tap);
+		}
+	} else if (type & NEMOTOOL_TOUCH_MOTION_EVENT) {
+		tap = nemoaction_get_tap_by_device(art->action, event->device);
+		if (tap != NULL) {
+			nemoaction_tap_set_lx(tap, event->x);
+			nemoaction_tap_set_ly(tap, event->y);
+			nemoaction_tap_dispatch_event(art->action, tap, NEMOACTION_TAP_MOTION_EVENT);
+		}
+	}
 
 	return 0;
 }
@@ -64,9 +102,7 @@ static void nemoart_dispatch_video_update(struct nemoplay *play, void *data)
 	struct nemoart *art = (struct nemoart *)data;
 
 	nemocook_egl_prerender(art->egl);
-
 	nemoplay_shader_dispatch(art->shader);
-
 	nemocook_egl_postrender(art->egl);
 
 	nemocanvas_dispatch_frame(art->canvas);
@@ -98,6 +134,35 @@ static void nemoart_dispatch_video_done(struct nemoplay *play, void *data)
 	nemoplay_shader_set_flip(art->shader, art->flip);
 }
 
+static int nemoart_dispatch_canvas_tap_event(struct nemoaction *action, struct actiontap *tap, uint32_t event)
+{
+	struct nemoart *art = (struct nemoart *)nemoaction_get_userdata(action);
+
+	if (event & NEMOACTION_TAP_DOWN_EVENT) {
+		struct actiontap *taps[8];
+		int ntaps;
+
+		ntaps = nemoaction_get_taps_by_target(art->action, art->canvas, taps, 8);
+		if (ntaps == 1) {
+			nemocanvas_move(art->canvas,
+					nemoaction_tap_get_serial(taps[0]));
+		} else if (ntaps == 2) {
+			nemocanvas_pick(art->canvas,
+					nemoaction_tap_get_serial(taps[0]),
+					nemoaction_tap_get_serial(taps[1]),
+					(1 << NEMO_SURFACE_PICK_TYPE_ROTATE) |
+					(1 << NEMO_SURFACE_PICK_TYPE_SCALE) |
+					(1 << NEMO_SURFACE_PICK_TYPE_MOVE));
+		}
+	}
+	if (event & NEMOACTION_TAP_UP_EVENT) {
+	}
+	if (event & NEMOACTION_TAP_MOTION_EVENT) {
+	}
+
+	return 0;
+}
+
 int main(int argc, char *argv[])
 {
 	struct option options[] = {
@@ -112,6 +177,7 @@ int main(int argc, char *argv[])
 	struct nemoart *art;
 	struct nemotool *tool;
 	struct nemocanvas *canvas;
+	struct nemoaction *action;
 	struct cookegl *egl;
 	char *fullscreenid = NULL;
 	char *contentpath = NULL;
@@ -190,6 +256,10 @@ int main(int argc, char *argv[])
 	if (fullscreenid != NULL)
 		nemocanvas_set_fullscreen(canvas, fullscreenid);
 
+	art->action = action = nemoaction_create();
+	nemoaction_set_one_tap_callback(action, canvas, nemoart_dispatch_canvas_tap_event);
+	nemoaction_set_userdata(action, art);
+
 	art->egl = egl = nemocook_egl_create(
 			NTEGL_DISPLAY(tool),
 			NTEGL_CONTEXT(tool),
@@ -219,6 +289,8 @@ int main(int argc, char *argv[])
 	nemoplay_destroy(art->play);
 
 	nemocook_egl_destroy(egl);
+
+	nemoaction_destroy(action);
 
 	nemocanvas_egl_destroy(canvas);
 
