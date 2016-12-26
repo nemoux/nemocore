@@ -61,7 +61,7 @@ struct playdecoder *nemoplay_decoder_create(struct nemoplay *play)
 	memset(decoder, 0, sizeof(struct playdecoder));
 
 	decoder->play = play;
-	decoder->maxcount = 128;
+	decoder->maxcount = nemoplay_get_video_framerate(play);
 
 	pthread_create(&decoder->thread, NULL, nemoplay_decoder_handle_thread, (void *)decoder);
 
@@ -178,7 +178,7 @@ struct playaudio *nemoplay_audio_create_by_ao(struct nemoplay *play)
 	memset(audio, 0, sizeof(struct playaudio));
 
 	audio->play = play;
-	audio->mincount = 64;
+	audio->mincount = nemoplay_get_video_framerate(play) * 0.5f;
 
 	pthread_create(&audio->thread, NULL, nemoplay_audio_handle_thread, (void *)audio);
 
@@ -327,7 +327,7 @@ struct playvideo *nemoplay_video_create_by_timer(struct nemoplay *play)
 	video->play = play;
 	video->framerate = 1.0f / nemoplay_get_video_framerate(play);
 	video->threshold = video->framerate * 0.5f;
-	video->mincount = 64;
+	video->mincount = nemoplay_get_video_framerate(play) * 0.5f;
 
 	video->shader = nemoplay_shader_create();
 	nemoplay_shader_set_format(video->shader,
