@@ -332,10 +332,9 @@ struct playvideo *nemoplay_video_create_by_timer(struct nemoplay *play)
 	video->shader = nemoplay_shader_create();
 	nemoplay_shader_set_format(video->shader,
 			nemoplay_get_pixel_format(play));
-	nemoplay_shader_prepare(video->shader,
+	nemoplay_shader_resize(video->shader,
 			nemoplay_get_video_width(play),
-			nemoplay_get_video_height(play),
-			0);
+			nemoplay_get_video_height(play));
 
 	video->timer = nemotimer_create(nemotool_get_instance());
 	nemotimer_set_callback(video->timer, nemoplay_video_handle_timer);

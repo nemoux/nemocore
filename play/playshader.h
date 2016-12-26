@@ -17,7 +17,7 @@ NEMO_BEGIN_EXTERN_C
 struct playone;
 struct playshader;
 
-typedef int (*nemoplay_shader_prepare_t)(struct playshader *shader, int32_t width, int32_t height, int use_pbo);
+typedef int (*nemoplay_shader_resize_t)(struct playshader *shader, int32_t width, int32_t height);
 typedef int (*nemoplay_shader_update_t)(struct playshader *shader, struct playone *one);
 typedef int (*nemoplay_shader_dispatch_t)(struct playshader *shader);
 
@@ -27,6 +27,8 @@ struct playshader {
 	int32_t viewport_width, viewport_height;
 
 	int format;
+
+	int use_pbo;
 
 	GLuint shaders[2];
 	GLuint program;
@@ -49,7 +51,7 @@ struct playshader {
 	int32_t texture_width, texture_height;
 	int flip;
 
-	nemoplay_shader_prepare_t prepare;
+	nemoplay_shader_resize_t resize;
 	nemoplay_shader_update_t update;
 	nemoplay_shader_dispatch_t dispatch;
 };
@@ -60,6 +62,7 @@ extern void nemoplay_shader_destroy(struct playshader *shader);
 extern int nemoplay_shader_set_format(struct playshader *shader, int format);
 extern int nemoplay_shader_set_viewport(struct playshader *shader, uint32_t texture, int32_t width, int32_t height);
 extern int nemoplay_shader_set_flip(struct playshader *shader, int flip);
+extern int nemoplay_shader_set_pbo(struct playshader *shader, int use_pbo);
 
 static inline uint32_t nemoplay_shader_get_viewport(struct playshader *shader)
 {
@@ -86,12 +89,12 @@ static inline int32_t nemoplay_shader_get_texture_height(struct playshader *shad
 	return shader->texture_height;
 }
 
-static inline int nemoplay_shader_prepare(struct playshader *shader, int32_t width, int32_t height, int use_pbo)
+static inline int nemoplay_shader_resize(struct playshader *shader, int32_t width, int32_t height)
 {
 	shader->texture_width = width;
 	shader->texture_height = height;
 
-	return shader->prepare(shader, width, height, use_pbo);
+	return shader->resize(shader, width, height);
 }
 
 static inline int nemoplay_shader_update(struct playshader *shader, struct playone *one)
