@@ -7,13 +7,21 @@
 NEMO_BEGIN_EXTERN_C
 #endif
 
+struct nemocompz;
+
 struct nemolayer {
+	struct nemocompz *compz;
+
 	struct wl_list view_list;
 	struct wl_list link;
 };
 
-extern void nemolayer_prepare(struct nemolayer *layer, struct wl_list *below);
-extern void nemolayer_finish(struct nemolayer *layer);
+extern struct nemolayer *nemolayer_create(struct nemocompz *compz);
+extern void nemolayer_destroy(struct nemolayer *layer);
+
+extern void nemolayer_attach_below(struct nemolayer *layer, struct nemolayer *below);
+extern void nemolayer_attach_above(struct nemolayer *layer, struct nemolayer *above);
+extern void nemolayer_detach(struct nemolayer *layer);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

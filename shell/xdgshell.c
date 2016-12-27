@@ -305,9 +305,6 @@ static void xdg_get_xdg_surface(struct wl_client *client, struct wl_resource *re
 		return;
 	}
 
-	if (shell->default_layer != NULL)
-		bin->layer = shell->default_layer;
-
 	bin->type = NEMOSHELL_SURFACE_NORMAL_TYPE;
 	bin->owner = sc;
 
@@ -349,9 +346,6 @@ static void xdg_get_xdg_popup(struct wl_client *client, struct wl_resource *reso
 				"failed to create shell surface");
 		return;
 	}
-
-	if (shell->default_layer != NULL)
-		bin->layer = shell->default_layer;
 
 	bin->type = NEMOSHELL_SURFACE_POPUP_TYPE;
 	bin->owner = sc;

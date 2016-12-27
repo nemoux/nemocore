@@ -327,14 +327,7 @@ void nemoshow_view_set_layer(struct nemoshow *show, const char *layer)
 	struct nemoshell *shell = scon->shell;
 	struct nemoactor *actor = scon->actor;
 
-	if (layer == NULL || strcmp(layer, "service") == 0)
-		nemoview_attach_layer(actor->view, &shell->service_layer);
-	else if (strcmp(layer, "background") == 0)
-		nemoview_attach_layer(actor->view, &shell->background_layer);
-	else if (strcmp(layer, "underlay") == 0)
-		nemoview_attach_layer(actor->view, &shell->underlay_layer);
-	else if (strcmp(layer, "overlay") == 0)
-		nemoview_attach_layer(actor->view, &shell->overlay_layer);
+	nemoview_attach_layer(actor->view, shell->default_layer);
 
 	nemoview_set_state(actor->view, NEMOVIEW_MAP_STATE);
 }

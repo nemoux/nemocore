@@ -67,18 +67,14 @@ struct clientstate;
 
 typedef void (*nemoshell_destroy_client_t)(void *data, pid_t pid);
 typedef void (*nemoshell_update_client_t)(void *data, struct shellbin *bin, struct clientstate *state);
+typedef void (*nemoshell_attach_layer_t)(void *data, struct shellbin *bin, const char *type);
 typedef void (*nemoshell_enter_idle_t)(void *data);
 
 struct nemoshell {
 	struct nemocompz *compz;
 
-	struct nemolayer overlay_layer;
-	struct nemolayer fullscreen_layer;
-	struct nemolayer service_layer;
-	struct nemolayer underlay_layer;
-	struct nemolayer background_layer;
-
 	struct nemolayer *default_layer;
+	struct nemolayer *fullscreen_layer;
 
 	struct wl_listener pointer_focus_listener;
 	struct wl_listener keyboard_focus_listener;
@@ -122,6 +118,7 @@ struct nemoshell {
 
 	nemoshell_destroy_client_t destroy_client;
 	nemoshell_update_client_t update_client;
+	nemoshell_attach_layer_t attach_layer;
 	nemoshell_enter_idle_t enter_idle;
 	void *userdata;
 
@@ -295,6 +292,7 @@ extern void nemoshell_destroy(struct nemoshell *shell);
 extern void nemoshell_set_frame_timeout(struct nemoshell *shell, uint32_t timeout);
 
 extern void nemoshell_set_default_layer(struct nemoshell *shell, struct nemolayer *layer);
+extern void nemoshell_set_fullscreen_layer(struct nemoshell *shell, struct nemolayer *layer);
 
 extern struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas *canvas, struct nemocanvas_callback *callback);
 extern void nemoshell_destroy_bin(struct shellbin *bin);
@@ -354,6 +352,11 @@ static inline void nemoshell_set_destroy_client(struct nemoshell *shell, nemoshe
 static inline void nemoshell_set_update_client(struct nemoshell *shell, nemoshell_update_client_t dispatch)
 {
 	shell->update_client = dispatch;
+}
+
+static inline void nemoshell_set_attach_layer(struct nemoshell *shell, nemoshell_attach_layer_t dispatch)
+{
+	shell->attach_layer = dispatch;
 }
 
 static inline void nemoshell_set_enter_idle(struct nemoshell *shell, nemoshell_enter_idle_t dispatch)

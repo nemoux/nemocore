@@ -219,18 +219,10 @@ static void nemo_surface_set_flag(struct wl_client *client, struct wl_resource *
 static void nemo_surface_set_layer(struct wl_client *client, struct wl_resource *resource, const char *type)
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
+	struct nemoshell *shell = bin->shell;
 
-	if (strcmp(type, "background") == 0) {
-		bin->layer = &bin->shell->background_layer;
-
-		nemoview_put_state(bin->view, NEMOVIEW_CATCH_STATE);
-	} else if (strcmp(type, "service") == 0) {
-		bin->layer = &bin->shell->service_layer;
-	} else if (strcmp(type, "overlay") == 0) {
-		bin->layer = &bin->shell->overlay_layer;
-	} else if (strcmp(type, "underlay") == 0) {
-		bin->layer = &bin->shell->underlay_layer;
-	}
+	if (shell->attach_layer != NULL)
+		shell->attach_layer(shell->userdata, bin, type);
 }
 
 static void nemo_surface_set_parent(struct wl_client *client, struct wl_resource *resource, struct wl_resource *parent_resource)
@@ -468,9 +460,6 @@ static void nemo_get_nemo_surface(struct wl_client *client, struct wl_resource *
 	}
 
 	nemoview_put_state(bin->view, NEMOVIEW_CATCH_STATE);
-
-	if (shell->default_layer != NULL)
-		bin->layer = shell->default_layer;
 
 	bin->owner = sc;
 

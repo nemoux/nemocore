@@ -11,22 +11,53 @@
 #include <view.h>
 #include <nemomisc.h>
 
-void nemolayer_prepare(struct nemolayer *layer, struct wl_list *below)
+struct nemolayer *nemolayer_create(struct nemocompz *compz)
 {
+	struct nemolayer *layer;
+
+	layer = (struct nemolayer *)malloc(sizeof(struct nemolayer));
+	if (layer == NULL)
+		return NULL;
+	memset(layer, 0, sizeof(struct nemolayer));
+
+	layer->compz = compz;
+
 	wl_list_init(&layer->view_list);
 
-	if (below != NULL)
-		wl_list_insert(below, &layer->link);
+	return layer;
 }
 
-void nemolayer_finish(struct nemolayer *layer)
+void nemolayer_destroy(struct nemolayer *layer)
 {
 	struct nemoview *view, *next;
+
+	wl_list_remove(&layer->link);
 
 	wl_list_for_each_safe(view, next, &layer->view_list, layer_link) {
 		nemoview_detach_layer(view);
 	}
 
+	free(layer);
+}
+
+void nemolayer_attach_below(struct nemolayer *layer, struct nemolayer *below)
+{
+	if (below != NULL)
+		wl_list_insert(below->link.next, &layer->link);
+	else
+		wl_list_insert(layer->compz->layer_list.prev, &layer->link);
+}
+
+void nemolayer_attach_above(struct nemolayer *layer, struct nemolayer *above)
+{
+	if (above != NULL)
+		wl_list_insert(above->link.prev, &layer->link);
+	else
+		wl_list_insert(&layer->compz->layer_list, &layer->link);
+}
+
+void nemolayer_detach(struct nemolayer *layer)
+{
 	wl_list_remove(&layer->link);
 	wl_list_init(&layer->link);
 }

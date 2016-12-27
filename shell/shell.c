@@ -213,7 +213,7 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 				nemoview_set_position(view, bin->screen.x, bin->screen.y);
 				nemoview_set_rotation(view, bin->screen.r);
 
-				nemoview_attach_layer(view, &bin->shell->fullscreen_layer);
+				nemoview_attach_layer(view, bin->shell->fullscreen_layer);
 				nemoview_update_transform(view);
 				nemoview_damage_below(view);
 			} else {
@@ -347,7 +347,7 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 			viewanimation_revoke(view->compz, view, NEMOVIEW_TRANSLATE_ANIMATION | NEMOVIEW_ROTATE_ANIMATION);
 			vieweffect_revoke(view->compz, view);
 
-			nemoview_attach_layer(view, &bin->shell->fullscreen_layer);
+			nemoview_attach_layer(view, bin->shell->fullscreen_layer);
 			nemoview_correct_pivot(view, bin->screen.width / 2.0f, bin->screen.height / 2.0f);
 			nemoview_set_position(view, bin->screen.x, bin->screen.y);
 			nemoview_set_rotation(view, bin->screen.r);
@@ -466,7 +466,7 @@ struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas
 	bin->canvas = canvas;
 	bin->callback = callback;
 	bin->flags = NEMOSHELL_SURFACE_ALL_FLAGS;
-	bin->layer = &shell->service_layer;
+	bin->layer = shell->default_layer;
 
 	bin->min_width = shell->bin.min_width;
 	bin->min_height = shell->bin.min_height;
@@ -713,12 +713,6 @@ struct nemoshell *nemoshell_create(struct nemocompz *compz)
 
 	shell->compz = compz;
 
-	nemolayer_prepare(&shell->overlay_layer, &compz->cursor_layer.link);
-	nemolayer_prepare(&shell->fullscreen_layer, &shell->overlay_layer.link);
-	nemolayer_prepare(&shell->service_layer, &shell->fullscreen_layer.link);
-	nemolayer_prepare(&shell->underlay_layer, &shell->service_layer.link);
-	nemolayer_prepare(&shell->background_layer, &shell->underlay_layer.link);
-
 #ifdef NEMOUX_WITH_WAYLANDSHELL
 	if (!wl_global_create(compz->display, &wl_shell_interface, 1, shell, nemoshell_bind_wayland_shell))
 		goto err1;
@@ -792,12 +786,6 @@ void nemoshell_destroy(struct nemoshell *shell)
 	if (shell->frame_timer != NULL)
 		wl_event_source_remove(shell->frame_timer);
 
-	nemolayer_finish(&shell->overlay_layer);
-	nemolayer_finish(&shell->fullscreen_layer);
-	nemolayer_finish(&shell->service_layer);
-	nemolayer_finish(&shell->underlay_layer);
-	nemolayer_finish(&shell->background_layer);
-
 	free(shell);
 }
 
@@ -811,6 +799,11 @@ void nemoshell_set_frame_timeout(struct nemoshell *shell, uint32_t timeout)
 void nemoshell_set_default_layer(struct nemoshell *shell, struct nemolayer *layer)
 {
 	shell->default_layer = layer;
+}
+
+void nemoshell_set_fullscreen_layer(struct nemoshell *shell, struct nemolayer *layer)
+{
+	shell->fullscreen_layer = layer;
 }
 
 void nemoshell_send_bin_close(struct shellbin *bin)

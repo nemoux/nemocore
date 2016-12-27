@@ -174,7 +174,7 @@ static void nemopointer_configure_canvas(struct nemocanvas *canvas, int32_t dx, 
 	pixman_region32_clear(&canvas->base.input);
 
 	if (!nemoview_has_state(pointer->sprite, NEMOVIEW_MAP_STATE)) {
-		nemoview_attach_layer(pointer->sprite, &canvas->compz->cursor_layer);
+		nemoview_attach_layer(pointer->sprite, canvas->compz->cursor_layer);
 		nemoview_damage_below(pointer->sprite);
 		nemoview_update_transform(pointer->sprite);
 	}

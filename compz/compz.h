@@ -35,6 +35,7 @@ struct nemoanimation;
 struct nemoeffect;
 struct nemoscreen;
 struct nemoview;
+struct nemolayer;
 struct evdevnode;
 
 typedef void (*nemocompz_dispatch_idle_t)(void *data);
@@ -102,7 +103,7 @@ struct nemocompz {
 	struct wl_list actor_list;
 	struct wl_list feedback_list;
 
-	struct nemolayer cursor_layer;
+	struct nemolayer *cursor_layer;
 
 	uint32_t screen_idpool;
 	uint32_t render_idpool;

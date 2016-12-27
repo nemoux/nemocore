@@ -194,9 +194,6 @@ static void shell_get_shell_surface(struct wl_client *client, struct wl_resource
 		return;
 	}
 
-	if (shell->default_layer != NULL)
-		bin->layer = shell->default_layer;
-
 	bin->type = NEMOSHELL_SURFACE_NORMAL_TYPE;
 	bin->owner = sc;
 

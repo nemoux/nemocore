@@ -45,6 +45,12 @@ struct minishell {
 	struct nemoshell *shell;
 	struct nemoenvs *envs;
 
+	struct nemolayer *overlay_layer;
+	struct nemolayer *fullscreen_layer;
+	struct nemolayer *service_layer;
+	struct nemolayer *underlay_layer;
+	struct nemolayer *background_layer;
+
 	struct nemobus *bus;
 	struct wl_event_source *busfd;
 
@@ -411,6 +417,24 @@ static void minishell_update_client(void *data, struct shellbin *bin, struct cli
 	}
 }
 
+static void minishell_attach_layer(void *data, struct shellbin *bin, const char *type)
+{
+	struct minishell *mini = (struct minishell *)data;
+	struct nemoshell *shell = mini->shell;
+
+	if (strcmp(type, "background") == 0) {
+		bin->layer = mini->background_layer;
+
+		nemoview_put_state(bin->view, NEMOVIEW_CATCH_STATE);
+	} else if (strcmp(type, "service") == 0) {
+		bin->layer = mini->service_layer;
+	} else if (strcmp(type, "overlay") == 0) {
+		bin->layer = mini->overlay_layer;
+	} else if (strcmp(type, "underlay") == 0) {
+		bin->layer = mini->underlay_layer;
+	}
+}
+
 static void minishell_enter_idle(void *data)
 {
 	struct minishell *mini = (struct minishell *)data;
@@ -503,6 +527,7 @@ int main(int argc, char *argv[])
 		goto out2;
 	nemoshell_set_destroy_client(shell, minishell_destroy_client);
 	nemoshell_set_update_client(shell, minishell_update_client);
+	nemoshell_set_attach_layer(shell, minishell_attach_layer);
 	nemoshell_set_enter_idle(shell, minishell_enter_idle);
 	nemoshell_set_userdata(shell, mini);
 
@@ -519,6 +544,20 @@ int main(int argc, char *argv[])
 	} else {
 		minishell_dispatch_text(mini, configpath);
 	}
+
+	mini->overlay_layer = nemolayer_create(compz);
+	nemolayer_attach_below(mini->overlay_layer, NULL);
+	mini->fullscreen_layer = nemolayer_create(compz);
+	nemolayer_attach_below(mini->fullscreen_layer, NULL);
+	mini->service_layer = nemolayer_create(compz);
+	nemolayer_attach_below(mini->service_layer, NULL);
+	mini->underlay_layer = nemolayer_create(compz);
+	nemolayer_attach_below(mini->underlay_layer, NULL);
+	mini->background_layer = nemolayer_create(compz);
+	nemolayer_attach_below(mini->background_layer, NULL);
+
+	nemoshell_set_default_layer(shell, mini->service_layer);
+	nemoshell_set_fullscreen_layer(shell, mini->fullscreen_layer);
 
 	mini->bus = nemobus_create();
 	nemobus_connect(mini->bus, NULL);
@@ -551,6 +590,12 @@ int main(int argc, char *argv[])
 
 	if (mini->db != NULL)
 		nemodb_destroy(mini->db);
+
+	nemolayer_destroy(mini->background_layer);
+	nemolayer_destroy(mini->underlay_layer);
+	nemolayer_destroy(mini->service_layer);
+	nemolayer_destroy(mini->fullscreen_layer);
+	nemolayer_destroy(mini->overlay_layer);
 
 	nemoenvs_destroy(mini->envs);
 

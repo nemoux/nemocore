@@ -379,7 +379,8 @@ struct nemocompz *nemocompz_create(void)
 	wl_signal_init(&compz->child_signal);
 	wl_signal_init(&compz->idle_signal);
 
-	nemolayer_prepare(&compz->cursor_layer, &compz->layer_list);
+	compz->cursor_layer = nemolayer_create(compz);
+	nemolayer_attach_above(compz->cursor_layer, NULL);
 
 	pixman_region32_init(&compz->damage);
 	pixman_region32_init(&compz->scene);
@@ -504,6 +505,9 @@ void nemocompz_destroy(struct nemocompz *compz)
 		nemosession_destroy(compz->session);
 
 	nemolog_message("COMPZ", "destroy wayland display\n");
+
+	if (compz->cursor_layer != NULL)
+		nemolayer_destroy(compz->cursor_layer);
 
 	if (compz->display != NULL)
 		wl_display_destroy(compz->display);

@@ -26,7 +26,7 @@ static void datadrag_configure_pointer_canvas(struct nemocanvas *canvas, int32_t
 	struct nemopointer *pointer = drag->base.pointer.pointer;
 
 	if (!nemoview_has_state(drag->icon, NEMOVIEW_MAP_STATE) && canvas->buffer_reference.buffer) {
-		nemoview_attach_layer(drag->icon, &canvas->compz->cursor_layer);
+		nemoview_attach_layer(drag->icon, canvas->compz->cursor_layer);
 		nemoview_damage_below(drag->icon);
 		nemoview_update_transform(drag->icon);
 
