@@ -19,6 +19,7 @@ struct actiontap *nemoaction_tap_create(struct nemoaction *action)
 	memset(tap, 0, sizeof(struct actiontap));
 
 	tap->action = action;
+	tap->dispatch_event = action->dispatch_tap_event;
 
 	nemolist_insert_tail(&action->tap_list, &tap->link);
 

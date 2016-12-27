@@ -75,7 +75,6 @@ static int nemoart_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t typ
 		nemoaction_tap_set_ty(tap, event->y);
 		nemoaction_tap_set_device(tap, event->device);
 		nemoaction_tap_set_serial(tap, event->serial);
-		nemoaction_tap_set_focus(tap, canvas);
 		nemoaction_tap_clear(tap, event->gx, event->gy);
 		nemoaction_tap_dispatch_event(art->action, tap, NEMOACTION_TAP_DOWN_EVENT);
 	} else if (type & NEMOTOOL_TOUCH_UP_EVENT) {
@@ -143,7 +142,7 @@ static void nemoart_dispatch_video_done(struct nemoplay *play, void *data)
 	nemoplay_shader_set_flip(art->shader, art->flip);
 }
 
-static int nemoart_dispatch_canvas_tap_event(struct nemoaction *action, struct actiontap *tap, uint32_t event)
+static int nemoart_dispatch_tap_event(struct nemoaction *action, struct actiontap *tap, uint32_t event)
 {
 	struct nemoart *art = (struct nemoart *)nemoaction_get_userdata(action);
 
@@ -152,7 +151,7 @@ static int nemoart_dispatch_canvas_tap_event(struct nemoaction *action, struct a
 		int tap0, tap1;
 		int ntaps;
 
-		ntaps = nemoaction_get_taps_by_target(art->action, art->canvas, taps, 8);
+		ntaps = nemoaction_get_taps_all(art->action, taps, 8);
 		if (ntaps == 1) {
 			nemocanvas_move(art->canvas,
 					nemoaction_tap_get_serial(taps[0]));
@@ -275,7 +274,7 @@ int main(int argc, char *argv[])
 		nemocanvas_set_fullscreen(canvas, fullscreenid);
 
 	art->action = action = nemoaction_create();
-	nemoaction_set_one_tap_callback(action, canvas, nemoart_dispatch_canvas_tap_event);
+	nemoaction_set_tap_callback(action, nemoart_dispatch_tap_event);
 	nemoaction_set_userdata(action, art);
 
 	art->egl = egl = nemocook_egl_create(
