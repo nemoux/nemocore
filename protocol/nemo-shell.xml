@@ -25,6 +25,10 @@
 	</interface>
 
 	<interface name="nemo_surface" version="1">
+		<enum name="error">
+			<entry name="invalid_layer" value="0"/>
+		</enum>
+
 		<request name="destroy" type="destructor">
 		</request>
 

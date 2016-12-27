@@ -222,6 +222,11 @@ static void nemo_surface_set_layer(struct wl_client *client, struct wl_resource 
 	struct nemoshell *shell = bin->shell;
 
 	bin->layer = nemocompz_get_layer_by_name(shell->compz, type);
+	if (bin->layer == NULL) {
+		wl_resource_post_error(resource,
+				NEMO_SURFACE_ERROR_INVALID_LAYER,
+				"failed to attach shell surface to '%s' layer", type);
+	}
 
 	if (shell->update_layer != NULL)
 		shell->update_layer(shell->userdata, bin, type);
@@ -434,7 +439,7 @@ static void nemoshell_unbind_nemo_surface(struct wl_resource *resource)
 static void nemo_use_unstable_version(struct wl_client *client, struct wl_resource *resource, int32_t version)
 {
 	if (version > 1) {
-		wl_resource_post_error(resource, 1, "nemo-shell: version not implemented yet");
+		wl_resource_post_error(resource, 0, "nemo-shell: version not implemented yet");
 		return;
 	}
 }
