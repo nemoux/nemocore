@@ -14,14 +14,6 @@ NEMO_BEGIN_EXTERN_C
 
 #include <nemoshow.h>
 
-typedef enum {
-	NEMOSHOW_VIEW_PICK_ROTATE_TYPE = (1 << 0),
-	NEMOSHOW_VIEW_PICK_SCALE_TYPE = (1 << 1),
-	NEMOSHOW_VIEW_PICK_TRANSLATE_TYPE = (1 << 2),
-	NEMOSHOW_VIEW_PICK_RESIZE_TYPE = (1 << 3),
-	NEMOSHOW_VIEW_PICK_ALL_TYPE = NEMOSHOW_VIEW_PICK_ROTATE_TYPE | NEMOSHOW_VIEW_PICK_SCALE_TYPE | NEMOSHOW_VIEW_PICK_TRANSLATE_TYPE | NEMOSHOW_VIEW_PICK_RESIZE_TYPE
-} NemoShowViewPickType;
-
 struct showcontext {
 	struct nemotool *tool;
 	struct nemotimer *timer;
@@ -72,8 +64,8 @@ extern void nemoshow_view_set_tag(struct nemoshow *show, uint32_t tag);
 extern void nemoshow_view_set_type(struct nemoshow *show, const char *type);
 extern void nemoshow_view_set_uuid(struct nemoshow *show, const char *uuid);
 extern int nemoshow_view_move(struct nemoshow *show, uint32_t serial);
-extern int nemoshow_view_pick(struct nemoshow *show, uint32_t serial0, uint32_t serial1, uint32_t type);
-extern int nemoshow_view_pick_distant(struct nemoshow *show, void *event, uint32_t type);
+extern int nemoshow_view_pick(struct nemoshow *show, uint32_t serial0, uint32_t serial1, const char *type);
+extern int nemoshow_view_pick_distant(struct nemoshow *show, void *event, const char *type);
 extern void nemoshow_view_miss(struct nemoshow *show);
 extern void nemoshow_view_focus_to(struct nemoshow *show, const char *uuid);
 extern void nemoshow_view_focus_on(struct nemoshow *show, double x, double y);

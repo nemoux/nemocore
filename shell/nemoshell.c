@@ -216,19 +216,19 @@ static void nemo_surface_set_flag(struct wl_client *client, struct wl_resource *
 			wl_fixed_to_double(fy));
 }
 
-static void nemo_surface_set_layer(struct wl_client *client, struct wl_resource *resource, uint32_t type)
+static void nemo_surface_set_layer(struct wl_client *client, struct wl_resource *resource, const char *type)
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 
-	if (type == NEMO_SURFACE_LAYER_TYPE_BACKGROUND) {
+	if (strcmp(type, "background") == 0) {
 		bin->layer = &bin->shell->background_layer;
 
 		nemoview_put_state(bin->view, NEMOVIEW_CATCH_STATE);
-	} else if (type == NEMO_SURFACE_LAYER_TYPE_SERVICE) {
+	} else if (strcmp(type, "service") == 0) {
 		bin->layer = &bin->shell->service_layer;
-	} else if (type == NEMO_SURFACE_LAYER_TYPE_OVERLAY) {
+	} else if (strcmp(type, "overlay") == 0) {
 		bin->layer = &bin->shell->overlay_layer;
-	} else if (type == NEMO_SURFACE_LAYER_TYPE_UNDERLAY) {
+	} else if (strcmp(type, "underlay") == 0) {
 		bin->layer = &bin->shell->underlay_layer;
 	}
 }
@@ -269,33 +269,27 @@ static void nemo_surface_put_scope(struct wl_client *client, struct wl_resource 
 	nemoview_put_scope(bin->view);
 }
 
-static void nemo_surface_set_fullscreen_type(struct wl_client *client, struct wl_resource *resource, uint32_t type)
+static void nemo_surface_set_fullscreen_type(struct wl_client *client, struct wl_resource *resource, const char *type)
 {
 #ifdef NEMOUX_WITH_FULLSCREEN
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 
-	if (type & (1 << NEMO_SURFACE_FULLSCREEN_TYPE_PICK)) {
+	if (strstr(type, "pick") != NULL)
 		nemoshell_bin_set_state(bin, NEMOSHELL_BIN_PICKSCREEN_STATE);
-	}
-
-	if (type & (1 << NEMO_SURFACE_FULLSCREEN_TYPE_PITCH)) {
+	if (strstr(type, "pitch") != NULL)
 		nemoshell_bin_set_state(bin, NEMOSHELL_BIN_PITCHSCREEN_STATE);
-	}
 #endif
 }
 
-static void nemo_surface_put_fullscreen_type(struct wl_client *client, struct wl_resource *resource, uint32_t type)
+static void nemo_surface_put_fullscreen_type(struct wl_client *client, struct wl_resource *resource, const char *type)
 {
 #ifdef NEMOUX_WITH_FULLSCREEN
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 
-	if (type & (1 << NEMO_SURFACE_FULLSCREEN_TYPE_PICK)) {
+	if (strstr(type, "pick") != NULL)
 		nemoshell_bin_put_state(bin, NEMOSHELL_BIN_PICKSCREEN_STATE);
-	}
-
-	if (type & (1 << NEMO_SURFACE_FULLSCREEN_TYPE_PITCH)) {
+	if (strstr(type, "pitch") != NULL)
 		nemoshell_bin_put_state(bin, NEMOSHELL_BIN_PITCHSCREEN_STATE);
-	}
 #endif
 }
 
@@ -342,13 +336,24 @@ static void nemo_surface_move(struct wl_client *client, struct wl_resource *reso
 	}
 }
 
-static void nemo_surface_pick(struct wl_client *client, struct wl_resource *resource, struct wl_resource *seat_resource, uint32_t serial0, uint32_t serial1, uint32_t type)
+static void nemo_surface_pick(struct wl_client *client, struct wl_resource *resource, struct wl_resource *seat_resource, uint32_t serial0, uint32_t serial1, const char *type)
 {
 	struct nemoseat *seat = (struct nemoseat *)wl_resource_get_user_data(seat_resource);
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 
 	if (nemoshell_bin_has_flags(bin, NEMOSHELL_SURFACE_PICKABLE_FLAG)) {
-		nemoshell_pick_canvas(bin->shell, bin, serial0, serial1, type);
+		uint32_t ptype = 0x0;
+
+		if (strstr(type, "rotate") != NULL)
+			ptype |= NEMOSHELL_PICK_ROTATE_FLAG;
+		if (strstr(type, "scale") != NULL)
+			ptype |= NEMOSHELL_PICK_SCALE_FLAG;
+		if (strstr(type, "translate") != NULL)
+			ptype |= NEMOSHELL_PICK_TRANSLATE_FLAG;
+		if (strstr(type, "resize") != NULL)
+			ptype |= NEMOSHELL_PICK_RESIZE_FLAG;
+
+		nemoshell_pick_canvas(bin->shell, bin, serial0, serial1, ptype);
 	}
 }
 
@@ -440,7 +445,7 @@ static void nemo_use_unstable_version(struct wl_client *client, struct wl_resour
 	}
 }
 
-static void nemo_get_nemo_surface(struct wl_client *client, struct wl_resource *resource, uint32_t id, struct wl_resource *surface_resource, uint32_t type)
+static void nemo_get_nemo_surface(struct wl_client *client, struct wl_resource *resource, uint32_t id, struct wl_resource *surface_resource, const char *type)
 {
 	struct nemocanvas *canvas = (struct nemocanvas *)wl_resource_get_user_data(surface_resource);
 	struct shellclient *sc = (struct shellclient *)wl_resource_get_user_data(resource);
@@ -480,9 +485,9 @@ static void nemo_get_nemo_surface(struct wl_client *client, struct wl_resource *
 
 	wl_resource_set_implementation(bin->resource, &nemo_surface_implementation, bin, nemoshell_unbind_nemo_surface);
 
-	if (type == NEMO_SHELL_SURFACE_TYPE_NORMAL) {
+	if (strcmp(type, "normal") == 0) {
 		bin->type = NEMOSHELL_SURFACE_NORMAL_TYPE;
-	} else if (type == NEMO_SHELL_SURFACE_TYPE_OVERLAY) {
+	} else if (strcmp(type, "overlay") == 0) {
 		bin->type = NEMOSHELL_SURFACE_OVERLAY_TYPE;
 		bin->view->transform.type = NEMOVIEW_TRANSFORM_OVERLAY;
 	}

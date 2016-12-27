@@ -10,7 +10,6 @@
 #include <assert.h>
 #include <wayland-server.h>
 #include <wayland-xdg-shell-server-protocol.h>
-#include <wayland-nemo-shell-server-protocol.h>
 
 #include <shell.h>
 #include <compz.h>

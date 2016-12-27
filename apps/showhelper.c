@@ -196,7 +196,7 @@ struct nemoshow *nemoshow_create_view(struct nemotool *tool, int32_t width, int3
 
 	scon->canvas = nemocanvas_egl_create(scon->tool, width, height);
 
-	nemocanvas_set_nemosurface(scon->canvas, NEMO_SHELL_SURFACE_TYPE_NORMAL);
+	nemocanvas_set_nemosurface(scon->canvas, "normal");
 	nemocanvas_set_dispatch_resize(scon->canvas, nemoshow_dispatch_canvas_resize);
 	nemocanvas_set_dispatch_frame(scon->canvas, nemoshow_dispatch_canvas_frame);
 	nemocanvas_set_dispatch_discard(scon->canvas, nemoshow_dispatch_canvas_discard);
@@ -299,14 +299,7 @@ void nemoshow_view_set_layer(struct nemoshow *show, const char *layer)
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemocanvas *canvas = scon->canvas;
 
-	if (layer == NULL || strcmp(layer, "service") == 0)
-		nemocanvas_set_layer(canvas, NEMO_SURFACE_LAYER_TYPE_SERVICE);
-	else if (strcmp(layer, "background") == 0)
-		nemocanvas_set_layer(canvas, NEMO_SURFACE_LAYER_TYPE_BACKGROUND);
-	else if (strcmp(layer, "underlay") == 0)
-		nemocanvas_set_layer(canvas, NEMO_SURFACE_LAYER_TYPE_UNDERLAY);
-	else if (strcmp(layer, "overlay") == 0)
-		nemocanvas_set_layer(canvas, NEMO_SURFACE_LAYER_TYPE_OVERLAY);
+	nemocanvas_set_layer(canvas, layer);
 }
 
 void nemoshow_view_put_layer(struct nemoshow *show)
@@ -320,13 +313,7 @@ void nemoshow_view_set_fullscreen_type(struct nemoshow *show, const char *type)
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemocanvas *canvas = scon->canvas;
 
-	if (type == NULL)
-		return;
-
-	if (strcmp(type, "pick") == 0)
-		nemocanvas_set_fullscreen_type(canvas, (1 << NEMO_SURFACE_FULLSCREEN_TYPE_PICK));
-	else if (strcmp(type, "pitch") == 0)
-		nemocanvas_set_fullscreen_type(canvas, (1 << NEMO_SURFACE_FULLSCREEN_TYPE_PITCH));
+	nemocanvas_set_fullscreen_type(canvas, type);
 }
 
 void nemoshow_view_put_fullscreen_type(struct nemoshow *show, const char *type)
@@ -334,13 +321,7 @@ void nemoshow_view_put_fullscreen_type(struct nemoshow *show, const char *type)
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemocanvas *canvas = scon->canvas;
 
-	if (type == NULL)
-		return;
-
-	if (strcmp(type, "pick") == 0)
-		nemocanvas_put_fullscreen_type(canvas, (1 << NEMO_SURFACE_FULLSCREEN_TYPE_PICK));
-	else if (strcmp(type, "pitch") == 0)
-		nemocanvas_put_fullscreen_type(canvas, (1 << NEMO_SURFACE_FULLSCREEN_TYPE_PITCH));
+	nemocanvas_put_fullscreen_type(canvas, type);
 }
 
 void nemoshow_view_set_fullscreen(struct nemoshow *show, const char *id)
@@ -541,47 +522,31 @@ int nemoshow_view_move(struct nemoshow *show, uint32_t serial)
 	return 1;
 }
 
-int nemoshow_view_pick(struct nemoshow *show, uint32_t serial0, uint32_t serial1, uint32_t type)
+int nemoshow_view_pick(struct nemoshow *show, uint32_t serial0, uint32_t serial1, const char *type)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemocanvas *canvas = scon->canvas;
-	uint32_t ptype = 0x0;
 
-	if (type & NEMOSHOW_VIEW_PICK_ROTATE_TYPE)
-		ptype |= (1 << NEMO_SURFACE_PICK_TYPE_ROTATE);
-	if (type & NEMOSHOW_VIEW_PICK_SCALE_TYPE)
-		ptype |= (1 << NEMO_SURFACE_PICK_TYPE_SCALE);
-	if (type & NEMOSHOW_VIEW_PICK_TRANSLATE_TYPE)
-		ptype |= (1 << NEMO_SURFACE_PICK_TYPE_MOVE);
-
-	nemocanvas_pick(canvas, serial0, serial1, ptype);
+	nemocanvas_pick(canvas, serial0, serial1, type);
 
 	return 1;
 }
 
-int nemoshow_view_pick_distant(struct nemoshow *show, void *event, uint32_t type)
+int nemoshow_view_pick_distant(struct nemoshow *show, void *event, const char *type)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemocanvas *canvas = scon->canvas;
 	int tap0, tap1;
-	uint32_t ptype = 0x0;
 
 	nemoshow_event_get_distant_tapindices(show, event, &tap0, &tap1);
 
 	nemoshow_event_set_done_on(event, tap0);
 	nemoshow_event_set_done_on(event, tap1);
 
-	if (type & NEMOSHOW_VIEW_PICK_ROTATE_TYPE)
-		ptype |= (1 << NEMO_SURFACE_PICK_TYPE_ROTATE);
-	if (type & NEMOSHOW_VIEW_PICK_SCALE_TYPE)
-		ptype |= (1 << NEMO_SURFACE_PICK_TYPE_SCALE);
-	if (type & NEMOSHOW_VIEW_PICK_TRANSLATE_TYPE)
-		ptype |= (1 << NEMO_SURFACE_PICK_TYPE_MOVE);
-
 	nemocanvas_pick(canvas,
 			nemoshow_event_get_serial_on(event, tap0),
 			nemoshow_event_get_serial_on(event, tap1),
-			ptype);
+			type);
 
 	return 1;
 }

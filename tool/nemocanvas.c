@@ -519,7 +519,7 @@ void nemocanvas_set_flag(struct nemocanvas *canvas, float fx, float fy)
 			wl_fixed_from_double(fy));
 }
 
-void nemocanvas_set_layer(struct nemocanvas *canvas, uint32_t type)
+void nemocanvas_set_layer(struct nemocanvas *canvas, const char *type)
 {
 	nemo_surface_set_layer(canvas->nemo_surface, type);
 }
@@ -551,12 +551,12 @@ void nemocanvas_put_scope(struct nemocanvas *canvas)
 	nemo_surface_put_scope(canvas->nemo_surface);
 }
 
-void nemocanvas_set_fullscreen_type(struct nemocanvas *canvas, uint32_t type)
+void nemocanvas_set_fullscreen_type(struct nemocanvas *canvas, const char *type)
 {
 	nemo_surface_set_fullscreen_type(canvas->nemo_surface, type);
 }
 
-void nemocanvas_put_fullscreen_type(struct nemocanvas *canvas, uint32_t type)
+void nemocanvas_put_fullscreen_type(struct nemocanvas *canvas, const char *type)
 {
 	nemo_surface_put_fullscreen_type(canvas->nemo_surface, type);
 }
@@ -576,7 +576,7 @@ void nemocanvas_move(struct nemocanvas *canvas, uint32_t serial)
 	nemo_surface_move(canvas->nemo_surface, canvas->tool->seat, serial);
 }
 
-void nemocanvas_pick(struct nemocanvas *canvas, uint32_t serial0, uint32_t serial1, uint32_t type)
+void nemocanvas_pick(struct nemocanvas *canvas, uint32_t serial0, uint32_t serial1, const char *type)
 {
 	nemo_surface_pick(canvas->nemo_surface, canvas->tool->seat, serial0, serial1, type);
 }
@@ -603,7 +603,7 @@ void nemocanvas_update(struct nemocanvas *canvas, uint32_t serial)
 	nemo_surface_update(canvas->nemo_surface, serial);
 }
 
-void nemocanvas_set_nemosurface(struct nemocanvas *canvas, uint32_t type)
+void nemocanvas_set_nemosurface(struct nemocanvas *canvas, const char *type)
 {
 	struct nemo_shell *shell = canvas->tool->shell;
 

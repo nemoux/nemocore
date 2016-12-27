@@ -9,15 +9,10 @@
 			<arg name="version" type="int"/>
 		</request>
 
-		<enum name="surface_type">
-			<entry name="normal" value="0"/>
-			<entry name="overlay" value="1"/>
-		</enum>
-
 		<request name="get_nemo_surface">
 			<arg name="id" type="new_id" interface="nemo_surface"/>
 			<arg name="surface" type="object" interface="wl_surface"/>
-			<arg name="type" type="uint"/>
+			<arg name="type" type="string"/>
 		</request>
 
 		<request name="pong">
@@ -97,15 +92,8 @@
 			<arg name="fy" type="fixed"/>
 		</request>
 
-		<enum name="layer_type">
-			<entry name="background" value="0"/>
-			<entry name="service" value="1"/>
-			<entry name="overlay" value="2"/>
-			<entry name="underlay" value="3"/>
-		</enum>
-
 		<request name="set_layer">
-			<arg name="type" type="uint"/>
+			<arg name="type" type="string"/>
 		</request>
 
 		<request name="set_parent">
@@ -129,18 +117,12 @@
 		<request name="put_scope">
 		</request>
 
-		<enum name="fullscreen_type">
-			<entry name="normal" value="0"/>
-			<entry name="pick" value="1"/>
-			<entry name="pitch" value="2"/>
-		</enum>
-
 		<request name="set_fullscreen_type">
-			<arg name="type" type="uint"/>
+			<arg name="type" type="string"/>
 		</request>
 
 		<request name="put_fullscreen_type">
-			<arg name="type" type="uint"/>
+			<arg name="type" type="string"/>
 		</request>
 
 		<request name="set_fullscreen">
@@ -155,18 +137,11 @@
 			<arg name="serial" type="uint"/>
 		</request>
 
-		<enum name="pick_type">
-			<entry name="scale" value="0"/>
-			<entry name="rotate" value="1"/>
-			<entry name="resize" value="2"/>
-			<entry name="move" value="3"/>
-		</enum>
-
 		<request name="pick">
 			<arg name="seat" type="object" interface="nemo_seat"/>
 			<arg name="serial0" type="uint"/>
 			<arg name="serial1" type="uint"/>
-			<arg name="type" type="uint"/>
+			<arg name="type" type="string"/>
 		</request>
 
 		<request name="miss">

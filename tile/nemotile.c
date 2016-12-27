@@ -1550,7 +1550,7 @@ static void nemotile_dispatch_canvas_event(struct nemoshow *show, struct showone
 		nemoshow_event_update_taps(show, canvas, event);
 
 		if (nemoshow_event_is_more_taps(show, event, 8)) {
-			nemoshow_view_pick_distant(show, event, NEMOSHOW_VIEW_PICK_ALL_TYPE);
+			nemoshow_view_pick_distant(show, event, "rotate;scale;translate;resize");
 
 			nemoshow_event_set_cancel(event);
 

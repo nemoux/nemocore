@@ -6,7 +6,6 @@
 #include <errno.h>
 
 #include <wayland-server.h>
-#include <wayland-nemo-shell-server-protocol.h>
 
 #include <shell.h>
 #include <compz.h>
@@ -572,7 +571,7 @@ int nemoshow_view_move(struct nemoshow *show, uint64_t device)
 	return 0;
 }
 
-int nemoshow_view_pick(struct nemoshow *show, uint64_t device0, uint64_t device1, uint32_t type)
+int nemoshow_view_pick(struct nemoshow *show, uint64_t device0, uint64_t device1, const char *type)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemoseat *seat = scon->compz->seat;
@@ -581,7 +580,7 @@ int nemoshow_view_pick(struct nemoshow *show, uint64_t device0, uint64_t device1
 	return 0;
 }
 
-int nemoshow_view_pick_distant(struct nemoshow *show, void *event, uint32_t type)
+int nemoshow_view_pick_distant(struct nemoshow *show, void *event, const char *type)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemoseat *seat = scon->compz->seat;

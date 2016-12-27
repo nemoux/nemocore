@@ -157,9 +157,7 @@ static int nemoart_dispatch_canvas_tap_event(struct nemoaction *action, struct a
 			nemocanvas_pick(art->canvas,
 					nemoaction_tap_get_serial(taps[0]),
 					nemoaction_tap_get_serial(taps[1]),
-					(1 << NEMO_SURFACE_PICK_TYPE_ROTATE) |
-					(1 << NEMO_SURFACE_PICK_TYPE_SCALE) |
-					(1 << NEMO_SURFACE_PICK_TYPE_MOVE));
+					"rotate;scale;translate");
 		}
 	}
 	if (event & NEMOACTION_TAP_UP_EVENT) {
@@ -254,7 +252,7 @@ int main(int argc, char *argv[])
 
 	art->canvas = canvas = nemocanvas_egl_create(tool, width, height);
 	nemocanvas_opaque(canvas, 0, 0, width, height);
-	nemocanvas_set_nemosurface(canvas, NEMO_SHELL_SURFACE_TYPE_NORMAL);
+	nemocanvas_set_nemosurface(canvas, "normal");
 	nemocanvas_set_dispatch_resize(canvas, nemoart_dispatch_canvas_resize);
 	nemocanvas_set_dispatch_frame(canvas, nemoart_dispatch_canvas_frame);
 	nemocanvas_set_dispatch_event(canvas, nemoart_dispatch_canvas_event);

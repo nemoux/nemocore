@@ -218,7 +218,7 @@ static void pick_shellgrab_touchpoint_frame(struct touchpoint_grab *base, uint32
 			bin->reset_move = 0;
 		}
 
-		if ((shell->pick.flags & NEMOSHELL_PICK_ROTATE_FLAG) && (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_ROTATE))) {
+		if ((shell->pick.flags & NEMOSHELL_PICK_ROTATE_FLAG) && (pick->type & NEMOSHELL_PICK_ROTATE_FLAG)) {
 			if (d > shell->pick.rotate_distance) {
 				nemoview_set_rotation(bin->view, bin->view->geometry.r + pick->rotate.r - r);
 
@@ -229,7 +229,7 @@ static void pick_shellgrab_touchpoint_frame(struct touchpoint_grab *base, uint32
 			pick->rotate.r = pick->other->rotate.r = r;
 		}
 
-		if ((shell->pick.flags & NEMOSHELL_PICK_SCALE_FLAG) && (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALE))) {
+		if ((shell->pick.flags & NEMOSHELL_PICK_SCALE_FLAG) && (pick->type & NEMOSHELL_PICK_SCALE_FLAG)) {
 			if (d > shell->pick.scale_distance) {
 				float s = d / pick->scale.distance;
 
@@ -256,7 +256,7 @@ static void pick_shellgrab_touchpoint_frame(struct touchpoint_grab *base, uint32
 			pick->scale.distance = pick->other->scale.distance = d;
 		}
 
-		if ((shell->pick.flags & NEMOSHELL_PICK_RESIZE_FLAG) && (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_RESIZE))) {
+		if ((shell->pick.flags & NEMOSHELL_PICK_RESIZE_FLAG) && (pick->type & NEMOSHELL_PICK_RESIZE_FLAG)) {
 			if (fabsf(pick->resize.distance - d) > shell->pick.resize_interval) {
 				int32_t width, height;
 
@@ -285,7 +285,7 @@ static void pick_shellgrab_touchpoint_frame(struct touchpoint_grab *base, uint32
 			}
 		}
 
-		if ((shell->pick.flags & NEMOSHELL_PICK_TRANSLATE_FLAG) && (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_MOVE))) {
+		if ((shell->pick.flags & NEMOSHELL_PICK_TRANSLATE_FLAG) && (pick->type & NEMOSHELL_PICK_TRANSLATE_FLAG)) {
 			float cx, cy;
 
 			cx = pick->move.dx + (pick->tp0->x + pick->tp1->x) / 2.0f;
@@ -501,7 +501,7 @@ static void pick_shellgrab_singletap_frame(struct touchpoint_grab *base, uint32_
 		float r = pickgrab_calculate_angle(bin->view, tp->x, tp->y);
 		uint64_t touchid = tp->id;
 
-		if ((shell->pick.flags & NEMOSHELL_PICK_ROTATE_FLAG) && (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_ROTATE))) {
+		if ((shell->pick.flags & NEMOSHELL_PICK_ROTATE_FLAG) && (pick->type & NEMOSHELL_PICK_ROTATE_FLAG)) {
 			if (d > shell->pick.rotate_distance) {
 				nemoview_set_rotation(bin->view, bin->view->geometry.r + pick->rotate.r - r);
 
@@ -512,7 +512,7 @@ static void pick_shellgrab_singletap_frame(struct touchpoint_grab *base, uint32_
 			pick->rotate.r = r;
 		}
 
-		if ((shell->pick.flags & NEMOSHELL_PICK_SCALE_FLAG) && (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALE))) {
+		if ((shell->pick.flags & NEMOSHELL_PICK_SCALE_FLAG) && (pick->type & NEMOSHELL_PICK_SCALE_FLAG)) {
 			if (d > shell->pick.scale_distance) {
 				float s = d / pick->scale.distance;
 
@@ -539,7 +539,7 @@ static void pick_shellgrab_singletap_frame(struct touchpoint_grab *base, uint32_
 			pick->scale.distance = d;
 		}
 
-		if ((shell->pick.flags & NEMOSHELL_PICK_RESIZE_FLAG) && (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_RESIZE))) {
+		if ((shell->pick.flags & NEMOSHELL_PICK_RESIZE_FLAG) && (pick->type & NEMOSHELL_PICK_RESIZE_FLAG)) {
 			if (fabsf(pick->resize.distance - d) > shell->pick.resize_interval) {
 				int32_t width, height;
 
@@ -652,7 +652,7 @@ static void pick_shellgrab_pointer_motion(struct nemopointer_grab *base, uint32_
 		float d = pickgrab_calculate_distance(bin->view, pointer->x, pointer->y);
 		float r = pickgrab_calculate_angle(bin->view, pointer->x, pointer->y);
 
-		if ((shell->pick.flags & NEMOSHELL_PICK_ROTATE_FLAG) && (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_ROTATE))) {
+		if ((shell->pick.flags & NEMOSHELL_PICK_ROTATE_FLAG) && (pick->type & NEMOSHELL_PICK_ROTATE_FLAG)) {
 			if (d > shell->pick.rotate_distance) {
 				nemoview_set_rotation(bin->view, bin->view->geometry.r + pick->rotate.r - r);
 			}
@@ -660,7 +660,7 @@ static void pick_shellgrab_pointer_motion(struct nemopointer_grab *base, uint32_
 			pick->rotate.r = r;
 		}
 
-		if ((shell->pick.flags & NEMOSHELL_PICK_SCALE_FLAG) && (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_SCALE))) {
+		if ((shell->pick.flags & NEMOSHELL_PICK_SCALE_FLAG) && (pick->type & NEMOSHELL_PICK_SCALE_FLAG)) {
 			if (d > shell->pick.scale_distance) {
 				float s = d / pick->scale.distance;
 
@@ -684,7 +684,7 @@ static void pick_shellgrab_pointer_motion(struct nemopointer_grab *base, uint32_
 			pick->scale.distance = d;
 		}
 
-		if ((shell->pick.flags & NEMOSHELL_PICK_RESIZE_FLAG) && (pick->type & (1 << NEMO_SURFACE_PICK_TYPE_RESIZE))) {
+		if ((shell->pick.flags & NEMOSHELL_PICK_RESIZE_FLAG) && (pick->type & NEMOSHELL_PICK_RESIZE_FLAG)) {
 			if (fabsf(pick->resize.distance - d) > shell->pick.resize_interval) {
 				int32_t width, height;
 
