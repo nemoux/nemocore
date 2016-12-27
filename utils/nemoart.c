@@ -43,6 +43,9 @@ static void nemoart_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t wi
 {
 	struct nemoart *art = (struct nemoart *)nemocanvas_get_userdata(canvas);
 
+	if (width == 0 || height == 0)
+		return;
+
 	art->width = width;
 	art->height = height;
 
