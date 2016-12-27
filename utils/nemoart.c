@@ -97,6 +97,13 @@ static int nemoart_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t typ
 	return 0;
 }
 
+static int nemoart_dispatch_canvas_destroy(struct nemocanvas *canvas)
+{
+	nemotool_exit(canvas->tool);
+
+	return 1;
+}
+
 static void nemoart_dispatch_video_update(struct nemoplay *play, void *data)
 {
 	struct nemoart *art = (struct nemoart *)data;
@@ -251,6 +258,8 @@ int main(int argc, char *argv[])
 	nemocanvas_set_dispatch_resize(canvas, nemoart_dispatch_canvas_resize);
 	nemocanvas_set_dispatch_frame(canvas, nemoart_dispatch_canvas_frame);
 	nemocanvas_set_dispatch_event(canvas, nemoart_dispatch_canvas_event);
+	nemocanvas_set_dispatch_destroy(canvas, nemoart_dispatch_canvas_destroy);
+	nemocanvas_set_state(canvas, "close");
 	nemocanvas_set_userdata(canvas, art);
 
 	if (fullscreenid != NULL)
