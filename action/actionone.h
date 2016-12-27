@@ -20,6 +20,8 @@ struct actionone {
 
 	void *target;
 
+	uint32_t tag;
+
 	nemoaction_tap_dispatch_event_t dispatch_tap_event;
 
 	struct nemolist link;
@@ -36,6 +38,16 @@ static inline void nemoaction_one_set_tap_callback(struct actionone *one, nemoac
 static inline void nemoaction_one_set_target(struct actionone *one, void *target)
 {
 	one->target = target;
+}
+
+static inline void nemoaction_one_set_tag(struct actionone *one, uint32_t tag)
+{
+	one->tag = tag;
+}
+
+static inline uint32_t nemoaction_one_get_tag(struct actionone *one)
+{
+	return one->tag;
 }
 
 #ifdef __cplusplus

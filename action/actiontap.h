@@ -23,6 +23,8 @@ struct actiontap {
 	uint64_t device;
 	uint32_t serial;
 
+	uint32_t tag;
+
 	float dx, dy;
 	float dd;
 
@@ -41,6 +43,8 @@ struct actiontap {
 	nemoaction_tap_dispatch_event_t dispatch_event;
 
 	struct nemolist link;
+
+	void *data;
 };
 
 extern struct actiontap *nemoaction_tap_create(struct nemoaction *action);
@@ -238,6 +242,26 @@ static inline void nemoaction_tap_set_callback(struct actiontap *tap, nemoaction
 static inline int nemoaction_tap_dispatch_event(struct nemoaction *action, struct actiontap *tap, uint32_t event)
 {
 	return tap->dispatch_event(action, tap, event);
+}
+
+static inline void nemoaction_tap_set_tag(struct actiontap *tap, uint32_t tag)
+{
+	tap->tag = tag;
+}
+
+static inline uint32_t nemoaction_tap_get_tag(struct actiontap *tap)
+{
+	return tap->tag;
+}
+
+static inline void nemoaction_tap_set_userdata(struct actiontap *tap, void *data)
+{
+	tap->data = data;
+}
+
+static inline void *nemoaction_tap_get_userdata(struct actiontap *tap)
+{
+	return tap->data;
 }
 
 #ifdef __cplusplus
