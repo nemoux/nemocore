@@ -259,6 +259,7 @@ int main(int argc, char *argv[])
 	nemocanvas_set_dispatch_frame(canvas, nemoart_dispatch_canvas_frame);
 	nemocanvas_set_dispatch_event(canvas, nemoart_dispatch_canvas_event);
 	nemocanvas_set_dispatch_destroy(canvas, nemoart_dispatch_canvas_destroy);
+	nemocanvas_set_fullscreen_type(canvas, "pick;pitch");
 	nemocanvas_set_state(canvas, "close");
 	nemocanvas_set_userdata(canvas, art);
 
