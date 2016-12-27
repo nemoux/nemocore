@@ -8,6 +8,7 @@ NEMO_BEGIN_EXTERN_C
 #endif
 
 #include <stdint.h>
+#include <math.h>
 
 #include <nemolist.h>
 
@@ -21,6 +22,9 @@ struct actiontap {
 
 	uint64_t device;
 	uint32_t serial;
+
+	float dx, dy;
+	float dd;
 
 	float gx0, gy0;
 	float gx, gy;
@@ -202,6 +206,28 @@ static inline uint32_t nemoaction_tap_get_device(struct actiontap *tap)
 static inline uint32_t nemoaction_tap_get_serial(struct actiontap *tap)
 {
 	return tap->serial;
+}
+
+static inline void nemoaction_tap_clear(struct actiontap *tap, float x, float y)
+{
+	tap->dx = x;
+	tap->dy = y;
+	tap->dd = 0.0f;
+}
+
+static inline void nemoaction_tap_trace(struct actiontap *tap, float x, float y)
+{
+	float dx = x - tap->dx;
+	float dy = y - tap->dy;
+
+	tap->dd = sqrtf(dx * dx + dy * dy);
+	tap->dx = x;
+	tap->dy = y;
+}
+
+static inline float nemoaction_tap_get_distance(struct actiontap *tap)
+{
+	return tap->dd;
 }
 
 static inline void nemoaction_tap_set_callback(struct actiontap *tap, nemoaction_tap_dispatch_event_t dispatch)

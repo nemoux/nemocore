@@ -76,6 +76,7 @@ static int nemoart_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t typ
 		nemoaction_tap_set_device(tap, event->device);
 		nemoaction_tap_set_serial(tap, event->serial);
 		nemoaction_tap_set_focus(tap, canvas);
+		nemoaction_tap_clear(tap, event->gx, event->gy);
 		nemoaction_tap_dispatch_event(art->action, tap, NEMOACTION_TAP_DOWN_EVENT);
 	} else if (type & NEMOTOOL_TOUCH_UP_EVENT) {
 		tap = nemoaction_get_tap_by_device(art->action, event->device);
@@ -90,6 +91,7 @@ static int nemoart_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t typ
 		if (tap != NULL) {
 			nemoaction_tap_set_lx(tap, event->x);
 			nemoaction_tap_set_ly(tap, event->y);
+			nemoaction_tap_trace(tap, event->gx, event->gy);
 			nemoaction_tap_dispatch_event(art->action, tap, NEMOACTION_TAP_MOTION_EVENT);
 		}
 	}
