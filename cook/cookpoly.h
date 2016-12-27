@@ -43,6 +43,7 @@ struct cookpoly {
 	struct cooktrans *transform;
 
 	struct nemomatrix matrix;
+	struct nemomatrix inverse;
 
 	struct nemolist link;
 
@@ -67,6 +68,9 @@ extern void nemocook_polygon_set_color(struct cookpoly *poly, float r, float g, 
 
 extern void nemocook_polygon_set_transform(struct cookpoly *poly, struct cooktrans *trans);
 extern int nemocook_polygon_update_transform(struct cookpoly *poly);
+
+extern int nemocook_polygon_transform_to_global(struct cookpoly *poly, float sx, float sy, float sz, float *x, float *y, float *z);
+extern int nemocook_polygon_transform_from_global(struct cookpoly *poly, float x, float y, float z, float *sx, float *sy, float *sz);
 
 static inline void nemocook_polygon_attach_state(struct cookpoly *poly, struct cookstate *state)
 {

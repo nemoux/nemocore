@@ -35,6 +35,7 @@ struct cookpoly *nemocook_polygon_create(void)
 	poly->draw = nemocook_polygon_draw_simple;
 
 	nemomatrix_init_identity(&poly->matrix);
+	nemomatrix_init_identity(&poly->inverse);
 
 	nemolist_init(&poly->link);
 
@@ -130,6 +131,41 @@ int nemocook_polygon_update_transform(struct cookpoly *poly)
 	for (trans = poly->transform; trans != NULL; trans = trans->parent) {
 		nemomatrix_multiply(&poly->matrix, &trans->matrix);
 	}
+
+	if (nemomatrix_invert(&poly->inverse, &poly->matrix) < 0)
+		return -1;
+
+	return 0;
+}
+
+int nemocook_polygon_transform_to_global(struct cookpoly *poly, float sx, float sy, float sz, float *x, float *y, float *z)
+{
+	struct nemovector v = { { sx, sy, sz, 1.0f } };
+
+	nemomatrix_transform_vector(&poly->matrix, &v);
+
+	if (fabsf(v.f[3]) < 1e-6)
+		return -1;
+
+	*x = v.f[0] / v.f[3];
+	*y = v.f[1] / v.f[3];
+	*z = v.f[2] / v.f[3];
+
+	return 0;
+}
+
+int nemocook_polygon_transform_from_global(struct cookpoly *poly, float x, float y, float z, float *sx, float *sy, float *sz)
+{
+	struct nemovector v = { { x, y, z, 1.0f } };
+
+	nemomatrix_transform_vector(&poly->inverse, &v);
+
+	if (fabsf(v.f[3]) < 1e-6)
+		return -1;
+
+	*sx = v.f[0] / v.f[3];
+	*sy = v.f[1] / v.f[3];
+	*sz = v.f[2] / v.f[3];
 
 	return 0;
 }
