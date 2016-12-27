@@ -379,7 +379,7 @@ struct nemocompz *nemocompz_create(void)
 	wl_signal_init(&compz->child_signal);
 	wl_signal_init(&compz->idle_signal);
 
-	compz->cursor_layer = nemolayer_create(compz);
+	compz->cursor_layer = nemolayer_create(compz, "cursor");
 	nemolayer_attach_above(compz->cursor_layer, NULL);
 
 	pixman_region32_init(&compz->damage);
@@ -1049,6 +1049,18 @@ struct nemoview *nemocompz_get_view_by_client(struct nemocompz *compz, struct wl
 				}
 			}
 		}
+	}
+
+	return NULL;
+}
+
+struct nemolayer *nemocompz_get_layer_by_name(struct nemocompz *compz, const char *name)
+{
+	struct nemolayer *layer;
+
+	wl_list_for_each(layer, &compz->layer_list, link) {
+		if (strcmp(layer->name, name) == 0)
+			return layer;
 	}
 
 	return NULL;

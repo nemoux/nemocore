@@ -321,15 +321,19 @@ void nemoshow_dispatch_resize(struct nemoshow *show, int32_t width, int32_t heig
 	nemoactor_dispatch_resize(scon->actor, width, height);
 }
 
-void nemoshow_view_set_layer(struct nemoshow *show, const char *layer)
+void nemoshow_view_set_layer(struct nemoshow *show, const char *type)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemoshell *shell = scon->shell;
 	struct nemoactor *actor = scon->actor;
+	struct nemolayer *layer;
 
-	nemoview_attach_layer(actor->view, shell->default_layer);
+	layer = nemocompz_get_layer_by_name(shell->compz, type);
+	if (layer != NULL) {
+		nemoview_attach_layer(actor->view, layer);
 
-	nemoview_set_state(actor->view, NEMOVIEW_MAP_STATE);
+		nemoview_set_state(actor->view, NEMOVIEW_MAP_STATE);
+	}
 }
 
 void nemoshow_view_put_layer(struct nemoshow *show)

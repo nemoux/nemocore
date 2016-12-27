@@ -11,7 +11,7 @@
 #include <view.h>
 #include <nemomisc.h>
 
-struct nemolayer *nemolayer_create(struct nemocompz *compz)
+struct nemolayer *nemolayer_create(struct nemocompz *compz, const char *name)
 {
 	struct nemolayer *layer;
 
@@ -21,6 +21,7 @@ struct nemolayer *nemolayer_create(struct nemocompz *compz)
 	memset(layer, 0, sizeof(struct nemolayer));
 
 	layer->compz = compz;
+	layer->name = strdup(name);
 
 	wl_list_init(&layer->view_list);
 
@@ -37,6 +38,7 @@ void nemolayer_destroy(struct nemolayer *layer)
 		nemoview_detach_layer(view);
 	}
 
+	free(layer->name);
 	free(layer);
 }
 

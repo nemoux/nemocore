@@ -294,12 +294,12 @@ void nemoshow_dispatch_resize(struct nemoshow *show, int32_t width, int32_t heig
 	nemocanvas_dispatch_resize(scon->canvas, width, height);
 }
 
-void nemoshow_view_set_layer(struct nemoshow *show, const char *layer)
+void nemoshow_view_set_layer(struct nemoshow *show, const char *type)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
 	struct nemocanvas *canvas = scon->canvas;
 
-	nemocanvas_set_layer(canvas, layer);
+	nemocanvas_set_layer(canvas, type);
 }
 
 void nemoshow_view_put_layer(struct nemoshow *show)

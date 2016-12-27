@@ -196,6 +196,8 @@ extern int nemocompz_contain_view_near(struct nemocompz *compz, struct nemoview 
 extern struct nemoview *nemocompz_get_view_by_uuid(struct nemocompz *compz, const char *uuid);
 extern struct nemoview *nemocompz_get_view_by_client(struct nemocompz *compz, struct wl_client *client);
 
+extern struct nemolayer *nemocompz_get_layer_by_name(struct nemocompz *compz, const char *name);
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

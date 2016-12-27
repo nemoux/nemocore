@@ -221,6 +221,8 @@ static void nemo_surface_set_layer(struct wl_client *client, struct wl_resource 
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 	struct nemoshell *shell = bin->shell;
 
+	bin->layer = nemocompz_get_layer_by_name(shell->compz, type);
+
 	if (shell->update_layer != NULL)
 		shell->update_layer(shell->userdata, bin, type);
 }

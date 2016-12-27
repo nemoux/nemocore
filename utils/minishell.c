@@ -420,18 +420,9 @@ static void minishell_update_client(void *data, struct shellbin *bin, struct cli
 static void minishell_update_layer(void *data, struct shellbin *bin, const char *type)
 {
 	struct minishell *mini = (struct minishell *)data;
-	struct nemoshell *shell = mini->shell;
 
 	if (strcmp(type, "background") == 0) {
-		bin->layer = mini->background_layer;
-
 		nemoview_put_state(bin->view, NEMOVIEW_CATCH_STATE);
-	} else if (strcmp(type, "service") == 0) {
-		bin->layer = mini->service_layer;
-	} else if (strcmp(type, "overlay") == 0) {
-		bin->layer = mini->overlay_layer;
-	} else if (strcmp(type, "underlay") == 0) {
-		bin->layer = mini->underlay_layer;
 	}
 }
 
@@ -545,15 +536,15 @@ int main(int argc, char *argv[])
 		minishell_dispatch_text(mini, configpath);
 	}
 
-	mini->overlay_layer = nemolayer_create(compz);
+	mini->overlay_layer = nemolayer_create(compz, "overlay");
 	nemolayer_attach_below(mini->overlay_layer, NULL);
-	mini->fullscreen_layer = nemolayer_create(compz);
+	mini->fullscreen_layer = nemolayer_create(compz, "fullscreen");
 	nemolayer_attach_below(mini->fullscreen_layer, NULL);
-	mini->service_layer = nemolayer_create(compz);
+	mini->service_layer = nemolayer_create(compz, "service");
 	nemolayer_attach_below(mini->service_layer, NULL);
-	mini->underlay_layer = nemolayer_create(compz);
+	mini->underlay_layer = nemolayer_create(compz, "underlay");
 	nemolayer_attach_below(mini->underlay_layer, NULL);
-	mini->background_layer = nemolayer_create(compz);
+	mini->background_layer = nemolayer_create(compz, "background");
 	nemolayer_attach_below(mini->background_layer, NULL);
 
 	nemoshell_set_default_layer(shell, mini->service_layer);
