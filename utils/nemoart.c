@@ -71,8 +71,8 @@ static int nemoart_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t typ
 
 	if (type & NEMOTOOL_TOUCH_DOWN_EVENT) {
 		tap = nemoaction_tap_create(art->action);
-		nemoaction_tap_set_lx(tap, event->x);
-		nemoaction_tap_set_ly(tap, event->y);
+		nemoaction_tap_set_tx(tap, event->x);
+		nemoaction_tap_set_ty(tap, event->y);
 		nemoaction_tap_set_device(tap, event->device);
 		nemoaction_tap_set_serial(tap, event->serial);
 		nemoaction_tap_set_focus(tap, canvas);
@@ -81,16 +81,16 @@ static int nemoart_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t typ
 	} else if (type & NEMOTOOL_TOUCH_UP_EVENT) {
 		tap = nemoaction_get_tap_by_device(art->action, event->device);
 		if (tap != NULL) {
-			nemoaction_tap_set_lx(tap, event->x);
-			nemoaction_tap_set_ly(tap, event->y);
+			nemoaction_tap_set_tx(tap, event->x);
+			nemoaction_tap_set_ty(tap, event->y);
 			nemoaction_tap_dispatch_event(art->action, tap, NEMOACTION_TAP_UP_EVENT);
 			nemoaction_tap_destroy(tap);
 		}
 	} else if (type & NEMOTOOL_TOUCH_MOTION_EVENT) {
 		tap = nemoaction_get_tap_by_device(art->action, event->device);
 		if (tap != NULL) {
-			nemoaction_tap_set_lx(tap, event->x);
-			nemoaction_tap_set_ly(tap, event->y);
+			nemoaction_tap_set_tx(tap, event->x);
+			nemoaction_tap_set_ty(tap, event->y);
 			nemoaction_tap_trace(tap, event->gx, event->gy);
 			nemoaction_tap_dispatch_event(art->action, tap, NEMOACTION_TAP_MOTION_EVENT);
 		}
@@ -149,6 +149,7 @@ static int nemoart_dispatch_canvas_tap_event(struct nemoaction *action, struct a
 
 	if (event & NEMOACTION_TAP_DOWN_EVENT) {
 		struct actiontap *taps[8];
+		int tap0, tap1;
 		int ntaps;
 
 		ntaps = nemoaction_get_taps_by_target(art->action, art->canvas, taps, 8);
@@ -159,6 +160,13 @@ static int nemoart_dispatch_canvas_tap_event(struct nemoaction *action, struct a
 			nemocanvas_pick(art->canvas,
 					nemoaction_tap_get_serial(taps[0]),
 					nemoaction_tap_get_serial(taps[1]),
+					"rotate;scale;translate");
+		} else if (ntaps >= 3) {
+			nemoaction_get_distant_taps(art->action, taps, ntaps, &tap0, &tap1);
+
+			nemocanvas_pick(art->canvas,
+					nemoaction_tap_get_serial(taps[tap0]),
+					nemoaction_tap_get_serial(taps[tap1]),
 					"rotate;scale;translate");
 		}
 	}

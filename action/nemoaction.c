@@ -135,6 +135,31 @@ int nemoaction_get_taps_all(struct nemoaction *action, struct actiontap **taps, 
 	return index;
 }
 
+int nemoaction_get_distant_taps(struct nemoaction *action, struct actiontap **taps, int ntaps, int *index0, int *index1)
+{
+	float dm = 0.0f;
+	float dd;
+	float dx, dy;
+	int i, j;
+
+	for (i = 0; i < ntaps - 1; i++) {
+		for (j = i + 1; j < ntaps; j++) {
+			dx = taps[j]->tx - taps[i]->tx;
+			dy = taps[j]->ty - taps[i]->ty;
+			dd = sqrtf(dx * dx + dy * dy);
+
+			if (dd > dm) {
+				dm = dd;
+
+				*index0 = i;
+				*index1 = j;
+			}
+		}
+	}
+
+	return 0;
+}
+
 void nemoaction_set_one_tap_callback(struct nemoaction *action, void *target, nemoaction_tap_dispatch_event_t dispatch)
 {
 	struct actionone *one;
