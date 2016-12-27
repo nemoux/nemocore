@@ -221,8 +221,8 @@ static void nemo_surface_set_layer(struct wl_client *client, struct wl_resource 
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 	struct nemoshell *shell = bin->shell;
 
-	if (shell->attach_layer != NULL)
-		shell->attach_layer(shell->userdata, bin, type);
+	if (shell->update_layer != NULL)
+		shell->update_layer(shell->userdata, bin, type);
 }
 
 static void nemo_surface_set_parent(struct wl_client *client, struct wl_resource *resource, struct wl_resource *parent_resource)

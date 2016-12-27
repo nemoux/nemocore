@@ -417,7 +417,7 @@ static void minishell_update_client(void *data, struct shellbin *bin, struct cli
 	}
 }
 
-static void minishell_attach_layer(void *data, struct shellbin *bin, const char *type)
+static void minishell_update_layer(void *data, struct shellbin *bin, const char *type)
 {
 	struct minishell *mini = (struct minishell *)data;
 	struct nemoshell *shell = mini->shell;
@@ -527,7 +527,7 @@ int main(int argc, char *argv[])
 		goto out2;
 	nemoshell_set_destroy_client(shell, minishell_destroy_client);
 	nemoshell_set_update_client(shell, minishell_update_client);
-	nemoshell_set_attach_layer(shell, minishell_attach_layer);
+	nemoshell_set_update_layer(shell, minishell_update_layer);
 	nemoshell_set_enter_idle(shell, minishell_enter_idle);
 	nemoshell_set_userdata(shell, mini);
 
