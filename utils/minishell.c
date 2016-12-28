@@ -135,8 +135,8 @@ static int minishell_dispatch_keypad(struct minishell *mini, struct itemone *one
 			state = nemoshell_create_client_state(shell, pid);
 			if (state != NULL) {
 				clientstate_set_fattr(state, "x", x);
-				clientstate_set_fattr(state, "x", y);
-				clientstate_set_fattr(state, "r", focus->geometry.r);
+				clientstate_set_fattr(state, "y", y);
+				clientstate_set_fattr(state, "r", focus->geometry.r * 180.0f / M_PI);
 			}
 		}
 
