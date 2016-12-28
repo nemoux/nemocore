@@ -55,18 +55,18 @@ static void nemoart_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t wi
 	nemocook_egl_resize(art->egl, width, height);
 	nemoplay_video_set_texture(art->videoback, 0, width, height);
 
-	nemocook_egl_prerender(art->egl);
+	nemocook_egl_make_current(art->egl);
 	nemoplay_shader_dispatch(art->shader);
-	nemocook_egl_postrender(art->egl);
+	nemocook_egl_swap_buffers(art->egl);
 }
 
 static void nemoart_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t secs, uint32_t nsecs)
 {
 	struct nemoart *art = (struct nemoart *)nemocanvas_get_userdata(canvas);
 
-	nemocook_egl_prerender(art->egl);
+	nemocook_egl_make_current(art->egl);
 	nemoplay_shader_dispatch(art->shader);
-	nemocook_egl_postrender(art->egl);
+	nemocook_egl_swap_buffers(art->egl);
 }
 
 static int nemoart_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t type, struct nemoevent *event)

@@ -26,8 +26,8 @@ extern void nemocook_egl_destroy(struct cookegl *egl);
 
 extern int nemocook_egl_resize(struct cookegl *egl, int width, int height);
 
-extern int nemocook_egl_prerender(struct cookegl *egl);
-extern int nemocook_egl_postrender(struct cookegl *egl);
+extern int nemocook_egl_make_current(struct cookegl *egl);
+extern int nemocook_egl_swap_buffers(struct cookegl *egl);
 
 extern struct cookshader *nemocook_egl_use_shader(struct cookegl *egl, struct cookshader *shader);
 

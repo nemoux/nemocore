@@ -21,7 +21,7 @@ struct cookfbo {
 	int width, height;
 };
 
-int nemocook_fbo_prerender(struct cookfbo *fbo)
+int nemocook_fbo_bind(struct cookfbo *fbo)
 {
 	fbo->shader = NULL;
 
@@ -32,7 +32,7 @@ int nemocook_fbo_prerender(struct cookfbo *fbo)
 	return 0;
 }
 
-int nemocook_fbo_postrender(struct cookfbo *fbo)
+int nemocook_fbo_unbind(struct cookfbo *fbo)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 

@@ -23,8 +23,8 @@ extern void nemocook_fbo_destroy(struct cookfbo *fbo);
 
 extern int nemocook_fbo_resize(struct cookfbo *fbo, int width, int height);
 
-extern int nemocook_fbo_prerender(struct cookfbo *fbo);
-extern int nemocook_fbo_postrender(struct cookfbo *fbo);
+extern int nemocook_fbo_bind(struct cookfbo *fbo);
+extern int nemocook_fbo_unbind(struct cookfbo *fbo);
 
 extern struct cookshader *nemocook_fbo_use_shader(struct cookfbo *fbo, struct cookshader *shader);
 

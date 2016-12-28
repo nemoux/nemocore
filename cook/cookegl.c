@@ -38,7 +38,7 @@ struct cookegl {
 	int has_egl_image_external;
 };
 
-int nemocook_egl_prerender(struct cookegl *egl)
+int nemocook_egl_make_current(struct cookegl *egl)
 {
 	egl->shader = NULL;
 
@@ -50,7 +50,7 @@ int nemocook_egl_prerender(struct cookegl *egl)
 	return 0;
 }
 
-int nemocook_egl_postrender(struct cookegl *egl)
+int nemocook_egl_swap_buffers(struct cookegl *egl)
 {
 	if (eglSwapBuffers(egl->display, egl->surface) == EGL_FALSE)
 		return -1;
