@@ -29,6 +29,12 @@ extern int nemocook_egl_resize(struct cookegl *egl, int width, int height);
 extern int nemocook_egl_make_current(struct cookegl *egl);
 extern int nemocook_egl_swap_buffers(struct cookegl *egl);
 
+extern int nemocook_egl_has_swap_buffers_with_damage(struct cookegl *egl);
+
+extern void nemocook_egl_clear(struct cookegl *egl);
+extern void nemocook_egl_damage(struct cookegl *egl, int x, int y, int w, int h);
+extern int nemocook_egl_swap_buffers_with_damage(struct cookegl *egl);
+
 extern struct cookshader *nemocook_egl_use_shader(struct cookegl *egl, struct cookshader *shader);
 
 extern void nemocook_egl_attach_state(struct cookegl *egl, struct cookstate *state);

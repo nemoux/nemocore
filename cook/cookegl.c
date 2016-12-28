@@ -36,6 +36,10 @@ struct cookegl {
 	int has_bind_display;
 	int has_configless_context;
 	int has_egl_image_external;
+
+	EGLint *damages;
+	int sdamages;
+	int ndamages;
 };
 
 int nemocook_egl_make_current(struct cookegl *egl)
@@ -53,6 +57,39 @@ int nemocook_egl_make_current(struct cookegl *egl)
 int nemocook_egl_swap_buffers(struct cookegl *egl)
 {
 	if (eglSwapBuffers(egl->display, egl->surface) == EGL_FALSE)
+		return -1;
+
+	return 0;
+}
+
+int nemocook_egl_has_swap_buffers_with_damage(struct cookegl *egl)
+{
+	return egl->swap_buffers_with_damage != NULL;
+}
+
+void nemocook_egl_clear(struct cookegl *egl)
+{
+	egl->ndamages = 0;
+}
+
+void nemocook_egl_damage(struct cookegl *egl, int x, int y, int w, int h)
+{
+	if (egl->ndamages >= egl->sdamages) {
+		egl->sdamages += 16;
+		egl->damages = (EGLint *)realloc(egl->damages, sizeof(EGLint[4]) * egl->sdamages);
+	}
+
+	egl->damages[egl->ndamages * 4 + 0] = x;
+	egl->damages[egl->ndamages * 4 + 1] = y;
+	egl->damages[egl->ndamages * 4 + 2] = w;
+	egl->damages[egl->ndamages * 4 + 3] = h;
+
+	egl->ndamages++;
+}
+
+int nemocook_egl_swap_buffers_with_damage(struct cookegl *egl)
+{
+	if (egl->swap_buffers_with_damage(egl->display, egl->surface, egl->damages, egl->ndamages) == EGL_FALSE)
 		return -1;
 
 	return 0;
@@ -138,6 +175,9 @@ void nemocook_egl_destroy(struct cookegl *egl)
 	eglMakeCurrent(egl->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 
 	eglDestroySurface(egl->display, egl->surface);
+
+	if (egl->damages != NULL)
+		free(egl->damages);
 
 	free(egl);
 }
