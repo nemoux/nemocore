@@ -59,7 +59,7 @@ void nemoplay_destroy(struct nemoplay *play)
 		swr_free(&play->swr);
 
 	if (play->container != NULL)
-		avformat_close_input(&play->container);
+		avformat_free_context(play->container);
 
 	if (play->video_opts != NULL)
 		av_dict_free(&play->video_opts);
@@ -192,7 +192,7 @@ int nemoplay_load_media(struct nemoplay *play, const char *mediapath)
 	return 0;
 
 err1:
-	avformat_close_input(&container);
+	avformat_free_context(container);
 
 	return -1;
 }
