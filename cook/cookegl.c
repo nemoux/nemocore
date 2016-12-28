@@ -11,8 +11,6 @@
 #include <nemocook.h>
 #include <nemomisc.h>
 
-#define NEMOCOOK_BUFFER_AGE_COUNT		(2)
-
 struct cookegl {
 	struct cookone one;
 
@@ -72,10 +70,12 @@ void nemocook_egl_clear(struct cookegl *egl)
 	egl->ndamages = 0;
 }
 
+#define NEMOCOOK_DAMAGE_INCS			(16)
+
 void nemocook_egl_damage(struct cookegl *egl, int x, int y, int w, int h)
 {
 	if (egl->ndamages >= egl->sdamages) {
-		egl->sdamages += 16;
+		egl->sdamages += NEMOCOOK_DAMAGE_INCS;
 		egl->damages = (EGLint *)realloc(egl->damages, sizeof(EGLint[4]) * egl->sdamages);
 	}
 
