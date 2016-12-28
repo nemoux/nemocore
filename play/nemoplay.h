@@ -65,6 +65,8 @@ struct nemoplay {
 
 	AVCodecContext *video_context;
 	AVCodecContext *audio_context;
+	AVDictionary *video_opts;
+	AVDictionary *audio_opts;
 	int video_stream;
 	int audio_stream;
 
@@ -105,6 +107,11 @@ struct playone {
 
 extern struct nemoplay *nemoplay_create(void);
 extern void nemoplay_destroy(struct nemoplay *play);
+
+extern void nemoplay_set_video_stropt(struct nemoplay *play, const char *key, const char *value);
+extern void nemoplay_set_video_intopt(struct nemoplay *play, const char *key, int64_t value);
+extern void nemoplay_set_audio_stropt(struct nemoplay *play, const char *key, const char *value);
+extern void nemoplay_set_audio_intopt(struct nemoplay *play, const char *key, int64_t value);
 
 extern int nemoplay_load_media(struct nemoplay *play, const char *mediapath);
 extern int nemoplay_decode_media(struct nemoplay *play, int maxcount);

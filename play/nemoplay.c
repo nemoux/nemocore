@@ -61,6 +61,11 @@ void nemoplay_destroy(struct nemoplay *play)
 	if (play->container != NULL)
 		avformat_close_input(&play->container);
 
+	if (play->video_opts != NULL)
+		av_dict_free(&play->video_opts);
+	if (play->audio_opts != NULL)
+		av_dict_free(&play->audio_opts);
+
 	pthread_cond_destroy(&play->signal);
 	pthread_mutex_destroy(&play->lock);
 
@@ -68,6 +73,26 @@ void nemoplay_destroy(struct nemoplay *play)
 		free(play->path);
 
 	free(play);
+}
+
+void nemoplay_set_video_stropt(struct nemoplay *play, const char *key, const char *value)
+{
+	av_dict_set(&play->video_opts, key, value, 0);
+}
+
+void nemoplay_set_video_intopt(struct nemoplay *play, const char *key, int64_t value)
+{
+	av_dict_set_int(&play->video_opts, key, value, 0);
+}
+
+void nemoplay_set_audio_stropt(struct nemoplay *play, const char *key, const char *value)
+{
+	av_dict_set(&play->audio_opts, key, value, 0);
+}
+
+void nemoplay_set_audio_intopt(struct nemoplay *play, const char *key, int64_t value)
+{
+	av_dict_set_int(&play->audio_opts, key, value, 0);
 }
 
 int nemoplay_load_media(struct nemoplay *play, const char *mediapath)
@@ -100,14 +125,14 @@ int nemoplay_load_media(struct nemoplay *play, const char *mediapath)
 
 			codec = avcodec_find_decoder(context->codec_id);
 			if (codec != NULL)
-				avcodec_open2(context, codec, NULL);
+				avcodec_open2(context, codec, &play->video_opts);
 		} else if (context->codec_type == AVMEDIA_TYPE_AUDIO) {
 			audio_stream = i;
 			audio_context = context;
 
 			codec = avcodec_find_decoder(context->codec_id);
 			if (codec != NULL)
-				avcodec_open2(context, codec, NULL);
+				avcodec_open2(context, codec, &play->audio_opts);
 		}
 	}
 

@@ -186,6 +186,7 @@ int main(int argc, char *argv[])
 		{ "fullscreen",		required_argument,		NULL,		'f' },
 		{ "content",			required_argument,		NULL,		'c' },
 		{ "flip",					required_argument,		NULL,		'l' },
+		{ "threads",			required_argument,		NULL,		't' },
 		{ 0 }
 	};
 
@@ -196,6 +197,7 @@ int main(int argc, char *argv[])
 	struct cookegl *egl;
 	char *fullscreenid = NULL;
 	char *contentpath = NULL;
+	char *threads = NULL;
 	int width = 1920;
 	int height = 1080;
 	int flip = 1;
@@ -203,7 +205,7 @@ int main(int argc, char *argv[])
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "w:h:f:c:l:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:f:c:l:t:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -226,6 +228,10 @@ int main(int argc, char *argv[])
 
 			case 'l':
 				flip = strcasecmp(optarg, "off") == 0;
+				break;
+
+			case 't':
+				threads = strdup(optarg);
 				break;
 
 			default:
@@ -286,6 +292,8 @@ int main(int argc, char *argv[])
 	nemocook_egl_resize(egl, width, height);
 
 	art->play = nemoplay_create();
+	if (threads != NULL)
+		nemoplay_set_video_stropt(art->play, "threads", threads);
 	nemoplay_load_media(art->play, nemofs_dir_get_filepath(art->contents, art->icontents));
 
 	art->decoderback = nemoplay_decoder_create(art->play);
