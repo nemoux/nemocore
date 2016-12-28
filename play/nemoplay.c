@@ -58,6 +58,10 @@ void nemoplay_destroy(struct nemoplay *play)
 	if (play->swr != NULL)
 		swr_free(&play->swr);
 
+	if (play->video_context != NULL)
+		avcodec_close(play->video_context);
+	if (play->audio_context != NULL)
+		avcodec_close(play->audio_context);
 	if (play->container != NULL)
 		avformat_free_context(play->container);
 
