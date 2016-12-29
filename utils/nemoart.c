@@ -26,7 +26,7 @@ struct nemoart {
 	struct nemoaction *action;
 
 	int width, height;
-	int flip;
+	int vertex;
 
 	char *threads;
 
@@ -221,7 +221,7 @@ static int nemoart_play_video(struct nemoart *art, const char *url)
 	nemoplay_video_set_done(art->videoback, nemoart_dispatch_video_done);
 	nemoplay_video_set_data(art->videoback, art);
 	art->shader = nemoplay_video_get_shader(art->videoback);
-	nemoplay_shader_set_flip(art->shader, art->flip);
+	nemoplay_shader_set_vertex(art->shader, art->vertex);
 
 	return 0;
 }
@@ -250,7 +250,7 @@ int main(int argc, char *argv[])
 	char *busid = NULL;
 	int width = 1920;
 	int height = 1080;
-	int flip = 1;
+	int flip = 0;
 	int opt;
 
 	opterr = 0;
@@ -277,7 +277,7 @@ int main(int argc, char *argv[])
 				break;
 
 			case 'l':
-				flip = strcasecmp(optarg, "off") == 0;
+				flip = strcasecmp(optarg, "on") == 0;
 				break;
 
 			case 't':
@@ -303,7 +303,7 @@ int main(int argc, char *argv[])
 
 	art->width = width;
 	art->height = height;
-	art->flip = flip;
+	art->vertex = flip == 0 ? NEMOPLAY_SHADER_FLIP_VERTEX : NEMOPLAY_SHADER_FLIP_ROTATE_VERTEX;
 
 	art->threads = threads != NULL ? strdup(threads) : NULL;
 
@@ -336,8 +336,6 @@ int main(int argc, char *argv[])
 			NTEGL_WINDOW(canvas));
 	nemocook_egl_resize(egl, width, height);
 
-	art->contents = nemofs_dir_create(contentpath, 128);
-
 	if (busid != NULL) {
 		art->bus = nemobus_create();
 		nemobus_connect(art->bus, NULL);
@@ -348,15 +346,19 @@ int main(int argc, char *argv[])
 				"reh",
 				nemoart_dispatch_bus,
 				art);
+
+		art->contents = nemofs_dir_create(NULL, 32);
 	}
 
 	if (contentpath != NULL) {
 		if (os_check_path_is_directory(contentpath) != 0) {
+			art->contents = nemofs_dir_create(contentpath, 128);
 			nemofs_dir_scan_extension(art->contents, "mp4");
 			nemofs_dir_scan_extension(art->contents, "avi");
 			nemofs_dir_scan_extension(art->contents, "mov");
 			nemofs_dir_scan_extension(art->contents, "ts");
 		} else {
+			art->contents = nemofs_dir_create(NULL, 32);
 			nemofs_dir_insert_file(art->contents, contentpath);
 		}
 

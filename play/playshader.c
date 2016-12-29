@@ -78,6 +78,33 @@ static const char NEMOPLAY_RGBA_FRAGMENT_SHADER[] =
 "  gl_FragColor = vec4(c.b, c.g, c.r, c.a);\n"
 "}\n";
 
+static const GLfloat NEMOPLAY_VERTICES[4][16] = {
+	{
+		-1.0f, -1.0f, 0.0f, 0.0f,
+		1.0f, -1.0f, 1.0f, 0.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+		-1.0f, 1.0f, 0.0f, 1.0f
+	},
+	{
+		-1.0f, 1.0f, 0.0f, 0.0f,
+		1.0f, 1.0f, 1.0f, 0.0f,
+		1.0f, -1.0f, 1.0f, 1.0f,
+		-1.0f, -1.0f, 0.0f, 1.0f
+	},
+	{
+		1.0f, 1.0f, 0.0f, 0.0f,
+		-1.0f, 1.0f, 1.0f, 0.0f,
+		-1.0f, -1.0f, 1.0f, 1.0f,
+		1.0f, -1.0f, 0.0f, 1.0f
+	},
+	{
+		1.0f, -1.0f, 0.0f, 0.0f,
+		-1.0f, -1.0f, 1.0f, 0.0f,
+		-1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 0.0f, 1.0f
+	}
+};
+
 static int nemoplay_shader_update_yuv420(struct playshader *shader, struct playone *one)
 {
 	glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
@@ -236,13 +263,6 @@ static int nemoplay_shader_update_rgba_pbo(struct playshader *shader, struct pla
 
 static int nemoplay_shader_dispatch_yuv420(struct playshader *shader)
 {
-	GLfloat vertices[] = {
-		-1.0f, -1.0f * shader->flip, 0.0f, 0.0f,
-		1.0f, -1.0f * shader->flip, 1.0f, 0.0f,
-		1.0f, 1.0f * shader->flip, 1.0f, 1.0f,
-		-1.0f, 1.0f * shader->flip, 0.0f, 1.0f
-	};
-
 	glBindFramebuffer(GL_FRAMEBUFFER, shader->fbo);
 
 	glViewport(0, 0, shader->viewport_width, shader->viewport_height);
@@ -259,9 +279,9 @@ static int nemoplay_shader_dispatch_yuv420(struct playshader *shader)
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, shader->texy);
 
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &vertices[0]);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &NEMOPLAY_VERTICES[shader->vertex][0]);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &vertices[2]);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &NEMOPLAY_VERTICES[shader->vertex][2]);
 	glEnableVertexAttribArray(1);
 
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
@@ -280,13 +300,6 @@ static int nemoplay_shader_dispatch_yuv420(struct playshader *shader)
 
 static int nemoplay_shader_dispatch_rgba(struct playshader *shader)
 {
-	GLfloat vertices[] = {
-		-1.0f, -1.0f * shader->flip, 0.0f, 0.0f,
-		1.0f, -1.0f * shader->flip, 1.0f, 0.0f,
-		1.0f, 1.0f * shader->flip, 1.0f, 1.0f,
-		-1.0f, 1.0f * shader->flip, 0.0f, 1.0f
-	};
-
 	glBindFramebuffer(GL_FRAMEBUFFER, shader->fbo);
 
 	glViewport(0, 0, shader->viewport_width, shader->viewport_height);
@@ -300,9 +313,9 @@ static int nemoplay_shader_dispatch_rgba(struct playshader *shader)
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, shader->tex);
 
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &vertices[0]);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &NEMOPLAY_VERTICES[shader->vertex][0]);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &vertices[2]);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &NEMOPLAY_VERTICES[shader->vertex][2]);
 	glEnableVertexAttribArray(1);
 
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
@@ -542,8 +555,6 @@ struct playshader *nemoplay_shader_create(void)
 		return NULL;
 	memset(shader, 0, sizeof(struct playshader));
 
-	shader->flip = 1;
-
 	return shader;
 }
 
@@ -677,9 +688,9 @@ int nemoplay_shader_set_viewport(struct playshader *shader, uint32_t texture, in
 	return 0;
 }
 
-int nemoplay_shader_set_flip(struct playshader *shader, int flip)
+int nemoplay_shader_set_vertex(struct playshader *shader, int vertex)
 {
-	shader->flip = flip == 0 ? 1 : -1;
+	shader->vertex = vertex;
 
 	return 0;
 }

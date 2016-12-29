@@ -14,6 +14,14 @@ NEMO_BEGIN_EXTERN_C
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
+typedef enum {
+	NEMOPLAY_SHADER_NORMAL_VERTEX = 0,
+	NEMOPLAY_SHADER_FLIP_VERTEX = 1,
+	NEMOPLAY_SHADER_ROTATE_VERTEX = 2,
+	NEMOPLAY_SHADER_FLIP_ROTATE_VERTEX = 3,
+	NEMOPLAY_SHADER_LAST_VERTEX
+} NemoPlayShaderVertex;
+
 struct playone;
 struct playshader;
 
@@ -27,6 +35,7 @@ struct playshader {
 	int32_t viewport_width, viewport_height;
 
 	int format;
+	int vertex;
 
 	int use_pbo;
 
@@ -49,7 +58,6 @@ struct playshader {
 	GLuint pbov;
 
 	int32_t texture_width, texture_height;
-	int flip;
 
 	nemoplay_shader_resize_t resize;
 	nemoplay_shader_update_t update;
@@ -61,7 +69,7 @@ extern void nemoplay_shader_destroy(struct playshader *shader);
 
 extern int nemoplay_shader_set_format(struct playshader *shader, int format);
 extern int nemoplay_shader_set_viewport(struct playshader *shader, uint32_t texture, int32_t width, int32_t height);
-extern int nemoplay_shader_set_flip(struct playshader *shader, int flip);
+extern int nemoplay_shader_set_vertex(struct playshader *shader, int vertex);
 extern int nemoplay_shader_set_pbo(struct playshader *shader, int use_pbo);
 
 static inline uint32_t nemoplay_shader_get_viewport(struct playshader *shader)
