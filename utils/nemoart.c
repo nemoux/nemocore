@@ -14,6 +14,7 @@
 #include <nemoplay.h>
 #include <playback.h>
 #include <nemocook.h>
+#include <nemobus.h>
 #include <nemoaction.h>
 #include <nemofs.h>
 #include <nemomisc.h>
@@ -27,6 +28,8 @@ struct nemoart {
 	int width, height;
 	int flip;
 
+	char *threads;
+
 	struct fsdir *contents;
 	int icontents;
 
@@ -37,7 +40,11 @@ struct nemoart {
 	struct playaudio *audioback;
 	struct playvideo *videoback;
 	struct playshader *shader;
+
+	struct nemobus *bus;
 };
+
+static int nemoart_play_video(struct nemoart *art, const char *url);
 
 static void nemoart_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t width, int32_t height)
 {
@@ -53,20 +60,25 @@ static void nemoart_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t wi
 	nemocanvas_opaque(art->canvas, 0, 0, width, height);
 
 	nemocook_egl_resize(art->egl, width, height);
-	nemoplay_video_set_texture(art->videoback, 0, width, height);
 
-	nemocook_egl_make_current(art->egl);
-	nemoplay_shader_dispatch(art->shader);
-	nemocook_egl_swap_buffers(art->egl);
+	if (art->play != NULL) {
+		nemoplay_video_set_texture(art->videoback, 0, width, height);
+
+		nemocook_egl_make_current(art->egl);
+		nemoplay_shader_dispatch(art->shader);
+		nemocook_egl_swap_buffers(art->egl);
+	}
 }
 
 static void nemoart_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t secs, uint32_t nsecs)
 {
 	struct nemoart *art = (struct nemoart *)nemocanvas_get_userdata(canvas);
 
-	nemocook_egl_make_current(art->egl);
-	nemoplay_shader_dispatch(art->shader);
-	nemocook_egl_swap_buffers(art->egl);
+	if (art->play != NULL) {
+		nemocook_egl_make_current(art->egl);
+		nemoplay_shader_dispatch(art->shader);
+		nemocook_egl_swap_buffers(art->egl);
+	}
 }
 
 static int nemoart_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t type, struct nemoevent *event)
@@ -121,26 +133,9 @@ static void nemoart_dispatch_video_done(struct nemoplay *play, void *data)
 {
 	struct nemoart *art = (struct nemoart *)data;
 
-	nemoplay_video_destroy(art->videoback);
-	nemoplay_audio_destroy(art->audioback);
-	nemoplay_decoder_destroy(art->decoderback);
-
-	nemoplay_destroy(art->play);
-
 	art->icontents = (art->icontents + 1) % nemofs_dir_get_filecount(art->contents);
 
-	art->play = nemoplay_create();
-	nemoplay_load_media(art->play, nemofs_dir_get_filepath(art->contents, art->icontents));
-
-	art->decoderback = nemoplay_decoder_create(art->play);
-	art->audioback = nemoplay_audio_create_by_ao(art->play);
-	art->videoback = nemoplay_video_create_by_timer(art->play);
-	nemoplay_video_set_texture(art->videoback, 0, art->width, art->height);
-	nemoplay_video_set_update(art->videoback, nemoart_dispatch_video_update);
-	nemoplay_video_set_done(art->videoback, nemoart_dispatch_video_done);
-	nemoplay_video_set_data(art->videoback, art);
-	art->shader = nemoplay_video_get_shader(art->videoback);
-	nemoplay_shader_set_flip(art->shader, art->flip);
+	nemoart_play_video(art, nemofs_dir_get_filepath(art->contents, art->icontents));
 }
 
 static int nemoart_dispatch_tap_event(struct nemoaction *action, struct actiontap *tap, uint32_t event)
@@ -178,6 +173,57 @@ static int nemoart_dispatch_tap_event(struct nemoaction *action, struct actionta
 	return 0;
 }
 
+static void nemoart_dispatch_bus(void *data, const char *events)
+{
+	struct nemoart *art = (struct nemoart *)data;
+	struct nemoitem *msg;
+	struct itemone *one;
+
+	msg = nemobus_recv_item(art->bus);
+	if (msg == NULL)
+		return;
+
+	nemoitem_for_each(one, msg) {
+		if (nemoitem_one_has_path(one, "/nemocast/play") != 0) {
+			const char *path = nemoitem_one_get_attr(one, "url");
+
+			nemofs_dir_clear(art->contents);
+			nemofs_dir_insert_file(art->contents, path);
+
+			nemoart_play_video(art, path);
+		}
+	}
+
+	nemoitem_destroy(msg);
+}
+
+static int nemoart_play_video(struct nemoart *art, const char *url)
+{
+	if (art->play != NULL) {
+		nemoplay_video_destroy(art->videoback);
+		nemoplay_audio_destroy(art->audioback);
+		nemoplay_decoder_destroy(art->decoderback);
+		nemoplay_destroy(art->play);
+	}
+
+	art->play = nemoplay_create();
+	if (art->threads != NULL)
+		nemoplay_set_video_stropt(art->play, "threads", art->threads);
+	nemoplay_load_media(art->play, url);
+
+	art->decoderback = nemoplay_decoder_create(art->play);
+	art->audioback = nemoplay_audio_create_by_ao(art->play);
+	art->videoback = nemoplay_video_create_by_timer(art->play);
+	nemoplay_video_set_texture(art->videoback, 0, art->width, art->height);
+	nemoplay_video_set_update(art->videoback, nemoart_dispatch_video_update);
+	nemoplay_video_set_done(art->videoback, nemoart_dispatch_video_done);
+	nemoplay_video_set_data(art->videoback, art);
+	art->shader = nemoplay_video_get_shader(art->videoback);
+	nemoplay_shader_set_flip(art->shader, art->flip);
+
+	return 0;
+}
+
 int main(int argc, char *argv[])
 {
 	struct option options[] = {
@@ -187,6 +233,7 @@ int main(int argc, char *argv[])
 		{ "content",			required_argument,		NULL,		'c' },
 		{ "flip",					required_argument,		NULL,		'l' },
 		{ "threads",			required_argument,		NULL,		't' },
+		{ "busid",				required_argument,		NULL,		'b' },
 		{ 0 }
 	};
 
@@ -198,6 +245,7 @@ int main(int argc, char *argv[])
 	char *fullscreenid = NULL;
 	char *contentpath = NULL;
 	char *threads = NULL;
+	char *busid = NULL;
 	int width = 1920;
 	int height = 1080;
 	int flip = 1;
@@ -205,7 +253,7 @@ int main(int argc, char *argv[])
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "w:h:f:c:l:t:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:f:c:l:t:b:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -234,12 +282,16 @@ int main(int argc, char *argv[])
 				threads = strdup(optarg);
 				break;
 
+			case 'b':
+				busid = strdup(optarg);
+				break;
+
 			default:
 				break;
 		}
 	}
 
-	if (contentpath == NULL)
+	if (contentpath == NULL && busid == NULL)
 		return 0;
 
 	art = (struct nemoart *)malloc(sizeof(struct nemoart));
@@ -251,16 +303,7 @@ int main(int argc, char *argv[])
 	art->height = height;
 	art->flip = flip;
 
-	if (os_check_path_is_directory(contentpath) != 0) {
-		art->contents = nemofs_dir_create(contentpath, 128);
-		nemofs_dir_scan_extension(art->contents, "mp4");
-		nemofs_dir_scan_extension(art->contents, "avi");
-		nemofs_dir_scan_extension(art->contents, "mov");
-		nemofs_dir_scan_extension(art->contents, "ts");
-	} else {
-		art->contents = nemofs_dir_create(NULL, 32);
-		nemofs_dir_insert_file(art->contents, contentpath);
-	}
+	art->threads = threads != NULL ? strdup(threads) : NULL;
 
 	art->tool = tool = nemotool_create();
 	nemotool_connect_wayland(tool, NULL);
@@ -291,20 +334,32 @@ int main(int argc, char *argv[])
 			NTEGL_WINDOW(canvas));
 	nemocook_egl_resize(egl, width, height);
 
-	art->play = nemoplay_create();
-	if (threads != NULL)
-		nemoplay_set_video_stropt(art->play, "threads", threads);
-	nemoplay_load_media(art->play, nemofs_dir_get_filepath(art->contents, art->icontents));
+	if (busid != NULL) {
+		art->bus = nemobus_create();
+		nemobus_connect(art->bus, NULL);
+		nemobus_advertise(art->bus, "set", busid);
 
-	art->decoderback = nemoplay_decoder_create(art->play);
-	art->audioback = nemoplay_audio_create_by_ao(art->play);
-	art->videoback = nemoplay_video_create_by_timer(art->play);
-	nemoplay_video_set_texture(art->videoback, 0, width, height);
-	nemoplay_video_set_update(art->videoback, nemoart_dispatch_video_update);
-	nemoplay_video_set_done(art->videoback, nemoart_dispatch_video_done);
-	nemoplay_video_set_data(art->videoback, art);
-	art->shader = nemoplay_video_get_shader(art->videoback);
-	nemoplay_shader_set_flip(art->shader, flip);
+		nemotool_watch_source(tool,
+				nemobus_get_socket(art->bus),
+				"reh",
+				nemoart_dispatch_bus,
+				art);
+	}
+
+	if (contentpath != NULL) {
+		if (os_check_path_is_directory(contentpath) != 0) {
+			art->contents = nemofs_dir_create(contentpath, 128);
+			nemofs_dir_scan_extension(art->contents, "mp4");
+			nemofs_dir_scan_extension(art->contents, "avi");
+			nemofs_dir_scan_extension(art->contents, "mov");
+			nemofs_dir_scan_extension(art->contents, "ts");
+		} else {
+			art->contents = nemofs_dir_create(NULL, 32);
+			nemofs_dir_insert_file(art->contents, contentpath);
+		}
+
+		nemoart_play_video(art, nemofs_dir_get_filepath(art->contents, art->icontents));
+	}
 
 	nemotool_run(tool);
 
@@ -313,6 +368,9 @@ int main(int argc, char *argv[])
 	nemoplay_decoder_destroy(art->decoderback);
 
 	nemoplay_destroy(art->play);
+
+	if (art->bus != NULL)
+		nemobus_destroy(art->bus);
 
 	nemocook_egl_destroy(egl);
 

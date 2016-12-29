@@ -80,6 +80,7 @@ TARGET_LINK_LIBRARIES(nemoart
 	nemoplay
 	nemocook
 	nemoaction
+	nemobus
 	)
 
 INSTALL(TARGETS nemoart DESTINATION bin)
