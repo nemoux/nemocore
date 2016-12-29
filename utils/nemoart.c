@@ -179,22 +179,24 @@ static void nemoart_dispatch_bus(void *data, const char *events)
 	struct nemoitem *msg;
 	struct itemone *one;
 
+	nemofs_dir_clear(art->contents);
+	art->icontents = 0;
+
 	msg = nemobus_recv_item(art->bus);
 	if (msg == NULL)
 		return;
 
 	nemoitem_for_each(one, msg) {
-		if (nemoitem_one_has_path(one, "/nemocast/play") != 0) {
+		if (nemoitem_one_has_path_suffix(one, "/play") != 0) {
 			const char *path = nemoitem_one_get_attr(one, "url");
 
-			nemofs_dir_clear(art->contents);
 			nemofs_dir_insert_file(art->contents, path);
-
-			nemoart_play_video(art, path);
 		}
 	}
 
 	nemoitem_destroy(msg);
+
+	nemoart_play_video(art, nemofs_dir_get_filepath(art->contents, art->icontents));
 }
 
 static int nemoart_play_video(struct nemoart *art, const char *url)
@@ -334,6 +336,8 @@ int main(int argc, char *argv[])
 			NTEGL_WINDOW(canvas));
 	nemocook_egl_resize(egl, width, height);
 
+	art->contents = nemofs_dir_create(contentpath, 128);
+
 	if (busid != NULL) {
 		art->bus = nemobus_create();
 		nemobus_connect(art->bus, NULL);
@@ -348,13 +352,11 @@ int main(int argc, char *argv[])
 
 	if (contentpath != NULL) {
 		if (os_check_path_is_directory(contentpath) != 0) {
-			art->contents = nemofs_dir_create(contentpath, 128);
 			nemofs_dir_scan_extension(art->contents, "mp4");
 			nemofs_dir_scan_extension(art->contents, "avi");
 			nemofs_dir_scan_extension(art->contents, "mov");
 			nemofs_dir_scan_extension(art->contents, "ts");
 		} else {
-			art->contents = nemofs_dir_create(NULL, 32);
 			nemofs_dir_insert_file(art->contents, contentpath);
 		}
 
