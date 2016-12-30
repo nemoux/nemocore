@@ -8,7 +8,6 @@ NEMO_BEGIN_EXTERN_C
 #endif
 
 #include <nemotool.h>
-#include <nemotimer.h>
 #include <nemocanvas.h>
 #include <nemoegl.h>
 
@@ -16,14 +15,11 @@ NEMO_BEGIN_EXTERN_C
 
 struct showcontext {
 	struct nemotool *tool;
-	struct nemotimer *timer;
 	struct nemocanvas *canvas;
 
 	struct nemotale *tale;
 
 	int32_t width, height;
-
-	int has_framelog;
 };
 
 #define NEMOSHOW_AT(show, at)			(((struct showcontext *)nemoshow_get_context(show))->at)

@@ -12,31 +12,14 @@ set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 
 set(CMAKE_INSTALL_PREFIX "/usr")
 
-set(WAYLAND_COMPOSITOR_VERSION "4" CACHE STRING "Wayland default compositor version")
-
-option(WITH_LOGIND "Build with LOGIND" OFF)
-option(WITH_XWAYLAND "Build with XWAYLAND" ON)
-option(WITH_CEF "Build with CEF" ON)
-option(WITH_MINISHELL "Build with MINISHELL" ON)
-
-option(WITH_WAYLANDSHELL "Build with WAYLANDSHELL" ON)
-option(WITH_XDGSHELL "Build with XDGSHELL" ON)
-option(WITH_FULLSCREEN "Build with FULLSCREEN" ON)
-
-option(WITH_OPENGL_PBO "Build with OPENGL PBO" OFF)
-option(WITH_OPENGL_UNPACK_SUBIMAGE "Build with OPENGL's UNPACK SUBIMAGE" ON)
-
-option(WITH_TOUCH_TO_POINTER "Build with Touch to Pointer" OFF)
-
 option(WITH_OPTIMIZE "Build with OPTIMIZE" ON)
 option(WITH_DEBUG "Build with DEBUG" OFF)
 option(WITH_PROFILE "Build with PROFILE" OFF)
 option(WITH_NEMO_DEBUG "Build with NEMODEBUG" ON)
 option(WITH_NEMO_LOG "Build with NEMOLOG" ON)
-option(WITH_XWAYLAND_DEBUG "Build with XWAYLAND DEBUG" OFF)
-option(WITH_NEMONAVI_DEBUG "Build with NEMONAVI DEBUG" OFF)
-option(WITH_NEMOSHOW_DEBUG "Build with NEMOSHOW DEBUG" OFF)
-option(WITH_NEMOPLAY_DEBUG "Build with NEMOPLAY DEBUG" OFF)
+
+option(WITH_XWAYLAND "Build with XWAYLAND" ON)
+option(WITH_CEF "Build with CEF" ON)
 
 include_directories(
 	${CMAKE_CURRENT_BINARY_DIR}
@@ -67,36 +50,6 @@ if(WITH_NEMO_LOG)
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DNEMO_LOG_ON")
 endif(WITH_NEMO_LOG)
 
-if(WITH_XWAYLAND_DEBUG)
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DXWAYLAND_DEBUG_ON")
-endif(WITH_XWAYLAND_DEBUG)
-
-if(WITH_NEMONAVI_DEBUG)
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DNEMONAVI_DEBUG_ON")
-endif(WITH_NEMONAVI_DEBUG)
-
-if(WITH_NEMOSHOW_DEBUG)
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DNEMOSHOW_DEBUG_ON")
-endif(WITH_NEMOSHOW_DEBUG)
-
-if(WITH_NEMOPLAY_DEBUG)
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DNEMOPLAY_DEBUG_ON")
-endif(WITH_NEMOPLAY_DEBUG)
-
-if(WITH_OPENGL_UNPACK_SUBIMAGE)
-	add_definitions(-DNEMOUX_WITH_OPENGL_UNPACK_SUBIMAGE=1)
-endif(WITH_OPENGL_UNPACK_SUBIMAGE)
-
-if(WITH_OPENGL_PBO)
-	add_definitions(-DNEMOUX_WITH_OPENGL_PBO=1)
-endif(WITH_OPENGL_PBO)
-
-if(WITH_XWAYLAND)
-	add_definitions(-DNEMOUX_WITH_XWAYLAND=1)
-
-	add_subdirectory(xwayland)
-endif(WITH_XWAYLAND)
-
 add_subdirectory(asst)
 add_subdirectory(helper)
 
@@ -116,6 +69,10 @@ add_subdirectory(db)
 if(WITH_CEF)
 	add_subdirectory(navi)
 endif(WITH_CEF)
+
+if(WITH_XWAYLAND)
+	add_subdirectory(xwayland)
+endif(WITH_XWAYLAND)
 
 add_subdirectory(compz)
 add_subdirectory(shell)

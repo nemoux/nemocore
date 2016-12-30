@@ -52,6 +52,8 @@ PKG_CHECK_MODULES(EGL REQUIRED egl)
 INCLUDE_DIRECTORIES(${EGL_INCLUDE_DIRS})
 LINK_DIRECTORIES(${EGL_LIBRARY_DIRS})
 
+option(WITH_OPENGL_PBO "Build with OPENGL PBO" OFF)
+
 include_directories(
 	${CMAKE_SOURCE_DIR}/asst
 	${CMAKE_SOURCE_DIR}/helper
@@ -59,6 +61,10 @@ include_directories(
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
+
+if(WITH_OPENGL_PBO)
+	add_definitions(-DNEMOUX_WITH_OPENGL_PBO=1)
+endif(WITH_OPENGL_PBO)
 
 add_library(nemotale SHARED
 	nemotale.c

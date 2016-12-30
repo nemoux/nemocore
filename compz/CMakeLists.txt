@@ -44,6 +44,11 @@ PKG_CHECK_MODULES(GBM REQUIRED gbm)
 INCLUDE_DIRECTORIES(${GBM_INCLUDE_DIRS})
 LINK_DIRECTORIES(${GBM_LIBRARY_DIRS})
 
+set(WAYLAND_COMPOSITOR_VERSION "4" CACHE STRING "Wayland default compositor version")
+
+option(WITH_TOUCH_TO_POINTER "Build with Touch to Pointer" OFF)
+option(WITH_LOGIND "Build with LOGIND" OFF)
+
 include(wayland)
 
 wayland_add_protocol_server(PROTOCOLS

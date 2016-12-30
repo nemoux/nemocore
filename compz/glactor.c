@@ -185,8 +185,10 @@ void glrenderer_flush_actor(struct nemorenderer *base, struct nemoactor *actor)
 {
 	struct glrenderer *renderer = (struct glrenderer *)container_of(base, struct glrenderer, base);
 	struct glcontent *glcontent = (struct glcontent *)nemocontent_get_opengl_context(&actor->base, base->node);
-	int width, height;
+	pixman_box32_t *rects;
 	uint32_t *data;
+	int width, height;
+	int i, n;
 
 	if (glcontent == NULL || actor->image == NULL)
 		return;
@@ -207,10 +209,6 @@ void glrenderer_flush_actor(struct nemorenderer *base, struct nemoactor *actor)
 	}
 
 	glBindTexture(GL_TEXTURE_2D, glcontent->textures[0]);
-
-#ifdef NEMOUX_WITH_OPENGL_UNPACK_SUBIMAGE
-	pixman_box32_t *rects;
-	int i, n;
 
 	glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, glcontent->pitch);
 
@@ -234,14 +232,6 @@ void glrenderer_flush_actor(struct nemorenderer *base, struct nemoactor *actor)
 					glcontent->format, glcontent->pixeltype, (void *)data);
 		}
 	}
-#else
-	glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
-	glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
-
-	glTexImage2D(GL_TEXTURE_2D, 0, glcontent->format,
-			glcontent->pitch, height, 0,
-			glcontent->format, glcontent->pixeltype, (void *)data);
-#endif
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 

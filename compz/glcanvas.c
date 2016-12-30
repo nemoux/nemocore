@@ -307,6 +307,9 @@ void glrenderer_flush_canvas(struct nemorenderer *base, struct nemocanvas *canva
 	struct glrenderer *renderer = (struct glrenderer *)container_of(base, struct glrenderer, base);
 	struct glcontent *glcontent = (struct glcontent *)nemocontent_get_opengl_context(&canvas->base, base->node);
 	struct nemobuffer *buffer;
+	pixman_box32_t *rects;
+	void *data;
+	int i, n;
 
 	if (glcontent == NULL ||
 			glcontent->buffer_reference.buffer == NULL ||
@@ -328,12 +331,8 @@ void glrenderer_flush_canvas(struct nemorenderer *base, struct nemocanvas *canva
 
 	glBindTexture(GL_TEXTURE_2D, glcontent->textures[0]);
 
-#ifdef NEMOUX_WITH_OPENGL_UNPACK_SUBIMAGE
-	pixman_box32_t *rects;
-	void *data;
-	int i, n;
-
 	glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, glcontent->pitch);
+
 	data = wl_shm_buffer_get_data(buffer->shmbuffer);
 
 	if (glcontent->needs_full_upload) {
@@ -362,17 +361,6 @@ void glrenderer_flush_canvas(struct nemorenderer *base, struct nemocanvas *canva
 
 		wl_shm_buffer_end_access(buffer->shmbuffer);
 	}
-#else
-	glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
-	glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
-
-	wl_shm_buffer_begin_access(buffer->shmbuffer);
-	glTexImage2D(GL_TEXTURE_2D, 0, glcontent->format,
-			glcontent->pitch, buffer->height, 0,
-			glcontent->format, glcontent->pixeltype,
-			wl_shm_buffer_get_data(buffer->shmbuffer));
-	wl_shm_buffer_end_access(buffer->shmbuffer);
-#endif
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 

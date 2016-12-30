@@ -19,7 +19,6 @@
 #include <seat.h>
 #include <move.h>
 #include <pick.h>
-#include <timer.h>
 
 #include <nemoshow.h>
 #include <showhelper.h>
@@ -181,27 +180,12 @@ static int nemoshow_dispatch_actor_destroy(struct nemoactor *actor)
 	return 0;
 }
 
-static void nemoshow_dispatch_timer(struct nemotimer *timer, void *data)
-{
-	struct showcontext *scon = (struct showcontext *)data;
-	struct nemoshow *show = (struct nemoshow *)nemoactor_get_context(scon->actor);
-
-	nemotimer_set_timeout(timer, 1000);
-
-#ifdef NEMOSHOW_DEBUG_ON
-	if (scon->has_framelog != 0) {
-		nemoshow_dump_times(show);
-	}
-#endif
-}
-
 struct nemoshow *nemoshow_create_view(struct nemoshell *shell, int32_t width, int32_t height)
 {
 	struct nemocompz *compz = shell->compz;
 	struct showcontext *scon;
 	struct nemoshow *show;
 	struct nemoactor *actor;
-	struct nemotimer *timer;
 	const char *env;
 
 	scon = (struct showcontext *)malloc(sizeof(struct showcontext));
@@ -212,13 +196,6 @@ struct nemoshow *nemoshow_create_view(struct nemoshell *shell, int32_t width, in
 	scon->actor = actor = nemoactor_create_gl(compz, width, height);
 	if (actor == NULL)
 		goto err1;
-
-	timer = nemotimer_create(compz);
-	if (timer == NULL)
-		goto err2;
-	nemotimer_set_callback(timer, nemoshow_dispatch_timer);
-	nemotimer_set_timeout(timer, 1000);
-	nemotimer_set_userdata(timer, scon);
 
 	nemoactor_set_dispatch_event(actor, nemoshow_dispatch_actor_event);
 	nemoactor_set_dispatch_pick(actor, nemoshow_dispatch_actor_pick);
@@ -248,20 +225,10 @@ struct nemoshow *nemoshow_create_view(struct nemoshell *shell, int32_t width, in
 
 	scon->shell = shell;
 	scon->compz = compz;
-	scon->timer = timer;
 	scon->width = width;
 	scon->height = height;
 
-#ifdef NEMOSHOW_DEBUG_ON
-	env = getenv("NEMOSHOW_DEBUG");
-	if (env != NULL && strcasecmp(env, "ON") == 0)
-		scon->has_framelog = 1;
-#endif
-
 	return show;
-
-err2:
-	nemoactor_destroy(actor);
 
 err1:
 	free(scon);
@@ -272,8 +239,6 @@ err1:
 void nemoshow_destroy_view(struct nemoshow *show)
 {
 	struct showcontext *scon = (struct showcontext *)nemoshow_get_context(show);
-
-	nemotimer_destroy(scon->timer);
 
 	nemoshow_destroy(show);
 

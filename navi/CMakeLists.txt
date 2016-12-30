@@ -1,4 +1,4 @@
-FIND_PACKAGE(PkgConfig REQUIRED)
+option(WITH_NEMONAVI_DEBUG "Build with NEMONAVI DEBUG" OFF)
 
 include_directories(
 	${CMAKE_SOURCE_DIR}/asst
@@ -7,6 +7,10 @@ include_directories(
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -std=c++11")
 set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
+
+if(WITH_NEMONAVI_DEBUG)
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DNEMONAVI_DEBUG_ON")
+endif(WITH_NEMONAVI_DEBUG)
 
 add_library(nemonavi SHARED
 	nemonavi.cpp

@@ -119,10 +119,8 @@ struct talenode *nemotale_node_create_gl(int32_t width, int32_t height)
 	node->dispatch_flush = nemotale_node_flush_gl_pbo;
 	node->dispatch_map = nemotale_node_map_pbo;
 	node->dispatch_unmap = nemotale_node_unmap_pbo;
-#elif NEMOUX_WITH_OPENGL_UNPACK_SUBIMAGE
-	node->dispatch_flush = nemotale_node_flush_gl_subimage;
 #else
-	node->dispatch_flush = nemotale_node_flush_gl;
+	node->dispatch_flush = nemotale_node_flush_gl_subimage;
 #endif
 
 	node->dispatch_filter = nemotale_node_filter_gl;
@@ -172,10 +170,8 @@ int nemotale_node_prepare_gl(struct talenode *node)
 
 #ifdef NEMOUX_WITH_OPENGL_PBO
 		node->dispatch_flush = nemotale_node_flush_gl_pbo;
-#elif NEMOUX_WITH_OPENGL_UNPACK_SUBIMAGE
-		node->dispatch_flush = nemotale_node_flush_gl_subimage;
 #else
-		node->dispatch_flush = nemotale_node_flush_gl;
+		node->dispatch_flush = nemotale_node_flush_gl_subimage;
 #endif
 
 		node->dispatch_filter = nemotale_node_filter_gl;
@@ -1062,11 +1058,7 @@ int nemotale_node_use_pbo(struct talenode *node, int use_pbo)
 	if (use_pbo != 0) {
 		node->dispatch_flush = nemotale_node_flush_gl_pbo;
 	} else {
-#ifdef NEMOUX_WITH_OPENGL_UNPACK_SUBIMAGE
 		node->dispatch_flush = nemotale_node_flush_gl_subimage;
-#else
-		node->dispatch_flush = nemotale_node_flush_gl;
-#endif
 	}
 #endif
 
