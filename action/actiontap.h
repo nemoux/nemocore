@@ -50,6 +50,9 @@ struct actiontap {
 extern struct actiontap *nemoaction_tap_create(struct nemoaction *action);
 extern void nemoaction_tap_destroy(struct actiontap *tap);
 
+extern void nemoaction_tap_attach(struct nemoaction *action, struct actiontap *tap);
+extern void nemoaction_tap_detach(struct actiontap *tap);
+
 extern int nemoaction_tap_set_focus(struct actiontap *tap, void *target);
 
 static inline void nemoaction_tap_set_grab_gx(struct actiontap *tap, float gx)

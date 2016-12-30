@@ -33,6 +33,17 @@ void nemoaction_tap_destroy(struct actiontap *tap)
 	free(tap);
 }
 
+void nemoaction_tap_attach(struct nemoaction *action, struct actiontap *tap)
+{
+	nemolist_insert_tail(&action->tap_list, &tap->link);
+}
+
+void nemoaction_tap_detach(struct actiontap *tap)
+{
+	nemolist_remove(&tap->link);
+	nemolist_init(&tap->link);
+}
+
 int nemoaction_tap_set_focus(struct actiontap *tap, void *target)
 {
 	struct actionone *one;

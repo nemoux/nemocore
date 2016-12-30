@@ -99,6 +99,7 @@ static int nemoart_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t typ
 		if (tap != NULL) {
 			nemoaction_tap_set_tx(tap, event->x);
 			nemoaction_tap_set_ty(tap, event->y);
+			nemoaction_tap_detach(tap);
 			nemoaction_tap_dispatch_event(art->action, tap, NEMOACTION_TAP_UP_EVENT);
 			nemoaction_tap_destroy(tap);
 		}
@@ -142,7 +143,7 @@ static int nemoart_dispatch_tap_event(struct nemoaction *action, struct actionta
 {
 	struct nemoart *art = (struct nemoart *)nemoaction_get_userdata(action);
 
-	if (event & NEMOACTION_TAP_DOWN_EVENT) {
+	if ((event & NEMOACTION_TAP_DOWN_EVENT) || (event & NEMOACTION_TAP_UP_EVENT)) {
 		struct actiontap *taps[8];
 		int tap0, tap1;
 		int ntaps;
@@ -164,10 +165,6 @@ static int nemoart_dispatch_tap_event(struct nemoaction *action, struct actionta
 					nemoaction_tap_get_serial(taps[tap1]),
 					"rotate;scale;translate");
 		}
-	}
-	if (event & NEMOACTION_TAP_UP_EVENT) {
-	}
-	if (event & NEMOACTION_TAP_MOTION_EVENT) {
 	}
 
 	return 0;
