@@ -14,7 +14,6 @@
 
 int nemotool_connect_egl(struct nemotool *tool)
 {
-#ifdef NEMOUX_WITH_OPENGL_ES3
 	static const EGLint opaque_attribs[] = {
 		EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
 		EGL_RED_SIZE, 1,
@@ -41,34 +40,6 @@ int nemotool_connect_egl(struct nemotool *tool)
 		EGL_CONTEXT_CLIENT_VERSION, 3,
 		EGL_NONE
 	};
-#else
-	static const EGLint opaque_attribs[] = {
-		EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-		EGL_RED_SIZE, 1,
-		EGL_GREEN_SIZE, 1,
-		EGL_BLUE_SIZE, 1,
-		EGL_ALPHA_SIZE, 0,
-		EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
-		EGL_SAMPLE_BUFFERS, 1,
-		EGL_SAMPLES, 4,
-		EGL_NONE
-	};
-	static const EGLint alpha_attribs[] = {
-		EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-		EGL_RED_SIZE, 1,
-		EGL_GREEN_SIZE, 1,
-		EGL_BLUE_SIZE, 1,
-		EGL_ALPHA_SIZE, 1,
-		EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
-		EGL_SAMPLE_BUFFERS, 1,
-		EGL_SAMPLES, 4,
-		EGL_NONE
-	};
-	static const EGLint client_attribs[] = {
-		EGL_CONTEXT_CLIENT_VERSION, 2,
-		EGL_NONE
-	};
-#endif
 
 	struct eglcontext *econtext;
 	EGLConfig configs[16];

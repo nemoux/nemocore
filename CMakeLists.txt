@@ -16,9 +16,6 @@ set(WAYLAND_COMPOSITOR_VERSION "4" CACHE STRING "Wayland default compositor vers
 
 option(WITH_LOGIND "Build with LOGIND" OFF)
 option(WITH_XWAYLAND "Build with XWAYLAND" ON)
-option(WITH_GLIB "Build with GLIB" ON)
-option(WITH_PULSEAUDIO "Build with PULSEAUDIO" ON)
-option(WITH_MUPDF "Build with MUPDF" ON)
 option(WITH_CEF "Build with CEF" ON)
 option(WITH_MINISHELL "Build with MINISHELL" ON)
 
@@ -26,15 +23,8 @@ option(WITH_WAYLANDSHELL "Build with WAYLANDSHELL" ON)
 option(WITH_XDGSHELL "Build with XDGSHELL" ON)
 option(WITH_FULLSCREEN "Build with FULLSCREEN" ON)
 
-option(WITH_OPENGL_ES3 "Build with OPENGL ES3" ON)
 option(WITH_OPENGL_PBO "Build with OPENGL PBO" OFF)
 option(WITH_OPENGL_UNPACK_SUBIMAGE "Build with OPENGL's UNPACK SUBIMAGE" ON)
-
-option(WITH_OPENGL_CS "Build with OPENGL COMPUTESHADER" OFF)
-
-option(WITH_OPENCL "Build with OPENCL" OFF)
-
-option(WITH_BULLET "Build with BULLET" OFF)
 
 option(WITH_TOUCH_TO_POINTER "Build with Touch to Pointer" OFF)
 
@@ -93,10 +83,6 @@ if(WITH_NEMOPLAY_DEBUG)
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DNEMOPLAY_DEBUG_ON")
 endif(WITH_NEMOPLAY_DEBUG)
 
-if(WITH_OPENGL_ES3)
-	add_definitions(-DNEMOUX_WITH_OPENGL_ES3=1)
-endif(WITH_OPENGL_ES3)
-
 if(WITH_OPENGL_UNPACK_SUBIMAGE)
 	add_definitions(-DNEMOUX_WITH_OPENGL_UNPACK_SUBIMAGE=1)
 endif(WITH_OPENGL_UNPACK_SUBIMAGE)
@@ -104,22 +90,6 @@ endif(WITH_OPENGL_UNPACK_SUBIMAGE)
 if(WITH_OPENGL_PBO)
 	add_definitions(-DNEMOUX_WITH_OPENGL_PBO=1)
 endif(WITH_OPENGL_PBO)
-
-if(WITH_OPENGL_CS)
-	add_definitions(-DNEMOUX_WITH_OPENGL_CS=1)
-endif(WITH_OPENGL_CS)
-
-if(WITH_OPENCL)
-	add_definitions(-DNEMOUX_WITH_OPENCL=1)
-endif(WITH_OPENCL)
-
-if(WITH_GLIB)
-	add_definitions(-DNEMOUX_WITH_GLIB=1)
-endif(WITH_GLIB)
-
-if(WITH_PULSEAUDIO)
-	add_definitions(-DNEMOUX_WITH_PULSEAUDIO=1)
-endif(WITH_PULSEAUDIO)
 
 if(WITH_XWAYLAND)
 	add_definitions(-DNEMOUX_WITH_XWAYLAND=1)

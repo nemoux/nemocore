@@ -26,7 +26,6 @@ struct nemoart {
 	struct nemoaction *action;
 
 	int width, height;
-	int vertex;
 
 	char *threads;
 
@@ -40,6 +39,7 @@ struct nemoart {
 	struct playaudio *audioback;
 	struct playvideo *videoback;
 	struct playshader *shader;
+	int vertex;
 
 	struct nemobus *bus;
 };
