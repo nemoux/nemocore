@@ -7,14 +7,14 @@
 NEMO_BEGIN_EXTERN_C
 #endif
 
+#include <stdint.h>
+
 #include <pixman.h>
 
 #include <nemotool.h>
 #include <nemotimer.h>
 #include <nemolist.h>
 #include <nemolistener.h>
-
-#define NEMOCANVAS_DEFAULT_FRAMERATE			(60)
 
 struct nemocanvas;
 

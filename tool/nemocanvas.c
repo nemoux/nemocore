@@ -322,7 +322,7 @@ struct nemocanvas *nemocanvas_create(struct nemotool *tool)
 
 	canvas->tool = tool;
 
-	canvas->framerate = NEMOCANVAS_DEFAULT_FRAMERATE;
+	canvas->framerate = 0;
 	canvas->framemsecs = 0;
 
 	canvas->surface = wl_compositor_create_surface(tool->compositor);
@@ -400,7 +400,7 @@ int nemocanvas_init(struct nemocanvas *canvas, struct nemotool *tool)
 
 	canvas->tool = tool;
 
-	canvas->framerate = NEMOCANVAS_DEFAULT_FRAMERATE;
+	canvas->framerate = 0;
 	canvas->framemsecs = 0;
 
 	canvas->surface = wl_compositor_create_surface(tool->compositor);
@@ -772,12 +772,28 @@ void nemocanvas_set_dispatch_destroy(struct nemocanvas *canvas, nemocanvas_dispa
 }
 
 static const struct presentation_feedback_listener presentation_feedback_listener;
+static const struct presentation_feedback_listener presentation_feedback_framerate_listener;
 
 static void presentation_feedback_sync_output(void *data, struct presentation_feedback *feedback, struct wl_output *output)
 {
 }
 
 static void presentation_feedback_presented(void *data, struct presentation_feedback *feedback,
+		uint32_t tv_sec_hi, uint32_t tv_sec_lo, uint32_t tv_nsec, uint32_t refresh,
+		uint32_t seq_hi, uint32_t seq_lo, uint32_t flags)
+{
+	struct nemocanvas *canvas = (struct nemocanvas *)data;
+
+	if (canvas->feedback != NULL) {
+		presentation_feedback_destroy(canvas->feedback);
+
+		canvas->feedback = NULL;
+	}
+
+	canvas->dispatch_frame(canvas, ((uint64_t)tv_sec_hi << 32) + tv_sec_lo, tv_nsec);
+}
+
+static void presentation_feedback_framerate_presented(void *data, struct presentation_feedback *feedback,
 		uint32_t tv_sec_hi, uint32_t tv_sec_lo, uint32_t tv_nsec, uint32_t refresh,
 		uint32_t seq_hi, uint32_t seq_lo, uint32_t flags)
 {
@@ -796,7 +812,7 @@ static void presentation_feedback_presented(void *data, struct presentation_feed
 		canvas->framemsecs = msecs;
 	} else {
 		canvas->feedback = presentation_feedback(canvas->tool->presentation, canvas->surface);
-		presentation_feedback_add_listener(canvas->feedback, &presentation_feedback_listener, canvas);
+		presentation_feedback_add_listener(canvas->feedback, &presentation_feedback_framerate_listener, canvas);
 
 		wl_surface_commit(canvas->surface);
 	}
@@ -821,11 +837,22 @@ static const struct presentation_feedback_listener presentation_feedback_listene
 	presentation_feedback_discarded
 };
 
+static const struct presentation_feedback_listener presentation_feedback_framerate_listener = {
+	presentation_feedback_sync_output,
+	presentation_feedback_framerate_presented,
+	presentation_feedback_discarded
+};
+
 void nemocanvas_dispatch_feedback(struct nemocanvas *canvas)
 {
 	if (canvas->feedback == NULL) {
-		canvas->feedback = presentation_feedback(canvas->tool->presentation, canvas->surface);
-		presentation_feedback_add_listener(canvas->feedback, &presentation_feedback_listener, canvas);
+		if (canvas->framerate == 0) {
+			canvas->feedback = presentation_feedback(canvas->tool->presentation, canvas->surface);
+			presentation_feedback_add_listener(canvas->feedback, &presentation_feedback_listener, canvas);
+		} else {
+			canvas->feedback = presentation_feedback(canvas->tool->presentation, canvas->surface);
+			presentation_feedback_add_listener(canvas->feedback, &presentation_feedback_framerate_listener, canvas);
+		}
 	}
 }
 
