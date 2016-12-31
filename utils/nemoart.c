@@ -293,7 +293,7 @@ int main(int argc, char *argv[])
 	art->height = height;
 	art->vertex = flip == 0 ? NEMOPLAY_SHADER_FLIP_VERTEX : NEMOPLAY_SHADER_FLIP_ROTATE_VERTEX;
 
-	art->threads = threads != NULL ? strdup(threads) : NULL;
+	art->threads = threads != NULL ? strdup(threads) : "1";
 
 	art->tool = tool = nemotool_create();
 	nemotool_connect_wayland(tool, NULL);
