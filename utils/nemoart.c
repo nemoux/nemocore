@@ -70,17 +70,6 @@ static void nemoart_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t wi
 	}
 }
 
-static void nemoart_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t secs, uint32_t nsecs)
-{
-	struct nemoart *art = (struct nemoart *)nemocanvas_get_userdata(canvas);
-
-	if (art->play != NULL) {
-		nemocook_egl_make_current(art->egl);
-		nemoplay_shader_dispatch(art->shader);
-		nemocook_egl_swap_buffers(art->egl);
-	}
-}
-
 static int nemoart_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t type, struct nemoevent *event)
 {
 	struct nemoart *art = (struct nemoart *)nemocanvas_get_userdata(canvas);
@@ -127,7 +116,9 @@ static void nemoart_dispatch_video_update(struct nemoplay *play, void *data)
 {
 	struct nemoart *art = (struct nemoart *)data;
 
-	nemocanvas_dispatch_frame(art->canvas);
+	nemocook_egl_make_current(art->egl);
+	nemoplay_shader_dispatch(art->shader);
+	nemocook_egl_swap_buffers(art->egl);
 }
 
 static void nemoart_dispatch_video_done(struct nemoplay *play, void *data)
@@ -312,7 +303,6 @@ int main(int argc, char *argv[])
 	nemocanvas_opaque(canvas, 0, 0, width, height);
 	nemocanvas_set_nemosurface(canvas, "normal");
 	nemocanvas_set_dispatch_resize(canvas, nemoart_dispatch_canvas_resize);
-	nemocanvas_set_dispatch_frame(canvas, nemoart_dispatch_canvas_frame);
 	nemocanvas_set_dispatch_event(canvas, nemoart_dispatch_canvas_event);
 	nemocanvas_set_dispatch_destroy(canvas, nemoart_dispatch_canvas_destroy);
 	nemocanvas_set_fullscreen_type(canvas, "pick;pitch");

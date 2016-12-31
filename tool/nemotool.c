@@ -26,17 +26,14 @@ static void pointer_handle_enter(void *data, struct nemo_pointer *pointer, uint3
 {
 	if (surface != NULL) {
 		struct nemocanvas *canvas = (struct nemocanvas *)wl_surface_get_user_data(surface);
+		struct nemoevent event;
 
-		if (canvas != NULL && canvas->dispatch_event != NULL) {
-			struct nemoevent event;
+		event.device = id;
+		event.serial = serial;
+		event.x = wl_fixed_to_double(sx);
+		event.y = wl_fixed_to_double(sy);
 
-			event.device = id;
-			event.serial = serial;
-			event.x = wl_fixed_to_double(sx);
-			event.y = wl_fixed_to_double(sy);
-
-			canvas->dispatch_event(canvas, NEMOTOOL_POINTER_ENTER_EVENT, &event);
-		}
+		canvas->dispatch_event(canvas, NEMOTOOL_POINTER_ENTER_EVENT, &event);
 	}
 }
 
@@ -44,15 +41,12 @@ static void pointer_handle_leave(void *data, struct nemo_pointer *pointer, uint3
 {
 	if (surface != NULL) {
 		struct nemocanvas *canvas = (struct nemocanvas *)wl_surface_get_user_data(surface);
+		struct nemoevent event;
 
-		if (canvas != NULL && canvas->dispatch_event != NULL) {
-			struct nemoevent event;
+		event.device = id;
+		event.serial = serial;
 
-			event.device = id;
-			event.serial = serial;
-
-			canvas->dispatch_event(canvas, NEMOTOOL_POINTER_LEAVE_EVENT, &event);
-		}
+		canvas->dispatch_event(canvas, NEMOTOOL_POINTER_LEAVE_EVENT, &event);
 	}
 }
 
@@ -60,17 +54,14 @@ static void pointer_handle_motion(void *data, struct nemo_pointer *pointer, uint
 {
 	if (surface != NULL) {
 		struct nemocanvas *canvas = (struct nemocanvas *)wl_surface_get_user_data(surface);
+		struct nemoevent event;
 
-		if (canvas != NULL && canvas->dispatch_event != NULL) {
-			struct nemoevent event;
+		event.device = id;
+		event.time = time;
+		event.x = wl_fixed_to_double(sx);
+		event.y = wl_fixed_to_double(sy);
 
-			event.device = id;
-			event.time = time;
-			event.x = wl_fixed_to_double(sx);
-			event.y = wl_fixed_to_double(sy);
-
-			canvas->dispatch_event(canvas, NEMOTOOL_POINTER_MOTION_EVENT, &event);
-		}
+		canvas->dispatch_event(canvas, NEMOTOOL_POINTER_MOTION_EVENT, &event);
 	}
 }
 
@@ -78,18 +69,15 @@ static void pointer_handle_button(void *data, struct nemo_pointer *pointer, uint
 {
 	if (surface != NULL) {
 		struct nemocanvas *canvas = (struct nemocanvas *)wl_surface_get_user_data(surface);
+		struct nemoevent event;
 
-		if (canvas != NULL && canvas->dispatch_event != NULL) {
-			struct nemoevent event;
+		event.device = id;
+		event.serial = serial;
+		event.time = time;
+		event.value = button;
+		event.state = state;
 
-			event.device = id;
-			event.serial = serial;
-			event.time = time;
-			event.value = button;
-			event.state = state;
-
-			canvas->dispatch_event(canvas, NEMOTOOL_POINTER_BUTTON_EVENT, &event);
-		}
+		canvas->dispatch_event(canvas, NEMOTOOL_POINTER_BUTTON_EVENT, &event);
 	}
 }
 
@@ -97,17 +85,14 @@ static void pointer_handle_axis(void *data, struct nemo_pointer *pointer, uint32
 {
 	if (surface != NULL) {
 		struct nemocanvas *canvas = (struct nemocanvas *)wl_surface_get_user_data(surface);
+		struct nemoevent event;
 
-		if (canvas != NULL && canvas->dispatch_event != NULL) {
-			struct nemoevent event;
+		event.device = id;
+		event.time = time;
+		event.r = wl_fixed_to_double(value);
+		event.state = axis;
 
-			event.device = id;
-			event.time = time;
-			event.r = wl_fixed_to_double(value);
-			event.state = axis;
-
-			canvas->dispatch_event(canvas, NEMOTOOL_POINTER_AXIS_EVENT, &event);
-		}
+		canvas->dispatch_event(canvas, NEMOTOOL_POINTER_AXIS_EVENT, &event);
 	}
 }
 
@@ -170,15 +155,12 @@ static void keyboard_handle_enter(void *data, struct nemo_keyboard *keyboard, ui
 {
 	if (surface != NULL) {
 		struct nemocanvas *canvas = (struct nemocanvas *)wl_surface_get_user_data(surface);
+		struct nemoevent event;
 
-		if (canvas != NULL && canvas->dispatch_event != NULL) {
-			struct nemoevent event;
+		event.device = id;
+		event.serial = serial;
 
-			event.device = id;
-			event.serial = serial;
-
-			canvas->dispatch_event(canvas, NEMOTOOL_KEYBOARD_ENTER_EVENT, &event);
-		}
+		canvas->dispatch_event(canvas, NEMOTOOL_KEYBOARD_ENTER_EVENT, &event);
 	}
 }
 
@@ -186,15 +168,12 @@ static void keyboard_handle_leave(void *data, struct nemo_keyboard *keyboard, ui
 {
 	if (surface != NULL) {
 		struct nemocanvas *canvas = (struct nemocanvas *)wl_surface_get_user_data(surface);
+		struct nemoevent event;
 
-		if (canvas != NULL && canvas->dispatch_event != NULL) {
-			struct nemoevent event;
+		event.device = id;
+		event.serial = serial;
 
-			event.device = id;
-			event.serial = serial;
-
-			canvas->dispatch_event(canvas, NEMOTOOL_KEYBOARD_LEAVE_EVENT, &event);
-		}
+		canvas->dispatch_event(canvas, NEMOTOOL_KEYBOARD_LEAVE_EVENT, &event);
 	}
 }
 
@@ -203,18 +182,15 @@ static void keyboard_handle_key(void *data, struct nemo_keyboard *keyboard, uint
 	if (surface != NULL) {
 		struct nemotool *tool = (struct nemotool *)data;
 		struct nemocanvas *canvas = (struct nemocanvas *)wl_surface_get_user_data(surface);
+		struct nemoevent event;
 
-		if (canvas != NULL && canvas->dispatch_event != NULL) {
-			struct nemoevent event;
+		event.device = id;
+		event.serial = serial;
+		event.time = time;
+		event.value = key;
+		event.state = state;
 
-			event.device = id;
-			event.serial = serial;
-			event.time = time;
-			event.value = key;
-			event.state = state;
-
-			canvas->dispatch_event(canvas, NEMOTOOL_KEYBOARD_KEY_EVENT, &event);
-		}
+		canvas->dispatch_event(canvas, NEMOTOOL_KEYBOARD_KEY_EVENT, &event);
 	}
 }
 
@@ -223,6 +199,7 @@ static void keyboard_handle_modifiers(void *data, struct nemo_keyboard *keyboard
 	if (surface != NULL) {
 		struct nemotool *tool = (struct nemotool *)data;
 		struct nemocanvas *canvas = (struct nemocanvas *)wl_surface_get_user_data(surface);
+		struct nemoevent event;
 		xkb_mod_mask_t mask;
 
 		if (tool->xkb.keymap == NULL)
@@ -238,14 +215,10 @@ static void keyboard_handle_modifiers(void *data, struct nemo_keyboard *keyboard
 		if (mask & tool->xkb.shift_mask)
 			tool->modifiers |= NEMOMOD_SHIFT_MASK;
 
-		if (canvas != NULL && canvas->dispatch_event != NULL) {
-			struct nemoevent event;
+		event.device = id;
+		event.serial = serial;
 
-			event.device = id;
-			event.serial = serial;
-
-			canvas->dispatch_event(canvas, NEMOTOOL_KEYBOARD_MODIFIERS_EVENT, &event);
-		}
+		canvas->dispatch_event(canvas, NEMOTOOL_KEYBOARD_MODIFIERS_EVENT, &event);
 	}
 }
 
@@ -254,16 +227,13 @@ static void keyboard_handle_layout(void *data, struct nemo_keyboard *keyboard, u
 	if (surface != NULL) {
 		struct nemotool *tool = (struct nemotool *)data;
 		struct nemocanvas *canvas = (struct nemocanvas *)wl_surface_get_user_data(surface);
+		struct nemoevent event;
 
-		if (canvas != NULL && canvas->dispatch_event != NULL) {
-			struct nemoevent event;
+		event.device = id;
+		event.serial = serial;
+		event.name = name;
 
-			event.device = id;
-			event.serial = serial;
-			event.name = name;
-
-			canvas->dispatch_event(canvas, NEMOTOOL_KEYBOARD_LAYOUT_EVENT, &event);
-		}
+		canvas->dispatch_event(canvas, NEMOTOOL_KEYBOARD_LAYOUT_EVENT, &event);
 	}
 }
 
@@ -300,20 +270,17 @@ static void touch_handle_down(void *data, struct nemo_touch *touch, uint32_t ser
 {
 	if (surface != NULL) {
 		struct nemocanvas *canvas = (struct nemocanvas *)wl_surface_get_user_data(surface);
+		struct nemoevent event;
 
-		if (canvas != NULL && canvas->dispatch_event != NULL) {
-			struct nemoevent event;
+		event.device = id;
+		event.serial = serial;
+		event.time = time;
+		event.x = wl_fixed_to_double(sx);
+		event.y = wl_fixed_to_double(sy);
+		event.gx = wl_fixed_to_double(x);
+		event.gy = wl_fixed_to_double(y);
 
-			event.device = id;
-			event.serial = serial;
-			event.time = time;
-			event.x = wl_fixed_to_double(sx);
-			event.y = wl_fixed_to_double(sy);
-			event.gx = wl_fixed_to_double(x);
-			event.gy = wl_fixed_to_double(y);
-
-			canvas->dispatch_event(canvas, NEMOTOOL_TOUCH_DOWN_EVENT, &event);
-		}
+		canvas->dispatch_event(canvas, NEMOTOOL_TOUCH_DOWN_EVENT, &event);
 	}
 }
 
@@ -321,16 +288,13 @@ static void touch_handle_up(void *data, struct nemo_touch *touch, uint32_t seria
 {
 	if (surface != NULL) {
 		struct nemocanvas *canvas = (struct nemocanvas *)wl_surface_get_user_data(surface);
+		struct nemoevent event;
 
-		if (canvas != NULL && canvas->dispatch_event != NULL) {
-			struct nemoevent event;
+		event.device = id;
+		event.serial = serial;
+		event.time = time;
 
-			event.device = id;
-			event.serial = serial;
-			event.time = time;
-
-			canvas->dispatch_event(canvas, NEMOTOOL_TOUCH_UP_EVENT, &event);
-		}
+		canvas->dispatch_event(canvas, NEMOTOOL_TOUCH_UP_EVENT, &event);
 	}
 }
 
@@ -338,19 +302,16 @@ static void touch_handle_motion(void *data, struct nemo_touch *touch, uint32_t t
 {
 	if (surface != NULL) {
 		struct nemocanvas *canvas = (struct nemocanvas *)wl_surface_get_user_data(surface);
+		struct nemoevent event;
 
-		if (canvas != NULL && canvas->dispatch_event != NULL) {
-			struct nemoevent event;
+		event.device = id;
+		event.time = time;
+		event.x = wl_fixed_to_double(sx);
+		event.y = wl_fixed_to_double(sy);
+		event.gx = wl_fixed_to_double(x);
+		event.gy = wl_fixed_to_double(y);
 
-			event.device = id;
-			event.time = time;
-			event.x = wl_fixed_to_double(sx);
-			event.y = wl_fixed_to_double(sy);
-			event.gx = wl_fixed_to_double(x);
-			event.gy = wl_fixed_to_double(y);
-
-			canvas->dispatch_event(canvas, NEMOTOOL_TOUCH_MOTION_EVENT, &event);
-		}
+		canvas->dispatch_event(canvas, NEMOTOOL_TOUCH_MOTION_EVENT, &event);
 	}
 }
 
@@ -358,16 +319,13 @@ static void touch_handle_pressure(void *data, struct nemo_touch *touch, uint32_t
 {
 	if (surface != NULL) {
 		struct nemocanvas *canvas = (struct nemocanvas *)wl_surface_get_user_data(surface);
+		struct nemoevent event;
 
-		if (canvas != NULL && canvas->dispatch_event != NULL) {
-			struct nemoevent event;
+		event.device = id;
+		event.time = time;
+		event.p = wl_fixed_to_double(p);
 
-			event.device = id;
-			event.time = time;
-			event.p = wl_fixed_to_double(p);
-
-			canvas->dispatch_event(canvas, NEMOTOOL_TOUCH_PRESSURE_EVENT, &event);
-		}
+		canvas->dispatch_event(canvas, NEMOTOOL_TOUCH_PRESSURE_EVENT, &event);
 	}
 }
 

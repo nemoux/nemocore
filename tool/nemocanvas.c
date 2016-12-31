@@ -30,40 +30,35 @@ static void nemo_surface_handle_configure(void *data, struct nemo_surface *surfa
 
 	nemocanvas_update(canvas, serial);
 
-	if (canvas->dispatch_resize != NULL)
-		canvas->dispatch_resize(canvas, width, height);
+	canvas->dispatch_resize(canvas, width, height);
 }
 
 static void nemo_surface_handle_transform(void *data, struct nemo_surface *surface, int32_t visible, int32_t x, int32_t y, int32_t width, int32_t height)
 {
 	struct nemocanvas *canvas = (struct nemocanvas *)data;
 
-	if (canvas->dispatch_transform != NULL)
-		canvas->dispatch_transform(canvas, visible, x, y, width, height);
+	canvas->dispatch_transform(canvas, visible, x, y, width, height);
 }
 
 static void nemo_surface_handle_layer(void *data, struct nemo_surface *surface, int32_t visible)
 {
 	struct nemocanvas *canvas = (struct nemocanvas *)data;
 
-	if (canvas->dispatch_layer != NULL)
-		canvas->dispatch_layer(canvas, visible);
+	canvas->dispatch_layer(canvas, visible);
 }
 
 static void nemo_surface_handle_fullscreen(void *data, struct nemo_surface *surface, const char *id, int32_t x, int32_t y, int32_t width, int32_t height)
 {
 	struct nemocanvas *canvas = (struct nemocanvas *)data;
 
-	if (canvas->dispatch_fullscreen != NULL)
-		canvas->dispatch_fullscreen(canvas, id, x, y, width, height);
+	canvas->dispatch_fullscreen(canvas, id, x, y, width, height);
 }
 
 static void nemo_surface_handle_close(void *data, struct nemo_surface *surface)
 {
 	struct nemocanvas *canvas = (struct nemocanvas *)data;
 
-	if (canvas->dispatch_destroy != NULL)
-		canvas->dispatch_destroy(canvas);
+	canvas->dispatch_destroy(canvas);
 }
 
 static const struct nemo_surface_listener nemo_surface_listener = {
@@ -250,13 +245,11 @@ static void surface_enter(void *data, struct wl_surface *surface, struct wl_outp
 	struct nemocanvas *canvas = (struct nemocanvas *)data;
 	struct nemooutput *output;
 
-	if (canvas->dispatch_screen != NULL) {
-		output = nemooutput_find(canvas->tool, _output);
-		if (output == NULL)
-			return;
+	output = nemooutput_find(canvas->tool, _output);
+	if (output == NULL)
+		return;
 
-		canvas->dispatch_screen(canvas, output->x, output->y, output->width, output->height, output->mmwidth, output->mmheight, 0);
-	}
+	canvas->dispatch_screen(canvas, output->x, output->y, output->width, output->height, output->mmwidth, output->mmheight, 0);
 }
 
 static void surface_leave(void *data, struct wl_surface *surface, struct wl_output *_output)
@@ -264,19 +257,55 @@ static void surface_leave(void *data, struct wl_surface *surface, struct wl_outp
 	struct nemocanvas *canvas = (struct nemocanvas *)data;
 	struct nemooutput *output;
 
-	if (canvas->dispatch_screen != NULL) {
-		output = nemooutput_find(canvas->tool, _output);
-		if (output == NULL)
-			return;
+	output = nemooutput_find(canvas->tool, _output);
+	if (output == NULL)
+		return;
 
-		canvas->dispatch_screen(canvas, output->x, output->y, output->width, output->height, output->mmwidth, output->mmheight, 1);
-	}
+	canvas->dispatch_screen(canvas, output->x, output->y, output->width, output->height, output->mmwidth, output->mmheight, 1);
 }
 
 static const struct wl_surface_listener surface_listener = {
 	surface_enter,
 	surface_leave
 };
+
+static int nemocanvas_dispatch_event_none(struct nemocanvas *canvas, uint32_t type, struct nemoevent *event)
+{
+	return 0;
+}
+
+static void nemocanvas_dispatch_resize_none(struct nemocanvas *canvas, int32_t width, int32_t height)
+{
+}
+
+static void nemocanvas_dispatch_transform_none(struct nemocanvas *canvas, int32_t visible, int32_t x, int32_t y, int32_t width, int32_t height)
+{
+}
+
+static void nemocanvas_dispatch_layer_none(struct nemocanvas *canvas, int32_t visible)
+{
+}
+
+static void nemocanvas_dispatch_fullscreen_none(struct nemocanvas *canvas, const char *id, int32_t x, int32_t y, int32_t width, int32_t height)
+{
+}
+
+static void nemocanvas_dispatch_frame_none(struct nemocanvas *canvas, uint64_t secs, uint32_t nsecs)
+{
+}
+
+static void nemocanvas_dispatch_discard_none(struct nemocanvas *canvas)
+{
+}
+
+static void nemocanvas_dispatch_screen_none(struct nemocanvas *canvas, int32_t x, int32_t y, int32_t width, int32_t height, int32_t mmwidth, int32_t mmheight, int left)
+{
+}
+
+static int nemocanvas_dispatch_destroy_none(struct nemocanvas *canvas)
+{
+	return 0;
+}
 
 struct nemocanvas *nemocanvas_create(struct nemotool *tool)
 {
@@ -299,6 +328,16 @@ struct nemocanvas *nemocanvas_create(struct nemotool *tool)
 	canvas->surface = wl_compositor_create_surface(tool->compositor);
 	wl_surface_add_listener(canvas->surface, &surface_listener, canvas);
 	wl_surface_set_user_data(canvas->surface, canvas);
+
+	canvas->dispatch_event = nemocanvas_dispatch_event_none;
+	canvas->dispatch_resize = nemocanvas_dispatch_resize_none;
+	canvas->dispatch_transform = nemocanvas_dispatch_transform_none;
+	canvas->dispatch_layer = nemocanvas_dispatch_layer_none;
+	canvas->dispatch_fullscreen = nemocanvas_dispatch_fullscreen_none;
+	canvas->dispatch_frame = nemocanvas_dispatch_frame_none;
+	canvas->dispatch_discard = nemocanvas_dispatch_discard_none;
+	canvas->dispatch_screen = nemocanvas_dispatch_screen_none;
+	canvas->dispatch_destroy = nemocanvas_dispatch_destroy_none;
 
 	return canvas;
 }
@@ -367,6 +406,16 @@ int nemocanvas_init(struct nemocanvas *canvas, struct nemotool *tool)
 	canvas->surface = wl_compositor_create_surface(tool->compositor);
 	wl_surface_add_listener(canvas->surface, &surface_listener, canvas);
 	wl_surface_set_user_data(canvas->surface, canvas);
+
+	canvas->dispatch_event = nemocanvas_dispatch_event_none;
+	canvas->dispatch_resize = nemocanvas_dispatch_resize_none;
+	canvas->dispatch_transform = nemocanvas_dispatch_transform_none;
+	canvas->dispatch_layer = nemocanvas_dispatch_layer_none;
+	canvas->dispatch_fullscreen = nemocanvas_dispatch_fullscreen_none;
+	canvas->dispatch_frame = nemocanvas_dispatch_frame_none;
+	canvas->dispatch_discard = nemocanvas_dispatch_discard_none;
+	canvas->dispatch_screen = nemocanvas_dispatch_screen_none;
+	canvas->dispatch_destroy = nemocanvas_dispatch_destroy_none;
 
 	return 0;
 }
@@ -647,27 +696,42 @@ void nemocanvas_set_subsurface_desync(struct nemocanvas *canvas)
 
 void nemocanvas_set_dispatch_event(struct nemocanvas *canvas, nemocanvas_dispatch_event_t dispatch)
 {
-	canvas->dispatch_event = dispatch;
+	if (dispatch != NULL)
+		canvas->dispatch_event = dispatch;
+	else
+		canvas->dispatch_event = nemocanvas_dispatch_event_none;
 }
 
 void nemocanvas_set_dispatch_resize(struct nemocanvas *canvas, nemocanvas_dispatch_resize_t dispatch)
 {
-	canvas->dispatch_resize = dispatch;
+	if (dispatch != NULL)
+		canvas->dispatch_resize = dispatch;
+	else
+		canvas->dispatch_resize = nemocanvas_dispatch_resize_none;
 }
 
 void nemocanvas_set_dispatch_transform(struct nemocanvas *canvas, nemocanvas_dispatch_transform_t dispatch)
 {
-	canvas->dispatch_transform = dispatch;
+	if (dispatch != NULL)
+		canvas->dispatch_transform = dispatch;
+	else
+		canvas->dispatch_transform = nemocanvas_dispatch_transform_none;
 }
 
 void nemocanvas_set_dispatch_layer(struct nemocanvas *canvas, nemocanvas_dispatch_layer_t dispatch)
 {
-	canvas->dispatch_layer = dispatch;
+	if (dispatch != NULL)
+		canvas->dispatch_layer = dispatch;
+	else
+		canvas->dispatch_layer = nemocanvas_dispatch_layer_none;
 }
 
 void nemocanvas_set_dispatch_fullscreen(struct nemocanvas *canvas, nemocanvas_dispatch_fullscreen_t dispatch)
 {
-	canvas->dispatch_fullscreen = dispatch;
+	if (dispatch != NULL)
+		canvas->dispatch_fullscreen = dispatch;
+	else
+		canvas->dispatch_fullscreen = nemocanvas_dispatch_fullscreen_none;
 }
 
 void nemocanvas_set_framerate(struct nemocanvas *canvas, uint32_t framerate)
@@ -677,22 +741,34 @@ void nemocanvas_set_framerate(struct nemocanvas *canvas, uint32_t framerate)
 
 void nemocanvas_set_dispatch_frame(struct nemocanvas *canvas, nemocanvas_dispatch_frame_t dispatch)
 {
-	canvas->dispatch_frame = dispatch;
+	if (dispatch != NULL)
+		canvas->dispatch_frame = dispatch;
+	else
+		canvas->dispatch_frame = nemocanvas_dispatch_frame_none;
 }
 
 void nemocanvas_set_dispatch_discard(struct nemocanvas *canvas, nemocanvas_dispatch_discard_t dispatch)
 {
-	canvas->dispatch_discard = dispatch;
+	if (dispatch != NULL)
+		canvas->dispatch_discard = dispatch;
+	else
+		canvas->dispatch_discard = nemocanvas_dispatch_discard_none;
 }
 
 void nemocanvas_set_dispatch_screen(struct nemocanvas *canvas, nemocanvas_dispatch_screen_t dispatch)
 {
-	canvas->dispatch_screen = dispatch;
+	if (dispatch != NULL)
+		canvas->dispatch_screen = dispatch;
+	else
+		canvas->dispatch_screen = nemocanvas_dispatch_screen_none;
 }
 
 void nemocanvas_set_dispatch_destroy(struct nemocanvas *canvas, nemocanvas_dispatch_destroy_t dispatch)
 {
-	canvas->dispatch_destroy = dispatch;
+	if (dispatch != NULL)
+		canvas->dispatch_destroy = dispatch;
+	else
+		canvas->dispatch_destroy = nemocanvas_dispatch_destroy_none;
 }
 
 static const struct presentation_feedback_listener presentation_feedback_listener;
@@ -736,8 +812,7 @@ static void presentation_feedback_discarded(void *data, struct presentation_feed
 		canvas->feedback = NULL;
 	}
 
-	if (canvas->dispatch_discard != NULL)
-		canvas->dispatch_discard(canvas);
+	canvas->dispatch_discard(canvas);
 }
 
 static const struct presentation_feedback_listener presentation_feedback_listener = {
@@ -771,14 +846,10 @@ void nemocanvas_dispatch_frame(struct nemocanvas *canvas)
 
 void nemocanvas_dispatch_resize(struct nemocanvas *canvas, int32_t width, int32_t height)
 {
-	if (canvas->dispatch_resize != NULL)
-		canvas->dispatch_resize(canvas, width, height);
+	canvas->dispatch_resize(canvas, width, height);
 }
 
 int nemocanvas_dispatch_destroy(struct nemocanvas *canvas)
 {
-	if (canvas->dispatch_destroy != NULL)
-		return canvas->dispatch_destroy(canvas);
-
-	return 0;
+	return canvas->dispatch_destroy(canvas);
 }
