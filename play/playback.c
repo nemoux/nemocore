@@ -278,7 +278,7 @@ static void nemoplay_video_handle_timer(struct nemotimer *timer, void *data)
 retry_next:
 		one = nemoplay_queue_dequeue(queue);
 		if (one == NULL) {
-			nemotimer_set_timeout(timer, threshold * 1000);
+			nemotimer_set_timeout(timer, framerate * 1000);
 		} else if (nemoplay_one_get_serial(one) != nemoplay_queue_get_serial(queue)) {
 			nemoplay_one_destroy(one);
 			goto retry_next;
@@ -392,11 +392,15 @@ void nemoplay_video_redraw(struct playvideo *video)
 void nemoplay_video_play(struct playvideo *video)
 {
 	nemoplay_queue_set_state(video->queue, NEMOPLAY_QUEUE_NORMAL_STATE);
+
+	nemotimer_set_timeout(video->timer, 1);
 }
 
 void nemoplay_video_stop(struct playvideo *video)
 {
 	nemoplay_queue_set_state(video->queue, NEMOPLAY_QUEUE_STOP_STATE);
+
+	nemotimer_set_timeout(video->timer, 0);
 }
 
 struct playshader *nemoplay_video_get_shader(struct playvideo *video)
