@@ -110,11 +110,12 @@ extern void nemoplay_set_audio_stropt(struct nemoplay *play, const char *key, co
 extern void nemoplay_set_audio_intopt(struct nemoplay *play, const char *key, int64_t value);
 
 extern int nemoplay_load_media(struct nemoplay *play, const char *mediapath);
-extern int nemoplay_decode_media(struct nemoplay *play, int maxcount);
 extern int nemoplay_seek_media(struct nemoplay *play, double pts);
 extern void nemoplay_flush_media(struct nemoplay *play);
 extern void nemoplay_wait_media(struct nemoplay *play);
+extern void nemoplay_done_media(struct nemoplay *play);
 
+extern int nemoplay_decode_media(struct nemoplay *play, int maxcount);
 extern int nemoplay_extract_video(struct nemoplay *play, struct playbox *box, int maxcount);
 
 extern void nemoplay_revoke_video(struct nemoplay *play);
@@ -128,10 +129,11 @@ extern void nemoplay_wait_thread(struct nemoplay *play);
 
 extern void nemoplay_set_video_pts(struct nemoplay *play, double pts);
 extern void nemoplay_set_audio_pts(struct nemoplay *play, double pts);
-extern void nemoplay_set_cts(struct nemoplay *play, double cts);
-extern double nemoplay_get_cts(struct nemoplay *play);
+extern void nemoplay_set_clock_cts(struct nemoplay *play, double cts);
+extern double nemoplay_get_clock_cts(struct nemoplay *play);
 
-extern void nemoplay_set_speed(struct nemoplay *play, double speed);
+extern void nemoplay_set_clock_state(struct nemoplay *play, int state);
+extern void nemoplay_set_clock_speed(struct nemoplay *play, double speed);
 
 extern void nemoplay_set_cmds(struct nemoplay *play, uint32_t cmds);
 extern void nemoplay_put_cmds(struct nemoplay *play, uint32_t cmds);

@@ -201,6 +201,49 @@ err1:
 	return -1;
 }
 
+int nemoplay_seek_media(struct nemoplay *play, double pts)
+{
+	if (avformat_seek_file(play->container, -1, INT64_MIN, (int64_t)(pts * AV_TIME_BASE), INT64_MAX, 0) >= 0) {
+		if (play->video_context != NULL)
+			avcodec_flush_buffers(play->video_context);
+		if (play->audio_context != NULL)
+			avcodec_flush_buffers(play->audio_context);
+
+		return 1;
+	}
+
+	return 0;
+}
+
+void nemoplay_flush_media(struct nemoplay *play)
+{
+	nemoplay_queue_flush(play->video_queue);
+	nemoplay_queue_flush(play->audio_queue);
+}
+
+void nemoplay_wait_media(struct nemoplay *play)
+{
+	pthread_mutex_lock(&play->lock);
+
+	pthread_cond_wait(&play->signal, &play->lock);
+
+	pthread_mutex_unlock(&play->lock);
+}
+
+void nemoplay_done_media(struct nemoplay *play)
+{
+	pthread_mutex_lock(&play->lock);
+
+	play->state = NEMOPLAY_DONE_STATE;
+
+	pthread_cond_signal(&play->signal);
+
+	pthread_mutex_unlock(&play->lock);
+
+	nemoplay_queue_set_state(play->audio_queue, NEMOPLAY_QUEUE_DONE_STATE);
+	nemoplay_queue_set_state(play->video_queue, NEMOPLAY_QUEUE_DONE_STATE);
+}
+
 int nemoplay_decode_media(struct nemoplay *play, int maxcount)
 {
 	AVFormatContext *container = play->container;
@@ -314,35 +357,6 @@ int nemoplay_decode_media(struct nemoplay *play, int maxcount)
 	return done;
 }
 
-int nemoplay_seek_media(struct nemoplay *play, double pts)
-{
-	if (avformat_seek_file(play->container, -1, INT64_MIN, (int64_t)(pts * AV_TIME_BASE), INT64_MAX, 0) >= 0) {
-		if (play->video_context != NULL)
-			avcodec_flush_buffers(play->video_context);
-		if (play->audio_context != NULL)
-			avcodec_flush_buffers(play->audio_context);
-
-		return 1;
-	}
-
-	return 0;
-}
-
-void nemoplay_flush_media(struct nemoplay *play)
-{
-	nemoplay_queue_flush(play->video_queue);
-	nemoplay_queue_flush(play->audio_queue);
-}
-
-void nemoplay_wait_media(struct nemoplay *play)
-{
-	pthread_mutex_lock(&play->lock);
-
-	pthread_cond_wait(&play->signal, &play->lock);
-
-	pthread_mutex_unlock(&play->lock);
-}
-
 int nemoplay_extract_video(struct nemoplay *play, struct playbox *box, int maxcount)
 {
 	AVFormatContext *container = play->container;
@@ -438,18 +452,14 @@ void nemoplay_revoke_audio(struct nemoplay *play)
 
 void nemoplay_set_state(struct nemoplay *play, int state)
 {
-	if (play->state == NEMOPLAY_DONE_STATE)
+	if (play->state == NEMOPLAY_DONE_STATE || play->state == state)
 		return;
 
 	pthread_mutex_lock(&play->lock);
 
-	if (state == NEMOPLAY_DONE_STATE) {
-		play->state = state;
-	} else if (play->state == NEMOPLAY_STOP_STATE) {
+	if (play->state == NEMOPLAY_STOP_STATE) {
 		if (state == NEMOPLAY_PLAY_STATE)
 			play->state = state;
-		else
-			state = NEMOPLAY_NONE_STATE;
 	} else {
 		if (state == NEMOPLAY_WAKE_STATE)
 			play->state = NEMOPLAY_PLAY_STATE;
@@ -460,19 +470,6 @@ void nemoplay_set_state(struct nemoplay *play, int state)
 	pthread_cond_signal(&play->signal);
 
 	pthread_mutex_unlock(&play->lock);
-
-	if (state == NEMOPLAY_PLAY_STATE) {
-		nemoplay_queue_set_state(play->video_queue, NEMOPLAY_QUEUE_NORMAL_STATE);
-		nemoplay_queue_set_state(play->audio_queue, NEMOPLAY_QUEUE_NORMAL_STATE);
-		nemoplay_clock_set_state(play->clock, NEMOPLAY_CLOCK_NORMAL_STATE);
-	} else if (state == NEMOPLAY_STOP_STATE) {
-		nemoplay_queue_set_state(play->video_queue, NEMOPLAY_QUEUE_STOP_STATE);
-		nemoplay_queue_set_state(play->audio_queue, NEMOPLAY_QUEUE_STOP_STATE);
-		nemoplay_clock_set_state(play->clock, NEMOPLAY_CLOCK_STOP_STATE);
-	} else if (state == NEMOPLAY_DONE_STATE) {
-		nemoplay_queue_set_state(play->video_queue, NEMOPLAY_QUEUE_DONE_STATE);
-		nemoplay_queue_set_state(play->audio_queue, NEMOPLAY_QUEUE_DONE_STATE);
-	}
 }
 
 void nemoplay_enter_thread(struct nemoplay *play)
@@ -518,17 +515,22 @@ void nemoplay_set_audio_pts(struct nemoplay *play, double pts)
 	nemoplay_clock_set(play->clock, pts);
 }
 
-void nemoplay_set_cts(struct nemoplay *play, double cts)
+void nemoplay_set_clock_cts(struct nemoplay *play, double cts)
 {
 	nemoplay_clock_set(play->clock, cts);
 }
 
-double nemoplay_get_cts(struct nemoplay *play)
+double nemoplay_get_clock_cts(struct nemoplay *play)
 {
 	return nemoplay_clock_get(play->clock);
 }
 
-void nemoplay_set_speed(struct nemoplay *play, double speed)
+void nemoplay_set_clock_state(struct nemoplay *play, int state)
+{
+	nemoplay_clock_set_state(play->clock, state);
+}
+
+void nemoplay_set_clock_speed(struct nemoplay *play, double speed)
 {
 	nemoplay_clock_set_speed(play->clock, speed);
 }

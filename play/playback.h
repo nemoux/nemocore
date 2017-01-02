@@ -21,6 +21,7 @@ typedef void (*nemoplay_frame_done_t)(struct nemoplay *play, void *data);
 
 extern struct playdecoder *nemoplay_decoder_create(struct nemoplay *play);
 extern void nemoplay_decoder_destroy(struct playdecoder *decoder);
+extern void nemoplay_decoder_ready(struct playdecoder *decoder);
 extern void nemoplay_decoder_play(struct playdecoder *decoder);
 extern void nemoplay_decoder_stop(struct playdecoder *decoder);
 extern void nemoplay_decoder_seek(struct playdecoder *decoder, double pts);
@@ -28,11 +29,15 @@ extern void nemoplay_decoder_set_maxcount(struct playdecoder *decoder, int maxco
 
 extern struct playaudio *nemoplay_audio_create_by_ao(struct nemoplay *play);
 extern void nemoplay_audio_destroy(struct playaudio *audio);
+extern void nemoplay_audio_play(struct playaudio *audio);
+extern void nemoplay_audio_stop(struct playaudio *audio);
 extern void nemoplay_audio_set_mincount(struct playaudio *audio, int mincount);
 
 extern struct playvideo *nemoplay_video_create_by_timer(struct nemoplay *play);
 extern void nemoplay_video_destroy(struct playvideo *video);
 extern void nemoplay_video_redraw(struct playvideo *video);
+extern void nemoplay_video_play(struct playvideo *video);
+extern void nemoplay_video_stop(struct playvideo *video);
 extern struct playshader *nemoplay_video_get_shader(struct playvideo *video);
 extern void nemoplay_video_set_texture(struct playvideo *video, uint32_t texture, int width, int height);
 extern void nemoplay_video_set_threshold(struct playvideo *video, double threshold);
