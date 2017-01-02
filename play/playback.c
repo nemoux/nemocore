@@ -432,8 +432,6 @@ static void *nemoplay_extractor_handle_thread(void *arg)
 
 	nemoplay_leave_thread(play);
 
-	nemoplay_set_state(play, NEMOPLAY_DONE_STATE);
-
 	return NULL;
 }
 

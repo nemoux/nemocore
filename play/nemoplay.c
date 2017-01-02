@@ -311,7 +311,7 @@ int nemoplay_decode_media(struct nemoplay *play, int maxcount)
 
 	av_frame_free(&frame);
 
-	return 0;
+	return done;
 }
 
 int nemoplay_seek_media(struct nemoplay *play, double pts)
