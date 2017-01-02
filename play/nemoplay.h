@@ -39,13 +39,9 @@ typedef enum {
 #define NEMOPLAY_PIXEL_IS_YUV420_FORMAT(fmt)			(((fmt) & 0xff00) == 0x0)
 #define NEMOPLAY_PIXEL_IS_RGBA_FORMAT(fmt)				(((fmt) & 0xff00) == 0x100)
 
-typedef enum {
-	NEMOPLAY_SEEK_CMD = (1 << 0)
-} NemoPlayCmd;
-
 struct nemoplay {
 	int state;
-	uint32_t cmd;
+	uint32_t cmds;
 
 	char *path;
 
@@ -116,9 +112,10 @@ extern void nemoplay_set_audio_intopt(struct nemoplay *play, const char *key, in
 extern int nemoplay_load_media(struct nemoplay *play, const char *mediapath);
 extern int nemoplay_decode_media(struct nemoplay *play, int maxcount);
 extern int nemoplay_seek_media(struct nemoplay *play, double pts);
+extern void nemoplay_flush_media(struct nemoplay *play);
 extern void nemoplay_wait_media(struct nemoplay *play);
 
-extern int nemoplay_extract_video(struct nemoplay *play, struct playbox *box, int count);
+extern int nemoplay_extract_video(struct nemoplay *play, struct playbox *box, int maxcount);
 
 extern void nemoplay_revoke_video(struct nemoplay *play);
 extern void nemoplay_revoke_audio(struct nemoplay *play);
@@ -131,13 +128,14 @@ extern void nemoplay_wait_thread(struct nemoplay *play);
 
 extern void nemoplay_set_video_pts(struct nemoplay *play, double pts);
 extern void nemoplay_set_audio_pts(struct nemoplay *play, double pts);
+extern void nemoplay_set_cts(struct nemoplay *play, double cts);
 extern double nemoplay_get_cts(struct nemoplay *play);
 
 extern void nemoplay_set_speed(struct nemoplay *play, double speed);
 
-extern void nemoplay_set_cmd(struct nemoplay *play, uint32_t cmd);
-extern void nemoplay_put_cmd(struct nemoplay *play, uint32_t cmd);
-extern int nemoplay_has_cmd(struct nemoplay *play, uint32_t cmd);
+extern void nemoplay_set_cmds(struct nemoplay *play, uint32_t cmds);
+extern void nemoplay_put_cmds(struct nemoplay *play, uint32_t cmds);
+extern int nemoplay_has_cmds(struct nemoplay *play, uint32_t cmds);
 
 static inline int nemoplay_get_state(struct nemoplay *play)
 {

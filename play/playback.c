@@ -15,6 +15,10 @@
 #include <nemolog.h>
 #include <nemomisc.h>
 
+typedef enum {
+	NEMOPLAY_SEEK_CMD = (1 << 0)
+} NemoPlayCmd;
+
 struct playdecoder {
 	struct nemoplay *play;
 
@@ -34,13 +38,16 @@ static void *nemoplay_decoder_handle_thread(void *arg)
 	nemoplay_enter_thread(play);
 
 	while ((state = nemoplay_get_state(play)) != NEMOPLAY_DONE_STATE) {
-		if (nemoplay_has_cmd(play, NEMOPLAY_SEEK_CMD) != 0) {
+		if (nemoplay_has_cmds(play, NEMOPLAY_SEEK_CMD) != 0) {
+			nemoplay_flush_media(play);
 			nemoplay_seek_media(play, decoder->pts_to_seek);
-			nemoplay_put_cmd(play, NEMOPLAY_SEEK_CMD);
+			nemoplay_set_cts(play, decoder->pts_to_seek);
+			nemoplay_put_cmds(play, NEMOPLAY_SEEK_CMD);
 		}
 
 		if (state == NEMOPLAY_PLAY_STATE) {
-			nemoplay_decode_media(play, decoder->maxcount);
+			if (nemoplay_decode_media(play, decoder->maxcount) != 0)
+				nemoplay_set_state(play, NEMOPLAY_WAIT_STATE);
 		} else if (state == NEMOPLAY_WAIT_STATE || state == NEMOPLAY_STOP_STATE) {
 			nemoplay_wait_media(play);
 		}
@@ -92,7 +99,7 @@ void nemoplay_decoder_seek(struct playdecoder *decoder, double pts)
 {
 	decoder->pts_to_seek = pts;
 
-	nemoplay_set_cmd(decoder->play, NEMOPLAY_SEEK_CMD);
+	nemoplay_set_cmds(decoder->play, NEMOPLAY_SEEK_CMD);
 }
 
 void nemoplay_decoder_set_maxcount(struct playdecoder *decoder, int maxcount)
