@@ -21,7 +21,6 @@ typedef void (*nemoplay_frame_done_t)(struct nemoplay *play, void *data);
 
 extern struct playdecoder *nemoplay_decoder_create(struct nemoplay *play);
 extern void nemoplay_decoder_destroy(struct playdecoder *decoder);
-extern void nemoplay_decoder_ready(struct playdecoder *decoder);
 extern void nemoplay_decoder_play(struct playdecoder *decoder);
 extern void nemoplay_decoder_stop(struct playdecoder *decoder);
 extern void nemoplay_decoder_seek(struct playdecoder *decoder, double pts);

@@ -86,11 +86,6 @@ void nemoplay_decoder_destroy(struct playdecoder *decoder)
 	free(decoder);
 }
 
-void nemoplay_decoder_ready(struct playdecoder *decoder)
-{
-	nemoplay_set_state(decoder->play, NEMOPLAY_PLAY_STATE);
-}
-
 void nemoplay_decoder_play(struct playdecoder *decoder)
 {
 	nemoplay_set_state(decoder->play, NEMOPLAY_PLAY_STATE);
