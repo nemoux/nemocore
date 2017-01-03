@@ -9,6 +9,8 @@ NEMO_BEGIN_EXTERN_C
 
 #include <stdint.h>
 
+#include <pixman.h>
+
 #define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
 #include <GLES2/gl2.h>
@@ -31,9 +33,9 @@ extern int nemocook_egl_swap_buffers(struct cookegl *egl);
 
 extern int nemocook_egl_has_swap_buffers_with_damage(struct cookegl *egl);
 
-extern void nemocook_egl_clear(struct cookegl *egl);
-extern void nemocook_egl_damage(struct cookegl *egl, int x, int y, int w, int h);
-extern int nemocook_egl_swap_buffers_with_damage(struct cookegl *egl);
+extern void nemocook_egl_fetch_damage(struct cookegl *egl, pixman_region32_t *damage);
+extern void nemocook_egl_rotate_damage(struct cookegl *egl, pixman_region32_t *damage);
+extern int nemocook_egl_swap_buffers_with_damage(struct cookegl *egl, pixman_region32_t *damage);
 
 extern struct cookshader *nemocook_egl_use_shader(struct cookegl *egl, struct cookshader *shader);
 
