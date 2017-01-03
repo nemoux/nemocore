@@ -278,7 +278,7 @@ retry_next:
 				goto retry_next;
 			} else if (cts < nemoplay_one_get_pts(one) - threshold) {
 				nemoplay_queue_enqueue_tail(queue, one);
-				nemotimer_set_timeout(timer, (nemoplay_one_get_pts(one) - cts) * 1000);
+				nemotimer_set_timeout(timer, MAX((nemoplay_one_get_pts(one) - cts) * 1000, 1));
 			} else {
 				nemoplay_set_video_pts(play, cts);
 
@@ -291,7 +291,7 @@ retry_next:
 					video->dispatch_update(video->play, video->data);
 
 				if (nemoplay_queue_peek_pts(queue, &pts) != 0)
-					nemotimer_set_timeout(timer, pts > cts ? (pts - cts) * 1000 : 1);
+					nemotimer_set_timeout(timer, MAX((pts - cts) * 1000, 1));
 				else
 					nemotimer_set_timeout(timer, threshold * 1000);
 
@@ -335,7 +335,7 @@ struct playvideo *nemoplay_video_create_by_timer(struct nemoplay *play)
 	video->timer = nemotimer_create(nemotool_get_instance());
 	nemotimer_set_callback(video->timer, nemoplay_video_handle_timer);
 	nemotimer_set_userdata(video->timer, video);
-	nemotimer_set_timeout(video->timer, 10);
+	nemotimer_set_timeout(video->timer, 1);
 
 	return video;
 }
