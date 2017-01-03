@@ -773,7 +773,7 @@ void glrenderer_finish_screen(struct nemorenderer *base, struct nemoscreen *scre
 	struct glsurface *surface = (struct glsurface *)screen->gcontext;
 	int i;
 
-	for (i = 0; i < 2; i++)
+	for (i = 0; i < GLRENDERER_BUFFER_AGE_COUNT; i++)
 		pixman_region32_fini(&surface->damages[i]);
 
 	eglDestroySurface(renderer->egl_display, surface->egl_surface);

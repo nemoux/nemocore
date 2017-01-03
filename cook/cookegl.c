@@ -11,6 +11,8 @@
 #include <nemocook.h>
 #include <nemomisc.h>
 
+#define NEMOCOOK_EGL_BUFFER_AGES		(2)
+
 struct cookegl {
 	struct cookone one;
 
@@ -36,6 +38,7 @@ struct cookegl {
 	int has_egl_image_external;
 
 	pixman_region32_t damage;
+	pixman_region32_t damages[NEMOCOOK_EGL_BUFFER_AGES];
 };
 
 int nemocook_egl_make_current(struct cookegl *egl)
@@ -73,14 +76,54 @@ void nemocook_egl_damage(struct cookegl *egl, int x, int y, int w, int h)
 	pixman_region32_union_rect(&egl->damage, &egl->damage, x, y, w, h);
 }
 
+static void nemocook_egl_fetch_damage(struct cookegl *egl, pixman_region32_t *damage)
+{
+	EGLint buffer_age = 0;
+	int i;
+
+	if (eglQuerySurface(egl->display, egl->surface, EGL_BUFFER_AGE_EXT, &buffer_age) == EGL_FALSE) {
+		pixman_region32_init_rect(damage, 0, 0, egl->width, egl->height);
+		return;
+	}
+
+	if (buffer_age == 0 || buffer_age - 1 > NEMOCOOK_EGL_BUFFER_AGES) {
+		pixman_region32_init_rect(damage, 0, 0, egl->width, egl->height);
+	} else {
+		for (i = 0; i < buffer_age - 1; i++) {
+			pixman_region32_union(damage, damage, &egl->damages[i]);
+		}
+	}
+}
+
+static void nemocook_egl_rotate_damage(struct cookegl *egl, pixman_region32_t *damage)
+{
+	int i;
+
+	for (i = NEMOCOOK_EGL_BUFFER_AGES - 1; i >= 1; i--) {
+		pixman_region32_copy(&egl->damages[i], &egl->damages[i - 1]);
+	}
+
+	pixman_region32_copy(&egl->damages[0], damage);
+}
+
 int nemocook_egl_swap_buffers_with_damage(struct cookegl *egl)
 {
+	pixman_region32_t damage;
 	pixman_box32_t *boxs;
 	int nboxs;
 	EGLint *damages;
 	int i, r;
 
-	boxs = pixman_region32_rectangles(&egl->damage, &nboxs);
+	pixman_region32_init(&damage);
+
+	nemocook_egl_fetch_damage(egl, &damage);
+	nemocook_egl_rotate_damage(egl, &egl->damage);
+
+	pixman_region32_union(&damage, &damage, &egl->damage);
+
+	boxs = pixman_region32_rectangles(&damage, &nboxs);
+
+	damages = (EGLint *)malloc(sizeof(EGLint[4]) * nboxs);
 
 	for (i = 0; i < nboxs; i++) {
 		damages[i * 4 + 0] = boxs[i].x1;
@@ -89,9 +132,11 @@ int nemocook_egl_swap_buffers_with_damage(struct cookegl *egl)
 		damages[i * 4 + 3] = boxs[i].y2 - boxs[i].y1;
 	}
 
-	r = egl->swap_buffers_with_damage(egl->display, egl->surface, damages, nboxs) == EGL_FALSE ? -1 : 0;
+	r = egl->swap_buffers_with_damage(egl->display, egl->surface, damages, nboxs) == EGL_TRUE ? 0 : -1;
 
 	free(damages);
+
+	pixman_region32_fini(&damage);
 
 	return r;
 }
@@ -119,6 +164,7 @@ struct cookegl *nemocook_egl_create(EGLDisplay egl_display, EGLContext egl_conte
 {
 	struct cookegl *egl;
 	const char *extensions;
+	int i;
 
 	egl = (struct cookegl *)malloc(sizeof(struct cookegl));
 	if (egl == NULL)
@@ -161,6 +207,9 @@ struct cookegl *nemocook_egl_create(EGLDisplay egl_display, EGLContext egl_conte
 
 	pixman_region32_init(&egl->damage);
 
+	for (i = 0; i < NEMOCOOK_EGL_BUFFER_AGES; i++)
+		pixman_region32_init(&egl->damages[i]);
+
 	nemocook_one_prepare(&egl->one);
 
 	return egl;
@@ -173,9 +222,14 @@ err1:
 
 void nemocook_egl_destroy(struct cookegl *egl)
 {
+	int i;
+
 	nemocook_one_finish(&egl->one);
 
 	pixman_region32_fini(&egl->damage);
+
+	for (i = 0; i < NEMOCOOK_EGL_BUFFER_AGES; i++)
+		pixman_region32_fini(&egl->damages[i]);
 
 	eglMakeCurrent(egl->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 
