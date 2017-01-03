@@ -280,7 +280,7 @@ retry_next:
 				nemoplay_queue_enqueue_tail(queue, one);
 				nemotimer_set_timeout(timer, (nemoplay_one_get_pts(one) - cts) * 1000);
 			} else {
-				nemoplay_set_video_pts(play, nemoplay_one_get_pts(one));
+				nemoplay_set_video_pts(play, cts);
 
 				nemoplay_shader_update(video->shader, one);
 
