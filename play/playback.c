@@ -12,7 +12,6 @@
 #include <nemoplay.h>
 #include <nemotool.h>
 #include <nemotimer.h>
-#include <nemolog.h>
 #include <nemomisc.h>
 
 typedef enum {
@@ -263,10 +262,6 @@ static void nemoplay_video_handle_timer(struct nemotimer *timer, void *data)
 	double threshold = video->threshold;
 	int state;
 
-#ifdef NEMOPLAY_DEBUG_ON
-	nemolog_message("PLAY", "[VIDEO] %s\n", play->path);
-#endif
-
 	state = nemoplay_queue_get_state(queue);
 	if (state == NEMOPLAY_QUEUE_NORMAL_STATE) {
 		double cts = nemoplay_get_clock_cts(play);
@@ -284,38 +279,18 @@ retry_next:
 			goto retry_next;
 		} else if (nemoplay_one_get_cmd(one) == NEMOPLAY_QUEUE_NORMAL_COMMAND) {
 			if (cts > nemoplay_one_get_pts(one) + threshold) {
-#ifdef NEMOPLAY_DEBUG_ON
-				nemolog_message("PLAY", "  drop: cts(%f) pts(%f)\n", cts, nemoplay_one_get_pts(one));
-#endif
-
 				nemoplay_one_destroy(one);
 				goto retry_next;
 			} else if (cts < nemoplay_one_get_pts(one) - threshold) {
-#ifdef NEMOPLAY_DEBUG_ON
-				nemolog_message("PLAY", "  wait: cts(%f) pts(%f)\n", cts, nemoplay_one_get_pts(one));
-#endif
-
 				nemoplay_queue_enqueue_tail(queue, one);
 				nemotimer_set_timeout(timer, (nemoplay_one_get_pts(one) - cts) * 1000);
 			} else {
 				nemoplay_set_video_pts(play, nemoplay_one_get_pts(one));
 
-#ifdef NEMOPLAY_DEBUG_ON
-				nemolog_checkpoint();
-#endif
-
 				nemoplay_shader_update(video->shader, one);
-
-#ifdef NEMOPLAY_DEBUG_ON
-				nemolog_check(1, "PLAY", "  update:\n");
-#endif
 
 				if (nemoplay_shader_get_viewport(video->shader) > 0)
 					nemoplay_shader_dispatch(video->shader);
-
-#ifdef NEMOPLAY_DEBUG_ON
-				nemolog_check(1, "PLAY", "  dispatch:\n");
-#endif
 
 				if (video->dispatch_update != NULL)
 					video->dispatch_update(video->play, video->data);
