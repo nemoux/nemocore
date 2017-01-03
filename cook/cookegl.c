@@ -35,9 +35,7 @@ struct cookegl {
 	int has_configless_context;
 	int has_egl_image_external;
 
-	EGLint *damages;
-	int sdamages;
-	int ndamages;
+	pixman_region32_t damage;
 };
 
 int nemocook_egl_make_current(struct cookegl *egl)
@@ -67,32 +65,35 @@ int nemocook_egl_has_swap_buffers_with_damage(struct cookegl *egl)
 
 void nemocook_egl_clear(struct cookegl *egl)
 {
-	egl->ndamages = 0;
+	pixman_region32_clear(&egl->damage);
 }
-
-#define NEMOCOOK_DAMAGE_INCS			(16)
 
 void nemocook_egl_damage(struct cookegl *egl, int x, int y, int w, int h)
 {
-	if (egl->ndamages >= egl->sdamages) {
-		egl->sdamages += NEMOCOOK_DAMAGE_INCS;
-		egl->damages = (EGLint *)realloc(egl->damages, sizeof(EGLint[4]) * egl->sdamages);
-	}
-
-	egl->damages[egl->ndamages * 4 + 0] = x;
-	egl->damages[egl->ndamages * 4 + 1] = y;
-	egl->damages[egl->ndamages * 4 + 2] = w;
-	egl->damages[egl->ndamages * 4 + 3] = h;
-
-	egl->ndamages++;
+	pixman_region32_union_rect(&egl->damage, &egl->damage, x, y, w, h);
 }
 
 int nemocook_egl_swap_buffers_with_damage(struct cookegl *egl)
 {
-	if (egl->swap_buffers_with_damage(egl->display, egl->surface, egl->damages, egl->ndamages) == EGL_FALSE)
-		return -1;
+	pixman_box32_t *boxs;
+	int nboxs;
+	EGLint *damages;
+	int i, r;
 
-	return 0;
+	boxs = pixman_region32_rectangles(&egl->damage, &nboxs);
+
+	for (i = 0; i < nboxs; i++) {
+		damages[i * 4 + 0] = boxs[i].x1;
+		damages[i * 4 + 1] = egl->height - boxs[i].y2;
+		damages[i * 4 + 2] = boxs[i].x2 - boxs[i].x1;
+		damages[i * 4 + 3] = boxs[i].y2 - boxs[i].y1;
+	}
+
+	r = egl->swap_buffers_with_damage(egl->display, egl->surface, damages, nboxs) == EGL_FALSE ? -1 : 0;
+
+	free(damages);
+
+	return r;
 }
 
 struct cookshader *nemocook_egl_use_shader(struct cookegl *egl, struct cookshader *shader)
@@ -158,6 +159,8 @@ struct cookegl *nemocook_egl_create(EGLDisplay egl_display, EGLContext egl_conte
 	if (egl->surface == EGL_NO_SURFACE)
 		goto err1;
 
+	pixman_region32_init(&egl->damage);
+
 	nemocook_one_prepare(&egl->one);
 
 	return egl;
@@ -172,12 +175,11 @@ void nemocook_egl_destroy(struct cookegl *egl)
 {
 	nemocook_one_finish(&egl->one);
 
+	pixman_region32_fini(&egl->damage);
+
 	eglMakeCurrent(egl->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 
 	eglDestroySurface(egl->display, egl->surface);
-
-	if (egl->damages != NULL)
-		free(egl->damages);
 
 	free(egl);
 }
