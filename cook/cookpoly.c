@@ -133,6 +133,11 @@ void nemocook_polygon_set_color(struct cookpoly *poly, float r, float g, float b
 	poly->color[3] = a;
 }
 
+float *nemocook_polygon_get_color(struct cookpoly *poly)
+{
+	return poly->color;
+}
+
 void nemocook_polygon_set_transform(struct cookpoly *poly, struct cooktrans *trans)
 {
 	poly->transform = trans;

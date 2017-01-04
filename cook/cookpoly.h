@@ -68,6 +68,7 @@ extern void nemocook_polygon_set_texture(struct cookpoly *poly, struct cooktex *
 extern struct cooktex *nemocook_polygon_get_texture(struct cookpoly *poly);
 
 extern void nemocook_polygon_set_color(struct cookpoly *poly, float r, float g, float b, float a);
+extern float *nemocook_polygon_get_color(struct cookpoly *poly);
 
 extern void nemocook_polygon_set_transform(struct cookpoly *poly, struct cooktrans *trans);
 extern int nemocook_polygon_update_transform(struct cookpoly *poly);
