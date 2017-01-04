@@ -35,6 +35,8 @@ struct cookpoly {
 	float *buffers[NEMOCOOK_POLYGON_ATTRIBS_MAX];
 	int elements[NEMOCOOK_POLYGON_ATTRIBS_MAX];
 
+	uint32_t *indices;
+
 	int count;
 	int type;
 
@@ -61,8 +63,11 @@ extern void nemocook_polygon_set_type(struct cookpoly *poly, int type);
 
 extern void nemocook_polygon_set_buffer(struct cookpoly *poly, int attrib, int element);
 extern float *nemocook_polygon_get_buffer(struct cookpoly *poly, int attrib);
-
 extern void nemocook_polygon_copy_buffer(struct cookpoly *poly, int attrib, float *buffer, int size);
+
+extern void nemocook_polygon_set_indices(struct cookpoly *poly);
+extern uint32_t *nemocook_polygon_get_indices(struct cookpoly *poly);
+extern void nemocook_polygon_copy_indices(struct cookpoly *poly, uint32_t *indices, int size);
 
 extern void nemocook_polygon_set_texture(struct cookpoly *poly, struct cooktex *tex);
 extern struct cooktex *nemocook_polygon_get_texture(struct cookpoly *poly);
@@ -99,6 +104,16 @@ static inline void nemocook_polygon_set_element(struct cookpoly *poly, int attri
 static inline float nemocook_polygon_get_element(struct cookpoly *poly, int attrib, int index, int element)
 {
 	return poly->buffers[attrib][index * poly->elements[attrib] + element];
+}
+
+static inline void nemocook_polygon_set_index(struct cookpoly *poly, int index, uint32_t value)
+{
+	poly->indices[index] = value;
+}
+
+static inline uint32_t nemocook_polygon_get_index(struct cookpoly *poly, int index)
+{
+	return poly->indices[index];
 }
 
 static inline struct nemomatrix *nemocook_polygon_get_matrix(struct cookpoly *poly)

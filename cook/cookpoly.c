@@ -29,6 +29,11 @@ static void nemocook_polygon_draw_simple(struct cookpoly *poly)
 	glDrawArrays(poly->type, 0, poly->count);
 }
 
+static void nemocook_polygon_draw_indices(struct cookpoly *poly)
+{
+	glDrawElements(poly->type, poly->count, GL_UNSIGNED_INT, poly->indices);
+}
+
 static void nemocook_polygon_draw_texture(struct cookpoly *poly)
 {
 	nemocook_texture_update_state(poly->texture);
@@ -36,6 +41,32 @@ static void nemocook_polygon_draw_texture(struct cookpoly *poly)
 	glBindTexture(GL_TEXTURE_2D, poly->texture->texture);
 	glDrawArrays(poly->type, 0, poly->count);
 	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+static void nemocook_polygon_draw_indices_texture(struct cookpoly *poly)
+{
+	nemocook_texture_update_state(poly->texture);
+
+	glBindTexture(GL_TEXTURE_2D, poly->texture->texture);
+	glDrawElements(poly->type, poly->count, GL_UNSIGNED_INT, poly->indices);
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+static inline void nemocook_polygon_update_callbacks(struct cookpoly *poly)
+{
+	if (poly->texture > 0) {
+		if (poly->indices != NULL) {
+			poly->draw = nemocook_polygon_draw_indices_texture;
+		} else {
+			poly->draw = nemocook_polygon_draw_texture;
+		}
+	} else {
+		if (poly->indices != NULL) {
+			poly->draw = nemocook_polygon_draw_indices;
+		} else {
+			poly->draw = nemocook_polygon_draw_simple;
+		}
+	}
 }
 
 struct cookpoly *nemocook_polygon_create(void)
@@ -73,6 +104,9 @@ void nemocook_polygon_destroy(struct cookpoly *poly)
 			free(poly->buffers[i]);
 	}
 
+	if (poly->indices != NULL)
+		free(poly->indices);
+
 	free(poly);
 }
 
@@ -86,6 +120,9 @@ void nemocook_polygon_set_count(struct cookpoly *poly, int count)
 		if (poly->buffers[i] != NULL)
 			poly->buffers[i] = (float *)realloc(poly->buffers[i], sizeof(float) * poly->count * poly->elements[i]);
 	}
+
+	if (poly->indices != NULL)
+		poly->indices = (uint32_t *)realloc(poly->indices, sizeof(uint32_t) * poly->count);
 }
 
 void nemocook_polygon_set_type(struct cookpoly *poly, int type)
@@ -110,14 +147,28 @@ void nemocook_polygon_copy_buffer(struct cookpoly *poly, int attrib, float *buff
 	memcpy(poly->buffers[attrib], buffer, size);
 }
 
+void nemocook_polygon_set_indices(struct cookpoly *poly)
+{
+	poly->indices = (uint32_t *)realloc(poly->indices, sizeof(uint32_t) * poly->count);
+
+	nemocook_polygon_update_callbacks(poly);
+}
+
+uint32_t *nemocook_polygon_get_indices(struct cookpoly *poly)
+{
+	return poly->indices;
+}
+
+void nemocook_polygon_copy_indices(struct cookpoly *poly, uint32_t *indices, int size)
+{
+	memcpy(poly->indices, indices, size);
+}
+
 void nemocook_polygon_set_texture(struct cookpoly *poly, struct cooktex *tex)
 {
 	poly->texture = tex;
 
-	if (tex != NULL)
-		poly->draw = nemocook_polygon_draw_texture;
-	else
-		poly->draw = nemocook_polygon_draw_simple;
+	nemocook_polygon_update_callbacks(poly);
 }
 
 struct cooktex *nemocook_polygon_get_texture(struct cookpoly *poly)
