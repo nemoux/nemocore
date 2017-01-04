@@ -27,6 +27,7 @@ NEMO_BEGIN_EXTERN_C
 struct cookpoly;
 
 typedef void (*nemocook_poly_update_attrib_t)(struct cookpoly *poly, int nattribs);
+typedef void (*nemocook_poly_update_buffer_t)(struct cookpoly *poly);
 typedef void (*nemocook_poly_draw_t)(struct cookpoly *poly);
 
 struct cookpoly {
@@ -40,11 +41,17 @@ struct cookpoly {
 	int count;
 	int type;
 
+	int use_vbo;
+
+	GLuint varray;
+	GLuint vindices;
+	GLuint vbuffers[NEMOCOOK_POLYGON_ATTRIBS_MAX];
+
 	struct cooktex *texture;
 
-	float color[4];
-
 	struct cooktrans *transform;
+
+	float color[4];
 
 	struct nemomatrix matrix;
 	struct nemomatrix inverse;
@@ -52,6 +59,7 @@ struct cookpoly {
 	struct nemolist link;
 
 	nemocook_poly_update_attrib_t update_attrib;
+	nemocook_poly_update_buffer_t update_buffer;
 	nemocook_poly_draw_t draw;
 };
 
@@ -60,6 +68,8 @@ extern void nemocook_polygon_destroy(struct cookpoly *poly);
 
 extern void nemocook_polygon_set_count(struct cookpoly *poly, int count);
 extern void nemocook_polygon_set_type(struct cookpoly *poly, int type);
+
+extern void nemocook_polygon_use_vbo(struct cookpoly *poly);
 
 extern void nemocook_polygon_set_buffer(struct cookpoly *poly, int attrib, int element);
 extern float *nemocook_polygon_get_buffer(struct cookpoly *poly, int attrib);
@@ -139,6 +149,11 @@ static inline float *nemocook_polygon_get_inverse_matrix4fv(struct cookpoly *pol
 static inline void nemocook_polygon_update_attrib(struct cookpoly *poly, int nattribs)
 {
 	poly->update_attrib(poly, nattribs);
+}
+
+static inline void nemocook_polygon_update_buffer(struct cookpoly *poly)
+{
+	poly->update_buffer(poly);
 }
 
 static inline void nemocook_polygon_draw(struct cookpoly *poly)

@@ -24,6 +24,65 @@ static void nemocook_polygon_update_attrib_simple(struct cookpoly *poly, int nat
 	}
 }
 
+static void nemocook_polygon_update_attrib_vbo(struct cookpoly *poly, int nattribs)
+{
+}
+
+static void nemocook_polygon_update_buffer_simple(struct cookpoly *poly)
+{
+}
+
+static void nemocook_polygon_update_buffer_vbo(struct cookpoly *poly)
+{
+	int i;
+
+	if (poly->varray == 0)
+		glGenVertexArrays(1, &poly->varray);
+
+	glBindVertexArray(poly->varray);
+
+	for (i = 0; i < NEMOCOOK_POLYGON_ATTRIBS_MAX; i++) {
+		if (poly->buffers[i] != NULL && poly->vbuffers[i] == 0) {
+			glGenBuffers(1, &poly->vbuffers[i]);
+
+			glBindBuffer(GL_ARRAY_BUFFER, poly->vbuffers[i]);
+			glVertexAttribPointer(i,
+					poly->elements[i],
+					GL_FLOAT,
+					GL_FALSE,
+					poly->elements[i] * sizeof(GLfloat),
+					NULL);
+			glEnableVertexAttribArray(i);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+		}
+	}
+
+	if (poly->indices != NULL && poly->vindices == 0)
+		glGenBuffers(1, &poly->vindices);
+
+	for (i = 0; i < NEMOCOOK_POLYGON_ATTRIBS_MAX; i++) {
+		if (poly->vbuffers[i] > 0) {
+			glBindBuffer(GL_ARRAY_BUFFER, poly->vbuffers[i]);
+			glBufferData(GL_ARRAY_BUFFER,
+					poly->count * poly->elements[i] * sizeof(GLfloat),
+					poly->buffers[i],
+					GL_STATIC_DRAW);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+		}
+	}
+
+	if (poly->vindices > 0) {
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, poly->vindices);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+				poly->count * sizeof(GLuint),
+				poly->indices,
+				GL_STATIC_DRAW);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	}
+
+	glBindVertexArray(0);
+}
+
 static void nemocook_polygon_draw_simple(struct cookpoly *poly)
 {
 	glDrawArrays(poly->type, 0, poly->count);
@@ -52,20 +111,90 @@ static void nemocook_polygon_draw_indices_texture(struct cookpoly *poly)
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+static void nemocook_polygon_draw_vbo(struct cookpoly *poly)
+{
+	glBindVertexArray(poly->varray);
+
+	glDrawArrays(poly->type, 0, poly->count);
+
+	glBindVertexArray(0);
+}
+
+static void nemocook_polygon_draw_vbo_indices(struct cookpoly *poly)
+{
+	glBindVertexArray(poly->varray);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, poly->vindices);
+
+	glDrawElements(poly->type, poly->count, GL_UNSIGNED_INT, NULL);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+}
+
+static void nemocook_polygon_draw_vbo_texture(struct cookpoly *poly)
+{
+	nemocook_texture_update_state(poly->texture);
+
+	glBindVertexArray(poly->varray);
+
+	glBindTexture(GL_TEXTURE_2D, poly->texture->texture);
+	glDrawArrays(poly->type, 0, poly->count);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glBindVertexArray(0);
+}
+
+static void nemocook_polygon_draw_vbo_indices_texture(struct cookpoly *poly)
+{
+	nemocook_texture_update_state(poly->texture);
+
+	glBindVertexArray(poly->varray);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, poly->vindices);
+
+	glBindTexture(GL_TEXTURE_2D, poly->texture->texture);
+	glDrawElements(poly->type, poly->count, GL_UNSIGNED_INT, NULL);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+}
+
 static inline void nemocook_polygon_update_callbacks(struct cookpoly *poly)
 {
-	if (poly->texture > 0) {
-		if (poly->indices != NULL) {
-			poly->draw = nemocook_polygon_draw_indices_texture;
+	if (poly->use_vbo != 0) {
+		if (poly->texture > 0) {
+			if (poly->indices != NULL) {
+				poly->draw = nemocook_polygon_draw_vbo_indices_texture;
+			} else {
+				poly->draw = nemocook_polygon_draw_vbo_texture;
+			}
 		} else {
-			poly->draw = nemocook_polygon_draw_texture;
+			if (poly->indices != NULL) {
+				poly->draw = nemocook_polygon_draw_vbo_indices;
+			} else {
+				poly->draw = nemocook_polygon_draw_vbo;
+			}
 		}
+
+		poly->update_attrib = nemocook_polygon_update_attrib_vbo;
+		poly->update_buffer = nemocook_polygon_update_buffer_vbo;
 	} else {
-		if (poly->indices != NULL) {
-			poly->draw = nemocook_polygon_draw_indices;
+		if (poly->texture > 0) {
+			if (poly->indices != NULL) {
+				poly->draw = nemocook_polygon_draw_indices_texture;
+			} else {
+				poly->draw = nemocook_polygon_draw_texture;
+			}
 		} else {
-			poly->draw = nemocook_polygon_draw_simple;
+			if (poly->indices != NULL) {
+				poly->draw = nemocook_polygon_draw_indices;
+			} else {
+				poly->draw = nemocook_polygon_draw_simple;
+			}
 		}
+
+		poly->update_attrib = nemocook_polygon_update_attrib_simple;
+		poly->update_buffer = nemocook_polygon_update_buffer_simple;
 	}
 }
 
@@ -79,6 +208,7 @@ struct cookpoly *nemocook_polygon_create(void)
 	memset(poly, 0, sizeof(struct cookpoly));
 
 	poly->update_attrib = nemocook_polygon_update_attrib_simple;
+	poly->update_buffer = nemocook_polygon_update_buffer_simple;
 	poly->draw = nemocook_polygon_draw_simple;
 
 	nemomatrix_init_identity(&poly->matrix);
@@ -102,10 +232,19 @@ void nemocook_polygon_destroy(struct cookpoly *poly)
 	for (i = 0; i < NEMOCOOK_POLYGON_ATTRIBS_MAX; i++) {
 		if (poly->buffers[i] != NULL)
 			free(poly->buffers[i]);
+
+		if (poly->vbuffers[i] > 0)
+			glDeleteBuffers(1, &poly->vbuffers[i]);
 	}
 
 	if (poly->indices != NULL)
 		free(poly->indices);
+
+	if (poly->vindices > 0)
+		glDeleteBuffers(1, &poly->vindices);
+
+	if (poly->varray > 0)
+		glDeleteVertexArrays(1, &poly->varray);
 
 	free(poly);
 }
@@ -128,6 +267,13 @@ void nemocook_polygon_set_count(struct cookpoly *poly, int count)
 void nemocook_polygon_set_type(struct cookpoly *poly, int type)
 {
 	poly->type = type;
+}
+
+void nemocook_polygon_use_vbo(struct cookpoly *poly)
+{
+	poly->use_vbo = 1;
+
+	nemocook_polygon_update_callbacks(poly);
 }
 
 void nemocook_polygon_set_buffer(struct cookpoly *poly, int attrib, int element)
