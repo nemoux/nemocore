@@ -359,7 +359,7 @@ int nemoshow_dispatch_transition(struct nemoshow *show, uint32_t msecs)
 			if (trans->dispatch_done != NULL)
 				trans->dispatch_done(trans->userdata);
 
-			if (trans->done != 0 || trans->repeat == 1) {
+			if (done != 0 || trans->done != 0 || trans->repeat == 1) {
 				nemoshow_transition_destroy(trans);
 			} else if (trans->repeat == 0 || --trans->repeat) {
 				trans->stime = 0;
