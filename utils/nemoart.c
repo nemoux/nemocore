@@ -39,7 +39,7 @@ struct nemoart {
 	struct playaudio *audioback;
 	struct playvideo *videoback;
 	struct playshader *shader;
-	int vertex;
+	int polygon;
 
 	struct nemobus *bus;
 };
@@ -209,7 +209,7 @@ static int nemoart_play_video(struct nemoart *art, const char *url)
 	nemoplay_video_set_done(art->videoback, nemoart_dispatch_video_done);
 	nemoplay_video_set_data(art->videoback, art);
 	art->shader = nemoplay_video_get_shader(art->videoback);
-	nemoplay_shader_set_vertex(art->shader, art->vertex);
+	nemoplay_shader_set_polygon(art->shader, art->polygon);
 
 	return 0;
 }
@@ -291,7 +291,7 @@ int main(int argc, char *argv[])
 
 	art->width = width;
 	art->height = height;
-	art->vertex = flip == 0 ? NEMOPLAY_SHADER_FLIP_VERTEX : NEMOPLAY_SHADER_FLIP_ROTATE_VERTEX;
+	art->polygon = flip == 0 ? NEMOPLAY_SHADER_FLIP_POLYGON : NEMOPLAY_SHADER_FLIP_ROTATE_POLYGON;
 
 	art->threads = threads != NULL ? strdup(threads) : "1";
 

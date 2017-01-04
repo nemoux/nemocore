@@ -11,7 +11,7 @@
 #include <glhelper.h>
 #include <nemomisc.h>
 
-static const char NEMOPLAY_YUV420_VERTEX_SHADER[] =
+static const char NEMOPLAY_YUV420_POLYGON_SHADER[] =
 "attribute vec2 position;\n"
 "attribute vec2 texcoord;\n"
 "varying vec2 vtexcoord;\n"
@@ -38,7 +38,7 @@ static const char NEMOPLAY_YUV420_FRAGMENT_SHADER[] =
 "  gl_FragColor = vec4(r, g, b, 1.0);\n"
 "}\n";
 
-static const char NEMOPLAY_BGRA_VERTEX_SHADER[] =
+static const char NEMOPLAY_BGRA_POLYGON_SHADER[] =
 "attribute vec2 position;\n"
 "attribute vec2 texcoord;\n"
 "varying vec2 vtexcoord;\n"
@@ -58,7 +58,7 @@ static const char NEMOPLAY_BGRA_FRAGMENT_SHADER[] =
 "  gl_FragColor = vec4(c.r, c.g, c.b, c.a);\n"
 "}\n";
 
-static const char NEMOPLAY_RGBA_VERTEX_SHADER[] =
+static const char NEMOPLAY_RGBA_POLYGON_SHADER[] =
 "attribute vec2 position;\n"
 "attribute vec2 texcoord;\n"
 "varying vec2 vtexcoord;\n"
@@ -78,7 +78,7 @@ static const char NEMOPLAY_RGBA_FRAGMENT_SHADER[] =
 "  gl_FragColor = vec4(c.b, c.g, c.r, c.a);\n"
 "}\n";
 
-static const GLfloat NEMOPLAY_VERTICES[4][16] = {
+static const GLfloat NEMOPLAY_POLYGONS[4][16] = {
 	{
 		-1.0f, -1.0f, 0.0f, 0.0f,
 		1.0f, -1.0f, 1.0f, 0.0f,
@@ -279,9 +279,9 @@ static int nemoplay_shader_dispatch_yuv420(struct playshader *shader)
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, shader->texy);
 
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &NEMOPLAY_VERTICES[shader->vertex][0]);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &NEMOPLAY_POLYGONS[shader->polygon][0]);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &NEMOPLAY_VERTICES[shader->vertex][2]);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &NEMOPLAY_POLYGONS[shader->polygon][2]);
 	glEnableVertexAttribArray(1);
 
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
@@ -313,9 +313,9 @@ static int nemoplay_shader_dispatch_rgba(struct playshader *shader)
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, shader->tex);
 
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &NEMOPLAY_VERTICES[shader->vertex][0]);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &NEMOPLAY_POLYGONS[shader->polygon][0]);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &NEMOPLAY_VERTICES[shader->vertex][2]);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &NEMOPLAY_POLYGONS[shader->polygon][2]);
 	glEnableVertexAttribArray(1);
 
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
@@ -628,7 +628,7 @@ int nemoplay_shader_set_format(struct playshader *shader, int format)
 		glDeleteProgram(shader->program);
 
 	if (format == NEMOPLAY_YUV420_PIXEL_FORMAT) {
-		shader->program = gl_compile_program(NEMOPLAY_YUV420_VERTEX_SHADER, NEMOPLAY_YUV420_FRAGMENT_SHADER, &shader->shaders[0], &shader->shaders[1]);
+		shader->program = gl_compile_program(NEMOPLAY_YUV420_POLYGON_SHADER, NEMOPLAY_YUV420_FRAGMENT_SHADER, &shader->shaders[0], &shader->shaders[1]);
 		if (shader->program == 0)
 			return -1;
 		glUseProgram(shader->program);
@@ -639,7 +639,7 @@ int nemoplay_shader_set_format(struct playshader *shader, int format)
 		shader->utexu = glGetUniformLocation(shader->program, "texu");
 		shader->utexv = glGetUniformLocation(shader->program, "texv");
 	} else if (format == NEMOPLAY_BGRA_PIXEL_FORMAT) {
-		shader->program = gl_compile_program(NEMOPLAY_BGRA_VERTEX_SHADER, NEMOPLAY_BGRA_FRAGMENT_SHADER, &shader->shaders[0], &shader->shaders[1]);
+		shader->program = gl_compile_program(NEMOPLAY_BGRA_POLYGON_SHADER, NEMOPLAY_BGRA_FRAGMENT_SHADER, &shader->shaders[0], &shader->shaders[1]);
 		if (shader->program == 0)
 			return -1;
 		glUseProgram(shader->program);
@@ -648,7 +648,7 @@ int nemoplay_shader_set_format(struct playshader *shader, int format)
 
 		shader->utex = glGetUniformLocation(shader->program, "tex");
 	} else if (format == NEMOPLAY_RGBA_PIXEL_FORMAT) {
-		shader->program = gl_compile_program(NEMOPLAY_RGBA_VERTEX_SHADER, NEMOPLAY_RGBA_FRAGMENT_SHADER, &shader->shaders[0], &shader->shaders[1]);
+		shader->program = gl_compile_program(NEMOPLAY_RGBA_POLYGON_SHADER, NEMOPLAY_RGBA_FRAGMENT_SHADER, &shader->shaders[0], &shader->shaders[1]);
 		if (shader->program == 0)
 			return -1;
 		glUseProgram(shader->program);
@@ -688,9 +688,9 @@ int nemoplay_shader_set_viewport(struct playshader *shader, uint32_t texture, in
 	return 0;
 }
 
-int nemoplay_shader_set_vertex(struct playshader *shader, int vertex)
+int nemoplay_shader_set_polygon(struct playshader *shader, int polygon)
 {
-	shader->vertex = vertex;
+	shader->polygon = polygon;
 
 	return 0;
 }
