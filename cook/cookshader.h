@@ -17,13 +17,6 @@ NEMO_BEGIN_EXTERN_C
 #define NEMOCOOK_SHADER_ATTRIBS_MAX					(4)
 #define NEMOCOOK_SHADER_UNIFORMS_MAX				(16)
 
-typedef enum {
-	NEMOCOOK_SHADER_POLYGON_TRANSFORM_UNIFORM = (1 << 0),
-	NEMOCOOK_SHADER_POLYGON_COLOR_UNIFORM = (1 << 1)
-} NemoCookShaderPolygonUniform;
-
-struct cookpoly;
-
 struct cookshader {
 	GLuint program;
 	GLuint vshader;
@@ -32,12 +25,9 @@ struct cookshader {
 	int attribs[NEMOCOOK_SHADER_ATTRIBS_MAX];
 	int nattribs;
 
-	uint32_t polygon_uniforms;
-
-	GLint utransform;
-	GLint ucolor;
-
 	GLint uniforms[NEMOCOOK_SHADER_UNIFORMS_MAX];
+
+	uint32_t flags;
 };
 
 extern struct cookshader *nemocook_shader_create(void);
@@ -52,30 +42,27 @@ extern void nemocook_shader_set_uniform(struct cookshader *shader, int index, co
 extern void nemocook_shader_set_uniform_1i(struct cookshader *shader, int index, int value);
 extern void nemocook_shader_set_uniform_1f(struct cookshader *shader, int index, float value);
 extern void nemocook_shader_set_uniform_2fv(struct cookshader *shader, int index, float *value);
-extern void nemocook_shader_set_uniform_matrix4fv(struct cookshader *shader, int index, float *value);
 extern void nemocook_shader_set_uniform_4fv(struct cookshader *shader, int index, float *value);
-
-extern void nemocook_shader_update_polygon_transform(struct cookshader *shader, struct cookpoly *poly);
-extern void nemocook_shader_update_polygon_color(struct cookshader *shader, struct cookpoly *poly);
-
-static inline void nemocook_shader_set_polygon_uniforms(struct cookshader *shader, uint32_t uniforms)
-{
-	shader->polygon_uniforms |= uniforms;
-}
-
-static inline void nemocook_shader_put_polygon_uniforms(struct cookshader *shader, uint32_t uniforms)
-{
-	shader->polygon_uniforms &= ~uniforms;
-}
-
-static inline int nemocook_shader_has_polygon_uniforms(struct cookshader *shader, uint32_t uniforms)
-{
-	return (shader->polygon_uniforms & uniforms) == uniforms;
-}
+extern void nemocook_shader_set_uniform_matrix4fv(struct cookshader *shader, int index, float *value);
 
 static inline int nemocook_shader_get_attribs_count(struct cookshader *shader)
 {
 	return shader->nattribs;
+}
+
+static inline void nemocook_shader_set_flags(struct cookshader *shader, uint32_t flags)
+{
+	shader->flags |= flags;
+}
+
+static inline void nemocook_shader_put_flags(struct cookshader *shader, uint32_t flags)
+{
+	shader->flags &= ~flags;
+}
+
+static inline int nemocook_shader_has_flags(struct cookshader *shader, uint32_t flags)
+{
+	return (shader->flags & flags) == flags;
 }
 
 #ifdef __cplusplus

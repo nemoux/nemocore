@@ -134,6 +134,11 @@ static inline float nemomatrix_get_factor(struct nemomatrix *matrix, int y, int 
 	return matrix->d[y * 4 + x];
 }
 
+static inline float *nemomatrix_get_data(struct nemomatrix *matrix)
+{
+	return matrix->d;
+}
+
 static inline double nemovector2d_distance(double x0, double y0, double x1, double y1)
 {
 	double dx = x1 - x0;

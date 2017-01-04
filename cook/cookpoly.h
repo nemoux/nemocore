@@ -100,6 +100,26 @@ static inline float nemocook_polygon_get_element(struct cookpoly *poly, int attr
 	return poly->buffers[attrib][index * poly->elements[attrib] + element];
 }
 
+static inline struct nemomatrix *nemocook_polygon_get_matrix(struct cookpoly *poly)
+{
+	return &poly->matrix;
+}
+
+static inline float *nemocook_polygon_get_matrix4fv(struct cookpoly *poly)
+{
+	return nemomatrix_get_data(&poly->matrix);
+}
+
+static inline struct nemomatrix *nemocook_polygon_get_inverse_matrix(struct cookpoly *poly)
+{
+	return &poly->inverse;
+}
+
+static inline float *nemocook_polygon_get_inverse_matrix4fv(struct cookpoly *poly)
+{
+	return nemomatrix_get_data(&poly->inverse);
+}
+
 static inline void nemocook_polygon_update_attrib(struct cookpoly *poly, int nattribs)
 {
 	poly->update_attrib(poly, nattribs);
