@@ -425,7 +425,7 @@ struct playextractor {
 
 	pthread_t thread;
 
-	int framerate;
+	int maxcount;
 };
 
 static void *nemoplay_extractor_handle_thread(void *arg)
@@ -433,11 +433,11 @@ static void *nemoplay_extractor_handle_thread(void *arg)
 	struct playextractor *extractor = (struct playextractor *)arg;
 	struct nemoplay *play = extractor->play;
 	struct playbox *box = extractor->box;
-	int framerate = extractor->framerate;
+	int maxcount = extractor->maxcount;
 
 	nemoplay_enter_thread(play);
 
-	while (nemoplay_extract_video(play, box, framerate) > 0)
+	while (nemoplay_extract_video(play, box, maxcount) > 0)
 		sleep(1);
 
 	nemoplay_leave_thread(play);
@@ -445,7 +445,7 @@ static void *nemoplay_extractor_handle_thread(void *arg)
 	return NULL;
 }
 
-struct playextractor *nemoplay_extractor_create(struct nemoplay *play, struct playbox *box, int framerate)
+struct playextractor *nemoplay_extractor_create(struct nemoplay *play, struct playbox *box, int maxcount)
 {
 	struct playextractor *extractor;
 
@@ -456,7 +456,7 @@ struct playextractor *nemoplay_extractor_create(struct nemoplay *play, struct pl
 
 	extractor->play = play;
 	extractor->box = box;
-	extractor->framerate = framerate;
+	extractor->maxcount = maxcount;
 
 	pthread_create(&extractor->thread, NULL, nemoplay_extractor_handle_thread, (void *)extractor);
 

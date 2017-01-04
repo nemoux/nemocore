@@ -46,7 +46,7 @@ extern void nemoplay_video_set_update(struct playvideo *video, nemoplay_frame_up
 extern void nemoplay_video_set_done(struct playvideo *video, nemoplay_frame_done_t dispatch);
 extern void nemoplay_video_set_data(struct playvideo *video, void *data);
 
-extern struct playextractor *nemoplay_extractor_create(struct nemoplay *play, struct playbox *box, int framerate);
+extern struct playextractor *nemoplay_extractor_create(struct nemoplay *play, struct playbox *box, int maxcount);
 extern void nemoplay_extractor_destroy(struct playextractor *extractor);
 
 #ifdef __cplusplus
