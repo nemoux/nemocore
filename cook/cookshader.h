@@ -55,7 +55,6 @@ extern void nemocook_shader_set_uniform_2fv(struct cookshader *shader, int index
 extern void nemocook_shader_set_uniform_matrix4fv(struct cookshader *shader, int index, float *value);
 extern void nemocook_shader_set_uniform_4fv(struct cookshader *shader, int index, float *value);
 
-extern void nemocook_shader_update_polygon_attribs(struct cookshader *shader, struct cookpoly *poly);
 extern void nemocook_shader_update_polygon_transform(struct cookshader *shader, struct cookpoly *poly);
 extern void nemocook_shader_update_polygon_color(struct cookshader *shader, struct cookpoly *poly);
 
@@ -72,6 +71,11 @@ static inline void nemocook_shader_put_polygon_uniforms(struct cookshader *shade
 static inline int nemocook_shader_has_polygon_uniforms(struct cookshader *shader, uint32_t uniforms)
 {
 	return (shader->polygon_uniforms & uniforms) == uniforms;
+}
+
+static inline int nemocook_shader_get_attribs_count(struct cookshader *shader)
+{
+	return shader->nattribs;
 }
 
 #ifdef __cplusplus

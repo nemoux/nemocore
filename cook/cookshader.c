@@ -95,21 +95,6 @@ void nemocook_shader_set_uniform_4fv(struct cookshader *shader, int index, float
 	glUniform4fv(shader->uniforms[index], 1, value);
 }
 
-void nemocook_shader_update_polygon_attribs(struct cookshader *shader, struct cookpoly *poly)
-{
-	int i;
-
-	for (i = 0; i < shader->nattribs; i++) {
-		glVertexAttribPointer(i,
-				shader->attribs[i],
-				GL_FLOAT,
-				GL_FALSE,
-				shader->attribs[i] * sizeof(GLfloat),
-				poly->buffers[i]);
-		glEnableVertexAttribArray(i);
-	}
-}
-
 void nemocook_shader_update_polygon_transform(struct cookshader *shader, struct cookpoly *poly)
 {
 	glUniformMatrix4fv(shader->utransform, 1, GL_FALSE, poly->matrix.d);

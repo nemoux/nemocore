@@ -9,6 +9,21 @@
 #include <cookone.h>
 #include <nemomisc.h>
 
+static void nemocook_polygon_update_attrib_simple(struct cookpoly *poly, int nattribs)
+{
+	int i;
+
+	for (i = 0; i < nattribs; i++) {
+		glVertexAttribPointer(i,
+				poly->elements[i],
+				GL_FLOAT,
+				GL_FALSE,
+				poly->elements[i] * sizeof(GLfloat),
+				poly->buffers[i]);
+		glEnableVertexAttribArray(i);
+	}
+}
+
 static void nemocook_polygon_draw_simple(struct cookpoly *poly)
 {
 	glDrawArrays(poly->type, 0, poly->count);
@@ -32,6 +47,7 @@ struct cookpoly *nemocook_polygon_create(void)
 		return NULL;
 	memset(poly, 0, sizeof(struct cookpoly));
 
+	poly->update_attrib = nemocook_polygon_update_attrib_simple;
 	poly->draw = nemocook_polygon_draw_simple;
 
 	nemomatrix_init_identity(&poly->matrix);
@@ -52,7 +68,7 @@ void nemocook_polygon_destroy(struct cookpoly *poly)
 
 	nemocook_one_finish(&poly->one);
 
-	for (i = 0; i < NEMOCOOK_SHADER_ATTRIBS_MAX; i++) {
+	for (i = 0; i < NEMOCOOK_POLYGON_ATTRIBS_MAX; i++) {
 		if (poly->buffers[i] != NULL)
 			free(poly->buffers[i]);
 	}
@@ -66,7 +82,7 @@ void nemocook_polygon_set_count(struct cookpoly *poly, int count)
 
 	poly->count = count;
 
-	for (i = 0; i < NEMOCOOK_SHADER_ATTRIBS_MAX; i++) {
+	for (i = 0; i < NEMOCOOK_POLYGON_ATTRIBS_MAX; i++) {
 		if (poly->buffers[i] != NULL)
 			poly->buffers[i] = (float *)realloc(poly->buffers[i], sizeof(float) * poly->count * poly->elements[i]);
 	}
