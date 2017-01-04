@@ -124,17 +124,17 @@ static void pixmanrenderer_draw_region(struct pixmanrenderer *renderer, struct n
 
 	if (view->transform.enable) {
 		pixman_transform_t matrix = {{{
-			pixman_double_to_fixed(view->transform.matrix.d[0]),
-				pixman_double_to_fixed(view->transform.matrix.d[4]),
-				pixman_double_to_fixed(view->transform.matrix.d[12])
+			pixman_double_to_fixed(nemomatrix_get_float(&view->transform.matrix, 0)),
+				pixman_double_to_fixed(nemomatrix_get_float(&view->transform.matrix, 4)),
+				pixman_double_to_fixed(nemomatrix_get_float(&view->transform.matrix, 12))
 		}, {
-			pixman_double_to_fixed(view->transform.matrix.d[1]),
-				pixman_double_to_fixed(view->transform.matrix.d[5]),
-				pixman_double_to_fixed(view->transform.matrix.d[13])
+			pixman_double_to_fixed(nemomatrix_get_float(&view->transform.matrix, 1)),
+				pixman_double_to_fixed(nemomatrix_get_float(&view->transform.matrix, 5)),
+				pixman_double_to_fixed(nemomatrix_get_float(&view->transform.matrix, 13))
 		}, {
-			pixman_double_to_fixed(view->transform.matrix.d[3]),
-				pixman_double_to_fixed(view->transform.matrix.d[7]),
-				pixman_double_to_fixed(view->transform.matrix.d[15])
+			pixman_double_to_fixed(nemomatrix_get_float(&view->transform.matrix, 3)),
+				pixman_double_to_fixed(nemomatrix_get_float(&view->transform.matrix, 7)),
+				pixman_double_to_fixed(nemomatrix_get_float(&view->transform.matrix, 15))
 		}}};
 
 		pixman_transform_invert(&matrix, &matrix);

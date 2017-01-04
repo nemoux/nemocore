@@ -405,7 +405,7 @@ uint32_t nemofx_glshadow_dispatch(struct glshadow *shadow, uint32_t texture)
 					(float)shadow->height / (float)shadow->lightscope);
 
 			glUseProgram(shadow->program1);
-			glUniformMatrix4fv(shadow->uprojection1, 1, GL_FALSE, matrix.d);
+			glUniformMatrix4fv(shadow->uprojection1, 1, GL_FALSE, nemomatrix_get_array(&matrix));
 			glUniform1i(shadow->utexture1, 0);
 
 			glBindTexture(GL_TEXTURE_2D, texture);
@@ -456,7 +456,7 @@ uint32_t nemofx_glshadow_dispatch(struct glshadow *shadow, uint32_t texture)
 					shadow->pointlights[i].position[1]);
 
 			glUseProgram(shadow->program3);
-			glUniformMatrix4fv(shadow->uprojection3, 1, GL_FALSE, matrix.d);
+			glUniformMatrix4fv(shadow->uprojection3, 1, GL_FALSE, nemomatrix_get_array(&matrix));
 			glUniform1i(shadow->ushadow3, 0);
 			glUniform1i(shadow->uwidth3, shadow->lightscope);
 			glUniform1i(shadow->uheight3, shadow->lightscope);

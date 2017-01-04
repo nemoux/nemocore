@@ -108,7 +108,7 @@ static inline struct nemomatrix *nemocook_polygon_get_matrix(struct cookpoly *po
 
 static inline float *nemocook_polygon_get_matrix4fv(struct cookpoly *poly)
 {
-	return nemomatrix_get_data(&poly->matrix);
+	return nemomatrix_get_array(&poly->matrix);
 }
 
 static inline struct nemomatrix *nemocook_polygon_get_inverse_matrix(struct cookpoly *poly)
@@ -118,7 +118,7 @@ static inline struct nemomatrix *nemocook_polygon_get_inverse_matrix(struct cook
 
 static inline float *nemocook_polygon_get_inverse_matrix4fv(struct cookpoly *poly)
 {
-	return nemomatrix_get_data(&poly->inverse);
+	return nemomatrix_get_array(&poly->inverse);
 }
 
 static inline void nemocook_polygon_update_attrib(struct cookpoly *poly, int nattribs)

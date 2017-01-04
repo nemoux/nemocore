@@ -34,7 +34,7 @@ void nemocook_camera_set_type(struct cookcamera *camera, int type)
 
 float *nemocook_camera_get_array(struct cookcamera *camera)
 {
-	return camera->matrix.d;
+	return nemomatrix_get_array(&camera->matrix);
 }
 
 struct nemomatrix *nemocook_camera_get_matrix(struct cookcamera *camera)

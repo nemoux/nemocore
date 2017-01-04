@@ -134,7 +134,17 @@ static inline float nemomatrix_get_factor(struct nemomatrix *matrix, int y, int 
 	return matrix->d[y * 4 + x];
 }
 
-static inline float *nemomatrix_get_data(struct nemomatrix *matrix)
+static inline void nemomatrix_set_float(struct nemomatrix *matrix, int i, float v)
+{
+	matrix->d[i] = v;
+}
+
+static inline float nemomatrix_get_float(struct nemomatrix *matrix, int i)
+{
+	return matrix->d[i];
+}
+
+static inline float *nemomatrix_get_array(struct nemomatrix *matrix)
 {
 	return matrix->d;
 }

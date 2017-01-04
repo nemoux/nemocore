@@ -122,7 +122,7 @@ static inline void glrenderer_use_uniforms(struct glcompz *shader, struct nemovi
 	struct glcontent *glcontent = (struct glcontent *)nemocontent_get_opengl_context(view->content, screen->node);
 	int i;
 
-	glUniformMatrix4fv(shader->uprojection, 1, GL_FALSE, screen->render.matrix.d);
+	glUniformMatrix4fv(shader->uprojection, 1, GL_FALSE, nemomatrix_get_array(&screen->render.matrix));
 	glUniform4fv(shader->ucolor, 1, glcontent->colors);
 	glUniform1f(shader->ualpha, view->alpha);
 
