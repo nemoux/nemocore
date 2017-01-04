@@ -19,32 +19,100 @@
 #include <nemofs.h>
 #include <nemomisc.h>
 
-struct nemoart {
-	struct nemotool *tool;
-	struct nemocanvas *canvas;
+struct nemoart;
 
-	struct nemoaction *action;
-
-	int width, height;
-
-	char *threads;
-
-	struct fsdir *contents;
-	int icontents;
-
-	struct cookegl *egl;
+struct artone {
+	struct nemoart *art;
 
 	struct nemoplay *play;
 	struct playdecoder *decoderback;
 	struct playaudio *audioback;
 	struct playvideo *videoback;
 	struct playshader *shader;
-	int polygon;
-
-	struct nemobus *bus;
 };
 
-static int nemoart_play_video(struct nemoart *art, const char *url);
+struct nemoart {
+	struct nemotool *tool;
+	struct nemocanvas *canvas;
+	struct nemoaction *action;
+	struct nemobus *bus;
+
+	int width, height;
+
+	int threads;
+	int polygon;
+
+	struct cookegl *egl;
+
+	struct fsdir *contents;
+	int icontents;
+
+	struct artone *one;
+};
+
+static void nemoart_dispatch_video_update(struct nemoplay *play, void *data);
+static void nemoart_dispatch_video_done(struct nemoplay *play, void *data);
+
+static struct artone *nemoart_one_create(struct nemoart *art, const char *url)
+{
+	struct artone *one;
+
+	one = (struct artone *)malloc(sizeof(struct artone));
+	if (one == NULL)
+		return NULL;
+	memset(one, 0, sizeof(struct artone));
+
+	one->art = art;
+
+	one->play = nemoplay_create();
+	if (art->threads > 0)
+		nemoplay_set_video_intopt(one->play, "threads", art->threads);
+	nemoplay_load_media(one->play, url);
+
+	one->decoderback = nemoplay_decoder_create(one->play);
+	one->audioback = nemoplay_audio_create_by_ao(one->play);
+	one->videoback = nemoplay_video_create_by_timer(one->play);
+	nemoplay_video_set_texture(one->videoback, 0, art->width, art->height);
+	nemoplay_video_set_update(one->videoback, nemoart_dispatch_video_update);
+	nemoplay_video_set_done(one->videoback, nemoart_dispatch_video_done);
+	nemoplay_video_set_data(one->videoback, one);
+	one->shader = nemoplay_video_get_shader(one->videoback);
+	nemoplay_shader_set_polygon(one->shader, art->polygon);
+
+	return one;
+}
+
+static void nemoart_one_destroy(struct artone *one)
+{
+	nemoplay_video_destroy(one->videoback);
+	nemoplay_audio_destroy(one->audioback);
+	nemoplay_decoder_destroy(one->decoderback);
+	nemoplay_destroy(one->play);
+
+	free(one);
+}
+
+static void nemoart_dispatch_video_update(struct nemoplay *play, void *data)
+{
+	struct artone *one = (struct artone *)data;
+	struct nemoart *art = one->art;
+
+	nemocanvas_dispatch_frame(art->canvas);
+}
+
+static void nemoart_dispatch_video_done(struct nemoplay *play, void *data)
+{
+	struct artone *one = (struct artone *)data;
+	struct nemoart *art = one->art;
+
+	art->icontents = (art->icontents + 1) % nemofs_dir_get_filecount(art->contents);
+
+	if (art->one != NULL)
+		nemoart_one_destroy(art->one);
+
+	art->one = nemoart_one_create(art,
+			nemofs_dir_get_filepath(art->contents, art->icontents));
+}
 
 static void nemoart_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t width, int32_t height)
 {
@@ -61,8 +129,8 @@ static void nemoart_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t wi
 
 	nemocook_egl_resize(art->egl, width, height);
 
-	if (art->play != NULL)
-		nemoplay_video_set_texture(art->videoback, 0, width, height);
+	if (art->one != NULL)
+		nemoplay_video_set_texture(art->one->videoback, 0, width, height);
 
 	nemocanvas_dispatch_frame(canvas);
 }
@@ -71,9 +139,13 @@ static void nemoart_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t se
 {
 	struct nemoart *art = (struct nemoart *)nemocanvas_get_userdata(canvas);
 
-	nemocook_egl_make_current(art->egl);
-	nemoplay_shader_dispatch(art->shader);
-	nemocook_egl_swap_buffers(art->egl);
+	if (art->one != NULL) {
+		nemocook_egl_make_current(art->egl);
+
+		nemoplay_shader_dispatch(art->one->shader);
+
+		nemocook_egl_swap_buffers(art->egl);
+	}
 }
 
 static int nemoart_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t type, struct nemoevent *event)
@@ -116,22 +188,6 @@ static int nemoart_dispatch_canvas_destroy(struct nemocanvas *canvas)
 	nemotool_exit(canvas->tool);
 
 	return 1;
-}
-
-static void nemoart_dispatch_video_update(struct nemoplay *play, void *data)
-{
-	struct nemoart *art = (struct nemoart *)data;
-
-	nemocanvas_dispatch_frame(art->canvas);
-}
-
-static void nemoart_dispatch_video_done(struct nemoplay *play, void *data)
-{
-	struct nemoart *art = (struct nemoart *)data;
-
-	art->icontents = (art->icontents + 1) % nemofs_dir_get_filecount(art->contents);
-
-	nemoart_play_video(art, nemofs_dir_get_filepath(art->contents, art->icontents));
 }
 
 static int nemoart_dispatch_tap_event(struct nemoaction *action, struct actiontap *tap, uint32_t event)
@@ -188,34 +244,11 @@ static void nemoart_dispatch_bus(void *data, const char *events)
 
 	nemoitem_destroy(msg);
 
-	nemoart_play_video(art, nemofs_dir_get_filepath(art->contents, art->icontents));
-}
+	if (art->one != NULL)
+		nemoart_one_destroy(art->one);
 
-static int nemoart_play_video(struct nemoart *art, const char *url)
-{
-	if (art->play != NULL) {
-		nemoplay_video_destroy(art->videoback);
-		nemoplay_audio_destroy(art->audioback);
-		nemoplay_decoder_destroy(art->decoderback);
-		nemoplay_destroy(art->play);
-	}
-
-	art->play = nemoplay_create();
-	if (art->threads != NULL)
-		nemoplay_set_video_stropt(art->play, "threads", art->threads);
-	nemoplay_load_media(art->play, url);
-
-	art->decoderback = nemoplay_decoder_create(art->play);
-	art->audioback = nemoplay_audio_create_by_ao(art->play);
-	art->videoback = nemoplay_video_create_by_timer(art->play);
-	nemoplay_video_set_texture(art->videoback, 0, art->width, art->height);
-	nemoplay_video_set_update(art->videoback, nemoart_dispatch_video_update);
-	nemoplay_video_set_done(art->videoback, nemoart_dispatch_video_done);
-	nemoplay_video_set_data(art->videoback, art);
-	art->shader = nemoplay_video_get_shader(art->videoback);
-	nemoplay_shader_set_polygon(art->shader, art->polygon);
-
-	return 0;
+	art->one = nemoart_one_create(art,
+			nemofs_dir_get_filepath(art->contents, art->icontents));
 }
 
 int main(int argc, char *argv[])
@@ -238,10 +271,10 @@ int main(int argc, char *argv[])
 	struct cookegl *egl;
 	char *fullscreenid = NULL;
 	char *contentpath = NULL;
-	char *threads = NULL;
 	char *busid = NULL;
 	int width = 1920;
 	int height = 1080;
+	int threads = 0;
 	int flip = 0;
 	int opt;
 
@@ -273,7 +306,7 @@ int main(int argc, char *argv[])
 				break;
 
 			case 't':
-				threads = strdup(optarg);
+				threads = strtoul(optarg, NULL, 10);
 				break;
 
 			case 'b':
@@ -295,9 +328,8 @@ int main(int argc, char *argv[])
 
 	art->width = width;
 	art->height = height;
+	art->threads = threads;
 	art->polygon = flip == 0 ? NEMOPLAY_SHADER_FLIP_POLYGON : NEMOPLAY_SHADER_FLIP_ROTATE_POLYGON;
-
-	art->threads = threads != NULL ? strdup(threads) : "1";
 
 	art->tool = tool = nemotool_create();
 	nemotool_connect_wayland(tool, NULL);
@@ -354,16 +386,14 @@ int main(int argc, char *argv[])
 			nemofs_dir_insert_file(art->contents, contentpath);
 		}
 
-		nemoart_play_video(art, nemofs_dir_get_filepath(art->contents, art->icontents));
+		art->one = nemoart_one_create(art,
+				nemofs_dir_get_filepath(art->contents, art->icontents));
 	}
 
 	nemotool_run(tool);
 
-	nemoplay_video_destroy(art->videoback);
-	nemoplay_audio_destroy(art->audioback);
-	nemoplay_decoder_destroy(art->decoderback);
-
-	nemoplay_destroy(art->play);
+	if (art->one != NULL)
+		nemoart_one_destroy(art->one);
 
 	if (art->bus != NULL)
 		nemobus_destroy(art->bus);
