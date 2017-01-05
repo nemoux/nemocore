@@ -33,6 +33,7 @@ struct artone {
 	struct playshader *shader;
 
 	struct cooktex *tex;
+	int use_tex;
 };
 
 struct nemoart {
@@ -85,15 +86,13 @@ static struct artone *nemoart_one_create(struct nemoart *art, const char *url, i
 	one->shader = nemoplay_video_get_shader(one->videoback);
 	nemoplay_shader_set_polygon(one->shader, art->polygon);
 
-	one->tex = nemocook_texture_create();
-	nemocook_texture_assign(one->tex, NEMOCOOK_TEXTURE_BGRA_FORMAT, one->width, one->height);
-
 	return one;
 }
 
 static void nemoart_one_destroy(struct artone *one)
 {
-	nemocook_texture_destroy(one->tex);
+	if (one->tex != NULL)
+		nemocook_texture_destroy(one->tex);
 
 	nemoplay_video_destroy(one->videoback);
 	nemoplay_audio_destroy(one->audioback);
@@ -105,14 +104,45 @@ static void nemoart_one_destroy(struct artone *one)
 
 static void nemoart_one_use_egl(struct artone *one)
 {
+	one->use_tex = 0;
+
 	nemoplay_video_set_texture(one->videoback, 0, one->width, one->height);
 }
 
 static void nemoart_one_use_tex(struct artone *one)
 {
+	one->use_tex = 1;
+
+	if (one->tex == NULL) {
+		one->tex = nemocook_texture_create();
+		nemocook_texture_assign(one->tex, NEMOCOOK_TEXTURE_BGRA_FORMAT, one->width, one->height);
+	}
+
 	nemoplay_video_set_texture(one->videoback,
 			nemocook_texture_get(one->tex),
 			one->width, one->height);
+}
+
+static void nemoart_one_resize(struct artone *one, int width, int height)
+{
+	one->width = width;
+	one->height = height;
+
+	if (one->tex != NULL)
+		nemocook_texture_resize(one->tex, one->width, one->height);
+
+	if (one->use_tex == 0) {
+		nemoplay_video_set_texture(one->videoback, 0, one->width, one->height);
+	} else {
+		nemoplay_video_set_texture(one->videoback,
+				nemocook_texture_get(one->tex),
+				one->width, one->height);
+	}
+}
+
+static void nemoart_one_update(struct artone *one)
+{
+	nemoplay_shader_dispatch(one->shader);
 }
 
 static void nemoart_one_replay(struct artone *one)
@@ -168,8 +198,7 @@ static void nemoart_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t wi
 
 	nemocook_egl_resize(art->egl, width, height);
 
-	if (art->one != NULL)
-		nemoplay_video_set_texture(art->one->videoback, 0, width, height);
+	nemoart_one_resize(art->one, width, height);
 
 	nemocanvas_dispatch_frame(canvas);
 }
@@ -178,13 +207,11 @@ static void nemoart_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t se
 {
 	struct nemoart *art = (struct nemoart *)nemocanvas_get_userdata(canvas);
 
-	if (art->one != NULL) {
-		nemocook_egl_make_current(art->egl);
+	nemocook_egl_make_current(art->egl);
 
-		nemoplay_shader_dispatch(art->one->shader);
+	nemoart_one_update(art->one);
 
-		nemocook_egl_swap_buffers(art->egl);
-	}
+	nemocook_egl_swap_buffers(art->egl);
 }
 
 static int nemoart_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t type, struct nemoevent *event)
