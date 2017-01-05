@@ -24,11 +24,15 @@ struct nemoart;
 struct artone {
 	struct nemoart *art;
 
+	int width, height;
+
 	struct nemoplay *play;
 	struct playdecoder *decoderback;
 	struct playaudio *audioback;
 	struct playvideo *videoback;
 	struct playshader *shader;
+
+	struct cooktex *tex;
 };
 
 struct nemoart {
@@ -53,7 +57,7 @@ struct nemoart {
 static void nemoart_dispatch_video_update(struct nemoplay *play, void *data);
 static void nemoart_dispatch_video_done(struct nemoplay *play, void *data);
 
-static struct artone *nemoart_one_create(struct nemoart *art, const char *url)
+static struct artone *nemoart_one_create(struct nemoart *art, const char *url, int width, int height)
 {
 	struct artone *one;
 
@@ -63,6 +67,8 @@ static struct artone *nemoart_one_create(struct nemoart *art, const char *url)
 	memset(one, 0, sizeof(struct artone));
 
 	one->art = art;
+	one->width = width;
+	one->height = height;
 
 	one->play = nemoplay_create();
 	if (art->threads > 0)
@@ -72,24 +78,41 @@ static struct artone *nemoart_one_create(struct nemoart *art, const char *url)
 	one->decoderback = nemoplay_decoder_create(one->play);
 	one->audioback = nemoplay_audio_create_by_ao(one->play);
 	one->videoback = nemoplay_video_create_by_timer(one->play);
-	nemoplay_video_set_texture(one->videoback, 0, art->width, art->height);
+	nemoplay_video_set_texture(one->videoback, 0, one->width, one->height);
 	nemoplay_video_set_update(one->videoback, nemoart_dispatch_video_update);
 	nemoplay_video_set_done(one->videoback, nemoart_dispatch_video_done);
 	nemoplay_video_set_data(one->videoback, one);
 	one->shader = nemoplay_video_get_shader(one->videoback);
 	nemoplay_shader_set_polygon(one->shader, art->polygon);
 
+	one->tex = nemocook_texture_create();
+	nemocook_texture_assign(one->tex, NEMOCOOK_TEXTURE_BGRA_FORMAT, one->width, one->height);
+
 	return one;
 }
 
 static void nemoart_one_destroy(struct artone *one)
 {
+	nemocook_texture_destroy(one->tex);
+
 	nemoplay_video_destroy(one->videoback);
 	nemoplay_audio_destroy(one->audioback);
 	nemoplay_decoder_destroy(one->decoderback);
 	nemoplay_destroy(one->play);
 
 	free(one);
+}
+
+static void nemoart_one_use_egl(struct artone *one)
+{
+	nemoplay_video_set_texture(one->videoback, 0, one->width, one->height);
+}
+
+static void nemoart_one_use_tex(struct artone *one)
+{
+	nemoplay_video_set_texture(one->videoback,
+			nemocook_texture_get(one->tex),
+			one->width, one->height);
 }
 
 static void nemoart_one_replay(struct artone *one)
@@ -123,7 +146,8 @@ static void nemoart_dispatch_video_done(struct nemoplay *play, void *data)
 			nemoart_one_destroy(art->one);
 
 		art->one = nemoart_one_create(art,
-				nemofs_dir_get_filepath(art->contents, art->icontents));
+				nemofs_dir_get_filepath(art->contents, art->icontents),
+				art->width, art->height);
 	} else {
 		nemoart_one_replay(art->one);
 	}
@@ -263,7 +287,8 @@ static void nemoart_dispatch_bus(void *data, const char *events)
 		nemoart_one_destroy(art->one);
 
 	art->one = nemoart_one_create(art,
-			nemofs_dir_get_filepath(art->contents, art->icontents));
+			nemofs_dir_get_filepath(art->contents, art->icontents),
+			art->width, art->height);
 }
 
 int main(int argc, char *argv[])
@@ -402,7 +427,8 @@ int main(int argc, char *argv[])
 		}
 
 		art->one = nemoart_one_create(art,
-				nemofs_dir_get_filepath(art->contents, art->icontents));
+				nemofs_dir_get_filepath(art->contents, art->icontents),
+				art->width, art->height);
 	}
 
 	nemotool_run(tool);
