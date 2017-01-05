@@ -90,6 +90,8 @@ extern int nemocook_polygon_update_transform(struct cookpoly *poly);
 
 extern int nemocook_polygon_transform_to_global(struct cookpoly *poly, float sx, float sy, float sz, float *x, float *y, float *z);
 extern int nemocook_polygon_transform_from_global(struct cookpoly *poly, float x, float y, float z, float *sx, float *sy, float *sz);
+extern int nemocook_polygon_2d_transform_to_global(struct cookpoly *poly, float sx, float sy, float *x, float *y);
+extern int nemocook_polygon_2d_transform_from_global(struct cookpoly *poly, float x, float y, float *sx, float *sy);
 
 static inline void nemocook_polygon_attach_state(struct cookpoly *poly, struct cookstate *state)
 {

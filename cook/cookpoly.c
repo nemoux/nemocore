@@ -387,3 +387,33 @@ int nemocook_polygon_transform_from_global(struct cookpoly *poly, float x, float
 
 	return 0;
 }
+
+int nemocook_polygon_2d_transform_to_global(struct cookpoly *poly, float sx, float sy, float *x, float *y)
+{
+	struct nemovector v = { { sx, sy, 0.0f, 1.0f } };
+
+	nemomatrix_transform_vector(&poly->matrix, &v);
+
+	if (fabsf(v.f[3]) < 1e-6)
+		return -1;
+
+	*x = v.f[0] / v.f[3];
+	*y = v.f[1] / v.f[3];
+
+	return 0;
+}
+
+int nemocook_polygon_2d_transform_from_global(struct cookpoly *poly, float x, float y, float *sx, float *sy)
+{
+	struct nemovector v = { { x, y, 0.0f, 1.0f } };
+
+	nemomatrix_transform_vector(&poly->inverse, &v);
+
+	if (fabsf(v.f[3]) < 1e-6)
+		return -1;
+
+	*sx = v.f[0] / v.f[3];
+	*sy = v.f[1] / v.f[3];
+
+	return 0;
+}
