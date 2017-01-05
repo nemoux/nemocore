@@ -95,23 +95,23 @@ void nemocook_egl_rotate_damage(struct cookegl *egl, pixman_region32_t *damage)
 
 int nemocook_egl_swap_buffers_with_damage(struct cookegl *egl, pixman_region32_t *damage)
 {
-	pixman_box32_t *boxs;
-	int nboxs;
+	pixman_box32_t *boxes;
+	int nboxes;
 	EGLint *damages;
 	int i, r;
 
-	boxs = pixman_region32_rectangles(damage, &nboxs);
+	boxes = pixman_region32_rectangles(damage, &nboxes);
 
-	damages = (EGLint *)malloc(sizeof(EGLint[4]) * nboxs);
+	damages = (EGLint *)malloc(sizeof(EGLint[4]) * nboxes);
 
-	for (i = 0; i < nboxs; i++) {
-		damages[i * 4 + 0] = boxs[i].x1;
-		damages[i * 4 + 1] = egl->height - boxs[i].y2;
-		damages[i * 4 + 2] = boxs[i].x2 - boxs[i].x1;
-		damages[i * 4 + 3] = boxs[i].y2 - boxs[i].y1;
+	for (i = 0; i < nboxes; i++) {
+		damages[i * 4 + 0] = boxes[i].x1;
+		damages[i * 4 + 1] = egl->height - boxes[i].y2;
+		damages[i * 4 + 2] = boxes[i].x2 - boxes[i].x1;
+		damages[i * 4 + 3] = boxes[i].y2 - boxes[i].y1;
 	}
 
-	r = egl->swap_buffers_with_damage(egl->display, egl->surface, damages, nboxs) == EGL_TRUE ? 0 : -1;
+	r = egl->swap_buffers_with_damage(egl->display, egl->surface, damages, nboxes) == EGL_TRUE ? 0 : -1;
 
 	free(damages);
 

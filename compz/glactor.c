@@ -185,7 +185,7 @@ void glrenderer_flush_actor(struct nemorenderer *base, struct nemoactor *actor)
 {
 	struct glrenderer *renderer = (struct glrenderer *)container_of(base, struct glrenderer, base);
 	struct glcontent *glcontent = (struct glcontent *)nemocontent_get_opengl_context(&actor->base, base->node);
-	pixman_box32_t *rects;
+	pixman_box32_t *boxes;
 	uint32_t *data;
 	int width, height;
 	int i, n;
@@ -220,10 +220,10 @@ void glrenderer_flush_actor(struct nemorenderer *base, struct nemoactor *actor)
 				glcontent->pitch, height, 0,
 				glcontent->format, glcontent->pixeltype, (void *)data);
 	} else {
-		rects = pixman_region32_rectangles(&glcontent->damage, &n);
+		boxes = pixman_region32_rectangles(&glcontent->damage, &n);
 
 		for (i = 0; i < n; i++) {
-			pixman_box32_t box = nemocontent_transform_to_buffer_rect(&actor->base, rects[i]);
+			pixman_box32_t box = nemocontent_transform_to_buffer_rect(&actor->base, boxes[i]);
 
 			glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, box.x1);
 			glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, box.y1);

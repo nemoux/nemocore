@@ -307,7 +307,7 @@ void glrenderer_flush_canvas(struct nemorenderer *base, struct nemocanvas *canva
 	struct glrenderer *renderer = (struct glrenderer *)container_of(base, struct glrenderer, base);
 	struct glcontent *glcontent = (struct glcontent *)nemocontent_get_opengl_context(&canvas->base, base->node);
 	struct nemobuffer *buffer;
-	pixman_box32_t *rects;
+	pixman_box32_t *boxes;
 	void *data;
 	int i, n;
 
@@ -345,12 +345,12 @@ void glrenderer_flush_canvas(struct nemorenderer *base, struct nemocanvas *canva
 				glcontent->format, glcontent->pixeltype, data);
 		wl_shm_buffer_end_access(buffer->shmbuffer);
 	} else {
-		rects = pixman_region32_rectangles(&glcontent->damage, &n);
+		boxes = pixman_region32_rectangles(&glcontent->damage, &n);
 
 		wl_shm_buffer_begin_access(buffer->shmbuffer);
 
 		for (i = 0; i < n; i++) {
-			pixman_box32_t box = nemocontent_transform_to_buffer_rect(&canvas->base, rects[i]);
+			pixman_box32_t box = nemocontent_transform_to_buffer_rect(&canvas->base, boxes[i]);
 
 			glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, box.x1);
 			glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, box.y1);

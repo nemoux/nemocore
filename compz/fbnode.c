@@ -33,8 +33,8 @@ static int fb_screen_repaint_frame(struct nemoscreen *base, pixman_region32_t *d
 {
 	struct fbscreen *screen = (struct fbscreen *)container_of(base, struct fbscreen, base);
 	struct fbnode *node = screen->node;
-	pixman_box32_t *rects;
-	int nrects, width, height, i;
+	pixman_box32_t *boxes;
+	int nboxes, width, height, i;
 	int x1, x2, y1, y2;
 
 	pixmanrenderer_set_screen_buffer(node->base.pixman, &screen->base, screen->shadow_image);
@@ -43,13 +43,13 @@ static int fb_screen_repaint_frame(struct nemoscreen *base, pixman_region32_t *d
 
 	width = pixman_image_get_width(screen->shadow_image);
 	height = pixman_image_get_height(screen->shadow_image);
-	rects = pixman_region32_rectangles(damage, &nrects);
+	boxes = pixman_region32_rectangles(damage, &nboxes);
 
-	for (i = 0; i < nrects; i++) {
-		x1 = rects[i].x1;
-		x2 = rects[i].x2;
-		y1 = rects[i].y1;
-		y2 = rects[i].y2;
+	for (i = 0; i < nboxes; i++) {
+		x1 = boxes[i].x1;
+		x2 = boxes[i].x2;
+		y1 = boxes[i].y1;
+		y2 = boxes[i].y2;
 
 		pixman_image_composite32(PIXMAN_OP_SRC,
 				screen->shadow_image,

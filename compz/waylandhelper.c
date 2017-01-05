@@ -164,8 +164,8 @@ pixman_box32_t wayland_transform_rect(int width, int height, enum wl_output_tran
 
 void wayland_transform_region(int width, int height, enum wl_output_transform transform, int32_t scale, pixman_region32_t *src, pixman_region32_t *dest)
 {
-	pixman_box32_t *src_rects, *dest_rects;
-	int nrects, i;
+	pixman_box32_t *sboxes, *dboxes;
+	int nboxes, i;
 
 	if (transform == WL_OUTPUT_TRANSFORM_NORMAL && scale == 1) {
 		if (src != dest)
@@ -173,79 +173,79 @@ void wayland_transform_region(int width, int height, enum wl_output_transform tr
 		return;
 	}
 
-	src_rects = pixman_region32_rectangles(src, &nrects);
-	dest_rects = (pixman_box32_t *)malloc(nrects * sizeof(pixman_box32_t));
-	if (!dest_rects)
+	sboxes = pixman_region32_rectangles(src, &nboxes);
+	dboxes = (pixman_box32_t *)malloc(nboxes * sizeof(pixman_box32_t));
+	if (!dboxes)
 		return;
 
 	if (transform == WL_OUTPUT_TRANSFORM_NORMAL) {
-		memcpy(dest_rects, src_rects, nrects * sizeof(pixman_box32_t));
+		memcpy(dboxes, sboxes, nboxes * sizeof(pixman_box32_t));
 	} else {
-		for (i = 0; i < nrects; i++) {
+		for (i = 0; i < nboxes; i++) {
 			switch (transform) {
 				default:
 				case WL_OUTPUT_TRANSFORM_NORMAL:
-					dest_rects[i].x1 = src_rects[i].x1;
-					dest_rects[i].y1 = src_rects[i].y1;
-					dest_rects[i].x2 = src_rects[i].x2;
-					dest_rects[i].y2 = src_rects[i].y2;
+					dboxes[i].x1 = sboxes[i].x1;
+					dboxes[i].y1 = sboxes[i].y1;
+					dboxes[i].x2 = sboxes[i].x2;
+					dboxes[i].y2 = sboxes[i].y2;
 					break;
 				case WL_OUTPUT_TRANSFORM_90:
-					dest_rects[i].x1 = height - src_rects[i].y2;
-					dest_rects[i].y1 = src_rects[i].x1;
-					dest_rects[i].x2 = height - src_rects[i].y1;
-					dest_rects[i].y2 = src_rects[i].x2;
+					dboxes[i].x1 = height - sboxes[i].y2;
+					dboxes[i].y1 = sboxes[i].x1;
+					dboxes[i].x2 = height - sboxes[i].y1;
+					dboxes[i].y2 = sboxes[i].x2;
 					break;
 				case WL_OUTPUT_TRANSFORM_180:
-					dest_rects[i].x1 = width - src_rects[i].x2;
-					dest_rects[i].y1 = height - src_rects[i].y2;
-					dest_rects[i].x2 = width - src_rects[i].x1;
-					dest_rects[i].y2 = height - src_rects[i].y1;
+					dboxes[i].x1 = width - sboxes[i].x2;
+					dboxes[i].y1 = height - sboxes[i].y2;
+					dboxes[i].x2 = width - sboxes[i].x1;
+					dboxes[i].y2 = height - sboxes[i].y1;
 					break;
 				case WL_OUTPUT_TRANSFORM_270:
-					dest_rects[i].x1 = src_rects[i].y1;
-					dest_rects[i].y1 = width - src_rects[i].x2;
-					dest_rects[i].x2 = src_rects[i].y2;
-					dest_rects[i].y2 = width - src_rects[i].x1;
+					dboxes[i].x1 = sboxes[i].y1;
+					dboxes[i].y1 = width - sboxes[i].x2;
+					dboxes[i].x2 = sboxes[i].y2;
+					dboxes[i].y2 = width - sboxes[i].x1;
 					break;
 				case WL_OUTPUT_TRANSFORM_FLIPPED:
-					dest_rects[i].x1 = width - src_rects[i].x2;
-					dest_rects[i].y1 = src_rects[i].y1;
-					dest_rects[i].x2 = width - src_rects[i].x1;
-					dest_rects[i].y2 = src_rects[i].y2;
+					dboxes[i].x1 = width - sboxes[i].x2;
+					dboxes[i].y1 = sboxes[i].y1;
+					dboxes[i].x2 = width - sboxes[i].x1;
+					dboxes[i].y2 = sboxes[i].y2;
 					break;
 				case WL_OUTPUT_TRANSFORM_FLIPPED_90:
-					dest_rects[i].x1 = height - src_rects[i].y2;
-					dest_rects[i].y1 = width - src_rects[i].x2;
-					dest_rects[i].x2 = height - src_rects[i].y1;
-					dest_rects[i].y2 = width - src_rects[i].x1;
+					dboxes[i].x1 = height - sboxes[i].y2;
+					dboxes[i].y1 = width - sboxes[i].x2;
+					dboxes[i].x2 = height - sboxes[i].y1;
+					dboxes[i].y2 = width - sboxes[i].x1;
 					break;
 				case WL_OUTPUT_TRANSFORM_FLIPPED_180:
-					dest_rects[i].x1 = src_rects[i].x1;
-					dest_rects[i].y1 = height - src_rects[i].y2;
-					dest_rects[i].x2 = src_rects[i].x2;
-					dest_rects[i].y2 = height - src_rects[i].y1;
+					dboxes[i].x1 = sboxes[i].x1;
+					dboxes[i].y1 = height - sboxes[i].y2;
+					dboxes[i].x2 = sboxes[i].x2;
+					dboxes[i].y2 = height - sboxes[i].y1;
 					break;
 				case WL_OUTPUT_TRANSFORM_FLIPPED_270:
-					dest_rects[i].x1 = src_rects[i].y1;
-					dest_rects[i].y1 = src_rects[i].x1;
-					dest_rects[i].x2 = src_rects[i].y2;
-					dest_rects[i].y2 = src_rects[i].x2;
+					dboxes[i].x1 = sboxes[i].y1;
+					dboxes[i].y1 = sboxes[i].x1;
+					dboxes[i].x2 = sboxes[i].y2;
+					dboxes[i].y2 = sboxes[i].x2;
 					break;
 			}
 		}
 	}
 
 	if (scale != 1) {
-		for (i = 0; i < nrects; i++) {
-			dest_rects[i].x1 *= scale;
-			dest_rects[i].x2 *= scale;
-			dest_rects[i].y1 *= scale;
-			dest_rects[i].y2 *= scale;
+		for (i = 0; i < nboxes; i++) {
+			dboxes[i].x1 *= scale;
+			dboxes[i].x2 *= scale;
+			dboxes[i].y1 *= scale;
+			dboxes[i].y2 *= scale;
 		}
 	}
 
 	pixman_region32_clear(dest);
-	pixman_region32_init_rects(dest, dest_rects, nrects);
-	free(dest_rects);
+	pixman_region32_init_rects(dest, dboxes, nboxes);
+	free(dboxes);
 }

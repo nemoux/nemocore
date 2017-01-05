@@ -204,19 +204,19 @@ void nemocanvas_damage_region(struct nemocanvas *canvas, pixman_region32_t *regi
 void nemocanvas_commit(struct nemocanvas *canvas)
 {
 	struct wl_callback *callback;
-	pixman_box32_t *rects;
-	int nrects, i;
+	pixman_box32_t *boxes;
+	int nboxes, i;
 
 	wl_surface_attach(canvas->surface, canvas->buffer->buffer, 0, 0);
 
-	rects = pixman_region32_rectangles(&canvas->damage, &nrects);
+	boxes = pixman_region32_rectangles(&canvas->damage, &nboxes);
 
-	for (i = 0; i < nrects; i++) {
+	for (i = 0; i < nboxes; i++) {
 		wl_surface_damage(canvas->surface,
-				rects[i].x1,
-				rects[i].y1,
-				rects[i].x2 - rects[i].x1,
-				rects[i].y2 - rects[i].y1);
+				boxes[i].x1,
+				boxes[i].y1,
+				boxes[i].x2 - boxes[i].x1,
+				boxes[i].y2 - boxes[i].y1);
 	}
 
 	callback = wl_surface_frame(canvas->surface);
