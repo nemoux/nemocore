@@ -92,6 +92,17 @@ static void nemoart_one_destroy(struct artone *one)
 	free(one);
 }
 
+static void nemoart_one_replay(struct artone *one)
+{
+	nemoplay_decoder_seek(one->decoderback, 0.0f);
+	nemoplay_decoder_play(one->decoderback);
+}
+
+static void nemoart_one_seek(struct artone *one, double pts)
+{
+	nemoplay_decoder_seek(one->decoderback, pts);
+}
+
 static void nemoart_dispatch_video_update(struct nemoplay *play, void *data)
 {
 	struct artone *one = (struct artone *)data;
@@ -104,14 +115,18 @@ static void nemoart_dispatch_video_done(struct nemoplay *play, void *data)
 {
 	struct artone *one = (struct artone *)data;
 	struct nemoart *art = one->art;
+	int pcontents = art->icontents;
 
 	art->icontents = (art->icontents + 1) % nemofs_dir_get_filecount(art->contents);
+	if (art->icontents != pcontents) {
+		if (art->one != NULL)
+			nemoart_one_destroy(art->one);
 
-	if (art->one != NULL)
-		nemoart_one_destroy(art->one);
-
-	art->one = nemoart_one_create(art,
-			nemofs_dir_get_filepath(art->contents, art->icontents));
+		art->one = nemoart_one_create(art,
+				nemofs_dir_get_filepath(art->contents, art->icontents));
+	} else {
+		nemoart_one_replay(art->one);
+	}
 }
 
 static void nemoart_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t width, int32_t height)
