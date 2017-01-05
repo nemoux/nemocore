@@ -18,6 +18,8 @@ NEMO_BEGIN_EXTERN_C
 #include <cookone.h>
 #include <cookstate.h>
 
+extern void nemocook_draw_arrays(int mode, int ncounts, uint32_t *counts);
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

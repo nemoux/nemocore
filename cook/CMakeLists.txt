@@ -61,6 +61,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 
 add_library(nemocook SHARED
+	nemocook.c
 	cookshader.c
 	cooktex.c
 	cookpoly.c

@@ -72,6 +72,11 @@ void nemocook_shader_set_attrib_pointer(struct cookshader *shader, int index, fl
 	glEnableVertexAttribArray(index);
 }
 
+void nemocook_shader_put_attrib_pointer(struct cookshader *shader, int index)
+{
+	glDisableVertexAttribArray(index);
+}
+
 void nemocook_shader_set_uniform(struct cookshader *shader, int index, const char *name)
 {
 	shader->uniforms[index] = glGetUniformLocation(shader->program, name);
