@@ -37,8 +37,9 @@ extern int nemocook_shader_set_program(struct cookshader *shader, const char *ve
 extern void nemocook_shader_use_program(struct cookshader *shader);
 
 extern void nemocook_shader_set_attrib(struct cookshader *shader, int index, const char *name, int size);
-extern void nemocook_shader_set_uniform(struct cookshader *shader, int index, const char *name);
+extern void nemocook_shader_set_attrib_pointer(struct cookshader *shader, int index, float *pointer);
 
+extern void nemocook_shader_set_uniform(struct cookshader *shader, int index, const char *name);
 extern void nemocook_shader_set_uniform_1i(struct cookshader *shader, int index, int value);
 extern void nemocook_shader_set_uniform_1f(struct cookshader *shader, int index, float value);
 extern void nemocook_shader_set_uniform_2fv(struct cookshader *shader, int index, float *value);
