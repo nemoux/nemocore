@@ -102,6 +102,7 @@ static void nemoenvs_execute_background(struct nemoenvs *envs, struct itemone *o
 			clientstate_set_fattr(state, "y", y);
 			clientstate_set_fattr(state, "dx", 0.0f);
 			clientstate_set_fattr(state, "dy", 0.0f);
+			clientstate_set_sattr(state, "keypad", "off");
 		}
 
 		nemoenvs_attach_app(envs, nemoitem_one_get_path(one), pid);
@@ -157,6 +158,7 @@ static void nemoenvs_execute_screensaver(struct nemoenvs *envs, struct itemone *
 			clientstate_set_fattr(state, "y", y);
 			clientstate_set_fattr(state, "dx", 0.0f);
 			clientstate_set_fattr(state, "dy", 0.0f);
+			clientstate_set_sattr(state, "keypad", "off");
 		}
 	}
 
