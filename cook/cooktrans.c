@@ -28,6 +28,7 @@ struct cooktrans *nemocook_transform_create(void)
 	trans->sz = 1.0f;
 
 	nemomatrix_init_identity(&trans->matrix);
+	nemomatrix_init_identity(&trans->inverse);
 
 	return trans;
 }
@@ -45,6 +46,71 @@ int nemocook_transform_update(struct cooktrans *trans)
 	nemomatrix_rotate_y(&trans->matrix, cos(trans->ry), sin(trans->ry));
 	nemomatrix_rotate_z(&trans->matrix, cos(trans->rz), sin(trans->rz));
 	nemomatrix_translate_xyz(&trans->matrix, trans->tx, trans->ty, trans->tz);
+
+	if (nemomatrix_invert(&trans->inverse, &trans->matrix) < 0)
+		return -1;
+
+	return 0;
+}
+
+int nemocook_transform_to_global(struct cooktrans *trans, float sx, float sy, float sz, float *x, float *y, float *z)
+{
+	struct nemovector v = { { sx, sy, sz, 1.0f } };
+
+	nemomatrix_transform_vector(&trans->matrix, &v);
+
+	if (fabsf(v.f[3]) < 1e-6)
+		return -1;
+
+	*x = v.f[0] / v.f[3];
+	*y = v.f[1] / v.f[3];
+	*z = v.f[2] / v.f[3];
+
+	return 0;
+}
+
+int nemocook_transform_from_global(struct cooktrans *trans, float x, float y, float z, float *sx, float *sy, float *sz)
+{
+	struct nemovector v = { { x, y, z, 1.0f } };
+
+	nemomatrix_transform_vector(&trans->inverse, &v);
+
+	if (fabsf(v.f[3]) < 1e-6)
+		return -1;
+
+	*sx = v.f[0] / v.f[3];
+	*sy = v.f[1] / v.f[3];
+	*sz = v.f[2] / v.f[3];
+
+	return 0;
+}
+
+int nemocook_2d_transform_to_global(struct cooktrans *trans, float sx, float sy, float *x, float *y)
+{
+	struct nemovector v = { { sx, sy, 0.0f, 1.0f } };
+
+	nemomatrix_transform_vector(&trans->matrix, &v);
+
+	if (fabsf(v.f[3]) < 1e-6)
+		return -1;
+
+	*x = v.f[0] / v.f[3];
+	*y = v.f[1] / v.f[3];
+
+	return 0;
+}
+
+int nemocook_2d_transform_from_global(struct cooktrans *trans, float x, float y, float *sx, float *sy)
+{
+	struct nemovector v = { { x, y, 0.0f, 1.0f } };
+
+	nemomatrix_transform_vector(&trans->inverse, &v);
+
+	if (fabsf(v.f[3]) < 1e-6)
+		return -1;
+
+	*sx = v.f[0] / v.f[3];
+	*sy = v.f[1] / v.f[3];
 
 	return 0;
 }
