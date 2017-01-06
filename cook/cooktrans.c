@@ -26,6 +26,9 @@ struct cooktrans *nemocook_transform_create(void)
 	trans->sx = 1.0f;
 	trans->sy = 1.0f;
 	trans->sz = 1.0f;
+	trans->px = 0.0f;
+	trans->py = 0.0f;
+	trans->pz = 0.0f;
 
 	nemomatrix_init_identity(&trans->matrix);
 	nemomatrix_init_identity(&trans->inverse);
@@ -41,10 +44,21 @@ void nemocook_transform_destroy(struct cooktrans *trans)
 int nemocook_transform_update(struct cooktrans *trans)
 {
 	nemomatrix_init_identity(&trans->matrix);
-	nemomatrix_scale_xyz(&trans->matrix, trans->sx, trans->sy, trans->sz);
-	nemomatrix_rotate_x(&trans->matrix, cos(trans->rx), sin(trans->rx));
-	nemomatrix_rotate_y(&trans->matrix, cos(trans->ry), sin(trans->ry));
-	nemomatrix_rotate_z(&trans->matrix, cos(trans->rz), sin(trans->rz));
+
+	if (trans->sx != 1.0f || trans->sy != 1.0f || trans->sz != 1.0f) {
+		nemomatrix_translate_xyz(&trans->matrix, -trans->px, -trans->py, -trans->pz);
+		nemomatrix_scale_xyz(&trans->matrix, trans->sx, trans->sy, trans->sz);
+		nemomatrix_translate_xyz(&trans->matrix, trans->px, trans->py, trans->pz);
+	}
+
+	if (trans->rx != 0.0f || trans->ry != 0.0f || trans->rz != 0.0f) {
+		nemomatrix_translate_xyz(&trans->matrix, -trans->px, -trans->py, -trans->pz);
+		nemomatrix_rotate_x(&trans->matrix, cos(trans->rx), sin(trans->rx));
+		nemomatrix_rotate_y(&trans->matrix, cos(trans->ry), sin(trans->ry));
+		nemomatrix_rotate_z(&trans->matrix, cos(trans->rz), sin(trans->rz));
+		nemomatrix_translate_xyz(&trans->matrix, trans->px, trans->py, trans->pz);
+	}
+
 	nemomatrix_translate_xyz(&trans->matrix, trans->tx, trans->ty, trans->tz);
 
 	if (nemomatrix_invert(&trans->inverse, &trans->matrix) < 0)

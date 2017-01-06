@@ -15,6 +15,7 @@ struct cooktrans {
 	float tx, ty, tz;
 	float sx, sy, sz;
 	float rx, ry, rz;
+	float px, py, pz;
 
 	struct nemomatrix matrix;
 	struct nemomatrix inverse;
@@ -51,6 +52,13 @@ static inline void nemocook_transform_set_rotate(struct cooktrans *trans, float 
 	trans->rx = rx;
 	trans->ry = ry;
 	trans->rz = rz;
+}
+
+static inline void nemocook_transform_set_pivot(struct cooktrans *trans, float px, float py, float pz)
+{
+	trans->px = px;
+	trans->py = py;
+	trans->pz = pz;
 }
 
 static inline void nemocook_transform_set_parent(struct cooktrans *trans, struct cooktrans *parent)
