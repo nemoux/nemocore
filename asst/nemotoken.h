@@ -71,6 +71,14 @@ static inline int nemotoken_get_integer(struct nemotoken *token, int index, int 
 	return strtoul(token->tokens[index], NULL, 10);
 }
 
+static inline float nemotoken_get_float(struct nemotoken *token, int index, float value)
+{
+	if (index >= token->ntokens || token->tokens[index] == NULL)
+		return value;
+
+	return strtof(token->tokens[index], NULL);
+}
+
 static inline double nemotoken_get_double(struct nemotoken *token, int index, double value)
 {
 	if (index >= token->ntokens || token->tokens[index] == NULL)

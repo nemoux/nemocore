@@ -129,29 +129,29 @@ int poly_intersect_ray_triangle(float *v0, float *v1, float *v2, float *o, float
 	float tvec[3], pvec[3], qvec[3];
 	float det, inv;
 
-	nemovector3d_sub(edge1, v1, v0);
-	nemovector3d_sub(edge2, v2, v0);
+	nemovector_sub_xyz(edge1, v1, v0);
+	nemovector_sub_xyz(edge2, v2, v0);
 
-	nemovector3d_cross(pvec, d, edge2);
+	nemovector_cross_xyz(pvec, d, edge2);
 
-	det = nemovector3d_dot(edge1, pvec);
+	det = nemovector_dot_xyz(edge1, pvec);
 	if (fabsf(det) < 1e-6)
 		return 0;
 	inv = 1.0f / det;
 
-	nemovector3d_sub(tvec, o, v0);
+	nemovector_sub_xyz(tvec, o, v0);
 
-	*u = nemovector3d_dot(tvec, pvec) * inv;
+	*u = nemovector_dot_xyz(tvec, pvec) * inv;
 	if (*u < 0.0f || *u > 1.0f)
 		return 0;
 
-	nemovector3d_cross(qvec, tvec, edge1);
+	nemovector_cross_xyz(qvec, tvec, edge1);
 
-	*v = nemovector3d_dot(d, qvec) * inv;
+	*v = nemovector_dot_xyz(d, qvec) * inv;
 	if (*v < 0.0f || *u + *v > 1.0f)
 		return 0;
 
-	*t = nemovector3d_dot(edge2, qvec) * inv;
+	*t = nemovector_dot_xyz(edge2, qvec) * inv;
 
 	return 1;
 }

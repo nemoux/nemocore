@@ -153,7 +153,7 @@ static inline int nemoitem_one_has_iattr(struct itemone *one, const char *name, 
 {
 	const char *str = nemoitem_one_get_attr(one, name);
 
-	return str != NULL ? strtoul(str, NULL, 10) == value : 0;
+	return str != NULL ? strtol(str, NULL, 10) == value : 0;
 }
 
 static inline int nemoitem_one_has_fattr(struct itemone *one, const char *name, float value)

@@ -9,10 +9,10 @@
 #include <nemotoken.h>
 #include <nemomisc.h>
 
-static inline void nemomatrix_swap_rows(double *a, double *b)
+static inline void nemomatrix_swap_rows(float *a, float *b)
 {
 	unsigned k;
-	double tmp;
+	float tmp;
 
 	for (k = 0; k < 13; k += 4) {
 		tmp = a[k];
@@ -30,7 +30,7 @@ static inline void nemomatrix_swap_unsigned(unsigned *a, unsigned *b)
 	*b = tmp;
 }
 
-static inline unsigned nemomatrix_find_pivot(double *column, unsigned k)
+static inline unsigned nemomatrix_find_pivot(float *column, unsigned k)
 {
 	unsigned p = k;
 
@@ -41,11 +41,11 @@ static inline unsigned nemomatrix_find_pivot(double *column, unsigned k)
 	return p;
 }
 
-static inline int nemomatrix_inverse_matrix(double *A, unsigned *p, const struct nemomatrix *matrix)
+static inline int nemomatrix_inverse_matrix(float *A, unsigned *p, const struct nemomatrix *matrix)
 {
 	unsigned i, j, k;
 	unsigned pivot;
-	double pv;
+	float pv;
 
 	for (i = 0; i < 4; ++i)
 		p[i] = i;
@@ -74,15 +74,15 @@ static inline int nemomatrix_inverse_matrix(double *A, unsigned *p, const struct
 	return 0;
 }
 
-static inline void nemomatrix_inverse_transform(const double *LU, const unsigned *p, float *v)
+static inline void nemomatrix_inverse_transform(const float *LU, const unsigned *p, float *v)
 {
-	double b[4];
+	float b[4];
 	unsigned j;
 
 	b[0] = v[p[0]];
-	b[1] = (double)v[p[1]] - b[0] * LU[1 + 0 * 4];
-	b[2] = (double)v[p[2]] - b[0] * LU[2 + 0 * 4];
-	b[3] = (double)v[p[3]] - b[0] * LU[3 + 0 * 4];
+	b[1] = (float)v[p[1]] - b[0] * LU[1 + 0 * 4];
+	b[2] = (float)v[p[2]] - b[0] * LU[2 + 0 * 4];
+	b[3] = (float)v[p[3]] - b[0] * LU[3 + 0 * 4];
 	b[2] -= b[1] * LU[2 + 1 * 4];
 	b[3] -= b[1] * LU[3 + 1 * 4];
 	b[3] -= b[2] * LU[3 + 2 * 4];
@@ -185,7 +185,7 @@ int nemomatrix_transform_xyz(struct nemomatrix *matrix, float *x, float *y, floa
 
 int nemomatrix_invert(struct nemomatrix *inverse, const struct nemomatrix *matrix)
 {
-	double LU[16];
+	float LU[16];
 	unsigned perm[4];
 	unsigned c;
 
@@ -527,23 +527,23 @@ void nemomatrix_asymmetric(struct nemomatrix *matrix, float *pa, float *pb, floa
 	float bottom, top;
 	float eyedist;
 
-	nemovector3d_sub(vr, pb, pa);
-	nemovector3d_normalize(vr);
-	nemovector3d_sub(vu, pc, pa);
-	nemovector3d_normalize(vu);
-	nemovector3d_cross(vn, vr, vu);
-	nemovector3d_normalize(vn);
+	nemovector_sub_xyz(vr, pb, pa);
+	nemovector_normalize_xyz(vr);
+	nemovector_sub_xyz(vu, pc, pa);
+	nemovector_normalize_xyz(vu);
+	nemovector_cross_xyz(vn, vr, vu);
+	nemovector_normalize_xyz(vn);
 
-	nemovector3d_sub(va, pa, pe);
-	nemovector3d_sub(vb, pb, pe);
-	nemovector3d_sub(vc, pc, pe);
+	nemovector_sub_xyz(va, pa, pe);
+	nemovector_sub_xyz(vb, pb, pe);
+	nemovector_sub_xyz(vc, pc, pe);
 
-	eyedist = -nemovector3d_dot(va, vn);
+	eyedist = -nemovector_dot_xyz(va, vn);
 
-	left = nemovector3d_dot(vr, va) * near / eyedist;
-	right = nemovector3d_dot(vr, vb) * near / eyedist;
-	bottom = nemovector3d_dot(vu, va) * near / eyedist;
-	top = nemovector3d_dot(vu, vc) * near / eyedist;
+	left = nemovector_dot_xyz(vr, va) * near / eyedist;
+	right = nemovector_dot_xyz(vr, vb) * near / eyedist;
+	bottom = nemovector_dot_xyz(vu, va) * near / eyedist;
+	top = nemovector_dot_xyz(vu, vc) * near / eyedist;
 
 	nemomatrix_init_identity(&projection);
 	nemomatrix_set_factor(&projection, 0, 0, 2.0f * near / (right - left));
@@ -620,19 +620,19 @@ void nemomatrix_append_command(struct nemomatrix *matrix, const char *str)
 	for (i = 0; i < nemotoken_get_token_count(token); i++) {
 		cmd = nemotoken_get_token(token, i);
 		if (strcmp(cmd, "translate") == 0) {
-			x = nemotoken_get_double(token, ++i, 0.0f);
-			y = nemotoken_get_double(token, ++i, 0.0f);
+			x = nemotoken_get_float(token, ++i, 0.0f);
+			y = nemotoken_get_float(token, ++i, 0.0f);
 
 			nemomatrix_translate(matrix, x, y);
 		} else if (strcmp(cmd, "rotate") == 0) {
-			x = nemotoken_get_double(token, ++i, 0.0f);
+			x = nemotoken_get_float(token, ++i, 0.0f);
 
 			nemomatrix_rotate(matrix,
 					cos(x / 180.0f * M_PI),
 					sin(x / 180.0f * M_PI));
 		} else if (strcmp(cmd, "scale") == 0) {
-			x = nemotoken_get_double(token, ++i, 0.0f);
-			y = nemotoken_get_double(token, ++i, 0.0f);
+			x = nemotoken_get_float(token, ++i, 0.0f);
+			y = nemotoken_get_float(token, ++i, 0.0f);
 
 			nemomatrix_scale(matrix, x, y);
 		}
@@ -641,28 +641,28 @@ void nemomatrix_append_command(struct nemomatrix *matrix, const char *str)
 	nemotoken_destroy(token);
 }
 
-double nemovector_distance(struct nemovector *v0, struct nemovector *v1)
+float nemovector_distance(struct nemovector *v0, struct nemovector *v1)
 {
-	double dx = v0->f[0] - v1->f[0];
-	double dy = v0->f[1] - v1->f[1];
-	double dz = v0->f[2] - v1->f[2];
+	float dx = v0->f[0] - v1->f[0];
+	float dy = v0->f[1] - v1->f[1];
+	float dz = v0->f[2] - v1->f[2];
 
 	return sqrtf(dx * dx + dy * dy + dz * dz);
 }
 
-double nemovector_dot(struct nemovector *v0, struct nemovector *v1)
+float nemovector_dot(struct nemovector *v0, struct nemovector *v1)
 {
 	return v0->f[0] * v1->f[0] + v0->f[1] * v1->f[1] + v0->f[2] * v1->f[2];
 }
 
 void nemovector_cross(struct nemovector *v0, struct nemovector *v1)
 {
-	double lx = v0->f[0];
-	double ly = v0->f[1];
-	double lz = v0->f[2];
-	double rx = v1->f[0];
-	double ry = v1->f[1];
-	double rz = v1->f[2];
+	float lx = v0->f[0];
+	float ly = v0->f[1];
+	float lz = v0->f[2];
+	float rx = v1->f[0];
+	float ry = v1->f[1];
+	float rz = v1->f[2];
 
 	v0->f[0] = ly * rz - lz * ry;
 	v0->f[1] = lz * rx - lx * rz;
@@ -671,7 +671,7 @@ void nemovector_cross(struct nemovector *v0, struct nemovector *v1)
 
 void nemovector_normalize(struct nemovector *v0)
 {
-	double l = sqrtf(v0->f[0] * v0->f[0] + v0->f[1] * v0->f[1] + v0->f[2] * v0->f[2]);
+	float l = sqrtf(v0->f[0] * v0->f[0] + v0->f[1] * v0->f[1] + v0->f[2] * v0->f[2]);
 
 	v0->f[0] /= l;
 	v0->f[1] /= l;

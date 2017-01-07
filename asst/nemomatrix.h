@@ -32,7 +32,7 @@ typedef enum {
 	NEMOMATRIX_TRANSFORM_SCALE_TYPE = (1 << 1),
 	NEMOMATRIX_TRANSFORM_ROTATE_TYPE = (1 << 2),
 	NEMOMATRIX_TRANSFORM_OTHER_TYPE = (1 << 3),
-} NeomMatrixTransformType;
+} NemoMatrixTransformType;
 
 struct nemomatrix {
 	float d[16];
@@ -78,8 +78,8 @@ extern void nemomatrix_asymmetric(struct nemomatrix *matrix, float *pa, float *p
 
 extern void nemomatrix_append_command(struct nemomatrix *matrix, const char *str);
 
-extern double nemovector_distance(struct nemovector *v0, struct nemovector *v1);
-extern double nemovector_dot(struct nemovector *v0, struct nemovector *v1);
+extern float nemovector_distance(struct nemovector *v0, struct nemovector *v1);
+extern float nemovector_dot(struct nemovector *v0, struct nemovector *v1);
 extern void nemovector_cross(struct nemovector *v0, struct nemovector *v1);
 extern void nemovector_normalize(struct nemovector *v0);
 
@@ -149,55 +149,55 @@ static inline int nemomatrix_has_other(struct nemomatrix *matrix)
 	return matrix->type & NEMOMATRIX_TRANSFORM_OTHER_TYPE;
 }
 
-static inline double nemovector3d_dot(float *v1, float *v2)
+static inline void nemovector_normalize_xyz(float *v0)
 {
-	return v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
-}
-
-static inline double nemovector3d_normalize(float *v0)
-{
-	double l = sqrtf(v0[0] * v0[0] + v0[1] * v0[1] + v0[2] * v0[2]);
+	float l = sqrtf(v0[0] * v0[0] + v0[1] * v0[1] + v0[2] * v0[2]);
 
 	v0[0] /= l;
 	v0[1] /= l;
 	v0[2] /= l;
 }
 
-static inline void nemovector3d_cross(float *v0, float *v1, float *v2)
+static inline float nemovector_dot_xyz(float *v1, float *v2)
+{
+	return v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
+}
+
+static inline void nemovector_cross_xyz(float *v0, float *v1, float *v2)
 {
 	v0[0] = v1[1] * v2[2] - v1[2] * v2[1];
 	v0[1] = v1[2] * v2[0] - v1[0] * v2[2];
 	v0[2] = v1[0] * v2[1] - v1[1] * v2[0];
 }
 
-static inline void nemovector3d_add(float *v0, float *v1, float *v2)
+static inline void nemovector_add_xyz(float *v0, float *v1, float *v2)
 {
 	v0[0] = v1[0] + v2[0];
 	v0[1] = v1[1] + v2[1];
 	v0[2] = v1[2] + v2[2];
 }
 
-static inline void nemovector3d_sub(float *v0, float *v1, float *v2)
+static inline void nemovector_sub_xyz(float *v0, float *v1, float *v2)
 {
 	v0[0] = v1[0] - v2[0];
 	v0[1] = v1[1] - v2[1];
 	v0[2] = v1[2] - v2[2];
 }
 
-static inline double nemovector2d_distance(double x0, double y0, double x1, double y1)
+static inline float nemovector_distance_xy(float x0, float y0, float x1, float y1)
 {
-	double dx = x1 - x0;
-	double dy = y1 - y0;
+	float dx = x1 - x0;
+	float dy = y1 - y0;
 
 	return sqrtf(dx * dx + dy * dy);
 }
 
-static inline double nemovector2d_dot(double x0, double y0, double x1, double y1)
+static inline float nemovector_dot_xy(float x0, float y0, float x1, float y1)
 {
 	return x0 * x1 + y0 * y1;
 }
 
-static inline double nemovector2d_cross(double x0, double y0, double x1, double y1)
+static inline float nemovector_cross_xy(float x0, float y0, float x1, float y1)
 {
 	return x0 * y1 + x1 * y0;
 }
