@@ -11,6 +11,23 @@ NEMO_BEGIN_EXTERN_C
 
 #include <nemomatrix.h>
 
+typedef enum {
+	NEMOCOOK_TRANSFORM_2D_MODE = 0,
+	NEMOCOOK_TRANSFORM_3D_MODE = 1,
+	NEMOCOOK_TRANSFORM_LAST_MODE
+} NemoCookTransformMode;
+
+typedef enum {
+	NEMOCOOK_TRANSFORM_NORMAL_STATE = 0,
+	NEMOCOOK_TRANSFORM_SIMPLE_STATE = 1,
+	NEMOCOOK_TRANSFORM_NOPIN_STATE = 2,
+	NEMOCOOK_TRANSFORM_LAST_STATE
+} NemoCookTransformState;
+
+struct cooktrans;
+
+typedef int (*nemocook_transform_update_t)(struct cooktrans *trans);
+
 struct cooktrans {
 	float tx, ty, tz;
 	float sx, sy, sz;
@@ -30,12 +47,17 @@ struct cooktrans {
 	struct nemomatrix inverse;
 
 	struct cooktrans *parent;
+
+	nemocook_transform_update_t update;
+	int mode;
+	int state;
 };
 
 extern struct cooktrans *nemocook_transform_create(void);
 extern void nemocook_transform_destroy(struct cooktrans *trans);
 
-extern int nemocook_transform_update(struct cooktrans *trans);
+extern void nemocook_transform_set_mode(struct cooktrans *trans, int mode);
+extern void nemocook_transform_set_state(struct cooktrans *trans, int state);
 
 extern int nemocook_transform_to_global(struct cooktrans *trans, float sx, float sy, float sz, float *x, float *y, float *z);
 extern int nemocook_transform_from_global(struct cooktrans *trans, float x, float y, float z, float *sx, float *sy, float *sz);
@@ -94,6 +116,11 @@ static inline void nemocook_transform_unpin_rotate(struct cooktrans *trans, floa
 static inline void nemocook_transform_set_parent(struct cooktrans *trans, struct cooktrans *parent)
 {
 	trans->parent = parent;
+}
+
+static inline int nemocook_transform_update(struct cooktrans *trans)
+{
+	return trans->update(trans);
 }
 
 #ifdef __cplusplus
