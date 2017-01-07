@@ -81,10 +81,10 @@ struct tileone *nemotile_one_create_polygon(const char *filepath, const char *ba
 				n2[1] = shapes[i].mesh.normals[v2 * 3 + 1];
 				n2[2] = shapes[i].mesh.normals[v2 * 3 + 2];
 			} else {
-				NEMOVECTOR_SUB(s0, p1, p0);
-				NEMOVECTOR_SUB(s1, p2, p0);
-				NEMOVECTOR_CROSS(s0, s0, s1);
-				NEMOVECTOR_NORMALIZE(s0);
+				nemovector3d_sub(s0, p1, p0);
+				nemovector3d_sub(s1, p2, p0);
+				nemovector3d_cross(s0, s0, s1);
+				nemovector3d_normalize(s0);
 
 				n0[0] = n1[0] = n2[0] = s0[0];
 				n0[1] = n1[1] = n2[1] = s0[1];
@@ -308,10 +308,10 @@ struct tileone *nemotile_one_create_polyline(const char *filepath, const char *b
 				n2[1] = shapes[i].mesh.normals[v2 * 3 + 1];
 				n2[2] = shapes[i].mesh.normals[v2 * 3 + 2];
 			} else {
-				NEMOVECTOR_SUB(s0, p1, p0);
-				NEMOVECTOR_SUB(s1, p2, p0);
-				NEMOVECTOR_CROSS(s0, s0, s1);
-				NEMOVECTOR_NORMALIZE(s0);
+				nemovector3d_sub(s0, p1, p0);
+				nemovector3d_sub(s1, p2, p0);
+				nemovector3d_cross(s0, s0, s1);
+				nemovector3d_normalize(s0);
 
 				n0[0] = n1[0] = n2[0] = s0[0];
 				n0[1] = n1[1] = n2[1] = s0[1];

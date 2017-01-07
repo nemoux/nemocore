@@ -521,23 +521,23 @@ void nemomatrix_asymmetric(struct nemomatrix *matrix, float *pa, float *pb, floa
 	float bottom, top;
 	float eyedist;
 
-	NEMOVECTOR_SUB(vr, pb, pa);
-	NEMOVECTOR_NORMALIZE(vr);
-	NEMOVECTOR_SUB(vu, pc, pa);
-	NEMOVECTOR_NORMALIZE(vu);
-	NEMOVECTOR_CROSS(vn, vr, vu);
-	NEMOVECTOR_NORMALIZE(vn);
+	nemovector3d_sub(vr, pb, pa);
+	nemovector3d_normalize(vr);
+	nemovector3d_sub(vu, pc, pa);
+	nemovector3d_normalize(vu);
+	nemovector3d_cross(vn, vr, vu);
+	nemovector3d_normalize(vn);
 
-	NEMOVECTOR_SUB(va, pa, pe);
-	NEMOVECTOR_SUB(vb, pb, pe);
-	NEMOVECTOR_SUB(vc, pc, pe);
+	nemovector3d_sub(va, pa, pe);
+	nemovector3d_sub(vb, pb, pe);
+	nemovector3d_sub(vc, pc, pe);
 
-	eyedist = -NEMOVECTOR_DOT(va, vn);
+	eyedist = -nemovector3d_dot(va, vn);
 
-	left = NEMOVECTOR_DOT(vr, va) * near / eyedist;
-	right = NEMOVECTOR_DOT(vr, vb) * near / eyedist;
-	bottom = NEMOVECTOR_DOT(vu, va) * near / eyedist;
-	top = NEMOVECTOR_DOT(vu, vc) * near / eyedist;
+	left = nemovector3d_dot(vr, va) * near / eyedist;
+	right = nemovector3d_dot(vr, vb) * near / eyedist;
+	bottom = nemovector3d_dot(vu, va) * near / eyedist;
+	top = nemovector3d_dot(vu, vc) * near / eyedist;
 
 	nemomatrix_init_identity(&projection);
 	nemomatrix_set_factor(&projection, 0, 0, 2.0f * near / (right - left));

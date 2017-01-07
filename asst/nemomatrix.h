@@ -27,31 +27,6 @@ NEMO_BEGIN_EXTERN_C
 #	define MAX3D(x,y,z) MAX(MAX(x,y),z)
 #endif
 
-#define NEMOVECTOR_CROSS(v0, v1, v2)	\
-	v0[0] = v1[1] * v2[2] - v1[2] * v2[1];	\
-v0[1] = v1[2] * v2[0] - v1[0] * v2[2];	\
-v0[2] = v1[0] * v2[1] - v1[1] * v2[0]
-
-#define NEMOVECTOR_DOT(v1, v2)	(v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2])
-
-#define NEMOVECTOR_ADD(v0, v1, v2)	\
-	v0[0] = v1[0] + v2[0];	\
-v0[1] = v1[1] + v2[1];	\
-v0[2] = v1[2] + v2[2]
-
-#define NEMOVECTOR_SUB(v0, v1, v2)	\
-	v0[0] = v1[0] - v2[0];	\
-v0[1] = v1[1] - v2[1];	\
-v0[2] = v1[2] - v2[2]
-
-#define NEMOVECTOR_NORMALIZE(v0)	\
-{	\
-	double l = sqrtf(v0[0] * v0[0] + v0[1] * v0[1] + v0[2] * v0[2]);	\
-	v0[0] /= l;	\
-	v0[1] /= l;	\
-	v0[2] /= l;	\
-}
-
 typedef enum {
 	NEMOMATRIX_TRANSFORM_TRANSLATE = (1 << 0),
 	NEMOMATRIX_TRANSFORM_SCALE = (1 << 1),
@@ -149,20 +124,47 @@ static inline float *nemomatrix_get_array(struct nemomatrix *matrix)
 	return matrix->d;
 }
 
+static inline double nemovector3d_dot(float *v1, float *v2)
+{
+	return v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
+}
+
+static inline double nemovector3d_normalize(float *v0)
+{
+	double l = sqrtf(v0[0] * v0[0] + v0[1] * v0[1] + v0[2] * v0[2]);
+
+	v0[0] /= l;
+	v0[1] /= l;
+	v0[2] /= l;
+}
+
+static inline void nemovector3d_cross(float *v0, float *v1, float *v2)
+{
+	v0[0] = v1[1] * v2[2] - v1[2] * v2[1];
+	v0[1] = v1[2] * v2[0] - v1[0] * v2[2];
+	v0[2] = v1[0] * v2[1] - v1[1] * v2[0];
+}
+
+static inline void nemovector3d_add(float *v0, float *v1, float *v2)
+{
+	v0[0] = v1[0] + v2[0];
+	v0[1] = v1[1] + v2[1];
+	v0[2] = v1[2] + v2[2];
+}
+
+static inline void nemovector3d_sub(float *v0, float *v1, float *v2)
+{
+	v0[0] = v1[0] - v2[0];
+	v0[1] = v1[1] - v2[1];
+	v0[2] = v1[2] - v2[2];
+}
+
 static inline double nemovector2d_distance(double x0, double y0, double x1, double y1)
 {
 	double dx = x1 - x0;
 	double dy = y1 - y0;
 
 	return sqrtf(dx * dx + dy * dy);
-}
-
-static inline double nemovector2d_distance_square(double x0, double y0, double x1, double y1)
-{
-	double dx = x1 - x0;
-	double dy = y1 - y0;
-
-	return dx * dx + dy * dy;
 }
 
 static inline double nemovector2d_dot(double x0, double y0, double x1, double y1)
@@ -173,24 +175,6 @@ static inline double nemovector2d_dot(double x0, double y0, double x1, double y1
 static inline double nemovector2d_cross(double x0, double y0, double x1, double y1)
 {
 	return x0 * y1 + x1 * y0;
-}
-
-static inline double nemovector2d_distance_line_point(double x0, double y0, double x1, double y1, double p0, double p1)
-{
-	double l2;
-	double t;
-
-	l2 = nemovector2d_distance_square(x0, y0, x1, y1);
-	if (l2 < 1e-6)
-		return nemovector2d_distance(p0, p1, x0, y0);
-
-	t = nemovector2d_dot(p0 - x0, p1 - y0, x1 - x0, y1 - y0) / l2;
-	if (t < 1e-6)
-		return nemovector2d_distance(p0, p1, x0, y0);
-	else if (t > 1.0f)
-		return nemovector2d_distance(p0, p1, x1, y1);
-
-	return nemovector2d_distance(p0, p1, x0 + t * (x1 - x0), y0 + t * (y1 - y0));
 }
 
 #ifdef __cplusplus
