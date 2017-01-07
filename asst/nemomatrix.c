@@ -9,7 +9,7 @@
 #include <nemotoken.h>
 #include <nemomisc.h>
 
-static inline void swap_rows(double *a, double *b)
+static inline void nemomatrix_swap_rows(double *a, double *b)
 {
 	unsigned k;
 	double tmp;
@@ -21,7 +21,7 @@ static inline void swap_rows(double *a, double *b)
 	}
 }
 
-static inline void swap_unsigned(unsigned *a, unsigned *b)
+static inline void nemomatrix_swap_unsigned(unsigned *a, unsigned *b)
 {
 	unsigned tmp;
 
@@ -30,7 +30,7 @@ static inline void swap_unsigned(unsigned *a, unsigned *b)
 	*b = tmp;
 }
 
-static inline unsigned find_pivot(double *column, unsigned k)
+static inline unsigned nemomatrix_find_pivot(double *column, unsigned k)
 {
 	unsigned p = k;
 
@@ -41,7 +41,7 @@ static inline unsigned find_pivot(double *column, unsigned k)
 	return p;
 }
 
-static inline int invert_matrix(double *A, unsigned *p, const struct nemomatrix *matrix)
+static inline int nemomatrix_inverse_matrix(double *A, unsigned *p, const struct nemomatrix *matrix)
 {
 	unsigned i, j, k;
 	unsigned pivot;
@@ -53,10 +53,10 @@ static inline int invert_matrix(double *A, unsigned *p, const struct nemomatrix 
 		A[i] = matrix->d[i];
 
 	for (k = 0; k < 4; ++k) {
-		pivot = find_pivot(&A[k * 4], k);
+		pivot = nemomatrix_find_pivot(&A[k * 4], k);
 		if (pivot != k) {
-			swap_unsigned(&p[k], &p[pivot]);
-			swap_rows(&A[k], &A[pivot]);
+			nemomatrix_swap_unsigned(&p[k], &p[pivot]);
+			nemomatrix_swap_rows(&A[k], &A[pivot]);
 		}
 
 		pv = A[k * 4 + k];
@@ -74,7 +74,7 @@ static inline int invert_matrix(double *A, unsigned *p, const struct nemomatrix 
 	return 0;
 }
 
-static inline void inverse_transform(const double *LU, const unsigned *p, float *v)
+static inline void nemomatrix_inverse_transform(const double *LU, const unsigned *p, float *v)
 {
 	double b[4];
 	unsigned j;
@@ -189,13 +189,13 @@ int nemomatrix_invert(struct nemomatrix *inverse, const struct nemomatrix *matri
 	unsigned perm[4];
 	unsigned c;
 
-	if (invert_matrix(LU, perm, matrix) < 0)
+	if (nemomatrix_inverse_matrix(LU, perm, matrix) < 0)
 		return -1;
 
 	nemomatrix_init_identity(inverse);
 
 	for (c = 0; c < 4; ++c)
-		inverse_transform(LU, perm, &inverse->d[c * 4]);
+		nemomatrix_inverse_transform(LU, perm, &inverse->d[c * 4]);
 	inverse->type = matrix->type;
 
 	return 0;
@@ -210,7 +210,7 @@ void nemomatrix_init_3x3(struct nemomatrix *matrix, float m[9])
 			0, 0, 1, 0,
 			m[2], m[5], 0, 1
 		},
-		.type = 0,
+		.type = NEMOMATRIX_TRANSFORM_OTHER_TYPE
 	};
 
 	memcpy(matrix, &target, sizeof(target));
@@ -225,7 +225,7 @@ void nemomatrix_init_4x4(struct nemomatrix *matrix, float m[16])
 			m[2], m[6], m[10], m[14],
 			m[3], m[7], m[11], m[15]
 		},
-		.type = 0,
+		.type = NEMOMATRIX_TRANSFORM_OTHER_TYPE
 	};
 
 	memcpy(matrix, &target, sizeof(target));
@@ -255,7 +255,7 @@ void nemomatrix_init_translate(struct nemomatrix *matrix, float x, float y)
 			0, 0, 1, 0,
 			x, y, 0, 1
 		},
-		.type = NEMOMATRIX_TRANSFORM_TRANSLATE,
+		.type = NEMOMATRIX_TRANSFORM_TRANSLATE_TYPE,
 	};
 
 	memcpy(matrix, &translate, sizeof(translate));
@@ -270,7 +270,7 @@ void nemomatrix_init_translate_xyz(struct nemomatrix *matrix, float x, float y, 
 			0, 0, 1, 0,
 			x, y, z, 1
 		},
-		.type = NEMOMATRIX_TRANSFORM_TRANSLATE,
+		.type = NEMOMATRIX_TRANSFORM_TRANSLATE_TYPE,
 	};
 
 	memcpy(matrix, &translate, sizeof(translate));
@@ -285,7 +285,7 @@ void nemomatrix_init_scale(struct nemomatrix *matrix, float x, float y)
 			0, 0, 1, 0,
 			0, 0, 0, 1
 		},
-		.type = NEMOMATRIX_TRANSFORM_SCALE,
+		.type = NEMOMATRIX_TRANSFORM_SCALE_TYPE,
 	};
 
 	memcpy(matrix, &scale, sizeof(scale));
@@ -300,7 +300,7 @@ void nemomatrix_init_scale_xyz(struct nemomatrix *matrix, float x, float y, floa
 			0, 0, z, 0,
 			0, 0, 0, 1
 		},
-		.type = NEMOMATRIX_TRANSFORM_SCALE,
+		.type = NEMOMATRIX_TRANSFORM_SCALE_TYPE,
 	};
 
 	memcpy(matrix, &scale, sizeof(scale));
@@ -315,7 +315,7 @@ void nemomatrix_init_rotate(struct nemomatrix *matrix, float cos, float sin)
 			0, 0, 1, 0,
 			0, 0, 0, 1
 		},
-		.type = NEMOMATRIX_TRANSFORM_ROTATE,
+		.type = NEMOMATRIX_TRANSFORM_ROTATE_TYPE,
 	};
 
 	memcpy(matrix, &rotate, sizeof(rotate));
@@ -330,7 +330,7 @@ void nemomatrix_init_rotate_x(struct nemomatrix *matrix, float cos, float sin)
 			0, -sin, cos, 0,
 			0, 0, 0, 1
 		},
-		.type = NEMOMATRIX_TRANSFORM_ROTATE,
+		.type = NEMOMATRIX_TRANSFORM_ROTATE_TYPE,
 	};
 
 	memcpy(matrix, &rotate, sizeof(rotate));
@@ -345,7 +345,7 @@ void nemomatrix_init_rotate_y(struct nemomatrix *matrix, float cos, float sin)
 			sin, 0, cos, 0,
 			0, 0, 0, 1
 		},
-		.type = NEMOMATRIX_TRANSFORM_ROTATE,
+		.type = NEMOMATRIX_TRANSFORM_ROTATE_TYPE,
 	};
 
 	memcpy(matrix, &rotate, sizeof(rotate));
@@ -360,7 +360,7 @@ void nemomatrix_init_rotate_z(struct nemomatrix *matrix, float cos, float sin)
 			0, 0, 1, 0,
 			0, 0, 0, 1
 		},
-		.type = NEMOMATRIX_TRANSFORM_ROTATE,
+		.type = NEMOMATRIX_TRANSFORM_ROTATE_TYPE,
 	};
 
 	memcpy(matrix, &rotate, sizeof(rotate));
@@ -375,7 +375,7 @@ void nemomatrix_translate(struct nemomatrix *matrix, float x, float y)
 			0, 0, 1, 0,
 			x, y, 0, 1
 		},
-		.type = NEMOMATRIX_TRANSFORM_TRANSLATE,
+		.type = NEMOMATRIX_TRANSFORM_TRANSLATE_TYPE,
 	};
 
 	nemomatrix_multiply(matrix, &translate);
@@ -390,7 +390,7 @@ void nemomatrix_translate_xyz(struct nemomatrix *matrix, float x, float y, float
 			0, 0, 1, 0,
 			x, y, z, 1
 		},
-		.type = NEMOMATRIX_TRANSFORM_TRANSLATE,
+		.type = NEMOMATRIX_TRANSFORM_TRANSLATE_TYPE,
 	};
 
 	nemomatrix_multiply(matrix, &translate);
@@ -405,7 +405,7 @@ void nemomatrix_scale(struct nemomatrix *matrix, float x, float y)
 			0, 0, 1, 0,
 			0, 0, 0, 1
 		},
-		.type = NEMOMATRIX_TRANSFORM_SCALE,
+		.type = NEMOMATRIX_TRANSFORM_SCALE_TYPE,
 	};
 
 	nemomatrix_multiply(matrix, &scale);
@@ -420,7 +420,7 @@ void nemomatrix_scale_xyz(struct nemomatrix *matrix, float x, float y, float z)
 			0, 0, z, 0,
 			0, 0, 0, 1
 		},
-		.type = NEMOMATRIX_TRANSFORM_SCALE,
+		.type = NEMOMATRIX_TRANSFORM_SCALE_TYPE,
 	};
 
 	nemomatrix_multiply(matrix, &scale);
@@ -435,7 +435,7 @@ void nemomatrix_rotate(struct nemomatrix *matrix, float cos, float sin)
 			0, 0, 1, 0,
 			0, 0, 0, 1
 		},
-		.type = NEMOMATRIX_TRANSFORM_ROTATE,
+		.type = NEMOMATRIX_TRANSFORM_ROTATE_TYPE,
 	};
 
 	nemomatrix_multiply(matrix, &rotate);
@@ -450,7 +450,7 @@ void nemomatrix_rotate_x(struct nemomatrix *matrix, float cos, float sin)
 			0, -sin, cos, 0,
 			0, 0, 0, 1
 		},
-		.type = NEMOMATRIX_TRANSFORM_ROTATE,
+		.type = NEMOMATRIX_TRANSFORM_ROTATE_TYPE,
 	};
 
 	nemomatrix_multiply(matrix, &rotate);
@@ -465,7 +465,7 @@ void nemomatrix_rotate_y(struct nemomatrix *matrix, float cos, float sin)
 			sin, 0, cos, 0,
 			0, 0, 0, 1
 		},
-		.type = NEMOMATRIX_TRANSFORM_ROTATE,
+		.type = NEMOMATRIX_TRANSFORM_ROTATE_TYPE,
 	};
 
 	nemomatrix_multiply(matrix, &rotate);
@@ -480,7 +480,7 @@ void nemomatrix_rotate_z(struct nemomatrix *matrix, float cos, float sin)
 			0, 0, 1, 0,
 			0, 0, 0, 1
 		},
-		.type = NEMOMATRIX_TRANSFORM_ROTATE,
+		.type = NEMOMATRIX_TRANSFORM_ROTATE_TYPE,
 	};
 
 	nemomatrix_multiply(matrix, &rotate);
@@ -489,10 +489,13 @@ void nemomatrix_rotate_z(struct nemomatrix *matrix, float cos, float sin)
 void nemomatrix_perspective(struct nemomatrix *matrix, float left, float right, float bottom, float top, float near, float far)
 {
 	struct nemomatrix perspective = {
-		2.0f * near / (right - left), 0.0f, 0.0f, 0.0f,
-		0.0f, 2.0f * near / (top - bottom), 0.0f, 0.0f,
-		(right + left) / (right - left), (top + bottom) / (top - bottom), (far + near) / (near - far), -1.0f,
-		0.0f, 0.0f, 2.0f * far * near / (near - far), 0.0f
+		.d = {
+			2.0f * near / (right - left), 0.0f, 0.0f, 0.0f,
+			0.0f, 2.0f * near / (top - bottom), 0.0f, 0.0f,
+			(right + left) / (right - left), (top + bottom) / (top - bottom), (far + near) / (near - far), -1.0f,
+			0.0f, 0.0f, 2.0f * far * near / (near - far), 0.0f
+		},
+		.type = NEMOMATRIX_TRANSFORM_OTHER_TYPE
 	};
 
 	nemomatrix_multiply(matrix, &perspective);
@@ -501,10 +504,13 @@ void nemomatrix_perspective(struct nemomatrix *matrix, float left, float right, 
 void nemomatrix_orthogonal(struct nemomatrix *matrix, float left, float right, float bottom, float top, float near, float far)
 {
 	struct nemomatrix orthogonal = {
-		2.0f / (right - left), 0.0f, 0.0f, 0.0f,
-		0.0f, 2.0f / (top - bottom), 0.0f, 0.0f,
-		0.0f, 0.0f, 2.0f / (far - near), 0.0f,
-		(right + left) / (left - right), (top + bottom) / (bottom - top), (far + near) / (near - far), 0.0f
+		.d = {
+			2.0f / (right - left), 0.0f, 0.0f, 0.0f,
+			0.0f, 2.0f / (top - bottom), 0.0f, 0.0f,
+			0.0f, 0.0f, 2.0f / (far - near), 0.0f,
+			(right + left) / (left - right), (top + bottom) / (bottom - top), (far + near) / (near - far), 0.0f
+		},
+		.type = NEMOMATRIX_TRANSFORM_OTHER_TYPE
 	};
 
 	nemomatrix_multiply(matrix, &orthogonal);
@@ -681,7 +687,7 @@ void nemomatrix_init_quaternion(struct nemomatrix *matrix, float qx, float qy, f
 			2 * qx * qz + 2 * qy * qw, 2 * qy * qz - 2 * qx * qw, 1 - 2 * qx * qx - 2 * qy * qy, 0,
 			0, 0, 0, 1
 		},
-		.type = NEMOMATRIX_TRANSFORM_ROTATE,
+		.type = NEMOMATRIX_TRANSFORM_ROTATE_TYPE,
 	};
 
 	memcpy(matrix, &rotate, sizeof(rotate));
@@ -696,7 +702,7 @@ void nemomatrix_multiply_quaternion(struct nemomatrix *matrix, float qx, float q
 			2 * qx * qz + 2 * qy * qw, 2 * qy * qz - 2 * qx * qw, 1 - 2 * qx * qx - 2 * qy * qy, 0,
 			0, 0, 0, 1
 		},
-		.type = NEMOMATRIX_TRANSFORM_ROTATE,
+		.type = NEMOMATRIX_TRANSFORM_ROTATE_TYPE,
 	};
 
 	nemomatrix_multiply(matrix, &rotate);
@@ -797,7 +803,7 @@ void nemoquaternion_init_matrix(struct nemoquaternion *quat, struct nemomatrix *
 			2 * qx * qz + 2 * qy * qw, 2 * qy * qz - 2 * qx * qw, 1 - 2 * qx * qx - 2 * qy * qy, 0,
 			0, 0, 0, 1
 		},
-		.type = NEMOMATRIX_TRANSFORM_ROTATE,
+		.type = NEMOMATRIX_TRANSFORM_ROTATE_TYPE,
 	};
 
 	memcpy(matrix, &rotate, sizeof(rotate));
@@ -816,7 +822,7 @@ void nemoquaternion_multiply_matrix(struct nemoquaternion *quat, struct nemomatr
 			2 * qx * qz + 2 * qy * qw, 2 * qy * qz - 2 * qx * qw, 1 - 2 * qx * qx - 2 * qy * qy, 0,
 			0, 0, 0, 1
 		},
-		.type = NEMOMATRIX_TRANSFORM_ROTATE,
+		.type = NEMOMATRIX_TRANSFORM_ROTATE_TYPE,
 	};
 
 	nemomatrix_multiply(matrix, &rotate);

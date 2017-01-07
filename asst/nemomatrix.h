@@ -28,10 +28,10 @@ NEMO_BEGIN_EXTERN_C
 #endif
 
 typedef enum {
-	NEMOMATRIX_TRANSFORM_TRANSLATE = (1 << 0),
-	NEMOMATRIX_TRANSFORM_SCALE = (1 << 1),
-	NEMOMATRIX_TRANSFORM_ROTATE = (1 << 2),
-	NEMOMATRIX_TRANSFORM_OTHER = (1 << 3),
+	NEMOMATRIX_TRANSFORM_TRANSLATE_TYPE = (1 << 0),
+	NEMOMATRIX_TRANSFORM_SCALE_TYPE = (1 << 1),
+	NEMOMATRIX_TRANSFORM_ROTATE_TYPE = (1 << 2),
+	NEMOMATRIX_TRANSFORM_OTHER_TYPE = (1 << 3),
 } NeomMatrixTransformType;
 
 struct nemomatrix {
@@ -122,6 +122,31 @@ static inline float nemomatrix_get_float(struct nemomatrix *matrix, int i)
 static inline float *nemomatrix_get_array(struct nemomatrix *matrix)
 {
 	return matrix->d;
+}
+
+static inline int nemomatrix_has_translate(struct nemomatrix *matrix)
+{
+	return matrix->type & NEMOMATRIX_TRANSFORM_TRANSLATE_TYPE;
+}
+
+static inline int nemomatrix_has_translate_only(struct nemomatrix *matrix)
+{
+	return matrix->type == NEMOMATRIX_TRANSFORM_TRANSLATE_TYPE;
+}
+
+static inline int nemomatrix_has_scale(struct nemomatrix *matrix)
+{
+	return matrix->type & NEMOMATRIX_TRANSFORM_SCALE_TYPE;
+}
+
+static inline int nemomatrix_has_rotate(struct nemomatrix *matrix)
+{
+	return matrix->type & NEMOMATRIX_TRANSFORM_ROTATE_TYPE;
+}
+
+static inline int nemomatrix_has_other(struct nemomatrix *matrix)
+{
+	return matrix->type & NEMOMATRIX_TRANSFORM_OTHER_TYPE;
 }
 
 static inline double nemovector3d_dot(float *v1, float *v2)
