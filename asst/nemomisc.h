@@ -81,7 +81,7 @@ extern int os_create_anonymous_file(off_t size);
 
 extern int os_exist_path(const char *path);
 extern int os_check_is_directory(const char *path);
-extern int os_check_is_file(const char *path);
+extern int os_check_is_regular_file(const char *path);
 extern int os_load_path(const char *path, char **buffer, int *size);
 extern int os_save_path(const char *path, char *buffer, int size);
 extern uint32_t os_execute_path(const char *path, char *const argv[], char *const envp[]);

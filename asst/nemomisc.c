@@ -242,7 +242,7 @@ int os_check_is_directory(const char *path)
 	return S_ISDIR(st.st_mode);
 }
 
-int os_check_is_file(const char *path)
+int os_check_is_regular_file(const char *path)
 {
 	struct stat st;
 
