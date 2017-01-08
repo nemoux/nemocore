@@ -1678,8 +1678,8 @@ int main(int argc, char *argv[])
 			const char *filepath;
 			int i;
 
-			dir = nemofs_dir_create(imagepath, 32);
-			nemofs_dir_scan_extension(dir, "svg");
+			dir = nemofs_dir_create(32);
+			nemofs_dir_scan_extension(dir, imagepath, "svg");
 
 			for (i = 0; i < nemofs_dir_get_filecount(dir); i++) {
 				srand(time_current_msecs());
@@ -1716,8 +1716,8 @@ int main(int argc, char *argv[])
 			}
 
 			nemofs_dir_clear(dir);
-			nemofs_dir_scan_extension(dir, "png");
-			nemofs_dir_scan_extension(dir, "jpg");
+			nemofs_dir_scan_extension(dir, imagepath, "png");
+			nemofs_dir_scan_extension(dir, imagepath, "jpg");
 
 			for (i = 0; i < nemofs_dir_get_filecount(dir); i++) {
 				filepath = nemofs_dir_get_filepath(dir, i);
@@ -1784,13 +1784,13 @@ int main(int argc, char *argv[])
 
 	if (videopath != NULL) {
 		if (os_check_path_is_directory(videopath) != 0) {
-			pixs->movies = nemofs_dir_create(videopath, 32);
-			nemofs_dir_scan_extension(pixs->movies, "mp4");
-			nemofs_dir_scan_extension(pixs->movies, "avi");
-			nemofs_dir_scan_extension(pixs->movies, "ts");
+			pixs->movies = nemofs_dir_create(32);
+			nemofs_dir_scan_extension(pixs->movies, videopath, "mp4");
+			nemofs_dir_scan_extension(pixs->movies, videopath, "avi");
+			nemofs_dir_scan_extension(pixs->movies, videopath, "ts");
 		} else {
-			pixs->movies = nemofs_dir_create(NULL, 32);
-			nemofs_dir_insert_file(pixs->movies, videopath);
+			pixs->movies = nemofs_dir_create(32);
+			nemofs_dir_insert_file(pixs->movies, NULL, videopath);
 		}
 
 		pixs->play = nemoplay_create();

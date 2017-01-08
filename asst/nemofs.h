@@ -12,21 +12,19 @@ struct fsdir {
 	char **filepaths;
 	int nfiles;
 	int mfiles;
-
-	char *path;
 };
 
-extern struct fsdir *nemofs_dir_create(const char *path, int minimum_files);
+extern struct fsdir *nemofs_dir_create(int maxmium_files);
 extern void nemofs_dir_destroy(struct fsdir *dir);
 
 extern void nemofs_dir_clear(struct fsdir *dir);
 
-extern int nemofs_dir_scan_directories(struct fsdir *dir);
-extern int nemofs_dir_scan_files(struct fsdir *dir);
-extern int nemofs_dir_scan_extension(struct fsdir *dir, const char *extension);
-extern int nemofs_dir_scan_regex(struct fsdir *dir, const char *expr);
+extern int nemofs_dir_scan_directories(struct fsdir *dir, const char *path);
+extern int nemofs_dir_scan_files(struct fsdir *dir, const char *path);
+extern int nemofs_dir_scan_extension(struct fsdir *dir, const char *path, const char *extension);
+extern int nemofs_dir_scan_regex(struct fsdir *dir, const char *path, const char *expr);
 
-extern int nemofs_dir_insert_file(struct fsdir *dir, const char *filename);
+extern int nemofs_dir_insert_file(struct fsdir *dir, const char *path, const char *filename);
 
 static inline int nemofs_dir_get_filecount(struct fsdir *dir)
 {

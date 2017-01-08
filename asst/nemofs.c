@@ -14,30 +14,19 @@
 #include <nemofs.h>
 #include <nemomisc.h>
 
-struct fsdir *nemofs_dir_create(const char *path, int minimum_files)
+struct fsdir *nemofs_dir_create(int maximum_files)
 {
 	struct fsdir *dir;
-	struct dirent **entries;
-	int count = 0;
 
 	dir = (struct fsdir *)malloc(sizeof(struct fsdir));
 	if (dir == NULL)
 		return NULL;
 	memset(dir, 0, sizeof(struct fsdir));
 
-	if (path != NULL) {
-		count = scandir(path, &entries, NULL, alphasort);
-		if (count > 0)
-			free(entries);
-	}
-
-	count = MAX(count, minimum_files);
-
-	dir->filenames = (char **)malloc(sizeof(char *) * count);
-	dir->filepaths = (char **)malloc(sizeof(char *) * count);
+	dir->filenames = (char **)malloc(sizeof(char *) * maximum_files);
+	dir->filepaths = (char **)malloc(sizeof(char *) * maximum_files);
+	dir->mfiles = maximum_files;
 	dir->nfiles = 0;
-	dir->mfiles = count;
-	dir->path = path != NULL ? strdup(path) : NULL;
 
 	return dir;
 }
@@ -54,9 +43,6 @@ void nemofs_dir_destroy(struct fsdir *dir)
 	free(dir->filenames);
 	free(dir->filepaths);
 
-	if (dir->path != NULL)
-		free(dir->path);
-
 	free(dir);
 }
 
@@ -72,7 +58,7 @@ void nemofs_dir_clear(struct fsdir *dir)
 	dir->nfiles = 0;
 }
 
-int nemofs_dir_scan_directories(struct fsdir *dir)
+int nemofs_dir_scan_directories(struct fsdir *dir, const char *path)
 {
 	struct dirent **entries;
 	const char *filename;
@@ -80,13 +66,13 @@ int nemofs_dir_scan_directories(struct fsdir *dir)
 	int nfiles = 0;
 	int i, count;
 
-	count = scandir(dir->path, &entries, NULL, alphasort);
+	count = scandir(path, &entries, NULL, alphasort);
 	count = MIN(count, dir->mfiles - dir->nfiles);
 
 	for (i = 0; i < count; i++) {
 		filename = entries[i]->d_name;
 
-		strcpy(filepath, dir->path);
+		strcpy(filepath, path);
 		strcat(filepath, "/");
 		strcat(filepath, filename);
 
@@ -104,7 +90,7 @@ int nemofs_dir_scan_directories(struct fsdir *dir)
 	return nfiles;
 }
 
-int nemofs_dir_scan_files(struct fsdir *dir)
+int nemofs_dir_scan_files(struct fsdir *dir, const char *path)
 {
 	struct dirent **entries;
 	const char *filename;
@@ -112,13 +98,13 @@ int nemofs_dir_scan_files(struct fsdir *dir)
 	int nfiles = 0;
 	int i, count;
 
-	count = scandir(dir->path, &entries, NULL, alphasort);
+	count = scandir(path, &entries, NULL, alphasort);
 	count = MIN(count, dir->mfiles - dir->nfiles);
 
 	for (i = 0; i < count; i++) {
 		filename = entries[i]->d_name;
 
-		strcpy(filepath, dir->path);
+		strcpy(filepath, path);
 		strcat(filepath, "/");
 		strcat(filepath, filename);
 
@@ -136,7 +122,7 @@ int nemofs_dir_scan_files(struct fsdir *dir)
 	return nfiles;
 }
 
-int nemofs_dir_scan_extension(struct fsdir *dir, const char *extension)
+int nemofs_dir_scan_extension(struct fsdir *dir, const char *path, const char *extension)
 {
 	struct dirent **entries;
 	const char *filename;
@@ -144,13 +130,13 @@ int nemofs_dir_scan_extension(struct fsdir *dir, const char *extension)
 	int nfiles = 0;
 	int i, count;
 
-	count = scandir(dir->path, &entries, NULL, alphasort);
+	count = scandir(path, &entries, NULL, alphasort);
 	count = MIN(count, dir->mfiles - dir->nfiles);
 
 	for (i = 0; i < count; i++) {
 		filename = entries[i]->d_name;
 
-		strcpy(filepath, dir->path);
+		strcpy(filepath, path);
 		strcat(filepath, "/");
 		strcat(filepath, filename);
 
@@ -168,7 +154,7 @@ int nemofs_dir_scan_extension(struct fsdir *dir, const char *extension)
 	return nfiles;
 }
 
-int nemofs_dir_scan_regex(struct fsdir *dir, const char *expr)
+int nemofs_dir_scan_regex(struct fsdir *dir, const char *path, const char *expr)
 {
 	struct dirent **entries;
 	regex_t regex;
@@ -180,13 +166,13 @@ int nemofs_dir_scan_regex(struct fsdir *dir, const char *expr)
 	if (regcomp(&regex, expr, REG_EXTENDED))
 		return 0;
 
-	count = scandir(dir->path, &entries, NULL, alphasort);
+	count = scandir(path, &entries, NULL, alphasort);
 	count = MIN(count, dir->mfiles - dir->nfiles);
 
 	for (i = 0; i < count; i++) {
 		filename = entries[i]->d_name;
 
-		strcpy(filepath, dir->path);
+		strcpy(filepath, path);
 		strcat(filepath, "/");
 		strcat(filepath, filename);
 
@@ -206,17 +192,18 @@ int nemofs_dir_scan_regex(struct fsdir *dir, const char *expr)
 	return nfiles;
 }
 
-int nemofs_dir_insert_file(struct fsdir *dir, const char *filename)
+int nemofs_dir_insert_file(struct fsdir *dir, const char *path, const char *filename)
 {
 	if (dir->nfiles >= dir->mfiles)
 		return -1;
 
-	dir->filenames[dir->nfiles] = strdup(filename);
-
-	if (dir->path == NULL)
+	if (path != NULL) {
+		dir->filenames[dir->nfiles] = strdup(filename);
+		asprintf(&dir->filepaths[dir->nfiles], "%s/%s", path, filename);
+	} else {
+		dir->filenames[dir->nfiles] = strdup(filename);
 		dir->filepaths[dir->nfiles] = strdup(filename);
-	else
-		asprintf(&dir->filepaths[dir->nfiles], "%s/%s", dir->path, filename);
+	}
 
 	return dir->nfiles++;
 }

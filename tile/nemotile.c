@@ -2825,11 +2825,11 @@ int main(int argc, char *argv[])
 
 	if (programpath != NULL) {
 		if (os_check_path_is_directory(programpath) != 0) {
-			tile->shaders = nemofs_dir_create(programpath, 32);
-			nemofs_dir_scan_extension(tile->shaders, "fsh");
+			tile->shaders = nemofs_dir_create(32);
+			nemofs_dir_scan_extension(tile->shaders, programpath, "fsh");
 		} else {
-			tile->shaders = nemofs_dir_create(NULL, 32);
-			nemofs_dir_insert_file(tile->shaders, programpath);
+			tile->shaders = nemofs_dir_create(32);
+			nemofs_dir_insert_file(tile->shaders, NULL, programpath);
 		}
 
 		tile->filter = nemofx_glfilter_create(width, height);
@@ -3001,8 +3001,8 @@ int main(int argc, char *argv[])
 			const char *filepath;
 			int i;
 
-			dir = nemofs_dir_create(imagepath, 32);
-			nemofs_dir_scan_extension(dir, "svg");
+			dir = nemofs_dir_create(32);
+			nemofs_dir_scan_extension(dir, imagepath, "svg");
 
 			for (i = 0; i < nemofs_dir_get_filecount(dir); i++) {
 				srand(time_current_msecs());
@@ -3039,8 +3039,8 @@ int main(int argc, char *argv[])
 			}
 
 			nemofs_dir_clear(dir);
-			nemofs_dir_scan_extension(dir, "png");
-			nemofs_dir_scan_extension(dir, "jpg");
+			nemofs_dir_scan_extension(dir, imagepath, "png");
+			nemofs_dir_scan_extension(dir, imagepath, "jpg");
 
 			for (i = 0; i < nemofs_dir_get_filecount(dir); i++) {
 				filepath = nemofs_dir_get_filepath(dir, i);
@@ -3104,13 +3104,13 @@ int main(int argc, char *argv[])
 
 	if (videopath != NULL) {
 		if (os_check_path_is_directory(videopath) != 0) {
-			tile->movies = nemofs_dir_create(videopath, 32);
-			nemofs_dir_scan_extension(tile->movies, "mp4");
-			nemofs_dir_scan_extension(tile->movies, "avi");
-			nemofs_dir_scan_extension(tile->movies, "ts");
+			tile->movies = nemofs_dir_create(32);
+			nemofs_dir_scan_extension(tile->movies, videopath, "mp4");
+			nemofs_dir_scan_extension(tile->movies, videopath, "avi");
+			nemofs_dir_scan_extension(tile->movies, videopath, "ts");
 		} else {
-			tile->movies = nemofs_dir_create(NULL, 32);
-			nemofs_dir_insert_file(tile->movies, videopath);
+			tile->movies = nemofs_dir_create(32);
+			nemofs_dir_insert_file(tile->movies, NULL, videopath);
 		}
 
 		tile->play = nemoplay_create();
