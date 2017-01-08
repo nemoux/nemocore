@@ -201,7 +201,7 @@ int nemofs_dir_insert_file(struct fsdir *dir, const char *path, const char *file
 		dir->filenames[dir->nfiles] = strdup(filename);
 		asprintf(&dir->filepaths[dir->nfiles], "%s/%s", path, filename);
 	} else {
-		dir->filenames[dir->nfiles] = strdup(filename);
+		dir->filenames[dir->nfiles] = os_get_file_name(filename);
 		dir->filepaths[dir->nfiles] = strdup(filename);
 	}
 
