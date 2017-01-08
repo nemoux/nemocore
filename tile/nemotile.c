@@ -2824,7 +2824,7 @@ int main(int argc, char *argv[])
 	nemoshow_one_attach(scene, canvas);
 
 	if (programpath != NULL) {
-		if (os_check_path_is_directory(programpath) != 0) {
+		if (os_check_is_directory(programpath) != 0) {
 			tile->shaders = nemofs_dir_create(32);
 			nemofs_dir_scan_extension(tile->shaders, programpath, "fsh");
 		} else {
@@ -2996,7 +2996,7 @@ int main(int argc, char *argv[])
 	nemotile_prepare_opengl(tile, width, height);
 
 	if (imagepath != NULL) {
-		if (os_check_path_is_directory(imagepath) != 0) {
+		if (os_check_is_directory(imagepath) != 0) {
 			struct fsdir *dir;
 			const char *filepath;
 			int i;
@@ -3103,7 +3103,7 @@ int main(int argc, char *argv[])
 	}
 
 	if (videopath != NULL) {
-		if (os_check_path_is_directory(videopath) != 0) {
+		if (os_check_is_directory(videopath) != 0) {
 			tile->movies = nemofs_dir_create(32);
 			nemofs_dir_scan_extension(tile->movies, videopath, "mp4");
 			nemofs_dir_scan_extension(tile->movies, videopath, "avi");

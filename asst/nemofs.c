@@ -76,7 +76,7 @@ int nemofs_dir_scan_directories(struct fsdir *dir, const char *path)
 		strcat(filepath, "/");
 		strcat(filepath, filename);
 
-		if (os_check_path_is_directory(filepath) != 0) {
+		if (os_check_is_directory(filepath) != 0) {
 			dir->filenames[dir->nfiles + nfiles] = strdup(filename);
 			dir->filepaths[dir->nfiles + nfiles] = strdup(filepath);
 			nfiles++;
@@ -108,7 +108,7 @@ int nemofs_dir_scan_files(struct fsdir *dir, const char *path)
 		strcat(filepath, "/");
 		strcat(filepath, filename);
 
-		if (os_check_path_is_file(filepath) != 0) {
+		if (os_check_is_file(filepath) != 0) {
 			dir->filenames[dir->nfiles + nfiles] = strdup(filename);
 			dir->filepaths[dir->nfiles + nfiles] = strdup(filepath);
 			nfiles++;
@@ -140,7 +140,7 @@ int nemofs_dir_scan_extension(struct fsdir *dir, const char *path, const char *e
 		strcat(filepath, "/");
 		strcat(filepath, filename);
 
-		if (os_check_path_is_file(filepath) != 0 && os_has_file_extension(filename, extension) != 0) {
+		if (os_check_is_file(filepath) != 0 && os_has_file_extension(filename, extension) != 0) {
 			dir->filenames[dir->nfiles + nfiles] = strdup(filename);
 			dir->filepaths[dir->nfiles + nfiles] = strdup(filepath);
 			nfiles++;
@@ -176,7 +176,7 @@ int nemofs_dir_scan_regex(struct fsdir *dir, const char *path, const char *expr)
 		strcat(filepath, "/");
 		strcat(filepath, filename);
 
-		if (os_check_path_is_file(filepath) != 0 && regexec(&regex, filename, 0, NULL, 0) == 0) {
+		if (os_check_is_file(filepath) != 0 && regexec(&regex, filename, 0, NULL, 0) == 0) {
 			dir->filenames[dir->nfiles + nfiles] = strdup(filename);
 			dir->filepaths[dir->nfiles + nfiles] = strdup(filepath);
 			nfiles++;

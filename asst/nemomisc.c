@@ -233,7 +233,7 @@ int os_exist_path(const char *path)
 	return access(path, F_OK) == 0;
 }
 
-int os_check_path_is_directory(const char *path)
+int os_check_is_directory(const char *path)
 {
 	struct stat st;
 
@@ -242,7 +242,7 @@ int os_check_path_is_directory(const char *path)
 	return S_ISDIR(st.st_mode);
 }
 
-int os_check_path_is_file(const char *path)
+int os_check_is_file(const char *path)
 {
 	struct stat st;
 
@@ -301,6 +301,40 @@ int os_save_path(const char *path, char *buffer, int size)
 	fwrite(buffer, sizeof(char), size, fp);
 
 	fclose(fp);
+
+	return 0;
+}
+
+uint32_t os_execute_path(const char *path, char *const argv[], char *const envp[])
+{
+	sigset_t allsigs;
+	pid_t pid;
+
+	pid = fork();
+	if (pid == -1)
+		return 0;
+
+	if (pid > 0)
+		return pid;
+
+	sigfillset(&allsigs);
+	sigprocmask(SIG_UNBLOCK, &allsigs, NULL);
+
+	if (seteuid(getuid()) == -1)
+		return 0;
+
+	if (setpgid(getpid(), getpid()) == -1)
+		return 0;
+
+	if (argv == NULL || argv[0] == NULL) {
+		execl(path, path, NULL);
+	} else if (envp == NULL || envp[0] == NULL) {
+		execv(path, argv);
+	} else {
+		execve(path, argv, envp);
+	}
+
+	exit(EXIT_FAILURE);
 
 	return 0;
 }
@@ -396,6 +430,19 @@ char *os_get_file_path(const char *name)
 	return NULL;
 }
 
+char *os_get_file_name(const char *path)
+{
+	int len = strlen(path);
+	int i;
+
+	for (i = len - 1; i >= 0; i--) {
+		if (path[i] == '/')
+			return strdup(&path[i + 1]);
+	}
+
+	return NULL;
+}
+
 int os_set_nonblocking_mode(int fd)
 {
 	int flags;
@@ -413,38 +460,4 @@ int os_sched_set_affinity(pid_t pid, uint32_t cpuid)
 	CPU_SET(cpuid, &cset);
 
 	return sched_setaffinity(pid, sizeof(cpu_set_t), &cset);
-}
-
-uint32_t os_execute_path(const char *path, char *const argv[], char *const envp[])
-{
-	sigset_t allsigs;
-	pid_t pid;
-
-	pid = fork();
-	if (pid == -1)
-		return 0;
-
-	if (pid > 0)
-		return pid;
-
-	sigfillset(&allsigs);
-	sigprocmask(SIG_UNBLOCK, &allsigs, NULL);
-
-	if (seteuid(getuid()) == -1)
-		return 0;
-
-	if (setpgid(getpid(), getpid()) == -1)
-		return 0;
-
-	if (argv == NULL || argv[0] == NULL) {
-		execl(path, path, NULL);
-	} else if (envp == NULL || envp[0] == NULL) {
-		execv(path, argv);
-	} else {
-		execve(path, argv, envp);
-	}
-
-	exit(EXIT_FAILURE);
-
-	return 0;
 }

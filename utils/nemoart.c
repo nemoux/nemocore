@@ -442,7 +442,7 @@ int main(int argc, char *argv[])
 	}
 
 	if (contentpath != NULL) {
-		if (os_check_path_is_directory(contentpath) != 0) {
+		if (os_check_is_directory(contentpath) != 0) {
 			nemofs_dir_scan_extension(art->contents, contentpath, "mp4");
 			nemofs_dir_scan_extension(art->contents, contentpath, "avi");
 			nemofs_dir_scan_extension(art->contents, contentpath, "mov");

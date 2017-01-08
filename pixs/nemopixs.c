@@ -1673,7 +1673,7 @@ int main(int argc, char *argv[])
 	}
 
 	if (imagepath != NULL) {
-		if (os_check_path_is_directory(imagepath) != 0) {
+		if (os_check_is_directory(imagepath) != 0) {
 			struct fsdir *dir;
 			const char *filepath;
 			int i;
@@ -1783,7 +1783,7 @@ int main(int argc, char *argv[])
 	}
 
 	if (videopath != NULL) {
-		if (os_check_path_is_directory(videopath) != 0) {
+		if (os_check_is_directory(videopath) != 0) {
 			pixs->movies = nemofs_dir_create(32);
 			nemofs_dir_scan_extension(pixs->movies, videopath, "mp4");
 			nemofs_dir_scan_extension(pixs->movies, videopath, "avi");
