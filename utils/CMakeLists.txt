@@ -8,6 +8,7 @@ PKG_CHECK_MODULES(JSON REQUIRED json-c)
 INCLUDE_DIRECTORIES(${JSON_INCLUDE_DIRS})
 LINK_DIRECTORIES(${JSON_LIBRARY_DIRS})
 
+option(WITH_TCMALLOC "Build with TCMALLOC" ON)
 option(WITH_MINISHELL "Build with MINISHELL" ON)
 
 include_directories(
@@ -85,6 +86,12 @@ TARGET_LINK_LIBRARIES(nemoart
 	nemobus
 	)
 
+if(WITH_TCMALLOC)
+	TARGET_LINK_LIBRARIES(nemoart
+		tcmalloc_minimal
+		)
+endif(WITH_TCMALLOC)
+
 INSTALL(TARGETS nemoart DESTINATION bin)
 
 if(WITH_MINISHELL)
@@ -111,6 +118,12 @@ if(WITH_MINISHELL)
 		nemobus
 		nemodb
 		)
+
+	if(WITH_TCMALLOC)
+		TARGET_LINK_LIBRARIES(minishell
+			tcmalloc_minimal
+			)
+	endif(WITH_TCMALLOC)
 
 	INSTALL(TARGETS minishell DESTINATION bin)
 endif(WITH_MINISHELL)
