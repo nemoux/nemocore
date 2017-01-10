@@ -45,6 +45,7 @@ struct nemotrans {
 	uint32_t etime;
 
 	uint32_t tag;
+	uint32_t flags;
 
 	nemotrans_dispatch_update_t dispatch_update;
 	nemotrans_dispatch_done_t dispatch_done;
@@ -111,6 +112,26 @@ static inline uint32_t nemotrans_get_duration(struct nemotrans *trans)
 static inline uint32_t nemotrans_get_delay(struct nemotrans *trans)
 {
 	return trans->delay;
+}
+
+static inline void nemotrans_set_flags(struct nemotrans *trans, uint32_t flags)
+{
+	trans->flags |= flags;
+}
+
+static inline void nemotrans_put_flags(struct nemotrans *trans, uint32_t flags)
+{
+	trans->flags &= ~flags;
+}
+
+static inline int nemotrans_has_flags(struct nemotrans *trans, uint32_t flags)
+{
+	return trans->flags & flags;
+}
+
+static inline int nemotrans_has_flags_all(struct nemotrans *trans, uint32_t flags)
+{
+	return (trans->flags & flags) == flags;
 }
 
 #ifdef __cplusplus
