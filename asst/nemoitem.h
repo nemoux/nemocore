@@ -66,6 +66,8 @@ extern void nemoitem_detach_one(struct nemoitem *item, struct itemone *one);
 
 extern struct itemone *nemoitem_search_one(struct nemoitem *item, const char *path);
 extern struct itemone *nemoitem_search_attr(struct nemoitem *item, const char *path, const char *name, const char *value);
+extern struct itemone *nemoitem_search_attr2(struct nemoitem *item, const char *path, const char *name0, const char *value0, const char *name1, const char *value1);
+extern struct itemone *nemoitem_search_attr3(struct nemoitem *item, const char *path, const char *name0, const char *value0, const char *name1, const char *value1, const char *name2, const char *value2);
 extern struct itemone *nemoitem_search_attrs(struct nemoitem *item, const char *path, char delimiter, const char *attrs);
 extern struct itemone *nemoitem_search_format(struct nemoitem *item, const char *path, char delimiter, const char *fmt, ...);
 extern int nemoitem_count_one(struct nemoitem *item, const char *path);

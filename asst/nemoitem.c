@@ -80,6 +80,35 @@ struct itemone *nemoitem_search_attr(struct nemoitem *item, const char *path, co
 	return NULL;
 }
 
+struct itemone *nemoitem_search_attr2(struct nemoitem *item, const char *path, const char *name0, const char *value0, const char *name1, const char *value1)
+{
+	struct itemone *one;
+
+	nemolist_for_each(one, &item->list, link) {
+		if ((path == NULL || strcmp(one->path, path) == 0) &&
+				nemoitem_one_has_sattr(one, name0, value0) != 0 &&
+				nemoitem_one_has_sattr(one, name1, value1) != 0)
+			return one;
+	}
+
+	return NULL;
+}
+
+struct itemone *nemoitem_search_attr3(struct nemoitem *item, const char *path, const char *name0, const char *value0, const char *name1, const char *value1, const char *name2, const char *value2)
+{
+	struct itemone *one;
+
+	nemolist_for_each(one, &item->list, link) {
+		if ((path == NULL || strcmp(one->path, path) == 0) &&
+				nemoitem_one_has_sattr(one, name0, value0) != 0 &&
+				nemoitem_one_has_sattr(one, name1, value1) != 0 &&
+				nemoitem_one_has_sattr(one, name2, value2) != 0)
+			return one;
+	}
+
+	return NULL;
+}
+
 struct itemone *nemoitem_search_attrs(struct nemoitem *item, const char *path, char delimiter, const char *attrs)
 {
 	struct itemone *one;
