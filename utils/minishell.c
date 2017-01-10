@@ -36,6 +36,8 @@
 #include <nemoenvs.h>
 #include <nemomirror.h>
 #include <nemobus.h>
+#include <nemojson.h>
+#include <nemoitem.h>
 #include <nemodb.h>
 #include <nemotoken.h>
 #include <nemomisc.h>
@@ -367,19 +369,33 @@ static int minishell_dispatch_text(struct minishell *mini, const char *configpat
 static int minishell_dispatch_bus(int fd, uint32_t mask, void *data)
 {
 	struct minishell *mini = (struct minishell *)data;
+	struct nemojson *json;
 	struct nemoitem *msg;
 	struct itemone *one;
+	char buffer[4096];
+	int length;
+	int i;
 
-	msg = nemobus_recv_item(mini->bus);
-	if (msg == NULL)
+	length = nemobus_recv(mini->bus, buffer, sizeof(buffer));
+	if (length <= 0)
 		return 1;
 
-	nemoitem_for_each(one, msg) {
-		if (nemoitem_one_has_path(one, "/nemoshell/command") != 0)
-			minishell_dispatch_command(mini, one);
+	json = nemojson_create(buffer, length);
+	nemojson_update(json);
+
+	for (i = 0; i < nemojson_get_object_count(json); i++) {
+		msg = nemoitem_create();
+		nemoitem_load_json(msg, "/nemoshell", nemojson_get_object(json, i));
+
+		nemoitem_for_each(one, msg) {
+			if (nemoitem_one_has_path(one, "/nemoshell/command") != 0)
+				minishell_dispatch_command(mini, one);
+		}
+
+		nemoitem_destroy(msg);
 	}
 
-	nemoitem_destroy(msg);
+	nemojson_destroy(json);
 
 	return 1;
 }

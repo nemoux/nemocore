@@ -77,50 +77,7 @@ int nemobus_advertise(struct nemobus *bus, const char *type, const char *path)
 	return nemobus_send_format(bus, "{ \"to\": \"/nemobusd\", \"advertise\": { \"type\": \"%s\", \"path\": \"%s\" } }", type, path);
 }
 
-int nemobus_send(struct nemobus *bus, const char *from, const char *to, struct busmsg *msg)
-{
-	struct json_object *jobj;
-	const char *contents;
-	int r;
-
-	jobj = json_object_new_object();
-	json_object_object_add(jobj, "from", json_object_new_string(from));
-	json_object_object_add(jobj, "to", json_object_new_string(to));
-	json_object_object_add(jobj, nemobus_msg_get_name(msg), nemobus_msg_to_json(msg));
-
-	contents = json_object_get_string(jobj);
-
-	r = send(bus->soc, contents, strlen(contents), MSG_NOSIGNAL | MSG_DONTWAIT);
-
-	json_object_put(jobj);
-
-	return r;
-}
-
-int nemobus_send_many(struct nemobus *bus, const char *from, const char *to, struct busmsg **msgs, int count)
-{
-	struct json_object *jobj;
-	const char *contents;
-	int r;
-	int i;
-
-	jobj = json_object_new_object();
-	json_object_object_add(jobj, "from", json_object_new_string(from));
-	json_object_object_add(jobj, "to", json_object_new_string(to));
-
-	for (i = 0; i < count; i++)
-		json_object_object_add(jobj, nemobus_msg_get_name(msgs[i]), nemobus_msg_to_json(msgs[i]));
-
-	contents = json_object_get_string(jobj);
-
-	r = send(bus->soc, contents, strlen(contents), MSG_NOSIGNAL | MSG_DONTWAIT);
-
-	json_object_put(jobj);
-
-	return r;
-}
-
-int nemobus_send_raw(struct nemobus *bus, const char *buffer)
+int nemobus_send(struct nemobus *bus, const char *buffer)
 {
 	return send(bus->soc, buffer, strlen(buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
 }
@@ -142,51 +99,27 @@ int nemobus_send_format(struct nemobus *bus, const char *fmt, ...)
 	return r;
 }
 
-struct busmsg *nemobus_recv(struct nemobus *bus)
+int nemobus_send_msg(struct nemobus *bus, const char *from, const char *to, struct busmsg *msg)
 {
-	struct busmsg *msg;
-	char buffer[4096];
-	int r;
-
-	r = recv(bus->soc, buffer, sizeof(buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
-	if (r <= 0)
-		return NULL;
-	buffer[r] = '\0';
-
-	return nemobus_msg_from_json_string(buffer);
-}
-
-struct nemoitem *nemobus_recv_item(struct nemobus *bus)
-{
-	struct nemoitem *item;
 	struct json_object *jobj;
-	char buffer[4096];
+	const char *contents;
 	int r;
 
-	r = recv(bus->soc, buffer, sizeof(buffer), MSG_NOSIGNAL | MSG_DONTWAIT);
-	if (r <= 0)
-		return NULL;
-	buffer[r] = '\0';
+	jobj = json_object_new_object();
+	json_object_object_add(jobj, "from", json_object_new_string(from));
+	json_object_object_add(jobj, "to", json_object_new_string(to));
+	json_object_object_add(jobj, nemobus_msg_get_name(msg), nemobus_msg_to_json(msg));
 
-	jobj = json_tokener_parse(buffer);
-	if (jobj != NULL) {
-		struct json_object *pobj;
+	contents = json_object_get_string(jobj);
 
-		if (json_object_object_get_ex(jobj, "to", &pobj) != 0) {
-			item = nemoitem_create();
+	r = send(bus->soc, contents, strlen(contents), MSG_NOSIGNAL | MSG_DONTWAIT);
 
-			nemoitem_load_json(item, json_object_get_string(pobj), jobj);
+	json_object_put(jobj);
 
-			json_object_put(pobj);
-		}
-
-		json_object_put(jobj);
-	}
-
-	return item;
+	return r;
 }
 
-int nemobus_recv_raw(struct nemobus *bus, char *buffer, size_t size)
+int nemobus_recv(struct nemobus *bus, char *buffer, size_t size)
 {
 	return recv(bus->soc, buffer, size, MSG_NOSIGNAL | MSG_DONTWAIT);
 }

@@ -15,6 +15,8 @@
 #include <playback.h>
 #include <nemocook.h>
 #include <nemobus.h>
+#include <nemojson.h>
+#include <nemoitem.h>
 #include <nemoaction.h>
 #include <nemofs.h>
 #include <nemomisc.h>
@@ -290,25 +292,39 @@ static int nemoart_dispatch_tap_event(struct nemoaction *action, struct actionta
 static void nemoart_dispatch_bus(void *data, const char *events)
 {
 	struct nemoart *art = (struct nemoart *)data;
+	struct nemojson *json;
 	struct nemoitem *msg;
 	struct itemone *one;
+	char buffer[4096];
+	int length;
+	int i;
 
 	nemofs_dir_clear(art->contents);
 	art->icontents = 0;
 
-	msg = nemobus_recv_item(art->bus);
-	if (msg == NULL)
+	length = nemobus_recv(art->bus, buffer, sizeof(buffer));
+	if (length <= 0)
 		return;
 
-	nemoitem_for_each(one, msg) {
-		if (nemoitem_one_has_path_suffix(one, "/play") != 0) {
-			const char *path = nemoitem_one_get_attr(one, "url");
+	json = nemojson_create(buffer, length);
+	nemojson_update(json);
 
-			nemofs_dir_insert_file(art->contents, NULL, path);
+	for (i = 0; i < nemojson_get_object_count(json); i++) {
+		msg = nemoitem_create();
+		nemoitem_load_json(msg, "/nemoart", nemojson_get_object(json, i));
+
+		nemoitem_for_each(one, msg) {
+			if (nemoitem_one_has_path_suffix(one, "/play") != 0) {
+				const char *path = nemoitem_one_get_attr(one, "url");
+
+				nemofs_dir_insert_file(art->contents, NULL, path);
+			}
 		}
+
+		nemoitem_destroy(msg);
 	}
 
-	nemoitem_destroy(msg);
+	nemojson_destroy(json);
 
 	if (art->one != NULL)
 		nemoart_one_destroy(art->one);

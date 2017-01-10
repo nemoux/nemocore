@@ -38,18 +38,6 @@ TARGET_LINK_LIBRARIES(nemolog
 
 INSTALL(TARGETS nemolog DESTINATION bin)
 
-add_executable(nemobusc
-	nemobusc.c
-	)
-
-TARGET_LINK_LIBRARIES(nemobusc
-	nemoasst
-	nemobus
-	${JSON_LIBRARIES}
-	)
-
-INSTALL(TARGETS nemobusc DESTINATION bin)
-
 add_executable(nemobusd
 	nemobusd.c
 	)
