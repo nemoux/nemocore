@@ -299,9 +299,6 @@ static void nemoart_dispatch_bus(void *data, const char *events)
 	int length;
 	int i;
 
-	nemofs_dir_clear(art->contents);
-	art->icontents = 0;
-
 	length = nemobus_recv(art->bus, buffer, sizeof(buffer));
 	if (length <= 0)
 		return;
@@ -317,7 +314,10 @@ static void nemoart_dispatch_bus(void *data, const char *events)
 			if (nemoitem_one_has_path_suffix(one, "/play") != 0) {
 				const char *path = nemoitem_one_get_attr(one, "url");
 
+				nemofs_dir_clear(art->contents);
 				nemofs_dir_insert_file(art->contents, NULL, path);
+
+				art->icontents = 0;
 			}
 		}
 
