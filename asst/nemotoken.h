@@ -10,14 +10,14 @@ NEMO_BEGIN_EXTERN_C
 #include <stdlib.h>
 #include <string.h>
 
+#define NEMOTOKEN_TOKEN_MAX			(128)
+
 struct nemotoken {
 	char *contents;
 	int length;
 
-	char **tokens;
+	char *tokens[NEMOTOKEN_TOKEN_MAX];
 	int ntokens;
-
-	char fence;
 };
 
 extern struct nemotoken *nemotoken_create(const char *str, int length);
@@ -27,8 +27,6 @@ extern void nemotoken_destroy(struct nemotoken *token);
 extern int nemotoken_append(struct nemotoken *token, const char *str, int length);
 extern int nemotoken_append_one(struct nemotoken *token, char c);
 extern int nemotoken_append_format(struct nemotoken *token, const char *fmt, ...);
-
-extern void nemotoken_fence(struct nemotoken *token, char fence);
 
 extern void nemotoken_divide(struct nemotoken *token, char div);
 extern void nemotoken_replace(struct nemotoken *token, char src, char dst);
@@ -52,7 +50,7 @@ static inline char **nemotoken_get_tokens(struct nemotoken *token)
 
 static inline const char *nemotoken_get_token(struct nemotoken *token, int index)
 {
-	return index < token->ntokens ? token->tokens[index] : NULL;
+	return token->tokens[index];
 }
 
 static inline const char *nemotoken_get_string(struct nemotoken *token, int index, const char *value)
