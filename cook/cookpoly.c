@@ -162,7 +162,7 @@ static void nemocook_polygon_draw_vbo_indices_texture(struct cookpoly *poly)
 static inline void nemocook_polygon_update_callbacks(struct cookpoly *poly)
 {
 	if (poly->use_vbo != 0) {
-		if (poly->texture > 0) {
+		if (poly->texture != NULL) {
 			if (poly->indices != NULL) {
 				poly->draw = nemocook_polygon_draw_vbo_indices_texture;
 			} else {
@@ -179,7 +179,7 @@ static inline void nemocook_polygon_update_callbacks(struct cookpoly *poly)
 		poly->update_attrib = nemocook_polygon_update_attrib_vbo;
 		poly->update_buffer = nemocook_polygon_update_buffer_vbo;
 	} else {
-		if (poly->texture > 0) {
+		if (poly->texture != NULL) {
 			if (poly->indices != NULL) {
 				poly->draw = nemocook_polygon_draw_indices_texture;
 			} else {
