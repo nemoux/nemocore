@@ -27,7 +27,7 @@ NEMO_BEGIN_EXTERN_C
 #endif
 
 #ifndef CLAMP
-#	define CLAMP(x, a, b)	(MIN(MAX(x, a), b))
+#	define CLAMP(x, a, b)		(MIN(MAX(x, a), b))
 #endif
 
 #ifndef MINMAX
@@ -35,7 +35,11 @@ NEMO_BEGIN_EXTERN_C
 #endif
 
 #ifndef SQUARE
-#	define SQUARE(x)			((x) * (x))
+#	define SQUARE(x)				((x) * (x))
+#endif
+
+#ifndef ALIGN
+#	define ALIGN(x, n)			(((x - 1) / n + 1) * n)
 #endif
 
 #ifndef offsetof
