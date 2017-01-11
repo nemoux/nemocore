@@ -53,6 +53,13 @@ static inline int nemotable_get_iattr(struct nemotable *table, int cell, int row
 	return *p;
 }
 
+static inline int nemotable_has_iattr(struct nemotable *table, int cell, int row, int column, int value)
+{
+	int *p = nemotable_get_element(table, cell, row, column);
+
+	return *p == value;
+}
+
 static inline void nemotable_set_fattr(struct nemotable *table, int cell, int row, int column, float value)
 {
 	float *p = nemotable_get_element(table, cell, row, column);
@@ -67,6 +74,13 @@ static inline float nemotable_get_fattr(struct nemotable *table, int cell, int r
 	return *p;
 }
 
+static inline int nemotable_has_fattr(struct nemotable *table, int cell, int row, int column, float value)
+{
+	float *p = nemotable_get_element(table, cell, row, column);
+
+	return *p == value;
+}
+
 static inline void nemotable_set_sattr(struct nemotable *table, int cell, int row, int column, const char *value)
 {
 	char *p = nemotable_get_element(table, cell, row, column);
@@ -79,6 +93,13 @@ static inline const char *nemotable_get_sattr(struct nemotable *table, int cell,
 	const char *p = nemotable_get_element(table, cell, row, column);
 
 	return p;
+}
+
+static inline int nemotable_has_sattr(struct nemotable *table, int cell, int row, int column, const char *value)
+{
+	char *p = nemotable_get_element(table, cell, row, column);
+
+	return strcmp(p, value) == 0;
 }
 
 #ifdef __cplusplus
