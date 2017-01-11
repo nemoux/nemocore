@@ -8,52 +8,29 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include <stdarg.h>
-
 #include <nemotable.h>
 #include <nemomisc.h>
 
-struct nemotable *nemotable_create(int cells, int rows, int columns, ...)
+struct nemotable *nemotable_create(int maximum_elements)
 {
 	struct nemotable *table;
-	va_list vargs;
-	int offset;
-	int i;
 
 	table = (struct nemotable *)malloc(sizeof(struct nemotable));
 	if (table == NULL)
 		return NULL;
 	memset(table, 0, sizeof(struct nemotable));
 
-	table->cells = cells;
-	table->rows = rows;
-	table->columns = columns;
-
-	table->elements = (int *)malloc(sizeof(int) * columns);
-	if (table->elements == NULL)
+	table->elementsizes = (int *)malloc(sizeof(int) * maximum_elements);
+	if (table->elementsizes == NULL)
 		goto err1;
-
-	va_start(vargs, columns);
-
-	for (i = 0, offset = 0; i < columns; i++) {
-		table->elements[i] = offset;
-		offset += ALIGN(va_arg(vargs, int), 4);
-	}
-
-	va_end(vargs);
-
-	table->columnsize = offset;
-	table->cellsize = rows * table->columnsize;
-	table->tablesize = cells * table->cellsize;
-
-	table->buffer = malloc(table->tablesize);
-	if (table->buffer == NULL)
+	table->elementoffsets = (int *)malloc(sizeof(int) * maximum_elements);
+	if (table->elementoffsets == NULL)
 		goto err2;
 
 	return table;
 
 err2:
-	free(table->elements);
+	free(table->elementsizes);
 
 err1:
 	free(table);
@@ -63,15 +40,47 @@ err1:
 
 void nemotable_destroy(struct nemotable *table)
 {
-	free(table->buffer);
-	free(table->elements);
+	if (table->buffer != NULL)
+		free(table->buffer);
+
+	free(table->elementoffsets);
+	free(table->elementsizes);
 	free(table);
 }
 
-int nemotable_set_cell_count(struct nemotable *table, int cells)
+void nemotable_set_element_size(struct nemotable *table, int index, int size)
+{
+	table->elementsizes[index] = ALIGN(size, 4);
+}
+
+void nemotable_set_column_count(struct nemotable *table, int columns)
+{
+	table->columns = columns;
+}
+
+void nemotable_set_row_count(struct nemotable *table, int rows)
+{
+	table->rows = rows;
+}
+
+void nemotable_set_cell_count(struct nemotable *table, int cells)
 {
 	table->cells = cells;
-	table->tablesize = cells * table->cellsize;
+}
+
+int nemotable_update(struct nemotable *table)
+{
+	int offset;
+	int i;
+
+	for (i = 0, offset = 0; i < table->columns; i++) {
+		table->elementoffsets[i] = offset;
+		offset += table->elementsizes[i];
+	}
+
+	table->rowsize = offset;
+	table->cellsize = table->rows * table->rowsize;
+	table->tablesize = table->cells * table->cellsize;
 
 	table->buffer = realloc(table->buffer, table->tablesize);
 	if (table->buffer == NULL)
