@@ -304,6 +304,8 @@ static int nemoplay_shader_dispatch_rgba(struct playshader *shader)
 
 	glViewport(0, 0, shader->viewport_width, shader->viewport_height);
 
+	glDisable(GL_BLEND);
+
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
