@@ -437,7 +437,7 @@ static void *nemoplay_extractor_handle_thread(void *arg)
 
 	nemoplay_enter_thread(play);
 
-	while (nemoplay_extract_video(play, box, maxcount) > 0)
+	while (nemoplay_is_state(play, NEMOPLAY_PLAY_STATE) != 0 && nemoplay_extract_video(play, box, maxcount) > 0)
 		sleep(1);
 
 	nemoplay_leave_thread(play);
