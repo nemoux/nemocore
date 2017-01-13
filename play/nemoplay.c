@@ -472,6 +472,17 @@ void nemoplay_set_state(struct nemoplay *play, int state)
 	pthread_mutex_unlock(&play->lock);
 }
 
+void nemoplay_reset_state(struct nemoplay *play, int state)
+{
+	pthread_mutex_lock(&play->lock);
+
+	play->state = state;
+
+	pthread_cond_signal(&play->signal);
+
+	pthread_mutex_unlock(&play->lock);
+}
+
 void nemoplay_enter_thread(struct nemoplay *play)
 {
 	pthread_mutex_lock(&play->lock);

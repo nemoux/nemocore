@@ -122,6 +122,7 @@ extern void nemoplay_revoke_video(struct nemoplay *play);
 extern void nemoplay_revoke_audio(struct nemoplay *play);
 
 extern void nemoplay_set_state(struct nemoplay *play, int state);
+extern void nemoplay_reset_state(struct nemoplay *play, int state);
 
 extern void nemoplay_enter_thread(struct nemoplay *play);
 extern void nemoplay_leave_thread(struct nemoplay *play);
