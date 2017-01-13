@@ -402,7 +402,7 @@ int nemoplay_extract_video(struct nemoplay *play, struct playbox *box, int maxco
 					one->linesize[2] = frame->linesize[2];
 					one->height = frame->height;
 
-					nemoplay_box_add_one(box, one);
+					nemoplay_box_insert_one(box, one);
 				} else if (NEMOPLAY_PIXEL_IS_RGBA_FORMAT(play->pixel_format)) {
 					struct playone *one;
 					void *buffer;
@@ -420,7 +420,7 @@ int nemoplay_extract_video(struct nemoplay *play, struct playbox *box, int maxco
 					one->linesize[0] = frame->linesize[0];
 					one->height = frame->height;
 
-					nemoplay_box_add_one(box, one);
+					nemoplay_box_insert_one(box, one);
 				}
 			}
 		}

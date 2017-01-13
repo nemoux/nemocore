@@ -44,3 +44,13 @@ void nemoplay_box_destroy(struct playbox *box)
 	free(box->ones);
 	free(box);
 }
+
+int nemoplay_box_insert_one(struct playbox *box, struct playone *one)
+{
+	if (box->nones >= box->sones)
+		return -1;
+
+	box->ones[box->nones++] = one;
+
+	return 0;
+}

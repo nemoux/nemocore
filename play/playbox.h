@@ -19,6 +19,8 @@ struct playbox {
 extern struct playbox *nemoplay_box_create(int size);
 extern void nemoplay_box_destroy(struct playbox *box);
 
+extern int nemoplay_box_insert_one(struct playbox *box, struct playone *one);
+
 static inline struct playone *nemoplay_box_get_one(struct playbox *box, int index)
 {
 	return box->ones[index];
@@ -27,11 +29,6 @@ static inline struct playone *nemoplay_box_get_one(struct playbox *box, int inde
 static inline void nemoplay_box_set_one(struct playbox *box, int index, struct playone *one)
 {
 	box->ones[index] = one;
-}
-
-static inline void nemoplay_box_add_one(struct playbox *box, struct playone *one)
-{
-	box->ones[box->nones++] = one;
 }
 
 static inline int nemoplay_box_get_count(struct playbox *box)
