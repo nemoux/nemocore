@@ -105,6 +105,8 @@ static const GLfloat NEMOPLAY_POLYGONS[4][16] = {
 	}
 };
 
+static inline void nemoplay_shader_update_callbacks(struct playshader *shader);
+
 static int nemoplay_shader_update_yuv420(struct playshader *shader, struct playone *one)
 {
 	glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
@@ -327,11 +329,6 @@ static int nemoplay_shader_resize_yuv420(struct playshader *shader, int32_t widt
 	return 0;
 }
 
-static int nemoplay_shader_resize_rgba_bypass(struct playshader *shader, int32_t width, int32_t height)
-{
-	return 0;
-}
-
 static int nemoplay_shader_resize_rgba(struct playshader *shader, int32_t width, int32_t height)
 {
 	if (shader->tex > 0)
@@ -355,6 +352,8 @@ static int nemoplay_shader_resize_rgba(struct playshader *shader, int32_t width,
 			GL_UNSIGNED_BYTE,
 			NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
+
+	nemoplay_shader_update_callbacks(shader);
 
 	return 0;
 }
@@ -397,19 +396,19 @@ void nemoplay_shader_destroy(struct playshader *shader)
 	free(shader);
 }
 
-static inline void nemoplay_shader_update_callbacks(struct playshader *shader, int format)
+static inline void nemoplay_shader_update_callbacks(struct playshader *shader)
 {
-	if (NEMOPLAY_PIXEL_IS_YUV420_FORMAT(format)) {
+	if (NEMOPLAY_PIXEL_IS_YUV420_FORMAT(shader->format)) {
 		shader->resize = nemoplay_shader_resize_yuv420;
 		shader->update = nemoplay_shader_update_yuv420;
 		shader->dispatch = nemoplay_shader_dispatch_yuv420;
-	} else if (NEMOPLAY_PIXEL_IS_RGBA_FORMAT(format)) {
-		if (shader->texture == 0) {
-			shader->resize = nemoplay_shader_resize_rgba;
+	} else if (NEMOPLAY_PIXEL_IS_RGBA_FORMAT(shader->format)) {
+		shader->resize = nemoplay_shader_resize_rgba;
+
+		if (shader->texture == 0 || shader->texture_width != shader->viewport_width || shader->texture_height != shader->viewport_height) {
 			shader->update = nemoplay_shader_update_rgba;
 			shader->dispatch = nemoplay_shader_dispatch_rgba;
 		} else {
-			shader->resize = nemoplay_shader_resize_rgba_bypass;
 			shader->update = nemoplay_shader_update_rgba_bypass;
 			shader->dispatch = nemoplay_shader_dispatch_rgba_bypass;
 		}
@@ -460,7 +459,7 @@ int nemoplay_shader_set_format(struct playshader *shader, int format)
 
 	shader->format = format;
 
-	nemoplay_shader_update_callbacks(shader, shader->format);
+	nemoplay_shader_update_callbacks(shader);
 
 	return 0;
 }
@@ -485,7 +484,7 @@ int nemoplay_shader_set_viewport(struct playshader *shader, uint32_t texture, in
 	shader->viewport_width = width;
 	shader->viewport_height = height;
 
-	nemoplay_shader_update_callbacks(shader, shader->format);
+	nemoplay_shader_update_callbacks(shader);
 
 	return 0;
 }
