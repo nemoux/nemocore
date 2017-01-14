@@ -37,8 +37,6 @@ struct playshader {
 	int format;
 	int polygon;
 
-	int use_pbo;
-
 	GLuint shaders[2];
 	GLuint program;
 
@@ -51,11 +49,6 @@ struct playshader {
 	GLuint texy;
 	GLuint texu;
 	GLuint texv;
-
-	GLuint pbo;
-	GLuint pboy;
-	GLuint pbou;
-	GLuint pbov;
 
 	GLint glformat;
 
@@ -72,7 +65,6 @@ extern void nemoplay_shader_destroy(struct playshader *shader);
 extern int nemoplay_shader_set_format(struct playshader *shader, int format);
 extern int nemoplay_shader_set_viewport(struct playshader *shader, uint32_t texture, int32_t width, int32_t height);
 extern int nemoplay_shader_set_polygon(struct playshader *shader, int polygon);
-extern int nemoplay_shader_set_pbo(struct playshader *shader, int use_pbo);
 
 static inline uint32_t nemoplay_shader_get_viewport(struct playshader *shader)
 {
