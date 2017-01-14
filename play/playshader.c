@@ -213,6 +213,54 @@ static int nemoplay_shader_update_yuv420_pbo(struct playshader *shader, struct p
 	return 0;
 }
 
+static int nemoplay_shader_update_rgba_bypass(struct playshader *shader, struct playone *one)
+{
+	glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
+	glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, shader->texture);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, nemoplay_one_get_linesize(one, 0) / 4);
+	glTexSubImage2D(GL_TEXTURE_2D, 0,
+			0, 0,
+			shader->viewport_width,
+			shader->viewport_height,
+			shader->glformat,
+			GL_UNSIGNED_BYTE,
+			nemoplay_one_get_data(one, 0));
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	return 0;
+}
+
+static int nemoplay_shader_update_rgba_pbo_bypass(struct playshader *shader, struct playone *one)
+{
+	GLubyte *ptr;
+
+	glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
+	glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
+
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, shader->pbo);
+
+	ptr = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, shader->viewport_width * shader->viewport_height * 4, GL_MAP_WRITE_BIT);
+	memcpy(ptr, nemoplay_one_get_data(one, 0), shader->viewport_width * shader->viewport_height * 4);
+	glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+
+	glBindTexture(GL_TEXTURE_2D, shader->texture);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, nemoplay_one_get_linesize(one, 0) / 4);
+	glTexSubImage2D(GL_TEXTURE_2D, 0,
+			0, 0,
+			shader->viewport_width,
+			shader->viewport_height,
+			shader->glformat,
+			GL_UNSIGNED_BYTE,
+			NULL);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+	return 0;
+}
+
 static int nemoplay_shader_update_rgba(struct playshader *shader, struct playone *one)
 {
 	glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
@@ -295,6 +343,11 @@ static int nemoplay_shader_dispatch_yuv420(struct playshader *shader)
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+	return 0;
+}
+
+static int nemoplay_shader_dispatch_rgba_bypass(struct playshader *shader)
+{
 	return 0;
 }
 
@@ -487,6 +540,24 @@ static int nemoplay_shader_resize_yuv420_pbo(struct playshader *shader, int32_t 
 	return 0;
 }
 
+static int nemoplay_shader_resize_rgba_bypass(struct playshader *shader, int32_t width, int32_t height)
+{
+	return 0;
+}
+
+static int nemoplay_shader_resize_rgba_pbo_bypass(struct playshader *shader, int32_t width, int32_t height)
+{
+	if (shader->pbo > 0)
+		glDeleteBuffers(1, &shader->pbo);
+
+	glGenBuffers(1, &shader->pbo);
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, shader->pbo);
+	glBufferData(GL_PIXEL_UNPACK_BUFFER, width * height * 4, NULL, GL_DYNAMIC_DRAW);
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+	return 0;
+}
+
 static int nemoplay_shader_resize_rgba(struct playshader *shader, int32_t width, int32_t height)
 {
 	if (shader->tex > 0)
@@ -608,14 +679,26 @@ static inline void nemoplay_shader_update_callbacks(struct playshader *shader, i
 			shader->dispatch = nemoplay_shader_dispatch_yuv420;
 		}
 	} else if (NEMOPLAY_PIXEL_IS_RGBA_FORMAT(format)) {
-		if (use_pbo == 0) {
-			shader->resize = nemoplay_shader_resize_rgba;
-			shader->update = nemoplay_shader_update_rgba;
-			shader->dispatch = nemoplay_shader_dispatch_rgba;
+		if (shader->texture == 0) {
+			if (use_pbo == 0) {
+				shader->resize = nemoplay_shader_resize_rgba;
+				shader->update = nemoplay_shader_update_rgba;
+				shader->dispatch = nemoplay_shader_dispatch_rgba;
+			} else {
+				shader->resize = nemoplay_shader_resize_rgba_pbo;
+				shader->update = nemoplay_shader_update_rgba_pbo;
+				shader->dispatch = nemoplay_shader_dispatch_rgba;
+			}
 		} else {
-			shader->resize = nemoplay_shader_resize_rgba_pbo;
-			shader->update = nemoplay_shader_update_rgba_pbo;
-			shader->dispatch = nemoplay_shader_dispatch_rgba;
+			if (use_pbo == 0) {
+				shader->resize = nemoplay_shader_resize_rgba_bypass;
+				shader->update = nemoplay_shader_update_rgba_bypass;
+				shader->dispatch = nemoplay_shader_dispatch_rgba_bypass;
+			} else {
+				shader->resize = nemoplay_shader_resize_rgba_pbo_bypass;
+				shader->update = nemoplay_shader_update_rgba_pbo_bypass;
+				shader->dispatch = nemoplay_shader_dispatch_rgba_bypass;
+			}
 		}
 	}
 }
@@ -649,6 +732,7 @@ int nemoplay_shader_set_format(struct playshader *shader, int format)
 		glBindAttribLocation(shader->program, 1, "texcoord");
 
 		shader->utex = glGetUniformLocation(shader->program, "tex");
+		shader->glformat = GL_BGRA;
 	} else if (format == NEMOPLAY_RGBA_PIXEL_FORMAT) {
 		shader->program = gl_compile_program(NEMOPLAY_RGBA_VERTEX_SHADER, NEMOPLAY_RGBA_FRAGMENT_SHADER, &shader->shaders[0], &shader->shaders[1]);
 		if (shader->program == 0)
@@ -658,6 +742,7 @@ int nemoplay_shader_set_format(struct playshader *shader, int format)
 		glBindAttribLocation(shader->program, 1, "texcoord");
 
 		shader->utex = glGetUniformLocation(shader->program, "tex");
+		shader->glformat = GL_RGBA;
 	}
 
 	shader->format = format;
@@ -686,6 +771,8 @@ int nemoplay_shader_set_viewport(struct playshader *shader, uint32_t texture, in
 
 	shader->viewport_width = width;
 	shader->viewport_height = height;
+
+	nemoplay_shader_update_callbacks(shader, shader->format, shader->use_pbo);
 
 	return 0;
 }

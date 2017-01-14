@@ -57,6 +57,8 @@ struct playshader {
 	GLuint pbou;
 	GLuint pbov;
 
+	GLint glformat;
+
 	int32_t texture_width, texture_height;
 
 	nemoplay_shader_resize_t resize;
