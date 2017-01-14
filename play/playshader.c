@@ -153,7 +153,7 @@ static int nemoplay_shader_update_rgba_bypass(struct playshader *shader, struct 
 	glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
 	glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
 
-	glBindTexture(GL_TEXTURE_2D, shader->texture);
+	glBindTexture(GL_TEXTURE_2D, shader->viewport);
 	glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, nemoplay_one_get_linesize(one, 0) / 4);
 	glTexSubImage2D(GL_TEXTURE_2D, 0,
 			0, 0,
@@ -405,7 +405,7 @@ static inline void nemoplay_shader_update_callbacks(struct playshader *shader)
 	} else if (NEMOPLAY_PIXEL_IS_RGBA_FORMAT(shader->format)) {
 		shader->resize = nemoplay_shader_resize_rgba;
 
-		if (shader->texture == 0 || shader->texture_width != shader->viewport_width || shader->texture_height != shader->viewport_height) {
+		if (shader->viewport == 0 || shader->viewport_width != shader->texture_width || shader->viewport_height != shader->texture_height) {
 			shader->update = nemoplay_shader_update_rgba;
 			shader->dispatch = nemoplay_shader_dispatch_rgba;
 		} else {
@@ -474,9 +474,9 @@ int nemoplay_shader_set_viewport(struct playshader *shader, uint32_t texture, in
 	if (texture > 0) {
 		gl_create_fbo(texture, width, height, &shader->fbo, &shader->dbo);
 
-		shader->texture = texture;
+		shader->viewport = texture;
 	} else {
-		shader->texture = 0;
+		shader->viewport = 0;
 		shader->fbo = 0;
 		shader->dbo = 0;
 	}

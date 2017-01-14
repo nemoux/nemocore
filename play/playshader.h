@@ -30,7 +30,7 @@ typedef int (*nemoplay_shader_update_t)(struct playshader *shader, struct playon
 typedef int (*nemoplay_shader_dispatch_t)(struct playshader *shader);
 
 struct playshader {
-	GLuint texture;
+	GLuint viewport;
 	GLuint fbo, dbo;
 	int32_t viewport_width, viewport_height;
 
@@ -68,7 +68,7 @@ extern int nemoplay_shader_set_polygon(struct playshader *shader, int polygon);
 
 static inline uint32_t nemoplay_shader_get_viewport(struct playshader *shader)
 {
-	return shader->texture;
+	return shader->viewport;
 }
 
 static inline int32_t nemoplay_shader_get_viewport_width(struct playshader *shader)
