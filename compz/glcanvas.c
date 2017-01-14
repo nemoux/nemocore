@@ -47,14 +47,14 @@ static int glrenderer_attach_shm(struct glrenderer *renderer, struct glcontent *
 		case WL_SHM_FORMAT_XRGB8888:
 			glcontent->shader = &renderer->texture_shader_rgbx;
 			pitch = wl_shm_buffer_get_stride(shmbuffer) / 4;
-			format = GL_BGRA_EXT;
+			format = GL_BGRA;
 			pixeltype = GL_UNSIGNED_BYTE;
 			break;
 
 		case WL_SHM_FORMAT_ARGB8888:
 			glcontent->shader = &renderer->texture_shader_rgba;
 			pitch = wl_shm_buffer_get_stride(shmbuffer) / 4;
-			format = GL_BGRA_EXT;
+			format = GL_BGRA;
 			pixeltype = GL_UNSIGNED_BYTE;
 			break;
 
@@ -391,7 +391,7 @@ int glrenderer_read_canvas(struct nemorenderer *base, struct nemocanvas *canvas,
 
 	switch (format) {
 		case PIXMAN_a8r8g8b8:
-			glformat = GL_BGRA_EXT;
+			glformat = GL_BGRA;
 			break;
 
 		case PIXMAN_a8b8g8r8:

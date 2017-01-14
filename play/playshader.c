@@ -224,7 +224,7 @@ static int nemoplay_shader_update_rgba(struct playshader *shader, struct playone
 			0, 0,
 			shader->texture_width,
 			shader->texture_height,
-			GL_BGRA_EXT,
+			GL_BGRA,
 			GL_UNSIGNED_BYTE,
 			nemoplay_one_get_data(one, 0));
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -251,7 +251,7 @@ static int nemoplay_shader_update_rgba_pbo(struct playshader *shader, struct pla
 			0, 0,
 			shader->texture_width,
 			shader->texture_height,
-			GL_BGRA_EXT,
+			GL_BGRA,
 			GL_UNSIGNED_BYTE,
 			NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -502,11 +502,11 @@ static int nemoplay_shader_resize_rgba(struct playshader *shader, int32_t width,
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexImage2D(GL_TEXTURE_2D,
 			0,
-			GL_BGRA_EXT,
+			GL_BGRA,
 			width,
 			height,
 			0,
-			GL_BGRA_EXT,
+			GL_BGRA,
 			GL_UNSIGNED_BYTE,
 			NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -531,11 +531,11 @@ static int nemoplay_shader_resize_rgba_pbo(struct playshader *shader, int32_t wi
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexImage2D(GL_TEXTURE_2D,
 			0,
-			GL_BGRA_EXT,
+			GL_BGRA,
 			width,
 			height,
 			0,
-			GL_BGRA_EXT,
+			GL_BGRA,
 			GL_UNSIGNED_BYTE,
 			NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);

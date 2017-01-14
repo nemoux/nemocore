@@ -40,7 +40,7 @@ static int glrenderer_read_pixels(struct nemorenderer *base, struct nemoscreen *
 
 	switch (format) {
 		case PIXMAN_a8r8g8b8:
-			glformat = GL_BGRA_EXT;
+			glformat = GL_BGRA;
 			break;
 
 		case PIXMAN_a8b8g8r8:

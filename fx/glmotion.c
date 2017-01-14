@@ -129,7 +129,7 @@ void nemofx_glmotion_resize(struct glmotion *motion, int32_t width, int32_t heig
 
 	if (motion->texture[0] > 0) {
 		glBindTexture(GL_TEXTURE_2D, motion->texture[0]);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		glDeleteFramebuffers(1, &motion->fbo[0]);
@@ -139,7 +139,7 @@ void nemofx_glmotion_resize(struct glmotion *motion, int32_t width, int32_t heig
 	}
 
 	glBindTexture(GL_TEXTURE_2D, motion->texture[1]);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glDeleteFramebuffers(1, &motion->fbo[1]);

@@ -96,7 +96,7 @@ struct talenode *nemotale_node_create_gl(int32_t width, int32_t height)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 #ifdef NEMOUX_WITH_OPENGL_PBO
@@ -200,7 +200,7 @@ int nemotale_node_resize_gl(struct talenode *node, int32_t width, int32_t height
 
 		if (gcontext->has_texture_external == 0) {
 			glBindTexture(GL_TEXTURE_2D, gcontext->otexture);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 
@@ -807,9 +807,9 @@ int nemotale_node_flush_gl(struct talenode *node)
 		glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
 		glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT,
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA,
 				node->geometry.width, node->geometry.height, 0,
-				GL_BGRA_EXT, GL_UNSIGNED_BYTE, pcontext->data);
+				GL_BGRA, GL_UNSIGNED_BYTE, pcontext->data);
 
 		glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -877,9 +877,9 @@ int nemotale_node_flush_gl_pbo(struct talenode *node)
 
 		glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
 		glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT,
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA,
 				node->geometry.width, node->geometry.height, 0,
-				GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
+				GL_BGRA, GL_UNSIGNED_BYTE, NULL);
 
 		glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -925,9 +925,9 @@ int nemotale_node_unmap_pbo(struct talenode *node)
 
 	glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
 	glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT,
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA,
 			node->geometry.width, node->geometry.height, 0,
-			GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
+			GL_BGRA, GL_UNSIGNED_BYTE, NULL);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -953,9 +953,9 @@ int nemotale_node_flush_gl_subimage(struct talenode *node)
 		if (node->needs_full_upload != 0) {
 			glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
 			glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT,
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA,
 					node->geometry.width, node->geometry.height, 0,
-					GL_BGRA_EXT, GL_UNSIGNED_BYTE, pcontext->data);
+					GL_BGRA, GL_UNSIGNED_BYTE, pcontext->data);
 
 			node->needs_full_upload = 0;
 		} else {
@@ -976,7 +976,7 @@ int nemotale_node_flush_gl_subimage(struct talenode *node)
 				glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, box.y1);
 				glTexSubImage2D(GL_TEXTURE_2D, 0, box.x1, box.y1,
 						box.x2 - box.x1, box.y2 - box.y1,
-						GL_BGRA_EXT, GL_UNSIGNED_BYTE, pcontext->data);
+						GL_BGRA, GL_UNSIGNED_BYTE, pcontext->data);
 			}
 		}
 

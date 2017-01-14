@@ -217,7 +217,7 @@ void nemofx_gllight_resize(struct gllight *light, int32_t width, int32_t height)
 
 	if (light->texture > 0) {
 		glBindTexture(GL_TEXTURE_2D, light->texture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		glDeleteFramebuffers(1, &light->fbo);

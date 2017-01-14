@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <errno.h>
 
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
@@ -79,7 +81,7 @@ GLuint gl_create_texture(GLint filter, GLint wrap, GLuint width, GLuint height)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	return texture;
@@ -98,11 +100,11 @@ int gl_load_texture(GLuint texture, GLuint width, GLuint height, const char *fil
 	glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
 	glTexImage2D(GL_TEXTURE_2D,
 			0,
-			GL_BGRA_EXT,
+			GL_BGRA,
 			pixman_image_get_stride(image),
 			pixman_image_get_height(image),
 			0,
-			GL_BGRA_EXT,
+			GL_BGRA,
 			GL_UNSIGNED_BYTE,
 			(void *)pixman_image_get_data(image));
 	glBindTexture(GL_TEXTURE_2D, 0);

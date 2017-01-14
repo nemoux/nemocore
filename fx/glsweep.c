@@ -263,7 +263,7 @@ void nemofx_glsweep_set_snapshot(struct glsweep *sweep, uint32_t texture, int32_
 
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	glBindTexture(GL_TEXTURE_2D, sweep->snapshot);
-	glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, 0, 0, width, height, 0);
+	glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA, 0, 0, width, height, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -371,7 +371,7 @@ void nemofx_glsweep_resize(struct glsweep *sweep, int32_t width, int32_t height)
 
 	if (sweep->texture > 0) {
 		glBindTexture(GL_TEXTURE_2D, sweep->texture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		glDeleteFramebuffers(1, &sweep->fbo);
@@ -381,7 +381,7 @@ void nemofx_glsweep_resize(struct glsweep *sweep, int32_t width, int32_t height)
 
 		if (sweep->is_reference == 0 && sweep->snapshot > 0) {
 			glBindTexture(GL_TEXTURE_2D, sweep->snapshot);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 	}

@@ -337,7 +337,7 @@ void nemofx_glshadow_resize(struct glshadow *shadow, int32_t width, int32_t heig
 
 	if (shadow->texture > 0) {
 		glBindTexture(GL_TEXTURE_2D, shadow->texture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		glDeleteFramebuffers(1, &shadow->fbo);

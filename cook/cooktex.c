@@ -41,7 +41,7 @@ void nemocook_texture_assign(struct cooktex *tex, int format, int width, int hei
 	tex->height = height;
 
 	if (format == NEMOCOOK_TEXTURE_BGRA_FORMAT) {
-		tex->format = GL_BGRA_EXT;
+		tex->format = GL_BGRA;
 		tex->bpp = 4;
 	} else if (format == NEMOCOOK_TEXTURE_LUMINANCE_FORMAT) {
 		tex->format = GL_LUMINANCE;

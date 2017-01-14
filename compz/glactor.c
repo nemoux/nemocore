@@ -126,7 +126,7 @@ static int glrenderer_attach_shm(struct glrenderer *renderer, struct glcontent *
 	pitch = stride / 4;
 
 	glcontent->shader = &renderer->texture_shader_rgba;
-	format = GL_BGRA_EXT;
+	format = GL_BGRA;
 	pixeltype = GL_UNSIGNED_BYTE;
 
 	if (pitch != glcontent->pitch ||
@@ -173,7 +173,7 @@ void glrenderer_attach_actor(struct nemorenderer *base, struct nemoactor *actor)
 		glcontent->height = actor->base.height;
 		glcontent->target = GL_TEXTURE_2D;
 		glcontent->shader = &renderer->texture_shader_rgba;
-		glcontent->format = GL_BGRA_EXT;
+		glcontent->format = GL_BGRA;
 		glcontent->pixeltype = GL_UNSIGNED_BYTE;
 		glcontent->textures[0] = actor->texture;
 		glcontent->ntextures = 1;
@@ -257,7 +257,7 @@ int glrenderer_read_actor(struct nemorenderer *base, struct nemoactor *actor, pi
 
 	switch (format) {
 		case PIXMAN_a8r8g8b8:
-			glformat = GL_BGRA_EXT;
+			glformat = GL_BGRA;
 			break;
 
 		case PIXMAN_a8b8g8r8:
