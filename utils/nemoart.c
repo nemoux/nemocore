@@ -48,6 +48,7 @@ struct nemoart {
 
 	int threads;
 	int polygon;
+	int audion;
 
 	struct cookegl *egl;
 
@@ -78,8 +79,10 @@ static struct artone *nemoart_one_create(struct nemoart *art, const char *url, i
 		nemoplay_set_video_intopt(one->play, "threads", art->threads);
 	nemoplay_load_media(one->play, url);
 
+	if (art->audion == 0)
+		nemoplay_revoke_audio(one->play);
+
 	one->decoderback = nemoplay_decoder_create(one->play);
-	one->audioback = nemoplay_audio_create_by_ao(one->play);
 	one->videoback = nemoplay_video_create_by_timer(one->play);
 	nemoplay_video_set_texture(one->videoback, 0, one->width, one->height);
 	nemoplay_video_set_update(one->videoback, nemoart_dispatch_video_update);
@@ -87,6 +90,9 @@ static struct artone *nemoart_one_create(struct nemoart *art, const char *url, i
 	nemoplay_video_set_data(one->videoback, one);
 	one->shader = nemoplay_video_get_shader(one->videoback);
 	nemoplay_shader_set_polygon(one->shader, art->polygon);
+
+	if (art->audion != 0)
+		one->audioback = nemoplay_audio_create_by_ao(one->play);
 
 	return one;
 }
@@ -96,8 +102,10 @@ static void nemoart_one_destroy(struct artone *one)
 	if (one->tex != NULL)
 		nemocook_texture_destroy(one->tex);
 
+	if (one->audioback != NULL)
+		nemoplay_audio_destroy(one->audioback);
+
 	nemoplay_video_destroy(one->videoback);
-	nemoplay_audio_destroy(one->audioback);
 	nemoplay_decoder_destroy(one->decoderback);
 	nemoplay_destroy(one->play);
 
@@ -343,6 +351,7 @@ int main(int argc, char *argv[])
 		{ "content",			required_argument,		NULL,		'c' },
 		{ "flip",					required_argument,		NULL,		'l' },
 		{ "threads",			required_argument,		NULL,		't' },
+		{ "audio",				required_argument,		NULL,		'a' },
 		{ "busid",				required_argument,		NULL,		'b' },
 		{ 0 }
 	};
@@ -358,12 +367,13 @@ int main(int argc, char *argv[])
 	int width = 1920;
 	int height = 1080;
 	int threads = 0;
+	int audion = 0;
 	int flip = 0;
 	int opt;
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "w:h:f:c:l:t:b:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:f:c:l:t:a:b:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -392,6 +402,10 @@ int main(int argc, char *argv[])
 				threads = strtoul(optarg, NULL, 10);
 				break;
 
+			case 'a':
+				audion = strcasecmp(optarg, "on") == 0;
+				break;
+
 			case 'b':
 				busid = strdup(optarg);
 				break;
@@ -413,6 +427,7 @@ int main(int argc, char *argv[])
 	art->height = height;
 	art->threads = threads;
 	art->polygon = flip == 0 ? NEMOPLAY_SHADER_FLIP_POLYGON : NEMOPLAY_SHADER_FLIP_ROTATE_POLYGON;
+	art->audion = audion;
 
 	art->tool = tool = nemotool_create();
 	nemotool_connect_wayland(tool, NULL);
