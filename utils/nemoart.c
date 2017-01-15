@@ -40,6 +40,7 @@ struct artone {
 
 struct nemoart {
 	struct nemotool *tool;
+	struct nemotimer *timer;
 	struct nemocanvas *canvas;
 	struct nemoaction *action;
 	struct nemobus *bus;
@@ -49,6 +50,7 @@ struct nemoart {
 	int threads;
 	int polygon;
 	int audion;
+	int alive;
 
 	struct cookegl *egl;
 
@@ -297,6 +299,15 @@ static int nemoart_dispatch_tap_event(struct nemoaction *action, struct actionta
 	return 0;
 }
 
+static void nemoart_dispatch_timer(struct nemotimer *timer, void *data)
+{
+	struct nemoart *art = (struct nemoart *)data;
+
+	nemotool_client_alive(art->tool, art->alive);
+
+	nemotimer_set_timeout(art->timer, art->alive / 2);
+}
+
 static void nemoart_dispatch_bus(void *data, const char *events)
 {
 	struct nemoart *art = (struct nemoart *)data;
@@ -353,11 +364,13 @@ int main(int argc, char *argv[])
 		{ "threads",			required_argument,		NULL,		't' },
 		{ "audio",				required_argument,		NULL,		'a' },
 		{ "busid",				required_argument,		NULL,		'b' },
+		{ "alive",				required_argument,		NULL,		'e' },
 		{ 0 }
 	};
 
 	struct nemoart *art;
 	struct nemotool *tool;
+	struct nemotimer *timer;
 	struct nemocanvas *canvas;
 	struct nemoaction *action;
 	struct cookegl *egl;
@@ -369,11 +382,12 @@ int main(int argc, char *argv[])
 	int threads = 0;
 	int audion = 0;
 	int flip = 0;
+	int alive = 0;
 	int opt;
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "w:h:f:c:l:t:a:b:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:f:c:l:t:a:b:e:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -410,6 +424,10 @@ int main(int argc, char *argv[])
 				busid = strdup(optarg);
 				break;
 
+			case 'e':
+				alive = strtoul(optarg, NULL, 10);
+				break;
+
 			default:
 				break;
 		}
@@ -428,10 +446,16 @@ int main(int argc, char *argv[])
 	art->threads = threads;
 	art->polygon = flip == 0 ? NEMOPLAY_SHADER_FLIP_POLYGON : NEMOPLAY_SHADER_FLIP_ROTATE_POLYGON;
 	art->audion = audion;
+	art->alive = alive;
 
 	art->tool = tool = nemotool_create();
 	nemotool_connect_wayland(tool, NULL);
 	nemotool_connect_egl(tool);
+
+	art->timer = timer = nemotimer_create(tool);
+	nemotimer_set_callback(timer, nemoart_dispatch_timer);
+	nemotimer_set_userdata(timer, art);
+	nemotimer_set_timeout(timer, art->alive / 2);
 
 	art->canvas = canvas = nemocanvas_egl_create(tool, width, height);
 	nemocanvas_opaque(canvas, 0, 0, width, height);
