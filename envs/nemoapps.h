@@ -10,11 +10,16 @@ NEMO_BEGIN_EXTERN_C
 #include <nemolist.h>
 
 struct nemoenvs;
+struct nemotimer;
 
 struct nemoapp {
+	struct nemoenvs *envs;
+
 	pid_t pid;
 
 	char *id;
+
+	struct nemotimer *timer;
 
 	struct nemolist link;
 };
@@ -34,6 +39,8 @@ extern void nemoenvs_destroy_app(struct nemoapp *app);
 
 extern int nemoenvs_attach_app(struct nemoenvs *envs, const char *id, pid_t pid);
 extern void nemoenvs_detach_app(struct nemoenvs *envs, pid_t pid);
+
+extern void nemoenvs_alive_app(struct nemoenvs *envs, pid_t pid, uint32_t timeout);
 
 extern int nemoenvs_respawn_app(struct nemoenvs *envs, pid_t pid);
 

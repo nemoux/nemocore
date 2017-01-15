@@ -65,7 +65,7 @@ typedef enum {
 struct shellbin;
 struct clientstate;
 
-typedef void (*nemoshell_alive_client_t)(void *data, pid_t pid);
+typedef void (*nemoshell_alive_client_t)(void *data, pid_t pid, uint32_t timeout);
 typedef void (*nemoshell_destroy_client_t)(void *data, pid_t pid);
 typedef void (*nemoshell_update_client_t)(void *data, struct shellbin *bin, struct clientstate *state);
 typedef void (*nemoshell_update_layer_t)(void *data, struct shellbin *bin, const char *type);

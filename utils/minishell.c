@@ -400,9 +400,11 @@ static int minishell_dispatch_bus(int fd, uint32_t mask, void *data)
 	return 1;
 }
 
-static void minishell_alive_client(void *data, pid_t pid)
+static void minishell_alive_client(void *data, pid_t pid, uint32_t timeout)
 {
 	struct minishell *mini = (struct minishell *)data;
+
+	nemoenvs_alive_app(mini->envs, pid, timeout);
 }
 
 static void minishell_destroy_client(void *data, pid_t pid)

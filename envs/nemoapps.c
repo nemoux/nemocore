@@ -12,6 +12,7 @@
 
 #include <shell.h>
 #include <compz.h>
+#include <timer.h>
 #include <waylandhelper.h>
 
 #include <nemoenvs.h>
@@ -20,6 +21,9 @@
 #include <nemoitem.h>
 #include <nemolog.h>
 #include <nemomisc.h>
+
+static void nemoenvs_execute_background(struct nemoenvs *envs, struct itemone *one);
+static void nemoenvs_execute_daemon(struct nemoenvs *envs, struct itemone *one);
 
 struct nemoapp *nemoenvs_create_app(void)
 {
@@ -39,6 +43,9 @@ void nemoenvs_destroy_app(struct nemoapp *app)
 {
 	nemolist_remove(&app->link);
 
+	if (app->timer != NULL)
+		nemotimer_destroy(app->timer);
+
 	if (app->id != NULL)
 		free(app->id);
 
@@ -53,6 +60,7 @@ int nemoenvs_attach_app(struct nemoenvs *envs, const char *id, pid_t pid)
 	if (app == NULL)
 		return -1;
 
+	app->envs = envs;
 	app->id = strdup(id);
 	app->pid = pid;
 
@@ -68,6 +76,49 @@ void nemoenvs_detach_app(struct nemoenvs *envs, pid_t pid)
 	nemolist_for_each_safe(app, napp, &envs->app_list, link) {
 		if (app->pid == pid) {
 			nemoenvs_destroy_app(app);
+			return;
+		}
+	}
+}
+
+static void nemoenvs_dispatch_alive_timer(struct nemotimer *timer, void *data)
+{
+	struct nemoapp *app = (struct nemoapp *)data;
+	struct nemoenvs *envs = app->envs;
+	struct itemone *one;
+
+	nemolog_warning("ENVS", "alive timeout, respawn app(%s) pid(%d)!\n", app->id, app->pid);
+
+	kill(app->pid, SIGKILL);
+
+	one = nemoitem_search_one(envs->apps, app->id);
+	if (one != NULL) {
+		if (nemoitem_one_has_path_prefix(one, "/nemoshell/background") != 0) {
+			nemoenvs_execute_background(envs, one);
+		} else if (nemoitem_one_has_path_prefix(one, "/nemoshell/daemon") != 0) {
+			nemoenvs_execute_daemon(envs, one);
+		}
+	}
+
+	nemoenvs_destroy_app(app);
+}
+
+void nemoenvs_alive_app(struct nemoenvs *envs, pid_t pid, uint32_t timeout)
+{
+	struct nemoshell *shell = envs->shell;
+	struct nemocompz *compz = shell->compz;
+	struct nemoapp *app, *napp;
+
+	nemolist_for_each_safe(app, napp, &envs->app_list, link) {
+		if (app->pid == pid) {
+			if (app->timer == NULL) {
+				app->timer = nemotimer_create(compz);
+				nemotimer_set_callback(app->timer, nemoenvs_dispatch_alive_timer);
+				nemotimer_set_userdata(app->timer, app);
+			}
+
+			nemotimer_set_timeout(app->timer, timeout);
+
 			return;
 		}
 	}

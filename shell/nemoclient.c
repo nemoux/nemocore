@@ -23,7 +23,7 @@ static void nemo_client_alive(struct wl_client *client, struct wl_resource *reso
 
 		wl_client_get_credentials(client, &pid, NULL, NULL);
 
-		shell->alive_client(shell->userdata, pid);
+		shell->alive_client(shell->userdata, pid, timeout);
 	}
 }
 
