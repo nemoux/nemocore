@@ -17,6 +17,7 @@
 #include <wayland-client.h>
 #include <wayland-nemo-seat-client-protocol.h>
 #include <wayland-nemo-shell-client-protocol.h>
+#include <wayland-presentation-timing-client-protocol.h>
 
 #include <nemotool.h>
 #include <nemocanvas.h>

@@ -5,6 +5,9 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <wayland-client.h>
+#include <wayland-nemo-shell-client-protocol.h>
+
 #include <nemotool.h>
 #include <nemooutput.h>
 #include <nemomisc.h>

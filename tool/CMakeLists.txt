@@ -82,6 +82,11 @@ wayland_add_protocol_client(PROTOCOLS
 	nemo-shell
 	)
 
+wayland_add_protocol_client(PROTOCOLS
+	${CMAKE_SOURCE_DIR}/protocol/nemo-client.xml
+	nemo-client
+	)
+
 include_directories(
 	${CMAKE_SOURCE_DIR}/asst
 	${CMAKE_SOURCE_DIR}/helper
@@ -141,10 +146,6 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/tool/nemoqueue.h
 	${CMAKE_SOURCE_DIR}/tool/nemoegl.h
 	${CMAKE_SOURCE_DIR}/tool/nemoplugin.h
-	${CMAKE_BINARY_DIR}/tool/wayland-presentation-timing-client-protocol.h
-	${CMAKE_BINARY_DIR}/tool/wayland-nemo-shell-client-protocol.h
-	${CMAKE_BINARY_DIR}/tool/wayland-nemo-seat-client-protocol.h
-	${CMAKE_BINARY_DIR}/tool/wayland-nemo-sound-client-protocol.h
 	)
 
 configure_file(

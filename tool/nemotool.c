@@ -13,8 +13,11 @@
 #include <pixman.h>
 
 #include <wayland-client.h>
+#include <wayland-presentation-timing-client-protocol.h>
 #include <wayland-nemo-seat-client-protocol.h>
+#include <wayland-nemo-sound-client-protocol.h>
 #include <wayland-nemo-shell-client-protocol.h>
+#include <wayland-nemo-client-client-protocol.h>
 
 #include <nemotool.h>
 #include <nemocanvas.h>
@@ -455,6 +458,8 @@ static void registry_handle_global(void *data, struct wl_registry *registry, uin
 		tool->shell = wl_registry_bind(registry, id, &nemo_shell_interface, 1);
 		nemo_shell_use_unstable_version(tool->shell, 1);
 		nemo_shell_add_listener(tool->shell, &nemo_shell_listener, data);
+	} else if (strcmp(interface, "nemo_client") == 0) {
+		tool->client = wl_registry_bind(registry, id, &nemo_client_interface, 1);
 	} else if (strcmp(interface, "presentation") == 0) {
 		tool->presentation = wl_registry_bind(registry, id, &presentation_interface, 1);
 		presentation_add_listener(tool->presentation, &presentation_listener, data);
@@ -838,6 +843,11 @@ int nemotool_dispatch_idle(struct nemotool *tool, nemotool_dispatch_idle_t dispa
 	nemolist_insert(&tool->idle_list, &idle->link);
 
 	return 0;
+}
+
+void nemotool_client_alive(struct nemotool *tool, uint32_t timeout)
+{
+	nemo_client_alive(tool->client, timeout);
 }
 
 uint32_t nemotool_get_keysym(struct nemotool *tool, uint32_t code)

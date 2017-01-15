@@ -5,6 +5,9 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <wayland-client.h>
+#include <wayland-nemo-sound-client-protocol.h>
+
 #include <nemotool.h>
 #include <nemosound.h>
 

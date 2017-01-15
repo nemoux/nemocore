@@ -11,11 +11,8 @@ NEMO_BEGIN_EXTERN_C
 #include <sys/types.h>
 
 #include <xkbcommon/xkbcommon.h>
+
 #include <wayland-client.h>
-#include <wayland-presentation-timing-client-protocol.h>
-#include <wayland-nemo-seat-client-protocol.h>
-#include <wayland-nemo-sound-client-protocol.h>
-#include <wayland-nemo-shell-client-protocol.h>
 
 #include <nemolist.h>
 #include <nemolistener.h>
@@ -103,6 +100,7 @@ struct nemotool {
 	struct nemo_touch *touch;
 	struct nemo_sound *sound;
 	struct nemo_shell *shell;
+	struct nemo_client *client;
 	struct wl_shm *shm;
 	uint32_t formats;
 	clockid_t clock_id;
@@ -235,6 +233,8 @@ extern void nemotool_keyboard_key(struct nemotool *tool, uint32_t time, uint32_t
 extern void nemotool_keyboard_layout(struct nemotool *tool, const char *name);
 
 extern void nemotool_touch_bypass(struct nemotool *tool, int32_t id, float x, float y);
+
+extern void nemotool_client_alive(struct nemotool *tool, uint32_t timeout);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
