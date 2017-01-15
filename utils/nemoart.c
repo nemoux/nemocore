@@ -40,17 +40,18 @@ struct artone {
 
 struct nemoart {
 	struct nemotool *tool;
-	struct nemotimer *timer;
 	struct nemocanvas *canvas;
 	struct nemoaction *action;
 	struct nemobus *bus;
+
+	struct nemotimer *alive_timer;
+	int alive_timeout;
 
 	int width, height;
 
 	int threads;
 	int polygon;
 	int audion;
-	int alive;
 
 	struct cookegl *egl;
 
@@ -299,13 +300,13 @@ static int nemoart_dispatch_tap_event(struct nemoaction *action, struct actionta
 	return 0;
 }
 
-static void nemoart_dispatch_timer(struct nemotimer *timer, void *data)
+static void nemoart_dispatch_alive_timer(struct nemotimer *timer, void *data)
 {
 	struct nemoart *art = (struct nemoart *)data;
 
-	nemotool_client_alive(art->tool, art->alive);
+	nemotool_client_alive(art->tool, art->alive_timeout);
 
-	nemotimer_set_timeout(art->timer, art->alive / 2);
+	nemotimer_set_timeout(art->alive_timer, art->alive_timeout / 2);
 }
 
 static void nemoart_dispatch_bus(void *data, const char *events)
@@ -446,16 +447,16 @@ int main(int argc, char *argv[])
 	art->threads = threads;
 	art->polygon = flip == 0 ? NEMOPLAY_SHADER_FLIP_POLYGON : NEMOPLAY_SHADER_FLIP_ROTATE_POLYGON;
 	art->audion = audion;
-	art->alive = alive;
+	art->alive_timeout = alive;
 
 	art->tool = tool = nemotool_create();
 	nemotool_connect_wayland(tool, NULL);
 	nemotool_connect_egl(tool);
 
-	art->timer = timer = nemotimer_create(tool);
-	nemotimer_set_callback(timer, nemoart_dispatch_timer);
+	art->alive_timer = timer = nemotimer_create(tool);
+	nemotimer_set_callback(timer, nemoart_dispatch_alive_timer);
 	nemotimer_set_userdata(timer, art);
-	nemotimer_set_timeout(timer, art->alive / 2);
+	nemotimer_set_timeout(timer, art->alive_timeout / 2);
 
 	art->canvas = canvas = nemocanvas_egl_create(tool, width, height);
 	nemocanvas_opaque(canvas, 0, 0, width, height);
@@ -524,6 +525,8 @@ int main(int argc, char *argv[])
 	nemoaction_destroy(action);
 
 	nemocanvas_egl_destroy(canvas);
+
+	nemotimer_destroy(timer);
 
 	nemotool_destroy(tool);
 
