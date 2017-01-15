@@ -65,6 +65,7 @@ typedef enum {
 struct shellbin;
 struct clientstate;
 
+typedef void (*nemoshell_alive_client_t)(void *data, pid_t pid);
 typedef void (*nemoshell_destroy_client_t)(void *data, pid_t pid);
 typedef void (*nemoshell_update_client_t)(void *data, struct shellbin *bin, struct clientstate *state);
 typedef void (*nemoshell_update_layer_t)(void *data, struct shellbin *bin, const char *type);
@@ -116,6 +117,7 @@ struct nemoshell {
 		uint32_t max_width, max_height;
 	} bin;
 
+	nemoshell_alive_client_t alive_client;
 	nemoshell_destroy_client_t destroy_client;
 	nemoshell_update_client_t update_client;
 	nemoshell_update_layer_t update_layer;
@@ -343,6 +345,11 @@ extern void nemoshell_set_maximized_bin_legacy(struct nemoshell *shell, struct s
 extern void nemoshell_set_maximized_bin(struct nemoshell *shell, struct shellbin *bin, struct shellscreen *screen);
 extern void nemoshell_put_maximized_bin(struct nemoshell *shell, struct shellbin *bin);
 extern void nemoshell_kill_fullscreen_bin(struct nemoshell *shell, uint32_t target);
+
+static inline void nemoshell_set_alive_client(struct nemoshell *shell, nemoshell_alive_client_t dispatch)
+{
+	shell->alive_client = dispatch;
+}
 
 static inline void nemoshell_set_destroy_client(struct nemoshell *shell, nemoshell_destroy_client_t dispatch)
 {

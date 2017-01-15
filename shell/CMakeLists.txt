@@ -68,6 +68,11 @@ wayland_add_protocol_server(PROTOCOLS
 	nemo-shell
 	)
 
+wayland_add_protocol_server(PROTOCOLS
+	${CMAKE_SOURCE_DIR}/protocol/nemo-client.xml
+	nemo-client
+	)
+
 include_directories(
 	${CMAKE_SOURCE_DIR}/asst
 	${CMAKE_SOURCE_DIR}/helper
@@ -103,6 +108,7 @@ add_library(nemoshell SHARED
 	waylandshell.c
 	xdgshell.c
 	nemoshell.c
+	nemoclient.c
 	${PROTOCOLS}
 	)
 
@@ -136,8 +142,6 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/shell/grab.h
 	${CMAKE_SOURCE_DIR}/shell/move.h
 	${CMAKE_SOURCE_DIR}/shell/pick.h
-	${CMAKE_SOURCE_DIR}/shell/nemoshell.h
-	${CMAKE_BINARY_DIR}/shell/wayland-nemo-shell-server-protocol.h
 	)
 
 configure_file(

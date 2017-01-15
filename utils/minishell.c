@@ -400,6 +400,11 @@ static int minishell_dispatch_bus(int fd, uint32_t mask, void *data)
 	return 1;
 }
 
+static void minishell_alive_client(void *data, pid_t pid)
+{
+	struct minishell *mini = (struct minishell *)data;
+}
+
 static void minishell_destroy_client(void *data, pid_t pid)
 {
 	struct minishell *mini = (struct minishell *)data;
@@ -532,6 +537,7 @@ int main(int argc, char *argv[])
 	shell = nemoshell_create(compz);
 	if (shell == NULL)
 		goto out2;
+	nemoshell_set_alive_client(shell, minishell_alive_client);
 	nemoshell_set_destroy_client(shell, minishell_destroy_client);
 	nemoshell_set_update_client(shell, minishell_update_client);
 	nemoshell_set_update_layer(shell, minishell_update_layer);

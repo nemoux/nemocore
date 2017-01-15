@@ -10,6 +10,7 @@
 #include <wayland-server.h>
 #include <wayland-xdg-shell-server-protocol.h>
 #include <wayland-nemo-shell-server-protocol.h>
+#include <wayland-nemo-client-server-protocol.h>
 
 #include <shell.h>
 #include <compz.h>
@@ -29,6 +30,7 @@
 #include <waylandshell.h>
 #include <xdgshell.h>
 #include <nemoshell.h>
+#include <nemoclient.h>
 #include <syshelper.h>
 #include <nemotoken.h>
 #include <nemoitem.h>
@@ -584,6 +586,11 @@ static void nemoshell_bind_nemo_shell(struct wl_client *client, void *data, uint
 	nemoshell_bind(client, data, version, id);
 }
 
+static void nemoshell_bind_nemo_client(struct wl_client *client, void *data, uint32_t version, uint32_t id)
+{
+	nemoclient_bind(client, data, version, id);
+}
+
 static void nemoshell_handle_pointer_focus(struct wl_listener *listener, void *data)
 {
 	struct nemoshell *shell = (struct nemoshell *)container_of(listener, struct nemoshell, pointer_focus_listener);
@@ -722,6 +729,8 @@ struct nemoshell *nemoshell_create(struct nemocompz *compz)
 		goto err1;
 #endif
 	if (!wl_global_create(compz->display, &nemo_shell_interface, 1, shell, nemoshell_bind_nemo_shell))
+		goto err1;
+	if (!wl_global_create(compz->display, &nemo_client_interface, 1, shell, nemoshell_bind_nemo_client))
 		goto err1;
 
 	wl_list_init(&shell->pointer_focus_listener.link);
