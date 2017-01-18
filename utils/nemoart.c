@@ -52,6 +52,7 @@ struct nemoart {
 	int threads;
 	int polygon;
 	int audion;
+	int opaque;
 
 	struct cookegl *egl;
 
@@ -207,7 +208,9 @@ static void nemoart_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t wi
 	art->height = height;
 
 	nemocanvas_egl_resize(art->canvas, width, height);
-	nemocanvas_opaque(art->canvas, 0, 0, width, height);
+
+	if (art->opaque != 0)
+		nemocanvas_opaque(art->canvas, 0, 0, width, height);
 
 	nemocook_egl_resize(art->egl, width, height);
 
@@ -362,6 +365,7 @@ int main(int argc, char *argv[])
 		{ "fullscreen",		required_argument,		NULL,		'f' },
 		{ "content",			required_argument,		NULL,		'c' },
 		{ "flip",					required_argument,		NULL,		'l' },
+		{ "opaque",				required_argument,		NULL,		'q' },
 		{ "threads",			required_argument,		NULL,		't' },
 		{ "audio",				required_argument,		NULL,		'a' },
 		{ "busid",				required_argument,		NULL,		'b' },
@@ -383,12 +387,13 @@ int main(int argc, char *argv[])
 	int threads = 0;
 	int audion = 0;
 	int flip = 0;
+	int opaque = 1;
 	int alive = 0;
 	int opt;
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "w:h:f:c:l:t:a:b:e:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:f:c:l:q:t:a:b:e:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -411,6 +416,10 @@ int main(int argc, char *argv[])
 
 			case 'l':
 				flip = strcasecmp(optarg, "on") == 0;
+				break;
+
+			case 'q':
+				opaque = strcasecmp(optarg, "on") == 0;
 				break;
 
 			case 't':
@@ -447,6 +456,7 @@ int main(int argc, char *argv[])
 	art->threads = threads;
 	art->polygon = flip == 0 ? NEMOPLAY_SHADER_FLIP_POLYGON : NEMOPLAY_SHADER_FLIP_ROTATE_POLYGON;
 	art->audion = audion;
+	art->opaque = opaque;
 	art->alive_timeout = alive;
 
 	art->tool = tool = nemotool_create();
@@ -459,7 +469,6 @@ int main(int argc, char *argv[])
 	nemotimer_set_timeout(timer, art->alive_timeout / 2);
 
 	art->canvas = canvas = nemocanvas_egl_create(tool, width, height);
-	nemocanvas_opaque(canvas, 0, 0, width, height);
 	nemocanvas_set_nemosurface(canvas, "normal");
 	nemocanvas_set_dispatch_resize(canvas, nemoart_dispatch_canvas_resize);
 	nemocanvas_set_dispatch_frame(canvas, nemoart_dispatch_canvas_frame);
@@ -468,6 +477,9 @@ int main(int argc, char *argv[])
 	nemocanvas_set_fullscreen_type(canvas, "pick;pitch");
 	nemocanvas_set_state(canvas, "close");
 	nemocanvas_set_userdata(canvas, art);
+
+	if (opaque != 0)
+		nemocanvas_opaque(canvas, 0, 0, width, height);
 
 	if (fullscreenid != NULL)
 		nemocanvas_set_fullscreen(canvas, fullscreenid);
