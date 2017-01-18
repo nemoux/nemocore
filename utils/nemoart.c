@@ -55,6 +55,8 @@ struct nemoart {
 	int opaque;
 	int replay;
 
+	int playing;
+
 	struct cookegl *egl;
 
 	struct fsdir *contents;
@@ -101,6 +103,8 @@ static struct artone *nemoart_one_create(struct nemoart *art, const char *url, i
 
 	if (art->audion != 0)
 		one->audioback = nemoplay_audio_create_by_ao(one->play);
+
+	art->playing = 1;
 
 	return one;
 }
@@ -198,6 +202,10 @@ static void nemoart_dispatch_video_done(struct nemoplay *play, void *data)
 				art->width, art->height);
 	} else if (art->replay != 0) {
 		nemoart_one_replay(art->one);
+	} else {
+		art->playing = 0;
+
+		nemocanvas_dispatch_frame(art->canvas);
 	}
 }
 
@@ -229,7 +237,10 @@ static void nemoart_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t se
 
 	nemocook_egl_make_current(art->egl);
 
-	nemoart_one_update(art->one);
+	if (art->playing != 0)
+		nemoart_one_update(art->one);
+	else
+		nemocook_clear_color_buffer(0.0f, 0.0f, 0.0f, 0.0f);
 
 	nemocook_egl_swap_buffers(art->egl);
 }

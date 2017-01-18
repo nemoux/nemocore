@@ -20,6 +20,9 @@ NEMO_BEGIN_EXTERN_C
 
 extern void nemocook_draw_arrays(int mode, int ncounts, uint32_t *counts);
 
+extern void nemocook_clear_color_buffer(float r, float g, float b, float a);
+extern void nemocook_clear_depth_buffer(float d);
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif
