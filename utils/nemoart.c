@@ -53,6 +53,7 @@ struct nemoart {
 	int polygon;
 	int audion;
 	int opaque;
+	int replay;
 
 	struct cookegl *egl;
 
@@ -192,7 +193,7 @@ static void nemoart_dispatch_video_done(struct nemoplay *play, void *data)
 		art->one = nemoart_one_create(art,
 				nemofs_dir_get_filepath(art->contents, art->icontents),
 				art->width, art->height);
-	} else {
+	} else if (art->replay != 0) {
 		nemoart_one_replay(art->one);
 	}
 }
@@ -341,6 +342,11 @@ static void nemoart_dispatch_bus(void *data, const char *events)
 				nemofs_dir_insert_file(art->contents, NULL, path);
 
 				art->icontents = 0;
+
+				if (nemoitem_one_has_sattr(one, "mode", "oneshot") != 0)
+					art->replay = 0;
+				else
+					art->replay = 1;
 			}
 		}
 
@@ -463,6 +469,7 @@ int main(int argc, char *argv[])
 	art->polygon = flip == 0 ? NEMOPLAY_SHADER_FLIP_POLYGON : NEMOPLAY_SHADER_FLIP_ROTATE_POLYGON;
 	art->audion = audion;
 	art->opaque = opaque;
+	art->replay = 1;
 	art->alive_timeout = alive;
 
 	art->tool = tool = nemotool_create();
