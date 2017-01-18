@@ -366,6 +366,7 @@ int main(int argc, char *argv[])
 		{ "content",			required_argument,		NULL,		'c' },
 		{ "flip",					required_argument,		NULL,		'l' },
 		{ "opaque",				required_argument,		NULL,		'q' },
+		{ "layer",				required_argument,		NULL,		'y' },
 		{ "threads",			required_argument,		NULL,		't' },
 		{ "audio",				required_argument,		NULL,		'a' },
 		{ "busid",				required_argument,		NULL,		'b' },
@@ -382,6 +383,7 @@ int main(int argc, char *argv[])
 	char *fullscreenid = NULL;
 	char *contentpath = NULL;
 	char *busid = NULL;
+	char *layer = NULL;
 	int width = 1920;
 	int height = 1080;
 	int threads = 0;
@@ -393,7 +395,7 @@ int main(int argc, char *argv[])
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "w:h:f:c:l:q:t:a:b:e:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:f:c:l:q:y:t:a:b:e:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -424,6 +426,10 @@ int main(int argc, char *argv[])
 
 			case 't':
 				threads = strtoul(optarg, NULL, 10);
+				break;
+
+			case 'y':
+				layer = strdup(optarg);
 				break;
 
 			case 'a':
@@ -480,6 +486,9 @@ int main(int argc, char *argv[])
 
 	if (opaque != 0)
 		nemocanvas_opaque(canvas, 0, 0, width, height);
+
+	if (layer != NULL)
+		nemocanvas_set_layer(canvas, layer);
 
 	if (fullscreenid != NULL)
 		nemocanvas_set_fullscreen(canvas, fullscreenid);
