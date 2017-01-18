@@ -96,6 +96,9 @@ static struct artone *nemoart_one_create(struct nemoart *art, const char *url, i
 	one->shader = nemoplay_video_get_shader(one->videoback);
 	nemoplay_shader_set_polygon(one->shader, art->polygon);
 
+	if (art->opaque == 0)
+		nemoplay_shader_set_blend(one->shader, NEMOPLAY_SHADER_SRC_ALPHA_BLEND);
+
 	if (art->audion != 0)
 		one->audioback = nemoplay_audio_create_by_ao(one->play);
 
