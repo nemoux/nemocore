@@ -228,6 +228,43 @@ static int nemoplay_shader_dispatch_rgba_bypass(struct playshader *shader)
 	return 0;
 }
 
+static int nemoplay_shader_dispatch_rgba_src_alpha(struct playshader *shader)
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, shader->fbo);
+
+	glViewport(0, 0, shader->viewport_width, shader->viewport_height);
+
+	glEnable(GL_BLEND);
+	glBlendFuncSeparate(
+			GL_SRC_ALPHA,
+			GL_ONE_MINUS_SRC_ALPHA,
+			GL_ONE,
+			GL_ONE_MINUS_SRC_ALPHA);
+
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	glUseProgram(shader->program);
+	glUniform1i(shader->utex, 0);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, shader->tex);
+
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &NEMOPLAY_POLYGONS[shader->polygon][0]);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), &NEMOPLAY_POLYGONS[shader->polygon][2]);
+	glEnableVertexAttribArray(1);
+
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	return 0;
+}
+
 static int nemoplay_shader_dispatch_rgba(struct playshader *shader)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, shader->fbo);
@@ -407,7 +444,11 @@ static inline void nemoplay_shader_update_callbacks(struct playshader *shader)
 
 		if (shader->viewport == 0 || shader->viewport_width != shader->texture_width || shader->viewport_height != shader->texture_height) {
 			shader->update = nemoplay_shader_update_rgba;
-			shader->dispatch = nemoplay_shader_dispatch_rgba;
+
+			if (shader->blend == NEMOPLAY_SHADER_SRC_ALPHA_BLEND)
+				shader->dispatch = nemoplay_shader_dispatch_rgba_src_alpha;
+			else
+				shader->dispatch = nemoplay_shader_dispatch_rgba;
 		} else {
 			shader->update = nemoplay_shader_update_rgba_bypass;
 			shader->dispatch = nemoplay_shader_dispatch_rgba_bypass;
@@ -483,6 +524,15 @@ int nemoplay_shader_set_viewport(struct playshader *shader, uint32_t texture, in
 
 	shader->viewport_width = width;
 	shader->viewport_height = height;
+
+	nemoplay_shader_update_callbacks(shader);
+
+	return 0;
+}
+
+int nemoplay_shader_set_blend(struct playshader *shader, int blend)
+{
+	shader->blend = blend;
 
 	nemoplay_shader_update_callbacks(shader);
 

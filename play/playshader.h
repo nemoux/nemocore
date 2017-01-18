@@ -22,6 +22,12 @@ typedef enum {
 	NEMOPLAY_SHADER_LAST_POLYGON
 } NemoPlayShaderPolygon;
 
+typedef enum {
+	NEMOPLAY_SHADER_NONE_BLEND = 0,
+	NEMOPLAY_SHADER_SRC_ALPHA_BLEND = 1,
+	NEMOPLAY_SHADER_LAST_BLEND
+} NemoPlayShaderBlend;
+
 struct playone;
 struct playshader;
 
@@ -36,6 +42,7 @@ struct playshader {
 
 	int format;
 	int polygon;
+	int blend;
 
 	GLuint shaders[2];
 	GLuint program;
@@ -64,6 +71,7 @@ extern void nemoplay_shader_destroy(struct playshader *shader);
 
 extern int nemoplay_shader_set_format(struct playshader *shader, int format);
 extern int nemoplay_shader_set_viewport(struct playshader *shader, uint32_t texture, int32_t width, int32_t height);
+extern int nemoplay_shader_set_blend(struct playshader *shader, int blend);
 extern int nemoplay_shader_set_polygon(struct playshader *shader, int polygon);
 
 static inline uint32_t nemoplay_shader_get_viewport(struct playshader *shader)
