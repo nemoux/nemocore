@@ -36,7 +36,7 @@ static void *nemoplay_decoder_handle_thread(void *arg)
 
 	nemoplay_enter_thread(play);
 
-	while ((state = nemoplay_get_state(play)) != NEMOPLAY_DONE_STATE) {
+	while (nemoplay_has_flags(play, NEMOPLAY_DONE_FLAG) == 0) {
 		if (nemoplay_has_cmds(play, NEMOPLAY_SEEK_CMD) != 0) {
 			nemoplay_put_cmds(play, NEMOPLAY_SEEK_CMD);
 
@@ -46,10 +46,10 @@ static void *nemoplay_decoder_handle_thread(void *arg)
 			nemoplay_set_clock_cts(play, decoder->pts_to_seek);
 		}
 
-		if (state == NEMOPLAY_PLAY_STATE) {
+		if (nemoplay_is_playing(play) != 0) {
 			if (nemoplay_decode_media(play, decoder->maxcount) != 0)
-				nemoplay_set_state(play, NEMOPLAY_EOF_STATE);
-		} else if (state == NEMOPLAY_WAIT_STATE || state == NEMOPLAY_STOP_STATE || state == NEMOPLAY_EOF_STATE) {
+				nemoplay_eof_media(play);
+		} else {
 			nemoplay_wait_media(play);
 		}
 	}
@@ -88,13 +88,13 @@ void nemoplay_decoder_destroy(struct playdecoder *decoder)
 
 void nemoplay_decoder_play(struct playdecoder *decoder)
 {
-	nemoplay_set_state(decoder->play, NEMOPLAY_PLAY_STATE);
+	nemoplay_play_media(decoder->play);
 	nemoplay_set_clock_state(decoder->play, NEMOPLAY_CLOCK_NORMAL_STATE);
 }
 
 void nemoplay_decoder_stop(struct playdecoder *decoder)
 {
-	nemoplay_set_state(decoder->play, NEMOPLAY_STOP_STATE);
+	nemoplay_stop_media(decoder->play);
 	nemoplay_set_clock_state(decoder->play, NEMOPLAY_CLOCK_STOP_STATE);
 }
 
@@ -502,7 +502,7 @@ static void *nemoplay_extractor_handle_thread(void *arg)
 
 	nemoplay_enter_thread(play);
 
-	while (nemoplay_is_state(play, NEMOPLAY_PLAY_STATE) != 0 && nemoplay_extract_video(play, box, maxcount) > 0)
+	while (nemoplay_is_playing(play) != 0 && nemoplay_extract_video(play, box, maxcount) > 0)
 		sleep(1);
 
 	nemoplay_leave_thread(play);
