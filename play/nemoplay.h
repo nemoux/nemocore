@@ -20,10 +20,9 @@ NEMO_BEGIN_EXTERN_C
 #include <playmisc.h>
 
 typedef enum {
-	NEMOPLAY_WAIT_FLAG = (1 << 0),
-	NEMOPLAY_STOP_FLAG = (1 << 1),
-	NEMOPLAY_EOF_FLAG = (1 << 2),
-	NEMOPLAY_DONE_FLAG = (1 << 3)
+	NEMOPLAY_STOP_FLAG = (1 << 0),
+	NEMOPLAY_EOF_FLAG = (1 << 1),
+	NEMOPLAY_DONE_FLAG = (1 << 2)
 } NemoPlayFlag;
 
 typedef enum {
@@ -106,17 +105,26 @@ extern void nemoplay_set_video_intopt(struct nemoplay *play, const char *key, in
 extern void nemoplay_set_audio_stropt(struct nemoplay *play, const char *key, const char *value);
 extern void nemoplay_set_audio_intopt(struct nemoplay *play, const char *key, int64_t value);
 
+extern void nemoplay_set_flags(struct nemoplay *play, uint32_t flags);
+extern void nemoplay_put_flags(struct nemoplay *play, uint32_t flags);
+extern void nemoplay_put_flags_all(struct nemoplay *play);
+extern int nemoplay_has_flags(struct nemoplay *play, uint32_t flags);
+extern int nemoplay_has_flags_all(struct nemoplay *play, uint32_t flags);
+extern int nemoplay_has_no_flags(struct nemoplay *play);
+
+extern void nemoplay_set_cmds(struct nemoplay *play, uint32_t cmds);
+extern void nemoplay_put_cmds(struct nemoplay *play, uint32_t cmds);
+extern void nemoplay_put_cmds_all(struct nemoplay *play);
+extern int nemoplay_has_cmds(struct nemoplay *play, uint32_t cmds);
+extern int nemoplay_has_no_cmds(struct nemoplay *play);
+
+extern void nemoplay_reset_media(struct nemoplay *play);
+
 extern int nemoplay_load_media(struct nemoplay *play, const char *mediapath);
 extern int nemoplay_seek_media(struct nemoplay *play, double pts);
-extern void nemoplay_flush_media(struct nemoplay *play);
-extern void nemoplay_stop_media(struct nemoplay *play);
-extern void nemoplay_play_media(struct nemoplay *play);
+
 extern void nemoplay_wait_media(struct nemoplay *play);
 extern void nemoplay_wake_media(struct nemoplay *play);
-extern void nemoplay_eof_media(struct nemoplay *play);
-extern void nemoplay_replay_media(struct nemoplay *play);
-extern void nemoplay_done_media(struct nemoplay *play);
-extern void nemoplay_restart_media(struct nemoplay *play);
 
 extern int nemoplay_decode_media(struct nemoplay *play, int maxcount);
 extern int nemoplay_extract_video(struct nemoplay *play, struct playbox *box, int maxcount);
@@ -139,41 +147,6 @@ extern void nemoplay_set_clock_speed(struct nemoplay *play, double speed);
 extern void nemoplay_set_cmds(struct nemoplay *play, uint32_t cmds);
 extern void nemoplay_put_cmds(struct nemoplay *play, uint32_t cmds);
 extern int nemoplay_has_cmds(struct nemoplay *play, uint32_t cmds);
-
-static inline void nemoplay_set_flags(struct nemoplay *play, uint32_t flags)
-{
-	play->flags |= flags;
-}
-
-static inline void nemoplay_put_flags(struct nemoplay *play, uint32_t flags)
-{
-	play->flags &= ~flags;
-}
-
-static inline int nemoplay_has_flags(struct nemoplay *play, uint32_t flags)
-{
-	return play->flags & flags;
-}
-
-static inline int nemoplay_has_flags_all(struct nemoplay *play, uint32_t flags)
-{
-	return (play->flags & flags) == flags;
-}
-
-static inline int nemoplay_is_playing(struct nemoplay *play)
-{
-	return nemoplay_has_flags(play, NEMOPLAY_WAIT_FLAG | NEMOPLAY_STOP_FLAG | NEMOPLAY_EOF_FLAG | NEMOPLAY_DONE_FLAG) == 0;
-}
-
-static inline int nemoplay_is_eof(struct nemoplay *play)
-{
-	return nemoplay_has_flags(play, NEMOPLAY_EOF_FLAG) != 0;
-}
-
-static inline int nemoplay_is_done(struct nemoplay *play)
-{
-	return nemoplay_has_flags(play, NEMOPLAY_DONE_FLAG) != 0;
-}
 
 static inline uint64_t nemoplay_get_frame(struct nemoplay *play)
 {

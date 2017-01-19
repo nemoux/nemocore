@@ -40,15 +40,17 @@ static void *nemoplay_decoder_handle_thread(void *arg)
 		if (nemoplay_has_cmds(play, NEMOPLAY_SEEK_CMD) != 0) {
 			nemoplay_put_cmds(play, NEMOPLAY_SEEK_CMD);
 
-			nemoplay_flush_media(play);
+			nemoplay_queue_flush(play->video_queue);
+			nemoplay_queue_flush(play->audio_queue);
+
 			nemoplay_seek_media(play, decoder->pts_to_seek);
 
 			nemoplay_set_clock_cts(play, decoder->pts_to_seek);
 		}
 
-		if (nemoplay_is_playing(play) != 0) {
+		if (nemoplay_has_no_flags(play) != 0) {
 			if (nemoplay_decode_media(play, decoder->maxcount) != 0)
-				nemoplay_eof_media(play);
+				nemoplay_set_flags(play, NEMOPLAY_EOF_FLAG);
 		} else {
 			nemoplay_wait_media(play);
 		}
@@ -80,7 +82,10 @@ void nemoplay_decoder_destroy(struct playdecoder *decoder)
 {
 	struct nemoplay *play = decoder->play;
 
-	nemoplay_done_media(play);
+	nemoplay_set_flags(play, NEMOPLAY_DONE_FLAG);
+	nemoplay_queue_set_state(play->video_queue, NEMOPLAY_QUEUE_DONE_STATE);
+	nemoplay_queue_set_state(play->audio_queue, NEMOPLAY_QUEUE_DONE_STATE);
+
 	nemoplay_wait_thread(play);
 
 	free(decoder);
@@ -88,13 +93,15 @@ void nemoplay_decoder_destroy(struct playdecoder *decoder)
 
 void nemoplay_decoder_play(struct playdecoder *decoder)
 {
-	nemoplay_play_media(decoder->play);
+	nemoplay_put_flags(decoder->play, NEMOPLAY_STOP_FLAG | NEMOPLAY_EOF_FLAG | NEMOPLAY_DONE_FLAG);
+
 	nemoplay_set_clock_state(decoder->play, NEMOPLAY_CLOCK_NORMAL_STATE);
 }
 
 void nemoplay_decoder_stop(struct playdecoder *decoder)
 {
-	nemoplay_stop_media(decoder->play);
+	nemoplay_set_flags(decoder->play, NEMOPLAY_STOP_FLAG);
+
 	nemoplay_set_clock_state(decoder->play, NEMOPLAY_CLOCK_STOP_STATE);
 }
 
@@ -199,7 +206,10 @@ void nemoplay_audio_destroy(struct playaudio *audio)
 {
 	struct nemoplay *play = audio->play;
 
-	nemoplay_done_media(play);
+	nemoplay_set_flags(play, NEMOPLAY_DONE_FLAG);
+	nemoplay_queue_set_state(play->video_queue, NEMOPLAY_QUEUE_DONE_STATE);
+	nemoplay_queue_set_state(play->audio_queue, NEMOPLAY_QUEUE_DONE_STATE);
+
 	nemoplay_wait_thread(play);
 
 	free(audio);
@@ -269,7 +279,7 @@ static void nemoplay_video_handle_timer(struct nemotimer *timer, void *data)
 retry_next:
 		one = nemoplay_queue_dequeue(queue);
 		if (one == NULL) {
-			if (nemoplay_is_eof(play) == 0) {
+			if (nemoplay_has_flags(play, NEMOPLAY_EOF_FLAG) == 0) {
 				nemotimer_set_timeout(timer, screenrate * 1000);
 			} else if (video->dispatch_done != NULL) {
 				video->dispatch_done(video->play, video->data);
@@ -330,7 +340,7 @@ static void nemoplay_video_handle_timer_without_drop(struct nemotimer *timer, vo
 retry_next:
 		one = nemoplay_queue_dequeue(queue);
 		if (one == NULL) {
-			if (nemoplay_is_eof(play) == 0) {
+			if (nemoplay_has_flags(play, NEMOPLAY_EOF_FLAG) == 0) {
 				nemotimer_set_timeout(timer, screenrate * 1000);
 			} else if (video->dispatch_done != NULL) {
 				video->dispatch_done(video->play, video->data);
@@ -406,7 +416,9 @@ void nemoplay_video_destroy(struct playvideo *video)
 {
 	struct nemoplay *play = video->play;
 
-	nemoplay_done_media(play);
+	nemoplay_set_flags(play, NEMOPLAY_DONE_FLAG);
+	nemoplay_queue_set_state(play->video_queue, NEMOPLAY_QUEUE_DONE_STATE);
+	nemoplay_queue_set_state(play->audio_queue, NEMOPLAY_QUEUE_DONE_STATE);
 
 	nemotimer_destroy(video->timer);
 
@@ -502,7 +514,7 @@ static void *nemoplay_extractor_handle_thread(void *arg)
 
 	nemoplay_enter_thread(play);
 
-	while (nemoplay_is_playing(play) != 0 && nemoplay_extract_video(play, box, maxcount) > 0)
+	while (nemoplay_has_no_flags(play) != 0 && nemoplay_extract_video(play, box, maxcount) > 0)
 		sleep(1);
 
 	nemoplay_leave_thread(play);
@@ -532,7 +544,10 @@ void nemoplay_extractor_destroy(struct playextractor *extractor)
 {
 	struct nemoplay *play = extractor->play;
 
-	nemoplay_done_media(play);
+	nemoplay_set_flags(play, NEMOPLAY_DONE_FLAG);
+	nemoplay_queue_set_state(play->video_queue, NEMOPLAY_QUEUE_DONE_STATE);
+	nemoplay_queue_set_state(play->audio_queue, NEMOPLAY_QUEUE_DONE_STATE);
+
 	nemoplay_wait_thread(play);
 
 	free(extractor);

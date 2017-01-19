@@ -99,6 +99,93 @@ void nemoplay_set_audio_intopt(struct nemoplay *play, const char *key, int64_t v
 	av_dict_set_int(&play->audio_opts, key, value, 0);
 }
 
+void nemoplay_set_flags(struct nemoplay *play, uint32_t flags)
+{
+	pthread_mutex_lock(&play->lock);
+
+	play->flags |= flags;
+
+	pthread_mutex_unlock(&play->lock);
+}
+
+void nemoplay_put_flags(struct nemoplay *play, uint32_t flags)
+{
+	pthread_mutex_lock(&play->lock);
+
+	play->flags &= ~flags;
+
+	pthread_mutex_unlock(&play->lock);
+}
+
+void nemoplay_put_flags_all(struct nemoplay *play)
+{
+	pthread_mutex_lock(&play->lock);
+
+	play->flags = 0x0;
+
+	pthread_mutex_unlock(&play->lock);
+}
+
+int nemoplay_has_flags(struct nemoplay *play, uint32_t flags)
+{
+	return play->flags & flags;
+}
+
+int nemoplay_has_flags_all(struct nemoplay *play, uint32_t flags)
+{
+	return (play->flags & flags) == flags;
+}
+
+int nemoplay_has_no_flags(struct nemoplay *play)
+{
+	return play->flags == 0x0;
+}
+
+void nemoplay_set_cmds(struct nemoplay *play, uint32_t cmds)
+{
+	pthread_mutex_lock(&play->lock);
+
+	play->cmds |= cmds;
+
+	pthread_cond_signal(&play->signal);
+
+	pthread_mutex_unlock(&play->lock);
+}
+
+void nemoplay_put_cmds(struct nemoplay *play, uint32_t cmds)
+{
+	pthread_mutex_lock(&play->lock);
+
+	play->cmds &= ~cmds;
+
+	pthread_mutex_unlock(&play->lock);
+}
+
+void nemoplay_put_cmds_all(struct nemoplay *play)
+{
+	pthread_mutex_lock(&play->lock);
+
+	play->cmds = 0x0;
+
+	pthread_mutex_unlock(&play->lock);
+}
+
+int nemoplay_has_cmds(struct nemoplay *play, uint32_t cmds)
+{
+	return (play->cmds & cmds) == cmds;
+}
+
+int nemoplay_has_no_cmds(struct nemoplay *play)
+{
+	return play->cmds == 0x0;
+}
+
+void nemoplay_reset_media(struct nemoplay *play)
+{
+	nemoplay_put_flags_all(play);
+	nemoplay_put_cmds_all(play);
+}
+
 int nemoplay_load_media(struct nemoplay *play, const char *mediapath)
 {
 	AVFormatContext *container;
@@ -215,44 +302,11 @@ int nemoplay_seek_media(struct nemoplay *play, double pts)
 	return 0;
 }
 
-void nemoplay_flush_media(struct nemoplay *play)
-{
-	nemoplay_queue_flush(play->video_queue);
-	nemoplay_queue_flush(play->audio_queue);
-}
-
-void nemoplay_stop_media(struct nemoplay *play)
-{
-	pthread_mutex_lock(&play->lock);
-
-	if (nemoplay_has_flags(play, NEMOPLAY_STOP_FLAG) == 0)
-		nemoplay_set_flags(play, NEMOPLAY_STOP_FLAG);
-
-	pthread_mutex_unlock(&play->lock);
-}
-
-void nemoplay_play_media(struct nemoplay *play)
-{
-	pthread_mutex_lock(&play->lock);
-
-	if (nemoplay_has_flags(play, NEMOPLAY_STOP_FLAG) != 0) {
-		nemoplay_put_flags(play, NEMOPLAY_STOP_FLAG);
-
-		pthread_cond_signal(&play->signal);
-	}
-
-	pthread_mutex_unlock(&play->lock);
-}
-
 void nemoplay_wait_media(struct nemoplay *play)
 {
 	pthread_mutex_lock(&play->lock);
 
-	if (nemoplay_has_flags(play, NEMOPLAY_WAIT_FLAG) == 0) {
-		nemoplay_set_flags(play, NEMOPLAY_WAIT_FLAG);
-
-		pthread_cond_wait(&play->signal, &play->lock);
-	}
+	pthread_cond_wait(&play->signal, &play->lock);
 
 	pthread_mutex_unlock(&play->lock);
 }
@@ -261,66 +315,7 @@ void nemoplay_wake_media(struct nemoplay *play)
 {
 	pthread_mutex_lock(&play->lock);
 
-	if (nemoplay_has_flags(play, NEMOPLAY_WAIT_FLAG) != 0) {
-		nemoplay_put_flags(play, NEMOPLAY_WAIT_FLAG);
-
-		pthread_cond_signal(&play->signal);
-	}
-
-	pthread_mutex_unlock(&play->lock);
-}
-
-void nemoplay_eof_media(struct nemoplay *play)
-{
-	pthread_mutex_lock(&play->lock);
-
-	if (nemoplay_has_flags(play, NEMOPLAY_EOF_FLAG) == 0)
-		nemoplay_set_flags(play, NEMOPLAY_EOF_FLAG);
-
-	pthread_mutex_unlock(&play->lock);
-}
-
-void nemoplay_replay_media(struct nemoplay *play)
-{
-	pthread_mutex_lock(&play->lock);
-
-	if (nemoplay_has_flags(play, NEMOPLAY_EOF_FLAG) != 0) {
-		nemoplay_put_flags(play, NEMOPLAY_WAIT_FLAG | NEMOPLAY_STOP_FLAG | NEMOPLAY_EOF_FLAG);
-
-		pthread_cond_signal(&play->signal);
-	}
-
-	pthread_mutex_unlock(&play->lock);
-}
-
-void nemoplay_done_media(struct nemoplay *play)
-{
-	pthread_mutex_lock(&play->lock);
-
-	if (nemoplay_has_flags(play, NEMOPLAY_DONE_FLAG) == 0) {
-		nemoplay_set_flags(play, NEMOPLAY_DONE_FLAG);
-
-		pthread_cond_signal(&play->signal);
-
-		nemoplay_queue_set_state(play->audio_queue, NEMOPLAY_QUEUE_DONE_STATE);
-		nemoplay_queue_set_state(play->video_queue, NEMOPLAY_QUEUE_DONE_STATE);
-	}
-
-	pthread_mutex_unlock(&play->lock);
-}
-
-void nemoplay_restart_media(struct nemoplay *play)
-{
-	pthread_mutex_lock(&play->lock);
-
-	if (nemoplay_has_flags(play, NEMOPLAY_DONE_FLAG) != 0) {
-		nemoplay_put_flags(play, NEMOPLAY_WAIT_FLAG | NEMOPLAY_STOP_FLAG | NEMOPLAY_EOF_FLAG | NEMOPLAY_DONE_FLAG);
-
-		pthread_cond_signal(&play->signal);
-
-		nemoplay_queue_set_state(play->audio_queue, NEMOPLAY_QUEUE_NORMAL_STATE);
-		nemoplay_queue_set_state(play->video_queue, NEMOPLAY_QUEUE_NORMAL_STATE);
-	}
+	pthread_cond_signal(&play->signal);
 
 	pthread_mutex_unlock(&play->lock);
 }
@@ -340,7 +335,7 @@ int nemoplay_decode_media(struct nemoplay *play, int maxcount)
 
 	frame = av_frame_alloc();
 
-	for (i = 0; i < maxcount && nemoplay_is_playing(play) != 0 && play->cmds == 0x0; i++) {
+	for (i = 0; i < maxcount && nemoplay_has_no_flags(play) != 0 && nemoplay_has_no_cmds(play) != 0; i++) {
 		if (av_read_frame(container, &packet) < 0) {
 			done = 1;
 			break;
@@ -449,7 +444,7 @@ int nemoplay_extract_video(struct nemoplay *play, struct playbox *box, int maxco
 
 	frame = av_frame_alloc();
 
-	for (i = 0; i < maxcount && play->cmds == 0x0; i++) {
+	for (i = 0; i < maxcount && nemoplay_has_no_cmds(play) != 0; i++) {
 		if (av_read_frame(container, &packet) < 0)
 			break;
 
@@ -591,31 +586,6 @@ void nemoplay_set_clock_state(struct nemoplay *play, int state)
 void nemoplay_set_clock_speed(struct nemoplay *play, double speed)
 {
 	nemoplay_clock_set_speed(play->clock, speed);
-}
-
-void nemoplay_set_cmds(struct nemoplay *play, uint32_t cmds)
-{
-	pthread_mutex_lock(&play->lock);
-
-	play->cmds |= cmds;
-
-	pthread_cond_signal(&play->signal);
-
-	pthread_mutex_unlock(&play->lock);
-}
-
-void nemoplay_put_cmds(struct nemoplay *play, uint32_t cmds)
-{
-	pthread_mutex_lock(&play->lock);
-
-	play->cmds &= ~cmds;
-
-	pthread_mutex_unlock(&play->lock);
-}
-
-int nemoplay_has_cmds(struct nemoplay *play, uint32_t cmds)
-{
-	return (play->cmds & cmds) == cmds;
 }
 
 struct playone *nemoplay_one_create(void)
