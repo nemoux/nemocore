@@ -170,6 +170,10 @@ static void nemoart_one_replay(struct artone *one)
 {
 	nemoplay_decoder_seek(one->decoderback, 0.0f);
 	nemoplay_decoder_play(one->decoderback);
+	nemoplay_video_play(one->videoback);
+
+	if (one->audioback != NULL)
+		nemoplay_audio_play(one->audioback);
 }
 
 static void nemoart_one_stop(struct artone *one)
