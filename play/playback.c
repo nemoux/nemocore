@@ -261,7 +261,7 @@ static void nemoplay_video_handle_timer(struct nemotimer *timer, void *data)
 	state = nemoplay_queue_get_state(queue);
 	if (state == NEMOPLAY_QUEUE_NORMAL_STATE) {
 		double cts = nemoplay_get_clock_cts(play);
-		double pts;
+		double nts;
 
 		if (nemoplay_queue_get_count(queue) < video->mincount)
 			nemoplay_set_state(play, NEMOPLAY_WAKE_STATE);
@@ -291,8 +291,8 @@ retry_next:
 				if (video->dispatch_update != NULL)
 					video->dispatch_update(video->play, video->data);
 
-				if (nemoplay_queue_peek_pts(queue, &pts) != 0)
-					nemotimer_set_timeout(timer, MAX((pts - cts) * 1000, screenrate * 1000));
+				if (nemoplay_queue_peek_pts(queue, &nts) != 0)
+					nemotimer_set_timeout(timer, MAX((nts - cts) * 1000, screenrate * 1000));
 				else
 					nemotimer_set_timeout(timer, screenrate * 1000);
 
@@ -305,6 +305,68 @@ retry_next:
 		if (cts >= nemoplay_get_duration(play)) {
 			if (video->dispatch_done != NULL)
 				video->dispatch_done(video->play, video->data);
+		}
+	} else if (state == NEMOPLAY_QUEUE_STOP_STATE) {
+		nemotimer_set_timeout(timer, screenrate * 1000);
+	}
+}
+
+static void nemoplay_video_handle_timer_without_drop(struct nemotimer *timer, void *data)
+{
+	struct playvideo *video = (struct playvideo *)data;
+	struct nemoplay *play = video->play;
+	struct playqueue *queue = video->queue;
+	struct playone *one;
+	double screenrate = 1.0f / video->screenrate;
+	int state;
+
+	state = nemoplay_queue_get_state(queue);
+	if (state == NEMOPLAY_QUEUE_NORMAL_STATE) {
+		double cts = nemoplay_get_clock_cts(play);
+		double pts;
+
+		if (nemoplay_queue_get_count(queue) < video->mincount)
+			nemoplay_set_state(play, NEMOPLAY_WAKE_STATE);
+
+retry_next:
+		one = nemoplay_queue_dequeue(queue);
+		if (one == NULL) {
+			nemotimer_set_timeout(timer, screenrate * 1000);
+		} else if (nemoplay_one_get_serial(one) != nemoplay_queue_get_serial(queue)) {
+			nemoplay_one_destroy(one);
+			goto retry_next;
+		} else if (nemoplay_one_get_cmd(one) == NEMOPLAY_QUEUE_NORMAL_COMMAND) {
+			double pts = nemoplay_one_get_pts(one);
+			double nts;
+
+			if (cts < pts - screenrate) {
+				nemoplay_queue_enqueue_tail(queue, one);
+				nemotimer_set_timeout(timer, MAX((pts - cts) * 1000, screenrate * 1000));
+			} else {
+				nemoplay_set_video_pts(play, cts);
+
+				nemoplay_shader_update(video->shader, one);
+
+				if (nemoplay_shader_get_viewport(video->shader) > 0)
+					nemoplay_shader_dispatch(video->shader);
+
+				if (video->dispatch_update != NULL)
+					video->dispatch_update(video->play, video->data);
+
+				if (nemoplay_queue_peek_pts(queue, &pts) != 0)
+					nemotimer_set_timeout(timer, MAX((pts - cts) * 1000, screenrate * 1000));
+				else
+					nemotimer_set_timeout(timer, screenrate * 1000);
+
+				nemoplay_one_destroy(one);
+
+				nemoplay_next_frame(play);
+
+				if (pts >= nemoplay_get_duration(play)) {
+					if (video->dispatch_done != NULL)
+						video->dispatch_done(video->play, video->data);
+				}
+			}
 		}
 	} else if (state == NEMOPLAY_QUEUE_STOP_STATE) {
 		nemotimer_set_timeout(timer, screenrate * 1000);
@@ -391,6 +453,11 @@ void nemoplay_video_set_texture(struct playvideo *video, uint32_t texture, int w
 void nemoplay_video_set_drop_rate(struct playvideo *video, double rate)
 {
 	video->droprate = rate;
+
+	if (rate > 0.0f)
+		nemotimer_set_callback(video->timer, nemoplay_video_handle_timer);
+	else
+		nemotimer_set_callback(video->timer, nemoplay_video_handle_timer_without_drop);
 }
 
 void nemoplay_video_set_screen_rate(struct playvideo *video, double rate)

@@ -49,6 +49,8 @@ struct nemoart {
 
 	int width, height;
 
+	double droprate;
+
 	int threads;
 	int polygon;
 	int audion;
@@ -89,6 +91,7 @@ static struct artone *nemoart_one_create(struct nemoart *art, const char *url, i
 
 	one->decoderback = nemoplay_decoder_create(one->play);
 	one->videoback = nemoplay_video_create_by_timer(one->play);
+	nemoplay_video_set_drop_rate(one->videoback, art->droprate);
 	nemoplay_video_set_texture(one->videoback, 0, one->width, one->height);
 	nemoplay_video_set_update(one->videoback, nemoart_dispatch_video_update);
 	nemoplay_video_set_done(one->videoback, nemoart_dispatch_video_done);
@@ -390,6 +393,7 @@ int main(int argc, char *argv[])
 		{ "height",				required_argument,		NULL,		'h' },
 		{ "fullscreen",		required_argument,		NULL,		'f' },
 		{ "content",			required_argument,		NULL,		'c' },
+		{ "droprate",			required_argument,		NULL,		'd' },
 		{ "flip",					required_argument,		NULL,		'l' },
 		{ "opaque",				required_argument,		NULL,		'q' },
 		{ "layer",				required_argument,		NULL,		'y' },
@@ -410,6 +414,7 @@ int main(int argc, char *argv[])
 	char *contentpath = NULL;
 	char *busid = NULL;
 	char *layer = NULL;
+	double droprate = 2.0f;
 	int width = 1920;
 	int height = 1080;
 	int threads = 0;
@@ -421,7 +426,7 @@ int main(int argc, char *argv[])
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "w:h:f:c:l:q:y:t:a:b:e:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:f:c:d:l:q:y:t:a:b:e:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -440,6 +445,10 @@ int main(int argc, char *argv[])
 
 			case 'c':
 				contentpath = strdup(optarg);
+				break;
+
+			case 'd':
+				droprate = strtod(optarg, NULL);
 				break;
 
 			case 'l':
@@ -485,6 +494,7 @@ int main(int argc, char *argv[])
 
 	art->width = width;
 	art->height = height;
+	art->droprate = droprate;
 	art->threads = threads;
 	art->polygon = flip == 0 ? NEMOPLAY_SHADER_FLIP_POLYGON : NEMOPLAY_SHADER_FLIP_ROTATE_POLYGON;
 	art->audion = audion;
