@@ -169,6 +169,15 @@ static void nemoart_one_replay(struct artone *one)
 	nemoplay_decoder_play(one->decoderback);
 }
 
+static void nemoart_one_stop(struct artone *one)
+{
+	if (one->audioback != NULL)
+		nemoplay_audio_stop(one->audioback);
+
+	nemoplay_video_stop(one->videoback);
+	nemoplay_decoder_stop(one->decoderback);
+}
+
 static void nemoart_one_seek(struct artone *one, double pts)
 {
 	nemoplay_decoder_seek(one->decoderback, pts);
@@ -199,8 +208,7 @@ static void nemoart_dispatch_video_done(struct nemoplay *play, void *data)
 	} else if (art->replay != 0) {
 		nemoart_one_replay(art->one);
 	} else {
-		nemoart_one_destroy(art->one);
-		art->one = NULL;
+		nemoart_one_stop(art->one);
 
 		nemocanvas_dispatch_frame(art->canvas);
 	}
