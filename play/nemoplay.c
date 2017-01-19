@@ -225,11 +225,8 @@ void nemoplay_stop_media(struct nemoplay *play)
 {
 	pthread_mutex_lock(&play->lock);
 
-	if (nemoplay_has_flags(play, NEMOPLAY_STOP_FLAG) == 0) {
+	if (nemoplay_has_flags(play, NEMOPLAY_STOP_FLAG) == 0)
 		nemoplay_set_flags(play, NEMOPLAY_STOP_FLAG);
-
-		pthread_cond_wait(&play->signal, &play->lock);
-	}
 
 	pthread_mutex_unlock(&play->lock);
 }
@@ -277,11 +274,8 @@ void nemoplay_eof_media(struct nemoplay *play)
 {
 	pthread_mutex_lock(&play->lock);
 
-	if (nemoplay_has_flags(play, NEMOPLAY_EOF_FLAG) == 0) {
+	if (nemoplay_has_flags(play, NEMOPLAY_EOF_FLAG) == 0)
 		nemoplay_set_flags(play, NEMOPLAY_EOF_FLAG);
-
-		pthread_cond_wait(&play->signal, &play->lock);
-	}
 
 	pthread_mutex_unlock(&play->lock);
 }
@@ -291,9 +285,9 @@ void nemoplay_replay_media(struct nemoplay *play)
 	pthread_mutex_lock(&play->lock);
 
 	if (nemoplay_has_flags(play, NEMOPLAY_EOF_FLAG) != 0) {
-		nemoplay_put_flags(play, NEMOPLAY_EOF_FLAG);
+		nemoplay_put_flags(play, NEMOPLAY_WAIT_FLAG | NEMOPLAY_STOP_FLAG | NEMOPLAY_EOF_FLAG);
 
-		pthread_cond_wait(&play->signal, &play->lock);
+		pthread_cond_signal(&play->signal);
 	}
 
 	pthread_mutex_unlock(&play->lock);
