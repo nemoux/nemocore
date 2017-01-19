@@ -178,7 +178,7 @@ int nemoplay_load_media(struct nemoplay *play, const char *mediapath)
 
 	play->container = container;
 
-	play->duration = container->duration / AV_TIME_BASE;
+	play->duration = (float)container->duration / (float)AV_TIME_BASE;
 
 	play->video_context = video_context;
 	play->audio_context = audio_context;
@@ -186,7 +186,7 @@ int nemoplay_load_media(struct nemoplay *play, const char *mediapath)
 	play->audio_stream = audio_stream;
 
 	play->video_framerate = av_q2d(av_guess_frame_rate(container, container->streams[video_stream], NULL));
-	play->video_framecount = ceil(play->video_framerate) * (play->duration + 1);
+	play->video_framecount = ceil(play->video_framerate * play->duration);
 
 	play->state = NEMOPLAY_PLAY_STATE;
 	play->cmds = 0x0;

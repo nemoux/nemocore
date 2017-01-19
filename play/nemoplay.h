@@ -57,7 +57,7 @@ struct nemoplay {
 
 	AVFormatContext *container;
 
-	int32_t duration;
+	double duration;
 
 	AVCodecContext *video_context;
 	AVCodecContext *audio_context;
@@ -235,9 +235,9 @@ static inline int nemoplay_has_audio(struct nemoplay *play)
 	return play->audio_context != NULL;
 }
 
-static inline int32_t nemoplay_get_duration(struct nemoplay *play)
+static inline double nemoplay_get_duration(struct nemoplay *play)
 {
-	return play->duration > 0 ? play->duration : INT32_MAX;
+	return play->duration;
 }
 
 static inline const char *nemoplay_get_path(struct nemoplay *play)

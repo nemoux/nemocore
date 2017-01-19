@@ -211,7 +211,8 @@ static void nemoart_dispatch_video_done(struct nemoplay *play, void *data)
 	} else if (art->replay != 0) {
 		nemoart_one_replay(art->one);
 	} else {
-		nemoart_one_stop(art->one);
+		nemoart_one_destroy(art->one);
+		art->one = NULL;
 
 		nemocanvas_dispatch_frame(art->canvas);
 	}
