@@ -225,7 +225,24 @@ void nemoplay_wait_media(struct nemoplay *play)
 {
 	pthread_mutex_lock(&play->lock);
 
-	pthread_cond_wait(&play->signal, &play->lock);
+	if (play->state == NEMOPLAY_PLAY_STATE) {
+		play->state = NEMOPLAY_WAIT_STATE;
+
+		pthread_cond_wait(&play->signal, &play->lock);
+	}
+
+	pthread_mutex_unlock(&play->lock);
+}
+
+void nemoplay_wake_media(struct nemoplay *play)
+{
+	pthread_mutex_lock(&play->lock);
+
+	if (play->state == NEMOPLAY_WAIT_STATE) {
+		play->state = NEMOPLAY_PLAY_STATE;
+
+		pthread_cond_signal(&play->signal);
+	}
 
 	pthread_mutex_unlock(&play->lock);
 }
@@ -242,6 +259,30 @@ void nemoplay_done_media(struct nemoplay *play)
 
 	nemoplay_queue_set_state(play->audio_queue, NEMOPLAY_QUEUE_DONE_STATE);
 	nemoplay_queue_set_state(play->video_queue, NEMOPLAY_QUEUE_DONE_STATE);
+}
+
+void nemoplay_set_state(struct nemoplay *play, int state)
+{
+	pthread_mutex_lock(&play->lock);
+
+	if (play->state != NEMOPLAY_DONE_STATE && play->state != state) {
+		play->state = state;
+
+		pthread_cond_signal(&play->signal);
+	}
+
+	pthread_mutex_unlock(&play->lock);
+}
+
+void nemoplay_reset_state(struct nemoplay *play, int state)
+{
+	pthread_mutex_lock(&play->lock);
+
+	play->state = state;
+
+	pthread_cond_signal(&play->signal);
+
+	pthread_mutex_unlock(&play->lock);
 }
 
 int nemoplay_decode_media(struct nemoplay *play, int maxcount)
@@ -344,9 +385,8 @@ int nemoplay_decode_media(struct nemoplay *play, int maxcount)
 		}
 
 		if ((video_context == NULL || nemoplay_queue_get_count(play->video_queue) > maxcount) &&
-				(audio_context == NULL || nemoplay_queue_get_count(play->audio_queue) > maxcount)) {
-			nemoplay_set_state(play, NEMOPLAY_WAIT_STATE);
-		}
+				(audio_context == NULL || nemoplay_queue_get_count(play->audio_queue) > maxcount))
+			nemoplay_wait_media(play);
 
 		av_frame_unref(frame);
 		av_packet_unref(&packet);
@@ -448,39 +488,6 @@ void nemoplay_revoke_audio(struct nemoplay *play)
 		play->audio_context = NULL;
 		play->audio_stream = -1;
 	}
-}
-
-void nemoplay_set_state(struct nemoplay *play, int state)
-{
-	if (play->state == NEMOPLAY_DONE_STATE || play->state == state)
-		return;
-
-	pthread_mutex_lock(&play->lock);
-
-	if (play->state == NEMOPLAY_STOP_STATE) {
-		if (state == NEMOPLAY_PLAY_STATE)
-			play->state = state;
-	} else {
-		if (state == NEMOPLAY_WAKE_STATE)
-			play->state = NEMOPLAY_PLAY_STATE;
-		else
-			play->state = state;
-	}
-
-	pthread_cond_signal(&play->signal);
-
-	pthread_mutex_unlock(&play->lock);
-}
-
-void nemoplay_reset_state(struct nemoplay *play, int state)
-{
-	pthread_mutex_lock(&play->lock);
-
-	play->state = state;
-
-	pthread_cond_signal(&play->signal);
-
-	pthread_mutex_unlock(&play->lock);
 }
 
 void nemoplay_enter_thread(struct nemoplay *play)

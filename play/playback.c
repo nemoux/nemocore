@@ -48,8 +48,8 @@ static void *nemoplay_decoder_handle_thread(void *arg)
 
 		if (state == NEMOPLAY_PLAY_STATE) {
 			if (nemoplay_decode_media(play, decoder->maxcount) != 0)
-				nemoplay_set_state(play, NEMOPLAY_WAIT_STATE);
-		} else if (state == NEMOPLAY_WAIT_STATE || state == NEMOPLAY_STOP_STATE) {
+				nemoplay_set_state(play, NEMOPLAY_EOF_STATE);
+		} else if (state == NEMOPLAY_WAIT_STATE || state == NEMOPLAY_STOP_STATE || state == NEMOPLAY_EOF_STATE) {
 			nemoplay_wait_media(play);
 		}
 	}
@@ -148,7 +148,7 @@ static void *nemoplay_audio_handle_thread(void *arg)
 	while ((state = nemoplay_queue_get_state(queue)) != NEMOPLAY_QUEUE_DONE_STATE) {
 		if (state == NEMOPLAY_QUEUE_NORMAL_STATE) {
 			if (nemoplay_queue_get_count(queue) < audio->mincount)
-				nemoplay_set_state(play, NEMOPLAY_WAKE_STATE);
+				nemoplay_wake_media(play);
 
 			one = nemoplay_queue_dequeue(queue);
 			if (one == NULL) {
@@ -264,12 +264,16 @@ static void nemoplay_video_handle_timer(struct nemotimer *timer, void *data)
 		double nts;
 
 		if (nemoplay_queue_get_count(queue) < video->mincount)
-			nemoplay_set_state(play, NEMOPLAY_WAKE_STATE);
+			nemoplay_wake_media(play);
 
 retry_next:
 		one = nemoplay_queue_dequeue(queue);
 		if (one == NULL) {
-			nemotimer_set_timeout(timer, screenrate * 1000);
+			if (nemoplay_is_eof(play) == 0) {
+				nemotimer_set_timeout(timer, screenrate * 1000);
+			} else if (video->dispatch_done != NULL) {
+				video->dispatch_done(video->play, video->data);
+			}
 		} else if (nemoplay_one_get_serial(one) != nemoplay_queue_get_serial(queue)) {
 			nemoplay_one_destroy(one);
 			goto retry_next;
@@ -301,11 +305,6 @@ retry_next:
 				nemoplay_next_frame(play);
 			}
 		}
-
-		if (cts >= nemoplay_get_duration(play)) {
-			if (video->dispatch_done != NULL)
-				video->dispatch_done(video->play, video->data);
-		}
 	} else if (state == NEMOPLAY_QUEUE_STOP_STATE) {
 		nemotimer_set_timeout(timer, screenrate * 1000);
 	}
@@ -326,12 +325,16 @@ static void nemoplay_video_handle_timer_without_drop(struct nemotimer *timer, vo
 		double pts;
 
 		if (nemoplay_queue_get_count(queue) < video->mincount)
-			nemoplay_set_state(play, NEMOPLAY_WAKE_STATE);
+			nemoplay_wake_media(play);
 
 retry_next:
 		one = nemoplay_queue_dequeue(queue);
 		if (one == NULL) {
-			nemotimer_set_timeout(timer, screenrate * 1000);
+			if (nemoplay_is_eof(play) == 0) {
+				nemotimer_set_timeout(timer, screenrate * 1000);
+			} else if (video->dispatch_done != NULL) {
+				video->dispatch_done(video->play, video->data);
+			}
 		} else if (nemoplay_one_get_serial(one) != nemoplay_queue_get_serial(queue)) {
 			nemoplay_one_destroy(one);
 			goto retry_next;
@@ -361,11 +364,6 @@ retry_next:
 				nemoplay_one_destroy(one);
 
 				nemoplay_next_frame(play);
-
-				if (pts >= nemoplay_get_duration(play)) {
-					if (video->dispatch_done != NULL)
-						video->dispatch_done(video->play, video->data);
-				}
 			}
 		}
 	} else if (state == NEMOPLAY_QUEUE_STOP_STATE) {

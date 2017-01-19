@@ -23,8 +23,8 @@ typedef enum {
 	NEMOPLAY_NONE_STATE = 0,
 	NEMOPLAY_PLAY_STATE = 1,
 	NEMOPLAY_STOP_STATE = 2,
-	NEMOPLAY_WAKE_STATE = 3,
-	NEMOPLAY_WAIT_STATE = 4,
+	NEMOPLAY_WAIT_STATE = 3,
+	NEMOPLAY_EOF_STATE = 4,
 	NEMOPLAY_DONE_STATE = 5,
 	NEMOPLAY_LAST_STATE
 } NemoPlayState;
@@ -113,16 +113,16 @@ extern int nemoplay_load_media(struct nemoplay *play, const char *mediapath);
 extern int nemoplay_seek_media(struct nemoplay *play, double pts);
 extern void nemoplay_flush_media(struct nemoplay *play);
 extern void nemoplay_wait_media(struct nemoplay *play);
+extern void nemoplay_wake_media(struct nemoplay *play);
 extern void nemoplay_done_media(struct nemoplay *play);
+extern void nemoplay_set_state(struct nemoplay *play, int state);
+extern void nemoplay_reset_state(struct nemoplay *play, int state);
 
 extern int nemoplay_decode_media(struct nemoplay *play, int maxcount);
 extern int nemoplay_extract_video(struct nemoplay *play, struct playbox *box, int maxcount);
 
 extern void nemoplay_revoke_video(struct nemoplay *play);
 extern void nemoplay_revoke_audio(struct nemoplay *play);
-
-extern void nemoplay_set_state(struct nemoplay *play, int state);
-extern void nemoplay_reset_state(struct nemoplay *play, int state);
 
 extern void nemoplay_enter_thread(struct nemoplay *play);
 extern void nemoplay_leave_thread(struct nemoplay *play);
@@ -148,6 +148,11 @@ static inline int nemoplay_get_state(struct nemoplay *play)
 static inline int nemoplay_is_state(struct nemoplay *play, int state)
 {
 	return play->state == state;
+}
+
+static inline int nemoplay_is_eof(struct nemoplay *play)
+{
+	return play->state == NEMOPLAY_EOF_STATE;
 }
 
 static inline int nemoplay_is_done(struct nemoplay *play)
