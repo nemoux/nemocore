@@ -83,6 +83,7 @@ void nemoplay_decoder_destroy(struct playdecoder *decoder)
 	struct nemoplay *play = decoder->play;
 
 	nemoplay_set_flags(play, NEMOPLAY_DONE_FLAG);
+	nemoplay_wake_media(play);
 	nemoplay_queue_set_state(play->video_queue, NEMOPLAY_QUEUE_DONE_STATE);
 	nemoplay_queue_set_state(play->audio_queue, NEMOPLAY_QUEUE_DONE_STATE);
 
@@ -207,6 +208,7 @@ void nemoplay_audio_destroy(struct playaudio *audio)
 	struct nemoplay *play = audio->play;
 
 	nemoplay_set_flags(play, NEMOPLAY_DONE_FLAG);
+	nemoplay_wake_media(play);
 	nemoplay_queue_set_state(play->video_queue, NEMOPLAY_QUEUE_DONE_STATE);
 	nemoplay_queue_set_state(play->audio_queue, NEMOPLAY_QUEUE_DONE_STATE);
 
@@ -417,6 +419,7 @@ void nemoplay_video_destroy(struct playvideo *video)
 	struct nemoplay *play = video->play;
 
 	nemoplay_set_flags(play, NEMOPLAY_DONE_FLAG);
+	nemoplay_wake_media(play);
 	nemoplay_queue_set_state(play->video_queue, NEMOPLAY_QUEUE_DONE_STATE);
 	nemoplay_queue_set_state(play->audio_queue, NEMOPLAY_QUEUE_DONE_STATE);
 
@@ -545,6 +548,7 @@ void nemoplay_extractor_destroy(struct playextractor *extractor)
 	struct nemoplay *play = extractor->play;
 
 	nemoplay_set_flags(play, NEMOPLAY_DONE_FLAG);
+	nemoplay_wake_media(play);
 	nemoplay_queue_set_state(play->video_queue, NEMOPLAY_QUEUE_DONE_STATE);
 	nemoplay_queue_set_state(play->audio_queue, NEMOPLAY_QUEUE_DONE_STATE);
 
