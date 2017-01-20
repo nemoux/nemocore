@@ -34,8 +34,6 @@ static void *nemoplay_decoder_handle_thread(void *arg)
 	struct nemoplay *play = decoder->play;
 	int state;
 
-	nemoplay_enter_thread(play);
-
 	while (nemoplay_has_flags(play, NEMOPLAY_DONE_FLAG) == 0) {
 		if (nemoplay_has_cmds(play, NEMOPLAY_SEEK_CMD) != 0) {
 			nemoplay_put_cmds(play, NEMOPLAY_SEEK_CMD);
@@ -72,6 +70,8 @@ struct playdecoder *nemoplay_decoder_create(struct nemoplay *play)
 
 	decoder->play = play;
 	decoder->maxcount = nemoplay_get_video_framerate(play);
+
+	nemoplay_enter_thread(play);
 
 	pthread_create(&decoder->thread, NULL, nemoplay_decoder_handle_thread, (void *)decoder);
 
@@ -138,8 +138,6 @@ static void *nemoplay_audio_handle_thread(void *arg)
 	int driver;
 	int state;
 
-	nemoplay_enter_thread(play);
-
 	format.channels = nemoplay_get_audio_channels(play);
 	format.bits = nemoplay_get_audio_samplebits(play);
 	format.rate = nemoplay_get_audio_samplerate(play);
@@ -197,6 +195,8 @@ struct playaudio *nemoplay_audio_create_by_ao(struct nemoplay *play)
 	audio->play = play;
 	audio->queue = nemoplay_get_audio_queue(play);
 	audio->mincount = nemoplay_get_video_framerate(play);
+
+	nemoplay_enter_thread(play);
 
 	pthread_create(&audio->thread, NULL, nemoplay_audio_handle_thread, (void *)audio);
 
@@ -515,8 +515,6 @@ static void *nemoplay_extractor_handle_thread(void *arg)
 	struct playbox *box = extractor->box;
 	int maxcount = extractor->maxcount;
 
-	nemoplay_enter_thread(play);
-
 	while (nemoplay_has_no_flags(play) != 0 && nemoplay_extract_video(play, box, maxcount) > 0)
 		sleep(1);
 
@@ -537,6 +535,8 @@ struct playextractor *nemoplay_extractor_create(struct nemoplay *play, struct pl
 	extractor->play = play;
 	extractor->box = box;
 	extractor->maxcount = maxcount;
+
+	nemoplay_enter_thread(play);
 
 	pthread_create(&extractor->thread, NULL, nemoplay_extractor_handle_thread, (void *)extractor);
 
