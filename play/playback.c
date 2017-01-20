@@ -153,7 +153,7 @@ static void *nemoplay_audio_handle_thread(void *arg)
 
 	while ((state = nemoplay_queue_get_state(queue)) != NEMOPLAY_QUEUE_DONE_STATE) {
 		if (state == NEMOPLAY_QUEUE_NORMAL_STATE) {
-			if (nemoplay_queue_get_count(queue) < audio->mincount)
+			if (nemoplay_has_flags(play, NEMOPLAY_EOF_FLAG) == 0 && nemoplay_queue_get_count(queue) < audio->mincount)
 				nemoplay_wake_media(play);
 
 			one = nemoplay_queue_dequeue(queue);
@@ -275,7 +275,7 @@ static void nemoplay_video_handle_timer(struct nemotimer *timer, void *data)
 		double cts = nemoplay_get_clock_cts(play);
 		double nts;
 
-		if (nemoplay_queue_get_count(queue) < video->mincount)
+		if (nemoplay_has_flags(play, NEMOPLAY_EOF_FLAG) == 0 && nemoplay_queue_get_count(queue) < video->mincount)
 			nemoplay_wake_media(play);
 
 retry_next:
@@ -336,7 +336,7 @@ static void nemoplay_video_handle_timer_without_drop(struct nemotimer *timer, vo
 		double cts = nemoplay_get_clock_cts(play);
 		double pts;
 
-		if (nemoplay_queue_get_count(queue) < video->mincount)
+		if (nemoplay_has_flags(play, NEMOPLAY_EOF_FLAG) == 0 && nemoplay_queue_get_count(queue) < video->mincount)
 			nemoplay_wake_media(play);
 
 retry_next:
