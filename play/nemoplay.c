@@ -62,8 +62,11 @@ void nemoplay_destroy(struct nemoplay *play)
 		avcodec_close(play->video_context);
 	if (play->audio_context != NULL)
 		avcodec_close(play->audio_context);
-	if (play->container != NULL)
+
+	if (play->container != NULL) {
+		avformat_close_input(&play->container);
 		avformat_free_context(play->container);
+	}
 
 	if (play->video_opts != NULL)
 		av_dict_free(&play->video_opts);
@@ -205,7 +208,7 @@ int nemoplay_load_media(struct nemoplay *play, const char *mediapath)
 		goto err1;
 
 	if (avformat_find_stream_info(container, NULL) < 0)
-		goto err1;
+		goto err2;
 
 	for (i = 0; i < container->nb_streams; i++) {
 		context = container->streams[i]->codec;
@@ -281,6 +284,9 @@ int nemoplay_load_media(struct nemoplay *play, const char *mediapath)
 	play->path = strdup(mediapath);
 
 	return 0;
+
+err2:
+	avformat_close_input(&container);
 
 err1:
 	avformat_free_context(container);
@@ -517,6 +523,8 @@ int nemoplay_extract_video(struct nemoplay *play, struct playbox *box, int maxco
 void nemoplay_revoke_video(struct nemoplay *play)
 {
 	if (play->video_context != NULL) {
+		avcodec_close(play->video_context);
+
 		play->video_context = NULL;
 		play->video_stream = -1;
 	}
@@ -525,6 +533,8 @@ void nemoplay_revoke_video(struct nemoplay *play)
 void nemoplay_revoke_audio(struct nemoplay *play)
 {
 	if (play->audio_context != NULL) {
+		avcodec_close(play->audio_context);
+
 		play->audio_context = NULL;
 		play->audio_stream = -1;
 	}
