@@ -94,7 +94,7 @@ void nemoplay_decoder_destroy(struct playdecoder *decoder)
 
 void nemoplay_decoder_play(struct playdecoder *decoder)
 {
-	nemoplay_put_flags(decoder->play, NEMOPLAY_STOP_FLAG | NEMOPLAY_EOF_FLAG | NEMOPLAY_DONE_FLAG);
+	nemoplay_put_flags(decoder->play, NEMOPLAY_STOP_FLAG | NEMOPLAY_EOF_FLAG);
 
 	nemoplay_set_clock_state(decoder->play, NEMOPLAY_CLOCK_NORMAL_STATE);
 }
