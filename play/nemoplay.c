@@ -144,49 +144,9 @@ int nemoplay_has_no_flags(struct nemoplay *play)
 	return play->flags == 0x0;
 }
 
-void nemoplay_set_cmds(struct nemoplay *play, uint32_t cmds)
-{
-	pthread_mutex_lock(&play->lock);
-
-	play->cmds |= cmds;
-
-	pthread_cond_signal(&play->signal);
-
-	pthread_mutex_unlock(&play->lock);
-}
-
-void nemoplay_put_cmds(struct nemoplay *play, uint32_t cmds)
-{
-	pthread_mutex_lock(&play->lock);
-
-	play->cmds &= ~cmds;
-
-	pthread_mutex_unlock(&play->lock);
-}
-
-void nemoplay_put_cmds_all(struct nemoplay *play)
-{
-	pthread_mutex_lock(&play->lock);
-
-	play->cmds = 0x0;
-
-	pthread_mutex_unlock(&play->lock);
-}
-
-int nemoplay_has_cmds(struct nemoplay *play, uint32_t cmds)
-{
-	return (play->cmds & cmds) == cmds;
-}
-
-int nemoplay_has_no_cmds(struct nemoplay *play)
-{
-	return play->cmds == 0x0;
-}
-
 void nemoplay_reset_media(struct nemoplay *play)
 {
 	nemoplay_put_flags_all(play);
-	nemoplay_put_cmds_all(play);
 }
 
 int nemoplay_load_media(struct nemoplay *play, const char *mediapath)
@@ -279,7 +239,6 @@ int nemoplay_load_media(struct nemoplay *play, const char *mediapath)
 	play->video_framecount = ceil(play->video_framerate * play->duration);
 
 	play->flags = 0x0;
-	play->cmds = 0x0;
 	play->frame = 0;
 	play->path = strdup(mediapath);
 
@@ -342,7 +301,7 @@ int nemoplay_decode_media(struct nemoplay *play, int maxcount)
 
 	frame = av_frame_alloc();
 
-	for (i = 0; i < maxcount && nemoplay_has_no_flags(play) != 0 && nemoplay_has_no_cmds(play) != 0; i++) {
+	for (i = 0; i < maxcount && nemoplay_has_no_flags(play) != 0; i++) {
 		if (av_read_frame(container, &packet) < 0) {
 			done = 1;
 			break;
@@ -454,7 +413,7 @@ int nemoplay_extract_video(struct nemoplay *play, struct playbox *box, int maxco
 
 	frame = av_frame_alloc();
 
-	for (i = 0; i < maxcount && nemoplay_has_no_cmds(play) != 0; i++) {
+	for (i = 0; i < maxcount && nemoplay_has_no_flags(play) != 0; i++) {
 		if (av_read_frame(container, &packet) < 0)
 			break;
 

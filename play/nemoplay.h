@@ -22,7 +22,8 @@ NEMO_BEGIN_EXTERN_C
 typedef enum {
 	NEMOPLAY_STOP_FLAG = (1 << 0),
 	NEMOPLAY_EOF_FLAG = (1 << 1),
-	NEMOPLAY_DONE_FLAG = (1 << 2)
+	NEMOPLAY_DONE_FLAG = (1 << 2),
+	NEMOPLAY_SEEK_FLAG = (1 << 8)
 } NemoPlayFlag;
 
 typedef enum {
@@ -36,10 +37,9 @@ typedef enum {
 #define NEMOPLAY_PIXEL_IS_RGBA_FORMAT(fmt)				(((fmt) & 0xff00) == 0x100)
 
 struct nemoplay {
-	uint32_t flags;
-	uint32_t cmds;
-
 	char *path;
+
+	uint32_t flags;
 
 	uint64_t frame;
 
@@ -112,12 +112,6 @@ extern int nemoplay_has_flags(struct nemoplay *play, uint32_t flags);
 extern int nemoplay_has_flags_all(struct nemoplay *play, uint32_t flags);
 extern int nemoplay_has_no_flags(struct nemoplay *play);
 
-extern void nemoplay_set_cmds(struct nemoplay *play, uint32_t cmds);
-extern void nemoplay_put_cmds(struct nemoplay *play, uint32_t cmds);
-extern void nemoplay_put_cmds_all(struct nemoplay *play);
-extern int nemoplay_has_cmds(struct nemoplay *play, uint32_t cmds);
-extern int nemoplay_has_no_cmds(struct nemoplay *play);
-
 extern void nemoplay_reset_media(struct nemoplay *play);
 
 extern int nemoplay_load_media(struct nemoplay *play, const char *mediapath);
@@ -143,10 +137,6 @@ extern double nemoplay_get_clock_cts(struct nemoplay *play);
 
 extern void nemoplay_set_clock_state(struct nemoplay *play, int state);
 extern void nemoplay_set_clock_speed(struct nemoplay *play, double speed);
-
-extern void nemoplay_set_cmds(struct nemoplay *play, uint32_t cmds);
-extern void nemoplay_put_cmds(struct nemoplay *play, uint32_t cmds);
-extern int nemoplay_has_cmds(struct nemoplay *play, uint32_t cmds);
 
 static inline uint64_t nemoplay_get_frame(struct nemoplay *play)
 {

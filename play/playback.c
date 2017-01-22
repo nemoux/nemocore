@@ -14,10 +14,6 @@
 #include <nemotimer.h>
 #include <nemomisc.h>
 
-typedef enum {
-	NEMOPLAY_SEEK_CMD = (1 << 0)
-} NemoPlayCmd;
-
 struct playdecoder {
 	struct nemoplay *play;
 
@@ -35,8 +31,8 @@ static void *nemoplay_decoder_handle_thread(void *arg)
 	int state;
 
 	while (nemoplay_has_flags(play, NEMOPLAY_DONE_FLAG) == 0) {
-		if (nemoplay_has_cmds(play, NEMOPLAY_SEEK_CMD) != 0) {
-			nemoplay_put_cmds(play, NEMOPLAY_SEEK_CMD);
+		if (nemoplay_has_flags(play, NEMOPLAY_SEEK_FLAG) != 0) {
+			nemoplay_put_flags(play, NEMOPLAY_SEEK_FLAG);
 
 			nemoplay_queue_flush(play->video_queue);
 			nemoplay_queue_flush(play->audio_queue);
@@ -110,7 +106,7 @@ void nemoplay_decoder_seek(struct playdecoder *decoder, double pts)
 {
 	decoder->pts_to_seek = pts;
 
-	nemoplay_set_cmds(decoder->play, NEMOPLAY_SEEK_CMD);
+	nemoplay_set_flags(decoder->play, NEMOPLAY_SEEK_FLAG);
 }
 
 void nemoplay_decoder_set_maxcount(struct playdecoder *decoder, int maxcount)
