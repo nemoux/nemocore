@@ -268,8 +268,6 @@ int nemotrans_dispatch(struct nemotrans *trans, uint32_t msecs)
 	for (i = 0; i < trans->nones; i++) {
 		one = trans->ones[i];
 		if (one != NULL) {
-			v = one->targets[one->count - 1];
-
 			for (j = 0; j < one->count - 1; j++) {
 				if (one->timings[j] <= t && t < one->timings[j + 1]) {
 					u = (t - one->timings[j]) / (one->timings[j + 1] - one->timings[j]);
@@ -277,6 +275,9 @@ int nemotrans_dispatch(struct nemotrans *trans, uint32_t msecs)
 					break;
 				}
 			}
+
+			if (j >= one->count - 1)
+				v = one->targets[one->count - 1] * (t / one->timings[one->count - 1]);
 
 			if (one->is_double == 0)
 				nemoattr_setf(&one->attr, v);
