@@ -6,6 +6,7 @@
 #include <errno.h>
 
 #include <nemotrans.h>
+#include <nemomisc.h>
 
 struct transgroup *nemotrans_group_create(void)
 {
@@ -180,7 +181,8 @@ struct nemotrans *nemotrans_create(int max, int type, uint32_t duration, uint32_
 		goto err1;
 	memset(trans->ones, 0, sizeof(struct transone *) * max);
 
-	trans->nones = max;
+	trans->sones = max;
+	trans->nones = 0;
 
 	nemolist_init(&trans->link);
 
@@ -304,6 +306,8 @@ void nemotrans_set_float(struct nemotrans *trans, int index, float *var)
 
 	if (var != NULL)
 		nemotrans_set_target(trans, index, 0.0f, *var);
+
+	trans->nones = MAX(trans->nones, index + 1);
 }
 
 void nemotrans_set_double(struct nemotrans *trans, int index, double *var)
@@ -318,6 +322,8 @@ void nemotrans_set_double(struct nemotrans *trans, int index, double *var)
 
 	if (var != NULL)
 		nemotrans_set_target(trans, index, 0.0f, *var);
+
+	trans->nones = MAX(trans->nones, index + 1);
 }
 
 float nemotrans_get_float(struct nemotrans *trans, int index)

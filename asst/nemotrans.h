@@ -36,7 +36,7 @@ struct nemotrans {
 	struct nemoease ease;
 
 	struct transone **ones;
-	int nones;
+	int nones, sones;
 
 	uint32_t duration;
 	uint32_t delay;
