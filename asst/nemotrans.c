@@ -271,7 +271,7 @@ int nemotrans_dispatch(struct nemotrans *trans, uint32_t msecs)
 			v = one->targets[one->count - 1];
 
 			for (j = 0; j < one->count - 1; j++) {
-				if (one->timings[j] <= t && one->timings[j + 1] < t) {
+				if (one->timings[j] <= t && t < one->timings[j + 1]) {
 					u = (t - one->timings[j]) / (one->timings[j + 1] - one->timings[j]);
 					v = (one->targets[j + 1] - one->targets[j]) * u + one->targets[j];
 					break;
