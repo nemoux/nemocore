@@ -13,6 +13,8 @@ NEMO_BEGIN_EXTERN_C
 #include <nemoattr.h>
 #include <nemolist.h>
 
+#define NEMOTRANS_ONE_TARGETS_MAX			(8)
+
 struct nemotrans;
 struct transgroup;
 
@@ -20,13 +22,12 @@ typedef void (*nemotrans_dispatch_update_t)(struct nemotrans *trans, void *data,
 typedef void (*nemotrans_dispatch_done_t)(struct nemotrans *trans, void *data);
 
 struct transone {
-	struct nemolist link;
-
 	struct nemoattr attr;
 	int is_double;
 
-	double sattr;
-	double eattr;
+	double timings[NEMOTRANS_ONE_TARGETS_MAX];
+	double targets[NEMOTRANS_ONE_TARGETS_MAX];
+	int count;
 };
 
 struct nemotrans {
@@ -34,9 +35,8 @@ struct nemotrans {
 
 	struct nemoease ease;
 
-	struct nemolist list;
-
 	struct transone **ones;
+	int nones;
 
 	uint32_t duration;
 	uint32_t delay;
@@ -74,12 +74,10 @@ extern void nemotrans_group_revoke_one(struct transgroup *group, void *var);
 extern void nemotrans_group_revoke_tag(struct transgroup *group, uint32_t tag);
 extern void nemotrans_group_revoke_all(struct transgroup *group);
 
-extern struct nemotrans *nemotrans_create(int type, uint32_t duration, uint32_t delay);
+extern struct nemotrans *nemotrans_create(int max, int type, uint32_t duration, uint32_t delay);
 extern void nemotrans_destroy(struct nemotrans *trans);
 
 extern void nemotrans_set_tag(struct nemotrans *trans, uint32_t tag);
-
-extern void nemotrans_set_max(struct nemotrans *trans, int max);
 
 extern void nemotrans_ease_set_type(struct nemotrans *trans, int type);
 extern void nemotrans_ease_set_bezier(struct nemotrans *trans, double x0, double y0, double x1, double y1);
@@ -87,13 +85,12 @@ extern void nemotrans_ease_set_bezier(struct nemotrans *trans, double x0, double
 extern int nemotrans_ready(struct nemotrans *trans, uint32_t msecs);
 extern int nemotrans_dispatch(struct nemotrans *trans, uint32_t msecs);
 
-extern void nemotrans_set_float(struct nemotrans *trans, float *var, float value);
-extern void nemotrans_set_double(struct nemotrans *trans, double *var, double value);
+extern void nemotrans_set_float(struct nemotrans *trans, int index, float *var);
+extern void nemotrans_set_double(struct nemotrans *trans, int index, double *var);
+extern float nemotrans_get_float(struct nemotrans *trans, int index);
+extern double nemotrans_get_double(struct nemotrans *trans, int index);
 
-extern void nemotrans_set_float_one(struct nemotrans *trans, int index, float sattr, float eattr);
-extern void nemotrans_set_double_one(struct nemotrans *trans, int index, double sattr, double eattr);
-extern float nemotrans_get_float_one(struct nemotrans *trans, int index);
-extern double nemotrans_get_double_one(struct nemotrans *trans, int index);
+extern void nemotrans_set_target(struct nemotrans *trans, int index, double t, double v);
 
 extern void nemotrans_set_dispatch_update(struct nemotrans *trans, nemotrans_dispatch_update_t dispatch);
 extern void nemotrans_set_dispatch_done(struct nemotrans *trans, nemotrans_dispatch_done_t dispatch);

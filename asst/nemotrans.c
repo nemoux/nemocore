@@ -29,18 +29,22 @@ void nemotrans_group_destroy(struct transgroup *group)
 void nemotrans_group_attach_trans(struct transgroup *group, struct nemotrans *trans)
 {
 	struct nemotrans *strans;
-	struct transone *one, *sone, *none;
-	int is_first = nemolist_empty(&group->list) != 0;
+	struct transone *one, *sone;
+	int i, j;
 
-	nemolist_for_each(one, &trans->list, link) {
-		nemolist_for_each(strans, &group->list, link) {
-			nemolist_for_each_safe(sone, none, &strans->list, link) {
-				if (nemoattr_getp(&one->attr) == nemoattr_getp(&sone->attr)) {
-					nemolist_remove(&sone->link);
-
-					free(sone);
-
-					break;
+	for (i = 0; i < trans->nones; i++) {
+		one = trans->ones[i];
+		if (one != NULL) {
+			nemolist_for_each(strans, &group->list, link) {
+				for (j = 0; j < strans->nones; j++) {
+					sone = strans->ones[j];
+					if (sone != NULL) {
+						if (nemoattr_getp(&one->attr) == nemoattr_getp(&sone->attr)) {
+							strans->ones[j] = NULL;
+							free(sone);
+							break;
+						}
+					}
 				}
 			}
 		}
@@ -78,13 +82,17 @@ struct nemotrans *nemotrans_group_get_last_one(struct transgroup *group, void *v
 	struct nemotrans *ltrans = NULL;
 	struct nemotrans *trans;
 	struct transone *one;
+	int i;
 
 	nemolist_for_each(trans, &group->list, link) {
-		nemolist_for_each(one, &trans->list, link) {
-			if (nemoattr_getp(&one->attr) == var) {
-				if (ltrans == NULL || ltrans->etime < trans->etime) {
-					ltrans = trans;
-					break;
+		for (i = 0; i < trans->nones; i++) {
+			one = trans->ones[i];
+			if (one != NULL) {
+				if (nemoattr_getp(&one->attr) == var) {
+					if (ltrans == NULL || ltrans->etime < trans->etime) {
+						ltrans = trans;
+						break;
+					}
 				}
 			}
 		}
@@ -124,15 +132,15 @@ struct nemotrans *nemotrans_group_get_last_all(struct transgroup *group)
 void nemotrans_group_revoke_one(struct transgroup *group, void *var)
 {
 	struct nemotrans *trans;
-	struct transone *one, *none;
+	struct transone *one;
+	int i;
 
 	nemolist_for_each(trans, &group->list, link) {
-		nemolist_for_each_safe(one, none, &trans->list, link) {
-			if (nemoattr_getp(&one->attr) == var) {
-				nemolist_remove(&one->link);
-
+		for (i = 0; i < trans->nones; i++) {
+			one = trans->ones[i];
+			if (one != NULL && nemoattr_getp(&one->attr) == var) {
+				trans->ones[i] = NULL;
 				free(one);
-
 				break;
 			}
 		}
@@ -158,7 +166,7 @@ void nemotrans_group_revoke_all(struct transgroup *group)
 	}
 }
 
-struct nemotrans *nemotrans_create(int type, uint32_t duration, uint32_t delay)
+struct nemotrans *nemotrans_create(int max, int type, uint32_t duration, uint32_t delay)
 {
 	struct nemotrans *trans;
 
@@ -167,8 +175,14 @@ struct nemotrans *nemotrans_create(int type, uint32_t duration, uint32_t delay)
 		return NULL;
 	memset(trans, 0, sizeof(struct nemotrans));
 
+	trans->ones = (struct transone **)malloc(sizeof(struct transone *) * max);
+	if (trans->ones == NULL)
+		goto err1;
+	memset(trans->ones, 0, sizeof(struct transone *) * max);
+
+	trans->nones = max;
+
 	nemolist_init(&trans->link);
-	nemolist_init(&trans->list);
 
 	nemoease_set(&trans->ease, type);
 
@@ -179,34 +193,31 @@ struct nemotrans *nemotrans_create(int type, uint32_t duration, uint32_t delay)
 	trans->etime = 0;
 
 	return trans;
+
+err1:
+	free(trans);
+
+	return NULL;
 }
 
 void nemotrans_destroy(struct nemotrans *trans)
 {
-	struct transone *one, *next;
+	int i;
 
 	nemolist_remove(&trans->link);
 
-	nemolist_for_each_safe(one, next, &trans->list, link) {
-		nemolist_remove(&one->link);
-
-		free(one);
+	for (i = 0; i < trans->nones; i++) {
+		if (trans->ones[i] != NULL)
+			free(trans->ones[i]);
 	}
 
-	if (trans->ones != NULL)
-		free(trans->ones);
-
+	free(trans->ones);
 	free(trans);
 }
 
 void nemotrans_set_tag(struct nemotrans *trans, uint32_t tag)
 {
 	trans->tag = tag;
-}
-
-void nemotrans_set_max(struct nemotrans *trans, int max)
-{
-	trans->ones = (struct transone **)malloc(sizeof(struct transone *) * max);
 }
 
 void nemotrans_ease_set_type(struct nemotrans *trans, int type)
@@ -232,8 +243,9 @@ int nemotrans_ready(struct nemotrans *trans, uint32_t msecs)
 int nemotrans_dispatch(struct nemotrans *trans, uint32_t msecs)
 {
 	struct transone *one;
-	double t;
+	double t, u, v;
 	int done;
+	int i, j;
 
 	if (trans->stime == 0) {
 		trans->stime = msecs + trans->delay;
@@ -251,13 +263,24 @@ int nemotrans_dispatch(struct nemotrans *trans, uint32_t msecs)
 		done = 1;
 	}
 
-	nemolist_for_each(one, &trans->list, link) {
-		double v = (one->eattr - one->sattr) * t + one->sattr;
+	for (i = 0; i < trans->nones; i++) {
+		one = trans->ones[i];
+		if (one != NULL) {
+			v = one->targets[one->count - 1];
 
-		if (one->is_double == 0)
-			nemoattr_setf(&one->attr, v);
-		else
-			nemoattr_setd(&one->attr, v);
+			for (j = 0; j < one->count - 1; j++) {
+				if (one->timings[j] <= t && one->timings[j + 1] < t) {
+					u = (t - one->timings[j]) / (one->timings[j + 1] - one->timings[j]);
+					v = (one->targets[j + 1] - one->targets[j]) * u + one->targets[j];
+					break;
+				}
+			}
+
+			if (one->is_double == 0)
+				nemoattr_setf(&one->attr, v);
+			else
+				nemoattr_setd(&one->attr, v);
+		}
 	}
 
 	if (trans->dispatch_update != NULL)
@@ -269,72 +292,71 @@ int nemotrans_dispatch(struct nemotrans *trans, uint32_t msecs)
 	return done;
 }
 
-void nemotrans_set_float(struct nemotrans *trans, float *var, float value)
-{
-	struct transone *one;
-
-	one = (struct transone *)malloc(sizeof(struct transone));
-	one->sattr = *var;
-	one->eattr = value;
-	one->is_double = 0;
-
-	nemoattr_setp(&one->attr, var);
-
-	nemolist_insert_tail(&trans->list, &one->link);
-}
-
-void nemotrans_set_double(struct nemotrans *trans, double *var, double value)
-{
-	struct transone *one;
-
-	one = (struct transone *)malloc(sizeof(struct transone));
-	one->sattr = *var;
-	one->eattr = value;
-	one->is_double = 1;
-
-	nemoattr_setp(&one->attr, var);
-
-	nemolist_insert_tail(&trans->list, &one->link);
-}
-
-void nemotrans_set_float_one(struct nemotrans *trans, int index, float sattr, float eattr)
+void nemotrans_set_float(struct nemotrans *trans, int index, float *var)
 {
 	struct transone *one;
 
 	trans->ones[index] = one = (struct transone *)malloc(sizeof(struct transone));
-	one->sattr = sattr;
-	one->eattr = eattr;
+	one->count = 0;
 	one->is_double = 0;
 
-	nemoattr_setp(&one->attr, NULL);
-	nemoattr_setf(&one->attr, sattr);
+	nemoattr_setp(&one->attr, var);
 
-	nemolist_insert_tail(&trans->list, &one->link);
+	if (var != NULL)
+		nemotrans_set_target(trans, index, 0.0f, *var);
 }
 
-void nemotrans_set_double_one(struct nemotrans *trans, int index, double sattr, double eattr)
+void nemotrans_set_double(struct nemotrans *trans, int index, double *var)
 {
 	struct transone *one;
 
 	trans->ones[index] = one = (struct transone *)malloc(sizeof(struct transone));
-	one->sattr = sattr;
-	one->eattr = eattr;
+	one->count = 0;
 	one->is_double = 1;
 
-	nemoattr_setp(&one->attr, NULL);
-	nemoattr_setd(&one->attr, sattr);
+	nemoattr_setp(&one->attr, var);
 
-	nemolist_insert_tail(&trans->list, &one->link);
+	if (var != NULL)
+		nemotrans_set_target(trans, index, 0.0f, *var);
 }
 
-float nemotrans_get_float_one(struct nemotrans *trans, int index)
+float nemotrans_get_float(struct nemotrans *trans, int index)
 {
 	return nemoattr_getf(&trans->ones[index]->attr);
 }
 
-double nemotrans_get_double_one(struct nemotrans *trans, int index)
+double nemotrans_get_double(struct nemotrans *trans, int index)
 {
 	return nemoattr_getd(&trans->ones[index]->attr);
+}
+
+void nemotrans_set_target(struct nemotrans *trans, int index, double t, double v)
+{
+	struct transone *one = trans->ones[index];
+	int i, j;
+
+	for (i = 0; i < one->count; i++) {
+		if (t == one->timings[i]) {
+			one->targets[i] = v;
+			break;
+		} else if (t < one->timings[i]) {
+			for (j = i; j < one->count; j++) {
+				one->timings[j + 1] = one->timings[j];
+				one->targets[j + 1] = one->targets[j];
+			}
+
+			one->timings[i] = t;
+			one->targets[i] = v;
+			one->count++;
+			break;
+		}
+	}
+
+	if (i >= one->count) {
+		one->timings[one->count] = t;
+		one->targets[one->count] = v;
+		one->count++;
+	}
 }
 
 void nemotrans_set_dispatch_update(struct nemotrans *trans, nemotrans_dispatch_update_t dispatch)
