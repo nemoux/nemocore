@@ -259,9 +259,9 @@ void nemotool_keyboard_leave(struct nemotool *tool)
 	nemo_keyboard_leave(tool->keyboard);
 }
 
-void nemotool_keyboard_key(struct nemotool *tool, uint32_t time, uint32_t key, uint32_t state)
+void nemotool_keyboard_key(struct nemotool *tool, uint32_t time, uint32_t key, int pressed)
 {
-	nemo_keyboard_key(tool->keyboard, time, key, state);
+	nemo_keyboard_key(tool->keyboard, time, key, pressed != 0 ? NEMO_KEYBOARD_KEY_STATE_PRESSED : NEMO_KEYBOARD_KEY_STATE_RELEASED);
 }
 
 void nemotool_keyboard_layout(struct nemotool *tool, const char *name)

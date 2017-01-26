@@ -229,7 +229,7 @@ static inline void *nemotool_get_userdata(struct nemotool *tool)
 
 extern void nemotool_keyboard_enter(struct nemotool *tool);
 extern void nemotool_keyboard_leave(struct nemotool *tool);
-extern void nemotool_keyboard_key(struct nemotool *tool, uint32_t time, uint32_t key, uint32_t state);
+extern void nemotool_keyboard_key(struct nemotool *tool, uint32_t time, uint32_t key, int pressed);
 extern void nemotool_keyboard_layout(struct nemotool *tool, const char *name);
 
 extern void nemotool_touch_bypass(struct nemotool *tool, int32_t id, float x, float y);
