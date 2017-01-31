@@ -1,0 +1,11 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+bindir=${prefix}/bin
+libdir=${prefix}/lib@CMAKE_LIBRARY_SUFFIX@
+incdir=${prefix}/include
+
+Name: Nemomotz
+Description: NEMO-UX motion graphics library
+Version: 0.1.0
+Requires: @NEMOMOTZ_PKGCONFIG_REQUIRES@
+Libs: -L${libdir} -lnemomotz
+Cflags: -I${incdir}/nemomotz
