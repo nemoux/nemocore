@@ -82,6 +82,20 @@ endif(WITH_TCMALLOC)
 
 INSTALL(TARGETS nemoart DESTINATION bin)
 
+add_executable(nemopix
+	nemopix.c
+	)
+
+TARGET_LINK_LIBRARIES(nemopix
+	nemoasst
+	nemotool
+	nemocook
+	nemoaction
+	nemobus
+	)
+
+INSTALL(TARGETS nemopix DESTINATION bin)
+
 if(WITH_MINISHELL)
 	include_directories(
 		${CMAKE_SOURCE_DIR}/compz
