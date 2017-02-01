@@ -62,8 +62,10 @@ extern void nemotoyz_style_set_anti_alias(struct toyzstyle *style, int use_antia
 extern void nemotoyz_style_set_blur_filter(struct toyzstyle *style, int type, int quality, float r);
 extern void nemotoyz_style_set_emboss_filter(struct toyzstyle *style, float x, float y, float z, float r, float ambient, float specular);
 extern void nemotoyz_style_set_shadow_filter(struct toyzstyle *style, int mode, float dx, float dy, float sx, float sy, float r, float g, float b, float a);
+extern void nemotoyz_style_set_path_effect(struct toyzstyle *style, float segment, float deviation, uint32_t seed);
 extern void nemotoyz_style_put_mask_filter(struct toyzstyle *style);
 extern void nemotoyz_style_put_image_filter(struct toyzstyle *style);
+extern void nemotoyz_style_put_path_effect(struct toyzstyle *style);
 
 extern struct toyzpath *nemotoyz_path_create(void);
 extern void nemotoyz_path_destroy(struct toyzpath *path);

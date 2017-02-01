@@ -136,6 +136,12 @@ void nemotoyz_style_set_shadow_filter(struct toyzstyle *style, int mode, float d
 				NULL));
 }
 
+void nemotoyz_style_set_path_effect(struct toyzstyle *style, float segment, float deviation, uint32_t seed)
+{
+	style->paint->setPathEffect(
+			SkDiscretePathEffect::Make(segment, deviation, seed));
+}
+
 void nemotoyz_style_put_mask_filter(struct toyzstyle *style)
 {
 	style->paint->setMaskFilter(NULL);
@@ -144,4 +150,9 @@ void nemotoyz_style_put_mask_filter(struct toyzstyle *style)
 void nemotoyz_style_put_image_filter(struct toyzstyle *style)
 {
 	style->paint->setImageFilter(NULL);
+}
+
+void nemotoyz_style_put_path_effect(struct toyzstyle *style)
+{
+	style->paint->setPathEffect(NULL);
 }
