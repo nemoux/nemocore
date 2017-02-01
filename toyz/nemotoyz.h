@@ -93,6 +93,7 @@ extern void nemotoyz_matrix_post_translate(struct toyzmatrix *matrix, float tx, 
 extern void nemotoyz_matrix_post_scale(struct toyzmatrix *matrix, float sx, float sy);
 extern void nemotoyz_matrix_post_rotate(struct toyzmatrix *matrix, float rz);
 extern void nemotoyz_matrix_concat(struct toyzmatrix *matrix, struct toyzmatrix *smatrix);
+extern void nemotoyz_matrix_invert(struct toyzmatrix *matrix, struct toyzmatrix *smatrix);
 extern void nemotoyz_matrix_map_point(struct toyzmatrix *matrix, float *x, float *y);
 extern void nemotoyz_matrix_map_vector(struct toyzmatrix *matrix, float *x, float *y);
 extern void nemotoyz_matrix_map_rectangle(struct toyzmatrix *matrix, float *x, float *y, float *w, float *h);

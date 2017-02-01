@@ -81,6 +81,11 @@ void nemotoyz_matrix_concat(struct toyzmatrix *matrix, struct toyzmatrix *smatri
 	matrix->matrix->postConcat(*smatrix->matrix);
 }
 
+void nemotoyz_matrix_invert(struct toyzmatrix *matrix, struct toyzmatrix *smatrix)
+{
+	smatrix->matrix->invert(matrix->matrix);
+}
+
 void nemotoyz_matrix_map_point(struct toyzmatrix *matrix, float *x, float *y)
 {
 	SkPoint p = matrix->matrix->mapXY(*x, *y);
