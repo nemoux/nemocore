@@ -9,6 +9,7 @@
 #include <toyzstyle.hpp>
 #include <toyzpath.hpp>
 #include <toyzmatrix.hpp>
+#include <toyzregion.hpp>
 #include <nemomisc.h>
 
 struct nemotoyz *nemotoyz_create(void)

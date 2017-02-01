@@ -110,6 +110,13 @@ extern void nemotoyz_matrix_map_point(struct toyzmatrix *matrix, float *x, float
 extern void nemotoyz_matrix_map_vector(struct toyzmatrix *matrix, float *x, float *y);
 extern void nemotoyz_matrix_map_rectangle(struct toyzmatrix *matrix, float *x, float *y, float *w, float *h);
 
+extern struct toyzregion *nemotoyz_region_create(void);
+extern void nemotoyz_region_destroy(struct toyzregion *region);
+extern void nemotoyz_region_clear(struct toyzregion *region);
+extern void nemotoyz_region_set_rectangle(struct toyzregion *region, float x, float y, float w, float h);
+extern void nemotoyz_region_intersect(struct toyzregion *region, float x, float y, float w, float h);
+extern void nemotoyz_region_union(struct toyzregion *region, float x, float y, float w, float h);
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif
