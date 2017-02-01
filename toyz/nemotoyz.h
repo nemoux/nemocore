@@ -119,6 +119,7 @@ extern void nemotoyz_region_clear(struct toyzregion *region);
 extern void nemotoyz_region_set_rectangle(struct toyzregion *region, float x, float y, float w, float h);
 extern void nemotoyz_region_intersect(struct toyzregion *region, float x, float y, float w, float h);
 extern void nemotoyz_region_union(struct toyzregion *region, float x, float y, float w, float h);
+extern int nemotoyz_region_check_intersection(struct toyzregion *region, float x, float y, float w, float h);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

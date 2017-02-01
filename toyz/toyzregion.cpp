@@ -43,3 +43,8 @@ void nemotoyz_region_union(struct toyzregion *region, float x, float y, float w,
 {
 	region->region->op(*region->region, SkIRect::MakeXYWH(x, y, w, h), SkRegion::kUnion_Op);
 }
+
+int nemotoyz_region_check_intersection(struct toyzregion *region, float x, float y, float w, float h)
+{
+	return region->region->intersects(SkIRect::MakeXYWH(x, y, w, h)) == true;
+}
