@@ -82,6 +82,21 @@ extern void nemotoyz_path_translate(struct toyzpath *path, float tx, float ty);
 extern void nemotoyz_path_scale(struct toyzpath *path, float sx, float sy);
 extern void nemotoyz_path_rotate(struct toyzpath *path, float rz);
 
+extern struct toyzmatrix *nemotoyz_matrix_create(void);
+extern void nemotoyz_matrix_destroy(struct toyzmatrix *matrix);
+extern void nemotoyz_matrix_set(struct toyzmatrix *matrix, float *ms);
+extern void nemotoyz_matrix_identity(struct toyzmatrix *matrix);
+extern void nemotoyz_matrix_translate(struct toyzmatrix *matrix, float tx, float ty);
+extern void nemotoyz_matrix_scale(struct toyzmatrix *matrix, float sx, float sy);
+extern void nemotoyz_matrix_rotate(struct toyzmatrix *matrix, float rz);
+extern void nemotoyz_matrix_post_translate(struct toyzmatrix *matrix, float tx, float ty);
+extern void nemotoyz_matrix_post_scale(struct toyzmatrix *matrix, float sx, float sy);
+extern void nemotoyz_matrix_post_rotate(struct toyzmatrix *matrix, float rz);
+extern void nemotoyz_matrix_concat(struct toyzmatrix *matrix, struct toyzmatrix *smatrix);
+extern void nemotoyz_matrix_map_point(struct toyzmatrix *matrix, float *x, float *y);
+extern void nemotoyz_matrix_map_vector(struct toyzmatrix *matrix, float *x, float *y);
+extern void nemotoyz_matrix_map_rectangle(struct toyzmatrix *matrix, float *x, float *y, float *w, float *h);
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

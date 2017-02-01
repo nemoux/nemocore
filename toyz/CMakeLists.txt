@@ -31,6 +31,7 @@ add_library(nemotoyz SHARED
 	nemotoyz.cpp
 	toyzstyle.cpp
 	toyzpath.cpp
+	toyzmatrix.cpp
 	)
 
 TARGET_LINK_LIBRARIES(nemotoyz
