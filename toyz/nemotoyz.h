@@ -10,7 +10,7 @@ NEMO_BEGIN_EXTERN_C
 #include <stdint.h>
 
 typedef enum {
-	NEMOTOYZ_CANVAS_32BIT_COLOR = 0,
+	NEMOTOYZ_CANVAS_RGBA_COLOR = 0,
 	NEMOTOYZ_CANVAS_LAST_COLOR
 } NemoToyzCanvasColorType;
 
@@ -54,6 +54,8 @@ extern struct toyzstyle *nemotoyz_style_create(void);
 extern void nemotoyz_style_destroy(struct toyzstyle *style);
 
 extern void nemotoyz_style_set_type(struct toyzstyle *style, int type);
+extern void nemotoyz_style_set_color(struct toyzstyle *style, float r, float g, float b, float a);
+extern void nemotoyz_style_set_stroke_width(struct toyzstyle *style, float w);
 extern void nemotoyz_style_set_stroke_cap(struct toyzstyle *style, int cap);
 extern void nemotoyz_style_set_stroke_join(struct toyzstyle *style, int join);
 extern void nemotoyz_style_set_anti_alias(struct toyzstyle *style, int use_antialias);

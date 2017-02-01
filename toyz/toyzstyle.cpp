@@ -40,6 +40,16 @@ void nemotoyz_style_set_type(struct toyzstyle *style, int type)
 	style->paint->setStyle(styles[type]);
 }
 
+void nemotoyz_style_set_color(struct toyzstyle *style, float r, float g, float b, float a)
+{
+	style->paint->setColor(SkColorSetARGB(a, r, g, b));
+}
+
+void nemotoyz_style_set_stroke_width(struct toyzstyle *style, float w)
+{
+	style->paint->setStrokeWidth(w);
+}
+
 void nemotoyz_style_set_stroke_cap(struct toyzstyle *style, int cap)
 {
 	static const SkPaint::Cap caps[] = {
