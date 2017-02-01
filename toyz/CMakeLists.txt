@@ -30,6 +30,7 @@ include_directories(
 add_library(nemotoyz SHARED
 	nemotoyz.cpp
 	toyzstyle.cpp
+	toyzpath.cpp
 	)
 
 TARGET_LINK_LIBRARIES(nemotoyz
