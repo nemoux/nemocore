@@ -62,6 +62,9 @@ extern void nemotoyz_scale(struct nemotoyz *toyz, float sx, float sy);
 extern void nemotoyz_rotate(struct nemotoyz *toyz, float rz);
 extern void nemotoyz_concat(struct nemotoyz *toyz, struct toyzmatrix *matrix);
 extern void nemotoyz_matrix(struct nemotoyz *toyz, struct toyzmatrix *matrix);
+extern void nemotoyz_clip_rectangle(struct nemotoyz *toyz, float x, float y, float w, float h);
+extern void nemotoyz_clip_region(struct nemotoyz *toyz, struct toyzregion *region);
+extern void nemotoyz_clip_path(struct nemotoyz *toyz, struct toyzpath *path);
 
 extern struct toyzstyle *nemotoyz_style_create(void);
 extern void nemotoyz_style_destroy(struct toyzstyle *style);

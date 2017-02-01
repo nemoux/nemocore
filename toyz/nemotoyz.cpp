@@ -144,3 +144,18 @@ void nemotoyz_matrix(struct nemotoyz *toyz, struct toyzmatrix *matrix)
 {
 	toyz->canvas->setMatrix(*matrix->matrix);
 }
+
+void nemotoyz_clip_rectangle(struct nemotoyz *toyz, float x, float y, float w, float h)
+{
+	toyz->canvas->clipRect(SkRect::MakeXYWH(x, y, w, h));
+}
+
+void nemotoyz_clip_region(struct nemotoyz *toyz, struct toyzregion *region)
+{
+	toyz->canvas->clipRegion(*region->region);
+}
+
+void nemotoyz_clip_path(struct nemotoyz *toyz, struct toyzpath *path)
+{
+	toyz->canvas->clipPath(*path->path);
+}
