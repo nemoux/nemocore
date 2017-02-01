@@ -29,6 +29,7 @@ include_directories(
 
 add_library(nemomotz SHARED
 	nemomotz.c
+	motzobject.c
 	)
 
 TARGET_LINK_LIBRARIES(nemomotz
@@ -44,6 +45,7 @@ INSTALL(TARGETS nemomotz DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
 
 set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/motz/nemomotz.h
+	${CMAKE_SOURCE_DIR}/motz/motzobject.h
 	)
 
 set(NEMOMOTZ_PKGCONFIG_REQUIRES "nemoasst nemohelper nemotool")

@@ -56,6 +56,13 @@ void nemomotz_one_up_null(struct motzone *one, float x, float y)
 {
 }
 
+void nemomotz_one_destroy_null(struct motzone *one)
+{
+	nemolist_remove(&one->link);
+
+	free(one);
+}
+
 struct motzone *nemomotz_one_create(void)
 {
 	struct motzone *one;
@@ -71,13 +78,25 @@ struct motzone *nemomotz_one_create(void)
 	one->down = nemomotz_one_down_null;
 	one->motion = nemomotz_one_motion_null;
 	one->up = nemomotz_one_up_null;
+	one->destroy = nemomotz_one_destroy_null;
 
 	return one;
 }
 
-void nemomotz_one_destroy(struct motzone *one)
+int nemomotz_one_prepare(struct motzone *one)
+{
+	nemolist_init(&one->link);
+
+	one->draw = nemomotz_one_draw_null;
+	one->down = nemomotz_one_down_null;
+	one->motion = nemomotz_one_motion_null;
+	one->up = nemomotz_one_up_null;
+	one->destroy = nemomotz_one_destroy_null;
+
+	return 0;
+}
+
+void nemomotz_one_finish(struct motzone *one)
 {
 	nemolist_remove(&one->link);
-
-	free(one);
 }
