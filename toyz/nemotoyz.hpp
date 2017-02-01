@@ -5,6 +5,8 @@
 
 struct nemotoyz {
 	SkBitmap *bitmap;
+	SkBitmapDevice *device;
+	SkCanvas *canvas;
 };
 
 #endif

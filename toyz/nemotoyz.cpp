@@ -6,6 +6,9 @@
 #include <errno.h>
 
 #include <nemotoyz.hpp>
+#include <toyzstyle.hpp>
+#include <toyzpath.hpp>
+#include <toyzmatrix.hpp>
 #include <nemomisc.h>
 
 struct nemotoyz *nemotoyz_create(void)
@@ -14,6 +17,8 @@ struct nemotoyz *nemotoyz_create(void)
 
 	toyz = new nemotoyz;
 	toyz->bitmap = NULL;
+	toyz->device = NULL;
+	toyz->canvas = NULL;
 
 	return toyz;
 }
@@ -22,6 +27,10 @@ void nemotoyz_destroy(struct nemotoyz *toyz)
 {
 	if (toyz->bitmap != NULL)
 		delete toyz->bitmap;
+	if (toyz->device != NULL)
+		delete toyz->device;
+	if (toyz->canvas != NULL)
+		delete toyz->canvas;
 
 	delete toyz;
 }
@@ -39,6 +48,10 @@ int nemotoyz_attach_canvas(struct nemotoyz *toyz, int colortype, int alphatype, 
 
 	if (toyz->bitmap != NULL)
 		delete toyz->bitmap;
+	if (toyz->device != NULL)
+		delete toyz->device;
+	if (toyz->canvas != NULL)
+		delete toyz->canvas;
 
 	toyz->bitmap = new SkBitmap;
 	toyz->bitmap->setInfo(
@@ -48,6 +61,9 @@ int nemotoyz_attach_canvas(struct nemotoyz *toyz, int colortype, int alphatype, 
 				colortypes[colortype],
 				alphatypes[alphatype]));
 	toyz->bitmap->setPixels(buffer);
+
+	toyz->device = new SkBitmapDevice(*toyz->bitmap);
+	toyz->canvas = new SkCanvas(toyz->device);
 
 	return 0;
 }
@@ -59,4 +75,71 @@ void nemotoyz_detach_canvas(struct nemotoyz *toyz)
 
 		toyz->bitmap = NULL;
 	}
+
+	if (toyz->device != NULL) {
+		delete toyz->device;
+
+		toyz->device = NULL;
+	}
+
+	if (toyz->canvas != NULL) {
+		delete toyz->canvas;
+
+		toyz->canvas = NULL;
+	}
+}
+
+void nemotoyz_save(struct nemotoyz *toyz)
+{
+	toyz->canvas->save();
+}
+
+void nemotoyz_save_alpha(struct nemotoyz *toyz, float a)
+{
+	toyz->canvas->saveLayerAlpha(NULL, 0xff * a);
+}
+
+void nemotoyz_restore(struct nemotoyz *toyz)
+{
+	toyz->canvas->restore();
+}
+
+void nemotoyz_clear(struct nemotoyz *toyz)
+{
+	toyz->canvas->clear(SK_ColorTRANSPARENT);
+}
+
+void nemotoyz_clear_color(struct nemotoyz *toyz, float r, float g, float b, float a)
+{
+	toyz->canvas->clear(SkColorSetARGB(a, r, g, b));
+}
+
+void nemotoyz_identity(struct nemotoyz *toyz)
+{
+	toyz->canvas->resetMatrix();
+}
+
+void nemotoyz_translate(struct nemotoyz *toyz, float tx, float ty)
+{
+	toyz->canvas->translate(tx, ty);
+}
+
+void nemotoyz_scale(struct nemotoyz *toyz, float sx, float sy)
+{
+	toyz->canvas->scale(sx, sy);
+}
+
+void nemotoyz_rotate(struct nemotoyz *toyz, float rz)
+{
+	toyz->canvas->rotate(rz);
+}
+
+void nemotoyz_concat(struct nemotoyz *toyz, struct toyzmatrix *matrix)
+{
+	toyz->canvas->concat(*matrix->matrix);
+}
+
+void nemotoyz_matrix(struct nemotoyz *toyz, struct toyzmatrix *matrix)
+{
+	toyz->canvas->setMatrix(*matrix->matrix);
 }

@@ -51,6 +51,18 @@ extern void nemotoyz_destroy(struct nemotoyz *toyz);
 extern int nemotoyz_attach_canvas(struct nemotoyz *toyz, int colortype, int alphatype, void *buffer, int width, int height);
 extern void nemotoyz_detach_canvas(struct nemotoyz *toyz);
 
+extern void nemotoyz_save(struct nemotoyz *toyz);
+extern void nemotoyz_save_alpha(struct nemotoyz *toyz, float a);
+extern void nemotoyz_restore(struct nemotoyz *toyz);
+extern void nemotoyz_clear(struct nemotoyz *toyz);
+extern void nemotoyz_clear_color(struct nemotoyz *toyz, float r, float g, float b, float a);
+extern void nemotoyz_identity(struct nemotoyz *toyz);
+extern void nemotoyz_translate(struct nemotoyz *toyz, float tx, float ty);
+extern void nemotoyz_scale(struct nemotoyz *toyz, float sx, float sy);
+extern void nemotoyz_rotate(struct nemotoyz *toyz, float rz);
+extern void nemotoyz_concat(struct nemotoyz *toyz, struct toyzmatrix *matrix);
+extern void nemotoyz_matrix(struct nemotoyz *toyz, struct toyzmatrix *matrix);
+
 extern struct toyzstyle *nemotoyz_style_create(void);
 extern void nemotoyz_style_destroy(struct toyzstyle *style);
 extern void nemotoyz_style_set_type(struct toyzstyle *style, int type);
