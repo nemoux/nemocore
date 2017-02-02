@@ -7,11 +7,13 @@
 
 #include <stdarg.h>
 
+#include <nemotoyz.h>
 #include <nemotoyz.hpp>
 #include <toyzstyle.hpp>
 #include <toyzpath.hpp>
 #include <toyzmatrix.hpp>
 #include <toyzregion.hpp>
+#include <toyzpicture.hpp>
 #include <nemomisc.h>
 
 struct nemotoyz *nemotoyz_create(void)
@@ -23,22 +25,26 @@ struct nemotoyz *nemotoyz_create(void)
 	toyz->device = NULL;
 	toyz->canvas = NULL;
 
+	toyz->type = NEMOTOYZ_CANVAS_NONE_TYPE;
+
 	return toyz;
 }
 
 void nemotoyz_destroy(struct nemotoyz *toyz)
 {
-	if (toyz->bitmap != NULL)
-		delete toyz->bitmap;
-	if (toyz->device != NULL)
-		delete toyz->device;
-	if (toyz->canvas != NULL)
-		delete toyz->canvas;
+	if (toyz->type == NEMOTOYZ_CANVAS_BUFFER_TYPE) {
+		if (toyz->bitmap != NULL)
+			delete toyz->bitmap;
+		if (toyz->device != NULL)
+			delete toyz->device;
+		if (toyz->canvas != NULL)
+			delete toyz->canvas;
+	}
 
 	delete toyz;
 }
 
-int nemotoyz_attach_canvas(struct nemotoyz *toyz, int colortype, int alphatype, void *buffer, int width, int height)
+int nemotoyz_attach_buffer(struct nemotoyz *toyz, int colortype, int alphatype, void *buffer, int width, int height)
 {
 	static SkColorType colortypes[] = {
 		kN32_SkColorType
@@ -49,12 +55,14 @@ int nemotoyz_attach_canvas(struct nemotoyz *toyz, int colortype, int alphatype, 
 		kOpaque_SkAlphaType
 	};
 
-	if (toyz->bitmap != NULL)
-		delete toyz->bitmap;
-	if (toyz->device != NULL)
-		delete toyz->device;
-	if (toyz->canvas != NULL)
-		delete toyz->canvas;
+	if (toyz->type == NEMOTOYZ_CANVAS_BUFFER_TYPE) {
+		if (toyz->bitmap != NULL)
+			delete toyz->bitmap;
+		if (toyz->device != NULL)
+			delete toyz->device;
+		if (toyz->canvas != NULL)
+			delete toyz->canvas;
+	}
 
 	toyz->bitmap = new SkBitmap;
 	toyz->bitmap->setInfo(
@@ -68,28 +76,37 @@ int nemotoyz_attach_canvas(struct nemotoyz *toyz, int colortype, int alphatype, 
 	toyz->device = new SkBitmapDevice(*toyz->bitmap);
 	toyz->canvas = new SkCanvas(toyz->device);
 
+	toyz->type = NEMOTOYZ_CANVAS_BUFFER_TYPE;
+
 	return 0;
 }
 
-void nemotoyz_detach_canvas(struct nemotoyz *toyz)
+void nemotoyz_detach_buffer(struct nemotoyz *toyz)
 {
-	if (toyz->bitmap != NULL) {
+	if (toyz->bitmap != NULL)
 		delete toyz->bitmap;
-
-		toyz->bitmap = NULL;
-	}
-
-	if (toyz->device != NULL) {
+	if (toyz->device != NULL)
 		delete toyz->device;
-
-		toyz->device = NULL;
-	}
-
-	if (toyz->canvas != NULL) {
+	if (toyz->canvas != NULL)
 		delete toyz->canvas;
 
-		toyz->canvas = NULL;
-	}
+	toyz->type = NEMOTOYZ_CANVAS_NONE_TYPE;
+}
+
+int nemotoyz_attach_picture(struct nemotoyz *toyz, struct toyzpicture *picture, int width, int height)
+{
+	toyz->canvas = picture->recorder.beginRecording(width, height);
+
+	toyz->type = NEMOTOYZ_CANVAS_PICTURE_TYPE;
+
+	return 0;
+}
+
+void nemotoyz_detach_picture(struct nemotoyz *toyz, struct toyzpicture *picture)
+{
+	picture->picture = picture->recorder.finishRecordingAsPicture();
+
+	toyz->type = NEMOTOYZ_CANVAS_NONE_TYPE;
 }
 
 int nemotoyz_load_image(struct nemotoyz *toyz, const char *url)
@@ -299,4 +316,9 @@ void nemotoyz_draw_bitmap_with_alpha(struct nemotoyz *toyz, struct toyzstyle *st
 		toyz->canvas->drawBitmapRect(*bitmap->bitmap, rect, NULL);
 
 	toyz->canvas->restore();
+}
+
+void nemotoyz_draw_picture(struct nemotoyz *toyz, struct toyzpicture *picture)
+{
+	toyz->canvas->drawPicture(picture->picture);
 }

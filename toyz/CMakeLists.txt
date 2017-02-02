@@ -33,6 +33,7 @@ add_library(nemotoyz SHARED
 	toyzpath.cpp
 	toyzmatrix.cpp
 	toyzregion.cpp
+	toyzpicture.cpp
 	)
 
 TARGET_LINK_LIBRARIES(nemotoyz

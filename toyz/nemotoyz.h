@@ -10,6 +10,13 @@ NEMO_BEGIN_EXTERN_C
 #include <stdint.h>
 
 typedef enum {
+	NEMOTOYZ_CANVAS_NONE_TYPE = 0,
+	NEMOTOYZ_CANVAS_BUFFER_TYPE = 1,
+	NEMOTOYZ_CANVAS_PICTURE_TYPE = 2,
+	NEMOTOYZ_CANVAS_LAST_TYPE
+} NemoToyzCanvasType;
+
+typedef enum {
 	NEMOTOYZ_CANVAS_RGBA_COLOR = 0,
 	NEMOTOYZ_CANVAS_LAST_COLOR
 } NemoToyzCanvasColorType;
@@ -50,8 +57,10 @@ struct toyzregion;
 
 extern struct nemotoyz *nemotoyz_create(void);
 extern void nemotoyz_destroy(struct nemotoyz *toyz);
-extern int nemotoyz_attach_canvas(struct nemotoyz *toyz, int colortype, int alphatype, void *buffer, int width, int height);
-extern void nemotoyz_detach_canvas(struct nemotoyz *toyz);
+extern int nemotoyz_attach_buffer(struct nemotoyz *toyz, int colortype, int alphatype, void *buffer, int width, int height);
+extern void nemotoyz_detach_buffer(struct nemotoyz *toyz);
+extern int nemotoyz_attach_picture(struct nemotoyz *toyz, struct toyzpicture *picture, int width, int height);
+extern void nemotoyz_detach_picture(struct nemotoyz *toyz, struct toyzpicture *picture);
 
 extern int nemotoyz_load_image(struct nemotoyz *toyz, const char *url);
 
@@ -80,6 +89,7 @@ extern void nemotoyz_draw_polyline(struct nemotoyz *toyz, struct toyzstyle *styl
 extern void nemotoyz_draw_polygon(struct nemotoyz *toyz, struct toyzstyle *style, int npoints, ...);
 extern void nemotoyz_draw_bitmap(struct nemotoyz *toyz, struct toyzstyle *style, struct nemotoyz *bitmap, float x, float y, float w, float h);
 extern void nemotoyz_draw_bitmap_with_alpha(struct nemotoyz *toyz, struct toyzstyle *style, struct nemotoyz *bitmap, float x, float y, float w, float h, float alpha);
+extern void nemotoyz_draw_picture(struct nemotoyz *toyz, struct toyzpicture *picture);
 
 extern struct toyzstyle *nemotoyz_style_create(void);
 extern void nemotoyz_style_destroy(struct toyzstyle *style);
@@ -140,6 +150,9 @@ extern void nemotoyz_region_set_rectangle(struct toyzregion *region, float x, fl
 extern void nemotoyz_region_intersect(struct toyzregion *region, float x, float y, float w, float h);
 extern void nemotoyz_region_union(struct toyzregion *region, float x, float y, float w, float h);
 extern int nemotoyz_region_check_intersection(struct toyzregion *region, float x, float y, float w, float h);
+
+extern struct toyzpicture *nemotoyz_picture_create(void);
+extern void nemotoyz_picture_destroy(struct toyzpicture *picture);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
