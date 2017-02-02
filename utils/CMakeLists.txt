@@ -21,6 +21,8 @@ include_directories(
 	${CMAKE_SOURCE_DIR}/play
 	${CMAKE_SOURCE_DIR}/cook
 	${CMAKE_SOURCE_DIR}/action
+	${CMAKE_SOURCE_DIR}/motz
+	${CMAKE_SOURCE_DIR}/toyz
 	)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
@@ -92,6 +94,8 @@ TARGET_LINK_LIBRARIES(nemopix
 	nemocook
 	nemoaction
 	nemobus
+	nemomotz
+	nemotoyz
 	)
 
 INSTALL(TARGETS nemopix DESTINATION bin)

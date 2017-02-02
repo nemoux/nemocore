@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <nemotoyz.h>
 #include <toyzmatrix.hpp>
 #include <nemomisc.h>
 

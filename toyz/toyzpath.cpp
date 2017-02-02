@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <nemotoyz.h>
 #include <toyzpath.hpp>
 #include <nemomisc.h>
 

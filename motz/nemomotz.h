@@ -10,18 +10,21 @@ NEMO_BEGIN_EXTERN_C
 #include <stdint.h>
 
 #include <nemolist.h>
+#include <nemotoyz.h>
 
 struct nemomotz;
 struct motzone;
 
-typedef void (*nemomotz_one_draw_t)(struct motzone *one);
-typedef void (*nemomotz_one_down_t)(struct motzone *one, float x, float y);
-typedef void (*nemomotz_one_motion_t)(struct motzone *one, float x, float y);
-typedef void (*nemomotz_one_up_t)(struct motzone *one, float x, float y);
+typedef void (*nemomotz_one_draw_t)(struct nemomotz *motz, struct motzone *one);
+typedef void (*nemomotz_one_down_t)(struct nemomotz *motz, struct motzone *one, float x, float y);
+typedef void (*nemomotz_one_motion_t)(struct nemomotz *motz, struct motzone *one, float x, float y);
+typedef void (*nemomotz_one_up_t)(struct nemomotz *motz, struct motzone *one, float x, float y);
 typedef void (*nemomotz_one_destroy_t)(struct motzone *one);
 
 struct nemomotz {
 	struct nemolist one_list;
+
+	struct nemotoyz *toyz;
 };
 
 struct motzone {
@@ -37,17 +40,22 @@ struct motzone {
 extern struct nemomotz *nemomotz_create(void);
 extern void nemomotz_destroy(struct nemomotz *motz);
 
+extern int nemomotz_attach_buffer(struct nemomotz *motz, void *buffer, int width, int height);
+extern void nemomotz_detach_buffer(struct nemomotz *motz);
+
 extern void nemomotz_attach_one(struct nemomotz *motz, struct motzone *one);
 extern void nemomotz_detach_one(struct nemomotz *motz, struct motzone *one);
+
+extern void nemomotz_update(struct nemomotz *motz);
 
 extern struct motzone *nemomotz_one_create(void);
 extern int nemomotz_one_prepare(struct motzone *one);
 extern void nemomotz_one_finish(struct motzone *one);
 
-extern void nemomotz_one_draw_null(struct motzone *one);
-extern void nemomotz_one_down_null(struct motzone *one, float x, float y);
-extern void nemomotz_one_motion_null(struct motzone *one, float x, float y);
-extern void nemomotz_one_up_null(struct motzone *one, float x, float y);
+extern void nemomotz_one_draw_null(struct nemomotz *motz, struct motzone *one);
+extern void nemomotz_one_down_null(struct nemomotz *motz, struct motzone *one, float x, float y);
+extern void nemomotz_one_motion_null(struct nemomotz *motz, struct motzone *one, float x, float y);
+extern void nemomotz_one_up_null(struct nemomotz *motz, struct motzone *one, float x, float y);
 extern void nemomotz_one_destroy_null(struct motzone *one);
 
 static inline void nemomotz_one_set_draw_callback(struct motzone *one, nemomotz_one_draw_t draw)
@@ -58,9 +66,9 @@ static inline void nemomotz_one_set_draw_callback(struct motzone *one, nemomotz_
 		one->draw = nemomotz_one_draw_null;
 }
 
-static inline void nemomotz_one_draw(struct motzone *one)
+static inline void nemomotz_one_draw(struct nemomotz *motz, struct motzone *one)
 {
-	one->draw(one);
+	one->draw(motz, one);
 }
 
 static inline void nemomotz_one_set_down_callback(struct motzone *one, nemomotz_one_down_t down)
@@ -71,9 +79,9 @@ static inline void nemomotz_one_set_down_callback(struct motzone *one, nemomotz_
 		one->down = nemomotz_one_down_null;
 }
 
-static inline void nemomotz_one_down(struct motzone *one, float x, float y)
+static inline void nemomotz_one_down(struct nemomotz *motz, struct motzone *one, float x, float y)
 {
-	one->down(one, x, y);
+	one->down(motz, one, x, y);
 }
 
 static inline void nemomotz_one_set_motion_callback(struct motzone *one, nemomotz_one_motion_t motion)
@@ -84,9 +92,9 @@ static inline void nemomotz_one_set_motion_callback(struct motzone *one, nemomot
 		one->motion = nemomotz_one_motion_null;
 }
 
-static inline void nemomotz_one_motion(struct motzone *one, float x, float y)
+static inline void nemomotz_one_motion(struct nemomotz *motz, struct motzone *one, float x, float y)
 {
-	one->motion(one, x, y);
+	one->motion(motz, one, x, y);
 }
 
 static inline void nemomotz_one_set_up_callback(struct motzone *one, nemomotz_one_up_t up)
@@ -97,9 +105,9 @@ static inline void nemomotz_one_set_up_callback(struct motzone *one, nemomotz_on
 		one->up = nemomotz_one_up_null;
 }
 
-static inline void nemomotz_one_up(struct motzone *one, float x, float y)
+static inline void nemomotz_one_up(struct nemomotz *motz, struct motzone *one, float x, float y)
 {
-	one->up(one, x, y);
+	one->up(motz, one, x, y);
 }
 
 static inline void nemomotz_one_set_destroy_callback(struct motzone *one, nemomotz_one_destroy_t destroy)

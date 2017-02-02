@@ -7,6 +7,7 @@
 
 #include <stdarg.h>
 
+#include <nemotoyz.h>
 #include <toyzstyle.hpp>
 #include <toyzmatrix.hpp>
 #include <nemotoyz.hpp>

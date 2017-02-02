@@ -8,27 +8,29 @@
 #include <motzobject.h>
 #include <nemomisc.h>
 
-void nemomotz_object_draw(struct motzone *one)
+static void nemomotz_object_draw(struct nemomotz *motz, struct motzone *one)
 {
 }
 
-void nemomotz_object_down(struct motzone *one, float x, float y)
+static void nemomotz_object_down(struct nemomotz *motz, struct motzone *one, float x, float y)
 {
 }
 
-void nemomotz_object_motion(struct motzone *one, float x, float y)
+static void nemomotz_object_motion(struct nemomotz *motz, struct motzone *one, float x, float y)
 {
 }
 
-void nemomotz_object_up(struct motzone *one, float x, float y)
+static void nemomotz_object_up(struct nemomotz *motz, struct motzone *one, float x, float y)
 {
 }
 
-void nemomotz_object_destroy(struct motzone *one)
+static void nemomotz_object_destroy(struct motzone *one)
 {
 	struct motzobject *object = (struct motzobject *)container_of(one, struct motzobject, one);
 
 	nemomotz_one_finish(one);
+
+	nemotoyz_style_destroy(object->style);
 
 	free(object);
 }
@@ -52,6 +54,8 @@ struct motzone *nemomotz_object_create(void)
 	one->motion = nemomotz_object_motion;
 	one->up = nemomotz_object_up;
 	one->destroy = nemomotz_object_destroy;
+
+	object->style = nemotoyz_style_create();
 
 	return one;
 }

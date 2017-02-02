@@ -10,6 +10,8 @@
 #include <nemotool.h>
 #include <nemocanvas.h>
 
+#include <nemomotz.h>
+#include <motzobject.h>
 #include <nemobus.h>
 #include <nemojson.h>
 #include <nemoitem.h>
@@ -21,6 +23,7 @@ struct nemopix {
 	struct nemocanvas *canvas;
 	struct nemoaction *action;
 	struct nemobus *bus;
+	struct nemomotz *motz;
 
 	struct nemotimer *alive_timer;
 	int alive_timeout;
@@ -39,10 +42,10 @@ static void nemopix_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t wi
 	pix->width = width;
 	pix->height = height;
 
-	nemocanvas_set_size(pix->canvas, width, height);
+	nemocanvas_set_size(canvas, width, height);
 
 	if (pix->opaque != 0)
-		nemocanvas_opaque(pix->canvas, 0, 0, width, height);
+		nemocanvas_opaque(canvas, 0, 0, width, height);
 
 	nemocanvas_dispatch_frame(canvas);
 }
@@ -50,11 +53,22 @@ static void nemopix_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t wi
 static void nemopix_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t secs, uint32_t nsecs)
 {
 	struct nemopix *pix = (struct nemopix *)nemocanvas_get_userdata(canvas);
+	pixman_image_t *framebuffer;
 
-	nemocanvas_buffer(pix->canvas);
-	nemocanvas_damage(pix->canvas, 0, 0, pix->width, pix->height);
+	nemocanvas_buffer(canvas);
 
-	nemocanvas_commit(pix->canvas);
+	framebuffer = nemocanvas_get_pixman_image(canvas);
+	if (framebuffer != NULL) {
+		nemomotz_attach_buffer(pix->motz,
+				pixman_image_get_data(framebuffer),
+				pixman_image_get_width(framebuffer),
+				pixman_image_get_height(framebuffer));
+		nemomotz_update(pix->motz);
+		nemomotz_detach_buffer(pix->motz);
+	}
+
+	nemocanvas_damage(canvas, 0, 0, pix->width, pix->height);
+	nemocanvas_commit(canvas);
 }
 
 static int nemopix_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t type, struct nemoevent *event)
@@ -296,9 +310,14 @@ int main(int argc, char *argv[])
 				pix);
 	}
 
+	pix->motz = nemomotz_create();
+	nemomotz_attach_one(pix->motz, nemomotz_object_create());
+
 	nemocanvas_dispatch_frame(canvas);
 
 	nemotool_run(tool);
+
+	nemomotz_destroy(pix->motz);
 
 	if (pix->bus != NULL)
 		nemobus_destroy(pix->bus);

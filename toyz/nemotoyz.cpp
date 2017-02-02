@@ -22,7 +22,6 @@ struct nemotoyz *nemotoyz_create(void)
 
 	toyz = new nemotoyz;
 	toyz->bitmap = NULL;
-	toyz->device = NULL;
 	toyz->canvas = NULL;
 
 	toyz->type = NEMOTOYZ_CANVAS_NONE_TYPE;
@@ -35,8 +34,6 @@ void nemotoyz_destroy(struct nemotoyz *toyz)
 	if (toyz->type == NEMOTOYZ_CANVAS_BUFFER_TYPE) {
 		if (toyz->bitmap != NULL)
 			delete toyz->bitmap;
-		if (toyz->device != NULL)
-			delete toyz->device;
 		if (toyz->canvas != NULL)
 			delete toyz->canvas;
 	}
@@ -58,8 +55,6 @@ int nemotoyz_attach_buffer(struct nemotoyz *toyz, int colortype, int alphatype, 
 	if (toyz->type == NEMOTOYZ_CANVAS_BUFFER_TYPE) {
 		if (toyz->bitmap != NULL)
 			delete toyz->bitmap;
-		if (toyz->device != NULL)
-			delete toyz->device;
 		if (toyz->canvas != NULL)
 			delete toyz->canvas;
 	}
@@ -73,8 +68,7 @@ int nemotoyz_attach_buffer(struct nemotoyz *toyz, int colortype, int alphatype, 
 				alphatypes[alphatype]));
 	toyz->bitmap->setPixels(buffer);
 
-	toyz->device = new SkBitmapDevice(*toyz->bitmap);
-	toyz->canvas = new SkCanvas(toyz->device);
+	toyz->canvas = new SkCanvas(new SkBitmapDevice(*toyz->bitmap));
 
 	toyz->type = NEMOTOYZ_CANVAS_BUFFER_TYPE;
 
@@ -85,8 +79,6 @@ void nemotoyz_detach_buffer(struct nemotoyz *toyz)
 {
 	if (toyz->bitmap != NULL)
 		delete toyz->bitmap;
-	if (toyz->device != NULL)
-		delete toyz->device;
 	if (toyz->canvas != NULL)
 		delete toyz->canvas;
 

@@ -40,6 +40,7 @@ TARGET_LINK_LIBRARIES(nemotoyz
 	${PIXMAN_LIBRARIES}
 	${FREETYPE_LIBRARIES}
 	${HARFBUZZ_LIBRARIES}
+	${SKIA_LIBRARIES}
 	nemoasst
 	nemohelper
 	nemotool
@@ -51,7 +52,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/toyz/nemotoyz.h
 	)
 
-set(NEMOTOYZ_PKGCONFIG_REQUIRES "nemoasst nemohelper nemotool")
+set(NEMOTOYZ_PKGCONFIG_REQUIRES "nemoasst nemohelper nemotool pixman-1 freetype2 harfbuzz skia")
 
 configure_file(
 	nemotoyz.pc.in

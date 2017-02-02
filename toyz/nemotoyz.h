@@ -54,6 +54,7 @@ struct toyzstyle;
 struct toyzpath;
 struct toyzmatrix;
 struct toyzregion;
+struct toyzpicture;
 
 extern struct nemotoyz *nemotoyz_create(void);
 extern void nemotoyz_destroy(struct nemotoyz *toyz);

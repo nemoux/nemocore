@@ -16,6 +16,8 @@ NEMO_BEGIN_EXTERN_C
 struct motzobject {
 	struct motzone one;
 
+	struct toyzstyle *style;
+
 	float tx, ty;
 	float sx, sy;
 	float rz;
