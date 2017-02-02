@@ -13,6 +13,17 @@ NEMO_BEGIN_EXTERN_C
 
 #include <nemomotz.h>
 
+typedef enum {
+	NEMOMOTZ_OBJECT_FILL_FLAG = (1 << 0),
+	NEMOMOTZ_OBJECT_STROKE_FLAG = (1 << 1)
+} NemoMotzObjectFlag;
+
+typedef enum {
+	NEMOMOTZ_OBJECT_TRANSFORM_DIRTY = (1 << 0),
+	NEMOMOTZ_OBJECT_COLOR_DIRTY = (1 << 1),
+	NEMOMOTZ_OBJECT_THICKNESS_DIRTY = (1 << 2)
+} NemoMotzObjectDirty;
+
 struct motzobject {
 	struct motzone one;
 
@@ -22,21 +33,12 @@ struct motzobject {
 	float sx, sy;
 	float rz;
 
-	float r;
+	float x, y;
+	float w, h;
+	float radius;
 
-	struct {
-		float r, g, b, a;
-
-		int has;
-	} fill;
-
-	struct {
-		float r, g, b, a;
-
-		float w;
-
-		int has;
-	} stroke;
+	float r, g, b, a;
+	float thickness;
 };
 
 #define NEMOMOTZ_OBJECT(one)		((struct motzobject *)container_of(one, struct motzobject, one))
@@ -64,15 +66,6 @@ extern struct motzone *nemomotz_object_create(void);
 		struct motzobject *object = (struct motzobject *)container_of(one, struct motzobject, one);	\
 		strcpy(object->attr, attr);	\
 	}
-#define NEMOMOTZ_OBJECT_DECLARE_SET_COLOR(type, attr, name)	\
-	static inline void nemomotz_object_set_##name(struct motzone *one, type r, type g, type b, type a) {	\
-		struct motzobject *object = (struct motzobject *)container_of(one, struct motzobject, one);	\
-		object->attr.r = r;	\
-		object->attr.g = g;	\
-		object->attr.b = b;	\
-		object->attr.a = a;	\
-		object->attr.has = 1;	\
-	}
 
 NEMOMOTZ_OBJECT_DECLARE_SET_ATTRIBUTE(float, tx, tx);
 NEMOMOTZ_OBJECT_DECLARE_GET_ATTRIBUTE(float, tx, tx);
@@ -85,11 +78,27 @@ NEMOMOTZ_OBJECT_DECLARE_GET_ATTRIBUTE(float, sy, sy);
 NEMOMOTZ_OBJECT_DECLARE_SET_ATTRIBUTE(float, rz, rz);
 NEMOMOTZ_OBJECT_DECLARE_GET_ATTRIBUTE(float, rz, rz);
 
-NEMOMOTZ_OBJECT_DECLARE_SET_ATTRIBUTE(float, r, r);
-NEMOMOTZ_OBJECT_DECLARE_GET_ATTRIBUTE(float, r, r);
+NEMOMOTZ_OBJECT_DECLARE_SET_ATTRIBUTE(float, x, x);
+NEMOMOTZ_OBJECT_DECLARE_GET_ATTRIBUTE(float, x, x);
+NEMOMOTZ_OBJECT_DECLARE_SET_ATTRIBUTE(float, y, y);
+NEMOMOTZ_OBJECT_DECLARE_GET_ATTRIBUTE(float, y, y);
+NEMOMOTZ_OBJECT_DECLARE_SET_ATTRIBUTE(float, w, width);
+NEMOMOTZ_OBJECT_DECLARE_GET_ATTRIBUTE(float, w, width);
+NEMOMOTZ_OBJECT_DECLARE_SET_ATTRIBUTE(float, h, height);
+NEMOMOTZ_OBJECT_DECLARE_GET_ATTRIBUTE(float, h, height);
+NEMOMOTZ_OBJECT_DECLARE_SET_ATTRIBUTE(float, radius, radius);
+NEMOMOTZ_OBJECT_DECLARE_GET_ATTRIBUTE(float, radius, radius);
 
-NEMOMOTZ_OBJECT_DECLARE_SET_COLOR(float, fill, fill);
-NEMOMOTZ_OBJECT_DECLARE_SET_COLOR(float, stroke, stroke);
+NEMOMOTZ_OBJECT_DECLARE_SET_ATTRIBUTE(float, r, red);
+NEMOMOTZ_OBJECT_DECLARE_GET_ATTRIBUTE(float, r, red);
+NEMOMOTZ_OBJECT_DECLARE_SET_ATTRIBUTE(float, g, green);
+NEMOMOTZ_OBJECT_DECLARE_GET_ATTRIBUTE(float, g, green);
+NEMOMOTZ_OBJECT_DECLARE_SET_ATTRIBUTE(float, b, blue);
+NEMOMOTZ_OBJECT_DECLARE_GET_ATTRIBUTE(float, b, blue);
+NEMOMOTZ_OBJECT_DECLARE_SET_ATTRIBUTE(float, a, alpha);
+NEMOMOTZ_OBJECT_DECLARE_GET_ATTRIBUTE(float, a, alpha);
+NEMOMOTZ_OBJECT_DECLARE_SET_ATTRIBUTE(float, thickness, thickness);
+NEMOMOTZ_OBJECT_DECLARE_GET_ATTRIBUTE(float, thickness, thickness);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

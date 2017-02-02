@@ -34,6 +34,7 @@ struct motzone {
 	nemomotz_one_up_t up;
 	nemomotz_one_destroy_t destroy;
 
+	uint32_t flags;
 	uint32_t dirty;
 
 	struct nemolist link;
@@ -123,6 +124,26 @@ static inline void nemomotz_one_set_destroy_callback(struct motzone *one, nemomo
 static inline void nemomotz_one_destroy(struct motzone *one)
 {
 	one->destroy(one);
+}
+
+static inline void nemomotz_one_set_flags(struct motzone *one, uint32_t flags)
+{
+	one->flags |= flags;
+}
+
+static inline void nemomotz_one_put_flags(struct motzone *one, uint32_t flags)
+{
+	one->flags &= ~flags;
+}
+
+static inline int nemomotz_one_has_flags(struct motzone *one, uint32_t flags)
+{
+	return one->flags & flags;
+}
+
+static inline int nemomotz_one_has_flags_all(struct motzone *one, uint32_t flags)
+{
+	return (one->flags & flags) == flags;
 }
 
 static inline void nemomotz_one_set_dirty(struct motzone *one, uint32_t dirty)
