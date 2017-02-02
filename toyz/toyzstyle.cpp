@@ -5,7 +5,10 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <stdarg.h>
+
 #include <toyzstyle.hpp>
+#include <nemotoyz.hpp>
 #include <nemomisc.h>
 
 struct toyzstyle *nemotoyz_style_create(void)
@@ -155,4 +158,99 @@ void nemotoyz_style_put_image_filter(struct toyzstyle *style)
 void nemotoyz_style_put_path_effect(struct toyzstyle *style)
 {
 	style->paint->setPathEffect(NULL);
+}
+
+void nemotoyz_style_set_linear_gradient_shader(struct toyzstyle *style, float x0, float y0, float x1, float y1, int tilemode, int noffsets, ...)
+{
+	static const SkShader::TileMode tilemodes[] = {
+		SkShader::kClamp_TileMode,
+		SkShader::kRepeat_TileMode,
+		SkShader::kMirror_TileMode
+	};
+	SkPoint points[] = {
+		SkDoubleToScalar(x0),
+		SkDoubleToScalar(y0),
+		SkDoubleToScalar(x1),
+		SkDoubleToScalar(y1)
+	};
+	SkColor colors[noffsets];
+	SkScalar offsets[noffsets];
+	va_list vargs;
+	double r, g, b, a;
+	double off;
+	int i;
+
+	for (i = 0; i < noffsets; i++) {
+		r = va_arg(vargs, double);
+		g = va_arg(vargs, double);
+		b = va_arg(vargs, double);
+		a = va_arg(vargs, double);
+		off = va_arg(vargs, double);
+
+		colors[i] = SkColorSetARGB(a, r, g, b);
+		offsets[i] = off;
+	}
+
+	style->paint->setShader(
+			SkGradientShader::MakeLinear(
+				points,
+				colors,
+				offsets,
+				noffsets,
+				tilemodes[tilemode]));
+}
+
+void nemotoyz_style_set_radial_gradient_shader(struct toyzstyle *style, float x, float y, float radius, int tilemode, int noffsets, ...)
+{
+	static const SkShader::TileMode tilemodes[] = {
+		SkShader::kClamp_TileMode,
+		SkShader::kRepeat_TileMode,
+		SkShader::kMirror_TileMode
+	};
+	SkColor colors[noffsets];
+	SkScalar offsets[noffsets];
+	va_list vargs;
+	double r, g, b, a;
+	double off;
+	int i;
+
+	for (i = 0; i < noffsets; i++) {
+		r = va_arg(vargs, double);
+		g = va_arg(vargs, double);
+		b = va_arg(vargs, double);
+		a = va_arg(vargs, double);
+		off = va_arg(vargs, double);
+
+		colors[i] = SkColorSetARGB(a, r, g, b);
+		offsets[i] = off;
+	}
+
+	style->paint->setShader(
+			SkGradientShader::MakeRadial(
+				SkPoint::Make(x, y),
+				radius,
+				colors,
+				offsets,
+				noffsets,
+				tilemodes[tilemode]));
+}
+
+void nemotoyz_style_set_bitmap_shader(struct toyzstyle *style, struct nemotoyz *bitmap, int tilemodex, int tilemodey)
+{
+	static const SkShader::TileMode tilemodes[] = {
+		SkShader::kClamp_TileMode,
+		SkShader::kRepeat_TileMode,
+		SkShader::kMirror_TileMode
+	};
+
+	style->paint->setShader(
+			SkShader::MakeBitmapShader(
+				*bitmap->bitmap,
+				tilemodes[tilemodex],
+				tilemodes[tilemodey]));
+}
+
+void nemotoyz_style_put_shader(struct toyzstyle *style)
+{
+	style->paint->setShader(NULL);
 }

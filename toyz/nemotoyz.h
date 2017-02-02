@@ -81,6 +81,10 @@ extern void nemotoyz_style_set_path_effect(struct toyzstyle *style, float segmen
 extern void nemotoyz_style_put_mask_filter(struct toyzstyle *style);
 extern void nemotoyz_style_put_image_filter(struct toyzstyle *style);
 extern void nemotoyz_style_put_path_effect(struct toyzstyle *style);
+extern void nemotoyz_style_set_linear_gradient_shader(struct toyzstyle *style, float x0, float y0, float x1, float y1, int tilemode, int noffsets, ...);
+extern void nemotoyz_style_set_radial_gradient_shader(struct toyzstyle *style, float x, float y, float radius, int tilemode, int noffsets, ...);
+extern void nemotoyz_style_set_bitmap_shader(struct toyzstyle *style, struct nemotoyz *bitmap, int tilemodex, int tilemodey);
+extern void nemotoyz_style_put_shader(struct toyzstyle *style);
 
 extern struct toyzpath *nemotoyz_path_create(void);
 extern void nemotoyz_path_destroy(struct toyzpath *path);
