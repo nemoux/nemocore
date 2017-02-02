@@ -39,6 +39,8 @@ struct motzobject {
 	} stroke;
 };
 
+#define NEMOMOTZ_OBJECT(one)		((struct motzobject *)container_of(one, struct motzobject, one))
+
 extern struct motzone *nemomotz_object_create(void);
 
 #define NEMOMOTZ_OBJECT_DECLARE_SET_ATTRIBUTE(type, attr, name)	\

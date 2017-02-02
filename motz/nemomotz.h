@@ -34,6 +34,8 @@ struct motzone {
 	nemomotz_one_up_t up;
 	nemomotz_one_destroy_t destroy;
 
+	uint32_t dirty;
+
 	struct nemolist link;
 };
 
@@ -121,6 +123,26 @@ static inline void nemomotz_one_set_destroy_callback(struct motzone *one, nemomo
 static inline void nemomotz_one_destroy(struct motzone *one)
 {
 	one->destroy(one);
+}
+
+static inline void nemomotz_one_set_dirty(struct motzone *one, uint32_t dirty)
+{
+	one->dirty |= dirty;
+}
+
+static inline void nemomotz_one_put_dirty(struct motzone *one, uint32_t dirty)
+{
+	one->dirty &= ~dirty;
+}
+
+static inline int nemomotz_one_has_dirty(struct motzone *one, uint32_t dirty)
+{
+	return one->dirty & dirty;
+}
+
+static inline int nemomotz_one_has_dirty_all(struct motzone *one, uint32_t dirty)
+{
+	return (one->dirty & dirty) == dirty;
 }
 
 #ifdef __cplusplus
