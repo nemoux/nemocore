@@ -9,9 +9,7 @@
 
 #include <nemotool.h>
 #include <nemocanvas.h>
-#include <nemoegl.h>
 
-#include <nemocook.h>
 #include <nemobus.h>
 #include <nemojson.h>
 #include <nemoitem.h>
@@ -29,8 +27,6 @@ struct nemopix {
 
 	int width, height;
 	int opaque;
-
-	struct cookegl *egl;
 };
 
 static void nemopix_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t width, int32_t height)
@@ -43,12 +39,10 @@ static void nemopix_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t wi
 	pix->width = width;
 	pix->height = height;
 
-	nemocanvas_egl_resize(pix->canvas, width, height);
+	nemocanvas_set_size(pix->canvas, width, height);
 
 	if (pix->opaque != 0)
 		nemocanvas_opaque(pix->canvas, 0, 0, width, height);
-
-	nemocook_egl_resize(pix->egl, width, height);
 
 	nemocanvas_dispatch_frame(canvas);
 }
@@ -57,11 +51,10 @@ static void nemopix_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t se
 {
 	struct nemopix *pix = (struct nemopix *)nemocanvas_get_userdata(canvas);
 
-	nemocook_egl_make_current(pix->egl);
+	nemocanvas_buffer(pix->canvas);
+	nemocanvas_damage(pix->canvas, 0, 0, pix->width, pix->height);
 
-	nemocook_clear_color_buffer(0.0f, 0.0f, 0.0f, 0.0f);
-
-	nemocook_egl_swap_buffers(pix->egl);
+	nemocanvas_commit(pix->canvas);
 }
 
 static int nemopix_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t type, struct nemoevent *event)
@@ -195,7 +188,6 @@ int main(int argc, char *argv[])
 	struct nemotimer *timer;
 	struct nemocanvas *canvas;
 	struct nemoaction *action;
-	struct cookegl *egl;
 	char *fullscreenid = NULL;
 	char *contentpath = NULL;
 	char *busid = NULL;
@@ -250,9 +242,6 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	if (contentpath == NULL && busid == NULL)
-		return 0;
-
 	pix = (struct nemopix *)malloc(sizeof(struct nemopix));
 	if (pix == NULL)
 		return -1;
@@ -265,14 +254,14 @@ int main(int argc, char *argv[])
 
 	pix->tool = tool = nemotool_create();
 	nemotool_connect_wayland(tool, NULL);
-	nemotool_connect_egl(tool);
 
 	pix->alive_timer = timer = nemotimer_create(tool);
 	nemotimer_set_callback(timer, nemopix_dispatch_alive_timer);
 	nemotimer_set_userdata(timer, pix);
 	nemotimer_set_timeout(timer, pix->alive_timeout / 2);
 
-	pix->canvas = canvas = nemocanvas_egl_create(tool, width, height);
+	pix->canvas = canvas = nemocanvas_create(tool);
+	nemocanvas_set_size(canvas, width, height);
 	nemocanvas_set_nemosurface(canvas, "normal");
 	nemocanvas_set_dispatch_resize(canvas, nemopix_dispatch_canvas_resize);
 	nemocanvas_set_dispatch_frame(canvas, nemopix_dispatch_canvas_frame);
@@ -295,13 +284,6 @@ int main(int argc, char *argv[])
 	nemoaction_set_tap_callback(action, nemopix_dispatch_tap_event);
 	nemoaction_set_userdata(action, pix);
 
-	pix->egl = egl = nemocook_egl_create(
-			NTEGL_DISPLAY(tool),
-			NTEGL_CONTEXT(tool),
-			NTEGL_CONFIG(tool),
-			NTEGL_WINDOW(canvas));
-	nemocook_egl_resize(egl, width, height);
-
 	if (busid != NULL) {
 		pix->bus = nemobus_create();
 		nemobus_connect(pix->bus, NULL);
@@ -314,16 +296,14 @@ int main(int argc, char *argv[])
 				pix);
 	}
 
+	nemocanvas_dispatch_frame(canvas);
+
 	nemotool_run(tool);
 
 	if (pix->bus != NULL)
 		nemobus_destroy(pix->bus);
 
-	nemocook_egl_destroy(egl);
-
 	nemoaction_destroy(action);
-
-	nemocanvas_egl_destroy(canvas);
 
 	nemotimer_destroy(timer);
 
