@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <stdarg.h>
+
 #include <nemotoyz.hpp>
 #include <toyzstyle.hpp>
 #include <toyzpath.hpp>
@@ -90,12 +92,34 @@ void nemotoyz_detach_canvas(struct nemotoyz *toyz)
 	}
 }
 
+int nemotoyz_load_image(struct nemotoyz *toyz, const char *url)
+{
+	sk_sp<SkData> data(SkData::MakeFromFileName(url));
+	SkCodec *codec(SkCodec::NewFromData(data));
+	SkBitmap *bitmap = toyz->bitmap;
+
+	if (codec == NULL)
+		return -1;
+
+	SkImageInfo info = codec->getInfo().makeColorSpace(NULL);
+
+	bitmap->setInfo(info);
+	bitmap->allocPixels();
+
+	SkCodec::Result r = codec->getPixels(info, bitmap->getPixels(), bitmap->rowBytes());
+
+	if (r != SkCodec::kSuccess)
+		return -1;
+
+	return 0;
+}
+
 void nemotoyz_save(struct nemotoyz *toyz)
 {
 	toyz->canvas->save();
 }
 
-void nemotoyz_save_alpha(struct nemotoyz *toyz, float a)
+void nemotoyz_save_with_alpha(struct nemotoyz *toyz, float a)
 {
 	toyz->canvas->saveLayerAlpha(NULL, 0xff * a);
 }
@@ -158,4 +182,121 @@ void nemotoyz_clip_region(struct nemotoyz *toyz, struct toyzregion *region)
 void nemotoyz_clip_path(struct nemotoyz *toyz, struct toyzpath *path)
 {
 	toyz->canvas->clipPath(*path->path);
+}
+
+void nemotoyz_draw_line(struct nemotoyz *toyz, struct toyzstyle *style, float x, float y, float w, float h)
+{
+	toyz->canvas->drawLine(x, y, w, h, *style->paint);
+}
+
+void nemotoyz_draw_rect(struct nemotoyz *toyz, struct toyzstyle *style, float x, float y, float w, float h)
+{
+	SkRect rect = SkRect::MakeXYWH(x, y, w, h);
+
+	toyz->canvas->drawRect(rect, *style->paint);
+}
+
+void nemotoyz_draw_round_rect(struct nemotoyz *toyz, struct toyzstyle *style, float x, float y, float w, float h, float ox, float oy)
+{
+	SkRect rect = SkRect::MakeXYWH(x, y, w, h);
+
+	toyz->canvas->drawRoundRect(rect, ox, oy, *style->paint);
+}
+
+void nemotoyz_draw_circle(struct nemotoyz *toyz, struct toyzstyle *style, float x, float y, float r)
+{
+	toyz->canvas->drawCircle(x, y, r, *style->paint);
+}
+
+void nemotoyz_draw_arc(struct nemotoyz *toyz, struct toyzstyle *style, float x, float y, float w, float h, float from, float to)
+{
+	SkRect rect = SkRect::MakeXYWH(x, y, w, h);
+
+	toyz->canvas->drawArc(rect, from, to - from, false, *style->paint);
+}
+
+void nemotoyz_draw_path(struct nemotoyz *toyz, struct toyzstyle *style, struct toyzpath *path)
+{
+	toyz->canvas->drawPath(*path->path, *style->paint);
+}
+
+void nemotoyz_draw_points(struct nemotoyz *toyz, struct toyzstyle *style, int npoints, ...)
+{
+	SkPoint points[npoints];
+	va_list vargs;
+	int i;
+
+	va_start(vargs, npoints);
+
+	for (i = 0; i < npoints; i++) {
+		points[i].set(
+				va_arg(vargs, double),
+				va_arg(vargs, double));
+	}
+
+	va_end(vargs);
+
+	toyz->canvas->drawPoints(SkCanvas::kPoints_PointMode, npoints, points, *style->paint);
+}
+
+void nemotoyz_draw_polyline(struct nemotoyz *toyz, struct toyzstyle *style, int npoints, ...)
+{
+	SkPoint points[npoints];
+	va_list vargs;
+	int i;
+
+	va_start(vargs, npoints);
+
+	for (i = 0; i < npoints; i++) {
+		points[i].set(
+				va_arg(vargs, double),
+				va_arg(vargs, double));
+	}
+
+	va_end(vargs);
+
+	toyz->canvas->drawPoints(SkCanvas::kLines_PointMode, npoints, points, *style->paint);
+}
+
+void nemotoyz_draw_polygon(struct nemotoyz *toyz, struct toyzstyle *style, int npoints, ...)
+{
+	SkPoint points[npoints];
+	va_list vargs;
+	int i;
+
+	va_start(vargs, npoints);
+
+	for (i = 0; i < npoints; i++) {
+		points[i].set(
+				va_arg(vargs, double),
+				va_arg(vargs, double));
+	}
+
+	va_end(vargs);
+
+	toyz->canvas->drawPoints(SkCanvas::kPolygon_PointMode, npoints, points, *style->paint);
+}
+
+void nemotoyz_draw_bitmap(struct nemotoyz *toyz, struct toyzstyle *style, struct nemotoyz *bitmap, float x, float y, float w, float h)
+{
+	SkRect rect = SkRect::MakeXYWH(x, y, w, h);
+
+	if (style != NULL)
+		toyz->canvas->drawBitmapRect(*bitmap->bitmap, rect, style->paint);
+	else
+		toyz->canvas->drawBitmapRect(*bitmap->bitmap, rect, NULL);
+}
+
+void nemotoyz_draw_bitmap_with_alpha(struct nemotoyz *toyz, struct toyzstyle *style, struct nemotoyz *bitmap, float x, float y, float w, float h, float alpha)
+{
+	SkRect rect = SkRect::MakeXYWH(x, y, w, h);
+
+	toyz->canvas->saveLayerAlpha(&rect, 0xff * alpha);
+
+	if (style != NULL)
+		toyz->canvas->drawBitmapRect(*bitmap->bitmap, rect, style->paint);
+	else
+		toyz->canvas->drawBitmapRect(*bitmap->bitmap, rect, NULL);
+
+	toyz->canvas->restore();
 }

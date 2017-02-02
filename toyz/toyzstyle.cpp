@@ -180,6 +180,8 @@ void nemotoyz_style_set_linear_gradient_shader(struct toyzstyle *style, float x0
 	double off;
 	int i;
 
+	va_start(vargs, noffsets);
+
 	for (i = 0; i < noffsets; i++) {
 		r = va_arg(vargs, double);
 		g = va_arg(vargs, double);
@@ -190,6 +192,8 @@ void nemotoyz_style_set_linear_gradient_shader(struct toyzstyle *style, float x0
 		colors[i] = SkColorSetARGB(a, r, g, b);
 		offsets[i] = off;
 	}
+
+	va_end(vargs);
 
 	style->paint->setShader(
 			SkGradientShader::MakeLinear(
@@ -214,6 +218,8 @@ void nemotoyz_style_set_radial_gradient_shader(struct toyzstyle *style, float x,
 	double off;
 	int i;
 
+	va_start(vargs, noffsets);
+
 	for (i = 0; i < noffsets; i++) {
 		r = va_arg(vargs, double);
 		g = va_arg(vargs, double);
@@ -224,6 +230,8 @@ void nemotoyz_style_set_radial_gradient_shader(struct toyzstyle *style, float x,
 		colors[i] = SkColorSetARGB(a, r, g, b);
 		offsets[i] = off;
 	}
+
+	va_end(vargs);
 
 	style->paint->setShader(
 			SkGradientShader::MakeRadial(

@@ -51,8 +51,10 @@ extern void nemotoyz_destroy(struct nemotoyz *toyz);
 extern int nemotoyz_attach_canvas(struct nemotoyz *toyz, int colortype, int alphatype, void *buffer, int width, int height);
 extern void nemotoyz_detach_canvas(struct nemotoyz *toyz);
 
+extern int nemotoyz_load_image(struct nemotoyz *toyz, const char *url);
+
 extern void nemotoyz_save(struct nemotoyz *toyz);
-extern void nemotoyz_save_alpha(struct nemotoyz *toyz, float a);
+extern void nemotoyz_save_with_alpha(struct nemotoyz *toyz, float a);
 extern void nemotoyz_restore(struct nemotoyz *toyz);
 extern void nemotoyz_clear(struct nemotoyz *toyz);
 extern void nemotoyz_clear_color(struct nemotoyz *toyz, float r, float g, float b, float a);
@@ -65,6 +67,17 @@ extern void nemotoyz_matrix(struct nemotoyz *toyz, struct toyzmatrix *matrix);
 extern void nemotoyz_clip_rectangle(struct nemotoyz *toyz, float x, float y, float w, float h);
 extern void nemotoyz_clip_region(struct nemotoyz *toyz, struct toyzregion *region);
 extern void nemotoyz_clip_path(struct nemotoyz *toyz, struct toyzpath *path);
+extern void nemotoyz_draw_line(struct nemotoyz *toyz, struct toyzstyle *style, float x, float y, float w, float h);
+extern void nemotoyz_draw_rect(struct nemotoyz *toyz, struct toyzstyle *style, float x, float y, float w, float h);
+extern void nemotoyz_draw_round_rect(struct nemotoyz *toyz, struct toyzstyle *style, float x, float y, float w, float h, float ox, float oy);
+extern void nemotoyz_draw_circle(struct nemotoyz *toyz, struct toyzstyle *style, float x, float y, float r);
+extern void nemotoyz_draw_arc(struct nemotoyz *toyz, struct toyzstyle *style, float x, float y, float w, float h, float from, float to);
+extern void nemotoyz_draw_path(struct nemotoyz *toyz, struct toyzstyle *style, struct toyzpath *path);
+extern void nemotoyz_draw_points(struct nemotoyz *toyz, struct toyzstyle *style, int npoints, ...);
+extern void nemotoyz_draw_polyline(struct nemotoyz *toyz, struct toyzstyle *style, int npoints, ...);
+extern void nemotoyz_draw_polygon(struct nemotoyz *toyz, struct toyzstyle *style, int npoints, ...);
+extern void nemotoyz_draw_bitmap(struct nemotoyz *toyz, struct toyzstyle *style, struct nemotoyz *bitmap, float x, float y, float w, float h);
+extern void nemotoyz_draw_bitmap_with_alpha(struct nemotoyz *toyz, struct toyzstyle *style, struct nemotoyz *bitmap, float x, float y, float w, float h, float alpha);
 
 extern struct toyzstyle *nemotoyz_style_create(void);
 extern void nemotoyz_style_destroy(struct toyzstyle *style);
