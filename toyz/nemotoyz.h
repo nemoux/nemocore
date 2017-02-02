@@ -45,6 +45,8 @@ typedef enum {
 struct nemotoyz;
 struct toyzstyle;
 struct toyzpath;
+struct toyzmatrix;
+struct toyzregion;
 
 extern struct nemotoyz *nemotoyz_create(void);
 extern void nemotoyz_destroy(struct nemotoyz *toyz);
@@ -98,6 +100,7 @@ extern void nemotoyz_style_set_linear_gradient_shader(struct toyzstyle *style, f
 extern void nemotoyz_style_set_radial_gradient_shader(struct toyzstyle *style, float x, float y, float radius, int tilemode, int noffsets, ...);
 extern void nemotoyz_style_set_bitmap_shader(struct toyzstyle *style, struct nemotoyz *bitmap, int tilemodex, int tilemodey);
 extern void nemotoyz_style_put_shader(struct toyzstyle *style);
+extern void nemotoyz_style_transform_shader(struct toyzstyle *style, struct toyzmatrix *matrix);
 
 extern struct toyzpath *nemotoyz_path_create(void);
 extern void nemotoyz_path_destroy(struct toyzpath *path);

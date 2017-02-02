@@ -8,6 +8,7 @@
 #include <stdarg.h>
 
 #include <toyzstyle.hpp>
+#include <toyzmatrix.hpp>
 #include <nemotoyz.hpp>
 #include <nemomisc.h>
 
@@ -261,4 +262,14 @@ void nemotoyz_style_set_bitmap_shader(struct toyzstyle *style, struct nemotoyz *
 void nemotoyz_style_put_shader(struct toyzstyle *style)
 {
 	style->paint->setShader(NULL);
+}
+
+void nemotoyz_style_transform_shader(struct toyzstyle *style, struct toyzmatrix *matrix)
+{
+	SkShader *shader;
+
+	shader = style->paint->getShader();
+	if (shader != NULL)
+		style->paint->setShader(
+				shader->makeWithLocalMatrix(*matrix->matrix));
 }
