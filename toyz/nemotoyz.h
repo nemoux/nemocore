@@ -153,6 +153,8 @@ extern int nemotoyz_region_check_intersection(struct toyzregion *region, float x
 
 extern struct toyzpicture *nemotoyz_picture_create(void);
 extern void nemotoyz_picture_destroy(struct toyzpicture *picture);
+extern void nemotoyz_picture_save(struct toyzpicture *picture, const char *url);
+extern void nemotoyz_picture_load(struct toyzpicture *picture, const char *url);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
