@@ -19,9 +19,9 @@ typedef enum {
 } NemoMotzObjectFlag;
 
 typedef enum {
-	NEMOMOTZ_OBJECT_TRANSFORM_DIRTY = (1 << 0),
-	NEMOMOTZ_OBJECT_COLOR_DIRTY = (1 << 1),
-	NEMOMOTZ_OBJECT_THICKNESS_DIRTY = (1 << 2)
+	NEMOMOTZ_OBJECT_TRANSFORM_DIRTY = (1 << 8),
+	NEMOMOTZ_OBJECT_COLOR_DIRTY = (1 << 9),
+	NEMOMOTZ_OBJECT_THICKNESS_DIRTY = (1 << 10)
 } NemoMotzObjectDirty;
 
 struct motzobject {

@@ -12,6 +12,10 @@ NEMO_BEGIN_EXTERN_C
 #include <nemolist.h>
 #include <nemotoyz.h>
 
+typedef enum {
+	NEMOMOTZ_ONE_FLAGS_DIRTY = (1 << 0)
+} NemoMotzOneDirty;
+
 struct nemomotz;
 struct motzone;
 
@@ -126,26 +130,6 @@ static inline void nemomotz_one_destroy(struct motzone *one)
 	one->destroy(one);
 }
 
-static inline void nemomotz_one_set_flags(struct motzone *one, uint32_t flags)
-{
-	one->flags |= flags;
-}
-
-static inline void nemomotz_one_put_flags(struct motzone *one, uint32_t flags)
-{
-	one->flags &= ~flags;
-}
-
-static inline int nemomotz_one_has_flags(struct motzone *one, uint32_t flags)
-{
-	return one->flags & flags;
-}
-
-static inline int nemomotz_one_has_flags_all(struct motzone *one, uint32_t flags)
-{
-	return (one->flags & flags) == flags;
-}
-
 static inline void nemomotz_one_set_dirty(struct motzone *one, uint32_t dirty)
 {
 	one->dirty |= dirty;
@@ -164,6 +148,30 @@ static inline int nemomotz_one_has_dirty(struct motzone *one, uint32_t dirty)
 static inline int nemomotz_one_has_dirty_all(struct motzone *one, uint32_t dirty)
 {
 	return (one->dirty & dirty) == dirty;
+}
+
+static inline void nemomotz_one_set_flags(struct motzone *one, uint32_t flags)
+{
+	one->flags |= flags;
+
+	nemomotz_one_set_dirty(one, NEMOMOTZ_ONE_FLAGS_DIRTY);
+}
+
+static inline void nemomotz_one_put_flags(struct motzone *one, uint32_t flags)
+{
+	one->flags &= ~flags;
+
+	nemomotz_one_set_dirty(one, NEMOMOTZ_ONE_FLAGS_DIRTY);
+}
+
+static inline int nemomotz_one_has_flags(struct motzone *one, uint32_t flags)
+{
+	return one->flags & flags;
+}
+
+static inline int nemomotz_one_has_flags_all(struct motzone *one, uint32_t flags)
+{
+	return (one->flags & flags) == flags;
 }
 
 #ifdef __cplusplus
