@@ -45,6 +45,8 @@ struct motzone {
 	uint32_t dirty;
 
 	struct nemolist link;
+
+	struct nemolist one_list;
 };
 
 extern struct nemomotz *nemomotz_create(void);
@@ -61,6 +63,9 @@ extern void nemomotz_update(struct nemomotz *motz);
 extern struct motzone *nemomotz_one_create(void);
 extern int nemomotz_one_prepare(struct motzone *one);
 extern void nemomotz_one_finish(struct motzone *one);
+
+extern void nemomotz_one_attach_one(struct motzone *one, struct motzone *child);
+extern void nemomotz_one_detach_one(struct motzone *one, struct motzone *child);
 
 extern void nemomotz_one_draw_null(struct nemomotz *motz, struct motzone *one);
 extern void nemomotz_one_down_null(struct nemomotz *motz, struct motzone *one, float x, float y);

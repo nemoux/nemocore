@@ -100,6 +100,7 @@ void nemomotz_one_update_null(struct motzone *one)
 void nemomotz_one_destroy_null(struct motzone *one)
 {
 	nemolist_remove(&one->link);
+	nemolist_remove(&one->one_list);
 
 	free(one);
 }
@@ -114,6 +115,7 @@ struct motzone *nemomotz_one_create(void)
 	memset(one, 0, sizeof(struct motzone));
 
 	nemolist_init(&one->link);
+	nemolist_init(&one->one_list);
 
 	one->draw = nemomotz_one_draw_null;
 	one->down = nemomotz_one_down_null;
@@ -128,6 +130,7 @@ struct motzone *nemomotz_one_create(void)
 int nemomotz_one_prepare(struct motzone *one)
 {
 	nemolist_init(&one->link);
+	nemolist_init(&one->one_list);
 
 	one->draw = nemomotz_one_draw_null;
 	one->down = nemomotz_one_down_null;
@@ -142,4 +145,16 @@ int nemomotz_one_prepare(struct motzone *one)
 void nemomotz_one_finish(struct motzone *one)
 {
 	nemolist_remove(&one->link);
+	nemolist_remove(&one->one_list);
+}
+
+void nemomotz_one_attach_one(struct motzone *one, struct motzone *child)
+{
+	nemolist_insert_tail(&one->one_list, &child->link);
+}
+
+void nemomotz_one_detach_one(struct motzone *one, struct motzone *child)
+{
+	nemolist_remove(&child->link);
+	nemolist_init(&child->link);
 }
