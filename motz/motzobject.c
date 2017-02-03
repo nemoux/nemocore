@@ -24,6 +24,10 @@ static void nemomotz_object_up(struct nemomotz *motz, struct motzone *one, float
 {
 }
 
+static void nemomotz_object_update(struct motzone *one)
+{
+}
+
 static void nemomotz_object_destroy(struct motzone *one)
 {
 	struct motzobject *object = (struct motzobject *)container_of(one, struct motzobject, one);
@@ -53,6 +57,7 @@ struct motzone *nemomotz_object_create(void)
 	one->down = nemomotz_object_down;
 	one->motion = nemomotz_object_motion;
 	one->up = nemomotz_object_up;
+	one->update = nemomotz_object_update;
 	one->destroy = nemomotz_object_destroy;
 
 	object->style = nemotoyz_style_create();
