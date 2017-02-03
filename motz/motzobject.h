@@ -22,7 +22,7 @@ typedef enum {
 typedef enum {
 	NEMOMOTZ_OBJECT_TRANSFORM_DIRTY = (1 << 8),
 	NEMOMOTZ_OBJECT_COLOR_DIRTY = (1 << 9),
-	NEMOMOTZ_OBJECT_THICKNESS_DIRTY = (1 << 10)
+	NEMOMOTZ_OBJECT_STROKE_WIDTH_DIRTY = (1 << 10)
 } NemoMotzObjectDirty;
 
 struct motzobject {
@@ -40,7 +40,8 @@ struct motzobject {
 	float radius;
 
 	float r, g, b, a;
-	float thickness;
+
+	float stroke_width;
 };
 
 #define NEMOMOTZ_OBJECT(one)		((struct motzobject *)container_of(one, struct motzobject, one))
@@ -109,8 +110,8 @@ NEMOMOTZ_OBJECT_DECLARE_SET_ATTRIBUTE(float, b, blue, NEMOMOTZ_OBJECT_COLOR_DIRT
 NEMOMOTZ_OBJECT_DECLARE_GET_ATTRIBUTE(float, b, blue);
 NEMOMOTZ_OBJECT_DECLARE_SET_ATTRIBUTE(float, a, alpha, NEMOMOTZ_OBJECT_COLOR_DIRTY);
 NEMOMOTZ_OBJECT_DECLARE_GET_ATTRIBUTE(float, a, alpha);
-NEMOMOTZ_OBJECT_DECLARE_SET_ATTRIBUTE(float, thickness, thickness, NEMOMOTZ_OBJECT_THICKNESS_DIRTY);
-NEMOMOTZ_OBJECT_DECLARE_GET_ATTRIBUTE(float, thickness, thickness);
+NEMOMOTZ_OBJECT_DECLARE_SET_ATTRIBUTE(float, stroke_width, stroke_width, NEMOMOTZ_OBJECT_STROKE_WIDTH_DIRTY);
+NEMOMOTZ_OBJECT_DECLARE_GET_ATTRIBUTE(float, stroke_width, stroke_width);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

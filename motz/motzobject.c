@@ -36,6 +36,18 @@ static void nemomotz_object_update(struct motzone *one)
 		else if (nemomotz_one_has_flags(one, NEMOMOTZ_OBJECT_STROKE_FLAG) != 0)
 			nemotoyz_style_set_type(object->style, NEMOTOYZ_STYLE_STROKE_TYPE);
 	}
+
+	if (nemomotz_one_has_dirty(one, NEMOMOTZ_OBJECT_TRANSFORM_DIRTY) != 0) {
+		nemotoyz_matrix_identity(object->matrix);
+		nemotoyz_matrix_rotate(object->matrix, object->rz);
+		nemotoyz_matrix_scale(object->matrix, object->sx, object->sy);
+		nemotoyz_matrix_translate(object->matrix, object->tx, object->ty);
+	}
+
+	if (nemomotz_one_has_dirty(one, NEMOMOTZ_OBJECT_COLOR_DIRTY) != 0)
+		nemotoyz_style_set_color(object->style, object->r, object->g, object->b, object->a);
+	if (nemomotz_one_has_dirty(one, NEMOMOTZ_OBJECT_STROKE_WIDTH_DIRTY) != 0)
+		nemotoyz_style_set_stroke_width(object->style, object->stroke_width);
 }
 
 static void nemomotz_object_destroy(struct motzone *one)
