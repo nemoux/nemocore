@@ -25,6 +25,16 @@ typedef enum {
 	NEMOMOTZ_OBJECT_STROKE_WIDTH_DIRTY = (1 << 10)
 } NemoMotzObjectDirty;
 
+typedef enum {
+	NEMOMOTZ_OBJECT_NONE_SHAPE = 0,
+	NEMOMOTZ_OBJECT_LINE_SHAPE = 1,
+	NEMOMOTZ_OBJECT_RECT_SHAPE = 2,
+	NEMOMOTZ_OBJECT_ROUND_RECT_SHAPE = 3,
+	NEMOMOTZ_OBJECT_CIRCLE_SHAPE = 4,
+	NEMOMOTZ_OBJECT_ARC_SHAPE = 5,
+	NEMOMOTZ_OBJECT_LAST_SHAPE
+} NemoMotzObjectShape;
+
 struct motzobject {
 	struct motzone one;
 
@@ -47,6 +57,8 @@ struct motzobject {
 #define NEMOMOTZ_OBJECT(one)		((struct motzobject *)container_of(one, struct motzobject, one))
 
 extern struct motzone *nemomotz_object_create(void);
+
+extern void nemomotz_object_set_shape(struct motzone *one, int shape);
 
 #define NEMOMOTZ_OBJECT_DECLARE_SET_ATTRIBUTE(type, attr, name, dirty)	\
 	static inline void nemomotz_object_set_##name(struct motzone *one, type attr) {	\
