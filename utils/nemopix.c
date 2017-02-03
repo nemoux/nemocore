@@ -202,12 +202,14 @@ int main(int argc, char *argv[])
 	struct nemotimer *timer;
 	struct nemocanvas *canvas;
 	struct nemoaction *action;
+	struct nemomotz *motz;
+	struct motzone *one;
 	char *fullscreenid = NULL;
 	char *contentpath = NULL;
 	char *busid = NULL;
 	char *layer = NULL;
-	int width = 1920;
-	int height = 1080;
+	int width = 500;
+	int height = 500;
 	int opaque = 1;
 	int alive = 0;
 	int opt;
@@ -310,8 +312,21 @@ int main(int argc, char *argv[])
 				pix);
 	}
 
-	pix->motz = nemomotz_create();
-	nemomotz_attach_one(pix->motz, nemomotz_object_create());
+	pix->motz = motz = nemomotz_create();
+
+	one = nemomotz_object_create();
+	nemomotz_object_set_shape(one, NEMOMOTZ_OBJECT_RECT_SHAPE);
+	nemomotz_object_set_x(one, 50.0f);
+	nemomotz_object_set_y(one, 50.0f);
+	nemomotz_object_set_width(one, 150.0f);
+	nemomotz_object_set_height(one, 150.0f);
+	nemomotz_object_set_red(one, 0.0f);
+	nemomotz_object_set_green(one, 255.0f);
+	nemomotz_object_set_blue(one, 255.0f);
+	nemomotz_object_set_alpha(one, 255.0f);
+	nemomotz_object_set_stroke_width(one, 5.0f);
+	nemomotz_one_set_flags(one, NEMOMOTZ_OBJECT_STROKE_FLAG);
+	nemomotz_attach_one(motz, one);
 
 	nemocanvas_dispatch_frame(canvas);
 
