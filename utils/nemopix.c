@@ -328,6 +328,7 @@ int main(int argc, char *argv[])
 	nemomotz_object_set_blue(one, 255.0f);
 	nemomotz_object_set_alpha(one, 255.0f);
 	nemomotz_object_set_stroke_width(one, 5.0f);
+	nemomotz_object_set_sx(one, 1.5f);
 	nemomotz_one_set_flags(one, NEMOMOTZ_OBJECT_STROKE_FLAG);
 	nemomotz_attach_one(motz, one);
 

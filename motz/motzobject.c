@@ -66,7 +66,18 @@ static void nemomotz_object_draw(struct nemomotz *motz, struct motzone *one)
 
 	struct motzobject *object = NEMOMOTZ_OBJECT(one);
 
-	draws[object->shape](motz, one);
+	if (nemomotz_one_has_flags(one, NEMOMOTZ_OBJECT_TRANSFORM_FLAG) != 0) {
+		struct nemotoyz *toyz = motz->toyz;
+
+		nemotoyz_save(toyz);
+		nemotoyz_concat(toyz, object->matrix);
+
+		draws[object->shape](motz, one);
+
+		nemotoyz_restore(toyz);
+	} else {
+		draws[object->shape](motz, one);
+	}
 }
 
 static void nemomotz_object_down(struct nemomotz *motz, struct motzone *one, float x, float y)
@@ -96,9 +107,9 @@ static void nemomotz_object_update(struct motzone *one)
 
 	if (nemomotz_one_has_dirty(one, NEMOMOTZ_OBJECT_TRANSFORM_DIRTY) != 0) {
 		nemotoyz_matrix_identity(object->matrix);
-		nemotoyz_matrix_rotate(object->matrix, object->rz);
-		nemotoyz_matrix_scale(object->matrix, object->sx, object->sy);
-		nemotoyz_matrix_translate(object->matrix, object->tx, object->ty);
+		nemotoyz_matrix_post_rotate(object->matrix, object->rz);
+		nemotoyz_matrix_post_scale(object->matrix, object->sx, object->sy);
+		nemotoyz_matrix_post_translate(object->matrix, object->tx, object->ty);
 	}
 
 	if (nemomotz_one_has_dirty(one, NEMOMOTZ_OBJECT_COLOR_DIRTY) != 0)
@@ -142,6 +153,9 @@ struct motzone *nemomotz_object_create(void)
 
 	object->style = nemotoyz_style_create();
 	object->matrix = nemotoyz_matrix_create();
+
+	object->sx = 1.0f;
+	object->sy = 1.0f;
 
 	return one;
 }
