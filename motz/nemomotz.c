@@ -40,8 +40,25 @@ void nemomotz_destroy(struct nemomotz *motz)
 	free(motz);
 }
 
+void nemomotz_set_size(struct nemomotz *motz, int width, int height)
+{
+	motz->width = width;
+	motz->height = height;
+}
+
+void nemomotz_update(struct nemomotz *motz)
+{
+	struct motzone *one;
+
+	nemolist_for_each(one, &motz->one_list, link)
+		nemomotz_one_update(one);
+}
+
 int nemomotz_attach_buffer(struct nemomotz *motz, void *buffer, int width, int height)
 {
+	motz->viewport.width = width;
+	motz->viewport.height = height;
+
 	return nemotoyz_attach_buffer(motz->toyz,
 			NEMOTOYZ_CANVAS_RGBA_COLOR,
 			NEMOTOYZ_CANVAS_PREMUL_ALPHA,
@@ -55,6 +72,24 @@ void nemomotz_detach_buffer(struct nemomotz *motz)
 	nemotoyz_detach_buffer(motz->toyz);
 }
 
+void nemomotz_update_buffer(struct nemomotz *motz)
+{
+	struct nemotoyz *toyz = motz->toyz;
+	struct motzone *one;
+
+	nemotoyz_save(toyz);
+
+	if (motz->width != motz->viewport.width || motz->height != motz->viewport.height)
+		nemotoyz_scale(toyz,
+				(float)motz->viewport.width / (float)motz->width,
+				(float)motz->viewport.height / (float)motz->height);
+
+	nemolist_for_each(one, &motz->one_list, link)
+		nemomotz_one_draw(motz, one);
+
+	nemotoyz_restore(toyz);
+}
+
 void nemomotz_attach_one(struct nemomotz *motz, struct motzone *one)
 {
 	nemolist_insert_tail(&motz->one_list, &one->link);
@@ -64,17 +99,6 @@ void nemomotz_detach_one(struct nemomotz *motz, struct motzone *one)
 {
 	nemolist_remove(&one->link);
 	nemolist_init(&one->link);
-}
-
-void nemomotz_update(struct nemomotz *motz)
-{
-	struct motzone *one;
-
-	nemolist_for_each(one, &motz->one_list, link) {
-		nemomotz_one_update(one);
-
-		nemomotz_one_draw(motz, one);
-	}
 }
 
 void nemomotz_one_draw_null(struct nemomotz *motz, struct motzone *one)

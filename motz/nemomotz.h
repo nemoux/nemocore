@@ -31,6 +31,12 @@ struct nemomotz {
 	struct nemolist one_list;
 
 	struct nemotoyz *toyz;
+
+	int width, height;
+
+	struct {
+		int width, height;
+	} viewport;
 };
 
 struct motzone {
@@ -52,13 +58,16 @@ struct motzone {
 extern struct nemomotz *nemomotz_create(void);
 extern void nemomotz_destroy(struct nemomotz *motz);
 
+extern void nemomotz_set_size(struct nemomotz *motz, int width, int height);
+
+extern void nemomotz_update(struct nemomotz *motz);
+
 extern int nemomotz_attach_buffer(struct nemomotz *motz, void *buffer, int width, int height);
 extern void nemomotz_detach_buffer(struct nemomotz *motz);
+extern void nemomotz_update_buffer(struct nemomotz *motz);
 
 extern void nemomotz_attach_one(struct nemomotz *motz, struct motzone *one);
 extern void nemomotz_detach_one(struct nemomotz *motz, struct motzone *one);
-
-extern void nemomotz_update(struct nemomotz *motz);
 
 extern struct motzone *nemomotz_one_create(void);
 extern int nemomotz_one_prepare(struct motzone *one);

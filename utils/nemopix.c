@@ -55,6 +55,8 @@ static void nemopix_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t se
 	struct nemopix *pix = (struct nemopix *)nemocanvas_get_userdata(canvas);
 	pixman_image_t *framebuffer;
 
+	nemomotz_update(pix->motz);
+
 	nemocanvas_buffer(canvas);
 
 	framebuffer = nemocanvas_get_pixman_image(canvas);
@@ -63,7 +65,7 @@ static void nemopix_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t se
 				pixman_image_get_data(framebuffer),
 				pixman_image_get_width(framebuffer),
 				pixman_image_get_height(framebuffer));
-		nemomotz_update(pix->motz);
+		nemomotz_update_buffer(pix->motz);
 		nemomotz_detach_buffer(pix->motz);
 	}
 
@@ -313,6 +315,7 @@ int main(int argc, char *argv[])
 	}
 
 	pix->motz = motz = nemomotz_create();
+	nemomotz_set_size(motz, width, height);
 
 	one = nemomotz_object_create();
 	nemomotz_object_set_shape(one, NEMOMOTZ_OBJECT_RECT_SHAPE);
