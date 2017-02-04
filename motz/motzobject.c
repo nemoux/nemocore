@@ -8,8 +8,65 @@
 #include <motzobject.h>
 #include <nemomisc.h>
 
+static void nemomotz_object_draw_line(struct nemomotz *motz, struct motzone *one)
+{
+	struct motzobject *object = NEMOMOTZ_OBJECT(one);
+
+	nemotoyz_draw_line(motz->toyz,
+			object->style,
+			object->x,
+			object->y,
+			object->w,
+			object->h);
+}
+
+static void nemomotz_object_draw_rect(struct nemomotz *motz, struct motzone *one)
+{
+	struct motzobject *object = NEMOMOTZ_OBJECT(one);
+
+	nemotoyz_draw_rect(motz->toyz,
+			object->style,
+			object->x,
+			object->y,
+			object->w,
+			object->h);
+}
+
+static void nemomotz_object_draw_round_rect(struct nemomotz *motz, struct motzone *one)
+{
+	struct motzobject *object = NEMOMOTZ_OBJECT(one);
+}
+
+static void nemomotz_object_draw_circle(struct nemomotz *motz, struct motzone *one)
+{
+	struct motzobject *object = NEMOMOTZ_OBJECT(one);
+
+	nemotoyz_draw_circle(motz->toyz,
+			object->style,
+			object->x,
+			object->y,
+			object->radius);
+}
+
+static void nemomotz_object_draw_arc(struct nemomotz *motz, struct motzone *one)
+{
+	struct motzobject *object = NEMOMOTZ_OBJECT(one);
+}
+
 static void nemomotz_object_draw(struct nemomotz *motz, struct motzone *one)
 {
+	static nemomotz_one_draw_t draws[NEMOMOTZ_OBJECT_LAST_SHAPE] = {
+		nemomotz_object_draw,
+		nemomotz_object_draw_line,
+		nemomotz_object_draw_rect,
+		nemomotz_object_draw_round_rect,
+		nemomotz_object_draw_circle,
+		nemomotz_object_draw_arc
+	};
+
+	struct motzobject *object = NEMOMOTZ_OBJECT(one);
+
+	draws[object->shape](motz, one);
 }
 
 static void nemomotz_object_down(struct nemomotz *motz, struct motzone *one, float x, float y)
@@ -87,63 +144,4 @@ struct motzone *nemomotz_object_create(void)
 	object->matrix = nemotoyz_matrix_create();
 
 	return one;
-}
-
-static void nemomotz_object_draw_line(struct nemomotz *motz, struct motzone *one)
-{
-	struct motzobject *object = NEMOMOTZ_OBJECT(one);
-
-	nemotoyz_draw_line(motz->toyz,
-			object->style,
-			object->x,
-			object->y,
-			object->w,
-			object->h);
-}
-
-static void nemomotz_object_draw_rect(struct nemomotz *motz, struct motzone *one)
-{
-	struct motzobject *object = NEMOMOTZ_OBJECT(one);
-
-	nemotoyz_draw_rect(motz->toyz,
-			object->style,
-			object->x,
-			object->y,
-			object->w,
-			object->h);
-}
-
-static void nemomotz_object_draw_round_rect(struct nemomotz *motz, struct motzone *one)
-{
-	struct motzobject *object = NEMOMOTZ_OBJECT(one);
-}
-
-static void nemomotz_object_draw_circle(struct nemomotz *motz, struct motzone *one)
-{
-	struct motzobject *object = NEMOMOTZ_OBJECT(one);
-
-	nemotoyz_draw_circle(motz->toyz,
-			object->style,
-			object->x,
-			object->y,
-			object->radius);
-}
-
-static void nemomotz_object_draw_arc(struct nemomotz *motz, struct motzone *one)
-{
-	struct motzobject *object = NEMOMOTZ_OBJECT(one);
-}
-
-void nemomotz_object_set_shape(struct motzone *one, int shape)
-{
-	static nemomotz_one_draw_t draws[NEMOMOTZ_OBJECT_LAST_SHAPE] = {
-		nemomotz_object_draw,
-		nemomotz_object_draw_line,
-		nemomotz_object_draw_rect,
-		nemomotz_object_draw_round_rect,
-		nemomotz_object_draw_circle,
-		nemomotz_object_draw_arc
-	};
-
-	one->draw = draws[shape];
 }
