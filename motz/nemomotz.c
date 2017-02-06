@@ -22,6 +22,7 @@ struct nemomotz *nemomotz_create(void)
 		goto err1;
 
 	nemolist_init(&motz->one_list);
+	nemolist_init(&motz->tap_list);
 
 	return motz;
 
@@ -34,6 +35,7 @@ err1:
 void nemomotz_destroy(struct nemomotz *motz)
 {
 	nemolist_remove(&motz->one_list);
+	nemolist_remove(&motz->tap_list);
 
 	nemotoyz_destroy(motz->toyz);
 
@@ -101,6 +103,61 @@ void nemomotz_detach_one(struct nemomotz *motz, struct motzone *one)
 	nemolist_init(&one->link);
 }
 
+struct motzone *nemomotz_pick_one(struct nemomotz *motz, float x, float y)
+{
+	struct motzone *one;
+	float sx, sy;
+
+	if (motz->width == motz->viewport.width && motz->height == motz->viewport.height) {
+		sx = x;
+		sy = y;
+	} else {
+		sx = (float)motz->width / (float)motz->viewport.width;
+		sy = (float)motz->height / (float)motz->viewport.height;
+	}
+
+	nemolist_for_each_reverse(one, &motz->one_list, link) {
+		if (nemomotz_one_contain(one, sx, sy) != 0)
+			return one;
+	}
+
+	return NULL;
+}
+
+void nemomotz_down(struct nemomotz *motz, uint64_t id, float x, float y)
+{
+	struct motztap *tap;
+	struct motzone *one;
+
+	one = nemomotz_pick_one(motz, x, y);
+
+	tap = nemomotz_tap_create();
+	nemomotz_tap_set_id(tap, id);
+	nemomotz_tap_set_one(tap, one);
+
+	nemomotz_attach_tap(motz, tap);
+
+	nemomotz_one_down(motz, tap->one, x, y);
+}
+
+void nemomotz_motion(struct nemomotz *motz, uint64_t id, float x, float y)
+{
+	struct motztap *tap;
+
+	tap = nemomotz_find_tap(motz, id);
+	if (tap != NULL && tap->one != NULL)
+		nemomotz_one_motion(motz, tap->one, x, y);
+}
+
+void nemomotz_up(struct nemomotz *motz, uint64_t id, float x, float y)
+{
+	struct motztap *tap;
+
+	tap = nemomotz_find_tap(motz, id);
+	if (tap != NULL && tap->one != NULL)
+		nemomotz_one_up(motz, tap->one, x, y);
+}
+
 void nemomotz_one_draw_null(struct nemomotz *motz, struct motzone *one)
 {
 }
@@ -115,6 +172,11 @@ void nemomotz_one_motion_null(struct nemomotz *motz, struct motzone *one, float 
 
 void nemomotz_one_up_null(struct nemomotz *motz, struct motzone *one, float x, float y)
 {
+}
+
+int nemomotz_one_contain_null(struct motzone *one, float x, float y)
+{
+	return 0;
 }
 
 void nemomotz_one_update_null(struct motzone *one)
@@ -145,6 +207,7 @@ struct motzone *nemomotz_one_create(void)
 	one->down = nemomotz_one_down_null;
 	one->motion = nemomotz_one_motion_null;
 	one->up = nemomotz_one_up_null;
+	one->contain = nemomotz_one_contain_null;
 	one->update = nemomotz_one_update_null;
 	one->destroy = nemomotz_one_destroy_null;
 
@@ -160,6 +223,7 @@ int nemomotz_one_prepare(struct motzone *one)
 	one->down = nemomotz_one_down_null;
 	one->motion = nemomotz_one_motion_null;
 	one->up = nemomotz_one_up_null;
+	one->contain = nemomotz_one_contain_null;
 	one->update = nemomotz_one_update_null;
 	one->destroy = nemomotz_one_destroy_null;
 
@@ -181,4 +245,58 @@ void nemomotz_one_detach_one(struct motzone *one, struct motzone *child)
 {
 	nemolist_remove(&child->link);
 	nemolist_init(&child->link);
+}
+
+struct motztap *nemomotz_tap_create(void)
+{
+	struct motztap *tap;
+
+	tap = (struct motztap *)malloc(sizeof(struct motztap));
+	if (tap == NULL)
+		return NULL;
+	memset(tap, 0, sizeof(struct motztap));
+
+	nemolist_init(&tap->link);
+
+	return tap;
+}
+
+void nemomotz_tap_destroy(struct motztap *tap)
+{
+	nemolist_remove(&tap->link);
+
+	free(tap);
+}
+
+void nemomotz_tap_set_id(struct motztap *tap, uint64_t id)
+{
+	tap->id = id;
+}
+
+void nemomotz_tap_set_one(struct motztap *tap, struct motzone *one)
+{
+	tap->one = one;
+}
+
+void nemomotz_attach_tap(struct nemomotz *motz, struct motztap *tap)
+{
+	nemolist_insert_tail(&motz->tap_list, &tap->link);
+}
+
+void nemomotz_detach_tap(struct nemomotz *motz, struct motztap *tap)
+{
+	nemolist_remove(&tap->link);
+	nemolist_init(&tap->link);
+}
+
+struct motztap *nemomotz_find_tap(struct nemomotz *motz, uint64_t id)
+{
+	struct motztap *tap;
+
+	nemolist_for_each(tap, &motz->tap_list, link) {
+		if (tap->id == id)
+			return tap;
+	}
+
+	return NULL;
 }
