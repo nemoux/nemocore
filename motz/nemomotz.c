@@ -134,16 +134,18 @@ void nemomotz_dispatch_down_event(struct nemomotz *motz, uint64_t id, float x, f
 	struct motzone *one;
 
 	tap = nemomotz_tap_create();
-	nemomotz_tap_set_id(tap, id);
-	nemomotz_attach_tap(motz, tap);
+	if (tap != NULL) {
+		nemomotz_tap_set_id(tap, id);
+		nemomotz_attach_tap(motz, tap);
 
-	one = nemomotz_pick_one(motz, x, y);
-	if (one != NULL) {
-		nemomotz_tap_set_one(tap, one);
+		one = nemomotz_pick_one(motz, x, y);
+		if (one != NULL) {
+			nemomotz_tap_set_one(tap, one);
 
-		nemomotz_one_down(motz, one, x, y);
-	} else {
-		nemomotz_down(motz, x, y);
+			nemomotz_one_down(motz, one, x, y);
+		} else {
+			nemomotz_down(motz, x, y);
+		}
 	}
 }
 
@@ -152,10 +154,12 @@ void nemomotz_dispatch_motion_event(struct nemomotz *motz, uint64_t id, float x,
 	struct motztap *tap;
 
 	tap = nemomotz_find_tap(motz, id);
-	if (tap != NULL && tap->one != NULL)
-		nemomotz_one_motion(motz, tap->one, x, y);
-	else
-		nemomotz_motion(motz, x, y);
+	if (tap != NULL) {
+		if (tap->one != NULL)
+			nemomotz_one_motion(motz, tap->one, x, y);
+		else
+			nemomotz_motion(motz, x, y);
+	}
 }
 
 void nemomotz_dispatch_up_event(struct nemomotz *motz, uint64_t id, float x, float y)
@@ -163,12 +167,14 @@ void nemomotz_dispatch_up_event(struct nemomotz *motz, uint64_t id, float x, flo
 	struct motztap *tap;
 
 	tap = nemomotz_find_tap(motz, id);
-	if (tap != NULL && tap->one != NULL)
-		nemomotz_one_up(motz, tap->one, x, y);
-	else
-		nemomotz_up(motz, x, y);
+	if (tap != NULL) {
+		if (tap->one != NULL)
+			nemomotz_one_up(motz, tap->one, x, y);
+		else
+			nemomotz_up(motz, x, y);
 
-	nemomotz_tap_destroy(tap);
+		nemomotz_tap_destroy(tap);
+	}
 }
 
 void nemomotz_down_null(struct nemomotz *motz, float x, float y)
