@@ -41,6 +41,7 @@ struct motzobject {
 
 	struct toyzstyle *style;
 	struct toyzmatrix *matrix;
+	struct toyzmatrix *inverse;
 
 	int shape;
 

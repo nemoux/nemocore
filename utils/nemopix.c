@@ -89,8 +89,6 @@ static int nemopix_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t typ
 	} else if (type & NEMOTOOL_TOUCH_UP_EVENT) {
 		tap = nemoaction_get_tap_by_device(pix->action, event->device);
 		if (tap != NULL) {
-			nemoaction_tap_set_tx(tap, event->x);
-			nemoaction_tap_set_ty(tap, event->y);
 			nemoaction_tap_detach(tap);
 			nemoaction_tap_dispatch_event(pix->action, tap, NEMOACTION_TAP_UP_EVENT);
 			nemoaction_tap_destroy(tap);
@@ -143,7 +141,48 @@ static int nemopix_dispatch_tap_event(struct nemoaction *action, struct actionta
 		}
 	}
 
+	if (event & NEMOACTION_TAP_DOWN_EVENT) {
+		nemomotz_dispatch_down_event(pix->motz,
+				nemoaction_tap_get_device(tap),
+				nemoaction_tap_get_tx(tap),
+				nemoaction_tap_get_ty(tap));
+	} else if (event & NEMOACTION_TAP_MOTION_EVENT) {
+		nemomotz_dispatch_motion_event(pix->motz,
+				nemoaction_tap_get_device(tap),
+				nemoaction_tap_get_tx(tap),
+				nemoaction_tap_get_ty(tap));
+	} else if (event & NEMOACTION_TAP_UP_EVENT) {
+		nemomotz_dispatch_up_event(pix->motz,
+				nemoaction_tap_get_device(tap),
+				nemoaction_tap_get_tx(tap),
+				nemoaction_tap_get_ty(tap));
+	}
+
 	return 0;
+}
+
+static void nemopix_dispatch_motz_down(struct nemomotz *motz, float x, float y)
+{
+}
+
+static void nemopix_dispatch_motz_motion(struct nemomotz *motz, float x, float y)
+{
+}
+
+static void nemopix_dispatch_motz_up(struct nemomotz *motz, float x, float y)
+{
+}
+
+static void nemopix_dispatch_motz_one_down(struct nemomotz *motz, struct motzone *one, float x, float y)
+{
+}
+
+static void nemopix_dispatch_motz_one_motion(struct nemomotz *motz, struct motzone *one, float x, float y)
+{
+}
+
+static void nemopix_dispatch_motz_one_up(struct nemomotz *motz, struct motzone *one, float x, float y)
+{
 }
 
 static void nemopix_dispatch_alive_timer(struct nemotimer *timer, void *data)
@@ -315,12 +354,18 @@ int main(int argc, char *argv[])
 	}
 
 	pix->motz = motz = nemomotz_create();
+	nemomotz_set_down_callback(motz, nemopix_dispatch_motz_down);
+	nemomotz_set_motion_callback(motz, nemopix_dispatch_motz_motion);
+	nemomotz_set_up_callback(motz, nemopix_dispatch_motz_up);
 	nemomotz_set_size(motz, width, height);
 
 	one = nemomotz_object_create();
+	nemomotz_one_set_down_callback(one, nemopix_dispatch_motz_one_down);
+	nemomotz_one_set_motion_callback(one, nemopix_dispatch_motz_one_motion);
+	nemomotz_one_set_up_callback(one, nemopix_dispatch_motz_one_up);
 	nemomotz_object_set_shape(one, NEMOMOTZ_OBJECT_RECT_SHAPE);
-	nemomotz_object_set_x(one, 50.0f);
-	nemomotz_object_set_y(one, 50.0f);
+	nemomotz_object_set_x(one, 0.0f);
+	nemomotz_object_set_y(one, 0.0f);
 	nemomotz_object_set_width(one, 150.0f);
 	nemomotz_object_set_height(one, 150.0f);
 	nemomotz_object_set_red(one, 0.0f);
@@ -328,6 +373,8 @@ int main(int argc, char *argv[])
 	nemomotz_object_set_blue(one, 255.0f);
 	nemomotz_object_set_alpha(one, 255.0f);
 	nemomotz_object_set_stroke_width(one, 5.0f);
+	nemomotz_object_set_tx(one, 50.0f);
+	nemomotz_object_set_ty(one, 50.0f);
 	nemomotz_object_set_sx(one, 1.5f);
 	nemomotz_one_set_flags(one, NEMOMOTZ_OBJECT_STROKE_FLAG);
 	nemomotz_attach_one(motz, one);
