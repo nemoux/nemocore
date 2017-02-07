@@ -127,6 +127,28 @@ extern void nemomotz_detach_tap(struct nemomotz *motz, struct motztap *tap);
 
 extern struct motztap *nemomotz_find_tap(struct nemomotz *motz, uint64_t id);
 
+static inline void nemomotz_transform_from_viewport(struct nemomotz *motz, float x, float y, float *sx, float *sy)
+{
+	if (motz->width == motz->viewport.width && motz->height == motz->viewport.height) {
+		*sx = x;
+		*sy = y;
+	} else {
+		*sx = x * (float)motz->width / (float)motz->viewport.width;
+		*sy = y * (float)motz->height / (float)motz->viewport.height;
+	}
+}
+
+static inline void nemomotz_transform_to_viewport(struct nemomotz *motz, float sx, float sy, float *x, float *y)
+{
+	if (motz->width == motz->viewport.width && motz->height == motz->viewport.height) {
+		*x = sx;
+		*y = sy;
+	} else {
+		*x = sx * (float)motz->viewport.width / (float)motz->width;
+		*y = sy * (float)motz->viewport.height / (float)motz->height;
+	}
+}
+
 static inline void nemomotz_set_down_callback(struct nemomotz *motz, nemomotz_down_t down)
 {
 	if (down != NULL)

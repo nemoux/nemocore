@@ -114,13 +114,7 @@ struct motzone *nemomotz_pick_one(struct nemomotz *motz, float x, float y)
 	struct motzone *one;
 	float sx, sy;
 
-	if (motz->width == motz->viewport.width && motz->height == motz->viewport.height) {
-		sx = x;
-		sy = y;
-	} else {
-		sx = (float)motz->width / (float)motz->viewport.width;
-		sy = (float)motz->height / (float)motz->viewport.height;
-	}
+	nemomotz_transform_from_viewport(motz, x, y, &sx, &sy);
 
 	nemolist_for_each_reverse(one, &motz->one_list, link) {
 		if (nemomotz_one_contain(one, sx, sy) != 0)
@@ -134,19 +128,22 @@ void nemomotz_dispatch_down_event(struct nemomotz *motz, uint64_t id, float x, f
 {
 	struct motztap *tap;
 	struct motzone *one;
+	float sx, sy;
+
+	nemomotz_transform_from_viewport(motz, x, y, &sx, &sy);
 
 	tap = nemomotz_tap_create();
 	if (tap != NULL) {
 		nemomotz_tap_set_id(tap, id);
 		nemomotz_attach_tap(motz, tap);
 
-		one = nemomotz_pick_one(motz, x, y);
+		one = nemomotz_pick_one(motz, sx, sy);
 		if (one != NULL) {
 			nemomotz_tap_set_one(tap, one);
 
-			nemomotz_one_down(motz, tap, one, x, y);
+			nemomotz_one_down(motz, tap, one, sx, sy);
 		} else {
-			nemomotz_down(motz, tap, x, y);
+			nemomotz_down(motz, tap, sx, sy);
 		}
 	}
 }
@@ -154,26 +151,32 @@ void nemomotz_dispatch_down_event(struct nemomotz *motz, uint64_t id, float x, f
 void nemomotz_dispatch_motion_event(struct nemomotz *motz, uint64_t id, float x, float y)
 {
 	struct motztap *tap;
+	float sx, sy;
+
+	nemomotz_transform_from_viewport(motz, x, y, &sx, &sy);
 
 	tap = nemomotz_find_tap(motz, id);
 	if (tap != NULL) {
 		if (tap->one != NULL)
-			nemomotz_one_motion(motz, tap, tap->one, x, y);
+			nemomotz_one_motion(motz, tap, tap->one, sx, sy);
 		else
-			nemomotz_motion(motz, tap, x, y);
+			nemomotz_motion(motz, tap, sx, sy);
 	}
 }
 
 void nemomotz_dispatch_up_event(struct nemomotz *motz, uint64_t id, float x, float y)
 {
 	struct motztap *tap;
+	float sx, sy;
+
+	nemomotz_transform_from_viewport(motz, x, y, &sx, &sy);
 
 	tap = nemomotz_find_tap(motz, id);
 	if (tap != NULL) {
 		if (tap->one != NULL)
-			nemomotz_one_up(motz, tap, tap->one, x, y);
+			nemomotz_one_up(motz, tap, tap->one, sx, sy);
 		else
-			nemomotz_up(motz, tap, x, y);
+			nemomotz_up(motz, tap, sx, sy);
 
 		nemomotz_tap_destroy(tap);
 	}
