@@ -34,7 +34,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/db/nemodb.h
 	)
 
-set(NEMOBUS_PKGCONFIG_REQUIRES "nemoasst nemohelper libmongoc-1.0 libbson-1.0")
+set(NEMODB_PKGCONFIG_REQUIRES "nemoasst nemohelper libmongoc-1.0 libbson-1.0")
 
 configure_file(
 	nemodb.pc.in

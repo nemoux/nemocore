@@ -27,7 +27,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/action/actiontap.h
 	)
 
-set(NEMOCOOK_PKGCONFIG_REQUIRES "nemoasst nemohelper")
+set(NEMOACTION_PKGCONFIG_REQUIRES "nemoasst nemohelper")
 
 configure_file(
 	nemoaction.pc.in

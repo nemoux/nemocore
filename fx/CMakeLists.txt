@@ -48,7 +48,7 @@ set(HEADER_FILES
 	fxsph.h
 	)
 
-set(NEMOPLAY_PKGCONFIG_REQUIRES "nemoasst nemohelper")
+set(NEMOFX_PKGCONFIG_REQUIRES "nemoasst nemohelper")
 
 configure_file(
 	nemofx.pc.in
