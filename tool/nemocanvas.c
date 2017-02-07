@@ -445,6 +445,18 @@ pixman_image_t *nemocanvas_get_pixman_image(struct nemocanvas *canvas)
 	return image;
 }
 
+int nemocanvas_set_buffer_max(struct nemocanvas *canvas, int nbuffers)
+{
+	canvas->buffers = (struct nemobuffer *)realloc(canvas->buffers, sizeof(struct nemobuffer[nbuffers]));
+	if (canvas->buffers == NULL)
+		return -1;
+	memset(canvas->buffers, 0, sizeof(struct nemobuffer[nbuffers]));
+
+	canvas->nbuffers = nbuffers;
+
+	return 0;
+}
+
 void nemocanvas_set_tag(struct nemocanvas *canvas, uint32_t tag)
 {
 	nemo_surface_set_tag(canvas->nemo_surface, tag);

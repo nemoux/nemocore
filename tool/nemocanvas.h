@@ -88,6 +88,8 @@ extern void nemocanvas_opaque(struct nemocanvas *canvas, int32_t x, int32_t y, i
 
 extern pixman_image_t *nemocanvas_get_pixman_image(struct nemocanvas *canvas);
 
+extern int nemocanvas_set_buffer_max(struct nemocanvas *canvas, int nbuffers);
+
 extern void nemocanvas_set_tag(struct nemocanvas *canvas, uint32_t tag);
 extern void nemocanvas_set_type(struct nemocanvas *canvas, const char *type);
 extern void nemocanvas_set_uuid(struct nemocanvas *canvas, const char *uuid);
