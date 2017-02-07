@@ -20,14 +20,14 @@ struct nemomotz;
 struct motzone;
 struct motztap;
 
-typedef void (*nemomotz_down_t)(struct nemomotz *motz, float x, float y);
-typedef void (*nemomotz_motion_t)(struct nemomotz *motz, float x, float y);
-typedef void (*nemomotz_up_t)(struct nemomotz *motz, float x, float y);
+typedef void (*nemomotz_down_t)(struct nemomotz *motz, struct motztap *tap, float x, float y);
+typedef void (*nemomotz_motion_t)(struct nemomotz *motz, struct motztap *tap, float x, float y);
+typedef void (*nemomotz_up_t)(struct nemomotz *motz, struct motztap *tap, float x, float y);
 
 typedef void (*nemomotz_one_draw_t)(struct nemomotz *motz, struct motzone *one);
-typedef void (*nemomotz_one_down_t)(struct nemomotz *motz, struct motzone *one, float x, float y);
-typedef void (*nemomotz_one_motion_t)(struct nemomotz *motz, struct motzone *one, float x, float y);
-typedef void (*nemomotz_one_up_t)(struct nemomotz *motz, struct motzone *one, float x, float y);
+typedef void (*nemomotz_one_down_t)(struct nemomotz *motz, struct motztap *tap, struct motzone *one, float x, float y);
+typedef void (*nemomotz_one_motion_t)(struct nemomotz *motz, struct motztap *tap, struct motzone *one, float x, float y);
+typedef void (*nemomotz_one_up_t)(struct nemomotz *motz, struct motztap *tap, struct motzone *one, float x, float y);
 
 typedef int (*nemomotz_one_contain_t)(struct motzone *one, float x, float y);
 typedef void (*nemomotz_one_update_t)(struct motzone *one);
@@ -48,6 +48,8 @@ struct nemomotz {
 	nemomotz_down_t down;
 	nemomotz_motion_t motion;
 	nemomotz_up_t up;
+
+	void *data;
 };
 
 struct motzone {
@@ -95,9 +97,9 @@ extern void nemomotz_dispatch_down_event(struct nemomotz *motz, uint64_t id, flo
 extern void nemomotz_dispatch_motion_event(struct nemomotz *motz, uint64_t id, float x, float y);
 extern void nemomotz_dispatch_up_event(struct nemomotz *motz, uint64_t id, float x, float y);
 
-extern void nemomotz_down_null(struct nemomotz *motz, float x, float y);
-extern void nemomotz_motion_null(struct nemomotz *motz, float x, float y);
-extern void nemomotz_up_null(struct nemomotz *motz, float x, float y);
+extern void nemomotz_down_null(struct nemomotz *motz, struct motztap *tap, float x, float y);
+extern void nemomotz_motion_null(struct nemomotz *motz, struct motztap *tap, float x, float y);
+extern void nemomotz_up_null(struct nemomotz *motz, struct motztap *tap, float x, float y);
 
 extern struct motzone *nemomotz_one_create(void);
 extern int nemomotz_one_prepare(struct motzone *one);
@@ -107,9 +109,9 @@ extern void nemomotz_one_attach_one(struct motzone *one, struct motzone *child);
 extern void nemomotz_one_detach_one(struct motzone *one, struct motzone *child);
 
 extern void nemomotz_one_draw_null(struct nemomotz *motz, struct motzone *one);
-extern void nemomotz_one_down_null(struct nemomotz *motz, struct motzone *one, float x, float y);
-extern void nemomotz_one_motion_null(struct nemomotz *motz, struct motzone *one, float x, float y);
-extern void nemomotz_one_up_null(struct nemomotz *motz, struct motzone *one, float x, float y);
+extern void nemomotz_one_down_null(struct nemomotz *motz, struct motztap *tap, struct motzone *one, float x, float y);
+extern void nemomotz_one_motion_null(struct nemomotz *motz, struct motztap *tap, struct motzone *one, float x, float y);
+extern void nemomotz_one_up_null(struct nemomotz *motz, struct motztap *tap, struct motzone *one, float x, float y);
 extern int nemomotz_one_contain_null(struct motzone *one, float x, float y);
 extern void nemomotz_one_update_null(struct motzone *one);
 extern void nemomotz_one_destroy_null(struct motzone *one);
@@ -133,9 +135,9 @@ static inline void nemomotz_set_down_callback(struct nemomotz *motz, nemomotz_do
 		motz->down = nemomotz_down_null;
 }
 
-static inline void nemomotz_down(struct nemomotz *motz, float x, float y)
+static inline void nemomotz_down(struct nemomotz *motz, struct motztap *tap, float x, float y)
 {
-	motz->down(motz, x, y);
+	motz->down(motz, tap, x, y);
 }
 
 static inline void nemomotz_set_motion_callback(struct nemomotz *motz, nemomotz_motion_t motion)
@@ -146,9 +148,9 @@ static inline void nemomotz_set_motion_callback(struct nemomotz *motz, nemomotz_
 		motz->motion = nemomotz_motion_null;
 }
 
-static inline void nemomotz_motion(struct nemomotz *motz, float x, float y)
+static inline void nemomotz_motion(struct nemomotz *motz, struct motztap *tap, float x, float y)
 {
-	motz->motion(motz, x, y);
+	motz->motion(motz, tap, x, y);
 }
 
 static inline void nemomotz_set_up_callback(struct nemomotz *motz, nemomotz_up_t up)
@@ -159,9 +161,9 @@ static inline void nemomotz_set_up_callback(struct nemomotz *motz, nemomotz_up_t
 		motz->up = nemomotz_up_null;
 }
 
-static inline void nemomotz_up(struct nemomotz *motz, float x, float y)
+static inline void nemomotz_up(struct nemomotz *motz, struct motztap *tap, float x, float y)
 {
-	motz->up(motz, x, y);
+	motz->up(motz, tap, x, y);
 }
 
 static inline void nemomotz_one_set_draw_callback(struct motzone *one, nemomotz_one_draw_t draw)
@@ -185,9 +187,9 @@ static inline void nemomotz_one_set_down_callback(struct motzone *one, nemomotz_
 		one->down = nemomotz_one_down_null;
 }
 
-static inline void nemomotz_one_down(struct nemomotz *motz, struct motzone *one, float x, float y)
+static inline void nemomotz_one_down(struct nemomotz *motz, struct motztap *tap, struct motzone *one, float x, float y)
 {
-	one->down(motz, one, x, y);
+	one->down(motz, tap, one, x, y);
 }
 
 static inline void nemomotz_one_set_motion_callback(struct motzone *one, nemomotz_one_motion_t motion)
@@ -198,9 +200,9 @@ static inline void nemomotz_one_set_motion_callback(struct motzone *one, nemomot
 		one->motion = nemomotz_one_motion_null;
 }
 
-static inline void nemomotz_one_motion(struct nemomotz *motz, struct motzone *one, float x, float y)
+static inline void nemomotz_one_motion(struct nemomotz *motz, struct motztap *tap, struct motzone *one, float x, float y)
 {
-	one->motion(motz, one, x, y);
+	one->motion(motz, tap, one, x, y);
 }
 
 static inline void nemomotz_one_set_up_callback(struct motzone *one, nemomotz_one_up_t up)
@@ -211,9 +213,9 @@ static inline void nemomotz_one_set_up_callback(struct motzone *one, nemomotz_on
 		one->up = nemomotz_one_up_null;
 }
 
-static inline void nemomotz_one_up(struct nemomotz *motz, struct motzone *one, float x, float y)
+static inline void nemomotz_one_up(struct nemomotz *motz, struct motztap *tap, struct motzone *one, float x, float y)
 {
-	one->up(motz, one, x, y);
+	one->up(motz, tap, one, x, y);
 }
 
 static inline void nemomotz_one_set_contain_callback(struct motzone *one, nemomotz_one_contain_t contain)
@@ -297,6 +299,16 @@ static inline int nemomotz_one_has_flags(struct motzone *one, uint32_t flags)
 static inline int nemomotz_one_has_flags_all(struct motzone *one, uint32_t flags)
 {
 	return (one->flags & flags) == flags;
+}
+
+static inline void nemomotz_set_userdata(struct nemomotz *motz, void *data)
+{
+	motz->data = data;
+}
+
+static inline void *nemomotz_get_userdata(struct nemomotz *motz)
+{
+	return motz->data;
 }
 
 #ifdef __cplusplus

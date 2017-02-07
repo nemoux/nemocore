@@ -12,6 +12,7 @@
 
 #include <nemomotz.h>
 #include <motzobject.h>
+#include <motzburst.h>
 #include <nemobus.h>
 #include <nemojson.h>
 #include <nemoitem.h>
@@ -123,10 +124,7 @@ static int nemopix_dispatch_tap_event(struct nemoaction *action, struct actionta
 		int ntaps;
 
 		ntaps = nemoaction_get_taps_all(pix->action, taps, 8);
-		if (ntaps == 1) {
-			nemocanvas_move(pix->canvas,
-					nemoaction_tap_get_serial(taps[0]));
-		} else if (ntaps == 2) {
+		if (ntaps == 2) {
 			nemocanvas_pick(pix->canvas,
 					nemoaction_tap_get_serial(taps[0]),
 					nemoaction_tap_get_serial(taps[1]),
@@ -146,42 +144,59 @@ static int nemopix_dispatch_tap_event(struct nemoaction *action, struct actionta
 				nemoaction_tap_get_device(tap),
 				nemoaction_tap_get_tx(tap),
 				nemoaction_tap_get_ty(tap));
+		nemocanvas_dispatch_frame(pix->canvas);
 	} else if (event & NEMOACTION_TAP_MOTION_EVENT) {
 		nemomotz_dispatch_motion_event(pix->motz,
 				nemoaction_tap_get_device(tap),
 				nemoaction_tap_get_tx(tap),
 				nemoaction_tap_get_ty(tap));
+		nemocanvas_dispatch_frame(pix->canvas);
 	} else if (event & NEMOACTION_TAP_UP_EVENT) {
 		nemomotz_dispatch_up_event(pix->motz,
 				nemoaction_tap_get_device(tap),
 				nemoaction_tap_get_tx(tap),
 				nemoaction_tap_get_ty(tap));
+		nemocanvas_dispatch_frame(pix->canvas);
 	}
 
 	return 0;
 }
 
-static void nemopix_dispatch_motz_down(struct nemomotz *motz, float x, float y)
+static void nemopix_dispatch_motz_down(struct nemomotz *motz, struct motztap *tap, float x, float y)
+{
+	struct motzone *one;
+
+	one = nemomotz_burst_create();
+	nemomotz_burst_set_size(one, 25.0f);
+	nemomotz_burst_set_red(one, 0.0f);
+	nemomotz_burst_set_green(one, 255.0f);
+	nemomotz_burst_set_blue(one, 255.0f);
+	nemomotz_burst_set_alpha(one, 255.0f);
+	nemomotz_burst_set_stroke_width(one, 6.5f);
+	nemomotz_attach_one(motz, one);
+
+	nemomotz_tap_set_one(tap, one);
+
+	nemomotz_one_down(motz, tap, one, x, y);
+}
+
+static void nemopix_dispatch_motz_motion(struct nemomotz *motz, struct motztap *tap, float x, float y)
 {
 }
 
-static void nemopix_dispatch_motz_motion(struct nemomotz *motz, float x, float y)
+static void nemopix_dispatch_motz_up(struct nemomotz *motz, struct motztap *tap, float x, float y)
 {
 }
 
-static void nemopix_dispatch_motz_up(struct nemomotz *motz, float x, float y)
+static void nemopix_dispatch_motz_one_down(struct nemomotz *motz, struct motztap *tap, struct motzone *one, float x, float y)
 {
 }
 
-static void nemopix_dispatch_motz_one_down(struct nemomotz *motz, struct motzone *one, float x, float y)
+static void nemopix_dispatch_motz_one_motion(struct nemomotz *motz, struct motztap *tap, struct motzone *one, float x, float y)
 {
 }
 
-static void nemopix_dispatch_motz_one_motion(struct nemomotz *motz, struct motzone *one, float x, float y)
-{
-}
-
-static void nemopix_dispatch_motz_one_up(struct nemomotz *motz, struct motzone *one, float x, float y)
+static void nemopix_dispatch_motz_one_up(struct nemomotz *motz, struct motztap *tap, struct motzone *one, float x, float y)
 {
 }
 
@@ -358,6 +373,7 @@ int main(int argc, char *argv[])
 	nemomotz_set_motion_callback(motz, nemopix_dispatch_motz_motion);
 	nemomotz_set_up_callback(motz, nemopix_dispatch_motz_up);
 	nemomotz_set_size(motz, width, height);
+	nemomotz_set_userdata(motz, pix);
 
 	one = nemomotz_object_create();
 	nemomotz_one_set_down_callback(one, nemopix_dispatch_motz_one_down);

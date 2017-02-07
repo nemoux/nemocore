@@ -90,6 +90,8 @@ void nemomotz_update_buffer(struct nemomotz *motz)
 				(float)motz->viewport.width / (float)motz->width,
 				(float)motz->viewport.height / (float)motz->height);
 
+	nemotoyz_clear(toyz);
+
 	nemolist_for_each(one, &motz->one_list, link)
 		nemomotz_one_draw(motz, one);
 
@@ -142,9 +144,9 @@ void nemomotz_dispatch_down_event(struct nemomotz *motz, uint64_t id, float x, f
 		if (one != NULL) {
 			nemomotz_tap_set_one(tap, one);
 
-			nemomotz_one_down(motz, one, x, y);
+			nemomotz_one_down(motz, tap, one, x, y);
 		} else {
-			nemomotz_down(motz, x, y);
+			nemomotz_down(motz, tap, x, y);
 		}
 	}
 }
@@ -156,9 +158,9 @@ void nemomotz_dispatch_motion_event(struct nemomotz *motz, uint64_t id, float x,
 	tap = nemomotz_find_tap(motz, id);
 	if (tap != NULL) {
 		if (tap->one != NULL)
-			nemomotz_one_motion(motz, tap->one, x, y);
+			nemomotz_one_motion(motz, tap, tap->one, x, y);
 		else
-			nemomotz_motion(motz, x, y);
+			nemomotz_motion(motz, tap, x, y);
 	}
 }
 
@@ -169,23 +171,23 @@ void nemomotz_dispatch_up_event(struct nemomotz *motz, uint64_t id, float x, flo
 	tap = nemomotz_find_tap(motz, id);
 	if (tap != NULL) {
 		if (tap->one != NULL)
-			nemomotz_one_up(motz, tap->one, x, y);
+			nemomotz_one_up(motz, tap, tap->one, x, y);
 		else
-			nemomotz_up(motz, x, y);
+			nemomotz_up(motz, tap, x, y);
 
 		nemomotz_tap_destroy(tap);
 	}
 }
 
-void nemomotz_down_null(struct nemomotz *motz, float x, float y)
+void nemomotz_down_null(struct nemomotz *motz, struct motztap *tap, float x, float y)
 {
 }
 
-void nemomotz_motion_null(struct nemomotz *motz, float x, float y)
+void nemomotz_motion_null(struct nemomotz *motz, struct motztap *tap, float x, float y)
 {
 }
 
-void nemomotz_up_null(struct nemomotz *motz, float x, float y)
+void nemomotz_up_null(struct nemomotz *motz, struct motztap *tap, float x, float y)
 {
 }
 
@@ -193,15 +195,15 @@ void nemomotz_one_draw_null(struct nemomotz *motz, struct motzone *one)
 {
 }
 
-void nemomotz_one_down_null(struct nemomotz *motz, struct motzone *one, float x, float y)
+void nemomotz_one_down_null(struct nemomotz *motz, struct motztap *tap, struct motzone *one, float x, float y)
 {
 }
 
-void nemomotz_one_motion_null(struct nemomotz *motz, struct motzone *one, float x, float y)
+void nemomotz_one_motion_null(struct nemomotz *motz, struct motztap *tap, struct motzone *one, float x, float y)
 {
 }
 
-void nemomotz_one_up_null(struct nemomotz *motz, struct motzone *one, float x, float y)
+void nemomotz_one_up_null(struct nemomotz *motz, struct motztap *tap, struct motzone *one, float x, float y)
 {
 }
 

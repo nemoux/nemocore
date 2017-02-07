@@ -83,15 +83,15 @@ static void nemomotz_object_draw(struct nemomotz *motz, struct motzone *one)
 	}
 }
 
-static void nemomotz_object_down(struct nemomotz *motz, struct motzone *one, float x, float y)
+static void nemomotz_object_down(struct nemomotz *motz, struct motztap *tap, struct motzone *one, float x, float y)
 {
 }
 
-static void nemomotz_object_motion(struct nemomotz *motz, struct motzone *one, float x, float y)
+static void nemomotz_object_motion(struct nemomotz *motz, struct motztap *tap, struct motzone *one, float x, float y)
 {
 }
 
-static void nemomotz_object_up(struct nemomotz *motz, struct motzone *one, float x, float y)
+static void nemomotz_object_up(struct nemomotz *motz, struct motztap *tap, struct motzone *one, float x, float y)
 {
 }
 
