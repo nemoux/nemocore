@@ -112,12 +112,9 @@ void nemomotz_detach_one(struct nemomotz *motz, struct motzone *one)
 struct motzone *nemomotz_pick_one(struct nemomotz *motz, float x, float y)
 {
 	struct motzone *one;
-	float sx, sy;
-
-	nemomotz_transform_from_viewport(motz, x, y, &sx, &sy);
 
 	nemolist_for_each_reverse(one, &motz->one_list, link) {
-		if (nemomotz_one_contain(one, sx, sy) != 0)
+		if (nemomotz_one_contain(one, x, y) != 0)
 			return one;
 	}
 
