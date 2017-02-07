@@ -58,7 +58,7 @@ static void nemopix_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t se
 
 	nemomotz_update(pix->motz);
 
-	nemocanvas_buffer(canvas);
+	nemocanvas_ready(canvas);
 
 	framebuffer = nemocanvas_get_pixman_image(canvas);
 	if (framebuffer != NULL) {

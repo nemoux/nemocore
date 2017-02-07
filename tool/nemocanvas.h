@@ -53,10 +53,9 @@ struct nemocanvas {
 	int width, height;
 	pixman_region32_t damage;
 
-	struct nemobuffer buffers[2];
-	struct nemobuffer *extras;
+	struct nemobuffer *buffers;
 	struct nemobuffer *buffer;
-	int nextras;
+	int nbuffers;
 
 	nemocanvas_dispatch_event_t dispatch_event;
 	nemocanvas_dispatch_resize_t dispatch_resize;
@@ -81,7 +80,7 @@ extern void nemocanvas_destroy(struct nemocanvas *canvas);
 extern int nemocanvas_init(struct nemocanvas *canvas, struct nemotool *tool);
 extern void nemocanvas_exit(struct nemocanvas *canvas);
 
-extern int nemocanvas_buffer(struct nemocanvas *canvas);
+extern int nemocanvas_ready(struct nemocanvas *canvas);
 extern void nemocanvas_damage(struct nemocanvas *canvas, int32_t x, int32_t y, int32_t width, int32_t height);
 extern void nemocanvas_damage_region(struct nemocanvas *canvas, pixman_region32_t *region);
 extern void nemocanvas_commit(struct nemocanvas *canvas);

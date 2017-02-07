@@ -81,6 +81,15 @@ static const struct wl_buffer_listener buffer_listener = {
 	buffer_release
 };
 
+static void frame_handle_done(void *data, struct wl_callback *callback, uint32_t time)
+{
+	wl_callback_destroy(callback);
+}
+
+static const struct wl_callback_listener frame_listener = {
+	frame_handle_done
+};
+
 static int nemocanvas_get_shm_buffer(struct wl_shm *shm, struct nemobuffer *buffer, int width, int height, uint32_t format)
 {
 	struct wl_shm_pool *pool;
@@ -114,39 +123,20 @@ static int nemocanvas_get_shm_buffer(struct wl_shm *shm, struct nemobuffer *buff
 	return 0;
 }
 
-static struct nemobuffer *nemocanvas_get_next_buffer(struct nemocanvas *canvas)
+int nemocanvas_ready(struct nemocanvas *canvas)
 {
 	struct nemobuffer *buffer = NULL;
-	int i, ret = 0;
+	int i;
 
-	if (canvas->buffers[0].busy == 0) {
-		buffer = &canvas->buffers[0];
-	} else if (canvas->buffers[1].busy == 0) {
-		buffer = &canvas->buffers[1];
-	} else {
-retry:
-		for (i = 0; i < canvas->nextras; i++) {
-			if (canvas->extras[i].busy == 0) {
-				buffer = &canvas->extras[i];
-				break;
-			}
-		}
-
-		if (buffer == NULL) {
-			canvas->extras = (struct nemobuffer *)realloc(canvas->extras, sizeof(struct nemobuffer) * (canvas->nextras + 4));
-			if (canvas->extras == NULL)
-				return NULL;
-			memset(&canvas->extras[canvas->nextras], 0, sizeof(struct nemobuffer) * 4);
-
-			canvas->nextras = canvas->nextras + 4;
-
-			goto retry;
+	for (i = 0; i < canvas->nbuffers; i++) {
+		if (canvas->buffers[i].busy == 0) {
+			buffer = &canvas->buffers[i];
+			break;
 		}
 	}
 
-	if (buffer == NULL) {
+	if (buffer == NULL)
 		buffer = &canvas->buffers[0];
-	}
 
 	if ((buffer->buffer != NULL) &&
 			(buffer->width != canvas->width || buffer->height != canvas->height)) {
@@ -159,34 +149,20 @@ retry:
 	}
 
 	if (buffer->buffer == NULL) {
-		struct wl_shm *shm = canvas->tool->shm;
-
-		ret = nemocanvas_get_shm_buffer(shm, buffer, canvas->width, canvas->height, WL_SHM_FORMAT_ARGB8888);
-		if (ret < 0)
-			return NULL;
+		if (nemocanvas_get_shm_buffer(canvas->tool->shm, buffer, canvas->width, canvas->height, WL_SHM_FORMAT_ARGB8888) < 0)
+			goto failed;
 
 		memset(buffer->shm_data, 0xff, canvas->width * canvas->height * 4);
 	}
 
-	return buffer;
-}
-
-static void frame_handle_done(void *data, struct wl_callback *callback, uint32_t time)
-{
-	wl_callback_destroy(callback);
-}
-
-static const struct wl_callback_listener frame_listener = {
-	frame_handle_done
-};
-
-int nemocanvas_buffer(struct nemocanvas *canvas)
-{
-	canvas->buffer = nemocanvas_get_next_buffer(canvas);
-	if (canvas->buffer == NULL)
-		return -1;
+	canvas->buffer = buffer;
 
 	return 0;
+
+failed:
+	canvas->buffer = NULL;
+
+	return -1;
 }
 
 void nemocanvas_damage(struct nemocanvas *canvas, int32_t x, int32_t y, int32_t width, int32_t height)
@@ -317,6 +293,13 @@ struct nemocanvas *nemocanvas_create(struct nemotool *tool)
 		return NULL;
 	memset(canvas, 0, sizeof(struct nemocanvas));
 
+	canvas->buffers = (struct nemobuffer *)malloc(sizeof(struct nemobuffer[2]));
+	if (canvas->buffers == NULL)
+		goto err1;
+	memset(canvas->buffers, 0, sizeof(struct nemobuffer[2]));
+
+	canvas->nbuffers = 2;
+
 	nemosignal_init(&canvas->destroy_signal);
 
 	pixman_region32_init(&canvas->damage);
@@ -341,6 +324,11 @@ struct nemocanvas *nemocanvas_create(struct nemotool *tool)
 	canvas->dispatch_destroy = nemocanvas_dispatch_destroy_none;
 
 	return canvas;
+
+err1:
+	free(canvas);
+
+	return NULL;
 }
 
 void nemocanvas_destroy(struct nemocanvas *canvas)
@@ -350,7 +338,7 @@ void nemocanvas_destroy(struct nemocanvas *canvas)
 
 	nemosignal_emit(&canvas->destroy_signal, canvas);
 
-	for (i = 0; i < 2; i++) {
+	for (i = 0; i < canvas->nbuffers; i++) {
 		buffer = &canvas->buffers[i];
 
 		if (buffer->buffer != NULL) {
@@ -363,23 +351,6 @@ void nemocanvas_destroy(struct nemocanvas *canvas)
 		}
 	}
 
-	if (canvas->nextras > 0) {
-		for (i = 0; i < canvas->nextras; i++) {
-			buffer = &canvas->extras[i];
-
-			if (buffer->buffer != NULL) {
-				wl_buffer_destroy(buffer->buffer);
-
-				munmap(buffer->shm_data, buffer->shm_size);
-
-				buffer->busy = 0;
-				buffer->buffer = NULL;
-			}
-		}
-
-		free(canvas->extras);
-	}
-
 	if (canvas->nemo_surface != NULL)
 		nemo_surface_destroy(canvas->nemo_surface);
 
@@ -390,11 +361,19 @@ void nemocanvas_destroy(struct nemocanvas *canvas)
 
 	pixman_region32_fini(&canvas->damage);
 
+	free(canvas->buffers);
 	free(canvas);
 }
 
 int nemocanvas_init(struct nemocanvas *canvas, struct nemotool *tool)
 {
+	canvas->buffers = (struct nemobuffer *)malloc(sizeof(struct nemobuffer[2]));
+	if (canvas->buffers == NULL)
+		return -1;
+	memset(canvas->buffers, 0, sizeof(struct nemobuffer[2]));
+
+	canvas->nbuffers = 2;
+
 	nemosignal_init(&canvas->destroy_signal);
 
 	pixman_region32_init(&canvas->damage);
@@ -428,7 +407,7 @@ void nemocanvas_exit(struct nemocanvas *canvas)
 
 	nemosignal_emit(&canvas->destroy_signal, canvas);
 
-	for (i = 0; i < 2; i++) {
+	for (i = 0; i < canvas->nbuffers; i++) {
 		buffer = &canvas->buffers[i];
 
 		if (buffer->buffer != NULL) {
@@ -441,23 +420,6 @@ void nemocanvas_exit(struct nemocanvas *canvas)
 		}
 	}
 
-	if (canvas->nextras > 0) {
-		for (i = 0; i < canvas->nextras; i++) {
-			buffer = &canvas->extras[i];
-
-			if (buffer->buffer != NULL) {
-				wl_buffer_destroy(buffer->buffer);
-
-				munmap(buffer->shm_data, buffer->shm_size);
-
-				buffer->busy = 0;
-				buffer->buffer = NULL;
-			}
-		}
-
-		free(canvas->extras);
-	}
-
 	if (canvas->nemo_surface != NULL)
 		nemo_surface_destroy(canvas->nemo_surface);
 
@@ -467,6 +429,8 @@ void nemocanvas_exit(struct nemocanvas *canvas)
 	wl_surface_destroy(canvas->surface);
 
 	pixman_region32_fini(&canvas->damage);
+
+	free(canvas->buffers);
 }
 
 pixman_image_t *nemocanvas_get_pixman_image(struct nemocanvas *canvas)
