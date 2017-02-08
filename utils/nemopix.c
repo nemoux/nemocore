@@ -48,7 +48,7 @@ static void nemopix_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t wi
 	if (pix->opaque != 0)
 		nemocanvas_opaque(canvas, 0, 0, width, height);
 
-	nemocanvas_dispatch_frame_with_feedback(canvas);
+	nemocanvas_dispatch_frame(canvas);
 }
 
 static void nemopix_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t secs, uint32_t nsecs)
@@ -56,22 +56,26 @@ static void nemopix_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t se
 	struct nemopix *pix = (struct nemopix *)nemocanvas_get_userdata(canvas);
 	pixman_image_t *framebuffer;
 
-	nemomotz_update(pix->motz);
+	if (nemomotz_update(pix->motz) > 0) {
+		nemocanvas_dispatch_feedback(canvas);
 
-	nemocanvas_ready(canvas);
+		nemocanvas_ready(canvas);
 
-	framebuffer = nemocanvas_get_pixman_image(canvas);
-	if (framebuffer != NULL) {
-		nemomotz_attach_buffer(pix->motz,
-				pixman_image_get_data(framebuffer),
-				pixman_image_get_width(framebuffer),
-				pixman_image_get_height(framebuffer));
-		nemomotz_update_buffer(pix->motz);
-		nemomotz_detach_buffer(pix->motz);
+		framebuffer = nemocanvas_get_pixman_image(canvas);
+		if (framebuffer != NULL) {
+			nemomotz_attach_buffer(pix->motz,
+					pixman_image_get_data(framebuffer),
+					pixman_image_get_width(framebuffer),
+					pixman_image_get_height(framebuffer));
+			nemomotz_update_buffer(pix->motz);
+			nemomotz_detach_buffer(pix->motz);
+		}
+
+		nemocanvas_damage(canvas, 0, 0, pix->width, pix->height);
+		nemocanvas_commit(canvas);
+	} else {
+		nemocanvas_terminate_feedback(canvas);
 	}
-
-	nemocanvas_damage(canvas, 0, 0, pix->width, pix->height);
-	nemocanvas_commit(canvas);
 }
 
 static int nemopix_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t type, struct nemoevent *event)
@@ -144,19 +148,19 @@ static int nemopix_dispatch_tap_event(struct nemoaction *action, struct actionta
 				nemoaction_tap_get_device(tap),
 				nemoaction_tap_get_tx(tap),
 				nemoaction_tap_get_ty(tap));
-		nemocanvas_dispatch_frame_with_feedback(pix->canvas);
+		nemocanvas_dispatch_frame(pix->canvas);
 	} else if (event & NEMOACTION_TAP_MOTION_EVENT) {
 		nemomotz_dispatch_motion_event(pix->motz,
 				nemoaction_tap_get_device(tap),
 				nemoaction_tap_get_tx(tap),
 				nemoaction_tap_get_ty(tap));
-		nemocanvas_dispatch_frame_with_feedback(pix->canvas);
+		nemocanvas_dispatch_frame(pix->canvas);
 	} else if (event & NEMOACTION_TAP_UP_EVENT) {
 		nemomotz_dispatch_up_event(pix->motz,
 				nemoaction_tap_get_device(tap),
 				nemoaction_tap_get_tx(tap),
 				nemoaction_tap_get_ty(tap));
-		nemocanvas_dispatch_frame_with_feedback(pix->canvas);
+		nemocanvas_dispatch_frame(pix->canvas);
 	}
 
 	return 0;
@@ -395,7 +399,7 @@ int main(int argc, char *argv[])
 	nemomotz_one_set_flags(one, NEMOMOTZ_OBJECT_STROKE_FLAG);
 	nemomotz_attach_one(motz, one);
 
-	nemocanvas_dispatch_frame_with_feedback(canvas);
+	nemocanvas_dispatch_frame(canvas);
 
 	nemotool_run(tool);
 

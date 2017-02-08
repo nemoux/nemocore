@@ -848,21 +848,6 @@ void nemocanvas_dispatch_frame(struct nemocanvas *canvas)
 		canvas->dispatch_frame(canvas, 0, 0);
 }
 
-void nemocanvas_dispatch_frame_with_feedback(struct nemocanvas *canvas)
-{
-	if (canvas->feedback == NULL) {
-		if (canvas->framerate == 0) {
-			canvas->feedback = presentation_feedback(canvas->tool->presentation, canvas->surface);
-			presentation_feedback_add_listener(canvas->feedback, &presentation_feedback_listener, canvas);
-		} else {
-			canvas->feedback = presentation_feedback(canvas->tool->presentation, canvas->surface);
-			presentation_feedback_add_listener(canvas->feedback, &presentation_feedback_framerate_listener, canvas);
-		}
-
-		canvas->dispatch_frame(canvas, 0, 0);
-	}
-}
-
 void nemocanvas_dispatch_resize(struct nemocanvas *canvas, int32_t width, int32_t height)
 {
 	canvas->dispatch_resize(canvas, width, height);
