@@ -35,6 +35,8 @@ static void nemomotz_burst_motion(struct nemomotz *motz, struct motztap *tap, st
 
 static void nemomotz_burst_up(struct nemomotz *motz, struct motztap *tap, struct motzone *one, float x, float y)
 {
+	nemomotz_set_flags(motz, NEMOMOTZ_REDRAW_FLAG);
+
 	nemomotz_one_destroy(one);
 }
 

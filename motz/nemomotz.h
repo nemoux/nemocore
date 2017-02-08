@@ -13,6 +13,10 @@ NEMO_BEGIN_EXTERN_C
 #include <nemotoyz.h>
 
 typedef enum {
+	NEMOMOTZ_REDRAW_FLAG = (1 << 0)
+} NemoMotzFlag;
+
+typedef enum {
 	NEMOMOTZ_ONE_FLAGS_DIRTY = (1 << 0)
 } NemoMotzOneDirty;
 
@@ -44,6 +48,8 @@ struct nemomotz {
 	struct {
 		int width, height;
 	} viewport;
+
+	uint32_t flags;
 
 	nemomotz_down_t down;
 	nemomotz_motion_t motion;
@@ -82,7 +88,7 @@ extern void nemomotz_destroy(struct nemomotz *motz);
 
 extern void nemomotz_set_size(struct nemomotz *motz, int width, int height);
 
-extern int nemomotz_update(struct nemomotz *motz);
+extern void nemomotz_update(struct nemomotz *motz);
 
 extern int nemomotz_attach_buffer(struct nemomotz *motz, void *buffer, int width, int height);
 extern void nemomotz_detach_buffer(struct nemomotz *motz);
@@ -186,6 +192,26 @@ static inline void nemomotz_set_up_callback(struct nemomotz *motz, nemomotz_up_t
 static inline void nemomotz_up(struct nemomotz *motz, struct motztap *tap, float x, float y)
 {
 	motz->up(motz, tap, x, y);
+}
+
+static inline void nemomotz_set_flags(struct nemomotz *motz, uint32_t flags)
+{
+	motz->flags |= flags;
+}
+
+static inline void nemomotz_put_flags(struct nemomotz *motz, uint32_t flags)
+{
+	motz->flags &= ~flags;
+}
+
+static inline int nemomotz_has_flags(struct nemomotz *motz, uint32_t flags)
+{
+	return motz->flags & flags;
+}
+
+static inline int nemomotz_has_flags_all(struct nemomotz *motz, uint32_t flags)
+{
+	return (motz->flags & flags) == flags;
 }
 
 static inline void nemomotz_one_set_draw_callback(struct motzone *one, nemomotz_one_draw_t draw)

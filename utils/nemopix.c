@@ -56,8 +56,10 @@ static void nemopix_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t se
 	struct nemopix *pix = (struct nemopix *)nemocanvas_get_userdata(canvas);
 	pixman_image_t *framebuffer;
 
-	if (nemomotz_update(pix->motz) > 0) {
-		nemocanvas_dispatch_feedback(canvas);
+	nemomotz_update(pix->motz);
+
+	if (nemomotz_has_flags(pix->motz, NEMOMOTZ_REDRAW_FLAG) != 0) {
+		nemomotz_put_flags(pix->motz, NEMOMOTZ_REDRAW_FLAG);
 
 		nemocanvas_ready(canvas);
 
@@ -70,6 +72,8 @@ static void nemopix_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t se
 			nemomotz_update_buffer(pix->motz);
 			nemomotz_detach_buffer(pix->motz);
 		}
+
+		nemocanvas_dispatch_feedback(canvas);
 
 		nemocanvas_damage(canvas, 0, 0, pix->width, pix->height);
 		nemocanvas_commit(canvas);
