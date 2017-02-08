@@ -52,12 +52,22 @@ void nemomotz_set_size(struct nemomotz *motz, int width, int height)
 	motz->height = height;
 }
 
-void nemomotz_update(struct nemomotz *motz)
+int nemomotz_update(struct nemomotz *motz)
 {
 	struct motzone *one;
+	int dirties = 0;
 
-	nemolist_for_each(one, &motz->one_list, link)
-		nemomotz_one_update(one);
+	nemolist_for_each(one, &motz->one_list, link) {
+		if (nemomotz_one_has_no_dirty(one) == 0) {
+			nemomotz_one_update(one);
+
+			nemomotz_one_put_dirty_all(one);
+
+			dirties++;
+		}
+	}
+
+	return dirties;
 }
 
 int nemomotz_attach_buffer(struct nemomotz *motz, void *buffer, int width, int height)

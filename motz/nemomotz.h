@@ -82,7 +82,7 @@ extern void nemomotz_destroy(struct nemomotz *motz);
 
 extern void nemomotz_set_size(struct nemomotz *motz, int width, int height);
 
-extern void nemomotz_update(struct nemomotz *motz);
+extern int nemomotz_update(struct nemomotz *motz);
 
 extern int nemomotz_attach_buffer(struct nemomotz *motz, void *buffer, int width, int height);
 extern void nemomotz_detach_buffer(struct nemomotz *motz);
@@ -289,6 +289,11 @@ static inline void nemomotz_one_put_dirty(struct motzone *one, uint32_t dirty)
 	one->dirty &= ~dirty;
 }
 
+static inline void nemomotz_one_put_dirty_all(struct motzone *one)
+{
+	one->dirty = 0x0;
+}
+
 static inline int nemomotz_one_has_dirty(struct motzone *one, uint32_t dirty)
 {
 	return one->dirty & dirty;
@@ -297,6 +302,11 @@ static inline int nemomotz_one_has_dirty(struct motzone *one, uint32_t dirty)
 static inline int nemomotz_one_has_dirty_all(struct motzone *one, uint32_t dirty)
 {
 	return (one->dirty & dirty) == dirty;
+}
+
+static inline int nemomotz_one_has_no_dirty(struct motzone *one)
+{
+	return one->dirty == 0x0;
 }
 
 static inline void nemomotz_one_set_flags(struct motzone *one, uint32_t flags)
