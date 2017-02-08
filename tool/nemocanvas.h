@@ -144,6 +144,7 @@ extern void nemocanvas_dispatch_feedback(struct nemocanvas *canvas);
 extern void nemocanvas_terminate_feedback(struct nemocanvas *canvas);
 
 extern void nemocanvas_dispatch_frame(struct nemocanvas *canvas);
+extern void nemocanvas_dispatch_frame_with_feedback(struct nemocanvas *canvas);
 
 extern void nemocanvas_dispatch_resize(struct nemocanvas *canvas, int32_t width, int32_t height);
 extern int nemocanvas_dispatch_destroy(struct nemocanvas *canvas);
