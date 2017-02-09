@@ -8,6 +8,17 @@
 #include <nemotrans.h>
 #include <nemomisc.h>
 
+#define NEMOTRANS_ONE_TARGETS_MAX			(8)
+
+struct transone {
+	struct nemoattr attr;
+	int is_double;
+
+	double timings[NEMOTRANS_ONE_TARGETS_MAX];
+	double targets[NEMOTRANS_ONE_TARGETS_MAX];
+	int count;
+};
+
 struct transgroup *nemotrans_group_create(void)
 {
 	struct transgroup *group;

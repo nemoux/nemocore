@@ -13,22 +13,12 @@ NEMO_BEGIN_EXTERN_C
 #include <nemoattr.h>
 #include <nemolist.h>
 
-#define NEMOTRANS_ONE_TARGETS_MAX			(8)
-
 struct nemotrans;
+struct transone;
 struct transgroup;
 
 typedef void (*nemotrans_dispatch_update_t)(struct nemotrans *trans, void *data, float t);
 typedef void (*nemotrans_dispatch_done_t)(struct nemotrans *trans, void *data);
-
-struct transone {
-	struct nemoattr attr;
-	int is_double;
-
-	double timings[NEMOTRANS_ONE_TARGETS_MAX];
-	double targets[NEMOTRANS_ONE_TARGETS_MAX];
-	int count;
-};
 
 struct nemotrans {
 	struct nemolist link;
