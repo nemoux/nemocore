@@ -56,12 +56,17 @@ void nemomotz_set_size(struct nemomotz *motz, int width, int height)
 
 void nemomotz_update(struct nemomotz *motz, uint32_t msecs)
 {
-	struct motztrans *trans, *ntrans;
 	struct motzone *one;
 
-	nemolist_for_each_safe(trans, ntrans, &motz->transition_list, link) {
-		if (nemomotz_transition_dispatch(trans, msecs) != 0)
-			nemomotz_transition_destroy(trans);
+	if (nemolist_empty(&motz->transition_list) == 0) {
+		struct motztrans *trans, *ntrans;
+
+		nemolist_for_each_safe(trans, ntrans, &motz->transition_list, link) {
+			if (nemomotz_transition_dispatch(trans, msecs) != 0)
+				nemomotz_transition_destroy(trans);
+		}
+
+		nemomotz_set_flags(motz, NEMOMOTZ_REDRAW_FLAG);
 	}
 
 	nemolist_for_each(one, &motz->one_list, link) {
