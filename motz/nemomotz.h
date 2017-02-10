@@ -12,6 +12,8 @@ NEMO_BEGIN_EXTERN_C
 #include <nemolist.h>
 #include <nemotoyz.h>
 
+#include <motztrans.h>
+
 typedef enum {
 	NEMOMOTZ_REDRAW_FLAG = (1 << 0)
 } NemoMotzFlag;
@@ -40,6 +42,7 @@ typedef void (*nemomotz_one_destroy_t)(struct motzone *one);
 struct nemomotz {
 	struct nemolist one_list;
 	struct nemolist tap_list;
+	struct nemolist transition_list;
 
 	struct nemotoyz *toyz;
 
@@ -88,7 +91,7 @@ extern void nemomotz_destroy(struct nemomotz *motz);
 
 extern void nemomotz_set_size(struct nemomotz *motz, int width, int height);
 
-extern void nemomotz_update(struct nemomotz *motz);
+extern void nemomotz_update(struct nemomotz *motz, uint32_t msecs);
 
 extern int nemomotz_attach_buffer(struct nemomotz *motz, void *buffer, int width, int height);
 extern void nemomotz_detach_buffer(struct nemomotz *motz);
@@ -132,6 +135,9 @@ extern void nemomotz_attach_tap(struct nemomotz *motz, struct motztap *tap);
 extern void nemomotz_detach_tap(struct nemomotz *motz, struct motztap *tap);
 
 extern struct motztap *nemomotz_find_tap(struct nemomotz *motz, uint64_t id);
+
+extern void nemomotz_attach_transition(struct nemomotz *motz, struct motztrans *trans);
+extern void nemomotz_detach_transition(struct nemomotz *motz, struct motztrans *trans);
 
 static inline void nemomotz_transform_from_viewport(struct nemomotz *motz, float x, float y, float *sx, float *sy)
 {

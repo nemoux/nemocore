@@ -12,8 +12,8 @@ NEMO_BEGIN_EXTERN_C
 #include <nemolist.h>
 #include <nemoease.h>
 
-#include <nemomotz.h>
-
+struct nemomotz;
+struct motzone;
 struct transone;
 
 struct motztrans {

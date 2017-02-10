@@ -6,6 +6,7 @@
 #include <errno.h>
 
 #include <motztrans.h>
+#include <nemomotz.h>
 #include <nemomisc.h>
 
 #define NEMOMOTZ_TRANSITION_ONE_TARGETS_MAX			(8)
@@ -186,5 +187,5 @@ int nemomotz_transition_dispatch(struct motztrans *trans, uint32_t msecs)
 		}
 	}
 
-	return 0;
+	return done;
 }

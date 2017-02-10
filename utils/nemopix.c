@@ -56,7 +56,7 @@ static void nemopix_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t se
 	struct nemopix *pix = (struct nemopix *)nemocanvas_get_userdata(canvas);
 	pixman_image_t *framebuffer;
 
-	nemomotz_update(pix->motz);
+	nemomotz_update(pix->motz, time_current_msecs());
 
 	if (nemomotz_has_flags(pix->motz, NEMOMOTZ_REDRAW_FLAG) != 0) {
 		nemomotz_put_flags(pix->motz, NEMOMOTZ_REDRAW_FLAG);
