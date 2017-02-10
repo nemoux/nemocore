@@ -139,6 +139,8 @@ extern struct motztap *nemomotz_find_tap(struct nemomotz *motz, uint64_t id);
 extern void nemomotz_attach_transition(struct nemomotz *motz, struct motztrans *trans);
 extern void nemomotz_detach_transition(struct nemomotz *motz, struct motztrans *trans);
 
+extern void nemomotz_revoke_transition(struct nemomotz *motz, void *var, int size);
+
 static inline void nemomotz_transform_from_viewport(struct nemomotz *motz, float x, float y, float *sx, float *sy)
 {
 	if (motz->width == motz->viewport.width && motz->height == motz->viewport.height) {

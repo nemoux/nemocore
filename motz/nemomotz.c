@@ -359,3 +359,12 @@ void nemomotz_detach_transition(struct nemomotz *motz, struct motztrans *trans)
 	nemolist_remove(&trans->link);
 	nemolist_init(&trans->link);
 }
+
+void nemomotz_revoke_transition(struct nemomotz *motz, void *var, int size)
+{
+	struct motztrans *trans;
+
+	nemolist_for_each(trans, &motz->transition_list, link) {
+		nemomotz_transition_put_attr(trans, var, size);
+	}
+}
