@@ -268,6 +268,7 @@ int main(int argc, char *argv[])
 	struct nemoaction *action;
 	struct nemomotz *motz;
 	struct motzone *one;
+	struct motztrans *trans;
 	char *fullscreenid = NULL;
 	char *contentpath = NULL;
 	char *busid = NULL;
@@ -402,6 +403,13 @@ int main(int argc, char *argv[])
 	nemomotz_object_set_sx(one, 1.5f);
 	nemomotz_one_set_flags(one, NEMOMOTZ_OBJECT_STROKE_FLAG);
 	nemomotz_attach_one(motz, one);
+
+	trans = nemomotz_transition_create(8, NEMOEASE_CUBIC_INOUT_TYPE, 1000, 300);
+	nemomotz_transition_object_set_red(trans, 0, one);
+	nemomotz_transition_set_target(trans, 0, 1.0f, 255.0f);
+	nemomotz_transition_object_set_green(trans, 1, one);
+	nemomotz_transition_set_target(trans, 1, 1.0f, 0.0f);
+	nemomotz_attach_transition(motz, trans);
 
 	nemocanvas_dispatch_frame(canvas);
 

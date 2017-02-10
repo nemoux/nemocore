@@ -132,15 +132,15 @@ NEMOMOTZ_OBJECT_DECLARE_SET_ATTRIBUTE(float, stroke_width, stroke_width, NEMOMOT
 NEMOMOTZ_OBJECT_DECLARE_GET_ATTRIBUTE(float, stroke_width, stroke_width);
 
 #define NEMOMOTZ_OBJECT_DECLARE_SET_TRANSITION(type, attr, name, _dirty)	\
-	static inline void nemomotz_transition_object_set_##name(struct motztrans *trans, int index, struct motzone *one, type attr) {	\
+	static inline void nemomotz_transition_object_set_##name(struct motztrans *trans, int index, struct motzone *one) {	\
 		struct motzobject *object = NEMOMOTZ_OBJECT(one);	\
-		nemomotz_transition_set_attr(trans, index, &object->attr, attr, &one->dirty, _dirty);	\
+		nemomotz_transition_set_attr(trans, index, &object->attr, object->attr, &one->dirty, _dirty);	\
 	}
 #define NEMOMOTZ_OBJECT_DECLARE_SET_TRANSITION_WITH_FLAGS(type, attr, name, _dirty, _flags)	\
-	static inline void nemomotz_transition_object_set_##name(struct motztrans *trans, int index, struct motzone *one, type attr) {	\
+	static inline void nemomotz_transition_object_set_##name(struct motztrans *trans, int index, struct motzone *one) {	\
 		struct motzobject *object = NEMOMOTZ_OBJECT(one);	\
 		nemomotz_one_set_flags(one, _flags);	\
-		nemomotz_transition_set_attr(trans, index, &object->attr, attr, &one->dirty, _dirty);	\
+		nemomotz_transition_set_attr(trans, index, &object->attr, object->attr, &one->dirty, _dirty);	\
 	}
 
 NEMOMOTZ_OBJECT_DECLARE_SET_TRANSITION_WITH_FLAGS(float, tx, tx, NEMOMOTZ_OBJECT_TRANSFORM_DIRTY, NEMOMOTZ_OBJECT_TRANSFORM_FLAG);
