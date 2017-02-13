@@ -286,6 +286,16 @@ void nemotoyz_draw_polygon(struct nemotoyz *toyz, struct toyzstyle *style, int n
 	toyz->canvas->drawPoints(SkCanvas::kPolygon_PointMode, npoints, points, *style->paint);
 }
 
+void nemotoyz_draw_text(struct nemotoyz *toyz, struct toyzstyle *style, float x, float y, const char *text)
+{
+	toyz->canvas->drawText(text, strlen(text), x, y - style->fontascent, *style->paint);
+}
+
+void nemotoyz_draw_text_on_path(struct nemotoyz *toyz, struct toyzstyle *style, struct toyzpath *path, const char *text)
+{
+	toyz->canvas->drawTextOnPath(text, strlen(text), *path->path, NULL, *style->paint);
+}
+
 void nemotoyz_draw_bitmap(struct nemotoyz *toyz, struct toyzstyle *style, struct nemotoyz *bitmap, float x, float y, float w, float h)
 {
 	SkRect rect = SkRect::MakeXYWH(x, y, w, h);

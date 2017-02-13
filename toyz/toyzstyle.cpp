@@ -11,6 +11,7 @@
 #include <toyzstyle.hpp>
 #include <toyzmatrix.hpp>
 #include <nemotoyz.hpp>
+#include <fonthelper.h>
 #include <nemomisc.h>
 
 struct toyzstyle *nemotoyz_style_create(void)
@@ -273,4 +274,35 @@ void nemotoyz_style_transform_shader(struct toyzstyle *style, struct toyzmatrix 
 	if (shader != NULL)
 		style->paint->setShader(
 				shader->makeWithLocalMatrix(*matrix->matrix));
+}
+
+void nemotoyz_style_load_font(struct toyzstyle *style, const char *path, int index)
+{
+	style->paint->setTypeface(
+			SkTypeface::MakeFromFile(path, index));
+}
+
+void nemotoyz_style_load_fontconfig(struct toyzstyle *style, const char *fontfamily, const char *fontstyle)
+{
+	style->paint->setTypeface(
+			SkTypeface::MakeFromFile(
+				fontconfig_get_path(
+					fontfamily,
+					fontstyle,
+					FC_SLANT_ROMAN,
+					FC_WEIGHT_NORMAL,
+					FC_WIDTH_NORMAL,
+					FC_MONO),
+				0));
+}
+
+void nemotoyz_style_set_font_size(struct toyzstyle *style, float fontsize)
+{
+	SkPaint::FontMetrics metrics;
+
+	style->paint->setTextSize(fontsize);
+
+	style->paint->getFontMetrics(&metrics, 0);
+	style->fontascent = metrics.fAscent;
+	style->fontdescent = metrics.fDescent;
 }

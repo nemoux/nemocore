@@ -88,6 +88,8 @@ extern void nemotoyz_draw_path(struct nemotoyz *toyz, struct toyzstyle *style, s
 extern void nemotoyz_draw_points(struct nemotoyz *toyz, struct toyzstyle *style, int npoints, ...);
 extern void nemotoyz_draw_polyline(struct nemotoyz *toyz, struct toyzstyle *style, int npoints, ...);
 extern void nemotoyz_draw_polygon(struct nemotoyz *toyz, struct toyzstyle *style, int npoints, ...);
+extern void nemotoyz_draw_text(struct nemotoyz *toyz, struct toyzstyle *style, float x, float y, const char *text);
+extern void nemotoyz_draw_text_on_path(struct nemotoyz *toyz, struct toyzstyle *style, struct toyzpath *path, const char *text);
 extern void nemotoyz_draw_bitmap(struct nemotoyz *toyz, struct toyzstyle *style, struct nemotoyz *bitmap, float x, float y, float w, float h);
 extern void nemotoyz_draw_bitmap_with_alpha(struct nemotoyz *toyz, struct toyzstyle *style, struct nemotoyz *bitmap, float x, float y, float w, float h, float alpha);
 extern void nemotoyz_draw_picture(struct nemotoyz *toyz, struct toyzpicture *picture);
@@ -112,6 +114,9 @@ extern void nemotoyz_style_set_radial_gradient_shader(struct toyzstyle *style, f
 extern void nemotoyz_style_set_bitmap_shader(struct toyzstyle *style, struct nemotoyz *bitmap, int tilemodex, int tilemodey);
 extern void nemotoyz_style_put_shader(struct toyzstyle *style);
 extern void nemotoyz_style_transform_shader(struct toyzstyle *style, struct toyzmatrix *matrix);
+extern void nemotoyz_style_load_font(struct toyzstyle *style, const char *path, int index);
+extern void nemotoyz_style_load_fontconfig(struct toyzstyle *style, const char *fontfamily, const char *fontstyle);
+extern void nemotoyz_style_set_font_size(struct toyzstyle *style, float fontsize);
 
 extern struct toyzpath *nemotoyz_path_create(void);
 extern void nemotoyz_path_destroy(struct toyzpath *path);

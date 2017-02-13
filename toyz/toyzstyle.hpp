@@ -5,6 +5,9 @@
 
 struct toyzstyle {
 	SkPaint *paint;
+
+	float fontascent;
+	float fontdescent;
 };
 
 #endif
