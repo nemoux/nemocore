@@ -57,6 +57,17 @@ static void nemomotz_object_draw_arc(struct nemomotz *motz, struct motzone *one)
 	struct motzobject *object = NEMOMOTZ_OBJECT(one);
 }
 
+static void nemomotz_object_draw_text(struct nemomotz *motz, struct motzone *one)
+{
+	struct motzobject *object = NEMOMOTZ_OBJECT(one);
+
+	nemotoyz_draw_text(motz->toyz,
+			object->style,
+			object->x,
+			object->y,
+			object->text);
+}
+
 static void nemomotz_object_draw(struct nemomotz *motz, struct motzone *one)
 {
 	static nemomotz_one_draw_t draws[NEMOMOTZ_OBJECT_LAST_SHAPE] = {
@@ -65,7 +76,8 @@ static void nemomotz_object_draw(struct nemomotz *motz, struct motzone *one)
 		nemomotz_object_draw_rect,
 		nemomotz_object_draw_round_rect,
 		nemomotz_object_draw_circle,
-		nemomotz_object_draw_arc
+		nemomotz_object_draw_arc,
+		nemomotz_object_draw_text
 	};
 	struct motzobject *object = NEMOMOTZ_OBJECT(one);
 
@@ -122,6 +134,7 @@ static int nemomotz_object_contain(struct motzone *one, float x, float y)
 		nemomotz_object_contain_base,
 		nemomotz_object_contain_base,
 		nemomotz_object_contain_circle,
+		nemomotz_object_contain_base,
 		nemomotz_object_contain_base
 	};
 	struct motzobject *object = NEMOMOTZ_OBJECT(one);
@@ -157,6 +170,10 @@ static void nemomotz_object_update(struct motzone *one)
 		nemotoyz_style_set_color(object->style, object->r, object->g, object->b, object->a);
 	if (nemomotz_one_has_dirty(one, NEMOMOTZ_OBJECT_STROKE_WIDTH_DIRTY) != 0)
 		nemotoyz_style_set_stroke_width(object->style, object->stroke_width);
+	if (nemomotz_one_has_dirty(one, NEMOMOTZ_OBJECT_FONT_PATH_DIRTY) != 0)
+		nemotoyz_style_load_font(object->style, object->font_path, 0);
+	if (nemomotz_one_has_dirty(one, NEMOMOTZ_OBJECT_FONT_SIZE_DIRTY) != 0)
+		nemotoyz_style_set_font_size(object->style, object->font_size);
 }
 
 static void nemomotz_object_destroy(struct motzone *one)

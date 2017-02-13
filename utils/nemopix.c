@@ -411,6 +411,21 @@ int main(int argc, char *argv[])
 	nemomotz_transition_set_target(trans, 1, 1.0f, 0.0f);
 	nemomotz_attach_transition(motz, trans);
 
+	one = nemomotz_object_create();
+	nemomotz_object_set_shape(one, NEMOMOTZ_OBJECT_TEXT_SHAPE);
+	nemomotz_object_set_x(one, 0.0f);
+	nemomotz_object_set_y(one, 0.0f);
+	nemomotz_object_set_red(one, 0.0f);
+	nemomotz_object_set_green(one, 255.0f);
+	nemomotz_object_set_blue(one, 255.0f);
+	nemomotz_object_set_alpha(one, 255.0f);
+	nemomotz_object_set_stroke_width(one, 1.0f);
+	nemomotz_one_set_flags(one, NEMOMOTZ_OBJECT_STROKE_FLAG);
+	nemomotz_object_set_font_path(one, "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf");
+	nemomotz_object_set_font_size(one, 32.0f);
+	nemomotz_object_set_text(one, "NEMO-pix");
+	nemomotz_attach_one(motz, one);
+
 	nemocanvas_dispatch_frame(canvas);
 
 	nemotool_run(tool);

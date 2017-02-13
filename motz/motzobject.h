@@ -23,7 +23,10 @@ typedef enum {
 	NEMOMOTZ_OBJECT_SHAPE_DIRTY = (1 << 8),
 	NEMOMOTZ_OBJECT_TRANSFORM_DIRTY = (1 << 9),
 	NEMOMOTZ_OBJECT_COLOR_DIRTY = (1 << 10),
-	NEMOMOTZ_OBJECT_STROKE_WIDTH_DIRTY = (1 << 11)
+	NEMOMOTZ_OBJECT_STROKE_WIDTH_DIRTY = (1 << 11),
+	NEMOMOTZ_OBJECT_FONT_PATH_DIRTY = (1 << 12),
+	NEMOMOTZ_OBJECT_FONT_SIZE_DIRTY = (1 << 13),
+	NEMOMOTZ_OBJECT_TEXT_DIRTY = (1 << 14)
 } NemoMotzObjectDirty;
 
 typedef enum {
@@ -33,6 +36,7 @@ typedef enum {
 	NEMOMOTZ_OBJECT_ROUND_RECT_SHAPE = 3,
 	NEMOMOTZ_OBJECT_CIRCLE_SHAPE = 4,
 	NEMOMOTZ_OBJECT_ARC_SHAPE = 5,
+	NEMOMOTZ_OBJECT_TEXT_SHAPE = 6,
 	NEMOMOTZ_OBJECT_LAST_SHAPE
 } NemoMotzObjectShape;
 
@@ -56,6 +60,10 @@ struct motzobject {
 	float r, g, b, a;
 
 	float stroke_width;
+
+	char *font_path;
+	float font_size;
+	char *text;
 };
 
 #define NEMOMOTZ_OBJECT(one)		((struct motzobject *)container_of(one, struct motzobject, one))
@@ -131,6 +139,13 @@ NEMOMOTZ_OBJECT_DECLARE_GET_ATTRIBUTE(float, a, alpha);
 NEMOMOTZ_OBJECT_DECLARE_SET_ATTRIBUTE(float, stroke_width, stroke_width, NEMOMOTZ_OBJECT_STROKE_WIDTH_DIRTY);
 NEMOMOTZ_OBJECT_DECLARE_GET_ATTRIBUTE(float, stroke_width, stroke_width);
 
+NEMOMOTZ_OBJECT_DECLARE_DUP_STRING(font_path, font_path, NEMOMOTZ_OBJECT_FONT_PATH_DIRTY);
+NEMOMOTZ_OBJECT_DECLARE_GET_ATTRIBUTE(char *, font_path, font_path);
+NEMOMOTZ_OBJECT_DECLARE_SET_ATTRIBUTE(float, font_size, font_size, NEMOMOTZ_OBJECT_FONT_SIZE_DIRTY);
+NEMOMOTZ_OBJECT_DECLARE_GET_ATTRIBUTE(float, font_size, font_size);
+NEMOMOTZ_OBJECT_DECLARE_DUP_STRING(text, text, NEMOMOTZ_OBJECT_TEXT_DIRTY);
+NEMOMOTZ_OBJECT_DECLARE_GET_ATTRIBUTE(char *, text, text);
+
 #define NEMOMOTZ_OBJECT_DECLARE_SET_TRANSITION(type, attr, name, _dirty)	\
 	static inline void nemomotz_transition_object_set_##name(struct motztrans *trans, int index, struct motzone *one) {	\
 		struct motzobject *object = NEMOMOTZ_OBJECT(one);	\
@@ -161,6 +176,8 @@ NEMOMOTZ_OBJECT_DECLARE_SET_TRANSITION(float, b, blue, NEMOMOTZ_OBJECT_COLOR_DIR
 NEMOMOTZ_OBJECT_DECLARE_SET_TRANSITION(float, a, alpha, NEMOMOTZ_OBJECT_COLOR_DIRTY);
 
 NEMOMOTZ_OBJECT_DECLARE_SET_TRANSITION(float, stroke_width, stroke_width, NEMOMOTZ_OBJECT_STROKE_WIDTH_DIRTY);
+
+NEMOMOTZ_OBJECT_DECLARE_SET_TRANSITION(float, font_size, font_size, NEMOMOTZ_OBJECT_FONT_SIZE_DIRTY);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
