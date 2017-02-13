@@ -128,6 +128,7 @@ extern void nemotoyz_path_arcto(struct toyzpath *path, float x, float y, float w
 extern void nemotoyz_path_close(struct toyzpath *path);
 extern void nemotoyz_path_cmd(struct toyzpath *path, const char *cmd);
 extern void nemotoyz_path_arc(struct toyzpath *path, float x, float y, float w, float h, float from, float to);
+extern void nemotoyz_path_text(struct toyzpath *path, struct toyzstyle *style, float x, float y, const char *text);
 extern void nemotoyz_path_append(struct toyzpath *path, struct toyzpath *spath);
 extern void nemotoyz_path_translate(struct toyzpath *path, float tx, float ty);
 extern void nemotoyz_path_scale(struct toyzpath *path, float sx, float sy);

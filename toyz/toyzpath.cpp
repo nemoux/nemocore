@@ -7,6 +7,7 @@
 
 #include <nemotoyz.h>
 #include <toyzpath.hpp>
+#include <toyzstyle.hpp>
 #include <nemomisc.h>
 
 struct toyzpath *nemotoyz_path_create(void)
@@ -70,6 +71,14 @@ void nemotoyz_path_arc(struct toyzpath *path, float x, float y, float w, float h
 	SkRect rect = SkRect::MakeXYWH(x, y, w, h);
 
 	path->path->addArc(rect, from, to);
+}
+
+void nemotoyz_path_text(struct toyzpath *path, struct toyzstyle *style, float x, float y, const char *text)
+{
+	SkPath rpath;
+	style->paint->getTextPath(text, strlen(text), x, y - style->fontascent, &rpath);
+
+	path->path->addPath(rpath);
 }
 
 void nemotoyz_path_append(struct toyzpath *path, struct toyzpath *spath)
