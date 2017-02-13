@@ -20,15 +20,12 @@ int nemomote_tween_update(struct nemomote *mote, uint32_t type, double secs, str
 
 		NEMOMOTE_TWEEN_RT(mote, i) -= secs;
 
-		if (NEMOMOTE_TWEEN_RT(mote, i) > 0.0f) {
-			t = nemoease_get(ease,
-					NEMOMOTE_TWEEN_DT(mote, i) - NEMOMOTE_TWEEN_RT(mote, i),
-					NEMOMOTE_TWEEN_DT(mote, i));
-		} else {
-			t = 1.0f;
+		t = nemoease_get(ease,
+				NEMOMOTE_TWEEN_DT(mote, i) - NEMOMOTE_TWEEN_RT(mote, i),
+				NEMOMOTE_TWEEN_DT(mote, i));
 
+		if (NEMOMOTE_TWEEN_RT(mote, i) <= 0.0f)
 			mote->types[i] = dtype;
-		}
 
 		if (tween & NEMOMOTE_POSITION_TWEEN) {
 			NEMOMOTE_POSITION_X(mote, i) = (NEMOMOTE_TWEEN_DX(mote, i) - NEMOMOTE_TWEEN_SX(mote, i)) * t + NEMOMOTE_TWEEN_SX(mote, i);

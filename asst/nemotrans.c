@@ -257,7 +257,6 @@ int nemotrans_dispatch(struct nemotrans *trans, uint32_t msecs)
 {
 	struct transone *one;
 	double t, u, v;
-	int done;
 	int i, j;
 
 	if (trans->stime == 0) {
@@ -268,13 +267,7 @@ int nemotrans_dispatch(struct nemotrans *trans, uint32_t msecs)
 	if (trans->stime > msecs)
 		return 0;
 
-	if (trans->etime > msecs) {
-		t = nemoease_get(&trans->ease, msecs - trans->stime, trans->duration);
-		done = 0;
-	} else {
-		t = 1.0f;
-		done = 1;
-	}
+	t = nemoease_get(&trans->ease, msecs - trans->stime, trans->duration);
 
 	for (i = 0; i < trans->nones; i++) {
 		one = trans->ones[i];
@@ -300,10 +293,10 @@ int nemotrans_dispatch(struct nemotrans *trans, uint32_t msecs)
 	if (trans->dispatch_update != NULL)
 		trans->dispatch_update(trans, trans->data, t);
 
-	if (done != 0 && trans->dispatch_done != NULL)
+	if (trans->etime <= msecs && trans->dispatch_done != NULL)
 		trans->dispatch_done(trans, trans->data);
 
-	return done;
+	return trans->etime <= msecs;
 }
 
 void nemotrans_set_float(struct nemotrans *trans, int index, float *var)

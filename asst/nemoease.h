@@ -381,6 +381,9 @@ static inline void nemoease_set_cubic(struct nemoease *ease, double sx, double s
 
 static inline double nemoease_get(struct nemoease *ease, double elapsed, double duration)
 {
+	if (elapsed >= duration)
+		return 1.0f;
+
 	if (ease->dispatch != NULL)
 		return ease->dispatch(elapsed, duration);
 

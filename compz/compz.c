@@ -215,7 +215,6 @@ static inline void nemocompz_dispatch_actor_frame(struct nemocompz *compz, uint3
 static inline void nemocompz_dispatch_animation_frame(struct nemocompz *compz, uint32_t msecs)
 {
 	struct nemoanimation *anim, *next;
-	double progress;
 
 	wl_list_for_each_safe(anim, next, &compz->animation_list, link) {
 		if (msecs < anim->stime)
@@ -223,13 +222,8 @@ static inline void nemocompz_dispatch_animation_frame(struct nemocompz *compz, u
 
 		anim->frame_count++;
 
-		if (msecs >= anim->etime) {
-			progress = 1.0f;
-		} else {
-			progress = nemoease_get(&anim->ease, msecs - anim->stime, anim->duration);
-		}
-
-		anim->frame(anim, progress);
+		anim->frame(anim,
+				nemoease_get(&anim->ease, msecs - anim->stime, anim->duration));
 
 		if (msecs >= anim->etime) {
 			wl_list_remove(&anim->link);
