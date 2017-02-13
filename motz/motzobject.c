@@ -107,26 +107,32 @@ static void nemomotz_object_up(struct nemomotz *motz, struct motztap *tap, struc
 {
 }
 
-static int nemomotz_object_contain_none(struct motzone *one, float x, float y)
+static struct motzone *nemomotz_object_contain_none(struct motzone *one, float x, float y)
 {
-	return 0;
+	return NULL;
 }
 
-static int nemomotz_object_contain_base(struct motzone *one, float x, float y)
-{
-	struct motzobject *object = NEMOMOTZ_OBJECT(one);
-
-	return object->x <= x && x < object->x + object->w && object->y <= y && y < object->y + object->h;
-}
-
-static int nemomotz_object_contain_circle(struct motzone *one, float x, float y)
+static struct motzone *nemomotz_object_contain_base(struct motzone *one, float x, float y)
 {
 	struct motzobject *object = NEMOMOTZ_OBJECT(one);
 
-	return object->x - object->radius / 2.0f <= x && x < object->x + object->radius / 2.0f && object->y - object->radius / 2.0f <= y && y < object->y + object->radius / 2.0f;
+	if (object->x <= x && x < object->x + object->w && object->y <= y && y < object->y + object->h)
+		return one;
+
+	return NULL;
 }
 
-static int nemomotz_object_contain(struct motzone *one, float x, float y)
+static struct motzone *nemomotz_object_contain_circle(struct motzone *one, float x, float y)
+{
+	struct motzobject *object = NEMOMOTZ_OBJECT(one);
+
+	if (object->x - object->radius / 2.0f <= x && x < object->x + object->radius / 2.0f && object->y - object->radius / 2.0f <= y && y < object->y + object->radius / 2.0f)
+		return one;
+
+	return NULL;
+}
+
+static struct motzone *nemomotz_object_contain(struct motzone *one, float x, float y)
 {
 	static nemomotz_one_contain_t contains[NEMOMOTZ_OBJECT_LAST_SHAPE] = {
 		nemomotz_object_contain_none,

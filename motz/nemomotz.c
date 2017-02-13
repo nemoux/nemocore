@@ -54,6 +54,23 @@ void nemomotz_set_size(struct nemomotz *motz, int width, int height)
 	motz->height = height;
 }
 
+static inline void nemomotz_update_one(struct nemomotz *motz, struct motzone *one, uint32_t msecs)
+{
+	struct motzone *child;
+
+	if (nemomotz_one_has_no_dirty(one) == 0) {
+		nemomotz_one_update(one);
+
+		nemomotz_one_put_dirty_all(one);
+
+		nemomotz_set_flags(motz, NEMOMOTZ_REDRAW_FLAG);
+	}
+
+	nemolist_for_each(child, &one->one_list, link) {
+		nemomotz_update_one(motz, child, msecs);
+	}
+}
+
 void nemomotz_update(struct nemomotz *motz, uint32_t msecs)
 {
 	struct motzone *one;
@@ -70,13 +87,7 @@ void nemomotz_update(struct nemomotz *motz, uint32_t msecs)
 	}
 
 	nemolist_for_each(one, &motz->one_list, link) {
-		if (nemomotz_one_has_no_dirty(one) == 0) {
-			nemomotz_one_update(one);
-
-			nemomotz_one_put_dirty_all(one);
-
-			nemomotz_set_flags(motz, NEMOMOTZ_REDRAW_FLAG);
-		}
+		nemomotz_update_one(motz, one, msecs);
 	}
 }
 
@@ -132,10 +143,12 @@ void nemomotz_detach_one(struct nemomotz *motz, struct motzone *one)
 struct motzone *nemomotz_pick_one(struct nemomotz *motz, float x, float y)
 {
 	struct motzone *one;
+	struct motzone *tone;
 
 	nemolist_for_each_reverse(one, &motz->one_list, link) {
-		if (nemomotz_one_contain(one, x, y) != 0)
-			return one;
+		tone = nemomotz_one_contain(one, x, y);
+		if (tone != NULL)
+			return tone;
 	}
 
 	return NULL;
@@ -227,9 +240,9 @@ void nemomotz_one_up_null(struct nemomotz *motz, struct motztap *tap, struct mot
 {
 }
 
-int nemomotz_one_contain_null(struct motzone *one, float x, float y)
+struct motzone *nemomotz_one_contain_null(struct motzone *one, float x, float y)
 {
-	return 0;
+	return NULL;
 }
 
 void nemomotz_one_update_null(struct motzone *one)

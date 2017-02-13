@@ -40,11 +40,11 @@ static void nemomotz_burst_up(struct nemomotz *motz, struct motztap *tap, struct
 	nemomotz_one_destroy(one);
 }
 
-static int nemomotz_burst_contain(struct motzone *one, float x, float y)
+static struct motzone *nemomotz_burst_contain(struct motzone *one, float x, float y)
 {
 	struct motzburst *burst = NEMOMOTZ_BURST(one);
 
-	return 0;
+	return NULL;
 }
 
 static void nemomotz_burst_update(struct motzone *one)
