@@ -22,6 +22,9 @@ struct toyzpath *nemotoyz_path_create(void)
 
 void nemotoyz_path_destroy(struct toyzpath *path)
 {
+	if (path->measure != NULL)
+		delete path->measure;
+
 	delete path->path;
 	delete path;
 }
@@ -111,4 +114,52 @@ void nemotoyz_path_rotate(struct toyzpath *path, float rz)
 	matrix.postRotate(rz);
 
 	path->path->transform(matrix);
+}
+
+void nemotoyz_path_bounds(struct toyzpath *path, float *x, float *y, float *w, float *h)
+{
+	SkRect box = path->path->getBounds();
+
+	*x = box.x();
+	*y = box.y();
+	*w = box.width();
+	*h = box.height();
+}
+
+void nemotoyz_path_measure(struct toyzpath *path)
+{
+	if (path->measure == NULL)
+		path->measure = new SkPathMeasure;
+
+	path->measure->setPath(path->path, false);
+}
+
+int nemotoyz_path_position(struct toyzpath *path, float t, float *px, float *py, float *tx, float *ty)
+{
+	SkPoint point;
+	SkVector tangent;
+	bool r;
+
+	r = path->measure->getPosTan(
+			path->measure->getLength() * t,
+			&point,
+			&tangent);
+	if (r == false)
+		return -1;
+
+	*px = point.x();
+	*py = point.y();
+
+	*tx = tangent.x();
+	*ty = tangent.y();
+
+	return 0;
+}
+
+void nemotoyz_path_segment(struct toyzpath *path, float from, float to, struct toyzpath *spath)
+{
+	path->measure->getSegment(
+			path->measure->getLength() * from,
+			path->measure->getLength() * to,
+			spath->path, true);
 }

@@ -135,6 +135,10 @@ extern void nemotoyz_path_append(struct toyzpath *path, struct toyzpath *spath);
 extern void nemotoyz_path_translate(struct toyzpath *path, float tx, float ty);
 extern void nemotoyz_path_scale(struct toyzpath *path, float sx, float sy);
 extern void nemotoyz_path_rotate(struct toyzpath *path, float rz);
+extern void nemotoyz_path_bounds(struct toyzpath *path, float *x, float *y, float *w, float *h);
+extern void nemotoyz_path_measure(struct toyzpath *path);
+extern int nemotoyz_path_position(struct toyzpath *path, float t, float *px, float *py, float *tx, float *ty);
+extern void nemotoyz_path_segment(struct toyzpath *path, float from, float to, struct toyzpath *spath);
 
 extern struct toyzmatrix *nemotoyz_matrix_create(void);
 extern void nemotoyz_matrix_destroy(struct toyzmatrix *matrix);

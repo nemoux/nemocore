@@ -5,6 +5,8 @@
 
 struct toyzpath {
 	SkPath *path;
+
+	SkPathMeasure *measure;
 };
 
 #endif
