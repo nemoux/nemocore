@@ -13,6 +13,7 @@
 #include <nemomotz.h>
 #include <motzgroup.h>
 #include <motzobject.h>
+#include <motzclip.h>
 #include <motzburst.h>
 #include <nemobus.h>
 #include <nemojson.h>
@@ -269,6 +270,7 @@ int main(int argc, char *argv[])
 	struct nemoaction *action;
 	struct nemomotz *motz;
 	struct motzone *group;
+	struct motzone *clip;
 	struct motzone *one;
 	struct motztrans *trans;
 	char *fullscreenid = NULL;
@@ -391,13 +393,6 @@ int main(int argc, char *argv[])
 	nemomotz_group_set_ty(group, 0.0f);
 	nemomotz_attach_one(motz, group);
 
-	trans = nemomotz_transition_create(8, NEMOEASE_CUBIC_INOUT_TYPE, 800, 150);
-	nemomotz_transition_group_set_tx(trans, 0, group);
-	nemomotz_transition_set_target(trans, 0, 1.0f, 100.0f);
-	nemomotz_transition_group_set_ty(trans, 1, group);
-	nemomotz_transition_set_target(trans, 1, 1.0f, 100.0f);
-	nemomotz_attach_transition(motz, trans);
-
 	one = nemomotz_object_create();
 	nemomotz_one_set_down_callback(one, nemopix_dispatch_motz_one_down);
 	nemomotz_one_set_motion_callback(one, nemopix_dispatch_motz_one_motion);
@@ -425,6 +420,13 @@ int main(int argc, char *argv[])
 	nemomotz_transition_set_target(trans, 1, 1.0f, 0.0f);
 	nemomotz_attach_transition(motz, trans);
 
+	clip = nemomotz_clip_create();
+	nemomotz_clip_set_x(clip, 0.0f);
+	nemomotz_clip_set_y(clip, 0.0f);
+	nemomotz_clip_set_width(clip, width);
+	nemomotz_clip_set_height(clip, 96.0f);
+	nemomotz_one_attach_one(group, clip);
+
 	one = nemomotz_object_create();
 	nemomotz_object_set_shape(one, NEMOMOTZ_OBJECT_TEXT_SHAPE);
 	nemomotz_object_set_x(one, 0.0f);
@@ -438,7 +440,12 @@ int main(int argc, char *argv[])
 	nemomotz_object_set_font_path(one, "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf");
 	nemomotz_object_set_font_size(one, 32.0f);
 	nemomotz_object_set_text(one, "NEMO-pix");
-	nemomotz_one_attach_one(group, one);
+	nemomotz_one_attach_one(clip, one);
+
+	trans = nemomotz_transition_create(8, NEMOEASE_CUBIC_INOUT_TYPE, 800, 150);
+	nemomotz_transition_object_set_ty(trans, 0, one);
+	nemomotz_transition_set_target(trans, 0, 1.0f, 96.0f);
+	nemomotz_attach_transition(motz, trans);
 
 	nemocanvas_dispatch_frame(canvas);
 
