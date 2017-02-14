@@ -117,6 +117,8 @@ extern void nemotoyz_style_transform_shader(struct toyzstyle *style, struct toyz
 extern void nemotoyz_style_load_font(struct toyzstyle *style, const char *path, int index);
 extern void nemotoyz_style_load_fontconfig(struct toyzstyle *style, const char *fontfamily, const char *fontstyle);
 extern void nemotoyz_style_set_font_size(struct toyzstyle *style, float fontsize);
+extern float nemotoyz_style_get_text_height(struct toyzstyle *style);
+extern float nemotoyz_style_get_text_width(struct toyzstyle *style, const char *text, int length);
 
 extern struct toyzpath *nemotoyz_path_create(void);
 extern void nemotoyz_path_destroy(struct toyzpath *path);

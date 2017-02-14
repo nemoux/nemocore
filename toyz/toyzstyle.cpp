@@ -306,3 +306,22 @@ void nemotoyz_style_set_font_size(struct toyzstyle *style, float fontsize)
 	style->fontascent = metrics.fAscent;
 	style->fontdescent = metrics.fDescent;
 }
+
+float nemotoyz_style_get_text_height(struct toyzstyle *style)
+{
+	return style->fontdescent - style->fontascent;
+}
+
+float nemotoyz_style_get_text_width(struct toyzstyle *style, const char *text, int length)
+{
+	SkScalar widths[length];
+	float width = 0.0f;
+	int i, count;
+
+	count = style->paint->getTextWidths(text, length, widths, NULL);
+
+	for (i = 0; i < count; i++)
+		width += ceil(widths[i]);
+
+	return width;
+}
