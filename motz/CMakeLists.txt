@@ -16,6 +16,7 @@ add_library(nemomotz SHARED
 	nemomotz.c
 	motztrans.c
 	motzgroup.c
+	motzclip.c
 	motzobject.c
 	motzburst.c
 	)
@@ -33,6 +34,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/motz/nemomotz.h
 	${CMAKE_SOURCE_DIR}/motz/motztrans.h
 	${CMAKE_SOURCE_DIR}/motz/motzgroup.h
+	${CMAKE_SOURCE_DIR}/motz/motzclip.h
 	${CMAKE_SOURCE_DIR}/motz/motzobject.h
 	${CMAKE_SOURCE_DIR}/motz/motzburst.h
 	)

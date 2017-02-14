@@ -14,14 +14,14 @@ static void nemomotz_group_draw(struct nemomotz *motz, struct motzone *one)
 	struct nemotoyz *toyz = motz->toyz;
 	struct motzone *child;
 
+	nemotoyz_save(toyz);
+	nemotoyz_concat(toyz, group->matrix);
+
 	nemolist_for_each(child, &one->one_list, link) {
-		nemotoyz_save(toyz);
-		nemotoyz_concat(toyz, group->matrix);
-
 		nemomotz_one_draw(motz, child);
-
-		nemotoyz_restore(toyz);
 	}
+
+	nemotoyz_restore(toyz);
 }
 
 static void nemomotz_group_down(struct nemomotz *motz, struct motztap *tap, struct motzone *one, float x, float y)

@@ -43,19 +43,6 @@ extern struct motzone *nemomotz_group_create(void);
 		struct motzgroup *group = NEMOMOTZ_GROUP(one);	\
 		return group->attr;	\
 	}
-#define NEMOMOTZ_GROUP_DECLARE_DUP_STRING(attr, name, dirty)	\
-	static inline void nemomotz_group_set_##name(struct motzone *one, const char *attr) {	\
-		struct motzgroup *group = NEMOMOTZ_GROUP(one);	\
-		if (group->attr != NULL) free(group->attr);	\
-		group->attr = strdup(attr);	\
-		nemomotz_one_set_dirty(one, dirty);	\
-	}
-#define NEMOMOTZ_GROUP_DECLARE_COPY_STRING(attr, name, dirty)	\
-	static inline void nemomotz_group_set_##name(struct motzone *one, const char *attr) {	\
-		struct motzgroup *group = NEMOMOTZ_GROUP(one);	\
-		strcpy(group->attr, attr);	\
-		nemomotz_one_set_dirty(one, dirty);	\
-	}
 
 NEMOMOTZ_GROUP_DECLARE_SET_ATTRIBUTE(float, tx, tx, NEMOMOTZ_GROUP_TRANSFORM_DIRTY);
 NEMOMOTZ_GROUP_DECLARE_GET_ATTRIBUTE(float, tx, tx);
