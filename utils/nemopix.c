@@ -11,6 +11,7 @@
 #include <nemocanvas.h>
 
 #include <nemomotz.h>
+#include <motzgroup.h>
 #include <motzobject.h>
 #include <motzburst.h>
 #include <nemobus.h>
@@ -267,6 +268,7 @@ int main(int argc, char *argv[])
 	struct nemocanvas *canvas;
 	struct nemoaction *action;
 	struct nemomotz *motz;
+	struct motzone *group;
 	struct motzone *one;
 	struct motztrans *trans;
 	char *fullscreenid = NULL;
@@ -384,6 +386,18 @@ int main(int argc, char *argv[])
 	nemomotz_set_size(motz, width, height);
 	nemomotz_set_userdata(motz, pix);
 
+	group = nemomotz_group_create();
+	nemomotz_group_set_tx(group, 0.0f);
+	nemomotz_group_set_ty(group, 0.0f);
+	nemomotz_attach_one(motz, group);
+
+	trans = nemomotz_transition_create(8, NEMOEASE_CUBIC_INOUT_TYPE, 800, 150);
+	nemomotz_transition_group_set_tx(trans, 0, group);
+	nemomotz_transition_set_target(trans, 0, 1.0f, 100.0f);
+	nemomotz_transition_group_set_ty(trans, 1, group);
+	nemomotz_transition_set_target(trans, 1, 1.0f, 100.0f);
+	nemomotz_attach_transition(motz, trans);
+
 	one = nemomotz_object_create();
 	nemomotz_one_set_down_callback(one, nemopix_dispatch_motz_one_down);
 	nemomotz_one_set_motion_callback(one, nemopix_dispatch_motz_one_motion);
@@ -402,7 +416,7 @@ int main(int argc, char *argv[])
 	nemomotz_object_set_ty(one, 50.0f);
 	nemomotz_object_set_sx(one, 1.5f);
 	nemomotz_one_set_flags(one, NEMOMOTZ_OBJECT_STROKE_FLAG);
-	nemomotz_attach_one(motz, one);
+	nemomotz_one_attach_one(group, one);
 
 	trans = nemomotz_transition_create(8, NEMOEASE_CUBIC_INOUT_TYPE, 1000, 300);
 	nemomotz_transition_object_set_red(trans, 0, one);
@@ -424,7 +438,7 @@ int main(int argc, char *argv[])
 	nemomotz_object_set_font_path(one, "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf");
 	nemomotz_object_set_font_size(one, 32.0f);
 	nemomotz_object_set_text(one, "NEMO-pix");
-	nemomotz_attach_one(motz, one);
+	nemomotz_one_attach_one(group, one);
 
 	nemocanvas_dispatch_frame(canvas);
 
