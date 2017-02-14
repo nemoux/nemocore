@@ -16,6 +16,7 @@ struct toyzpath *nemotoyz_path_create(void)
 
 	path = new toyzpath;
 	path->path = new SkPath;
+	path->measure = NULL;
 
 	return path;
 }
