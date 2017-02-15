@@ -148,6 +148,18 @@ void nemotoyz_style_set_path_effect(struct toyzstyle *style, float segment, floa
 			SkDiscretePathEffect::Make(segment, deviation, seed));
 }
 
+void nemotoyz_style_set_dash_effect(struct toyzstyle *style, int *dashes, int count)
+{
+	SkScalar intervals[count];
+	int i;
+
+	for (i = 0; i < count; i++)
+		intervals[i] = SkIntToScalar(dashes[i]);
+
+	style->paint->setPathEffect(
+			SkDashPathEffect::Make(intervals, count, 0));
+}
+
 void nemotoyz_style_put_mask_filter(struct toyzstyle *style)
 {
 	style->paint->setMaskFilter(NULL);
