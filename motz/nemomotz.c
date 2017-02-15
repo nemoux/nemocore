@@ -61,8 +61,6 @@ static inline void nemomotz_update_one(struct nemomotz *motz, struct motzone *on
 	if (nemomotz_one_has_no_dirty(one) == 0) {
 		nemomotz_one_update(one);
 
-		nemomotz_one_put_dirty_all(one);
-
 		nemomotz_set_flags(motz, NEMOMOTZ_REDRAW_FLAG);
 	}
 

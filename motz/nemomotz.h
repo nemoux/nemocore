@@ -298,6 +298,8 @@ static inline void nemomotz_one_set_update_callback(struct motzone *one, nemomot
 static inline void nemomotz_one_update(struct motzone *one)
 {
 	one->update(one);
+
+	one->dirty = 0x0;
 }
 
 static inline void nemomotz_one_set_destroy_callback(struct motzone *one, nemomotz_one_destroy_t destroy)
