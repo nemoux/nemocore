@@ -24,7 +24,7 @@ typedef enum {
 	NEMOMOTZ_OBJECT_TRANSFORM_DIRTY = (1 << 9),
 	NEMOMOTZ_OBJECT_COLOR_DIRTY = (1 << 10),
 	NEMOMOTZ_OBJECT_STROKE_WIDTH_DIRTY = (1 << 11),
-	NEMOMOTZ_OBJECT_FONT_PATH_DIRTY = (1 << 12),
+	NEMOMOTZ_OBJECT_FONT_DIRTY = (1 << 12),
 	NEMOMOTZ_OBJECT_FONT_SIZE_DIRTY = (1 << 13),
 	NEMOMOTZ_OBJECT_TEXT_DIRTY = (1 << 14)
 } NemoMotzObjectDirty;
@@ -62,6 +62,7 @@ struct motzobject {
 	float stroke_width;
 
 	char *font_path;
+	int font_index;
 	float font_size;
 	char *text;
 };
@@ -84,7 +85,7 @@ extern struct motzone *nemomotz_object_create(void);
 		nemomotz_one_set_flags(one, flags);	\
 	}
 #define NEMOMOTZ_OBJECT_DECLARE_GET_ATTRIBUTE(type, attr, name)	\
-	static inline type nemomotz_object_get_##name(struct motzone *one, type attr) {	\
+	static inline type nemomotz_object_get_##name(struct motzone *one) {	\
 		struct motzobject *object = NEMOMOTZ_OBJECT(one);	\
 		return object->attr;	\
 	}
@@ -139,8 +140,10 @@ NEMOMOTZ_OBJECT_DECLARE_GET_ATTRIBUTE(float, a, alpha);
 NEMOMOTZ_OBJECT_DECLARE_SET_ATTRIBUTE(float, stroke_width, stroke_width, NEMOMOTZ_OBJECT_STROKE_WIDTH_DIRTY);
 NEMOMOTZ_OBJECT_DECLARE_GET_ATTRIBUTE(float, stroke_width, stroke_width);
 
-NEMOMOTZ_OBJECT_DECLARE_DUP_STRING(font_path, font_path, NEMOMOTZ_OBJECT_FONT_PATH_DIRTY);
+NEMOMOTZ_OBJECT_DECLARE_DUP_STRING(font_path, font_path, NEMOMOTZ_OBJECT_FONT_DIRTY);
 NEMOMOTZ_OBJECT_DECLARE_GET_ATTRIBUTE(char *, font_path, font_path);
+NEMOMOTZ_OBJECT_DECLARE_SET_ATTRIBUTE(int, font_index, font_index, NEMOMOTZ_OBJECT_FONT_DIRTY);
+NEMOMOTZ_OBJECT_DECLARE_GET_ATTRIBUTE(int, font_index, font_index);
 NEMOMOTZ_OBJECT_DECLARE_SET_ATTRIBUTE(float, font_size, font_size, NEMOMOTZ_OBJECT_FONT_SIZE_DIRTY);
 NEMOMOTZ_OBJECT_DECLARE_GET_ATTRIBUTE(float, font_size, font_size);
 NEMOMOTZ_OBJECT_DECLARE_DUP_STRING(text, text, NEMOMOTZ_OBJECT_TEXT_DIRTY);

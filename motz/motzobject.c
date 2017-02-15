@@ -176,8 +176,8 @@ static void nemomotz_object_update(struct motzone *one)
 		nemotoyz_style_set_color(object->style, object->r, object->g, object->b, object->a);
 	if (nemomotz_one_has_dirty(one, NEMOMOTZ_OBJECT_STROKE_WIDTH_DIRTY) != 0)
 		nemotoyz_style_set_stroke_width(object->style, object->stroke_width);
-	if (nemomotz_one_has_dirty(one, NEMOMOTZ_OBJECT_FONT_PATH_DIRTY) != 0)
-		nemotoyz_style_load_font(object->style, object->font_path, 0);
+	if (nemomotz_one_has_dirty(one, NEMOMOTZ_OBJECT_FONT_DIRTY) != 0)
+		nemotoyz_style_load_font(object->style, object->font_path, object->font_index);
 	if (nemomotz_one_has_dirty(one, NEMOMOTZ_OBJECT_FONT_SIZE_DIRTY) != 0)
 		nemotoyz_style_set_font_size(object->style, object->font_size);
 }

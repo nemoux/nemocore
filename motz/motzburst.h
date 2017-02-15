@@ -58,7 +58,7 @@ extern struct motzone *nemomotz_burst_create(void);
 		nemomotz_one_set_flags(one, flags);	\
 	}
 #define NEMOMOTZ_BURST_DECLARE_GET_ATTRIBUTE(type, attr, name)	\
-	static inline type nemomotz_burst_get_##name(struct motzone *one, type attr) {	\
+	static inline type nemomotz_burst_get_##name(struct motzone *one) {	\
 		struct motzburst *burst = NEMOMOTZ_BURST(one);	\
 		return burst->attr;	\
 	}

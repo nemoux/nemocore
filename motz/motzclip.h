@@ -35,7 +35,7 @@ extern struct motzone *nemomotz_clip_create(void);
 		nemomotz_one_set_dirty(one, dirty);	\
 	}
 #define NEMOMOTZ_CLIP_DECLARE_GET_ATTRIBUTE(type, attr, name)	\
-	static inline type nemomotz_clip_get_##name(struct motzone *one, type attr) {	\
+	static inline type nemomotz_clip_get_##name(struct motzone *one) {	\
 		struct motzclip *clip = NEMOMOTZ_CLIP(one);	\
 		return clip->attr;	\
 	}

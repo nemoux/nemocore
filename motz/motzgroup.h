@@ -39,7 +39,7 @@ extern struct motzone *nemomotz_group_create(void);
 		nemomotz_one_set_dirty(one, dirty);	\
 	}
 #define NEMOMOTZ_GROUP_DECLARE_GET_ATTRIBUTE(type, attr, name)	\
-	static inline type nemomotz_group_get_##name(struct motzone *one, type attr) {	\
+	static inline type nemomotz_group_get_##name(struct motzone *one) {	\
 		struct motzgroup *group = NEMOMOTZ_GROUP(one);	\
 		return group->attr;	\
 	}
