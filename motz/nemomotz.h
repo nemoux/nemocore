@@ -86,6 +86,38 @@ struct motztap {
 	struct nemolist link;
 };
 
+#define NEMOMOTZ_DECLARE_SET_ATTRIBUTE(tag, type, attr, name, dirty)	\
+	static inline void nemomotz_##tag##_set_##name(struct motzone *one, type attr) {	\
+		struct motz##tag *tag = ((struct motz##tag *)container_of(one, struct motz##tag, one));	\
+		tag->attr = attr;	\
+		nemomotz_one_set_dirty(one, dirty);	\
+	}
+#define NEMOMOTZ_DECLARE_SET_ATTRIBUTE_WITH_FLAGS(tag, type, attr, name, dirty, flags)	\
+	static inline void nemomotz_##tag##_set_##name(struct motzone *one, type attr) {	\
+		struct motz##tag *tag = ((struct motz##tag *)container_of(one, struct motz##tag, one));	\
+		tag->attr = attr;	\
+		nemomotz_one_set_dirty(one, dirty);	\
+		nemomotz_one_set_flags(one, flags);	\
+	}
+#define NEMOMOTZ_DECLARE_GET_ATTRIBUTE(tag, type, attr, name)	\
+	static inline type nemomotz_##tag##_get_##name(struct motzone *one) {	\
+		struct motz##tag *tag = ((struct motz##tag *)container_of(one, struct motz##tag, one));	\
+		return tag->attr;	\
+	}
+#define NEMOMOTZ_DECLARE_DUP_STRING(tag, attr, name, dirty)	\
+	static inline void nemomotz_##tag##_set_##name(struct motzone *one, const char *attr) {	\
+		struct motz##tag *tag = ((struct motz##tag *)container_of(one, struct motz##tag, one));	\
+		if (tag->attr != NULL) free(tag->attr);	\
+		tag->attr = strdup(attr);	\
+		nemomotz_one_set_dirty(one, dirty);	\
+	}
+#define NEMOMOTZ_DECLARE_COPY_STRING(tag, attr, name, dirty)	\
+	static inline void nemomotz_##tag##_set_##name(struct motzone *one, const char *attr) {	\
+		struct motz##tag *tag = ((struct motz##tag *)container_of(one, struct motz##tag, one));	\
+		strcpy(tag->attr, attr);	\
+		nemomotz_one_set_dirty(one, dirty);	\
+	}
+
 extern struct nemomotz *nemomotz_create(void);
 extern void nemomotz_destroy(struct nemomotz *motz);
 

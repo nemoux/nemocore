@@ -28,37 +28,19 @@ struct motzclip {
 
 extern struct motzone *nemomotz_clip_create(void);
 
-#define NEMOMOTZ_CLIP_DECLARE_SET_ATTRIBUTE(type, attr, name, dirty)	\
-	static inline void nemomotz_clip_set_##name(struct motzone *one, type attr) {	\
-		struct motzclip *clip = NEMOMOTZ_CLIP(one);	\
-		clip->attr = attr;	\
-		nemomotz_one_set_dirty(one, dirty);	\
-	}
-#define NEMOMOTZ_CLIP_DECLARE_GET_ATTRIBUTE(type, attr, name)	\
-	static inline type nemomotz_clip_get_##name(struct motzone *one) {	\
-		struct motzclip *clip = NEMOMOTZ_CLIP(one);	\
-		return clip->attr;	\
-	}
+NEMOMOTZ_DECLARE_SET_ATTRIBUTE(clip, float, x, x, NEMOMOTZ_CLIP_SHAPE_DIRTY);
+NEMOMOTZ_DECLARE_GET_ATTRIBUTE(clip, float, x, x);
+NEMOMOTZ_DECLARE_SET_ATTRIBUTE(clip, float, y, y, NEMOMOTZ_CLIP_SHAPE_DIRTY);
+NEMOMOTZ_DECLARE_GET_ATTRIBUTE(clip, float, y, y);
+NEMOMOTZ_DECLARE_SET_ATTRIBUTE(clip, float, w, width, NEMOMOTZ_CLIP_SHAPE_DIRTY);
+NEMOMOTZ_DECLARE_GET_ATTRIBUTE(clip, float, w, width);
+NEMOMOTZ_DECLARE_SET_ATTRIBUTE(clip, float, h, height, NEMOMOTZ_CLIP_SHAPE_DIRTY);
+NEMOMOTZ_DECLARE_GET_ATTRIBUTE(clip, float, h, height);
 
-NEMOMOTZ_CLIP_DECLARE_SET_ATTRIBUTE(float, x, x, NEMOMOTZ_CLIP_SHAPE_DIRTY);
-NEMOMOTZ_CLIP_DECLARE_GET_ATTRIBUTE(float, x, x);
-NEMOMOTZ_CLIP_DECLARE_SET_ATTRIBUTE(float, y, y, NEMOMOTZ_CLIP_SHAPE_DIRTY);
-NEMOMOTZ_CLIP_DECLARE_GET_ATTRIBUTE(float, y, y);
-NEMOMOTZ_CLIP_DECLARE_SET_ATTRIBUTE(float, w, width, NEMOMOTZ_CLIP_SHAPE_DIRTY);
-NEMOMOTZ_CLIP_DECLARE_GET_ATTRIBUTE(float, w, width);
-NEMOMOTZ_CLIP_DECLARE_SET_ATTRIBUTE(float, h, height, NEMOMOTZ_CLIP_SHAPE_DIRTY);
-NEMOMOTZ_CLIP_DECLARE_GET_ATTRIBUTE(float, h, height);
-
-#define NEMOMOTZ_CLIP_DECLARE_SET_TRANSITION(type, attr, name, _dirty)	\
-	static inline void nemomotz_transition_clip_set_##name(struct motztrans *trans, int index, struct motzone *one) {	\
-		struct motzclip *clip = NEMOMOTZ_CLIP(one);	\
-		nemomotz_transition_set_attr(trans, index, &clip->attr, clip->attr, &one->dirty, _dirty);	\
-	}
-
-NEMOMOTZ_CLIP_DECLARE_SET_TRANSITION(float, x, x, NEMOMOTZ_CLIP_SHAPE_DIRTY);
-NEMOMOTZ_CLIP_DECLARE_SET_TRANSITION(float, y, y, NEMOMOTZ_CLIP_SHAPE_DIRTY);
-NEMOMOTZ_CLIP_DECLARE_SET_TRANSITION(float, w, width, NEMOMOTZ_CLIP_SHAPE_DIRTY);
-NEMOMOTZ_CLIP_DECLARE_SET_TRANSITION(float, h, height, NEMOMOTZ_CLIP_SHAPE_DIRTY);
+NEMOMOTZ_DECLARE_SET_TRANSITION(clip, float, x, x, NEMOMOTZ_CLIP_SHAPE_DIRTY);
+NEMOMOTZ_DECLARE_SET_TRANSITION(clip, float, y, y, NEMOMOTZ_CLIP_SHAPE_DIRTY);
+NEMOMOTZ_DECLARE_SET_TRANSITION(clip, float, w, width, NEMOMOTZ_CLIP_SHAPE_DIRTY);
+NEMOMOTZ_DECLARE_SET_TRANSITION(clip, float, h, height, NEMOMOTZ_CLIP_SHAPE_DIRTY);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

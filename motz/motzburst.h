@@ -44,43 +44,24 @@ struct motzburst {
 
 extern struct motzone *nemomotz_burst_create(void);
 
-#define NEMOMOTZ_BURST_DECLARE_SET_ATTRIBUTE(type, attr, name, dirty)	\
-	static inline void nemomotz_burst_set_##name(struct motzone *one, type attr) {	\
-		struct motzburst *burst = NEMOMOTZ_BURST(one);	\
-		burst->attr = attr;	\
-		nemomotz_one_set_dirty(one, dirty);	\
-	}
-#define NEMOMOTZ_BURST_DECLARE_SET_ATTRIBUTE_WITH_FLAGS(type, attr, name, dirty, flags)	\
-	static inline void nemomotz_burst_set_##name(struct motzone *one, type attr) {	\
-		struct motzburst *burst = NEMOMOTZ_BURST(one);	\
-		burst->attr = attr;	\
-		nemomotz_one_set_dirty(one, dirty);	\
-		nemomotz_one_set_flags(one, flags);	\
-	}
-#define NEMOMOTZ_BURST_DECLARE_GET_ATTRIBUTE(type, attr, name)	\
-	static inline type nemomotz_burst_get_##name(struct motzone *one) {	\
-		struct motzburst *burst = NEMOMOTZ_BURST(one);	\
-		return burst->attr;	\
-	}
+NEMOMOTZ_DECLARE_SET_ATTRIBUTE_WITH_FLAGS(burst, float, tx, tx, NEMOMOTZ_BURST_TRANSFORM_DIRTY, NEMOMOTZ_BURST_TRANSFORM_FLAG);
+NEMOMOTZ_DECLARE_GET_ATTRIBUTE(burst, float, tx, tx);
+NEMOMOTZ_DECLARE_SET_ATTRIBUTE_WITH_FLAGS(burst, float, ty, ty, NEMOMOTZ_BURST_TRANSFORM_DIRTY, NEMOMOTZ_BURST_TRANSFORM_FLAG);
+NEMOMOTZ_DECLARE_GET_ATTRIBUTE(burst, float, ty, ty);
 
-NEMOMOTZ_BURST_DECLARE_SET_ATTRIBUTE_WITH_FLAGS(float, tx, tx, NEMOMOTZ_BURST_TRANSFORM_DIRTY, NEMOMOTZ_BURST_TRANSFORM_FLAG);
-NEMOMOTZ_BURST_DECLARE_GET_ATTRIBUTE(float, tx, tx);
-NEMOMOTZ_BURST_DECLARE_SET_ATTRIBUTE_WITH_FLAGS(float, ty, ty, NEMOMOTZ_BURST_TRANSFORM_DIRTY, NEMOMOTZ_BURST_TRANSFORM_FLAG);
-NEMOMOTZ_BURST_DECLARE_GET_ATTRIBUTE(float, ty, ty);
+NEMOMOTZ_DECLARE_SET_ATTRIBUTE(burst, float, size, size, NEMOMOTZ_BURST_SHAPE_DIRTY);
+NEMOMOTZ_DECLARE_GET_ATTRIBUTE(burst, float, size, size);
 
-NEMOMOTZ_BURST_DECLARE_SET_ATTRIBUTE(float, size, size, NEMOMOTZ_BURST_SHAPE_DIRTY);
-NEMOMOTZ_BURST_DECLARE_GET_ATTRIBUTE(float, size, size);
-
-NEMOMOTZ_BURST_DECLARE_SET_ATTRIBUTE(float, r, red, NEMOMOTZ_BURST_COLOR_DIRTY);
-NEMOMOTZ_BURST_DECLARE_GET_ATTRIBUTE(float, r, red);
-NEMOMOTZ_BURST_DECLARE_SET_ATTRIBUTE(float, g, green, NEMOMOTZ_BURST_COLOR_DIRTY);
-NEMOMOTZ_BURST_DECLARE_GET_ATTRIBUTE(float, g, green);
-NEMOMOTZ_BURST_DECLARE_SET_ATTRIBUTE(float, b, blue, NEMOMOTZ_BURST_COLOR_DIRTY);
-NEMOMOTZ_BURST_DECLARE_GET_ATTRIBUTE(float, b, blue);
-NEMOMOTZ_BURST_DECLARE_SET_ATTRIBUTE(float, a, alpha, NEMOMOTZ_BURST_COLOR_DIRTY);
-NEMOMOTZ_BURST_DECLARE_GET_ATTRIBUTE(float, a, alpha);
-NEMOMOTZ_BURST_DECLARE_SET_ATTRIBUTE(float, stroke_width, stroke_width, NEMOMOTZ_BURST_STROKE_WIDTH_DIRTY);
-NEMOMOTZ_BURST_DECLARE_GET_ATTRIBUTE(float, stroke_width, stroke_width);
+NEMOMOTZ_DECLARE_SET_ATTRIBUTE(burst, float, r, red, NEMOMOTZ_BURST_COLOR_DIRTY);
+NEMOMOTZ_DECLARE_GET_ATTRIBUTE(burst, float, r, red);
+NEMOMOTZ_DECLARE_SET_ATTRIBUTE(burst, float, g, green, NEMOMOTZ_BURST_COLOR_DIRTY);
+NEMOMOTZ_DECLARE_GET_ATTRIBUTE(burst, float, g, green);
+NEMOMOTZ_DECLARE_SET_ATTRIBUTE(burst, float, b, blue, NEMOMOTZ_BURST_COLOR_DIRTY);
+NEMOMOTZ_DECLARE_GET_ATTRIBUTE(burst, float, b, blue);
+NEMOMOTZ_DECLARE_SET_ATTRIBUTE(burst, float, a, alpha, NEMOMOTZ_BURST_COLOR_DIRTY);
+NEMOMOTZ_DECLARE_GET_ATTRIBUTE(burst, float, a, alpha);
+NEMOMOTZ_DECLARE_SET_ATTRIBUTE(burst, float, stroke_width, stroke_width, NEMOMOTZ_BURST_STROKE_WIDTH_DIRTY);
+NEMOMOTZ_DECLARE_GET_ATTRIBUTE(burst, float, stroke_width, stroke_width);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

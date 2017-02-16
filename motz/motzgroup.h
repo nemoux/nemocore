@@ -32,40 +32,22 @@ struct motzgroup {
 
 extern struct motzone *nemomotz_group_create(void);
 
-#define NEMOMOTZ_GROUP_DECLARE_SET_ATTRIBUTE(type, attr, name, dirty)	\
-	static inline void nemomotz_group_set_##name(struct motzone *one, type attr) {	\
-		struct motzgroup *group = NEMOMOTZ_GROUP(one);	\
-		group->attr = attr;	\
-		nemomotz_one_set_dirty(one, dirty);	\
-	}
-#define NEMOMOTZ_GROUP_DECLARE_GET_ATTRIBUTE(type, attr, name)	\
-	static inline type nemomotz_group_get_##name(struct motzone *one) {	\
-		struct motzgroup *group = NEMOMOTZ_GROUP(one);	\
-		return group->attr;	\
-	}
+NEMOMOTZ_DECLARE_SET_ATTRIBUTE(group, float, tx, tx, NEMOMOTZ_GROUP_TRANSFORM_DIRTY);
+NEMOMOTZ_DECLARE_GET_ATTRIBUTE(group, float, tx, tx);
+NEMOMOTZ_DECLARE_SET_ATTRIBUTE(group, float, ty, ty, NEMOMOTZ_GROUP_TRANSFORM_DIRTY);
+NEMOMOTZ_DECLARE_GET_ATTRIBUTE(group, float, ty, ty);
+NEMOMOTZ_DECLARE_SET_ATTRIBUTE(group, float, sx, sx, NEMOMOTZ_GROUP_TRANSFORM_DIRTY);
+NEMOMOTZ_DECLARE_GET_ATTRIBUTE(group, float, sx, sx);
+NEMOMOTZ_DECLARE_SET_ATTRIBUTE(group, float, sy, sy, NEMOMOTZ_GROUP_TRANSFORM_DIRTY);
+NEMOMOTZ_DECLARE_GET_ATTRIBUTE(group, float, sy, sy);
+NEMOMOTZ_DECLARE_SET_ATTRIBUTE(group, float, rz, rz, NEMOMOTZ_GROUP_TRANSFORM_DIRTY);
+NEMOMOTZ_DECLARE_GET_ATTRIBUTE(group, float, rz, rz);
 
-NEMOMOTZ_GROUP_DECLARE_SET_ATTRIBUTE(float, tx, tx, NEMOMOTZ_GROUP_TRANSFORM_DIRTY);
-NEMOMOTZ_GROUP_DECLARE_GET_ATTRIBUTE(float, tx, tx);
-NEMOMOTZ_GROUP_DECLARE_SET_ATTRIBUTE(float, ty, ty, NEMOMOTZ_GROUP_TRANSFORM_DIRTY);
-NEMOMOTZ_GROUP_DECLARE_GET_ATTRIBUTE(float, ty, ty);
-NEMOMOTZ_GROUP_DECLARE_SET_ATTRIBUTE(float, sx, sx, NEMOMOTZ_GROUP_TRANSFORM_DIRTY);
-NEMOMOTZ_GROUP_DECLARE_GET_ATTRIBUTE(float, sx, sx);
-NEMOMOTZ_GROUP_DECLARE_SET_ATTRIBUTE(float, sy, sy, NEMOMOTZ_GROUP_TRANSFORM_DIRTY);
-NEMOMOTZ_GROUP_DECLARE_GET_ATTRIBUTE(float, sy, sy);
-NEMOMOTZ_GROUP_DECLARE_SET_ATTRIBUTE(float, rz, rz, NEMOMOTZ_GROUP_TRANSFORM_DIRTY);
-NEMOMOTZ_GROUP_DECLARE_GET_ATTRIBUTE(float, rz, rz);
-
-#define NEMOMOTZ_GROUP_DECLARE_SET_TRANSITION(type, attr, name, _dirty)	\
-	static inline void nemomotz_transition_group_set_##name(struct motztrans *trans, int index, struct motzone *one) {	\
-		struct motzgroup *group = NEMOMOTZ_GROUP(one);	\
-		nemomotz_transition_set_attr(trans, index, &group->attr, group->attr, &one->dirty, _dirty);	\
-	}
-
-NEMOMOTZ_GROUP_DECLARE_SET_TRANSITION(float, tx, tx, NEMOMOTZ_GROUP_TRANSFORM_DIRTY);
-NEMOMOTZ_GROUP_DECLARE_SET_TRANSITION(float, ty, ty, NEMOMOTZ_GROUP_TRANSFORM_DIRTY);
-NEMOMOTZ_GROUP_DECLARE_SET_TRANSITION(float, sx, sx, NEMOMOTZ_GROUP_TRANSFORM_DIRTY);
-NEMOMOTZ_GROUP_DECLARE_SET_TRANSITION(float, sy, sy, NEMOMOTZ_GROUP_TRANSFORM_DIRTY);
-NEMOMOTZ_GROUP_DECLARE_SET_TRANSITION(float, rz, rz, NEMOMOTZ_GROUP_TRANSFORM_DIRTY);
+NEMOMOTZ_DECLARE_SET_TRANSITION(group, float, tx, tx, NEMOMOTZ_GROUP_TRANSFORM_DIRTY);
+NEMOMOTZ_DECLARE_SET_TRANSITION(group, float, ty, ty, NEMOMOTZ_GROUP_TRANSFORM_DIRTY);
+NEMOMOTZ_DECLARE_SET_TRANSITION(group, float, sx, sx, NEMOMOTZ_GROUP_TRANSFORM_DIRTY);
+NEMOMOTZ_DECLARE_SET_TRANSITION(group, float, sy, sy, NEMOMOTZ_GROUP_TRANSFORM_DIRTY);
+NEMOMOTZ_DECLARE_SET_TRANSITION(group, float, rz, rz, NEMOMOTZ_GROUP_TRANSFORM_DIRTY);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
