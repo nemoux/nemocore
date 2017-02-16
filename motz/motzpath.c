@@ -85,7 +85,7 @@ static void nemomotz_path_update(struct motzone *one)
 
 	if (nemomotz_one_has_dirty(one, NEMOMOTZ_PATH_RANGE_DIRTY) != 0) {
 		if (nemomotz_one_has_flags(one, NEMOMOTZ_PATH_RANGE_FLAG) != 0) {
-			float length = ceil(nemotoyz_path_length(path->path));
+			float length = nemotoyz_path_length(path->path) + 2.0f;
 			int dashes[4] = {
 				0,
 				length * (path->from),

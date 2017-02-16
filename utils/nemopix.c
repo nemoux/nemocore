@@ -479,6 +479,9 @@ int main(int argc, char *argv[])
 	nemomotz_path_moveto(one, 0.0f, 0.0f);
 	nemomotz_path_lineto(one, width, 0.0f);
 	nemomotz_path_lineto(one, width, height);
+	nemomotz_path_lineto(one, 0.0f, 0.0f);
+	nemomotz_path_lineto(one, 0.0f, height);
+	nemomotz_path_lineto(one, width, height);
 	nemomotz_path_close(one);
 	nemomotz_path_set_red(one, 0.0f);
 	nemomotz_path_set_green(one, 255.0f);
