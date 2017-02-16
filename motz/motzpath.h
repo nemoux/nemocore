@@ -66,6 +66,7 @@ extern void nemomotz_path_lineto(struct motzone *one, float x, float y);
 extern void nemomotz_path_cubicto(struct motzone *one, float x0, float y0, float x1, float y1, float x2, float y2);
 extern void nemomotz_path_close(struct motzone *one);
 extern void nemomotz_path_cmd(struct motzone *one, const char *cmd);
+extern void nemomotz_path_text(struct motzone *one, float x, float y, const char *text);
 
 NEMOMOTZ_DECLARE_SET_ATTRIBUTE_WITH_FLAGS(path, float, from, from, NEMOMOTZ_PATH_RANGE_DIRTY, NEMOMOTZ_PATH_RANGE_FLAG);
 NEMOMOTZ_DECLARE_GET_ATTRIBUTE(path, float, from, from);

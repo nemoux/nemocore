@@ -200,3 +200,12 @@ void nemomotz_path_cmd(struct motzone *one, const char *cmd)
 
 	nemomotz_one_set_dirty(one, NEMOMOTZ_PATH_SHAPE_DIRTY);
 }
+
+void nemomotz_path_text(struct motzone *one, float x, float y, const char *text)
+{
+	struct motzpath *path = NEMOMOTZ_PATH(one);
+
+	nemotoyz_path_text(path->path, path->style, x, y, text);
+
+	nemomotz_one_set_dirty(one, NEMOMOTZ_PATH_SHAPE_DIRTY);
+}
