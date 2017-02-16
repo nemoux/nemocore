@@ -135,6 +135,11 @@ void nemotoyz_path_measure(struct toyzpath *path)
 	path->measure->setPath(path->path, false);
 }
 
+float nemotoyz_path_length(struct toyzpath *path)
+{
+	return path->measure->getLength();
+}
+
 int nemotoyz_path_position(struct toyzpath *path, float t, float *px, float *py, float *tx, float *ty)
 {
 	SkPoint point;

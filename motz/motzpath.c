@@ -69,8 +69,10 @@ static void nemomotz_path_update(struct motzone *one)
 		nemotoyz_matrix_invert(path->inverse, path->matrix);
 	}
 
-	if (nemomotz_one_has_dirty(one, NEMOMOTZ_PATH_SHAPE_DIRTY) != 0)
+	if (nemomotz_one_has_dirty(one, NEMOMOTZ_PATH_SHAPE_DIRTY) != 0) {
 		nemotoyz_path_bounds(path->path, &path->x, &path->y, &path->w, &path->h);
+		nemotoyz_path_measure(path->path);
+	}
 
 	if (nemomotz_one_has_dirty(one, NEMOMOTZ_PATH_COLOR_DIRTY) != 0)
 		nemotoyz_style_set_color(path->style, path->r, path->g, path->b, path->a);
@@ -80,6 +82,20 @@ static void nemomotz_path_update(struct motzone *one)
 		nemotoyz_style_load_font(path->style, path->font_path, path->font_index);
 	if (nemomotz_one_has_dirty(one, NEMOMOTZ_PATH_FONT_SIZE_DIRTY) != 0)
 		nemotoyz_style_set_font_size(path->style, path->font_size);
+
+	if (nemomotz_one_has_dirty(one, NEMOMOTZ_PATH_RANGE_DIRTY) != 0) {
+		if (nemomotz_one_has_flags(one, NEMOMOTZ_PATH_RANGE_FLAG) != 0) {
+			float length = ceil(nemotoyz_path_length(path->path));
+			int dashes[4] = {
+				0,
+				length * (path->from),
+				length * (path->to - path->from),
+				length
+			};
+
+			nemotoyz_style_set_dash_effect(path->style, dashes, 4);
+		}
+	}
 }
 
 static void nemomotz_path_destroy(struct motzone *one)

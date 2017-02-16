@@ -157,7 +157,7 @@ void nemotoyz_style_set_dash_effect(struct toyzstyle *style, int *dashes, int co
 		intervals[i] = SkIntToScalar(dashes[i]);
 
 	style->paint->setPathEffect(
-			SkDashPathEffect::Make(intervals, count, 0));
+			SkDashPathEffect::Make(intervals, count, 1));
 }
 
 void nemotoyz_style_put_mask_filter(struct toyzstyle *style)

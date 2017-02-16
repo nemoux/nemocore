@@ -16,7 +16,8 @@ NEMO_BEGIN_EXTERN_C
 typedef enum {
 	NEMOMOTZ_PATH_FILL_FLAG = (1 << 0),
 	NEMOMOTZ_PATH_STROKE_FLAG = (1 << 1),
-	NEMOMOTZ_PATH_TRANSFORM_FLAG = (1 << 2)
+	NEMOMOTZ_PATH_TRANSFORM_FLAG = (1 << 2),
+	NEMOMOTZ_PATH_RANGE_FLAG = (1 << 3)
 } NemoMotzPathFlag;
 
 typedef enum {
@@ -25,7 +26,8 @@ typedef enum {
 	NEMOMOTZ_PATH_COLOR_DIRTY = (1 << 10),
 	NEMOMOTZ_PATH_STROKE_WIDTH_DIRTY = (1 << 11),
 	NEMOMOTZ_PATH_FONT_DIRTY = (1 << 12),
-	NEMOMOTZ_PATH_FONT_SIZE_DIRTY = (1 << 13)
+	NEMOMOTZ_PATH_FONT_SIZE_DIRTY = (1 << 13),
+	NEMOMOTZ_PATH_RANGE_DIRTY = (1 << 14)
 } NemoMotzPathDirty;
 
 struct motzpath {
@@ -36,6 +38,7 @@ struct motzpath {
 	struct toyzmatrix *inverse;
 
 	struct toyzpath *path;
+	float from, to;
 
 	float tx, ty;
 	float sx, sy;
@@ -63,6 +66,11 @@ extern void nemomotz_path_lineto(struct motzone *one, float x, float y);
 extern void nemomotz_path_cubicto(struct motzone *one, float x0, float y0, float x1, float y1, float x2, float y2);
 extern void nemomotz_path_close(struct motzone *one);
 extern void nemomotz_path_cmd(struct motzone *one, const char *cmd);
+
+NEMOMOTZ_DECLARE_SET_ATTRIBUTE_WITH_FLAGS(path, float, from, from, NEMOMOTZ_PATH_RANGE_DIRTY, NEMOMOTZ_PATH_RANGE_FLAG);
+NEMOMOTZ_DECLARE_GET_ATTRIBUTE(path, float, from, from);
+NEMOMOTZ_DECLARE_SET_ATTRIBUTE_WITH_FLAGS(path, float, to, to, NEMOMOTZ_PATH_RANGE_DIRTY, NEMOMOTZ_PATH_RANGE_FLAG);
+NEMOMOTZ_DECLARE_GET_ATTRIBUTE(path, float, to, to);
 
 NEMOMOTZ_DECLARE_SET_ATTRIBUTE_WITH_FLAGS(path, float, tx, tx, NEMOMOTZ_PATH_TRANSFORM_DIRTY, NEMOMOTZ_PATH_TRANSFORM_FLAG);
 NEMOMOTZ_DECLARE_GET_ATTRIBUTE(path, float, tx, tx);
@@ -98,6 +106,9 @@ NEMOMOTZ_DECLARE_SET_ATTRIBUTE(path, int, font_index, font_index, NEMOMOTZ_PATH_
 NEMOMOTZ_DECLARE_GET_ATTRIBUTE(path, int, font_index, font_index);
 NEMOMOTZ_DECLARE_SET_ATTRIBUTE(path, float, font_size, font_size, NEMOMOTZ_PATH_FONT_SIZE_DIRTY);
 NEMOMOTZ_DECLARE_GET_ATTRIBUTE(path, float, font_size, font_size);
+
+NEMOMOTZ_DECLARE_SET_TRANSITION_WITH_FLAGS(path, float, from, from, NEMOMOTZ_PATH_RANGE_DIRTY, NEMOMOTZ_PATH_RANGE_FLAG);
+NEMOMOTZ_DECLARE_SET_TRANSITION_WITH_FLAGS(path, float, to, to, NEMOMOTZ_PATH_RANGE_DIRTY, NEMOMOTZ_PATH_RANGE_FLAG);
 
 NEMOMOTZ_DECLARE_SET_TRANSITION_WITH_FLAGS(path, float, tx, tx, NEMOMOTZ_PATH_TRANSFORM_DIRTY, NEMOMOTZ_PATH_TRANSFORM_FLAG);
 NEMOMOTZ_DECLARE_SET_TRANSITION_WITH_FLAGS(path, float, ty, ty, NEMOMOTZ_PATH_TRANSFORM_DIRTY, NEMOMOTZ_PATH_TRANSFORM_FLAG);
