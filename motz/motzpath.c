@@ -130,3 +130,57 @@ struct motzone *nemomotz_path_create(void)
 
 	return one;
 }
+
+void nemomotz_path_clear(struct motzone *one)
+{
+	struct motzpath *path = NEMOMOTZ_PATH(one);
+
+	nemotoyz_path_clear(path->path);
+
+	nemomotz_one_set_dirty(one, NEMOMOTZ_PATH_SHAPE_DIRTY);
+}
+
+void nemomotz_path_moveto(struct motzone *one, float x, float y)
+{
+	struct motzpath *path = NEMOMOTZ_PATH(one);
+
+	nemotoyz_path_moveto(path->path, x, y);
+
+	nemomotz_one_set_dirty(one, NEMOMOTZ_PATH_SHAPE_DIRTY);
+}
+
+void nemomotz_path_lineto(struct motzone *one, float x, float y)
+{
+	struct motzpath *path = NEMOMOTZ_PATH(one);
+
+	nemotoyz_path_lineto(path->path, x, y);
+
+	nemomotz_one_set_dirty(one, NEMOMOTZ_PATH_SHAPE_DIRTY);
+}
+
+void nemomotz_path_cubicto(struct motzone *one, float x0, float y0, float x1, float y1, float x2, float y2)
+{
+	struct motzpath *path = NEMOMOTZ_PATH(one);
+
+	nemotoyz_path_cubicto(path->path, x0, y0, x1, y1, x2, y2);
+
+	nemomotz_one_set_dirty(one, NEMOMOTZ_PATH_SHAPE_DIRTY);
+}
+
+void nemomotz_path_close(struct motzone *one)
+{
+	struct motzpath *path = NEMOMOTZ_PATH(one);
+
+	nemotoyz_path_close(path->path);
+
+	nemomotz_one_set_dirty(one, NEMOMOTZ_PATH_SHAPE_DIRTY);
+}
+
+void nemomotz_path_cmd(struct motzone *one, const char *cmd)
+{
+	struct motzpath *path = NEMOMOTZ_PATH(one);
+
+	nemotoyz_path_cmd(path->path, cmd);
+
+	nemomotz_one_set_dirty(one, NEMOMOTZ_PATH_SHAPE_DIRTY);
+}

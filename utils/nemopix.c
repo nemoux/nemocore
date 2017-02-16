@@ -13,6 +13,7 @@
 #include <nemomotz.h>
 #include <motzgroup.h>
 #include <motzobject.h>
+#include <motzpath.h>
 #include <motzclip.h>
 #include <motzburst.h>
 #include <nemobus.h>
@@ -472,6 +473,21 @@ int main(int argc, char *argv[])
 	nemomotz_transition_object_set_ty(trans, 0, one);
 	nemomotz_transition_set_target(trans, 0, 1.0f, 96.0f);
 	nemomotz_attach_transition(motz, trans);
+
+	one = nemomotz_path_create();
+	nemomotz_path_clear(one);
+	nemomotz_path_moveto(one, 0.0f, 0.0f);
+	nemomotz_path_lineto(one, width, 0.0f);
+	nemomotz_path_lineto(one, width, height);
+	nemomotz_path_close(one);
+	nemomotz_object_set_red(one, 0.0f);
+	nemomotz_object_set_green(one, 255.0f);
+	nemomotz_object_set_blue(one, 255.0f);
+	nemomotz_object_set_alpha(one, 255.0f);
+	nemomotz_object_set_stroke_width(one, 3.0f);
+	nemomotz_one_set_flags(one, NEMOMOTZ_OBJECT_STROKE_FLAG);
+	nemomotz_one_set_contain_callback(one, NULL);
+	nemomotz_attach_one(motz, one);
 
 	nemocanvas_dispatch_frame(canvas);
 

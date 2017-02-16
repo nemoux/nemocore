@@ -25,8 +25,7 @@ typedef enum {
 	NEMOMOTZ_PATH_COLOR_DIRTY = (1 << 10),
 	NEMOMOTZ_PATH_STROKE_WIDTH_DIRTY = (1 << 11),
 	NEMOMOTZ_PATH_FONT_DIRTY = (1 << 12),
-	NEMOMOTZ_PATH_FONT_SIZE_DIRTY = (1 << 13),
-	NEMOMOTZ_PATH_TEXT_DIRTY = (1 << 14)
+	NEMOMOTZ_PATH_FONT_SIZE_DIRTY = (1 << 13)
 } NemoMotzPathDirty;
 
 struct motzpath {
@@ -57,6 +56,13 @@ struct motzpath {
 #define NEMOMOTZ_PATH(one)		((struct motzpath *)container_of(one, struct motzpath, one))
 
 extern struct motzone *nemomotz_path_create(void);
+
+extern void nemomotz_path_clear(struct motzone *one);
+extern void nemomotz_path_moveto(struct motzone *one, float x, float y);
+extern void nemomotz_path_lineto(struct motzone *one, float x, float y);
+extern void nemomotz_path_cubicto(struct motzone *one, float x0, float y0, float x1, float y1, float x2, float y2);
+extern void nemomotz_path_close(struct motzone *one);
+extern void nemomotz_path_cmd(struct motzone *one, const char *cmd);
 
 NEMOMOTZ_DECLARE_SET_ATTRIBUTE_WITH_FLAGS(path, float, tx, tx, NEMOMOTZ_PATH_TRANSFORM_DIRTY, NEMOMOTZ_PATH_TRANSFORM_FLAG);
 NEMOMOTZ_DECLARE_GET_ATTRIBUTE(path, float, tx, tx);
