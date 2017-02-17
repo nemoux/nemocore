@@ -192,6 +192,15 @@ void nemomotz_path_close(struct motzone *one)
 	nemomotz_one_set_dirty(one, NEMOMOTZ_PATH_SHAPE_DIRTY);
 }
 
+void nemomotz_path_text(struct motzone *one, float x, float y, const char *text)
+{
+	struct motzpath *path = NEMOMOTZ_PATH(one);
+
+	nemotoyz_path_text(path->path, path->style, x, y, text);
+
+	nemomotz_one_set_dirty(one, NEMOMOTZ_PATH_SHAPE_DIRTY);
+}
+
 void nemomotz_path_cmd(struct motzone *one, const char *cmd)
 {
 	struct motzpath *path = NEMOMOTZ_PATH(one);
@@ -201,11 +210,11 @@ void nemomotz_path_cmd(struct motzone *one, const char *cmd)
 	nemomotz_one_set_dirty(one, NEMOMOTZ_PATH_SHAPE_DIRTY);
 }
 
-void nemomotz_path_text(struct motzone *one, float x, float y, const char *text)
+void nemomotz_path_svg(struct motzone *one, const char *url, float x, float y, float w, float h)
 {
 	struct motzpath *path = NEMOMOTZ_PATH(one);
 
-	nemotoyz_path_text(path->path, path->style, x, y, text);
+	nemotoyz_path_svg(path->path, url, x, y, w, h);
 
 	nemomotz_one_set_dirty(one, NEMOMOTZ_PATH_SHAPE_DIRTY);
 }

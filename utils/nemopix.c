@@ -475,17 +475,10 @@ int main(int argc, char *argv[])
 	nemomotz_attach_transition(motz, trans);
 
 	one = nemomotz_path_create();
-	nemomotz_path_clear(one);
-	nemomotz_path_moveto(one, 0.0f, 0.0f);
-	nemomotz_path_lineto(one, width, 0.0f);
-	nemomotz_path_lineto(one, width, height);
-	nemomotz_path_lineto(one, 0.0f, 0.0f);
-	nemomotz_path_lineto(one, 0.0f, height);
-	nemomotz_path_lineto(one, width, height);
-	nemomotz_path_close(one);
-	nemomotz_path_set_red(one, 0.0f);
+	nemomotz_path_svg(one, "/usr/share/steshell/sub-icons/clock.svg", 0.0f, 0.0f, width, height);
+	nemomotz_path_set_red(one, 255.0f);
 	nemomotz_path_set_green(one, 255.0f);
-	nemomotz_path_set_blue(one, 255.0f);
+	nemomotz_path_set_blue(one, 0.0f);
 	nemomotz_path_set_alpha(one, 255.0f);
 	nemomotz_path_set_stroke_width(one, 3.0f);
 	nemomotz_path_set_to(one, 0.0f);
