@@ -1,5 +1,5 @@
-#ifndef __NEMOMOTZ_MATRIX_HPP__
-#define __NEMOMOTZ_MATRIX_HPP__
+#ifndef __NEMOTOYZ_MATRIX_HPP__
+#define __NEMOTOYZ_MATRIX_HPP__
 
 #include <skiaconfig.hpp>
 

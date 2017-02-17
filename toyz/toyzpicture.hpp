@@ -1,5 +1,5 @@
-#ifndef __NEMOMOTZ_PICTURE_HPP__
-#define __NEMOMOTZ_PICTURE_HPP__
+#ifndef __NEMOTOYZ_PICTURE_HPP__
+#define __NEMOTOYZ_PICTURE_HPP__
 
 #include <skiaconfig.hpp>
 

@@ -1,5 +1,5 @@
-#ifndef __NEMOMOTZ_HPP__
-#define __NEMOMOTZ_HPP__
+#ifndef __NEMOTOYZ_HPP__
+#define __NEMOTOYZ_HPP__
 
 #include <skiaconfig.hpp>
 
