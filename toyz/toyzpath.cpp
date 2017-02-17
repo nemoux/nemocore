@@ -178,3 +178,72 @@ void nemotoyz_path_segment(struct toyzpath *path, float from, float to, struct t
 			path->measure->getLength() * to,
 			spath->path, true);
 }
+
+void nemotoyz_path_dump(struct toyzpath *path, FILE *out)
+{
+	SkPath::Iter iter(*path->path, false);
+	SkPath::Verb verb;
+	SkPoint points[4];
+
+	while ((verb = iter.next(points)) != SkPath::kDone_Verb) {
+		switch (verb) {
+			case SkPath::kMove_Verb:
+				fprintf(out, "[MOVE] (%.2f, %.2f)\n",
+						points[0].x(),
+						points[0].y());
+				break;
+
+			case SkPath::kLine_Verb:
+				fprintf(out, "[LINE] (%.2f, %.2f) (%.2f, %.2f)\n",
+						points[0].x(),
+						points[0].y(),
+						points[1].x(),
+						points[1].y());
+				break;
+
+			case SkPath::kQuad_Verb:
+				fprintf(out, "[QUAD] (%.2f, %.2f) (%.2f, %.2f) (%.2f, %.2f)\n",
+						points[0].x(),
+						points[0].y(),
+						points[1].x(),
+						points[1].y(),
+						points[2].x(),
+						points[2].y());
+				break;
+
+			case SkPath::kConic_Verb:
+				fprintf(out, "[CONIC] (%.2f, %.2f) (%.2f, %.2f) (%.2f, %.2f) weight(%f)\n",
+						points[0].x(),
+						points[0].y(),
+						points[1].x(),
+						points[1].y(),
+						points[2].x(),
+						points[2].y(),
+						SkScalarToFloat(iter.conicWeight()));
+				break;
+
+			case SkPath::kCubic_Verb:
+				fprintf(out, "[CUBIC] (%.2f, %.2f) (%.2f, %.2f) (%.2f, %.2f) (%.2f, %.2f)\n",
+						points[0].x(),
+						points[0].y(),
+						points[1].x(),
+						points[1].y(),
+						points[2].x(),
+						points[2].y(),
+						points[3].x(),
+						points[3].y());
+				break;
+
+			case SkPath::kClose_Verb:
+				fprintf(out, "[CLOSE]\n");
+				break;
+
+			case SkPath::kDone_Verb:
+				fprintf(out, "[DONE]\n");
+				break;
+
+			default:
+				break;
+		}
+	}
+}
