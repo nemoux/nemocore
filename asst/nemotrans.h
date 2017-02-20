@@ -34,6 +34,8 @@ struct nemotrans {
 	uint32_t stime;
 	uint32_t etime;
 
+	uint32_t repeat;
+
 	uint32_t tag;
 	uint32_t flags;
 
@@ -71,6 +73,9 @@ extern void nemotrans_set_tag(struct nemotrans *trans, uint32_t tag);
 
 extern void nemotrans_ease_set_type(struct nemotrans *trans, int type);
 extern void nemotrans_ease_set_bezier(struct nemotrans *trans, double x0, double y0, double x1, double y1);
+
+extern void nemotrans_set_repeat(struct nemotrans *trans, uint32_t repeat);
+extern int nemotrans_check_repeat(struct nemotrans *trans);
 
 extern int nemotrans_ready(struct nemotrans *trans, uint32_t msecs);
 extern int nemotrans_dispatch(struct nemotrans *trans, uint32_t msecs);

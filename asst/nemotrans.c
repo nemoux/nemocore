@@ -84,8 +84,10 @@ void nemotrans_group_dispatch(struct transgroup *group, uint32_t msecs)
 	struct nemotrans *trans, *ntrans;
 
 	nemolist_for_each_safe(trans, ntrans, &group->list, link) {
-		if (nemotrans_dispatch(trans, msecs) != 0)
-			nemotrans_destroy(trans);
+		if (nemotrans_dispatch(trans, msecs) != 0) {
+			if (nemotrans_check_repeat(trans) > 0)
+				nemotrans_destroy(trans);
+		}
 	}
 }
 
@@ -202,6 +204,8 @@ struct nemotrans *nemotrans_create(int max, int type, uint32_t duration, uint32_
 	trans->duration = duration;
 	trans->delay = delay;
 
+	trans->repeat = 1;
+
 	trans->stime = 0;
 	trans->etime = 0;
 
@@ -241,6 +245,23 @@ void nemotrans_ease_set_type(struct nemotrans *trans, int type)
 void nemotrans_ease_set_bezier(struct nemotrans *trans, double x0, double y0, double x1, double y1)
 {
 	nemoease_set_cubic(&trans->ease, x0, y0, x1, y1);
+}
+
+void nemotrans_set_repeat(struct nemotrans *trans, uint32_t repeat)
+{
+	trans->repeat = repeat;
+}
+
+int nemotrans_check_repeat(struct nemotrans *trans)
+{
+	if (trans->repeat == 0 || --trans->repeat > 0) {
+		trans->stime = 0;
+		trans->etime = 0;
+
+		return 0;
+	}
+
+	return 1;
 }
 
 int nemotrans_ready(struct nemotrans *trans, uint32_t msecs)
