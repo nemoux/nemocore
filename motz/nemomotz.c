@@ -77,8 +77,10 @@ void nemomotz_update(struct nemomotz *motz, uint32_t msecs)
 		struct motztrans *trans, *ntrans;
 
 		nemolist_for_each_safe(trans, ntrans, &motz->transition_list, link) {
-			if (nemomotz_transition_dispatch(trans, msecs) != 0)
-				nemomotz_transition_destroy(trans);
+			if (nemomotz_transition_dispatch(trans, msecs) != 0) {
+				if (nemomotz_transition_check_repeat(trans) > 0)
+					nemomotz_transition_destroy(trans);
+			}
 		}
 
 		nemomotz_set_flags(motz, NEMOMOTZ_REDRAW_FLAG);

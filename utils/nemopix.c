@@ -493,6 +493,7 @@ int main(int argc, char *argv[])
 	nemomotz_transition_path_set_to(trans, 1, one);
 	nemomotz_transition_set_target(trans, 1, 0.5f, 0.75f);
 	nemomotz_transition_set_target(trans, 1, 1.0f, 1.0f);
+	nemomotz_transition_set_repeat(trans, 0);
 	nemomotz_attach_transition(motz, trans);
 
 	nemocanvas_dispatch_frame(canvas);

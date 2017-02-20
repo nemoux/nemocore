@@ -25,6 +25,8 @@ struct motztrans {
 	uint32_t stime;
 	uint32_t etime;
 
+	uint32_t repeat;
+
 	struct transone **ones;
 	int nones, sones;
 };
@@ -46,6 +48,9 @@ extern void nemomotz_transition_destroy(struct motztrans *trans);
 
 extern void nemomotz_transition_ease_set_type(struct motztrans *trans, int type);
 extern void nemomotz_transition_ease_set_bezier(struct motztrans *trans, double x0, double y0, double x1, double y1);
+
+extern void nemomotz_transition_set_repeat(struct motztrans *trans, uint32_t repeat);
+extern int nemomotz_transition_check_repeat(struct motztrans *trans);
 
 extern int nemomotz_transition_set_attr(struct motztrans *trans, int index, float *toattr, float attr, uint32_t *todirty, uint32_t dirty);
 extern void nemomotz_transition_put_attr(struct motztrans *trans, void *var, int size);

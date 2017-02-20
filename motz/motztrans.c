@@ -46,6 +46,8 @@ struct motztrans *nemomotz_transition_create(int max, int type, uint32_t duratio
 	trans->duration = duration;
 	trans->delay = delay;
 
+	trans->repeat = 1;
+
 	trans->stime = 0;
 	trans->etime = 0;
 
@@ -79,6 +81,23 @@ void nemomotz_transition_ease_set_type(struct motztrans *trans, int type)
 void nemomotz_transition_ease_set_bezier(struct motztrans *trans, double x0, double y0, double x1, double y1)
 {
 	nemoease_set_cubic(&trans->ease, x0, y0, x1, y1);
+}
+
+void nemomotz_transition_set_repeat(struct motztrans *trans, uint32_t repeat)
+{
+	trans->repeat = repeat;
+}
+
+int nemomotz_transition_check_repeat(struct motztrans *trans)
+{
+	if (trans->repeat == 0 || --trans->repeat > 0) {
+		trans->stime = 0;
+		trans->etime = 0;
+
+		return 0;
+	}
+
+	return 1;
 }
 
 int nemomotz_transition_set_attr(struct motztrans *trans, int index, float *toattr, float attr, uint32_t *todirty, uint32_t dirty)

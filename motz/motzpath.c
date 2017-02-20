@@ -122,8 +122,10 @@ static void nemomotz_path_update(struct motzone *one)
 		nemotoyz_style_set_font_size(path->style, path->font_size);
 
 	if (nemomotz_one_has_dirty(one, NEMOMOTZ_PATH_RANGE_DIRTY) != 0) {
-		if (nemomotz_one_has_flags(one, NEMOMOTZ_PATH_RANGE_FLAG) != 0)
+		if (nemomotz_one_has_flags(one, NEMOMOTZ_PATH_RANGE_FLAG) != 0) {
+			nemotoyz_path_clear(path->subpath);
 			nemotoyz_path_segment(path->path, path->from, path->to, path->subpath);
+		}
 	}
 }
 
