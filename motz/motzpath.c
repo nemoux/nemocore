@@ -74,22 +74,22 @@ static void nemomotz_path_update(struct motzone *one)
 {
 	struct motzpath *path = NEMOMOTZ_PATH(one);
 
-	if (nemomotz_one_has_flags(one, NEMOMOTZ_PATH_RANGE_FLAG) != 0) {
-		if (path->subpath == NULL)
-			path->subpath = nemotoyz_path_create();
-
-		if (nemomotz_one_has_flags(one, NEMOMOTZ_PATH_TRANSFORM_FLAG) != 0)
-			one->draw = nemomotz_path_draw_range_transform;
-		else
-			one->draw = nemomotz_path_draw_range;
-	} else {
-		if (nemomotz_one_has_flags(one, NEMOMOTZ_PATH_TRANSFORM_FLAG) != 0)
-			one->draw = nemomotz_path_draw_transform;
-		else
-			one->draw = nemomotz_path_draw_simple;
-	}
-
 	if (nemomotz_one_has_dirty(one, NEMOMOTZ_ONE_FLAGS_DIRTY) != 0) {
+		if (nemomotz_one_has_flags(one, NEMOMOTZ_PATH_RANGE_FLAG) != 0) {
+			if (path->subpath == NULL)
+				path->subpath = nemotoyz_path_create();
+
+			if (nemomotz_one_has_flags(one, NEMOMOTZ_PATH_TRANSFORM_FLAG) != 0)
+				one->draw = nemomotz_path_draw_range_transform;
+			else
+				one->draw = nemomotz_path_draw_range;
+		} else {
+			if (nemomotz_one_has_flags(one, NEMOMOTZ_PATH_TRANSFORM_FLAG) != 0)
+				one->draw = nemomotz_path_draw_transform;
+			else
+				one->draw = nemomotz_path_draw_simple;
+		}
+
 		if (nemomotz_one_has_flags_all(one, NEMOMOTZ_PATH_FILL_FLAG | NEMOMOTZ_PATH_STROKE_FLAG) != 0)
 			nemotoyz_style_set_type(path->style, NEMOTOYZ_STYLE_STROKE_AND_FILL_TYPE);
 		else if (nemomotz_one_has_flags(one, NEMOMOTZ_PATH_FILL_FLAG) != 0)

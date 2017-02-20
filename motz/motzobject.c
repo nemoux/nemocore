@@ -68,7 +68,7 @@ static void nemomotz_object_draw_text(struct nemomotz *motz, struct motzone *one
 			object->text);
 }
 
-static void nemomotz_object_draw(struct nemomotz *motz, struct motzone *one)
+static void nemomotz_object_draw_simple(struct nemomotz *motz, struct motzone *one)
 {
 	static nemomotz_one_draw_t draws[NEMOMOTZ_OBJECT_LAST_SHAPE] = {
 		nemomotz_object_draw_none,
@@ -81,18 +81,29 @@ static void nemomotz_object_draw(struct nemomotz *motz, struct motzone *one)
 	};
 	struct motzobject *object = NEMOMOTZ_OBJECT(one);
 
-	if (nemomotz_one_has_flags(one, NEMOMOTZ_OBJECT_TRANSFORM_FLAG) != 0) {
-		struct nemotoyz *toyz = motz->toyz;
+	draws[object->shape](motz, one);
+}
 
-		nemotoyz_save(toyz);
-		nemotoyz_concat(toyz, object->matrix);
+static void nemomotz_object_draw_transform(struct nemomotz *motz, struct motzone *one)
+{
+	static nemomotz_one_draw_t draws[NEMOMOTZ_OBJECT_LAST_SHAPE] = {
+		nemomotz_object_draw_none,
+		nemomotz_object_draw_line,
+		nemomotz_object_draw_rect,
+		nemomotz_object_draw_round_rect,
+		nemomotz_object_draw_circle,
+		nemomotz_object_draw_arc,
+		nemomotz_object_draw_text
+	};
+	struct motzobject *object = NEMOMOTZ_OBJECT(one);
+	struct nemotoyz *toyz = motz->toyz;
 
-		draws[object->shape](motz, one);
+	nemotoyz_save(toyz);
+	nemotoyz_concat(toyz, object->matrix);
 
-		nemotoyz_restore(toyz);
-	} else {
-		draws[object->shape](motz, one);
-	}
+	draws[object->shape](motz, one);
+
+	nemotoyz_restore(toyz);
 }
 
 static void nemomotz_object_down(struct nemomotz *motz, struct motztap *tap, struct motzone *one, float x, float y)
@@ -155,6 +166,11 @@ static void nemomotz_object_update(struct motzone *one)
 	struct motzobject *object = NEMOMOTZ_OBJECT(one);
 
 	if (nemomotz_one_has_dirty(one, NEMOMOTZ_ONE_FLAGS_DIRTY) != 0) {
+		if (nemomotz_one_has_flags(one, NEMOMOTZ_OBJECT_TRANSFORM_FLAG) != 0)
+			one->draw = nemomotz_object_draw_transform;
+		else
+			one->draw = nemomotz_object_draw_simple;
+
 		if (nemomotz_one_has_flags_all(one, NEMOMOTZ_OBJECT_FILL_FLAG | NEMOMOTZ_OBJECT_STROKE_FLAG) != 0)
 			nemotoyz_style_set_type(object->style, NEMOTOYZ_STYLE_STROKE_AND_FILL_TYPE);
 		else if (nemomotz_one_has_flags(one, NEMOMOTZ_OBJECT_FILL_FLAG) != 0)
@@ -209,7 +225,7 @@ struct motzone *nemomotz_object_create(void)
 
 	nemomotz_one_prepare(one);
 
-	one->draw = nemomotz_object_draw;
+	one->draw = nemomotz_object_draw_simple;
 	one->down = nemomotz_object_down;
 	one->motion = nemomotz_object_motion;
 	one->up = nemomotz_object_up;
