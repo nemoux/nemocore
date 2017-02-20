@@ -38,6 +38,8 @@ struct motzpath {
 	struct toyzmatrix *inverse;
 
 	struct toyzpath *path;
+
+	struct toyzpath *subpath;
 	float from, to;
 
 	float tx, ty;

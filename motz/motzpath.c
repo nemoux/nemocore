@@ -8,19 +8,42 @@
 #include <motzpath.h>
 #include <nemomisc.h>
 
-static void nemomotz_path_draw(struct nemomotz *motz, struct motzone *one)
+static void nemomotz_path_draw_simple(struct nemomotz *motz, struct motzone *one)
 {
 	struct motzpath *path = NEMOMOTZ_PATH(one);
 	struct nemotoyz *toyz = motz->toyz;
 
-	if (nemomotz_one_has_flags(one, NEMOMOTZ_PATH_TRANSFORM_FLAG) != 0) {
-		nemotoyz_save(toyz);
-		nemotoyz_concat(toyz, path->matrix);
-		nemotoyz_draw_path(toyz, path->style, path->path);
-		nemotoyz_restore(toyz);
-	} else {
-		nemotoyz_draw_path(toyz, path->style, path->path);
-	}
+	nemotoyz_draw_path(toyz, path->style, path->path);
+}
+
+static void nemomotz_path_draw_transform(struct nemomotz *motz, struct motzone *one)
+{
+	struct motzpath *path = NEMOMOTZ_PATH(one);
+	struct nemotoyz *toyz = motz->toyz;
+
+	nemotoyz_save(toyz);
+	nemotoyz_concat(toyz, path->matrix);
+	nemotoyz_draw_path(toyz, path->style, path->path);
+	nemotoyz_restore(toyz);
+}
+
+static void nemomotz_path_draw_range(struct nemomotz *motz, struct motzone *one)
+{
+	struct motzpath *path = NEMOMOTZ_PATH(one);
+	struct nemotoyz *toyz = motz->toyz;
+
+	nemotoyz_draw_path(toyz, path->style, path->subpath);
+}
+
+static void nemomotz_path_draw_range_transform(struct nemomotz *motz, struct motzone *one)
+{
+	struct motzpath *path = NEMOMOTZ_PATH(one);
+	struct nemotoyz *toyz = motz->toyz;
+
+	nemotoyz_save(toyz);
+	nemotoyz_concat(toyz, path->matrix);
+	nemotoyz_draw_path(toyz, path->style, path->subpath);
+	nemotoyz_restore(toyz);
 }
 
 static void nemomotz_path_down(struct nemomotz *motz, struct motztap *tap, struct motzone *one, float x, float y)
@@ -50,6 +73,21 @@ static struct motzone *nemomotz_path_contain(struct motzone *one, float x, float
 static void nemomotz_path_update(struct motzone *one)
 {
 	struct motzpath *path = NEMOMOTZ_PATH(one);
+
+	if (nemomotz_one_has_flags(one, NEMOMOTZ_PATH_RANGE_FLAG) != 0) {
+		if (path->subpath == NULL)
+			path->subpath = nemotoyz_path_create();
+
+		if (nemomotz_one_has_flags(one, NEMOMOTZ_PATH_TRANSFORM_FLAG) != 0)
+			one->draw = nemomotz_path_draw_range_transform;
+		else
+			one->draw = nemomotz_path_draw_range;
+	} else {
+		if (nemomotz_one_has_flags(one, NEMOMOTZ_PATH_TRANSFORM_FLAG) != 0)
+			one->draw = nemomotz_path_draw_transform;
+		else
+			one->draw = nemomotz_path_draw_simple;
+	}
 
 	if (nemomotz_one_has_dirty(one, NEMOMOTZ_ONE_FLAGS_DIRTY) != 0) {
 		if (nemomotz_one_has_flags_all(one, NEMOMOTZ_PATH_FILL_FLAG | NEMOMOTZ_PATH_STROKE_FLAG) != 0)
@@ -84,17 +122,8 @@ static void nemomotz_path_update(struct motzone *one)
 		nemotoyz_style_set_font_size(path->style, path->font_size);
 
 	if (nemomotz_one_has_dirty(one, NEMOMOTZ_PATH_RANGE_DIRTY) != 0) {
-		if (nemomotz_one_has_flags(one, NEMOMOTZ_PATH_RANGE_FLAG) != 0) {
-			float length = nemotoyz_path_length(path->path) + 2.0f;
-			int dashes[4] = {
-				0,
-				length * (path->from),
-				length * (path->to - path->from),
-				length
-			};
-
-			nemotoyz_style_set_dash_effect(path->style, dashes, 4);
-		}
+		if (nemomotz_one_has_flags(one, NEMOMOTZ_PATH_RANGE_FLAG) != 0)
+			nemotoyz_path_segment(path->path, path->from, path->to, path->subpath);
 	}
 }
 
@@ -103,6 +132,9 @@ static void nemomotz_path_destroy(struct motzone *one)
 	struct motzpath *path = NEMOMOTZ_PATH(one);
 
 	nemomotz_one_finish(one);
+
+	if (path->subpath != NULL)
+		nemotoyz_path_destroy(path->subpath);
 
 	nemotoyz_path_destroy(path->path);
 
@@ -127,7 +159,7 @@ struct motzone *nemomotz_path_create(void)
 
 	nemomotz_one_prepare(one);
 
-	one->draw = nemomotz_path_draw;
+	one->draw = nemomotz_path_draw_simple;
 	one->down = nemomotz_path_down;
 	one->motion = nemomotz_path_motion;
 	one->up = nemomotz_path_up;
