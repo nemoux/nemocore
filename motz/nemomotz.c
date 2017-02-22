@@ -64,12 +64,12 @@ static inline void nemomotz_update_one(struct nemomotz *motz, struct motzone *on
 		nemomotz_set_flags(motz, NEMOMOTZ_REDRAW_FLAG);
 	}
 
-	if (nemomotz_one_frame(one, msecs) != 0)
-		nemomotz_set_flags(motz, NEMOMOTZ_REDRAW_FLAG);
-
 	nemolist_for_each(child, &one->one_list, link) {
 		nemomotz_update_one(motz, child, msecs);
 	}
+
+	if (nemomotz_one_frame(one, msecs) != 0)
+		nemomotz_set_flags(motz, NEMOMOTZ_REDRAW_FLAG);
 }
 
 void nemomotz_update(struct nemomotz *motz, uint32_t msecs)
