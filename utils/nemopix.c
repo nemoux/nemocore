@@ -16,6 +16,7 @@
 #include <motzpath.h>
 #include <motzclip.h>
 #include <motzburst.h>
+#include <motzswirl.h>
 #include <nemobus.h>
 #include <nemojson.h>
 #include <nemoitem.h>
@@ -202,6 +203,19 @@ static void nemopix_dispatch_motz_up(struct nemomotz *motz, struct motztap *tap,
 
 static void nemopix_dispatch_motz_one_down(struct nemomotz *motz, struct motztap *tap, struct motzone *one, float x, float y)
 {
+	struct motzone *cone;
+
+	cone = nemomotz_swirl_create();
+	nemomotz_swirl_set_size(cone, 25.0f);
+	nemomotz_swirl_set_red(cone, 0.0f);
+	nemomotz_swirl_set_green(cone, 255.0f);
+	nemomotz_swirl_set_blue(cone, 255.0f);
+	nemomotz_swirl_set_alpha(cone, 255.0f);
+	nemomotz_swirl_set_stroke_width(cone, 3.0f);
+	nemomotz_swirl_set_tx(cone, x);
+	nemomotz_swirl_set_ty(cone, y);
+	nemomotz_swirl_set_duration(cone, 800);
+	nemomotz_attach_one(motz, cone);
 }
 
 static void nemopix_dispatch_motz_one_motion(struct nemomotz *motz, struct motztap *tap, struct motzone *one, float x, float y)

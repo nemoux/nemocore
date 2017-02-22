@@ -20,6 +20,7 @@ add_library(nemomotz SHARED
 	motzobject.c
 	motzpath.c
 	motzburst.c
+	motzswirl.c
 	)
 
 TARGET_LINK_LIBRARIES(nemomotz
@@ -39,6 +40,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/motz/motzobject.h
 	${CMAKE_SOURCE_DIR}/motz/motzpath.h
 	${CMAKE_SOURCE_DIR}/motz/motzburst.h
+	${CMAKE_SOURCE_DIR}/motz/motzswirl.h
 	)
 
 set(NEMOMOTZ_PKGCONFIG_REQUIRES "nemoasst nemohelper nemotool nemotoyz")

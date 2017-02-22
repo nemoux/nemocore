@@ -56,7 +56,7 @@ void nemomotz_set_size(struct nemomotz *motz, int width, int height)
 
 static inline void nemomotz_update_one(struct nemomotz *motz, struct motzone *one, uint32_t msecs)
 {
-	struct motzone *child;
+	struct motzone *cone, *none;
 
 	if (nemomotz_one_has_no_dirty(one) == 0) {
 		nemomotz_one_update(one);
@@ -64,8 +64,8 @@ static inline void nemomotz_update_one(struct nemomotz *motz, struct motzone *on
 		nemomotz_set_flags(motz, NEMOMOTZ_REDRAW_FLAG);
 	}
 
-	nemolist_for_each(child, &one->one_list, link) {
-		nemomotz_update_one(motz, child, msecs);
+	nemolist_for_each_safe(cone, none, &one->one_list, link) {
+		nemomotz_update_one(motz, cone, msecs);
 	}
 
 	if (nemomotz_one_frame(one, msecs) != 0)
@@ -74,7 +74,7 @@ static inline void nemomotz_update_one(struct nemomotz *motz, struct motzone *on
 
 void nemomotz_update(struct nemomotz *motz, uint32_t msecs)
 {
-	struct motzone *one;
+	struct motzone *one, *none;
 
 	if (nemolist_empty(&motz->transition_list) == 0) {
 		struct motztrans *trans, *ntrans;
@@ -89,7 +89,7 @@ void nemomotz_update(struct nemomotz *motz, uint32_t msecs)
 		nemomotz_set_flags(motz, NEMOMOTZ_REDRAW_FLAG);
 	}
 
-	nemolist_for_each(one, &motz->one_list, link) {
+	nemolist_for_each_safe(one, none, &motz->one_list, link) {
 		nemomotz_update_one(motz, one, msecs);
 	}
 }
