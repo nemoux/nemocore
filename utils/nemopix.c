@@ -72,6 +72,7 @@ static void nemopix_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t se
 					pixman_image_get_data(framebuffer),
 					pixman_image_get_width(framebuffer),
 					pixman_image_get_height(framebuffer));
+			nemomotz_clear_buffer(pix->motz);
 			nemomotz_update_buffer(pix->motz);
 			nemomotz_detach_buffer(pix->motz);
 		}

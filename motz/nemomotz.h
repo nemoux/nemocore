@@ -128,6 +128,7 @@ extern void nemomotz_update(struct nemomotz *motz, uint32_t msecs);
 extern int nemomotz_attach_buffer(struct nemomotz *motz, void *buffer, int width, int height);
 extern void nemomotz_detach_buffer(struct nemomotz *motz);
 extern void nemomotz_update_buffer(struct nemomotz *motz);
+extern void nemomotz_clear_buffer(struct nemomotz *motz);
 
 extern void nemomotz_attach_one(struct nemomotz *motz, struct motzone *one);
 extern void nemomotz_detach_one(struct nemomotz *motz, struct motzone *one);

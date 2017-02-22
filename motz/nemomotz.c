@@ -121,12 +121,15 @@ void nemomotz_update_buffer(struct nemomotz *motz)
 				(float)motz->viewport.width / (float)motz->width,
 				(float)motz->viewport.height / (float)motz->height);
 
-	nemotoyz_clear(toyz);
-
 	nemolist_for_each(one, &motz->one_list, link)
 		nemomotz_one_draw(motz, one);
 
 	nemotoyz_restore(toyz);
+}
+
+void nemomotz_clear_buffer(struct nemomotz *motz)
+{
+	nemotoyz_clear(motz->toyz);
 }
 
 void nemomotz_attach_one(struct nemomotz *motz, struct motzone *one)
