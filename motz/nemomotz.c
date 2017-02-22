@@ -64,6 +64,9 @@ static inline void nemomotz_update_one(struct nemomotz *motz, struct motzone *on
 		nemomotz_set_flags(motz, NEMOMOTZ_REDRAW_FLAG);
 	}
 
+	if (nemomotz_one_frame(one, msecs) != 0)
+		nemomotz_set_flags(motz, NEMOMOTZ_REDRAW_FLAG);
+
 	nemolist_for_each(child, &one->one_list, link) {
 		nemomotz_update_one(motz, child, msecs);
 	}
@@ -252,6 +255,11 @@ void nemomotz_one_update_null(struct motzone *one)
 {
 }
 
+int nemomotz_one_frame_null(struct motzone *one, uint32_t msecs)
+{
+	return 0;
+}
+
 void nemomotz_one_destroy_null(struct motzone *one)
 {
 	nemolist_remove(&one->link);
@@ -278,6 +286,7 @@ struct motzone *nemomotz_one_create(void)
 	one->up = nemomotz_one_up_null;
 	one->contain = nemomotz_one_contain_null;
 	one->update = nemomotz_one_update_null;
+	one->frame = nemomotz_one_frame_null;
 	one->destroy = nemomotz_one_destroy_null;
 
 	return one;
@@ -294,6 +303,7 @@ int nemomotz_one_prepare(struct motzone *one)
 	one->up = nemomotz_one_up_null;
 	one->contain = nemomotz_one_contain_null;
 	one->update = nemomotz_one_update_null;
+	one->frame = nemomotz_one_frame_null;
 	one->destroy = nemomotz_one_destroy_null;
 
 	return 0;

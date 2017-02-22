@@ -63,6 +63,19 @@ static void nemomotz_burst_update(struct motzone *one)
 		nemotoyz_style_set_stroke_width(burst->style, burst->stroke_width);
 }
 
+static int nemomotz_burst_frame(struct motzone *one, uint32_t msecs)
+{
+	struct motzburst *burst = NEMOMOTZ_BURST(one);
+
+	nemotoyz_style_set_color(burst->style,
+			random_get_double(64.0f, 255.0f),
+			random_get_double(64.0f, 255.0f),
+			random_get_double(64.0f, 255.0f),
+			255.0f);
+
+	return 1;
+}
+
 static void nemomotz_burst_destroy(struct motzone *one)
 {
 	struct motzburst *burst = NEMOMOTZ_BURST(one);
@@ -96,6 +109,7 @@ struct motzone *nemomotz_burst_create(void)
 	one->up = nemomotz_burst_up;
 	one->contain = nemomotz_burst_contain;
 	one->update = nemomotz_burst_update;
+	one->frame = nemomotz_burst_frame;
 	one->destroy = nemomotz_burst_destroy;
 
 	burst->style = nemotoyz_style_create();

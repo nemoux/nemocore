@@ -37,6 +37,7 @@ typedef void (*nemomotz_one_up_t)(struct nemomotz *motz, struct motztap *tap, st
 
 typedef struct motzone *(*nemomotz_one_contain_t)(struct motzone *one, float x, float y);
 typedef void (*nemomotz_one_update_t)(struct motzone *one);
+typedef int (*nemomotz_one_frame_t)(struct motzone *one, uint32_t msecs);
 typedef void (*nemomotz_one_destroy_t)(struct motzone *one);
 
 struct nemomotz {
@@ -68,6 +69,7 @@ struct motzone {
 	nemomotz_one_up_t up;
 	nemomotz_one_contain_t contain;
 	nemomotz_one_update_t update;
+	nemomotz_one_frame_t frame;
 	nemomotz_one_destroy_t destroy;
 
 	uint32_t flags;
@@ -156,6 +158,7 @@ extern void nemomotz_one_motion_null(struct nemomotz *motz, struct motztap *tap,
 extern void nemomotz_one_up_null(struct nemomotz *motz, struct motztap *tap, struct motzone *one, float x, float y);
 extern struct motzone *nemomotz_one_contain_null(struct motzone *one, float x, float y);
 extern void nemomotz_one_update_null(struct motzone *one);
+extern int nemomotz_one_frame_null(struct motzone *one, uint32_t msecs);
 extern void nemomotz_one_destroy_null(struct motzone *one);
 
 extern struct motztap *nemomotz_tap_create(void);
@@ -333,6 +336,19 @@ static inline void nemomotz_one_update(struct motzone *one)
 	one->update(one);
 
 	one->dirty = 0x0;
+}
+
+static inline void nemomotz_one_set_frame_callback(struct motzone *one, nemomotz_one_frame_t frame)
+{
+	if (frame != NULL)
+		one->frame = frame;
+	else
+		one->frame = nemomotz_one_frame_null;
+}
+
+static inline int nemomotz_one_frame(struct motzone *one, uint32_t msecs)
+{
+	return one->frame(one, msecs);
 }
 
 static inline void nemomotz_one_set_destroy_callback(struct motzone *one, nemomotz_one_destroy_t destroy)
