@@ -199,5 +199,15 @@ int nemomotz_transition_dispatch(struct motztrans *trans, uint32_t msecs)
 		}
 	}
 
-	return trans->etime <= msecs;
+	if (trans->dispatch_update != NULL)
+		trans->dispatch_update(trans, trans->data, t);
+
+	if (trans->etime <= msecs) {
+		if (trans->dispatch_done != NULL)
+			trans->dispatch_done(trans, trans->data);
+
+		return 1;
+	}
+
+	return 0;
 }

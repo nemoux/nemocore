@@ -87,10 +87,6 @@ extern double nemotrans_get_double(struct nemotrans *trans, int index);
 
 extern void nemotrans_set_target(struct nemotrans *trans, int index, double t, double v);
 
-extern void nemotrans_set_dispatch_update(struct nemotrans *trans, nemotrans_dispatch_update_t dispatch);
-extern void nemotrans_set_dispatch_done(struct nemotrans *trans, nemotrans_dispatch_done_t dispatch);
-extern void nemotrans_set_userdata(struct nemotrans *trans, void *data);
-
 static inline int nemotrans_group_has_transition(struct transgroup *group)
 {
 	return nemolist_empty(&group->list) == 0;
@@ -124,6 +120,21 @@ static inline int nemotrans_has_flags(struct nemotrans *trans, uint32_t flags)
 static inline int nemotrans_has_flags_all(struct nemotrans *trans, uint32_t flags)
 {
 	return (trans->flags & flags) == flags;
+}
+
+static inline void nemotrans_set_dispatch_update(struct nemotrans *trans, nemotrans_dispatch_update_t dispatch)
+{
+	trans->dispatch_update = dispatch;
+}
+
+static inline void nemotrans_set_dispatch_done(struct nemotrans *trans, nemotrans_dispatch_done_t dispatch)
+{
+	trans->dispatch_done = dispatch;
+}
+
+static inline void nemotrans_set_userdata(struct nemotrans *trans, void *data)
+{
+	trans->data = data;
 }
 
 #ifdef __cplusplus

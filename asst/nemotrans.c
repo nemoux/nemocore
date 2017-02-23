@@ -314,10 +314,14 @@ int nemotrans_dispatch(struct nemotrans *trans, uint32_t msecs)
 	if (trans->dispatch_update != NULL)
 		trans->dispatch_update(trans, trans->data, t);
 
-	if (trans->etime <= msecs && trans->dispatch_done != NULL)
-		trans->dispatch_done(trans, trans->data);
+	if (trans->etime <= msecs) {
+		if (trans->dispatch_done != NULL)
+			trans->dispatch_done(trans, trans->data);
 
-	return trans->etime <= msecs;
+		return 1;
+	}
+
+	return 0;
 }
 
 void nemotrans_set_float(struct nemotrans *trans, int index, float *var)
@@ -389,19 +393,4 @@ void nemotrans_set_target(struct nemotrans *trans, int index, double t, double v
 		one->targets[one->count] = v;
 		one->count++;
 	}
-}
-
-void nemotrans_set_dispatch_update(struct nemotrans *trans, nemotrans_dispatch_update_t dispatch)
-{
-	trans->dispatch_update = dispatch;
-}
-
-void nemotrans_set_dispatch_done(struct nemotrans *trans, nemotrans_dispatch_done_t dispatch)
-{
-	trans->dispatch_done = dispatch;
-}
-
-void nemotrans_set_userdata(struct nemotrans *trans, void *data)
-{
-	trans->data = data;
 }

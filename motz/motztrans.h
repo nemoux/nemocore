@@ -14,7 +14,11 @@ NEMO_BEGIN_EXTERN_C
 
 struct nemomotz;
 struct motzone;
+struct motztrans;
 struct transone;
+
+typedef void (*nemomotz_transition_dispatch_update_t)(struct motztrans *trans, void *data, float t);
+typedef void (*nemomotz_transition_dispatch_done_t)(struct motztrans *trans, void *data);
 
 struct motztrans {
 	struct nemolist link;
@@ -29,6 +33,11 @@ struct motztrans {
 
 	struct transone **ones;
 	int nones, sones;
+
+	nemomotz_transition_dispatch_update_t dispatch_update;
+	nemomotz_transition_dispatch_done_t dispatch_done;
+
+	void *data;
 };
 
 #define NEMOMOTZ_DECLARE_SET_TRANSITION(tag, type, attr, name, _dirty)	\
@@ -57,6 +66,21 @@ extern void nemomotz_transition_put_attr(struct motztrans *trans, void *var, int
 extern void nemomotz_transition_set_target(struct motztrans *trans, int index, float t, float v);
 
 extern int nemomotz_transition_dispatch(struct motztrans *trans, uint32_t msecs);
+
+static inline void nemomotz_transition_set_dispatch_update(struct motztrans *trans, nemomotz_transition_dispatch_update_t dispatch)
+{
+	trans->dispatch_update = dispatch;
+}
+
+static inline void nemomotz_transition_set_dispatch_done(struct motztrans *trans, nemomotz_transition_dispatch_done_t dispatch)
+{
+	trans->dispatch_done = dispatch;
+}
+
+static inline void nemomotz_transition_set_userdata(struct motztrans *trans, void *data)
+{
+	trans->data = data;
+}
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
