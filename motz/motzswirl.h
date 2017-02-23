@@ -40,6 +40,9 @@ struct motzswirl {
 	float x, y;
 	float size;
 
+	float frequence;
+	float scale;
+
 	uint32_t duration;
 	uint32_t delay;
 };
@@ -75,6 +78,10 @@ NEMOMOTZ_DECLARE_SET_ATTRIBUTE(swirl, float, y, y, NEMOMOTZ_SWIRL_SHAPE_DIRTY);
 NEMOMOTZ_DECLARE_GET_ATTRIBUTE(swirl, float, y, y);
 NEMOMOTZ_DECLARE_SET_ATTRIBUTE(swirl, float, size, size, NEMOMOTZ_SWIRL_SHAPE_DIRTY);
 NEMOMOTZ_DECLARE_GET_ATTRIBUTE(swirl, float, size, size);
+NEMOMOTZ_DECLARE_SET_ATTRIBUTE(swirl, float, frequence, frequence, NEMOMOTZ_SWIRL_SHAPE_DIRTY);
+NEMOMOTZ_DECLARE_GET_ATTRIBUTE(swirl, float, frequence, frequence);
+NEMOMOTZ_DECLARE_SET_ATTRIBUTE(swirl, float, scale, scale, NEMOMOTZ_SWIRL_SHAPE_DIRTY);
+NEMOMOTZ_DECLARE_GET_ATTRIBUTE(swirl, float, scale, scale);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

@@ -205,7 +205,8 @@ static void nemopix_dispatch_motz_one_down(struct nemomotz *motz, struct motztap
 	struct motzone *cone;
 
 	cone = nemomotz_swirl_create();
-	nemomotz_swirl_set_size(cone, 25.0f);
+	nemomotz_swirl_set_frequence(cone, 8.0f);
+	nemomotz_swirl_set_scale(cone, 16.0f);
 	nemomotz_swirl_set_red(cone, 0.0f);
 	nemomotz_swirl_set_green(cone, 255.0f);
 	nemomotz_swirl_set_blue(cone, 255.0f);
