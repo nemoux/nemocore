@@ -21,8 +21,34 @@ static void nemomotz_swirl_draw(struct nemomotz *motz, struct motzone *one)
 	nemotoyz_restore(toyz);
 }
 
+static void nemomotz_swirl_dispatch_transition_update(struct motztrans *trans, void *data, float t)
+{
+	struct motzone *one = (struct motzone *)data;
+	struct motzswirl *swirl = NEMOMOTZ_SWIRL(one);
+
+	nemomotz_swirl_set_x(one,
+			cos(t * M_PI * 2.0f) * nemomotz_swirl_get_size(one));
+	nemomotz_swirl_set_y(one,
+			sin(t * M_PI * 2.0f) * nemomotz_swirl_get_size(one));
+}
+
+static void nemomotz_swirl_dispatch_transition_done(struct motztrans *trans, void *data)
+{
+	struct motzone *one = (struct motzone *)data;
+
+	nemomotz_one_destroy(one);
+}
+
 static void nemomotz_swirl_down(struct nemomotz *motz, struct motztap *tap, struct motzone *one, float x, float y)
 {
+	struct motzswirl *swirl = NEMOMOTZ_SWIRL(one);
+	struct motztrans *trans;
+
+	trans = nemomotz_transition_create(8, NEMOEASE_CUBIC_INOUT_TYPE, swirl->duration, swirl->delay);
+	nemomotz_transition_set_dispatch_update(trans, nemomotz_swirl_dispatch_transition_update);
+	nemomotz_transition_set_dispatch_done(trans, nemomotz_swirl_dispatch_transition_done);
+	nemomotz_transition_set_userdata(trans, one);
+	nemomotz_attach_transition(motz, trans);
 }
 
 static void nemomotz_swirl_motion(struct nemomotz *motz, struct motztap *tap, struct motzone *one, float x, float y)
@@ -54,32 +80,6 @@ static void nemomotz_swirl_update(struct motzone *one)
 		nemotoyz_style_set_color(swirl->style, swirl->r, swirl->g, swirl->b, swirl->a);
 	if (nemomotz_one_has_dirty(one, NEMOMOTZ_SWIRL_STROKE_WIDTH_DIRTY) != 0)
 		nemotoyz_style_set_stroke_width(swirl->style, swirl->stroke_width);
-}
-
-static int nemomotz_swirl_frame(struct motzone *one, uint32_t msecs)
-{
-	struct motzswirl *swirl = NEMOMOTZ_SWIRL(one);
-	float t;
-
-	if (swirl->stime == 0) {
-		swirl->stime = msecs + swirl->delay;
-		swirl->etime = msecs + swirl->delay + swirl->duration;
-	}
-
-	if (swirl->stime > msecs)
-		return 0;
-
-	if (swirl->etime < msecs) {
-		nemomotz_one_destroy(one);
-		return 1;
-	}
-
-	t = nemoease_get(&swirl->ease, msecs - swirl->stime, swirl->duration);
-
-	swirl->x = cos(t * M_PI * 2.0f) * swirl->size;
-	swirl->y = sin(t * M_PI * 2.0f) * swirl->size;
-
-	return 1;
 }
 
 static void nemomotz_swirl_destroy(struct motzone *one)
@@ -115,7 +115,6 @@ struct motzone *nemomotz_swirl_create(void)
 	one->up = nemomotz_swirl_up;
 	one->contain = nemomotz_swirl_contain;
 	one->update = nemomotz_swirl_update;
-	one->frame = nemomotz_swirl_frame;
 	one->destroy = nemomotz_swirl_destroy;
 
 	swirl->style = nemotoyz_style_create();
@@ -123,8 +122,6 @@ struct motzone *nemomotz_swirl_create(void)
 
 	swirl->matrix = nemotoyz_matrix_create();
 	swirl->inverse = nemotoyz_matrix_create();
-
-	nemoease_set(&swirl->ease, NEMOEASE_CUBIC_INOUT_TYPE);
 
 	return one;
 }

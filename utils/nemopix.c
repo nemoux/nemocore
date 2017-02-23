@@ -189,7 +189,6 @@ static void nemopix_dispatch_motz_down(struct nemomotz *motz, struct motztap *ta
 	nemomotz_attach_one(motz, one);
 
 	nemomotz_tap_set_one(tap, one);
-
 	nemomotz_one_down(motz, tap, one, x, y);
 }
 
@@ -216,6 +215,9 @@ static void nemopix_dispatch_motz_one_down(struct nemomotz *motz, struct motztap
 	nemomotz_swirl_set_ty(cone, y);
 	nemomotz_swirl_set_duration(cone, 800);
 	nemomotz_attach_one(motz, cone);
+
+	nemomotz_tap_set_one(tap, cone);
+	nemomotz_one_down(motz, tap, cone, x, y);
 }
 
 static void nemopix_dispatch_motz_one_motion(struct nemomotz *motz, struct motztap *tap, struct motzone *one, float x, float y)

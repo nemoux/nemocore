@@ -10,7 +10,6 @@ NEMO_BEGIN_EXTERN_C
 #include <stdint.h>
 
 #include <nemolist.h>
-#include <nemoease.h>
 
 #include <nemomotz.h>
 
@@ -34,18 +33,15 @@ struct motzswirl {
 
 	float tx, ty;
 
-	float size;
-
 	float r, g, b, a;
 
 	float stroke_width;
 
 	float x, y;
+	float size;
 
-	uint32_t duration, delay;
-	uint32_t stime, etime;
-
-	struct nemoease ease;
+	uint32_t duration;
+	uint32_t delay;
 };
 
 #define NEMOMOTZ_SWIRL(one)			((struct motzswirl *)container_of(one, struct motzswirl, one))
@@ -56,9 +52,6 @@ NEMOMOTZ_DECLARE_SET_ATTRIBUTE_WITH_FLAGS(swirl, float, tx, tx, NEMOMOTZ_SWIRL_T
 NEMOMOTZ_DECLARE_GET_ATTRIBUTE(swirl, float, tx, tx);
 NEMOMOTZ_DECLARE_SET_ATTRIBUTE_WITH_FLAGS(swirl, float, ty, ty, NEMOMOTZ_SWIRL_TRANSFORM_DIRTY, NEMOMOTZ_SWIRL_TRANSFORM_FLAG);
 NEMOMOTZ_DECLARE_GET_ATTRIBUTE(swirl, float, ty, ty);
-
-NEMOMOTZ_DECLARE_SET_ATTRIBUTE(swirl, float, size, size, NEMOMOTZ_SWIRL_SHAPE_DIRTY);
-NEMOMOTZ_DECLARE_GET_ATTRIBUTE(swirl, float, size, size);
 
 NEMOMOTZ_DECLARE_SET_ATTRIBUTE(swirl, float, r, red, NEMOMOTZ_SWIRL_COLOR_DIRTY);
 NEMOMOTZ_DECLARE_GET_ATTRIBUTE(swirl, float, r, red);
@@ -75,6 +68,13 @@ NEMOMOTZ_DECLARE_SET_ATTRIBUTE(swirl, uint32_t, duration, duration, 0x0);
 NEMOMOTZ_DECLARE_GET_ATTRIBUTE(swirl, uint32_t, duration, duration);
 NEMOMOTZ_DECLARE_SET_ATTRIBUTE(swirl, uint32_t, delay, delay, 0x0);
 NEMOMOTZ_DECLARE_GET_ATTRIBUTE(swirl, uint32_t, delay, delay);
+
+NEMOMOTZ_DECLARE_SET_ATTRIBUTE(swirl, float, x, x, NEMOMOTZ_SWIRL_SHAPE_DIRTY);
+NEMOMOTZ_DECLARE_GET_ATTRIBUTE(swirl, float, x, x);
+NEMOMOTZ_DECLARE_SET_ATTRIBUTE(swirl, float, y, y, NEMOMOTZ_SWIRL_SHAPE_DIRTY);
+NEMOMOTZ_DECLARE_GET_ATTRIBUTE(swirl, float, y, y);
+NEMOMOTZ_DECLARE_SET_ATTRIBUTE(swirl, float, size, size, NEMOMOTZ_SWIRL_SHAPE_DIRTY);
+NEMOMOTZ_DECLARE_GET_ATTRIBUTE(swirl, float, size, size);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

@@ -33,11 +33,11 @@ struct motzburst {
 
 	float tx, ty;
 
-	float size;
-
 	float r, g, b, a;
 
 	float stroke_width;
+
+	float size;
 };
 
 #define NEMOMOTZ_BURST(one)			((struct motzburst *)container_of(one, struct motzburst, one))
@@ -49,9 +49,6 @@ NEMOMOTZ_DECLARE_GET_ATTRIBUTE(burst, float, tx, tx);
 NEMOMOTZ_DECLARE_SET_ATTRIBUTE_WITH_FLAGS(burst, float, ty, ty, NEMOMOTZ_BURST_TRANSFORM_DIRTY, NEMOMOTZ_BURST_TRANSFORM_FLAG);
 NEMOMOTZ_DECLARE_GET_ATTRIBUTE(burst, float, ty, ty);
 
-NEMOMOTZ_DECLARE_SET_ATTRIBUTE(burst, float, size, size, NEMOMOTZ_BURST_SHAPE_DIRTY);
-NEMOMOTZ_DECLARE_GET_ATTRIBUTE(burst, float, size, size);
-
 NEMOMOTZ_DECLARE_SET_ATTRIBUTE(burst, float, r, red, NEMOMOTZ_BURST_COLOR_DIRTY);
 NEMOMOTZ_DECLARE_GET_ATTRIBUTE(burst, float, r, red);
 NEMOMOTZ_DECLARE_SET_ATTRIBUTE(burst, float, g, green, NEMOMOTZ_BURST_COLOR_DIRTY);
@@ -62,6 +59,9 @@ NEMOMOTZ_DECLARE_SET_ATTRIBUTE(burst, float, a, alpha, NEMOMOTZ_BURST_COLOR_DIRT
 NEMOMOTZ_DECLARE_GET_ATTRIBUTE(burst, float, a, alpha);
 NEMOMOTZ_DECLARE_SET_ATTRIBUTE(burst, float, stroke_width, stroke_width, NEMOMOTZ_BURST_STROKE_WIDTH_DIRTY);
 NEMOMOTZ_DECLARE_GET_ATTRIBUTE(burst, float, stroke_width, stroke_width);
+
+NEMOMOTZ_DECLARE_SET_ATTRIBUTE(burst, float, size, size, NEMOMOTZ_BURST_SHAPE_DIRTY);
+NEMOMOTZ_DECLARE_GET_ATTRIBUTE(burst, float, size, size);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
