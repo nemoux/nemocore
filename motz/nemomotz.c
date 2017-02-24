@@ -262,6 +262,8 @@ int nemomotz_one_frame_null(struct motzone *one, uint32_t msecs)
 
 void nemomotz_one_destroy_null(struct motzone *one)
 {
+	nemosignal_emit(&one->destroy_signal, one);
+
 	nemolist_remove(&one->link);
 	nemolist_remove(&one->one_list);
 
@@ -280,6 +282,8 @@ struct motzone *nemomotz_one_create(void)
 	nemolist_init(&one->link);
 	nemolist_init(&one->one_list);
 
+	nemosignal_init(&one->destroy_signal);
+
 	one->draw = nemomotz_one_draw_null;
 	one->down = nemomotz_one_down_null;
 	one->motion = nemomotz_one_motion_null;
@@ -297,6 +301,8 @@ int nemomotz_one_prepare(struct motzone *one)
 	nemolist_init(&one->link);
 	nemolist_init(&one->one_list);
 
+	nemosignal_init(&one->destroy_signal);
+
 	one->draw = nemomotz_one_draw_null;
 	one->down = nemomotz_one_down_null;
 	one->motion = nemomotz_one_motion_null;
@@ -311,6 +317,8 @@ int nemomotz_one_prepare(struct motzone *one)
 
 void nemomotz_one_finish(struct motzone *one)
 {
+	nemosignal_emit(&one->destroy_signal, one);
+
 	nemolist_remove(&one->link);
 	nemolist_remove(&one->one_list);
 }
@@ -336,6 +344,7 @@ struct motztap *nemomotz_tap_create(void)
 	memset(tap, 0, sizeof(struct motztap));
 
 	nemolist_init(&tap->link);
+	nemolist_init(&tap->destroy_listener.link);
 
 	return tap;
 }
@@ -343,6 +352,7 @@ struct motztap *nemomotz_tap_create(void)
 void nemomotz_tap_destroy(struct motztap *tap)
 {
 	nemolist_remove(&tap->link);
+	nemolist_remove(&tap->destroy_listener.link);
 
 	free(tap);
 }
@@ -352,9 +362,25 @@ void nemomotz_tap_set_id(struct motztap *tap, uint64_t id)
 	tap->id = id;
 }
 
+static void nemomotz_tap_handle_one_destroy(struct nemolistener *listener, void *data)
+{
+	struct motztap *tap = (struct motztap *)container_of(listener, struct motztap, destroy_listener);
+
+	nemolist_remove(&tap->destroy_listener.link);
+	nemolist_init(&tap->destroy_listener.link);
+
+	tap->one = NULL;
+}
+
 void nemomotz_tap_set_one(struct motztap *tap, struct motzone *one)
 {
+	if (tap->one != NULL)
+		nemolist_remove(&tap->destroy_listener.link);
+
 	tap->one = one;
+
+	tap->destroy_listener.notify = nemomotz_tap_handle_one_destroy;
+	nemosignal_add(&one->destroy_signal, &tap->destroy_listener);
 }
 
 void nemomotz_attach_tap(struct nemomotz *motz, struct motztap *tap)

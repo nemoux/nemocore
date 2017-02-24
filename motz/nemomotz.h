@@ -10,6 +10,7 @@ NEMO_BEGIN_EXTERN_C
 #include <stdint.h>
 
 #include <nemolist.h>
+#include <nemolistener.h>
 #include <nemotoyz.h>
 
 #include <motztrans.h>
@@ -76,6 +77,7 @@ struct motzone {
 	uint32_t dirty;
 
 	struct nemolist link;
+	struct nemosignal destroy_signal;
 
 	struct nemolist one_list;
 };
@@ -84,6 +86,7 @@ struct motztap {
 	uint64_t id;
 
 	struct motzone *one;
+	struct nemolistener destroy_listener;
 
 	struct nemolist link;
 };
