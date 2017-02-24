@@ -5,13 +5,13 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include <motztrans.h>
+#include <motztransition.h>
 #include <nemomotz.h>
 #include <nemomisc.h>
 
 #define NEMOMOTZ_TRANSITION_ONE_TARGETS_MAX			(8)
 
-struct transone {
+struct transitionone {
 	float *toattr;
 	uint32_t *todirty;
 
@@ -22,19 +22,19 @@ struct transone {
 	int count;
 };
 
-struct motztrans *nemomotz_transition_create(int max, int type, uint32_t duration, uint32_t delay)
+struct motztransition *nemomotz_transition_create(int max, int type, uint32_t duration, uint32_t delay)
 {
-	struct motztrans *trans;
+	struct motztransition *trans;
 
-	trans = (struct motztrans *)malloc(sizeof(struct motztrans));
+	trans = (struct motztransition *)malloc(sizeof(struct motztransition));
 	if (trans == NULL)
 		return NULL;
-	memset(trans, 0, sizeof(struct motztrans));
+	memset(trans, 0, sizeof(struct motztransition));
 
-	trans->ones = (struct transone **)malloc(sizeof(struct transone *) * max);
+	trans->ones = (struct transitionone **)malloc(sizeof(struct transitionone *) * max);
 	if (trans->ones == NULL)
 		goto err1;
-	memset(trans->ones, 0, sizeof(struct transone *) * max);
+	memset(trans->ones, 0, sizeof(struct transitionone *) * max);
 
 	trans->sones = max;
 	trans->nones = 0;
@@ -59,7 +59,7 @@ err1:
 	return NULL;
 }
 
-void nemomotz_transition_destroy(struct motztrans *trans)
+void nemomotz_transition_destroy(struct motztransition *trans)
 {
 	int i;
 
@@ -73,22 +73,22 @@ void nemomotz_transition_destroy(struct motztrans *trans)
 	free(trans);
 }
 
-void nemomotz_transition_ease_set_type(struct motztrans *trans, int type)
+void nemomotz_transition_ease_set_type(struct motztransition *trans, int type)
 {
 	nemoease_set(&trans->ease, type);
 }
 
-void nemomotz_transition_ease_set_bezier(struct motztrans *trans, double x0, double y0, double x1, double y1)
+void nemomotz_transition_ease_set_bezier(struct motztransition *trans, double x0, double y0, double x1, double y1)
 {
 	nemoease_set_cubic(&trans->ease, x0, y0, x1, y1);
 }
 
-void nemomotz_transition_set_repeat(struct motztrans *trans, uint32_t repeat)
+void nemomotz_transition_set_repeat(struct motztransition *trans, uint32_t repeat)
 {
 	trans->repeat = repeat;
 }
 
-int nemomotz_transition_check_repeat(struct motztrans *trans)
+int nemomotz_transition_check_repeat(struct motztransition *trans)
 {
 	if (trans->repeat == 0 || --trans->repeat > 0) {
 		trans->stime = 0;
@@ -100,14 +100,14 @@ int nemomotz_transition_check_repeat(struct motztrans *trans)
 	return 1;
 }
 
-int nemomotz_transition_set_attr(struct motztrans *trans, int index, float *toattr, float attr, uint32_t *todirty, uint32_t dirty)
+int nemomotz_transition_set_attr(struct motztransition *trans, int index, float *toattr, float attr, uint32_t *todirty, uint32_t dirty)
 {
-	struct transone *one;
+	struct transitionone *one;
 
-	trans->ones[index] = one = (struct transone *)malloc(sizeof(struct transone));
+	trans->ones[index] = one = (struct transitionone *)malloc(sizeof(struct transitionone));
 	if (one == NULL)
 		return -1;
-	memset(one, 0, sizeof(struct transone));
+	memset(one, 0, sizeof(struct transitionone));
 
 	one->count = 0;
 	one->toattr = toattr;
@@ -121,9 +121,9 @@ int nemomotz_transition_set_attr(struct motztrans *trans, int index, float *toat
 	return 0;
 }
 
-void nemomotz_transition_put_attr(struct motztrans *trans, void *var, int size)
+void nemomotz_transition_put_attr(struct motztransition *trans, void *var, int size)
 {
-	struct transone *one;
+	struct transitionone *one;
 	int i;
 
 	for (i = 0; i < trans->nones; i++) {
@@ -135,9 +135,9 @@ void nemomotz_transition_put_attr(struct motztrans *trans, void *var, int size)
 	}
 }
 
-void nemomotz_transition_set_target(struct motztrans *trans, int index, float t, float v)
+void nemomotz_transition_set_target(struct motztransition *trans, int index, float t, float v)
 {
-	struct transone *one = trans->ones[index];
+	struct transitionone *one = trans->ones[index];
 	int i, j;
 
 	for (i = 0; i < one->count; i++) {
@@ -164,9 +164,9 @@ void nemomotz_transition_set_target(struct motztrans *trans, int index, float t,
 	}
 }
 
-int nemomotz_transition_dispatch(struct motztrans *trans, uint32_t msecs)
+int nemomotz_transition_dispatch(struct motztransition *trans, uint32_t msecs)
 {
-	struct transone *one;
+	struct transitionone *one;
 	float t, u, v;
 	int i, j;
 

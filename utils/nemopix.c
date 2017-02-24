@@ -291,7 +291,7 @@ int main(int argc, char *argv[])
 	struct motzone *group;
 	struct motzone *clip;
 	struct motzone *one;
-	struct motztrans *trans;
+	struct motztransition *trans;
 	struct toyzstyle *style;
 	char *fullscreenid = NULL;
 	char *contentpath = NULL;

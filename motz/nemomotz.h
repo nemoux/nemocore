@@ -13,7 +13,7 @@ NEMO_BEGIN_EXTERN_C
 #include <nemolistener.h>
 #include <nemotoyz.h>
 
-#include <motztrans.h>
+#include <motztransition.h>
 
 typedef enum {
 	NEMOMOTZ_REDRAW_FLAG = (1 << 0)
@@ -175,8 +175,8 @@ extern void nemomotz_detach_tap(struct nemomotz *motz, struct motztap *tap);
 
 extern struct motztap *nemomotz_find_tap(struct nemomotz *motz, uint64_t id);
 
-extern void nemomotz_attach_transition(struct nemomotz *motz, struct motztrans *trans);
-extern void nemomotz_detach_transition(struct nemomotz *motz, struct motztrans *trans);
+extern void nemomotz_attach_transition(struct nemomotz *motz, struct motztransition *trans);
+extern void nemomotz_detach_transition(struct nemomotz *motz, struct motztransition *trans);
 
 extern void nemomotz_revoke_transition(struct nemomotz *motz, void *var, int size);
 

@@ -77,7 +77,7 @@ void nemomotz_update(struct nemomotz *motz, uint32_t msecs)
 	struct motzone *one, *none;
 
 	if (nemolist_empty(&motz->transition_list) == 0) {
-		struct motztrans *trans, *ntrans;
+		struct motztransition *trans, *ntrans;
 
 		nemolist_for_each_safe(trans, ntrans, &motz->transition_list, link) {
 			if (nemomotz_transition_dispatch(trans, msecs) != 0) {
@@ -406,12 +406,12 @@ struct motztap *nemomotz_find_tap(struct nemomotz *motz, uint64_t id)
 	return NULL;
 }
 
-void nemomotz_attach_transition(struct nemomotz *motz, struct motztrans *trans)
+void nemomotz_attach_transition(struct nemomotz *motz, struct motztransition *trans)
 {
 	nemolist_insert_tail(&motz->transition_list, &trans->link);
 }
 
-void nemomotz_detach_transition(struct nemomotz *motz, struct motztrans *trans)
+void nemomotz_detach_transition(struct nemomotz *motz, struct motztransition *trans)
 {
 	nemolist_remove(&trans->link);
 	nemolist_init(&trans->link);
@@ -419,7 +419,7 @@ void nemomotz_detach_transition(struct nemomotz *motz, struct motztrans *trans)
 
 void nemomotz_revoke_transition(struct nemomotz *motz, void *var, int size)
 {
-	struct motztrans *trans;
+	struct motztransition *trans;
 
 	nemolist_for_each(trans, &motz->transition_list, link) {
 		nemomotz_transition_put_attr(trans, var, size);

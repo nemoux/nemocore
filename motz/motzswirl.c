@@ -21,7 +21,7 @@ static void nemomotz_swirl_draw(struct nemomotz *motz, struct motzone *one)
 	nemotoyz_restore(toyz);
 }
 
-static void nemomotz_swirl_dispatch_transition_update(struct motztrans *trans, void *data, float t)
+static void nemomotz_swirl_dispatch_transition_update(struct motztransition *trans, void *data, float t)
 {
 	struct motzone *one = (struct motzone *)data;
 	struct motzswirl *swirl = NEMOMOTZ_SWIRL(one);
@@ -31,7 +31,7 @@ static void nemomotz_swirl_dispatch_transition_update(struct motztrans *trans, v
 	nemomotz_swirl_set_x(one, sin(swirl->frequence * t) * swirl->size);
 }
 
-static void nemomotz_swirl_dispatch_transition_done(struct motztrans *trans, void *data)
+static void nemomotz_swirl_dispatch_transition_done(struct motztransition *trans, void *data)
 {
 	struct motzone *one = (struct motzone *)data;
 
@@ -41,7 +41,7 @@ static void nemomotz_swirl_dispatch_transition_done(struct motztrans *trans, voi
 static void nemomotz_swirl_down(struct nemomotz *motz, struct motztap *tap, struct motzone *one, float x, float y)
 {
 	struct motzswirl *swirl = NEMOMOTZ_SWIRL(one);
-	struct motztrans *trans;
+	struct motztransition *trans;
 
 	trans = nemomotz_transition_create(8, NEMOEASE_LINEAR_TYPE, swirl->duration, swirl->delay);
 	nemomotz_transition_set_dispatch_update(trans, nemomotz_swirl_dispatch_transition_update);
