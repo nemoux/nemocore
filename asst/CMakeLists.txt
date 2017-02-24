@@ -24,7 +24,7 @@ add_library(nemoasst SHARED
 	nemoitem.c
 	nemotable.c
 	nemojson.c
-	nemotrans.c
+	nemotransition.c
 	nemolog.c
 	nemofs.c
 	nemomisc.c
@@ -46,7 +46,7 @@ set(HEADER_FILES
 	nemoitem.h
 	nemotable.h
 	nemojson.h
-	nemotrans.h
+	nemotransition.h
 	nemolog.h
 	nemomisc.h
 	nemoattr.h
