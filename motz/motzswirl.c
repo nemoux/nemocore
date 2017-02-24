@@ -47,6 +47,7 @@ static void nemomotz_swirl_down(struct nemomotz *motz, struct motztap *tap, stru
 	nemomotz_transition_set_dispatch_update(trans, nemomotz_swirl_dispatch_transition_update);
 	nemomotz_transition_set_dispatch_done(trans, nemomotz_swirl_dispatch_transition_done);
 	nemomotz_transition_set_userdata(trans, one);
+	nemomotz_transition_check_one(trans, one);
 	nemomotz_attach_transition(motz, trans);
 }
 
@@ -106,7 +107,7 @@ struct motzone *nemomotz_swirl_create(void)
 
 	one = &swirl->one;
 
-	nemomotz_one_prepare(one);
+	nemomotz_one_prepare(one, sizeof(struct motzswirl));
 
 	one->draw = nemomotz_swirl_draw;
 	one->down = nemomotz_swirl_down;

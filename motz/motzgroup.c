@@ -91,7 +91,7 @@ struct motzone *nemomotz_group_create(void)
 
 	one = &group->one;
 
-	nemomotz_one_prepare(one);
+	nemomotz_one_prepare(one, sizeof(struct motzgroup));
 
 	one->draw = nemomotz_group_draw;
 	one->down = nemomotz_group_down;

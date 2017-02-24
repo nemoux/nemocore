@@ -77,7 +77,7 @@ struct motzone *nemomotz_clip_create(void)
 
 	one = &clip->one;
 
-	nemomotz_one_prepare(one);
+	nemomotz_one_prepare(one, sizeof(struct motzclip));
 
 	one->draw = nemomotz_clip_draw;
 	one->down = nemomotz_clip_down;

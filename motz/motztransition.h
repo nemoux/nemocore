@@ -34,6 +34,8 @@ struct motztransition {
 	struct transitionone **ones;
 	int nones, sones;
 
+	struct nemolist sensor_list;
+
 	nemomotz_transition_dispatch_update_t dispatch_update;
 	nemomotz_transition_dispatch_done_t dispatch_done;
 
@@ -60,6 +62,8 @@ extern void nemomotz_transition_ease_set_bezier(struct motztransition *trans, do
 
 extern void nemomotz_transition_set_repeat(struct motztransition *trans, uint32_t repeat);
 extern int nemomotz_transition_check_repeat(struct motztransition *trans);
+
+extern void nemomotz_transition_check_one(struct motztransition *trans, struct motzone *one);
 
 extern int nemomotz_transition_set_attr(struct motztransition *trans, int index, float *toattr, float attr, uint32_t *todirty, uint32_t dirty);
 extern void nemomotz_transition_put_attr(struct motztransition *trans, void *var, int size);

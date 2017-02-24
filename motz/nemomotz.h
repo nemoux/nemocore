@@ -73,6 +73,8 @@ struct motzone {
 	nemomotz_one_frame_t frame;
 	nemomotz_one_destroy_t destroy;
 
+	int size;
+
 	uint32_t flags;
 	uint32_t dirty;
 
@@ -149,7 +151,7 @@ extern void nemomotz_motion_null(struct nemomotz *motz, struct motztap *tap, flo
 extern void nemomotz_up_null(struct nemomotz *motz, struct motztap *tap, float x, float y);
 
 extern struct motzone *nemomotz_one_create(void);
-extern int nemomotz_one_prepare(struct motzone *one);
+extern int nemomotz_one_prepare(struct motzone *one, int size);
 extern void nemomotz_one_finish(struct motzone *one);
 
 extern void nemomotz_one_attach_one(struct motzone *one, struct motzone *child);

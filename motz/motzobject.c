@@ -223,7 +223,7 @@ struct motzone *nemomotz_object_create(void)
 
 	one = &object->one;
 
-	nemomotz_one_prepare(one);
+	nemomotz_one_prepare(one, sizeof(struct motzobject));
 
 	one->draw = nemomotz_object_draw_simple;
 	one->down = nemomotz_object_down;

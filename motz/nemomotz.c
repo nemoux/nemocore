@@ -293,10 +293,12 @@ struct motzone *nemomotz_one_create(void)
 	one->frame = nemomotz_one_frame_null;
 	one->destroy = nemomotz_one_destroy_null;
 
+	one->size = sizeof(struct motzone);
+
 	return one;
 }
 
-int nemomotz_one_prepare(struct motzone *one)
+int nemomotz_one_prepare(struct motzone *one, int size)
 {
 	nemolist_init(&one->link);
 	nemolist_init(&one->one_list);
@@ -311,6 +313,8 @@ int nemomotz_one_prepare(struct motzone *one)
 	one->update = nemomotz_one_update_null;
 	one->frame = nemomotz_one_frame_null;
 	one->destroy = nemomotz_one_destroy_null;
+
+	one->size = size;
 
 	return 0;
 }

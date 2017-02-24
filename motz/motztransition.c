@@ -22,6 +22,14 @@ struct transitionone {
 	int count;
 };
 
+struct transitionsensor {
+	struct nemolist link;
+	struct nemolistener listener;
+
+	struct motztransition *transition;
+	struct motzone *one;
+};
+
 struct motztransition *nemomotz_transition_create(int max, int type, uint32_t duration, uint32_t delay)
 {
 	struct motztransition *trans;
@@ -40,6 +48,8 @@ struct motztransition *nemomotz_transition_create(int max, int type, uint32_t du
 	trans->nones = 0;
 
 	nemolist_init(&trans->link);
+
+	nemolist_init(&trans->sensor_list);
 
 	nemoease_set(&trans->ease, type);
 
@@ -61,9 +71,17 @@ err1:
 
 void nemomotz_transition_destroy(struct motztransition *trans)
 {
+	struct transitionsensor *sensor, *nsensor;
 	int i;
 
 	nemolist_remove(&trans->link);
+
+	nemolist_for_each_safe(sensor, nsensor, &trans->sensor_list, link) {
+		nemolist_remove(&sensor->link);
+		nemolist_remove(&sensor->listener.link);
+
+		free(sensor);
+	}
 
 	for (i = 0; i < trans->nones; i++) {
 		if (trans->ones[i] != NULL)
@@ -98,6 +116,34 @@ int nemomotz_transition_check_repeat(struct motztransition *trans)
 	}
 
 	return 1;
+}
+
+static void nemomotz_transition_handle_one_destroy(struct nemolistener *listener, void *data)
+{
+	struct transitionsensor *sensor = (struct transitionsensor *)container_of(listener, struct transitionsensor, listener);
+	struct motztransition *trans = sensor->transition;
+	struct motzone *one = sensor->one;
+
+	nemomotz_transition_put_attr(trans, one, one->size);
+
+	nemolist_remove(&sensor->link);
+	nemolist_remove(&sensor->listener.link);
+
+	free(sensor);
+}
+
+void nemomotz_transition_check_one(struct motztransition *trans, struct motzone *one)
+{
+	struct transitionsensor *sensor;
+
+	sensor = (struct transitionsensor *)malloc(sizeof(struct transitionsensor));
+	sensor->transition = trans;
+	sensor->one = one;
+
+	sensor->listener.notify = nemomotz_transition_handle_one_destroy;
+	nemosignal_add(&one->destroy_signal, &sensor->listener);
+
+	nemolist_insert_tail(&trans->sensor_list, &sensor->link);
 }
 
 int nemomotz_transition_set_attr(struct motztransition *trans, int index, float *toattr, float attr, uint32_t *todirty, uint32_t dirty)

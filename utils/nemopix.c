@@ -438,6 +438,7 @@ int main(int argc, char *argv[])
 	nemomotz_transition_set_target(trans, 0, 1.0f, 255.0f);
 	nemomotz_transition_object_set_green(trans, 1, one);
 	nemomotz_transition_set_target(trans, 1, 1.0f, 0.0f);
+	nemomotz_transition_check_one(trans, one);
 	nemomotz_attach_transition(motz, trans);
 
 	clip = nemomotz_clip_create();
@@ -490,6 +491,7 @@ int main(int argc, char *argv[])
 	trans = nemomotz_transition_create(8, NEMOEASE_CUBIC_INOUT_TYPE, 800, 150);
 	nemomotz_transition_object_set_ty(trans, 0, one);
 	nemomotz_transition_set_target(trans, 0, 1.0f, 96.0f);
+	nemomotz_transition_check_one(trans, one);
 	nemomotz_attach_transition(motz, trans);
 
 	one = nemomotz_path_create();
@@ -512,6 +514,7 @@ int main(int argc, char *argv[])
 	nemomotz_transition_set_target(trans, 1, 0.5f, 0.75f);
 	nemomotz_transition_set_target(trans, 1, 1.0f, 1.0f);
 	nemomotz_transition_set_repeat(trans, 0);
+	nemomotz_transition_check_one(trans, one);
 	nemomotz_attach_transition(motz, trans);
 
 	nemocanvas_dispatch_frame(canvas);
