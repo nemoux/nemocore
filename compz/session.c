@@ -23,34 +23,6 @@
 #include <logindhelper.h>
 #endif
 
-static int nemosession_dispatch_signal(int fd, uint32_t mask, void *data)
-{
-	struct nemosession *session = (struct nemosession *)data;
-	struct nemocompz *compz = session->compz;
-	struct signalfd_siginfo sig;
-
-	if (read(fd, &sig, sizeof(struct signalfd_siginfo)) != sizeof(struct signalfd_siginfo)) {
-		nemolog_error("LOGIND", "failed to read signalfd\n");
-		return 0;
-	}
-
-	switch (sig.ssi_signo) {
-		case SIGUSR1:
-			compz->session_active = 0;
-			wl_signal_emit(&compz->session_signal, compz);
-			ioctl(session->ttyfd, VT_RELDISP, 1);
-			break;
-
-		case SIGUSR2:
-			ioctl(session->ttyfd, VT_RELDISP, VT_ACKACQ);
-			compz->session_active = 1;
-			wl_signal_emit(&compz->session_signal, compz);
-			break;
-	}
-
-	return 1;
-}
-
 struct nemosession *nemosession_create(struct nemocompz *compz)
 {
 	struct nemosession *session;
@@ -90,60 +62,6 @@ void nemosession_destroy(struct nemosession *session)
 	}
 
 	free(session);
-}
-
-int nemosession_connect(struct nemosession *session, const char *seatid, int tty)
-{
-	struct nemocompz *compz = session->compz;
-
-	if (seatid == NULL)
-		return -1;
-
-#ifdef NEMOUX_WITH_LOGIND
-	session->logind = logind_connect(compz, seatid, tty);
-	if (session->logind == NULL) {
-		nemolog_error("LOGIND", "failed to connect logind (%s, %d)\n", seatid, tty);
-#endif
-		if (geteuid() == 0) {
-			sigset_t mask;
-
-			session->ttyfd = tty_connect(tty, &session->kbmode);
-			if (session->ttyfd < 0) {
-				nemolog_error("LOGIND", "failed to open tty %d\n", tty);
-				return -1;
-			}
-
-			sigemptyset(&mask);
-			sigaddset(&mask, SIGUSR1);
-			sigaddset(&mask, SIGUSR2);
-			sigprocmask(SIG_BLOCK, &mask, NULL);
-
-			session->sfd = signalfd(-1, &mask, SFD_NONBLOCK | SFD_CLOEXEC);
-			if (session->sfd < 0) {
-				nemolog_error("LOGIND", "failed to create signal fd for vt event handling\n");
-				close(session->ttyfd);
-				return -1;
-			}
-
-			session->signal_source = wl_event_loop_add_fd(compz->loop,
-					session->sfd,
-					WL_EVENT_READABLE,
-					nemosession_dispatch_signal,
-					session);
-			if (session->signal_source == NULL) {
-				nemolog_error("LOGIND", "failed to create vt event source\n");
-				close(session->ttyfd);
-				close(session->sfd);
-				session->ttyfd = -1;
-				session->sfd = -1;
-				return -1;
-			}
-		}
-#ifdef NEMOUX_WITH_LOGIND
-	}
-#endif
-
-	return 0;
 }
 
 int nemosession_activate_vt(struct nemosession *session, int vt)
@@ -186,4 +104,86 @@ void nemosession_close(struct nemosession *session, int fd)
 #endif
 
 	close(fd);
+}
+
+static int nemocompz_dispatch_session_signal(int fd, uint32_t mask, void *data)
+{
+	struct nemosession *session = (struct nemosession *)data;
+	struct nemocompz *compz = session->compz;
+	struct signalfd_siginfo sig;
+
+	if (read(fd, &sig, sizeof(struct signalfd_siginfo)) != sizeof(struct signalfd_siginfo)) {
+		nemolog_error("LOGIND", "failed to read signalfd\n");
+		return 0;
+	}
+
+	switch (sig.ssi_signo) {
+		case SIGUSR1:
+			compz->session_active = 0;
+			wl_signal_emit(&compz->session_signal, compz);
+			ioctl(session->ttyfd, VT_RELDISP, 1);
+			break;
+
+		case SIGUSR2:
+			ioctl(session->ttyfd, VT_RELDISP, VT_ACKACQ);
+			compz->session_active = 1;
+			wl_signal_emit(&compz->session_signal, compz);
+			break;
+	}
+
+	return 1;
+}
+
+int nemocompz_connect_session(struct nemocompz *compz, const char *seatid, int tty)
+{
+	struct nemosession *session = compz->session;
+
+	if (seatid == NULL)
+		return -1;
+
+#ifdef NEMOUX_WITH_LOGIND
+	session->logind = logind_connect(compz, seatid, tty);
+	if (session->logind == NULL) {
+		nemolog_error("LOGIND", "failed to connect logind (%s, %d)\n", seatid, tty);
+#endif
+		if (geteuid() == 0) {
+			sigset_t mask;
+
+			session->ttyfd = tty_connect(tty, &session->kbmode);
+			if (session->ttyfd < 0) {
+				nemolog_error("LOGIND", "failed to open tty %d\n", tty);
+				return -1;
+			}
+
+			sigemptyset(&mask);
+			sigaddset(&mask, SIGUSR1);
+			sigaddset(&mask, SIGUSR2);
+			sigprocmask(SIG_BLOCK, &mask, NULL);
+
+			session->sfd = signalfd(-1, &mask, SFD_NONBLOCK | SFD_CLOEXEC);
+			if (session->sfd < 0) {
+				nemolog_error("LOGIND", "failed to create signal fd for vt event handling\n");
+				close(session->ttyfd);
+				return -1;
+			}
+
+			session->signal_source = wl_event_loop_add_fd(compz->loop,
+					session->sfd,
+					WL_EVENT_READABLE,
+					nemocompz_dispatch_session_signal,
+					session);
+			if (session->signal_source == NULL) {
+				nemolog_error("LOGIND", "failed to create vt event source\n");
+				close(session->ttyfd);
+				close(session->sfd);
+				session->ttyfd = -1;
+				session->sfd = -1;
+				return -1;
+			}
+		}
+#ifdef NEMOUX_WITH_LOGIND
+	}
+#endif
+
+	return 0;
 }

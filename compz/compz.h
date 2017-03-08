@@ -197,6 +197,11 @@ extern struct nemoview *nemocompz_get_view_by_client(struct nemocompz *compz, st
 
 extern struct nemolayer *nemocompz_get_layer_by_name(struct nemocompz *compz, const char *name);
 
+static inline struct wl_event_loop *nemocompz_get_wayland_event_loop(struct nemocompz *compz)
+{
+	return compz->loop;
+}
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

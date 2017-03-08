@@ -433,6 +433,21 @@ static inline int32_t nemoshell_bin_get_geometry_height(struct shellbin *bin)
 	return bin->has_set_geometry == 0 ? bin->view->content->height : bin->geometry.height;
 }
 
+static void nemoshell_bin_set_pid(struct shellbin *bin, uint32_t pid)
+{
+	bin->pid = pid;
+}
+
+static uint32_t nemoshell_bin_get_pid(struct shellbin *bin)
+{
+	return bin->pid;
+}
+
+static struct nemoview *nemoshell_bin_get_view(struct shellbin *bin)
+{
+	return bin->view;
+}
+
 static inline void clientstate_set_pid(struct clientstate *state, uint32_t pid)
 {
 	state->pid = pid;

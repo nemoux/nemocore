@@ -24,11 +24,12 @@ struct nemosession {
 extern struct nemosession *nemosession_create(struct nemocompz *compz);
 extern void nemosession_destroy(struct nemosession *session);
 
-extern int nemosession_connect(struct nemosession *session, const char *seatid, int tty);
 extern int nemosession_activate_vt(struct nemosession *session, int vt);
 
 extern int nemosession_open(struct nemosession *session, const char *path, int flags);
 extern void nemosession_close(struct nemosession *session, int fd);
+
+extern int nemocompz_connect_session(struct nemocompz *compz, const char *seatid, int tty);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

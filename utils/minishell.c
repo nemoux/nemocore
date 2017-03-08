@@ -83,7 +83,7 @@ static void minishell_update_state(struct minishell *mini, struct itemone *one, 
 
 	owner = nemoitem_one_get_attr(one, "owner");
 	if (owner != NULL) {
-		view = nemocompz_get_view_by_uuid(mini->shell->compz, owner);
+		view = nemocompz_get_view_by_uuid(mini->compz, owner);
 
 		if (nemoitem_one_has_sattr(one, "coords", "global") == 0) {
 			float x = nemoitem_one_get_fattr(one, "x", 0.0f);
@@ -103,7 +103,7 @@ static void minishell_update_state(struct minishell *mini, struct itemone *one, 
 static int minishell_dispatch_keypad(struct minishell *mini, struct itemone *one)
 {
 	struct nemoshell *shell = mini->shell;
-	struct nemocompz *compz = shell->compz;
+	struct nemocompz *compz = mini->compz;
 	struct nemolayer *layer;
 	struct nemoview *view;
 	struct nemoview *focus;
@@ -433,7 +433,7 @@ static void minishell_update_client(void *data, struct shellbin *bin, struct cli
 			if (mirror != NULL) {
 				nemoshell_kill_fullscreen_bin(shell, screen->target);
 
-				nemomirror_set_view(mirror, bin->view);
+				nemomirror_set_view(mirror, nemoshell_bin_get_view(bin));
 				nemomirror_check_screen(mirror, screen);
 			}
 		}
@@ -445,7 +445,7 @@ static void minishell_update_layer(void *data, struct shellbin *bin, const char 
 	struct minishell *mini = (struct minishell *)data;
 
 	if (strcmp(type, "background") == 0) {
-		nemoview_put_state(bin->view, NEMOVIEW_CATCH_STATE);
+		nemoview_put_state(nemoshell_bin_get_view(bin), NEMOVIEW_CATCH_STATE);
 	}
 }
 
@@ -529,6 +529,8 @@ int main(int argc, char *argv[])
 
 	if (configpath == NULL)
 		asprintf(&configpath, "%s/.config/nemoshell.item", getenv("HOME"));
+	if (seat == NULL)
+		asprintf(&seat, "seat%d", 0);
 
 	mini = (struct minishell *)malloc(sizeof(struct minishell));
 	if (mini == NULL)
@@ -538,6 +540,7 @@ int main(int argc, char *argv[])
 	compz = nemocompz_create();
 	nemocompz_load_backend(compz, "drm", rendernode);
 	nemocompz_load_backend(compz, "evdev", evdevopts);
+	nemocompz_connect_session(compz, seat, tty);
 
 	shell = nemoshell_create(compz);
 	nemoshell_set_alive_client(shell, minishell_alive_client);
@@ -548,19 +551,23 @@ int main(int argc, char *argv[])
 	nemoshell_set_enter_idle(shell, minishell_enter_idle);
 	nemoshell_set_userdata(shell, mini);
 
-	if (framelog != NULL && strcasecmp(framelog, "ON") == 0)
-		nemoshell_set_frame_timeout(shell, 1000);
-
 	mini->compz = compz;
 	mini->shell = shell;
-
 	mini->envs = nemoenvs_create(shell);
 
-	if (configpath[0] == '@') {
+	nemocompz_add_key_binding(compz, KEY_F1, MODIFIER_CTRL, nemoenvs_handle_terminal_key, (void *)mini->envs);
+	nemocompz_add_key_binding(compz, KEY_F2, MODIFIER_CTRL, nemoenvs_handle_touch_key, (void *)mini->envs);
+	nemocompz_add_key_binding(compz, KEY_ESC, MODIFIER_CTRL, nemoenvs_handle_escape_key, (void *)mini->envs);
+	nemocompz_add_button_binding(compz, BTN_LEFT, nemoenvs_handle_left_button, (void *)mini->envs);
+	nemocompz_add_button_binding(compz, BTN_RIGHT, nemoenvs_handle_right_button, (void *)mini->envs);
+	nemocompz_add_touch_binding(compz, nemoenvs_handle_touch_event, (void *)mini->envs);
+
+	nemocompz_make_current(compz);
+
+	if (configpath[0] == '@')
 		minishell_dispatch_db(mini, configpath + 1);
-	} else {
+	else
 		minishell_dispatch_text(mini, configpath);
-	}
 
 	mini->overlay_layer = nemolayer_create(compz, "overlay");
 	nemolayer_attach_below(mini->overlay_layer, NULL);
@@ -580,7 +587,8 @@ int main(int argc, char *argv[])
 	nemobus_connect(mini->bus, NULL);
 	nemobus_advertise(mini->bus, "set", "/nemoshell");
 
-	mini->busfd = wl_event_loop_add_fd(compz->loop,
+	mini->busfd = wl_event_loop_add_fd(
+			nemocompz_get_wayland_event_loop(compz),
 			nemobus_get_socket(mini->bus),
 			WL_EVENT_READABLE,
 			minishell_dispatch_bus,
@@ -589,19 +597,11 @@ int main(int argc, char *argv[])
 	nemoenvs_launch_xserver(mini->envs, xdisplay == NULL ? 0 : strtoul(xdisplay, NULL, 10), rendernode);
 	nemoenvs_use_xserver(mini->envs, xdisplay == NULL ? 0 : strtoul(xdisplay, NULL, 10));
 
-	nemosession_connect(compz->session, seat, tty);
-
-	nemocompz_add_key_binding(compz, KEY_F1, MODIFIER_CTRL, nemoenvs_handle_terminal_key, (void *)mini->envs);
-	nemocompz_add_key_binding(compz, KEY_F2, MODIFIER_CTRL, nemoenvs_handle_touch_key, (void *)mini->envs);
-	nemocompz_add_key_binding(compz, KEY_ESC, MODIFIER_CTRL, nemoenvs_handle_escape_key, (void *)mini->envs);
-	nemocompz_add_button_binding(compz, BTN_LEFT, nemoenvs_handle_left_button, (void *)mini->envs);
-	nemocompz_add_button_binding(compz, BTN_RIGHT, nemoenvs_handle_right_button, (void *)mini->envs);
-	nemocompz_add_touch_binding(compz, nemoenvs_handle_touch_event, (void *)mini->envs);
-
-	nemocompz_make_current(compz);
-
 	nemoenvs_execute_backgrounds(mini->envs);
 	nemoenvs_execute_daemons(mini->envs);
+
+	if (framelog != NULL && strcasecmp(framelog, "ON") == 0)
+		nemoshell_set_frame_timeout(shell, 1000);
 
 	nemocompz_run(compz);
 
