@@ -122,7 +122,7 @@ static int on_chld_signal(int signum, void *data)
 			return 1;
 
 		proc.pid = pid;
-		wl_signal_emit(&compz->child_signal, &proc);
+		wl_signal_emit(&compz->sigchld_signal, &proc);
 
 		wl_list_for_each(task, &compz->task_list, link) {
 			if (task->pid == pid)
@@ -369,8 +369,7 @@ struct nemocompz *nemocompz_create(void)
 	wl_signal_init(&compz->create_surface_signal);
 	wl_signal_init(&compz->activate_signal);
 	wl_signal_init(&compz->transform_signal);
-	wl_signal_init(&compz->kill_signal);
-	wl_signal_init(&compz->child_signal);
+	wl_signal_init(&compz->sigchld_signal);
 	wl_signal_init(&compz->idle_signal);
 
 	compz->cursor_layer = nemolayer_create(compz, "cursor");
@@ -783,6 +782,8 @@ void nemocompz_update_transform(struct nemocompz *compz)
 
 					if (child->transform.notify != 0) {
 						nemoview_update_transform_notify(child);
+
+						wl_signal_emit(&compz->transform_signal, child);
 					}
 				}
 			}
@@ -793,6 +794,8 @@ void nemocompz_update_transform(struct nemocompz *compz)
 
 			if (view->transform.notify != 0) {
 				nemoview_update_transform_notify(view);
+
+				wl_signal_emit(&compz->transform_signal, view);
 			}
 		}
 	}

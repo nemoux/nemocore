@@ -69,6 +69,7 @@ typedef void (*nemoshell_alive_client_t)(void *data, pid_t pid, uint32_t timeout
 typedef void (*nemoshell_destroy_client_t)(void *data, pid_t pid);
 typedef void (*nemoshell_update_client_t)(void *data, struct shellbin *bin, struct clientstate *state);
 typedef void (*nemoshell_update_layer_t)(void *data, struct shellbin *bin, const char *type);
+typedef void (*nemoshell_update_transform_t)(void *data, struct shellbin *bin);
 typedef void (*nemoshell_enter_idle_t)(void *data);
 
 struct nemoshell {
@@ -82,8 +83,8 @@ struct nemoshell {
 	struct wl_listener keypad_focus_listener;
 	struct wl_listener touch_focus_listener;
 
-	struct wl_listener child_signal_listener;
-
+	struct wl_listener transform_listener;
+	struct wl_listener sigchld_listener;
 	struct wl_listener idle_listener;
 
 	struct wl_event_source *frame_timer;
@@ -121,6 +122,7 @@ struct nemoshell {
 	nemoshell_destroy_client_t destroy_client;
 	nemoshell_update_client_t update_client;
 	nemoshell_update_layer_t update_layer;
+	nemoshell_update_transform_t update_transform;
 	nemoshell_enter_idle_t enter_idle;
 	void *userdata;
 
@@ -364,6 +366,11 @@ static inline void nemoshell_set_update_client(struct nemoshell *shell, nemoshel
 static inline void nemoshell_set_update_layer(struct nemoshell *shell, nemoshell_update_layer_t dispatch)
 {
 	shell->update_layer = dispatch;
+}
+
+static inline void nemoshell_set_update_transform(struct nemoshell *shell, nemoshell_update_transform_t dispatch)
+{
+	shell->update_transform = dispatch;
 }
 
 static inline void nemoshell_set_enter_idle(struct nemoshell *shell, nemoshell_enter_idle_t dispatch)

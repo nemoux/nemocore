@@ -121,8 +121,7 @@ struct nemocompz {
 	struct wl_signal create_surface_signal;
 	struct wl_signal activate_signal;
 	struct wl_signal transform_signal;
-	struct wl_signal kill_signal;
-	struct wl_signal child_signal;
+	struct wl_signal sigchld_signal;
 	struct wl_signal idle_signal;
 
 	clockid_t presentation_clock;

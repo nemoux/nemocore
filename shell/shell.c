@@ -650,9 +650,21 @@ static void nemoshell_handle_touch_focus(struct wl_listener *listener, void *dat
 	struct nemoshell *shell = (struct nemoshell *)container_of(listener, struct nemoshell, touch_focus_listener);
 }
 
-static void nemoshell_handle_child_signal(struct wl_listener *listener, void *data)
+static void nemoshell_handle_transform(struct wl_listener *listener, void *data)
 {
-	struct nemoshell *shell = (struct nemoshell *)container_of(listener, struct nemoshell, child_signal_listener);
+	struct nemoshell *shell = (struct nemoshell *)container_of(listener, struct nemoshell, transform_listener);
+	struct nemoview *view = (struct nemoview *)data;
+
+	if (shell->update_transform != NULL && view != NULL && view->canvas != NULL) {
+		struct shellbin *bin = nemoshell_get_bin(view->canvas);
+
+		shell->update_transform(shell->userdata, bin);
+	}
+}
+
+static void nemoshell_handle_sigchld(struct wl_listener *listener, void *data)
+{
+	struct nemoshell *shell = (struct nemoshell *)container_of(listener, struct nemoshell, sigchld_listener);
 	struct nemoproc *proc = (struct nemoproc *)data;
 	struct clientstate *state;
 
@@ -749,9 +761,13 @@ struct nemoshell *nemoshell_create(struct nemocompz *compz)
 	shell->touch_focus_listener.notify = nemoshell_handle_touch_focus;
 	wl_signal_add(&compz->seat->touch.focus_signal, &shell->touch_focus_listener);
 
-	wl_list_init(&shell->child_signal_listener.link);
-	shell->child_signal_listener.notify = nemoshell_handle_child_signal;
-	wl_signal_add(&compz->child_signal, &shell->child_signal_listener);
+	wl_list_init(&shell->transform_listener.link);
+	shell->transform_listener.notify = nemoshell_handle_transform;
+	wl_signal_add(&compz->transform_signal, &shell->transform_listener);
+
+	wl_list_init(&shell->sigchld_listener.link);
+	shell->sigchld_listener.notify = nemoshell_handle_sigchld;
+	wl_signal_add(&compz->sigchld_signal, &shell->sigchld_listener);
 
 	wl_list_init(&shell->idle_listener.link);
 	shell->idle_listener.notify = nemoshell_handle_idle;

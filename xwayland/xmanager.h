@@ -149,7 +149,6 @@ struct nemoxmanager {
 	struct wl_listener create_surface_listener;
 	struct wl_listener activate_listener;
 	struct wl_listener transform_listener;
-	struct wl_listener kill_listener;
 
 	struct nemoxwindow *focus;
 

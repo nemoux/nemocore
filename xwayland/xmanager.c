@@ -1008,12 +1008,6 @@ static void nemoxmanager_handle_transform(struct wl_listener *listener, void *da
 	}
 }
 
-static void nemoxmanager_handle_kill(struct wl_listener *listener, void *data)
-{
-	struct nemoxmanager *xmanager = container_of(listener, struct nemoxmanager, kill_listener);
-	struct nemocanvas *canvas = (struct nemocanvas *)data;
-}
-
 struct nemoxmanager *nemoxmanager_create(struct nemoxserver *xserver, int fd)
 {
 	struct nemoxmanager *xmanager;
@@ -1094,9 +1088,6 @@ struct nemoxmanager *nemoxmanager_create(struct nemoxserver *xserver, int fd)
 	xmanager->transform_listener.notify = nemoxmanager_handle_transform;
 	wl_signal_add(&xserver->compz->transform_signal, &xmanager->transform_listener);
 
-	xmanager->kill_listener.notify = nemoxmanager_handle_kill;
-	wl_signal_add(&xserver->compz->kill_signal, &xmanager->kill_listener);
-
 	nemoxmanager_create_cursors(xmanager);
 	nemoxmanager_set_cursor(xmanager, xmanager->screen->root, NEMOX_CURSOR_LEFT_PTR);
 
@@ -1125,7 +1116,6 @@ void nemoxmanager_destroy(struct nemoxmanager *xmanager)
 
 	wl_list_remove(&xmanager->activate_listener.link);
 	wl_list_remove(&xmanager->transform_listener.link);
-	wl_list_remove(&xmanager->kill_listener.link);
 
 	free(xmanager);
 }

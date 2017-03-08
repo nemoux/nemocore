@@ -449,6 +449,11 @@ static void minishell_update_layer(void *data, struct shellbin *bin, const char 
 	}
 }
 
+static void minishell_update_transform(void *data, struct shellbin *bin)
+{
+	struct minishell *mini = (struct minishell *)data;
+}
+
 static void minishell_enter_idle(void *data)
 {
 	struct minishell *mini = (struct minishell *)data;
@@ -531,18 +536,15 @@ int main(int argc, char *argv[])
 	memset(mini, 0, sizeof(struct minishell));
 
 	compz = nemocompz_create();
-	if (compz == NULL)
-		goto out1;
 	nemocompz_load_backend(compz, "drm", rendernode);
 	nemocompz_load_backend(compz, "evdev", evdevopts);
 
 	shell = nemoshell_create(compz);
-	if (shell == NULL)
-		goto out2;
 	nemoshell_set_alive_client(shell, minishell_alive_client);
 	nemoshell_set_destroy_client(shell, minishell_destroy_client);
 	nemoshell_set_update_client(shell, minishell_update_client);
 	nemoshell_set_update_layer(shell, minishell_update_layer);
+	nemoshell_set_update_transform(shell, minishell_update_transform);
 	nemoshell_set_enter_idle(shell, minishell_enter_idle);
 	nemoshell_set_userdata(shell, mini);
 
@@ -616,10 +618,8 @@ int main(int argc, char *argv[])
 
 	nemoshell_destroy(shell);
 
-out2:
 	nemocompz_destroy(compz);
 
-out1:
 	free(mini);
 
 	return 0;
