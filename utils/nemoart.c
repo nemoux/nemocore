@@ -21,6 +21,13 @@
 #include <nemofs.h>
 #include <nemomisc.h>
 
+typedef enum {
+	NEMOART_ONESHOT_MODE = 0,
+	NEMOART_REPEAT_MODE = 1,
+	NEMOART_REPEAT_ALL_MODE = 2,
+	NEMOART_LAST_MODE
+} NemoArtReplayMode;
+
 struct nemoart;
 
 struct artone {
@@ -202,23 +209,28 @@ static void nemoart_dispatch_video_done(struct nemoplay *play, void *data)
 {
 	struct artone *one = (struct artone *)data;
 	struct nemoart *art = one->art;
-	int pcontents = art->icontents;
 
-	art->icontents = (art->icontents + 1) % nemofs_dir_get_filecount(art->contents);
-	if (art->icontents != pcontents) {
-		if (art->one != NULL)
-			nemoart_one_destroy(art->one);
-
-		art->one = nemoart_one_create(art,
-				nemofs_dir_get_filepath(art->contents, art->icontents),
-				art->width, art->height);
-	} else if (art->replay != 0) {
-		nemoart_one_replay(art->one);
-	} else {
+	if (art->replay == NEMOART_ONESHOT_MODE) {
 		nemoart_one_destroy(art->one);
 		art->one = NULL;
 
 		nemocanvas_dispatch_frame(art->canvas);
+	} else if (art->replay == NEMOART_REPEAT_MODE) {
+		nemoart_one_replay(art->one);
+	} else {
+		int pcontents = art->icontents;
+
+		art->icontents = (art->icontents + 1) % nemofs_dir_get_filecount(art->contents);
+		if (art->icontents != pcontents) {
+			if (art->one != NULL)
+				nemoart_one_destroy(art->one);
+
+			art->one = nemoart_one_create(art,
+					nemofs_dir_get_filepath(art->contents, art->icontents),
+					art->width, art->height);
+		} else {
+			nemoart_one_replay(art->one);
+		}
 	}
 }
 
@@ -370,15 +382,21 @@ static void nemoart_dispatch_bus(void *data, const char *events)
 			if (nemoitem_one_has_path_suffix(one, "/play") != 0) {
 				const char *path = nemoitem_one_get_attr(one, "url");
 
-				nemofs_dir_clear(art->contents);
-				nemofs_dir_insert_file(art->contents, NULL, path);
+				if (path != NULL) {
+					const char *mode = nemoitem_one_get_sattr(one, "mode", "repeat_all");
 
-				art->icontents = 0;
+					nemofs_dir_clear(art->contents);
+					nemofs_dir_insert_file(art->contents, NULL, path);
 
-				if (nemoitem_one_has_sattr(one, "mode", "oneshot") != 0)
-					art->replay = 0;
-				else
-					art->replay = 1;
+					art->icontents = 0;
+
+					if (strcmp(mode, "oneshot") == 0)
+						art->replay = NEMOART_ONESHOT_MODE;
+					else if (strcmp(mode, "repeat") == 0)
+						art->replay = NEMOART_REPEAT_MODE;
+					else
+						art->replay = NEMOART_REPEAT_ALL_MODE;
+				}
 			}
 		}
 
@@ -508,7 +526,7 @@ int main(int argc, char *argv[])
 	art->polygon = flip == 0 ? NEMOPLAY_SHADER_FLIP_POLYGON : NEMOPLAY_SHADER_FLIP_ROTATE_POLYGON;
 	art->audion = audion;
 	art->opaque = opaque;
-	art->replay = 1;
+	art->replay = NEMOART_REPEAT_ALL_MODE;
 	art->alive_timeout = alive;
 
 	art->tool = tool = nemotool_create();
