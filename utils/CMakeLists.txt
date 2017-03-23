@@ -150,6 +150,9 @@ if(WITH_TESSERACT)
 
 	TARGET_LINK_LIBRARIES(nemopen
 		nemoasst
+		nemotool
+		nemoaction
+		nemotoyz
 		${LEPTONICA_LIBRARIES}
 		${TESSERACT_LIBRARIES}
 		)

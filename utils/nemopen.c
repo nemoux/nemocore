@@ -5,18 +5,119 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <math.h>
 #include <getopt.h>
 
 #include <tesseract/capi.h>
 #include <leptonica/allheaders.h>
 
+#include <nemotool.h>
+#include <nemocanvas.h>
+#include <nemoaction.h>
+#include <nemotoyz.h>
 #include <nemomisc.h>
 
 struct nemopen {
+	struct nemotool *tool;
+	struct nemocanvas *canvas;
+	struct nemoaction *action;
+	struct nemotoyz *toyz;
+
 	int width, height;
+	int opaque;
 
 	TessBaseAPI *tess;
 };
+
+static void nemopen_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t width, int32_t height)
+{
+	struct nemopen *pen = (struct nemopen *)nemocanvas_get_userdata(canvas);
+
+	if (width == 0 || height == 0)
+		return;
+
+	pen->width = width;
+	pen->height = height;
+
+	nemocanvas_set_size(canvas, width, height);
+
+	if (pen->opaque != 0)
+		nemocanvas_opaque(canvas, 0, 0, width, height);
+
+	nemocanvas_dispatch_frame(canvas);
+}
+
+static void nemopen_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t secs, uint32_t nsecs)
+{
+	struct nemopen *pen = (struct nemopen *)nemocanvas_get_userdata(canvas);
+	pixman_image_t *framebuffer;
+
+	nemocanvas_ready(canvas);
+
+	framebuffer = nemocanvas_get_pixman_image(canvas);
+	if (framebuffer != NULL) {
+		nemotoyz_attach_buffer(pen->toyz,
+				NEMOTOYZ_CANVAS_RGBA_COLOR,
+				NEMOTOYZ_CANVAS_PREMUL_ALPHA,
+				pixman_image_get_data(framebuffer),
+				pixman_image_get_width(framebuffer),
+				pixman_image_get_height(framebuffer));
+		nemotoyz_clear(pen->toyz);
+		nemotoyz_detach_buffer(pen->toyz);
+
+		nemocanvas_dispatch_feedback(canvas);
+
+		nemocanvas_damage(canvas, 0, 0, pen->width, pen->height);
+		nemocanvas_commit(canvas);
+	}
+}
+
+static int nemopen_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t type, struct nemoevent *event)
+{
+	struct nemopen *pen = (struct nemopen *)nemocanvas_get_userdata(canvas);
+	struct actiontap *tap;
+
+	if (type & NEMOTOOL_TOUCH_DOWN_EVENT) {
+		tap = nemoaction_tap_create(pen->action);
+		nemoaction_tap_set_tx(tap, event->x);
+		nemoaction_tap_set_ty(tap, event->y);
+		nemoaction_tap_set_device(tap, event->device);
+		nemoaction_tap_set_serial(tap, event->serial);
+		nemoaction_tap_clear(tap, event->gx, event->gy);
+		nemoaction_tap_dispatch_event(pen->action, tap, NEMOACTION_TAP_DOWN_EVENT);
+	} else if (type & NEMOTOOL_TOUCH_UP_EVENT) {
+		tap = nemoaction_get_tap_by_device(pen->action, event->device);
+		if (tap != NULL) {
+			nemoaction_tap_detach(tap);
+			nemoaction_tap_dispatch_event(pen->action, tap, NEMOACTION_TAP_UP_EVENT);
+			nemoaction_tap_destroy(tap);
+		}
+	} else if (type & NEMOTOOL_TOUCH_MOTION_EVENT) {
+		tap = nemoaction_get_tap_by_device(pen->action, event->device);
+		if (tap != NULL) {
+			nemoaction_tap_set_tx(tap, event->x);
+			nemoaction_tap_set_ty(tap, event->y);
+			nemoaction_tap_trace(tap, event->gx, event->gy);
+			nemoaction_tap_dispatch_event(pen->action, tap, NEMOACTION_TAP_MOTION_EVENT);
+		}
+	}
+
+	return 0;
+}
+
+static int nemopen_dispatch_canvas_destroy(struct nemocanvas *canvas)
+{
+	nemotool_exit(nemocanvas_get_tool(canvas));
+
+	return 1;
+}
+
+static int nemopen_dispatch_tap_event(struct nemoaction *action, struct actiontap *tap, uint32_t event)
+{
+	struct nemopen *pen = (struct nemopen *)nemoaction_get_userdata(action);
+
+	return 0;
+}
 
 int nemopen_initialize(struct nemopen *pen, const char *language)
 {
@@ -71,19 +172,27 @@ int main(int argc, char *argv[])
 	struct option options[] = {
 		{ "width",				required_argument,		NULL,		'w' },
 		{ "height",				required_argument,		NULL,		'h' },
-		{ "content",			required_argument,		NULL,		'c' },
+		{ "opaque",				required_argument,		NULL,		'q' },
+		{ "layer",				required_argument,		NULL,		'y' },
+		{ "fullscreen",		required_argument,		NULL,		'f' },
 		{ 0 }
 	};
 
 	struct nemopen *pen;
-	char *contentpath = NULL;
+	struct nemotool *tool;
+	struct nemocanvas *canvas;
+	struct nemoaction *action;
+	struct nemotoyz *toyz;
+	char *layer = NULL;
+	char *fullscreenid = NULL;
 	int width = 500;
 	int height = 500;
+	int opaque = 0;
 	int opt;
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "w:h:c:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:q:y:f:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -96,17 +205,22 @@ int main(int argc, char *argv[])
 				height = strtoul(optarg, NULL, 10);
 				break;
 
-			case 'c':
-				contentpath = strdup(optarg);
+			case 'q':
+				opaque = strcasecmp(optarg, "on") == 0;
+				break;
+
+			case 'y':
+				layer = strdup(optarg);
+				break;
+
+			case 'f':
+				fullscreenid = strdup(optarg);
 				break;
 
 			default:
 				break;
 		}
 	}
-
-	if (contentpath == NULL)
-		return 0;
 
 	pen = (struct nemopen *)malloc(sizeof(struct nemopen));
 	if (pen == NULL)
@@ -115,12 +229,49 @@ int main(int argc, char *argv[])
 
 	pen->width = width;
 	pen->height = height;
+	pen->opaque = opaque;
+
+	pen->tool = tool = nemotool_create();
+	nemotool_connect_wayland(tool, NULL);
+
+	pen->canvas = canvas = nemocanvas_create(tool);
+	nemocanvas_set_size(canvas, width, height);
+	nemocanvas_set_nemosurface(canvas, "normal");
+	nemocanvas_set_dispatch_resize(canvas, nemopen_dispatch_canvas_resize);
+	nemocanvas_set_dispatch_frame(canvas, nemopen_dispatch_canvas_frame);
+	nemocanvas_set_dispatch_event(canvas, nemopen_dispatch_canvas_event);
+	nemocanvas_set_dispatch_destroy(canvas, nemopen_dispatch_canvas_destroy);
+	nemocanvas_set_state(canvas, "close");
+	nemocanvas_set_userdata(canvas, pen);
+
+	if (opaque != 0)
+		nemocanvas_opaque(canvas, 0, 0, width, height);
+	if (layer != NULL)
+		nemocanvas_set_layer(canvas, layer);
+	if (fullscreenid != NULL)
+		nemocanvas_set_fullscreen(canvas, fullscreenid);
+
+	pen->action = action = nemoaction_create();
+	nemoaction_set_tap_callback(action, nemopen_dispatch_tap_event);
+	nemoaction_set_userdata(action, pen);
+
+	pen->toyz = toyz = nemotoyz_create();
 
 	nemopen_initialize(pen, "eng");
 
-	nemopen_recognize(pen, contentpath);
+	nemocanvas_dispatch_frame(canvas);
+
+	nemotool_run(tool);
 
 	nemopen_finalize(pen);
+
+	nemotoyz_destroy(toyz);
+
+	nemoaction_destroy(action);
+
+	nemocanvas_destroy(canvas);
+
+	nemotool_destroy(tool);
 
 	free(pen);
 

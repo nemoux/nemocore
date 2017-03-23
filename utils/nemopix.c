@@ -122,7 +122,7 @@ static int nemopix_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t typ
 
 static int nemopix_dispatch_canvas_destroy(struct nemocanvas *canvas)
 {
-	nemotool_exit(canvas->tool);
+	nemotool_exit(nemocanvas_get_tool(canvas));
 
 	return 1;
 }
