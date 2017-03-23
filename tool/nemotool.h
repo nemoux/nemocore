@@ -236,6 +236,71 @@ extern void nemotool_touch_bypass(struct nemotool *tool, int32_t id, float x, fl
 
 extern void nemotool_client_alive(struct nemotool *tool, uint32_t timeout);
 
+static inline uint64_t nemoevent_get_device(struct nemoevent *event)
+{
+	return event->device;
+}
+
+static inline uint32_t nemoevent_get_serial(struct nemoevent *event)
+{
+	return event->serial;
+}
+
+static inline uint32_t nemoevent_get_time(struct nemoevent *event)
+{
+	return event->time;
+}
+
+static inline uint32_t nemoevent_get_value(struct nemoevent *event)
+{
+	return event->value;
+}
+
+static inline uint32_t nemoevent_get_state(struct nemoevent *event)
+{
+	return event->state;
+}
+
+static inline float nemoevent_get_canvas_x(struct nemoevent *event)
+{
+	return event->x;
+}
+
+static inline float nemoevent_get_canvas_y(struct nemoevent *event)
+{
+	return event->y;
+}
+
+static inline float nemoevent_get_canvas_z(struct nemoevent *event)
+{
+	return event->z;
+}
+
+static inline float nemoevent_get_rotate(struct nemoevent *event)
+{
+	return event->r;
+}
+
+static inline float nemoevent_get_pressure(struct nemoevent *event)
+{
+	return event->p;
+}
+
+static inline float nemoevent_get_global_x(struct nemoevent *event)
+{
+	return event->gx;
+}
+
+static inline float nemoevent_get_global_y(struct nemoevent *event)
+{
+	return event->gy;
+}
+
+static inline const char *nemoevent_get_name(struct nemoevent *event)
+{
+	return event->name;
+}
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif
