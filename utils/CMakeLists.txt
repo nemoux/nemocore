@@ -10,6 +10,7 @@ LINK_DIRECTORIES(${JSON_LIBRARY_DIRS})
 
 option(WITH_TCMALLOC "Build with TCMALLOC" ON)
 option(WITH_MINISHELL "Build with MINISHELL" ON)
+option(WITH_TESSERACT "Build with TESSERACT" ON)
 
 include_directories(
 	${CMAKE_SOURCE_DIR}/asst
@@ -28,6 +29,40 @@ include_directories(
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -std=c++11")
 set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
+
+if(WITH_MINISHELL)
+	include_directories(
+		${CMAKE_SOURCE_DIR}/compz
+		${CMAKE_SOURCE_DIR}/shell
+		${CMAKE_SOURCE_DIR}/xwayland
+		${CMAKE_SOURCE_DIR}/envs
+		)
+
+	add_executable(minishell
+		minishell.c
+		)
+
+	TARGET_LINK_LIBRARIES(minishell
+		nemoasst
+		nemohelper
+		nemocompz
+		nemoshell
+		nemoxwayland
+		nemoenvs
+		nemoplay
+		nemocook
+		nemobus
+		nemodb
+		)
+
+	if(WITH_TCMALLOC)
+		TARGET_LINK_LIBRARIES(minishell
+			tcmalloc_minimal
+			)
+	endif(WITH_TCMALLOC)
+
+	INSTALL(TARGETS minishell DESTINATION bin)
+endif(WITH_MINISHELL)
 
 add_executable(nemolog
 	nemolog.c
@@ -100,36 +135,24 @@ TARGET_LINK_LIBRARIES(nemopix
 
 INSTALL(TARGETS nemopix DESTINATION bin)
 
-if(WITH_MINISHELL)
-	include_directories(
-		${CMAKE_SOURCE_DIR}/compz
-		${CMAKE_SOURCE_DIR}/shell
-		${CMAKE_SOURCE_DIR}/xwayland
-		${CMAKE_SOURCE_DIR}/envs
+if(WITH_TESSERACT)
+	PKG_CHECK_MODULES(LEPTONICA REQUIRED lept)
+	INCLUDE_DIRECTORIES(${LEPTONICA_INCLUDE_DIRS})
+	LINK_DIRECTORIES(${LEPTONICA_LIBRARY_DIRS})
+
+	PKG_CHECK_MODULES(TESSERACT REQUIRED tesseract)
+	INCLUDE_DIRECTORIES(${TESSERACT_INCLUDE_DIRS})
+	LINK_DIRECTORIES(${TESSERACT_LIBRARY_DIRS})
+
+	add_executable(nemopen
+		nemopen.c
 		)
 
-	add_executable(minishell
-		minishell.c
-		)
-
-	TARGET_LINK_LIBRARIES(minishell
+	TARGET_LINK_LIBRARIES(nemopen
 		nemoasst
-		nemohelper
-		nemocompz
-		nemoshell
-		nemoxwayland
-		nemoenvs
-		nemoplay
-		nemocook
-		nemobus
-		nemodb
+		${LEPTONICA_LIBRARIES}
+		${TESSERACT_LIBRARIES}
 		)
 
-	if(WITH_TCMALLOC)
-		TARGET_LINK_LIBRARIES(minishell
-			tcmalloc_minimal
-			)
-	endif(WITH_TCMALLOC)
-
-	INSTALL(TARGETS minishell DESTINATION bin)
-endif(WITH_MINISHELL)
+	INSTALL(TARGETS nemopen DESTINATION bin)
+endif(WITH_TESSERACT)
