@@ -380,15 +380,29 @@ static void nemoart_dispatch_bus(void *data, const char *events)
 
 		nemoitem_for_each(one, msg) {
 			if (nemoitem_one_has_path_suffix(one, "/play") != 0) {
-				const char *path = nemoitem_one_get_attr(one, "url");
+				const char *url = nemoitem_one_get_attr(one, "url");
 
-				if (path != NULL) {
+				if (url != NULL) {
 					const char *mode = nemoitem_one_get_sattr(one, "mode", "repeat_all");
 
-					nemofs_dir_clear(art->contents);
-					nemofs_dir_insert_file(art->contents, NULL, path);
+					if (url[0] == '@') {
+						if (strcmp(url, "@next") == 0)
+							art->icontents = (art->icontents + 1) % nemofs_dir_get_filecount(art->contents);
+						else if (strcmp(url, "@prev") == 0)
+							art->icontents = (art->icontents + nemofs_dir_get_filecount(art->contents) - 1) % nemofs_dir_get_filecount(art->contents);
 
-					art->icontents = 0;
+						if (art->one != NULL)
+							nemoart_one_destroy(art->one);
+
+						art->one = nemoart_one_create(art,
+								nemofs_dir_get_filepath(art->contents, art->icontents),
+								art->width, art->height);
+					} else {
+						nemofs_dir_clear(art->contents);
+						nemofs_dir_insert_file(art->contents, NULL, url);
+
+						art->icontents = 0;
+					}
 
 					if (strcmp(mode, "oneshot") == 0)
 						art->replay = NEMOART_ONESHOT_MODE;
@@ -420,6 +434,7 @@ int main(int argc, char *argv[])
 		{ "height",				required_argument,		NULL,		'h' },
 		{ "fullscreen",		required_argument,		NULL,		'f' },
 		{ "content",			required_argument,		NULL,		'c' },
+		{ "replay",				required_argument,		NULL,		'r' },
 		{ "droprate",			required_argument,		NULL,		'd' },
 		{ "flip",					required_argument,		NULL,		'l' },
 		{ "opaque",				required_argument,		NULL,		'q' },
@@ -444,6 +459,7 @@ int main(int argc, char *argv[])
 	double droprate = 2.0f;
 	int width = 1920;
 	int height = 1080;
+	int replay = NEMOART_REPEAT_ALL_MODE;
 	int threads = 0;
 	int audion = 0;
 	int flip = 0;
@@ -453,7 +469,7 @@ int main(int argc, char *argv[])
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "w:h:f:c:d:l:q:y:t:a:b:e:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:f:c:r:d:l:q:y:t:a:b:e:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -472,6 +488,13 @@ int main(int argc, char *argv[])
 
 			case 'c':
 				contentpath = strdup(optarg);
+				break;
+
+			case 'r':
+				if (strcmp(optarg, "oneshot") == 0)
+					replay = NEMOART_ONESHOT_MODE;
+				else if (strcmp(optarg, "repeat") == 0)
+					replay = NEMOART_REPEAT_MODE;
 				break;
 
 			case 'd':
@@ -526,7 +549,7 @@ int main(int argc, char *argv[])
 	art->polygon = flip == 0 ? NEMOPLAY_SHADER_FLIP_POLYGON : NEMOPLAY_SHADER_FLIP_ROTATE_POLYGON;
 	art->audion = audion;
 	art->opaque = opaque;
-	art->replay = NEMOART_REPEAT_ALL_MODE;
+	art->replay = replay;
 	art->alive_timeout = alive;
 
 	art->tool = tool = nemotool_create();
