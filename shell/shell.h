@@ -296,7 +296,9 @@ extern void nemoshell_destroy(struct nemoshell *shell);
 extern void nemoshell_set_frame_timeout(struct nemoshell *shell, uint32_t timeout);
 
 extern void nemoshell_set_default_layer(struct nemoshell *shell, struct nemolayer *layer);
+extern struct nemolayer *nemoshell_get_default_layer(struct nemoshell *shell);
 extern void nemoshell_set_fullscreen_layer(struct nemoshell *shell, struct nemolayer *layer);
+extern struct nemolayer *nemoshell_get_fullscreen_layer(struct nemoshell *shell);
 
 extern struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas *canvas, struct nemocanvas_callback *callback);
 extern void nemoshell_destroy_bin(struct shellbin *bin);

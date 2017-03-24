@@ -569,6 +569,26 @@ int nemoenvs_set_config(struct nemoenvs *envs, struct itemone *one)
 		int32_t height = nemoitem_one_get_iattr(one, "height", 0);
 
 		nemocompz_set_scope(compz, x, y, width, height);
+	} else if (namespace_has_prefix(path, "/nemoshell/layer") != 0) {
+		const char *name = nemoitem_one_get_attr(one, "name");
+
+		if (name != NULL) {
+			const char *below = nemoitem_one_get_attr(one, "below");
+			struct nemolayer *layer;
+
+			layer = nemolayer_create(compz, name);
+
+			if (below == NULL)
+				nemolayer_attach_below(layer, NULL);
+			else
+				nemolayer_attach_below(layer,
+						nemocompz_get_layer_by_name(compz, below));
+
+			if (nemoitem_one_has_sattr(one, "default", "on") != 0)
+				nemoshell_set_default_layer(shell, layer);
+			if (nemoitem_one_has_sattr(one, "fullscreen", "on") != 0)
+				nemoshell_set_fullscreen_layer(shell, layer);
+		}
 	} else if (namespace_has_prefix(path, "/nemoshell/virtuio") != 0) {
 		int32_t port = nemoitem_one_get_iattr(one, "port", 3333);
 		int32_t fps = nemoitem_one_get_iattr(one, "fps", 60);

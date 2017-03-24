@@ -826,9 +826,19 @@ void nemoshell_set_default_layer(struct nemoshell *shell, struct nemolayer *laye
 	shell->default_layer = layer;
 }
 
+struct nemolayer *nemoshell_get_default_layer(struct nemoshell *shell)
+{
+	return shell->default_layer;
+}
+
 void nemoshell_set_fullscreen_layer(struct nemoshell *shell, struct nemolayer *layer)
 {
 	shell->fullscreen_layer = layer;
+}
+
+struct nemolayer *nemoshell_get_fullscreen_layer(struct nemoshell *shell)
+{
+	return shell->fullscreen_layer;
 }
 
 void nemoshell_send_bin_close(struct shellbin *bin)

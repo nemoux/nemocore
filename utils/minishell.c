@@ -17,7 +17,6 @@
 #include <backend.h>
 #include <screen.h>
 #include <view.h>
-#include <layer.h>
 #include <content.h>
 #include <session.h>
 #include <binding.h>
@@ -46,13 +45,6 @@ struct minishell {
 	struct nemocompz *compz;
 	struct nemoshell *shell;
 	struct nemoenvs *envs;
-
-	struct nemolayer *overlay_layer;
-	struct nemolayer *fullscreen_layer;
-	struct nemolayer *service_layer;
-	struct nemolayer *underlay_layer;
-	struct nemolayer *background_layer;
-
 	struct nemobus *bus;
 	struct wl_event_source *busfd;
 
@@ -104,7 +96,6 @@ static int minishell_dispatch_keypad(struct minishell *mini, struct itemone *one
 {
 	struct nemoshell *shell = mini->shell;
 	struct nemocompz *compz = mini->compz;
-	struct nemolayer *layer;
 	struct nemoview *view;
 	struct nemoview *focus;
 	struct nemotoken *args;
@@ -569,20 +560,6 @@ int main(int argc, char *argv[])
 	else
 		minishell_dispatch_text(mini, configpath);
 
-	mini->overlay_layer = nemolayer_create(compz, "overlay");
-	nemolayer_attach_below(mini->overlay_layer, NULL);
-	mini->fullscreen_layer = nemolayer_create(compz, "fullscreen");
-	nemolayer_attach_below(mini->fullscreen_layer, NULL);
-	mini->service_layer = nemolayer_create(compz, "service");
-	nemolayer_attach_below(mini->service_layer, NULL);
-	mini->underlay_layer = nemolayer_create(compz, "underlay");
-	nemolayer_attach_below(mini->underlay_layer, NULL);
-	mini->background_layer = nemolayer_create(compz, "background");
-	nemolayer_attach_below(mini->background_layer, NULL);
-
-	nemoshell_set_default_layer(shell, mini->service_layer);
-	nemoshell_set_fullscreen_layer(shell, mini->fullscreen_layer);
-
 	mini->bus = nemobus_create();
 	nemobus_connect(mini->bus, NULL);
 	nemobus_advertise(mini->bus, "set", "/nemoshell");
@@ -607,12 +584,6 @@ int main(int argc, char *argv[])
 
 	if (mini->db != NULL)
 		nemodb_destroy(mini->db);
-
-	nemolayer_destroy(mini->background_layer);
-	nemolayer_destroy(mini->underlay_layer);
-	nemolayer_destroy(mini->service_layer);
-	nemolayer_destroy(mini->fullscreen_layer);
-	nemolayer_destroy(mini->overlay_layer);
 
 	nemoenvs_destroy(mini->envs);
 
