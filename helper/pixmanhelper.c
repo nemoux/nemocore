@@ -474,9 +474,9 @@ pixman_image_t *pixman_load_image(const char *filepath, int32_t width, int32_t h
 	pixman_image_t *dst;
 	pixman_transform_t transform;
 
-	if (os_has_file_extensions(filepath, "png", NULL) != 0)
+	if (os_has_file_extension(filepath, "png") != 0)
 		src = pixman_load_png_file(filepath);
-	else if (os_has_file_extensions(filepath, "jpg", "jpeg", NULL) != 0)
+	else if (os_has_file_extension(filepath, "jpg") != 0 || os_has_file_extension(filepath, "jpeg") != 0)
 		src = pixman_load_jpeg_file(filepath);
 	if (src == NULL)
 		return NULL;

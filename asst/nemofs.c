@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <stdarg.h>
 #include <dirent.h>
 #include <regex.h>
 
@@ -141,6 +142,45 @@ int nemofs_dir_scan_extension(struct fsdir *dir, const char *path, const char *e
 		strcat(filepath, filename);
 
 		if (os_check_is_regular_file(filepath) != 0 && os_has_file_extension(filename, extension) != 0) {
+			dir->filenames[dir->nfiles + nfiles] = strdup(filename);
+			dir->filepaths[dir->nfiles + nfiles] = strdup(filepath);
+			nfiles++;
+		}
+	}
+
+	dir->nfiles += nfiles;
+
+	free(entries);
+
+	return nfiles;
+}
+
+int nemofs_dir_scan_extensions(struct fsdir *dir, const char *path, int nextensions, ...)
+{
+	struct dirent **entries;
+	const char *extensions[nextensions];
+	const char *filename;
+	char filepath[128];
+	va_list vargs;
+	int nfiles = 0;
+	int i, count;
+
+	va_start(vargs, nextensions);
+	for (i = 0; i < nextensions; i++)
+		extensions[i] = va_arg(vargs, const char *);
+	va_end(vargs);
+
+	count = scandir(path, &entries, NULL, alphasort);
+	count = MIN(count, dir->mfiles - dir->nfiles);
+
+	for (i = 0; i < count; i++) {
+		filename = entries[i]->d_name;
+
+		strcpy(filepath, path);
+		strcat(filepath, "/");
+		strcat(filepath, filename);
+
+		if (os_check_is_regular_file(filepath) != 0 && os_has_file_extensions(filename, nextensions, extensions) != 0) {
 			dir->filenames[dir->nfiles + nfiles] = strdup(filename);
 			dir->filepaths[dir->nfiles + nfiles] = strdup(filepath);
 			nfiles++;

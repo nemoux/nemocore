@@ -612,10 +612,7 @@ int main(int argc, char *argv[])
 
 	if (contentpath != NULL) {
 		if (os_check_is_directory(contentpath) != 0) {
-			nemofs_dir_scan_extension(art->contents, contentpath, "mp4");
-			nemofs_dir_scan_extension(art->contents, contentpath, "avi");
-			nemofs_dir_scan_extension(art->contents, contentpath, "mov");
-			nemofs_dir_scan_extension(art->contents, contentpath, "ts");
+			nemofs_dir_scan_extensions(art->contents, contentpath, 4, "mp4", "avi", "mov", "ts");
 		} else {
 			nemofs_dir_insert_file(art->contents, NULL, contentpath);
 		}

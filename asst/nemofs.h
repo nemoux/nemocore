@@ -22,6 +22,7 @@ extern void nemofs_dir_clear(struct fsdir *dir);
 extern int nemofs_dir_scan_directories(struct fsdir *dir, const char *path);
 extern int nemofs_dir_scan_files(struct fsdir *dir, const char *path);
 extern int nemofs_dir_scan_extension(struct fsdir *dir, const char *path, const char *extension);
+extern int nemofs_dir_scan_extensions(struct fsdir *dir, const char *path, int nextensions, ...);
 extern int nemofs_dir_scan_regex(struct fsdir *dir, const char *path, const char *expr);
 
 extern int nemofs_dir_insert_file(struct fsdir *dir, const char *path, const char *filename);

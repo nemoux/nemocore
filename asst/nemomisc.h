@@ -93,7 +93,7 @@ extern uint32_t os_execute_path(const char *path, char *const argv[], char *cons
 extern int os_append_path(char *path, const char *name);
 extern const char *os_get_file_extension(const char *name);
 extern int os_has_file_extension(const char *name, const char *ext);
-extern int os_has_file_extensions(const char *name, ...);
+extern int os_has_file_extensions(const char *name, int nexts, const char *exts[]);
 extern char *os_get_file_path(const char *name);
 extern char *os_get_file_name(const char *path);
 

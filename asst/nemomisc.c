@@ -7,8 +7,6 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include <stdarg.h>
-
 #include <math.h>
 #include <time.h>
 #include <signal.h>
@@ -389,24 +387,19 @@ int os_has_file_extension(const char *name, const char *ext)
 	return strcmp(ext, os_get_file_extension(name)) == 0;
 }
 
-int os_has_file_extensions(const char *name, ...)
+int os_has_file_extensions(const char *name, int nexts, const char *exts[])
 {
 	const char *ext;
-	const char *cmp;
-	va_list vargs;
+	int i;
 
 	ext = os_get_file_extension(name);
 	if (ext == NULL)
 		return 0;
 
-	va_start(vargs, name);
-
-	while ((cmp = va_arg(vargs, const char *)) != NULL) {
-		if (strcmp(ext, cmp) == 0)
+	for (i = 0; i < nexts; i++) {
+		if (strcmp(ext, exts[i]) == 0)
 			return 1;
 	}
-
-	va_end(vargs);
 
 	return 0;
 }
