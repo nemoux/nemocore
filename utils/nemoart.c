@@ -436,6 +436,7 @@ int main(int argc, char *argv[])
 		{ "replay",				required_argument,		NULL,		'r' },
 		{ "maximum",			required_argument,		NULL,		'm' },
 		{ "droprate",			required_argument,		NULL,		'd' },
+		{ "pick",					required_argument,		NULL,		'p' },
 		{ "flip",					required_argument,		NULL,		'l' },
 		{ "opaque",				required_argument,		NULL,		'q' },
 		{ "layer",				required_argument,		NULL,		'y' },
@@ -463,6 +464,7 @@ int main(int argc, char *argv[])
 	int maximum = 128;
 	int threads = 0;
 	int audion = 0;
+	int pick = 1;
 	int flip = 0;
 	int opaque = 1;
 	int alive = 0;
@@ -470,7 +472,7 @@ int main(int argc, char *argv[])
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "w:h:f:c:r:m:d:l:q:y:t:a:b:e:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:f:c:r:m:d:p:l:q:y:t:a:b:e:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -504,6 +506,10 @@ int main(int argc, char *argv[])
 
 			case 'd':
 				droprate = strtod(optarg, NULL);
+				break;
+
+			case 'p':
+				pick = strcasecmp(optarg, "on") == 0;
 				break;
 
 			case 'l':
@@ -575,6 +581,9 @@ int main(int argc, char *argv[])
 	nemocanvas_set_fullscreen_type(canvas, "pick;pitch");
 	nemocanvas_set_state(canvas, "close");
 	nemocanvas_set_userdata(canvas, art);
+
+	if (pick == 0)
+		nemocanvas_put_state(canvas, "pick");
 
 	if (opaque != 0)
 		nemocanvas_opaque(canvas, 0, 0, width, height);
