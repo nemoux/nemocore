@@ -389,6 +389,8 @@ static void nemoart_dispatch_bus(void *data, const char *events)
 						art->icontents = (art->icontents + 1) % nemofs_dir_get_filecount(art->contents);
 					else if (strcmp(url, "@prev") == 0)
 						art->icontents = (art->icontents + nemofs_dir_get_filecount(art->contents) - 1) % nemofs_dir_get_filecount(art->contents);
+					else if (strcmp(url, "@random") == 0)
+						art->icontents = random_get_int(0, nemofs_dir_get_filecount(art->contents) - 1);
 					else
 						art->icontents = nemofs_dir_insert_file(art->contents, NULL, url);
 
@@ -432,6 +434,7 @@ int main(int argc, char *argv[])
 		{ "fullscreen",		required_argument,		NULL,		'f' },
 		{ "content",			required_argument,		NULL,		'c' },
 		{ "replay",				required_argument,		NULL,		'r' },
+		{ "maximum",			required_argument,		NULL,		'm' },
 		{ "droprate",			required_argument,		NULL,		'd' },
 		{ "flip",					required_argument,		NULL,		'l' },
 		{ "opaque",				required_argument,		NULL,		'q' },
@@ -457,6 +460,7 @@ int main(int argc, char *argv[])
 	int width = 1920;
 	int height = 1080;
 	int replay = NEMOART_REPEAT_ALL_MODE;
+	int maximum = 128;
 	int threads = 0;
 	int audion = 0;
 	int flip = 0;
@@ -466,7 +470,7 @@ int main(int argc, char *argv[])
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "w:h:f:c:r:d:l:q:y:t:a:b:e:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:f:c:r:m:d:l:q:y:t:a:b:e:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -492,6 +496,10 @@ int main(int argc, char *argv[])
 					replay = NEMOART_ONESHOT_MODE;
 				else if (strcmp(optarg, "repeat") == 0)
 					replay = NEMOART_REPEAT_MODE;
+				break;
+
+			case 'm':
+				maximum = strtoul(optarg, NULL, 10);
 				break;
 
 			case 'd':
@@ -588,7 +596,7 @@ int main(int argc, char *argv[])
 			NTEGL_WINDOW(canvas));
 	nemocook_egl_resize(egl, width, height);
 
-	art->contents = nemofs_dir_create(128);
+	art->contents = nemofs_dir_create(maximum);
 
 	if (busid != NULL) {
 		art->bus = nemobus_create();
