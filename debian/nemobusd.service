@@ -1,0 +1,12 @@
+[Unit]
+Description=nemobus daemon service
+RequiresMountsFor=network.target
+
+[Service]
+User=root
+ExecStart=/usr/bin/nemobusd
+Restart=always
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target
