@@ -210,7 +210,7 @@ static void nemoart_dispatch_video_done(struct nemoplay *play, void *data)
 	struct artone *one = (struct artone *)data;
 	struct nemoart *art = one->art;
 
-	if (art->replay == NEMOART_ONESHOT_MODE) {
+	if (art->replay == NEMOART_ONESHOT_MODE || nemofs_dir_get_filecount(art->contents) == 0) {
 		nemoart_one_destroy(art->one);
 		art->one = NULL;
 
@@ -385,24 +385,12 @@ static void nemoart_dispatch_bus(void *data, const char *events)
 				if (url != NULL) {
 					const char *mode = nemoitem_one_get_sattr(one, "mode", "repeat_all");
 
-					if (url[0] == '@') {
-						if (strcmp(url, "@next") == 0)
-							art->icontents = (art->icontents + 1) % nemofs_dir_get_filecount(art->contents);
-						else if (strcmp(url, "@prev") == 0)
-							art->icontents = (art->icontents + nemofs_dir_get_filecount(art->contents) - 1) % nemofs_dir_get_filecount(art->contents);
-
-						if (art->one != NULL)
-							nemoart_one_destroy(art->one);
-
-						art->one = nemoart_one_create(art,
-								nemofs_dir_get_filepath(art->contents, art->icontents),
-								art->width, art->height);
-					} else {
-						nemofs_dir_clear(art->contents);
-						nemofs_dir_insert_file(art->contents, NULL, url);
-
-						art->icontents = 0;
-					}
+					if (strcmp(url, "@next") == 0)
+						art->icontents = (art->icontents + 1) % nemofs_dir_get_filecount(art->contents);
+					else if (strcmp(url, "@prev") == 0)
+						art->icontents = (art->icontents + nemofs_dir_get_filecount(art->contents) - 1) % nemofs_dir_get_filecount(art->contents);
+					else
+						art->icontents = nemofs_dir_insert_file(art->contents, NULL, url);
 
 					if (strcmp(mode, "oneshot") == 0)
 						art->replay = NEMOART_ONESHOT_MODE;
@@ -410,7 +398,23 @@ static void nemoart_dispatch_bus(void *data, const char *events)
 						art->replay = NEMOART_REPEAT_MODE;
 					else
 						art->replay = NEMOART_REPEAT_ALL_MODE;
+
+					if (art->one != NULL)
+						nemoart_one_destroy(art->one);
+
+					art->one = nemoart_one_create(art,
+							nemofs_dir_get_filepath(art->contents, art->icontents),
+							art->width, art->height);
 				}
+			} else if (nemoitem_one_has_path_suffix(one, "clear") != 0) {
+				nemofs_dir_clear(art->contents);
+
+				art->icontents = 0;
+			} else if (nemoitem_one_has_path_suffix(one, "append") != 0) {
+				const char *url = nemoitem_one_get_attr(one, "url");
+
+				if (url != NULL)
+					nemofs_dir_insert_file(art->contents, NULL, url);
 			}
 		}
 
@@ -418,13 +422,6 @@ static void nemoart_dispatch_bus(void *data, const char *events)
 	}
 
 	nemojson_destroy(json);
-
-	if (art->one != NULL)
-		nemoart_one_destroy(art->one);
-
-	art->one = nemoart_one_create(art,
-			nemofs_dir_get_filepath(art->contents, art->icontents),
-			art->width, art->height);
 }
 
 int main(int argc, char *argv[])
