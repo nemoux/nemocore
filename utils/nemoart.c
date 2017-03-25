@@ -408,11 +408,11 @@ static void nemoart_dispatch_bus(void *data, const char *events)
 							nemofs_dir_get_filepath(art->contents, art->icontents),
 							art->width, art->height);
 				}
-			} else if (nemoitem_one_has_path_suffix(one, "clear") != 0) {
+			} else if (nemoitem_one_has_path_suffix(one, "/clear") != 0) {
 				nemofs_dir_clear(art->contents);
 
 				art->icontents = 0;
-			} else if (nemoitem_one_has_path_suffix(one, "append") != 0) {
+			} else if (nemoitem_one_has_path_suffix(one, "/append") != 0) {
 				const char *url = nemoitem_one_get_attr(one, "url");
 
 				if (url != NULL)
@@ -620,11 +620,10 @@ int main(int argc, char *argv[])
 	}
 
 	if (contentpath != NULL) {
-		if (os_check_is_directory(contentpath) != 0) {
-			nemofs_dir_scan_extensions(art->contents, contentpath, 4, "mp4", "avi", "mov", "ts");
-		} else {
+		if (os_check_is_directory(contentpath) != 0)
+			nemofs_dir_scan_extensions(art->contents, contentpath, 5, "mp4", "avi", "mov", "mkv", "ts");
+		else
 			nemofs_dir_insert_file(art->contents, NULL, contentpath);
-		}
 
 		art->one = nemoart_one_create(art,
 				nemofs_dir_get_filepath(art->contents, art->icontents),
