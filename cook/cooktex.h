@@ -67,6 +67,8 @@ extern void nemocook_texture_upload_slice(struct cooktex *tex, void *buffer, int
 extern void *nemocook_texture_map(struct cooktex *tex);
 extern void nemocook_texture_unmap(struct cooktex *tex);
 
+extern int nemocook_texture_load_image(struct cooktex *tex, const char *filepath);
+
 static inline void nemocook_texture_set(struct cooktex *tex, GLuint texture)
 {
 	tex->texture = texture;

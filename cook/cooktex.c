@@ -6,6 +6,7 @@
 #include <errno.h>
 
 #include <cooktex.h>
+#include <pixmanhelper.h>
 #include <nemomisc.h>
 
 struct cooktex *nemocook_texture_create(void)
@@ -158,4 +159,31 @@ void nemocook_texture_unmap(struct cooktex *tex)
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+}
+
+int nemocook_texture_load_image(struct cooktex *tex, const char *filepath)
+{
+	pixman_image_t *image;
+
+	image = pixman_load_image(filepath, tex->width, tex->height);
+	if (image == NULL)
+		return -1;
+
+	glBindTexture(GL_TEXTURE_2D, tex->texture);
+	glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
+	glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
+	glTexImage2D(GL_TEXTURE_2D,
+			0,
+			GL_BGRA,
+			pixman_image_get_stride(image),
+			pixman_image_get_height(image),
+			0,
+			GL_BGRA,
+			GL_UNSIGNED_BYTE,
+			(void *)pixman_image_get_data(image));
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	pixman_image_unref(image);
+
+	return 0;
 }
