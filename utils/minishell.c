@@ -74,9 +74,7 @@ static void minishell_update_state(struct minishell *mini, struct itemone *one, 
 	clientstate_set_attrs(state, one);
 
 	owner = nemoitem_one_get_attr(one, "owner");
-	if (owner != NULL) {
-		view = nemocompz_get_view_by_uuid(mini->compz, owner);
-
+	if (owner != NULL && (view = nemocompz_get_view_by_uuid(mini->compz, owner)) != NULL) {
 		if (nemoitem_one_has_sattr(one, "coords", "global") == 0) {
 			float x = nemoitem_one_get_fattr(one, "x", 0.0f);
 			float y = nemoitem_one_get_fattr(one, "y", 0.0f);
