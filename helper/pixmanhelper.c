@@ -468,47 +468,66 @@ out:
 	return image;
 }
 
+static int pixman_compare_extension(const void *a, const void *b)
+{
+	return strcasecmp((const char *)a, (const char *)b);
+}
+
+typedef pixman_image_t *(*pixman_load_image_t)(const char *path);
+
 pixman_image_t *pixman_load_image(const char *filepath, int32_t width, int32_t height)
 {
-	pixman_image_t *src;
-	pixman_image_t *dst;
-	pixman_transform_t transform;
+	static struct extensionmap {
+		char extension[32];
 
-	if (os_has_file_extension(filepath, "png") != 0)
-		src = pixman_load_png_file(filepath);
-	else if (os_has_file_extension(filepath, "jpg") != 0 || os_has_file_extension(filepath, "jpeg") != 0)
-		src = pixman_load_jpeg_file(filepath);
-	if (src == NULL)
+		pixman_load_image_t load;
+	} maps[] = {
+		{ "png",				pixman_load_png_file },
+		{ "jpg",				pixman_load_jpeg_file },
+		{ "jpeg",				pixman_load_jpeg_file }
+	}, *map;
+
+	pixman_image_t *src;
+	const char *extension = os_get_file_extension(filepath);
+
+	if (extension == NULL)
 		return NULL;
 
-	if (pixman_image_get_width(src) == width &&
-			pixman_image_get_height(src) == height)
-		return src;
+	map = (struct extensionmap *)bsearch(extension, maps, sizeof(maps) / sizeof(maps[0]), sizeof(maps[0]), pixman_compare_extension);
+	if (map != NULL && (src = map->load(filepath)) != NULL) {
+		pixman_image_t *dst;
+		pixman_transform_t transform;
 
-	dst = pixman_image_create_bits_no_clear(PIXMAN_a8r8g8b8,
-			width, height,
-			NULL,
-			width * 4);
+		if (pixman_image_get_width(src) == width && pixman_image_get_height(src) == height)
+			return src;
 
-	pixman_transform_init_identity(&transform);
-	pixman_transform_scale(&transform, NULL,
-			pixman_double_to_fixed(
-				(double)pixman_image_get_width(src) / (double)pixman_image_get_width(dst)),
-			pixman_double_to_fixed(
-				(double)pixman_image_get_height(src) / (double)pixman_image_get_height(dst)));
+		dst = pixman_image_create_bits_no_clear(PIXMAN_a8r8g8b8,
+				width, height,
+				NULL,
+				width * 4);
 
-	pixman_image_set_transform(src, &transform);
+		pixman_transform_init_identity(&transform);
+		pixman_transform_scale(&transform, NULL,
+				pixman_double_to_fixed(
+					(double)pixman_image_get_width(src) / (double)pixman_image_get_width(dst)),
+				pixman_double_to_fixed(
+					(double)pixman_image_get_height(src) / (double)pixman_image_get_height(dst)));
 
-	pixman_image_composite32(PIXMAN_OP_SRC,
-			src,
-			NULL,
-			dst,
-			0, 0, 0, 0, 0, 0,
-			width, height);
+		pixman_image_set_transform(src, &transform);
 
-	pixman_image_unref(src);
+		pixman_image_composite32(PIXMAN_OP_SRC,
+				src,
+				NULL,
+				dst,
+				0, 0, 0, 0, 0, 0,
+				width, height);
 
-	return dst;
+		pixman_image_unref(src);
+
+		return dst;
+	}
+
+	return NULL;
 }
 
 pixman_image_t *pixman_resize_image(pixman_image_t *src, int32_t width, int32_t height)
