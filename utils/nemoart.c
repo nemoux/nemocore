@@ -20,6 +20,7 @@
 #include <nemoitem.h>
 #include <nemoaction.h>
 #include <nemofs.h>
+#include <nemonoty.h>
 #include <nemomisc.h>
 
 typedef enum {
@@ -57,6 +58,9 @@ struct artone {
 	int width, height;
 
 	int needs_timeout;
+
+	struct nemonoty *update_noty;
+	struct nemonoty *done_noty;
 };
 
 struct artvideo {
@@ -113,11 +117,15 @@ struct nemoart {
 static void nemoart_video_dispatch_update(struct nemoplay *play, void *data)
 {
 	struct artone *one = (struct artone *)data;
+
+	nemonoty_dispatch(one->update_noty, one);
 }
 
 static void nemoart_video_dispatch_done(struct nemoplay *play, void *data)
 {
 	struct artone *one = (struct artone *)data;
+
+	nemonoty_dispatch(one->done_noty, one);
 }
 
 static void nemoart_video_destroy(struct artone *one)
@@ -134,6 +142,11 @@ static void nemoart_video_destroy(struct artone *one)
 		nemoplay_decoder_destroy(video->decoderback);
 
 	nemoplay_destroy(video->play);
+
+	if (one->update_noty != NULL)
+		nemonoty_destroy(one->update_noty);
+	if (one->done_noty != NULL)
+		nemonoty_destroy(one->done_noty);
 
 	if (one->url != NULL)
 		free(one->url);
@@ -169,7 +182,7 @@ static int nemoart_video_load(struct artone *one)
 	else
 		nemoplay_shader_set_blend(video->shader, NEMOPLAY_SHADER_SRC_ALPHA_BLEND);
 
-	if (video->flip == 0)
+	if (video->flip != 0)
 		nemoplay_shader_set_polygon(video->shader, NEMOPLAY_SHADER_FLIP_ROTATE_POLYGON);
 	else
 		nemoplay_shader_set_polygon(video->shader, NEMOPLAY_SHADER_FLIP_POLYGON);
@@ -238,7 +251,7 @@ static void nemoart_video_set_integer(struct artone *one, const char *key, int v
 		video->flip = value;
 
 		if (video->shader != NULL) {
-			if (video->flip == 0)
+			if (video->flip != 0)
 				nemoplay_shader_set_polygon(video->shader, NEMOPLAY_SHADER_FLIP_ROTATE_POLYGON);
 			else
 				nemoplay_shader_set_polygon(video->shader, NEMOPLAY_SHADER_FLIP_POLYGON);
@@ -287,6 +300,9 @@ static struct artone *nemoart_video_create(const char *url, int width, int heigh
 	one->set_float = nemoart_video_set_float;
 	one->set_string = nemoart_video_set_string;
 
+	one->update_noty = nemonoty_create();
+	one->done_noty = nemonoty_create();
+
 	video->play = nemoplay_create();
 
 	video->threads = 0;
@@ -308,6 +324,9 @@ static struct artone *nemoart_image_create(const char *url, int width, int heigh
 	one->url = strdup(url);
 	one->width = width;
 	one->height = height;
+
+	one->update_noty = nemonoty_create();
+	one->done_noty = nemonoty_create();
 
 	return one;
 }
@@ -391,6 +410,16 @@ static inline void nemoart_one_stop(struct artone *one)
 	one->stop(one);
 }
 
+static void nemoart_one_set_update_callback(struct artone *one, nemonoty_dispatch_t dispatch, void *data)
+{
+	nemonoty_attach(one->update_noty, dispatch, data);
+}
+
+static void nemoart_one_set_done_callback(struct artone *one, nemonoty_dispatch_t dispatch, void *data)
+{
+	nemonoty_attach(one->done_noty, dispatch, data);
+}
+
 static void nemoart_dispatch_video_update(void *data, void *event)
 {
 	struct nemoart *art = (struct nemoart *)data;
@@ -425,6 +454,9 @@ static void nemoart_dispatch_video_done(void *data, void *event)
 			nemoart_one_set_integer(art->one, "opaque", art->opaque);
 			nemoart_one_set_integer(art->one, "flip", art->flip);
 			nemoart_one_set_float(art->one, "droprate", art->droprate);
+			nemoart_one_set_update_callback(art->one, nemoart_dispatch_video_update, art);
+			nemoart_one_set_done_callback(art->one, nemoart_dispatch_video_done, art);
+			nemoart_one_load(art->one);
 		} else {
 			nemoart_one_replay(art->one);
 		}
@@ -609,6 +641,9 @@ static void nemoart_dispatch_bus(void *data, const char *events)
 					nemoart_one_set_integer(art->one, "opaque", art->opaque);
 					nemoart_one_set_integer(art->one, "flip", art->flip);
 					nemoart_one_set_float(art->one, "droprate", art->droprate);
+					nemoart_one_set_update_callback(art->one, nemoart_dispatch_video_update, art);
+					nemoart_one_set_done_callback(art->one, nemoart_dispatch_video_done, art);
+					nemoart_one_load(art->one);
 				}
 			} else if (nemoitem_one_has_path_suffix(one, "/clear") != 0) {
 				nemofs_dir_clear(art->contents);
@@ -835,6 +870,9 @@ int main(int argc, char *argv[])
 		nemoart_one_set_integer(art->one, "opaque", art->opaque);
 		nemoart_one_set_integer(art->one, "flip", art->flip);
 		nemoart_one_set_float(art->one, "droprate", art->droprate);
+		nemoart_one_set_update_callback(art->one, nemoart_dispatch_video_update, art);
+		nemoart_one_set_done_callback(art->one, nemoart_dispatch_video_done, art);
+		nemoart_one_load(art->one);
 	}
 
 	nemotool_run(tool);
