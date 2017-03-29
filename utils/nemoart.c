@@ -417,9 +417,14 @@ static void nemoart_dispatch_video_done(void *data, void *event)
 			if (art->one != NULL)
 				nemoart_one_destroy(art->one);
 
-			art->one = nemoart_one_create(art,
+			art->one = nemoart_one_create(
 					nemofs_dir_get_filepath(art->contents, art->icontents),
 					art->width, art->height);
+			nemoart_one_set_integer(art->one, "threads", art->threads);
+			nemoart_one_set_integer(art->one, "audio", art->audioon);
+			nemoart_one_set_integer(art->one, "opaque", art->opaque);
+			nemoart_one_set_integer(art->one, "flip", art->flip);
+			nemoart_one_set_float(art->one, "droprate", art->droprate);
 		} else {
 			nemoart_one_replay(art->one);
 		}
@@ -596,9 +601,14 @@ static void nemoart_dispatch_bus(void *data, const char *events)
 					if (art->one != NULL)
 						nemoart_one_destroy(art->one);
 
-					art->one = nemoart_one_create(art,
+					art->one = nemoart_one_create(
 							nemofs_dir_get_filepath(art->contents, art->icontents),
 							art->width, art->height);
+					nemoart_one_set_integer(art->one, "threads", art->threads);
+					nemoart_one_set_integer(art->one, "audio", art->audioon);
+					nemoart_one_set_integer(art->one, "opaque", art->opaque);
+					nemoart_one_set_integer(art->one, "flip", art->flip);
+					nemoart_one_set_float(art->one, "droprate", art->droprate);
 				}
 			} else if (nemoitem_one_has_path_suffix(one, "/clear") != 0) {
 				nemofs_dir_clear(art->contents);
@@ -817,9 +827,14 @@ int main(int argc, char *argv[])
 		else
 			nemofs_dir_insert_file(art->contents, NULL, contentpath);
 
-		art->one = nemoart_one_create(art,
+		art->one = nemoart_one_create(
 				nemofs_dir_get_filepath(art->contents, art->icontents),
 				art->width, art->height);
+		nemoart_one_set_integer(art->one, "threads", art->threads);
+		nemoart_one_set_integer(art->one, "audio", art->audioon);
+		nemoart_one_set_integer(art->one, "opaque", art->opaque);
+		nemoart_one_set_integer(art->one, "flip", art->flip);
+		nemoart_one_set_float(art->one, "droprate", art->droprate);
 	}
 
 	nemotool_run(tool);
