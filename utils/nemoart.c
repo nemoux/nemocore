@@ -31,32 +31,29 @@ typedef enum {
 
 struct artone;
 
-typedef struct artone *(*nemoart_one_create_t)(const char *url, int width, int height, int threads, int audio);
+typedef struct artone *(*nemoart_one_create_t)(const char *url, int width, int height);
 typedef void (*nemoart_one_destroy_t)(struct artone *one);
 typedef int (*nemoart_one_load_t)(struct artone *one);
+typedef void (*nemoart_one_stop_t)(struct artone *one);
+typedef void (*nemoart_one_update_t)(struct artone *one);
+typedef void (*nemoart_one_resize_t)(struct artone *one, int width, int height);
+typedef void (*nemoart_one_replay_t)(struct artone *one);
 typedef void (*nemoart_one_set_integer_t)(struct artone *one, const char *key, int value);
 typedef void (*nemoart_one_set_float_t)(struct artone *one, const char *key, float value);
 typedef void (*nemoart_one_set_string_t)(struct artone *one, const char *key, const char *value);
-typedef void (*nemoart_one_update_t)(struct artone *one);
-typedef void (*nemoart_one_done_t)(struct artone *one);
-typedef void (*nemoart_one_resize_t)(struct artone *one, int width, int height);
-typedef void (*nemoart_one_replay_t)(struct artone *one);
-typedef void (*nemoart_one_stop_t)(struct artone *one);
-typedef void (*nemoart_one_opaque_t)(struct artone *one, int opaque);
-typedef void (*nemoart_one_flip_t)(struct artone *one, int flip);
 
 struct artone {
 	nemoart_one_destroy_t destroy;
 	nemoart_one_load_t load;
+	nemoart_one_stop_t stop;
+	nemoart_one_update_t update;
+	nemoart_one_resize_t resize;
+	nemoart_one_replay_t replay;
 	nemoart_one_set_integer_t set_integer;
 	nemoart_one_set_float_t set_float;
 	nemoart_one_set_string_t set_string;
-	nemoart_one_update_t update;
-	nemoart_one_done_t done;
-	nemoart_one_resize_t resize;
-	nemoart_one_replay_t replay;
-	nemoart_one_stop_t stop;
 
+	char *url;
 	int width, height;
 
 	int needs_timeout;
@@ -73,6 +70,8 @@ struct artvideo {
 
 	int threads;
 	int audioon;
+	int opaque;
+	int flip;
 	double droprate;
 };
 
@@ -98,8 +97,8 @@ struct nemoart {
 	double droprate;
 
 	int threads;
+	int audioon;
 	int flip;
-	int audion;
 	int opaque;
 	int replay;
 
@@ -111,7 +110,17 @@ struct nemoart {
 	struct artone *one;
 };
 
-static void nemoart_one_destroy_video(struct artone *one)
+static void nemoart_video_dispatch_update(struct nemoplay *play, void *data)
+{
+	struct artone *one = (struct artone *)data;
+}
+
+static void nemoart_video_dispatch_done(struct nemoplay *play, void *data)
+{
+	struct artone *one = (struct artone *)data;
+}
+
+static void nemoart_video_destroy(struct artone *one)
 {
 	struct artvideo *video = NEMOART_VIDEO(one);
 
@@ -126,10 +135,67 @@ static void nemoart_one_destroy_video(struct artone *one)
 
 	nemoplay_destroy(video->play);
 
+	if (one->url != NULL)
+		free(one->url);
+
 	free(one);
 }
 
-static void nemoart_one_resize_video(struct artone *one, int width, int height)
+static int nemoart_video_load(struct artone *one)
+{
+	struct artvideo *video = NEMOART_VIDEO(one);
+
+	if (video->threads > 0)
+		nemoplay_set_video_intopt(video->play, "threads", video->threads);
+
+	nemoplay_load_media(video->play, one->url);
+
+	video->decoderback = nemoplay_decoder_create(video->play);
+	video->videoback = nemoplay_video_create_by_timer(video->play);
+	nemoplay_video_set_drop_rate(video->videoback, video->droprate);
+	nemoplay_video_set_texture(video->videoback, 0, one->width, one->height);
+	nemoplay_video_set_update(video->videoback, nemoart_video_dispatch_update);
+	nemoplay_video_set_done(video->videoback, nemoart_video_dispatch_done);
+	nemoplay_video_set_data(video->videoback, one);
+	video->shader = nemoplay_video_get_shader(video->videoback);
+
+	if (video->audioon != 0)
+		video->audioback = nemoplay_audio_create_by_ao(video->play);
+	else
+		nemoplay_revoke_audio(video->play);
+
+	if (video->opaque != 0)
+		nemoplay_shader_set_blend(video->shader, NEMOPLAY_SHADER_NONE_BLEND);
+	else
+		nemoplay_shader_set_blend(video->shader, NEMOPLAY_SHADER_SRC_ALPHA_BLEND);
+
+	if (video->flip == 0)
+		nemoplay_shader_set_polygon(video->shader, NEMOPLAY_SHADER_FLIP_ROTATE_POLYGON);
+	else
+		nemoplay_shader_set_polygon(video->shader, NEMOPLAY_SHADER_FLIP_POLYGON);
+
+	return 0;
+}
+
+static void nemoart_video_stop(struct artone *one)
+{
+	struct artvideo *video = NEMOART_VIDEO(one);
+
+	if (video->audioback != NULL)
+		nemoplay_audio_stop(video->audioback);
+
+	nemoplay_video_stop(video->videoback);
+	nemoplay_decoder_stop(video->decoderback);
+}
+
+static void nemoart_video_update(struct artone *one)
+{
+	struct artvideo *video = NEMOART_VIDEO(one);
+
+	nemoplay_shader_dispatch(video->shader);
+}
+
+static void nemoart_video_resize(struct artone *one, int width, int height)
 {
 	struct artvideo *video = NEMOART_VIDEO(one);
 
@@ -139,64 +205,7 @@ static void nemoart_one_resize_video(struct artone *one, int width, int height)
 	nemoplay_video_set_texture(video->videoback, 0, one->width, one->height);
 }
 
-static int nemoart_one_load_video(struct artone *one)
-{
-	struct artvideo *video = NEMOART_VIDEO(one);
-
-	if (video->threads > 0)
-		nemoplay_set_video_intopt(video->play, "threads", video->threads);
-
-	nemoplay_load_media(video->play, video->url);
-
-	if (video->audioon == 0)
-		nemoplay_revoke_audio(video->play);
-
-	video->decoderback = nemoplay_decoder_create(video->play);
-	video->videoback = nemoplay_video_create_by_timer(video->play);
-	nemoplay_video_set_drop_rate(video->videoback, video->droprate);
-	nemoplay_video_set_texture(video->videoback, 0, one->width, one->height);
-	nemoplay_video_set_update(video->videoback, nemoart_dispatch_video_update);
-	nemoplay_video_set_done(video->videoback, nemoart_dispatch_video_done);
-	nemoplay_video_set_data(video->videoback, one);
-	video->shader = nemoplay_video_get_shader(video->videoback);
-
-	if (video->audioon != 0)
-		video->audioback = nemoplay_audio_create_by_ao(video->play);
-
-	return 0;
-}
-
-static void nemoart_one_set_integer(struct artone *one, const char *key, int value)
-{
-	struct artvideo *video = NEMOART_VIDEO(one);
-
-	if (strcmp(key, "threads") == 0)
-		video->threads = value;
-	else if (strcmp(key, "audio") == 0)
-		video->audioon = value;
-}
-
-static void nemoart_one_set_float(struct artone *one, const char *key, float value)
-{
-	struct artvideo *video = NEMOART_VIDEO(one);
-
-	if (strcmp(key, "droprate") == 0)
-		video->droprate = value;
-}
-
-static void nemoart_one_set_string(struct artone *one, const char *key, const char *value)
-{
-	struct artvideo *video = NEMOART_VIDEO(one);
-}
-
-static void nemoart_one_update_video(struct artone *one)
-{
-	struct artvideo *video = NEMOART_VIDEO(one);
-
-	nemoplay_shader_dispatch(video->shader);
-}
-
-static void nemoart_one_replay_video(struct artone *one)
+static void nemoart_video_replay(struct artone *one)
 {
 	struct artvideo *video = NEMOART_VIDEO(one);
 
@@ -208,38 +217,49 @@ static void nemoart_one_replay_video(struct artone *one)
 		nemoplay_audio_play(video->audioback);
 }
 
-static void nemoart_one_stop_video(struct artone *one)
+static void nemoart_video_set_integer(struct artone *one, const char *key, int value)
 {
 	struct artvideo *video = NEMOART_VIDEO(one);
 
-	if (video->audioback != NULL)
-		nemoplay_audio_stop(video->audioback);
+	if (strcmp(key, "threads") == 0) {
+		video->threads = value;
+	} else if (strcmp(key, "audio") == 0) {
+		video->audioon = value;
+	} else if (strcmp(key, "opaque") == 0) {
+		video->opaque = value;
 
-	nemoplay_video_stop(video->videoback);
-	nemoplay_decoder_stop(video->decoderback);
+		if (video->shader != NULL) {
+			if (video->opaque != 0)
+				nemoplay_shader_set_blend(video->shader, NEMOPLAY_SHADER_NONE_BLEND);
+			else
+				nemoplay_shader_set_blend(video->shader, NEMOPLAY_SHADER_SRC_ALPHA_BLEND);
+		}
+	} else if (strcmp(key, "flip") == 0) {
+		video->flip = value;
+
+		if (video->shader != NULL) {
+			if (video->flip == 0)
+				nemoplay_shader_set_polygon(video->shader, NEMOPLAY_SHADER_FLIP_ROTATE_POLYGON);
+			else
+				nemoplay_shader_set_polygon(video->shader, NEMOPLAY_SHADER_FLIP_POLYGON);
+		}
+	}
 }
 
-static void nemoart_one_opaque_video(struct artone *one, int opaque)
+static void nemoart_video_set_float(struct artone *one, const char *key, float value)
 {
 	struct artvideo *video = NEMOART_VIDEO(one);
 
-	if (opaque == 0)
-		nemoplay_shader_set_blend(video->shader, NEMOPLAY_SHADER_SRC_ALPHA_BLEND);
-	else
-		nemoplay_shader_set_blend(video->shader, NEMOPLAY_SHADER_NONE_BLEND);
+	if (strcmp(key, "droprate") == 0)
+		video->droprate = value;
 }
 
-static void nemoart_one_flip_video(struct artone *one, int flip)
+static void nemoart_video_set_string(struct artone *one, const char *key, const char *value)
 {
 	struct artvideo *video = NEMOART_VIDEO(one);
-
-	if (flip == 0)
-		nemoplay_shader_set_polygon(video->shader, NEMOPLAY_SHADER_FLIP_POLYGON);
-	else
-		nemoplay_shader_set_polygon(video->shader, NEMOPLAY_SHADER_FLIP_ROTATE_POLYGON);
 }
 
-static struct artone *nemoart_one_create_video(const char *url, int width, int height, int threads, int audio)
+static struct artone *nemoart_video_create(const char *url, int width, int height)
 {
 	struct artvideo *video;
 	struct artone *one;
@@ -251,30 +271,32 @@ static struct artone *nemoart_one_create_video(const char *url, int width, int h
 
 	one = &video->one;
 
+	one->url = strdup(url);
 	one->width = width;
 	one->height = height;
 
 	one->needs_timeout = 0;
 
-	one->destroy = nemoart_one_destroy_video;
-	one->load = nemoart_one_load_video;
-	one->set_integer = nemoart_one_set_integer;
-	one->set_float = nemoart_one_set_float;
-	one->set_string = nemoart_one_set_string;
-	one->update = nemoart_one_update_video;
-	one->done = nemoart_one_done_video;
-	one->resize = nemoart_one_resize_video;
-	one->replay = nemoart_one_replay_video;
-	one->stop = nemoart_one_stop_video;
-	one->opaque = nemoart_one_opaque_video;
-	one->flip = nemoart_one_flip_video;
+	one->destroy = nemoart_video_destroy;
+	one->load = nemoart_video_load;
+	one->stop = nemoart_video_stop;
+	one->update = nemoart_video_update;
+	one->resize = nemoart_video_resize;
+	one->replay = nemoart_video_replay;
+	one->set_integer = nemoart_video_set_integer;
+	one->set_float = nemoart_video_set_float;
+	one->set_string = nemoart_video_set_string;
 
 	video->play = nemoplay_create();
+
+	video->threads = 0;
+	video->audioon = 1;
+	video->droprate = 2.0f;
 
 	return one;
 }
 
-static struct artone *nemoart_one_create_image(const char *url, int width, int height, int threads, int audio)
+static struct artone *nemoart_image_create(const char *url, int width, int height)
 {
 	struct artone *one;
 
@@ -283,6 +305,7 @@ static struct artone *nemoart_one_create_image(const char *url, int width, int h
 		return NULL;
 	memset(one, 0, sizeof(struct artone));
 
+	one->url = strdup(url);
 	one->width = width;
 	one->height = height;
 
@@ -294,21 +317,21 @@ static int nemoart_one_compare_extension(const void *a, const void *b)
 	return strcasecmp((const char *)a, (const char *)b);
 }
 
-static struct artone *nemoart_one_create(const char *url, int width, int height, int threads, int audio)
+static struct artone *nemoart_one_create(const char *url, int width, int height)
 {
 	static struct extensionelement {
 		char extension[32];
 
 		nemoart_one_create_t create;
 	} elements[] = {
-		{ "avi",					nemoart_one_create_video },
-		{ "jpg",					nemoart_one_create_image },
-		{ "jpeg",					nemoart_one_create_image },
-		{ "mkv",					nemoart_one_create_video },
-		{ "mov",					nemoart_one_create_video },
-		{ "mp4",					nemoart_one_create_video },
-		{ "png",					nemoart_one_create_image },
-		{ "ts",						nemoart_one_create_video }
+		{ "avi",					nemoart_video_create },
+		{ "jpg",					nemoart_image_create },
+		{ "jpeg",					nemoart_image_create },
+		{ "mkv",					nemoart_video_create },
+		{ "mov",					nemoart_video_create },
+		{ "mp4",					nemoart_video_create },
+		{ "png",					nemoart_image_create },
+		{ "ts",						nemoart_video_create }
 	}, *element;
 
 	const char *extension = os_get_file_extension(url);
@@ -318,7 +341,7 @@ static struct artone *nemoart_one_create(const char *url, int width, int height,
 
 	element = (struct extensionelement *)bsearch(extension, elements, sizeof(elements) / sizeof(elements[0]), sizeof(elements[0]), nemoart_one_compare_extension);
 	if (element != NULL)
-		return element->create(url, width, height, threads, audio);
+		return element->create(url, width, height);
 
 	return NULL;
 }
@@ -328,14 +351,29 @@ static inline void nemoart_one_destroy(struct artone *one)
 	one->destroy(one);
 }
 
+static inline int nemoart_one_load(struct artone *one)
+{
+	return one->load(one);
+}
+
+static inline void nemoart_one_set_integer(struct artone *one, const char *key, int value)
+{
+	one->set_integer(one, key, value);
+}
+
+static inline void nemoart_one_set_float(struct artone *one, const char *key, float value)
+{
+	one->set_float(one, key, value);
+}
+
+static inline void nemoart_one_set_string(struct artone *one, const char *key, const char *value)
+{
+	one->set_string(one, key, value);
+}
+
 static inline void nemoart_one_update(struct artone *one)
 {
 	one->update(one);
-}
-
-static inline void nemoart_one_done(struct artone *one)
-{
-	one->done(one);
 }
 
 static inline void nemoart_one_resize(struct artone *one, int width, int height)
@@ -353,28 +391,16 @@ static inline void nemoart_one_stop(struct artone *one)
 	one->stop(one);
 }
 
-static inline void nemoart_one_opaque(struct artone *one, int opaque)
+static void nemoart_dispatch_video_update(void *data, void *event)
 {
-	one->opaque(one, opaque);
-}
-
-static inline void nemoart_one_flip(struct artone *one, int flip)
-{
-	one->flip(one, flip);
-}
-
-static void nemoart_dispatch_video_update(struct nemoplay *play, void *data)
-{
-	struct artone *one = (struct artone *)data;
-	struct nemoart *art = one->art;
+	struct nemoart *art = (struct nemoart *)data;
 
 	nemocanvas_dispatch_frame(art->canvas);
 }
 
-static void nemoart_dispatch_video_done(struct nemoplay *play, void *data)
+static void nemoart_dispatch_video_done(void *data, void *event)
 {
-	struct artone *one = (struct artone *)data;
-	struct nemoart *art = one->art;
+	struct nemoart *art = (struct nemoart *)data;
 
 	if (art->replay == NEMOART_ONESHOT_MODE || nemofs_dir_get_filecount(art->contents) == 0) {
 		nemoart_one_destroy(art->one);
@@ -629,7 +655,7 @@ int main(int argc, char *argv[])
 	int replay = NEMOART_REPEAT_ALL_MODE;
 	int maximum = 128;
 	int threads = 0;
-	int audion = 0;
+	int audioon = 0;
 	int pick = 1;
 	int flip = 0;
 	int opaque = 1;
@@ -695,7 +721,7 @@ int main(int argc, char *argv[])
 				break;
 
 			case 'a':
-				audion = strcasecmp(optarg, "on") == 0;
+				audioon = strcasecmp(optarg, "on") == 0;
 				break;
 
 			case 'b':
@@ -723,8 +749,8 @@ int main(int argc, char *argv[])
 	art->height = height;
 	art->droprate = droprate;
 	art->threads = threads;
+	art->audioon = audioon;
 	art->flip = flip;
-	art->audion = audion;
 	art->opaque = opaque;
 	art->replay = replay;
 	art->alive_timeout = alive;
