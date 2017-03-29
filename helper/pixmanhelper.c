@@ -477,15 +477,15 @@ typedef pixman_image_t *(*pixman_load_image_t)(const char *path);
 
 pixman_image_t *pixman_load_image(const char *filepath, int32_t width, int32_t height)
 {
-	static struct extensionmap {
+	static struct extensionelement {
 		char extension[32];
 
 		pixman_load_image_t load;
-	} maps[] = {
-		{ "png",				pixman_load_png_file },
+	} elements[] = {
+		{ "jpeg",				pixman_load_jpeg_file },
 		{ "jpg",				pixman_load_jpeg_file },
-		{ "jpeg",				pixman_load_jpeg_file }
-	}, *map;
+		{ "png",				pixman_load_png_file }
+	}, *element;
 
 	pixman_image_t *src;
 	const char *extension = os_get_file_extension(filepath);
@@ -493,8 +493,8 @@ pixman_image_t *pixman_load_image(const char *filepath, int32_t width, int32_t h
 	if (extension == NULL)
 		return NULL;
 
-	map = (struct extensionmap *)bsearch(extension, maps, sizeof(maps) / sizeof(maps[0]), sizeof(maps[0]), pixman_compare_extension);
-	if (map != NULL && (src = map->load(filepath)) != NULL) {
+	element = (struct extensionelement *)bsearch(extension, elements, sizeof(elements) / sizeof(elements[0]), sizeof(elements[0]), pixman_compare_extension);
+	if (element != NULL && (src = element->load(filepath)) != NULL) {
 		pixman_image_t *dst;
 		pixman_transform_t transform;
 

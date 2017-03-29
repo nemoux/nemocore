@@ -15,11 +15,11 @@ static int nemoshow_color_compare(const void *a, const void *b)
 
 static inline const uint8_t *nemoshow_color_get_reserved(const char *name)
 {
-	static struct colormap {
+	static struct colorelement {
 		char name[32];
 
 		uint8_t rgb[3];
-	} maps[] = {
+	} elements[] = {
 		{ "aliceblue",            { 240,248,255 } },
 		{ "antiquewhite",         { 250,235,215 } },
 		{ "aqua",                 {   0,255,255 } },
@@ -167,11 +167,11 @@ static inline const uint8_t *nemoshow_color_get_reserved(const char *name)
 		{ "whitesmoke",           { 245,245,245 } },
 		{ "yellow",               { 255,255,  0 } },
 		{ "yellowgreen",          { 154,205, 50 } }
-	}, *map;
+	}, *element;
 
-	map = static_cast<struct colormap *>(bsearch(name, static_cast<void *>(maps), sizeof(maps) / sizeof(maps[0]), sizeof(maps[0]), nemoshow_color_compare));
-	if (map != NULL)
-		return map->rgb;
+	element = static_cast<struct colorelement *>(bsearch(name, static_cast<void *>(elements), sizeof(elements) / sizeof(elements[0]), sizeof(elements[0]), nemoshow_color_compare));
+	if (element != NULL)
+		return element->rgb;
 
 	return NULL;
 }
