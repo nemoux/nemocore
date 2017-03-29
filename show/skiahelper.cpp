@@ -81,6 +81,8 @@ int skia_read_image(SkBitmap *bitmap, const char *imagepath)
 
 	SkCodec::Result r = codec->getPixels(info, bitmap->getPixels(), bitmap->rowBytes());
 
+	delete codec;
+
 	if (r != SkCodec::kSuccess)
 		return -1;
 
