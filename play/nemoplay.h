@@ -115,6 +115,8 @@ extern int nemoplay_has_no_flags(struct nemoplay *play);
 extern void nemoplay_reset_media(struct nemoplay *play);
 
 extern int nemoplay_load_media(struct nemoplay *play, const char *mediapath);
+extern void nemoplay_unload_media(struct nemoplay *play);
+
 extern int nemoplay_seek_media(struct nemoplay *play, double pts);
 
 extern void nemoplay_wait_media(struct nemoplay *play);

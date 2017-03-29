@@ -253,6 +253,37 @@ err1:
 	return -1;
 }
 
+void nemoplay_unload_media(struct nemoplay *play)
+{
+	nemoplay_queue_flush(play->video_queue);
+	nemoplay_queue_flush(play->audio_queue);
+
+	if (play->swr != NULL) {
+		swr_free(&play->swr);
+		play->swr = NULL;
+	}
+
+	if (play->video_context != NULL) {
+		avcodec_close(play->video_context);
+		play->video_context = NULL;
+	}
+	if (play->audio_context != NULL) {
+		avcodec_close(play->audio_context);
+		play->audio_context = NULL;
+	}
+
+	if (play->container != NULL) {
+		avformat_close_input(&play->container);
+		avformat_free_context(play->container);
+		play->container = NULL;
+	}
+
+	if (play->path != NULL) {
+		free(play->path);
+		play->path = NULL;
+	}
+}
+
 int nemoplay_seek_media(struct nemoplay *play, double pts)
 {
 	if (avformat_seek_file(play->container, -1, INT64_MIN, (int64_t)(pts * AV_TIME_BASE), INT64_MAX, 0) >= 0) {
