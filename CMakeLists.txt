@@ -19,7 +19,7 @@ option(WITH_NEMO_DEBUG "Build with NEMODEBUG" ON)
 option(WITH_NEMO_LOG "Build with NEMOLOG" ON)
 
 option(WITH_XWAYLAND "Build with XWAYLAND" ON)
-option(WITH_CEF "Build with CEF" ON)
+option(WITH_CEF "Build with CEF" OFF)
 
 include_directories(
 	${CMAKE_CURRENT_BINARY_DIR}
