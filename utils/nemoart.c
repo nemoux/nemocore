@@ -104,6 +104,9 @@ struct nemoart {
 	struct nemotimer *alive_timer;
 	int alive_timeout;
 
+	struct nemotimer *tween_timer;
+	int tween_timeout;
+
 	int width, height;
 
 	double droprate;
@@ -552,7 +555,9 @@ static void nemoart_dispatch_one_done(void *data, void *event)
 				nemoart_one_set_float(art->one, "droprate", art->droprate);
 				nemoart_one_set_integer(art->one, "opaque", art->opaque);
 				nemoart_one_set_integer(art->one, "flip", art->flip);
+				nemotimer_set_timeout(art->tween_timer, 0);
 			} else if (nemoart_one_is_type(art->one, NEMOART_ONE_IMAGE_TYPE) != 0) {
+				nemotimer_set_timeout(art->tween_timer, art->tween_timeout);
 			}
 			nemoart_one_set_update_callback(art->one, nemoart_dispatch_one_update, art);
 			nemoart_one_set_done_callback(art->one, nemoart_dispatch_one_done, art);
@@ -686,6 +691,47 @@ static void nemoart_dispatch_alive_timer(struct nemotimer *timer, void *data)
 	nemotimer_set_timeout(art->alive_timer, art->alive_timeout / 2);
 }
 
+static void nemoart_dispatch_tween_timer(struct nemotimer *timer, void *data)
+{
+	struct nemoart *art = (struct nemoart *)data;
+
+	if (art->replay == NEMOART_ONESHOT_MODE || nemofs_dir_get_filecount(art->contents) == 0) {
+		nemoart_one_destroy(art->one);
+		art->one = NULL;
+
+		nemocanvas_dispatch_frame(art->canvas);
+	} else if (art->replay == NEMOART_REPEAT_MODE) {
+		nemoart_one_replay(art->one);
+	} else {
+		int pcontents = art->icontents;
+
+		art->icontents = (art->icontents + 1) % nemofs_dir_get_filecount(art->contents);
+		if (art->icontents != pcontents) {
+			if (art->one != NULL)
+				nemoart_one_destroy(art->one);
+
+			art->one = nemoart_one_create(
+					nemofs_dir_get_filepath(art->contents, art->icontents),
+					art->width, art->height);
+			if (nemoart_one_is_type(art->one, NEMOART_ONE_VIDEO_TYPE) != 0) {
+				nemoart_one_set_integer(art->one, "threads", art->threads);
+				nemoart_one_set_integer(art->one, "audio", art->audioon);
+				nemoart_one_set_float(art->one, "droprate", art->droprate);
+				nemoart_one_set_integer(art->one, "opaque", art->opaque);
+				nemoart_one_set_integer(art->one, "flip", art->flip);
+				nemotimer_set_timeout(art->tween_timer, 0);
+			} else if (nemoart_one_is_type(art->one, NEMOART_ONE_IMAGE_TYPE) != 0) {
+				nemotimer_set_timeout(art->tween_timer, art->tween_timeout);
+			}
+			nemoart_one_set_update_callback(art->one, nemoart_dispatch_one_update, art);
+			nemoart_one_set_done_callback(art->one, nemoart_dispatch_one_done, art);
+			nemoart_one_load(art->one);
+		} else {
+			nemoart_one_replay(art->one);
+		}
+	}
+}
+
 static void nemoart_dispatch_bus(void *data, const char *events)
 {
 	struct nemoart *art = (struct nemoart *)data;
@@ -742,7 +788,9 @@ static void nemoart_dispatch_bus(void *data, const char *events)
 						nemoart_one_set_float(art->one, "droprate", art->droprate);
 						nemoart_one_set_integer(art->one, "opaque", art->opaque);
 						nemoart_one_set_integer(art->one, "flip", art->flip);
+						nemotimer_set_timeout(art->tween_timer, 0);
 					} else if (nemoart_one_is_type(art->one, NEMOART_ONE_IMAGE_TYPE) != 0) {
+						nemotimer_set_timeout(art->tween_timer, art->tween_timeout);
 					}
 					nemoart_one_set_update_callback(art->one, nemoart_dispatch_one_update, art);
 					nemoart_one_set_done_callback(art->one, nemoart_dispatch_one_done, art);
@@ -784,6 +832,7 @@ int main(int argc, char *argv[])
 		{ "audio",				required_argument,		NULL,		'a' },
 		{ "busid",				required_argument,		NULL,		'b' },
 		{ "alive",				required_argument,		NULL,		'e' },
+		{ "tween",				required_argument,		NULL,		'n' },
 		{ 0 }
 	};
 
@@ -808,11 +857,12 @@ int main(int argc, char *argv[])
 	int flip = 0;
 	int opaque = 1;
 	int alive = 0;
+	int tween = 5000;
 	int opt;
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "w:h:f:c:r:m:d:p:l:q:y:t:a:b:e:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:f:c:r:m:d:p:l:q:y:t:a:b:e:n:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -880,6 +930,10 @@ int main(int argc, char *argv[])
 				alive = strtoul(optarg, NULL, 10);
 				break;
 
+			case 'n':
+				tween = strtoul(optarg, NULL, 10);
+				break;
+
 			default:
 				break;
 		}
@@ -902,6 +956,7 @@ int main(int argc, char *argv[])
 	art->opaque = opaque;
 	art->replay = replay;
 	art->alive_timeout = alive;
+	art->tween_timeout = tween;
 
 	art->tool = tool = nemotool_create();
 	nemotool_connect_wayland(tool, NULL);
@@ -911,6 +966,10 @@ int main(int argc, char *argv[])
 	nemotimer_set_callback(timer, nemoart_dispatch_alive_timer);
 	nemotimer_set_userdata(timer, art);
 	nemotimer_set_timeout(timer, art->alive_timeout / 2);
+
+	art->tween_timer = timer = nemotimer_create(tool);
+	nemotimer_set_callback(timer, nemoart_dispatch_tween_timer);
+	nemotimer_set_userdata(timer, art);
 
 	art->canvas = canvas = nemocanvas_egl_create(tool, width, height);
 	nemocanvas_set_nemosurface(canvas, "normal");
@@ -974,7 +1033,9 @@ int main(int argc, char *argv[])
 			nemoart_one_set_float(art->one, "droprate", art->droprate);
 			nemoart_one_set_integer(art->one, "opaque", art->opaque);
 			nemoart_one_set_integer(art->one, "flip", art->flip);
+			nemotimer_set_timeout(art->tween_timer, 0);
 		} else if (nemoart_one_is_type(art->one, NEMOART_ONE_IMAGE_TYPE) != 0) {
+			nemotimer_set_timeout(art->tween_timer, art->tween_timeout);
 		}
 		nemoart_one_set_update_callback(art->one, nemoart_dispatch_one_update, art);
 		nemoart_one_set_done_callback(art->one, nemoart_dispatch_one_done, art);
