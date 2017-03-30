@@ -24,6 +24,13 @@
 #include <nemomisc.h>
 
 typedef enum {
+	NEMOART_ONE_NONE_TYPE = 0,
+	NEMOART_ONE_VIDEO_TYPE = 1,
+	NEMOART_ONE_IMAGE_TYPE = 2,
+	NEMOART_ONE_LAST_TYPE
+} NemoArtOneType;
+
+typedef enum {
 	NEMOART_ONESHOT_MODE = 0,
 	NEMOART_REPEAT_MODE = 1,
 	NEMOART_REPEAT_ALL_MODE = 2,
@@ -55,9 +62,8 @@ struct artone {
 	nemoart_one_set_string_t set_string;
 
 	char *url;
+	int type;
 	int width, height;
-
-	int needs_timeout;
 
 	struct nemonoty *update_noty;
 	struct nemonoty *done_noty;
@@ -285,10 +291,9 @@ static struct artone *nemoart_video_create(const char *url, int width, int heigh
 	one = &video->one;
 
 	one->url = strdup(url);
+	one->type = NEMOART_ONE_VIDEO_TYPE;
 	one->width = width;
 	one->height = height;
-
-	one->needs_timeout = 0;
 
 	one->destroy = nemoart_video_destroy;
 	one->load = nemoart_video_load;
@@ -322,6 +327,7 @@ static struct artone *nemoart_image_create(const char *url, int width, int heigh
 	memset(one, 0, sizeof(struct artone));
 
 	one->url = strdup(url);
+	one->type = NEMOART_ONE_IMAGE_TYPE;
 	one->width = width;
 	one->height = height;
 
@@ -363,6 +369,11 @@ static struct artone *nemoart_one_create(const char *url, int width, int height)
 		return element->create(url, width, height);
 
 	return NULL;
+}
+
+static inline int nemoart_one_is_type(struct artone *one, int type)
+{
+	return one->type == type;
 }
 
 static inline void nemoart_one_destroy(struct artone *one)
@@ -420,14 +431,14 @@ static void nemoart_one_set_done_callback(struct artone *one, nemonoty_dispatch_
 	nemonoty_attach(one->done_noty, dispatch, data);
 }
 
-static void nemoart_dispatch_video_update(void *data, void *event)
+static void nemoart_dispatch_one_update(void *data, void *event)
 {
 	struct nemoart *art = (struct nemoart *)data;
 
 	nemocanvas_dispatch_frame(art->canvas);
 }
 
-static void nemoart_dispatch_video_done(void *data, void *event)
+static void nemoart_dispatch_one_done(void *data, void *event)
 {
 	struct nemoart *art = (struct nemoart *)data;
 
@@ -449,13 +460,16 @@ static void nemoart_dispatch_video_done(void *data, void *event)
 			art->one = nemoart_one_create(
 					nemofs_dir_get_filepath(art->contents, art->icontents),
 					art->width, art->height);
-			nemoart_one_set_integer(art->one, "threads", art->threads);
-			nemoart_one_set_integer(art->one, "audio", art->audioon);
+			if (nemoart_one_is_type(art->one, NEMOART_ONE_VIDEO_TYPE) != 0) {
+				nemoart_one_set_integer(art->one, "threads", art->threads);
+				nemoart_one_set_integer(art->one, "audio", art->audioon);
+				nemoart_one_set_float(art->one, "droprate", art->droprate);
+				nemoart_one_set_update_callback(art->one, nemoart_dispatch_one_update, art);
+				nemoart_one_set_done_callback(art->one, nemoart_dispatch_one_done, art);
+			} else if (nemoart_one_is_type(art->one, NEMOART_ONE_IMAGE_TYPE) != 0) {
+			}
 			nemoart_one_set_integer(art->one, "opaque", art->opaque);
 			nemoart_one_set_integer(art->one, "flip", art->flip);
-			nemoart_one_set_float(art->one, "droprate", art->droprate);
-			nemoart_one_set_update_callback(art->one, nemoart_dispatch_video_update, art);
-			nemoart_one_set_done_callback(art->one, nemoart_dispatch_video_done, art);
 			nemoart_one_load(art->one);
 		} else {
 			nemoart_one_replay(art->one);
@@ -636,13 +650,16 @@ static void nemoart_dispatch_bus(void *data, const char *events)
 					art->one = nemoart_one_create(
 							nemofs_dir_get_filepath(art->contents, art->icontents),
 							art->width, art->height);
-					nemoart_one_set_integer(art->one, "threads", art->threads);
-					nemoart_one_set_integer(art->one, "audio", art->audioon);
+					if (nemoart_one_is_type(art->one, NEMOART_ONE_VIDEO_TYPE) != 0) {
+						nemoart_one_set_integer(art->one, "threads", art->threads);
+						nemoart_one_set_integer(art->one, "audio", art->audioon);
+						nemoart_one_set_float(art->one, "droprate", art->droprate);
+						nemoart_one_set_update_callback(art->one, nemoart_dispatch_one_update, art);
+						nemoart_one_set_done_callback(art->one, nemoart_dispatch_one_done, art);
+					} else if (nemoart_one_is_type(art->one, NEMOART_ONE_IMAGE_TYPE) != 0) {
+					}
 					nemoart_one_set_integer(art->one, "opaque", art->opaque);
 					nemoart_one_set_integer(art->one, "flip", art->flip);
-					nemoart_one_set_float(art->one, "droprate", art->droprate);
-					nemoart_one_set_update_callback(art->one, nemoart_dispatch_video_update, art);
-					nemoart_one_set_done_callback(art->one, nemoart_dispatch_video_done, art);
 					nemoart_one_load(art->one);
 				}
 			} else if (nemoitem_one_has_path_suffix(one, "/clear") != 0) {
@@ -865,13 +882,16 @@ int main(int argc, char *argv[])
 		art->one = nemoart_one_create(
 				nemofs_dir_get_filepath(art->contents, art->icontents),
 				art->width, art->height);
-		nemoart_one_set_integer(art->one, "threads", art->threads);
-		nemoart_one_set_integer(art->one, "audio", art->audioon);
+		if (nemoart_one_is_type(art->one, NEMOART_ONE_VIDEO_TYPE) != 0) {
+			nemoart_one_set_integer(art->one, "threads", art->threads);
+			nemoart_one_set_integer(art->one, "audio", art->audioon);
+			nemoart_one_set_float(art->one, "droprate", art->droprate);
+			nemoart_one_set_update_callback(art->one, nemoart_dispatch_one_update, art);
+			nemoart_one_set_done_callback(art->one, nemoart_dispatch_one_done, art);
+		} else if (nemoart_one_is_type(art->one, NEMOART_ONE_IMAGE_TYPE) != 0) {
+		}
 		nemoart_one_set_integer(art->one, "opaque", art->opaque);
 		nemoart_one_set_integer(art->one, "flip", art->flip);
-		nemoart_one_set_float(art->one, "droprate", art->droprate);
-		nemoart_one_set_update_callback(art->one, nemoart_dispatch_video_update, art);
-		nemoart_one_set_done_callback(art->one, nemoart_dispatch_video_done, art);
 		nemoart_one_load(art->one);
 	}
 
