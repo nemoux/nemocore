@@ -19,6 +19,7 @@ NEMO_BEGIN_EXTERN_C
 #include <cookstate.h>
 
 extern void nemocook_draw_arrays(int mode, int ncounts, uint32_t *counts);
+extern void nemocook_draw_texture(uint32_t tex, float x0, float y0, float x1, float y1);
 
 extern void nemocook_clear_color_buffer(float r, float g, float b, float a);
 extern void nemocook_clear_depth_buffer(float d);
