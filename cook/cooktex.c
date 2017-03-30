@@ -44,6 +44,9 @@ void nemocook_texture_assign(struct cooktex *tex, int format, int width, int hei
 	if (format == NEMOCOOK_TEXTURE_BGRA_FORMAT) {
 		tex->format = GL_BGRA;
 		tex->bpp = 4;
+	} else if (format == NEMOCOOK_TEXTURE_RGBA_FORMAT) {
+		tex->format = GL_RGBA;
+		tex->bpp = 4;
 	} else if (format == NEMOCOOK_TEXTURE_LUMINANCE_FORMAT) {
 		tex->format = GL_LUMINANCE;
 		tex->bpp = 1;
@@ -170,15 +173,16 @@ int nemocook_texture_load_image(struct cooktex *tex, const char *filepath)
 		return -1;
 
 	glBindTexture(GL_TEXTURE_2D, tex->texture);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, tex->width);
 	glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
 	glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
 	glTexImage2D(GL_TEXTURE_2D,
 			0,
-			GL_BGRA,
-			pixman_image_get_stride(image),
-			pixman_image_get_height(image),
+			GL_RGBA,
+			tex->width,
+			tex->height,
 			0,
-			GL_BGRA,
+			GL_RGBA,
 			GL_UNSIGNED_BYTE,
 			(void *)pixman_image_get_data(image));
 	glBindTexture(GL_TEXTURE_2D, 0);
