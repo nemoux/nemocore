@@ -168,7 +168,7 @@ static void nemoart_video_destroy(struct artone *one)
 	if (one->url != NULL)
 		free(one->url);
 
-	free(one);
+	free(video);
 }
 
 static int nemoart_video_load(struct artone *one)
@@ -349,7 +349,7 @@ static void nemoart_image_destroy(struct artone *one)
 	if (one->url != NULL)
 		free(one->url);
 
-	free(one);
+	free(image);
 }
 
 static int nemoart_image_load(struct artone *one)
@@ -568,14 +568,16 @@ static void nemoart_one_set_done_callback(struct artone *one, nemonoty_dispatch_
 	nemonoty_attach(one->done_noty, dispatch, data);
 }
 
-static void nemoart_dispatch_one_update(void *data, void *event)
+static int nemoart_dispatch_one_update(void *data, void *event)
 {
 	struct nemoart *art = (struct nemoart *)data;
 
 	nemocanvas_dispatch_frame(art->canvas);
+
+	return 0;
 }
 
-static void nemoart_dispatch_one_done(void *data, void *event)
+static int nemoart_dispatch_one_done(void *data, void *event)
 {
 	struct nemoart *art = (struct nemoart *)data;
 
@@ -615,6 +617,8 @@ static void nemoart_dispatch_one_done(void *data, void *event)
 			nemoart_one_replay(art->one);
 		}
 	}
+
+	return 1;
 }
 
 static void nemoart_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t width, int32_t height)

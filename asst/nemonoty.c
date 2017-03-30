@@ -67,6 +67,7 @@ void nemonoty_dispatch(struct nemonoty *noty, void *event)
 	struct notyone *one;
 
 	nemolist_for_each(one, &noty->list, link) {
-		one->dispatch(one->data, event);
+		if (one->dispatch(one->data, event) != 0)
+			break;
 	}
 }

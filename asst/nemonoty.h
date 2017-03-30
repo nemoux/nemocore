@@ -9,7 +9,7 @@ NEMO_BEGIN_EXTERN_C
 
 #include <nemolist.h>
 
-typedef void (*nemonoty_dispatch_t)(void *data, void *event);
+typedef int (*nemonoty_dispatch_t)(void *data, void *event);
 
 struct notyone {
 	struct nemolist link;
