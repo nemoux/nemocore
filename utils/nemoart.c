@@ -88,6 +88,8 @@ struct artvideo {
 #define NEMOART_VIDEO(one)			((struct artvideo *)container_of(one, struct artvideo, one))
 
 struct artimage {
+	struct artone one;
+
 	struct cooktex *tex;
 };
 
@@ -317,22 +319,106 @@ static struct artone *nemoart_video_create(const char *url, int width, int heigh
 	return one;
 }
 
+static void nemoart_image_destroy(struct artone *one)
+{
+	struct artimage *image = NEMOART_IMAGE(one);
+
+	if (image->tex != NULL)
+		nemocook_texture_destroy(image->tex);
+
+	if (one->update_noty != NULL)
+		nemonoty_destroy(one->update_noty);
+	if (one->done_noty != NULL)
+		nemonoty_destroy(one->done_noty);
+
+	if (one->url != NULL)
+		free(one->url);
+
+	free(one);
+}
+
+static int nemoart_image_load(struct artone *one)
+{
+	struct artimage *image = NEMOART_IMAGE(one);
+
+	nemocook_texture_load_image(image->tex, one->url);
+
+	return 0;
+}
+
+static void nemoart_image_stop(struct artone *one)
+{
+	struct artimage *image = NEMOART_IMAGE(one);
+}
+
+static void nemoart_image_update(struct artone *one)
+{
+	struct artimage *image = NEMOART_IMAGE(one);
+}
+
+static void nemoart_image_resize(struct artone *one, int width, int height)
+{
+	struct artimage *image = NEMOART_IMAGE(one);
+
+	one->width = width;
+	one->height = height;
+
+	nemocook_texture_resize(image->tex, one->width, one->height);
+
+	nemocook_texture_load_image(image->tex, one->url);
+}
+
+static void nemoart_image_replay(struct artone *one)
+{
+	struct artimage *image = NEMOART_IMAGE(one);
+}
+
+static void nemoart_image_set_integer(struct artone *one, const char *key, int value)
+{
+	struct artimage *image = NEMOART_IMAGE(one);
+}
+
+static void nemoart_image_set_float(struct artone *one, const char *key, float value)
+{
+	struct artimage *image = NEMOART_IMAGE(one);
+}
+
+static void nemoart_image_set_string(struct artone *one, const char *key, const char *value)
+{
+	struct artimage *image = NEMOART_IMAGE(one);
+}
+
 static struct artone *nemoart_image_create(const char *url, int width, int height)
 {
+	struct artimage *image;
 	struct artone *one;
 
-	one = (struct artone *)malloc(sizeof(struct artone));
-	if (one == NULL)
+	image = (struct artimage *)malloc(sizeof(struct artimage));
+	if (image == NULL)
 		return NULL;
-	memset(one, 0, sizeof(struct artone));
+	memset(image, 0, sizeof(struct artimage));
+
+	one = &image->one;
 
 	one->url = strdup(url);
 	one->type = NEMOART_ONE_IMAGE_TYPE;
 	one->width = width;
 	one->height = height;
 
+	one->destroy = nemoart_image_destroy;
+	one->load = nemoart_image_load;
+	one->stop = nemoart_image_stop;
+	one->update = nemoart_image_update;
+	one->resize = nemoart_image_resize;
+	one->replay = nemoart_image_replay;
+	one->set_integer = nemoart_image_set_integer;
+	one->set_float = nemoart_image_set_float;
+	one->set_string = nemoart_image_set_string;
+
 	one->update_noty = nemonoty_create();
 	one->done_noty = nemonoty_create();
+
+	image->tex = nemocook_texture_create();
 
 	return one;
 }
@@ -464,12 +550,12 @@ static void nemoart_dispatch_one_done(void *data, void *event)
 				nemoart_one_set_integer(art->one, "threads", art->threads);
 				nemoart_one_set_integer(art->one, "audio", art->audioon);
 				nemoart_one_set_float(art->one, "droprate", art->droprate);
-				nemoart_one_set_update_callback(art->one, nemoart_dispatch_one_update, art);
-				nemoart_one_set_done_callback(art->one, nemoart_dispatch_one_done, art);
+				nemoart_one_set_integer(art->one, "opaque", art->opaque);
+				nemoart_one_set_integer(art->one, "flip", art->flip);
 			} else if (nemoart_one_is_type(art->one, NEMOART_ONE_IMAGE_TYPE) != 0) {
 			}
-			nemoart_one_set_integer(art->one, "opaque", art->opaque);
-			nemoart_one_set_integer(art->one, "flip", art->flip);
+			nemoart_one_set_update_callback(art->one, nemoart_dispatch_one_update, art);
+			nemoart_one_set_done_callback(art->one, nemoart_dispatch_one_done, art);
 			nemoart_one_load(art->one);
 		} else {
 			nemoart_one_replay(art->one);
@@ -654,12 +740,12 @@ static void nemoart_dispatch_bus(void *data, const char *events)
 						nemoart_one_set_integer(art->one, "threads", art->threads);
 						nemoart_one_set_integer(art->one, "audio", art->audioon);
 						nemoart_one_set_float(art->one, "droprate", art->droprate);
-						nemoart_one_set_update_callback(art->one, nemoart_dispatch_one_update, art);
-						nemoart_one_set_done_callback(art->one, nemoart_dispatch_one_done, art);
+						nemoart_one_set_integer(art->one, "opaque", art->opaque);
+						nemoart_one_set_integer(art->one, "flip", art->flip);
 					} else if (nemoart_one_is_type(art->one, NEMOART_ONE_IMAGE_TYPE) != 0) {
 					}
-					nemoart_one_set_integer(art->one, "opaque", art->opaque);
-					nemoart_one_set_integer(art->one, "flip", art->flip);
+					nemoart_one_set_update_callback(art->one, nemoart_dispatch_one_update, art);
+					nemoart_one_set_done_callback(art->one, nemoart_dispatch_one_done, art);
 					nemoart_one_load(art->one);
 				}
 			} else if (nemoitem_one_has_path_suffix(one, "/clear") != 0) {
@@ -875,7 +961,7 @@ int main(int argc, char *argv[])
 
 	if (contentpath != NULL) {
 		if (os_check_is_directory(contentpath) != 0)
-			nemofs_dir_scan_extensions(art->contents, contentpath, 5, "mp4", "avi", "mov", "mkv", "ts");
+			nemofs_dir_scan_extensions(art->contents, contentpath, 8, "mp4", "avi", "mov", "mkv", "ts", "png", "jpg", "jpeg");
 		else
 			nemofs_dir_insert_file(art->contents, NULL, contentpath);
 
@@ -886,12 +972,12 @@ int main(int argc, char *argv[])
 			nemoart_one_set_integer(art->one, "threads", art->threads);
 			nemoart_one_set_integer(art->one, "audio", art->audioon);
 			nemoart_one_set_float(art->one, "droprate", art->droprate);
-			nemoart_one_set_update_callback(art->one, nemoart_dispatch_one_update, art);
-			nemoart_one_set_done_callback(art->one, nemoart_dispatch_one_done, art);
+			nemoart_one_set_integer(art->one, "opaque", art->opaque);
+			nemoart_one_set_integer(art->one, "flip", art->flip);
 		} else if (nemoart_one_is_type(art->one, NEMOART_ONE_IMAGE_TYPE) != 0) {
 		}
-		nemoart_one_set_integer(art->one, "opaque", art->opaque);
-		nemoart_one_set_integer(art->one, "flip", art->flip);
+		nemoart_one_set_update_callback(art->one, nemoart_dispatch_one_update, art);
+		nemoart_one_set_done_callback(art->one, nemoart_dispatch_one_done, art);
 		nemoart_one_load(art->one);
 	}
 
