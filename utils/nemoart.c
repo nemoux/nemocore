@@ -49,6 +49,7 @@ typedef void (*nemoart_one_replay_t)(struct artone *one);
 typedef void (*nemoart_one_set_integer_t)(struct artone *one, const char *key, int value);
 typedef void (*nemoart_one_set_float_t)(struct artone *one, const char *key, float value);
 typedef void (*nemoart_one_set_string_t)(struct artone *one, const char *key, const char *value);
+typedef void (*nemoart_one_set_pointer_t)(struct artone *one, const char *key, void *value);
 
 struct artone {
 	nemoart_one_destroy_t destroy;
@@ -60,6 +61,7 @@ struct artone {
 	nemoart_one_set_integer_t set_integer;
 	nemoart_one_set_float_t set_float;
 	nemoart_one_set_string_t set_string;
+	nemoart_one_set_pointer_t set_pointer;
 
 	char *url;
 	int type;
@@ -91,6 +93,7 @@ struct artimage {
 	struct artone one;
 
 	struct cooktex *tex;
+	struct cookshader *shader;
 
 	int flip;
 };
@@ -286,6 +289,11 @@ static void nemoart_video_set_string(struct artone *one, const char *key, const 
 	struct artvideo *video = NEMOART_VIDEO(one);
 }
 
+static void nemoart_video_set_pointer(struct artone *one, const char *key, void *value)
+{
+	struct artvideo *video = NEMOART_VIDEO(one);
+}
+
 static struct artone *nemoart_video_create(const char *url, int width, int height)
 {
 	struct artvideo *video;
@@ -312,6 +320,7 @@ static struct artone *nemoart_video_create(const char *url, int width, int heigh
 	one->set_integer = nemoart_video_set_integer;
 	one->set_float = nemoart_video_set_float;
 	one->set_string = nemoart_video_set_string;
+	one->set_pointer = nemoart_video_set_pointer;
 
 	one->update_noty = nemonoty_create();
 	one->done_noty = nemonoty_create();
@@ -363,14 +372,18 @@ static void nemoart_image_update(struct artone *one)
 {
 	struct artimage *image = NEMOART_IMAGE(one);
 
-	if (image->flip != 0) {
-		nemocook_draw_texture(
-				nemocook_texture_get(image->tex),
-				-1.0f, 1.0f, 1.0f, -1.0f);
-	} else {
-		nemocook_draw_texture(
-				nemocook_texture_get(image->tex),
-				-1.0f, -1.0f, 1.0f, 1.0f);
+	if (image->shader != NULL) {
+		nemocook_shader_use_program(image->shader);
+
+		if (image->flip != 0) {
+			nemocook_draw_texture(
+					nemocook_texture_get(image->tex),
+					-1.0f, 1.0f, 1.0f, -1.0f);
+		} else {
+			nemocook_draw_texture(
+					nemocook_texture_get(image->tex),
+					-1.0f, -1.0f, 1.0f, 1.0f);
+		}
 	}
 }
 
@@ -410,6 +423,15 @@ static void nemoart_image_set_string(struct artone *one, const char *key, const 
 	struct artimage *image = NEMOART_IMAGE(one);
 }
 
+static void nemoart_image_set_pointer(struct artone *one, const char *key, void *value)
+{
+	struct artimage *image = NEMOART_IMAGE(one);
+
+	if (strcmp(key, "shader") == 0) {
+		image->shader = (struct cookshader *)value;
+	}
+}
+
 static struct artone *nemoart_image_create(const char *url, int width, int height)
 {
 	struct artimage *image;
@@ -436,6 +458,7 @@ static struct artone *nemoart_image_create(const char *url, int width, int heigh
 	one->set_integer = nemoart_image_set_integer;
 	one->set_float = nemoart_image_set_float;
 	one->set_string = nemoart_image_set_string;
+	one->set_pointer = nemoart_image_set_pointer;
 
 	one->update_noty = nemonoty_create();
 	one->done_noty = nemonoty_create();
@@ -510,6 +533,11 @@ static inline void nemoart_one_set_string(struct artone *one, const char *key, c
 	one->set_string(one, key, value);
 }
 
+static inline void nemoart_one_set_pointer(struct artone *one, const char *key, void *value)
+{
+	one->set_pointer(one, key, value);
+}
+
 static inline void nemoart_one_update(struct artone *one)
 {
 	one->update(one);
@@ -575,6 +603,7 @@ static void nemoart_dispatch_one_done(void *data, void *event)
 				nemoart_one_set_float(art->one, "droprate", art->droprate);
 				nemotimer_set_timeout(art->tween_timer, 0);
 			} else if (nemoart_one_is_type(art->one, NEMOART_ONE_IMAGE_TYPE) != 0) {
+				nemoart_one_set_pointer(art->one, "shader", art->shader);
 				nemotimer_set_timeout(art->tween_timer, art->tween_timeout);
 			}
 			nemoart_one_set_integer(art->one, "opaque", art->opaque);
@@ -616,8 +645,6 @@ static void nemoart_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t se
 	struct nemoart *art = (struct nemoart *)nemocanvas_get_userdata(canvas);
 
 	nemocook_egl_make_current(art->egl);
-
-	nemocook_shader_use_program(art->shader);
 
 	if (art->one != NULL)
 		nemoart_one_update(art->one);
@@ -741,6 +768,7 @@ static void nemoart_dispatch_tween_timer(struct nemotimer *timer, void *data)
 				nemoart_one_set_float(art->one, "droprate", art->droprate);
 				nemotimer_set_timeout(art->tween_timer, 0);
 			} else if (nemoart_one_is_type(art->one, NEMOART_ONE_IMAGE_TYPE) != 0) {
+				nemoart_one_set_pointer(art->one, "shader", art->shader);
 				nemotimer_set_timeout(art->tween_timer, art->tween_timeout);
 			}
 			nemoart_one_set_integer(art->one, "opaque", art->opaque);
@@ -810,6 +838,7 @@ static void nemoart_dispatch_bus(void *data, const char *events)
 						nemoart_one_set_float(art->one, "droprate", art->droprate);
 						nemotimer_set_timeout(art->tween_timer, 0);
 					} else if (nemoart_one_is_type(art->one, NEMOART_ONE_IMAGE_TYPE) != 0) {
+						nemoart_one_set_pointer(art->one, "shader", art->shader);
 						nemotimer_set_timeout(art->tween_timer, art->tween_timeout);
 					}
 					nemoart_one_set_integer(art->one, "opaque", art->opaque);
@@ -1081,6 +1110,7 @@ int main(int argc, char *argv[])
 			nemoart_one_set_float(art->one, "droprate", art->droprate);
 			nemotimer_set_timeout(art->tween_timer, 0);
 		} else if (nemoart_one_is_type(art->one, NEMOART_ONE_IMAGE_TYPE) != 0) {
+			nemoart_one_set_pointer(art->one, "shader", art->shader);
 			nemotimer_set_timeout(art->tween_timer, art->tween_timeout);
 		}
 		nemoart_one_set_integer(art->one, "opaque", art->opaque);
