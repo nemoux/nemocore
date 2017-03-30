@@ -118,6 +118,7 @@ struct nemoart {
 	int replay;
 
 	struct cookegl *egl;
+	struct cookshader *shader;
 
 	struct fsdir *contents;
 	int icontents;
@@ -346,6 +347,8 @@ static int nemoart_image_load(struct artone *one)
 
 	nemocook_texture_load_image(image->tex, one->url);
 
+	nemonoty_dispatch(one->update_noty, one);
+
 	return 0;
 }
 
@@ -357,6 +360,10 @@ static void nemoart_image_stop(struct artone *one)
 static void nemoart_image_update(struct artone *one)
 {
 	struct artimage *image = NEMOART_IMAGE(one);
+
+	nemocook_draw_texture(
+			nemocook_texture_get(image->tex),
+			-1.0f, -1.0f, 1.0f, 1.0f);
 }
 
 static void nemoart_image_resize(struct artone *one, int width, int height)
@@ -422,6 +429,7 @@ static struct artone *nemoart_image_create(const char *url, int width, int heigh
 	one->done_noty = nemonoty_create();
 
 	image->tex = nemocook_texture_create();
+	nemocook_texture_assign(image->tex, NEMOCOOK_TEXTURE_BGRA_FORMAT, width, height);
 
 	return one;
 }
@@ -596,6 +604,8 @@ static void nemoart_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t se
 	struct nemoart *art = (struct nemoart *)nemocanvas_get_userdata(canvas);
 
 	nemocook_egl_make_current(art->egl);
+
+	nemocook_shader_use_program(art->shader);
 
 	if (art->one != NULL)
 		nemoart_one_update(art->one);
@@ -816,6 +826,26 @@ static void nemoart_dispatch_bus(void *data, const char *events)
 
 int main(int argc, char *argv[])
 {
+	static const char texture_vertex_shader[] =
+		"attribute vec2 position;\n"
+		"attribute vec2 texcoord;\n"
+		"varying vec2 vtexcoord;\n"
+		"void main()\n"
+		"{\n"
+		"  gl_Position = vec4(position, 0.0, 1.0);\n"
+		"  vtexcoord = texcoord;\n"
+		"}\n";
+
+	static const char texture_fragment_shader[] =
+		"precision mediump float;\n"
+		"varying vec2 vtexcoord;\n"
+		"uniform sampler2D tex;\n"
+		"void main()\n"
+		"{\n"
+		"  vec4 c = texture2D(tex, vtexcoord);\n"
+		"  gl_FragColor = vec4(c.b, c.g, c.r, c.a);\n"
+		"}\n";
+
 	struct option options[] = {
 		{ "width",				required_argument,		NULL,		'w' },
 		{ "height",				required_argument,		NULL,		'h' },
@@ -842,6 +872,7 @@ int main(int argc, char *argv[])
 	struct nemocanvas *canvas;
 	struct nemoaction *action;
 	struct cookegl *egl;
+	struct cookshader *shader;
 	char *fullscreenid = NULL;
 	char *contentpath = NULL;
 	char *busid = NULL;
@@ -1004,6 +1035,11 @@ int main(int argc, char *argv[])
 			NTEGL_WINDOW(canvas));
 	nemocook_egl_resize(egl, width, height);
 
+	art->shader = shader = nemocook_shader_create();
+	nemocook_shader_set_program(shader, texture_vertex_shader, texture_fragment_shader);
+	nemocook_shader_set_attrib(shader, 0, "position", 2);
+	nemocook_shader_set_attrib(shader, 1, "texcoord", 2);
+
 	art->contents = nemofs_dir_create(maximum);
 
 	if (busid != NULL) {
@@ -1050,6 +1086,7 @@ int main(int argc, char *argv[])
 	if (art->bus != NULL)
 		nemobus_destroy(art->bus);
 
+	nemocook_shader_destroy(shader);
 	nemocook_egl_destroy(egl);
 
 	nemoaction_destroy(action);
