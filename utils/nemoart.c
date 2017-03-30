@@ -91,6 +91,8 @@ struct artimage {
 	struct artone one;
 
 	struct cooktex *tex;
+
+	int flip;
 };
 
 #define NEMOART_IMAGE(one)			((struct artimage *)container_of(one, struct artimage, one))
@@ -361,9 +363,15 @@ static void nemoart_image_update(struct artone *one)
 {
 	struct artimage *image = NEMOART_IMAGE(one);
 
-	nemocook_draw_texture(
-			nemocook_texture_get(image->tex),
-			-1.0f, -1.0f, 1.0f, 1.0f);
+	if (image->flip != 0) {
+		nemocook_draw_texture(
+				nemocook_texture_get(image->tex),
+				-1.0f, 1.0f, 1.0f, -1.0f);
+	} else {
+		nemocook_draw_texture(
+				nemocook_texture_get(image->tex),
+				-1.0f, -1.0f, 1.0f, 1.0f);
+	}
 }
 
 static void nemoart_image_resize(struct artone *one, int width, int height)
@@ -386,6 +394,10 @@ static void nemoart_image_replay(struct artone *one)
 static void nemoart_image_set_integer(struct artone *one, const char *key, int value)
 {
 	struct artimage *image = NEMOART_IMAGE(one);
+
+	if (strcmp(key, "flip") == 0) {
+		image->flip = value;
+	}
 }
 
 static void nemoart_image_set_float(struct artone *one, const char *key, float value)
@@ -561,12 +573,12 @@ static void nemoart_dispatch_one_done(void *data, void *event)
 				nemoart_one_set_integer(art->one, "threads", art->threads);
 				nemoart_one_set_integer(art->one, "audio", art->audioon);
 				nemoart_one_set_float(art->one, "droprate", art->droprate);
-				nemoart_one_set_integer(art->one, "opaque", art->opaque);
-				nemoart_one_set_integer(art->one, "flip", art->flip);
 				nemotimer_set_timeout(art->tween_timer, 0);
 			} else if (nemoart_one_is_type(art->one, NEMOART_ONE_IMAGE_TYPE) != 0) {
 				nemotimer_set_timeout(art->tween_timer, art->tween_timeout);
 			}
+			nemoart_one_set_integer(art->one, "opaque", art->opaque);
+			nemoart_one_set_integer(art->one, "flip", art->flip);
 			nemoart_one_set_update_callback(art->one, nemoart_dispatch_one_update, art);
 			nemoart_one_set_done_callback(art->one, nemoart_dispatch_one_done, art);
 			nemoart_one_load(art->one);
@@ -727,12 +739,12 @@ static void nemoart_dispatch_tween_timer(struct nemotimer *timer, void *data)
 				nemoart_one_set_integer(art->one, "threads", art->threads);
 				nemoart_one_set_integer(art->one, "audio", art->audioon);
 				nemoart_one_set_float(art->one, "droprate", art->droprate);
-				nemoart_one_set_integer(art->one, "opaque", art->opaque);
-				nemoart_one_set_integer(art->one, "flip", art->flip);
 				nemotimer_set_timeout(art->tween_timer, 0);
 			} else if (nemoart_one_is_type(art->one, NEMOART_ONE_IMAGE_TYPE) != 0) {
 				nemotimer_set_timeout(art->tween_timer, art->tween_timeout);
 			}
+			nemoart_one_set_integer(art->one, "opaque", art->opaque);
+			nemoart_one_set_integer(art->one, "flip", art->flip);
 			nemoart_one_set_update_callback(art->one, nemoart_dispatch_one_update, art);
 			nemoart_one_set_done_callback(art->one, nemoart_dispatch_one_done, art);
 			nemoart_one_load(art->one);
@@ -796,12 +808,12 @@ static void nemoart_dispatch_bus(void *data, const char *events)
 						nemoart_one_set_integer(art->one, "threads", art->threads);
 						nemoart_one_set_integer(art->one, "audio", art->audioon);
 						nemoart_one_set_float(art->one, "droprate", art->droprate);
-						nemoart_one_set_integer(art->one, "opaque", art->opaque);
-						nemoart_one_set_integer(art->one, "flip", art->flip);
 						nemotimer_set_timeout(art->tween_timer, 0);
 					} else if (nemoart_one_is_type(art->one, NEMOART_ONE_IMAGE_TYPE) != 0) {
 						nemotimer_set_timeout(art->tween_timer, art->tween_timeout);
 					}
+					nemoart_one_set_integer(art->one, "opaque", art->opaque);
+					nemoart_one_set_integer(art->one, "flip", art->flip);
 					nemoart_one_set_update_callback(art->one, nemoart_dispatch_one_update, art);
 					nemoart_one_set_done_callback(art->one, nemoart_dispatch_one_done, art);
 					nemoart_one_load(art->one);
@@ -1067,12 +1079,12 @@ int main(int argc, char *argv[])
 			nemoart_one_set_integer(art->one, "threads", art->threads);
 			nemoart_one_set_integer(art->one, "audio", art->audioon);
 			nemoart_one_set_float(art->one, "droprate", art->droprate);
-			nemoart_one_set_integer(art->one, "opaque", art->opaque);
-			nemoart_one_set_integer(art->one, "flip", art->flip);
 			nemotimer_set_timeout(art->tween_timer, 0);
 		} else if (nemoart_one_is_type(art->one, NEMOART_ONE_IMAGE_TYPE) != 0) {
 			nemotimer_set_timeout(art->tween_timer, art->tween_timeout);
 		}
+		nemoart_one_set_integer(art->one, "opaque", art->opaque);
+		nemoart_one_set_integer(art->one, "flip", art->flip);
 		nemoart_one_set_update_callback(art->one, nemoart_dispatch_one_update, art);
 		nemoart_one_set_done_callback(art->one, nemoart_dispatch_one_done, art);
 		nemoart_one_load(art->one);
