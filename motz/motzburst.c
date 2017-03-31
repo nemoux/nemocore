@@ -11,14 +11,14 @@
 static void nemomotz_burst_draw(struct nemomotz *motz, struct motzone *one)
 {
 	struct motzburst *burst = NEMOMOTZ_BURST(one);
-	struct nemotoyz *toyz = motz->toyz;
+	struct nemotozz *tozz = motz->tozz;
 
-	nemotoyz_save(toyz);
-	nemotoyz_concat(toyz, burst->matrix);
+	nemotozz_save(tozz);
+	nemotozz_concat(tozz, burst->matrix);
 
-	nemotoyz_draw_circle(toyz, burst->style, 0.0f, 0.0f, burst->size / 2.0f);
+	nemotozz_draw_circle(tozz, burst->style, 0.0f, 0.0f, burst->size / 2.0f);
 
-	nemotoyz_restore(toyz);
+	nemotozz_restore(tozz);
 }
 
 static void nemomotz_burst_down(struct nemomotz *motz, struct motztap *tap, struct motzone *one, float x, float y)
@@ -52,22 +52,22 @@ static void nemomotz_burst_update(struct motzone *one)
 	struct motzburst *burst = NEMOMOTZ_BURST(one);
 
 	if (nemomotz_one_has_dirty(one, NEMOMOTZ_BURST_TRANSFORM_DIRTY) != 0) {
-		nemotoyz_matrix_translate(burst->matrix, burst->tx, burst->ty);
+		nemotozz_matrix_translate(burst->matrix, burst->tx, burst->ty);
 
-		nemotoyz_matrix_invert(burst->inverse, burst->matrix);
+		nemotozz_matrix_invert(burst->inverse, burst->matrix);
 	}
 
 	if (nemomotz_one_has_dirty(one, NEMOMOTZ_BURST_COLOR_DIRTY) != 0)
-		nemotoyz_style_set_color(burst->style, burst->r, burst->g, burst->b, burst->a);
+		nemotozz_style_set_color(burst->style, burst->r, burst->g, burst->b, burst->a);
 	if (nemomotz_one_has_dirty(one, NEMOMOTZ_BURST_STROKE_WIDTH_DIRTY) != 0)
-		nemotoyz_style_set_stroke_width(burst->style, burst->stroke_width);
+		nemotozz_style_set_stroke_width(burst->style, burst->stroke_width);
 }
 
 static int nemomotz_burst_frame(struct motzone *one, uint32_t msecs)
 {
 	struct motzburst *burst = NEMOMOTZ_BURST(one);
 
-	nemotoyz_style_set_color(burst->style,
+	nemotozz_style_set_color(burst->style,
 			random_get_double(64.0f, 255.0f),
 			random_get_double(64.0f, 255.0f),
 			random_get_double(64.0f, 255.0f),
@@ -82,9 +82,9 @@ static void nemomotz_burst_destroy(struct motzone *one)
 
 	nemomotz_one_finish(one);
 
-	nemotoyz_style_destroy(burst->style);
-	nemotoyz_matrix_destroy(burst->matrix);
-	nemotoyz_matrix_destroy(burst->inverse);
+	nemotozz_style_destroy(burst->style);
+	nemotozz_matrix_destroy(burst->matrix);
+	nemotozz_matrix_destroy(burst->inverse);
 
 	free(burst);
 }
@@ -112,11 +112,11 @@ struct motzone *nemomotz_burst_create(void)
 	one->frame = nemomotz_burst_frame;
 	one->destroy = nemomotz_burst_destroy;
 
-	burst->style = nemotoyz_style_create();
-	nemotoyz_style_set_type(burst->style, NEMOTOYZ_STYLE_STROKE_AND_FILL_TYPE);
+	burst->style = nemotozz_style_create();
+	nemotozz_style_set_type(burst->style, NEMOTOZZ_STYLE_STROKE_AND_FILL_TYPE);
 
-	burst->matrix = nemotoyz_matrix_create();
-	burst->inverse = nemotoyz_matrix_create();
+	burst->matrix = nemotozz_matrix_create();
+	burst->inverse = nemotozz_matrix_create();
 
 	return one;
 }

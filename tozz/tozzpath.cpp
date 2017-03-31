@@ -5,24 +5,24 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include <nemotoyz.h>
-#include <toyzpath.hpp>
-#include <toyzstyle.hpp>
-#include <toyzsvg.hpp>
+#include <nemotozz.h>
+#include <tozzpath.hpp>
+#include <tozzstyle.hpp>
+#include <tozzsvg.hpp>
 #include <nemomisc.h>
 
-struct toyzpath *nemotoyz_path_create(void)
+struct tozzpath *nemotozz_path_create(void)
 {
-	struct toyzpath *path;
+	struct tozzpath *path;
 
-	path = new toyzpath;
+	path = new tozzpath;
 	path->path = new SkPath;
 	path->measure = NULL;
 
 	return path;
 }
 
-void nemotoyz_path_destroy(struct toyzpath *path)
+void nemotozz_path_destroy(struct tozzpath *path)
 {
 	if (path->measure != NULL)
 		delete path->measure;
@@ -31,46 +31,46 @@ void nemotoyz_path_destroy(struct toyzpath *path)
 	delete path;
 }
 
-void nemotoyz_path_clear(struct toyzpath *path)
+void nemotozz_path_clear(struct tozzpath *path)
 {
 	path->path->reset();
 }
 
-void nemotoyz_path_moveto(struct toyzpath *path, float x, float y)
+void nemotozz_path_moveto(struct tozzpath *path, float x, float y)
 {
 	path->path->moveTo(x, y);
 }
 
-void nemotoyz_path_lineto(struct toyzpath *path, float x, float y)
+void nemotozz_path_lineto(struct tozzpath *path, float x, float y)
 {
 	path->path->lineTo(x, y);
 }
 
-void nemotoyz_path_cubicto(struct toyzpath *path, float x0, float y0, float x1, float y1, float x2, float y2)
+void nemotozz_path_cubicto(struct tozzpath *path, float x0, float y0, float x1, float y1, float x2, float y2)
 {
 	path->path->cubicTo(x0, y0, x1, y1, x2, y2);
 }
 
-void nemotoyz_path_arcto(struct toyzpath *path, float x, float y, float w, float h, float from, float to, int needs_moveto)
+void nemotozz_path_arcto(struct tozzpath *path, float x, float y, float w, float h, float from, float to, int needs_moveto)
 {
 	SkRect rect = SkRect::MakeXYWH(x, y, w, h);
 
 	path->path->arcTo(rect, from, to, needs_moveto == 0 ? false : true);
 }
 
-void nemotoyz_path_close(struct toyzpath *path)
+void nemotozz_path_close(struct tozzpath *path)
 {
 	path->path->close();
 }
 
-void nemotoyz_path_arc(struct toyzpath *path, float x, float y, float w, float h, float from, float to)
+void nemotozz_path_arc(struct tozzpath *path, float x, float y, float w, float h, float from, float to)
 {
 	SkRect rect = SkRect::MakeXYWH(x, y, w, h);
 
 	path->path->addArc(rect, from, to);
 }
 
-void nemotoyz_path_text(struct toyzpath *path, struct toyzstyle *style, float x, float y, const char *text)
+void nemotozz_path_text(struct tozzpath *path, struct tozzstyle *style, float x, float y, const char *text)
 {
 	SkPath rpath;
 	style->paint->getTextPath(text, strlen(text), x, y - style->fontascent, &rpath);
@@ -78,7 +78,7 @@ void nemotoyz_path_text(struct toyzpath *path, struct toyzstyle *style, float x,
 	path->path->addPath(rpath);
 }
 
-void nemotoyz_path_cmd(struct toyzpath *path, const char *cmd)
+void nemotozz_path_cmd(struct tozzpath *path, const char *cmd)
 {
 	SkPath rpath;
 	SkParsePath::FromSVGString(cmd, &rpath);
@@ -86,20 +86,20 @@ void nemotoyz_path_cmd(struct toyzpath *path, const char *cmd)
 	path->path->addPath(rpath);
 }
 
-void nemotoyz_path_svg(struct toyzpath *path, const char *url, float x, float y, float w, float h)
+void nemotozz_path_svg(struct tozzpath *path, const char *url, float x, float y, float w, float h)
 {
 	SkPath rpath;
-	nemotoyz_svg_load(url, x, y, w, h, &rpath);
+	nemotozz_svg_load(url, x, y, w, h, &rpath);
 
 	path->path->addPath(rpath);
 }
 
-void nemotoyz_path_append(struct toyzpath *path, struct toyzpath *spath)
+void nemotozz_path_append(struct tozzpath *path, struct tozzpath *spath)
 {
 	path->path->addPath(*spath->path);
 }
 
-void nemotoyz_path_translate(struct toyzpath *path, float tx, float ty)
+void nemotozz_path_translate(struct tozzpath *path, float tx, float ty)
 {
 	SkMatrix matrix;
 	matrix.setIdentity();
@@ -108,7 +108,7 @@ void nemotoyz_path_translate(struct toyzpath *path, float tx, float ty)
 	path->path->transform(matrix);
 }
 
-void nemotoyz_path_scale(struct toyzpath *path, float sx, float sy)
+void nemotozz_path_scale(struct tozzpath *path, float sx, float sy)
 {
 	SkMatrix matrix;
 	matrix.setIdentity();
@@ -117,7 +117,7 @@ void nemotoyz_path_scale(struct toyzpath *path, float sx, float sy)
 	path->path->transform(matrix);
 }
 
-void nemotoyz_path_rotate(struct toyzpath *path, float rz)
+void nemotozz_path_rotate(struct tozzpath *path, float rz)
 {
 	SkMatrix matrix;
 	matrix.setIdentity();
@@ -126,7 +126,7 @@ void nemotoyz_path_rotate(struct toyzpath *path, float rz)
 	path->path->transform(matrix);
 }
 
-void nemotoyz_path_bounds(struct toyzpath *path, float *x, float *y, float *w, float *h)
+void nemotozz_path_bounds(struct tozzpath *path, float *x, float *y, float *w, float *h)
 {
 	SkRect box = path->path->getBounds();
 
@@ -136,7 +136,7 @@ void nemotoyz_path_bounds(struct toyzpath *path, float *x, float *y, float *w, f
 	*h = box.height();
 }
 
-void nemotoyz_path_measure(struct toyzpath *path)
+void nemotozz_path_measure(struct tozzpath *path)
 {
 	if (path->measure == NULL)
 		path->measure = new SkPathMeasure;
@@ -144,12 +144,12 @@ void nemotoyz_path_measure(struct toyzpath *path)
 	path->measure->setPath(path->path, false);
 }
 
-float nemotoyz_path_length(struct toyzpath *path)
+float nemotozz_path_length(struct tozzpath *path)
 {
 	return path->measure->getLength();
 }
 
-int nemotoyz_path_position(struct toyzpath *path, float t, float *px, float *py, float *tx, float *ty)
+int nemotozz_path_position(struct tozzpath *path, float t, float *px, float *py, float *tx, float *ty)
 {
 	SkPoint point;
 	SkVector tangent;
@@ -171,7 +171,7 @@ int nemotoyz_path_position(struct toyzpath *path, float t, float *px, float *py,
 	return 0;
 }
 
-void nemotoyz_path_segment(struct toyzpath *path, float from, float to, struct toyzpath *spath)
+void nemotozz_path_segment(struct tozzpath *path, float from, float to, struct tozzpath *spath)
 {
 	path->measure->getSegment(
 			path->measure->getLength() * from,
@@ -179,7 +179,7 @@ void nemotoyz_path_segment(struct toyzpath *path, float from, float to, struct t
 			spath->path, true);
 }
 
-void nemotoyz_path_dump(struct toyzpath *path, FILE *out)
+void nemotozz_path_dump(struct tozzpath *path, FILE *out)
 {
 	SkPath::Iter iter(*path->path, false);
 	SkPath::Verb verb;

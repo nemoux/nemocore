@@ -7,18 +7,18 @@
 
 #include <stdarg.h>
 
-#include <nemotoyz.h>
-#include <toyzstyle.hpp>
-#include <toyzmatrix.hpp>
-#include <nemotoyz.hpp>
+#include <nemotozz.h>
+#include <tozzstyle.hpp>
+#include <tozzmatrix.hpp>
+#include <nemotozz.hpp>
 #include <fonthelper.h>
 #include <nemomisc.h>
 
-struct toyzstyle *nemotoyz_style_create(void)
+struct tozzstyle *nemotozz_style_create(void)
 {
-	struct toyzstyle *style;
+	struct tozzstyle *style;
 
-	style = new toyzstyle;
+	style = new tozzstyle;
 	style->paint = new SkPaint;
 
 	style->paint->setStyle(SkPaint::kFill_Style);
@@ -29,13 +29,13 @@ struct toyzstyle *nemotoyz_style_create(void)
 	return style;
 }
 
-void nemotoyz_style_destroy(struct toyzstyle *style)
+void nemotozz_style_destroy(struct tozzstyle *style)
 {
 	delete style->paint;
 	delete style;
 }
 
-void nemotoyz_style_set_type(struct toyzstyle *style, int type)
+void nemotozz_style_set_type(struct tozzstyle *style, int type)
 {
 	static const SkPaint::Style styles[] = {
 		SkPaint::kFill_Style,
@@ -46,17 +46,17 @@ void nemotoyz_style_set_type(struct toyzstyle *style, int type)
 	style->paint->setStyle(styles[type]);
 }
 
-void nemotoyz_style_set_color(struct toyzstyle *style, float r, float g, float b, float a)
+void nemotozz_style_set_color(struct tozzstyle *style, float r, float g, float b, float a)
 {
 	style->paint->setColor(SkColorSetARGB(a, r, g, b));
 }
 
-void nemotoyz_style_set_stroke_width(struct toyzstyle *style, float w)
+void nemotozz_style_set_stroke_width(struct tozzstyle *style, float w)
 {
 	style->paint->setStrokeWidth(w);
 }
 
-void nemotoyz_style_set_stroke_cap(struct toyzstyle *style, int cap)
+void nemotozz_style_set_stroke_cap(struct tozzstyle *style, int cap)
 {
 	static const SkPaint::Cap caps[] = {
 		SkPaint::kButt_Cap,
@@ -67,7 +67,7 @@ void nemotoyz_style_set_stroke_cap(struct toyzstyle *style, int cap)
 	style->paint->setStrokeCap(caps[cap]);
 }
 
-void nemotoyz_style_set_stroke_join(struct toyzstyle *style, int join)
+void nemotozz_style_set_stroke_join(struct tozzstyle *style, int join)
 {
 	static const SkPaint::Join joins[] = {
 		SkPaint::kMiter_Join,
@@ -78,7 +78,7 @@ void nemotoyz_style_set_stroke_join(struct toyzstyle *style, int join)
 	style->paint->setStrokeJoin(joins[join]);
 }
 
-void nemotoyz_style_set_anti_alias(struct toyzstyle *style, int use_antialias)
+void nemotozz_style_set_anti_alias(struct tozzstyle *style, int use_antialias)
 {
 	if (use_antialias != 0)
 		style->paint->setAntiAlias(true);
@@ -86,7 +86,7 @@ void nemotoyz_style_set_anti_alias(struct toyzstyle *style, int use_antialias)
 		style->paint->setAntiAlias(false);
 }
 
-void nemotoyz_style_set_blur_filter(struct toyzstyle *style, int type, int quality, float r)
+void nemotozz_style_set_blur_filter(struct tozzstyle *style, int type, int quality, float r)
 {
 	static const SkBlurStyle styles[] = {
 		kNormal_SkBlurStyle,
@@ -107,7 +107,7 @@ void nemotoyz_style_set_blur_filter(struct toyzstyle *style, int type, int quali
 				flags[quality]));
 }
 
-void nemotoyz_style_set_emboss_filter(struct toyzstyle *style, float x, float y, float z, float r, float ambient, float specular)
+void nemotozz_style_set_emboss_filter(struct tozzstyle *style, float x, float y, float z, float r, float ambient, float specular)
 {
 	SkEmbossMaskFilter::Light light;
 
@@ -123,7 +123,7 @@ void nemotoyz_style_set_emboss_filter(struct toyzstyle *style, float x, float y,
 				light));
 }
 
-void nemotoyz_style_set_shadow_filter(struct toyzstyle *style, int mode, float dx, float dy, float sx, float sy, float r, float g, float b, float a)
+void nemotozz_style_set_shadow_filter(struct tozzstyle *style, int mode, float dx, float dy, float sx, float sy, float r, float g, float b, float a)
 {
 	static const SkDropShadowImageFilter::ShadowMode modes[] = {
 		SkDropShadowImageFilter::kDrawShadowAndForeground_ShadowMode,
@@ -142,13 +142,13 @@ void nemotoyz_style_set_shadow_filter(struct toyzstyle *style, int mode, float d
 				NULL));
 }
 
-void nemotoyz_style_set_path_effect(struct toyzstyle *style, float segment, float deviation, uint32_t seed)
+void nemotozz_style_set_path_effect(struct tozzstyle *style, float segment, float deviation, uint32_t seed)
 {
 	style->paint->setPathEffect(
 			SkDiscretePathEffect::Make(segment, deviation, seed));
 }
 
-void nemotoyz_style_set_dash_effect(struct toyzstyle *style, int *dashes, int count)
+void nemotozz_style_set_dash_effect(struct tozzstyle *style, int *dashes, int count)
 {
 	SkScalar intervals[count];
 	int i;
@@ -160,22 +160,22 @@ void nemotoyz_style_set_dash_effect(struct toyzstyle *style, int *dashes, int co
 			SkDashPathEffect::Make(intervals, count, 1));
 }
 
-void nemotoyz_style_put_mask_filter(struct toyzstyle *style)
+void nemotozz_style_put_mask_filter(struct tozzstyle *style)
 {
 	style->paint->setMaskFilter(NULL);
 }
 
-void nemotoyz_style_put_image_filter(struct toyzstyle *style)
+void nemotozz_style_put_image_filter(struct tozzstyle *style)
 {
 	style->paint->setImageFilter(NULL);
 }
 
-void nemotoyz_style_put_path_effect(struct toyzstyle *style)
+void nemotozz_style_put_path_effect(struct tozzstyle *style)
 {
 	style->paint->setPathEffect(NULL);
 }
 
-void nemotoyz_style_set_linear_gradient_shader(struct toyzstyle *style, float x0, float y0, float x1, float y1, int tilemode, int noffsets, ...)
+void nemotozz_style_set_linear_gradient_shader(struct tozzstyle *style, float x0, float y0, float x1, float y1, int tilemode, int noffsets, ...)
 {
 	static const SkShader::TileMode tilemodes[] = {
 		SkShader::kClamp_TileMode,
@@ -219,7 +219,7 @@ void nemotoyz_style_set_linear_gradient_shader(struct toyzstyle *style, float x0
 				tilemodes[tilemode]));
 }
 
-void nemotoyz_style_set_radial_gradient_shader(struct toyzstyle *style, float x, float y, float radius, int tilemode, int noffsets, ...)
+void nemotozz_style_set_radial_gradient_shader(struct tozzstyle *style, float x, float y, float radius, int tilemode, int noffsets, ...)
 {
 	static const SkShader::TileMode tilemodes[] = {
 		SkShader::kClamp_TileMode,
@@ -258,7 +258,7 @@ void nemotoyz_style_set_radial_gradient_shader(struct toyzstyle *style, float x,
 				tilemodes[tilemode]));
 }
 
-void nemotoyz_style_set_bitmap_shader(struct toyzstyle *style, struct nemotoyz *bitmap, int tilemodex, int tilemodey)
+void nemotozz_style_set_bitmap_shader(struct tozzstyle *style, struct nemotozz *bitmap, int tilemodex, int tilemodey)
 {
 	static const SkShader::TileMode tilemodes[] = {
 		SkShader::kClamp_TileMode,
@@ -273,12 +273,12 @@ void nemotoyz_style_set_bitmap_shader(struct toyzstyle *style, struct nemotoyz *
 				tilemodes[tilemodey]));
 }
 
-void nemotoyz_style_put_shader(struct toyzstyle *style)
+void nemotozz_style_put_shader(struct tozzstyle *style)
 {
 	style->paint->setShader(NULL);
 }
 
-void nemotoyz_style_transform_shader(struct toyzstyle *style, struct toyzmatrix *matrix)
+void nemotozz_style_transform_shader(struct tozzstyle *style, struct tozzmatrix *matrix)
 {
 	SkShader *shader;
 
@@ -288,13 +288,13 @@ void nemotoyz_style_transform_shader(struct toyzstyle *style, struct toyzmatrix 
 				shader->makeWithLocalMatrix(*matrix->matrix));
 }
 
-void nemotoyz_style_load_font(struct toyzstyle *style, const char *path, int index)
+void nemotozz_style_load_font(struct tozzstyle *style, const char *path, int index)
 {
 	style->paint->setTypeface(
 			SkTypeface::MakeFromFile(path, index));
 }
 
-void nemotoyz_style_load_fontconfig(struct toyzstyle *style, const char *fontfamily, const char *fontstyle)
+void nemotozz_style_load_fontconfig(struct tozzstyle *style, const char *fontfamily, const char *fontstyle)
 {
 	style->paint->setTypeface(
 			SkTypeface::MakeFromFile(
@@ -308,7 +308,7 @@ void nemotoyz_style_load_fontconfig(struct toyzstyle *style, const char *fontfam
 				0));
 }
 
-void nemotoyz_style_set_font_size(struct toyzstyle *style, float fontsize)
+void nemotozz_style_set_font_size(struct tozzstyle *style, float fontsize)
 {
 	SkPaint::FontMetrics metrics;
 
@@ -319,12 +319,12 @@ void nemotoyz_style_set_font_size(struct toyzstyle *style, float fontsize)
 	style->fontdescent = metrics.fDescent;
 }
 
-float nemotoyz_style_get_text_height(struct toyzstyle *style)
+float nemotozz_style_get_text_height(struct tozzstyle *style)
 {
 	return style->fontdescent - style->fontascent;
 }
 
-float nemotoyz_style_get_text_width(struct toyzstyle *style, const char *text, int length)
+float nemotozz_style_get_text_width(struct tozzstyle *style, const char *text, int length)
 {
 	SkScalar widths[length];
 	float width = 0.0f;

@@ -27,9 +27,9 @@ typedef enum {
 struct motzburst {
 	struct motzone one;
 
-	struct toyzstyle *style;
-	struct toyzmatrix *matrix;
-	struct toyzmatrix *inverse;
+	struct tozzstyle *style;
+	struct tozzmatrix *matrix;
+	struct tozzmatrix *inverse;
 
 	float tx, ty;
 

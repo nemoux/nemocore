@@ -11,17 +11,17 @@
 static void nemomotz_clip_draw(struct nemomotz *motz, struct motzone *one)
 {
 	struct motzclip *clip = NEMOMOTZ_CLIP(one);
-	struct nemotoyz *toyz = motz->toyz;
+	struct nemotozz *tozz = motz->tozz;
 	struct motzone *child;
 
-	nemotoyz_save(toyz);
-	nemotoyz_clip_rectangle(toyz, clip->x, clip->y, clip->w, clip->h);
+	nemotozz_save(tozz);
+	nemotozz_clip_rectangle(tozz, clip->x, clip->y, clip->w, clip->h);
 
 	nemolist_for_each(child, &one->one_list, link) {
 		nemomotz_one_draw(motz, child);
 	}
 
-	nemotoyz_restore(toyz);
+	nemotozz_restore(tozz);
 }
 
 static void nemomotz_clip_down(struct nemomotz *motz, struct motztap *tap, struct motzone *one, float x, float y)

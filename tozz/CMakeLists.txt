@@ -27,17 +27,17 @@ include_directories(
 	${CMAKE_BINARY_DIR}/tool
 	)
 
-add_library(nemotoyz SHARED
-	nemotoyz.cpp
-	toyzstyle.cpp
-	toyzpath.cpp
-	toyzmatrix.cpp
-	toyzregion.cpp
-	toyzpicture.cpp
-	toyzsvg.cpp
+add_library(nemotozz SHARED
+	nemotozz.cpp
+	tozzstyle.cpp
+	tozzpath.cpp
+	tozzmatrix.cpp
+	tozzregion.cpp
+	tozzpicture.cpp
+	tozzsvg.cpp
 	)
 
-TARGET_LINK_LIBRARIES(nemotoyz
+TARGET_LINK_LIBRARIES(nemotozz
 	${PIXMAN_LIBRARIES}
 	${FREETYPE_LIBRARIES}
 	${HARFBUZZ_LIBRARIES}
@@ -47,19 +47,19 @@ TARGET_LINK_LIBRARIES(nemotoyz
 	nemotool
 	)
 
-INSTALL(TARGETS nemotoyz DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
+INSTALL(TARGETS nemotozz DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
 
 set(HEADER_FILES
-	${CMAKE_SOURCE_DIR}/toyz/nemotoyz.h
+	${CMAKE_SOURCE_DIR}/tozz/nemotozz.h
 	)
 
-set(NEMOTOYZ_PKGCONFIG_REQUIRES "nemoasst nemohelper nemotool pixman-1 freetype2 harfbuzz skia")
+set(NEMOTOZZ_PKGCONFIG_REQUIRES "nemoasst nemohelper nemotool pixman-1 freetype2 harfbuzz skia")
 
 configure_file(
-	nemotoyz.pc.in
-	nemotoyz.pc
+	nemotozz.pc.in
+	nemotozz.pc
 	@ONLY
 	)
 
-INSTALL(FILES ${HEADER_FILES} DESTINATION include/nemotoyz)
-INSTALL(FILES ${CMAKE_BINARY_DIR}/toyz/nemotoyz.pc DESTINATION lib${CMAKE_LIBRARY_SUFFIX}/pkgconfig)
+INSTALL(FILES ${HEADER_FILES} DESTINATION include/nemotozz)
+INSTALL(FILES ${CMAKE_BINARY_DIR}/tozz/nemotozz.pc DESTINATION lib${CMAKE_LIBRARY_SUFFIX}/pkgconfig)

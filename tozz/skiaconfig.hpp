@@ -1,5 +1,5 @@
-#ifndef	__NEMOTOYZ_SKIA_CONFIG_H__
-#define	__NEMOTOYZ_SKIA_CONFIG_H__
+#ifndef	__NEMOTOZZ_SKIA_CONFIG_H__
+#define	__NEMOTOZZ_SKIA_CONFIG_H__
 
 #define	SK_RELEASE			1
 #define	SK_CPU_LENDIAN	1

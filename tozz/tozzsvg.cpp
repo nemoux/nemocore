@@ -5,13 +5,13 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include <toyzsvg.hpp>
+#include <tozzsvg.hpp>
 #include <stringhelper.h>
 #include <nemoxml.h>
 #include <nemotoken.h>
 #include <nemomisc.h>
 
-static int nemotoyz_svg_get_transform_args(struct nemotoken *token, int offset, double *args)
+static int nemotozz_svg_get_transform_args(struct nemotoken *token, int offset, double *args)
 {
 	const char *value;
 	int i;
@@ -27,7 +27,7 @@ static int nemotoyz_svg_get_transform_args(struct nemotoken *token, int offset, 
 	return i;
 }
 
-static int nemotoyz_svg_get_transform(SkMatrix *matrix, const char *value)
+static int nemotozz_svg_get_transform(SkMatrix *matrix, const char *value)
 {
 	struct nemotoken *token;
 	const char *type;
@@ -52,7 +52,7 @@ static int nemotoyz_svg_get_transform(SkMatrix *matrix, const char *value)
 		type = nemotoken_get_token(token, i++);
 		if (type != NULL) {
 			if (strcmp(type, "translate") == 0) {
-				nargs = nemotoyz_svg_get_transform_args(token, i, args);
+				nargs = nemotozz_svg_get_transform_args(token, i, args);
 				if (nargs == 1) {
 					matrix->postTranslate(args[0], 0.0f);
 				} else if (nargs == 2) {
@@ -61,7 +61,7 @@ static int nemotoyz_svg_get_transform(SkMatrix *matrix, const char *value)
 
 				i += nargs;
 			} else if (strcmp(type, "rotate") == 0) {
-				nargs = nemotoyz_svg_get_transform_args(token, i, args);
+				nargs = nemotozz_svg_get_transform_args(token, i, args);
 				if (nargs == 1) {
 					matrix->postRotate(args[0]);
 				} else if (nargs == 3) {
@@ -72,7 +72,7 @@ static int nemotoyz_svg_get_transform(SkMatrix *matrix, const char *value)
 
 				i += nargs;
 			} else if (strcmp(type, "scale") == 0) {
-				nargs = nemotoyz_svg_get_transform_args(token, i, args);
+				nargs = nemotozz_svg_get_transform_args(token, i, args);
 				if (nargs == 1) {
 					matrix->postScale(args[0], 0.0f);
 				} else if (nargs == 2) {
@@ -81,21 +81,21 @@ static int nemotoyz_svg_get_transform(SkMatrix *matrix, const char *value)
 
 				i += nargs;
 			} else if (strcmp(type, "skewX") == 0) {
-				nargs = nemotoyz_svg_get_transform_args(token, i, args);
+				nargs = nemotozz_svg_get_transform_args(token, i, args);
 				if (nargs == 1) {
 					matrix->postSkew(args[0], 0.0f);
 				}
 
 				i += nargs;
 			} else if (strcmp(type, "skewY") == 0) {
-				nargs = nemotoyz_svg_get_transform_args(token, i, args);
+				nargs = nemotozz_svg_get_transform_args(token, i, args);
 				if (nargs == 1) {
 					matrix->postSkew(0.0f, args[0]);
 				}
 
 				i += nargs;
 			} else if (strcmp(type, "matrix") == 0) {
-				nargs = nemotoyz_svg_get_transform_args(token, i, args);
+				nargs = nemotozz_svg_get_transform_args(token, i, args);
 				if (nargs == 6) {
 					SkScalar targs[9] = {
 						SkDoubleToScalar(args[0]), SkDoubleToScalar(args[2]), SkDoubleToScalar(args[4]),
@@ -116,7 +116,7 @@ static int nemotoyz_svg_get_transform(SkMatrix *matrix, const char *value)
 	return 0;
 }
 
-int nemotoyz_svg_load(const char *url, float x, float y, float w, float h, SkPath *path)
+int nemotozz_svg_load(const char *url, float x, float y, float w, float h, SkPath *path)
 {
 	struct nemoxml *xml;
 	struct xmlnode *node;
@@ -232,7 +232,7 @@ int nemotoyz_svg_load(const char *url, float x, float y, float w, float h, SkPat
 		}
 
 		if ((attr0 = nemoxml_node_get_attr(node, "transform")) != NULL) {
-			nemotoyz_svg_get_transform(&smatrix, attr0);
+			nemotozz_svg_get_transform(&smatrix, attr0);
 
 			spath.transform(smatrix);
 		}

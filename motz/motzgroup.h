@@ -20,8 +20,8 @@ typedef enum {
 struct motzgroup {
 	struct motzone one;
 
-	struct toyzmatrix *matrix;
-	struct toyzmatrix *inverse;
+	struct tozzmatrix *matrix;
+	struct tozzmatrix *inverse;
 
 	float tx, ty;
 	float sx, sy;

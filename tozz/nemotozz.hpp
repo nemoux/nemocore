@@ -1,9 +1,9 @@
-#ifndef __NEMOTOYZ_HPP__
-#define __NEMOTOYZ_HPP__
+#ifndef __NEMOTOZZ_HPP__
+#define __NEMOTOZZ_HPP__
 
 #include <skiaconfig.hpp>
 
-struct nemotoyz {
+struct nemotozz {
 	int type;
 
 	SkBitmap *bitmap;

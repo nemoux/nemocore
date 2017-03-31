@@ -1,9 +1,9 @@
-#ifndef __NEMOTOYZ_PICTURE_HPP__
-#define __NEMOTOYZ_PICTURE_HPP__
+#ifndef __NEMOTOZZ_PICTURE_HPP__
+#define __NEMOTOZZ_PICTURE_HPP__
 
 #include <skiaconfig.hpp>
 
-struct toyzpicture {
+struct tozzpicture {
 	SkPictureRecorder recorder;
 	sk_sp<SkPicture> picture;
 };

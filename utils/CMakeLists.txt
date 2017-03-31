@@ -23,7 +23,7 @@ include_directories(
 	${CMAKE_SOURCE_DIR}/cook
 	${CMAKE_SOURCE_DIR}/action
 	${CMAKE_SOURCE_DIR}/motz
-	${CMAKE_SOURCE_DIR}/toyz
+	${CMAKE_SOURCE_DIR}/tozz
 	)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
@@ -130,7 +130,7 @@ TARGET_LINK_LIBRARIES(nemopix
 	nemoaction
 	nemobus
 	nemomotz
-	nemotoyz
+	nemotozz
 	)
 
 INSTALL(TARGETS nemopix DESTINATION bin)
@@ -152,7 +152,7 @@ if(WITH_TESSERACT)
 		nemoasst
 		nemotool
 		nemoaction
-		nemotoyz
+		nemotozz
 		${LEPTONICA_LIBRARIES}
 		${TESSERACT_LIBRARIES}
 		)

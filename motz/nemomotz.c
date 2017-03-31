@@ -17,8 +17,8 @@ struct nemomotz *nemomotz_create(void)
 		return NULL;
 	memset(motz, 0, sizeof(struct nemomotz));
 
-	motz->toyz = nemotoyz_create();
-	if (motz->toyz == NULL)
+	motz->tozz = nemotozz_create();
+	if (motz->tozz == NULL)
 		goto err1;
 
 	nemolist_init(&motz->one_list);
@@ -43,7 +43,7 @@ void nemomotz_destroy(struct nemomotz *motz)
 	nemolist_remove(&motz->tap_list);
 	nemolist_remove(&motz->transition_list);
 
-	nemotoyz_destroy(motz->toyz);
+	nemotozz_destroy(motz->tozz);
 
 	free(motz);
 }
@@ -99,9 +99,9 @@ int nemomotz_attach_buffer(struct nemomotz *motz, void *buffer, int width, int h
 	motz->viewport.width = width;
 	motz->viewport.height = height;
 
-	return nemotoyz_attach_buffer(motz->toyz,
-			NEMOTOYZ_CANVAS_RGBA_COLOR,
-			NEMOTOYZ_CANVAS_PREMUL_ALPHA,
+	return nemotozz_attach_buffer(motz->tozz,
+			NEMOTOZZ_CANVAS_RGBA_COLOR,
+			NEMOTOZZ_CANVAS_PREMUL_ALPHA,
 			buffer,
 			width,
 			height);
@@ -109,30 +109,30 @@ int nemomotz_attach_buffer(struct nemomotz *motz, void *buffer, int width, int h
 
 void nemomotz_detach_buffer(struct nemomotz *motz)
 {
-	nemotoyz_detach_buffer(motz->toyz);
+	nemotozz_detach_buffer(motz->tozz);
 }
 
 void nemomotz_update_buffer(struct nemomotz *motz)
 {
-	struct nemotoyz *toyz = motz->toyz;
+	struct nemotozz *tozz = motz->tozz;
 	struct motzone *one;
 
-	nemotoyz_save(toyz);
+	nemotozz_save(tozz);
 
 	if (motz->width != motz->viewport.width || motz->height != motz->viewport.height)
-		nemotoyz_scale(toyz,
+		nemotozz_scale(tozz,
 				(float)motz->viewport.width / (float)motz->width,
 				(float)motz->viewport.height / (float)motz->height);
 
 	nemolist_for_each(one, &motz->one_list, link)
 		nemomotz_one_draw(motz, one);
 
-	nemotoyz_restore(toyz);
+	nemotozz_restore(tozz);
 }
 
 void nemomotz_clear_buffer(struct nemomotz *motz)
 {
-	nemotoyz_clear(motz->toyz);
+	nemotozz_clear(motz->tozz);
 }
 
 void nemomotz_attach_one(struct nemomotz *motz, struct motzone *one)

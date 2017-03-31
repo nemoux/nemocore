@@ -11,7 +11,7 @@ NEMO_BEGIN_EXTERN_C
 
 #include <nemolist.h>
 #include <nemolistener.h>
-#include <nemotoyz.h>
+#include <nemotozz.h>
 
 #include <motztransition.h>
 
@@ -46,7 +46,7 @@ struct nemomotz {
 	struct nemolist tap_list;
 	struct nemolist transition_list;
 
-	struct nemotoyz *toyz;
+	struct nemotozz *tozz;
 
 	int width, height;
 

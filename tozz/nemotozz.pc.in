@@ -3,9 +3,9 @@ bindir=${prefix}/bin
 libdir=${prefix}/lib@CMAKE_LIBRARY_SUFFIX@
 incdir=${prefix}/include
 
-Name: Nemotoyz
+Name: Nemotozz
 Description: NEMO-UX vector graphics library
 Version: 0.1.0
-Requires: @NEMOTOYZ_PKGCONFIG_REQUIRES@
-Libs: -L${libdir} -lnemotoyz
-Cflags: -I${incdir}/nemotoyz
+Requires: @NEMOTOZZ_PKGCONFIG_REQUIRES@
+Libs: -L${libdir} -lnemotozz
+Cflags: -I${incdir}/nemotozz

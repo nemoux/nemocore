@@ -1,9 +1,9 @@
-#ifndef __NEMOTOYZ_PATH_HPP__
-#define __NEMOTOYZ_PATH_HPP__
+#ifndef __NEMOTOZZ_PATH_HPP__
+#define __NEMOTOZZ_PATH_HPP__
 
 #include <skiaconfig.hpp>
 
-struct toyzpath {
+struct tozzpath {
 	SkPath *path;
 
 	SkPathMeasure *measure;

@@ -298,7 +298,7 @@ int main(int argc, char *argv[])
 	struct motzone *clip;
 	struct motzone *one;
 	struct motztransition *trans;
-	struct toyzstyle *style;
+	struct tozzstyle *style;
 	char *fullscreenid = NULL;
 	char *contentpath = NULL;
 	char *busid = NULL;
@@ -469,11 +469,11 @@ int main(int argc, char *argv[])
 	nemomotz_object_set_text(one, "NEMO-pix");
 	nemomotz_one_attach_one(clip, one);
 
-	style = nemotoyz_style_create();
-	nemotoyz_style_load_font(style,
+	style = nemotozz_style_create();
+	nemotozz_style_load_font(style,
 			nemomotz_object_get_font_path(one),
 			nemomotz_object_get_font_index(one));
-	nemotoyz_style_set_font_size(style,
+	nemotozz_style_set_font_size(style,
 			nemomotz_object_get_font_size(one));
 
 	one = nemomotz_object_create();
@@ -481,9 +481,9 @@ int main(int argc, char *argv[])
 	nemomotz_object_set_x(one, 0.0f);
 	nemomotz_object_set_y(one, 0.0f);
 	nemomotz_object_set_width(one,
-			nemotoyz_style_get_text_width(style, "NEMO-pix", 8));
+			nemotozz_style_get_text_width(style, "NEMO-pix", 8));
 	nemomotz_object_set_height(one,
-			nemotoyz_style_get_text_height(style));
+			nemotozz_style_get_text_height(style));
 	nemomotz_object_set_red(one, 0.0f);
 	nemomotz_object_set_green(one, 255.0f);
 	nemomotz_object_set_blue(one, 255.0f);
@@ -492,7 +492,7 @@ int main(int argc, char *argv[])
 	nemomotz_one_set_flags(one, NEMOMOTZ_OBJECT_STROKE_FLAG);
 	nemomotz_one_attach_one(clip, one);
 
-	nemotoyz_style_destroy(style);
+	nemotozz_style_destroy(style);
 
 	trans = nemomotz_transition_create(8, NEMOEASE_CUBIC_INOUT_TYPE, 800, 150);
 	nemomotz_transition_object_set_ty(trans, 0, one);

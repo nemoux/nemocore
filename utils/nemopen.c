@@ -14,14 +14,14 @@
 #include <nemotool.h>
 #include <nemocanvas.h>
 #include <nemoaction.h>
-#include <nemotoyz.h>
+#include <nemotozz.h>
 #include <nemomisc.h>
 
 struct nemopen {
 	struct nemotool *tool;
 	struct nemocanvas *canvas;
 	struct nemoaction *action;
-	struct nemotoyz *toyz;
+	struct nemotozz *tozz;
 
 	int width, height;
 	int opaque;
@@ -56,14 +56,14 @@ static void nemopen_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t se
 
 	framebuffer = nemocanvas_get_pixman_image(canvas);
 	if (framebuffer != NULL) {
-		nemotoyz_attach_buffer(pen->toyz,
-				NEMOTOYZ_CANVAS_RGBA_COLOR,
-				NEMOTOYZ_CANVAS_PREMUL_ALPHA,
+		nemotozz_attach_buffer(pen->tozz,
+				NEMOTOZZ_CANVAS_RGBA_COLOR,
+				NEMOTOZZ_CANVAS_PREMUL_ALPHA,
 				pixman_image_get_data(framebuffer),
 				pixman_image_get_width(framebuffer),
 				pixman_image_get_height(framebuffer));
-		nemotoyz_clear(pen->toyz);
-		nemotoyz_detach_buffer(pen->toyz);
+		nemotozz_clear(pen->tozz);
+		nemotozz_detach_buffer(pen->tozz);
 
 		nemocanvas_dispatch_feedback(canvas);
 
@@ -188,7 +188,7 @@ int main(int argc, char *argv[])
 	struct nemotool *tool;
 	struct nemocanvas *canvas;
 	struct nemoaction *action;
-	struct nemotoyz *toyz;
+	struct nemotozz *tozz;
 	char *layer = NULL;
 	char *fullscreenid = NULL;
 	int width = 500;
@@ -261,7 +261,7 @@ int main(int argc, char *argv[])
 	nemoaction_set_tap_callback(action, nemopen_dispatch_tap_event);
 	nemoaction_set_userdata(action, pen);
 
-	pen->toyz = toyz = nemotoyz_create();
+	pen->tozz = tozz = nemotozz_create();
 
 	nemopen_initialize(pen, "eng");
 
@@ -271,7 +271,7 @@ int main(int argc, char *argv[])
 
 	nemopen_finalize(pen);
 
-	nemotoyz_destroy(toyz);
+	nemotozz_destroy(tozz);
 
 	nemoaction_destroy(action);
 

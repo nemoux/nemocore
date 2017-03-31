@@ -11,14 +11,14 @@
 static void nemomotz_swirl_draw(struct nemomotz *motz, struct motzone *one)
 {
 	struct motzswirl *swirl = NEMOMOTZ_SWIRL(one);
-	struct nemotoyz *toyz = motz->toyz;
+	struct nemotozz *tozz = motz->tozz;
 
-	nemotoyz_save(toyz);
-	nemotoyz_concat(toyz, swirl->matrix);
+	nemotozz_save(tozz);
+	nemotozz_concat(tozz, swirl->matrix);
 
-	nemotoyz_draw_circle(toyz, swirl->style, swirl->x, swirl->y, swirl->size);
+	nemotozz_draw_circle(tozz, swirl->style, swirl->x, swirl->y, swirl->size);
 
-	nemotoyz_restore(toyz);
+	nemotozz_restore(tozz);
 }
 
 static void nemomotz_swirl_dispatch_transition_update(struct motztransition *trans, void *data, float t)
@@ -71,15 +71,15 @@ static void nemomotz_swirl_update(struct motzone *one)
 	struct motzswirl *swirl = NEMOMOTZ_SWIRL(one);
 
 	if (nemomotz_one_has_dirty(one, NEMOMOTZ_SWIRL_TRANSFORM_DIRTY) != 0) {
-		nemotoyz_matrix_translate(swirl->matrix, swirl->tx, swirl->ty);
+		nemotozz_matrix_translate(swirl->matrix, swirl->tx, swirl->ty);
 
-		nemotoyz_matrix_invert(swirl->inverse, swirl->matrix);
+		nemotozz_matrix_invert(swirl->inverse, swirl->matrix);
 	}
 
 	if (nemomotz_one_has_dirty(one, NEMOMOTZ_SWIRL_COLOR_DIRTY) != 0)
-		nemotoyz_style_set_color(swirl->style, swirl->r, swirl->g, swirl->b, swirl->a);
+		nemotozz_style_set_color(swirl->style, swirl->r, swirl->g, swirl->b, swirl->a);
 	if (nemomotz_one_has_dirty(one, NEMOMOTZ_SWIRL_STROKE_WIDTH_DIRTY) != 0)
-		nemotoyz_style_set_stroke_width(swirl->style, swirl->stroke_width);
+		nemotozz_style_set_stroke_width(swirl->style, swirl->stroke_width);
 }
 
 static void nemomotz_swirl_destroy(struct motzone *one)
@@ -88,9 +88,9 @@ static void nemomotz_swirl_destroy(struct motzone *one)
 
 	nemomotz_one_finish(one);
 
-	nemotoyz_style_destroy(swirl->style);
-	nemotoyz_matrix_destroy(swirl->matrix);
-	nemotoyz_matrix_destroy(swirl->inverse);
+	nemotozz_style_destroy(swirl->style);
+	nemotozz_matrix_destroy(swirl->matrix);
+	nemotozz_matrix_destroy(swirl->inverse);
 
 	free(swirl);
 }
@@ -117,11 +117,11 @@ struct motzone *nemomotz_swirl_create(void)
 	one->update = nemomotz_swirl_update;
 	one->destroy = nemomotz_swirl_destroy;
 
-	swirl->style = nemotoyz_style_create();
-	nemotoyz_style_set_type(swirl->style, NEMOTOYZ_STYLE_STROKE_AND_FILL_TYPE);
+	swirl->style = nemotozz_style_create();
+	nemotozz_style_set_type(swirl->style, NEMOTOZZ_STYLE_STROKE_AND_FILL_TYPE);
 
-	swirl->matrix = nemotoyz_matrix_create();
-	swirl->inverse = nemotoyz_matrix_create();
+	swirl->matrix = nemotozz_matrix_create();
+	swirl->inverse = nemotozz_matrix_create();
 
 	return one;
 }

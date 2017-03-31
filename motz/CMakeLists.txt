@@ -9,7 +9,7 @@ include_directories(
 	${CMAKE_SOURCE_DIR}/helper
 	${CMAKE_SOURCE_DIR}/tool
 	${CMAKE_BINARY_DIR}/tool
-	${CMAKE_SOURCE_DIR}/toyz
+	${CMAKE_SOURCE_DIR}/tozz
 	)
 
 add_library(nemomotz SHARED
@@ -27,7 +27,7 @@ TARGET_LINK_LIBRARIES(nemomotz
 	nemoasst
 	nemohelper
 	nemotool
-	nemotoyz
+	nemotozz
 	)
 
 INSTALL(TARGETS nemomotz DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
@@ -43,7 +43,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/motz/motzswirl.h
 	)
 
-set(NEMOMOTZ_PKGCONFIG_REQUIRES "nemoasst nemohelper nemotool nemotoyz")
+set(NEMOMOTZ_PKGCONFIG_REQUIRES "nemoasst nemohelper nemotool nemotozz")
 
 configure_file(
 	nemomotz.pc.in

@@ -1,9 +1,9 @@
-#ifndef __NEMOTOYZ_STYLE_HPP__
-#define __NEMOTOYZ_STYLE_HPP__
+#ifndef __NEMOTOZZ_STYLE_HPP__
+#define __NEMOTOZZ_STYLE_HPP__
 
 #include <skiaconfig.hpp>
 
-struct toyzstyle {
+struct tozzstyle {
 	SkPaint *paint;
 
 	float fontascent;

@@ -33,13 +33,13 @@ typedef enum {
 struct motzpath {
 	struct motzone one;
 
-	struct toyzstyle *style;
-	struct toyzmatrix *matrix;
-	struct toyzmatrix *inverse;
+	struct tozzstyle *style;
+	struct tozzmatrix *matrix;
+	struct tozzmatrix *inverse;
 
-	struct toyzpath *path;
+	struct tozzpath *path;
 
-	struct toyzpath *subpath;
+	struct tozzpath *subpath;
 	float from, to;
 
 	float tx, ty;

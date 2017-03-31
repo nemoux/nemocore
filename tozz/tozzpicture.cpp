@@ -5,33 +5,33 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include <nemotoyz.h>
-#include <toyzpicture.hpp>
+#include <nemotozz.h>
+#include <tozzpicture.hpp>
 #include <nemomisc.h>
 
-struct toyzpicture *nemotoyz_picture_create(void)
+struct tozzpicture *nemotozz_picture_create(void)
 {
-	struct toyzpicture *picture;
+	struct tozzpicture *picture;
 
-	picture = new toyzpicture;
+	picture = new tozzpicture;
 	picture->picture = NULL;
 
 	return picture;
 }
 
-void nemotoyz_picture_destroy(struct toyzpicture *picture)
+void nemotozz_picture_destroy(struct tozzpicture *picture)
 {
 	delete picture;
 }
 
-void nemotoyz_picture_save(struct toyzpicture *picture, const char *url)
+void nemotozz_picture_save(struct tozzpicture *picture, const char *url)
 {
 	SkFILEWStream stream(url);
 
 	picture->picture->serialize(&stream);
 }
 
-void nemotoyz_picture_load(struct toyzpicture *picture, const char *url)
+void nemotozz_picture_load(struct tozzpicture *picture, const char *url)
 {
 	SkFILEStream stream(url);
 
