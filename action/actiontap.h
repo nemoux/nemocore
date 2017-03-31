@@ -210,6 +210,11 @@ static inline uint32_t nemoaction_tap_get_time(struct actiontap *tap)
 	return tap->time;
 }
 
+static inline uint32_t nemoaction_tap_get_duration(struct actiontap *tap)
+{
+	return tap->time - tap->time0;
+}
+
 static inline uint32_t nemoaction_tap_get_device(struct actiontap *tap)
 {
 	return tap->device;
