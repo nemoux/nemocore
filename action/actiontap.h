@@ -26,7 +26,10 @@ struct actiontap {
 	uint32_t tag;
 
 	float dx, dy;
-	float dd;
+	float distance;
+
+	float *traces;
+	int mtraces, ntraces;
 
 	float gx0, gy0;
 	float gx, gy;
@@ -52,6 +55,8 @@ extern void nemoaction_tap_destroy(struct actiontap *tap);
 
 extern void nemoaction_tap_attach(struct nemoaction *action, struct actiontap *tap);
 extern void nemoaction_tap_detach(struct actiontap *tap);
+
+extern int nemoaction_tap_set_trace_max(struct actiontap *tap, int maximum);
 
 extern int nemoaction_tap_set_focus(struct actiontap *tap, void *target);
 
@@ -219,22 +224,47 @@ static inline void nemoaction_tap_clear(struct actiontap *tap, float x, float y)
 {
 	tap->dx = x;
 	tap->dy = y;
-	tap->dd = 0.0f;
+
+	tap->distance = 0.0f;
+
+	tap->ntraces = 0;
 }
 
 static inline void nemoaction_tap_trace(struct actiontap *tap, float x, float y)
 {
-	float dx = x - tap->dx;
-	float dy = y - tap->dy;
+	if (tap->ntraces < tap->mtraces) {
+		float dx = x - tap->dx;
+		float dy = y - tap->dy;
 
-	tap->dd = sqrtf(dx * dx + dy * dy);
-	tap->dx = x;
-	tap->dy = y;
+		tap->distance += sqrtf(dx * dx + dy * dy);
+
+		tap->dx = x;
+		tap->dy = y;
+
+		tap->traces[tap->ntraces * 2 + 0] = x;
+		tap->traces[tap->ntraces * 2 + 1] = y;
+		tap->ntraces++;
+	}
+}
+
+static inline float nemoaction_tap_get_trace_x(struct actiontap *tap, int index)
+{
+	return tap->traces[index * 2 + 0];
+}
+
+static inline float nemoaction_tap_get_trace_y(struct actiontap *tap, int index)
+{
+	return tap->traces[index * 2 + 1];
+}
+
+static inline int nemoaction_tap_get_trace_count(struct actiontap *tap)
+{
+	return tap->ntraces;
 }
 
 static inline float nemoaction_tap_get_distance(struct actiontap *tap)
 {
-	return tap->dd;
+	return tap->distance;
 }
 
 static inline void nemoaction_tap_set_callback(struct actiontap *tap, nemoaction_tap_dispatch_event_t dispatch)

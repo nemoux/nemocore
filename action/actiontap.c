@@ -30,6 +30,9 @@ void nemoaction_tap_destroy(struct actiontap *tap)
 {
 	nemolist_remove(&tap->link);
 
+	if (tap->traces != NULL)
+		free(tap->traces);
+
 	free(tap);
 }
 
@@ -42,6 +45,21 @@ void nemoaction_tap_detach(struct actiontap *tap)
 {
 	nemolist_remove(&tap->link);
 	nemolist_init(&tap->link);
+}
+
+int nemoaction_tap_set_trace_max(struct actiontap *tap, int maximum)
+{
+	if (tap->traces != NULL)
+		free(tap->traces);
+
+	tap->traces = (float *)malloc(sizeof(float[2]) * maximum);
+	if (tap->traces == NULL)
+		return -1;
+
+	tap->mtraces = maximum;
+	tap->ntraces = 0;
+
+	return 0;
 }
 
 int nemoaction_tap_set_focus(struct actiontap *tap, void *target)
