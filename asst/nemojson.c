@@ -157,7 +157,6 @@ void nemojson_update(struct nemojson *json)
 struct json_object *nemojson_search_object(struct nemojson *json, int index, int depth, ...)
 {
 	struct json_object *jobj;
-	struct json_object *tobj;
 	const char *key;
 	va_list vargs;
 	int i;
@@ -170,10 +169,10 @@ struct json_object *nemojson_search_object(struct nemojson *json, int index, int
 
 	for (i = 0; i < depth; i++) {
 		key = va_arg(vargs, const char *);
-		if ('0' <= key[0] && key[0] <= '9') {
+		if ((uint64_t)key < NEMOJSON_ARRAY_MAX) {
 			if (json_object_is_type(jobj, json_type_array) == 0)
 				goto nofound;
-			if ((jobj = json_object_array_get_idx(jobj, strtoul(key, NULL, 10))) == NULL)
+			if ((jobj = json_object_array_get_idx(jobj, (uint64_t)key)) == NULL)
 				goto nofound;
 		} else {
 			if (json_object_is_type(jobj, json_type_object) == 0)

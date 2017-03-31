@@ -11,6 +11,8 @@ NEMO_BEGIN_EXTERN_C
 
 #define NEMOJSON_OBJECT_MAX			(128)
 
+#define NEMOJSON_ARRAY_MAX			(4096)
+
 struct json_object;
 
 struct nemojson {
