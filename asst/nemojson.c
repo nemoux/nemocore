@@ -153,3 +153,42 @@ void nemojson_update(struct nemojson *json)
 
 	json_tokener_free(jtok);
 }
+
+struct json_object *nemojson_search_object(struct nemojson *json, int index, int depth, ...)
+{
+	struct json_object *jobj;
+	struct json_object *tobj;
+	const char *key;
+	va_list vargs;
+	int i;
+
+	jobj = json->jobjs[index];
+	if (jobj == NULL)
+		return NULL;
+
+	va_start(vargs, depth);
+
+	for (i = 0; i < depth; i++) {
+		key = va_arg(vargs, const char *);
+		if ('0' <= key[0] && key[0] <= '9') {
+			if (json_object_is_type(jobj, json_type_array) == 0)
+				goto nofound;
+			if ((jobj = json_object_array_get_idx(jobj, strtoul(key, NULL, 10))) == NULL)
+				goto nofound;
+		} else {
+			if (json_object_is_type(jobj, json_type_object) == 0)
+				goto nofound;
+			if (json_object_object_get_ex(jobj, key, &jobj) == 0)
+				goto nofound;
+		}
+	}
+
+	va_end(vargs);
+
+	return jobj;
+
+nofound:
+	va_end(vargs);
+
+	return NULL;
+}

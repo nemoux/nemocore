@@ -31,6 +31,8 @@ extern int nemojson_append_format(struct nemojson *json, const char *fmt, ...);
 
 extern void nemojson_update(struct nemojson *json);
 
+extern struct json_object *nemojson_search_object(struct nemojson *json, int index, int depth, ...);
+
 static inline int nemojson_get_object_count(struct nemojson *json)
 {
 	return json->count;
