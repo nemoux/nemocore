@@ -154,25 +154,22 @@ void nemojson_update(struct nemojson *json)
 	json_tokener_free(jtok);
 }
 
-struct json_object *nemojson_search_object(struct nemojson *json, int index, int depth, ...)
+static inline struct json_object *nemojson_search_object_vargs(struct nemojson *json, int index, int depth, va_list vargs)
 {
 	struct json_object *jobj;
 	const char *key;
-	va_list vargs;
 	int i;
 
 	jobj = json->jobjs[index];
 	if (jobj == NULL)
 		return NULL;
 
-	va_start(vargs, depth);
-
 	for (i = 0; i < depth; i++) {
 		key = va_arg(vargs, const char *);
-		if ((uint64_t)key < NEMOJSON_ARRAY_MAX) {
+		if ('0' <= key[0] && key[0] <= '9') {
 			if (json_object_is_type(jobj, json_type_array) == 0)
 				goto nofound;
-			if ((jobj = json_object_array_get_idx(jobj, (uint64_t)key)) == NULL)
+			if ((jobj = json_object_array_get_idx(jobj, strtoul(key, NULL, 10))) == NULL)
 				goto nofound;
 		} else {
 			if (json_object_is_type(jobj, json_type_object) == 0)
@@ -182,12 +179,64 @@ struct json_object *nemojson_search_object(struct nemojson *json, int index, int
 		}
 	}
 
-	va_end(vargs);
-
 	return jobj;
 
 nofound:
+	return NULL;
+}
+
+struct json_object *nemojson_search_object(struct nemojson *json, int index, int depth, ...)
+{
+	struct json_object *jobj;
+	va_list vargs;
+
+	va_start(vargs, depth);
+
+	jobj = nemojson_search_object_vargs(json, index, depth, vargs);
+
 	va_end(vargs);
 
-	return NULL;
+	return jobj;
+}
+
+int nemojson_search_integer(struct nemojson *json, int index, int depth, ...)
+{
+	struct json_object *jobj;
+	va_list vargs;
+
+	va_start(vargs, depth);
+
+	jobj = nemojson_search_object_vargs(json, index, depth, vargs);
+
+	va_end(vargs);
+
+	return json_object_get_int(jobj);
+}
+
+double nemojson_search_double(struct nemojson *json, int index, int depth, ...)
+{
+	struct json_object *jobj;
+	va_list vargs;
+
+	va_start(vargs, depth);
+
+	jobj = nemojson_search_object_vargs(json, index, depth, vargs);
+
+	va_end(vargs);
+
+	return json_object_get_double(jobj);
+}
+
+const char *nemojson_search_string(struct nemojson *json, int index, int depth, ...)
+{
+	struct json_object *jobj;
+	va_list vargs;
+
+	va_start(vargs, depth);
+
+	jobj = nemojson_search_object_vargs(json, index, depth, vargs);
+
+	va_end(vargs);
+
+	return json_object_get_string(jobj);
 }

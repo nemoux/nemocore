@@ -11,8 +11,6 @@ NEMO_BEGIN_EXTERN_C
 
 #define NEMOJSON_OBJECT_MAX			(128)
 
-#define NEMOJSON_ARRAY_MAX			(4096)
-
 struct json_object;
 
 struct nemojson {
@@ -34,6 +32,9 @@ extern int nemojson_append_format(struct nemojson *json, const char *fmt, ...);
 extern void nemojson_update(struct nemojson *json);
 
 extern struct json_object *nemojson_search_object(struct nemojson *json, int index, int depth, ...);
+extern int nemojson_search_integer(struct nemojson *json, int index, int depth, ...);
+extern double nemojson_search_double(struct nemojson *json, int index, int depth, ...);
+extern const char *nemojson_search_string(struct nemojson *json, int index, int depth, ...);
 
 static inline int nemojson_get_object_count(struct nemojson *json)
 {
