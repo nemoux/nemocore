@@ -249,11 +249,11 @@ int os_check_is_regular_file(const char *path)
 	return S_ISREG(st.st_mode);
 }
 
-int os_load_path(const char *path, char **buffer, int *size)
+int os_load_path(const char *path, char **buffer)
 {
 	FILE *fp;
-	char *tbuffer;
-	int tsize;
+	char *contents;
+	int size;
 
 	if (path == NULL)
 		return -1;
@@ -263,26 +263,29 @@ int os_load_path(const char *path, char **buffer, int *size)
 		return -1;
 
 	fseek(fp, 0, SEEK_END);
-	tsize = ftell(fp);
+	size = ftell(fp);
 	rewind(fp);
 
-	tbuffer = malloc(sizeof(char) * (tsize + 1));
-	if (tbuffer == NULL) {
+	if (size <= 0) {
+		fclose(fp);
+		return 0;
+	}
+
+	contents = malloc(sizeof(char) * (size + 1));
+	if (contents == NULL) {
 		fclose(fp);
 		return -1;
 	}
-	memset(tbuffer, 0, tsize + 1);
+	memset(contents, 0, size + 1);
 
-	fread(tbuffer, sizeof(char), tsize, fp);
+	fread(contents, sizeof(char), size, fp);
 
 	fclose(fp);
 
 	if (buffer != NULL)
-		*buffer = tbuffer;
-	if (size != NULL)
-		*size = tsize;
+		*buffer = contents;
 
-	return 0;
+	return size;
 }
 
 int os_save_path(const char *path, char *buffer, int size)

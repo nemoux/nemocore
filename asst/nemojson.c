@@ -56,6 +56,32 @@ struct nemojson *nemojson_create_format(const char *fmt, ...)
 	return json;
 }
 
+struct nemojson *nemojson_create_file(const char *filepath)
+{
+	struct nemojson *json;
+	char *buffer = NULL;
+	int length;
+
+	json = (struct nemojson *)malloc(sizeof(struct nemojson));
+	if (json == NULL)
+		return NULL;
+	memset(json, 0, sizeof(struct nemojson));
+
+	length = os_load_path(filepath, &buffer);
+	if (length <= 0)
+		goto err1;
+
+	json->contents = buffer;
+	json->length = length;
+
+	return json;
+
+err1:
+	free(json);
+
+	return NULL;
+}
+
 void nemojson_destroy(struct nemojson *json)
 {
 	int i;

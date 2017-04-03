@@ -204,9 +204,7 @@ int nemoxml_load_file(struct nemoxml *xml, const char *filepath)
 	XML_SetEndElementHandler(context.parser, nemoxml_handle_sax_end_element);
 	XML_SetCharacterDataHandler(context.parser, nemoxml_handle_sax_characters);
 
-	os_load_path(filepath, &buffer, &length);
-
-	if (buffer != NULL) {
+	if ((length = os_load_path(filepath, &buffer)) >= 0) {
 		XML_Parse(context.parser, buffer, length, 0);
 
 		free(buffer);

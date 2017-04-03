@@ -23,6 +23,7 @@ struct nemojson {
 
 extern struct nemojson *nemojson_create(const char *str, int length);
 extern struct nemojson *nemojson_create_format(const char *fmt, ...);
+extern struct nemojson *nemojson_create_file(const char *filepath);
 extern void nemojson_destroy(struct nemojson *json);
 
 extern int nemojson_append(struct nemojson *json, const char *str, int length);

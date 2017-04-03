@@ -229,7 +229,7 @@ void nemofx_glfilter_set_program(struct glfilter *filter, const char *shaderpath
 		char *shader;
 		int size;
 
-		if (os_load_path(shaderpath, &shader, &size) >= 0) {
+		if ((size = os_load_path(shaderpath, &shader)) > 0) {
 			filter->program = gl_compile_program(GLFILTER_SIMPLE_VERTEX_SHADER, shader, &filter->vshader, &filter->fshader);
 
 			free(shader);
