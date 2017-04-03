@@ -120,6 +120,8 @@ int main(int argc, char *argv[])
 
 	pixman_region32_init(&yoyo->damage);
 
+	nemolist_init(&yoyo->spot_list);
+
 	tool = yoyo->tool = nemotool_create();
 	nemotool_connect_wayland(tool, NULL);
 	nemotool_connect_egl(tool);

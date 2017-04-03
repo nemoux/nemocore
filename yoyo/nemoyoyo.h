@@ -16,6 +16,7 @@ NEMO_BEGIN_EXTERN_C
 #include <nemoegl.h>
 
 #include <nemocook.h>
+#include <nemolist.h>
 
 struct nemoyoyo {
 	struct nemotool *tool;
@@ -27,6 +28,8 @@ struct nemoyoyo {
 	int width, height;
 
 	pixman_region32_t damage;
+
+	struct nemolist spot_list;
 };
 
 static inline void nemoyoyo_damage(struct nemoyoyo *yoyo, pixman_region32_t *damage)
