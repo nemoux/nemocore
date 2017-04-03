@@ -18,9 +18,6 @@ option(WITH_PROFILE "Build with PROFILE" OFF)
 option(WITH_NEMO_DEBUG "Build with NEMODEBUG" ON)
 option(WITH_NEMO_LOG "Build with NEMOLOG" ON)
 
-option(WITH_XWAYLAND "Build with XWAYLAND" ON)
-option(WITH_CEF "Build with CEF" OFF)
-
 include_directories(
 	${CMAKE_CURRENT_BINARY_DIR}
 	)
@@ -66,17 +63,14 @@ add_subdirectory(bus)
 add_subdirectory(fx)
 add_subdirectory(db)
 
-if(WITH_CEF)
-	add_subdirectory(navi)
-endif(WITH_CEF)
-
-if(WITH_XWAYLAND)
-	add_subdirectory(xwayland)
-endif(WITH_XWAYLAND)
+add_subdirectory(xwayland)
 
 add_subdirectory(compz)
 add_subdirectory(shell)
+
 add_subdirectory(sound)
+
 add_subdirectory(envs)
 add_subdirectory(apps)
+
 add_subdirectory(utils)
