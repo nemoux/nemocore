@@ -68,25 +68,27 @@ int nemofs_dir_scan_directories(struct fsdir *dir, const char *path)
 	int i, count;
 
 	count = scandir(path, &entries, NULL, alphasort);
-	count = MIN(count, dir->mfiles - dir->nfiles);
+	if (count > 0) {
+		count = MIN(count, dir->mfiles - dir->nfiles);
 
-	for (i = 0; i < count; i++) {
-		filename = entries[i]->d_name;
+		for (i = 0; i < count; i++) {
+			filename = entries[i]->d_name;
 
-		strcpy(filepath, path);
-		strcat(filepath, "/");
-		strcat(filepath, filename);
+			strcpy(filepath, path);
+			strcat(filepath, "/");
+			strcat(filepath, filename);
 
-		if (os_check_is_directory(filepath) != 0) {
-			dir->filenames[dir->nfiles + nfiles] = strdup(filename);
-			dir->filepaths[dir->nfiles + nfiles] = strdup(filepath);
-			nfiles++;
+			if (os_check_is_directory(filepath) != 0) {
+				dir->filenames[dir->nfiles + nfiles] = strdup(filename);
+				dir->filepaths[dir->nfiles + nfiles] = strdup(filepath);
+				nfiles++;
+			}
 		}
+
+		dir->nfiles += nfiles;
+
+		free(entries);
 	}
-
-	dir->nfiles += nfiles;
-
-	free(entries);
 
 	return nfiles;
 }
@@ -100,25 +102,27 @@ int nemofs_dir_scan_files(struct fsdir *dir, const char *path)
 	int i, count;
 
 	count = scandir(path, &entries, NULL, alphasort);
-	count = MIN(count, dir->mfiles - dir->nfiles);
+	if (count > 0) {
+		count = MIN(count, dir->mfiles - dir->nfiles);
 
-	for (i = 0; i < count; i++) {
-		filename = entries[i]->d_name;
+		for (i = 0; i < count; i++) {
+			filename = entries[i]->d_name;
 
-		strcpy(filepath, path);
-		strcat(filepath, "/");
-		strcat(filepath, filename);
+			strcpy(filepath, path);
+			strcat(filepath, "/");
+			strcat(filepath, filename);
 
-		if (os_check_is_regular_file(filepath) != 0) {
-			dir->filenames[dir->nfiles + nfiles] = strdup(filename);
-			dir->filepaths[dir->nfiles + nfiles] = strdup(filepath);
-			nfiles++;
+			if (os_check_is_regular_file(filepath) != 0) {
+				dir->filenames[dir->nfiles + nfiles] = strdup(filename);
+				dir->filepaths[dir->nfiles + nfiles] = strdup(filepath);
+				nfiles++;
+			}
 		}
+
+		dir->nfiles += nfiles;
+
+		free(entries);
 	}
-
-	dir->nfiles += nfiles;
-
-	free(entries);
 
 	return nfiles;
 }
@@ -132,25 +136,27 @@ int nemofs_dir_scan_extension(struct fsdir *dir, const char *path, const char *e
 	int i, count;
 
 	count = scandir(path, &entries, NULL, alphasort);
-	count = MIN(count, dir->mfiles - dir->nfiles);
+	if (count > 0) {
+		count = MIN(count, dir->mfiles - dir->nfiles);
 
-	for (i = 0; i < count; i++) {
-		filename = entries[i]->d_name;
+		for (i = 0; i < count; i++) {
+			filename = entries[i]->d_name;
 
-		strcpy(filepath, path);
-		strcat(filepath, "/");
-		strcat(filepath, filename);
+			strcpy(filepath, path);
+			strcat(filepath, "/");
+			strcat(filepath, filename);
 
-		if (os_check_is_regular_file(filepath) != 0 && os_has_file_extension(filename, extension) != 0) {
-			dir->filenames[dir->nfiles + nfiles] = strdup(filename);
-			dir->filepaths[dir->nfiles + nfiles] = strdup(filepath);
-			nfiles++;
+			if (os_check_is_regular_file(filepath) != 0 && os_has_file_extension(filename, extension) != 0) {
+				dir->filenames[dir->nfiles + nfiles] = strdup(filename);
+				dir->filepaths[dir->nfiles + nfiles] = strdup(filepath);
+				nfiles++;
+			}
 		}
+
+		dir->nfiles += nfiles;
+
+		free(entries);
 	}
-
-	dir->nfiles += nfiles;
-
-	free(entries);
 
 	return nfiles;
 }
@@ -171,25 +177,27 @@ int nemofs_dir_scan_extensions(struct fsdir *dir, const char *path, int nextensi
 	va_end(vargs);
 
 	count = scandir(path, &entries, NULL, alphasort);
-	count = MIN(count, dir->mfiles - dir->nfiles);
+	if (count > 0) {
+		count = MIN(count, dir->mfiles - dir->nfiles);
 
-	for (i = 0; i < count; i++) {
-		filename = entries[i]->d_name;
+		for (i = 0; i < count; i++) {
+			filename = entries[i]->d_name;
 
-		strcpy(filepath, path);
-		strcat(filepath, "/");
-		strcat(filepath, filename);
+			strcpy(filepath, path);
+			strcat(filepath, "/");
+			strcat(filepath, filename);
 
-		if (os_check_is_regular_file(filepath) != 0 && os_has_file_extensions(filename, nextensions, extensions) != 0) {
-			dir->filenames[dir->nfiles + nfiles] = strdup(filename);
-			dir->filepaths[dir->nfiles + nfiles] = strdup(filepath);
-			nfiles++;
+			if (os_check_is_regular_file(filepath) != 0 && os_has_file_extensions(filename, nextensions, extensions) != 0) {
+				dir->filenames[dir->nfiles + nfiles] = strdup(filename);
+				dir->filepaths[dir->nfiles + nfiles] = strdup(filepath);
+				nfiles++;
+			}
 		}
+
+		dir->nfiles += nfiles;
+
+		free(entries);
 	}
-
-	dir->nfiles += nfiles;
-
-	free(entries);
 
 	return nfiles;
 }
@@ -207,25 +215,27 @@ int nemofs_dir_scan_regex(struct fsdir *dir, const char *path, const char *expr)
 		return 0;
 
 	count = scandir(path, &entries, NULL, alphasort);
-	count = MIN(count, dir->mfiles - dir->nfiles);
+	if (count > 0) {
+		count = MIN(count, dir->mfiles - dir->nfiles);
 
-	for (i = 0; i < count; i++) {
-		filename = entries[i]->d_name;
+		for (i = 0; i < count; i++) {
+			filename = entries[i]->d_name;
 
-		strcpy(filepath, path);
-		strcat(filepath, "/");
-		strcat(filepath, filename);
+			strcpy(filepath, path);
+			strcat(filepath, "/");
+			strcat(filepath, filename);
 
-		if (os_check_is_regular_file(filepath) != 0 && regexec(&regex, filename, 0, NULL, 0) == 0) {
-			dir->filenames[dir->nfiles + nfiles] = strdup(filename);
-			dir->filepaths[dir->nfiles + nfiles] = strdup(filepath);
-			nfiles++;
+			if (os_check_is_regular_file(filepath) != 0 && regexec(&regex, filename, 0, NULL, 0) == 0) {
+				dir->filenames[dir->nfiles + nfiles] = strdup(filename);
+				dir->filepaths[dir->nfiles + nfiles] = strdup(filepath);
+				nfiles++;
+			}
 		}
+
+		dir->nfiles += nfiles;
+
+		free(entries);
 	}
-
-	dir->nfiles += nfiles;
-
-	free(entries);
 
 	regfree(&regex);
 
