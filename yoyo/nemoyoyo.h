@@ -17,6 +17,7 @@ NEMO_BEGIN_EXTERN_C
 
 #include <nemocook.h>
 #include <nemoaction.h>
+#include <nemotransition.h>
 #include <nemolist.h>
 
 struct nemoyoyo {
@@ -33,6 +34,8 @@ struct nemoyoyo {
 	pixman_region32_t damage;
 
 	struct nemolist one_list;
+
+	struct transitiongroup *transitions;
 
 	struct {
 		struct cooktex **textures;

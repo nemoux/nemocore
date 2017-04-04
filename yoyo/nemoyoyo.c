@@ -49,6 +49,29 @@ static int nemoyoyo_load_json(struct nemoyoyo *yoyo, const char *jsonpath)
 	return 0;
 }
 
+static int nemoyoyo_update_frame(struct nemoyoyo *yoyo)
+{
+	pixman_region32_t damage;
+
+	pixman_region32_init(&damage);
+
+	nemocook_egl_fetch_damage(yoyo->egl, &damage);
+	nemocook_egl_rotate_damage(yoyo->egl, &yoyo->damage);
+
+	pixman_region32_union(&damage, &damage, &yoyo->damage);
+
+	nemocook_egl_make_current(yoyo->egl);
+	nemocook_egl_update_state(yoyo->egl);
+
+	nemocook_egl_use_shader(yoyo->egl, yoyo->shader);
+
+	nemocook_egl_swap_buffers_with_damage(yoyo->egl, &yoyo->damage);
+
+	pixman_region32_fini(&damage);
+
+	return 0;
+}
+
 static int nemoyoyo_dispatch_tap_event(struct nemoaction *action, struct actiontap *tap, uint32_t event)
 {
 	struct nemoyoyo *yoyo = (struct nemoyoyo *)nemoaction_get_userdata(action);
@@ -89,23 +112,10 @@ static void nemoyoyo_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t w
 static void nemoyoyo_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t secs, uint32_t nsecs)
 {
 	struct nemoyoyo *yoyo = (struct nemoyoyo *)nemocanvas_get_userdata(canvas);
-	pixman_region32_t damage;
 
-	pixman_region32_init(&damage);
+	nemotransition_group_dispatch(yoyo->transitions, time_current_msecs());
 
-	nemocook_egl_fetch_damage(yoyo->egl, &damage);
-	nemocook_egl_rotate_damage(yoyo->egl, &yoyo->damage);
-
-	pixman_region32_union(&damage, &damage, &yoyo->damage);
-
-	nemocook_egl_make_current(yoyo->egl);
-	nemocook_egl_update_state(yoyo->egl);
-
-	nemocook_egl_use_shader(yoyo->egl, yoyo->shader);
-
-	nemocook_egl_swap_buffers_with_damage(yoyo->egl, &yoyo->damage);
-
-	pixman_region32_fini(&damage);
+	nemoyoyo_update_frame(yoyo);
 }
 
 static int nemoyoyo_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t type, struct nemoevent *event)
@@ -232,6 +242,8 @@ int main(int argc, char *argv[])
 
 	nemolist_init(&yoyo->one_list);
 
+	yoyo->transitions = nemotransition_group_create();
+
 	tool = yoyo->tool = nemotool_create();
 	nemotool_connect_wayland(tool, NULL);
 	nemotool_connect_egl(tool);
@@ -288,6 +300,8 @@ int main(int argc, char *argv[])
 	nemocanvas_egl_destroy(canvas);
 
 	nemotool_destroy(tool);
+
+	nemotransition_group_destroy(yoyo->transitions);
 
 	pixman_region32_fini(&yoyo->damage);
 
