@@ -27,6 +27,9 @@ struct yoyospot {
 	struct nemolist link;
 };
 
+extern struct yoyospot *nemoyoyo_spot_create(void);
+extern void nemoyoyo_spot_destroy(struct yoyospot *spot);
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

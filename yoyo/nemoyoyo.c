@@ -8,6 +8,7 @@
 #include <getopt.h>
 
 #include <nemoyoyo.h>
+#include <yoyospot.h>
 #include <nemojson.h>
 #include <nemofs.h>
 #include <nemomisc.h>
@@ -48,9 +49,28 @@ static int nemoyoyo_load_json(struct nemoyoyo *yoyo, const char *jsonpath)
 	return 0;
 }
 
+static int nemoyoyo_dispatch_spot_event(struct nemoaction *action, struct actiontap *tap, uint32_t event)
+{
+	struct nemoyoyo *yoyo = (struct nemoyoyo *)nemoaction_get_userdata(action);
+	struct yoyospot *spot = (struct yoyospot *)nemoaction_tap_get_userdata(tap);
+
+	if (event & NEMOACTION_TAP_DOWN_EVENT) {
+	} else if (event & NEMOACTION_TAP_MOTION_EVENT) {
+	} else if (event & NEMOACTION_TAP_UP_EVENT) {
+	}
+
+	return 0;
+}
+
 static int nemoyoyo_dispatch_tap_event(struct nemoaction *action, struct actiontap *tap, uint32_t event)
 {
 	struct nemoyoyo *yoyo = (struct nemoyoyo *)nemoaction_get_userdata(action);
+
+	if (event & NEMOACTION_TAP_DOWN_EVENT) {
+		nemoaction_tap_set_callback(tap, nemoyoyo_dispatch_spot_event);
+		nemoaction_tap_set_userdata(tap, nemoyoyo_spot_create());
+		nemoaction_tap_dispatch_event(action, tap, NEMOACTION_TAP_DOWN_EVENT);
+	}
 
 	return 0;
 }
