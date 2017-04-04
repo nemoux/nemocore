@@ -43,6 +43,15 @@ static int nemoyoyo_load_json(struct nemoyoyo *yoyo, const char *jsonpath)
 		}
 	}
 
+	nemojson_destroy(json);
+
+	return 0;
+}
+
+static int nemoyoyo_dispatch_tap_event(struct nemoaction *action, struct actiontap *tap, uint32_t event)
+{
+	struct nemoyoyo *yoyo = (struct nemoyoyo *)nemoaction_get_userdata(action);
+
 	return 0;
 }
 
@@ -85,6 +94,13 @@ static int nemoyoyo_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t ty
 	return 0;
 }
 
+static int nemoyoyo_dispatch_canvas_destroy(struct nemocanvas *canvas)
+{
+	nemotool_exit(nemocanvas_get_tool(canvas));
+
+	return 1;
+}
+
 int main(int argc, char *argv[])
 {
 	static const char *vertexshader_texture =
@@ -121,6 +137,7 @@ int main(int argc, char *argv[])
 	struct nemocanvas *canvas;
 	struct cookegl *egl;
 	struct cookshader *shader;
+	struct nemoaction *action;
 	char *configpath = NULL;
 	char *fullscreenid = NULL;
 	int width = 1920;
@@ -176,6 +193,7 @@ int main(int argc, char *argv[])
 	nemocanvas_set_dispatch_resize(canvas, nemoyoyo_dispatch_canvas_resize);
 	nemocanvas_set_dispatch_frame(canvas, nemoyoyo_dispatch_canvas_frame);
 	nemocanvas_set_dispatch_event(canvas, nemoyoyo_dispatch_canvas_event);
+	nemocanvas_set_dispatch_destroy(canvas, nemoyoyo_dispatch_canvas_destroy);
 	nemocanvas_set_userdata(canvas, yoyo);
 
 	if (fullscreenid != NULL)
@@ -198,10 +216,19 @@ int main(int argc, char *argv[])
 	nemocook_shader_set_uniform(shader, 0, "transform");
 	nemocook_shader_set_uniform(shader, 1, "alpha");
 
+	action = yoyo->action = nemoaction_create();
+	nemoaction_set_tap_callback(action, nemoyoyo_dispatch_tap_event);
+	nemoaction_set_userdata(action, yoyo);
+
 	nemoyoyo_load_json(yoyo, configpath);
+
+	nemocanvas_dispatch_frame(canvas);
 
 	nemotool_run(tool);
 
+	nemoaction_destroy(action);
+
+	nemocook_shader_destroy(shader);
 	nemocook_egl_destroy(egl);
 
 	nemocanvas_egl_destroy(canvas);

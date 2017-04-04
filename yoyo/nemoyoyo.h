@@ -16,6 +16,7 @@ NEMO_BEGIN_EXTERN_C
 #include <nemoegl.h>
 
 #include <nemocook.h>
+#include <nemoaction.h>
 #include <nemolist.h>
 
 struct nemoyoyo {
@@ -24,6 +25,7 @@ struct nemoyoyo {
 	struct nemocook *cook;
 	struct cookegl *egl;
 	struct cookshader *shader;
+	struct nemoaction *action;
 
 	int width, height;
 
