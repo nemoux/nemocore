@@ -21,6 +21,7 @@ typedef enum {
 	NEMOCOOK_TRANSFORM_NORMAL_STATE = 0,
 	NEMOCOOK_TRANSFORM_SIMPLE_STATE = 1,
 	NEMOCOOK_TRANSFORM_NOPIN_STATE = 2,
+	NEMOCOOK_TRANSFORM_COMPLEX_STATE = 3,
 	NEMOCOOK_TRANSFORM_LAST_STATE
 } NemoCookTransformState;
 
@@ -32,6 +33,7 @@ struct cooktrans {
 	float tx, ty, tz;
 	float sx, sy, sz;
 	float rx, ry, rz;
+	float px, py, pz;
 
 	struct {
 		float px, py, pz;
@@ -111,6 +113,13 @@ static inline void nemocook_transform_unpin_rotate(struct cooktrans *trans, floa
 	trans->rotate.ux = ux;
 	trans->rotate.uy = uy;
 	trans->rotate.uz = uz;
+}
+
+static inline void nemocook_transform_set_pivot(struct cooktrans *trans, float px, float py, float pz)
+{
+	trans->px = px;
+	trans->py = py;
+	trans->pz = pz;
 }
 
 static inline void nemocook_transform_set_parent(struct cooktrans *trans, struct cooktrans *parent)

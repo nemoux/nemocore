@@ -8,6 +8,30 @@
 #include <cooktrans.h>
 #include <nemomisc.h>
 
+static int nemocook_transform_update_2d_normal(struct cooktrans *trans)
+{
+	nemomatrix_init_identity(&trans->matrix);
+
+	if (trans->sx != 1.0f || trans->sy != 1.0f) {
+		nemomatrix_translate(&trans->matrix, -trans->px, -trans->py);
+		nemomatrix_scale(&trans->matrix, trans->sx, trans->sy);
+		nemomatrix_translate(&trans->matrix, trans->px, trans->py);
+	}
+
+	if (trans->rz != 0.0f) {
+		nemomatrix_translate(&trans->matrix, -trans->px, -trans->py);
+		nemomatrix_rotate(&trans->matrix, cos(trans->rz), sin(trans->rz));
+		nemomatrix_translate(&trans->matrix, trans->px, trans->py);
+	}
+
+	nemomatrix_translate(&trans->matrix, trans->tx, trans->ty);
+
+	if (nemomatrix_invert(&trans->inverse, &trans->matrix) < 0)
+		return -1;
+
+	return 0;
+}
+
 static int nemocook_transform_update_2d_simple(struct cooktrans *trans)
 {
 	nemomatrix_init_translate(&trans->matrix, trans->tx, trans->ty);
@@ -36,7 +60,7 @@ static int nemocook_transform_update_2d_nopin(struct cooktrans *trans)
 	return 0;
 }
 
-static int nemocook_transform_update_2d_all(struct cooktrans *trans)
+static int nemocook_transform_update_2d_complex(struct cooktrans *trans)
 {
 	nemomatrix_init_identity(&trans->matrix);
 
@@ -53,6 +77,32 @@ static int nemocook_transform_update_2d_all(struct cooktrans *trans)
 	}
 
 	nemomatrix_translate(&trans->matrix, trans->tx, trans->ty);
+
+	if (nemomatrix_invert(&trans->inverse, &trans->matrix) < 0)
+		return -1;
+
+	return 0;
+}
+
+static int nemocook_transform_update_3d_normal(struct cooktrans *trans)
+{
+	nemomatrix_init_identity(&trans->matrix);
+
+	if (trans->sx != 1.0f || trans->sy != 1.0f || trans->sz != 1.0f) {
+		nemomatrix_translate_xyz(&trans->matrix, -trans->px, -trans->py, -trans->pz);
+		nemomatrix_scale_xyz(&trans->matrix, trans->sx, trans->sy, trans->sz);
+		nemomatrix_translate_xyz(&trans->matrix, trans->px, trans->py, trans->pz);
+	}
+
+	if (trans->rx != 0.0f || trans->ry != 0.0f || trans->rz != 0.0f) {
+		nemomatrix_translate_xyz(&trans->matrix, -trans->px, -trans->py, -trans->pz);
+		nemomatrix_rotate_x(&trans->matrix, cos(trans->rx), sin(trans->rx));
+		nemomatrix_rotate_y(&trans->matrix, cos(trans->ry), sin(trans->ry));
+		nemomatrix_rotate_z(&trans->matrix, cos(trans->rz), sin(trans->rz));
+		nemomatrix_translate_xyz(&trans->matrix, trans->px, trans->py, trans->pz);
+	}
+
+	nemomatrix_translate_xyz(&trans->matrix, trans->tx, trans->ty, trans->tz);
 
 	if (nemomatrix_invert(&trans->inverse, &trans->matrix) < 0)
 		return -1;
@@ -90,7 +140,7 @@ static int nemocook_transform_update_3d_nopin(struct cooktrans *trans)
 	return 0;
 }
 
-static int nemocook_transform_update_3d_all(struct cooktrans *trans)
+static int nemocook_transform_update_3d_complex(struct cooktrans *trans)
 {
 	nemomatrix_init_identity(&trans->matrix);
 
@@ -134,6 +184,9 @@ struct cooktrans *nemocook_transform_create(void)
 	trans->sx = 1.0f;
 	trans->sy = 1.0f;
 	trans->sz = 1.0f;
+	trans->px = 0.0f;
+	trans->py = 0.0f;
+	trans->pz = 0.0f;
 	trans->scale.px = 0.0f;
 	trans->scale.py = 0.0f;
 	trans->scale.pz = 0.0f;
@@ -147,7 +200,7 @@ struct cooktrans *nemocook_transform_create(void)
 	trans->rotate.uy = 0.0f;
 	trans->rotate.uz = 0.0f;
 
-	trans->update = nemocook_transform_update_2d_all;
+	trans->update = nemocook_transform_update_2d_normal;
 	trans->mode = NEMOCOOK_TRANSFORM_2D_MODE;
 	trans->state = NEMOCOOK_TRANSFORM_NORMAL_STATE;
 
@@ -169,16 +222,20 @@ static inline void nemocook_transform_update_callbacks(struct cooktrans *trans)
 			trans->update = nemocook_transform_update_2d_simple;
 		} else if (trans->state == NEMOCOOK_TRANSFORM_NOPIN_STATE) {
 			trans->update = nemocook_transform_update_2d_nopin;
+		} else if (trans->state == NEMOCOOK_TRANSFORM_COMPLEX_STATE) {
+			trans->update = nemocook_transform_update_2d_complex;
 		} else {
-			trans->update = nemocook_transform_update_2d_all;
+			trans->update = nemocook_transform_update_2d_normal;
 		}
 	} else {
 		if (trans->state == NEMOCOOK_TRANSFORM_SIMPLE_STATE) {
 			trans->update = nemocook_transform_update_3d_simple;
 		} else if (trans->state == NEMOCOOK_TRANSFORM_NOPIN_STATE) {
 			trans->update = nemocook_transform_update_3d_nopin;
+		} else if (trans->state == NEMOCOOK_TRANSFORM_COMPLEX_STATE) {
+			trans->update = nemocook_transform_update_3d_complex;
 		} else {
-			trans->update = nemocook_transform_update_3d_all;
+			trans->update = nemocook_transform_update_3d_normal;
 		}
 	}
 }
