@@ -101,7 +101,7 @@ struct motzone *nemomotz_burst_create(void)
 
 	one = &burst->one;
 
-	nemomotz_one_prepare(one, sizeof(struct motzburst));
+	nemomotz_one_prepare(one);
 
 	one->draw = nemomotz_burst_draw;
 	one->down = nemomotz_burst_down;

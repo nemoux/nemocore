@@ -83,6 +83,8 @@ NEMOMOTZ_DECLARE_GET_ATTRIBUTE(swirl, float, frequence, frequence);
 NEMOMOTZ_DECLARE_SET_ATTRIBUTE(swirl, float, scale, scale, NEMOMOTZ_SWIRL_SHAPE_DIRTY);
 NEMOMOTZ_DECLARE_GET_ATTRIBUTE(swirl, float, scale, scale);
 
+NEMOMOTZ_DECLARE_CHECK_TRANSITION(swirl);
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

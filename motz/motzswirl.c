@@ -21,7 +21,7 @@ static void nemomotz_swirl_draw(struct nemomotz *motz, struct motzone *one)
 	nemotozz_restore(tozz);
 }
 
-static void nemomotz_swirl_dispatch_transition_update(struct motztransition *trans, void *data, float t)
+static void nemomotz_swirl_dispatch_transition_update(struct nemotransition *trans, void *data, float t)
 {
 	struct motzone *one = (struct motzone *)data;
 	struct motzswirl *swirl = NEMOMOTZ_SWIRL(one);
@@ -31,7 +31,7 @@ static void nemomotz_swirl_dispatch_transition_update(struct motztransition *tra
 	nemomotz_swirl_set_x(one, sin(swirl->frequence * t) * swirl->size);
 }
 
-static void nemomotz_swirl_dispatch_transition_done(struct motztransition *trans, void *data)
+static void nemomotz_swirl_dispatch_transition_done(struct nemotransition *trans, void *data)
 {
 	struct motzone *one = (struct motzone *)data;
 
@@ -41,13 +41,14 @@ static void nemomotz_swirl_dispatch_transition_done(struct motztransition *trans
 static void nemomotz_swirl_down(struct nemomotz *motz, struct motztap *tap, struct motzone *one, float x, float y)
 {
 	struct motzswirl *swirl = NEMOMOTZ_SWIRL(one);
-	struct motztransition *trans;
+	struct nemotransition *trans;
 
-	trans = nemomotz_transition_create(8, NEMOEASE_LINEAR_TYPE, swirl->duration, swirl->delay);
-	nemomotz_transition_set_dispatch_update(trans, nemomotz_swirl_dispatch_transition_update);
-	nemomotz_transition_set_dispatch_done(trans, nemomotz_swirl_dispatch_transition_done);
-	nemomotz_transition_set_userdata(trans, one);
-	nemomotz_transition_check_one(trans, one);
+	trans = nemotransition_create(8, NEMOEASE_LINEAR_TYPE, swirl->duration, swirl->delay);
+	nemotransition_set_dispatch_update(trans, nemomotz_swirl_dispatch_transition_update);
+	nemotransition_set_dispatch_done(trans, nemomotz_swirl_dispatch_transition_done);
+	nemotransition_set_userdata(trans, one);
+
+	nemomotz_transition_swirl_check(trans, one);
 	nemomotz_attach_transition(motz, trans);
 }
 
@@ -107,7 +108,7 @@ struct motzone *nemomotz_swirl_create(void)
 
 	one = &swirl->one;
 
-	nemomotz_one_prepare(one, sizeof(struct motzswirl));
+	nemomotz_one_prepare(one);
 
 	one->draw = nemomotz_swirl_draw;
 	one->down = nemomotz_swirl_down;

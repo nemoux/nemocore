@@ -14,7 +14,6 @@ include_directories(
 
 add_library(nemomotz SHARED
 	nemomotz.c
-	motztransition.c
 	motzgroup.c
 	motzclip.c
 	motzobject.c
@@ -34,7 +33,6 @@ INSTALL(TARGETS nemomotz DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
 
 set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/motz/nemomotz.h
-	${CMAKE_SOURCE_DIR}/motz/motztransition.h
 	${CMAKE_SOURCE_DIR}/motz/motzgroup.h
 	${CMAKE_SOURCE_DIR}/motz/motzclip.h
 	${CMAKE_SOURCE_DIR}/motz/motzobject.h

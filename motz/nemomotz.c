@@ -23,7 +23,8 @@ struct nemomotz *nemomotz_create(void)
 
 	nemolist_init(&motz->one_list);
 	nemolist_init(&motz->tap_list);
-	nemolist_init(&motz->transition_list);
+
+	motz->transitions = nemotransition_group_create();
 
 	motz->down = nemomotz_down_null;
 	motz->motion = nemomotz_motion_null;
@@ -41,7 +42,8 @@ void nemomotz_destroy(struct nemomotz *motz)
 {
 	nemolist_remove(&motz->one_list);
 	nemolist_remove(&motz->tap_list);
-	nemolist_remove(&motz->transition_list);
+
+	nemotransition_group_destroy(motz->transitions);
 
 	nemotozz_destroy(motz->tozz);
 
@@ -76,15 +78,8 @@ void nemomotz_update(struct nemomotz *motz, uint32_t msecs)
 {
 	struct motzone *one, *none;
 
-	if (nemolist_empty(&motz->transition_list) == 0) {
-		struct motztransition *trans, *ntrans;
-
-		nemolist_for_each_safe(trans, ntrans, &motz->transition_list, link) {
-			if (nemomotz_transition_dispatch(trans, msecs) != 0) {
-				if (nemomotz_transition_check_repeat(trans) > 0)
-					nemomotz_transition_destroy(trans);
-			}
-		}
+	if (nemotransition_group_has_transition(motz->transitions) != 0) {
+		nemotransition_group_dispatch(motz->transitions, msecs);
 
 		nemomotz_set_flags(motz, NEMOMOTZ_REDRAW_FLAG);
 	}
@@ -293,12 +288,10 @@ struct motzone *nemomotz_one_create(void)
 	one->frame = nemomotz_one_frame_null;
 	one->destroy = nemomotz_one_destroy_null;
 
-	one->size = sizeof(struct motzone);
-
 	return one;
 }
 
-int nemomotz_one_prepare(struct motzone *one, int size)
+int nemomotz_one_prepare(struct motzone *one)
 {
 	nemolist_init(&one->link);
 	nemolist_init(&one->one_list);
@@ -313,8 +306,6 @@ int nemomotz_one_prepare(struct motzone *one, int size)
 	one->update = nemomotz_one_update_null;
 	one->frame = nemomotz_one_frame_null;
 	one->destroy = nemomotz_one_destroy_null;
-
-	one->size = size;
 
 	return 0;
 }
@@ -410,22 +401,17 @@ struct motztap *nemomotz_find_tap(struct nemomotz *motz, uint64_t id)
 	return NULL;
 }
 
-void nemomotz_attach_transition(struct nemomotz *motz, struct motztransition *trans)
+void nemomotz_attach_transition(struct nemomotz *motz, struct nemotransition *trans)
 {
-	nemolist_insert_tail(&motz->transition_list, &trans->link);
+	nemotransition_group_attach_transition(motz->transitions, trans);
 }
 
-void nemomotz_detach_transition(struct nemomotz *motz, struct motztransition *trans)
+void nemomotz_detach_transition(struct nemomotz *motz, struct nemotransition *trans)
 {
-	nemolist_remove(&trans->link);
-	nemolist_init(&trans->link);
+	nemotransition_group_detach_transition(motz->transitions, trans);
 }
 
 void nemomotz_revoke_transition(struct nemomotz *motz, void *var, int size)
 {
-	struct motztransition *trans;
-
-	nemolist_for_each(trans, &motz->transition_list, link) {
-		nemomotz_transition_put_attr(trans, var, size);
-	}
+	nemotransition_group_revoke_one(motz->transitions, var, size);
 }

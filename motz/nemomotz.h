@@ -11,9 +11,8 @@ NEMO_BEGIN_EXTERN_C
 
 #include <nemolist.h>
 #include <nemolistener.h>
+#include <nemotransition.h>
 #include <nemotozz.h>
-
-#include <motztransition.h>
 
 typedef enum {
 	NEMOMOTZ_REDRAW_FLAG = (1 << 0)
@@ -44,7 +43,8 @@ typedef void (*nemomotz_one_destroy_t)(struct motzone *one);
 struct nemomotz {
 	struct nemolist one_list;
 	struct nemolist tap_list;
-	struct nemolist transition_list;
+
+	struct transitiongroup *transitions;
 
 	struct nemotozz *tozz;
 
@@ -72,8 +72,6 @@ struct motzone {
 	nemomotz_one_update_t update;
 	nemomotz_one_frame_t frame;
 	nemomotz_one_destroy_t destroy;
-
-	int size;
 
 	uint32_t flags;
 	uint32_t dirty;
@@ -124,6 +122,21 @@ struct motztap {
 		strcpy(tag->attr, attr);	\
 		nemomotz_one_set_dirty(one, dirty);	\
 	}
+#define NEMOMOTZ_DECLARE_SET_TRANSITION(tag, attr, name, _dirty)	\
+	static inline void nemomotz_transition_##tag##_set_##name(struct nemotransition *trans, int index, struct motzone *one) {	\
+		struct motz##tag *tag = ((struct motz##tag *)container_of(one, struct motz##tag, one));	\
+		nemotransition_set_float_with_dirty(trans, index, &tag->attr, tag->attr, &one->dirty, _dirty);	\
+	}
+#define NEMOMOTZ_DECLARE_SET_TRANSITION_WITH_FLAGS(tag, attr, name, _dirty, _flags)	\
+	static inline void nemomotz_transition_##tag##_set_##name(struct nemotransition *trans, int index, struct motzone *one) {	\
+		struct motz##tag *tag = ((struct motz##tag *)container_of(one, struct motz##tag, one));	\
+		nemomotz_one_set_flags(one, _flags);	\
+		nemotransition_set_float_with_dirty(trans, index, &tag->attr, tag->attr, &one->dirty, _dirty);	\
+	}
+#define NEMOMOTZ_DECLARE_CHECK_TRANSITION(tag)	\
+	static inline void nemomotz_transition_##tag##_check(struct nemotransition *trans, struct motzone *one) {	\
+		nemotransition_check_object(trans, &one->destroy_signal, one, sizeof(struct motz##tag));	\
+	}
 
 extern struct nemomotz *nemomotz_create(void);
 extern void nemomotz_destroy(struct nemomotz *motz);
@@ -151,7 +164,7 @@ extern void nemomotz_motion_null(struct nemomotz *motz, struct motztap *tap, flo
 extern void nemomotz_up_null(struct nemomotz *motz, struct motztap *tap, float x, float y);
 
 extern struct motzone *nemomotz_one_create(void);
-extern int nemomotz_one_prepare(struct motzone *one, int size);
+extern int nemomotz_one_prepare(struct motzone *one);
 extern void nemomotz_one_finish(struct motzone *one);
 
 extern void nemomotz_one_attach_one(struct motzone *one, struct motzone *child);
@@ -177,8 +190,8 @@ extern void nemomotz_detach_tap(struct nemomotz *motz, struct motztap *tap);
 
 extern struct motztap *nemomotz_find_tap(struct nemomotz *motz, uint64_t id);
 
-extern void nemomotz_attach_transition(struct nemomotz *motz, struct motztransition *trans);
-extern void nemomotz_detach_transition(struct nemomotz *motz, struct motztransition *trans);
+extern void nemomotz_attach_transition(struct nemomotz *motz, struct nemotransition *trans);
+extern void nemomotz_detach_transition(struct nemomotz *motz, struct nemotransition *trans);
 
 extern void nemomotz_revoke_transition(struct nemomotz *motz, void *var, int size);
 

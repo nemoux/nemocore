@@ -159,7 +159,7 @@ struct motzone *nemomotz_path_create(void)
 
 	one = &path->one;
 
-	nemomotz_one_prepare(one, sizeof(struct motzpath));
+	nemomotz_one_prepare(one);
 
 	one->draw = nemomotz_path_draw_simple;
 	one->down = nemomotz_path_down;
