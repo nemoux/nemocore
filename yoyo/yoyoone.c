@@ -32,6 +32,9 @@ struct yoyoone *nemoyoyo_one_create(void)
 	one->geometry.sy = 1.0f;
 	one->geometry.rz = 0.0f;
 
+	one->geometry.ax = 0.5f;
+	one->geometry.ay = 0.5f;
+
 	one->size = sizeof(struct yoyoone);
 
 	nemolist_init(&one->link);
@@ -67,8 +70,8 @@ void nemoyoyo_one_set_texture(struct yoyoone *one, struct cooktex *tex)
 static inline void nemoyoyo_one_update_transform(struct yoyoone *one)
 {
 	nemocook_transform_set_translate(one->trans,
-			one->geometry.tx,
-			one->geometry.ty,
+			one->geometry.tx - one->geometry.w * one->geometry.ax,
+			one->geometry.ty - one->geometry.h * one->geometry.ay,
 			0.0f);
 	nemocook_transform_set_scale(one->trans,
 			one->geometry.w * one->geometry.sx,
@@ -84,8 +87,10 @@ static inline void nemoyoyo_one_update_bounds(struct yoyoone *one)
 {
 	if (nemoyoyo_one_has_flags(one, NEMOYOYO_ONE_TRANSFORM_FLAG) == 0) {
 		pixman_region32_init_rect(&one->bounds,
-				one->geometry.tx, one->geometry.ty,
-				one->geometry.w, one->geometry.h);
+				one->geometry.tx - one->geometry.w * one->geometry.ax,
+				one->geometry.ty - one->geometry.h * one->geometry.ay,
+				one->geometry.w,
+				one->geometry.h);
 	} else {
 		float minx = HUGE_VALF, miny = HUGE_VALF;
 		float maxx = -HUGE_VALF, maxy = -HUGE_VALF;
