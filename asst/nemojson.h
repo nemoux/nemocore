@@ -33,9 +33,9 @@ extern int nemojson_append_format(struct nemojson *json, const char *fmt, ...);
 extern void nemojson_update(struct nemojson *json);
 
 extern struct json_object *nemojson_search_object(struct nemojson *json, int index, int depth, ...);
-extern int nemojson_search_integer(struct nemojson *json, int index, int depth, ...);
-extern double nemojson_search_double(struct nemojson *json, int index, int depth, ...);
-extern const char *nemojson_search_string(struct nemojson *json, int index, int depth, ...);
+extern int nemojson_search_integer(struct nemojson *json, int index, int value, int depth, ...);
+extern double nemojson_search_double(struct nemojson *json, int index, double value, int depth, ...);
+extern const char *nemojson_search_string(struct nemojson *json, int index, const char *value, int depth, ...);
 
 static inline int nemojson_get_object_count(struct nemojson *json)
 {

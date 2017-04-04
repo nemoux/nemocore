@@ -8,7 +8,43 @@
 #include <getopt.h>
 
 #include <nemoyoyo.h>
+#include <nemojson.h>
+#include <nemofs.h>
 #include <nemomisc.h>
+
+static int nemoyoyo_load_json(struct nemoyoyo *yoyo, const char *jsonpath)
+{
+	struct nemojson *json;
+	const char *spoturl;
+
+	json = nemojson_create_file(jsonpath);
+	if (json == NULL)
+		return -1;
+	nemojson_update(json);
+
+	spoturl = nemojson_search_string(json, 0, NULL, 2, "spot", "url");
+	if (spoturl != NULL) {
+		struct cooktex *tex;
+		struct fsdir *contents;
+		int width = nemojson_search_integer(json, 0, 128, 2, "spot", "width");
+		int height = nemojson_search_integer(json, 0, 128, 2, "spot", "height");
+		int i;
+
+		contents = nemofs_dir_create(128);
+		nemofs_dir_scan_extensions(contents, spoturl, 3, "png", "jpg", "jpeg");
+
+		yoyo->spot.textures = (struct cooktex **)malloc(sizeof(struct cooktex *) * nemofs_dir_get_filecount(contents));
+		yoyo->spot.ntextures = nemofs_dir_get_filecount(contents);
+
+		for (i = 0; i < nemofs_dir_get_filecount(contents); i++) {
+			tex = yoyo->spot.textures[i] = nemocook_texture_create();
+			nemocook_texture_assign(tex, NEMOCOOK_TEXTURE_BGRA_FORMAT, width, height);
+			nemocook_texture_load_image(tex, nemofs_dir_get_filepath(contents, i));
+		}
+	}
+
+	return 0;
+}
 
 static void nemoyoyo_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t width, int32_t height)
 {
@@ -76,6 +112,7 @@ int main(int argc, char *argv[])
 		{ "width",						required_argument,		NULL,		'w' },
 		{ "height",						required_argument,		NULL,		'h' },
 		{ "fullscreen",				required_argument,		NULL,		'f' },
+		{ "config",						required_argument,		NULL,		'c' },
 		{ 0 }
 	};
 
@@ -84,6 +121,7 @@ int main(int argc, char *argv[])
 	struct nemocanvas *canvas;
 	struct cookegl *egl;
 	struct cookshader *shader;
+	char *configpath = NULL;
 	char *fullscreenid = NULL;
 	int width = 1920;
 	int height = 1080;
@@ -91,7 +129,7 @@ int main(int argc, char *argv[])
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "w:h:f:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:f:c:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -108,10 +146,17 @@ int main(int argc, char *argv[])
 				fullscreenid = strdup(optarg);
 				break;
 
+			case 'c':
+				configpath = strdup(optarg);
+				break;
+
 			default:
 				break;
 		}
 	}
+
+	if (configpath == NULL)
+		return 0;
 
 	yoyo = (struct nemoyoyo *)malloc(sizeof(struct nemoyoyo));
 	if (yoyo == NULL)
@@ -152,6 +197,8 @@ int main(int argc, char *argv[])
 	nemocook_shader_set_attrib(shader, 1, "texcoord", 2);
 	nemocook_shader_set_uniform(shader, 0, "transform");
 	nemocook_shader_set_uniform(shader, 1, "alpha");
+
+	nemoyoyo_load_json(yoyo, configpath);
 
 	nemotool_run(tool);
 

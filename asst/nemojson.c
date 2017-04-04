@@ -225,7 +225,7 @@ struct json_object *nemojson_search_object(struct nemojson *json, int index, int
 	return jobj;
 }
 
-int nemojson_search_integer(struct nemojson *json, int index, int depth, ...)
+int nemojson_search_integer(struct nemojson *json, int index, int value, int depth, ...)
 {
 	struct json_object *jobj;
 	va_list vargs;
@@ -235,11 +235,14 @@ int nemojson_search_integer(struct nemojson *json, int index, int depth, ...)
 	jobj = nemojson_search_object_vargs(json, index, depth, vargs);
 
 	va_end(vargs);
+
+	if (jobj == NULL)
+		return value;
 
 	return json_object_get_int(jobj);
 }
 
-double nemojson_search_double(struct nemojson *json, int index, int depth, ...)
+double nemojson_search_double(struct nemojson *json, int index, double value, int depth, ...)
 {
 	struct json_object *jobj;
 	va_list vargs;
@@ -249,11 +252,14 @@ double nemojson_search_double(struct nemojson *json, int index, int depth, ...)
 	jobj = nemojson_search_object_vargs(json, index, depth, vargs);
 
 	va_end(vargs);
+
+	if (jobj == NULL)
+		return value;
 
 	return json_object_get_double(jobj);
 }
 
-const char *nemojson_search_string(struct nemojson *json, int index, int depth, ...)
+const char *nemojson_search_string(struct nemojson *json, int index, const char *value, int depth, ...)
 {
 	struct json_object *jobj;
 	va_list vargs;
@@ -263,6 +269,9 @@ const char *nemojson_search_string(struct nemojson *json, int index, int depth, 
 	jobj = nemojson_search_object_vargs(json, index, depth, vargs);
 
 	va_end(vargs);
+
+	if (jobj == NULL)
+		return value;
 
 	return json_object_get_string(jobj);
 }

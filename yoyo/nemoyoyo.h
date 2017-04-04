@@ -30,6 +30,11 @@ struct nemoyoyo {
 	pixman_region32_t damage;
 
 	struct nemolist spot_list;
+
+	struct {
+		struct cooktex **textures;
+		int ntextures;
+	} spot;
 };
 
 static inline void nemoyoyo_damage(struct nemoyoyo *yoyo, pixman_region32_t *damage)
