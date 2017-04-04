@@ -25,6 +25,7 @@ struct nemoyoyo {
 	struct nemocook *cook;
 	struct cookegl *egl;
 	struct cookshader *shader;
+	struct cooktrans *projection;
 	struct nemoaction *action;
 
 	int width, height;

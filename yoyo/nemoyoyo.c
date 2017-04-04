@@ -183,6 +183,7 @@ int main(int argc, char *argv[])
 	struct nemocanvas *canvas;
 	struct cookegl *egl;
 	struct cookshader *shader;
+	struct cooktrans *trans;
 	struct nemoaction *action;
 	char *configpath = NULL;
 	char *fullscreenid = NULL;
@@ -262,6 +263,11 @@ int main(int argc, char *argv[])
 	nemocook_shader_set_uniform(shader, 0, "transform");
 	nemocook_shader_set_uniform(shader, 1, "alpha");
 
+	trans = yoyo->projection = nemocook_transform_create();
+	nemocook_transform_set_translate(trans, -1.0f, 1.0f, 0.0f);
+	nemocook_transform_set_scale(trans, 2.0f / (float)width, -2.0f / (float)height, 1.0f);
+	nemocook_transform_set_state(trans, NEMOCOOK_TRANSFORM_NOPIN_STATE);
+
 	action = yoyo->action = nemoaction_create();
 	nemoaction_set_tap_callback(action, nemoyoyo_dispatch_tap_event);
 	nemoaction_set_userdata(action, yoyo);
@@ -274,6 +280,7 @@ int main(int argc, char *argv[])
 
 	nemoaction_destroy(action);
 
+	nemocook_transform_destroy(trans);
 	nemocook_shader_destroy(shader);
 	nemocook_egl_destroy(egl);
 
