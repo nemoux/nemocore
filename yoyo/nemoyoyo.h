@@ -32,7 +32,7 @@ struct nemoyoyo {
 
 	pixman_region32_t damage;
 
-	struct nemolist spot_list;
+	struct nemolist one_list;
 
 	struct {
 		struct cooktex **textures;

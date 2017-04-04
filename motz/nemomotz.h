@@ -94,15 +94,15 @@ struct motztap {
 };
 
 #define NEMOMOTZ_DECLARE_SET_ATTRIBUTE(tag, type, attr, name, dirty)	\
-	static inline void nemomotz_##tag##_set_##name(struct motzone *one, type attr) {	\
+	static inline void nemomotz_##tag##_set_##name(struct motzone *one, type name) {	\
 		struct motz##tag *tag = ((struct motz##tag *)container_of(one, struct motz##tag, one));	\
-		tag->attr = attr;	\
+		tag->attr = name;	\
 		nemomotz_one_set_dirty(one, dirty);	\
 	}
 #define NEMOMOTZ_DECLARE_SET_ATTRIBUTE_WITH_FLAGS(tag, type, attr, name, dirty, flags)	\
-	static inline void nemomotz_##tag##_set_##name(struct motzone *one, type attr) {	\
+	static inline void nemomotz_##tag##_set_##name(struct motzone *one, type name) {	\
 		struct motz##tag *tag = ((struct motz##tag *)container_of(one, struct motz##tag, one));	\
-		tag->attr = attr;	\
+		tag->attr = name;	\
 		nemomotz_one_set_dirty(one, dirty);	\
 		nemomotz_one_set_flags(one, flags);	\
 	}

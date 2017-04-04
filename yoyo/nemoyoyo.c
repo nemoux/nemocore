@@ -8,7 +8,7 @@
 #include <getopt.h>
 
 #include <nemoyoyo.h>
-#include <yoyospot.h>
+#include <yoyoone.h>
 #include <nemojson.h>
 #include <nemofs.h>
 #include <nemomisc.h>
@@ -49,26 +49,27 @@ static int nemoyoyo_load_json(struct nemoyoyo *yoyo, const char *jsonpath)
 	return 0;
 }
 
-static int nemoyoyo_dispatch_spot_event(struct nemoaction *action, struct actiontap *tap, uint32_t event)
+static int nemoyoyo_dispatch_tap_event(struct nemoaction *action, struct actiontap *tap, uint32_t event)
 {
 	struct nemoyoyo *yoyo = (struct nemoyoyo *)nemoaction_get_userdata(action);
-	struct yoyospot *spot = (struct yoyospot *)nemoaction_tap_get_userdata(tap);
 
 	if (event & NEMOACTION_TAP_DOWN_EVENT) {
 	} else if (event & NEMOACTION_TAP_MOTION_EVENT) {
+		struct yoyoone *one;
+
+		one = nemoyoyo_one_create();
 	} else if (event & NEMOACTION_TAP_UP_EVENT) {
 	}
 
 	return 0;
 }
 
-static int nemoyoyo_dispatch_tap_event(struct nemoaction *action, struct actiontap *tap, uint32_t event)
+static int nemoyoyo_dispatch_top_event(struct nemoaction *action, struct actiontap *tap, uint32_t event)
 {
 	struct nemoyoyo *yoyo = (struct nemoyoyo *)nemoaction_get_userdata(action);
 
 	if (event & NEMOACTION_TAP_DOWN_EVENT) {
-		nemoaction_tap_set_callback(tap, nemoyoyo_dispatch_spot_event);
-		nemoaction_tap_set_userdata(tap, nemoyoyo_spot_create());
+		nemoaction_tap_set_callback(tap, nemoyoyo_dispatch_tap_event);
 		nemoaction_tap_dispatch_event(action, tap, NEMOACTION_TAP_DOWN_EVENT);
 	}
 
@@ -229,7 +230,7 @@ int main(int argc, char *argv[])
 
 	pixman_region32_init(&yoyo->damage);
 
-	nemolist_init(&yoyo->spot_list);
+	nemolist_init(&yoyo->one_list);
 
 	tool = yoyo->tool = nemotool_create();
 	nemotool_connect_wayland(tool, NULL);
@@ -269,7 +270,7 @@ int main(int argc, char *argv[])
 	nemocook_transform_set_state(trans, NEMOCOOK_TRANSFORM_NOPIN_STATE);
 
 	action = yoyo->action = nemoaction_create();
-	nemoaction_set_tap_callback(action, nemoyoyo_dispatch_tap_event);
+	nemoaction_set_tap_callback(action, nemoyoyo_dispatch_top_event);
 	nemoaction_set_userdata(action, yoyo);
 
 	nemoyoyo_load_json(yoyo, configpath);
