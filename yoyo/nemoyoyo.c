@@ -90,6 +90,32 @@ static void nemoyoyo_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 static int nemoyoyo_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t type, struct nemoevent *event)
 {
 	struct nemoyoyo *yoyo = (struct nemoyoyo *)nemocanvas_get_userdata(canvas);
+	struct actiontap *tap;
+
+	if (type & NEMOTOOL_TOUCH_DOWN_EVENT) {
+		tap = nemoaction_tap_create(yoyo->action);
+		nemoaction_tap_set_tx(tap, nemoevent_get_canvas_x(event));
+		nemoaction_tap_set_ty(tap, nemoevent_get_canvas_y(event));
+		nemoaction_tap_set_device(tap, nemoevent_get_device(event));
+		nemoaction_tap_set_serial(tap, nemoevent_get_serial(event));
+		nemoaction_tap_dispatch_event(yoyo->action, tap, NEMOACTION_TAP_DOWN_EVENT);
+	} else if (type & NEMOTOOL_TOUCH_UP_EVENT) {
+		tap = nemoaction_get_tap_by_device(yoyo->action, nemoevent_get_device(event));
+		if (tap != NULL) {
+			nemoaction_tap_set_tx(tap, nemoevent_get_canvas_x(event));
+			nemoaction_tap_set_ty(tap, nemoevent_get_canvas_y(event));
+			nemoaction_tap_detach(tap);
+			nemoaction_tap_dispatch_event(yoyo->action, tap, NEMOACTION_TAP_UP_EVENT);
+			nemoaction_tap_destroy(tap);
+		}
+	} else if (type & NEMOTOOL_TOUCH_MOTION_EVENT) {
+		tap = nemoaction_get_tap_by_device(yoyo->action, nemoevent_get_device(event));
+		if (tap != NULL) {
+			nemoaction_tap_set_tx(tap, nemoevent_get_canvas_x(event));
+			nemoaction_tap_set_ty(tap, nemoevent_get_canvas_y(event));
+			nemoaction_tap_dispatch_event(yoyo->action, tap, NEMOACTION_TAP_MOTION_EVENT);
+		}
+	}
 
 	return 0;
 }
