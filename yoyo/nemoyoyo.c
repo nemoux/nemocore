@@ -63,6 +63,7 @@ static int nemoyoyo_update_one(struct nemoyoyo *yoyo)
 
 static int nemoyoyo_update_frame(struct nemoyoyo *yoyo)
 {
+	struct yoyoone *one;
 	pixman_region32_t damage;
 
 	pixman_region32_init(&damage);
@@ -76,6 +77,42 @@ static int nemoyoyo_update_frame(struct nemoyoyo *yoyo)
 	nemocook_egl_update_state(yoyo->egl);
 
 	nemocook_egl_use_shader(yoyo->egl, yoyo->shader);
+
+	nemolist_for_each(one, &yoyo->one_list, link) {
+		pixman_region32_t region;
+
+		pixman_region32_init(&region);
+		pixman_region32_intersect(&region, &one->bounds, &damage);
+
+		if (pixman_region32_not_empty(&region)) {
+			float vertices[64 * 8];
+			float texcoords[64 * 8];
+			int slices[64];
+			int count;
+
+			nemocook_shader_set_uniform_matrix4fv(yoyo->shader, 0, nemocook_polygon_get_matrix4fv(one->poly));
+			nemocook_shader_set_uniform_1f(yoyo->shader, 1, one->alpha);
+
+			nemocook_polygon_update_state(one->poly);
+
+			nemocook_texture_update_state(one->tex);
+			nemocook_texture_bind(one->tex);
+
+			count = nemoyoyo_one_clip_slice(one, &region, vertices, texcoords, slices);
+
+			nemocook_shader_set_attrib_pointer(yoyo->shader, 0, vertices);
+			nemocook_shader_set_attrib_pointer(yoyo->shader, 1, texcoords);
+
+			nemocook_draw_arrays(GL_TRIANGLE_FAN, count, slices);
+
+			nemocook_shader_put_attrib_pointer(yoyo->shader, 0);
+			nemocook_shader_put_attrib_pointer(yoyo->shader, 1);
+
+			nemocook_texture_unbind(one->tex);
+		}
+
+		pixman_region32_fini(&region);
+	}
 
 	nemocook_egl_swap_buffers_with_damage(yoyo->egl, &yoyo->damage);
 

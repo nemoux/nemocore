@@ -8,6 +8,7 @@
 #include <yoyoone.h>
 #include <nemoyoyo.h>
 #include <nemomisc.h>
+#include <cliphelper.h>
 
 struct yoyoone *nemoyoyo_one_create(void)
 {
@@ -22,6 +23,8 @@ struct yoyoone *nemoyoyo_one_create(void)
 
 	one->trans = nemocook_transform_create();
 	nemocook_polygon_set_transform(one->poly, one->trans);
+
+	one->alpha = 1.0f;
 
 	one->geometry.tx = 0.0f;
 	one->geometry.ty = 0.0f;
@@ -121,4 +124,75 @@ void nemoyoyo_one_update(struct nemoyoyo *yoyo, struct yoyoone *one)
 	}
 
 	nemoyoyo_one_put_dirty_all(one);
+}
+
+static int nemoyoyo_one_clip_box(struct yoyoone *one, pixman_box32_t *box, float *ex, float *ey)
+{
+	struct clip clip;
+	struct polygon8 slice = {
+		{ 0.0f, 1.0f, 1.0f, 0.0f },
+		{ 0.0f, 0.0f, 1.0f, 1.0f },
+		4
+	};
+	float min_x, max_x, min_y, max_y;
+	int i;
+
+	clip_set_region(&clip, box->x1, box->y1, box->x2, box->y2);
+
+	for (i = 0; i < slice.n; i++) {
+		nemocook_2d_transform_to_global(one->trans, slice.x[i], slice.y[i], &slice.x[i], &slice.y[i]);
+	}
+
+	min_x = max_x = slice.x[0];
+	min_y = max_y = slice.y[0];
+
+	for (i = 1; i < slice.n; i++) {
+		min_x = MIN(min_x, slice.x[i]);
+		max_x = MAX(max_x, slice.x[i]);
+		min_y = MIN(min_y, slice.y[i]);
+		max_y = MAX(max_y, slice.y[i]);
+	}
+
+	if (clip_check_minmax(&clip, min_x, min_y, max_x, max_y) != 0)
+		return 0;
+
+	if (nemoyoyo_one_has_flags(one, NEMOYOYO_ONE_TRANSFORM_FLAG) == 0)
+		return clip_simple(&clip, &slice, ex, ey);
+
+	return clip_transformed(&clip, &slice, ex, ey);
+}
+
+int nemoyoyo_one_clip_slice(struct yoyoone *one, pixman_region32_t *region, float *vertices, float *texcoords, int *slices)
+{
+	float *v = vertices;
+	float *t = texcoords;
+	pixman_box32_t *boxes;
+	int nboxes;
+	int count = 0;
+	int i;
+
+	boxes = pixman_region32_rectangles(region, &nboxes);
+
+	for (i = 0; i < nboxes; i++) {
+		float ex[8], ey[8];
+		float sx, sy;
+		int n, k;
+
+		n = nemoyoyo_one_clip_box(one, &boxes[i], ex, ey);
+		if (n < 3)
+			continue;
+
+		for (k = 0; k < n; k++) {
+			nemocook_2d_transform_from_global(one->trans, ex[k], ey[k], &sx, &sy);
+
+			*(v++) = sx;
+			*(v++) = sy;
+			*(t++) = sx;
+			*(t++) = sy;
+		}
+
+		slices[count++] = n;
+	}
+
+	return count;
 }

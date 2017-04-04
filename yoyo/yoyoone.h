@@ -28,11 +28,14 @@ struct nemoyoyo;
 struct yoyoone {
 	struct cookpoly *poly;
 	struct cooktrans *trans;
+	struct cooktex *tex;
 
 	int size;
 
 	uint32_t flags;
 	uint32_t dirty;
+
+	float alpha;
 
 	struct {
 		float tx, ty;
@@ -55,6 +58,8 @@ extern struct yoyoone *nemoyoyo_one_create(void);
 extern void nemoyoyo_one_destroy(struct yoyoone *one);
 
 extern void nemoyoyo_one_update(struct nemoyoyo *yoyo, struct yoyoone *one);
+
+extern int nemoyoyo_one_clip_slice(struct yoyoone *one, pixman_region32_t *region, float *vertices, float *texcoords, int *slices);
 
 static inline void nemoyoyo_one_set_dirty(struct yoyoone *one, uint32_t dirty)
 {
@@ -160,6 +165,8 @@ static inline void *nemoyoyo_one_get_userdata(struct yoyoone *one)
 		nemotransition_check_object(trans, &one->destroy_signal, one, sizeof(struct yoyo##tag));	\
 	}
 
+NEMOYOYO_ONE_DECLARE_SET_ATTRIBUTE(float, alpha, alpha, 0x0);
+
 NEMOYOYO_ONE_DECLARE_SET_ATTRIBUTE(float, geometry.tx, tx, NEMOYOYO_ONE_TRANSFORM_DIRTY);
 NEMOYOYO_ONE_DECLARE_SET_ATTRIBUTE(float, geometry.ty, ty, NEMOYOYO_ONE_TRANSFORM_DIRTY);
 NEMOYOYO_ONE_DECLARE_SET_ATTRIBUTE_WITH_FLAGS(float, geometry.sx, sx, NEMOYOYO_ONE_TRANSFORM_DIRTY, NEMOYOYO_ONE_TRANSFORM_FLAG);
@@ -167,6 +174,8 @@ NEMOYOYO_ONE_DECLARE_SET_ATTRIBUTE_WITH_FLAGS(float, geometry.sy, sy, NEMOYOYO_O
 NEMOYOYO_ONE_DECLARE_SET_ATTRIBUTE_WITH_FLAGS(float, geometry.rz, rz, NEMOYOYO_ONE_TRANSFORM_DIRTY, NEMOYOYO_ONE_TRANSFORM_FLAG);
 NEMOYOYO_ONE_DECLARE_SET_ATTRIBUTE(float, geometry.w, width, NEMOYOYO_ONE_TRANSFORM_DIRTY);
 NEMOYOYO_ONE_DECLARE_SET_ATTRIBUTE(float, geometry.h, height, NEMOYOYO_ONE_TRANSFORM_DIRTY);
+
+NEMOYOYO_ONE_DECLARE_SET_TRANSITION(alpha, alpha, 0x0);
 
 NEMOYOYO_ONE_DECLARE_SET_TRANSITION(geometry.tx, tx, NEMOYOYO_ONE_TRANSFORM_DIRTY);
 NEMOYOYO_ONE_DECLARE_SET_TRANSITION(geometry.ty, ty, NEMOYOYO_ONE_TRANSFORM_DIRTY);
