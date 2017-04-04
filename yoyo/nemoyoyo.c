@@ -49,6 +49,18 @@ static int nemoyoyo_load_json(struct nemoyoyo *yoyo, const char *jsonpath)
 	return 0;
 }
 
+static int nemoyoyo_update_one(struct nemoyoyo *yoyo)
+{
+	struct yoyoone *one;
+
+	nemolist_for_each(one, &yoyo->one_list, link) {
+		if (nemoyoyo_one_has_no_dirty(one) == 0)
+			nemoyoyo_one_update(yoyo, one);
+	}
+
+	return 0;
+}
+
 static int nemoyoyo_update_frame(struct nemoyoyo *yoyo)
 {
 	pixman_region32_t damage;
@@ -115,6 +127,7 @@ static void nemoyoyo_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 
 	nemotransition_group_dispatch(yoyo->transitions, time_current_msecs());
 
+	nemoyoyo_update_one(yoyo);
 	nemoyoyo_update_frame(yoyo);
 }
 

@@ -15,13 +15,15 @@ NEMO_BEGIN_EXTERN_C
 #include <nemotransition.h>
 
 typedef enum {
-	NEMOYOYO_ONE_NONE_FLAG = (1 << 0)
+	NEMOYOYO_ONE_TRANSFORM_FLAG = (1 << 0)
 } NemoYoyoOneFlag;
 
 typedef enum {
 	NEMOYOYO_ONE_FLAGS_DIRTY = (1 << 0),
 	NEMOYOYO_ONE_TRANSFORM_DIRTY = (1 << 1)
 } NemoYoyoOneDirty;
+
+struct nemoyoyo;
 
 struct yoyoone {
 	struct cookpoly *poly;
@@ -40,6 +42,8 @@ struct yoyoone {
 		float w, h;
 	} geometry;
 
+	pixman_region32_t bounds;
+
 	struct nemolist link;
 
 	struct nemosignal destroy_signal;
@@ -50,7 +54,7 @@ struct yoyoone {
 extern struct yoyoone *nemoyoyo_one_create(void);
 extern void nemoyoyo_one_destroy(struct yoyoone *one);
 
-extern void nemoyoyo_one_update(struct yoyoone *one);
+extern void nemoyoyo_one_update(struct nemoyoyo *yoyo, struct yoyoone *one);
 
 static inline void nemoyoyo_one_set_dirty(struct yoyoone *one, uint32_t dirty)
 {
@@ -158,17 +162,17 @@ static inline void *nemoyoyo_one_get_userdata(struct yoyoone *one)
 
 NEMOYOYO_ONE_DECLARE_SET_ATTRIBUTE(float, geometry.tx, tx, NEMOYOYO_ONE_TRANSFORM_DIRTY);
 NEMOYOYO_ONE_DECLARE_SET_ATTRIBUTE(float, geometry.ty, ty, NEMOYOYO_ONE_TRANSFORM_DIRTY);
-NEMOYOYO_ONE_DECLARE_SET_ATTRIBUTE(float, geometry.sx, sx, NEMOYOYO_ONE_TRANSFORM_DIRTY);
-NEMOYOYO_ONE_DECLARE_SET_ATTRIBUTE(float, geometry.sy, sy, NEMOYOYO_ONE_TRANSFORM_DIRTY);
-NEMOYOYO_ONE_DECLARE_SET_ATTRIBUTE(float, geometry.rz, rz, NEMOYOYO_ONE_TRANSFORM_DIRTY);
+NEMOYOYO_ONE_DECLARE_SET_ATTRIBUTE_WITH_FLAGS(float, geometry.sx, sx, NEMOYOYO_ONE_TRANSFORM_DIRTY, NEMOYOYO_ONE_TRANSFORM_FLAG);
+NEMOYOYO_ONE_DECLARE_SET_ATTRIBUTE_WITH_FLAGS(float, geometry.sy, sy, NEMOYOYO_ONE_TRANSFORM_DIRTY, NEMOYOYO_ONE_TRANSFORM_FLAG);
+NEMOYOYO_ONE_DECLARE_SET_ATTRIBUTE_WITH_FLAGS(float, geometry.rz, rz, NEMOYOYO_ONE_TRANSFORM_DIRTY, NEMOYOYO_ONE_TRANSFORM_FLAG);
 NEMOYOYO_ONE_DECLARE_SET_ATTRIBUTE(float, geometry.w, width, NEMOYOYO_ONE_TRANSFORM_DIRTY);
 NEMOYOYO_ONE_DECLARE_SET_ATTRIBUTE(float, geometry.h, height, NEMOYOYO_ONE_TRANSFORM_DIRTY);
 
 NEMOYOYO_ONE_DECLARE_SET_TRANSITION(geometry.tx, tx, NEMOYOYO_ONE_TRANSFORM_DIRTY);
 NEMOYOYO_ONE_DECLARE_SET_TRANSITION(geometry.ty, ty, NEMOYOYO_ONE_TRANSFORM_DIRTY);
-NEMOYOYO_ONE_DECLARE_SET_TRANSITION(geometry.sx, sx, NEMOYOYO_ONE_TRANSFORM_DIRTY);
-NEMOYOYO_ONE_DECLARE_SET_TRANSITION(geometry.sy, sy, NEMOYOYO_ONE_TRANSFORM_DIRTY);
-NEMOYOYO_ONE_DECLARE_SET_TRANSITION(geometry.rz, rz, NEMOYOYO_ONE_TRANSFORM_DIRTY);
+NEMOYOYO_ONE_DECLARE_SET_TRANSITION_WITH_FLAGS(geometry.sx, sx, NEMOYOYO_ONE_TRANSFORM_DIRTY, NEMOYOYO_ONE_TRANSFORM_FLAG);
+NEMOYOYO_ONE_DECLARE_SET_TRANSITION_WITH_FLAGS(geometry.sy, sy, NEMOYOYO_ONE_TRANSFORM_DIRTY, NEMOYOYO_ONE_TRANSFORM_FLAG);
+NEMOYOYO_ONE_DECLARE_SET_TRANSITION_WITH_FLAGS(geometry.rz, rz, NEMOYOYO_ONE_TRANSFORM_DIRTY, NEMOYOYO_ONE_TRANSFORM_FLAG);
 NEMOYOYO_ONE_DECLARE_SET_TRANSITION(geometry.w, width, NEMOYOYO_ONE_TRANSFORM_DIRTY);
 NEMOYOYO_ONE_DECLARE_SET_TRANSITION(geometry.h, height, NEMOYOYO_ONE_TRANSFORM_DIRTY);
 
