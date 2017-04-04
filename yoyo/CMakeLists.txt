@@ -20,7 +20,6 @@ set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 add_executable(nemoyoyo
 	nemoyoyo.c
 	yoyoone.c
-	yoyotransition.c
 	)
 
 TARGET_LINK_LIBRARIES(nemoyoyo

@@ -12,8 +12,7 @@ NEMO_BEGIN_EXTERN_C
 #include <nemocook.h>
 #include <nemolist.h>
 #include <nemolistener.h>
-
-#include <yoyotransition.h>
+#include <nemotransition.h>
 
 typedef enum {
 	NEMOYOYO_ONE_NONE_FLAG = (1 << 0)
@@ -138,10 +137,23 @@ static inline void *nemoyoyo_one_get_userdata(struct yoyoone *one)
 		one->attr = strdup(attr);	\
 		nemoyoyo_one_set_dirty(one, dirty);	\
 	}
-#define NEMOYOYO_ONE_DECLARE_COPY_STRING(tag, attr, name, dirty)	\
+#define NEMOYOYO_ONE_DECLARE_COPY_STRING(attr, name, dirty)	\
 	static inline void nemoyoyo_one_set_##name(struct yoyoone *one, const char *attr) {	\
 		strcpy(one->attr, attr);	\
 		nemoyoyo_one_set_dirty(one, dirty);	\
+	}
+#define NEMOYOYO_ONE_DECLARE_SET_TRANSITION(attr, name, _dirty)	\
+	static inline void nemoyoyo_one_transition_set_##name(struct nemotransition *trans, int index, struct yoyoone *one) {	\
+		nemotransition_set_float_with_dirty(trans, index, &one->attr, one->attr, &one->dirty, _dirty);	\
+	}
+#define NEMOYOYO_ONE_DECLARE_SET_TRANSITION_WITH_FLAGS(attr, name, _dirty, _flags)	\
+	static inline void nemoyoyo_one_transition_set_##name(struct nemotransition *trans, int index, struct yoyoone *one) {	\
+		nemoyoyo_one_set_flags(one, _flags);	\
+		nemotransition_set_float_with_dirty(trans, index, &one->attr, one->attr, &one->dirty, _dirty);	\
+	}
+#define NEMOYOYO_ONE_DECLARE_CHECK_TRANSITION(tag)	\
+	static inline void nemoyoyo_transition_##tag##_check(struct nemotransition *trans, struct yoyoone *one) {	\
+		nemotransition_check_object(trans, &one->destroy_signal, one, sizeof(struct yoyo##tag));	\
 	}
 
 NEMOYOYO_ONE_DECLARE_SET_ATTRIBUTE(float, geometry.tx, tx, NEMOYOYO_ONE_TRANSFORM_DIRTY);
@@ -152,13 +164,15 @@ NEMOYOYO_ONE_DECLARE_SET_ATTRIBUTE(float, geometry.rz, rz, NEMOYOYO_ONE_TRANSFOR
 NEMOYOYO_ONE_DECLARE_SET_ATTRIBUTE(float, geometry.w, width, NEMOYOYO_ONE_TRANSFORM_DIRTY);
 NEMOYOYO_ONE_DECLARE_SET_ATTRIBUTE(float, geometry.h, height, NEMOYOYO_ONE_TRANSFORM_DIRTY);
 
-NEMOYOYO_ONE_DECLARE_SET_TRANSITION(float, geometry.tx, tx, NEMOYOYO_ONE_TRANSFORM_DIRTY);
-NEMOYOYO_ONE_DECLARE_SET_TRANSITION(float, geometry.ty, ty, NEMOYOYO_ONE_TRANSFORM_DIRTY);
-NEMOYOYO_ONE_DECLARE_SET_TRANSITION(float, geometry.sx, sx, NEMOYOYO_ONE_TRANSFORM_DIRTY);
-NEMOYOYO_ONE_DECLARE_SET_TRANSITION(float, geometry.sy, sy, NEMOYOYO_ONE_TRANSFORM_DIRTY);
-NEMOYOYO_ONE_DECLARE_SET_TRANSITION(float, geometry.rz, rz, NEMOYOYO_ONE_TRANSFORM_DIRTY);
-NEMOYOYO_ONE_DECLARE_SET_TRANSITION(float, geometry.w, width, NEMOYOYO_ONE_TRANSFORM_DIRTY);
-NEMOYOYO_ONE_DECLARE_SET_TRANSITION(float, geometry.h, height, NEMOYOYO_ONE_TRANSFORM_DIRTY);
+NEMOYOYO_ONE_DECLARE_SET_TRANSITION(geometry.tx, tx, NEMOYOYO_ONE_TRANSFORM_DIRTY);
+NEMOYOYO_ONE_DECLARE_SET_TRANSITION(geometry.ty, ty, NEMOYOYO_ONE_TRANSFORM_DIRTY);
+NEMOYOYO_ONE_DECLARE_SET_TRANSITION(geometry.sx, sx, NEMOYOYO_ONE_TRANSFORM_DIRTY);
+NEMOYOYO_ONE_DECLARE_SET_TRANSITION(geometry.sy, sy, NEMOYOYO_ONE_TRANSFORM_DIRTY);
+NEMOYOYO_ONE_DECLARE_SET_TRANSITION(geometry.rz, rz, NEMOYOYO_ONE_TRANSFORM_DIRTY);
+NEMOYOYO_ONE_DECLARE_SET_TRANSITION(geometry.w, width, NEMOYOYO_ONE_TRANSFORM_DIRTY);
+NEMOYOYO_ONE_DECLARE_SET_TRANSITION(geometry.h, height, NEMOYOYO_ONE_TRANSFORM_DIRTY);
+
+NEMOYOYO_ONE_DECLARE_CHECK_TRANSITION(one);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
