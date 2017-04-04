@@ -130,8 +130,20 @@ static int nemoyoyo_dispatch_tap_event(struct nemoaction *action, struct actiont
 		struct yoyoone *one;
 
 		one = nemoyoyo_one_create();
+		nemoyoyo_one_set_tx(one,
+				nemoaction_tap_get_tx(tap));
+		nemoyoyo_one_set_ty(one,
+				nemoaction_tap_get_ty(tap));
+		nemoyoyo_one_set_width(one, 128.0f);
+		nemoyoyo_one_set_height(one, 128.0f);
+		nemoyoyo_one_set_texture(one,
+				yoyo->spot.textures[random_get_int(0, yoyo->spot.ntextures - 1)]);
+
+		nemoyoyo_attach_one(yoyo, one);
 	} else if (event & NEMOACTION_TAP_UP_EVENT) {
 	}
+
+	nemocanvas_dispatch_frame(yoyo->canvas);
 
 	return 0;
 }
@@ -330,6 +342,7 @@ int main(int argc, char *argv[])
 	nemocook_transform_set_translate(trans, -1.0f, 1.0f, 0.0f);
 	nemocook_transform_set_scale(trans, 2.0f / (float)width, -2.0f / (float)height, 1.0f);
 	nemocook_transform_set_state(trans, NEMOCOOK_TRANSFORM_NOPIN_STATE);
+	nemocook_transform_update(trans);
 
 	action = yoyo->action = nemoaction_create();
 	nemoaction_set_tap_callback(action, nemoyoyo_dispatch_top_event);
@@ -358,4 +371,19 @@ int main(int argc, char *argv[])
 	free(yoyo);
 
 	return 0;
+}
+
+void nemoyoyo_attach_one(struct nemoyoyo *yoyo, struct yoyoone *one)
+{
+	nemolist_insert_tail(&yoyo->one_list, &one->link);
+
+	nemocook_transform_set_parent(one->trans, yoyo->projection);
+}
+
+void nemoyoyo_detach_one(struct nemoyoyo *yoyo, struct yoyoone *one)
+{
+	nemolist_remove(&one->link);
+	nemolist_init(&one->link);
+
+	nemocook_transform_set_parent(one->trans, NULL);
 }

@@ -57,6 +57,13 @@ void nemoyoyo_one_destroy(struct yoyoone *one)
 	free(one);
 }
 
+void nemoyoyo_one_set_texture(struct yoyoone *one, struct cooktex *tex)
+{
+	nemocook_polygon_set_texture(one->poly, tex);
+
+	one->tex = tex;
+}
+
 static inline void nemoyoyo_one_update_transform(struct yoyoone *one)
 {
 	nemocook_transform_set_translate(one->trans,

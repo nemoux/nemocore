@@ -20,6 +20,8 @@ NEMO_BEGIN_EXTERN_C
 #include <nemotransition.h>
 #include <nemolist.h>
 
+struct yoyoone;
+
 struct nemoyoyo {
 	struct nemotool *tool;
 	struct nemocanvas *canvas;
@@ -42,6 +44,9 @@ struct nemoyoyo {
 		int ntextures;
 	} spot;
 };
+
+extern void nemoyoyo_attach_one(struct nemoyoyo *yoyo, struct yoyoone *one);
+extern void nemoyoyo_detach_one(struct nemoyoyo *yoyo, struct yoyoone *one);
 
 static inline void nemoyoyo_damage(struct nemoyoyo *yoyo, pixman_region32_t *damage)
 {

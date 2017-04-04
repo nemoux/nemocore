@@ -57,6 +57,8 @@ struct yoyoone {
 extern struct yoyoone *nemoyoyo_one_create(void);
 extern void nemoyoyo_one_destroy(struct yoyoone *one);
 
+extern void nemoyoyo_one_set_texture(struct yoyoone *one, struct cooktex *tex);
+
 extern void nemoyoyo_one_update(struct nemoyoyo *yoyo, struct yoyoone *one);
 
 extern int nemoyoyo_one_clip_slice(struct yoyoone *one, pixman_region32_t *region, float *vertices, float *texcoords, int *slices);
