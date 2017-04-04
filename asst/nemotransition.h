@@ -10,11 +10,12 @@ NEMO_BEGIN_EXTERN_C
 #include <stdint.h>
 
 #include <nemoease.h>
-#include <nemoattr.h>
 #include <nemolist.h>
+#include <nemolistener.h>
 
 struct nemotransition;
 struct transitionone;
+struct transitionsensor;
 struct transitiongroup;
 
 typedef void (*nemotransition_dispatch_update_t)(struct nemotransition *trans, void *data, float t);
@@ -27,6 +28,8 @@ struct nemotransition {
 
 	struct transitionone **ones;
 	int nones, sones;
+
+	struct nemolist sensor_list;
 
 	uint32_t duration;
 	uint32_t delay;
@@ -52,8 +55,8 @@ struct transitiongroup {
 extern struct transitiongroup *nemotransition_group_create(void);
 extern void nemotransition_group_destroy(struct transitiongroup *group);
 
-extern void nemotransition_group_attach_trans(struct transitiongroup *group, struct nemotransition *trans);
-extern void nemotransition_group_detach_trans(struct transitiongroup *group, struct nemotransition *trans);
+extern void nemotransition_group_attach_transition(struct transitiongroup *group, struct nemotransition *trans);
+extern void nemotransition_group_detach_transition(struct transitiongroup *group, struct nemotransition *trans);
 
 extern void nemotransition_group_ready(struct transitiongroup *group, uint32_t msecs);
 extern void nemotransition_group_dispatch(struct transitiongroup *group, uint32_t msecs);
@@ -62,7 +65,7 @@ extern struct nemotransition *nemotransition_group_get_last_one(struct transitio
 extern struct nemotransition *nemotransition_group_get_last_tag(struct transitiongroup *group, uint32_t tag);
 extern struct nemotransition *nemotransition_group_get_last_all(struct transitiongroup *group);
 
-extern void nemotransition_group_revoke_one(struct transitiongroup *group, void *var);
+extern void nemotransition_group_revoke_one(struct transitiongroup *group, void *var, int size);
 extern void nemotransition_group_revoke_tag(struct transitiongroup *group, uint32_t tag);
 extern void nemotransition_group_revoke_all(struct transitiongroup *group);
 
@@ -75,17 +78,23 @@ extern void nemotransition_ease_set_type(struct nemotransition *trans, int type)
 extern void nemotransition_ease_set_bezier(struct nemotransition *trans, double x0, double y0, double x1, double y1);
 
 extern void nemotransition_set_repeat(struct nemotransition *trans, uint32_t repeat);
-extern int nemotransition_check_repeat(struct nemotransition *trans);
+extern int nemotransition_put_repeat(struct nemotransition *trans);
 
 extern int nemotransition_ready(struct nemotransition *trans, uint32_t msecs);
 extern int nemotransition_dispatch(struct nemotransition *trans, uint32_t msecs);
 
-extern void nemotransition_set_float(struct nemotransition *trans, int index, float *var);
-extern void nemotransition_set_double(struct nemotransition *trans, int index, double *var);
+extern void nemotransition_set_float(struct nemotransition *trans, int index, float *var, float attr);
+extern void nemotransition_set_double(struct nemotransition *trans, int index, double *var, double attr);
+extern void nemotransition_set_float_with_dirty(struct nemotransition *trans, int index, float *var, float attr, uint32_t *obj, uint32_t dirty);
+extern void nemotransition_set_double_with_dirty(struct nemotransition *trans, int index, double *var, double attr, uint32_t *obj, uint32_t dirty);
 extern float nemotransition_get_float(struct nemotransition *trans, int index);
 extern double nemotransition_get_double(struct nemotransition *trans, int index);
 
 extern void nemotransition_set_target(struct nemotransition *trans, int index, double t, double v);
+
+extern void nemotransition_put_one(struct nemotransition *trans, void *var, int size);
+
+extern void nemotransition_check_object(struct nemotransition *trans, struct nemosignal *signal, void *var, int size);
 
 static inline int nemotransition_group_has_transition(struct transitiongroup *group)
 {

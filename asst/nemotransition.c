@@ -11,12 +11,29 @@
 #define NEMOTRANSITION_ONE_TARGETS_MAX			(8)
 
 struct transitionone {
-	struct nemoattr attr;
 	int is_double;
+	void *var;
+
+	union {
+		float f;
+		double d;
+	} v;
+
+	uint32_t *obj;
+	uint32_t dirty;
 
 	double timings[NEMOTRANSITION_ONE_TARGETS_MAX];
 	double targets[NEMOTRANSITION_ONE_TARGETS_MAX];
 	int count;
+};
+
+struct transitionsensor {
+	struct nemolist link;
+	struct nemolistener listener;
+
+	struct nemotransition *transition;
+	void *var;
+	int size;
 };
 
 struct transitiongroup *nemotransition_group_create(void)
@@ -38,7 +55,7 @@ void nemotransition_group_destroy(struct transitiongroup *group)
 	free(group);
 }
 
-void nemotransition_group_attach_trans(struct transitiongroup *group, struct nemotransition *trans)
+void nemotransition_group_attach_transition(struct transitiongroup *group, struct nemotransition *trans)
 {
 	struct nemotransition *strans;
 	struct transitionone *one, *sone;
@@ -51,7 +68,7 @@ void nemotransition_group_attach_trans(struct transitiongroup *group, struct nem
 				for (j = 0; j < strans->nones; j++) {
 					sone = strans->ones[j];
 					if (sone != NULL) {
-						if (nemoattr_getp(&one->attr) == nemoattr_getp(&sone->attr)) {
+						if (one->var == sone->var) {
 							strans->ones[j] = NULL;
 							free(sone);
 							break;
@@ -65,7 +82,7 @@ void nemotransition_group_attach_trans(struct transitiongroup *group, struct nem
 	nemolist_insert_tail(&group->list, &trans->link);
 }
 
-void nemotransition_group_detach_trans(struct transitiongroup *group, struct nemotransition *trans)
+void nemotransition_group_detach_transition(struct transitiongroup *group, struct nemotransition *trans)
 {
 	nemolist_remove(&trans->link);
 }
@@ -85,7 +102,7 @@ void nemotransition_group_dispatch(struct transitiongroup *group, uint32_t msecs
 
 	nemolist_for_each_safe(trans, ntrans, &group->list, link) {
 		if (nemotransition_dispatch(trans, msecs) != 0) {
-			if (nemotransition_check_repeat(trans) > 0)
+			if (nemotransition_put_repeat(trans) > 0)
 				nemotransition_destroy(trans);
 		}
 	}
@@ -102,7 +119,7 @@ struct nemotransition *nemotransition_group_get_last_one(struct transitiongroup 
 		for (i = 0; i < trans->nones; i++) {
 			one = trans->ones[i];
 			if (one != NULL) {
-				if (nemoattr_getp(&one->attr) == var) {
+				if (one->var == var) {
 					if (ltrans == NULL || ltrans->etime < trans->etime) {
 						ltrans = trans;
 						break;
@@ -143,7 +160,7 @@ struct nemotransition *nemotransition_group_get_last_all(struct transitiongroup 
 	return ltrans;
 }
 
-void nemotransition_group_revoke_one(struct transitiongroup *group, void *var)
+void nemotransition_group_revoke_one(struct transitiongroup *group, void *var, int size)
 {
 	struct nemotransition *trans;
 	struct transitionone *one;
@@ -152,10 +169,9 @@ void nemotransition_group_revoke_one(struct transitiongroup *group, void *var)
 	nemolist_for_each(trans, &group->list, link) {
 		for (i = 0; i < trans->nones; i++) {
 			one = trans->ones[i];
-			if (one != NULL && nemoattr_getp(&one->attr) == var) {
+			if (one != NULL && var <= one->var && one->var < var + size) {
 				trans->ones[i] = NULL;
 				free(one);
-				break;
 			}
 		}
 	}
@@ -199,6 +215,8 @@ struct nemotransition *nemotransition_create(int max, int type, uint32_t duratio
 
 	nemolist_init(&trans->link);
 
+	nemolist_init(&trans->sensor_list);
+
 	nemoease_set(&trans->ease, type);
 
 	trans->duration = duration;
@@ -219,9 +237,17 @@ err1:
 
 void nemotransition_destroy(struct nemotransition *trans)
 {
+	struct transitionsensor *sensor, *nsensor;
 	int i;
 
 	nemolist_remove(&trans->link);
+
+	nemolist_for_each_safe(sensor, nsensor, &trans->sensor_list, link) {
+		nemolist_remove(&sensor->link);
+		nemolist_remove(&sensor->listener.link);
+
+		free(sensor);
+	}
 
 	for (i = 0; i < trans->nones; i++) {
 		if (trans->ones[i] != NULL)
@@ -252,7 +278,7 @@ void nemotransition_set_repeat(struct nemotransition *trans, uint32_t repeat)
 	trans->repeat = repeat;
 }
 
-int nemotransition_check_repeat(struct nemotransition *trans)
+int nemotransition_put_repeat(struct nemotransition *trans)
 {
 	if (trans->repeat == 0 || --trans->repeat > 0) {
 		trans->stime = 0;
@@ -305,9 +331,12 @@ int nemotransition_dispatch(struct nemotransition *trans, uint32_t msecs)
 				v = one->targets[one->count - 1] * (t / one->timings[one->count - 1]);
 
 			if (one->is_double == 0)
-				nemoattr_setf(&one->attr, v);
+				*((float *)one->var) = v;
 			else
-				nemoattr_setd(&one->attr, v);
+				*((double *)one->var) = v;
+
+			if (one->obj != NULL)
+				*one->obj |= one->dirty;
 		}
 	}
 
@@ -324,46 +353,88 @@ int nemotransition_dispatch(struct nemotransition *trans, uint32_t msecs)
 	return 0;
 }
 
-void nemotransition_set_float(struct nemotransition *trans, int index, float *var)
+void nemotransition_set_float(struct nemotransition *trans, int index, float *var, float attr)
 {
 	struct transitionone *one;
 
 	trans->ones[index] = one = (struct transitionone *)malloc(sizeof(struct transitionone));
 	one->count = 0;
 	one->is_double = 0;
-
-	nemoattr_setp(&one->attr, var);
-
 	if (var != NULL)
-		nemotransition_set_target(trans, index, 0.0f, *var);
+		one->var = var;
+	else
+		one->var = &one->v.f;
+	one->obj = NULL;
+
+	nemotransition_set_target(trans, index, 0.0f, attr);
 
 	trans->nones = MAX(trans->nones, index + 1);
 }
 
-void nemotransition_set_double(struct nemotransition *trans, int index, double *var)
+void nemotransition_set_double(struct nemotransition *trans, int index, double *var, double attr)
 {
 	struct transitionone *one;
 
 	trans->ones[index] = one = (struct transitionone *)malloc(sizeof(struct transitionone));
 	one->count = 0;
 	one->is_double = 1;
-
-	nemoattr_setp(&one->attr, var);
-
 	if (var != NULL)
-		nemotransition_set_target(trans, index, 0.0f, *var);
+		one->var = var;
+	else
+		one->var = &one->v.d;
+	one->obj = NULL;
+
+	nemotransition_set_target(trans, index, 0.0f, attr);
+
+	trans->nones = MAX(trans->nones, index + 1);
+}
+
+void nemotransition_set_float_with_dirty(struct nemotransition *trans, int index, float *var, float attr, uint32_t *obj, uint32_t dirty)
+{
+	struct transitionone *one;
+
+	trans->ones[index] = one = (struct transitionone *)malloc(sizeof(struct transitionone));
+	one->count = 0;
+	one->is_double = 0;
+	if (var != NULL)
+		one->var = var;
+	else
+		one->var = &one->v.f;
+	one->obj = obj;
+	one->dirty = dirty;
+
+	nemotransition_set_target(trans, index, 0.0f, attr);
+
+	trans->nones = MAX(trans->nones, index + 1);
+}
+
+void nemotransition_set_double_with_dirty(struct nemotransition *trans, int index, double *var, double attr, uint32_t *obj, uint32_t dirty)
+{
+	struct transitionone *one;
+
+	trans->ones[index] = one = (struct transitionone *)malloc(sizeof(struct transitionone));
+	one->count = 0;
+	one->is_double = 1;
+	if (var != NULL)
+		one->var = var;
+	else
+		one->var = &one->v.d;
+	one->obj = obj;
+	one->dirty = dirty;
+
+	nemotransition_set_target(trans, index, 0.0f, attr);
 
 	trans->nones = MAX(trans->nones, index + 1);
 }
 
 float nemotransition_get_float(struct nemotransition *trans, int index)
 {
-	return nemoattr_getf(&trans->ones[index]->attr);
+	return *((float *)trans->ones[index]->var);
 }
 
 double nemotransition_get_double(struct nemotransition *trans, int index)
 {
-	return nemoattr_getd(&trans->ones[index]->attr);
+	return *((double *)trans->ones[index]->var);
 }
 
 void nemotransition_set_target(struct nemotransition *trans, int index, double t, double v)
@@ -393,4 +464,45 @@ void nemotransition_set_target(struct nemotransition *trans, int index, double t
 		one->targets[one->count] = v;
 		one->count++;
 	}
+}
+
+void nemotransition_put_one(struct nemotransition *trans, void *var, int size)
+{
+	struct transitionone *one;
+	int i;
+
+	for (i = 0; i < trans->nones; i++) {
+		one = trans->ones[i];
+		if (one != NULL && var <= one->var && one->var < var + size) {
+			trans->ones[i] = NULL;
+			free(one);
+		}
+	}
+}
+
+static void nemotransition_handle_object_destroy(struct nemolistener *listener, void *data)
+{
+	struct transitionsensor *sensor = (struct transitionsensor *)container_of(listener, struct transitionsensor, listener);
+
+	nemotransition_put_one(sensor->transition, sensor->var, sensor->size);
+
+	nemolist_remove(&sensor->link);
+	nemolist_remove(&sensor->listener.link);
+
+	free(sensor);
+}
+
+void nemotransition_check_object(struct nemotransition *trans, struct nemosignal *signal, void *var, int size)
+{
+	struct transitionsensor *sensor;
+
+	sensor = (struct transitionsensor *)malloc(sizeof(struct transitionsensor));
+	sensor->transition = trans;
+	sensor->var = var;
+	sensor->size = size;
+
+	sensor->listener.notify = nemotransition_handle_object_destroy;
+	nemosignal_add(signal, &sensor->listener);
+
+	nemolist_insert_tail(&trans->sensor_list, &sensor->link);
 }
