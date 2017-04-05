@@ -136,7 +136,7 @@ static int nemoyoyo_dispatch_tap_event(struct nemoaction *action, struct actiont
 		nemoyoyo_sweep_set_maximum_interval(sweep, 20);
 		nemoyoyo_sweep_set_minimum_duration(sweep, 800);
 		nemoyoyo_sweep_set_maximum_duration(sweep, 1200);
-		nemoyoyo_sweep_dispatch(sweep, yoyo->tool);
+		nemoyoyo_sweep_dispatch(sweep);
 	}
 
 	return 0;

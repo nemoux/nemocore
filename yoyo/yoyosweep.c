@@ -10,46 +10,6 @@
 #include <yoyoone.h>
 #include <nemomisc.h>
 
-static int nemoyoyo_sweep_dispatch_tap_event(struct nemoaction *action, struct actiontap *tap, uint32_t event)
-{
-	struct nemoyoyo *yoyo = (struct nemoyoyo *)nemoaction_get_userdata(action);
-	struct yoyosweep *sweep = (struct yoyosweep *)nemoaction_tap_get_userdata(tap);
-
-	if (event & NEMOACTION_TAP_DOWN_EVENT) {
-	} else if (event & NEMOACTION_TAP_MOTION_EVENT) {
-	} else if (event & NEMOACTION_TAP_UP_EVENT) {
-		nemoyoyo_sweep_destroy(sweep);
-	}
-
-	return 0;
-}
-
-struct yoyosweep *nemoyoyo_sweep_create(struct nemoyoyo *yoyo, struct actiontap *tap)
-{
-	struct yoyosweep *sweep;
-
-	sweep = (struct yoyosweep *)malloc(sizeof(struct yoyosweep));
-	if (sweep == NULL)
-		return NULL;
-	memset(sweep, 0, sizeof(struct yoyosweep));
-
-	sweep->yoyo = yoyo;
-	sweep->tap = tap;
-
-	nemoaction_tap_set_callback(tap, nemoyoyo_sweep_dispatch_tap_event);
-	nemoaction_tap_set_userdata(tap, sweep);
-
-	return sweep;
-}
-
-void nemoyoyo_sweep_destroy(struct yoyosweep *sweep)
-{
-	if (sweep->timer != NULL)
-		nemotimer_destroy(sweep->timer);
-
-	free(sweep);
-}
-
 static void nemoyoyo_sweep_dispatch_transition_done(struct nemotransition *trans, void *data)
 {
 	struct yoyoone *one = (struct yoyoone *)data;
@@ -100,15 +60,54 @@ static void nemoyoyo_sweep_dispatch_timer(struct nemotimer *timer, void *data)
 			random_get_int(sweep->minimum_interval, sweep->maximum_interval));
 }
 
-void nemoyoyo_sweep_dispatch(struct yoyosweep *sweep, struct nemotool *tool)
+static int nemoyoyo_sweep_dispatch_tap_event(struct nemoaction *action, struct actiontap *tap, uint32_t event)
 {
-	sweep->timer = nemotimer_create(tool);
-	nemotimer_set_callback(sweep->timer, nemoyoyo_sweep_dispatch_timer);
-	nemotimer_set_userdata(sweep->timer, sweep);
+	struct nemoyoyo *yoyo = (struct nemoyoyo *)nemoaction_get_userdata(action);
+	struct yoyosweep *sweep = (struct yoyosweep *)nemoaction_tap_get_userdata(tap);
 
-	nemotimer_set_timeout(sweep->timer,
-			random_get_int(sweep->minimum_interval, sweep->maximum_interval));
+	if (event & NEMOACTION_TAP_DOWN_EVENT) {
+		sweep->timer = nemotimer_create(nemotool_get_instance());
+		nemotimer_set_callback(sweep->timer, nemoyoyo_sweep_dispatch_timer);
+		nemotimer_set_userdata(sweep->timer, sweep);
 
+		nemotimer_set_timeout(sweep->timer,
+				random_get_int(sweep->minimum_interval, sweep->maximum_interval));
+	} else if (event & NEMOACTION_TAP_MOTION_EVENT) {
+	} else if (event & NEMOACTION_TAP_UP_EVENT) {
+		nemoyoyo_sweep_destroy(sweep);
+	}
+
+	return 0;
+}
+
+struct yoyosweep *nemoyoyo_sweep_create(struct nemoyoyo *yoyo, struct actiontap *tap)
+{
+	struct yoyosweep *sweep;
+
+	sweep = (struct yoyosweep *)malloc(sizeof(struct yoyosweep));
+	if (sweep == NULL)
+		return NULL;
+	memset(sweep, 0, sizeof(struct yoyosweep));
+
+	sweep->yoyo = yoyo;
+	sweep->tap = tap;
+
+	nemoaction_tap_set_callback(tap, nemoyoyo_sweep_dispatch_tap_event);
+	nemoaction_tap_set_userdata(tap, sweep);
+
+	return sweep;
+}
+
+void nemoyoyo_sweep_destroy(struct yoyosweep *sweep)
+{
+	if (sweep->timer != NULL)
+		nemotimer_destroy(sweep->timer);
+
+	free(sweep);
+}
+
+void nemoyoyo_sweep_dispatch(struct yoyosweep *sweep)
+{
 	nemoaction_tap_dispatch_event(
 			nemoaction_tap_get_action(sweep->tap),
 			sweep->tap,
