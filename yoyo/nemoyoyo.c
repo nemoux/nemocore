@@ -27,8 +27,6 @@ static int nemoyoyo_load_json(struct nemoyoyo *yoyo, const char *jsonpath)
 	if (spoturl != NULL) {
 		struct cooktex *tex;
 		struct fsdir *contents;
-		int width = nemojson_search_integer(json, 0, 128, 2, "spot", "width");
-		int height = nemojson_search_integer(json, 0, 128, 2, "spot", "height");
 		int i;
 
 		contents = nemofs_dir_create(128);
@@ -39,7 +37,7 @@ static int nemoyoyo_load_json(struct nemoyoyo *yoyo, const char *jsonpath)
 
 		for (i = 0; i < nemofs_dir_get_filecount(contents); i++) {
 			tex = yoyo->spot.textures[i] = nemocook_texture_create();
-			nemocook_texture_assign(tex, NEMOCOOK_TEXTURE_BGRA_FORMAT, width, height);
+			nemocook_texture_assign(tex, NEMOCOOK_TEXTURE_BGRA_FORMAT, 0, 0);
 			nemocook_texture_load_image(tex, nemofs_dir_get_filepath(contents, i));
 		}
 	}
@@ -128,16 +126,20 @@ static int nemoyoyo_dispatch_tap_event(struct nemoaction *action, struct actiont
 	if (event & NEMOACTION_TAP_DOWN_EVENT) {
 	} else if (event & NEMOACTION_TAP_MOTION_EVENT) {
 		struct yoyoone *one;
+		struct cooktex *tex;
+
+		tex = yoyo->spot.textures[random_get_int(0, yoyo->spot.ntextures - 1)];
 
 		one = nemoyoyo_one_create();
 		nemoyoyo_one_set_tx(one,
 				nemoaction_tap_get_tx(tap));
 		nemoyoyo_one_set_ty(one,
 				nemoaction_tap_get_ty(tap));
-		nemoyoyo_one_set_width(one, 128.0f);
-		nemoyoyo_one_set_height(one, 128.0f);
-		nemoyoyo_one_set_texture(one,
-				yoyo->spot.textures[random_get_int(0, yoyo->spot.ntextures - 1)]);
+		nemoyoyo_one_set_width(one,
+				nemocook_texture_get_width(tex));
+		nemoyoyo_one_set_height(one,
+				nemocook_texture_get_height(tex));
+		nemoyoyo_one_set_texture(one, tex);
 
 		nemoyoyo_attach_one(yoyo, one);
 	} else if (event & NEMOACTION_TAP_UP_EVENT) {

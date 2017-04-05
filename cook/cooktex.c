@@ -172,6 +172,11 @@ int nemocook_texture_load_image(struct cooktex *tex, const char *filepath)
 	if (image == NULL)
 		return -1;
 
+	if (tex->width == 0)
+		tex->width = pixman_image_get_width(image);
+	if (tex->height == 0)
+		tex->height = pixman_image_get_height(image);
+
 	glBindTexture(GL_TEXTURE_2D, tex->texture);
 	glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, tex->width);
 	glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);

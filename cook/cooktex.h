@@ -80,6 +80,16 @@ static inline GLuint nemocook_texture_get(struct cooktex *tex)
 	return tex->texture;
 }
 
+static inline int nemocook_texture_get_width(struct cooktex *tex)
+{
+	return tex->width;
+}
+
+static inline int nemocook_texture_get_height(struct cooktex *tex)
+{
+	return tex->height;
+}
+
 static inline void nemocook_texture_attach_state(struct cooktex *tex, struct cookstate *state)
 {
 	nemocook_one_attach_state(&tex->one, state);
