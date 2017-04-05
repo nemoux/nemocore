@@ -73,10 +73,7 @@ static inline void nemoyoyo_one_update_transform(struct yoyoone *one)
 			one->geometry.tx - one->geometry.w * one->geometry.ax,
 			one->geometry.ty - one->geometry.h * one->geometry.ay,
 			0.0f);
-	nemocook_transform_set_scale(one->trans,
-			one->geometry.w * one->geometry.sx,
-			one->geometry.h * one->geometry.sy,
-			1.0f);
+	nemocook_transform_set_scale(one->trans, one->geometry.sx, one->geometry.sy, 1.0f);
 	nemocook_transform_set_rotate(one->trans, 0.0f, 0.0f, one->geometry.rz);
 	nemocook_transform_update(one->trans);
 
@@ -96,9 +93,9 @@ static inline void nemoyoyo_one_update_bounds(struct yoyoone *one)
 		float maxx = -HUGE_VALF, maxy = -HUGE_VALF;
 		float s[4][2] = {
 			{ 0.0f, 0.0f },
-			{ 0.0f, 1.0f },
-			{ 1.0f, 0.0f },
-			{ 1.0f, 1.0f }
+			{ 0.0f, one->geometry.h },
+			{ one->geometry.w, 0.0f },
+			{ one->geometry.w, one->geometry.h }
 		};
 		float tx, ty;
 		float sx, sy, ex, ey;
@@ -142,8 +139,8 @@ static int nemoyoyo_one_clip_box(struct yoyoone *one, pixman_box32_t *box, float
 {
 	struct clip clip;
 	struct polygon8 slice = {
-		{ 0.0f, 1.0f, 1.0f, 0.0f },
-		{ 0.0f, 0.0f, 1.0f, 1.0f },
+		{ 0.0f, one->geometry.w, one->geometry.w, 0.0f },
+		{ 0.0f, 0.0f, one->geometry.h, one->geometry.h },
 		4
 	};
 	float min_x, max_x, min_y, max_y;
@@ -178,6 +175,8 @@ int nemoyoyo_one_clip_slice(struct yoyoone *one, pixman_region32_t *region, floa
 {
 	float *v = vertices;
 	float *t = texcoords;
+	float iw = 1.0f / one->geometry.w;
+	float ih = 1.0f / one->geometry.h;
 	pixman_box32_t *boxes;
 	int nboxes;
 	int count = 0;
@@ -199,8 +198,8 @@ int nemoyoyo_one_clip_slice(struct yoyoone *one, pixman_region32_t *region, floa
 
 			*(v++) = sx;
 			*(v++) = sy;
-			*(t++) = sx;
-			*(t++) = sy;
+			*(t++) = sx * iw;
+			*(t++) = sy * ih;
 		}
 
 		slices[count++] = n;
