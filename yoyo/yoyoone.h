@@ -30,8 +30,6 @@ struct yoyoone {
 	struct cooktrans *trans;
 	struct cooktex *tex;
 
-	int size;
-
 	uint32_t flags;
 	uint32_t dirty;
 

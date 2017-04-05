@@ -35,8 +35,6 @@ struct yoyoone *nemoyoyo_one_create(void)
 	one->geometry.ax = 0.5f;
 	one->geometry.ay = 0.5f;
 
-	one->size = sizeof(struct yoyoone);
-
 	nemolist_init(&one->link);
 
 	nemosignal_init(&one->destroy_signal);
