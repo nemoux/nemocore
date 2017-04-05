@@ -86,8 +86,10 @@ static void nemoyoyo_sweep_dispatch_timer(struct nemotimer *timer, void *data)
 			0);
 	nemoyoyo_one_transition_set_sx(trans, 0, one);
 	nemoyoyo_one_transition_set_sy(trans, 1, one);
+	nemoyoyo_one_transition_set_alpha(trans, 2, one);
 	nemotransition_set_target(trans, 0, 1.0f, 0.0f);
 	nemotransition_set_target(trans, 1, 1.0f, 0.0f);
+	nemotransition_set_target(trans, 2, 1.0f, 0.0f);
 	nemotransition_set_dispatch_done(trans, nemoyoyo_sweep_dispatch_transition_done);
 	nemotransition_set_userdata(trans, one);
 	nemotransition_group_attach_transition(yoyo->transitions, trans);

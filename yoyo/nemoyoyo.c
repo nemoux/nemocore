@@ -314,6 +314,8 @@ int main(int argc, char *argv[])
 
 	nemocook_egl_attach_state(egl,
 			nemocook_state_create(1, NEMOCOOK_STATE_COLOR_BUFFER_TYPE, 0.0f, 0.0f, 0.0f, 0.0f));
+	nemocook_egl_attach_state(egl,
+			nemocook_state_create(2, NEMOCOOK_STATE_BLEND_SEPARATE_TYPE, 1, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA));
 
 	shader = yoyo->shader = nemocook_shader_create();
 	nemocook_shader_set_program(shader, vertexshader_texture, fragmentshader_texture);
