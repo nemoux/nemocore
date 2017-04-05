@@ -230,6 +230,7 @@ int main(int argc, char *argv[])
 		{ "width",						required_argument,		NULL,		'w' },
 		{ "height",						required_argument,		NULL,		'h' },
 		{ "fullscreen",				required_argument,		NULL,		'f' },
+		{ "layer",						required_argument,		NULL,		'y' },
 		{ "config",						required_argument,		NULL,		'c' },
 		{ 0 }
 	};
@@ -243,13 +244,14 @@ int main(int argc, char *argv[])
 	struct nemoaction *action;
 	char *configpath = NULL;
 	char *fullscreenid = NULL;
+	char *layer = NULL;
 	int width = 1920;
 	int height = 1080;
 	int opt;
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "w:h:f:c:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:f:y:c:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -264,6 +266,10 @@ int main(int argc, char *argv[])
 
 			case 'f':
 				fullscreenid = strdup(optarg);
+				break;
+
+			case 'y':
+				layer = strdup(optarg);
 				break;
 
 			case 'c':
@@ -304,6 +310,8 @@ int main(int argc, char *argv[])
 
 	if (fullscreenid != NULL)
 		nemocanvas_set_fullscreen(canvas, fullscreenid);
+	if (layer != NULL)
+		nemocanvas_set_layer(canvas, layer);
 
 	egl = yoyo->egl = nemocook_egl_create(
 			NTEGL_DISPLAY(tool),
