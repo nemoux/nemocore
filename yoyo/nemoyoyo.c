@@ -142,16 +142,6 @@ static int nemoyoyo_dispatch_tap_event(struct nemoaction *action, struct actiont
 	return 0;
 }
 
-static void nemoyoyo_dispatch_canvas_resize(struct nemocanvas *canvas, int32_t width, int32_t height)
-{
-	struct nemoyoyo *yoyo = (struct nemoyoyo *)nemocanvas_get_userdata(canvas);
-
-	yoyo->width = width;
-	yoyo->height = height;
-
-	nemocanvas_egl_resize(yoyo->canvas, width, height);
-}
-
 static void nemoyoyo_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t secs, uint32_t nsecs)
 {
 	struct nemoyoyo *yoyo = (struct nemoyoyo *)nemocanvas_get_userdata(canvas);
@@ -307,7 +297,6 @@ int main(int argc, char *argv[])
 
 	canvas = yoyo->canvas = nemocanvas_egl_create(tool, width, height);
 	nemocanvas_set_nemosurface(canvas, "normal");
-	nemocanvas_set_dispatch_resize(canvas, nemoyoyo_dispatch_canvas_resize);
 	nemocanvas_set_dispatch_frame(canvas, nemoyoyo_dispatch_canvas_frame);
 	nemocanvas_set_dispatch_event(canvas, nemoyoyo_dispatch_canvas_event);
 	nemocanvas_set_dispatch_destroy(canvas, nemoyoyo_dispatch_canvas_destroy);
