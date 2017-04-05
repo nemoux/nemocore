@@ -9,7 +9,7 @@
 
 #include <nemoyoyo.h>
 #include <yoyoone.h>
-#include <yoyodotor.h>
+#include <yoyosweep.h>
 #include <nemojson.h>
 #include <nemofs.h>
 #include <nemomisc.h>
@@ -129,14 +129,14 @@ static int nemoyoyo_dispatch_tap_event(struct nemoaction *action, struct actiont
 	struct nemoyoyo *yoyo = (struct nemoyoyo *)nemoaction_get_userdata(action);
 
 	if (event & NEMOACTION_TAP_DOWN_EVENT) {
-		struct yoyodotor *dotor;
+		struct yoyosweep *sweep;
 
-		dotor = nemoyoyo_dotor_create(yoyo, tap);
-		nemoyoyo_dotor_set_minimum_interval(dotor, 18);
-		nemoyoyo_dotor_set_maximum_interval(dotor, 20);
-		nemoyoyo_dotor_set_minimum_duration(dotor, 800);
-		nemoyoyo_dotor_set_maximum_duration(dotor, 1200);
-		nemoyoyo_dotor_dispatch(dotor, yoyo->tool);
+		sweep = nemoyoyo_sweep_create(yoyo, tap);
+		nemoyoyo_sweep_set_minimum_interval(sweep, 18);
+		nemoyoyo_sweep_set_maximum_interval(sweep, 20);
+		nemoyoyo_sweep_set_minimum_duration(sweep, 800);
+		nemoyoyo_sweep_set_maximum_duration(sweep, 1200);
+		nemoyoyo_sweep_dispatch(sweep, yoyo->tool);
 	}
 
 	return 0;
