@@ -292,6 +292,11 @@ static inline uint32_t nemoaction_tap_get_tag(struct actiontap *tap)
 	return tap->tag;
 }
 
+static inline struct nemoaction *nemoaction_tap_get_action(struct actiontap *tap)
+{
+	return tap->action;
+}
+
 static inline void nemoaction_tap_set_userdata(struct actiontap *tap, void *data)
 {
 	tap->data = data;

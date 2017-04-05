@@ -9,6 +9,7 @@
 
 #include <nemoyoyo.h>
 #include <yoyoone.h>
+#include <yoyodotor.h>
 #include <nemojson.h>
 #include <nemofs.h>
 #include <nemomisc.h>
@@ -124,39 +125,12 @@ static int nemoyoyo_dispatch_tap_event(struct nemoaction *action, struct actiont
 	struct nemoyoyo *yoyo = (struct nemoyoyo *)nemoaction_get_userdata(action);
 
 	if (event & NEMOACTION_TAP_DOWN_EVENT) {
-	} else if (event & NEMOACTION_TAP_MOTION_EVENT) {
-		struct yoyoone *one;
-		struct cooktex *tex;
+		struct yoyodotor *dotor;
 
-		tex = yoyo->spot.textures[random_get_int(0, yoyo->spot.ntextures - 1)];
-
-		one = nemoyoyo_one_create();
-		nemoyoyo_one_set_tx(one,
-				nemoaction_tap_get_tx(tap));
-		nemoyoyo_one_set_ty(one,
-				nemoaction_tap_get_ty(tap));
-		nemoyoyo_one_set_width(one,
-				nemocook_texture_get_width(tex));
-		nemoyoyo_one_set_height(one,
-				nemocook_texture_get_height(tex));
-		nemoyoyo_one_set_texture(one, tex);
-
-		nemoyoyo_attach_one(yoyo, one);
-	} else if (event & NEMOACTION_TAP_UP_EVENT) {
-	}
-
-	nemocanvas_dispatch_frame(yoyo->canvas);
-
-	return 0;
-}
-
-static int nemoyoyo_dispatch_top_event(struct nemoaction *action, struct actiontap *tap, uint32_t event)
-{
-	struct nemoyoyo *yoyo = (struct nemoyoyo *)nemoaction_get_userdata(action);
-
-	if (event & NEMOACTION_TAP_DOWN_EVENT) {
-		nemoaction_tap_set_callback(tap, nemoyoyo_dispatch_tap_event);
-		nemoaction_tap_dispatch_event(action, tap, NEMOACTION_TAP_DOWN_EVENT);
+		dotor = nemoyoyo_dotor_create(yoyo, tap);
+		nemoyoyo_dotor_set_minimum_interval(dotor, 12);
+		nemoyoyo_dotor_set_maximum_interval(dotor, 24);
+		nemoyoyo_dotor_dispatch(dotor, yoyo->tool);
 	}
 
 	return 0;
@@ -347,7 +321,7 @@ int main(int argc, char *argv[])
 	nemocook_transform_update(trans);
 
 	action = yoyo->action = nemoaction_create();
-	nemoaction_set_tap_callback(action, nemoyoyo_dispatch_top_event);
+	nemoaction_set_tap_callback(action, nemoyoyo_dispatch_tap_event);
 	nemoaction_set_userdata(action, yoyo);
 
 	nemoyoyo_load_json(yoyo, configpath);
