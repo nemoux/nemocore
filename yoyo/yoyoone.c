@@ -75,6 +75,10 @@ static inline void nemoyoyo_one_update_transform(struct yoyoone *one)
 			0.0f);
 	nemocook_transform_set_scale(one->trans, one->geometry.sx, one->geometry.sy, 1.0f);
 	nemocook_transform_set_rotate(one->trans, 0.0f, 0.0f, one->geometry.rz);
+	nemocook_transform_set_pivot(one->trans,
+			one->geometry.w * one->geometry.ax,
+			one->geometry.h * one->geometry.ay,
+			0.0f);
 	nemocook_transform_update(one->trans);
 
 	nemocook_polygon_update_transform(one->poly);
