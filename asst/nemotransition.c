@@ -96,9 +96,10 @@ void nemotransition_group_ready(struct transitiongroup *group, uint32_t msecs)
 	}
 }
 
-void nemotransition_group_dispatch(struct transitiongroup *group, uint32_t msecs)
+int nemotransition_group_dispatch(struct transitiongroup *group, uint32_t msecs)
 {
 	struct nemotransition *trans, *ntrans;
+	int has_transition = nemolist_empty(&group->list) == 0;
 
 	nemolist_for_each_safe(trans, ntrans, &group->list, link) {
 		if (nemotransition_dispatch(trans, msecs) != 0) {
@@ -106,6 +107,8 @@ void nemotransition_group_dispatch(struct transitiongroup *group, uint32_t msecs
 				nemotransition_destroy(trans);
 		}
 	}
+
+	return has_transition;
 }
 
 struct nemotransition *nemotransition_group_get_last_one(struct transitiongroup *group, void *var)

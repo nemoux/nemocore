@@ -59,7 +59,7 @@ extern void nemotransition_group_attach_transition(struct transitiongroup *group
 extern void nemotransition_group_detach_transition(struct transitiongroup *group, struct nemotransition *trans);
 
 extern void nemotransition_group_ready(struct transitiongroup *group, uint32_t msecs);
-extern void nemotransition_group_dispatch(struct transitiongroup *group, uint32_t msecs);
+extern int nemotransition_group_dispatch(struct transitiongroup *group, uint32_t msecs);
 
 extern struct nemotransition *nemotransition_group_get_last_one(struct transitiongroup *group, void *var);
 extern struct nemotransition *nemotransition_group_get_last_tag(struct transitiongroup *group, uint32_t tag);

@@ -50,11 +50,19 @@ void nemoyoyo_dotor_destroy(struct yoyodotor *dotor)
 	free(dotor);
 }
 
+static void nemoyoyo_dotor_dispatch_transition_done(struct nemotransition *trans, void *data)
+{
+	struct yoyoone *one = (struct yoyoone *)data;
+
+	nemoyoyo_one_destroy(one);
+}
+
 static void nemoyoyo_dotor_dispatch_timer(struct nemotimer *timer, void *data)
 {
 	struct yoyodotor *dotor = (struct yoyodotor *)data;
 	struct nemoyoyo *yoyo = dotor->yoyo;
 	struct actiontap *tap = dotor->tap;
+	struct nemotransition *trans;
 	struct yoyoone *one;
 	struct cooktex *tex;
 
@@ -70,8 +78,19 @@ static void nemoyoyo_dotor_dispatch_timer(struct nemotimer *timer, void *data)
 	nemoyoyo_one_set_height(one,
 			nemocook_texture_get_height(tex));
 	nemoyoyo_one_set_texture(one, tex);
-
 	nemoyoyo_attach_one(yoyo, one);
+
+	trans = nemotransition_create(8,
+			NEMOEASE_CUBIC_INOUT_TYPE,
+			random_get_int(dotor->minimum_duration, dotor->maximum_duration),
+			0);
+	nemoyoyo_one_transition_set_sx(trans, 0, one);
+	nemoyoyo_one_transition_set_sy(trans, 1, one);
+	nemotransition_set_target(trans, 0, 1.0f, 0.0f);
+	nemotransition_set_target(trans, 1, 1.0f, 0.0f);
+	nemotransition_set_dispatch_done(trans, nemoyoyo_dotor_dispatch_transition_done);
+	nemotransition_set_userdata(trans, one);
+	nemotransition_group_attach_transition(yoyo->transitions, trans);
 
 	nemocanvas_dispatch_frame(yoyo->canvas);
 

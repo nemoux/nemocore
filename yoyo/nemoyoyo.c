@@ -51,13 +51,17 @@ static int nemoyoyo_load_json(struct nemoyoyo *yoyo, const char *jsonpath)
 static int nemoyoyo_update_one(struct nemoyoyo *yoyo)
 {
 	struct yoyoone *one;
+	int count = 0;
 
 	nemolist_for_each(one, &yoyo->one_list, link) {
-		if (nemoyoyo_one_has_no_dirty(one) == 0)
+		if (nemoyoyo_one_has_no_dirty(one) == 0) {
 			nemoyoyo_one_update(yoyo, one);
+
+			count++;
+		}
 	}
 
-	return 0;
+	return count;
 }
 
 static int nemoyoyo_update_frame(struct nemoyoyo *yoyo)
@@ -128,8 +132,10 @@ static int nemoyoyo_dispatch_tap_event(struct nemoaction *action, struct actiont
 		struct yoyodotor *dotor;
 
 		dotor = nemoyoyo_dotor_create(yoyo, tap);
-		nemoyoyo_dotor_set_minimum_interval(dotor, 12);
-		nemoyoyo_dotor_set_maximum_interval(dotor, 24);
+		nemoyoyo_dotor_set_minimum_interval(dotor, 18);
+		nemoyoyo_dotor_set_maximum_interval(dotor, 20);
+		nemoyoyo_dotor_set_minimum_duration(dotor, 800);
+		nemoyoyo_dotor_set_maximum_duration(dotor, 1200);
 		nemoyoyo_dotor_dispatch(dotor, yoyo->tool);
 	}
 
@@ -150,10 +156,21 @@ static void nemoyoyo_dispatch_canvas_frame(struct nemocanvas *canvas, uint64_t s
 {
 	struct nemoyoyo *yoyo = (struct nemoyoyo *)nemocanvas_get_userdata(canvas);
 
-	nemotransition_group_dispatch(yoyo->transitions, time_current_msecs());
+	if (nemotransition_group_dispatch(yoyo->transitions, time_current_msecs()) != 0)
+		nemoyoyo_set_flags(yoyo, NEMOYOYO_REDRAW_FLAG);
 
-	nemoyoyo_update_one(yoyo);
-	nemoyoyo_update_frame(yoyo);
+	if (nemoyoyo_update_one(yoyo) != 0)
+		nemoyoyo_set_flags(yoyo, NEMOYOYO_REDRAW_FLAG);
+
+	if (nemoyoyo_has_flags(yoyo, NEMOYOYO_REDRAW_FLAG) != 0) {
+		nemocanvas_dispatch_feedback(canvas);
+
+		nemoyoyo_update_frame(yoyo);
+
+		nemoyoyo_put_flags(yoyo, NEMOYOYO_REDRAW_FLAG);
+	} else {
+		nemocanvas_terminate_feedback(canvas);
+	}
 }
 
 static int nemoyoyo_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t type, struct nemoevent *event)
@@ -279,6 +296,8 @@ int main(int argc, char *argv[])
 	pixman_region32_init(&yoyo->damage);
 
 	nemolist_init(&yoyo->one_list);
+
+	yoyo->flags = NEMOYOYO_REDRAW_FLAG;
 
 	yoyo->transitions = nemotransition_group_create();
 
