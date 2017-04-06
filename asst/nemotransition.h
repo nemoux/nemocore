@@ -38,6 +38,7 @@ struct nemotransition {
 	uint32_t etime;
 
 	uint32_t repeat;
+	uint32_t done;
 
 	uint32_t tag;
 	uint32_t flags;
@@ -94,7 +95,8 @@ extern void nemotransition_set_target(struct nemotransition *trans, int index, d
 
 extern void nemotransition_put_one(struct nemotransition *trans, void *var, int size);
 
-extern void nemotransition_check_object(struct nemotransition *trans, struct nemosignal *signal, void *var, int size);
+extern void nemotransition_check_object_destroy(struct nemotransition *trans, struct nemosignal *signal);
+extern void nemotransition_check_object_revoke(struct nemotransition *trans, struct nemosignal *signal, void *var, int size);
 
 static inline int nemotransition_group_has_transition(struct transitiongroup *group)
 {
@@ -109,6 +111,11 @@ static inline uint32_t nemotransition_get_duration(struct nemotransition *trans)
 static inline uint32_t nemotransition_get_delay(struct nemotransition *trans)
 {
 	return trans->delay;
+}
+
+static inline void nemotransition_terminate(struct nemotransition *trans)
+{
+	trans->done = 1;
 }
 
 static inline void nemotransition_set_flags(struct nemotransition *trans, uint32_t flags)

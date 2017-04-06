@@ -161,9 +161,13 @@ static inline void *nemoyoyo_one_get_userdata(struct yoyoone *one)
 		nemoyoyo_one_set_flags(one, _flags);	\
 		nemotransition_set_float_with_dirty(trans, index, &one->attr, one->attr, &one->dirty, _dirty);	\
 	}
-#define NEMOYOYO_ONE_DECLARE_CHECK_TRANSITION()	\
-	static inline void nemoyoyo_one_transition_check(struct nemotransition *trans, struct yoyoone *one) {	\
-		nemotransition_check_object(trans, &one->destroy_signal, one, sizeof(struct yoyoone));	\
+#define NEMOYOYO_ONE_DECLARE_CHECK_TRANSITION_DESTROY()	\
+	static inline void nemoyoyo_one_transition_check_destroy(struct nemotransition *trans, struct yoyoone *one) {	\
+		nemotransition_check_object_destroy(trans, &one->destroy_signal);	\
+	}
+#define NEMOYOYO_ONE_DECLARE_CHECK_TRANSITION_REVOKE()	\
+	static inline void nemoyoyo_one_transition_check_revoke(struct nemotransition *trans, struct yoyoone *one) {	\
+		nemotransition_check_object_revoke(trans, &one->destroy_signal, one, sizeof(struct yoyoone));	\
 	}
 
 NEMOYOYO_ONE_DECLARE_SET_ATTRIBUTE(float, alpha, alpha, 0x0);
@@ -190,7 +194,8 @@ NEMOYOYO_ONE_DECLARE_SET_TRANSITION(geometry.h, height, NEMOYOYO_ONE_TRANSFORM_D
 NEMOYOYO_ONE_DECLARE_SET_TRANSITION(geometry.ax, ax, NEMOYOYO_ONE_TRANSFORM_DIRTY);
 NEMOYOYO_ONE_DECLARE_SET_TRANSITION(geometry.ay, ay, NEMOYOYO_ONE_TRANSFORM_DIRTY);
 
-NEMOYOYO_ONE_DECLARE_CHECK_TRANSITION();
+NEMOYOYO_ONE_DECLARE_CHECK_TRANSITION_DESTROY();
+NEMOYOYO_ONE_DECLARE_CHECK_TRANSITION_REVOKE();
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

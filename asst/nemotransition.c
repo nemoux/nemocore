@@ -283,6 +283,9 @@ void nemotransition_set_repeat(struct nemotransition *trans, uint32_t repeat)
 
 int nemotransition_put_repeat(struct nemotransition *trans)
 {
+	if (trans->done != 0)
+		return 1;
+
 	if (trans->repeat == 0 || --trans->repeat > 0) {
 		trans->stime = 0;
 		trans->etime = 0;
@@ -308,6 +311,9 @@ int nemotransition_dispatch(struct nemotransition *trans, uint32_t msecs)
 	struct transitionone *one;
 	double t, u, v;
 	int i, j;
+
+	if (trans->done != 0)
+		return 1;
 
 	if (trans->stime == 0) {
 		trans->stime = msecs + trans->delay;
@@ -487,6 +493,31 @@ static void nemotransition_handle_object_destroy(struct nemolistener *listener, 
 {
 	struct transitionsensor *sensor = (struct transitionsensor *)container_of(listener, struct transitionsensor, listener);
 
+	nemotransition_terminate(sensor->transition);
+
+	nemolist_remove(&sensor->link);
+	nemolist_remove(&sensor->listener.link);
+
+	free(sensor);
+}
+
+void nemotransition_check_object_destroy(struct nemotransition *trans, struct nemosignal *signal)
+{
+	struct transitionsensor *sensor;
+
+	sensor = (struct transitionsensor *)malloc(sizeof(struct transitionsensor));
+	sensor->transition = trans;
+
+	sensor->listener.notify = nemotransition_handle_object_destroy;
+	nemosignal_add(signal, &sensor->listener);
+
+	nemolist_insert_tail(&trans->sensor_list, &sensor->link);
+}
+
+static void nemotransition_handle_object_revoke(struct nemolistener *listener, void *data)
+{
+	struct transitionsensor *sensor = (struct transitionsensor *)container_of(listener, struct transitionsensor, listener);
+
 	nemotransition_put_one(sensor->transition, sensor->var, sensor->size);
 
 	nemolist_remove(&sensor->link);
@@ -495,7 +526,7 @@ static void nemotransition_handle_object_destroy(struct nemolistener *listener, 
 	free(sensor);
 }
 
-void nemotransition_check_object(struct nemotransition *trans, struct nemosignal *signal, void *var, int size)
+void nemotransition_check_object_revoke(struct nemotransition *trans, struct nemosignal *signal, void *var, int size)
 {
 	struct transitionsensor *sensor;
 
@@ -504,7 +535,7 @@ void nemotransition_check_object(struct nemotransition *trans, struct nemosignal
 	sensor->var = var;
 	sensor->size = size;
 
-	sensor->listener.notify = nemotransition_handle_object_destroy;
+	sensor->listener.notify = nemotransition_handle_object_revoke;
 	nemosignal_add(signal, &sensor->listener);
 
 	nemolist_insert_tail(&trans->sensor_list, &sensor->link);

@@ -63,7 +63,7 @@ static void nemoyoyo_actor_dispatch_timer(struct nemotimer *timer, void *data)
 	nemoyoyo_one_transition_set_sx(trans, 0, one);
 	nemoyoyo_one_transition_set_sy(trans, 1, one);
 	nemoyoyo_one_transition_set_alpha(trans, 2, one);
-	nemoyoyo_one_transition_check(trans, one);
+	nemoyoyo_one_transition_check_destroy(trans, one);
 	nemotransition_set_target(trans, 0, 1.0f, 2.0f);
 	nemotransition_set_target(trans, 1, 1.0f, 2.0f);
 	nemotransition_set_target(trans, 2, 0.5f, 0.1f);

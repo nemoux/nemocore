@@ -48,7 +48,7 @@ static void nemomotz_swirl_down(struct nemomotz *motz, struct motztap *tap, stru
 	nemotransition_set_dispatch_done(trans, nemomotz_swirl_dispatch_transition_done);
 	nemotransition_set_userdata(trans, one);
 
-	nemomotz_transition_swirl_check(trans, one);
+	nemomotz_transition_swirl_check_destroy(trans, one);
 	nemomotz_attach_transition(motz, trans);
 }
 

@@ -133,9 +133,13 @@ struct motztap {
 		nemomotz_one_set_flags(one, _flags);	\
 		nemotransition_set_float_with_dirty(trans, index, &tag->attr, tag->attr, &one->dirty, _dirty);	\
 	}
-#define NEMOMOTZ_DECLARE_CHECK_TRANSITION(tag)	\
-	static inline void nemomotz_transition_##tag##_check(struct nemotransition *trans, struct motzone *one) {	\
-		nemotransition_check_object(trans, &one->destroy_signal, one, sizeof(struct motz##tag));	\
+#define NEMOMOTZ_DECLARE_CHECK_TRANSITION_DESTROY(tag)	\
+	static inline void nemomotz_transition_##tag##_check_destroy(struct nemotransition *trans, struct motzone *one) {	\
+		nemotransition_check_object_destroy(trans, &one->destroy_signal);	\
+	}
+#define NEMOMOTZ_DECLARE_CHECK_TRANSITION_REVOKE(tag)	\
+	static inline void nemomotz_transition_##tag##_check_revoke(struct nemotransition *trans, struct motzone *one) {	\
+		nemotransition_check_object_revoke(trans, &one->destroy_signal, one, sizeof(struct motz##tag));	\
 	}
 
 extern struct nemomotz *nemomotz_create(void);
