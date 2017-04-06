@@ -76,16 +76,31 @@ static int nemoyoyo_sweep_dispatch_tap_event(struct nemoaction *action, struct a
 				random_get_int(sweep->minimum_interval, sweep->maximum_interval));
 	} else if (event & NEMOACTION_TAP_MOTION_EVENT) {
 	} else if (event & NEMOACTION_TAP_UP_EVENT) {
-		if (nemoaction_tap_get_duration(tap) > sweep->actor_duration &&
-				nemoaction_tap_get_distance(tap) > sweep->actor_distance) {
-			struct yoyoactor *actor;
+		if (nemoaction_tap_get_duration(tap) > sweep->actor_duration && nemoaction_tap_get_distance(tap) > sweep->actor_distance) {
+			struct json_object *jobj;
 
-			actor = nemoyoyo_actor_create(yoyo);
-			nemoyoyo_actor_set_json_object(actor,
-					nemojson_search_object(yoyo->config, 0, 1, "menu"));
-			nemoyoyo_actor_set_lifetime(actor, 1800);
-			nemoyoyo_actor_set_hidetime(actor, 800);
-			nemoyoyo_actor_dispatch(actor, tap);
+			jobj = nemojson_search_object(yoyo->config, 0, 1, "menu");
+			if (jobj != NULL) {
+				struct yoyoactor *actor;
+				struct json_object *cobj;
+				float cx = nemoaction_tap_get_tx(tap);
+				float cy = nemoaction_tap_get_ty(tap);
+				float dx, dy;
+				int i;
+
+				for (i = 0; i < json_object_array_length(jobj); i++) {
+					cobj = json_object_array_get_idx(jobj, i);
+
+					dx = random_get_double(-180.0f, 180.0f);
+					dy = random_get_double(-180.0f, 180.0f);
+
+					actor = nemoyoyo_actor_create(yoyo);
+					nemoyoyo_actor_set_json_object(actor, cobj);
+					nemoyoyo_actor_set_lifetime(actor, 1800);
+					nemoyoyo_actor_set_hidetime(actor, 800);
+					nemoyoyo_actor_dispatch(actor, cx + dx, cy + dy);
+				}
+			}
 		}
 
 		nemoyoyo_sweep_destroy(sweep);

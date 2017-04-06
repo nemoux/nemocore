@@ -87,14 +87,18 @@ static int nemoyoyo_actor_dispatch_tap_event(struct nemoaction *action, struct a
 	} else if (event & NEMOACTION_TAP_UP_EVENT) {
 		nemoaction_destroy_one_by_target(action, one);
 		nemoaction_destroy_tap_by_target(action, one);
-		nemoyoyo_actor_execute(actor, tap, "click");
+		nemoyoyo_actor_execute(actor,
+				nemoaction_tap_get_tx(tap),
+				nemoaction_tap_get_ty(tap),
+				0.0f,
+				"click");
 		nemoyoyo_actor_destroy(actor);
 	}
 
 	return 0;
 }
 
-int nemoyoyo_actor_dispatch(struct yoyoactor *actor, struct actiontap *tap)
+int nemoyoyo_actor_dispatch(struct yoyoactor *actor, float x, float y)
 {
 	struct nemoyoyo *yoyo = actor->yoyo;
 	struct yoyoone *one;
@@ -112,10 +116,8 @@ int nemoyoyo_actor_dispatch(struct yoyoactor *actor, struct actiontap *tap)
 		goto err1;
 
 	one = actor->icon = nemoyoyo_one_create();
-	nemoyoyo_one_set_tx(one,
-			nemoaction_tap_get_tx(tap));
-	nemoyoyo_one_set_ty(one,
-			nemoaction_tap_get_ty(tap));
+	nemoyoyo_one_set_tx(one, x);
+	nemoyoyo_one_set_ty(one, y);
 	nemoyoyo_one_set_width(one,
 			nemocook_texture_get_width(tex));
 	nemoyoyo_one_set_height(one,
@@ -142,7 +144,7 @@ err1:
 	return -1;
 }
 
-int nemoyoyo_actor_execute(struct yoyoactor *actor, struct actiontap *tap, const char *event)
+int nemoyoyo_actor_execute(struct yoyoactor *actor, float x, float y, float r, const char *event)
 {
 	struct nemoyoyo *yoyo = actor->yoyo;
 	struct json_object *tobj;
@@ -166,14 +168,38 @@ int nemoyoyo_actor_execute(struct yoyoactor *actor, struct actiontap *tap, const
 		msg = nemobus_msg_create();
 		nemobus_msg_set_name(msg, "command");
 		nemobus_msg_set_attr(msg, "type", type);
-		nemobus_msg_set_attr_format(msg, "x", "%f", nemoaction_tap_get_tx(tap));
-		nemobus_msg_set_attr_format(msg, "y", "%f", nemoaction_tap_get_ty(tap));
-		nemobus_msg_set_attr_format(msg, "r", "%f", 0.0f);
+		nemobus_msg_set_attr_format(msg, "x", "%f", x);
+		nemobus_msg_set_attr_format(msg, "y", "%f", y);
+		nemobus_msg_set_attr_format(msg, "r", "%f", r);
 		nemobus_msg_set_attr(msg, "path", path);
 		if (args != NULL)
 			nemobus_msg_set_attr(msg, "args", args);
 		nemobus_send_msg(yoyo->bus, yoyo->busid, "/nemoshell", msg);
 		nemobus_msg_destroy(msg);
+	} else if (strcmp(type, "group") == 0) {
+		struct json_object *jobj;
+
+		if (json_object_object_get_ex(actor->jobj, "item", &jobj) != 0) {
+			struct yoyoactor *child;
+			struct json_object *cobj;
+			float cx = x;
+			float cy = y;
+			float dx, dy;
+			int i;
+
+			for (i = 0; i < json_object_array_length(jobj); i++) {
+				cobj = json_object_array_get_idx(jobj, i);
+
+				dx = random_get_double(-180.0f, 180.0f);
+				dy = random_get_double(-180.0f, 180.0f);
+
+				child = nemoyoyo_actor_create(yoyo);
+				nemoyoyo_actor_set_json_object(child, cobj);
+				nemoyoyo_actor_set_lifetime(child, 1800);
+				nemoyoyo_actor_set_hidetime(child, 800);
+				nemoyoyo_actor_dispatch(child, cx + dx, cy + dy);
+			}
+		}
 	}
 
 	return 0;
