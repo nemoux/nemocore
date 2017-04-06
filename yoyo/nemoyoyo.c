@@ -121,16 +121,23 @@ static int nemoyoyo_dispatch_tap_event(struct nemoaction *action, struct actiont
 	struct nemoyoyo *yoyo = (struct nemoyoyo *)nemoaction_get_userdata(action);
 
 	if (event & NEMOACTION_TAP_DOWN_EVENT) {
-		struct yoyosweep *sweep;
+		struct yoyoone *one;
 
-		sweep = nemoyoyo_sweep_create(yoyo, tap);
-		nemoyoyo_sweep_set_minimum_interval(sweep, 18);
-		nemoyoyo_sweep_set_maximum_interval(sweep, 20);
-		nemoyoyo_sweep_set_minimum_duration(sweep, 800);
-		nemoyoyo_sweep_set_maximum_duration(sweep, 1200);
-		nemoyoyo_sweep_set_actor_distance(sweep, 100.0f);
-		nemoyoyo_sweep_set_actor_duration(sweep, 300);
-		nemoyoyo_sweep_dispatch(sweep);
+		one = nemoyoyo_pick_one(yoyo,
+				nemoaction_tap_get_tx(tap),
+				nemoaction_tap_get_ty(tap));
+		if (one == NULL) {
+			struct yoyosweep *sweep;
+
+			sweep = nemoyoyo_sweep_create(yoyo, tap);
+			nemoyoyo_sweep_set_minimum_interval(sweep, 18);
+			nemoyoyo_sweep_set_maximum_interval(sweep, 20);
+			nemoyoyo_sweep_set_minimum_duration(sweep, 800);
+			nemoyoyo_sweep_set_maximum_duration(sweep, 1200);
+			nemoyoyo_sweep_set_actor_distance(sweep, 100.0f);
+			nemoyoyo_sweep_set_actor_duration(sweep, 300);
+			nemoyoyo_sweep_dispatch(sweep);
+		}
 	}
 
 	return 0;
@@ -391,6 +398,21 @@ void nemoyoyo_detach_one(struct nemoyoyo *yoyo, struct yoyoone *one)
 	nemolist_init(&one->link);
 
 	nemocook_transform_set_parent(one->trans, NULL);
+}
+
+struct yoyoone *nemoyoyo_pick_one(struct nemoyoyo *yoyo, float x, float y)
+{
+	struct yoyoone *one;
+	float sx, sy;
+
+	nemolist_for_each_reverse(one, &yoyo->one_list, link) {
+		nemocook_2d_transform_from_global(one->trans, x, y, &sx, &sy);
+
+		if (0.0f <= sx && sx <= one->geometry.w && 0.0f <= sy && sy <= one->geometry.h)
+			return one;
+	}
+
+	return NULL;
 }
 
 struct cooktex *nemoyoyo_search_tex(struct nemoyoyo *yoyo, const char *path)

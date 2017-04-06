@@ -57,6 +57,8 @@ struct nemoyoyo {
 extern void nemoyoyo_attach_one(struct nemoyoyo *yoyo, struct yoyoone *one);
 extern void nemoyoyo_detach_one(struct nemoyoyo *yoyo, struct yoyoone *one);
 
+extern struct yoyoone *nemoyoyo_pick_one(struct nemoyoyo *yoyo, float x, float y);
+
 extern struct cooktex *nemoyoyo_search_tex(struct nemoyoyo *yoyo, const char *path);
 
 static inline void nemoyoyo_set_flags(struct nemoyoyo *yoyo, uint32_t flags)
