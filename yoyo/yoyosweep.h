@@ -24,6 +24,9 @@ struct yoyosweep {
 	float minimum_range, maximum_range;
 	uint32_t minimum_interval, maximum_interval;
 	uint32_t minimum_duration, maximum_duration;
+
+	float actor_distance;
+	uint32_t actor_duration;
 };
 
 extern struct yoyosweep *nemoyoyo_sweep_create(struct nemoyoyo *yoyo, struct actiontap *tap);
@@ -59,6 +62,16 @@ static inline void nemoyoyo_sweep_set_minimum_duration(struct yoyosweep *sweep, 
 static inline void nemoyoyo_sweep_set_maximum_duration(struct yoyosweep *sweep, uint32_t max)
 {
 	sweep->maximum_duration = max;
+}
+
+static inline void nemoyoyo_sweep_set_actor_distance(struct yoyosweep *sweep, float distance)
+{
+	sweep->actor_distance = distance;
+}
+
+static inline void nemoyoyo_sweep_set_actor_duration(struct yoyosweep *sweep, uint32_t duration)
+{
+	sweep->actor_duration = duration;
 }
 
 #ifdef __cplusplus

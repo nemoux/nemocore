@@ -237,15 +237,15 @@ static inline void nemoaction_tap_clear(struct actiontap *tap, float x, float y)
 
 static inline void nemoaction_tap_trace(struct actiontap *tap, float x, float y)
 {
+	float dx = x - tap->dx;
+	float dy = y - tap->dy;
+
+	tap->distance += sqrtf(dx * dx + dy * dy);
+
+	tap->dx = x;
+	tap->dy = y;
+
 	if (tap->ntraces < tap->mtraces) {
-		float dx = x - tap->dx;
-		float dy = y - tap->dy;
-
-		tap->distance += sqrtf(dx * dx + dy * dy);
-
-		tap->dx = x;
-		tap->dy = y;
-
 		tap->traces[tap->ntraces * 2 + 0] = x;
 		tap->traces[tap->ntraces * 2 + 1] = y;
 		tap->ntraces++;

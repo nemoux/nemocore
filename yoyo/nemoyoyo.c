@@ -128,6 +128,8 @@ static int nemoyoyo_dispatch_tap_event(struct nemoaction *action, struct actiont
 		nemoyoyo_sweep_set_maximum_interval(sweep, 20);
 		nemoyoyo_sweep_set_minimum_duration(sweep, 800);
 		nemoyoyo_sweep_set_maximum_duration(sweep, 1200);
+		nemoyoyo_sweep_set_actor_distance(sweep, 100.0f);
+		nemoyoyo_sweep_set_actor_duration(sweep, 300);
 		nemoyoyo_sweep_dispatch(sweep);
 	}
 
@@ -164,14 +166,22 @@ static int nemoyoyo_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t ty
 		tap = nemoaction_tap_create(yoyo->action);
 		nemoaction_tap_set_tx(tap, nemoevent_get_canvas_x(event));
 		nemoaction_tap_set_ty(tap, nemoevent_get_canvas_y(event));
+		nemoaction_tap_set_time(tap, nemoevent_get_time(event));
+		nemoaction_tap_set_grab_tx(tap, nemoevent_get_canvas_x(event));
+		nemoaction_tap_set_grab_ty(tap, nemoevent_get_canvas_y(event));
+		nemoaction_tap_set_grab_time(tap, nemoevent_get_time(event));
 		nemoaction_tap_set_device(tap, nemoevent_get_device(event));
 		nemoaction_tap_set_serial(tap, nemoevent_get_serial(event));
+		nemoaction_tap_clear(tap,
+				nemoevent_get_canvas_x(event),
+				nemoevent_get_canvas_y(event));
 		nemoaction_tap_dispatch_event(yoyo->action, tap, NEMOACTION_TAP_DOWN_EVENT);
 	} else if (type & NEMOTOOL_TOUCH_UP_EVENT) {
 		tap = nemoaction_get_tap_by_device(yoyo->action, nemoevent_get_device(event));
 		if (tap != NULL) {
 			nemoaction_tap_set_tx(tap, nemoevent_get_canvas_x(event));
 			nemoaction_tap_set_ty(tap, nemoevent_get_canvas_y(event));
+			nemoaction_tap_set_time(tap, nemoevent_get_time(event));
 			nemoaction_tap_detach(tap);
 			nemoaction_tap_dispatch_event(yoyo->action, tap, NEMOACTION_TAP_UP_EVENT);
 			nemoaction_tap_destroy(tap);
@@ -181,6 +191,10 @@ static int nemoyoyo_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t ty
 		if (tap != NULL) {
 			nemoaction_tap_set_tx(tap, nemoevent_get_canvas_x(event));
 			nemoaction_tap_set_ty(tap, nemoevent_get_canvas_y(event));
+			nemoaction_tap_set_time(tap, nemoevent_get_time(event));
+			nemoaction_tap_trace(tap,
+					nemoevent_get_canvas_x(event),
+					nemoevent_get_canvas_y(event));
 			nemoaction_tap_dispatch_event(yoyo->action, tap, NEMOACTION_TAP_MOTION_EVENT);
 		}
 	}

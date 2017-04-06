@@ -74,6 +74,10 @@ static int nemoyoyo_sweep_dispatch_tap_event(struct nemoaction *action, struct a
 				random_get_int(sweep->minimum_interval, sweep->maximum_interval));
 	} else if (event & NEMOACTION_TAP_MOTION_EVENT) {
 	} else if (event & NEMOACTION_TAP_UP_EVENT) {
+		if (nemoaction_tap_get_duration(tap) > sweep->actor_duration &&
+				nemoaction_tap_get_distance(tap) > sweep->actor_distance) {
+		}
+
 		nemoyoyo_sweep_destroy(sweep);
 	}
 
