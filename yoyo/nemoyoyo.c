@@ -137,6 +137,9 @@ static int nemoyoyo_dispatch_tap_event(struct nemoaction *action, struct actiont
 			nemoyoyo_sweep_set_actor_distance(sweep, 100.0f);
 			nemoyoyo_sweep_set_actor_duration(sweep, 300);
 			nemoyoyo_sweep_dispatch(sweep);
+		} else {
+			nemoaction_tap_set_callback(tap, one->tap_event_callback);
+			nemoaction_tap_dispatch_event(action, tap, NEMOACTION_TAP_DOWN_EVENT);
 		}
 	}
 

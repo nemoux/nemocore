@@ -10,6 +10,11 @@
 #include <nemomisc.h>
 #include <cliphelper.h>
 
+static int nemoyoyo_one_dispatch_tap_event(struct nemoaction *action, struct actiontap *tap, uint32_t event)
+{
+	return 0;
+}
+
 struct yoyoone *nemoyoyo_one_create(void)
 {
 	struct yoyoone *one;
@@ -34,6 +39,8 @@ struct yoyoone *nemoyoyo_one_create(void)
 
 	one->geometry.ax = 0.5f;
 	one->geometry.ay = 0.5f;
+
+	one->tap_event_callback = nemoyoyo_one_dispatch_tap_event;
 
 	nemolist_init(&one->link);
 
