@@ -26,8 +26,12 @@ static void nemoyoyo_sweep_dispatch_timer(struct nemotimer *timer, void *data)
 	struct nemotransition *trans;
 	struct yoyoone *one;
 	struct cooktex *tex;
+	float r, w;
 
 	tex = yoyo->sweeps[random_get_int(0, yoyo->nsweeps - 1)];
+
+	r = random_get_double(sweep->minimum_range, sweep->maximum_range);
+	w = random_get_double(0.0f, M_PI * 2.0f);
 
 	one = nemoyoyo_one_create();
 	nemoyoyo_one_set_tx(one,
@@ -45,13 +49,19 @@ static void nemoyoyo_sweep_dispatch_timer(struct nemotimer *timer, void *data)
 			NEMOEASE_CUBIC_INOUT_TYPE,
 			random_get_int(sweep->minimum_duration, sweep->maximum_duration),
 			0);
-	nemoyoyo_one_transition_set_sx(trans, 0, one);
-	nemoyoyo_one_transition_set_sy(trans, 1, one);
-	nemoyoyo_one_transition_set_alpha(trans, 2, one);
+	nemoyoyo_one_transition_set_tx(trans, 0, one);
+	nemoyoyo_one_transition_set_ty(trans, 1, one);
+	nemoyoyo_one_transition_set_sx(trans, 2, one);
+	nemoyoyo_one_transition_set_sy(trans, 3, one);
+	nemoyoyo_one_transition_set_alpha(trans, 4, one);
 	nemoyoyo_one_transition_check_destroy(trans, one);
-	nemotransition_set_target(trans, 0, 1.0f, 0.0f);
-	nemotransition_set_target(trans, 1, 1.0f, 0.0f);
-	nemotransition_set_target(trans, 2, 1.0f, 0.0f);
+	nemotransition_set_target(trans, 0, 1.0f,
+			nemoaction_tap_get_tx(tap) + cos(w) * r);
+	nemotransition_set_target(trans, 1, 1.0f,
+			nemoaction_tap_get_ty(tap) + sin(w) * r);
+	nemotransition_set_target(trans, 2, 1.0f, 0.45f);
+	nemotransition_set_target(trans, 3, 1.0f, 0.45f);
+	nemotransition_set_target(trans, 4, 1.0f, 0.0f);
 	nemotransition_set_dispatch_done(trans, nemoyoyo_sweep_dispatch_transition_done);
 	nemotransition_set_userdata(trans, one);
 	nemotransition_group_attach_transition(yoyo->transitions, trans);
