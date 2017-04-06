@@ -6,6 +6,7 @@
 #include <errno.h>
 
 #include <yoyosweep.h>
+#include <yoyoactor.h>
 #include <nemoyoyo.h>
 #include <yoyoone.h>
 #include <nemomisc.h>
@@ -76,6 +77,12 @@ static int nemoyoyo_sweep_dispatch_tap_event(struct nemoaction *action, struct a
 	} else if (event & NEMOACTION_TAP_UP_EVENT) {
 		if (nemoaction_tap_get_duration(tap) > sweep->actor_duration &&
 				nemoaction_tap_get_distance(tap) > sweep->actor_distance) {
+			struct yoyoactor *actor;
+
+			actor = nemoyoyo_actor_create(yoyo);
+			nemoyoyo_actor_set_json_object(actor,
+					nemojson_search_object(yoyo->config, 0, 1, "menu"));
+			nemoyoyo_actor_dispatch(actor);
 		}
 
 		nemoyoyo_sweep_destroy(sweep);
