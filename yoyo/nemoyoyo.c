@@ -452,7 +452,11 @@ struct cooktex *nemoyoyo_search_tex(struct nemoyoyo *yoyo, const char *path)
 
 	tex = nemocook_texture_create();
 	nemocook_texture_assign(tex, NEMOCOOK_TEXTURE_BGRA_FORMAT, 0, 0);
-	nemocook_texture_load_image(tex, path);
+
+	if (nemocook_texture_load_image(tex, path) < 0) {
+		nemocook_texture_destroy(tex);
+		return NULL;
+	}
 
 	nemodick_insert(yoyo->textures, path, tex);
 
