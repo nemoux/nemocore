@@ -10,9 +10,9 @@ NEMO_BEGIN_EXTERN_C
 #include <stdint.h>
 
 #include <nemotimer.h>
+#include <nemoaction.h>
 
 struct nemoyoyo;
-struct actiontap;
 
 struct yoyosweep {
 	struct nemoyoyo *yoyo;
@@ -29,10 +29,10 @@ struct yoyosweep {
 	uint32_t actor_duration;
 };
 
-extern struct yoyosweep *nemoyoyo_sweep_create(struct nemoyoyo *yoyo, struct actiontap *tap);
+extern struct yoyosweep *nemoyoyo_sweep_create(struct nemoyoyo *yoyo);
 extern void nemoyoyo_sweep_destroy(struct yoyosweep *sweep);
 
-extern int nemoyoyo_sweep_dispatch(struct yoyosweep *sweep);
+extern int nemoyoyo_sweep_dispatch(struct yoyosweep *sweep, struct actiontap *tap);
 
 static inline void nemoyoyo_sweep_set_minimum_range(struct yoyosweep *sweep, float min)
 {

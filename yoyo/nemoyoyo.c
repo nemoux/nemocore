@@ -129,14 +129,14 @@ static int nemoyoyo_dispatch_tap_event(struct nemoaction *action, struct actiont
 		if (one == NULL) {
 			struct yoyosweep *sweep;
 
-			sweep = nemoyoyo_sweep_create(yoyo, tap);
+			sweep = nemoyoyo_sweep_create(yoyo);
 			nemoyoyo_sweep_set_minimum_interval(sweep, 18);
 			nemoyoyo_sweep_set_maximum_interval(sweep, 20);
 			nemoyoyo_sweep_set_minimum_duration(sweep, 800);
 			nemoyoyo_sweep_set_maximum_duration(sweep, 1200);
 			nemoyoyo_sweep_set_actor_distance(sweep, 100.0f);
 			nemoyoyo_sweep_set_actor_duration(sweep, 300);
-			nemoyoyo_sweep_dispatch(sweep);
+			nemoyoyo_sweep_dispatch(sweep, tap);
 		} else {
 			nemoaction_tap_set_callback(tap, one->tap_event_callback);
 			nemoaction_tap_set_userdata(tap, one);

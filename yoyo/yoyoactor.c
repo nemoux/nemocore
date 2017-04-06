@@ -28,7 +28,8 @@ struct yoyoactor *nemoyoyo_actor_create(struct nemoyoyo *yoyo)
 
 void nemoyoyo_actor_destroy(struct yoyoactor *actor)
 {
-	nemoyoyo_one_destroy(actor->icon);
+	if (actor->icon != NULL)
+		nemoyoyo_one_destroy(actor->icon);
 
 	if (actor->timer != NULL)
 		nemotimer_destroy(actor->timer);
@@ -88,25 +89,17 @@ static int nemoyoyo_actor_dispatch_tap_event(struct nemoaction *action, struct a
 	return 0;
 }
 
-int nemoyoyo_actor_dispatch(struct yoyoactor *actor, float x, float y)
+int nemoyoyo_actor_dispatch(struct yoyoactor *actor, struct actiontap *tap)
 {
 	struct nemoyoyo *yoyo = actor->yoyo;
 	struct yoyoone *one;
 	struct cooktex *tex;
-	struct json_object *iobj = NULL;
-	struct json_object *tobj = NULL;
+	struct json_object *tobj;
 	const char *icon = NULL;
-	const char *type = NULL;
 
-	if (json_object_object_get_ex(actor->jobj, "icon", &iobj) != 0) {
-		icon = json_object_get_string(iobj);
-	}
-
-	if (json_object_object_get_ex(actor->jobj, "type", &tobj) != 0) {
-		type = json_object_get_string(tobj);
-	}
-
-	if (icon == NULL || type == NULL)
+	if (json_object_object_get_ex(actor->jobj, "icon", &tobj) != 0)
+		icon = json_object_get_string(tobj);
+	if (icon == NULL)
 		goto err1;
 
 	tex = nemoyoyo_search_tex(yoyo, icon);
@@ -114,8 +107,10 @@ int nemoyoyo_actor_dispatch(struct yoyoactor *actor, float x, float y)
 		goto err1;
 
 	one = actor->icon = nemoyoyo_one_create();
-	nemoyoyo_one_set_tx(one, x);
-	nemoyoyo_one_set_ty(one, y);
+	nemoyoyo_one_set_tx(one,
+			nemoaction_tap_get_tx(tap));
+	nemoyoyo_one_set_ty(one,
+			nemoaction_tap_get_ty(tap));
 	nemoyoyo_one_set_width(one,
 			nemocook_texture_get_width(tex));
 	nemoyoyo_one_set_height(one,
