@@ -85,13 +85,13 @@ static int nemoyoyo_actor_dispatch_tap_event(struct nemoaction *action, struct a
 	} else if (event & NEMOACTION_TAP_MOTION_EVENT) {
 		nemotimer_set_timeout(actor->timer, actor->lifetime);
 	} else if (event & NEMOACTION_TAP_UP_EVENT) {
-		nemoaction_destroy_one_by_target(action, one);
-		nemoaction_destroy_tap_by_target(action, one);
 		nemoyoyo_actor_execute(actor,
 				nemoaction_tap_get_tx(tap),
 				nemoaction_tap_get_ty(tap),
 				0.0f,
 				"click");
+		nemoaction_destroy_one_by_target(action, one);
+		nemoaction_destroy_tap_by_target(action, one);
 		nemoyoyo_actor_destroy(actor);
 	}
 
