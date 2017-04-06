@@ -57,7 +57,7 @@ static void nemoyoyo_actor_dispatch_timer(struct nemotimer *timer, void *data)
 	struct nemotransition *trans;
 
 	trans = nemotransition_create(8,
-			NEMOEASE_CUBIC_INOUT_TYPE,
+			NEMOEASE_CUBIC_OUT_TYPE,
 			actor->hidetime,
 			0);
 	nemoyoyo_one_transition_set_sx(trans, 0, one);
@@ -131,7 +131,7 @@ int nemoyoyo_actor_dispatch(struct yoyoactor *actor, float cx, float cy, float t
 	nemoaction_one_set_tap_callback(yoyo->action, one, nemoyoyo_actor_dispatch_tap_event);
 
 	trans = nemotransition_create(8,
-			NEMOEASE_CUBIC_INOUT_TYPE,
+			NEMOEASE_CUBIC_OUT_TYPE,
 			actor->hidetime,
 			0);
 	nemoyoyo_one_transition_set_tx(trans, 0, one);

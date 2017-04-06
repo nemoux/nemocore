@@ -46,7 +46,7 @@ static void nemoyoyo_sweep_dispatch_timer(struct nemotimer *timer, void *data)
 	nemoyoyo_attach_one(yoyo, one);
 
 	trans = nemotransition_create(8,
-			NEMOEASE_CUBIC_INOUT_TYPE,
+			NEMOEASE_CUBIC_OUT_TYPE,
 			random_get_int(sweep->minimum_duration, sweep->maximum_duration),
 			0);
 	nemoyoyo_one_transition_set_tx(trans, 0, one);
