@@ -62,6 +62,11 @@ int nemoaction_tap_set_trace_max(struct actiontap *tap, int maximum)
 	return 0;
 }
 
+static int nemoaction_tap_dispatch_no_event(struct nemoaction *action, struct actiontap *tap, uint32_t event)
+{
+	return 0;
+}
+
 int nemoaction_tap_set_focus(struct nemoaction *action, struct actiontap *tap, void *target)
 {
 	struct actionone *one;
@@ -73,6 +78,8 @@ int nemoaction_tap_set_focus(struct nemoaction *action, struct actiontap *tap, v
 
 		return 1;
 	}
+
+	tap->dispatch_event = nemoaction_tap_dispatch_no_event;
 
 	return 0;
 }
