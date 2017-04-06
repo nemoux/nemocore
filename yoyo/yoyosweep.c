@@ -99,6 +99,8 @@ static int nemoyoyo_sweep_dispatch_tap_event(struct nemoaction *action, struct a
 					nemoyoyo_actor_set_lifetime(actor, 1800);
 					nemoyoyo_actor_set_hidetime(actor, 800);
 					nemoyoyo_actor_dispatch(actor,
+							cx,
+							cy,
 							cx + cos(w) * r,
 							cy + sin(w) * r);
 				}

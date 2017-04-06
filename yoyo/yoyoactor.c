@@ -98,11 +98,12 @@ static int nemoyoyo_actor_dispatch_tap_event(struct nemoaction *action, struct a
 	return 0;
 }
 
-int nemoyoyo_actor_dispatch(struct yoyoactor *actor, float x, float y)
+int nemoyoyo_actor_dispatch(struct yoyoactor *actor, float cx, float cy, float tx, float ty)
 {
 	struct nemoyoyo *yoyo = actor->yoyo;
 	struct yoyoone *one;
 	struct cooktex *tex;
+	struct nemotransition *trans;
 	struct json_object *tobj;
 	const char *icon = NULL;
 
@@ -116,8 +117,9 @@ int nemoyoyo_actor_dispatch(struct yoyoactor *actor, float x, float y)
 		goto err1;
 
 	one = actor->icon = nemoyoyo_one_create();
-	nemoyoyo_one_set_tx(one, x);
-	nemoyoyo_one_set_ty(one, y);
+	nemoyoyo_one_set_tx(one, cx);
+	nemoyoyo_one_set_ty(one, cy);
+	nemoyoyo_one_set_alpha(one, 0.0f);
 	nemoyoyo_one_set_width(one,
 			nemocook_texture_get_width(tex));
 	nemoyoyo_one_set_height(one,
@@ -127,6 +129,20 @@ int nemoyoyo_actor_dispatch(struct yoyoactor *actor, float x, float y)
 	nemoyoyo_attach_one(yoyo, one);
 
 	nemoaction_one_set_tap_callback(yoyo->action, one, nemoyoyo_actor_dispatch_tap_event);
+
+	trans = nemotransition_create(8,
+			NEMOEASE_CUBIC_INOUT_TYPE,
+			actor->hidetime,
+			0);
+	nemoyoyo_one_transition_set_tx(trans, 0, one);
+	nemoyoyo_one_transition_set_ty(trans, 1, one);
+	nemoyoyo_one_transition_set_alpha(trans, 2, one);
+	nemoyoyo_one_transition_check_destroy(trans, one);
+	nemotransition_set_target(trans, 0, 1.0f, tx);
+	nemotransition_set_target(trans, 1, 1.0f, ty);
+	nemotransition_set_target(trans, 2, 1.0f, 1.0f);
+	nemotransition_set_userdata(trans, actor);
+	nemotransition_group_attach_transition(yoyo->transitions, trans);
 
 	nemocanvas_dispatch_frame(yoyo->canvas);
 
@@ -198,6 +214,8 @@ int nemoyoyo_actor_execute(struct yoyoactor *actor, float x, float y, float r, c
 				nemoyoyo_actor_set_lifetime(child, 1800);
 				nemoyoyo_actor_set_hidetime(child, 800);
 				nemoyoyo_actor_dispatch(child,
+						cx,
+						cy,
 						cx + cos(w) * r,
 						cy + sin(w) * r);
 			}
