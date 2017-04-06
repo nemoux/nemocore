@@ -32,7 +32,7 @@ struct yoyosweep {
 extern struct yoyosweep *nemoyoyo_sweep_create(struct nemoyoyo *yoyo, struct actiontap *tap);
 extern void nemoyoyo_sweep_destroy(struct yoyosweep *sweep);
 
-extern void nemoyoyo_sweep_dispatch(struct yoyosweep *sweep);
+extern int nemoyoyo_sweep_dispatch(struct yoyosweep *sweep);
 
 static inline void nemoyoyo_sweep_set_minimum_range(struct yoyosweep *sweep, float min)
 {

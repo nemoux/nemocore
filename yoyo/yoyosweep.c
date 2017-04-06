@@ -82,7 +82,11 @@ static int nemoyoyo_sweep_dispatch_tap_event(struct nemoaction *action, struct a
 			actor = nemoyoyo_actor_create(yoyo);
 			nemoyoyo_actor_set_json_object(actor,
 					nemojson_search_object(yoyo->config, 0, 1, "menu"));
-			nemoyoyo_actor_dispatch(actor);
+			nemoyoyo_actor_set_lifetime(actor, 1800);
+			nemoyoyo_actor_set_hidetime(actor, 800);
+			nemoyoyo_actor_dispatch(actor,
+					nemoaction_tap_get_tx(tap),
+					nemoaction_tap_get_ty(tap));
 		}
 
 		nemoyoyo_sweep_destroy(sweep);
@@ -117,10 +121,12 @@ void nemoyoyo_sweep_destroy(struct yoyosweep *sweep)
 	free(sweep);
 }
 
-void nemoyoyo_sweep_dispatch(struct yoyosweep *sweep)
+int nemoyoyo_sweep_dispatch(struct yoyosweep *sweep)
 {
 	nemoaction_tap_dispatch_event(
 			nemoaction_tap_get_action(sweep->tap),
 			sweep->tap,
 			NEMOACTION_TAP_DOWN_EVENT);
+
+	return 0;
 }

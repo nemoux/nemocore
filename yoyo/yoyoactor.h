@@ -14,13 +14,19 @@ NEMO_BEGIN_EXTERN_C
 struct json_object;
 
 struct nemoyoyo;
+struct yoyoone;
 
 struct yoyoactor {
 	struct nemoyoyo *yoyo;
 
 	struct nemotimer *timer;
 
+	struct yoyoone *icon;
+
 	struct json_object *jobj;
+
+	uint32_t lifetime;
+	uint32_t hidetime;
 };
 
 extern struct yoyoactor *nemoyoyo_actor_create(struct nemoyoyo *yoyo);
@@ -28,7 +34,17 @@ extern void nemoyoyo_actor_destroy(struct yoyoactor *actor);
 
 extern void nemoyoyo_actor_set_json_object(struct yoyoactor *actor, struct json_object *jobj);
 
-extern void nemoyoyo_actor_dispatch(struct yoyoactor *actor);
+extern int nemoyoyo_actor_dispatch(struct yoyoactor *actor, float x, float y);
+
+static inline void nemoyoyo_actor_set_lifetime(struct yoyoactor *actor, uint32_t lifetime)
+{
+	actor->lifetime = lifetime;
+}
+
+static inline void nemoyoyo_actor_set_hidetime(struct yoyoactor *actor, uint32_t hidetime)
+{
+	actor->hidetime = hidetime;
+}
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

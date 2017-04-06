@@ -676,8 +676,6 @@ static int nemoart_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t typ
 	} else if (type & NEMOTOOL_TOUCH_UP_EVENT) {
 		tap = nemoaction_get_tap_by_device(art->action, nemoevent_get_device(event));
 		if (tap != NULL) {
-			nemoaction_tap_set_tx(tap, nemoevent_get_canvas_x(event));
-			nemoaction_tap_set_ty(tap, nemoevent_get_canvas_y(event));
 			nemoaction_tap_detach(tap);
 			nemoaction_tap_dispatch_event(art->action, tap, NEMOACTION_TAP_UP_EVENT);
 			nemoaction_tap_destroy(tap);

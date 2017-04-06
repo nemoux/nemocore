@@ -179,8 +179,6 @@ static int nemoyoyo_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t ty
 	} else if (type & NEMOTOOL_TOUCH_UP_EVENT) {
 		tap = nemoaction_get_tap_by_device(yoyo->action, nemoevent_get_device(event));
 		if (tap != NULL) {
-			nemoaction_tap_set_tx(tap, nemoevent_get_canvas_x(event));
-			nemoaction_tap_set_ty(tap, nemoevent_get_canvas_y(event));
 			nemoaction_tap_set_time(tap, nemoevent_get_time(event));
 			nemoaction_tap_detach(tap);
 			nemoaction_tap_dispatch_event(yoyo->action, tap, NEMOACTION_TAP_UP_EVENT);
@@ -191,7 +189,6 @@ static int nemoyoyo_dispatch_canvas_event(struct nemocanvas *canvas, uint32_t ty
 		if (tap != NULL) {
 			nemoaction_tap_set_tx(tap, nemoevent_get_canvas_x(event));
 			nemoaction_tap_set_ty(tap, nemoevent_get_canvas_y(event));
-			nemoaction_tap_set_time(tap, nemoevent_get_time(event));
 			nemoaction_tap_trace(tap,
 					nemoevent_get_canvas_x(event),
 					nemoevent_get_canvas_y(event));
@@ -396,7 +393,7 @@ void nemoyoyo_detach_one(struct nemoyoyo *yoyo, struct yoyoone *one)
 	nemocook_transform_set_parent(one->trans, NULL);
 }
 
-struct cooktex *nemoyyo_search_tex(struct nemoyoyo *yoyo, const char *path)
+struct cooktex *nemoyoyo_search_tex(struct nemoyoyo *yoyo, const char *path)
 {
 	struct cooktex *tex;
 
