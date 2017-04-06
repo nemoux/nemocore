@@ -27,7 +27,7 @@ static void nemoyoyo_sweep_dispatch_timer(struct nemotimer *timer, void *data)
 	struct yoyoone *one;
 	struct cooktex *tex;
 
-	tex = yoyo->spots[random_get_int(0, yoyo->nspots - 1)];
+	tex = yoyo->sweeps[random_get_int(0, yoyo->nsweeps - 1)];
 
 	one = nemoyoyo_one_create();
 	nemoyoyo_one_set_tx(one,

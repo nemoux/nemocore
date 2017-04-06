@@ -14,24 +14,24 @@
 #include <nemofs.h>
 #include <nemomisc.h>
 
-static int nemoyoyo_load_spot(struct nemoyoyo *yoyo)
+static int nemoyoyo_load_sweep(struct nemoyoyo *yoyo)
 {
-	const char *spoturl;
+	const char *sweepurl;
 
-	spoturl = nemojson_search_string(yoyo->config, 0, NULL, 2, "spot", "url");
-	if (spoturl != NULL) {
+	sweepurl = nemojson_search_string(yoyo->config, 0, NULL, 2, "sweep", "url");
+	if (sweepurl != NULL) {
 		struct cooktex *tex;
 		struct fsdir *contents;
 		int i;
 
 		contents = nemofs_dir_create(128);
-		nemofs_dir_scan_extensions(contents, spoturl, 3, "png", "jpg", "jpeg");
+		nemofs_dir_scan_extensions(contents, sweepurl, 3, "png", "jpg", "jpeg");
 
-		yoyo->spots = (struct cooktex **)malloc(sizeof(struct cooktex *) * nemofs_dir_get_filecount(contents));
-		yoyo->nspots = nemofs_dir_get_filecount(contents);
+		yoyo->sweeps = (struct cooktex **)malloc(sizeof(struct cooktex *) * nemofs_dir_get_filecount(contents));
+		yoyo->nsweeps = nemofs_dir_get_filecount(contents);
 
 		for (i = 0; i < nemofs_dir_get_filecount(contents); i++) {
-			tex = yoyo->spots[i] = nemocook_texture_create();
+			tex = yoyo->sweeps[i] = nemocook_texture_create();
 			nemocook_texture_assign(tex, NEMOCOOK_TEXTURE_BGRA_FORMAT, 0, 0);
 			nemocook_texture_load_image(tex, nemofs_dir_get_filepath(contents, i));
 		}
@@ -350,7 +350,7 @@ int main(int argc, char *argv[])
 	config = yoyo->config = nemojson_create_file(configpath);
 	nemojson_update(config);
 
-	nemoyoyo_load_spot(yoyo);
+	nemoyoyo_load_sweep(yoyo);
 
 	nemocanvas_dispatch_frame(canvas);
 

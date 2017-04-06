@@ -50,8 +50,8 @@ struct nemoyoyo {
 
 	struct transitiongroup *transitions;
 
-	struct cooktex **spots;
-	int nspots;
+	struct cooktex **sweeps;
+	int nsweeps;
 };
 
 extern void nemoyoyo_attach_one(struct nemoyoyo *yoyo, struct yoyoone *one);
