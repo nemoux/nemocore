@@ -18,6 +18,7 @@ NEMO_BEGIN_EXTERN_C
 #include <nemocook.h>
 #include <nemoaction.h>
 #include <nemotransition.h>
+#include <nemojson.h>
 #include <nemolist.h>
 
 typedef enum {
@@ -34,6 +35,7 @@ struct nemoyoyo {
 	struct cookshader *shader;
 	struct cooktrans *projection;
 	struct nemoaction *action;
+	struct nemojson *config;
 
 	int width, height;
 

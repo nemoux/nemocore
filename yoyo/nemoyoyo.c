@@ -14,17 +14,11 @@
 #include <nemofs.h>
 #include <nemomisc.h>
 
-static int nemoyoyo_load_json(struct nemoyoyo *yoyo, const char *jsonpath)
+static int nemoyoyo_load_spot(struct nemoyoyo *yoyo)
 {
-	struct nemojson *json;
 	const char *spoturl;
 
-	json = nemojson_create_file(jsonpath);
-	if (json == NULL)
-		return -1;
-	nemojson_update(json);
-
-	spoturl = nemojson_search_string(json, 0, NULL, 2, "spot", "url");
+	spoturl = nemojson_search_string(yoyo->config, 0, NULL, 2, "spot", "url");
 	if (spoturl != NULL) {
 		struct cooktex *tex;
 		struct fsdir *contents;
@@ -42,8 +36,6 @@ static int nemoyoyo_load_json(struct nemoyoyo *yoyo, const char *jsonpath)
 			nemocook_texture_load_image(tex, nemofs_dir_get_filepath(contents, i));
 		}
 	}
-
-	nemojson_destroy(json);
 
 	return 0;
 }
@@ -242,6 +234,7 @@ int main(int argc, char *argv[])
 	struct cookshader *shader;
 	struct cooktrans *trans;
 	struct nemoaction *action;
+	struct nemojson *config;
 	char *configpath = NULL;
 	char *fullscreenid = NULL;
 	char *layer = NULL;
@@ -342,11 +335,16 @@ int main(int argc, char *argv[])
 	nemoaction_set_tap_callback(action, nemoyoyo_dispatch_tap_event);
 	nemoaction_set_userdata(action, yoyo);
 
-	nemoyoyo_load_json(yoyo, configpath);
+	config = yoyo->config = nemojson_create_file(configpath);
+	nemojson_update(config);
+
+	nemoyoyo_load_spot(yoyo);
 
 	nemocanvas_dispatch_frame(canvas);
 
 	nemotool_run(tool);
+
+	nemojson_destroy(config);
 
 	nemoaction_destroy(action);
 
