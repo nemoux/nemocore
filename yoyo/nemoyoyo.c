@@ -27,11 +27,11 @@ static int nemoyoyo_load_spot(struct nemoyoyo *yoyo)
 		contents = nemofs_dir_create(128);
 		nemofs_dir_scan_extensions(contents, spoturl, 3, "png", "jpg", "jpeg");
 
-		yoyo->spot.textures = (struct cooktex **)malloc(sizeof(struct cooktex *) * nemofs_dir_get_filecount(contents));
-		yoyo->spot.ntextures = nemofs_dir_get_filecount(contents);
+		yoyo->spots = (struct cooktex **)malloc(sizeof(struct cooktex *) * nemofs_dir_get_filecount(contents));
+		yoyo->nspots = nemofs_dir_get_filecount(contents);
 
 		for (i = 0; i < nemofs_dir_get_filecount(contents); i++) {
-			tex = yoyo->spot.textures[i] = nemocook_texture_create();
+			tex = yoyo->spots[i] = nemocook_texture_create();
 			nemocook_texture_assign(tex, NEMOCOOK_TEXTURE_BGRA_FORMAT, 0, 0);
 			nemocook_texture_load_image(tex, nemofs_dir_get_filepath(contents, i));
 		}
@@ -300,9 +300,10 @@ int main(int argc, char *argv[])
 
 	nemolist_init(&yoyo->one_list);
 
-	yoyo->flags = NEMOYOYO_REDRAW_FLAG;
-
+	yoyo->textures = nemodick_create();
 	yoyo->transitions = nemotransition_group_create();
+
+	yoyo->flags = NEMOYOYO_REDRAW_FLAG;
 
 	tool = yoyo->tool = nemotool_create();
 	nemotool_connect_wayland(tool, NULL);
@@ -371,6 +372,7 @@ int main(int argc, char *argv[])
 	nemotool_destroy(tool);
 
 	nemotransition_group_destroy(yoyo->transitions);
+	nemodick_destroy(yoyo->textures);
 
 	pixman_region32_fini(&yoyo->damage);
 
@@ -392,4 +394,21 @@ void nemoyoyo_detach_one(struct nemoyoyo *yoyo, struct yoyoone *one)
 	nemolist_init(&one->link);
 
 	nemocook_transform_set_parent(one->trans, NULL);
+}
+
+struct cooktex *nemoyyo_search_tex(struct nemoyoyo *yoyo, const char *path)
+{
+	struct cooktex *tex;
+
+	tex = (struct cooktex *)nemodick_search(yoyo->textures, path);
+	if (tex != NULL)
+		return tex;
+
+	tex = nemocook_texture_create();
+	nemocook_texture_assign(tex, NEMOCOOK_TEXTURE_BGRA_FORMAT, 0, 0);
+	nemocook_texture_load_image(tex, path);
+
+	nemodick_insert(yoyo->textures, path, tex);
+
+	return tex;
 }
