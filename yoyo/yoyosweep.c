@@ -85,20 +85,22 @@ static int nemoyoyo_sweep_dispatch_tap_event(struct nemoaction *action, struct a
 				struct json_object *cobj;
 				float cx = nemoaction_tap_get_tx(tap);
 				float cy = nemoaction_tap_get_ty(tap);
-				float dx, dy;
+				float r, w;
 				int i;
 
 				for (i = 0; i < json_object_array_length(jobj); i++) {
 					cobj = json_object_array_get_idx(jobj, i);
 
-					dx = random_get_double(-180.0f, 180.0f);
-					dy = random_get_double(-180.0f, 180.0f);
+					r = random_get_double(160.0f, 180.0f);
+					w = random_get_double(0.0f, M_PI * 2.0f);
 
 					actor = nemoyoyo_actor_create(yoyo);
 					nemoyoyo_actor_set_json_object(actor, cobj);
 					nemoyoyo_actor_set_lifetime(actor, 1800);
 					nemoyoyo_actor_set_hidetime(actor, 800);
-					nemoyoyo_actor_dispatch(actor, cx + dx, cy + dy);
+					nemoyoyo_actor_dispatch(actor,
+							cx + cos(w) * r,
+							cy + sin(w) * r);
 				}
 			}
 		}

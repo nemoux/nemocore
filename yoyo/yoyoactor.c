@@ -184,20 +184,22 @@ int nemoyoyo_actor_execute(struct yoyoactor *actor, float x, float y, float r, c
 			struct json_object *cobj;
 			float cx = x;
 			float cy = y;
-			float dx, dy;
+			float r, w;
 			int i;
 
 			for (i = 0; i < json_object_array_length(jobj); i++) {
 				cobj = json_object_array_get_idx(jobj, i);
 
-				dx = random_get_double(-180.0f, 180.0f);
-				dy = random_get_double(-180.0f, 180.0f);
+				r = random_get_double(160.0f, 180.0f);
+				w = random_get_double(0.0f, M_PI * 2.0f);
 
 				child = nemoyoyo_actor_create(yoyo);
 				nemoyoyo_actor_set_json_object(child, cobj);
 				nemoyoyo_actor_set_lifetime(child, 1800);
 				nemoyoyo_actor_set_hidetime(child, 800);
-				nemoyoyo_actor_dispatch(child, cx + dx, cy + dy);
+				nemoyoyo_actor_dispatch(child,
+						cx + cos(w) * r,
+						cy + sin(w) * r);
 			}
 		}
 	}
