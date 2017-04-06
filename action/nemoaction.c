@@ -159,16 +159,3 @@ int nemoaction_get_distant_taps(struct nemoaction *action, struct actiontap **ta
 
 	return 0;
 }
-
-void nemoaction_set_one_tap_callback(struct nemoaction *action, void *target, nemoaction_tap_dispatch_event_t dispatch)
-{
-	struct actionone *one;
-
-	one = nemoaction_get_one_by_target(action, target);
-	if (one == NULL) {
-		one = nemoaction_one_create(action);
-		one->target = target;
-	}
-
-	one->dispatch_tap_event = dispatch;
-}

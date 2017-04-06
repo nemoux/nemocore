@@ -62,11 +62,11 @@ int nemoaction_tap_set_trace_max(struct actiontap *tap, int maximum)
 	return 0;
 }
 
-int nemoaction_tap_set_focus(struct actiontap *tap, void *target)
+int nemoaction_tap_set_focus(struct nemoaction *action, struct actiontap *tap, void *target)
 {
 	struct actionone *one;
 
-	one = nemoaction_get_one_by_target(tap->action, target);
+	one = nemoaction_get_one_by_target(action, target);
 	if (one != NULL) {
 		tap->target = one->target;
 		tap->dispatch_event = one->dispatch_tap_event;

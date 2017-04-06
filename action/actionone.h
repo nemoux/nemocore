@@ -16,11 +16,7 @@ NEMO_BEGIN_EXTERN_C
 struct nemoaction;
 
 struct actionone {
-	struct nemoaction *action;
-
 	void *target;
-
-	uint32_t tag;
 
 	nemoaction_tap_dispatch_event_t dispatch_tap_event;
 
@@ -30,25 +26,7 @@ struct actionone {
 extern struct actionone *nemoaction_one_create(struct nemoaction *action);
 extern void nemoaction_one_destroy(struct actionone *one);
 
-static inline void nemoaction_one_set_tap_callback(struct actionone *one, nemoaction_tap_dispatch_event_t dispatch)
-{
-	one->dispatch_tap_event = dispatch;
-}
-
-static inline void nemoaction_one_set_target(struct actionone *one, void *target)
-{
-	one->target = target;
-}
-
-static inline void nemoaction_one_set_tag(struct actionone *one, uint32_t tag)
-{
-	one->tag = tag;
-}
-
-static inline uint32_t nemoaction_one_get_tag(struct actionone *one)
-{
-	return one->tag;
-}
+extern void nemoaction_one_set_tap_callback(struct nemoaction *action, void *target, nemoaction_tap_dispatch_event_t dispatch);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

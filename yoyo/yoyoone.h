@@ -10,7 +10,6 @@ NEMO_BEGIN_EXTERN_C
 #include <stdint.h>
 
 #include <nemocook.h>
-#include <nemoaction.h>
 #include <nemolist.h>
 #include <nemolistener.h>
 #include <nemotransition.h>
@@ -47,8 +46,6 @@ struct yoyoone {
 	} geometry;
 
 	pixman_region32_t bounds;
-
-	nemoaction_tap_dispatch_event_t tap_event_callback;
 
 	struct nemolist link;
 	struct nemosignal destroy_signal;
@@ -117,11 +114,6 @@ static inline int nemoyoyo_one_has_flags(struct yoyoone *one, uint32_t flags)
 static inline int nemoyoyo_one_has_flags_all(struct yoyoone *one, uint32_t flags)
 {
 	return (one->flags & flags) == flags;
-}
-
-static inline void nemoyoyo_one_set_tap_event_callback(struct yoyoone *one, nemoaction_tap_dispatch_event_t callback)
-{
-	one->tap_event_callback = callback;
 }
 
 static inline void nemoyoyo_one_set_userdata(struct yoyoone *one, void *data)

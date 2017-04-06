@@ -47,8 +47,6 @@ extern int nemoaction_get_taps_all(struct nemoaction *action, struct actiontap *
 
 extern int nemoaction_get_distant_taps(struct nemoaction *action, struct actiontap **taps, int ntaps, int *index0, int *index1);
 
-extern void nemoaction_set_one_tap_callback(struct nemoaction *action, void *target, nemoaction_tap_dispatch_event_t dispatch);
-
 static inline void nemoaction_set_tap_callback(struct nemoaction *action, nemoaction_tap_dispatch_event_t dispatch)
 {
 	action->dispatch_tap_event = dispatch;

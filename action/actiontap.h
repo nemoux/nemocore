@@ -57,8 +57,7 @@ extern void nemoaction_tap_attach(struct nemoaction *action, struct actiontap *t
 extern void nemoaction_tap_detach(struct actiontap *tap);
 
 extern int nemoaction_tap_set_trace_max(struct actiontap *tap, int maximum);
-
-extern int nemoaction_tap_set_focus(struct actiontap *tap, void *target);
+extern int nemoaction_tap_set_focus(struct nemoaction *action, struct actiontap *tap, void *target);
 
 static inline void nemoaction_tap_set_grab_gx(struct actiontap *tap, float gx)
 {

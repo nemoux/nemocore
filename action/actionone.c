@@ -18,8 +18,6 @@ struct actionone *nemoaction_one_create(struct nemoaction *action)
 		return NULL;
 	memset(one, 0, sizeof(struct actionone));
 
-	one->action = action;
-
 	nemolist_insert_tail(&action->one_list, &one->link);
 
 	return one;
@@ -30,4 +28,17 @@ void nemoaction_one_destroy(struct actionone *one)
 	nemolist_remove(&one->link);
 
 	free(one);
+}
+
+void nemoaction_one_set_tap_callback(struct nemoaction *action, void *target, nemoaction_tap_dispatch_event_t dispatch)
+{
+	struct actionone *one;
+
+	one = nemoaction_get_one_by_target(action, target);
+	if (one == NULL) {
+		one = nemoaction_one_create(action);
+		one->target = target;
+	}
+
+	one->dispatch_tap_event = dispatch;
 }
