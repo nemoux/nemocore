@@ -75,8 +75,13 @@ static void nemoyoyo_actor_dispatch_timer(struct nemotimer *timer, void *data)
 
 static int nemoyoyo_actor_dispatch_tap_event(struct nemoaction *action, struct actiontap *tap, uint32_t event)
 {
+	struct yoyoone *one = (struct yoyoone *)nemoaction_tap_get_userdata(tap);
+	struct yoyoactor *actor = (struct yoyoactor *)nemoyoyo_one_get_userdata(one);
+
 	if (event & NEMOACTION_TAP_DOWN_EVENT) {
+		nemotimer_set_timeout(actor->timer, actor->lifetime);
 	} else if (event & NEMOACTION_TAP_MOTION_EVENT) {
+		nemotimer_set_timeout(actor->timer, actor->lifetime);
 	} else if (event & NEMOACTION_TAP_UP_EVENT) {
 	}
 
@@ -117,6 +122,7 @@ int nemoyoyo_actor_dispatch(struct yoyoactor *actor, float x, float y)
 			nemocook_texture_get_height(tex));
 	nemoyoyo_one_set_texture(one, tex);
 	nemoyoyo_one_set_tap_event_callback(one, nemoyoyo_actor_dispatch_tap_event);
+	nemoyoyo_one_set_userdata(one, actor);
 	nemoyoyo_attach_one(yoyo, one);
 
 	nemocanvas_dispatch_frame(yoyo->canvas);
