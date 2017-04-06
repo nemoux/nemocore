@@ -87,6 +87,7 @@ static int nemoyoyo_actor_dispatch_tap_event(struct nemoaction *action, struct a
 	} else if (event & NEMOACTION_TAP_UP_EVENT) {
 		nemoaction_destroy_one_by_target(action, one);
 		nemoaction_destroy_tap_by_target(action, one);
+		nemoyoyo_actor_execute(actor, tap, "click");
 		nemoyoyo_actor_destroy(actor);
 	}
 
@@ -139,4 +140,41 @@ err1:
 	nemoyoyo_actor_destroy(actor);
 
 	return -1;
+}
+
+int nemoyoyo_actor_execute(struct yoyoactor *actor, struct actiontap *tap, const char *event)
+{
+	struct nemoyoyo *yoyo = actor->yoyo;
+	struct json_object *tobj;
+	const char *type = NULL;
+
+	if (json_object_object_get_ex(actor->jobj, "type", &tobj) != 0)
+		type = json_object_get_string(tobj);
+	if (type == NULL)
+		return -1;
+
+	if (strcmp(type, "app") == 0) {
+		const char *path = NULL;
+		const char *args = NULL;
+		struct busmsg *msg;
+
+		if (json_object_object_get_ex(actor->jobj, "path", &tobj) != 0)
+			path = json_object_get_string(tobj);
+		if (json_object_object_get_ex(actor->jobj, "args", &tobj) != 0)
+			args = json_object_get_string(tobj);
+
+		msg = nemobus_msg_create();
+		nemobus_msg_set_name(msg, "command");
+		nemobus_msg_set_attr(msg, "type", type);
+		nemobus_msg_set_attr_format(msg, "x", "%f", nemoaction_tap_get_tx(tap));
+		nemobus_msg_set_attr_format(msg, "y", "%f", nemoaction_tap_get_ty(tap));
+		nemobus_msg_set_attr_format(msg, "r", "%f", 0.0f);
+		nemobus_msg_set_attr(msg, "path", path);
+		if (args != NULL)
+			nemobus_msg_set_attr(msg, "args", args);
+		nemobus_send_msg(yoyo->bus, yoyo->busid, "/nemoshell", msg);
+		nemobus_msg_destroy(msg);
+	}
+
+	return 0;
 }

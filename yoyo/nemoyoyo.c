@@ -322,6 +322,8 @@ int main(int argc, char *argv[])
 	yoyo->textures = nemodick_create();
 	yoyo->transitions = nemotransition_group_create();
 
+	yoyo->busid = busid != NULL ? strdup(busid) : "/nemoyoyo";
+
 	yoyo->flags = NEMOYOYO_REDRAW_FLAG;
 
 	tool = yoyo->tool = nemotool_create();
@@ -374,7 +376,7 @@ int main(int argc, char *argv[])
 
 	bus = yoyo->bus = nemobus_create();
 	nemobus_connect(bus, NULL);
-	nemobus_advertise(bus, "set", busid != NULL ? busid : "/nemoyoyo");
+	nemobus_advertise(bus, "set", yoyo->busid);
 	nemotool_watch_source(tool,
 			nemobus_get_socket(bus),
 			"reh",

@@ -39,6 +39,7 @@ struct nemoyoyo {
 	struct nemoaction *action;
 	struct nemojson *config;
 	struct nemobus *bus;
+	char *busid;
 
 	int width, height;
 
