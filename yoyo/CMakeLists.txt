@@ -15,6 +15,7 @@ include_directories(
 	${CMAKE_BINARY_DIR}/tool
 	${CMAKE_SOURCE_DIR}/cook
 	${CMAKE_SOURCE_DIR}/action
+	${CMAKE_SOURCE_DIR}/bus
 	)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
@@ -33,6 +34,7 @@ TARGET_LINK_LIBRARIES(nemoyoyo
 	nemotool
 	nemocook
 	nemoaction
+	nemobus
 	)
 
 INSTALL(TARGETS nemoyoyo DESTINATION bin)

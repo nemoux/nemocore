@@ -217,6 +217,10 @@ static int nemoyoyo_dispatch_canvas_destroy(struct nemocanvas *canvas)
 	return 1;
 }
 
+static void nemoyoyo_dispatch_bus(void *data, const char *events)
+{
+}
+
 int main(int argc, char *argv[])
 {
 	static const char *vertexshader_texture =
@@ -246,6 +250,7 @@ int main(int argc, char *argv[])
 		{ "fullscreen",				required_argument,		NULL,		'f' },
 		{ "layer",						required_argument,		NULL,		'y' },
 		{ "config",						required_argument,		NULL,		'c' },
+		{ "busid",						required_argument,		NULL,		'b' },
 		{ 0 }
 	};
 
@@ -257,16 +262,18 @@ int main(int argc, char *argv[])
 	struct cooktrans *trans;
 	struct nemoaction *action;
 	struct nemojson *config;
+	struct nemobus *bus;
 	char *configpath = NULL;
 	char *fullscreenid = NULL;
 	char *layer = NULL;
+	char *busid = NULL;
 	int width = 1920;
 	int height = 1080;
 	int opt;
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "w:h:f:y:c:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:f:y:c:b:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -289,6 +296,10 @@ int main(int argc, char *argv[])
 
 			case 'c':
 				configpath = strdup(optarg);
+				break;
+
+			case 'b':
+				busid = strdup(optarg);
 				break;
 
 			default:
@@ -361,12 +372,22 @@ int main(int argc, char *argv[])
 	config = yoyo->config = nemojson_create_file(configpath);
 	nemojson_update(config);
 
+	bus = yoyo->bus = nemobus_create();
+	nemobus_connect(bus, NULL);
+	nemobus_advertise(bus, "set", busid != NULL ? busid : "/nemoyoyo");
+	nemotool_watch_source(tool,
+			nemobus_get_socket(bus),
+			"reh",
+			nemoyoyo_dispatch_bus,
+			yoyo);
+
 	nemoyoyo_load_sweep(yoyo);
 
 	nemocanvas_dispatch_frame(canvas);
 
 	nemotool_run(tool);
 
+	nemobus_destroy(bus);
 	nemojson_destroy(config);
 
 	nemoaction_destroy(action);

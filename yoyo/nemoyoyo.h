@@ -17,6 +17,7 @@ NEMO_BEGIN_EXTERN_C
 
 #include <nemocook.h>
 #include <nemoaction.h>
+#include <nemobus.h>
 #include <nemotransition.h>
 #include <nemojson.h>
 #include <nemodick.h>
@@ -37,6 +38,7 @@ struct nemoyoyo {
 	struct cooktrans *projection;
 	struct nemoaction *action;
 	struct nemojson *config;
+	struct nemobus *bus;
 
 	int width, height;
 
