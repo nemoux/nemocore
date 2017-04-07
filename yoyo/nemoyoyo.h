@@ -65,6 +65,7 @@ extern struct yoyoone *nemoyoyo_pick_one(struct nemoyoyo *yoyo, float x, float y
 
 extern void nemoyoyo_attach_actor(struct nemoyoyo *yoyo, struct yoyoactor *actor);
 extern void nemoyoyo_detach_actor(struct nemoyoyo *yoyo, struct yoyoactor *actor);
+extern int nemoyoyo_overlap_actor(struct nemoyoyo *yoyo, float x, float y);
 
 extern struct cooktex *nemoyoyo_search_tex(struct nemoyoyo *yoyo, const char *path);
 

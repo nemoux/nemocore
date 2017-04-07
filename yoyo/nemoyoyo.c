@@ -457,6 +457,22 @@ void nemoyoyo_detach_actor(struct nemoyoyo *yoyo, struct yoyoactor *actor)
 	nemolist_init(&actor->link);
 }
 
+int nemoyoyo_overlap_actor(struct nemoyoyo *yoyo, float x, float y)
+{
+	struct yoyoactor *actor;
+	float dx, dy;
+
+	nemolist_for_each(actor, &yoyo->actor_list, link) {
+		dx = actor->geometry.x - x;
+		dy = actor->geometry.y - y;
+
+		if (sqrtf(dx * dx + dy * dy) < 300.0f)
+			return 1;
+	}
+
+	return 0;
+}
+
 struct cooktex *nemoyoyo_search_tex(struct nemoyoyo *yoyo, const char *path)
 {
 	struct cooktex *tex;
