@@ -92,7 +92,7 @@ static int nemoyoyo_sweep_dispatch_tap_event(struct nemoaction *action, struct a
 		if (nemoaction_tap_get_duration(tap) > sweep->actor_duration && nemoaction_tap_get_distance(tap) > sweep->actor_distance) {
 			struct json_object *jobj;
 
-			jobj = nemojson_search_object(yoyo->config, 0, 1, "menu");
+			jobj = nemojson_search_object(yoyo->config, 0, 1, "items");
 			if (jobj != NULL) {
 				float cx = nemoaction_tap_get_tx(tap);
 				float cy = nemoaction_tap_get_ty(tap);

@@ -203,7 +203,7 @@ int nemoyoyo_actor_execute(struct yoyoactor *actor, float x, float y, float r, c
 	} else if (strcmp(type, "group") == 0) {
 		struct json_object *jobj;
 
-		if (json_object_object_get_ex(actor->jobj, "item", &jobj) != 0) {
+		if (json_object_object_get_ex(actor->jobj, "items", &jobj) != 0) {
 			struct yoyoactor *child;
 			struct json_object *cobj;
 			float cx = x;
