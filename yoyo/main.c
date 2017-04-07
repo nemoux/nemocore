@@ -35,9 +35,12 @@ static int nemoyoyo_dispatch_tap_event(struct nemoaction *action, struct actiont
 			nemoyoyo_sweep_set_maximum_interval(sweep, 8);
 			nemoyoyo_sweep_set_minimum_duration(sweep, 800);
 			nemoyoyo_sweep_set_maximum_duration(sweep, 1200);
-			nemoyoyo_sweep_set_feedback_sx(sweep, 0.15f, 1.0f);
-			nemoyoyo_sweep_set_feedback_sy(sweep, 0.15f, 1.0f);
-			nemoyoyo_sweep_set_feedback_alpha(sweep, 0.75f, 0.0f);
+			nemoyoyo_sweep_set_feedback_sx0(sweep, 0.15f);
+			nemoyoyo_sweep_set_feedback_sx1(sweep, 1.0f);
+			nemoyoyo_sweep_set_feedback_sy0(sweep, 0.15f);
+			nemoyoyo_sweep_set_feedback_sy1(sweep, 1.0f);
+			nemoyoyo_sweep_set_feedback_alpha0(sweep, 0.75f);
+			nemoyoyo_sweep_set_feedback_alpha1(sweep, 0.0f);
 			nemoyoyo_sweep_set_actor_distance(sweep, 100.0f);
 			nemoyoyo_sweep_set_actor_duration(sweep, 300);
 			nemoyoyo_sweep_dispatch(sweep, tap);
@@ -214,22 +217,8 @@ int main(int argc, char *argv[])
 	if (configpath == NULL)
 		return 0;
 
-	yoyo = (struct nemoyoyo *)malloc(sizeof(struct nemoyoyo));
-	if (yoyo == NULL)
-		return -1;
-	memset(yoyo, 0, sizeof(struct nemoyoyo));
-
-	pixman_region32_init(&yoyo->damage);
-
-	nemolist_init(&yoyo->one_list);
-	nemolist_init(&yoyo->actor_list);
-
-	yoyo->textures = nemodick_create();
-	yoyo->transitions = nemotransition_group_create();
-
+	yoyo = nemoyoyo_create();
 	yoyo->busid = busid != NULL ? strdup(busid) : "/nemoyoyo";
-
-	yoyo->flags = NEMOYOYO_REDRAW_FLAG;
 
 	tool = yoyo->tool = nemotool_create();
 	nemotool_connect_wayland(tool, NULL);
@@ -306,12 +295,7 @@ int main(int argc, char *argv[])
 
 	nemotool_destroy(tool);
 
-	nemotransition_group_destroy(yoyo->transitions);
-	nemodick_destroy(yoyo->textures);
-
-	pixman_region32_fini(&yoyo->damage);
-
-	free(yoyo);
+	nemoyoyo_destroy(yoyo);
 
 	return 0;
 }

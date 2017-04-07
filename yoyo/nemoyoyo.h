@@ -28,7 +28,9 @@ typedef enum {
 } NemoYoyoFlag;
 
 struct yoyoone;
+struct yoyosweep;
 struct yoyoactor;
+struct yoyoregion;
 
 struct nemoyoyo {
 	struct nemotool *tool;
@@ -50,6 +52,7 @@ struct nemoyoyo {
 
 	struct nemolist one_list;
 	struct nemolist actor_list;
+	struct nemolist region_list;
 
 	struct nemodick *textures;
 
@@ -58,6 +61,9 @@ struct nemoyoyo {
 	struct cooktex **sweeps;
 	int nsweeps;
 };
+
+extern struct nemoyoyo *nemoyoyo_create(void);
+extern void nemoyoyo_destroy(struct nemoyoyo *yoyo);
 
 extern int nemoyoyo_load_config(struct nemoyoyo *yoyo);
 
@@ -71,6 +77,10 @@ extern struct yoyoone *nemoyoyo_pick_one(struct nemoyoyo *yoyo, float x, float y
 extern void nemoyoyo_attach_actor(struct nemoyoyo *yoyo, struct yoyoactor *actor);
 extern void nemoyoyo_detach_actor(struct nemoyoyo *yoyo, struct yoyoactor *actor);
 extern int nemoyoyo_overlap_actor(struct nemoyoyo *yoyo, float x, float y);
+
+extern void nemoyoyo_attach_region(struct nemoyoyo *yoyo, struct yoyoregion *region);
+extern void nemoyoyo_detach_region(struct nemoyoyo *yoyo, struct yoyoregion *region);
+extern struct yoyoregion *nemoyoyo_search_region(struct nemoyoyo *yoyo, float x, float y);
 
 extern struct cooktex *nemoyoyo_search_tex(struct nemoyoyo *yoyo, const char *path);
 
@@ -98,6 +108,15 @@ static inline void nemoyoyo_damage(struct nemoyoyo *yoyo, pixman_region32_t *dam
 {
 	pixman_region32_union(&yoyo->damage, &yoyo->damage, damage);
 }
+
+#define NEMOYOYO_DECLARE_SET_ATTRIBUTE(tag, type, attr, name)	\
+	static inline void nemoyoyo_##tag##_set_##name(struct yoyo##tag *tag, type name) {	\
+		tag->attr = name;	\
+	}
+#define NEMOYOYO_DECLARE_GET_ATTRIBUTE(tag, type, attr, name)	\
+	static inline type nemoyoyo_##tag##_get_##name(struct yoyo##tag *tag) {	\
+		return tag->attr;	\
+	}
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

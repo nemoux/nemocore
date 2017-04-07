@@ -14,6 +14,8 @@ NEMO_BEGIN_EXTERN_C
 #include <nemolistener.h>
 #include <nemotransition.h>
 
+#include <nemoyoyo.h>
+
 typedef enum {
 	NEMOYOYO_ONE_TRANSFORM_FLAG = (1 << 0),
 	NEMOYOYO_ONE_PICK_FLAG = (1 << 1)
@@ -23,8 +25,6 @@ typedef enum {
 	NEMOYOYO_ONE_FLAGS_DIRTY = (1 << 0),
 	NEMOYOYO_ONE_TRANSFORM_DIRTY = (1 << 1)
 } NemoYoyoOneDirty;
-
-struct nemoyoyo;
 
 struct yoyoone {
 	struct cookpoly *poly;

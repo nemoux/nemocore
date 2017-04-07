@@ -15,7 +15,8 @@ NEMO_BEGIN_EXTERN_C
 #include <nemotimer.h>
 #include <nemoaction.h>
 
-struct nemoyoyo;
+#include <nemoyoyo.h>
+
 struct yoyoone;
 
 struct yoyoactor {
@@ -46,15 +47,8 @@ extern void nemoyoyo_actor_set_json_object(struct yoyoactor *actor, struct json_
 extern int nemoyoyo_actor_dispatch(struct yoyoactor *actor, float cx, float cy, float x, float y, float r);
 extern int nemoyoyo_actor_execute(struct yoyoactor *actor, float x, float y, float r, const char *event);
 
-static inline void nemoyoyo_actor_set_lifetime(struct yoyoactor *actor, uint32_t lifetime)
-{
-	actor->lifetime = lifetime;
-}
-
-static inline void nemoyoyo_actor_set_hidetime(struct yoyoactor *actor, uint32_t hidetime)
-{
-	actor->hidetime = hidetime;
-}
+NEMOYOYO_DECLARE_SET_ATTRIBUTE(actor, uint32_t, lifetime, lifetime);
+NEMOYOYO_DECLARE_SET_ATTRIBUTE(actor, uint32_t, hidetime, hidetime);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

@@ -9,9 +9,43 @@
 #include <yoyoone.h>
 #include <yoyosweep.h>
 #include <yoyoactor.h>
+#include <yoyoregion.h>
 #include <nemojson.h>
 #include <nemofs.h>
 #include <nemomisc.h>
+
+struct nemoyoyo *nemoyoyo_create(void)
+{
+	struct nemoyoyo *yoyo;
+
+	yoyo = (struct nemoyoyo *)malloc(sizeof(struct nemoyoyo));
+	if (yoyo == NULL)
+		return NULL;
+	memset(yoyo, 0, sizeof(struct nemoyoyo));
+
+	pixman_region32_init(&yoyo->damage);
+
+	nemolist_init(&yoyo->one_list);
+	nemolist_init(&yoyo->actor_list);
+	nemolist_init(&yoyo->region_list);
+
+	yoyo->textures = nemodick_create();
+	yoyo->transitions = nemotransition_group_create();
+
+	yoyo->flags = NEMOYOYO_REDRAW_FLAG;
+
+	return yoyo;
+}
+
+void nemoyoyo_destroy(struct nemoyoyo *yoyo)
+{
+	nemotransition_group_destroy(yoyo->transitions);
+	nemodick_destroy(yoyo->textures);
+
+	pixman_region32_fini(&yoyo->damage);
+
+	free(yoyo);
+}
 
 int nemoyoyo_load_config(struct nemoyoyo *yoyo)
 {
@@ -173,6 +207,29 @@ int nemoyoyo_overlap_actor(struct nemoyoyo *yoyo, float x, float y)
 	}
 
 	return 0;
+}
+
+void nemoyoyo_attach_region(struct nemoyoyo *yoyo, struct yoyoregion *region)
+{
+	nemolist_insert_tail(&yoyo->region_list, &region->link);
+}
+
+void nemoyoyo_detach_region(struct nemoyoyo *yoyo, struct yoyoregion *region)
+{
+	nemolist_remove(&region->link);
+	nemolist_init(&region->link);
+}
+
+struct yoyoregion *nemoyoyo_search_region(struct nemoyoyo *yoyo, float x, float y)
+{
+	struct yoyoregion *region;
+
+	nemolist_for_each(region, &yoyo->region_list, link) {
+		if (region->x0 <= x && x < region->x1 && region->y0 <= y && y < region->y1)
+			return region;
+	}
+
+	return NULL;
 }
 
 struct cooktex *nemoyoyo_search_tex(struct nemoyoyo *yoyo, const char *path)
