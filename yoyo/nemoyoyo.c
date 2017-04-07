@@ -10,6 +10,7 @@
 #include <nemoyoyo.h>
 #include <yoyoone.h>
 #include <yoyosweep.h>
+#include <yoyoactor.h>
 #include <nemojson.h>
 #include <nemofs.h>
 #include <nemomisc.h>
@@ -320,6 +321,7 @@ int main(int argc, char *argv[])
 	pixman_region32_init(&yoyo->damage);
 
 	nemolist_init(&yoyo->one_list);
+	nemolist_init(&yoyo->actor_list);
 
 	yoyo->textures = nemodick_create();
 	yoyo->transitions = nemotransition_group_create();
@@ -442,6 +444,17 @@ struct yoyoone *nemoyoyo_pick_one(struct nemoyoyo *yoyo, float x, float y)
 	}
 
 	return NULL;
+}
+
+void nemoyoyo_attach_actor(struct nemoyoyo *yoyo, struct yoyoactor *actor)
+{
+	nemolist_insert_tail(&yoyo->actor_list, &actor->link);
+}
+
+void nemoyoyo_detach_actor(struct nemoyoyo *yoyo, struct yoyoactor *actor)
+{
+	nemolist_remove(&actor->link);
+	nemolist_init(&actor->link);
 }
 
 struct cooktex *nemoyoyo_search_tex(struct nemoyoyo *yoyo, const char *path)

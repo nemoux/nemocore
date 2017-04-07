@@ -26,12 +26,12 @@ static void nemoyoyo_sweep_dispatch_timer(struct nemotimer *timer, void *data)
 	struct nemotransition *trans;
 	struct yoyoone *one;
 	struct cooktex *tex;
-	float r, w;
+	float rs, rn;
 
 	tex = yoyo->sweeps[random_get_int(0, yoyo->nsweeps - 1)];
 
-	r = random_get_double(sweep->minimum_range, sweep->maximum_range);
-	w = random_get_double(0.0f, M_PI * 2.0f);
+	rs = random_get_double(sweep->minimum_range, sweep->maximum_range);
+	rn = random_get_double(0.0f, M_PI * 2.0f);
 
 	one = nemoyoyo_one_create();
 	nemoyoyo_one_set_tx(one,
@@ -56,9 +56,9 @@ static void nemoyoyo_sweep_dispatch_timer(struct nemotimer *timer, void *data)
 	nemoyoyo_one_transition_set_alpha(trans, 4, one);
 	nemoyoyo_one_transition_check_destroy(trans, one);
 	nemotransition_set_target(trans, 0, 1.0f,
-			nemoaction_tap_get_tx(tap) + cos(w) * r);
+			nemoaction_tap_get_tx(tap) + cos(rn) * rs);
 	nemotransition_set_target(trans, 1, 1.0f,
-			nemoaction_tap_get_ty(tap) + sin(w) * r);
+			nemoaction_tap_get_ty(tap) + sin(rn) * rs);
 	nemotransition_set_target(trans, 2, 1.0f, 0.45f);
 	nemotransition_set_target(trans, 3, 1.0f, 0.45f);
 	nemotransition_set_target(trans, 4, 1.0f, 0.0f);
@@ -95,14 +95,14 @@ static int nemoyoyo_sweep_dispatch_tap_event(struct nemoaction *action, struct a
 				struct json_object *cobj;
 				float cx = nemoaction_tap_get_tx(tap);
 				float cy = nemoaction_tap_get_ty(tap);
-				float r, w;
+				float rs, rn;
 				int i;
 
 				for (i = 0; i < json_object_array_length(jobj); i++) {
 					cobj = json_object_array_get_idx(jobj, i);
 
-					r = random_get_double(160.0f, 180.0f);
-					w = random_get_double(0.0f, M_PI * 2.0f);
+					rs = random_get_double(160.0f, 180.0f);
+					rn = random_get_double(0.0f, M_PI * 2.0f);
 
 					actor = nemoyoyo_actor_create(yoyo);
 					nemoyoyo_actor_set_json_object(actor, cobj);
@@ -111,8 +111,9 @@ static int nemoyoyo_sweep_dispatch_tap_event(struct nemoaction *action, struct a
 					nemoyoyo_actor_dispatch(actor,
 							cx,
 							cy,
-							cx + cos(w) * r,
-							cy + sin(w) * r);
+							cx + cos(rn) * rs,
+							cy + sin(rn) * rs,
+							0.0f);
 				}
 			}
 		}

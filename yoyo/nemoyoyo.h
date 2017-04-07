@@ -28,6 +28,7 @@ typedef enum {
 } NemoYoyoFlag;
 
 struct yoyoone;
+struct yoyoactor;
 
 struct nemoyoyo {
 	struct nemotool *tool;
@@ -48,6 +49,7 @@ struct nemoyoyo {
 	pixman_region32_t damage;
 
 	struct nemolist one_list;
+	struct nemolist actor_list;
 
 	struct nemodick *textures;
 
@@ -59,8 +61,10 @@ struct nemoyoyo {
 
 extern void nemoyoyo_attach_one(struct nemoyoyo *yoyo, struct yoyoone *one);
 extern void nemoyoyo_detach_one(struct nemoyoyo *yoyo, struct yoyoone *one);
-
 extern struct yoyoone *nemoyoyo_pick_one(struct nemoyoyo *yoyo, float x, float y);
+
+extern void nemoyoyo_attach_actor(struct nemoyoyo *yoyo, struct yoyoactor *actor);
+extern void nemoyoyo_detach_actor(struct nemoyoyo *yoyo, struct yoyoactor *actor);
 
 extern struct cooktex *nemoyoyo_search_tex(struct nemoyoyo *yoyo, const char *path);
 

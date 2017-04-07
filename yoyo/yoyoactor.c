@@ -23,11 +23,15 @@ struct yoyoactor *nemoyoyo_actor_create(struct nemoyoyo *yoyo)
 
 	actor->yoyo = yoyo;
 
+	nemolist_init(&actor->link);
+
 	return actor;
 }
 
 void nemoyoyo_actor_destroy(struct yoyoactor *actor)
 {
+	nemolist_remove(&actor->link);
+
 	if (actor->icon != NULL)
 		nemoyoyo_one_destroy(actor->icon);
 
@@ -96,7 +100,7 @@ static int nemoyoyo_actor_dispatch_tap_event(struct nemoaction *action, struct a
 	return 0;
 }
 
-int nemoyoyo_actor_dispatch(struct yoyoactor *actor, float cx, float cy, float tx, float ty)
+int nemoyoyo_actor_dispatch(struct yoyoactor *actor, float cx, float cy, float x, float y, float r)
 {
 	struct nemoyoyo *yoyo = actor->yoyo;
 	struct yoyoone *one;
@@ -136,8 +140,8 @@ int nemoyoyo_actor_dispatch(struct yoyoactor *actor, float cx, float cy, float t
 	nemoyoyo_one_transition_set_ty(trans, 1, one);
 	nemoyoyo_one_transition_set_alpha(trans, 2, one);
 	nemoyoyo_one_transition_check_destroy(trans, one);
-	nemotransition_set_target(trans, 0, 1.0f, tx);
-	nemotransition_set_target(trans, 1, 1.0f, ty);
+	nemotransition_set_target(trans, 0, 1.0f, x);
+	nemotransition_set_target(trans, 1, 1.0f, y);
 	nemotransition_set_target(trans, 2, 1.0f, 1.0f);
 	nemotransition_set_userdata(trans, actor);
 	nemotransition_group_attach_transition(yoyo->transitions, trans);
@@ -147,8 +151,13 @@ int nemoyoyo_actor_dispatch(struct yoyoactor *actor, float cx, float cy, float t
 	actor->timer = nemotimer_create(nemotool_get_instance());
 	nemotimer_set_callback(actor->timer, nemoyoyo_actor_dispatch_timer);
 	nemotimer_set_userdata(actor->timer, actor);
-
 	nemotimer_set_timeout(actor->timer, actor->lifetime);
+
+	actor->geometry.x = x;
+	actor->geometry.y = y;
+	actor->geometry.r = r;
+
+	nemoyoyo_attach_actor(yoyo, actor);
 
 	return 0;
 
@@ -198,14 +207,14 @@ int nemoyoyo_actor_execute(struct yoyoactor *actor, float x, float y, float r, c
 			struct json_object *cobj;
 			float cx = x;
 			float cy = y;
-			float r, w;
+			float rs, rn;
 			int i;
 
 			for (i = 0; i < json_object_array_length(jobj); i++) {
 				cobj = json_object_array_get_idx(jobj, i);
 
-				r = random_get_double(160.0f, 180.0f);
-				w = random_get_double(0.0f, M_PI * 2.0f);
+				rs = random_get_double(160.0f, 180.0f);
+				rn = random_get_double(0.0f, M_PI * 2.0f);
 
 				child = nemoyoyo_actor_create(yoyo);
 				nemoyoyo_actor_set_json_object(child, cobj);
@@ -214,8 +223,9 @@ int nemoyoyo_actor_execute(struct yoyoactor *actor, float x, float y, float r, c
 				nemoyoyo_actor_dispatch(child,
 						cx,
 						cy,
-						cx + cos(w) * r,
-						cy + sin(w) * r);
+						cx + cos(rn) * rs,
+						cy + sin(rn) * rs,
+						r);
 			}
 		}
 	}
