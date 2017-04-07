@@ -418,7 +418,7 @@ int main(int argc, char *argv[])
 
 void nemoyoyo_attach_one(struct nemoyoyo *yoyo, struct yoyoone *one)
 {
-	nemolist_insert_tail(&yoyo->one_list, &one->link);
+	nemolist_insert(&yoyo->one_list, &one->link);
 
 	nemocook_transform_set_parent(one->trans, yoyo->projection);
 }
