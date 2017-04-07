@@ -90,8 +90,6 @@ static int nemoyoyo_actor_dispatch_tap_event(struct nemoaction *action, struct a
 				nemoaction_tap_get_ty(tap),
 				0.0f,
 				"click");
-		nemoaction_destroy_one_by_target(action, one);
-		nemoaction_destroy_tap_by_target(action, one);
 		nemoyoyo_actor_destroy(actor);
 	}
 
