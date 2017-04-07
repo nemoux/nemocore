@@ -83,6 +83,13 @@ int nemoyoyo_load_config(struct nemoyoyo *yoyo)
 
 			region = nemoyoyo_region_create(yoyo);
 
+			if (json_object_object_get_ex(cobj, "type", &tobj) != 0) {
+				const char *type = json_object_get_string(tobj);
+
+				if (strcmp(type, "triangle") == 0)
+					region->type = NEMOYOYO_REGION_TRIANGLE_TYPE;
+			}
+
 			if (json_object_object_get_ex(cobj, "x0", &tobj) != 0)
 				region->x0 = json_object_get_double(tobj);
 			if (json_object_object_get_ex(cobj, "y0", &tobj) != 0)
@@ -91,6 +98,10 @@ int nemoyoyo_load_config(struct nemoyoyo *yoyo)
 				region->x1 = json_object_get_double(tobj);
 			if (json_object_object_get_ex(cobj, "y1", &tobj) != 0)
 				region->y1 = json_object_get_double(tobj);
+			if (json_object_object_get_ex(cobj, "x2", &tobj) != 0)
+				region->x2 = json_object_get_double(tobj);
+			if (json_object_object_get_ex(cobj, "y2", &tobj) != 0)
+				region->y2 = json_object_get_double(tobj);
 			if (json_object_object_get_ex(cobj, "rotate", &tobj) != 0)
 				region->rotate = json_object_get_double(tobj) * M_PI / 180.0f;
 
@@ -253,8 +264,21 @@ struct yoyoregion *nemoyoyo_search_region(struct nemoyoyo *yoyo, float x, float 
 	struct yoyoregion *region;
 
 	nemolist_for_each(region, &yoyo->region_list, link) {
-		if (region->x0 <= x && x < region->x1 && region->y0 <= y && y < region->y1)
+		if (region->type == NEMOYOYO_REGION_TRIANGLE_TYPE) {
+			float x0 = x - region->x0;
+			float y0 = y - region->y0;
+			int xy = ((region->x1 - region->x0) * y0 - (region->y1 - region->y0) * x0 > 0);
+
+			if ((((region->x2 - region->x0) * y0 - (region->y2 - region->y0) * x0) > 0) == xy)
+				continue;
+			if ((((region->x2 - region->x1) * (y - region->y1) - (region->y2 - region->y1) * (x - region->x1)) > 0) != xy)
+				continue;
+
 			return region;
+		} else {
+			if (region->x0 <= x && x < region->x1 && region->y0 <= y && y < region->y1)
+				return region;
+		}
 	}
 
 	return NULL;

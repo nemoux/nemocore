@@ -13,9 +13,18 @@ NEMO_BEGIN_EXTERN_C
 
 #include <nemoyoyo.h>
 
+typedef enum {
+	NEMOYOYO_REGION_RECTANGLE_TYPE = 0,
+	NEMOYOYO_REGION_TRIANGLE_TYPE = 1,
+	NEMOYOYO_REGION_LAST_TYPE
+} NemoYoyoRegionType;
+
 struct yoyoregion {
+	int type;
+
 	float x0, y0;
 	float x1, y1;
+	float x2, y2;
 
 	float rotate;
 
