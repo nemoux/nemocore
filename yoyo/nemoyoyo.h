@@ -59,7 +59,8 @@ struct nemoyoyo {
 	int nsweeps;
 };
 
-extern int nemoyoyo_load_contents(struct nemoyoyo *yoyo);
+extern int nemoyoyo_load_config(struct nemoyoyo *yoyo);
+
 extern int nemoyoyo_update_one(struct nemoyoyo *yoyo);
 extern int nemoyoyo_update_frame(struct nemoyoyo *yoyo);
 

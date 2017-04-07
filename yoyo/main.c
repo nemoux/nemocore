@@ -278,6 +278,7 @@ int main(int argc, char *argv[])
 
 	config = yoyo->config = nemojson_create_file(configpath);
 	nemojson_update(config);
+	nemoyoyo_load_config(yoyo);
 
 	bus = yoyo->bus = nemobus_create();
 	nemobus_connect(bus, NULL);
@@ -287,8 +288,6 @@ int main(int argc, char *argv[])
 			"reh",
 			nemoyoyo_dispatch_bus,
 			yoyo);
-
-	nemoyoyo_load_contents(yoyo);
 
 	nemocanvas_dispatch_frame(canvas);
 

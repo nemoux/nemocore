@@ -13,7 +13,7 @@
 #include <nemofs.h>
 #include <nemomisc.h>
 
-int nemoyoyo_load_contents(struct nemoyoyo *yoyo)
+int nemoyoyo_load_config(struct nemoyoyo *yoyo)
 {
 	const char *sweepurl;
 
