@@ -414,38 +414,8 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-struct yoyosensor {
-	struct nemolistener listener;
-
-	struct nemoyoyo *yoyo;
-	void *object;
-};
-
-static void nemoyoyo_handle_one_destroy(struct nemolistener *listener, void *data)
-{
-	struct yoyosensor *sensor = (struct yoyosensor *)container_of(listener, struct yoyosensor, listener);
-	struct nemoaction *action = sensor->yoyo->action;
-	struct yoyoone *one = (struct yoyoone *)data;
-
-	nemoaction_destroy_one_by_target(action, one);
-	nemoaction_destroy_tap_by_target(action, one);
-
-	nemolist_remove(&sensor->listener.link);
-
-	free(sensor);
-}
-
 void nemoyoyo_attach_one(struct nemoyoyo *yoyo, struct yoyoone *one)
 {
-	struct yoyosensor *sensor;
-
-	sensor = (struct yoyosensor *)malloc(sizeof(struct yoyosensor));
-	sensor->yoyo = yoyo;
-	sensor->object = one;
-
-	sensor->listener.notify = nemoyoyo_handle_one_destroy;
-	nemosignal_add(&one->destroy_signal, &sensor->listener);
-
 	nemolist_insert_tail(&yoyo->one_list, &one->link);
 
 	nemocook_transform_set_parent(one->trans, yoyo->projection);

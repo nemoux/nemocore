@@ -11,6 +11,7 @@ NEMO_BEGIN_EXTERN_C
 #include <math.h>
 
 #include <nemolist.h>
+#include <nemolistener.h>
 
 struct nemoaction;
 struct actiontap;
@@ -46,6 +47,7 @@ struct actiontap {
 	nemoaction_tap_dispatch_event_t dispatch_event;
 
 	struct nemolist link;
+	struct nemolistener listener;
 
 	void *data;
 };

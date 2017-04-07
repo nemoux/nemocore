@@ -126,7 +126,7 @@ int nemoyoyo_actor_dispatch(struct yoyoactor *actor, float cx, float cy, float t
 	nemoyoyo_one_set_userdata(one, actor);
 	nemoyoyo_attach_one(yoyo, one);
 
-	nemoaction_one_set_tap_callback(yoyo->action, one, nemoyoyo_actor_dispatch_tap_event);
+	nemoaction_one_set_tap_callback(yoyo->action, one, &one->destroy_signal, nemoyoyo_actor_dispatch_tap_event);
 
 	trans = nemotransition_create(8,
 			NEMOEASE_CUBIC_OUT_TYPE,

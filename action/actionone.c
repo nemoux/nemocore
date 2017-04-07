@@ -19,6 +19,7 @@ struct actionone *nemoaction_one_create(struct nemoaction *action)
 	memset(one, 0, sizeof(struct actionone));
 
 	nemolist_insert_tail(&action->one_list, &one->link);
+	nemolist_init(&one->listener.link);
 
 	return one;
 }
@@ -26,11 +27,19 @@ struct actionone *nemoaction_one_create(struct nemoaction *action)
 void nemoaction_one_destroy(struct actionone *one)
 {
 	nemolist_remove(&one->link);
+	nemolist_remove(&one->listener.link);
 
 	free(one);
 }
 
-void nemoaction_one_set_tap_callback(struct nemoaction *action, void *target, nemoaction_tap_dispatch_event_t dispatch)
+static void nemoaction_one_handle_destroy(struct nemolistener *listener, void *data)
+{
+	struct actionone *one = (struct actionone *)container_of(listener, struct actionone, listener);
+
+	nemoaction_one_destroy(one);
+}
+
+void nemoaction_one_set_tap_callback(struct nemoaction *action, void *target, struct nemosignal *signal, nemoaction_tap_dispatch_event_t dispatch)
 {
 	struct actionone *one;
 
@@ -38,6 +47,12 @@ void nemoaction_one_set_tap_callback(struct nemoaction *action, void *target, ne
 	if (one == NULL) {
 		one = nemoaction_one_create(action);
 		one->target = target;
+		one->signal = signal;
+
+		if (signal != NULL) {
+			one->listener.notify = nemoaction_one_handle_destroy;
+			nemosignal_add(signal, &one->listener);
+		}
 	}
 
 	one->dispatch_tap_event = dispatch;
