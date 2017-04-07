@@ -28,6 +28,7 @@ add_executable(nemoyoyo
 	yoyoone.c
 	yoyosweep.c
 	yoyoactor.c
+	yoyoregion.c
 	)
 
 TARGET_LINK_LIBRARIES(nemoyoyo

@@ -49,6 +49,7 @@ void nemoyoyo_destroy(struct nemoyoyo *yoyo)
 
 int nemoyoyo_load_config(struct nemoyoyo *yoyo)
 {
+	struct json_object *jobj;
 	const char *sweepurl;
 
 	sweepurl = nemojson_search_string(yoyo->config, 0, NULL, 2, "sweep", "url");
@@ -67,6 +68,33 @@ int nemoyoyo_load_config(struct nemoyoyo *yoyo)
 			tex = yoyo->sweeps[i] = nemocook_texture_create();
 			nemocook_texture_assign(tex, NEMOCOOK_TEXTURE_BGRA_FORMAT, 0, 0);
 			nemocook_texture_load_image(tex, nemofs_dir_get_filepath(contents, i));
+		}
+	}
+
+	jobj = nemojson_search_object(yoyo->config, 0, 1, "regions");
+	if (jobj != NULL) {
+		struct yoyoregion *region;
+		struct json_object *cobj;
+		struct json_object *tobj;
+		int i;
+
+		for (i = 0; i < json_object_array_length(jobj); i++) {
+			cobj = json_object_array_get_idx(jobj, i);
+
+			region = nemoyoyo_region_create(yoyo);
+
+			if (json_object_object_get_ex(cobj, "x0", &tobj) != 0)
+				region->x0 = json_object_get_double(tobj);
+			if (json_object_object_get_ex(cobj, "y0", &tobj) != 0)
+				region->y0 = json_object_get_double(tobj);
+			if (json_object_object_get_ex(cobj, "x1", &tobj) != 0)
+				region->x1 = json_object_get_double(tobj);
+			if (json_object_object_get_ex(cobj, "y1", &tobj) != 0)
+				region->y1 = json_object_get_double(tobj);
+			if (json_object_object_get_ex(cobj, "rotate", &tobj) != 0)
+				region->rotate = json_object_get_double(tobj) * M_PI / 180.0f;
+
+			nemoyoyo_attach_region(yoyo, region);
 		}
 	}
 

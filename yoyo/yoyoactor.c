@@ -139,11 +139,13 @@ int nemoyoyo_actor_dispatch(struct yoyoactor *actor, float cx, float cy, float x
 			0);
 	nemoyoyo_one_transition_set_tx(trans, 0, one);
 	nemoyoyo_one_transition_set_ty(trans, 1, one);
-	nemoyoyo_one_transition_set_alpha(trans, 2, one);
+	nemoyoyo_one_transition_set_rz(trans, 2, one);
+	nemoyoyo_one_transition_set_alpha(trans, 3, one);
 	nemoyoyo_one_transition_check_destroy(trans, one);
 	nemotransition_set_target(trans, 0, 1.0f, x);
 	nemotransition_set_target(trans, 1, 1.0f, y);
-	nemotransition_set_target(trans, 2, 1.0f, 1.0f);
+	nemotransition_set_target(trans, 2, 1.0f, r);
+	nemotransition_set_target(trans, 3, 1.0f, 1.0f);
 	nemotransition_set_userdata(trans, actor);
 	nemotransition_group_attach_transition(yoyo->transitions, trans);
 

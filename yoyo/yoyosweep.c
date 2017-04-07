@@ -7,8 +7,9 @@
 
 #include <yoyosweep.h>
 #include <yoyoactor.h>
-#include <nemoyoyo.h>
+#include <yoyoregion.h>
 #include <yoyoone.h>
+#include <nemoyoyo.h>
 #include <nemomisc.h>
 
 static void nemoyoyo_sweep_dispatch_transition_done(struct nemotransition *trans, void *data)
@@ -99,9 +100,12 @@ static int nemoyoyo_sweep_dispatch_tap_event(struct nemoaction *action, struct a
 
 				if (nemoyoyo_overlap_actor(yoyo, cx, cy) == 0) {
 					struct yoyoactor *actor;
+					struct yoyoregion *region;
 					struct json_object *cobj;
 					float rs, rn;
 					int i;
+
+					region = nemoyoyo_search_region(yoyo, cx, cy);
 
 					for (i = 0; i < json_object_array_length(jobj); i++) {
 						cobj = json_object_array_get_idx(jobj, i);
@@ -118,7 +122,7 @@ static int nemoyoyo_sweep_dispatch_tap_event(struct nemoaction *action, struct a
 								cy,
 								cx + cos(rn) * rs,
 								cy + sin(rn) * rs,
-								0.0f);
+								region == NULL ? 0.0f : nemoyoyo_region_get_rotate(region));
 					}
 				}
 			}
