@@ -19,8 +19,12 @@ typedef enum {
 	NEMOYOYO_REGION_LAST_TYPE
 } NemoYoyoRegionType;
 
+struct yoyoregion;
+
+typedef int (*nemoyoyo_region_contain_t)(struct yoyoregion *region, float x, float y);
+
 struct yoyoregion {
-	int type;
+	nemoyoyo_region_contain_t contain;
 
 	float x0, y0;
 	float x1, y1;
@@ -33,6 +37,13 @@ struct yoyoregion {
 
 extern struct yoyoregion *nemoyoyo_region_create(struct nemoyoyo *yoyo);
 extern void nemoyoyo_region_destroy(struct yoyoregion *region);
+
+extern void nemoyoyo_region_set_type(struct yoyoregion *region, int type);
+
+static inline int nemoyoyo_region_contain(struct yoyoregion *region, float x, float y)
+{
+	return region->contain(region, x, y);
+}
 
 NEMOYOYO_DECLARE_SET_ATTRIBUTE(region, float, rotate, rotate);
 NEMOYOYO_DECLARE_GET_ATTRIBUTE(region, float, rotate, rotate);

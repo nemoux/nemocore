@@ -87,7 +87,9 @@ int nemoyoyo_load_config(struct nemoyoyo *yoyo)
 				const char *type = json_object_get_string(tobj);
 
 				if (strcmp(type, "triangle") == 0)
-					region->type = NEMOYOYO_REGION_TRIANGLE_TYPE;
+					nemoyoyo_region_set_type(region, NEMOYOYO_REGION_TRIANGLE_TYPE);
+				else
+					nemoyoyo_region_set_type(region, NEMOYOYO_REGION_RECTANGLE_TYPE);
 			}
 
 			if (json_object_object_get_ex(cobj, "x0", &tobj) != 0)
@@ -264,21 +266,8 @@ struct yoyoregion *nemoyoyo_search_region(struct nemoyoyo *yoyo, float x, float 
 	struct yoyoregion *region;
 
 	nemolist_for_each(region, &yoyo->region_list, link) {
-		if (region->type == NEMOYOYO_REGION_TRIANGLE_TYPE) {
-			float x0 = x - region->x0;
-			float y0 = y - region->y0;
-			int xy = ((region->x1 - region->x0) * y0 - (region->y1 - region->y0) * x0 > 0);
-
-			if ((((region->x2 - region->x0) * y0 - (region->y2 - region->y0) * x0) > 0) == xy)
-				continue;
-			if ((((region->x2 - region->x1) * (y - region->y1) - (region->y2 - region->y1) * (x - region->x1)) > 0) != xy)
-				continue;
-
+		if (nemoyoyo_region_contain(region, x, y) > 0)
 			return region;
-		} else {
-			if (region->x0 <= x && x < region->x1 && region->y0 <= y && y < region->y1)
-				return region;
-		}
 	}
 
 	return NULL;
