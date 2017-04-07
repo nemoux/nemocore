@@ -25,6 +25,10 @@ struct yoyosweep {
 	uint32_t minimum_interval, maximum_interval;
 	uint32_t minimum_duration, maximum_duration;
 
+	float feedback_sx0, feedback_sx1;
+	float feedback_sy0, feedback_sy1;
+	float feedback_alpha0, feedback_alpha1;
+
 	float actor_distance;
 	uint32_t actor_duration;
 };
@@ -62,6 +66,24 @@ static inline void nemoyoyo_sweep_set_minimum_duration(struct yoyosweep *sweep, 
 static inline void nemoyoyo_sweep_set_maximum_duration(struct yoyosweep *sweep, uint32_t max)
 {
 	sweep->maximum_duration = max;
+}
+
+static inline void nemoyoyo_sweep_set_feedback_sx(struct yoyosweep *sweep, float sx0, float sx1)
+{
+	sweep->feedback_sx0 = sx0;
+	sweep->feedback_sx1 = sx1;
+}
+
+static inline void nemoyoyo_sweep_set_feedback_sy(struct yoyosweep *sweep, float sy0, float sy1)
+{
+	sweep->feedback_sy0 = sy0;
+	sweep->feedback_sy1 = sy1;
+}
+
+static inline void nemoyoyo_sweep_set_feedback_alpha(struct yoyosweep *sweep, float alpha0, float alpha1)
+{
+	sweep->feedback_alpha0 = alpha0;
+	sweep->feedback_alpha1 = alpha1;
 }
 
 static inline void nemoyoyo_sweep_set_actor_distance(struct yoyosweep *sweep, float distance)

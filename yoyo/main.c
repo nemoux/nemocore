@@ -35,6 +35,9 @@ static int nemoyoyo_dispatch_tap_event(struct nemoaction *action, struct actiont
 			nemoyoyo_sweep_set_maximum_interval(sweep, 8);
 			nemoyoyo_sweep_set_minimum_duration(sweep, 800);
 			nemoyoyo_sweep_set_maximum_duration(sweep, 1200);
+			nemoyoyo_sweep_set_feedback_sx(sweep, 0.15f, 1.0f);
+			nemoyoyo_sweep_set_feedback_sy(sweep, 0.15f, 1.0f);
+			nemoyoyo_sweep_set_feedback_alpha(sweep, 0.75f, 0.0f);
 			nemoyoyo_sweep_set_actor_distance(sweep, 100.0f);
 			nemoyoyo_sweep_set_actor_duration(sweep, 300);
 			nemoyoyo_sweep_dispatch(sweep, tap);

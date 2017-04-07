@@ -42,6 +42,9 @@ static void nemoyoyo_sweep_dispatch_timer(struct nemotimer *timer, void *data)
 			nemocook_texture_get_width(tex));
 	nemoyoyo_one_set_height(one,
 			nemocook_texture_get_height(tex));
+	nemoyoyo_one_set_sx(one, sweep->feedback_sx0);
+	nemoyoyo_one_set_sy(one, sweep->feedback_sy0);
+	nemoyoyo_one_set_alpha(one, sweep->feedback_alpha0);
 	nemoyoyo_one_set_texture(one, tex);
 	nemoyoyo_attach_one(yoyo, one);
 
@@ -59,9 +62,9 @@ static void nemoyoyo_sweep_dispatch_timer(struct nemotimer *timer, void *data)
 			nemoaction_tap_get_tx(tap) + cos(rn) * rs);
 	nemotransition_set_target(trans, 1, 1.0f,
 			nemoaction_tap_get_ty(tap) + sin(rn) * rs);
-	nemotransition_set_target(trans, 2, 1.0f, 0.45f);
-	nemotransition_set_target(trans, 3, 1.0f, 0.45f);
-	nemotransition_set_target(trans, 4, 1.0f, 0.0f);
+	nemotransition_set_target(trans, 2, 1.0f, sweep->feedback_sx1);
+	nemotransition_set_target(trans, 3, 1.0f, sweep->feedback_sy1);
+	nemotransition_set_target(trans, 4, 1.0f, sweep->feedback_alpha1);
 	nemotransition_set_dispatch_done(trans, nemoyoyo_sweep_dispatch_transition_done);
 	nemotransition_set_userdata(trans, one);
 	nemotransition_group_attach_transition(yoyo->transitions, trans);
