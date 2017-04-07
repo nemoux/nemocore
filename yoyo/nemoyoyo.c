@@ -136,6 +136,9 @@ struct yoyoone *nemoyoyo_pick_one(struct nemoyoyo *yoyo, float x, float y)
 	float sx, sy;
 
 	nemolist_for_each_reverse(one, &yoyo->one_list, link) {
+		if (nemoyoyo_one_has_flags(one, NEMOYOYO_ONE_PICK_FLAG) == 0)
+			continue;
+
 		nemocook_2d_transform_from_global(one->trans, x, y, &sx, &sy);
 
 		if (0.0f <= sx && sx <= one->geometry.w && 0.0f <= sy && sy <= one->geometry.h)

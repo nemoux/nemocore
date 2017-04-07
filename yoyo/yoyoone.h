@@ -15,7 +15,8 @@ NEMO_BEGIN_EXTERN_C
 #include <nemotransition.h>
 
 typedef enum {
-	NEMOYOYO_ONE_TRANSFORM_FLAG = (1 << 0)
+	NEMOYOYO_ONE_TRANSFORM_FLAG = (1 << 0),
+	NEMOYOYO_ONE_PICK_FLAG = (1 << 1)
 } NemoYoyoOneFlag;
 
 typedef enum {

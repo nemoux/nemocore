@@ -119,6 +119,7 @@ int nemoyoyo_actor_dispatch(struct yoyoactor *actor, float cx, float cy, float x
 		goto err1;
 
 	one = actor->icon = nemoyoyo_one_create();
+	nemoyoyo_one_set_flags(one, NEMOYOYO_ONE_PICK_FLAG);
 	nemoyoyo_one_set_tx(one, cx);
 	nemoyoyo_one_set_ty(one, cy);
 	nemoyoyo_one_set_alpha(one, 0.0f);
