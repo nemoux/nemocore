@@ -289,7 +289,7 @@ struct cooktex *nemoyoyo_search_tex(struct nemoyoyo *yoyo, const char *path)
 		return NULL;
 	}
 
-	nemodick_insert(yoyo->textures, path, tex);
+	nemodick_insert(yoyo->textures, tex, path);
 
 	return tex;
 }
