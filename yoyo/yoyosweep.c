@@ -107,8 +107,8 @@ static int nemoyoyo_sweep_dispatch_tap_event(struct nemoaction *action, struct a
 
 					region = nemoyoyo_search_region(yoyo, cx, cy);
 
-					for (i = 0; i < json_object_array_length(jobj); i++) {
-						cobj = json_object_array_get_idx(jobj, i);
+					for (i = 0; i < nemojson_array_get_length(jobj); i++) {
+						cobj = nemojson_array_get_object(jobj, i);
 
 						rs = random_get_double(160.0f, 180.0f);
 						rn = random_get_double(0.0f, M_PI * 2.0f);

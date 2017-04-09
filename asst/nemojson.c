@@ -315,3 +315,13 @@ int nemojson_object_get_integer(struct json_object *jobj, const char *name, int 
 
 	return json_object_get_int(tobj);
 }
+
+int nemojson_array_get_length(struct json_object *jobj)
+{
+	return json_object_array_length(jobj);
+}
+
+struct json_object *nemojson_array_get_object(struct json_object *jobj, int index)
+{
+	return json_object_array_get_idx(jobj, index);
+}

@@ -78,10 +78,10 @@ int nemoyoyo_load_config(struct nemoyoyo *yoyo)
 		struct json_object *tobj;
 		int i;
 
-		for (i = 0; i < json_object_array_length(jobj); i++) {
+		for (i = 0; i < nemojson_array_get_length(jobj); i++) {
 			const char *type;
 
-			cobj = json_object_array_get_idx(jobj, i);
+			cobj = nemojson_array_get_object(jobj, i);
 
 			region = nemoyoyo_region_create(yoyo);
 
