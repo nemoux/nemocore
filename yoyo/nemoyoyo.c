@@ -273,23 +273,23 @@ struct yoyoregion *nemoyoyo_search_region(struct nemoyoyo *yoyo, float x, float 
 	return NULL;
 }
 
-struct cooktex *nemoyoyo_search_tex(struct nemoyoyo *yoyo, const char *path)
+struct cooktex *nemoyoyo_search_tex(struct nemoyoyo *yoyo, const char *path, int width, int height)
 {
 	struct cooktex *tex;
 
-	tex = (struct cooktex *)nemodick_search(yoyo->textures, path);
+	tex = (struct cooktex *)nemodick_search_format(yoyo->textures, "%s@%dx%d", path, width, height);
 	if (tex != NULL)
 		return tex;
 
 	tex = nemocook_texture_create();
-	nemocook_texture_assign(tex, NEMOCOOK_TEXTURE_BGRA_FORMAT, 0, 0);
+	nemocook_texture_assign(tex, NEMOCOOK_TEXTURE_BGRA_FORMAT, width, height);
 
 	if (nemocook_texture_load_image(tex, path) < 0) {
 		nemocook_texture_destroy(tex);
 		return NULL;
 	}
 
-	nemodick_insert(yoyo->textures, tex, path);
+	nemodick_insert_format(yoyo->textures, tex, "%s@%dx%d", path, width, height);
 
 	return tex;
 }

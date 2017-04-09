@@ -114,7 +114,7 @@ int nemoyoyo_actor_dispatch(struct yoyoactor *actor, float cx, float cy, float x
 	if (icon == NULL)
 		goto err1;
 
-	tex = nemoyoyo_search_tex(yoyo, icon);
+	tex = nemoyoyo_search_tex(yoyo, icon, 0, 0);
 	if (tex == NULL)
 		goto err1;
 
