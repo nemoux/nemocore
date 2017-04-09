@@ -106,11 +106,9 @@ int nemoyoyo_actor_dispatch(struct yoyoactor *actor, float cx, float cy, float x
 	struct yoyoone *one;
 	struct cooktex *tex;
 	struct nemotransition *trans;
-	struct json_object *tobj;
-	const char *icon = NULL;
+	const char *icon;
 
-	if (json_object_object_get_ex(actor->jobj, "icon", &tobj) != 0)
-		icon = json_object_get_string(tobj);
+	icon = nemojson_object_get_string(actor->jobj, "icon", NULL);
 	if (icon == NULL)
 		goto err1;
 
@@ -174,22 +172,19 @@ int nemoyoyo_actor_execute(struct yoyoactor *actor, float x, float y, float r, c
 {
 	struct nemoyoyo *yoyo = actor->yoyo;
 	struct json_object *tobj;
-	const char *type = NULL;
+	const char *type;
 
-	if (json_object_object_get_ex(actor->jobj, "type", &tobj) != 0)
-		type = json_object_get_string(tobj);
+	type = nemojson_object_get_string(actor->jobj, "type", NULL);
 	if (type == NULL)
 		return -1;
 
 	if (strcmp(type, "app") == 0) {
-		const char *path = NULL;
-		const char *args = NULL;
 		struct busmsg *msg;
+		const char *path;
+		const char *args;
 
-		if (json_object_object_get_ex(actor->jobj, "path", &tobj) != 0)
-			path = json_object_get_string(tobj);
-		if (json_object_object_get_ex(actor->jobj, "args", &tobj) != 0)
-			args = json_object_get_string(tobj);
+		path = nemojson_object_get_string(actor->jobj, "path", NULL);
+		args = nemojson_object_get_string(actor->jobj, "args", NULL);
 
 		msg = nemobus_msg_create();
 		nemobus_msg_set_name(msg, "command");
@@ -205,7 +200,8 @@ int nemoyoyo_actor_execute(struct yoyoactor *actor, float x, float y, float r, c
 	} else if (strcmp(type, "group") == 0) {
 		struct json_object *jobj;
 
-		if (json_object_object_get_ex(actor->jobj, "items", &jobj) != 0) {
+		jobj = nemojson_object_get_object(actor->jobj, "items", NULL);
+		if (jobj != NULL) {
 			struct yoyoactor *child;
 			struct json_object *cobj;
 			float cx = x;

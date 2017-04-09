@@ -79,33 +79,25 @@ int nemoyoyo_load_config(struct nemoyoyo *yoyo)
 		int i;
 
 		for (i = 0; i < json_object_array_length(jobj); i++) {
+			const char *type;
+
 			cobj = json_object_array_get_idx(jobj, i);
 
 			region = nemoyoyo_region_create(yoyo);
 
-			if (json_object_object_get_ex(cobj, "type", &tobj) != 0) {
-				const char *type = json_object_get_string(tobj);
+			type = nemojson_object_get_string(cobj, "type", "rectangle");
+			if (strcmp(type, "triangle") == 0)
+				nemoyoyo_region_set_type(region, NEMOYOYO_REGION_TRIANGLE_TYPE);
+			else
+				nemoyoyo_region_set_type(region, NEMOYOYO_REGION_RECTANGLE_TYPE);
 
-				if (strcmp(type, "triangle") == 0)
-					nemoyoyo_region_set_type(region, NEMOYOYO_REGION_TRIANGLE_TYPE);
-				else
-					nemoyoyo_region_set_type(region, NEMOYOYO_REGION_RECTANGLE_TYPE);
-			}
-
-			if (json_object_object_get_ex(cobj, "x0", &tobj) != 0)
-				region->x0 = json_object_get_double(tobj);
-			if (json_object_object_get_ex(cobj, "y0", &tobj) != 0)
-				region->y0 = json_object_get_double(tobj);
-			if (json_object_object_get_ex(cobj, "x1", &tobj) != 0)
-				region->x1 = json_object_get_double(tobj);
-			if (json_object_object_get_ex(cobj, "y1", &tobj) != 0)
-				region->y1 = json_object_get_double(tobj);
-			if (json_object_object_get_ex(cobj, "x2", &tobj) != 0)
-				region->x2 = json_object_get_double(tobj);
-			if (json_object_object_get_ex(cobj, "y2", &tobj) != 0)
-				region->y2 = json_object_get_double(tobj);
-			if (json_object_object_get_ex(cobj, "rotate", &tobj) != 0)
-				region->rotate = json_object_get_double(tobj) * M_PI / 180.0f;
+			region->x0 = nemojson_object_get_double(cobj, "x0", 0.0f);
+			region->y0 = nemojson_object_get_double(cobj, "y0", 0.0f);
+			region->x1 = nemojson_object_get_double(cobj, "x1", 0.0f);
+			region->y1 = nemojson_object_get_double(cobj, "y1", 0.0f);
+			region->x2 = nemojson_object_get_double(cobj, "x2", 0.0f);
+			region->y2 = nemojson_object_get_double(cobj, "y2", 0.0f);
+			region->rotate = nemojson_object_get_double(cobj, "rotate", 0.0f) * M_PI / 180.0f;
 
 			nemoyoyo_attach_region(yoyo, region);
 		}

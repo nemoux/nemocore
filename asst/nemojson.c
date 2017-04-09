@@ -275,3 +275,43 @@ const char *nemojson_search_string(struct nemojson *json, int index, const char 
 
 	return json_object_get_string(jobj);
 }
+
+struct json_object *nemojson_object_get_object(struct json_object *jobj, const char *name, struct json_object *value)
+{
+	struct json_object *tobj;
+
+	if (json_object_object_get_ex(jobj, name, &tobj) == 0)
+		return value;
+
+	return tobj;
+}
+
+const char *nemojson_object_get_string(struct json_object *jobj, const char *name, const char *value)
+{
+	struct json_object *tobj;
+
+	if (json_object_object_get_ex(jobj, name, &tobj) == 0)
+		return value;
+
+	return json_object_get_string(tobj);
+}
+
+double nemojson_object_get_double(struct json_object *jobj, const char *name, double value)
+{
+	struct json_object *tobj;
+
+	if (json_object_object_get_ex(jobj, name, &tobj) == 0)
+		return value;
+
+	return json_object_get_double(tobj);
+}
+
+int nemojson_object_get_integer(struct json_object *jobj, const char *name, int value)
+{
+	struct json_object *tobj;
+
+	if (json_object_object_get_ex(jobj, name, &tobj) == 0)
+		return value;
+
+	return json_object_get_int(tobj);
+}

@@ -37,6 +37,11 @@ extern int nemojson_search_integer(struct nemojson *json, int index, int value, 
 extern double nemojson_search_double(struct nemojson *json, int index, double value, int depth, ...);
 extern const char *nemojson_search_string(struct nemojson *json, int index, const char *value, int depth, ...);
 
+extern struct json_object *nemojson_object_get_object(struct json_object *jobj, const char *name, struct json_object *value);
+extern const char *nemojson_object_get_string(struct json_object *jobj, const char *name, const char *value);
+extern double nemojson_object_get_double(struct json_object *jobj, const char *name, double value);
+extern int nemojson_object_get_integer(struct json_object *jobj, const char *name, int value);
+
 static inline int nemojson_get_object_count(struct nemojson *json)
 {
 	return json->count;
