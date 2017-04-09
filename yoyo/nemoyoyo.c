@@ -273,7 +273,7 @@ struct yoyoregion *nemoyoyo_search_region(struct nemoyoyo *yoyo, float x, float 
 	return NULL;
 }
 
-struct cooktex *nemoyoyo_search_tex(struct nemoyoyo *yoyo, const char *path, int width, int height)
+struct cooktex *nemoyoyo_search_texture(struct nemoyoyo *yoyo, const char *path, int width, int height)
 {
 	struct cooktex *tex;
 
