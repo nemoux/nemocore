@@ -166,7 +166,7 @@ struct nemoshow *nemoshow_create_view(struct nemotool *tool, int32_t width, int3
 		return NULL;
 	memset(scon, 0, sizeof(struct showcontext));
 
-	nemotool_connect_egl(tool);
+	nemotool_connect_egl(tool, 1, 4);
 
 	scon->tool = tool;
 	scon->width = width;

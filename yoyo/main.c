@@ -224,7 +224,7 @@ int main(int argc, char *argv[])
 
 	tool = yoyo->tool = nemotool_create();
 	nemotool_connect_wayland(tool, NULL);
-	nemotool_connect_egl(tool);
+	nemotool_connect_egl(tool, 1, 4);
 
 	canvas = yoyo->canvas = nemocanvas_egl_create(tool, width, height);
 	nemocanvas_set_nemosurface(canvas, "normal");

@@ -1034,7 +1034,7 @@ int main(int argc, char *argv[])
 
 	art->tool = tool = nemotool_create();
 	nemotool_connect_wayland(tool, NULL);
-	nemotool_connect_egl(tool);
+	nemotool_connect_egl(tool, 1, 4);
 
 	art->alive_timer = timer = nemotimer_create(tool);
 	nemotimer_set_callback(timer, nemoart_dispatch_alive_timer);

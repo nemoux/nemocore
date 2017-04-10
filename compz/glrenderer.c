@@ -630,7 +630,7 @@ void glrenderer_make_current(struct nemorenderer *base)
 
 static int glrenderer_prepare_egl_context(struct glrenderer *renderer, struct nemoscreen *screen, EGLSurface egl_surface)
 {
-	static const EGLint attribs[] = {
+	static EGLint attribs[] = {
 		EGL_CONTEXT_CLIENT_VERSION, 2,
 		EGL_NONE
 	};

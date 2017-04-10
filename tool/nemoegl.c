@@ -12,20 +12,9 @@
 #include <nemoegl.h>
 #include <nemomisc.h>
 
-int nemotool_connect_egl(struct nemotool *tool)
+int nemotool_connect_egl(struct nemotool *tool, int alpha, int samples)
 {
-	static const EGLint opaque_attribs[] = {
-		EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-		EGL_RED_SIZE, 1,
-		EGL_GREEN_SIZE, 1,
-		EGL_BLUE_SIZE, 1,
-		EGL_ALPHA_SIZE, 0,
-		EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT,
-		EGL_SAMPLE_BUFFERS, 1,
-		EGL_SAMPLES, 4,
-		EGL_NONE
-	};
-	static const EGLint alpha_attribs[] = {
+	static EGLint attribs[] = {
 		EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
 		EGL_RED_SIZE, 1,
 		EGL_GREEN_SIZE, 1,
@@ -36,7 +25,7 @@ int nemotool_connect_egl(struct nemotool *tool)
 		EGL_SAMPLES, 4,
 		EGL_NONE
 	};
-	static const EGLint client_attribs[] = {
+	static EGLint client_attribs[] = {
 		EGL_CONTEXT_CLIENT_VERSION, 3,
 		EGL_NONE
 	};
@@ -46,7 +35,6 @@ int nemotool_connect_egl(struct nemotool *tool)
 	EGLint major, minor;
 	EGLint count, n, i, s;
 	int buffer_size = 32;
-	int use_alpha = 1;
 
 	tool->eglcontext = econtext = (struct eglcontext *)malloc(sizeof(struct eglcontext));
 	if (econtext == NULL)
@@ -66,7 +54,10 @@ int nemotool_connect_egl(struct nemotool *tool)
 	if (!eglGetConfigs(econtext->display, NULL, 0, &count) || count < 1)
 		goto err1;
 
-	if (!eglChooseConfig(econtext->display, use_alpha == 0 ? opaque_attribs : alpha_attribs, configs, count, &n))
+	attribs[9] = alpha;
+	attribs[15] = samples;
+
+	if (!eglChooseConfig(econtext->display, attribs, configs, count, &n))
 		goto err1;
 
 	for (i = 0; i < n; i++) {
