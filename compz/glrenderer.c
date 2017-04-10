@@ -547,8 +547,6 @@ struct nemorenderer *glrenderer_create(struct rendernode *node, EGLNativeDisplay
 	renderer->base.destroy = glrenderer_destroy;
 	renderer->base.make_current = glrenderer_make_current;
 
-	attribs[15] = env_get_integer("NEMOCOMPZ_EGL_SAMPLES", 4);
-
 	renderer->attribs = attribs;
 
 	renderer->egl_display = eglGetDisplay(display);
