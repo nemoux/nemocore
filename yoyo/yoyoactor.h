@@ -24,12 +24,14 @@ struct yoyoactor {
 
 	struct nemotimer *timer;
 
-	struct yoyoone *icon;
+	struct yoyoone **ones;
+	int nones;
 
 	struct json_object *jobj;
 
 	uint32_t lifetime;
 	uint32_t hidetime;
+	float itemsize;
 
 	struct {
 		float x, y;
@@ -42,13 +44,16 @@ struct yoyoactor {
 extern struct yoyoactor *nemoyoyo_actor_create(struct nemoyoyo *yoyo);
 extern void nemoyoyo_actor_destroy(struct yoyoactor *actor);
 
-extern void nemoyoyo_actor_set_json_object(struct yoyoactor *actor, struct json_object *jobj);
+extern int nemoyoyo_actor_dispatch(struct yoyoactor *actor, float x, float y, float r);
 
-extern int nemoyoyo_actor_dispatch(struct yoyoactor *actor, float cx, float cy, float x, float y, float r);
-extern int nemoyoyo_actor_execute(struct yoyoactor *actor, float x, float y, float r, const char *event);
+extern int nemoyoyo_actor_activate(struct yoyoactor *actor, struct json_object *jobj);
+extern void nemoyoyo_actor_deactivate(struct yoyoactor *actor);
+
+extern int nemoyoyo_actor_execute(struct yoyoactor *actor, int index, float x, float y, const char *event);
 
 NEMOYOYO_DECLARE_SET_ATTRIBUTE(actor, uint32_t, lifetime, lifetime);
 NEMOYOYO_DECLARE_SET_ATTRIBUTE(actor, uint32_t, hidetime, hidetime);
+NEMOYOYO_DECLARE_SET_ATTRIBUTE(actor, float, itemsize, itemsize);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

@@ -33,6 +33,7 @@ struct yoyoone {
 
 	uint32_t flags;
 	uint32_t dirty;
+	uint32_t tag;
 
 	float alpha;
 
@@ -115,6 +116,16 @@ static inline int nemoyoyo_one_has_flags(struct yoyoone *one, uint32_t flags)
 static inline int nemoyoyo_one_has_flags_all(struct yoyoone *one, uint32_t flags)
 {
 	return (one->flags & flags) == flags;
+}
+
+static inline void nemoyoyo_one_set_tag(struct yoyoone *one, uint32_t tag)
+{
+	one->tag = tag;
+}
+
+static inline uint32_t nemoyoyo_one_get_tag(struct yoyoone *one)
+{
+	return one->tag;
 }
 
 static inline void nemoyoyo_one_set_userdata(struct yoyoone *one, void *data)
