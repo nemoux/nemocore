@@ -72,10 +72,11 @@ static int nemoyoyo_actor_dispatch_tap_event(struct nemoaction *action, struct a
 static void nemoyoyo_actor_dispatch_timer(struct nemotimer *timer, void *data)
 {
 	struct yoyoactor *actor = (struct yoyoactor *)data;
-
-	nemoyoyo_dispatch_frame(actor->yoyo);
+	struct nemoyoyo *yoyo = actor->yoyo;
 
 	nemoyoyo_actor_destroy(actor);
+
+	nemoyoyo_dispatch_frame(yoyo);
 }
 
 int nemoyoyo_actor_dispatch(struct yoyoactor *actor, float x, float y, float r)
