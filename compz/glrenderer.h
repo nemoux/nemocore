@@ -16,12 +16,12 @@ struct nemorenderer;
 struct nemoscreen;
 struct rendernode;
 
-extern struct nemorenderer *glrenderer_create(struct rendernode *node, EGLNativeDisplayType display, int use_alpha, const EGLint *visualid);
+extern struct nemorenderer *glrenderer_create(struct rendernode *node, EGLNativeDisplayType display, const EGLint *visualid);
 extern void glrenderer_destroy(struct nemorenderer *renderer);
 
 extern void glrenderer_make_current(struct nemorenderer *base);
 
-extern int glrenderer_prepare_screen(struct nemorenderer *base, struct nemoscreen *screen, EGLNativeWindowType window, int use_alpha, const EGLint *visualid);
+extern int glrenderer_prepare_screen(struct nemorenderer *base, struct nemoscreen *screen, EGLNativeWindowType window, const EGLint *visualid);
 extern void glrenderer_finish_screen(struct nemorenderer *base, struct nemoscreen *screen);
 
 #ifdef __cplusplus

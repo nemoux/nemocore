@@ -327,7 +327,7 @@ static int drm_prepare_egl(struct drmnode *node)
 	if (node->gbm == NULL)
 		return -1;
 
-	node->base.opengl = glrenderer_create(&node->base, node->gbm, 0, &node->format);
+	node->base.opengl = glrenderer_create(&node->base, node->gbm, &node->format);
 	if (node->base.opengl == NULL)
 		goto err1;
 
@@ -362,7 +362,7 @@ static int drm_prepare_egl_screen(struct drmscreen *screen)
 		return -1;
 	}
 
-	if (glrenderer_prepare_screen(node->base.opengl, &screen->base, screen->surface, 0, &screen->format) < 0) {
+	if (glrenderer_prepare_screen(node->base.opengl, &screen->base, screen->surface, &screen->format) < 0) {
 		nemolog_error("DRM", "failed to prepare gl renderer screen\n");
 		goto err1;
 	}

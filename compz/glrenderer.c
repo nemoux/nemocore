@@ -509,20 +509,9 @@ extern void glrenderer_attach_actor(struct nemorenderer *base, struct nemoactor 
 extern void glrenderer_flush_actor(struct nemorenderer *base, struct nemoactor *actor);
 extern int glrenderer_read_actor(struct nemorenderer *base, struct nemoactor *actor, pixman_format_code_t format, void *pixels);
 
-struct nemorenderer *glrenderer_create(struct rendernode *node, EGLNativeDisplayType display, int use_alpha, const EGLint *visualid)
+struct nemorenderer *glrenderer_create(struct rendernode *node, EGLNativeDisplayType display, const EGLint *visualid)
 {
-	static const EGLint opaque_attribs[] = {
-		EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-		EGL_RED_SIZE, 1,
-		EGL_GREEN_SIZE, 1,
-		EGL_BLUE_SIZE, 1,
-		EGL_ALPHA_SIZE, 0,
-		EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT,
-		EGL_SAMPLE_BUFFERS, 1,
-		EGL_SAMPLES, 4,
-		EGL_NONE
-	};
-	static const EGLint alpha_attribs[] = {
+	EGLint attribs[] = {
 		EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
 		EGL_RED_SIZE, 1,
 		EGL_GREEN_SIZE, 1,
@@ -530,7 +519,7 @@ struct nemorenderer *glrenderer_create(struct rendernode *node, EGLNativeDisplay
 		EGL_ALPHA_SIZE, 1,
 		EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT,
 		EGL_SAMPLE_BUFFERS, 1,
-		EGL_SAMPLES, 4,
+		EGL_SAMPLES, env_get_integer("NEMOCOMPZ_EGL_SAMPLES", 4),
 		EGL_NONE
 	};
 
@@ -558,7 +547,7 @@ struct nemorenderer *glrenderer_create(struct rendernode *node, EGLNativeDisplay
 	renderer->base.destroy = glrenderer_destroy;
 	renderer->base.make_current = glrenderer_make_current;
 
-	renderer->attribs = use_alpha == 0 ? opaque_attribs : alpha_attribs;
+	renderer->attribs = attribs;
 
 	renderer->egl_display = eglGetDisplay(display);
 	if (renderer->egl_display == EGL_NO_DISPLAY) {
@@ -721,7 +710,7 @@ static int glrenderer_prepare_egl_context(struct glrenderer *renderer, struct ne
 	return 0;
 }
 
-int glrenderer_prepare_screen(struct nemorenderer *base, struct nemoscreen *screen, EGLNativeWindowType window, int use_alpha, const EGLint *visualid)
+int glrenderer_prepare_screen(struct nemorenderer *base, struct nemoscreen *screen, EGLNativeWindowType window, const EGLint *visualid)
 {
 	struct glrenderer *renderer = (struct glrenderer *)container_of(base, struct glrenderer, base);
 	struct glsurface *surface;
