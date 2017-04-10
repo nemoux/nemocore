@@ -38,7 +38,7 @@ static int nemoxserver_handle_sigusr1(int signum, void *data)
 static int nemoxserver_handle_event(int listenfd, uint32_t mask, void *data)
 {
 	struct nemoxserver *xserver = (struct nemoxserver *)data;
-	char display[8], s[8], abstract_fd[8], unix_fd[8], wm_fd[8];
+	char display[8], abstract_fd[8], unix_fd[8], wm_fd[8];
 	int sv[2], wm[2], fd;
 
 	if (socketpair(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0, sv) < 0) {
@@ -59,13 +59,12 @@ static int nemoxserver_handle_event(int listenfd, uint32_t mask, void *data)
 		if (fd < 0)
 			return 1;
 
-		snprintf(s, sizeof(s), "%d", fd);
-		setenv("WAYLAND_SOCKET", s, 1);
+		env_set_integer("WAYLAND_SOCKET", fd);
 
 		snprintf(display, sizeof(display), ":%d", xserver->xdisplay);
 
 		if (xserver->rendernode != NULL)
-			setenv("XWAYLAND_RENDERNODE", xserver->rendernode, 1);
+			env_set_string("XWAYLAND_RENDERNODE", xserver->rendernode);
 
 		fd = dup(xserver->abstract_fd);
 		if (fd < 0)
@@ -341,7 +340,7 @@ void nemoxserver_destroy(struct nemoxserver *xserver)
 
 int nemoxserver_execute(struct nemoxserver *xserver)
 {
-	char display[8], s[8], abstract_fd[8], unix_fd[8], wm_fd[8];
+	char display[8], abstract_fd[8], unix_fd[8], wm_fd[8];
 	int sv[2], wm[2], fd;
 
 	if (socketpair(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0, sv) < 0) {
@@ -362,13 +361,12 @@ int nemoxserver_execute(struct nemoxserver *xserver)
 		if (fd < 0)
 			return -1;
 
-		snprintf(s, sizeof(s), "%d", fd);
-		setenv("WAYLAND_SOCKET", s, 1);
+		env_set_integer("WAYLAND_SOCKET", fd);
 
 		snprintf(display, sizeof(display), ":%d", xserver->xdisplay);
 
 		if (xserver->rendernode != NULL)
-			setenv("XWAYLAND_RENDERNODE", xserver->rendernode, 1);
+			env_set_string("XWAYLAND_RENDERNODE", xserver->rendernode);
 
 		fd = dup(xserver->abstract_fd);
 		if (fd < 0)

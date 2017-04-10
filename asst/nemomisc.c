@@ -7,6 +7,8 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <stdarg.h>
+
 #include <math.h>
 #include <time.h>
 #include <signal.h>
@@ -456,4 +458,71 @@ int os_sched_set_affinity(pid_t pid, uint32_t cpuid)
 	CPU_SET(cpuid, &cset);
 
 	return sched_setaffinity(pid, sizeof(cpu_set_t), &cset);
+}
+
+const char *env_get_string(const char *name, const char *value)
+{
+	const char *env = getenv(name);
+
+	return env != NULL ? env : value;
+}
+
+double env_get_double(const char *name, double value)
+{
+	const char *env = getenv(name);
+
+	return env != NULL ? strtod(env, NULL) : value;
+}
+
+int env_get_integer(const char *name, int value)
+{
+	const char *env = getenv(name);
+
+	return env != NULL ? strtoul(env, NULL, 10) : value;
+}
+
+void env_set_string(const char *name, const char *value)
+{
+	setenv(name, value, 1);
+}
+
+void env_set_double(const char *name, double value)
+{
+	char *env;
+
+	asprintf(&env, "%f", value);
+
+	setenv(name, env, 1);
+
+	free(env);
+}
+
+void env_set_integer(const char *name, int value)
+{
+	char *env;
+
+	asprintf(&env, "%d", value);
+
+	setenv(name, env, 1);
+
+	free(env);
+}
+
+void env_set_format(const char *name, const char *fmt, ...)
+{
+	va_list vargs;
+	char *env;
+
+	va_start(vargs, fmt);
+	vasprintf(&env, fmt, vargs);
+	va_end(vargs);
+
+	setenv(name, env, 1);
+
+	free(env);
+}
+
+void env_put_value(const char *name)
+{
+	unsetenv(name);
 }

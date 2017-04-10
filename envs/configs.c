@@ -498,51 +498,6 @@ static void nemoenvs_handle_set_nemoshell_stage(struct nemoshell *shell, struct 
 	}
 }
 
-static void nemoenvs_handle_set_nemoshell_show(struct nemoshell *shell, struct itemone *one)
-{
-	char contents[128];
-	int threads;
-	int tilesize;
-	int duration;
-	int distance;
-
-	threads = nemoitem_one_get_iattr(one, "threads", 0);
-	if (threads > 0) {
-		snprintf(contents, sizeof(contents), "%d", threads);
-
-		setenv("NEMOSHOW_THREADS", contents, 1);
-	} else {
-		unsetenv("NEMOSHOW_THREADS");
-	}
-
-	tilesize = nemoitem_one_get_iattr(one, "tilesize", 0);
-	if (tilesize > 0) {
-		snprintf(contents, sizeof(contents), "%d", tilesize);
-
-		setenv("NEMOSHOW_TILESIZE", contents, 1);
-	} else {
-		unsetenv("NEMOSHOW_TILESIZE");
-	}
-
-	duration = nemoitem_one_get_iattr(one, "single_click_duration", 0);
-	if (duration > 0) {
-		snprintf(contents, sizeof(contents), "%d", duration);
-
-		setenv("NEMOSHOW_SINGLE_CLICK_DURATION", contents, 1);
-	} else {
-		unsetenv("NEMOSHOW_SINGLE_CLICK_DURATION");
-	}
-
-	distance = nemoitem_one_get_iattr(one, "single_click_distance", 0);
-	if (distance > 0) {
-		snprintf(contents, sizeof(contents), "%d", distance);
-
-		setenv("NEMOSHOW_SINGLE_CLICK_DISTANCE", contents, 1);
-	} else {
-		unsetenv("NEMOSHOW_SINGLE_CLICK_DISTANCE");
-	}
-}
-
 int nemoenvs_set_config(struct nemoenvs *envs, struct itemone *one)
 {
 	struct nemoshell *shell = envs->shell;
@@ -620,8 +575,6 @@ int nemoenvs_set_config(struct nemoenvs *envs, struct itemone *one)
 		nemoenvs_handle_set_nemoshell_fullscreen(shell, one);
 	} else if (namespace_has_prefix(path, "/nemoshell/stage") != 0) {
 		nemoenvs_handle_set_nemoshell_stage(shell, one);
-	} else if (namespace_has_prefix(path, "/nemoshell/show") != 0) {
-		nemoenvs_handle_set_nemoshell_show(shell, one);
 	} else if (namespace_has_prefix(path, "/nemoshell/idle") != 0) {
 		uint32_t timeout;
 

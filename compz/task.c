@@ -33,13 +33,11 @@ struct wl_client *nemotask_launch(struct nemocompz *compz, struct nemotask *task
 
 	if (pid == 0) {
 		sigset_t allsigs;
-		char fdstr[32];
 
 		sigfillset(&allsigs);
 		sigprocmask(SIG_UNBLOCK, &allsigs, NULL);
 
-		snprintf(fdstr, sizeof(fdstr), "%d", sv[1]);
-		setenv("WAYLAND_SOCKET", fdstr, 1);
+		env_set_integer("WAYLAND_SOCKET", sv[1]);
 
 		execl(path, path, NULL);
 

@@ -181,10 +181,7 @@ int nemoenvs_launch_xserver(struct nemoenvs *envs, int xdisplay, const char *ren
 
 void nemoenvs_use_xserver(struct nemoenvs *envs, int xdisplay)
 {
-	char display[256];
-
-	snprintf(display, sizeof(display), ":%d", xdisplay);
-	setenv("DISPLAY", display, 1);
+	env_set_format("DISPLAY", ":%d", xdisplay);
 }
 
 int nemoenvs_launch_xapp(struct nemoenvs *envs, const char *path, const char *args, struct clientstate *state)

@@ -97,9 +97,8 @@ static int on_term_signal(int signum, void *data)
 
 	nemolog_error("COMPZ", "received %d term signal\n", signum);
 
-	if (compz->display != NULL) {
+	if (compz->display != NULL)
 		nemocompz_exit(compz);
-	}
 
 	return 1;
 }
@@ -163,13 +162,13 @@ static int on_pipe_signal(int signum, void *data)
 
 static int nemocompz_check_xdg_runtime_dir(void)
 {
-	char *dir = getenv("XDG_RUNTIME_DIR");
+	const char *dir = env_get_string("XDG_RUNTIME_DIR", NULL);
 	struct stat st;
 
 	if (dir == NULL) {
-		setenv("XDG_RUNTIME_DIR", "/tmp", 1);
+		env_set_string("XDG_RUNTIME_DIR", "/tmp");
 
-		dir = getenv("XDG_RUNTIME_DIR");
+		dir = env_get_string("XDG_RUNTIME_DIR", NULL);
 		if (dir == NULL)
 			return -1;
 	}
@@ -187,7 +186,7 @@ static int nemocompz_check_xdg_runtime_dir(void)
 
 static char *nemocompz_get_display_name(void)
 {
-	char *ename = getenv("WAYLAND_DISPLAY");
+	const char *ename = env_get_string("WAYLAND_DISPLAY", NULL);
 	char *dname;
 	int i;
 
@@ -307,8 +306,7 @@ struct nemocompz *nemocompz_create(void)
 	struct nemocompz *compz;
 	struct wl_display *display;
 	struct wl_event_loop *loop;
-	int compositor_version = NEMOUX_WITH_WAYLAND_COMPOSITOR_VERSION;
-	char *version;
+	int compositor_version = env_get_integer("WAYLAND_COMPOSITOR_VERSION", NEMOUX_WITH_WAYLAND_COMPOSITOR_VERSION);
 
 	compz = (struct nemocompz *)malloc(sizeof(struct nemocompz));
 	if (compz == NULL)
@@ -386,10 +384,6 @@ struct nemocompz *nemocompz_create(void)
 	compz->session = nemosession_create(compz);
 	if (compz->session == NULL)
 		goto err1;
-
-	version = getenv("WAYLAND_COMPOSITOR_VERSION");
-	if (version != NULL)
-		compositor_version = strtoul(version, NULL, 10);
 
 	if (!wl_global_create(compz->display, &wl_compositor_interface, compositor_version, compz, nemocompz_bind_compositor))
 		goto err1;
@@ -511,7 +505,7 @@ void nemocompz_destroy(struct nemocompz *compz)
 int nemocompz_run(struct nemocompz *compz)
 {
 	if (compz->state == NEMOCOMPZ_RUNNING_STATE) {
-		setenv("WAYLAND_DISPLAY", compz->name, 1);
+		env_set_string("WAYLAND_DISPLAY", compz->name);
 
 		wl_display_run(compz->display);
 	}

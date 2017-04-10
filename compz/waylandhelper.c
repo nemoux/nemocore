@@ -16,7 +16,6 @@
 static inline void wayland_execute_client_in(int sockfd, const char *path, char *const argv[], char *const envp[])
 {
 	int clientfd;
-	char fdstr[32];
 	char fdenv[32];
 	sigset_t allsigs;
 
@@ -32,14 +31,12 @@ static inline void wayland_execute_client_in(int sockfd, const char *path, char 
 	}
 
 	if (argv == NULL || argv[0] == NULL) {
-		snprintf(fdstr, sizeof(fdstr), "%d", clientfd);
-		setenv("WAYLAND_SOCKET", fdstr, 1);
+		env_set_integer("WAYLAND_SOCKET", clientfd);
 
 		if (execl(path, path, NULL) < 0)
 			nemolog_warning("WAYLAND", "failed to execute '%s' with errno %d\n", path, errno);
 	} else if (envp == NULL || envp[0] == NULL) {
-		snprintf(fdstr, sizeof(fdstr), "%d", clientfd);
-		setenv("WAYLAND_SOCKET", fdstr, 1);
+		env_set_integer("WAYLAND_SOCKET", clientfd);
 
 		if (execv(path, argv) < 0)
 			nemolog_warning("WAYLAND", "failed to execute '%s' with errno %d\n", path, errno);
