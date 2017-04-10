@@ -38,6 +38,8 @@ struct yoyoactor {
 		float r;
 	} geometry;
 
+	struct cooktrans *trans;
+
 	struct nemolist link;
 };
 

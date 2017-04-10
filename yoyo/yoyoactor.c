@@ -37,6 +37,9 @@ void nemoyoyo_actor_destroy(struct yoyoactor *actor)
 	if (actor->timer != NULL)
 		nemotimer_destroy(actor->timer);
 
+	if (actor->trans != NULL)
+		nemocook_transform_destroy(actor->trans);
+
 	for (i = 0; i < actor->nones; i++)
 		nemoyoyo_one_destroy(actor->ones[i]);
 
@@ -85,6 +88,10 @@ int nemoyoyo_actor_dispatch(struct yoyoactor *actor, float x, float y, float r)
 	actor->geometry.y = y;
 	actor->geometry.r = r;
 
+	actor->trans = nemocook_transform_create();
+	nemocook_transform_set_rotate(actor->trans, 0.0f, 0.0f, r);
+	nemocook_transform_update(actor->trans);
+
 	actor->timer = nemotimer_create(nemotool_get_instance());
 	nemotimer_set_callback(actor->timer, nemoyoyo_actor_dispatch_timer);
 	nemotimer_set_userdata(actor->timer, actor);
@@ -122,7 +129,7 @@ int nemoyoyo_actor_execute(struct yoyoactor *actor, int index, float x, float y,
 		nemobus_msg_set_attr(msg, "type", type);
 		nemobus_msg_set_attr_format(msg, "x", "%f", x);
 		nemobus_msg_set_attr_format(msg, "y", "%f", y);
-		nemobus_msg_set_attr_format(msg, "r", "%f", actor->geometry.r);
+		nemobus_msg_set_attr_format(msg, "r", "%f", actor->geometry.r * 180.0f / M_PI);
 		nemobus_msg_set_attr(msg, "path", path);
 		if (args != NULL)
 			nemobus_msg_set_attr(msg, "args", args);
@@ -188,19 +195,32 @@ int nemoyoyo_actor_activate(struct yoyoactor *actor, struct json_object *jobj)
 			nemoyoyo_one_transition_check_destroy(trans, one);
 
 			if (column == 0 || row == 0) {
-				nemotransition_set_target(trans, 0, 1.0f,
-						actor->geometry.x + column * actor->itemsize);
-				nemotransition_set_target(trans, 1, 1.0f,
-						actor->geometry.y - row * actor->itemsize);
+				float tx, ty;
+
+				nemocook_2d_transform_to_global(actor->trans,
+						column * actor->itemsize,
+						-row * actor->itemsize,
+						&tx, &ty);
+
+				nemotransition_set_target(trans, 0, 1.0f, actor->geometry.x + tx);
+				nemotransition_set_target(trans, 1, 1.0f, actor->geometry.y + ty);
 			} else {
-				nemotransition_set_target(trans, 0, 0.5f,
-						actor->geometry.x + column * actor->itemsize);
-				nemotransition_set_target(trans, 1, 0.5f,
-						actor->geometry.y);
-				nemotransition_set_target(trans, 0, 1.0f,
-						actor->geometry.x + column * actor->itemsize);
-				nemotransition_set_target(trans, 1, 1.0f,
-						actor->geometry.y - row * actor->itemsize);
+				float tx0, ty0;
+				float tx1, ty1;
+
+				nemocook_2d_transform_to_global(actor->trans,
+						column * actor->itemsize,
+						0.0f,
+						&tx0, &ty0);
+				nemocook_2d_transform_to_global(actor->trans,
+						column * actor->itemsize,
+						-row * actor->itemsize,
+						&tx1, &ty1);
+
+				nemotransition_set_target(trans, 0, 0.5f, actor->geometry.x + tx0);
+				nemotransition_set_target(trans, 1, 0.5f, actor->geometry.y + ty0);
+				nemotransition_set_target(trans, 0, 1.0f, actor->geometry.x + tx1);
+				nemotransition_set_target(trans, 1, 1.0f, actor->geometry.y + ty1);
 			}
 
 			nemotransition_set_target(trans, 2, 1.0f, 1.0f);
