@@ -70,6 +70,8 @@ extern int nemoyoyo_load_config(struct nemoyoyo *yoyo);
 extern int nemoyoyo_update_one(struct nemoyoyo *yoyo);
 extern int nemoyoyo_update_frame(struct nemoyoyo *yoyo);
 
+extern void nemoyoyo_dispatch_frame(struct nemoyoyo *yoyo);
+
 extern void nemoyoyo_attach_one_above(struct nemoyoyo *yoyo, struct yoyoone *one, struct yoyoone *above);
 extern void nemoyoyo_attach_one_below(struct nemoyoyo *yoyo, struct yoyoone *one, struct yoyoone *below);
 extern void nemoyoyo_detach_one(struct nemoyoyo *yoyo, struct yoyoone *one);

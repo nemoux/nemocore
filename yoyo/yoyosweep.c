@@ -70,7 +70,7 @@ static void nemoyoyo_sweep_dispatch_timer(struct nemotimer *timer, void *data)
 	nemotransition_set_userdata(trans, one);
 	nemotransition_group_attach_transition(yoyo->transitions, trans);
 
-	nemocanvas_dispatch_frame(yoyo->canvas);
+	nemoyoyo_dispatch_frame(yoyo);
 
 	nemotimer_set_timeout(sweep->timer,
 			random_get_int(sweep->minimum_interval, sweep->maximum_interval));

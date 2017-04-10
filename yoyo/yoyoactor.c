@@ -72,12 +72,10 @@ static int nemoyoyo_actor_dispatch_tap_event(struct nemoaction *action, struct a
 static void nemoyoyo_actor_dispatch_timer(struct nemotimer *timer, void *data)
 {
 	struct yoyoactor *actor = (struct yoyoactor *)data;
-	struct nemoyoyo *yoyo = actor->yoyo;
+
+	nemoyoyo_dispatch_frame(actor->yoyo);
 
 	nemoyoyo_actor_destroy(actor);
-
-	nemoyoyo_set_flags(yoyo, NEMOYOYO_REDRAW_FLAG);
-	nemocanvas_dispatch_frame(yoyo->canvas);
 }
 
 int nemoyoyo_actor_dispatch(struct yoyoactor *actor, float x, float y, float r)
@@ -228,7 +226,7 @@ int nemoyoyo_actor_activate(struct yoyoactor *actor, struct json_object *jobj)
 		}
 	}
 
-	nemocanvas_dispatch_frame(yoyo->canvas);
+	nemoyoyo_dispatch_frame(yoyo);
 
 	return 0;
 }
@@ -243,8 +241,7 @@ void nemoyoyo_actor_deactivate(struct yoyoactor *actor)
 
 	free(actor->ones);
 	actor->ones = NULL;
-
 	actor->nones = 0;
 
-	nemocanvas_dispatch_frame(yoyo->canvas);
+	nemoyoyo_dispatch_frame(yoyo);
 }

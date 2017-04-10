@@ -182,6 +182,13 @@ int nemoyoyo_update_frame(struct nemoyoyo *yoyo)
 	return 0;
 }
 
+void nemoyoyo_dispatch_frame(struct nemoyoyo *yoyo)
+{
+	nemoyoyo_set_flags(yoyo, NEMOYOYO_REDRAW_FLAG);
+
+	nemocanvas_dispatch_frame(yoyo->canvas);
+}
+
 void nemoyoyo_attach_one_above(struct nemoyoyo *yoyo, struct yoyoone *one, struct yoyoone *above)
 {
 	if (above == NULL)

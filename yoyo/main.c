@@ -278,7 +278,7 @@ int main(int argc, char *argv[])
 			nemoyoyo_dispatch_bus,
 			yoyo);
 
-	nemocanvas_dispatch_frame(canvas);
+	nemoyoyo_dispatch_frame(yoyo);
 
 	nemotool_run(tool);
 
