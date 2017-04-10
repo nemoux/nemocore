@@ -110,6 +110,7 @@ static int nemoyoyo_sweep_dispatch_tap_event(struct nemoaction *action, struct a
 					actor = nemoyoyo_actor_create(yoyo);
 					nemoyoyo_actor_set_lifetime(actor, nemojson_object_get_integer(jobj, "lifetime", 2400));
 					nemoyoyo_actor_set_movetime(actor, nemojson_object_get_integer(jobj, "movetime", 800));
+					nemoyoyo_actor_set_hidetime(actor, nemojson_object_get_integer(jobj, "hidetime", 400));
 					nemoyoyo_actor_set_itemsize(actor, nemojson_object_get_double(jobj, "itemsize", 128.0f));
 					nemoyoyo_actor_dispatch(actor,
 							cx,

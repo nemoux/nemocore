@@ -74,6 +74,7 @@ static void nemoyoyo_actor_dispatch_timer(struct nemotimer *timer, void *data)
 	struct yoyoactor *actor = (struct yoyoactor *)data;
 	struct nemoyoyo *yoyo = actor->yoyo;
 
+	nemoyoyo_actor_deactivate(actor);
 	nemoyoyo_actor_destroy(actor);
 
 	nemoyoyo_dispatch_frame(yoyo);
@@ -226,13 +227,29 @@ int nemoyoyo_actor_activate(struct yoyoactor *actor, struct json_object *jobj)
 	return 0;
 }
 
+static void nemoyoyo_actor_dispatch_transition_done(struct nemotransition *trans, void *data)
+{
+	struct yoyoone *one = (struct yoyoone *)data;
+
+	nemoyoyo_one_destroy(one);
+}
+
 void nemoyoyo_actor_deactivate(struct yoyoactor *actor)
 {
 	struct nemoyoyo *yoyo = actor->yoyo;
+	struct nemotransition *trans;
 	int i;
 
-	for (i = 0; i < actor->nones; i++)
-		nemoyoyo_one_destroy(actor->ones[i]);
+	for (i = 0; i < actor->nones; i++) {
+		nemoyoyo_one_put_flags(actor->ones[i], NEMOYOYO_ONE_PICK_FLAG);
+
+		trans = nemotransition_create(8, NEMOEASE_CUBIC_OUT_TYPE, actor->hidetime, 0);
+		nemoyoyo_one_transition_set_alpha(trans, 0, actor->ones[i]);
+		nemotransition_set_target(trans, 0, 1.0f, 0.0f);
+		nemotransition_set_dispatch_done(trans, nemoyoyo_actor_dispatch_transition_done);
+		nemotransition_set_userdata(trans, actor->ones[i]);
+		nemotransition_group_attach_transition(yoyo->transitions, trans);
+	}
 
 	free(actor->ones);
 	actor->ones = NULL;

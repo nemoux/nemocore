@@ -31,6 +31,7 @@ struct yoyoactor {
 
 	uint32_t lifetime;
 	uint32_t movetime;
+	uint32_t hidetime;
 	float itemsize;
 
 	struct {
@@ -55,6 +56,7 @@ extern int nemoyoyo_actor_execute(struct yoyoactor *actor, int index, float x, f
 
 NEMOYOYO_DECLARE_SET_ATTRIBUTE(actor, uint32_t, lifetime, lifetime);
 NEMOYOYO_DECLARE_SET_ATTRIBUTE(actor, uint32_t, movetime, movetime);
+NEMOYOYO_DECLARE_SET_ATTRIBUTE(actor, uint32_t, hidetime, hidetime);
 NEMOYOYO_DECLARE_SET_ATTRIBUTE(actor, float, itemsize, itemsize);
 
 #ifdef __cplusplus
