@@ -511,15 +511,15 @@ extern int glrenderer_read_actor(struct nemorenderer *base, struct nemoactor *ac
 
 struct nemorenderer *glrenderer_create(struct rendernode *node, EGLNativeDisplayType display, const EGLint *visualid)
 {
-	EGLint attribs[] = {
+	static EGLint attribs[] = {
 		EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
 		EGL_RED_SIZE, 1,
 		EGL_GREEN_SIZE, 1,
 		EGL_BLUE_SIZE, 1,
-		EGL_ALPHA_SIZE, 1,
+		EGL_ALPHA_SIZE, 0,
 		EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT,
 		EGL_SAMPLE_BUFFERS, 1,
-		EGL_SAMPLES, env_get_integer("NEMOCOMPZ_EGL_SAMPLES", 4),
+		EGL_SAMPLES, 4,
 		EGL_NONE
 	};
 
@@ -546,6 +546,8 @@ struct nemorenderer *glrenderer_create(struct rendernode *node, EGLNativeDisplay
 	renderer->base.get_actor_buffer = NULL;
 	renderer->base.destroy = glrenderer_destroy;
 	renderer->base.make_current = glrenderer_make_current;
+
+	attribs[15] = env_get_integer("NEMOCOMPZ_EGL_SAMPLES", 4);
 
 	renderer->attribs = attribs;
 
