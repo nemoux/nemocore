@@ -31,6 +31,8 @@ static int nemoyoyo_dispatch_tap_event(struct nemoaction *action, struct actiont
 			sweep = nemoyoyo_sweep_create(yoyo);
 			nemoyoyo_sweep_set_minimum_range(sweep, 50.0f);
 			nemoyoyo_sweep_set_maximum_range(sweep, 150.0f);
+			nemoyoyo_sweep_set_minimum_angle(sweep, M_PI * 1.5f);
+			nemoyoyo_sweep_set_maximum_angle(sweep, M_PI * 3.0f);
 			nemoyoyo_sweep_set_minimum_interval(sweep, 4);
 			nemoyoyo_sweep_set_maximum_interval(sweep, 8);
 			nemoyoyo_sweep_set_minimum_duration(sweep, 800);

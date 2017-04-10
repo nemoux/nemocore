@@ -57,7 +57,8 @@ static void nemoyoyo_sweep_dispatch_timer(struct nemotimer *timer, void *data)
 	nemoyoyo_one_transition_set_ty(trans, 1, one);
 	nemoyoyo_one_transition_set_sx(trans, 2, one);
 	nemoyoyo_one_transition_set_sy(trans, 3, one);
-	nemoyoyo_one_transition_set_alpha(trans, 4, one);
+	nemoyoyo_one_transition_set_rz(trans, 4, one);
+	nemoyoyo_one_transition_set_alpha(trans, 5, one);
 	nemoyoyo_one_transition_check_destroy(trans, one);
 	nemotransition_set_target(trans, 0, 1.0f,
 			nemoaction_tap_get_tx(tap) + cos(rn) * rs);
@@ -65,7 +66,9 @@ static void nemoyoyo_sweep_dispatch_timer(struct nemotimer *timer, void *data)
 			nemoaction_tap_get_ty(tap) + sin(rn) * rs);
 	nemotransition_set_target(trans, 2, 1.0f, sweep->feedback_sx1);
 	nemotransition_set_target(trans, 3, 1.0f, sweep->feedback_sy1);
-	nemotransition_set_target(trans, 4, 1.0f, sweep->feedback_alpha1);
+	nemotransition_set_target(trans, 4, 1.0f,
+			random_get_double(sweep->minimum_angle, sweep->maximum_angle));
+	nemotransition_set_target(trans, 5, 1.0f, sweep->feedback_alpha1);
 	nemotransition_set_dispatch_done(trans, nemoyoyo_sweep_dispatch_transition_done);
 	nemotransition_set_userdata(trans, one);
 	nemotransition_group_attach_transition(yoyo->transitions, trans);

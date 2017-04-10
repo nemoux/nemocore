@@ -22,6 +22,7 @@ struct yoyosweep {
 	struct nemotimer *timer;
 
 	float minimum_range, maximum_range;
+	float minimum_angle, maximum_angle;
 	uint32_t minimum_interval, maximum_interval;
 	uint32_t minimum_duration, maximum_duration;
 
@@ -40,6 +41,8 @@ extern int nemoyoyo_sweep_dispatch(struct yoyosweep *sweep, struct actiontap *ta
 
 NEMOYOYO_DECLARE_SET_ATTRIBUTE(sweep, float, minimum_range, minimum_range);
 NEMOYOYO_DECLARE_SET_ATTRIBUTE(sweep, float, maximum_range, maximum_range);
+NEMOYOYO_DECLARE_SET_ATTRIBUTE(sweep, float, minimum_angle, minimum_angle);
+NEMOYOYO_DECLARE_SET_ATTRIBUTE(sweep, float, maximum_angle, maximum_angle);
 NEMOYOYO_DECLARE_SET_ATTRIBUTE(sweep, uint32_t, minimum_interval, minimum_interval);
 NEMOYOYO_DECLARE_SET_ATTRIBUTE(sweep, uint32_t, maximum_interval, maximum_interval);
 NEMOYOYO_DECLARE_SET_ATTRIBUTE(sweep, uint32_t, minimum_duration, minimum_duration);
