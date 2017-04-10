@@ -151,7 +151,7 @@ int nemomote_get_one_by_type(struct nemomote *mote, uint32_t type)
 	int base;
 	int i;
 
-	base = random_get_int(0, mote->lcount);
+	base = random_get_integer(0, mote->lcount);
 
 	for (i = 0; i < mote->lcount; i++) {
 		if (mote->types[(base + i) % mote->lcount] == type)

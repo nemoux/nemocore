@@ -202,8 +202,8 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 				dy = canvas->base.height / 2;
 			}
 
-			bin->initial.x = random_get_int(extents->x1 + dx, extents->x2 - dx);
-			bin->initial.y = random_get_int(extents->y1 + dy, extents->y2 - dy);
+			bin->initial.x = random_get_integer(extents->x1 + dx, extents->x2 - dx);
+			bin->initial.y = random_get_integer(extents->y1 + dy, extents->y2 - dy);
 		}
 
 		if (nemoview_has_state(view, NEMOVIEW_STAGE_STATE) != 0)

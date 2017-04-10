@@ -817,7 +817,7 @@ static void nemoart_dispatch_bus(void *data, const char *events)
 					else if (strcmp(url, "@prev") == 0)
 						art->icontents = (art->icontents + nemofs_dir_get_filecount(art->contents) - 1) % nemofs_dir_get_filecount(art->contents);
 					else if (strcmp(url, "@random") == 0)
-						art->icontents = random_get_int(0, nemofs_dir_get_filecount(art->contents) - 1);
+						art->icontents = random_get_integer(0, nemofs_dir_get_filecount(art->contents) - 1);
 					else
 						art->icontents = nemofs_dir_insert_file(art->contents, NULL, url);
 

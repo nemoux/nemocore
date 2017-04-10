@@ -80,9 +80,9 @@ static void nemoenvs_dispatch_touch_canvas_event(struct nemoshow *show, struct s
 		nemoshow_item_set_cy(one, nemoshow_event_get_y(event));
 		nemoshow_item_set_r(one, 15.0f);
 		nemoshow_item_set_stroke_color(one,
-				random_get_int(0, 255),
-				random_get_int(0, 255),
-				random_get_int(0, 255),
+				random_get_integer(0, 255),
+				random_get_integer(0, 255),
+				random_get_integer(0, 255),
 				255.0f);
 		nemoshow_item_set_stroke_width(one, 10.0f);
 		nemoshow_one_attach(canvas, one);

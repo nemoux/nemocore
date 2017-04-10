@@ -29,7 +29,7 @@ static void nemoyoyo_sweep_dispatch_timer(struct nemotimer *timer, void *data)
 	struct cooktex *tex;
 	float rs, rn;
 
-	tex = yoyo->sweeps[random_get_int(0, yoyo->nsweeps - 1)];
+	tex = yoyo->sweeps[random_get_integer(0, yoyo->nsweeps - 1)];
 
 	rs = random_get_double(sweep->minimum_range, sweep->maximum_range);
 	rn = random_get_double(0.0f, M_PI * 2.0f);
@@ -51,7 +51,7 @@ static void nemoyoyo_sweep_dispatch_timer(struct nemotimer *timer, void *data)
 
 	trans = nemotransition_create(8,
 			NEMOEASE_CUBIC_OUT_TYPE,
-			random_get_int(sweep->minimum_duration, sweep->maximum_duration),
+			random_get_integer(sweep->minimum_duration, sweep->maximum_duration),
 			0);
 	nemoyoyo_one_transition_set_tx(trans, 0, one);
 	nemoyoyo_one_transition_set_ty(trans, 1, one);
@@ -76,7 +76,7 @@ static void nemoyoyo_sweep_dispatch_timer(struct nemotimer *timer, void *data)
 	nemoyoyo_dispatch_frame(yoyo);
 
 	nemotimer_set_timeout(sweep->timer,
-			random_get_int(sweep->minimum_interval, sweep->maximum_interval));
+			random_get_integer(sweep->minimum_interval, sweep->maximum_interval));
 }
 
 static int nemoyoyo_sweep_dispatch_tap_event(struct nemoaction *action, struct actiontap *tap, uint32_t event)
@@ -90,7 +90,7 @@ static int nemoyoyo_sweep_dispatch_tap_event(struct nemoaction *action, struct a
 		nemotimer_set_userdata(sweep->timer, sweep);
 
 		nemotimer_set_timeout(sweep->timer,
-				random_get_int(sweep->minimum_interval, sweep->maximum_interval));
+				random_get_integer(sweep->minimum_interval, sweep->maximum_interval));
 	} else if (event & NEMOACTION_TAP_MOTION_EVENT) {
 	} else if (event & NEMOACTION_TAP_UP_EVENT) {
 		if (nemoaction_tap_get_duration(tap) > sweep->actor_duration && nemoaction_tap_get_distance(tap) > sweep->actor_distance) {

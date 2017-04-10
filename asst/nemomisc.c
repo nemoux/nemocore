@@ -48,7 +48,7 @@ double time_current_secs(void)
 	return (double)ts.tv_sec + (double)ts.tv_nsec / 1000000000.0f;
 }
 
-int random_get_int(int min, int max)
+int random_get_integer(int min, int max)
 {
 	if (min == max)
 		return min;
