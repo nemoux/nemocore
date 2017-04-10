@@ -182,9 +182,22 @@ int nemoyoyo_update_frame(struct nemoyoyo *yoyo)
 	return 0;
 }
 
-void nemoyoyo_attach_one(struct nemoyoyo *yoyo, struct yoyoone *one)
+void nemoyoyo_attach_one_above(struct nemoyoyo *yoyo, struct yoyoone *one, struct yoyoone *above)
 {
-	nemolist_insert(&yoyo->one_list, &one->link);
+	if (above == NULL)
+		nemolist_insert(yoyo->one_list.prev, &one->link);
+	else
+		nemolist_insert(above->link.next, &one->link);
+
+	nemocook_transform_set_parent(one->trans, yoyo->projection);
+}
+
+void nemoyoyo_attach_one_below(struct nemoyoyo *yoyo, struct yoyoone *one, struct yoyoone *below)
+{
+	if (below == NULL)
+		nemolist_insert(yoyo->one_list.next, &one->link);
+	else
+		nemolist_insert(below->link.prev, &one->link);
 
 	nemocook_transform_set_parent(one->trans, yoyo->projection);
 }

@@ -173,7 +173,7 @@ int nemoyoyo_actor_activate(struct yoyoactor *actor, struct json_object *jobj)
 			nemoyoyo_one_set_texture(one, tex);
 			nemoyoyo_one_set_tag(one, i);
 			nemoyoyo_one_set_userdata(one, actor);
-			nemoyoyo_attach_one(yoyo, one);
+			nemoyoyo_attach_one_above(yoyo, one, NULL);
 
 			nemoaction_one_set_tap_callback(yoyo->action, one, &one->destroy_signal, nemoyoyo_actor_dispatch_tap_event);
 

@@ -47,7 +47,7 @@ static void nemoyoyo_sweep_dispatch_timer(struct nemotimer *timer, void *data)
 	nemoyoyo_one_set_sy(one, sweep->feedback_sy0);
 	nemoyoyo_one_set_alpha(one, sweep->feedback_alpha0);
 	nemoyoyo_one_set_texture(one, tex);
-	nemoyoyo_attach_one(yoyo, one);
+	nemoyoyo_attach_one_below(yoyo, one, NULL);
 
 	trans = nemotransition_create(8,
 			NEMOEASE_CUBIC_OUT_TYPE,
