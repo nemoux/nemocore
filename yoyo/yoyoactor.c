@@ -139,6 +139,7 @@ int nemoyoyo_actor_activate(struct yoyoactor *actor, struct json_object *jobj)
 	struct json_object *cobj;
 	struct yoyoone *one;
 	struct cooktex *tex;
+	struct nemotransition *trans;
 	int i;
 
 	if (jobj == NULL)
@@ -163,10 +164,10 @@ int nemoyoyo_actor_activate(struct yoyoactor *actor, struct json_object *jobj)
 
 			one = actor->ones[i] = nemoyoyo_one_create();
 			nemoyoyo_one_set_flags(one, NEMOYOYO_ONE_PICK_FLAG);
-			nemoyoyo_one_set_tx(one, actor->geometry.x + column * actor->itemsize);
-			nemoyoyo_one_set_ty(one, actor->geometry.y - row * actor->itemsize);
+			nemoyoyo_one_set_tx(one, actor->geometry.x);
+			nemoyoyo_one_set_ty(one, actor->geometry.y);
 			nemoyoyo_one_set_rz(one, actor->geometry.r);
-			nemoyoyo_one_set_alpha(one, 1.0f);
+			nemoyoyo_one_set_alpha(one, 0.0f);
 			nemoyoyo_one_set_width(one, actor->itemsize);
 			nemoyoyo_one_set_height(one, actor->itemsize);
 			nemoyoyo_one_set_texture(one, tex);
@@ -175,6 +176,31 @@ int nemoyoyo_actor_activate(struct yoyoactor *actor, struct json_object *jobj)
 			nemoyoyo_attach_one(yoyo, one);
 
 			nemoaction_one_set_tap_callback(yoyo->action, one, &one->destroy_signal, nemoyoyo_actor_dispatch_tap_event);
+
+			trans = nemotransition_create(8, NEMOEASE_CUBIC_OUT_TYPE, actor->movetime, actor->movetime * i * 0.25f);
+			nemoyoyo_one_transition_set_tx(trans, 0, one);
+			nemoyoyo_one_transition_set_ty(trans, 1, one);
+			nemoyoyo_one_transition_set_alpha(trans, 2, one);
+			nemoyoyo_one_transition_check_destroy(trans, one);
+
+			if (column == 0 || row == 0) {
+				nemotransition_set_target(trans, 0, 1.0f,
+						actor->geometry.x + column * actor->itemsize);
+				nemotransition_set_target(trans, 1, 1.0f,
+						actor->geometry.y - row * actor->itemsize);
+			} else {
+				nemotransition_set_target(trans, 0, 0.5f,
+						actor->geometry.x + column * actor->itemsize);
+				nemotransition_set_target(trans, 1, 0.5f,
+						actor->geometry.y);
+				nemotransition_set_target(trans, 0, 1.0f,
+						actor->geometry.x + column * actor->itemsize);
+				nemotransition_set_target(trans, 1, 1.0f,
+						actor->geometry.y - row * actor->itemsize);
+			}
+
+			nemotransition_set_target(trans, 2, 1.0f, 1.0f);
+			nemotransition_group_attach_transition(yoyo->transitions, trans);
 		}
 	}
 

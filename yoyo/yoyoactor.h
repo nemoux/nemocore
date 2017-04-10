@@ -30,7 +30,7 @@ struct yoyoactor {
 	struct json_object *jobj;
 
 	uint32_t lifetime;
-	uint32_t hidetime;
+	uint32_t movetime;
 	float itemsize;
 
 	struct {
@@ -52,7 +52,7 @@ extern void nemoyoyo_actor_deactivate(struct yoyoactor *actor);
 extern int nemoyoyo_actor_execute(struct yoyoactor *actor, int index, float x, float y, const char *event);
 
 NEMOYOYO_DECLARE_SET_ATTRIBUTE(actor, uint32_t, lifetime, lifetime);
-NEMOYOYO_DECLARE_SET_ATTRIBUTE(actor, uint32_t, hidetime, hidetime);
+NEMOYOYO_DECLARE_SET_ATTRIBUTE(actor, uint32_t, movetime, movetime);
 NEMOYOYO_DECLARE_SET_ATTRIBUTE(actor, float, itemsize, itemsize);
 
 #ifdef __cplusplus
