@@ -26,26 +26,31 @@ static int nemoyoyo_dispatch_tap_event(struct nemoaction *action, struct actiont
 				nemoaction_tap_get_tx(tap),
 				nemoaction_tap_get_ty(tap));
 		if (one == NULL) {
-			struct yoyosweep *sweep;
+			struct json_object *jobj;
 
-			sweep = nemoyoyo_sweep_create(yoyo);
-			nemoyoyo_sweep_set_minimum_range(sweep, 50.0f);
-			nemoyoyo_sweep_set_maximum_range(sweep, 150.0f);
-			nemoyoyo_sweep_set_minimum_angle(sweep, M_PI * 1.5f);
-			nemoyoyo_sweep_set_maximum_angle(sweep, M_PI * 3.0f);
-			nemoyoyo_sweep_set_minimum_interval(sweep, 4);
-			nemoyoyo_sweep_set_maximum_interval(sweep, 8);
-			nemoyoyo_sweep_set_minimum_duration(sweep, 800);
-			nemoyoyo_sweep_set_maximum_duration(sweep, 1200);
-			nemoyoyo_sweep_set_feedback_sx0(sweep, 0.15f);
-			nemoyoyo_sweep_set_feedback_sx1(sweep, 1.0f);
-			nemoyoyo_sweep_set_feedback_sy0(sweep, 0.15f);
-			nemoyoyo_sweep_set_feedback_sy1(sweep, 1.0f);
-			nemoyoyo_sweep_set_feedback_alpha0(sweep, 0.75f);
-			nemoyoyo_sweep_set_feedback_alpha1(sweep, 0.0f);
-			nemoyoyo_sweep_set_actor_distance(sweep, 100.0f);
-			nemoyoyo_sweep_set_actor_duration(sweep, 300);
-			nemoyoyo_sweep_dispatch(sweep, tap);
+			jobj = nemojson_search_object(yoyo->config, 0, 1, "sweep");
+			if (jobj != NULL) {
+				struct yoyosweep *sweep;
+
+				sweep = nemoyoyo_sweep_create(yoyo);
+				nemoyoyo_sweep_set_minimum_range(sweep, nemojson_object_get_double(jobj, "minimum_range", 50.0f));
+				nemoyoyo_sweep_set_maximum_range(sweep, nemojson_object_get_double(jobj, "maximum_range", 150.0f));
+				nemoyoyo_sweep_set_minimum_angle(sweep, nemojson_object_get_double(jobj, "minimum_angle", 180.0f) * M_PI / 180.0f);
+				nemoyoyo_sweep_set_maximum_angle(sweep, nemojson_object_get_double(jobj, "maximum_angle", 540.0f) * M_PI / 180.0f);
+				nemoyoyo_sweep_set_minimum_interval(sweep, nemojson_object_get_integer(jobj, "minimum_interval", 4));
+				nemoyoyo_sweep_set_maximum_interval(sweep, nemojson_object_get_integer(jobj, "maximum_interval", 8));
+				nemoyoyo_sweep_set_minimum_duration(sweep, nemojson_object_get_integer(jobj, "minimum_duration", 800));
+				nemoyoyo_sweep_set_maximum_duration(sweep, nemojson_object_get_integer(jobj, "maximum_duration", 1200));
+				nemoyoyo_sweep_set_feedback_sx0(sweep, nemojson_object_get_double(jobj, "feedback_sx0", 0.15f));
+				nemoyoyo_sweep_set_feedback_sx1(sweep, nemojson_object_get_double(jobj, "feedback_sx1", 1.0f));
+				nemoyoyo_sweep_set_feedback_sy0(sweep, nemojson_object_get_double(jobj, "feedback_sy0", 0.15f));
+				nemoyoyo_sweep_set_feedback_sy1(sweep, nemojson_object_get_double(jobj, "feedback_sy1", 1.0f));
+				nemoyoyo_sweep_set_feedback_alpha0(sweep, nemojson_object_get_double(jobj, "feedback_alpha0", 0.75f));
+				nemoyoyo_sweep_set_feedback_alpha1(sweep, nemojson_object_get_double(jobj, "feedback_alpha1", 0.0f));
+				nemoyoyo_sweep_set_actor_distance(sweep, nemojson_object_get_double(jobj, "actor_distance", 180.0f));
+				nemoyoyo_sweep_set_actor_duration(sweep, nemojson_object_get_integer(jobj, "actor_duration", 300));
+				nemoyoyo_sweep_dispatch(sweep, tap);
+			}
 		} else {
 			nemoaction_tap_set_userdata(tap, one);
 			nemoaction_tap_set_focus(action, tap, one);
