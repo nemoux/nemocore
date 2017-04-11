@@ -117,7 +117,7 @@ int nemoyoyo_actor_execute(struct yoyoactor *actor, int index, float x, float y,
 	if (type == NULL)
 		return -1;
 
-	if (strcmp(type, "app") == 0) {
+	if (strcmp(type, "app") == 0 || strcmp(type, "xapp") == 0) {
 		struct busmsg *msg;
 		const char *path;
 
