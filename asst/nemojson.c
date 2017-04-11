@@ -295,6 +295,8 @@ struct json_object *nemojson_search_attribute(struct json_object *jobj, const ch
 			tobj = nemojson_search_attribute(iobj, key, value);
 			if (tobj != NULL)
 				return tobj;
+
+			json_object_iter_next(&citer);
 		}
 	} else if (json_object_is_type(jobj, json_type_object) != 0) {
 		struct json_object *tobj;
