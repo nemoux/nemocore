@@ -285,7 +285,7 @@ int nemoyoyo_actor_activate(struct yoyoactor *actor, struct json_object *jobj)
 
 			nemoaction_one_set_tap_callback(yoyo->action, one, &one->destroy_signal, nemoyoyo_actor_dispatch_tap_event);
 
-			trans = nemotransition_create(8, NEMOEASE_CUBIC_OUT_TYPE, actor->movetime, actor->movetime * i * 0.25f);
+			trans = nemotransition_create(8, NEMOEASE_CUBIC_OUT_TYPE, actor->movetime, random_get_integer(0, actor->movetime));
 			nemoyoyo_one_transition_set_tx(trans, 0, one);
 			nemoyoyo_one_transition_set_ty(trans, 1, one);
 			nemoyoyo_one_transition_set_alpha(trans, 2, one);
@@ -332,7 +332,7 @@ void nemoyoyo_actor_deactivate(struct yoyoactor *actor)
 	for (i = 0; i < actor->nones; i++) {
 		nemoyoyo_one_put_flags(actor->ones[i], NEMOYOYO_ONE_PICK_FLAG);
 
-		trans = nemotransition_create(8, NEMOEASE_CUBIC_OUT_TYPE, actor->hidetime, 0);
+		trans = nemotransition_create(8, NEMOEASE_CUBIC_OUT_TYPE, actor->hidetime, random_get_integer(0, actor->hidetime));
 		nemoyoyo_one_transition_set_alpha(trans, 0, actor->ones[i]);
 		nemotransition_set_target(trans, 0, 1.0f, 0.0f);
 		nemotransition_set_dispatch_done(trans, nemoyoyo_actor_dispatch_transition_done);
