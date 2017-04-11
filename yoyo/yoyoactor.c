@@ -152,6 +152,9 @@ int nemoyoyo_actor_execute(struct yoyoactor *actor, int index, float x, float y,
 				nemojson_object_get_string(cobj, "target", NULL));
 		nemoyoyo_actor_activate(actor,
 				nemojson_object_get_object(tobj, "items", NULL));
+	} else if (strcmp(type, "exit") == 0) {
+		nemoyoyo_actor_deactivate(actor);
+		nemoyoyo_actor_destroy(actor);
 	}
 
 	return 0;
