@@ -140,15 +140,20 @@ int nemoyoyo_actor_execute(struct yoyoactor *actor, int index, float x, float y,
 			while (json_object_iter_equal(&citer, &eiter) == 0) {
 				const char *ikey = json_object_iter_peek_name(&citer);
 				struct json_object *iobj = json_object_iter_peek_value(&citer);
+				const char *istr = json_object_get_string(iobj);
 
 				if (strcmp(ikey, "#optind") == 0) {
-					strcat(args, json_object_get_string(iobj));
+					strcat(args, istr);
+					strcat(args, ";");
+				} else if (istr[0] != '\0' && istr[0] != ' ' && istr[0] != '\t' && istr[0] != '\n') {
+					strcat(args, "--");
+					strcat(args, ikey);
+					strcat(args, ";");
+					strcat(args, istr);
 					strcat(args, ";");
 				} else {
 					strcat(args, "--");
 					strcat(args, ikey);
-					strcat(args, ";");
-					strcat(args, json_object_get_string(iobj));
 					strcat(args, ";");
 				}
 
