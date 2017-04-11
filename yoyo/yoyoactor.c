@@ -106,6 +106,7 @@ int nemoyoyo_actor_execute(struct yoyoactor *actor, int index, float x, float y,
 {
 	struct nemoyoyo *yoyo = actor->yoyo;
 	struct json_object *cobj;
+	struct json_object *tobj;
 	const char *type;
 
 	cobj = nemojson_array_get_object(actor->jobj, index);
@@ -135,10 +136,22 @@ int nemoyoyo_actor_execute(struct yoyoactor *actor, int index, float x, float y,
 			nemobus_msg_set_attr(msg, "args", args);
 		nemobus_send_msg(yoyo->bus, yoyo->busid, "/nemoshell", msg);
 		nemobus_msg_destroy(msg);
+
+		nemoyoyo_actor_deactivate(actor);
+		nemoyoyo_actor_destroy(actor);
 	} else if (strcmp(type, "group") == 0) {
 		nemoyoyo_actor_deactivate(actor);
 		nemoyoyo_actor_activate(actor,
 				nemojson_object_get_object(cobj, "items", NULL));
+	} else if (strcmp(type, "menu") == 0) {
+		nemoyoyo_actor_deactivate(actor);
+
+		tobj = nemojson_search_attribute(
+				nemojson_search_object(yoyo->config, 0, 1, "menu"),
+				"id",
+				nemojson_object_get_string(cobj, "target", NULL));
+		nemoyoyo_actor_activate(actor,
+				nemojson_object_get_object(tobj, "items", NULL));
 	}
 
 	return 0;
