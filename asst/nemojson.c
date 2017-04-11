@@ -276,6 +276,40 @@ const char *nemojson_search_string(struct nemojson *json, int index, const char 
 	return json_object_get_string(jobj);
 }
 
+struct json_object *nemojson_search_attribute(struct json_object *jobj, const char *key, const char *value)
+{
+	if (json_object_is_type(jobj, json_type_object) != 0) {
+		struct json_object_iterator citer = json_object_iter_begin(jobj);
+		struct json_object_iterator eiter = json_object_iter_end(jobj);
+		struct json_object *tobj;
+
+		while (json_object_iter_equal(&citer, &eiter) == 0) {
+			const char *ikey = json_object_iter_peek_name(&citer);
+			struct json_object *iobj = json_object_iter_peek_value(&citer);
+
+			if (json_object_is_type(iobj, json_type_string) != 0 &&
+					strcmp(ikey, key) == 0 &&
+					strcmp(json_object_get_string(iobj), value) == 0)
+				return jobj;
+
+			tobj = nemojson_search_attribute(iobj, key, value);
+			if (tobj != NULL)
+				return tobj;
+		}
+	} else if (json_object_is_type(jobj, json_type_object) != 0) {
+		struct json_object *tobj;
+		int i;
+
+		for (i = 0; i < json_object_array_length(jobj); i++) {
+			tobj = nemojson_search_attribute(json_object_array_get_idx(jobj, i), key, value);
+			if (tobj != NULL)
+				return tobj;
+		}
+	}
+
+	return NULL;
+}
+
 struct json_object *nemojson_object_get_object(struct json_object *jobj, const char *name, struct json_object *value)
 {
 	struct json_object *tobj;
