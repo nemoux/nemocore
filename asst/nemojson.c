@@ -359,3 +359,18 @@ struct json_object *nemojson_array_get_object(struct json_object *jobj, int inde
 {
 	return json_object_array_get_idx(jobj, index);
 }
+
+const char *nemojson_array_get_string(struct json_object *jobj, int index)
+{
+	return json_object_get_string(json_object_array_get_idx(jobj, index));
+}
+
+double nemojson_array_get_double(struct json_object *jobj, int index)
+{
+	return json_object_get_double(json_object_array_get_idx(jobj, index));
+}
+
+int nemojson_array_get_integer(struct json_object *jobj, int index)
+{
+	return json_object_get_int(json_object_array_get_idx(jobj, index));
+}

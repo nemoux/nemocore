@@ -120,10 +120,8 @@ int nemoyoyo_actor_execute(struct yoyoactor *actor, int index, float x, float y,
 	if (strcmp(type, "app") == 0) {
 		struct busmsg *msg;
 		const char *path;
-		const char *args;
 
 		path = nemojson_object_get_string(cobj, "path", NULL);
-		args = nemojson_object_get_string(cobj, "args", NULL);
 
 		msg = nemobus_msg_create();
 		nemobus_msg_set_name(msg, "command");
@@ -132,8 +130,18 @@ int nemoyoyo_actor_execute(struct yoyoactor *actor, int index, float x, float y,
 		nemobus_msg_set_attr_format(msg, "y", "%f", y);
 		nemobus_msg_set_attr_format(msg, "r", "%f", actor->geometry.r * 180.0f / M_PI);
 		nemobus_msg_set_attr(msg, "path", path);
-		if (args != NULL)
+
+		tobj = nemojson_object_get_object(cobj, "params", NULL);
+		if (tobj != NULL) {
+			char args[512] = "";
+			int i;
+
+			for (i = 0; i < nemojson_array_get_length(tobj); i++)
+				strcat(args, nemojson_array_get_string(tobj, i));
+
 			nemobus_msg_set_attr(msg, "args", args);
+		}
+
 		nemobus_send_msg(yoyo->bus, yoyo->busid, "/nemoshell", msg);
 		nemobus_msg_destroy(msg);
 
