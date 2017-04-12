@@ -12,6 +12,8 @@
 
 #include <getopt.h>
 
+#include <json.h>
+
 #include <nemobus.h>
 #include <nemojson.h>
 #include <nemolist.h>

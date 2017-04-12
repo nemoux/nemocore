@@ -48,7 +48,7 @@ set(HEADER_FILES
 	nemobus.h
 	)
 
-set(NEMODB_PKGCONFIG_REQUIRES "nemoasst libmongoc-1.0 libbson-1.0")
+set(NEMODB_PKGCONFIG_REQUIRES "nemoasst expat json-c libmongoc-1.0 libbson-1.0")
 
 configure_file(
 	nemokits.pc.in

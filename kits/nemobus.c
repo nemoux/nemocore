@@ -13,6 +13,8 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
+#include <json.h>
+
 #include <nemobus.h>
 #include <nemomisc.h>
 

@@ -9,9 +9,9 @@ NEMO_BEGIN_EXTERN_C
 
 #include <stdint.h>
 
-#include <json.h>
-
 #include <nemolist.h>
+
+struct json_object;
 
 struct nemobus {
 	int soc;
