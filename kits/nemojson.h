@@ -20,19 +20,23 @@ struct nemojson {
 	int length;
 
 	struct json_object *jobjs[NEMOJSON_OBJECT_MAX];
+	char *jkeys[NEMOJSON_OBJECT_MAX];
 	int count;
 };
 
-extern struct nemojson *nemojson_create(const char *str, int length);
+extern struct nemojson *nemojson_create_string(const char *str, int length);
 extern struct nemojson *nemojson_create_format(const char *fmt, ...);
 extern struct nemojson *nemojson_create_file(const char *filepath);
+extern struct nemojson *nemojson_create(void);
 extern void nemojson_destroy(struct nemojson *json);
 
 extern int nemojson_append(struct nemojson *json, const char *str, int length);
 extern int nemojson_append_one(struct nemojson *json, char c);
 extern int nemojson_append_format(struct nemojson *json, const char *fmt, ...);
 
-extern void nemojson_update(struct nemojson *json);
+extern int nemojson_update(struct nemojson *json);
+
+extern int nemojson_query_object(struct nemojson *json, struct json_object *jobj);
 
 extern struct json_object *nemojson_search_object(struct nemojson *json, int index, int depth, ...);
 extern int nemojson_search_integer(struct nemojson *json, int index, int value, int depth, ...);
@@ -65,6 +69,11 @@ static inline int nemojson_get_object_count(struct nemojson *json)
 static inline struct json_object *nemojson_get_object(struct nemojson *json, int index)
 {
 	return json->jobjs[index];
+}
+
+static inline const char *nemojson_get_object_key(struct nemojson *json, int index)
+{
+	return json->jkeys[index];
 }
 
 #ifdef __cplusplus

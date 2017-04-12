@@ -369,7 +369,7 @@ static int minishell_dispatch_bus(int fd, uint32_t mask, void *data)
 	if (length <= 0)
 		return 1;
 
-	json = nemojson_create(buffer, length);
+	json = nemojson_create_string(buffer, length);
 	nemojson_update(json);
 
 	for (i = 0; i < nemojson_get_object_count(json); i++) {

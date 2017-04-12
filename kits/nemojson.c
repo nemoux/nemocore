@@ -13,7 +13,7 @@
 #include <nemojson.h>
 #include <nemomisc.h>
 
-struct nemojson *nemojson_create(const char *str, int length)
+struct nemojson *nemojson_create_string(const char *str, int length)
 {
 	struct nemojson *json;
 
@@ -82,14 +82,35 @@ err1:
 	return NULL;
 }
 
+struct nemojson *nemojson_create(void)
+{
+	struct nemojson *json;
+
+	json = (struct nemojson *)malloc(sizeof(struct nemojson));
+	if (json == NULL)
+		return NULL;
+	memset(json, 0, sizeof(struct nemojson));
+
+	return json;
+}
+
 void nemojson_destroy(struct nemojson *json)
 {
 	int i;
 
-	for (i = 0; i < json->count; i++)
-		json_object_put(json->jobjs[i]);
+	for (i = 0; i < json->count; i++) {
+		if (json->jobjs[i] != NULL)
+			json_object_put(json->jobjs[i]);
+	}
 
-	free(json->contents);
+	for (i = 0; i < json->count; i++) {
+		if (json->jkeys[i] != NULL)
+			free(json->jkeys[i]);
+	}
+
+	if (json->contents != NULL)
+		free(json->contents);
+
 	free(json);
 }
 
@@ -105,7 +126,8 @@ int nemojson_append(struct nemojson *json, const char *str, int length)
 	strcat(contents, str);
 	contents[json->length + length] = '\0';
 
-	free(json->contents);
+	if (json->contents != NULL)
+		free(json->contents);
 
 	json->contents = contents;
 	json->length = json->length + length;
@@ -123,7 +145,8 @@ int nemojson_append_one(struct nemojson *json, char c)
 
 	snprintf(contents, json->length + 1 + 1, "%s%c", json->contents, c);
 
-	free(json->contents);
+	if (json->contents != NULL)
+		free(json->contents);
 
 	json->contents = contents;
 	json->length = json->length + 1;
@@ -152,7 +175,9 @@ int nemojson_append_format(struct nemojson *json, const char *fmt, ...)
 	strcat(contents, str);
 	contents[json->length + length] = '\0';
 
-	free(json->contents);
+	if (json->contents != NULL)
+		free(json->contents);
+
 	free(str);
 
 	json->contents = contents;
@@ -161,11 +186,12 @@ int nemojson_append_format(struct nemojson *json, const char *fmt, ...)
 	return 0;
 }
 
-void nemojson_update(struct nemojson *json)
+int nemojson_update(struct nemojson *json)
 {
 	struct json_tokener *jtok;
 	struct json_object *jobj;
 	char *msg;
+	int count = 0;
 
 	jtok = json_tokener_new();
 
@@ -175,9 +201,48 @@ void nemojson_update(struct nemojson *json)
 			break;
 
 		json->jobjs[json->count++] = jobj;
+
+		count++;
 	}
 
 	json_tokener_free(jtok);
+
+	return count;
+}
+
+int nemojson_query_object(struct nemojson *json, struct json_object *jobj)
+{
+	if (json_object_is_type(jobj, json_type_object)) {
+		struct json_object_iterator citer = json_object_iter_begin(jobj);
+		struct json_object_iterator eiter = json_object_iter_end(jobj);
+		int count = 0;
+
+		while (json_object_iter_equal(&citer, &eiter) == 0) {
+			const char *ikey = json_object_iter_peek_name(&citer);
+			struct json_object *iobj = json_object_iter_peek_value(&citer);
+
+			json->jobjs[json->count] = json_object_get(iobj);
+			json->jkeys[json->count] = strdup(ikey);
+			json->count++;
+
+			count++;
+		}
+
+		return count;
+	} else if (json_object_is_type(jobj, json_type_array)) {
+		int i;
+
+		for (i = 0; i < json_object_array_length(jobj); i++) {
+			struct json_object *cobj = json_object_array_get_idx(jobj, i);
+
+			json->jobjs[json->count] = json_object_get(cobj);
+			json->count++;
+		}
+
+		return json_object_array_length(jobj);
+	}
+
+	return 0;
 }
 
 static inline struct json_object *nemojson_search_object_vargs(struct nemojson *json, int index, int depth, va_list vargs)

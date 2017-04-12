@@ -133,13 +133,16 @@ int nemoyoyo_actor_execute(struct yoyoactor *actor, int index, float x, float y,
 
 		tobj = nemojson_object_get_object(cobj, "param", NULL);
 		if (tobj != NULL) {
-			struct json_object_iterator citer = json_object_iter_begin(tobj);
-			struct json_object_iterator eiter = json_object_iter_end(tobj);
+			struct nemojson *json;
 			char args[512] = "";
+			int i;
 
-			while (json_object_iter_equal(&citer, &eiter) == 0) {
-				const char *ikey = json_object_iter_peek_name(&citer);
-				struct json_object *iobj = json_object_iter_peek_value(&citer);
+			json = nemojson_create();
+			nemojson_query_object(json, tobj);
+
+			for (i = 0; i < nemojson_get_object_count(json); i++) {
+				struct json_object *iobj = nemojson_get_object(json, i);
+				const char *ikey = nemojson_get_object_key(json, i);
 				const char *istr = json_object_get_string(iobj);
 
 				if (strcmp(ikey, "#optind") == 0) {
@@ -156,26 +159,30 @@ int nemoyoyo_actor_execute(struct yoyoactor *actor, int index, float x, float y,
 					strcat(args, ikey);
 					strcat(args, ";");
 				}
-
-				json_object_iter_next(&citer);
 			}
+
+			nemojson_destroy(json);
 
 			nemobus_msg_set_attr(msg, "args", args);
 		}
 
 		tobj = nemojson_object_get_object(cobj, "state", NULL);
 		if (tobj != NULL) {
-			struct json_object_iterator citer = json_object_iter_begin(tobj);
-			struct json_object_iterator eiter = json_object_iter_end(tobj);
+			struct nemojson *json;
+			int i;
 
-			while (json_object_iter_equal(&citer, &eiter) == 0) {
-				const char *ikey = json_object_iter_peek_name(&citer);
-				struct json_object *iobj = json_object_iter_peek_value(&citer);
+			json = nemojson_create();
+			nemojson_query_object(json, tobj);
 
-				nemobus_msg_set_attr(msg, ikey, json_object_get_string(iobj));
+			for (i = 0; i < nemojson_get_object_count(json); i++) {
+				struct json_object *iobj = nemojson_get_object(json, i);
+				const char *ikey = nemojson_get_object_key(json, i);
+				const char *istr = json_object_get_string(iobj);
 
-				json_object_iter_next(&citer);
+				nemobus_msg_set_attr(msg, ikey, istr);
 			}
+
+			nemojson_destroy(json);
 		}
 
 		nemobus_send_msg(yoyo->bus, yoyo->busid, "/nemoshell", msg);
@@ -212,17 +219,21 @@ int nemoyoyo_actor_execute(struct yoyoactor *actor, int index, float x, float y,
 
 		tobj = nemojson_object_get_object(cobj, "option", NULL);
 		if (tobj != NULL) {
-			struct json_object_iterator citer = json_object_iter_begin(tobj);
-			struct json_object_iterator eiter = json_object_iter_end(tobj);
+			struct nemojson *json;
+			int i;
 
-			while (json_object_iter_equal(&citer, &eiter) == 0) {
-				const char *ikey = json_object_iter_peek_name(&citer);
-				struct json_object *iobj = json_object_iter_peek_value(&citer);
+			json = nemojson_create();
+			nemojson_query_object(json, tobj);
 
-				nemobus_msg_set_attr(msg, ikey, json_object_get_string(iobj));
+			for (i = 0; i < nemojson_get_object_count(json); i++) {
+				struct json_object *iobj = nemojson_get_object(json, i);
+				const char *ikey = nemojson_get_object_key(json, i);
+				const char *istr = json_object_get_string(iobj);
 
-				json_object_iter_next(&citer);
+				nemobus_msg_set_attr(msg, ikey, istr);
 			}
+
+			nemojson_destroy(json);
 		}
 
 		nemobus_send_msg(yoyo->bus, yoyo->busid, "/nemoshell", msg);

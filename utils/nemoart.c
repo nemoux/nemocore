@@ -798,7 +798,7 @@ static void nemoart_dispatch_bus(void *data, const char *events)
 	if (length <= 0)
 		return;
 
-	json = nemojson_create(buffer, length);
+	json = nemojson_create_string(buffer, length);
 	nemojson_update(json);
 
 	for (i = 0; i < nemojson_get_object_count(json); i++) {
