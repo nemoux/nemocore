@@ -336,6 +336,7 @@ void nemoyoyo_actor_deactivate(struct yoyoactor *actor)
 
 	for (i = 0; i < actor->nones; i++) {
 		nemoyoyo_one_put_flags(actor->ones[i], NEMOYOYO_ONE_PICK_FLAG);
+		nemoaction_destroy_tap_by_target(yoyo->action, actor->ones[i]);
 
 		trans = nemotransition_create(8, NEMOEASE_CUBIC_OUT_TYPE, actor->hidetime, random_get_integer(0, actor->hidetime));
 		nemoyoyo_one_transition_set_alpha(trans, 0, actor->ones[i]);
