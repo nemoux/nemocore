@@ -261,7 +261,7 @@ static void nemopix_dispatch_bus(void *data, const char *events)
 
 	for (i = 0; i < nemojson_get_object_count(json); i++) {
 		msg = nemoitem_create();
-		nemoitem_load_json(msg, "/nemopix", nemojson_get_object(json, i));
+		nemojson_object_load_item(nemojson_get_object(json, i), msg, "/nemopix");
 
 		nemoitem_for_each(one, msg) {
 		}

@@ -1,0 +1,11 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+bindir=${prefix}/bin
+libdir=${prefix}/lib@CMAKE_LIBRARY_SUFFIX@
+incdir=${prefix}/include
+
+Name: Nemokits
+Description: NEMO-UX kits library
+Version: 0.1.0
+Requires: @NEMOKITS_PKGCONFIG_REQUIRES@
+Libs: -L${libdir} -lnemokits
+Cflags: -I${incdir}/nemokits

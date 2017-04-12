@@ -18,6 +18,7 @@ LINK_DIRECTORIES(${SKIA_LIBRARY_DIRS})
 
 include_directories(
 	${CMAKE_SOURCE_DIR}/asst
+	${CMAKE_SOURCE_DIR}/kits
 	${CMAKE_SOURCE_DIR}/helper
 	${CMAKE_SOURCE_DIR}/compz
 	${CMAKE_SOURCE_DIR}/shell
@@ -45,6 +46,7 @@ add_library(nemoenvs SHARED
 
 TARGET_LINK_LIBRARIES(nemoenvs
 	nemoasst
+	nemokits
 	nemocompz
 	nemoshell
 	nemotale

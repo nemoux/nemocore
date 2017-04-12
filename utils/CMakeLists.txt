@@ -14,10 +14,10 @@ option(WITH_TESSERACT "Build with TESSERACT" ON)
 
 include_directories(
 	${CMAKE_SOURCE_DIR}/asst
+	${CMAKE_SOURCE_DIR}/kits
 	${CMAKE_SOURCE_DIR}/helper
 	${CMAKE_SOURCE_DIR}/tool
 	${CMAKE_BINARY_DIR}/tool
-	${CMAKE_SOURCE_DIR}/bus
 	${CMAKE_SOURCE_DIR}/db
 	${CMAKE_SOURCE_DIR}/play
 	${CMAKE_SOURCE_DIR}/cook
@@ -44,6 +44,7 @@ if(WITH_MINISHELL)
 
 	TARGET_LINK_LIBRARIES(minishell
 		nemoasst
+		nemokits
 		nemohelper
 		nemocompz
 		nemoshell
@@ -51,7 +52,6 @@ if(WITH_MINISHELL)
 		nemoenvs
 		nemoplay
 		nemocook
-		nemobus
 		nemodb
 		)
 
@@ -70,6 +70,7 @@ add_executable(nemolog
 
 TARGET_LINK_LIBRARIES(nemolog
 	nemoasst
+	nemokits
 	nemohelper
 	)
 
@@ -81,7 +82,8 @@ add_executable(nemobusd
 
 TARGET_LINK_LIBRARIES(nemobusd
 	nemoasst
-	nemobus
+	nemokits
+	nemohelper
 	${JSON_LIBRARIES}
 	)
 
@@ -104,11 +106,11 @@ add_executable(nemoart
 
 TARGET_LINK_LIBRARIES(nemoart
 	nemoasst
+	nemokits
 	nemotool
 	nemoplay
 	nemocook
 	nemoaction
-	nemobus
 	)
 
 if(WITH_TCMALLOC)
@@ -125,10 +127,10 @@ add_executable(nemopix
 
 TARGET_LINK_LIBRARIES(nemopix
 	nemoasst
+	nemokits
 	nemotool
 	nemocook
 	nemoaction
-	nemobus
 	nemomotz
 	nemotozz
 	)
@@ -150,6 +152,7 @@ if(WITH_TESSERACT)
 
 	TARGET_LINK_LIBRARIES(nemopen
 		nemoasst
+		nemokits
 		nemotool
 		nemoaction
 		nemotozz

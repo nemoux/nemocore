@@ -22,6 +22,7 @@ set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 
 include_directories(
 	${CMAKE_SOURCE_DIR}/asst
+	${CMAKE_SOURCE_DIR}/kits
 	${CMAKE_SOURCE_DIR}/helper
 	${CMAKE_SOURCE_DIR}/tool
 	${CMAKE_BINARY_DIR}/tool
@@ -43,6 +44,7 @@ TARGET_LINK_LIBRARIES(nemotozz
 	${HARFBUZZ_LIBRARIES}
 	${SKIA_LIBRARIES}
 	nemoasst
+	nemokits
 	nemohelper
 	nemotool
 	)

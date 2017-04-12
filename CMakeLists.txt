@@ -48,6 +48,7 @@ if(WITH_NEMO_LOG)
 endif(WITH_NEMO_LOG)
 
 add_subdirectory(asst)
+add_subdirectory(kits)
 add_subdirectory(helper)
 
 add_subdirectory(tool)
@@ -59,9 +60,7 @@ add_subdirectory(mote)
 add_subdirectory(play)
 add_subdirectory(tozz)
 add_subdirectory(motz)
-add_subdirectory(bus)
 add_subdirectory(fx)
-add_subdirectory(db)
 
 add_subdirectory(xwayland)
 

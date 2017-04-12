@@ -9,6 +9,8 @@ NEMO_BEGIN_EXTERN_C
 
 #include <stdint.h>
 
+#include <nemoitem.h>
+
 #define NEMOJSON_OBJECT_MAX			(128)
 
 struct json_object;
@@ -49,6 +51,11 @@ extern struct json_object *nemojson_array_get_object(struct json_object *jobj, i
 extern const char *nemojson_array_get_string(struct json_object *jobj, int index);
 extern double nemojson_array_get_double(struct json_object *jobj, int index);
 extern int nemojson_array_get_integer(struct json_object *jobj, int index);
+
+extern int nemojson_object_load_item(struct json_object *jobj, struct nemoitem *item, const char *prefix);
+extern int nemojson_string_load_item(const char *contents, struct nemoitem *item, const char *prefix);
+extern int nemojson_object_load_item_one(struct json_object *jobj, struct itemone *one);
+extern int nemojson_string_load_item_one(const char *contents, struct itemone *one);
 
 static inline int nemojson_get_object_count(struct nemojson *json)
 {

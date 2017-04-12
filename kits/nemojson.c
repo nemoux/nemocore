@@ -376,3 +376,74 @@ int nemojson_array_get_integer(struct json_object *jobj, int index)
 {
 	return json_object_get_int(json_object_array_get_idx(jobj, index));
 }
+
+static int nemojson_object_load_item_inherit(struct json_object *jobj, struct nemoitem *item, struct itemone *one)
+{
+	struct itemone *cone;
+
+	json_object_object_foreach(jobj, key, value) {
+		if (json_object_is_type(value, json_type_object)) {
+			cone = nemoitem_one_create();
+			nemoitem_one_set_path_format(cone, "%s/%s", one->path, key);
+			nemoitem_attach_one(item, cone);
+
+			nemojson_object_load_item_inherit(value, item, cone);
+		} else if (json_object_is_type(value, json_type_string)) {
+			nemoitem_one_set_attr(one, key, json_object_get_string(value));
+		}
+	}
+
+	return 0;
+}
+
+int nemojson_object_load_item(struct json_object *jobj, struct nemoitem *item, const char *prefix)
+{
+	struct itemone *one;
+
+	one = nemoitem_one_create();
+	nemoitem_one_set_path(one, prefix);
+	nemoitem_attach_one(item, one);
+
+	nemojson_object_load_item_inherit(jobj, item, one);
+
+	return 0;
+}
+
+int nemojson_string_load_item(const char *contents, struct nemoitem *item, const char *prefix)
+{
+	struct json_object *jobj;
+	int r = 0;
+
+	jobj = json_tokener_parse(contents);
+	if (jobj != NULL) {
+		r = nemojson_object_load_item(jobj, item, prefix);
+
+		json_object_put(jobj);
+	}
+
+	return r;
+}
+
+int nemojson_object_load_item_one(struct json_object *jobj, struct itemone *one)
+{
+	json_object_object_foreach(jobj, key, value) {
+		nemoitem_one_set_attr(one, key, json_object_get_string(value));
+	}
+
+	return 0;
+}
+
+int nemojson_string_load_item_one(const char *contents, struct itemone *one)
+{
+	struct json_object *jobj;
+	int r = 0;
+
+	jobj = json_tokener_parse(contents);
+	if (jobj != NULL) {
+		r = nemojson_object_load_item_one(jobj, one);
+
+		json_object_put(jobj);
+	}
+
+	return r;
+}

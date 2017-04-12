@@ -1,5 +1,5 @@
-#ifndef	__NEMOBUS_H__
-#define	__NEMOBUS_H__
+#ifndef	__NEMO_BUS_H__
+#define	__NEMO_BUS_H__
 
 #include <nemoconfig.h>
 

@@ -1,5 +1,5 @@
-#ifndef	__NEMODB_H__
-#define	__NEMODB_H__
+#ifndef	__NEMO_DB_H__
+#define	__NEMO_DB_H__
 
 #include <nemoconfig.h>
 

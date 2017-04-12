@@ -10,12 +10,12 @@ LINK_DIRECTORIES(${JSON_LIBRARY_DIRS})
 
 include_directories(
 	${CMAKE_SOURCE_DIR}/asst
+	${CMAKE_SOURCE_DIR}/kits
 	${CMAKE_SOURCE_DIR}/helper
 	${CMAKE_SOURCE_DIR}/tool
 	${CMAKE_BINARY_DIR}/tool
 	${CMAKE_SOURCE_DIR}/cook
 	${CMAKE_SOURCE_DIR}/action
-	${CMAKE_SOURCE_DIR}/bus
 	)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
@@ -33,10 +33,10 @@ add_executable(nemoyoyo
 
 TARGET_LINK_LIBRARIES(nemoyoyo
 	nemoasst
+	nemokits
 	nemotool
 	nemocook
 	nemoaction
-	nemobus
 	)
 
 INSTALL(TARGETS nemoyoyo DESTINATION bin)

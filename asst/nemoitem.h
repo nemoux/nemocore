@@ -13,8 +13,6 @@ NEMO_BEGIN_EXTERN_C
 
 #include <nemolist.h>
 
-struct json_object;
-
 struct itemattr {
 	char *name;
 	char *value;
@@ -113,12 +111,6 @@ extern int nemoitem_one_save_string(struct itemone *one, char *buffer, int size,
 
 extern int nemoitem_load_textfile(struct nemoitem *item, const char *filepath, char delimiter);
 extern int nemoitem_save_textfile(struct nemoitem *item, const char *filepath, char delimiter);
-
-extern int nemoitem_load_json(struct nemoitem *item, const char *prefix, struct json_object *jobj);
-extern int nemoitem_load_json_string(struct nemoitem *item, const char *prefix, const char *contents);
-
-extern int nemoitem_one_load_json(struct itemone *one, struct json_object *jobj);
-extern int nemoitem_one_load_json_string(struct itemone *one, const char *contents);
 
 static inline int nemoitem_get_count(struct nemoitem *item)
 {

@@ -11,8 +11,6 @@
 #include <ctype.h>
 #include <regex.h>
 
-#include <json.h>
-
 #include <nemoitem.h>
 #include <nemotoken.h>
 #include <nemomisc.h>
@@ -805,75 +803,4 @@ int nemoitem_save_textfile(struct nemoitem *item, const char *filepath, char del
 	fclose(fp);
 
 	return 0;
-}
-
-static int nemoitem_load_json_object(struct nemoitem *item, struct itemone *one, struct json_object *jobj)
-{
-	struct itemone *cone;
-
-	json_object_object_foreach(jobj, key, value) {
-		if (json_object_is_type(value, json_type_object)) {
-			cone = nemoitem_one_create();
-			nemoitem_one_set_path_format(cone, "%s/%s", one->path, key);
-			nemoitem_attach_one(item, cone);
-
-			nemoitem_load_json_object(item, cone, value);
-		} else if (json_object_is_type(value, json_type_string)) {
-			nemoitem_one_set_attr(one, key, json_object_get_string(value));
-		}
-	}
-
-	return 0;
-}
-
-int nemoitem_load_json(struct nemoitem *item, const char *prefix, struct json_object *jobj)
-{
-	struct itemone *one;
-
-	one = nemoitem_one_create();
-	nemoitem_one_set_path(one, prefix);
-	nemoitem_attach_one(item, one);
-
-	nemoitem_load_json_object(item, one, jobj);
-
-	return 0;
-}
-
-int nemoitem_load_json_string(struct nemoitem *item, const char *prefix, const char *contents)
-{
-	struct json_object *jobj;
-	int r = 0;
-
-	jobj = json_tokener_parse(contents);
-	if (jobj != NULL) {
-		r = nemoitem_load_json(item, prefix, jobj);
-
-		json_object_put(jobj);
-	}
-
-	return r;
-}
-
-int nemoitem_one_load_json(struct itemone *one, struct json_object *jobj)
-{
-	json_object_object_foreach(jobj, key, value) {
-		nemoitem_one_set_attr(one, key, json_object_get_string(value));
-	}
-
-	return 0;
-}
-
-int nemoitem_one_load_json_string(struct itemone *one, const char *contents)
-{
-	struct json_object *jobj;
-	int r = 0;
-
-	jobj = json_tokener_parse(contents);
-	if (jobj != NULL) {
-		r = nemoitem_one_load_json(one, jobj);
-
-		json_object_put(jobj);
-	}
-
-	return r;
 }

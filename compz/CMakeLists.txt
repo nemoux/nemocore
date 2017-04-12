@@ -83,6 +83,7 @@ wayland_add_protocol_server(PROTOCOLS
 
 include_directories(
 	${CMAKE_SOURCE_DIR}/asst
+	${CMAKE_SOURCE_DIR}/kits
 	${CMAKE_SOURCE_DIR}/helper
 	${CMAKE_SOURCE_DIR}/compz
 	${CMAKE_BINARY_DIR}/compz
@@ -182,6 +183,7 @@ TARGET_LINK_LIBRARIES(nemocompz
 	${LIBUDEV_LIBRARIES}
 	${LIBLO_LIBRARIES}
 	nemoasst
+	nemokits
 	nemohelper
 	)
 
