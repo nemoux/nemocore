@@ -89,17 +89,6 @@ TARGET_LINK_LIBRARIES(nemobusd
 
 INSTALL(TARGETS nemobusd DESTINATION bin)
 
-add_executable(nemodbs
-	nemodbs.c
-	)
-
-TARGET_LINK_LIBRARIES(nemodbs
-	nemoasst
-	nemodb
-	)
-
-INSTALL(TARGETS nemodbs DESTINATION bin)
-
 add_executable(nemoart
 	nemoart.c
 	)
