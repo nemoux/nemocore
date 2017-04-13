@@ -377,6 +377,26 @@ struct json_object *nemojson_search_attribute(struct json_object *jobj, const ch
 	return NULL;
 }
 
+struct json_object *nemojson_get_object(struct nemojson *json, int index)
+{
+	return json->jobjs[index];
+}
+
+const char *nemojson_get_string(struct nemojson *json, int index)
+{
+	return json_object_get_string(json->jobjs[index]);
+}
+
+double nemojson_get_double(struct nemojson *json, int index)
+{
+	return json_object_get_double(json->jobjs[index]);
+}
+
+int nemojson_get_integer(struct nemojson *json, int index)
+{
+	return json_object_get_int(json->jobjs[index]);
+}
+
 struct json_object *nemojson_object_get_object(struct json_object *jobj, const char *name, struct json_object *value)
 {
 	struct json_object *tobj;

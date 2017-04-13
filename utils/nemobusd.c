@@ -138,7 +138,7 @@ static void nemobusd_dispatch_message_task(int efd, struct bustask *task)
 		json = nemojson_create_string(msg, len);
 		nemojson_update(json);
 
-		for (i = 0; i < nemojson_get_object_count(json); i++) {
+		for (i = 0; i < nemojson_get_count(json); i++) {
 			jobj = nemojson_get_object(json, i);
 
 			if (json_object_object_get_ex(jobj, "to", &pobj) != 0) {

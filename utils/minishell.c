@@ -372,7 +372,7 @@ static int minishell_dispatch_bus(int fd, uint32_t mask, void *data)
 	json = nemojson_create_string(buffer, length);
 	nemojson_update(json);
 
-	for (i = 0; i < nemojson_get_object_count(json); i++) {
+	for (i = 0; i < nemojson_get_count(json); i++) {
 		msg = nemoitem_create();
 		nemojson_object_load_item(nemojson_get_object(json, i), msg, "/nemoshell");
 

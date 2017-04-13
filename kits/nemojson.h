@@ -45,6 +45,11 @@ extern const char *nemojson_search_string(struct nemojson *json, int index, cons
 
 extern struct json_object *nemojson_search_attribute(struct json_object *jobj, const char *key, const char *value);
 
+extern struct json_object *nemojson_get_object(struct nemojson *json, int index);
+extern const char *nemojson_get_string(struct nemojson *json, int index);
+extern double nemojson_get_double(struct nemojson *json, int index);
+extern int nemojson_get_integer(struct nemojson *json, int index);
+
 extern struct json_object *nemojson_object_get_object(struct json_object *jobj, const char *name, struct json_object *value);
 extern const char *nemojson_object_get_string(struct json_object *jobj, const char *name, const char *value);
 extern double nemojson_object_get_double(struct json_object *jobj, const char *name, double value);
@@ -61,17 +66,12 @@ extern int nemojson_string_load_item(const char *contents, struct nemoitem *item
 extern int nemojson_object_load_item_one(struct json_object *jobj, struct itemone *one);
 extern int nemojson_string_load_item_one(const char *contents, struct itemone *one);
 
-static inline int nemojson_get_object_count(struct nemojson *json)
+static inline int nemojson_get_count(struct nemojson *json)
 {
 	return json->count;
 }
 
-static inline struct json_object *nemojson_get_object(struct nemojson *json, int index)
-{
-	return json->jobjs[index];
-}
-
-static inline const char *nemojson_get_object_key(struct nemojson *json, int index)
+static inline const char *nemojson_get_key(struct nemojson *json, int index)
 {
 	return json->jkeys[index];
 }

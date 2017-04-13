@@ -140,10 +140,9 @@ int nemoyoyo_actor_execute(struct yoyoactor *actor, int index, float x, float y,
 			json = nemojson_create();
 			nemojson_query_object(json, tobj);
 
-			for (i = 0; i < nemojson_get_object_count(json); i++) {
-				struct json_object *iobj = nemojson_get_object(json, i);
-				const char *ikey = nemojson_get_object_key(json, i);
-				const char *istr = json_object_get_string(iobj);
+			for (i = 0; i < nemojson_get_count(json); i++) {
+				const char *ikey = nemojson_get_key(json, i);
+				const char *istr = nemojson_get_string(json, i);
 
 				if (strcmp(ikey, "#optind") == 0) {
 					strcat(args, istr);
@@ -174,10 +173,9 @@ int nemoyoyo_actor_execute(struct yoyoactor *actor, int index, float x, float y,
 			json = nemojson_create();
 			nemojson_query_object(json, tobj);
 
-			for (i = 0; i < nemojson_get_object_count(json); i++) {
-				struct json_object *iobj = nemojson_get_object(json, i);
-				const char *ikey = nemojson_get_object_key(json, i);
-				const char *istr = json_object_get_string(iobj);
+			for (i = 0; i < nemojson_get_count(json); i++) {
+				const char *ikey = nemojson_get_key(json, i);
+				const char *istr = nemojson_get_string(json, i);
 
 				nemobus_msg_set_attr(msg, ikey, istr);
 			}
@@ -225,10 +223,9 @@ int nemoyoyo_actor_execute(struct yoyoactor *actor, int index, float x, float y,
 			json = nemojson_create();
 			nemojson_query_object(json, tobj);
 
-			for (i = 0; i < nemojson_get_object_count(json); i++) {
-				struct json_object *iobj = nemojson_get_object(json, i);
-				const char *ikey = nemojson_get_object_key(json, i);
-				const char *istr = json_object_get_string(iobj);
+			for (i = 0; i < nemojson_get_count(json); i++) {
+				const char *ikey = nemojson_get_key(json, i);
+				const char *istr = nemojson_get_string(json, i);
 
 				nemobus_msg_set_attr(msg, ikey, istr);
 			}
