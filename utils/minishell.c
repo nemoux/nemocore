@@ -12,6 +12,8 @@
 
 #include <wayland-server.h>
 
+#include <json.h>
+
 #include <shell.h>
 #include <compz.h>
 #include <backend.h>
@@ -35,6 +37,7 @@
 #include <nemoenvs.h>
 #include <nemomirror.h>
 #include <nemobus.h>
+#include <nemodb.h>
 #include <nemojson.h>
 #include <nemoitem.h>
 #include <nemotoken.h>
@@ -314,6 +317,20 @@ static int minishell_dispatch_config(struct minishell *mini, struct itemone *one
 
 static int minishell_dispatch_db(struct minishell *mini, const char *dburi, const char *dbname, const char *configpath, const char *themepath)
 {
+	struct nemodb *db;
+	struct json_object *jobj;
+
+	db = nemodb_create(dburi);
+	if (db == NULL)
+		return -1;
+	nemodb_use_collection(db, dbname, configpath);
+
+	jobj = nemodb_load_json_object(db);
+	if (jobj != NULL) {
+	}
+
+	nemodb_destroy(db);
+
 	return 0;
 }
 
@@ -436,9 +453,9 @@ int main(int argc, char *argv[])
 	struct minishell *mini;
 	struct nemoshell *shell;
 	struct nemocompz *compz;
-	char *dbname;
-	char *configpath;
-	char *themepath;
+	char *dbname = NULL;
+	char *configpath = NULL;
+	char *themepath = NULL;
 	char *rendernode = env_get_string("NEMOSHELL_RENDER_NODE", NULL);
 	char *evdevopts = env_get_string("NEMOSHELL_EVDEV_OPTS", NULL);
 	char *seat = env_get_string("NEMOSHELL_SEAT_NAME", "seat0");
@@ -484,10 +501,8 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	if (configpath == NULL)
-		asprintf(&configpath, "%s/.config/nemoshell.json", env_get_string("HOME", ""));
-	if (themepath == NULL)
-		asprintf(&configpath, "%s/.config/nemotheme.json", env_get_string("HOME", ""));
+	if (configpath == NULL || themepath == NULL)
+		return 0;
 
 	mini = (struct minishell *)malloc(sizeof(struct minishell));
 	if (mini == NULL)
