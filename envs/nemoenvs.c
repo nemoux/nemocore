@@ -47,6 +47,11 @@ struct nemoenvs *nemoenvs_create(struct nemoshell *shell)
 
 	envs->legacy.pick_taps = 3;
 
+	envs->terminal.path = env_get_string("NEMOSHELL_TERMINAL_PATH", "/usr/bin/weston-terminal");
+	envs->terminal.args = env_get_string("NEMOSHELL_TERMINAL_ARGS", NULL);
+	envs->xserver.path = env_get_string("NEMOSHELL_XSERVER_PATH", "/usr/bin/Xwayland");
+	envs->xserver.node = env_get_string("NEMOSHELL_XSERVER_NODE", NULL);
+
 	return envs;
 }
 
@@ -64,48 +69,4 @@ void nemoenvs_destroy(struct nemoenvs *envs)
 	nemolist_remove(&envs->client_list);
 
 	free(envs);
-}
-
-void nemoenvs_set_terminal_path(struct nemoenvs *envs, const char *path)
-{
-	if (envs->terminal.path != NULL)
-		free(envs->terminal.path);
-
-	if (path != NULL)
-		envs->terminal.path = strdup(path);
-	else
-		envs->terminal.path = NULL;
-}
-
-void nemoenvs_set_terminal_args(struct nemoenvs *envs, const char *args)
-{
-	if (envs->terminal.args != NULL)
-		free(envs->terminal.args);
-
-	if (args != NULL)
-		envs->terminal.args = strdup(args);
-	else
-		envs->terminal.args = NULL;
-}
-
-void nemoenvs_set_xserver_path(struct nemoenvs *envs, const char *path)
-{
-	if (envs->xserver.path != NULL)
-		free(envs->xserver.path);
-
-	if (path != NULL)
-		envs->xserver.path = strdup(path);
-	else
-		envs->xserver.path = NULL;
-}
-
-void nemoenvs_set_xserver_node(struct nemoenvs *envs, const char *node)
-{
-	if (envs->xserver.node != NULL)
-		free(envs->xserver.node);
-
-	if (node != NULL)
-		envs->xserver.node = strdup(node);
-	else
-		envs->xserver.node = NULL;
 }
