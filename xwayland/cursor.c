@@ -135,18 +135,12 @@ static xcb_cursor_t xcb_cursor_library_load_cursor(struct nemoxmanager *xmanager
 {
 	xcb_cursor_t cursor;
 	XcursorImages *images;
-	char *v = NULL;
-	int size = 0;
+	int size;
 
 	if (!file)
 		return 0;
 
-	v = getenv("XCURSOR_SIZE");
-	if (v)
-		size = atoi(v);
-
-	if (!size)
-		size = 32;
+	size = env_get_integer("XCURSOR_SIZE", 32);
 
 	images = XcursorLibraryLoadImages(file, NULL, size);
 	if (!images)

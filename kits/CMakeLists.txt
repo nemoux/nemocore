@@ -27,7 +27,6 @@ set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 add_library(nemokits SHARED
 	nemoxml.c
 	nemojson.c
-	nemodb.c
 	nemobus.c
 	)
 
@@ -44,7 +43,6 @@ INSTALL(TARGETS nemokits DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
 set(HEADER_FILES
 	nemoxml.h
 	nemojson.h
-	nemodb.h
 	nemobus.h
 	)
 

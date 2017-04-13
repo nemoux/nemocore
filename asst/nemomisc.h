@@ -101,7 +101,7 @@ extern int os_set_nonblocking_mode(int fd);
 
 extern int os_sched_set_affinity(pid_t pid, uint32_t cpuid);
 
-extern const char *env_get_string(const char *name, const char *value);
+extern char *env_get_string(const char *name, char *value);
 extern double env_get_double(const char *name, double value);
 extern int env_get_integer(const char *name, int value);
 extern void env_set_string(const char *name, const char *value);

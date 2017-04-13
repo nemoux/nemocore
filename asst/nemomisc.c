@@ -460,9 +460,9 @@ int os_sched_set_affinity(pid_t pid, uint32_t cpuid)
 	return sched_setaffinity(pid, sizeof(cpu_set_t), &cset);
 }
 
-const char *env_get_string(const char *name, const char *value)
+char *env_get_string(const char *name, char *value)
 {
-	const char *env = getenv(name);
+	char *env = getenv(name);
 
 	return env != NULL ? env : value;
 }

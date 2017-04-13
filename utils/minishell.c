@@ -37,7 +37,6 @@
 #include <nemobus.h>
 #include <nemojson.h>
 #include <nemoitem.h>
-#include <nemodb.h>
 #include <nemotoken.h>
 #include <nemomisc.h>
 
@@ -47,8 +46,6 @@ struct minishell {
 	struct nemoenvs *envs;
 	struct nemobus *bus;
 	struct wl_event_source *busfd;
-
-	struct nemodb *db;
 
 	struct {
 		char *path;
@@ -315,43 +312,13 @@ static int minishell_dispatch_config(struct minishell *mini, struct itemone *one
 	return 0;
 }
 
-static int minishell_dispatch_db(struct minishell *mini, const char *configpath)
+static int minishell_dispatch_db(struct minishell *mini, const char *dburi, const char *dbname, const char *configpath, const char *themepath)
 {
-	struct itemone *one;
-	struct dbiter *iter;
-
-	mini->db = nemodb_create("mongodb://127.0.0.1");
-	nemodb_use_collection(mini->db, "nemodb", configpath);
-
-	iter = nemodb_query_iter_all(mini->db);
-
-	while ((one = nemodb_iter_next(iter)) != NULL) {
-		nemoenvs_set_item_config(mini->envs, one);
-
-		minishell_dispatch_config(mini, one);
-
-		nemoitem_one_destroy(one);
-	}
-
 	return 0;
 }
 
-static int minishell_dispatch_text(struct minishell *mini, const char *configpath)
+static int minishell_dispatch_text(struct minishell *mini, const char *configpath, const char *themepath)
 {
-	struct nemoitem *item;
-	struct itemone *one;
-
-	item = nemoitem_create();
-	nemoitem_load_textfile(item, configpath, ' ');
-
-	nemoitem_for_each(one, item) {
-		nemoenvs_set_item_config(mini->envs, one);
-
-		minishell_dispatch_config(mini, one);
-	}
-
-	nemoitem_destroy(item);
-
 	return 0;
 }
 
@@ -456,12 +423,12 @@ static void minishell_enter_idle(void *data)
 int main(int argc, char *argv[])
 {
 	struct option options[] = {
-		{ "seat",								required_argument,	NULL,		's' },
 		{ "rendernode",					required_argument,	NULL,		'r' },
 		{ "evdevopts",					required_argument,	NULL,		'e' },
 		{ "xdisplay",						required_argument,	NULL,		'x' },
-		{ "tty",								required_argument,	NULL,		't' },
+		{ "db",									required_argument,	NULL,		'd' },
 		{ "config",							required_argument,	NULL,		'c' },
+		{ "theme",							required_argument,	NULL,		't' },
 		{ "help",								no_argument,				NULL,		'h' },
 		{ 0 }
 	};
@@ -469,24 +436,21 @@ int main(int argc, char *argv[])
 	struct minishell *mini;
 	struct nemoshell *shell;
 	struct nemocompz *compz;
-	char *configpath = getenv("NEMOSHELL_CONFIG_PATH");
-	char *rendernode = getenv("NEMOSHELL_RENDER_NODE");
-	char *evdevopts = getenv("NEMOSHELL_EVDEV_OPTS");
-	char *xdisplay = getenv("NEMOSHELL_XDISPLAY_NUMBER");
-	char *seat = getenv("NEMOSHELL_SEAT_NAME");
-	char *framelog = getenv("NEMOSHELL_FRAMELOG");
-	int tty = 0;
+	char *dbname;
+	char *configpath;
+	char *themepath;
+	char *rendernode = env_get_string("NEMOSHELL_RENDER_NODE", NULL);
+	char *evdevopts = env_get_string("NEMOSHELL_EVDEV_OPTS", NULL);
+	char *seat = env_get_string("NEMOSHELL_SEAT_NAME", "seat0");
+	int xdisplay = env_get_integer("NEMOSHELL_XDISPLAY_NUMBER", 0);
+	int tty = env_get_integer("NEMOSHELL_TTY", 0);
 	int opt;
 
-	while (opt = getopt_long(argc, argv, "s:r:e:x:t:c:h", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "r:e:x:d:c:t:h", options, NULL)) {
 		if (opt == -1)
 			break;
 
 		switch (opt) {
-			case 's':
-				seat = strdup(optarg);
-				break;
-
 			case 'r':
 				rendernode = strdup(optarg);
 				break;
@@ -496,19 +460,23 @@ int main(int argc, char *argv[])
 				break;
 
 			case 'x':
-				xdisplay = strdup(optarg);
+				xdisplay = strtoul(optarg, NULL, 10);
 				break;
 
-			case 't':
-				tty = strtoul(optarg, NULL, 10);
+			case 'd':
+				dbname = strdup(optarg);
 				break;
 
 			case 'c':
 				configpath = strdup(optarg);
 				break;
 
+			case 't':
+				themepath = strdup(optarg);
+				break;
+
 			case 'h':
-				fprintf(stderr, "usage: minishell --seat [name] --tty [number] --config [filepath]\n");
+				fprintf(stderr, "usage: minishell --db [dbname] --config [configname] --theme [themename]\n");
 				return 0;
 
 			default:
@@ -517,9 +485,9 @@ int main(int argc, char *argv[])
 	}
 
 	if (configpath == NULL)
-		asprintf(&configpath, "%s/.config/nemoshell.item", getenv("HOME"));
-	if (seat == NULL)
-		asprintf(&seat, "seat%d", 0);
+		asprintf(&configpath, "%s/.config/nemoshell.json", env_get_string("HOME", ""));
+	if (themepath == NULL)
+		asprintf(&configpath, "%s/.config/nemotheme.json", env_get_string("HOME", ""));
 
 	mini = (struct minishell *)malloc(sizeof(struct minishell));
 	if (mini == NULL)
@@ -553,10 +521,10 @@ int main(int argc, char *argv[])
 
 	nemocompz_make_current(compz);
 
-	if (configpath[0] == '@')
-		minishell_dispatch_db(mini, configpath + 1);
+	if (dbname != NULL)
+		minishell_dispatch_db(mini, "mongodb://127.0.0.1", dbname, configpath, themepath);
 	else
-		minishell_dispatch_text(mini, configpath);
+		minishell_dispatch_text(mini, configpath, themepath);
 
 	mini->bus = nemobus_create();
 	nemobus_connect(mini->bus, NULL);
@@ -569,19 +537,13 @@ int main(int argc, char *argv[])
 			minishell_dispatch_bus,
 			mini);
 
-	nemoenvs_launch_xserver(mini->envs, xdisplay == NULL ? 0 : strtoul(xdisplay, NULL, 10), rendernode);
-	nemoenvs_use_xserver(mini->envs, xdisplay == NULL ? 0 : strtoul(xdisplay, NULL, 10));
+	nemoenvs_launch_xserver(mini->envs, xdisplay, rendernode);
+	nemoenvs_use_xserver(mini->envs, xdisplay);
 
 	nemoenvs_execute_backgrounds(mini->envs);
 	nemoenvs_execute_daemons(mini->envs);
 
-	if (framelog != NULL && strcasecmp(framelog, "ON") == 0)
-		nemoshell_set_frame_timeout(shell, 1000);
-
 	nemocompz_run(compz);
-
-	if (mini->db != NULL)
-		nemodb_destroy(mini->db);
 
 	nemoenvs_destroy(mini->envs);
 
