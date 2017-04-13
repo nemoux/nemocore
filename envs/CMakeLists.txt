@@ -40,7 +40,7 @@ add_library(nemoenvs SHARED
 	nemoxapp.c
 	nemomirror.c
 	bindings.c
-	configs.c
+	configs-item.c
 	showhelper.c
 	)
 

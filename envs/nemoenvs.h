@@ -55,11 +55,8 @@ extern void nemoenvs_set_terminal_args(struct nemoenvs *envs, const char *args);
 extern void nemoenvs_set_xserver_path(struct nemoenvs *envs, const char *path);
 extern void nemoenvs_set_xserver_node(struct nemoenvs *envs, const char *node);
 
-extern int nemoenvs_set_service(struct nemoenvs *envs, struct itemone *one);
-extern void nemoenvs_put_service(struct nemoenvs *envs, const char *path);
-
-extern int nemoenvs_set_config(struct nemoenvs *envs, struct itemone *one);
-extern void nemoenvs_put_config(struct nemoenvs *envs, const char *path);
+extern int nemoenvs_set_item_config(struct nemoenvs *envs, struct itemone *one);
+extern void nemoenvs_put_item_config(struct nemoenvs *envs, const char *path);
 
 extern void nemoenvs_handle_terminal_key(struct nemocompz *compz, struct nemokeyboard *keyboard, uint32_t time, uint32_t key, enum wl_keyboard_key_state state, void *data);
 extern void nemoenvs_handle_touch_key(struct nemocompz *compz, struct nemokeyboard *keyboard, uint32_t time, uint32_t key, enum wl_keyboard_key_state state, void *data);

@@ -326,7 +326,7 @@ static int minishell_dispatch_db(struct minishell *mini, const char *configpath)
 	iter = nemodb_query_iter_all(mini->db);
 
 	while ((one = nemodb_iter_next(iter)) != NULL) {
-		nemoenvs_set_config(mini->envs, one);
+		nemoenvs_set_item_config(mini->envs, one);
 
 		minishell_dispatch_config(mini, one);
 
@@ -345,7 +345,7 @@ static int minishell_dispatch_text(struct minishell *mini, const char *configpat
 	nemoitem_load_textfile(item, configpath, ' ');
 
 	nemoitem_for_each(one, item) {
-		nemoenvs_set_config(mini->envs, one);
+		nemoenvs_set_item_config(mini->envs, one);
 
 		minishell_dispatch_config(mini, one);
 	}

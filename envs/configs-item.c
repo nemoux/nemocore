@@ -498,7 +498,7 @@ static void nemoenvs_handle_set_nemoshell_stage(struct nemoshell *shell, struct 
 	}
 }
 
-int nemoenvs_set_config(struct nemoenvs *envs, struct itemone *one)
+int nemoenvs_set_item_config(struct nemoenvs *envs, struct itemone *one)
 {
 	struct nemoshell *shell = envs->shell;
 	struct nemocompz *compz = shell->compz;
@@ -589,18 +589,16 @@ int nemoenvs_set_config(struct nemoenvs *envs, struct itemone *one)
 	} else if (namespace_has_prefix(path, "/nemoshell/xserver") != 0) {
 		nemoenvs_set_xserver_path(envs, nemoitem_one_get_attr(one, "path"));
 		nemoenvs_set_xserver_node(envs, nemoitem_one_get_attr(one, "node"));
-	} else if (namespace_has_prefix(path, "/nemoshell/background") != 0) {
-		nemoenvs_set_service(envs, one);
-	} else if (namespace_has_prefix(path, "/nemoshell/daemon") != 0) {
-		nemoenvs_set_service(envs, one);
-	} else if (namespace_has_prefix(path, "/nemoshell/screensaver") != 0) {
-		nemoenvs_set_service(envs, one);
+	} else if (namespace_has_prefix(path, "/nemoshell/background") != 0 ||
+			namespace_has_prefix(path, "/nemoshell/daemon") != 0 ||
+			namespace_has_prefix(path, "/nemoshell/screensaver") != 0) {
+		nemoitem_attach_one(envs->apps, nemoitem_one_clone(one));
 	}
 
 	return 0;
 }
 
-void nemoenvs_put_config(struct nemoenvs *envs, const char *path)
+void nemoenvs_put_item_config(struct nemoenvs *envs, const char *path)
 {
 	struct nemoshell *shell = envs->shell;
 	struct nemocompz *compz = shell->compz;

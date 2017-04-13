@@ -109,25 +109,3 @@ void nemoenvs_set_xserver_node(struct nemoenvs *envs, const char *node)
 	else
 		envs->xserver.node = NULL;
 }
-
-int nemoenvs_set_service(struct nemoenvs *envs, struct itemone *one)
-{
-	struct itemone *tone;
-
-	tone = nemoitem_search_one(envs->apps, nemoitem_one_get_path(one));
-	if (tone != NULL)
-		return -1;
-
-	nemoitem_attach_one(envs->apps, nemoitem_one_clone(one));
-
-	return 0;
-}
-
-void nemoenvs_put_service(struct nemoenvs *envs, const char *path)
-{
-	struct itemone *one;
-
-	one = nemoitem_search_one(envs->apps, path);
-	if (one != NULL)
-		nemoitem_one_destroy(one);
-}
