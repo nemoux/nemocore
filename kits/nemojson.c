@@ -210,7 +210,19 @@ int nemojson_update(struct nemojson *json)
 	return count;
 }
 
-int nemojson_query_object(struct nemojson *json, struct json_object *jobj)
+int nemojson_insert_object(struct nemojson *json, const char *jkey, struct json_object *jobj)
+{
+	if (jkey != NULL)
+		json->jkeys[json->count] = strdup(jkey);
+
+	json->jobjs[json->count] = json_object_get(jobj);
+
+	json->count++;
+
+	return 0;
+}
+
+int nemojson_iterate_object(struct nemojson *json, struct json_object *jobj)
 {
 	if (json_object_is_type(jobj, json_type_object)) {
 		struct json_object_iterator citer = json_object_iter_begin(jobj);

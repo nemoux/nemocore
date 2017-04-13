@@ -138,7 +138,7 @@ int nemoyoyo_actor_execute(struct yoyoactor *actor, int index, float x, float y,
 			int i;
 
 			json = nemojson_create();
-			nemojson_query_object(json, tobj);
+			nemojson_iterate_object(json, tobj);
 
 			for (i = 0; i < nemojson_get_count(json); i++) {
 				const char *ikey = nemojson_get_key(json, i);
@@ -171,7 +171,7 @@ int nemoyoyo_actor_execute(struct yoyoactor *actor, int index, float x, float y,
 			int i;
 
 			json = nemojson_create();
-			nemojson_query_object(json, tobj);
+			nemojson_iterate_object(json, tobj);
 
 			for (i = 0; i < nemojson_get_count(json); i++) {
 				const char *ikey = nemojson_get_key(json, i);
@@ -221,7 +221,7 @@ int nemoyoyo_actor_execute(struct yoyoactor *actor, int index, float x, float y,
 			int i;
 
 			json = nemojson_create();
-			nemojson_query_object(json, tobj);
+			nemojson_iterate_object(json, tobj);
 
 			for (i = 0; i < nemojson_get_count(json); i++) {
 				const char *ikey = nemojson_get_key(json, i);

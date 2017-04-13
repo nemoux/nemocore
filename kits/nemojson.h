@@ -36,7 +36,8 @@ extern int nemojson_append_format(struct nemojson *json, const char *fmt, ...);
 
 extern int nemojson_update(struct nemojson *json);
 
-extern int nemojson_query_object(struct nemojson *json, struct json_object *jobj);
+extern int nemojson_insert_object(struct nemojson *json, const char *jkey, struct json_object *jobj);
+extern int nemojson_iterate_object(struct nemojson *json, struct json_object *jobj);
 
 extern struct json_object *nemojson_search_object(struct nemojson *json, int index, int depth, ...);
 extern int nemojson_search_integer(struct nemojson *json, int index, int value, int depth, ...);
