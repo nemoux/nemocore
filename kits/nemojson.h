@@ -51,6 +51,8 @@ extern const char *nemojson_get_string(struct nemojson *json, int index);
 extern double nemojson_get_double(struct nemojson *json, int index);
 extern int nemojson_get_integer(struct nemojson *json, int index);
 
+extern struct json_object *nemojson_object_create_file(const char *filepath);
+
 extern struct json_object *nemojson_object_get_object(struct json_object *jobj, const char *name, struct json_object *value);
 extern const char *nemojson_object_get_string(struct json_object *jobj, const char *name, const char *value);
 extern double nemojson_object_get_double(struct json_object *jobj, const char *name, double value);

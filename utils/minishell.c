@@ -334,8 +334,14 @@ static int minishell_dispatch_db(struct minishell *mini, const char *dburi, cons
 	return 0;
 }
 
-static int minishell_dispatch_text(struct minishell *mini, const char *configpath, const char *themepath)
+static int minishell_dispatch_file(struct minishell *mini, const char *configpath, const char *themepath)
 {
+	struct json_object *jobj;
+
+	jobj = nemojson_object_create_file(configpath);
+	if (jobj != NULL) {
+	}
+
 	return 0;
 }
 
@@ -539,7 +545,7 @@ int main(int argc, char *argv[])
 	if (dbname != NULL)
 		minishell_dispatch_db(mini, "mongodb://127.0.0.1", dbname, configpath, themepath);
 	else
-		minishell_dispatch_text(mini, configpath, themepath);
+		minishell_dispatch_file(mini, configpath, themepath);
 
 	mini->bus = nemobus_create();
 	nemobus_connect(mini->bus, NULL);

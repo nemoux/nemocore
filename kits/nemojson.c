@@ -409,6 +409,23 @@ int nemojson_get_integer(struct nemojson *json, int index)
 	return json_object_get_int(json->jobjs[index]);
 }
 
+struct json_object *nemojson_object_create_file(const char *filepath)
+{
+	struct json_object *jobj;
+	char *buffer;
+	int length;
+
+	length = os_load_path(filepath, &buffer);
+	if (length <= 0)
+		return NULL;
+
+	jobj = json_tokener_parse(buffer);
+
+	free(buffer);
+
+	return jobj;
+}
+
 struct json_object *nemojson_object_get_object(struct json_object *jobj, const char *name, struct json_object *value)
 {
 	struct json_object *tobj;
