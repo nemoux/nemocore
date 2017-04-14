@@ -452,6 +452,7 @@ int main(int argc, char *argv[])
 		{ "db",									required_argument,	NULL,		'd' },
 		{ "config",							required_argument,	NULL,		'c' },
 		{ "theme",							required_argument,	NULL,		't' },
+		{ "debug",							no_argument,				NULL,		'g' },
 		{ "help",								no_argument,				NULL,		'h' },
 		{ 0 }
 	};
@@ -469,7 +470,7 @@ int main(int argc, char *argv[])
 	int tty = env_get_integer("NEMOSHELL_TTY", 0);
 	int opt;
 
-	while (opt = getopt_long(argc, argv, "r:e:x:d:c:t:h", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "r:e:x:d:c:t:gh", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -496,6 +497,10 @@ int main(int argc, char *argv[])
 
 			case 't':
 				themepath = strdup(optarg);
+				break;
+
+			case 'g':
+				seat = NULL;
 				break;
 
 			case 'h':
