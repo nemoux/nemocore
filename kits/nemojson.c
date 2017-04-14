@@ -409,6 +409,11 @@ int nemojson_get_integer(struct nemojson *json, int index)
 	return json_object_get_int(json->jobjs[index]);
 }
 
+int nemojson_get_boolean(struct nemojson *json, int index)
+{
+	return json_object_get_boolean(json->jobjs[index]);
+}
+
 struct json_object *nemojson_object_create_file(const char *filepath)
 {
 	struct json_object *jobj;
@@ -466,6 +471,16 @@ int nemojson_object_get_integer(struct json_object *jobj, const char *name, int 
 	return json_object_get_int(tobj);
 }
 
+int nemojson_object_get_boolean(struct json_object *jobj, const char *name, int value)
+{
+	struct json_object *tobj;
+
+	if (json_object_object_get_ex(jobj, name, &tobj) == 0)
+		return value;
+
+	return json_object_get_boolean(tobj) == TRUE;
+}
+
 int nemojson_array_get_length(struct json_object *jobj)
 {
 	return json_object_array_length(jobj);
@@ -489,6 +504,11 @@ double nemojson_array_get_double(struct json_object *jobj, int index)
 int nemojson_array_get_integer(struct json_object *jobj, int index)
 {
 	return json_object_get_int(json_object_array_get_idx(jobj, index));
+}
+
+int nemojson_array_get_boolean(struct json_object *jobj, int index)
+{
+	return json_object_get_boolean(json_object_array_get_idx(jobj, index)) == TRUE;
 }
 
 static int nemojson_object_load_item_inherit(struct json_object *jobj, struct nemoitem *item, struct itemone *one)

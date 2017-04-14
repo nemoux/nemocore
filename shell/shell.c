@@ -1141,6 +1141,9 @@ struct shellscreen *nemoshell_get_fullscreen(struct nemoshell *shell, const char
 {
 	struct shellscreen *screen;
 
+	if (id == NULL)
+		return NULL;
+
 	wl_list_for_each(screen, &shell->fullscreen_list, link) {
 		if (strcmp(screen->id, id) == 0)
 			return screen;
@@ -1198,6 +1201,9 @@ struct shellscreen *nemoshell_get_fullscreen_on(struct nemoshell *shell, int32_t
 struct shellstage *nemoshell_get_stage(struct nemoshell *shell, const char *id)
 {
 	struct shellstage *stage;
+
+	if (id == NULL)
+		return NULL;
 
 	wl_list_for_each(stage, &shell->stage_list, link) {
 		if (strcmp(stage->id, id) == 0)

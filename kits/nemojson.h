@@ -50,6 +50,7 @@ extern struct json_object *nemojson_get_object(struct nemojson *json, int index)
 extern const char *nemojson_get_string(struct nemojson *json, int index);
 extern double nemojson_get_double(struct nemojson *json, int index);
 extern int nemojson_get_integer(struct nemojson *json, int index);
+extern int nemojson_get_boolean(struct nemojson *json, int index);
 
 extern struct json_object *nemojson_object_create_file(const char *filepath);
 
@@ -57,12 +58,14 @@ extern struct json_object *nemojson_object_get_object(struct json_object *jobj, 
 extern const char *nemojson_object_get_string(struct json_object *jobj, const char *name, const char *value);
 extern double nemojson_object_get_double(struct json_object *jobj, const char *name, double value);
 extern int nemojson_object_get_integer(struct json_object *jobj, const char *name, int value);
+extern int nemojson_object_get_boolean(struct json_object *jobj, const char *name, int value);
 
 extern int nemojson_array_get_length(struct json_object *jobj);
 extern struct json_object *nemojson_array_get_object(struct json_object *jobj, int index);
 extern const char *nemojson_array_get_string(struct json_object *jobj, int index);
 extern double nemojson_array_get_double(struct json_object *jobj, int index);
 extern int nemojson_array_get_integer(struct json_object *jobj, int index);
+extern int nemojson_array_get_boolean(struct json_object *jobj, int index);
 
 extern int nemojson_object_load_item(struct json_object *jobj, struct nemoitem *item, const char *prefix);
 extern int nemojson_string_load_item(const char *contents, struct nemoitem *item, const char *prefix);
