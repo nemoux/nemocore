@@ -11,6 +11,8 @@ NEMO_BEGIN_EXTERN_C
 #include <nemoxapp.h>
 #include <nemoitem.h>
 
+struct json_object;
+
 struct nemoenvs;
 struct nemoshell;
 
@@ -50,7 +52,8 @@ extern struct nemoenvs *nemoenvs_create(struct nemoshell *shell);
 extern void nemoenvs_destroy(struct nemoenvs *envs);
 
 extern int nemoenvs_set_item_config(struct nemoenvs *envs, struct itemone *one);
-extern void nemoenvs_put_item_config(struct nemoenvs *envs, const char *path);
+extern int nemoenvs_set_json_config(struct nemoenvs *envs, struct json_object *jobj);
+extern int nemoenvs_set_json_theme(struct nemoenvs *envs, struct json_object *jobj);
 
 extern void nemoenvs_handle_terminal_key(struct nemocompz *compz, struct nemokeyboard *keyboard, uint32_t time, uint32_t key, enum wl_keyboard_key_state state, void *data);
 extern void nemoenvs_handle_touch_key(struct nemocompz *compz, struct nemokeyboard *keyboard, uint32_t time, uint32_t key, enum wl_keyboard_key_state state, void *data);

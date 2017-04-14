@@ -591,15 +591,3 @@ int nemoenvs_set_item_config(struct nemoenvs *envs, struct itemone *one)
 
 	return 0;
 }
-
-void nemoenvs_put_item_config(struct nemoenvs *envs, const char *path)
-{
-	struct nemoshell *shell = envs->shell;
-	struct nemocompz *compz = shell->compz;
-
-	if (namespace_has_prefix(path, "/nemoshell/fullscreen") != 0) {
-		nemoshell_put_fullscreen(shell, path);
-	} else if (namespace_has_prefix(path, "/nemoshell/stage") != 0) {
-		nemoshell_put_stage(shell, path);
-	}
-}

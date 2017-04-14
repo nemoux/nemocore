@@ -16,6 +16,10 @@ PKG_CHECK_MODULES(SKIA REQUIRED skia)
 INCLUDE_DIRECTORIES(${SKIA_INCLUDE_DIRS})
 LINK_DIRECTORIES(${SKIA_LIBRARY_DIRS})
 
+PKG_CHECK_MODULES(JSON REQUIRED json-c)
+INCLUDE_DIRECTORIES(${JSON_INCLUDE_DIRS})
+LINK_DIRECTORIES(${JSON_LIBRARY_DIRS})
+
 include_directories(
 	${CMAKE_SOURCE_DIR}/asst
 	${CMAKE_SOURCE_DIR}/kits
@@ -41,6 +45,8 @@ add_library(nemoenvs SHARED
 	nemomirror.c
 	bindings.c
 	configs-item.c
+	configs-json.c
+	themes-json.c
 	showhelper.c
 	)
 

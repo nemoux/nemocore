@@ -54,16 +54,6 @@ struct minishell {
 		char *path;
 		char *args;
 	} keypad;
-
-	struct {
-		char *path;
-		char *args;
-	} content;
-
-	struct {
-		char *path;
-		char *args;
-	} chrome;
 };
 
 static void minishell_update_state(struct minishell *mini, struct itemone *one, struct clientstate *state)
@@ -182,68 +172,6 @@ static int minishell_dispatch_app(struct minishell *mini, struct itemone *one)
 	return 0;
 }
 
-static int minishell_dispatch_content(struct minishell *mini, struct itemone *one)
-{
-	struct nemotoken *args;
-	struct clientstate *state;
-	const char *_path = nemoitem_one_get_attr(one, "path");
-	const char *contentpath = mini->content.path;
-	const char *contentargs = mini->content.args;
-	pid_t pid;
-
-	args = nemotoken_create(contentpath, strlen(contentpath));
-	if (contentargs != NULL) {
-		nemotoken_append_one(args, ';');
-		nemotoken_append_format(args, contentargs, _path);
-	}
-	nemotoken_divide(args, ';');
-	nemotoken_update(args);
-
-	pid = os_execute_path(contentpath, nemotoken_get_tokens(args), NULL);
-	if (pid > 0) {
-		nemoenvs_attach_client(mini->envs, pid, contentpath);
-
-		state = nemoshell_create_client_state(mini->shell, pid);
-		if (state != NULL)
-			minishell_update_state(mini, one, state);
-	}
-
-	nemotoken_destroy(args);
-
-	return 0;
-}
-
-static int minishell_dispatch_bookmark(struct minishell *mini, struct itemone *one)
-{
-	struct nemotoken *args;
-	struct clientstate *state;
-	const char *_path = nemoitem_one_get_attr(one, "path");
-	const char *chromepath = mini->chrome.path;
-	const char *chromeargs = mini->chrome.args;
-	pid_t pid;
-
-	args = nemotoken_create(chromepath, strlen(chromepath));
-	if (chromeargs != NULL) {
-		nemotoken_append_one(args, ';');
-		nemotoken_append_format(args, chromeargs, _path);
-	}
-	nemotoken_divide(args, ';');
-	nemotoken_update(args);
-
-	pid = os_execute_path(chromepath, nemotoken_get_tokens(args), NULL);
-	if (pid > 0) {
-		nemoenvs_attach_client(mini->envs, pid, chromepath);
-
-		state = nemoshell_create_client_state(mini->shell, pid);
-		if (state != NULL)
-			minishell_update_state(mini, one, state);
-	}
-
-	nemotoken_destroy(args);
-
-	return 0;
-}
-
 static int minishell_dispatch_close(struct minishell *mini, struct itemone *one)
 {
 	struct nemoshell *shell = mini->shell;
@@ -278,10 +206,6 @@ static int minishell_dispatch_command(struct minishell *mini, struct itemone *on
 		minishell_dispatch_xapp(mini, one);
 	else if (strcmp(type, "app") == 0)
 		minishell_dispatch_app(mini, one);
-	else if (strcmp(type, "content") == 0)
-		minishell_dispatch_content(mini, one);
-	else if (strcmp(type, "bookmark") == 0)
-		minishell_dispatch_bookmark(mini, one);
 	else if (strcmp(type, "close") == 0)
 		minishell_dispatch_close(mini, one);
 	else if (strcmp(type, "close_all") == 0)
@@ -298,18 +222,6 @@ static int minishell_dispatch_config(struct minishell *mini, struct itemone *one
 
 		mini->keypad.path = path != NULL ? strdup(path) : NULL;
 		mini->keypad.args = args != NULL ? strdup(args) : NULL;
-	} else if (nemoitem_one_has_path_prefix(one, "/nemoshell/chrome") != 0) {
-		const char *path = nemoitem_one_get_attr(one, "path");
-		const char *args = nemoitem_one_get_attr(one, "args");
-
-		mini->chrome.path = path != NULL ? strdup(path) : NULL;
-		mini->chrome.args = args != NULL ? strdup(args) : NULL;
-	} else if (nemoitem_one_has_path_prefix(one, "/nemoshell/content") != 0) {
-		const char *path = nemoitem_one_get_attr(one, "path");
-		const char *args = nemoitem_one_get_attr(one, "args");
-
-		mini->content.path = path != NULL ? strdup(path) : NULL;
-		mini->content.args = args != NULL ? strdup(args) : NULL;
 	}
 
 	return 0;
@@ -323,10 +235,23 @@ static int minishell_dispatch_db(struct minishell *mini, const char *dburi, cons
 	db = nemodb_create(dburi);
 	if (db == NULL)
 		return -1;
+
 	nemodb_use_collection(db, dbname, configpath);
 
 	jobj = nemodb_load_json_object(db);
 	if (jobj != NULL) {
+		nemoenvs_set_json_config(mini->envs, jobj);
+
+		json_object_put(jobj);
+	}
+
+	nemodb_use_collection(db, dbname, themepath);
+
+	jobj = nemodb_load_json_object(db);
+	if (jobj != NULL) {
+		nemoenvs_set_json_theme(mini->envs, jobj);
+
+		json_object_put(jobj);
 	}
 
 	nemodb_destroy(db);
@@ -340,6 +265,16 @@ static int minishell_dispatch_file(struct minishell *mini, const char *configpat
 
 	jobj = nemojson_object_create_file(configpath);
 	if (jobj != NULL) {
+		nemoenvs_set_json_config(mini->envs, jobj);
+
+		json_object_put(jobj);
+	}
+
+	jobj = nemojson_object_create_file(themepath);
+	if (jobj != NULL) {
+		nemoenvs_set_json_theme(mini->envs, jobj);
+
+		json_object_put(jobj);
 	}
 
 	return 0;
