@@ -377,7 +377,7 @@ struct json_object *nemojson_search_attribute(struct json_object *jobj, const ch
 
 			json_object_iter_next(&citer);
 		}
-	} else if (json_object_is_type(jobj, json_type_object) != 0) {
+	} else if (json_object_is_type(jobj, json_type_array) != 0) {
 		struct json_object *tobj;
 		int i;
 
