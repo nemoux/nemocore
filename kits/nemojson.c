@@ -238,6 +238,8 @@ int nemojson_iterate_object(struct nemojson *json, struct json_object *jobj)
 			json->count++;
 
 			count++;
+
+			json_object_iter_next(&citer);
 		}
 
 		return count;
