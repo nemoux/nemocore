@@ -38,6 +38,13 @@ extern void nemotoken_toupper(struct nemotoken *token);
 extern int nemotoken_get_index(struct nemotoken *token, const char *name);
 extern int nemotoken_has_token(struct nemotoken *token, const char *name);
 
+extern char *nemotoken_get_contents(struct nemotoken *token, char div);
+
+static inline int nemotoken_get_length(struct nemotoken *token)
+{
+	return token->length;
+}
+
 static inline int nemotoken_get_token_count(struct nemotoken *token)
 {
 	return token->ntokens;

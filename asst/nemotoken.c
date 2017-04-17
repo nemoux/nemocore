@@ -211,3 +211,25 @@ int nemotoken_has_token(struct nemotoken *token, const char *name)
 
 	return 0;
 }
+
+char *nemotoken_get_contents(struct nemotoken *token, char div)
+{
+	char *contents;
+	int i;
+
+	if (token->ntokens <= 0)
+		return NULL;
+
+	contents = (char *)malloc(token->length + 1);
+	if (contents == NULL)
+		return NULL;
+
+	strcpy(contents, token->tokens[0]);
+
+	for (i = 1; i < token->ntokens; i++) {
+		strncat(contents, &div, 1);
+		strcat(contents, token->tokens[i]);
+	}
+
+	return contents;
+}
