@@ -115,10 +115,10 @@ static int minishell_dispatch_xapp(struct minishell *mini, struct itemone *one)
 static int minishell_dispatch_app(struct minishell *mini, struct itemone *one)
 {
 	struct nemoshell *shell = mini->shell;
-	struct clientstate *state;
 	struct nemotoken *args;
 	const char *_path = nemoitem_one_get_attr(one, "path");
 	const char *_args = nemoitem_one_get_attr(one, "args");
+	const char *_states = nemoitem_one_get_attr(one, "states");
 	pid_t pid;
 
 	args = nemotoken_create(_path, strlen(_path));
@@ -129,10 +129,21 @@ static int minishell_dispatch_app(struct minishell *mini, struct itemone *one)
 
 	pid = os_execute_path(_path, nemotoken_get_tokens(args), NULL);
 	if (pid > 0) {
-		nemoenvs_attach_client(mini->envs, pid, _path);
+		struct nemotoken *states;
+		struct clientstate *state;
+
+		states = nemotoken_create(_states, strlen(_states));
+		nemotoken_divide(states, ';');
+		nemotoken_update(states);
 
 		state = nemoshell_create_client_state(shell, pid);
-		clientstate_copy_attrs(state, one);
+		clientstate_set_attrs(state,
+				nemotoken_get_tokens(states),
+				nemotoken_get_count(states) / 2);
+
+		nemotoken_destroy(states);
+
+		nemoenvs_attach_client(mini->envs, pid, _path);
 	}
 
 	nemotoken_destroy(args);
