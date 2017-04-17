@@ -13,6 +13,7 @@
 #include <yoyoactor.h>
 #include <nemojson.h>
 #include <nemofs.h>
+#include <nemodb.h>
 #include <nemomisc.h>
 
 static int nemoyoyo_dispatch_tap_event(struct nemoaction *action, struct actiontap *tap, uint32_t event)
@@ -163,6 +164,7 @@ int main(int argc, char *argv[])
 		{ "height",						required_argument,		NULL,		'h' },
 		{ "fullscreen",				required_argument,		NULL,		'f' },
 		{ "layer",						required_argument,		NULL,		'y' },
+		{ "db",								required_argument,		NULL,		'd' },
 		{ "config",						required_argument,		NULL,		'c' },
 		{ "busid",						required_argument,		NULL,		'b' },
 		{ 0 }
@@ -177,6 +179,7 @@ int main(int argc, char *argv[])
 	struct nemoaction *action;
 	struct nemojson *config;
 	struct nemobus *bus;
+	char *dbname = NULL;
 	char *configpath = NULL;
 	char *fullscreenid = NULL;
 	char *layer = NULL;
@@ -187,7 +190,7 @@ int main(int argc, char *argv[])
 
 	opterr = 0;
 
-	while (opt = getopt_long(argc, argv, "w:h:f:y:c:b:", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "w:h:f:y:d:c:b:", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -206,6 +209,10 @@ int main(int argc, char *argv[])
 
 			case 'y':
 				layer = strdup(optarg);
+				break;
+
+			case 'd':
+				dbname = strdup(optarg);
 				break;
 
 			case 'c':
@@ -273,8 +280,17 @@ int main(int argc, char *argv[])
 	nemoaction_set_userdata(action, yoyo);
 
 	config = yoyo->config = nemojson_create();
-	nemojson_append_file(config, configpath);
-	nemojson_update(config);
+	if (dbname != NULL) {
+		struct nemodb *db;
+
+		db = nemodb_create("mongodb://127.0.0.1");
+		nemodb_use_collection(db, dbname, configpath);
+		nemojson_insert_object(config, NULL, nemodb_load_json_object(db));
+		nemodb_destroy(db);
+	} else {
+		nemojson_append_file(config, configpath);
+		nemojson_update(config);
+	}
 	nemoyoyo_load_config(yoyo);
 
 	bus = yoyo->bus = nemobus_create();
