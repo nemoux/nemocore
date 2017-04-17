@@ -47,7 +47,7 @@
 
 #include <nemoenvs.h>
 
-static void nemoenvs_handle_set_nemotheme_background(struct nemoenvs *envs, struct json_object *jobj)
+static void nemoenvs_handle_set_nemotheme_service(struct nemoenvs *envs, struct json_object *jobj, const char *type)
 {
 	int i;
 
@@ -115,7 +115,8 @@ static void nemoenvs_handle_set_nemotheme_background(struct nemoenvs *envs, stru
 			nemojson_destroy(json);
 		}
 
-		nemoenvs_create_service(envs, "background",
+		nemoenvs_create_service(envs,
+				type,
 				path,
 				nemostring_get(args),
 				nemostring_get(states));
@@ -177,7 +178,11 @@ int nemoenvs_set_json_theme(struct nemoenvs *envs, struct json_object *jobj)
 		const char *ikey = nemojson_get_key(json, i);
 
 		if (strcmp(ikey, "backgrounds") == 0) {
-			nemoenvs_handle_set_nemotheme_background(envs, iobj);
+			nemoenvs_handle_set_nemotheme_service(envs, iobj, "background");
+		} else if (strcmp(ikey, "daemons") == 0) {
+			nemoenvs_handle_set_nemotheme_service(envs, iobj, "daemon");
+		} else if (strcmp(ikey, "screensavers") == 0) {
+			nemoenvs_handle_set_nemotheme_service(envs, iobj, "screensaver");
 		} else if (strcmp(ikey, "layers") == 0) {
 			nemoenvs_handle_set_nemotheme_layer(envs, iobj);
 		} else if (strcmp(ikey, "defaultLayerId") == 0) {
