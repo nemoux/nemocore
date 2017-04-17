@@ -117,8 +117,8 @@ static void nemoenvs_handle_set_nemotheme_background(struct nemoenvs *envs, stru
 
 		nemoenvs_create_service(envs, "background",
 				path,
-				nemostring_get_contents(args),
-				nemostring_get_contents(states));
+				nemostring_get(args),
+				nemostring_get(states));
 
 		nemostring_destroy(args);
 		nemostring_destroy(states);

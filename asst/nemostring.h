@@ -25,7 +25,7 @@ extern void nemostring_append_format(struct nemostring *str, const char *fmt, ..
 extern void nemostring_tolower(struct nemostring *str);
 extern void nemostring_toupper(struct nemostring *str);
 
-static inline const char *nemostring_get_contents(struct nemostring *str)
+static inline const char *nemostring_get(struct nemostring *str)
 {
 	return str->contents;
 }
