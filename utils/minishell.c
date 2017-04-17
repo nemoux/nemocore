@@ -103,14 +103,11 @@ static int minishell_dispatch_keypad(struct minishell *mini, struct itemone *one
 
 static int minishell_dispatch_xapp(struct minishell *mini, struct itemone *one)
 {
-	struct nemoshell *shell = mini->shell;
-	const char *_path = nemoitem_one_get_attr(one, "path");
-	const char *_args = nemoitem_one_get_attr(one, "args");
-	char states[512];
+	const char *path = nemoitem_one_get_attr(one, "path");
+	const char *args = nemoitem_one_get_attr(one, "args");
+	const char *states = nemoitem_one_get_attr(one, "states");
 
-	nemoitem_one_save_attrs(one, states, ';');
-
-	nemoenvs_launch_xapp(mini->envs, _path, _args, states);
+	nemoenvs_launch_xapp(mini->envs, path, args, states);
 
 	return 0;
 }

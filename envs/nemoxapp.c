@@ -148,7 +148,6 @@ static int nemoenvs_execute_xapp(struct nemoenvs *envs, struct nemoxserver *xser
 			struct clientstate *state;
 
 			states = nemotoken_create(_states, strlen(_states));
-			nemotoken_divide(states, '=');
 			nemotoken_divide(states, ';');
 			nemotoken_update(states);
 
@@ -156,7 +155,6 @@ static int nemoenvs_execute_xapp(struct nemoenvs *envs, struct nemoxserver *xser
 			clientstate_set_attrs(state,
 					nemotoken_get_tokens(states),
 					nemotoken_get_count(states) / 2);
-			clientstate_set_pid(state, pid);
 
 			nemotoken_destroy(states);
 		}

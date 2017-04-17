@@ -119,22 +119,21 @@ int nemoyoyo_actor_execute(struct yoyoactor *actor, int index, float x, float y,
 
 	if (strcmp(type, "app") == 0 || strcmp(type, "xapp") == 0) {
 		struct busmsg *msg;
+		struct itemone *sone;
 		const char *path;
+		char args[512] = "";
+		char states[512] = "";
 
 		path = nemojson_object_get_string(cobj, "path", NULL);
 
 		msg = nemobus_msg_create();
 		nemobus_msg_set_name(msg, "command");
 		nemobus_msg_set_attr(msg, "type", type);
-		nemobus_msg_set_attr_format(msg, "x", "%f", x);
-		nemobus_msg_set_attr_format(msg, "y", "%f", y);
-		nemobus_msg_set_attr_format(msg, "r", "%f", actor->geometry.r * 180.0f / M_PI);
 		nemobus_msg_set_attr(msg, "path", path);
 
 		tobj = nemojson_object_get_object(cobj, "param", NULL);
 		if (tobj != NULL) {
 			struct nemojson *json;
-			char args[512] = "";
 			int i;
 
 			json = nemojson_create();
@@ -161,9 +160,13 @@ int nemoyoyo_actor_execute(struct yoyoactor *actor, int index, float x, float y,
 			}
 
 			nemojson_destroy(json);
-
-			nemobus_msg_set_attr(msg, "args", args);
 		}
+		nemobus_msg_set_attr(msg, "args", args);
+
+		sone = nemoitem_one_create();
+		nemoitem_one_set_attr_format(sone, "x", "%f", x);
+		nemoitem_one_set_attr_format(sone, "y", "%f", y);
+		nemoitem_one_set_attr_format(sone, "r", "%f", actor->geometry.r * 180.0f / M_PI);
 
 		tobj = nemojson_object_get_object(cobj, "state", NULL);
 		if (tobj != NULL) {
@@ -177,11 +180,14 @@ int nemoyoyo_actor_execute(struct yoyoactor *actor, int index, float x, float y,
 				const char *ikey = nemojson_get_key(json, i);
 				const char *istr = nemojson_get_string(json, i);
 
-				nemobus_msg_set_attr(msg, ikey, istr);
+				nemoitem_one_set_attr(sone, ikey, istr);
 			}
 
 			nemojson_destroy(json);
 		}
+		nemoitem_one_save_attrs(sone, states, ';');
+		nemoitem_one_destroy(sone);
+		nemobus_msg_set_attr(msg, "states", states);
 
 		nemobus_send_msg(yoyo->bus, yoyo->busid, "/nemoshell", msg);
 		nemobus_msg_destroy(msg);
