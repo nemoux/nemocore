@@ -49,68 +49,7 @@ struct minishell {
 	struct nemoenvs *envs;
 	struct nemobus *bus;
 	struct wl_event_source *busfd;
-
-	struct {
-		char *path;
-		char *args;
-	} keypad;
 };
-
-static int minishell_dispatch_keypad(struct minishell *mini, struct itemone *one)
-{
-	struct nemoshell *shell = mini->shell;
-	struct nemocompz *compz = mini->compz;
-	struct nemoview *view;
-	struct nemoview *focus;
-	struct nemotoken *args;
-	const char *keypadpath = mini->keypad.path;
-	const char *keypadargs = mini->keypad.args;
-	float sx, sy;
-	float x, y, r;
-	pid_t pid;
-
-	x = nemoitem_one_get_fattr(one, "x", 0.0f);
-	y = nemoitem_one_get_fattr(one, "y", 0.0f);
-	r = nemoitem_one_get_fattr(one, "r", 0.0f) * M_PI / 180.0f;
-
-	focus = nemocompz_pick_view(compz, x, y, &sx, &sy, NEMOVIEW_PICK_STATE | NEMOVIEW_CANVAS_STATE);
-	if (focus != NULL && nemoview_has_state(focus, NEMOVIEW_KEYPAD_STATE) != 0) {
-		args = nemotoken_create(keypadpath, strlen(keypadpath));
-		if (keypadargs != NULL) {
-			nemotoken_append_one(args, ';');
-			nemotoken_append_format(args, keypadargs, focus->uuid, nemoitem_one_get_sattr(one, "language", "eng"));
-		}
-		nemotoken_divide(args, ';');
-		nemotoken_update(args);
-
-		pid = os_execute_path(keypadpath, nemotoken_get_tokens(args), NULL);
-		if (pid > 0) {
-			struct clientstate *state;
-
-			nemoenvs_attach_client(mini->envs, pid, keypadpath);
-
-			state = nemoshell_create_client_state(shell, pid);
-			clientstate_set_fattr(state, "x", x);
-			clientstate_set_fattr(state, "y", y);
-			clientstate_set_fattr(state, "r", focus->geometry.r * 180.0f / M_PI);
-		}
-
-		nemotoken_destroy(args);
-	}
-
-	return 0;
-}
-
-static int minishell_dispatch_xapp(struct minishell *mini, struct itemone *one)
-{
-	const char *path = nemoitem_one_get_attr(one, "path");
-	const char *args = nemoitem_one_get_attr(one, "args");
-	const char *states = nemoitem_one_get_attr(one, "states");
-
-	nemoenvs_launch_xapp(mini->envs, path, args, states);
-
-	return 0;
-}
 
 static int minishell_dispatch_app(struct minishell *mini, struct itemone *one)
 {
@@ -151,6 +90,17 @@ static int minishell_dispatch_app(struct minishell *mini, struct itemone *one)
 	return 0;
 }
 
+static int minishell_dispatch_xapp(struct minishell *mini, struct itemone *one)
+{
+	const char *path = nemoitem_one_get_attr(one, "path");
+	const char *args = nemoitem_one_get_attr(one, "args");
+	const char *states = nemoitem_one_get_attr(one, "states");
+
+	nemoenvs_launch_xapp(mini->envs, path, args, states);
+
+	return 0;
+}
+
 static int minishell_dispatch_close(struct minishell *mini, struct itemone *one)
 {
 	struct nemoshell *shell = mini->shell;
@@ -179,29 +129,14 @@ static int minishell_dispatch_command(struct minishell *mini, struct itemone *on
 {
 	const char *type = nemoitem_one_get_attr(one, "type");
 
-	if (strcmp(type, "keypad") == 0)
-		minishell_dispatch_keypad(mini, one);
+	if (strcmp(type, "app") == 0)
+		minishell_dispatch_app(mini, one);
 	else if (strcmp(type, "xapp") == 0)
 		minishell_dispatch_xapp(mini, one);
-	else if (strcmp(type, "app") == 0)
-		minishell_dispatch_app(mini, one);
 	else if (strcmp(type, "close") == 0)
 		minishell_dispatch_close(mini, one);
 	else if (strcmp(type, "close_all") == 0)
 		minishell_dispatch_close_all(mini, one);
-
-	return 0;
-}
-
-static int minishell_dispatch_config(struct minishell *mini, struct itemone *one)
-{
-	if (nemoitem_one_has_path_prefix(one, "/nemoshell/keypad") != 0) {
-		const char *path = nemoitem_one_get_attr(one, "path");
-		const char *args = nemoitem_one_get_attr(one, "args");
-
-		mini->keypad.path = path != NULL ? strdup(path) : NULL;
-		mini->keypad.args = args != NULL ? strdup(args) : NULL;
-	}
 
 	return 0;
 }
