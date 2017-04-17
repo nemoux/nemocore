@@ -21,7 +21,7 @@
 #include <nemolog.h>
 #include <nemomisc.h>
 
-static int nemoenvs_execute_xapp(struct nemoenvs *envs, struct nemoxserver *xserver, const char *_path, const char *_args, struct clientstate *state);
+static int nemoenvs_execute_xapp(struct nemoenvs *envs, struct nemoxserver *xserver, const char *_path, const char *_args, const char *_states);
 static int nemoenvs_execute_xserver(struct nemoenvs *envs, int xdisplay, const char *rendernode);
 
 static struct nemoxserver *nemoenvs_search_xserver_ready(struct nemoenvs *envs)
@@ -76,9 +76,12 @@ static void nemoenvs_handle_xserver_sigusr1(struct wl_listener *listener, void *
 			if (xserver == NULL)
 				break;
 
-			nemoenvs_execute_xapp(envs, xserver, xapp->path, xapp->args, xapp->state);
+			nemoenvs_execute_xapp(envs, xserver, xapp->path, xapp->args, xapp->states);
 
 			wl_list_remove(&xapp->link);
+
+			if (xapp->states != NULL)
+				free(xapp->states);
 
 			if (xapp->args != NULL)
 				free(xapp->args);
@@ -120,7 +123,7 @@ static int nemoenvs_execute_xserver(struct nemoenvs *envs, int xdisplay, const c
 	return 0;
 }
 
-static int nemoenvs_execute_xapp(struct nemoenvs *envs, struct nemoxserver *xserver, const char *_path, const char *_args, struct clientstate *state)
+static int nemoenvs_execute_xapp(struct nemoenvs *envs, struct nemoxserver *xserver, const char *_path, const char *_args, const char *_states)
 {
 	struct nemotoken *args;
 	struct nemotoken *envp;
@@ -140,8 +143,23 @@ static int nemoenvs_execute_xapp(struct nemoenvs *envs, struct nemoxserver *xser
 	if (pid > 0) {
 		nemoenvs_attach_xclient(envs, xserver, pid, _path);
 
-		if (state != NULL)
+		if (_states != NULL) {
+			struct nemotoken *states;
+			struct clientstate *state;
+
+			states = nemotoken_create(_states, strlen(_states));
+			nemotoken_divide(states, '=');
+			nemotoken_divide(states, ';');
+			nemotoken_update(states);
+
+			state = nemoshell_create_client_state(envs->shell, pid);
+			clientstate_set_attrs(state,
+					nemotoken_get_tokens(states),
+					nemotoken_get_count(states) / 2);
 			clientstate_set_pid(state, pid);
+
+			nemotoken_destroy(states);
+		}
 	}
 
 	nemotoken_destroy(args);
@@ -170,7 +188,7 @@ int nemoenvs_launch_xserver(struct nemoenvs *envs, int xdisplay, const char *ren
 	xapp = (struct nemoxapp *)malloc(sizeof(struct nemoxapp));
 	xapp->path = NULL;
 	xapp->args = NULL;
-	xapp->state = NULL;
+	xapp->states = NULL;
 	xapp->xdisplay = xdisplay;
 	xapp->rendernode = rendernode != NULL ? strdup(rendernode) : NULL;
 
@@ -184,19 +202,19 @@ void nemoenvs_use_xserver(struct nemoenvs *envs, int xdisplay)
 	env_set_format("DISPLAY", ":%d", xdisplay);
 }
 
-int nemoenvs_launch_xapp(struct nemoenvs *envs, const char *path, const char *args, struct clientstate *state)
+int nemoenvs_launch_xapp(struct nemoenvs *envs, const char *path, const char *args, const char *states)
 {
 	struct nemoxserver *xserver;
 	struct nemoxapp *xapp;
 
 	xserver = nemoenvs_search_xserver_ready(envs);
 	if (xserver != NULL)
-		return nemoenvs_execute_xapp(envs, xserver, path, args, state);
+		return nemoenvs_execute_xapp(envs, xserver, path, args, states);
 
 	xapp = (struct nemoxapp *)malloc(sizeof(struct nemoxapp));
 	xapp->path = strdup(path);
 	xapp->args = args != NULL ? strdup(args) : NULL;
-	xapp->state = state;
+	xapp->states = states != NULL ? strdup(states) : NULL;
 	xapp->xdisplay = -1;
 	xapp->rendernode = NULL;
 

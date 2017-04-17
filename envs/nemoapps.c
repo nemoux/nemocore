@@ -19,6 +19,7 @@
 #include <nemoapps.h>
 #include <nemolist.h>
 #include <nemoitem.h>
+#include <nemotoken.h>
 #include <nemolog.h>
 #include <nemomisc.h>
 

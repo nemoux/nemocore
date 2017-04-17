@@ -68,7 +68,7 @@ int nemoscope_add_cmd(struct nemoscope *scope, uint32_t tag, const char *cmd)
 	nemotoken_divide(token, ',');
 	nemotoken_update(token);
 
-	count = nemotoken_get_token_count(token);
+	count = nemotoken_get_count(token);
 
 	one = (struct scopeone *)malloc(sizeof(struct scopeone));
 	if (one == NULL)

@@ -32,20 +32,20 @@ extern void nemotoken_divide(struct nemotoken *token, char div);
 extern void nemotoken_replace(struct nemotoken *token, char src, char dst);
 extern int nemotoken_update(struct nemotoken *token);
 
+extern char *nemotoken_merge(struct nemotoken *token, char div);
+
 extern void nemotoken_tolower(struct nemotoken *token);
 extern void nemotoken_toupper(struct nemotoken *token);
 
 extern int nemotoken_get_index(struct nemotoken *token, const char *name);
 extern int nemotoken_has_token(struct nemotoken *token, const char *name);
 
-extern char *nemotoken_get_contents(struct nemotoken *token, char div);
-
 static inline int nemotoken_get_length(struct nemotoken *token)
 {
 	return token->length;
 }
 
-static inline int nemotoken_get_token_count(struct nemotoken *token)
+static inline int nemotoken_get_count(struct nemotoken *token)
 {
 	return token->ntokens;
 }

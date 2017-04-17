@@ -1536,7 +1536,7 @@ int nemoshow_item_path_load_svg(struct showone *one, const char *uri, double x, 
 			nemotoken_divide(token, ',');
 			nemotoken_update(token);
 
-			count = nemotoken_get_token_count(token);
+			count = nemotoken_get_count(token);
 
 			path.moveTo(
 					nemotoken_get_double(token, 0, 0.0f),
@@ -1562,7 +1562,7 @@ int nemoshow_item_path_load_svg(struct showone *one, const char *uri, double x, 
 			nemotoken_divide(token, ',');
 			nemotoken_update(token);
 
-			count = nemotoken_get_token_count(token);
+			count = nemotoken_get_count(token);
 
 			path.moveTo(
 					nemotoken_get_double(token, 0, 0.0f),

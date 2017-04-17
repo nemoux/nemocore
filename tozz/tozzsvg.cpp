@@ -45,7 +45,7 @@ static int nemotozz_svg_get_transform(SkMatrix *matrix, const char *value)
 	nemotoken_divide(token, '\t');
 	nemotoken_update(token);
 
-	count = nemotoken_get_token_count(token);
+	count = nemotoken_get_count(token);
 	i = 0;
 
 	while (i < count) {
@@ -182,7 +182,7 @@ int nemotozz_svg_load(const char *url, float x, float y, float w, float h, SkPat
 			nemotoken_divide(token, ',');
 			nemotoken_update(token);
 
-			count = nemotoken_get_token_count(token);
+			count = nemotoken_get_count(token);
 
 			spath.moveTo(
 					nemotoken_get_double(token, 0, 0.0f),
@@ -208,7 +208,7 @@ int nemotozz_svg_load(const char *url, float x, float y, float w, float h, SkPat
 			nemotoken_divide(token, ',');
 			nemotoken_update(token);
 
-			count = nemotoken_get_token_count(token);
+			count = nemotoken_get_count(token);
 
 			spath.moveTo(
 					nemotoken_get_double(token, 0, 0.0f),

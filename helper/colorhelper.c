@@ -213,7 +213,7 @@ uint32_t color_parse(const char *value)
 		nemotoken_divide(token, ',');
 		nemotoken_update(token);
 
-		if (nemotoken_get_token_count(token) >= 4) {
+		if (nemotoken_get_count(token) >= 4) {
 			rgba[2] = (uint8_t)nemotoken_get_integer(token, 1, 0);
 			rgba[1] = (uint8_t)nemotoken_get_integer(token, 2, 0);
 			rgba[0] = (uint8_t)nemotoken_get_integer(token, 3, 0);

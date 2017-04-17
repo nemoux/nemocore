@@ -118,7 +118,7 @@ struct itemone *nemoitem_search_attrs(struct nemoitem *item, const char *path, c
 	nemotoken_divide(token, delimiter);
 	nemotoken_update(token);
 
-	ntokens = nemotoken_get_token_count(token) / 2;
+	ntokens = nemotoken_get_count(token) / 2;
 
 	nemolist_for_each(one, &item->list, link) {
 		if (path != NULL && strcmp(one->path, path) != 0)
@@ -248,7 +248,7 @@ struct itembox *nemoitem_box_search_attrs(struct nemoitem *item, const char *pat
 	nemotoken_divide(token, delimiter);
 	nemotoken_update(token);
 
-	ntokens = nemotoken_get_token_count(token) / 2;
+	ntokens = nemotoken_get_count(token) / 2;
 
 	nemolist_for_each(one, &item->list, link) {
 		if (path != NULL && nemoitem_one_has_path_prefix(one, path) != 0)
@@ -694,7 +694,7 @@ int nemoitem_one_load_attrs(struct itemone *one, const char *buffer, char delimi
 	nemotoken_divide(token, delimiter);
 	nemotoken_update(token);
 
-	count = nemotoken_get_token_count(token) / 2;
+	count = nemotoken_get_count(token) / 2;
 
 	for (i = 0; i < count; i++) {
 		nemoitem_one_set_attr(one,
@@ -775,7 +775,7 @@ int nemoitem_one_load_textline(struct itemone *one, const char *buffer, char del
 
 	nemoitem_one_set_path(one, nemotoken_get_token(token, 0));
 
-	count = (nemotoken_get_token_count(token) - 1) / 2;
+	count = (nemotoken_get_count(token) - 1) / 2;
 
 	for (i = 0; i < count; i++) {
 		nemoitem_one_set_attr(one,

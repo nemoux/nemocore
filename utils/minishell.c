@@ -90,11 +90,9 @@ static int minishell_dispatch_keypad(struct minishell *mini, struct itemone *one
 			nemoenvs_attach_client(mini->envs, pid, keypadpath);
 
 			state = nemoshell_create_client_state(shell, pid);
-			if (state != NULL) {
-				clientstate_set_fattr(state, "x", x);
-				clientstate_set_fattr(state, "y", y);
-				clientstate_set_fattr(state, "r", focus->geometry.r * 180.0f / M_PI);
-			}
+			clientstate_set_fattr(state, "x", x);
+			clientstate_set_fattr(state, "y", y);
+			clientstate_set_fattr(state, "r", focus->geometry.r * 180.0f / M_PI);
 		}
 
 		nemotoken_destroy(args);
@@ -106,15 +104,13 @@ static int minishell_dispatch_keypad(struct minishell *mini, struct itemone *one
 static int minishell_dispatch_xapp(struct minishell *mini, struct itemone *one)
 {
 	struct nemoshell *shell = mini->shell;
-	struct clientstate *state;
 	const char *_path = nemoitem_one_get_attr(one, "path");
 	const char *_args = nemoitem_one_get_attr(one, "args");
+	char states[512];
 
-	state = nemoshell_create_client_state(shell, 0);
-	if (state != NULL)
-		clientstate_set_attrs(state, one);
+	nemoitem_one_save_attrs(one, states, ';');
 
-	nemoenvs_launch_xapp(mini->envs, _path, _args, state);
+	nemoenvs_launch_xapp(mini->envs, _path, _args, states);
 
 	return 0;
 }
@@ -139,8 +135,7 @@ static int minishell_dispatch_app(struct minishell *mini, struct itemone *one)
 		nemoenvs_attach_client(mini->envs, pid, _path);
 
 		state = nemoshell_create_client_state(shell, pid);
-		if (state != NULL)
-			clientstate_set_attrs(state, one);
+		clientstate_copy_attrs(state, one);
 	}
 
 	nemotoken_destroy(args);

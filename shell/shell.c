@@ -32,7 +32,6 @@
 #include <nemoshell.h>
 #include <nemoclient.h>
 #include <syshelper.h>
-#include <nemotoken.h>
 #include <nemoitem.h>
 #include <nemomisc.h>
 #include <nemolog.h>

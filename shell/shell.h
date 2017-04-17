@@ -12,7 +12,6 @@ NEMO_BEGIN_EXTERN_C
 #include <layer.h>
 #include <view.h>
 #include <content.h>
-#include <nemotoken.h>
 #include <nemoitem.h>
 
 typedef enum {
@@ -455,9 +454,14 @@ static inline void clientstate_set_pid(struct clientstate *state, uint32_t pid)
 	state->pid = pid;
 }
 
-static inline void clientstate_set_attrs(struct clientstate *state, struct itemone *one)
+static inline void clientstate_set_attrs(struct clientstate *state, char *attrs[], int nattrs)
 {
-	nemoitem_one_copy(state->one, one);
+	int i;
+
+	for (i = 0; i < nattrs; i++)
+		nemoitem_one_set_attr(state->one,
+				attrs[i * 2 + 0],
+				attrs[i * 2 + 1]);
 }
 
 static inline void clientstate_set_sattr(struct clientstate *state, const char *name, const char *value)
@@ -468,6 +472,11 @@ static inline void clientstate_set_sattr(struct clientstate *state, const char *
 static inline void clientstate_set_fattr(struct clientstate *state, const char *name, float value)
 {
 	nemoitem_one_set_attr_format(state->one, name, "%f", value);
+}
+
+static inline void clientstate_copy_attrs(struct clientstate *state, struct itemone *one)
+{
+	nemoitem_one_copy(state->one, one);
 }
 
 #ifdef __cplusplus

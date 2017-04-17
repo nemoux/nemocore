@@ -617,7 +617,7 @@ void nemomatrix_append_command(struct nemomatrix *matrix, const char *str)
 	nemotoken_divide(token, ',');
 	nemotoken_update(token);
 
-	for (i = 0; i < nemotoken_get_token_count(token); i++) {
+	for (i = 0; i < nemotoken_get_count(token); i++) {
 		cmd = nemotoken_get_token(token, i);
 		if (strcmp(cmd, "translate") == 0) {
 			x = nemotoken_get_float(token, ++i, 0.0f);

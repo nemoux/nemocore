@@ -51,7 +51,7 @@ int nemoshow_svg_get_transform(SkMatrix *matrix, const char *value)
 	nemotoken_divide(token, '\t');
 	nemotoken_update(token);
 
-	count = nemotoken_get_token_count(token);
+	count = nemotoken_get_count(token);
 	i = 0;
 
 	while (i < count) {
