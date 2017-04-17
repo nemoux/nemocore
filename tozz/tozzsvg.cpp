@@ -121,7 +121,6 @@ int nemotozz_svg_load(const char *url, float x, float y, float w, float h, SkPat
 	struct nemoxml *xml;
 	struct xmlnode *node;
 	const char *attr0, *attr1;
-	const char *units;
 	float width = w, height = h;
 	SkPath spath;
 	SkMatrix smatrix;
@@ -226,8 +225,8 @@ int nemotozz_svg_load(const char *url, float x, float y, float w, float h, SkPat
 			attr1 = nemoxml_node_get_attr(node, "height");
 
 			if (attr0 != NULL && attr1 != NULL) {
-				width = string_parse_float_with_endptr(attr0, 0, strlen(attr0), &units);
-				height = string_parse_float_with_endptr(attr1, 0, strlen(attr1), &units);
+				width = string_parse_float(attr0, 0, strlen(attr0));
+				height = string_parse_float(attr1, 0, strlen(attr1));
 			}
 		}
 

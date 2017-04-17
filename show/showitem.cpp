@@ -1451,7 +1451,6 @@ int nemoshow_item_path_load_svg(struct showone *one, const char *uri, double x, 
 	double sw, sh;
 	double pw, ph;
 	const char *attr0, *attr1;
-	const char *units;
 	int has_fill;
 	int has_stroke;
 	SkPath path;
@@ -1611,8 +1610,8 @@ int nemoshow_item_path_load_svg(struct showone *one, const char *uri, double x, 
 				sw = width;
 				sh = height;
 
-				pw = string_parse_float_with_endptr(attr0, 0, strlen(attr0), &units);
-				ph = string_parse_float_with_endptr(attr1, 0, strlen(attr1), &units);
+				pw = string_parse_float(attr0, 0, strlen(attr0));
+				ph = string_parse_float(attr1, 0, strlen(attr1));
 
 				if (sw != pw || sh != ph) {
 					matrix.postScale(sw / pw, sh / ph);
