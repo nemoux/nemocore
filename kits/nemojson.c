@@ -91,6 +91,10 @@ struct nemojson *nemojson_create(void)
 		return NULL;
 	memset(json, 0, sizeof(struct nemojson));
 
+	json->contents = (char *)malloc(1);
+	json->contents[0] = '\0';
+	json->length = 0;
+
 	return json;
 }
 
@@ -108,9 +112,7 @@ void nemojson_destroy(struct nemojson *json)
 			free(json->jkeys[i]);
 	}
 
-	if (json->contents != NULL)
-		free(json->contents);
-
+	free(json->contents);
 	free(json);
 }
 
@@ -126,8 +128,7 @@ int nemojson_append(struct nemojson *json, const char *str, int length)
 	strcat(contents, str);
 	contents[json->length + length] = '\0';
 
-	if (json->contents != NULL)
-		free(json->contents);
+	free(json->contents);
 
 	json->contents = contents;
 	json->length = json->length + length;
@@ -145,8 +146,7 @@ int nemojson_append_one(struct nemojson *json, char c)
 
 	snprintf(contents, json->length + 1 + 1, "%s%c", json->contents, c);
 
-	if (json->contents != NULL)
-		free(json->contents);
+	free(json->contents);
 
 	json->contents = contents;
 	json->length = json->length + 1;
@@ -175,15 +175,45 @@ int nemojson_append_format(struct nemojson *json, const char *fmt, ...)
 	strcat(contents, str);
 	contents[json->length + length] = '\0';
 
-	if (json->contents != NULL)
-		free(json->contents);
-
+	free(json->contents);
 	free(str);
 
 	json->contents = contents;
 	json->length = json->length + length;
 
 	return 0;
+}
+
+int nemojson_append_file(struct nemojson *json, const char *filepath)
+{
+	char *contents;
+	char *buffer;
+	int length;
+
+	length = os_load_path(filepath, &buffer);
+	if (length <= 0)
+		return -1;
+
+	contents = (char *)malloc(json->length + length + 1);
+	if (contents == NULL)
+		goto err1;
+
+	strcpy(contents, json->contents);
+	strcat(contents, buffer);
+	contents[json->length + length] = '\0';
+
+	free(json->contents);
+	free(buffer);
+
+	json->contents = contents;
+	json->length = json->length + length;
+
+	return 0;
+
+err1:
+	free(buffer);
+
+	return -1;
 }
 
 int nemojson_update(struct nemojson *json)

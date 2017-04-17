@@ -33,6 +33,7 @@ extern void nemojson_destroy(struct nemojson *json);
 extern int nemojson_append(struct nemojson *json, const char *str, int length);
 extern int nemojson_append_one(struct nemojson *json, char c);
 extern int nemojson_append_format(struct nemojson *json, const char *fmt, ...);
+extern int nemojson_append_file(struct nemojson *json, const char *filepath);
 
 extern int nemojson_update(struct nemojson *json);
 

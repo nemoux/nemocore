@@ -272,7 +272,8 @@ int main(int argc, char *argv[])
 	nemoaction_set_tap_callback(action, nemoyoyo_dispatch_tap_event);
 	nemoaction_set_userdata(action, yoyo);
 
-	config = yoyo->config = nemojson_create_file(configpath);
+	config = yoyo->config = nemojson_create();
+	nemojson_append_file(config, configpath);
 	nemojson_update(config);
 	nemoyoyo_load_config(yoyo);
 
