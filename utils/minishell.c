@@ -56,30 +56,6 @@ struct minishell {
 	} keypad;
 };
 
-static void minishell_update_state(struct minishell *mini, struct itemone *one, struct clientstate *state)
-{
-	struct nemoview *view;
-	const char *owner;
-
-	clientstate_set_attrs(state, one);
-
-	owner = nemoitem_one_get_attr(one, "owner");
-	if (owner != NULL && (view = nemocompz_get_view_by_uuid(mini->compz, owner)) != NULL) {
-		if (nemoitem_one_has_sattr(one, "coords", "global") == 0) {
-			float x = nemoitem_one_get_fattr(one, "x", 0.0f);
-			float y = nemoitem_one_get_fattr(one, "y", 0.0f);
-			float r = nemoitem_one_get_fattr(one, "r", 0.0f) * M_PI / 180.0f;
-
-			nemoview_transform_to_global(view, x, y, &x, &y);
-			nemoview_rotate_to_global(view, r, &r);
-
-			clientstate_set_fattr(state, "x", x);
-			clientstate_set_fattr(state, "y", y);
-			clientstate_set_fattr(state, "r", r * 180.0f / M_PI);
-		}
-	}
-}
-
 static int minishell_dispatch_keypad(struct minishell *mini, struct itemone *one)
 {
 	struct nemoshell *shell = mini->shell;
@@ -136,7 +112,7 @@ static int minishell_dispatch_xapp(struct minishell *mini, struct itemone *one)
 
 	state = nemoshell_create_client_state(shell, 0);
 	if (state != NULL)
-		minishell_update_state(mini, one, state);
+		clientstate_set_attrs(state, one);
 
 	nemoenvs_launch_xapp(mini->envs, _path, _args, state);
 
@@ -164,7 +140,7 @@ static int minishell_dispatch_app(struct minishell *mini, struct itemone *one)
 
 		state = nemoshell_create_client_state(shell, pid);
 		if (state != NULL)
-			minishell_update_state(mini, one, state);
+			clientstate_set_attrs(state, one);
 	}
 
 	nemotoken_destroy(args);
