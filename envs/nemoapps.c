@@ -137,7 +137,7 @@ static void nemoenvs_execute_background(struct nemoenvs *envs, struct itemone *o
 
 	path = nemoitem_one_get_attr(one, "path");
 
-	nemoitem_one_save_string(one, cmds, sizeof(cmds), ";--", ";", ";--");
+	nemoitem_one_save_format(one, cmds, ";--", ";", ";--");
 
 	token = nemotoken_create(cmds, strlen(cmds));
 	nemotoken_divide(token, ';');
@@ -169,7 +169,7 @@ static void nemoenvs_execute_daemon(struct nemoenvs *envs, struct itemone *one)
 	char cmds[512];
 	pid_t pid;
 
-	nemoitem_one_save_string(one, cmds, sizeof(cmds), ";--", ";", ";--");
+	nemoitem_one_save_format(one, cmds, ";--", ";", ";--");
 
 	token = nemotoken_create(cmds, strlen(cmds));
 	nemotoken_divide(token, ';');
@@ -193,7 +193,7 @@ static void nemoenvs_execute_screensaver(struct nemoenvs *envs, struct itemone *
 	const char *path = nemoitem_one_get_attr(one, "path");
 	pid_t pid;
 
-	nemoitem_one_save_string(one, cmds, sizeof(cmds), ";--", ";", ";--");
+	nemoitem_one_save_format(one, cmds, ";--", ";", ";--");
 
 	token = nemotoken_create(cmds, strlen(cmds));
 	nemotoken_divide(token, ';');

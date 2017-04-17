@@ -682,7 +682,86 @@ int nemoitem_one_has_attr_tag(struct itemone *one, const char *name, uint32_t ta
 	return 0;
 }
 
-int nemoitem_one_load_simple(struct itemone *one, const char *buffer, char delimiter)
+int nemoitem_one_load_attrs(struct itemone *one, const char *buffer, char delimiter)
+{
+	struct nemotoken *token;
+	int count;
+	int i;
+
+	token = nemotoken_create(buffer, strlen(buffer));
+	if (token == NULL)
+		return -1;
+	nemotoken_divide(token, delimiter);
+	nemotoken_update(token);
+
+	count = nemotoken_get_token_count(token) / 2;
+
+	for (i = 0; i < count; i++) {
+		nemoitem_one_set_attr(one,
+				nemotoken_get_token(token, i * 2 + 0),
+				nemotoken_get_token(token, i * 2 + 1));
+	}
+
+	nemotoken_destroy(token);
+
+	return 0;
+}
+
+int nemoitem_one_save_attrs(struct itemone *one, char *buffer, char delimiter)
+{
+	struct itemattr *attr;
+	int is_first_attr = 1;
+
+	nemoitem_attr_for_each(attr, one) {
+		if (is_first_attr != 0) {
+			is_first_attr = 0;
+
+			strcpy(buffer, attr->name);
+			strncat(buffer, &delimiter, 1);
+			strcat(buffer, attr->value);
+		} else {
+			strncat(buffer, &delimiter, 1);
+			strcat(buffer, attr->name);
+			strncat(buffer, &delimiter, 1);
+			strcat(buffer, attr->value);
+		}
+	}
+
+	return 0;
+}
+
+int nemoitem_one_save_format(struct itemone *one, char *buffer, const char *atpath, const char *atattr, const char *atvalue)
+{
+	struct itemattr *attr;
+	const char *name;
+	const char *value;
+	int is_first_attr = 1;
+
+	strcpy(buffer, one->path);
+
+	nemoitem_attr_for_each(attr, one) {
+		name = nemoitem_attr_get_name(attr);
+		value = nemoitem_attr_get_value(attr);
+
+		if (is_first_attr != 0) {
+			is_first_attr = 0;
+
+			strcat(buffer, atpath);
+			strcat(buffer, name);
+			strcat(buffer, atattr);
+			strcat(buffer, value);
+		} else {
+			strcat(buffer, atvalue);
+			strcat(buffer, name);
+			strcat(buffer, atattr);
+			strcat(buffer, value);
+		}
+	}
+
+	return 0;
+}
+
+int nemoitem_one_load_textline(struct itemone *one, const char *buffer, char delimiter)
 {
 	struct nemotoken *token;
 	int count;
@@ -704,10 +783,12 @@ int nemoitem_one_load_simple(struct itemone *one, const char *buffer, char delim
 				nemotoken_get_token(token, 1 + i * 2 + 1));
 	}
 
+	nemotoken_destroy(token);
+
 	return 0;
 }
 
-int nemoitem_one_save_simple(struct itemone *one, char *buffer, char delimiter)
+int nemoitem_one_save_textline(struct itemone *one, char *buffer, char delimiter)
 {
 	struct itemattr *attr;
 
@@ -718,35 +799,6 @@ int nemoitem_one_save_simple(struct itemone *one, char *buffer, char delimiter)
 		strcat(buffer, attr->name);
 		strncat(buffer, &delimiter, 1);
 		strcat(buffer, attr->value);
-	}
-
-	return 0;
-}
-
-int nemoitem_one_save_string(struct itemone *one, char *buffer, int size, const char *atpath, const char *atattr, const char *atvalue)
-{
-	struct itemattr *attr;
-	const char *name;
-	const char *value;
-	int is_first_attr = 1;
-
-	strcpy(buffer, one->path);
-
-	nemoitem_attr_for_each(attr, one) {
-		name = nemoitem_attr_get_name(attr);
-		value = nemoitem_attr_get_value(attr);
-
-		if (is_first_attr != 0) {
-			strcat(buffer, atpath);
-
-			is_first_attr = 0;
-		} else {
-			strcat(buffer, atvalue);
-		}
-
-		strcat(buffer, name);
-		strcat(buffer, atattr);
-		strcat(buffer, value);
 	}
 
 	return 0;
@@ -774,7 +826,7 @@ int nemoitem_load_textfile(struct nemoitem *item, const char *filepath, char del
 			buffer[length - 1] = '\0';
 
 		one = nemoitem_one_create();
-		nemoitem_one_load_simple(one, buffer, delimiter);
+		nemoitem_one_load_textline(one, buffer, delimiter);
 		nemoitem_attach_one(item, one);
 	}
 
@@ -794,7 +846,7 @@ int nemoitem_save_textfile(struct nemoitem *item, const char *filepath, char del
 		return -1;
 
 	nemoitem_for_each(one, item) {
-		nemoitem_one_save_simple(one, buffer, delimiter);
+		nemoitem_one_save_textline(one, buffer, delimiter);
 
 		fputs(buffer, fp);
 		fputc('\n', fp);

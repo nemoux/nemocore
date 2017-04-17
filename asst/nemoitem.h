@@ -105,9 +105,13 @@ extern const char *nemoitem_one_get_attr_tag(struct itemone *one, const char *na
 extern void nemoitem_one_put_attr_tag(struct itemone *one, const char *name, uint32_t tag);
 extern int nemoitem_one_has_attr_tag(struct itemone *one, const char *name, uint32_t tag);
 
-extern int nemoitem_one_load_simple(struct itemone *one, const char *buffer, char delimiter);
-extern int nemoitem_one_save_simple(struct itemone *one, char *buffer, char delimiter);
-extern int nemoitem_one_save_string(struct itemone *one, char *buffer, int size, const char *atpath, const char *atattr, const char *atvalue);
+extern int nemoitem_one_load_attrs(struct itemone *one, const char *buffer, char delimiter);
+extern int nemoitem_one_save_attrs(struct itemone *one, char *buffer, char delimiter);
+
+extern int nemoitem_one_save_format(struct itemone *one, char *buffer, const char *atpath, const char *atattr, const char *atvalue);
+
+extern int nemoitem_one_load_textline(struct itemone *one, const char *buffer, char delimiter);
+extern int nemoitem_one_save_textline(struct itemone *one, char *buffer, char delimiter);
 
 extern int nemoitem_load_textfile(struct nemoitem *item, const char *filepath, char delimiter);
 extern int nemoitem_save_textfile(struct nemoitem *item, const char *filepath, char delimiter);
