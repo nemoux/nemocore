@@ -353,3 +353,38 @@ int nemoenvs_get_client_count(struct nemoenvs *envs)
 {
 	return nemolist_length(&envs->client_list);
 }
+
+int nemoenvs_launch_app(struct nemoenvs *envs, const char *_path, const char *_args, const char *_states)
+{
+	struct nemotoken *args;
+	pid_t pid;
+
+	args = nemotoken_create(_path, strlen(_path));
+	if (_args != NULL)
+		nemotoken_append_format(args, ";%s", _args);
+	nemotoken_divide(args, ';');
+	nemotoken_update(args);
+
+	pid = os_execute_path(_path, nemotoken_get_tokens(args), NULL);
+	if (pid > 0) {
+		struct nemotoken *states;
+		struct clientstate *state;
+
+		states = nemotoken_create(_states, strlen(_states));
+		nemotoken_divide(states, ';');
+		nemotoken_update(states);
+
+		state = nemoshell_create_client_state(envs->shell, pid);
+		clientstate_set_attrs(state,
+				nemotoken_get_tokens(states),
+				nemotoken_get_count(states) / 2);
+
+		nemotoken_destroy(states);
+
+		nemoenvs_attach_client(envs, pid, _path);
+	}
+
+	nemotoken_destroy(args);
+
+	return 0;
+}

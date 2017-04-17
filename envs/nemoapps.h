@@ -56,6 +56,8 @@ extern int nemoenvs_terminate_clients(struct nemoenvs *envs);
 
 extern int nemoenvs_get_client_count(struct nemoenvs *envs);
 
+extern int nemoenvs_launch_app(struct nemoenvs *envs, const char *_path, const char *_args, const char *_states);
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

@@ -51,92 +51,37 @@ struct minishell {
 	struct wl_event_source *busfd;
 };
 
-static int minishell_dispatch_app(struct minishell *mini, struct itemone *one)
-{
-	struct nemoshell *shell = mini->shell;
-	struct nemotoken *args;
-	const char *_path = nemoitem_one_get_attr(one, "path");
-	const char *_args = nemoitem_one_get_attr(one, "args");
-	const char *_states = nemoitem_one_get_attr(one, "states");
-	pid_t pid;
-
-	args = nemotoken_create(_path, strlen(_path));
-	if (_args != NULL)
-		nemotoken_append_format(args, ";%s", _args);
-	nemotoken_divide(args, ';');
-	nemotoken_update(args);
-
-	pid = os_execute_path(_path, nemotoken_get_tokens(args), NULL);
-	if (pid > 0) {
-		struct nemotoken *states;
-		struct clientstate *state;
-
-		states = nemotoken_create(_states, strlen(_states));
-		nemotoken_divide(states, ';');
-		nemotoken_update(states);
-
-		state = nemoshell_create_client_state(shell, pid);
-		clientstate_set_attrs(state,
-				nemotoken_get_tokens(states),
-				nemotoken_get_count(states) / 2);
-
-		nemotoken_destroy(states);
-
-		nemoenvs_attach_client(mini->envs, pid, _path);
-	}
-
-	nemotoken_destroy(args);
-
-	return 0;
-}
-
-static int minishell_dispatch_xapp(struct minishell *mini, struct itemone *one)
-{
-	const char *path = nemoitem_one_get_attr(one, "path");
-	const char *args = nemoitem_one_get_attr(one, "args");
-	const char *states = nemoitem_one_get_attr(one, "states");
-
-	nemoenvs_launch_xapp(mini->envs, path, args, states);
-
-	return 0;
-}
-
-static int minishell_dispatch_close(struct minishell *mini, struct itemone *one)
-{
-	struct nemoshell *shell = mini->shell;
-	struct shellbin *bin;
-	const char *uuid;
-
-	uuid = nemoitem_one_get_attr(one, "uuid");
-	if (uuid != NULL) {
-		bin = nemoshell_get_bin_by_uuid(shell, uuid);
-		if (bin != NULL)
-			nemoshell_send_bin_close(bin);
-	}
-
-	return 0;
-}
-
-static int minishell_dispatch_close_all(struct minishell *mini, struct itemone *one)
-{
-	nemoenvs_terminate_clients(mini->envs);
-	nemoenvs_terminate_xclients(mini->envs);
-
-	return 0;
-}
-
 static int minishell_dispatch_command(struct minishell *mini, struct itemone *one)
 {
 	const char *type = nemoitem_one_get_attr(one, "type");
 
-	if (strcmp(type, "app") == 0)
-		minishell_dispatch_app(mini, one);
-	else if (strcmp(type, "xapp") == 0)
-		minishell_dispatch_xapp(mini, one);
-	else if (strcmp(type, "close") == 0)
-		minishell_dispatch_close(mini, one);
-	else if (strcmp(type, "close_all") == 0)
-		minishell_dispatch_close_all(mini, one);
+	if (strcmp(type, "app") == 0) {
+		const char *path = nemoitem_one_get_attr(one, "path");
+		const char *args = nemoitem_one_get_attr(one, "args");
+		const char *states = nemoitem_one_get_attr(one, "states");
+
+		nemoenvs_launch_app(mini->envs, path, args, states);
+	} else if (strcmp(type, "xapp") == 0) {
+		const char *path = nemoitem_one_get_attr(one, "path");
+		const char *args = nemoitem_one_get_attr(one, "args");
+		const char *states = nemoitem_one_get_attr(one, "states");
+
+		nemoenvs_launch_xapp(mini->envs, path, args, states);
+	} else if (strcmp(type, "close") == 0) {
+		struct nemoshell *shell = mini->shell;
+		struct shellbin *bin;
+		const char *uuid;
+
+		uuid = nemoitem_one_get_attr(one, "uuid");
+		if (uuid != NULL) {
+			bin = nemoshell_get_bin_by_uuid(shell, uuid);
+			if (bin != NULL)
+				nemoshell_send_bin_close(bin);
+		}
+	} else if (strcmp(type, "close_all") == 0) {
+		nemoenvs_terminate_clients(mini->envs);
+		nemoenvs_terminate_xclients(mini->envs);
+	}
 
 	return 0;
 }

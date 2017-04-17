@@ -200,19 +200,19 @@ void nemoenvs_use_xserver(struct nemoenvs *envs, int xdisplay)
 	env_set_format("DISPLAY", ":%d", xdisplay);
 }
 
-int nemoenvs_launch_xapp(struct nemoenvs *envs, const char *path, const char *args, const char *states)
+int nemoenvs_launch_xapp(struct nemoenvs *envs, const char *_path, const char *_args, const char *_states)
 {
 	struct nemoxserver *xserver;
 	struct nemoxapp *xapp;
 
 	xserver = nemoenvs_search_xserver_ready(envs);
 	if (xserver != NULL)
-		return nemoenvs_execute_xapp(envs, xserver, path, args, states);
+		return nemoenvs_execute_xapp(envs, xserver, _path, _args, _states);
 
 	xapp = (struct nemoxapp *)malloc(sizeof(struct nemoxapp));
-	xapp->path = strdup(path);
-	xapp->args = args != NULL ? strdup(args) : NULL;
-	xapp->states = states != NULL ? strdup(states) : NULL;
+	xapp->path = strdup(_path);
+	xapp->args = _args != NULL ? strdup(_args) : NULL;
+	xapp->states = _states != NULL ? strdup(_states) : NULL;
 	xapp->xdisplay = -1;
 	xapp->rendernode = NULL;
 
