@@ -39,6 +39,7 @@
 #include <syshelper.h>
 #include <namespacehelper.h>
 #include <nemotoken.h>
+#include <nemostring.h>
 #include <nemoitem.h>
 #include <nemojson.h>
 #include <nemomisc.h>
@@ -53,75 +54,74 @@ static void nemoenvs_handle_set_nemotheme_background(struct nemoenvs *envs, stru
 	for (i = 0; i < nemojson_array_get_length(jobj); i++) {
 		struct json_object *cobj = nemojson_array_get_object(jobj, i);
 		struct json_object *tobj;
-		struct itemone *sone;
+		struct nemostring *args;
+		struct nemostring *states;
 		const char *path = NULL;
-		const char *layer = NULL;
-		char args[512] = "";
-		char states[512] = "";
 
 		path = nemojson_object_get_string(cobj, "path", NULL);
+
+		args = nemostring_create(512);
+		nemostring_append_format(args, "--width;%d;", nemojson_object_get_integer(cobj, "width", 0));
+		nemostring_append_format(args, "--height;%d;", nemojson_object_get_integer(cobj, "height", 0));
 
 		tobj = nemojson_object_get_object(cobj, "param", NULL);
 		if (tobj != NULL) {
 			struct nemojson *json;
-			int i;
+			int j;
 
 			json = nemojson_create();
 			nemojson_iterate_object(json, tobj);
 
-			for (i = 0; i < nemojson_get_count(json); i++) {
-				const char *ikey = nemojson_get_key(json, i);
-				const char *istr = nemojson_get_string(json, i);
+			for (j = 0; j < nemojson_get_count(json); j++) {
+				const char *ikey = nemojson_get_key(json, j);
+				const char *istr = nemojson_get_string(json, j);
 
 				if (strcmp(ikey, "#optind") == 0) {
-					strcat(args, istr);
-					strcat(args, ";");
+					nemostring_append_format(args, "%s;", istr);
 				} else if (istr[0] != '\0' && istr[0] != ' ' && istr[0] != '\t' && istr[0] != '\n') {
-					strcat(args, "--");
-					strcat(args, ikey);
-					strcat(args, ";");
-					strcat(args, istr);
-					strcat(args, ";");
+					nemostring_append_format(args, "--%s;%s;", ikey, istr);
 				} else {
-					strcat(args, "--");
-					strcat(args, ikey);
-					strcat(args, ";");
+					nemostring_append_format(args, "--%s;", ikey);
 				}
 			}
 
 			nemojson_destroy(json);
 		}
 
-		sone = nemoitem_one_create();
-		nemoitem_one_set_attr_format(sone, "x", "%f", nemojson_object_get_double(cobj, "x", 0.0f));
-		nemoitem_one_set_attr_format(sone, "y", "%f", nemojson_object_get_double(cobj, "y", 0.0f));
-		nemoitem_one_set_attr_format(sone, "width", "%f", nemojson_object_get_double(cobj, "width", 0.0f));
-		nemoitem_one_set_attr_format(sone, "height", "%f", nemojson_object_get_double(cobj, "height", 0.0f));
-		nemoitem_one_set_attr_format(sone, "dx", "%f", nemojson_object_get_double(cobj, "dx", 0.0f));
-		nemoitem_one_set_attr_format(sone, "dy", "%f", nemojson_object_get_double(cobj, "dy", 0.0f));
-		nemoitem_one_set_attr(sone, "layer", nemojson_object_get_string(cobj, "layerId", "background"));
+		states = nemostring_create(512);
+		nemostring_append_format(states, "%s;%f;", "x", nemojson_object_get_double(cobj, "x", 0.0f));
+		nemostring_append_format(states, "%s;%f;", "y", nemojson_object_get_double(cobj, "y", 0.0f));
+		nemostring_append_format(states, "%s;%f;", "width", nemojson_object_get_double(cobj, "width", 0.0f));
+		nemostring_append_format(states, "%s;%f;", "height", nemojson_object_get_double(cobj, "height", 0.0f));
+		nemostring_append_format(states, "%s;%f;", "dx", nemojson_object_get_double(cobj, "dx", 0.0f));
+		nemostring_append_format(states, "%s;%f;", "dy", nemojson_object_get_double(cobj, "dy", 0.0f));
+		nemostring_append_format(states, "%s;%s;", "layer", nemojson_object_get_string(cobj, "layerId", "background"));
 
 		tobj = nemojson_object_get_object(cobj, "state", NULL);
 		if (tobj != NULL) {
 			struct nemojson *json;
-			int i;
+			int j;
 
 			json = nemojson_create();
 			nemojson_iterate_object(json, tobj);
 
-			for (i = 0; i < nemojson_get_count(json); i++) {
-				const char *ikey = nemojson_get_key(json, i);
-				const char *istr = nemojson_get_string(json, i);
+			for (j = 0; j < nemojson_get_count(json); j++) {
+				const char *ikey = nemojson_get_key(json, j);
+				const char *istr = nemojson_get_string(json, j);
 
-				nemoitem_one_set_attr(sone, ikey, istr);
+				nemostring_append_format(states, "%s:%s;", ikey, istr);
 			}
 
 			nemojson_destroy(json);
 		}
-		nemoitem_one_save_attrs(sone, states, ';');
-		nemoitem_one_destroy(sone);
 
-		nemoenvs_create_service(envs, "background", path, args, states);
+		nemoenvs_create_service(envs, "background",
+				path,
+				nemostring_get_contents(args),
+				nemostring_get_contents(states));
+
+		nemostring_destroy(args);
+		nemostring_destroy(states);
 	}
 }
 
