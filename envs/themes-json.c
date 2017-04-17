@@ -46,17 +46,88 @@
 
 #include <nemoenvs.h>
 
-static void nemoenvs_handle_set_nemotheme_background(struct nemoshell *shell, struct json_object *jobj)
+static void nemoenvs_handle_set_nemotheme_background(struct nemoenvs *envs, struct json_object *jobj)
 {
 	int i;
 
 	for (i = 0; i < nemojson_array_get_length(jobj); i++) {
 		struct json_object *cobj = nemojson_array_get_object(jobj, i);
+		struct json_object *tobj;
+		struct itemone *sone;
+		const char *path = NULL;
+		const char *layer = NULL;
+		char args[512] = "";
+		char states[512] = "";
+
+		path = nemojson_object_get_string(cobj, "path", NULL);
+
+		tobj = nemojson_object_get_object(cobj, "param", NULL);
+		if (tobj != NULL) {
+			struct nemojson *json;
+			int i;
+
+			json = nemojson_create();
+			nemojson_iterate_object(json, tobj);
+
+			for (i = 0; i < nemojson_get_count(json); i++) {
+				const char *ikey = nemojson_get_key(json, i);
+				const char *istr = nemojson_get_string(json, i);
+
+				if (strcmp(ikey, "#optind") == 0) {
+					strcat(args, istr);
+					strcat(args, ";");
+				} else if (istr[0] != '\0' && istr[0] != ' ' && istr[0] != '\t' && istr[0] != '\n') {
+					strcat(args, "--");
+					strcat(args, ikey);
+					strcat(args, ";");
+					strcat(args, istr);
+					strcat(args, ";");
+				} else {
+					strcat(args, "--");
+					strcat(args, ikey);
+					strcat(args, ";");
+				}
+			}
+
+			nemojson_destroy(json);
+		}
+
+		sone = nemoitem_one_create();
+		nemoitem_one_set_attr_format(sone, "x", "%f", nemojson_object_get_double(cobj, "x", 0.0f));
+		nemoitem_one_set_attr_format(sone, "y", "%f", nemojson_object_get_double(cobj, "y", 0.0f));
+		nemoitem_one_set_attr_format(sone, "width", "%f", nemojson_object_get_double(cobj, "width", 0.0f));
+		nemoitem_one_set_attr_format(sone, "height", "%f", nemojson_object_get_double(cobj, "height", 0.0f));
+		nemoitem_one_set_attr_format(sone, "dx", "%f", nemojson_object_get_double(cobj, "dx", 0.0f));
+		nemoitem_one_set_attr_format(sone, "dy", "%f", nemojson_object_get_double(cobj, "dy", 0.0f));
+		nemoitem_one_set_attr(sone, "layer", nemojson_object_get_string(cobj, "layerId", "background"));
+
+		tobj = nemojson_object_get_object(cobj, "state", NULL);
+		if (tobj != NULL) {
+			struct nemojson *json;
+			int i;
+
+			json = nemojson_create();
+			nemojson_iterate_object(json, tobj);
+
+			for (i = 0; i < nemojson_get_count(json); i++) {
+				const char *ikey = nemojson_get_key(json, i);
+				const char *istr = nemojson_get_string(json, i);
+
+				nemoitem_one_set_attr(sone, ikey, istr);
+			}
+
+			nemojson_destroy(json);
+		}
+		nemoitem_one_save_attrs(sone, states, ';');
+		nemoitem_one_destroy(sone);
+
+		nemoenvs_create_service(envs, "background", path, args, states);
 	}
 }
 
-static void nemoenvs_handle_set_nemotheme_layer(struct nemoshell *shell, struct json_object *jobj)
+static void nemoenvs_handle_set_nemotheme_layer(struct nemoenvs *envs, struct json_object *jobj)
 {
+	struct nemoshell *shell = envs->shell;
 	struct nemocompz *compz = shell->compz;
 	int i;
 
@@ -106,10 +177,10 @@ int nemoenvs_set_json_theme(struct nemoenvs *envs, struct json_object *jobj)
 		const char *ikey = nemojson_get_key(json, i);
 
 		if (strcmp(ikey, "backgrounds") == 0) {
-			nemoenvs_handle_set_nemotheme_background(shell, iobj);
+			nemoenvs_handle_set_nemotheme_background(envs, iobj);
 		} else if (strcmp(ikey, "layers") == 0) {
-			nemoenvs_handle_set_nemotheme_layer(shell, iobj);
-		} else if (strcmp(ikey, "defualtLayerId") == 0) {
+			nemoenvs_handle_set_nemotheme_layer(envs, iobj);
+		} else if (strcmp(ikey, "defaultLayerId") == 0) {
 			struct nemolayer *layer;
 
 			layer = nemocompz_get_layer_by_name(compz, json_object_get_string(iobj));
