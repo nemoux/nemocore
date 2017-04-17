@@ -177,14 +177,14 @@ static void minishell_alive_client(void *data, pid_t pid, uint32_t timeout)
 {
 	struct minishell *mini = (struct minishell *)data;
 
-	nemoenvs_alive_app(mini->envs, pid, timeout);
+	nemoenvs_alive_service(mini->envs, pid, timeout);
 }
 
 static void minishell_destroy_client(void *data, pid_t pid)
 {
 	struct minishell *mini = (struct minishell *)data;
 
-	if (nemoenvs_respawn_app(mini->envs, pid) > 0) {
+	if (nemoenvs_respawn_service(mini->envs, pid) > 0) {
 	} else if (nemoenvs_detach_client(mini->envs, pid) != 0) {
 	} else if (nemoenvs_detach_xclient(mini->envs, pid) != 0) {
 	}
@@ -234,7 +234,7 @@ static void minishell_enter_idle(void *data)
 	nemoenvs_terminate_clients(mini->envs);
 	nemoenvs_terminate_xclients(mini->envs);
 
-	nemoenvs_execute_screensavers(mini->envs);
+	nemoenvs_launch_services(mini->envs, "screensaver");
 }
 
 int main(int argc, char *argv[])
@@ -360,8 +360,8 @@ int main(int argc, char *argv[])
 	nemoenvs_launch_xserver(mini->envs, xdisplay, rendernode);
 	nemoenvs_use_xserver(mini->envs, xdisplay);
 
-	nemoenvs_execute_backgrounds(mini->envs);
-	nemoenvs_execute_daemons(mini->envs);
+	nemoenvs_launch_services(mini->envs, "background");
+	nemoenvs_launch_services(mini->envs, "daemon");
 
 	nemocompz_run(compz);
 

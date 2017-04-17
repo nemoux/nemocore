@@ -36,7 +36,7 @@ struct nemoenvs *nemoenvs_create(struct nemoshell *shell)
 	envs->shell = shell;
 	envs->apps = nemoitem_create();
 
-	nemolist_init(&envs->app_list);
+	nemolist_init(&envs->service_list);
 	nemolist_init(&envs->client_list);
 
 	wl_list_init(&envs->xserver_list);
@@ -65,7 +65,7 @@ void nemoenvs_destroy(struct nemoenvs *envs)
 	nemoenvs_terminate_xclients(envs);
 	nemoenvs_terminate_xapps(envs);
 
-	nemolist_remove(&envs->app_list);
+	nemolist_remove(&envs->service_list);
 	nemolist_remove(&envs->client_list);
 
 	free(envs);

@@ -12,12 +12,15 @@ NEMO_BEGIN_EXTERN_C
 struct nemoenvs;
 struct nemotimer;
 
-struct nemoapp {
+struct nemoservice {
 	struct nemoenvs *envs;
 
 	pid_t pid;
 
-	char *id;
+	char *type;
+	char *path;
+	char *args;
+	char *states;
 
 	struct nemotimer *timer;
 
@@ -34,19 +37,13 @@ struct nemoclient {
 	struct nemolist link;
 };
 
-extern struct nemoapp *nemoenvs_create_app(void);
-extern void nemoenvs_destroy_app(struct nemoapp *app);
+extern struct nemoservice *nemoenvs_create_service(struct nemoenvs *envs, const char *type, const char *path, const char *args, const char *states);
+extern void nemoenvs_destroy_service(struct nemoservice *service);
 
-extern int nemoenvs_attach_app(struct nemoenvs *envs, const char *id, pid_t pid);
-extern void nemoenvs_detach_app(struct nemoenvs *envs, pid_t pid);
+extern int nemoenvs_alive_service(struct nemoenvs *envs, pid_t pid, uint32_t timeout);
+extern int nemoenvs_respawn_service(struct nemoenvs *envs, pid_t pid);
 
-extern void nemoenvs_alive_app(struct nemoenvs *envs, pid_t pid, uint32_t timeout);
-
-extern int nemoenvs_respawn_app(struct nemoenvs *envs, pid_t pid);
-
-extern void nemoenvs_execute_backgrounds(struct nemoenvs *envs);
-extern void nemoenvs_execute_daemons(struct nemoenvs *envs);
-extern void nemoenvs_execute_screensavers(struct nemoenvs *envs);
+extern void nemoenvs_launch_services(struct nemoenvs *envs, const char *type);
 
 extern int nemoenvs_attach_client(struct nemoenvs *envs, pid_t pid, const char *name);
 extern int nemoenvs_detach_client(struct nemoenvs *envs, pid_t pid);

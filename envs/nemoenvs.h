@@ -21,7 +21,7 @@ struct nemoenvs {
 
 	struct nemoitem *apps;
 
-	struct nemolist app_list;
+	struct nemolist service_list;
 	struct nemolist client_list;
 
 	struct wl_list xserver_list;

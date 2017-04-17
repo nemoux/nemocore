@@ -23,219 +23,72 @@
 #include <nemolog.h>
 #include <nemomisc.h>
 
-static void nemoenvs_execute_background(struct nemoenvs *envs, struct itemone *one);
-static void nemoenvs_execute_daemon(struct nemoenvs *envs, struct itemone *one);
-
-struct nemoapp *nemoenvs_create_app(void)
+struct nemoservice *nemoenvs_create_service(struct nemoenvs *envs, const char *type, const char *path, const char *args, const char *states)
 {
-	struct nemoapp *app;
+	struct nemoservice *service;
 
-	app = (struct nemoapp *)malloc(sizeof(struct nemoapp));
-	if (app == NULL)
+	service = (struct nemoservice *)malloc(sizeof(struct nemoservice));
+	if (service == NULL)
 		return NULL;
-	memset(app, 0, sizeof(struct nemoapp));
+	memset(service, 0, sizeof(struct nemoservice));
 
-	nemolist_init(&app->link);
+	service->envs = envs;
 
-	return app;
+	service->type = strdup(type);
+	service->path = strdup(path);
+	service->args = args != NULL ? strdup(args) : NULL;
+	service->states = states != NULL ? strdup(states) : NULL;
+
+	nemolist_insert(&envs->service_list, &service->link);
+
+	return service;
 }
 
-void nemoenvs_destroy_app(struct nemoapp *app)
+void nemoenvs_destroy_service(struct nemoservice *service)
 {
-	nemolist_remove(&app->link);
+	nemolist_remove(&service->link);
 
-	if (app->timer != NULL)
-		nemotimer_destroy(app->timer);
+	if (service->timer != NULL)
+		nemotimer_destroy(service->timer);
 
-	if (app->id != NULL)
-		free(app->id);
+	if (service->args != NULL)
+		free(service->args);
 
-	free(app);
+	if (service->states != NULL)
+		free(service->states);
+
+	free(service->path);
+	free(service->type);
+	free(service);
 }
 
-int nemoenvs_attach_app(struct nemoenvs *envs, const char *id, pid_t pid)
+static void nemoenvs_dispatch_service_timer(struct nemotimer *timer, void *data)
 {
-	struct nemoapp *app;
+	struct nemoservice *service = (struct nemoservice *)data;
+	struct nemoenvs *envs = service->envs;
 
-	app = nemoenvs_create_app();
-	if (app == NULL)
-		return -1;
+	nemolog_warning("ENVS", "alive timeout, respawn service(%s) pid(%d)!\n", service->path, service->pid);
 
-	app->envs = envs;
-	app->id = strdup(id);
-	app->pid = pid;
+	kill(service->pid, SIGKILL);
 
-	nemolist_insert(&envs->app_list, &app->link);
-
-	return 0;
+	service->pid = nemoenvs_launch_app(envs, service->path, service->args, service->states);
 }
 
-void nemoenvs_detach_app(struct nemoenvs *envs, pid_t pid)
-{
-	struct nemoapp *app, *napp;
-
-	nemolist_for_each_safe(app, napp, &envs->app_list, link) {
-		if (app->pid == pid) {
-			nemoenvs_destroy_app(app);
-			return;
-		}
-	}
-}
-
-static void nemoenvs_dispatch_alive_timer(struct nemotimer *timer, void *data)
-{
-	struct nemoapp *app = (struct nemoapp *)data;
-	struct nemoenvs *envs = app->envs;
-	struct itemone *one;
-
-	nemolog_warning("ENVS", "alive timeout, respawn app(%s) pid(%d)!\n", app->id, app->pid);
-
-	kill(app->pid, SIGKILL);
-
-	one = nemoitem_search_one(envs->apps, app->id);
-	if (one != NULL) {
-		if (nemoitem_one_has_path_prefix(one, "/nemoshell/background") != 0) {
-			nemoenvs_execute_background(envs, one);
-		} else if (nemoitem_one_has_path_prefix(one, "/nemoshell/daemon") != 0) {
-			nemoenvs_execute_daemon(envs, one);
-		}
-	}
-
-	nemoenvs_destroy_app(app);
-}
-
-void nemoenvs_alive_app(struct nemoenvs *envs, pid_t pid, uint32_t timeout)
+int nemoenvs_alive_service(struct nemoenvs *envs, pid_t pid, uint32_t timeout)
 {
 	struct nemoshell *shell = envs->shell;
 	struct nemocompz *compz = shell->compz;
-	struct nemoapp *app, *napp;
+	struct nemoservice *service, *nservice;
 
-	nemolist_for_each_safe(app, napp, &envs->app_list, link) {
-		if (app->pid == pid) {
-			if (app->timer == NULL) {
-				app->timer = nemotimer_create(compz);
-				nemotimer_set_callback(app->timer, nemoenvs_dispatch_alive_timer);
-				nemotimer_set_userdata(app->timer, app);
+	nemolist_for_each_safe(service, nservice, &envs->service_list, link) {
+		if (service->pid == pid) {
+			if (service->timer == NULL) {
+				service->timer = nemotimer_create(compz);
+				nemotimer_set_callback(service->timer, nemoenvs_dispatch_service_timer);
+				nemotimer_set_userdata(service->timer, service);
 			}
 
-			nemotimer_set_timeout(app->timer, timeout);
-
-			return;
-		}
-	}
-}
-
-static void nemoenvs_execute_background(struct nemoenvs *envs, struct itemone *one)
-{
-	struct nemoshell *shell = envs->shell;
-	struct nemocompz *compz = shell->compz;
-	struct nemotoken *token;
-	char cmds[512];
-	int32_t x = nemoitem_one_get_iattr(one, "x", 0);
-	int32_t y = nemoitem_one_get_iattr(one, "y", 0);
-	const char *path = nemoitem_one_get_attr(one, "path");
-	pid_t pid;
-
-	path = nemoitem_one_get_attr(one, "path");
-
-	nemoitem_one_save_format(one, cmds, ";--", ";", ";--");
-
-	token = nemotoken_create(cmds, strlen(cmds));
-	nemotoken_divide(token, ';');
-	nemotoken_update(token);
-
-	pid = os_execute_path(path, nemotoken_get_tokens(token), NULL);
-	if (pid > 0) {
-		struct clientstate *state;
-
-		state = nemoshell_create_client_state(shell, pid);
-		if (state != NULL) {
-			clientstate_set_fattr(state, "x", x);
-			clientstate_set_fattr(state, "y", y);
-			clientstate_set_fattr(state, "dx", 0.0f);
-			clientstate_set_fattr(state, "dy", 0.0f);
-			clientstate_set_sattr(state, "keypad", "off");
-		}
-
-		nemoenvs_attach_app(envs, nemoitem_one_get_path(one), pid);
-	}
-
-	nemotoken_destroy(token);
-}
-
-static void nemoenvs_execute_daemon(struct nemoenvs *envs, struct itemone *one)
-{
-	struct nemotoken *token;
-	const char *path = nemoitem_one_get_attr(one, "path");
-	char cmds[512];
-	pid_t pid;
-
-	nemoitem_one_save_format(one, cmds, ";--", ";", ";--");
-
-	token = nemotoken_create(cmds, strlen(cmds));
-	nemotoken_divide(token, ';');
-	nemotoken_update(token);
-
-	pid = os_execute_path(path, nemotoken_get_tokens(token), NULL);
-	if (pid > 0)
-		nemoenvs_attach_app(envs, nemoitem_one_get_path(one), pid);
-
-	nemotoken_destroy(token);
-}
-
-static void nemoenvs_execute_screensaver(struct nemoenvs *envs, struct itemone *one)
-{
-	struct nemoshell *shell = envs->shell;
-	struct nemocompz *compz = shell->compz;
-	struct nemotoken *token;
-	char cmds[512];
-	int32_t x = nemoitem_one_get_iattr(one, "x", 0);
-	int32_t y = nemoitem_one_get_iattr(one, "y", 0);
-	const char *path = nemoitem_one_get_attr(one, "path");
-	pid_t pid;
-
-	nemoitem_one_save_format(one, cmds, ";--", ";", ";--");
-
-	token = nemotoken_create(cmds, strlen(cmds));
-	nemotoken_divide(token, ';');
-	nemotoken_update(token);
-
-	pid = os_execute_path(path, nemotoken_get_tokens(token), NULL);
-	if (pid > 0) {
-		struct clientstate *state;
-
-		state = nemoshell_create_client_state(shell, pid);
-		if (state != NULL) {
-			clientstate_set_fattr(state, "x", x);
-			clientstate_set_fattr(state, "y", y);
-			clientstate_set_fattr(state, "dx", 0.0f);
-			clientstate_set_fattr(state, "dy", 0.0f);
-			clientstate_set_sattr(state, "keypad", "off");
-		}
-	}
-
-	nemotoken_destroy(token);
-}
-
-int nemoenvs_respawn_app(struct nemoenvs *envs, pid_t pid)
-{
-	struct nemoapp *app, *napp;
-	struct itemone *one;
-
-	nemolist_for_each_safe(app, napp, &envs->app_list, link) {
-		if (app->pid == pid) {
-			nemolog_warning("ENVS", "respawn app(%s) pid(%d)!\n", app->id, pid);
-
-			one = nemoitem_search_one(envs->apps, app->id);
-			if (one != NULL) {
-				if (nemoitem_one_has_path_prefix(one, "/nemoshell/background") != 0) {
-					nemoenvs_execute_background(envs, one);
-				} else if (nemoitem_one_has_path_prefix(one, "/nemoshell/daemon") != 0) {
-					nemoenvs_execute_daemon(envs, one);
-				}
-			}
-
-			nemoenvs_destroy_app(app);
+			nemotimer_set_timeout(service->timer, timeout);
 
 			return 1;
 		}
@@ -244,36 +97,30 @@ int nemoenvs_respawn_app(struct nemoenvs *envs, pid_t pid)
 	return 0;
 }
 
-void nemoenvs_execute_backgrounds(struct nemoenvs *envs)
+int nemoenvs_respawn_service(struct nemoenvs *envs, pid_t pid)
 {
-	struct itemone *one;
+	struct nemoservice *service, *nservice;
 
-	nemoitem_for_each(one, envs->apps) {
-		if (nemoitem_one_has_path_prefix(one, "/nemoshell/background") != 0) {
-			nemoenvs_execute_background(envs, one);
+	nemolist_for_each_safe(service, nservice, &envs->service_list, link) {
+		if (service->pid == pid) {
+			nemolog_warning("ENVS", "respawn service(%s) pid(%d)!\n", service->path, pid);
+
+			service->pid = nemoenvs_launch_app(envs, service->path, service->args, service->states);
+
+			return 1;
 		}
 	}
+
+	return 0;
 }
 
-void nemoenvs_execute_daemons(struct nemoenvs *envs)
+void nemoenvs_launch_services(struct nemoenvs *envs, const char *type)
 {
-	struct itemone *one;
+	struct nemoservice *service;
 
-	nemoitem_for_each(one, envs->apps) {
-		if (nemoitem_one_has_path_prefix(one, "/nemoshell/daemon") != 0) {
-			nemoenvs_execute_daemon(envs, one);
-		}
-	}
-}
-
-void nemoenvs_execute_screensavers(struct nemoenvs *envs)
-{
-	struct itemone *one;
-
-	nemoitem_for_each(one, envs->apps) {
-		if (nemoitem_one_has_path_prefix(one, "/nemoshell/screensaver") != 0) {
-			nemoenvs_execute_screensaver(envs, one);
-		}
+	nemolist_for_each(service, &envs->service_list, link) {
+		if (strcmp(service->type, type) == 0)
+			service->pid = nemoenvs_launch_app(envs, service->path, service->args, service->states);
 	}
 }
 
@@ -386,5 +233,5 @@ int nemoenvs_launch_app(struct nemoenvs *envs, const char *_path, const char *_a
 
 	nemotoken_destroy(args);
 
-	return 0;
+	return pid;
 }

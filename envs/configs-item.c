@@ -583,10 +583,53 @@ int nemoenvs_set_item_config(struct nemoenvs *envs, struct itemone *one)
 		nemocompz_set_idle_timeout(shell->compz, timeout);
 	} else if (namespace_has_prefix(path, "/nemoshell/legacy") != 0) {
 		envs->legacy.pick_taps = nemoitem_one_get_iattr(one, "pick_taps", 3);
-	} else if (namespace_has_prefix(path, "/nemoshell/background") != 0 ||
-			namespace_has_prefix(path, "/nemoshell/daemon") != 0 ||
-			namespace_has_prefix(path, "/nemoshell/screensaver") != 0) {
-		nemoitem_attach_one(envs->apps, nemoitem_one_clone(one));
+	} else if (namespace_has_prefix(path, "/nemoshell/background") != 0) {
+		struct itemone *sone;
+		const char *path = nemoitem_one_get_attr(one, "path");
+		int x = nemoitem_one_get_iattr(one, "x", 0);
+		int y = nemoitem_one_get_iattr(one, "y", 0);
+		char args[512];
+		char states[512];
+
+		nemoitem_one_save_format(one, args, ";--", ";", ";--");
+
+		sone = nemoitem_one_create();
+		nemoitem_one_set_attr_format(sone, "x", "%f", x);
+		nemoitem_one_set_attr_format(sone, "y", "%f", y);
+		nemoitem_one_set_attr_format(sone, "dx", "%f", 0.0f);
+		nemoitem_one_set_attr_format(sone, "dy", "%f", 0.0f);
+		nemoitem_one_set_attr(sone, "keypad", "off");
+		nemoitem_one_save_attrs(sone, states, ';');
+		nemoitem_one_destroy(sone);
+
+		nemoenvs_create_service(envs, "background", path, args, states);
+	} else if (namespace_has_prefix(path, "/nemoshell/daemon") != 0) {
+		const char *path = nemoitem_one_get_attr(one, "path");
+		char args[512];
+
+		nemoitem_one_save_format(one, args, ";--", ";", ";--");
+
+		nemoenvs_create_service(envs, "daemon", path, args, NULL);
+	} else if (namespace_has_prefix(path, "/nemoshell/screensaver") != 0) {
+		struct itemone *sone;
+		const char *path = nemoitem_one_get_attr(one, "path");
+		int x = nemoitem_one_get_iattr(one, "x", 0);
+		int y = nemoitem_one_get_iattr(one, "y", 0);
+		char args[512];
+		char states[512];
+
+		nemoitem_one_save_format(one, args, ";--", ";", ";--");
+
+		sone = nemoitem_one_create();
+		nemoitem_one_set_attr_format(sone, "x", "%f", x);
+		nemoitem_one_set_attr_format(sone, "y", "%f", y);
+		nemoitem_one_set_attr_format(sone, "dx", "%f", 0.0f);
+		nemoitem_one_set_attr_format(sone, "dy", "%f", 0.0f);
+		nemoitem_one_set_attr(sone, "keypad", "off");
+		nemoitem_one_save_attrs(sone, states, ';');
+		nemoitem_one_destroy(sone);
+
+		nemoenvs_create_service(envs, "screensaver", path, args, states);
 	}
 
 	return 0;
