@@ -602,14 +602,14 @@ int nemoenvs_set_item_config(struct nemoenvs *envs, struct itemone *one)
 		nemoitem_one_save_attrs(sone, states, ';');
 		nemoitem_one_destroy(sone);
 
-		nemoenvs_create_service(envs, "background", path, args, states);
+		nemoenvs_attach_service(envs, "background", path, args, states);
 	} else if (namespace_has_prefix(path, "/nemoshell/daemon") != 0) {
 		const char *path = nemoitem_one_get_attr(one, "path");
 		char args[512];
 
 		nemoitem_one_save_format(one, args, ";--", ";", ";--");
 
-		nemoenvs_create_service(envs, "daemon", path, args, NULL);
+		nemoenvs_attach_service(envs, "daemon", path, args, NULL);
 	} else if (namespace_has_prefix(path, "/nemoshell/screensaver") != 0) {
 		struct itemone *sone;
 		const char *path = nemoitem_one_get_attr(one, "path");
@@ -629,7 +629,7 @@ int nemoenvs_set_item_config(struct nemoenvs *envs, struct itemone *one)
 		nemoitem_one_save_attrs(sone, states, ';');
 		nemoitem_one_destroy(sone);
 
-		nemoenvs_create_service(envs, "screensaver", path, args, states);
+		nemoenvs_attach_service(envs, "screensaver", path, args, states);
 	}
 
 	return 0;

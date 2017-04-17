@@ -37,8 +37,8 @@ struct nemoclient {
 	struct nemolist link;
 };
 
-extern struct nemoservice *nemoenvs_create_service(struct nemoenvs *envs, const char *type, const char *path, const char *args, const char *states);
-extern void nemoenvs_destroy_service(struct nemoservice *service);
+extern struct nemoservice *nemoenvs_attach_service(struct nemoenvs *envs, const char *type, const char *path, const char *args, const char *states);
+extern void nemoenvs_detach_service(struct nemoservice *service);
 
 extern int nemoenvs_alive_service(struct nemoenvs *envs, pid_t pid, uint32_t timeout);
 extern int nemoenvs_respawn_service(struct nemoenvs *envs, pid_t pid);

@@ -115,7 +115,7 @@ static void nemoenvs_handle_set_nemotheme_service(struct nemoenvs *envs, struct 
 			nemojson_destroy(json);
 		}
 
-		nemoenvs_create_service(envs,
+		nemoenvs_attach_service(envs,
 				type,
 				path,
 				nemostring_get(args),

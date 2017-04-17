@@ -23,7 +23,7 @@
 #include <nemolog.h>
 #include <nemomisc.h>
 
-struct nemoservice *nemoenvs_create_service(struct nemoenvs *envs, const char *type, const char *path, const char *args, const char *states)
+struct nemoservice *nemoenvs_attach_service(struct nemoenvs *envs, const char *type, const char *path, const char *args, const char *states)
 {
 	struct nemoservice *service;
 
@@ -44,7 +44,7 @@ struct nemoservice *nemoenvs_create_service(struct nemoenvs *envs, const char *t
 	return service;
 }
 
-void nemoenvs_destroy_service(struct nemoservice *service)
+void nemoenvs_detach_service(struct nemoservice *service)
 {
 	nemolist_remove(&service->link);
 
