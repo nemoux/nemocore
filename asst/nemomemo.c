@@ -9,6 +9,7 @@
 #include <errno.h>
 
 #include <ctype.h>
+#include <regex.h>
 
 #include <nemomemo.h>
 #include <nemomisc.h>
@@ -81,6 +82,86 @@ void nemomemo_toupper(struct nemomemo *memo)
 
 	for (i = 0; i < length; i++)
 		memo->contents[i] = toupper(memo->contents[i]);
+}
+
+int nemomemo_string_has_prefix(const char *str, const char *ps)
+{
+	int length = strlen(ps);
+	int i;
+
+	for (i = 0; i < length; i++) {
+		if (str[i] != ps[i])
+			return 0;
+	}
+
+	return 1;
+}
+
+int nemomemo_string_has_prefix_format(const char *str, const char *fmt, ...)
+{
+	va_list vargs;
+	char *ps;
+	int length;
+	int i;
+
+	va_start(vargs, fmt);
+	vasprintf(&ps, fmt, vargs);
+	va_end(vargs);
+
+	length = strlen(ps);
+
+	for (i = 0; i < length; i++) {
+		if (str[i] != ps[i]) {
+			free(ps);
+
+			return 0;
+		}
+	}
+
+	free(ps);
+
+	return 1;
+}
+
+int nemomemo_string_has_regex(const char *str, const char *expr)
+{
+	regex_t regex;
+	int r;
+
+	if (regcomp(&regex, expr, REG_EXTENDED))
+		return -1;
+
+	r = regexec(&regex, str, 0, NULL, 0) == 0;
+
+	regfree(&regex);
+
+	return r;
+}
+
+int nemomemo_string_has_regex_format(const char *str, const char *fmt, ...)
+{
+	va_list vargs;
+	regex_t regex;
+	char *expr;
+	int r;
+
+	va_start(vargs, fmt);
+	vasprintf(&expr, fmt, vargs);
+	va_end(vargs);
+
+	if (regcomp(&regex, expr, REG_EXTENDED)) {
+		free(expr);
+
+		return -1;
+	}
+
+	r = regexec(&regex, str, 0, NULL, 0) == 0;
+
+	regfree(&regex);
+
+	free(expr);
+
+	return r;
 }
 
 int nemomemo_string_parse_decimal(const char *str, int offset, int length)

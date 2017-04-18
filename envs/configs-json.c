@@ -37,7 +37,6 @@
 #include <xdgshell.h>
 #include <nemoshell.h>
 #include <syshelper.h>
-#include <namespacehelper.h>
 #include <nemotoken.h>
 #include <nemoitem.h>
 #include <nemojson.h>

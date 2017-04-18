@@ -25,6 +25,11 @@ extern void nemomemo_append_format(struct nemomemo *memo, const char *fmt, ...);
 extern void nemomemo_tolower(struct nemomemo *memo);
 extern void nemomemo_toupper(struct nemomemo *memo);
 
+extern int nemomemo_string_has_prefix(const char *str, const char *ps);
+extern int nemomemo_string_has_prefix_format(const char *str, const char *fmt, ...);
+extern int nemomemo_string_has_regex(const char *str, const char *expr);
+extern int nemomemo_string_has_regex_format(const char *str, const char *fmt, ...);
+
 extern int nemomemo_string_parse_decimal(const char *str, int offset, int length);
 extern int nemomemo_string_parse_hexadecimal(const char *str, int offset, int length);
 extern double nemomemo_string_parse_float(const char *str, int offset, int length);

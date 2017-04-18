@@ -68,7 +68,6 @@ add_library(nemohelper SHARED
 	codehelper.c
 	utf8helper.c
 	fonthelper.c
-	namespacehelper.c
 	keycodehelper.c
 	colorhelper.c
 	syshelper.c
@@ -110,7 +109,6 @@ set(HEADER_FILES
 	codehelper.h
 	utf8helper.h
 	fonthelper.h
-	namespacehelper.h
 	keycodehelper.h
 	colorhelper.h
 	syshelper.h
