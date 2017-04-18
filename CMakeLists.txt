@@ -73,5 +73,3 @@ add_subdirectory(envs)
 add_subdirectory(apps)
 
 add_subdirectory(utils)
-
-add_subdirectory(yoyo)
