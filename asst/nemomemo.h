@@ -25,6 +25,14 @@ extern void nemomemo_append_format(struct nemomemo *memo, const char *fmt, ...);
 extern void nemomemo_tolower(struct nemomemo *memo);
 extern void nemomemo_toupper(struct nemomemo *memo);
 
+extern int nemomemo_string_parse_decimal(const char *str, int offset, int length);
+extern int nemomemo_string_parse_hexadecimal(const char *str, int offset, int length);
+extern double nemomemo_string_parse_float(const char *str, int offset, int length);
+extern const char *nemomemo_string_find_alphabet(const char *str, int offset, int length);
+extern const char *nemomemo_string_find_number(const char *str, int offset, int length);
+extern int nemomemo_string_is_alphabet(const char *str, int offset, int length);
+extern int nemomemo_string_is_number(const char *str, int offset, int length);
+
 static inline const char *nemomemo_get(struct nemomemo *memo)
 {
 	return memo->contents;

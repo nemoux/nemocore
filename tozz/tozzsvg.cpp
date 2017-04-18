@@ -6,9 +6,9 @@
 #include <errno.h>
 
 #include <tozzsvg.hpp>
-#include <stringhelper.h>
 #include <nemoxml.h>
 #include <nemotoken.h>
+#include <nemomemo.h>
 #include <nemomisc.h>
 
 static int nemotozz_svg_get_transform_args(struct nemotoken *token, int offset, double *args)
@@ -18,7 +18,7 @@ static int nemotozz_svg_get_transform_args(struct nemotoken *token, int offset, 
 
 	for (i = 0; ; i++) {
 		value = nemotoken_get_token(token, i + offset);
-		if (value == NULL || string_is_number(value, 0, strlen(value)) == 0)
+		if (value == NULL || nemomemo_string_is_number(value, 0, strlen(value)) == 0)
 			break;
 
 		args[i] = strtod(value, NULL);
@@ -225,8 +225,8 @@ int nemotozz_svg_load(const char *url, float x, float y, float w, float h, SkPat
 			attr1 = nemoxml_node_get_attr(node, "height");
 
 			if (attr0 != NULL && attr1 != NULL) {
-				width = string_parse_float(attr0, 0, strlen(attr0));
-				height = string_parse_float(attr1, 0, strlen(attr1));
+				width = nemomemo_string_parse_float(attr0, 0, strlen(attr0));
+				height = nemomemo_string_parse_float(attr1, 0, strlen(attr1));
 			}
 		}
 

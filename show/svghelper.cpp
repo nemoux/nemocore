@@ -13,8 +13,8 @@
 #include <showitem.hpp>
 #include <showshader.h>
 #include <showshader.hpp>
-#include <stringhelper.h>
 #include <nemotoken.h>
+#include <nemomemo.h>
 #include <nemomisc.h>
 
 static int nemoshow_svg_get_transform_args(struct nemotoken *token, int offset, double *args)
@@ -24,7 +24,7 @@ static int nemoshow_svg_get_transform_args(struct nemotoken *token, int offset, 
 
 	for (i = 0; ; i++) {
 		value = nemotoken_get_token(token, i + offset);
-		if (value == NULL || string_is_number(value, 0, strlen(value)) == 0)
+		if (value == NULL || nemomemo_string_is_number(value, 0, strlen(value)) == 0)
 			break;
 
 		args[i] = strtod(value, NULL);

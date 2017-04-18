@@ -26,8 +26,8 @@
 #include <skiahelper.hpp>
 #include <fonthelper.h>
 #include <svghelper.hpp>
-#include <stringhelper.h>
 #include <colorhelper.h>
+#include <nemomemo.h>
 #include <nemoxml.h>
 #include <nemomisc.h>
 
@@ -1610,8 +1610,8 @@ int nemoshow_item_path_load_svg(struct showone *one, const char *uri, double x, 
 				sw = width;
 				sh = height;
 
-				pw = string_parse_float(attr0, 0, strlen(attr0));
-				ph = string_parse_float(attr1, 0, strlen(attr1));
+				pw = nemomemo_string_parse_float(attr0, 0, strlen(attr0));
+				ph = nemomemo_string_parse_float(attr1, 0, strlen(attr1));
 
 				if (sw != pw || sh != ph) {
 					matrix.postScale(sw / pw, sh / ph);
