@@ -11,7 +11,7 @@ set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 add_library(nemoasst SHARED
 	nemomatrix.c
 	nemotoken.c
-	nemostring.c
+	nemomemo.c
 	nemoitem.c
 	nemotable.c
 	nemotransition.c
@@ -29,7 +29,7 @@ INSTALL(TARGETS nemoasst DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
 set(HEADER_FILES
 	nemomatrix.h
 	nemotoken.h
-	nemostring.h
+	nemomemo.h
 	nemoitem.h
 	nemotable.h
 	nemotransition.h

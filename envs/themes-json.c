@@ -39,7 +39,7 @@
 #include <syshelper.h>
 #include <namespacehelper.h>
 #include <nemotoken.h>
-#include <nemostring.h>
+#include <nemomemo.h>
 #include <nemoitem.h>
 #include <nemojson.h>
 #include <nemomisc.h>
@@ -54,15 +54,15 @@ static void nemoenvs_handle_set_nemotheme_service(struct nemoenvs *envs, struct 
 	for (i = 0; i < nemojson_array_get_length(jobj); i++) {
 		struct json_object *cobj = nemojson_array_get_object(jobj, i);
 		struct json_object *tobj;
-		struct nemostring *args;
-		struct nemostring *states;
+		struct nemomemo *args;
+		struct nemomemo *states;
 		const char *path = NULL;
 
 		path = nemojson_object_get_string(cobj, "path", NULL);
 
-		args = nemostring_create(512);
-		nemostring_append_format(args, "--width;%d;", nemojson_object_get_integer(cobj, "width", 0));
-		nemostring_append_format(args, "--height;%d;", nemojson_object_get_integer(cobj, "height", 0));
+		args = nemomemo_create(512);
+		nemomemo_append_format(args, "--width;%d;", nemojson_object_get_integer(cobj, "width", 0));
+		nemomemo_append_format(args, "--height;%d;", nemojson_object_get_integer(cobj, "height", 0));
 
 		tobj = nemojson_object_get_object(cobj, "param", NULL);
 		if (tobj != NULL) {
@@ -77,25 +77,25 @@ static void nemoenvs_handle_set_nemotheme_service(struct nemoenvs *envs, struct 
 				const char *istr = nemojson_get_string(json, j);
 
 				if (strcmp(ikey, "#optind") == 0) {
-					nemostring_append_format(args, "%s;", istr);
+					nemomemo_append_format(args, "%s;", istr);
 				} else if (istr[0] != '\0' && istr[0] != ' ' && istr[0] != '\t' && istr[0] != '\n') {
-					nemostring_append_format(args, "--%s;%s;", ikey, istr);
+					nemomemo_append_format(args, "--%s;%s;", ikey, istr);
 				} else {
-					nemostring_append_format(args, "--%s;", ikey);
+					nemomemo_append_format(args, "--%s;", ikey);
 				}
 			}
 
 			nemojson_destroy(json);
 		}
 
-		states = nemostring_create(512);
-		nemostring_append_format(states, "%s;%f;", "x", nemojson_object_get_double(cobj, "x", 0.0f));
-		nemostring_append_format(states, "%s;%f;", "y", nemojson_object_get_double(cobj, "y", 0.0f));
-		nemostring_append_format(states, "%s;%f;", "width", nemojson_object_get_double(cobj, "width", 0.0f));
-		nemostring_append_format(states, "%s;%f;", "height", nemojson_object_get_double(cobj, "height", 0.0f));
-		nemostring_append_format(states, "%s;%f;", "dx", nemojson_object_get_double(cobj, "dx", 0.0f));
-		nemostring_append_format(states, "%s;%f;", "dy", nemojson_object_get_double(cobj, "dy", 0.0f));
-		nemostring_append_format(states, "%s;%s;", "layer", nemojson_object_get_string(cobj, "layerId", "background"));
+		states = nemomemo_create(512);
+		nemomemo_append_format(states, "%s;%f;", "x", nemojson_object_get_double(cobj, "x", 0.0f));
+		nemomemo_append_format(states, "%s;%f;", "y", nemojson_object_get_double(cobj, "y", 0.0f));
+		nemomemo_append_format(states, "%s;%f;", "width", nemojson_object_get_double(cobj, "width", 0.0f));
+		nemomemo_append_format(states, "%s;%f;", "height", nemojson_object_get_double(cobj, "height", 0.0f));
+		nemomemo_append_format(states, "%s;%f;", "dx", nemojson_object_get_double(cobj, "dx", 0.0f));
+		nemomemo_append_format(states, "%s;%f;", "dy", nemojson_object_get_double(cobj, "dy", 0.0f));
+		nemomemo_append_format(states, "%s;%s;", "layer", nemojson_object_get_string(cobj, "layerId", "background"));
 
 		tobj = nemojson_object_get_object(cobj, "state", NULL);
 		if (tobj != NULL) {
@@ -109,7 +109,7 @@ static void nemoenvs_handle_set_nemotheme_service(struct nemoenvs *envs, struct 
 				const char *ikey = nemojson_get_key(json, j);
 				const char *istr = nemojson_get_string(json, j);
 
-				nemostring_append_format(states, "%s:%s;", ikey, istr);
+				nemomemo_append_format(states, "%s:%s;", ikey, istr);
 			}
 
 			nemojson_destroy(json);
@@ -118,11 +118,11 @@ static void nemoenvs_handle_set_nemotheme_service(struct nemoenvs *envs, struct 
 		nemoenvs_attach_service(envs,
 				type,
 				path,
-				nemostring_get(args),
-				nemostring_get(states));
+				nemomemo_get(args),
+				nemomemo_get(states));
 
-		nemostring_destroy(args);
-		nemostring_destroy(states);
+		nemomemo_destroy(args);
+		nemomemo_destroy(states);
 	}
 }
 
