@@ -159,9 +159,9 @@ int nemoyoyo_actor_execute(struct yoyoactor *actor, int index, float x, float y,
 		nemobus_msg_set_attr(msg, "args", nemostring_get(args));
 
 		states = nemostring_create(512);
-		nemostring_append_format(states, "%s;%f", "x", x);
-		nemostring_append_format(states, "%s;%f", "y", y);
-		nemostring_append_format(states, "%s;%f", "r", actor->geometry.r * 100.0f / M_PI);
+		nemostring_append_format(states, "%s;%f;", "x", x);
+		nemostring_append_format(states, "%s;%f;", "y", y);
+		nemostring_append_format(states, "%s;%f;", "r", actor->geometry.r * 180.0f / M_PI);
 
 		tobj = nemojson_object_get_object(cobj, "state", NULL);
 		if (tobj != NULL) {
