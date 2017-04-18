@@ -62,6 +62,7 @@ static void nemoenvs_handle_set_nemotheme_service(struct nemoenvs *envs, struct 
 		args = nemomemo_create(512);
 		nemomemo_append_format(args, "--width;%d;", nemojson_object_get_integer(cobj, "width", 0));
 		nemomemo_append_format(args, "--height;%d;", nemojson_object_get_integer(cobj, "height", 0));
+		nemomemo_append_format(args, "--layer;%s;", nemojson_object_get_string(cobj, "layerId", "background"));
 
 		tobj = nemojson_object_get_object(cobj, "param", NULL);
 		if (tobj != NULL) {
@@ -94,7 +95,6 @@ static void nemoenvs_handle_set_nemotheme_service(struct nemoenvs *envs, struct 
 		nemomemo_append_format(states, "%s;%f;", "height", nemojson_object_get_double(cobj, "height", 0.0f));
 		nemomemo_append_format(states, "%s;%f;", "dx", nemojson_object_get_double(cobj, "dx", 0.0f));
 		nemomemo_append_format(states, "%s;%f;", "dy", nemojson_object_get_double(cobj, "dy", 0.0f));
-		nemomemo_append_format(states, "%s;%s;", "layer", nemojson_object_get_string(cobj, "layerId", "background"));
 
 		tobj = nemojson_object_get_object(cobj, "state", NULL);
 		if (tobj != NULL) {
