@@ -132,6 +132,26 @@ static inline int nemocook_transform_update(struct cooktrans *trans)
 	return trans->update(trans);
 }
 
+static inline struct nemomatrix *nemocook_transform_get_matrix(struct cooktrans *trans)
+{
+	return &trans->matrix;
+}
+
+static inline float *nemocook_transform_get_matrix4fv(struct cooktrans *trans)
+{
+	return nemomatrix_get_array(&trans->matrix);
+}
+
+static inline struct nemomatrix *nemocook_transform_get_inverse_matrix(struct cooktrans *trans)
+{
+	return &trans->inverse;
+}
+
+static inline float *nemocook_transform_get_inverse_matrix4fv(struct cooktrans *trans)
+{
+	return nemomatrix_get_array(&trans->inverse);
+}
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif
