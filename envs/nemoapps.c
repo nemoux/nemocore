@@ -71,7 +71,7 @@ static void nemoenvs_dispatch_service_timer(struct nemotimer *timer, void *data)
 
 	kill(service->pid, SIGKILL);
 
-	service->pid = nemoenvs_launch_app(envs, service->path, service->args, service->states);
+	service->pid = nemoenvs_launch_service(envs, service->path, service->args, service->states);
 }
 
 int nemoenvs_alive_service(struct nemoenvs *envs, pid_t pid, uint32_t timeout)
@@ -105,7 +105,7 @@ int nemoenvs_respawn_service(struct nemoenvs *envs, pid_t pid)
 		if (service->pid == pid) {
 			nemolog_warning("ENVS", "respawn service(%s) pid(%d)!\n", service->path, pid);
 
-			service->pid = nemoenvs_launch_app(envs, service->path, service->args, service->states);
+			service->pid = nemoenvs_launch_service(envs, service->path, service->args, service->states);
 
 			return 1;
 		}
@@ -114,13 +114,13 @@ int nemoenvs_respawn_service(struct nemoenvs *envs, pid_t pid)
 	return 0;
 }
 
-void nemoenvs_launch_services(struct nemoenvs *envs, const char *type)
+void nemoenvs_start_services(struct nemoenvs *envs, const char *type)
 {
 	struct nemoservice *service;
 
 	nemolist_for_each(service, &envs->service_list, link) {
 		if (strcmp(service->type, type) == 0)
-			service->pid = nemoenvs_launch_app(envs, service->path, service->args, service->states);
+			service->pid = nemoenvs_launch_service(envs, service->path, service->args, service->states);
 	}
 }
 
@@ -199,6 +199,39 @@ int nemoenvs_terminate_clients(struct nemoenvs *envs)
 int nemoenvs_get_client_count(struct nemoenvs *envs)
 {
 	return nemolist_length(&envs->client_list);
+}
+
+int nemoenvs_launch_service(struct nemoenvs *envs, const char *_path, const char *_args, const char *_states)
+{
+	struct nemotoken *args;
+	pid_t pid;
+
+	args = nemotoken_create(_path, strlen(_path));
+	if (_args != NULL)
+		nemotoken_append_format(args, ";%s", _args);
+	nemotoken_divide(args, ';');
+	nemotoken_update(args);
+
+	pid = os_execute_path(_path, nemotoken_get_tokens(args), NULL);
+	if (pid > 0) {
+		struct nemotoken *states;
+		struct clientstate *state;
+
+		states = nemotoken_create(_states, strlen(_states));
+		nemotoken_divide(states, ';');
+		nemotoken_update(states);
+
+		state = nemoshell_create_client_state(envs->shell, pid);
+		clientstate_set_attrs(state,
+				nemotoken_get_tokens(states),
+				nemotoken_get_count(states) / 2);
+
+		nemotoken_destroy(states);
+	}
+
+	nemotoken_destroy(args);
+
+	return pid;
 }
 
 int nemoenvs_launch_app(struct nemoenvs *envs, const char *_path, const char *_args, const char *_states)

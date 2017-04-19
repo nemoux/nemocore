@@ -234,7 +234,7 @@ static void minishell_enter_idle(void *data)
 	nemoenvs_terminate_clients(mini->envs);
 	nemoenvs_terminate_xclients(mini->envs);
 
-	nemoenvs_launch_services(mini->envs, "screensaver");
+	nemoenvs_start_services(mini->envs, "screensaver");
 }
 
 int main(int argc, char *argv[])
@@ -360,8 +360,8 @@ int main(int argc, char *argv[])
 	nemoenvs_launch_xserver(mini->envs, xdisplay, rendernode);
 	nemoenvs_use_xserver(mini->envs, xdisplay);
 
-	nemoenvs_launch_services(mini->envs, "background");
-	nemoenvs_launch_services(mini->envs, "daemon");
+	nemoenvs_start_services(mini->envs, "background");
+	nemoenvs_start_services(mini->envs, "daemon");
 
 	nemocompz_run(compz);
 
