@@ -214,19 +214,21 @@ int nemoenvs_launch_service(struct nemoenvs *envs, const char *_path, const char
 
 	pid = os_execute_path(_path, nemotoken_get_tokens(args), NULL);
 	if (pid > 0) {
-		struct nemotoken *states;
-		struct clientstate *state;
+		if (_states != NULL) {
+			struct nemotoken *states;
+			struct clientstate *state;
 
-		states = nemotoken_create(_states, strlen(_states));
-		nemotoken_divide(states, ';');
-		nemotoken_update(states);
+			states = nemotoken_create(_states, strlen(_states));
+			nemotoken_divide(states, ';');
+			nemotoken_update(states);
 
-		state = nemoshell_create_client_state(envs->shell, pid);
-		clientstate_set_attrs(state,
-				nemotoken_get_tokens(states),
-				nemotoken_get_count(states) / 2);
+			state = nemoshell_create_client_state(envs->shell, pid);
+			clientstate_set_attrs(state,
+					nemotoken_get_tokens(states),
+					nemotoken_get_count(states) / 2);
 
-		nemotoken_destroy(states);
+			nemotoken_destroy(states);
+		}
 	}
 
 	nemotoken_destroy(args);
@@ -247,21 +249,23 @@ int nemoenvs_launch_app(struct nemoenvs *envs, const char *_path, const char *_a
 
 	pid = os_execute_path(_path, nemotoken_get_tokens(args), NULL);
 	if (pid > 0) {
-		struct nemotoken *states;
-		struct clientstate *state;
-
-		states = nemotoken_create(_states, strlen(_states));
-		nemotoken_divide(states, ';');
-		nemotoken_update(states);
-
-		state = nemoshell_create_client_state(envs->shell, pid);
-		clientstate_set_attrs(state,
-				nemotoken_get_tokens(states),
-				nemotoken_get_count(states) / 2);
-
-		nemotoken_destroy(states);
-
 		nemoenvs_attach_client(envs, pid, _path);
+
+		if (_states != NULL) {
+			struct nemotoken *states;
+			struct clientstate *state;
+
+			states = nemotoken_create(_states, strlen(_states));
+			nemotoken_divide(states, ';');
+			nemotoken_update(states);
+
+			state = nemoshell_create_client_state(envs->shell, pid);
+			clientstate_set_attrs(state,
+					nemotoken_get_tokens(states),
+					nemotoken_get_count(states) / 2);
+
+			nemotoken_destroy(states);
+		}
 	}
 
 	nemotoken_destroy(args);
