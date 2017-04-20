@@ -52,7 +52,6 @@ if(WITH_MINISHELL)
 		nemoenvs
 		nemoplay
 		nemocook
-		nemodb
 		)
 
 	if(WITH_TCMALLOC)
