@@ -8,6 +8,7 @@ NEMO_BEGIN_EXTERN_C
 #endif
 
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <nemolist.h>
