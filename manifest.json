@@ -1,0 +1,12 @@
+{
+ "pkgname": "nemocore",
+ "name": "nemocore",
+ "maintainer": "Kim Taehwan<taehwan.kim@nemoux.net>",
+ "description": "nemocore",
+ "version": "0.1.0",
+ "type": "shell",
+ "icon": {
+ },
+ "config": {
+ }
+}

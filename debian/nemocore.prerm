@@ -1,5 +1,5 @@
 # Automatically added by dh_systemd_start
 if [ -d /run/systemd/system ]; then
-	deb-systemd-invoke stop nemobusd.service >/dev/null
+	deb-systemd-invoke stop minishell.service nemobusd.service >/dev/null
 fi
 # End automatically added section

@@ -13,7 +13,7 @@ Package: nemocore
 Priority: optional
 Section: libs
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, pulseaudio, xwayland
 Description: NEMOUX's core platform libraries
  <insert long description, indented with spaces>
 
@@ -27,20 +27,11 @@ Depends: ${shlibs:Depends}, ${misc:Depends},
 Description: NEMOUX's core platform development files
  <insert long description, indented with spaces>
 
-Package: nemocore-bin
-Priority: optional
-Section: graphics
-Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends},
-    nemocore (= ${binary:Version}), pulseaudio, xwayland
-Description: NEMOUX's core platform applications
- <insert long description, indented with spaces>
-
 Package: nemocore-dbg
 Priority: extra
 Section: debug
 Architecture: any
-Depends: nemocore (= ${binary:Version}), nemocore-bin (= ${binary:Version})
+Depends: nemocore (= ${binary:Version})
     ${shlibs:Depends}, ${misc:Depends}
 Description: NEMOUX's core platform debugging symbols
  <insert long description, indented with spaces>

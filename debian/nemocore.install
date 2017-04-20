@@ -1,1 +1,5 @@
 usr/lib/*.so
+usr/bin/*
+lib/systemd/system/minishell.service
+lib/systemd/system/nemobusd.service
+opt/pkgs/nemocore/*

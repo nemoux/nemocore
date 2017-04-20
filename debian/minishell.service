@@ -1,0 +1,19 @@
+[Unit]
+Description=minishell Wayland compositor startup
+RequiresMountsFor=/run
+Requires=nemobusd.service
+After=nemosnow-agent.service
+Conflicts=ste-shell.service
+
+[Service]
+User=root
+Environment="XDG_RUNTIME_DIR=/run/user/root"
+#ExecStartPre=. /etc/profile
+ExecStartPre=/bin/mkdir -p /run/user/root
+ExecStartPre=/bin/chmod 0700 /run/user/root
+ExecStart=/bin/openvt -s -w -- /usr/bin/minishell -s seat0
+#Restart=always
+#RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

@@ -73,3 +73,7 @@ add_subdirectory(envs)
 add_subdirectory(apps)
 
 add_subdirectory(utils)
+
+INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/manifest.json
+    DESTINATION  /opt/pkgs/nemocore/
+    )

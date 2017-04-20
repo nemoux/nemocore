@@ -14,7 +14,7 @@
 #export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
 
 %:
-	dh $@ --with=systemd
+	dh $@
 
 
 override_dh_auto_configure:
@@ -26,6 +26,7 @@ override_dh_auto_build:
 override_dh_auto_install:
 	dh_auto_install --
 	mkdir -p debian/tmp/lib/systemd/system && cp -rfv debian/nemobusd.service debian/tmp/lib/systemd/system/
+	mkdir -p debian/tmp/lib/systemd/system && cp -rfv debian/minishell.service debian/tmp/lib/systemd/system/
 
 # dh_make generated override targets
 # This is example for Cmake (See https://bugs.debian.org/641051 )
