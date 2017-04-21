@@ -1018,7 +1018,7 @@ static inline void nemoshell_set_client_state(struct shellbin *bin, struct clien
 			const char *uuid = nemoitem_one_get_sattr(state->one, "owner", NULL);
 			struct nemoview *owner = uuid != NULL ? nemocompz_get_view_by_uuid(shell->compz, uuid) : NULL;
 
-			if (strcmp(coordination, "local") != 0 && owner != NULL) {
+			if (strcmp(coordination, "local") == 0 && owner != NULL) {
 				bin->initial.x = nemoitem_one_get_fattr(state->one, "x", 0.0f);
 				bin->initial.y = nemoitem_one_get_fattr(state->one, "y", 0.0f);
 				bin->initial.has_position = 1;
