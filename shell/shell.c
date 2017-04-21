@@ -1014,9 +1014,21 @@ static inline void nemoshell_set_client_state(struct shellbin *bin, struct clien
 			nemoshell_set_fullscreen_bin(shell, bin, screen);
 	} else {
 		if (nemoitem_one_has_attr(state->one, "x") != 0 || nemoitem_one_has_attr(state->one, "y") != 0) {
-			bin->initial.x = nemoitem_one_get_fattr(state->one, "x", 0.0f);
-			bin->initial.y = nemoitem_one_get_fattr(state->one, "y", 0.0f);
-			bin->initial.has_position = 1;
+			const char *coordination = nemoitem_one_get_sattr(state->one, "coordination", "local");
+			const char *uuid = nemoitem_one_get_sattr(state->one, "owner", NULL);
+			struct nemoview *owner = uuid != NULL ? nemocompz_get_view_by_uuid(shell->compz, uuid) : NULL;
+
+			if (strcmp(coordination, "local") != 0 && owner != NULL) {
+				bin->initial.x = nemoitem_one_get_fattr(state->one, "x", 0.0f);
+				bin->initial.y = nemoitem_one_get_fattr(state->one, "y", 0.0f);
+				bin->initial.has_position = 1;
+
+				nemoview_transform_to_global(owner, bin->initial.x, bin->initial.y, &bin->initial.x, &bin->initial.y);
+			} else {
+				bin->initial.x = nemoitem_one_get_fattr(state->one, "x", 0.0f);
+				bin->initial.y = nemoitem_one_get_fattr(state->one, "y", 0.0f);
+				bin->initial.has_position = 1;
+			}
 		}
 
 		bin->initial.r = nemoitem_one_get_fattr(state->one, "r", 0.0f) * M_PI / 180.0f;
