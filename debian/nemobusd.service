@@ -1,6 +1,6 @@
 [Unit]
 Description=nemobus daemon service
-RequiresMountsFor=network.target
+Requires=network.target
 
 [Service]
 User=root
