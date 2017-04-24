@@ -91,7 +91,7 @@ INSTALL(TARGETS nemobusd DESTINATION bin)
 add_executable(nemoart
 	nemoart.c
 	)
-
+SET_TARGET_PROPERTIES(nemoart PROPERTIES OUTPUT_NAME "exec")
 TARGET_LINK_LIBRARIES(nemoart
 	nemoasst
 	nemokits
@@ -107,7 +107,10 @@ if(WITH_TCMALLOC)
 		)
 endif(WITH_TCMALLOC)
 
-INSTALL(TARGETS nemoart DESTINATION bin)
+INSTALL(TARGETS nemoart DESTINATION /opt/pkgs/nemo.art)
+INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/manifest.json
+    DESTINATION  /opt/pkgs/nemo.art/
+    )
 
 add_executable(nemopix
 	nemopix.c

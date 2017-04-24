@@ -31,9 +31,18 @@ Package: nemocore-dbg
 Priority: extra
 Section: debug
 Architecture: any
-Depends: nemocore (= ${binary:Version})
+Depends: nemocore (= ${binary:Version}), 
     ${shlibs:Depends}, ${misc:Depends}
 Description: NEMOUX's core platform debugging symbols
+ <insert long description, indented with spaces>
+
+Package: nemo.art
+Priority: optional
+Section: graphics
+Architecture: any
+Depends: nemocore (= ${binary:Version}),
+    ${shlibs:Depends}, ${misc:Depends}
+Description: NEMOUX's art shell application
  <insert long description, indented with spaces>
 
 #Package: nemocore-doc
