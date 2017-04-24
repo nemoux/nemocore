@@ -62,7 +62,7 @@ static void nemoenvs_handle_set_nemotheme_service(struct nemoenvs *envs, struct 
 		if (path != NULL) {
 			strcpy(binpath, path);
 		} else {
-			const char *pkgpath = env_get_string("NEMO_PKG_PATH", "/opt/pkgs");
+			const char *pkgpath = env_get_string("NEMO_PKG_PATH", NEMOUX_INSTALL_PKGS);
 			const char *pkgname;
 
 			pkgname = nemojson_object_get_string(cobj, "pkgname", NULL);

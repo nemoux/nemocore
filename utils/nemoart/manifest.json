@@ -1,0 +1,10 @@
+{
+	"pkgname": "nemo.art",
+	"name": "nemoart",
+	"maintainer": "Kim Taehwan<taehwan.kim@nemoux.net>",
+	"description": "nemoart",
+	"version": "0.1.0",
+	"type": "theme",
+	"config": {
+	}
+}

@@ -11,6 +11,9 @@ set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 
 set(CMAKE_INSTALL_PREFIX "/usr")
+set(CMAKE_INSTALL_PKGS "/opt/pkgs")
+
+add_definitions(-DNEMOUX_INSTALL_PKGS="${CMAKE_INSTALL_PKGS}")
 
 option(WITH_OPTIMIZE "Build with OPTIMIZE" ON)
 option(WITH_DEBUG "Build with DEBUG" OFF)
@@ -72,8 +75,9 @@ add_subdirectory(sound)
 add_subdirectory(envs)
 add_subdirectory(apps)
 
-add_subdirectory(utils)
+add_subdirectory(utils/nemolog)
+add_subdirectory(utils/nemoart)
+add_subdirectory(utils/nemobusd)
+add_subdirectory(utils/minishell)
 
-INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/manifest.json
-    DESTINATION  /opt/pkgs/nemocore/
-    )
+INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/manifest.json DESTINATION ${CMAKE_INSTALL_PKGS}/nemocore/)
