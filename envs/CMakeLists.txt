@@ -4,18 +4,6 @@ PKG_CHECK_MODULES(PIXMAN REQUIRED pixman-1)
 INCLUDE_DIRECTORIES(${PIXMAN_INCLUDE_DIRS})
 LINK_DIRECTORIES(${PIXMAN_LIBRARY_DIRS})
 
-PKG_CHECK_MODULES(FREETYPE REQUIRED freetype2)
-INCLUDE_DIRECTORIES(${FREETYPE_INCLUDE_DIRS})
-LINK_DIRECTORIES(${FREETYPE_LIBRARY_DIRS})
-
-PKG_CHECK_MODULES(HARFBUZZ REQUIRED harfbuzz)
-INCLUDE_DIRECTORIES(${HARFBUZZ_INCLUDE_DIRS})
-LINK_DIRECTORIES(${HARFBUZZ_LIBRARY_DIRS})
-
-PKG_CHECK_MODULES(SKIA REQUIRED skia)
-INCLUDE_DIRECTORIES(${SKIA_INCLUDE_DIRS})
-LINK_DIRECTORIES(${SKIA_LIBRARY_DIRS})
-
 PKG_CHECK_MODULES(JSON REQUIRED json-c)
 INCLUDE_DIRECTORIES(${JSON_INCLUDE_DIRS})
 LINK_DIRECTORIES(${JSON_LIBRARY_DIRS})
@@ -27,8 +15,6 @@ include_directories(
 	${CMAKE_SOURCE_DIR}/compz
 	${CMAKE_SOURCE_DIR}/shell
 	${CMAKE_BINARY_DIR}/shell
-	${CMAKE_SOURCE_DIR}/tale
-	${CMAKE_SOURCE_DIR}/show
 	${CMAKE_SOURCE_DIR}/xwayland
 	)
 
@@ -42,12 +28,10 @@ add_library(nemoenvs SHARED
 	nemoenvs.c
 	nemoapps.c
 	nemoxapp.c
-	nemomirror.c
 	bindings.c
 	configs-item.c
 	configs-json.c
 	themes-json.c
-	showhelper.c
 	)
 
 TARGET_LINK_LIBRARIES(nemoenvs
@@ -55,12 +39,10 @@ TARGET_LINK_LIBRARIES(nemoenvs
 	nemokits
 	nemocompz
 	nemoshell
-	nemotale
-	nemoshow
 	nemoxwayland
 	)
 
-set(NEMOENVS_PKGCONFIG_REQUIRES "nemoasst nemocompz nemoshell nemoshow nemoxwayland")
+set(NEMOENVS_PKGCONFIG_REQUIRES "nemoasst nemocompz nemoshell nemoxwayland")
 
 INSTALL(TARGETS nemoenvs DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
 
@@ -68,8 +50,6 @@ set(HEADER_FILES
 	nemoenvs.h
 	nemoapps.h
 	nemoxapp.h
-	nemomirror.h
-	showhelper.h
 	)
 
 configure_file(

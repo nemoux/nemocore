@@ -43,10 +43,8 @@
 #include <nemomisc.h>
 
 #include <nemoenvs.h>
-#include <nemomirror.h>
 #include <nemotoken.h>
 #include <nemoitem.h>
-#include <showhelper.h>
 #include <nemolog.h>
 #include <pixmanhelper.h>
 
@@ -70,82 +68,8 @@ void nemoenvs_handle_terminal_key(struct nemocompz *compz, struct nemokeyboard *
 	}
 }
 
-static void nemoenvs_dispatch_touch_canvas_event(struct nemoshow *show, struct showone *canvas, struct showevent *event)
-{
-	if (nemoshow_event_is_touch_down(show, event)) {
-		struct showone *one;
-
-		one = nemoshow_item_create(NEMOSHOW_CIRCLE_ITEM);
-		nemoshow_item_set_cx(one, nemoshow_event_get_x(event));
-		nemoshow_item_set_cy(one, nemoshow_event_get_y(event));
-		nemoshow_item_set_r(one, 15.0f);
-		nemoshow_item_set_stroke_color(one,
-				random_get_integer(0, 255),
-				random_get_integer(0, 255),
-				random_get_integer(0, 255),
-				255.0f);
-		nemoshow_item_set_stroke_width(one, 10.0f);
-		nemoshow_one_attach(canvas, one);
-
-		nemoshow_event_set_data(event, one);
-	} else if (nemoshow_event_is_touch_up(show, event)) {
-		struct showone *one = (struct showone *)nemoshow_event_get_data(event);
-
-		nemoshow_one_destroy(one);
-	} else if (nemoshow_event_is_touch_motion(show, event)) {
-		struct showone *one = (struct showone *)nemoshow_event_get_data(event);
-
-		nemoshow_item_set_cx(one, nemoshow_event_get_x(event));
-		nemoshow_item_set_cy(one, nemoshow_event_get_y(event));
-	}
-
-	nemoshow_dispatch_frame(show);
-
-	if (nemoshow_event_is_keyboard_down(show, event)) {
-		nemoshow_revoke_view(show);
-		nemoshow_destroy_view_on_idle(show);
-	}
-}
-
 void nemoenvs_handle_touch_key(struct nemocompz *compz, struct nemokeyboard *keyboard, uint32_t time, uint32_t key, enum wl_keyboard_key_state state, void *data)
 {
-	if (state == WL_KEYBOARD_KEY_STATE_PRESSED) {
-		struct nemoenvs *envs = (struct nemoenvs *)data;
-		struct nemoshell *shell = envs->shell;
-		struct nemoshow *show;
-		struct showone *scene;
-		struct showone *canvas;
-		int width = nemocompz_get_scene_width(compz);
-		int height = nemocompz_get_scene_height(compz);
-
-		show = nemoshow_create_view(shell, width, height);
-		nemoshow_view_set_position(show, 0.0f, 0.0f);
-		nemoshow_view_set_layer(show, "overlay");
-
-		scene = nemoshow_scene_create();
-		nemoshow_scene_set_width(scene, width);
-		nemoshow_scene_set_height(scene, height);
-		nemoshow_set_scene(show, scene);
-
-		canvas = nemoshow_canvas_create();
-		nemoshow_canvas_set_width(canvas, width);
-		nemoshow_canvas_set_height(canvas, height);
-		nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_BACK_TYPE);
-		nemoshow_canvas_set_fill_color(canvas, 0.0f, 0.0f, 0.0f, 255.0f);
-		nemoshow_canvas_set_alpha(canvas, 1.0f);
-		nemoshow_one_attach(scene, canvas);
-
-		canvas = nemoshow_canvas_create();
-		nemoshow_canvas_set_width(canvas, width);
-		nemoshow_canvas_set_height(canvas, height);
-		nemoshow_canvas_set_type(canvas, NEMOSHOW_CANVAS_VECTOR_TYPE);
-		nemoshow_canvas_set_dispatch_event(canvas, nemoenvs_dispatch_touch_canvas_event);
-		nemoshow_one_attach(scene, canvas);
-
-		nemoshow_set_keyboard_focus(show, canvas);
-
-		nemoshow_dispatch_frame(show);
-	}
 }
 
 void nemoenvs_handle_escape_key(struct nemocompz *compz, struct nemokeyboard *keyboard, uint32_t time, uint32_t key, enum wl_keyboard_key_state state, void *data)
@@ -219,27 +143,6 @@ void nemoenvs_handle_left_button(struct nemocompz *compz, struct nemopointer *po
 				pixman_save_png_file(image, "nemoshot.png");
 
 				pixman_image_unref(image);
-			}
-		} else if (pointer->keyboard != NULL && nemoxkb_has_modifiers_state(pointer->keyboard->xkb, MODIFIER_CTRL | MODIFIER_ALT)) {
-			struct nemoenvs *envs = (struct nemoenvs *)data;
-			struct nemoshell *shell = envs->shell;
-			struct shellscreen *screen;
-			struct nemoview *view;
-			float sx, sy;
-
-			view = nemocompz_pick_view(compz, pointer->x, pointer->y, &sx, &sy, NEMOVIEW_PICK_STATE);
-			screen = nemoshell_get_fullscreen(shell, "/nemoshell/fullscreen/mirror");
-
-			if (view != NULL && view->canvas != NULL && screen != NULL && screen->dw != 0 && screen->dh != 0) {
-				struct nemomirror *mirror;
-
-				mirror = nemomirror_create(shell, screen->dx, screen->dy, screen->dw, screen->dh, "overlay");
-				if (mirror != NULL) {
-					nemoshell_kill_fullscreen_bin(shell, screen->target);
-
-					nemomirror_set_view(mirror, view);
-					nemomirror_check_screen(mirror, screen);
-				}
 			}
 		}
 

@@ -35,7 +35,6 @@
 #include <nemomisc.h>
 
 #include <nemoenvs.h>
-#include <nemomirror.h>
 #include <nemobus.h>
 #include <nemodb.h>
 #include <nemojson.h>
@@ -193,24 +192,6 @@ static void minishell_destroy_client(void *data, pid_t pid)
 static void minishell_update_client(void *data, struct shellbin *bin, struct clientstate *state)
 {
 	struct minishell *mini = (struct minishell *)data;
-	struct nemoshell *shell = mini->shell;
-
-	if (nemoitem_one_has_attr(state->one, "mirrorscreen") != 0) {
-		struct shellscreen *screen;
-
-		screen = nemoshell_get_fullscreen(shell, nemoitem_one_get_attr(state->one, "mirrorscreen"));
-		if (screen != NULL && screen->dw != 0 && screen->dh != 0) {
-			struct nemomirror *mirror;
-
-			mirror = nemomirror_create(shell, screen->dx, screen->dy, screen->dw, screen->dh, "overlay");
-			if (mirror != NULL) {
-				nemoshell_kill_fullscreen_bin(shell, screen->target);
-
-				nemomirror_set_view(mirror, nemoshell_bin_get_view(bin));
-				nemomirror_check_screen(mirror, screen);
-			}
-		}
-	}
 }
 
 static void minishell_update_layer(void *data, struct shellbin *bin, const char *type)
