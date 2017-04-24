@@ -617,7 +617,16 @@ void nemoshow_path_text(struct showone *one, const char *font, int fontsize, con
 	paint.setAntiAlias(true);
 	paint.setTextSize(fontsize);
 	paint.getFontMetrics(&metrics, 0);
-	paint.getTextPath(text, textlength, x, y - metrics.fAscent, &rpath);
+	paint.getTextPath(text, textlength, x, y - metrics.fAscent - metrics.fDescent, &rpath);
+
+	SkRect box;
+	box = rpath.getBounds();
+
+	SkMatrix matrix;
+	matrix.setIdentity();
+	matrix.postTranslate(-box.x(), -box.y());
+
+	rpath.transform(matrix);
 
 	NEMOSHOW_PATH_CC(path, path)->addPath(rpath);
 

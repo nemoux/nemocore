@@ -1346,7 +1346,16 @@ void nemoshow_item_path_text(struct showone *one, const char *font, int fontsize
 	paint.setAntiAlias(true);
 	paint.setTextSize(fontsize);
 	paint.getFontMetrics(&metrics, 0);
-	paint.getTextPath(text, textlength, x, y - metrics.fAscent, &path);
+	paint.getTextPath(text, textlength, x, y - metrics.fAscent - metrics.fDescent, &path);
+
+	SkRect box;
+	box = path.getBounds();
+
+	SkMatrix matrix;
+	matrix.setIdentity();
+	matrix.postTranslate(-box.x(), -box.y());
+
+	path.transform(matrix);
 
 	if (one->sub == NEMOSHOW_PATHTWICE_ITEM) {
 		if (item->pathselect & NEMOSHOW_ITEM_STROKE_PATH)
