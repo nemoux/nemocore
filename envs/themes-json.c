@@ -55,9 +55,25 @@ static void nemoenvs_handle_set_nemotheme_service(struct nemoenvs *envs, struct 
 		struct json_object *tobj;
 		struct nemomemo *args;
 		struct nemomemo *states;
-		const char *path = NULL;
+		char binpath[256] = "";
+		const char *path;
 
 		path = nemojson_object_get_string(cobj, "path", NULL);
+		if (path != NULL) {
+			strcpy(binpath, path);
+		} else {
+			const char *pkgpath = env_get_string("NEMO_PKG_PATH", "/opt/pkgs");
+			const char *pkgname;
+
+			pkgname = nemojson_object_get_string(cobj, "pkgname", NULL);
+			if (pkgname != NULL) {
+				strcpy(binpath, pkgpath);
+				strncat(binpath, "/", 1);
+				strcat(binpath, pkgname);
+				strncat(binpath, "/", 1);
+				strcat(binpath, "exec");
+			}
+		}
 
 		args = nemomemo_create(512);
 		nemomemo_append_format(args, "--width;%d;", nemojson_object_get_integer(cobj, "width", 0));
@@ -116,7 +132,7 @@ static void nemoenvs_handle_set_nemotheme_service(struct nemoenvs *envs, struct 
 
 		nemoenvs_attach_service(envs,
 				type,
-				path,
+				binpath,
 				nemomemo_get(args),
 				nemomemo_get(states));
 
