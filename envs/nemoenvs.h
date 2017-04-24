@@ -15,6 +15,7 @@ struct json_object;
 
 struct nemoenvs;
 struct nemoshell;
+struct nemotimer;
 
 struct nemoenvs {
 	struct nemoshell *shell;
@@ -46,6 +47,12 @@ struct nemoenvs {
 		const char *path;
 		const char *args;
 	} terminal;
+
+	struct {
+		struct nemotimer *timer;
+		char *path;
+		uint32_t interval;
+	} screenshot;
 };
 
 extern struct nemoenvs *nemoenvs_create(struct nemoshell *shell);

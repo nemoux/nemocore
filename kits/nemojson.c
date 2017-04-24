@@ -483,6 +483,19 @@ const char *nemojson_object_get_string(struct json_object *jobj, const char *nam
 	return json_object_get_string(tobj);
 }
 
+char *nemojson_object_dup_string(struct json_object *jobj, const char *name, const char *value)
+{
+	struct json_object *tobj;
+	const char *tstr;
+
+	if (json_object_object_get_ex(jobj, name, &tobj) == 0)
+		return value != NULL ? strdup(value) : NULL;
+
+	tstr = json_object_get_string(tobj);
+
+	return tstr != NULL ? strdup(tstr) : NULL;
+}
+
 double nemojson_object_get_double(struct json_object *jobj, const char *name, double value)
 {
 	struct json_object *tobj;

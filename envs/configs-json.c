@@ -26,6 +26,7 @@
 #include <datadevice.h>
 #include <screen.h>
 #include <plugin.h>
+#include <timer.h>
 #include <viewanimation.h>
 #include <busycursor.h>
 #include <vieweffect.h>
@@ -37,6 +38,7 @@
 #include <xdgshell.h>
 #include <nemoshell.h>
 #include <syshelper.h>
+#include <pixmanhelper.h>
 #include <nemotoken.h>
 #include <nemoitem.h>
 #include <nemojson.h>
@@ -45,8 +47,9 @@
 
 #include <nemoenvs.h>
 
-static void nemoenvs_handle_set_nemoshell_screen(struct nemoshell *shell, struct json_object *jobj)
+static void nemoenvs_handle_set_nemoshell_screen(struct nemoenvs *envs, struct json_object *jobj)
 {
+	struct nemoshell *shell = envs->shell;
 	struct nemocompz *compz = shell->compz;
 	int i;
 
@@ -108,8 +111,9 @@ static void nemoenvs_handle_set_nemoshell_screen(struct nemoshell *shell, struct
 	}
 }
 
-static void nemoenvs_handle_set_nemoshell_input(struct nemoshell *shell, struct json_object *jobj)
+static void nemoenvs_handle_set_nemoshell_input(struct nemoenvs *envs, struct json_object *jobj)
 {
+	struct nemoshell *shell = envs->shell;
 	struct nemocompz *compz = shell->compz;
 	struct nemoscreen *screen;
 	struct inputnode *node;
@@ -179,8 +183,9 @@ static void nemoenvs_handle_set_nemoshell_input(struct nemoshell *shell, struct 
 	}
 }
 
-static void nemoenvs_handle_set_nemoshell_evdev(struct nemoshell *shell, struct json_object *jobj)
+static void nemoenvs_handle_set_nemoshell_evdev(struct nemoenvs *envs, struct json_object *jobj)
 {
+	struct nemoshell *shell = envs->shell;
 	struct nemocompz *compz = shell->compz;
 	struct nemoscreen *screen;
 	struct inputnode *node;
@@ -260,8 +265,9 @@ static void nemoenvs_handle_set_nemoshell_evdev(struct nemoshell *shell, struct 
 	}
 }
 
-static void nemoenvs_handle_set_nemoshell_fullscreen(struct nemoshell *shell, struct json_object *jobj)
+static void nemoenvs_handle_set_nemoshell_fullscreen(struct nemoenvs *envs, struct json_object *jobj)
 {
+	struct nemoshell *shell = envs->shell;
 	struct nemocompz *compz = shell->compz;
 	struct shellscreen *screen;
 	int i;
@@ -312,8 +318,9 @@ static void nemoenvs_handle_set_nemoshell_fullscreen(struct nemoshell *shell, st
 	}
 }
 
-static void nemoenvs_handle_set_nemoshell_daemon(struct nemoshell *shell, struct json_object *jobj)
+static void nemoenvs_handle_set_nemoshell_daemon(struct nemoenvs *envs, struct json_object *jobj)
 {
+	struct nemoshell *shell = envs->shell;
 	struct nemocompz *compz = shell->compz;
 	int i;
 
@@ -322,8 +329,9 @@ static void nemoenvs_handle_set_nemoshell_daemon(struct nemoshell *shell, struct
 	}
 }
 
-static void nemoenvs_handle_set_nemoshell_stage(struct nemoshell *shell, struct json_object *jobj)
+static void nemoenvs_handle_set_nemoshell_stage(struct nemoenvs *envs, struct json_object *jobj)
 {
+	struct nemoshell *shell = envs->shell;
 	struct nemocompz *compz = shell->compz;
 	struct shellstage *stage;
 	int i;
@@ -343,8 +351,9 @@ static void nemoenvs_handle_set_nemoshell_stage(struct nemoshell *shell, struct 
 	}
 }
 
-static void nemoenvs_handle_set_nemoshell_window(struct nemoshell *shell, struct json_object *jobj)
+static void nemoenvs_handle_set_nemoshell_window(struct nemoenvs *envs, struct json_object *jobj)
 {
+	struct nemoshell *shell = envs->shell;
 	struct nemocompz *compz = shell->compz;
 	struct json_object *tobj;
 
@@ -364,8 +373,9 @@ static void nemoenvs_handle_set_nemoshell_window(struct nemoshell *shell, struct
 		nemocompz_set_output(shell->compz, 0, 0, shell->bin.max_width, shell->bin.max_height);
 }
 
-static void nemoenvs_handle_set_nemoshell_pick(struct nemoshell *shell, struct json_object *jobj)
+static void nemoenvs_handle_set_nemoshell_pick(struct nemoenvs *envs, struct json_object *jobj)
 {
+	struct nemoshell *shell = envs->shell;
 	struct nemocompz *compz = shell->compz;
 
 	shell->pick.flags = NEMOSHELL_PICK_ALL_FLAGS;
@@ -385,8 +395,9 @@ static void nemoenvs_handle_set_nemoshell_pick(struct nemoshell *shell, struct j
 		shell->pick.flags &= ~NEMOSHELL_PICK_RESIZE_FLAG;
 }
 
-static void nemoenvs_handle_set_nemoshell_pitch(struct nemoshell *shell, struct json_object *jobj)
+static void nemoenvs_handle_set_nemoshell_pitch(struct nemoenvs *envs, struct json_object *jobj)
 {
+	struct nemoshell *shell = envs->shell;
 	struct nemocompz *compz = shell->compz;
 
 	shell->pitch.samples = nemojson_object_get_integer(jobj, "samples", 0);
@@ -395,9 +406,54 @@ static void nemoenvs_handle_set_nemoshell_pitch(struct nemoshell *shell, struct 
 	shell->pitch.coefficient = nemojson_object_get_double(jobj, "coefficient", 0.0f);
 }
 
-int nemoenvs_set_json_config(struct nemoenvs *envs, struct json_object *jobj)
+static void nemoenvs_dispatch_screenshot_timer(struct nemotimer *timer, void *data)
+{
+	struct nemoenvs *envs = (struct nemoenvs *)data;
+	struct nemoshell *shell = envs->shell;
+	struct nemocompz *compz = shell->compz;
+	struct nemoscreen *screen;
+
+	wl_list_for_each(screen, &compz->screen_list, link) {
+		char pngfile[256];
+
+		pixman_image_t *image;
+
+		image = pixman_image_create_bits(PIXMAN_a8b8g8r8, screen->width, screen->height, NULL, screen->width * 4);
+
+		nemoscreen_read_pixels(screen, PIXMAN_a8b8g8r8,
+				pixman_image_get_data(image),
+				screen->x, screen->y,
+				screen->width, screen->height);
+
+		snprintf(pngfile, sizeof(pngfile), "%s/screen-%d-%d.png", envs->screenshot.path, screen->node->nodeid, screen->screenid);
+
+		pixman_save_png_file(image, pngfile);
+
+		pixman_image_unref(image);
+	}
+
+	nemotimer_set_timeout(envs->screenshot.timer, envs->screenshot.interval);
+}
+
+static void nemoenvs_handle_set_nemoshell_screenshot(struct nemoenvs *envs, struct json_object *jobj)
 {
 	struct nemoshell *shell = envs->shell;
+	struct nemocompz *compz = shell->compz;
+
+	if (envs->screenshot.timer == NULL) {
+		envs->screenshot.timer = nemotimer_create(compz);
+		nemotimer_set_callback(envs->screenshot.timer, nemoenvs_dispatch_screenshot_timer);
+		nemotimer_set_userdata(envs->screenshot.timer, envs);
+	}
+
+	envs->screenshot.path = nemojson_object_dup_string(jobj, "path", "/opt/screenshots");
+	envs->screenshot.interval = nemojson_object_get_integer(jobj, "interval", 60 * 1000);
+
+	nemotimer_set_timeout(envs->screenshot.timer, envs->screenshot.interval);
+}
+
+int nemoenvs_set_json_config(struct nemoenvs *envs, struct json_object *jobj)
+{
 	struct nemojson *json;
 	int i;
 
@@ -409,23 +465,25 @@ int nemoenvs_set_json_config(struct nemoenvs *envs, struct json_object *jobj)
 		const char *ikey = nemojson_get_key(json, i);
 
 		if (strcmp(ikey, "screens") == 0) {
-			nemoenvs_handle_set_nemoshell_screen(shell, iobj);
+			nemoenvs_handle_set_nemoshell_screen(envs, iobj);
 		} else if (strcmp(ikey, "inputs") == 0) {
-			nemoenvs_handle_set_nemoshell_input(shell, iobj);
+			nemoenvs_handle_set_nemoshell_input(envs, iobj);
 		} else if (strcmp(ikey, "evdevs") == 0) {
-			nemoenvs_handle_set_nemoshell_evdev(shell, iobj);
+			nemoenvs_handle_set_nemoshell_evdev(envs, iobj);
 		} else if (strcmp(ikey, "fullscreens") == 0) {
-			nemoenvs_handle_set_nemoshell_fullscreen(shell, iobj);
+			nemoenvs_handle_set_nemoshell_fullscreen(envs, iobj);
 		} else if (strcmp(ikey, "daemons") == 0) {
-			nemoenvs_handle_set_nemoshell_daemon(shell, iobj);
+			nemoenvs_handle_set_nemoshell_daemon(envs, iobj);
 		} else if (strcmp(ikey, "stages") == 0) {
-			nemoenvs_handle_set_nemoshell_stage(shell, iobj);
+			nemoenvs_handle_set_nemoshell_stage(envs, iobj);
 		} else if (strcmp(ikey, "window") == 0) {
-			nemoenvs_handle_set_nemoshell_window(shell, iobj);
+			nemoenvs_handle_set_nemoshell_window(envs, iobj);
 		} else if (strcmp(ikey, "pick") == 0) {
-			nemoenvs_handle_set_nemoshell_pick(shell, iobj);
+			nemoenvs_handle_set_nemoshell_pick(envs, iobj);
 		} else if (strcmp(ikey, "pitch") == 0) {
-			nemoenvs_handle_set_nemoshell_pitch(shell, iobj);
+			nemoenvs_handle_set_nemoshell_pitch(envs, iobj);
+		} else if (strcmp(ikey, "screenshot") == 0) {
+			nemoenvs_handle_set_nemoshell_screenshot(envs, iobj);
 		}
 	}
 
