@@ -5,7 +5,6 @@ set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 include_directories(
 	${CMAKE_SOURCE_DIR}/asst
 	${CMAKE_SOURCE_DIR}/helper
-	${CMAKE_SOURCE_DIR}/thirds
 	)
 
 add_library(nemofx SHARED
@@ -22,7 +21,7 @@ add_library(nemofx SHARED
 	glcolor.c
 	fxnoise.cpp
 	fxsph.c
-	${CMAKE_SOURCE_DIR}/thirds/fastnoise.cpp
+	fastnoise.cpp
 	)
 
 TARGET_LINK_LIBRARIES(nemofx
