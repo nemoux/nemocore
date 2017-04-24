@@ -108,9 +108,7 @@ if(WITH_TCMALLOC)
 endif(WITH_TCMALLOC)
 
 INSTALL(TARGETS nemoart DESTINATION /opt/pkgs/nemo.art)
-INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/manifest.json
-    DESTINATION  /opt/pkgs/nemo.art/
-    )
+INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/manifest.json DESTINATION /opt/pkgs/nemo.art)
 
 add_executable(nemopix
 	nemopix.c
