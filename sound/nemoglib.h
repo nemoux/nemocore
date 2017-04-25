@@ -1,5 +1,5 @@
-#ifndef	__NEMOTOOL_GLIB_H__
-#define	__NEMOTOOL_GLIB_H__
+#ifndef	__NEMO_GLIB_H__
+#define	__NEMO_GLIB_H__
 
 #include <glib.h>
 

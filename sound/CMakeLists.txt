@@ -21,7 +21,6 @@ include_directories(
 	${CMAKE_SOURCE_DIR}/helper
 	${CMAKE_SOURCE_DIR}/tool
 	${CMAKE_BINARY_DIR}/tool
-	${CMAKE_SOURCE_DIR}/apps
 	)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
@@ -30,13 +29,13 @@ set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS}")
 
 add_executable(nemosound
 	nemosound.c
+	nemoglib.c
 	)
 
 TARGET_LINK_LIBRARIES(nemosound
 	nemoasst
 	nemohelper
 	nemotool
-	nemoapps
 	${GLIB_LIBRARIES}
 	${LIBPULSE_LIBRARIES}
 	${GLIBPULSE_LIBRARIES}

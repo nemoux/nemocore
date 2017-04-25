@@ -55,8 +55,6 @@ add_subdirectory(kits)
 add_subdirectory(helper)
 
 add_subdirectory(tool)
-add_subdirectory(tale)
-add_subdirectory(show)
 add_subdirectory(cook)
 add_subdirectory(action)
 add_subdirectory(mote)
@@ -73,7 +71,6 @@ add_subdirectory(shell)
 add_subdirectory(sound)
 
 add_subdirectory(envs)
-add_subdirectory(apps)
 
 add_subdirectory(utils/nemolog)
 add_subdirectory(utils/nemoart)
