@@ -67,13 +67,12 @@ add_subdirectory(xwayland)
 add_subdirectory(compz)
 add_subdirectory(shell)
 
-add_subdirectory(sound)
-
 add_subdirectory(envs)
 
 add_subdirectory(utils/nemolog)
 add_subdirectory(utils/nemoart)
 add_subdirectory(utils/nemobusd)
+add_subdirectory(utils/nemosound)
 add_subdirectory(utils/minishell)
 
 INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/manifest.json DESTINATION ${CMAKE_INSTALL_PKGS}/nemocore/)
