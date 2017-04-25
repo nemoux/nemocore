@@ -60,7 +60,6 @@ add_subdirectory(action)
 add_subdirectory(play)
 add_subdirectory(tozz)
 add_subdirectory(motz)
-add_subdirectory(fx)
 
 add_subdirectory(xwayland)
 
