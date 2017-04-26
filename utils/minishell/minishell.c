@@ -50,6 +50,9 @@ struct minishell {
 
 	struct {
 		struct nemotimer *timer;
+
+		char *path;
+		uint32_t interval;
 	} screenshot;
 };
 
@@ -88,6 +91,29 @@ static int minishell_dispatch_command(struct minishell *mini, struct itemone *on
 	return 0;
 }
 
+static int minishell_handle_json_config(struct minishell *mini, struct json_object *jobj)
+{
+	struct nemojson *json;
+	int i;
+
+	json = nemojson_create();
+	nemojson_iterate_object(json, jobj);
+
+	for (i = 0; i < nemojson_get_count(json); i++) {
+		struct json_object *iobj = nemojson_get_object(json, i);
+		const char *ikey = nemojson_get_key(json, i);
+
+		if (strcmp(ikey, "screenshot") == 0) {
+			mini->screenshot.path = nemojson_object_dup_string(iobj, "path", NULL);
+			mini->screenshot.interval = nemojson_object_get_integer(iobj, "interval", 60 * 1000);
+		}
+	}
+
+	nemojson_destroy(json);
+
+	return 0;
+}
+
 static int minishell_dispatch_db(struct minishell *mini, const char *dburi, const char *dbname, const char *configpath, const char *themepath)
 {
 	struct nemodb *db;
@@ -101,7 +127,8 @@ static int minishell_dispatch_db(struct minishell *mini, const char *dburi, cons
 
 	jobj = nemodb_load_json_object(db);
 	if (jobj != NULL) {
-		nemoenvs_set_json_config(mini->envs, jobj);
+		nemoenvs_handle_json_config(mini->envs, jobj);
+		minishell_handle_json_config(mini, jobj);
 
 		json_object_put(jobj);
 	}
@@ -110,7 +137,8 @@ static int minishell_dispatch_db(struct minishell *mini, const char *dburi, cons
 
 	jobj = nemodb_load_json_object(db);
 	if (jobj != NULL) {
-		nemoenvs_set_json_theme(mini->envs, jobj);
+		nemoenvs_handle_json_theme(mini->envs, jobj);
+		minishell_handle_json_config(mini, jobj);
 
 		json_object_put(jobj);
 	}
@@ -126,14 +154,16 @@ static int minishell_dispatch_file(struct minishell *mini, const char *configpat
 
 	jobj = nemojson_object_create_file(configpath);
 	if (jobj != NULL) {
-		nemoenvs_set_json_config(mini->envs, jobj);
+		nemoenvs_handle_json_config(mini->envs, jobj);
+		minishell_handle_json_config(mini, jobj);
 
 		json_object_put(jobj);
 	}
 
 	jobj = nemojson_object_create_file(themepath);
 	if (jobj != NULL) {
-		nemoenvs_set_json_theme(mini->envs, jobj);
+		nemoenvs_handle_json_theme(mini->envs, jobj);
+		minishell_handle_json_config(mini, jobj);
 
 		json_object_put(jobj);
 	}
@@ -240,14 +270,14 @@ static void minishell_dispatch_screenshot_timer(struct nemotimer *timer, void *d
 				screen->x, screen->y,
 				screen->width, screen->height);
 
-		snprintf(pngfile, sizeof(pngfile), "%s/screen-%d-%d.png", nemoenvs_get_screenshot_path(envs), screen->node->nodeid, screen->screenid);
+		snprintf(pngfile, sizeof(pngfile), "%s/screen-%d-%d.png", mini->screenshot.path, screen->node->nodeid, screen->screenid);
 
 		pixman_save_png_file(image, pngfile);
 
 		pixman_image_unref(image);
 	}
 
-	nemotimer_set_timeout(mini->screenshot.timer, nemoenvs_get_screenshot_interval(envs));
+	nemotimer_set_timeout(mini->screenshot.timer, mini->screenshot.interval);
 }
 
 int main(int argc, char *argv[])
@@ -376,11 +406,11 @@ int main(int argc, char *argv[])
 	nemoenvs_start_services(mini->envs, "background");
 	nemoenvs_start_services(mini->envs, "daemon");
 
-	if (nemoenvs_get_screenshot_path(mini->envs) != NULL && nemoenvs_get_screenshot_interval(mini->envs) > 0) {
+	if (mini->screenshot.path != NULL && mini->screenshot.interval > 0) {
 		mini->screenshot.timer = nemotimer_create(compz);
 		nemotimer_set_callback(mini->screenshot.timer, minishell_dispatch_screenshot_timer);
 		nemotimer_set_userdata(mini->screenshot.timer, mini);
-		nemotimer_set_timeout(mini->screenshot.timer, nemoenvs_get_screenshot_interval(mini->envs));
+		nemotimer_set_timeout(mini->screenshot.timer, mini->screenshot.interval);
 	}
 
 	nemocompz_run(compz);

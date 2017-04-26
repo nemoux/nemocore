@@ -46,7 +46,7 @@
 
 #include <nemoenvs.h>
 
-static void nemoenvs_handle_set_nemotheme_service(struct nemoenvs *envs, struct json_object *jobj, const char *type)
+static void nemoenvs_handle_nemotheme_service(struct nemoenvs *envs, struct json_object *jobj, const char *type)
 {
 	int i;
 
@@ -141,7 +141,7 @@ static void nemoenvs_handle_set_nemotheme_service(struct nemoenvs *envs, struct 
 	}
 }
 
-static void nemoenvs_handle_set_nemotheme_layer(struct nemoenvs *envs, struct json_object *jobj)
+static void nemoenvs_handle_nemotheme_layer(struct nemoenvs *envs, struct json_object *jobj)
 {
 	struct nemoshell *shell = envs->shell;
 	struct nemocompz *compz = shell->compz;
@@ -166,7 +166,7 @@ static void nemoenvs_handle_set_nemotheme_layer(struct nemoenvs *envs, struct js
 	}
 }
 
-int nemoenvs_set_json_theme(struct nemoenvs *envs, struct json_object *jobj)
+int nemoenvs_handle_json_theme(struct nemoenvs *envs, struct json_object *jobj)
 {
 	struct nemoshell *shell = envs->shell;
 	struct nemocompz *compz = shell->compz;
@@ -193,13 +193,13 @@ int nemoenvs_set_json_theme(struct nemoenvs *envs, struct json_object *jobj)
 		const char *ikey = nemojson_get_key(json, i);
 
 		if (strcmp(ikey, "backgrounds") == 0) {
-			nemoenvs_handle_set_nemotheme_service(envs, iobj, "background");
+			nemoenvs_handle_nemotheme_service(envs, iobj, "background");
 		} else if (strcmp(ikey, "daemons") == 0) {
-			nemoenvs_handle_set_nemotheme_service(envs, iobj, "daemon");
+			nemoenvs_handle_nemotheme_service(envs, iobj, "daemon");
 		} else if (strcmp(ikey, "screensavers") == 0) {
-			nemoenvs_handle_set_nemotheme_service(envs, iobj, "screensaver");
+			nemoenvs_handle_nemotheme_service(envs, iobj, "screensaver");
 		} else if (strcmp(ikey, "layers") == 0) {
-			nemoenvs_handle_set_nemotheme_layer(envs, iobj);
+			nemoenvs_handle_nemotheme_layer(envs, iobj);
 		} else if (strcmp(ikey, "defaultLayerId") == 0) {
 			struct nemolayer *layer;
 

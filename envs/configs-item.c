@@ -43,7 +43,7 @@
 
 #include <nemoenvs.h>
 
-static void nemoenvs_handle_set_nemoshell_screen(struct nemoshell *shell, struct itemone *one)
+static void nemoenvs_handle_nemoshell_screen(struct nemoshell *shell, struct itemone *one)
 {
 	struct nemocompz *compz = shell->compz;
 	struct nemoscreen *screen;
@@ -124,7 +124,7 @@ static void nemoenvs_handle_set_nemoshell_screen(struct nemoshell *shell, struct
 	}
 }
 
-static void nemoenvs_handle_set_nemoshell_input(struct nemoshell *shell, struct itemone *one)
+static void nemoenvs_handle_nemoshell_input(struct nemoshell *shell, struct itemone *one)
 {
 	struct nemocompz *compz = shell->compz;
 	struct nemoscreen *screen;
@@ -216,7 +216,7 @@ static void nemoenvs_handle_set_nemoshell_input(struct nemoshell *shell, struct 
 	}
 }
 
-static void nemoenvs_handle_set_nemoshell_evdev(struct nemoshell *shell, struct itemone *one)
+static void nemoenvs_handle_nemoshell_evdev(struct nemoshell *shell, struct itemone *one)
 {
 	struct nemocompz *compz = shell->compz;
 	struct nemoscreen *screen;
@@ -321,7 +321,7 @@ static void nemoenvs_handle_set_nemoshell_evdev(struct nemoshell *shell, struct 
 	nemoinput_set_state(node, NEMOINPUT_CONFIG_STATE);
 }
 
-static void nemoenvs_handle_set_nemoshell_pick(struct nemoshell *shell, struct itemone *one)
+static void nemoenvs_handle_nemoshell_pick(struct nemoshell *shell, struct itemone *one)
 {
 	struct itemattr *attr;
 	const char *id;
@@ -358,7 +358,7 @@ static void nemoenvs_handle_set_nemoshell_pick(struct nemoshell *shell, struct i
 	}
 }
 
-static void nemoenvs_handle_set_nemoshell_pitch(struct nemoshell *shell, struct itemone *one)
+static void nemoenvs_handle_nemoshell_pitch(struct nemoshell *shell, struct itemone *one)
 {
 	struct itemattr *attr;
 	const char *id;
@@ -381,7 +381,7 @@ static void nemoenvs_handle_set_nemoshell_pitch(struct nemoshell *shell, struct 
 	}
 }
 
-static void nemoenvs_handle_set_nemoshell_bin(struct nemoshell *shell, struct itemone *one)
+static void nemoenvs_handle_nemoshell_bin(struct nemoshell *shell, struct itemone *one)
 {
 	struct itemattr *attr;
 	const char *id;
@@ -407,7 +407,7 @@ static void nemoenvs_handle_set_nemoshell_bin(struct nemoshell *shell, struct it
 	}
 }
 
-static void nemoenvs_handle_set_nemoshell_fullscreen(struct nemoshell *shell, struct itemone *one)
+static void nemoenvs_handle_nemoshell_fullscreen(struct nemoshell *shell, struct itemone *one)
 {
 	struct shellscreen *screen;
 	struct itemattr *attr;
@@ -469,7 +469,7 @@ static void nemoenvs_handle_set_nemoshell_fullscreen(struct nemoshell *shell, st
 	}
 }
 
-static void nemoenvs_handle_set_nemoshell_stage(struct nemoshell *shell, struct itemone *one)
+static void nemoenvs_handle_nemoshell_stage(struct nemoshell *shell, struct itemone *one)
 {
 	struct shellstage *stage;
 	struct itemattr *attr;
@@ -498,18 +498,18 @@ static void nemoenvs_handle_set_nemoshell_stage(struct nemoshell *shell, struct 
 	}
 }
 
-int nemoenvs_set_item_config(struct nemoenvs *envs, struct itemone *one)
+int nemoenvs_handle_item_config(struct nemoenvs *envs, struct itemone *one)
 {
 	struct nemoshell *shell = envs->shell;
 	struct nemocompz *compz = shell->compz;
 	const char *path = nemoitem_one_get_path(one);
 
 	if (nemomemo_string_has_prefix(path, "/nemoshell/screen") != 0) {
-		nemoenvs_handle_set_nemoshell_screen(shell, one);
+		nemoenvs_handle_nemoshell_screen(shell, one);
 	} else if (nemomemo_string_has_prefix(path, "/nemoshell/input") != 0) {
-		nemoenvs_handle_set_nemoshell_input(shell, one);
+		nemoenvs_handle_nemoshell_input(shell, one);
 	} else if (nemomemo_string_has_prefix(path, "/nemoshell/evdev") != 0) {
-		nemoenvs_handle_set_nemoshell_evdev(shell, one);
+		nemoenvs_handle_nemoshell_evdev(shell, one);
 	} else if (nemomemo_string_has_prefix(path, "/nemoshell/scene") != 0) {
 		int32_t x = nemoitem_one_get_iattr(one, "x", 0);
 		int32_t y = nemoitem_one_get_iattr(one, "y", 0);
@@ -566,15 +566,15 @@ int nemoenvs_set_item_config(struct nemoenvs *envs, struct itemone *one)
 				nemoitem_one_get_attr(one, "path"),
 				nemoitem_one_get_attr(one, "args"));
 	} else if (nemomemo_string_has_prefix(path, "/nemoshell/pick") != 0) {
-		nemoenvs_handle_set_nemoshell_pick(shell, one);
+		nemoenvs_handle_nemoshell_pick(shell, one);
 	} else if (nemomemo_string_has_prefix(path, "/nemoshell/pitch") != 0) {
-		nemoenvs_handle_set_nemoshell_pitch(shell, one);
+		nemoenvs_handle_nemoshell_pitch(shell, one);
 	} else if (nemomemo_string_has_prefix(path, "/nemoshell/bin") != 0) {
-		nemoenvs_handle_set_nemoshell_bin(shell, one);
+		nemoenvs_handle_nemoshell_bin(shell, one);
 	} else if (nemomemo_string_has_prefix(path, "/nemoshell/fullscreen") != 0) {
-		nemoenvs_handle_set_nemoshell_fullscreen(shell, one);
+		nemoenvs_handle_nemoshell_fullscreen(shell, one);
 	} else if (nemomemo_string_has_prefix(path, "/nemoshell/stage") != 0) {
-		nemoenvs_handle_set_nemoshell_stage(shell, one);
+		nemoenvs_handle_nemoshell_stage(shell, one);
 	} else if (nemomemo_string_has_prefix(path, "/nemoshell/idle") != 0) {
 		uint32_t timeout;
 
