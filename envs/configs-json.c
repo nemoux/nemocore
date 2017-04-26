@@ -406,50 +406,10 @@ static void nemoenvs_handle_set_nemoshell_pitch(struct nemoenvs *envs, struct js
 	shell->pitch.coefficient = nemojson_object_get_double(jobj, "coefficient", 0.0f);
 }
 
-static void nemoenvs_dispatch_screenshot_timer(struct nemotimer *timer, void *data)
-{
-	struct nemoenvs *envs = (struct nemoenvs *)data;
-	struct nemoshell *shell = envs->shell;
-	struct nemocompz *compz = shell->compz;
-	struct nemoscreen *screen;
-
-	wl_list_for_each(screen, &compz->screen_list, link) {
-		char pngfile[256];
-
-		pixman_image_t *image;
-
-		image = pixman_image_create_bits(PIXMAN_a8b8g8r8, screen->width, screen->height, NULL, screen->width * 4);
-
-		nemoscreen_read_pixels(screen, PIXMAN_a8b8g8r8,
-				pixman_image_get_data(image),
-				screen->x, screen->y,
-				screen->width, screen->height);
-
-		snprintf(pngfile, sizeof(pngfile), "%s/screen-%d-%d.png", envs->screenshot.path, screen->node->nodeid, screen->screenid);
-
-		pixman_save_png_file(image, pngfile);
-
-		pixman_image_unref(image);
-	}
-
-	nemotimer_set_timeout(envs->screenshot.timer, envs->screenshot.interval);
-}
-
 static void nemoenvs_handle_set_nemoshell_screenshot(struct nemoenvs *envs, struct json_object *jobj)
 {
-	struct nemoshell *shell = envs->shell;
-	struct nemocompz *compz = shell->compz;
-
-	if (envs->screenshot.timer == NULL) {
-		envs->screenshot.timer = nemotimer_create(compz);
-		nemotimer_set_callback(envs->screenshot.timer, nemoenvs_dispatch_screenshot_timer);
-		nemotimer_set_userdata(envs->screenshot.timer, envs);
-	}
-
-	envs->screenshot.path = nemojson_object_dup_string(jobj, "path", "/opt/screenshots");
+	envs->screenshot.path = nemojson_object_dup_string(jobj, "path", NULL);
 	envs->screenshot.interval = nemojson_object_get_integer(jobj, "interval", 60 * 1000);
-
-	nemotimer_set_timeout(envs->screenshot.timer, envs->screenshot.interval);
 }
 
 int nemoenvs_set_json_config(struct nemoenvs *envs, struct json_object *jobj)

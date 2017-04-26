@@ -49,7 +49,6 @@ struct nemoenvs {
 	} terminal;
 
 	struct {
-		struct nemotimer *timer;
 		char *path;
 		uint32_t interval;
 	} screenshot;
@@ -68,6 +67,16 @@ extern void nemoenvs_handle_escape_key(struct nemocompz *compz, struct nemokeybo
 extern void nemoenvs_handle_left_button(struct nemocompz *compz, struct nemopointer *pointer, uint32_t time, uint32_t button, enum wl_pointer_button_state state, void *data);
 extern void nemoenvs_handle_right_button(struct nemocompz *compz, struct nemopointer *pointer, uint32_t time, uint32_t button, enum wl_pointer_button_state state, void *data);
 extern void nemoenvs_handle_touch_event(struct nemocompz *compz, struct touchpoint *tp, uint32_t time, void *data);
+
+static const char *nemoenvs_get_screenshot_path(struct nemoenvs *envs)
+{
+	return envs->screenshot.path;
+}
+
+static uint32_t nemoenvs_get_screenshot_interval(struct nemoenvs *envs)
+{
+	return envs->screenshot.interval;
+}
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

@@ -16,7 +16,6 @@
 #include <screen.h>
 #include <view.h>
 #include <xserver.h>
-#include <timer.h>
 #include <waylandhelper.h>
 
 #include <nemoenvs.h>
@@ -66,9 +65,6 @@ void nemoenvs_destroy(struct nemoenvs *envs)
 	nemoenvs_terminate_xservers(envs);
 	nemoenvs_terminate_xclients(envs);
 	nemoenvs_terminate_xapps(envs);
-
-	if (envs->screenshot.timer != NULL)
-		nemotimer_destroy(envs->screenshot.timer);
 
 	nemolist_remove(&envs->service_list);
 	nemolist_remove(&envs->client_list);

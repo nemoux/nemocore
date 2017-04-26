@@ -27,20 +27,19 @@
 #include <timer.h>
 #include <picker.h>
 #include <keymap.h>
-#include <nemoxml.h>
-#include <nemolist.h>
-#include <nemolistener.h>
-#include <nemolog.h>
-#include <nemoitem.h>
-#include <nemomisc.h>
 
 #include <nemoenvs.h>
 #include <nemobus.h>
 #include <nemodb.h>
 #include <nemojson.h>
+#include <nemoxml.h>
+#include <nemolist.h>
+#include <nemolistener.h>
+#include <nemolog.h>
 #include <nemoitem.h>
 #include <nemotoken.h>
 #include <nemomisc.h>
+#include <pixmanhelper.h>
 
 struct minishell {
 	struct nemocompz *compz;
@@ -48,6 +47,10 @@ struct minishell {
 	struct nemoenvs *envs;
 	struct nemobus *bus;
 	struct wl_event_source *busfd;
+
+	struct {
+		struct nemotimer *timer;
+	} screenshot;
 };
 
 static int minishell_dispatch_command(struct minishell *mini, struct itemone *one)
@@ -218,6 +221,35 @@ static void minishell_enter_idle(void *data)
 	nemoenvs_start_services(mini->envs, "screensaver");
 }
 
+static void minishell_dispatch_screenshot_timer(struct nemotimer *timer, void *data)
+{
+	struct minishell *mini = (struct minishell *)data;
+	struct nemoshell *shell = mini->shell;
+	struct nemocompz *compz = mini->compz;
+	struct nemoenvs *envs = mini->envs;
+	struct nemoscreen *screen;
+
+	wl_list_for_each(screen, &compz->screen_list, link) {
+		char pngfile[256];
+		pixman_image_t *image;
+
+		image = pixman_image_create_bits(PIXMAN_a8b8g8r8, screen->width, screen->height, NULL, screen->width * 4);
+
+		nemoscreen_read_pixels(screen, PIXMAN_a8b8g8r8,
+				pixman_image_get_data(image),
+				screen->x, screen->y,
+				screen->width, screen->height);
+
+		snprintf(pngfile, sizeof(pngfile), "%s/screen-%d-%d.png", nemoenvs_get_screenshot_path(envs), screen->node->nodeid, screen->screenid);
+
+		pixman_save_png_file(image, pngfile);
+
+		pixman_image_unref(image);
+	}
+
+	nemotimer_set_timeout(mini->screenshot.timer, nemoenvs_get_screenshot_interval(envs));
+}
+
 int main(int argc, char *argv[])
 {
 	struct option options[] = {
@@ -343,6 +375,13 @@ int main(int argc, char *argv[])
 
 	nemoenvs_start_services(mini->envs, "background");
 	nemoenvs_start_services(mini->envs, "daemon");
+
+	if (nemoenvs_get_screenshot_path(mini->envs) != NULL && nemoenvs_get_screenshot_interval(mini->envs) > 0) {
+		mini->screenshot.timer = nemotimer_create(compz);
+		nemotimer_set_callback(mini->screenshot.timer, minishell_dispatch_screenshot_timer);
+		nemotimer_set_userdata(mini->screenshot.timer, mini);
+		nemotimer_set_timeout(mini->screenshot.timer, nemoenvs_get_screenshot_interval(mini->envs));
+	}
 
 	nemocompz_run(compz);
 
