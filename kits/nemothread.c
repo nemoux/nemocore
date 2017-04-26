@@ -13,11 +13,21 @@
 struct nemothread {
 	pthread_t thread;
 
-	void *(*dispatch)(void *);
+	int (*dispatch)(void *);
+	int value;
 	void *data;
 };
 
-struct nemothread *nemothread_create(void *(*dispatch)(void *), void *data)
+static void *nemothread_handle_routine(void *arg)
+{
+	struct nemothread *thread = (struct nemothread *)arg;
+
+	thread->value = thread->dispatch(thread->data);
+
+	return thread;
+}
+
+struct nemothread *nemothread_create(int (*dispatch)(void *), void *data)
 {
 	struct nemothread *thread;
 
@@ -29,7 +39,7 @@ struct nemothread *nemothread_create(void *(*dispatch)(void *), void *data)
 	thread->dispatch = dispatch;
 	thread->data = data;
 
-	pthread_create(&thread->thread, NULL, dispatch, (void *)thread);
+	pthread_create(&thread->thread, NULL, nemothread_handle_routine, (void *)thread);
 
 	return thread;
 }
@@ -39,12 +49,10 @@ void nemothread_destroy(struct nemothread *thread)
 	free(thread);
 }
 
-void *nemothread_join(struct nemothread *thread)
+int nemothread_join(struct nemothread *thread)
 {
-	void *r;
+	if (pthread_join(thread->thread, NULL) < 0)
+		return errno;
 
-	if (pthread_join(thread->thread, &r) < 0)
-		return NULL;
-
-	return r;
+	return thread->value;
 }

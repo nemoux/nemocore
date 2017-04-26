@@ -11,10 +11,10 @@ NEMO_BEGIN_EXTERN_C
 
 struct nemothread;
 
-extern struct nemothread *nemothread_create(void *(*dispatch)(void *), void *data);
+extern struct nemothread *nemothread_create(int (*dispatch)(void *), void *data);
 extern void nemothread_destroy(struct nemothread *thread);
 
-extern void *nemothread_join(struct nemothread *thread);
+extern int nemothread_join(struct nemothread *thread);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
