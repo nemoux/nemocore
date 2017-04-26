@@ -1,5 +1,5 @@
-#ifndef __NEMOTOOL_QUEUE_H__
-#define	__NEMOTOOL_QUEUE_H__
+#ifndef __NEMO_QUEUE_H__
+#define	__NEMO_QUEUE_H__
 
 #include <nemoconfig.h>
 

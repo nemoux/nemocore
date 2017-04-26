@@ -89,6 +89,7 @@ wayland_add_protocol_client(PROTOCOLS
 
 include_directories(
 	${CMAKE_SOURCE_DIR}/asst
+	${CMAKE_SOURCE_DIR}/kits
 	${CMAKE_SOURCE_DIR}/helper
 	)
 
@@ -103,7 +104,6 @@ add_library(nemotool SHARED
 	nemosound.c
 	nemotimer.c
 	nemochannel.c
-	nemoqueue.c
 	nemoegl.c
 	nemoplugin.c
 	${PROTOCOLS}
@@ -129,6 +129,7 @@ TARGET_LINK_LIBRARIES(nemotool
 	${WAYLANDEGL_LIBRARIES}
 	${EXTRA_LIBRARIES}
 	nemoasst
+	nemokits
 	nemohelper
 	)
 
@@ -137,15 +138,14 @@ set(NEMOTOOL_PKGCONFIG_REQUIRES "nemoasst nemohelper pixman-1 expat wayland-clie
 INSTALL(TARGETS nemotool DESTINATION lib${CMAKE_LIBRARY_SUFFIX})
 
 set(HEADER_FILES
-	${CMAKE_SOURCE_DIR}/tool/nemotool.h
-	${CMAKE_SOURCE_DIR}/tool/nemocanvas.h
-	${CMAKE_SOURCE_DIR}/tool/nemooutput.h
-	${CMAKE_SOURCE_DIR}/tool/nemosound.h
-	${CMAKE_SOURCE_DIR}/tool/nemotimer.h
-	${CMAKE_SOURCE_DIR}/tool/nemochannel.h
-	${CMAKE_SOURCE_DIR}/tool/nemoqueue.h
-	${CMAKE_SOURCE_DIR}/tool/nemoegl.h
-	${CMAKE_SOURCE_DIR}/tool/nemoplugin.h
+	nemotool.h
+	nemocanvas.h
+	nemooutput.h
+	nemosound.h
+	nemotimer.h
+	nemochannel.h
+	nemoegl.h
+	nemoplugin.h
 	)
 
 configure_file(
