@@ -30,6 +30,7 @@ add_library(nemokits SHARED
 	nemobus.c
 	nemodb.c
 	nemoqueue.c
+	nemothread.c
 	)
 
 TARGET_LINK_LIBRARIES(nemokits
@@ -49,6 +50,7 @@ set(HEADER_FILES
 	nemobus.h
 	nemodb.h
 	nemoqueue.h
+	nemothread.h
 	)
 
 set(NEMODB_PKGCONFIG_REQUIRES "nemoasst expat json-c libmongoc-1.0 libbson-1.0")
