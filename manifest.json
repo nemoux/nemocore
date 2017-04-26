@@ -2,7 +2,7 @@
 	"pkgname": "nemocore",
 	"name": "nemocore",
 	"maintainer": "Kim Taehwan<taehwan.kim@nemoux.net>",
-	"description": "nemocore",
+	"description": "nemo platform core libraries",
 	"version": "0.1.0",
 	"type": "shell",
 	"icon": {
