@@ -9,24 +9,8 @@ NEMO_BEGIN_EXTERN_C
 
 #include <stdint.h>
 
-#include <pthread.h>
-
-#include <nemolist.h>
-
-struct eventone {
-	int *iattrs;
-	int niattrs;
-
-	float *fattrs;
-	int nfattrs;
-
-	struct nemolist link;
-};
-
-struct nemoqueue {
-	struct nemolist list;
-	pthread_mutex_t lock;
-};
+struct nemoqueue;
+struct eventone;
 
 extern struct nemoqueue *nemoqueue_create(void);
 extern void nemoqueue_destroy(struct nemoqueue *queue);
@@ -38,35 +22,12 @@ extern struct eventone *nemoqueue_dequeue_one(struct nemoqueue *queue);
 extern struct eventone *nemoqueue_one_create(int isize, int fsize);
 extern void nemoqueue_one_destroy(struct eventone *one);
 
-static inline int nemoqueue_one_get_icount(struct eventone *one)
-{
-	return one->niattrs;
-}
-
-static inline int nemoqueue_one_get_fcount(struct eventone *one)
-{
-	return one->nfattrs;
-}
-
-static inline void nemoqueue_one_seti(struct eventone *one, int index, int attr)
-{
-	one->iattrs[index] = attr;
-}
-
-static inline int nemoqueue_one_geti(struct eventone *one, int index)
-{
-	return one->iattrs[index];
-}
-
-static inline void nemoqueue_one_setf(struct eventone *one, int index, float attr)
-{
-	one->fattrs[index] = attr;
-}
-
-static inline float nemoqueue_one_getf(struct eventone *one, int index)
-{
-	return one->fattrs[index];
-}
+extern int nemoqueue_one_get_icount(struct eventone *one);
+extern int nemoqueue_one_get_fcount(struct eventone *one);
+extern void nemoqueue_one_seti(struct eventone *one, int index, int attr);
+extern int nemoqueue_one_geti(struct eventone *one, int index);
+extern void nemoqueue_one_setf(struct eventone *one, int index, float attr);
+extern float nemoqueue_one_getf(struct eventone *one, int index);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

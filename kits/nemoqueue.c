@@ -5,8 +5,26 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <pthread.h>
+
 #include <nemoqueue.h>
+#include <nemolist.h>
 #include <nemomisc.h>
+
+struct eventone {
+	int *iattrs;
+	int niattrs;
+
+	float *fattrs;
+	int nfattrs;
+
+	struct nemolist link;
+};
+
+struct nemoqueue {
+	struct nemolist list;
+	pthread_mutex_t lock;
+};
 
 struct nemoqueue *nemoqueue_create(void)
 {
@@ -108,4 +126,34 @@ void nemoqueue_one_destroy(struct eventone *one)
 		free(one->fattrs);
 
 	free(one);
+}
+
+int nemoqueue_one_get_icount(struct eventone *one)
+{
+	return one->niattrs;
+}
+
+int nemoqueue_one_get_fcount(struct eventone *one)
+{
+	return one->nfattrs;
+}
+
+void nemoqueue_one_seti(struct eventone *one, int index, int attr)
+{
+	one->iattrs[index] = attr;
+}
+
+int nemoqueue_one_geti(struct eventone *one, int index)
+{
+	return one->iattrs[index];
+}
+
+void nemoqueue_one_setf(struct eventone *one, int index, float attr)
+{
+	one->fattrs[index] = attr;
+}
+
+float nemoqueue_one_getf(struct eventone *one, int index)
+{
+	return one->fattrs[index];
 }
