@@ -8,6 +8,10 @@
 #include <errno.h>
 
 #include <getopt.h>
+
+#include <time.h>
+#include <sys/time.h>
+
 #include <linux/input.h>
 
 #include <wayland-server.h>
@@ -292,12 +296,16 @@ static void minishell_dispatch_screenshot_timer(struct nemotimer *timer, void *d
 	struct nemocompz *compz = mini->compz;
 	struct nemoenvs *envs = mini->envs;
 	struct nemoscreen *screen;
-	struct eventone *eone;
-	struct screenshotone *sone;
-	pixman_image_t *image;
-	char *pngpath;
 
 	wl_list_for_each(screen, &compz->screen_list, link) {
+		struct eventone *eone;
+		struct screenshotone *sone;
+		pixman_image_t *image;
+		char *pngpath;
+		time_t ttime;
+		struct tm *stime;
+		char times[128];
+
 		image = pixman_image_create_bits(PIXMAN_a8b8g8r8, screen->width, screen->height, NULL, screen->width * 4);
 
 		nemoscreen_read_pixels(screen, PIXMAN_a8b8g8r8,
@@ -305,7 +313,11 @@ static void minishell_dispatch_screenshot_timer(struct nemotimer *timer, void *d
 				screen->x, screen->y,
 				screen->width, screen->height);
 
-		asprintf(&pngpath, "%s/screen-%d-%d.png", mini->screenshot.path, screen->node->nodeid, screen->screenid);
+		time(&ttime);
+		stime = localtime(&ttime);
+		strftime(times, sizeof(times), "%Y:%m:%d-%H:%M:%S", stime);
+
+		asprintf(&pngpath, "%s/screen-%d-%d-%s.png", mini->screenshot.path, screen->node->nodeid, screen->screenid, times);
 
 		sone = (struct screenshotone *)malloc(sizeof(struct screenshotone));
 		sone->path = pngpath;
