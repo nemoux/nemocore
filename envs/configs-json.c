@@ -97,7 +97,7 @@ static void nemoenvs_handle_nemoshell_screen(struct nemoenvs *envs, struct json_
 				nemoscreen_set_pivot(screen, px, py);
 			}
 
-			if (scope != NULL && strcmp(scope, "off") == 0) {
+			if (scope != NULL && (strcmp(scope, "off") == 0 || strcmp(scope, "false") == 0)) {
 				nemoscreen_put_state(screen, NEMOSCREEN_SCOPE_STATE);
 			} else {
 				nemoscreen_set_state(screen, NEMOSCREEN_SCOPE_STATE);

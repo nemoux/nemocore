@@ -111,7 +111,7 @@ static void nemoenvs_handle_nemoshell_screen(struct nemoshell *shell, struct ite
 			nemoscreen_set_pivot(screen, px, py);
 		}
 
-		if (scope != NULL && strcmp(scope, "off") == 0) {
+		if (scope != NULL && (strcmp(scope, "off") == 0 || strcmp(scope, "false") == 0)) {
 			nemoscreen_put_state(screen, NEMOSCREEN_SCOPE_STATE);
 		} else {
 			nemoscreen_set_state(screen, NEMOSCREEN_SCOPE_STATE);
@@ -343,16 +343,16 @@ static void nemoenvs_handle_nemoshell_pick(struct nemoshell *shell, struct itemo
 		} else if (strcmp(name, "resize_interval") == 0) {
 			shell->pick.resize_interval = strtod(value, NULL);
 		} else if (strcmp(name, "scale") == 0) {
-			if (strcmp(value, "off") == 0)
+			if (strcmp(value, "off") == 0 || strcmp(value, "false") == 0)
 				shell->pick.flags &= ~NEMOSHELL_PICK_SCALE_FLAG;
 		} else if (strcmp(name, "rotate") == 0) {
-			if (strcmp(value, "off") == 0)
+			if (strcmp(value, "off") == 0 || strcmp(value, "false") == 0)
 				shell->pick.flags &= ~NEMOSHELL_PICK_ROTATE_FLAG;
 		} else if (strcmp(name, "translate") == 0) {
-			if (strcmp(value, "off") == 0)
+			if (strcmp(value, "off") == 0 || strcmp(value, "false") == 0)
 				shell->pick.flags &= ~NEMOSHELL_PICK_TRANSLATE_FLAG;
 		} else if (strcmp(name, "resize") == 0) {
-			if (strcmp(value, "off") == 0)
+			if (strcmp(value, "off") == 0 || strcmp(value, "false") == 0)
 				shell->pick.flags &= ~NEMOSHELL_PICK_RESIZE_FLAG;
 		}
 	}
@@ -458,7 +458,7 @@ static void nemoenvs_handle_nemoshell_fullscreen(struct nemoshell *shell, struct
 				else
 					screen->focus = NEMOSHELL_FULLSCREEN_NONE_FOCUS;
 			} else if (strcmp(name, "fixed") == 0) {
-				if (strcmp(value, "on") == 0)
+				if (strcmp(value, "on") == 0 || strcmp(value, "true") == 0)
 					screen->fixed = 1;
 				else
 					screen->fixed = 0;
@@ -526,6 +526,7 @@ int nemoenvs_handle_item_config(struct nemoenvs *envs, struct itemone *one)
 		nemocompz_set_scope(compz, x, y, width, height);
 	} else if (nemomemo_string_has_prefix(path, "/nemoshell/layer") != 0) {
 		const char *name = nemoitem_one_get_attr(one, "name");
+		const char *attr;
 
 		if (name != NULL) {
 			const char *below = nemoitem_one_get_attr(one, "below");
@@ -539,9 +540,11 @@ int nemoenvs_handle_item_config(struct nemoenvs *envs, struct itemone *one)
 				nemolayer_attach_below(layer,
 						nemocompz_get_layer_by_name(compz, below));
 
-			if (nemoitem_one_has_sattr(one, "default", "on") != 0)
+			attr = nemoitem_one_get_attr(one, "default");
+			if (attr != NULL && (strcmp(attr, "on") == 0 || strcmp(attr, "true") == 0))
 				nemoshell_set_default_layer(shell, layer);
-			if (nemoitem_one_has_sattr(one, "fullscreen", "on") != 0)
+			attr = nemoitem_one_get_attr(one, "fullscreen");
+			if (attr != NULL && (strcmp(attr, "on") == 0 || strcmp(attr, "true") == 0))
 				nemoshell_set_fullscreen_layer(shell, layer);
 		}
 	} else if (nemomemo_string_has_prefix(path, "/nemoshell/virtuio") != 0) {
