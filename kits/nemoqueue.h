@@ -24,6 +24,8 @@ extern void nemoqueue_one_destroy(struct eventone *one);
 
 extern int nemoqueue_one_get_icount(struct eventone *one);
 extern int nemoqueue_one_get_fcount(struct eventone *one);
+extern void nemoqueue_one_set_data(struct eventone *one, void *data);
+extern void *nemoqueue_one_get_data(struct eventone *one);
 extern void nemoqueue_one_seti(struct eventone *one, int index, int attr);
 extern int nemoqueue_one_geti(struct eventone *one, int index);
 extern void nemoqueue_one_setf(struct eventone *one, int index, float attr);

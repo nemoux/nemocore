@@ -98,6 +98,7 @@ extern char *os_get_file_path(const char *name);
 extern char *os_get_file_name(const char *path);
 
 extern int os_set_nonblocking_mode(int fd);
+extern int os_put_nonblocking_mode(int fd);
 
 extern int os_sched_set_affinity(pid_t pid, uint32_t cpuid);
 

@@ -34,6 +34,7 @@
 #include <nemojson.h>
 #include <nemoxml.h>
 #include <nemothread.h>
+#include <nemochannel.h>
 #include <nemoqueue.h>
 #include <nemolist.h>
 #include <nemolistener.h>
@@ -52,6 +53,7 @@ struct minishell {
 
 	struct {
 		struct nemothread *thread;
+		struct nemochannel *channel;
 		struct nemoqueue *queue;
 		struct nemotimer *timer;
 
@@ -255,9 +257,30 @@ static void minishell_enter_idle(void *data)
 	nemoenvs_start_services(mini->envs, "screensaver");
 }
 
+struct screenshotone {
+	char *path;
+
+	pixman_image_t *image;
+};
+
 static int minishell_dispatch_screenshot_thread(void *data)
 {
 	struct minishell *mini = (struct minishell *)data;
+	struct eventone *eone;
+	struct screenshotone *sone;
+	uint64_t event;
+
+	while ((event = nemochannel_read(mini->screenshot.channel)) > 0) {
+		while ((eone = nemoqueue_dequeue_one(mini->screenshot.queue)) != NULL) {
+			sone = (struct screenshotone *)nemoqueue_one_get_data(eone);
+
+			pixman_save_png_file(sone->image, sone->path);
+			pixman_image_unref(sone->image);
+
+			free(sone->path);
+			free(sone);
+		}
+	}
 
 	return 0;
 }
@@ -269,11 +292,12 @@ static void minishell_dispatch_screenshot_timer(struct nemotimer *timer, void *d
 	struct nemocompz *compz = mini->compz;
 	struct nemoenvs *envs = mini->envs;
 	struct nemoscreen *screen;
+	struct eventone *eone;
+	struct screenshotone *sone;
+	pixman_image_t *image;
+	char *pngpath;
 
 	wl_list_for_each(screen, &compz->screen_list, link) {
-		char pngfile[256];
-		pixman_image_t *image;
-
 		image = pixman_image_create_bits(PIXMAN_a8b8g8r8, screen->width, screen->height, NULL, screen->width * 4);
 
 		nemoscreen_read_pixels(screen, PIXMAN_a8b8g8r8,
@@ -281,12 +305,18 @@ static void minishell_dispatch_screenshot_timer(struct nemotimer *timer, void *d
 				screen->x, screen->y,
 				screen->width, screen->height);
 
-		snprintf(pngfile, sizeof(pngfile), "%s/screen-%d-%d.png", mini->screenshot.path, screen->node->nodeid, screen->screenid);
+		asprintf(&pngpath, "%s/screen-%d-%d.png", mini->screenshot.path, screen->node->nodeid, screen->screenid);
 
-		pixman_save_png_file(image, pngfile);
+		sone = (struct screenshotone *)malloc(sizeof(struct screenshotone));
+		sone->path = pngpath;
+		sone->image = image;
 
-		pixman_image_unref(image);
+		eone = nemoqueue_one_create(0, 0);
+		nemoqueue_one_set_data(eone, sone);
+		nemoqueue_enqueue_one(mini->screenshot.queue, eone);
 	}
+
+	nemochannel_write(mini->screenshot.channel, 1);
 
 	nemotimer_set_timeout(mini->screenshot.timer, mini->screenshot.interval);
 }
@@ -418,6 +448,9 @@ int main(int argc, char *argv[])
 	nemoenvs_start_services(mini->envs, "daemon");
 
 	if (mini->screenshot.path != NULL && mini->screenshot.interval > 0) {
+		mini->screenshot.channel = nemochannel_create();
+		nemochannel_set_blocking_mode(mini->screenshot.channel, 1);
+
 		mini->screenshot.queue = nemoqueue_create();
 		mini->screenshot.thread = nemothread_create(minishell_dispatch_screenshot_thread, mini);
 

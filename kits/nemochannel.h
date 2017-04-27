@@ -18,6 +18,8 @@ struct nemochannel {
 extern struct nemochannel *nemochannel_create(void);
 extern void nemochannel_destroy(struct nemochannel *chan);
 
+extern void nemochannel_set_blocking_mode(struct nemochannel *chan, int is_blocking);
+
 extern uint64_t nemochannel_read(struct nemochannel *chan);
 extern void nemochannel_write(struct nemochannel *chan, uint64_t event);
 

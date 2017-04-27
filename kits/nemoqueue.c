@@ -18,6 +18,8 @@ struct eventone {
 	float *fattrs;
 	int nfattrs;
 
+	void *data;
+
 	struct nemolist link;
 };
 
@@ -136,6 +138,16 @@ int nemoqueue_one_get_icount(struct eventone *one)
 int nemoqueue_one_get_fcount(struct eventone *one)
 {
 	return one->nfattrs;
+}
+
+void nemoqueue_one_set_data(struct eventone *one, void *data)
+{
+	one->data = data;
+}
+
+void *nemoqueue_one_get_data(struct eventone *one)
+{
+	return one->data;
 }
 
 void nemoqueue_one_seti(struct eventone *one, int index, int attr)

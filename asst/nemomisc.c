@@ -450,6 +450,15 @@ int os_set_nonblocking_mode(int fd)
 	return fcntl(fd, F_SETFL, flags | O_NONBLOCK);
 }
 
+int os_put_nonblocking_mode(int fd)
+{
+	int flags;
+
+	flags = fcntl(fd, F_GETFL, 0);
+
+	return fcntl(fd, F_SETFL, flags & ~O_NONBLOCK);
+}
+
 int os_sched_set_affinity(pid_t pid, uint32_t cpuid)
 {
 	cpu_set_t cset;
