@@ -300,7 +300,7 @@ static void minishell_dispatch_screenshot_timer(struct nemotimer *timer, void *d
 		char *pngpath;
 		char times[128];
 
-		image = pixman_image_create_bits(PIXMAN_a8b8g8r8, screen->width, screen->height, NULL, screen->width * 4);
+		image = pixman_image_create_bits(PIXMAN_a8r8g8b8, screen->width, screen->height, NULL, screen->width * 4);
 
 		nemoscreen_read_pixels(screen, PIXMAN_a8b8g8r8,
 				pixman_image_get_data(image),
