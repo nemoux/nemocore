@@ -124,7 +124,7 @@ static void nemoenvs_handle_nemotheme_service(struct nemoenvs *envs, struct json
 				const char *ikey = nemojson_get_key(json, j);
 				const char *istr = nemojson_get_string(json, j);
 
-				nemomemo_append_format(states, "%s:%s;", ikey, istr);
+				nemomemo_append_format(states, "%s;%s;", ikey, istr);
 			}
 
 			nemojson_destroy(json);
