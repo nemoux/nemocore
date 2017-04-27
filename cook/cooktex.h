@@ -55,6 +55,7 @@ extern void nemocook_texture_destroy(struct cooktex *tex);
 
 extern void nemocook_texture_assign(struct cooktex *tex, int format, int width, int height);
 extern void nemocook_texture_resize(struct cooktex *tex, int width, int height);
+extern void nemocook_texture_clear(struct cooktex *tex);
 
 extern void nemocook_texture_set_filter(struct cooktex *tex, int filter);
 extern void nemocook_texture_set_wrap(struct cooktex *tex, int wrap);

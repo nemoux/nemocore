@@ -82,6 +82,22 @@ void nemocook_texture_resize(struct cooktex *tex, int width, int height)
 	}
 }
 
+void nemocook_texture_clear(struct cooktex *tex)
+{
+	if (tex->width > 0 && tex->height > 0) {
+		uint8_t zeros[tex->width * tex->height][4];
+
+		memset(zeros, 0, sizeof(zeros));
+
+		glBindTexture(GL_TEXTURE_2D, tex->texture);
+		glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, tex->width);
+		glPixelStorei(GL_UNPACK_SKIP_PIXELS_EXT, 0);
+		glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
+		glTexImage2D(GL_TEXTURE_2D, 0, tex->format, tex->width, tex->height, 0, tex->format, GL_UNSIGNED_BYTE, zeros);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+}
+
 void nemocook_texture_set_filter(struct cooktex *tex, int filter)
 {
 	static GLuint glfilters[] = {
