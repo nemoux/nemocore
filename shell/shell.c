@@ -467,7 +467,7 @@ struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas
 	bin->canvas = canvas;
 	bin->callback = callback;
 	bin->flags = NEMOSHELL_SURFACE_ALL_FLAGS;
-	bin->state = NEMOSHELL_BIN_ALL_STATES;
+	bin->state = NEMOSHELL_BIN_PICKSCREEN_STATE | NEMOSHELL_BIN_PITCHSCREEN_STATE;
 	bin->layer = shell->default_layer;
 
 	bin->min_width = shell->bin.min_width;
