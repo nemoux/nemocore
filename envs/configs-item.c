@@ -594,8 +594,8 @@ int nemoenvs_handle_item_config(struct nemoenvs *envs, struct itemone *one)
 		nemoitem_one_save_format(one, args, ";--", ";", ";--");
 
 		sone = nemoitem_one_create();
-		nemoitem_one_set_attr_format(sone, "x", "%f", x);
-		nemoitem_one_set_attr_format(sone, "y", "%f", y);
+		nemoitem_one_set_attr_format(sone, "x", "%d", x);
+		nemoitem_one_set_attr_format(sone, "y", "%d", y);
 		nemoitem_one_set_attr_format(sone, "dx", "%f", 0.0f);
 		nemoitem_one_set_attr_format(sone, "dy", "%f", 0.0f);
 		nemoitem_one_set_attr(sone, "keypad", "off");
@@ -621,8 +621,8 @@ int nemoenvs_handle_item_config(struct nemoenvs *envs, struct itemone *one)
 		nemoitem_one_save_format(one, args, ";--", ";", ";--");
 
 		sone = nemoitem_one_create();
-		nemoitem_one_set_attr_format(sone, "x", "%f", x);
-		nemoitem_one_set_attr_format(sone, "y", "%f", y);
+		nemoitem_one_set_attr_format(sone, "x", "%d", x);
+		nemoitem_one_set_attr_format(sone, "y", "%d", y);
 		nemoitem_one_set_attr_format(sone, "dx", "%f", 0.0f);
 		nemoitem_one_set_attr_format(sone, "dy", "%f", 0.0f);
 		nemoitem_one_set_attr(sone, "keypad", "off");
