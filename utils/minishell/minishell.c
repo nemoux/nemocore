@@ -33,6 +33,8 @@
 #include <nemodb.h>
 #include <nemojson.h>
 #include <nemoxml.h>
+#include <nemothread.h>
+#include <nemoqueue.h>
 #include <nemolist.h>
 #include <nemolistener.h>
 #include <nemolog.h>
@@ -49,6 +51,8 @@ struct minishell {
 	struct wl_event_source *busfd;
 
 	struct {
+		struct nemothread *thread;
+		struct nemoqueue *queue;
 		struct nemotimer *timer;
 
 		char *path;
@@ -251,6 +255,13 @@ static void minishell_enter_idle(void *data)
 	nemoenvs_start_services(mini->envs, "screensaver");
 }
 
+static int minishell_dispatch_screenshot_thread(void *data)
+{
+	struct minishell *mini = (struct minishell *)data;
+
+	return 0;
+}
+
 static void minishell_dispatch_screenshot_timer(struct nemotimer *timer, void *data)
 {
 	struct minishell *mini = (struct minishell *)data;
@@ -407,6 +418,9 @@ int main(int argc, char *argv[])
 	nemoenvs_start_services(mini->envs, "daemon");
 
 	if (mini->screenshot.path != NULL && mini->screenshot.interval > 0) {
+		mini->screenshot.queue = nemoqueue_create();
+		mini->screenshot.thread = nemothread_create(minishell_dispatch_screenshot_thread, mini);
+
 		mini->screenshot.timer = nemotimer_create(compz);
 		nemotimer_set_callback(mini->screenshot.timer, minishell_dispatch_screenshot_timer);
 		nemotimer_set_userdata(mini->screenshot.timer, mini);
