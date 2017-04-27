@@ -103,7 +103,6 @@ add_library(nemotool SHARED
 	nemooutput.c
 	nemosound.c
 	nemotimer.c
-	nemochannel.c
 	nemoegl.c
 	nemoplugin.c
 	${PROTOCOLS}
@@ -143,7 +142,6 @@ set(HEADER_FILES
 	nemooutput.h
 	nemosound.h
 	nemotimer.h
-	nemochannel.h
 	nemoegl.h
 	nemoplugin.h
 	)

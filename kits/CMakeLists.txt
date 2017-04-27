@@ -29,6 +29,7 @@ add_library(nemokits SHARED
 	nemojson.c
 	nemobus.c
 	nemodb.c
+	nemochannel.c
 	nemoqueue.c
 	nemothread.c
 	)
@@ -49,6 +50,7 @@ set(HEADER_FILES
 	nemojson.h
 	nemobus.h
 	nemodb.h
+	nemochannel.h
 	nemoqueue.h
 	nemothread.h
 	)
