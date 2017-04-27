@@ -8,10 +8,6 @@
 #include <errno.h>
 
 #include <getopt.h>
-
-#include <time.h>
-#include <sys/time.h>
-
 #include <linux/input.h>
 
 #include <wayland-server.h>
@@ -302,8 +298,6 @@ static void minishell_dispatch_screenshot_timer(struct nemotimer *timer, void *d
 		struct screenshotone *sone;
 		pixman_image_t *image;
 		char *pngpath;
-		time_t ttime;
-		struct tm *stime;
 		char times[128];
 
 		image = pixman_image_create_bits(PIXMAN_a8b8g8r8, screen->width, screen->height, NULL, screen->width * 4);
@@ -313,9 +307,7 @@ static void minishell_dispatch_screenshot_timer(struct nemotimer *timer, void *d
 				screen->x, screen->y,
 				screen->width, screen->height);
 
-		time(&ttime);
-		stime = localtime(&ttime);
-		strftime(times, sizeof(times), "%Y:%m:%d-%H:%M:%S", stime);
+		time_get_string("%Y:%m:%d-%H:%M:%S", times, sizeof(times));
 
 		asprintf(&pngpath, "%s/screen-%d-%d-%s.png", mini->screenshot.path, screen->node->nodeid, screen->screenid, times);
 

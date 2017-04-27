@@ -70,6 +70,7 @@ NEMO_BEGIN_EXTERN_C
 extern uint32_t time_current_msecs(void);
 extern uint64_t time_current_nsecs(void);
 extern double time_current_secs(void);
+extern void time_get_string(const char *fmt, char *buffer, int length);
 
 extern int random_get_integer(int min, int max);
 extern double random_get_double(double min, double max);

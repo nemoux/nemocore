@@ -48,6 +48,16 @@ double time_current_secs(void)
 	return (double)ts.tv_sec + (double)ts.tv_nsec / 1000000000.0f;
 }
 
+void time_get_string(const char *fmt, char *buffer, int length)
+{
+	time_t ttime;
+	struct tm *stime;
+
+	time(&ttime);
+	stime = localtime(&ttime);
+	strftime(buffer, length, "%Y:%m:%d-%H:%M:%S", stime);
+}
+
 int random_get_integer(int min, int max)
 {
 	if (min == max)
