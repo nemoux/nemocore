@@ -8,6 +8,8 @@
 #include <errno.h>
 
 #include <getopt.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <linux/input.h>
 
 #include <wayland-server.h>
@@ -464,6 +466,9 @@ int main(int argc, char *argv[])
 	nemoenvs_start_services(mini->envs, "daemon");
 
 	if (mini->screenshot.path != NULL && mini->screenshot.interval > 0) {
+		if (os_exist_path(mini->screenshot.path) == 0)
+			mkdir(mini->screenshot.path, 0755);
+
 		mini->screenshot.channel = nemochannel_create();
 		nemochannel_set_blocking_mode(mini->screenshot.channel, 1);
 
