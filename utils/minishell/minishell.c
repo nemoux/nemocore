@@ -297,10 +297,22 @@ static void minishell_dispatch_screenshot_timer(struct nemotimer *timer, void *d
 		struct eventone *eone;
 		struct screenshotone *sone;
 		pixman_image_t *image;
+		pixman_transform_t transform;
 		char *pngpath;
 		char times[128];
 
 		image = pixman_image_create_bits(PIXMAN_a8r8g8b8, screen->width, screen->height, NULL, screen->width * 4);
+		pixman_transform_init_identity(&transform);
+		pixman_transform_translate(&transform, NULL,
+				pixman_double_to_fixed(screen->width / -2.0f),
+				pixman_double_to_fixed(screen->height / -2.0f));
+		pixman_transform_scale(&transform, NULL,
+				pixman_double_to_fixed(1.0f),
+				pixman_double_to_fixed(-1.0f));
+		pixman_transform_translate(&transform, NULL,
+				pixman_double_to_fixed(screen->width / 2.0f),
+				pixman_double_to_fixed(screen->height / 2.0f));
+		pixman_image_set_transform(image, &transform);
 
 		nemoscreen_read_pixels(screen, PIXMAN_a8b8g8r8,
 				pixman_image_get_data(image),
