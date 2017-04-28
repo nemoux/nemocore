@@ -33,19 +33,30 @@ static int nemoxkb_make_keymap(struct nemoxkbinfo *xkbinfo)
 
 	xkbinfo->keymap_size = strlen(keymap_str) + 1;
 
-	xkbinfo->keymap_fd = os_create_anonymous_file(xkbinfo->keymap_size);
+	xkbinfo->keymap_fd = os_file_create_temp("%s/nemo-shared-XXXXXX", getenv("XDG_RUNTIME_DIR"));
 	if (xkbinfo->keymap_fd < 0)
-		return -1;
+		goto err1;
+
+	if (ftruncate(xkbinfo->keymap_fd, xkbinfo->keymap_size) < 0)
+		goto err2;
 
 	xkbinfo->keymap_area = (char *)mmap(NULL, xkbinfo->keymap_size, PROT_READ | PROT_WRITE, MAP_SHARED, xkbinfo->keymap_fd, 0);
 	if (xkbinfo->keymap_area == MAP_FAILED)
-		return -1;
+		goto err2;
 
 	strcpy(xkbinfo->keymap_area, keymap_str);
 
 	free(keymap_str);
 
 	return 0;
+
+err2:
+	close(xkbinfo->keymap_fd);
+
+err1:
+	free(keymap_str);
+
+	return -1;
 }
 
 struct nemoxkb *nemoxkb_create(void)

@@ -43,9 +43,9 @@ void nemochannel_destroy(struct nemochannel *chan)
 void nemochannel_set_blocking_mode(struct nemochannel *chan, int is_blocking)
 {
 	if (is_blocking != 0)
-		os_put_nonblocking_mode(chan->eventfd);
+		os_fd_put_nonblocking_mode(chan->eventfd);
 	else
-		os_set_nonblocking_mode(chan->eventfd);
+		os_fd_set_nonblocking_mode(chan->eventfd);
 }
 
 uint64_t nemochannel_read(struct nemochannel *chan)

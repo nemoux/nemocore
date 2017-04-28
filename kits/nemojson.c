@@ -67,7 +67,7 @@ struct nemojson *nemojson_create_file(const char *filepath)
 		return NULL;
 	memset(json, 0, sizeof(struct nemojson));
 
-	length = os_load_path(filepath, &buffer);
+	length = os_file_load(filepath, &buffer);
 	if (length <= 0)
 		goto err1;
 
@@ -190,7 +190,7 @@ int nemojson_append_file(struct nemojson *json, const char *filepath)
 	char *buffer;
 	int length;
 
-	length = os_load_path(filepath, &buffer);
+	length = os_file_load(filepath, &buffer);
 	if (length <= 0)
 		return -1;
 
@@ -452,7 +452,7 @@ struct json_object *nemojson_object_create_file(const char *filepath)
 	char *buffer;
 	int length;
 
-	length = os_load_path(filepath, &buffer);
+	length = os_file_load(filepath, &buffer);
 	if (length <= 0)
 		return NULL;
 

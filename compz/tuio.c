@@ -284,7 +284,7 @@ static int tuio_prepare_xml(struct tuio *tuio, int port)
 	if (r < 0)
 		goto err1;
 
-	os_set_nonblocking_mode(tuio->fd);
+	os_fd_set_nonblocking_mode(tuio->fd);
 
 	parser = xmlparser_create(8192);
 	if (parser == NULL)
@@ -340,7 +340,7 @@ static int tuio_prepare_osc(struct tuio *tuio, int port)
 	if (r < 0)
 		goto err1;
 
-	os_set_nonblocking_mode(tuio->fd);
+	os_fd_set_nonblocking_mode(tuio->fd);
 
 	tuio->source = wl_event_loop_add_fd(tuio->compz->loop,
 			tuio->fd,

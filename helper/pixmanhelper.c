@@ -488,7 +488,7 @@ pixman_image_t *pixman_load_image(const char *filepath, int32_t width, int32_t h
 	}, *element;
 
 	pixman_image_t *src;
-	const char *extension = os_get_file_extension(filepath);
+	const char *extension = os_file_get_extension(filepath);
 
 	if (extension == NULL)
 		return NULL;

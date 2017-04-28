@@ -212,7 +212,7 @@ int nemoenvs_launch_service(struct nemoenvs *envs, const char *_path, const char
 	nemotoken_divide(args, ';');
 	nemotoken_update(args);
 
-	pid = os_execute_path(_path, nemotoken_get_tokens(args), NULL);
+	pid = os_file_execute(_path, nemotoken_get_tokens(args), NULL);
 	if (pid > 0) {
 		if (_states != NULL) {
 			struct nemotoken *states;
@@ -247,7 +247,7 @@ int nemoenvs_launch_app(struct nemoenvs *envs, const char *_path, const char *_a
 	nemotoken_divide(args, ';');
 	nemotoken_update(args);
 
-	pid = os_execute_path(_path, nemotoken_get_tokens(args), NULL);
+	pid = os_file_execute(_path, nemotoken_get_tokens(args), NULL);
 	if (pid > 0) {
 		nemoenvs_attach_client(envs, pid, _path);
 

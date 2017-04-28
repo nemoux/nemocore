@@ -75,7 +75,7 @@ static void nemolog_dispatch_listen_task(int efd, struct logtask *task)
 	if (csoc <= 0)
 		return;
 
-	os_set_nonblocking_mode(csoc);
+	os_fd_set_nonblocking_mode(csoc);
 
 	ctask = (struct logtask *)malloc(sizeof(struct logtask));
 	ctask->fd = csoc;
@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
 	if (lsoc < 0)
 		goto err0;
 
-	os_set_nonblocking_mode(lsoc);
+	os_fd_set_nonblocking_mode(lsoc);
 
 	addr.sun_family = AF_LOCAL;
 	namesize = snprintf(addr.sun_path, sizeof(addr.sun_path), "%s", socketpath);

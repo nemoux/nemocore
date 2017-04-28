@@ -184,9 +184,15 @@ int os_timerfd_set_timeout(int tfd, uint32_t secs, uint32_t nsecs)
 	return timerfd_settime(tfd, 0, &its, NULL);
 }
 
-static int os_create_tmpfile_cloexec(char *tmpname)
+int os_file_create_temp(const char *fmt, ...)
 {
+	va_list vargs;
+	char *tmpname;
 	int fd;
+
+	va_start(vargs, fmt);
+	vasprintf(&tmpname, fmt, vargs);
+	va_end(vargs);
 
 #ifdef HAVE_MKOSTEMP
 	fd = mkostemp(tmpname, O_CLOEXEC);
@@ -200,50 +206,17 @@ static int os_create_tmpfile_cloexec(char *tmpname)
 	}
 #endif
 
-	return fd;
-}
-
-int os_create_anonymous_file(off_t size)
-{
-	static const char template[] = "/nemo-shared-XXXXXX";
-	const char *path;
-	char *name;
-	int fd;
-
-	path = getenv("XDG_RUNTIME_DIR");
-	if (!path) {
-		errno = ENOENT;
-		return -1;
-	}
-
-	name = malloc(strlen(path) + sizeof(template));
-	if (!name)
-		return -1;
-
-	strcpy(name, path);
-	strcat(name, template);
-
-	fd = os_create_tmpfile_cloexec(name);
-
-	free(name);
-
-	if (fd < 0)
-		return -1;
-
-	if (ftruncate(fd, size) < 0) {
-		close(fd);
-		return -1;
-	}
+	free(tmpname);
 
 	return fd;
 }
 
-int os_exist_path(const char *path)
+int os_file_is_exist(const char *path)
 {
 	return access(path, F_OK) == 0;
 }
 
-int os_check_is_directory(const char *path)
+int os_file_is_directory(const char *path)
 {
 	struct stat st;
 
@@ -252,7 +225,7 @@ int os_check_is_directory(const char *path)
 	return S_ISDIR(st.st_mode);
 }
 
-int os_check_is_regular_file(const char *path)
+int os_file_is_regular(const char *path)
 {
 	struct stat st;
 
@@ -261,7 +234,7 @@ int os_check_is_regular_file(const char *path)
 	return S_ISREG(st.st_mode);
 }
 
-int os_load_path(const char *path, char **buffer)
+int os_file_load(const char *path, char **buffer)
 {
 	FILE *fp;
 	char *contents;
@@ -300,7 +273,7 @@ int os_load_path(const char *path, char **buffer)
 	return size;
 }
 
-int os_save_path(const char *path, char *buffer, int size)
+int os_file_save(const char *path, char *buffer, int size)
 {
 	FILE *fp;
 
@@ -318,7 +291,7 @@ int os_save_path(const char *path, char *buffer, int size)
 	return 0;
 }
 
-uint32_t os_execute_path(const char *path, char *const argv[], char *const envp[])
+uint32_t os_file_execute(const char *path, char *const argv[], char *const envp[])
 {
 	sigset_t allsigs;
 	pid_t pid;
@@ -352,39 +325,7 @@ uint32_t os_execute_path(const char *path, char *const argv[], char *const envp[
 	return 0;
 }
 
-int os_append_path(char *path, const char *name)
-{
-	int len = strlen(path);
-
-	if (name[0] == '/') {
-		strcpy(path, name);
-	} else if (len <= 0) {
-		strcpy(path, "/");
-		strcat(path, name);
-	} else if (strcmp(name, ".") == 0) {
-	} else if (strcmp(name, "..") == 0) {
-		int i, state = 0;
-
-		for (i = len - 1; i >= 0; i--) {
-			if (path[i] == '/' && state == 0)
-				continue;
-			if (path[i] == '/' && state == 1)
-				break;
-
-			state = 1;
-		}
-
-		path[i] = '\0';
-	} else {
-		if (path[len - 1] != '/')
-			strcat(path, "/");
-		strcat(path, name);
-	}
-
-	return 0;
-}
-
-const char *os_get_file_extension(const char *name)
+const char *os_file_get_extension(const char *name)
 {
 	int len = strlen(name);
 	int i;
@@ -397,17 +338,17 @@ const char *os_get_file_extension(const char *name)
 	return NULL;
 }
 
-int os_has_file_extension(const char *name, const char *ext)
+int os_file_has_extension(const char *name, const char *ext)
 {
-	return strcmp(ext, os_get_file_extension(name)) == 0;
+	return strcmp(ext, os_file_get_extension(name)) == 0;
 }
 
-int os_has_file_extensions(const char *name, int nexts, const char *exts[])
+int os_file_has_extensions(const char *name, int nexts, const char *exts[])
 {
 	const char *ext;
 	int i;
 
-	ext = os_get_file_extension(name);
+	ext = os_file_get_extension(name);
 	if (ext == NULL)
 		return 0;
 
@@ -419,7 +360,7 @@ int os_has_file_extensions(const char *name, int nexts, const char *exts[])
 	return 0;
 }
 
-char *os_get_file_path(const char *name)
+char *os_file_get_path(const char *name)
 {
 	char *path = strdup(name);
 	int len = strlen(name);
@@ -438,7 +379,7 @@ char *os_get_file_path(const char *name)
 	return NULL;
 }
 
-char *os_get_file_name(const char *path)
+char *os_file_get_name(const char *path)
 {
 	int len = strlen(path);
 	int i;
@@ -451,7 +392,7 @@ char *os_get_file_name(const char *path)
 	return NULL;
 }
 
-int os_set_nonblocking_mode(int fd)
+int os_fd_set_nonblocking_mode(int fd)
 {
 	int flags;
 
@@ -460,7 +401,7 @@ int os_set_nonblocking_mode(int fd)
 	return fcntl(fd, F_SETFL, flags | O_NONBLOCK);
 }
 
-int os_put_nonblocking_mode(int fd)
+int os_fd_put_nonblocking_mode(int fd)
 {
 	int flags;
 

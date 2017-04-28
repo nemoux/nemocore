@@ -82,24 +82,23 @@ extern int os_epoll_del_fd(int efd, int fd);
 extern int os_epoll_set_fd(int efd, int fd, uint32_t events, void *data);
 extern int os_timerfd_create_cloexec(void);
 extern int os_timerfd_set_timeout(int tfd, uint32_t secs, uint32_t nsecs);
-extern int os_create_anonymous_file(off_t size);
 
-extern int os_exist_path(const char *path);
-extern int os_check_is_directory(const char *path);
-extern int os_check_is_regular_file(const char *path);
-extern int os_load_path(const char *path, char **buffer);
-extern int os_save_path(const char *path, char *buffer, int size);
-extern uint32_t os_execute_path(const char *path, char *const argv[], char *const envp[]);
+extern int os_file_create_temp(const char *fmt, ...);
+extern int os_file_is_exist(const char *path);
+extern int os_file_is_directory(const char *path);
+extern int os_file_is_regular(const char *path);
+extern int os_file_load(const char *path, char **buffer);
+extern int os_file_save(const char *path, char *buffer, int size);
+extern uint32_t os_file_execute(const char *path, char *const argv[], char *const envp[]);
 
-extern int os_append_path(char *path, const char *name);
-extern const char *os_get_file_extension(const char *name);
-extern int os_has_file_extension(const char *name, const char *ext);
-extern int os_has_file_extensions(const char *name, int nexts, const char *exts[]);
-extern char *os_get_file_path(const char *name);
-extern char *os_get_file_name(const char *path);
+extern const char *os_file_get_extension(const char *name);
+extern int os_file_has_extension(const char *name, const char *ext);
+extern int os_file_has_extensions(const char *name, int nexts, const char *exts[]);
+extern char *os_file_get_path(const char *name);
+extern char *os_file_get_name(const char *path);
 
-extern int os_set_nonblocking_mode(int fd);
-extern int os_put_nonblocking_mode(int fd);
+extern int os_fd_set_nonblocking_mode(int fd);
+extern int os_fd_put_nonblocking_mode(int fd);
 
 extern int os_sched_set_affinity(pid_t pid, uint32_t cpuid);
 

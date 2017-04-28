@@ -99,15 +99,16 @@ static int nemocanvas_get_shm_buffer(struct wl_shm *shm, struct nemobuffer *buff
 	stride = width * 4;
 	size = stride * height;
 
-	fd = os_create_anonymous_file(size);
+	fd = os_file_create_temp("%s/nemo-shared-XXXXXX", getenv("XDG_RUNTIME_DIR"));
 	if (fd < 0)
 		return -1;
 
+	if (ftruncate(fd, size) < 0)
+		goto err1;
+
 	data = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-	if (data == MAP_FAILED) {
-		close(fd);
-		return -1;
-	}
+	if (data == MAP_FAILED)
+		goto err1;
 
 	pool = wl_shm_create_pool(shm, fd, size);
 	buffer->buffer = wl_shm_pool_create_buffer(pool, 0, width, height, stride, format);
@@ -121,6 +122,11 @@ static int nemocanvas_get_shm_buffer(struct wl_shm *shm, struct nemobuffer *buff
 	buffer->height = height;
 
 	return 0;
+
+err1:
+	close(fd);
+
+	return -1;
 }
 
 int nemocanvas_ready(struct nemocanvas *canvas)
