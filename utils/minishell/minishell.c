@@ -259,28 +259,21 @@ static void minishell_enter_idle(void *data)
 	nemoenvs_start_services(mini->envs, "screensaver");
 }
 
-struct screenshotone {
-	char *path;
-
-	pixman_image_t *image;
-};
-
 static int minishell_dispatch_screenshot_thread(void *data)
 {
 	struct minishell *mini = (struct minishell *)data;
 	struct eventone *eone;
-	struct screenshotone *sone;
 	uint64_t event;
 
 	while ((event = nemochannel_read(mini->screenshot.channel)) > 0) {
 		while ((eone = nemoqueue_dequeue_one(mini->screenshot.queue)) != NULL) {
-			sone = (struct screenshotone *)nemoqueue_one_get_data(eone);
+			const char *pngpath = nemoqueue_one_get_string(eone, 0);
+			pixman_image_t *image = (pixman_image_t *)nemoqueue_one_get_pointer(eone, 0);
 
-			pixman_save_png_file(sone->image, sone->path);
-			pixman_image_unref(sone->image);
+			pixman_save_png_file(image, pngpath);
+			pixman_image_unref(image);
 
-			free(sone->path);
-			free(sone);
+			nemoqueue_one_destroy(eone);
 		}
 	}
 
@@ -297,10 +290,9 @@ static void minishell_dispatch_screenshot_timer(struct nemotimer *timer, void *d
 
 	wl_list_for_each(screen, &compz->screen_list, link) {
 		struct eventone *eone;
-		struct screenshotone *sone;
 		pixman_image_t *image;
 		pixman_transform_t transform;
-		char *pngpath;
+		char pngpath[128];
 		char times[128];
 
 		image = pixman_image_create_bits(PIXMAN_a8r8g8b8, screen->width, screen->height, NULL, screen->width * 4);
@@ -322,15 +314,13 @@ static void minishell_dispatch_screenshot_timer(struct nemotimer *timer, void *d
 				screen->width, screen->height);
 
 		time_get_string("%Y:%m:%d-%H:%M:%S", times, sizeof(times));
+		snprintf(pngpath, sizeof(pngpath), "%s/screen-%d-%d-%s.png", mini->screenshot.path, screen->node->nodeid, screen->screenid, times);
 
-		asprintf(&pngpath, "%s/screen-%d-%d-%s.png", mini->screenshot.path, screen->node->nodeid, screen->screenid, times);
-
-		sone = (struct screenshotone *)malloc(sizeof(struct screenshotone));
-		sone->path = pngpath;
-		sone->image = image;
-
-		eone = nemoqueue_one_create(0, 0);
-		nemoqueue_one_set_data(eone, sone);
+		eone = nemoqueue_one_create();
+		nemoqueue_one_set_max_string(eone, 1);
+		nemoqueue_one_set_max_pointer(eone, 1);
+		nemoqueue_one_set_string(eone, 0, pngpath);
+		nemoqueue_one_set_pointer(eone, 0, image);
 		nemoqueue_enqueue_one(mini->screenshot.queue, eone);
 	}
 

@@ -18,7 +18,11 @@ struct eventone {
 	float *fattrs;
 	int nfattrs;
 
-	void *data;
+	char **sattrs;
+	int nsattrs;
+
+	void **pattrs;
+	int npattrs;
 
 	struct nemolist link;
 };
@@ -94,7 +98,7 @@ struct eventone *nemoqueue_dequeue_one(struct nemoqueue *queue)
 	return elm != NULL ? container_of(elm, struct eventone, link) : NULL;
 }
 
-struct eventone *nemoqueue_one_create(int isize, int fsize)
+struct eventone *nemoqueue_one_create(void)
 {
 	struct eventone *one;
 
@@ -103,16 +107,6 @@ struct eventone *nemoqueue_one_create(int isize, int fsize)
 		return NULL;
 	memset(one, 0, sizeof(struct eventone));
 
-	if (isize > 0) {
-		one->iattrs = (int *)malloc(sizeof(int) * isize);
-		one->niattrs = isize;
-	}
-
-	if (fsize > 0) {
-		one->fattrs = (float *)malloc(sizeof(float) * fsize);
-		one->nfattrs = fsize;
-	}
-
 	nemolist_init(&one->link);
 
 	return one;
@@ -120,52 +114,106 @@ struct eventone *nemoqueue_one_create(int isize, int fsize)
 
 void nemoqueue_one_destroy(struct eventone *one)
 {
+	int i;
+
 	nemolist_remove(&one->link);
 
 	if (one->iattrs != NULL)
 		free(one->iattrs);
 	if (one->fattrs != NULL)
 		free(one->fattrs);
+	if (one->sattrs != NULL) {
+		for (i = 0; i < one->nsattrs; i++)
+			free(one->sattrs[i]);
+
+		free(one->sattrs);
+	}
+	if (one->pattrs != NULL)
+		free(one->pattrs);
 
 	free(one);
 }
 
-int nemoqueue_one_get_icount(struct eventone *one)
+void nemoqueue_one_set_max_integer(struct eventone *one, int count)
+{
+	one->iattrs = (int *)malloc(sizeof(int) * count);
+	one->niattrs = count;
+}
+
+void nemoqueue_one_set_max_float(struct eventone *one, int count)
+{
+	one->fattrs = (float *)malloc(sizeof(float) * count);
+	one->nfattrs = count;
+}
+
+void nemoqueue_one_set_max_string(struct eventone *one, int count)
+{
+	one->sattrs = (char **)malloc(sizeof(char *) * count);
+	one->nsattrs = count;
+}
+
+void nemoqueue_one_set_max_pointer(struct eventone *one, int count)
+{
+	one->pattrs = (void **)malloc(sizeof(void *) * count);
+	one->npattrs = count;
+}
+
+int nemoqueue_one_get_max_integer(struct eventone *one)
 {
 	return one->niattrs;
 }
 
-int nemoqueue_one_get_fcount(struct eventone *one)
+int nemoqueue_one_get_max_float(struct eventone *one)
 {
 	return one->nfattrs;
 }
 
-void nemoqueue_one_set_data(struct eventone *one, void *data)
+int nemoqueue_one_get_max_string(struct eventone *one)
 {
-	one->data = data;
+	return one->nsattrs;
 }
 
-void *nemoqueue_one_get_data(struct eventone *one)
+int nemoqueue_one_get_max_pointer(struct eventone *one)
 {
-	return one->data;
+	return one->npattrs;
 }
 
-void nemoqueue_one_seti(struct eventone *one, int index, int attr)
+void nemoqueue_one_set_integer(struct eventone *one, int index, int attr)
 {
 	one->iattrs[index] = attr;
 }
 
-int nemoqueue_one_geti(struct eventone *one, int index)
+int nemoqueue_one_get_integer(struct eventone *one, int index)
 {
 	return one->iattrs[index];
 }
 
-void nemoqueue_one_setf(struct eventone *one, int index, float attr)
+void nemoqueue_one_set_float(struct eventone *one, int index, float attr)
 {
 	one->fattrs[index] = attr;
 }
 
-float nemoqueue_one_getf(struct eventone *one, int index)
+float nemoqueue_one_get_float(struct eventone *one, int index)
 {
 	return one->fattrs[index];
+}
+
+void nemoqueue_one_set_string(struct eventone *one, int index, const char *attr)
+{
+	one->sattrs[index] = strdup(attr);
+}
+
+const char *nemoqueue_one_get_string(struct eventone *one, int index)
+{
+	return one->sattrs[index];
+}
+
+void nemoqueue_one_set_pointer(struct eventone *one, int index, void *attr)
+{
+	one->pattrs[index] = attr;
+}
+
+void *nemoqueue_one_get_pointer(struct eventone *one, int index)
+{
+	return one->pattrs[index];
 }
