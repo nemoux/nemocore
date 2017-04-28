@@ -380,10 +380,10 @@ static void nemoenvs_handle_nemoshell_pick(struct nemoenvs *envs, struct json_ob
 
 	shell->pick.flags = NEMOSHELL_PICK_ALL_FLAGS;
 
-	shell->pick.rotate_distance = nemojson_object_get_double(jobj, "rotate_distance", 0.0f);
-	shell->pick.scale_distance = nemojson_object_get_double(jobj, "scale_distance", 0.0f);
-	shell->pick.fullscreen_scale = nemojson_object_get_double(jobj, "fullscreen_scale", 0.0f);
-	shell->pick.resize_interval = nemojson_object_get_double(jobj, "resize_interval", 0.0f);
+	shell->pick.rotate_distance = nemojson_object_get_double(jobj, "rotateDistance", 0.0f);
+	shell->pick.scale_distance = nemojson_object_get_double(jobj, "scaleDistance", 0.0f);
+	shell->pick.fullscreen_scale = nemojson_object_get_double(jobj, "fullscreenScale", 0.0f);
+	shell->pick.resize_interval = nemojson_object_get_double(jobj, "resizeInterval", 0.0f);
 
 	if (nemojson_object_get_boolean(jobj, "scale", 1) == 0)
 		shell->pick.flags &= ~NEMOSHELL_PICK_SCALE_FLAG;
@@ -401,7 +401,7 @@ static void nemoenvs_handle_nemoshell_pitch(struct nemoenvs *envs, struct json_o
 	struct nemocompz *compz = shell->compz;
 
 	shell->pitch.samples = nemojson_object_get_integer(jobj, "samples", 0);
-	shell->pitch.max_duration = nemojson_object_get_integer(jobj, "max_duration", 0);
+	shell->pitch.max_duration = nemojson_object_get_integer(jobj, "maxDuration", 0);
 	shell->pitch.friction = nemojson_object_get_double(jobj, "friction", 0.0f);
 	shell->pitch.coefficient = nemojson_object_get_double(jobj, "coefficient", 0.0f);
 }
