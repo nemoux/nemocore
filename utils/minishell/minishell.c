@@ -238,10 +238,6 @@ static void minishell_update_client(void *data, struct shellbin *bin, struct cli
 static void minishell_update_layer(void *data, struct shellbin *bin, const char *type)
 {
 	struct minishell *mini = (struct minishell *)data;
-
-	if (strcmp(type, "background") == 0) {
-		nemoview_put_state(nemoshell_bin_get_view(bin), NEMOVIEW_CATCH_STATE);
-	}
 }
 
 static void minishell_update_transform(void *data, struct shellbin *bin)

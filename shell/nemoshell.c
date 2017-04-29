@@ -97,9 +97,7 @@ static void nemo_surface_set_state(struct wl_client *client, struct wl_resource 
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 
-	if (strcmp(state, "catch") == 0)
-		nemoview_set_state(bin->view, NEMOVIEW_CATCH_STATE);
-	else if (strcmp(state, "pick") == 0)
+	if (strcmp(state, "pick") == 0)
 		nemoview_set_state(bin->view, NEMOVIEW_PICK_STATE);
 	else if (strcmp(state, "keypad") == 0)
 		nemoview_set_state(bin->view, NEMOVIEW_KEYPAD_STATE);
@@ -121,9 +119,7 @@ static void nemo_surface_put_state(struct wl_client *client, struct wl_resource 
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 
-	if (strcmp(state, "catch") == 0)
-		nemoview_put_state(bin->view, NEMOVIEW_CATCH_STATE);
-	else if (strcmp(state, "pick") == 0)
+	if (strcmp(state, "pick") == 0)
 		nemoview_put_state(bin->view, NEMOVIEW_PICK_STATE);
 	else if (strcmp(state, "keypad") == 0)
 		nemoview_put_state(bin->view, NEMOVIEW_KEYPAD_STATE);
@@ -465,8 +461,6 @@ static void nemo_get_nemo_surface(struct wl_client *client, struct wl_resource *
 				"failed to create shell surface");
 		return;
 	}
-
-	nemoview_put_state(bin->view, NEMOVIEW_CATCH_STATE);
 
 	bin->owner = sc;
 
