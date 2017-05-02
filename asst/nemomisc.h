@@ -76,10 +76,12 @@ extern int random_get_integer(int min, int max);
 extern double random_get_double(double min, double max);
 
 extern int os_socketpair_cloexec(int domain, int type, int protocol, int *sv);
+
 extern int os_epoll_create_cloexec(void);
 extern int os_epoll_add_fd(int efd, int fd, uint32_t events, void *data);
 extern int os_epoll_del_fd(int efd, int fd);
 extern int os_epoll_set_fd(int efd, int fd, uint32_t events, void *data);
+
 extern int os_timerfd_create_cloexec(void);
 extern int os_timerfd_set_timeout(int tfd, uint32_t secs, uint32_t nsecs);
 
@@ -94,8 +96,6 @@ extern uint32_t os_file_execute(const char *path, char *const argv[], char *cons
 extern const char *os_file_get_extension(const char *name);
 extern int os_file_has_extension(const char *name, const char *ext);
 extern int os_file_has_extensions(const char *name, int nexts, const char *exts[]);
-extern char *os_file_get_path(const char *name);
-extern char *os_file_get_name(const char *path);
 
 extern int os_fd_set_nonblocking_mode(int fd);
 extern int os_fd_put_nonblocking_mode(int fd);

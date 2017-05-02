@@ -360,38 +360,6 @@ int os_file_has_extensions(const char *name, int nexts, const char *exts[])
 	return 0;
 }
 
-char *os_file_get_path(const char *name)
-{
-	char *path = strdup(name);
-	int len = strlen(name);
-	int i;
-
-	for (i = len - 1; i >= 0; i--) {
-		if (path[i] == '/') {
-			path[i + 1] = '\0';
-
-			return path;
-		}
-	}
-
-	free(path);
-
-	return NULL;
-}
-
-char *os_file_get_name(const char *path)
-{
-	int len = strlen(path);
-	int i;
-
-	for (i = len - 1; i >= 0; i--) {
-		if (path[i] == '/')
-			return strdup(&path[i + 1]);
-	}
-
-	return NULL;
-}
-
 int os_fd_set_nonblocking_mode(int fd)
 {
 	int flags;
