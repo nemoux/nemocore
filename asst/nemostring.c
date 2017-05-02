@@ -14,9 +14,12 @@
 #include <nemostring.h>
 #include <nemomisc.h>
 
-char *nemostring_append(const char *str, const char *s)
+char *nemostring_append(char *str, const char *s)
 {
 	char *n;
+
+	if (str == NULL)
+		return strdup(s);
 
 	n = (char *)malloc(strlen(str) + strlen(s) + 1);
 	if (n == NULL)
@@ -25,13 +28,18 @@ char *nemostring_append(const char *str, const char *s)
 	strcpy(n, str);
 	strcat(n, s);
 
+	free(str);
+
 out:
 	return n;
 }
 
-char *nemostring_append_one(const char *str, char c)
+char *nemostring_append_one(char *str, char c)
 {
 	char *n;
+
+	if (str == NULL)
+		return strndup(&c, 1);
 
 	n = (char *)malloc(strlen(str) + 1 + 1);
 	if (n == NULL)
@@ -40,11 +48,13 @@ char *nemostring_append_one(const char *str, char c)
 	strcpy(n, str);
 	strncat(n, &c, 1);
 
+	free(str);
+
 out:
 	return n;
 }
 
-char *nemostring_append_format(const char *str, const char *fmt, ...)
+char *nemostring_append_format(char *str, const char *fmt, ...)
 {
 	va_list vargs;
 	char *s;
@@ -54,12 +64,17 @@ char *nemostring_append_format(const char *str, const char *fmt, ...)
 	vasprintf(&s, fmt, vargs);
 	va_end(vargs);
 
+	if (str == NULL)
+		return s;
+
 	n = (char *)malloc(strlen(str) + strlen(s) + 1);
 	if (n == NULL)
 		goto out;
 
 	strcpy(n, str);
 	strcat(n, s);
+
+	free(str);
 
 out:
 	free(s);
