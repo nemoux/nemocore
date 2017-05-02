@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include <nemomemo.h>
+#include <nemostring.h>
 #include <colorhelper.h>
 
 static int color_compare(const void *a, const void *b)
@@ -186,19 +186,19 @@ uint32_t color_parse(const char *value)
 
 	if (value[0] == '#' || value[0] == '@') {
 		if (strlen(value) >= 9) {
-			rgba[2] = (uint8_t)nemomemo_string_parse_hexadecimal(value, 1, 2);
-			rgba[1] = (uint8_t)nemomemo_string_parse_hexadecimal(value, 3, 2);
-			rgba[0] = (uint8_t)nemomemo_string_parse_hexadecimal(value, 5, 2);
-			rgba[3] = (uint8_t)nemomemo_string_parse_hexadecimal(value, 7, 2);
+			rgba[2] = (uint8_t)nemostring_parse_hexadecimal(value, 1, 2);
+			rgba[1] = (uint8_t)nemostring_parse_hexadecimal(value, 3, 2);
+			rgba[0] = (uint8_t)nemostring_parse_hexadecimal(value, 5, 2);
+			rgba[3] = (uint8_t)nemostring_parse_hexadecimal(value, 7, 2);
 		} else if (strlen(value) >= 7) {
-			rgba[2] = (uint8_t)nemomemo_string_parse_hexadecimal(value, 1, 2);
-			rgba[1] = (uint8_t)nemomemo_string_parse_hexadecimal(value, 3, 2);
-			rgba[0] = (uint8_t)nemomemo_string_parse_hexadecimal(value, 5, 2);
+			rgba[2] = (uint8_t)nemostring_parse_hexadecimal(value, 1, 2);
+			rgba[1] = (uint8_t)nemostring_parse_hexadecimal(value, 3, 2);
+			rgba[0] = (uint8_t)nemostring_parse_hexadecimal(value, 5, 2);
 			rgba[3] = 255;
 		} else if (strlen(value) >= 4) {
-			rgba[2] = (uint8_t)nemomemo_string_parse_hexadecimal(value, 1, 1);
-			rgba[1] = (uint8_t)nemomemo_string_parse_hexadecimal(value, 2, 1);
-			rgba[0] = (uint8_t)nemomemo_string_parse_hexadecimal(value, 3, 1);
+			rgba[2] = (uint8_t)nemostring_parse_hexadecimal(value, 1, 1);
+			rgba[1] = (uint8_t)nemostring_parse_hexadecimal(value, 2, 1);
+			rgba[0] = (uint8_t)nemostring_parse_hexadecimal(value, 3, 1);
 			rgba[3] = 255;
 		}
 	} else if (strcasestr(value, "rgb") != NULL) {

@@ -16,7 +16,7 @@
 
 #include <nemobus.h>
 #include <nemojson.h>
-#include <nemomemo.h>
+#include <nemostring.h>
 #include <nemolist.h>
 #include <nemolog.h>
 #include <nemomisc.h>
@@ -180,7 +180,7 @@ static void nemobusd_dispatch_message_task(int efd, struct bustask *task)
 							continue;
 
 						nemolist_for_each(client, &busd->client_list, link) {
-							if (nemomemo_string_has_prefix(client->path, path) != 0) {
+							if (nemostring_has_prefix(client->path, path) != 0) {
 								const char *jstr = json_object_get_string(jobj);
 
 								send(client->soc, jstr, strlen(jstr), MSG_NOSIGNAL | MSG_DONTWAIT);

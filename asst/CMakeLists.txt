@@ -12,6 +12,7 @@ add_library(nemoasst SHARED
 	nemomatrix.c
 	nemotoken.c
 	nemomemo.c
+	nemostring.c
 	nemoitem.c
 	nemotable.c
 	nemotransition.c
@@ -30,6 +31,7 @@ set(HEADER_FILES
 	nemomatrix.h
 	nemotoken.h
 	nemomemo.h
+	nemostring.h
 	nemoitem.h
 	nemotable.h
 	nemotransition.h

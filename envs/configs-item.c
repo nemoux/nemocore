@@ -37,7 +37,7 @@
 #include <syshelper.h>
 #include <nemotoken.h>
 #include <nemoitem.h>
-#include <nemomemo.h>
+#include <nemostring.h>
 #include <nemomisc.h>
 #include <nemolog.h>
 
@@ -504,27 +504,27 @@ int nemoenvs_handle_item_config(struct nemoenvs *envs, struct itemone *one)
 	struct nemocompz *compz = shell->compz;
 	const char *path = nemoitem_one_get_path(one);
 
-	if (nemomemo_string_has_prefix(path, "/nemoshell/screen") != 0) {
+	if (nemostring_has_prefix(path, "/nemoshell/screen") != 0) {
 		nemoenvs_handle_nemoshell_screen(shell, one);
-	} else if (nemomemo_string_has_prefix(path, "/nemoshell/input") != 0) {
+	} else if (nemostring_has_prefix(path, "/nemoshell/input") != 0) {
 		nemoenvs_handle_nemoshell_input(shell, one);
-	} else if (nemomemo_string_has_prefix(path, "/nemoshell/evdev") != 0) {
+	} else if (nemostring_has_prefix(path, "/nemoshell/evdev") != 0) {
 		nemoenvs_handle_nemoshell_evdev(shell, one);
-	} else if (nemomemo_string_has_prefix(path, "/nemoshell/scene") != 0) {
+	} else if (nemostring_has_prefix(path, "/nemoshell/scene") != 0) {
 		int32_t x = nemoitem_one_get_iattr(one, "x", 0);
 		int32_t y = nemoitem_one_get_iattr(one, "y", 0);
 		int32_t width = nemoitem_one_get_iattr(one, "width", 0);
 		int32_t height = nemoitem_one_get_iattr(one, "height", 0);
 
 		nemocompz_set_scene(compz, x, y, width, height);
-	} else if (nemomemo_string_has_prefix(path, "/nemoshell/scope") != 0) {
+	} else if (nemostring_has_prefix(path, "/nemoshell/scope") != 0) {
 		int32_t x = nemoitem_one_get_iattr(one, "x", 0);
 		int32_t y = nemoitem_one_get_iattr(one, "y", 0);
 		int32_t width = nemoitem_one_get_iattr(one, "width", 0);
 		int32_t height = nemoitem_one_get_iattr(one, "height", 0);
 
 		nemocompz_set_scope(compz, x, y, width, height);
-	} else if (nemomemo_string_has_prefix(path, "/nemoshell/layer") != 0) {
+	} else if (nemostring_has_prefix(path, "/nemoshell/layer") != 0) {
 		const char *name = nemoitem_one_get_attr(one, "name");
 		const char *attr;
 
@@ -547,7 +547,7 @@ int nemoenvs_handle_item_config(struct nemoenvs *envs, struct itemone *one)
 			if (attr != NULL && (strcmp(attr, "on") == 0 || strcmp(attr, "true") == 0))
 				nemoshell_set_fullscreen_layer(shell, layer);
 		}
-	} else if (nemomemo_string_has_prefix(path, "/nemoshell/virtuio") != 0) {
+	} else if (nemostring_has_prefix(path, "/nemoshell/virtuio") != 0) {
 		int32_t port = nemoitem_one_get_iattr(one, "port", 3333);
 		int32_t fps = nemoitem_one_get_iattr(one, "fps", 60);
 		int32_t x = nemoitem_one_get_iattr(one, "x", 0);
@@ -556,37 +556,37 @@ int nemoenvs_handle_item_config(struct nemoenvs *envs, struct itemone *one)
 		int32_t height = nemoitem_one_get_iattr(one, "height", 0);
 
 		virtuio_create(compz, port, fps, x, y, width, height);
-	} else if (nemomemo_string_has_prefix(path, "/nemoshell/tuio") != 0) {
+	} else if (nemostring_has_prefix(path, "/nemoshell/tuio") != 0) {
 		int32_t port = nemoitem_one_get_iattr(one, "port", 3333);
 		int32_t max = nemoitem_one_get_iattr(one, "max", 16);
 		const char *protocol = nemoitem_one_get_sattr(one, "protocol", "osc");
 
 		tuio_create(compz,
-				nemomemo_string_has_prefix(protocol, "osc") == 0 ? NEMOTUIO_OSC_PROTOCOL : NEMOTUIO_XML_PROTOCOL,
+				nemostring_has_prefix(protocol, "osc") == 0 ? NEMOTUIO_OSC_PROTOCOL : NEMOTUIO_XML_PROTOCOL,
 				port, max);
-	} else if (nemomemo_string_has_prefix(path, "/nemoshell/plugin") != 0) {
+	} else if (nemostring_has_prefix(path, "/nemoshell/plugin") != 0) {
 		nemocompz_load_plugin(compz,
 				nemoitem_one_get_attr(one, "path"),
 				nemoitem_one_get_attr(one, "args"));
-	} else if (nemomemo_string_has_prefix(path, "/nemoshell/pick") != 0) {
+	} else if (nemostring_has_prefix(path, "/nemoshell/pick") != 0) {
 		nemoenvs_handle_nemoshell_pick(shell, one);
-	} else if (nemomemo_string_has_prefix(path, "/nemoshell/pitch") != 0) {
+	} else if (nemostring_has_prefix(path, "/nemoshell/pitch") != 0) {
 		nemoenvs_handle_nemoshell_pitch(shell, one);
-	} else if (nemomemo_string_has_prefix(path, "/nemoshell/bin") != 0) {
+	} else if (nemostring_has_prefix(path, "/nemoshell/bin") != 0) {
 		nemoenvs_handle_nemoshell_bin(shell, one);
-	} else if (nemomemo_string_has_prefix(path, "/nemoshell/fullscreen") != 0) {
+	} else if (nemostring_has_prefix(path, "/nemoshell/fullscreen") != 0) {
 		nemoenvs_handle_nemoshell_fullscreen(shell, one);
-	} else if (nemomemo_string_has_prefix(path, "/nemoshell/stage") != 0) {
+	} else if (nemostring_has_prefix(path, "/nemoshell/stage") != 0) {
 		nemoenvs_handle_nemoshell_stage(shell, one);
-	} else if (nemomemo_string_has_prefix(path, "/nemoshell/idle") != 0) {
+	} else if (nemostring_has_prefix(path, "/nemoshell/idle") != 0) {
 		uint32_t timeout;
 
 		timeout = nemoitem_one_get_iattr(one, "timeout", 0);
 
 		nemocompz_set_idle_timeout(shell->compz, timeout);
-	} else if (nemomemo_string_has_prefix(path, "/nemoshell/legacy") != 0) {
+	} else if (nemostring_has_prefix(path, "/nemoshell/legacy") != 0) {
 		envs->legacy.pick_taps = nemoitem_one_get_iattr(one, "pick_taps", 3);
-	} else if (nemomemo_string_has_prefix(path, "/nemoshell/background") != 0) {
+	} else if (nemostring_has_prefix(path, "/nemoshell/background") != 0) {
 		struct itemone *sone;
 		const char *path = nemoitem_one_get_attr(one, "path");
 		int x = nemoitem_one_get_iattr(one, "x", 0);
@@ -606,14 +606,14 @@ int nemoenvs_handle_item_config(struct nemoenvs *envs, struct itemone *one)
 		nemoitem_one_destroy(sone);
 
 		nemoenvs_attach_service(envs, "background", path, args, states);
-	} else if (nemomemo_string_has_prefix(path, "/nemoshell/daemon") != 0) {
+	} else if (nemostring_has_prefix(path, "/nemoshell/daemon") != 0) {
 		const char *path = nemoitem_one_get_attr(one, "path");
 		char args[512];
 
 		nemoitem_one_save_format(one, args, ";--", ";", ";--");
 
 		nemoenvs_attach_service(envs, "daemon", path, args, NULL);
-	} else if (nemomemo_string_has_prefix(path, "/nemoshell/screensaver") != 0) {
+	} else if (nemostring_has_prefix(path, "/nemoshell/screensaver") != 0) {
 		struct itemone *sone;
 		const char *path = nemoitem_one_get_attr(one, "path");
 		int x = nemoitem_one_get_iattr(one, "x", 0);
