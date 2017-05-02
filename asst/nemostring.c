@@ -14,6 +14,59 @@
 #include <nemostring.h>
 #include <nemomisc.h>
 
+char *nemostring_append(const char *str, const char *s)
+{
+	char *n;
+
+	n = (char *)malloc(strlen(str) + strlen(s) + 1);
+	if (n == NULL)
+		goto out;
+
+	strcpy(n, str);
+	strcat(n, s);
+
+out:
+	return n;
+}
+
+char *nemostring_append_one(const char *str, char c)
+{
+	char *n;
+
+	n = (char *)malloc(strlen(str) + 1 + 1);
+	if (n == NULL)
+		goto out;
+
+	strcpy(n, str);
+	strncat(n, &c, 1);
+
+out:
+	return n;
+}
+
+char *nemostring_append_format(const char *str, const char *fmt, ...)
+{
+	va_list vargs;
+	char *s;
+	char *n;
+
+	va_start(vargs, fmt);
+	vasprintf(&s, fmt, vargs);
+	va_end(vargs);
+
+	n = (char *)malloc(strlen(str) + strlen(s) + 1);
+	if (n == NULL)
+		goto out;
+
+	strcpy(n, str);
+	strcat(n, s);
+
+out:
+	free(s);
+
+	return n;
+}
+
 int nemostring_has_prefix(const char *str, const char *ps)
 {
 	int length = strlen(ps);

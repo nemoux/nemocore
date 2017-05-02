@@ -10,6 +10,10 @@ NEMO_BEGIN_EXTERN_C
 #include <stdlib.h>
 #include <string.h>
 
+extern char *nemostring_append(const char *str, const char *s);
+extern char *nemostring_append_one(const char *str, char c);
+extern char *nemostring_append_format(const char *str, const char *fmt, ...);
+
 extern int nemostring_has_prefix(const char *str, const char *ps);
 extern int nemostring_has_prefix_format(const char *str, const char *fmt, ...);
 extern int nemostring_has_regex(const char *str, const char *expr);
