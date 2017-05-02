@@ -106,6 +106,53 @@ int nemostring_has_prefix_format(const char *str, const char *fmt, ...)
 	return 1;
 }
 
+int nemostring_has_suffix(const char *str, const char *ss)
+{
+	int length0 = strlen(str);
+	int length1 = strlen(ss);
+	int i;
+
+	if (length1 > length0)
+		return 0;
+
+	for (i = 1; i <= length1; i++)
+		if (str[length0 - i] != ss[length1 - i])
+			return 0;
+
+	return 1;
+}
+
+int nemostring_has_suffix_format(const char *str, const char *fmt, ...)
+{
+	va_list vargs;
+	char *ss;
+	int length0 = strlen(str);
+	int length1;
+	int i;
+
+	va_start(vargs, fmt);
+	vasprintf(&ss, fmt, vargs);
+	va_end(vargs);
+
+	length1 = strlen(ss);
+
+	if (length1 > length0)
+		goto none;
+
+	for (i = 1; i <= length1; i++)
+		if (str[length0 - i] != ss[length1 - i])
+			goto none;
+
+	free(ss);
+
+	return 1;
+
+none:
+	free(ss);
+
+	return 0;
+}
+
 int nemostring_has_regex(const char *str, const char *expr)
 {
 	regex_t regex;

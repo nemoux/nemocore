@@ -13,6 +13,7 @@
 #include <regex.h>
 
 #include <nemofs.h>
+#include <nemostring.h>
 #include <nemomisc.h>
 
 struct fsdir *nemofs_dir_create(int maximum_files)
@@ -146,7 +147,7 @@ int nemofs_dir_scan_extension(struct fsdir *dir, const char *path, const char *e
 			strcat(filepath, "/");
 			strcat(filepath, filename);
 
-			if (os_file_is_regular(filepath) != 0 && os_file_has_extension(filename, extension) != 0) {
+			if (os_file_is_regular(filepath) != 0 && nemostring_has_suffix(filename, extension) != 0) {
 				dir->filenames[dir->nfiles + nfiles] = strdup(filename);
 				dir->filepaths[dir->nfiles + nfiles] = strdup(filepath);
 				nfiles++;
@@ -169,7 +170,7 @@ int nemofs_dir_scan_extensions(struct fsdir *dir, const char *path, int nextensi
 	char filepath[128];
 	va_list vargs;
 	int nfiles = 0;
-	int i, count;
+	int i, j, count;
 
 	va_start(vargs, nextensions);
 	for (i = 0; i < nextensions; i++)
@@ -187,10 +188,16 @@ int nemofs_dir_scan_extensions(struct fsdir *dir, const char *path, int nextensi
 			strcat(filepath, "/");
 			strcat(filepath, filename);
 
-			if (os_file_is_regular(filepath) != 0 && os_file_has_extensions(filename, nextensions, extensions) != 0) {
-				dir->filenames[dir->nfiles + nfiles] = strdup(filename);
-				dir->filepaths[dir->nfiles + nfiles] = strdup(filepath);
-				nfiles++;
+			if (os_file_is_regular(filepath) != 0) {
+				for (j = 0; j < nextensions; j++) {
+					if (nemostring_has_suffix(filename, extensions[j]) != 0) {
+						dir->filenames[dir->nfiles + nfiles] = strdup(filename);
+						dir->filepaths[dir->nfiles + nfiles] = strdup(filepath);
+						nfiles++;
+
+						break;
+					}
+				}
 			}
 		}
 

@@ -325,41 +325,6 @@ uint32_t os_file_execute(const char *path, char *const argv[], char *const envp[
 	return 0;
 }
 
-const char *os_file_get_extension(const char *name)
-{
-	int len = strlen(name);
-	int i;
-
-	for (i = len - 1; i >= 0; i--) {
-		if (name[i] == '.')
-			return &name[i+1];
-	}
-
-	return NULL;
-}
-
-int os_file_has_extension(const char *name, const char *ext)
-{
-	return strcmp(ext, os_file_get_extension(name)) == 0;
-}
-
-int os_file_has_extensions(const char *name, int nexts, const char *exts[])
-{
-	const char *ext;
-	int i;
-
-	ext = os_file_get_extension(name);
-	if (ext == NULL)
-		return 0;
-
-	for (i = 0; i < nexts; i++) {
-		if (strcmp(ext, exts[i]) == 0)
-			return 1;
-	}
-
-	return 0;
-}
-
 int os_fd_set_nonblocking_mode(int fd)
 {
 	int flags;

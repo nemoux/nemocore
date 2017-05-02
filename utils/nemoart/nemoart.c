@@ -481,17 +481,17 @@ static struct artone *nemoart_one_create(const char *url, int width, int height)
 
 		nemoart_one_create_t create;
 	} elements[] = {
-		{ "avi",					nemoart_video_create },
-		{ "jpeg",					nemoart_image_create },
-		{ "jpg",					nemoart_image_create },
-		{ "mkv",					nemoart_video_create },
-		{ "mov",					nemoart_video_create },
-		{ "mp4",					nemoart_video_create },
-		{ "png",					nemoart_image_create },
-		{ "ts",						nemoart_video_create }
+		{ ".avi",					nemoart_video_create },
+		{ ".jpeg",					nemoart_image_create },
+		{ ".jpg",					nemoart_image_create },
+		{ ".mkv",					nemoart_video_create },
+		{ ".mov",					nemoart_video_create },
+		{ ".mp4",					nemoart_video_create },
+		{ ".png",					nemoart_image_create },
+		{ ".ts",						nemoart_video_create }
 	}, *element;
 
-	const char *extension = os_file_get_extension(url);
+	const char *extension = strrchr(url, '.');
 
 	if (extension == NULL)
 		return NULL;

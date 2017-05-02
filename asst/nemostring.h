@@ -16,6 +16,8 @@ extern char *nemostring_append_format(const char *str, const char *fmt, ...);
 
 extern int nemostring_has_prefix(const char *str, const char *ps);
 extern int nemostring_has_prefix_format(const char *str, const char *fmt, ...);
+extern int nemostring_has_suffix(const char *str, const char *ss);
+extern int nemostring_has_suffix_format(const char *str, const char *fmt, ...);
 extern int nemostring_has_regex(const char *str, const char *expr);
 extern int nemostring_has_regex_format(const char *str, const char *fmt, ...);
 

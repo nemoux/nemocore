@@ -482,13 +482,13 @@ pixman_image_t *pixman_load_image(const char *filepath, int32_t width, int32_t h
 
 		pixman_load_image_t load;
 	} elements[] = {
-		{ "jpeg",				pixman_load_jpeg_file },
-		{ "jpg",				pixman_load_jpeg_file },
-		{ "png",				pixman_load_png_file }
+		{ ".jpeg",				pixman_load_jpeg_file },
+		{ ".jpg",				pixman_load_jpeg_file },
+		{ ".png",				pixman_load_png_file }
 	}, *element;
 
 	pixman_image_t *src;
-	const char *extension = os_file_get_extension(filepath);
+	const char *extension = strrchr(filepath, '.');
 
 	if (extension == NULL)
 		return NULL;

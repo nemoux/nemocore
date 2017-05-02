@@ -93,10 +93,6 @@ extern int os_file_load(const char *path, char **buffer);
 extern int os_file_save(const char *path, char *buffer, int size);
 extern uint32_t os_file_execute(const char *path, char *const argv[], char *const envp[]);
 
-extern const char *os_file_get_extension(const char *name);
-extern int os_file_has_extension(const char *name, const char *ext);
-extern int os_file_has_extensions(const char *name, int nexts, const char *exts[]);
-
 extern int os_fd_set_nonblocking_mode(int fd);
 extern int os_fd_put_nonblocking_mode(int fd);
 
