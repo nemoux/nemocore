@@ -84,13 +84,13 @@ int nemoaction_tap_set_focus(struct nemoaction *action, struct actiontap *tap, v
 {
 	struct actionone *one;
 
+	nemolist_remove(&tap->listener.link);
+	nemolist_init(&tap->listener.link);
+
 	one = nemoaction_get_one_by_target(action, target);
 	if (one != NULL) {
 		tap->target = one->target;
 		tap->dispatch_event = one->dispatch_tap_event;
-
-		nemolist_remove(&tap->listener.link);
-		nemolist_init(&tap->listener.link);
 
 		if (one->signal != NULL) {
 			tap->listener.notify = nemoaction_tap_handle_destroy;
@@ -100,6 +100,7 @@ int nemoaction_tap_set_focus(struct nemoaction *action, struct actiontap *tap, v
 		return 1;
 	}
 
+	tap->target = NULL;
 	tap->dispatch_event = nemoaction_tap_dispatch_no_event;
 
 	return 0;
