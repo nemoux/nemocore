@@ -1286,7 +1286,8 @@ void nemocanvas_destroy(struct nemocanvas *canvas)
 	assert(wl_list_empty(&canvas->subcanvas_list));
 
 	wl_list_for_each_safe(view, nview, &canvas->view_list, link) {
-		nemoview_destroy(view);
+		wl_list_remove(&view->link);
+		wl_list_init(&view->link);
 	}
 
 	wl_list_remove(&canvas->link);

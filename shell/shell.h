@@ -170,13 +170,13 @@ struct shellbin {
 	uint32_t state;
 
 	struct nemoshell *shell;
-	struct nemocanvas *canvas;
-	struct nemoview *view;
 	struct nemolayer *layer;
+	struct nemoview *view;
 
 	int32_t last_width, last_height;
 	int32_t last_sx, last_sy;
 
+	struct nemocanvas *canvas;
 	struct wl_listener canvas_destroy_listener;
 
 	uint32_t min_width, min_height;

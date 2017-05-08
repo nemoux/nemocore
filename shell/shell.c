@@ -451,8 +451,6 @@ struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas
 
 	nemoview_set_state(bin->view, NEMOVIEW_CANVAS_STATE);
 
-	wl_list_insert(&canvas->view_list, &bin->view->link);
-
 	wl_signal_init(&bin->destroy_signal);
 	wl_signal_init(&bin->ungrab_signal);
 	wl_signal_init(&bin->change_signal);
@@ -490,6 +488,8 @@ struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas
 	canvas->update_layer = shellbin_update_canvas_layer;
 	canvas->update_fullscreen = shellbin_update_canvas_fullscreen;
 
+	wl_list_insert(&canvas->view_list, &bin->view->link);
+
 	bin->canvas_destroy_listener.notify = shellbin_handle_canvas_destroy;
 	wl_signal_add(&canvas->destroy_signal, &bin->canvas_destroy_listener);
 
@@ -510,16 +510,14 @@ void nemoshell_destroy_bin(struct shellbin *bin)
 	wl_signal_emit(&bin->destroy_signal, bin);
 
 	wl_list_remove(&bin->link);
-
+	wl_list_remove(&bin->children_link);
+	wl_list_remove(&bin->screen_link);
 	wl_list_remove(&bin->canvas_destroy_listener.link);
 
 	bin->canvas->configure = NULL;
 	bin->canvas->configure_private = NULL;
 
 	nemoview_destroy(bin->view);
-
-	wl_list_remove(&bin->children_link);
-	wl_list_remove(&bin->screen_link);
 
 	wl_list_for_each_safe(child, cnext, &bin->children_list, children_link) {
 		nemoshell_set_parent_bin(child, NULL);
